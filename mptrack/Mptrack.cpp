@@ -34,6 +34,15 @@
 #include "../soundlib/plugins/PluginManager.h"
 #include "MPTrackWine.h"
 
+#ifdef MPT_WITH_GDIPLUS
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+#define min(a,b) (((a) < (b)) ? (a) : (b))
+#pragma warning(push)
+#pragma warning(disable:4458) // declaration of 'x' hides class member
+#include <gdiplus.h>
+#pragma warning(pop)
+#endif // MPT_WITH_GDIPLUS
+
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
@@ -851,6 +860,10 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// additionally, seed the C rand() PRNG, just in case any third party library calls rand()
 	mpt::rng::crand::reseed(RandomDevice());
 
+	#ifdef MPT_WITH_GDIPLUS
+		m_Gdiplus = mpt::make_unique<GdiplusRAII>();
+	#endif // MPT_WITH_GDIPLUS
+
 	if(cmdInfo.m_bNoWine)
 	{
 		mpt::Windows::PreventWineDetection();
@@ -1215,6 +1228,10 @@ int CTrackApp::ExitInstanceImpl()
 		SetWineVersion(nullptr);
 	}
 
+	#ifdef MPT_WITH_GDIPLUS
+		m_Gdiplus.reset();
+	#endif // MPT_WITH_GDIPLUS
+
 	m_PRNG.reset();
 	mpt::set_global_prng(nullptr);
 	m_BestPRNG.reset();
@@ -1337,8 +1354,13 @@ void CTrackApp::OnAppAbout()
 class CSplashScreen: public CDialog
 {
 protected:
+#ifdef MPT_WITH_GDIPLUS
+	std::unique_ptr<Gdiplus::Image> m_Image;
+#else
 	CBitmap m_Bitmap;
-	PNG::Bitmap *bitmap;
+	uint32 m_BitmapWidth;
+	uint32 m_BitmapHeight;
+#endif
 
 public:
 	CSplashScreen();
@@ -1364,48 +1386,95 @@ static DWORD gSplashScreenStartTime = 0;
 
 CSplashScreen::CSplashScreen()
 {
-	bitmap = PNG::ReadPNG(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN));
 }
 
 
 CSplashScreen::~CSplashScreen()
 {
 	gpSplashScreen = nullptr;
-	delete bitmap;
 }
 
 
 void CSplashScreen::OnPaint()
 {
-	CPaintDC dc(this);
+	#ifdef MPT_WITH_GDIPLUS
 
-	CDC hdcMem;
-	hdcMem.CreateCompatibleDC(&dc);
-	CBitmap *oldBitmap = hdcMem.SelectObject(&m_Bitmap);
-	dc.BitBlt(0, 0, bitmap->width, bitmap->height, &hdcMem, 0, 0, SRCCOPY);
-	hdcMem.SelectObject(oldBitmap);
-	hdcMem.DeleteDC();
+		CPaintDC dc(this);
+		Gdiplus::Graphics gfx(dc);
 
-	CDialog::OnPaint();
+		gfx.DrawImage(m_Image.get(), 0, 0);
+
+		CDialog::OnPaint();
+
+	#else // !MPT_WITH_GDIPLUS
+
+		CPaintDC dc(this);
+
+		CDC hdcMem;
+		hdcMem.CreateCompatibleDC(&dc);
+		CBitmap *oldBitmap = hdcMem.SelectObject(&m_Bitmap);
+		dc.BitBlt(0, 0, m_BitmapWidth, m_BitmapHeight, &hdcMem, 0, 0, SRCCOPY);
+		hdcMem.SelectObject(oldBitmap);
+		hdcMem.DeleteDC();
+
+		CDialog::OnPaint();
+
+	#endif // MPT_WITH_GDIPLUS
 }
 
 
 BOOL CSplashScreen::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	if(!CDialog::OnInitDialog())
+	{
+		return FALSE;
+	}
 
-	CDC *dc = GetDC();
-	bitmap->ToDIB(m_Bitmap, dc);
-	ReleaseDC(dc);
+	#ifdef MPT_WITH_GDIPLUS
 
-	CRect rect;
-	GetWindowRect(&rect);
-	SetWindowPos(nullptr,
-		rect.left - ((static_cast<int32>(bitmap->width) - rect.Width()) / 2),
-		rect.top - ((static_cast<int32>(bitmap->height) - rect.Height()) / 2),
-		bitmap->width,
-		bitmap->height,
-		SWP_NOZORDER | SWP_NOCOPYBITS);
+		try
+		{
+			m_Image = GDIP::LoadPixelImage(GetResource(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN), _T("PNG")));
+		} catch(const bad_image &)
+		{
+			return FALSE;
+		}
+
+		CRect rect;
+		GetWindowRect(&rect);
+		SetWindowPos(nullptr,
+			rect.left - ((static_cast<int32>(m_Image->GetWidth()) - rect.Width()) / 2),
+			rect.top - ((static_cast<int32>(m_Image->GetHeight()) - rect.Height()) / 2),
+			m_Image->GetWidth(),
+			m_Image->GetHeight(),
+			SWP_NOZORDER | SWP_NOCOPYBITS);
+
+	#else // !MPT_WITH_GDIPLUS
+	
+		std::unique_ptr<RawGDIDIB> bitmap;
+		try
+		{
+			bitmap = LoadPixelImage(GetResource(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN), _T("PNG")));
+		} catch(const bad_image &)
+		{
+			return FALSE;
+		}
+		m_BitmapWidth = bitmap->Width();
+		m_BitmapHeight = bitmap->Height();
+		CDC *dc = GetDC();
+		CopyToCompatibleBitmap(m_Bitmap, *dc, *bitmap);
+		ReleaseDC(dc);
+	
+		CRect rect;
+		GetWindowRect(&rect);
+		SetWindowPos(nullptr,
+			rect.left - ((static_cast<int32>(m_BitmapWidth) - rect.Width()) / 2),
+			rect.top - ((static_cast<int32>(m_BitmapHeight) - rect.Height()) / 2),
+			m_BitmapWidth,
+			m_BitmapHeight,
+			SWP_NOZORDER | SWP_NOCOPYBITS);
+
+	#endif // MPT_WITH_GDIPLUS
 
 	return TRUE;
 }

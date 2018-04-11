@@ -101,6 +101,7 @@
 // OpenMPT-only dependencies
 #define MPT_WITH_ASIO
 #define MPT_WITH_DSOUND
+//#define MPT_WITH_GDIPLUS
 #define MPT_WITH_LHASA
 #define MPT_WITH_MINIZIP
 #define MPT_WITH_OPUS

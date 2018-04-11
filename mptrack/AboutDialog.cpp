@@ -25,17 +25,17 @@ END_MESSAGE_MAP()
 
 CRippleBitmap::CRippleBitmap()
 {
-	bitmapSrc = PNG::ReadPNG(MAKEINTRESOURCE(IDB_MPTRACK));
-	bitmapTarget = new PNG::Bitmap(bitmapSrc->width, bitmapSrc->height);
-	offset1.assign(bitmapSrc->GetNumPixels(), 0);
-	offset2.assign(bitmapSrc->GetNumPixels(), 0);
+	bitmapSrc = LoadPixelImage(GetResource(MAKEINTRESOURCE(IDB_MPTRACK), _T("PNG")));
+	bitmapTarget = mpt::make_unique<RawGDIDIB>(bitmapSrc->Width(), bitmapSrc->Height());
+	offset1.assign(bitmapSrc->Pixels().size(), 0);
+	offset2.assign(bitmapSrc->Pixels().size(), 0);
 	frontBuf = offset2.data();
 	backBuf = offset1.data();
 
 	// Pre-fill first and last row of output bitmap, since those won't be touched.
-	const PNG::Pixel *in1 = bitmapSrc->GetPixels(), *in2 = bitmapSrc->GetPixels() + (bitmapSrc->height - 1) * bitmapSrc->width;
-	PNG::Pixel *out1 = bitmapTarget->GetPixels(), *out2 = bitmapTarget->GetPixels() + (bitmapSrc->height - 1) * bitmapSrc->width;
-	for(uint32 i = 0; i < bitmapSrc->width; i++)
+	const RawGDIDIB::Pixel *in1 = bitmapSrc->Pixels().data(), *in2 = bitmapSrc->Pixels().data() + (bitmapSrc->Height() - 1) * bitmapSrc->Width();
+	RawGDIDIB::Pixel *out1 = bitmapTarget->Pixels().data(), *out2 = bitmapTarget->Pixels().data() + (bitmapSrc->Height() - 1) * bitmapSrc->Width();
+	for(uint32 i = 0; i < bitmapSrc->Width(); i++)
 	{
 		*(out1++) = *(in1++);
 		*(out2++) = *(in2++);
@@ -43,12 +43,12 @@ CRippleBitmap::CRippleBitmap()
 
 	MemsetZero(bi);
 	bi.biSize = sizeof(BITMAPINFOHEADER);
-	bi.biWidth = bitmapSrc->width;
-	bi.biHeight = -(int32)bitmapSrc->height;
+	bi.biWidth = bitmapSrc->Width();
+	bi.biHeight = -(int32)bitmapSrc->Height();
 	bi.biPlanes = 1;
 	bi.biBitCount = 32;
 	bi.biCompression = BI_RGB;
-	bi.biSizeImage = bitmapSrc->width * bitmapSrc->height * 4;
+	bi.biSizeImage = bitmapSrc->Width() * bitmapSrc->Height() * 4;
 
 }
 
@@ -59,8 +59,6 @@ CRippleBitmap::~CRippleBitmap()
 	{
 		ShowCursor(TRUE);
 	}
-	delete bitmapSrc;
-	delete bitmapTarget;
 }
 
 
@@ -74,13 +72,13 @@ void CRippleBitmap::OnMouseMove(UINT nFlags, CPoint point)
 	lastRipple = now;
 
 	// Initiate ripples at cursor location
-	Limit(point.x, 1, int(bitmapSrc->width) - 2);
-	Limit(point.y, 2, int(bitmapSrc->height) - 3);
-	int32 *p = backBuf + point.x + point.y * bitmapSrc->width;
+	Limit(point.x, 1, int(bitmapSrc->Width()) - 2);
+	Limit(point.y, 2, int(bitmapSrc->Height()) - 3);
+	int32 *p = backBuf + point.x + point.y * bitmapSrc->Width();
 	p[0] += (nFlags & MK_LBUTTON) ? 50 : 150;
 	p[0] += (nFlags & MK_MBUTTON) ? 150 : 0;
 
-	int32 w = bitmapSrc->width;
+	int32 w = bitmapSrc->Width();
 	// Make the initial point of this ripple a bit "fatter".
 	p[-1] += p[0] / 2;     p[1] += p[0] / 2;
 	p[-w] += p[0] / 2;     p[w] += p[0] / 2;
@@ -133,8 +131,8 @@ void CRippleBitmap::OnPaint()
 	GetClientRect(rect);
 	StretchDIBits(dc.m_hDC,
 		0, 0, rect.Width(), rect.Height(),
-		0, 0, bitmapTarget->width, bitmapTarget->height,
-		bitmapTarget->GetPixels(),
+		0, 0, bitmapTarget->Width(), bitmapTarget->Height(),
+		bitmapTarget->Pixels().data(),
 		reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS, SRCCOPY);
 }
 
@@ -155,7 +153,7 @@ bool CRippleBitmap::Animate()
 	backBuf = (frame ? offset1 : offset2).data();
 
 	// Spread the ripples...
-	const int32 w = bitmapSrc->width, h = bitmapSrc->height;
+	const int32 w = bitmapSrc->Width(), h = bitmapSrc->Height();
 	const int32 numPixels = w * (h - 2);
 	const int32 *back = backBuf + w;
 	int32 *front = frontBuf + w;
@@ -167,9 +165,9 @@ bool CRippleBitmap::Animate()
 
 	// ...and compute the final picture.
 	const int32 *offset = frontBuf + w;
-	const PNG::Pixel *pixelIn = bitmapSrc->GetPixels() + w;
-	PNG::Pixel *pixelOut = bitmapTarget->GetPixels() + w;
-	PNG::Pixel *limitMin = bitmapSrc->GetPixels(), *limitMax = bitmapSrc->GetPixels() + bitmapSrc->GetNumPixels() - 1;
+	const RawGDIDIB::Pixel *pixelIn = bitmapSrc->Pixels().data() + w;
+	RawGDIDIB::Pixel *pixelOut = bitmapTarget->Pixels().data() + w;
+	RawGDIDIB::Pixel *limitMin = bitmapSrc->Pixels().data(), *limitMax = bitmapSrc->Pixels().data() + bitmapSrc->Pixels().size() - 1;
 	for(int32 i = numPixels; i != 0; i--, pixelIn++, pixelOut++, offset++)
 	{
 		// Compute pixel displacement
@@ -178,7 +176,7 @@ bool CRippleBitmap::Animate()
 
 		if(xOff | yOff)
 		{
-			const PNG::Pixel *p = pixelIn + xOff + yOff * w;
+			const RawGDIDIB::Pixel *p = pixelIn + xOff + yOff * w;
 			Limit(p, limitMin, limitMax);
 			// Add a bit of shading depending on how far we're displacing the pixel...
 			pixelOut->r = mpt::saturate_cast<uint8>(p->r + (p->r * xOff) / 32);

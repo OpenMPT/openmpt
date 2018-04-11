@@ -24,6 +24,10 @@ OPENMPT_NAMESPACE_BEGIN
 #pragma comment(lib, "htmlhelp.lib")
 #pragma comment(lib, "uxtheme.lib")
 
+#ifdef MPT_WITH_GDIPLUS
+#pragma comment(lib, "gdiplus.lib")
+#endif
+
 #pragma comment(lib, "dmoguids.lib")
 #pragma comment(lib, "strmiids.lib")
 

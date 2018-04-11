@@ -2,7 +2,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-namespace PNG { struct Bitmap; }
+class RawGDIDIB;
 
 class CRippleBitmap: public CWnd
 {
@@ -14,7 +14,7 @@ public:
 protected:
 
 	BITMAPINFOHEADER bi;
-	PNG::Bitmap *bitmapSrc, *bitmapTarget;
+	std::unique_ptr<RawGDIDIB> bitmapSrc, bitmapTarget;
 	std::vector<int32> offset1, offset2;
 	int32 *frontBuf, *backBuf;
 	DWORD lastFrame = 0;	// Time of last frame

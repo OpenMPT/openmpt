@@ -1,9 +1,8 @@
 /*
- * PNG.cpp
- * -------
- * Purpose: Extremely minimalistic PNG loader (only for internal data resources)
- * Notes  : Currently implemented: 8-bit, 24-bit and 32-bit images (8 bits per component), no filters, no interlaced pictures.
- *          Paletted pictures are automatically depalettized.
+ * Image.cpp
+ * ---------
+ * Purpose: Bitmap and Vector image file handling.
+ * Notes  : Either uses GDI+ or a simple custom PNG loader.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -13,22 +12,36 @@
 #include "MPTrackUtil.h"
 #include "PNG.h"
 #include "../common/FileReader.h"
+#include "../common/ComponentManager.h"
+
+#ifdef MPT_WITH_GDIPLUS
+#include <atlbase.h>
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+#define min(a,b) (((a) < (b)) ? (a) : (b))
+#pragma warning(push)
+#pragma warning(disable:4458) // declaration of 'x' hides class member
+#include <gdiplus.h>
+#pragma warning(pop)
+#else // !MPT_WITH_GDIPLUS
 #if defined(MPT_WITH_ZLIB)
 #include <zlib.h>
 #elif defined(MPT_WITH_MINIZ)
 #include <miniz/miniz.h>
 #endif
+#endif // MPT_WITH_GDIPLUS
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-PNG::Bitmap *PNG::ReadPNG(FileReader &file)
+#ifndef MPT_WITH_GDIPLUS
+
+static std::unique_ptr<RawGDIDIB> ReadPNG(FileReader file)
 {
 	file.Rewind();
 	if(!file.ReadMagic("\211PNG\r\n\032\n"))
 	{
-		return nullptr;
+		throw bad_image();
 	}
 
 	uint32_t width = 0;
@@ -40,7 +53,7 @@ PNG::Bitmap *PNG::ReadPNG(FileReader &file)
 	uint8_t interlaceMethod;
 
 	std::vector<uint8_t> dataIn;
-	std::vector<Pixel> palette;
+	std::vector<RawGDIDIB::Pixel> palette;
 
 	while(file.CanRead(12))
 	{
@@ -91,7 +104,7 @@ PNG::Bitmap *PNG::ReadPNG(FileReader &file)
 			{
 				uint8_t p[3];
 				chunk.ReadArray(p);
-				palette[i] = Pixel(p[0], p[1], p[2], 255);
+				palette[i] = RawGDIDIB::Pixel(p[0], p[1], p[2], 255);
 			}
 		}
 	}
@@ -115,12 +128,12 @@ PNG::Bitmap *PNG::ReadPNG(FileReader &file)
 		|| (colorType == 3 && palette.empty())
 		|| dataIn.size() < (bitsPerPixel * width * height) / 8 + height)			// Enough data present?
 	{
-		return nullptr;
+		throw bad_image();
 	}
 
-	Bitmap *bitmap = new (std::nothrow) Bitmap(width, height);
+	std::unique_ptr<RawGDIDIB> bitmap = mpt::make_unique<RawGDIDIB>(width, height);
 
-	Pixel *pixelOut = bitmap->GetPixels();
+	RawGDIDIB::Pixel *pixelOut = bitmap->Pixels().data();
 	uint32_t x = 0, y = 0;
 	size_t offset = 0;
 	while(y < height)
@@ -163,35 +176,272 @@ PNG::Bitmap *PNG::ReadPNG(FileReader &file)
 	return bitmap;
 }
 
+#endif // !MPT_WITH_GDIPLUS
 
-PNG::Bitmap *PNG::ReadPNG(const TCHAR *resource)
+
+#ifdef MPT_WITH_GDIPLUS
+
+
+GdiplusRAII::GdiplusRAII()
+	: gdiplusToken(0)
 {
-	mpt::const_byte_span data = GetResource(resource, TEXT("PNG"));
-	if(!data.data())
+	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+}
+
+
+GdiplusRAII::~GdiplusRAII()
+{
+	Gdiplus::GdiplusShutdown(gdiplusToken);
+	gdiplusToken = 0;
+}
+
+
+#endif // MPT_WITH_GDIPLUS
+
+
+RawGDIDIB::RawGDIDIB(uint32 width, uint32 height)
+	: width(width)
+	, height(height)
+	, pixels(width * height)
+{
+	MPT_ASSERT(width > 0);
+	MPT_ASSERT(height > 0);
+}
+
+
+#ifdef MPT_WITH_GDIPLUS
+
+
+namespace GDIP
+{
+
+
+static CComPtr<IStream> GetStream(mpt::const_byte_span data)
+{
+	CComPtr<IStream> stream;
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+	stream.Attach(SHCreateMemStream(data.data(), mpt::saturate_cast<UINT>(data.size())));
+#else
+	HGLOBAL hGlobal = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, data.size());
+	if(hGlobal == NULL)
 	{
-		return nullptr;
+		throw bad_image();
 	}
-	FileReader file(data);
-	return ReadPNG(file);
+	void * mem = GlobalLock(hGlobal);
+	if(!mem)
+	{
+		hGlobal = GlobalFree(hGlobal);
+		throw bad_image();
+	}
+	std::memcpy(mem, data.data(), data.size());
+	GlobalUnlock(hGlobal);
+	if(CreateStreamOnHGlobal(NULL, TRUE, &stream) != S_OK)
+	{
+		hGlobal = GlobalFree(hGlobal);
+		throw bad_image();
+	}
+	hGlobal = NULL;
+#endif
+	if(!stream)
+	{
+		throw bad_image();
+	}
+	return stream;
+}
+
+
+std::unique_ptr<Gdiplus::Bitmap> LoadPixelImage(mpt::const_byte_span file)
+{
+	CComPtr<IStream> stream = GetStream(file);
+	std::unique_ptr<Gdiplus::Bitmap> result = mpt::make_unique<Gdiplus::Bitmap>(stream, FALSE);
+	if(result->GetLastStatus() != Gdiplus::Ok)
+	{
+		throw bad_image();
+	}
+	if(result->GetWidth() == 0 || result->GetHeight() == 0)
+	{
+		throw bad_image();
+	}
+	return result;
+}
+
+
+std::unique_ptr<Gdiplus::Bitmap> LoadPixelImage(FileReader file)
+{
+	FileReader::PinnedRawDataView view = file.GetPinnedRawDataView();
+	return LoadPixelImage(view.span());
+}
+
+
+std::unique_ptr<Gdiplus::Metafile> LoadVectorImage(mpt::const_byte_span file)
+{
+	CComPtr<IStream> stream = GetStream(file);
+	std::unique_ptr<Gdiplus::Metafile> result = mpt::make_unique<Gdiplus::Metafile>(stream);
+	if(result->GetLastStatus() != Gdiplus::Ok)
+	{
+		throw bad_image();
+	}
+	if(result->GetWidth() == 0 || result->GetHeight() == 0)
+	{
+		throw bad_image();
+	}
+	return result;
+}
+
+
+std::unique_ptr<Gdiplus::Metafile> LoadVectorImage(FileReader file)
+{
+	FileReader::PinnedRawDataView view = file.GetPinnedRawDataView();
+	return LoadVectorImage(view.span());
+}
+
+
+} // namespace GDPI
+
+
+#endif // MPT_WITH_GDIPLUS
+
+
+#ifdef MPT_WITH_GDIPLUS
+
+std::unique_ptr<RawGDIDIB> ToRawGDIDIB(Gdiplus::Bitmap &bitmap)
+{
+	Gdiplus::BitmapData bitmapData;
+	Gdiplus::Rect rect{Gdiplus::Point{0, 0}, Gdiplus::Size{static_cast<INT>(bitmap.GetWidth()), static_cast<INT>(bitmap.GetHeight())}};
+	std::unique_ptr<RawGDIDIB> result = mpt::make_unique<RawGDIDIB>(bitmap.GetWidth(), bitmap.GetHeight());
+	if(bitmap.LockBits(&rect, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bitmapData) != Gdiplus::Ok)
+	{
+		throw bad_image();
+	}
+	RawGDIDIB::Pixel *dst = result->Pixels().data();
+	for(uint32 y = 0; y < result->Height(); ++y)
+	{
+		const GDIP::Pixel *src = GDIP::GetScanline(bitmapData, y);
+		for(uint32 x = 0; x < result->Width(); ++x)
+		{
+			*dst = GDIP::TORawGDIDIB(*src);
+			src++;
+			dst++;
+		}
+	}
+	bitmap.UnlockBits(&bitmapData);
+	return result;
+}
+
+#endif // MPT_WITH_GDIPLUS
+
+
+std::unique_ptr<RawGDIDIB> LoadPixelImage(mpt::const_byte_span file)
+{
+	#ifdef MPT_WITH_GDIPLUS
+		return ToRawGDIDIB(*GDIP::LoadPixelImage(file));
+	#else // !MPT_WITH_GDIPLUS
+		return ReadPNG(file);
+	#endif // MPT_WITH_GDIPLUS
+}
+
+
+std::unique_ptr<RawGDIDIB> LoadPixelImage(FileReader file)
+{
+	#ifdef MPT_WITH_GDIPLUS
+		return ToRawGDIDIB(*GDIP::LoadPixelImage(file));
+	#else // !MPT_WITH_GDIPLUS
+		return ReadPNG(file);
+	#endif // MPT_WITH_GDIPLUS
 }
 
 
 // Create a DIB for the current device from our PNG.
-bool PNG::Bitmap::ToDIB(CBitmap &bitmap, CDC *dc) const
+bool CopyToCompatibleBitmap(CBitmap &dst, CDC &dc, const RawGDIDIB &src)
 {
 	BITMAPINFOHEADER bi;
 	MemsetZero(bi);
 	bi.biSize = sizeof(BITMAPINFOHEADER);
-	bi.biWidth = width;
-	bi.biHeight = -(int32_t)height;
+	bi.biWidth = src.Width();
+	bi.biHeight = -static_cast<LONG>(src.Height());
 	bi.biPlanes = 1;
 	bi.biBitCount = 32;
 	bi.biCompression = BI_RGB;
-	bi.biSizeImage = width * height * 4;
-
-	if(dc == nullptr) dc = CDC::FromHandle(GetDC(NULL));
-	return bitmap.CreateCompatibleBitmap(dc, width, height)
-		&& SetDIBits(dc->GetSafeHdc(), bitmap, 0, height, GetPixels(), reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS);
+	bi.biSizeImage = src.Width() * src.Height() * 4;
+	if(!dst.CreateCompatibleBitmap(&dc, src.Width(), src.Height()))
+	{
+		return false;
+	}
+	if(!SetDIBits(dc.GetSafeHdc(), dst, 0, src.Height(), src.Pixels().data(), reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS))
+	{
+		return false;
+	}
+	return true;
 }
+
+
+#ifdef MPT_WITH_GDIPLUS
+
+bool CopyToCompatibleBitmap(CBitmap &dst, CDC &dc, Gdiplus::Image &src)
+{
+	if(!dst.CreateCompatibleBitmap(&dc, src.GetWidth(), src.GetHeight()))
+	{
+		return false;
+	}
+	CDC memdc;
+	if(!memdc.CreateCompatibleDC(&dc))
+	{
+		return false;
+	}
+	memdc.SelectObject(dst);
+	Gdiplus::Graphics gfx(memdc);
+	if(gfx.DrawImage(&src, 0, 0) != Gdiplus::Ok)
+	{
+		return false;
+	}
+	return true;
+}
+
+#endif // MPT_WITH_GDIPLUS
+
+
+
+bool LoadCompatibleBitmapFromPixelImage(CBitmap &dst, CDC &dc, mpt::const_byte_span file)
+{
+	try
+	{
+		#ifdef MPT_WITH_GDIPLUS
+			std::unique_ptr<Gdiplus::Bitmap> pBitmap = GDIP::LoadPixelImage(file);
+		#else // !MPT_WITH_GDIPLUS
+			std::unique_ptr<RawGDIDIB> pBitmap = ReadPNG(file);
+		#endif // MPT_WITH_GDIPLUS
+		if(!CopyToCompatibleBitmap(dst, dc, *pBitmap))
+		{
+			return false;
+		}
+	} catch(...)
+	{
+		return false;
+	}
+	return true;
+}
+
+
+bool LoadCompatibleBitmapFromPixelImage(CBitmap &dst, CDC &dc, FileReader file)
+{
+	try
+	{
+		#ifdef MPT_WITH_GDIPLUS
+			std::unique_ptr<Gdiplus::Bitmap> pBitmap = GDIP::LoadPixelImage(file);
+		#else // !MPT_WITH_GDIPLUS
+			std::unique_ptr<RawGDIDIB> pBitmap = ReadPNG(file);
+		#endif // MPT_WITH_GDIPLUS
+		if(!CopyToCompatibleBitmap(dst, dc, *pBitmap))
+		{
+			return false;
+		}
+	} catch(...)
+	{
+		return false;
+	}
+	return true;
+}
+
 
 OPENMPT_NAMESPACE_END
