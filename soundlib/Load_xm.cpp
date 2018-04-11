@@ -651,7 +651,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Hey, I know this tracker!
 		std::string mptVersion(fileHeader.trackerName + 8, 12);
-		m_dwLastSavedWithVersion = MptVersion::ToNum(mptVersion);
+		m_dwLastSavedWithVersion = Version::Parse(mptVersion);
 		madeWith = verOpenMPT | verConfirmed;
 
 		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 19))
@@ -660,7 +660,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			m_nMixLevels = mixLevelsCompatibleFT2;
 	}
 
-	if(m_dwLastSavedWithVersion != 0 && !madeWith[verOpenMPT])
+	if(m_dwLastSavedWithVersion != Version(0) && !madeWith[verOpenMPT])
 	{
 		m_nMixLevels = mixLevelsOriginal;
 		m_playBehaviour.reset();
@@ -722,7 +722,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 00, 00))
 	{
-		m_madeWithTracker = MPT_USTRING("OpenMPT ") + MptVersion::ToUString(m_dwLastSavedWithVersion);
+		m_madeWithTracker = MPT_USTRING("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
 	}
 
 	// We no longer allow any --- or +++ items in the order list now.
@@ -764,7 +764,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	memcpy(fileHeader.signature, "Extended Module: ", 17);
 	mpt::String::Write<mpt::String::spacePadded>(fileHeader.songName, m_songName);
 	fileHeader.eof = 0x1A;
-	const std::string openMptTrackerName = MptVersion::GetOpenMPTVersionStr();
+	const std::string openMptTrackerName = mpt::ToCharset(GetCharsetFile(), Version::Current().GetOpenMPTVersionString());
 	mpt::String::Write<mpt::String::spacePadded>(fileHeader.trackerName, openMptTrackerName);
 
 	// Writing song header

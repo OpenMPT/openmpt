@@ -389,7 +389,7 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 		m_MidiCfg.Reset();
 	}
 
-	m_madeWithTracker = MPT_USTRING("OpenMPT ") + MptVersion::ToUString(m_dwLastSavedWithVersion);
+	m_madeWithTracker = MPT_USTRING("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
 
 	return true;
 #endif // MPT_EXTERNAL_SAMPLES

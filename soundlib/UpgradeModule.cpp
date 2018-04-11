@@ -423,7 +423,7 @@ void CSoundFile::UpgradeModule()
 	struct PlayBehaviourVersion
 	{
 		PlayBehaviour behaviour;
-		MptVersion::VersionNum version;
+		Version version;
 	};
 	
 	if(compatModeIT && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
@@ -478,7 +478,7 @@ void CSoundFile::UpgradeModule()
 
 		for(const auto &b : behaviours)
 		{
-			m_playBehaviour.set(b.behaviour, (m_dwLastSavedWithVersion >= b.version || m_dwLastSavedWithVersion == (b.version & 0xFFFF0000)));
+			m_playBehaviour.set(b.behaviour, (m_dwLastSavedWithVersion >= b.version || m_dwLastSavedWithVersion == b.version.Masked(0xFFFF0000u)));
 		}
 	} else if(compatModeXM && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
 	{
@@ -534,10 +534,10 @@ void CSoundFile::UpgradeModule()
 
 		for(const auto &b : behaviours)
 		{
-			if(m_dwLastSavedWithVersion < (b.version & 0xFFFF0000))
+			if(m_dwLastSavedWithVersion < b.version.Masked(0xFFFF0000u))
 				m_playBehaviour.reset(b.behaviour);
 			// Full version information available, i.e. not compatibility-exported.
-			else if(m_dwLastSavedWithVersion > (b.version & 0xFFFF0000) && m_dwLastSavedWithVersion < b.version)
+			else if(m_dwLastSavedWithVersion > b.version.Masked(0xFFFF0000u) && m_dwLastSavedWithVersion < b.version)
 				m_playBehaviour.reset(b.behaviour);
 		}
 	} else if(GetType() == MOD_TYPE_XM)

@@ -113,9 +113,9 @@ BOOL CModTypeDlg::OnInitDialog()
 }
 
 
-CString CModTypeDlg::FormatVersionNumber(DWORD version)
+CString CModTypeDlg::FormatVersionNumber(Version version)
 {
-	return mpt::ToCString(MptVersion::ToUString(version) + (MptVersion::IsTestBuild(version) ? MPT_USTRING(" (test build)") : MPT_USTRING("")));
+	return mpt::ToCString(version.ToUString() + (version.IsTestVersion() ? MPT_USTRING(" (test build)") : MPT_USTRING("")));
 }
 
 

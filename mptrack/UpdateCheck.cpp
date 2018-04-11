@@ -53,7 +53,7 @@ public:
 		m_boldFont.CreateFontIndirect(&lf);
 		GetDlgItem(IDC_VERSION2)->SetFont(&m_boldFont);
 
-		SetDlgItemText(IDC_VERSION1, mpt::ToCString(mpt::CharsetASCII, MptVersion::str));
+		SetDlgItemText(IDC_VERSION1, mpt::cfmt::val(Version::Current()));
 		SetDlgItemText(IDC_VERSION2, m_releaseVersion);
 		SetDlgItemText(IDC_DATE, m_releaseDate);
 		SetDlgItemText(IDC_SYSLINK1, _T("More information about this build:\n<a href=\"") + m_releaseURL + _T("\">") + m_releaseURL + _T("</a>"));
@@ -170,10 +170,10 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 {
 
 	// Prepare UA / URL strings...
-	const CString userAgent = CString(_T("OpenMPT ")) + MptVersion::str;
+	const CString userAgent = CString(_T("OpenMPT ")) + mpt::cfmt::val(Version::Current());
 	CString updateURL = settings.updateBaseURL;
 	if(updateURL.IsEmpty()) updateURL = defaultUpdateURL;
-	CString versionStr = MptVersion::str;
+	CString versionStr = mpt::cfmt::val(Version::Current());
 	versionStr.Append(_T("-"));
 	versionStr.Append(mpt::ToCString(BuildVariants().GuessCurrentBuildName()));
 	// Windows Version statistics

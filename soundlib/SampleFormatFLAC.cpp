@@ -513,7 +513,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 		FLAC__StreamMetadata_VorbisComment_Entry entry;
 		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "TITLE", mpt::ToCharset(mpt::CharsetUTF8, GetCharsetInternal(), m_szNames[nSample]).c_str());
 		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
-		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ENCODER", MptVersion::GetOpenMPTVersionStr().c_str());
+		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ENCODER", mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString()).c_str());
 		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
 		if(sampleRate > FLAC__MAX_SAMPLE_RATE)
 		{

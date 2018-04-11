@@ -174,7 +174,8 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	m_nMinPeriod = 16;
 	m_nMaxPeriod = 32767;
 	m_nResampling = SRCMODE_DEFAULT;
-	m_dwLastSavedWithVersion = m_dwCreatedWithVersion = 0;
+	m_dwLastSavedWithVersion = Version(0);
+	m_dwCreatedWithVersion = Version(0);
 
 	SetMixLevels(mixLevelsCompatible);
 
@@ -480,7 +481,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	{
 		// New song
 		InitializeGlobals();
-		m_dwCreatedWithVersion = MptVersion::num;
+		m_dwCreatedWithVersion = Version::Current();
 	}
 
 	// Adjust channels

@@ -492,7 +492,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// OpenMPT Version number (Major.Minor)
 				// This will only be interpreted as "made with ModPlug" (i.e. disable compatible playback etc) if the "reserved" field is set to "OMPT" - else, compatibility was used.
-				m_dwLastSavedWithVersion = (fileHeader.cwtv & 0x0FFF) << 16;
+				m_dwLastSavedWithVersion = Version((fileHeader.cwtv & 0x0FFF) << 16);
 				if(!memcmp(&fileHeader.reserved, "OMPT", 4))
 					interpretModPlugMade = true;
 			} else if(fileHeader.cmwt == 0x888 || fileHeader.cwtv == 0x888)
@@ -551,7 +551,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		//   Luckily OpenMPT 1.17.03.02 should not be very wide-spread.
 		// - In normal mode the time signature is always present in the song extensions anyway. So it's okay if we read
 		//   the signature here and maybe overwrite it later when parsing the song extensions.
-		if(m_dwLastSavedWithVersion == 0 || m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02))
+		if(m_dwLastSavedWithVersion == Version(0) || m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02))
 		{
 			m_nDefaultRowsPerBeat = fileHeader.highlight_minor;
 			m_nDefaultRowsPerMeasure = fileHeader.highlight_major;
@@ -1138,11 +1138,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(m_dwLastSavedWithVersion && m_madeWithTracker.empty())
 	{
-		m_madeWithTracker = MPT_USTRING("OpenMPT ") + MptVersion::ToUString(m_dwLastSavedWithVersion);
+		m_madeWithTracker = MPT_USTRING("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
 		if(memcmp(&fileHeader.reserved, "OMPT", 4) && (fileHeader.cwtv & 0xF000) == 0x5000)
 		{
 			m_madeWithTracker += MPT_USTRING(" (compatibility export)");
-		} else if(MptVersion::IsTestBuild(m_dwLastSavedWithVersion))
+		} else if(m_dwLastSavedWithVersion.IsTestVersion())
 		{
 			m_madeWithTracker += MPT_USTRING(" (test build)");
 		}
@@ -1256,7 +1256,7 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 	if(cwtv >= 0x88D)
 	{
 		srlztn::SsbRead ssb(iStrm);
-		ssb.BeginRead("mptm", MptVersion::num);
+		ssb.BeginRead("mptm", Version::Current().GetRawVersion());
 		ssb.ReadItem(GetTuneSpecificTunings(), "0", &ReadTuningCollection);
 		ssb.ReadItem(*this, "1", &ReadTuningMap);
 		ssb.ReadItem(Order, "2", &ReadModSequenceOld);
@@ -1396,7 +1396,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	} else
 	{
 		// IT
-		MptVersion::VersionNum vVersion = MptVersion::num;
+		uint32 vVersion = Version::Current().GetRawVersion();
 		itHeader.cwtv = 0x5000 | (uint16)((vVersion >> 16) & 0x0FFF); // format: txyy (t = tracker ID, x = version major, yy = version minor), e.g. 0x5117 (OpenMPT = 5, 117 = v1.17)
 		itHeader.cmwt = 0x0214;	// Common compatible tracker :)
 		// Hack from schism tracker:
@@ -1868,7 +1868,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	MPT_ASSERT_ALWAYS(MPTStartPos > 0);
 
 	srlztn::SsbWrite ssb(fout);
-	ssb.BeginWrite("mptm", MptVersion::num);
+	ssb.BeginWrite("mptm", Version::Current().GetRawVersion());
 
 	if(GetTuneSpecificTunings().GetNumTunings() > 0)
 		ssb.WriteItem(GetTuneSpecificTunings(), "0", &WriteTuningCollection);
@@ -2057,7 +2057,7 @@ void CSoundFile::LoadMixPlugins(FileReader &file)
 		} else if(!memcmp(code, "MODU", 4))
 		{
 			m_madeWithTracker = MPT_USTRING("BeRoTracker");
-			m_dwLastSavedWithVersion = 0;	// Reset MPT detection for old files that have a similar fingerprint
+			m_dwLastSavedWithVersion = Version(0);	// Reset MPT detection for old files that have a similar fingerprint
 		}
 	}
 }
@@ -2189,10 +2189,10 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 
 	if(m_dwCreatedWithVersion)
 	{
-		WRITEMODULAR(MagicBE("CWV."), m_dwCreatedWithVersion);
+		WRITEMODULAR(MagicBE("CWV."), m_dwCreatedWithVersion.GetRawVersion());
 	}
 
-	WRITEMODULAR(MagicBE("LSWV"), MptVersion::num);
+	WRITEMODULAR(MagicBE("LSWV"), Version::Current().GetRawVersion());
 	WRITEMODULAR(MagicBE("SPA."), m_nSamplePreAmp);
 	WRITEMODULAR(MagicBE("VSTV"), m_nVSTiVolume);
 
@@ -2349,8 +2349,8 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 			case MagicBE("C..."): if(GetType() != MOD_TYPE_XM && m_ContainerType != MOD_CONTAINERTYPE_MO3) { CHANNELINDEX chn = 0; ReadField(chunk, size, chn); m_nChannels = Clamp(chn, m_nChannels, MAX_BASECHANNELS); } break;
 			case MagicBE("TM.."): ReadFieldCast(chunk, size, m_nTempoMode); break;
 			case MagicBE("PMM."): ReadFieldCast(chunk, size, m_nMixLevels); break;
-			case MagicBE("CWV."): ReadField(chunk, size, m_dwCreatedWithVersion); break;
-			case MagicBE("LSWV"): { uint32 ver; ReadField(chunk, size, ver); if(ver != 0) { m_dwLastSavedWithVersion = ver; } break; }
+			case MagicBE("CWV."): { uint32 ver = 0; ReadField(chunk, size, ver); m_dwCreatedWithVersion = Version(ver); break; }
+			case MagicBE("LSWV"): { uint32 ver = 0; ReadField(chunk, size, ver); if(ver != 0) { m_dwLastSavedWithVersion = Version(ver); } break; }
 			case MagicBE("SPA."): ReadField(chunk, size, m_nSamplePreAmp); break;
 			case MagicBE("VSTV"): ReadField(chunk, size, m_nVSTiVolume); break;
 			case MagicBE("DGV."): ReadField(chunk, size, m_nDefaultGlobalVolume); break;

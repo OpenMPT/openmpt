@@ -647,7 +647,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 CString CTrackApp::SuggestModernBuildText()
 {
 	CString updateText;
-	const CString url = mpt::ToCString(MptVersion::GetDownloadURL());
+	const CString url = mpt::ToCString(Build::GetURL(Build::Url::Download));
 	if(BuildVariants::IsKnownSystem())
 	{
 		if(!BuildVariants::CurrentBuildIsModern())
@@ -667,7 +667,7 @@ CString CTrackApp::SuggestModernBuildText()
 bool CTrackApp::CheckSystemSupport()
 {
 	const mpt::ustring lf = MPT_USTRING("\n");
-	const mpt::ustring url = MptVersion::GetDownloadURL();
+	const mpt::ustring url = Build::GetURL(Build::Url::Download);
 	if(!BuildVariants::ProcessorCanRunCurrentBuild())
 	{
 		mpt::ustring text = mpt::ustring();
@@ -1051,7 +1051,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		CUpdateCheck::DoAutoUpdateCheck();
 
 		// Open settings if the previous execution was with an earlier version.
-		if(TrackerSettings::Instance().ShowSettingsOnNewVersion && (TrackerSettings::Instance().PreviousSettingsVersion < MptVersion::num))
+		if(TrackerSettings::Instance().ShowSettingsOnNewVersion && (TrackerSettings::Instance().PreviousSettingsVersion < Version::Current()))
 		{
 			m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
 		}

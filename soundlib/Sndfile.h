@@ -15,6 +15,7 @@
 #include "MixerSettings.h"
 #include "../common/misc_util.h"
 #include "../common/mptRandom.h"
+#include "../common/version.h"
 #include <vector>
 #include <bitset>
 #include <set>
@@ -390,8 +391,8 @@ public:
 #endif
 	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Sample names
 
-	uint32 m_dwCreatedWithVersion;
-	uint32 m_dwLastSavedWithVersion;
+	Version m_dwCreatedWithVersion;
+	Version m_dwLastSavedWithVersion;
 
 	PlayBehaviourSet m_playBehaviour;
 

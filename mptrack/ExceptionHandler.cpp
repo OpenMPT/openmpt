@@ -253,9 +253,9 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 
 	errorMessage += MPT_ULITERAL("\n\n");
 	errorMessage += mpt::format(MPT_USTRING("OpenMPT %1 (%2 (%3))"))
-		( mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringExtended())
-		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetSourceInfo().GetUrlWithRevision())
-		, mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetSourceInfo().GetStateString())
+		( Build::GetVersionStringExtended()
+		, SourceInfo::Current().GetUrlWithRevision()
+		, SourceInfo::Current().GetStateString()
 		);
 
 	errorMessage += MPT_ULITERAL("\n\n");

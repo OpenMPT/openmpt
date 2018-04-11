@@ -285,7 +285,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		break;
 	case S3MFileHeader::trkOpenMPT:
 		trackerStr = MPT_USTRING("OpenMPT");
-		m_dwLastSavedWithVersion = (fileHeader.cwtv & S3MFileHeader::versionMask) << 16;
+		m_dwLastSavedWithVersion = Version((fileHeader.cwtv & S3MFileHeader::versionMask) << 16);
 		break; 
 	case S3MFileHeader::trkBeRoTracker:
 		m_madeWithTracker = MPT_USTRING("BeRoTracker");
@@ -647,7 +647,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	// Version info following: ST3.20 = 0x1320
 	// Most significant nibble = Tracker ID, see S3MFileHeader::S3MTrackerVersions
 	// Following: One nibble = Major version, one byte = Minor version (hex)
-	fileHeader.cwtv = S3MFileHeader::trkOpenMPT | static_cast<uint16>((MptVersion::num >> 16) & S3MFileHeader::versionMask);
+	fileHeader.cwtv = S3MFileHeader::trkOpenMPT | static_cast<uint16>((Version::Current().GetRawVersion() >> 16) & S3MFileHeader::versionMask);
 	fileHeader.formatVersion = S3MFileHeader::newVersion;
 	memcpy(fileHeader.magic, "SCRM", 4);
 

@@ -214,24 +214,24 @@ void CMainFrame::Initialize()
 {
 	//Adding version number to the frame title
 	CString title = GetTitle();
-	title += CString(" ") + MptVersion::str;
+	title += _T(" ") + mpt::cfmt::val(Version::Current());
 	#ifdef DEBUG
-		title += CString(" DEBUG");
+		title += _T(" DEBUG");
 	#endif
 	#ifdef NO_VST
-		title += " NO_VST";
+		title += _T(" NO_VST");
 	#endif
 	#ifdef NO_DMO
-		title += " NO_DMO";
+		title += _T(" NO_DMO");
 	#endif
 	#ifdef NO_PLUGINS
-		title += " NO_PLUGINS";
+		title += _T(" NO_PLUGINS");
 	#endif
 	#ifndef MPT_WITH_ASIO
-		title += " NO_ASIO";
+		title += _T(" NO_ASIO");
 	#endif
 	#ifndef MPT_WITH_DSOUND
-		title += " NO_DSOUND";
+		title += _T(" NO_DSOUND");
 	#endif
 	SetTitle(title);
 	OnUpdateFrameTitle(false);
@@ -2275,7 +2275,7 @@ void CMainFrame::OnNextOctave()
 
 void CMainFrame::OnReportBug()
 {
-	CTrackApp::OpenURL(MptVersion::GetURL("bugtracker"));
+	CTrackApp::OpenURL(Build::GetURL(Build::Url::Bugtracker));
 }
 
 
@@ -2284,8 +2284,8 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 	mpt::ustring url;
 	switch(nID)
 	{
-	case ID_NETLINK_MODPLUG:	url = MptVersion::GetURL("website"); break;
-	case ID_NETLINK_TOP_PICKS:	url = MptVersion::GetURL("top_picks"); break;
+	case ID_NETLINK_MODPLUG:	url = Build::GetURL(Build::Url::Website); break;
+	case ID_NETLINK_TOP_PICKS:	url = Build::GetURL(Build::Url::TopPicks); break;
 	}
 	if(!url.empty())
 	{

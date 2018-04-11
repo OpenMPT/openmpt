@@ -111,12 +111,12 @@ std::uint32_t get_library_version() {
 }
 
 std::uint32_t get_core_version() {
-	return MptVersion::num;
+	return Version::Current().GetRawVersion();
 }
 
 static std::string get_library_version_string() {
 	std::string str;
-	const MptVersion::SourceInfo sourceInfo = MptVersion::GetSourceInfo();
+	const SourceInfo sourceInfo = SourceInfo::Current();
 	str += mpt::fmt::val(OPENMPT_API_VERSION_MAJOR);
 	str += ".";
 	str += mpt::fmt::val(OPENMPT_API_VERSION_MINOR);
@@ -126,15 +126,15 @@ static std::string get_library_version_string() {
 		str += OPENMPT_API_VERSION_PREREL;
 	}
 	std::vector<std::string> fields;
-	if ( sourceInfo.Revision ) {
-		fields.push_back( "r" + mpt::fmt::val( sourceInfo.Revision ) );
+	if ( sourceInfo.Revision() ) {
+		fields.push_back( "r" + mpt::fmt::val( sourceInfo.Revision() ) );
 	}
-	if ( sourceInfo.IsDirty ) {
+	if ( sourceInfo.IsDirty() ) {
 		fields.push_back( "modified" );
-	} else if ( sourceInfo.HasMixedRevisions ) {
+	} else if ( sourceInfo.HasMixedRevisions() ) {
 		fields.push_back( "mixed" );
 	}
-	if ( sourceInfo.IsPackage ) {
+	if ( sourceInfo.IsPackage() ) {
 		fields.push_back( "pkg" );
 	}
 	if ( !fields.empty() ) {
@@ -145,56 +145,56 @@ static std::string get_library_version_string() {
 }
 
 static std::string get_library_features_string() {
-	return mpt::String::Trim(MptVersion::GetBuildFeaturesString());
+	return mpt::ToCharset(mpt::CharsetUTF8, mpt::String::Trim(Build::GetBuildFeaturesString()));
 }
 
 static std::string get_core_version_string() {
-	return MptVersion::GetVersionStringExtended();
+	return mpt::ToCharset(mpt::CharsetUTF8, Build::GetVersionStringExtended());
 }
 
 static std::string get_source_url_string() {
-	return MptVersion::GetSourceInfo().GetUrlWithRevision();
+	return mpt::ToCharset(mpt::CharsetUTF8, SourceInfo::Current().GetUrlWithRevision());
 }
 
 static std::string get_source_date_string() {
-	return MptVersion::GetSourceInfo().Date;
+	return mpt::ToCharset(mpt::CharsetUTF8, SourceInfo::Current().Date());
 }
 
 static std::string get_source_revision_string() {
-	const MptVersion::SourceInfo sourceInfo = MptVersion::GetSourceInfo();
-	return sourceInfo.Revision ? mpt::fmt::val(sourceInfo.Revision) : std::string();
+	const SourceInfo sourceInfo = SourceInfo::Current();
+	return sourceInfo.Revision() ? mpt::fmt::val(sourceInfo.Revision()) : std::string();
 }
 
 static std::string get_build_string() {
-	return MptVersion::GetBuildDateString();
+	return mpt::ToCharset(mpt::CharsetUTF8, Build::GetBuildDateString());
 }
 
 static std::string get_build_compiler_string() {
-	return MptVersion::GetBuildCompilerString();
+	return mpt::ToCharset(mpt::CharsetUTF8, Build::GetBuildCompilerString());
 }
 
 static std::string get_credits_string() {
-	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetFullCreditsString());
+	return mpt::ToCharset(mpt::CharsetUTF8, Build::GetFullCreditsString());
 }
 
 static std::string get_contact_string() {
-	return mpt::ToCharset(mpt::CharsetUTF8, MPT_USTRING("Forum: ") +  MptVersion::GetURL("forum"));
+	return mpt::ToCharset(mpt::CharsetUTF8, MPT_USTRING("Forum: ") +  Build::GetURL(Build::Url::Forum));
 }
 
 static std::string get_license_string() {
-	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetLicenseString());
+	return mpt::ToCharset(mpt::CharsetUTF8, Build::GetLicenseString());
 }
 
 static std::string get_url_string() {
-	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetURL("website"));
+	return mpt::ToCharset(mpt::CharsetUTF8, Build::GetURL(Build::Url::Website));
 }
 
 static std::string get_support_forum_url_string() {
-	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetURL("forum"));
+	return mpt::ToCharset(mpt::CharsetUTF8, Build::GetURL(Build::Url::Forum));
 }
 
 static std::string get_bugtracker_url_string() {
-	return mpt::ToCharset(mpt::CharsetUTF8, MptVersion::GetURL("bugtracker"));
+	return mpt::ToCharset(mpt::CharsetUTF8, Build::GetURL(Build::Url::Bugtracker));
 }
 
 std::string get_string( const std::string & key ) {
@@ -223,11 +223,11 @@ std::string get_string( const std::string & key ) {
 	} else if ( key == "source_revision" ) {
 		return get_source_revision_string();
 	} else if ( key == "source_is_modified" ) {
-		return MptVersion::GetSourceInfo().IsDirty ? "1" : "0";
+		return SourceInfo::Current().IsDirty() ? "1" : "0";
 	} else if ( key == "source_has_mixed_revision" ) {
-		return MptVersion::GetSourceInfo().HasMixedRevisions ? "1" : "0";
+		return SourceInfo::Current().HasMixedRevisions() ? "1" : "0";
 	} else if ( key == "source_is_package" ) {
-		return MptVersion::GetSourceInfo().IsPackage ? "1" : "0";
+		return SourceInfo::Current().IsPackage() ? "1" : "0";
 	} else if ( key == "build" ) {
 		return get_build_string();
 	} else if ( key == "build_compiler" ) {

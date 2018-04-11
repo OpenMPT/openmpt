@@ -337,7 +337,7 @@ bool Dump(const mpt::PathString &filename)
 
 	mpt::ofstream f(filename, std::ios::out);
 
-	f << "Build: OpenMPT " << MptVersion::GetVersionStringExtended() << std::endl;
+	f << "Build: OpenMPT " << mpt::ToCharset(mpt::CharsetUTF8, Build::GetVersionStringExtended()) << std::endl;
 
 	bool qpcValid = false;
 

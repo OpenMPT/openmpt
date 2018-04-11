@@ -582,7 +582,7 @@ public:
 
 	Setting<mpt::ustring> IniVersion;
 	const bool FirstRun;
-	const MptVersion::VersionNum PreviousSettingsVersion;
+	const Version PreviousSettingsVersion;
 	Setting<mpt::ustring> gcsInstallGUID;
 
 	// Display
@@ -839,7 +839,7 @@ public:
 	void MigrateOldSoundDeviceSettings(SoundDevice::Manager &manager);
 
 private:
-	void MigrateTunings(const MptVersion::VersionNum storedVersion);
+	void MigrateTunings(const Version storedVersion);
 	std::unique_ptr<CTuningCollection> LoadLocalTunings();
 public:
 

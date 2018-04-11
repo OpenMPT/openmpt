@@ -212,7 +212,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 	logcapturer.ShowLog(
 		mpt::cformat(_T("File: %1\n"))(filename) +
-		mpt::cformat(_T("Last saved with: %1, you are using OpenMPT %2\n"))(m_SndFile.m_madeWithTracker, MptVersion::AsUString()) +
+		mpt::cformat(_T("Last saved with: %1, you are using OpenMPT %2\n"))(m_SndFile.m_madeWithTracker, Version::Current()) +
 		_T("\n")
 		);
 
@@ -253,11 +253,11 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	}
 
 	// Show warning if file was made with more recent version of OpenMPT except
-	if(MptVersion::RemoveBuildNumber(m_SndFile.m_dwLastSavedWithVersion) > MptVersion::num)
+	if(m_SndFile.m_dwLastSavedWithVersion.WithoutTestNumber() > Version::Current())
 	{
 		Reporting::Notification(mpt::format(MPT_USTRING("Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%1. Current version: v%2.\r\n"))(
-			MptVersion::ToUString(m_SndFile.m_dwLastSavedWithVersion),
-			MptVersion::AsUString()));
+			m_SndFile.m_dwLastSavedWithVersion,
+			Version::Current()));
 	}
 
 	SetModified(false);
@@ -282,7 +282,7 @@ BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTempla
 {
 	ScopedLogCapturer logcapturer(*this);
 	BOOL bOk = FALSE;
-	m_SndFile.m_dwLastSavedWithVersion = MptVersion::num;
+	m_SndFile.m_dwLastSavedWithVersion = Version::Current();
 	if(filename.empty())
 		return FALSE;
 

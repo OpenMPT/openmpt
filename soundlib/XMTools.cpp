@@ -290,7 +290,7 @@ void XIInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibi
 	mpt::String::Write<mpt::String::spacePadded>(name, mptIns.name);
 	eof = 0x1A;
 
-	const std::string openMptTrackerName = MptVersion::GetOpenMPTVersionStr();
+	const std::string openMptTrackerName = mpt::ToCharset(mpt::CharsetCP437, Version::Current().GetOpenMPTVersionString());
 	mpt::String::Write<mpt::String::spacePadded>(trackerName, openMptTrackerName);
 
 	version = 0x102;

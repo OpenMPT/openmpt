@@ -48,20 +48,18 @@ TrackerSettings &TrackerSettings::Instance()
 }
 
 
-static MptVersion::VersionNum GetPreviousSettingsVersion(const mpt::ustring &iniVersion)
+static Version GetPreviousSettingsVersion(const mpt::ustring &iniVersion)
 {
-	MptVersion::VersionNum result = 0;
 	if(!iniVersion.empty())
 	{
-		result = MptVersion::ToNum(iniVersion);
+		return Version::Parse(iniVersion);
 	} else
 	{
 		// No version stored.
 		// This is the first run, thus set the previous version to our current
 		// version which will avoid running all settings upgrade code.
-		result = MptVersion::num;
+		return Version::Current();
 	}
-	return result;
 }
 
 
@@ -331,7 +329,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, pluginProjectPath(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("ProjectPath"), mpt::ustring())
 	, vstHostProductString(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("HostProductString"), "OpenMPT")
 	, vstHostVendorString(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("HostVendorString"), "OpenMPT project")
-	, vstHostVendorVersion(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("HostVendorVersion"), MptVersion::num)
+	, vstHostVendorVersion(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("HostVendorVersion"), Version::Current().GetRawVersion())
 	// Update
 	, UpdateLastUpdateCheck(conf, MPT_USTRING("Update"), MPT_USTRING("LastUpdateCheck"), mpt::Date::Unix(time_t()))
 	, UpdateUpdateCheckPeriod(conf, MPT_USTRING("Update"), MPT_USTRING("UpdateCheckPeriod"), 7)
@@ -455,7 +453,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Fixups:
 	// -------
 
-	const MptVersion::VersionNum storedVersion = PreviousSettingsVersion;
+	const Version storedVersion = PreviousSettingsVersion;
 
 	// Version
 	if(gcsInstallGUID.Get().empty())
@@ -467,7 +465,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Plugins
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,19,03,01) && vstHostProductString.Get() == "OpenMPT")
 	{
-		vstHostVendorVersion = MptVersion::num;
+		vstHostVendorVersion = Version::Current().GetRawVersion();
 	}
 
 	// Sound Settings
@@ -697,7 +695,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		midiImportTicks = 16;
 
 	// Last fixup: update config version
-	IniVersion = MptVersion::AsUString();
+	IniVersion = mpt::ufmt::val(Version::Current());
 
 	// Write updated settings
 	conf.Flush();
@@ -770,7 +768,7 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 }
 
 
-void TrackerSettings::MigrateTunings(const MptVersion::VersionNum storedVersion)
+void TrackerSettings::MigrateTunings(const Version storedVersion)
 {
 	
 	if(!PathTunings.GetDefaultDir().IsDirectory())

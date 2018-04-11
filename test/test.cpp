@@ -140,8 +140,8 @@ void DoTests()
 	
 		std::cout << "libopenmpt test suite" << std::endl;
 
-		std::cout << "Version.: " << MptVersion::GetVersionString(MptVersion::StringVersion | MptVersion::StringRevision | MptVersion::StringBitness | MptVersion::StringSourceInfo | MptVersion::StringBuildFlags | MptVersion::StringBuildFeatures) << std::endl;
-		std::cout << "Compiler: " << MptVersion::GetBuildCompilerString() << std::endl;
+		std::cout << "Version.: " << mpt::ToCharset(mpt::CharsetASCII, Build::GetVersionString(Build::StringVersion | Build::StringRevision | Build::StringBitness | Build::StringSourceInfo | Build::StringBuildFlags | Build::StringBuildFeatures)) << std::endl;
+		std::cout << "Compiler: " << mpt::ToCharset(mpt::CharsetASCII, Build::GetBuildCompilerString()) << std::endl;
 		#if MPT_OS_WINDOWS
 			std::cout << "Required Windows Kernel Level: " << mpt::ToCharset(mpt::CharsetASCII, mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel())) << std::endl;
 			std::cout << "Required Windows API Level...: " << mpt::ToCharset(mpt::CharsetASCII, mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel())) << std::endl;
@@ -248,38 +248,37 @@ static MPT_NOINLINE void TestVersion()
 {
 	//Verify that macros and functions work.
 	{
-		VERIFY_EQUAL( MptVersion::ToNum(MptVersion::ToUString(MptVersion::num)), MptVersion::num );
-		VERIFY_EQUAL( MptVersion::ToUString(MptVersion::ToNum(std::string(MptVersion::str))), MptVersion::AsUString() );
-		VERIFY_EQUAL( MptVersion::ToUString(18285096), MPT_USTRING("1.17.02.28") );
-		VERIFY_EQUAL( MptVersion::ToNum(std::string("1.17.02.28")), MptVersion::VersionNum(18285096) );
-		VERIFY_EQUAL( MptVersion::ToNum(std::string("1.fe.02.28")), MptVersion::VersionNum(0x01fe0228) );
-		VERIFY_EQUAL( MptVersion::ToNum(std::string("01.fe.02.28")), MptVersion::VersionNum(0x01fe0228) );
-		VERIFY_EQUAL( MptVersion::ToNum(std::string("1.22")), MptVersion::VersionNum(0x01220000) );
-		VERIFY_EQUAL( MptVersion::ToNum(std::string(MptVersion::str)), MptVersion::num );
-		VERIFY_EQUAL( MptVersion::ToUString(MptVersion::num), MptVersion::AsUString() );
-		VERIFY_EQUAL( MptVersion::RemoveBuildNumber(MAKE_VERSION_NUMERIC(1,19,02,00)), MAKE_VERSION_NUMERIC(1,19,02,00));
-		VERIFY_EQUAL( MptVersion::RemoveBuildNumber(MAKE_VERSION_NUMERIC(1,18,03,20)), MAKE_VERSION_NUMERIC(1,18,03,00));
-		VERIFY_EQUAL( MptVersion::IsTestBuild(MAKE_VERSION_NUMERIC(1,18,01,13)), true);
-		VERIFY_EQUAL( MptVersion::IsTestBuild(MAKE_VERSION_NUMERIC(1,19,01,00)), false);
-		VERIFY_EQUAL( MptVersion::IsTestBuild(MAKE_VERSION_NUMERIC(1,17,02,54)), false);
-		VERIFY_EQUAL( MptVersion::IsTestBuild(MAKE_VERSION_NUMERIC(1,18,00,00)), false);
-		VERIFY_EQUAL( MptVersion::IsTestBuild(MAKE_VERSION_NUMERIC(1,18,02,00)), false);
-		VERIFY_EQUAL( MptVersion::IsTestBuild(MAKE_VERSION_NUMERIC(1,18,02,01)), true);
+		VERIFY_EQUAL( Version::Parse(Version::Current().ToString()), Version::Current() );
+		VERIFY_EQUAL( Version::Parse(Version::Current().ToUString()), Version::Current() );
+		VERIFY_EQUAL( Version::Parse(Version::Current().ToUString()).ToUString(), Version::Current().ToUString() );
+		VERIFY_EQUAL( Version(18285096).ToUString(), MPT_USTRING("1.17.02.28") );
+		VERIFY_EQUAL( Version::Parse(std::string("1.17.02.28")), Version(18285096) );
+		VERIFY_EQUAL( Version::Parse(std::string("1.fe.02.28")), Version(0x01fe0228) );
+		VERIFY_EQUAL( Version::Parse(std::string("01.fe.02.28")), Version(0x01fe0228) );
+		VERIFY_EQUAL( Version::Parse(std::string("1.22")), Version(0x01220000) );
+		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,19,02,00).WithoutTestNumber(), MAKE_VERSION_NUMERIC(1,19,02,00));
+		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,03,20).WithoutTestNumber(), MAKE_VERSION_NUMERIC(1,18,03,00));
+		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,01,13).IsTestVersion(), true);
+		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,19,01,00).IsTestVersion(), false);
+		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,17,02,54).IsTestVersion(), false);
+		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,00,00).IsTestVersion(), false);
+		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,02,00).IsTestVersion(), false);
+		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,02,01).IsTestVersion(), true);
 
 		// Ensure that versions ending in .00.00 (which are ambiguous to truncated version numbers in certain file formats (e.g. S3M and IT) do not get qualified as test builds.
-		VERIFY_EQUAL( MptVersion::IsTestBuild(MAKE_VERSION_NUMERIC(1,23,00,00)), false);
+		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,23,00,00).IsTestVersion(), false);
 
-		STATIC_ASSERT( MAKE_VERSION_NUMERIC(1,17,2,28) == 18285096 );
-		STATIC_ASSERT( MAKE_VERSION_NUMERIC(1,17,02,48) == 18285128 );
-		STATIC_ASSERT( MAKE_VERSION_NUMERIC(01,17,02,52) == 18285138 );
+		STATIC_ASSERT( MAKE_VERSION_NUMERIC(1,17,2,28).GetRawVersion() == 18285096 );
+		STATIC_ASSERT( MAKE_VERSION_NUMERIC(1,17,02,48).GetRawVersion() == 18285128 );
+		STATIC_ASSERT( MAKE_VERSION_NUMERIC(01,17,02,52).GetRawVersion() == 18285138 );
 		// Ensure that bit-shifting works (used in some mod loaders for example)
-		STATIC_ASSERT( MAKE_VERSION_NUMERIC(01,17,00,00) == 0x0117 << 16 );
-		STATIC_ASSERT( MAKE_VERSION_NUMERIC(01,17,03,00) >> 8 == 0x011703 );
+		STATIC_ASSERT( MAKE_VERSION_NUMERIC(01,17,00,00).GetRawVersion() == 0x0117 << 16 );
+		STATIC_ASSERT( MAKE_VERSION_NUMERIC(01,17,03,00).GetRawVersion() >> 8 == 0x011703 );
 	}
 
 #ifdef MODPLUG_TRACKER
 	//Verify that the version obtained from the executable file is the same as
-	//defined in MptVersion.
+	//defined in Version.
 	{
 		WCHAR szFullPath[MAX_PATH];
 		DWORD dwVerHnd;
@@ -310,8 +309,8 @@ static MPT_NOINLINE void TestVersion()
 		//version string should be like: 1,17,2,38  Change ',' to '.' to get format 1.17.2.38
 		version = mpt::String::Replace(version, ",", ".");
 
-		VERIFY_EQUAL( version, MptVersion::str );
-		VERIFY_EQUAL( MptVersion::ToNum(version), MptVersion::num );
+		VERIFY_EQUAL( version, mpt::fmt::val(Version::Current()) );
+		VERIFY_EQUAL( Version::Parse(version), Version::Current() );
 	}
 #endif
 
@@ -3216,7 +3215,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
 	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevelsCompatible);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempoModeClassic);
-	VERIFY_EQUAL_NONCONT(sndFile.m_dwLastSavedWithVersion, resaved ? (MptVersion::num & 0xFFFF0000) : MAKE_VERSION_NUMERIC(1, 27, 00, 00));
+	VERIFY_EQUAL_NONCONT(sndFile.m_dwLastSavedWithVersion, resaved ? Version(Version::Current().GetRawVersion() & 0xFFFF0000u) : MAKE_VERSION_NUMERIC(1, 27, 00, 00));
 	VERIFY_EQUAL_NONCONT(sndFile.Order().GetRestartPos(), 0);
 
 	// Channels
@@ -3499,7 +3498,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			GetSoundFile(sndFileContainer).m_dwLastSavedWithVersion = MptVersion::num;
+			GetSoundFile(sndFileContainer).m_dwLastSavedWithVersion = Version::Current();
 			SaveIT(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.mptm"));
 		#endif
 
@@ -3535,7 +3534,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
-			GetSoundFile(sndFileContainer).m_dwLastSavedWithVersion = MptVersion::num;
+			GetSoundFile(sndFileContainer).m_dwLastSavedWithVersion = Version::Current();
 			SaveXM(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.xm"));
 		#endif
 
@@ -3580,7 +3579,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
 			sndFile.ChnSettings[1].dwFlags.set(CHN_MUTE);
-			sndFile.m_dwLastSavedWithVersion = MptVersion::num;
+			sndFile.m_dwLastSavedWithVersion = Version::Current();
 			SaveS3M(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.s3m"));
 		#endif
 

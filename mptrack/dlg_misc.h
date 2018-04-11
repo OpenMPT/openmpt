@@ -14,6 +14,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class Version;
 class CSoundFile;
 class CModDoc;
 class CDLSBank;
@@ -45,7 +46,7 @@ public:
 
 protected:
 	void UpdateChannelCBox();
-	CString FormatVersionNumber(DWORD version);
+	CString FormatVersionNumber(Version version);
 
 protected:
 	//{{AFX_VIRTUAL(CModTypeDlg)

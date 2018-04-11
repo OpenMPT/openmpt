@@ -94,11 +94,11 @@ namespace WineIntegration {
 static mpt::checksum::crc64_jones WineHashVersion(mpt::checksum::crc64_jones crc)
 {
 	std::string s;
-	s += MptVersion::GetVersionStringExtended();
+	s += mpt::ToCharset(mpt::CharsetUTF8, Build::GetVersionStringExtended());
 	s += " ";
-	s += MptVersion::GetSourceInfo().GetUrlWithRevision();
+	s += mpt::ToCharset(mpt::CharsetUTF8, SourceInfo::Current().GetUrlWithRevision());
 	s += " ";
-	s += MptVersion::GetSourceInfo().GetStateString();
+	s += mpt::ToCharset(mpt::CharsetUTF8, SourceInfo::Current().GetStateString());
 	crc(s.begin(), s.end());
 	return crc;
 }
@@ -318,7 +318,7 @@ void Initialize()
 			std::string GetOpenMPTVersion() const
 			{
 				std::string ver;
-				ver += mpt::String::Replace(MptVersion::GetVersionStringPure(), std::string(" "), std::string("_"));
+				ver += mpt::String::Replace(mpt::ToCharset(mpt::CharsetUTF8, Build::GetVersionStringPure()), std::string(" "), std::string("_"));
 				mpt::checksum::crc64_jones crc;
 				crc = WineHashVersion(crc);
 				crc = WineHashFile(crc, theApp.GetAppDirPath() + WineGetSupportZipFilename());
@@ -410,12 +410,12 @@ void Initialize()
 		script += std::string() + "\n";
 
 		script += std::string() + "printf \"#pragma once\\n\" >> common/svn_version.h" + "\n";
-		script += std::string() + "printf \"#define OPENMPT_VERSION_URL \\\"" + MptVersion::GetSourceInfo().Url + "\\\"\\n\" >> common/svn_version.h" + "\n";
-		script += std::string() + "printf \"#define OPENMPT_VERSION_DATE \\\"" + MptVersion::GetSourceInfo().Date + "\\\"\\n\" >> common/svn_version.h" + "\n";
-		script += std::string() + "printf \"#define OPENMPT_VERSION_REVISION " + mpt::fmt::dec(MptVersion::GetSourceInfo().Revision) + "\\n\" >> common/svn_version.h" + "\n";
-		script += std::string() + "printf \"#define OPENMPT_VERSION_DIRTY " + mpt::fmt::dec(MptVersion::GetSourceInfo().IsDirty) + "\\n\" >> common/svn_version.h" + "\n";
-		script += std::string() + "printf \"#define OPENMPT_VERSION_MIXEDREVISIONS " + mpt::fmt::dec(MptVersion::GetSourceInfo().HasMixedRevisions) + "\\n\" >> common/svn_version.h" + "\n";
-		script += std::string() + "printf \"#define OPENMPT_VERSION_IS_PACKAGE " + mpt::fmt::dec(MptVersion::GetSourceInfo().IsPackage) + "\\n\" >> common/svn_version.h" + "\n";
+		script += std::string() + "printf \"#define OPENMPT_VERSION_URL \\\"" + mpt::ToCharset(mpt::CharsetASCII, SourceInfo::Current().Url()) + "\\\"\\n\" >> common/svn_version.h" + "\n";
+		script += std::string() + "printf \"#define OPENMPT_VERSION_DATE \\\"" + mpt::ToCharset(mpt::CharsetASCII, SourceInfo::Current().Date()) + "\\\"\\n\" >> common/svn_version.h" + "\n";
+		script += std::string() + "printf \"#define OPENMPT_VERSION_REVISION " + mpt::fmt::dec(SourceInfo::Current().Revision()) + "\\n\" >> common/svn_version.h" + "\n";
+		script += std::string() + "printf \"#define OPENMPT_VERSION_DIRTY " + mpt::fmt::dec(SourceInfo::Current().IsDirty()) + "\\n\" >> common/svn_version.h" + "\n";
+		script += std::string() + "printf \"#define OPENMPT_VERSION_MIXEDREVISIONS " + mpt::fmt::dec(SourceInfo::Current().HasMixedRevisions()) + "\\n\" >> common/svn_version.h" + "\n";
+		script += std::string() + "printf \"#define OPENMPT_VERSION_IS_PACKAGE " + mpt::fmt::dec(SourceInfo::Current().IsPackage()) + "\\n\" >> common/svn_version.h" + "\n";
 
 		script += std::string() + "\n";
 

@@ -60,8 +60,8 @@ CDocument *CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bo
 			// Reset edit history for template files
 			CSoundFile &sndFile = modDoc->GetSoundFile();
 			sndFile.GetFileHistory().clear();
-			sndFile.m_dwCreatedWithVersion = MptVersion::num;
-			sndFile.m_dwLastSavedWithVersion = 0;
+			sndFile.m_dwCreatedWithVersion = Version::Current();
+			sndFile.m_dwLastSavedWithVersion = Version();
 			sndFile.m_madeWithTracker.clear();
 			sndFile.m_songArtist = TrackerSettings::Instance().defaultArtist;
 			sndFile.m_playBehaviour = sndFile.GetDefaultPlaybackBehaviour(sndFile.GetType());

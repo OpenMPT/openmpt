@@ -246,9 +246,9 @@ BOOL CAboutDlg::OnInitDialog()
 		#endif // UNICODE
 		+ (!BuildVariants().CurrentBuildIsModern() ? MPT_USTRING(" for older Windows") : MPT_USTRING(""))
 		+ MPT_USTRING("\n");
-	app += MPT_USTRING("Version ") + mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringSimple()) + MPT_USTRING("\n");
+	app += MPT_USTRING("Version ") + Build::GetVersionStringSimple() + MPT_USTRING("\n");
 	app += MPT_USTRING("\n");
-	app += MptVersion::GetURL("website") + MPT_USTRING("\n");
+	app += Build::GetURL(Build::Url::Website) + MPT_USTRING("\n");
 	SetDlgItemText(IDC_EDIT3, mpt::ToCString(mpt::String::Replace(app, MPT_USTRING("\n"), MPT_USTRING("\r\n"))));
 
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
@@ -301,10 +301,10 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 		case 0:
 			text += MPT_USTRING("OpenMPT - Open ModPlug Tracker") + lf;
 			text += lf;
-			text += mpt::format(MPT_USTRING("Version: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetVersionStringExtended())) + lf;
-			text += mpt::format(MPT_USTRING("Source Code: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetSourceInfo().GetUrlWithRevision() + " " + MptVersion::GetSourceInfo().GetStateString())) + lf;
-			text += mpt::format(MPT_USTRING("Build Date: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetBuildDateString())) + lf;
-			text += mpt::format(MPT_USTRING("Compiler: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, MptVersion::GetBuildCompilerString())) + lf;
+			text += mpt::format(MPT_USTRING("Version: %1"))(Build::GetVersionStringExtended()) + lf;
+			text += mpt::format(MPT_USTRING("Source Code: %1"))(SourceInfo::Current().GetUrlWithRevision() + MPT_ULITERAL(" ") + SourceInfo::Current().GetStateString()) + lf;
+			text += mpt::format(MPT_USTRING("Build Date: %1"))(Build::GetBuildDateString()) + lf;
+			text += mpt::format(MPT_USTRING("Compiler: %1"))(Build::GetBuildCompilerString()) + lf;
 			text += mpt::format(MPT_USTRING("Required Windows Kernel Level: %1"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel())) + lf;
 			text += mpt::format(MPT_USTRING("Required Windows API Level: %1"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel())) + lf;
 			{
@@ -468,20 +468,20 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			}
 			break;
 		case 2:
-			text += MptVersion::GetFullCreditsString();
+			text += Build::GetFullCreditsString();
 			break;
 		case 3:
-			text += MptVersion::GetLicenseString();
+			text += Build::GetLicenseString();
 			break;
 		case 4:
 			text += lf;
-			text += MPT_USTRING("Website: ") + lf + MptVersion::GetURL("website") + lf;
+			text += MPT_USTRING("Website: ") + lf + Build::GetURL(Build::Url::Website) + lf;
 			text += lf;
-			text += MPT_USTRING("Forum: ") + lf + MptVersion::GetURL("forum") + lf;
+			text += MPT_USTRING("Forum: ") + lf + Build::GetURL(Build::Url::Forum) + lf;
 			text += lf;
-			text += MPT_USTRING("Bug Tracker: ") + lf + MptVersion::GetURL("bugtracker") + lf;
+			text += MPT_USTRING("Bug Tracker: ") + lf + Build::GetURL(Build::Url::Bugtracker) + lf;
 			text += lf;
-			text += MPT_USTRING("Updates: ") + lf + MptVersion::GetURL("updates") + lf;
+			text += MPT_USTRING("Updates: ") + lf + Build::GetURL(Build::Url::Updates) + lf;
 			text += lf;
 			break;
 		case 5:

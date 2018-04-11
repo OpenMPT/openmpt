@@ -168,7 +168,7 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 
 	// Header
 	memcpy(id, "IMPI", 4);
-	trkvers = 0x5000 | static_cast<uint16>(MptVersion::num >> 16);
+	trkvers = 0x5000 | static_cast<uint16>(Version::Current().GetRawVersion() >> 16);
 
 	mpt::String::Write<mpt::String::nullTerminated>(filename, mptIns.filename);
 	mpt::String::Write<mpt::String::nullTerminated>(name, mptIns.name);

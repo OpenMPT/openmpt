@@ -17,7 +17,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 void FileTags::SetEncoder()
 {
-	encoder = mpt::ToUnicode(mpt::CharsetASCII, MptVersion::GetOpenMPTVersionStr());
+	encoder = Version::Current().GetOpenMPTVersionString();
 }
 
 
