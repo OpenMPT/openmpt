@@ -361,8 +361,10 @@ struct ResonantFilter
 		}
 	}
 
+	// To avoid a precision loss especially with quiet samples at low cutoff and high mix rate, we pre-amplify the sample.
+#define MIXING_FILTER_PREAMP 256
 	// Filter values are clipped to double the input range
-#define ClipFilter(x) Clamp<typename Traits::output_t, typename Traits::output_t>(x, int16_min * 2, int16_max * 2)
+#define ClipFilter(x) Clamp<typename Traits::output_t, typename Traits::output_t>(x, int16_min * 2 * MIXING_FILTER_PREAMP, int16_max * 2 * MIXING_FILTER_PREAMP)
 
 	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const ModChannel &chn)
 	{
@@ -371,13 +373,13 @@ struct ResonantFilter
 		for(int i = 0; i < Traits::numChannelsIn; i++)
 		{
 			typename Traits::output_t val = static_cast<typename Traits::output_t>((
-				Util::mul32to64(outSample[i], chn.nFilter_A0) +
+				Util::mul32to64(outSample[i] * MIXING_FILTER_PREAMP, chn.nFilter_A0) +
 				Util::mul32to64(ClipFilter(fy[i][0]), chn.nFilter_B0) +
 				Util::mul32to64(ClipFilter(fy[i][1]), chn.nFilter_B1) +
 				(1 << (MIXING_FILTER_PRECISION - 1))) / (1 << MIXING_FILTER_PRECISION));
 			fy[i][1] = fy[i][0];
 			fy[i][0] = val - (outSample[i] & chn.nFilter_HP);
-			outSample[i] = val;
+			outSample[i] = val / MIXING_FILTER_PREAMP;
 		}
 	}
 
