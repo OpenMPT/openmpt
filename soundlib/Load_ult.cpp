@@ -307,7 +307,7 @@ struct PostFixUltCommands
 		// Apply porta?
 		if(m.note == NOTE_NONE && isPortaActive[curChannel])
 		{
-			if(m.command == CMD_NONE && m.vol != VOLCMD_TONEPORTAMENTO)
+			if(m.command == CMD_NONE && m.volcmd != VOLCMD_TONEPORTAMENTO)
 			{
 				m.command = CMD_TONEPORTAMENTO;
 				m.param = 0;
