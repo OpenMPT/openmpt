@@ -99,6 +99,18 @@ struct PACKED UltSample
 
 STATIC_ASSERT(sizeof(UltSample) == 66);
 
+
+struct PACKED UltPatternCommand
+{
+	uint8 instr;
+	uint8 cmd;
+	uint8 param1;
+	uint8 param2;
+};
+
+STATIC_ASSERT(sizeof(UltPatternCommand) == 4)
+
+
 #ifdef NEEDS_PRAGMA_PACK
 #pragma pack(pop)
 #endif
@@ -235,13 +247,14 @@ static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 		b = file.ReadUint8();
 	}
 
-	m.note = (b > 0 && b < 61) ? b + 36 : NOTE_NONE;
-	m.instr = file.ReadUint8();
-	b = file.ReadUint8();
-	cmd1 = b & 0x0F;
-	cmd2 = b >> 4;
-	param1 = file.ReadUint8();
-	param2 = file.ReadUint8();
+	m.note = (b > 0 && b < 61) ? (b + 35 + NOTE_MIN) : NOTE_NONE;
+	UltPatternCommand patCmd;
+	file.ReadStruct(patCmd);
+	m.instr = patCmd.instr;
+	cmd1 = patCmd.cmd & 0x0F;
+	cmd2 = patCmd.cmd >> 4;
+	param1 = patCmd.param1;
+	param2 = patCmd.param2;
 	TranslateULTCommands(cmd1, param1, version);
 	TranslateULTCommands(cmd2, param2, version);
 
@@ -434,12 +447,10 @@ bool CSoundFile::ReadUlt(FileReader &file, ModLoadingFlags loadFlags)
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
 		ModCommand evnote;
-		ModCommand *note;
 		evnote.Clear();
-
-		for(PATTERNINDEX pat = 0; pat < numPats; pat++)
+		for(PATTERNINDEX pat = 0; pat < numPats && file.CanRead(5); pat++)
 		{
-			note = Patterns[pat] + chn;
+			ModCommand *note = Patterns[pat] + chn;
 			ROWINDEX row = 0;
 			while(row < 64)
 			{
