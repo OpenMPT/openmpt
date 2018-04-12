@@ -108,7 +108,7 @@ struct PACKED UltPatternCommand
 	uint8 param2;
 };
 
-STATIC_ASSERT(sizeof(UltPatternCommand) == 4)
+STATIC_ASSERT(sizeof(UltPatternCommand) == 4);
 
 
 #ifdef NEEDS_PRAGMA_PACK
