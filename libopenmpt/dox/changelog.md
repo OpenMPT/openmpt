@@ -7,6 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.9-pre
 
+ *  Speed up reading of truncated ULT files.
+ *  The resonant filter was sometimes unstable when combining low-volume
+    samples, low cutoff and high mixing rates.
+
 ### libopenmpt 0.3.8 (2018-04-08)
 
  *  [**Sec**] Possible out-of-bounds memory read with IT and MO3 files

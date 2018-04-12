@@ -30,6 +30,12 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.27.08.00 (* April 2018, revision 10086)
+------------------------------------------
+Playback
+   [Fix] <js> The resonant filter was sometimes unstable when combining low-volume samples, low cutoff and high mixing rates.
+
+
 v1.27.07.00 (8 April 2018, revision 10044)
 ------------------------------------------
 Pattern tab
