@@ -108,13 +108,13 @@ void Manager::ReEnumerate()
 	}
 #endif // MPT_OS_WINDOWS
 
-#ifdef MPT_WITH_DSOUND
+#if MPT_OS_WINDOWS
 	// kind of deprecated by now
 	if(IsComponentAvailable(m_DirectSound))
 	{
 		EnumerateDevices<CDSoundDevice>(GetSysInfo());
 	}
-#endif // MPT_WITH_DSOUND
+#endif // MPT_OS_WINDOWS
 
 #ifdef MPT_WITH_ASIO
 	if(IsComponentAvailable(m_ASIO))

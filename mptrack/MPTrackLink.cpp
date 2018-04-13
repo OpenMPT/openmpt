@@ -31,9 +31,7 @@ OPENMPT_NAMESPACE_BEGIN
 #pragma comment(lib, "dmoguids.lib")
 #pragma comment(lib, "strmiids.lib")
 
-#ifdef MPT_WITH_DSOUND
 #pragma comment(lib, "dsound.lib")
-#endif
 #pragma comment(lib, "winmm.lib")
 
 #pragma comment(lib, "ksuser.lib")

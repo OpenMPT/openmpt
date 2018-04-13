@@ -230,9 +230,6 @@ void CMainFrame::Initialize()
 	#ifndef MPT_WITH_ASIO
 		title += _T(" NO_ASIO");
 	#endif
-	#ifndef MPT_WITH_DSOUND
-		title += _T(" NO_DSOUND");
-	#endif
 	SetTitle(title);
 	OnUpdateFrameTitle(false);
 

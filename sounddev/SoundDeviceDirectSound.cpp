@@ -27,7 +27,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-#ifdef MPT_WITH_DSOUND
+#if MPT_OS_WINDOWS
 
 
 MPT_REGISTERED_COMPONENT(ComponentDirectSound, "DirectSound")
@@ -533,7 +533,7 @@ SoundDevice::Statistics CDSoundDevice::GetStatistics() const
 }
 
 
-#endif // NO_DIRECTSOUND
+#endif // MPT_OS_WINDOWS
 
 
 } // namespace SoundDevice

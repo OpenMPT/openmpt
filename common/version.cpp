@@ -432,9 +432,6 @@ mpt::ustring GetBuildFeaturesString()
 		#ifndef MPT_WITH_ASIO
 			MPT_ULITERAL(" NO_ASIO")
 		#endif
-		#ifndef MPT_WITH_DSOUND
-			MPT_ULITERAL(" NO_DSOUND")
-		#endif
 			;
 	#endif
 	return retval;

@@ -63,9 +63,9 @@ private:
 #if MPT_OS_WINDOWS
 	ComponentHandle<ComponentWaveOut> m_WaveOut;
 #endif // MPT_OS_WINDOWS
-#ifdef MPT_WITH_DSOUND
+#if MPT_OS_WINDOWS
 	ComponentHandle<ComponentDirectSound> m_DirectSound;
-#endif // MPT_WITH_DSOUND
+#endif // MPT_OS_WINDOWS
 #ifdef MPT_WITH_ASIO
 	ComponentHandle<ComponentASIO> m_ASIO;
 #endif // MPT_WITH_ASIO

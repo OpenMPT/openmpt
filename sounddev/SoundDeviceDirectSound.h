@@ -16,15 +16,15 @@
 
 #include "../common/ComponentManager.h"
 
-#ifdef MPT_WITH_DSOUND
+#if MPT_OS_WINDOWS
 #include <dsound.h>
-#endif
+#endif // MPT_OS_WINDOWS
 
 OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
-#ifdef MPT_WITH_DSOUND
+#if MPT_OS_WINDOWS
 
 class ComponentDirectSound : public ComponentBuiltin
 {
@@ -68,7 +68,7 @@ public:
 	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::SysInfo sysInfo);
 };
 
-#endif // NO_DIRECTSOUND
+#endif // MPT_OS_WINDOWS
 
 
 } // namespace SoundDevice

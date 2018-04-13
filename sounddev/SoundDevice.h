@@ -542,10 +542,10 @@ static const SoundDevice::Legacy::ID TypePORTAUDIO_WASAPI = 3;
 static const SoundDevice::Legacy::ID TypePORTAUDIO_WDMKS  = 4;
 static const SoundDevice::Legacy::ID TypePORTAUDIO_WMME   = 5;
 static const SoundDevice::Legacy::ID TypePORTAUDIO_DS     = 6;
-#ifdef MPT_WITH_DSOUND
+#if MPT_OS_WINDOWS
 mpt::ustring GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04();
 mpt::ustring GetDirectSoundDefaultDeviceIdentifier_1_25_00_04();
-#endif // MPT_WITH_DSOUND
+#endif // MPT_OS_WINDOWS
 }
 
 
