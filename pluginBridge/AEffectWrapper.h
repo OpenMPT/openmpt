@@ -99,7 +99,14 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const VstEvents 
 {
 	data.reserve(data.size() + sizeof(int32) + sizeof(VstEvent) * events->numEvents);
 	// Write number of events
-	PushToVector(data, events->numEvents);
+	if(data.size() >= sizeof(int32))
+	{
+		int32 &numEvents = reinterpret_cast<int32 &>(data[0]);
+		numEvents += events->numEvents;
+	} else
+	{
+		PushToVector(data, events->numEvents);
+	}
 
 	// Write events
 	for(VstInt32 i = 0; i < events->numEvents; i++)
@@ -108,11 +115,12 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const VstEvents 
 		{
 			// This is going to be messy since the VstMidiSysexEvent event has a different size than other events on 64-bit platforms.
 			// We are going to write the event using the target process pointer size.
-			const VstMidiSysexEvent *event = reinterpret_cast<const VstMidiSysexEvent *>(events->events[i]);
-			PushToVector(data, *events->events[i], sizeof(VstEvent) + sizeof(VstInt32));	// Regular VstEvent struct + dump size
-			data.resize(data.size() + 3 * targetPtrSize);									// Dump pointer + two reserved VstIntPtrs
+			VstMidiSysexEvent event = *reinterpret_cast<const VstMidiSysexEvent *>(events->events[i]);
+			event.byteSize = 5 * sizeof(VstInt32) + 3 * targetPtrSize;
+			PushToVector(data, event, 5 * sizeof(VstInt32));	// Exclude the three pointers at the end for now
+			data.resize(data.size() + 3 * targetPtrSize);		// Make space for pointer + two reserved VstIntPtrs
 			// Embed SysEx dump as well...
-			data.insert(data.end(), event->sysexDump, event->sysexDump + event->dumpBytes);
+			data.insert(data.end(), event.sysexDump, event.sysexDump + event.dumpBytes);
 		} else if(events->events[i]->type == kVstMidiType)
 		{
 			// randomid by Insert Piz Here sends events of type kVstMidiType, but with a claimed size of 24 bytes instead of 32.
@@ -170,7 +178,6 @@ static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 		if(events->events[i]->type == kVstSysExType)
 		{
 			VstMidiSysexEvent *event = reinterpret_cast<VstMidiSysexEvent *>(events->events[i]);
-			event->byteSize = sizeof(VstMidiSysexEvent);	// Adjust to target platform
 			event->sysexDump = offset;
 			offset += event->dumpBytes;
 		}
