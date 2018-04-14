@@ -241,6 +241,23 @@ std::string FormatVal(const float & x, const FormatSpec & f);
 std::string FormatVal(const double & x, const FormatSpec & f);
 std::string FormatVal(const long double & x, const FormatSpec & f);
 
+MPT_DEPRECATED mpt::ustring FormatValU(const char & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::string(1, x) instead
+MPT_DEPRECATED mpt::ustring FormatValU(const wchar_t & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+mpt::ustring FormatValU(const bool & x, const FormatSpec & f);
+mpt::ustring FormatValU(const signed char & x, const FormatSpec & f);
+mpt::ustring FormatValU(const unsigned char & x, const FormatSpec & f);
+mpt::ustring FormatValU(const signed short & x, const FormatSpec & f);
+mpt::ustring FormatValU(const unsigned short & x, const FormatSpec & f);
+mpt::ustring FormatValU(const signed int & x, const FormatSpec & f);
+mpt::ustring FormatValU(const unsigned int & x, const FormatSpec & f);
+mpt::ustring FormatValU(const signed long & x, const FormatSpec & f);
+mpt::ustring FormatValU(const unsigned long & x, const FormatSpec & f);
+mpt::ustring FormatValU(const signed long long & x, const FormatSpec & f);
+mpt::ustring FormatValU(const unsigned long long & x, const FormatSpec & f);
+mpt::ustring FormatValU(const float & x, const FormatSpec & f);
+mpt::ustring FormatValU(const double & x, const FormatSpec & f);
+mpt::ustring FormatValU(const long double & x, const FormatSpec & f);
+
 #if MPT_WSTRING_FORMAT
 MPT_DEPRECATED std::wstring FormatValW(const char & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::string(1, x) instead
 MPT_DEPRECATED std::wstring FormatValW(const wchar_t & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
@@ -262,11 +279,9 @@ std::wstring FormatValW(const long double & x, const FormatSpec & f);
 
 template <typename Tstring> struct FormatValTFunctor {};
 template <> struct FormatValTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x, const FormatSpec & f) { return FormatVal(x, f); } };
-#if MPT_WSTRING_FORMAT
+template <> struct FormatValTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x, const FormatSpec & f) { return FormatValU(x, f); } };
+#if MPT_USTRING_MODE_UTF8 && MPT_WSTRING_FORMAT
 template <> struct FormatValTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x, const FormatSpec & f) { return FormatValW(x, f); } };
-#endif
-#if MPT_USTRING_MODE_UTF8
-template <> struct FormatValTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatVal(x, f)); } };
 #endif
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 template <> struct FormatValTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x, const FormatSpec & f) { return mpt::ToLocale(mpt::CharsetLocale, FormatVal(x, f)); } };
