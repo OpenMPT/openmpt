@@ -820,13 +820,19 @@ public:
 			gfp_inited = true;
 		}
 		buf.resize(count + (count+3)/4 + 7200);
+		int result = 0;
 		if(lame.lame_get_num_channels(gfp) == 1)
 		{
 			// lame always assumes stereo input with interleaved interface, so use non-interleaved for mono
-			buf.resize(lame.lame_encode_buffer_ieee_float(gfp, interleaved, nullptr, count, (unsigned char*)buf.data(), buf.size()));
+			result = lame.lame_encode_buffer_ieee_float(gfp, interleaved, nullptr, count, (unsigned char*)buf.data(), buf.size());
 		} else
 		{
-			buf.resize(lame.lame_encode_buffer_interleaved_ieee_float(gfp, interleaved, count, (unsigned char*)buf.data(), buf.size()));
+			result = lame.lame_encode_buffer_interleaved_ieee_float(gfp, interleaved, count, (unsigned char*)buf.data(), buf.size());
+		}
+		buf.resize((result >= 0) ? result : 0);
+		if(result == -2)
+		{
+			throw std::bad_alloc();
 		}
 		WriteBuffer();
 	}
