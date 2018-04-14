@@ -220,11 +220,7 @@ public:
 		return ChannelToDeviceChannel[channel];
 	}
 
-	std::string ToString() const;
-
 	mpt::ustring ToUString() const;
-
-	static SoundDevice::ChannelMapping FromString(const std::string &str);
 
 	static SoundDevice::ChannelMapping FromString(const mpt::ustring &str);
 

@@ -37,17 +37,6 @@ mpt::ustring Version::GetOpenMPTVersionString() const
 	return MPT_USTRING("OpenMPT ") + ToUString();
 }
 
-Version Version::Parse(const std::string &s)
-{
-	uint32 result = 0;
-	std::vector<std::string> numbers = mpt::String::Split<std::string>(s, std::string("."));
-	for(std::size_t i = 0; i < numbers.size() && i < 4; ++i)
-	{
-		result |= (mpt::String::Parse::Hex<unsigned int>(numbers[i]) & 0xff) << ((3-i)*8);
-	}
-	return Version(result);
-}
-
 Version Version::Parse(const mpt::ustring &s)
 {
 	uint32 result = 0;
@@ -57,24 +46,6 @@ Version Version::Parse(const mpt::ustring &s)
 		result |= (mpt::String::Parse::Hex<unsigned int>(numbers[i]) & 0xff) << ((3 - i) * 8);
 	}
 	return Version(result);
-}
-
-std::string Version::ToString() const
-{
-	uint32 v = m_Version;
-	if(v == 0)
-	{
-		// Unknown version
-		return std::string("Unknown");
-	} else if((v & 0xFFFF) == 0)
-	{
-		// Only parts of the version number are known (e.g. when reading the version from the IT or S3M file header)
-		return mpt::format(std::string("%1.%2"))(mpt::fmt::HEX((v >> 24) & 0xFF), mpt::fmt::HEX0<2>((v >> 16) & 0xFF));
-	} else
-	{
-		// Full version info available
-		return mpt::format(std::string("%1.%2.%3.%4"))(mpt::fmt::HEX((v >> 24) & 0xFF), mpt::fmt::HEX0<2>((v >> 16) & 0xFF), mpt::fmt::HEX0<2>((v >> 8) & 0xFF), mpt::fmt::HEX0<2>((v) & 0xFF));
-	}
 }
 
 mpt::ustring Version::ToUString() const

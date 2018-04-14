@@ -112,21 +112,9 @@ bool ChannelMapping::IsValid(const std::vector<int32> &mapping)
 }
 
 
-std::string ChannelMapping::ToString() const
-{
-	return mpt::String::Combine<int32>(ChannelToDeviceChannel, std::string(","));
-}
-
-
 mpt::ustring ChannelMapping::ToUString() const
 {
 	return mpt::String::Combine<int32>(ChannelToDeviceChannel, MPT_USTRING(","));
-}
-
-
-ChannelMapping ChannelMapping::FromString(const std::string &str)
-{
-	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(str, std::string(",")));
 }
 
 

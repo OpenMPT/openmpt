@@ -53,11 +53,9 @@ public:
 
 public:
 
-	std::string ToString() const; // e.g "1.17.02.08"
 	mpt::ustring ToUString() const; // e.g "1.17.02.08"
 
 	// Returns numerical version value from given version string.
-	static Version Parse(const std::string &s);
 	static Version Parse(const mpt::ustring &s);
 
 public:

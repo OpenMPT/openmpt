@@ -43,7 +43,7 @@ uint64 Now()
 	return ((uint64)filetime.dwHighDateTime << 32 | filetime.dwLowDateTime);
 }
 
-mpt::ustring ToString(uint64 time100ns)
+mpt::ustring ToUString(uint64 time100ns)
 {
 	static const std::size_t bufsize = 256;
 

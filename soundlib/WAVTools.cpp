@@ -163,7 +163,7 @@ uint16 WAVReader::GetFileCodePage(ChunkReader::ChunkList<RIFFChunk> &chunks)
 			std::string versionString;
 			iSFT.ReadString<mpt::String::maybeNullTerminated>(versionString, iSFT.BytesLeft());
 			versionString = mpt::String::Trim(versionString);
-			Version version = Version::Parse(versionString);
+			Version version = Version::Parse(mpt::ToUnicode(mpt::CharsetISO8859_1, versionString));
 			if(version && version < MAKE_VERSION_NUMERIC(1,28,00,02))
 			{
 				return 1252; // mpt::CharsetWindows1252; // OpenMPT up to and including 1.28.00.01 wrote metadata in windows-1252 encoding

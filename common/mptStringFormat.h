@@ -53,8 +53,8 @@ OPENMPT_NAMESPACE_BEGIN
 //      - Faster compile times because <sstream> and <locale> (2 very complex headers) are not included everywhere.
 //     Disadvantages:
 //      - Slightly more c++ code is required for delegating work.
-//      - As the header does not use iostreams, custom types need to overload mpt::String, mpt::ToWstring and mpt::UString instead of
-//        iostream operator << to allow for custom type formatting.
+//      - As the header does not use iostreams, custom types need to overload mpt::UString instead of iostream operator << to allow for custom type
+//        formatting.
 //      - std::string, std::wstring and mpt::ustring are returned from somewhat deep cascades of helper functions. Where possible, code is
 //        written in such a way that return-value-optimization (RVO) or named-return-value-optimization (NRVO) should be able to eliminate
 //        almost all these copies. This should not be a problem for any decent modern compiler (and even less so for a c++11 compiler where
@@ -63,12 +63,16 @@ OPENMPT_NAMESPACE_BEGIN
 namespace mpt
 {
 
-// ToString() converts various built-in types to a well-defined, locale-independent string representation.
+// ToUString() converts various built-in types to a well-defined, locale-independent string representation.
 // This is also used as a type-tunnel pattern for mpt::format.
-// Custom types that need to be converted to strings are encouraged to overload ToString() and ToWString().
+// Custom types that need to be converted to strings are encouraged to overload ToUString().
 
-// fallback to member function ToString()
-template <typename T> auto ToString(const T & x) -> decltype(x.ToString()) { return x.ToString(); }
+// fallback to member function ToUString()
+#if MPT_USTRING_MODE_UTF8
+template <typename T> auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::CharsetUTF8, x.ToUString())) { return mpt::ToCharset(mpt::CharsetUTF8, x.ToUString()); }
+#else
+template <typename T> auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::CharsetLocaleOrUTF8, x.ToUString())) { return mpt::ToCharset(mpt::CharsetLocaleOrUTF8, x.ToUString()); }
+#endif
 
 static inline std::string ToString(const std::string & x) { return x; }
 static inline std::string ToString(const char * const & x) { return x; }
@@ -165,20 +169,18 @@ std::wstring ToWString(const long double & x);
 template <typename T> auto ToWString(const T & x) -> decltype(mpt::ToWide(x.ToUString())) { return mpt::ToWide(x.ToUString()); }
 #endif
 
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+template <typename T> struct ToLocaleHelper { mpt::lstring operator () (const T & v) { return mpt::ToLocale(mpt::CharsetLocale, ToString(v)); } };
+template <> struct ToLocaleHelper<mpt::lstring> { mpt::lstring operator () (const mpt::lstring & v) { return v; } };
+#endif // MPT_ENABLE_CHARSET_LOCALE
+
 #if defined(_MFC_VER)
 #ifdef UNICODE
-#if MPT_WSTRING_FORMAT
-template <typename T> static inline CString ToCStringHelper(const T & x) { return mpt::ToCString(ToWString(x)); }
+template <typename T> struct ToCStringHelper { CString operator () (const T & v) { return mpt::ToCString(ToUString(v)); } };
 #else
-template <typename T> static inline CString ToCStringHelper(const T & x) { return mpt::ToCString(ToUString(x)); }
+template <typename T> struct ToCStringHelper { CString operator () (const T & v) { return mpt::ToCString(mpt::CharsetLocale, ToString(v)); } };
 #endif
-#else
-namespace detail {
-template <typename T> struct CstringToStdStringImpl { CString operator () (const T & v) { return mpt::ToCString(ToUString(v)); } };
-template <> struct CstringToStdStringImpl<CString> { CString operator () (const CString & v) { return v; } };
-}
-template <typename T> static inline CString ToCStringHelper(const T & x) { return mpt::detail::CstringToStdStringImpl<T>()(x); }
-#endif
+template <> struct ToCStringHelper<CString> { CString operator () (const CString & v) { return v; } };
 #endif
 
 template <typename Tstring> struct ToStringTFunctor {};
@@ -188,10 +190,10 @@ template <> struct ToStringTFunctor<mpt::ustring> { template <typename T> inline
 template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x) { return ToWString(x); } };
 #endif
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-template <> struct ToStringTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x) { return mpt::ToLocale(mpt::CharsetLocale, ToString(x)); } };
+template <> struct ToStringTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x) { return mpt::ToLocaleHelper<T>()(x); } };
 #endif // MPT_ENABLE_CHARSET_LOCALE
 #if defined(_MFC_VER)
-template <> struct ToStringTFunctor<CString> { template <typename T> inline CString operator() (const T & x) { return mpt::ToCStringHelper(x); } };
+template <> struct ToStringTFunctor<CString> { template <typename T> inline CString operator() (const T & x) { return mpt::ToCStringHelper<T>()(x); } };
 #endif
 
 template<typename Tstring, typename T> inline Tstring ToStringT(const T & x) { return ToStringTFunctor<Tstring>()(x); }

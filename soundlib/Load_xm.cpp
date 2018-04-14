@@ -651,7 +651,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Hey, I know this tracker!
 		std::string mptVersion(fileHeader.trackerName + 8, 12);
-		m_dwLastSavedWithVersion = Version::Parse(mptVersion);
+		m_dwLastSavedWithVersion = Version::Parse(mpt::ToUnicode(GetCharsetFile(), mptVersion));
 		madeWith = verOpenMPT | verConfirmed;
 
 		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 19))

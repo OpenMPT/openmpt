@@ -248,14 +248,13 @@ static MPT_NOINLINE void TestVersion()
 {
 	//Verify that macros and functions work.
 	{
-		VERIFY_EQUAL( Version::Parse(Version::Current().ToString()), Version::Current() );
 		VERIFY_EQUAL( Version::Parse(Version::Current().ToUString()), Version::Current() );
 		VERIFY_EQUAL( Version::Parse(Version::Current().ToUString()).ToUString(), Version::Current().ToUString() );
 		VERIFY_EQUAL( Version(18285096).ToUString(), MPT_USTRING("1.17.02.28") );
-		VERIFY_EQUAL( Version::Parse(std::string("1.17.02.28")), Version(18285096) );
-		VERIFY_EQUAL( Version::Parse(std::string("1.fe.02.28")), Version(0x01fe0228) );
-		VERIFY_EQUAL( Version::Parse(std::string("01.fe.02.28")), Version(0x01fe0228) );
-		VERIFY_EQUAL( Version::Parse(std::string("1.22")), Version(0x01220000) );
+		VERIFY_EQUAL( Version::Parse(MPT_USTRING("1.17.02.28")), Version(18285096) );
+		VERIFY_EQUAL( Version::Parse(MPT_USTRING("1.fe.02.28")), Version(0x01fe0228) );
+		VERIFY_EQUAL( Version::Parse(MPT_USTRING("01.fe.02.28")), Version(0x01fe0228) );
+		VERIFY_EQUAL( Version::Parse(MPT_USTRING("1.22")), Version(0x01220000) );
 		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,19,02,00).WithoutTestNumber(), MAKE_VERSION_NUMERIC(1,19,02,00));
 		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,03,20).WithoutTestNumber(), MAKE_VERSION_NUMERIC(1,18,03,00));
 		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,01,13).IsTestVersion(), true);
@@ -304,12 +303,12 @@ static MPT_NOINLINE void TestVersion()
 			throw std::runtime_error("VerQueryValue() returned false");
 		}
 
-		std::string version = mpt::ToCharset(mpt::CharsetASCII, szVer);
+		mpt::ustring version = mpt::ToUnicode(szVer);
 
 		//version string should be like: 1,17,2,38  Change ',' to '.' to get format 1.17.2.38
-		version = mpt::String::Replace(version, ",", ".");
+		version = mpt::String::Replace(version, MPT_USTRING(","), MPT_USTRING("."));
 
-		VERIFY_EQUAL( version, mpt::fmt::val(Version::Current()) );
+		VERIFY_EQUAL( version, mpt::ufmt::val(Version::Current()) );
 		VERIFY_EQUAL( Version::Parse(version), Version::Current() );
 	}
 #endif
@@ -1358,7 +1357,7 @@ static MPT_NOINLINE void TestMisc2()
 	STATIC_ASSERT(sizeof(mpt::UUID) == 16);
 	UUIDbin uuid2;
 	std::memcpy(&uuid2, uuiddata, 16);
-	VERIFY_EQUAL(mpt::UUID(uuid2).ToString(), std::string("00010203-0405-0607-0809-0a0b0c0d0e0f"));
+	VERIFY_EQUAL(mpt::UUID(uuid2).ToUString(), MPT_USTRING("00010203-0405-0607-0809-0a0b0c0d0e0f"));
 	}
 
 	constexpr mpt::UUID uuid3 = "2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"_uuid;

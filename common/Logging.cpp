@@ -133,7 +133,7 @@ void Logger::SendLogMessage(const Context &context, LogLevel level, const char *
 			if(s_logfile)
 			{
 				fprintf(s_logfile, mpt::ToCharset(mpt::CharsetUTF8, mpt::format(MPT_USTRING("%1+%2 %3(%4): %5 [%6]\n"))
-					( mpt::Date::ANSI::ToString(cur)
+					( mpt::Date::ANSI::ToUString(cur)
 					, mpt::ufmt::dec<6>(diff)
 					, file
 					, line
@@ -349,7 +349,7 @@ bool Dump(const mpt::PathString &filename)
 		qpcValid = true;
 	}
 
-	f << "Dump: " << mpt::ToCharset(mpt::CharsetUTF8, mpt::Date::ANSI::ToString(ftNow)) << std::endl;
+	f << "Dump: " << mpt::ToCharset(mpt::CharsetUTF8, mpt::Date::ANSI::ToUString(ftNow)) << std::endl;
 	f << "Captured events: " << Entries.size() << std::endl;
 	if(qpcValid && (Entries.size() > 0))
 	{
@@ -366,7 +366,7 @@ bool Dump(const mpt::PathString &filename)
 		std::string time;
 		if(qpcValid)
 		{
-			time = mpt::ToCharset(mpt::CharsetUTF8, mpt::Date::ANSI::ToString( ftNow - static_cast<int64>( static_cast<double>(qpcNow.QuadPart - entry.Timestamp) * (10000000.0 / static_cast<double>(qpcFreq.QuadPart) ) ) ) );
+			time = mpt::ToCharset(mpt::CharsetUTF8, mpt::Date::ANSI::ToUString( ftNow - static_cast<int64>( static_cast<double>(qpcNow.QuadPart - entry.Timestamp) * (10000000.0 / static_cast<double>(qpcFreq.QuadPart) ) ) ) );
 		} else
 		{
 			time = mpt::format("0x%1")(mpt::fmt::hex0<16>(entry.Timestamp));
