@@ -819,22 +819,28 @@ public:
 			lame.lame_init_params(gfp);
 			gfp_inited = true;
 		}
-		buf.resize(count + (count+3)/4 + 7200);
-		int result = 0;
-		if(lame.lame_get_num_channels(gfp) == 1)
+		const size_t count_max = 0xffff;
+		while(count > 0)
 		{
-			// lame always assumes stereo input with interleaved interface, so use non-interleaved for mono
-			result = lame.lame_encode_buffer_ieee_float(gfp, interleaved, nullptr, count, (unsigned char*)buf.data(), buf.size());
-		} else
-		{
-			result = lame.lame_encode_buffer_interleaved_ieee_float(gfp, interleaved, count, (unsigned char*)buf.data(), buf.size());
+			size_t count_chunk = mpt::clamp(count, size_t(0), count_max);
+			buf.resize(count_chunk + (count_chunk+3)/4 + 7200);
+			int result = 0;
+			if(lame.lame_get_num_channels(gfp) == 1)
+			{
+				// lame always assumes stereo input with interleaved interface, so use non-interleaved for mono
+				result = lame.lame_encode_buffer_ieee_float(gfp, interleaved, nullptr, count_chunk, (unsigned char*)buf.data(), buf.size());
+			} else
+			{
+				result = lame.lame_encode_buffer_interleaved_ieee_float(gfp, interleaved, count_chunk, (unsigned char*)buf.data(), buf.size());
+			}
+			buf.resize((result >= 0) ? result : 0);
+			if(result == -2)
+			{
+				throw std::bad_alloc();
+			}
+			WriteBuffer();
+			count -= count_chunk;
 		}
-		buf.resize((result >= 0) ? result : 0);
-		if(result == -2)
-		{
-			throw std::bad_alloc();
-		}
-		WriteBuffer();
 	}
 	virtual ~MP3LameStreamWriter()
 	{
