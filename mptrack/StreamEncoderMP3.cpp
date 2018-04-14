@@ -819,19 +819,19 @@ public:
 			lame.lame_init_params(gfp);
 			gfp_inited = true;
 		}
-		const size_t count_max = 0xffff;
+		const int count_max = 0xffff;
 		while(count > 0)
 		{
-			size_t count_chunk = mpt::clamp(count, size_t(0), count_max);
+			int count_chunk = mpt::clamp(mpt::saturate_cast<int>(count), int(0), count_max);
 			buf.resize(count_chunk + (count_chunk+3)/4 + 7200);
 			int result = 0;
 			if(lame.lame_get_num_channels(gfp) == 1)
 			{
 				// lame always assumes stereo input with interleaved interface, so use non-interleaved for mono
-				result = lame.lame_encode_buffer_ieee_float(gfp, interleaved, nullptr, count_chunk, (unsigned char*)buf.data(), buf.size());
+				result = lame.lame_encode_buffer_ieee_float(gfp, interleaved, nullptr, count_chunk, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size()));
 			} else
 			{
-				result = lame.lame_encode_buffer_interleaved_ieee_float(gfp, interleaved, count_chunk, (unsigned char*)buf.data(), buf.size());
+				result = lame.lame_encode_buffer_interleaved_ieee_float(gfp, interleaved, count_chunk, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size()));
 			}
 			buf.resize((result >= 0) ? result : 0);
 			if(result == -2)
@@ -839,7 +839,7 @@ public:
 				throw std::bad_alloc();
 			}
 			WriteBuffer();
-			count -= count_chunk;
+			count -= static_cast<size_t>(count_chunk);
 		}
 	}
 	virtual ~MP3LameStreamWriter()
@@ -854,7 +854,7 @@ public:
 			gfp_inited = true;
 		}
 		buf.resize(7200);
-		buf.resize(lame.lame_encode_flush(gfp, (unsigned char*)buf.data(), buf.size()));
+		buf.resize(lame.lame_encode_flush(gfp, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size())));
 		WriteBuffer();
 		ReplayGain replayGain;
 		if(StreamEncoderSettings::Instance().MP3LameCalculatePeakSample)
