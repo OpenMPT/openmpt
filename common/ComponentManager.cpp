@@ -313,6 +313,10 @@ void ComponentManager::Startup()
 
 bool ComponentManager::IsComponentBlocked(const std::string &settingsKey) const
 {
+	if(settingsKey.empty())
+	{
+		return false;
+	}
 	return m_Settings.IsBlocked(settingsKey);
 }
 
