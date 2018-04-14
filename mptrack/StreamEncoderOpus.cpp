@@ -165,7 +165,11 @@ public:
 	}
 	void WriteInterleaved(size_t count, const float *interleaved) override
 	{
-		ope_encoder_write_float(ope_encoder, interleaved, count);
+		while(count > 0)
+		{
+			ope_encoder_write_float(ope_encoder, interleaved, mpt::saturate_cast<int>(count));
+			count -= static_cast<size_t>(mpt::saturate_cast<int>(count));
+		}
 	}
 	virtual ~OpusStreamWriter()
 	{
