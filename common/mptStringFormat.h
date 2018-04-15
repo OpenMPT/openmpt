@@ -170,16 +170,12 @@ template <typename T> auto ToWString(const T & x) -> decltype(mpt::ToWide(x.ToUS
 #endif
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-template <typename T> struct ToLocaleHelper { mpt::lstring operator () (const T & v) { return mpt::ToLocale(mpt::CharsetLocale, ToString(v)); } };
+template <typename T> struct ToLocaleHelper { mpt::lstring operator () (const T & v) { return mpt::ToLocale(ToUString(v)); } };
 template <> struct ToLocaleHelper<mpt::lstring> { mpt::lstring operator () (const mpt::lstring & v) { return v; } };
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 #if defined(_MFC_VER)
-#ifdef UNICODE
 template <typename T> struct ToCStringHelper { CString operator () (const T & v) { return mpt::ToCString(ToUString(v)); } };
-#else
-template <typename T> struct ToCStringHelper { CString operator () (const T & v) { return mpt::ToCString(mpt::CharsetLocale, ToString(v)); } };
-#endif
 template <> struct ToCStringHelper<CString> { CString operator () (const CString & v) { return v; } };
 #endif
 
