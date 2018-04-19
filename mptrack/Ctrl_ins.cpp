@@ -2003,18 +2003,24 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 	}
 	SanitizeFilename(fileName);
 
-	int index = (m_sndFile.GetType() == MOD_TYPE_XM || !TrackerSettings::Instance().compressITI) ? 1 : 2;
+	int index;
+	if(TrackerSettings::Instance().compressITI)
+		index = 2;
+	else if(m_sndFile.GetType() == MOD_TYPE_XM)
+		index = 4;
+	else
+		index = 1;
+
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(m_sndFile.GetType() == MOD_TYPE_XM ? "xi" : "iti")
 		.DefaultFilename(fileName)
-		.ExtensionFilter((m_sndFile.GetType() == MOD_TYPE_XM) ?
-		"FastTracker II Instruments (*.xi)|*.xi|"
-		"Impulse Tracker Instruments (*.iti)|*.iti|"
-		"Compressed Impulse Tracker Instruments (*.iti)|*.iti||"
-		: "Impulse Tracker Instruments (*.iti)|*.iti|"
-		"Compressed Impulse Tracker Instruments (*.iti)|*.iti|"
-		"Impulse Tracker Instruments with external Samples (*.iti)|*.iti|"
-		"FastTracker II Instruments (*.xi)|*.xi||")
+		.ExtensionFilter(
+			"Impulse Tracker Instruments (*.iti)|*.iti|"
+			"Compressed Impulse Tracker Instruments (*.iti)|*.iti|"
+			"Impulse Tracker Instruments with external Samples (*.iti)|*.iti|"
+			"FastTracker II Instruments (*.xi)|*.xi|"
+			"SFZ Instruments with WAV (*.sfz)|*.sfz|"
+			"SFZ Instruments with FLAC (*.sfz)|*.sfz||")
 		.WorkingDirectory(TrackerSettings::Instance().PathInstruments.GetWorkingDir())
 		.FilterIndex(&index);
 	if(!dlg.Show(this)) return;
@@ -2032,8 +2038,9 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 
 	bool ok = false;
 	const bool saveXI = !mpt::PathString::CompareNoCase(dlg.GetExtension(), MPT_PATHSTRING("xi"));
-	const bool doCompress = index == (m_sndFile.GetType() == MOD_TYPE_XM ? 3 : 2);
-	const bool allowExternal = m_sndFile.GetType() != MOD_TYPE_XM && index == 3;
+	const bool saveSFZ = !mpt::PathString::CompareNoCase(dlg.GetExtension(), MPT_PATHSTRING("sfz"));
+	const bool doCompress = index == 2 || index == 6;
+	const bool allowExternal = index == 3;
 
 	for(INSTRUMENTINDEX ins = minIns; ins <= maxIns; ins++)
 	{
@@ -2057,6 +2064,8 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 
 			if(saveXI)
 				ok = m_sndFile.SaveXIInstrument(ins, fileName);
+			else if(saveSFZ)
+				ok = m_sndFile.SaveSFZInstrument(ins, fileName, doCompress);
 			else
 				ok = m_sndFile.SaveITIInstrument(ins, fileName, doCompress, allowExternal);
 		}

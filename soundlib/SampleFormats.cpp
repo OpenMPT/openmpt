@@ -2066,6 +2066,150 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	pIns->Convert(MOD_TYPE_MPT, GetType());
 	return true;
 }
+
+#ifndef MODPLUG_NO_FILESAVE
+
+static double SFZLinear2dB(double volume)
+{
+	return (volume > 0.0 ? 20.0 * std::log10(volume) : -144.0);
+}
+
+bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool useFLACsamples) const
+{
+	const ModInstrument *ins = Instruments[nInstr];
+	if(ins == nullptr)
+	{
+		return false;
+	}
+	mpt::ofstream f(filename, std::ios::binary);
+	if(!f.good())
+	{
+		return false;
+	}
+	const mpt::PathString sampleBaseName = filename.GetFileName();
+	const mpt::PathString sampleDirName = sampleBaseName + MPT_PATHSTRING("/");
+	const mpt::PathString sampleBasePath = filename.GetPath() + sampleDirName;
+	if(!::CreateDirectoryW(sampleBasePath.AsNative().c_str(), nullptr))
+	{
+		return false;
+	}
+
+	if(strcmp(ins->name, ""))
+	{
+		f << "// Name: " << mpt::ToCharset(mpt::CharsetUTF8, GetCharsetInternal(), ins->name) << "\n";
+	}
+	f << "// Created with " << mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString()) << "\n\n";
+
+	f << "<control>\ndefault_path=" << sampleDirName.ToUTF8() << "\n\n";
+	f << "<group>";
+	f << "\nbend_up=" << ins->midiPWD * 100;
+	if(ins->IsCutoffEnabled())
+	{
+		f << "\ncutoff=" << CSoundFile::CutOffToFrequency(ins->GetCutoff());
+	}
+	if(ins->IsResonanceEnabled())
+	{
+		f << "\nresonance=" << Util::muldivr_unsigned(ins->GetResonance(), 24, 128);
+	}
+	if(ins->IsCutoffEnabled() || ins->IsResonanceEnabled())
+	{
+		f << "\nfil_type=" << (ins->nFilterMode == FLTMODE_HIGHPASS ? "hpf_2p" : "lpf_2p");
+	}
+	if(ins->dwFlags[INS_SETPANNING])
+	{
+		f << "\npan=" << (Util::muldivr_unsigned(ins->nPan, 200, 256) - 100);
+	}
+	if(ins->nGlobalVol != 64)
+	{
+		f << "\nvolume=" << SFZLinear2dB(ins->nGlobalVol / 64.0);
+	}
+
+	size_t numSamples = 0;
+	for(size_t i = 0; i < mpt::size(ins->Keyboard); i++)
+	{
+		if(ins->Keyboard[i] < 1 || ins->Keyboard[i] > GetNumSamples())
+			continue;
+
+		numSamples++;
+		size_t endOfRegion = i + 1;
+		while(endOfRegion < mpt::size(ins->Keyboard))
+		{
+			if(ins->Keyboard[endOfRegion] != ins->Keyboard[i] || ins->NoteMap[endOfRegion] != (ins->NoteMap[i] + endOfRegion - i))
+				break;
+			endOfRegion++;
+		}
+		endOfRegion--;
+
+		mpt::PathString sampleName = sampleBasePath + sampleBaseName + MPT_PATHSTRING(" ") + mpt::PathString::FromUnicode(mpt::ufmt::val(numSamples));
+		if(useFLACsamples)
+		{
+			sampleName += MPT_PATHSTRING(".flac");
+			SaveFLACSample(ins->Keyboard[i], sampleName);
+		} else
+		{
+			sampleName += MPT_PATHSTRING(".wav");
+			SaveWAVSample(ins->Keyboard[i], sampleName);
+		}
+
+		const ModSample &sample = Samples[ins->Keyboard[i]];
+		f << "\n\n<region>";
+		if(strcmp(m_szNames[ins->Keyboard[i]], ""))
+		{
+			f << "\nregion_label=" << mpt::ToCharset(mpt::CharsetUTF8, GetCharsetInternal(), m_szNames[ins->Keyboard[i]]);
+		}
+		f << "\nsample=" << sampleName.GetFullFileName().ToUTF8();
+		f << "\nlokey=" << i;
+		f << "\nhikey=" << endOfRegion;
+		if(sample.rootNote != NOTE_NONE)
+		{
+			f << "\npitch_keycenter=" << sample.rootNote - NOTE_MIN;
+		} else
+		{
+			f << "\npitch_keycenter=" << NOTE_MIDDLEC + i - ins->NoteMap[i];
+		}
+		if(sample.uFlags[CHN_PANNING])
+		{
+			f << "\npan=" << (Util::muldivr_unsigned(sample.nPan, 200, 256) - 100);
+		}
+		if(sample.nGlobalVol != 64)
+		{
+			f << "\nvolume=" << SFZLinear2dB((ins->nGlobalVol * sample.nGlobalVol) / 4096.0);
+		}
+		const char *loopMode;
+		SmpLength loopStart = 0, loopEnd = 0;
+		bool loopType = false;
+		if(sample.uFlags[CHN_SUSTAINLOOP])
+		{
+			loopMode = "loop_sustain";
+			loopStart = sample.nSustainStart;
+			loopEnd = sample.nSustainEnd;
+			loopType = sample.uFlags[CHN_PINGPONGSUSTAIN];
+		} else if(sample.uFlags[CHN_LOOP])
+		{
+			loopMode = "loop_continuous";
+			loopStart = sample.nLoopStart;
+			loopEnd = sample.nLoopEnd;
+			loopType = sample.uFlags[CHN_SUSTAINLOOP];
+			// TODO backward loop (supported by engine but no UI)
+		} else
+		{
+			loopMode = "no_loop";
+		}
+		f << "\nloop_mode=" << loopMode;
+		if(loopStart < loopEnd)
+		{
+			f << "\nloop_start=" << loopStart;
+			f << "\nloop_end=" << loopEnd;
+			f << "\nloop_type=" << (loopType ? "alternate" : "forward");
+		}
+		i = endOfRegion;
+	}
+
+	return true;
+}
+
+#endif // MODPLUG_NO_FILESAVE
+
 #else
 bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX, FileReader &)
 {

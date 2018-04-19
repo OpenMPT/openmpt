@@ -1021,6 +1021,7 @@ public:
 #ifndef MODPLUG_NO_FILESAVE
 	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename) const;
 	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool compress, bool allowExternal) const;
+	bool SaveSFZInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool useFLACsamples) const;
 #endif
 
 	// I/O from another sound file
