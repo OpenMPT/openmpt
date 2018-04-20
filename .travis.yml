@@ -28,9 +28,9 @@ install:
 
 script:
   - ./build/auto/dist.sh
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then xcodebuild clean -workspace build/xcode-macos/libopenmpt.xcworkspace/ -scheme libopenmpt ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then xcodebuild build -workspace build/xcode-macos/libopenmpt.xcworkspace/ -scheme libopenmpt -configuration Release ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then xcodebuild clean -workspace build/xcode-ios/libopenmpt.xcworkspace/ -scheme libopenmpt ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then xcodebuild build -workspace build/xcode-ios/libopenmpt.xcworkspace/ -scheme libopenmpt -configuration Release -sdk iphoneos IPHONEOS_DEPLOYMENT_TARGET='10.0' ARCHS='armv7 armv7s arm64' CONFIGURATION_BUILD_DIR=../../bin/test/arm ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then xcodebuild build -workspace build/xcode-ios/libopenmpt.xcworkspace/ -scheme libopenmpt -configuration Release -sdk iphonesimulator IPHONEOS_DEPLOYMENT_TARGET='10.0' ARCHS='i386 x86_64' CONFIGURATION_BUILD_DIR=../../bin/test/x86 ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then xcodebuild clean -workspace build/xcode-macosx/libopenmpt.xcworkspace/ -scheme libopenmpt ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then xcodebuild build -workspace build/xcode-macosx/libopenmpt.xcworkspace/ -scheme libopenmpt -configuration Release ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then xcodebuild clean -workspace build/xcode-iphoneos/libopenmpt.xcworkspace/ -scheme libopenmpt ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then xcodebuild build -workspace build/xcode-iphoneos/libopenmpt.xcworkspace/ -scheme libopenmpt -configuration Release -sdk iphoneos IPHONEOS_DEPLOYMENT_TARGET='10.0' ARCHS='armv7 armv7s arm64' CONFIGURATION_BUILD_DIR=../../bin/test/arm ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then xcodebuild build -workspace build/xcode-iphoneos/libopenmpt.xcworkspace/ -scheme libopenmpt -configuration Release -sdk iphonesimulator IPHONEOS_DEPLOYMENT_TARGET='10.0' ARCHS='i386 x86_64' CONFIGURATION_BUILD_DIR=../../bin/test/x86 ; fi
 
