@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="tests">
       <UniqueIdentifier>{78756B10-E489-93C1-AD0B-372119DF8FF2}</UniqueIdentifier>
@@ -441,7 +441,7 @@
     <None Include="..\..\src\actions\vstudio\vs2010.lua">
       <Filter>src\actions\vstudio</Filter>
     </None>
-    <None Include="..\..\src\actions\xcode\xcode6_project.lua">
+    <None Include="..\..\src\actions\xcode\xcode8.lua">
       <Filter>src\actions\xcode</Filter>
     </None>
     <None Include="..\..\src\actions\xcode\_xcode.lua">
@@ -450,10 +450,13 @@
     <None Include="..\..\src\actions\xcode\xcode_common.lua">
       <Filter>src\actions\xcode</Filter>
     </None>
-    <None Include="..\..\src\actions\xcode\xcode6_config.lua">
+    <None Include="..\..\src\actions\xcode\xcode9.lua">
       <Filter>src\actions\xcode</Filter>
     </None>
-    <None Include="..\..\src\actions\xcode\xcode4_workspace.lua">
+    <None Include="..\..\src\actions\xcode\xcode4.lua">
+      <Filter>src\actions\xcode</Filter>
+    </None>
+    <None Include="..\..\src\actions\xcode\xcode_workspace.lua">
       <Filter>src\actions\xcode</Filter>
     </None>
     <None Include="..\..\src\actions\xcode\xcode_project.lua">

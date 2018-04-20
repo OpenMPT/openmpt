@@ -441,7 +441,7 @@
     <None Include="..\..\src\actions\vstudio\vs2010.lua">
       <Filter>src\actions\vstudio</Filter>
     </None>
-    <None Include="..\..\src\actions\xcode\xcode6_project.lua">
+    <None Include="..\..\src\actions\xcode\xcode8.lua">
       <Filter>src\actions\xcode</Filter>
     </None>
     <None Include="..\..\src\actions\xcode\_xcode.lua">
@@ -450,10 +450,13 @@
     <None Include="..\..\src\actions\xcode\xcode_common.lua">
       <Filter>src\actions\xcode</Filter>
     </None>
-    <None Include="..\..\src\actions\xcode\xcode6_config.lua">
+    <None Include="..\..\src\actions\xcode\xcode9.lua">
       <Filter>src\actions\xcode</Filter>
     </None>
-    <None Include="..\..\src\actions\xcode\xcode4_workspace.lua">
+    <None Include="..\..\src\actions\xcode\xcode4.lua">
+      <Filter>src\actions\xcode</Filter>
+    </None>
+    <None Include="..\..\src\actions\xcode\xcode_workspace.lua">
       <Filter>src\actions\xcode</Filter>
     </None>
     <None Include="..\..\src\actions\xcode\xcode_project.lua">

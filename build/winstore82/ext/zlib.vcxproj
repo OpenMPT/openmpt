@@ -66,72 +66,84 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -641,63 +653,48 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\include\zlib\adler32.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\compress.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\crc32.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\deflate.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\gzclose.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\gzlib.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\gzread.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\gzwrite.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\infback.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\inffast.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\inflate.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\inftrees.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\trees.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\uncompr.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\zlib\zutil.c">
-      <ObjectFileName>$(IntDir)include\zlib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
   </ItemGroup>

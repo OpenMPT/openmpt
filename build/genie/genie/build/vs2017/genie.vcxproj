@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -20,12 +20,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -39,14 +40,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>..\..\bin\windows\</OutDir>
-    <IntDir>obj\Release\</IntDir>
+    <IntDir>\home\manx\VirtualBox VMs\shared\g\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377\build\vs2017\obj\Release\</IntDir>
     <TargetName>genie</TargetName>
     <TargetExt>.exe</TargetExt>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>..\..\bin\windows\</OutDir>
-    <IntDir>obj\Debug\</IntDir>
+    <IntDir>\home\manx\VirtualBox VMs\shared\g\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377\build\vs2017\obj\Debug\</IntDir>
     <TargetName>genie</TargetName>
     <TargetExt>.exe</TargetExt>
     <LinkIncremental>true</LinkIncremental>
@@ -95,7 +96,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)genie.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -105,6 +105,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDataBaseFileName>$(OutDir)genie.pdb</ProgramDataBaseFileName>
       <AdditionalDependencies>ole32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)genie.exe</OutputFile>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -141,179 +142,122 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\host\os_is64bit.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_ticks.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_match.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\scripts.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_stat.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\premake.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\premake_main.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\string_hash.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_uuid.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\path_getrelative.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_copyfile.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_mkdir.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\path_getabsolute.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\path_helpers.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_pathsearch.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_isfile.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_getcwd.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\string_endswith.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_rmdir.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\path_isabsolute.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_chdir.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_isdir.c">
-      <ObjectFileName>$(IntDir)src\host\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lvm.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lmem.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\llex.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\loslib.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\ldblib.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lua.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lgc.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\loadlib.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\ldebug.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lundump.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lutf8lib.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lobject.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lparser.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\liolib.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\ltm.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lmathlib.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lstate.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lcorolib.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lapi.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lbaselib.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lstrlib.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\ltablib.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lauxlib.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lstring.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\linit.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lbitlib.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lfunc.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\ldo.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\luac.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lzio.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lcode.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\ldump.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lctype.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\lopcodes.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\src\host\lua-5.3.0\src\ltable.c">
-      <ObjectFileName>$(IntDir)src\host\lua-5.3.0\src\</ObjectFileName>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -432,11 +376,12 @@
     <None Include="..\..\src\actions\vstudio\vstudio_vcxproj.lua" />
     <None Include="..\..\src\actions\vstudio\vstudio_vcxproj_filters.lua" />
     <None Include="..\..\src\actions\vstudio\vs2010.lua" />
-    <None Include="..\..\src\actions\xcode\xcode6_project.lua" />
+    <None Include="..\..\src\actions\xcode\xcode8.lua" />
     <None Include="..\..\src\actions\xcode\_xcode.lua" />
     <None Include="..\..\src\actions\xcode\xcode_common.lua" />
-    <None Include="..\..\src\actions\xcode\xcode6_config.lua" />
-    <None Include="..\..\src\actions\xcode\xcode4_workspace.lua" />
+    <None Include="..\..\src\actions\xcode\xcode9.lua" />
+    <None Include="..\..\src\actions\xcode\xcode4.lua" />
+    <None Include="..\..\src\actions\xcode\xcode_workspace.lua" />
     <None Include="..\..\src\actions\xcode\xcode_project.lua" />
     <None Include="..\..\src\actions\ninja\_ninja.lua" />
     <None Include="..\..\src\actions\ninja\ninja_cpp.lua" />

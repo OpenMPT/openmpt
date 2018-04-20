@@ -66,72 +66,84 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -681,95 +693,72 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\include\vorbis\lib\analysis.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\barkmel.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\bitrate.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\block.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\codebook.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\envelope.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\floor0.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\floor1.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\info.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\lookup.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\lpc.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\lsp.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\mapping0.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\mdct.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\psy.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\registry.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\res0.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\sharedbook.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\smallft.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\synthesis.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\vorbisenc.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\vorbisfile.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\window.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
   </ItemGroup>

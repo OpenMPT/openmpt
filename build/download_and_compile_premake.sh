@@ -45,7 +45,7 @@ fi
 
 
 
-download_and_unpack "genie" "https://github.com/bkaradzic/GENie/archive/b0582481bebe3372eb05504768ff76c45f14607d.zip" "genie-b0582481bebe3372eb05504768ff76c45f14607d.zip" "GENie-b0582481bebe3372eb05504768ff76c45f14607d"
+download_and_unpack "genie" "https://github.com/bkaradzic/GENie/archive/78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "GENie-78817a9707c1a02e845fb38b3adcc5353b02d377"
 
 cd include/genie
 

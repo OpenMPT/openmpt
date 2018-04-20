@@ -112,8 +112,8 @@ if not exist "build\externals" mkdir "build\externals"
 
 
 
-rem call :download_and_unpack "genie" "https://github.com/bkaradzic/GENie/archive/b0582481bebe3372eb05504768ff76c45f14607d.zip" "genie-b0582481bebe3372eb05504768ff76c45f14607d.zip" "GENie-b0582481bebe3372eb05504768ff76c45f14607d" "-" || goto error
-call :unpack "genie" "genie\GENie-b0582481bebe3372eb05504768ff76c45f14607d.zip" "genie-b0582481bebe3372eb05504768ff76c45f14607d.zip" "GENie-b0582481bebe3372eb05504768ff76c45f14607d" "-" || goto error
+rem call :download_and_unpack "genie" "https://github.com/bkaradzic/GENie/archive/78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "GENie-78817a9707c1a02e845fb38b3adcc5353b02d377" "-" || goto error
+call :unpack "genie" "genie\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "GENie-78817a9707c1a02e845fb38b3adcc5353b02d377" "-" || goto error
 
 xcopy /E /I /Y build\genie\genie\build\vs2015 include\genie\build\vs2015 || goto error
 xcopy /E /I /Y build\genie\genie\build\vs2017 include\genie\build\vs2017 || goto error
