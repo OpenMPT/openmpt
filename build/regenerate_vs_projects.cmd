@@ -25,6 +25,15 @@ del genie.lua || goto err
 
 
 
+echo dofile "build/xcode-genie/genie.lua" > genie.lua || goto err
+
+%GENIE% --target="macosx"   --os=macosx xcode9 || goto err
+%GENIE% --target="iphoneos" --os=macosx xcode9 || goto err
+
+del genie.lua || goto err
+
+
+
 %PREMAKE% --file=build\vcpkg\premake5.lua vs2017 || goto err
 
 

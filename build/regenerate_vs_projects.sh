@@ -24,6 +24,15 @@ rm genie.lua
 
 
 
+echo dofile \"build/xcode-genie/genie.lua\" > genie.lua
+
+${GENIE} --target="macosx"   --os=macosx xcode9
+${GENIE} --target="iphoneos" --os=macosx xcode9
+
+rm genie.lua
+
+
+
 ${PREMAKE} --file=build/vcpkg/premake5.lua vs2017
 
 

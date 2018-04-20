@@ -1,0 +1,308 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		EAABCACD563B8CB85F376DD0 /* bitwise.c in Sources */ = {isa = PBXBuildFile; fileRef = 79BDACA965F9AF13CE0BC80A /* bitwise.c */; };
+		D0C215F43C52D7DE454EB8F6 /* framing.c in Sources */ = {isa = PBXBuildFile; fileRef = 9F6CEE2F8BA8F199F4BA0991 /* framing.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		E912D981D564B071BE83ED81 /* ogg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "ogg.h"; path = "../../../include/ogg/include/ogg/ogg.h"; sourceTree = "<group>"; };
+		83D8C24AEF3D56D17816F8A9 /* os_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "os_types.h"; path = "../../../include/ogg/include/ogg/os_types.h"; sourceTree = "<group>"; };
+		79BDACA965F9AF13CE0BC80A /* bitwise.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "bitwise.c"; path = "../../../include/ogg/src/bitwise.c"; sourceTree = "<group>"; };
+		9F6CEE2F8BA8F199F4BA0991 /* framing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "framing.c"; path = "../../../include/ogg/src/framing.c"; sourceTree = "<group>"; };
+		F4DBB09760F497C129A1275B /* libopenmpt-ogg.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = "libopenmpt-ogg.dylib"; path = "libopenmpt-ogg.dylib"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4BA255AEB716EB0B8060381B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D0647E3ABCC70DDF654D4695 /* ogg */ = {
+			isa = PBXGroup;
+			children = (
+				B8CE717CA4C790CECDF97553 /* include */,
+				CAA8EF6436BFEDFA7F36791C /* Products */,
+			);
+			name = "ogg";
+			sourceTree = "<group>";
+		};
+		B8CE717CA4C790CECDF97553 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				A587F78D911681573A359552 /* ogg */,
+			);
+			name = "include";
+			sourceTree = "<group>";
+		};
+		A587F78D911681573A359552 /* ogg */ = {
+			isa = PBXGroup;
+			children = (
+				392DABFB25E89AA7CE9F13F2 /* include */,
+				61E058BD4D05A83D76508DCD /* src */,
+			);
+			name = "ogg";
+			sourceTree = "<group>";
+		};
+		392DABFB25E89AA7CE9F13F2 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				26E8FF1F1239EB613B9DD923 /* ogg */,
+			);
+			name = "include";
+			sourceTree = "<group>";
+		};
+		26E8FF1F1239EB613B9DD923 /* ogg */ = {
+			isa = PBXGroup;
+			children = (
+				E912D981D564B071BE83ED81 /* ogg.h */,
+				83D8C24AEF3D56D17816F8A9 /* os_types.h */,
+			);
+			name = "ogg";
+			sourceTree = "<group>";
+		};
+		61E058BD4D05A83D76508DCD /* src */ = {
+			isa = PBXGroup;
+			children = (
+				79BDACA965F9AF13CE0BC80A /* bitwise.c */,
+				9F6CEE2F8BA8F199F4BA0991 /* framing.c */,
+			);
+			name = "src";
+			sourceTree = "<group>";
+		};
+		CAA8EF6436BFEDFA7F36791C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F4DBB09760F497C129A1275B /* libopenmpt-ogg.dylib */,
+			);
+			name = "Products";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5A1D66B746D85563EF8FCEAD /* ogg */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 876F1B24F3E3B081BC2DFE90 /* Build configuration list for PBXNativeTarget "ogg" */;
+			buildPhases = (
+				29BBD9FC952F6F5A5E79BC69 /* Resources */,
+				E1CC97D54D412D33168B7A42 /* Sources */,
+				4BA255AEB716EB0B8060381B /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "ogg";
+			productName = "ogg";
+			productReference = F4DBB09760F497C129A1275B /* libopenmpt-ogg.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		__RootObject_ /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "ogg" */;
+			compatibilityVersion = "Xcode 8.0";
+			hasScannedForEncodings = 1;
+			mainGroup = D0647E3ABCC70DDF654D4695 /* ogg */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5A1D66B746D85563EF8FCEAD /* libopenmpt-ogg.dylib */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		29BBD9FC952F6F5A5E79BC69 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E1CC97D54D412D33168B7A42 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EAABCACD563B8CB85F376DD0 /* bitwise.c in Sources */,
+				D0C215F43C52D7DE454EB8F6 /* framing.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		5C3A174348B70A8671340B9A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = "../../../bin/debug/xcode9-macosx/all";
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "openmpt-ogg";
+			};
+			name = Debug;
+		};
+		96B82A9C8220F169EB8B0580 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = "../../../bin/release/xcode9-macosx/all";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "openmpt-ogg";
+			};
+			name = Release;
+		};
+		ADEE9D5E19078588E2B31422 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					DEBUG,
+					MPT_BUILD_XCODE,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../../include/ogg/include,
+				);
+				OBJROOT = obj/Debug/ogg;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SYMROOT = "../../../bin/debug/xcode9-macosx/all";
+			};
+			name = Debug;
+		};
+		68DCA8C7D4BFB707DDC2E543 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NDEBUG,
+					MPT_BUILD_XCODE,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../../include/ogg/include,
+				);
+				OBJROOT = obj/Release/ogg;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-ffast-math",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-ffast-math",
+				);
+				SDKROOT = macosx;
+				SYMROOT = "../../../bin/release/xcode9-macosx/all";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		876F1B24F3E3B081BC2DFE90 /* Build configuration list for PBXNativeTarget "libopenmpt-ogg.dylib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5C3A174348B70A8671340B9A /* Debug */,
+				96B82A9C8220F169EB8B0580 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug";
+		};
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "ogg" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ADEE9D5E19078588E2B31422 /* Debug */,
+				68DCA8C7D4BFB707DDC2E543 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug";
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = __RootObject_ /* Project object */;
+}

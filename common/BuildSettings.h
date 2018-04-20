@@ -182,6 +182,35 @@
 #endif // MPT_BUILD_MSVC
 
 
+#if defined(MPT_BUILD_XCODE)
+
+#if defined(MODPLUG_TRACKER)
+
+// n/a
+
+#endif // MODPLUG_TRACKER
+
+#if defined(LIBOPENMPT_BUILD)
+
+//#define MPT_WITH_DL
+//#define MPT_WITH_FLAC
+//#define MPT_WITH_ICONV
+//#define MPT_WITH_LTDL
+//#define MPT_WITH_MEDIAFOUNDATION
+//#define MPT_WITH_MINIMP3
+//#define MPT_WITH_MINIZ
+#define MPT_WITH_MPG123
+#define MPT_WITH_OGG
+//#define MPT_WITH_STBVORBIS
+#define MPT_WITH_VORBIS
+#define MPT_WITH_VORBISFILE
+#define MPT_WITH_ZLIB
+
+#endif // LIBOPENMPT_BUILD
+
+#endif // MPT_BUILD_XCODE
+
+
 
 #if defined(MODPLUG_TRACKER)
 
