@@ -183,7 +183,22 @@ static void ApplyStereoSeparation(mixsample_t *SoundFrontBuffer, mixsample_t *So
 }
 
 
-CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget &target)
+void CSoundFile::ProcessInputChannels(IAudioSource &source, std::size_t countChunk)
+{
+	for(std::size_t channel = 0; channel < NUMMIXINPUTBUFFERS; ++channel)
+	{
+		std::fill(&(MixInputBuffer[channel][0]), &(MixInputBuffer[channel][countChunk]), 0);
+	}
+	mixsample_t * buffers[NUMMIXINPUTBUFFERS];
+	for(std::size_t channel = 0; channel < NUMMIXINPUTBUFFERS; ++channel)
+	{
+		buffers[channel] = MixInputBuffer[channel];
+	}
+	source.FillCallback(buffers, m_MixerSettings.NumInputChannels, countChunk);
+}
+
+
+CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget &target, IAudioSource &source)
 {
 	MPT_ASSERT_ALWAYS(m_MixerSettings.IsValid());
 
@@ -271,6 +286,11 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 		MPT_ASSERT(m_PlayState.m_nBufferCount > 0); // assert that we have actually something to do
 
 		const samplecount_t countChunk = std::min<samplecount_t>({ MIXBUFFERSIZE, m_PlayState.m_nBufferCount, countToRender });
+
+		if(m_MixerSettings.NumInputChannels > 0)
+		{
+			ProcessInputChannels(source, countChunk);
+		}
 
 		CreateStereoMix(countChunk);
 

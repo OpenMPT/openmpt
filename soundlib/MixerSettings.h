@@ -25,6 +25,7 @@ struct MixerSettings
 	uint32 gdwMixingFreq;
 	uint32 gnChannels;
 	uint32 m_nPreAmp;
+	std::size_t NumInputChannels;
 
 	int32 VolumeRampUpMicroseconds;
 	int32 VolumeRampDownMicroseconds;
@@ -41,7 +42,7 @@ struct MixerSettings
 	
 	bool IsValid() const
 	{
-		return (gdwMixingFreq > 0) && (gnChannels == 1 || gnChannels == 2 || gnChannels == 4);
+		return (gdwMixingFreq > 0) && (gnChannels == 1 || gnChannels == 2 || gnChannels == 4) && (NumInputChannels == 0 || NumInputChannels == 1 || NumInputChannels == 2 || NumInputChannels == 4);
 	}
 	
 	MixerSettings();

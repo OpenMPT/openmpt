@@ -143,6 +143,78 @@ public:
 };
 
 
+class AudioSourceBuffer
+	: public IAudioSource
+{
+private:
+	std::size_t countRendered;
+protected:
+	SampleFormat sampleFormat;
+	const void *inputBuffer;
+public:
+	AudioSourceBuffer(SampleFormat sampleFormat, const void *buffer)
+		: countRendered(0)
+		, sampleFormat(sampleFormat)
+		, inputBuffer(buffer)
+	{
+		MPT_ASSERT(sampleFormat.IsValid());
+	}
+	virtual ~AudioSourceBuffer() { }
+	std::size_t GetRenderedCount() const { return countRendered; }
+private:
+	template<typename Tsample>
+	void Fill(const Tsample *inputBuffer, int * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			SC::ConvertToFixedPoint<int32, Tsample, MIXING_FRACTIONAL_BITS> conv;
+			for(std::size_t frame = 0; frame < countChunk; ++frame)
+			{
+				MixInputBuffers[channel][frame] = conv(inputBuffer[channel + ((countRendered + frame) * channels)]);
+			}
+		}
+		countRendered += countChunk;
+	}
+public:
+	virtual void FillCallback(int * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
+	{
+		switch(sampleFormat.value)
+		{
+		case SampleFormatUnsigned8:
+			{
+				typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
+				Fill(reinterpret_cast<const Tsample*>(inputBuffer), MixInputBuffers, channels, countChunk);
+			}
+			break;
+		case SampleFormatInt16:
+			{
+				typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
+				Fill(reinterpret_cast<const Tsample*>(inputBuffer), MixInputBuffers, channels, countChunk);
+			}
+			break;
+		case SampleFormatInt24:
+			{
+				typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
+				Fill(reinterpret_cast<const Tsample*>(inputBuffer), MixInputBuffers, channels, countChunk);
+			}
+			break;
+		case SampleFormatInt32:
+			{
+				typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
+				Fill(reinterpret_cast<const Tsample*>(inputBuffer), MixInputBuffers, channels, countChunk);
+			}
+			break;
+		case SampleFormatFloat32:
+			{
+				typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
+				Fill(reinterpret_cast<const Tsample*>(inputBuffer), MixInputBuffers, channels, countChunk);
+			}
+			break;
+		}
+	}
+};
+
+
 #else // !MODPLUG_TRACKER
 
 

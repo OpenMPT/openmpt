@@ -251,6 +251,30 @@ public:
 };
 
 
+class IAudioSource
+{
+public:
+	virtual void FillCallback(int * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) = 0;
+};
+
+
+class AudioSourceNone
+	: public IAudioSource
+{
+public:
+	virtual void FillCallback(int * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			for(std::size_t frame = 0; frame < countChunk; ++frame)
+			{
+				MixSoundBuffers[channel][frame] = 0;
+			}
+		}
+	}
+};
+
+
 typedef char NoteName[4];
 
 
@@ -312,6 +336,7 @@ private:
 	float MixFloatBuffer[2][MIXBUFFERSIZE];
 	mixsample_t gnDryLOfsVol;
 	mixsample_t gnDryROfsVol;
+	mixsample_t MixInputBuffer[NUMMIXINPUTBUFFERS][MIXBUFFERSIZE];
 
 public:
 	MixerSettings m_MixerSettings;
@@ -798,7 +823,8 @@ public:
 	void StopAllVsti();
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
-	samplecount_t Read(samplecount_t count, IAudioReadTarget &target);
+	samplecount_t Read(samplecount_t count, IAudioReadTarget &target) { AudioSourceNone source; return Read(count, target, source); }
+	samplecount_t Read(samplecount_t count, IAudioReadTarget &target, IAudioSource &source);
 private:
 	void CreateStereoMix(int count);
 public:
@@ -806,6 +832,7 @@ public:
 private:
 	void ProcessDSP(std::size_t countChunk);
 	void ProcessPlugins(uint32 nCount);
+	void ProcessInputChannels(IAudioSource &source, std::size_t countChunk);
 public:
 	samplecount_t GetTotalSampleCount() const { return m_PlayState.m_lTotalSampleCount; }
 	bool HasPositionChanged() { bool b = m_PlayState.m_bPositionChanged; m_PlayState.m_bPositionChanged = false; return b; }
