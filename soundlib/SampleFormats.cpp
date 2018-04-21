@@ -2089,7 +2089,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 	const mpt::PathString sampleBaseName = filename.GetFileName();
 	const mpt::PathString sampleDirName = sampleBaseName + MPT_PATHSTRING("/");
 	const mpt::PathString sampleBasePath = filename.GetPath() + sampleDirName;
-	if(!::CreateDirectoryW(sampleBasePath.AsNative().c_str(), nullptr))
+	if(!::CreateDirectory(sampleBasePath.AsNative().c_str(), nullptr))
 	{
 		return false;
 	}
