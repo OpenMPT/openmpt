@@ -271,7 +271,8 @@ public:
 	SoundDevice::IBase *gpSoundDevice;
 	UINT_PTR m_NotifyTimer;
 	Dither m_Dither;
-	VUMeter m_VUMeter;
+	VUMeter m_VUMeterInput;
+	VUMeter m_VUMeterOutput;
 
 	DWORD m_AudioThreadId;
 	bool m_InNotifyHandler;

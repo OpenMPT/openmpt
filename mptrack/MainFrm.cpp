@@ -715,6 +715,26 @@ void CMainFrame::SoundSourceUnlock()
 }
 
 
+class StereoVuMeterSourceWrapper
+	: public AudioSourceBuffer
+{
+private:
+	VUMeter &vumeter;
+public:
+	StereoVuMeterSourceWrapper(SampleFormat sampleFormat, const void *buffer, VUMeter &vumeter)
+		: AudioSourceBuffer(sampleFormat, buffer)
+		, vumeter(vumeter)
+	{
+		return;
+	}
+	virtual void FillCallback(int * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
+	{
+		AudioSourceBuffer::FillCallback(MixInputBuffers, channels, countChunk);
+		vumeter.Process(MixInputBuffers, channels, countChunk);
+	}
+};
+
+
 class StereoVuMeterTargetWrapper
 	: public AudioReadTargetBufferInterleavedDynamic
 {
@@ -738,7 +758,6 @@ public:
 void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer)
 {
 	MPT_TRACE_SCOPE();
-	MPT_UNREFERENCED_PARAMETER(inputBuffer);
 	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	TimingInfo timingInfo;
@@ -748,8 +767,9 @@ void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, S
 	timingInfo.Speed = timeInfo.Speed;
 	m_pSndFile->m_TimingInfo = timingInfo;
 	m_Dither.SetMode((DitherMode)bufferFormat.DitherType);
-	StereoVuMeterTargetWrapper target(bufferFormat.sampleFormat, bufferFormat.NeedsClippedFloat, m_Dither, buffer, m_VUMeter);
-	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(numFrames, target);
+	StereoVuMeterSourceWrapper source(bufferFormat.sampleFormat, inputBuffer, m_VUMeterInput);
+	StereoVuMeterTargetWrapper target(bufferFormat.sampleFormat, bufferFormat.NeedsClippedFloat, m_Dither, buffer, m_VUMeterOutput);
+	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(numFrames, target, source);
 	ASSERT(renderedFrames <= numFrames);
 	CSoundFile::samplecount_t remainingFrames = numFrames - renderedFrames;
 	if(remainingFrames > 0)
@@ -962,7 +982,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 
 	// Add an entry to the notification history
 
-	Notification notification(notifyType, notifyItem, streamPosition, m_pSndFile->m_PlayState.m_nRow, m_pSndFile->m_PlayState.m_nTickCount, m_pSndFile->GetNumTicksOnCurrentRow(), m_pSndFile->m_PlayState.m_nCurrentOrder, m_pSndFile->m_PlayState.m_nPattern, m_pSndFile->GetMixStat(), static_cast<uint8>(m_pSndFile->m_MixerSettings.gnChannels));
+	Notification notification(notifyType, notifyItem, streamPosition, m_pSndFile->m_PlayState.m_nRow, m_pSndFile->m_PlayState.m_nTickCount, m_pSndFile->GetNumTicksOnCurrentRow(), m_pSndFile->m_PlayState.m_nCurrentOrder, m_pSndFile->m_PlayState.m_nPattern, m_pSndFile->GetMixStat(), static_cast<uint8>(m_pSndFile->m_MixerSettings.gnChannels), static_cast<uint8>(m_pSndFile->m_MixerSettings.NumInputChannels));
 
 	m_pSndFile->ResetMixStat();
 
@@ -1047,8 +1067,10 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 
 	{
 		// Master VU meter
-		SetVUMeter(notification.masterVU, m_VUMeter);
-		m_VUMeter.Decay(dwSamplesRead, m_pSndFile->m_MixerSettings.gdwMixingFreq);
+		SetVUMeter(notification.masterVUin, m_VUMeterInput);
+		SetVUMeter(notification.masterVUout, m_VUMeterOutput);
+		m_VUMeterInput.Decay(dwSamplesRead, m_pSndFile->m_MixerSettings.gdwMixingFreq);
+		m_VUMeterOutput.Decay(dwSamplesRead, m_pSndFile->m_MixerSettings.gdwMixingFreq);
 
 	}
 
@@ -1381,7 +1403,8 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 
 	m_wndToolBar.SetCurrentSong(m_pSndFile);
 
-	m_VUMeter = VUMeter();
+	m_VUMeterInput = VUMeter();
+	m_VUMeterOutput = VUMeter();
 
 	if(!StartPlayback())
 	{
@@ -2219,7 +2242,8 @@ LRESULT CMainFrame::OnInvalidatePatterns(WPARAM, LPARAM)
 LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::GUI);
-	m_VUMeter.SetDecaySpeedDecibelPerSecond(TrackerSettings::Instance().VuMeterDecaySpeedDecibelPerSecond); // update in notification update in order to avoid querying the settings framework from inside audio thread
+	m_VUMeterOutput.SetDecaySpeedDecibelPerSecond(TrackerSettings::Instance().VuMeterDecaySpeedDecibelPerSecond); // update in notification update in order to avoid querying the settings framework from inside audio thread
+	m_VUMeterInput.SetDecaySpeedDecibelPerSecond(TrackerSettings::Instance().VuMeterDecaySpeedDecibelPerSecond); // update in notification update in order to avoid querying the settings framework from inside audio thread
 	Notification *pnotify = (Notification *)lParam;
 	if (pnotify)
 	{
@@ -2235,7 +2259,37 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 				::SendMessage(GetFollowSong(), WM_MOD_UPDATEPOSITION, 0, lParam);
 		}
 		m_nMixChn = pnotify->mixedChannels;
-		m_wndToolBar.m_VuMeter.SetVuMeter(pnotify->masterVUchannels, pnotify->masterVU,  pnotify->type[Notification::Stop]);
+
+		bool duplicateMono = false;
+		if(pnotify->masterVUinChannels == 1 && pnotify->masterVUoutChannels > 1)
+		{
+			duplicateMono = true;
+		} else if(pnotify->masterVUoutChannels == 1 && pnotify->masterVUinChannels > 1)
+		{
+			duplicateMono = true;
+		}
+		uint8 countChan = 0;
+		uint32 vu[VUMeter::maxChannels * 2];
+		MemsetZero(vu);
+		std::copy(pnotify->masterVUin, pnotify->masterVUin + pnotify->masterVUinChannels, vu + countChan);
+
+		countChan += pnotify->masterVUinChannels;
+		if(pnotify->masterVUinChannels == 1 && duplicateMono)
+		{
+			std::copy(pnotify->masterVUin, pnotify->masterVUin + 1, vu + countChan);
+			countChan += 1;
+		}
+
+		std::copy(pnotify->masterVUout, pnotify->masterVUout + pnotify->masterVUoutChannels, vu + countChan);
+		countChan += pnotify->masterVUoutChannels;
+		if(pnotify->masterVUoutChannels == 1 && duplicateMono)
+		{
+			std::copy(pnotify->masterVUout, pnotify->masterVUout + 1, vu + countChan);
+			countChan += 1;
+		}
+
+		m_wndToolBar.m_VuMeter.SetVuMeter(countChan, vu, pnotify->type[Notification::Stop]);
+
 		m_wndToolBar.SetCurrentSong(m_pSndFile);
 	}
 	return 0;

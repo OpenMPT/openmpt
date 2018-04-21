@@ -615,8 +615,8 @@ LRESULT CCtrlGeneral::OnUpdatePosition(WPARAM, LPARAM lParam)
 	Notification *pnotify = (Notification *)lParam;
 	if (pnotify)
 	{
-		m_VuMeterLeft.SetVuMeter(pnotify->masterVU[0] & (~Notification::ClipVU), pnotify->type[Notification::Stop]);
-		m_VuMeterRight.SetVuMeter(pnotify->masterVU[1] & (~Notification::ClipVU), pnotify->type[Notification::Stop]);
+		m_VuMeterLeft.SetVuMeter(pnotify->masterVUout[0] & (~Notification::ClipVU), pnotify->type[Notification::Stop]);
+		m_VuMeterRight.SetVuMeter(pnotify->masterVUout[1] & (~Notification::ClipVU), pnotify->type[Notification::Stop]);
 	}
 	return 0;
 }

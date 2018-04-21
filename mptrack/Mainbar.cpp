@@ -1298,7 +1298,8 @@ void CStereoVU::DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw)
 void CStereoVU::OnLButtonDown(UINT, CPoint)
 {
 	// Reset clip indicator.
-	CMainFrame::GetMainFrame()->m_VUMeter.ResetClipped();
+	CMainFrame::GetMainFrame()->m_VUMeterInput.ResetClipped();
+	CMainFrame::GetMainFrame()->m_VUMeterOutput.ResetClipped();
 }
 
 
