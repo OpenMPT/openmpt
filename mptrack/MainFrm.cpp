@@ -861,19 +861,39 @@ void CMainFrame::audioCloseDevice()
 }
 
 
+void VUMeter::Process(Channel &c, int sample)
+{
+	c.peak = std::max(c.peak, mpt::abs(sample));
+	if(sample < MIXING_CLIPMIN || MIXING_CLIPMAX < sample)
+	{
+		c.clipped = true;
+	}
+}
+
+
 void VUMeter::Process(const int *mixbuffer, std::size_t numChannels, std::size_t numFrames)
 {
 	for(std::size_t frame = 0; frame < numFrames; ++frame)
 	{
 		for(std::size_t channel = 0; channel < std::min(numChannels, maxChannels); ++channel)
 		{
-			Channel &c = channels[channel];
-			const int sample = mixbuffer[frame*numChannels + channel];
-			c.peak = std::max(c.peak, mpt::abs(sample));
-			if(sample < MIXING_CLIPMIN || MIXING_CLIPMAX < sample)
-			{
-				c.clipped = true;
-			}
+			Process(channels[channel], mixbuffer[frame*numChannels + channel]);
+		}
+	}
+	for(std::size_t channel = std::min(numChannels, maxChannels); channel < maxChannels; ++channel)
+	{
+		channels[channel] = Channel();
+	}
+}
+
+
+void VUMeter::Process(const int *const *mixbuffers, std::size_t numChannels, std::size_t numFrames)
+{
+	for(std::size_t channel = 0; channel < std::min(numChannels, maxChannels); ++channel)
+	{
+		for(std::size_t frame = 0; frame < numFrames; ++frame)
+		{
+			Process(channels[channel], mixbuffers[channel][frame]);
 		}
 	}
 	for(std::size_t channel = std::min(numChannels, maxChannels); channel < maxChannels; ++channel)
