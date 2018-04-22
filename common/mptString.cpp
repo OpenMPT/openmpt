@@ -1122,12 +1122,12 @@ static const char * Charset_wchar_t()
 
 #if !defined(MPT_CHARSET_ICONV)
 template<typename Tdststring>
-Tdststring EncodeImplFallback(Charset charset, const std::wstring &src);
+static Tdststring EncodeImplFallback(Charset charset, const std::wstring &src);
 #endif // !MPT_CHARSET_ICONV
 
 // templated on 8bit strings because of type-safe variants
 template<typename Tdststring>
-Tdststring EncodeImpl(Charset charset, const std::wstring &src)
+static Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 {
 	STATIC_ASSERT(sizeof(typename Tdststring::value_type) == sizeof(char));
 	if(charset == CharsetCP437AMS || charset == CharsetCP437AMS2)
@@ -1204,7 +1204,7 @@ Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 
 #if !defined(MPT_CHARSET_ICONV)
 template<typename Tdststring>
-Tdststring EncodeImplFallback(Charset charset, const std::wstring &src)
+static Tdststring EncodeImplFallback(Charset charset, const std::wstring &src)
 {
 		std::string out;
 		switch(charset)
@@ -1228,12 +1228,12 @@ Tdststring EncodeImplFallback(Charset charset, const std::wstring &src)
 
 #if !defined(MPT_CHARSET_ICONV)
 template<typename Tsrcstring>
-std::wstring DecodeImplFallback(Charset charset, const Tsrcstring &src);
+static std::wstring DecodeImplFallback(Charset charset, const Tsrcstring &src);
 #endif // !MPT_CHARSET_ICONV
 
 // templated on 8bit strings because of type-safe variants
 template<typename Tsrcstring>
-std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
+static std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 {
 	STATIC_ASSERT(sizeof(typename Tsrcstring::value_type) == sizeof(char));
 	if(charset == CharsetCP437AMS || charset == CharsetCP437AMS2)
@@ -1323,7 +1323,7 @@ std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 
 #if !defined(MPT_CHARSET_ICONV)
 template<typename Tsrcstring>
-std::wstring DecodeImplFallback(Charset charset, const Tsrcstring &src)
+static std::wstring DecodeImplFallback(Charset charset, const Tsrcstring &src)
 {
 		std::string in(src.begin(), src.end());
 		std::wstring out;
@@ -1348,7 +1348,7 @@ std::wstring DecodeImplFallback(Charset charset, const Tsrcstring &src)
 
 // templated on 8bit strings because of type-safe variants
 template<typename Tdststring, typename Tsrcstring>
-Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
+static Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 {
 	STATIC_ASSERT(sizeof(typename Tdststring::value_type) == sizeof(char));
 	STATIC_ASSERT(sizeof(typename Tsrcstring::value_type) == sizeof(char));
