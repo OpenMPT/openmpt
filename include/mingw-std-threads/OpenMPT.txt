@@ -1,0 +1,4 @@
+mingw-std-threads library from https://github.com/meganz/mingw-std-threads
+commit 3a5361a3e9308ce854dd2761d2a9416e21ad489d (2018-02-14)
+The following changes have been made:
+ *  Unnecessary files have been removed.

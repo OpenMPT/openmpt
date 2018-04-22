@@ -23,11 +23,19 @@
 #define MPT_MUTEX_STD     1
 #define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
+#elif (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(_GLIBCXX_HAS_GTHREADS) && defined(MPT_WITH_MINGWSTDTHREADS)
+#define MPT_MUTEX_STD     1
+#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_WIN32   0
+#elif (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(_GLIBCXX_HAS_GTHREADS)
+#define MPT_MUTEX_STD     0
+#define MPT_MUTEX_PTHREAD 0
+#define MPT_MUTEX_WIN32   1
 #elif MPT_COMPILER_MSVC
 #define MPT_MUTEX_STD     1
 #define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
-#elif MPT_COMPILER_GCC && !MPT_OS_WINDOWS
+#elif MPT_COMPILER_GCC
 #define MPT_MUTEX_STD     1
 #define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
@@ -56,7 +64,11 @@
 #endif
 
 #if MPT_MUTEX_STD
+#if (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(_GLIBCXX_HAS_GTHREADS) && defined(MPT_WITH_MINGWSTDTHREADS)
+#include <mingw.mutex.h>
+#else
 #include <mutex>
+#endif
 #elif MPT_MUTEX_WIN32
 #include <windows.h>
 #elif MPT_MUTEX_PTHREAD

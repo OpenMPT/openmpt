@@ -72,7 +72,7 @@ libopenmpt_example_c_mem_CPPFLAGS = $(PORTAUDIO_CFLAGS)
 libopenmpt_example_c_unsafe_CPPFLAGS = $(PORTAUDIO_CFLAGS)
 endif
 if HAVE_PORTAUDIOCPP
-libopenmpt_example_cxx_CPPFLAGS = $(PORTAUDIOCPP_CFLAGS)
+libopenmpt_example_cxx_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) $(PORTAUDIOCPP_CFLAGS)
 endif
 
 libopenmpt_example_c_stdout_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
@@ -352,7 +352,7 @@ nobase_include_HEADERS += libopenmpt/libopenmpt_stream_callbacks_fd.h
 nobase_include_HEADERS += libopenmpt/libopenmpt_stream_callbacks_file.h
 nobase_include_HEADERS += libopenmpt/libopenmpt_ext.h
 nobase_include_HEADERS += libopenmpt/libopenmpt_ext.hpp
-libopenmpt_la_CPPFLAGS = -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
+libopenmpt_la_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
 libopenmpt_la_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
 libopenmpt_la_CFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
 libopenmpt_la_LIBADD = $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LIBOPENMPT_WIN32_LIBS)
@@ -382,7 +382,7 @@ libopenmpt_la_SOURCES += libopenmpt/libopenmpt_version.h
 if ENABLE_LIBOPENMPT_MODPLUG
 lib_LTLIBRARIES += libopenmpt_modplug.la
 libopenmpt_modplug_la_LDFLAGS = -version-info 1:0:0 -no-undefined
-libopenmpt_modplug_la_CPPFLAGS = -I$(srcdir)/
+libopenmpt_modplug_la_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -I$(srcdir)/
 libopenmpt_modplug_la_CXXFLAGS = 
 libopenmpt_modplug_la_CFLAGS = 
 libopenmpt_modplug_la_LIBADD = libopenmpt.la
@@ -396,7 +396,7 @@ pkgconfig_DATA += libmodplug/libmodplug.pc
 lib_LTLIBRARIES += libmodplug.la
 libmodplug_la_LDFLAGS = -version-info 1:0:0 -no-undefined
 nobase_include_HEADERS += libmodplug/modplug.h libmodplug/sndfile.h libmodplug/stdafx.h
-libmodplug_la_CPPFLAGS = -I$(srcdir)/
+libmodplug_la_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -I$(srcdir)/
 libmodplug_la_CXXFLAGS = 
 libmodplug_la_CFLAGS = 
 libmodplug_la_LIBADD = libopenmpt.la
@@ -407,7 +407,7 @@ endif
 
 if ENABLE_TESTS
 check_PROGRAMS += libopenmpttest
-libopenmpttest_CPPFLAGS = -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_TEST -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
+libopenmpttest_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_TEST -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
 libopenmpttest_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(WIN32_CONSOLE_CXXFLAGS)
 libopenmpttest_CFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(WIN32_CONSOLE_CFLAGS)
 libopenmpttest_LDADD = $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LIBOPENMPT_WIN32_LIB)
@@ -445,7 +445,7 @@ endif
 if ENABLE_OPENMPT123
 
 bin_PROGRAMS += bin/openmpt123
-bin_openmpt123_CPPFLAGS = -I$(srcdir)/src/openmpt123 $(PORTAUDIO_CFLAGS) $(PULSEAUDIO_CFLAGS) $(SDL2_CFLAGS) $(SDL_CFLAGS) $(SNDFILE_CFLAGS) $(FLAC_CFLAGS)
+bin_openmpt123_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -I$(srcdir)/src/openmpt123 $(PORTAUDIO_CFLAGS) $(PULSEAUDIO_CFLAGS) $(SDL2_CFLAGS) $(SDL_CFLAGS) $(SNDFILE_CFLAGS) $(FLAC_CFLAGS)
 bin_openmpt123_CXXFLAGS = $(WIN32_CONSOLE_CXXFLAGS)
 bin_openmpt123_LDADD = libopenmpt.la $(PORTAUDIO_LIBS) $(PULSEAUDIO_LIBS) $(SDL2_LIBS) $(SDL_LIBS) $(SNDFILE_LIBS) $(FLAC_LIBS) $(OPENMPT123_WIN32_LIBS)
 bin_openmpt123_SOURCES = 

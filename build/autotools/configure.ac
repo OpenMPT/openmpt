@@ -58,6 +58,33 @@ AC_SUBST([OPENMPT123_WIN32_LIBS])
 AC_SUBST([WIN32_CONSOLE_CXXFLAGS])
 AC_SUBST([WIN32_CONSOLE_CFLAGS])
 
+AC_LANG_PUSH([C++])
+case $host_os in
+ mingw32*)
+  AC_CHECK_HEADER([mingw.thread.h],
+   [
+    have_mingwstdtthreads=1
+   ],
+   [
+    have_mingwstdtthreads=0
+   ]
+  )
+  ;;
+ *)
+  have_mingwstdtthreads=0
+  ;;
+esac
+AC_LANG_POP([C++])
+AS_IF([test "x$have_mingwstdtthreads" = "x1"],
+ [
+  MINGWSTDTHREADS_CPPFLAGS=-DMPT_WITH_MINGWSTDTHREADS
+ ],
+ [
+  MINGWSTDTHREADS_CPPFLAGS=
+ ]
+)
+AC_SUBST([MINGWSTDTHREADS_CPPFLAGS])
+
 
 LIBOPENMPT_REQUIRES_PRIVATE=
 LIBOPENMPT_LIBS_PRIVATE=

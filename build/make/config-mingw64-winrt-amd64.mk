@@ -1,10 +1,10 @@
 
-CC  = x86_64-w64-mingw32-gcc
-CXX = x86_64-w64-mingw32-g++
-LD  = x86_64-w64-mingw32-g++
-AR  = x86_64-w64-mingw32-ar
+CC  = x86_64-w64-mingw32-gcc$(MINGW_FLAVOUR)
+CXX = x86_64-w64-mingw32-g++$(MINGW_FLAVOUR)
+LD  = x86_64-w64-mingw32-g++$(MINGW_FLAVOUR)
+AR  = x86_64-w64-mingw32-ar$(MINGW_FLAVOUR)
 
-CPPFLAGS += -DWIN32 -D_WIN32 -DWIN64 -D_WIN64 -DWINAPI_FAMILY=0x2 -D_WIN32_WINNT=0x0602
+CPPFLAGS += -DWIN32 -D_WIN32 -DWIN64 -D_WIN64 -DWINAPI_FAMILY=0x2 -D_WIN32_WINNT=0x0602 -Iinclude/mingw-std-threads -DMPT_WITH_MINGWSTDTHREADS
 CXXFLAGS += -std=c++11 -municode -mconsole 
 CFLAGS   += -std=c99   -municode -mconsole 
 LDFLAGS  +=

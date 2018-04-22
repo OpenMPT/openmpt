@@ -43,6 +43,15 @@ is just a high-level summary.
     be placed into the same directory as `in_openmpt.dll`.
  *  [**Change**] foo_openmpt: foo_openmpt is now packaged as a fb2k-component
     package for easier installation.
+ *  [**Change**] When building libopenmpt with MinGW-w64, it is now recommended
+    to use the posix thread model (as opposed to the win32 threading model),
+    because the former does support std::mutex while the latter does not. When
+    building with win32 threading model with the Autotools build system, it is
+    recommended to provide the `mingw-std-threads` package. `mingw-std-threads`
+    is automatically included with the `Makefile` build system. Building
+    libopenmpt with MinGW-w64 without any `std::thread`/`std::mutex` support is
+    deprecated and support for such configurations will be removed in libopenmpt
+    0.5.
 
  *  [**Regression**] Support for Clang 3.4, 3.5 has been removed.
  *  [**Regression**] Building with Android NDK older than NDK r16b is not

@@ -12,7 +12,9 @@ Dependencies
      *  **Microsoft Visual Studio 2015** or higher
      *  **GCC 4.8** or higher
      *  **Clang 3.6** or higher
-     *  **MinGW-W64 4.8** or higher
+     *  **MinGW-W64 4.8** or higher (it is recommended to preferably use
+        posix threading model as opposed to win32 threading model, or at least
+        have mingw-std-threads available otherwise)
      *  **emscripten 1.31** or higher
      *  any other **C++11 compliant** compiler (full standard compliant mode is
         known to work with GCC >= 5.1 and Clang)
