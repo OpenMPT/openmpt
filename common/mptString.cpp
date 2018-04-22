@@ -95,12 +95,10 @@ List of string types
     UNICODE). Specify literals with _T(""). Use in MFC GUI code.
 
  *  CStringA (OpenMPT)
-    MFC ANSI string type. The encoding is always CP_ACP. Do not use unless there
-    is an obvious reason to do so.
+    MFC ANSI string type. The encoding is always CP_ACP. Do not use.
 
  *  CStringW (OpenMPT)
-    MFC Unicode string type. Do not use unless there is an obvious reason to do
-    so.
+    MFC Unicode string type. Do not use.
 
  *  mpt::PathString (OpenMPT, libopenmpt)
     String type representing paths and filenames. Always use for these in order
