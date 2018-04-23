@@ -206,9 +206,9 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 		ORDERINDEX breakPos = ORDERINDEX_INVALID;
 		ROWINDEX breakRow = 63;	// Candidate row for inserting pattern break
 	
-		for(size_t n = 0; n < 64 * 4; n++, m++)
+		for(unsigned int i = 0; i < 64 * 4; i++, m++)
 		{
-			const STMPatternEntry &entry = patternData.entry[n];
+			const STMPatternEntry &entry = patternData.entry[i];
 
 			if(entry.note == 0xFE || entry.note == 0xFC)
 			{
@@ -247,16 +247,22 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 			case CMD_VOLUMESLIDE:
 				// Lower nibble always has precedence, and there are no fine slides.
-				if(m->param & 0x0F) m->param &= 0x0F;
-				else m->param &= 0xF0;
+				if(m->param & 0x0F)
+					m->param &= 0x0F;
+				else
+					m->param &= 0xF0;
 				break;
 
 			case CMD_PATTERNBREAK:
 				m->param = (m->param & 0xF0) * 10 + (m->param & 0x0F);
-				if(breakRow > m->param)
+				if(breakPos != ORDERINDEX_INVALID && m->param == 0)
 				{
-					breakRow = m->param;
+					// Merge Bxx + C00 into just Bxx
+					m->command = CMD_POSITIONJUMP;
+					m->param = static_cast<ModCommand::PARAM>(breakPos);
+					breakPos = ORDERINDEX_INVALID;
 				}
+				LimitMax(breakRow, i / 4u);
 				break;
 
 			case CMD_POSITIONJUMP:
