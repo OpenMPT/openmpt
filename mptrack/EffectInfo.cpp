@@ -308,8 +308,8 @@ bool EffectInfo::GetEffectInfo(UINT ndx, CString *s, bool bXX, ModCommand::PARAM
 			if(gFXInfo[ndx].paramValue >= 0x30 && gFXInfo[ndx].paramValue <= 0x50) nmax = gFXInfo[ndx].paramValue | ((sndFile.m_playBehaviour[kITVibratoTremoloPanbrello] || sndFile.GetType() == MOD_TYPE_S3M) ? 0x03 : 0x07);
 			break;
 		case CMD_PATTERNBREAK:
-			// no big patterns in MOD/S3M files
-			if(sndFile.GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M))
+			// no big patterns in MOD/S3M files, and FT2 disallows breaking to rows > 63
+			if(sndFile.GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M | MOD_TYPE_XM))
 				nmax = 63;
 			break;
 		}
