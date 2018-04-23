@@ -508,6 +508,10 @@
 #define MPT_ENABLE_TEMPFILE
 #endif
 
+#if MPT_CXX_AT_LEAST(17) && defined(MPT_CHARSET_CODECVTUTF8)
+#undef MPT_CHARSET_CODECVTUTF8 // std::codecvt_utf8 is deprecated in c++17
+#endif
+
 #if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_ICONV) && !defined(MPT_CHARSET_CODECVTUTF8) && !defined(MPT_CHARSET_INTERNAL)
 #define MPT_CHARSET_INTERNAL
 #endif
