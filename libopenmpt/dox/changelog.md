@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.9-pre
 
+ *  [**Bug**] openmpt123: Fixed build failure in C++17 due to use of removed
+    feature `std::random_shuffle`.
+
  *  Speed up reading of truncated ULT files.
  *  The resonant filter was sometimes unstable when combining low-volume
     samples, low cutoff and high mixing rates.
