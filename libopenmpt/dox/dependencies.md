@@ -109,3 +109,19 @@ Optional dependencies
      *  raw PCM has no external dependencies
  *  **help2man** is required to build the documentation.
 
+
+Source packages
+---------------
+ 
+Building the source packages additionally requires:
+ *  7z (7-zip)
+ *  autoconf
+ *  autoconf-archive
+ *  automake
+ *  gzip
+ *  help2man
+ *  libtool
+ *  subversion
+ *  tar
+ *  xpath (libxml-xpath-perl)
+ *  zip
