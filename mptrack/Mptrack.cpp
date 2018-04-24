@@ -803,7 +803,9 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 		ExceptionHandler::useImplicitFallbackSEH = false;
 		ExceptionHandler::useExplicitSEH = true;
 		ExceptionHandler::handleStdTerminate = true;
-		ExceptionHandler::handleStdUnexpected = true;
+		#if MPT_CXX_BEFORE(17)
+			ExceptionHandler::handleStdUnexpected = true;
+		#endif
 		ExceptionHandler::handleMfcExceptions = true;
 		ExceptionHandler::debugExceptionHandler = true;
 	} else if(IsDebuggerPresent() || cmdInfo.m_bNoCrashHandler)
@@ -812,7 +814,9 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 		ExceptionHandler::useImplicitFallbackSEH = false;
 		ExceptionHandler::useExplicitSEH = false;
 		ExceptionHandler::handleStdTerminate = false;
-		ExceptionHandler::handleStdUnexpected = false;
+		#if MPT_CXX_BEFORE(17)
+			ExceptionHandler::handleStdUnexpected = false;
+		#endif
 		ExceptionHandler::handleMfcExceptions = false;
 		ExceptionHandler::debugExceptionHandler = false;
 	} else
@@ -821,7 +825,9 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 		ExceptionHandler::useImplicitFallbackSEH = true;
 		ExceptionHandler::useExplicitSEH = true;
 		ExceptionHandler::handleStdTerminate = true;
-		ExceptionHandler::handleStdUnexpected = true;
+		#if MPT_CXX_BEFORE(17)
+			ExceptionHandler::handleStdUnexpected = true;
+		#endif
 		ExceptionHandler::handleMfcExceptions = true;
 		ExceptionHandler::debugExceptionHandler = false;
 	}
