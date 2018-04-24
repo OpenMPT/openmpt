@@ -44,6 +44,10 @@ using std::cv_status;
 #endif
 namespace xp
 {
+//    Include the XP-compatible condition_variable classes only if actually
+//  compiling for XP. The XP-compatible classes are slower than the newer
+//  versions, and depend on features not compatible with Windows Phone 8.
+#if (WINVER < _WIN32_WINNT_VISTA)
 class condition_variable_any
 {
 protected:
@@ -231,6 +235,7 @@ public:
         return base::wait_until(lock, abs_time, pred);
     }
 };
+#endif  //  Compiling for XP
 } //  Namespace mingw_stdthread::xp
 
 #if (WINVER >= _WIN32_WINNT_VISTA)

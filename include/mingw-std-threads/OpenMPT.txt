@@ -1,6 +1,5 @@
 mingw-std-threads library from https://github.com/meganz/mingw-std-threads
-commit 3a5361a3e9308ce854dd2761d2a9416e21ad489d (2018-02-14)
+commit 90115fc02ed145033b5c9c55116694cdd5547f6e (2018-04-23)
 The following changes have been made:
  *  Unnecessary files have been removed.
- *  https://github.com/meganz/mingw-std-threads/issues/39 has been fixed.
  *  All modifications are additions and are marked with "// OpenMPT".

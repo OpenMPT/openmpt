@@ -263,11 +263,7 @@ public:
     static unsigned int _hardware_concurrency_helper() noexcept
     {
         SYSTEM_INFO sysinfo;
-#if (WINVER >= _WIN32_WINNT_WINXP)  // OpenMPT
-        ::GetNativeSystemInfo(&sysinfo);  // OpenMPT
-#else  // OpenMPT
-        ::GetSystemInfo(&sysinfo);
-#endif  // OpenMPT
+        ::GetNativeSystemInfo(&sysinfo);
         return sysinfo.dwNumberOfProcessors;
     }
 
