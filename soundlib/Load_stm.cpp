@@ -180,7 +180,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 		if(sampleHeader.zero != 0 && sampleHeader.zero != 46)	// putup10.stm has zero = 46
 			return false;
 		sampleHeader.ConvertToMPT(Samples[smp]);
-		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.filename);
+		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.filename);
 		sampleOffsets[smp - 1] = sampleHeader.offset;
 	}
 
