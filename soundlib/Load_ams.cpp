@@ -75,8 +75,7 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 		CMD_GLOBALVOLUME,	// Global volume (0... 127)
 	};
 
-	ModCommand dummy = ModCommand::Empty();
-
+	ModCommand dummy;
 	for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
 	{
 		PatternRow baseRow = pattern.GetRow(row);
@@ -478,12 +477,12 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	ReadOrderFromFile<uint16le>(Order(), file, fileHeader.numOrds);
 
 	// Read patterns
-	for(PATTERNINDEX pat = 0; pat < fileHeader.numPats; pat++)
+	for(PATTERNINDEX pat = 0; pat < fileHeader.numPats && file.CanRead(4); pat++)
 	{
 		uint32 patLength = file.ReadUint32LE();
 		FileReader patternChunk = file.ReadChunk(patLength);
 
-		if(loadFlags & loadPatternData)
+		if((loadFlags & loadPatternData) && Patterns.IsValidPat(pat))
 		{
 			ReadAMSPattern(Patterns[pat], false, patternChunk);
 		}
@@ -950,7 +949,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	// Read Patterns
 	if(loadFlags & loadPatternData)
 		Patterns.ResizeArray(fileHeader.numPats);
-	for(PATTERNINDEX pat = 0; pat < fileHeader.numPats; pat++)
+	for(PATTERNINDEX pat = 0; pat < fileHeader.numPats && file.CanRead(4); pat++)
 	{
 		uint32 patLength = file.ReadUint32LE();
 		FileReader patternChunk = file.ReadChunk(patLength);
