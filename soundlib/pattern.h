@@ -30,23 +30,10 @@ class CPattern
 	friend class CPatternContainer;
 	
 public:
-//BEGIN: OPERATORS
-	CPattern& operator= (const CPattern &pat)
-	{
-		m_ModCommands = pat.m_ModCommands;
-		m_Rows = pat.m_Rows;
-		m_RowsPerBeat = pat.m_RowsPerBeat;
-		m_RowsPerMeasure = pat.m_RowsPerMeasure;
-		m_tempoSwing = pat.m_tempoSwing;
-		m_PatternName = pat.m_PatternName;
-		return *this;
-	}
-
+	CPattern& operator= (const CPattern &pat);
 	bool operator== (const CPattern &other) const;
 	bool operator!= (const CPattern &other) const { return !(*this == other); }
-//END: OPERATORS
 
-//BEGIN: INTERFACE METHODS
 public:
 	ModCommand* GetpModCommand(const ROWINDEX r, const CHANNELINDEX c) { return &m_ModCommands[r * GetNumChannels() + c]; }
 	const ModCommand* GetpModCommand(const ROWINDEX r, const CHANNELINDEX c) const { return &m_ModCommands[r * GetNumChannels() + c]; }
@@ -120,8 +107,6 @@ public:
 	// Write some kind of effect data to the pattern
 	bool WriteEffect(EffectWriter &settings);
 
-//END: INTERFACE METHODS
-
 	typedef std::vector<ModCommand>::iterator iterator;
 	typedef std::vector<ModCommand>::const_iterator const_iterator;
 
@@ -145,7 +130,6 @@ protected:
 	const ModCommand& GetModCommand(ROWINDEX r, CHANNELINDEX c) const { return m_ModCommands[r * GetNumChannels() + c]; }
 
 
-//BEGIN: DATA
 protected:
 	std::vector<ModCommand> m_ModCommands;
 	ROWINDEX m_Rows = 0;
@@ -154,7 +138,6 @@ protected:
 	TempoSwing m_tempoSwing;
 	std::string m_PatternName;
 	CPatternContainer& m_rPatternContainer;
-//END: DATA
 };
 
 

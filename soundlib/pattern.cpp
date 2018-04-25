@@ -138,6 +138,19 @@ void CPattern::Deallocate()
 }
 
 
+CPattern& CPattern::operator= (const CPattern &pat)
+{
+	m_ModCommands = pat.m_ModCommands;
+	m_Rows = pat.m_Rows;
+	m_RowsPerBeat = pat.m_RowsPerBeat;
+	m_RowsPerMeasure = pat.m_RowsPerMeasure;
+	m_tempoSwing = pat.m_tempoSwing;
+	m_PatternName = pat.m_PatternName;
+	return *this;
+}
+
+
+
 bool CPattern::operator== (const CPattern &other) const
 {
 	return GetNumRows() == other.GetNumRows()
