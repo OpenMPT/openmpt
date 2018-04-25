@@ -282,16 +282,9 @@ AS_IF([test "x$with_flac" != "xno"],
 # We want a modern C compiler 
 AC_PROG_CC_STDC
 #AC_PROG_CC_C99
-#AC_LANG_PUSH([C])
-#AX_CHECK_COMPILE_FLAG([-std=c++0x], [CFLAGS="$CFLAGS -std=c99"])
-#AC_LANG_POP([C])
 
-# We need basic C++11 support (implementing C++03TR2 features in namespace std::)
-AX_CXX_COMPILE_STDCXX_11([noext],[optional])
-AC_LANG_PUSH([C++])
-# Even if AX_CXX_COMPILE_STDCXX_11 fails, std=c++0x on older GCC and Clang compilers enables enough of C++11 for libopenmpt to build.
-AS_IF([test "x$HAVE_CXX11" = x0], [AX_CHECK_COMPILE_FLAG([-std=c++0x], [CXXFLAGS="$CXXFLAGS -std=c++0x"])])
-AC_LANG_POP([C++])
+# We need C++11 support
+AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 
 AC_LANG_PUSH([C])
 AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [CFLAGS="$CFLAGS -fvisibility=hidden"])
