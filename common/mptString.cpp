@@ -1129,7 +1129,8 @@ static Tdststring EncodeImplFallback(Charset charset, const std::wstring &src);
 template<typename Tdststring>
 static Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 {
-	STATIC_ASSERT(sizeof(typename Tdststring::value_type) == sizeof(char));
+	MPT_STATIC_ASSERT(sizeof(typename Tdststring::value_type) == sizeof(char));
+	MPT_STATIC_ASSERT((std::is_same<typename Tdststring::value_type, char>::value));
 	if(charset == CharsetCP437AMS || charset == CharsetCP437AMS2)
 	{
 		std::string out;
@@ -1156,9 +1157,16 @@ static Tdststring EncodeImpl(Charset charset, const std::wstring &src)
 		{
 			return Tdststring();
 		}
-		std::vector<CHAR> encoded_string(required_size);
-		WideCharToMultiByte(codepage, 0, src.c_str(), -1, encoded_string.data(), required_size, nullptr, nullptr);
-		return reinterpret_cast<const typename Tdststring::value_type*>(encoded_string.data());
+		#if MPT_CXX_AT_LEAST(17)
+			Tdststring encoded_string(required_size, char());
+			WideCharToMultiByte(codepage, 0, src.c_str(), -1, encoded_string.data(), required_size, nullptr, nullptr);
+			encoded_string.resize(encoded_string.size() - 1); // remove \0
+			return encoded_string;
+		#else
+			std::vector<CHAR> encoded_string(required_size);
+			WideCharToMultiByte(codepage, 0, src.c_str(), -1, encoded_string.data(), required_size, nullptr, nullptr);
+			return reinterpret_cast<const typename Tdststring::value_type*>(encoded_string.data());
+		#endif
 	#elif defined(MPT_CHARSET_ICONV)
 		iconv_t conv = iconv_t();
 		conv = iconv_open(CharsetToStringTranslit(charset), Charset_wchar_t());
@@ -1235,7 +1243,8 @@ static std::wstring DecodeImplFallback(Charset charset, const Tsrcstring &src);
 template<typename Tsrcstring>
 static std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 {
-	STATIC_ASSERT(sizeof(typename Tsrcstring::value_type) == sizeof(char));
+	MPT_STATIC_ASSERT(sizeof(typename Tsrcstring::value_type) == sizeof(char));
+	MPT_STATIC_ASSERT((std::is_same<typename Tsrcstring::value_type, char>::value));
 	if(charset == CharsetCP437AMS || charset == CharsetCP437AMS2)
 	{
 		std::string in(src.begin(), src.end());
@@ -1263,9 +1272,16 @@ static std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 		{
 			return std::wstring();
 		}
-		std::vector<WCHAR> decoded_string(required_size);
-		MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, decoded_string.data(), required_size);
-		return decoded_string.data();
+		#if MPT_CXX_AT_LEAST(17)
+			std::wstring decoded_string(required_size, wchar_t());
+			MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, decoded_string.data(), required_size);
+			decoded_string.resize(decoded_string.size() - 1); // remove \0
+			return decoded_string;
+		#else
+			std::vector<WCHAR> decoded_string(required_size);
+			MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, decoded_string.data(), required_size);
+			return decoded_string.data();
+		#endif
 	#elif defined(MPT_CHARSET_ICONV)
 		iconv_t conv = iconv_t();
 		conv = iconv_open(Charset_wchar_t(), CharsetToString(charset));
@@ -1678,9 +1694,16 @@ static mpt::ustring FromCodePageDirect(uint16 codepage, const std::string & src)
 	{
 		return mpt::ustring();
 	}
-	std::vector<WCHAR> decoded_string(required_size);
-	MultiByteToWideChar(codepage, 0, src.c_str(), -1, decoded_string.data(), required_size);
-	return mpt::ToUnicode(std::wstring(decoded_string.data()));
+	#if MPT_CXX_AT_LEAST(17)
+		std::wstring decoded_string(required_size, wchar_t());
+		MultiByteToWideChar(codepage, 0, src.c_str(), -1, decoded_string.data(), required_size);
+		decoded_string.resize(decoded_string.size() - 1); // remove \0
+		return mpt::ToUnicode(decoded_string);
+	#else
+		std::vector<WCHAR> decoded_string(required_size);
+		MultiByteToWideChar(codepage, 0, src.c_str(), -1, decoded_string.data(), required_size);
+		return mpt::ToUnicode(std::wstring(decoded_string.data()));
+	#endif
 }
 
 #endif // MPT_OS_WINDOWS
