@@ -144,7 +144,7 @@ public:
 	iterator End() { return (m_ModCommands != nullptr) ? m_ModCommands + m_Rows * GetNumChannels() : nullptr; }
 	const_iterator End() const { return (m_ModCommands != nullptr) ? m_ModCommands + m_Rows * GetNumChannels() : nullptr; }
 
-	CPattern(CPatternContainer& patCont) : m_Rows(0), m_RowsPerBeat(0), m_RowsPerMeasure(0), m_rPatternContainer(patCont) {};
+	CPattern(CPatternContainer& patCont) : m_ModCommands(nullptr), m_Rows(0), m_RowsPerBeat(0), m_RowsPerMeasure(0), m_rPatternContainer(patCont) {};
 
 protected:
 	ModCommand& GetModCommand(size_t i) { return m_ModCommands[i]; }
