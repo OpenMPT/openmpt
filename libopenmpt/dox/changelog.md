@@ -7,10 +7,17 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.9-pre
 
+ *  [**Sec**] Possible write near address 0 in out-of-memory situations when
+    reading AMS files (r10149).
+
  *  [**Bug**] openmpt123: Fixed build failure in C++17 due to use of removed
     feature `std::random_shuffle`.
 
+ *  STM: Having both Bxx and Cxx commands in a pattern imported the Bxx command
+    incorrectly.
+ *  STM: Last character of sample name was missing.
  *  Speed up reading of truncated ULT files.
+ *  ULT: Portamento import was sometimes broken.
  *  The resonant filter was sometimes unstable when combining low-volume
     samples, low cutoff and high mixing rates.
 
@@ -69,7 +76,6 @@ is just a high-level summary.
  *  Tighten M15 and MOD file rejection heuristics.
  *  J2B: Ignore frequency limits from file header. Fixes Medivo.j2b, broken
     since libopenmpt-0.2.6401-beta17.
- *  STM: Last character of sample name was missing.
  *  ParamEq plugin center frequency was not limited correctly.
  *  libopenmpt_ext C API was not included in the documentation.
 

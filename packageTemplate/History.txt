@@ -30,10 +30,21 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.08.00 (* April 2018, revision 10086)
+v1.27.08.00 (* April 2018, revision 10156)
 ------------------------------------------
+Instrument tab
+   [Fix] SFZ: Assume UTF-8 encoding for region names.
+
+VST::Plugin Bridge
+   [Fix] <js> Sending or receiving SysEx messages resulted in a crash.
+
 Playback
    [Fix] <js> The resonant filter was sometimes unstable when combining low-volume samples, low cutoff and high mixing rates.
+
+Other formats
+   [Fix] <js> AMS: Possible crash during load in low memory situations.
+   [Fix] <js> STM: Having both Bxx and Cxx commands in a pattern imported the Bxx command incorrectly (fixes ilu.stm).
+   [Fix] <js> ULT: Portamento import was sometimes broken.
 
 
 v1.27.07.00 (8 April 2018, revision 10044)
