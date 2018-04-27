@@ -21,7 +21,7 @@ int main( int argc, char * argv [] ) {
 			std::cout << "unknown" << std::endl;
 
 		} else if ( arg == "openmpt" ) {
-			std::cout << MPT_VERSION_STR << std::endl;
+			std::cout << VER_STRINGIZE(VER_MAJORMAJOR) << "." << VER_STRINGIZE(VER_MAJOR) << "." << VER_STRINGIZE(VER_MINOR) << "." << VER_STRINGIZE(VER_MINORMINOR) << std::endl;
 
 		} else if ( arg == "openmpt-version-majormajor" ) {
 			std::cout << VER_STRINGIZE(VER_MAJORMAJOR) << std::endl;
