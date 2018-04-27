@@ -48,6 +48,10 @@ clang++ -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bi
 rm bin/headercheck.*.out
 rm bin/headercheck.cpp
 
+echo "Checking version helper ..."
+c++ -Wall -Wextra -I. build/auto/helper_get_openmpt_version.cpp -o bin/helper_get_openmpt_version
+rm bin/helper_get_openmpt_version
+
 # Clean dist
 make clean-dist
 
