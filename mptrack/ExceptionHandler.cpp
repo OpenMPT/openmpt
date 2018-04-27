@@ -726,15 +726,25 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 		DebugBreak();
 	} else
 	{
-		CStringA errorMessage;
+		mpt::ustring errorMessage;
 		if(msg)
 		{
-			errorMessage.Format("Internal state inconsistency detected at %s(%d). This is just a warning that could potentially lead to a crash later on: %s [%s].", file, line, msg, function);
+			errorMessage = mpt::format(MPT_USTRING("Internal state inconsistency detected at %1(%2). This is just a warning that could potentially lead to a crash later on: %3 [%4]."))
+				( mpt::ToUnicode(mpt::CharsetASCII, file)
+				, line
+				, mpt::ToUnicode(mpt::CharsetASCII, msg)
+				, mpt::ToUnicode(mpt::CharsetASCII, function)
+				);
 		} else
 		{
-			errorMessage.Format("Internal error occurred at %s(%d): ASSERT(%s) failed in [%s].", file, line, expr, function);
+			errorMessage = mpt::format(MPT_USTRING("Internal error occurred at %1(%2): ASSERT(%3) failed in [%4]."))
+				( mpt::ToUnicode(mpt::CharsetASCII, file)
+				, line
+				, mpt::ToUnicode(mpt::CharsetASCII, expr)
+				, mpt::ToUnicode(mpt::CharsetASCII, function)
+				);
 		}
-		report.ReportError(mpt::ToUnicode(mpt::CharsetLocale, errorMessage.GetString()));
+		report.ReportError(errorMessage);
 	}
 }
 
