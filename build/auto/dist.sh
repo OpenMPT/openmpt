@@ -78,6 +78,10 @@ rm bin/headercheck.cpp
 rm bin/empty.*.out
 rm bin/empty.cpp
 
+echo "Checking version helper ..."
+c++ -Wall -Wextra -I. build/auto/helper_get_openmpt_version.cpp -o bin/helper_get_openmpt_version
+rm bin/helper_get_openmpt_version
+
 # Clean dist
 make NO_SDL=1 NO_SDL2=1 clean-dist
 
