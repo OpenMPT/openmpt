@@ -7,6 +7,15 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta32
 
+ *  [**Sec**] Possible write near address 0 in out-of-memory situations when
+    reading AMS files (r10151, r10154).
+
+ *  STM: Having both Bxx and Cxx commands in a pattern imported the Bxx command
+    incorrectly.
+ *  STM: Last character of sample name was missing.
+ *  Speed up reading of truncated ULT files.
+ *  ULT: Portamento import was sometimes broken.
+
 ### libopenmpt 0.2-beta31 (2018-04-08)
 
  *  [**Sec**] Possible out-of-bounds memory read with IT / MO3 files containing
