@@ -19,9 +19,9 @@ struct InstrumentEnvelope;
 class CScaleEnvPointsDlg : public CDialog
 {
 protected:
-	CNumberEdit m_EditX, m_EditY;
-	InstrumentEnvelope &m_Env; //To tell which envelope to process.
-	static double m_fFactorX, m_fFactorY;
+	CNumberEdit m_EditX, m_EditY, m_EditOffset;
+	InstrumentEnvelope &m_Env;
+	static double m_factorX, m_factorY, m_offsetY;
 	int m_nCenter;
 
 public:
@@ -34,8 +34,8 @@ public:
 	void Apply();
 
 protected:
-	virtual void OnOK();
-	virtual BOOL OnInitDialog();
+	void OnOK() override;
+	BOOL OnInitDialog() override;
 };
 
 OPENMPT_NAMESPACE_END
