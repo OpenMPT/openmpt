@@ -44,7 +44,7 @@ void itoa(int64 n,char *Str,size_t MaxSize);
 void itoa(int64 n,wchar *Str,size_t MaxSize);
 const wchar* GetWide(const char *Src);
 const wchar* GetCmdParam(const wchar *CmdLine,wchar *Param,size_t MaxSize);
-#ifndef SILENT
+#ifndef RARDLL
 void PrintfPrepareFmt(const wchar *Org,wchar *Cvt,size_t MaxSize);
 #endif
 
