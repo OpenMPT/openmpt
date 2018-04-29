@@ -704,6 +704,16 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcPrevEntryInColumn, 1971, _T("Jump to previous entry in column"));
 	DefineKeyCommand(kcNextEntryInColumn, 1972, _T("Jump to next entry in column"));
 	DefineKeyCommand(kcViewTempoSwing, 1973, _T("View Global Tempo Swing Settings"));
+	DefineKeyCommand(kcInstrumentEnvelopeSwitchToVolume, 1976, _T("Switch to Volume Envelope"));
+	DefineKeyCommand(kcInstrumentEnvelopeSwitchToPanning, 1977, _T("Switch to Panning Envelope"));
+	DefineKeyCommand(kcInstrumentEnvelopeSwitchToPitch, 1978, _T("Switch to Pitch / Filter Envelope"));
+	DefineKeyCommand(kcInstrumentEnvelopeToggleVolume, 1979, _T("Toggle Volume Envelope"));
+	DefineKeyCommand(kcInstrumentEnvelopeTogglePanning, 1980, _T("Toggle Panning Envelope"));
+	DefineKeyCommand(kcInstrumentEnvelopeTogglePitch, 1981, _T("Toggle Pitch Envelope"));
+	DefineKeyCommand(kcInstrumentEnvelopeToggleFilter, 1982, _T("Toggle Filter Envelope"));
+	DefineKeyCommand(kcInstrumentEnvelopeToggleLoop, 1983, _T("Toggle Envelope Loop"));
+	DefineKeyCommand(kcInstrumentEnvelopeToggleSustain, 1984, _T("Toggle Envelope Sustain Loop"));
+	DefineKeyCommand(kcInstrumentEnvelopeToggleCarry, 1985, _T("Toggle Envelope Carry"));
 
 	// Add new key commands here.
 
