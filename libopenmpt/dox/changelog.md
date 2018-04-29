@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2-beta33
+
 ### libopenmpt 0.2-beta32 (2018-04-29)
 
  *  [**Sec**] Possible write near address 0 in out-of-memory situations when
