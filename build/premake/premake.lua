@@ -46,8 +46,7 @@ newoption {
 --	layout = custom
 --end
 
--- arm64 requires Premake 5.0.0-alpha13
-with_arm64 = false
+with_arm64 = true
 
 if _OPTIONS["win10"] then
 	if _ACTION == "vs2017" then
