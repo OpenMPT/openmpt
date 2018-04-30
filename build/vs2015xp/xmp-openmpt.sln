@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xmp-openmpt", "xmp-openmpt.vcxproj", "{AEA14F53-ADB0-45E5-9823-81F4F36886C2}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vcxproj", "{9C5101EF-3E20-4558-809B-277FDD50E878}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mpg123", "ext\mpg123.vcxproj", "{7ADFAFB9-0A83-4D35-9891-FB24FDF30B53}"
@@ -13,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pugixml", "ext\pugixml.vcxp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbis", "ext\vorbis.vcxproj", "{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xmp-openmpt", "xmp-openmpt.vcxproj", "{AEA14F53-ADB0-45E5-9823-81F4F36886C2}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "ext\zlib.vcxproj", "{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}"
 EndProject
 Global
@@ -21,10 +21,6 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Debug|Win32.ActiveCfg = Debug|Win32
-		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Debug|Win32.Build.0 = Debug|Win32
-		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Release|Win32.ActiveCfg = Release|Win32
-		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Release|Win32.Build.0 = Release|Win32
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.ActiveCfg = Debug|Win32
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Debug|Win32.Build.0 = Debug|Win32
 		{9C5101EF-3E20-4558-809B-277FDD50E878}.Release|Win32.ActiveCfg = Release|Win32
@@ -45,6 +41,10 @@ Global
 		{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}.Debug|Win32.Build.0 = Debug|Win32
 		{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}.Release|Win32.ActiveCfg = Release|Win32
 		{B544DCB7-16E5-41BC-B51B-7EAD8CFDFA05}.Release|Win32.Build.0 = Release|Win32
+		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Debug|Win32.Build.0 = Debug|Win32
+		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Release|Win32.ActiveCfg = Release|Win32
+		{AEA14F53-ADB0-45E5-9823-81F4F36886C2}.Release|Win32.Build.0 = Release|Win32
 		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.ActiveCfg = Debug|Win32
 		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Debug|Win32.Build.0 = Debug|Win32
 		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}.Release|Win32.ActiveCfg = Release|Win32

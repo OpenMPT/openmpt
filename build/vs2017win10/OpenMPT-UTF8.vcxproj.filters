@@ -1516,9 +1516,6 @@
     <None Include="..\..\mptrack\res\nodrag.cur">
       <Filter>mptrack\res</Filter>
     </None>
-    <None Include="..\vs\debug\openmpt.natvis">
-      <Filter>build\vs\debug</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\mptrack\mptrack.rc">
@@ -1556,5 +1553,10 @@
     <Image Include="..\..\mptrack\res\vumeters.bmp">
       <Filter>mptrack\res</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\vs\debug\openmpt.natvis">
+      <Filter>build\vs\debug</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>

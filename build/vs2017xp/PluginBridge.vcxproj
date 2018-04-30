@@ -278,7 +278,7 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -313,7 +313,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-winxp64\$(Targe
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -356,7 +356,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-winxp\$(TargetN
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -399,7 +399,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-winxp64\$(Targe
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -419,6 +419,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-winxp\$(TargetN
       <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <AdditionalOptions>/Zc:threadSafeInit- /Qspectre %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -434,7 +435,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-winxp\$(TargetN
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -454,6 +455,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-winxp64\$(Targe
       <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/Zc:threadSafeInit- /Qspectre %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
@@ -469,7 +471,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-winxp64\$(Targe
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -512,7 +514,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-winxp\$(TargetN
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -555,7 +557,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-winxp64\$(Targe
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -576,6 +578,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-winxp\$(TargetN
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Zc:threadSafeInit- /Qspectre %(AdditionalOptions)</AdditionalOptions>
@@ -591,7 +594,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-winxp\$(TargetN
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -612,6 +615,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-winxp64\$(Targe
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Zc:threadSafeInit- /Qspectre %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -627,7 +631,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-winxp64\$(Targe
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -651,6 +655,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-winxp\$(TargetN
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -669,7 +674,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-winxp\$(TargetN
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -693,6 +698,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-winxp64\$(Targe
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Zc:threadSafeInit- /Qspectre %(AdditionalOptions)</AdditionalOptions>
@@ -711,7 +717,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-winxp64\$(Targe
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>

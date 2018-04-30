@@ -277,7 +277,7 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -312,7 +312,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -355,7 +355,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -398,7 +398,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -418,6 +418,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/Qspectre %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
@@ -432,7 +433,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -452,6 +453,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <AdditionalIncludeDirectories>..\include\vstsdk2.4;..\..\common;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/Qspectre %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
@@ -467,7 +469,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -510,7 +512,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -553,7 +555,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -574,6 +576,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Qspectre %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -588,7 +591,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -609,6 +612,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Qspectre %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -624,7 +628,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -648,6 +652,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -666,7 +671,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
@@ -690,6 +695,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/Qspectre %(AdditionalOptions)</AdditionalOptions>
@@ -708,7 +714,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDPIAwareness>false</EnableDPIAwareness>
     </Manifest>
     <PreBuildEvent>
