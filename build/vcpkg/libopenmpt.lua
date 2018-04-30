@@ -55,7 +55,7 @@ solution "libopenmpt"
 		defines { "DEBUG" }
 		defines { "MPT_BUILD_MSVC_STATIC" }
 		flags { "MultiProcessorCompile" }
-		flags { "StaticRuntime" }
+		staticruntime "On"
 		symbols "On"
 		runtime "Debug"
 		optimize "Debug"
@@ -74,7 +74,7 @@ solution "libopenmpt"
 		defines { "MPT_BUILD_MSVC_STATIC" }
 		symbols "On"
 		flags { "MultiProcessorCompile" }
-		flags { "StaticRuntime" }
+		staticruntime "On"
 		runtime "Release"
 		optimize "Speed"
 		floatingpoint "Fast"

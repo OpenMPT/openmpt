@@ -131,7 +131,7 @@
    defines { "DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
    symbols "On"
-   flags { "StaticRuntime" }
+   staticruntime "On"
 	 runtime "Debug"
    optimize "Debug"
 
@@ -155,7 +155,7 @@
    defines { "MPT_BUILD_MSVC_STATIC" }
    symbols "On"
    flags { "MultiProcessorCompile" }
-   flags { "StaticRuntime" }
+   staticruntime "On"
 	 runtime "Release"
    optimize "Speed"
    floatingpoint "Fast"
@@ -174,7 +174,7 @@
    defines { "MPT_BUILD_MSVC_STATIC" }
    symbols "On"
    flags { "MultiProcessorCompile", "LinkTimeOptimization" }
-   flags { "StaticRuntime" }
+   staticruntime "On"
 	 runtime "Release"
    optimize "Full"
    floatingpoint "Fast"

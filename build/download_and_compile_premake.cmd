@@ -154,35 +154,59 @@ if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
 
 
 
-rem call :download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-src.zip" "premake-5.0-alpha12-src.zip" "premake-5.0.0-alpha12" "-" || goto error
-call :unpack "premake" "premake\premake-5.0.0-alpha12-src.zip" "premake-5.0-alpha12-src.zip" "premake-5.0.0-alpha12" "-" || goto error
+rem call :download_and_unpack "premake" "https://github.com/premake/premake-core/archive/2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6" "-" || goto error
+call :unpack "premake" "premake\premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6" "-" || goto error
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2017.cmd || goto error
+ cd include\premake || goto error
+  nmake -f Bootstrap.mak windows MSDEV=vs2017 || goto error
+  bin\release\premake5 embed || goto error
+  bin\release\premake5 --to=build/vs2017 vs2017 || goto error
+ cd ..\.. || goto error
  cd include\premake\build\vs2017 || goto error
- devenv Premake5.sln /build "Release|Win32" || goto error
+  devenv Premake5.sln /clean "Release|Win32" || goto error
+  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
 if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2017.cmd || goto error
+ cd include\premake || goto error
+  nmake -f Bootstrap.mak windows MSDEV=vs2017 || goto error
+  bin\release\premake5 embed || goto error
+  bin\release\premake5 --to=build/vs2017 vs2017 || goto error
+ cd ..\.. || goto error
  cd include\premake\build\vs2017 || goto error
- devenv Premake5.sln /build "Release|Win32" || goto error
+  devenv Premake5.sln /clean "Release|Win32" || goto error
+  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
+ cd include\premake || goto error
+  nmake -f Bootstrap.mak windows MSDEV=vs2015 || goto error
+  bin\release\premake5 embed || goto error
+  bin\release\premake5 --to=build/vs2015 vs2015 || goto error
+ cd ..\.. || goto error
  cd include\premake\build\vs2015 || goto error
- devenv Premake5.sln /build "Release|Win32" || goto error
+  devenv Premake5.sln /clean "Release|Win32" || goto error
+  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
 if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
+ cd include\premake || goto error
+  nmake -f Bootstrap.mak windows MSDEV=vs2015 || goto error
+  bin\release\premake5 embed || goto error
+  bin\release\premake5 --to=build/vs2015 vs2015 || goto error
+ cd ..\.. || goto error
  cd include\premake\build\vs2015 || goto error
- devenv Premake5.sln /build "Release|Win32" || goto error
+  devenv Premake5.sln /clean "Release|Win32" || goto error
+  devenv Premake5.sln /build "Release|Win32" || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )

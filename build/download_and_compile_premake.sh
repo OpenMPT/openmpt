@@ -63,12 +63,14 @@ cp -ar include/genie/build/vs* build/genie/genie/build/
 
 
 
-download_and_unpack "premake" "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha12/premake-5.0.0-alpha12-src.zip" "premake-5.0-alpha12-src.zip" "premake-5.0.0-alpha12"
+download_and_unpack "premake" "https://github.com/premake/premake-core/archive/2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6"
 
 cd include/premake
 
+make -f Bootstrap.mak linux
+bin/release/premake5 embed
+bin/release/premake5 --to=build/gmake.unix gmake
 cd build/gmake.unix
 make
 cd ../..
-echo "Test suite is broken in premake-5.0.0-alpha12."
-#bin/release/premake5 test
+bin/release/premake5 test
