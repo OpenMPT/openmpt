@@ -254,6 +254,16 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	}
 
 	{
+		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("threads.txt"), std::ios::binary);
+		f.imbue(std::locale::classic());
+		f << mpt::format("current : %1")(mpt::fmt::hex0<8>(GetCurrentThreadId())) << "\r\n";
+		f << mpt::format("GUI     : %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindGUI))) << "\r\n";
+		f << mpt::format("Audio   : %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindAudio))) << "\r\n";
+		f << mpt::format("Notify  : %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindNotify))) << "\r\n";
+		f << mpt::format("WatchDir: %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindWatchdir))) << "\r\n";
+	}
+
+	{
 		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("active-settings.txt"), std::ios::binary);
 		f.imbue(std::locale::classic());
 		if(&theApp.GetSettings())
