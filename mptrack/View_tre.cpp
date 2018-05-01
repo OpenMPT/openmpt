@@ -1929,6 +1929,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 void CModTree::MonitorInstrumentLibrary()
 {
 	mpt::SetCurrentThreadPriority(mpt::ThreadPriorityLowest);
+	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindWatchdir, GetCurrentThreadId());
 	DWORD result;
 	mpt::PathString lastWatchDir;
 	HANDLE hWatchDir = INVALID_HANDLE_VALUE;
