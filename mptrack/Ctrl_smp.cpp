@@ -2037,10 +2037,9 @@ public:
 	ComponentSoundTouch()
 		: ComponentBuiltin()
 	{
-		return;
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentSoundTouch, "SoundTouch")
+MPT_REGISTERED_COMPONENT(ComponentSoundTouch, "")
 
 #else
 
@@ -2052,10 +2051,9 @@ public:
 	ComponentSoundTouch()
 		: ComponentBundledDLL(MPT_PATHSTRING("OpenMPT_SoundTouch_f32"))
 	{
-		return;
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentSoundTouch, "SoundTouch")
+MPT_REGISTERED_COMPONENT(ComponentSoundTouch, "")
 
 #endif
 

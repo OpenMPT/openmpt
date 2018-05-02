@@ -120,7 +120,7 @@ public:
 		}
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentMPG123, "Mpg123")
+MPT_REGISTERED_COMPONENT(ComponentMPG123, "")
 
 #endif // MPT_WITH_MPG123
 
