@@ -73,7 +73,7 @@ static UINT ShowNotificationImpl(const CString &text, const CString &caption, UI
 		parent = CMainFrame::GetActiveWindow();
 	}
 	BypassInputHandler bih;
-	UINT result = ::MessageBox(parent->GetSafeHwnd(), text, caption.IsEmpty() ? MAINFRAME_TITLE : caption, flags);
+	UINT result = ::MessageBox(parent->GetSafeHwnd(), text, caption.IsEmpty() ? CString(MAINFRAME_TITLE) : caption, flags);
 	return result;
 }
 

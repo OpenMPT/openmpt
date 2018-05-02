@@ -74,7 +74,7 @@ void CTuningRatioMapWnd::OnPaint()
 			const bool isValidNote = m_pTuning->IsValidNote(noteToDraw);
 
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
-			DrawButtonRect(hdc, &rect, isValidNote ? mpt::cfmt::val(noteToDraw) : _T("..."), FALSE, FALSE);
+			DrawButtonRect(hdc, &rect, isValidNote ? mpt::cfmt::val(noteToDraw) : CString(_T("...")), FALSE, FALSE);
 
 			// Mapped Note
 			bHighLight = ((bFocus) && (nPos == (int)m_nNote) ) ? TRUE : FALSE;

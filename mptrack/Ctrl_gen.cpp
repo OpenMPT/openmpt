@@ -638,13 +638,13 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPTSTR pszText)
 			_tcscpy(pszText, _T("Click button multiple times to tap in the desired tempo."));
 			return TRUE;
 		case IDC_SLIDER_SAMPLEPREAMP:
-			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nSamplePreAmp, m_sndFile.GetPlayConfig().getNormalSamplePreAmp()) : moreRecentMixModeNote);
+			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nSamplePreAmp, m_sndFile.GetPlayConfig().getNormalSamplePreAmp()).GetString() : moreRecentMixModeNote);
 			return TRUE;
 		case IDC_SLIDER_VSTIVOL:
-			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nVSTiVolume, m_sndFile.GetPlayConfig().getNormalVSTiVol()) : moreRecentMixModeNote);
+			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nVSTiVolume, m_sndFile.GetPlayConfig().getNormalVSTiVol()).GetString() : moreRecentMixModeNote);
 			return TRUE;
 		case IDC_SLIDER_GLOBALVOL:
-			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()) : moreRecentMixModeNote);
+			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()).GetString() : moreRecentMixModeNote);
 			return TRUE;
 		}
 	}

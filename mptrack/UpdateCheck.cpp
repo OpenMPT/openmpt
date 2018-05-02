@@ -65,7 +65,7 @@ public:
 	{
 		m_boldFont.DeleteObject();
 		CDialog::OnClose();
-		TrackerSettings::Instance().UpdateIgnoreVersion = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED ? m_releaseVersion : _T("");
+		TrackerSettings::Instance().UpdateIgnoreVersion = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED ? m_releaseVersion : CString(_T(""));
 	}
 
 	void OnClickURL(NMHDR * /*pNMHDR*/, LRESULT * /*pResult*/)
@@ -136,7 +136,7 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 	settings.msgFailure = MPT_WM_APP_UPDATECHECK_FAILURE;
 	settings.autoUpdate = isAutoUpdate;
 	settings.updateBaseURL = TrackerSettings::Instance().UpdateUpdateURL;
-	settings.guidString = (TrackerSettings::Instance().UpdateSendGUID ? mpt::ToCString(TrackerSettings::Instance().gcsInstallGUID.Get()) : _T("anonymous"));
+	settings.guidString = (TrackerSettings::Instance().UpdateSendGUID ? mpt::ToCString(TrackerSettings::Instance().gcsInstallGUID.Get()) : CString(_T("anonymous")));
 	settings.suggestDifferentBuilds = TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant;
 	mpt::thread(CUpdateCheck::ThreadFunc(settings)).detach();
 }
