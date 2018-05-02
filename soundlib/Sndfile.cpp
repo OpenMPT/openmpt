@@ -1431,18 +1431,18 @@ CTuning* CSoundFile::CreateTuning12TET(const std::string &name)
 	CTuning* pT = CTuning::CreateGeometric(name, 12, 2, 15);
 	for(ModCommand::NOTE note = 0; note < 12; ++note)
 	{
-		pT->SetNoteName(note, NoteNamesSharp[note]);
+		pT->SetNoteName(note, mpt::ToCharset(mpt::CharsetASCII, mpt::ustring(NoteNamesSharp[note])));
 	}
 	return pT;
 }
 
 
-std::string CSoundFile::GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst) const
+mpt::ustring CSoundFile::GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst) const
 {
 	// For MPTM instruments with custom tuning, find the appropriate note name. Else, use default note names.
 	if(ModCommand::IsNote(note) && GetType() == MOD_TYPE_MPT && inst >= 1 && inst <= GetNumInstruments() && Instruments[inst] && Instruments[inst]->pTuning)
 	{
-		return Instruments[inst]->pTuning->GetNoteName(note - NOTE_MIDDLEC);
+		return mpt::ToUnicode(GetCharsetInternal(), Instruments[inst]->pTuning->GetNoteName(note - NOTE_MIDDLEC));
 	} else
 	{
 		return GetNoteName(note);
@@ -1450,30 +1450,30 @@ std::string CSoundFile::GetNoteName(const ModCommand::NOTE note, const INSTRUMEN
 }
 
 
-std::string CSoundFile::GetNoteName(const ModCommand::NOTE note) const
+mpt::ustring CSoundFile::GetNoteName(const ModCommand::NOTE note) const
 {
 	return GetNoteName(note, m_NoteNames);
 }
 
 
-std::string CSoundFile::GetNoteName(const ModCommand::NOTE note, const char (*noteNames)[4])
+mpt::ustring CSoundFile::GetNoteName(const ModCommand::NOTE note, const NoteName *noteNames)
 {
 	if(ModCommand::IsSpecialNote(note))
 	{
-		const char specialNoteNames[][4] = { "PCs",  "PC ", "~~~", "^^^", "===" };
+		const MPT_UCHAR_TYPE specialNoteNames[][4] = { MPT_ULITERAL("PCs"), MPT_ULITERAL("PC "), MPT_ULITERAL("~~~"), MPT_ULITERAL("^^^"), MPT_ULITERAL("===") };
 		STATIC_ASSERT(CountOf(specialNoteNames) == NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1);
 		return specialNoteNames[note - NOTE_MIN_SPECIAL];
 	} else if(ModCommand::IsNote(note))
 	{
-		return std::string()
+		return mpt::ustring()
 			.append(noteNames[(note - NOTE_MIN) % 12])
-			.append(1, '0' + (note - NOTE_MIN) / 12)
+			.append(1, MPT_UCHAR('0') + (note - NOTE_MIN) / 12)
 			;	// e.g. "C#" + "5"
 	} else if(note == NOTE_NONE)
 	{
-		return "...";
+		return MPT_ULITERAL("...");
 	}
-	return "???";
+	return MPT_ULITERAL("???");
 }
 
 

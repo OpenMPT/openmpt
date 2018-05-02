@@ -354,7 +354,7 @@ BOOL CAutotuneDlg::OnInitDialog()
 	m_CbnNoteBox.ResetContent();
 	for(int note = 0; note < 12; note++)
 	{
-		const int item = m_CbnNoteBox.AddString(mpt::ToCString(mpt::CharsetASCII, CSoundFile::m_NoteNames[note]));
+		const int item = m_CbnNoteBox.AddString(mpt::ToCString(CSoundFile::GetDefaultNoteName(note)));
 		m_CbnNoteBox.SetItemData(item, note);
 		if(note == targetNote)
 		{

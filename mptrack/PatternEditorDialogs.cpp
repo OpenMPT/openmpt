@@ -900,7 +900,7 @@ BOOL CChordEditor::OnInitDialog()
 			s = _T("--");
 		} else
 		{
-			s = CSoundFile::m_NoteNames[inotes % 12];
+			s = mpt::ToCString(CSoundFile::GetDefaultNoteName(inotes % 12));
 			if(inotes >= 12)
 				s.AppendFormat(_T(" (+%d)"), inotes / 12);
 		}

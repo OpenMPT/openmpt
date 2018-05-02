@@ -24,16 +24,16 @@ OPENMPT_NAMESPACE_BEGIN
 /////////////////////////////////////////////////////////////////////////////
 // Note Name Tables
 
-const char NoteNamesSharp[12][4] =
+const MPT_UCHAR_TYPE NoteNamesSharp[12][4] =
 {
-	"C-", "C#", "D-", "D#", "E-", "F-",
-	"F#", "G-", "G#", "A-", "A#", "B-"
+	MPT_ULITERAL("C-"), MPT_ULITERAL("C#"), MPT_ULITERAL("D-"), MPT_ULITERAL("D#"), MPT_ULITERAL("E-"), MPT_ULITERAL("F-"),
+	MPT_ULITERAL("F#"), MPT_ULITERAL("G-"), MPT_ULITERAL("G#"), MPT_ULITERAL("A-"), MPT_ULITERAL("A#"), MPT_ULITERAL("B-")
 };
 
-const char NoteNamesFlat[12][4] =
+const MPT_UCHAR_TYPE NoteNamesFlat[12][4] =
 {
-	"C-", "Db", "D-", "Eb", "E-", "F-",
-	"Gb", "G-", "Ab", "A-", "Bb", "B-"
+	MPT_ULITERAL("C-"), MPT_ULITERAL("Db"), MPT_ULITERAL("D-"), MPT_ULITERAL("Eb"), MPT_ULITERAL("E-"), MPT_ULITERAL("F-"),
+	MPT_ULITERAL("Gb"), MPT_ULITERAL("G-"), MPT_ULITERAL("Ab"), MPT_ULITERAL("A-"), MPT_ULITERAL("Bb"), MPT_ULITERAL("B-")
 };
 
 

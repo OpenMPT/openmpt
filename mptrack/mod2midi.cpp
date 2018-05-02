@@ -601,7 +601,7 @@ void CModToMidi::FillProgramBox(bool percussion)
 			ModCommand::NOTE note = i + 24;
 			auto s = mpt::format(CString(_T("%1 (%2): %3")))(
 				note,
-				mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.GetNoteName(note + NOTE_MIN)),
+				mpt::ToCString(m_sndFile.GetNoteName(note + NOTE_MIN)),
 				mpt::ToCString(mpt::CharsetASCII, szMidiPercussionNames[i]));
 			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), note);
 		}

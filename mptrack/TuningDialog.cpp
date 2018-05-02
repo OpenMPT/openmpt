@@ -1712,7 +1712,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 	{
 		for(NOTEINDEXTYPE note = 0; note < mpt::saturate_cast<NOTEINDEXTYPE>(names.size()); ++note)
 		{
-			pT->SetNoteName(note, CSoundFile::GetDefaultNoteNames()[note]);
+			pT->SetNoteName(note, mpt::ToCharset(mpt::CharsetLocale, mpt::ustring(CSoundFile::GetDefaultNoteNames()[note])));
 		}
 	} else
 	{

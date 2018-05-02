@@ -1176,7 +1176,7 @@ void TrackerSettings::LoadChords(MPTChords &chords)
 	for(std::size_t i = 0; i < mpt::size(chords); i++)
 	{
 		uint32 chord;
-		mpt::ustring note = mpt::format(MPT_USTRING("%1%2"))(mpt::ToUnicode(mpt::CharsetASCII, NoteNamesSharp[i % 12]), i / 12);
+		mpt::ustring note = mpt::format(MPT_USTRING("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
 		if((chord = conf.Read<int32>(MPT_USTRING("Chords"), note, -1)) != uint32(-1))
 		{
 			if((chord & 0xFFFFFFC0) || (!chords[i].notes[0]))
@@ -1196,7 +1196,7 @@ void TrackerSettings::SaveChords(MPTChords &chords)
 	for(std::size_t i = 0; i < mpt::size(chords); i++)
 	{
 		int32 s = (chords[i].key) | (chords[i].notes[0] << 6) | (chords[i].notes[1] << 12) | (chords[i].notes[2] << 18);
-		mpt::ustring note = mpt::format(MPT_USTRING("%1%2"))(mpt::ToUnicode(mpt::CharsetASCII, NoteNamesSharp[i % 12]), i / 12);
+		mpt::ustring note = mpt::format(MPT_USTRING("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
 		conf.Write<int32>(MPT_USTRING("Chords"), note, s);
 	}
 }

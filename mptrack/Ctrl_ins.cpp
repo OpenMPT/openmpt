@@ -194,14 +194,14 @@ void CNoteMapWnd::OnPaint()
 		int nNotes = (rcClient.bottom + m_cyFont - 1) / m_cyFont;
 		int nPos = m_nNote - (nNotes/2);
 		int ypaint = 0;
-		std::string s;
+		mpt::winstring s;
 		for (int ynote=0; ynote<nNotes; ynote++, ypaint+=m_cyFont, nPos++)
 		{
 			// Note
 			bool isValidPos = (nPos >= 0) && (nPos < NOTE_MAX - NOTE_MIN + 1);
 			if (isValidPos)
 			{
-				s = sndFile.GetNoteName(static_cast<ModCommand::NOTE>(nPos + 1), m_nInstrument);
+				s = mpt::ToWin(sndFile.GetNoteName(static_cast<ModCommand::NOTE>(nPos + 1), m_nInstrument));
 				s.resize(4);
 			} else
 			{
@@ -213,17 +213,17 @@ void CNoteMapWnd::OnPaint()
 			bool highlight = ((bFocus) && (nPos == (int)m_nNote));
 			rect.left = rect.right;
 			rect.right = m_cxFont*2-1;
-			s = "...";
+			s = _T("...");
 			if (pIns != nullptr && isValidPos && (pIns->NoteMap[nPos] != NOTE_NONE))
 			{
 				ModCommand::NOTE n = pIns->NoteMap[nPos];
 				if(ModCommand::IsNote(n))
 				{
-					s = sndFile.GetNoteName(n, m_nInstrument);
+					s = mpt::ToWin(sndFile.GetNoteName(n, m_nInstrument));
 					s.resize(4);
 				} else
 				{
-					s = "???";
+					s = _T("???");
 				}
 			}
 			FillRect(hdc, &rect, highlight ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
@@ -234,15 +234,15 @@ void CNoteMapWnd::OnPaint()
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor(highlight ? colorTextSel : colorText);
-			dc.DrawText(mpt::ToCString(mpt::CharsetLocale, s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.DrawText(mpt::ToCString(s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 			// Sample
 			highlight = ((bFocus) && (nPos == (int)m_nNote) /*&& (m_bIns)*/);
 			rect.left = rcClient.left + m_cxFont*2+3;
 			rect.right = rcClient.right;
-			s = " ..";
+			s = _T(" ..");
 			if ((pIns) && (nPos >= 0) && (nPos < NOTE_MAX) && (pIns->Keyboard[nPos]))
 			{
-				s = mpt::fmt::dec<3>(pIns->Keyboard[nPos]);
+				s = mpt::tfmt::dec<3>(pIns->Keyboard[nPos]);
 			}
 			FillRect(hdc, &rect, (highlight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
 			if ((nPos == (int)m_nNote) && (m_bIns))
@@ -252,10 +252,10 @@ void CNoteMapWnd::OnPaint()
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor((highlight) ? colorTextSel : colorText);
-			dc.DrawText(mpt::ToCString(mpt::CharsetLocale, s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.DrawText(mpt::ToCString(s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 		}
 		rect.SetRect(rcClient.left+m_cxFont*2-1, rcClient.top, rcClient.left+m_cxFont*2+3, ypaint);
-		DrawButtonRect(hdc, &rect, "", FALSE, FALSE);
+		DrawButtonRect(hdc, &rect, _T(""), FALSE, FALSE);
 		if (ypaint < rcClient.bottom)
 		{
 			rect.SetRect(rcClient.left, ypaint, rcClient.right, rcClient.bottom);
@@ -319,7 +319,6 @@ void CNoteMapWnd::OnLButtonDblClk(UINT, CPoint)
 
 void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 {
-	TCHAR s[64];
 	CInputHandler* ih = CMainFrame::GetInputHandler();
 
 	CSoundFile &sndFile = m_modDoc.GetSoundFile();
@@ -341,25 +340,20 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				{
 					if(sample <= sndFile.GetNumSamples())
 					{
-						wsprintf(s, _T("%u: "), sample);
-						_tcscat(s, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[sample]).GetString());
-						AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE + sample, s);
+						AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE + sample, mpt::cformat(_T("%1: %2"))(sample, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[sample])));
 					}
 				}
 
 				AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hSubMenu), ih->GetKeyTextFromCommand(kcInsNoteMapEditSample, _T("&Edit Sample")));
 				AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
 			}
-			wsprintf(s, _T("Map all notes to &sample %u"), pIns->Keyboard[m_nNote]);
-			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample, s));
+			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample, mpt::cformat(_T("Map all notes to &sample %1"))(pIns->Keyboard[m_nNote])));
 
 			if(sndFile.GetType() != MOD_TYPE_XM)
 			{
 				if(ModCommand::IsNote(pIns->NoteMap[m_nNote]))
 				{
-					_tcscpy(s, _T("Map all &notes to "));
-					_tcscat(s, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument)).GetString());
-					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote, s));
+					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote, mpt::cformat(_T("Map all &notes to %1"))(mpt::ToCString(sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument)))));
 				}
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeUp, _T("Transpose map &up")));
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeDown, _T("Transpose map &down")));

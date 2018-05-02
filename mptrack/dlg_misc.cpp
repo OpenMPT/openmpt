@@ -1172,7 +1172,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 		SAMPLEINDEX nSample = static_cast<SAMPLEINDEX>(m_CbnSample.GetItemData(m_CbnSample.GetCurSel()));
 		uint32 nBaseOctave = m_SbOctave.GetPos() & 7;
 		
-		const CString temp = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetNoteName(static_cast<ModCommand::NOTE>(lParam + 1 + 12 * nBaseOctave), m_nInstrument));
+		const CString temp = mpt::ToCString(sndFile.GetNoteName(static_cast<ModCommand::NOTE>(lParam + 1 + 12 * nBaseOctave), m_nInstrument));
 		if(temp.GetLength() >= CountOf(s))
 			wsprintf(s, _T("%s"), _T("..."));
 		else
@@ -1490,7 +1490,7 @@ void AppendNotesToControl(CComboBox& combobox, ModCommand::NOTE noteStart, ModCo
 {
 	const ModCommand::NOTE upperLimit = std::min(ModCommand::NOTE(NOTE_MAX), noteEnd);
 	for(ModCommand::NOTE note = noteStart; note <= upperLimit; note++)
-		combobox.SetItemData(combobox.AddString(mpt::ToCString(mpt::CharsetLocale, CSoundFile::GetNoteName(note, CSoundFile::GetDefaultNoteNames()))), note);
+		combobox.SetItemData(combobox.AddString(mpt::ToCString(CSoundFile::GetNoteName(note, CSoundFile::GetDefaultNoteNames()))), note);
 }
 
 
@@ -1504,7 +1504,7 @@ void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, INST
 	}
 	for(ModCommand::NOTE note = noteStart; note <= noteEnd; note++)
 	{
-		combobox.SetItemData(combobox.AddString(mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetNoteName(note, nInstr))), note);
+		combobox.SetItemData(combobox.AddString(mpt::ToCString(sndFile.GetNoteName(note, nInstr))), note);
 	}
 	if(addSpecial)
 	{

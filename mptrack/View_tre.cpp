@@ -585,7 +585,7 @@ void CModTree::RefreshMidiLibrary()
 	for (UINT iPerc=24; iPerc<=84; iPerc++)
 	{
 		DWORD dwImage = IMAGE_NOSAMPLE;
-		s = mpt::ToCString(mpt::CharsetASCII, CSoundFile::GetNoteName((ModCommand::NOTE)(iPerc + NOTE_MIN), CSoundFile::GetDefaultNoteNames()))
+		s = mpt::ToCString(CSoundFile::GetNoteName((ModCommand::NOTE)(iPerc + NOTE_MIN), CSoundFile::GetDefaultNoteNames()))
 			+ _T(": ") + mpt::ToCString(mpt::CharsetASCII, szMidiPercussionNames[iPerc - 24]);
 		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
 		if(!midiLib.MidiMap[iPerc | 0x80].empty())
@@ -676,15 +676,15 @@ void CModTree::RefreshDlsBanks()
 								if (keymin >= keymax)
 								{
 									wsprintf(szName, _T("%s%u: %s"),
-										mpt::ToCString(mpt::CharsetLocale, CSoundFile::m_NoteNames[keymin % 12]).GetString(),
+										mpt::ToCString(CSoundFile::GetDefaultNoteName(keymin % 12)).GetString(),
 										keymin / 12,
 										mpt::ToCString(charset, regionName).GetString());
 								} else
 								{
 									wsprintf(szName, _T("%s%u-%s%u: %s"),
-										mpt::ToCString(mpt::CharsetLocale, CSoundFile::m_NoteNames[keymin % 12]).GetString(),
+										mpt::ToCString(CSoundFile::GetDefaultNoteName(keymin % 12)).GetString(),
 										keymin / 12,
-										mpt::ToCString(mpt::CharsetLocale, CSoundFile::m_NoteNames[keymax % 12]).GetString(),
+										mpt::ToCString(CSoundFile::GetDefaultNoteName(keymax % 12)).GetString(),
 										keymax / 12,
 										mpt::ToCString(charset, regionName).GetString());
 								}

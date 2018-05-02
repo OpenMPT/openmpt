@@ -1967,7 +1967,7 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 			CString noteName;
 			if(ModCommand::IsNote(note))
 			{
-				noteName = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetNoteName(note, m_nInstrument));
+				noteName = mpt::ToCString(sndFile.GetNoteName(note, m_nInstrument));
 			}
 			pMainFrm->SetInfoText(noteName);
 		}
@@ -2161,7 +2161,7 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM midiData, LPARAM)
 		uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
 		if(event == MIDIEvents::evNoteOn)
 		{
-			CMainFrame::GetMainFrame()->SetInfoText(mpt::ToCString(modDoc->GetSoundFile().GetCharsetInternal(), modDoc->GetSoundFile().GetNoteName(midiByte1 + NOTE_MIN, m_nInstrument)));
+			CMainFrame::GetMainFrame()->SetInfoText(mpt::ToCString(modDoc->GetSoundFile().GetNoteName(midiByte1 + NOTE_MIN, m_nInstrument)));
 		}
 
 		return 1;

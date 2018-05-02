@@ -483,11 +483,11 @@ EndSearch:
 		// Note
 		if(FindReplace::instance.findFlags[FindReplace::Note])
 		{
-			result += sndFile.GetNoteName(FindReplace::instance.findNoteMin).c_str();
+			result += mpt::ToCString(sndFile.GetNoteName(FindReplace::instance.findNoteMin));
 			if(FindReplace::instance.findNoteMax > FindReplace::instance.findNoteMin)
 			{
 				result.AppendChar(_T('-'));
-				result += sndFile.GetNoteName(FindReplace::instance.findNoteMax).c_str();
+				result += mpt::ToCString(sndFile.GetNoteName(FindReplace::instance.findNoteMax));
 			}
 		} else
 		{

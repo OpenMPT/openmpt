@@ -286,7 +286,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 					{
 						s.Format(szSplitFormat,
 							nSplitIns,
-							mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.GetNoteName(noteSplit, nSplitIns)).GetString(),
+							mpt::ToCString(m_sndFile.GetNoteName(noteSplit, nSplitIns)).GetString(),
 							i,
 							sSplitInsName.GetString(),
 							m_modDoc.GetPatternViewInstrumentName(i, true, false).GetString());
@@ -308,7 +308,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 					if (m_modDoc.GetSplitKeyboardSettings().IsSplitActive())
 						s.Format(szSplitFormat,
 							nSplitIns,
-							mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.GetNoteName(noteSplit, nSplitIns)).GetString(),
+							mpt::ToCString(m_sndFile.GetNoteName(noteSplit, nSplitIns)).GetString(),
 							i,
 							mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[nSplitIns]).GetString(),
 							mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[i]).GetString());

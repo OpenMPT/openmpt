@@ -270,6 +270,7 @@ public:
 public:
 	void DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnable, bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint);
 	void DrawLetter(int x, int y, char letter, int sizex=10, int ofsx=0);
+	void DrawLetter(int x, int y, wchar_t letter, int sizex=10, int ofsx=0);
 	void DrawNote(int x, int y, UINT note, CTuning* pTuning = NULL);
 	void DrawInstrument(int x, int y, UINT instr);
 	void DrawVolumeCommand(int x, int y, const ModCommand &mc, bool drawDefaultVolume);

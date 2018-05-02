@@ -331,6 +331,11 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 	m_Dib.TextBlt(x, y, sizex, pfnt->spacingY, srcx+ofsx, srcy, pfnt->dib);
 }
 
+void CViewPattern::DrawLetter(int x, int y, wchar_t letter, int sizex, int ofsx)
+{
+	DrawLetter(x, y, static_cast<char>(letter), sizex, ofsx);
+}
+
 
 static MPT_FORCEINLINE void DrawPadding(CFastBitmap &dib, const PATTERNFONT *pfnt, int x, int y, int col)
 {
@@ -1605,7 +1610,7 @@ CString CViewPattern::GetCursorDescription() const
 		if(m->IsSpecialNote())
 			s = szSpecialNoteShortDesc[m->note - NOTE_MIN_SPECIAL];
 		else if(m->IsNote())
-			s = sndFile.GetNoteName(m->note, m->instr).c_str();
+			s = mpt::ToCString(sndFile.GetNoteName(m->note, m->instr));
 		break;
 
 	case PatternCursor::instrColumn:

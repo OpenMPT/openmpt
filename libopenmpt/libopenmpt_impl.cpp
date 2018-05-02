@@ -1390,7 +1390,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	switch ( cmd ) {
 		case module::command_note:
 			return std::make_pair(
-					( cell.IsNote() || cell.IsSpecialNote() ) ? m_sndFile->GetNoteName( cell.note, cell.instr ) : std::string("...")
+					( cell.IsNote() || cell.IsSpecialNote() ) ? mpt::ToCharset( mpt::CharsetUTF8, m_sndFile->GetNoteName( cell.note, cell.instr ) ) : std::string("...")
 				,
 					( cell.IsNote() ) ? std::string("nnn") : cell.IsSpecialNote() ? std::string("mmm") : std::string("...")
 				);
@@ -1459,7 +1459,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	const ModCommand & cell = *pattern.GetpModCommand( static_cast<ROWINDEX>( r ), static_cast<CHANNELINDEX>( c ) );
 	text.clear();
 	high.clear();
-	text += ( cell.IsNote() || cell.IsSpecialNote() ) ? m_sndFile->GetNoteName( cell.note, cell.instr ) : std::string("...");
+	text += ( cell.IsNote() || cell.IsSpecialNote() ) ? mpt::ToCharset( mpt::CharsetUTF8, m_sndFile->GetNoteName( cell.note, cell.instr ) ) : std::string("...");
 	high += ( cell.IsNote() ) ? std::string("nnn") : cell.IsSpecialNote() ? std::string("mmm") : std::string("...");
 	if ( ( width == 0 ) || ( width >= 6 ) ) {
 		text += std::string(" ");
