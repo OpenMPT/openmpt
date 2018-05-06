@@ -271,6 +271,9 @@ inline void MemsetZero(T &a)
 
 namespace mpt {
 
+#if (MPT_CXX >= 20)
+using std::bit_cast;
+#else
 // C++2a compatible bit_cast.
 // See <http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0476r1.html>.
 // Not implementing constexpr because this is not easily possible pre C++2a.
@@ -285,19 +288,28 @@ MPT_FORCEINLINE Tdst bit_cast(const Tsrc & src) noexcept
 	MPT_STATIC_ASSERT(std::is_trivially_copyable<Tdst>::value);
 	MPT_STATIC_ASSERT(std::is_trivially_copyable<Tsrc>::value);
 #endif
-	#if MPT_COMPILER_UNION_TYPE_ALIASES
+	#if MPT_COMPILER_GCC || MPT_COMPILER_MSVC
+		// Compiler supports type-punning through unions. This is not stricly standard-conforming.
+		// For GCC, this is documented, for MSVC this is apparently not documented, but we assume it.
 		union {
 			Tsrc src;
 			Tdst dst;
 		} conv;
 		conv.src = src;
 		return conv.dst;
-	#else // !MPT_COMPILER_UNION_TYPE_ALIASES
+	#else // MPT_COMPILER
+		// Compiler does not support type-punning through unions. std::memcpy is used instead.
+		// This is the safe fallback and strictly standard-conforming.
+		// Another standard-compliant alternative would be casting pointers to a character type pointer.
+		// This results in rather unreadable code and,
+		// in most cases, compilers generate better code by just inlining the memcpy anyway.
+		// (see <http://blog.regehr.org/archives/959>).
 		Tdst dst{};
 		std::memcpy(&dst, &src, sizeof(Tdst));
 		return dst;
-	#endif // MPT_COMPILER_UNION_TYPE_ALIASES
+	#endif // MPT_COMPILER
 }
+#endif
 
 } // namespace mpt
 
