@@ -30,10 +30,14 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.08.00 (* April 2018, revision 10156)
-------------------------------------------
+v1.27.08.00 (* May 2018, revision 10201)
+----------------------------------------
 Instrument tab
-   [Fix] SFZ: Assume UTF-8 encoding for region names.
+   [Imp] <js> New shortcuts: Switch to Volume / Panning / Pitch / Filter Envelope, Toggle Volume / Panning / Pitch / Filter Envelope, Toggle Envelope Loop, Toggle Envelope Sustain Loop, Toggle Envelope Carry.
+   [Fix] <js> SFZ: Assume UTF-8 encoding for region names.
+
+Tree view
+   [Imp] <js> Select next item after deleting a file to prevent scrolling back to top on Wine.
 
 VST::Plugin Bridge
    [Fix] <js> Sending or receiving SysEx messages resulted in a crash.
@@ -43,8 +47,12 @@ Playback
 
 Other formats
    [Fix] <js> AMS: Possible crash during load in low memory situations.
+   [Fix] <js> FAR: Properly import volume commands
    [Fix] <js> STM: Having both Bxx and Cxx commands in a pattern imported the Bxx command incorrectly (fixes ilu.stm).
    [Fix] <js> ULT: Portamento import was sometimes broken.
+
+Third-Party Libraries
+   [Mod] Update UnRAR (v5.6.3)
 
 
 v1.27.07.00 (8 April 2018, revision 10044)
