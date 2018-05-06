@@ -1664,7 +1664,14 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 			fos.wFunc = FO_DELETE;
 			fos.pFrom = fullPath.c_str();
 			fos.fFlags = CMainFrame::GetInputHandler()->ShiftPressed() ? 0 : FOF_ALLOWUNDO;
-			if ((0 == SHFileOperation(&fos)) && (!fos.fAnyOperationsAborted)) RefreshInstrumentLibrary();
+			if(!SHFileOperation(&fos) && !fos.fAnyOperationsAborted)
+			{
+				HTREEITEM newSel = GetNextSiblingItem(hItem);
+				if(!newSel) newSel = GetPrevSiblingItem(hItem);
+				SelectItem(newSel);
+				RefreshInstrumentLibrary();
+				SetFocus();
+			}
 		}
 		break;
 	}
