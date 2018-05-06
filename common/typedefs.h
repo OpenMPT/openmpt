@@ -342,7 +342,11 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 
 
 // Compile time assert.
+#if (MPT_CXX >= 17)
+#define MPT_STATIC_ASSERT static_assert
+#else
 #define MPT_STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
+#endif
 
 
 
