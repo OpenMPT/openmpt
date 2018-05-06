@@ -434,7 +434,7 @@ const wchar* GetCmdParam(const wchar *CmdLine,wchar *Param,size_t MaxSize)
 }
 
 
-#ifndef SILENT
+#ifndef RARDLL
 // For compatibility with existing translations we use %s to print Unicode
 // strings in format strings and convert them to %ls here. %s could work
 // without such conversion in Windows, but not in Unix wprintf.

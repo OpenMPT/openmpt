@@ -395,8 +395,12 @@ class Unpack:PackDef
     uint GetChar()
     {
       if (Inp.InAddr>BitInput::MAX_SIZE-30)
+      {
         UnpReadBuf();
-      return(Inp.InBuf[Inp.InAddr++]);
+        if (Inp.InAddr>=BitInput::MAX_SIZE) // If nothing was read.
+          return 0;
+      }
+      return Inp.InBuf[Inp.InAddr++];
     }
 };
 
