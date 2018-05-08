@@ -38,67 +38,64 @@ void CPatternGotoDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN2, m_SpinChannel);
 	DDX_Control(pDX, IDC_SPIN3, m_SpinPattern);
 	DDX_Control(pDX, IDC_SPIN4, m_SpinOrder);
-
-	UINT temp;
-	temp = m_nRow; DDX_Text(pDX, IDC_GOTO_ROW, temp); m_nRow = static_cast<ROWINDEX>(temp);
-	temp = m_nChannel; DDX_Text(pDX, IDC_GOTO_CHAN, temp); m_nChannel = static_cast<CHANNELINDEX>(temp);
-	temp = m_nPattern; DDX_Text(pDX, IDC_GOTO_PAT, temp); m_nPattern = static_cast<PATTERNINDEX>(temp);
-	temp = m_nOrder; DDX_Text(pDX, IDC_GOTO_ORD, temp); m_nOrder = static_cast<ORDERINDEX>(temp);
 }
 
 
 BEGIN_MESSAGE_MAP(CPatternGotoDialog, CDialog)
-	ON_EN_CHANGE(IDC_GOTO_PAT, &CPatternGotoDialog::OnEnChangeGotoPat)
-	ON_EN_CHANGE(IDC_GOTO_ORD, &CPatternGotoDialog::OnEnChangeGotoOrd)
+	ON_EN_CHANGE(IDC_GOTO_PAT, &CPatternGotoDialog::OnPatternChanged)
+	ON_EN_CHANGE(IDC_GOTO_ORD, &CPatternGotoDialog::OnOrderChanged)
 END_MESSAGE_MAP()
 
 
 BOOL CPatternGotoDialog::OnInitDialog()
 {
+	CDialog::OnInitDialog();
 	m_SpinRow.SetRange32(0, MAX_PATTERN_ROWS - 1);
 	m_SpinChannel.SetRange32(1, MAX_BASECHANNELS);
 	m_SpinPattern.SetRange32(0, std::max(m_SndFile.Patterns.GetNumPatterns(), PATTERNINDEX(1)) - 1);
 	m_SpinOrder.SetRange32(0, std::max(m_SndFile.Order().GetLengthTailTrimmed(), ORDERINDEX(1)) - 1);
+	SetDlgItemInt(IDC_GOTO_ROW, m_nRow);
+	SetDlgItemInt(IDC_GOTO_CHAN, m_nChannel);
+	SetDlgItemInt(IDC_GOTO_PAT, m_nPattern);
+	SetDlgItemInt(IDC_GOTO_ORD, m_nOrder);
 	return TRUE;
 }
 
 void CPatternGotoDialog::OnOK()
 {
-	UpdateData();
 	const auto &Order = m_SndFile.Order();
+	m_nRow = mpt::saturate_cast<ROWINDEX>(GetDlgItemInt(IDC_GOTO_ROW));
+	m_nChannel = mpt::saturate_cast<CHANNELINDEX>(GetDlgItemInt(IDC_GOTO_CHAN));
 
-	bool validated = true;
 	// Valid order item?
 	if(m_nOrder >= Order.size())
-		validated = false;
-	// Does order match pattern?
-	else if(Order[m_nOrder] != m_nPattern)
-		validated = false;
-	// Does pattern exist?
-	if(!Order.IsValidPat(m_nOrder))
-		validated = false;
-	// Does pattern have enough rows?
-	else if(m_SndFile.Patterns[m_nPattern].GetNumRows() <= m_nRow)
-		validated = false;
-	
+	{
+		MessageBeep(MB_ICONWARNING);
+		GetDlgItem(IDC_GOTO_ORD)->SetFocus();
+		return;
+	}
+	// Does order match pattern? Does pattern exist?
+	if(Order[m_nOrder] != m_nPattern || !Order.IsValidPat(m_nOrder))
+	{
+		MessageBeep(MB_ICONWARNING);
+		GetDlgItem(IDC_GOTO_PAT)->SetFocus();
+		return;
+	}
+
+	LimitMax(m_nRow, m_SndFile.Patterns[m_nPattern].GetNumRows() - ROWINDEX(1));
 	Limit(m_nChannel, CHANNELINDEX(1), m_SndFile.GetNumChannels());
 
-	if(validated)
-		CDialog::OnOK();
-	else
-		CDialog::OnCancel();
-
-
+	CDialog::OnOK();
 }
 
-void CPatternGotoDialog::OnEnChangeGotoPat()
+void CPatternGotoDialog::OnPatternChanged()
 {
 	if(ControlsLocked())
 	{
 		return;	// The change to textbox did not come from user.
 	}
-		
-	UpdateData();
+
+	m_nPattern = mpt::saturate_cast<PATTERNINDEX>(GetDlgItemInt(IDC_GOTO_PAT));
 	m_nOrder = m_SndFile.Order().FindOrder(m_nPattern, m_nActiveOrder);
 
 	if(m_nOrder == ORDERINDEX_INVALID)
@@ -107,27 +104,26 @@ void CPatternGotoDialog::OnEnChangeGotoPat()
 	}
 
 	LockControls();
-	UpdateData(FALSE);
+	SetDlgItemInt(IDC_GOTO_ORD, m_nOrder);
 	UnlockControls();
 }
 
 
-void CPatternGotoDialog::OnEnChangeGotoOrd()
+void CPatternGotoDialog::OnOrderChanged()
 {
 	if(ControlsLocked())
 	{
 		return;	//the change to textbox did not come from user.
 	}
 
-	UpdateData();
-
+	m_nOrder = mpt::saturate_cast<ORDERINDEX>(GetDlgItemInt(IDC_GOTO_ORD));
 	if(m_SndFile.Order().IsValidPat(m_nOrder))
 	{
 		m_nPattern = m_SndFile.Order()[m_nOrder];
 	}
 
 	LockControls();
-	UpdateData(FALSE);
+	SetDlgItemInt(IDC_GOTO_PAT, m_nPattern);
 	UnlockControls();
 }
 

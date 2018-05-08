@@ -39,8 +39,9 @@ protected:
 
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	virtual void OnOK();
-	afx_msg void OnEnChangeGotoPat();
-	afx_msg void OnEnChangeGotoOrd();
+
+	afx_msg void OnPatternChanged();
+	afx_msg void OnOrderChanged();
 
 	DECLARE_MESSAGE_MAP()
 };
