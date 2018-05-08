@@ -446,7 +446,11 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 	} else if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtMP3)
 	{
 		// MP3 in WAV
-		return ReadMP3Sample(nSample, sampleChunk, true) || ReadMediaFoundationSample(nSample, sampleChunk, true);
+		bool loadedMP3 = ReadMP3Sample(nSample, sampleChunk, true) || ReadMediaFoundationSample(nSample, sampleChunk, true);
+		if(!loadedMP3)
+		{
+			return false;
+		}
 	} else if(!wavFile.IsExtensibleFormat() && wavFile.MayBeCoolEdit16_8() && wavFile.GetSampleFormat() == WAVFormatChunk::fmtPCM && wavFile.GetBitsPerSample() == 32 && wavFile.GetBlockAlign() == wavFile.GetNumChannels() * 4)
 	{
 		// Syntrillium Cool Edit hack to store IEEE 32bit floating point
