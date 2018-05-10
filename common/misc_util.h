@@ -633,33 +633,40 @@ inline Tdst saturate_cast(Tsrc src)
 		MPT_CONSTANT_IF(sizeof(Tdst) >= sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(src);
+		} else
+		{
+			return static_cast<Tdst>(std::max<Tsrc>(static_cast<Tsrc>(std::numeric_limits<Tdst>::min()), std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
 		}
-		return static_cast<Tdst>(std::max<Tsrc>(static_cast<Tsrc>(std::numeric_limits<Tdst>::min()), std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
 	} else MPT_CONSTANT_IF(!std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
 	{
 		MPT_CONSTANT_IF(sizeof(Tdst) >= sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(src);
+		} else
+		{
+			return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
 		}
-		return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
 	} else MPT_CONSTANT_IF(std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
 	{
 		MPT_CONSTANT_IF(sizeof(Tdst) > sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(src);
-		}
-		MPT_CONSTANT_IF(sizeof(Tdst) == sizeof(Tsrc))
+		} else MPT_CONSTANT_IF(sizeof(Tdst) == sizeof(Tsrc))
+		{
+			return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
+		} else
 		{
 			return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
 		}
-		return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
 	} else // Tdst unsigned, Tsrc signed
 	{
 		MPT_CONSTANT_IF(sizeof(Tdst) >= sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(std::max<Tsrc>(0, src));
+		} else
+		{
+			return static_cast<Tdst>(std::max<Tsrc>(0, std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
 		}
-		return static_cast<Tdst>(std::max<Tsrc>(0, std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
 	}
 }
 
