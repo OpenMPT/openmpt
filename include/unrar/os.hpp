@@ -70,7 +70,7 @@ struct IUnknown; // OPENMPT ADDITION
   #include <direct.h>
   #include <intrin.h>
 
-  #if !defined(__clang__) // OPENMPT ADDITION
+  #if (defined(_M_IX86) || defined(_M_X64)) && !defined(__clang__) // OPENMPT ADDITION
   #define USE_SSE
   #define SSE_ALIGNMENT 16
   #endif // OPENMPT ADDITION

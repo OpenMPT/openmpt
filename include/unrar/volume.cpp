@@ -212,6 +212,7 @@ bool DllVolChange(RAROptions *Cmd,wchar *NextName,size_t NameSize)
   {
     char NextNameA[NM];
     WideToChar(NextName,NextNameA,ASIZE(NextNameA));
+    /*	// OPENMPT ADDITION
     // Here we preserve ESP value. It is necessary for those developers,
     // who still define ChangeVolProc callback as "C" type function,
     // even though in year 2001 we announced in unrar.dll whatsnew.txt
@@ -223,8 +224,10 @@ bool DllVolChange(RAROptions *Cmd,wchar *NextName,size_t NameSize)
 #elif defined(_WIN_ALL) && defined(__BORLANDC__)
     _EBX=_ESP;
 #endif
+    */	// OPENMPT ADDITION
     int RetCode=Cmd->ChangeVolProc(NextNameA,RAR_VOL_ASK);
 
+    /*	// OPENMPT ADDITION
     // Restore ESP after ChangeVolProc with wrongly defined calling
     // convention broken it.
 #if defined(_MSC_VER)
@@ -234,6 +237,7 @@ bool DllVolChange(RAROptions *Cmd,wchar *NextName,size_t NameSize)
 #elif defined(_WIN_ALL) && defined(__BORLANDC__)
     _ESP=_EBX;
 #endif
+    */	// OPENMPT ADDITION
     if (RetCode==0)
       DllVolAborted=true;
     else
