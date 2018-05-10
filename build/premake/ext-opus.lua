@@ -40,17 +40,21 @@
   files {
    "../../include/opus/celt/*.c",
    "../../include/opus/celt/*.h",
-   "../../include/opus/celt/x86/*.c",
-   "../../include/opus/celt/x86/*.h",
    "../../include/opus/silk/*.c",
    "../../include/opus/silk/*.h",
    "../../include/opus/silk/float/*.c",
    "../../include/opus/silk/float/*.h",
-   "../../include/opus/silk/x86/*.c",
-   "../../include/opus/silk/x86/*.h",
    "../../include/opus/src/*.c",
    "../../include/opus/src/*.h",
   }
+	filter { "architecture:x86 or x86_64" }
+	files {
+		"../../include/opus/celt/x86/*.c",
+		"../../include/opus/celt/x86/*.h",
+		"../../include/opus/silk/x86/*.c",
+		"../../include/opus/silk/x86/*.h",
+	}
+	filter {}
   excludes {
    "../../include/opus/celt/opus_custom_demo.c",
    "../../include/opus/src/opus_compare.c",
