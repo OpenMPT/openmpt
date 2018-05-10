@@ -52,13 +52,15 @@ if _OPTIONS["win10"] then
 	if _ACTION == "vs2017" then
 		if with_arm64 then
 			allplatforms = { "x86", "x86_64", "arm", "arm64" }
+			trkplatforms = { "x86", "x86_64", "arm", "arm64" }
 		else
 			allplatforms = { "x86", "x86_64", "arm" }
+			trkplatforms = { "x86", "x86_64", "arm" }
 		end
 	else
 		allplatforms = { "x86", "x86_64" }
+		trkplatforms = { "x86", "x86_64" }
 	end
-	trkplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = _ACTION .. "win10"
 	mpt_bindirsuffix = "win10"
 	mpt_bindirsuffix32 = "win10"

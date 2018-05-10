@@ -8,7 +8,10 @@
 
 #if defined(_MSC_VER)
 
+#pragma comment(lib, "advapi32.lib")
+#pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "rpcrt4.lib")
+#pragma comment(lib, "shell32.lib")
 #pragma comment(lib, "shlwapi.lib")
 
 #pragma comment(lib, "strmiids.lib")

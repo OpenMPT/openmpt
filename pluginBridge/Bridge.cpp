@@ -27,6 +27,12 @@
 #include <tchar.h>
 #include <algorithm>
 
+#if defined(MPT_BUILD_MSVC)
+#pragma comment(lib, "comdlg32.lib")
+#pragma comment(lib, "ole32.lib")
+#pragma comment(lib, "shell32.lib")
+#endif
+
 
 #ifdef _DEBUG
 #include <intrin.h>
