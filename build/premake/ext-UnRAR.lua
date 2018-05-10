@@ -141,6 +141,7 @@
    "../../include/unrar/volume.hpp",
   }
   filter { "action:vs*" }
+    links { "advapi32", "shell32" }
     buildoptions { "/wd4996" }
   filter {}
   filter { "kind:SharedLib" }

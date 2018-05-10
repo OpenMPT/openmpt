@@ -24,3 +24,6 @@
 	links {
 		"dsound",
 	}
+  filter { "action:vs*" }
+    links { "ole32" }
+  filter { }
