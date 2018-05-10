@@ -128,13 +128,19 @@ std::unique_ptr<T> make_unique(Args&&... args)
 
 
 
+#if MPT_CXX_AT_LEAST(17)
+#define MPT_CONSTANT_IF if constexpr
+#endif
+
 #if MPT_COMPILER_MSVC
+#if !defined(MPT_CONSTANT_IF)
 #define MPT_CONSTANT_IF(x) \
   __pragma(warning(push)) \
   __pragma(warning(disable:4127)) \
   if(x) \
   __pragma(warning(pop)) \
 /**/
+#endif
 #define MPT_MAYBE_CONSTANT_IF(x) \
   __pragma(warning(push)) \
   __pragma(warning(disable:4127)) \
