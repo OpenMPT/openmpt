@@ -122,6 +122,38 @@ public:
 };
 MPT_REGISTERED_COMPONENT(ComponentMPG123, "")
 
+static mpt::ustring ReadMPG123String(const mpg123_string &str)
+{
+	mpt::ustring result;
+	if(!str.p)
+	{
+		return result;
+	}
+	if(str.fill < 1)
+	{
+		return result;
+	}
+	result = mpt::ToUnicode(mpt::CharsetUTF8, std::string(str.p, str.p + str.fill - 1));
+	return result;
+}
+
+static mpt::ustring ReadMPG123String(const mpg123_string *str)
+{
+	mpt::ustring result;
+	if(!str)
+	{
+		return result;
+	}
+	result = ReadMPG123String(*str);
+	return result;
+}
+
+template <std::size_t N>
+static mpt::ustring ReadMPG123String(const char (&str)[N])
+{
+	return mpt::ToUnicode(mpt::CharsetISO8859_1, mpt::String::ReadBuf(mpt::String::spacePadded, str));
+}
+
 #endif // MPT_WITH_MPG123
 
 
@@ -495,10 +527,35 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 		}
 	}
 
+	FileTags tags;
+	mpg123_id3v1 *id3v1 = nullptr;
+	mpg123_id3v2 *id3v2 = nullptr;
+	if(mpg123_id3(mh, &id3v1, &id3v2) == MPG123_OK)
+	{
+		if(id3v2)
+		{
+			if(tags.title.empty())    tags.title    = ReadMPG123String(id3v2->title);
+			if(tags.artist.empty())   tags.artist   = ReadMPG123String(id3v2->artist);
+			if(tags.album.empty())    tags.album    = ReadMPG123String(id3v2->album);
+			if(tags.year.empty())     tags.year     = ReadMPG123String(id3v2->year);
+			if(tags.genre.empty())    tags.genre    = ReadMPG123String(id3v2->genre);
+			if(tags.comments.empty()) tags.comments = ReadMPG123String(id3v2->comment);
+		}
+		if(id3v1)
+		{
+			if(tags.title.empty())    tags.title    = ReadMPG123String(id3v1->title);
+			if(tags.artist.empty())   tags.artist   = ReadMPG123String(id3v1->artist);
+			if(tags.album.empty())    tags.album    = ReadMPG123String(id3v1->album);
+			if(tags.year.empty())     tags.year     = ReadMPG123String(id3v1->year);
+			if(tags.comments.empty()) tags.comments = ReadMPG123String(id3v1->comment);
+		}
+	}
+	mpt::ustring sampleName = GetSampleNameFromTags(tags);
+
 	DestroySampleThreadsafe(sample);
 	if(!mo3Decode)
 	{
-		strcpy(m_szNames[sample], "");
+		mpt::String::Copy(m_szNames[sample], mpt::ToCharset(GetCharsetInternal(), sampleName));
 		Samples[sample].Initialize();
 		Samples[sample].nC5Speed = rate;
 	}
