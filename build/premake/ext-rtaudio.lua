@@ -24,6 +24,6 @@
 	links {
 		"dsound",
 	}
-  filter { "action:vs*" }
+  filter { "action:vs*", "architecture:ARM or architecture:ARM64" }
     links { "ole32" }
   filter { }

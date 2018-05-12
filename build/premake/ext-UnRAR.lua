@@ -140,7 +140,7 @@
    "../../include/unrar/version.hpp",
    "../../include/unrar/volume.hpp",
   }
-  filter { "action:vs*" }
+  filter { "action:vs*", "architecture:ARM or architecture:ARM64" }
     links { "advapi32", "shell32" }
     buildoptions { "/wd4996" }
   filter {}
