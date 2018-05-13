@@ -494,6 +494,7 @@ public:
 	const dsp_preset & get_item(t_size p_index) const {return m_data.get_item(p_index);}
 	void get_data(dsp_chain_config & p_data) const;
 	void set_data(const dsp_chain_config & p_data);
+	dsp_chain_config_impl & _data() {return m_data; }
 private:
 	dsp_chain_config_impl m_data;
 };

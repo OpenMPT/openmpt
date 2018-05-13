@@ -1,3 +1,5 @@
+#pragma once
+
 //! Implemented by file object returned by http_request::run methods. Allows you to retrieve various additional information returned by the server. \n
 //! Warning: reply status may change when seeking on the file object since seek operations often require a new HTTP request to be fired.
 class NOVTABLE http_reply : public service_base {

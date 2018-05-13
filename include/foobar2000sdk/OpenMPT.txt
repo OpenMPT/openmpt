@@ -1,1 +1,1 @@
-This directory contains the contents of the foobar2000 SDK 1.4 Beta. (SDK-2018-02-05.zip).
+This directory contains the contents of the foobar2000 SDK 1.4 Beta. (SDK-2018-03-06.zip).

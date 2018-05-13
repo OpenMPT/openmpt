@@ -5,6 +5,7 @@
 //! Entrypoint service for user interface modules. Implement when registering an UI module. Do not call existing implementations; only core enumerates / dispatches calls. To control UI behaviors from other components, use ui_control API. \n
 //! Use user_interface_factory_t<> to register, e.g static user_interface_factory_t<myclass> g_myclass_factory;
 class NOVTABLE user_interface : public service_base {
+	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(user_interface);
 public:
 	//!HookProc usage: \n
 	//! in your windowproc, call HookProc first, and if it returns true, return LRESULT value it passed to you
@@ -34,12 +35,28 @@ public:
 	virtual void show_now_playing() = 0;
 
 	static bool g_find(service_ptr_t<user_interface> & p_out,const GUID & p_guid);
-
-	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(user_interface);
 };
 
 template<typename T>
 class user_interface_factory : public service_factory_single_t<T> {};
+
+//! \since 1.4
+//! Extended version to allow explicit control over certain app features.
+class NOVTABLE user_interface_v2 : public user_interface {
+	FB2K_MAKE_SERVICE_INTERFACE( user_interface_v2, user_interface );
+public:
+	//! Allows the core to ask the UI module about a specific feature.
+	virtual bool query_capability( const GUID & cap ) = 0;
+
+	//! Suppress core's shellhook window for intercepting systemwide WM_APPCOMMAND? \n
+	//! Recommended: false - return true only if your UI does this on its own.
+	static const GUID cap_suppress_core_shellhook;
+	//! Suppress coer's integration with with Win10 Universal Volume Control? \n
+	//! Recommended: false - return true only if your UI is explicitly incompatbile with Win10 UVC. \n
+	//! Note that cap_suppress_core_shellhook is queried first, as core can't use UVC if this UI does global WM_APPCOMMAND handling on its own. \n
+	//! Returning true from cap_suppress_core_shellhook implies the same from cap_suppress_core_uvc.
+	static const GUID cap_suppress_core_uvc;
+};
 
 //! Interface class allowing you to override UI statusbar text. There may be multiple callers trying to override statusbar text; backend decides which one succeeds so you will not always get what you want. Statusbar text override is automatically cancelled when the object is released.\n
 //! Use ui_control::override_status_text_create() to instantiate.

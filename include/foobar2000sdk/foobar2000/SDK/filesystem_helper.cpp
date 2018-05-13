@@ -182,21 +182,15 @@ bool fb2kFileSelfTest(file::ptr f, abort_callback & aborter) {
 }
 
 
-
-namespace {
-    class listDirectoryCallback : public directory_callback {
-    public:
-        bool on_entry(filesystem * p_owner,abort_callback & p_abort,const char * p_url,bool p_is_subdirectory,const t_filestats & p_stats) {
-            m_func( p_url, p_stats, p_is_subdirectory );
-            return true;
-        }
-        listDirectoryFunc_t m_func;
-    };
-
-}
 namespace foobar2000_io {
+	void retryOnSharingViolation(double timeout, abort_callback & a, std::function<void() > f) {
+		FB2K_RETRY_ON_SHARING_VIOLATION(f(), a, timeout);
+	}
+	void retryOnSharingViolation(std::function<void() > f, double timeout, abort_callback & a) {
+		FB2K_RETRY_ON_SHARING_VIOLATION( f(), a, timeout );
+	}
     void listDirectory( const char * path, abort_callback & aborter, listDirectoryFunc_t func) {
-        listDirectoryCallback cb; cb.m_func = func;
+		listDirectoryCallbackImpl cb; cb.m_func = func;
         filesystem::g_list_directory(path, cb, aborter);
     }
 

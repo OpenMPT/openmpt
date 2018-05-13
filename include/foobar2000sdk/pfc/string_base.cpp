@@ -98,6 +98,15 @@ string_filename::string_filename(const char * fn)
 	else set_string(fn);
 }
 
+const char * filename_ext_v2(const char * fn, char slash) {
+	if (slash == 0) {
+		slash = pfc::io::path::getDefaultSeparator();
+	}
+	size_t split = pfc::string_find_last(fn, slash);
+	if (split == pfc_infinite) return fn;
+	return fn + split + 1;
+}
+
 string_filename_ext::string_filename_ext(const char * fn)
 {
 	fn += pfc::scan_filename(fn);

@@ -516,6 +516,7 @@
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\file_operation_callback.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\filesystem.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\filesystem_helper.h" />
+    <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\filesystem_transacted.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\foobar2000-dsp.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\foobar2000-pfc.h" />
     <ClInclude Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\foobar2000-winver.h" />
@@ -582,6 +583,7 @@
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\commandline.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\completion_notify.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\componentversion.cpp" />
+    <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\config_io_callback.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\config_object.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\console.cpp" />
     <ClCompile Include="..\..\..\include\foobar2000sdk\foobar2000\SDK\dsp.cpp" />

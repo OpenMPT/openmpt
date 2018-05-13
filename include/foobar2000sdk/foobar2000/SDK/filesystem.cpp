@@ -1,6 +1,5 @@
 #include "foobar2000.h"
 
-
 // For reasons unknown, MS linker will not throw these global constants out if the code using them is not referenced
 // To verify, flip the #if and search your DLL for "unpack://"
 // Using #defines instead fixes it
@@ -491,11 +490,8 @@ bool filesystem::g_is_empty_directory(const char * path,abort_callback & p_abort
 
 bool filesystem::g_is_valid_directory(const char * path,abort_callback & p_abort) {
 	if ( path == NULL || path[0] == 0 ) return false;
-	try {
-        directory_callback_dummy cb;
-		g_list_directory(path,cb,p_abort);
-		return true;
-	} catch(exception_io const &) {return false;}
+
+	return get(path)->directory_exists( path, p_abort );
 }
 
 bool directory_callback_impl::on_entry(filesystem * owner,abort_callback & p_abort,const char * url,bool is_subdirectory,const t_filestats & p_stats) {
@@ -561,6 +557,26 @@ namespace {
 		pfc::string8_fastalloc m_target;
 		filesystem::ptr m_fs;
 	};
+}
+
+file::ptr filesystem::openEx(const char * path, filesystem::t_open_mode mode, abort_callback & abort, double timeout) {
+	file::ptr f;
+	retryOnSharingViolation([&] {
+		this->open(f, path, mode, abort);
+	}, timeout, abort);
+	return f;
+}
+
+file::ptr filesystem::openRead(const char * path, abort_callback & abort, double timeout) {
+	return this->openEx(path, open_mode_read, abort, timeout);
+}
+
+file::ptr filesystem::openWriteExisting(const char * path, abort_callback & abort, double timeout) {
+	return this->openEx(path, open_mode_write_existing, abort, timeout);
+}
+
+file::ptr filesystem::openWriteNew(const char * path, abort_callback & abort, double timeout) {
+	return this->openEx( path, open_mode_write_new, abort, timeout );
 }
 
 void filesystem::copy_directory(const char * src, const char * dst, abort_callback & p_abort) {
@@ -840,6 +856,8 @@ PFC_NORETURN void foobar2000_io::exception_io_from_win32(DWORD p_code) {
 	case ERROR_BAD_NETPATH:
 		// known to be inflicted by momentary net connectivity issues - NOT the same as exception_io_not_found
 		throw exception_io("Network path not found");
+	case ERROR_TRANSACTIONAL_OPEN_NOT_ALLOWED:
+		throw exception_io_transactions_unsupported();
 	default:
 		throw exception_io_win32_ex(p_code);
 	}
@@ -1161,3 +1179,280 @@ void foobar2000_io::substituteProtocol(pfc::string_base & out, const char * full
     }
 }
 
+void filesystem::move_overwrite(const char * src, const char * dst, abort_callback & abort) {
+	{
+		filesystem_v2::ptr v2;
+		if (v2 &= this) {
+			v2->move_overwrite(src, dst, abort); return;
+		}
+	}
+	try {
+		this->remove(dst, abort);
+	} catch (exception_io_not_found) {}
+	this->move(src, dst, abort);
+}
+
+void filesystem::replace_file(const char * src, const char * dst, abort_callback & abort) {
+	filesystem_v2::ptr v2;
+	if ( v2 &= this ) {
+		v2->replace_file(  src, dst, abort ); return;
+	}
+	move_overwrite( src, dst, abort );
+}
+
+void filesystem::make_directory(const char * path, abort_callback & abort, bool * didCreate) {
+	filesystem_v2::ptr v2;
+	if ( v2 &= this ) {
+		v2->make_directory( path, abort, didCreate );
+		return;
+	}
+	bool rv = false;
+	try {
+		create_directory( path, abort );
+		rv = true;
+	} catch(exception_io_already_exists) {
+	}
+	if (didCreate != nullptr) * didCreate = rv;
+}
+
+bool filesystem::make_directory_check(const char * path, abort_callback & abort) {
+	bool rv = false;
+	make_directory(path, abort, &rv);
+	return rv;
+}
+
+bool filesystem::directory_exists(const char * path, abort_callback & abort) {
+	filesystem_v2::ptr v2;
+	if ( v2 &= this ) {
+		return v2->directory_exists( path, abort );
+	}
+	try {
+		directory_callback_dummy cb;
+		list_directory(path, cb, abort);
+		return true;
+	} catch (exception_io const &) { return false; }
+}
+bool filesystem::file_exists(const char * path, abort_callback & abort) {
+	filesystem_v2::ptr v2;
+	if ( v2 &= this ) {
+		return v2->file_exists( path, abort );
+	}
+	try {
+		t_filestats stats; bool writable;
+		get_stats(path, stats, writable, abort );
+		return true;
+	} catch(exception_io) { return false; }
+}
+
+char filesystem::pathSeparator() {
+	filesystem_v2::ptr v2;
+	if ( v2 &= this ) return v2->pathSeparator();
+	return '/';
+}
+
+void filesystem::extract_filename_ext(const char * path, pfc::string_base & outFN) {
+	filesystem_v2::ptr v2;
+	if ( v2 &= this ) {
+		v2->extract_filename_ext( path, outFN );
+		return;
+	}
+	outFN = pfc::filename_ext_v2( path );
+}
+
+bool filesystem::get_parent_helper( const char * path, char separator, pfc::string_base & out ) {
+	auto proto = path;
+	path = afterProtocol(path);
+
+	auto sep_ptr = strrchr( path, separator );
+	if ( sep_ptr == path ) return false;
+	if ( sep_ptr >= path + 1 && sep_ptr[-1] == separator ) return false;
+	
+	out.set_string(proto, path - proto);
+	out.add_string(path, sep_ptr - path);
+	return true;
+}
+
+bool filesystem::get_parent_path(const char * path, pfc::string_base & out) {
+	filesystem_v2::ptr v2;
+	if ( v2 &= this ) {
+		return v2->get_parent_path(path, out);
+	}
+	return get_parent_helper( path, '/', out );
+}
+
+void filesystem::read_whole_file(const char * path, mem_block_container & out, pfc::string_base & outContentType, size_t maxBytes, abort_callback & abort) {
+	filesystem_v2::ptr v2;
+	if ( v2 &= this ) {
+		v2->read_whole_file( path, out, outContentType, maxBytes, abort );
+		return;
+	}
+	read_whole_file_fallback(path, out, outContentType, maxBytes, abort);
+}
+
+void filesystem::read_whole_file_fallback(const char * path, mem_block_container & out, pfc::string_base & outContentType, size_t maxBytes, abort_callback & abort) {
+	auto f = this->openRead( path, abort, 0 );
+	if (!f->get_content_type(outContentType)) outContentType = "";
+	auto s64 = f->get_size( abort );
+	if ( s64 == filesize_invalid ) {
+		// unknown length, perform streamed read
+		size_t done = 0, alloc = 0;
+
+		while(alloc < maxBytes ) {
+			if ( alloc == 0 ) alloc = 4096;
+			else {
+				size_t next = alloc * 2;
+				if ( next <= alloc ) throw exception_io_data();
+				alloc = next;
+			}
+			if ( alloc > maxBytes ) alloc = maxBytes;
+			
+			out.set_size( alloc );
+			size_t delta = alloc - done;
+			size_t deltaGot = f->read( (uint8_t*) out.get_ptr() + done, delta, abort );
+			PFC_ASSERT( deltaGot <= delta );
+			done += deltaGot;
+			if ( deltaGot != delta ) {
+				out.set_size( done ); return;
+			}
+		}
+		// maxbytes reached
+		PFC_ASSERT( done == maxBytes );
+		// corner case check
+		if ( f->skip(1, abort) != 0 ) throw exception_io_data();
+	} else if ( s64 > maxBytes ) {
+		throw exception_io_data();
+	} else {
+		size_t s = (size_t) s64;
+		out.set_size( s );
+		if (s > 0) f->read_object( out.get_ptr(), s, abort);
+	}
+}
+
+bool filesystem::is_transacted() {
+	filesystem_transacted::ptr p;
+	return ( p &= this );
+}
+
+void filesystem::rewrite_file(const char * path, abort_callback & abort, double opTimeout, std::function<void(file::ptr) > worker) {
+	if ( this->is_transacted() ) {
+		auto f = this->openWriteNew( path, abort, opTimeout );
+		worker(f);
+	} else {
+		pfc::string_formatter temp(path); temp << ".temp";
+		try {
+			{
+				auto f = this->openWriteNew( temp, abort, opTimeout );
+				worker(f);
+			}
+
+			retryOnSharingViolation(opTimeout, abort, [&] {
+				this->replace_file(temp, path, abort);
+			});
+
+		} catch(...) {
+			try {
+				abort_callback_dummy noAbort;
+				retryOnSharingViolation(opTimeout, abort, [&] { this->remove(temp, noAbort); } );
+			} catch(...) {}
+			throw;
+		}
+	}
+}
+
+void filesystem::rewrite_directory(const char * path, abort_callback & abort, double opTimeout, std::function<void(const char *) > worker) {
+	if ( this->is_transacted() ) {
+		// so simple
+		if ( ! this->make_directory_check( path, abort)  ) {
+			retryOnSharingViolation(opTimeout, abort, [&] { this->remove_directory_content(path, abort); });
+		}
+		worker( path );
+	} else {
+		// so complex
+		pfc::string8 fnNew( path ); fnNew += ".new";
+		pfc::string8 fnOld( path ); fnOld += ".old";
+
+		if ( !this->make_directory_check( fnNew, abort ) ) {
+			// folder.new folder already existed? clear contents
+			try {
+				retryOnSharingViolation(opTimeout, abort, [&] { this->remove_directory_content(fnNew, abort); });
+			} catch(exception_io_not_found) {}
+		}
+
+		// write to folder.new
+		worker( fnNew );
+
+		bool haveOld = false;
+		if ( directory_exists( path, abort ) ) {
+			// move folder to folder.old
+			if (this->directory_exists(fnOld, abort)) {
+				try {
+					retryOnSharingViolation(opTimeout, abort, [&] { this->remove_object_recur(fnOld, abort); });
+				} catch (exception_io_not_found) {}
+			}
+			try {
+				retryOnSharingViolation(opTimeout, abort, [&] { this->move( path, fnOld, abort ); } ) ;
+				haveOld = true;
+			} catch(exception_io_not_found) {}
+		}
+
+		// move folder.new to folder
+		retryOnSharingViolation( opTimeout, abort, [&] {
+			this->move( fnNew, path, abort );
+		} );
+
+		if ( haveOld ) {
+			// delete folder.old if we made one
+			try {
+				retryOnSharingViolation( opTimeout, abort, [&] { this->remove_object_recur( fnOld, abort); } );
+			} catch (exception_io_not_found) {}
+		}
+	}
+}
+
+void filesystem_v2::list_directory(const char * p_path, directory_callback & p_out, abort_callback & p_abort) {
+	list_directory_ex(p_path, p_out, listMode::filesAndFolders | listMode::hidden, p_abort);
+}
+
+void filesystem_v2::extract_filename_ext(const char * path, pfc::string_base & outFN) {
+	outFN = pfc::filename_ext_v2(path, this->pathSeparator() );
+}
+
+bool filesystem_v2::get_parent_path(const char * path, pfc::string_base & out) {
+	return get_parent_helper(path, pathSeparator(), out);
+}
+
+void filesystem_v2::replace_file(const char * src, const char * dst, abort_callback & abort) {
+	this->move_overwrite( src, dst, abort );
+}
+
+void filesystem_v2::read_whole_file(const char * path, mem_block_container & out, pfc::string_base & outContentType, size_t maxBytes, abort_callback & abort) {
+	read_whole_file_fallback( path, out, outContentType, maxBytes, abort );
+}
+
+bool filesystem_v2::make_directory_check(const char * path, abort_callback & abort) {
+	bool rv = false;
+	make_directory(path, abort, &rv);
+	return rv;
+}
+
+
+filesystem_transacted::ptr filesystem_transacted::create( const char * pathFor ) {
+	service_enum_t<filesystem_transacted_entry> e;
+	filesystem_transacted_entry::ptr p;
+	while(e.next(p)) {
+		if ( p->is_our_path( pathFor ) ) {
+			auto ret = p->create();
+			if (ret.is_valid()) return ret;
+		}
+	}
+	return nullptr;
+}
+
+bool filesystem::commit_if_transacted(abort_callback &abort) {
+	bool rv = false;
+	filesystem_transacted::ptr t;
+	if ( t &= this ) {
+		t->commit( abort ); rv = true;
+	}
+	return rv;
+}

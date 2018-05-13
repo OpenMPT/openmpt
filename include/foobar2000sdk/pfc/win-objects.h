@@ -147,6 +147,7 @@ public:
 	static bool g_wait_for(HANDLE p_event,double p_timeout_seconds);
 
 	void set_state(bool p_state);
+	bool is_set() { return wait_for(0); }
 
     // Two-wait event functions, return 0 on timeout, 1 on evt1 set, 2 on evt2 set
     static int g_twoEventWait( win32_event & ev1, win32_event & ev2, double timeout );

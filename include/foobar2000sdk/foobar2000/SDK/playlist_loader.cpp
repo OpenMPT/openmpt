@@ -157,40 +157,70 @@ static void track_indexer__g_get_tracks_wrap(const char * p_path,const service_p
 }
 
 namespace {
+
+	static bool queryAddHidden() {
+		// {2F9F4956-363F-4045-9531-603B1BF39BA8}
+		static const GUID guid_cfg_addhidden =
+		{ 0x2f9f4956, 0x363f, 0x4045,{ 0x95, 0x31, 0x60, 0x3b, 0x1b, 0xf3, 0x9b, 0xa8 } };
+
+		advconfig_entry_checkbox::ptr ptr;
+		if (advconfig_entry::g_find_t(ptr, guid_cfg_addhidden)) {
+			return ptr->get_state();
+		}
+		return false;
+	}
+
 	// SPECIAL HACK
 	// filesystem service does not present file hidden attrib but we want to weed files/folders out
 	// so check separately on all native paths (inefficient but meh)
-	class directory_callback_impl2 : public directory_callback_impl
+	class directory_callback_myimpl : public directory_callback
 	{
 	public:
+		directory_callback_myimpl() : m_addHidden(queryAddHidden()) {}
+
 		bool on_entry(filesystem * owner,abort_callback & p_abort,const char * url,bool is_subdirectory,const t_filestats & p_stats) {
 			p_abort.check();
 
-			if (!m_addHidden) {
-				const char * n = url;
-				if (_extract_native_path_ptr(n)) {
-					DWORD att = uGetFileAttributes(n);
-					if (att == ~0 || (att & FILE_ATTRIBUTE_HIDDEN) != 0) return true;
+			filesystem_v2::ptr v2;
+			v2 &= owner;
+
+			if ( is_subdirectory ) {
+				if (v2.is_valid()) {
+					v2->list_directory_ex(url, *this, flags(), p_abort);
+				} else {
+					owner->list_directory(url, *this, p_abort );
 				}
+			} else {
+				// In fb2k 1.4 the default filesystem is v2 and performs hidden file checks
+#if FOOBAR2000_TARGET_VERSION < 79
+				if ( ! m_addHidden && v2.is_empty() ) {
+					const char * n = url;
+					if (_extract_native_path_ptr(n)) {
+						DWORD att = uGetFileAttributes(n);
+						if (att == ~0 || (att & FILE_ATTRIBUTE_HIDDEN) != 0) return true;
+					}
+				}
+#endif
+				auto i = m_entries.insert_last();
+				i->m_path = url;
+				i->m_stats = p_stats;
 			}
-
-			return directory_callback_impl::on_entry(owner, p_abort, url, is_subdirectory, p_stats);
+			return true;
 		}
 
-		directory_callback_impl2(bool p_recur) : directory_callback_impl(p_recur), m_addHidden(queryAddHidden()) {}
-	private:
-		static bool queryAddHidden() {
-			// {2F9F4956-363F-4045-9531-603B1BF39BA8}
-			static const GUID guid_cfg_addhidden =  
-			{ 0x2f9f4956, 0x363f, 0x4045, { 0x95, 0x31, 0x60, 0x3b, 0x1b, 0xf3, 0x9b, 0xa8 } };
-
-			advconfig_entry_checkbox::ptr ptr;
-			if (advconfig_entry::g_find_t(ptr, guid_cfg_addhidden)) {
-				return ptr->get_state();
-			}
-			return false;
+		uint32_t flags() const {
+			uint32_t flags = listMode::filesAndFolders;
+			if (m_addHidden) flags |= listMode::hidden;
+			return flags;
 		}
+
 		const bool m_addHidden;
+		struct entry_t {
+			pfc::string8 m_path;
+			t_filestats m_stats;
+		};
+		pfc::chain_list_v2_t<entry_t> m_entries;
+
 	};
 }
 
@@ -206,11 +236,14 @@ static void process_path_internal(const char * p_path,const service_ptr_t<file> 
 	
 	{
 		if (p_reader.is_empty() && type != playlist_loader_callback::entry_directory_enumerated) {
-			directory_callback_impl2 directory_results(true);
 			try {
-				filesystem::g_list_directory(p_path,directory_results,abort);
-				for(t_size n=0;n<directory_results.get_count();n++) {
-					process_path_internal(directory_results.get_item(n),0,callback,abort,playlist_loader_callback::entry_directory_enumerated,directory_results.get_item_stats(n));
+				directory_callback_myimpl results;
+				auto fs = filesystem::get(p_path);
+				filesystem_v2::ptr v2;
+				if ( v2 &= fs ) v2->list_directory_ex(p_path, results, results.flags(), abort );
+				else fs->list_directory(p_path, results, abort);
+				for( auto i = results.m_entries.first(); i.is_valid(); ++i ) {
+					process_path_internal(i->m_path, 0, callback, abort, playlist_loader_callback::entry_directory_enumerated, i->m_stats );
 				}
 				return;
 			} catch(exception_aborted) {throw;}

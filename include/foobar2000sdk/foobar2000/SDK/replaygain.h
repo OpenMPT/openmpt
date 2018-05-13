@@ -72,3 +72,18 @@ public:
 
 	FB2K_MAKE_SERVICE_COREAPI(replaygain_manager);
 };
+
+//! \since 1.4
+class NOVTABLE replaygain_core_settings_notify {
+public:
+	virtual void on_changed( t_replaygain_config const & cfg ) = 0;
+};
+
+//! \since 1.4
+//! Adds new method for getting notified about core RG settings changing
+class NOVTABLE replaygain_manager_v2 : public replaygain_manager {
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION( replaygain_manager_v2, replaygain_manager );
+public:
+	virtual void add_notify(replaygain_core_settings_notify *) = 0;
+	virtual void remove_notify(replaygain_core_settings_notify *) = 0;
+};

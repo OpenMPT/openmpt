@@ -11,6 +11,11 @@ public:
 	//! @param reset If set to true, our configuration is being reset, so you should wipe your files rather than rewrite them with current configuration.
 	virtual void on_write(bool reset) = 0;
 
+	static void g_read();
+	static void g_write(bool bReset = false);
+	static void g_reset() { g_write(true); }
+	static void g_quicksave();
+
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(config_io_callback);
 };
 
@@ -21,3 +26,17 @@ public:
 	//! Implement optionally. Called to quickly flush recent configuration changes. If your instance of config_io_callback needs to perform timeconsuming tasks when saving, you should skip implementing this method entirely.
 	virtual void on_quicksave() = 0;
 };
+
+//! \since 1.4
+class NOVTABLE config_io_callback_v3 : public config_io_callback_v2 {
+	FB2K_MAKE_SERVICE_INTERFACE(config_io_callback_v3, config_io_callback_v2);
+public:
+	void on_quicksave();
+	void on_write(bool bReset);
+	virtual void on_reset_v3( filesystem::ptr fs ) = 0;
+	virtual void on_write_v3( filesystem::ptr fs ) = 0;
+	virtual void on_quicksave_v3( filesystem::ptr fs ) = 0;
+};
+
+// For internal use in fb2k core
+#define FB2K_PROFILE_CONFIG_READS_WRITES 0

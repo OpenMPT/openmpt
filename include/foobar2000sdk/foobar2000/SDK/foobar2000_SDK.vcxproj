@@ -123,6 +123,7 @@
     <ClInclude Include="dsp_manager.h" />
     <ClInclude Include="event_logger.h" />
     <ClInclude Include="exceptions.h" />
+    <ClInclude Include="filesystem_transacted.h" />
     <ClInclude Include="file_format_sanitizer.h" />
     <ClInclude Include="file_info.h" />
     <ClInclude Include="file_info_impl.h" />
@@ -195,6 +196,7 @@
     <ClCompile Include="commandline.cpp" />
     <ClCompile Include="completion_notify.cpp" />
     <ClCompile Include="componentversion.cpp" />
+    <ClCompile Include="config_io_callback.cpp" />
     <ClCompile Include="config_object.cpp" />
     <ClCompile Include="console.cpp">
     </ClCompile>

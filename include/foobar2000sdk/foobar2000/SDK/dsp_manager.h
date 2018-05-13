@@ -79,6 +79,19 @@ public:
 	bool core_query_dsp(const GUID & id, dsp_preset & out);
 };
 
+//! \since 1.4
+//! Allows manipulation of DSP presets saved by user. \n
+//! Note that there's no multi thread safety implemented, all methods are valid from main thread only.
+class dsp_config_manager_v2 : public dsp_config_manager {
+	FB2K_MAKE_SERVICE_COREAPI_EXTENSION(dsp_config_manager_v2, dsp_config_manager)
+public:
+	virtual size_t get_preset_count() = 0;
+	virtual void get_preset_name( size_t index, pfc::string_base & out ) = 0;
+	virtual void get_preset_data( size_t index, dsp_chain_config & out ) = 0;
+	virtual void select_preset( size_t which ) = 0;
+	virtual size_t get_selected_preset() = 0;
+};
+
 //! Callback class for getting notified about core playback DSP settings getting altered. \n
 //! Register your implementations with static service_factory_single_t<myclass> g_myclass_factory;
 class NOVTABLE dsp_config_callback : public service_base {

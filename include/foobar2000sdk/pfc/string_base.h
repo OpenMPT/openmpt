@@ -515,6 +515,7 @@ namespace pfc {
 		explicit string_extension(const char * src);
 	};
 
+	const char * filename_ext_v2(const char * fn, char slash = 0);
 
 	class string_replace_extension
 	{

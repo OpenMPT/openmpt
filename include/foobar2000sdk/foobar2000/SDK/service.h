@@ -394,6 +394,10 @@ public:
 
 	typedef service_base t_interface;
 	enum { _is_core_api = false };
+
+	static bool serviceRequiresMainThreadDestructor() { return false; }
+
+	service_base * as_service_base() { return this; }
 protected:
 	service_base() {}
 	~service_base() {}
@@ -413,7 +417,6 @@ protected:
 		typename class_t::t_interface * in2 = in;
 		return service_query_walk( out, guid, in2 );
 	}
-
 private:
 	service_base(const service_base&) = delete;
 	const service_base & operator=(const service_base&) = delete;

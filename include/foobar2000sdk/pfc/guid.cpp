@@ -174,3 +174,23 @@ void print_hex_raw(const void * buffer,unsigned bytes,char * p_out)
 
 const GUID pfc::guid_null = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } };
 
+
+namespace pfc {
+	format_guid_cpp::format_guid_cpp(const GUID & guid) {
+		*this << "{0x" << pfc::format_hex(guid.Data1,8) << ", 0x" << pfc::format_hex(guid.Data2, 4) << ", 0x" << pfc::format_hex(guid.Data3,4) << ", {0x" << pfc::format_hex(guid.Data4[0],2);
+		for(int n = 1; n < 8; ++n) {
+			*this << ", 0x" << pfc::format_hex(guid.Data4[n],2);
+		}
+		*this << "}}";
+	}
+
+	uint64_t halveGUID(const GUID & id) {
+		static_assert(sizeof(id) == 2 * sizeof(uint64_t), "sanity" );
+		union {
+			GUID g;
+			uint64_t u[2];
+		} u;
+		u.g = id;
+		return u.u[0] ^ u.u[1];
+	}
+}

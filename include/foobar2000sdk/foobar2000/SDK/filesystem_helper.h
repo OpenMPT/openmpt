@@ -7,6 +7,21 @@ namespace foobar2000_io {
     void listDirectory( const char * path, abort_callback & aborter, listDirectoryFunc_t func);
 
 	pfc::string8 stripParentFolders( const char * inPath );
+
+	void retryOnSharingViolation( std::function<void () > f, double timeout, abort_callback & a);
+	void retryOnSharingViolation( double timeout, abort_callback & a, std::function<void() > f);
+
+	class listDirectoryCallbackImpl : public directory_callback {
+	public:
+		listDirectoryCallbackImpl() {}
+		listDirectoryCallbackImpl( listDirectoryFunc_t f ) : m_func(f) {}
+		bool on_entry(filesystem * p_owner, abort_callback & p_abort, const char * p_url, bool p_is_subdirectory, const t_filestats & p_stats) {
+			m_func(p_url, p_stats, p_is_subdirectory);
+			return true;
+		}
+		listDirectoryFunc_t m_func;
+	};
+
 }
 
 

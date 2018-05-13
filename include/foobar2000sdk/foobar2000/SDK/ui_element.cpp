@@ -171,3 +171,22 @@ ui_element_min_max_info ui_element_instance::get_min_max_info() {
 	if (temp.ptMaxTrackSize.y > 0) ret.m_max_height = temp.ptMaxTrackSize.y;
 	return ret;
 }
+
+
+namespace {
+	class ui_element_replace_dialog_notify_impl : public ui_element_replace_dialog_notify {
+	public:
+		void on_cancelled() {
+			reply(pfc::guid_null);
+		}
+		void on_ok(const GUID & guid) {
+			reply(guid);
+		}
+		std::function<void(GUID)> reply;
+	};
+}
+ui_element_replace_dialog_notify::ptr ui_element_replace_dialog_notify::create(std::function<void(GUID)> reply) {
+	auto obj = fb2k::service_new<ui_element_replace_dialog_notify_impl>();
+	obj->reply = reply;
+	return obj;
+}

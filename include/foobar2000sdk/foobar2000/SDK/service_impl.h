@@ -7,6 +7,12 @@
 
 #include <utility>
 
+namespace service_impl_helper {
+	//! Helper function to defer destruction of a service object. 
+	//! Enqueues a main_thread_callback to release the object at a later time, escaping the current scope.
+    void release_object_delayed(service_ptr obj);
+};
+
 //! Multi inheritance helper. \n
 //! Please note that use of multi inheritance is not recommended. Most components will never need this. \n
 //! This class handles multi inherited service_query() for you. \n
@@ -19,6 +25,13 @@ public:
 	static bool handle_service_query(service_ptr & out, const GUID & guid, self_t * in) {
 		return service_base::handle_service_query(out, guid, (class1_t*) in) || service_base::handle_service_query(out, guid, (class2_t*) in);
 	}
+
+	service_base * as_service_base() { return class1_t::as_service_base(); }
+
+	// Obscure service_base methods from both so calling myclass->service_query() works like it should
+	virtual int service_release() throw() = 0;
+	virtual int service_add_ref() throw() = 0;
+	virtual bool service_query(service_ptr & p_out, const GUID & p_guid) = 0;
 };
 
 //! Template implementing service_query walking the inheritance chain. \n
@@ -44,7 +57,11 @@ public:
 	int service_release() throw() {
 		int ret = (int) --m_counter;
 		if (ret == 0) {
-			PFC_ASSERT_NO_EXCEPTION( delete this );
+            if (!this->serviceRequiresMainThreadDestructor() || core_api::is_main_thread()) {
+				PFC_ASSERT_NO_EXCEPTION( delete this );
+            } else {
+                service_impl_helper::release_object_delayed(this->as_service_base());
+            }
 		}
 		return ret;
 	}
@@ -87,13 +104,6 @@ public:
 	int service_add_ref() throw() {return 1;}
 
 	template<typename ... arg_t> service_impl_single_t(arg_t && ... arg) : base_t(std::forward<arg_t>(arg) ...) {}
-};
-
-
-namespace service_impl_helper {
-	//! Helper function to defer destruction of a service object. 
-	//! Enqueues a main_thread_callback to release the object at a later time, escaping the current scope.
-	void release_object_delayed(service_ptr obj);
 };
 
 namespace fb2k {

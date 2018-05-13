@@ -1,3 +1,5 @@
+#pragma once
+
 struct hasher_md5_state {
 	char m_data[128];
 };
@@ -7,6 +9,7 @@ struct hasher_md5_result {
 
 	t_uint64 xorHalve() const;
 	GUID asGUID() const;
+	pfc::string8 asString() const;
 
 	static hasher_md5_result null() {hasher_md5_result h = {}; return h;}
 };

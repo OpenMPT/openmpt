@@ -1,4 +1,6 @@
+#pragma once
 class file_info;
+class mem_block_container;
 
 //! Contains various I/O related structures and interfaces.
 
@@ -65,7 +67,8 @@ namespace foobar2000_io
 	PFC_DECLARE_EXCEPTION( exception_io_net, exception_io, "Connection error");
 	//! A network connectivity error, specifically a DNS query failure
 	PFC_DECLARE_EXCEPTION( exception_io_dns, exception_io_net, "DNS error");
-
+	//! The path does not point to a directory.
+	PFC_DECLARE_EXCEPTION(exception_io_not_directory, exception_io, "Not a directory");
 
 	//! Stores file stats (size and timestamp).
 	struct t_filestats {
@@ -388,13 +391,16 @@ namespace foobar2000_io
 		FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(filesystem);
 	public:
 		//! Enumeration specifying how to open a file. See: filesystem::open(), filesystem::g_open().
-		enum t_open_mode {
+		typedef uint32_t t_open_mode;
+		enum {
 			//! Opens an existing file for reading; if the file does not exist, the operation will fail.
 			open_mode_read,
 			//! Opens an existing file for writing; if the file does not exist, the operation will fail.
 			open_mode_write_existing,
 			//! Opens a new file for writing; if the file exists, its contents will be wiped.
 			open_mode_write_new,
+
+			open_mode_mask = 0xFF,
 		};
 
 		virtual bool get_canonical_path(const char * p_path,pfc::string_base & p_out)=0;
@@ -486,6 +492,82 @@ namespace foobar2000_io
 
 		// Presumes both source and destination belong to this filesystem.
 		void copy_directory(const char * p_src, const char * p_dst, abort_callback & p_abort);
+
+		//! Move file overwriting an existing one. Regular move() will fail if the file exists.
+		void move_overwrite( const char * src, const char * dst, abort_callback & abort);
+		//! See win32 ReplaceFile(). Same as move_overwrite() for other filesystems.
+		void replace_file(const char * src, const char * dst, abort_callback & abort);
+		//! Create a directory, without throwing an exception if it already exists.
+		//! @param didCreate bool flag indicating whether a new directory was created or not. \n
+		//! This should be a retval, but because it's messy to obtain this information with certain APIs, the caller can opt out of receiving this information,.
+		void make_directory( const char * path, abort_callback & abort, bool * didCreate = nullptr );
+		//! Bool retval version of make_directory().
+		bool make_directory_check( const char * path, abort_callback & abort );
+
+		bool directory_exists(const char * path, abort_callback & abort);
+		bool file_exists( const char * path, abort_callback & abort );
+		char pathSeparator();
+		//! Extracts the filename.ext portion of the path. \n
+		//! The filename is ready to be presented to the user - URL decoding and such (similar to get_display_path()) is applied.
+		void extract_filename_ext(const char * path, pfc::string_base & outFN);
+		//! Retrieves the parent path.
+		bool get_parent_path(const char * path, pfc::string_base & out);
+
+		file::ptr openWriteNew( const char * path, abort_callback & abort, double timeout );
+		file::ptr openWriteExisting(const char * path, abort_callback & abort, double timeout);
+		file::ptr openRead( const char * path, abort_callback & abort, double timeout);
+		file::ptr openEx( const char * path, t_open_mode mode, abort_callback & abort, double timeout);
+
+		void read_whole_file(const char * path, mem_block_container & out, pfc::string_base & outContentType, size_t maxBytes, abort_callback & abort );
+
+		bool is_transacted();
+		bool commit_if_transacted(abort_callback &abort);
+
+		//! Full file rewrite helper that automatically does the right thing to ensure atomic update. \n
+		//! If this is a transacted filesystem, a simple in-place rewrite is performed. \n
+		//! If this is not a transacted filesystem, your content first goes to a temporary file, which then replaces the original. \n
+		//! See also: filesystem_transacted. \n
+		//! In order to perform transacted operations, you must obtain a transacted filesystem explicitly, or get one passed down from a higher level context (example: in config_io_callback_v3).
+		void rewrite_file( const char * path, abort_callback & abort, double opTimeout, std::function<void (file::ptr) > worker );
+		void rewrite_directory(const char * path, abort_callback & abort, double opTimeout, std::function<void(const char *) > worker);
+	protected:
+		static bool get_parent_helper(const char * path, char separator, pfc::string_base & out);
+		void read_whole_file_fallback( const char * path, mem_block_container & out, pfc::string_base & outContentType, size_t maxBytes, abort_callback & abort );
+	};
+
+	namespace listMode {
+		enum {
+			//! Return files
+			files = 1,
+			//! Return folders
+			folders = 2,
+			//! Return both files and flders
+			filesAndFolders = files | folders,
+			//! Return hidden files
+			hidden = 4,
+			//! Do not hand over filestats unless they come for free with folder enumeration
+			suppressStats = 8,
+		};
+	}
+
+	class filesystem_v2 : public filesystem {
+		FB2K_MAKE_SERVICE_INTERFACE( filesystem_v2, filesystem )
+	public:
+		virtual void move_overwrite(const char * src, const char * dst, abort_callback & abort) = 0;
+		virtual void replace_file(const char * src, const char * dst, abort_callback & abort);
+		virtual void make_directory(const char * path, abort_callback & abort, bool * didCreate = nullptr) = 0;
+		virtual bool directory_exists(const char * path, abort_callback & abort) = 0;
+		virtual bool file_exists(const char * path, abort_callback & abort) = 0;
+		virtual char pathSeparator() = 0;
+		virtual void extract_filename_ext(const char * path, pfc::string_base & outFN);
+		virtual bool get_parent_path( const char * path, pfc::string_base & out);
+		virtual void list_directory_ex(const char * p_path, directory_callback & p_out, unsigned listMode, abort_callback & p_abort) = 0;
+		virtual void read_whole_file(const char * path, mem_block_container & out, pfc::string_base & outContentType, size_t maxBytes, abort_callback & abort);
+
+		//! Wrapper to list_directory_ex
+		void list_directory( const char * p_path, directory_callback & p_out, abort_callback & p_abort );
+		
+		bool make_directory_check(const char * path, abort_callback & abort);
 	};
 
 	class directory_callback_impl : public directory_callback

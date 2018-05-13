@@ -275,6 +275,9 @@
     <ClInclude Include="foobar2000-pfc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="filesystem_transacted.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="abort_callback.cpp">
@@ -443,6 +446,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="config_io_callback.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,3 +1,5 @@
+#pragma once
+
 class NOVTABLE core_version_info : public service_base {
 	FB2K_MAKE_SERVICE_COREAPI(core_version_info);
 public:

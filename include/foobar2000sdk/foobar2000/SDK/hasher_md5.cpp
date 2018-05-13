@@ -37,3 +37,7 @@ t_uint64 hasher_md5_result::xorHalve() const {
 	return v[0] ^ v[1];
 #endif
 }
+
+pfc::string8 hasher_md5_result::asString() const {
+	return pfc::format_hexdump( this->m_data, sizeof(m_data), "").get_ptr();
+}
