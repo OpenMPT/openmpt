@@ -68,8 +68,8 @@ download_and_unpack "premake" "https://github.com/premake/premake-core/archive/2
 cd include/premake
 
 make -f Bootstrap.mak linux
-bin/release/premake5 embed
-bin/release/premake5 --to=build/gmake.unix gmake
+bin/release/premake5 embed --bytecode
+bin/release/premake5 --to=build/gmake.unix gmake --no-curl --no-zlib --no-luasocket
 cd build/gmake.unix
 make
 cd ../..

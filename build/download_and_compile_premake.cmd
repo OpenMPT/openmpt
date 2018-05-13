@@ -161,8 +161,8 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxil
  call build\auto\setup_vs2017.cmd || goto error
  cd include\premake || goto error
   nmake -f Bootstrap.mak windows MSDEV=vs2017 || goto error
-  bin\release\premake5 embed || goto error
-  bin\release\premake5 --to=build/vs2017 vs2017 || goto error
+  bin\release\premake5 embed --bytecode || goto error
+  bin\release\premake5 --to=build/vs2017 vs2017 --no-curl --no-zlib --no-luasocket || goto error
  cd ..\.. || goto error
  cd include\premake\build\vs2017 || goto error
   devenv Premake5.sln /clean "Release|Win32" || goto error
@@ -174,8 +174,8 @@ if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\B
  call build\auto\setup_vs2017.cmd || goto error
  cd include\premake || goto error
   nmake -f Bootstrap.mak windows MSDEV=vs2017 || goto error
-  bin\release\premake5 embed || goto error
-  bin\release\premake5 --to=build/vs2017 vs2017 || goto error
+  bin\release\premake5 embed --bytecode || goto error
+  bin\release\premake5 --to=build/vs2017 vs2017 --no-curl --no-zlib --no-luasocket || goto error
  cd ..\.. || goto error
  cd include\premake\build\vs2017 || goto error
   devenv Premake5.sln /clean "Release|Win32" || goto error
@@ -188,8 +188,8 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" 
  call build\auto\setup_vs2015.cmd || goto error
  cd include\premake || goto error
   nmake -f Bootstrap.mak windows MSDEV=vs2015 || goto error
-  bin\release\premake5 embed || goto error
-  bin\release\premake5 --to=build/vs2015 vs2015 || goto error
+  bin\release\premake5 embed --bytecode || goto error
+  bin\release\premake5 --to=build/vs2015 vs2015 --no-curl --no-zlib --no-luasocket || goto error
  cd ..\.. || goto error
  cd include\premake\build\vs2015 || goto error
   devenv Premake5.sln /clean "Release|Win32" || goto error
@@ -201,8 +201,8 @@ if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
  cd include\premake || goto error
   nmake -f Bootstrap.mak windows MSDEV=vs2015 || goto error
-  bin\release\premake5 embed || goto error
-  bin\release\premake5 --to=build/vs2015 vs2015 || goto error
+  bin\release\premake5 embed --bytecode || goto error
+  bin\release\premake5 --to=build/vs2015 vs2015 --no-curl --no-zlib --no-luasocket || goto error
  cd ..\.. || goto error
  cd include\premake\build\vs2015 || goto error
   devenv Premake5.sln /clean "Release|Win32" || goto error
