@@ -46,17 +46,10 @@ newoption {
 --	layout = custom
 --end
 
-with_arm64 = true
-
 if _OPTIONS["win10"] then
 	if _ACTION == "vs2017" then
-		if with_arm64 then
-			allplatforms = { "x86", "x86_64", "arm", "arm64" }
-			trkplatforms = { "x86", "x86_64", "arm", "arm64" }
-		else
-			allplatforms = { "x86", "x86_64", "arm" }
-			trkplatforms = { "x86", "x86_64", "arm" }
-		end
+		allplatforms = { "x86", "x86_64", "arm", "arm64" }
+		trkplatforms = { "x86", "x86_64", "arm", "arm64" }
 	else
 		allplatforms = { "x86", "x86_64" }
 		trkplatforms = { "x86", "x86_64" }

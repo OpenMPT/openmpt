@@ -13,9 +13,7 @@ end
 	filter { "platforms:arm" }
 		system "Windows"
 		architecture "ARM"
-if with_arm64 then
 	filter { "platforms:arm64" }
 		system "Windows"
 		architecture "ARM64"
-end
 	filter {}
