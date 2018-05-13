@@ -140,9 +140,11 @@
    "../../include/unrar/version.hpp",
    "../../include/unrar/volume.hpp",
   }
-  filter { "action:vs*", "architecture:ARM or architecture:ARM64" }
-    links { "advapi32", "shell32" }
-    buildoptions { "/wd4996" }
+	filter { "action:vs*", "architecture:ARM or architecture:ARM64" }
+		links { "advapi32", "shell32" }
+	filter {}
+	filter { "action:vs*" }
+		buildoptions { "/wd4996" }
   filter {}
   filter { "kind:SharedLib" }
    files { "../../include/unrar/dll.def" }
