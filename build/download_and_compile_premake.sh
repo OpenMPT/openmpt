@@ -78,5 +78,7 @@ make
 cd ../..
 #bin/release/premake5 test --no-curl --no-zlib --no-luasocket
 
+cd ../..
+
 echo "2e7ca5fb18acdbcd5755fb741710622b20f2e0f6" > include/premake/OpenMPT-version.txt
 
