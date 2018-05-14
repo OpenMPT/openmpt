@@ -15,6 +15,19 @@ PREMAKE=include/premake/bin/release/premake5
 
 
 
+echo "78817a9707c1a02e845fb38b3adcc5353b02d377" > include/genie/OpenMPT-expected.txt
+if diff include/genie/OpenMPT-expected.txt include/genie/OpenMPT-version.txt >/dev/null ; then
+  echo "Genie version mismatch"
+	exit 1
+fi
+echo "2e7ca5fb18acdbcd5755fb741710622b20f2e0f6" > include/premake/OpenMPT-expected.txt
+if diff include/premake/OpenMPT-expected.txt include/premake/OpenMPT-version.txt >/dev/null ; then
+  echo "Genie version mismatch"
+	exit 1
+fi
+
+
+
 echo dofile \"build/genie/genie.lua\" > genie.lua
 
 ${GENIE} --target="windesktop81" vs2015

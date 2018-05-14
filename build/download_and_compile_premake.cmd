@@ -152,6 +152,8 @@ if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
 
 :geniedone
 
+echo "78817a9707c1a02e845fb38b3adcc5353b02d377" > include\genie\OpenMPT-version.txt
+
 
 
 rem call :download_and_unpack "premake" "https://github.com/premake/premake-core/archive/2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6" "-" || goto error
@@ -216,6 +218,8 @@ if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
 goto error
 
 :premakedone
+
+echo "2e7ca5fb18acdbcd5755fb741710622b20f2e0f6" > include\premake\OpenMPT-version.txt
 
 goto ok
 

@@ -61,6 +61,8 @@ cd ../..
 
 cp -ar include/genie/build/vs* build/genie/genie/build/
 
+echo "78817a9707c1a02e845fb38b3adcc5353b02d377" > include/genie/OpenMPT-version.txt
+
 
 
 download_and_unpack "premake" "https://github.com/premake/premake-core/archive/2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6"
@@ -75,3 +77,6 @@ cd build/gmake.unix
 make
 cd ../..
 #bin/release/premake5 test --no-curl --no-zlib --no-luasocket
+
+echo "2e7ca5fb18acdbcd5755fb741710622b20f2e0f6" > include/premake/OpenMPT-version.txt
+
