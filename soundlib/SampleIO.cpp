@@ -94,6 +94,18 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			maxLength /= encodedBytesPerSample;
 		}
 		LimitMax(sample.nLength, mpt::saturate_cast<SmpLength>(maxLength));
+	} else if(GetEncoding() == IT214 || GetEncoding() == IT215)
+	{
+		// In the best case, IT compression represents each sample point as a single bit.
+		// In practice, there is of course the two-byte header per compressed block and the initial bit width change.
+		// As a result, if we have a file length of n, we know that the sample can be at most n*8 sample points long.
+		size_t maxLength = fileSize;
+		uint8 bps = 8 / GetNumChannels();
+		if(Util::MaxValueOfType(maxLength) / bps >= maxLength)
+			maxLength *= bps;
+		else
+			maxLength = Util::MaxValueOfType(maxLength);
+		LimitMax(sample.nLength, mpt::saturate_cast<SmpLength>(maxLength));
 	}
 
 	if(sample.nLength < 1)
@@ -927,7 +939,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 			int s_old = 0;
 
 			bufcount = 0;
-			for (uint32 j=0; j<numSamples; j++)
+			for (SmpLength j = 0; j < numSamples; j++)
 			{
 				int s_new = *p;
 				p += 2;
@@ -963,7 +975,7 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 			int s_old = 0;
 
 			bufcount = 0;
-			for (SmpLength j=0; j<numSamples; j++)
+			for (SmpLength j = 0; j < numSamples; j++)
 			{
 				int s_new = *p;
 				p += 2;
