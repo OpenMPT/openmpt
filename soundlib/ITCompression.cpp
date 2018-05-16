@@ -349,7 +349,7 @@ void ITDecompression::Uncompress(typename Properties::sample_t *target)
 	int width = defWidth;
 	while(curLength > 0)
 	{
-		if(width < 1 || width > defWidth || dataPos >= dataSize)
+		if(width > defWidth || dataPos >= dataSize)
 		{
 			// Error!
 			return;
@@ -383,11 +383,6 @@ void ITDecompression::Uncompress(typename Properties::sample_t *target)
 }
 
 
-#if MPT_MSVC_AT_LEAST(2017,3) && MPT_MSVC_BEFORE(2017,5)
-// Work-around compiler crash in VS2017.3 / cl 19.11.25506
-// https://developercommunity.visualstudio.com/content/problem/96687/c1063-and-c1001-while-compiling-trivial-code-in-vs.html
-MPT_NOINLINE
-#endif
 void ITDecompression::ChangeWidth(int &curWidth, int width)
 {
 	width++;
@@ -397,11 +392,6 @@ void ITDecompression::ChangeWidth(int &curWidth, int width)
 }
 
 
-#if MPT_MSVC_AT_LEAST(2017,3) && MPT_MSVC_BEFORE(2017,5)
-// Work-around compiler crash in VS2017.3 / cl 19.11.25506
-// https://developercommunity.visualstudio.com/content/problem/96687/c1063-and-c1001-while-compiling-trivial-code-in-vs.html
-MPT_NOINLINE
-#endif
 int ITDecompression::ReadBits(int width)
 {
 	int v = 0, vPos = 0, vMask = (1 << width) - 1;
