@@ -263,9 +263,8 @@ bool PluginBridge::SendToHost(BridgeMessage &sendMsg)
 			{
 				// Some message got answered - is it our message?
 				bool done = false;
-				for(size_t i = 0; i < CountOf(sharedMem->toHost); i++)
+				for(auto &msg : sharedMem->toHost)
 				{
-					BridgeMessage &msg = sharedMem->toHost[i];
 					if(InterlockedCompareExchange(&msg.header.status, MsgHeader::delivered, MsgHeader::done) == MsgHeader::done)
 					{
 						if(&msg != addr)
@@ -586,7 +585,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	case effOfflineNotify:
 		// VstAudioFile* in [ptr]
 		extraData.resize(sizeof(VstAudioFile *) * static_cast<size_t>(msg->value));
-		ptr = &extraData[0];
+		ptr = extraData.data();
 		for(int64 i = 0; i < msg->value; i++)
 		{
 			// TODO create pointers
@@ -597,7 +596,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	case effOfflineRun:
 		// VstOfflineTask* in [ptr]
 		extraData.resize(sizeof(VstOfflineTask *) * static_cast<size_t>(msg->value));
-		ptr = &extraData[0];
+		ptr = extraData.data();
 		for(int64 i = 0; i < msg->value; i++)
 		{
 			// TODO create pointers
@@ -656,7 +655,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 					int32 paramMin = static_cast<const int32 *>(ptr)[0];
 					int32 paramMax  = static_cast<const int32 *>(ptr)[1];
 					ParameterInfo *param = static_cast<ParameterInfo *>(ptr);
-					for(int32 i = paramMin; i < paramMax; i++)
+					for(int32 i = paramMin; i < paramMax; i++, param++)
 					{
 						strcpy(param->name, "");
 						strcpy(param->label, "");
@@ -673,7 +672,6 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 							memset(&param->props, 0, sizeof(param->props));
 							strncpy(param->props.label, param->name, CountOf(param->props.label));
 						}
-						param++;
 					}
 				}
 				break;
@@ -688,7 +686,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	if(extraDataSize != 0)
 	{
 		extraData.resize(extraDataSize, 0);
-		ptr = &extraData[0];
+		ptr = extraData.data();
 	}
 
 	//std::cout << "about to dispatch " << msg->opcode << " to effect...";
@@ -725,13 +723,13 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	case effShellGetNextPlugin:
 		// Name in [ptr]
 		extraData.back() = 0;
-		vst_strncpy(static_cast<char *>(origPtr), &extraData[0], static_cast<size_t>(msg->ptr - 1));
+		vst_strncpy(static_cast<char *>(origPtr), extraData.data(), static_cast<size_t>(msg->ptr - 1));
 		break;
 
 	case effEditGetRect:
 		// ERect** in [ptr]
 		{
-			ERect *rectPtr = *reinterpret_cast<ERect **>(&extraData[0]);
+			ERect *rectPtr = *reinterpret_cast<ERect **>(extraData.data());
 			if(rectPtr != nullptr)
 			{
 				assert(static_cast<size_t>(msg->ptr) >= sizeof(ERect));
@@ -762,7 +760,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 		// void** in [ptr] for chunk data address
 		if(getChunkMem.Create(static_cast<const wchar_t *>(origPtr), msg->result))
 		{
-			memcpy(getChunkMem.view, *reinterpret_cast<void **>(&extraData[0]), msg->result);
+			memcpy(getChunkMem.view, *reinterpret_cast<void **>(extraData.data()), msg->result);
 		}
 		break;
 	}
@@ -815,11 +813,12 @@ void PluginBridge::AutomateParameters()
 {
 	__try
 	{
-		uint32 numEvents = InterlockedExchange(&sharedMem->automationQueue.pendingEvents, 0);
 		const AutomationQueue::Parameter *param = sharedMem->automationQueue.params;
-		for(uint32 i = 0; i < numEvents; i++, param++)
+		const AutomationQueue::Parameter *paramEnd = param + std::min<LONG>(InterlockedExchange(&sharedMem->automationQueue.pendingEvents, 0), CountOf(sharedMem->automationQueue.params));
+		while(param != paramEnd)
 		{
 			nativeEffect->setParameter(nativeEffect, param->index, param->value);
+			param++;
 		}
 	} __except(EXCEPTION_EXECUTE_HANDLER)
 	{
@@ -948,7 +947,7 @@ int32 PluginBridge::BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPoi
 			samplePointers[i] = offset;
 			offset += msg->sampleFrames;
 		}
-		inPointers = reinterpret_cast<buf_t **>(&samplePointers[0]);
+		inPointers = reinterpret_cast<buf_t **>(samplePointers.data());
 		outPointers = inPointers + msg->numInputs;
 	}
 
