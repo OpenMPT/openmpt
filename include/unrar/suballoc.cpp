@@ -80,7 +80,7 @@ bool SubAllocator::StartSubAllocator(int SASize)
 {
   uint t=SASize << 20;
   if (SubAllocatorSize == t)
-    return TRUE;
+    return true;
   StopSubAllocator();
 
   // Original algorithm expects FIXED_UNIT_SIZE, but actual structure size
@@ -91,7 +91,7 @@ bool SubAllocator::StartSubAllocator(int SASize)
   if ((HeapStart=(byte *)malloc(AllocSize)) == NULL)
   {
     ErrHandler.MemoryError();
-    return FALSE;
+    return false;
   }
 
   // HeapEnd did not present in original algorithm. We added it to control
@@ -99,7 +99,7 @@ bool SubAllocator::StartSubAllocator(int SASize)
   HeapEnd=HeapStart+AllocSize-UNIT_SIZE;
 
   SubAllocatorSize=t;
-  return TRUE;
+  return true;
 }
 
 

@@ -30,8 +30,14 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.08.00 (* May 2018, revision 10201)
+v1.27.08.00 (* May 2018, revision 10235)
 ----------------------------------------
+Pattern tab
+   [Imp] <js> Show instrument change shortcuts also in sub menu of context menu.
+
+Sample tab
+   [Fix] <js> Convert sample properties when importing samples via Media Foundation codecs (for MOD / XM).
+
 Instrument tab
    [Imp] <js> New shortcuts: Switch to Volume / Panning / Pitch / Filter Envelope, Toggle Volume / Panning / Pitch / Filter Envelope, Toggle Envelope Loop, Toggle Envelope Sustain Loop, Toggle Envelope Carry.
    [Fix] <js> SFZ: Assume UTF-8 encoding for region names.
@@ -41,6 +47,7 @@ Tree view
 
 VST::Plugin Bridge
    [Fix] <js> Sending or receiving SysEx messages resulted in a crash.
+   [Fix] <js> When automating more than 64 plugin parameters at the same time (also when restoring saved parameters), parameter 0 was reset to a value of 0.
 
 Playback
    [Fix] <js> The resonant filter was sometimes unstable when combining low-volume samples, low cutoff and high mixing rates.
@@ -52,7 +59,7 @@ Other formats
    [Fix] <js> ULT: Portamento import was sometimes broken.
 
 Third-Party Libraries
-   [Mod] Update UnRAR (v5.6.3)
+   [Mod] Update UnRAR (v5.6.4)
 
 
 v1.27.07.00 (8 April 2018, revision 10044)

@@ -280,6 +280,8 @@ bool QuickOpen::ReadNext()
   uint Flags=(uint)Raw.GetV();
   uint64 Offset=Raw.GetV();
   size_t HeaderSize=(size_t)Raw.GetV();
+  if (HeaderSize>MAX_HEADER_SIZE_RAR5)
+    return false;
   LastReadHeader.Alloc(HeaderSize);
   Raw.GetB(&LastReadHeader[0],HeaderSize);
   // Calculate the absolute position as offset from quick open service header.
