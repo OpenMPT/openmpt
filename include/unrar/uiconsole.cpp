@@ -100,6 +100,7 @@ void uiMsgStore::Msg()
       Log(Str[0],St(MWrongPassword));
       break;
     case UIERROR_MEMORY:
+      mprintf(L"\n");
       Log(NULL,St(MErrOutMem));
       break;
     case UIERROR_FILEOPEN:

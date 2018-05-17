@@ -595,8 +595,8 @@ size_t Archive::ReadHeader50()
   }
 
   // Header size must not occupy more than 3 variable length integer bytes
-  // resulting in 2 MB maximum header size, so here we read 4 byte CRC32
-  // followed by 3 bytes or less of header size.
+  // resulting in 2 MB maximum header size (MAX_HEADER_SIZE_RAR5),
+  // so here we read 4 byte CRC32 followed by 3 bytes or less of header size.
   const size_t FirstReadSize=7; // Smallest possible block size.
   if (Raw.Read(FirstReadSize)<FirstReadSize)
   {

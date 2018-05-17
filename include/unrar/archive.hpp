@@ -20,6 +20,9 @@ enum ADDSUBDATA_FLAGS
   ASDF_CRYPTIFHEADERS = 8  // Encrypt data after subheader only in -hp mode.
 };
 
+// RAR5 headers must not exceed 2 MB.
+#define MAX_HEADER_SIZE_RAR5 0x200000
+
 class Archive:public File
 {
   private:
