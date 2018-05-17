@@ -6012,8 +6012,8 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 				AppendMenu(instrumentChangeMenu, MF_SEPARATOR, 0, 0);
 			}
 			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT, _T("&Remove Instrument"));
-			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + GetCurrentInstrument(), _T("&Current Instrument"));
-			AppendMenu(instrumentChangeMenu, MF_STRING, ID_PATTERN_SETINSTRUMENT, _T("Current Instrument (&only change existing)"));
+			AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + GetCurrentInstrument(), ih->GetKeyTextFromCommand(kcPatternSetInstrument, _T("&Current Instrument")));
+			AppendMenu(instrumentChangeMenu, MF_STRING, ID_PATTERN_SETINSTRUMENT, ih->GetKeyTextFromCommand(kcPatternSetInstrumentNotEmpty, _T("Current Instrument (&only change existing)")));
 		}
 		return BuildTogglePlugEditorCtxMenu(hMenu, ih);
 	}
