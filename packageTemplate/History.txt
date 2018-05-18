@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.08.00 (* May 2018, revision 10235)
+v1.27.08.00 (* May 2018, revision 10233)
 ----------------------------------------
 Pattern tab
    [Imp] <js> Show instrument change shortcuts also in sub menu of context menu.
@@ -47,7 +47,7 @@ Tree view
 
 VST::Plugin Bridge
    [Fix] <js> Sending or receiving SysEx messages resulted in a crash.
-   [Fix] <js> When automating more than 64 plugin parameters at the same time (also when restoring saved parameters), parameter 0 was reset to a value of 0.
+   [Fix] <js> When automating more than 64 plugin parameters at the same time (also when restoring saved parameters), parameter 0 was reset to a value of 0 (http://forum.openmpt.org/index.php?topic=5967.0).
 
 Playback
    [Fix] <js> The resonant filter was sometimes unstable when combining low-volume samples, low cutoff and high mixing rates.
