@@ -4,9 +4,14 @@ CXX ?= c++
 LD  ?= c++
 AR  = ar
 
+CXXFLAGS_STDCXX = -std=c++11
+CFLAGS_STDC = -std=c99
+CXXFLAGS += $(CXXFLAGS_STDCXX)
+CFLAGS += $(CFLAGS_STDC)
+
 CPPFLAGS += 
-CXXFLAGS += -std=c++11 
-CFLAGS   += -std=c99   
+CXXFLAGS += 
+CFLAGS   += 
 LDFLAGS  += 
 LDLIBS   += 
 ARFLAGS  := rcs

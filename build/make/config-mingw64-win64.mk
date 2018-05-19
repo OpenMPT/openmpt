@@ -4,9 +4,14 @@ CXX = x86_64-w64-mingw32-g++$(MINGW_FLAVOUR)
 LD  = x86_64-w64-mingw32-g++$(MINGW_FLAVOUR)
 AR  = x86_64-w64-mingw32-ar$(MINGW_FLAVOUR)
 
+CXXFLAGS_STDCXX = -std=c++11
+CFLAGS_STDC = -std=c99
+CXXFLAGS += $(CXXFLAGS_STDCXX)
+CFLAGS += $(CFLAGS_STDC)
+
 CPPFLAGS += -DWIN32 -D_WIN32 -DWIN64 -D_WIN64 -Iinclude/mingw-std-threads -DMPT_WITH_MINGWSTDTHREADS
-CXXFLAGS += -std=c++11 -municode -mconsole 
-CFLAGS   += -std=c99   -municode -mconsole 
+CXXFLAGS += -municode -mconsole 
+CFLAGS   += -municode -mconsole 
 LDFLAGS  +=
 LDLIBS   += -lm -lrpcrt4 -lwinmm
 ARFLAGS  := rcs

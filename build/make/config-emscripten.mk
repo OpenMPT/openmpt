@@ -6,11 +6,30 @@ AR  = emar
 
 EMSCRIPTEN_TARGET?=asmjs
 
+ifneq ($(STDCXX),)
+CXXFLAGS_STDCXX = -std=$(STDCXX)
+else
+ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=c++17 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++17' ; fi ), c++17)
+CXXFLAGS_STDCXX = -std=c++17
+else
+ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=c++14 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++14' ; fi ), c++14)
+CXXFLAGS_STDCXX = -std=c++14
+else
+ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=c++11 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++11' ; fi ), c++11)
+CXXFLAGS_STDCXX = -std=c++11
+endif
+endif
+endif
+endif
+CFLAGS_STDC = -std=c99
+CXXFLAGS += $(CXXFLAGS_STDCXX)
+CFLAGS += $(CFLAGS_STDC)
+
 ifeq ($(EMSCRIPTEN_TARGET),js)
 
 CPPFLAGS += 
-CXXFLAGS += -std=c++11 -fPIC -O2 -s ASM_JS=2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
-CFLAGS   += -std=c99   -fPIC -O2 -s ASM_JS=2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
+CXXFLAGS += -fPIC -O2 -s ASM_JS=2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
+CFLAGS   += -fPIC -O2 -s ASM_JS=2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
 LDFLAGS  += -O2 -s ASM_JS=2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
 LDLIBS   += 
 ARFLAGS  := rcs
@@ -25,8 +44,8 @@ LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 else ifeq ($(EMSCRIPTEN_TARGET),asmjs)
 
 CPPFLAGS += 
-CXXFLAGS += -std=c++11 -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
-CFLAGS   += -std=c99   -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
+CXXFLAGS += -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
+CFLAGS   += -fPIC -O2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
 LDFLAGS  += -O2 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
 LDLIBS   += 
 ARFLAGS  := rcs
@@ -41,8 +60,8 @@ LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 else ifeq ($(EMSCRIPTEN_TARGET),wasm)
 
 CPPFLAGS += -DMPT_BUILD_WASM
-CXXFLAGS += -std=c++11 -fPIC -Os -s WASM=1 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
-CFLAGS   += -std=c99   -fPIC -Os -s WASM=1 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
+CXXFLAGS += -fPIC -Os -s WASM=1 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
+CFLAGS   += -fPIC -Os -s WASM=1 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
 LDFLAGS  += -Os -s WASM=1 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
 LDLIBS   += 
 ARFLAGS  := rcs
