@@ -17,6 +17,9 @@
 
 #include <map>
 #include <set>
+#if MPT_CXX_AT_LEAST(17)
+#include <variant>
+#endif
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -35,6 +38,157 @@ enum SettingType
 // SettingValue is a variant type that stores any type that can natively be represented in a config backend.
 // Any other type that should be stored must provide a matching ToSettingValue and FromSettingValue.
 // Other types can optionally also set a type tag which would get checked in debug builds.
+#if MPT_CXX_AT_LEAST(17)
+class SettingValue
+{
+private:
+	std::variant<std::monostate, bool, int32, double, mpt::ustring, std::vector<mpt::byte>> value;
+	std::string typeTag;
+public:
+	bool operator == (const SettingValue &other) const
+	{
+		return value == other.value && typeTag == other.typeTag;
+	}
+	bool operator != (const SettingValue &other) const
+	{
+		return !(*this == other);
+	}
+	SettingValue()
+	{
+	}
+	SettingValue(const SettingValue &other)
+	{
+		*this = other;
+	}
+	SettingValue & operator = (const SettingValue &other)
+	{
+		if(this == &other)
+		{
+			return *this;
+		}
+		MPT_ASSERT(value.index() == 0 || (value.index() == other.value.index() && typeTag == other.typeTag));
+		value = other.value;
+		typeTag = other.typeTag;
+		return *this;
+	}
+	SettingValue(bool val)
+		: value(val)
+	{
+	}
+	SettingValue(int32 val)
+		: value(val)
+	{
+	}
+	SettingValue(double val)
+		: value(val)
+	{
+	}
+	SettingValue(const mpt::ustring &val)
+		: value(val)
+	{
+	}
+	SettingValue(const std::vector<mpt::byte> &val)
+		: value(val)
+	{
+	}
+	SettingValue(bool val, const std::string &typeTag_)
+		: value(val)
+		, typeTag(typeTag_)
+	{
+	}
+	SettingValue(int32 val, const std::string &typeTag_)
+		: value(val)
+		, typeTag(typeTag_)
+	{
+	}
+	SettingValue(double val, const std::string &typeTag_)
+		: value(val)
+		, typeTag(typeTag_)
+	{
+	}
+	SettingValue(const mpt::ustring &val, const std::string &typeTag_)
+		: value(val)
+		, typeTag(typeTag_)
+	{
+	}
+	SettingValue(const std::vector<mpt::byte> &val, const std::string &typeTag_)
+		: value(val)
+		, typeTag(typeTag_)
+	{
+	}
+	// these need to be explicitly deleted because otherwise the bool overload will catch the pointers
+	SettingValue(const char *val) = delete;
+	SettingValue(const wchar_t *val) = delete;
+	SettingValue(const char *val, const std::string &typeTag_) = delete;
+	SettingValue(const wchar_t *val, const std::string &typeTag_) = delete;
+	SettingType GetType() const
+	{
+		SettingType result = SettingTypeNone;
+		if(std::holds_alternative<bool>(value))
+		{
+			result = SettingTypeBool;
+		}
+		if(std::holds_alternative<int32>(value))
+		{
+			result = SettingTypeInt;
+		}
+		if(std::holds_alternative<double>(value))
+		{
+			result = SettingTypeFloat;
+		}
+		if(std::holds_alternative<mpt::ustring>(value))
+		{
+			result = SettingTypeString;
+		}
+		if(std::holds_alternative<std::vector<mpt::byte>>(value))
+		{
+			result = SettingTypeBinary;
+		}
+		return result;
+	}
+	bool HasTypeTag() const
+	{
+		return !typeTag.empty();
+	}
+	std::string GetTypeTag() const
+	{
+		return typeTag;
+	}
+	template <typename T>
+	T as() const
+	{
+		return *this;
+	}
+	operator bool () const
+	{
+		MPT_ASSERT(std::holds_alternative<bool>(value));
+		return std::get<bool>(value);			
+	}
+	operator int32 () const
+	{
+		MPT_ASSERT(std::holds_alternative<int32>(value));
+		return std::get<int32>(value);			
+	}
+	operator double () const
+	{
+		MPT_ASSERT(std::holds_alternative<double>(value));
+		return std::get<double>(value);			
+	}
+	operator mpt::ustring () const
+	{
+		MPT_ASSERT(std::holds_alternative<mpt::ustring>(value));
+		return std::get<mpt::ustring>(value);			
+	}
+	operator std::vector<mpt::byte> () const
+	{
+		MPT_ASSERT(std::holds_alternative<std::vector<mpt::byte>>(value));
+		return std::get<std::vector<std::byte>>(value);			
+	}
+	mpt::ustring FormatTypeAsString() const;
+	mpt::ustring FormatValueAsString() const;
+	void SetFromString(const AnyStringLocale &newVal);
+};
+#else
 class SettingValue
 {
 private:
@@ -212,6 +366,7 @@ public:
 	mpt::ustring FormatValueAsString() const;
 	void SetFromString(const AnyStringLocale &newVal);
 };
+#endif
 
 
 template<typename T>
