@@ -138,7 +138,7 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 	settings.updateBaseURL = TrackerSettings::Instance().UpdateUpdateURL;
 	settings.guidString = (TrackerSettings::Instance().UpdateSendGUID ? mpt::ToCString(TrackerSettings::Instance().gcsInstallGUID.Get()) : CString(_T("anonymous")));
 	settings.suggestDifferentBuilds = TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant;
-	mpt::thread(CUpdateCheck::ThreadFunc(settings)).detach();
+	std::thread(CUpdateCheck::ThreadFunc(settings)).detach();
 }
 
 

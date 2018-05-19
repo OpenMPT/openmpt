@@ -154,7 +154,7 @@ protected:
 	HANDLE m_hSwitchWatchDir;
 	mpt::PathString m_WatchDir;
 	HANDLE m_hWatchDirKillThread;
-	mpt::thread m_WatchDirThread;
+	std::thread m_WatchDirThread;
 	ModItem m_itemDrag;
 	DWORD m_dwStatus;
 	UINT m_nDocNdx, m_nDragDocNdx;

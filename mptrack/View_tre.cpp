@@ -154,7 +154,7 @@ CModTree::CModTree(CModTree *pDataTree) :
 		// Set up instrument library monitoring thread
 		m_hWatchDirKillThread = CreateEvent(NULL, FALSE, FALSE, NULL);
 		m_hSwitchWatchDir = CreateEvent(NULL,  FALSE, FALSE, NULL);
-		m_WatchDirThread = mpt::thread([&](){MonitorInstrumentLibrary();});
+		m_WatchDirThread = std::thread([&](){MonitorInstrumentLibrary();});
 	}
 	MemsetZero(m_tiMidi);
 	MemsetZero(m_tiPerc);

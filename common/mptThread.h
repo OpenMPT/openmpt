@@ -31,15 +31,9 @@ namespace mpt
 {
 
 
-
-typedef std::thread::native_handle_type native_handle_type;
-typedef std::thread thread;
-
-
-
 #if defined(MODPLUG_TRACKER)
 
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && (MPT_COMPILER_MSVC || MPT_COMPILER_CLANG)
 
 enum ThreadPriority
 {
@@ -50,7 +44,7 @@ enum ThreadPriority
 	ThreadPriorityHighest = THREAD_PRIORITY_HIGHEST
 };
 
-inline void SetThreadPriority(mpt::thread &t, mpt::ThreadPriority priority)
+inline void SetThreadPriority(std::thread &t, mpt::ThreadPriority priority)
 {
 	::SetThreadPriority(t.native_handle(), priority);
 }
@@ -71,7 +65,7 @@ enum ThreadPriority
 	ThreadPriorityHighest =  2
 };
 
-inline void SetThreadPriority(mpt::thread & /*t*/ , mpt::ThreadPriority /*priority*/ )
+inline void SetThreadPriority(std::thread & /*t*/ , mpt::ThreadPriority /*priority*/ )
 {
 	// nothing
 }
@@ -81,7 +75,7 @@ inline void SetCurrentThreadPriority(mpt::ThreadPriority /*priority*/ )
 	// nothing
 }
 
-#endif // MPT_OS_WINDOWS
+#endif // MPT_OS_WINDOWS && (MPT_COMPILER_MSVC || MPT_COMPILER_CLANG)
 
 #endif // MODPLUG_TRACKER
 
