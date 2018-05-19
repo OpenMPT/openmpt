@@ -44,6 +44,14 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // C++17 std::size
+#if MPT_CXX_AT_LEAST(17)
+OPENMPT_NAMESPACE_END
+#include <iterator>
+OPENMPT_NAMESPACE_BEGIN
+namespace mpt {
+using std::size;
+} // namespace mpt
+#else
 OPENMPT_NAMESPACE_END
 #include <cstddef>
 OPENMPT_NAMESPACE_BEGIN
@@ -59,6 +67,7 @@ MPT_CONSTEXPR11_FUN std::size_t size(const T(&)[N]) noexcept
 	return N;
 }
 } // namespace mpt
+#endif
 
 
 
