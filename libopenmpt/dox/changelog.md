@@ -7,6 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.10-pre
 
+ *  Switching between instruments with portamento did not update the NNA
+    settings for the new instrument.
+ *  FAR: Properly import volume commands.
+
 ### libopenmpt 0.3.9 (2018-04-29)
 
  *  [**Sec**] Possible write near address 0 in out-of-memory situations when

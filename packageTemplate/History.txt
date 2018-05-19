@@ -30,8 +30,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.08.00 (* May 2018, revision 10233)
-----------------------------------------
+v1.27.08.00 (19 May 2018, revision 10245)
+-----------------------------------------
 Pattern tab
    [Imp] <js> Show instrument change shortcuts also in sub menu of context menu.
 
@@ -51,10 +51,12 @@ VST::Plugin Bridge
 
 Playback
    [Fix] <js> The resonant filter was sometimes unstable when combining low-volume samples, low cutoff and high mixing rates.
+   [Fix] <js> Switching between instruments with portamento did not update the NNA settings (fixes outcast the third.it, http://bugs.openmpt.org/view.php?id=1122).
 
 Other formats
    [Fix] <js> AMS: Possible crash during load in low memory situations.
-   [Fix] <js> FAR: Properly import volume commands
+   [Fix] <js> FAR: Properly import volume commands.
+   [Fix] <js> MID: GS drum channel enable and disable messages were still broken since v1.27.06.00.
    [Fix] <js> STM: Having both Bxx and Cxx commands in a pattern imported the Bxx command incorrectly (fixes ilu.stm).
    [Fix] <js> ULT: Portamento import was sometimes broken.
 
