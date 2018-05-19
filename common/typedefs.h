@@ -463,26 +463,29 @@ MPT_STATIC_ASSERT(sizeof(float64) == 8);
 MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
 
 
-namespace mpt {
-
 MPT_STATIC_ASSERT(std::numeric_limits<unsigned char>::digits == 8);
 
 MPT_STATIC_ASSERT(sizeof(char) == 1);
 
 #if MPT_CXX_AT_LEAST(17)
+OPENMPT_NAMESPACE_END
+#include <cstddef>
+OPENMPT_NAMESPACE_BEGIN
+namespace mpt {
 using byte = std::byte;
+} // namespace mpt
 #define MPT_BYTE_IS_STD_BYTE 1
 #else
 // In C++11 and C++14, a C++17 compatible definition of byte would not be required to be allowed to alias other types,
 // thus just use a typedef for unsigned char which is guaranteed to be allowed to alias.
 //enum class byte : unsigned char { };
+namespace mpt {
 typedef unsigned char byte;
+} // namespace mpt
 #define MPT_BYTE_IS_STD_BYTE 0
 #endif
 MPT_STATIC_ASSERT(sizeof(mpt::byte) == 1);
 MPT_STATIC_ASSERT(alignof(mpt::byte) == 1);
-
-} // namespace mpt
 
 
 
