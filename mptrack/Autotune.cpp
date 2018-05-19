@@ -229,7 +229,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 	const SmpLength processLength = sampleLength - maxShift;
 
 	// Set up the autocorrelation threads
-	const uint32 numProcs = std::max<uint32>(mpt::thread::hardware_concurrency(), 1);
+	const uint32 numProcs = std::max<unsigned int>(mpt::thread::hardware_concurrency(), 1);
 	const uint32 notesPerThread = (END_NOTE - START_NOTE + 1) / numProcs;
 	std::vector<AutotuneThreadData> threadInfo(numProcs);
 
