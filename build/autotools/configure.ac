@@ -284,7 +284,17 @@ AC_PROG_CC_STDC
 #AC_PROG_CC_C99
 
 # We need C++11 support
-AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
+AX_CXX_COMPILE_STDCXX(17, [noext], [optional])
+AS_IF([test "x$HAVE_CXX17" != "x1"],
+ [
+  AX_CXX_COMPILE_STDCXX(14, [noext], [optional])
+  AS_IF([test "x$HAVE_CXX14" != "x1"],
+   [
+    AX_CXX_COMPILE_STDCXX(11, [noext], [mandatory])
+   ],[]
+  )
+ ],[]
+)
 
 AC_LANG_PUSH([C])
 AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [CFLAGS="$CFLAGS -fvisibility=hidden"])
