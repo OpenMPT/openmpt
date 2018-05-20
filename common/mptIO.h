@@ -281,9 +281,9 @@ inline bool ReadIntLE(Tfile & f, T & v)
 	{
 		result = (static_cast<uint64>(readResult) == sizeof(T));
 	}
-	T val = 0;
+	typename mpt::make_le<T>::type val;
 	std::memcpy(&val, bytes, sizeof(T));
-	v = SwapBytesLE(val);
+	v = val;
 	return result;
 }
 
@@ -302,9 +302,9 @@ inline bool ReadIntBE(Tfile & f, T & v)
 	{
 		result = (static_cast<uint64>(readResult) == sizeof(T));
 	}
-	T val = 0;
+	typename mpt::make_be<T>::type val;
 	std::memcpy(&val, bytes, sizeof(T));
-	v = SwapBytesBE(val);
+	v = val;
 	return result;
 }
 
@@ -399,20 +399,14 @@ template <typename T, typename Tfile>
 inline bool WriteIntLE(Tfile & f, const T v)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	const T val = SwapBytesLE(v);
-	mpt::byte bytes[sizeof(T)];
-	std::memcpy(bytes, &val, sizeof(T));
-	return IO::WriteRaw(f, bytes, sizeof(T));
+	return IO::Write(f, mpt::as_le(v));
 }
 
 template <typename T, typename Tfile>
 inline bool WriteIntBE(Tfile & f, const T v)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	const T val = SwapBytesBE(v);
-	mpt::byte bytes[sizeof(T)];
-	std::memcpy(bytes, &val, sizeof(T));
-	return IO::WriteRaw(f, bytes, sizeof(T));
+	return IO::Write(f, mpt::as_be(v));
 }
 
 template <typename Tfile>
