@@ -94,15 +94,16 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			maxLength /= encodedBytesPerSample;
 		}
 		LimitMax(sample.nLength, mpt::saturate_cast<SmpLength>(maxLength));
-	} else if(GetEncoding() == IT214 || GetEncoding() == IT215)
+	} else if(GetEncoding() == IT214 || GetEncoding() == IT215 || GetEncoding() == MDL || GetEncoding() == DMF)
 	{
 		// In the best case, IT compression represents each sample point as a single bit.
 		// In practice, there is of course the two-byte header per compressed block and the initial bit width change.
 		// As a result, if we have a file length of n, we know that the sample can be at most n*8 sample points long.
+		// For DMF, there are at least two bits per sample, and for MDL at least 5 (so both are worse than IT).
 		size_t maxLength = fileSize;
-		uint8 bps = 8 / GetNumChannels();
-		if(Util::MaxValueOfType(maxLength) / bps >= maxLength)
-			maxLength *= bps;
+		uint8 maxSamplesPerByte = 8 / GetNumChannels();
+		if(Util::MaxValueOfType(maxLength) / maxSamplesPerByte >= maxLength)
+			maxLength *= maxSamplesPerByte;
 		else
 			maxLength = Util::MaxValueOfType(maxLength);
 		LimitMax(sample.nLength, mpt::saturate_cast<SmpLength>(maxLength));
