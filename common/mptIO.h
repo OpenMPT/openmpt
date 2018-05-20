@@ -95,104 +95,21 @@ bool Flush(FILE* & f);
 
 
 
-// WriteBuffer class that avoids calling to the underlying file writing
-// functions for every operation, which would involve rather slow un-inlinable
-// virtual calls in the iostream and FILE* cases. It is the users responabiliy
-// to call HasWriteError() to check for writeback errors at this buffering
-// level.
+template <typename Tfile> class WriteBuffer;
 
-template <typename Tfile>
-class WriteBuffer
-{
-private:
-	mpt::byte_span buffer;
-	std::size_t size;
-	Tfile & f;
-	bool writeError;
-public:
-	WriteBuffer(const WriteBuffer &) = delete;
-	WriteBuffer & operator=(const WriteBuffer &) = delete;
-public:
-	inline WriteBuffer(Tfile & f_, mpt::byte_span buffer_)
-		: buffer(buffer_)
-		, size(0)
-		, f(f_)
-		, writeError(false)
-	{
-	}
-	inline ~WriteBuffer()
-	{
-		FlushLocal();
-	}
-public:
-	inline Tfile & file() const
-	{
-		if(IsDirty())
-		{
-			FlushLocal();
-		}
-		return f;
-	}
-public:
-	inline bool HasWriteError() const
-	{
-		return writeError;
-	}
-	inline void ClearError()
-	{
-		writeError = false;
-	}
-	inline bool IsDirty() const
-	{
-		return size > 0;
-	}
-	inline bool IsClean() const
-	{
-		return size == 0;
-	}
-	inline bool IsFull() const
-	{
-		return size == buffer.size();
-	}
-	inline bool Write(mpt::const_byte_span data)
-	{
-		bool result = true;
-		for(std::size_t i = 0; i < data.size(); ++i)
-		{
-			buffer[size] = data[i];
-			size++;
-			if(IsFull())
-			{
-				FlushLocal();
-			}
-		}
-		return result;
-	}
-	inline void FlushLocal()
-	{
-		if(IsClean())
-		{
-			return;
-		}
-		if(!mpt::IO::WriteRaw(f, mpt::as_span(buffer.data(), size)))
-		{
-			writeError = true;
-		}
-		size = 0;
-	}
-};
-
-template <typename Tfile> bool IsValid(typename WriteBuffer<Tfile> & f) { return IsValid(f.file()); }
-template <typename Tfile> IO::Offset TellRead(typename WriteBuffer<Tfile> & f) { return TellRead(f.file()); }
-template <typename Tfile> IO::Offset TellWrite(typename WriteBuffer<Tfile> & f) { return TellWrite(f.file()); }
-template <typename Tfile> bool SeekBegin(typename WriteBuffer<Tfile> & f) { return SeekBegin(f.file()); }
-template <typename Tfile> bool SeekEnd(typename WriteBuffer<Tfile> & f) { return SeekEnd(f.file()); }
-template <typename Tfile> bool SeekAbsolute(typename WriteBuffer<Tfile> & f, IO::Offset pos) { return SeekAbsolute(f.file(), pos); }
-template <typename Tfile> bool SeekRelative(typename WriteBuffer<Tfile> & f, IO::Offset off) { return SeekRelative(f.file(), off); }
-template <typename Tfile> IO::Offset ReadRawImpl(FILE * & f, mpt::byte * data, std::size_t size) { return ReadRawImpl(f.file(), data, size); }
-template <typename Tfile> bool WriteRawImpl(typename WriteBuffer<Tfile> & f, const mpt::byte * data, std::size_t size) { return f.Write(mpt::as_span(data, size)); }
+template <typename Tfile> bool IsValid(WriteBuffer<Tfile> & f) { return IsValid(f.file()); }
+template <typename Tfile> IO::Offset TellRead(WriteBuffer<Tfile> & f) { return TellRead(f.file()); }
+template <typename Tfile> IO::Offset TellWrite(WriteBuffer<Tfile> & f) { return TellWrite(f.file()); }
+template <typename Tfile> bool SeekBegin(WriteBuffer<Tfile> & f) { return SeekBegin(f.file()); }
+template <typename Tfile> bool SeekEnd(WriteBuffer<Tfile> & f) { return SeekEnd(f.file()); }
+template <typename Tfile> bool SeekAbsolute(WriteBuffer<Tfile> & f, IO::Offset pos) { return SeekAbsolute(f.file(), pos); }
+template <typename Tfile> bool SeekRelative(WriteBuffer<Tfile> & f, IO::Offset off) { return SeekRelative(f.file(), off); }
+template <typename Tfile> IO::Offset ReadRawImpl(WriteBuffer<Tfile> & f, mpt::byte * data, std::size_t size) { return ReadRawImpl(f.file(), data, size); }
+template <typename Tfile> bool WriteRawImpl(WriteBuffer<Tfile> & f, const mpt::byte * data, std::size_t size) { return f.Write(mpt::as_span(data, size)); }
 template <typename Tfile> bool IsEof(WriteBuffer<Tfile> & f) { return IsEof(f.file()); }
-template <typename Tfile> bool Flush(typename WriteBuffer<Tfile> & f) { return Flush(f.file()); }
+template <typename Tfile> bool Flush(WriteBuffer<Tfile> & f) { return Flush(f.file()); }
+
+
 
 
 
@@ -672,6 +589,97 @@ inline bool WriteTextLF(Tfile &f, const std::string &s)
 {
 	return mpt::IO::WriteText(f, s) && mpt::IO::WriteTextLF(f);
 }
+
+
+
+// WriteBuffer class that avoids calling to the underlying file writing
+// functions for every operation, which would involve rather slow un-inlinable
+// virtual calls in the iostream and FILE* cases. It is the users responabiliy
+// to call HasWriteError() to check for writeback errors at this buffering
+// level.
+
+template <typename Tfile>
+class WriteBuffer
+{
+private:
+	mpt::byte_span buffer;
+	std::size_t size;
+	Tfile & f;
+	bool writeError;
+public:
+	WriteBuffer(const WriteBuffer &) = delete;
+	WriteBuffer & operator=(const WriteBuffer &) = delete;
+public:
+	inline WriteBuffer(Tfile & f_, mpt::byte_span buffer_)
+		: buffer(buffer_)
+		, size(0)
+		, f(f_)
+		, writeError(false)
+	{
+	}
+	inline ~WriteBuffer()
+	{
+		FlushLocal();
+	}
+public:
+	inline Tfile & file() const
+	{
+		if(IsDirty())
+		{
+			FlushLocal();
+		}
+		return f;
+	}
+public:
+	inline bool HasWriteError() const
+	{
+		return writeError;
+	}
+	inline void ClearError()
+	{
+		writeError = false;
+	}
+	inline bool IsDirty() const
+	{
+		return size > 0;
+	}
+	inline bool IsClean() const
+	{
+		return size == 0;
+	}
+	inline bool IsFull() const
+	{
+		return size == buffer.size();
+	}
+	inline bool Write(mpt::const_byte_span data)
+	{
+		bool result = true;
+		for(std::size_t i = 0; i < data.size(); ++i)
+		{
+			buffer[size] = data[i];
+			size++;
+			if(IsFull())
+			{
+				FlushLocal();
+			}
+		}
+		return result;
+	}
+	inline void FlushLocal()
+	{
+		if(IsClean())
+		{
+			return;
+		}
+		if(!mpt::IO::WriteRaw(f, mpt::as_span(buffer.data(), size)))
+		{
+			writeError = true;
+		}
+		size = 0;
+	}
+};
+
+
 
 } // namespace IO
 
