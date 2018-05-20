@@ -37,10 +37,10 @@ namespace IO {
 
 typedef int64 Offset;
 
-static const std::size_t BUFFERSIZE_TINY   =    1 * 1024; // on stack usage
-static const std::size_t BUFFERSIZE_SMALL  =    4 * 1024; // on heap
-static const std::size_t BUFFERSIZE_NORMAL =   64 * 1024; // FILE I/O
-static const std::size_t BUFFERSIZE_LARGE  = 1024 * 1024;
+static constexpr std::size_t BUFFERSIZE_TINY   =    1 * 1024; // on stack usage
+static constexpr std::size_t BUFFERSIZE_SMALL  =    4 * 1024; // on heap
+static constexpr std::size_t BUFFERSIZE_NORMAL =   64 * 1024; // FILE I/O
+static constexpr std::size_t BUFFERSIZE_LARGE  = 1024 * 1024;
 
 
 
