@@ -954,14 +954,6 @@ public:
 	MPT_ENDIAN_CONSTEXPR_FUN base_type operator -- (int) noexcept { base_type old = get(); set(old - 1); return old; } // postfix
 };
 
-template <typename Tpacked>
-MPT_ENDIAN_CONSTEXPR_FUN Tpacked as_endian(typename Tpacked::base_type v) noexcept
-{
-	Tpacked res;
-	res = v;
-	return res;
-}
-
 typedef packed< int64, LittleEndian_tag> int64le;
 typedef packed< int32, LittleEndian_tag> int32le;
 typedef packed< int16, LittleEndian_tag> int16le;
@@ -1000,8 +992,31 @@ MPT_BINARY_STRUCT(uint8be , 1)
 
 namespace mpt {
 
-template <typename T> struct make_le { typedef packed<T, LittleEndian_tag> type; };
-template <typename T> struct make_be { typedef packed<T, BigEndian_tag> type; };
+template <typename T> struct make_le { typedef packed<typename std::remove_const<T>::type, LittleEndian_tag> type; };
+template <typename T> struct make_be { typedef packed<typename std::remove_const<T>::type, BigEndian_tag> type; };
+
+template <typename T>
+MPT_ENDIAN_CONSTEXPR_FUN auto as_le(T v) noexcept -> typename mpt::make_le<typename std::remove_const<T>::type>::type
+{
+	typename mpt::make_le<typename std::remove_const<T>::type>::type res;
+	res = v;
+	return res;
+}
+template <typename T>
+MPT_ENDIAN_CONSTEXPR_FUN auto as_be(T v) noexcept -> typename mpt::make_be<typename std::remove_const<T>::type>::type
+{
+	typename mpt::make_be<typename std::remove_const<T>::type>::type res;
+	res = v;
+	return res;
+}
+
+template <typename Tpacked>
+MPT_ENDIAN_CONSTEXPR_FUN Tpacked as_endian(typename Tpacked::base_type v) noexcept
+{
+	Tpacked res;
+	res = v;
+	return res;
+}
 
 } // namespace mpt
 
