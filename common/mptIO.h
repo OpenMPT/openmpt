@@ -196,7 +196,7 @@ inline bool WriteRaw(Tfile & f, const Tbyte * data, std::size_t size)
 }
 
 template <typename Tbyte, typename Tfile>
-inline bool WriteRaw(Tfile & f, mpt::span<const Tbyte> data)
+inline bool WriteRaw(Tfile & f, mpt::span<Tbyte> data)
 {
 	return IO::WriteRawImpl(f, mpt::byte_cast<const mpt::byte*>(data.data()), data.size());
 }
