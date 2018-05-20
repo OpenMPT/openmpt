@@ -397,6 +397,10 @@ template <typename T> inline span<T> as_span(T * data, std::size_t size) { retur
 
 template <typename T, std::size_t N> inline span<T> as_span(T (&arr)[N]) { return span<T>(std::begin(arr), std::end(arr)); }
 
+template <typename T, std::size_t N> inline span<T> as_span(std::array<T, N> & cont) { return span<T>(cont); }
+
+template <typename T, std::size_t N> inline span<const T> as_span(const std::array<T, N> & cont) { return span<const T>(cont); }
+
 template <typename T> inline span<T> as_span(std::vector<T> & cont) { return span<T>(cont); }
 
 template <typename T> inline span<const T> as_span(const std::vector<T> & cont) { return span<const T>(cont); }
