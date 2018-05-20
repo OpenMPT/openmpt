@@ -520,10 +520,10 @@ public:
 	T ReadIntLE()
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Target type is a not an integer");
-		T target;
+		typename mpt::make_le<T>::type target;
 		if(Read(target))
 		{
-			return SwapBytesLE(target);
+			return target;
 		} else
 		{
 			return 0;
@@ -536,10 +536,10 @@ public:
 	T ReadIntBE()
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Target type is a not an integer");
-		T target;
+		typename mpt::make_be<T>::type target;
 		if(Read(target))
 		{
-			return SwapBytesBE(target);
+			return target;
 		} else
 		{
 			return 0;
@@ -577,9 +577,9 @@ public:
 			}
 			buf[i] = byte;
 		}
-		T target;
+		typename mpt::make_le<T>::type target;
 		std::memcpy(&target, buf, sizeof(T));
-		return SwapBytesLE(target);
+		return target;
 	}
 
 	// Read a supplied-size little endian integer to a fixed size variable.
