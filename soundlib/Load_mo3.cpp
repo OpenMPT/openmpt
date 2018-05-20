@@ -1317,6 +1317,19 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			FileReader sampleData = file.ReadChunk(smpHeader.compressedSize);
 			const uint8 numChannels = sample.GetNumChannels();
 
+			if(compression == MO3Sample::smpDeltaCompression || compression == MO3Sample::smpDeltaPrediction)
+			{
+				// In the best case, MO3 compression represents each sample point as two bits.
+				// As a result, if we have a file length of n, we know that the sample can be at most n*4 sample points long.
+				size_t maxLength = smpHeader.compressedSize;
+				uint8 maxSamplesPerByte = 4 / numChannels;
+				if(Util::MaxValueOfType(maxLength) / maxSamplesPerByte >= maxLength)
+					maxLength *= maxSamplesPerByte;
+				else
+					maxLength = Util::MaxValueOfType(maxLength);
+				LimitMax(sample.nLength, mpt::saturate_cast<SmpLength>(maxLength));
+			}
+
 			if(compression == MO3Sample::smpDeltaCompression)
 			{
 				if(sample.AllocateSample())
@@ -1404,7 +1417,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				// We do not handle multiple muxed logical streams as they do not exist in practice in mo3.
 				// We assume sequence numbers are consecutive at the end of the headers.
 				// Corrupted pages get dropped as required by Ogg spec. We cannot do any further sane parsing on them anyway.
-				// We do not match up multiple muxed stream properly as this wold need parsing of actual packet data to determine or guess the codec.
+				// We do not match up multiple muxed stream properly as this would need parsing of actual packet data to determine or guess the codec.
 				// Ogg Vorbis files may contain at least an additional Ogg Skeleton stream. It is not clear whether these actually exist in MO3.
 				// We do not validate packet structure or logical bitstream structure (i.e. sequence numbers and granule positions).
 
@@ -1576,7 +1589,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			};
 			OggVorbis_File vf;
 			MemsetZero(vf);
-			if(ov_open_callbacks(&sampleData, &vf, NULL, 0, callbacks) == 0)
+			if(ov_open_callbacks(&sampleData, &vf, nullptr, 0, callbacks) == 0)
 			{
 				if(ov_streams(&vf) == 1)
 				{ // we do not support chained vorbis samples
