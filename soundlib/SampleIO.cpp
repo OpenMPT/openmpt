@@ -21,15 +21,14 @@
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
 #endif
-#include <stdexcept>
+#include "BitReader.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 // Sample decompression routines in other source files
 void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
-uint8 MDLReadBits(uint32 &bitbuf, int32 &bitnum, const uint8 *(&ibuf), size_t &bytesLeft, int8 n);
-uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uint32 maxlen);
+uintptr_t DMFUnpack(FileReader &file, uint8 *psample, uint32 maxlen);
 
 
 // Read a sample from memory
@@ -59,14 +58,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		fileSize = restrictedSampleDataView.size();
 	} else
 	{
-		// Only DMF sample compression encoding should fall in this case,
-		MPT_ASSERT(GetEncoding() == DMF);
-		// file is guaranteed by the caller to be ONLY data for this sample,
-		// it is thus efficient to create a view to the whole file object.
-		// See MPT_ASSERT with fileSize below.
-		restrictedSampleDataView = file.GetPinnedRawDataView();
-		sourceBuf = restrictedSampleDataView.data();
-		fileSize = restrictedSampleDataView.size();
+		MPT_ASSERT_NOTREACHED();
 	}
 	if(!IsVariableLengthEncoded() && sample.nLength > 0x40000)
 	{
@@ -182,16 +174,8 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		// Huffman MDL compressed samples
 		if(file.CanRead(8) && (fileSize = file.ReadUint32LE()) >= 4)
 		{
-			FileReader chunk = file.ReadChunk(fileSize);
+			BitReader chunk = file.ReadChunk(fileSize);
 			bytesRead = chunk.GetLength() + 4;
-			uint32 bitBuf = chunk.ReadUint32LE();
-			int32 bitNum = 32;
-
-			restrictedSampleDataView = chunk.GetPinnedRawDataView();
-			sourceBuf = restrictedSampleDataView.data();
-
-			const uint8 *inBuf = reinterpret_cast<const uint8*>(sourceBuf);
-			size_t bytesLeft = chunk.BytesLeft();
 
 			uint8 dlt = 0, lowbyte = 0;
 			const bool is16bit = GetBitDepth() == 16;
@@ -202,20 +186,20 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 					uint8 hibyte;
 					if(is16bit)
 					{
-						lowbyte = MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 8);
+						lowbyte = chunk.ReadBits(8);
 					}
-					bool sign = MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1) != 0;
-					if(MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1))
+					bool sign = chunk.ReadBits(1) != 0;
+					if(chunk.ReadBits(1))
 					{
-						hibyte = MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 3);
+						hibyte = chunk.ReadBits(3);
 					} else
 					{
 						hibyte = 8;
-						while(!MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 1))
+						while(!chunk.ReadBits(1))
 						{
 							hibyte += 0x10;
 						}
-						hibyte += MDLReadBits(bitBuf, bitNum, inBuf, bytesLeft, 4);
+						hibyte += chunk.ReadBits(4);
 					}
 					if(sign)
 					{
@@ -225,13 +209,12 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 					if(!is16bit)
 					{
 						sample.sample8()[j] = dlt;
-					}
-					else
+					} else
 					{
 						sample.sample16()[j] = lowbyte | (dlt << 8);
 					}
 				}
-			} catch(const std::range_error &)
+			} catch(const BitReader::eof &)
 			{
 				// Data is not sufficient to decode the whole sample
 				//AddToLog(LogWarning, "Truncated MDL sample block");
@@ -242,17 +225,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		// DMF Huffman compression
 		if(fileSize > 4)
 		{
-			const uint8 *inBuf = mpt::byte_cast<const uint8*>(sourceBuf);
-			const uint8 *inBufMax = inBuf + fileSize;
-			uint8 *outBuf = mpt::byte_cast<uint8 *>(sample.sampleb());
-			bytesRead = DMFUnpack(outBuf, inBuf, inBufMax, sample.GetSampleSizeInBytes());
-
-			// This assertion ensures that, when using variable length samples,
-			// the caller actually provided a trimmed chunk to read the sample data from.
-			// This is required as we cannot know the encoded sample data size upfront
-			// to construct a properly sized pinned view.
-			MPT_ASSERT(bytesRead == fileSize);
-
+			bytesRead = DMFUnpack(file, mpt::byte_cast<uint8 *>(sample.sampleb()), sample.GetSampleSizeInBytes());
 		}
 #ifdef MODPLUG_TRACKER
 	} else if((GetEncoding() == uLaw || GetEncoding() == aLaw) && GetBitDepth() == 16 && (GetChannelFormat() == mono || GetChannelFormat() == stereoInterleaved))

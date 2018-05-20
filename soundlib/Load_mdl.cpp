@@ -12,8 +12,6 @@
 #include "Loaders.h"
 #include "ChunkReader.h"
 
-#include <stdexcept>
-
 OPENMPT_NAMESPACE_BEGIN
 
 // MDL file header
@@ -821,32 +819,6 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	return true;
-}
-
-
-/////////////////////////////////////////////////////////////////////////
-// MDL Sample Unpacking
-
-// MDL Huffman ReadBits compression
-uint8 MDLReadBits(uint32 &bitbuf, int32 &bitnum, const uint8 *(&ibuf), size_t &bytesLeft, int8 n)
-{
-	if(bitnum < n)
-	{
-		if(bytesLeft)
-		{
-			bitbuf |= (((uint32)(*ibuf++)) << bitnum);
-			bitnum += 8;
-			bytesLeft--;
-		} else
-		{
-			throw std::range_error("Truncated MDL sample block");
-		}
-	}
-
-	uint8 v = static_cast<uint8>(bitbuf & ((1 << n) - 1));
-	bitbuf >>= n;
-	bitnum -= n;
-	return v;
 }
 
 
