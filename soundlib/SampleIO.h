@@ -126,22 +126,6 @@ public:
 		format = (format & ~encodingMask) | (encoding << encodingOffset);
 	}
 
-	static inline Endianness GetNativeEndianness()
-	{
-		const mpt::endian_type endian = mpt::endian();
-		MPT_ASSERT((endian == mpt::endian_little) || (endian == mpt::endian_big));
-		Endianness result = littleEndian;
-		MPT_MAYBE_CONSTANT_IF(endian == mpt::endian_little)
-		{
-			result = littleEndian;
-		}
-		MPT_MAYBE_CONSTANT_IF(endian == mpt::endian_big)
-		{
-			result = bigEndian;
-		}
-		return result;
-	}
-
 	void MayNormalize()
 	{
 		if(GetBitDepth() == 24 || GetBitDepth() == 32)
@@ -299,8 +283,6 @@ public:
 	size_t ReadSample(ModSample &sample, FileReader &file) const;
 
 #ifndef MODPLUG_NO_FILESAVE
-	// Optionally write a sample to file
-	size_t WriteSample(std::ostream *f, const ModSample &sample, SmpLength maxSamples = 0) const;
 	// Write a sample to file
 	size_t WriteSample(std::ostream &f, const ModSample &sample, SmpLength maxSamples = 0) const;
 	// Write a sample to file

@@ -846,20 +846,24 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 
 
 // Write a sample to file
-size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength maxSamples) const
+size_t SampleIO::WriteSample(std::ostream &f, const ModSample &sample, SmpLength maxSamples) const
 {
-	if(!sample.HasSampleData()) return 0;
-
-	union
+	if(!sample.HasSampleData())
 	{
-		int8 buffer8[8192];
-		int16 buffer16[4096];
-	};
+		return 0;
+	}
+
+	std::array<mpt::byte, mpt::IO::BUFFERSIZE_TINY> writeBuffer;
+	mpt::IO::WriteBuffer<std::ostream> fb{f, mpt::as_span(writeBuffer)};
+
 	SmpLength numSamples = sample.nLength;
 
-	if(maxSamples && numSamples > maxSamples) numSamples = maxSamples;
+	if(maxSamples && numSamples > maxSamples)
+	{
+		numSamples = maxSamples;
+	}
 
-	size_t len = CalculateEncodedSize(numSamples), bufcount = 0;
+	std::size_t len = CalculateEncodedSize(numSamples);
 
 	if(GetBitDepth() == 16 && GetChannelFormat() == mono && GetEndianness() == littleEndian &&
 		(GetEncoding() == signedPCM || GetEncoding() == unsignedPCM || GetEncoding() == deltaPCM))
@@ -867,7 +871,6 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 		// 16-bit little-endian mono samples
 		MPT_ASSERT(len == numSamples * 2);
 		const int16 *const pSample16 = sample.sample16();
-		if(!f) return len;
 		const int16 *p = pSample16;
 		int s_old = 0;
 		const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x8000 : 0;
@@ -883,20 +886,13 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 			}
 			if(GetEncoding() == deltaPCM)
 			{
-				buffer16[bufcount] = SwapBytesLE((int16)(s_new - s_old));
+				mpt::IO::Write(fb, mpt::as_le(static_cast<int16>(s_new - s_old)));
 				s_old = s_new;
 			} else
 			{
-				buffer16[bufcount] = SwapBytesLE((int16)(s_new + s_ofs));
-			}
-			bufcount++;
-			if(bufcount >= mpt::size(buffer16))
-			{
-				mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer16), bufcount * 2);
-				bufcount = 0;
+				mpt::IO::Write(fb, mpt::as_le(static_cast<int16>(s_new + s_ofs)));
 			}
 		}
-		if (bufcount) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer16), bufcount * 2);
 	}
 
 	else if(GetBitDepth() == 8 && GetChannelFormat() == stereoSplit &&
@@ -905,33 +901,24 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 		// 8-bit Stereo samples (not interleaved)
 		MPT_ASSERT(len == numSamples * 2);
 		const int8 *const pSample8 = sample.sample8();
-		if(!f) return len;
 		const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
 		for (uint32 iCh=0; iCh<2; iCh++)
 		{
 			const int8 *p = pSample8 + iCh;
 			int s_old = 0;
-
-			bufcount = 0;
 			for (SmpLength j = 0; j < numSamples; j++)
 			{
 				int s_new = *p;
 				p += 2;
 				if (GetEncoding() == deltaPCM)
 				{
-					buffer8[bufcount++] = (int8)(s_new - s_old);
+					mpt::IO::Write(fb, static_cast<int8>(s_new - s_old));
 					s_old = s_new;
 				} else
 				{
-					buffer8[bufcount++] = (int8)(s_new + s_ofs);
-				}
-				if(bufcount >= mpt::size(buffer8))
-				{
-					mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
-					bufcount = 0;
+					mpt::IO::Write(fb, static_cast<int8>(s_new + s_ofs));
 				}
 			}
-			if (bufcount) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
 		}
 	}
 
@@ -941,42 +928,61 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 		// 16-bit little-endian Stereo samples (not interleaved)
 		MPT_ASSERT(len == numSamples * 4);
 		const int16 *const pSample16 = sample.sample16();
-		if(!f) return len;
 		const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x8000 : 0;
 		for (uint32 iCh=0; iCh<2; iCh++)
 		{
 			const int16 *p = pSample16 + iCh;
 			int s_old = 0;
-
-			bufcount = 0;
 			for (SmpLength j = 0; j < numSamples; j++)
 			{
 				int s_new = *p;
 				p += 2;
 				if (GetEncoding() == deltaPCM)
 				{
-					buffer16[bufcount] = SwapBytesLE((int16)(s_new - s_old));
+					mpt::IO::Write(fb, mpt::as_le(static_cast<int16>(s_new - s_old)));
 					s_old = s_new;
 				} else
 				{
-					buffer16[bufcount] = SwapBytesLE((int16)(s_new + s_ofs));
-				}
-				bufcount++;
-				if(bufcount >= mpt::size(buffer16))
-				{
-					mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer16), bufcount * 2);
-					bufcount = 0;
+					mpt::IO::Write(fb, mpt::as_le(static_cast<int16>(s_new + s_ofs)));
 				}
 			}
-			if (bufcount) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer16), bufcount * 2);
 		}
 	}
 
-	else if((GetBitDepth() == 8 || (GetBitDepth() == 16 && GetEndianness() == GetNativeEndianness())) && GetChannelFormat() == stereoInterleaved && GetEncoding() == signedPCM)
+	else if(GetBitDepth() == 8 && GetChannelFormat() == stereoInterleaved && GetEncoding() == signedPCM)
 	{
 		// Stereo signed interleaved
-		const void *const pSampleVoid = sample.samplev();
-		if(f) mpt::IO::WriteRaw(*f, mpt::void_cast<const mpt::byte*>(pSampleVoid), len);
+		MPT_ASSERT(len == numSamples * 2);
+		const int8 *const pSample8 = sample.sample8();
+		mpt::IO::WriteRaw(f, reinterpret_cast<const mpt::byte*>(pSample8), len);
+	}
+
+	else if(GetBitDepth() == 16 && GetChannelFormat() == stereoInterleaved && GetEncoding() == signedPCM && GetEndianness() == littleEndian)
+	{
+		// Stereo signed interleaved
+		MPT_ASSERT(len == numSamples * 4);
+		const int16 *const pSample16 = sample.sample16();
+		const int16 *p = pSample16;
+		for(SmpLength j = 0; j < numSamples; j++)
+		{
+			mpt::IO::Write(fb, mpt::as_le(p[0]));
+			mpt::IO::Write(fb, mpt::as_le(p[1]));
+			p += 2;
+		}
+	}
+
+	else if(GetBitDepth() == 16 && GetChannelFormat() == stereoInterleaved && GetEncoding() == signedPCM && GetEndianness() == bigEndian)
+	{
+		// Stereo signed interleaved
+		MPT_ASSERT(len == numSamples * 4);
+		const int16 *const pSample16 = sample.sample16();
+		const int16 *p = pSample16;
+		for(SmpLength j = 0; j < numSamples; j++)
+		{
+			mpt::IO::Write(fb, mpt::as_be(p[0]));
+			mpt::IO::Write(fb, mpt::as_be(p[1]));
+			p += 2;
+		}
 	}
 
 	else if(GetBitDepth() == 8 && GetChannelFormat() == stereoInterleaved && GetEncoding() == unsignedPCM)
@@ -984,24 +990,16 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 		// Stereo unsigned interleaved
 		MPT_ASSERT(len == numSamples * 2);
 		const int8 *const pSample8 = sample.sample8();
-		if(!f) return len;
-		for(SmpLength j = 0; j < len; j++)
+		for(SmpLength j = 0; j < numSamples * 2; j++)
 		{
-			buffer8[bufcount] = (int8)((uint8)(pSample8[j]) + 0x80);
-			bufcount++;
-			if(bufcount >= mpt::size(buffer8))
-			{
-				mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
-				bufcount = 0;
-			}
+			mpt::IO::Write(fb, static_cast<int8>(static_cast<uint8>(pSample8[j]) + 0x80));
 		}
-		if (bufcount) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
 	}
 
 	else if(GetEncoding() == IT214 || GetEncoding() == IT215)
 	{
 		// IT2.14-encoded samples
-		ITCompression its(sample, GetEncoding() == IT215, f, numSamples);
+		ITCompression its(sample, GetEncoding() == IT215, &f, numSamples);
 		len = its.GetCompressedSize();
 	}
 
@@ -1011,7 +1009,6 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 		MPT_ASSERT(GetBitDepth() == 8);
 		MPT_ASSERT(len == numSamples);
 		const int8 *const pSample8 = sample.sample8();
-		if(!f) return len;
 		const int8 *p = pSample8;
 		int sinc = sample.GetElementarySampleSize();
 		int s_old = 0;
@@ -1020,48 +1017,36 @@ size_t SampleIO::WriteSample(std::ostream *f, const ModSample &sample, SmpLength
 		{
 			if (sample.uFlags[CHN_16BIT]) p++;
 		}
-
-		for (SmpLength j = 0; j < len; j++)
+		for (SmpLength j = 0; j < numSamples; j++)
 		{
-			int s_new = (int8)(*p);
+			int s_new = *p;
 			p += sinc;
 			if (sample.uFlags[CHN_STEREO])
 			{
-				s_new = (s_new + ((int)*p) + 1) / 2;
+				s_new = (s_new + (static_cast<int>(*p)) + 1) / 2;
 				p += sinc;
 			}
 			if (GetEncoding() == deltaPCM)
 			{
-				buffer8[bufcount++] = (int8)(s_new - s_old);
+				mpt::IO::Write(fb, static_cast<int8>(s_new - s_old));
 				s_old = s_new;
 			} else
 			{
-				buffer8[bufcount++] = (int8)(s_new + s_ofs);
-			}
-			if(bufcount >= mpt::size(buffer8))
-			{
-				mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
-				bufcount = 0;
+				mpt::IO::Write(fb, static_cast<int8>(s_new + s_ofs));
 			}
 		}
-		if (bufcount) mpt::IO::WriteRaw(*f, reinterpret_cast<mpt::byte*>(buffer8), bufcount);
 	}
+
 	return len;
-}
-
-
-// Write a sample to file
-size_t SampleIO::WriteSample(std::ostream &f, const ModSample &sample, SmpLength maxSamples) const
-{
-	return WriteSample(&f, sample, maxSamples);
 }
 
 
 // Write a sample to file
 size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamples) const
 {
+	MPT_ASSERT(f != nullptr);
 	mpt::FILE_ostream s(f);
-	return WriteSample(f ? &s : nullptr, sample, maxSamples);
+	return WriteSample(s, sample, maxSamples);
 }
 
 
