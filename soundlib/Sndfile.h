@@ -262,7 +262,7 @@ class AudioSourceNone
 	: public IAudioSource
 {
 public:
-	virtual void FillCallback(int * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk)
+	void FillCallback(int * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) override
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
