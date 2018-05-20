@@ -954,6 +954,14 @@ public:
 	MPT_ENDIAN_CONSTEXPR_FUN base_type operator -- (int) noexcept { base_type old = get(); set(old - 1); return old; } // postfix
 };
 
+template <typename Tpacked>
+MPT_ENDIAN_CONSTEXPR_FUN Tpacked as_endian(typename Tpacked::base_type v) noexcept
+{
+	Tpacked res;
+	res = v;
+	return res;
+}
+
 typedef packed< int64, LittleEndian_tag> int64le;
 typedef packed< int32, LittleEndian_tag> int32le;
 typedef packed< int16, LittleEndian_tag> int16le;
