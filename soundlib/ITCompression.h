@@ -13,7 +13,7 @@
 #include <vector>
 #include <iosfwd>
 #include "Snd_defs.h"
-#include "../common/FileReader.h"
+#include "BitReader.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -73,26 +73,18 @@ public:
 	ITDecompression(FileReader &file, ModSample &sample, bool it215);
 
 protected:
+	BitReader bitFile;
 	ModSample &mptSample;		// Sample that is being processed
 
 	SmpLength writtenSamples;	// Number of samples so far written on this channel
 	SmpLength writePos;			// Absolut write position in sample (for stereo samples)
 	SmpLength curLength;		// Length of currently processed block
 	unsigned int mem1, mem2;	// Integrator memory
-	int dataPos, dataSize;		// Position in and size of input block
-
-	// Bit reader
-	int bitPos;					// Current bit position in this byte
-	int remBits;				// Remaining bits in this byte
-
 	bool is215;					// Use IT2.15 compression (double deltas)
-
-	mpt::byte chunk[65535];		// Input block
 
 	template<typename Properties>
 	void Uncompress(typename Properties::sample_t *target);
 	static void ChangeWidth(int &curWidth, int width);
-	int ReadBits(int width);
 
 	template<typename Properties>
 	void Write(int v, int topbit, typename Properties::sample_t *target);

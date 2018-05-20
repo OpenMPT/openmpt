@@ -1066,9 +1066,9 @@ struct DMFHTree
 	{
 		int actnode = nodecount;
 		if(actnode > 255) return;
-		nodes[actnode].value = file.ReadBits(7);
-		uint8 isLeft = file.ReadBits(1);
-		uint8 isRight = file.ReadBits(1);
+		nodes[actnode].value = static_cast<uint8>(file.ReadBits(7));
+		bool isLeft = file.ReadBits(1) != 0;
+		bool isRight = file.ReadBits(1) != 0;
 		actnode = lastnode;
 		if(actnode > 255) return;
 		nodecount++;
@@ -1105,7 +1105,7 @@ uintptr_t DMFUnpack(FileReader &file, uint8 *psample, uint32 maxlen)
 		for(uint32 i = 0; i < maxlen; i++)
 		{
 			int actnode = 0;
-			uint8 sign = tree.file.ReadBits(1);
+			bool sign = tree.file.ReadBits(1) != 0;
 			do
 			{
 				if(tree.file.ReadBits(1))

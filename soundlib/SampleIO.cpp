@@ -186,12 +186,12 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 					uint8 hibyte;
 					if(is16bit)
 					{
-						lowbyte = chunk.ReadBits(8);
+						lowbyte = static_cast<uint8>(chunk.ReadBits(8));
 					}
 					bool sign = chunk.ReadBits(1) != 0;
 					if(chunk.ReadBits(1))
 					{
-						hibyte = chunk.ReadBits(3);
+						hibyte = static_cast<uint8>(chunk.ReadBits(3));
 					} else
 					{
 						hibyte = 8;
@@ -199,7 +199,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 						{
 							hibyte += 0x10;
 						}
-						hibyte += chunk.ReadBits(4);
+						hibyte += static_cast<uint8>(chunk.ReadBits(4));
 					}
 					if(sign)
 					{

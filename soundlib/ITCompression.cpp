@@ -319,21 +319,25 @@ ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215
 		writtenSamples = writePos = 0;
 		while(writtenSamples < sample.nLength && file.CanRead(sizeof(uint16)))
 		{
-			dataSize = file.ReadUint16LE();
-			if(!dataSize)
+			uint16 compressedSize = file.ReadUint16LE();
+			if(!compressedSize)
 				continue;	// Malformed sample?
-			file.ReadRaw(chunk, dataSize);
+			bitFile = file.ReadChunk(compressedSize);
 
 			// Initialise bit reader
-			dataPos = 0;
-			bitPos = 0;
-			remBits = 8;
 			mem1 = mem2 = 0;
 
-			if(mptSample.GetElementarySampleSize() > 1)
-				Uncompress<IT16BitParams>(mptSample.sample16() + chn);
-			else
-				Uncompress<IT8BitParams>(mptSample.sample8() + chn);
+			try
+			{
+				if(mptSample.GetElementarySampleSize() > 1)
+					Uncompress<IT16BitParams>(mptSample.sample16() + chn);
+				else
+					Uncompress<IT8BitParams>(mptSample.sample8() + chn);
+			} catch(const BitReader::eof &)
+			{
+				// Data is not sufficient to decode the block
+				//AddToLog(LogWarning, "Truncated IT sample block");
+			}
 		}
 	}
 }
@@ -349,19 +353,19 @@ void ITDecompression::Uncompress(typename Properties::sample_t *target)
 	int width = defWidth;
 	while(curLength > 0)
 	{
-		if(width > defWidth || dataPos >= dataSize)
+		if(width > defWidth)
 		{
 			// Error!
 			return;
 		}
 
-		int v = ReadBits(width);
+		int v = bitFile.ReadBits(width);
 		const int topBit = (1 << (width - 1));
 		if(width <= 6)
 		{
 			// Mode A: 1 to 6 bits
 			if(v == topBit)
-				ChangeWidth(width, ReadBits(Properties::fetchA));
+				ChangeWidth(width, bitFile.ReadBits(Properties::fetchA));
 			else
 				Write<Properties>(v, topBit, target);
 		} else if(width < defWidth)
@@ -389,30 +393,6 @@ void ITDecompression::ChangeWidth(int &curWidth, int width)
 	if(width >= curWidth)
 		width++;
 	curWidth = width;
-}
-
-
-int ITDecompression::ReadBits(int width)
-{
-	int v = 0, vPos = 0, vMask = (1 << width) - 1;
-	while(width >= remBits && dataPos < dataSize)
-	{
-		v |= (mpt::byte_cast<uint8>(chunk[dataPos]) >> bitPos) << vPos;
-		vPos += remBits;
-		width -= remBits;
-		dataPos++;
-		remBits = 8;
-		bitPos = 0;
-	}
-
-	if(width > 0 && dataPos < dataSize)
-	{
-		v |= (mpt::byte_cast<uint8>(chunk[dataPos]) >> bitPos) << vPos;
-		v &= vMask;
-		remBits -= width;
-		bitPos += width;
-	}
-	return v;
 }
 
 

@@ -2,7 +2,7 @@
  * BitReader.h
  * -----------
  * Purpose: An extended FileReader to read bit-oriented rather than byte-oriented streams.
- * Notes  : The current implementation can only read bit widths up to 8 bits, and it always
+ * Notes  : The current implementation can only read bit widths up to 32 bits, and it always
  *          reads bits starting from the least significant bit, as this is all that is
  *          required by the class users at the moment.
  * Authors: OpenMPT Devs
@@ -24,10 +24,10 @@ class BitReader : private FileReader
 //==================================
 {
 protected:
-	off_t bufPos = 0, bufSize = 0;
-	uint32 bitBuf = 0;
-	int bitNum = 0;
-	mpt::byte buffer[16384];
+	off_t m_bufPos = 0, m_bufSize = 0;
+	uint32 bitBuf = 0; // Current bit buffer
+	int m_bitNum = 0;  // Currently available number of bits
+	mpt::byte buffer[mpt::IO::BUFFERSIZE_TINY];
 
 public:
 
@@ -38,7 +38,7 @@ public:
 	};
 
 	BitReader(mpt::span<const mpt::byte> bytedata) : FileReader(bytedata) { }
-	BitReader(const FileReader &other) : FileReader(other) { }
+	BitReader(const FileReader &other = FileReader()) : FileReader(other) { }
 
 	off_t GetLength() const
 	{
@@ -47,30 +47,30 @@ public:
 
 	off_t GetPosition() const
 	{
-		return FileReader::GetPosition() - bufSize + bufPos;
+		return FileReader::GetPosition() - m_bufSize + m_bufPos;
 	}
 
-	uint8 ReadBits(int numBits)
+	uint32 ReadBits(int numBits)
 	{
-		if(bitNum < numBits)
+		while(m_bitNum < numBits)
 		{
 			// Fetch more bits
-			if(bufPos >= bufSize)
+			if(m_bufPos >= m_bufSize)
 			{
-				bufSize = ReadRaw(buffer, sizeof(buffer));
-				bufPos = 0;
-				if(!bufSize)
+				m_bufSize = ReadRaw(buffer, sizeof(buffer));
+				m_bufPos = 0;
+				if(!m_bufSize)
 				{
 					throw eof();
 				}
 			}
-			bitBuf |= (static_cast<uint32>(buffer[bufPos++]) << bitNum);
-			bitNum += 8;
+			bitBuf |= (static_cast<uint32>(buffer[m_bufPos++]) << m_bitNum);
+			m_bitNum += 8;
 		}
 
-		uint8 v = static_cast<uint8>(bitBuf & ((1 << numBits) - 1));
+		uint32 v = bitBuf & ((1 << numBits) - 1);
 		bitBuf >>= numBits;
-		bitNum -= numBits;
+		m_bitNum -= numBits;
 		return v;
 	}
 };
