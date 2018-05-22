@@ -695,8 +695,16 @@ static constexpr int32le TestEndianConstexpr(uint32 x)
 static MPT_NOINLINE void TestMisc1()
 {
 
-	VERIFY_EQUAL(mpt::endian(), mpt::detail::endian_probe());
-	VERIFY_EQUAL((mpt::endian() == mpt::endian_big) || (mpt::endian() == mpt::endian_little), true);	
+	VERIFY_EQUAL(mpt::get_endian(), mpt::detail::endian_probe());
+	#if MPT_PLATFORM_ENDIAN_KNOWN && defined(MPT_PLATFORM_LITTLE_ENDIAN)
+		VERIFY_EQUAL(mpt::get_endian(), mpt::endian_little);
+		VERIFY_EQUAL(mpt::detail::endian_probe(), mpt::endian_little);
+		VERIFY_EQUAL(mpt::endian::native, mpt::endian::little);
+	#elif MPT_PLATFORM_ENDIAN_KNOWN && defined(MPT_PLATFORM_BIG_ENDIAN)
+		VERIFY_EQUAL(mpt::get_endian(), mpt::endian_big);
+		VERIFY_EQUAL(mpt::detail::endian_probe(), mpt::endian_big);
+		VERIFY_EQUAL(mpt::endian::native, mpt::endian::big);
+	#endif
 
 #if MPT_ENDIAN_IS_CONSTEXPR
 	constexpr int32le foo = TestEndianConstexpr(23);

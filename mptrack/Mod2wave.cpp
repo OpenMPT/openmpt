@@ -1170,7 +1170,8 @@ void CDoWaveConvert::Run()
 				fileEnc->WriteInterleaved(lRead, floatbuffer);
 			} else
 			{
-				if(fileEnc->GetConvertedEndianness() != mpt::endian())
+				MPT_ASSERT(!mpt::endian_is_weird());
+				if(fileEnc->GetConvertedEndianness() != mpt::get_endian())
 				{
 					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetBitsPerSample()/8, buffer, lRead * encSettings.Channels);
 				}
@@ -1277,7 +1278,8 @@ void CDoWaveConvert::Run()
 					case SampleFormatInt32:     ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<int32*>(buffer), mixbuffer, channels, framesChunk); break;
 					default: ASSERT(false); break;
 				}
-				if(fileEnc->GetConvertedEndianness() != mpt::endian())
+				MPT_ASSERT(!mpt::endian_is_weird());
+				if(fileEnc->GetConvertedEndianness() != mpt::get_endian())
 				{
 					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetBitsPerSample()/8, buffer, framesChunk * channels);
 				}

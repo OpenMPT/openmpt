@@ -1101,6 +1101,7 @@ static const char * Charset_wchar_t()
 			{
 				return "UTF-16BE";
 			}
+			return "UTF-16";
 		} else if(sizeof(wchar_t) == 4)
 		{
 			// "UTF-32" generates BOM
@@ -1112,8 +1113,8 @@ static const char * Charset_wchar_t()
 			{
 				return "UTF-32BE";
 			}
+			return "UTF-32";
 		}
-		return "";
 	#endif // !MPT_ICONV_NO_WCHAR | MPT_ICONV_NO_WCHAR
 }
 
@@ -1305,20 +1306,8 @@ static std::wstring DecodeImpl(Charset charset, const Tsrcstring &src)
 				{
 					outbuf[i] = 0;
 				}
-				#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
-					outbuf[1] = uint8(0xff); outbuf[0] = uint8(0xfd);
-				#elif defined(MPT_PLATFORM_BIG_ENDIAN)
-					outbuf[sizeof(wchar_t)-1 - 1] = uint8(0xff); outbuf[sizeof(wchar_t)-1 - 0] = uint8(0xfd);
-				#else
-					MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
-					{
-						outbuf[1] = uint8(0xff); outbuf[0] = uint8(0xfd);
-					}
-					MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
-					{
-						outbuf[sizeof(wchar_t)-1 - 1] = uint8(0xff); outbuf[sizeof(wchar_t)-1 - 0] = uint8(0xfd);
-					}
-				#endif
+				wchar_t tmp = 0xfffd;
+				std::memcpy(outbuf, &tmp, sizeof(wchar_t));
 				outbuf += sizeof(wchar_t);
 				outbytesleft -= sizeof(wchar_t);
 				iconv(conv, NULL, NULL, NULL, NULL); // reset state

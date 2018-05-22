@@ -277,10 +277,9 @@ inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 	{
 		result = (static_cast<uint64>(readResult) == std::min(size, sizeof(T)));
 	}
-	#ifdef MPT_PLATFORM_BIG_ENDIAN
-		std::reverse(bytes, bytes + sizeof(T));
-	#endif
-	std::memcpy(&v, bytes, sizeof(T));
+	typename mpt::make_le<T>::type val;
+	std::memcpy(&val, bytes, sizeof(T));
+	v = val;
 	return result;
 }
 

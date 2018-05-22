@@ -44,7 +44,7 @@ public:
 	}
 	mpt::endian_type GetConvertedEndianness() const override
 	{
-		return mpt::endian();
+		return mpt::get_endian();
 	}
 	void WriteInterleaved(size_t count, const float *interleaved) override
 	{

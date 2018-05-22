@@ -73,72 +73,79 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace mpt {
 
-struct endian_type { uint16 value; };
+// C++20 std::endian
+enum class endian
+{
+	little = 0x78563412u,
+	big    = 0x12345678u,
+#if MPT_PLATFORM_ENDIAN_KNOWN && defined(MPT_PLATFORM_LITTLE_ENDIAN)
+	native = little
+#elif MPT_PLATFORM_ENDIAN_KNOWN && defined(MPT_PLATFORM_BIG_ENDIAN)
+	native = big
+#else
+	native = 0u
+#endif
+};
+
+struct endian_type { uint32 value; };
 static MPT_ENDIAN_CONSTEXPR_FUN bool operator == (const endian_type & a, const endian_type & b) { return a.value == b.value; }
 static MPT_ENDIAN_CONSTEXPR_FUN bool operator != (const endian_type & a, const endian_type & b) { return a.value != b.value; }
 
-static MPT_ENDIAN_CONSTEXPR_VAR endian_type endian_big    = { 0x1234u };
-static MPT_ENDIAN_CONSTEXPR_VAR endian_type endian_little = { 0x3412u };
+static MPT_ENDIAN_CONSTEXPR_VAR endian_type endian_big    = { 0x12345678u };
+static MPT_ENDIAN_CONSTEXPR_VAR endian_type endian_little = { 0x78563412u };
 
 namespace detail {
 	static MPT_FORCEINLINE endian_type endian_probe()
 	{
-		STATIC_ASSERT(sizeof(endian_type) == 2);
-		const mpt::byte probe[2] = { mpt::as_byte(0x12), mpt::as_byte(0x34) };
+		STATIC_ASSERT(sizeof(endian_type) == 4);
+		const mpt::byte probe[4] = { mpt::as_byte(0x12), mpt::as_byte(0x34), mpt::as_byte(0x56), mpt::as_byte(0x78) };
 		endian_type test;
-		std::memcpy(&test, probe, 2);
+		std::memcpy(&test, probe, 4);
 		return test;
 	}
 }
 
-static MPT_ENDIAN_CONSTEXPR_FUN endian_type endian()
+static MPT_ENDIAN_CONSTEXPR_FUN endian_type get_endian()
 {
-	#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+	MPT_CONSTANT_IF(mpt::endian::native == mpt::endian::little)
+	{
 		return endian_little;
-	#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+	} else MPT_CONSTANT_IF(mpt::endian::native == mpt::endian::big)
+	{
 		return endian_big;
-	#else
+	} else
+	{
 		return detail::endian_probe();
-	#endif
+	}
 }
 
 static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_little()
 {
-	return endian() == endian_little;
+	return get_endian() == endian_little;
 }
 
 static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_big()
 {
-	return endian() == endian_big;
+	return get_endian() == endian_big;
+}
+
+static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_weird()
+{
+	return !endian_is_little() && !endian_is_big();
 }
 
 } // namespace mpt
 
 
 
-namespace mpt { namespace detail {
-enum Endianness
-{
-	BigEndian,
-	LittleEndian,
-#if MPT_PLATFORM_ENDIAN_KNOWN
-#if defined(MPT_PLATFORM_BIG_ENDIAN)
-	NativeEndian = BigEndian,
-#else
-	NativeEndian = LittleEndian,
-#endif
-#endif
-};
-} } // namespace mpt::detail
-
 struct BigEndian_tag
 {
-	static MPT_ENDIAN_CONSTEXPR_VAR mpt::detail::Endianness Endianness = mpt::detail::BigEndian;
+	static MPT_ENDIAN_CONSTEXPR_VAR mpt::endian endian = mpt::endian::big;
 };
 
 struct LittleEndian_tag
 {
-	static MPT_ENDIAN_CONSTEXPR_VAR mpt::detail::Endianness Endianness = mpt::detail::LittleEndian;
+	static MPT_ENDIAN_CONSTEXPR_VAR mpt::endian endian = mpt::endian::little;
 };
 
 
@@ -276,7 +283,7 @@ static MPT_FORCEINLINE std::array<mpt::byte, size> EndianEncode(T val)
 	typedef Tendian endian_type;
 	unsigned_base_type uval = static_cast<unsigned_base_type>(val);
 	std::array<mpt::byte, size> data;
-	MPT_CONSTANT_IF(endian_type::Endianness == mpt::detail::LittleEndian)
+	MPT_CONSTANT_IF(endian_type::endian == mpt::endian::little)
 	{
 		for(std::size_t i = 0; i < sizeof(base_type); ++i)
 		{
@@ -303,7 +310,7 @@ static MPT_FORCEINLINE T EndianDecode(std::array<mpt::byte, size> data)
 	typedef Tendian endian_type;
 	base_type val = base_type();
 	unsigned_base_type uval = unsigned_base_type();
-	MPT_CONSTANT_IF(endian_type::Endianness == mpt::detail::LittleEndian)
+	MPT_CONSTANT_IF(endian_type::endian == mpt::endian::little)
 	{
 		for(std::size_t i = 0; i < sizeof(base_type); ++i)
 		{
@@ -877,7 +884,7 @@ public:
 	{
 		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 		#if MPT_ENDIAN_IS_CONSTEXPR
-			MPT_CONSTANT_IF(endian_type::Endianness == mpt::detail::LittleEndian)
+			MPT_CONSTANT_IF(endian_type::endian == mpt::endian::little)
 			{
 				typename std::make_unsigned<base_type>::type uval = val;
 				for(std::size_t i = 0; i < sizeof(base_type); ++i)
@@ -893,7 +900,7 @@ public:
 				}
 			}
 		#elif MPT_PLATFORM_ENDIAN_KNOWN
-			MPT_CONSTANT_IF(mpt::detail::NativeEndian != endian_type::Endianness)
+			MPT_CONSTANT_IF(mpt::endian::native != endian_type::endian)
 			{
 				val = SwapBytes(val);
 			}
@@ -907,7 +914,7 @@ public:
 	{
 		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 		#if MPT_ENDIAN_IS_CONSTEXPR
-			MPT_CONSTANT_IF(endian_type::Endianness == mpt::detail::LittleEndian)
+			MPT_CONSTANT_IF(endian_type::endian == mpt::endian::little)
 			{
 				typename std::make_unsigned<base_type>::type uval = 0;
 				for(std::size_t i = 0; i < sizeof(base_type); ++i)
@@ -927,7 +934,7 @@ public:
 		#elif MPT_PLATFORM_ENDIAN_KNOWN
 			base_type val = base_type();
 			std::memcpy(&val, data, sizeof(val));
-			MPT_CONSTANT_IF(mpt::detail::NativeEndian != endian_type::Endianness)
+			MPT_CONSTANT_IF(mpt::endian::native != endian_type::endian)
 			{
 				val = SwapBytes(val);
 			}

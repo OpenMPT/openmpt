@@ -59,7 +59,7 @@ StreamWriterBase::~StreamWriterBase()
 
 mpt::endian_type StreamWriterBase::GetConvertedEndianness() const
 {
-	return mpt::endian();
+	return mpt::get_endian();
 }
 
 
