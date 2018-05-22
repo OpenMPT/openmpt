@@ -1769,10 +1769,10 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 			}
 		}
 
-		fseek(f, dwPatPos, SEEK_SET);
+		mpt::IO::SeekAbsolute(f, dwPatPos);
 		patinfo[0] = writeSize;
 		mpt::IO::Write(f, patinfo);
-		fseek(f, static_cast<long>(dwPos), SEEK_SET);
+		mpt::IO::SeekAbsolute(f, dwPos);
 	}
 	// Writing Sample Data
 	for(SAMPLEINDEX smp = 1; smp <= itHeader.smpnum; smp++)
@@ -1800,14 +1800,14 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 			itss.length = 0;
 		}
 		SmpLength smpLength = itss.length;	// Possibly truncated to 2^32 samples
-		fseek(f, smppos[smp - 1], SEEK_SET);
+		mpt::IO::SeekAbsolute(f, smppos[smp - 1]);
 		mpt::IO::Write(f, itss);
 		if(dwPos > uint32_max)
 		{
 			continue;
 		}
 		// TODO this actually wraps around at 2 GB, so we either need to use the 64-bit seek API or warn earlier!
-		fseek(f, static_cast<long>(dwPos), SEEK_SET);
+		mpt::IO::SeekAbsolute(f, dwPos);
 		if(!isExternal)
 		{
 			if(Samples[smp].nLength != smpLength)
@@ -1842,7 +1842,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	}
 
 	// Updating offsets
-	fseek(f, dwHdrPos, SEEK_SET);
+	mpt::IO::SeekAbsolute(f, dwHdrPos);
 	mpt::IO::Write(f, inspos);
 	mpt::IO::Write(f, smppos);
 	mpt::IO::Write(f, patpos);
@@ -1858,14 +1858,16 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 	bool success = true;
 
-	fseek(f, 0, SEEK_END);
+	mpt::IO::SeekEnd(f);
+	const mpt::IO::Offset standardEndPos = mpt::IO::TellWrite(f);
 	{
 	mpt::FILE_ostream fout(f);
 
-	const uint32 MPTStartPos = (uint32)fout.tellp();
+	const mpt::IO::Offset MPTStartPos = mpt::IO::TellWrite(fout);
 	
 	// catch standard library truncating files
 	MPT_ASSERT_ALWAYS(MPTStartPos > 0);
+	MPT_ASSERT_ALWAYS(MPTStartPos == standardEndPos);
 
 	srlztn::SsbWrite ssb(fout);
 	ssb.BeginWrite("mptm", Version::Current().GetRawVersion());
@@ -1893,9 +1895,9 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		fout.clear();
 		success = false;
 	}
-	mpt::IO::WriteIntLE<uint32>(fout, MPTStartPos);
+	mpt::IO::WriteIntLE<uint32>(fout, static_cast<uint32>(MPTStartPos));
 
-	fout.seekp(0, std::ios_base::end);
+	mpt::IO::SeekEnd(fout);
 	}
 	fclose(f);
 	f = nullptr;

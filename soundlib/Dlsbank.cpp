@@ -516,7 +516,7 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 	if(filename.empty()) return false;
 	if((f = mpt_fopen(filename, "rb")) == nullptr) return false;
 	MemsetZero(riff);
-	fread(&riff, sizeof(RIFFCHUNKID), 1, f);
+	mpt::IO::Read(f, riff);
 	// Check for embedded DLS sections
 	if (riff.id_RIFF == IFFID_FORM)
 	{
@@ -527,26 +527,26 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 			if (len <= 4) break;
 			if (riff.id_DLS == IFFID_XDLS)
 			{
-				fread(&riff, sizeof(RIFFCHUNKID), 1, f);
+				mpt::IO::Read(f, riff);
 				break;
 			}
 			if((len % 2u) != 0)
 				len++;
-			if (fseek(f, len-4, SEEK_CUR) != 0) break;
-		} while (fread(&riff, sizeof(RIFFCHUNKID), 1, f) != 0);
+			if (!mpt::IO::SeekRelative(f, len-4)) break;
+		} while (mpt::IO::Read(f, riff));
 	} else
 	if ((riff.id_RIFF == IFFID_RIFF) && (riff.id_DLS == IFFID_RMID))
 	{
 		for (;;)
 		{
-			if(!fread(&riff, sizeof(RIFFCHUNKID), 1, f))
+			if(!mpt::IO::Read(f, riff))
 				break;
 			if (riff.id_DLS == IFFID_DLS)
 				break; // found it
 			int len = riff.riff_len;
 			if((len % 2u) != 0)
 				len++;
-			if ((len <= 4) || (fseek(f, len-4, SEEK_CUR) != 0)) break;
+			if ((len <= 4) || !mpt::IO::SeekRelative(f, len-4)) break;
 		}
 	}
 	fclose(f);
@@ -1443,19 +1443,19 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 	long dwOffset = mpt::saturate_cast<long>(m_WaveForms[nWaveLink] + m_dwWavePoolOffset);
 	FILE *f = mpt_fopen(m_szFileName, "rb");
 	if(f == nullptr) return false;
-	if (fseek(f, dwOffset, SEEK_SET) == 0)
+	if (mpt::IO::SeekAbsolute(f, dwOffset))
 	{
 		if (m_nType & SOUNDBANK_TYPE_SF2)
 		{
 			if (m_SamplesEx[nWaveLink].dwLen)
 			{
-				if (fseek(f, 8, SEEK_CUR) == 0)
+				if (mpt::IO::SeekRelative(f, 8))
 				{
 					length = m_SamplesEx[nWaveLink].dwLen;
 					try
 					{
 						waveData.assign(length + 8, 0);
-						fread(waveData.data(), 1, length, f);
+						mpt::IO::ReadRaw(f, waveData.data(), length);
 					} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 					{
 						MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
@@ -1465,7 +1465,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 		} else
 		{
 			LISTCHUNK chunk;
-			if (fread(&chunk, 1, 12, f) == 12)
+			if (mpt::IO::Read(f, chunk))
 			{
 				if ((chunk.id == IFFID_LIST) && (chunk.listid == IFFID_wave) && (chunk.len > 4))
 				{
@@ -1474,7 +1474,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 					{
 						waveData.assign(chunk.len + 8, 0);
 						memcpy(waveData.data(), &chunk, 12);
-						fread(&waveData[12], 1, length - 12, f);
+						mpt::IO::ReadRaw(f, &waveData[12], length - 12);
 					} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 					{
 						MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);

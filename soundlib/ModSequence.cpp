@@ -511,12 +511,12 @@ size_t ModSequence::WriteAsByte(FILE *f, const ORDERINDEX count, uint8 stopIndex
 
 		if(pat == GetInvalidPatIndex()) temp = stopIndex;
 		else if(pat == GetIgnoreIndex() || pat > 0xFF) temp = ignoreIndex;
-		fwrite(&temp, 1, 1, f);
+		mpt::IO::WriteIntLE<uint8>(f, temp);
 	}
 	// Fill non-existing order items with stop indices
 	for(size_t i = limit; i < count; i++)
 	{
-		fwrite(&stopIndex, 1, 1, f);
+		mpt::IO::WriteIntLE<uint8>(f, stopIndex);
 	}
 	return count; //Returns the number of bytes written.
 }

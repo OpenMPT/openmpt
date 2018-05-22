@@ -1281,7 +1281,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString 
 		header.instrument.ApplyAutoVibratoToXM(Samples[samples[0]], GetType());
 	}
 
-	fwrite(&header, 1, sizeof(XIInstrumentHeader), f);
+	mpt::IO::Write(f, header);
 
 	std::vector<SampleIO> sampleFlags(samples.size());
 
@@ -1300,7 +1300,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString 
 
 		mpt::String::Write<mpt::String::spacePadded>(xmSample.name, m_szNames[samples[i]]);
 
-		fwrite(&xmSample, 1, sizeof(xmSample), f);
+		mpt::IO::Write(f, xmSample);
 	}
 
 	// XI Sample Data
@@ -1313,9 +1313,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString 
 	}
 
 	// Write 'MPTX' extension tag
-	char code[4];
-	memcpy(code, "XTPM", 4);
-	fwrite(code, 1, 4, f);
+	mpt::IO::WriteText(f, "XTPM");
 	WriteInstrumentHeaderStructOrField(pIns, f);	// Write full extended header.
 
 	fclose(f);

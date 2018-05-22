@@ -2180,7 +2180,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 	{
 		char name[20];
 		mpt::String::Write<mpt::String::maybeNullTerminated>(name, m_songName);
-		fwrite(name, 20, 1, f);
+		mpt::IO::Write(f, name);
 	}
 
 	std::vector<SmpLength> sampleLength(32, 0);
@@ -2215,7 +2215,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 		MODSampleHeader sampleHeader;
 		mpt::String::Write<mpt::String::maybeNullTerminated>(sampleHeader.name, m_szNames[sampleSource[smp]]);
 		sampleLength[smp] = sampleHeader.ConvertToMOD(sampleSource[smp] <= GetNumSamples() ? GetSample(sampleSource[smp]) : ModSample(MOD_TYPE_MOD));
-		fwrite(&sampleHeader, sizeof(sampleHeader), 1, f);
+		mpt::IO::Write(f, sampleHeader);
 	}
 
 	// Write order list
@@ -2241,7 +2241,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 		}
 	}
 	fileHeader.numOrders = writtenOrders;
-	fwrite(&fileHeader, sizeof(fileHeader), 1, f);
+	mpt::IO::Write(f, fileHeader);
 
 	// Write magic bytes
 	char modMagic[4];
@@ -2263,7 +2263,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 		modMagic[0] += static_cast<char>(writeChannels / 10u);
 		modMagic[1] += static_cast<char>(writeChannels % 10u);
 	}
-	fwrite(modMagic, 4, 1, f);
+	mpt::IO::Write(f, modMagic);
 
 	// Write patterns
 	std::vector<uint8> events;
@@ -2273,7 +2273,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 		{
 			// Invent empty pattern
 			events.assign(writeChannels * 64 * 4, 0);
-			fwrite(events.data(), events.size(), 1, f);
+			mpt::IO::Write(f, events);
 			continue;
 		}
 
@@ -2283,7 +2283,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 			{
 				// Invent empty row
 				events.assign(writeChannels * 4, 0);
-				fwrite(events.data(), events.size(), 1, f);
+				mpt::IO::Write(f, events);
 				continue;
 			}
 			PatternRow rowBase = Patterns[pat].GetRow(row);
@@ -2317,7 +2317,7 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 				events[eventByte++] = ((instr & 0x0F) << 4) | (command & 0x0F);
 				events[eventByte++] = param;
 			}
-			fwrite(events.data(), eventByte, 1, f);
+			mpt::IO::WriteRaw(f, mpt::as_span(events.data(), eventByte));
 		}
 	}
 
@@ -2340,24 +2340,25 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 		}
 		const ModSample &sample = Samples[sampleSource[smp]];
 
-		const long sampleStart = ftell(f);
+		const mpt::IO::Offset sampleStart = mpt::IO::TellWrite(f);
 		const size_t writtenBytes = MODSampleHeader::GetSampleFormat().WriteSample(f, sample, sampleLength[smp]);
 
-		const int8 silence[] = { 0, 0 };
+		const int8 silence = 0;
 
 		// Write padding byte if the sample size is odd.
 		if((writtenBytes % 2u) != 0)
 		{
-			fwrite(silence, 1, 1, f);
+			mpt::IO::Write(f, silence);
 		}
 
 		if(!sample.uFlags[CHN_LOOP] && writtenBytes >= 2)
 		{
 			// First two bytes of oneshot samples have to be 0 due to PT's one-shot loop
-			const long sampleEnd = ftell(f);
-			fseek(f, sampleStart, SEEK_SET);
-			fwrite(&silence, 2, 1, f);
-			fseek(f, sampleEnd, SEEK_SET);
+			const mpt::IO::Offset sampleEnd = mpt::IO::TellWrite(f);
+			mpt::IO::SeekAbsolute(f, sampleStart);
+			mpt::IO::Write(f, silence);
+			mpt::IO::Write(f, silence);
+			mpt::IO::SeekAbsolute(f, sampleEnd);
 		}
 	}
 

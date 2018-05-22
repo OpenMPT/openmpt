@@ -1113,7 +1113,7 @@ bool CModDoc::SaveEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::P
 		EndWaitCursor();
 		return false;
 	}
-	fwrite(s.GetString(), s.GetLength(), 1, f);
+	mpt::IO::WriteText(f, std::string(s.GetString(), s.GetString() + s.GetLength()));
 	fclose(f);
 	EndWaitCursor();
 	return true;
