@@ -167,15 +167,6 @@ inline void SwapBufferEndian(std::size_t elementSize, Tbyte * buffer, std::size_
 
 
 
-// Ending swaps:
-// SwapBytesBE(x) and variants may be used either to:
-// -Convert integer x, which is in big endian format (for example read from file),
-//		to endian format of current architecture.
-// -Convert value x from endian format of current architecture to big endian format.
-// Similarly SwapBytesLE(x) converts known little endian format to format of current
-// endian architecture or value x in format of current architecture to little endian
-// format.
-
 #if !MPT_ENDIAN_IS_CONSTEXPR
 
 #if MPT_COMPILER_GCC
@@ -345,29 +336,10 @@ static MPT_FORCEINLINE T MPT_bswap_impl(T val)
 
 #endif // MPT_PLATFORM_ENDIAN_KNOWN
 
-static MPT_ENDIAN_CONSTEXPR_FUN uint64 SwapBytesBE(uint64 value) noexcept { return MPT_bswap64be(value); }
-static MPT_ENDIAN_CONSTEXPR_FUN uint32 SwapBytesBE(uint32 value) noexcept { return MPT_bswap32be(value); }
-static MPT_ENDIAN_CONSTEXPR_FUN uint16 SwapBytesBE(uint16 value) noexcept { return MPT_bswap16be(value); }
-static MPT_ENDIAN_CONSTEXPR_FUN uint64 SwapBytesLE(uint64 value) noexcept { return MPT_bswap64le(value); }
-static MPT_ENDIAN_CONSTEXPR_FUN uint32 SwapBytesLE(uint32 value) noexcept { return MPT_bswap32le(value); }
-static MPT_ENDIAN_CONSTEXPR_FUN uint16 SwapBytesLE(uint16 value) noexcept { return MPT_bswap16le(value); }
-static MPT_ENDIAN_CONSTEXPR_FUN int64  SwapBytesBE(int64  value) noexcept { return MPT_bswap64be(value); }
-static MPT_ENDIAN_CONSTEXPR_FUN int32  SwapBytesBE(int32  value) noexcept { return MPT_bswap32be(value); }
-static MPT_ENDIAN_CONSTEXPR_FUN int16  SwapBytesBE(int16  value) noexcept { return MPT_bswap16be(value); }
-static MPT_ENDIAN_CONSTEXPR_FUN int64  SwapBytesLE(int64  value) noexcept { return MPT_bswap64le(value); }
-static MPT_ENDIAN_CONSTEXPR_FUN int32  SwapBytesLE(int32  value) noexcept { return MPT_bswap32le(value); }
-static MPT_ENDIAN_CONSTEXPR_FUN int16  SwapBytesLE(int16  value) noexcept { return MPT_bswap16le(value); }
-
-// Do NOT remove these overloads, even if they seem useless.
-// We do not want risking to extend 8bit integers to int and then
-// endian-converting and casting back to int.
-// Thus these overloads.
-static MPT_ENDIAN_CONSTEXPR_FUN uint8  SwapBytesLE(uint8  value) noexcept { return value; }
-static MPT_ENDIAN_CONSTEXPR_FUN int8   SwapBytesLE(int8   value) noexcept { return value; }
-static MPT_ENDIAN_CONSTEXPR_FUN char   SwapBytesLE(char   value) noexcept { return value; }
-static MPT_ENDIAN_CONSTEXPR_FUN uint8  SwapBytesBE(uint8  value) noexcept { return value; }
-static MPT_ENDIAN_CONSTEXPR_FUN int8   SwapBytesBE(int8   value) noexcept { return value; }
-static MPT_ENDIAN_CONSTEXPR_FUN char   SwapBytesBE(char   value) noexcept { return value; }
+namespace mpt
+{
+namespace detail
+{
 
 static MPT_ENDIAN_CONSTEXPR_FUN uint64 SwapBytes(uint64 value) noexcept { return MPT_bswap64(value); }
 static MPT_ENDIAN_CONSTEXPR_FUN uint32 SwapBytes(uint32 value) noexcept { return MPT_bswap32(value); }
@@ -375,9 +347,17 @@ static MPT_ENDIAN_CONSTEXPR_FUN uint16 SwapBytes(uint16 value) noexcept { return
 static MPT_ENDIAN_CONSTEXPR_FUN int64  SwapBytes(int64  value) noexcept { return MPT_bswap64(value); }
 static MPT_ENDIAN_CONSTEXPR_FUN int32  SwapBytes(int32  value) noexcept { return MPT_bswap32(value); }
 static MPT_ENDIAN_CONSTEXPR_FUN int16  SwapBytes(int16  value) noexcept { return MPT_bswap16(value); }
+
+// Do NOT remove these overloads, even if they seem useless.
+// We do not want risking to extend 8bit integers to int and then
+// endian-converting and casting back to int.
+// Thus these overloads.
 static MPT_ENDIAN_CONSTEXPR_FUN uint8  SwapBytes(uint8  value) noexcept { return value; }
 static MPT_ENDIAN_CONSTEXPR_FUN int8   SwapBytes(int8   value) noexcept { return value; }
 static MPT_ENDIAN_CONSTEXPR_FUN char   SwapBytes(char   value) noexcept { return value; }
+
+} // namespace detail
+} // namespace mpt
 
 #undef MPT_bswap16le
 #undef MPT_bswap32le
@@ -902,7 +882,7 @@ public:
 		#elif MPT_PLATFORM_ENDIAN_KNOWN
 			MPT_CONSTANT_IF(mpt::endian::native != endian_type::endian)
 			{
-				val = SwapBytes(val);
+				val = mpt::detail::SwapBytes(val);
 			}
 			std::memcpy(data, &val, sizeof(val));
 		#else // !MPT_PLATFORM_ENDIAN_KNOWN
@@ -936,7 +916,7 @@ public:
 			std::memcpy(&val, data, sizeof(val));
 			MPT_CONSTANT_IF(mpt::endian::native != endian_type::endian)
 			{
-				val = SwapBytes(val);
+				val = mpt::detail::SwapBytes(val);
 			}
 			return val;
 		#else // !MPT_PLATFORM_ENDIAN_KNOWN

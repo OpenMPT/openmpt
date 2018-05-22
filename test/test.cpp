@@ -711,19 +711,15 @@ static MPT_NOINLINE void TestMisc1()
 	(void)foo;
 #endif
 
-#define SwapBytesReturn(x) SwapBytesLE(SwapBytesBE(x))
+	VERIFY_EQUAL(mpt::detail::SwapBytes(uint8(0x12)), 0x12);
+	VERIFY_EQUAL(mpt::detail::SwapBytes(uint16(0x1234)), 0x3412);
+	VERIFY_EQUAL(mpt::detail::SwapBytes(uint32(0x12345678u)), 0x78563412u);
+	VERIFY_EQUAL(mpt::detail::SwapBytes(uint64(0x123456789abcdef0ull)), 0xf0debc9a78563412ull);
 
-	VERIFY_EQUAL(SwapBytesReturn(uint8(0x12)), 0x12);
-	VERIFY_EQUAL(SwapBytesReturn(uint16(0x1234)), 0x3412);
-	VERIFY_EQUAL(SwapBytesReturn(uint32(0x12345678u)), 0x78563412u);
-	VERIFY_EQUAL(SwapBytesReturn(uint64(0x123456789abcdef0ull)), 0xf0debc9a78563412ull);
-
-	VERIFY_EQUAL(SwapBytesReturn(int8(int8_min)), int8_min);
-	VERIFY_EQUAL(SwapBytesReturn(int16(int16_min)), int16(0x80));
-	VERIFY_EQUAL(SwapBytesReturn(int32(int32_min)), int32(0x80));
-	VERIFY_EQUAL(SwapBytesReturn(int64(int64_min)), int64(0x80));
-
-#undef SwapBytesReturn
+	VERIFY_EQUAL(mpt::detail::SwapBytes(int8(int8_min)), int8_min);
+	VERIFY_EQUAL(mpt::detail::SwapBytes(int16(int16_min)), int16(0x80));
+	VERIFY_EQUAL(mpt::detail::SwapBytes(int32(int32_min)), int32(0x80));
+	VERIFY_EQUAL(mpt::detail::SwapBytes(int64(int64_min)), int64(0x80));
 
 	VERIFY_EQUAL(EncodeIEEE754binary32(1.0f), 0x3f800000u);
 	VERIFY_EQUAL(EncodeIEEE754binary32(-1.0f), 0xbf800000u);
