@@ -13,6 +13,7 @@
 
 #if defined(MPT_ENABLE_TEMPFILE) && MPT_OS_WINDOWS
 #include <windows.h>
+#include "mptFileIO.h"
 #endif // MPT_ENABLE_TEMPFILE && MPT_OS_WINDOWS
 
 
@@ -40,7 +41,7 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 
 #ifdef MPT_ONDISKFILEWRAPPER_NO_CREATEFILE
 
-			FILE * f = _wfopen(tempName.AsNative().c_str(), L"wb");
+			FILE * f = mpt_fopen(tempName, "wb");
 			if(!f)
 			{
 				throw std::runtime_error("");
@@ -53,16 +54,16 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 				do
 				{
 					std::size_t chunkSize = mpt::saturate_cast<std::size_t>(towrite);
-					std::size_t chunkDone = 0;
-					chunkDone = fwrite(view.data() + written, 1, chunkSize, f);
-					if(chunkDone != chunkSize)
+					bool chunkOk = false;
+					chunkOk = mpt::IO::WriteRaw(f, mpt::const_byte_span(view.data() + written, chunkSize));
+					if(!chunkOk)
 					{
 						fclose(f);
 						f = NULL;
 						throw std::runtime_error("");
 					}
-					towrite -= chunkDone;
-					written += chunkDone;
+					towrite -= chunkSize;
+					written += chunkSize;
 				} while(towrite > 0);
 			}
 			fclose(f);
