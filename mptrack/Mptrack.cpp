@@ -1971,7 +1971,7 @@ BOOL CTrackApp::InitializeDXPlugins()
 			mpt::ustring plugTags = GetSettings().Read<mpt::ustring>(MPT_USTRING("VST Plugins"), tagFormat(plug), mpt::ustring());
 
 			VSTPluginLib *lib = m_pPluginManager->AddPlugin(plugPath, plugTags, true, true, &nonFoundPlugs);
-			if(lib != nullptr && lib->libraryName == MPT_PATHSTRING("MIDI Input Output") && lib->pluginId1 == 'VstP' && lib->pluginId2 == 'MMID')
+			if(lib != nullptr && lib->libraryName == MPT_PATHSTRING("MIDI Input Output") && lib->pluginId1 == PLUGMAGIC('V','s','t','P') && lib->pluginId2 == PLUGMAGIC('M','M','I','D'))
 			{
 				// This appears to be an old version of our MIDI I/O plugin, which is now built right into the main executable.
 				m_pPluginManager->RemovePlugin(lib);
