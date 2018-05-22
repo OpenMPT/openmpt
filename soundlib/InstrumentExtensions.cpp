@@ -181,8 +181,7 @@ bool IsNegative(const T &val)
 	if(only_this_code == fcode || only_this_code == Util::MaxValueOfType(only_this_code)) \
 	{ \
 		type tmp = input-> name; \
-		tmp = SwapBytesLE(tmp); \
-		fwrite(&tmp , 1 , fsize , file); \
+		mpt::IO::WriteIntLE(file, tmp); \
 	} \
 /**/
 
@@ -198,8 +197,7 @@ bool IsNegative(const T &val)
 		mpt::IO::WriteIntLE<uint32>(file, fcode); \
 		mpt::IO::WriteIntLE<uint16>(file, fsize); \
 		type tmp = (type)(input-> name ); \
-		tmp = SwapBytesLE(tmp); \
-		fwrite(&tmp , 1 , fsize , file); \
+		mpt::IO::WriteIntLE(file, tmp); \
 	} else if(only_this_code == fcode)\
 	{ \
 		/* hackish workaround to resolve mismatched size values: */ \
@@ -207,14 +205,13 @@ bool IsNegative(const T &val)
 		/* This worked fine on little-endian, on big-endian not so much. Thus support writing size-mismatched fields. */ \
 		MPT_ASSERT(fixedsize >= fsize); \
 		type tmp = (type)(input-> name ); \
-		tmp = SwapBytesLE(tmp); \
-		fwrite(&tmp , 1 , fsize , file); \
+		mpt::IO::WriteIntLE(file, tmp); \
 		if(fixedsize > fsize) \
 		{ \
 			for(int16 i = 0; i < fixedsize - fsize; ++i) \
 			{ \
 				uint8 fillbyte = !IsNegative(tmp) ? 0 : 0xff; /* sign extend */ \
-				fwrite(&fillbyte, 1, 1, file); \
+				mpt::IO::WriteIntLE(file, fillbyte); \
 			} \
 		} \
 	} \
@@ -243,8 +240,7 @@ bool IsNegative(const T &val)
 		{ \
 			type tmp; \
 			tmp = input-> name [i]; \
-			tmp = SwapBytesLE(tmp); \
-			fwrite(&tmp, 1, sizeof(type), file); \
+			mpt::IO::WriteIntLE(file, tmp); \
 		} \
 	} \
 /**/
@@ -274,16 +270,14 @@ bool IsNegative(const T &val)
 			for(uint32 i = 0; i < maxNodes; ++i) \
 			{ \
 				type tmp; \
-				tmp = env[i]. envField; \
-				tmp = SwapBytesLE(tmp); \
-				fwrite(&tmp, 1, sizeof(type), file); \
+				tmp = env[i]. envField ; \
+				mpt::IO::WriteIntLE(file, tmp); \
 			} \
 			/* Not every instrument's envelope will be the same length. fill up with zeros. */ \
 			for(uint32 i = maxNodes; i < fsize/sizeof(type); ++i) \
 			{ \
 				type tmp = 0; \
-				tmp = SwapBytesLE(tmp); \
-				fwrite(&tmp, 1, sizeof(type), file); \
+				mpt::IO::WriteIntLE(file, tmp); \
 			} \
 		} \
 	}\
