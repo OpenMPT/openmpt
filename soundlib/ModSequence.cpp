@@ -500,6 +500,7 @@ bool ModSequence::IsPositionLocked(ORDERINDEX position) const
 /////////////////////////////////////
 
 
+#ifndef MODPLUG_NO_FILESAVE
 size_t ModSequence::WriteAsByte(FILE *f, const ORDERINDEX count, uint8 stopIndex, uint8 ignoreIndex) const
 {
 	const size_t limit = std::min(count, GetLength());
@@ -520,6 +521,7 @@ size_t ModSequence::WriteAsByte(FILE *f, const ORDERINDEX count, uint8 stopIndex
 	}
 	return count; //Returns the number of bytes written.
 }
+#endif // MODPLUG_NO_FILESAVE
 
 
 void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
@@ -541,6 +543,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 }
 
 
+#ifndef MODPLUG_NO_FILESAVE
 void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq)
 {
 	const uint16 size = seq().GetLength();
@@ -550,8 +553,10 @@ void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq)
 		mpt::IO::WriteIntLE<uint16>(oStrm, static_cast<uint16>(pat));
 	}
 }
+#endif // MODPLUG_NO_FILESAVE
 
 
+#ifndef MODPLUG_NO_FILESAVE
 void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 {
 	srlztn::SsbWrite ssb(oStrm);
@@ -564,6 +569,7 @@ void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 		ssb.WriteItem<uint16>(seq.GetRestartPos(), "r");
 	ssb.FinishWrite();
 }
+#endif // MODPLUG_NO_FILESAVE
 
 
 void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
@@ -586,6 +592,7 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
 }
 
 
+#ifndef MODPLUG_NO_FILESAVE
 void WriteModSequences(std::ostream& oStrm, const ModSequenceSet& seq)
 {
 	srlztn::SsbWrite ssb(oStrm);
@@ -600,6 +607,7 @@ void WriteModSequences(std::ostream& oStrm, const ModSequenceSet& seq)
 	}
 	ssb.FinishWrite();
 }
+#endif // MODPLUG_NO_FILESAVE
 
 
 void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
