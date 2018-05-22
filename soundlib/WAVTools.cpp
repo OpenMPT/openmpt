@@ -508,10 +508,10 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 void WAVWriter::WriteMetatags(const FileTags &tags)
 {
 	StartChunk(RIFFChunk::idCSET);
-	Write(SwapBytesLE(uint16(65001)));  // code page    (UTF-8)
-	Write(SwapBytesLE(uint16(0)));      // country code (unset)
-	Write(SwapBytesLE(uint16(0)));      // language     (unset)
-	Write(SwapBytesLE(uint16(0)));      // dialect      (unset)
+	Write(mpt::as_le(uint16(65001)));  // code page    (UTF-8)
+	Write(mpt::as_le(uint16(0)));      // country code (unset)
+	Write(mpt::as_le(uint16(0)));      // language     (unset)
+	Write(mpt::as_le(uint16(0)));      // dialect      (unset)
 
 	StartChunk(RIFFChunk::idLIST);
 	const char info[] = { 'I', 'N', 'F', 'O' };
@@ -603,8 +603,7 @@ void WAVWriter::WriteCueInformation(const ModSample &sample)
 {
 	StartChunk(RIFFChunk::idcue_);
 	{
-		const uint32 numPoints = SwapBytesLE(static_cast<uint32>(CountOf(sample.cues)));
-		Write(numPoints);
+		Write(mpt::as_le(static_cast<uint32>(CountOf(sample.cues))));
 	}
 	for(uint32 i = 0; i < CountOf(sample.cues); i++)
 	{
