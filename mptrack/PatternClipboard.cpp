@@ -399,9 +399,17 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 			if(data[curPos] == '+')
 			{
 				insertPat = order.GetIgnoreIndex();
+				if(patternMode == kMultiOverwrite)
+				{
+					continue;
+				}
 			} else if(data[curPos] == '-')
 			{
 				insertPat = order.GetInvalidPatIndex();
+				if(patternMode == kMultiOverwrite)
+				{
+					continue;
+				}
 			} else
 			{
 				insertPat = ConvertStrTo<PATTERNINDEX>(data.substr(curPos, 10));
