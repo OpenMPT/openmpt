@@ -12,6 +12,7 @@
 #include "Moddoc.h"
 #include "MIDIMapping.h"
 #include "../common/FileReader.h"
+#include "../common/mptIO.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/plugins/PlugInterface.h"
 
@@ -46,11 +47,10 @@ size_t CMIDIMapper::Serialize(FILE *f) const
 
 		if(f)
 		{
-			fwrite(&temp8, 1, sizeof(temp8), f);
-			fwrite(&temp16, 1, sizeof(temp16), f);
-			temp8 = d.GetPlugIndex();
-			fwrite(&temp8, 1, sizeof(temp8), f);
-			fwrite(&temp32, 1, parambytes, f);
+			mpt::IO::WriteIntLE<uint8>(f, temp8);
+			mpt::IO::WriteIntLE<uint16>(f, temp16);
+			mpt::IO::WriteIntLE<uint8>(f, d.GetPlugIndex());
+			mpt::IO::WritePartial<uint32le>(f, mpt::as_le(temp32), parambytes);
 		}
 		size += sizeof(temp8) + sizeof(temp16) + sizeof(temp8) + parambytes;
 	}
