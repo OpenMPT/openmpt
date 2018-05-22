@@ -372,7 +372,7 @@ public:
 	template<typename T>
 	void Write(const T &data)
 	{
-		MPT_STATIC_ASSERT(typename mpt::is_binary_safe<T>::value);
+		MPT_STATIC_ASSERT((mpt::is_binary_safe<T>::value));
 		Write(&data, sizeof(T));
 	}
 
