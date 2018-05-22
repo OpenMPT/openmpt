@@ -271,7 +271,7 @@ inline void MemsetZero(T &a)
 
 namespace mpt {
 
-#if (MPT_CXX >= 20)
+#if MPT_CXX_AT_LEAST(20)
 using std::bit_cast;
 #else
 // C++2a compatible bit_cast.
@@ -321,8 +321,8 @@ namespace mpt {
 //  Simplified version of gsl::span.
 //  Non-owning read-only or read-write view into a contiguous block of T
 // objects, i.e. equivalent to a (beg,end) or (data,size) tuple.
-//  Can eventually be replaced without further modifications with a full
-// gsl::span.
+//  Can eventually be replaced without further modifications with a full C++20
+// std::span.
 template <typename T>
 class span
 {
