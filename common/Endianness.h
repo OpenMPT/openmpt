@@ -74,6 +74,9 @@ OPENMPT_NAMESPACE_BEGIN
 namespace mpt {
 
 // C++20 std::endian
+#if MPT_CXX_AT_LEAST(20)
+using std::endian;
+#else
 enum class endian
 {
 	little = 0x78563412u,
@@ -86,6 +89,7 @@ enum class endian
 	native = 0u
 #endif
 };
+#endif
 
 struct endian_type { uint32 value; };
 static MPT_ENDIAN_CONSTEXPR_FUN bool operator == (const endian_type & a, const endian_type & b) { return a.value == b.value; }
