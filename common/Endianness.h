@@ -981,13 +981,8 @@ private:
 	const mpt::byte *mem;
 	value_type Read() const
 	{
-		mpt::byte bytes[sizeof(value_type)];
-		std::memcpy(bytes, mem, sizeof(value_type));
-		#if defined(MPT_PLATFORM_BIG_ENDIAN)
-			std::reverse(bytes, bytes + sizeof(value_type));
-		#endif
-		value_type val = value_type();
-		std::memcpy(&val, bytes, sizeof(value_type));
+		typename mpt::make_le<T>::type val;
+		std::memcpy(&val, mem, sizeof(value_type));
 		return val;
 	}
 public:
@@ -1017,13 +1012,8 @@ private:
 	const mpt::byte *mem;
 	value_type Read() const
 	{
-		mpt::byte bytes[sizeof(value_type)];
-		std::memcpy(bytes, mem, sizeof(value_type));
-		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
-			std::reverse(bytes, bytes + sizeof(value_type));
-		#endif
-		value_type val = value_type();
-		std::memcpy(&val, bytes, sizeof(value_type));
+		typename mpt::make_le<T>::type val;
+		std::memcpy(&val, mem, sizeof(value_type));
 		return val;
 	}
 public:
