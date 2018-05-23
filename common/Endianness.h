@@ -1012,7 +1012,7 @@ private:
 	const mpt::byte *mem;
 	value_type Read() const
 	{
-		typename mpt::make_le<T>::type val;
+		typename mpt::make_be<T>::type val;
 		std::memcpy(&val, mem, sizeof(value_type));
 		return val;
 	}
