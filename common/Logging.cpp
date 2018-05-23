@@ -128,7 +128,7 @@ void Logger::SendLogMessage(const Context &context, LogLevel level, const char *
 			static mpt::ofstream s_logfile;
 			if(!s_logfile)
 			{
-				s_logfile = s_logfile.open(MPT_PATHSTRING("mptrack.log"), std::ios::app);
+				s_logfile.open(MPT_PATHSTRING("mptrack.log"), std::ios::app);
 			}
 			if(s_logfile)
 			{
