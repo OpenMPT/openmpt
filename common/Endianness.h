@@ -404,14 +404,14 @@ static MPT_FORCEINLINE float32 DecodeIEEE754binary32(uint32 i)
 	if(expo == 0)
 	{
 		float m = sign ? -static_cast<float>(mant) : static_cast<float>(mant);
-		int e = expo - 127 + 1 - 24;
+		int e = static_cast<int>(expo) - 127 + 1 - 24;
 		float f = std::ldexp(m, e);
 		return static_cast<float32>(f);
 	} else
 	{
 		mant |= 0x00800000u;
 		float m = sign ? -static_cast<float>(mant) : static_cast<float>(mant);
-		int e = expo - 127 + 1 - 24;
+		int e = static_cast<int>(expo) - 127 + 1 - 24;
 		float f = std::ldexp(m, e);
 		return static_cast<float32>(f);
 	}
@@ -428,14 +428,14 @@ static MPT_FORCEINLINE float64 DecodeIEEE754binary64(uint64 i)
 	if(expo == 0)
 	{
 		double m = sign ? -static_cast<double>(mant) : static_cast<double>(mant);
-		int e = expo - 1023 + 1 - 53;
+		int e = static_cast<int>(expo) - 1023 + 1 - 53;
 		double f = std::ldexp(m, e);
 		return static_cast<float64>(f);
 	} else
 	{
 		mant |= 0x0010000000000000ull;
 		double m = sign ? -static_cast<double>(mant) : static_cast<double>(mant);
-		int e = expo - 1023 + 1 - 53;
+		int e = static_cast<int>(expo) - 1023 + 1 - 53;
 		double f = std::ldexp(m, e);
 		return static_cast<float64>(f);
 	}
