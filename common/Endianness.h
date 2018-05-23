@@ -243,29 +243,7 @@ static MPT_FORCEINLINE uint64 mpt_bswap64(uint64 x) { return bswap64(x); }
 #endif
 
 
-#if MPT_PLATFORM_ENDIAN_KNOWN
-
-#if defined(MPT_PLATFORM_BIG_ENDIAN)
-
-#define MPT_bswap64le(x) MPT_bswap64(x)
-#define MPT_bswap32le(x) MPT_bswap32(x)
-#define MPT_bswap16le(x) MPT_bswap16(x)
-#define MPT_bswap64be(x) (x)
-#define MPT_bswap32be(x) (x)
-#define MPT_bswap16be(x) (x)
-
-#elif defined(MPT_PLATFORM_LITTLE_ENDIAN)
-
-#define MPT_bswap64be(x) MPT_bswap64(x)
-#define MPT_bswap32be(x) MPT_bswap32(x)
-#define MPT_bswap16be(x) MPT_bswap16(x)
-#define MPT_bswap64le(x) (x)
-#define MPT_bswap32le(x) (x)
-#define MPT_bswap16le(x) (x)
-
-#endif
-
-#else // !MPT_PLATFORM_ENDIAN_KNOWN
+#if !MPT_PLATFORM_ENDIAN_KNOWN
 
 template <typename T, typename Tendian, std::size_t size>
 static MPT_FORCEINLINE std::array<mpt::byte, size> EndianEncode(T val)
@@ -322,23 +300,7 @@ static MPT_FORCEINLINE T EndianDecode(std::array<mpt::byte, size> data)
 	return val;
 }
 
-template <typename Tendian, typename T>
-static MPT_FORCEINLINE T MPT_bswap_impl(T val)
-{
-	typedef typename std::make_unsigned<T>::type Tu;
-	std::array<mpt::byte, sizeof(T)> data = EndianEncode<Tu, Tendian, sizeof(T)>(val);
-	std::memcpy(&val, data.data(), sizeof(T));
-	return val;
-}
-
-#define MPT_bswap64be(x) MPT_bswap_impl<BigEndian_tag, uint64>(x)
-#define MPT_bswap32be(x) MPT_bswap_impl<BigEndian_tag, uint32>(x)
-#define MPT_bswap16be(x) MPT_bswap_impl<BigEndian_tag, uint16>(x)
-#define MPT_bswap64le(x) MPT_bswap_impl<LittleEndian_tag, uint64>(x)
-#define MPT_bswap32le(x) MPT_bswap_impl<LittleEndian_tag, uint32>(x)
-#define MPT_bswap16le(x) MPT_bswap_impl<LittleEndian_tag, uint16>(x)
-
-#endif // MPT_PLATFORM_ENDIAN_KNOWN
+#endif // !MPT_PLATFORM_ENDIAN_KNOWN
 
 namespace mpt
 {
@@ -363,12 +325,6 @@ static MPT_ENDIAN_CONSTEXPR_FUN char   SwapBytes(char   value) noexcept { return
 } // namespace detail
 } // namespace mpt
 
-#undef MPT_bswap16le
-#undef MPT_bswap32le
-#undef MPT_bswap64le
-#undef MPT_bswap16be
-#undef MPT_bswap32be
-#undef MPT_bswap64be
 #undef MPT_bswap16
 #undef MPT_bswap32
 #undef MPT_bswap64
