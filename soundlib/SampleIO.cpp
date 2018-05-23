@@ -1008,31 +1008,53 @@ size_t SampleIO::WriteSample(std::ostream &f, const ModSample &sample, SmpLength
 	{
 		MPT_ASSERT(GetBitDepth() == 8);
 		MPT_ASSERT(len == numSamples);
-		const int8 *const pSample8 = sample.sample8();
-		const int8 *p = pSample8;
-		int sinc = sample.GetElementarySampleSize();
-		int s_old = 0;
-		const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
-		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
+		if(sample.uFlags[CHN_16BIT])
 		{
-			if (sample.uFlags[CHN_16BIT]) p++;
-		}
-		for (SmpLength j = 0; j < numSamples; j++)
-		{
-			int s_new = *p;
-			p += sinc;
-			if (sample.uFlags[CHN_STEREO])
+			const int16 *const pSample16 = sample.sample16();
+			const int16 *p = pSample16;
+			int s_old = 0;
+			const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
+			for(SmpLength j = 0; j < numSamples; j++)
 			{
-				s_new = (s_new + (static_cast<int>(*p)) + 1) / 2;
-				p += sinc;
+				int s_new = mpt::rshift_signed(*p, 8);
+				p++;
+				if(sample.uFlags[CHN_STEREO])
+				{
+					s_new = (s_new + (static_cast<int>(*p)) + 1) / 2;
+					p++;
+				}
+				if(GetEncoding() == deltaPCM)
+				{
+					mpt::IO::Write(fb, static_cast<int8>(s_new - s_old));
+					s_old = s_new;
+				} else
+				{
+					mpt::IO::Write(fb, static_cast<int8>(s_new + s_ofs));
+				}
 			}
-			if (GetEncoding() == deltaPCM)
+		} else
+		{
+			const int8 *const pSample8 = sample.sample8();
+			const int8 *p = pSample8;
+			int s_old = 0;
+			const int s_ofs = (GetEncoding() == unsignedPCM) ? 0x80 : 0;
+			for(SmpLength j = 0; j < numSamples; j++)
 			{
-				mpt::IO::Write(fb, static_cast<int8>(s_new - s_old));
-				s_old = s_new;
-			} else
-			{
-				mpt::IO::Write(fb, static_cast<int8>(s_new + s_ofs));
+				int s_new = *p;
+				p++;
+				if(sample.uFlags[CHN_STEREO])
+				{
+					s_new = (s_new + (static_cast<int>(*p)) + 1) / 2;
+					p++;
+				}
+				if(GetEncoding() == deltaPCM)
+				{
+					mpt::IO::Write(fb, static_cast<int8>(s_new - s_old));
+					s_old = s_new;
+				} else
+				{
+					mpt::IO::Write(fb, static_cast<int8>(s_new + s_ofs));
+				}
 			}
 		}
 	}
