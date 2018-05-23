@@ -106,7 +106,7 @@ public:
 	size_t GetCount() const {return m_Directives.size();}
 
 	// Serialize to file, or just return the serialization size if no file handle is provided.
-	size_t Serialize(FILE *f = nullptr) const;
+	size_t Serialize(std::ostream *file = nullptr) const;
 	// Deserialize MIDI Mappings from file. Returns true if no errors were encountered.
 	bool Deserialize(FileReader &file);
 

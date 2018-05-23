@@ -20,7 +20,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-size_t CMIDIMapper::Serialize(FILE *f) const
+size_t CMIDIMapper::Serialize(std::ostream *file) const
 {
 	//Bytes: 1 Flags, 2 key, 1 plugindex, 1,2,4,8 plug/etc.
 	size_t size = 0;
@@ -45,8 +45,9 @@ size_t CMIDIMapper::Serialize(FILE *f) const
 		}
 		else temp8 |= (2 << 6);
 
-		if(f)
+		if(file)
 		{
+			std::ostream & f = *file;
 			mpt::IO::WriteIntLE<uint8>(f, temp8);
 			mpt::IO::WriteIntLE<uint16>(f, temp16);
 			mpt::IO::WriteIntLE<uint8>(f, d.GetPlugIndex());

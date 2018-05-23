@@ -512,9 +512,12 @@ CDLSBank::CDLSBank()
 bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 {
 	RIFFCHUNKID riff;
-	FILE *f;
 	if(filename.empty()) return false;
-	if((f = mpt_fopen(filename, "rb")) == nullptr) return false;
+	mpt::ifstream f(filename, std::ios::binary);
+	if(!f)
+	{
+		return false;
+	}
 	MemsetZero(riff);
 	mpt::IO::Read(f, riff);
 	// Check for embedded DLS sections
@@ -549,7 +552,6 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 			if ((len <= 4) || !mpt::IO::SeekRelative(f, len-4)) break;
 		}
 	}
-	fclose(f);
 	return ((riff.id_RIFF == IFFID_RIFF)
 		&& ((riff.id_DLS == IFFID_DLS) || (riff.id_DLS == IFFID_MLS) || (riff.id_DLS == IFFID_sfbk))
 		&& (riff.riff_len >= 256));
@@ -1441,8 +1443,11 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 	}
 
 	long dwOffset = mpt::saturate_cast<long>(m_WaveForms[nWaveLink] + m_dwWavePoolOffset);
-	FILE *f = mpt_fopen(m_szFileName, "rb");
-	if(f == nullptr) return false;
+	mpt::ifstream f(m_szFileName, std::ios::binary);
+	if(!f)
+	{
+		return false;
+	}
 	if (mpt::IO::SeekAbsolute(f, dwOffset))
 	{
 		if (m_nType & SOUNDBANK_TYPE_SF2)
@@ -1483,7 +1488,6 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 			}
 		}
 	}
-	fclose(f);
 	return !waveData.empty();
 }
 

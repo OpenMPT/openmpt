@@ -97,7 +97,7 @@ public:
 
 #ifndef MODPLUG_NO_FILESAVE
 	// Write order items as bytes. '---' is written as stopIndex, '+++' is written as ignoreIndex
-	size_t WriteAsByte(FILE *f, const ORDERINDEX count, uint8 stopIndex = 0xFF, uint8 ignoreIndex = 0xFE) const;
+	size_t WriteAsByte(std::ostream &f, const ORDERINDEX count, uint8 stopIndex = 0xFF, uint8 ignoreIndex = 0xFE) const;
 #endif // MODPLUG_NO_FILESAVE
 
 	// Returns true if the IT orderlist datafield is not sufficient to store orderlist information.

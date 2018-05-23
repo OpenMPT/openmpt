@@ -125,22 +125,22 @@ void Logger::SendLogMessage(const Context &context, LogLevel level, const char *
 #endif
 		if(mpt::log::FileEnabled)
 		{
-			static FILE * s_logfile = nullptr;
+			static mpt::ofstream s_logfile;
 			if(!s_logfile)
 			{
-				s_logfile = mpt_fopen(MPT_PATHSTRING("mptrack.log"), "a");
+				s_logfile = s_logfile.open(MPT_PATHSTRING("mptrack.log"), std::ios::app);
 			}
 			if(s_logfile)
 			{
-				fprintf(s_logfile, mpt::ToCharset(mpt::CharsetUTF8, mpt::format(MPT_USTRING("%1+%2 %3(%4): %5 [%6]\n"))
+				mpt::IO::WriteText(s_logfile, mpt::ToCharset(mpt::CharsetUTF8, mpt::format(MPT_USTRING("%1+%2 %3(%4): %5 [%6]\n"))
 					( mpt::Date::ANSI::ToUString(cur)
 					, mpt::ufmt::dec<6>(diff)
 					, file
 					, line
 					, message
 					, function
-					)).c_str());
-				fflush(s_logfile);
+					)));
+				mpt::IO::Flush(s_logfile);
 			}
 		}
 		if(mpt::log::DebuggerEnabled)

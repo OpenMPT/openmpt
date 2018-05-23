@@ -501,7 +501,7 @@ bool ModSequence::IsPositionLocked(ORDERINDEX position) const
 
 
 #ifndef MODPLUG_NO_FILESAVE
-size_t ModSequence::WriteAsByte(FILE *f, const ORDERINDEX count, uint8 stopIndex, uint8 ignoreIndex) const
+size_t ModSequence::WriteAsByte(std::ostream &f, const ORDERINDEX count, uint8 stopIndex, uint8 ignoreIndex) const
 {
 	const size_t limit = std::min(count, GetLength());
 

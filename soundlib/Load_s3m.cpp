@@ -597,9 +597,12 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
 	};
 
-	FILE *f;
 	if(m_nChannels == 0 || filename.empty()) return false;
-	if((f = mpt_fopen(filename, "wb")) == nullptr) return false;
+	mpt::ofstream f(filename, std::ios::binary);
+	if(!f)
+	{
+		return false;
+	}
 
 	S3MFileHeader fileHeader;
 	MemsetZero(fileHeader);
@@ -950,7 +953,6 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		mpt::IO::Write(f, sampleHeader);
 	}
 
-	fclose(f);
 	return true;
 }
 

@@ -1107,14 +1107,14 @@ bool CModDoc::SaveEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::P
 	CStringA s;
 	EnvelopeToString(s, pIns->GetEnvelope(nEnv));
 
-	FILE *f = mpt_fopen(fileName, "wb");
-	if(f == nullptr)
+	mpt::ofstream f(fileName, std::ios::binary);
+	if(!f)
 	{
 		EndWaitCursor();
 		return false;
 	}
 	mpt::IO::WriteText(f, std::string(s.GetString(), s.GetString() + s.GetLength()));
-	fclose(f);
+	f.close();
 	EndWaitCursor();
 	return true;
 }

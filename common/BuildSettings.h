@@ -552,10 +552,6 @@
 #define MPT_ENABLE_FILEIO // External samples require disk file io
 #endif
 
-#if !defined(MODPLUG_NO_FILESAVE) && !defined(MPT_ENABLE_FILEIO_STDIO)
-#define MPT_ENABLE_FILEIO_STDIO // file saving requires FILE*
-#endif
-
 #if defined(NO_PLUGINS)
 // Any plugin type requires NO_PLUGINS to not be defined.
 #define NO_VST

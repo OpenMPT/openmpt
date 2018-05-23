@@ -41,7 +41,7 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 
 #ifdef MPT_ONDISKFILEWRAPPER_NO_CREATEFILE
 
-			FILE * f = mpt_fopen(tempName, "wb");
+			mpt::ofstream f(tempName, std::ios::binary);
 			if(!f)
 			{
 				throw std::runtime_error("");
@@ -58,16 +58,13 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 					chunkOk = mpt::IO::WriteRaw(f, mpt::const_byte_span(view.data() + written, chunkSize));
 					if(!chunkOk)
 					{
-						fclose(f);
-						f = NULL;
 						throw std::runtime_error("");
 					}
 					towrite -= chunkSize;
 					written += chunkSize;
 				} while(towrite > 0);
 			}
-			fclose(f);
-			f = NULL;
+			f.close();
 
 #else // !MPT_ONDISKFILEWRAPPER_NO_CREATEFILE
 

@@ -285,8 +285,6 @@ public:
 #ifndef MODPLUG_NO_FILESAVE
 	// Write a sample to file
 	size_t WriteSample(std::ostream &f, const ModSample &sample, SmpLength maxSamples = 0) const;
-	// Write a sample to file
-	size_t WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamples = 0) const;
 #endif // MODPLUG_NO_FILESAVE
 };
 

@@ -62,7 +62,7 @@ OPENMPT_NAMESPACE_BEGIN
 // MODULAR ModInstrument FIELD ACCESS : body content in InstrumentExtensions.cpp
 // -----------------------------------------------------------------------------
 #ifndef MODPLUG_NO_FILESAVE
-extern void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code = -1 /* -1 for all */, uint16 fixedsize = 0);
+extern void WriteInstrumentHeaderStructOrField(ModInstrument * input, std::ostream &file, uint32 only_this_code = -1 /* -1 for all */, uint16 fixedsize = 0);
 #endif // !MODPLUG_NO_FILESAVE
 extern bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, uint16 fsize, FileReader &file);
 // --------------------------------------------------------------------------------------------
@@ -794,10 +794,10 @@ public:
 	bool SaveS3M(const mpt::PathString &filename) const;
 	bool SaveMod(const mpt::PathString &filename) const;
 	bool SaveIT(const mpt::PathString &filename, bool compatibilityExport = false);
-	uint32 SaveMixPlugins(FILE *f=NULL, bool bUpdate=true);
-	void WriteInstrumentPropertyForAllInstruments(uint32 code,  uint16 size, FILE* f, INSTRUMENTINDEX nInstruments) const;
-	void SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, FILE* f) const;
-	void SaveExtendedSongProperties(FILE* f) const;
+	uint32 SaveMixPlugins(std::ostream *file=nullptr, bool bUpdate=true);
+	void WriteInstrumentPropertyForAllInstruments(uint32 code,  uint16 size, std::ostream &f, INSTRUMENTINDEX nInstruments) const;
+	void SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, std::ostream &f) const;
+	void SaveExtendedSongProperties(std::ostream &f) const;
 #endif // MODPLUG_NO_FILESAVE
 	void LoadExtendedSongProperties(FileReader &file, bool* pInterpretMptMade = nullptr);
 	void LoadMPTMProperties(FileReader &file, uint16 cwtv);

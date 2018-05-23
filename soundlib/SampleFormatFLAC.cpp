@@ -469,16 +469,59 @@ inline static void SampleToFLAC32(FLAC__int32 *dst, const T *src, SmpLength numS
 struct FLAC__StreamEncoder_RAII
 {
 	FLAC__StreamEncoder *encoder;
-	FILE *f;
+	mpt::ofstream f;
 
 	operator FLAC__StreamEncoder *() { return encoder; }
 
-	FLAC__StreamEncoder_RAII() : encoder(FLAC__stream_encoder_new()), f(nullptr) { }
+	FLAC__StreamEncoder_RAII() : encoder(FLAC__stream_encoder_new()) { }
 	~FLAC__StreamEncoder_RAII()
 	{
 		FLAC__stream_encoder_delete(encoder);
-		if(f != nullptr) fclose(f);
 	}
+
+	static FLAC__StreamEncoderWriteStatus StreamEncoderWriteCallback(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data)
+	{
+		mpt::ofstream & file = *reinterpret_cast<mpt::ofstream*>(client_data);
+		MPT_UNUSED_VARIABLE(encoder);
+		MPT_UNUSED_VARIABLE(samples);
+		MPT_UNUSED_VARIABLE(current_frame);
+		if(!mpt::IO::WriteRaw(file, mpt::as_span(buffer, bytes)))
+		{
+			return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
+		}
+		return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
+	}
+	static FLAC__StreamEncoderSeekStatus StreamEncoderSeekCallback(const FLAC__StreamEncoder *encoder, FLAC__uint64 absolute_byte_offset, void *client_data)
+	{
+		mpt::ofstream & file = *reinterpret_cast<mpt::ofstream*>(client_data);
+		MPT_UNUSED_VARIABLE(encoder);
+		if(!Util::TypeCanHoldValue<mpt::IO::Offset>(absolute_byte_offset))
+		{
+			return FLAC__STREAM_ENCODER_SEEK_STATUS_ERROR;
+		}
+		if(!mpt::IO::SeekAbsolute(file, static_cast<mpt::IO::Offset>(absolute_byte_offset)))
+		{
+			return FLAC__STREAM_ENCODER_SEEK_STATUS_ERROR;
+		}
+		return FLAC__STREAM_ENCODER_SEEK_STATUS_OK;
+	}
+	static FLAC__StreamEncoderTellStatus StreamEncoderTellCallback(const FLAC__StreamEncoder *encoder, FLAC__uint64 *absolute_byte_offset, void *client_data)
+	{
+		mpt::ofstream & file = *reinterpret_cast<mpt::ofstream*>(client_data);
+		MPT_UNUSED_VARIABLE(encoder);
+		mpt::IO::Offset pos = mpt::IO::TellWrite(file);
+		if(pos < 0)
+		{
+			return FLAC__STREAM_ENCODER_TELL_STATUS_ERROR;
+		}
+		if(!mpt::IO::OffsetFits<FLAC__uint64>(pos))
+		{
+			return FLAC__STREAM_ENCODER_TELL_STATUS_ERROR;
+		}
+		*absolute_byte_offset = static_cast<FLAC__uint64>(pos);
+		return FLAC__STREAM_ENCODER_TELL_STATUS_OK;
+	}
+
 };
 
 #endif
@@ -624,8 +667,8 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 	FLAC__int32 *sampleData = nullptr;
 	SmpLength numSamples = 0;
 
-	encoder.f = mpt_fopen(filename, "wb");
-	if(encoder.f == nullptr || FLAC__stream_encoder_init_FILE(encoder, encoder.f, nullptr, nullptr) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
+	encoder.f.open(filename, std::ios::binary);
+	if(!encoder.f || FLAC__stream_encoder_init_stream(encoder, &FLAC__StreamEncoder_RAII::StreamEncoderWriteCallback, &FLAC__StreamEncoder_RAII::StreamEncoderSeekCallback, &FLAC__StreamEncoder_RAII::StreamEncoderTellCallback, nullptr, &encoder.f) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
 	{
 		goto fail;
 	}

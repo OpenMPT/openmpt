@@ -2171,10 +2171,13 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 
 bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 {
-	FILE *f;
 
 	if(m_nChannels == 0 || filename.empty()) return false;
-	if((f = mpt_fopen(filename, "wb")) == nullptr) return false;
+	mpt::ofstream f(filename, std::ios::binary);
+	if(!f)
+	{
+		return false;
+	}
 
 	// Write song title
 	{
@@ -2362,7 +2365,6 @@ bool CSoundFile::SaveMod(const mpt::PathString &filename) const
 		}
 	}
 
-	fclose(f);
 	return true;
 }
 

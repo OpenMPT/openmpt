@@ -1264,8 +1264,8 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString 
 		return false;
 	}
 
-	FILE *f;
-	if((f = mpt_fopen(filename, "wb")) == nullptr)
+	mpt::ofstream f(filename, std::ios::binary);
+	if(!f)
 	{
 		return false;
 	}
@@ -1316,7 +1316,6 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString 
 	mpt::IO::WriteText(f, "XTPM");
 	WriteInstrumentHeaderStructOrField(pIns, f);	// Write full extended header.
 
-	fclose(f);
 	return true;
 }
 
@@ -3162,10 +3161,13 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 {
 	ITInstrument iti;
 	ModInstrument *pIns = Instruments[nInstr];
-	FILE *f;
 
 	if((!pIns) || filename.empty()) return false;
-	if((f = mpt_fopen(filename, "wb")) == nullptr) return false;
+	mpt::ofstream f(filename, std::ios::binary);
+	if(!f)
+	{
+		return false;
+	}
 
 	auto instSize = iti.ConvertToIT(*pIns, false, *this);
 
@@ -3237,7 +3239,6 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 	mpt::IO::WriteRaw(f, "XTPM", 4);
 	WriteInstrumentHeaderStructOrField(pIns, f);	// Write full extended header.
 
-	fclose(f);
 	return true;
 }
 

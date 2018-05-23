@@ -750,7 +750,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 	{
 		return false;
 	}
-	FILE *f = mpt_fopen(filename, "wb");
+	mpt::ofstream f(filename, std::ios::binary);
 	if(!f)
 	{
 		return false;
@@ -1124,7 +1124,7 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 		}
 
 		//Save hacked-on extra info
-		SaveMixPlugins(f);
+		SaveMixPlugins(&f);
 		if(GetNumInstruments())
 		{
 			SaveExtendedInstrumentProperties(writeInstruments, f);
@@ -1132,7 +1132,6 @@ bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExpor
 		SaveExtendedSongProperties(f);
 	}
 
-	fclose(f);
 	return true;
 }
 

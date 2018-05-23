@@ -1285,7 +1285,7 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 #ifndef MODPLUG_NO_FILESAVE
 
 // Save edit history. Pass a null pointer for *f to retrieve the number of bytes that would be written.
-static uint32 SaveITEditHistory(const CSoundFile &sndFile, FILE *f)
+static uint32 SaveITEditHistory(const CSoundFile &sndFile, std::ostream *file)
 {
 	size_t num = sndFile.GetFileHistory().size();
 #ifdef MODPLUG_TRACKER
@@ -1296,8 +1296,11 @@ static uint32 SaveITEditHistory(const CSoundFile &sndFile, FILE *f)
 	uint16 fnum = mpt::saturate_cast<uint16>(num);	// Number of entries that are actually going to be written
 	const uint32 bytesWritten = 2 + fnum * 8;		// Number of bytes that are actually going to be written
 
-	if(f == nullptr)
+	if(!file)
+	{
 		return bytesWritten;
+	}
+	std::ostream & f = *file;
 
 	// Write number of history entries
 	mpt::IO::WriteIntLE(f, fnum);
@@ -1349,9 +1352,16 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	ITFileHeader itHeader;
 	uint64 dwPos = 0;
 	uint32 dwHdrPos = 0, dwExtra = 0;
-	FILE *f;
 
-	if(filename.empty() || ((f = mpt_fopen(filename, "wb")) == NULL)) return false;
+	if(filename.empty())
+	{
+		return false;
+	}
+	mpt::ofstream f(filename, std::ios::binary);
+	if(!f)
+	{
+		return false;
+	}
 
 	// Writing Header
 	MemsetZero(itHeader);
@@ -1509,7 +1519,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	mpt::IO::Write(f, patpos);
 
 	// Writing edit history information
-	SaveITEditHistory(*this, f);
+	SaveITEditHistory(*this, &f);
 
 	// Writing midi cfg
 	if(itHeader.flags & ITFileHeader::reqEmbeddedMIDIConfig)
@@ -1548,7 +1558,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Writing mix plugins info
 	if(!compatibilityExport)
 	{
-		SaveMixPlugins(f, false);
+		SaveMixPlugins(&f, false);
 	}
 
 	// Writing song message
@@ -1849,7 +1859,6 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 	if(GetType() == MOD_TYPE_IT)
 	{
-		fclose(f);
 		return true;
 	}
 
@@ -1859,17 +1868,10 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	bool success = true;
 
 	mpt::IO::SeekEnd(f);
-	const mpt::IO::Offset standardEndPos = mpt::IO::TellWrite(f);
-	{
-	mpt::FILE_ostream fout(f);
 
-	const mpt::IO::Offset MPTStartPos = mpt::IO::TellWrite(fout);
+	const mpt::IO::Offset MPTStartPos = mpt::IO::TellWrite(f);
 	
-	// catch standard library truncating files
-	MPT_ASSERT_ALWAYS(MPTStartPos > 0);
-	MPT_ASSERT_ALWAYS(MPTStartPos == standardEndPos);
-
-	srlztn::SsbWrite ssb(fout);
+	srlztn::SsbWrite ssb(f);
 	ssb.BeginWrite("mptm", Version::Current().GetRawVersion());
 
 	if(GetTuneSpecificTunings().GetNumTunings() > 0)
@@ -1890,17 +1892,14 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	}
 
 	//Last 4 bytes should tell where the hack mpt things begin.
-	if(!fout.good())
+	if(!f.good())
 	{
-		fout.clear();
+		f.clear();
 		success = false;
 	}
-	mpt::IO::WriteIntLE<uint32>(fout, static_cast<uint32>(MPTStartPos));
+	mpt::IO::WriteIntLE<uint32>(f, static_cast<uint32>(MPTStartPos));
 
-	mpt::IO::SeekEnd(fout);
-	}
-	fclose(f);
-	f = nullptr;
+	mpt::IO::SeekEnd(f);
 
 	//END  : MPT SPECIFIC
 
@@ -1915,7 +1914,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 #ifndef MODPLUG_NO_FILESAVE
 
-uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
+uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool bUpdate)
 {
 #ifndef NO_PLUGINS
 	uint32 chinfo[MAX_BASECHANNELS];
@@ -1942,8 +1941,9 @@ uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 								// for each extra entity, add 4 for ID, plus 4 for size of entity, plus size of entity
 
 			nPluginSize += MPTxPlugDataSize + 4; //+4 is for size itself: sizeof(uint32) is 4
-			if(f)
+			if(file)
 			{
+				std::ostream & f = *file;
 				// write plugin ID
 				id[0] = 'F';
 				id[1] = i < 100 ? 'X' : '0' + i / 100;
@@ -1993,8 +1993,9 @@ uint32 CSoundFile::SaveMixPlugins(FILE *f, bool bUpdate)
 	}
 	if(nChInfo)
 	{
-		if(f)
+		if(file)
 		{
+			std::ostream & f = *file;
 			memcpy(id, "CHFX", 4);
 			mpt::IO::WriteRaw(f, id, 4);
 			mpt::IO::WriteIntLE<uint32>(f, nChInfo * 4);
@@ -2124,7 +2125,7 @@ void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-void CSoundFile::SaveExtendedSongProperties(FILE* f) const
+void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 {
 	const CModSpecifications &specs = GetModSpecifications();
 	// Extra song data - Yet Another Hack.
@@ -2282,7 +2283,7 @@ void CSoundFile::SaveExtendedSongProperties(FILE* f) const
 		} else
 		{
 			WRITEMODULARHEADER(MagicBE("MIMA"), static_cast<uint16>(objectsize));
-			GetMIDIMapper().Serialize(f);
+			GetMIDIMapper().Serialize(&f);
 		}
 	}
 #endif

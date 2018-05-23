@@ -1041,15 +1041,6 @@ size_t SampleIO::WriteSample(std::ostream &f, const ModSample &sample, SmpLength
 }
 
 
-// Write a sample to file
-size_t SampleIO::WriteSample(FILE *f, const ModSample &sample, SmpLength maxSamples) const
-{
-	MPT_ASSERT(f != nullptr);
-	mpt::FILE_ostream s(f);
-	return WriteSample(s, sample, maxSamples);
-}
-
-
 #endif // MODPLUG_NO_FILESAVE
 
 

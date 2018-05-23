@@ -26,7 +26,7 @@ MODULAR (in/out) ModInstrument :
 
 - both following functions need to be updated when adding a new member in ModInstrument :
 
-void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code, int16 fixedsize);
+void WriteInstrumentHeaderStructOrField(ModInstrument * input, std::ostream &file, uint32 only_this_code, int16 fixedsize);
 bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, int16 fsize, FileReader &file);
 
 - see below for body declaration.
@@ -285,7 +285,7 @@ bool IsNegative(const T &val)
 
 
 // Write (in 'file') 'input' ModInstrument with 'code' & 'size' extra field infos for each member
-void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code, uint16 fixedsize)
+void WriteInstrumentHeaderStructOrField(ModInstrument * input, std::ostream &file, uint32 only_this_code, uint16 fixedsize)
 {
 uint32 fcode;
 uint16 fsize;
@@ -346,7 +346,7 @@ static bool IsPropertyNeeded(const TIns &Instruments, PropType ModInstrument::*P
 
 
 template<typename PropType>
-static void WritePropertyIfNeeded(const CSoundFile &sndFile, PropType ModInstrument::*Prop, uint32 code, uint16 size, FILE *f, INSTRUMENTINDEX numInstruments)
+static void WritePropertyIfNeeded(const CSoundFile &sndFile, PropType ModInstrument::*Prop, uint32 code, uint16 size, std::ostream &f, INSTRUMENTINDEX numInstruments)
 {
 	if(IsPropertyNeeded(sndFile.Instruments, Prop))
 	{
@@ -360,7 +360,7 @@ static void WritePropertyIfNeeded(const CSoundFile &sndFile, PropType ModInstrum
 // The reason is that ITs and XMs save [code][size][ins1.Value][ins2.Value]...
 // whereas ITP saves [code][size][ins1.Value][code][size][ins2.Value]...
 // too late to turn back....
-void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX numInstruments, FILE *f) const
+void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX numInstruments, std::ostream &f) const
 {
 	uint32 code = MagicBE("MPTX");	// write extension header code
 	mpt::IO::WriteIntLE<uint32>(f, code);
@@ -436,7 +436,7 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX numInstruments
 	}
 }
 
-void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, uint16 size, FILE *f, INSTRUMENTINDEX nInstruments) const
+void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, uint16 size, std::ostream &f, INSTRUMENTINDEX nInstruments) const
 {
 	mpt::IO::WriteIntLE<uint32>(f, code);		//write code
 	mpt::IO::WriteIntLE<uint16>(f, size);		//write size
