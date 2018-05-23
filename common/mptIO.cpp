@@ -22,11 +22,6 @@
 #include <typeinfo>
 #endif // MPT_COMPILER_MSVC
 
-#if defined(MPT_ENABLE_FILEIO_STDIO)
-#include <cstdio>
-#include <stdio.h>
-#endif // MPT_ENABLE_FILEIO_STDIO
-
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -286,50 +281,6 @@ IO::Offset ReadRawImpl(std::istream & f, mpt::byte * data, std::size_t size) { r
 bool WriteRawImpl(std::ostream & f, const mpt::byte * data, std::size_t size) { f.write(mpt::byte_cast<const char *>(data), size); return !f.fail(); }
 bool IsEof(std::istream & f) { return f.eof(); }
 bool Flush(std::ostream & f) { f.flush(); return !f.fail(); }
-
-
-
-#if defined(MPT_ENABLE_FILEIO_STDIO)
-
-bool IsValid(FILE* & f) { return f != NULL; }
-
-#if MPT_COMPILER_MSVC
-
-IO::Offset TellRead(FILE* & f) { return _ftelli64(f); }
-IO::Offset TellWrite(FILE* & f) { return _ftelli64(f); }
-bool SeekBegin(FILE* & f) { return _fseeki64(f, 0, SEEK_SET) == 0; }
-bool SeekEnd(FILE* & f) { return _fseeki64(f, 0, SEEK_END) == 0; }
-bool SeekAbsolute(FILE* & f, IO::Offset pos) { return _fseeki64(f, pos, SEEK_SET) == 0; }
-bool SeekRelative(FILE* & f, IO::Offset off) { return _fseeki64(f, off, SEEK_CUR) == 0; }
-
-#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE > 0) 
-
-//STATIC_ASSERT(sizeof(off_t) == 8);
-IO::Offset TellRead(FILE* & f) { return ftello(f); }
-IO::Offset TellWrite(FILE* & f) { return ftello(f); }
-bool SeekBegin(FILE* & f) { return fseeko(f, 0, SEEK_SET) == 0; }
-bool SeekEnd(FILE* & f) { return fseeko(f, 0, SEEK_END) == 0; }
-bool SeekAbsolute(FILE* & f, IO::Offset pos) { return OffsetFits<off_t>(pos) && (fseek(f, mpt::saturate_cast<off_t>(pos), SEEK_SET) == 0); }
-bool SeekRelative(FILE* & f, IO::Offset off) { return OffsetFits<off_t>(off) && (fseek(f, mpt::saturate_cast<off_t>(off), SEEK_CUR) == 0); }
-
-#else
-
-//STATIC_ASSERT(sizeof(long) == 8); // Fails on 32bit non-POSIX systems for now.
-IO::Offset TellRead(FILE* & f) { return ftell(f); }
-IO::Offset TellWrite(FILE* & f) { return ftell(f); }
-bool SeekBegin(FILE* & f) { return fseek(f, 0, SEEK_SET) == 0; }
-bool SeekEnd(FILE* & f) { return fseek(f, 0, SEEK_END) == 0; }
-bool SeekAbsolute(FILE* & f, IO::Offset pos) { return OffsetFits<long>(pos) && (fseek(f, mpt::saturate_cast<long>(pos), SEEK_SET) == 0); }
-bool SeekRelative(FILE* & f, IO::Offset off) { return OffsetFits<long>(off) && (fseek(f, mpt::saturate_cast<long>(off), SEEK_CUR) == 0); }
-
-#endif
-
-IO::Offset ReadRawImpl(FILE * & f, mpt::byte * data, std::size_t size) { return fread(mpt::void_cast<void*>(data), 1, size, f); }
-bool WriteRawImpl(FILE* & f, const mpt::byte * data, std::size_t size) { return fwrite(mpt::void_cast<const void*>(data), 1, size, f) == size; }
-bool IsEof(FILE * & f) { return feof(f) != 0; }
-bool Flush(FILE* & f) { return fflush(f) == 0; }
-
-#endif // MPT_ENABLE_FILEIO_STDIO
 
 
 

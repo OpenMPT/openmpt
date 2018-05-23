@@ -104,12 +104,6 @@
 #include <cmath>
 #include <math.h>
 
-#if defined(MPT_ENABLE_FILEIO_STDIO)
-// for FILE* definition (which cannot be forward-declared in a portable way)
-#include <cstdio>
-#include <stdio.h>
-#endif
-
 #ifndef NO_VST
 // VST SDK includes these headers after messing with default compiler structure
 // packing. No problem in practice as VST SDK sets packing matching the default

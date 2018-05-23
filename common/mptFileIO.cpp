@@ -53,21 +53,6 @@ bool SetFilesystemCompression(int fd)
 	}
 	return SetFilesystemCompression(hFile);
 }
-#if defined(MPT_ENABLE_FILEIO_STDIO)
-bool SetFilesystemCompression(FILE *file)
-{
-	if(!file)
-	{
-		return false;
-	}
-	int fd = _fileno(file);
-	if(fd == -1)
-	{
-		return false;
-	}
-	return SetFilesystemCompression(fd);
-}
-#endif // MPT_ENABLE_FILEIO_STDIO
 bool SetFilesystemCompression(const mpt::PathString &filename)
 {
 	DWORD attributes = GetFileAttributes(filename.AsNativePrefixed().c_str());

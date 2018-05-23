@@ -22,11 +22,6 @@
 #include <limits>
 #include <cstring>
 
-#if defined(MPT_ENABLE_FILEIO_STDIO)
-#include <cstdio>
-#include <stdio.h>
-#endif // MPT_ENABLE_FILEIO_STDIO
-
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -74,24 +69,6 @@ IO::Offset ReadRawImpl(std::istream & f, mpt::byte * data, std::size_t size);
 bool WriteRawImpl(std::ostream & f, const mpt::byte * data, std::size_t size);
 bool IsEof(std::istream & f);
 bool Flush(std::ostream & f);
-
-
-
-#if defined(MPT_ENABLE_FILEIO_STDIO)
-
-bool IsValid(FILE* & f);
-IO::Offset TellRead(FILE* & f);
-IO::Offset TellWrite(FILE* & f);
-bool SeekBegin(FILE* & f);
-bool SeekEnd(FILE* & f);
-bool SeekAbsolute(FILE* & f, IO::Offset pos);
-bool SeekRelative(FILE* & f, IO::Offset off);
-IO::Offset ReadRawImpl(FILE * & f, mpt::byte * data, std::size_t size);
-bool WriteRawImpl(FILE* & f, const mpt::byte * data, std::size_t size);
-bool IsEof(FILE * & f);
-bool Flush(FILE* & f);
-
-#endif // MPT_ENABLE_FILEIO_STDIO
 
 
 
