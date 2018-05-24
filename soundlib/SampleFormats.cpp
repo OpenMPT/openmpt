@@ -257,7 +257,7 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 	}
 
 #ifdef MODPLUG_TRACKER
-	if(!strcmp(pIns->filename, "") && srcSong.GetpModDoc() != nullptr)
+	if(!strcmp(pIns->filename, "") && srcSong.GetpModDoc() != nullptr && &srcSong != this)
 	{
 		mpt::String::Copy(pIns->filename, srcSong.GetpModDoc()->GetPathNameMpt().GetFullFileName().ToLocale());
 	}
@@ -310,7 +310,7 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 	}
 
 #ifdef MODPLUG_TRACKER
-	if(!strcmp(targetSmp.filename, "") && srcSong.GetpModDoc() != nullptr)
+	if(!strcmp(targetSmp.filename, "") && srcSong.GetpModDoc() != nullptr && &srcSong != this)
 	{
 		mpt::String::Copy(targetSmp.filename, mpt::ToCharset(GetCharsetInternal(), srcSong.GetpModDoc()->GetTitle()));
 	}
