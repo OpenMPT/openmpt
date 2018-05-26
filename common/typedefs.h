@@ -424,42 +424,6 @@ constexpr uint32 uint32_max = std::numeric_limits<uint32>::max();
 constexpr uint64 uint64_max = std::numeric_limits<uint64>::max();
 
 
-// 24-bit integer wrapper (for 24-bit PCM)
-struct int24
-{
-	uint8 bytes[3];
-	int24() { bytes[0] = bytes[1] = bytes[2] = 0; }
-#if MPT_PLATFORM_ENDIAN_KNOWN
-	explicit int24(int other)
-	{
-		#ifdef MPT_PLATFORM_BIG_ENDIAN
-			bytes[0] = (static_cast<unsigned int>(other)>>16)&0xff;
-			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
-			bytes[2] = (static_cast<unsigned int>(other)>> 0)&0xff;
-		#else
-			bytes[0] = (static_cast<unsigned int>(other)>> 0)&0xff;
-			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
-			bytes[2] = (static_cast<unsigned int>(other)>>16)&0xff;
-		#endif
-	}
-	operator int() const
-	{
-		#ifdef MPT_PLATFORM_BIG_ENDIAN
-			return (static_cast<int8>(bytes[0]) * 65536) + (bytes[1] * 256) + bytes[2];
-		#else
-			return (static_cast<int8>(bytes[2]) * 65536) + (bytes[1] * 256) + bytes[0];
-		#endif
-	}
-#else
-	explicit int24(int other);
-	operator int() const;
-#endif
-};
-MPT_STATIC_ASSERT(sizeof(int24) == 3);
-#define int24_min (0-0x00800000)
-#define int24_max (0+0x007fffff)
-
-
 typedef float float32;
 MPT_STATIC_ASSERT(sizeof(float32) == 4);
 

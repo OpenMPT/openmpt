@@ -969,6 +969,61 @@ MPT_ENDIAN_CONSTEXPR_FUN Tpacked as_endian(typename Tpacked::base_type v) noexce
 
 
 
+// 24-bit integer wrapper (for 24-bit PCM)
+struct int24
+{
+	uint8 bytes[3];
+	int24() { bytes[0] = bytes[1] = bytes[2] = 0; }
+#if MPT_PLATFORM_ENDIAN_KNOWN
+	explicit int24(int other)
+	{
+		#ifdef MPT_PLATFORM_BIG_ENDIAN
+			bytes[0] = (static_cast<unsigned int>(other)>>16)&0xff;
+			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
+			bytes[2] = (static_cast<unsigned int>(other)>> 0)&0xff;
+		#else
+			bytes[0] = (static_cast<unsigned int>(other)>> 0)&0xff;
+			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
+			bytes[2] = (static_cast<unsigned int>(other)>>16)&0xff;
+		#endif
+	}
+	operator int() const
+	{
+		#ifdef MPT_PLATFORM_BIG_ENDIAN
+			return (static_cast<int8>(bytes[0]) * 65536) + (bytes[1] * 256) + bytes[2];
+		#else
+			return (static_cast<int8>(bytes[2]) * 65536) + (bytes[1] * 256) + bytes[0];
+		#endif
+	}
+#else
+	explicit int24(int other)
+	{
+		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big()) {
+			bytes[0] = (static_cast<unsigned int>(other)>>16)&0xff;
+			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
+			bytes[2] = (static_cast<unsigned int>(other)>> 0)&0xff;
+		} else {
+			bytes[0] = (static_cast<unsigned int>(other)>> 0)&0xff;
+			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
+			bytes[2] = (static_cast<unsigned int>(other)>>16)&0xff;
+		}
+	}
+	operator int() const
+	{
+		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big()) {
+			return (static_cast<int8>(bytes[0]) * 65536) + (bytes[1] * 256) + bytes[2];
+		} else {
+			return (static_cast<int8>(bytes[2]) * 65536) + (bytes[1] * 256) + bytes[0];
+		}
+	}
+#endif
+};
+MPT_STATIC_ASSERT(sizeof(int24) == 3);
+#define int24_min (0-0x00800000)
+#define int24_max (0+0x007fffff)
+
+
+
 // Small helper class to support unaligned memory access on all platforms.
 // This is only used to make old module loaders work everywhere.
 // Do not use in new code.

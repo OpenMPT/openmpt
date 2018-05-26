@@ -13,6 +13,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+struct int24;
+
+
 enum SampleFormatEnum
 {
 	SampleFormatUnsigned8 =  8,       // do not change value (for compatibility with old configuration settings)

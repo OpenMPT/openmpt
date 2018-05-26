@@ -17,6 +17,7 @@
 
 #include "../common/ComponentManager.h"
 
+#include "../common/Endianness.h"
 #include "../common/FlagSet.h"
 
 #ifdef MPT_WITH_ASIO
