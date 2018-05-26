@@ -622,7 +622,7 @@ bool CViewPattern::SetPlayCursor(PATTERNINDEX pat, ROWINDEX row, uint32 tick)
 
 UINT CViewPattern::GetCurrentInstrument() const
 {
-	return SendCtrlMessage(CTRLMSG_GETCURRENTINSTRUMENT);
+	return static_cast<UINT>(SendCtrlMessage(CTRLMSG_GETCURRENTINSTRUMENT));
 }
 
 
@@ -663,7 +663,7 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 			CInputHandler *ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
-			UINT nChar = pMsg->wParam;
+			UINT nChar = static_cast<UINT>(pMsg->wParam);
 			UINT nRepCnt = LOWORD(pMsg->lParam);
 			UINT nFlags = HIWORD(pMsg->lParam);
 			KeyEventType kT = ih->GetKeyEventType(nFlags);
@@ -3260,7 +3260,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		{
 			pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
 
-			pRow->Set(NOTE_PCS, static_cast<ModCommand::INSTR>(plugSlot + 1), static_cast<uint16>(paramIndex), static_cast<uint16>(pPlug->GetParameter(paramIndex) * ModCommand::maxColumnValue));
+			pRow->Set(NOTE_PCS, static_cast<ModCommand::INSTR>(plugSlot + 1), static_cast<uint16>(paramIndex), static_cast<uint16>(pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex)) * ModCommand::maxColumnValue));
 			InvalidateRow(nRow);
 		}
 	} else if(sndFile.GetModSpecifications().HasCommand(CMD_SMOOTHMIDI))
@@ -3280,7 +3280,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		//If we can, activate it for this chan by writing appropriate SFx command it.
 		if (activePlugParam != paramIndex)
 		{ 
-			int foundMacro = sndFile.m_MidiCfg.FindMacroForParam(paramIndex);
+			int foundMacro = sndFile.m_MidiCfg.FindMacroForParam(static_cast<PlugParamIndex>(paramIndex));
 			if (foundMacro >= 0)
 			{
 				sndFile.m_PlayState.Chn[nChn].nActiveMacro = static_cast<uint8>(foundMacro);
@@ -3303,7 +3303,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 			pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
 
 			pRow->command = CMD_SMOOTHMIDI;
-			PlugParamValue param = pPlug->GetParameter(paramIndex);
+			PlugParamValue param = pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex));
 			Limit(param, 0.0f, 1.0f);
 			pRow->param = static_cast<ModCommand::PARAM>(param * 127.0f);
 			InvalidateRow(nRow);
@@ -3375,8 +3375,8 @@ ModCommand &CViewPattern::GetModCommand(CSoundFile &sndFile, const ModCommandPos
 
 LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 {
-	const DWORD dwMidiData = dwMidiDataParam;
-	static BYTE midivolume = 127;
+	const uint32 midiData = static_cast<uint32>(dwMidiDataParam);
+	static uint8 midiVolume = 127;
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
@@ -3402,14 +3402,14 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	//  BYTE event  = (dwMidiData>>16) & 0x64;
 	//. Sample- and instrumentview handle midi mesages in their own methods.
 
-	const uint8 nByte1 = MIDIEvents::GetDataByte1FromEvent(dwMidiData);
-	const uint8 nByte2 = MIDIEvents::GetDataByte2FromEvent(dwMidiData);
+	const uint8 nByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
+	const uint8 nByte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
 
 	const uint8 nNote = nByte1 + NOTE_MIN;
 	int nVol = nByte2;							// At this stage nVol is a non linear value in [0;127]
 												// Need to convert to linear in [0;64] - see below
-	MIDIEvents::EventType event = MIDIEvents::GetTypeFromEvent(dwMidiData);
-	uint8 channel = MIDIEvents::GetChannelFromEvent(dwMidiData);
+	MIDIEvents::EventType event = MIDIEvents::GetTypeFromEvent(midiData);
+	uint8 channel = MIDIEvents::GetChannelFromEvent(midiData);
 
 	if ((event == MIDIEvents::evNoteOn) && !nVol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
 
@@ -3418,13 +3418,13 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	PLUGINDEX mappedIndex = uint8_max;
 	PlugParamIndex paramIndex = 0;
 	uint16 paramValue = uint16_max;
-	bool captured = sndFile.GetMIDIMapper().OnMIDImsg(dwMidiData, mappedIndex, paramIndex, paramValue);
+	bool captured = sndFile.GetMIDIMapper().OnMIDImsg(midiData, mappedIndex, paramIndex, paramValue);
 
 
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetInputHandler();
-	if(ih->HandleMIDIMessage(static_cast<InputTargetContext>(kCtxViewPatterns + 1 + m_Cursor.GetColumnType()), dwMidiData) != kcNull
-		|| ih->HandleMIDIMessage(kCtxAllContexts, dwMidiData) != kcNull)
+	if(ih->HandleMIDIMessage(static_cast<InputTargetContext>(kCtxViewPatterns + 1 + m_Cursor.GetColumnType()), midiData) != kcNull
+		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull)
 	{
 		// Mapped to a command, no need to pass message on.
 		captured = true;
@@ -3467,7 +3467,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		if((pMainFrm->GetSoundFilePlaying() != &sndFile || sndFile.IsPaused()) && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
 			pModDoc->OnPatternPlayNoLoop();
 
-		nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
+		nVol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
 		if(nVol < 0) nVol = -1;
 		else nVol = (nVol + 3) / 4; //Value from [0,256] to [0,64]
 		TempEnterNote(nNote, nVol, true);
@@ -3489,7 +3489,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		switch(nByte1)
 		{
 			case MIDIEvents::MIDICC_Volume_Coarse: //Volume
-				midivolume = nByte2;
+				midiVolume = nByte2;
 			break;
 		}
 
@@ -3571,10 +3571,10 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		IMixPlugin* plug = sndFile.GetInstrumentPlugin(instr);
 		if(plug)
 		{
-			plug->MidiSend(dwMidiData);
+			plug->MidiSend(midiData);
 			// Sending MIDI may modify the plugin. For now, if MIDI data
 			// is not active sensing, set modified.
-			if(dwMidiData != MIDIEvents::System(MIDIEvents::sysActiveSense))
+			if(midiData != MIDIEvents::System(MIDIEvents::sysActiveSense))
 				pModDoc->SetModified();
 		}
 
@@ -3633,7 +3633,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case VIEWMSG_SETSPACING:
-		m_nSpacing = lParam;
+		m_nSpacing = static_cast<UINT>(lParam);
 		break;
 
 	case VIEWMSG_PATTERNPROPERTIES:
@@ -4119,34 +4119,34 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 	if(wParam >= kcSetSpacing0 && wParam <= kcSetSpacing9)
 	{
-		SetSpacing(wParam - kcSetSpacing0);
+		SetSpacing(static_cast<int>(wParam) - kcSetSpacing0);
 		return wParam;
 	}
 
 	if(wParam >= kcSetIns0 && wParam <= kcSetIns9)
 	{
 		if(IsEditingEnabled_bmsg())
-			TempEnterIns(wParam - kcSetIns0);
+			TempEnterIns(static_cast<int>(wParam) - kcSetIns0);
 		return wParam;
 	}
 
 	if(wParam >= kcSetOctave0 && wParam <= kcSetOctave9)
 	{
 		if(IsEditingEnabled_bmsg())
-			TempEnterOctave(wParam - kcSetOctave0);
+			TempEnterOctave(static_cast<int>(wParam) - kcSetOctave0);
 		return wParam;
 	}
 
 	if(wParam >= kcSetOctaveStop0 && wParam <= kcSetOctaveStop9)
 	{
-		TempStopOctave(wParam - kcSetOctaveStop0);
+		TempStopOctave(static_cast<int>(wParam) - kcSetOctaveStop0);
 		return wParam;
 	}
 
 	if(wParam >= kcSetVolumeStart && wParam <= kcSetVolumeEnd)
 	{
 		if(IsEditingEnabled_bmsg())
-			TempEnterVol(wParam - kcSetVolumeStart);
+			TempEnterVol(static_cast<int>(wParam) - kcSetVolumeStart);
 		return wParam;
 	}
 
@@ -4160,7 +4160,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	if(wParam >= kcSetFXParam0 && wParam <= kcSetFXParamF)
 	{
 		if(IsEditingEnabled_bmsg())
-			TempEnterFXparam(wParam - kcSetFXParam0);
+			TempEnterFXparam(static_cast<int>(wParam) - kcSetFXParam0);
 		return wParam;
 	}
 
@@ -4438,7 +4438,7 @@ void CViewPattern::TempEnterFXparam(int v)
 
 
 // Stop a note that has been entered
-void CViewPattern::TempStopNote(ModCommand::NOTE note, bool fromMidi, const bool bChordMode)
+void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool chordMode)
 {
 	CModDoc *pModDoc = GetDocument();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -4461,10 +4461,11 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, bool fromMidi, const bool
 	const bool liveRecord = IsLiveRecord();
 	const bool isSplit = IsNoteSplit(note);
 	UINT ins = 0;
+	chordMode = chordMode && (prevChordNote != NOTE_NONE);
 
 	BYTE *activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
 	const CHANNELINDEX nChnCursor = GetCurrentChannel();
-	const CHANNELINDEX nChn = bChordMode ? chordPatternChannels[0] : (activeNoteMap[note] < sndFile.GetNumChannels() ? activeNoteMap[note] : nChnCursor);
+	const CHANNELINDEX nChn = chordMode ? chordPatternChannels[0] : (activeNoteMap[note] < sndFile.GetNumChannels() ? activeNoteMap[note] : nChnCursor);
 
 	CHANNELINDEX noteChannels[MPTChord::notesPerChord] = { nChn };
 	ModCommand::NOTE notes[MPTChord::notesPerChord] = { note };
@@ -4488,7 +4489,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, bool fromMidi, const bool
 			ins = m_nFoundInstrument;
 
 		const bool playWholeRow = ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !liveRecord);
-		if(bChordMode == true)
+		if(chordMode == true)
 		{
 			m_Status.reset(psChordPlaying);
 
@@ -4514,7 +4515,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, bool fromMidi, const bool
 	// Enter note off in pattern?
 	if(!ModCommand::IsNote(note))
 		return;
-	if (m_Cursor.GetColumnType() > PatternCursor::instrColumn && (bChordMode || !fromMidi))
+	if (m_Cursor.GetColumnType() > PatternCursor::instrColumn && (chordMode || !fromMidi))
 		return;
 	if (!pModDoc || !pMainFrm || !(IsEditingEnabled()))
 		return;
@@ -4528,7 +4529,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, bool fromMidi, const bool
 	}
 
 	// -- write sdx if playing live
-	const bool usePlaybackPosition = (!bChordMode) && (liveRecord && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_AUTODELAY));
+	const bool usePlaybackPosition = (!chordMode) && (liveRecord && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_AUTODELAY));
 
 	//Work out where to put the note off
 	ModCommandPos editPos = GetEditPos(sndFile, usePlaybackPosition);
@@ -4549,7 +4550,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, bool fromMidi, const bool
 		if(pTarget->note == note && liveRecord && sndFile.Patterns[editPos.pattern].IsValidRow(editPos.row))
 		{
 			pTarget = sndFile.Patterns[editPos.pattern].GetpModCommand(editPos.row, nChn);
-			if(pTarget->note != NOTE_NONE || (!bChordMode && (pTarget->instr || pTarget->volcmd)))
+			if(pTarget->note != NOTE_NONE || (!chordMode && (pTarget->instr || pTarget->volcmd)))
 				return;
 		} else
 		{
