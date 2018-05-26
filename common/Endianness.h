@@ -10,38 +10,66 @@
 
 #pragma once
 
+#include <array>
+#include <limits>
+
 #include <cmath>
 #include <cstdlib>
+
 #include <math.h>
 #include <stdlib.h>
+
 #if MPT_COMPILER_MSVC
 #include <intrin.h>
 #endif
 
 
 
-// Platform has native IEEE floating point representation _AND_ floating point
-// endianess is the same as integer endianness.
-// We just test __STDC_IEC_559__ for now.
-#if MPT_COMPILER_GENERIC
-	#define MPT_PLATFORM_IEEE_FLOAT 0
-#elif MPT_COMPILER_MSVC
-	#define MPT_PLATFORM_IEEE_FLOAT 1
-#else // MPT_COMPILER
-	#if MPT_PLATFORM_ENDIAN_KNOWN
-		#if defined(__STDC_IEC_559__)
-			#if (__STDC_IEC_559__)
-				#define MPT_PLATFORM_IEEE_FLOAT 1
-			#else
-				#define MPT_PLATFORM_IEEE_FLOAT 0
-			#endif
-		#else
-			#define MPT_PLATFORM_IEEE_FLOAT 0
-		#endif
-	#else
-		#define MPT_PLATFORM_IEEE_FLOAT 0
+#if MPT_COMPILER_MSVC
+	#define MPT_PLATFORM_LITTLE_ENDIAN
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+	#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+		#define MPT_PLATFORM_BIG_ENDIAN
+	#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+		#define MPT_PLATFORM_LITTLE_ENDIAN
 	#endif
-#endif // MPT_COMPILER
+#endif
+
+// fallback:
+#if !defined(MPT_PLATFORM_BIG_ENDIAN) && !defined(MPT_PLATFORM_LITTLE_ENDIAN)
+	// taken from boost/detail/endian.hpp
+	#if (defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN)) \
+		|| (defined(__BIG_ENDIAN__) && !defined(__LITTLE_ENDIAN__)) \
+		|| (defined(_STLP_BIG_ENDIAN) && !defined(_STLP_LITTLE_ENDIAN))
+			#define MPT_PLATFORM_BIG_ENDIAN
+	#elif (defined(_LITTLE_ENDIAN) && !defined(_BIG_ENDIAN)) \
+		|| (defined(__LITTLE_ENDIAN__) && !defined(__BIG_ENDIAN__)) \
+		|| (defined(_STLP_LITTLE_ENDIAN) && !defined(_STLP_BIG_ENDIAN))
+			#define MPT_PLATFORM_LITTLE_ENDIAN
+	#elif defined(__sparc) || defined(__sparc__) \
+		|| defined(_POWER) || defined(__powerpc__) \
+		|| defined(__ppc__) || defined(__hpux) || defined(__hppa) \
+		|| defined(_MIPSEB) || defined(_POWER) \
+		|| defined(__s390__)
+			#define MPT_PLATFORM_BIG_ENDIAN
+	#elif defined(__i386__) || defined(__alpha__) \
+		|| defined(__ia64) || defined(__ia64__) \
+		|| defined(_M_IX86) || defined(_M_IA64) \
+		|| defined(_M_ALPHA) || defined(__amd64) \
+		|| defined(__amd64__) || defined(_M_AMD64) \
+		|| defined(__x86_64) || defined(__x86_64__) \
+		|| defined(_M_X64) || defined(__bfin__)
+			#define MPT_PLATFORM_LITTLE_ENDIAN
+	#endif
+#endif
+
+#if defined(MPT_PLATFORM_BIG_ENDIAN) || defined(MPT_PLATFORM_LITTLE_ENDIAN)
+#define MPT_PLATFORM_ENDIAN_KNOWN 1
+#else
+#define MPT_PLATFORM_ENDIAN_KNOWN 0
+#endif
+
+
 
 #if MPT_PLATFORM_ENDIAN_KNOWN && MPT_CXX_AT_LEAST(14)
 //#define MPT_ENDIAN_IS_CONSTEXPR 1
@@ -62,16 +90,15 @@
 #define MPT_ENDIAN_CONSTEXPR_VAR const
 #endif
 
-#if !MPT_PLATFORM_IEEE_FLOAT
-#include <array>
-#endif
-
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
+
 namespace mpt {
+
+
 
 // C++20 std::endian
 #if MPT_CXX_AT_LEAST(20)
@@ -91,6 +118,18 @@ enum class endian
 };
 #endif
 
+MPT_CONSTEXPR11_FUN bool endian_known() noexcept
+{
+	return ((mpt::endian::native == mpt::endian::little) || (mpt::endian::native == mpt::endian::big));
+}
+
+MPT_CONSTEXPR11_FUN bool endian_unknown() noexcept
+{
+	return ((mpt::endian::native != mpt::endian::little) && (mpt::endian::native != mpt::endian::big));
+}
+
+
+
 struct endian_type { uint32 value; };
 static MPT_ENDIAN_CONSTEXPR_FUN bool operator == (const endian_type & a, const endian_type & b) { return a.value == b.value; }
 static MPT_ENDIAN_CONSTEXPR_FUN bool operator != (const endian_type & a, const endian_type & b) { return a.value != b.value; }
@@ -99,9 +138,9 @@ static MPT_ENDIAN_CONSTEXPR_VAR endian_type endian_big    = { 0x12345678u };
 static MPT_ENDIAN_CONSTEXPR_VAR endian_type endian_little = { 0x78563412u };
 
 namespace detail {
-	static MPT_FORCEINLINE endian_type endian_probe()
+	static MPT_FORCEINLINE endian_type endian_probe() noexcept
 	{
-		STATIC_ASSERT(sizeof(endian_type) == 4);
+		MPT_STATIC_ASSERT(sizeof(endian_type) == 4);
 		const mpt::byte probe[4] = { mpt::as_byte(0x12), mpt::as_byte(0x34), mpt::as_byte(0x56), mpt::as_byte(0x78) };
 		endian_type test;
 		std::memcpy(&test, probe, 4);
@@ -109,7 +148,7 @@ namespace detail {
 	}
 }
 
-static MPT_ENDIAN_CONSTEXPR_FUN endian_type get_endian()
+static MPT_ENDIAN_CONSTEXPR_FUN endian_type get_endian() noexcept
 {
 	MPT_CONSTANT_IF(mpt::endian::native == mpt::endian::little)
 	{
@@ -123,20 +162,22 @@ static MPT_ENDIAN_CONSTEXPR_FUN endian_type get_endian()
 	}
 }
 
-static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_little()
+static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_little() noexcept
 {
 	return get_endian() == endian_little;
 }
 
-static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_big()
+static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_big() noexcept
 {
 	return get_endian() == endian_big;
 }
 
-static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_weird()
+static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_weird() noexcept
 {
 	return !endian_is_little() && !endian_is_big();
 }
+
+
 
 } // namespace mpt
 
@@ -144,12 +185,12 @@ static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_weird()
 
 struct BigEndian_tag
 {
-	static MPT_ENDIAN_CONSTEXPR_VAR mpt::endian endian = mpt::endian::big;
+	static MPT_CONSTEXPR11_VAR mpt::endian endian = mpt::endian::big;
 };
 
 struct LittleEndian_tag
 {
-	static MPT_ENDIAN_CONSTEXPR_VAR mpt::endian endian = mpt::endian::little;
+	static MPT_CONSTEXPR11_VAR mpt::endian endian = mpt::endian::little;
 };
 
 
@@ -243,11 +284,10 @@ static MPT_FORCEINLINE uint64 mpt_bswap64(uint64 x) { return bswap64(x); }
 #endif
 
 
-#if !MPT_PLATFORM_ENDIAN_KNOWN
-
 template <typename T, typename Tendian, std::size_t size>
 static MPT_CONSTEXPR17_FUN std::array<mpt::byte, size> EndianEncode(T val) noexcept
 {
+	MPT_STATIC_ASSERT(Tendian::endian == mpt::endian::little || Tendian::endian == mpt::endian::big);
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	STATIC_ASSERT(!std::numeric_limits<T>::is_signed);
 	STATIC_ASSERT(sizeof(T) == size);
@@ -275,6 +315,7 @@ static MPT_CONSTEXPR17_FUN std::array<mpt::byte, size> EndianEncode(T val) noexc
 template <typename T, typename Tendian, std::size_t size>
 static MPT_CONSTEXPR17_FUN T EndianDecode(std::array<mpt::byte, size> data) noexcept
 {
+	MPT_STATIC_ASSERT(Tendian::endian == mpt::endian::little || Tendian::endian == mpt::endian::big);
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	STATIC_ASSERT(!std::numeric_limits<T>::is_signed);
 	STATIC_ASSERT(sizeof(T) == size);
@@ -300,7 +341,6 @@ static MPT_CONSTEXPR17_FUN T EndianDecode(std::array<mpt::byte, size> data) noex
 	return val;
 }
 
-#endif // !MPT_PLATFORM_ENDIAN_KNOWN
 
 namespace mpt
 {
@@ -333,113 +373,121 @@ static MPT_ENDIAN_CONSTEXPR_FUN char   SwapBytes(char   value) noexcept { return
 // 1.0f --> 0x3f800000u
 static MPT_FORCEINLINE uint32 EncodeIEEE754binary32(float32 f)
 {
-#if MPT_PLATFORM_IEEE_FLOAT
-	return mpt::bit_cast<uint32>(f);
-#else
-	int e = 0;
-	float m = std::frexp(f, &e);
-	if(e == 0 && std::fabs(m) == 0.0f)
+	MPT_CONSTANT_IF(std::numeric_limits<float32>::is_iec559 && mpt::endian_known())
 	{
-		uint32 expo = 0u;
-		uint32 sign = std::signbit(m) ? 0x01u : 0x00u;
-		uint32 mant = 0u;
-		uint32 i = 0u;
-		i |= (mant <<  0) & 0x007fffffu;
-		i |= (expo << 23) & 0x7f800000u;
-		i |= (sign << 31) & 0x80000000u;
-		return i;
+		return mpt::bit_cast<uint32>(f);
 	} else
 	{
-		uint32 expo = e + 127 - 1;
-		uint32 sign = std::signbit(m) ? 0x01u : 0x00u;
-		uint32 mant = static_cast<uint32>(std::fabs(std::ldexp(m, 24)));
-		uint32 i = 0u;
-		i |= (mant <<  0) & 0x007fffffu;
-		i |= (expo << 23) & 0x7f800000u;
-		i |= (sign << 31) & 0x80000000u;
-		return i;
+		int e = 0;
+		float m = std::frexp(f, &e);
+		if(e == 0 && std::fabs(m) == 0.0f)
+		{
+			uint32 expo = 0u;
+			uint32 sign = std::signbit(m) ? 0x01u : 0x00u;
+			uint32 mant = 0u;
+			uint32 i = 0u;
+			i |= (mant <<  0) & 0x007fffffu;
+			i |= (expo << 23) & 0x7f800000u;
+			i |= (sign << 31) & 0x80000000u;
+			return i;
+		} else
+		{
+			uint32 expo = e + 127 - 1;
+			uint32 sign = std::signbit(m) ? 0x01u : 0x00u;
+			uint32 mant = static_cast<uint32>(std::fabs(std::ldexp(m, 24)));
+			uint32 i = 0u;
+			i |= (mant <<  0) & 0x007fffffu;
+			i |= (expo << 23) & 0x7f800000u;
+			i |= (sign << 31) & 0x80000000u;
+			return i;
+		}
 	}
-#endif
 }
 static MPT_FORCEINLINE uint64 EncodeIEEE754binary64(float64 f)
 {
-#if MPT_PLATFORM_IEEE_FLOAT
-	return mpt::bit_cast<uint64>(f);
-#else
-	int e = 0;
-	double m = std::frexp(f, &e);
-	if(e == 0 && std::fabs(m) == 0.0)
+	MPT_CONSTANT_IF(std::numeric_limits<float64>::is_iec559 && mpt::endian_known())
 	{
-		uint64 expo = 0u;
-		uint64 sign = std::signbit(m) ? 0x01u : 0x00u;
-		uint64 mant = 0u;
-		uint64 i = 0u;
-		i |= (mant <<  0) & 0x000fffffffffffffull;
-		i |= (expo << 52) & 0x7ff0000000000000ull;
-		i |= (sign << 63) & 0x8000000000000000ull;
-		return i;
+		return mpt::bit_cast<uint64>(f);
 	} else
 	{
-		uint64 expo = e + 1023 - 1;
-		uint64 sign = std::signbit(m) ? 0x01u : 0x00u;
-		uint64 mant = static_cast<uint64>(std::fabs(std::ldexp(m, 53)));
-		uint64 i = 0u;
-		i |= (mant <<  0) & 0x000fffffffffffffull;
-		i |= (expo << 52) & 0x7ff0000000000000ull;
-		i |= (sign << 63) & 0x8000000000000000ull;
-		return i;
+		int e = 0;
+		double m = std::frexp(f, &e);
+		if(e == 0 && std::fabs(m) == 0.0)
+		{
+			uint64 expo = 0u;
+			uint64 sign = std::signbit(m) ? 0x01u : 0x00u;
+			uint64 mant = 0u;
+			uint64 i = 0u;
+			i |= (mant <<  0) & 0x000fffffffffffffull;
+			i |= (expo << 52) & 0x7ff0000000000000ull;
+			i |= (sign << 63) & 0x8000000000000000ull;
+			return i;
+		} else
+		{
+			uint64 expo = e + 1023 - 1;
+			uint64 sign = std::signbit(m) ? 0x01u : 0x00u;
+			uint64 mant = static_cast<uint64>(std::fabs(std::ldexp(m, 53)));
+			uint64 i = 0u;
+			i |= (mant <<  0) & 0x000fffffffffffffull;
+			i |= (expo << 52) & 0x7ff0000000000000ull;
+			i |= (sign << 63) & 0x8000000000000000ull;
+			return i;
+		}
 	}
-#endif
 }
 
 // 0x3f800000u --> 1.0f
 static MPT_FORCEINLINE float32 DecodeIEEE754binary32(uint32 i)
 {
-#if MPT_PLATFORM_IEEE_FLOAT
-	return mpt::bit_cast<float32>(i);
-#else
-	uint32 mant = (i & 0x007fffffu) >>  0;
-	uint32 expo = (i & 0x7f800000u) >> 23;
-	uint32 sign = (i & 0x80000000u) >> 31;
-	if(expo == 0)
+	MPT_CONSTANT_IF(std::numeric_limits<float32>::is_iec559 && mpt::endian_known())
 	{
-		float m = sign ? -static_cast<float>(mant) : static_cast<float>(mant);
-		int e = static_cast<int>(expo) - 127 + 1 - 24;
-		float f = std::ldexp(m, e);
-		return static_cast<float32>(f);
+		return mpt::bit_cast<float32>(i);
 	} else
 	{
-		mant |= 0x00800000u;
-		float m = sign ? -static_cast<float>(mant) : static_cast<float>(mant);
-		int e = static_cast<int>(expo) - 127 + 1 - 24;
-		float f = std::ldexp(m, e);
-		return static_cast<float32>(f);
+		uint32 mant = (i & 0x007fffffu) >>  0;
+		uint32 expo = (i & 0x7f800000u) >> 23;
+		uint32 sign = (i & 0x80000000u) >> 31;
+		if(expo == 0)
+		{
+			float m = sign ? -static_cast<float>(mant) : static_cast<float>(mant);
+			int e = static_cast<int>(expo) - 127 + 1 - 24;
+			float f = std::ldexp(m, e);
+			return static_cast<float32>(f);
+		} else
+		{
+			mant |= 0x00800000u;
+			float m = sign ? -static_cast<float>(mant) : static_cast<float>(mant);
+			int e = static_cast<int>(expo) - 127 + 1 - 24;
+			float f = std::ldexp(m, e);
+			return static_cast<float32>(f);
+		}
 	}
-#endif
 }
 static MPT_FORCEINLINE float64 DecodeIEEE754binary64(uint64 i)
 {
-#if MPT_PLATFORM_IEEE_FLOAT
-	return mpt::bit_cast<float64>(i);
-#else
-	uint64 mant = (i & 0x000fffffffffffffull) >>  0;
-	uint64 expo = (i & 0x7ff0000000000000ull) >> 52;
-	uint64 sign = (i & 0x8000000000000000ull) >> 63;
-	if(expo == 0)
+	MPT_CONSTANT_IF(std::numeric_limits<float64>::is_iec559 && mpt::endian_known())
 	{
-		double m = sign ? -static_cast<double>(mant) : static_cast<double>(mant);
-		int e = static_cast<int>(expo) - 1023 + 1 - 53;
-		double f = std::ldexp(m, e);
-		return static_cast<float64>(f);
+		return mpt::bit_cast<float64>(i);
 	} else
 	{
-		mant |= 0x0010000000000000ull;
-		double m = sign ? -static_cast<double>(mant) : static_cast<double>(mant);
-		int e = static_cast<int>(expo) - 1023 + 1 - 53;
-		double f = std::ldexp(m, e);
-		return static_cast<float64>(f);
+		uint64 mant = (i & 0x000fffffffffffffull) >>  0;
+		uint64 expo = (i & 0x7ff0000000000000ull) >> 52;
+		uint64 sign = (i & 0x8000000000000000ull) >> 63;
+		if(expo == 0)
+		{
+			double m = sign ? -static_cast<double>(mant) : static_cast<double>(mant);
+			int e = static_cast<int>(expo) - 1023 + 1 - 53;
+			double f = std::ldexp(m, e);
+			return static_cast<float64>(f);
+		} else
+		{
+			mant |= 0x0010000000000000ull;
+			double m = sign ? -static_cast<double>(mant) : static_cast<double>(mant);
+			int e = static_cast<int>(expo) - 1023 + 1 - 53;
+			double f = std::ldexp(m, e);
+			return static_cast<float64>(f);
+		}
 	}
-#endif
 }
 
 
@@ -590,8 +638,7 @@ MPT_BINARY_STRUCT(IEEE754binary32EmulatedLE, 4)
 MPT_BINARY_STRUCT(IEEE754binary64EmulatedBE, 8)
 MPT_BINARY_STRUCT(IEEE754binary64EmulatedLE, 8)
 
-#if MPT_PLATFORM_IEEE_FLOAT
-
+template <mpt::endian endian = mpt::endian::native>
 struct IEEE754binary32Native
 {
 private:
@@ -599,13 +646,15 @@ private:
 public:
 	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
 	{
-		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+		MPT_STATIC_ASSERT(endian == mpt::endian::little || endian == mpt::endian::big);
+		MPT_CONSTANT_IF(endian == mpt::endian::little)
+		{
 			return static_cast<mpt::byte>(EncodeIEEE754binary32(value) >> (i*8));
-		#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+		}
+		MPT_CONSTANT_IF(endian == mpt::endian::big)
+		{
 			return static_cast<mpt::byte>(EncodeIEEE754binary32(value) >> ((4-1-i)*8));
-		#else
-			STATIC_ASSERT(false);
-		#endif
+		}
 	}
 	MPT_FORCEINLINE IEEE754binary32Native() { }
 	MPT_FORCEINLINE explicit IEEE754binary32Native(float32 f)
@@ -617,23 +666,25 @@ public:
 	// big endian:    (0x3f,0x80,0x00,0x00)
 	MPT_FORCEINLINE explicit IEEE754binary32Native(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3)
 	{
-		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+		MPT_STATIC_ASSERT(endian == mpt::endian::little || endian == mpt::endian::big);
+		MPT_CONSTANT_IF(endian == mpt::endian::little)
+		{
 			value = DecodeIEEE754binary32(0u
 				| (static_cast<uint32>(b0) <<  0)
 				| (static_cast<uint32>(b1) <<  8)
 				| (static_cast<uint32>(b2) << 16)
 				| (static_cast<uint32>(b3) << 24)
 				);
-		#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+		}
+		MPT_CONSTANT_IF(endian == mpt::endian::big)
+		{
 			value = DecodeIEEE754binary32(0u
 				| (static_cast<uint32>(b0) << 24)
 				| (static_cast<uint32>(b1) << 16)
 				| (static_cast<uint32>(b2) <<  8)
 				| (static_cast<uint32>(b3) <<  0)
 				);
-		#else
-			STATIC_ASSERT(false);
-		#endif
+		}
 	}
 	MPT_FORCEINLINE operator float32 () const
 	{
@@ -658,6 +709,7 @@ public:
 	}
 };
 
+template <mpt::endian endian = mpt::endian::native>
 struct IEEE754binary64Native
 {
 private:
@@ -665,13 +717,15 @@ private:
 public:
 	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
 	{
-		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+		MPT_STATIC_ASSERT(endian == mpt::endian::little || endian == mpt::endian::big);
+		MPT_CONSTANT_IF(endian == mpt::endian::little)
+		{
 			return mpt::byte_cast<mpt::byte>(static_cast<uint8>(EncodeIEEE754binary64(value) >> (i*8)));
-		#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+		}
+		MPT_CONSTANT_IF(endian == mpt::endian::big)
+		{
 			return mpt::byte_cast<mpt::byte>(static_cast<uint8>(EncodeIEEE754binary64(value) >> ((8-1-i)*8)));
-		#else
-			STATIC_ASSERT(false);
-		#endif
+		}
 	}
 	MPT_FORCEINLINE IEEE754binary64Native() { }
 	MPT_FORCEINLINE explicit IEEE754binary64Native(float64 f)
@@ -680,7 +734,9 @@ public:
 	}
 	MPT_FORCEINLINE explicit IEEE754binary64Native(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3, mpt::byte b4, mpt::byte b5, mpt::byte b6, mpt::byte b7)
 	{
-		#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
+		MPT_STATIC_ASSERT(endian == mpt::endian::little || endian == mpt::endian::big);
+		MPT_CONSTANT_IF(endian == mpt::endian::little)
+		{
 			value = DecodeIEEE754binary64(0ull
 				| (static_cast<uint64>(b0) <<  0)
 				| (static_cast<uint64>(b1) <<  8)
@@ -691,7 +747,9 @@ public:
 				| (static_cast<uint64>(b6) << 48)
 				| (static_cast<uint64>(b7) << 56)
 				);
-		#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+		}
+		MPT_CONSTANT_IF(endian == mpt::endian::big)
+		{
 			value = DecodeIEEE754binary64(0ull
 				| (static_cast<uint64>(b0) << 56)
 				| (static_cast<uint64>(b1) << 48)
@@ -702,9 +760,7 @@ public:
 				| (static_cast<uint64>(b6) <<  8)
 				| (static_cast<uint64>(b7) <<  0)
 				);
-		#else
-			STATIC_ASSERT(false);
-		#endif
+		}
 	}
 	MPT_FORCEINLINE operator float64 () const
 	{
@@ -729,36 +785,37 @@ public:
 	}
 };
 
-STATIC_ASSERT(sizeof(IEEE754binary32Native) == 4);
-STATIC_ASSERT(sizeof(IEEE754binary64Native) == 8);
+MPT_STATIC_ASSERT((sizeof(IEEE754binary32Native<>) == 4));
+MPT_STATIC_ASSERT((sizeof(IEEE754binary64Native<>) == 8));
 
-#if MPT_PLATFORM_IEEE_FLOAT
 namespace mpt {
-template <> struct is_binary_safe< IEEE754binary32Native > : public std::true_type { };
-template <> struct is_binary_safe< IEEE754binary64Native > : public std::true_type { };
+template <> struct is_binary_safe< IEEE754binary32Native<> > : public std::true_type { };
+template <> struct is_binary_safe< IEEE754binary64Native<> > : public std::true_type { };
 }
-#endif // MPT_PLATFORM_IEEE_FLOAT
 
-#if defined(MPT_PLATFORM_LITTLE_ENDIAN)
-typedef IEEE754binary32Native                    IEEE754binary32LE;
-typedef IEEE754binary32EmulatedBE                IEEE754binary32BE;
-typedef IEEE754binary64Native                    IEEE754binary64LE;
-typedef IEEE754binary64EmulatedBE                IEEE754binary64BE;
-#elif defined(MPT_PLATFORM_BIG_ENDIAN)
-typedef IEEE754binary32EmulatedLE                IEEE754binary32LE;
-typedef IEEE754binary32Native                    IEEE754binary32BE;
-typedef IEEE754binary64EmulatedLE                IEEE754binary64LE;
-typedef IEEE754binary64Native                    IEEE754binary64BE;
-#endif
+template <bool is_iec559, mpt::endian endian = mpt::endian::native> struct IEEE754binary_types {
+	typedef IEEE754binary32EmulatedLE IEEE754binary32LE;
+	typedef IEEE754binary32EmulatedBE IEEE754binary32BE;
+	typedef IEEE754binary64EmulatedLE IEEE754binary64LE;
+	typedef IEEE754binary64EmulatedBE IEEE754binary64BE;
+};
+template <> struct IEEE754binary_types<true, mpt::endian::little> {
+	typedef IEEE754binary32Native<>   IEEE754binary32LE;
+	typedef IEEE754binary32EmulatedBE IEEE754binary32BE;
+	typedef IEEE754binary64Native<>   IEEE754binary64LE;
+	typedef IEEE754binary64EmulatedBE IEEE754binary64BE;
+};
+template <> struct IEEE754binary_types<true, mpt::endian::big> {
+	typedef IEEE754binary32EmulatedLE IEEE754binary32LE;
+	typedef IEEE754binary32Native<>   IEEE754binary32BE;
+	typedef IEEE754binary64EmulatedLE IEEE754binary64LE;
+	typedef IEEE754binary64Native<>   IEEE754binary64BE;
+};
 
-#else // !MPT_PLATFORM_IEEE_FLOAT
-
-typedef IEEE754binary32EmulatedLE IEEE754binary32LE;
-typedef IEEE754binary32EmulatedBE IEEE754binary32BE;
-typedef IEEE754binary64EmulatedLE IEEE754binary64LE;
-typedef IEEE754binary64EmulatedBE IEEE754binary64BE;
-
-#endif // MPT_PLATFORM_IEEE_FLOAT
+typedef IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary32LE IEEE754binary32LE;
+typedef IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary32BE IEEE754binary32BE;
+typedef IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary64LE IEEE754binary64LE;
+typedef IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary64BE IEEE754binary64BE;
 
 STATIC_ASSERT(sizeof(IEEE754binary32LE) == 4);
 STATIC_ASSERT(sizeof(IEEE754binary32BE) == 4);
@@ -814,11 +871,9 @@ private:
 		MPT_ENDIAN_CONSTEXPR_FUN operator mpt::byte () const noexcept { return byte; }
 	};
 	zeroed_byte data[sizeof(base_type)];
-#elif MPT_PLATFORM_ENDIAN_KNOWN
-	mpt::byte data[sizeof(base_type)];
-#else // !MPT_PLATFORM_ENDIAN_KNOWN
+#else // !MPT_ENDIAN_IS_CONSTEXPR
 	std::array<mpt::byte, sizeof(base_type)> data;
-#endif // MPT_PLATFORM_ENDIAN_KNOWN
+#endif // MPT_ENDIAN_IS_CONSTEXPR
 public:
 	MPT_ENDIAN_CONSTEXPR_FUN void set(base_type val) noexcept
 	{
@@ -839,16 +894,20 @@ public:
 					data[i] = static_cast<mpt::byte>((uval >> (8*(sizeof(base_type)-1-i))) & 0xffu);
 				}
 			}
-		#elif MPT_PLATFORM_ENDIAN_KNOWN
-			MPT_CONSTANT_IF(mpt::endian::native != endian_type::endian)
+		#else // !MPT_ENDIAN_IS_CONSTEXPR
+			MPT_CONSTANT_IF(mpt::endian::native == mpt::endian::little || mpt::endian::native == mpt::endian::big)
 			{
-				val = mpt::detail::SwapBytes(val);
+				MPT_CONSTANT_IF(mpt::endian::native != endian_type::endian)
+				{
+					val = mpt::detail::SwapBytes(val);
+				}
+				std::memcpy(data.data(), &val, sizeof(val));
+			} else
+			{
+				typedef typename std::make_unsigned<base_type>::type unsigned_base_type;
+				data = EndianEncode<unsigned_base_type, Tendian, sizeof(T)>(val);
 			}
-			std::memcpy(data, &val, sizeof(val));
-		#else // !MPT_PLATFORM_ENDIAN_KNOWN
-			typedef typename std::make_unsigned<base_type>::type unsigned_base_type;
-			data = EndianEncode<unsigned_base_type, Tendian, sizeof(T)>(val);
-		#endif // MPT_PLATFORM_ENDIAN_KNOWN
+		#endif // MPT_ENDIAN_IS_CONSTEXPR
 	}
 	MPT_ENDIAN_CONSTEXPR_FUN base_type get() const noexcept
 	{
@@ -871,18 +930,22 @@ public:
 				}
 				return static_cast<base_type>(uval);
 			}
-		#elif MPT_PLATFORM_ENDIAN_KNOWN
-			base_type val = base_type();
-			std::memcpy(&val, data, sizeof(val));
-			MPT_CONSTANT_IF(mpt::endian::native != endian_type::endian)
+		#else // !MPT_ENDIAN_IS_CONSTEXPR
+			MPT_CONSTANT_IF(mpt::endian::native == mpt::endian::little || mpt::endian::native == mpt::endian::big)
 			{
-				val = mpt::detail::SwapBytes(val);
+				base_type val = base_type();
+				std::memcpy(&val, data.data(), sizeof(val));
+				MPT_CONSTANT_IF(mpt::endian::native != endian_type::endian)
+				{
+					val = mpt::detail::SwapBytes(val);
+				}
+				return val;
+			} else
+			{
+				typedef typename std::make_unsigned<base_type>::type unsigned_base_type;
+				return EndianDecode<unsigned_base_type, Tendian, sizeof(T)>(data);
 			}
-			return val;
-		#else // !MPT_PLATFORM_ENDIAN_KNOWN
-			typedef typename std::make_unsigned<base_type>::type unsigned_base_type;
-			return EndianDecode<unsigned_base_type, Tendian, sizeof(T)>(data);
-		#endif // MPT_PLATFORM_ENDIAN_KNOWN
+		#endif // MPT_ENDIAN_IS_CONSTEXPR
 	}
 	MPT_ENDIAN_CONSTEXPR_FUN packed & operator = (const base_type & val) noexcept { set(val); return *this; }
 	MPT_ENDIAN_CONSTEXPR_FUN operator base_type () const noexcept { return get(); }
@@ -973,50 +1036,34 @@ MPT_ENDIAN_CONSTEXPR_FUN Tpacked as_endian(typename Tpacked::base_type v) noexce
 struct int24
 {
 	uint8 bytes[3];
-	int24() { bytes[0] = bytes[1] = bytes[2] = 0; }
-#if MPT_PLATFORM_ENDIAN_KNOWN
-	explicit int24(int other)
+	int24() noexcept
 	{
-		#ifdef MPT_PLATFORM_BIG_ENDIAN
+		bytes[0] = bytes[1] = bytes[2] = 0;
+	}
+	explicit int24(int other) noexcept
+	{
+		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
+		{
 			bytes[0] = (static_cast<unsigned int>(other)>>16)&0xff;
 			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
 			bytes[2] = (static_cast<unsigned int>(other)>> 0)&0xff;
-		#else
-			bytes[0] = (static_cast<unsigned int>(other)>> 0)&0xff;
-			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
-			bytes[2] = (static_cast<unsigned int>(other)>>16)&0xff;
-		#endif
-	}
-	operator int() const
-	{
-		#ifdef MPT_PLATFORM_BIG_ENDIAN
-			return (static_cast<int8>(bytes[0]) * 65536) + (bytes[1] * 256) + bytes[2];
-		#else
-			return (static_cast<int8>(bytes[2]) * 65536) + (bytes[1] * 256) + bytes[0];
-		#endif
-	}
-#else
-	explicit int24(int other)
-	{
-		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big()) {
-			bytes[0] = (static_cast<unsigned int>(other)>>16)&0xff;
-			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
-			bytes[2] = (static_cast<unsigned int>(other)>> 0)&0xff;
-		} else {
+		} else
+		{
 			bytes[0] = (static_cast<unsigned int>(other)>> 0)&0xff;
 			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
 			bytes[2] = (static_cast<unsigned int>(other)>>16)&0xff;
 		}
 	}
-	operator int() const
+	operator int() const noexcept
 	{
-		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big()) {
+		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
+		{
 			return (static_cast<int8>(bytes[0]) * 65536) + (bytes[1] * 256) + bytes[2];
-		} else {
+		} else
+		{
 			return (static_cast<int8>(bytes[2]) * 65536) + (bytes[1] * 256) + bytes[0];
 		}
 	}
-#endif
 };
 MPT_STATIC_ASSERT(sizeof(int24) == 3);
 #define int24_min (0-0x00800000)
