@@ -283,7 +283,7 @@ public:
 	void CursorJump(int distance, bool snap);
 
 	void TempEnterNote(ModCommand::NOTE n, int vol = -1, bool fromMidi = false);
-	void TempStopNote(ModCommand::NOTE note, bool fromMidi = false, const bool bChordMode = false);
+	void TempStopNote(ModCommand::NOTE note, const bool fromMidi = false, bool chordMode = false);
 	void TempEnterChord(ModCommand::NOTE n);
 	void TempStopChord(ModCommand::NOTE note) {TempStopNote(note, false, true);}
 	void TempEnterIns(int val);
