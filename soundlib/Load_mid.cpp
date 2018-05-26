@@ -1278,12 +1278,8 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			uint32 nDlsIns = 0, nDrumRgn = 0;
 			uint32 nProgram = (pIns->nMidiProgram != 0) ? pIns->nMidiProgram - 1 : 0;
 			uint32 dwKey = (nMidiCode < 128) ? 0xFF : (nMidiCode & 0x7F);
-			if ((pEmbeddedBank->FindInstrument(	(nMidiCode >= 128),
-				((pIns->wMidiBank - 1) & 0x3FFF),
-				nProgram, dwKey, &nDlsIns))
-				|| (pEmbeddedBank->FindInstrument(	(nMidiCode >= 128),	0xFFFF,
-				(nMidiCode >= 128) ? 0xFF : nProgram,
-				dwKey, &nDlsIns)))
+			if (pEmbeddedBank->FindInstrument(nMidiCode >= 128, (pIns->wMidiBank - 1) & 0x3FFF, nProgram, dwKey, &nDlsIns)
+				|| pEmbeddedBank->FindInstrument(nMidiCode >= 128, 0xFFFF, (nMidiCode >= 128) ? 0xFF : nProgram, dwKey, &nDlsIns))
 			{
 				if (dwKey < 0x80) nDrumRgn = pEmbeddedBank->GetRegionFromKey(nDlsIns, dwKey);
 				if (pEmbeddedBank->ExtractInstrument(*this, nIns, nDlsIns, nDrumRgn))
@@ -1320,12 +1316,8 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					uint32 nDlsIns = 0, nDrumRgn = 0;
 					uint32 nProgram = (pIns->nMidiProgram != 0) ? pIns->nMidiProgram - 1 : 0;
 					uint32 dwKey = (nMidiCode < 128) ? 0xFF : (nMidiCode & 0x7F);
-					if ((pDLSBank->FindInstrument(	(nMidiCode >= 128),
-						((pIns->wMidiBank - 1) & 0x3FFF),
-						nProgram, dwKey, &nDlsIns))
-						|| (pDLSBank->FindInstrument(	(nMidiCode >= 128), 0xFFFF,
-						(nMidiCode >= 128) ? 0xFF : nProgram,
-						dwKey, &nDlsIns)))
+					if (pDLSBank->FindInstrument(nMidiCode >= 128, (pIns->wMidiBank - 1) & 0x3FFF, nProgram, dwKey, &nDlsIns)
+						|| pDLSBank->FindInstrument(nMidiCode >= 128, 0xFFFF, (nMidiCode >= 128) ? 0xFF : nProgram, dwKey, &nDlsIns))
 					{
 						if (dwKey < 0x80) nDrumRgn = pDLSBank->GetRegionFromKey(nDlsIns, dwKey);
 						pDLSBank->ExtractInstrument(*this, nIns, nDlsIns, nDrumRgn);

@@ -125,9 +125,9 @@ SmpLength RemoveRange(ModSample &smp, SmpLength selStart, SmpLength selEnd, CSou
 	if(smp.nLoopEnd == 0) smp.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
 	if(smp.nSustainEnd == 0) smp.uFlags.reset(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 
-	for(std::size_t i = 0; i < CountOf(smp.cues); i++)
+	for(auto &cue : smp.cues)
 	{
-		Util::DeleteItem(selStart, selEnd - 1, smp.cues[i]);
+		Util::DeleteItem(selStart, selEnd - 1, cue);
 	}
 
 	smp.PrecomputeLoops(sndFile);

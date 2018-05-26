@@ -1121,17 +1121,17 @@ void CCtrlSamples::OnSampleNew()
 
 bool CCtrlSamples::InsertSample(bool duplicate, int8 *confirm)
 {
-	SAMPLEINDEX smp = m_modDoc.InsertSample();
+	const SAMPLEINDEX smp = m_modDoc.InsertSample();
 	if(smp != SAMPLEINDEX_INVALID)
 	{
-		SAMPLEINDEX nOldSmp = m_nSample;
+		const SAMPLEINDEX oldSmp = m_nSample;
 		CSoundFile &sndFile = m_modDoc.GetSoundFile();
 		SetCurrentSample(smp);
 
-		if(duplicate && nOldSmp >= 1 && nOldSmp <= sndFile.GetNumSamples())
+		if(duplicate && oldSmp >= 1 && oldSmp <= sndFile.GetNumSamples())
 		{
 			m_modDoc.GetSampleUndo().PrepareUndo(smp, sundo_replace, "Duplicate");
-			sndFile.ReadSampleFromSong(smp, sndFile, nOldSmp);
+			sndFile.ReadSampleFromSong(smp, sndFile, oldSmp);
 		}
 
 		m_modDoc.UpdateAllViews(nullptr, SampleHint(smp).Info().Data().Names());
