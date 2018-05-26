@@ -2,8 +2,7 @@
  * mptIO.h
  * -------
  * Purpose: Basic functions for reading/writing binary and endian safe data to/from files/streams.
- * Notes  : This is work-in-progress.
- *          Some useful functions for reading and writing are still missing.
+ * Notes  : Some useful functions for reading and writing are still missing.
  * Authors: Joern Heusipp
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.

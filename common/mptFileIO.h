@@ -1,7 +1,7 @@
 /*
  * mptFileIO.h
  * -----------
- * Purpose: A wrapper around std::fstream, fixing VS2008 charset conversion braindamage, and enforcing usage of mpt::PathString.
+ * Purpose: A wrapper around std::fstream, enforcing usage of mpt::PathString.
  * Notes  : You should only ever use these wrappers instead of plain std::fstream classes.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -46,14 +46,10 @@ bool SetFilesystemCompression(const mpt::PathString &filename);
 namespace mpt
 {
 
-#if MPT_COMPILER_GCC
-
-#if MPT_OS_WINDOWS
+#if MPT_COMPILER_GCC && MPT_OS_WINDOWS
 // GCC C++ library has no wchar_t overloads
 #define MPT_FSTREAM_DO_CONVERSIONS
 #define MPT_FSTREAM_DO_CONVERSIONS_ANSI
-#endif
-
 #endif
 
 #ifdef MPT_FSTREAM_DO_CONVERSIONS
