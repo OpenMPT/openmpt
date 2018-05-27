@@ -263,6 +263,10 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		f << mpt::format("WatchDir: %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindWatchdir))) << "\r\n";
 	}
 
+	static constexpr struct { const MPT_UCHAR_TYPE * section; const MPT_UCHAR_TYPE * key; } configAnonymize[] = {
+		{ MPT_ULITERAL("Version"), MPT_ULITERAL("InstallGUID") }
+	};
+
 	{
 		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("active-settings.txt"), std::ios::binary);
 		f.imbue(std::locale::classic());
@@ -271,6 +275,18 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 			SettingsContainer & settings = theApp.GetSettings();
 			for(const auto &it : settings)
 			{
+				bool skipPath = false;
+				for(const auto &path : configAnonymize)
+				{
+					if(it.first == SettingPath(path.section, path.key))
+					{
+						skipPath = true;
+					}
+				}
+				if(skipPath)
+				{
+					continue;
+				}
 				f
 					<< mpt::ToCharset(mpt::CharsetUTF8, it.first.FormatAsString() + MPT_USTRING(" = ") + it.second.GetRefValue().FormatValueAsString())
 					<< std::endl;
@@ -279,11 +295,18 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	}
 
 	{
+		const mpt::PathString crashStoredSettingsFilename = crashDirectory.path + MPT_PATHSTRING("stored-mptrack.ini");
 		CopyFileW
 			( theApp.GetConfigFileName().AsNative().c_str()
-			, (crashDirectory.path + MPT_PATHSTRING("stored-mptrack.ini")).AsNative().c_str()
+			, crashStoredSettingsFilename.AsNative().c_str()
 			, FALSE
 			);
+		IniFileSettingsContainer crashStoredSettings{crashStoredSettingsFilename};
+		for(const auto &path : configAnonymize)
+		{
+			crashStoredSettings.Write(SettingPath(path.section, path.key), SettingValue(mpt::ustring()));
+	}
+		crashStoredSettings.Flush();
 	}
 
 	/*
