@@ -285,7 +285,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 
 	static constexpr struct { const MPT_UCHAR_TYPE * section; const MPT_UCHAR_TYPE * key; } configAnonymize[] = {
 		{ MPT_ULITERAL("Version"), MPT_ULITERAL("InstallGUID") },
-		{ MPT_ULITERAL("Recent File List"), MPT_ULITERAL("") },
+		{ MPT_ULITERAL("Recent File List"), nullptr },
 	};
 
 	{
@@ -299,8 +299,8 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 				bool skipPath = false;
 				for(const auto &path : configAnonymize)
 				{
-					if(((path.key == MPT_ULITERAL("") && path.section == it.first.GetRefSection())) // Omit entire section
-						|| it.first == SettingPath(path.section, path.key)) // Omit specific key
+					if(((path.key == nullptr && path.section == it.first.GetRefSection())) // Omit entire section
+						|| (path.key != nullptr && it.first == SettingPath(path.section, path.key))) // Omit specific key
 					{
 						skipPath = true;
 					}
