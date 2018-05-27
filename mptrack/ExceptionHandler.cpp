@@ -42,7 +42,7 @@ bool ExceptionHandler::delegateToWindowsHandler = false;
 // attached, no exceptions are unhandled because the debugger handles them. If
 // debugExceptionHandler is true, an additional __try/__catch is inserted around
 // InitInstance(), ExitInstance() and the main message loop, which will call our
-// filter, which then can be stepped through in a debugger. 
+// filter, which then can be stepped through in a debugger.
 bool ExceptionHandler::debugExceptionHandler = false;
 
 
@@ -284,7 +284,8 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	}
 
 	static constexpr struct { const MPT_UCHAR_TYPE * section; const MPT_UCHAR_TYPE * key; } configAnonymize[] = {
-		{ MPT_ULITERAL("Version"), MPT_ULITERAL("InstallGUID") }
+		{ MPT_ULITERAL("Version"), MPT_ULITERAL("InstallGUID") },
+		{ MPT_ULITERAL("Recent File List"), nullptr },
 	};
 
 	{
@@ -298,7 +299,8 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 				bool skipPath = false;
 				for(const auto &path : configAnonymize)
 				{
-					if(it.first == SettingPath(path.section, path.key))
+					if(((path.key == nullptr && path.section == it.first.GetRefSection())) // Omit entire section
+						|| it.first == SettingPath(path.section, path.key)) // Omit specific key
 					{
 						skipPath = true;
 					}
@@ -364,7 +366,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 }
 
 
-// Freezes the state as much aspossible in order to avoid further confusion by
+// Freezes the state as much as possible in order to avoid further confusion by
 // other (possibly still running) threads
 bool DebugReporter::FreezeState(DumpMode mode)
 {
@@ -551,7 +553,7 @@ void ExceptionHandler::UnhandledMFCException(CException * e, const MSG * pMsg)
 	{
 		TCHAR tmp[1024 + 1];
 		MemsetZero(tmp);
-		if(dynamic_cast<CSimpleException*>(e)->GetErrorMessage(tmp, mpt::size(tmp) - 1) != 0)
+		if(dynamic_cast<CSimpleException*>(e)->GetErrorMessage(tmp, static_cast<UINT>(mpt::size(tmp) - 1)) != 0)
 		{
 			tmp[1024] = 0;
 			errorMessage = mpt::format(MPT_USTRING("Unhandled MFC exception occurred while processming window message '%1': %2."))
