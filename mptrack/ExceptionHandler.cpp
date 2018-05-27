@@ -285,7 +285,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 
 	static constexpr struct { const MPT_UCHAR_TYPE * section; const MPT_UCHAR_TYPE * key; } configAnonymize[] = {
 		{ MPT_ULITERAL("Version"), MPT_ULITERAL("InstallGUID") },
-		{ MPT_ULITERAL("Recent File List"), MPT_ULITERAL("" },
+		{ MPT_ULITERAL("Recent File List"), MPT_ULITERAL("") },
 	};
 
 	{
