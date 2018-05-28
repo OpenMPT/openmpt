@@ -1,0 +1,7 @@
+lame library version 3.100.
+The following changes have been made:
+ *  Obviously, unnecessary folders and files have been removed.
+ *  Forced library name in lame.def has been removed.
+ *  All modifications have been marked with /* OpenMPT */.
+ *  For building, premake is used to generate Visual Studio project files.
+    See ../build/premake/ for details.
