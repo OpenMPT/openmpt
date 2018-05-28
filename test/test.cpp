@@ -3236,7 +3236,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[3].dwFlags, CHN_MUTE);
 
 	// Samples
-	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 3);
+	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 4);
 	{
 		const ModSample &sample = sndFile.GetSample(1);
 		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[1], "Sample_1__________________X"), 0);
@@ -3291,6 +3291,16 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 		{
 			VERIFY_EQUAL_NONCONT(sample.sample16()[4 + i], int16(-32768));
 		}
+	}
+
+	{
+		const ModSample &sample = sndFile.GetSample(4);
+		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[4], "adlib"), 0);
+		VERIFY_EQUAL_NONCONT(strcmp(sample.filename, ""), 0);
+		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_S3M), 8363);
+		VERIFY_EQUAL_NONCONT(sample.nVolume, 58 * 4);
+		VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_LOOP | CHN_ADLIB);
+		VERIFY_EQUAL_NONCONT(sample.adlib, (OPLPatch{ 0x00, 0x00, 0xC0, 0x00, 0xF0, 0xD2, 0x05, 0xB3, 0x01, 0x00, 0x00, 0x00 }));
 	}
 
 	// Orders
