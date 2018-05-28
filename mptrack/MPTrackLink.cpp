@@ -36,8 +36,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 #pragma comment(lib, "ksuser.lib")
 
-#pragma comment(lib, "msacm32.lib")
-
 #ifdef MPT_WITH_MEDIAFOUNDATION
 #pragma comment(lib, "mf.lib")
 #pragma comment(lib, "mfplat.lib")

@@ -1806,7 +1806,6 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	VorbisEncoder vorbisencoder;
 	MP3Encoder mp3lame(MP3EncoderLame);
 	MP3Encoder mp3lamecompatible(MP3EncoderLameCompatible);
-	MP3Encoder mp3acm(MP3EncoderACM);
 	RAWEncoder rawencoder;
 	std::vector<EncoderFactoryBase*> encoders;
 	if(wavencoder.IsAvailable()) encoders.push_back(&wavencoder);
@@ -1818,9 +1817,6 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 	if(mp3lame.IsAvailable())
 	{
 		encoders.push_back(&mp3lame);
-	} else if(mp3acm.IsAvailable())
-	{
-		encoders.push_back(&mp3acm);
 	}
 	if(mp3lamecompatible.IsAvailable()) encoders.push_back(&mp3lamecompatible);
 	OnFileWaveConvert(nMinOrder, nMaxOrder, encoders);
