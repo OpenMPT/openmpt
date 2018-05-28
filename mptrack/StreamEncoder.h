@@ -212,7 +212,6 @@ struct StreamEncoderSettings
 	Setting<bool> MP3LameID3v2UseLame;
 	Setting<bool> MP3LameCalculateReplayGain;
 	Setting<bool> MP3LameCalculatePeakSample;
-	Setting<bool> MP3ACMFast;
 	Setting<int32> OpusComplexity;
 	StreamEncoderSettings(SettingsContainer &conf, const mpt::ustring &section);
 	static StreamEncoderSettings &Instance();

@@ -37,7 +37,6 @@ StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const mpt:
 	, MP3LameID3v2UseLame(conf, section, MPT_USTRING("MP3LameID3v2UseLame"), false)
 	, MP3LameCalculateReplayGain(conf, section, MPT_USTRING("MP3LameCalculateReplayGain"), true)
 	, MP3LameCalculatePeakSample(conf, section, MPT_USTRING("MP3LameCalculatePeakSample"), true)
-	, MP3ACMFast(conf, section, MPT_USTRING("MP3ACMFast"), false)
 	, OpusComplexity(conf, section, MPT_USTRING("OpusComplexity"), -1)
 {
 	return;
