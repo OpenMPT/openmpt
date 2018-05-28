@@ -23,26 +23,11 @@
 #include "../common/misc_util.h"
 #include "../common/mptStringBuffer.h"
 
-#include <deque>
-
 #ifdef MPT_WITH_LAME
-//#define MPT_USE_LAME_H
-#ifdef MPT_USE_LAME_H
-#include <lame/lame.h>
+#if defined(MPT_BUILD_MSVC)
+#include <lame.h>
 #else
-// from lame.h:
-#ifndef CDECL
-#define CDECL __cdecl
-#endif
-typedef enum vbr_mode_e {
-	vbr_off=0,
-	vbr_mt,
-	vbr_rh,
-	vbr_abr,
-	vbr_mtrh,
-	vbr_max_indicator,
-	vbr_default=vbr_mtrh
-} vbr_mode;
+#include <lame/lame.h>
 #endif
 #endif // MPT_WITH_LAME
 
@@ -352,279 +337,105 @@ void ID3V2Tagger::WriteID3v2Frame(const char cFrameID[4], std::string sFramecont
 
 #ifdef MPT_WITH_LAME
 
-struct lame_global_struct;
-typedef struct lame_global_struct lame_global_flags;
+
 typedef lame_global_flags *lame_t;
 
-class ComponentLame
-	: public ComponentLibrary
-{
 
+class ComponentLame
+#if defined(MPT_ENABLE_LAME_DELAYLOAD)
+	: public ComponentBundledDLL
+#else
+	: public ComponentBuiltin
+#endif
+{
 	MPT_DECLARE_COMPONENT_MEMBERS
 
 public:
-
-	const char* (CDECL * get_lame_version)() = nullptr;
-	const char* (CDECL * get_lame_short_version)() = nullptr;
-	const char* (CDECL * get_lame_very_short_version)() = nullptr;
-	const char* (CDECL * get_psy_version)() = nullptr;
-	const char* (CDECL * get_lame_url)() = nullptr;
-
-	lame_global_flags * (CDECL * lame_init)(void) = nullptr;
-
-	int  (CDECL * lame_set_in_samplerate)(lame_global_flags *, int) = nullptr;
-	int  (CDECL * lame_set_num_channels)(lame_global_flags *, int) = nullptr;
-	int  (CDECL * lame_get_num_channels)(const lame_global_flags *) = nullptr;
-	int  (CDECL * lame_get_quality)(const lame_global_flags *) = nullptr;
-	int  (CDECL * lame_set_quality)(lame_global_flags *, int) = nullptr;
-	int  (CDECL * lame_set_out_samplerate)(lame_global_flags *, int) = nullptr;
-	int  (CDECL * lame_set_brate)(lame_global_flags *, int) = nullptr;
-	int  (CDECL * lame_set_VBR_quality)(lame_global_flags *, float) = nullptr;
-	int  (CDECL * lame_set_VBR)(lame_global_flags *, vbr_mode) = nullptr;
-	int  (CDECL * lame_set_bWriteVbrTag)(lame_global_flags *, int) = nullptr;
-	int  (CDECL * lame_set_strict_ISO)(lame_global_flags *, int) = nullptr;
-	int  (CDECL * lame_set_disable_reservoir)(lame_global_flags *, int) = nullptr;
-	int  (CDECL * lame_set_decode_on_the_fly)(lame_global_flags *, int) = nullptr;
-	int  (CDECL * lame_set_findReplayGain)(lame_global_flags *, int) = nullptr;
-
-	void (CDECL * id3tag_genre_list)(void (*handler)(int, const char *, void *), void* cookie) = nullptr;
-	void (CDECL * id3tag_init)     (lame_t gfp) = nullptr;
-	void (CDECL * id3tag_v1_only)  (lame_t gfp) = nullptr;
-	void (CDECL * id3tag_add_v2)   (lame_t gfp) = nullptr;
-	void (CDECL * id3tag_v2_only)  (lame_t gfp) = nullptr;
-	void (CDECL * id3tag_set_pad)  (lame_t gfp, size_t n) = nullptr;
-	void (CDECL * lame_set_write_id3tag_automatic)(lame_global_flags * gfp, int) = nullptr;
-
-	float (CDECL* lame_get_PeakSample)(const lame_global_flags *) = nullptr;
-	int  (CDECL * lame_get_RadioGain)(const lame_global_flags *) = nullptr;
-
-	void (CDECL * id3tag_set_title)(lame_t gfp, const char* title) = nullptr;
-	void (CDECL * id3tag_set_artist)(lame_t gfp, const char* artist) = nullptr;
-	void (CDECL * id3tag_set_album)(lame_t gfp, const char* album) = nullptr;
-	void (CDECL * id3tag_set_year)(lame_t gfp, const char* year) = nullptr;
-	void (CDECL * id3tag_set_comment)(lame_t gfp, const char* comment) = nullptr;
-	int  (CDECL * id3tag_set_track)(lame_t gfp, const char* track) = nullptr;
-	int  (CDECL * id3tag_set_genre)(lame_t gfp, const char* genre) = nullptr;
-
-	int  (CDECL * lame_init_params)(lame_global_flags *) = nullptr;
-
-	int  (CDECL * lame_encode_buffer_ieee_float)(
-	                                             lame_t          gfp,
-	                                             const float     pcm_l [],
-	                                             const float     pcm_r [],
-	                                             const int       nsamples,
-	                                             unsigned char * mp3buf,
-	                                             const int       mp3buf_size) = nullptr;
-	int  (CDECL * lame_encode_buffer_interleaved_ieee_float)(
-	                                                         lame_t          gfp,
-	                                                         const float     pcm[],
-	                                                         const int       nsamples,
-	                                                         unsigned char * mp3buf,
-	                                                         const int       mp3buf_size) = nullptr;
-	int  (CDECL * lame_encode_flush)(lame_global_flags * gfp, unsigned char* mp3buf, int size) = nullptr;
-	size_t(CDECL* lame_get_lametag_frame)(const lame_global_flags *, unsigned char* buffer, size_t size) = nullptr;
-	size_t(CDECL* lame_get_id3v2_tag)(lame_t gfp, unsigned char* buffer, size_t size) = nullptr;
-
-	int  (CDECL * lame_close) (lame_global_flags *) = nullptr;
-
-private:
-
-	void Reset()
-	{
-		ClearLibraries();
-	}
-
-public:
-
 	ComponentLame()
-		: ComponentLibrary(ComponentTypeForeign)
+#if defined(MPT_ENABLE_LAME_DELAYLOAD)
+		: ComponentBundledDLL(MPT_PATHSTRING("openmpt-lame"))
+#else
+		: ComponentBuiltin()
+#endif
 	{
 		return;
 	}
-
-protected:
-
-	bool DoInitialize()
+	bool DoInitialize() override
 	{
-		Reset();
-		struct dll_names_t {
-			const char *lame;
-		};
-		static const dll_names_t dll_names[] = {
-			{ "libmp3lame" },
-			{ "liblame" },
-			{ "mp3lame" },
-			{ "lame" },
-			{ "lame_enc" },
-		};
-		bool ok = false;
-		if(TryLoad(mpt::PathString::FromUTF8("openmpt-lame"), false))
+#if defined(MPT_ENABLE_LAME_DELAYLOAD)
+		if(!ComponentBundledDLL::DoInitialize())
 		{
-			ok = true;
-		}
-		if(ok)
-		{
-			return true;
-		}
-		for(const auto & dll : dll_names)
-		{
-			if(TryLoad(mpt::PathString::FromUTF8(dll.lame), true))
-			{
-				ok = true;
-				break;
-			}
-		}
-		if(ok)
-		{
-			return true;
-		}
-		for(const auto & dll : dll_names)
-		{
-			if(TryLoad(mpt::PathString::FromUTF8(dll.lame), false))
-			{
-				ok = true;
-				break;
-			}
-		}
-		return ok;
-	}
-
-private:
-
-	bool TryLoad(const mpt::PathString &filename, bool appdata)
-	{
-		Reset();
-		ClearBindFailed();
-		if(appdata)
-		{
-			if(!AddLibrary("libmp3lame", mpt::LibraryPath::AppDataFullName(filename, GetComponentPath())))
-			{
-				Reset();
-				return false;
-			}
-		} else
-		{
-			if(!AddLibrary("libmp3lame", mpt::LibraryPath::AppFullName(filename)))
-			{
-				Reset();
-				return false;
-			}
-		}
-		MPT_COMPONENT_BIND("libmp3lame", get_lame_version);
-		MPT_COMPONENT_BIND("libmp3lame", get_lame_short_version);
-		MPT_COMPONENT_BIND("libmp3lame", get_lame_very_short_version);
-		MPT_COMPONENT_BIND("libmp3lame", get_psy_version);
-		MPT_COMPONENT_BIND("libmp3lame", get_lame_url);
-		MPT_COMPONENT_BIND("libmp3lame", lame_init);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_in_samplerate);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_num_channels);
-		MPT_COMPONENT_BIND("libmp3lame", lame_get_num_channels);
-		MPT_COMPONENT_BIND("libmp3lame", lame_get_quality);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_quality);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_out_samplerate);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_brate);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_VBR_quality);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_VBR);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_bWriteVbrTag);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_strict_ISO);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_disable_reservoir);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_decode_on_the_fly);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_findReplayGain);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_genre_list);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_init);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_v1_only);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_add_v2);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_v2_only);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_pad);
-		MPT_COMPONENT_BIND("libmp3lame", lame_set_write_id3tag_automatic);
-		MPT_COMPONENT_BIND("libmp3lame", lame_get_PeakSample);
-		MPT_COMPONENT_BIND("libmp3lame", lame_get_RadioGain);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_title);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_artist);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_album);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_year);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_comment);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_track);
-		MPT_COMPONENT_BIND("libmp3lame", id3tag_set_genre);
-		MPT_COMPONENT_BIND("libmp3lame", lame_init_params);
-		MPT_COMPONENT_BIND("libmp3lame", lame_encode_buffer_ieee_float);
-		MPT_COMPONENT_BIND("libmp3lame", lame_encode_buffer_interleaved_ieee_float);
-		MPT_COMPONENT_BIND("libmp3lame", lame_encode_flush);
-		MPT_COMPONENT_BIND("libmp3lame", lame_get_lametag_frame);
-		MPT_COMPONENT_BIND("libmp3lame", lame_get_id3v2_tag);
-		MPT_COMPONENT_BIND("libmp3lame", lame_close);
-		if(HasBindFailed())
-		{
-			Reset();
 			return false;
 		}
+#endif
 		return true;
 	}
-
-public:
-
-	static void GenreEnumCallback(int num, const char *name, void *cookie)
+	virtual ~ComponentLame()
 	{
-		MPT_UNREFERENCED_PARAMETER(num);
-		Encoder::Traits &traits = *reinterpret_cast<Encoder::Traits*>(cookie);
-		if(name)
-		{
-			traits.genres.push_back(mpt::ToUnicode(mpt::CharsetISO8859_1, name));
-		}
-	}
-	Encoder::Traits BuildTraits(bool compatible) const
-	{
-		Encoder::Traits traits;
-		if(!IsAvailable())
-		{
-			return traits;
-		}
-		mpt::ustring version;
-		if(get_lame_version())
-		{
-			version = MPT_USTRING("Lame ") + mpt::ToUnicode(mpt::CharsetASCII, get_lame_version());
-		} else
-		{
-			version = MPT_USTRING("Lame");
-		}
-		traits.fileExtension = MPT_PATHSTRING("mp3");
-		traits.fileShortDescription = (compatible ? mpt::format(MPT_USTRING("compatible MP3 (%1)"))(version) : mpt::format(MPT_USTRING("MP3 (%1)"))(version));
-		traits.encoderSettingsName = (compatible ? MPT_USTRING("MP3LameCompatible") : MPT_USTRING("MP3Lame"));
-		traits.showEncoderInfo = true;
-		traits.fileDescription = (compatible ? MPT_USTRING("MPEG-1 Layer 3") : MPT_USTRING("MPEG-1/2 Layer 3"));
-		traits.encoderName = MPT_USTRING("libMP3Lame");
-		traits.description += MPT_USTRING("Version: ");
-		traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_lame_version()?get_lame_version():"");
-		traits.description += MPT_USTRING("\n");
-		traits.description += MPT_USTRING("Psycho acoustic model version: ");
-		traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_psy_version()?get_psy_version():"");
-		traits.description += MPT_USTRING("\n");
-		traits.description += MPT_USTRING("URL: ");
-		traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_lame_url()?get_lame_url():"");
-		traits.description += MPT_USTRING("\n");
-		traits.canTags = true;
-		traits.genres.clear();
-		id3tag_genre_list(&GenreEnumCallback, &traits);
-		traits.modesWithFixedGenres = (compatible ? Encoder::ModeCBR : Encoder::ModeInvalid);
-		traits.maxChannels = 2;
-		traits.samplerates = (compatible
-			? mpt::make_vector(mpeg1layer3_samplerates)
-			: mpt::make_vector(layer3_samplerates)
-			);
-		traits.modes = (compatible ? Encoder::ModeCBR : (Encoder::ModeABR | Encoder::ModeQuality));
-		traits.bitrates = (compatible
-			? mpt::make_vector(mpeg1layer3_bitrates)
-			: mpt::make_vector(layer3_bitrates)
-			);
-		traits.defaultSamplerate = 44100;
-		traits.defaultChannels = 2;
-		traits.defaultMode = (compatible ? Encoder::ModeCBR : Encoder::ModeQuality);
-		traits.defaultBitrate = 256;
-		traits.defaultQuality = 0.8f;
-		return traits;
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentLame, "LibMP3Lame")
+MPT_REGISTERED_COMPONENT(ComponentLame, "")
+
+
+static void GenreEnumCallback(int num, const char *name, void *cookie)
+{
+	MPT_UNREFERENCED_PARAMETER(num);
+	Encoder::Traits &traits = *reinterpret_cast<Encoder::Traits*>(cookie);
+	if(name)
+	{
+		traits.genres.push_back(mpt::ToUnicode(mpt::CharsetISO8859_1, name));
+	}
+}
+
+
+static Encoder::Traits BuildTraits(bool compatible)
+{
+	Encoder::Traits traits;
+	mpt::ustring version;
+	if(get_lame_version())
+	{
+		version = MPT_USTRING("Lame ") + mpt::ToUnicode(mpt::CharsetASCII, get_lame_version());
+	} else
+	{
+		version = MPT_USTRING("Lame");
+	}
+	traits.fileExtension = MPT_PATHSTRING("mp3");
+	traits.fileShortDescription = (compatible ? mpt::format(MPT_USTRING("compatible MP3 (%1)"))(version) : mpt::format(MPT_USTRING("MP3 (%1)"))(version));
+	traits.encoderSettingsName = (compatible ? MPT_USTRING("MP3LameCompatible") : MPT_USTRING("MP3Lame"));
+	traits.showEncoderInfo = true;
+	traits.fileDescription = (compatible ? MPT_USTRING("MPEG-1 Layer 3") : MPT_USTRING("MPEG-1/2 Layer 3"));
+	traits.encoderName = MPT_USTRING("libMP3Lame");
+	traits.description += MPT_USTRING("Version: ");
+	traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_lame_version()?get_lame_version():"");
+	traits.description += MPT_USTRING("\n");
+	traits.description += MPT_USTRING("Psycho acoustic model version: ");
+	traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_psy_version()?get_psy_version():"");
+	traits.description += MPT_USTRING("\n");
+	traits.description += MPT_USTRING("URL: ");
+	traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_lame_url()?get_lame_url():"");
+	traits.description += MPT_USTRING("\n");
+	traits.canTags = true;
+	traits.genres.clear();
+	id3tag_genre_list(&GenreEnumCallback, &traits);
+	traits.modesWithFixedGenres = (compatible ? Encoder::ModeCBR : Encoder::ModeInvalid);
+	traits.maxChannels = 2;
+	traits.samplerates = (compatible
+		? mpt::make_vector(mpeg1layer3_samplerates)
+		: mpt::make_vector(layer3_samplerates)
+		);
+	traits.modes = (compatible ? Encoder::ModeCBR : (Encoder::ModeABR | Encoder::ModeQuality));
+	traits.bitrates = (compatible
+		? mpt::make_vector(mpeg1layer3_bitrates)
+		: mpt::make_vector(layer3_bitrates)
+		);
+	traits.defaultSamplerate = 44100;
+	traits.defaultChannels = 2;
+	traits.defaultMode = (compatible ? Encoder::ModeCBR : Encoder::ModeQuality);
+	traits.defaultBitrate = 256;
+	traits.defaultQuality = 0.8f;
+	return traits;
+}
+
 
 class MP3LameStreamWriter : public StreamWriterBase
 {
@@ -658,7 +469,7 @@ public:
 
 		if(!gfp)
 		{
-			gfp = lame.lame_init();
+			gfp = lame_init();
 		}
 
 		uint32 samplerate = settings.Samplerate;
@@ -681,11 +492,11 @@ public:
 		}
 		id3v2Size = 0;
 
-		lame.lame_set_in_samplerate(gfp, samplerate);
-		lame.lame_set_num_channels(gfp, channels);
+		lame_set_in_samplerate(gfp, samplerate);
+		lame_set_num_channels(gfp, channels);
 
 		int lameQuality = StreamEncoderSettings::Instance().MP3LameQuality;
-		lame.lame_set_quality(gfp, lameQuality);
+		lame_set_quality(gfp, lameQuality);
 
 		if(settings.Mode == Encoder::ModeCBR)
 		{
@@ -706,69 +517,69 @@ public:
 					{
 						samplerate = 44100;
 					}
-					lame.lame_set_out_samplerate(gfp, samplerate);
+					lame_set_out_samplerate(gfp, samplerate);
 				} else
 				{
 					// A very low bitrate was chosen,
 					// force samplerate to lowest possible for MPEG2.
 					// Disable unofficial MPEG2.5 however.
-					lame.lame_set_out_samplerate(gfp, 16000);
+					lame_set_out_samplerate(gfp, 16000);
 				}
 			}
 
-			lame.lame_set_brate(gfp, settings.Bitrate);
-			lame.lame_set_VBR(gfp, vbr_off);
+			lame_set_brate(gfp, settings.Bitrate);
+			lame_set_VBR(gfp, vbr_off);
 
 			if(compatible)
 			{
-				lame.lame_set_bWriteVbrTag(gfp, 0);
-				lame.lame_set_strict_ISO(gfp, 1);
-				lame.lame_set_disable_reservoir(gfp, 1);
+				lame_set_bWriteVbrTag(gfp, 0);
+				lame_set_strict_ISO(gfp, 1);
+				lame_set_disable_reservoir(gfp, 1);
 			} else
 			{
-				lame.lame_set_bWriteVbrTag(gfp, 1);
+				lame_set_bWriteVbrTag(gfp, 1);
 			}
 
 		} else if(settings.Mode == Encoder::ModeABR)
 		{
 
-			lame.lame_set_brate(gfp, settings.Bitrate);
-			lame.lame_set_VBR(gfp, vbr_abr);
+			lame_set_brate(gfp, settings.Bitrate);
+			lame_set_VBR(gfp, vbr_abr);
 
-			lame.lame_set_bWriteVbrTag(gfp, 1);
+			lame_set_bWriteVbrTag(gfp, 1);
 
 		} else
 		{
 
 			float lame_quality = 10.0f - (settings.Quality * 10.0f);
 			Limit(lame_quality, 0.0f, 9.999f);
-			lame.lame_set_VBR_quality(gfp, lame_quality);
-			lame.lame_set_VBR(gfp, vbr_default);
+			lame_set_VBR_quality(gfp, lame_quality);
+			lame_set_VBR(gfp, vbr_default);
 
-			lame.lame_set_bWriteVbrTag(gfp, 1);
+			lame_set_bWriteVbrTag(gfp, 1);
 
 		}
 
-		lame.lame_set_decode_on_the_fly(gfp, StreamEncoderSettings::Instance().MP3LameCalculatePeakSample ? 1 : 0); // see LAME docs for why
-		lame.lame_set_findReplayGain(gfp, StreamEncoderSettings::Instance().MP3LameCalculateReplayGain ? 1 : 0);
+		lame_set_decode_on_the_fly(gfp, StreamEncoderSettings::Instance().MP3LameCalculatePeakSample ? 1 : 0); // see LAME docs for why
+		lame_set_findReplayGain(gfp, StreamEncoderSettings::Instance().MP3LameCalculateReplayGain ? 1 : 0);
 
 		switch(id3type)
 		{
 		case ID3None:
-			lame.lame_set_write_id3tag_automatic(gfp, 0);
+			lame_set_write_id3tag_automatic(gfp, 0);
 			break;
 		case ID3v1:
-			lame.id3tag_init(gfp);
-			lame.id3tag_v1_only(gfp);
+			id3tag_init(gfp);
+			id3tag_v1_only(gfp);
 			break;
 		case ID3v2Lame:
-			lame.id3tag_init(gfp);
-			lame.id3tag_add_v2(gfp);
-			lame.id3tag_v2_only(gfp);
-			lame.id3tag_set_pad(gfp, StreamEncoderSettings::Instance().MP3ID3v2MinPadding);
+			id3tag_init(gfp);
+			id3tag_add_v2(gfp);
+			id3tag_v2_only(gfp);
+			id3tag_set_pad(gfp, StreamEncoderSettings::Instance().MP3ID3v2MinPadding);
 			break;
 		case ID3v2OpenMPT:
-			lame.lame_set_write_id3tag_automatic(gfp, 0);
+			lame_set_write_id3tag_automatic(gfp, 0);
 			break;
 		}
 
@@ -779,13 +590,13 @@ public:
 			if(id3type == ID3v2Lame || id3type == ID3v1)
 			{
 				// Lame API expects Latin1, which is sad, but we cannot change that.
-				if(!tags.title.empty())    lame.id3tag_set_title(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.title   ).c_str());
-				if(!tags.artist.empty())   lame.id3tag_set_artist( gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.artist  ).c_str());
-				if(!tags.album.empty())    lame.id3tag_set_album(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.album   ).c_str());
-				if(!tags.year.empty())     lame.id3tag_set_year(   gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.year    ).c_str());
-				if(!tags.comments.empty()) lame.id3tag_set_comment(gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.comments).c_str());
-				if(!tags.trackno.empty())  lame.id3tag_set_track(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.trackno ).c_str());
-				if(!tags.genre.empty())    lame.id3tag_set_genre(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.genre   ).c_str());
+				if(!tags.title.empty())    id3tag_set_title(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.title   ).c_str());
+				if(!tags.artist.empty())   id3tag_set_artist( gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.artist  ).c_str());
+				if(!tags.album.empty())    id3tag_set_album(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.album   ).c_str());
+				if(!tags.year.empty())     id3tag_set_year(   gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.year    ).c_str());
+				if(!tags.comments.empty()) id3tag_set_comment(gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.comments).c_str());
+				if(!tags.trackno.empty())  id3tag_set_track(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.trackno ).c_str());
+				if(!tags.genre.empty())    id3tag_set_genre(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.genre   ).c_str());
 			} else if(id3type == ID3v2OpenMPT)
 			{
 				Tags = tags;
@@ -807,7 +618,7 @@ public:
 	{
 		if(!gfp_inited)
 		{
-			lame.lame_init_params(gfp);
+			lame_init_params(gfp);
 			gfp_inited = true;
 		}
 		const int count_max = 0xffff;
@@ -816,13 +627,13 @@ public:
 			int count_chunk = mpt::clamp(mpt::saturate_cast<int>(count), int(0), count_max);
 			buf.resize(count_chunk + (count_chunk+3)/4 + 7200);
 			int result = 0;
-			if(lame.lame_get_num_channels(gfp) == 1)
+			if(lame_get_num_channels(gfp) == 1)
 			{
 				// lame always assumes stereo input with interleaved interface, so use non-interleaved for mono
-				result = lame.lame_encode_buffer_ieee_float(gfp, interleaved, nullptr, count_chunk, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size()));
+				result = lame_encode_buffer_ieee_float(gfp, interleaved, nullptr, count_chunk, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size()));
 			} else
 			{
-				result = lame.lame_encode_buffer_interleaved_ieee_float(gfp, interleaved, count_chunk, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size()));
+				result = lame_encode_buffer_interleaved_ieee_float(gfp, interleaved, count_chunk, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size()));
 			}
 			buf.resize((result >= 0) ? result : 0);
 			if(result == -2)
@@ -841,21 +652,21 @@ public:
 		}
 		if(!gfp_inited)
 		{
-			lame.lame_init_params(gfp);
+			lame_init_params(gfp);
 			gfp_inited = true;
 		}
 		buf.resize(7200);
-		buf.resize(lame.lame_encode_flush(gfp, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size())));
+		buf.resize(lame_encode_flush(gfp, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size())));
 		WriteBuffer();
 		ReplayGain replayGain;
 		if(StreamEncoderSettings::Instance().MP3LameCalculatePeakSample)
 		{
-			replayGain.TrackPeak = std::fabs(lame.lame_get_PeakSample(gfp)) / 32768.0f;
+			replayGain.TrackPeak = std::fabs(lame_get_PeakSample(gfp)) / 32768.0f;
 			replayGain.TrackPeakValid = true;
 		}
 		if(StreamEncoderSettings::Instance().MP3LameCalculateReplayGain)
 		{
-			replayGain.TrackGaindB = lame.lame_get_RadioGain(gfp) / 10.0f;
+			replayGain.TrackGaindB = lame_get_RadioGain(gfp) / 10.0f;
 			replayGain.TrackGaindBValid = true;
 		}
 		if(id3type == ID3v2OpenMPT && (StreamEncoderSettings::Instance().MP3LameCalculatePeakSample || StreamEncoderSettings::Instance().MP3LameCalculateReplayGain))
@@ -872,7 +683,7 @@ public:
 		}
 		if(id3type == ID3v2Lame)
 		{
-			id3v2Size = lame.lame_get_id3v2_tag(gfp, nullptr, 0);
+			id3v2Size = lame_get_id3v2_tag(gfp, nullptr, 0);
 		} else if(id3type == ID3v2OpenMPT)
 		{
 			// id3v2Size already set
@@ -881,12 +692,12 @@ public:
 		{
 			std::streampos endPos = f.tellp();
 			f.seekp(fStart + id3v2Size);
-			buf.resize(lame.lame_get_lametag_frame(gfp, nullptr, 0));
-			buf.resize(lame.lame_get_lametag_frame(gfp, (unsigned char*)buf.data(), buf.size()));
+			buf.resize(lame_get_lametag_frame(gfp, nullptr, 0));
+			buf.resize(lame_get_lametag_frame(gfp, (unsigned char*)buf.data(), buf.size()));
 			WriteBuffer();
 			f.seekp(endPos);
 		}
-		lame.lame_close(gfp);
+		lame_close(gfp);
 		gfp = lame_t();
 		gfp_inited = false;
 	}
@@ -897,24 +708,24 @@ public:
 
 
 MP3Encoder::MP3Encoder(MP3EncoderType type)
-	: m_Type(MP3EncoderDefault)
+	: m_Type(type)
 {
 #ifdef MPT_WITH_LAME
-	if(type == MP3EncoderDefault || type == MP3EncoderLame)
+	if(type == MP3EncoderLame)
 	{
 		if(IsComponentAvailable(m_Lame))
 		{
 			m_Type = MP3EncoderLame;
-			SetTraits(m_Lame->BuildTraits(false));
+			SetTraits(BuildTraits(false));
 			return;
 		}
 	}
-	if(type == MP3EncoderDefault || type == MP3EncoderLameCompatible)
+	if(type == MP3EncoderLameCompatible)
 	{
 		if(IsComponentAvailable(m_Lame))
 		{
 			m_Type = MP3EncoderLameCompatible;
-			SetTraits(m_Lame->BuildTraits(true));
+			SetTraits(BuildTraits(true));
 			return;
 		}
 	}

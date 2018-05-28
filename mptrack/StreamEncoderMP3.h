@@ -14,7 +14,6 @@
 
 #include "../common/ComponentManager.h"
 
-
 OPENMPT_NAMESPACE_BEGIN
 
 
@@ -24,7 +23,6 @@ class ComponentLame;
 
 enum MP3EncoderType
 {
-	MP3EncoderDefault,
 	MP3EncoderLame,
 	MP3EncoderLameCompatible,
 };
@@ -49,7 +47,7 @@ public:
 
 public:
 
-	MP3Encoder(MP3EncoderType type=MP3EncoderDefault);
+	MP3Encoder(MP3EncoderType type);
 
 };
 

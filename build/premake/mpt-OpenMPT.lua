@@ -129,6 +129,7 @@ end
    "zlib",
    "minizip",
    "smbPitchShift",
+   "lame",
    "lhasa",
    "flac",
    "mpg123",
@@ -146,6 +147,7 @@ end
   filter { "configurations:*Shared" }
   filter { "not configurations:*Shared" }
    linkoptions {
+    "/DELAYLOAD:openmpt-lame.dll",
     "/DELAYLOAD:openmpt-mpg123.dll",
     "/DELAYLOAD:OpenMPT_SoundTouch_f32.dll",
    }
