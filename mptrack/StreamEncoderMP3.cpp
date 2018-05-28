@@ -25,10 +25,6 @@
 
 #include <deque>
 
-// For ACM debugging purposes
-#define ACMLOG(x, ...)
-//#define ACMLOG Log
-
 #ifdef MPT_WITH_LAME
 //#define MPT_USE_LAME_H
 #ifdef MPT_USE_LAME_H
