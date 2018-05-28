@@ -41,7 +41,11 @@ struct ModSample
 
 	//char name[MAX_SAMPLENAME];			// Maybe it would be nicer to have sample names here, but that would require some refactoring.
 	char filename [MAX_SAMPLEFILENAME];
-	SmpLength cues[9];
+	union
+	{
+		SmpLength cues[9];
+		OPLPatch adlib;
+	};
 
 	ModSample(MODTYPE type = MOD_TYPE_NONE)
 	{

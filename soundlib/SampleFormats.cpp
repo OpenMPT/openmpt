@@ -1140,7 +1140,15 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
 	ModSample &sample = Samples[nSample];
 	sampleHeader.ConvertToMPT(sample);
 	mpt::String::Read<mpt::String::nullTerminated>(m_szNames[nSample], sampleHeader.name);
-	sampleHeader.GetSampleFormat(false).ReadSample(sample, file);
+
+	if(sampleHeader.sampleType < S3MSampleHeader::typeAdMel)
+	{
+		sampleHeader.GetSampleFormat(false).ReadSample(sample, file);
+	} else
+	{
+		InitOPL();
+	}
+
 	sample.Convert(MOD_TYPE_S3M, GetType());
 	sample.PrecomputeLoops(*this, false);
 	return true;
@@ -3222,11 +3230,11 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 		{
 #ifdef MPT_EXTERNAL_SAMPLES
 			const std::string filenameU8 = GetSamplePath(smp).AbsolutePathToRelative(filename.GetPath()).ToUTF8();
-			const size_t strSize = mpt::saturate_cast<uint16>(filenameU8.size());
+			const size_t strSize = filenameU8.size();
 			size_t intBytes = 0;
 			if(mpt::IO::WriteVarInt(f, strSize, &intBytes))
 			{
-				filePos += intBytes + strSize;
+				filePos += mpt::saturate_cast<uint32>(intBytes + strSize);
 				mpt::IO::WriteRaw(f, filenameU8.data(), strSize);
 			}
 #endif // MPT_EXTERNAL_SAMPLES

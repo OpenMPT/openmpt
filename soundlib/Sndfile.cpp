@@ -33,8 +33,7 @@
 #include "../common/mptStringBuffer.h"
 #include "../common/FileReader.h"
 #include "Container.h"
-#include <sstream>
-#include <time.h>
+#include "OPL.h"
 
 #ifndef NO_ARCHIVE_SUPPORT
 #include "../unarchiver/unarchiver.h"
@@ -71,39 +70,21 @@ CSoundFile::CSoundFile() :
 #ifndef MODPLUG_TRACKER
 	m_NoteNames(NoteNamesSharp),
 #endif
-	m_pTuningsTuneSpecific(nullptr),
 	m_pModSpecs(&ModSpecs::itEx),
 	m_nType(MOD_TYPE_NONE),
 	Patterns(*this),
 	Order(*this),
 #ifdef MODPLUG_TRACKER
 	m_MIDIMapper(*this),
-	m_pModDoc(nullptr),
 #endif
 	m_PRNG(mpt::make_prng<mpt::fast_prng>(mpt::global_prng())),
-	visitedSongRows(*this),
-	m_pCustomLog(nullptr)
+	visitedSongRows(*this)
 {
 	MemsetZero(MixSoundBuffer);
 	MemsetZero(MixRearBuffer);
 	MemsetZero(MixFloatBuffer);
-	gnDryLOfsVol = 0;
-	gnDryROfsVol = 0;
-	m_nType = MOD_TYPE_NONE;
-	m_ContainerType = MOD_CONTAINERTYPE_NONE;
-	m_nMixChannels = 0;
-	m_nSamples = 0;
-	m_nInstruments = 0;
-#ifndef MODPLUG_TRACKER
-	m_nFreqFactor = m_nTempoFactor = 65536;
-#endif
-	m_nRepeatCount = 0;
-	m_nTempoMode = tempoModeClassic;
-	m_bIsRendering = false;
 
 #ifdef MODPLUG_TRACKER
-	m_lockRowStart = m_lockRowEnd = ROWINDEX_INVALID;
-	m_lockOrderStart = m_lockOrderEnd = ORDERINDEX_INVALID;
 	m_bChannelMuteTogglePending.reset();
 
 	m_nDefaultRowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat = (TrackerSettings::Instance().m_nRowHighlightBeats) ? TrackerSettings::Instance().m_nRowHighlightBeats : 4;
@@ -536,6 +517,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			sample.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 		}
 		if(sample.nGlobalVol > 64) sample.nGlobalVol = 64;
+		if(sample.uFlags[CHN_ADLIB] && m_opl == nullptr) InitOPL();
 	}
 	// Check invalid instruments
 	INSTRUMENTINDEX maxInstr = 0;
@@ -930,6 +912,12 @@ void CSoundFile::ResetChannels()
 	{
 		chn.nROfs = chn.nLOfs = 0;
 		chn.nLength = 0;
+		if(chn.dwFlags[CHN_ADLIB] && m_opl)
+		{
+			CHANNELINDEX c = static_cast<CHANNELINDEX>(std::distance(std::begin(m_PlayState.Chn), &chn));
+			m_opl->NoteOff(c);
+			m_opl->Volume(c, 0);
+		}
 	}
 }
 
@@ -1285,6 +1273,12 @@ void CSoundFile::InitAmigaResampler()
 			chn.paulaState = defaultState;
 		}
 	}
+}
+
+
+void CSoundFile::InitOPL()
+{
+	if(!m_opl) m_opl = mpt::make_unique<OPL>();
 }
 
 

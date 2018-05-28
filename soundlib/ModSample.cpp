@@ -108,6 +108,13 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 	{
 		uFlags.reset(SMP_KEEPONDISK);
 	}
+
+	// No Adlib instruments in formats other than S3M.
+	if(toType != MOD_TYPE_S3M && uFlags[CHN_ADLIB])
+	{
+		uFlags.reset(CHN_ADLIB);
+		adlib.assign(0);
+	}
 }
 
 
@@ -121,7 +128,7 @@ void ModSample::Initialize(MODTYPE type)
 	nPan = 128;
 	nVolume = 256;
 	nGlobalVol = 64;
-	uFlags.reset(CHN_PANNING | CHN_SUSTAINLOOP | CHN_LOOP | CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN | SMP_MODIFIED | SMP_KEEPONDISK);
+	uFlags.reset(CHN_PANNING | CHN_SUSTAINLOOP | CHN_LOOP | CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN | CHN_ADLIB | SMP_MODIFIED | SMP_KEEPONDISK);
 	if(type == MOD_TYPE_XM)
 	{
 		uFlags.set(CHN_PANNING);

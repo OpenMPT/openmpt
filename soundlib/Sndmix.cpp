@@ -22,6 +22,7 @@
 #ifndef NO_PLUGINS
 #include "plugins/PlugInterface.h"
 #endif // NO_PLUGINS
+#include "OPL.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -106,6 +107,10 @@ void CSoundFile::InitPlayer(bool bReset)
 #ifndef NO_AGC
 	m_AGC.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif
+	if(m_opl)
+	{
+		m_opl->Initialize(m_MixerSettings.gdwMixingFreq);
+	}
 }
 
 
@@ -293,6 +298,11 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 		}
 
 		CreateStereoMix(countChunk);
+
+		if(m_opl)
+		{
+			m_opl->Mix(MixSoundBuffer, countChunk);
+		}
 
 		#ifndef NO_REVERB
 			m_Reverb.Process(MixSoundBuffer, countChunk);
@@ -2168,7 +2178,6 @@ bool CSoundFile::ReadNote()
 			}
 
 			ProcessPanbrello(pChn);
-
 		}
 
 		// IT Compatibility: Ensure that there is no pan swing, panbrello, panning envelopes, etc. applied on surround channels.
@@ -2223,6 +2232,18 @@ bool CSoundFile::ReadNote()
 				period = m_nMinPeriod;
 			}
 
+			if((pChn->dwFlags & (CHN_ADLIB | CHN_NOTEFADE | CHN_MUTE | CHN_SYNCMUTE)) == CHN_ADLIB && !pChn->pModSample->uFlags[CHN_MUTE] && m_opl)
+			{
+				// In ST3, a sample rate of 8363 Hz is mapped to middle-C, which is 261.625 Hz in a tempered scale at A4 = 440.
+				// Hence, we have to translate our "sample rate" into pitch.
+				auto freq = GetFreqFromPeriod(period, pChn->nC5Speed, nPeriodFrac);
+				auto oplmilliHertz = Util::muldivr_unsigned(freq, 261625, 8363 << FREQ_FRACBITS);
+				m_opl->Frequency(nChn, oplmilliHertz, pChn->dwFlags[CHN_KEYOFF]);
+				// Scale volume to OPL range (0...63).
+				m_opl->Volume(nChn, static_cast<uint8>(pChn->nCalcVolume * pChn->nInsVol * 63 / (1 << 20)));
+				m_opl->Pan(nChn, pChn->nRealPan);
+			}
+
 			if(GetType() == MOD_TYPE_MPT && pIns != nullptr && pIns->pTuning != nullptr)
 			{
 				// In this case: GetType() == MOD_TYPE_MPT and using custom tunings.
@@ -2239,7 +2260,6 @@ bool CSoundFile::ReadNote()
 						pChn->m_CalculateFreq = false;
 				}
 			}
-
 
 			SamplePosition ninc = GetChannelIncrement(pChn, period, nPeriodFrac);
 #ifndef MODPLUG_TRACKER
@@ -2390,7 +2410,10 @@ bool CSoundFile::ReadNote()
 			ProcessRamping(pChn);
 
 			// Adding the channel in the channel list
-			m_PlayState.ChnMix[m_nMixChannels++] = nChn;
+			if(!pChn->dwFlags[CHN_ADLIB])
+			{
+				m_PlayState.ChnMix[m_nMixChannels++] = nChn;
+			}
 		} else
 		{
 			pChn->rightVol = pChn->leftVol = 0;

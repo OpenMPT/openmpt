@@ -120,45 +120,46 @@ enum MODCONTAINERTYPE
 enum ChannelFlags
 {
 	// Sample Flags
-	CHN_16BIT			= 0x01,			// 16-bit sample
-	CHN_LOOP			= 0x02,			// looped sample
-	CHN_PINGPONGLOOP	= 0x04,			// bidi-looped sample
-	CHN_SUSTAINLOOP		= 0x08,			// sample with sustain loop
-	CHN_PINGPONGSUSTAIN	= 0x10,			// sample with bidi sustain loop
-	CHN_PANNING			= 0x20,			// sample with forced panning
-	CHN_STEREO			= 0x40,			// stereo sample
-	CHN_REVERSE			= 0x80,			// start sample playback from sample / loop end (Velvet Studio feature) - this is intentionally the same flag as CHN_PINGPONGFLAG.
+	CHN_16BIT           = 0x01,        // 16-bit sample
+	CHN_LOOP            = 0x02,        // Looped sample
+	CHN_PINGPONGLOOP    = 0x04,        // Bidi-looped sample
+	CHN_SUSTAINLOOP     = 0x08,        // Sample with sustain loop
+	CHN_PINGPONGSUSTAIN = 0x10,        // Sample with bidi sustain loop
+	CHN_PANNING         = 0x20,        // Sample with forced panning
+	CHN_STEREO          = 0x40,        // Stereo sample
+	CHN_REVERSE         = 0x80,        // Start sample playback from sample / loop end (Velvet Studio feature)
+	CHN_SURROUND        = 0x200,       // Use surround channel
+	CHN_ADLIB           = 0x100,       // Adlib / OPL instrument is active on this channel
+
 	// Channel Flags
-	CHN_PINGPONGFLAG	= 0x80,			// when flag is on, sample is processed backwards
-	CHN_MUTE			= 0x100,		// muted channel
-	CHN_KEYOFF			= 0x200,		// exit sustain
-	CHN_NOTEFADE		= 0x400,		// fade note (instrument mode)
-	CHN_SURROUND		= 0x800,		// use surround channel
-	CHN_WRAPPED_LOOP	= 0x1000,		// loop just wrapped around to loop start (required for correct interpolation around loop points)
-	CHN_AMIGAFILTER		= 0x2000,		// Apply Amiga low-pass filter
-	CHN_FILTER			= 0x4000,		// Apply resonant filter on sample
-	CHN_VOLUMERAMP		= 0x8000,		// Apply volume ramping
-	CHN_VIBRATO			= 0x10000,		// Apply vibrato
-	CHN_TREMOLO			= 0x20000,		// Apply tremolo
-	//CHN_PANBRELLO		= 0x40000,		// Apply panbrello
-	CHN_PORTAMENTO		= 0x80000,		// Apply portamento
-	CHN_GLISSANDO		= 0x100000,		// Glissando (force portamento to semitones) mode
-	CHN_FASTVOLRAMP		= 0x200000,		// Force usage of global ramping settings instead of ramping over the complete render buffer length
-	CHN_EXTRALOUD		= 0x400000,		// Force sample to play at 0dB
-	CHN_REVERB			= 0x800000,		// Apply reverb on this channel
-	CHN_NOREVERB		= 0x1000000,	// Disable reverb on this channel
-	CHN_SOLO			= 0x2000000,	// solo channel -> CODE#0012 -> DESC="midi keyboard split" -! NEW_FEATURE#0012
-	CHN_NOFX			= 0x4000000,	// dry channel -> CODE#0015 -> DESC="channels management dlg" -! NEW_FEATURE#0015
-	CHN_SYNCMUTE		= 0x8000000,	// keep sample sync on mute
+	CHN_PINGPONGFLAG    = 0x80,        // When flag is on, sample is processed backwards - this is intentionally the same flag as CHN_REVERSE.
+	CHN_MUTE            = 0x400,       // Muted channel
+	CHN_KEYOFF          = 0x800,       // Exit sustain
+	CHN_NOTEFADE        = 0x1000,      // Fade note (instrument mode)
+	CHN_WRAPPED_LOOP    = 0x2000,      // Loop just wrapped around to loop start (required for correct interpolation around loop points)
+	CHN_AMIGAFILTER     = 0x4000,      // Apply Amiga low-pass filter
+	CHN_FILTER          = 0x8000,      // Apply resonant filter on sample
+	CHN_VOLUMERAMP      = 0x10000,     // Apply volume ramping
+	CHN_VIBRATO         = 0x20000,     // Apply vibrato
+	CHN_TREMOLO         = 0x40000,     // Apply tremolo
+	CHN_PORTAMENTO      = 0x80000,     // Apply portamento
+	CHN_GLISSANDO       = 0x100000,    // Glissando (force portamento to semitones) mode
+	CHN_FASTVOLRAMP     = 0x200000,    // Force usage of global ramping settings instead of ramping over the complete render buffer length
+	CHN_EXTRALOUD       = 0x400000,    // Force sample to play at 0dB
+	CHN_REVERB          = 0x800000,    // Apply reverb on this channel
+	CHN_NOREVERB        = 0x1000000,   // Disable reverb on this channel
+	CHN_SOLO            = 0x2000000,   // Solo channel
+	CHN_NOFX            = 0x4000000,   // Dry channel (no plugins)
+	CHN_SYNCMUTE        = 0x8000000,   // Keep sample sync on mute
 
 	// Sample flags (only present in ModSample::uFlags, may overlap with CHN_CHANNELFLAGS)
-	SMP_MODIFIED		= 0x1000,	// Sample data has been edited in the tracker
-	SMP_KEEPONDISK		= 0x2000,	// Sample is not saved to file, data is restored from original sample file
-	SMP_NODEFAULTVOLUME	= 0x4000,	// Ignore default volume setting
+	SMP_MODIFIED        = 0x2000,      // Sample data has been edited in the tracker
+	SMP_KEEPONDISK      = 0x4000,      // Sample is not saved to file, data is restored from original sample file
+	SMP_NODEFAULTVOLUME = 0x8000,      // Ignore default volume setting
 };
 DECLARE_FLAGSET(ChannelFlags)
 
-#define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG | CHN_REVERSE)
+#define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG | CHN_REVERSE | CHN_SURROUND | CHN_ADLIB)
 #define CHN_CHANNELFLAGS (~CHN_SAMPLEFLAGS)
 
 // Sample flags fit into the first 16 bits, and with the current memory layout, storing them as a 16-bit integer packs struct ModSample nicely.
@@ -612,5 +613,7 @@ public:
 };
 
 typedef FPInt<10000, uint32> TEMPO;
+
+typedef std::array<uint8, 12> OPLPatch;
 
 OPENMPT_NAMESPACE_END

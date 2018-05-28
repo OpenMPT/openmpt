@@ -49,22 +49,18 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#define CHANGEMODTYPE_WARNING(x)	warnings.set(x);
-#define CHANGEMODTYPE_CHECK(x, s)	if(warnings[x]) AddToLog(s);
-
-
 // Trim envelopes and remove release nodes.
 static void UpdateEnvelopes(InstrumentEnvelope &mptEnv, const CModSpecifications &specs, std::bitset<wNumWarnings> &warnings)
 {
 	// shorten instrument envelope if necessary (for mod conversion)
 	const uint8 envMax = specs.envelopePointsMax;
 
-#define TRIMENV(envLen) if(envLen >= envMax) { envLen = envMax - 1; CHANGEMODTYPE_WARNING(wTrimmedEnvelopes); }
+#define TRIMENV(envLen) if(envLen >= envMax) { envLen = envMax - 1; warnings.set(wTrimmedEnvelopes); }
 
 	if(mptEnv.size() > envMax)
 	{
 		mptEnv.resize(envMax);
-		CHANGEMODTYPE_WARNING(wTrimmedEnvelopes);
+		warnings.set(wTrimmedEnvelopes);
 	}
 	TRIMENV(mptEnv.nLoopStart);
 	TRIMENV(mptEnv.nLoopEnd);
@@ -78,7 +74,7 @@ static void UpdateEnvelopes(InstrumentEnvelope &mptEnv, const CModSpecifications
 		} else
 		{
 			mptEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
-			CHANGEMODTYPE_WARNING(wReleaseNode);
+			warnings.set(wReleaseNode);
 		}
 	}
 
@@ -130,7 +126,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		if(m_SndFile.GetNumInstruments())
 		{
 			ConvertInstrumentsToSamples();
-			CHANGEMODTYPE_WARNING(wInstrumentsToSamples);
+			warnings.set(wInstrumentsToSamples);
 		}
 
 		// Resizing all patterns to 64 rows
@@ -145,7 +141,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				pat.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(origRows - 1).RetryNextRow());
 			}
 
-			CHANGEMODTYPE_WARNING(wResizedPatterns);
+			warnings.set(wResizedPatterns);
 		}
 
 		// Removing all instrument headers from channels
@@ -345,7 +341,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		// Too many samples? Only 31 samples allowed in MOD format...
 		if(newTypeIsMOD && smp > 31 && sample.nLength > 0)
 		{
-			CHANGEMODTYPE_WARNING(wMOD31Samples);
+			warnings.set(wMOD31Samples);
 		}
 
 		// No Bidi and Autovibrato for MOD/S3M
@@ -354,13 +350,13 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			// Bidi loops
 			if((sample.uFlags[CHN_PINGPONGLOOP]) != 0)
 			{
-				CHANGEMODTYPE_WARNING(wSampleBidiLoops);
+				warnings.set(wSampleBidiLoops);
 			}
 
 			// Autovibrato
 			if((sample.nVibDepth | sample.nVibRate | sample.nVibSweep) != 0)
 			{
-				CHANGEMODTYPE_WARNING(wSampleAutoVibrato);
+				warnings.set(wSampleAutoVibrato);
 			}
 		}
 
@@ -370,13 +366,18 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			// Sustain loops - convert to normal loops
 			if((sample.uFlags[CHN_SUSTAINLOOP]) != 0)
 			{
-				CHANGEMODTYPE_WARNING(wSampleSustainLoops);
+				warnings.set(wSampleSustainLoops);
 			}
 		}
 
 		if(newTypeIsMOD && sample.RelativeTone != 0)
 		{
-			CHANGEMODTYPE_WARNING(wMODSampleFrequency);
+			warnings.set(wMODSampleFrequency);
+		}
+
+		if(!newTypeIsS3M && sample.uFlags[CHN_ADLIB])
+		{
+			warnings.set(wAdlibInstruments);
 		}
 
 		sample.Convert(nOldType, nNewType);
@@ -397,18 +398,18 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			{
 				if (pIns->NoteMap[i] && pIns->NoteMap[i] != (i + 1))
 				{
-					CHANGEMODTYPE_WARNING(wBrokenNoteMap);
+					warnings.set(wBrokenNoteMap);
 					break;
 				}
 			}
 			// Convert sustain loops to sustain "points"
 			if(pIns->VolEnv.nSustainStart != pIns->VolEnv.nSustainEnd)
 			{
-				CHANGEMODTYPE_WARNING(wInstrumentSustainLoops);
+				warnings.set(wInstrumentSustainLoops);
 			}
 			if(pIns->PanEnv.nSustainStart != pIns->PanEnv.nSustainEnd)
 			{
-				CHANGEMODTYPE_WARNING(wInstrumentSustainLoops);
+				warnings.set(wInstrumentSustainLoops);
 			}
 		}
 
@@ -418,15 +419,15 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		{
 			if(pIns->pTuning != nullptr)
 			{
-				CHANGEMODTYPE_WARNING(wInstrumentTuning);
+				warnings.set(wInstrumentTuning);
 			}
 			if(pIns->pitchToTempoLock.GetRaw() != 0)
 			{
-				CHANGEMODTYPE_WARNING(wPitchToTempoLock);
+				warnings.set(wPitchToTempoLock);
 			}
 			if((pIns->nCutSwing | pIns->nResSwing) != 0)
 			{
-				CHANGEMODTYPE_WARNING(wFilterVariation);
+				warnings.set(wFilterVariation);
 			}
 		}
 
@@ -467,7 +468,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		}
 		if(lossy)
 		{
-			CHANGEMODTYPE_WARNING(wMODGlobalVars);
+			warnings.set(wMODGlobalVars);
 		}
 	}
 
@@ -480,7 +481,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			if(!m_SndFile.Order.RestartPosToPattern(seq))
 			{
 				// Couldn't fix it! :(
-				CHANGEMODTYPE_WARNING(wRestartPos);
+				warnings.set(wRestartPos);
 			}
 		}
 	}
@@ -494,7 +495,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			{
 				m_SndFile.ChnSettings[nChn].nVolume = 64;
 				m_SndFile.ChnSettings[nChn].dwFlags.reset(CHN_SURROUND);
-				CHANGEMODTYPE_WARNING(wChannelVolSurround);
+				warnings.set(wChannelVolSurround);
 			}
 		}
 		if(newTypeIsXM)
@@ -502,7 +503,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			if(m_SndFile.ChnSettings[nChn].nPan != 128)
 			{
 				m_SndFile.ChnSettings[nChn].nPan = 128;
-				CHANGEMODTYPE_WARNING(wChannelPanning);
+				warnings.set(wChannelPanning);
 			}
 		}
 	}
@@ -514,7 +515,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		{
 			if(pat.GetOverrideSignature())
 			{
-				CHANGEMODTYPE_WARNING(wPatternSignatures);
+				warnings.set(wPatternSignatures);
 				break;
 			}
 		}
@@ -523,12 +524,12 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	// Check whether the new format supports embedding the edit history in the file.
 	if(oldTypeIsIT_MPT && !newTypeIsIT_MPT && GetSoundFile().GetFileHistory().size() > 0)
 	{
-		CHANGEMODTYPE_WARNING(wEditHistory);
+		warnings.set(wEditHistory);
 	}
 
 	if((nOldType & MOD_TYPE_XM) && m_SndFile.m_playBehaviour[kFT2VolumeRamping])
 	{
-		CHANGEMODTYPE_WARNING(wVolRamp);
+		warnings.set(wVolRamp);
 	}
 
 	CriticalSection cs;
@@ -540,7 +541,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	// Song flags
 	if(!(specs.songFlags & SONG_LINEARSLIDES) && m_SndFile.m_SongFlags[SONG_LINEARSLIDES])
 	{
-		CHANGEMODTYPE_WARNING(wLinearSlides);
+		warnings.set(wLinearSlides);
 	}
 	if(oldTypeIsXM && newTypeIsIT_MPT)
 	{
@@ -559,13 +560,13 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 	if(oldTypeIsMPT && m_SndFile.GetMixLevels() != mixLevelsCompatible && m_SndFile.GetMixLevels() != mixLevelsCompatibleFT2)
 	{
-		CHANGEMODTYPE_WARNING(wMixmode);
+		warnings.set(wMixmode);
 	}
 
 	if(!specs.hasFractionalTempo && m_SndFile.m_nDefaultTempo.GetFract() != 0)
 	{
 		m_SndFile.m_nDefaultTempo.Set(m_SndFile.m_nDefaultTempo.GetInt(), 0);
-		CHANGEMODTYPE_WARNING(wFractionalTempo);
+		warnings.set(wFractionalTempo);
 	}
 
 	ChangeFileExtension(nNewType);
@@ -592,14 +593,14 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	{
 		if(!GlobalVolumeToPattern())
 		{
-			CHANGEMODTYPE_WARNING(wGlobalVolumeNotSupported);
+			warnings.set(wGlobalVolumeNotSupported);
 		}
 	}
 
 	// Resampling is only saved in MPTM
 	if(!newTypeIsMPT && m_SndFile.m_nResampling != SRCMODE_DEFAULT)
 	{
-		CHANGEMODTYPE_WARNING(wResamplingMode);
+		warnings.set(wResamplingMode);
 		m_SndFile.m_nResampling = SRCMODE_DEFAULT;
 	}
 
@@ -611,7 +612,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	}
 	static constexpr struct
 	{
-		enmWarnings warning;
+		ConversionWarning warning;
 		const char *mesage;
 	} messages[] =
 	{
@@ -626,6 +627,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	{ wSampleAutoVibrato, "New format doesn't support sample autovibrato." },
 	{ wMODSampleFrequency, "Sample C-5 frequencies will be lost." },
 	{ wMOD31Samples, "Samples above 31 will be lost when saving as MOD. Consider rearranging samples if there are unused slots available." },
+	{ wAdlibInstruments, "OPL instruments are not supported by this format." },
 	// Instrument warnings
 	{ wInstrumentsToSamples, "All instruments have been converted to samples." },
 	{ wTrimmedEnvelopes, "Instrument envelopes have been shortened." },
@@ -661,10 +663,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 	return true;
 }
-
-
-#undef CHANGEMODTYPE_WARNING
-#undef CHANGEMODTYPE_CHECK
 
 
 OPENMPT_NAMESPACE_END

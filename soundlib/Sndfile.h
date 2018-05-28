@@ -210,6 +210,7 @@ class CTuningCollection;
 } // namespace Tuning
 typedef Tuning::CTuningCollection CTuningCollection;
 struct CModSpecifications;
+class OPL;
 #ifdef MODPLUG_TRACKER
 class CModDoc;
 #endif // MODPLUG_TRACKER
@@ -317,7 +318,7 @@ private:
 #endif
 
 private:
-	CTuningCollection* m_pTuningsTuneSpecific;
+	CTuningCollection* m_pTuningsTuneSpecific = nullptr;
 	//<--Tuning
 
 #ifdef MODPLUG_TRACKER
@@ -341,8 +342,8 @@ private:
 	mixsample_t MixRearBuffer[MIXBUFFERSIZE * 2];
 	// Non-interleaved plugin processing buffer
 	float MixFloatBuffer[2][MIXBUFFERSIZE];
-	mixsample_t gnDryLOfsVol;
-	mixsample_t gnDryROfsVol;
+	mixsample_t gnDryLOfsVol = 0;
+	mixsample_t gnDryROfsVol = 0;
 	mixsample_t MixInputBuffer[NUMMIXINPUTBUFFERS][MIXBUFFERSIZE];
 
 public:
@@ -366,37 +367,37 @@ public:
 
 public:	// for Editing
 #ifdef MODPLUG_TRACKER
-	CModDoc *m_pModDoc;		// Can be a null pointer for example when previewing samples from the treeview.
+	CModDoc *m_pModDoc = nullptr;		// Can be a null pointer for example when previewing samples from the treeview.
 #endif // MODPLUG_TRACKER
 	Enum<MODTYPE> m_nType;
 private:
-	MODCONTAINERTYPE m_ContainerType;
+	MODCONTAINERTYPE m_ContainerType = MOD_CONTAINERTYPE_NONE;
 public:
-	CHANNELINDEX m_nChannels;
-	SAMPLEINDEX m_nSamples;
-	INSTRUMENTINDEX m_nInstruments;
+	CHANNELINDEX m_nChannels = 0;
+	SAMPLEINDEX m_nSamples = 0;
+	INSTRUMENTINDEX m_nInstruments = 0;
 	uint32 m_nDefaultSpeed, m_nDefaultGlobalVolume;
 	TEMPO m_nDefaultTempo;
 	FlagSet<SongFlags> m_SongFlags;
-	CHANNELINDEX m_nMixChannels;
+	CHANNELINDEX m_nMixChannels = 0;
 private:
 	CHANNELINDEX m_nMixStat;
 public:
 	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module
-	TempoMode m_nTempoMode;
+	TempoMode m_nTempoMode = tempoModeClassic;
 
 #ifdef MODPLUG_TRACKER
 	// Lock playback between two rows. Lock is active if lock start != ROWINDEX_INVALID).
-	ROWINDEX m_lockRowStart, m_lockRowEnd;
+	ROWINDEX m_lockRowStart = ROWINDEX_INVALID, m_lockRowEnd = ROWINDEX_INVALID;
 	// Lock playback between two orders. Lock is active if lock start != ORDERINDEX_INVALID).
-	ORDERINDEX m_lockOrderStart, m_lockOrderEnd;
+	ORDERINDEX m_lockOrderStart = ORDERINDEX_INVALID, m_lockOrderEnd = ORDERINDEX_INVALID;
 #endif // MODPLUG_TRACKER
 
 	uint32 m_nSamplePreAmp, m_nVSTiVolume;
 	bool IsGlobalVolumeUnset() const { return IsFirstTick(); }
 #ifndef MODPLUG_TRACKER
-	uint32 m_nFreqFactor; // Pitch shift factor (65536 = no pitch shifting). Only used in libopenmpt (openmpt::ext::interactive::set_pitch_factor)
-	uint32 m_nTempoFactor; // Tempo factor (65536 = no tempo adjustment). Only used in libopenmpt (openmpt::ext::interactive::set_tempo_factor)
+	uint32 m_nFreqFactor = 65536; // Pitch shift factor (65536 = no pitch shifting). Only used in libopenmpt (openmpt::ext::interactive::set_pitch_factor)
+	uint32 m_nTempoFactor = 65536; // Tempo factor (65536 = no tempo adjustment). Only used in libopenmpt (openmpt::ext::interactive::set_tempo_factor)
 #endif
 
 	// Row swing factors for modern tempo mode
@@ -408,7 +409,7 @@ public:
 	int32 m_nMinPeriod, m_nMaxPeriod;
 
 	ResamplingMode m_nResampling;	// Resampling mode (if overriding the globally set resampling)
-	int32 m_nRepeatCount;	// -1 means repeat infinitely.
+	int32 m_nRepeatCount = 0;	// -1 means repeat infinitely.
 	ORDERINDEX m_nMaxOrderPosition;
 	ModChannelSettings ChnSettings[MAX_BASECHANNELS];	// Initial channels settings
 	CPatternContainer Patterns;							// Patterns
@@ -507,6 +508,8 @@ public:
 	std::vector<SmpLength> *m_SamplePlayLengths = nullptr;	// For storing the maximum play length of each sample for automatic sample trimming
 #endif // MODPLUG_TRACKER
 
+	std::unique_ptr<OPL> m_opl;
+
 public:
 #ifdef LIBOPENMPT_BUILD
 #ifndef NO_PLUGINS
@@ -544,12 +547,12 @@ public:
 	bool LoadExternalSample(SAMPLEINDEX smp, const mpt::PathString &filename);
 #endif // MPT_EXTERNAL_SAMPLES
 
-	bool m_bIsRendering;
+	bool m_bIsRendering = false;
 	TimingInfo m_TimingInfo; // only valid if !m_bIsRendering
 
 private:
 	// logging
-	ILog *m_pCustomLog;
+	ILog *m_pCustomLog = nullptr;
 
 public:
 	CSoundFile();
@@ -691,6 +694,7 @@ public:
 
 	bool InitChannel(CHANNELINDEX nChn);
 	void InitAmigaResampler();
+	void InitOPL();
 
 	static ProbeResult ProbeFileHeaderMMCMP(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderPP20(MemoryFileReader file, const uint64 *pfilesize);

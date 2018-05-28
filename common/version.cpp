@@ -607,7 +607,7 @@ mpt::ustring GetFullCreditsString()
 		"Olivier Lapicque (1997-2003)\n"
 		"\n"
 		"Additional patch submitters:\n"
-		"coda (http://coda.s3m.us/)\n"
+		"coda (https://coda.s3m.us/)\n"
 		"kode54 (https://kode54.net/)\n"
 		"Revenant (http://revenant1.net/)\n"
 		"xaimus (http://xaimus.com/)\n"
@@ -625,7 +625,7 @@ mpt::ustring GetFullCreditsString()
 		"https://github.com/avaneev/r8brain-free-src\n"
 		"\n"
 		"Olli Parviainen for SoundTouch Library (time stretching)\n"
-		"http://www.surina.net/soundtouch/\n"
+		"https://www.surina.net/soundtouch/\n"
 		"\n"
 #endif
 #ifndef NO_VST
@@ -649,9 +649,12 @@ mpt::ustring GetFullCreditsString()
 		"Antti S. Lankila for Amiga resampler implementation\n"
 		"https://bel.fi/alankila/modguide/interpolate.txt\n"
 		"\n"
+		"Shayde / Reality Productions for Opal OPL3 emulator\n"
+		"http://www.3eality.com/\n"
+		"\n"
 #ifdef MPT_WITH_ZLIB
 		"Jean-loup Gailly and Mark Adler for zlib\n"
-		"http://zlib.net/\n"
+		"https://zlib.net/\n"
 		"\n"
 #endif
 #ifdef MPT_WITH_MINIZ

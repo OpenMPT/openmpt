@@ -24,6 +24,7 @@
 #include "Tables.h"
 #include "modsmp_ctrl.h"	// For updating the loop wraparound data with the invert loop effect
 #include "plugins/PlugInterface.h"
+#include "OPL.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -543,9 +544,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					smp = pChn->nNewIns;
 				}
-				if(smp > 0 && smp <= GetNumSamples() && Samples[smp].uFlags[CHN_PANNING])
+				if(smp > 0 && smp <= GetNumSamples())
 				{
-					pChn->nPan = Samples[smp].nPan;
+					if(Samples[smp].uFlags[CHN_PANNING])
+						pChn->nPan = Samples[smp].nPan;
+					if(Samples[smp].uFlags[CHN_ADLIB])
+						memory.chnSettings[nChn].ticksToRender = GetLengthMemory::IGNORE_CHANNEL;
 				}
 			}
 
@@ -1593,7 +1597,7 @@ void CSoundFile::InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta, b
 	pChn->nLoopEnd = pSmp->nLoopEnd;
 	// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
 	if(m_playBehaviour[kMODOneShotLoops] && pChn->nLoopStart == 0) pChn->nLoopEnd = pSmp->nLength;
-	pChn->dwFlags |= (pSmp->uFlags & (CHN_SAMPLEFLAGS | CHN_SURROUND));
+	pChn->dwFlags |= (pSmp->uFlags & CHN_SAMPLEFLAGS);
 
 	// IT Compatibility: Autovibrato reset
 	if(m_playBehaviour[kITVibratoTremoloPanbrello])
@@ -1855,7 +1859,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			{
 				pChn->proTrackerOffset = 0;
 			}
-			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & (CHN_SAMPLEFLAGS | CHN_SURROUND));
+			pChn->dwFlags = (pChn->dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 			pChn->dwFlags.reset(CHN_PORTAMENTO);
 			if(pChn->dwFlags[CHN_SUSTAINLOOP])
 			{
@@ -2097,6 +2101,11 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		srcChn.position.Set(0);
 		srcChn.nROfs = srcChn.nLOfs = 0;
 		srcChn.rightVol = srcChn.leftVol = 0;
+		if(srcChn.dwFlags[CHN_ADLIB] && m_opl)
+		{
+			m_opl->NoteOff(nChn);
+			m_opl->Volume(nChn, 0);
+		}
 		return nnaChn;
 	}
 	if(instr > GetNumInstruments()) instr = 0;
@@ -2766,6 +2775,11 @@ bool CSoundFile::ProcessEffects()
 			// Instrument Change ?
 			if(instr)
 			{
+				if(instr <= GetNumSamples() && Samples[instr].uFlags[CHN_ADLIB] && m_opl)
+				{
+					m_opl->Patch(nChn, Samples[instr].adlib);
+				}
+
 				const ModSample *oldSample = pChn->pModSample;
 				//const ModInstrument *oldInstrument = pChn->pModInstrument;
 
@@ -2806,6 +2820,10 @@ bool CSoundFile::ProcessEffects()
 				if ((!instr) && (pChn->nNewIns) && (note < 0x80))
 				{
 					InstrumentChange(pChn, pChn->nNewIns, bPorta, pChn->pModSample == nullptr && pChn->pModInstrument == nullptr, !(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)));
+					if(pChn->nNewIns <= GetNumSamples() && Samples[pChn->nNewIns].uFlags[CHN_ADLIB] && m_opl)
+					{
+						m_opl->Patch(nChn, Samples[pChn->nNewIns].adlib);
+					}
 					pChn->nNewIns = 0;
 				}
 				NoteChange(pChn, note, bPorta, !(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)));
@@ -2815,6 +2833,10 @@ bool CSoundFile::ProcessEffects()
 					pChn->ResetEnvelopes();
 					pChn->nAutoVibDepth = 0;
 					pChn->nAutoVibPos = 0;
+				}
+				if(pChn->dwFlags[CHN_ADLIB] && (note == NOTE_NOTECUT || note == NOTE_FADE || note == NOTE_KEYOFF) && m_opl)
+				{
+					m_opl->NoteOff(nChn);
 				}
 			}
 			// Tick-0 only volume commands
@@ -5435,6 +5457,12 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample)
 
 		// instro sends to a midi chan
 		SendMIDINote(nChn, /*pChn->nNote+*/NOTE_MAX_SPECIAL, 0);
+		
+		if(pChn->dwFlags[CHN_ADLIB] && m_opl)
+		{
+			m_opl->NoteOff(nChn);
+			m_opl->Volume(nChn, 0);
+		}
 	}
 }
 

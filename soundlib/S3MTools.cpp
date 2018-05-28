@@ -39,20 +39,31 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 			mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
 			mptSmp.uFlags.reset();
 		}
-
-		// Volume / Panning
-		mptSmp.nVolume = MIN(defaultVolume, 64) * 4;
-
-		// C-5 frequency
-		mptSmp.nC5Speed = c5speed;
-		if(mptSmp.nC5Speed == 0)
-		{
-			mptSmp.nC5Speed = 8363;
-		} else if(mptSmp.nC5Speed < 1024)
-		{
-			mptSmp.nC5Speed = 1024;
-		}
+	} else if(sampleType == typeAdMel && !memcmp(magic, "SCRI", 4))
+	{
+		const uint8 *adlibBytes = reinterpret_cast<const uint8 *>(&length);
+		std::copy(adlibBytes, adlibBytes + 12, mptSmp.adlib.begin());
+		// Bogus sample to make playback work
+		mptSmp.nLength = 4;
+		mptSmp.nLoopStart = 0;
+		mptSmp.nLoopEnd = 4;
+		mptSmp.uFlags = CHN_LOOP | CHN_ADLIB;
+		mptSmp.AllocateSample();
 	}
+
+	// Volume / Panning
+	mptSmp.nVolume = std::min<uint8>(defaultVolume, 64) * 4;
+
+	// C-5 frequency
+	mptSmp.nC5Speed = c5speed;
+	if(mptSmp.nC5Speed == 0)
+	{
+		mptSmp.nC5Speed = 8363;
+	} else if(mptSmp.nC5Speed < 1024)
+	{
+		mptSmp.nC5Speed = 1024;
+	}
+
 }
 
 
@@ -61,13 +72,19 @@ SmpLength S3MSampleHeader::ConvertToS3M(const ModSample &mptSmp)
 {
 	SmpLength smpLength = 0;
 	mpt::String::Write<mpt::String::maybeNullTerminated>(filename, mptSmp.filename);
+	memcpy(magic, "SCRS", 4);
 
-	if(mptSmp.HasSampleData())
+	if(mptSmp.uFlags[CHN_ADLIB])
+	{
+		memcpy(magic, "SCRI", 4);
+		sampleType = typeAdMel;
+		std::copy(mptSmp.adlib.begin(), mptSmp.adlib.end(), reinterpret_cast<uint8 *>(&length));
+	} else if(mptSmp.HasSampleData())
 	{
 		sampleType = typePCM;
-		length = static_cast<uint32>(MIN(mptSmp.nLength, uint32_max));
-		loopStart = static_cast<uint32>(MIN(mptSmp.nLoopStart, uint32_max));
-		loopEnd = static_cast<uint32>(MIN(mptSmp.nLoopEnd, uint32_max));
+		length = mpt::saturate_cast<uint32>(mptSmp.nLength);
+		loopStart = mpt::saturate_cast<uint32>(mptSmp.nLoopStart);
+		loopEnd = mpt::saturate_cast<uint32>(mptSmp.nLoopEnd);
 
 		smpLength = length;
 
@@ -93,7 +110,6 @@ SmpLength S3MSampleHeader::ConvertToS3M(const ModSample &mptSmp)
 	{
 		c5speed = ModSample::TransposeToFrequency(mptSmp.RelativeTone, mptSmp.nFineTune);
 	}
-	memcpy(magic, "SCRS", 4);
 
 	return smpLength;
 }

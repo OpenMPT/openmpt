@@ -891,6 +891,7 @@
     <ClInclude Include="..\..\soundlib\ModSample.h" />
     <ClInclude Include="..\..\soundlib\ModSampleCopy.h" />
     <ClInclude Include="..\..\soundlib\ModSequence.h" />
+    <ClInclude Include="..\..\soundlib\OPL.h" />
     <ClInclude Include="..\..\soundlib\OggStream.h" />
     <ClInclude Include="..\..\soundlib\Paula.h" />
     <ClInclude Include="..\..\soundlib\Resampler.h" />
@@ -909,6 +910,7 @@
     <ClInclude Include="..\..\soundlib\mod_specifications.h" />
     <ClInclude Include="..\..\soundlib\modcommand.h" />
     <ClInclude Include="..\..\soundlib\modsmp_ctrl.h" />
+    <ClInclude Include="..\..\soundlib\opal.h" />
     <ClInclude Include="..\..\soundlib\pattern.h" />
     <ClInclude Include="..\..\soundlib\patternContainer.h" />
     <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h" />
@@ -1140,6 +1142,7 @@
     <ClCompile Include="..\..\soundlib\ModInstrument.cpp" />
     <ClCompile Include="..\..\soundlib\ModSample.cpp" />
     <ClCompile Include="..\..\soundlib\ModSequence.cpp" />
+    <ClCompile Include="..\..\soundlib\OPL.cpp" />
     <ClCompile Include="..\..\soundlib\OggStream.cpp" />
     <ClCompile Include="..\..\soundlib\Paula.cpp" />
     <ClCompile Include="..\..\soundlib\RowVisitor.cpp" />

@@ -42,6 +42,7 @@
 #include "FileDialog.h"
 #include "ExternalSamples.h"
 #include "Globals.h"
+#include "../soundlib/OPL.h"
 #ifndef NO_PLUGINS
 #include "AbstractVstEditor.h"
 #endif
@@ -915,10 +916,15 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 			chn.nLoopEnd = sample.nLoopEnd;
 			chn.dwFlags = (sample.uFlags & (CHN_SAMPLEFLAGS & ~CHN_MUTE));
 			chn.nPan = 128;
-			if (sample.uFlags[CHN_PANNING]) chn.nPan = sample.nPan;
+			if(sample.uFlags[CHN_PANNING]) chn.nPan = sample.nPan;
 			chn.UpdateInstrumentVolume(&sample, nullptr);
 		}
 		chn.nFadeOutVol = 0x10000;
+
+		if(chn.dwFlags[CHN_ADLIB] && chn.pModSample && m_SndFile.m_opl)
+		{
+			m_SndFile.m_opl->Patch(channel, chn.pModSample->adlib);
+		}
 
 		m_SndFile.NoteChange(&chn, note, false, true, true);
 		if(params.m_volume >= 0) chn.nVolume = std::min(params.m_volume, 256);
@@ -1030,6 +1036,10 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 			// Instantly stop samples that would otherwise play forever
 			if (pChn->pModInstrument && !pChn->pModInstrument->nFadeOut)
 				pChn->nFadeOutVol = 0;
+			if(pChn->dwFlags[CHN_ADLIB] && m_SndFile.m_opl)
+			{
+				m_SndFile.m_opl->NoteOff(i);
+			}
 			if (note) break;
 		}
 	}

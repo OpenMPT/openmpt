@@ -294,6 +294,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	case S3MFileHeader::trkCreamTracker:
 		m_madeWithTracker = MPT_USTRING("CreamTracker");
 		break;
+	case S3MFileHeader::trkCamoto:
+		m_madeWithTracker = MPT_USTRING("Camoto");
+		break;
 	}
 	if(!trackerStr.empty())
 	{
@@ -369,17 +372,20 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		ChnSettings[i].Reset();
 
+		uint8 ctype = fileHeader.channels[i] & ~0x80;
 		if(fileHeader.channels[i] != 0xFF)
 		{
 			m_nChannels = i + 1;
-			ChnSettings[i].nPan = (fileHeader.channels[i] & 8) ? 0xCC : 0x33;	// 200 : 56
+			ChnSettings[i].nPan = (ctype & 8) ? 0xCC : 0x33;	// 200 : 56
 		}
 		if(fileHeader.channels[i] & 0x80)
 		{
 			ChnSettings[i].dwFlags = CHN_MUTE;
-			// Detect Adlib channels here (except for OpenMPT 1.19 and older, which would write wrong channel types for PCM channels 16-32):
-			// c = channels[i] ^ 0x80;
-			// if(c >= 16 && c < 32) adlibChannel = true;
+		}
+		if(ctype >= 16 && ctype <= 29 && (!m_dwLastSavedWithVersion || m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+		{
+			// Adlib channel (except for OpenMPT 1.19 and older, which would write wrong channel types for PCM channels 16-32):
+			ChnSettings[i].nPan = 128;
 		}
 	}
 	if(m_nChannels < 1)
@@ -410,8 +416,6 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	bool hasAdlibPatches = false;
-
 	// Reading sample headers
 	m_nSamples = std::min<SAMPLEINDEX>(fileHeader.smpNum, MAX_SAMPLES - 1);
 	for(SAMPLEINDEX smp = 0; smp < m_nSamples; smp++)
@@ -426,24 +430,15 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		sampleHeader.ConvertToMPT(Samples[smp + 1]);
 		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp + 1], sampleHeader.name);
 
-		if(sampleHeader.sampleType >= S3MSampleHeader::typeAdMel)
+		if(sampleHeader.sampleType < S3MSampleHeader::typeAdMel)
 		{
-			hasAdlibPatches = true;
-		}
-
-		const uint32 sampleOffset = (sampleHeader.dataPointer[1] << 4) | (sampleHeader.dataPointer[2] << 12) | (sampleHeader.dataPointer[0] << 20);
-
-		if((loadFlags & loadSampleData) && sampleHeader.length != 0 && file.Seek(sampleOffset))
-		{
-			sampleHeader.GetSampleFormat((fileHeader.formatVersion == S3MFileHeader::oldVersion)).ReadSample(Samples[smp + 1], file);
+			const uint32 sampleOffset = (sampleHeader.dataPointer[1] << 4) | (sampleHeader.dataPointer[2] << 12) | (sampleHeader.dataPointer[0] << 20);
+			if((loadFlags & loadSampleData) && sampleHeader.length != 0 && file.Seek(sampleOffset))
+			{
+				sampleHeader.GetSampleFormat((fileHeader.formatVersion == S3MFileHeader::oldVersion)).ReadSample(Samples[smp + 1], file);
+			}
 		}
 	}
-
-	if(hasAdlibPatches)
-	{
-		AddToLog("This track uses Adlib instruments, which are not supported by OpenMPT.");
-	}
-
 
 	// Try to find out if Zxx commands are supposed to be panning commands (PixPlay).
 	// Actually I am only aware of one module that uses this panning style, namely "Crawling Despair" by $volkraq
@@ -604,6 +599,13 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		return false;
 	}
 
+	const bool saveMuteStatus =
+#ifdef MODPLUG_TRACKER
+		TrackerSettings::Instance().MiscSaveChannelMuteStatus;
+#else
+		true;
+#endif
+
 	S3MFileHeader fileHeader;
 	MemsetZero(fileHeader);
 
@@ -662,39 +664,6 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	fileHeader.ultraClicks = 8;
 	fileHeader.usePanningTable = S3MFileHeader::idPanning;
 
-	// Channel Table
-	const uint8 midCh = static_cast<uint8>(std::min(GetNumChannels() / 2, 8));
-	for(CHANNELINDEX chn = 0; chn < 32; chn++)
-	{
-		if(chn < GetNumChannels())
-		{
-			// ST3 only supports 16 PCM channels, so if channels 17-32 are used,
-			// they must be mapped to the same "internal channels" as channels 1-16.
-			// The channel indices determine in which order channels are evaluated in ST3.
-			// First, the "left" channels (0...7) are evaluated, then the "right" channels (8...15).
-			// Previously, an alternating LRLR scheme was written, which would lead to a different
-			// effect processing in ST3 than LLL...RRR, but since OpenMPT doesn't care about the
-			// channel order and always parses them left to right as they appear in the pattern,
-			// we should just write in the LLL...RRR manner.
-			uint8 ch = chn & 0x0F;
-			if(ch >= midCh)
-			{
-				ch += 8 - midCh;
-			}
-#ifdef MODPLUG_TRACKER
-			if(TrackerSettings::Instance().MiscSaveChannelMuteStatus)
-#endif
-			if(ChnSettings[chn].dwFlags[CHN_MUTE])
-			{
-				ch |= 0x80;
-			}
-			fileHeader.channels[chn] = ch;
-		} else
-		{
-			fileHeader.channels[chn] = 0xFF;
-		}
-	}
-
 	mpt::IO::Write(f, fileHeader);
 	Order().WriteAsByte(f, writeOrders);
 
@@ -731,7 +700,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	for(CHANNELINDEX chn = 0; chn < 32; chn++)
 	{
 		if(chn < GetNumChannels())
-			chnPan[chn] = static_cast<uint8>(((ChnSettings[chn].nPan * 15 + 128) / 256)) | 0x20;
+			chnPan[chn] = static_cast<uint8>(((ChnSettings[chn].nPan * 15 + 128) / 256) | 0x20);
 		else
 			chnPan[chn] = 0x08;
 	}
@@ -749,6 +718,9 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	mpt::IO::SeekAbsolute(f, firstPatternOffset);
 
 	// Write patterns
+	enum class S3MChannelType : uint8 { kUnused = 0, kPCM = 1, kAdlib = 2 };
+	FlagSet<S3MChannelType> channelType[32] = { S3MChannelType::kUnused };
+	bool globalCmdOnMutedChn = false;
 	for(PATTERNINDEX pat = 0; pat < writePatterns; pat++)
 	{
 		if(Patterns.IsPatternEmpty(pat))
@@ -817,6 +789,15 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 							note -= (12 + NOTE_MIN);
 							note = (note % 12) + ((note / 12) << 4);
 						}
+
+						if(m.instr > 0 && m.instr <= GetNumSamples())
+						{
+							const ModSample &smp = Samples[m.instr];
+							if(smp.uFlags[CHN_ADLIB])
+								channelType[chn].set(S3MChannelType::kAdlib);
+							else if(smp.HasSampleData())
+								channelType[chn].set(S3MChannelType::kPCM);
+						}
 					}
 
 					if(command == CMD_VOLUME)
@@ -841,6 +822,10 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 						if(command)
 						{
 							info |= s3mEffectPresent;
+							if(saveMuteStatus && ChnSettings[chn].dwFlags[CHN_MUTE] && m.IsGlobalCommand())
+							{
+								globalCmdOnMutedChn = true;
+							}
 						}
 					}
 
@@ -883,6 +868,10 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		}
 
 		mpt::IO::Write(f, buffer);
+	}
+	if(globalCmdOnMutedChn)
+	{
+		//AddToLog(LogWarning, MPT_USTRING("Global commands on muted channels are interpreted by only some S3M players."));
 	}
 
 	mpt::IO::Offset sampleDataOffset = mpt::IO::TellWrite(f);
@@ -938,6 +927,52 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			}
 		}
 	}
+
+	// Channel Table
+	uint8 sampleCh = 0, adlibCh = 0;
+	for(CHANNELINDEX chn = 0; chn < 32; chn++)
+	{
+		if(chn < GetNumChannels())
+		{
+			if(channelType[chn][S3MChannelType::kPCM] && channelType[chn][S3MChannelType::kAdlib])
+			{
+				AddToLog(LogWarning, mpt::format(MPT_USTRING("Pattern channel %1 constains both samples and OPL instruments, which is not supported by Scream Tracker 3."))(chn + 1));
+			}
+			// ST3 only supports 16 PCM channels, so if channels 17-32 are used,
+			// they must be mapped to the same "internal channels" as channels 1-16.
+			// The channel indices determine in which order channels are evaluated in ST3.
+			// First, the "left" channels (0...7) are evaluated, then the "right" channels (8...15).
+			// Previously, an alternating LRLR scheme was written, which would lead to a different
+			// effect processing in ST3 than LLL...RRR, but since OpenMPT doesn't care about the
+			// channel order and always parses them left to right as they appear in the pattern,
+			// we should just write in the LLL...RRR manner.
+			uint8 ch = 31;	// Shows up as "??" in ST3 but effects are still processed!
+			if(channelType[chn][S3MChannelType::kPCM])
+				ch = (sampleCh++) % 16u;
+			else if(channelType[chn][S3MChannelType::kAdlib])
+				ch = 16 + ((adlibCh++) % 9u);
+
+			if(saveMuteStatus && ChnSettings[chn].dwFlags[CHN_MUTE])
+			{
+				ch |= 0x80;
+			}
+			fileHeader.channels[chn] = ch;
+		} else
+		{
+			fileHeader.channels[chn] = 0xFF;
+		}
+	}
+	if(sampleCh > 16)
+	{
+		AddToLog(LogWarning, mpt::format(MPT_USTRING("This module has more than 16 (%1) sample channels, which is not supported by Scream Tracker 3."))(sampleCh));
+	}
+	if(adlibCh > 9)
+	{
+		AddToLog(LogWarning, mpt::format(MPT_USTRING("This module has more than 9 (%1) OPL channels, which is not supported by Scream Tracker 3."))(adlibCh));
+	}
+
+	mpt::IO::SeekAbsolute(f, 0);
+	mpt::IO::Write(f, fileHeader);
 
 	// Now we know where the patterns are.
 	if(writePatterns != 0)
