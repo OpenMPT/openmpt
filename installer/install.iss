@@ -61,12 +61,14 @@ Source: ..\bin\{#PlatformFolder}\mptrack.exe; DestDir: {app}; Flags: ignoreversi
 Source: ..\bin\{#PlatformFolder}\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 Source: ..\bin\{#PlatformFolder}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 Source: ..\bin\{#PlatformFolder}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
+Source: ..\bin\{#PlatformFolder}\openmpt-lame.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 Source: ..\bin\{#PlatformFolder}\openmpt-mpg123.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 ; Additional binaries for XP-/Vista-compatible version
 Source: ..\bin\{#PlatformFolderOld}\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
 Source: ..\bin\{#PlatformFolderOld}\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
 Source: ..\bin\{#PlatformFolderOld}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
 Source: ..\bin\{#PlatformFolderOld}\OpenMPT_SoundTouch_f32.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
+Source: ..\bin\{#PlatformFolderOld}\openmpt-lame.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
 Source: ..\bin\{#PlatformFolderOld}\openmpt-mpg123.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
 ; Wine support
 Source: ..\bin\{#PlatformFolder}\openmpt-wine-support.zip; DestDir: {app}; Flags: ignoreversion

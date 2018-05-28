@@ -18,11 +18,10 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#define MPT_MP3ENCODER_LAME
 #define MPT_MP3ENCODER_ACM
 
 
-#ifdef MPT_MP3ENCODER_LAME
+#ifdef MPT_WITH_LAME
 class ComponentLame;
 #endif
 #ifdef MPT_MP3ENCODER_ACM
@@ -43,7 +42,7 @@ class MP3Encoder : public EncoderFactoryBase
 
 private:
 
-#ifdef MPT_MP3ENCODER_LAME
+#ifdef MPT_WITH_LAME
 	ComponentHandle<ComponentLame> m_Lame;
 #endif
 #ifdef MPT_MP3ENCODER_ACM

@@ -29,7 +29,7 @@
 #define ACMLOG(x, ...)
 //#define ACMLOG Log
 
-#ifdef MPT_MP3ENCODER_LAME
+#ifdef MPT_WITH_LAME
 //#define MPT_USE_LAME_H
 #ifdef MPT_USE_LAME_H
 #include <lame/lame.h>
@@ -48,7 +48,7 @@ typedef enum vbr_mode_e {
 	vbr_default=vbr_mtrh
 } vbr_mode;
 #endif
-#endif // MPT_MP3ENCODER_LAME
+#endif // MPT_WITH_LAME
 
 #ifdef MPT_MP3ENCODER_ACM
 #include <mmreg.h>
@@ -359,7 +359,7 @@ void ID3V2Tagger::WriteID3v2Frame(const char cFrameID[4], std::string sFramecont
 
 
 
-#ifdef MPT_MP3ENCODER_LAME
+#ifdef MPT_WITH_LAME
 
 struct lame_global_struct;
 typedef struct lame_global_struct lame_global_flags;
@@ -901,7 +901,7 @@ public:
 	}
 };
 
-#endif // MPT_MP3ENCODER_LAME
+#endif // MPT_WITH_LAME
 
 
 
@@ -1462,7 +1462,7 @@ public:
 MP3Encoder::MP3Encoder(MP3EncoderType type)
 	: m_Type(MP3EncoderDefault)
 {
-#ifdef MPT_MP3ENCODER_LAME
+#ifdef MPT_WITH_LAME
 	if(type == MP3EncoderDefault || type == MP3EncoderLame)
 	{
 		if(IsComponentAvailable(m_Lame))
@@ -1481,7 +1481,7 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 			return;
 		}
 	}
-#endif // MPT_MP3ENCODER_LAME
+#endif // MPT_WITH_LAME
 #ifdef MPT_MP3ENCODER_ACM
 	if(type == MP3EncoderDefault || type == MP3EncoderACM)
 	{
@@ -1499,7 +1499,7 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 bool MP3Encoder::IsAvailable() const
 {
 	return false
-#ifdef MPT_MP3ENCODER_LAME
+#ifdef MPT_WITH_LAME
 		|| ((m_Type == MP3EncoderLame) && IsComponentAvailable(m_Lame))
 		|| ((m_Type == MP3EncoderLameCompatible) && IsComponentAvailable(m_Lame))
 #endif // MPT_MP3ENCODER_ACM
@@ -1516,11 +1516,11 @@ std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ost
 	if(false)
 	{
 		// nothing
-#ifdef MPT_MP3ENCODER_LAME
+#ifdef MPT_WITH_LAME
 	} else if(m_Type == MP3EncoderLame || m_Type == MP3EncoderLameCompatible)
 	{
 		result = mpt::make_unique<MP3LameStreamWriter>(*m_Lame, file, (m_Type == MP3EncoderLameCompatible), settings, tags);
-#endif // MPT_MP3ENCODER_LAME
+#endif // MPT_WITH_LAME
 #ifdef MPT_MP3ENCODER_ACM
 	} else if(m_Type == MP3EncoderACM)
 	{
@@ -1533,7 +1533,7 @@ std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ost
 
 mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 {
-#ifdef MPT_MP3ENCODER_LAME
+#ifdef MPT_WITH_LAME
 	if(m_Type == MP3EncoderLame)
 	{
 		static const int q_table[11] = { 240, 220, 190, 170, 160, 130, 120, 100, 80, 70, 50 }; // http://wiki.hydrogenaud.io/index.php?title=LAME
@@ -1547,7 +1547,7 @@ mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 			return mpt::format(MPT_USTRING("VBR -V%1 (~%2 kbit)"))(q, q_table[q]);
 		}
 	}
-#endif // MPT_MP3ENCODER_LAME
+#endif // MPT_WITH_LAME
 	return EncoderFactoryBase::DescribeQuality(quality);
 }
 

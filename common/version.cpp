@@ -729,6 +729,10 @@ mpt::ustring GetFullCreditsString()
 		"https://git.xiph.org/?p=libopusenc.git;a=summary\n"
 		"\n"
 #endif
+#if defined(MPT_WITH_LAME)
+		"The LAME project for LAME\n"
+		"http://lame.sourceforge.net/\n"
+#endif
 #if defined(MPT_WITH_PICOJSON)
 		"Cybozu Labs Inc. and Kazuho Oku et. al. for picojson\n"
 		"https://github.com/kazuho/picojson\n"
