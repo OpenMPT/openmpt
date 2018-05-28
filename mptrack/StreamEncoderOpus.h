@@ -12,8 +12,6 @@
 
 #include "StreamEncoder.h"
 
-#include "../common/ComponentManager.h"
-
 
 OPENMPT_NAMESPACE_BEGIN
 

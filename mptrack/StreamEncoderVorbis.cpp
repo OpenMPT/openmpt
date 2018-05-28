@@ -13,8 +13,6 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderVorbis.h"
 
-#include "../common/ComponentManager.h"
-
 #include "Mptrack.h"
 
 #ifdef MPT_WITH_OGG

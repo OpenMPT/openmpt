@@ -16,8 +16,6 @@
 #include "../common/mptIO.h"
 #include "../common/mptBufferIO.h"
 
-#include "../common/ComponentManager.h"
-
 #include "Mptrack.h"
 
 #include <deque>
