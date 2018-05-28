@@ -171,6 +171,7 @@ LOCAL_SRC_FILES += \
 	soundlib/mod_specifications.cpp \
 	soundlib/MPEGFrame.cpp \
 	soundlib/OggStream.cpp \
+	soundlib/OPL.cpp \
 	soundlib/Paula.cpp \
 	soundlib/patternContainer.cpp \
 	soundlib/pattern.cpp \
