@@ -113,7 +113,7 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 	if(toType != MOD_TYPE_S3M && uFlags[CHN_ADLIB])
 	{
 		uFlags.reset(CHN_ADLIB);
-		adlib.assign(0);
+		adlib.fill(0);
 	}
 }
 

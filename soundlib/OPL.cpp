@@ -13,6 +13,8 @@
 #include "OPL.h"
 #include "opal.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 enum OPLRegisters
 {
 	// Operators (combine with result of OperatorToRegister)
@@ -286,3 +288,5 @@ void OPL::Reset()
 	m_OPLtoChan.fill(CHANNELINDEX_INVALID);
 	m_ChanToOPL.fill(OPL_CHANNEL_INVALID);
 }
+
+OPENMPT_NAMESPACE_END

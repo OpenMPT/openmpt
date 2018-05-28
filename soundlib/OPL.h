@@ -13,6 +13,8 @@
 
 class Opal;
 
+OPENMPT_NAMESPACE_BEGIN
+
 class OPL
 {
 public:
@@ -49,3 +51,5 @@ protected:
 
 	bool isActive = false;
 };
+
+OPENMPT_NAMESPACE_END
