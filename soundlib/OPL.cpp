@@ -47,7 +47,7 @@ enum OPLValues
 	// ATTACK_DECAY
 	ATTACK_MASK      = 0xF0,
 	DECAY_MASK       = 0x0F,
-	
+
 	// SUSTAIN_RELEASE
 	SUSTAIN_MASK     = 0xF0,
 	RELEASE_MASK     = 0x0F,
@@ -204,8 +204,8 @@ void OPL::Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff)
 
 	uint16 channel = ChannelToRegister(oplCh);
 	m_KeyOnBlock[oplCh] = (keyOff ? 0 : KEYON_BIT)   // Key on
-		| (block << 2)                               // Octave
-		| ((fnum >> 8) & FNUM_HIGH_MASK);            // F-number high 2 bits
+	    | (block << 2)                               // Octave
+	    | ((fnum >> 8) & FNUM_HIGH_MASK);            // F-number high 2 bits
 	m_opl->Port(FNUM_LOW    | channel, fnum & 0xFF); // F-Number low 8 bits
 	m_opl->Port(KEYON_BLOCK | channel, m_KeyOnBlock[oplCh]);
 

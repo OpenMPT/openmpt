@@ -37,9 +37,12 @@ protected:
 	uint8 GetVoice(CHANNELINDEX c) const;
 	uint8 AllocateVoice(CHANNELINDEX c);
 
-	static const uint8 OPL_CHANNELS = 18;	// 9 for OPL2 or 18 for OPL3
-	static const uint8 OPL_CHANNEL_INVALID = 0xFF;
-	static const uint16 OPL_BASERATE = 49716;
+	enum
+	{
+		OPL_CHANNELS = 18,	// 9 for OPL2 or 18 for OPL3
+		OPL_CHANNEL_INVALID = 0xFF,
+		OPL_BASERATE = 49716,
+	};
 
 	std::unique_ptr<Opal> m_opl;
 
