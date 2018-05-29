@@ -130,8 +130,6 @@ MPT_CONSTEXPR11_FUN bool endian_unknown() noexcept
 
 
 
-#if defined(MODPLUG_TRACKER) || defined(MPT_ICONV_NO_WCHAR) || defined(ENABLE_TESTS)
-
 struct endian_type { uint32 value; };
 static MPT_ENDIAN_CONSTEXPR_FUN bool operator == (const endian_type & a, const endian_type & b) { return a.value == b.value; }
 static MPT_ENDIAN_CONSTEXPR_FUN bool operator != (const endian_type & a, const endian_type & b) { return a.value != b.value; }
@@ -178,8 +176,6 @@ static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_weird() noexcept
 {
 	return !endian_is_little() && !endian_is_big();
 }
-
-#endif // MODPLUG_TRACKER || MPT_ICONV_NO_WCHAR || ENABLE_TESTS
 
 
 
