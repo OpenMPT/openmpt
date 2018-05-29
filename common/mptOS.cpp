@@ -427,6 +427,9 @@ mpt::Windows::Version::System Version::GetMinimumAPILevel() noexcept
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 
+#ifndef PROCESSOR_ARCHITECTURE_NEUTRAL
+#define PROCESSOR_ARCHITECTURE_NEUTRAL          11
+#endif
 #ifndef PROCESSOR_ARCHITECTURE_ARM64
 #define PROCESSOR_ARCHITECTURE_ARM64            12
 #endif
