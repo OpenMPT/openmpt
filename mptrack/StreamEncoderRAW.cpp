@@ -42,7 +42,7 @@ public:
 
 		MPT_UNREFERENCED_PARAMETER(tags);
 	}
-	mpt::endian_type GetConvertedEndianness() const override
+	mpt::endian GetConvertedEndianness() const override
 	{
 		return mpt::get_endian();
 	}

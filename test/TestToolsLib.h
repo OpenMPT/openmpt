@@ -82,11 +82,13 @@ struct ToStringHelper
 #ifdef MPT_TEST_CXX11
 
 template<>
-struct ToStringHelper<mpt::endian_type>
+struct ToStringHelper<mpt::endian>
 {
-	std::string operator () (const mpt::endian_type &x)
+	std::string operator () (const mpt::endian &x)
 	{
-		return mpt::fmt::val(x.value);
+		if(x == mpt::endian::big) return "big";
+		if(x == mpt::endian::little) return "little";
+		return "unknown";
 	}
 };
 

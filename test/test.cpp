@@ -702,15 +702,21 @@ static constexpr int32le TestEndianConstexpr(uint32 x)
 static MPT_NOINLINE void TestMisc1()
 {
 
-	VERIFY_EQUAL(mpt::get_endian(), mpt::detail::endian_probe());
+	#if MPT_CXX_BEFORE(20)
+		VERIFY_EQUAL(mpt::get_endian(), mpt::detail::endian_probe());
+	#endif
 	#if MPT_PLATFORM_ENDIAN_KNOWN && defined(MPT_PLATFORM_LITTLE_ENDIAN)
-		VERIFY_EQUAL(mpt::get_endian(), mpt::endian_little);
-		VERIFY_EQUAL(mpt::detail::endian_probe(), mpt::endian_little);
+		VERIFY_EQUAL(mpt::get_endian(), mpt::endian::little);
 		VERIFY_EQUAL(mpt::endian::native, mpt::endian::little);
+		#if MPT_CXX_BEFORE(20)
+			VERIFY_EQUAL(mpt::detail::endian_probe(), mpt::endian::little);
+		#endif
 	#elif MPT_PLATFORM_ENDIAN_KNOWN && defined(MPT_PLATFORM_BIG_ENDIAN)
-		VERIFY_EQUAL(mpt::get_endian(), mpt::endian_big);
-		VERIFY_EQUAL(mpt::detail::endian_probe(), mpt::endian_big);
+		VERIFY_EQUAL(mpt::get_endian(), mpt::endian::big);
 		VERIFY_EQUAL(mpt::endian::native, mpt::endian::big);
+		#if MPT_CXX_BEFORE(20)
+			VERIFY_EQUAL(mpt::detail::endian_probe(), mpt::endian::big);
+		#endif
 	#endif
 
 #if MPT_ENDIAN_IS_CONSTEXPR

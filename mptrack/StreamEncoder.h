@@ -225,7 +225,7 @@ protected:
 public:
 	virtual ~IAudioStreamEncoder() = default;
 public:
-	virtual mpt::endian_type GetConvertedEndianness() const = 0;
+	virtual mpt::endian GetConvertedEndianness() const = 0;
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data) = 0;
 	virtual void WriteCues(const std::vector<uint64> &cues) = 0; // optional
@@ -243,7 +243,7 @@ public:
 	StreamWriterBase(std::ostream &stream);
 	virtual ~StreamWriterBase();
 public:
-	virtual mpt::endian_type GetConvertedEndianness() const;
+	virtual mpt::endian GetConvertedEndianness() const;
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
 	virtual void WriteInterleavedConverted(size_t frameCount, const char *data);
 	virtual void WriteCues(const std::vector<uint64> &cues);

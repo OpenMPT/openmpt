@@ -55,9 +55,9 @@ public:
 		fileWAV->StartChunk(RIFFChunk::iddata);
 
 	}
-	mpt::endian_type GetConvertedEndianness() const override
+	mpt::endian GetConvertedEndianness() const override
 	{
-		return mpt::endian_little;
+		return mpt::endian::little;
 	}
 	void WriteInterleaved(size_t count, const float *interleaved) override
 	{

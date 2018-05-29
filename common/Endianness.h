@@ -103,11 +103,12 @@ namespace mpt {
 // C++20 std::endian
 #if MPT_CXX_AT_LEAST(20)
 using std::endian;
-#else
+#else // !C++20
 enum class endian
 {
 	little = 0x78563412u,
 	big    = 0x12345678u,
+	weird  = 1u,
 #if MPT_PLATFORM_ENDIAN_KNOWN && defined(MPT_PLATFORM_LITTLE_ENDIAN)
 	native = little
 #elif MPT_PLATFORM_ENDIAN_KNOWN && defined(MPT_PLATFORM_BIG_ENDIAN)
@@ -116,7 +117,7 @@ enum class endian
 	native = 0u
 #endif
 };
-#endif
+#endif // C++20
 
 MPT_CONSTEXPR11_FUN bool endian_known() noexcept
 {
@@ -130,52 +131,86 @@ MPT_CONSTEXPR11_FUN bool endian_unknown() noexcept
 
 
 
-struct endian_type { uint32 value; };
-static MPT_ENDIAN_CONSTEXPR_FUN bool operator == (const endian_type & a, const endian_type & b) { return a.value == b.value; }
-static MPT_ENDIAN_CONSTEXPR_FUN bool operator != (const endian_type & a, const endian_type & b) { return a.value != b.value; }
+#if MPT_CXX_AT_LEAST(20)
 
-static MPT_ENDIAN_CONSTEXPR_VAR endian_type endian_big    = { 0x12345678u };
-static MPT_ENDIAN_CONSTEXPR_VAR endian_type endian_little = { 0x78563412u };
-
-namespace detail {
-	static MPT_FORCEINLINE endian_type endian_probe() noexcept
-	{
-		MPT_STATIC_ASSERT(sizeof(endian_type) == 4);
-		const mpt::byte probe[4] = { mpt::as_byte(0x12), mpt::as_byte(0x34), mpt::as_byte(0x56), mpt::as_byte(0x78) };
-		endian_type test;
-		std::memcpy(&test, probe, 4);
-		return test;
-	}
+static MPT_CONSTEXPR11_FUN mpt::endian get_endian() noexcept
+{
+	return mpt::endian::native;
 }
 
-static MPT_ENDIAN_CONSTEXPR_FUN endian_type get_endian() noexcept
+static MPT_CONSTEXPR11_FUN bool endian_is_little() noexcept
 {
-	MPT_CONSTANT_IF(mpt::endian::native == mpt::endian::little)
+	return get_endian() == mpt::endian::little;
+}
+
+static MPT_CONSTEXPR11_FUN bool endian_is_big() noexcept
+{
+	return get_endian() == mpt::endian::big;
+}
+
+static MPT_CONSTEXPR11_FUN bool endian_is_weird() noexcept
+{
+	return !endian_is_little() && !endian_is_big();
+}
+
+#else // !C++20
+
+namespace detail {
+
+	static MPT_FORCEINLINE mpt::endian endian_probe() noexcept
 	{
-		return endian_little;
-	} else MPT_CONSTANT_IF(mpt::endian::native == mpt::endian::big)
+		typedef uint32 endian_probe_type;
+		MPT_STATIC_ASSERT(sizeof(endian_probe_type) == 4);
+		constexpr endian_probe_type endian_probe_big    = 0x12345678u;
+		constexpr endian_probe_type endian_probe_little = 0x78563412u;
+		const mpt::byte probe[sizeof(endian_probe_type)] = { mpt::as_byte(0x12), mpt::as_byte(0x34), mpt::as_byte(0x56), mpt::as_byte(0x78) };
+		endian_probe_type test;
+		std::memcpy(&test, probe, sizeof(endian_probe_type));
+		mpt::endian result = mpt::endian::native;
+		switch(test)
+		{
+			case endian_probe_big:
+				result = mpt::endian::big;
+				break;
+			case endian_probe_little:
+				result = mpt::endian::little;
+				break;
+			default:
+				result = mpt::endian::weird;
+				break;
+		}
+		return result;
+	}
+
+}
+
+static MPT_FORCEINLINE mpt::endian get_endian() noexcept
+{
+	MPT_CONSTANT_IF(mpt::endian_known())
 	{
-		return endian_big;
+		return mpt::endian::native;
 	} else
 	{
 		return detail::endian_probe();
 	}
 }
 
-static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_little() noexcept
+static MPT_FORCEINLINE bool endian_is_little() noexcept
 {
-	return get_endian() == endian_little;
+	return get_endian() == mpt::endian::little;
 }
 
-static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_big() noexcept
+static MPT_FORCEINLINE bool endian_is_big() noexcept
 {
-	return get_endian() == endian_big;
+	return get_endian() == mpt::endian::big;
 }
 
-static MPT_ENDIAN_CONSTEXPR_FUN bool endian_is_weird() noexcept
+static MPT_FORCEINLINE bool endian_is_weird() noexcept
 {
 	return !endian_is_little() && !endian_is_big();
 }
+
+#endif // C++20
 
 
 

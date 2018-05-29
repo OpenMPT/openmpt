@@ -109,9 +109,9 @@ public:
 		}
 
 	}
-	mpt::endian_type GetConvertedEndianness() const override
+	mpt::endian GetConvertedEndianness() const override
 	{
-		return mpt::endian_big;
+		return mpt::endian::big;
 	}
 	void WriteInterleaved(size_t count, const float *interleaved) override
 	{
