@@ -174,6 +174,13 @@ void OPL::NoteOff(CHANNELINDEX c)
 }
 
 
+void OPL::NoteCut(CHANNELINDEX c)
+{
+	NoteOff(c);
+	Volume(c, 0);
+}
+
+
 void OPL::Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff)
 {
 	uint8 oplCh = GetVoice(c);
@@ -278,8 +285,7 @@ void OPL::Reset()
 	{
 		for(CHANNELINDEX chn = 0; chn < MAX_CHANNELS; chn++)
 		{
-			NoteOff(chn);
-			Volume(chn, 0);
+			NoteCut(chn);
 		}
 		isActive = false;
 	}

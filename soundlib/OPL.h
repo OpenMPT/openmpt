@@ -25,6 +25,7 @@ public:
 	void Mix(int *buffer, size_t count);
 
 	void NoteOff(CHANNELINDEX c);
+	void NoteCut(CHANNELINDEX c);
 	void Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff);
 	void Volume(CHANNELINDEX c, uint8 vol);
 	void Pan(CHANNELINDEX c, int32 pan);

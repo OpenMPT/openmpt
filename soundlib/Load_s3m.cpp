@@ -760,7 +760,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 
 				const PatternRow rowBase = Patterns[pat].GetRow(row);
 
-				CHANNELINDEX writeChannels = MIN(32, GetNumChannels());
+				CHANNELINDEX writeChannels = std::min(CHANNELINDEX(32), GetNumChannels());
 				for(CHANNELINDEX chn = 0; chn < writeChannels; chn++)
 				{
 					const ModCommand &m = rowBase[chn];

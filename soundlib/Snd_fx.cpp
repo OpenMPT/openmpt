@@ -1263,6 +1263,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					m_PlayState.Chn[n].nVolume = std::min(memory.chnSettings[n].vol, uint8(64)) * 4;
 				}
 			}
+			if(m_opl != nullptr) m_opl->Reset();
 
 #ifndef NO_PLUGINS
 			// If there were any PC events, update plugin parameters to their latest value.
@@ -2103,8 +2104,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		srcChn.rightVol = srcChn.leftVol = 0;
 		if(srcChn.dwFlags[CHN_ADLIB] && m_opl)
 		{
-			m_opl->NoteOff(nChn);
-			m_opl->Volume(nChn, 0);
+			m_opl->NoteCut(nChn);
 		}
 		return nnaChn;
 	}
@@ -5460,8 +5460,7 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample)
 		
 		if(pChn->dwFlags[CHN_ADLIB] && m_opl)
 		{
-			m_opl->NoteOff(nChn);
-			m_opl->Volume(nChn, 0);
+			m_opl->NoteCut(nChn);
 		}
 	}
 }
