@@ -14,15 +14,10 @@
 #include "Endianness.h"
 #include "mptCRC.h"
 
-#include <algorithm>
+#include <chrono>
 
 #include <cmath>
-#include <ctime>
 #include <cstdlib>
-
-#if MPT_OS_WINDOWS
-#include <windows.h>
-#endif // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -89,30 +84,18 @@ static T generate_timeseed()
 #else // !MPT_BUILD_FUZZER
 
 	{
-		#if MPT_OS_WINDOWS
-			FILETIME t;
-			MemsetZero(t);
-			GetSystemTimeAsFileTime(&t);
-		#else // !MPT_OS_WINDOWS
-			std::time_t t = std::time(nullptr);
-		#endif // MPT_OS_WINDOWS
-		mpt::byte bytes[sizeof(t)];
-		std::memcpy(bytes, &t, sizeof(t));
-		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
-		{
-			std::reverse(std::begin(bytes), std::end(bytes));
-		}
+		uint64be time;
+		time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock().now().time_since_epoch()).count();
+		mpt::byte bytes[sizeof(time)];
+		std::memcpy(bytes, &time, sizeof(time));
 		hash(std::begin(bytes), std::end(bytes));
 	}
 
 	{
-		std::clock_t c = std::clock();
-		mpt::byte bytes[sizeof(c)];
-		std::memcpy(bytes, &c, sizeof(c));
-		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
-		{
-			std::reverse(std::begin(bytes), std::end(bytes));
-		}
+		uint64be time;
+		time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock().now().time_since_epoch()).count();
+		mpt::byte bytes[sizeof(time)];
+		std::memcpy(bytes, &time, sizeof(time));
 		hash(std::begin(bytes), std::end(bytes));
 	}
 
