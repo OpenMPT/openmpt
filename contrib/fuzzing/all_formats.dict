@@ -202,8 +202,8 @@ ptm="PTMF"
 ptm="\x1A\x03\x02"
 
 s3m="SCRM"
-s3m="SCRS"
-s3m="SCRI"
+#s3m="SCRS"
+#s3m="SCRI"
 
 stm="\x1A\x02\x15"
 

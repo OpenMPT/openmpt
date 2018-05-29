@@ -648,6 +648,10 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 	{
 		fileHeader.flags |= S3MFileHeader::amigaLimits;
 	}
+	if(m_SongFlags[SONG_S3MOLDVIBRATO])
+	{
+		fileHeader.flags |= S3MFileHeader::st2Vibrato;
+	}
 
 	// Version info following: ST3.20 = 0x1320
 	// Most significant nibble = Tracker ID, see S3MFileHeader::S3MTrackerVersions
@@ -900,11 +904,10 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			continue;
 		}
 
-		SmpLength smpLength = sampleHeader[smp].ConvertToS3M(Samples[realSmp]);
-
+		const SmpLength smpLength = sampleHeader[smp].ConvertToS3M(Samples[realSmp]);
 		mpt::String::Write<mpt::String::nullTerminated>(sampleHeader[smp].name, m_szNames[realSmp]);
 
-		if(Samples[realSmp].HasSampleData())
+		if(smpLength != 0)
 		{
 			// Write sample data
 			if(sampleDataOffset > 0xFFFFFF0)
