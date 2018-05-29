@@ -460,52 +460,12 @@ MPT_STATIC_ASSERT(alignof(mpt::byte) == 1);
 
 
 
-#if MPT_COMPILER_MSVC
+namespace mpt {
+constexpr int arch_bits = sizeof(void*) * 8;
+constexpr std::size_t pointer_size = sizeof(void*);
+} // namespace mpt
 
-	#if defined(_M_X64)
-		#define MPT_ARCH_BITS 64
-		#define MPT_ARCH_BITS_32 0
-		#define MPT_ARCH_BITS_64 1
-	#elif defined(_M_IX86)
-		#define MPT_ARCH_BITS 32
-		#define MPT_ARCH_BITS_32 1
-		#define MPT_ARCH_BITS_64 0
-	#endif
-
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-
-	#if defined(__SIZEOF_POINTER__)
-		#if (__SIZEOF_POINTER__ == 8)
-			#define MPT_ARCH_BITS 64
-			#define MPT_ARCH_BITS_32 0
-			#define MPT_ARCH_BITS_64 1
-		#elif (__SIZEOF_POINTER__ == 4)
-			#define MPT_ARCH_BITS 32
-			#define MPT_ARCH_BITS_32 1
-			#define MPT_ARCH_BITS_64 0
-		#endif
-	#endif
-
-#endif // MPT_COMPILER
-
-// fallback
-
-#if !defined(MPT_ARCH_BITS)
-#include <cstdint>
-#include <stdint.h>
-MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
-#if defined(UINTPTR_MAX)
-	#if (UINTPTR_MAX == 0xffffffffffffffffull)
-		#define MPT_ARCH_BITS 64
-		#define MPT_ARCH_BITS_32 0
-		#define MPT_ARCH_BITS_64 1
-	#elif (UINTPTR_MAX == 0xffffffffu)
-		#define MPT_ARCH_BITS 32
-		#define MPT_ARCH_BITS_32 1
-		#define MPT_ARCH_BITS_64 0
-	#endif
-#endif // UINTPTR_MAX
-#endif // MPT_ARCH_BITS
+MPT_STATIC_ASSERT(mpt::arch_bits == static_cast<int>(mpt::pointer_size) * 8);
 
 
 

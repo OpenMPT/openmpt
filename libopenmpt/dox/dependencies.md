@@ -27,9 +27,6 @@ Dependencies
          *  existence of `std::uintptr_t` (enforced by static_assert)
          *  `sizeof(float) == 4` (enforced by static_assert)
          *  `sizeof(double) == 8` (enforced by static_assert)
-         *  if `__BYTE_ORDER__` is provided by the compiler and
-            `__STDC_IEC_559__ == 1`, the endianness of integers is the same as
-            the endianness of floats (implicitly assumed)
          *  `wchar_t` encoding is either UTF-16 or UTF-32 (implicitly assumed)
          *  representation of basic source character set is ASCII (implicitly
             assumed)

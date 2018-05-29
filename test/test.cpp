@@ -356,6 +356,13 @@ static MPT_NOINLINE void TestVersion()
 // Test if data types are interpreted correctly
 static MPT_NOINLINE void TestTypes()
 {
+
+	MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
+	#if defined(__SIZEOF_POINTER__)
+		MPT_STATIC_ASSERT(__SIZEOF_POINTER__ == mpt::pointer_size);
+		MPT_STATIC_ASSERT(__SIZEOF_POINTER__ == sizeof(void*));
+	#endif
+
 	VERIFY_EQUAL(int8_min, (std::numeric_limits<int8>::min)());
 	VERIFY_EQUAL(int8_max, (std::numeric_limits<int8>::max)());
 	VERIFY_EQUAL(uint8_max, (std::numeric_limits<uint8>::max)());

@@ -72,7 +72,7 @@ uint8 VSTPluginLib::GetDllBits(bool fromCache) const
 {
 	// Built-in plugins are always native.
 	if(dllPath.empty())
-		return sizeof(void *) * CHAR_BIT;
+		return mpt::arch_bits;
 #ifndef NO_VST
 	if(!dllBits || !fromCache)
 	{

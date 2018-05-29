@@ -238,7 +238,7 @@ BOOL CAboutDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	mpt::ustring app;
-	app += mpt::format(MPT_USTRING("OpenMPT %1 bit"))(sizeof(void*) * 8)
+	app += mpt::format(MPT_USTRING("OpenMPT %1 (%2 bit)"))(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()), mpt::arch_bits)
 		#if defined(UNICODE)
 			+ MPT_USTRING(" Unicode")
 		#endif // UNICODE
@@ -288,6 +288,59 @@ void CAboutDlg::OnTabChange(NMHDR * /*pNMHDR*/ , LRESULT * /*pResult*/ )
 }
 
 
+static mpt::ustring ProcSupportToString(uint32 procSupport)
+{
+	std::vector<mpt::ustring> features;
+#if MPT_COMPILER_MSVC && defined(ENABLE_ASM)
+#if defined(ENABLE_X86)
+	features.push_back(MPT_USTRING("x86"));
+#endif
+#if defined(ENABLE_X64)
+	features.push_back(MPT_USTRING("x86-64"));
+#endif
+	struct ProcFlag
+	{
+		decltype(procSupport) flag;
+		const char *name;
+	};
+	static constexpr ProcFlag flags[] =
+	{
+		{ 0, "" },
+#if defined(ENABLE_X86)
+		{ PROCSUPPORT_CMOV, "cmov" },
+#endif
+#if defined(ENABLE_MMX)
+		{ PROCSUPPORT_MMX, "mmx" },
+#endif
+#if defined(ENABLE_SSE)
+		{ PROCSUPPORT_SSE, "sse" },
+#endif
+#if defined(ENABLE_SSE2)
+		{ PROCSUPPORT_SSE2, "sse2" },
+#endif
+#if defined(ENABLE_SSE3)
+		{ PROCSUPPORT_SSE3, "sse3" },
+		{ PROCSUPPORT_SSSE3, "ssse3" },
+#endif
+#if defined(ENABLE_SSE4)
+		{ PROCSUPPORT_SSE4_1, "sse4.1" },
+		{ PROCSUPPORT_SSE4_2, "sse4.2" },
+#endif
+#if defined(ENABLE_X86_AMD)
+		{ PROCSUPPORT_AMD_MMXEXT, "mmxext" },
+		{ PROCSUPPORT_AMD_3DNOW, "3dnow" },
+		{ PROCSUPPORT_AMD_3DNOWEXT, "3dnowext" },
+#endif
+	};
+	for(const auto &f : flags)
+	{
+		if(procSupport & f.flag) features.push_back(mpt::ToUnicode(mpt::CharsetASCII, f.name));
+	}
+#endif
+	return mpt::String::Combine(features, MPT_USTRING(" "));
+}
+
+
 mpt::ustring CAboutDlg::GetTabText(int tab)
 {
 	const mpt::ustring lf = MPT_USTRING("\n");
@@ -303,6 +356,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += mpt::format(MPT_USTRING("Source Code: %1"))(SourceInfo::Current().GetUrlWithRevision() + MPT_ULITERAL(" ") + SourceInfo::Current().GetStateString()) + lf;
 			text += mpt::format(MPT_USTRING("Build Date: %1"))(Build::GetBuildDateString()) + lf;
 			text += mpt::format(MPT_USTRING("Compiler: %1"))(Build::GetBuildCompilerString()) + lf;
+			text += mpt::format(MPT_USTRING("Architecture: %1"))(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture())) + lf;
 			text += mpt::format(MPT_USTRING("Required Windows Kernel Level: %1"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel())) + lf;
 			text += mpt::format(MPT_USTRING("Required Windows API Level: %1"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel())) + lf;
 			{
@@ -333,67 +387,18 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				text += lf;
 			}
 #ifdef ENABLE_ASM
-			for(auto &cpuFeatures : { std::make_pair(GetProcSupport(), MPT_USTRING("Optional CPU features used: ")), std::make_pair(GetRealProcSupport(), MPT_USTRING("Available CPU features: ")) })
-			{
-				text += cpuFeatures.second;
-				auto procSupport = cpuFeatures.first;
-				std::vector<mpt::ustring> features;
-#if MPT_COMPILER_MSVC && defined(ENABLE_ASM)
-#if defined(ENABLE_X86)
-				features.push_back(MPT_USTRING("x86"));
-#endif
-#if defined(ENABLE_X64)
-				features.push_back(MPT_USTRING("x86-64"));
-#endif
-				struct ProcFlag
-				{
-					decltype(procSupport) flag;
-					const char *name;
-				};
-				static constexpr ProcFlag flags[] =
-				{
-					{ 0, "" },
-#if defined(ENABLE_X86)
-					{ PROCSUPPORT_CMOV, "cmov" },
-#endif
-#if defined(ENABLE_MMX)
-					{ PROCSUPPORT_MMX, "mmx" },
-#endif
-#if defined(ENABLE_SSE)
-					{ PROCSUPPORT_SSE, "sse" },
-#endif
-#if defined(ENABLE_SSE2)
-					{ PROCSUPPORT_SSE2, "sse2" },
-#endif
-#if defined(ENABLE_SSE3)
-					{ PROCSUPPORT_SSE3, "sse3" },
-					{ PROCSUPPORT_SSSE3, "ssse3" },
-#endif
-#if defined(ENABLE_SSE4)
-					{ PROCSUPPORT_SSE4_1, "sse4.1" },
-					{ PROCSUPPORT_SSE4_2, "sse4.2" },
-#endif
-#if defined(ENABLE_X86_AMD)
-					{ PROCSUPPORT_AMD_MMXEXT, "mmxext" },
-					{ PROCSUPPORT_AMD_3DNOW, "3dnow" },
-					{ PROCSUPPORT_AMD_3DNOWEXT, "3dnowext" },
-#endif
-				};
-				for(const auto &f : flags)
-				{
-					if(procSupport & f.flag) features.push_back(mpt::ToUnicode(mpt::CharsetASCII, f.name));
-				}
-#endif
-				text += mpt::String::Combine(features, MPT_USTRING(" "));
-				text += lf;
-			}
+			text += mpt::format(MPT_USTRING("Optional CPU features used: %1"))(ProcSupportToString(GetProcSupport())) + lf;
+#endif // ENABLE_ASM
 			text += lf;
+			text += mpt::format(MPT_USTRING("System Architecture: %1"))(mpt::Windows::Name(mpt::Windows::GetHostArchitecture())) + lf;
+#ifdef ENABLE_ASM
 			text += mpt::format(MPT_USTRING("CPU: %1, Family %2, Model %3, Stepping %4"))
 				( mpt::ToUnicode(mpt::CharsetASCII, (std::strlen(ProcVendorID) > 0) ? std::string(ProcVendorID) : std::string("Generic"))
 				, ProcFamily
 				, ProcModel
 				, ProcStepping
 				) + lf;
+			text += mpt::format(MPT_USTRING("Available CPU features: %1"))(ProcSupportToString(GetRealProcSupport())) + lf;
 #endif // ENABLE_ASM
 			text += mpt::format(MPT_USTRING("Operating System: %1"))(mpt::Windows::Version::Current().GetName()) + lf;
 			text += lf;

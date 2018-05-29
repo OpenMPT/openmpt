@@ -22,7 +22,8 @@ BuildVariant BuildVariants::GetCurrentBuildVariant()
 {
 	BuildVariant result = { 0
 		, GuessCurrentBuildName()
-		, MPT_ARCH_BITS
+		, CurrentBuildIsModern()
+		, mpt::Windows::GetProcessArchitecture()
 		, GetMinimumProcSupportFlags()
 		, GetMinimumSSEVersion()
 		, GetMinimumAVXVersion()
@@ -36,10 +37,22 @@ BuildVariant BuildVariants::GetCurrentBuildVariant()
 
 static bool CompareBuildVariantsByScore(const BuildVariant & a, const BuildVariant & b)
 {
-	if (a.Score > b.Score) return true;
-	if (a.Score < b.Score) return false;
-	if (a.Bitness > b.Bitness) return true;
-	if (a.Bitness < b.Bitness) return false;
+	if(a.Score > b.Score)
+	{
+		return true;
+	}
+	if(a.Score < b.Score)
+	{
+		return false;
+	}
+	if(mpt::Windows::Bitness(a.Architecture) > mpt::Windows::Bitness(b.Architecture))
+	{
+		return true;
+	}
+	if(mpt::Windows::Bitness(a.Architecture) < mpt::Windows::Bitness(b.Architecture))
+	{
+		return false;
+	}
 	return false;
 }
 
@@ -50,15 +63,15 @@ std::vector<BuildVariant> BuildVariants::GetBuildVariants()
 	{
 		// VS2015
 #ifdef ENABLE_ASM
-		BuildVariant Win32old = { 1, MPT_USTRING("win32old"), 32, PROCSUPPORT_i586    , 0, 0, mpt::Windows::Version::WinXP   , mpt::Windows::Version::WinXP  , mpt::Wine::Version(1,8,0) };
-		BuildVariant Win64old = { 1, MPT_USTRING("win64old"), 64, PROCSUPPORT_AMD64   , 2, 0, mpt::Windows::Version::WinXP64 , mpt::Windows::Version::WinXP64, mpt::Wine::Version(1,8,0) };
-		BuildVariant Win32    = { 2, MPT_USTRING("win32"   ), 32, PROCSUPPORT_x86_SSE2, 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) };
-		BuildVariant Win64    = { 2, MPT_USTRING("win64"   ), 64, PROCSUPPORT_AMD64   , 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) };
+		BuildVariant Win32old = { 1, MPT_USTRING("win32old"), false, mpt::Windows::Architecture::x86  , PROCSUPPORT_i586    , 0, 0, mpt::Windows::Version::WinXP   , mpt::Windows::Version::WinXP  , mpt::Wine::Version(1,8,0) };
+		BuildVariant Win64old = { 1, MPT_USTRING("win64old"), false, mpt::Windows::Architecture::amd64, PROCSUPPORT_AMD64   , 2, 0, mpt::Windows::Version::WinXP64 , mpt::Windows::Version::WinXP64, mpt::Wine::Version(1,8,0) };
+		BuildVariant Win32    = { 2, MPT_USTRING("win32"   ), true , mpt::Windows::Architecture::x86  , PROCSUPPORT_x86_SSE2, 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) };
+		BuildVariant Win64    = { 2, MPT_USTRING("win64"   ), true , mpt::Windows::Architecture::amd64, PROCSUPPORT_AMD64   , 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) };
 #else
-		BuildVariant Win32old = { 1, MPT_USTRING("win32old"), 32, 0                   , 0, 0, mpt::Windows::Version::WinXP   , mpt::Windows::Version::WinXP  , mpt::Wine::Version(1,8,0) };
-		BuildVariant Win64old = { 1, MPT_USTRING("win64old"), 64, 0                   , 2, 0, mpt::Windows::Version::WinXP64 , mpt::Windows::Version::WinXP64, mpt::Wine::Version(1,8,0) };
-		BuildVariant Win32    = { 2, MPT_USTRING("win32"   ), 32, 0                   , 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) };
-		BuildVariant Win64    = { 2, MPT_USTRING("win64"   ), 64, 0                   , 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) };
+		BuildVariant Win32old = { 1, MPT_USTRING("win32old"), false, mpt::Windows::Architecture::x86  , 0                   , 0, 0, mpt::Windows::Version::WinXP   , mpt::Windows::Version::WinXP  , mpt::Wine::Version(1,8,0) };
+		BuildVariant Win64old = { 1, MPT_USTRING("win64old"), false, mpt::Windows::Architecture::amd64, 0                   , 2, 0, mpt::Windows::Version::WinXP64 , mpt::Windows::Version::WinXP64, mpt::Wine::Version(1,8,0) };
+		BuildVariant Win32    = { 2, MPT_USTRING("win32"   ), true , mpt::Windows::Architecture::x86  , 0                   , 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) };
+		BuildVariant Win64    = { 2, MPT_USTRING("win64"   ), true , mpt::Windows::Architecture::amd64, 0                   , 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) };
 #endif
 		result.push_back(Win32old);
 		result.push_back(Win64old);
@@ -70,23 +83,7 @@ std::vector<BuildVariant> BuildVariants::GetBuildVariants()
 }
 
 
-BuildVariant BuildVariants::GetModernWin32BuildVariant()
-{
-	std::vector<BuildVariant> builds = GetBuildVariants();
-	MPT_ASSERT(builds[1].Bitness == 32);
-	return builds[1];
-}
-
-
-BuildVariant BuildVariants::GetModernWin64BuildVariant()
-{
-	std::vector<BuildVariant> builds = GetBuildVariants();
-	MPT_ASSERT(builds[0].Bitness == 64);
-	return builds[0];
-}
-
-
-std::vector<BuildVariant> BuildVariants::GetRecommendedWin32Build()
+std::vector<BuildVariant> BuildVariants::GetSupportedBuilds()
 {
 	std::vector<BuildVariant> result;
 	if(IsKnownSystem())
@@ -94,37 +91,9 @@ std::vector<BuildVariant> BuildVariants::GetRecommendedWin32Build()
 		auto builds = GetBuildVariants();
 		for(const auto &b : builds)
 		{
-			if(!(b.Bitness == 32))
-			{
-				continue;
-			}
 			if(CanRunBuild(b))
 			{
 				result.push_back(b);
-				break;
-			}
-		}
-	}
-	return result;
-}
-
-
-std::vector<BuildVariant> BuildVariants::GetRecommendedWin64Build()
-{
-	std::vector<BuildVariant> result;
-	if(IsKnownSystem())
-	{
-		auto builds = GetBuildVariants();
-		for(const auto &b : builds)
-		{
-			if(!(b.Bitness == 64))
-			{
-				continue;
-			}
-			if(CanRunBuild(b))
-			{
-				result.push_back(b);
-				break;
 			}
 		}
 	}
@@ -137,11 +106,19 @@ std::vector<BuildVariant> BuildVariants::GetRecommendedBuilds()
 	std::vector<BuildVariant> result;
 	if(IsKnownSystem())
 	{
-		std::vector<BuildVariant> builds;
-		builds = GetRecommendedWin32Build();
-		result.insert(result.end(), builds.begin(), builds.end());
-		builds = GetRecommendedWin64Build();
-		result.insert(result.end(), builds.begin(), builds.end());
+		auto builds = GetSupportedBuilds();
+		uint8 maxScore = 0;
+		for(const auto &b : builds)
+		{
+			maxScore = std::max(maxScore, b.Score);
+		}
+		for(const auto &b : builds)
+		{
+			if(b.Score == maxScore)
+			{
+				result.push_back(b);
+			}
+		}
 	}
 	return result;
 }
@@ -156,52 +133,35 @@ bool BuildVariants::IsKnownSystem()
 }
 
 
-bool BuildVariants::HostCan64bits()
-{
-	#if (MPT_ARCH_BITS == 64)
-		return true;
-	#else
-		#if MPT_OS_WINDOWS
-			BOOL is64 = FALSE;
-			if(IsWow64Process(GetCurrentProcess(), &is64) != 0)
-			{
-				return is64 ? true : false;
-			} else
-			{
-				return false;
-			}
-		#else
-			return false;
-		#endif
-	#endif
-}
-
-
 bool BuildVariants::CurrentBuildIsModern()
 {
-	#if (MPT_ARCH_BITS == 64)
+	if(mpt::Windows::GetProcessArchitecture() == mpt::Windows::Architecture::amd64)
+	{
 		return false
 			|| (GetMinimumSSEVersion() > 2)
 			|| (GetMinimumAVXVersion() > 0)
 			|| (mpt::Windows::Version::GetMinimumKernelLevel() > mpt::Windows::Version::WinXP64)
 			|| (mpt::Windows::Version::GetMinimumAPILevel() > mpt::Windows::Version::WinXP64)
 			;
-	#elif (MPT_ARCH_BITS == 32)
+	} else if(mpt::Windows::GetProcessArchitecture() == mpt::Windows::Architecture::x86)
+	{
 		return false
 			|| (GetMinimumSSEVersion() > 0)
 			|| (GetMinimumAVXVersion() > 0)
 			|| (mpt::Windows::Version::GetMinimumKernelLevel() > mpt::Windows::Version::WinXP)
 			|| (mpt::Windows::Version::GetMinimumAPILevel() > mpt::Windows::Version::WinXP)
 			;
-	#else
+	} else
+	{
 		return true;
-	#endif
+	}
 }
 
 
 mpt::ustring BuildVariants::GuessCurrentBuildName()
 {
-	#if (MPT_ARCH_BITS == 64)
+	if(mpt::Windows::GetProcessArchitecture() == mpt::Windows::Architecture::amd64)
+	{
 		if(CurrentBuildIsModern())
 		{
 			return MPT_USTRING("win64");
@@ -209,7 +169,8 @@ mpt::ustring BuildVariants::GuessCurrentBuildName()
 		{
 			return MPT_USTRING("win64old");
 		}
-	#elif (MPT_ARCH_BITS == 32)
+	} else if(mpt::Windows::GetProcessArchitecture() == mpt::Windows::Architecture::x86)
+	{
 		if(CurrentBuildIsModern())
 		{
 			return MPT_USTRING("win32");
@@ -217,15 +178,24 @@ mpt::ustring BuildVariants::GuessCurrentBuildName()
 		{
 			return MPT_USTRING("win32old");
 		}
-	#else
+	} else
+	{
 		return mpt::ustring();
-	#endif
+	}
 }
 
 
 bool BuildVariants::SystemCanRunModernBuilds()
 {
-	return CanRunBuild(GetModernWin64BuildVariant()) || CanRunBuild(GetModernWin32BuildVariant());
+	auto builds = GetBuildVariants();
+	for(const auto &b : builds)
+	{
+		if(b.Modern && CanRunBuild(b))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -260,7 +230,7 @@ bool BuildVariants::ProcessorCanRunCurrentBuild()
 
 bool BuildVariants::CanRunBuild(BuildVariant build) 
 {
-	if((build.Bitness == 64) && !HostCan64bits())
+	if(mpt::Windows::HostCanRun(mpt::Windows::GetHostArchitecture(), build.Architecture) == mpt::Windows::EmulationLevel::NA)
 	{
 		return false;
 	}
@@ -310,13 +280,7 @@ bool BuildVariants::CanRunBuild(BuildVariant build)
 
 mpt::PathString BuildVariants::GetComponentArch()
 {
-	#if (MPT_ARCH_BITS == 64)
-		return MPT_PATHSTRING("x64");
-	#elif (MPT_ARCH_BITS == 32)
-		return MPT_PATHSTRING("x86");
-	#else
-		return MPT_PATHSTRING("");
-	#endif
+	return mpt::PathString::FromUnicode(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()));
 }
 
 

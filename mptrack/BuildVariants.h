@@ -22,12 +22,13 @@ struct BuildVariant
 {
 	uint8 Score;
 	mpt::ustring Name;
-	uint8 Bitness;
+	bool Modern;
+	mpt::Windows::Architecture Architecture;
 	uint32 MinimumProcSupportFlags;
 	int MinimumSSE;
 	int MinimumAVX;
-	mpt::Windows::Version::Number MinimumWindowsKernel;
-	mpt::Windows::Version::Number MinimumWindowsAPI;
+	mpt::Windows::Version::System MinimumWindowsKernel;
+	mpt::Windows::Version::System MinimumWindowsAPI;
 	mpt::Wine::Version MinimumWine;
 };
 
@@ -40,16 +41,12 @@ public:
 
 	static BuildVariant GetCurrentBuildVariant();
 	static std::vector<BuildVariant> GetBuildVariants();
-	static BuildVariant GetModernWin32BuildVariant();
-	static BuildVariant GetModernWin64BuildVariant();
 
-	static std::vector<BuildVariant> GetRecommendedWin32Build();
-	static std::vector<BuildVariant> GetRecommendedWin64Build();
+	static std::vector<BuildVariant> GetSupportedBuilds();
 	static std::vector<BuildVariant> GetRecommendedBuilds();
 	static std::vector<mpt::ustring> GetBuildNames(std::vector<BuildVariant> builds);
 
 	static bool IsKnownSystem();
-	static bool HostCan64bits();
 
 	static bool CurrentBuildIsModern();
 	static mpt::ustring GuessCurrentBuildName();
@@ -60,5 +57,6 @@ public:
 	static mpt::PathString GetComponentArch();
 
 };
+
 
 OPENMPT_NAMESPACE_END

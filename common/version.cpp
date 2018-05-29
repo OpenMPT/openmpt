@@ -370,22 +370,24 @@ mpt::ustring GetBuildFeaturesString()
 		;
 	#endif
 	#ifdef MODPLUG_TRACKER
-		#if (MPT_ARCH_BITS == 64)
+		MPT_CONSTANT_IF(mpt::arch_bits == 64)
+		{
 			if (true
 				&& (mpt::Windows::Version::GetMinimumKernelLevel() <= mpt::Windows::Version::WinXP64)
 				&& (mpt::Windows::Version::GetMinimumAPILevel() <= mpt::Windows::Version::WinXP64)
 			) {
 				retval += MPT_ULITERAL(" WIN64OLD");
 			}
-		#elif (MPT_ARCH_BITS == 32)
+		} else MPT_CONSTANT_IF(mpt::arch_bits == 32)
+		{
 			if (true
 				&& (mpt::Windows::Version::GetMinimumKernelLevel() <= mpt::Windows::Version::WinXP)
 				&& (mpt::Windows::Version::GetMinimumAPILevel() <= mpt::Windows::Version::WinXP)
 			) {
 				retval += MPT_ULITERAL(" WIN32OLD");
 			}
-		#endif
-			retval += MPT_ULITERAL("")
+		}
+		retval += MPT_ULITERAL("")
 		#if defined(UNICODE)
 			MPT_ULITERAL(" UNICODE")
 		#else
@@ -479,7 +481,7 @@ mpt::ustring GetVersionString(FlagSet<Build::Strings> strings)
 	}
 	if(strings[StringBitness])
 	{
-		result.push_back(mpt::format(MPT_USTRING(" %1 bit"))(sizeof(void*)*8));
+		result.push_back(mpt::format(MPT_USTRING(" %1 bit"))(mpt::arch_bits));
 	}
 	if(strings[StringSourceInfo])
 	{

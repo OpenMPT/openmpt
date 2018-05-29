@@ -119,7 +119,7 @@ public:
 
 public:
 	static BinaryType GetPluginBinaryType(const mpt::PathString &pluginPath);
-	static bool IsPluginNative(const mpt::PathString &pluginPath) { return GetPluginBinaryType(pluginPath) == sizeof(void *) * 8; }
+	static bool IsPluginNative(const mpt::PathString &pluginPath) { return GetPluginBinaryType(pluginPath) == mpt::arch_bits; }
 	static uint64 GetFileVersion(const WCHAR *exePath);
 
 	static AEffect *Create(const VSTPluginLib &plugin);

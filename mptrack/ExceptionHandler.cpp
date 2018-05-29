@@ -589,14 +589,14 @@ static void UnhandledExceptionFilterImpl(_EXCEPTION_POINTERS *pExceptionInfo)
 		const std::exception & e = *pE;
 		errorMessage = mpt::format(MPT_USTRING("Unhandled C++ exception '%1' occurred at address 0x%2: '%3'."))
 			( mpt::ToUnicode(mpt::CharsetASCII, typeid(e).name())
-			, mpt::ufmt::hex0<sizeof(void*)*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
+			, mpt::ufmt::hex0<mpt::pointer_size*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
 			, mpt::get_exception_text<mpt::ustring>(e)
 			);
 	} else
 	{
 		errorMessage = mpt::format(MPT_USTRING("Unhandled exception 0x%1 at address 0x%2 occurred."))
 			( mpt::ufmt::HEX0<8>(pExceptionInfo->ExceptionRecord->ExceptionCode)
-			, mpt::ufmt::hex0<sizeof(void*)*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
+			, mpt::ufmt::hex0<mpt::pointer_size*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
 			);
 	}
 	report.ReportError(errorMessage);

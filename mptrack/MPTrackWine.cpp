@@ -178,7 +178,7 @@ bool WineSetupIsSupported(mpt::Wine::Context & wine)
 	}
 	if(supported)
 	{
-		if(wine.Uname_m() == "x86_64" && sizeof(void*) != 8) supported = false;
+		if(wine.Uname_m() == "x86_64" && mpt::pointer_size != 8) supported = false;
 	}
 	return supported;
 }
@@ -479,43 +479,43 @@ void Initialize()
 		script += std::string() + "\n";
 
 		std::vector<std::string> winegcc;
-		MPT_CONSTANT_IF(MPT_ARCH_BITS == 32)
+		MPT_CONSTANT_IF(mpt::arch_bits == 32)
 		{ // 32bit winegcc probably cannot compile to 64bit
 			winegcc.push_back("winegcc32-development");
 		}
-		MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (MPT_ARCH_BITS == 64))
+		MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (mpt::arch_bits == 64))
 		{
 			winegcc.push_back("winegcc64-development");
 		}
 		winegcc.push_back("winegcc-development");
 		if(!wineVersion.HostIsBSD())
 		{ // avoid C++ compiler on *BSD because libc++ Win32 support tends to be missing there.
-			MPT_CONSTANT_IF(MPT_ARCH_BITS == 32)
+			MPT_CONSTANT_IF(mpt::arch_bits == 32)
 			{ // 32bit winegcc probably cannot compile to 64bit
 				winegcc.push_back("wineg++32-development");
 			}
-			MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (MPT_ARCH_BITS == 64))
+			MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (mpt::arch_bits == 64))
 			{
 				winegcc.push_back("wineg++64-development");
 			}
 			winegcc.push_back("wineg++-development");
 		}
-		MPT_CONSTANT_IF(MPT_ARCH_BITS == 32)
+		MPT_CONSTANT_IF(mpt::arch_bits == 32)
 		{ // 32bit winegcc probably cannot compile to 64bit
 			winegcc.push_back("winegcc32");
 		}
-		MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (MPT_ARCH_BITS == 64))
+		MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (mpt::arch_bits == 64))
 		{
 			winegcc.push_back("winegcc64");
 		}
 		winegcc.push_back("winegcc");
 		if(!wineVersion.HostIsBSD())
 		{ // avoid C++ compiler on *BSD because libc++ Win32 support tends to be missing there.
-			MPT_CONSTANT_IF(MPT_ARCH_BITS == 32)
+			MPT_CONSTANT_IF(mpt::arch_bits == 32)
 			{ // 32bit winegcc probably cannot compile to 64bit
 				winegcc.push_back("wineg++32");
 			}
-			MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (MPT_ARCH_BITS == 64))
+			MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (mpt::arch_bits == 64))
 			{
 				winegcc.push_back("wineg++64");
 			}
@@ -536,7 +536,7 @@ void Initialize()
 		script += std::string() + "fi" + "\n";
 
 		// Work-around for Debian 8, Wine 1.6.2
-		MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (MPT_ARCH_BITS == 64))
+		MPT_MAYBE_CONSTANT_IF(TrackerSettings::Instance().WineSupportForeignOpenMPT || (mpt::arch_bits == 64))
 		{
 			script += std::string() + "if [ `$MPT_WINEGXX > /dev/null 2>&1 ; echo $?` -eq 127 ] ; then" + "\n";
 			script += std::string() + " if command -v /usr/lib/x86_64-linux-gnu/wine/bin/winegcc 2>/dev/null 1>/dev/null ; then" + "\n";
@@ -546,7 +546,7 @@ void Initialize()
 			script += std::string() + " fi" + "\n";
 			script += std::string() + "fi" + "\n";
 		}
-		MPT_CONSTANT_IF(MPT_ARCH_BITS == 32)
+		MPT_CONSTANT_IF(mpt::arch_bits == 32)
 		{
 			script += std::string() + "if [ `$MPT_WINEGXX > /dev/null 2>&1 ; echo $?` -eq 127 ] ; then" + "\n";
 			script += std::string() + " if command -v /usr/lib/i386-linux-gnu/wine/bin/winegcc 2>/dev/null 1>/dev/null ; then" + "\n";
@@ -560,8 +560,8 @@ void Initialize()
 		std::string features;
 		if(TrackerSettings::Instance().WineSupportForeignOpenMPT)
 		{
-			features += std::string() + " " + "MPT_ARCH_BITS=" + mpt::fmt::dec(MPT_ARCH_BITS);
-			MPT_CONSTANT_IF(MPT_ARCH_BITS == 64)
+			features += std::string() + " " + "MPT_ARCH_BITS=" + mpt::fmt::dec(mpt::arch_bits);
+			MPT_CONSTANT_IF(mpt::arch_bits == 64)
 			{
 				features += std::string() + " " + "MPT_TARGET=" + "x86_64-linux-gnu-";
 			} else

@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include <limits.h>
-
 OPENMPT_NAMESPACE_BEGIN
 
 #define PLUGMAGIC(a, b, c, d) \
@@ -91,10 +89,10 @@ public:
 
 	// Check whether a plugin can be hosted inside OpenMPT or requires bridging
 	uint8 GetDllBits(bool fromCache = true) const;
-	bool IsNative(bool fromCache = true) const { return GetDllBits(fromCache) == sizeof(void *) * CHAR_BIT; }
+	bool IsNative(bool fromCache = true) const { return GetDllBits(fromCache) == mpt::arch_bits; }
 	// Check if a plugin is native, and if it is currently unknown, assume that it is native. Use this function only for performance reasons
 	// (e.g. if tons of unscanned plugins would slow down generation of the plugin selection dialog)
-	bool IsNativeFromCache() const { return dllBits == sizeof(void *) * CHAR_BIT || dllBits == 0; }
+	bool IsNativeFromCache() const { return dllBits == mpt::arch_bits || dllBits == 0; }
 
 	void WriteToCache() const;
 
