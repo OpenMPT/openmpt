@@ -23,7 +23,7 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 	mptSmp.Initialize(MOD_TYPE_S3M);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
 
-	if((sampleType == typePCM || sampleType == typeNone) && !memcmp(magic, "SCRS", 4))
+	if(sampleType == typePCM || sampleType == typeNone)
 	{
 		// Sample Length and Loops
 		if(sampleType == typePCM)
@@ -39,7 +39,7 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 			mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
 			mptSmp.uFlags.reset();
 		}
-	} else if(sampleType == typeAdMel && !memcmp(magic, "SCRI", 4))
+	} else if(sampleType == typeAdMel)
 	{
 		const uint8 *adlibBytes = reinterpret_cast<const uint8 *>(&length);
 		std::copy(adlibBytes, adlibBytes + 12, mptSmp.adlib.begin());
