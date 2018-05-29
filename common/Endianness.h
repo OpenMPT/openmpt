@@ -25,6 +25,16 @@
 
 
 
+#if MPT_CXX_AT_LEAST(20)
+
+// nothing
+
+#elif MPT_COMPILER_GENERIC
+
+// rely on runtime detection instead of using non-standard macros
+
+#else
+
 #if MPT_COMPILER_MSVC
 	#define MPT_PLATFORM_LITTLE_ENDIAN
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
@@ -62,6 +72,8 @@
 			#define MPT_PLATFORM_LITTLE_ENDIAN
 	#endif
 #endif
+
+#endif 
 
 #if defined(MPT_PLATFORM_BIG_ENDIAN) || defined(MPT_PLATFORM_LITTLE_ENDIAN)
 #define MPT_PLATFORM_ENDIAN_KNOWN 1
