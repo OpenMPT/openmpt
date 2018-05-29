@@ -910,14 +910,7 @@ public:
 	typedef Tendian endian_type;
 private:
 #if MPT_ENDIAN_IS_CONSTEXPR
-	struct zeroed_byte
-	{
-		mpt::byte byte;
-		MPT_ENDIAN_CONSTEXPR_FUN zeroed_byte() noexcept : byte(0) {}
-		MPT_ENDIAN_CONSTEXPR_FUN zeroed_byte & operator = (mpt::byte newbyte) noexcept { byte = newbyte; return *this; }
-		MPT_ENDIAN_CONSTEXPR_FUN operator mpt::byte () const noexcept { return byte; }
-	};
-	zeroed_byte data[sizeof(base_type)];
+	mpt::byte data[sizeof(base_type)]{};
 #else // !MPT_ENDIAN_IS_CONSTEXPR
 	std::array<mpt::byte, sizeof(base_type)> data;
 #endif // MPT_ENDIAN_IS_CONSTEXPR
@@ -926,19 +919,19 @@ public:
 	{
 		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 		#if MPT_ENDIAN_IS_CONSTEXPR
-			MPT_CONSTANT_IF(endian_type::endian == mpt::endian::little)
+			MPT_CONSTANT_IF(endian_type::endian == mpt::endian::big)
 			{
 				typename std::make_unsigned<base_type>::type uval = val;
 				for(std::size_t i = 0; i < sizeof(base_type); ++i)
 				{
-					data[i] = static_cast<mpt::byte>((uval >> (8*i)) & 0xffu);
+					data[i] = static_cast<mpt::byte>((uval >> (8*(sizeof(base_type)-1-i))) & 0xffu);
 				}
 			} else
 			{
 				typename std::make_unsigned<base_type>::type uval = val;
 				for(std::size_t i = 0; i < sizeof(base_type); ++i)
 				{
-					data[i] = static_cast<mpt::byte>((uval >> (8*(sizeof(base_type)-1-i))) & 0xffu);
+					data[i] = static_cast<mpt::byte>((uval >> (8*i)) & 0xffu);
 				}
 			}
 		#else // !MPT_ENDIAN_IS_CONSTEXPR
@@ -960,12 +953,12 @@ public:
 	{
 		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 		#if MPT_ENDIAN_IS_CONSTEXPR
-			MPT_CONSTANT_IF(endian_type::endian == mpt::endian::little)
+			MPT_CONSTANT_IF(endian_type::endian == mpt::endian::big)
 			{
 				typename std::make_unsigned<base_type>::type uval = 0;
 				for(std::size_t i = 0; i < sizeof(base_type); ++i)
 				{
-					uval |= static_cast<typename std::make_unsigned<base_type>::type>(data[i]) << (8*i);
+					uval |= static_cast<typename std::make_unsigned<base_type>::type>(data[i]) << (8*(sizeof(base_type)-1-i));
 				}
 				return static_cast<base_type>(uval);
 			} else
@@ -973,7 +966,7 @@ public:
 				typename std::make_unsigned<base_type>::type uval = 0;
 				for(std::size_t i = 0; i < sizeof(base_type); ++i)
 				{
-					uval |= static_cast<typename std::make_unsigned<base_type>::type>(data[i]) << (8*(sizeof(base_type)-1-i));
+					uval |= static_cast<typename std::make_unsigned<base_type>::type>(data[i]) << (8*i);
 				}
 				return static_cast<base_type>(uval);
 			}
