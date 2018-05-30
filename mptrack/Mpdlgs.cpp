@@ -1428,10 +1428,10 @@ BOOL COptionsPlayer::OnInitDialog()
 	UINT nSel = 0;
 	for (UINT iRvb=0; iRvb<NUM_REVERBTYPES; iRvb++)
 	{
-		LPCSTR pszName = GetReverbPresetName(iRvb);
-		if (pszName)
+		CString pszName = mpt::ToCString(GetReverbPresetName(iRvb));
+		if(!pszName.IsEmpty())
 		{
-			UINT n = m_CbnReverbPreset.AddString(mpt::ToCString(mpt::CharsetASCII, pszName));
+			UINT n = m_CbnReverbPreset.AddString(pszName);
 			m_CbnReverbPreset.SetItemData(n, iRvb);
 			if (iRvb == TrackerSettings::Instance().m_ReverbSettings.m_nReverbType) nSel = n;
 		}

@@ -110,46 +110,46 @@ struct SNDMIX_REVERB_PROPERTIES
 struct SNDMIX_RVBPRESET
 {
 	SNDMIX_REVERB_PROPERTIES Preset;
-	const char *name;
+	const MPT_UCHAR_TYPE *name;
 };
 
 
 static const SNDMIX_RVBPRESET gRvbPresets[NUM_REVERBTYPES] =
 {
-	{{ SNDMIX_REVERB_PRESET_PLATE },			"GM Plate"},
-	{{ SNDMIX_REVERB_PRESET_SMALLROOM },		"GM Small Room"},
-	{{ SNDMIX_REVERB_PRESET_MEDIUMROOM },		"GM Medium Room"},
-	{{ SNDMIX_REVERB_PRESET_LARGEROOM },		"GM Large Room"},
-	{{ SNDMIX_REVERB_PRESET_MEDIUMHALL },		"GM Medium Hall"},
-	{{ SNDMIX_REVERB_PRESET_LARGEHALL },		"GM Large Hall"},
-	{{ SNDMIX_REVERB_PRESET_GENERIC },			"Generic"},
-	{{ SNDMIX_REVERB_PRESET_PADDEDCELL },		"Padded Cell"},
-	{{ SNDMIX_REVERB_PRESET_ROOM },				"Room"},
-	{{ SNDMIX_REVERB_PRESET_BATHROOM },			"Bathroom"},
-	{{ SNDMIX_REVERB_PRESET_LIVINGROOM },		"Living Room"},
-	{{ SNDMIX_REVERB_PRESET_STONEROOM },		"Stone Room"},
-	{{ SNDMIX_REVERB_PRESET_AUDITORIUM },		"Auditorium"},
-	{{ SNDMIX_REVERB_PRESET_CONCERTHALL },		"Concert Hall"},
-	{{ SNDMIX_REVERB_PRESET_CAVE },				"Cave"},
-	{{ SNDMIX_REVERB_PRESET_ARENA },			"Arena"},
-	{{ SNDMIX_REVERB_PRESET_HANGAR },			"Hangar"},
-	{{ SNDMIX_REVERB_PRESET_CARPETEDHALLWAY },	"Carpeted Hallway"},
-	{{ SNDMIX_REVERB_PRESET_HALLWAY },			"Hallway"},
-	{{ SNDMIX_REVERB_PRESET_STONECORRIDOR },	"Stone Corridor"},
-	{{ SNDMIX_REVERB_PRESET_ALLEY },			"Alley"},
-	{{ SNDMIX_REVERB_PRESET_FOREST },			"Forest"},
-	{{ SNDMIX_REVERB_PRESET_CITY },				"City"},
-	{{ SNDMIX_REVERB_PRESET_MOUNTAINS },		"Mountains"},
-	{{ SNDMIX_REVERB_PRESET_QUARRY },			"Quarry"},
-	{{ SNDMIX_REVERB_PRESET_PLAIN },			"Plain"},
-	{{ SNDMIX_REVERB_PRESET_PARKINGLOT },		"Parking Lot"},
-	{{ SNDMIX_REVERB_PRESET_SEWERPIPE },		"Sewer Pipe"},
-	{{ SNDMIX_REVERB_PRESET_UNDERWATER },		"Underwater"},
+	{{ SNDMIX_REVERB_PRESET_PLATE },           MPT_ULITERAL("GM Plate")},
+	{{ SNDMIX_REVERB_PRESET_SMALLROOM },       MPT_ULITERAL("GM Small Room")},
+	{{ SNDMIX_REVERB_PRESET_MEDIUMROOM },      MPT_ULITERAL("GM Medium Room")},
+	{{ SNDMIX_REVERB_PRESET_LARGEROOM },       MPT_ULITERAL("GM Large Room")},
+	{{ SNDMIX_REVERB_PRESET_MEDIUMHALL },      MPT_ULITERAL("GM Medium Hall")},
+	{{ SNDMIX_REVERB_PRESET_LARGEHALL },       MPT_ULITERAL("GM Large Hall")},
+	{{ SNDMIX_REVERB_PRESET_GENERIC },         MPT_ULITERAL("Generic")},
+	{{ SNDMIX_REVERB_PRESET_PADDEDCELL },      MPT_ULITERAL("Padded Cell")},
+	{{ SNDMIX_REVERB_PRESET_ROOM },            MPT_ULITERAL("Room")},
+	{{ SNDMIX_REVERB_PRESET_BATHROOM },        MPT_ULITERAL("Bathroom")},
+	{{ SNDMIX_REVERB_PRESET_LIVINGROOM },      MPT_ULITERAL("Living Room")},
+	{{ SNDMIX_REVERB_PRESET_STONEROOM },       MPT_ULITERAL("Stone Room")},
+	{{ SNDMIX_REVERB_PRESET_AUDITORIUM },      MPT_ULITERAL("Auditorium")},
+	{{ SNDMIX_REVERB_PRESET_CONCERTHALL },     MPT_ULITERAL("Concert Hall")},
+	{{ SNDMIX_REVERB_PRESET_CAVE },            MPT_ULITERAL("Cave")},
+	{{ SNDMIX_REVERB_PRESET_ARENA },           MPT_ULITERAL("Arena")},
+	{{ SNDMIX_REVERB_PRESET_HANGAR },          MPT_ULITERAL("Hangar")},
+	{{ SNDMIX_REVERB_PRESET_CARPETEDHALLWAY }, MPT_ULITERAL("Carpeted Hallway")},
+	{{ SNDMIX_REVERB_PRESET_HALLWAY },         MPT_ULITERAL("Hallway")},
+	{{ SNDMIX_REVERB_PRESET_STONECORRIDOR },   MPT_ULITERAL("Stone Corridor")},
+	{{ SNDMIX_REVERB_PRESET_ALLEY },           MPT_ULITERAL("Alley")},
+	{{ SNDMIX_REVERB_PRESET_FOREST },          MPT_ULITERAL("Forest")},
+	{{ SNDMIX_REVERB_PRESET_CITY },            MPT_ULITERAL("City")},
+	{{ SNDMIX_REVERB_PRESET_MOUNTAINS },       MPT_ULITERAL("Mountains")},
+	{{ SNDMIX_REVERB_PRESET_QUARRY },          MPT_ULITERAL("Quarry")},
+	{{ SNDMIX_REVERB_PRESET_PLAIN },           MPT_ULITERAL("Plain")},
+	{{ SNDMIX_REVERB_PRESET_PARKINGLOT },      MPT_ULITERAL("Parking Lot")},
+	{{ SNDMIX_REVERB_PRESET_SEWERPIPE },       MPT_ULITERAL("Sewer Pipe")},
+	{{ SNDMIX_REVERB_PRESET_UNDERWATER },      MPT_ULITERAL("Underwater")},
 };
 
-const char *GetReverbPresetName(uint32 nPreset)
+mpt::ustring GetReverbPresetName(uint32 nPreset)
 {
-	return (nPreset < NUM_REVERBTYPES) ? gRvbPresets[nPreset].name : nullptr;
+	return (nPreset < NUM_REVERBTYPES) ? mpt::ustring(gRvbPresets[nPreset].name) : mpt::ustring();
 }
 
 //////////////////////////////////////////////////////////////////////////
