@@ -55,11 +55,36 @@ static MPT_FORCEINLINE void Store64SSE(int32 *dst, __m128i src) { return _mm_sto
 static MPT_FORCEINLINE void Store64SSE(LR16 *dst, __m128i src) { return _mm_storel_epi64(reinterpret_cast<__m128i *>(dst), src); }
 #endif
 
+CReverbSettings::CReverbSettings()
+{
+	m_nReverbType = 0;
+	m_nReverbDepth = 8; // 50%
+}
+
 
 CReverb::CReverb()
 {
 	// Shared reverb state
 	InitMixBuffer(MixReverbBuffer, static_cast<uint32>(mpt::size(MixReverbBuffer)));
+	gnRvbROfsVol = 0;
+	gnRvbLOfsVol = 0;
+
+	gnReverbSend = 0;
+
+	gnReverbSamples = 0;
+	gnReverbDecaySamples = 0;
+
+	// Internal reverb state
+	g_bLastInPresent = 0;
+	g_bLastOutPresent = 0;
+	g_nLastRvbIn_xl = 0;
+	g_nLastRvbIn_xr = 0;
+	g_nLastRvbIn_yl = 0;
+	g_nLastRvbIn_yr = 0;
+	g_nLastRvbOut_xl = 0;
+	g_nLastRvbOut_xr = 0;
+	MemsetZero(gnDCRRvb_Y1);
+	MemsetZero(gnDCRRvb_X1);
 
 	// Reverb mix buffers
 	MemsetZero(g_RefDelay);
@@ -301,17 +326,18 @@ void CReverb::Shutdown()
 void CReverb::Initialize(bool bReset, uint32 MixingFreq)
 {
 	if (m_Settings.m_nReverbType >= NUM_REVERBTYPES) m_Settings.m_nReverbType = 0;
-	const SNDMIX_REVERB_PROPERTIES *rvbPreset = &gRvbPresets[m_Settings.m_nReverbType].Preset;
+	static SNDMIX_REVERB_PROPERTIES *spCurrentPreset = nullptr;
+	SNDMIX_REVERB_PROPERTIES *pRvbPreset = &gRvbPresets[m_Settings.m_nReverbType].Preset;
 
-	if ((rvbPreset != m_currentPreset) || (bReset))
+	if ((pRvbPreset != spCurrentPreset) || (bReset))
 	{
 		// Reverb output frequency is half of the dry output rate
 		float flOutputFrequency = (float)MixingFreq;
 		EnvironmentReverb rvb;
 
 		// Reset reverb parameters
-		m_currentPreset = rvbPreset;
-		I3dl2_to_Generic(rvbPreset, &rvb, flOutputFrequency,
+		spCurrentPreset = pRvbPreset;
+		I3dl2_to_Generic(pRvbPreset, &rvb, flOutputFrequency,
 							RVBMINREFDELAY, RVBMAXREFDELAY,
 							RVBMINRVBDELAY, RVBMAXRVBDELAY,
 							( RVBDIF1L_LEN + RVBDIF1R_LEN
