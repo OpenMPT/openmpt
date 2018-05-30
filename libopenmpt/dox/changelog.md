@@ -62,6 +62,8 @@ is just a high-level summary.
 
  *  [**Bug**] xmp-openmpt: Sample rate and number of output channels were not
     applied correctly when using per-file settings.
+ *  [**Bug**] Internal mixer state was not initialized properly when initially
+    rendering in 44100kHz stereo format.
 
  *  IT: In Compatible Gxx mode, allow sample changes next to a tone portamento
     effect if a previous sample has already stopped playing.
