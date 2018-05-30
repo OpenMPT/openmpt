@@ -50,7 +50,6 @@ protected:
 	std::array<uint8, OPL_CHANNELS> m_KeyOnBlock;
 	std::array<CHANNELINDEX, OPL_CHANNELS> m_OPLtoChan;
 	std::array<uint8, MAX_CHANNELS> m_ChanToOPL;
-	std::array<uint8, MAX_CHANNELS> m_Panning;
 	std::array<OPLPatch, OPL_CHANNELS> m_Patches;
 
 	bool isActive = false;

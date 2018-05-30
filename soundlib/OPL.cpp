@@ -60,16 +60,15 @@ enum OPLValues
 	// FEEDBACK_CONNECTION
 	FEEDBACK_MASK    = 0x0E, // Valid just for 1st OP of a voice
 	CONNECTION_BIT   = 0x01,
-	STEREO_BITS      = 0x30,
 	VOICE_TO_LEFT    = 0x10,
 	VOICE_TO_RIGHT   = 0x20,
+	STEREO_BITS      = VOICE_TO_LEFT | VOICE_TO_RIGHT,
 };
 
 
 OPL::OPL()
 {
 	m_KeyOnBlock.fill(0);
-	m_Panning.fill(0);
 	m_OPLtoChan.fill(CHANNELINDEX_INVALID);
 	m_ChanToOPL.fill(OPL_CHANNEL_INVALID);
 }
@@ -235,20 +234,21 @@ void OPL::Volume(CHANNELINDEX c, uint8 vol)
 
 void OPL::Pan(CHANNELINDEX c, int32 pan)
 {
-	if(pan < 85)
-		m_Panning[c] = VOICE_TO_LEFT;
-	else if(pan > 170)
-		m_Panning[c] = VOICE_TO_RIGHT;
-	else
-		m_Panning[c] = VOICE_TO_LEFT | VOICE_TO_RIGHT;
-
 	uint8 oplCh = GetVoice(c);
 	if(oplCh == OPL_CHANNEL_INVALID || m_opl == nullptr)
 		return;
 
 	const auto &patch = m_Patches[oplCh];
-	m_opl->Port(FEEDBACK_CONNECTION | ChannelToRegister(oplCh),
-		(patch[10] & ~STEREO_BITS) | m_Panning[c]);
+	uint8 fbConn = patch[10] & ~STEREO_BITS;
+	// OPL3 only knows hard left, center and right, so we need to translate our
+	// continuous panning range into one of those three states.
+	// 0...84 = left, 85...170 = center, 171...256 = right
+	if(pan <= 170)
+		fbConn |= VOICE_TO_LEFT;
+	if(pan >= 85)
+		fbConn |= VOICE_TO_RIGHT;
+
+	m_opl->Port(FEEDBACK_CONNECTION | ChannelToRegister(oplCh), fbConn);
 }
 
 
@@ -273,9 +273,7 @@ void OPL::Patch(CHANNELINDEX c, const OPLPatch &patch)
 	m_opl->Port(SUSTAIN_RELEASE | carrier, patch[7]);
 	m_opl->Port(WAVE_SELECT     | carrier, patch[9]);
 
-	// Keep panning bits from current channel panning
-	m_opl->Port(FEEDBACK_CONNECTION | ChannelToRegister(oplCh),
-		(patch[10] & ~STEREO_BITS) | m_Panning[c]);
+	m_opl->Port(FEEDBACK_CONNECTION | ChannelToRegister(oplCh), patch[10]);
 }
 
 
