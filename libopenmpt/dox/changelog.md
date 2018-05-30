@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta33
 
+ *  [**Bug**] Internal mixer state was not initialized properly when initially
+    rendering in 44100kHz stereo format.
+
 ### libopenmpt 0.2-beta32 (2018-04-29)
 
  *  [**Sec**] Possible write near address 0 in out-of-memory situations when

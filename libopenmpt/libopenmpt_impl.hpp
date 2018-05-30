@@ -98,6 +98,7 @@ protected:
 	std::unique_ptr<OpenMPT::CSoundFile> m_sndFile;
 #endif
 	bool m_loaded;
+	bool m_mixer_initialized;
 #ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
 	LIBOPENMPT_SHARED_PTR<OpenMPT::Dither> m_Dither;
 #else

@@ -369,11 +369,14 @@ void module_impl::apply_mixer_settings( std::int32_t samplerate, int channels ) 
 		mixersettings.SetVolumeRampUpMicroseconds( volrampin_us );
 		mixersettings.SetVolumeRampDownMicroseconds( volrampout_us );
 		m_sndFile->SetMixerSettings( mixersettings );
+	} else if ( !m_mixer_initialized ) {
+		m_sndFile->InitPlayer( true );
 	}
 	if ( samplerate_changed ) {
 		m_sndFile->SuspendPlugins();
 		m_sndFile->ResumePlugins();
 	}
+	m_mixer_initialized = true;
 }
 void module_impl::apply_libopenmpt_defaults() {
 	set_render_param( module::RENDER_STEREOSEPARATION_PERCENT, 100 );
@@ -405,6 +408,7 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 	m_sndFile = std::unique_ptr<CSoundFile>(new CSoundFile());
 #endif
 	m_loaded = false;
+	m_mixer_initialized = false;
 #ifdef LIBOPENMPT_ANCIENT_COMPILER_SHARED_PTR
 	m_Dither = LIBOPENMPT_SHARED_PTR<Dither>(new Dither(mpt::global_prng()));
 #else
