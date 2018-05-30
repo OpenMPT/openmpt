@@ -55,38 +55,11 @@ static MPT_FORCEINLINE void Store64SSE(int32 *dst, __m128i src) { return _mm_sto
 static MPT_FORCEINLINE void Store64SSE(LR16 *dst, __m128i src) { return _mm_storel_epi64(reinterpret_cast<__m128i *>(dst), src); }
 #endif
 
-CReverbSettings::CReverbSettings()
-{
-	m_nReverbType = 0;
-	m_nReverbDepth = 8; // 50%
-}
-
 
 CReverb::CReverb()
 {
-	m_currentPreset = nullptr;
-
 	// Shared reverb state
 	InitMixBuffer(MixReverbBuffer, static_cast<uint32>(mpt::size(MixReverbBuffer)));
-	gnRvbROfsVol = 0;
-	gnRvbLOfsVol = 0;
-
-	gnReverbSend = 0;
-
-	gnReverbSamples = 0;
-	gnReverbDecaySamples = 0;
-
-	// Internal reverb state
-	g_bLastInPresent = 0;
-	g_bLastOutPresent = 0;
-	g_nLastRvbIn_xl = 0;
-	g_nLastRvbIn_xr = 0;
-	g_nLastRvbIn_yl = 0;
-	g_nLastRvbIn_yr = 0;
-	g_nLastRvbOut_xl = 0;
-	g_nLastRvbOut_xr = 0;
-	MemsetZero(gnDCRRvb_Y1);
-	MemsetZero(gnDCRRvb_X1);
 
 	// Reverb mix buffers
 	MemsetZero(g_RefDelay);
