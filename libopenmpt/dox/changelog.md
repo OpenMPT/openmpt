@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.10-pre
 
+ *  [**Bug**] Internal mixer state was not initialized properly when initially
+    rendering in 44100kHz stereo format.
+
  *  Switching between instruments with portamento did not update the NNA
     settings for the new instrument.
  *  FAR: Properly import volume commands.
