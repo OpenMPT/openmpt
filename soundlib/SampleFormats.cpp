@@ -67,6 +67,10 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool 
 	{
 		m_nSamples = nSample;
 	}
+	if(Samples[nSample].uFlags[CHN_ADLIB])
+	{
+		InitOPL();
+	}
 	return true;
 }
 
@@ -317,6 +321,10 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 #endif
 
 	targetSmp.Convert(srcSong.GetType(), GetType());
+	if(targetSmp.uFlags[CHN_ADLIB])
+	{
+		InitOPL();
+	}
 	return true;
 }
 
