@@ -158,10 +158,7 @@ CViewInstrument::CViewInstrument()
 {
 	EnableActiveAccessibility();
 	m_rcClient.bottom = 2;
-	for(auto &pos : m_dwNotifyPos)
-	{
-		pos = (uint32)Notification::PosInvalid;
-	}
+	m_dwNotifyPos.fill(uint32(Notification::PosInvalid));
 	MemsetZero(m_NcButtonState);
 
 	m_bmpEnvBar.Create(&CMainFrame::GetMainFrame()->m_EnvelopeIcons);
@@ -2150,12 +2147,13 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 }
 
 
-LRESULT CViewInstrument::OnMidiMsg(WPARAM midiData, LPARAM)
+LRESULT CViewInstrument::OnMidiMsg(WPARAM midiDataParam, LPARAM)
 {
+	const uint32 midiData = static_cast<uint32>(midiDataParam);
 	CModDoc *modDoc = GetDocument();
 	if(modDoc != nullptr)
 	{
-		modDoc->ProcessMIDI(static_cast<uint32>(midiData), m_nInstrument, modDoc->GetSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
+		modDoc->ProcessMIDI(midiData, m_nInstrument, modDoc->GetSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
 
 		MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(midiData);
 		uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
@@ -2181,7 +2179,7 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 			CInputHandler* ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
-			UINT nChar = pMsg->wParam;
+			UINT nChar = static_cast<UINT>(pMsg->wParam);
 			UINT nRepCnt = LOWORD(pMsg->lParam);
 			UINT nFlags = HIWORD(pMsg->lParam);
 			KeyEventType kT = ih->GetKeyEventType(nFlags);

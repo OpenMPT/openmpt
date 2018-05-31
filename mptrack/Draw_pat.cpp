@@ -1756,7 +1756,7 @@ void CViewPattern::UpdateAllVUMeters(Notification *pnotify)
 	const int yPos = rcClient.top + MulDiv(COLHDR_HEIGHT, m_nDPIy, 96);
 	while ((nChn < pModDoc->GetNumChannels()) && (x < rcClient.right))
 	{
-		ChnVUMeters[nChn] = (WORD)pnotify->pos[nChn];
+		ChnVUMeters[nChn] = static_cast<uint16>(pnotify->pos[nChn]);
 		if ((!isPlaying) || pnotify->type[Notification::Stop]) ChnVUMeters[nChn] = 0;
 		DrawChannelVUMeter(hdc, x + 1, rcClient.top + yPos, nChn);
 		nChn++;

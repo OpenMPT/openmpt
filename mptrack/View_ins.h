@@ -62,7 +62,7 @@ protected:
 	bool m_mouseMoveModified : 1;
 
 	std::bitset<128> m_baPlayingNote;
-	uint32 m_dwNotifyPos[MAX_CHANNELS];
+	std::array<uint32, MAX_CHANNELS> m_dwNotifyPos;
 
 public:
 	CViewInstrument();

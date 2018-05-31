@@ -952,7 +952,7 @@ void VUMeter::ResetClipped()
 }
 
 
-static void SetVUMeter(uint32 *masterVU, const VUMeter &vumeter)
+static void SetVUMeter(std::array<uint32, 4> &masterVU, const VUMeter &vumeter)
 {
 	for(std::size_t channel = 0; channel < VUMeter::maxChannels; ++channel)
 	{
@@ -2271,20 +2271,20 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 		uint8 countChan = 0;
 		uint32 vu[VUMeter::maxChannels * 2];
 		MemsetZero(vu);
-		std::copy(pnotify->masterVUin, pnotify->masterVUin + pnotify->masterVUinChannels, vu + countChan);
+		std::copy(pnotify->masterVUin.begin(), pnotify->masterVUin.begin() + pnotify->masterVUinChannels, vu + countChan);
 
 		countChan += pnotify->masterVUinChannels;
 		if(pnotify->masterVUinChannels == 1 && duplicateMono)
 		{
-			std::copy(pnotify->masterVUin, pnotify->masterVUin + 1, vu + countChan);
+			std::copy(pnotify->masterVUin.begin(), pnotify->masterVUin.begin() + 1, vu + countChan);
 			countChan += 1;
 		}
 
-		std::copy(pnotify->masterVUout, pnotify->masterVUout + pnotify->masterVUoutChannels, vu + countChan);
+		std::copy(pnotify->masterVUout.begin(), pnotify->masterVUout.begin() + pnotify->masterVUoutChannels, vu + countChan);
 		countChan += pnotify->masterVUoutChannels;
 		if(pnotify->masterVUoutChannels == 1 && duplicateMono)
 		{
-			std::copy(pnotify->masterVUout, pnotify->masterVUout + 1, vu + countChan);
+			std::copy(pnotify->masterVUout.begin(), pnotify->masterVUout.begin() + 1, vu + countChan);
 			countChan += 1;
 		}
 

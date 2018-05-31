@@ -169,8 +169,8 @@ CViewPattern::~CViewPattern()
 void CViewPattern::OnInitialUpdate()
 {
 	CModScrollView::OnInitialUpdate();
-	MemsetZero(ChnVUMeters);
-	MemsetZero(OldVUMeters);
+	ChnVUMeters.fill(0);
+	OldVUMeters.fill(0);
 	memset(previousNote, NOTE_NONE, sizeof(previousNote));
 	memset(splitActiveNoteChannel, 0xFF, sizeof(splitActiveNoteChannel));
 	memset(activeNoteChannel, 0xFF, sizeof(activeNoteChannel));
@@ -3215,7 +3215,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 	if(pnotify->type[Notification::Stop])
 	{
 		m_baPlayingNote.reset();
-		MemsetZero(ChnVUMeters);	// Also zero all non-visible VU meters
+		ChnVUMeters.fill(0);	// Also zero all non-visible VU meters
 		SetPlayCursor(PATTERNINDEX_INVALID, ROWINDEX_INVALID, 0);
 	}
 

@@ -169,8 +169,8 @@ protected:
 	CHANNELINDEX chordPatternChannels[MPTChord::notesPerChord];
 	ModCommand::NOTE prevChordNote, prevChordBaseNote;
 
-	WORD ChnVUMeters[MAX_BASECHANNELS];
-	WORD OldVUMeters[MAX_BASECHANNELS];
+	std::array<uint16, MAX_BASECHANNELS> ChnVUMeters;
+	std::array<uint16, MAX_BASECHANNELS> OldVUMeters;
 
 	std::bitset<128> m_baPlayingNote;
 	ModCommand::NOTE octaveKeyMemory[10];

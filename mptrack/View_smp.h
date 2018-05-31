@@ -60,7 +60,7 @@ protected:
 	int m_drawChannel;			// Which sample channel are we drawing on?
 
 	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
-	SmpLength m_dwNotifyPos[MAX_CHANNELS];
+	std::array<SmpLength, MAX_CHANNELS> m_dwNotifyPos;
 
 public:
 	CViewSample();

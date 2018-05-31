@@ -136,10 +136,7 @@ CViewSample::CViewSample()
 	, m_nBtnMouseOver(0xFFFF)
 	, noteChannel(NOTE_MAX - NOTE_MIN + 1, CHANNELINDEX_INVALID)
 {
-	for(auto &pos : m_dwNotifyPos)
-	{
-		pos = Notification::PosInvalid;
-	}
+	m_dwNotifyPos.fill(Notification::PosInvalid);
 	MemsetZero(m_NcButtonState);
 	m_bmpEnvBar.Create(&CMainFrame::GetMainFrame()->m_SampleIcons);
 }
@@ -315,10 +312,7 @@ BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (pMainFrm) pMainFrm->SetInfoText(_T(""));
 	m_nSample = nSmp;
-	for(auto &pos : m_dwNotifyPos)
-	{
-		pos = Notification::PosInvalid;
-	}
+	m_dwNotifyPos.fill(Notification::PosInvalid);
 	UpdateScrollSize();
 	UpdateNcButtonState();
 	InvalidateRect(NULL, FALSE);
@@ -1268,10 +1262,7 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 		{
 			HDC hdc = ::GetDC(m_hWnd);
 			DrawPositionMarks();	// Erase old marks...
-			for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
-			{
-				m_dwNotifyPos[i] = pnotify->pos[i];
-			}
+			m_dwNotifyPos = pnotify->pos;
 			DrawPositionMarks();	// ...and draw new ones
 			BitBlt(hdc, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), offScreenDC, 0, 0, SRCCOPY);
 			::ReleaseDC(m_hWnd, hdc);
@@ -2959,21 +2950,21 @@ void CViewSample::OnAddSilence()
 	}
 }
 
-LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
+LRESULT CViewSample::OnMidiMsg(WPARAM midiDataParam, LPARAM)
 {
-	const DWORD dwMidiData = dwMidiDataParam;
+	const uint32 midiData = static_cast<uint32>(midiDataParam);
 	static BYTE midivolume = 127;
 
 	CModDoc *pModDoc = GetDocument();
-	uint8 midibyte1 = MIDIEvents::GetDataByte1FromEvent(dwMidiData);
-	uint8 midibyte2 = MIDIEvents::GetDataByte2FromEvent(dwMidiData);
+	uint8 midibyte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
+	uint8 midibyte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
 
 	CSoundFile *pSndFile = (pModDoc) ? &pModDoc->GetSoundFile() : nullptr;
 	if (!pSndFile) return 0;
 
 	uint8 nNote = midibyte1 + NOTE_MIN;
 	int nVol = midibyte2;
-	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(dwMidiData);
+	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(midiData);
 	if(event == MIDIEvents::evNoteOn && !nVol)
 	{
 		event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
@@ -2981,8 +2972,8 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetInputHandler();
-	if(ih->HandleMIDIMessage(kCtxViewSamples, dwMidiData) != kcNull
-		|| ih->HandleMIDIMessage(kCtxAllContexts, dwMidiData) != kcNull)
+	if(ih->HandleMIDIMessage(kCtxViewSamples, midiData) != kcNull
+		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull)
 	{
 		// Mapped to a command, no need to pass message on.
 		return 1;
@@ -2998,7 +2989,7 @@ LRESULT CViewSample::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		pModDoc->NoteOff(nNote, true);
 		if(midibyte2 & 0x7F)
 		{
-			nVol = CMainFrame::ApplyVolumeRelatedSettings(dwMidiData, midivolume);
+			nVol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midivolume);
 			PlayNote(nNote, 0, nVol);
 		}
 		break;
@@ -3027,7 +3018,7 @@ BOOL CViewSample::PreTranslateMessage(MSG *pMsg)
 			CInputHandler* ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
-			UINT nChar = pMsg->wParam;
+			UINT nChar = static_cast<UINT>(pMsg->wParam);
 			UINT nRepCnt = LOWORD(pMsg->lParam);
 			UINT nFlags = HIWORD(pMsg->lParam);
 			KeyEventType kT = ih->GetKeyEventType(nFlags);
