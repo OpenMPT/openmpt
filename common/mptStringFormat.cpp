@@ -408,14 +408,14 @@ Tstring PrintImplTemplate(const Tstring & format
 	traits::reserve(result, len);
 	for(std::size_t pos = 0; pos != len; ++pos)
 	{
-		traits::char_type c = format[pos];
-		if(pos + 1 != len && c == traits::char_type('%'))
+		typename traits::char_type c = format[pos];
+		if(pos + 1 != len && c == typename traits::char_type('%'))
 		{
 			pos++;
 			c = format[pos];
-			if(traits::char_type('1') <= c && c <= traits::char_type('9'))
+			if(typename traits::char_type('1') <= c && c <= typename traits::char_type('9'))
 			{
-				const std::size_t n = c - traits::char_type('0');
+				const std::size_t n = c - typename traits::char_type('0');
 				switch(n)
 				{
 					case 1: traits::append(result, x1); break;
@@ -428,9 +428,9 @@ Tstring PrintImplTemplate(const Tstring & format
 					case 8: traits::append(result, x8); break;
 				}
 				continue;
-			} else if(c != traits::char_type('%'))
+			} else if(c != typename traits::char_type('%'))
 			{
-				traits::append(result, 1, traits::char_type('%'));
+				traits::append(result, 1, typename traits::char_type('%'));
 			}
 		}
 		traits::append(result, 1, c);
