@@ -18,6 +18,55 @@ OPENMPT_NAMESPACE_BEGIN
 class OPL
 {
 public:
+	enum OPLRegisters : uint8
+	{
+		// Operators (combine with result of OperatorToRegister)
+		AM_VIB          = 0x20, // AM / VIB / EG / KSR / Multiple (0x20 to 0x35)
+		KSL_LEVEL       = 0x40, // KSL / Total level (0x40 to 0x55)
+		ATTACK_DECAY    = 0x60, // Attack rate / Decay rate (0x60 to 0x75)
+		SUSTAIN_RELEASE = 0x80, // Sustain level / Release rate (0x80 to 0x95)
+		WAVE_SELECT     = 0xE0, // Wave select (0xE0 to 0xF5)
+
+		// Channels (combine with result of ChannelToRegister)
+		FNUM_LOW            = 0xA0, // F-number low bits (0xA0 to 0xA8)
+		KEYON_BLOCK         = 0xB0, // F-number high bits / Key on / Block (octave) (0xB0 to 0xB8)
+		FEEDBACK_CONNECTION = 0xC0, // Feedback / Connection (0xC0 to 0xC8)
+	};
+
+	enum OPLValues : uint8
+	{
+		// AM_VIB
+		TREMOLO_ON       = 0x80,
+		VIBRATO_ON       = 0x40,
+		SUSTAIN_ON       = 0x20,
+		KSR              = 0x10, // Key scaling rate
+		MULTIPLE_MASK    = 0x0F, // Frequency multiplier
+
+		// KSL_LEVEL
+		KSL_MASK         = 0xC0, // Envelope scaling bits
+		TOTAL_LEVEL_MASK = 0x3F, // Strength (volume) of OP
+
+		// ATTACK_DECAY
+		ATTACK_MASK      = 0xF0,
+		DECAY_MASK       = 0x0F,
+
+		// SUSTAIN_RELEASE
+		SUSTAIN_MASK     = 0xF0,
+		RELEASE_MASK     = 0x0F,
+
+		// KEYON_BLOCK
+		KEYON_BIT        = 0x20,
+		BLOCKNUM_MASK    = 0x1C,
+		FNUM_HIGH_MASK   = 0x03,
+
+		// FEEDBACK_CONNECTION
+		FEEDBACK_MASK    = 0x0E, // Valid just for first OP of a voice
+		CONNECTION_BIT   = 0x01,
+		VOICE_TO_LEFT    = 0x10,
+		VOICE_TO_RIGHT   = 0x20,
+		STEREO_BITS      = VOICE_TO_LEFT | VOICE_TO_RIGHT,
+	};
+
 	OPL();
 	~OPL();
 
@@ -35,6 +84,7 @@ public:
 protected:
 	static uint16 ChannelToRegister(uint8 oplCh);
 	static uint16 OperatorToRegister(uint8 oplCh);
+	static uint8 CalcVolume(uint8 trackerVol, uint8 kslVolume);
 	uint8 GetVoice(CHANNELINDEX c) const;
 	uint8 AllocateVoice(CHANNELINDEX c);
 

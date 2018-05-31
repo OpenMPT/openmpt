@@ -15,57 +15,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-enum OPLRegisters
-{
-	// Operators (combine with result of OperatorToRegister)
-	AM_VIB          = 0x20, // AM / VIB / EG / KSR / Multiple (0x20 to 0x35)
-	KSL_LEVEL       = 0x40, // KSL / Total level (0x40 to 0x55)
-	ATTACK_DECAY    = 0x60, // Attack rate / Decay rate (0x60 to 0x75)
-	SUSTAIN_RELEASE = 0x80, // Sustain level / Release rate (0x80 to 0x95)
-	WAVE_SELECT     = 0xE0, // Wave select (0xE0 to 0xF5)
-
-	// Channels (combine with result of ChannelToRegister)
-	FNUM_LOW            = 0xA0, // F-number low bits (0xA0 to 0xA8)
-	KEYON_BLOCK         = 0xB0, // F-number high bits / Key on / Block (octave) (0xB0 to 0xB8)
-	FEEDBACK_CONNECTION = 0xC0, // Feedback / Connection (0xC0 to 0xC8)
-};
-
-
-enum OPLValues
-{
-	// AM_VIB
-	TREMOLO_ON       = 0x80,
-	VIBRATO_ON       = 0x40,
-	SUSTAIN_ON       = 0x20,
-	KSR              = 0x10, // Key scaling rate
-	MULTIPLE_MASK    = 0x0F, // Frequency multiplier
-
-	// KSL_LEVEL
-	KSL_MASK         = 0xC0, // Envelope scaling bits
-	TOTAL_LEVEL_MASK = 0x3F, // Strength (volume) of OP
-
-	// ATTACK_DECAY
-	ATTACK_MASK      = 0xF0,
-	DECAY_MASK       = 0x0F,
-
-	// SUSTAIN_RELEASE
-	SUSTAIN_MASK     = 0xF0,
-	RELEASE_MASK     = 0x0F,
-
-	// KEYON_BLOCK
-	KEYON_BIT        = 0x20,
-	BLOCKNUM_MASK    = 0x1C,
-	FNUM_HIGH_MASK   = 0x03,
-
-	// FEEDBACK_CONNECTION
-	FEEDBACK_MASK    = 0x0E, // Valid just for 1st OP of a voice
-	CONNECTION_BIT   = 0x01,
-	VOICE_TO_LEFT    = 0x10,
-	VOICE_TO_RIGHT   = 0x20,
-	STEREO_BITS      = VOICE_TO_LEFT | VOICE_TO_RIGHT,
-};
-
-
 OPL::OPL()
 {
 	m_KeyOnBlock.fill(0);
@@ -219,6 +168,16 @@ void OPL::Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff)
 }
 
 
+uint8 OPL::CalcVolume(uint8 trackerVol, uint8 kslVolume)
+{
+	if(trackerVol >= 63u)
+		return kslVolume;
+	else if(trackerVol > 0)
+		trackerVol++;
+	return (kslVolume & KSL_MASK) | (63u - ((63u - (kslVolume & TOTAL_LEVEL_MASK)) * trackerVol) / 64u);
+}
+
+
 void OPL::Volume(CHANNELINDEX c, uint8 vol)
 {
 	uint8 oplCh = GetVoice(c);
@@ -226,8 +185,13 @@ void OPL::Volume(CHANNELINDEX c, uint8 vol)
 		return;
 
 	const auto &patch = m_Patches[oplCh];
-	m_opl->Port(KSL_LEVEL + OperatorToRegister(oplCh) + 3,
-		(patch[3] & KSL_MASK) | (63 + ((patch[3] & TOTAL_LEVEL_MASK) * vol / 63) - vol));
+	const uint16 modulator = OperatorToRegister(oplCh), carrier = modulator + 3;
+	if(patch[10] & CONNECTION_BIT)
+	{
+		// Set volume of both operators in additive mode
+		m_opl->Port(KSL_LEVEL + modulator, CalcVolume(vol, patch[2]));
+	}
+	m_opl->Port(KSL_LEVEL + carrier, CalcVolume(vol, patch[3]));
 
 }
 
@@ -260,18 +224,16 @@ void OPL::Patch(CHANNELINDEX c, const OPLPatch &patch)
 
 	m_Patches[oplCh] = patch;
 
-	uint16 modulator = OperatorToRegister(oplCh);
-	m_opl->Port(AM_VIB          | modulator, patch[0]);
-	m_opl->Port(KSL_LEVEL       | modulator, patch[2]);
-	m_opl->Port(ATTACK_DECAY    | modulator, patch[4]);
-	m_opl->Port(SUSTAIN_RELEASE | modulator, patch[6]);
-	m_opl->Port(WAVE_SELECT     | modulator, patch[8]);
-	uint16 carrier = modulator + 3;
-	m_opl->Port(AM_VIB          | carrier, patch[1]);
-	m_opl->Port(KSL_LEVEL       | carrier, patch[3]);
-	m_opl->Port(ATTACK_DECAY    | carrier, patch[5]);
-	m_opl->Port(SUSTAIN_RELEASE | carrier, patch[7]);
-	m_opl->Port(WAVE_SELECT     | carrier, patch[9]);
+	const uint16 modulator = OperatorToRegister(oplCh), carrier = modulator + 3;
+	for(uint8 op = 0; op < 2; op++)
+	{
+		const auto opReg = op ? carrier : modulator;
+		m_opl->Port(AM_VIB          | opReg, patch[0 + op]);
+		m_opl->Port(KSL_LEVEL       | opReg, patch[2 + op]);
+		m_opl->Port(ATTACK_DECAY    | opReg, patch[4 + op]);
+		m_opl->Port(SUSTAIN_RELEASE | opReg, patch[6 + op]);
+		m_opl->Port(WAVE_SELECT     | opReg, patch[8 + op]);
+	}
 
 	m_opl->Port(FEEDBACK_CONNECTION | ChannelToRegister(oplCh), patch[10]);
 }
