@@ -52,6 +52,7 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool 
 		&& !(includeInstrumentFormats && ReadPATSample(nSample, file))
 		&& !ReadIFFSample(nSample, file)
 		&& !ReadS3ISample(nSample, file)
+		&& !ReadSBISample(nSample, file)
 		&& !ReadAUSample(nSample, file, mayNormalize)
 		&& !ReadFLACSample(nSample, file)
 		&& !ReadOpusSample(nSample, file)
@@ -1161,6 +1162,37 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
 	sample.PrecomputeLoops(*this, false);
 	return true;
 }
+
+
+/////////////////////////////////////////////////////////////
+// SBI OPL patch files
+
+bool CSoundFile::ReadSBISample(SAMPLEINDEX sample, FileReader &file)
+{
+	file.Rewind();
+	if(!file.ReadMagic("SBI\x1A")
+		|| !file.CanRead(32 + sizeof(OPLPatch))
+		|| file.CanRead(64))	// Arbitrary threshold to reject files that are unlikely to be SBI files
+		return false;
+
+	DestroySampleThreadsafe(sample);
+
+	ModSample &mptSmp = Samples[sample];
+	mptSmp.Initialize(MOD_TYPE_S3M);
+	mptSmp.nLength = 4;
+	mptSmp.nLoopStart = 0;
+	mptSmp.nLoopEnd = 4;
+	mptSmp.uFlags = CHN_LOOP | CHN_ADLIB;
+	mptSmp.AllocateSample();
+
+	file.ReadString<mpt::String::nullTerminated>(m_szNames[sample], 32);
+	file.ReadArray(mptSmp.adlib);
+	InitOPL();
+
+	mptSmp.Convert(MOD_TYPE_S3M, GetType());
+	return true;
+}
+
 
 
 /////////////////////////////////////////////////////////////

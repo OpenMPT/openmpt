@@ -926,6 +926,23 @@ public:
 			return false;
 		}
 	}
+	template<typename T, off_t destSize>
+	bool ReadArray(std::array<T, destSize> &destArray)
+	{
+		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		if(CanRead(sizeof(destArray)))
+		{
+			for(auto &element : destArray)
+			{
+				Read(element);
+			}
+			return true;
+		} else
+		{
+			destArray.fill(T());
+			return false;
+		}
+	}
 
 	// Read destSize elements of binary-safe type T into a vector.
 	// If successful, the file cursor is advanced by the size of the vector.

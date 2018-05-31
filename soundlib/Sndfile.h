@@ -1025,6 +1025,7 @@ public:
 	bool ReadW64Sample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false);
 	bool ReadPATSample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadS3ISample(SAMPLEINDEX nSample, FileReader &file);
+	bool ReadSBISample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadCAFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false);
 	bool ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false);
 	bool ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false);
