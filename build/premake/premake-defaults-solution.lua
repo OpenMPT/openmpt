@@ -1,4 +1,6 @@
 
+	preferredtoolarchitecture "x86_64"
+
 if _OPTIONS["win10"] then
 	filter {}
 		systemversion "10.0.16299.0"
