@@ -26,6 +26,46 @@ namespace mpt
 {
 
 
+
+// string_traits abstract the API of underlying string classes, in particular they allow adopting to CString without having to specialize for CString explicitly 
+
+template <typename Tstring>
+struct string_traits
+{
+
+	typedef Tstring string_type;
+	typedef typename string_type::value_type char_type;
+
+	static inline std::size_t length(const string_type &str) { return str.length(); }
+
+	static inline void reserve(string_type &str, std::size_t size) { str.reserve(size); }
+
+	static inline string_type& append(string_type &str, const string_type &a) { return str.append(a); }
+	static inline string_type& append(string_type &str, string_type &&a) { return str.append(std::move(a)); }
+	static inline string_type& append(string_type &str, std::size_t count, char_type c) { return str.append(count, c); }
+
+};
+
+#if defined(_MFC_VER)
+template <>
+struct string_traits<CString>
+{
+
+	typedef CString string_type;
+	typedef typename CString::XCHAR char_type;
+
+	static inline std::size_t length(const string_type &str) { return str.GetLength(); }
+
+	static inline void reserve(string_type &str, std::size_t size) { str.Preallocate(static_cast<int>(size)); }
+
+	static inline string_type& append(string_type &str, const string_type &a) { str += a; return str; }
+	static inline string_type& append(string_type &str, std::size_t count, char_type c) { while(count--) str.AppendChar(c); return str; }
+
+};
+#endif
+
+
+
 namespace String
 {
 
