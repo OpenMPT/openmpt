@@ -402,89 +402,41 @@ Tstring PrintImplTemplate(const Tstring & format
 	, const Tstring & x8
 	)
 {
+	typedef typename mpt::string_traits<Tstring> traits;
 	Tstring result;
-	const std::size_t len = format.length();
-	result.reserve(len);
+	const std::size_t len = traits::length(format);
+	traits::reserve(result, len);
 	for(std::size_t pos = 0; pos != len; ++pos)
 	{
-		typename Tstring::value_type c = format[pos];
-		if(pos + 1 != len && c == '%')
+		traits::char_type c = format[pos];
+		if(pos + 1 != len && c == traits::char_type('%'))
 		{
 			pos++;
 			c = format[pos];
-			if('1' <= c && c <= '9')
+			if(traits::char_type('1') <= c && c <= traits::char_type('9'))
 			{
-				const std::size_t n = c - '0';
+				const std::size_t n = c - traits::char_type('0');
 				switch(n)
 				{
-					case 1: result.append(x1); break;
-					case 2: result.append(x2); break;
-					case 3: result.append(x3); break;
-					case 4: result.append(x4); break;
-					case 5: result.append(x5); break;
-					case 6: result.append(x6); break;
-					case 7: result.append(x7); break;
-					case 8: result.append(x8); break;
+					case 1: traits::append(result, x1); break;
+					case 2: traits::append(result, x2); break;
+					case 3: traits::append(result, x3); break;
+					case 4: traits::append(result, x4); break;
+					case 5: traits::append(result, x5); break;
+					case 6: traits::append(result, x6); break;
+					case 7: traits::append(result, x7); break;
+					case 8: traits::append(result, x8); break;
 				}
 				continue;
-			} else if(c != '%')
+			} else if(c != traits::char_type('%'))
 			{
-				result.append(1, '%');
+				traits::append(result, 1, traits::char_type('%'));
 			}
 		}
-		result.append(1, c);
+		traits::append(result, 1, c);
 	}
 	return result;
 }
-
-#if defined(_MFC_VER)
-template<>
-CString PrintImplTemplate<CString>(const CString & format
-	, const CString & x1
-	, const CString & x2
-	, const CString & x3
-	, const CString & x4
-	, const CString & x5
-	, const CString & x6
-	, const CString & x7
-	, const CString & x8
-	)
-{
-	CString result;
-	const int len = format.GetLength();
-	result.Preallocate(len);
-	for(int pos = 0; pos != len; ++pos)
-	{
-		CString::XCHAR c = format[pos];
-		if(pos + 1 != len && c == _T('%'))
-		{
-			pos++;
-			c = format[pos];
-			if(_T('1') <= c && c <= _T('9'))
-			{
-				const std::size_t n = c - _T('0');
-				switch(n)
-				{
-					case 1: result += x1; break;
-					case 2: result += x2; break;
-					case 3: result += x3; break;
-					case 4: result += x4; break;
-					case 5: result += x5; break;
-					case 6: result += x6; break;
-					case 7: result += x7; break;
-					case 8: result += x8; break;
-				}
-				continue;
-			} else if(c != _T('%'))
-			{
-				result.AppendChar(_T('%'));
-			}
-		}
-		result.AppendChar(c);
-	}
-	return result;
-}
-#endif
 
 std::string PrintImpl(const std::string & format
 	, const std::string & x1
