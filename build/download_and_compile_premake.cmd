@@ -122,7 +122,7 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxil
  call build\auto\setup_vs2017.cmd || goto error
  cd include\genie\build\vs2017 || goto error
  devenv genie.sln /Upgrade || goto error
- devenv genie.sln /build "Release|Win32" || goto error
+ msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto geniedone
 )
@@ -130,7 +130,7 @@ if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\B
  call build\auto\setup_vs2017.cmd || goto error
  cd include\genie\build\vs2017 || goto error
  devenv genie.sln /Upgrade || goto error
- devenv genie.sln /build "Release|Win32" || goto error
+ msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto geniedone
 )
@@ -138,14 +138,14 @@ if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\B
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
  cd include\genie\build\vs2015 || goto error
- devenv genie.sln /build "Release|Win32" || goto error
+ msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto geniedone
 )
 if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
  cd include\genie\build\vs2015 || goto error
- devenv genie.sln /build "Release|Win32" || goto error
+ msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto geniedone
 )
@@ -168,8 +168,8 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxil
   bin\release\premake5 --to=build/vs2017 vs2017 --no-curl --no-zlib --no-luasocket || goto error
  cd ..\.. || goto error
  cd include\premake\build\vs2017 || goto error
-  devenv Premake5.sln /clean "Release|Win32" || goto error
-  devenv Premake5.sln /build "Release|Win32" || goto error
+  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
@@ -182,8 +182,8 @@ if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\B
   bin\release\premake5 --to=build/vs2017 vs2017 --no-curl --no-zlib --no-luasocket || goto error
  cd ..\.. || goto error
  cd include\premake\build\vs2017 || goto error
-  devenv Premake5.sln /clean "Release|Win32" || goto error
-  devenv Premake5.sln /build "Release|Win32" || goto error
+  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
@@ -196,8 +196,8 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" 
   bin\release\premake5 --to=build/vs2015 vs2015 --no-curl --no-zlib --no-luasocket || goto error
  cd ..\.. || goto error
  cd include\premake\build\vs2015 || goto error
-  devenv Premake5.sln /clean "Release|Win32" || goto error
-  devenv Premake5.sln /build "Release|Win32" || goto error
+  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
@@ -209,8 +209,8 @@ if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
   bin\release\premake5 --to=build/vs2015 vs2015 --no-curl --no-zlib --no-luasocket || goto error
  cd ..\.. || goto error
  cd include\premake\build\vs2015 || goto error
-  devenv Premake5.sln /clean "Release|Win32" || goto error
-  devenv Premake5.sln /build "Release|Win32" || goto error
+  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
