@@ -1184,13 +1184,8 @@ void Opal::Operator::SetFrequencyMultiplier(uint16_t scale) {
 //==================================================================================================
 void Opal::Operator::SetKeyScale(uint16_t scale) {
 
-    if (scale > 0)
-        KeyScaleShift = 3 - scale;
-
-    // No scaling, ensure it has no effect
-    else
-        KeyScaleShift = 15;
-
+    static const uint8_t kslShift[4] = { 15, 1, 2, 0 };
+    KeyScaleShift = kslShift[scale];
     ComputeKeyScaleLevel();
 }
 

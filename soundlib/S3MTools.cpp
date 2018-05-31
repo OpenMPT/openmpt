@@ -16,13 +16,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-// ST3 swaps the OPL Key Scale Level bits. We fix this when loading and saving S3M/S3I files so that we can simply send the correct value to the OPL emulator.
-static void FixKSLBits(uint8 &kslVolume)
-{
-	static const uint8 KSLFix[4] = { 0x00, 0x80, 0x40, 0xC0 };
-	kslVolume = (kslVolume & 0x3F) | KSLFix[kslVolume >> 6];
-}
-
 // Convert an S3M sample header to OpenMPT's internal sample header.
 void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 {
@@ -49,8 +42,6 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 	{
 		const uint8 *adlibBytes = reinterpret_cast<const uint8 *>(&length);
 		std::copy(adlibBytes, adlibBytes + 12, mptSmp.adlib.begin());
-		FixKSLBits(mptSmp.adlib[2]);
-		FixKSLBits(mptSmp.adlib[3]);
 		// Bogus sample to make playback work
 		mptSmp.nLength = 4;
 		mptSmp.nLoopStart = 0;
@@ -88,8 +79,6 @@ SmpLength S3MSampleHeader::ConvertToS3M(const ModSample &mptSmp)
 		sampleType = typeAdMel;
 		uint8 *adlibBytes = reinterpret_cast<uint8 *>(&length);
 		std::copy(mptSmp.adlib.begin(), mptSmp.adlib.end(), adlibBytes);
-		FixKSLBits(adlibBytes[2]);
-		FixKSLBits(adlibBytes[3]);
 	} else if(mptSmp.HasSampleData())
 	{
 		sampleType = typePCM;
