@@ -242,7 +242,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						s.Format(_T("%02u"), iSmp + 1);
 						break;
 					case SMPLIST_SIZE:
-						if (sample.nLength)
+						if(sample.nLength && !sample.uFlags[CHN_ADLIB])
 						{
 							auto size = sample.GetSampleSizeInBytes();
 							if(size >= 1024)
@@ -252,10 +252,10 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						}
 						break;
 					case SMPLIST_TYPE:
-						if(sample.nLength)
-						{
+						if(sample.uFlags[CHN_ADLIB])
+							s = _T("OPL");
+						else if(sample.HasSampleData())
 							s.Format(_T("%u Bit"), sample.GetElementarySampleSize() * 8);
-						}
 						break;
 					case SMPLIST_INSTR:
 						if (sndFile.GetNumInstruments())
