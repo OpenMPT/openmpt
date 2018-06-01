@@ -756,9 +756,7 @@ void CDoMidiConvert::Run()
 			{
 				timeRemaining = static_cast<uint32>(((currentTime - startTime) * (totalSamples - curSamples) / curSamples) / 1000u);
 			}
-			TCHAR s[128];
-			_stprintf(s, _T("Rendering file... (%umn%02us, %umn%02us remaining)"), curTime / 60u, curTime % 60u, timeRemaining / 60u, timeRemaining % 60u);
-			SetText(s);
+			SetText(mpt::cformat(_T("Rendering file... (%1mn%2s, %3mn%4s remaining)"))(curTime / 60u, mpt::cfmt::dec0<2>(curTime % 60u), timeRemaining / 60u, mpt::cfmt::dec0<2>(timeRemaining % 60u)));
 			SetProgress(curTime);
 			ProcessMessages();
 

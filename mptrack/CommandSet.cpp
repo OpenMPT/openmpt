@@ -675,8 +675,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcChannelDuplicate, 1923, _T("Duplicate Channel"));
 	for(int j = kcStartSampleCues; j <= kcEndSampleCues; j++)
 	{
-		TCHAR s[32];
-		wsprintf(s, _T("Preview Sample Cue %u"), j - kcStartSampleCues + 1);
+		CString s = mpt::cformat(_T("Preview Sample Cue %1"))(j - kcStartSampleCues + 1);
 		DefineKeyCommand((CommandID)j, 1924 + j - kcStartSampleCues, s);
 	}
 	// Safety margin if we want to add more cues

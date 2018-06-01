@@ -31,13 +31,13 @@ BOOL CProgressDialog::OnInitDialog()
 }
 
 
-void CProgressDialog::SetTitle(const TCHAR *title)
+void CProgressDialog::SetTitle(const CString &title)
 {
 	SetWindowText(title);
 }
 
 
-void CProgressDialog::SetText(const TCHAR *text)
+void CProgressDialog::SetText(const CString &text)
 {
 	SetDlgItemText(IDC_TEXT1, text);
 }

@@ -552,7 +552,6 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 
 		m_nCurHotKey = nCmd;
 		m_nCurCategory = GetCategoryFromCommandID(nCmd);
-		TCHAR s[20];
 
 		m_cmbKeyChoice.ResetContent();
 		int numChoices=plocalCmdSet->GetKeyListSize(nCmd);
@@ -560,7 +559,7 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 		{
 			for (int i=0; i<numChoices; i++)
 			{
-				wsprintf(s, _T("Choice %u (of %u)"), i+1, numChoices);
+				CString s = mpt::cformat(_T("Choice %1 (of %2)"))(i+1, numChoices);
 				m_cmbKeyChoice.SetItemData(m_cmbKeyChoice.AddString(s), i);
 			}
 		}
