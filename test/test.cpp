@@ -439,6 +439,7 @@ static void TestFloatFormat(Tfloat x, const char * format, mpt::FormatFlags f, s
 #ifdef MODPLUG_TRACKER
 	VERIFY_EQUAL(str_iostreams, str_sprintf); // this will fail with a set c locale (and there is nothing that can be done about that in libopenmpt)
 #else
+	MPT_UNREFERENCED_PARAMETER(format);
 	MPT_UNUSED_VARIABLE(str_iostreams);
 #endif
 }
