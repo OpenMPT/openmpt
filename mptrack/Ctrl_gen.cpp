@@ -652,23 +652,6 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPTSTR pszText)
 	
 }
 
-void CCtrlGeneral::setAsDecibels(LPSTR stringToSet, double value, double valueAtZeroDB)
-{
-	if (value == 0)
-	{
-		wsprintfA(stringToSet, "-inf");
-		return;
-	}
-	
-	double changeFactor = value / valueAtZeroDB;
-	double dB = 10 * log(changeFactor);
-
-	char sign = (dB>=0) ? '+' : ' ';
-	sprintf(stringToSet, "%c%.2f dB", sign, dB);
-	return;
-
-}
-
 
 void CCtrlGeneral::OnEnSetfocusEditSongtitle()
 {

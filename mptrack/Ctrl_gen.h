@@ -50,7 +50,6 @@ public:
 	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glGeneralWindowHeight;} 	//rewbs.varWindowSize
 
 private:
-	void setAsDecibels(LPSTR stringToSet, double value, double valueAtZeroDB);
 
 	// Determine how the global volume slider should be scaled to actual global volume.
 	// Display range for XM / S3M should be 0...64, for other formats it's 0...256.
