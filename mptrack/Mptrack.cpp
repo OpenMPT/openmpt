@@ -1369,13 +1369,12 @@ protected:
 #endif
 
 public:
-	CSplashScreen();
 	~CSplashScreen();
 	BOOL OnInitDialog() override;
 	void OnOK() override;
 	void OnCancel() override { OnOK(); }
-	void OnPaint() override;
-	BOOL OnEraseBkgnd(CDC *) override { return TRUE; }
+	void OnPaint();
+	BOOL OnEraseBkgnd(CDC *) { return TRUE; }
 
 	DECLARE_MESSAGE_MAP()
 };
@@ -1388,11 +1387,6 @@ END_MESSAGE_MAP()
 static CSplashScreen *gpSplashScreen = NULL;
 
 static DWORD gSplashScreenStartTime = 0;
-
-
-CSplashScreen::CSplashScreen()
-{
-}
 
 
 CSplashScreen::~CSplashScreen()
