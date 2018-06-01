@@ -170,8 +170,8 @@ public:
 	}
 };
 
-template<typename Tostream>
-inline void ApplyFormat(Tostream & o, const FormatSpec & format)
+template<typename Tostream, typename T>
+inline void ApplyFormat(Tostream & o, const FormatSpec & format, const T &)
 {
 	if(format.GetGroup() > 0)
 	{
@@ -195,20 +195,50 @@ inline void ApplyFormat(Tostream & o, const FormatSpec & format)
 	else if(f & fmt_base::NotaSci ) { o << std::setiosflags(std::ios::scientific); }
 	if(f & fmt_base::CaseLow) { o << std::nouppercase; }
 	else if(f & fmt_base::CaseUpp) { o << std::uppercase; }
-	if(f & fmt_base::FillOff) { /* nothing */ }
-	else if(f & fmt_base::FillNul) { o << std::setw(width) << std::setfill(typename Tostream::char_type('0')); }
+	MPT_MAYBE_CONSTANT_IF(!std::numeric_limits<T>::is_integer)
+	{
+		if(f & fmt_base::FillOff) { /* nothing */ }
+		else if(f & fmt_base::FillNul) { o << std::setw(width) << std::setfill(typename Tostream::char_type('0')); }
+	}
 	if(precision != -1) { o << std::setprecision(precision); }
 }
 
+template<typename Tstring, typename T>
+inline void PostProcessDigits(Tstring &str, const FormatSpec & format, const T &)
+{
+	FormatFlags f = format.GetFlags();
+	std::size_t width = format.GetWidth();
+	MPT_MAYBE_CONSTANT_IF(std::numeric_limits<T>::is_integer)
+	{
+		if(f & fmt_base::FillOff)
+		{
+			/* nothing */
+		} else if(f & fmt_base::FillNul)
+		{
+			if(str.length() < width)
+			{
+				auto pos = str.begin();
+				if(str.length() > 0)
+				{
+					if(str[0] == '+') { pos++; }
+					else if(str[0] == '-') { pos++; }
+				}
+				str.insert(pos, width - str.length(), '0');
+			}
+		}
+	}
+}
 
 template<typename T>
 inline std::string FormatValHelper(const T & x, const FormatSpec & f)
 {
 	std::ostringstream o;
 	o.imbue(std::locale::classic());
-	ApplyFormat(o, f);
+	ApplyFormat(o, f, x);
 	SaneInsert(o, x);
-	return o.str();
+	std::string result = o.str();
+	PostProcessDigits(result, f, x);
+	return result;
 }
 
 #if MPT_WSTRING_FORMAT
@@ -217,9 +247,11 @@ inline std::wstring FormatValWHelper(const T & x, const FormatSpec & f)
 {
 	std::wostringstream o;
 	o.imbue(std::locale::classic());
-	ApplyFormat(o, f);
+	ApplyFormat(o, f, x);
 	SaneInsert(o, x);
-	return o.str();
+	std::wstring result = o.str();
+	PostProcessDigits(result, f, x);
+	return result;
 }
 #endif
 

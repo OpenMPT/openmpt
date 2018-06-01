@@ -509,9 +509,29 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::fmt::val(-23), "-23");
 	VERIFY_EQUAL(mpt::fmt::val(42), "42");
 
+	VERIFY_EQUAL(mpt::fmt::hex0<3>((int32)-1), "ffffffff");  // "-001"
+	VERIFY_EQUAL(mpt::fmt::hex((int32)-1), "ffffffff");  // "-1"
 	VERIFY_EQUAL(mpt::fmt::hex(0x123e), "123e");
 	VERIFY_EQUAL(mpt::fmt::hex0<6>(0x123e), "00123e");
 	VERIFY_EQUAL(mpt::fmt::hex0<2>(0x123e), "123e");
+
+	VERIFY_EQUAL(mpt::fmt::dec0<0>(1), "1");
+	VERIFY_EQUAL(mpt::fmt::dec0<1>(1), "1");
+	VERIFY_EQUAL(mpt::fmt::dec0<2>(1), "01");
+	VERIFY_EQUAL(mpt::fmt::dec0<3>(1), "001");
+	VERIFY_EQUAL(mpt::fmt::dec0<0>(11), "11");
+	VERIFY_EQUAL(mpt::fmt::dec0<1>(11), "11");
+	VERIFY_EQUAL(mpt::fmt::dec0<2>(11), "11");
+	VERIFY_EQUAL(mpt::fmt::dec0<3>(11), "011");
+	VERIFY_EQUAL(mpt::fmt::dec0<0>(-1), "-1");
+	VERIFY_EQUAL(mpt::fmt::dec0<1>(-1), "-1");
+	VERIFY_EQUAL(mpt::fmt::dec0<2>(-1), "-1");
+	VERIFY_EQUAL(mpt::fmt::dec0<3>(-1), "-01");
+
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(0xa2345678), MPT_USTRING("A2345678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(0xa2345678), MPT_USTRING("A2345678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(0xa2345678), MPT_USTRING("0A2345678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(0xa2345678), MPT_USTRING("00A2345678"));
 
 #if MPT_WSTRING_FORMAT
 	VERIFY_EQUAL(mpt::wfmt::hex(0x123e), L"123e");
