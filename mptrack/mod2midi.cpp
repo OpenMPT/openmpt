@@ -743,6 +743,7 @@ void CDoMidiConvert::Run()
 
 	MidiExport::DummyAudioTarget target;
 	UINT ok = IDOK;
+	const auto fmt = mpt::tformat(_T("Rendering file... (%1mn%2s, %3mn%4s remaining)"));
 	while(m_sndFile.Read(MIXBUFFERSIZE, target) > 0)
 	{
 		auto currentTime = timeGetTime();
@@ -756,7 +757,7 @@ void CDoMidiConvert::Run()
 			{
 				timeRemaining = static_cast<uint32>(((currentTime - startTime) * (totalSamples - curSamples) / curSamples) / 1000u);
 			}
-			SetText(mpt::cformat(_T("Rendering file... (%1mn%2s, %3mn%4s remaining)"))(curTime / 60u, mpt::cfmt::dec0<2>(curTime % 60u), timeRemaining / 60u, mpt::cfmt::dec0<2>(timeRemaining % 60u)));
+			SetText(fmt(curTime / 60u, mpt::tfmt::dec0<2>(curTime % 60u), timeRemaining / 60u, mpt::tfmt::dec0<2>(timeRemaining % 60u)).c_str());
 			SetProgress(curTime);
 			ProcessMessages();
 

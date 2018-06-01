@@ -20,9 +20,9 @@ public:
 	CProgressDialog(CWnd *parent = nullptr);
 
 	// Set the window title
-	void SetTitle(const CString &title);
+	void SetTitle(const TCHAR *title);
 	// Set the text to be displayed along the progress bar.
-	void SetText(const CString &text);
+	void SetText(const TCHAR *text);
 	// Set the minimum and maximum value of the progress bar.
 	void SetRange(uint32 min, uint32 max);
 	// Set the current progress.
