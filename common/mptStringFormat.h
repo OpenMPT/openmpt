@@ -312,9 +312,6 @@ public:
 	MPT_CONSTEXPR14_FUN FormatSpec & SetGroup(unsigned int g) noexcept { group = g; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & SetGroupSep(char s) noexcept { group_sep = s; return *this; }
 public:
-	// short-hand construction
-	MPT_CONSTEXPR11_FUN explicit FormatSpec(FormatFlags f, std::size_t w = 0, int p = -1, unsigned int g = 0, char s = ',') noexcept : flags(f), width(w), precision(p), group(g), group_sep(s) {}
-public:
 	MPT_CONSTEXPR14_FUN FormatSpec & BaseDec() noexcept { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseDec; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & BaseHex() noexcept { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseHex; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & CaseLow() noexcept { flags &= ~(fmt_base::CaseLow|fmt_base::CaseUpp); flags |= fmt_base::CaseLow; return *this; }
