@@ -197,7 +197,6 @@ inline void ApplyFormat(Tostream & o, const FormatSpec & format)
 	else if(f & fmt_base::CaseUpp) { o << std::uppercase; }
 	if(f & fmt_base::FillOff) { /* nothing */ }
 	else if(f & fmt_base::FillNul) { o << std::setw(width) << std::setfill(typename Tostream::char_type('0')); }
-	else if(f & fmt_base::FillSpc) { o << std::setw(width) << std::setfill(typename Tostream::char_type(' ')); }
 	if(precision != -1) { o << std::setprecision(precision); }
 }
 

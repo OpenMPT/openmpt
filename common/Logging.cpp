@@ -134,7 +134,7 @@ void Logger::SendLogMessage(const Context &context, LogLevel level, const char *
 			{
 				mpt::IO::WriteText(s_logfile, mpt::ToCharset(mpt::CharsetUTF8, mpt::format(MPT_USTRING("%1+%2 %3(%4): %5 [%6]\n"))
 					( mpt::Date::ANSI::ToUString(cur)
-					, mpt::ufmt::dec<6>(diff)
+					, mpt::ufmt::right(6, mpt::ufmt::dec(diff))
 					, file
 					, line
 					, message
@@ -148,7 +148,7 @@ void Logger::SendLogMessage(const Context &context, LogLevel level, const char *
 			OutputDebugStringW(mpt::ToWide(mpt::format(MPT_USTRING("%1(%2): +%3 %4 [%5]\n"))
 				( file
 				, line
-				, mpt::ufmt::dec<6>(diff)
+				, mpt::ufmt::right(6, mpt::ufmt::dec(diff))
 				, message
 				, function
 				)).c_str());

@@ -2070,7 +2070,7 @@ void CMainFrame::OnTimerGUI()
 			cwnd->GetClientRect(&rect);
 			rect.left += width;
 			rect.top += i * height;
-			auto s = mpt::ToCString(mpt::CharsetASCII, mpt::fmt::f("%6.3f", cats[i] * 100.0) + "% " + catnames[i]);
+			auto s = mpt::ToCString(mpt::CharsetASCII, mpt::fmt::right(6, mpt::fmt::fix(cats[i] * 100.0, 3)) + "% " + catnames[i]);
 			dc.DrawText(s, s.GetLength(), &rect, DT_LEFT);
 		}
 

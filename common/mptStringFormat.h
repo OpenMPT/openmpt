@@ -195,6 +195,7 @@ template <> struct ToStringTFunctor<CString> { template <typename T> inline CStr
 template<typename Tstring, typename T> inline Tstring ToStringT(const T & x) { return ToStringTFunctor<Tstring>()(x); }
 
 
+
 struct fmt_base
 {
 
@@ -205,7 +206,6 @@ enum FormatFlagsEnum
 	CaseLow = 0x0010, // lower case hex digits
 	CaseUpp = 0x0020, // upper case hex digits
 	FillOff = 0x0100, // do not fill up width
-	FillSpc = 0x0200, // fill up width with spaces
 	FillNul = 0x0400, // fill up width with zeros
 	NotaNrm = 0x1000, // float: normal/default notation
 	NotaFix = 0x2000, // float: fixed point notation
@@ -319,9 +319,8 @@ public:
 	MPT_CONSTEXPR14_FUN FormatSpec & BaseHex() noexcept { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseHex; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & CaseLow() noexcept { flags &= ~(fmt_base::CaseLow|fmt_base::CaseUpp); flags |= fmt_base::CaseLow; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & CaseUpp() noexcept { flags &= ~(fmt_base::CaseLow|fmt_base::CaseUpp); flags |= fmt_base::CaseUpp; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & FillOff() noexcept { flags &= ~(fmt_base::FillOff|fmt_base::FillSpc|fmt_base::FillNul); flags |= fmt_base::FillOff; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & FillSpc() noexcept { flags &= ~(fmt_base::FillOff|fmt_base::FillSpc|fmt_base::FillNul); flags |= fmt_base::FillSpc; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & FillNul() noexcept { flags &= ~(fmt_base::FillOff|fmt_base::FillSpc|fmt_base::FillNul); flags |= fmt_base::FillNul; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & FillOff() noexcept { flags &= ~(fmt_base::FillOff|fmt_base::FillNul); flags |= fmt_base::FillOff; return *this; }
+	MPT_CONSTEXPR14_FUN FormatSpec & FillNul() noexcept { flags &= ~(fmt_base::FillOff|fmt_base::FillNul); flags |= fmt_base::FillNul; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & NotaNrm() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaNrm; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & NotaFix() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaFix; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & NotaSci() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaSci; return *this; }
@@ -335,7 +334,6 @@ public:
 	MPT_CONSTEXPR14_FUN FormatSpec & Low() noexcept { return CaseLow(); }
 	MPT_CONSTEXPR14_FUN FormatSpec & Upp() noexcept { return CaseUpp(); }
 	MPT_CONSTEXPR14_FUN FormatSpec & Off() noexcept { return FillOff(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Spc() noexcept { return FillSpc(); }
 	MPT_CONSTEXPR14_FUN FormatSpec & Nul() noexcept { return FillNul(); }
 	MPT_CONSTEXPR14_FUN FormatSpec & Nrm() noexcept { return NotaNrm(); }
 	MPT_CONSTEXPR14_FUN FormatSpec & Fix() noexcept { return NotaFix(); }
@@ -346,7 +344,6 @@ public:
 	MPT_CONSTEXPR14_FUN FormatSpec & Lower() noexcept { return CaseLow(); }
 	MPT_CONSTEXPR14_FUN FormatSpec & Upper() noexcept { return CaseUpp(); }
 	MPT_CONSTEXPR14_FUN FormatSpec & FillNone() noexcept { return FillOff(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & FillSpace() noexcept { return FillSpc(); }
 	MPT_CONSTEXPR14_FUN FormatSpec & FillZero() noexcept { return FillNul(); }
 	MPT_CONSTEXPR14_FUN FormatSpec & FloatNormal() noexcept { return NotaNrm(); }
 	MPT_CONSTEXPR14_FUN FormatSpec & FloatFixed() noexcept { return NotaFix(); }
@@ -378,12 +375,6 @@ static inline Tstring dec(const T& x)
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillOff());
 }
 template<int width, typename T>
-static inline Tstring dec(const T& x)
-{
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillSpc().Width(width));
-}
-template<int width, typename T>
 static inline Tstring dec0(const T& x)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
@@ -395,12 +386,6 @@ static inline Tstring dec(unsigned int g, char s, const T& x)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillOff().Group(g).GroupSep(s));
-}
-template<int width, typename T>
-static inline Tstring dec(unsigned int g, char s, const T& x)
-{
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillSpc().Width(width).Group(g).GroupSep(s));
 }
 template<int width, typename T>
 static inline Tstring dec0(unsigned int g, char s, const T& x)
@@ -420,18 +405,6 @@ static inline Tstring HEX(const T& x)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillOff());
-}
-template<int width, typename T>
-static inline Tstring hex(const T& x)
-{
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillSpc().Width(width));
-}
-template<int width, typename T>
-static inline Tstring HEX(const T& x)
-{
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillSpc().Width(width));
 }
 template<int width, typename T>
 static inline Tstring hex0(const T& x)
@@ -457,18 +430,6 @@ static inline Tstring HEX(unsigned int g, char s, const T& x)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillOff().Group(g).GroupSep(s));
-}
-template<int width, typename T>
-static inline Tstring hex(unsigned int g, char s, const T& x)
-{
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillSpc().Width(width).Group(g).GroupSep(s));
-}
-template<int width, typename T>
-static inline Tstring HEX(unsigned int g, char s, const T& x)
-{
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillSpc().Width(width).Group(g).GroupSep(s));
 }
 template<int width, typename T>
 static inline Tstring hex0(unsigned int g, char s, const T& x)
@@ -502,7 +463,34 @@ static inline Tstring sci(const T& x, int precision = -1)
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaSci().FillOff().Precision(precision));
 }
 
+static inline Tstring pad_left(std::size_t width, const Tstring &str)
+{
+	typedef mpt::string_traits<Tstring> traits;
+	return traits::pad(str, width, 0);
+}
+static inline Tstring pad_right(std::size_t width, const Tstring &str)
+{
+	typedef mpt::string_traits<Tstring> traits;
+	return traits::pad(str, 0, width);
+}
+static inline Tstring left(std::size_t width, const Tstring &str)
+{
+	typedef mpt::string_traits<Tstring> traits;
+	return (traits::length(str) < width) ? traits::pad(str, 0, width - traits::length(str)) : str;
+}
+static inline Tstring right(std::size_t width, const Tstring &str)
+{
+	typedef mpt::string_traits<Tstring> traits;
+	return (traits::length(str) < width) ? traits::pad(str, width - traits::length(str), 0) : str;
+}
+static inline Tstring center(std::size_t width, const Tstring &str)
+{
+	typedef mpt::string_traits<Tstring> traits;
+	return (traits::length(str) < width) ? traits::pad(str, (width - traits::length(str)) / 2, (width - traits::length(str) + 1) / 2) : str;
+}
+
 }; // struct fmtT
+
 
 typedef fmtT<std::string> fmt;
 #if MPT_WSTRING_FORMAT

@@ -44,6 +44,13 @@ struct string_traits
 	static inline string_type& append(string_type &str, string_type &&a) { return str.append(std::move(a)); }
 	static inline string_type& append(string_type &str, std::size_t count, char_type c) { return str.append(count, c); }
 
+	static inline string_type pad(string_type str, std::size_t left, std::size_t right)
+	{
+		str.insert(str.begin(), left, char_type(' '));
+		str.insert(str.end(), right, char_type(' '));
+		return str;
+	}
+
 };
 
 #if defined(_MFC_VER)
@@ -60,6 +67,15 @@ struct string_traits<CString>
 
 	static inline string_type& append(string_type &str, const string_type &a) { str += a; return str; }
 	static inline string_type& append(string_type &str, std::size_t count, char_type c) { while(count--) str.AppendChar(c); return str; }
+
+	static inline string_type pad(const string_type &str, std::size_t left, std::size_t right)
+	{
+		CString tmp;
+		while(left--) tmp.AppendChar(char_type(' '));
+		tmp += str;
+		while(right--) tmp.AppendChar(char_type(' '));
+		return tmp;
+	}
 
 };
 #endif

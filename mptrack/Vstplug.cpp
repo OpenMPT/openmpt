@@ -1067,7 +1067,7 @@ VstIntPtr CVstPlugin::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value,
 			codeStr = mpt::ToUnicode(mpt::CharsetASCII, VstOpCodes[opCode]);
 		else
 			codeStr = mpt::ufmt::val(opCode);
-		ReportPlugException(mpt::format(MPT_USTRING("Exception %1 in Dispatch(%2)"))(mpt::ufmt::HEX<8>(exception), codeStr));
+		ReportPlugException(mpt::format(MPT_USTRING("Exception %1 in Dispatch(%2)"))(mpt::ufmt::HEX0<8>(exception), codeStr));
 	}
 
 	return result;
@@ -1274,7 +1274,7 @@ void CVstPlugin::ProcessVSTEvents()
 		if(exception)
 		{
 			ReportPlugException(mpt::format(MPT_USTRING("Exception %1 in ProcessVSTEvents(numEvents:%2)!"))(
-				mpt::ufmt::HEX<8>(exception),
+				mpt::ufmt::HEX0<8>(exception),
 				vstEvents.GetNumEvents()));
 		}
 	}
@@ -1387,7 +1387,7 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		{
 			Bypass();
 			mpt::ustring processMethod = (m_Effect.flags & effFlagsCanReplacing) ? MPT_USTRING("processReplacing") : MPT_USTRING("process");
-			ReportPlugException(mpt::format(MPT_USTRING("The plugin threw an exception (%1) in %2. It has automatically been set to \"Bypass\"."))(mpt::ufmt::HEX<8>(exception), processMethod));
+			ReportPlugException(mpt::format(MPT_USTRING("The plugin threw an exception (%1) in %2. It has automatically been set to \"Bypass\"."))(mpt::ufmt::HEX0<8>(exception), processMethod));
 		}
 
 		// Mix outputs of multi-output VSTs:

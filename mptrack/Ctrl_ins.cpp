@@ -242,7 +242,7 @@ void CNoteMapWnd::OnPaint()
 			s = _T(" ..");
 			if ((pIns) && (nPos >= 0) && (nPos < NOTE_MAX) && (pIns->Keyboard[nPos]))
 			{
-				s = mpt::tfmt::dec<3>(pIns->Keyboard[nPos]);
+				s = mpt::tfmt::right(3, mpt::tfmt::dec(pIns->Keyboard[nPos]));
 			}
 			FillRect(hdc, &rect, (highlight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
 			if ((nPos == (int)m_nNote) && (m_bIns))

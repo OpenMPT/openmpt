@@ -458,10 +458,6 @@ static void TestFloatFormats(Tfloat x)
 	TestFloatFormat(x, "%.1f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 1);
 	TestFloatFormat(x, "%.2f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 2);
 	TestFloatFormat(x, "%.3f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 3);
-	TestFloatFormat(x, "%1.1f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 1, 1);
-	TestFloatFormat(x, "%3.1f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 3, 1);
-	TestFloatFormat(x, "%4.1f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 4, 1);
-	TestFloatFormat(x, "%6.3f", mpt::fmt::NotaFix | mpt::fmt::FillSpc, 6, 3);
 	TestFloatFormat(x, "%0.1f", mpt::fmt::NotaFix | mpt::fmt::FillNul, 0, 1);
 	TestFloatFormat(x, "%02.0f", mpt::fmt::NotaFix | mpt::fmt::FillNul, 2, 0);
 }
@@ -513,13 +509,11 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::fmt::val(-23), "-23");
 	VERIFY_EQUAL(mpt::fmt::val(42), "42");
 
-	VERIFY_EQUAL(mpt::fmt::hex<3>((int32)-1), "ffffffff");
 	VERIFY_EQUAL(mpt::fmt::hex(0x123e), "123e");
 	VERIFY_EQUAL(mpt::fmt::hex0<6>(0x123e), "00123e");
 	VERIFY_EQUAL(mpt::fmt::hex0<2>(0x123e), "123e");
 
 #if MPT_WSTRING_FORMAT
-	VERIFY_EQUAL(mpt::wfmt::hex<3>((int32)-1), L"ffffffff");
 	VERIFY_EQUAL(mpt::wfmt::hex(0x123e), L"123e");
 	VERIFY_EQUAL(mpt::wfmt::hex0<6>(0x123e), L"00123e");
 	VERIFY_EQUAL(mpt::wfmt::hex0<2>(0x123e), L"123e");
@@ -547,6 +541,18 @@ static MPT_NOINLINE void TestStringFormatting()
 	//VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, ':', 0xa2345678), MPT_USTRING("0A2:345:678"));
 	//VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, ':', 0xa2345678), MPT_USTRING(":0A2:345:678")); // GCC returns "00A2:345:678"
 	
+	VERIFY_EQUAL(mpt::fmt::left(3, "a"), "a  ");
+	VERIFY_EQUAL(mpt::fmt::right(3, "a"), "  a");
+	VERIFY_EQUAL(mpt::fmt::center(3, "a"), " a ");
+	VERIFY_EQUAL(mpt::fmt::center(4, "a"), " a  ");
+
+	#if defined(_MFC_VER)
+		VERIFY_EQUAL(mpt::cfmt::left(3, CString(_T("a"))), CString(_T("a  ")));
+		VERIFY_EQUAL(mpt::cfmt::right(3, CString(_T("a"))), CString(_T("  a")));
+		VERIFY_EQUAL(mpt::cfmt::center(3, CString(_T("a"))), CString(_T(" a ")));
+		VERIFY_EQUAL(mpt::cfmt::center(4, CString(_T("a"))), CString(_T(" a  ")));
+	#endif
+
 	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586u);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), (uint32)int32_max);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("4294967295"), uint32_max);

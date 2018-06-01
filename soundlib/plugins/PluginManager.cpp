@@ -446,7 +446,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	FreeLibrary(hLib);
 	if(exception != 0)
 	{
-		CVstPluginManager::ReportPlugException(mpt::format(MPT_USTRING("Exception %1 while trying to load plugin \"%2\"!\n"))(mpt::ufmt::HEX<8>(exception), plug->libraryName));
+		CVstPluginManager::ReportPlugException(mpt::format(MPT_USTRING("Exception %1 while trying to load plugin \"%2\"!\n"))(mpt::ufmt::HEX0<8>(exception), plug->libraryName));
 	}
 #endif // NO_VST
 
