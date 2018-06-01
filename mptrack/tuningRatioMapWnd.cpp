@@ -96,7 +96,7 @@ void CTuningRatioMapWnd::OnPaint()
 			dc.DrawText(mpt::cfmt::val(m_pTuning->GetRatio(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
 			rect.SetRect(m_cxFont * 3, ypaint, m_cxFont * 4 - 1, ypaint + m_cyFont);
-			dc.DrawText(mpt::cfmt::fix(std::log2(static_cast<double>(m_pTuning->GetRatio(noteToDraw))) * 1200.0, 0, 1), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.DrawText(mpt::cfmt::fix(std::log2(static_cast<double>(m_pTuning->GetRatio(noteToDraw))) * 1200.0, 1), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 
 		}
 		rect.SetRect(rcClient.left+m_cxFont*4-1, rcClient.top, rcClient.left+m_cxFont*4+3, ypaint);

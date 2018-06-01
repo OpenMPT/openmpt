@@ -484,40 +484,22 @@ static inline Tstring HEX0(unsigned int g, char s, const T& x)
 }
 
 template<typename T>
-static inline Tstring flt(const T& x, std::size_t width = 0, int precision = -1)
+static inline Tstring flt(const T& x, int precision = -1)
 {
 	STATIC_ASSERT(std::is_floating_point<T>::value);
-	if(width == 0)
-	{
-		return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaNrm().FillOff().Precision(precision));
-	} else
-	{
-		return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaNrm().FillSpc().Width(width).Precision(precision));
-	}
+	return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaNrm().FillOff().Precision(precision));
 }
 template<typename T>
-static inline Tstring fix(const T& x, std::size_t width = 0, int precision = -1)
+static inline Tstring fix(const T& x, int precision = -1)
 {
 	STATIC_ASSERT(std::is_floating_point<T>::value);
-	if(width == 0)
-	{
-		return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaFix().FillOff().Precision(precision));
-	} else
-	{
-		return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaFix().FillSpc().Width(width).Precision(precision));
-	}
+	return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaFix().FillOff().Precision(precision));
 }
 template<typename T>
-static inline Tstring sci(const T& x, std::size_t width = 0, int precision = -1)
+static inline Tstring sci(const T& x, int precision = -1)
 {
 	STATIC_ASSERT(std::is_floating_point<T>::value);
-	if(width == 0)
-	{
-		return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaSci().FillOff().Precision(precision));
-	} else
-	{
-		return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaSci().FillSpc().Width(width).Precision(precision));
-	}
+	return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaSci().FillOff().Precision(precision));
 }
 
 }; // struct fmtT

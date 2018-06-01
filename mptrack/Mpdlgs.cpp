@@ -82,7 +82,7 @@ static CString PrintTime(double seconds)
 	{
 		precision = 0;
 	}
-	return mpt::cformat(_T("%1 ms"))(mpt::cfmt::fix(seconds * 1000.0, 0, precision));
+	return mpt::cformat(_T("%1 ms"))(mpt::cfmt::fix(seconds * 1000.0, precision));
 }
 
 
@@ -904,8 +904,8 @@ void COptionsSoundcard::UpdateStatistics()
 		{
 			s += mpt::format(MPT_USTRING("Buffer: %1%%\r\n"))((bufferAttributes.Latency > 0.0) ? Util::Round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0);
 		}
-		s += mpt::format(MPT_USTRING("Latency: %1 ms (current: %2 ms, %3 frames)\r\n"))(mpt::ufmt::fix(bufferAttributes.Latency * 1000.0, 0, 1), mpt::ufmt::fix(stats.InstantaneousLatency * 1000.0, 0, 1), Util::Round<int64>(stats.InstantaneousLatency * samplerate));
-		s += mpt::format(MPT_USTRING("Period: %1 ms (current: %2 ms, %3 frames)\r\n"))(mpt::ufmt::fix(bufferAttributes.UpdateInterval * 1000.0, 0, 1), mpt::ufmt::fix(stats.LastUpdateInterval * 1000.0, 0, 1), Util::Round<int64>(stats.LastUpdateInterval * samplerate));
+		s += mpt::format(MPT_USTRING("Latency: %1 ms (current: %2 ms, %3 frames)\r\n"))(mpt::ufmt::fix(bufferAttributes.Latency * 1000.0, 1), mpt::ufmt::fix(stats.InstantaneousLatency * 1000.0, 1), Util::Round<int64>(stats.InstantaneousLatency * samplerate));
+		s += mpt::format(MPT_USTRING("Period: %1 ms (current: %2 ms, %3 frames)\r\n"))(mpt::ufmt::fix(bufferAttributes.UpdateInterval * 1000.0, 1), mpt::ufmt::fix(stats.LastUpdateInterval * 1000.0, 1), Util::Round<int64>(stats.LastUpdateInterval * samplerate));
 		s += stats.text;
 		m_EditStatistics.SetWindowText(mpt::ToCString(s));
 	}	else

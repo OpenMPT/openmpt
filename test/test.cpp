@@ -534,9 +534,9 @@ static MPT_NOINLINE void TestStringFormatting()
 		VERIFY_EQUAL(true, false);
 	}
 	VERIFY_EQUAL(mpt::fmt::val(58.65403492763), "58.654");
-	VERIFY_EQUAL(mpt::fmt::fix(23.42, 0, 1), "23.4");
-	VERIFY_EQUAL(mpt::fmt::fix(234.2, 0, 1), "234.2");
-	VERIFY_EQUAL(mpt::fmt::fix(2342.0, 0, 1), "2342.0");
+	VERIFY_EQUAL(mpt::fmt::fix(23.42, 1), "23.4");
+	VERIFY_EQUAL(mpt::fmt::fix(234.2, 1), "234.2");
+	VERIFY_EQUAL(mpt::fmt::fix(2342.0, 1), "2342.0");
 	
 	VERIFY_EQUAL(mpt::fmt::dec(2, ';', 12345678), std::string("12;34;56;78"));
 	VERIFY_EQUAL(mpt::fmt::hex(3, ':', 0xa2345678), std::string("a2:345:678"));
@@ -599,21 +599,20 @@ static MPT_NOINLINE void TestStringFormatting()
 	TestFloatFormats(1234567890000000.0);
 	TestFloatFormats(0.0000001234567890);
 
-	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 4, 3), "6.123");
-	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 7, 3), "  6.123");
-	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 7, 3), "  6.123");
-	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 0, 4), "6.123");
+	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 3), "6.12");
+	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 3), "6.123");
+	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 4), "6.123");
 	#if !(MPT_OS_EMSCRIPTEN && MPT_OS_EMSCRIPTEN_ANCIENT)
-	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 0, 4), "6.1235");
+	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 4), "6.1235");
 	#else
 	// emscripten(1.21)/nodejs(v0.10.25) print 6.1234 instead of 6.1235 for unknown reasons.
 	// As this test case is not fatal, ignore it for now in order to make the test cases pass.
 	#endif
 
 #if MPT_WSTRING_FORMAT
-	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 7, 3), L"  6.123");
-	VERIFY_EQUAL(mpt::wfmt::fix(6.12345, 7, 3), L"  6.123");
-	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 0, 4), L"6.123");
+	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 3), L"6.12");
+	VERIFY_EQUAL(mpt::wfmt::fix(6.12345, 3), L"6.123");
+	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 4), L"6.123");
 #endif
 
 	// basic
