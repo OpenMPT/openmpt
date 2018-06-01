@@ -315,18 +315,6 @@ public:
 	// short-hand construction
 	MPT_CONSTEXPR11_FUN explicit FormatSpec(FormatFlags f, std::size_t w = 0, int p = -1, unsigned int g = 0, char s = ',') noexcept : flags(f), width(w), precision(p), group(g), group_sep(s) {}
 public:
-	// parsing printf
-	explicit FormatSpec(const char * format) : flags(0), width(0), precision(-1) { ParsePrintf(format); }
-	explicit FormatSpec(const wchar_t * format) : flags(0), width(0), precision(-1) { ParsePrintf(format); }
-	explicit FormatSpec(const std::string & format) : flags(0), width(0), precision(-1) { ParsePrintf(format); }
-	explicit FormatSpec(const std::wstring & format) : flags(0), width(0), precision(-1) { ParsePrintf(format); }
-public:
-	// only for floating point formats
-	FormatSpec & ParsePrintf(const char * format);
-	FormatSpec & ParsePrintf(const wchar_t * format);
-	FormatSpec & ParsePrintf(const std::string & format);
-	FormatSpec & ParsePrintf(const std::wstring & format);
-public:
 	MPT_CONSTEXPR14_FUN FormatSpec & BaseDec() noexcept { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseDec; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & BaseHex() noexcept { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseHex; return *this; }
 	MPT_CONSTEXPR14_FUN FormatSpec & CaseLow() noexcept { flags &= ~(fmt_base::CaseLow|fmt_base::CaseUpp); flags |= fmt_base::CaseLow; return *this; }
@@ -530,13 +518,6 @@ static inline Tstring sci(const T& x, std::size_t width = 0, int precision = -1)
 	{
 		return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaSci().FillSpc().Width(width).Precision(precision));
 	}
-}
-
-template <typename T, typename Tformat>
-static inline Tstring f(const Tformat & format, const T& x)
-{
-	STATIC_ASSERT(std::is_floating_point<T>::value);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().ParsePrintf(format));
 }
 
 }; // struct fmtT
