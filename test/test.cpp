@@ -509,8 +509,11 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::fmt::val(-23), "-23");
 	VERIFY_EQUAL(mpt::fmt::val(42), "42");
 
-	VERIFY_EQUAL(mpt::fmt::hex0<3>((int32)-1), "ffffffff");  // "-001"
-	VERIFY_EQUAL(mpt::fmt::hex((int32)-1), "ffffffff");  // "-1"
+	VERIFY_EQUAL(mpt::fmt::hex0<3>((int32)-1), "-001");
+	VERIFY_EQUAL(mpt::fmt::hex((int32)-1), "-1");
+	VERIFY_EQUAL(mpt::fmt::hex(-0xabcde), "-abcde");
+	VERIFY_EQUAL(mpt::fmt::hex(int32_min), "-80000000");
+	VERIFY_EQUAL(mpt::fmt::hex(int32_min + 1), "-7fffffff");
 	VERIFY_EQUAL(mpt::fmt::hex(0x123e), "123e");
 	VERIFY_EQUAL(mpt::fmt::hex0<6>(0x123e), "00123e");
 	VERIFY_EQUAL(mpt::fmt::hex0<2>(0x123e), "123e");

@@ -236,6 +236,19 @@ static inline void PostProcessDigits(Tstring &str, const FormatSpec & format, co
 template<typename T>
 static inline std::string FormatValHelperInt(const T & x, const FormatSpec & f)
 {
+	MPT_MAYBE_CONSTANT_IF((f.GetFlags() & fmt_base::BaseHex) && std::is_signed<T>::value)
+	{
+		if(x == std::numeric_limits<T>::min())
+		{
+			return std::string(1, '-') + FormatValHelperInt(static_cast<typename std::make_unsigned<T>::type>(x), f);
+		} else MPT_MAYBE_CONSTANT_IF(x < 0)
+		{
+			return std::string(1, '-') + FormatValHelperInt(static_cast<typename std::make_unsigned<T>::type>(0-x), f);
+		} else
+		{
+			return FormatValHelperInt(static_cast<typename std::make_unsigned<T>::type>(x), f);
+		}
+	}
 	std::ostringstream o;
 	o.imbue(std::locale::classic());
 	ApplyFormat(o, f, x);
@@ -258,6 +271,19 @@ static inline std::string FormatValHelperFloat(const T & x, const FormatSpec & f
 template<typename T>
 static inline std::wstring FormatValWHelperInt(const T & x, const FormatSpec & f)
 {
+	MPT_MAYBE_CONSTANT_IF((f.GetFlags() & fmt_base::BaseHex) && std::is_signed<T>::value)
+	{
+		if(x == std::numeric_limits<T>::min())
+		{
+			return std::wstring(1, L'-') + FormatValWHelperInt(static_cast<typename std::make_unsigned<T>::type>(x), f);
+		} else MPT_MAYBE_CONSTANT_IF(x < 0)
+		{
+			return std::wstring(1, L'-') + FormatValWHelperInt(static_cast<typename std::make_unsigned<T>::type>(0-x), f);
+		} else
+		{
+			return FormatValWHelperInt(static_cast<typename std::make_unsigned<T>::type>(x), f);
+		}
+	}
 	std::wostringstream o;
 	o.imbue(std::locale::classic());
 	ApplyFormat(o, f, x);
@@ -280,7 +306,7 @@ static inline std::wstring FormatValWHelperFloat(const T & x, const FormatSpec &
 
 std::string FormatVal(const char & x, const FormatSpec & f) { return FormatValHelperInt(x, f); }
 std::string FormatVal(const wchar_t & x, const FormatSpec & f) { return FormatValHelperInt(x, f); }
-std::string FormatVal(const bool & x, const FormatSpec & f) { return FormatValHelperInt(x, f); }
+std::string FormatVal(const bool & x, const FormatSpec & f) { return FormatValHelperInt(static_cast<int>(x), f); }
 std::string FormatVal(const signed char & x, const FormatSpec & f) { return FormatValHelperInt(x, f); }
 std::string FormatVal(const unsigned char & x, const FormatSpec & f) { return FormatValHelperInt(x, f); }
 std::string FormatVal(const signed short & x, const FormatSpec & f) { return FormatValHelperInt(x, f); }
@@ -298,7 +324,7 @@ std::string FormatVal(const long double & x, const FormatSpec & f) { return Form
 #if MPT_USTRING_MODE_WIDE
 mpt::ustring FormatValU(const char & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
 mpt::ustring FormatValU(const wchar_t & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
-mpt::ustring FormatValU(const bool & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
+mpt::ustring FormatValU(const bool & x, const FormatSpec & f) { return FormatValWHelperInt(static_cast<int>(x), f); }
 mpt::ustring FormatValU(const signed char & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
 mpt::ustring FormatValU(const unsigned char & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
 mpt::ustring FormatValU(const signed short & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
@@ -316,7 +342,7 @@ mpt::ustring FormatValU(const long double & x, const FormatSpec & f) { return Fo
 #if MPT_USTRING_MODE_UTF8
 mpt::ustring FormatValU(const char & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatValHelperInt(x, f)); }
 mpt::ustring FormatValU(const wchar_t & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatValHelperInt(x, f)); }
-mpt::ustring FormatValU(const bool & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatValHelperInt(x, f)); }
+mpt::ustring FormatValU(const bool & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatValHelperInt(static_cast<int>(x), f)); }
 mpt::ustring FormatValU(const signed char & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatValHelperInt(x, f)); }
 mpt::ustring FormatValU(const unsigned char & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatValHelperInt(x, f)); }
 mpt::ustring FormatValU(const signed short & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatValHelperInt(x, f)); }
@@ -335,7 +361,7 @@ mpt::ustring FormatValU(const long double & x, const FormatSpec & f) { return mp
 #if MPT_WSTRING_FORMAT
 std::wstring FormatValW(const char & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
 std::wstring FormatValW(const wchar_t & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
-std::wstring FormatValW(const bool & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
+std::wstring FormatValW(const bool & x, const FormatSpec & f) { return FormatValWHelperInt(static_cast<int>(x), f); }
 std::wstring FormatValW(const signed char & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
 std::wstring FormatValW(const unsigned char & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
 std::wstring FormatValW(const signed short & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
