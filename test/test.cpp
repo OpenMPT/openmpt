@@ -562,9 +562,26 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::ufmt::dec(2, ';', 12345678), MPT_USTRING("12;34;56;78"));
 	VERIFY_EQUAL(mpt::ufmt::hex(3, ':', 0xa2345678), MPT_USTRING("a2:345:678"));
 
-	//VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, ':', 0xa2345678), MPT_USTRING("0A2:345:678"));
-	//VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, ':', 0xa2345678), MPT_USTRING(":0A2:345:678")); // GCC returns "00A2:345:678"
-	
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', 0xa2345678), MPT_USTRING("A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(3, ':', 0xa2345678), MPT_USTRING("A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(3, ':', 0xa2345678), MPT_USTRING("0A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(3, ':', 0xa2345678), MPT_USTRING("0:0A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, ':', 0xa2345678), MPT_USTRING("00:0A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, ':', 0xa2345678), MPT_USTRING("000:0A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', -0x12345678), MPT_USTRING("-12:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(3, ':', -0x12345678), MPT_USTRING("-12:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(3, ':', -0x12345678), MPT_USTRING("-012:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(3, ':', -0x12345678), MPT_USTRING("-0:012:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, ':', -0x12345678), MPT_USTRING("-00:012:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, ':', -0x12345678), MPT_USTRING("-000:012:345:678"));
+
+	VERIFY_EQUAL(mpt::ufmt::HEX0<5>(3, ':', 0x345678), MPT_USTRING("345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<6>(3, ':', 0x345678), MPT_USTRING("345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', 0x345678), MPT_USTRING("0:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<5>(3, ':', -0x345678), MPT_USTRING("-345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<6>(3, ':', -0x345678), MPT_USTRING("-345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', -0x345678), MPT_USTRING("-0:345:678"));
+
 	VERIFY_EQUAL(mpt::fmt::left(3, "a"), "a  ");
 	VERIFY_EQUAL(mpt::fmt::right(3, "a"), "  a");
 	VERIFY_EQUAL(mpt::fmt::center(3, "a"), " a ");

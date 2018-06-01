@@ -258,9 +258,12 @@ public:
 template<typename Tostream, typename T>
 static inline void ApplyFormat(Tostream & o, const FormatSpec & format, const T &)
 {
-	if(format.GetGroup() > 0)
+	MPT_MAYBE_CONSTANT_IF(!std::numeric_limits<T>::is_integer)
 	{
-		o.imbue(std::locale(o.getloc(), new NumPunct<typename Tostream::char_type>(format.GetGroup(), format.GetGroupSep())));
+		if(format.GetGroup() > 0)
+		{
+			o.imbue(std::locale(o.getloc(), new NumPunct<typename Tostream::char_type>(format.GetGroup(), format.GetGroupSep())));
+		}
 	}
 	FormatFlags f = format.GetFlags();
 	std::size_t width = format.GetWidth();
@@ -399,7 +402,7 @@ static inline std::string FormatValHelperInt(const T & x, const FormatSpec & f)
 	o.imbue(std::locale::classic());
 	ApplyFormat(o, f, x);
 	SaneInsert(o, x);
-	return PostProcessDigits(o.str(), f);
+	return PostProcessGroup(PostProcessDigits(o.str(), f), f);
 }
 
 #if MPT_WSTRING_FORMAT
@@ -423,7 +426,7 @@ static inline std::wstring FormatValWHelperInt(const T & x, const FormatSpec & f
 	o.imbue(std::locale::classic());
 	ApplyFormat(o, f, x);
 	SaneInsert(o, x);
-	return PostProcessDigits(o.str(), f);
+	return PostProcessGroup(PostProcessDigits(o.str(), f), f);
 }
 #endif
 
