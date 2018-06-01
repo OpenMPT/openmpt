@@ -1371,11 +1371,11 @@ protected:
 public:
 	CSplashScreen();
 	~CSplashScreen();
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual void OnCancel() { OnOK(); }
-	virtual void OnPaint();
-	virtual BOOL OnEraseBkgnd(CDC *) { return TRUE; }
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	void OnCancel() override { OnOK(); }
+	void OnPaint() override;
+	BOOL OnEraseBkgnd(CDC *) override { return TRUE; }
 
 	DECLARE_MESSAGE_MAP()
 };
@@ -1431,10 +1431,7 @@ void CSplashScreen::OnPaint()
 
 BOOL CSplashScreen::OnInitDialog()
 {
-	if(!CDialog::OnInitDialog())
-	{
-		return FALSE;
-	}
+	CDialog::OnInitDialog();
 
 	#ifdef MPT_WITH_GDIPLUS
 
