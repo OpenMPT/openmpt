@@ -343,7 +343,7 @@ static inline Tstring PostProcessGroup(Tstring str, const FormatSpec & format)
 		std::size_t len = str.length();
 		for(std::size_t n = 0; n < len; ++n)
 		{
-			if(n > 0 && (n % groupSize) == 0 && n != (len - 1))
+			if(n > 0 && (n % groupSize) == 0)
 			{
 				if(!(n == (len - 1) && (str[0] == typename Tstring::value_type('+') || str[0] == typename Tstring::value_type('-'))))
 				{
