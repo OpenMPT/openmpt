@@ -215,14 +215,21 @@ inline void PostProcessDigits(Tstring &str, const FormatSpec & format, const T &
 			/* nothing */
 		} else if(f & fmt_base::FillNul)
 		{
+			auto pos = str.begin();
+			if(str.length() > 0)
+			{
+				if(str[0] == '+')
+				{
+					pos++;
+					width++;
+				} else if(str[0] == '-')
+				{
+					pos++;
+					width++;
+				}
+			}
 			if(str.length() < width)
 			{
-				auto pos = str.begin();
-				if(str.length() > 0)
-				{
-					if(str[0] == '+') { pos++; }
-					else if(str[0] == '-') { pos++; }
-				}
 				str.insert(pos, width - str.length(), '0');
 			}
 		}

@@ -525,8 +525,8 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::fmt::dec0<3>(11), "011");
 	VERIFY_EQUAL(mpt::fmt::dec0<0>(-1), "-1");
 	VERIFY_EQUAL(mpt::fmt::dec0<1>(-1), "-1");
-	VERIFY_EQUAL(mpt::fmt::dec0<2>(-1), "-1");
-	VERIFY_EQUAL(mpt::fmt::dec0<3>(-1), "-01");
+	VERIFY_EQUAL(mpt::fmt::dec0<2>(-1), "-01");
+	VERIFY_EQUAL(mpt::fmt::dec0<3>(-1), "-001");
 
 	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(0xa2345678), MPT_USTRING("A2345678"));
 	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(0xa2345678), MPT_USTRING("A2345678"));
