@@ -424,6 +424,10 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return false;
 	}
+	if(loadFlags == onlyVerifyHeader)
+	{
+		return true;
+	}
 
 	// Read channel configuration
 	std::bitset<32> ignoreChannels; // bit set for each channel that's completely disabled
@@ -450,18 +454,8 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 			ignoreChannels[chn] = true;
 			break;
 		default: // uhhhh.... freak out
-			//fprintf(stderr, "imf: channel %d has unknown status %d\n", n, hdr.channels[n].status);
 			return false;
 		}
-	}
-	if(!detectedChannels)
-	{
-		return false;
-	}
-	
-	if(loadFlags == onlyVerifyHeader)
-	{
-		return true;
 	}
 
 	InitializeGlobals(MOD_TYPE_IMF);
@@ -508,7 +502,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		ModCommand junkNote;
+		ModCommand dummy;
 		ROWINDEX row = 0;
 		while(row < numRows)
 		{
@@ -520,7 +514,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			uint8 channel = mask & 0x1F;
-			ModCommand &m = ignoreChannels[channel] ? junkNote : *Patterns[pat].GetpModCommand(row, channel);
+			ModCommand &m = (channel < GetNumChannels()) ? *Patterns[pat].GetpModCommand(row, channel) : dummy;
 
 			if(mask & 0x20)
 			{
@@ -591,6 +585,8 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			if(m.command)
 				ImportIMFEffect(m);
+			if(ignoreChannels[channel] && m.IsGlobalCommand())
+				m.command = CMD_NONE;
 		}
 	}
 
