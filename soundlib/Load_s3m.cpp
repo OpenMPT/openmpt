@@ -949,7 +949,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 			// effect processing in ST3 than LLL...RRR, but since OpenMPT doesn't care about the
 			// channel order and always parses them left to right as they appear in the pattern,
 			// we should just write in the LLL...RRR manner.
-			uint8 ch = 31;	// Shows up as "??" in ST3 but effects are still processed!
+			uint8 ch = sampleCh % 16u; // If there are neither PCM nor AdLib instruments on this channel, just fall back a regular sample-based channel for maximum compatibility.
 			if(channelType[chn][S3MChannelType::kPCM])
 				ch = (sampleCh++) % 16u;
 			else if(channelType[chn][S3MChannelType::kAdlib])
