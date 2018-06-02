@@ -160,7 +160,7 @@ enum ChannelFlags
 DECLARE_FLAGSET(ChannelFlags)
 
 #define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG | CHN_REVERSE | CHN_SURROUND | CHN_ADLIB)
-#define CHN_CHANNELFLAGS (~CHN_SAMPLEFLAGS)
+#define CHN_CHANNELFLAGS (~CHN_SAMPLEFLAGS | CHN_SURROUND)
 
 // Sample flags fit into the first 16 bits, and with the current memory layout, storing them as a 16-bit integer packs struct ModSample nicely.
 typedef FlagSet<ChannelFlags, uint16> SampleFlags;
