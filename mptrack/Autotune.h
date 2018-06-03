@@ -13,9 +13,12 @@
 #include "../soundlib/Snd_defs.h"
 #include "resource.h"
 
+
 OPENMPT_NAMESPACE_BEGIN
 
-struct AutotuneThreadData;
+
+struct ModSample;
+
 
 class Autotune
 {
@@ -44,16 +47,12 @@ public:
 	bool Apply(double pitchReference, int targetNote);
 
 protected:
-	static double FrequencyToNote(double freq, double pitchReference);
-	static double NoteToFrequency(double note, double pitchReference);
-	static SmpLength NoteToShift(uint32 sampleFreq, int note, double pitchReference);
 
 	template <class T>
 	void CopySamples(const T* origSample, SmpLength sampleLoopStart, SmpLength sampleLoopEnd);
 
 	bool PrepareSample(SmpLength maxShift);
 
-	static void AutotuneThread(AutotuneThreadData &info);
 };
 
 

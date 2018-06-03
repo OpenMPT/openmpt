@@ -9,11 +9,23 @@
 
 
 #include "stdafx.h"
+#if MPT_CXX_AT_LEAST(17)
+#define MPT_AUTOTUNE_MODERN 1
+#else
+#define MPT_AUTOTUNE_MODERN 0
+#endif
+#include "Autotune.h"
 #include <math.h>
 #include "../common/misc_util.h"
+#if !MPT_AUTOTUNE_MODERN
 #include "../common/mptThread.h"
+#endif // !MPT_AUTOTUNE_MODERN
 #include "../soundlib/Sndfile.h"
-#include "Autotune.h"
+#if MPT_AUTOTUNE_MODERN
+#include <algorithm>
+#include <execution>
+#include <numeric>
+#endif // MPT_AUTOTUNE_MODERN
 #ifdef ENABLE_SSE2
 #include <emmintrin.h>
 #endif
@@ -31,20 +43,20 @@ OPENMPT_NAMESPACE_BEGIN
 #define HISTORY_BINS	(12 * BINS_PER_NOTE)	// One octave
 
 
-double Autotune::FrequencyToNote(double freq, double pitchReference)
+static double FrequencyToNote(double freq, double pitchReference)
 {
 	return ((12.0 * (log(freq / (pitchReference / 2.0)) / log(2.0))) + 57.0);
 }
 
 
-double Autotune::NoteToFrequency(double note, double pitchReference)
+static double NoteToFrequency(double note, double pitchReference)
 {
 	return pitchReference * pow(2.0, (note - 69.0) / 12.0);
 }
 
 
 // Calculate the amount of samples for autocorrelation shifting for a given note
-SmpLength Autotune::NoteToShift(uint32 sampleFreq, int note, double pitchReference)
+static SmpLength NoteToShift(uint32 sampleFreq, int note, double pitchReference)
 {
 	const double fundamentalFrequency = NoteToFrequency((double)note / BINS_PER_NOTE, pitchReference);
 	return std::max(Util::Round<SmpLength>((double)sampleFreq / fundamentalFrequency), SmpLength(1));
@@ -145,70 +157,160 @@ bool Autotune::CanApply() const
 }
 
 
-struct AutotuneThreadData
+namespace
 {
-	std::vector<uint64> histogram;
-	double pitchReference;
+
+
+struct AutotuneHistogramEntry
+{
+	int index;
+	uint64 sum;
+};
+
+struct AutotuneHistogram
+{
+	std::array<uint64, HISTORY_BINS> histogram{};
+};
+
+struct AutotuneContext
+{
 	int16 *sampleData;
+	double pitchReference;
 	SmpLength processLength;
 	uint32 sampleFreq;
+};
+
+static inline AutotuneHistogramEntry CalculateNoteHistogramSSE2(int note, AutotuneContext ctx)
+{
+	const SmpLength autocorrShift = NoteToShift(ctx.sampleFreq, note, ctx.pitchReference);
+	uint64 autocorrSum = 0;
+	{
+		const __m128i *normalData = reinterpret_cast<const __m128i *>(ctx.sampleData);
+		const __m128i *shiftedData = reinterpret_cast<const __m128i *>(ctx.sampleData + autocorrShift);
+		for(SmpLength i = ctx.processLength / 8; i != 0; i--)
+		{
+			__m128i normal = _mm_loadu_si128(normalData++);
+			__m128i shifted = _mm_loadu_si128(shiftedData++);
+			__m128i diff = _mm_sub_epi16(normal, shifted);		// 8 16-bit differences
+			__m128i squares = _mm_madd_epi16(diff, diff);		// Multiply and add: 4 32-bit squares
+
+			__m128i sum1 = _mm_shuffle_epi32(squares, _MM_SHUFFLE(0, 1, 2, 3));	// Move upper two integers to lower
+			__m128i sum2  = _mm_add_epi32(squares, sum1);						// Now we can add the (originally) upper two and lower two integers
+			__m128i sum3 = _mm_shuffle_epi32(sum2, _MM_SHUFFLE(1, 1, 1, 1));	// Move the second-lowest integer to lowest position
+			__m128i sum4  = _mm_add_epi32(sum2, sum3);							// Add the two lowest positions
+			autocorrSum += _mm_cvtsi128_si32(sum4);
+		}
+	}
+	return {note % HISTORY_BINS, autocorrSum};
+}
+
+static inline AutotuneHistogramEntry CalculateNoteHistogram(int note, AutotuneContext ctx)
+{
+	const SmpLength autocorrShift = NoteToShift(ctx.sampleFreq, note, ctx.pitchReference);
+	uint64 autocorrSum = 0;
+	{
+		const int16 *normalData = ctx.sampleData;
+		const int16 *shiftedData = ctx.sampleData + autocorrShift;
+		// Add up squared differences of all values
+		for(SmpLength i = ctx.processLength; i != 0; i--, normalData++, shiftedData++)
+		{
+			autocorrSum += (*normalData - *shiftedData) * (*normalData - *shiftedData);
+		}
+	}
+	return {note % HISTORY_BINS, autocorrSum};
+}
+
+
+static inline AutotuneHistogram operator+(AutotuneHistogram a, AutotuneHistogram b) noexcept
+{
+	AutotuneHistogram result;
+	for(std::size_t i = 0; i < HISTORY_BINS; ++i)
+	{
+		result.histogram[i] = a.histogram[i] + b.histogram[i];
+	}
+	return result;
+}
+
+
+static inline AutotuneHistogram & operator+=(AutotuneHistogram &a, AutotuneHistogram b) noexcept
+{
+	for(std::size_t i = 0; i < HISTORY_BINS; ++i)
+	{
+		a.histogram[i] += b.histogram[i];
+	}
+	return a;
+}
+
+
+static inline AutotuneHistogram &operator+=(AutotuneHistogram &a, AutotuneHistogramEntry b) noexcept
+{
+	a.histogram[b.index] += b.sum;
+	return a;
+}
+
+
+#if MPT_AUTOTUNE_MODERN
+
+
+struct AutotuneHistogramReduce
+{
+	inline AutotuneHistogram operator()(AutotuneHistogram a, AutotuneHistogram b) noexcept
+	{
+		return a + b;
+	}
+	inline AutotuneHistogram operator()(AutotuneHistogramEntry a, AutotuneHistogramEntry b) noexcept
+	{
+		AutotuneHistogram result;
+		result += a;
+		result += b;
+		return result;
+	}
+	inline AutotuneHistogram operator()(AutotuneHistogramEntry a, AutotuneHistogram b) noexcept
+	{
+		b += a;
+		return b;
+	}
+	inline AutotuneHistogram operator()(AutotuneHistogram a, AutotuneHistogramEntry b) noexcept
+	{
+		a += b;
+		return a;
+	}
+};
+
+
+#else // !MPT_AUTOTUNE_MODERN
+
+
+struct AutotuneThreadData
+{
+	AutotuneHistogram histogram;
+	AutotuneContext ctx;
 	int startNote, endNote;
 };
 
 
-void Autotune::AutotuneThread(AutotuneThreadData & info)
+static void AutotuneThread(AutotuneThreadData & info)
 {
-	info.histogram.resize(HISTORY_BINS, 0);
 #ifdef ENABLE_SSE2
 	const bool useSSE = (GetProcSupport() & PROCSUPPORT_SSE2) != 0;
 #endif
-
 	// Do autocorrelation and save results in a note histogram (restriced to one octave).
-	for(int note = info.startNote, noteBin = note; note < info.endNote; note++, noteBin++)
+	for(int note = info.startNote; note < info.endNote; note++)
 	{
-
-		if(noteBin >= HISTORY_BINS)
-		{
-			noteBin %= HISTORY_BINS;
-		}
-
-		const SmpLength autocorrShift = NoteToShift(info.sampleFreq, note, info.pitchReference);
-
-		uint64 autocorrSum = 0;
-
+		info.histogram +=
 #ifdef ENABLE_SSE2
-		if(useSSE)
-		{
-			const __m128i *normalData = reinterpret_cast<const __m128i *>(info.sampleData);
-			const __m128i *shiftedData = reinterpret_cast<const __m128i *>(info.sampleData + autocorrShift);
-			for(SmpLength i = info.processLength / 8; i != 0; i--)
-			{
-				__m128i normal = _mm_loadu_si128(normalData++);
-				__m128i shifted = _mm_loadu_si128(shiftedData++);
-				__m128i diff = _mm_sub_epi16(normal, shifted);		// 8 16-bit differences
-				__m128i squares = _mm_madd_epi16(diff, diff);		// Multiply and add: 4 32-bit squares
-
-				__m128i sum1 = _mm_shuffle_epi32(squares, _MM_SHUFFLE(0, 1, 2, 3));	// Move upper two integers to lower
-				__m128i sum2  = _mm_add_epi32(squares, sum1);						// Now we can add the (originally) upper two and lower two integers
-				__m128i sum3 = _mm_shuffle_epi32(sum2, _MM_SHUFFLE(1, 1, 1, 1));	// Move the second-lowest integer to lowest position
-				__m128i sum4  = _mm_add_epi32(sum2, sum3);							// Add the two lowest positions
-				autocorrSum += _mm_cvtsi128_si32(sum4);
-			}
-		} else
+			useSSE ? CalculateNoteHistogramSSE2(note, info.ctx) :
 #endif
-		{
-			const int16 *normalData = info.sampleData;
-			const int16 *shiftedData = info.sampleData + autocorrShift;
-			// Add up squared differences of all values
-			for(SmpLength i = info.processLength; i != 0; i--, normalData++, shiftedData++)
-			{
-				autocorrSum += (*normalData - *shiftedData) * (*normalData - *shiftedData);
-			}
-		}
-
-		info.histogram[noteBin] += autocorrSum;
+			CalculateNoteHistogram(note, info.ctx);
 	}
 }
+
+
+#endif // !MPT_AUTOTUNE_MODERN
+
+
+} // local
+
 
 
 bool Autotune::Apply(double pitchReference, int targetNote)
@@ -228,6 +330,26 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 	// We don't process the autocorrelation overhead.
 	const SmpLength processLength = sampleLength - maxShift;
 
+	AutotuneContext ctx;
+	ctx.sampleData = sampleData;
+	ctx.pitchReference = pitchReference;
+	ctx.processLength = processLength;
+	ctx.sampleFreq = sampleFreq;
+	
+#if MPT_AUTOTUNE_MODERN
+	
+	// Note that we cannot use a fake integer interator here because of the requirement on ForwardIterator to return a reference to the elements.
+	std::array<int, END_NOTE - START_NOTE> notes;
+	std::iota(std::begin(notes), std::end(notes), START_NOTE);
+
+	AutotuneHistogram autocorr =
+#ifdef ENABLE_SSE2
+		(GetProcSupport() & PROCSUPPORT_SSE2) ? std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogramSSE2(note, ctx); } ) :
+#endif
+		std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogram(note, ctx); } );
+	
+#else // !MPT_AUTOTUNE_MODERN
+	
 	// Set up the autocorrelation threads
 	const uint32 numProcs = std::max<unsigned int>(std::thread::hardware_concurrency(), 1);
 	const uint32 notesPerThread = (END_NOTE - START_NOTE + 1) / numProcs;
@@ -236,10 +358,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 	// Setup.
 	for(uint32 p = 0; p < numProcs; p++)
 	{
-		threadInfo[p].pitchReference = pitchReference;
-		threadInfo[p].sampleData = sampleData;
-		threadInfo[p].processLength = processLength;
-		threadInfo[p].sampleFreq = sampleFreq;
+		threadInfo[p].ctx = ctx;
 		threadInfo[p].startNote = START_NOTE + p * notesPerThread;
 		threadInfo[p].endNote = START_NOTE + (p + 1) * notesPerThread;
 		if(p == numProcs - 1)
@@ -261,21 +380,20 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 	}
 
 	// Histogram for all notes.
-	std::vector<uint64> autocorrHistogram(HISTORY_BINS, 0);
+	AutotuneHistogram autocorr;
 
 	for(uint32 p = 0; p < numProcs; p++)
 	{
-		for(int i = 0; i < HISTORY_BINS; i++)
-		{
-			autocorrHistogram[i] += threadInfo[p].histogram[i];
-		}
+		autocorr += threadInfo[p].histogram;
 	}
 
+#endif // MPT_AUTOTUNE_MODERN
+
 	// Interpolate the histogram...
-	std::vector<uint64> interpolatedHistogram(HISTORY_BINS, 0);
+	AutotuneHistogram interpolated;
 	for(int i = 0; i < HISTORY_BINS; i++)
 	{
-		interpolatedHistogram[i] = autocorrHistogram[i];
+		interpolated.histogram[i] = autocorr.histogram[i];
 		const int kernelWidth = 4;
 		for(int ki = kernelWidth; ki >= 0; ki--)
 		{
@@ -285,21 +403,12 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 			int right = i + ki;
 			if(right >= HISTORY_BINS) right -= HISTORY_BINS;
 
-			interpolatedHistogram[i] = interpolatedHistogram[i] / 2 + (autocorrHistogram[left] + autocorrHistogram[right]) / 2;
+			interpolated.histogram[i] = interpolated.histogram[i] / 2 + (autocorr.histogram[left] + autocorr.histogram[right]) / 2;
 		}
 	}
 
 	// ...and find global minimum
-	int minimumBin = 0;
-	for(int i = 0; i < HISTORY_BINS; i++)
-	{
-		const int prev = (i > 0) ? (i - 1) : (HISTORY_BINS - 1);
-		// Are we at the global minimum?
-		if(interpolatedHistogram[prev] < interpolatedHistogram[minimumBin])
-		{
-			minimumBin = prev;
-		}
-	}
+	int minimumBin = std::min_element(std::begin(interpolated.histogram), std::end(interpolated.histogram)) - std::begin(interpolated.histogram);
 
 	// Center target notes around C
 	if(targetNote >= 6)
