@@ -406,7 +406,7 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 			}
 		} else
 		{
-			m_parent.InstrumentChanged(lParam);
+			m_parent.InstrumentChanged(static_cast<int>(lParam));
 		}
 	}
 
@@ -943,7 +943,7 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampl
 			BeginWaitCursor();
 
 			m_sndFile.DestroySampleThreadsafe(m_nSample);
-			sample.nLength = file.GetLength();
+			sample.nLength = mpt::saturate_cast<SmpLength>(file.GetLength());
 
 			SampleIO sampleIO = dlg.GetSampleFormat();
 
@@ -1800,7 +1800,7 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 			// Resample using r8brain
 			const SmpLength bufferSize = std::min(std::max(selLength, SmpLength(oldRate)), SmpLength(1024 * 1024));
 			std::vector<double> convBuffer(bufferSize);
-			r8b::CDSPResampler16 resampler(oldRate, newRate, convBuffer.size());
+			r8b::CDSPResampler16 resampler(oldRate, newRate, bufferSize);
 
 			for(uint8 chn = 0; chn < numChannels; chn++)
 			{
@@ -2250,7 +2250,7 @@ public:
 
 			// Receive some processed samples (it's not guaranteed that there is any available).
 			{
-				SmpLength outChunkSize = std::min<size_t>(soundtouch_numSamples(handleSt), nNewSampleLength - outPos);
+				SmpLength outChunkSize = std::min<SmpLength>(soundtouch_numSamples(handleSt), nNewSampleLength - outPos);
 				if(outChunkSize > 0)
 				{
 					buffer.resize(outChunkSize * nChn);
@@ -2276,7 +2276,7 @@ public:
 		{
 			// The input sample should now be processed. Receive remaining samples.
 			soundtouch_flush(handleSt);
-			SmpLength outChunkSize = std::min<size_t>(soundtouch_numSamples(handleSt), nNewSampleLength - outPos);
+			SmpLength outChunkSize = std::min<SmpLength>(soundtouch_numSamples(handleSt), nNewSampleLength - outPos);
 			if(outChunkSize > 0)
 			{
 				buffer.resize(outChunkSize * nChn);
@@ -2303,14 +2303,14 @@ public:
 			ctrlSmp::ReplaceSample(sample, pNewSample, std::min(outPos, nNewSampleLength), sndFile);
 			// Update loops and wrap-around buffer
 			sample.SetLoop(
-				static_cast<SmpLength>(sample.nLoopStart * m_ratio),
-				static_cast<SmpLength>(sample.nLoopEnd * m_ratio),
+				Util::Round<SmpLength>(sample.nLoopStart * m_ratio),
+				Util::Round<SmpLength>(sample.nLoopEnd * m_ratio),
 				sample.uFlags[CHN_LOOP],
 				sample.uFlags[CHN_PINGPONGLOOP],
 				sndFile);
 			sample.SetSustainLoop(
-				static_cast<SmpLength>(sample.nSustainStart * m_ratio),
-				static_cast<SmpLength>(sample.nSustainEnd * m_ratio),
+				Util::Round<SmpLength>(sample.nSustainStart * m_ratio),
+				Util::Round<SmpLength>(sample.nSustainEnd * m_ratio),
 				sample.uFlags[CHN_SUSTAINLOOP],
 				sample.uFlags[CHN_PINGPONGSUSTAIN],
 				sndFile);
@@ -2344,7 +2344,7 @@ public:
 		CComboBox *combo = (CComboBox *)m_parent.GetDlgItem(IDC_COMBO5);
 		long ovs = combo->GetCurSel() + 4;
 
-		// Get selected FFT size (power of 2 ; should not exceed MAX_BUFFER_LENGTH - see smbPitchShift.h)
+		// Get selected FFT size (power of 2; should not exceed MAX_BUFFER_LENGTH - see smbPitchShift.h)
 		combo = (CComboBox *)m_parent.GetDlgItem(IDC_COMBO6);
 		UINT fft = 1 << (combo->GetCurSel() + 8);
 		while(fft > MAX_BUFFER_LENGTH) fft >>= 1;

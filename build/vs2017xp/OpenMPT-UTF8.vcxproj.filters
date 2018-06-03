@@ -309,6 +309,9 @@
     <ClInclude Include="..\..\mptrack\Notification.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\OPLInstrDlg.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\PSRatioCalc.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -987,6 +990,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Mptrack.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\OPLInstrDlg.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PSRatioCalc.cpp">

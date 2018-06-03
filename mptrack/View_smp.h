@@ -12,13 +12,13 @@
 #pragma once
 
 #include "modsmp_ctrl.h"
+#include "Globals.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
 
-
 #define SMP_LEFTBAR_BUTTONS		8
-
+class OPLInstrDlg;
 
 class CViewSample: public CModScrollView
 {
@@ -39,21 +39,19 @@ protected:
 		kInsert
 	};
 
-protected:
+	std::unique_ptr<OPLInstrDlg> m_oplEditor;
 	CImageList m_bmpEnvBar;
 	CRect m_rcClient;
 	CDC offScreenDC;
 	CBitmap offScreenBitmap;
 	SIZE m_sizeTotal;
-	UINT m_nBtnMouseOver;
-	int m_nZoom;	// < 0: Zoom into sample (2^x:1 ratio), 0: Auto zoom, > 0: Zoom out (1:2^x ratio)
+	UINT m_nBtnMouseOver = 0xFFFF;
+	int m_nZoom = 0;	// < 0: Zoom into sample (2^x:1 ratio), 0: Auto zoom, > 0: Zoom out (1:2^x ratio)
 	FlagSet<Flags> m_dwStatus;
 	SmpLength m_dwBeginSel, m_dwEndSel, m_dwBeginDrag, m_dwEndDrag;
 	SmpLength m_dwMenuParam;
-	SmpLength m_nGridSegments;
-	SAMPLEINDEX m_nSample;
-
-	std::vector<CHANNELINDEX> noteChannel;	// Note -> Preview channel assignment
+	SmpLength m_nGridSegments = 0;
+	SAMPLEINDEX m_nSample = 1;
 
 	// Sample drawing
 	CPoint m_lastDrawPoint;		// For drawing horizontal lines
@@ -61,6 +59,7 @@ protected:
 
 	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
 	std::array<SmpLength, MAX_CHANNELS> m_dwNotifyPos;
+	std::array<CHANNELINDEX, NOTE_MAX - NOTE_MIN + 1> m_noteChannel;	// Note -> Preview channel assignment
 
 public:
 	CViewSample();
@@ -74,8 +73,9 @@ protected:
 	MPT_NOINLINE void SetModified(SampleHint hint, bool updateAll, bool waveformModified);
 	void UpdateScrollSize() { UpdateScrollSize(m_nZoom, true); }
 	void UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength centeredSample = SmpLength(-1));
-	BOOL SetCurrentSample(SAMPLEINDEX nSmp);
-	BOOL SetZoom(int nZoom, SmpLength centeredSample = SmpLength(-1));
+	void UpdateOPLEditor();
+	void SetCurrentSample(SAMPLEINDEX nSmp);
+	void SetZoom(int nZoom, SmpLength centeredSample = SmpLength(-1));
 	int32 SampleToScreen(SmpLength pos) const;
 	SmpLength ScreenToSample(int32 x) const;
 	void PlayNote(ModCommand::NOTE note, const SmpLength nStartPos = 0, int volume = -1);
@@ -132,11 +132,7 @@ protected:
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp);
-#if _MFC_VER > 0x0710
 	afx_msg LRESULT OnNcHitTest(CPoint point);
-#else
-	afx_msg UINT OnNcHitTest(CPoint point);
-#endif 
 	afx_msg void OnNcPaint();
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnNcMouseMove(UINT nHitTest, CPoint point);
@@ -180,7 +176,7 @@ protected:
 	afx_msg void OnDrawingToggle();
 	afx_msg void OnAddSilence();
 	afx_msg void OnChangeGridSize();
-	afx_msg void OnQuickFade() { PostCtrlMessage(IDC_SAMPLE_QUICKFADE); };
+	afx_msg void OnQuickFade();
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);

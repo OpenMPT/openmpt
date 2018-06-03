@@ -24,6 +24,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 class CModControlView;
 class CModControlBar;
+class CModDoc;
 
 class CModControlBar: public CToolBarCtrl
 {

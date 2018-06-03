@@ -172,7 +172,7 @@ uint8 OPL::CalcVolume(uint8 trackerVol, uint8 kslVolume)
 {
 	if(trackerVol >= 63u)
 		return kslVolume;
-	else if(trackerVol > 0)
+	if(trackerVol > 0)
 		trackerVol++;
 	return (kslVolume & KSL_MASK) | (63u - ((63u - (kslVolume & TOTAL_LEVEL_MASK)) * trackerVol) / 64u);
 }
@@ -192,7 +192,6 @@ void OPL::Volume(CHANNELINDEX c, uint8 vol)
 		m_opl->Port(KSL_LEVEL + modulator, CalcVolume(vol, patch[2]));
 	}
 	m_opl->Port(KSL_LEVEL + carrier, CalcVolume(vol, patch[3]));
-
 }
 
 

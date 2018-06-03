@@ -523,6 +523,58 @@ BEGIN
     CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,270,180,11,14
 END
 
+IDD_OPL_PARAMS DIALOGEX 0, 0, 410, 218
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_POPUP
+EXSTYLE WS_EX_ACCEPTFILES
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Additive Synthesis",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,7,174,10
+    LTEXT           "Modulation Feedback:",IDC_STATIC,216,8,71,8
+    CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,288,6,108,12
+    GROUPBOX        "Carrier",IDC_STATIC,6,24,198,192
+    LTEXT           "Attack Rate:",IDC_STATIC,12,38,42,8
+    CONTROL         "",IDC_SLIDER9,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,36,108,12
+    LTEXT           "Decay Rate:",IDC_STATIC,12,50,41,8
+    CONTROL         "",IDC_SLIDER10,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,48,108,12
+    LTEXT           "Sustain Level:",IDC_STATIC,12,62,46,8
+    CONTROL         "",IDC_SLIDER11,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,60,108,12
+    LTEXT           "Release Rate:",IDC_STATIC,12,74,46,8
+    CONTROL         "",IDC_SLIDER12,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,72,108,12
+    CONTROL         "Sustain Sound",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,87,174,10
+    LTEXT           "Volume:",IDC_STATIC,12,104,26,8
+    CONTROL         "",IDC_SLIDER13,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,102,108,12
+    CONTROL         "Scale Envelope with Keys",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,120,174,10
+    LTEXT           "Key Scale Level:",IDC_STATIC,12,134,53,8
+    CONTROL         "",IDC_SLIDER14,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,132,108,12
+    LTEXT           "Frequency Multiplier:",IDC_STATIC,12,152,68,8
+    CONTROL         "",IDC_SLIDER15,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,150,108,12
+    LTEXT           "Waveform:",IDC_STATIC,12,168,68,8
+    COMBOBOX        IDC_COMBO2,84,168,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Vibrato",IDC_CHECK8,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,186,180,10
+    CONTROL         "Tremolo",IDC_CHECK9,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,198,180,10
+    GROUPBOX        "Modulator",IDC_STATIC,210,24,198,192
+    LTEXT           "Attack Rate:",IDC_STATIC,216,38,42,8
+    CONTROL         "",IDC_SLIDER2,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,36,108,12
+    LTEXT           "Decay Rate:",IDC_STATIC,216,50,41,8
+    CONTROL         "",IDC_SLIDER3,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,48,108,12
+    LTEXT           "Sustain Level:",IDC_STATIC,216,62,46,8
+    CONTROL         "",IDC_SLIDER4,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,60,108,12
+    LTEXT           "Release Rate:",IDC_STATIC,216,74,46,8
+    CONTROL         "",IDC_SLIDER5,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,72,108,12
+    CONTROL         "Sustain Sound",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,216,86,174,10
+    LTEXT           "Volume:",IDC_STATIC,216,104,26,8
+    CONTROL         "",IDC_SLIDER6,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,102,108,12
+    CONTROL         "Scale Envelope with Keys",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,216,120,174,10
+    LTEXT           "Key Scale Level:",IDC_STATIC,216,134,53,8
+    CONTROL         "",IDC_SLIDER7,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,132,108,12
+    LTEXT           "Frequency Multiplier:",IDC_STATIC,216,152,68,8
+    CONTROL         "",IDC_SLIDER8,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,150,108,12
+    LTEXT           "Waveform:",IDC_STATIC,216,168,68,8
+    COMBOBOX        IDC_COMBO1,288,168,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Vibrato",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,216,186,180,10
+    CONTROL         "Tremolo",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,216,198,180,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -747,6 +799,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 194
     END
+
+    IDD_OPL_PARAMS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 403
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 211
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -814,6 +874,58 @@ BEGIN
     0, 100, 0, 0,
     0, 100, 0, 0,
     0, 100, 0, 0
+END
+
+IDD_OPL_PARAMS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_OPL_PARAMS DLGINIT
+BEGIN
+    IDC_COMBO2, 0x403, 5, 0
+0x6953, 0x656e, "\000" 
+    IDC_COMBO2, 0x403, 10, 0
+0x6148, 0x666c, 0x5320, 0x6e69, 0x0065, 
+    IDC_COMBO2, 0x403, 14, 0
+0x6241, 0x6f73, 0x756c, 0x6574, 0x5320, 0x6e69, 0x0065, 
+    IDC_COMBO2, 0x403, 11, 0
+0x7550, 0x736c, 0x2065, 0x6953, 0x656e, "\000" 
+    IDC_COMBO2, 0x403, 20, 0
+0x6953, 0x656e, 0x2820, 0x7645, 0x6e65, 0x5020, 0x7265, 0x6f69, 0x7364, 
+0x0029, 
+    IDC_COMBO2, 0x403, 29, 0
+0x6241, 0x6f73, 0x756c, 0x6574, 0x5320, 0x6e69, 0x2065, 0x4528, 0x6576, 
+0x206e, 0x6550, 0x6972, 0x646f, 0x2973, "\000" 
+    IDC_COMBO2, 0x403, 7, 0
+0x7153, 0x6175, 0x6572, "\000" 
+    IDC_COMBO2, 0x403, 15, 0
+0x6544, 0x6972, 0x6576, 0x2064, 0x7153, 0x6175, 0x6572, "\000" 
+    IDC_COMBO1, 0x403, 5, 0
+0x6953, 0x656e, "\000" 
+    IDC_COMBO1, 0x403, 10, 0
+0x6148, 0x666c, 0x5320, 0x6e69, 0x0065, 
+    IDC_COMBO1, 0x403, 14, 0
+0x6241, 0x6f73, 0x756c, 0x6574, 0x5320, 0x6e69, 0x0065, 
+    IDC_COMBO1, 0x403, 11, 0
+0x7550, 0x736c, 0x2065, 0x6953, 0x656e, "\000" 
+    IDC_COMBO1, 0x403, 20, 0
+0x6953, 0x656e, 0x2820, 0x7645, 0x6e65, 0x5020, 0x7265, 0x6f69, 0x7364, 
+0x0029, 
+    IDC_COMBO1, 0x403, 29, 0
+0x6241, 0x6f73, 0x756c, 0x6574, 0x5320, 0x6e69, 0x2065, 0x4528, 0x6576, 
+0x206e, 0x6550, 0x6972, 0x646f, 0x2973, "\000" 
+    IDC_COMBO1, 0x403, 7, 0
+0x7153, 0x6175, 0x6572, "\000" 
+    IDC_COMBO1, 0x403, 15, 0
+0x6544, 0x6972, 0x6576, 0x2064, 0x7153, 0x6175, 0x6572, "\000" 
+    0
 END
 
 #endif    // German (Germany) resources
@@ -2319,6 +2431,27 @@ BEGIN
 END
 
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_OPTIONS_MIDI DLGINIT
+BEGIN
+    IDC_COMBO3, 0x403, 12, 0
+0x2f31, 0x7434, 0x2068, 0x6f4e, 0x6574, 0x0073, 
+    IDC_COMBO3, 0x403, 12, 0
+0x2f31, 0x7438, 0x2068, 0x6f4e, 0x6574, 0x0073, 
+    IDC_COMBO3, 0x403, 13, 0
+0x2f31, 0x3631, 0x6874, 0x4e20, 0x746f, 0x7365, "\000" 
+    IDC_COMBO3, 0x403, 13, 0
+0x2f31, 0x3233, 0x646e, 0x4e20, 0x746f, 0x7365, "\000" 
+    IDC_COMBO3, 0x403, 13, 0
+0x2f31, 0x3436, 0x6874, 0x4e20, 0x746f, 0x7365, "\000" 
+    0
+END
+
+
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2527,27 +2660,6 @@ IDC_DRAGGING            CURSOR                  "res\\dragging.cur"
 IDC_NODROP              CURSOR                  "res\\nodrop.cur"
 
 IDC_NODRAG              CURSOR                  "res\\nodrag.cur"
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog Info
-//
-
-IDD_OPTIONS_MIDI DLGINIT
-BEGIN
-    IDC_COMBO3, 0x403, 12, 0
-0x2f31, 0x7434, 0x2068, 0x6f4e, 0x6574, 0x0073, 
-    IDC_COMBO3, 0x403, 12, 0
-0x2f31, 0x7438, 0x2068, 0x6f4e, 0x6574, 0x0073, 
-    IDC_COMBO3, 0x403, 13, 0
-0x2f31, 0x3631, 0x6874, 0x4e20, 0x746f, 0x7365, "\000" 
-    IDC_COMBO3, 0x403, 13, 0
-0x2f31, 0x3233, 0x646e, 0x4e20, 0x746f, 0x7365, "\000" 
-    IDC_COMBO3, 0x403, 13, 0
-0x2f31, 0x3436, 0x6874, 0x4e20, 0x746f, 0x7365, "\000" 
-    0
-END
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -3175,38 +3287,6 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Menu
-//
-
-IDR_VSTMENU MENU
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Copy Preset",                ID_EDIT_COPY
-        MENUITEM "&Paste Preset",               ID_EDIT_PASTE
-        MENUITEM SEPARATOR
-        MENUITEM "&Load Preset / Bank...",      ID_PRESET_LOAD
-        MENUITEM "&Save Preset / Bank...",      ID_PRESET_SAVE
-        MENUITEM SEPARATOR
-        MENUITEM "Create &instrument from plugin", ID_PLUGINTOINSTRUMENT
-        MENUITEM "&Randomize Parameters",       ID_PRESET_RANDOM
-    END
-    POPUP "&Info"
-    BEGIN
-        MENUITEM "I&nputs",                     ID_INFO_INPUTS
-        MENUITEM "Ou&tputs",                    ID_INFO_OUPUTS
-        MENUITEM "&Macros",                     ID_INFO_MACROS
-    END
-    POPUP "&Options"
-    BEGIN
-        MENUITEM "&Bypass Plugin",              ID_PLUG_BYPASS
-        MENUITEM "Record &Parameter Changes",   ID_PLUG_RECORDAUTOMATION
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Dialog Info
 //
 
@@ -3247,6 +3327,38 @@ BEGIN
     IDC_COMBO_CHANNEL, 0x403, 3, 0
 0x3631, "\000" 
     0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_VSTMENU MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Copy Preset",                ID_EDIT_COPY
+        MENUITEM "&Paste Preset",               ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "&Load Preset / Bank...",      ID_PRESET_LOAD
+        MENUITEM "&Save Preset / Bank...",      ID_PRESET_SAVE
+        MENUITEM SEPARATOR
+        MENUITEM "Create &instrument from plugin", ID_PLUGINTOINSTRUMENT
+        MENUITEM "&Randomize Parameters",       ID_PRESET_RANDOM
+    END
+    POPUP "&Info"
+    BEGIN
+        MENUITEM "I&nputs",                     ID_INFO_INPUTS
+        MENUITEM "Ou&tputs",                    ID_INFO_OUPUTS
+        MENUITEM "&Macros",                     ID_INFO_MACROS
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "&Bypass Plugin",              ID_PLUG_BYPASS
+        MENUITEM "Record &Parameter Changes",   ID_PLUG_RECORDAUTOMATION
+    END
 END
 
 

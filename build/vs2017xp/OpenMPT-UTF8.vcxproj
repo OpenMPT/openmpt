@@ -795,6 +795,7 @@
     <ClInclude Include="..\..\mptrack\Mpdlgs.h" />
     <ClInclude Include="..\..\mptrack\Mptrack.h" />
     <ClInclude Include="..\..\mptrack\Notification.h" />
+    <ClInclude Include="..\..\mptrack\OPLInstrDlg.h" />
     <ClInclude Include="..\..\mptrack\PSRatioCalc.h" />
     <ClInclude Include="..\..\mptrack\PathConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\PatternClipboard.h" />
@@ -1025,6 +1026,7 @@
     <ClCompile Include="..\..\mptrack\Mpdlgs.cpp" />
     <ClCompile Include="..\..\mptrack\Mpt_midi.cpp" />
     <ClCompile Include="..\..\mptrack\Mptrack.cpp" />
+    <ClCompile Include="..\..\mptrack\OPLInstrDlg.cpp" />
     <ClCompile Include="..\..\mptrack\PSRatioCalc.cpp" />
     <ClCompile Include="..\..\mptrack\PathConfigDlg.cpp" />
     <ClCompile Include="..\..\mptrack\PatternClipboard.cpp" />

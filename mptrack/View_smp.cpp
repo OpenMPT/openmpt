@@ -21,6 +21,7 @@
 #include "Dlsbank.h"
 #include "ChannelManagerDlg.h"
 #include "View_smp.h"
+#include "OPLInstrDlg.h"
 #include "../soundlib/MIDIEvents.h"
 #include "SampleEditorDialogs.h"
 #include "../soundlib/WAVTools.h"
@@ -49,7 +50,7 @@ OPENMPT_NAMESPACE_BEGIN
 // of trimming is nTrimLengthMin + 1.
 #define MIN_TRIM_LENGTH			4
 
-const UINT cLeftBarButtons[SMP_LEFTBAR_BUTTONS] =
+static const UINT cLeftBarButtons[SMP_LEFTBAR_BUTTONS] =
 {
 	ID_SAMPLE_ZOOMUP,
 	ID_SAMPLE_ZOOMDOWN,
@@ -130,14 +131,10 @@ END_MESSAGE_MAP()
 
 CViewSample::CViewSample()
 	: m_lastDrawPoint(-1, -1)
-	, m_nGridSegments(0)
-	, m_nSample(1)
-	, m_nZoom(0)
-	, m_nBtnMouseOver(0xFFFF)
-	, noteChannel(NOTE_MAX - NOTE_MIN + 1, CHANNELINDEX_INVALID)
 {
-	m_dwNotifyPos.fill(Notification::PosInvalid);
 	MemsetZero(m_NcButtonState);
+	m_dwNotifyPos.fill(Notification::PosInvalid);
+	m_noteChannel.fill(CHANNELINDEX_INVALID);
 	m_bmpEnvBar.Create(&CMainFrame::GetMainFrame()->m_SampleIcons);
 }
 
@@ -163,6 +160,7 @@ void CViewSample::OnInitialUpdate()
 	}
 	UpdateScrollSize();
 	UpdateNcButtonState();
+	UpdateOPLEditor();
 }
 
 
@@ -195,6 +193,16 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 	m_nZoom = newZoom;
 
 	GetClientRect(&m_rcClient);
+
+	if(m_oplEditor && m_oplEditor->IsWindowVisible())
+	{
+		m_oplEditor->SetWindowPos(nullptr, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), SWP_NOZORDER | SWP_NOACTIVATE);
+		// TODO: Handle scrolling
+		const auto size = m_oplEditor->GetMinimumSize();
+		SetScrollSizes(MM_TEXT, size);
+		return;
+	}
+
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 	SIZE sizePage, sizeLine;
 	SmpLength dwLen = 0;
@@ -248,7 +256,7 @@ void CViewSample::ScrollToSample(SmpLength centeredSample, bool refresh)
 	Limit(scrollToSample, 0, GetScrollLimit(SB_HORZ));
 	SetScrollPos(SB_HORZ, scrollToSample);
 
-	if(refresh) InvalidateRect(nullptr, FALSE);
+	if(refresh) InvalidateSample();
 }
 
 
@@ -298,15 +306,15 @@ BOOL CViewSample::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 }
 
 
-BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
+void CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 {
 	CModDoc *pModDoc = GetDocument();
 
-	if (!pModDoc) return FALSE;
-	if ((nSmp < 1) || (nSmp > pModDoc->GetNumSamples())) return FALSE;
+	if (!pModDoc) return;
+	if ((nSmp < 1) || (nSmp > pModDoc->GetNumSamples())) return;
 	pModDoc->SetNotifications(Notification::Sample, nSmp);
 	pModDoc->SetFollowWnd(m_hWnd);
-	if (nSmp == m_nSample) return FALSE;
+	if (nSmp == m_nSample) return;
 	m_dwBeginSel = m_dwEndSel = 0;
 	m_dwStatus.reset(SMPSTATUS_DRAWING);
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -315,8 +323,29 @@ BOOL CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 	m_dwNotifyPos.fill(Notification::PosInvalid);
 	UpdateScrollSize();
 	UpdateNcButtonState();
-	InvalidateRect(NULL, FALSE);
-	return TRUE;
+	UpdateOPLEditor();
+	InvalidateSample();
+}
+
+
+void CViewSample::UpdateOPLEditor()
+{
+	ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
+	if(m_oplEditor && !sample.uFlags[CHN_ADLIB])
+	{
+		m_oplEditor->ShowWindow(SW_HIDE);
+	} else if(sample.uFlags[CHN_ADLIB])
+	{
+		if(!m_oplEditor)
+		{
+			m_oplEditor = mpt::make_unique<OPLInstrDlg>(*this);
+		}
+		if(m_oplEditor)
+		{
+			m_oplEditor->SetPatch(sample.adlib);
+			m_oplEditor->SetWindowPos(nullptr, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+		}
+	}
 }
 
 
@@ -328,17 +357,16 @@ void CViewSample::OnSetFocus(CWnd *pOldWnd)
 }
 
 
-BOOL CViewSample::SetZoom(int nZoom, SmpLength centeredSample)
+void CViewSample::SetZoom(int nZoom, SmpLength centeredSample)
 {
 
 	if (nZoom == m_nZoom)
-		return TRUE;
+		return;
 	if (nZoom > MAX_ZOOM)
-		return FALSE;
+		return;
 
 	UpdateScrollSize(nZoom, true, centeredSample);
-	InvalidateRect(NULL, FALSE);
-	return TRUE;
+	InvalidateSample();
 }
 
 
@@ -521,6 +549,10 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		}
 		break;
 
+	case VIEWMSG_SETMODIFIED:
+		SetModified(UpdateHint::FromLPARAM(lParam).ToType<SampleHint>(), false, false);
+		break;
+
 	default:
 		return CModScrollView::OnModViewMsg(wParam, lParam);
 	}
@@ -545,6 +577,7 @@ void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
 	{
 		UpdateScrollSize();
 		UpdateNcButtonState();
+		UpdateOPLEditor();
 		InvalidateSample();
 	}
 	if(hintType[HINT_SAMPLEINFO])
@@ -1059,6 +1092,11 @@ void CViewSample::OnDraw(CDC *pDC)
 
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 	const ModSample &sample = sndFile.GetSample((m_nSample <= sndFile.GetNumSamples()) ? m_nSample : 0);
+	if(sample.uFlags[CHN_ADLIB])
+	{
+		CModScrollView::OnDraw(pDC);
+		return;
+	}
 	
 	// Create off-screen image
 	if(offScreenDC.m_hDC == nullptr)
@@ -1212,7 +1250,8 @@ void CViewSample::OnDraw(CDC *pDC)
 
 void CViewSample::DrawPositionMarks()
 {
-	if(!GetDocument()->GetSoundFile().GetSample(m_nSample).HasSampleData())
+	const ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
+	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
 	{
 		return;
 	}
@@ -1245,7 +1284,7 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 		}
 		if(invalidate)
 		{
-			InvalidateRect(NULL, FALSE);
+			InvalidateSample();
 		}
 	} else if (pnotify->type[Notification::Sample] && pnotify->item == m_nSample)
 	{
@@ -1907,11 +1946,7 @@ void CViewSample::OnNcLButtonDblClk(UINT uFlags, CPoint point)
 }
 
 
-#if _MFC_VER > 0x0710
 LRESULT CViewSample::OnNcHitTest(CPoint point)
-#else
-UINT CViewSample::OnNcHitTest(CPoint point)
-#endif
 {
 	CRect rect;
 	GetWindowRect(&rect);
@@ -2555,7 +2590,7 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 				loopend = loopstart = 0;
 			}
 
-			noteChannel[note - NOTE_MIN] = pModDoc->PlayNote(PlayNoteParam(note).Sample(m_nSample).Volume(volume).LoopStart(loopstart).LoopEnd(loopend).Offset(nStartPos));
+			m_noteChannel[note - NOTE_MIN] = pModDoc->PlayNote(PlayNoteParam(note).Sample(m_nSample).Volume(volume).LoopStart(loopstart).LoopEnd(loopend).Offset(nStartPos));
 
 			m_dwStatus.set(SMPSTATUS_KEYDOWN);
 
@@ -2573,10 +2608,10 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 void CViewSample::NoteOff(ModCommand::NOTE note)
 {
 	CSoundFile &sndFile = GetDocument()->GetSoundFile();
-	ModChannel &chn = sndFile.m_PlayState.Chn[noteChannel[note - NOTE_MIN]];
+	ModChannel &chn = sndFile.m_PlayState.Chn[m_noteChannel[note - NOTE_MIN]];
 	sndFile.KeyOff(&chn);
 	chn.dwFlags.set(CHN_NOTEFADE);
-	noteChannel[note - NOTE_MIN] = CHANNELINDEX_INVALID;
+	m_noteChannel[note - NOTE_MIN] = CHANNELINDEX_INVALID;
 }
 
 
@@ -3133,7 +3168,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			switch(TrackerSettings::Instance().sampleEditorKeyBehaviour)
 			{
 			case seNoteOffOnKeyRestrike:
-				if(noteChannel[note - NOTE_MIN] != CHANNELINDEX_INVALID)
+				if(m_noteChannel[note - NOTE_MIN] != CHANNELINDEX_INVALID)
 				{
 					NoteOff(note);
 					break;
@@ -3153,14 +3188,14 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			{
 			case seNoteOffOnNewKey:
 				m_dwStatus.reset(SMPSTATUS_KEYDOWN);
-				if(noteChannel[note - NOTE_MIN] != CHANNELINDEX_INVALID)
+				if(m_noteChannel[note - NOTE_MIN] != CHANNELINDEX_INVALID)
 				{
 					// Release sustain loop on key up
-					sndFile.KeyOff(&sndFile.m_PlayState.Chn[noteChannel[note - NOTE_MIN]]);
+					sndFile.KeyOff(&sndFile.m_PlayState.Chn[m_noteChannel[note - NOTE_MIN]]);
 				}
 				break;
 			case seNoteOffOnKeyUp:
-				if(noteChannel[note - NOTE_MIN] != CHANNELINDEX_INVALID)
+				if(m_noteChannel[note - NOTE_MIN] != CHANNELINDEX_INVALID)
 				{
 					NoteOff(note);
 				}
@@ -3351,6 +3386,11 @@ void CViewSample::OnChangeGridSize()
 	}
 }
 
+
+void CViewSample::OnQuickFade()
+{
+	PostCtrlMessage(IDC_SAMPLE_QUICKFADE);
+}
 
 void CViewSample::OnUpdateUndo(CCmdUI *pCmdUI)
 {
