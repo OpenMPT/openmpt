@@ -141,14 +141,6 @@ public:
 	// Initialize file reader object based on an existing file reader object window.
 	explicit FileReader(value_data_type other, const mpt::PathString *filename = nullptr) : m_data(other), streamPos(0), fileName(filename) { }
 
-	// Initialize file reader object based on an existing file reader object. The other object's stream position is copied.
-	FileReader(const FileReader &) = default;
-	FileReader& operator=(const FileReader &) = default;
-
-	// Move an existing file reader object
-	FileReader(FileReader &&) noexcept = default;
-	FileReader& operator=(FileReader &&) noexcept = default;
-
 public:
 
 	mpt::PathString GetFileName() const
