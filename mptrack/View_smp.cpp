@@ -2410,7 +2410,7 @@ void CViewSample::On8BitConvert()
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if(sample.uFlags[CHN_16BIT] && sample.HasSampleData())
+		if(sample.uFlags[CHN_16BIT] && !sample.uFlags[CHN_ADLIB] && sample.HasSampleData())
 		{
 			ASSERT(sample.GetElementarySampleSize() == 2);
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "8-Bit Conversion");
@@ -2434,7 +2434,7 @@ void CViewSample::On16BitConvert()
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if(!sample.uFlags[CHN_16BIT] && sample.HasSampleData())
+		if(!sample.uFlags[CHN_16BIT] && !sample.uFlags[CHN_ADLIB] && sample.HasSampleData())
 		{
 			ASSERT(sample.GetElementarySampleSize() == 1);
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "16-Bit Conversion");
@@ -2459,7 +2459,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
-		if(sample.GetNumChannels() > 1 && sample.HasSampleData())
+		if(sample.GetNumChannels() > 1 && sample.HasSampleData() && !sample.uFlags[CHN_ADLIB])
 		{
 			SAMPLEINDEX rightSmp = SAMPLEINDEX_INVALID;
 			if(convert == ctrlSmp::splitSample)
@@ -2526,7 +2526,7 @@ void CViewSample::TrimSample(bool trimToLoopEnd)
 {
 	CModDoc *pModDoc = GetDocument();
 	//nothing loaded or invalid sample slot.
-	if(!pModDoc || m_nSample > pModDoc->GetNumSamples()) return;
+	if(!pModDoc || m_nSample > pModDoc->GetNumSamples() || IsOPLInstrument()) return;
 
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	ModSample &sample = sndFile.GetSample(m_nSample);
@@ -2944,12 +2944,12 @@ void CViewSample::OnAddSilence()
 
 	ModSample &sample = sndFile.GetSample(m_nSample);
 
-	CAddSilenceDlg dlg(this, sample.nLength, sample.GetSampleRate(sndFile.GetType()));
+	const SmpLength oldLength = IsOPLInstrument() ? 0 : sample.nLength;
+
+	CAddSilenceDlg dlg(this, oldLength, sample.GetSampleRate(sndFile.GetType()));
 	if (dlg.DoModal() != IDOK) return;
 
-	const SmpLength nOldLength = sample.nLength;
-
-	if(MAX_SAMPLE_LENGTH - nOldLength < dlg.m_nSamples && dlg.m_nEditOption != CAddSilenceDlg::kResize)
+	if(MAX_SAMPLE_LENGTH - oldLength < dlg.m_nSamples && dlg.m_nEditOption != CAddSilenceDlg::kResize)
 	{
 		CString str; str.Format(_T("Cannot add silence because the new sample length would exceed maximum sample length %u."), MAX_SAMPLE_LENGTH);
 		Reporting::Information(str);
@@ -2957,6 +2957,11 @@ void CViewSample::OnAddSilence()
 	}
 
 	BeginWaitCursor();
+
+	if(IsOPLInstrument())
+	{
+		GetDocument()->GetSoundFile().DestroySampleThreadsafe(m_nSample);
+	}
 
 	if(sample.nLength == 0 && sample.nVolume == 0)
 	{
@@ -2995,7 +3000,7 @@ void CViewSample::OnAddSilence()
 
 	EndWaitCursor();
 
-	if(nOldLength != sample.nLength)
+	if(oldLength != sample.nLength)
 	{
 		SetCurSel(0, 0);
 		SetModified(SampleHint().Info().Data().Names(), true, true);
@@ -3238,7 +3243,7 @@ void CViewSample::OnSampleSlice()
 	if(pModDoc == nullptr) return;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	ModSample &sample = sndFile.GetSample(m_nSample);
-	if(!sample.HasSampleData()) return;
+	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB]) return;
 
 	// Sort cue points and add two fake cue points to make things easier below...
 	SmpLength cues[CountOf(sample.cues) + 2];

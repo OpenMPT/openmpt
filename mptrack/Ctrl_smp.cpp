@@ -650,6 +650,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 	if(updateSmp != m_nSample && updateSmp != 0 && !hintType[HINT_MODTYPE]) return;
 
 	const CModSpecifications &specs = m_sndFile.GetModSpecifications();
+	const bool isOPL = IsOPLInstrument();
 	
 	LockControls();
 	// Updating Ranges
@@ -758,7 +759,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		m_SpinSample.Invalidate(FALSE);	// In case the spin button was previously disabled
 
 		// Length / Type
-		if(sample.uFlags[CHN_ADLIB])
+		if(isOPL)
 			s = _T("OPL instrument");
 		else
 			s.Format(_T("%u-bit %s, len: %s"), sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono"), mpt::cfmt::dec(3, ',', sample.nLength).GetString());
@@ -852,6 +853,31 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		CheckDlgButton(IDC_CHECK2, m_sndFile.GetSample(m_nSample).uFlags[SMP_KEEPONDISK] ? BST_CHECKED : BST_UNCHECKED);
 		GetDlgItem(IDC_CHECK2)->EnableWindow((m_sndFile.SampleHasPath(m_nSample) && m_sndFile.GetType() == MOD_TYPE_MPT) ? TRUE : FALSE);
 	}
+
+	// Update OPL instrument status
+	if(hintType[HINT_MODTYPE | HINT_SAMPLEINFO])
+	{
+		BOOL b = isOPL ? FALSE : TRUE;
+		static constexpr int sampleButtons[] =
+		{
+			IDC_SAMPLE_NORMALIZE,   IDC_SAMPLE_AMPLIFY,
+			IDC_SAMPLE_DCOFFSET,    IDC_SAMPLE_STEREOSEPARATION,
+			IDC_SAMPLE_RESAMPLE,    IDC_SAMPLE_REVERSE,
+			IDC_SAMPLE_SILENCE,     IDC_SAMPLE_INVERT,
+			IDC_SAMPLE_SIGN_UNSIGN, IDC_SAMPLE_XFADE,
+			IDC_SAMPLE_AUTOTUNE,
+		};
+		for(auto btn : sampleButtons)
+		{
+			m_ToolBar2.EnableButton(btn, b);
+		}
+		m_ComboLoopType.EnableWindow(b);
+		m_SpinLoopStart.EnableWindow(b);
+		m_SpinLoopEnd.EnableWindow(b);
+		m_EditLoopStart.EnableWindow(b);
+		m_EditLoopEnd.EnableWindow(b);
+	}
+
 	if (!m_bInitialized)
 	{
 		// First update
@@ -1728,12 +1754,13 @@ void CCtrlSamples::OnAmplify()
 // Fade-Out is applied if the selection ends and the end of the sample.
 void CCtrlSamples::OnQuickFade()
 {
-	if(!m_sndFile.GetSample(m_nSample).HasSampleData()) return;
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB]) return;
 
 	SampleSelectionPoints sel = GetSelectionPoints();
-	if(sel.selectionActive && (sel.nStart == 0 || sel.nEnd == m_sndFile.GetSample(m_nSample).nLength))
+	if(sel.selectionActive && (sel.nStart == 0 || sel.nEnd == sample.nLength))
 	{
-		ApplyAmplify(100, (sel.nStart == 0) ? 0 : 100, (sel.nEnd == m_sndFile.GetSample(m_nSample).nLength) ? 0 : 100, Fade::kLinear);
+		ApplyAmplify(100, (sel.nStart == 0) ? 0 : 100, (sel.nEnd == sample.nLength) ? 0 : 100, Fade::kLinear);
 	} else
 	{
 		// Can't apply quick fade as no appropriate selection has been made, so ask the user to amplify the whole sample instead.
@@ -1745,7 +1772,7 @@ void CCtrlSamples::OnQuickFade()
 void CCtrlSamples::OnResample()
 {
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	if(!sample.HasSampleData()) return;
+	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB]) return;
 
 	const uint32 oldRate = sample.GetSampleRate(m_sndFile.GetType());
 	CResamplingDlg dlg(this, oldRate, TrackerSettings::Instance().sampleEditorDefaultResampler);
@@ -1763,7 +1790,11 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 	BeginWaitCursor();
 
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	if(!sample.HasSampleData()) return;
+	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
+	{
+		EndWaitCursor();
+		return;
+	}
 
 	SampleSelectionPoints selection = GetSelectionPoints();
 	LimitMax(selection.nEnd, sample.nLength);
@@ -1783,6 +1814,7 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 	if(newRate < 1 || oldRate < 1)
 	{
 		MessageBeep(MB_ICONWARNING);
+		EndWaitCursor();
 		return;
 	}
 
@@ -3459,7 +3491,8 @@ void CCtrlSamples::OnStereoSeparation()
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
 	if(!sample.HasSampleData()
-		|| sample.GetNumChannels() != 2)
+		|| sample.GetNumChannels() != 2
+		|| sample.uFlags[CHN_ADLIB])
 	{
 		MessageBeep(MB_ICONWARNING);
 		SwitchToView();
@@ -3564,6 +3597,12 @@ void CCtrlSamples::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
 	else if(nButton == XBUTTON2) OnNextInstrument();
 	CModControlDlg::OnXButtonUp(nFlags, nButton, point);
 	SwitchToView();
+}
+
+
+bool CCtrlSamples::IsOPLInstrument() const
+{
+	return m_nSample >= 1 && m_nSample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(m_nSample).uFlags[CHN_ADLIB];
 }
 
 OPENMPT_NAMESPACE_END

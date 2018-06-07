@@ -69,6 +69,8 @@ protected:
 
 	void PropagateAutoVibratoChanges();
 
+	bool IsOPLInstrument() const;
+
 public:
 	CCtrlSamples(CModControlView &parent, CModDoc &document);
 	~CCtrlSamples();
