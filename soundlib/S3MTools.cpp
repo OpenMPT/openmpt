@@ -44,9 +44,7 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 		std::copy(adlibBytes, adlibBytes + 12, mptSmp.adlib.begin());
 		// Bogus sample to make playback work
 		mptSmp.nLength = 4;
-		mptSmp.nLoopStart = 0;
-		mptSmp.nLoopEnd = 4;
-		mptSmp.uFlags = CHN_LOOP | CHN_ADLIB;
+		mptSmp.uFlags = CHN_ADLIB;
 		mptSmp.AllocateSample();
 	}
 

@@ -1180,9 +1180,7 @@ bool CSoundFile::ReadSBISample(SAMPLEINDEX sample, FileReader &file)
 	ModSample &mptSmp = Samples[sample];
 	mptSmp.Initialize(MOD_TYPE_S3M);
 	mptSmp.nLength = 4;
-	mptSmp.nLoopStart = 0;
-	mptSmp.nLoopEnd = 4;
-	mptSmp.uFlags = CHN_LOOP | CHN_ADLIB;
+	mptSmp.uFlags = CHN_ADLIB;
 	mptSmp.AllocateSample();
 
 	file.ReadString<mpt::String::nullTerminated>(m_szNames[sample], 32);
