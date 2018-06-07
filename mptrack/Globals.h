@@ -152,12 +152,12 @@ public:
 
 protected:
 	//{{AFX_VIRTUAL(CModControlView)
-	public:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	protected:
-	virtual void OnInitialUpdate(); // called first time after construct
-	virtual void OnDraw(CDC *) {}
-	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+public:
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
+protected:
+	void OnInitialUpdate() override; // called first time after construct
+	void OnDraw(CDC *) override {}
+	void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint) override;
 	//}}AFX_VIRTUAL
 
 protected:
@@ -207,10 +207,10 @@ public:
 
 public:
 	//{{AFX_VIRTUAL(CModScrollView)
-	virtual void OnInitialUpdate();
-	virtual void OnDraw(CDC *) {}
-	virtual void OnPrepareDC(CDC*, CPrintInfo*) {}
-	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+	void OnInitialUpdate() override;
+	void OnDraw(CDC *) override {}
+	void OnPrepareDC(CDC*, CPrintInfo*) override {}
+	void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint) override;
 	virtual void UpdateView(UpdateHint, CObject *) {}
 	virtual LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *) { return FALSE; }
@@ -229,10 +229,10 @@ protected:
 	afx_msg LRESULT OnDPIChanged(WPARAM = 0, LPARAM = 0);
 
 	// Fixes for 16-bit limitation in MFC's CScrollView
-	virtual BOOL OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll = TRUE);
-	virtual BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE);
-	virtual int SetScrollPos(int nBar, int nPos, BOOL bRedraw = TRUE);
-	virtual void SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& sizePage = CScrollView::sizeDefault, const SIZE& sizeLine = CScrollView::sizeDefault);
+	BOOL OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll = TRUE) override;
+	BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE) override;
+	int SetScrollPos(int nBar, int nPos, BOOL bRedraw = TRUE);
+	void SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& sizePage = CScrollView::sizeDefault, const SIZE& sizeLine = CScrollView::sizeDefault);
 
 
 	//}}AFX_MSG

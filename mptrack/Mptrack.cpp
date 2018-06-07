@@ -100,7 +100,7 @@ void CTrackApp::OnUpdateAnyDocsOpen(CCmdUI *cmd)
 
 int CTrackApp::GetOpenDocumentCount() const
 {
-	return GetModDocTemplate()->size();
+	return static_cast<int>(GetModDocTemplate()->size());
 }
 
 
@@ -190,13 +190,13 @@ BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
 		CDLSBank dlsbank;
 		if (dlsbank.Open(filename))
 		{
-			for (UINT iIns=0; iIns<256; iIns++)
+			for (uint32 iIns=0; iIns<256; iIns++)
 			{
 				if((bReplaceAll) || midiLibrary.MidiMap[iIns].empty())
 				{
-					DWORD dwProgram = (iIns < 128) ? iIns : 0xFF;
-					DWORD dwKey = (iIns < 128) ? 0xFF : iIns & 0x7F;
-					DWORD dwBank = (iIns < 128) ? 0 : F_INSTRUMENT_DRUMS;
+					uint32 dwProgram = (iIns < 128) ? iIns : 0xFF;
+					uint32 dwKey = (iIns < 128) ? 0xFF : iIns & 0x7F;
+					uint32 dwBank = (iIns < 128) ? 0 : F_INSTRUMENT_DRUMS;
 					if (dlsbank.FindInstrument((iIns < 128) ? FALSE : TRUE,	dwBank, dwProgram, dwKey))
 					{
 						midiLibrary.MidiMap[iIns] = filename;
@@ -461,11 +461,12 @@ void CTrackApp::RemoveMruItem(const size_t item)
 
 void CTrackApp::RemoveMruItem(const mpt::PathString &path)
 {
-	for(auto i = TrackerSettings::Instance().mruFiles.begin(); i != TrackerSettings::Instance().mruFiles.end(); i++)
+	auto &mruFiles = TrackerSettings::Instance().mruFiles;
+	for(auto i = mruFiles.begin(); i != mruFiles.end(); i++)
 	{
 		if(!mpt::PathString::CompareNoCase(*i, path))
 		{
-			TrackerSettings::Instance().mruFiles.erase(i);
+			mruFiles.erase(i);
 			break;
 		}
 	}
@@ -498,19 +499,19 @@ public:
 	{
 		return;
 	}
-	virtual bool LoadOnStartup() const
+	bool LoadOnStartup() const override
 	{
 		return conf.ComponentsLoadOnStartup;
 	}
-	virtual bool KeepLoaded() const
+	bool KeepLoaded() const override
 	{
 		return conf.ComponentsKeepLoaded;
 	}
-	virtual bool IsBlocked(const std::string &key) const
+	bool IsBlocked(const std::string &key) const override
 	{
 		return conf.IsComponentBlocked(key);
 	}
-	virtual mpt::PathString Path() const
+	mpt::PathString Path() const override
 	{
 		if(BuildVariants::GetComponentArch().empty())
 		{

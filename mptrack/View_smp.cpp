@@ -196,9 +196,8 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 
 	if(m_oplEditor && m_oplEditor->IsWindowVisible())
 	{
-		m_oplEditor->SetWindowPos(nullptr, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), SWP_NOZORDER | SWP_NOACTIVATE);
-		// TODO: Handle scrolling
 		const auto size = m_oplEditor->GetMinimumSize();
+		m_oplEditor->SetWindowPos(nullptr, -m_nScrollPosX, -m_nScrollPosY, std::max(size.cx, m_rcClient.right), std::max(size.cy, m_rcClient.bottom), SWP_NOZORDER | SWP_NOACTIVATE);
 		SetScrollSizes(MM_TEXT, size);
 		return;
 	}
@@ -260,47 +259,49 @@ void CViewSample::ScrollToSample(SmpLength centeredSample, bool refresh)
 }
 
 
-BOOL CViewSample::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
+int CViewSample::CalcScroll(int &currentPos, int amount, int style, int bar)
 {
-	int xOrig, x;
-
-	// don't scroll if there is no valid scroll range (ie. no scroll bar)
-	CScrollBar* pBar;
+	// Don't scroll if there is no valid scroll range (ie. no scroll bar)
+	const CScrollBar *pBar = GetScrollBarCtrl(bar);
 	DWORD dwStyle = GetStyle();
-	pBar = GetScrollBarCtrl(SB_HORZ);
-	if ((pBar != NULL && !pBar->IsWindowEnabled()) ||
-		(pBar == NULL && !(dwStyle & WS_HSCROLL)))
+	if((pBar != nullptr && !pBar->IsWindowEnabled())
+		|| (pBar == nullptr && !(dwStyle & style)))
 	{
-		// horizontal scroll bar not enabled
-		sizeScroll.cx = 0;
+		// Scroll bar not enabled
+		amount = 0;
 	}
 
-	// adjust current x position
-	xOrig = x = GetScrollPos(SB_HORZ);
-	int xMax = GetScrollLimit(SB_HORZ);
-	x += sizeScroll.cx;
-	if (x < 0)
-		x = 0;
-	else if (x > xMax)
-		x = xMax;
+	// Adjust current position
+	int orig = GetScrollPos(bar);
+	currentPos = Clamp(orig + amount, 0, GetScrollLimit(bar));
 
-	// did anything change?
-	if (x == xOrig)
+	return -(currentPos - orig);
+}
+
+
+BOOL CViewSample::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
+{
+	int x = 0, y = 0;
+	int scrollByX = CalcScroll(x, sizeScroll.cx, WS_HSCROLL, SB_HORZ);
+	int scrollByY = CalcScroll(y, sizeScroll.cy, WS_VSCROLL, SB_VERT);
+
+	if(!scrollByX && !scrollByY)
+	{
+		// Nothing changed!
 		return FALSE;
+	}
 
 	if (bDoScroll)
 	{
-		// do scroll and update scroll positions
-		int scrollBy = -(x - xOrig);
 		// Don't allow to scroll into the middle of a sampling point
-		if(m_nZoom < 0)
+		if(m_nZoom < 0 && !IsOPLInstrument())
 		{
-			scrollBy *= (1 << (-m_nZoom - 1));
+			scrollByX *= (1 << (-m_nZoom - 1));
 		}
 
-		ScrollWindow(scrollBy, 0);
-		if (x != xOrig)
-			SetScrollPos(SB_HORZ, x);
+		ScrollWindow(scrollByX, scrollByY);
+		if(scrollByX) SetScrollPos(SB_HORZ, x);
+		if(scrollByY) SetScrollPos(SB_VERT, y);
 	}
 	return TRUE;
 }
@@ -321,10 +322,16 @@ void CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 	if (pMainFrm) pMainFrm->SetInfoText(_T(""));
 	m_nSample = nSmp;
 	m_dwNotifyPos.fill(Notification::PosInvalid);
+	UpdateOPLEditor();
 	UpdateScrollSize();
 	UpdateNcButtonState();
-	UpdateOPLEditor();
 	InvalidateSample();
+}
+
+
+bool CViewSample::IsOPLInstrument() const
+{
+	return m_nSample >= 1 && m_nSample <= GetDocument()->GetNumSamples() && GetDocument()->GetSoundFile().GetSample(m_nSample).uFlags[CHN_ADLIB];
 }
 
 
@@ -338,12 +345,19 @@ void CViewSample::UpdateOPLEditor()
 	{
 		if(!m_oplEditor)
 		{
-			m_oplEditor = mpt::make_unique<OPLInstrDlg>(*this);
+			try
+			{
+				m_oplEditor = mpt::make_unique<OPLInstrDlg>(*this);
+			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+			{
+				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+			}
 		}
 		if(m_oplEditor)
 		{
 			m_oplEditor->SetPatch(sample.adlib);
-			m_oplEditor->SetWindowPos(nullptr, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+			auto size = m_oplEditor->GetMinimumSize();
+			m_oplEditor->SetWindowPos(nullptr, -m_nScrollPosX, -m_nScrollPosY, std::max(size.cx, m_rcClient.right), std::max(size.cy, m_rcClient.bottom), SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
 		}
 	}
 }
@@ -1459,10 +1473,15 @@ void CViewSample::UpdateNcButtonState()
 		{
 			case ID_SAMPLE_DRAW:
 				if(m_dwStatus[SMPSTATUS_DRAWING]) dwStyle |= NCBTNS_CHECKED;
-				if(m_nSample > pModDoc->GetNumSamples())
+				if(m_nSample > pModDoc->GetNumSamples() || IsOPLInstrument())
 				{
 					dwStyle |= NCBTNS_DISABLED;
 				}
+				break;
+			case ID_SAMPLE_ZOOMUP:
+			case ID_SAMPLE_ZOOMDOWN:
+			case ID_SAMPLE_GRID:
+				if(IsOPLInstrument()) dwStyle |= NCBTNS_DISABLED;
 				break;
 		}
 
@@ -1539,7 +1558,7 @@ void CViewSample::SetInitialDrawPoint(ModSample &smp, const CPoint &point)
 	m_drawChannel = (point.y - m_rcClient.top) * smp.GetNumChannels() / m_rcClient.Height();
 	Limit(m_drawChannel, 0, (int)smp.GetNumChannels() - 1);
 
-	T *data = reinterpret_cast<T *>(smp.samplev()) + m_drawChannel;
+	T *data = static_cast<T *>(smp.samplev()) + m_drawChannel;
 	data[m_dwEndDrag * smp.GetNumChannels()] = GetSampleValueFromPoint<T, uT>(smp, point);
 }
 
@@ -1547,7 +1566,7 @@ void CViewSample::SetInitialDrawPoint(ModSample &smp, const CPoint &point)
 template<class T, class uT>
 void CViewSample::SetSampleData(ModSample &smp, const CPoint &point, const SmpLength old)
 {
-	T *data = reinterpret_cast<T *>(smp.samplev()) + m_drawChannel + old * smp.GetNumChannels();
+	T *data = static_cast<T *>(smp.samplev()) + m_drawChannel + old * smp.GetNumChannels();
 	const int oldvalue = *data;
 	const int value = GetSampleValueFromPoint<T, uT>(smp, point);
 	const int inc = (m_dwEndDrag > old ? 1 : -1);
@@ -1900,7 +1919,7 @@ void CViewSample::OnNcMouseMove(UINT nHitTest, CPoint point)
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if (pMainFrm)
 		{
-			CString strText = "";
+			CString strText;
 			if ((nBtnSel < SMP_LEFTBAR_BUTTONS) && (cLeftBarButtons[nBtnSel] != ID_SEPARATOR))
 			{
 				strText.LoadString(cLeftBarButtons[nBtnSel]);
@@ -2038,9 +2057,7 @@ void CViewSample::OnEditDelete()
 	{
 		if (Reporting::Confirm("Remove this sample?", "Remove Sample", true) != cnfYes) return;
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Delete Sample");
-
 		sndFile.DestroySampleThreadsafe(m_nSample);
-
 		updateHint.Names();
 	} else
 	{
@@ -2130,7 +2147,7 @@ void CViewSample::OnEditCopy()
 			// 8-Bit samples have to be unsigned.
 			for(size_t i = smpSize; i != 0; i--)
 			{
-				*(sampleData++) += 0x80u;
+				*(sampleData++) ^= 0x80u;
 			}
 		}
 		

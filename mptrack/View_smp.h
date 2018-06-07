@@ -75,6 +75,7 @@ protected:
 	void UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength centeredSample = SmpLength(-1));
 	void UpdateOPLEditor();
 	void SetCurrentSample(SAMPLEINDEX nSmp);
+	bool IsOPLInstrument() const;
 	void SetZoom(int nZoom, SmpLength centeredSample = SmpLength(-1));
 	int32 SampleToScreen(SmpLength pos) const;
 	SmpLength ScreenToSample(int32 x) const;
@@ -113,6 +114,8 @@ protected:
 
 	void OnMonoConvert(ctrlSmp::StereoToMonoMode convert);
 	void TrimSample(bool trimToLoopEnd);
+
+	int CalcScroll(int &currentPos, int amount, int style, int bar);
 
 public:
 	//{{AFX_VIRTUAL(CViewSample)
