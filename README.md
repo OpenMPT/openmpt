@@ -56,7 +56,7 @@ How to compile
         folder.
 
         Please visit
-        [steinberg.net](http://www.steinberg.net/en/company/developers.html) to
+        [steinberg.net](https://www.steinberg.net/en/company/developers.html) to
         download the SDK.
 
      -  VST:
@@ -72,7 +72,7 @@ How to compile
         have the old VST 2.4 SDK laying around, this should also work fine.
 
         Please visit
-        [steinberg.net](http://www.steinberg.net/en/company/developers.html) to
+        [steinberg.net](https://www.steinberg.net/en/company/developers.html) to
         download the SDK.
 
     If you need further help with the VST and ASIO SDKs, get in touch with the
@@ -81,7 +81,7 @@ How to compile
  -  7-Zip is required to be installed in the default path in order to build the
     required files for OpenMPT Wine integration.
 
-    Please visit [7-zip.org](http://www.7-zip.org/) to download 7-Zip.
+    Please visit [7-zip.org](https://www.7-zip.org/) to download 7-Zip.
 
 
 ### libopenmpt and openmpt123
@@ -133,7 +133,7 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
             To build libopenmpt with XMPlay input plugin support, copy the
             contents of xmp-sdk.zip into include/xmplay/.
 
-            Please visit [un4seen.com](http://www.un4seen.com/xmplay.html) to
+            Please visit [un4seen.com](https://www.un4seen.com/xmplay.html) to
             download the SDK.
             You can disable xmp-openmpt in the solution configuration.
 
