@@ -2958,11 +2958,6 @@ void CViewSample::OnAddSilence()
 
 	BeginWaitCursor();
 
-	if(IsOPLInstrument())
-	{
-		GetDocument()->GetSoundFile().DestroySampleThreadsafe(m_nSample);
-	}
-
 	if(sample.nLength == 0 && sample.nVolume == 0)
 	{
 		sample.nVolume = 256;
@@ -2983,6 +2978,8 @@ void CViewSample::OnAddSilence()
 				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Resize", dlg.m_nSamples, sample.nLength);
 			else	// make it longer!
 				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, "Add Silence", sample.nLength, dlg.m_nSamples);
+			if(IsOPLInstrument())
+				GetDocument()->GetSoundFile().DestroySampleThreadsafe(m_nSample);
 			ctrlSmp::ResizeSample(sample, dlg.m_nSamples, sndFile);
 		}
 	} else
@@ -2994,6 +2991,8 @@ void CViewSample::OnAddSilence()
 
 			SmpLength nStart = (dlg.m_nEditOption == CAddSilenceDlg::kSilenceAtEnd) ? sample.nLength : 0;
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, "Add Silence", nStart, nStart + dlg.m_nSamples);
+			if(IsOPLInstrument())
+				GetDocument()->GetSoundFile().DestroySampleThreadsafe(m_nSample);
 			ctrlSmp::InsertSilence(sample, dlg.m_nSamples, nStart, sndFile);
 		}
 	}
