@@ -158,9 +158,9 @@ void CViewSample::OnInitialUpdate()
 		pMainFrm->SetInfoText(_T(""));
 		pMainFrm->SetXInfoText(_T(""));
 	}
+	UpdateOPLEditor();
 	UpdateScrollSize();
 	UpdateNcButtonState();
-	UpdateOPLEditor();
 }
 
 
@@ -194,7 +194,7 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 
 	GetClientRect(&m_rcClient);
 
-	if(m_oplEditor && m_oplEditor->IsWindowVisible())
+	if(m_oplEditor && (::GetWindowLong(m_oplEditor->m_hWnd, GWL_STYLE) & WS_VISIBLE))
 	{
 		const auto size = m_oplEditor->GetMinimumSize();
 		m_oplEditor->SetWindowPos(nullptr, -m_nScrollPosX, -m_nScrollPosY, std::max(size.cx, m_rcClient.right), std::max(size.cy, m_rcClient.bottom), SWP_NOZORDER | SWP_NOACTIVATE);
@@ -589,9 +589,9 @@ void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
 	if(hintType[HINT_MPTOPTIONS | HINT_MODTYPE]
 		|| (hintType[HINT_SAMPLEDATA] && (m_nSample == updateSmp || updateSmp == 0)))
 	{
+		UpdateOPLEditor();
 		UpdateScrollSize();
 		UpdateNcButtonState();
-		UpdateOPLEditor();
 		InvalidateSample();
 	}
 	if(hintType[HINT_SAMPLEINFO])
@@ -1784,8 +1784,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 		const ModSample &sample = sndFile.GetSample(m_nSample);
 		HMENU hMenu = ::CreatePopupMenu();
 		CInputHandler* ih = CMainFrame::GetInputHandler();
-		if (!hMenu)	return;
-		if (sample.nLength)
+		if (!hMenu) return;
+		if (sample.HasSampleData() && !sample.uFlags[CHN_ADLIB])
 		{
 			if (m_dwEndSel >= m_dwBeginSel + 4)
 			{
