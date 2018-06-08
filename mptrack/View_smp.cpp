@@ -1300,18 +1300,9 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 		{
 			InvalidateSample();
 		}
-	} else if (pnotify->type[Notification::Sample] && pnotify->item == m_nSample)
+	} else if (pnotify->type[Notification::Sample] && pnotify->item == m_nSample && !IsOPLInstrument())
 	{
-		bool doUpdate = false;
-		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
-		{
-			if (m_dwNotifyPos[i] != pnotify->pos[i])
-			{
-				doUpdate = true;
-				break;
-			}
-		}
-		if (doUpdate)
+		if(m_dwNotifyPos != pnotify->pos)
 		{
 			HDC hdc = ::GetDC(m_hWnd);
 			DrawPositionMarks();	// Erase old marks...
