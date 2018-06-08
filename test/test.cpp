@@ -1413,7 +1413,7 @@ static MPT_NOINLINE void TestMisc2()
 	VERIFY_EQUAL(mpt::UUID::Generate() != mpt::UUID::Generate(), true);
 	mpt::UUID a = mpt::UUID::Generate();
 	VERIFY_EQUAL(a, mpt::UUID::FromString(a.ToUString()));
-	mpt::byte uuiddata[16];
+	mpt::byte uuiddata[16]{};
 	for(std::size_t i = 0; i < 16; ++i)
 	{
 		uuiddata[i] = mpt::byte_cast<mpt::byte>(static_cast<uint8>(i));
