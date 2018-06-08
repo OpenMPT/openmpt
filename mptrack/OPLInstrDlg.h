@@ -36,6 +36,7 @@ protected:
 	BOOL OnInitDialog() override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	void OnHScroll(UINT, UINT, CScrollBar *) { ParamsChanged(); }
+	LRESULT OnDragonDropping(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 };
 

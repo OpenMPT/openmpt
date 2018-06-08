@@ -17,6 +17,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(OPLInstrDlg, CDialog)
 	ON_WM_HSCROLL()
+	ON_MESSAGE(WM_MOD_DRAGONDROPPING, &OPLInstrDlg::OnDragonDropping)
 	ON_COMMAND(IDC_CHECK1, &OPLInstrDlg::ParamsChanged)
 	ON_COMMAND(IDC_CHECK2, &OPLInstrDlg::ParamsChanged)
 	ON_COMMAND(IDC_CHECK3, &OPLInstrDlg::ParamsChanged)
@@ -99,7 +100,7 @@ BOOL OPLInstrDlg::PreTranslateMessage(MSG *pMsg)
 {
 	if(pMsg)
 	{
-		// We handle keypresses before Windows has a chance to handle them (for alt etc..)
+		// Forward key presses and drag&drop support to parent editor
 		if(pMsg->message == WM_SYSKEYUP || pMsg->message == WM_KEYUP ||
 			pMsg->message == WM_SYSKEYDOWN || pMsg->message == WM_KEYDOWN ||
 			pMsg->message == WM_DROPFILES)
@@ -115,6 +116,12 @@ BOOL OPLInstrDlg::PreTranslateMessage(MSG *pMsg)
 		}
 	}
 	return CDialog::PreTranslateMessage(pMsg);
+}
+
+
+LRESULT OPLInstrDlg::OnDragonDropping(WPARAM wParam, LPARAM lParam)
+{
+	return m_parent.SendMessage(WM_MOD_DRAGONDROPPING, wParam, lParam);
 }
 
 
