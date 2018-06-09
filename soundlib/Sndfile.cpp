@@ -187,6 +187,73 @@ void CSoundFile::InitializeChannels()
 }
 
 
+struct FileFormatLoader
+{
+	decltype(CSoundFile::ProbeFileHeaderXM) *prober;
+	decltype(&CSoundFile::ReadXM) loader;
+};
+
+#ifdef MODPLUG_TRACKER
+#define MPT_DECLARE_FORMAT(format) { nullptr, &CSoundFile::Read ## format }
+#else
+#define MPT_DECLARE_FORMAT(format) { CSoundFile::ProbeFileHeader ## format, &CSoundFile::Read ## format }
+#endif
+
+// All module format loaders, in the order they should be executed.
+// This order matters, depending on the format, due to some unfortunate
+// clashes or lack of magic bytes that can lead to mis-detection of some formats.
+// Apart from that, more common formats with sane magic bytes are also found
+// at the top of the list to match the most common cases more quickly.
+static constexpr FileFormatLoader ModuleFormatLoaders[] =
+{
+	MPT_DECLARE_FORMAT(XM),
+	MPT_DECLARE_FORMAT(IT),
+	MPT_DECLARE_FORMAT(S3M),
+	MPT_DECLARE_FORMAT(STM),
+	MPT_DECLARE_FORMAT(MED),
+	MPT_DECLARE_FORMAT(MTM),
+	MPT_DECLARE_FORMAT(MDL),
+	MPT_DECLARE_FORMAT(DBM),
+	MPT_DECLARE_FORMAT(FAR),
+	MPT_DECLARE_FORMAT(AMS),
+	MPT_DECLARE_FORMAT(AMS2),
+	MPT_DECLARE_FORMAT(OKT),
+	MPT_DECLARE_FORMAT(PTM),
+	MPT_DECLARE_FORMAT(ULT),
+	MPT_DECLARE_FORMAT(DMF),
+	MPT_DECLARE_FORMAT(DSM),
+	MPT_DECLARE_FORMAT(AMF_Asylum),
+	MPT_DECLARE_FORMAT(AMF_DSMI),
+	MPT_DECLARE_FORMAT(PSM),
+	MPT_DECLARE_FORMAT(PSM16),
+	MPT_DECLARE_FORMAT(MT2),
+	MPT_DECLARE_FORMAT(ITP),
+#if defined(MODPLUG_TRACKER) || defined(MPT_FUZZ_TRACKER)
+	// These make little sense for a module player library
+	MPT_DECLARE_FORMAT(UAX),
+	MPT_DECLARE_FORMAT(WAV),
+	MPT_DECLARE_FORMAT(MID),
+#endif // MODPLUG_TRACKER || MPT_FUZZ_TRACKER
+	MPT_DECLARE_FORMAT(GDM),
+	MPT_DECLARE_FORMAT(IMF),
+	MPT_DECLARE_FORMAT(DIGI),
+	MPT_DECLARE_FORMAT(DTM),
+	MPT_DECLARE_FORMAT(PLM),
+	MPT_DECLARE_FORMAT(AM),
+	MPT_DECLARE_FORMAT(J2B),
+	MPT_DECLARE_FORMAT(PT36),
+	MPT_DECLARE_FORMAT(SFX),
+	MPT_DECLARE_FORMAT(STP),
+	MPT_DECLARE_FORMAT(MOD),
+	MPT_DECLARE_FORMAT(ICE),
+	MPT_DECLARE_FORMAT(669),
+	MPT_DECLARE_FORMAT(MO3),
+	MPT_DECLARE_FORMAT(M15),
+};
+
+#undef MPT_DECLARE_FORMAT
+
+
 CSoundFile::ProbeResult CSoundFile::ProbeAdditionalSize(MemoryFileReader &file, const uint64 *pfilesize, uint64 minimumAdditionalSize)
 {
 	const uint64 availableFileSize = file.GetLength();
@@ -251,43 +318,13 @@ CSoundFile::ProbeResult CSoundFile::Probe(ProbeFlags flags, mpt::span<const mpt:
 	}
 	if(flags & ProbeModules)
 	{
-		MPT_DO_PROBE(result, ProbeFileHeader669(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderAM(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderAMF_Asylum(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderAMF_DSMI(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderAMS(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderAMS2(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderDBM(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderDTM(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderDIGI(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderDMF(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderDSM(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderFAR(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderGDM(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderICE(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderIMF(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderIT(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderITP(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderJ2B(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderM15(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderMDL(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderMED(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderMO3(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderMOD(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderMT2(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderMTM(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderOKT(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderPLM(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderPSM(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderPSM16(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderPT36(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderPTM(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderS3M(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderSFX(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderSTM(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderSTP(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderULT(file, pfilesize));
-		MPT_DO_PROBE(result, ProbeFileHeaderXM(file, pfilesize));
+		for(const auto &format : ModuleFormatLoaders)
+		{
+			if(format.prober != nullptr)
+			{
+				MPT_DO_PROBE(result, format.prober(file, pfilesize));
+			}
+		}
 	}
 	if(pfilesize)
 	{
@@ -373,62 +410,23 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 				return false;
 			}
 
-			if(!ReadXM(file, loadFlags)
-			 && !ReadIT(file, loadFlags)
-			 && !ReadS3M(file, loadFlags)
-			 && !ReadSTM(file, loadFlags)
-			 && !ReadMED(file, loadFlags)
-			 && !ReadMTM(file, loadFlags)
-			 && !ReadMDL(file, loadFlags)
-			 && !ReadDBM(file, loadFlags)
-			 && !ReadFAR(file, loadFlags)
-			 && !ReadAMS(file, loadFlags)
-			 && !ReadAMS2(file, loadFlags)
-			 && !ReadOKT(file, loadFlags)
-			 && !ReadPTM(file, loadFlags)
-			 && !ReadULT(file, loadFlags)
-			 && !ReadDMF(file, loadFlags)
-			 && !ReadDSM(file, loadFlags)
-			 && !ReadAMF_Asylum(file, loadFlags)
-			 && !ReadAMF_DSMI(file, loadFlags)
-			 && !ReadPSM(file, loadFlags)
-			 && !ReadPSM16(file, loadFlags)
-			 && !ReadMT2(file, loadFlags)
-			 && !ReadITP(file, loadFlags)
-#if defined(MODPLUG_TRACKER) || defined(MPT_FUZZ_TRACKER)
-			 // These make little sense for a module player library
-			 && !ReadUAX(file, loadFlags)
-			 && !ReadWAV(file, loadFlags)
-			 && !ReadMID(file, loadFlags)
-#endif // MODPLUG_TRACKER || MPT_FUZZ_TRACKER
-			 && !ReadGDM(file, loadFlags)
-			 && !ReadIMF(file, loadFlags)
-			 && !ReadDIGI(file, loadFlags)
-			 && !ReadDTM(file, loadFlags)
-			 && !ReadPLM(file, loadFlags)
-			 && !ReadAM(file, loadFlags)
-			 && !ReadJ2B(file, loadFlags)
-			 && !ReadPT36(file, loadFlags)
-			 && !ReadSFX(file, loadFlags)
-			 && !ReadSTP(file, loadFlags)
-			 && !ReadMOD(file, loadFlags)
-			 && !ReadICE(file, loadFlags)
-			 && !Read669(file, loadFlags)
-			 && !ReadMO3(file, loadFlags)
-			 && !ReadM15(file, loadFlags))
+			// Try all module format loaders
+			bool loaderSuccess = false;
+			for(const auto &format : ModuleFormatLoaders)
+			{
+				loaderSuccess = (this->*(format.loader))(file, loadFlags);
+				if(loaderSuccess)
+					break;
+			}
+
+			if(!loaderSuccess)
 			{
 				m_nType = MOD_TYPE_NONE;
 				m_ContainerType = MOD_CONTAINERTYPE_NONE;
-				if(loadFlags == onlyVerifyHeader)
-				{
-					return false;
-				}
-			} else
+			}
+			if(loadFlags == onlyVerifyHeader)
 			{
-				if(loadFlags == onlyVerifyHeader)
-				{
-					return true;
-				}
+				return loaderSuccess;
 			}
 
 			if(packedContainerType != MOD_CONTAINERTYPE_NONE && m_ContainerType == MOD_CONTAINERTYPE_NONE)
