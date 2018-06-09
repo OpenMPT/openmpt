@@ -24,7 +24,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 template <typename SampleConversion>
-bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelIndex, size_t numChannels, SampleConversion conv = SampleConversion())
+static bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelIndex, size_t numChannels, SampleConversion conv = SampleConversion())
 {
 	MPT_ASSERT(sample.GetNumChannels() == 1);
 	MPT_ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
@@ -39,6 +39,23 @@ bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t channelInd
 	const mpt::byte *inBuf = file.GetRawData<mpt::byte>();
 	CopySample<SampleConversion>(reinterpret_cast<typename SampleConversion::output_t*>(sample.samplev()), sample.nLength, 1, inBuf + offset, file.BytesLeft() - offset, numChannels, conv);
 	return true;
+}
+
+
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderWAV(MemoryFileReader file, const uint64 *pfilesize)
+{
+	RIFFHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if((fileHeader.magic != RIFFHeader::idRIFF && fileHeader.magic != RIFFHeader::idLIST)
+		|| (fileHeader.type != RIFFHeader::idWAVE && fileHeader.type != RIFFHeader::idwave))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
 }
 
 

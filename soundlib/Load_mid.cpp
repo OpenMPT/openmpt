@@ -566,6 +566,21 @@ static void EnterMIDIVolume(ModCommand &m, ModChannelState &modChn, const MidiCh
 }
 
 
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMID(MemoryFileReader file, const uint64 *pfilesize)
+{
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	char magic[4];
+	file.ReadArray(magic);
+	if(!memcmp(magic, "MThd", 4))
+		return ProbeSuccess;
+
+	if(!memcmp(magic, "RIFF", 4) && file.Skip(4) && file.ReadMagic("RMID"))
+		return ProbeSuccess;
+
+	return ProbeFailure;
+}
+
+
 bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();

@@ -16,16 +16,32 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderUAX(MemoryFileReader file, const uint64 *pfilesize)
+{
+	UMXFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return ProbeWantMoreData;
+	}
+	if(!fileHeader.IsValid())
+	{
+		return ProbeFailure;
+	}
+	if(!FindUMXNameTableEntryMemory(file, fileHeader, "sound"))
+	{
+		return ProbeFailure;
+	}
+	MPT_UNREFERENCED_PARAMETER(pfilesize);
+	return ProbeSuccess;
+}
+
+
 bool CSoundFile::ReadUAX(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 	UMXFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.magic, "\xC1\x83\x2A\x9E", 4)
-		|| fileHeader.nameCount == 0
-		|| fileHeader.exportCount == 0
-		|| fileHeader.importCount == 0
-		)
+		|| !fileHeader.IsValid())
 	{
 		return false;
 	}

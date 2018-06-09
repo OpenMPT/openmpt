@@ -731,6 +731,10 @@ public:
 	static ProbeResult ProbeFileHeaderULT(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderXM(MemoryFileReader file, const uint64 *pfilesize);
 
+	static ProbeResult ProbeFileHeaderMID(MemoryFileReader file, const uint64 *pfilesize);
+	static ProbeResult ProbeFileHeaderUAX(MemoryFileReader file, const uint64 *pfilesize);
+	static ProbeResult ProbeFileHeaderWAV(MemoryFileReader file, const uint64 *pfilesize);
+
 	// Module Loaders
 	bool Read669(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
