@@ -178,7 +178,7 @@ bool CSoundFile::ReadC67(FileReader &file, ModLoadingFlags loadFlags)
 		mptSmp.Initialize(MOD_TYPE_S3M);
 		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp + 1], fileHeader.sampleNames[smp]);
 		mptSmp.nLength = fileHeader.samples[smp].length;
-		if(fileHeader.samples[smp].loopEnd < fileHeader.samples[smp].length)
+		if(fileHeader.samples[smp].loopEnd <= fileHeader.samples[smp].length)
 		{
 			mptSmp.nLoopStart = fileHeader.samples[smp].loopStart;
 			mptSmp.nLoopEnd = fileHeader.samples[smp].loopEnd;
