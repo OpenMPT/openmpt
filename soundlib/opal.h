@@ -1075,8 +1075,7 @@ int16_t Opal::Operator::Output(uint16_t /*keyscalenum*/, uint32_t phase_step, in
     // position given by the 8 LSB's of the input. The value + 1024 (the hidden bit) is then the
     // significand of the floating point output and the yet unused MSB's of the input are the
     // exponent of the floating point output."
-    int16_t v = Master->ExpTable[mix & 0xFF] + 1024;
-    v >>= mix >> 8;
+    int16_t v = (Master->ExpTable[mix & 0xFF] + 1024u) >> (mix >> 8u);
     v += v;
     if (negate)
         v = ~v;
