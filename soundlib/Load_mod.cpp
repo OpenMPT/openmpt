@@ -1233,7 +1233,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	// modules are checked.
 	if(isMdKd && hasTempoCommands && !definitelyCIA)
 	{
-		const double songTime = GetSongTime();
+		const double songTime = GetLength(eNoAdjust).front().duration;
 		if(songTime >= 600.0)
 		{
 			m_playBehaviour.set(kMODVBlankTiming);
@@ -1746,6 +1746,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
+	m_moduleFormat = MPT_USTRING("Soundtracker");
 	switch(minVersion)
 	{
 	case UST1_00:
@@ -1856,9 +1857,11 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(IsMagic(magic, "MTN\0"))
 	{
+		m_moduleFormat = MPT_USTRING("MnemoTroN SoundTracker");
 		m_madeWithTracker = MPT_USTRING("SoundTracker 2.6");
 	} else if(IsMagic(magic, "IT10"))
 	{
+		m_moduleFormat = MPT_USTRING("Ice Tracker");
 		m_madeWithTracker = MPT_USTRING("Ice Tracker 1.0 / 1.1");
 	} else
 	{

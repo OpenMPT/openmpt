@@ -85,9 +85,9 @@ typedef std::bitset<kMaxPlayBehaviours> PlayBehaviourSet;
 // For WAV export (writing pattern positions to file)
 struct PatternCuePoint
 {
-	uint64     offset;			// offset in the file (in samples)
-	ORDERINDEX order;			// which order is this?
-	bool       processed;		// has this point been processed by the main WAV render function yet?
+	uint64     offset;    // offset in the file (in samples)
+	ORDERINDEX order;     // which order is this?
+	bool       processed; // has this point been processed by the main WAV render function yet?
 };
 
 #endif // MODPLUG_TRACKER
@@ -283,7 +283,7 @@ class CSoundFile
 {
 	friend class GetLengthMemory;
 
-public: //Misc
+public:
 #ifdef MODPLUG_TRACKER
 	void ChangeModTypeTo(const MODTYPE& newType);
 #endif // MODPLUG_TRACKER
@@ -363,11 +363,11 @@ public:
 	CAGC m_AGC;
 #endif
 
-	typedef uint32 samplecount_t;	// Number of rendered samples
+	typedef uint32 samplecount_t; // Number of rendered samples
 
 public:	// for Editing
 #ifdef MODPLUG_TRACKER
-	CModDoc *m_pModDoc = nullptr;		// Can be a null pointer for example when previewing samples from the treeview.
+	CModDoc *m_pModDoc = nullptr; // Can be a null pointer for example when previewing samples from the treeview.
 #endif // MODPLUG_TRACKER
 	Enum<MODTYPE> m_nType;
 private:
@@ -408,12 +408,12 @@ public:
 	// Periods in MPT are 4 times as fine as Amiga periods because of extra fine frequency slides (introduced in the S3M format).
 	int32 m_nMinPeriod, m_nMaxPeriod;
 
-	ResamplingMode m_nResampling;	// Resampling mode (if overriding the globally set resampling)
-	int32 m_nRepeatCount = 0;	// -1 means repeat infinitely.
+	ResamplingMode m_nResampling; // Resampling mode (if overriding the globally set resampling)
+	int32 m_nRepeatCount = 0;     // -1 means repeat infinitely.
 	ORDERINDEX m_nMaxOrderPosition;
 	ModChannelSettings ChnSettings[MAX_BASECHANNELS];	// Initial channels settings
-	CPatternContainer Patterns;							// Patterns
-	ModSequenceSet Order;								// Modsequences. Order[x] returns an index of a pattern located at order x of the current sequence.
+	CPatternContainer Patterns;
+	ModSequenceSet Order;								// Pattern sequences (order lists)
 protected:
 	ModSample Samples[MAX_SAMPLES];						// Sample Headers
 public:
@@ -448,7 +448,7 @@ public:
 		samplecount_t m_nBufferCount;
 		double m_dBufferDiff;
 	public:
-		samplecount_t m_lTotalSampleCount;
+		samplecount_t m_lTotalSampleCount = 0;
 
 	public:
 		uint32 m_nTickCount;
@@ -457,8 +457,8 @@ public:
 	public:
 		uint32 m_nSamplesPerTick;
 		ROWINDEX m_nCurrentRowsPerBeat, m_nCurrentRowsPerMeasure;	// current rows per beat and measure for this module
-		uint32 m_nMusicSpeed;	// Current speed
-		TEMPO m_nMusicTempo;	// Current tempo
+		uint32 m_nMusicSpeed; // Current speed
+		TEMPO m_nMusicTempo;  // Current tempo
 
 		// Playback position
 		ROWINDEX m_nRow;
@@ -467,7 +467,7 @@ public:
 		ROWINDEX m_nNextPatStartRow; // for FT2's E60 bug
 	public:
 		PATTERNINDEX m_nPattern;
-		ORDERINDEX m_nCurrentOrder, m_nNextOrder, m_nSeqOverride;
+		ORDERINDEX m_nCurrentOrder, m_nNextOrder, m_nSeqOverride = ORDERINDEX_INVALID;
 
 		// Global volume
 	public:
@@ -478,17 +478,14 @@ public:
 		int32 m_lHighResRampingGlobalVolume;
 
 	public:
-		bool m_bPositionChanged;		// Report to plugins that we jumped around in the module
+		bool m_bPositionChanged = true; // Report to plugins that we jumped around in the module
 
 	public:
-		CHANNELINDEX ChnMix[MAX_CHANNELS];	// Channels to be mixed
-		ModChannel Chn[MAX_CHANNELS];		// Mixing channels... First m_nChannels channels are master channels (i.e. they are never NNA channels)!
+		CHANNELINDEX ChnMix[MAX_CHANNELS]; // Channels to be mixed
+		ModChannel Chn[MAX_CHANNELS];      // Mixing channels... First m_nChannels channels are master channels (i.e. they are never NNA channels)!
 
 	public:
 		PlayState()
-			: m_lTotalSampleCount(0)
-			, m_nSeqOverride(ORDERINDEX_INVALID)
-			, m_bPositionChanged(true)
 		{
 			std::fill(std::begin(Chn), std::end(Chn), ModChannel());
 		}
@@ -518,13 +515,11 @@ public:
 #endif
 
 public:
-
 	std::string m_songName;
 	mpt::ustring m_songArtist;
-
-	// Song message
 	SongMessage m_songMessage;
 	mpt::ustring m_madeWithTracker;
+	mpt::ustring m_moduleFormat;
 
 protected:
 	std::vector<FileHistory> m_FileHistory;	// File edit history
@@ -674,14 +669,10 @@ public:
 	TEMPO GetMusicTempo() const { return m_PlayState.m_nMusicTempo; }
 	bool IsFirstTick() const { return (m_PlayState.m_lTotalSampleCount == 0); }
 
-	//Get modlength in various cases: total length, length to
-	//specific order&row etc. Return value is in seconds.
+	// Get song duration in various cases: total length, length to specific order & row, etc.
 	std::vector<GetLengthType> GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target = GetLengthTarget());
 
 public:
-	//Returns song length in seconds.
-	double GetSongTime() { return GetLength(eNoAdjust).back().duration; }
-
 	void RecalculateSamplesPerTick();
 	double GetRowDuration(TEMPO tempo, uint32 speed) const;
 	uint32 GetTickDuration(PlayState &playState) const;
@@ -689,7 +680,7 @@ public:
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
 	int GetRepeatCount() const { return m_nRepeatCount; }
-	bool IsPaused() const {	return m_SongFlags[SONG_PAUSED | SONG_STEP]; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
+	bool IsPaused() const { return m_SongFlags[SONG_PAUSED | SONG_STEP]; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
 	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 
 	bool InitChannel(CHANNELINDEX nChn);
