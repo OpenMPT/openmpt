@@ -112,8 +112,7 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 	// No Adlib instruments in formats other than S3M.
 	if(toType != MOD_TYPE_S3M && uFlags[CHN_ADLIB])
 	{
-		uFlags.reset(CHN_ADLIB);
-		adlib.fill(0);
+		SetAdlib(false);
 	}
 }
 
@@ -142,11 +141,7 @@ void ModSample::Initialize(MODTYPE type)
 	rootNote = 0;
 	filename[0] = '\0';
 
-	// Default cues compatible with old-style volume column offset
-	for(int i = 0; i < 9; i++)
-	{
-		cues[i] = (i + 1) << 11;
-	}
+	SetDefaultCuePoints();
 }
 
 
@@ -358,12 +353,37 @@ void ModSample::Transpose(double amount)
 // Check if the sample's cue points are the default cue point set.
 bool ModSample::HasCustomCuePoints() const
 {
-	for(SmpLength i = 0; i < CountOf(cues); i++)
+	if(!uFlags[CHN_ADLIB])
 	{
-		if(cues[i] != (i + 1) << 11) return true;
+		for(SmpLength i = 0; i < CountOf(cues); i++)
+		{
+			if(cues[i] != (i + 1) << 11) return true;
+		}
 	}
 	return false;
 }
 
+
+void ModSample::SetDefaultCuePoints()
+{
+	// Default cues compatible with old-style volume column offset
+	for(int i = 0; i < 9; i++)
+	{
+		cues[i] = (i + 1) << 11;
+	}
+}
+
+void ModSample::SetAdlib(bool enable, OPLPatch patch)
+{
+	if(!enable && uFlags[CHN_ADLIB])
+	{
+		SetDefaultCuePoints();
+	}
+	uFlags.set(CHN_ADLIB, enable);
+	if(enable)
+	{
+		adlib = patch;
+	}
+}
 
 OPENMPT_NAMESPACE_END

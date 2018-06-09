@@ -126,6 +126,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_669.cpp \
 	soundlib/Load_amf.cpp \
 	soundlib/Load_ams.cpp \
+	soundlib/Load_c67.cpp \
 	soundlib/Load_dbm.cpp \
 	soundlib/Load_digi.cpp \
 	soundlib/Load_dmf.cpp \

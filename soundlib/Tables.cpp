@@ -11,11 +11,11 @@
 
 #include "stdafx.h"
 #include "Tables.h"
-#include <math.h>
 #include "Sndfile.h"
 
 #include "Resampler.h"
 #include "WindowedFIR.h"
+#include <cmath>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -67,11 +67,13 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_MOD,  MPT_ULITERAL("Mod's Grave"),             "wow" },
 	{ MOD_TYPE_ULT,  MPT_ULITERAL("UltraTracker"),            "ult" },
 	{ MOD_TYPE_669,  MPT_ULITERAL("Composer 669 / UNIS 669"), "669" },
+	{ MOD_TYPE_S3M,  MPT_ULITERAL("CDFM / Composer 670"),     "c67" },
 	{ MOD_TYPE_MTM,  MPT_ULITERAL("MultiTracker"),            "mtm" },
 	{ MOD_TYPE_MED,  MPT_ULITERAL("OctaMed"),                 "med" },
 	{ MOD_TYPE_FAR,  MPT_ULITERAL("Farandole Composer"),      "far" },
 	{ MOD_TYPE_MDL,  MPT_ULITERAL("Digitrakker"),             "mdl" },
 	{ MOD_TYPE_AMS,  MPT_ULITERAL("Extreme's Tracker"),       "ams" },
+	{ MOD_TYPE_AMS,  MPT_ULITERAL("Velvet Studio"),           "ams" },
 	{ MOD_TYPE_DSM,  MPT_ULITERAL("DSIK Format"),             "dsm" },
 	{ MOD_TYPE_AMF,  MPT_ULITERAL("DSMI"),                    "amf" },
 	{ MOD_TYPE_AMF0, MPT_ULITERAL("ASYLUM"),                  "amf" },

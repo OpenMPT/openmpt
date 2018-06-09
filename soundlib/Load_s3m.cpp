@@ -294,8 +294,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	case S3MFileHeader::trkCreamTracker:
 		m_madeWithTracker = MPT_USTRING("CreamTracker");
 		break;
-	case S3MFileHeader::trkCamoto:
-		m_madeWithTracker = MPT_USTRING("Camoto");
+	default:
+		if(fileHeader.cwtv == S3MFileHeader::trkCamoto)
+			m_madeWithTracker = MPT_USTRING("Camoto");
 		break;
 	}
 	if(!trackerStr.empty())

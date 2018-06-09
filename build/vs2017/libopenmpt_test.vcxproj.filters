@@ -548,6 +548,9 @@
     <ClCompile Include="..\..\soundlib\Load_ams.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_c67.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_dbm.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

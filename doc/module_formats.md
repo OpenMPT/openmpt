@@ -12,7 +12,9 @@ General hints
 * Write defensive code. Guard against out-of-bound values, division by zero and
   similar stuff. libopenmpt is constantly fuzz-tested to catch any crashes, but
   of course we want our code to be reliable from the start.
-* Every format should have its own `MODTYPE` flag.
+* Every format should have its own `MODTYPE` flag, unless it can be reasonably
+  represented as a subset of another format (like Ice Tracker ICE files being
+  a subset of ProTracker MOD).
 * When reading binary structs from the file, use our data types with defined
   endianness, which can be found in `common/Endianness.h`:
   * Big-Endian: (u)int8/16/32/64be, float32be, float64be

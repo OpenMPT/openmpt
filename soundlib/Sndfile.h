@@ -128,10 +128,10 @@ struct GetLengthTarget
 
 	enum Mode
 	{
-		NoTarget,		// Don't seek, i.e. return complete length of the first subsong.
-		GetAllSubsongs,	// Same as NoTarget (i.e. get complete length), but returns the length of all sub songs
-		SeekPosition,	// Seek to given pattern position.
-		SeekSeconds,	// Seek to given time.
+		NoTarget,       // Don't seek, i.e. return complete length of the first subsong.
+		GetAllSubsongs, // Same as NoTarget (i.e. get complete length), but returns the length of all sub songs
+		SeekPosition,   // Seek to given pattern position.
+		SeekSeconds,    // Seek to given time.
 	} mode;
 
 	// Don't seek, i.e. return complete module length.
@@ -187,11 +187,11 @@ struct GetLengthTarget
 enum enmGetLengthResetMode
 {
 	// Never adjust global variables / mod parameters
-	eNoAdjust			= 0x00,
+	eNoAdjust = 0x00,
 	// Mod parameters (such as global volume, speed, tempo, etc...) will always be memorized if the target was reached (i.e. they won't be reset to the previous values).  If target couldn't be reached, they are reset to their default values.
-	eAdjust				= 0x01,
+	eAdjust = 0x01,
 	// Same as above, but global variables will only be memorized if the target could be reached. This does *NOT* influence the visited rows vector - it will *ALWAYS* be adjusted in this mode.
-	eAdjustOnSuccess	= 0x02 | eAdjust,
+	eAdjustOnSuccess = 0x02 | eAdjust,
 	// Same as previous option, but will also try to emulate sample playback so that voices from previous patterns will sound when continuing playback at the target position.
 	eAdjustSamplePositions = 0x04 | eAdjustOnSuccess,
 };
@@ -564,10 +564,10 @@ public:
 	enum ModLoadingFlags
 	{
 		onlyVerifyHeader   = 0x00,
-		loadPatternData    = 0x01,	// If unset, advise loaders to not process any pattern data (if possible)
-		loadSampleData     = 0x02,	// If unset, advise loaders to not process any sample data (if possible)
-		loadPluginData     = 0x04,	// If unset, plugin data is not loaded (and as a consequence, plugins are not instanciated).
-		loadPluginInstance = 0x08,	// If unset, plugins are not instanciated.
+		loadPatternData    = 0x01, // If unset, advise loaders to not process any pattern data (if possible)
+		loadSampleData     = 0x02, // If unset, advise loaders to not process any sample data (if possible)
+		loadPluginData     = 0x04, // If unset, plugin data is not loaded (and as a consequence, plugins are not instanciated).
+		loadPluginInstance = 0x08, // If unset, plugins are not instanciated.
 		skipContainer      = 0x10,
 		skipModules        = 0x20,
 
@@ -698,6 +698,7 @@ public:
 	static ProbeResult ProbeFileHeaderAMF_DSMI(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderAMS(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderAMS2(MemoryFileReader file, const uint64 *pfilesize);
+	static ProbeResult ProbeFileHeaderC67(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderDBM(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderDTM(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderDIGI(MemoryFileReader file, const uint64 *pfilesize);
@@ -737,6 +738,7 @@ public:
 	bool ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMS(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMS2(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadC67(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDBM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDIGI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);

@@ -150,6 +150,9 @@ struct ModSample
 
 	// Check if the sample's cue points are the default cue point set.
 	bool HasCustomCuePoints() const;
+	void SetDefaultCuePoints();
+
+	void SetAdlib(bool enable, OPLPatch patch = {});
 };
 
 OPENMPT_NAMESPACE_END

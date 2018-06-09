@@ -191,6 +191,7 @@ MPT_FILES_SOUNDLIB += soundlib/ITTools.h
 MPT_FILES_SOUNDLIB += soundlib/Load_669.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_amf.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_ams.cpp
+MPT_FILES_SOUNDLIB += soundlib/Load_c67.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_dbm.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_digi.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_dmf.cpp
