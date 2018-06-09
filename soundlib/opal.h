@@ -917,8 +917,10 @@ int16_t Opal::Operator::Output(uint16_t /*keyscalenum*/, uint32_t phase_step, in
         case EnvDec: {
             if (DecayMask && (Master->Clock & DecayMask))
                 break;
-            uint16_t add = DecayAdd >> DecayTab[Master->Clock >> DecayShift & 7];
-            EnvelopeLevel += add;
+            if (DecayRate != 0) {
+                uint16_t add = DecayAdd >> DecayTab[Master->Clock >> DecayShift & 7];
+                EnvelopeLevel += add;
+            }
             if (EnvelopeLevel >= SustainLevel) {
                 EnvelopeLevel = SustainLevel;
                 EnvelopeStage = EnvSus;
