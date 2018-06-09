@@ -152,7 +152,7 @@ struct ModSample
 	bool HasCustomCuePoints() const;
 	void SetDefaultCuePoints();
 
-	void SetAdlib(bool enable, OPLPatch patch = {});
+	void SetAdlib(bool enable, OPLPatch patch = OPLPatch{});
 };
 
 OPENMPT_NAMESPACE_END
