@@ -197,7 +197,7 @@ bool CSoundFile::ReadC67(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// Reorder OPL patch bytes (interleave modulator and carrier)
 			const auto &fm = fileHeader.fmInstr[smp];
-			OPLPatch patch{};
+			OPLPatch patch{{}};
 			patch[0] = fm[1]; patch[1] = fm[6];
 			patch[2] = fm[2]; patch[3] = fm[7];
 			patch[4] = fm[3]; patch[5] = fm[8];

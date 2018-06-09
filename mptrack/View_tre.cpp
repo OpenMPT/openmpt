@@ -1834,7 +1834,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 		{
 			auto modExts = CSoundFile::GetSupportedExtensions(false);
 			auto instrExts = { "xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat" };
-			auto sampleExts = { "wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf" };
+			auto sampleExts = { "wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf", "sbi" };
 			auto allExtsBlacklist = { "txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "mol" };
 
 			do
@@ -2999,19 +2999,17 @@ void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 				SetCursor((bCanDrop) ? CMainFrame::curDragging : CMainFrame::curNoDrop2);
 			} else
 			{
-				CPoint pt = point;
-				ClientToScreen(&pt);
-				CWnd *pWnd = WindowFromPoint(pt);
-				HWND hwnd = (pWnd) ? pWnd->m_hWnd : NULL;
+				CPoint screenPt = point;
+				ClientToScreen(&screenPt);
+				HWND hwnd = ::WindowFromPoint(screenPt);
 				if (hwnd != m_hDropWnd)
 				{
-					BOOL bCanDrop = FALSE;
+					bool canDrop = false;
 					m_hDropWnd = hwnd;
 					if (hwnd == m_hWnd)
 					{
-						bCanDrop = TRUE;
-					} else
-					if (hwnd != NULL)
+						canDrop = true;
+					} else if (hwnd != NULL)
 					{
 						DRAGONDROP dropinfo;
 						mpt::PathString fullPath;
@@ -3019,16 +3017,15 @@ void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 						{
 							if (dropinfo.dwDropType == DRAGONDROP_SONG)
 							{
-								bCanDrop = TRUE;
-							} else
-							if (::SendMessage(hwnd, WM_MOD_DRAGONDROPPING, FALSE, (LPARAM)&dropinfo))
+								canDrop = true;
+							} else if(::SendMessage(hwnd, WM_MOD_DRAGONDROPPING, FALSE, (LPARAM)&dropinfo))
 							{
-								bCanDrop = TRUE;
+								canDrop = true;
 							}
 						}
 					}
-					SetCursor((bCanDrop) ? CMainFrame::curDragging : CMainFrame::curNoDrop);
-					if (bCanDrop)
+					SetCursor(canDrop ? CMainFrame::curDragging : CMainFrame::curNoDrop);
+					if (canDrop)
 					{
 						if (GetDropHilightItem() != m_hItemDrag)
 						{
