@@ -395,7 +395,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		// Otherwise, just act the same as a normal selection change
 		MPT_FALLTHROUGH;
 	case CTRLMSG_SETCURRENTORDER:
-		//Set orderlist selection and refresh GUI if change successful
+		// Set order list selection and refresh GUI if change successful
 		m_OrderList.SetCurSel(static_cast<ORDERINDEX>(lParam), false, false, true);
 		break;
 
@@ -409,13 +409,13 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 	case CTRLMSG_SETCURRENTINSTRUMENT:
 	case CTRLMSG_PAT_SETINSTRUMENT:
-		return SetCurrentInstrument(lParam);
+		return SetCurrentInstrument(static_cast<uint32>(lParam));
 
 	case CTRLMSG_PLAYPATTERN:
 		switch(lParam)
 		{
-			case -2: OnPatternPlayNoLoop();	break;		//rewbs.playSongFromCursor
-			case -1: OnPatternPlayFromStart();	break;
+			case -2: OnPatternPlayNoLoop(); break;
+			case -1: OnPatternPlayFromStart(); break;
 			default: OnPatternPlay();
 		}
 
@@ -435,7 +435,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		return GetDlgItemInt(IDC_EDIT_SPACING);
 
 	case CTRLMSG_SETSPACING:
-		SetDlgItemInt(IDC_EDIT_SPACING, lParam);
+		SetDlgItemInt(IDC_EDIT_SPACING, static_cast<UINT>(lParam));
 		break;
 
 	case CTRLMSG_ISRECORDING:
@@ -524,19 +524,16 @@ BOOL CCtrlPatterns::SetCurrentInstrument(UINT nIns)
 {
 	if (nIns == m_nInstrument) return TRUE;
 	int n = m_CbnInstrument.GetCount();
-	if (nIns > (UINT)n) return FALSE;
-	for (int i=0; i<n; i++)
+	for (int i = 0; i < n; i++)
 	{
 		if (m_CbnInstrument.GetItemData(i) == nIns)
 		{
 			m_CbnInstrument.SetCurSel(i);
 			m_nInstrument = static_cast<INSTRUMENTINDEX>(nIns);
-			//rewbs.instroVST
 			if (HasValidPlug(m_nInstrument))
 				::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), true);
 			else
 				::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), false);
-			//end rewbs.instroVST
 			return TRUE;
 		}
 	}
@@ -686,7 +683,7 @@ void CCtrlPatterns::OnInstrumentChanged()
 	int n = m_CbnInstrument.GetCurSel();
 	if (n >= 0)
 	{
-		n = m_CbnInstrument.GetItemData(n);
+		n = static_cast<int>(m_CbnInstrument.GetItemData(n));
 		int nmax = (m_sndFile.m_nInstruments) ? m_sndFile.m_nInstruments : m_sndFile.m_nSamples;
 		if ((n >= 0) && (n <= nmax) && (n != (int)m_nInstrument))
 		{
