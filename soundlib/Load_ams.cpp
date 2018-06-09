@@ -405,6 +405,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = (fileHeader.channelConfig & 0x1F) + 1;
 	m_nSamples = fileHeader.numSamps;
 	SetupMODPanning(true);
+	m_moduleFormat = MPT_USTRING("Extreme's Tracker");
 	m_madeWithTracker = mpt::format(MPT_USTRING("Extreme's Tracker %1.%2"))(fileHeader.versionHigh, fileHeader.versionLow);
 
 	std::vector<bool> packSample(fileHeader.numSamps);
@@ -769,13 +770,14 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 	
-	InitializeGlobals(MOD_TYPE_AMS2);
+	InitializeGlobals(MOD_TYPE_AMS);
 	
 	m_songName = songName;
 
 	m_nInstruments = fileHeader.numIns;
 	m_nChannels = 32;
 	SetupMODPanning(true);
+	m_moduleFormat = MPT_USTRING("Velvet Studio");
 	m_madeWithTracker = mpt::format(MPT_USTRING("Velvet Studio %1.%2"))(fileHeader.versionHigh.get(), mpt::ufmt::dec0<2>(fileHeader.versionLow.get()));
 
 	uint16 headerFlags;

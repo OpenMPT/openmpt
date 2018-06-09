@@ -1120,11 +1120,11 @@ void CSoundFile::ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const
 #else
 		// TODO: AMS2 envelopes behave differently when linear slides are off - emulate with 15 * (-128...127) >> 6
 		// Copy over vibrato behaviour for that?
-		const int32 range = GetType() == MOD_TYPE_AMS2 ? uint8_max : ENVELOPE_MAX;
+		const int32 range = GetType() == MOD_TYPE_AMS ? uint8_max : ENVELOPE_MAX;
 		int32 amp;
 		switch(GetType())
 		{
-		case MOD_TYPE_AMS2: amp = 64; break;
+		case MOD_TYPE_AMS: amp = 64; break;
 		case MOD_TYPE_MDL: amp = 192; break;
 		default: amp = 512;
 		}

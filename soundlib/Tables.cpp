@@ -72,7 +72,6 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_FAR,  MPT_ULITERAL("Farandole Composer"),      "far" },
 	{ MOD_TYPE_MDL,  MPT_ULITERAL("Digitrakker"),             "mdl" },
 	{ MOD_TYPE_AMS,  MPT_ULITERAL("Extreme's Tracker"),       "ams" },
-	{ MOD_TYPE_AMS2, MPT_ULITERAL("Velvet Studio"),           "ams" },
 	{ MOD_TYPE_DSM,  MPT_ULITERAL("DSIK Format"),             "dsm" },
 	{ MOD_TYPE_AMF,  MPT_ULITERAL("DSMI"),                    "amf" },
 	{ MOD_TYPE_AMF0, MPT_ULITERAL("ASYLUM"),                  "amf" },
@@ -176,7 +175,6 @@ static constexpr ModCharsetInfo ModCharsetInfos[] =
 	{ MOD_TYPE_IMF , mpt::CharsetCP437      },
 	{ MOD_TYPE_ULT , mpt::CharsetCP437      },
 	{ MOD_TYPE_AMS , mpt::CharsetCP437      },
-	{ MOD_TYPE_AMS2, mpt::CharsetCP437      },
 	{ MOD_TYPE_DSM , mpt::CharsetCP437      },
 	// Windows
 	{ MOD_TYPE_MT2 , mpt::CharsetWindows1252},

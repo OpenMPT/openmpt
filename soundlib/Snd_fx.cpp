@@ -34,7 +34,7 @@ OPENMPT_NAMESPACE_BEGIN
 #else
 #define GLOBALVOL_7BIT_FORMATS_EXT Enum<MODTYPE>::value_type()
 #endif // MODPLUG_TRACKER
-#define GLOBALVOL_7BIT_FORMATS (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM | MOD_TYPE_PTM | MOD_TYPE_MDL | MOD_TYPE_DTM | GLOBALVOL_7BIT_FORMATS_EXT)
+#define GLOBALVOL_7BIT_FORMATS (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_DBM | MOD_TYPE_PTM | MOD_TYPE_MDL | MOD_TYPE_DTM | GLOBALVOL_7BIT_FORMATS_EXT)
 
 
 // Compensate frequency slide LUTs depending on whether we are handling periods or frequency - "up" and "down" in function name are seen from frequency perspective.
@@ -130,7 +130,7 @@ public:
 				if(p.volcmd == VOLCMD_TONEPORTAMENTO)
 				{
 					uint32 param = p.vol;
-					if(sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
+					if(sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
 					{
 						param = ImpulseTrackerPortaVolCmd[param & 0x0F];
 					} else
@@ -2883,7 +2883,7 @@ bool CSoundFile::ProcessEffects()
 			if (volcmd == VOLCMD_TONEPORTAMENTO)
 			{
 				uint32 porta = 0;
-				if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
+				if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
 				{
 					porta = ImpulseTrackerPortaVolCmd[vol & 0x0F];
 				} else
@@ -5669,7 +5669,7 @@ void CSoundFile::GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSli
 			if (param & 0xF0)
 			{
 				// IT compatibility: Ignore slide commands with both nibbles set.
-				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM)) || (param & 0x0F) == 0)
+				if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_DBM)) || (param & 0x0F) == 0)
 					nGlbSlide = (int)((param & 0xF0) >> 4) * 2;
 			} else
 			{
@@ -5679,7 +5679,7 @@ void CSoundFile::GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSli
 	}
 	if (nGlbSlide)
 	{
-		if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_AMS2 | MOD_TYPE_DBM))) nGlbSlide *= 2;
+		if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_DBM))) nGlbSlide *= 2;
 		nGlbSlide += m_PlayState.m_nGlobalVolume;
 		Limit(nGlbSlide, 0, 256);
 		m_PlayState.m_nGlobalVolume = nGlbSlide;
