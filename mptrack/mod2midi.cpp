@@ -252,17 +252,17 @@ namespace MidiExport
 			return true;
 		}
 
-		bool MidiSysexSend(const void *message, uint32 length) override
+		bool MidiSysexSend(mpt::const_byte_span sysex) override
 		{
 			UpdateGlobals();
 			UpdateTicksSinceLastEvent();
 
-			if(length > 1)
+			if(sysex.size() > 1)
 			{
 				WriteTicks();
 				mpt::IO::WriteIntBE<uint8>(f, 0xF0);
-				mpt::IO::WriteVarInt(f, static_cast<uint32>(length - 1));
-				mpt::IO::WriteRaw(f, static_cast<const mpt::byte *>(message) + 1, length - 1);
+				mpt::IO::WriteVarInt(f, mpt::saturate_cast<uint32>(sysex.size() - 1));
+				mpt::IO::WriteRaw(f, sysex.data() + 1, sysex.size() - 1);
 			}
 			return true;
 		}

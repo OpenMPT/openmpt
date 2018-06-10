@@ -218,10 +218,10 @@ bool LFOPlugin::MidiSend(uint32 midiCode)
 }
 
 
-bool LFOPlugin::MidiSysexSend(const void *message, uint32 length)
+bool LFOPlugin::MidiSysexSend(mpt::const_byte_span sysex)
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
-		return plugin->MidiSysexSend(message, length);
+		return plugin->MidiSysexSend(sysex);
 	else
 		return true;
 }

@@ -140,7 +140,7 @@ public:
 
 	// MIDI event handling
 	virtual bool MidiSend(uint32 /*midiCode*/) { return true; }
-	virtual bool MidiSysexSend(const void * /*message*/, uint32 /*length*/) { return true; }
+	virtual bool MidiSysexSend(mpt::const_byte_span /*sysex*/) { return true; }
 	virtual void MidiCC(uint8 /*nMidiCh*/, MIDIEvents::MidiCC /*nController*/, uint8 /*nParam*/, CHANNELINDEX /*trackChannel*/) { }
 	virtual void MidiPitchBend(uint8 /*nMidiCh*/, int32 /*increment*/, int8 /*pwd*/) { }
 	virtual void MidiVibrato(uint8 /*nMidiCh*/, int32 /*depth*/, int8 /*pwd*/) { }
@@ -266,7 +266,7 @@ public:
 protected:
 	// Plugin wants to send MIDI to OpenMPT
 	virtual void ReceiveMidi(uint32 midiCode);
-	virtual void ReceiveSysex(const void *message, uint32 length);
+	virtual void ReceiveSysex(mpt::const_byte_span sysex);
 
 	// Converts a 14-bit MIDI pitch bend position to our internal pitch bend position representation
 	static constexpr int32 EncodePitchBendParam(int32 position) { return (position << vstPitchBendShift); }

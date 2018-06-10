@@ -967,7 +967,7 @@ void IMidiPlugin::ReceiveMidi(uint32 midiCode)
 }
 
 
-void IMidiPlugin::ReceiveSysex(const void *message, uint32 length)
+void IMidiPlugin::ReceiveSysex(mpt::const_byte_span sysex)
 {
 	ResetSilence();
 
@@ -978,7 +978,7 @@ void IMidiPlugin::ReceiveSysex(const void *message, uint32 length)
 	{
 		IMixPlugin *plugin = m_SndFile.m_MixPlugins[receiver].pMixPlugin;
 		// Add all events to the plugin's queue.
-		plugin->MidiSysexSend(message, length);
+		plugin->MidiSysexSend(sysex);
 	}
 }
 

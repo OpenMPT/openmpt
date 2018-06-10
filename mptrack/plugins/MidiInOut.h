@@ -174,7 +174,7 @@ public:
 	// Render silence and return the highest resulting output level
 	virtual float RenderSilence(uint32) { return 0; }
 	virtual bool MidiSend(uint32 midiCode);
-	virtual bool MidiSysexSend(const void *message, uint32 length);
+	virtual bool MidiSysexSend(mpt::const_byte_span sysex);
 	virtual void HardAllNotesOff();
 	// Modify parameter by given amount. Only needs to be re-implemented if plugin architecture allows this to be performed atomically.
 	virtual void Resume();

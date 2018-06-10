@@ -1317,7 +1317,7 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 				} else if(ev->type == kVstSysExType)
 				{
 					auto event = reinterpret_cast<const VstMidiSysexEvent *>(ev);
-					plugin->MidiSysexSend(event->sysexDump, event->dumpBytes);
+					plugin->MidiSysexSend(mpt::as_span(mpt::byte_cast<const mpt::byte*>(event->sysexDump), event->dumpBytes));
 				}
 			}
 		}
@@ -1470,16 +1470,16 @@ bool CVstPlugin::MidiSend(uint32 dwMidiCode)
 }
 
 
-bool CVstPlugin::MidiSysexSend(const void *message, uint32 length)
+bool CVstPlugin::MidiSysexSend(mpt::const_byte_span sysex)
 {
 	VstMidiSysexEvent event;
 	event.type = kVstSysExType;
 	event.byteSize = sizeof(event);
 	event.deltaFrames = 0;
 	event.flags = 0;
-	event.dumpBytes = length;
+	event.dumpBytes = mpt::saturate_cast<VstInt32>(sysex.size());
 	event.resvd1 = 0;
-	event.sysexDump = const_cast<char *>(static_cast<const char *>(message));	// We will make our own copy in VstEventQueue::Enqueue
+	event.sysexDump = const_cast<char *>(mpt::byte_cast<const char*>(sysex.data()));	// We will make our own copy in VstEventQueue::Enqueue
 	event.resvd2 = 0;
 
 	ResetSilence();

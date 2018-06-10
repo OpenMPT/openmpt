@@ -320,7 +320,7 @@ void MidiInOut::InputCallback(double /*deltatime*/, std::vector<unsigned char> &
 		{
 			// End of message found!
 			if(!isBypassed)
-				ReceiveSysex(m_bufferedInput.data(), m_bufferedInput.size());
+				ReceiveSysex(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(m_bufferedInput)));
 			m_bufferedInput.clear();
 		}
 	} else if(message.front() == 0xF0)
@@ -329,7 +329,7 @@ void MidiInOut::InputCallback(double /*deltatime*/, std::vector<unsigned char> &
 		if(message.back() != 0xF7)
 			m_bufferedInput.insert(m_bufferedInput.end(), message.begin(), message.end());	// ...but not the end!
 		else if(!isBypassed)
-			ReceiveSysex(message.data(), message.size());
+			ReceiveSysex(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(message)));
 	} else if(!isBypassed)
 	{
 		// Regular message
@@ -409,7 +409,7 @@ bool MidiInOut::MidiSend(uint32 midiCode)
 }
 
 
-bool MidiInOut::MidiSysexSend(const void *sysex, uint32 length)
+bool MidiInOut::MidiSysexSend(mpt::const_byte_span sysex)
 {
 	if(!m_midiOut.isPortOpen() || IsBypassed())
 	{
@@ -418,7 +418,7 @@ bool MidiInOut::MidiSysexSend(const void *sysex, uint32 length)
 	}
 
 	MPT_LOCK_GUARD<mpt::mutex> lock(m_mutex);
-	m_outQueue.push_back(Message(GetOutputTimestamp(), sysex, length));
+	m_outQueue.push_back(Message(GetOutputTimestamp(), sysex.data(), sysex.size()));
 	return true;
 }
 

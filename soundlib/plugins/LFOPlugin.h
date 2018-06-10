@@ -83,7 +83,7 @@ public:
 
 	// MIDI event handling (mostly passing it through to the follow-up plugin)
 	bool MidiSend(uint32 midiCode) override;
-	bool MidiSysexSend(const void *message, uint32 length) override;
+	bool MidiSysexSend(mpt::const_byte_span sysex) override;
 	void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) override;
 	void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd) override;
 	void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd) override;
