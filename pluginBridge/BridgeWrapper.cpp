@@ -56,7 +56,7 @@ bool ComponentPluginBridge::DoInitialize()
 		return false;
 	}
 	std::vector<WCHAR> exePath(MAX_PATH);
-	while(GetModuleFileNameW(0, exePath.data(), exePath.size()) >= exePath.size())
+	while(GetModuleFileNameW(0, exePath.data(), mpt::saturate_cast<DWORD>(exePath.size())) >= exePath.size())
 	{
 		exePath.resize(exePath.size() * 2);
 	}
@@ -814,7 +814,9 @@ VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIn
 	if(useAuxMem)
 	{
 		// Extra data doesn't fit in message - use secondary memory
-		auxMem = GetAuxMemory(dispatchData.size());
+		if(dispatchData.size() > std::numeric_limits<uint32>::max())
+			return 0;
+		auxMem = GetAuxMemory(mpt::saturate_cast<uint32>(dispatchData.size()));
 		if(auxMem == nullptr)
 			return 0;
 
