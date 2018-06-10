@@ -32,9 +32,10 @@ END_MESSAGE_MAP()
 
 LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 {
-	if(MIDIEvents::GetTypeFromEvent(dwMidiDataParam) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(dwMidiDataParam) != 0 && isFocussed)
+	uint32 midiData = static_cast<uint32>(dwMidiDataParam);
+	if(MIDIEvents::GetTypeFromEvent(midiData) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(midiData) != 0 && isFocussed)
 	{
-		SetKey(ModMidi, MIDIEvents::GetDataByte1FromEvent(dwMidiDataParam));
+		SetKey(ModMidi, MIDIEvents::GetDataByte1FromEvent(midiData));
 		m_pOptKeyDlg->OnSetKeyChoice();
 	}
 	return 1;
@@ -48,7 +49,7 @@ BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
 		if(pMsg->message == WM_KEYDOWN || pMsg->message == WM_SYSKEYDOWN)
 		{
 			//if (!(pMsg->lparam & 0x40000000)) { // only on first presss
-				SetKey(CMainFrame::GetInputHandler()->GetModifierMask(), pMsg->wParam);
+				SetKey(CMainFrame::GetInputHandler()->GetModifierMask(), static_cast<UINT>(pMsg->wParam));
 			//}
 			return -1; // Keypress handled, don't pass on message.
 		} else if(pMsg->message == WM_KEYUP || pMsg->message == WM_SYSKEYUP)
@@ -374,7 +375,7 @@ void COptionsKeyboard::OnKeyboardChanged()
 
 void COptionsKeyboard::OnCategorySelChanged()
 {
-	int cat = m_cmbCategory.GetItemData(m_cmbCategory.GetCurSel());
+	int cat = static_cast<int>(m_cmbCategory.GetItemData(m_cmbCategory.GetCurSel()));
 
 	if(cat >= 0 && cat != m_nCurCategory)
 	{
@@ -442,7 +443,7 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 	{
 		// We will search in all categories
 		firstCat = 0;
-		lastCat = commandCategories.size() - 1;
+		lastCat = static_cast<int>(commandCategories.size()) - 1;
 	}
 
 	CommandID curCommand  = static_cast<CommandID>(m_lbnCommandKeys.GetItemData( m_lbnCommandKeys.GetCurSel()));
@@ -463,8 +464,8 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 			if(searchByKey)
 			{
 				addKey = false;
-				size_t numChoices = plocalCmdSet->GetKeyListSize(com);
-				for(size_t choice = 0; choice < numChoices; choice++)
+				int numChoices = plocalCmdSet->GetKeyListSize(com);
+				for(int choice = 0; choice < numChoices; choice++)
 				{
 					const KeyCombination &kc = plocalCmdSet->GetKey(com, choice);
 					if(kc.KeyCode() == m_eFindHotKey.code && kc.Modifier() == m_eFindHotKey.mod)
@@ -574,7 +575,7 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 void COptionsKeyboard::OnKeyChoiceSelect()
 {
 	//CString str;
-	int choice = m_cmbKeyChoice.GetItemData( m_cmbKeyChoice.GetCurSel() );
+	int choice = static_cast<int>(m_cmbKeyChoice.GetItemData( m_cmbKeyChoice.GetCurSel()));
 	CommandID cmd = (CommandID)m_nCurHotKey;
 
 	//If nothing there, clear
@@ -839,7 +840,7 @@ int COptionsKeyboard::GetCategoryFromCommandID(CommandID command) const
 		{
 			if(commandCategories[cat].commands[cmd] == command)
 			{
-				return cat;
+				return static_cast<int>(cat);
 			}
 		}
 	}
