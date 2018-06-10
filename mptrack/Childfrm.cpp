@@ -319,7 +319,7 @@ LRESULT CChildFrame::OnInstrumentSelected(WPARAM wParam, LPARAM lParam)
 	if (pView) pModDoc = (CModDoc *)pView->GetDocument();
 	if ((m_hWndCtrl) && (pModDoc))
 	{
-		UINT nIns = lParam;
+		UINT_PTR nIns = lParam;
 
 		if ((!wParam) && (pModDoc->GetNumInstruments() > 0))
 		{
@@ -369,12 +369,12 @@ BOOL CChildFrame::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 		if (GetRoutingFrame() != NULL) return FALSE;
 		if (nID != 0) // will be zero on a separator
 		{
-			AfxLoadString(nID, szFullText);
+			AfxLoadString((UINT)nID, szFullText);
 			// this is the command id, not the button index
 			AfxExtractSubString(strTipText, szFullText, 1, _T('\n'));
 		}
 	}
-	lstrcpyn(pTTT->szText, strTipText, mpt::size(pTTT->szText));
+	lstrcpyn(pTTT->szText, strTipText, mpt::saturate_cast<int>(mpt::size(pTTT->szText)));
 	*pResult = 0;
 
 	// bring the tooltip window above other popup windows

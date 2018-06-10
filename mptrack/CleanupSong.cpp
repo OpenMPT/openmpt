@@ -484,7 +484,7 @@ bool CModCleanupDlg::RearrangePatterns()
 	modDoc.GetPatternUndo().RearrangePatterns(newIndex);
 
 	// Now rearrange the actual patterns
-	for(size_t i = 0; i < newIndex.size(); i++)
+	for(PATTERNINDEX i = 0; i < static_cast<PATTERNINDEX>(newIndex.size()); i++)
 	{
 		PATTERNINDEX j = newIndex[i];
 		if(i == j)

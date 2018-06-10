@@ -450,7 +450,7 @@ public:
 	BOOL SetupMiscOptions();
 	BOOL SetupPlayer();
 
-	void SetupMidi(DWORD d, UINT_PTR n);
+	void SetupMidi(DWORD d, UINT n);
 	HWND GetFollowSong() const;
 	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == GetModPlaying()) ? GetFollowSong() : NULL; }
 	void ResetNotificationBuffer();

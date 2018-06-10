@@ -507,7 +507,7 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 			textboxHasFocus = _tcsicmp(activeWindowClassName, _T("Edit")) == 0;
 			if(textboxHasFocus)
 			{
-				handledByTextBox = m_InputHandler->isKeyPressHandledByTextBox(wParam);
+				handledByTextBox = m_InputHandler->isKeyPressHandledByTextBox(static_cast<UINT>(wParam));
 			}
 		}
 
@@ -1795,7 +1795,7 @@ BOOL CMainFrame::SetupMiscOptions()
 }
 
 
-void CMainFrame::SetupMidi(DWORD d, UINT_PTR n)
+void CMainFrame::SetupMidi(DWORD d, UINT n)
 {
 	bool deviceChanged = (TrackerSettings::Instance().m_nMidiDevice != n);
 	TrackerSettings::Instance().m_dwMidiSetup = d;
@@ -2768,7 +2768,7 @@ void CMainFrame::UpdateMRUList()
 	{
 		const mpt::PathString workDir = TrackerSettings::Instance().PathSongs.GetWorkingDir();
 
-		for(size_t i = 0; i < TrackerSettings::Instance().mruFiles.size(); i++)
+		for(int i = 0; i < mpt::saturate_cast<int>(TrackerSettings::Instance().mruFiles.size()); i++)
 		{
 			mpt::winstring s = mpt::tfmt::val(i + 1) + _T(" ");
 			// Add mnemonics

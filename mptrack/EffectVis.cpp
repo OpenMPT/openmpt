@@ -70,7 +70,7 @@ void CEffectVis::OnActionChanged()
 
 void CEffectVis::OnEffectChanged()
 {
-	m_nFillEffect = m_cmbEffectList.GetItemData(m_cmbEffectList.GetCurSel());
+	m_nFillEffect = static_cast<UINT>(m_cmbEffectList.GetItemData(m_cmbEffectList.GetCurSel()));
 }
 
 void CEffectVis::OnPaint()

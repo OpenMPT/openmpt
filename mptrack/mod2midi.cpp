@@ -441,8 +441,8 @@ namespace MidiExport
 				if(!data.empty())
 				{
 					mpt::IO::WriteRaw(m_file, "MTrk", 4);
-					mpt::IO::WriteIntBE<uint32>(m_file, data.size());
-					mpt::IO::WriteRaw(m_file, data.data(), data.size());
+					mpt::IO::WriteIntBE<uint32>(m_file, mpt::saturate_cast<uint32>(data.size()));
+					mpt::IO::WriteRaw(m_file, data.data(), mpt::saturate_cast<uint32>(data.size()));
 				}
 			}
 
@@ -622,7 +622,7 @@ void CModToMidi::FillProgramBox(bool percussion)
 
 void CModToMidi::UpdateDialog()
 {
-	m_nCurrInstr = m_CbnInstrument.GetItemData(m_CbnInstrument.GetCurSel());
+	m_nCurrInstr = static_cast<UINT>(m_CbnInstrument.GetItemData(m_CbnInstrument.GetCurSel()));
 	if ((m_nCurrInstr > 0) && (m_nCurrInstr < MAX_SAMPLES))
 	{
 		uint8 nMidiCh = m_instrMap[m_nCurrInstr].channel;
