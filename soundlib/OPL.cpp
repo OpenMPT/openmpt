@@ -161,14 +161,13 @@ void OPL::Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff, bool beating
 	// We allocate our OPL channels dynamically, which would result in slightly different beating characteristics,
 	// but we can just take the pattern channel number instead, as the pattern channel layout is always identical.
 	if(beatingOscillators)
-		fnum += (c & 3);
+		fnum = std::min<uint16>(fnum + (c & 3), 1023);
 
 	fnum |= (block << 10);
 
 	uint16 channel = ChannelToRegister(oplCh);
-	m_KeyOnBlock[oplCh] = (keyOff ? 0 : KEYON_BIT)   // Key on
-		| (fnum >> 8);                               // Octave + F-number high 2 bits
-	m_opl->Port(FNUM_LOW    | channel, fnum & 0xFF); // F-Number low 8 bits
+	m_KeyOnBlock[oplCh] = (keyOff ? 0 : KEYON_BIT) | (fnum >> 8); // Key on bit + Octave (block) + F-number high 2 bits
+	m_opl->Port(FNUM_LOW    | channel, fnum & 0xFF);              // F-Number low 8 bits
 	m_opl->Port(KEYON_BLOCK | channel, m_KeyOnBlock[oplCh]);
 
 	m_isActive = true;
