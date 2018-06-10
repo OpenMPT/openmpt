@@ -677,7 +677,7 @@ void CEditCommand::OnVolCmdChanged()
 	int n = cbnVolCmd.GetCurSel();
 	if(n >= 0)
 	{
-		newVolCmd = effectInfo.GetVolCmdFromIndex(cbnVolCmd.GetItemData(n));
+		newVolCmd = effectInfo.GetVolCmdFromIndex(static_cast<UINT>(cbnVolCmd.GetItemData(n)));
 	}
 
 	newVol = static_cast<ModCommand::VOL>(sldVolParam.GetPos());
@@ -708,7 +708,7 @@ void CEditCommand::OnCommandChanged()
 	int n = cbnCommand.GetCurSel();
 	if(n >= 0)
 	{
-		int ndx = cbnCommand.GetItemData(n);
+		int ndx = static_cast<int>(cbnCommand.GetItemData(n));
 		newCommand = static_cast<ModCommand::COMMAND>((ndx >= 0) ? effectInfo.GetEffectFromIndex(ndx, newParam) : CMD_NONE);
 	}
 
@@ -918,7 +918,7 @@ MPTChord &CChordEditor::GetChord()
 {
 	MPTChords &chords = TrackerSettings::GetChords();
 	int chord = m_CbnShortcut.GetCurSel();
-	if(chord >= 0) chord = m_CbnShortcut.GetItemData(chord) - NOTE_MIN;
+	if(chord >= 0) chord = static_cast<int>(m_CbnShortcut.GetItemData(chord)) - NOTE_MIN;
 	if(chord < 0 || chord >= CountOf(chords)) chord = 0;
 	return chords[chord];
 }
@@ -997,7 +997,7 @@ void CChordEditor::UpdateKeyboard()
 void CChordEditor::OnBaseNoteChanged()
 {
 	MPTChord &chord = GetChord();
-	int basenote = m_CbnBaseNote.GetItemData(m_CbnBaseNote.GetCurSel());
+	int basenote = static_cast<int>(m_CbnBaseNote.GetItemData(m_CbnBaseNote.GetCurSel()));
 	if(basenote != MPTChord::relativeMode)
 		basenote -= NOTE_MIN;
 	chord.key = (uint8)basenote;
@@ -1452,7 +1452,7 @@ BOOL QuickChannelProperties::PreTranslateMessage(MSG *pMsg)
 			CInputHandler* ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
-			UINT nChar = pMsg->wParam;
+			UINT nChar = static_cast<UINT>(pMsg->wParam);
 			UINT nRepCnt = LOWORD(pMsg->lParam);
 			UINT nFlags = HIWORD(pMsg->lParam);
 			KeyEventType kT = ih->GetKeyEventType(nFlags);
