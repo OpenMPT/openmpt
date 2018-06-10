@@ -408,7 +408,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 	}
 
 	// ...and find global minimum
-	int minimumBin = std::min_element(std::begin(interpolated.histogram), std::end(interpolated.histogram)) - std::begin(interpolated.histogram);
+	int minimumBin = static_cast<int>(std::min_element(std::begin(interpolated.histogram), std::end(interpolated.histogram)) - std::begin(interpolated.histogram));
 
 	// Center target notes around C
 	if(targetNote >= 6)
