@@ -105,7 +105,7 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 	if(code == HC_ACTION)
 	{
 		//Get the KeyEventType (key up, key down, key repeat)
-		DWORD scancode = lParam >> 16;
+		DWORD scancode = static_cast<LONG>(lParam) >> 16;
 		if((scancode & 0xC000) == 0xC000)
 		{
 			keyEventType = kKeyEventUp;
@@ -121,20 +121,20 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 		// NB: we want to catch modifiers even when the input handler is locked
 		if(keyEventType == kKeyEventUp || keyEventType == kKeyEventDown)
 		{
-			scancode = (lParam >> 16) & 0x1FF;
+			scancode = (static_cast<LONG>(lParam) >> 16) & 0x1FF;
 			CatchModifierChange(wParam, keyEventType, scancode);
 		}
 
-		if(!InterceptSpecialKeys(wParam, lParam, true) && !IsBypassed())
+		if(!InterceptSpecialKeys(static_cast<UINT>(wParam), static_cast<LONG>(lParam), true) && !IsBypassed())
 		{
 			// only execute command when the input handler is not locked
 			// and the input is not a consequence of special key interception.
-			cmd = m_keyMap.equal_range(KeyCombination(context, m_modifierMask, wParam, keyEventType));
+			cmd = m_keyMap.equal_range(KeyCombination(context, m_modifierMask, static_cast<UINT>(wParam), keyEventType));
 		}
 	}
 	if(code == HC_MIDI)
 	{
-		cmd = m_keyMap.equal_range(KeyCombination(context, ModMidi, wParam, kKeyEventDown));
+		cmd = m_keyMap.equal_range(KeyCombination(context, ModMidi, static_cast<UINT>(wParam), kKeyEventDown));
 	}
 
 	return SendCommands(m_pMainFrm, cmd, wParam);

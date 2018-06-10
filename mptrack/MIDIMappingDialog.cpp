@@ -75,17 +75,18 @@ END_MESSAGE_MAP()
 
 LRESULT CMIDIMappingDialog::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 {
+	uint32 midiData = static_cast<uint32>(dwMidiDataParam);
 	if(IsDlgButtonChecked(IDC_CHECK_MIDILEARN))
 	{
 		for(int i = 0; i < m_EventCBox.GetCount(); i++)
 		{
-			if(static_cast<MIDIEvents::EventType>(m_EventCBox.GetItemData(i)) == MIDIEvents::GetTypeFromEvent(dwMidiDataParam))
+			if(static_cast<MIDIEvents::EventType>(m_EventCBox.GetItemData(i)) == MIDIEvents::GetTypeFromEvent(midiData))
 			{
-				m_ChannelCBox.SetCurSel(1 + MIDIEvents::GetChannelFromEvent(dwMidiDataParam));
+				m_ChannelCBox.SetCurSel(1 + MIDIEvents::GetChannelFromEvent(midiData));
 				m_EventCBox.SetCurSel(i);
-				if(MIDIEvents::GetTypeFromEvent(dwMidiDataParam) == MIDIEvents::evControllerChange)
+				if(MIDIEvents::GetTypeFromEvent(midiData) == MIDIEvents::evControllerChange)
 				{
-					uint8 cc = MIDIEvents::GetDataByte1FromEvent(dwMidiDataParam);
+					uint8 cc = MIDIEvents::GetDataByte1FromEvent(midiData);
 					if(m_lastCC >= 32 || cc != m_lastCC + 32)
 					{
 						// Ignore second CC message of 14-bit CC.
@@ -365,7 +366,7 @@ void CMIDIMappingDialog::OnBnClickedButtonAdd()
 		const size_t i = m_rMIDIMapper.AddDirective(m_Setting);
 		SetModified();
 
-		SelectItem(InsertItem(m_Setting, i));
+		SelectItem(InsertItem(m_Setting, static_cast<int>(i)));
 		OnSelectionChanged();
 	}
 }
@@ -380,7 +381,7 @@ void CMIDIMappingDialog::OnBnClickedButtonReplace()
 		SetModified();
 
 		m_List.DeleteItem(i);
-		SelectItem(InsertItem(m_Setting, newIndex));
+		SelectItem(InsertItem(m_Setting, static_cast<int>(newIndex)));
 		OnSelectionChanged();
 	}
 }

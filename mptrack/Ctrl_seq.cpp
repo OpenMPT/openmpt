@@ -518,7 +518,7 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	case kcOrderlistPat7:
 	case kcOrderlistPat8:
 	case kcOrderlistPat9:
-		EnterPatternNum(wParam - kcOrderlistPat0); return wParam;
+		EnterPatternNum(static_cast<UINT>(wParam) - kcOrderlistPat0); return wParam;
 	case kcOrderlistPatMinus:
 		EnterPatternNum(10); return wParam;
 	case kcOrderlistPatPlus:

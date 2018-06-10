@@ -58,7 +58,7 @@ BOOL CMoveFXSlotDialog::OnInitDialog()
 	}
 
 	CString slotText;
-	int defaultSlot = 0;
+	std::size_t defaultSlot = 0;
 	bool foundDefault = false;
 	for(size_t nSlot = 0; nSlot < m_EmptySlots.size(); nSlot++)
 	{
@@ -70,7 +70,7 @@ BOOL CMoveFXSlotDialog::OnInitDialog()
 			foundDefault = true;
 		}
 	}
-	m_CbnEmptySlots.SetCurSel(defaultSlot);
+	m_CbnEmptySlots.SetCurSel(static_cast<int>(defaultSlot));
 
 	GetDlgItem(IDC_CHECK1)->EnableWindow(moveChain ? TRUE : FALSE);
 	CheckDlgButton(IDC_CHECK1, moveChain ? BST_CHECKED : BST_UNCHECKED);
