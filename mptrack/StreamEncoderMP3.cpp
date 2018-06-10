@@ -103,6 +103,8 @@ public:
 private:
 	// Convert Integer to Synchsafe Integer (see ID3v2.4 specs)
 	uint32 intToSynchsafe(uint32 in);
+	// Return maximum value that fits into a syncsafe int
+	uint32 GetMaxSynchsafeInt() const;
 	// Write a frame
 	void WriteID3v2Frame(const char cFrameID[4], std::string sFramecontent, std::ostream &s);
 	// Return an upper bound for the size of all replay gain frames
@@ -139,6 +141,12 @@ uint32 ID3V2Tagger::intToSynchsafe(uint32 in)
 		steps += 8;
 	} while(in >>= 7);
 	return out;
+}
+
+// Return maximum value that fits into a syncsafe int
+uint32 ID3V2Tagger::GetMaxSynchsafeInt() const
+{
+	return 0x0fffffffu;
 }
 
 // Write Tags
@@ -208,13 +216,12 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 
 uint32 ID3V2Tagger::GetMaxReplayGainTxxxTrackGainFrameSize()
 {
-	return sizeof(ID3v2Frame) + 1 + std::strlen("REPLAYGAIN_TRACK_GAIN") + 1 + std::strlen("-123.45 dB") + 1; // should be enough
+	return mpt::saturate_cast<uint32>(sizeof(ID3v2Frame) + 1 + std::strlen("REPLAYGAIN_TRACK_GAIN") + 1 + std::strlen("-123.45 dB") + 1); // should be enough
 }
 
 uint32 ID3V2Tagger::GetMaxReplayGainTxxxTrackPeakFrameSize()
 {
-	return sizeof(ID3v2Frame) + 1 + std::strlen("REPLAYGAIN_TRACK_PEAK") + 1 + std::strlen("2147483648.123456") + 1; // unrealistic worst case
-
+	return mpt::saturate_cast<uint32>(sizeof(ID3v2Frame) + 1 + std::strlen("REPLAYGAIN_TRACK_PEAK") + 1 + std::strlen("2147483648.123456") + 1); // unrealistic worst case
 }
 
 uint32 ID3V2Tagger::GetMaxReplayGainFramesSizes()
@@ -230,15 +237,11 @@ uint32 ID3V2Tagger::GetMaxReplayGainFramesSizes()
 
 void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream &s)
 {
-	ID3v2Frame frame;
-	std::string content;
-
 
 	if(StreamEncoderSettings::Instance().MP3ID3v2WriteReplayGainTXXX && replayGain.TrackGaindBValid)
 	{
 
-		std::memset(&frame, 0, sizeof(ID3v2Frame));
-		content.clear();
+		std::string content;
 
 		content += std::string(1, 0x00); // ISO-8859-1
 		content += std::string("REPLAYGAIN_TRACK_GAIN");
@@ -258,11 +261,13 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 
 		content += std::string(1, '\0');
 
-		std::memcpy(&frame.frameid, "TXXX", 4);
-		frame.size = intToSynchsafe(content.size());
-		frame.flags = 0x4000; // discard if audio data changed
 		if(sizeof(ID3v2Frame) + content.size() <= GetMaxReplayGainTxxxTrackGainFrameSize())
 		{
+			ID3v2Frame frame;
+			std::memset(&frame, 0, sizeof(ID3v2Frame));
+			std::memcpy(&frame.frameid, "TXXX", 4);
+			frame.size = intToSynchsafe(static_cast<uint32>(content.size()));
+			frame.flags = 0x4000; // discard if audio data changed
 			s.write(reinterpret_cast<const char*>(&frame), sizeof(ID3v2Frame));
 			s.write(content.data(), content.size());
 		}
@@ -273,8 +278,7 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 	if(StreamEncoderSettings::Instance().MP3ID3v2WriteReplayGainTXXX && replayGain.TrackPeakValid)
 	{
 
-		std::memset(&frame, 0, sizeof(ID3v2Frame));
-		content.clear();
+		std::string content;
 
 		content += std::string(1, 0x00); // ISO-8859-1
 		content += std::string("REPLAYGAIN_TRACK_PEAK");
@@ -289,11 +293,13 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 
 		content += std::string(1, '\0');
 
-		std::memcpy(&frame.frameid, "TXXX", 4);
-		frame.size = intToSynchsafe(content.size());
-		frame.flags = 0x4000; // discard if audio data changed
 		if(sizeof(ID3v2Frame) + content.size() <= GetMaxReplayGainTxxxTrackPeakFrameSize())
 		{
+			ID3v2Frame frame;
+			std::memset(&frame, 0, sizeof(ID3v2Frame));
+			std::memcpy(&frame.frameid, "TXXX", 4);
+			frame.size = intToSynchsafe(static_cast<uint32>(content.size()));
+			frame.flags = 0x4000; // discard if audio data changed
 			s.write(reinterpret_cast<const char*>(&frame), sizeof(ID3v2Frame));
 			s.write(content.data(), content.size());
 		}
@@ -321,15 +327,18 @@ void ID3V2Tagger::WriteID3v2Frame(const char cFrameID[4], std::string sFramecont
 	sFramecontent = ID3v2_CHARSET + sFramecontent;
 	sFramecontent += ID3v2_TEXTENDING;
 
-	ID3v2Frame tFrame;
+	if(sFramecontent.size() <= GetMaxSynchsafeInt())
+	{
+		ID3v2Frame tFrame;
+		std::memset(&tFrame, 0, sizeof(ID3v2Frame));
+		std::memcpy(&tFrame.frameid, cFrameID, 4); // ID
+		tFrame.size = intToSynchsafe(static_cast<uint32>(sFramecontent.size())); // Text size
+		tFrame.flags = 0x0000; // No flags
+		s.write(reinterpret_cast<const char*>(&tFrame), sizeof(tFrame));
+		s.write(sFramecontent.c_str(), sFramecontent.size());
 
-	memcpy(&tFrame.frameid, cFrameID, 4); // ID
-	tFrame.size = intToSynchsafe(sFramecontent.size()); // Text size
-	tFrame.flags = 0x0000; // No flags
-	s.write(reinterpret_cast<const char*>(&tFrame), sizeof(tFrame));
-	s.write(sFramecontent.c_str(), sFramecontent.size());
-
-	totalID3v2Size += (sizeof(tFrame) + sFramecontent.size());
+		totalID3v2Size += static_cast<uint32>((sizeof(tFrame) + sFramecontent.size()));
+	}
 }
 
 
