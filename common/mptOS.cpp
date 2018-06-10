@@ -583,6 +583,14 @@ EmulationLevel HostCanRun(Architecture host, Architecture process) noexcept
 }
 
 
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
+
+#if defined(MODPLUG_TRACKER)
+
+
+#if MPT_OS_WINDOWS
+
 static bool GatherSystemIsWine()
 {
 	bool SystemIsWine = false;
@@ -595,7 +603,6 @@ static bool GatherSystemIsWine()
 	}
 	return SystemIsWine;
 }
-
 
 namespace {
 struct SystemIsWineCache
@@ -614,19 +621,17 @@ struct SystemIsWineCache
 };
 }
 
+#endif // MPT_OS_WINDOWS
 
 static bool SystemIsWine(bool allowDetection = true)
 {
-	#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+	#if MPT_OS_WINDOWS
 		static SystemIsWineCache gs_SystemIsWineCache = allowDetection ? SystemIsWineCache() : SystemIsWineCache(false);
 		if(!allowDetection)
 		{ // catch too late calls of PreventWineDetection
 			MPT_ASSERT(!gs_SystemIsWineCache.SystemIsWine);
 		}
 		return gs_SystemIsWineCache.SystemIsWine;
-	#elif MPT_OS_WINDOWS
-		MPT_UNREFERENCED_PARAMETER(allowDetection);
-		return GatherSystemIsWine();
 	#else
 		MPT_UNREFERENCED_PARAMETER(allowDetection);
 		return false;
@@ -649,7 +654,7 @@ bool IsWine()
 }
 
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
 
 
 } // namespace Windows

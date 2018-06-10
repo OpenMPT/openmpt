@@ -180,13 +180,17 @@ Architecture GetProcessArchitecture() noexcept;
 
 EmulationLevel HostCanRun(Architecture host, Architecture process) noexcept;
 
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
+
+#if defined(MODPLUG_TRACKER)
 
 void PreventWineDetection();
 
 bool IsOriginal();
 bool IsWine();
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
 
 } // namespace Windows
 } // namespace mpt
