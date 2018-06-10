@@ -37,7 +37,7 @@ public:
 		_tcsncpy(m_fileNameBuf.data(), lpszFileName, m_fileNameBuf.size());
 		m_fileNameBuf.back() = '\0';
 		m_ofn.lpstrFile = m_fileNameBuf.data();
-		m_ofn.nMaxFile = m_fileNameBuf.size();
+		m_ofn.nMaxFile = mpt::saturate_cast<DWORD>(m_fileNameBuf.size());
 	}
 
 	~CFileDialogEx()

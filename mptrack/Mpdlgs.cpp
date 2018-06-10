@@ -460,10 +460,10 @@ void COptionsSoundcard::UpdateChannels()
 		m_CbnChannels.EnableWindow(TRUE);
 	}
 	m_CbnChannels.ResetContent();
-	std::size_t maxChannels = 0;
+	int maxChannels = 0;
 	if(m_CurrentDeviceDynamicCaps.channelNames.size() > 0)
 	{
-		maxChannels = std::min<std::size_t>(4, m_CurrentDeviceDynamicCaps.channelNames.size());
+		maxChannels = static_cast<int>(std::min<std::size_t>(4, m_CurrentDeviceDynamicCaps.channelNames.size()));
 	} else
 	{
 		maxChannels = 4;
@@ -821,7 +821,7 @@ void COptionsSoundcard::OnOK()
 	// Channels
 	{
 		DWORD_PTR n = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
-		m_Settings.Channels = n;
+		m_Settings.Channels = static_cast<int>(n);
 		if((m_Settings.Channels != 1) && (m_Settings.Channels != 4))
 		{
 			m_Settings.Channels = 2;
@@ -1541,7 +1541,7 @@ void COptionsPlayer::OnOK()
 	// Reverb
 	{
 		// Reverb depth is dynamically changed
-		UINT nReverbType = m_CbnReverbPreset.GetItemData(m_CbnReverbPreset.GetCurSel());
+		uint32 nReverbType = static_cast<uint32>(m_CbnReverbPreset.GetItemData(m_CbnReverbPreset.GetCurSel()));
 		if (nReverbType < NUM_REVERBTYPES) TrackerSettings::Instance().m_ReverbSettings.m_nReverbType = nReverbType;
 	}
 #endif
@@ -1959,9 +1959,9 @@ void COptionsWine::OnSettingsChanged()
 void COptionsWine::OnOK()
 {
 	TrackerSettings::Instance().WineSupportEnabled = IsDlgButtonChecked(IDC_CHECK_WINE_ENABLE) ? true : false;
-	TrackerSettings::Instance().WineSupportEnablePulseAudio = m_CbnPulseAudio.GetItemData(m_CbnPulseAudio.GetCurSel());
-	TrackerSettings::Instance().WineSupportEnablePortAudio = m_CbnPortAudio.GetItemData(m_CbnPortAudio.GetCurSel());
-	TrackerSettings::Instance().WineSupportEnableRtAudio = m_CbnRtAudio.GetItemData(m_CbnRtAudio.GetCurSel());
+	TrackerSettings::Instance().WineSupportEnablePulseAudio = static_cast<int32>(m_CbnPulseAudio.GetItemData(m_CbnPulseAudio.GetCurSel()));
+	TrackerSettings::Instance().WineSupportEnablePortAudio = static_cast<int32>(m_CbnPortAudio.GetItemData(m_CbnPortAudio.GetCurSel()));
+	TrackerSettings::Instance().WineSupportEnableRtAudio = static_cast<int32>(m_CbnRtAudio.GetItemData(m_CbnRtAudio.GetCurSel()));
 	CPropertyPage::OnOK();
 }
 
