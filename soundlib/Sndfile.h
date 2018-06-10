@@ -838,7 +838,7 @@ private:
 public:
 	bool FadeSong(uint32 msec);
 private:
-	void ProcessDSP(std::size_t countChunk);
+	void ProcessDSP(uint32 countChunk);
 	void ProcessPlugins(uint32 nCount);
 	void ProcessInputChannels(IAudioSource &source, std::size_t countChunk);
 public:

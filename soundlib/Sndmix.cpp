@@ -370,7 +370,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 }
 
 
-void CSoundFile::ProcessDSP(std::size_t countChunk)
+void CSoundFile::ProcessDSP(uint32 countChunk)
 {
 	#ifndef NO_DSP
 		if(m_MixerSettings.DSPMask & SNDDSP_SURROUND)
