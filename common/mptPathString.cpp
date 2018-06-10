@@ -441,7 +441,7 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 	{
 		return path;
 	}
-	std::vector<TCHAR> fullPathName(size, _T('\0'));
+	std::vector<TCHAR> fullPathName(size, TEXT('\0'));
 	if(GetFullPathName(path.AsNative().c_str(), size, fullPathName.data(), nullptr) == 0)
 	{
 		return path;

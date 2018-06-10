@@ -594,7 +594,7 @@ EmulationLevel HostCanRun(Architecture host, Architecture process) noexcept
 static bool GatherSystemIsWine()
 {
 	bool SystemIsWine = false;
-	HMODULE hNTDLL = LoadLibraryW(L"ntdll.dll");
+	HMODULE hNTDLL = LoadLibrary(TEXT("ntdll.dll"));
 	if(hNTDLL)
 	{
 		SystemIsWine = (GetProcAddress(hNTDLL, "wine_get_version") != NULL);

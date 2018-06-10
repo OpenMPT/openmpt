@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "mptTime.h"
 
+#include "mptStringBuffer.h"
+
 #include <time.h>
 
 #if MPT_OS_WINDOWS
@@ -55,15 +57,15 @@ mpt::ustring ToUString(uint64 time100ns)
 	filetime.dwLowDateTime = (DWORD)((uint64)time100ns);
 	FileTimeToSystemTime(&filetime, &systime);
 
-	WCHAR buf[bufsize];
+	TCHAR buf[bufsize];
 
-	GetDateFormatW(LOCALE_SYSTEM_DEFAULT, 0, &systime, L"yyyy-MM-dd", buf, bufsize);
-	result.append(mpt::ToUnicode(buf));
+	GetDateFormat(LOCALE_SYSTEM_DEFAULT, 0, &systime, TEXT("yyyy-MM-dd"), buf, bufsize);
+	result.append(mpt::ToUnicode(mpt::String::ReadWinBuf(buf)));
 
 	result.append(MPT_USTRING(" "));
 
-	GetTimeFormatW(LOCALE_SYSTEM_DEFAULT, TIME_FORCE24HOURFORMAT, &systime, L"HH:mm:ss", buf, bufsize);
-	result.append(mpt::ToUnicode(buf));
+	GetTimeFormat(LOCALE_SYSTEM_DEFAULT, TIME_FORCE24HOURFORMAT, &systime, TEXT("HH:mm:ss"), buf, bufsize);
+	result.append(mpt::ToUnicode(mpt::String::ReadWinBuf(buf)));
 
 	result.append(MPT_USTRING("."));
 

@@ -295,6 +295,10 @@ When in MFC code, use CString.
 When in non MFC code, either use std::wstring when directly interfacing with
 APIs only available in WCHAR variants, or use mpt::winstring and
 mpt::WinStringBuf helpers otherwise.
+Specify TCHAR string literals with _T("foo") in mptrack/, and with TEXT("foo")
+in common/ or sounddev/. _T() requires <tchar.h> which is specific to the MSVC
+runtime and not portable across compilers. TEXT() is from <windows.h>. We use
+_T() in mptrack/ only because it is shorter.
 
 
 
