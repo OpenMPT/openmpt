@@ -41,7 +41,7 @@ void OPL::Initialize(uint32 samplerate)
 
 void OPL::Mix(int *target, size_t count)
 {
-	if(!isActive)
+	if(!m_isActive)
 		return;
 
 	while(count--)
@@ -129,7 +129,7 @@ void OPL::NoteCut(CHANNELINDEX c)
 }
 
 
-void OPL::Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff)
+void OPL::Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff, bool beatingOscillators)
 {
 	uint8 oplCh = GetVoice(c);
 	if(oplCh == OPL_CHANNEL_INVALID || m_opl == nullptr)
@@ -157,14 +157,21 @@ void OPL::Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff)
 		MPT_ASSERT(fnum < 1024);
 	}
 
+	// Evil CDFM hack! Composer 670 slightly detunes each note based on the OPL channel number modulo 4.
+	// We allocate our OPL channels dynamically, which would result in slightly different beating characteristics,
+	// but we can just take the pattern channel number instead, as the pattern channel layout is always identical.
+	if(beatingOscillators)
+		fnum += (c & 3);
+
+	fnum |= (block << 10);
+
 	uint16 channel = ChannelToRegister(oplCh);
 	m_KeyOnBlock[oplCh] = (keyOff ? 0 : KEYON_BIT)   // Key on
-	    | (block << 2)                               // Octave
-	    | ((fnum >> 8) & FNUM_HIGH_MASK);            // F-number high 2 bits
+		| (fnum >> 8);                               // Octave + F-number high 2 bits
 	m_opl->Port(FNUM_LOW    | channel, fnum & 0xFF); // F-Number low 8 bits
 	m_opl->Port(KEYON_BLOCK | channel, m_KeyOnBlock[oplCh]);
 
-	isActive = true;
+	m_isActive = true;
 }
 
 
@@ -240,13 +247,13 @@ void OPL::Patch(CHANNELINDEX c, const OPLPatch &patch)
 
 void OPL::Reset()
 {
-	if(isActive)
+	if(m_isActive)
 	{
 		for(CHANNELINDEX chn = 0; chn < MAX_CHANNELS; chn++)
 		{
 			NoteCut(chn);
 		}
-		isActive = false;
+		m_isActive = false;
 	}
 
 	m_KeyOnBlock.fill(0);

@@ -56,8 +56,6 @@ public:
 
 		// KEYON_BLOCK
 		KEYON_BIT        = 0x20,
-		BLOCKNUM_MASK    = 0x1C,
-		FNUM_HIGH_MASK   = 0x03,
 
 		// FEEDBACK_CONNECTION
 		FEEDBACK_MASK    = 0x0E, // Valid just for first OP of a voice
@@ -75,7 +73,7 @@ public:
 
 	void NoteOff(CHANNELINDEX c);
 	void NoteCut(CHANNELINDEX c);
-	void Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff);
+	void Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff, bool beatingOscillators);
 	void Volume(CHANNELINDEX c, uint8 vol);
 	void Pan(CHANNELINDEX c, int32 pan);
 	void Patch(CHANNELINDEX c, const OPLPatch &patch);
@@ -102,7 +100,7 @@ protected:
 	std::array<uint8, MAX_CHANNELS> m_ChanToOPL;
 	std::array<OPLPatch, OPL_CHANNELS> m_Patches;
 
-	bool isActive = false;
+	bool m_isActive = false;
 };
 
 OPENMPT_NAMESPACE_END

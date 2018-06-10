@@ -15,7 +15,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct C67SampleHeader
 {
-	uint32le unknown;
+	uint32le unknown; // Probably placeholder for in-memory address, 0 on disk
 	uint32le length;
 	uint32le loopStart;
 	uint32le loopEnd;
@@ -41,8 +41,6 @@ MPT_BINARY_STRUCT(C67FileHeader, 1954);
 static bool ValidateHeader(const C67FileHeader &fileHeader)
 {
 	if(fileHeader.speed < 1 || fileHeader.speed > 15)
-		return false;
-	if(fileHeader.orders[fileHeader.restartPos] >= 128)
 		return false;
 	for(auto ord : fileHeader.orders)
 	{
@@ -164,6 +162,7 @@ bool CSoundFile::ReadC67(FileReader &file, ModLoadingFlags loadFlags)
 	Order().SetRestartPos(fileHeader.restartPos);
 	m_nSamples = 64;
 	m_nChannels = 4 + 9;
+	m_playBehaviour.set(kOPLBeatingOscillators);
 
 	// Pan PCM channels only
 	for(CHANNELINDEX chn = 0; chn < 4; chn++)

@@ -2238,7 +2238,7 @@ bool CSoundFile::ReadNote()
 				// Hence, we have to translate our "sample rate" into pitch.
 				auto freq = GetFreqFromPeriod(period, pChn->nC5Speed, nPeriodFrac);
 				auto oplmilliHertz = Util::muldivr_unsigned(freq, 261625, 8363 << FREQ_FRACBITS);
-				m_opl->Frequency(nChn, oplmilliHertz, pChn->dwFlags[CHN_KEYOFF]);
+				m_opl->Frequency(nChn, oplmilliHertz, pChn->dwFlags[CHN_KEYOFF], m_playBehaviour[kOPLBeatingOscillators]);
 				// Scale volume to OPL range (0...63).
 				m_opl->Volume(nChn, static_cast<uint8>(pChn->nCalcVolume * pChn->nInsVol * 63 / (1 << 20)));
 				m_opl->Pan(nChn, pChn->nRealPan);
