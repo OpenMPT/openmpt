@@ -550,9 +550,9 @@ Tstring PrintImplTemplate(const Tstring & format
 {
 	typedef typename mpt::string_traits<Tstring> traits;
 	Tstring result;
-	const std::size_t len = traits::length(format);
+	const typename traits::size_type len = traits::length(format);
 	traits::reserve(result, len);
-	for(std::size_t pos = 0; pos != len; ++pos)
+	for(typename traits::size_type pos = 0; pos != len; ++pos)
 	{
 		typename traits::char_type c = format[pos];
 		if(pos + 1 != len && c == typename traits::char_type('%'))
