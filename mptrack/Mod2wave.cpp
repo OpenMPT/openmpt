@@ -382,8 +382,8 @@ void CWaveConvert::FillFormats()
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnSampleFormat.CComboBox::ResetContent();
 	int sel = -1;
-	DWORD_PTR dwSamplerate = m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel());
-	LONG_PTR nChannels = m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel());
+	int samplerate = static_cast<int>(m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel()));
+	int channels = static_cast<int>(m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel()));
 	if(encTraits->modes & Encoder::ModeQuality)
 	{
 		for(int quality = 100; quality >= 0; quality -= 10)
@@ -400,7 +400,7 @@ void CWaveConvert::FillFormats()
 	{
 		for(int bitrate = static_cast<int>(encTraits->bitrates.size()-1); bitrate >= 0; --bitrate)
 		{
-			if(!m_Settings.GetEncoderFactory()->IsBitrateSupported(dwSamplerate, nChannels, encTraits->bitrates[bitrate]))
+			if(!m_Settings.GetEncoderFactory()->IsBitrateSupported(samplerate, channels, encTraits->bitrates[bitrate]))
 			{
 				continue;
 			}
@@ -416,7 +416,7 @@ void CWaveConvert::FillFormats()
 	{
 		for(int bitrate = static_cast<int>(encTraits->bitrates.size()-1); bitrate >= 0; --bitrate)
 		{
-			if(!m_Settings.GetEncoderFactory()->IsBitrateSupported(dwSamplerate, nChannels, encTraits->bitrates[bitrate]))
+			if(!m_Settings.GetEncoderFactory()->IsBitrateSupported(samplerate, channels, encTraits->bitrates[bitrate]))
 			{
 				continue;
 			}
@@ -432,7 +432,7 @@ void CWaveConvert::FillFormats()
 	{
 		for(int bitrate = static_cast<int>(encTraits->bitrates.size()-1); bitrate >= 0; --bitrate)
 		{
-			if(!m_Settings.GetEncoderFactory()->IsBitrateSupported(dwSamplerate, nChannels, encTraits->bitrates[bitrate]))
+			if(!m_Settings.GetEncoderFactory()->IsBitrateSupported(samplerate, channels, encTraits->bitrates[bitrate]))
 			{
 				continue;
 			}
@@ -449,7 +449,7 @@ void CWaveConvert::FillFormats()
 		for(std::size_t i = 0; i < encTraits->formats.size(); ++i)
 		{
 			const Encoder::Format &format = encTraits->formats[i];
-			if(format.Samplerate != (int)dwSamplerate || format.Channels != nChannels)
+			if(static_cast<int32>(format.Samplerate) != samplerate || format.Channels != channels)
 			{
 				continue;
 			}
@@ -470,7 +470,7 @@ void CWaveConvert::FillFormats()
 			// select enumerated format based on bitrate
 			for(int ndx = 0; ndx < m_CbnSampleFormat.GetCount(); ++ndx)
 			{
-				int i = (int)((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
+				int i = static_cast<int>((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
 				const Encoder::Format &format = encTraits->formats[i];
 				if(format.Bitrate != 0 && encSettings.Bitrate == format.Bitrate)
 				{
@@ -482,7 +482,7 @@ void CWaveConvert::FillFormats()
 				// select enumerated format based on default bitrate
 				for(int ndx = 0; ndx < m_CbnSampleFormat.GetCount(); ++ndx)
 				{
-					int i = (int)((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
+					int i = static_cast<int>((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
 					const Encoder::Format &format = encTraits->formats[i];
 					if(format.Bitrate == encTraits->defaultBitrate)
 					{
@@ -496,7 +496,7 @@ void CWaveConvert::FillFormats()
 			// select enumerated format based on sampleformat
 			for(int ndx = 0; ndx < m_CbnSampleFormat.GetCount(); ++ndx)
 			{
-				int i = (int)((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
+				int i = static_cast<int>((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
 				const Encoder::Format &format = encTraits->formats[i];
 				int32 currentFormat = encSettings.Format;
 				if(encSettings.Format < 0 || (std::size_t)currentFormat >= encTraits->formats.size())
