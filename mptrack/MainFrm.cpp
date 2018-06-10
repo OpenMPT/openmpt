@@ -760,6 +760,8 @@ void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, S
 	MPT_TRACE_SCOPE();
 	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
+	MPT_ASSERT(numFrames <= std::numeric_limits<CSoundFile::samplecount_t>::max());
+	CSoundFile::samplecount_t framesToRender = static_cast<CSoundFile::samplecount_t>(numFrames);
 	TimingInfo timingInfo;
 	timingInfo.OutputLatency = bufferAttributes.Latency;
 	timingInfo.StreamFrames = timeInfo.SyncPointStreamFrames;
@@ -769,9 +771,9 @@ void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, S
 	m_Dither.SetMode((DitherMode)bufferFormat.DitherType);
 	StereoVuMeterSourceWrapper source(bufferFormat.sampleFormat, inputBuffer, m_VUMeterInput);
 	StereoVuMeterTargetWrapper target(bufferFormat.sampleFormat, bufferFormat.NeedsClippedFloat, m_Dither, buffer, m_VUMeterOutput);
-	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(numFrames, target, source);
-	ASSERT(renderedFrames <= numFrames);
-	CSoundFile::samplecount_t remainingFrames = numFrames - renderedFrames;
+	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(framesToRender, target, source);
+	MPT_ASSERT(renderedFrames <= framesToRender);
+	CSoundFile::samplecount_t remainingFrames = framesToRender - renderedFrames;
 	if(remainingFrames > 0)
 	{
 		// The sound device interface expects the whole buffer to be filled, always.
@@ -795,9 +797,10 @@ void CMainFrame::SoundSourceLockedDone(SoundDevice::BufferFormat bufferFormat, S
 	MPT_UNREFERENCED_PARAMETER(bufferAttributes);
 	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
-	std::size_t numFrames = static_cast<std::size_t>(timeInfo.RenderStreamPositionAfter.Frames - timeInfo.RenderStreamPositionBefore.Frames);
+	MPT_ASSERT((timeInfo.RenderStreamPositionAfter.Frames - timeInfo.RenderStreamPositionBefore.Frames) < std::numeric_limits<CSoundFile::samplecount_t>::max());
+	CSoundFile::samplecount_t framesRendered = static_cast<CSoundFile::samplecount_t>(timeInfo.RenderStreamPositionAfter.Frames - timeInfo.RenderStreamPositionBefore.Frames);
 	int64 streamPosition = timeInfo.RenderStreamPositionAfter.Frames;
-	DoNotification(numFrames, streamPosition);
+	DoNotification(framesRendered, streamPosition);
 	//m_pSndFile->m_TimingInfo = TimingInfo(); // reset
 }
 
