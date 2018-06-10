@@ -549,7 +549,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if(Samples[smp].uFlags[CHN_PANNING])
 						pChn->nPan = Samples[smp].nPan;
 					if(Samples[smp].uFlags[CHN_ADLIB])
-						memory.chnSettings[nChn].ticksToRender = GetLengthMemory::IGNORE_CHANNEL;
+					{
+						memory.state->Chn[nChn].Stop();
+						memory.chnSettings[nChn].ticksToRender = 0;
+					}
 				}
 			}
 
