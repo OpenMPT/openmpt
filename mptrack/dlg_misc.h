@@ -94,7 +94,7 @@ public:
 
 public:
 	CShowLogDlg(CWnd *parent = nullptr):CDialog(IDD_SHOWLOG, parent) { m_lpszLog = NULL; m_lpszTitle = NULL; }
-	UINT ShowLog(LPCTSTR pszLog, LPCTSTR lpszTitle=NULL);
+	INT_PTR ShowLog(LPCTSTR pszLog, LPCTSTR lpszTitle=NULL);
 
 protected:
 	BOOL OnInitDialog() override;

@@ -331,7 +331,7 @@ bool CModTypeDlg::VerifyData()
 		return false;
 	}
 
-	int sel = m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel());
+	int sel = static_cast<int>(m_ChannelsBox.GetItemData(m_ChannelsBox.GetCurSel()));
 	MODTYPE type = static_cast<MODTYPE>(m_TypeBox.GetItemData(m_TypeBox.GetCurSel()));
 
 	CHANNELINDEX maxChans = CSoundFile::GetModSpecifications(type).channelsMax;
@@ -466,12 +466,12 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 					s.AppendFormat(_T("%u%%"), Util::muldivr(m_tempoSwing[i], 100, TempoSwing::Unity));
 				}
 			}
-			lstrcpyn(pTTT->szText, s, mpt::size(pTTT->szText));
+			lstrcpyn(pTTT->szText, s, mpt::saturate_cast<int>(mpt::size(pTTT->szText)));
 			return TRUE;
 		}
 	}
 
-	lstrcpyn(pTTT->szText, text, mpt::size(pTTT->szText));
+	lstrcpyn(pTTT->szText, text, mpt::saturate_cast<int>(mpt::size(pTTT->szText)));
 	return TRUE;
 }
 
@@ -669,7 +669,7 @@ BOOL CShowLogDlg::OnInitDialog()
 }
 
 
-UINT CShowLogDlg::ShowLog(LPCTSTR pszLog, LPCTSTR lpszTitle)
+INT_PTR CShowLogDlg::ShowLog(LPCTSTR pszLog, LPCTSTR lpszTitle)
 {
 	m_lpszLog = pszLog;
 	m_lpszTitle = lpszTitle;
@@ -1089,7 +1089,7 @@ void CSampleMapDlg::OnUpdateSamples()
 	if ((m_nInstrument >= MAX_INSTRUMENTS)) return;
 	if (m_CbnSample.GetCount() > 0)
 	{
-		nOldPos = m_CbnSample.GetItemData(m_CbnSample.GetCurSel());
+		nOldPos = static_cast<UINT>(m_CbnSample.GetItemData(m_CbnSample.GetCurSel()));
 	}
 	m_CbnSample.ResetContent();
 	showAll = (IsDlgButtonChecked(IDC_CHECK1) != FALSE);

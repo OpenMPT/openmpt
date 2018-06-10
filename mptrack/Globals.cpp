@@ -291,7 +291,7 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 
 	if (nIndex == -1) nIndex = m_TabCtrl.GetCurSel();
 
-	const UINT nID = m_TabCtrl.GetItemData(nIndex);
+	const UINT nID = static_cast<UINT>(m_TabCtrl.GetItemData(nIndex));
 	if(nID == 0) return FALSE;
 
 	switch(nID)
@@ -475,8 +475,8 @@ LRESULT CModControlView::OnActivateModView(WPARAM nIndex, LPARAM lParam)
 	{
 		if (nIndex < 100)
 		{
-			m_TabCtrl.SetCurSel(nIndex);
-			SetActivePage(nIndex, lParam);
+			m_TabCtrl.SetCurSel(static_cast<int>(nIndex));
+			SetActivePage(static_cast<int>(nIndex), lParam);
 		} else
 		// Might be a dialog id IDD_XXXX
 		{
@@ -527,7 +527,7 @@ LRESULT CModControlView::OnGetToolTipText(WPARAM uId, LPARAM pszText)
 	if ((m_nActiveDlg >= 0) && (m_nActiveDlg < MAX_PAGES))
 	{
 		CModControlDlg *pActiveDlg = m_Pages[m_nActiveDlg];
-		if (pActiveDlg) return (LRESULT)pActiveDlg->GetToolTipText(uId, (LPTSTR)pszText);
+		if (pActiveDlg) return (LRESULT)pActiveDlg->GetToolTipText(static_cast<UINT>(uId), (LPTSTR)pszText);
 	}
 	return 0;
 }
