@@ -1049,7 +1049,7 @@ void PatternClipboardDialog::Show()
 		instance.Create(IDD_CLIPBOARD, CMainFrame::GetMainFrame());
 		instance.numClipboardsSpin.SetRange(0, int16_max);
 	}
-	instance.SetDlgItemInt(IDC_EDIT1, PatternClipboard::GetClipboardSize(), FALSE);
+	instance.SetDlgItemInt(IDC_EDIT1, mpt::saturate_cast<UINT>(PatternClipboard::GetClipboardSize()), FALSE);
 	instance.isLocked = false;
 	instance.isCreated = true;
 	instance.UpdateList();
