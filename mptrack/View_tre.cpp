@@ -3652,8 +3652,9 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 }
 
 
-LRESULT CModTree::OnMidiMsg(WPARAM midiData, LPARAM)
+LRESULT CModTree::OnMidiMsg(WPARAM midiData_, LPARAM)
 {
+	uint32 midiData = static_cast<uint32>(midiData_);
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetInputHandler();
 	ih->HandleMIDIMessage(kCtxViewTree, midiData) != kcNull

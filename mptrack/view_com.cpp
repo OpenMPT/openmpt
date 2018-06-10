@@ -160,8 +160,9 @@ void CViewComments::OnDestroy()
 }
 
 
-LRESULT CViewComments::OnMidiMsg(WPARAM midiData, LPARAM)
+LRESULT CViewComments::OnMidiMsg(WPARAM midiData_, LPARAM)
 {
+	uint32 midiData = static_cast<uint32>(midiData_);
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetInputHandler();
 	ih->HandleMIDIMessage(kCtxViewComments, midiData) != kcNull
@@ -298,7 +299,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 							TCHAR stmp[512];
 							lvi2 = lvi;
 							lvi2.pszText = stmp;
-							lvi2.cchTextMax = mpt::size(stmp);
+							lvi2.cchTextMax = mpt::saturate_cast<int>(mpt::size(stmp));
 							stmp[0] = 0;
 							m_ItemList.GetItem(&lvi2);
 							if (s == stmp) bOk = false;
@@ -386,7 +387,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 							TCHAR stmp[512];
 							lvi2 = lvi;
 							lvi2.pszText = stmp;
-							lvi2.cchTextMax = mpt::size(stmp);
+							lvi2.cchTextMax = mpt::saturate_cast<int>(mpt::size(stmp));
 							stmp[0] = 0;
 							m_ItemList.GetItem(&lvi2);
 							if (s == stmp) bOk = FALSE;
@@ -443,7 +444,7 @@ void CViewComments::OnBeginLabelEdit(LPNMHDR, LRESULT *)
 	if(editCtrl)
 	{
 		const CModSpecifications &specs = GetDocument()->GetSoundFile().GetModSpecifications();
-		const size_t maxStrLen = (m_nListId == IDC_LIST_SAMPLES) ? specs.sampleNameLengthMax : specs.instrNameLengthMax;
+		const auto maxStrLen = (m_nListId == IDC_LIST_SAMPLES) ? specs.sampleNameLengthMax : specs.instrNameLengthMax;
 		editCtrl->LimitText(maxStrLen);
 	}
 }

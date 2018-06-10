@@ -233,8 +233,9 @@ void CViewGlobals::OnDestroy()
 }
 
 
-LRESULT CViewGlobals::OnMidiMsg(WPARAM midiData, LPARAM)
+LRESULT CViewGlobals::OnMidiMsg(WPARAM midiData_, LPARAM)
 {
+	uint32 midiData = static_cast<uint32>(midiData_);
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetInputHandler();
 	ih->HandleMIDIMessage(kCtxViewGeneral, midiData) != kcNull
@@ -835,7 +836,7 @@ void CViewGlobals::OnFxChanged(const CHANNELINDEX chnMod4)
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + chnMod4;
-		int nfx = m_CbnEffects[chnMod4].GetItemData(m_CbnEffects[chnMod4].GetCurSel());
+		int nfx = static_cast<int>(m_CbnEffects[chnMod4].GetItemData(m_CbnEffects[chnMod4].GetCurSel()));
 		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < sndFile.GetNumChannels())
 		 && (sndFile.ChnSettings[nChn].nMixPlugin != (UINT)nfx))
 		{
@@ -952,7 +953,7 @@ LRESULT CViewGlobals::OnParamAutomated(WPARAM plugin, LPARAM param)
 
 void CViewGlobals::OnParamChanged()
 {
-	int cursel = m_CbnParam.GetItemData(m_CbnParam.GetCurSel());
+	int cursel = static_cast<int>(m_CbnParam.GetItemData(m_CbnParam.GetCurSel()));
 
 	IMixPlugin *pPlugin = GetCurrentPlugin();
 
@@ -1014,7 +1015,7 @@ void CViewGlobals::SetPluginModified()
 
 void CViewGlobals::OnProgramChanged()
 {
-	int32 curProg = m_CbnPreset.GetItemData(m_CbnPreset.GetCurSel());
+	int32 curProg = static_cast<int32>(m_CbnPreset.GetItemData(m_CbnPreset.GetCurSel()));
 
 	IMixPlugin *pPlugin = GetCurrentPlugin();
 	if(pPlugin != nullptr)
@@ -1162,7 +1163,7 @@ void CViewGlobals::OnOutputRoutingChanged()
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
-	nroute = m_CbnOutput.GetItemData(m_CbnOutput.GetCurSel());
+	nroute = static_cast<int>(m_CbnOutput.GetItemData(m_CbnOutput.GetCurSel()));
 
 	if(nroute == 1)
 	{
