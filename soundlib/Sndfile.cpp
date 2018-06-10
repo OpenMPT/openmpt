@@ -167,6 +167,7 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	m_songArtist.clear();
 	m_songMessage.clear();
 	m_madeWithTracker.clear();
+	m_moduleFormat.clear();
 	m_FileHistory.clear();
 	m_tempoSwing.clear();
 
