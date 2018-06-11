@@ -460,29 +460,34 @@ static inline Tstring sci(const T& x, int precision = -1)
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaSci().FillOff().Precision(precision));
 }
 
-static inline Tstring pad_left(std::size_t width, const Tstring &str)
+static inline Tstring pad_left(std::size_t width_, const Tstring &str)
 {
 	typedef mpt::string_traits<Tstring> traits;
+	traits::size_type width = mpt::saturate_cast<traits::size_type>(width_);
 	return traits::pad(str, width, 0);
 }
-static inline Tstring pad_right(std::size_t width, const Tstring &str)
+static inline Tstring pad_right(std::size_t width_, const Tstring &str)
 {
 	typedef mpt::string_traits<Tstring> traits;
+	traits::size_type width = mpt::saturate_cast<traits::size_type>(width_);
 	return traits::pad(str, 0, width);
 }
-static inline Tstring left(std::size_t width, const Tstring &str)
+static inline Tstring left(std::size_t width_, const Tstring &str)
 {
 	typedef mpt::string_traits<Tstring> traits;
+	traits::size_type width = mpt::saturate_cast<traits::size_type>(width_);
 	return (traits::length(str) < width) ? traits::pad(str, 0, width - traits::length(str)) : str;
 }
-static inline Tstring right(std::size_t width, const Tstring &str)
+static inline Tstring right(std::size_t width_, const Tstring &str)
 {
 	typedef mpt::string_traits<Tstring> traits;
+	traits::size_type width = mpt::saturate_cast<traits::size_type>(width_);
 	return (traits::length(str) < width) ? traits::pad(str, width - traits::length(str), 0) : str;
 }
-static inline Tstring center(std::size_t width, const Tstring &str)
+static inline Tstring center(std::size_t width_, const Tstring &str)
 {
 	typedef mpt::string_traits<Tstring> traits;
+	traits::size_type width = mpt::saturate_cast<traits::size_type>(width_);
 	return (traits::length(str) < width) ? traits::pad(str, (width - traits::length(str)) / 2, (width - traits::length(str) + 1) / 2) : str;
 }
 
