@@ -176,7 +176,7 @@
    flags { "MultiProcessorCompile", "LinkTimeOptimization" }
    staticruntime "On"
 	 runtime "Release"
-   optimize "Full"
+   optimize "Speed"
    floatingpoint "Fast"
 
 	filter {}
