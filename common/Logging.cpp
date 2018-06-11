@@ -163,7 +163,7 @@ void Logger::SendLogMessage(const Context &context, LogLevel level, const char *
 			}
 			std::wstring consoletext = mpt::ToWide(message) + L"\r\n";
 			DWORD dummy = 0;
-			WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), consoletext.c_str(), consoletext.length(), &dummy, NULL);
+			WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), consoletext.c_str(), mpt::saturate_cast<DWORD>(consoletext.length()), &dummy, NULL);
 		}
 	#elif defined(MODPLUG_TRACKER) && defined(MPT_BUILD_WINESUPPORT)
 		std::clog
