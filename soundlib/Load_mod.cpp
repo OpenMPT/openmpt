@@ -587,7 +587,7 @@ static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERIN
 		file.Seek(patternStartOffset);
 	}
 
-#ifdef _DEBUG
+#ifdef MPT_BUILD_DEBUG
 	// Check if the "hidden" patterns in the order list are actually real, i.e. if they are saved in the file.
 	// OpenMPT did this check in the past, but no other tracker appears to do this.
 	// Interestingly, (broken) variants of the ProTracker modules

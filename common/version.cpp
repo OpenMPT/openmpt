@@ -274,7 +274,7 @@ bool IsReleasedBuild()
 
 bool IsDebugBuild()
 {
-	#ifdef _DEBUG
+	#if defined(MPT_BUILD_DEBUG) || !defined(NDEBUG) || defined(DEBUG) || defined(_DEBUG)
 		return true;
 	#else
 		return false;

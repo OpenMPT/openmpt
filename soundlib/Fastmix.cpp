@@ -254,7 +254,7 @@ struct MixLoopState
 
 		Limit(nSmpCount, 1u, nSamples);
 
-#ifdef _DEBUG
+#ifdef MPT_BUILD_DEBUG
 		{
 			SmpLength posDest = (nPos + nInc * (nSmpCount - 1)).GetUInt();
 			if (posDest < 0 || posDest > chn.nLength)
@@ -393,11 +393,11 @@ void CSoundFile::CreateStereoMix(int count)
 				chn.nROfs = -*(pbufmax - 2);
 				chn.nLOfs = -*(pbufmax - 1);
 
-#ifdef _DEBUG
+#ifdef MPT_BUILD_DEBUG
 				SamplePosition targetpos = chn.position + chn.increment * nSmpCount;
 #endif
 				MixFuncTable::Functions[functionNdx | (chn.nRampLength ? MixFuncTable::ndxRamp : 0)](chn, m_Resampler, pbuffer, nSmpCount);
-#ifdef _DEBUG
+#ifdef MPT_BUILD_DEBUG
 				MPT_ASSERT(chn.position.GetUInt() == targetpos.GetUInt());
 #endif
 

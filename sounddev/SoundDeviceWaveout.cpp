@@ -225,7 +225,7 @@ bool CWaveDevice::InternalClose()
 		waveOutClose(m_hWaveOut);
 		m_hWaveOut = NULL;
 	}
-	#ifdef _DEBUG
+	#ifdef MPT_BUILD_DEBUG
 		if(m_DriverBugs.load())
 		{
 				SendDeviceMessage(LogError, MPT_USTRING("Errors were detected while playing sound:\n") + GetStatistics().text);

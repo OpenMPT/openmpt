@@ -264,7 +264,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if MPT_CHECKER_ASSUME_ASSERTIONS
 #ifdef NDEBUG
-#error "Builds for static analyzers depend on std::assert being enabled, but the current build has #define NDEBUG. This makes no sense."
+#error "Builds for static analyzers depend on assert() being enabled, but the current build has #define NDEBUG. This makes no sense."
 #endif
 OPENMPT_NAMESPACE_END
 #include <cassert>

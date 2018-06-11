@@ -173,7 +173,7 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle
 	, oldPriority(THREAD_PRIORITY_NORMAL)
 {
 	MPT_TRACE_SCOPE();
-	#ifdef _DEBUG
+	#ifdef MPT_BUILD_DEBUG
 		m_BoostPriority = false;
 	#endif
 	if(m_BoostPriority)

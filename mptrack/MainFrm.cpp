@@ -215,9 +215,10 @@ void CMainFrame::Initialize()
 	//Adding version number to the frame title
 	CString title = GetTitle();
 	title += _T(" ") + mpt::cfmt::val(Version::Current());
-	#ifdef DEBUG
+	if(Build::IsDebugBuild())
+	{
 		title += _T(" DEBUG");
-	#endif
+	}
 	#ifdef NO_VST
 		title += _T(" NO_VST");
 	#endif
