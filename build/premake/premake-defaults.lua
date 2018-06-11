@@ -129,6 +129,7 @@
 
   filter { "configurations:Debug" }
    defines { "DEBUG" }
+   defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
    symbols "On"
    staticruntime "On"
@@ -137,6 +138,7 @@
 
   filter { "configurations:DebugShared" }
    defines { "DEBUG" }
+   defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_SHARED" }
    flags { "MultiProcessorCompile" }
    symbols "On"
@@ -145,6 +147,7 @@
 
   filter { "configurations:DebugMDd" }
    defines { "DEBUG" }
+   defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
    symbols "FastLink"
 	 runtime "Debug"

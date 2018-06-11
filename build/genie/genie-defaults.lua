@@ -30,11 +30,13 @@
   
   configuration "Debug"
    defines { "DEBUG" }
+   defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
    flags { "Symbols" }
 
   configuration "DebugShared"
    defines { "DEBUG" }
+   defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_SHARED" }
    flags { "Symbols" }
 

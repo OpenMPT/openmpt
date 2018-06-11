@@ -8,6 +8,7 @@
 
 	configuration "Debug"
 		defines { "DEBUG" }
+		defines { "MPT_BUILD_DEBUG" }
 		flags { "Symbols" }
 
 	configuration "Release"
