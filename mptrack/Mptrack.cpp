@@ -132,7 +132,7 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 public:
 	bool m_bNoDls = false, m_bNoPlugins = false, m_bNoAssembly = false, m_bNoSysCheck = false, m_bNoWine = false,
 		 m_bPortable = false, m_bNoCrashHandler = false, m_bDebugCrashHandler = false;
-#ifdef _DEBUG
+#ifdef ENABLE_TESTS
 	bool m_bNoTests = false;
 #endif
 
@@ -151,7 +151,7 @@ public:
 			if (!lstrcmpi(lpszParam, _T("noWine"))) { m_bNoWine = true; return; }
 			if (!lstrcmpi(lpszParam, _T("noCrashHandler"))) { m_bNoCrashHandler = true; return; }
 			if (!lstrcmpi(lpszParam, _T("DebugCrashHandler"))) { m_bDebugCrashHandler = true; return; }
-#ifdef _DEBUG
+#ifdef ENABLE_TESTS
 			if (!lstrcmpi(lpszParam, _T("noTests"))) { m_bNoTests = true; return; }
 #endif
 		}
@@ -1078,7 +1078,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	}
 
-#ifdef _DEBUG
+#ifdef ENABLE_TESTS
 	if(!cmdInfo.m_bNoTests)
 		Test::DoTests();
 #endif

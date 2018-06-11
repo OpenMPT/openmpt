@@ -31,8 +31,10 @@
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/Debug" )
   filter { "kind:StaticLib", "configurations:DebugShared", "architecture:x86" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/DebugShared" )
-  filter { "kind:StaticLib", "configurations:DebugMDd", "architecture:x86" }
-   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/DebugMDd" )
+  filter { "kind:StaticLib", "configurations:Checked", "architecture:x86" }
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/Checked" )
+  filter { "kind:StaticLib", "configurations:CheckedShared", "architecture:x86" }
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/CheckedShared" )
   filter { "kind:StaticLib", "configurations:Release", "architecture:x86" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/Release" )
   filter { "kind:StaticLib", "configurations:ReleaseShared", "architecture:x86" }
@@ -43,8 +45,10 @@
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/Debug" )
   filter { "kind:StaticLib", "configurations:DebugShared", "architecture:x86_64" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/DebugShared" )
-  filter { "kind:StaticLib", "configurations:DebugMDd", "architecture:x86_64" }
-   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/DebugMDd" )
+  filter { "kind:StaticLib", "configurations:Checked", "architecture:x86_64" }
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/Checked" )
+  filter { "kind:StaticLib", "configurations:CheckedShared", "architecture:x86_64" }
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/CheckedShared" )
   filter { "kind:StaticLib", "configurations:Release", "architecture:x86_64" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/Release" )
   filter { "kind:StaticLib", "configurations:ReleaseShared", "architecture:x86_64" }
@@ -56,8 +60,10 @@
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm/Debug" )
   filter { "kind:StaticLib", "configurations:DebugShared", "architecture:ARM" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm/DebugShared" )
-  filter { "kind:StaticLib", "configurations:DebugMDd", "architecture:ARM" }
-   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm/DebugMDd" )
+  filter { "kind:StaticLib", "configurations:Checked", "architecture:ARM" }
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm/Checked" )
+  filter { "kind:StaticLib", "configurations:CheckedShared", "architecture:ARM" }
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm/CheckedShared" )
   filter { "kind:StaticLib", "configurations:Release", "architecture:ARM" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm/Release" )
   filter { "kind:StaticLib", "configurations:ReleaseShared", "architecture:ARM" }
@@ -68,8 +74,10 @@
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm64/Debug" )
   filter { "kind:StaticLib", "configurations:DebugShared", "architecture:ARM64" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm64/DebugShared" )
-  filter { "kind:StaticLib", "configurations:DebugMDd", "architecture:ARM64" }
-   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm64/DebugMDd" )
+  filter { "kind:StaticLib", "configurations:Checked", "architecture:ARM64" }
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm64/Checked" )
+  filter { "kind:StaticLib", "configurations:CheckedShared", "architecture:ARM64" }
+   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm64/CheckedShared" )
   filter { "kind:StaticLib", "configurations:Release", "architecture:ARM64" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm64/Release" )
   filter { "kind:StaticLib", "configurations:ReleaseShared", "architecture:ARM64" }
@@ -81,8 +89,10 @@
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-static/x86-32-" .. mpt_bindirsuffix32 )
   filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:x86" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-shared/x86-32-" .. mpt_bindirsuffix32 )
-  filter { "kind:not StaticLib", "configurations:DebugMDd", "architecture:x86" }
-		targetdir ( "../../bin/debug-MDd/" .. _ACTION .. "-static/x86-32-" .. mpt_bindirsuffix32 )
+  filter { "kind:not StaticLib", "configurations:Checked", "architecture:x86" }
+		targetdir ( "../../bin/checked/" .. _ACTION .. "-static/x86-32-" .. mpt_bindirsuffix32 )
+  filter { "kind:not StaticLib", "configurations:CheckedShared", "architecture:x86" }
+		targetdir ( "../../bin/checked/" .. _ACTION .. "-shared/x86-32-" .. mpt_bindirsuffix32 )
   filter { "kind:not StaticLib", "configurations:Release", "architecture:x86" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-static/x86-32-" .. mpt_bindirsuffix32 )
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:x86" }
@@ -93,8 +103,10 @@
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-static/x86-64-" .. mpt_bindirsuffix64 )
   filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:x86_64" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-shared/x86-64-" .. mpt_bindirsuffix64 )
-  filter { "kind:not StaticLib", "configurations:DebugMDd", "architecture:x86_64" }
-		targetdir ( "../../bin/debug-MDd/" .. _ACTION .. "-static/x86-64-" .. mpt_bindirsuffix64 )
+  filter { "kind:not StaticLib", "configurations:Checked", "architecture:x86_64" }
+		targetdir ( "../../bin/checked/" .. _ACTION .. "-static/x86-64-" .. mpt_bindirsuffix64 )
+  filter { "kind:not StaticLib", "configurations:CheckedShared", "architecture:x86_64" }
+		targetdir ( "../../bin/checked/" .. _ACTION .. "-shared/x86-64-" .. mpt_bindirsuffix64 )
   filter { "kind:not StaticLib", "configurations:Release", "architecture:x86_64" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-static/x86-64-" .. mpt_bindirsuffix64 )
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:x86_64" }
@@ -106,8 +118,10 @@
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-static/arm-32-" .. mpt_bindirsuffix32 )
   filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:ARM" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-shared/arm-32-" .. mpt_bindirsuffix32 )
-  filter { "kind:not StaticLib", "configurations:DebugMDd", "architecture:ARM" }
-		targetdir ( "../../bin/debug-MDd/" .. _ACTION .. "-static/arm-32-" .. mpt_bindirsuffix32 )
+  filter { "kind:not StaticLib", "configurations:Checked", "architecture:ARM" }
+		targetdir ( "../../bin/checked/" .. _ACTION .. "-static/arm-32-" .. mpt_bindirsuffix32 )
+  filter { "kind:not StaticLib", "configurations:CheckedShared", "architecture:ARM" }
+		targetdir ( "../../bin/checked/" .. _ACTION .. "-shared/arm-32-" .. mpt_bindirsuffix32 )
   filter { "kind:not StaticLib", "configurations:Release", "architecture:ARM" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-static/arm-32-" .. mpt_bindirsuffix32 )
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:ARM" }
@@ -118,8 +132,10 @@
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-static/arm-64-" .. mpt_bindirsuffix64 )
   filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:ARM64" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-shared/arm-64-" .. mpt_bindirsuffix64 )
-  filter { "kind:not StaticLib", "configurations:DebugMDd", "architecture:ARM64" }
-		targetdir ( "../../bin/debug-MDd/" .. _ACTION .. "-static/arm-64-" .. mpt_bindirsuffix64 )
+  filter { "kind:not StaticLib", "configurations:Checked", "architecture:ARM64" }
+		targetdir ( "../../bin/checked/" .. _ACTION .. "-static/arm-64-" .. mpt_bindirsuffix64 )
+  filter { "kind:not StaticLib", "configurations:CheckedShared", "architecture:ARM64" }
+		targetdir ( "../../bin/checked/" .. _ACTION .. "-shared/arm-64-" .. mpt_bindirsuffix64 )
   filter { "kind:not StaticLib", "configurations:Release", "architecture:ARM64" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-static/arm-64-" .. mpt_bindirsuffix64 )
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:ARM64" }
@@ -127,11 +143,16 @@
   filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:ARM64" }
 		targetdir ( "../../bin/release-LTCG/" .. _ACTION .. "-static/arm-64-" .. mpt_bindirsuffix64 )
 
-  filter { "configurations:Debug" }
+
+	filter { "configurations:Debug" }
    defines { "DEBUG" }
    defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
-   symbols "On"
+		if _ACTION == "vs2015" then
+			symbols "On"
+		else
+			symbols "FastLink"
+		end
    staticruntime "On"
 	 runtime "Debug"
    optimize "Debug"
@@ -140,19 +161,36 @@
    defines { "DEBUG" }
    defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_SHARED" }
-   flags { "MultiProcessorCompile" }
+   flags { "MultiProcessorCompile" }  -- implies NotIncremental
    symbols "On"
 	 runtime "Debug"
    optimize "Debug"
 
-  filter { "configurations:DebugMDd" }
+	 
+  filter { "configurations:Checked" }
    defines { "DEBUG" }
-   defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
-   symbols "FastLink"
-	 runtime "Debug"
-   optimize "Debug"
+   defines { "MPT_BUILD_CHECKED" }
+   symbols "On"
+   flags { "MultiProcessorCompile" }
+   staticruntime "On"
+	 runtime "Release"
+   optimize "On"
+	 omitframepointer "Off"
+   floatingpoint "Default"
 
+  filter { "configurations:CheckedShared" }
+   defines { "DEBUG" }
+   defines { "MPT_BUILD_MSVC_SHARED" }
+   defines { "MPT_BUILD_CHECKED" }
+   symbols "On"
+   flags { "MultiProcessorCompile" }
+	 runtime "Release"
+   optimize "On"
+	 omitframepointer "Off"
+   floatingpoint "Default"
+
+	 
   filter { "configurations:Release" }
    defines { "NDEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
@@ -172,6 +210,7 @@
    optimize "Speed"
    floatingpoint "Fast"
 
+	 
   filter { "configurations:ReleaseLTCG" }
    defines { "NDEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
@@ -181,6 +220,7 @@
 	 runtime "Release"
    optimize "Speed"
    floatingpoint "Fast"
+
 
 	filter {}
 
@@ -193,6 +233,12 @@
 	else
 
 		filter {}
+
+		filter { "architecture:x86", "configurations:Checked" }
+			vectorextensions "SSE2"
+
+		filter { "architecture:x86", "configurations:CheckedShared" }
+			vectorextensions "SSE2"
 
 		filter { "architecture:x86", "configurations:Release" }
 			vectorextensions "SSE2"

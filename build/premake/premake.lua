@@ -171,7 +171,7 @@ if _OPTIONS["group"] == "libopenmpt-all" then
 solution "libopenmpt-all"
 	startproject "libopenmpt"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "Checked" }
  platforms ( allplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -203,7 +203,7 @@ if _OPTIONS["group"] == "libopenmpt_test" then
 solution "libopenmpt_test"
 	startproject "libopenmpt_test"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "Checked" }
  platforms ( allplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -220,7 +220,7 @@ if _OPTIONS["group"] == "foo_openmpt" then
 solution "foo_openmpt"
 	startproject "foo_openmpt"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "Checked" }
  platforms { "x86" }
 	dofile "../../build/premake/premake-defaults-solution.lua"
 	
@@ -239,7 +239,7 @@ if _OPTIONS["group"] == "in_openmpt" then
 solution "in_openmpt"
 	startproject "in_openmpt"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "Checked" }
  platforms { "x86" }
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -257,7 +257,7 @@ if _OPTIONS["group"] == "xmp-openmpt" then
 solution "xmp-openmpt"
 	startproject "xmp-openmpt"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "Checked" }
  platforms { "x86" }
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -276,7 +276,7 @@ if _OPTIONS["group"] == "libopenmpt-small" then
 solution "libopenmpt-small"
 	startproject "libopenmpt-small"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
+ configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -293,7 +293,7 @@ if _OPTIONS["group"] == "libopenmpt" then
 solution "libopenmpt"
 	startproject "libopenmpt"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
+ configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -314,7 +314,7 @@ if _OPTIONS["group"] == "openmpt123" then
 solution "openmpt123"
 	startproject "openmpt123"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
+ configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -334,7 +334,7 @@ if _OPTIONS["group"] == "PluginBridge" then
 solution "PluginBridge"
 	startproject "PluginBridge"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG" }
+ configurations { "Debug", "Release", "ReleaseLTCG" }
  platforms ( trkplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -350,7 +350,7 @@ layout = ""
 solution "OpenMPT-UTF8"
 	startproject "OpenMPT-UTF8"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
+ configurations { "Debug", "Release", "Checked", "ReleaseLTCG", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -381,7 +381,7 @@ layout = ""
 solution "OpenMPT-ANSI"
 	startproject "OpenMPT-ANSI"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
+ configurations { "Debug", "Release", "Checked", "ReleaseLTCG", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -412,7 +412,7 @@ layout = "custom"
 solution "OpenMPT-custom"
 	startproject "OpenMPT-custom"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
+ configurations { "Debug", "Release", "Checked", "ReleaseLTCG", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -443,7 +443,7 @@ layout = ""
 solution "OpenMPT"
 	startproject "OpenMPT"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
+ configurations { "Debug", "Release", "Checked", "ReleaseLTCG", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -475,7 +475,7 @@ if _OPTIONS["group"] == "all-externals" then
 
 solution "all-externals"
  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
- configurations { "Debug", "Release", "DebugMDd", "ReleaseLTCG", "DebugShared", "ReleaseShared" }
+ configurations { "Debug", "Release", "Checked", "ReleaseLTCG", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 

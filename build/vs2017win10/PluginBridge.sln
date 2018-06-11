@@ -5,10 +5,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PluginBridge", "PluginBridg
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		DebugMDd|ARM = DebugMDd|ARM
-		DebugMDd|ARM64 = DebugMDd|ARM64
-		DebugMDd|Win32 = DebugMDd|Win32
-		DebugMDd|x64 = DebugMDd|x64
 		Debug|ARM = Debug|ARM
 		Debug|ARM64 = Debug|ARM64
 		Debug|Win32 = Debug|Win32
@@ -23,14 +19,6 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1A147336-891E-49AC-9EAD-A750599A224C}.DebugMDd|ARM.ActiveCfg = DebugMDd|ARM
-		{1A147336-891E-49AC-9EAD-A750599A224C}.DebugMDd|ARM.Build.0 = DebugMDd|ARM
-		{1A147336-891E-49AC-9EAD-A750599A224C}.DebugMDd|ARM64.ActiveCfg = DebugMDd|ARM64
-		{1A147336-891E-49AC-9EAD-A750599A224C}.DebugMDd|ARM64.Build.0 = DebugMDd|ARM64
-		{1A147336-891E-49AC-9EAD-A750599A224C}.DebugMDd|Win32.ActiveCfg = DebugMDd|Win32
-		{1A147336-891E-49AC-9EAD-A750599A224C}.DebugMDd|Win32.Build.0 = DebugMDd|Win32
-		{1A147336-891E-49AC-9EAD-A750599A224C}.DebugMDd|x64.ActiveCfg = DebugMDd|x64
-		{1A147336-891E-49AC-9EAD-A750599A224C}.DebugMDd|x64.Build.0 = DebugMDd|x64
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Debug|ARM.ActiveCfg = Debug|ARM
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Debug|ARM.Build.0 = Debug|ARM
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Debug|ARM64.ActiveCfg = Debug|ARM64
