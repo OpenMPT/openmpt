@@ -216,7 +216,7 @@
 #if defined(MODPLUG_TRACKER)
 
 // Enable built-in test suite.
-#ifdef _DEBUG
+#if defined(MPT_BUILD_DEBUG) || defined(MPT_BUILD_CHECKED)
 #define ENABLE_TESTS
 #endif
 
@@ -225,13 +225,13 @@
 
 // Disable any debug logging
 //#define NO_LOGGING
-#if !defined(_DEBUG) && !defined(MPT_BUILD_WINESUPPORT)
+#if !defined(MPT_BUILD_DEBUG) && !defined(MPT_BUILD_CHECKED) && !defined(MPT_BUILD_WINESUPPORT)
 #define MPT_LOG_GLOBAL_LEVEL_STATIC
 #define MPT_LOG_GLOBAL_LEVEL 0
 #endif
 
 // Disable all runtime asserts
-#if !defined(_DEBUG) && !defined(MPT_BUILD_WINESUPPORT)
+#if !defined(MPT_BUILD_DEBUG) && !defined(MPT_BUILD_CHECKED) && !defined(MPT_BUILD_WINESUPPORT)
 #define NO_ASSERTS
 #endif
 
@@ -295,7 +295,7 @@
 #else
 #define MODPLUG_NO_FILESAVE
 #endif
-#if defined(MPT_BUILD_ANALZYED) || defined(MPT_BUILD_CHECKED) || defined(ENABLE_TESTS)
+#if defined(MPT_BUILD_ANALZYED) || defined(MPT_BUILD_DEBUG) || defined(MPT_BUILD_CHECKED) || defined(ENABLE_TESTS)
 // enable asserts
 #else
 #define NO_ASSERTS
