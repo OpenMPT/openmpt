@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**Bug**] Internal mixer state was not initialized properly when initially
     rendering in 44100kHz stereo format.
+ *  [**Bug**] AMF: Undefined behaviour in loader code could lead to files
+    playing silent.
 
  *  Switching between instruments with portamento did not update the NNA
     settings for the new instrument.
