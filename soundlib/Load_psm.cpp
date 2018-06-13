@@ -211,19 +211,12 @@ static PATTERNINDEX ReadPSMPatternIndex(FileReader &file, bool &sinariaFormat)
 
 static bool ValidateHeader(const PSMFileHeader &fileHeader)
 {
-	if(!std::memcmp(fileHeader.formatID, "PSM ", 4)
-		&& std::memcmp(fileHeader.fileInfoID, "FILE", 4))
+	if(std::memcmp(fileHeader.formatID, "PSM ", 4)
+		|| std::memcmp(fileHeader.fileInfoID, "FILE", 4))
 	{
-		return true;
+		return false;
 	}
-#ifdef MPT_PSM_DECRYPT
-	if(!std::memcmp(fileHeader.formatID, "QUP$", 4)
-		&& std::memcmp(fileHeader.fileInfoID, "OSWQ", 4))
-	{
-		return true;
-	}
-#endif
-	return false;
+	return true;
 }
 
 
@@ -321,7 +314,6 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// "SONG" - Subsong information (channel count etc)
 	auto songChunks = chunks.GetAllChunks(PSMChunk::idSONG);
-	subsongs.reserve(songChunks.size());
 	for(ChunkReader chunk : songChunks)
 	{
 		PSMSongHeader songHeader;
@@ -443,16 +435,12 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 							// Output of PLAY.EXE: "SMapTabl from pos 0 to pos -1 starting at 0 and adding 1 to it each time"
 							// It appears that this maps e.g. what is "I0" in the file to sample 1.
 							// If we were being fancy, we could implement this, but in practice it won't matter.
+							if (subChunk.ReadUint8() != 0x00 || subChunk.ReadUint8() != 0xFF ||	// "0 to -1" (does not seem to do anything)
+								subChunk.ReadUint8() != 0x00 || subChunk.ReadUint8() != 0x00 ||	// "at 0" (actually this appears to be the adding part - changing this to 0x01 0x00 offsets all samples by 1)
+								subChunk.ReadUint8() != 0x01 || subChunk.ReadUint8() != 0x00)	// "adding 1" (does not seem to do anything)
 							{
-								uint8 mapTable[6];
-								if(!subChunk.ReadArray(mapTable)
-									|| mapTable[0] != 0x00 || mapTable[1] != 0xFF  // "0 to -1" (does not seem to do anything)
-									|| mapTable[2] != 0x00 || mapTable[3] != 0x00  // "at 0" (actually this appears to be the adding part - changing this to 0x01 0x00 offsets all samples by 1)
-									|| mapTable[4] != 0x01 || mapTable[5] != 0x00) // "adding 1" (does not seem to do anything)
-								{
-									return false;
-								}
-						}
+								return false;
+							}
 							break;
 
 						case 0x0D: // Channel panning table - can be set using CONVERT.EXE /E
