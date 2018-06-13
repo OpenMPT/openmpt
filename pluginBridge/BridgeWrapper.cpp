@@ -969,8 +969,8 @@ BridgeWrapper::AuxMem *BridgeWrapper::GetAuxMemory(uint32 size)
 	}
 	// Create new memory with appropriate size
 	static_assert(sizeof(DispatchMsg) + sizeof(auxMem.name) <= sizeof(BridgeMessage), "Check message sizes, this will crash!");
-	static int auxMemCount = 0;
-	swprintf(auxMem.name, CountOf(auxMem.name), L"Local\\openmpt-%d-auxmem-%d", GetCurrentProcessId(), auxMemCount++);
+	static unsigned int auxMemCount = 0;
+	swprintf(auxMem.name, CountOf(auxMem.name), L"Local\\openmpt-%u-auxmem-%u", GetCurrentProcessId(), auxMemCount++);
 	if(auxMem.memory.Create(auxMem.name, size))
 	{
 		auxMem.size = size;

@@ -343,7 +343,7 @@ void PluginBridge::CreateProcessingFile(std::vector<char> &dispatchData)
 {
 	static uint32 plugId = 0;
 	wchar_t mapName[64];
-	swprintf(mapName, CountOf(mapName), L"Local\\openmpt-%d-%d", GetCurrentProcessId(), plugId++);
+	swprintf(mapName, CountOf(mapName), L"Local\\openmpt-%u-%u", GetCurrentProcessId(), plugId++);
 
 	PushToVector(dispatchData, mapName[0], sizeof(mapName));
 
@@ -1143,7 +1143,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		// Extra data doesn't fit in message - use secondary memory
 		wchar_t auxMemName[64];
 		static_assert(sizeof(DispatchMsg) + sizeof(auxMemName) <= sizeof(BridgeMessage), "Check message sizes, this will crash!");
-		swprintf(auxMemName, CountOf(auxMemName), L"Local\\openmpt-%d-auxmem-%d", GetCurrentProcessId(), GetCurrentThreadId());
+		swprintf(auxMemName, CountOf(auxMemName), L"Local\\openmpt-%u-auxmem-%u", GetCurrentProcessId(), GetCurrentThreadId());
 		if(auxMem.Create(auxMemName, extraSize))
 		{
 			// Move message data to shared memory and then move shared memory name to message data
