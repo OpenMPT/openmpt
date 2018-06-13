@@ -21,7 +21,7 @@ struct C67SampleHeader
 	uint32le loopEnd;
 };
 
-MPT_BINARY_STRUCT(C67SampleHeader, 16);
+MPT_BINARY_STRUCT(C67SampleHeader, 16)
 
 
 struct C67FileHeader
@@ -35,7 +35,7 @@ struct C67FileHeader
 	uint8 orders[256];
 };
 
-MPT_BINARY_STRUCT(C67FileHeader, 1954);
+MPT_BINARY_STRUCT(C67FileHeader, 1954)
 
 
 static bool ValidateHeader(const C67FileHeader &fileHeader)
