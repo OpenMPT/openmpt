@@ -163,20 +163,15 @@ struct PSMSubSong // For internal use (pattern conversion)
 {
 	std::vector<uint8> channelPanning, channelVolume;
 	std::vector<bool> channelSurround;
-	uint8 defaultTempo, defaultSpeed;
-	char songName[10];
-	ORDERINDEX startOrder, endOrder, restartPos;
+	uint8 defaultTempo = 125, defaultSpeed = 6;
+	char songName[10] = "";
+	ORDERINDEX startOrder = ORDERINDEX_INVALID, endOrder = ORDERINDEX_INVALID, restartPos = 0;
 
 	PSMSubSong()
 	{
 		channelPanning.assign(MAX_BASECHANNELS, 128);
 		channelVolume.assign(MAX_BASECHANNELS, 64);
 		channelSurround.assign(MAX_BASECHANNELS, false);
-		MemsetZero(songName);
-		defaultTempo = 125;
-		defaultSpeed = 6;
-		startOrder = endOrder = ORDERINDEX_INVALID;
-		restartPos = 0;
 	}
 };
 

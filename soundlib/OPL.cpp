@@ -135,14 +135,9 @@ void OPL::Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff, bool beating
 	if(oplCh == OPL_CHANNEL_INVALID || m_opl == nullptr)
 		return;
 
-	uint16 fnum = 0;
-	uint8 block = 0;
-	if(milliHertz > 6208431)
-	{
-		// Frequencies too high to produce
-		block = 7;
-		fnum = 1023;
-	} else
+	uint16 fnum = 1023;
+	uint8 block = 7;
+	if(milliHertz <= 6208431)
 	{
 		if(milliHertz > 3104215) block = 7;
 		else if(milliHertz > 1552107) block = 6;
