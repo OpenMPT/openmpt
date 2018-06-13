@@ -42,12 +42,17 @@ CWaveDevice::CWaveDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	, m_DriverBugs(0)
 {
 	MPT_TRACE_SCOPE();
-	m_ThreadWakeupEvent;
+	m_ThreadWakeupEvent = NULL;
 	m_Failed = false;
 	m_hWaveOut = NULL;
 	m_nWaveBufferSize = 0;
 	m_JustStarted = false;
 	m_nPreparedHeaders = 0;
+	m_nWriteBuffer = 0;
+	m_nDoneBuffer = 0;
+	m_nBuffersPending = 0;
+	MemsetZero(m_PositionLast);
+	m_PositionWrappedCount = 0;
 }
 
 

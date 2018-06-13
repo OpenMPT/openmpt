@@ -117,6 +117,7 @@ CRtAudioDevice::CRtAudioDevice(SoundDevice::Info info, SoundDevice::SysInfo sysI
 	m_CurrentFrameBufferOutput = nullptr;
 	m_CurrentFrameBufferInput = nullptr;
 	m_CurrentFrameBufferCount = 0;
+	m_CurrentStreamTime = 0.0;
 	m_StatisticLatencyFrames.store(0);
 	m_StatisticPeriodFrames.store(0);
 	try
