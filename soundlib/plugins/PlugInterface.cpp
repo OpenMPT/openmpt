@@ -151,9 +151,9 @@ CString IMixPlugin::GetFormattedProgramName(int32 index)
 
 	CString formattedName;
 	if(rawname[0] >= 0 && rawname[0] < _T(' '))
-		formattedName.Format(_T("%02u - Program %u"), index, index);
+		formattedName = mpt::cformat(_T("%1 - Program %2"))(mpt::cfmt::dec0<2>(index), index);
 	else
-		formattedName.Format(_T("%02u - %s"), index, rawname.GetString());
+		formattedName = mpt::cformat(_T("%1 - %2"))(mpt::cfmt::dec0<2>(index), rawname);
 
 	return formattedName;
 }
