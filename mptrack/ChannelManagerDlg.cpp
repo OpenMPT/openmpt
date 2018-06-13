@@ -948,8 +948,7 @@ void CChannelManagerDlg::OnMButtonDown(UINT /*nFlags*/, CPoint point)
 	if(m_ModDoc != nullptr && (m_ModDoc->GetModType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && ButtonHit(point, &chn, &rect))
 	{
 		// Rename channel
-		TCHAR s[64];
-		wsprintf(s, _T("New name for channel %u:"), chn + 1);
+		CString s = mpt::cformat(_T("New name for channel %1:"))(chn +1);
 		CInputDlg dlg(this, s, mpt::ToCString(m_ModDoc->GetSoundFile().GetCharsetInternal(), m_ModDoc->GetSoundFile().ChnSettings[chn].szName));
 		if(dlg.DoModal() == IDOK)
 		{
