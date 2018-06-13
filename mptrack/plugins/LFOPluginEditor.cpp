@@ -70,7 +70,7 @@ bool LFOPluginEditor::OpenEditor(CWnd *parent)
 	m_midiChnSpin.SetRange32(1, 16);
 	m_midiCC.SetRedraw(FALSE);
 	CString s;
-	for(int i = 0; i < 128; i++)
+	for(unsigned int i = 0; i < 128; i++)
 	{
 		s.Format(_T("%3u: "), i);
 		s += MIDIEvents::MidiCCNames[i];
