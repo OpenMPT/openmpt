@@ -1169,7 +1169,8 @@ bool CSoundFile::SaveS3ISample(SAMPLEINDEX smp, const mpt::PathString &filename)
 		return false;
 
 	const ModSample &sample = Samples[smp];
-	S3MSampleHeader sampleHeader{};
+	S3MSampleHeader sampleHeader;
+	MemsetZero(sampleHeader);
 	SmpLength length = sampleHeader.ConvertToS3M(sample);
 	mpt::String::Write<mpt::String::nullTerminated>(sampleHeader.name, m_szNames[smp]);
 	mpt::String::Write<mpt::String::maybeNullTerminated>(sampleHeader.reserved2, mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString()));
