@@ -211,12 +211,19 @@ static PATTERNINDEX ReadPSMPatternIndex(FileReader &file, bool &sinariaFormat)
 
 static bool ValidateHeader(const PSMFileHeader &fileHeader)
 {
-	if(std::memcmp(fileHeader.formatID, "PSM ", 4)
-		|| std::memcmp(fileHeader.fileInfoID, "FILE", 4))
+	if(!std::memcmp(fileHeader.formatID, "PSM ", 4)
+		&& !std::memcmp(fileHeader.fileInfoID, "FILE", 4))
 	{
-		return false;
+		return true;
 	}
-	return true;
+#ifdef MPT_PSM_DECRYPT
+	if(!std::memcmp(fileHeader.formatID, "QUP$", 4)
+		&& !std::memcmp(fileHeader.fileInfoID, "OSWQ", 4))
+	{
+		return true;
+	}
+#endif
+	return false;
 }
 
 
