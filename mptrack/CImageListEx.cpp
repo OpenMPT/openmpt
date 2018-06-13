@@ -44,6 +44,8 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 
 	bool result;
 
+	if(dc == nullptr) dc = CDC::FromHandle(GetDC(NULL));
+
 	// Use 1-bit transperency when there is no alpha channel.
 	if(GetDeviceCaps(dc->GetSafeHdc(), BITSPIXEL) * GetDeviceCaps(dc->GetSafeHdc(), PLANES) < 32)
 	{
@@ -93,7 +95,6 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 		bi.bi.biSizeImage = static_cast<DWORD>(bitmapMask.size() * sizeof(decltype(bitmapMask[0])));
 		bi.col[1].rgbBlue = bi.col[1].rgbGreen = bi.col[1].rgbRed = 255;
 
-		if(dc == nullptr) dc = CDC::FromHandle(GetDC(NULL));
 		dibMask.CreateCompatibleBitmap(dc, bitmap->Width(), bitmap->Height());
 		SetDIBits(dc->GetSafeHdc(), dibMask, 0, bitmap->Height(), bitmapMask.data(), reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS);
 
