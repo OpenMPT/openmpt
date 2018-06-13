@@ -51,12 +51,6 @@ public:
 		Set(row, channel, column);
 	};
 
-	// Construct cursor from another cursor.
-	PatternCursor(const PatternCursor &other)
-	{
-		Set(other);
-	};
-
 	// Construct cursor from a given row and another cursor's horizontal position (channel + column).
 	PatternCursor(ROWINDEX row, const PatternCursor &other)
 	{
