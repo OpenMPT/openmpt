@@ -1042,6 +1042,7 @@ public:
 	bool SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const;
 	bool SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const;
 	bool SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const;
+	bool SaveS3ISample(SAMPLEINDEX smp, const mpt::PathString &filename) const;
 #endif
 	static bool CanReadMP3();
 	static bool CanReadVorbis();

@@ -1342,6 +1342,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 {
 	mpt::PathString fileName, defaultPath = TrackerSettings::Instance().PathSamples.GetWorkingDir();
 	SampleEditorDefaultFormat defaultFormat = TrackerSettings::Instance().m_defaultSampleFormat;
+	bool hasAdlib = false;
 
 	if(!doBatchSave)
 	{
@@ -1366,6 +1367,8 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		const mpt::PathString ext = fileName.GetFileExt();
 		if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING(".flac"))) defaultFormat = dfFLAC;
 		else if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING(".wav"))) defaultFormat = dfWAV;
+
+		hasAdlib = sample.uFlags[CHN_ADLIB];
 	} else
 	{
 		// Save all samples
@@ -1391,14 +1394,18 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		filter = 2;
 		break;
 	case dfRAW:
-		filter = 3;
+		filter = 4;
 	}
+	// Do we have to use a format that can save OPL instruments?
+	if(hasAdlib)
+		filter = 3;
 
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(ToSettingValue(defaultFormat).as<mpt::ustring>())
 		.DefaultFilename(fileName)
 		.ExtensionFilter("Wave File (*.wav)|*.wav|"
 			"FLAC File (*.flac)|*.flac|"
+			"S3I ScreamTracker 3 Instrument (*.s3i)|*.s3i|"
 			"RAW Audio (*.raw)|*.raw||")
 			.WorkingDirectory(defaultPath)
 			.FilterIndex(&filter);
@@ -1442,6 +1449,8 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 				ok = m_sndFile.SaveRAWSample(smp, fileName);
 			else if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING("flac")))
 				ok = m_sndFile.SaveFLACSample(smp, fileName);
+			else if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING("s3i")))
+				ok = m_sndFile.SaveS3ISample(smp, fileName);
 			else
 				ok = m_sndFile.SaveWAVSample(smp, fileName);
 

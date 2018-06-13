@@ -1151,17 +1151,38 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
 	mpt::String::Read<mpt::String::nullTerminated>(m_szNames[nSample], sampleHeader.name);
 
 	if(sampleHeader.sampleType < S3MSampleHeader::typeAdMel)
-	{
 		sampleHeader.GetSampleFormat(false).ReadSample(sample, file);
-	} else
-	{
+	else
 		InitOPL();
-	}
 
 	sample.Convert(MOD_TYPE_S3M, GetType());
 	sample.PrecomputeLoops(*this, false);
 	return true;
 }
+
+#ifndef MODPLUG_NO_FILESAVE
+
+bool CSoundFile::SaveS3ISample(SAMPLEINDEX smp, const mpt::PathString &filename) const
+{
+	mpt::ofstream f(filename, std::ios::binary);
+	if(!f)
+		return false;
+
+	const ModSample &sample = Samples[smp];
+	S3MSampleHeader sampleHeader{};
+	SmpLength length = sampleHeader.ConvertToS3M(sample);
+	mpt::String::Write<mpt::String::nullTerminated>(sampleHeader.name, m_szNames[smp]);
+	mpt::String::Write<mpt::String::maybeNullTerminated>(sampleHeader.reserved2, mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString()));
+	if(length)
+		sampleHeader.dataPointer[1] = sizeof(S3MSampleHeader) >> 4;
+	mpt::IO::Write(f, sampleHeader);
+	if(length)
+		sampleHeader.GetSampleFormat(false).WriteSample(f, sample, length);
+
+	return true;
+}
+
+#endif // MODPLUG_NO_FILESAVE
 
 
 /////////////////////////////////////////////////////////////
@@ -2248,6 +2269,10 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 			f << "\nloop_start=" << loopStart;
 			f << "\nloop_end=" << loopEnd;
 			f << "\nloop_type=" << (loopType ? "alternate" : "forward");
+		}
+		if(sample.uFlags.test_all(CHN_SUSTAINLOOP | CHN_LOOP))
+		{
+			f << "\n// Warning: Only sustain loop was exported!";
 		}
 		i = endOfRegion;
 	}
