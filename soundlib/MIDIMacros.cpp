@@ -212,7 +212,7 @@ CString MIDIMacroConfig::GetParameteredMacroName(uint32 macroIndex, IMixPlugin *
 		{
 			const int param = MacroToPlugParam(macroIndex);
 			CString formattedName;
-			formattedName.Format(_T("Param %u"), param);
+			formattedName.Format(_T("Param %d"), param);
 #ifndef NO_PLUGINS
 			if(plugin != nullptr)
 			{
@@ -234,7 +234,7 @@ CString MIDIMacroConfig::GetParameteredMacroName(uint32 macroIndex, IMixPlugin *
 	case sfx_cc:
 		{
 			CString formattedCC;
-			formattedCC.Format(_T("MIDI CC %u"), MacroToMidiCC(macroIndex));
+			formattedCC.Format(_T("MIDI CC %d"), MacroToMidiCC(macroIndex));
 			return formattedCC;
 		}
 
