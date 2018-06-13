@@ -97,6 +97,20 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
         make check
         sudo make install
 
+    Cross-compilation is generally supported (although only tested for
+    targetting MinGW-w64).
+
+    Note that some MinGW-w64 distributions come with the `win32` threading model
+    enabled by default instead of the `posix` threading model. The `win32`
+    threading model lacks proper support for C++11 `<thread>` and `<mutex>` as
+    well as thread-safe magic statics. It is recommended to use the `posix`
+    threading model for libopenmpt for this reason. On Debian, the appropriate
+    configure command is
+    `./configure --host=x86_64-w64-mingw32 CC=x86_64-w64-mingw32-gcc-posix CXX=x86_64-w64-mingw32-g++-posix`
+    for 64bit, or
+    `./configure --host=i686-w64-mingw32 CC=i686-w64-mingw32-gcc-posix CXX=i686-w64-mingw32-g++-posix`
+    for 32bit. Other MinGW-w64 distributions may differ.
+
  -  Visual Studio:
 
      -  You will find solutions for Visual Studio 2015 to 2017 in the
