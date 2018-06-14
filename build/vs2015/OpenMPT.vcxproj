@@ -887,6 +887,7 @@
     <ClInclude Include="..\..\mptrack\FolderScanner.h" />
     <ClInclude Include="..\..\mptrack\GeneralConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\Globals.h" />
+    <ClInclude Include="..\..\mptrack\HTTP.h" />
     <ClInclude Include="..\..\mptrack\Image.h" />
     <ClInclude Include="..\..\mptrack\ImageLists.h" />
     <ClInclude Include="..\..\mptrack\InputHandler.h" />
@@ -1115,6 +1116,7 @@
     <ClCompile Include="..\..\mptrack\FolderScanner.cpp" />
     <ClCompile Include="..\..\mptrack\GeneralConfigDlg.cpp" />
     <ClCompile Include="..\..\mptrack\Globals.cpp" />
+    <ClCompile Include="..\..\mptrack\HTTP.cpp" />
     <ClCompile Include="..\..\mptrack\Image.cpp" />
     <ClCompile Include="..\..\mptrack\InputHandler.cpp" />
     <ClCompile Include="..\..\mptrack\KeyConfigDlg.cpp" />
