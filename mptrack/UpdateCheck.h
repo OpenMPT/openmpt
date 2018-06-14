@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <WinInet.h>
 #include <time.h>
 
 #include <atomic>
@@ -20,7 +19,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#define DOWNLOAD_BUFFER_SIZE 4096
 
 class CUpdateCheck
 {
@@ -95,17 +93,10 @@ protected:
 		void operator () ();
 	};
 
-	// Runtime resource handles
-	HINTERNET internetHandle, connectionHandle, requestHandle;
+	static void CheckForUpdate(const CUpdateCheck::Settings &settings);
 
-	CUpdateCheck();
+	static CUpdateCheck::Result SearchUpdate(const CUpdateCheck::Settings &settings); // may throw
 	
-	void CheckForUpdate(const CUpdateCheck::Settings &settings);
-
-	CUpdateCheck::Result SearchUpdate(const CUpdateCheck::Settings &settings); // may throw
-	
-	~CUpdateCheck();
-
 };
 
 

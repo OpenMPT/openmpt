@@ -18,6 +18,7 @@
 // Setup dialog stuff
 #include "Mainfrm.h"
 #include "../common/mptThread.h"
+#include "HTTP.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -153,16 +154,7 @@ CUpdateCheck::ThreadFunc::ThreadFunc(const CUpdateCheck::Settings &settings)
 void CUpdateCheck::ThreadFunc::operator () ()
 {
 	mpt::SetCurrentThreadPriority(settings.autoUpdate ? mpt::ThreadPriorityLower : mpt::ThreadPriorityNormal);
-	CUpdateCheck().CheckForUpdate(settings);
-}
-
-
-CUpdateCheck::CUpdateCheck()
-	: internetHandle(nullptr)
-	, connectionHandle(nullptr)
-	, requestHandle(nullptr)
-{
-	return;
+	CUpdateCheck::CheckForUpdate(settings);
 }
 
 
@@ -189,20 +181,11 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	updateURL.Replace(_T("$VERSION"), versionStr);
 	updateURL.Replace(_T("$GUID"), settings.guidString);
 
-	// Establish a connection.
-	internetHandle = InternetOpen(userAgent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-	if(internetHandle == NULL)
-	{
-		throw CUpdateCheck::Error("Could not start update check:\n", GetLastError());
-	}
-
-	// TLS 1.0 is not enabled by default until IE7. Since WinInet won't let us override this setting, we cannot assume that HTTPS
-	// is going to work on older systems. Besides... Windows XP is already enough of a security risk by itself. :P
-	INTERNET_PORT port = mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinVista) ? INTERNET_DEFAULT_HTTPS_PORT : INTERNET_DEFAULT_HTTP_PORT;
+	bool ssl = true;
 	const int protoEnd = updateURL.Find(_T("://"));
 	if(protoEnd != -1)
 	{
-		if(updateURL.Left(protoEnd) == "http") port = INTERNET_DEFAULT_HTTP_PORT;
+		if(updateURL.Left(protoEnd) == "http") ssl = false;
 		updateURL = updateURL.Mid(protoEnd + 3);
 	}
 	const int pathStart = updateURL.Find(_T("/"));
@@ -212,67 +195,29 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 		updatePath = updateURL.Mid(pathStart);
 		updateURL = updateURL.Left(pathStart);
 	}
-	connectionHandle = InternetConnect(internetHandle, updateURL, port, nullptr, nullptr, INTERNET_SERVICE_HTTP, 0, 0);
-	if(connectionHandle == NULL)
-	{
-		throw CUpdateCheck::Error(_T("Could not establish connection:\n"), GetLastError());
-	}
 
-	requestHandle = HttpOpenRequest(connectionHandle, _T("GET"), updatePath, NULL, NULL, NULL, (port == INTERNET_DEFAULT_HTTPS_PORT ? INTERNET_FLAG_SECURE : 0) | INTERNET_FLAG_RELOAD | INTERNET_FLAG_DONT_CACHE | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP, NULL);
-	if(requestHandle == NULL)
-	{
-		throw CUpdateCheck::Error(_T("Preparing HTTP request failed:\n"), GetLastError());
-	}
+	// Establish a connection.
+	HTTP::InternetSession internet(mpt::ToUnicode(userAgent));
 
-	if(!HttpSendRequest(requestHandle, NULL, 0, NULL, 0))
-	{
-		throw CUpdateCheck::Error(_T("Sending HTTP request failed:\n"), GetLastError());
-	}
+	HTTP::Request request;
+	request.protocol = ssl ? HTTP::Protocol::HTTPS : HTTP::Protocol::HTTP;
+	request.host = mpt::ToUnicode(updateURL);
+	request.method = HTTP::Method::Get;
+	request.path = mpt::ToUnicode(updatePath);
+	request.flags = HTTP::NoCache;
+	HTTP::Result resultHTTP = internet(request.InsecureTLSDowngradeWindowsXP());
 
 	// Retrieve HTTP status code.
-	DWORD statusCodeHTTP = 0;
-	DWORD length = sizeof(statusCodeHTTP);
-	if(HttpQueryInfo(requestHandle, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&statusCodeHTTP, &length, NULL) == FALSE)
+	if(resultHTTP.Status >= 400)
 	{
-		throw CUpdateCheck::Error(_T("Could not retrieve HTTP header information:\n"), GetLastError());
-	}
-	if(statusCodeHTTP >= 400)
-	{
-		CString error;
-		error.Format(_T("Version information could not be found on the server (HTTP status code %d). Maybe your version of OpenMPT is too old!"), statusCodeHTTP);
-		throw CUpdateCheck::Error(error);
+		throw CUpdateCheck::Error(mpt::cformat(_T("Version information could not be found on the server (HTTP status code %1). Maybe your version of OpenMPT is too old!"))(resultHTTP.Status));
 	}
 
-	// Download data.
-	std::string resultBuffer = "";
-	DWORD bytesRead = 0;
-	do
-	{
-		// Query number of available bytes to download
-		DWORD availableSize = 0;
-		if(InternetQueryDataAvailable(requestHandle, &availableSize, 0, NULL) == FALSE)
-		{
-			throw CUpdateCheck::Error(_T("Error while downloading update information data:\n"), GetLastError());
-		}
-
-		LimitMax(availableSize, (DWORD)DOWNLOAD_BUFFER_SIZE);
-
-		// Put downloaded bytes into our buffer
-		char downloadBuffer[DOWNLOAD_BUFFER_SIZE];
-		if(InternetReadFile(requestHandle, downloadBuffer, availableSize, &bytesRead) == FALSE)
-		{
-			throw CUpdateCheck::Error(_T("Error while downloading update information data:\n"), GetLastError());
-		}
-		resultBuffer.append(downloadBuffer, downloadBuffer + bytesRead);
-
-		Sleep(1);
-	} while(bytesRead != 0);
-	
 	// Now, evaluate the downloaded data.
 	CUpdateCheck::Result result;
 	result.UpdateAvailable = false;
 	result.CheckTime = time(nullptr);
-	CString resultData = mpt::ToCString(mpt::CharsetUTF8, resultBuffer);
+	CString resultData = mpt::ToCString(mpt::CharsetUTF8, resultHTTP.Data);
 	if(resultData.CompareNoCase(_T("noupdate")) != 0)
 	{
 		CString token;
@@ -317,7 +262,13 @@ void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings)
 	settings.window->SendMessage(settings.msgProgress, settings.autoUpdate ? 1 : 0, s_InstanceCount.load());
 	try
 	{
-		result = SearchUpdate(settings);
+		try
+		{
+			result = SearchUpdate(settings);
+		} catch(const HTTP::exception &e)
+		{
+			throw CUpdateCheck::Error(CString(_T("HTTP error: ")) + mpt::ToCString(e.GetMessage()));
+		}
 	} catch(const CUpdateCheck::Error &e)
 	{
 		settings.window->SendMessage(settings.msgFailure, settings.autoUpdate ? 1 : 0, reinterpret_cast<LPARAM>(&e));
@@ -396,26 +347,6 @@ CString CUpdateCheck::Error::FormatErrorCode(CString errorMessage, DWORD errorCo
 	errorMessage.Append((LPTSTR)lpMsgBuf);
 	LocalFree(lpMsgBuf);
 	return errorMessage;
-}
-
-
-CUpdateCheck::~CUpdateCheck()
-{
-	if(requestHandle != nullptr)
-	{
-		InternetCloseHandle(requestHandle);
-		connectionHandle = nullptr;	
-	}
-	if(connectionHandle != nullptr)
-	{
-		InternetCloseHandle(connectionHandle);
-		connectionHandle = nullptr;
-	}
-	if(internetHandle != nullptr)
-	{
-		InternetCloseHandle(internetHandle);
-		internetHandle = nullptr;
-	}
 }
 
 
