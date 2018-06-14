@@ -215,7 +215,7 @@ Result Request::operator()(InternetSession &internet) const
 	{
 		actualPort = (protocol != Protocol::HTTP) ? PortHTTPS : PortHTTP;
 	}
-	Handle connection = InternetConnect(
+	Handle connection = NativeHandle(InternetConnect(
 		NativeHandle(internet),
 		mpt::ToWin(host).c_str(),
 		actualPort,
@@ -223,7 +223,7 @@ Result Request::operator()(InternetSession &internet) const
 		!password.empty() ? mpt::ToWin(password).c_str() : NULL,
 		INTERNET_SERVICE_HTTP,
 		0,
-		0);
+		0));
 	if(!connection)
 	{
 		throw HTTP::LastErrorException();
