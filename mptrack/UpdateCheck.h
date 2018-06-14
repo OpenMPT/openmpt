@@ -48,6 +48,7 @@ public:
 		UINT msgFailure;
 		bool autoUpdate;
 		CString updateBaseURL;  // URL where the version check should be made.
+		bool sendGUID;
 		CString guidString;     // Send GUID to collect basic stats or "anonymous"
 		bool suggestDifferentBuilds;
 	};
