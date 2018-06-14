@@ -136,6 +136,7 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 	settings.msgFailure = MPT_WM_APP_UPDATECHECK_FAILURE;
 	settings.autoUpdate = isAutoUpdate;
 	settings.updateBaseURL = TrackerSettings::Instance().UpdateUpdateURL;
+	settings.sendGUID = TrackerSettings::Instance().UpdateSendGUID;
 	settings.guidString = (TrackerSettings::Instance().UpdateSendGUID ? mpt::ToCString(TrackerSettings::Instance().gcsInstallGUID.Get()) : _T("anonymous"));
 	settings.suggestDifferentBuilds = TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant;
 	mpt::thread(CUpdateCheck::ThreadFunc(settings)).detach();
@@ -178,7 +179,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	versionStr.Append(mpt::ToCString(BuildVariants().GuessCurrentBuildName()));
 	// Windows Version statistics
 	versionStr.Append(_T("-"));
-	if(TrackerSettings::Instance().UpdateSendGUID)
+	if(settings.sendGUID)
 	{
 		versionStr.Append(mpt::ToCString(mpt::Windows::Version::Current().GetNameShort()));
 	} else
