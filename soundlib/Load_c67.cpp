@@ -155,6 +155,7 @@ bool CSoundFile::ReadC67(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals(MOD_TYPE_S3M);
+	InitializeChannels();
 	m_moduleFormat = MPT_USTRING("CDFM");
 	m_madeWithTracker = MPT_USTRING("Composer 670");
 	m_nDefaultSpeed = fileHeader.speed;
