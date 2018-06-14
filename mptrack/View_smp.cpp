@@ -29,6 +29,7 @@
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/S3MTools.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -2080,6 +2081,27 @@ void CViewSample::OnEditCopy()
 	const CSoundFile &sndFile = GetDocument()->GetSoundFile();
 	const ModSample &sample = sndFile.GetSample(m_nSample);
 
+	if(sample.uFlags[CHN_ADLIB])
+	{
+		// We cannot store an OPL patch in a Wave file...
+		HGLOBAL hCpy;
+		if(pMainFrm->OpenClipboard() && (hCpy = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, sizeof(S3MSampleHeader))) != nullptr)
+		{
+			EmptyClipboard();
+
+			S3MSampleHeader *sampleHeader = static_cast<S3MSampleHeader *>(GlobalLock(hCpy));
+			MemsetZero(*sampleHeader);
+			sampleHeader->ConvertToS3M(sample);
+			mpt::String::Write<mpt::String::nullTerminated>(sampleHeader->name, sndFile.m_szNames[m_nSample]);
+			mpt::String::Write<mpt::String::maybeNullTerminated>(sampleHeader->reserved2, mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString()));
+
+			GlobalUnlock(hCpy);
+			SetClipboardData(CF_WAVE, (HANDLE)hCpy);
+			CloseClipboard();
+		}
+		return;
+	}
+
 	bool addLoopInfo = true;
 	size_t smpSize = sample.nLength;
 	size_t smpOffset = 0;
@@ -2229,7 +2251,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			CSoundFile &sndFile = pModDoc->GetSoundFile();
 			ModSample &sample = sndFile.GetSample(m_nSample);
 
-			if(!sample.HasSampleData())
+			if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
 				pasteMode = kReplace;
 			// Show mix paste dialog
 			if(pasteMode == kMixPaste)
@@ -2256,6 +2278,12 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			CriticalSection cs;
 			bool ok = sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 			GlobalUnlock(hCpy);
+			if(sample.uFlags[CHN_ADLIB] != oldSample.uFlags[CHN_ADLIB])
+			{
+				// Cannot mix PCM with FM
+				pasteMode = kReplace;
+				oldSample.FreeSample();
+			}
 			if (!sndFile.m_szNames[m_nSample][0] || pasteMode != kReplace)
 			{
 				mpt::String::Copy(sndFile.m_szNames[m_nSample], oldSampleName);
