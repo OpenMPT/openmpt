@@ -139,7 +139,7 @@ InternetSession::operator NativeHandle ()
 
 static mpt::winstring Verb(Method method)
 {
-	mpt::ustring result;
+	mpt::winstring result;
 	switch(method)
 	{
 	case Method::Get:
