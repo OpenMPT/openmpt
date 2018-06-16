@@ -12,6 +12,7 @@
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
+#include "Clipboard.h"
 #include "dlg_misc.h"
 #include "Dlsbank.h"
 #include "../soundlib/modsmp_ctrl.h"
@@ -1068,8 +1069,6 @@ static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, cons
 bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	HANDLE hCpy;
-	DWORD dwMemSize;
 
 	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return false;
 	BeginWaitCursor();
@@ -1079,18 +1078,11 @@ bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 	CStringA s;
 	EnvelopeToString(s, pIns->GetEnvelope(nEnv));
 
-	dwMemSize = s.GetLength() + 1;
-	if ((pMainFrm->OpenClipboard()) && ((hCpy = GlobalAlloc(GMEM_MOVEABLE|GMEM_DDESHARE, dwMemSize))!=NULL))
+	int memSize = s.GetLength() + 1;
+	Clipboard clipboard(CF_TEXT, memSize);
+	if(auto p = clipboard.As<char>())
 	{
-		EmptyClipboard();
-		LPBYTE p = (LPBYTE)GlobalLock(hCpy);
-		if(p != nullptr)
-		{
-			memcpy(p, s.GetString(), dwMemSize);
-		}
-		GlobalUnlock(hCpy);
-		SetClipboardData (CF_TEXT, (HANDLE)hCpy);
-		CloseClipboard();
+		memcpy(p, s.GetString(), memSize);
 	}
 	EndWaitCursor();
 	return true;
@@ -1125,22 +1117,14 @@ bool CModDoc::PasteEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns] || !pMainFrm) return false;
 	BeginWaitCursor();
-	if (!pMainFrm->OpenClipboard())
+	Clipboard clipboard(CF_TEXT);
+	auto data = clipboard.Get();
+	if(!data)
 	{
 		EndWaitCursor();
 		return false;
 	}
-	HGLOBAL hCpy = ::GetClipboardData(CF_TEXT);
-	LPCSTR p;
-	bool result = false;
-	if ((hCpy) && ((p = (LPSTR)GlobalLock(hCpy)) != nullptr))
-	{
-		std::string data(p, p + GlobalSize(hCpy));
-		GlobalUnlock(hCpy);
-		CloseClipboard();
-
-		result = StringToEnvelope(data, m_SndFile.Instruments[nIns]->GetEnvelope(nEnv), m_SndFile.GetModSpecifications());
-	}
+	bool result = StringToEnvelope(std::string(data.begin(), data.end()), m_SndFile.Instruments[nIns]->GetEnvelope(nEnv), m_SndFile.GetModSpecifications());
 	EndWaitCursor();
 	return result;
 }

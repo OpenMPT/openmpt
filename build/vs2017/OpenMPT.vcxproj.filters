@@ -192,6 +192,9 @@
     <ClInclude Include="..\..\mptrack\CleanupSong.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\Clipboard.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\CloseMainDialog.h">
       <Filter>mptrack</Filter>
     </ClInclude>

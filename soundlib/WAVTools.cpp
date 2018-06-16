@@ -335,35 +335,24 @@ void WAVSampleLoop::ConvertToWAV(SmpLength start, SmpLength end, bool bidi)
 
 
 // Output to stream: Initialize with std::ostream*.
-WAVWriter::WAVWriter(std::ostream *stream) : s(nullptr), memory(nullptr), memSize(0)
+WAVWriter::WAVWriter(std::ostream *stream) : s(stream)
 {
-	s = stream;
-	Init();
+	// Skip file header for now
+	Seek(sizeof(RIFFHeader));
 }
 
 
 // Output to clipboard: Initialize with pointer to memory and size of reserved memory.
-WAVWriter::WAVWriter(void *mem, size_t size) : s(nullptr), memory(static_cast<uint8 *>(mem)), memSize(size)
+WAVWriter::WAVWriter(mpt::byte_span data) : memory(data)
 {
-	Init();
+	// Skip file header for now
+	Seek(sizeof(RIFFHeader));
 }
 
 
 WAVWriter::~WAVWriter()
 {
 	Finalize();
-}
-
-
-// Reset all file variables.
-void WAVWriter::Init()
-{
-	chunkStartPos = 0;
-	position = 0;
-	totalSize = 0;
-
-	// Skip file header for now
-	Seek(sizeof(RIFFHeader));
 }
 
 
@@ -381,7 +370,7 @@ size_t WAVWriter::Finalize()
 	Write(fileHeader);
 
 	s = nullptr;
-	memory = nullptr;
+	memory = {};
 
 	return totalSize;
 }
@@ -442,11 +431,11 @@ void WAVWriter::Write(const void *data, size_t numBytes)
 	if(s != nullptr)
 	{
 		s->write(static_cast<const char*>(data), numBytes);
-	} else if(memory != nullptr)
+	} else if(!memory.empty())
 	{
-		if(position <= memSize && numBytes <= memSize - position)
+		if(position <= memory.size() && numBytes <= memory.size() - position)
 		{
-			memcpy(memory + position, data, numBytes);
+			memcpy(memory.data() + position, data, numBytes);
 		} else
 		{
 			// Should never happen - did we calculate a wrong memory size?

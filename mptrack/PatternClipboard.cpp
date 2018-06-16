@@ -12,6 +12,7 @@
 #include "PatternClipboard.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
+#include "Clipboard.h"
 #include "View_pat.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"
@@ -967,57 +968,32 @@ bool PatternClipboard::CanPaste()
 // System-specific clipboard functions
 bool PatternClipboard::ToSystemClipboard(const std::string &data)
 {
-	CMainFrame *mainFrame = CMainFrame::GetMainFrame();
-	if(mainFrame == nullptr || !mainFrame->OpenClipboard())
+	size_t clipLength = data.size() + 1;
+	Clipboard clipboard(CF_TEXT, clipLength);
+	if(auto dst = clipboard.As<char>())
+	{
+		memcpy(dst, data.c_str(), data.size() + 1);
+		return true;
+	} else
 	{
 		return false;
 	}
-
-	HGLOBAL hCpy;
-	if((hCpy = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, data.size() + 1)) == NULL)
-	{
-		return false;
-	}
-
-	::EmptyClipboard();
-
-	void *clipboard;
-	if((clipboard = ::GlobalLock(hCpy)) != nullptr)
-	{
-		memcpy(clipboard, data.c_str(), data.size() + 1);
-		::GlobalUnlock(hCpy);
-	}
-
-	::SetClipboardData (CF_TEXT, (HANDLE)hCpy);
-	::CloseClipboard();
-
-	return (clipboard != nullptr);
-
 }
 
 
 // System-specific clipboard functions
 bool PatternClipboard::FromSystemClipboard(std::string &data)
 {
-	CMainFrame *mainFrame = CMainFrame::GetMainFrame();
-	if(mainFrame == nullptr || !mainFrame->OpenClipboard())
+	Clipboard clipboard(CF_TEXT);
+	if(auto cbdata = clipboard.Get())
 	{
-		return false;
+		if(cbdata.size() > 0)
+		{
+			data.assign(mpt::byte_cast<char *>(cbdata.data()), cbdata.size() - 1);
+		}
+		return !data.empty();
 	}
-
-	HGLOBAL hCpy = ::GetClipboardData(CF_TEXT);
-	LPSTR p = nullptr;
-	if(hCpy && (p = (LPSTR)::GlobalLock(hCpy)) != nullptr)
-	{
-		auto size = ::GlobalSize(hCpy);
-		if(size > 0)
-			data.assign(p, size - 1);
-		::GlobalUnlock(hCpy);
-	}
-
-	::CloseClipboard();
-
-	return(p != nullptr);
+	return false;
 }
 
 

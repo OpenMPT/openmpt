@@ -330,30 +330,29 @@ class WAVWriter
 {
 protected:
 	// When writing to a stream: Stream pointer
-	std::ostream *s;
+	std::ostream *s = nullptr;
 	// When writing to memory: Memory address + length
-	uint8 *memory;
-	size_t memSize;
+	mpt::byte_span memory;
 
 	// Cursor position
-	size_t position;
+	size_t position = 0;
 	// Total number of bytes written to file / memory
-	size_t totalSize;
+	size_t totalSize = 0;
 
 	// Currently written chunk
-	size_t chunkStartPos;
+	size_t chunkStartPos = 0;
 	RIFFChunk chunkHeader;
 
 public:
 	// Output to stream: Initialize with std::ostream*.
 	WAVWriter(std::ostream *stream);
 	// Output to clipboard: Initialize with pointer to memory and size of reserved memory.
-	WAVWriter(void *mem, size_t size);
+	WAVWriter(mpt::byte_span data);
 
 	~WAVWriter();
 
 	// Check if anything can be written to the file.
-	bool IsValid() const { return s != nullptr || memory != nullptr; }
+	bool IsValid() const { return s != nullptr || !memory.empty(); }
 
 	// Finalize the file by closing the last open chunk and updating the file header. Returns total size of file.
 	size_t Finalize();
@@ -401,7 +400,6 @@ public:
 	void WriteExtraInformation(const ModSample &sample, MODTYPE modType, const char *sampleName = nullptr);
 
 protected:
-	void Init();
 	// Seek to a position in file.
 	void Seek(size_t pos);
 	// End current chunk by updating the chunk header and writing a padding byte if necessary.

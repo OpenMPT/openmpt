@@ -93,7 +93,7 @@ void Autotune::CopySamples(const T* origSample, SmpLength sampleLoopStart, SmpLe
 	}
 }
 
-	
+
 // Prepare a sample buffer for autocorrelation
 bool Autotune::PrepareSample(SmpLength maxShift)
 {

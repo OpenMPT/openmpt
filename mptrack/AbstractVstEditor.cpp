@@ -12,6 +12,7 @@
 #include "Mptrack.h"
 #include "Moddoc.h"
 #include "Mainfrm.h"
+#include "Clipboard.h"
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
@@ -201,19 +202,10 @@ void CAbstractVstEditor::OnCopyParameters()
 	if(VSTPresets::SaveFile(f, m_VstPlugin, false))
 	{
 		const std::string data = f.str();
-
-		HGLOBAL hCpy;
-		if(CMainFrame::GetMainFrame()->OpenClipboard() && (hCpy = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, data.length())) != nullptr)
+		Clipboard clipboard(m_clipboardFormat, data.length());
+		if(auto dst = clipboard.As<char>())
 		{
-			EmptyClipboard();
-			LPSTR p = (LPSTR)GlobalLock(hCpy);
-			if(p)
-			{
-				memcpy(p, data.data(), data.length());
-			}
-			GlobalUnlock(hCpy);
-			SetClipboardData(m_clipboardFormat, (HANDLE) hCpy);
-			CloseClipboard();
+			memcpy(dst, data.data(), data.length());
 		}
 	}
 	EndWaitCursor();
@@ -225,32 +217,26 @@ void CAbstractVstEditor::OnPasteParameters()
 	if(CMainFrame::GetMainFrame() == nullptr) return;
 
 	BeginWaitCursor();
-	if(CMainFrame::GetMainFrame()->OpenClipboard())
+	Clipboard clipboard(m_clipboardFormat);
+	if(auto data = clipboard.Get())
 	{
-		HGLOBAL hCpy = ::GetClipboardData(m_clipboardFormat);
-		const char *p;
+		FileReader file(data);
+		VSTPresets::ErrorCode error = VSTPresets::LoadFile(file, m_VstPlugin);
+		clipboard.Close();
 
-		if(hCpy != nullptr && (p = static_cast<const char *>(GlobalLock(hCpy))) != nullptr)
+		if(error == VSTPresets::noError)
 		{
-			FileReader file(mpt::as_span(p, GlobalSize(hCpy)));
-			VSTPresets::ErrorCode error = VSTPresets::LoadFile(file, m_VstPlugin);
-			GlobalUnlock(hCpy);
-
-			if(error == VSTPresets::noError)
+			const CSoundFile &sndFile = m_VstPlugin.GetSoundFile();
+			CModDoc *pModDoc;
+			if(sndFile.GetModSpecifications().supportsPlugins && (pModDoc = sndFile.GetpModDoc()) != nullptr)
 			{
-				const CSoundFile &sndFile = m_VstPlugin.GetSoundFile();
-				CModDoc *pModDoc;
-				if(sndFile.GetModSpecifications().supportsPlugins && (pModDoc = sndFile.GetpModDoc()) != nullptr)
-				{
-					pModDoc->SetModified();
-				}
-				UpdatePresetField();
-			} else
-			{
-				Reporting::Error(VSTPresets::GetErrorMessage(error));
+				pModDoc->SetModified();
 			}
+			UpdatePresetField();
+		} else
+		{
+			Reporting::Error(VSTPresets::GetErrorMessage(error));
 		}
-		CloseClipboard();
 	}
 	EndWaitCursor();
 }
