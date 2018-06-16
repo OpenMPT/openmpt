@@ -1699,6 +1699,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	// Read MARK and INST chunk to extract sample loops
 	FileReader markerChunk(chunks.GetChunk(AIFFChunk::idMARK));
 	AIFFInstrumentChunk instrHeader;
+	MemsetZero(instrHeader);
 	if(markerChunk.IsValid() && chunks.GetChunk(AIFFChunk::idINST).ReadConvertEndianness(instrHeader))
 	{
 		uint16 numMarkers = markerChunk.ReadUint16BE();
