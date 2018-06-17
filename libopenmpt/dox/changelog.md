@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta33
+### libopenmpt 0.2-beta33 (2018-06-17)
 
  *  [**Bug**] Internal mixer state was not initialized properly when initially
     rendering in 44100kHz stereo format.
