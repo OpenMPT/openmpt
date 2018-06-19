@@ -314,7 +314,6 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 	if((fileHeader.cwtv & S3MFileHeader::trackerMask) > S3MFileHeader::trkScreamTracker)
 	{
-		// 2xyy - Imago Orpheus, 3xyy - IT, 4xyy - Schism, 5xyy - OpenMPT, 6xyy - BeRoTracker
 		if((fileHeader.cwtv & S3MFileHeader::trackerMask) != S3MFileHeader::trkImpulseTracker || fileHeader.cwtv >= S3MFileHeader::trkIT2_14)
 		{
 			// Keep MIDI macros if this is not an old IT version (BABYLON.S3M by Necros has Zxx commands and was saved with IT 2.05)
@@ -364,7 +363,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	}
 
-	// Bit 8 = Stereo (we always use stereo)
+	// Bit 7 = Stereo (we always use stereo)
 	m_nSamplePreAmp = std::max(fileHeader.masterVolume & 0x7F, 0x10);
 
 	// Channel setup
@@ -383,9 +382,10 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			ChnSettings[i].dwFlags = CHN_MUTE;
 		}
-		if(ctype >= 16 && ctype <= 29 && (!m_dwLastSavedWithVersion || m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 20, 00, 00)))
+		if(ctype >= 16 && ctype <= 29)
 		{
-			// Adlib channel (except for OpenMPT 1.19 and older, which would write wrong channel types for PCM channels 16-32):
+			// Adlib channel - except for OpenMPT 1.19 and older, which would write wrong channel types for PCM channels 16-32.
+			// However, MPT/OpenMPT always wrote the extra panning table, so there is no need to fix this here.
 			ChnSettings[i].nPan = 128;
 		}
 	}

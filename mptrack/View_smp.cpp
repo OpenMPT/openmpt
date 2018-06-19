@@ -2243,7 +2243,6 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			CMixSampleDlg dlg(this);
 			if(dlg.DoModal() != IDOK)
 			{
-				CloseClipboard();
 				EndWaitCursor();
 				return;
 			}

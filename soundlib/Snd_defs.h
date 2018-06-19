@@ -127,8 +127,8 @@ enum ChannelFlags
 	CHN_PANNING         = 0x20,        // Sample with forced panning
 	CHN_STEREO          = 0x40,        // Stereo sample
 	CHN_REVERSE         = 0x80,        // Start sample playback from sample / loop end (Velvet Studio feature)
-	CHN_SURROUND        = 0x200,       // Use surround channel
-	CHN_ADLIB           = 0x100,       // Adlib / OPL instrument is active on this channel
+	CHN_SURROUND        = 0x100,       // Use surround channel
+	CHN_ADLIB           = 0x200,       // Adlib / OPL instrument is active on this channel
 
 	// Channel Flags
 	CHN_PINGPONGFLAG    = 0x80,        // When flag is on, sample is processed backwards - this is intentionally the same flag as CHN_REVERSE.

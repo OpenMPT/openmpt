@@ -126,15 +126,10 @@ END_MESSAGE_MAP()
 // CModDoc construction/destruction
 
 CModDoc::CModDoc()
-	: m_LogMode(LogModeInstantReporting)
-	, m_hWndFollow(nullptr)
-	, m_bHasValidPath(false)
-	, m_notifyType(Notification::Default)
-	, m_notifyItem(0)
+	: m_notifyType(Notification::Default)
 	, m_PatternUndo(*this)
 	, m_SampleUndo(*this)
 	, m_InstrumentUndo(*this)
-	, m_modifiedAutosave(false)
 {
 	// Set the creation date of this file (or the load time if we're loading an existing file)
 	time(&m_creationTime);
@@ -142,7 +137,6 @@ CModDoc::CModDoc()
 	// Fix: save pattern scrollbar position when switching to other tab
 	m_szOldPatternScrollbarsPos = CSize(-10,-10);
 	ReinitRecordState();
-	m_ShowSavedialog = false;
 
 	CMainFrame::UpdateAudioParameters(m_SndFile, true);
 }
@@ -212,10 +206,8 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	EndWaitCursor();
 
 	logcapturer.ShowLog(
-		mpt::cformat(_T("File: %1\n"))(filename) +
-		mpt::cformat(_T("Last saved with: %1, you are using OpenMPT %2\n"))(m_SndFile.m_madeWithTracker, Version::Current()) +
-		_T("\n")
-		);
+		mpt::cformat(_T("File: %1\nLast saved with: %2, you are using OpenMPT %3\n\n"))
+		(filename, m_SndFile.m_madeWithTracker, Version::Current()));
 
 	if ((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels())) return FALSE;
 

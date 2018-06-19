@@ -355,8 +355,7 @@ static bool ValidateHeader(const IMFFileHeader &fileHeader)
 {
 	if(std::memcmp(fileHeader.im10, "IM10", 4)
 		|| fileHeader.ordNum > 256
-		|| fileHeader.insNum >= MAX_INSTRUMENTS
-		)
+		|| fileHeader.insNum >= MAX_INSTRUMENTS)
 	{
 		return false;
 	}
@@ -388,8 +387,7 @@ static bool ValidateHeader(const IMFFileHeader &fileHeader)
 
 static uint64 GetHeaderMinimumAdditionalSize(const IMFFileHeader &fileHeader)
 {
-	MPT_UNREFERENCED_PARAMETER(fileHeader);
-	return 256;
+	return 256 + fileHeader.patNum * 4 + fileHeader.insNum * sizeof(IMFInstrument);
 }
 
 

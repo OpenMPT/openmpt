@@ -105,12 +105,12 @@ class CModDoc: public CDocument
 protected:
 	friend ScopedLogCapturer;
 	mutable std::vector<LogEntry> m_Log;
-	LogMode m_LogMode;
+	LogMode m_LogMode = LogModeInstantReporting;
 	CSoundFile m_SndFile;
 
-	HWND m_hWndFollow;
+	HWND m_hWndFollow = nullptr;
 	FlagSet<Notification::Type, uint16> m_notifyType;
-	Notification::Item m_notifyItem;
+	Notification::Item m_notifyItem = 0;
 	CSize m_szOldPatternScrollbarsPos;
 
 	CPatternUndo m_PatternUndo;
@@ -119,10 +119,10 @@ protected:
 	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
 	time_t m_creationTime;
 
-	long m_modifiedAutosave; // Modified since last autosave?
+	long m_modifiedAutosave = false; // Modified since last autosave?
 public:
-	bool m_ShowSavedialog : 1;
-	bool m_bHasValidPath : 1; //becomes true if document is loaded or saved.
+	bool m_ShowSavedialog = false;
+	bool m_bHasValidPath = false; //becomes true if document is loaded or saved.
 
 protected:
 	std::bitset<MAX_BASECHANNELS> m_bsMultiRecordMask;
