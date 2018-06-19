@@ -2122,7 +2122,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 #endif // NO_PLUGINS
 
 	// New Note Action
-	if((pChn->nRealVolume > 0 && pChn->nLength > 0) || applyNNAtoPlug)
+	if(pChn->IsSamplePlaying() || applyNNAtoPlug)
 	{
 		nnaChn = GetNNAChannel(nChn);
 		if(nnaChn != 0)
@@ -2138,16 +2138,12 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 #ifndef NO_PLUGINS
 			if(applyNNAtoPlug && pPlugin)
 			{
-				//Move note to the NNA channel (odd, but makes sense with DNA stuff).
-				//Actually a bad idea since it then become very hard to kill some notes.
-				//pPlugin->MoveNote(pChn->nNote, pChn->pModInstrument->nMidiChannel, nChn, n);
 				switch(pChn->nNNA)
 				{
 				case NNA_NOTEOFF:
 				case NNA_NOTECUT:
 				case NNA_NOTEFADE:
-					//switch off note played on this plugin, on this tracker channel and midi channel
-					//pPlugin->MidiCommand(pChn->pModInstrument->nMidiChannel, pChn->pModInstrument->nMidiProgram, pChn->nNote + NOTE_MAX_SPECIAL, 0, n);
+					// Switch off note played on this plugin, on this tracker channel and midi channel
 					SendMIDINote(nChn, NOTE_KEYOFF, 0);
 					pChn->nArpeggioLastNote = NOTE_NONE;
 					break;
