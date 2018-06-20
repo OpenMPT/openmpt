@@ -4,6 +4,9 @@
     <Filter Include="common">
       <UniqueIdentifier>{AEFEE3F6-9AA0-0ECD-835B-22216F9C951D}</UniqueIdentifier>
     </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{B1A29A7C-9DD9-9B0D-46C6-811032DC170F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="mptrack">
       <UniqueIdentifier>{778900D8-E368-7F73-EC80-0A4A58DFE5D4}</UniqueIdentifier>
     </Filter>
@@ -122,6 +125,9 @@
     </ClInclude>
     <ClInclude Include="..\..\common\versionNumber.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\JSON.h">
+      <Filter>misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\wine\Native.h">
       <Filter>mptrack\wine</Filter>

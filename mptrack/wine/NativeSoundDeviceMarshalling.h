@@ -5,6 +5,12 @@
 
 #include "../../sounddev/SoundDevice.h"
 
+#ifdef MPT_WITH_NLOHMANNJSON
+
+#include "../../misc/JSON.h"
+
+#else // !MPT_WITH_NLOHMANNJSON
+
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4706) // assignment within conditional expression
@@ -14,9 +20,40 @@
 #pragma warning(pop)
 #endif // MPT_COMPILER_MSVC
 
+#endif // MPT_WITH_NLOHMANNJSON
+
+
+
 OPENMPT_NAMESPACE_BEGIN
 
-namespace C {
+
+
+#ifdef MPT_WITH_NLOHMANNJSON
+
+inline void to_json(JSON::value &j, const SampleFormat &val)
+{
+	j = static_cast<int>(val);
+}
+inline void from_json(const JSON::value &j, SampleFormat &val)
+{
+	val = static_cast<int>(j);
+}
+
+namespace SoundDevice
+{
+
+	inline void to_json(JSON::value &j, const SoundDevice::ChannelMapping &val)
+	{
+		j = val.ToUString();
+	}
+	inline void from_json(const JSON::value &j, SoundDevice::ChannelMapping &val)
+	{
+		val = SoundDevice::ChannelMapping::FromString(j);
+	}
+
+} // namespace SoundDevice
+
+#else // !MPT_WITH_NLOHMANNJSON
 
 namespace JSON {
 
@@ -39,6 +76,7 @@ namespace JSON {
 	{
 		dst = decode<Tdst>(val);
 	}
+
 
 	template <> struct Marshal<bool>
 	{
@@ -172,19 +210,137 @@ namespace JSON {
 	{
 		picojson::value enc(std::pair<Ta, Tb> src) const
 		{
-			picojson::value result = picojson::value(picojson::object());
-			result.get<picojson::object>()["first"] = JSON::encode(src.first);
-			result.get<picojson::object>()["second"] = JSON::encode(src.second);
-			return result;
+			picojson::array result = picojson::array();
+			result.push_back(JSON::encode(src.first));
+			result.push_back(JSON::encode(src.second));
+			return picojson::value(result);
 		}
 		std::pair<Ta, Tb> dec(picojson::value val) const
 		{
 			std::pair<Ta, Tb> result;
-			JSON::decode(result.first, val.get<picojson::object>()["first"]);
-			JSON::decode(result.second, val.get<picojson::object>()["second"]);
+			JSON::decode(result.first, val.get<picojson::array>()[0]);
+			JSON::decode(result.second, val.get<picojson::array>()[1]);
 			return result;
 		}
 	};
+
+	template <> struct Marshal<SoundDevice::ChannelMapping>
+	{
+		picojson::value enc(SoundDevice::ChannelMapping src) const
+		{
+			mpt::ustring tmp = src.ToUString();
+			return JSON::encode(tmp);
+		}
+		SoundDevice::ChannelMapping dec(picojson::value val) const
+		{
+			mpt::ustring tmp;
+			JSON::decode(tmp, val);
+			return SoundDevice::ChannelMapping::FromString(tmp);
+		}
+	};
+
+	template <> struct Marshal<SampleFormat>
+	{
+		picojson::value enc(SampleFormat src) const
+		{
+			int tmp = src;
+			return JSON::encode(tmp);
+		}
+		SampleFormat dec(picojson::value val) const
+		{
+			int tmp = 0;
+			JSON::decode(tmp, val);
+			return tmp;
+		}
+	};
+
+} // namespace JSON
+
+#endif // MPT_WITH_NLOHMANNJSON
+
+
+
+#ifdef MPT_WITH_NLOHMANNJSON
+
+namespace SoundDevice
+{
+
+	MPT_JSON_INLINE(SoundDevice::Info, {
+		MPT_JSON_MAP(type);
+		MPT_JSON_MAP(internalID);
+		MPT_JSON_MAP(name);
+		MPT_JSON_MAP(apiName);
+		MPT_JSON_MAP(apiPath);
+		MPT_JSON_MAP(isDefault);
+		MPT_JSON_MAP(useNameAsIdentifier);
+		MPT_JSON_MAP(extraData);
+	})
+
+	MPT_JSON_INLINE(SoundDevice::AppInfo, {
+		MPT_JSON_MAP(Name);
+		MPT_JSON_MAP(BoostedThreadPriorityXP);
+		MPT_JSON_MAP(BoostedThreadMMCSSClassVista);
+		MPT_JSON_MAP(BoostedThreadRealtimePosix);
+		MPT_JSON_MAP(BoostedThreadNicenessPosix);
+		MPT_JSON_MAP(BoostedThreadRtprioPosix);
+	})
+
+	MPT_JSON_INLINE(SoundDevice::Settings, {
+		MPT_JSON_MAP(Latency);
+		MPT_JSON_MAP(UpdateInterval);
+		MPT_JSON_MAP(Samplerate);
+		MPT_JSON_MAP(Channels);
+		MPT_JSON_MAP(InputChannels);
+		MPT_JSON_MAP(sampleFormat);
+		MPT_JSON_MAP(ExclusiveMode);
+		MPT_JSON_MAP(BoostThreadPriority);
+		MPT_JSON_MAP(KeepDeviceRunning);
+		MPT_JSON_MAP(UseHardwareTiming);
+		MPT_JSON_MAP(DitherType);
+		MPT_JSON_MAP(InputSourceID);
+	})
+
+	MPT_JSON_INLINE(SoundDevice::Caps, {
+		MPT_JSON_MAP(Available);
+		MPT_JSON_MAP(CanUpdateInterval);
+		MPT_JSON_MAP(CanSampleFormat);
+		MPT_JSON_MAP(CanExclusiveMode);
+		MPT_JSON_MAP(CanBoostThreadPriority);
+		MPT_JSON_MAP(CanKeepDeviceRunning);
+		MPT_JSON_MAP(CanUseHardwareTiming);
+		MPT_JSON_MAP(CanChannelMapping);
+		MPT_JSON_MAP(CanInput);
+		MPT_JSON_MAP(HasNamedInputSources);
+		MPT_JSON_MAP(CanDriverPanel);
+		MPT_JSON_MAP(HasInternalDither);
+		MPT_JSON_MAP(ExclusiveModeDescription);
+		MPT_JSON_MAP(LatencyMin);
+		MPT_JSON_MAP(LatencyMax);
+		MPT_JSON_MAP(UpdateIntervalMin);
+		MPT_JSON_MAP(UpdateIntervalMax);
+		MPT_JSON_MAP(DefaultSettings);
+	})
+
+	MPT_JSON_INLINE(SoundDevice::DynamicCaps, {
+		MPT_JSON_MAP(currentSampleRate);
+		MPT_JSON_MAP(supportedSampleRates);
+		MPT_JSON_MAP(supportedExclusiveSampleRates);
+		MPT_JSON_MAP(channelNames);
+		MPT_JSON_MAP(inputSourceNames);
+	})
+
+	MPT_JSON_INLINE(SoundDevice::Statistics, {
+		MPT_JSON_MAP(InstantaneousLatency);
+		MPT_JSON_MAP(LastUpdateInterval);
+		MPT_JSON_MAP(text);
+	})
+
+} // namespace SoundDevice
+
+#else // !MPT_WITH_NLOHMANNJSON
+
+namespace JSON
+{
 
 	template <> struct Marshal<SoundDevice::Info>
 	{
@@ -239,36 +395,6 @@ namespace JSON {
 			JSON::decode(result.BoostedThreadNicenessPosix, val.get<picojson::object>()["BoostedThreadNicenessPosix"]);
 			JSON::decode(result.BoostedThreadRtprioPosix, val.get<picojson::object>()["BoostedThreadRtprioPosix"]);
 			return result;
-		}
-	};
-
-	template <> struct Marshal<SoundDevice::ChannelMapping>
-	{
-		picojson::value enc(SoundDevice::ChannelMapping src) const
-		{
-			mpt::ustring tmp = src.ToUString();
-			return JSON::encode(tmp);
-		}
-		SoundDevice::ChannelMapping dec(picojson::value val) const
-		{
-			mpt::ustring tmp;
-			JSON::decode(tmp, val);
-			return SoundDevice::ChannelMapping::FromString(tmp);
-		}
-	};
-
-	template <> struct Marshal<SampleFormat>
-	{
-		picojson::value enc(SampleFormat src) const
-		{
-			int tmp = src;
-			return JSON::encode(tmp);
-		}
-		SampleFormat dec(picojson::value val) const
-		{
-			int tmp = 0;
-			JSON::decode(tmp, val);
-			return tmp;
 		}
 	};
 
@@ -406,6 +532,127 @@ namespace JSON {
 
 } // namespace JSON
 
+#endif // MPT_WITH_NLOHMANNJSON
+
+
+
+#ifdef MPT_WITH_NLOHMANNJSON
+
+template <typename Tdst, typename Tsrc>
+struct json_cast_impl
+{
+	Tdst operator () (const Tsrc &src);
+};
+
+
+template <typename Tdst, typename Tsrc>
+Tdst json_cast(const Tsrc &src)
+{
+	return json_cast_impl<Tdst, Tsrc>()(src);
+}
+
+
+template <typename Tsrc>
+struct json_cast_impl<JSON::value, Tsrc>
+{
+	JSON::value operator () (const Tsrc &src)
+	{
+		JSON::value j;
+		JSON::enc(j, src);
+		return j;
+	}
+};
+
+template <typename Tdst>
+struct json_cast_impl<Tdst, JSON::value>
+{
+	Tdst operator () (const JSON::value &j)
+	{
+		Tdst val;
+		JSON::dec(val, j);
+		return val;
+	}
+};
+
+template <typename Tsrc>
+struct json_cast_impl<std::string, Tsrc>
+{
+	std::string operator () (const Tsrc &src)
+	{
+		return JSON::serialize(json_cast<JSON::value>(src));
+	}
+};
+
+template <typename Tdst>
+struct json_cast_impl<Tdst, std::string>
+{
+	Tdst operator () (const std::string &str)
+	{
+		return json_cast<Tdst>(JSON::deserialize(str));
+	}
+};
+
+#else // !MPT_WITH_NLOHMANNJSON
+
+template <typename Tdst, typename Tsrc>
+struct json_cast_impl
+{
+	Tdst operator () (Tsrc src);
+};
+
+
+template <typename Tdst, typename Tsrc>
+Tdst json_cast(Tsrc src)
+{
+	return json_cast_impl<Tdst, Tsrc>()(src);
+}
+
+
+template <typename Tsrc>
+struct json_cast_impl<picojson::value, Tsrc>
+{
+	picojson::value operator () (Tsrc src)
+	{
+		return JSON::encode<Tsrc>(src);
+	}
+};
+
+template <typename Tdst>
+struct json_cast_impl<Tdst, picojson::value>
+{
+	Tdst operator () (picojson::value val)
+	{
+		return JSON::decode<Tdst>(val);
+	}
+};
+
+template <typename Tsrc>
+struct json_cast_impl<std::string, Tsrc>
+{
+	std::string operator () (Tsrc src)
+	{
+		picojson::value result = json_cast<picojson::value>(src);
+		return result.serialize(true);
+	}
+};
+
+template <typename Tdst>
+struct json_cast_impl<Tdst, std::string>
+{
+	Tdst operator () (std::string str)
+	{
+		picojson::value val;
+		picojson::parse(val, str);
+		return json_cast<Tdst>(val);
+	}
+};
+
+
+#endif // MPT_WITH_NLOHMANNJSON
+
+
+
+namespace C {
 
 STATIC_ASSERT(sizeof(OpenMPT_SoundDevice_StreamPosition) % 8 == 0);
 inline OpenMPT_SoundDevice_StreamPosition encode(SoundDevice::StreamPosition src) {
@@ -509,61 +756,8 @@ inline FlagSet<SoundDevice::RequestFlags> decode(OpenMPT_SoundDevice_RequestFlag
 	return dst;
 }
 
-
 } // namespace C
 
 
-template <typename Tdst, typename Tsrc>
-struct json_cast_impl
-{
-	Tdst operator () (Tsrc src);
-};
-
-
-template <typename Tdst, typename Tsrc>
-Tdst json_cast(Tsrc src)
-{
-	return json_cast_impl<Tdst, Tsrc>()(src);
-}
-
-
-template <typename Tsrc>
-struct json_cast_impl<picojson::value, Tsrc>
-{
-	picojson::value operator () (Tsrc src)
-	{
-		return C::JSON::encode<Tsrc>(src);
-	}
-};
-
-template <typename Tdst>
-struct json_cast_impl<Tdst, picojson::value>
-{
-	Tdst operator () (picojson::value val)
-	{
-		return C::JSON::decode<Tdst>(val);
-	}
-};
-
-template <typename Tsrc>
-struct json_cast_impl<std::string, Tsrc>
-{
-	std::string operator () (Tsrc src)
-	{
-		picojson::value result = json_cast<picojson::value>(src);
-		return result.serialize(true);
-	}
-};
-
-template <typename Tdst>
-struct json_cast_impl<Tdst, std::string>
-{
-	Tdst operator () (std::string str)
-	{
-		picojson::value val;
-		picojson::parse(val, str);
-		return json_cast<Tdst>(val);
-	}
-};
 
 OPENMPT_NAMESPACE_END

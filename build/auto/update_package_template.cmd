@@ -13,6 +13,7 @@ rem copy /y ..\..\include\minimp3\LICENSE                     .\Licenses\License
 rem copy /y ..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
 copy /y ..\include\mpg123\COPYING                         .\Licenses\License.mpg123.txt || goto error
 copy /y ..\include\mpg123\AUTHORS                         .\Licenses\License.mpg123.Authors.txt || goto error
+copy /y ..\include\nlohmann-json\LICENSE.MIT              .\Licenses\License.nlohmann-json.txt || goto error
 copy /y ..\include\ogg\COPYING                            .\Licenses\License.ogg.txt || goto error
 copy /y ..\include\opus\COPYING                           .\Licenses\License.Opus.txt || goto error
 copy /y ..\include\opusenc\COPYING                        .\Licenses\License.Opusenc.txt || goto error

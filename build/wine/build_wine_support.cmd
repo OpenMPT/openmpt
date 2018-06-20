@@ -14,6 +14,13 @@ cd ..\..
 del /f /q "%OUTDIR%\openmpt-wine-support.zip"
 "C:\Program Files\7-Zip\7z.exe" a -tzip -mm=Deflate -mx=9 openmpt-wine-support.zip ^
  LICENSE ^
+ include\nlohmann-json\LICENSE.MIT ^
+ include\nlohmann-json\include\nlohmann\*.hpp ^
+ include\nlohmann-json\include\nlohmann\detail\*.hpp ^
+ include\nlohmann-json\include\nlohmann\detail\conversion\*.hpp ^
+ include\nlohmann-json\include\nlohmann\detail\input\*.hpp ^
+ include\nlohmann-json\include\nlohmann\detail\iterators\*.hpp ^
+ include\nlohmann-json\include\nlohmann\detail\output\*.hpp ^
  include\picojson\LICENSE ^
  include\picojson\picojson.h ^
  include\rtkit\rtkit.c ^
@@ -24,6 +31,7 @@ del /f /q "%OUTDIR%\openmpt-wine-support.zip"
  soundbase\*.cpp ^
  sounddev\*.h ^
  sounddev\*.cpp ^
+ misc\*.h ^
  mptrack\wine\*.h ^
  mptrack\wine\*.cpp ^
  mptrack\wine\*.c ^
