@@ -1986,6 +1986,9 @@ static MPT_NOINLINE void TestMisc2()
 	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1413064016).AsUTC()), TestDate2( 56, 46, 21, 11, 10, 2014 ));
 	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1413064100).AsUTC()), TestDate2( 20, 48, 21, 11, 10, 2014 ));
 
+
+#ifdef MODPLUG_TRACKER
+
 	// URI & HTTP
 
 	{
@@ -2120,6 +2123,8 @@ static MPT_NOINLINE void TestMisc2()
 		VERIFY_EQUAL(req.host, MPT_USTRING("host"));
 		VERIFY_EQUAL(req.path, MPT_USTRING("/"));
 	}
+
+#endif // MODPLUG_TRACKER
 
 }
 
