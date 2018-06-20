@@ -38,6 +38,7 @@
 #include "../mptrack/ModDocTemplate.h"
 #include "../mptrack/Mainfrm.h"
 #include "../mptrack/Settings.h"
+#include "../mptrack/HTTP.h"
 #endif // MODPLUG_TRACKER
 #include "../common/mptFileIO.h"
 #ifdef LIBOPENMPT_BUILD
@@ -1984,6 +1985,141 @@ static MPT_NOINLINE void TestMisc2()
 	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1096588800).AsUTC()), TestDate2(  0,  0,  0,  1, 10, 2004 ));
 	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1413064016).AsUTC()), TestDate2( 56, 46, 21, 11, 10, 2014 ));
 	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1413064100).AsUTC()), TestDate2( 20, 48, 21, 11, 10, 2014 ));
+
+	// URI & HTTP
+
+	{
+		URI uri = ParseURI(MPT_USTRING("scheme://username:password@host:port/path?query#fragment"));
+		VERIFY_EQUAL(uri.scheme, MPT_USTRING("scheme"));
+		VERIFY_EQUAL(uri.username, MPT_USTRING("username"));
+		VERIFY_EQUAL(uri.password, MPT_USTRING("password"));
+		VERIFY_EQUAL(uri.host, MPT_USTRING("host"));
+		VERIFY_EQUAL(uri.port, MPT_USTRING("port"));
+		VERIFY_EQUAL(uri.path, MPT_USTRING("/path"));
+		VERIFY_EQUAL(uri.query, MPT_USTRING("query"));
+		VERIFY_EQUAL(uri.fragment, MPT_USTRING("fragment"));
+	}
+	{
+		URI uri = ParseURI(MPT_USTRING("scheme://host/path"));
+		VERIFY_EQUAL(uri.scheme, MPT_USTRING("scheme"));
+		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.host, MPT_USTRING("host"));
+		VERIFY_EQUAL(uri.port, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.path, MPT_USTRING("/path"));
+		VERIFY_EQUAL(uri.query, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+	}
+	{
+		URI uri = ParseURI(MPT_USTRING("scheme://username:password@[2001:db8::1]:port/path?query#fragment"));
+		VERIFY_EQUAL(uri.scheme, MPT_USTRING("scheme"));
+		VERIFY_EQUAL(uri.username, MPT_USTRING("username"));
+		VERIFY_EQUAL(uri.password, MPT_USTRING("password"));
+		VERIFY_EQUAL(uri.host, MPT_USTRING("[2001:db8::1]"));
+		VERIFY_EQUAL(uri.port, MPT_USTRING("port"));
+		VERIFY_EQUAL(uri.path, MPT_USTRING("/path"));
+		VERIFY_EQUAL(uri.query, MPT_USTRING("query"));
+		VERIFY_EQUAL(uri.fragment, MPT_USTRING("fragment"));
+	}
+
+	{
+		URI uri = ParseURI(MPT_USTRING("https://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top"));
+		VERIFY_EQUAL(uri.scheme, MPT_USTRING("https"));
+		VERIFY_EQUAL(uri.username, MPT_USTRING("john.doe"));
+		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.host, MPT_USTRING("www.example.com"));
+		VERIFY_EQUAL(uri.port, MPT_USTRING("123"));
+		VERIFY_EQUAL(uri.path, MPT_USTRING("/forum/questions/"));
+		VERIFY_EQUAL(uri.query, MPT_USTRING("tag=networking&order=newest"));
+		VERIFY_EQUAL(uri.fragment, MPT_USTRING("top"));
+	}
+	{
+		URI uri = ParseURI(MPT_USTRING("ldap://[2001:db8::7]/c=GB?objectClass?one"));
+		VERIFY_EQUAL(uri.scheme, MPT_USTRING("ldap"));
+		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.host, MPT_USTRING("[2001:db8::7]"));
+		VERIFY_EQUAL(uri.port, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.path, MPT_USTRING("/c=GB"));
+		VERIFY_EQUAL(uri.query, MPT_USTRING("objectClass?one"));
+		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+	}
+	{
+		URI uri = ParseURI(MPT_USTRING("mailto:John.Doe@example.com"));
+		VERIFY_EQUAL(uri.scheme, MPT_USTRING("mailto"));
+		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.host, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.port, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.path, MPT_USTRING("John.Doe@example.com"));
+		VERIFY_EQUAL(uri.query, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+	}
+	{
+		URI uri = ParseURI(MPT_USTRING("news:comp.infosystems.www.servers.unix"));
+		VERIFY_EQUAL(uri.scheme, MPT_USTRING("news"));
+		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.host, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.port, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.path, MPT_USTRING("comp.infosystems.www.servers.unix"));
+		VERIFY_EQUAL(uri.query, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+	}
+	{
+		URI uri = ParseURI(MPT_USTRING("tel:+1-816-555-1212"));
+		VERIFY_EQUAL(uri.scheme, MPT_USTRING("tel"));
+		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.host, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.port, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.path, MPT_USTRING("+1-816-555-1212"));
+		VERIFY_EQUAL(uri.query, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+	}
+	{
+		URI uri = ParseURI(MPT_USTRING("telnet://192.0.2.16:80/"));
+		VERIFY_EQUAL(uri.scheme, MPT_USTRING("telnet"));
+		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.host, MPT_USTRING("192.0.2.16"));
+		VERIFY_EQUAL(uri.port, MPT_USTRING("80"));
+		VERIFY_EQUAL(uri.path, MPT_USTRING("/"));
+		VERIFY_EQUAL(uri.query, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+	}
+	{
+		URI uri = ParseURI(MPT_USTRING("urn:oasis:names:specification:docbook:dtd:xml:4.1.2"));
+		VERIFY_EQUAL(uri.scheme, MPT_USTRING("urn"));
+		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.host, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.port, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.path, MPT_USTRING("oasis:names:specification:docbook:dtd:xml:4.1.2"));
+		VERIFY_EQUAL(uri.query, MPT_USTRING(""));
+		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+	}
+
+	{
+		HTTP::Request req;
+		req.SetURI(ParseURI(MPT_USTRING("https://host/path?a1=a&a2=b")));
+		VERIFY_EQUAL(req.protocol, HTTP::Protocol::HTTPS);
+		VERIFY_EQUAL(req.host, MPT_USTRING("host"));
+		VERIFY_EQUAL(req.path, MPT_USTRING("/path"));
+		VERIFY_EQUAL(req.query.size(), 2u);
+		if(req.query.size() == 2)
+		{
+			VERIFY_EQUAL(req.query[0], std::make_pair(MPT_USTRING("a1"), MPT_USTRING("a")));
+			VERIFY_EQUAL(req.query[1], std::make_pair(MPT_USTRING("a2"), MPT_USTRING("b")));
+		}
+	}
+	{
+		HTTP::Request req;
+		req.SetURI(ParseURI(MPT_USTRING("https://host/")));
+		VERIFY_EQUAL(req.protocol, HTTP::Protocol::HTTPS);
+		VERIFY_EQUAL(req.host, MPT_USTRING("host"));
+		VERIFY_EQUAL(req.path, MPT_USTRING("/"));
+	}
 
 }
 

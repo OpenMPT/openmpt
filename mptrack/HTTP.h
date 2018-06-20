@@ -13,6 +13,31 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+struct URI
+{
+	mpt::ustring scheme;
+	mpt::ustring username;
+	mpt::ustring password;
+	mpt::ustring host;
+	mpt::ustring port;
+	mpt::ustring path;
+	mpt::ustring query;
+	mpt::ustring fragment;
+};
+
+class bad_uri
+	: public std::runtime_error
+{
+public:
+	bad_uri(const std::string &msg)
+		: std::runtime_error(msg)
+	{
+	}
+};
+
+URI ParseURI(mpt::ustring str);
+
+
 namespace HTTP
 {
 
@@ -147,6 +172,7 @@ struct Request
 	std::string dataMimeType;
 	mpt::const_byte_span data;
 
+	Request &SetURI(const URI &uri);
 	Request &InsecureTLSDowngradeWindowsXP();
 
 	Result operator()(InternetSession &internet) const;
