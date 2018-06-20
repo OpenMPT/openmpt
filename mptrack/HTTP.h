@@ -144,6 +144,7 @@ struct Request
 	AcceptMimeTypes acceptMimeTypes;
 	Flags flags = None;
 	Headers headers;
+	std::string dataMimeType;
 	mpt::const_byte_span data;
 
 	Request &InsecureTLSDowngradeWindowsXP();

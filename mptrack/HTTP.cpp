@@ -257,6 +257,10 @@ Result Request::operator()(InternetSession &internet) const
 	}
 	{
 		std::string headersString;
+		if(!dataMimeType.empty())
+		{
+			headersString += mpt::format("Content-type: %1\r\n")(dataMimeType);
+		}
 		if(!headers.empty())
 		{
 			for(const auto &header : headers)
