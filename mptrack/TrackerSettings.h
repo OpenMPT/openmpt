@@ -13,6 +13,7 @@
 
 #include "../common/Logging.h"
 #include "../common/version.h"
+#include "../common/mptUUID.h"
 #include "../soundbase/SampleFormat.h"
 #include "../soundlib/MixerSettings.h"
 #include "../soundlib/Resampler.h"
@@ -173,6 +174,10 @@ template<> inline EQPreset FromSettingValue(const SettingValue &val)
 	std::copy(valpacked.Freqs, valpacked.Freqs + MAX_EQ_BANDS, valresult.Freqs);
 	return valresult;
 }
+
+
+template<> inline SettingValue ToSettingValue(const mpt::UUID &val) { return SettingValue(val.ToUString()); }
+template<> inline mpt::UUID FromSettingValue(const SettingValue &val) { return mpt::UUID::FromString(val.as<mpt::ustring>()); }
 
 
 
@@ -583,7 +588,7 @@ public:
 	Setting<mpt::ustring> IniVersion;
 	const bool FirstRun;
 	const Version PreviousSettingsVersion;
-	Setting<mpt::ustring> gcsInstallGUID;
+	Setting<mpt::UUID> VersionInstallGUID;
 
 	// Display
 
@@ -812,7 +817,7 @@ public:
 
 	Setting<mpt::Date::Unix> UpdateLastUpdateCheck;
 	Setting<int32> UpdateUpdateCheckPeriod;
-	Setting<CString> UpdateUpdateURL;
+	Setting<mpt::ustring> UpdateUpdateURL;
 	Setting<bool> UpdateSendGUID;
 	Setting<bool> UpdateShowUpdateHint;
 	Setting<bool> UpdateSuggestDifferentBuildVariant;

@@ -183,7 +183,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, IniVersion(conf, MPT_USTRING("Version"), MPT_USTRING("Version"), mpt::ustring())
 	, FirstRun(IniVersion.Get() == mpt::ustring())
 	, PreviousSettingsVersion(GetPreviousSettingsVersion(IniVersion))
-	, gcsInstallGUID(conf, MPT_USTRING("Version"), MPT_USTRING("InstallGUID"), mpt::ustring())
+	, VersionInstallGUID(conf, MPT_USTRING("Version"), MPT_USTRING("InstallGUID"), mpt::UUID())
 	// Display
 	, m_ShowSplashScreen(conf, MPT_USTRING("Display"), MPT_USTRING("ShowSplashScreen"), true)
 	, gbMdiMaximize(conf, MPT_USTRING("Display"), MPT_USTRING("MDIMaximize"), true)
@@ -333,7 +333,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Update
 	, UpdateLastUpdateCheck(conf, MPT_USTRING("Update"), MPT_USTRING("LastUpdateCheck"), mpt::Date::Unix(time_t()))
 	, UpdateUpdateCheckPeriod(conf, MPT_USTRING("Update"), MPT_USTRING("UpdateCheckPeriod"), 7)
-	, UpdateUpdateURL(conf, MPT_USTRING("Update"), MPT_USTRING("UpdateURL"), CUpdateCheck::defaultUpdateURL)
+	, UpdateUpdateURL(conf, MPT_USTRING("Update"), MPT_USTRING("UpdateURL"), CUpdateCheck::GetDefaultUpdateURL())
 	, UpdateSendGUID(conf, MPT_USTRING("Update"), MPT_USTRING("SendGUID"), true)
 	, UpdateShowUpdateHint(conf, MPT_USTRING("Update"), MPT_USTRING("ShowUpdateHint"), true)
 	, UpdateSuggestDifferentBuildVariant(conf, MPT_USTRING("Update"), MPT_USTRING("SuggestDifferentBuildVariant"), true)
@@ -456,10 +456,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	const Version storedVersion = PreviousSettingsVersion;
 
 	// Version
-	if(gcsInstallGUID.Get().empty())
+	if(!VersionInstallGUID.Get().IsValid())
 	{
 		// No UUID found - generate one.
-		gcsInstallGUID = mpt::UUID::Generate().ToUString();
+		VersionInstallGUID = mpt::UUID::Generate();
 	}
 
 	// Plugins

@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "../common/mptUUID.h"
+
 #include <time.h>
 
 #include <atomic>
@@ -29,8 +31,8 @@ private:
 
 public:
 
-	static const TCHAR *const defaultUpdateURL;
-
+	static mpt::ustring GetDefaultUpdateURL();
+	
 	int32 GetNumCurrentRunningInstances();
 
 	static void DoAutoUpdateCheck() { StartUpdateCheckAsync(true); }
@@ -45,9 +47,9 @@ public:
 		UINT msgSuccess;
 		UINT msgFailure;
 		bool autoUpdate;
-		CString updateBaseURL;  // URL where the version check should be made.
-		bool sendGUID;
-		CString guidString;     // Send GUID to collect basic stats or "anonymous"
+		mpt::ustring updateBaseURL;  // URL where the version check should be made.
+		bool sendStatistics;
+		mpt::UUID statisticsUUID;
 		bool suggestDifferentBuilds;
 	};
 

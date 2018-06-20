@@ -81,7 +81,14 @@ BEGIN_MESSAGE_MAP(UpdateDialog, CDialog)
 	ON_NOTIFY(NM_CLICK, IDC_SYSLINK1, &UpdateDialog::OnClickURL)
 END_MESSAGE_MAP()
 
-const TCHAR *const CUpdateCheck::defaultUpdateURL = _T("https://update.openmpt.org/check/$VERSION/$GUID");
+
+
+
+mpt::ustring CUpdateCheck::GetDefaultUpdateURL()
+{
+	return MPT_USTRING("https://update.openmpt.org/check/$VERSION/$GUID");
+}
+
 
 std::atomic<int32> CUpdateCheck::s_InstanceCount(0);
 
@@ -137,8 +144,8 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 	settings.msgFailure = MPT_WM_APP_UPDATECHECK_FAILURE;
 	settings.autoUpdate = isAutoUpdate;
 	settings.updateBaseURL = TrackerSettings::Instance().UpdateUpdateURL;
-	settings.sendGUID = TrackerSettings::Instance().UpdateSendGUID;
-	settings.guidString = (TrackerSettings::Instance().UpdateSendGUID ? mpt::ToCString(TrackerSettings::Instance().gcsInstallGUID.Get()) : CString(_T("anonymous")));
+	settings.sendStatistics = TrackerSettings::Instance().UpdateSendGUID;
+	settings.statisticsUUID = TrackerSettings::Instance().VersionInstallGUID;
 	settings.suggestDifferentBuilds = TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant;
 	std::thread(CUpdateCheck::ThreadFunc(settings)).detach();
 }
@@ -161,50 +168,33 @@ void CUpdateCheck::ThreadFunc::operator () ()
 // Run update check (independent thread)
 CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &settings)
 {
+	
+	HTTP::InternetSession internet(Version::Current().GetOpenMPTVersionString());
 
-	// Prepare UA / URL strings...
-	const CString userAgent = CString(_T("OpenMPT ")) + mpt::cfmt::val(Version::Current());
-	CString updateURL = settings.updateBaseURL;
-	if(updateURL.IsEmpty()) updateURL = defaultUpdateURL;
-	CString versionStr = mpt::cfmt::val(Version::Current());
-	versionStr.Append(_T("-"));
-	versionStr.Append(mpt::ToCString(BuildVariants().GuessCurrentBuildName()));
-	// Windows Version statistics
-	versionStr.Append(_T("-"));
-	if(settings.sendGUID)
+	mpt::ustring updateURL = settings.updateBaseURL;
+	if(updateURL.empty())
 	{
-		versionStr.Append(mpt::ToCString(mpt::Windows::Version::Current().GetNameShort()));
-	} else
-	{
-		versionStr.Append(_T("unknown"));
+		updateURL = GetDefaultUpdateURL();
 	}
-	updateURL.Replace(_T("$VERSION"), versionStr);
-	updateURL.Replace(_T("$GUID"), settings.guidString);
+	if(updateURL.find(MPT_USTRING("://")) == mpt::ustring::npos)
+	{
+		updateURL = MPT_USTRING("https://") + updateURL;
+	}
 
-	bool ssl = true;
-	const int protoEnd = updateURL.Find(_T("://"));
-	if(protoEnd != -1)
-	{
-		if(updateURL.Left(protoEnd) == "http") ssl = false;
-		updateURL = updateURL.Mid(protoEnd + 3);
-	}
-	const int pathStart = updateURL.Find(_T("/"));
-	CString updatePath = _T("/");
-	if(pathStart != -1)
-	{
-		updatePath = updateURL.Mid(pathStart);
-		updateURL = updateURL.Left(pathStart);
-	}
+	// Build update URL
+	updateURL = mpt::String::Replace(updateURL, MPT_USTRING("$VERSION"), mpt::uformat(MPT_USTRING("%1-%2-%3"))
+		( Version::Current()
+		, BuildVariants().GuessCurrentBuildName()
+		, settings.sendStatistics ? mpt::Windows::Version::Current().GetNameShort() : MPT_USTRING("unknown")
+		));
+	updateURL = mpt::String::Replace(updateURL, MPT_USTRING("$GUID"), settings.sendStatistics ? mpt::ufmt::val(settings.statisticsUUID) : MPT_USTRING("anonymous"));
 
 	// Establish a connection.
-	HTTP::InternetSession internet(mpt::ToUnicode(userAgent));
-
 	HTTP::Request request;
-	request.protocol = ssl ? HTTP::Protocol::HTTPS : HTTP::Protocol::HTTP;
-	request.host = mpt::ToUnicode(updateURL);
+	request.SetURI(ParseURI(updateURL));
 	request.method = HTTP::Method::Get;
-	request.path = mpt::ToUnicode(updatePath);
 	request.flags = HTTP::NoCache;
+
 	HTTP::Result resultHTTP = internet(request.InsecureTLSDowngradeWindowsXP());
 
 	// Retrieve HTTP status code.
@@ -265,6 +255,9 @@ void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings)
 		try
 		{
 			result = SearchUpdate(settings);
+		} catch(const bad_uri &e)
+		{
+			throw CUpdateCheck::Error(mpt::cformat(_T("Error parsing update URL: %1"))(mpt::get_exception_text<CString>(e)));
 		} catch(const HTTP::exception &e)
 		{
 			throw CUpdateCheck::Error(CString(_T("HTTP error: ")) + mpt::ToCString(e.GetMessage()));
@@ -394,7 +387,7 @@ BOOL CUpdateSetupDlg::OnInitDialog()
 	}
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO4, radioID);
 	CheckDlgButton(IDC_CHECK1, TrackerSettings::Instance().UpdateSendGUID ? BST_CHECKED : BST_UNCHECKED);
-	SetDlgItemText(IDC_EDIT1, TrackerSettings::Instance().UpdateUpdateURL.Get());
+	SetDlgItemText(IDC_EDIT1, mpt::ToCString(TrackerSettings::Instance().UpdateUpdateURL.Get()));
 
 	m_SettingChangedNotifyGuard.Register(this);
 	SettingChanged(TrackerSettings::Instance().UpdateLastUpdateCheck.GetPath());
@@ -439,7 +432,7 @@ void CUpdateSetupDlg::OnOK()
 	GetDlgItemText(IDC_EDIT1, updateURL);
 
 	TrackerSettings::Instance().UpdateUpdateCheckPeriod = updateCheckPeriod;
-	TrackerSettings::Instance().UpdateUpdateURL = updateURL;
+	TrackerSettings::Instance().UpdateUpdateURL = mpt::ToUnicode(updateURL);
 	TrackerSettings::Instance().UpdateSendGUID = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
 	
 	CPropertyPage::OnOK();
@@ -461,7 +454,7 @@ void CUpdateSetupDlg::OnCheckNow()
 
 void CUpdateSetupDlg::OnResetURL()
 {
-	SetDlgItemText(IDC_EDIT1, CUpdateCheck::defaultUpdateURL);
+	SetDlgItemText(IDC_EDIT1, mpt::ToCString(CUpdateCheck::GetDefaultUpdateURL()));
 }
 
 
