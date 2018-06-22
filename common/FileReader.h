@@ -496,11 +496,12 @@ protected:
 	template <typename T>
 	bool Read(T &target)
 	{
-		if(sizeof(T) != DataContainer().Read(reinterpret_cast<mpt::byte*>(&target), streamPos, sizeof(T)))
+		mpt::byte_span dst = mpt::as_raw_memory(target);
+		if(dst.size() != DataContainer().Read(streamPos, dst))
 		{
 			return false;
 		}
-		streamPos += sizeof(T);
+		streamPos += dst.size();
 		return true;
 	}
 
@@ -655,6 +656,20 @@ public:
 		return ReadIntBE<int16>();
 	}
 
+	// Read a single 8bit character.
+	// If successful, the file cursor is advanced by the size of the integer.
+	char ReadChar()
+	{
+		char target;
+		if(Read(target))
+		{
+			return target;
+		} else
+		{
+			return 0;
+		}
+	}
+
 	// Read unsigned 8-Bit integer.
 	// If successful, the file cursor is advanced by the size of the integer.
 	uint8 ReadUint8()
@@ -765,8 +780,8 @@ public:
 		{
 			copyBytes = BytesLeft();
 		}
-		DataContainer().Read(reinterpret_cast<mpt::byte *>(&target), streamPos, copyBytes);
-		std::memset(reinterpret_cast<mpt::byte *>(&target) + copyBytes, 0, sizeof(target) - copyBytes);
+		DataContainer().Read(mpt::as_raw_memory(target).data(), streamPos, copyBytes);
+		std::memset(mpt::as_raw_memory(target).data() + copyBytes, 0, sizeof(target) - copyBytes);
 		Skip(partialSize);
 		return true;
 	}
@@ -841,7 +856,7 @@ public:
 		{
 			char buffer[64];
 			off_t avail = 0;
-			while((avail = std::min(DataContainer().Read(reinterpret_cast<mpt::byte*>(buffer), streamPos, sizeof(buffer)), maxLength - dest.length())) != 0)
+			while((avail = std::min(DataContainer().Read(streamPos, mpt::byte_cast<mpt::byte_span>(mpt::as_span(buffer))), maxLength - dest.length())) != 0)
 			{
 				auto end = std::find(buffer, buffer + avail, '\0');
 				dest.insert(dest.end(), buffer, end);
@@ -871,9 +886,10 @@ public:
 			return false;
 		try
 		{
-			char buffer[64], c = '\0';
+			char buffer[64];
+			char c = '\0';
 			off_t avail = 0;
-			while((avail = std::min(DataContainer().Read(reinterpret_cast<mpt::byte*>(buffer), streamPos, sizeof(buffer)), maxLength - dest.length())) != 0)
+			while((avail = std::min(DataContainer().Read(streamPos, mpt::byte_cast<mpt::byte_span>(mpt::as_span(buffer))), maxLength - dest.length())) != 0)
 			{
 				auto end = std::find_if(buffer, buffer + avail, IsLineEnding);
 				dest.insert(dest.end(), buffer, end);

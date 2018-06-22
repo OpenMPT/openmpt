@@ -497,6 +497,23 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, uint16 si
 	} break;
 
 // --------------------------------------------------------------------------------------------
+// Convenient macro to help GET_HEADER declaration for character array members ONLY
+// --------------------------------------------------------------------------------------------
+#define GET_MPTHEADER_chararray_member(name,type,code) \
+	case code: \
+	{\
+		if( fsize <= sizeof( type ) * CountOf(input-> name) ) \
+		{ \
+			FileReader arrayChunk = file.ReadChunk(fsize); \
+			for(std::size_t i = 0; i < CountOf(input-> name); ++i) \
+			{ \
+				input-> name [i] = arrayChunk.ReadChar(); \
+			} \
+			result = true; \
+		} \
+	} break;
+
+// --------------------------------------------------------------------------------------------
 // Convenient macro to help GET_HEADER declaration for envelope tick/value members
 // --------------------------------------------------------------------------------------------
 #define GET_MPTHEADER_envelope_member(envType,envField,type,code) \
@@ -558,8 +575,8 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 	GET_MPTHEADER_envelope_member(ENV_PITCH		, value	, uint8			, MagicBE("PiE[")	)
 	GET_MPTHEADER_array_member(	NoteMap					, uint8			, MagicBE("NM[.")	)
 	GET_MPTHEADER_array_member(	Keyboard				, uint16		, MagicBE("K[..")	)
-	GET_MPTHEADER_array_member(	name					, char			, MagicBE("n[..")	)
-	GET_MPTHEADER_array_member(	filename				, char			, MagicBE("fn[.")	)
+	GET_MPTHEADER_chararray_member(	name					, char			, MagicBE("n[..")	)
+	GET_MPTHEADER_chararray_member(	filename				, char			, MagicBE("fn[.")	)
 	GET_MPTHEADER_sized_member(	nMixPlug				, uint8			, MagicBE("MiP.")	)
 	GET_MPTHEADER_sized_member(	nVolRampUp				, uint16		, MagicBE("VR..")	)
 	GET_MPTHEADER_sized_member(	nResampling				, uint32		, MagicBE("R...")	)

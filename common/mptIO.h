@@ -680,6 +680,11 @@ public:
 	virtual off_t GetLength() const = 0;
 	virtual off_t Read(mpt::byte *dst, off_t pos, off_t count) const = 0;
 
+	virtual off_t Read(off_t pos, mpt::byte_span dst) const
+	{
+		return Read(dst.data(), pos, dst.size());
+	}
+
 	virtual bool CanRead(off_t pos, off_t length) const
 	{
 		off_t dataLength = GetLength();
@@ -1025,6 +1030,11 @@ public:
 		off_t avail = std::min<off_t>(streamLength - pos, count);
 		std::copy(streamData + pos, streamData + pos + avail, dst);
 		return avail;
+	}
+
+	off_t Read(off_t pos, mpt::byte_span dst) const MPT_FILEDATACONTAINERMEMORY_OVERRIDE
+	{
+		return Read(dst.data(), pos, dst.size());
 	}
 
 	bool CanRead(off_t pos, off_t length) const MPT_FILEDATACONTAINERMEMORY_OVERRIDE
