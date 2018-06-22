@@ -37,6 +37,7 @@ WizardImageFile=install-big.bmp
 WizardSmallImageFile=install-small.bmp
 CreateUninstallRegKey=not IsTaskSelected('portable')
 Uninstallable=not IsTaskSelected('portable')
+UninstallDisplayIcon={app}\mptrack.exe
 DisableWelcomePage=yes
 
 [Tasks]
