@@ -229,20 +229,20 @@ std::unique_ptr<T> make_unique(Args&&... args)
 
 #if defined(_MFC_VER)
 
-#define MPT_EXCEPTION_THROW_OUT_OF_MEMORY()   MPT_DO { AfxThrowMemoryException(); } MPT_WHILE_0
-#define MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)  catch ( CMemoryException * e )
-#define MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY() MPT_DO { throw; } MPT_WHILE_0
-#define MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e) MPT_DO { if(e) { e->Delete(); e = nullptr; } } MPT_WHILE_0
+#define MPT_EXCEPTION_THROW_OUT_OF_MEMORY()    MPT_DO { AfxThrowMemoryException(); } MPT_WHILE_0
+#define MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)   catch ( CMemoryException * e )
+#define MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e) MPT_DO { MPT_UNUSED_VARIABLE(e); throw; } MPT_WHILE_0
+#define MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e)  MPT_DO { if(e) { e->Delete(); e = nullptr; } } MPT_WHILE_0
 
 #else // !_MFC_VER
 
 OPENMPT_NAMESPACE_END
 #include <new>
 OPENMPT_NAMESPACE_BEGIN
-#define MPT_EXCEPTION_THROW_OUT_OF_MEMORY()   MPT_DO { throw std::bad_alloc(); } MPT_WHILE_0
-#define MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)  catch ( const std::bad_alloc & e )
-#define MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY() MPT_DO { throw; } MPT_WHILE_0
-#define MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e) MPT_DO { MPT_UNUSED_VARIABLE(e); } MPT_WHILE_0
+#define MPT_EXCEPTION_THROW_OUT_OF_MEMORY()    MPT_DO { throw std::bad_alloc(); } MPT_WHILE_0
+#define MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)   catch ( const std::bad_alloc & e )
+#define MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e) MPT_DO { MPT_UNUSED_VARIABLE(e); throw; } MPT_WHILE_0
+#define MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e)  MPT_DO { MPT_UNUSED_VARIABLE(e); } MPT_WHILE_0
 
 #endif // _MFC_VER
 

@@ -75,8 +75,7 @@ mpt::winstring CLSIDToString(CLSID clsid)
 	{
 		::CoTaskMemFree(tmp);
 		tmp = nullptr;
-		MPT_UNUSED_VARIABLE(e);
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY();
+		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
 	}
 	::CoTaskMemFree(tmp);
 	tmp = nullptr;
@@ -216,8 +215,7 @@ mpt::winstring IIDToString(IID iid)
 	{
 		::CoTaskMemFree(tmp);
 		tmp = nullptr;
-		MPT_UNUSED_VARIABLE(e);
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY();
+		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
 	}
 	return mpt::ToWin(str);
 }
