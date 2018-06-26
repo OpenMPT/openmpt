@@ -61,6 +61,7 @@ class ErrorHandler
     void SysErrMsg();
     int GetSystemErrorCode();
     void SetSystemErrorCode(int Code);
+    void SetDisableShutdown() {DisableShutdown=true;}
     bool IsShutdownEnabled() {return !DisableShutdown;}
 
     bool UserBreak; // Ctrl+Break is pressed.

@@ -216,7 +216,8 @@ bool Archive::IsArchive(bool EnableBroken)
 
   if (BrokenHeader || !StartFound) // Main archive header is corrupt or missing.
   {
-    uiMsg(UIERROR_MHEADERBROKEN,FileName);
+    if (!FailedHeaderDecryption) // If not reported a wrong password already.
+      uiMsg(UIERROR_MHEADERBROKEN,FileName);
     if (!EnableBroken)
       return false;
   }

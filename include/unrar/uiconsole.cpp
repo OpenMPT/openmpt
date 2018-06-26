@@ -151,6 +151,10 @@ void uiMsgStore::Msg()
     case UIERROR_HLINKCREATE:
       Log(NULL,St(MErrCreateLnkH),Str[0]);
       break;
+    case UIERROR_NOLINKTARGET:
+      Log(NULL,St(MErrLnkTarget));
+      mprintf(L"     "); // For progress percent.
+      break;
     case UIERROR_NEEDADMIN:
       Log(NULL,St(MNeedAdmin));
       break;

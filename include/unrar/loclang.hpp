@@ -375,6 +375,7 @@
 #define   MCopyingData       L"\nCopying data"
 #define   MErrCreateLnkS     L"\nCannot create symbolic link %s"
 #define   MErrCreateLnkH     L"\nCannot create hard link %s"
+#define   MErrLnkTarget      L"\nYou need to unpack the link target first"
 #define   MNeedAdmin         L"\nYou may need to run RAR as administrator"
 #define   MDictOutMem        L"\nNot enough memory for %d MB compression dictionary, changed to %d MB."
 #define   MUseSmalllerDict   L"\nPlease use a smaller compression dictionary."
