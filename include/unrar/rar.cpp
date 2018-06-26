@@ -75,13 +75,6 @@ int main(int argc, char *argv[])
     ErrHandler.SetSilent(Cmd->AllYes || Cmd->MsgStream==MSG_NULL);
 
     Cmd->OutTitle();
-/*
-    byte Buf[10000];
-    File Src;
-    Src.TOpen(L"123.rar");
-    int Size=Src.Read(Buf,sizeof(Buf));
-    Cmd->SetArcInMem(Buf,Size);
-*/
     Cmd->ProcessCommand();
     delete Cmd;
   }

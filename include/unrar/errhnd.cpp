@@ -270,6 +270,7 @@ void _stdfunction ProcessSignal(int SigType)
 #endif
 
   ErrHandler.UserBreak=true;
+  ErrHandler.SetDisableShutdown();
   mprintf(St(MBreak));
 
 #ifdef _WIN_ALL
@@ -293,7 +294,7 @@ void _stdfunction ProcessSignal(int SigType)
 #endif
 
 #if defined(_WIN_ALL) && !defined(_MSC_VER)
-  // never reached, just to avoid a compiler warning
+  // Never reached, just to avoid a compiler warning
   return TRUE;
 #endif
 }

@@ -59,7 +59,11 @@ void CmdExtract::DoExtract()
   {
     if (!PasswordCancelled)
       uiMsg(UIERROR_NOFILESTOEXTRACT,ArcName);
-    ErrHandler.SetErrorCode(RARX_NOFILES);
+
+    // Other error codes may explain a reason of "no files extracted" clearer,
+    // so set it only if no other errors found (wrong mask set by user).
+    if (ErrHandler.GetErrorCode()==RARX_SUCCESS)
+      ErrHandler.SetErrorCode(RARX_NOFILES);
   }
   else
     if (!Cmd->DisableDone)

@@ -563,6 +563,11 @@ size_t Archive::ReadHeader50()
       return 0;
     }
 
+    // We repeat the password request only for manually entered passwords
+    // and not for -p<pwd>. Wrong password can be intentionally provided
+    // in -p<pwd> to not stop batch processing for encrypted archives.
+    bool GlobalPassword=Cmd->Password.IsSet();
+
     while (true) // Repeat the password prompt for wrong passwords.
     {
       RequestArcPassword();
@@ -572,11 +577,23 @@ size_t Archive::ReadHeader50()
       // Verify password validity.
       if (CryptHead.UsePswCheck && memcmp(PswCheck,CryptHead.PswCheck,SIZE_PSWCHECK)!=0)
       {
-        // This message is used by Android GUI and Windows GUI and SFX to
-        // reset cached passwords. Update appropriate code if changed.
-        uiMsg(UIWAIT_BADPSW,FileName);
+        if (GlobalPassword) // For -p<pwd> or Ctrl+P.
+        {
+          // This message is used by Android GUI to reset cached passwords.
+          // Update appropriate code if changed.
+          uiMsg(UIERROR_BADPSW,FileName);
+          FailedHeaderDecryption=true;
+          ErrHandler.SetErrorCode(RARX_BADPWD);
+          return 0;
+        }
+        else // For passwords entered manually.
+        {
+          // This message is used by Android GUI and Windows GUI and SFX to
+          // reset cached passwords. Update appropriate code if changed.
+          uiMsg(UIWAIT_BADPSW,FileName);
+          Cmd->Password.Clean();
+        }
 
-        Cmd->Password.Clean();
 #ifdef RARDLL
         // Avoid new requests for unrar.dll to prevent the infinite loop
         // if app always returns the same password.
