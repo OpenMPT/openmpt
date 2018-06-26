@@ -1,3 +1,13 @@
+/*
+ * AboutDialog.cpp
+ * ---------------
+ * Purpose: About dialog with credits, system information and a fancy demo effect.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
 #include "stdafx.h"
 #include "resource.h"
 #include "AboutDialog.h"
@@ -25,37 +35,36 @@ END_MESSAGE_MAP()
 
 CRippleBitmap::CRippleBitmap()
 {
-	bitmapSrc = LoadPixelImage(GetResource(MAKEINTRESOURCE(IDB_MPTRACK), _T("PNG")));
-	bitmapTarget = mpt::make_unique<RawGDIDIB>(bitmapSrc->Width(), bitmapSrc->Height());
-	offset1.assign(bitmapSrc->Pixels().size(), 0);
-	offset2.assign(bitmapSrc->Pixels().size(), 0);
-	frontBuf = offset2.data();
-	backBuf = offset1.data();
+	m_bitmapSrc = LoadPixelImage(GetResource(MAKEINTRESOURCE(IDB_MPTRACK), _T("PNG")));
+	m_bitmapTarget = mpt::make_unique<RawGDIDIB>(m_bitmapSrc->Width(), m_bitmapSrc->Height());
+	m_offset1.assign(m_bitmapSrc->Pixels().size(), 0);
+	m_offset2.assign(m_bitmapSrc->Pixels().size(), 0);
+	m_frontBuf = m_offset2.data();
+	m_backBuf = m_offset1.data();
 
 	// Pre-fill first and last row of output bitmap, since those won't be touched.
-	const RawGDIDIB::Pixel *in1 = bitmapSrc->Pixels().data(), *in2 = bitmapSrc->Pixels().data() + (bitmapSrc->Height() - 1) * bitmapSrc->Width();
-	RawGDIDIB::Pixel *out1 = bitmapTarget->Pixels().data(), *out2 = bitmapTarget->Pixels().data() + (bitmapSrc->Height() - 1) * bitmapSrc->Width();
-	for(uint32 i = 0; i < bitmapSrc->Width(); i++)
+	const RawGDIDIB::Pixel *in1 = m_bitmapSrc->Pixels().data(), *in2 = m_bitmapSrc->Pixels().data() + (m_bitmapSrc->Height() - 1) * m_bitmapSrc->Width();
+	RawGDIDIB::Pixel *out1 = m_bitmapTarget->Pixels().data(), *out2 = m_bitmapTarget->Pixels().data() + (m_bitmapSrc->Height() - 1) * m_bitmapSrc->Width();
+	for(uint32 i = 0; i < m_bitmapSrc->Width(); i++)
 	{
 		*(out1++) = *(in1++);
 		*(out2++) = *(in2++);
 	}
 
-	MemsetZero(bi);
-	bi.biSize = sizeof(BITMAPINFOHEADER);
-	bi.biWidth = bitmapSrc->Width();
-	bi.biHeight = -(int32)bitmapSrc->Height();
-	bi.biPlanes = 1;
-	bi.biBitCount = 32;
-	bi.biCompression = BI_RGB;
-	bi.biSizeImage = bitmapSrc->Width() * bitmapSrc->Height() * 4;
-
+	MemsetZero(m_bi);
+	m_bi.biSize = sizeof(BITMAPINFOHEADER);
+	m_bi.biWidth = m_bitmapSrc->Width();
+	m_bi.biHeight = -(int32)m_bitmapSrc->Height();
+	m_bi.biPlanes = 1;
+	m_bi.biBitCount = 32;
+	m_bi.biCompression = BI_RGB;
+	m_bi.biSizeImage = m_bitmapSrc->Width() * m_bitmapSrc->Height() * 4;
 }
 
 
 CRippleBitmap::~CRippleBitmap()
 {
-	if(!showMouse)
+	if(!m_showMouse)
 	{
 		ShowCursor(TRUE);
 	}
@@ -67,26 +76,28 @@ void CRippleBitmap::OnMouseMove(UINT nFlags, CPoint point)
 
 	// Rate limit in order to avoid too may ripples.
 	DWORD now = timeGetTime();
-	if(now - lastRipple < UPDATE_INTERVAL)
+	if(now - m_lastRipple < UPDATE_INTERVAL)
 		return;
-	lastRipple = now;
+	m_lastRipple = now;
 
 	// Initiate ripples at cursor location
-	Limit(point.x, 1, int(bitmapSrc->Width()) - 2);
-	Limit(point.y, 2, int(bitmapSrc->Height()) - 3);
-	int32 *p = backBuf + point.x + point.y * bitmapSrc->Width();
+	point.x = Util::ScalePixelsInv(point.x, m_hWnd);
+	point.y = Util::ScalePixelsInv(point.y, m_hWnd);
+	Limit(point.x, 1, int(m_bitmapSrc->Width()) - 2);
+	Limit(point.y, 2, int(m_bitmapSrc->Height()) - 3);
+	int32 *p = m_backBuf + point.x + point.y * m_bitmapSrc->Width();
 	p[0] += (nFlags & MK_LBUTTON) ? 50 : 150;
 	p[0] += (nFlags & MK_MBUTTON) ? 150 : 0;
 
-	int32 w = bitmapSrc->Width();
+	int32 w = m_bitmapSrc->Width();
 	// Make the initial point of this ripple a bit "fatter".
-	p[-1] += p[0] / 2;     p[1] += p[0] / 2;
-	p[-w] += p[0] / 2;     p[w] += p[0] / 2;
+	p[-1]     += p[0] / 2; p[1]      += p[0] / 2;
+	p[-w]     += p[0] / 2; p[w]      += p[0] / 2;
 	p[-w - 1] += p[0] / 4; p[-w + 1] += p[0] / 4;
-	p[w - 1] += p[0] / 4;  p[w + 1] += p[0] / 4;
+	p[w - 1]  += p[0] / 4; p[w + 1]  += p[0] / 4;
 
-	damp = !(nFlags & MK_RBUTTON);
-	activity = true;
+	m_damp = !(nFlags & MK_RBUTTON);
+	m_activity = true;
 
 	// Wine will only ever generate MouseLeave message when the message
 	// queue is completely empty and the hover timeout has expired.
@@ -105,20 +116,20 @@ void CRippleBitmap::OnMouseMove(UINT nFlags, CPoint point)
 	me.dwFlags = TME_LEAVE | TME_HOVER;
 	me.dwHoverTime = 1500;
 
-	if(TrackMouseEvent(&me) && showMouse)
+	if(TrackMouseEvent(&me) && m_showMouse)
 	{
 		ShowCursor(FALSE);
-		showMouse = false;
+		m_showMouse = false;
 	}
 }
 
 
 void CRippleBitmap::OnMouseLeave()
 {
-	if(!showMouse)
+	if(!m_showMouse)
 	{
 		ShowCursor(TRUE);
-		showMouse = true;
+		m_showMouse = true;
 	}
 }
 
@@ -131,43 +142,43 @@ void CRippleBitmap::OnPaint()
 	GetClientRect(rect);
 	StretchDIBits(dc.m_hDC,
 		0, 0, rect.Width(), rect.Height(),
-		0, 0, bitmapTarget->Width(), bitmapTarget->Height(),
-		bitmapTarget->Pixels().data(),
-		reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS, SRCCOPY);
+		0, 0, m_bitmapTarget->Width(), m_bitmapTarget->Height(),
+		m_bitmapTarget->Pixels().data(),
+		reinterpret_cast<BITMAPINFO *>(&m_bi), DIB_RGB_COLORS, SRCCOPY);
 }
 
 
 bool CRippleBitmap::Animate()
 {
 	// Were there any pixels being moved in the last frame?
-	if(!activity)
+	if(!m_activity)
 		return false;
 
 	DWORD now = timeGetTime();
-	if(now - lastFrame < UPDATE_INTERVAL)
+	if(now - m_lastFrame < UPDATE_INTERVAL)
 		return true;
-	lastFrame = now;
-	activity = false;
+	m_lastFrame = now;
+	m_activity = false;
 
-	frontBuf = (frame ? offset2 : offset1).data();
-	backBuf = (frame ? offset1 : offset2).data();
+	m_frontBuf = (m_frame ? m_offset2 : m_offset1).data();
+	m_backBuf = (m_frame ? m_offset1 : m_offset2).data();
 
 	// Spread the ripples...
-	const int32 w = bitmapSrc->Width(), h = bitmapSrc->Height();
+	const int32 w = m_bitmapSrc->Width(), h = m_bitmapSrc->Height();
 	const int32 numPixels = w * (h - 2);
-	const int32 *back = backBuf + w;
-	int32 *front = frontBuf + w;
+	const int32 *back = m_backBuf + w;
+	int32 *front = m_frontBuf + w;
 	for(int32 i = numPixels; i != 0; i--, back++, front++)
 	{
 		(*front) = (back[-1] + back[1] + back[w] + back[-w]) / 2 - (*front);
-		if(damp) (*front) -= (*front) >> 5;
+		if(m_damp) (*front) -= (*front) >> 5;
 	}
 
 	// ...and compute the final picture.
-	const int32 *offset = frontBuf + w;
-	const RawGDIDIB::Pixel *pixelIn = bitmapSrc->Pixels().data() + w;
-	RawGDIDIB::Pixel *pixelOut = bitmapTarget->Pixels().data() + w;
-	RawGDIDIB::Pixel *limitMin = bitmapSrc->Pixels().data(), *limitMax = bitmapSrc->Pixels().data() + bitmapSrc->Pixels().size() - 1;
+	const int32 *offset = m_frontBuf + w;
+	const RawGDIDIB::Pixel *pixelIn = m_bitmapSrc->Pixels().data() + w;
+	RawGDIDIB::Pixel *pixelOut = m_bitmapTarget->Pixels().data() + w;
+	RawGDIDIB::Pixel *limitMin = m_bitmapSrc->Pixels().data(), *limitMax = m_bitmapSrc->Pixels().data() + m_bitmapSrc->Pixels().size() - 1;
 	for(int32 i = numPixels; i != 0; i--, pixelIn++, pixelOut++, offset++)
 	{
 		// Compute pixel displacement
@@ -193,14 +204,14 @@ bool CRippleBitmap::Animate()
 			pixelOut[-w].r = (pixelOut->r + pixelOut[-w].r) / 2u;
 			pixelOut[-w].g = (pixelOut->g + pixelOut[-w].g) / 2u;
 			pixelOut[-w].b = (pixelOut->b + pixelOut[-w].b) / 2u;
-			activity = true;	// Also use this to update activity status...
+			m_activity = true;	// Also use this to update activity status...
 		} else
 		{
 			*pixelOut = *pixelIn;
 		}
 	}
 
-	frame = !frame;
+	m_frame = !m_frame;
 
 	InvalidateRect(NULL, FALSE);
 
@@ -239,13 +250,9 @@ BOOL CAboutDlg::OnInitDialog()
 
 	mpt::ustring app;
 	app += mpt::format(MPT_USTRING("OpenMPT %1 (%2 bit)"))(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()), mpt::arch_bits)
-		#if defined(UNICODE)
-			+ MPT_USTRING(" Unicode")
-		#endif // UNICODE
 		+ (!BuildVariants().CurrentBuildIsModern() ? MPT_USTRING(" for older Windows") : MPT_USTRING(""))
 		+ MPT_USTRING("\n");
-	app += MPT_USTRING("Version ") + Build::GetVersionStringSimple() + MPT_USTRING("\n");
-	app += MPT_USTRING("\n");
+	app += MPT_USTRING("Version ") + Build::GetVersionStringSimple() + MPT_USTRING("\n\n");
 	app += Build::GetURL(Build::Url::Website) + MPT_USTRING("\n");
 	SetDlgItemText(IDC_EDIT3, mpt::ToCString(mpt::String::Replace(app, MPT_USTRING("\n"), MPT_USTRING("\r\n"))));
 
@@ -268,8 +275,7 @@ BOOL CAboutDlg::OnInitDialog()
 	}
 	m_TimerID = SetTimer(TIMERID_ABOUT_DEFAULT, CRippleBitmap::UPDATE_INTERVAL, nullptr);
 
-	return TRUE;	// return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 
@@ -350,15 +356,14 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 	switch(tab)
 	{
 		case 0:
-			text += MPT_USTRING("OpenMPT - Open ModPlug Tracker") + lf;
-			text += lf;
-			text += mpt::format(MPT_USTRING("Version: %1"))(Build::GetVersionStringExtended()) + lf;
-			text += mpt::format(MPT_USTRING("Source Code: %1"))(SourceInfo::Current().GetUrlWithRevision() + MPT_ULITERAL(" ") + SourceInfo::Current().GetStateString()) + lf;
-			text += mpt::format(MPT_USTRING("Build Date: %1"))(Build::GetBuildDateString()) + lf;
-			text += mpt::format(MPT_USTRING("Compiler: %1"))(Build::GetBuildCompilerString()) + lf;
-			text += mpt::format(MPT_USTRING("Architecture: %1"))(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture())) + lf;
-			text += mpt::format(MPT_USTRING("Required Windows Kernel Level: %1"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel())) + lf;
-			text += mpt::format(MPT_USTRING("Required Windows API Level: %1"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel())) + lf;
+			text = MPT_USTRING("OpenMPT - Open ModPlug Tracker\n\n")
+				+ mpt::format(MPT_USTRING("Version: %1\n"))(Build::GetVersionStringExtended())
+				+ mpt::format(MPT_USTRING("Source Code: %1\n"))(SourceInfo::Current().GetUrlWithRevision() + MPT_ULITERAL(" ") + SourceInfo::Current().GetStateString())
+				+ mpt::format(MPT_USTRING("Build Date: %1\n"))(Build::GetBuildDateString())
+				+ mpt::format(MPT_USTRING("Compiler: %1\n"))(Build::GetBuildCompilerString())
+				+ mpt::format(MPT_USTRING("Architecture: %1\n"))(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()))
+				+ mpt::format(MPT_USTRING("Required Windows Kernel Level: %1\n"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel()))
+				+ mpt::format(MPT_USTRING("Required Windows API Level: %1\n"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel()));
 			{
 				text += MPT_USTRING("Required CPU features: ");
 				std::vector<mpt::ustring> features;
@@ -387,31 +392,29 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				text += lf;
 			}
 #ifdef ENABLE_ASM
-			text += mpt::format(MPT_USTRING("Optional CPU features used: %1"))(ProcSupportToString(GetProcSupport())) + lf;
+			text += mpt::format(MPT_USTRING("Optional CPU features used: %1\n"))(ProcSupportToString(GetProcSupport()));
 #endif // ENABLE_ASM
 			text += lf;
-			text += mpt::format(MPT_USTRING("System Architecture: %1"))(mpt::Windows::Name(mpt::Windows::GetHostArchitecture())) + lf;
+			text += mpt::format(MPT_USTRING("System Architecture: %1\n"))(mpt::Windows::Name(mpt::Windows::GetHostArchitecture()));
 #ifdef ENABLE_ASM
-			text += mpt::format(MPT_USTRING("CPU: %1, Family %2, Model %3, Stepping %4"))
+			text += mpt::format(MPT_USTRING("CPU: %1, Family %2, Model %3, Stepping %4\n"))
 				( mpt::ToUnicode(mpt::CharsetASCII, (std::strlen(ProcVendorID) > 0) ? std::string(ProcVendorID) : std::string("Generic"))
 				, ProcFamily
 				, ProcModel
 				, ProcStepping
-				) + lf;
-			text += mpt::format(MPT_USTRING("Available CPU features: %1"))(ProcSupportToString(GetRealProcSupport())) + lf;
+				);
+			text += mpt::format(MPT_USTRING("Available CPU features: %1\n"))(ProcSupportToString(GetRealProcSupport()));
 #endif // ENABLE_ASM
-			text += mpt::format(MPT_USTRING("Operating System: %1"))(mpt::Windows::Version::Current().GetName()) + lf;
-			text += lf;
-			text += mpt::format(MPT_USTRING("OpenMPT Path%2: %1"))(theApp.GetAppDirPath(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;
-			text += mpt::format(MPT_USTRING("Settings%2: %1"))(theApp.GetConfigFileName(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING("")) + lf;
+			text += mpt::format(MPT_USTRING("Operating System: %1\n\n"))(mpt::Windows::Version::Current().GetName());
+			text += mpt::format(MPT_USTRING("OpenMPT Path%2: %1\n"))(theApp.GetAppDirPath(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING(""));
+			text += mpt::format(MPT_USTRING("Settings%2: %1\n"))(theApp.GetConfigFileName(), theApp.IsPortableMode() ? MPT_USTRING(" (portable)") : MPT_USTRING(""));
 			break;
 		case 1:
 			{
 			std::vector<std::string> components = ComponentManager::Instance()->GetRegisteredComponents();
 			if(!TrackerSettings::Instance().ComponentsKeepLoaded)
 				{
-					text += MPT_USTRING("Components are loaded and unloaded as needed.") + lf;
-					text += lf;
+					text += MPT_USTRING("Components are loaded and unloaded as needed.\n\n");
 					for(const auto &component : components)
 					{
 						ComponentInfo info = ComponentManager::Instance()->GetComponentInfo(component);
@@ -428,11 +431,10 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 					{
 						if(available)
 						{
-							text += MPT_USTRING("Loaded Components:") + lf;
+							text += MPT_USTRING("Loaded Components:\n");
 						} else
 						{
-							text += lf;
-							text += MPT_USTRING("Unloaded Components:") + lf;
+							text += MPT_USTRING("\nUnloaded Components:\n");
 						}
 						for(const auto &component : components)
 						{
@@ -477,24 +479,17 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += Build::GetLicenseString();
 			break;
 		case 4:
-			text += lf;
-			text += MPT_USTRING("Website: ") + lf + Build::GetURL(Build::Url::Website) + lf;
-			text += lf;
-			text += MPT_USTRING("Forum: ") + lf + Build::GetURL(Build::Url::Forum) + lf;
-			text += lf;
-			text += MPT_USTRING("Bug Tracker: ") + lf + Build::GetURL(Build::Url::Bugtracker) + lf;
-			text += lf;
-			text += MPT_USTRING("Updates: ") + lf + Build::GetURL(Build::Url::Updates) + lf;
-			text += lf;
+			text += MPT_USTRING("Website:\n") + Build::GetURL(Build::Url::Website);
+			text += MPT_USTRING("\n\nForum:\n") + Build::GetURL(Build::Url::Forum);
+			text += MPT_USTRING("\n\nBug Tracker:\n") + Build::GetURL(Build::Url::Bugtracker);
+			text += MPT_USTRING("\n\nUpdates:\n") + Build::GetURL(Build::Url::Updates);
 			break;
 		case 5:
 			try
 			{
 				if(!theApp.GetWine())
 				{
-
 					text += MPT_USTRING("Wine integration not available.\n");
-
 				} else
 				{
 

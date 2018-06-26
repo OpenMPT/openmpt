@@ -1,3 +1,12 @@
+/*
+ * AboutDialog.h
+ * -------------
+ * Purpose: About dialog with credits, system information and a fancy demo effect.
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
 #pragma once
 
 OPENMPT_NAMESPACE_BEGIN
@@ -13,16 +22,16 @@ public:
 
 protected:
 
-	BITMAPINFOHEADER bi;
-	std::unique_ptr<RawGDIDIB> bitmapSrc, bitmapTarget;
-	std::vector<int32> offset1, offset2;
-	int32 *frontBuf, *backBuf;
-	DWORD lastFrame = 0;	// Time of last frame
-	DWORD lastRipple = 0;	// Time of last added ripple
-	bool frame = false;		// Backbuffer toggle
-	bool damp = true;		// Ripple damping status
-	bool activity = true;	// There are actually some ripples
-	bool showMouse = true;
+	BITMAPINFOHEADER m_bi;
+	std::unique_ptr<RawGDIDIB> m_bitmapSrc, m_bitmapTarget;
+	std::vector<int32> m_offset1, m_offset2;
+	int32 *m_frontBuf, *m_backBuf;
+	DWORD m_lastFrame = 0;	// Time of last frame
+	DWORD m_lastRipple = 0;	// Time of last added ripple
+	bool m_frame = false;		// Backbuffer toggle
+	bool m_damp = true;		// Ripple damping status
+	bool m_activity = true;	// There are actually some ripples
+	bool m_showMouse = true;
 
 public:
 
@@ -34,10 +43,11 @@ protected:
 	void OnPaint();
 	BOOL OnEraseBkgnd(CDC *) { return TRUE; }
 
-	DECLARE_MESSAGE_MAP()
 	void OnMouseMove(UINT nFlags, CPoint point);
 	void OnMouseHover(UINT nFlags, CPoint point) { OnMouseMove(nFlags, point); }
 	void OnMouseLeave();
+
+	DECLARE_MESSAGE_MAP()
 };
 
 
