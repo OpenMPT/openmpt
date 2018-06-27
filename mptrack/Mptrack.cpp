@@ -217,14 +217,13 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 
 	UltraSndPath = file.Read<mpt::PathString>(MPT_USTRING("Ultrasound"), MPT_USTRING("PatchDir"), mpt::PathString());
 	if(forgetSettings) file.Forget(MPT_USTRING("Ultrasound"), MPT_USTRING("PatchDir"));
-	if(UltraSndPath == MPT_PATHSTRING(".\\")) UltraSndPath = mpt::PathString();
-	if(UltraSndPath.empty())
+	if(UltraSndPath.empty() || UltraSndPath == MPT_PATHSTRING(".\\"))
 	{
-		TCHAR curDir[MAX_PATH];
-		GetCurrentDirectory(CountOf(curDir), curDir);
-		UltraSndPath = mpt::PathString::FromNative(curDir);
+		std::vector<TCHAR> curDir(::GetCurrentDirectory(0, nullptr), '\0');
+		::GetCurrentDirectory(static_cast<DWORD>(curDir.size()), curDir.data());
+		UltraSndPath = mpt::PathString::FromNative(curDir.data());
 	}
-	for (uint32 iMidi=0; iMidi<256; iMidi++)
+	for(uint32 iMidi = 0; iMidi < 256; iMidi++)
 	{
 		mpt::PathString filename;
 		mpt::ustring key = mpt::format(MPT_USTRING("%1%2"))((iMidi < 128) ? MPT_USTRING("Midi") : MPT_USTRING("Perc"), iMidi & 0x7f);
@@ -232,13 +231,13 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 		// Check for ULTRASND.INI
 		if(filename.empty())
 		{
-			mpt::ustring section = (iMidi < 128) ? MPT_USTRING("Melodic Patches") : MPT_USTRING("Drum Patches");
+			mpt::ustring section = (iMidi < 128) ? MPT_ULITERAL("Melodic Patches") : MPT_ULITERAL("Drum Patches");
 			key = mpt::ufmt::val(iMidi & 0x7f);
 			filename = file.Read<mpt::PathString>(section, key, mpt::PathString());
 			if(forgetSettings) file.Forget(section, key);
 			if(filename.empty())
 			{
-				section = (iMidi < 128) ? MPT_USTRING("Melodic Bank 0") : MPT_USTRING("Drum Bank 0");
+				section = (iMidi < 128) ? MPT_ULITERAL("Melodic Bank 0") : MPT_ULITERAL("Drum Bank 0");
 				filename = file.Read<mpt::PathString>(section, key, mpt::PathString());
 				if(forgetSettings) file.Forget(section, key);
 			}
@@ -250,9 +249,7 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 					tmp = UltraSndPath;
 					tmp.EnsureTrailingSlash();
 				}
-				tmp += filename;
-				tmp += MPT_PATHSTRING(".pat");
-				filename = tmp;
+				filename = tmp + filename + MPT_PATHSTRING(".pat");
 			}
 		}
 		if(!filename.empty())
@@ -755,7 +752,6 @@ bool CTrackApp::CheckSystemSupport()
 
 BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 {
-
 	// The first step of InitInstance, always executed without any crash handler.
 
 	#ifndef UNICODE
@@ -1063,10 +1059,8 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		font.size = Clamp(Util::GetDPIy(m_pMainWnd->m_hWnd) / 96 - 1, 0, 9);
 		TrackerSettings::Instance().patternFont = font;
 		new WelcomeDlg(m_pMainWnd);
-
 	} else
 	{
-
 		// Update check
 		CUpdateCheck::DoAutoUpdateCheck();
 
@@ -1075,7 +1069,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		{
 			m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
 		}
-
 	}
 
 #ifdef ENABLE_TESTS
@@ -1403,7 +1396,9 @@ void CSplashScreen::OnPaint()
 		CPaintDC dc(this);
 		Gdiplus::Graphics gfx(dc);
 
-		gfx.DrawImage(m_Image.get(), 0, 0);
+		const int width = Util::ScalePixels(m_Image->GetWidth(), m_hWnd);
+		const int height = Util::ScalePixels(m_Image->GetHeight(), m_hWnd);
+		gfx.DrawImage(m_Image.get(), 0, 0, width, height);
 
 		CDialog::OnPaint();
 
@@ -1440,11 +1435,13 @@ BOOL CSplashScreen::OnInitDialog()
 
 		CRect rect;
 		GetWindowRect(&rect);
+		const int width = Util::ScalePixels(m_Image->GetWidth(), m_hWnd);
+		const int height = Util::ScalePixels(m_Image->GetHeight(), m_hWnd);
 		SetWindowPos(nullptr,
-			rect.left - ((static_cast<int32>(m_Image->GetWidth()) - rect.Width()) / 2),
-			rect.top - ((static_cast<int32>(m_Image->GetHeight()) - rect.Height()) / 2),
-			m_Image->GetWidth(),
-			m_Image->GetHeight(),
+			rect.left - ((width - rect.Width()) / 2),
+			rect.top - ((height - rect.Height()) / 2),
+			width,
+			height,
 			SWP_NOZORDER | SWP_NOCOPYBITS);
 
 	#else // !MPT_WITH_GDIPLUS
