@@ -201,13 +201,8 @@ void CModTree::Init()
 
 	if(!IsSampleBrowser())
 	{
-		std::vector<TCHAR> curDir;
-		DWORD size = GetCurrentDirectory(0, nullptr);
-		if(size)
-		{
-			curDir.resize(size + 1);
-			GetCurrentDirectory(size + 1, curDir.data());
-		}
+		std::vector<TCHAR> curDir(::GetCurrentDirectory(0, nullptr), '\0');
+		::GetCurrentDirectory(static_cast<DWORD>(curDir.size()), curDir.data());
 		const mpt::PathString dirs[] =
 		{
 			TrackerSettings::Instance().PathSamples.GetDefaultDir(),
