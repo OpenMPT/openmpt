@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
+#include "IPCWindow.h"
 #include "InputHandler.h"
 #include "Childfrm.h"
 #include "Moddoc.h"
@@ -57,7 +58,6 @@ static char THIS_FILE[] = __FILE__;
 
 
 OPENMPT_NAMESPACE_BEGIN
-
 
 /////////////////////////////////////////////////////////////////////////////
 // The one and only CTrackApp object
@@ -125,37 +125,42 @@ std::vector<CModDoc *> CTrackApp::GetOpenDocuments() const
 
 
 /////////////////////////////////////////////////////////////////////////////
-// MPTRACK Command Line options
+// Command Line options
 
 class CMPTCommandLineInfo: public CCommandLineInfo
 {
 public:
-	bool m_bNoDls = false, m_bNoPlugins = false, m_bNoAssembly = false, m_bNoSysCheck = false, m_bNoWine = false,
-		 m_bPortable = false, m_bNoCrashHandler = false, m_bDebugCrashHandler = false;
+	std::vector<mpt::PathString> m_fileNames;
+	bool m_noDls = false, m_noPlugins = false, m_noAssembly = false, m_noSysCheck = false, m_noWine = false,
+		m_portable = false, m_noCrashHandler = false, m_debugCrashHandler = false;
 #ifdef ENABLE_TESTS
-	bool m_bNoTests = false;
+	bool m_noTests = false;
 #endif
 
 public:
-	void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast) override
+	void ParseParam(LPCTSTR param, BOOL isFlag, BOOL isLast) override
 	{
-		if ((lpszParam) && (bFlag))
+		if(isFlag)
 		{
-			if (!lstrcmpi(lpszParam, _T("nologo"))) { m_bShowSplash = FALSE; return; }
-			if (!lstrcmpi(lpszParam, _T("nodls"))) { m_bNoDls = true; return; }
-			if (!lstrcmpi(lpszParam, _T("noplugs"))) { m_bNoPlugins = true; return; }
-			if (!lstrcmpi(lpszParam, _T("portable"))) { m_bPortable = true; return; }
-			if (!lstrcmpi(lpszParam, _T("fullMemDump"))) { ExceptionHandler::fullMemDump = true; return; }
-			if (!lstrcmpi(lpszParam, _T("noAssembly"))) { m_bNoAssembly = true; return; }
-			if (!lstrcmpi(lpszParam, _T("noSysCheck"))) { m_bNoSysCheck = true; return; }
-			if (!lstrcmpi(lpszParam, _T("noWine"))) { m_bNoWine = true; return; }
-			if (!lstrcmpi(lpszParam, _T("noCrashHandler"))) { m_bNoCrashHandler = true; return; }
-			if (!lstrcmpi(lpszParam, _T("DebugCrashHandler"))) { m_bDebugCrashHandler = true; return; }
+			if(!lstrcmpi(param, _T("nologo"))) { m_bShowSplash = FALSE; return; }
+			if(!lstrcmpi(param, _T("nodls"))) { m_noDls = true; return; }
+			if(!lstrcmpi(param, _T("noplugs"))) { m_noPlugins = true; return; }
+			if(!lstrcmpi(param, _T("portable"))) { m_portable = true; return; }
+			if(!lstrcmpi(param, _T("fullMemDump"))) { ExceptionHandler::fullMemDump = true; return; }
+			if(!lstrcmpi(param, _T("noAssembly"))) { m_noAssembly = true; return; }
+			if(!lstrcmpi(param, _T("noSysCheck"))) { m_noSysCheck = true; return; }
+			if(!lstrcmpi(param, _T("noWine"))) { m_noWine = true; return; }
+			if(!lstrcmpi(param, _T("noCrashHandler"))) { m_noCrashHandler = true; return; }
+			if(!lstrcmpi(param, _T("DebugCrashHandler"))) { m_debugCrashHandler = true; return; }
 #ifdef ENABLE_TESTS
-			if (!lstrcmpi(lpszParam, _T("noTests"))) { m_bNoTests = true; return; }
+			if (!lstrcmpi(param, _T("noTests"))) { m_noTests = true; return; }
 #endif
+		} else
+		{
+			m_fileNames.push_back(mpt::PathString::FromNative(param));
+			if(m_nShellCommand == FileNew) m_nShellCommand = FileOpen;
 		}
-		CCommandLineInfo::ParseParam(lpszParam, bFlag, bLast);
+		CCommandLineInfo::ParseParam(param, isFlag, isLast);
 	}
 };
 
@@ -786,15 +791,22 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 	BOOL oleinit = AfxOleInit();
 	ASSERT(oleinit != FALSE); // no MPT_ASSERT here!
 
+	// Parse command line for standard shell commands, DDE, file open
+	ParseCommandLine(cmdInfo);
+
+	if(cmdInfo.m_nShellCommand == CCommandLineInfo::FileDDE && IPCWindow::SendToIPC(cmdInfo.m_fileNames))
+	{
+		ExitProcess(0);
+	}
+
 	// Initialize DocManager (for DDE)
 	// requires mpt::PathString
 	ASSERT(nullptr == m_pDocManager); // no MPT_ASSERT here!
 	m_pDocManager = new CModDocManager();
 
-	// Parse command line for standard shell commands, DDE, file open
-	ParseCommandLine(cmdInfo);
-	
-	if(IsDebuggerPresent() && cmdInfo.m_bDebugCrashHandler)
+	IPCWindow::Open(m_hInstance);
+
+	if(IsDebuggerPresent() && cmdInfo.m_debugCrashHandler)
 	{
 		ExceptionHandler::useAnyCrashHandler = true;
 		ExceptionHandler::useImplicitFallbackSEH = false;
@@ -805,7 +817,7 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 		#endif
 		ExceptionHandler::handleMfcExceptions = true;
 		ExceptionHandler::debugExceptionHandler = true;
-	} else if(IsDebuggerPresent() || cmdInfo.m_bNoCrashHandler)
+	} else if(IsDebuggerPresent() || cmdInfo.m_noCrashHandler)
 	{
 		ExceptionHandler::useAnyCrashHandler = false;
 		ExceptionHandler::useImplicitFallbackSEH = false;
@@ -867,14 +879,14 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		m_Gdiplus = mpt::make_unique<GdiplusRAII>();
 	#endif // MPT_WITH_GDIPLUS
 
-	if(cmdInfo.m_bNoWine)
+	if(cmdInfo.m_noWine)
 	{
 		mpt::Windows::PreventWineDetection();
 	}
 
 	#ifdef ENABLE_ASM
 		InitProcSupport();
-		if(cmdInfo.m_bNoAssembly)
+		if(cmdInfo.m_noAssembly)
 		{
 			ProcSupport = 0;
 		}
@@ -886,7 +898,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	}
 
 	// Set up paths to store configuration in
-	SetupPaths(cmdInfo.m_bPortable);
+	SetupPaths(cmdInfo.m_portable);
 
 	m_pSettingsIniFile = new IniFileSettingsBackend(m_szConfigFileName);
 	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
@@ -1008,10 +1020,10 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	CSoundFile::SetDefaultNoteNames();
 
 	// Load DLS Banks
-	if (!cmdInfo.m_bNoDls) LoadDefaultDLSBanks();
+	if (!cmdInfo.m_noDls) LoadDefaultDLSBanks();
 
 	// Initialize Plugins
-	if (!cmdInfo.m_bNoPlugins) InitializeDXPlugins();
+	if (!cmdInfo.m_noPlugins) InitializeDXPlugins();
 
 	// Initialize CMainFrame
 	pMainFrame->Initialize();
@@ -1026,7 +1038,19 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		// we do not want to open an empty new one on startup.
 		cmdInfo.m_nShellCommand = CCommandLineInfo::FileNothing;
 	}
-	if(!ProcessShellCommand(cmdInfo))
+	bool shellSuccess = false;
+	if(cmdInfo.m_fileNames.empty())
+	{
+		shellSuccess = ProcessShellCommand(cmdInfo) != FALSE;
+	} else
+	{
+		for(const auto &filename : cmdInfo.m_fileNames)
+		{
+			cmdInfo.m_strFileName = filename.ToCString();
+			shellSuccess |= ProcessShellCommand(cmdInfo) != FALSE;
+		}
+	}
+	if(!shellSuccess)
 	{
 		EndWaitCursor();
 		StopSplashScreen();
@@ -1042,7 +1066,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// Perform startup tasks.
 
 	// Check whether we are running the best build for the given system.
-	if(!cmdInfo.m_bNoSysCheck)
+	if(!cmdInfo.m_noSysCheck)
 	{
 		if(!CheckSystemSupport())
 		{
@@ -1072,7 +1096,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	}
 
 #ifdef ENABLE_TESTS
-	if(!cmdInfo.m_bNoTests)
+	if(!cmdInfo.m_noTests)
 		Test::DoTests();
 #endif
 
@@ -1191,6 +1215,8 @@ int CTrackApp::ExitInstance()
 
 int CTrackApp::ExitInstanceImpl()
 {
+	IPCWindow::Close();
+
 	delete m_pSoundDevicesManager;
 	m_pSoundDevicesManager = nullptr;
 	ExportMidiConfig(theApp.GetSettings());

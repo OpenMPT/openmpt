@@ -264,6 +264,9 @@
     <ClInclude Include="..\..\mptrack\HTTP.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\IPCWindow.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\Image.h">
       <Filter>mptrack</Filter>
     </ClInclude>
