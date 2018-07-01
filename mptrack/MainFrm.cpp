@@ -99,7 +99,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_UPDATE_COMMAND_UI(IDD_TREEVIEW,		&CMainFrame::OnUpdateControlBarMenu)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		&CMainFrame::OnUpdatePosition)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	&CMainFrame::OnInvalidatePatterns)
-	ON_MESSAGE(WM_MOD_SPECIALKEY,			&CMainFrame::OnSpecialKey)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			&CMainFrame::OnCustomKeyMsg)
 	ON_MESSAGE(WM_MOD_MIDIMAPPING,			&CMainFrame::OnViewMIDIMapping)
 	ON_MESSAGE(WM_MOD_UPDATEVIEWS,			&CMainFrame::OnUpdateViews)
@@ -336,7 +335,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_ENABLE_RECORD_DEFAULT) midiOpenDevice(false);
 
-	::HtmlHelpW(m_hWnd, nullptr, HH_INITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
+	::HtmlHelp(m_hWnd, nullptr, HH_INITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
 
 	return 0;
 }
@@ -350,7 +349,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 
 BOOL CMainFrame::DestroyWindow()
 {
-	::HtmlHelpW(m_hWnd, nullptr, HH_UNINITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
+	::HtmlHelp(m_hWnd, nullptr, HH_UNINITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
 
 	// Uninstall Keyboard Hook
 	if (ghKbdHook)
@@ -728,7 +727,7 @@ public:
 	{
 		return;
 	}
-	virtual void FillCallback(int * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
+	void FillCallback(int * const *MixInputBuffers, std::size_t channels, std::size_t countChunk) override
 	{
 		AudioSourceBuffer::FillCallback(MixInputBuffers, channels, countChunk);
 		vumeter.Process(MixInputBuffers, channels, countChunk);
@@ -748,7 +747,7 @@ public:
 	{
 		return;
 	}
-	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+	void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		vumeter.Process(MixSoundBuffer, channels, countChunk);
 		AudioReadTargetBufferInterleavedDynamic::DataCallback(MixSoundBuffer, channels, countChunk);
@@ -1148,7 +1147,7 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 void CMainFrame::UpdateColors()
 {
-	auto &colors = TrackerSettings::Instance().rgbCustomColors;
+	const auto &colors = TrackerSettings::Instance().rgbCustomColors;
 	const struct { MODPLUGDIB *bitmap; uint32 lo, med, hi; } meters[] =
 	{
 		{ bmpVUMeters, MODCOLOR_VUMETER_LO, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_HI },
@@ -2373,32 +2372,12 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 void CMainFrame::OnRButtonDown(UINT, CPoint pt)
 {
 	CMenu Menu;
-
 	ClientToScreen(&pt);
 	if (Menu.LoadMenu(IDR_TOOLBARS))
 	{
-		CMenu* pSubMenu = Menu.GetSubMenu(0);
-		if (pSubMenu!=NULL) pSubMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON,pt.x,pt.y,this);
+		CMenu *pSubMenu = Menu.GetSubMenu(0);
+		if (pSubMenu != nullptr) pSubMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, this);
 	}
-}
-
-
-LRESULT CMainFrame::OnSpecialKey(WPARAM /*vKey*/, LPARAM)
-{
-/*	CMDIChildWnd *pMDIActive = MDIGetActive();
-	CView *pView = NULL;
-	if (pMDIActive) pView = pMDIActive->GetActiveView();
-	switch(vKey)
-	{
-	case VK_RMENU:
-		if (pView) pView->PostMessage(WM_COMMAND, ID_PATTERN_RESTART, 0);
-		break;
-	case VK_RCONTROL:
-		if (pView) pView->PostMessage(WM_COMMAND, ID_PLAYER_PLAY, 0);
-		break;
-	}
-*/
-	return 0;
 }
 
 

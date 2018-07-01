@@ -45,7 +45,6 @@ enum
 	WM_MOD_MIDIMSG,
 	WM_MOD_GETTOOLTIPTEXT,
 	WM_MOD_DRAGONDROPPING,
-	WM_MOD_SPECIALKEY,
 	WM_MOD_KBDNOTIFY,
 	WM_MOD_INSTRSELECTED,
 	WM_MOD_KEYCOMMAND,
@@ -520,7 +519,6 @@ protected:
 	afx_msg void OnOpenMRUItem(UINT nId);
 	afx_msg void OnUpdateMRUItem(CCmdUI *cmd);
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);
-	afx_msg LRESULT OnSpecialKey(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnInternetUpdate();
 	afx_msg void OnShowSettingsFolder();
