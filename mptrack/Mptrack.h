@@ -119,7 +119,7 @@ protected:
 
 	mpt::recursive_mutex_with_lock_count m_GlobalMutex;
 
-	DWORD m_GuiThreadId;
+	DWORD m_GuiThreadId = 0;
 
 	std::unique_ptr<mpt::random_device> m_RD;
 	std::unique_ptr<mpt::thread_safe_prng<mpt::best_prng> > m_BestPRNG;
@@ -132,16 +132,16 @@ protected:
 	std::shared_ptr<mpt::Wine::VersionContext> m_WineVersion;
 
 	IniFileSettingsBackend *m_pSettingsIniFile;
-	SettingsContainer *m_pSettings;
-	DebugSettings *m_pDebugSettings;
-	TrackerSettings *m_pTrackerSettings;
-	IniFileSettingsBackend *m_pSongSettingsIniFile;
-	SettingsContainer *m_pSongSettings;
-	ComponentManagerSettings *m_pComponentManagerSettings;
-	IniFileSettingsContainer *m_pPluginCache;
-	CModDocTemplate *m_pModTemplate;
-	CVstPluginManager *m_pPluginManager;
-	SoundDevice::Manager *m_pSoundDevicesManager;
+	SettingsContainer *m_pSettings = nullptr;
+	DebugSettings *m_pDebugSettings = nullptr;
+	TrackerSettings *m_pTrackerSettings = nullptr;
+	IniFileSettingsBackend *m_pSongSettingsIniFile = nullptr;
+	SettingsContainer *m_pSongSettings = nullptr;
+	ComponentManagerSettings *m_pComponentManagerSettings = nullptr;
+	IniFileSettingsContainer *m_pPluginCache = nullptr;
+	CModDocTemplate *m_pModTemplate = nullptr;
+	CVstPluginManager *m_pPluginManager = nullptr;
+	SoundDevice::Manager *m_pSoundDevicesManager = nullptr;
 	mpt::PathString m_szExePath;
 	mpt::PathString m_szConfigDirectory;
 	mpt::PathString m_szConfigFileName;
@@ -150,8 +150,8 @@ protected:
 	mpt::PathString m_WineWrapperDllName;
 	// Default macro configuration
 	MIDIMacroConfig m_MidiCfg;
-	DWORD m_dwLastPluginIdleCall;
-	bool m_bPortableMode;
+	DWORD m_dwLastPluginIdleCall = 0;
+	bool m_bPortableMode = false;
 
 public:
 	CTrackApp();
@@ -172,10 +172,10 @@ public:
 	static BOOL ExportMidiConfig(const mpt::PathString &filename);
 	static BOOL ImportMidiConfig(SettingsContainer &file, bool forgetSettings = false);
 	static BOOL ExportMidiConfig(SettingsContainer &file);
-	static BOOL LoadDefaultDLSBanks();
-	static BOOL SaveDefaultDLSBanks();
-	static BOOL RemoveDLSBank(UINT nBank);
-	static BOOL AddDLSBank(const mpt::PathString &filename);
+	static void LoadDefaultDLSBanks();
+	static void SaveDefaultDLSBanks();
+	static void RemoveDLSBank(UINT nBank);
+	static bool AddDLSBank(const mpt::PathString &filename);
 	static bool OpenURL(const char *url); // UTF8
 	static bool OpenURL(const std::string &url); // UTF8
 	static bool OpenURL(const CString &url);

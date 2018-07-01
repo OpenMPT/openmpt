@@ -299,7 +299,7 @@ BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
 std::vector<CDLSBank *> CTrackApp::gpDLSBanks;
 
 
-BOOL CTrackApp::LoadDefaultDLSBanks()
+void CTrackApp::LoadDefaultDLSBanks()
 {
 	uint32 numBanks = theApp.GetSettings().Read<uint32>(MPT_USTRING("DLS Banks"), MPT_USTRING("NumBanks"), 0);
 	gpDLSBanks.reserve(numBanks);
@@ -317,7 +317,7 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 		DWORD dwSize = 0;
 		if(RegQueryValueEx(key, _T("GMFilePath"), NULL, &dwRegType, nullptr, &dwSize) == ERROR_SUCCESS && dwSize > 0)
 		{
-			std::vector<TCHAR> filenameT(dwSize / sizeof(WCHAR));
+			std::vector<TCHAR> filenameT(dwSize / sizeof(TCHAR));
 			if (RegQueryValueEx(key, _T("GMFilePath"), NULL, &dwRegType, reinterpret_cast<LPBYTE>(filenameT.data()), &dwSize) == ERROR_SUCCESS)
 			{
 				std::vector<TCHAR> filenameExpanded(::ExpandEnvironmentStrings(filenameT.data(), nullptr, 0));
@@ -329,12 +329,10 @@ BOOL CTrackApp::LoadDefaultDLSBanks()
 		}
 		RegCloseKey(key);
 	}
-
-	return TRUE;
 }
 
 
-BOOL CTrackApp::SaveDefaultDLSBanks()
+void CTrackApp::SaveDefaultDLSBanks()
 {
 	uint32 nBanks = 0;
 	for(const auto &bank : gpDLSBanks)
@@ -354,27 +352,25 @@ BOOL CTrackApp::SaveDefaultDLSBanks()
 
 	}
 	theApp.GetSettings().Write<uint32>(MPT_USTRING("DLS Banks"), MPT_USTRING("NumBanks"), nBanks);
-	return TRUE;
 }
 
 
-BOOL CTrackApp::RemoveDLSBank(UINT nBank)
+void CTrackApp::RemoveDLSBank(UINT nBank)
 {
-	if(nBank >= gpDLSBanks.size() || !gpDLSBanks[nBank]) return FALSE;
+	if(nBank >= gpDLSBanks.size() || !gpDLSBanks[nBank]) return;
 	delete gpDLSBanks[nBank];
 	gpDLSBanks[nBank] = nullptr;
 	//gpDLSBanks.erase(gpDLSBanks.begin() + nBank);
-	return TRUE;
 }
 
 
-BOOL CTrackApp::AddDLSBank(const mpt::PathString &filename)
+bool CTrackApp::AddDLSBank(const mpt::PathString &filename)
 {
-	if(filename.empty() || !CDLSBank::IsDLSBank(filename)) return FALSE;
+	if(filename.empty() || !CDLSBank::IsDLSBank(filename)) return false;
 	// Check for dupes
 	for(const auto &bank : gpDLSBanks)
 	{
-		if(bank && !mpt::PathString::CompareNoCase(filename, bank->GetFileName())) return TRUE;
+		if(bank && !mpt::PathString::CompareNoCase(filename, bank->GetFileName())) return true;
 	}
 	try
 	{
@@ -382,14 +378,14 @@ BOOL CTrackApp::AddDLSBank(const mpt::PathString &filename)
 		if(bank->Open(filename))
 		{
 			gpDLSBanks.push_back(bank);
-			return TRUE;
+			return true;
 		}
 		delete bank;
 	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
 		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 	}
-	return FALSE;
+	return false;
 }
 
 
@@ -417,18 +413,6 @@ END_MESSAGE_MAP()
 // CTrackApp construction
 
 CTrackApp::CTrackApp()
-	: m_GuiThreadId(0)
-	, m_pSettingsIniFile(nullptr)
-	, m_pSongSettings(nullptr)
-	, m_pSettings(nullptr)
-	, m_pDebugSettings(nullptr)
-	, m_pTrackerSettings(nullptr)
-	, m_pComponentManagerSettings(nullptr)
-	, m_pPluginCache(nullptr)
-	, m_pModTemplate(nullptr)
-	, m_pPluginManager(nullptr)
-	, m_pSoundDevicesManager(nullptr)
-	, m_bPortableMode(false)
 {
 }
 
@@ -658,21 +642,20 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 CString CTrackApp::SuggestModernBuildText()
 {
-	CString updateText;
-	const CString url = mpt::ToCString(Build::GetURL(Build::Url::Download));
 	if(BuildVariants::IsKnownSystem())
 	{
 		if(!BuildVariants::CurrentBuildIsModern())
 		{
 			if(BuildVariants::SystemCanRunModernBuilds())
 			{
-				updateText += CString(_T("You are running a '" + mpt::ToCString(BuildVariants::GuessCurrentBuildName()) + "' build of OpenMPT.")) + _T("\r\n");
-				updateText += CString(_T("However, OpenMPT detected that your system is capable of running the standard 'Win32' build as well, which provides better support for your system.")) + _T("\r\n");
-				updateText += CString(_T("You may want to visit ")) + url + CString(_T(" and upgrade.")) + _T("\r\n");
+				return mpt::format(CString(_T("You are running an OpenMPT build for older systems.\r\n")
+					_T("However, OpenMPT detected that your system is capable of running the standard build as well, which provides better support for your system.\r\n")
+					_T("You may want to visit %1 and upgrade.\r\n")))
+					(mpt::ToCString(Build::GetURL(Build::Url::Download)));
 			}
 		}
 	}
-	return updateText;
+	return CString();
 }
 
 
@@ -682,7 +665,7 @@ bool CTrackApp::CheckSystemSupport()
 	const mpt::ustring url = Build::GetURL(Build::Url::Download);
 	if(!BuildVariants::ProcessorCanRunCurrentBuild())
 	{
-		mpt::ustring text = mpt::ustring();
+		mpt::ustring text;
 		text += MPT_USTRING("Your CPU is too old to run this variant of OpenMPT.") + lf;
 		if(BuildVariants::GetRecommendedBuilds().size() > 0)
 		{
@@ -712,7 +695,7 @@ bool CTrackApp::CheckSystemSupport()
 	{
 		if(!BuildVariants::CanRunBuild(BuildVariants::GetCurrentBuildVariant()))
 		{
-			mpt::ustring text = mpt::ustring();
+			mpt::ustring text;
 			text += MPT_USTRING("Your system does not meet the minimum requirements for this variant of OpenMPT.") + lf;
 			if(BuildVariants::GetRecommendedBuilds().size() > 0)
 			{
@@ -1028,7 +1011,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// Initialize CMainFrame
 	pMainFrame->Initialize();
 	InitCommonControls();
-	m_dwLastPluginIdleCall = 0;
 	pMainFrame->m_InputHandler->UpdateMainMenu();
 
 	// Dispatch commands specified on the command line
@@ -1044,6 +1026,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		shellSuccess = ProcessShellCommand(cmdInfo) != FALSE;
 	} else
 	{
+		cmdInfo.m_nShellCommand = CCommandLineInfo::FileOpen;
 		for(const auto &filename : cmdInfo.m_fileNames)
 		{
 			cmdInfo.m_strFileName = filename.ToCString();
