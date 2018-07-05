@@ -371,23 +371,23 @@ public:
 	const_iterator cbegin() const { return const_iterator(begin()); }
 	const_iterator cend() const { return const_iterator(end()); }
 
-	operator bool () const throw() { return m_beg != nullptr; }
+	operator bool () const noexcept { return m_beg != nullptr; }
 
 	reference operator[](size_type index) { return at(index); }
 	const_reference operator[](size_type index) const { return at(index); }
 
-	bool operator==(span const & other) const throw() { return size() == other.size() && (m_beg == other.m_beg || std::equal(begin(), end(), other.begin())); }
-	bool operator!=(span const & other) const throw() { return !(*this == other); }
+	bool operator==(span const & other) const noexcept { return size() == other.size() && (m_beg == other.m_beg || std::equal(begin(), end(), other.begin())); }
+	bool operator!=(span const & other) const noexcept { return !(*this == other); }
 
 	reference at(size_type index) { return m_beg[index]; }
 	const_reference at(size_type index) const { return m_beg[index]; }
 
-	pointer data() const throw() { return m_beg; }
+	pointer data() const noexcept { return m_beg; }
 
-	bool empty() const throw() { return size() == 0; }
+	bool empty() const noexcept { return size() == 0; }
 
-	size_type size() const throw() { return std::distance(m_beg, m_end); }
-	size_type length() const throw() { return size(); }
+	size_type size() const noexcept { return static_cast<size_type>(std::distance(m_beg, m_end)); }
+	size_type length() const noexcept { return size(); }
 
 }; // class span
 
