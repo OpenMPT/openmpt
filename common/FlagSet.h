@@ -169,6 +169,12 @@ public:
 	MPT_CONSTEXPR11_FUN FlagSet() noexcept : bits_(store_from_value(value_type()))
 	{
 	}
+	
+	// Copy constructor
+	MPT_CONSTEXPR11_FUN FlagSet(const FlagSet &flags) noexcept
+		: bits_(flags.bits_)
+	{
+	}
 
 	// Value constructor
 	MPT_CONSTEXPR11_FUN FlagSet(value_type flags) noexcept : bits_(store_from_value(value_type(flags)))
