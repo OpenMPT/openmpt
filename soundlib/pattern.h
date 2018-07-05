@@ -94,7 +94,7 @@ public:
 		return SetName(buffer, bufferSize);
 	}
 
-	std::string GetName() const { return m_PatternName; };
+	std::string GetName() const { return m_PatternName; }
 
 #ifdef MODPLUG_TRACKER
 	// Double number of rows
@@ -118,7 +118,7 @@ public:
 	const_iterator end() const { return m_ModCommands.end(); }
 	const_iterator cend() const { return m_ModCommands.cend(); }
 
-	CPattern(CPatternContainer& patCont) : m_rPatternContainer(patCont) {};
+	CPattern(CPatternContainer& patCont) : m_rPatternContainer(patCont) {}
 	CPattern(const CPattern &) = default;
 	CPattern(CPattern &&) noexcept = default;
 

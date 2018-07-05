@@ -142,9 +142,9 @@ protected:
 	float RoomRolloffFactor() const { return m_param[kI3DL2ReverbRoomRolloffFactor] * 10.0f; }
 	float DecayTime() const { return 0.1f + m_param[kI3DL2ReverbDecayTime] * 19.9f; }
 	float DecayHFRatio() const { return 0.1f + m_param[kI3DL2ReverbDecayHFRatio] * 1.9f; }
-	float Reflections() const { return -10000.0f + m_param[kI3DL2ReverbReflections] * 11000.0f; };
+	float Reflections() const { return -10000.0f + m_param[kI3DL2ReverbReflections] * 11000.0f; }
 	float ReflectionsDelay() const { return m_param[kI3DL2ReverbReflectionsDelay] * 0.3f; }
-	float Reverb() const { return -10000.0f + m_param[kI3DL2ReverbReverb] * 12000.0f; };
+	float Reverb() const { return -10000.0f + m_param[kI3DL2ReverbReverb] * 12000.0f; }
 	float ReverbDelay() const { return m_param[kI3DL2ReverbReverbDelay] * 0.1f; }
 	float Diffusion() const { return m_param[kI3DL2ReverbDiffusion] * 100.0f; }
 	float Density() const { return m_param[kI3DL2ReverbDensity] * 100.0f; }

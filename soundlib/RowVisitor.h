@@ -41,13 +41,13 @@ public:
 	void Visit(ORDERINDEX ord, ROWINDEX row)
 	{
 		SetVisited(ord, row, true);
-	};
+	}
 
 	// Mark a row as not visited.
 	void Unvisit(ORDERINDEX ord, ROWINDEX row)
 	{
 		SetVisited(ord, row, false);
-	};
+	}
 
 	// Returns whether a given row has been visited yet.
 	// If autoSet is true, the queried row will automatically be marked as visited.

@@ -255,6 +255,8 @@ public:
 class IAudioSource
 {
 public:
+	virtual ~IAudioSource() = default;
+public:
 	virtual void FillCallback(int * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) = 0;
 };
 
@@ -319,7 +321,6 @@ private:
 
 private:
 	CTuningCollection* m_pTuningsTuneSpecific = nullptr;
-	//<--Tuning
 
 #ifdef MODPLUG_TRACKER
 public:

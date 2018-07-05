@@ -89,7 +89,7 @@ class MIDIMacroConfig : public MIDIMacroConfigData
 
 public:
 
-	MIDIMacroConfig() { Reset(); };
+	MIDIMacroConfig() { Reset(); }
 
 	// Get macro type from a macro string
 	parameteredMacroType GetParameteredMacroType(uint32 macroIndex) const;
@@ -102,13 +102,13 @@ public:
 	void CreateParameteredMacro(uint32 macroIndex, parameteredMacroType macroType, int subType = 0)
 	{
 		CreateParameteredMacro(szMidiSFXExt[macroIndex], macroType, subType);
-	};
+	}
 	std::string CreateParameteredMacro(parameteredMacroType macroType, int subType = 0) const
 	{
 		char parameteredMacro[MACRO_LENGTH];
 		CreateParameteredMacro(parameteredMacro, macroType, subType);
 		return std::string(parameteredMacro);
-	};
+	}
 
 protected:
 	void CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], fixedMacroType macroType) const;
@@ -116,7 +116,7 @@ public:
 	void CreateFixedMacro(fixedMacroType macroType)
 	{
 		CreateFixedMacro(szMidiZXXExt, macroType);
-	};
+	}
 
 #ifdef MODPLUG_TRACKER
 
