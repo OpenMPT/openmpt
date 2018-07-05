@@ -671,6 +671,8 @@ public:
 protected:
 	IFileDataContainer() = default;
 public:
+	IFileDataContainer(const IFileDataContainer&) = default;
+	IFileDataContainer & operator=(const IFileDataContainer&) = default;
 	virtual ~IFileDataContainer() = default;
 public:
 	virtual bool IsValid() const = 0;
