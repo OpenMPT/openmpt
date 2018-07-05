@@ -68,9 +68,8 @@ public:
 	{
 		return;
 	}
-	virtual ~invalid_module_pointer() noexcept {
-		return;
-	}
+	invalid_module_pointer(const invalid_module_pointer&) = default;
+	virtual ~invalid_module_pointer() noexcept = default;
 };
 
 class argument_null_pointer : public openmpt::exception {
@@ -80,9 +79,8 @@ public:
 	{
 		return;
 	}
-	virtual ~argument_null_pointer() noexcept {
-		return;
-	}
+	argument_null_pointer(const argument_null_pointer&) = default;
+	virtual ~argument_null_pointer() noexcept = default;
 };
 
 } // namespace interface
