@@ -63,7 +63,7 @@ namespace interface {
 
 class invalid_module_pointer : public openmpt::exception {
 public:
-	invalid_module_pointer() throw()
+	invalid_module_pointer()
 		: openmpt::exception("module * not valid")
 	{
 		return;
@@ -75,7 +75,7 @@ public:
 
 class argument_null_pointer : public openmpt::exception {
 public:
-	argument_null_pointer() throw()
+	argument_null_pointer()
 		: openmpt::exception("argument null pointer")
 	{
 		return;
