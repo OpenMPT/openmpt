@@ -15,7 +15,7 @@
 namespace openmpt123 {
 
 struct exception : public openmpt::exception {
-	exception( const std::string & text ) throw() : openmpt::exception(text) { }
+	exception( const std::string & text ) : openmpt::exception(text) { }
 };
 
 struct show_help_exception {
