@@ -654,6 +654,11 @@
 
 // stdlib configuration
 
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
+#endif
+
 #define __STDC_CONSTANT_MACROS
 #define __STDC_LIMIT_MACROS
 
@@ -661,6 +666,10 @@
 
 #ifndef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64
+#endif
+
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
 #endif
 
 
