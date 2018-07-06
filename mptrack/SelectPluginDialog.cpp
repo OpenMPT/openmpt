@@ -148,12 +148,12 @@ void CSelectPluginDlg::OnOK()
 			m_pPlugin->editorX = m_pPlugin->editorY = int32_min;
 
 #ifndef NO_VST
-			if(m_pPlugin->Info.dwPluginId1 == kEffectMagic)
+			if(m_pPlugin->Info.dwPluginId1 == Vst::kEffectMagic)
 			{
 				switch(m_pPlugin->Info.dwPluginId2)
 				{
 					// Enable drymix by default for these known plugins
-				case CCONST('S', 'c', 'o', 'p'):
+				case Vst::FourCC("Scop"):
 					m_pPlugin->SetWetMix();
 					break;
 				}
@@ -502,7 +502,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 		SetDlgItemText(IDC_PLUGINTAGS, mpt::ToCString(pPlug->tags));
 		enableRemoveButton = pPlug->isBuiltIn ? FALSE : TRUE;
 #ifndef NO_VST
-		if(pPlug->pluginId1 == kEffectMagic && !pPlug->isBuiltIn)
+		if(pPlug->pluginId1 == Vst::kEffectMagic && !pPlug->isBuiltIn)
 		{
 			bool isBridgeAvailable =
 					((pPlug->GetDllBits() == 32) && IsComponentAvailable(pluginBridge32))
@@ -559,11 +559,11 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 		const char *problem;
 	} problemPlugs[] =
 	{
-		{ kEffectMagic, CCONST('N', 'i', '4', 'S'), "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5 or newer.  *" },
-		{ kEffectMagic, CCONST('m', 'd', 'a', 'C'), "MDA Degrade", "*  Old versions of this plugin can crash OpenMPT.\nEnsure that you have the latest version of this plugin.  *" },
-		{ kEffectMagic, CCONST('f', 'V', '2', 's'), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins or use it brigded mode only.  *" },
-		{ kEffectMagic, CCONST('f', 'r', 'V', '2'), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins or use it brigded mode only.  *" },
-		{ kEffectMagic, CCONST('M', 'M', 'I', 'D'), "MIDI Input Output", "* The MIDI Input / Output plugin is now built right into OpenMPT and should not be loaded from an external file. *" },
+		{ Vst::kEffectMagic, Vst::FourCC("Ni4S"), "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5 or newer.  *" },
+		{ Vst::kEffectMagic, Vst::FourCC("mdaC"), "MDA Degrade", "*  Old versions of this plugin can crash OpenMPT.\nEnsure that you have the latest version of this plugin.  *" },
+		{ Vst::kEffectMagic, Vst::FourCC("fV2s"), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins or use it brigded mode only.  *" },
+		{ Vst::kEffectMagic, Vst::FourCC("frV2"), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins or use it brigded mode only.  *" },
+		{ Vst::kEffectMagic, Vst::FourCC("MMID"), "MIDI Input Output", "* The MIDI Input / Output plugin is now built right into OpenMPT and should not be loaded from an external file. *" },
 	};
 
 	// Plugins that should always be bridged.
@@ -575,13 +575,13 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 		bool shareInstance;
 	} bridgedPlugs[] =
 	{
-		{ kEffectMagic, CCONST('f', 'V', '2', 's'), true, true },	// Single instances of V2 can communicate (I think)
-		{ kEffectMagic, CCONST('f', 'r', 'V', '2'), true, false },
-		{ kEffectMagic, CCONST('S', 'K', 'V', '3'), false, true },	// SideKick v3 always has to run in a shared instance
-		{ kEffectMagic, CCONST('Y', 'W', 'S', '!'), false, true },	// You Wa Shock ! always has to run in a shared instance
+		{ Vst::kEffectMagic, Vst::FourCC("fV2s"), true, true },  // Single instances of V2 can communicate (I think)
+		{ Vst::kEffectMagic, Vst::FourCC("frV2"), true, false },
+		{ Vst::kEffectMagic, Vst::FourCC("SKV3"), false, true }, // SideKick v3 always has to run in a shared instance
+		{ Vst::kEffectMagic, Vst::FourCC("YWS!"), false, true }, // You Wa Shock ! always has to run in a shared instance
 	};
 
-	for(auto &p : problemPlugs)
+	for(const auto &p : problemPlugs)
 	{
 		if(p.id2 == plug->pluginId2 && p.id1 == plug->pluginId1)
 		{
@@ -594,7 +594,7 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 		}
 	}
 
-	for(auto &p : bridgedPlugs)
+	for(const auto &p : bridgedPlugs)
 	{
 		if(p.id2 == plug->pluginId2 && p.id1 == plug->pluginId1)
 		{
@@ -625,12 +625,11 @@ void CSelectPluginDlg::OnAddPlugin()
 	VSTPluginLib *plugLib = nullptr;
 	bool update = false;
 
-	const FileDialog::PathList &files = dlg.GetFilenames();
-	for(size_t counter = 0; counter < files.size(); counter++)
+	for(const auto &file : dlg.GetFilenames())
 	{
 		if (pManager)
 		{
-			VSTPluginLib *lib = pManager->AddPlugin(files[counter], mpt::ustring(), false);
+			VSTPluginLib *lib = pManager->AddPlugin(file, mpt::ustring(), false);
 			if(lib != nullptr)
 			{
 				update = true;

@@ -61,6 +61,13 @@ void COwnerVstEditor::OnPaint()
 }
 
 
+void COwnerVstEditor::UpdateParamDisplays()
+{
+	CAbstractVstEditor::UpdateParamDisplays();
+	// We trust that the plugin GUI can update its display with a bit of idle time.
+	static_cast<CVstPlugin &>(m_VstPlugin).Dispatch(Vst::effEditIdle, 0, 0, nullptr, 0.0f);
+}
+
 bool COwnerVstEditor::OpenEditor(CWnd *parent)
 {
 	Create(IDD_PLUGINEDITOR, parent);
@@ -69,26 +76,25 @@ bool COwnerVstEditor::OpenEditor(CWnd *parent)
 	m_plugWindow.Create(nullptr, WS_CHILD | WS_VISIBLE, CRect(0, 0, 100, 100), this);
 
 	// Set editor window size
-	ERect rect;
-	MemsetZero(rect);
-	ERect *pRect = nullptr;
+	Vst::ERect rect{};
+	Vst::ERect *pRect = nullptr;
 	CVstPlugin &vstPlug = static_cast<CVstPlugin &>(m_VstPlugin);
-	vstPlug.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
+	vstPlug.Dispatch(Vst::effEditGetRect, 0, 0, &pRect, 0);
 	if(pRect) rect = *pRect;
-	vstPlug.Dispatch(effEditOpen, 0, 0, m_plugWindow.m_hWnd, 0);
-	vstPlug.Dispatch(effEditGetRect, 0, 0, &pRect, 0);
+	vstPlug.Dispatch(Vst::effEditOpen, 0, 0, m_plugWindow.m_hWnd, 0);
+	vstPlug.Dispatch(Vst::effEditGetRect, 0, 0, &pRect, 0);
 	if(pRect) rect = *pRect;
 	if(rect.right > rect.left && rect.bottom > rect.top)
 	{
 		// Plugin provided valid window size.
-		SetSize(rect.right - rect.left, rect.bottom - rect.top);
+		SetSize(rect.Width(), rect.Height());
 	}
 
-	vstPlug.Dispatch(effEditTop, 0,0, NULL, 0);
-	vstPlug.Dispatch(effEditIdle, 0,0, NULL, 0);
+	vstPlug.Dispatch(Vst::effEditTop, 0,0, nullptr, 0.0f);
+	vstPlug.Dispatch(Vst::effEditIdle, 0,0, nullptr, 0.0f);
 
 	// Set knob mode to linear (2) instead of circular (0) for those plugins that support it (e.g. Steinberg VB-1)
-	vstPlug.Dispatch(effSetEditKnobMode, 0, 2, nullptr, 0.0f);
+	vstPlug.Dispatch(Vst::effSetEditKnobMode, 0, 2, nullptr, 0.0f);
 
 	return CAbstractVstEditor::OpenEditor(parent);
 }
@@ -99,7 +105,7 @@ void COwnerVstEditor::DoClose()
 	// Prevent some plugins from storing a bogus window size (e.g. Electri-Q)
 	ShowWindow(SW_HIDE);
 	if(m_isMinimized) OnNcLButtonDblClk(HTCAPTION, CPoint(0, 0));
-	static_cast<CVstPlugin &>(m_VstPlugin).Dispatch(effEditClose, 0, 0, NULL, 0);
+	static_cast<CVstPlugin &>(m_VstPlugin).Dispatch(Vst::effEditClose, 0, 0, nullptr, 0.0f);
 	CAbstractVstEditor::DoClose();
 }
 

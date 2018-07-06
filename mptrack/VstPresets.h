@@ -1,7 +1,7 @@
 /*
  * VstPresets.h
  * ------------
- * Purpose: VST plugin preset / bank handling
+ * Purpose: Plugin preset / bank handling
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -11,7 +11,6 @@
 #pragma once
 
 #include <iosfwd>
-
 #include "../common/FileReaderFwd.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -41,7 +40,7 @@ protected:
 #else
 	static ErrorCode LoadFile(FileReader &, IMixPlugin &) { return invalidFile; }
 	static bool SaveFile(std::ostream &, IMixPlugin &, bool) { return false; }
-	static const char *GetErrorMessage(ErrorCode) { return "OpenMPT has been built without VST support"; }
+	static const char *GetErrorMessage(ErrorCode) { return "OpenMPT has been built without plugin support"; }
 #endif // NO_PLUGINS
 };
 

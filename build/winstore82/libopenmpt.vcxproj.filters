@@ -300,9 +300,6 @@
     <ClInclude Include="..\..\soundlib\plugins\OpCodes.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h">
-      <Filter>soundlib\plugins</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\PluginManager.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>

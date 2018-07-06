@@ -12,13 +12,11 @@
 
 #ifndef NO_VST
 
-#define VST_FORCE_DEPRECATED 0
-#include <pluginterfaces/vst2.x/aeffectx.h>			// VST
-
 #include "../soundlib/Snd_defs.h"
 #include "../soundlib/plugins/PlugInterface.h"
-#include "../soundlib/plugins/PluginEventQueue.h"
 #include "../soundlib/Mixer.h"
+#include "plugins/VstDefinitions.h"
+#include "plugins/VstEventQueue.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -31,38 +29,31 @@ struct VSTPluginLib;
 class CVstPlugin: public IMidiPlugin
 {
 protected:
-
-	enum
-	{
-		// Number of MIDI events that can be sent to a plugin at once (the internal queue is not affected by this number, it can hold any number of events)
-		vstNumProcessEvents = 256,
-	};
-
 	HMODULE m_hLibrary;
-	AEffect &m_Effect;
-	AEffectProcessProc m_pProcessFP; //Function pointer to AEffect processReplacing if supported, else process.
+	Vst::AEffect &m_Effect;
+	Vst::ProcessProc m_pProcessFP = nullptr; // Function pointer to AEffect processReplacing if supported, else process.
 
-	double lastBarStartPos;
+	double lastBarStartPos = -1.0;
 	uint32 m_nSampleRate;
 
-	bool m_bIsVst2 : 1;
-	bool m_bIsInstrument : 1;
+	bool m_isVst2 : 1;
+	bool m_isInstrument : 1;
 	bool m_isInitialized : 1;
-	bool m_bNeedIdle : 1;
+	bool m_needIdle : 1;
 	bool m_positionChanged : 1;
 
-	PluginEventQueue<vstNumProcessEvents> vstEvents;	// MIDI events that should be sent to the plugin
+	PluginEventQueue vstEvents;	// MIDI events that should be sent to the plugin
 
-	VstTimeInfo timeInfo;
+	Vst::VstTimeInfo timeInfo;
 
 public:
 	const bool isBridged : 1;		// True if our built-in plugin bridge is being used.
 
 public:
-	CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, AEffect &effect, CSoundFile &sndFile);
+	CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, Vst::AEffect &effect, CSoundFile &sndFile);
 	~CVstPlugin();
 
-	static AEffect *LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool forceBridge);
+	static Vst::AEffect *LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool forceBridge);
 
 protected:
 	void Initialize();
@@ -74,7 +65,7 @@ public:
 	uint32 GetLatency() const override { return m_Effect.initialDelay; }
 
 	// Check if programs should be stored as chunks or parameters
-	bool ProgramsAreChunks() const override { return (m_Effect.flags & effFlagsProgramChunks) != 0; }
+	bool ProgramsAreChunks() const override { return (m_Effect.flags & Vst::effFlagsProgramChunks) != 0; }
 	ChunkData GetChunk(bool isBank) override;
 	void SetChunk(const ChunkData &chunk, bool isBank) override;
 	// If true, the plugin produces an output even if silence is being fed into it.
@@ -95,13 +86,13 @@ public:
 	CString GetProgramName(int32 program) override;
 
 	CString GetParamName(PlugParamIndex param) override;
-	CString GetParamLabel(PlugParamIndex param) override { return GetParamPropertyString(param, effGetParamLabel); };
-	CString GetParamDisplay(PlugParamIndex param) override { return GetParamPropertyString(param, effGetParamDisplay); };
+	CString GetParamLabel(PlugParamIndex param) override { return GetParamPropertyString(param, Vst::effGetParamLabel); };
+	CString GetParamDisplay(PlugParamIndex param) override { return GetParamPropertyString(param, Vst::effGetParamDisplay); };
 
-	static VstIntPtr DispatchSEH(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt, unsigned long &exception);
-	VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+	static intptr_t DispatchSEH(Vst::AEffect *effect, Vst::VstOpcodeToPlugin opCode, int32 index, intptr_t value, void *ptr, float opt, unsigned long &exception);
+	intptr_t Dispatch(Vst::VstOpcodeToPlugin opCode, int32 index, intptr_t value, void *ptr, float opt);
 
-	bool HasEditor() const override { return (m_Effect.flags & effFlagsHasEditor) != 0; }
+	bool HasEditor() const override { return (m_Effect.flags & Vst::effFlagsHasEditor) != 0; }
 	CAbstractVstEditor *OpenEditor() override;
 	CString GetDefaultEffectName() override;
 
@@ -138,21 +129,21 @@ public:
 
 protected:
 	// Helper function for retreiving parameter name / label / display
-	CString GetParamPropertyString(VstInt32 param, VstInt32 opcode);
+	CString GetParamPropertyString(int32 param, Vst::VstOpcodeToPlugin opcode);
 
 	// Set up input / output buffers.
 	bool InitializeIOBuffers();
 
 	// Process incoming and outgoing VST events.
 	void ProcessVSTEvents();
-	void ReceiveVSTEvents(const VstEvents *events);
+	void ReceiveVSTEvents(const Vst::VstEvents *events);
 
 	void ReportPlugException(const mpt::ustring &text) const;
 
 public:
-	static VstIntPtr VSTCALLBACK MasterCallBack(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+	static intptr_t VSTCALLBACK MasterCallBack(Vst::AEffect *effect, Vst::VstOpcodeToHost opcode, int32 index, intptr_t value, void *ptr, float opt);
 protected:
-	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel);
+	intptr_t VstFileSelector(bool destructor, Vst::VstFileSelect &fileSel);
 };
 
 

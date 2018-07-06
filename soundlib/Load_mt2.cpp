@@ -682,7 +682,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 						// Remove ".dll" from library name
 						mixPlug.Info.szLibraryName[len - 4] = '\0';
 					}
-					mixPlug.Info.dwPluginId1 = kEffectMagic;
+					mixPlug.Info.dwPluginId1 = Vst::kEffectMagic;
 					mixPlug.Info.dwPluginId2 = vstHeader.fxID;
 					if(vstHeader.track >= m_nChannels)
 					{

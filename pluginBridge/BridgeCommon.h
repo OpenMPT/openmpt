@@ -290,7 +290,7 @@ struct InitMsg : public MsgHeader
 };
 
 
-// Host-to-bridge VST dispatch message
+// Host-to-bridge or bridge-to-host VST dispatch message
 struct DispatchMsg : public MsgHeader
 {
 	int32 opcode;
@@ -348,7 +348,7 @@ union BridgeMessage
 		SetType(MsgHeader::init, sizeof(InitMsg));
 
 		init.result = 0;
-		init.hostPtrSize = sizeof(VstIntPtr);
+		init.hostPtrSize = sizeof(intptr_t);
 		init.mixBufSize = mixBufSize;
 		init.fullMemDump = fullMemDump;
 		wcsncpy(init.str, pluginPath, CountOf(init.str) - 1);
@@ -364,6 +364,16 @@ union BridgeMessage
 		dispatch.value = value;
 		dispatch.ptr = ptr;
 		dispatch.opt = opt;
+	}
+
+	void Dispatch(Vst::VstOpcodeToHost opcode, int32 index, int64 value, int64 ptr, float opt, uint32 extraDataSize)
+	{
+		Dispatch(static_cast<int32>(opcode), index, value, ptr, opt, extraDataSize);
+	}
+
+	void Dispatch(Vst::VstOpcodeToPlugin opcode, int32 index, int64 value, int64 ptr, float opt, uint32 extraDataSize)
+	{
+		Dispatch(static_cast<int32>(opcode), index, value, ptr, opt, extraDataSize);
 	}
 
 	void SetParameter(int32 index, float value)
@@ -420,23 +430,23 @@ struct SharedMemLayout
 
 	union
 	{
-		AEffect effect;		// Native layout
+		Vst::AEffect effect; // Native layout
 		AEffect32 effect32;
 		AEffect64 effect64;
 	};
 	MsgQueue toHost;
 	MsgQueue toBridge;
 	AutomationQueue automationQueue;
-	VstTimeInfo timeInfo;
+	Vst::VstTimeInfo timeInfo;
 	int32 tailSize;
 };
-static_assert(sizeof(AEffect) <= sizeof(AEffect64), "Something's going very wrong here.");
+static_assert(sizeof(Vst::AEffect) <= sizeof(AEffect64), "Something's going very wrong here.");
 
 
 // For caching parameter information
 struct ParameterInfo
 {
-	VstParameterProperties props;
+	Vst::VstParameterProperties props;
 	char name[64];
 	char label[64];
 	char display[64];

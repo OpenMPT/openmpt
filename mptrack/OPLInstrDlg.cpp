@@ -162,8 +162,7 @@ void OPLInstrDlg::SetPatch(OPLPatch &patch)
 
 void OPLInstrDlg::ParamsChanged()
 {
-	OPLPatch patch;
-	patch.fill(0);
+	OPLPatch patch{{}};
 	if(m_additive.GetCheck() != BST_UNCHECKED) patch[10] |= OPL::CONNECTION_BIT;
 	patch[10] |= static_cast<uint8>(m_feedback.GetPos() << 1);
 	for(int op = 0; op < 2; op++)

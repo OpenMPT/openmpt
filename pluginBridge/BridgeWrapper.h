@@ -83,8 +83,8 @@ protected:
 	
 	bool isSettingProgram;
 
-	ERect editRect;
-	VstSpeakerArrangement speakers[2];
+	Vst::ERect editRect;
+	Vst::VstSpeakerArrangement speakers[2];
 
 	ComponentHandle<ComponentPluginBridge32> pluginBridge32;
 	ComponentHandle<ComponentPluginBridge64> pluginBridge64;
@@ -122,7 +122,7 @@ public:
 	static bool IsPluginNative(const mpt::PathString &pluginPath) { return GetPluginBinaryType(pluginPath) == mpt::arch_bits; }
 	static uint64 GetFileVersion(const WCHAR *exePath);
 
-	static AEffect *Create(const VSTPluginLib &plugin);
+	static Vst::AEffect *Create(const VSTPluginLib &plugin);
 
 protected:
 	BridgeWrapper() : isSettingProgram(false) { }
@@ -138,18 +138,18 @@ protected:
 	void SendAutomationQueue();
 	AuxMem *GetAuxMemory(uint32 size);
 
-	static VstIntPtr VSTCALLBACK DispatchToPlugin(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	VstIntPtr DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	static void VSTCALLBACK SetParameter(AEffect *effect, VstInt32 index, float parameter);
-	void SetParameter(VstInt32 index, float parameter);
-	static float VSTCALLBACK GetParameter(AEffect *effect, VstInt32 index);
-	float GetParameter(VstInt32 index);
-	static void VSTCALLBACK Process(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleFrames);
-	static void VSTCALLBACK ProcessReplacing(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleFrames);
-	static void VSTCALLBACK ProcessDoubleReplacing(AEffect *effect, double **inputs, double **outputs, VstInt32 sampleFrames);
+	static intptr_t VSTCALLBACK DispatchToPlugin(Vst::AEffect *effect, Vst::VstOpcodeToPlugin opcode, int32 index, intptr_t value, void *ptr, float opt);
+	intptr_t DispatchToPlugin(Vst::VstOpcodeToPlugin opcode, int32 index, intptr_t value, void *ptr, float opt);
+	static void VSTCALLBACK SetParameter(Vst::AEffect *effect, int32 index, float parameter);
+	void SetParameter(int32 index, float parameter);
+	static float VSTCALLBACK GetParameter(Vst::AEffect *effect, int32 index);
+	float GetParameter(int32 index);
+	static void VSTCALLBACK Process(Vst::AEffect *effect, float **inputs, float **outputs, int32 sampleFrames);
+	static void VSTCALLBACK ProcessReplacing(Vst::AEffect *effect, float **inputs, float **outputs, int32 sampleFrames);
+	static void VSTCALLBACK ProcessDoubleReplacing(Vst::AEffect *effect, double **inputs, double **outputs, int32 sampleFrames);
 
 	template<typename buf_t>
-	void BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 numInputs, VstInt32 numOutputs, buf_t **inputs, buf_t **outputs, VstInt32 sampleFrames);
+	void BuildProcessBuffer(ProcessMsg::ProcessType type, int32 numInputs, int32 numOutputs, buf_t **inputs, buf_t **outputs, int32 sampleFrames);
 };
 
 OPENMPT_NAMESPACE_END

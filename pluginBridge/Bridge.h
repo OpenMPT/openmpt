@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include <array>
 #include <vector>
 #include "BridgeCommon.h"
 
@@ -27,7 +28,7 @@ protected:
 	static WNDCLASSEX windowClass;
 
 	// Plugin
-	AEffect *nativeEffect;
+	Vst::AEffect *nativeEffect;
 	HMODULE library;
 	HWND window, windowParent;
 	int windowWidth, windowHeight;
@@ -36,7 +37,7 @@ protected:
 	// Static memory for host-to-plugin pointers
 	union
 	{
-		VstSpeakerArrangement speakerArrangement;
+		Vst::VstSpeakerArrangement speakerArrangement;
 		char name[256];
 	} host2PlugMem;
 	std::vector<char> eventCache;	// Cached VST (MIDI) events
@@ -71,10 +72,10 @@ protected:
 	void Process();
 	void ProcessReplacing();
 	void ProcessDoubleReplacing();
-	VstIntPtr DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
-	VstIntPtr VstFileSelector(bool destructor, VstFileSelect *fileSel);
+	intptr_t DispatchToHost(Vst::VstOpcodeToHost opcode, int32 index, intptr_t value, void *ptr, float opt);
+	intptr_t VstFileSelector(bool destructor, Vst::VstFileSelect &fileSel);
 	void SendErrorMessage(const wchar_t *str);
-	VstIntPtr Dispatch(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+	intptr_t Dispatch(Vst::VstOpcodeToPlugin opcode, int32 index, intptr_t value, void *ptr, float opt);
 
 	template<typename buf_t>
 	int32 BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPointers));
@@ -83,7 +84,7 @@ protected:
 
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	static VstIntPtr VSTCALLBACK MasterCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt);
+	static intptr_t VSTCALLBACK MasterCallback(Vst::AEffect *effect, Vst::VstOpcodeToHost, int32 index, intptr_t value, void *ptr, float opt);
 };
 
 

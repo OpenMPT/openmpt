@@ -1,7 +1,7 @@
 /*
  * VstPresets.cpp
  * --------------
- * Purpose: VST plugin preset / bank handling
+ * Purpose: Plugin preset / bank handling
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -26,13 +26,13 @@ OPENMPT_NAMESPACE_BEGIN
 // This part of the header is identical for both presets and banks.
 struct ChunkHeader
 {
-	char    chunkMagic[4];	///< 'CcnK'
-	int32be byteSize;		///< size of this chunk, excl. magic + byteSize
+	char    chunkMagic[4];	// 'CcnK'
+	int32be byteSize;		// Size of this chunk, excluding magic + byteSize
 
-	char    fxMagic[4];		///< 'FxBk' (regular) or 'FBCh' (opaque chunk)
-	int32be version;		///< format version (1 or 2)
-	int32be fxID;			///< fx unique ID
-	int32be fxVersion;		///< fx version
+	char    fxMagic[4];		// 'FxBk' (regular) or 'FBCh' (opaque chunk)
+	int32be version;		// Format version (1 or 2)
+	int32be fxID;			// Plugin unique ID
+	int32be fxVersion;		// Plugin version
 };
 
 MPT_BINARY_STRUCT(ChunkHeader, 24)
@@ -62,13 +62,13 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 #ifndef NO_VST
 		if(vstPlug != nullptr)
 		{
-			VstPatchChunkInfo info;
+			Vst::VstPatchChunkInfo info;
 			info.version = 1;
 			info.pluginUniqueID = header.fxID;
 			info.pluginVersion = header.fxVersion;
 			info.numElements = numParams;
-			MemsetZero(info.future);
-			vstPlug->Dispatch(effBeginLoadProgram, 0, 0, &info, 0.0f);
+			MemsetZero(info.reserved);
+			vstPlug->Dispatch(Vst::effBeginLoadProgram, 0, 0, &info, 0.0f);
 		}
 #endif
 		plugin.BeginSetProgram();
@@ -114,13 +114,13 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 #ifndef NO_VST
 		if(vstPlug != nullptr)
 		{
-			VstPatchChunkInfo info;
+			Vst::VstPatchChunkInfo info;
 			info.version = 1;
 			info.pluginUniqueID = header.fxID;
 			info.pluginVersion = header.fxVersion;
 			info.numElements = numProgs;
-			MemsetZero(info.future);
-			vstPlug->Dispatch(effBeginLoadBank, 0, 0, &info, 0.0f);
+			MemsetZero(info.reserved);
+			vstPlug->Dispatch(Vst::effBeginLoadBank, 0, 0, &info, 0.0f);
 		}
 #endif
 

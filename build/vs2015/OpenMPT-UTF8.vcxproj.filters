@@ -465,6 +465,12 @@
     <ClInclude Include="..\..\mptrack\plugins\MidiInOutEditor.h">
       <Filter>mptrack\plugins</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\plugins\VstDefinitions.h">
+      <Filter>mptrack\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\plugins\VstEventQueue.h">
+      <Filter>mptrack\plugins</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\resource.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -691,9 +697,6 @@
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\PlugInterface.h">
-      <Filter>soundlib\plugins</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\PluginManager.h">

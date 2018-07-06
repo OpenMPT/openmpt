@@ -31,14 +31,13 @@ public:
 	afx_msg void OnPaint();
 
 	// Plugins may request to change the GUI size.
-	virtual bool IsResizable() const { return true; };
-	virtual bool SetSize(int contentWidth, int contentHeight);
+	bool IsResizable() const override { return true; };
+	bool SetSize(int contentWidth, int contentHeight) override;
 
-	// Overridden:
-	virtual void UpdateParamDisplays() { CAbstractVstEditor::UpdateParamDisplays(); static_cast<CVstPlugin &>(m_VstPlugin).Dispatch(effEditIdle, 0, 0, nullptr, 0.0f); };	//we trust that the plugin GUI can update its display with a bit of idle time.
+	void UpdateParamDisplays() override;
 
-	virtual bool OpenEditor(CWnd *parent);
-	virtual void DoClose();
+	bool OpenEditor(CWnd *parent) override;
+	void DoClose() override;
 };
 
 #endif // NO_VST

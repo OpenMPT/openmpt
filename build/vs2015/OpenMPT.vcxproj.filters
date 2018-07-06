@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="build">
@@ -264,6 +264,9 @@
     <ClInclude Include="..\..\mptrack\HTTP.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\IPCWindow.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\Image.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -460,6 +463,12 @@
       <Filter>mptrack\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\plugins\MidiInOutEditor.h">
+      <Filter>mptrack\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\plugins\VstDefinitions.h">
+      <Filter>mptrack\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\plugins\VstEventQueue.h">
       <Filter>mptrack\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\resource.h">
@@ -690,9 +699,6 @@
     <ClInclude Include="..\..\soundlib\plugins\PlugInterface.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\soundlib\plugins\PluginEventQueue.h">
-      <Filter>soundlib\plugins</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\PluginManager.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
@@ -770,9 +776,6 @@
     </ClInclude>
     <ClInclude Include="..\..\unarchiver\unzip.h">
       <Filter>unarchiver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mptrack\IPCWindow.h">
-      <Filter>mptrack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

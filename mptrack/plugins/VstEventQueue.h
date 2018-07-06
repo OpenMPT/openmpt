@@ -1,7 +1,7 @@
 /*
  * PluginEventQueue.h
  * ------------------
- * Purpose: Alternative, easy to use implementation of the VST event queue mechanism.
+ * Purpose: Event queue for VST events.
  * Notes  : Modelled after an idea from http://www.kvraudio.com/forum/viewtopic.php?p=3043807#p3043807
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -11,29 +11,12 @@
 #pragma once
 
 #include <deque>
-#include "../common/mptMutex.h"
-
-// Copied packing options from affectx.h
-#if TARGET_API_MAC_CARBON
-	#ifdef __LP64__
-	#pragma options align=power
-	#else
-	#pragma options align=mac68k
-	#endif
-#elif defined __BORLANDC__
-	#pragma -a8
-#elif defined(__GNUC__)
-	#pragma pack(push,8)
-#elif defined(WIN32) || defined(__FLAT__)
-	#pragma pack(push)
-	#pragma pack(8)
-#endif
+#include "../../common/mptMutex.h"
+#include "VstDefinitions.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
-// Alternative, easy to use implementation of VstEvents struct.
-template <size_t N>
-class PluginEventQueue
+class PluginEventQueue : public Vst::VstEvents
 {
 protected:
 
@@ -41,16 +24,12 @@ protected:
 	// VstMidiSysexEvent contains 3 pointers, so the struct size differs between 32-Bit and 64-Bit systems.
 	union Event
 	{
-		VstEvent event;
-		VstMidiEvent midi;
-		VstMidiSysexEvent sysex;
+		Vst::VstEvent event;
+		Vst::VstMidiEvent midi;
+		Vst::VstMidiSysexEvent sysex;
 	};
 
-	// The first three member variables of this class mustn't be changed, to be compatible with the original VSTEvents struct.
-	VstInt32 numEvents;		///< number of Events in array
-	VstIntPtr reserved;		///< zero (Reserved for future use)
-	VstEvent *events[N];	///< event pointer array
-	// Here we store our events.
+	// Here we store our events which are then inserted into the fixed-size event buffer sent to the plugin.
 	std::deque<Event> eventQueue;
 	// Since plugins can also add events to the queue (even from a different thread than the processing thread),
 	// we need to ensure that reading and writing is never done in parallel.
@@ -62,14 +41,7 @@ public:
 	{
 		numEvents = 0;
 		reserved = 0;
-		MemsetZero(events);
-	}
-
-	// Get the number of events that are currently in the output buffer.
-	// It is possible that there are more events left in the queue if the output buffer is full.
-	size_t GetNumEvents()
-	{
-		return numEvents;
+		events.fill(nullptr);
 	}
 
 	// Get the number of events that are currently queued, but not in the output buffer.
@@ -80,30 +52,29 @@ public:
 
 	// Add a VST event to the queue. Returns true on success.
 	// Set insertFront to true to prioritise this event (i.e. add it at the front of the queue instead of the back)
-	bool Enqueue(const VstEvent *event, bool insertFront = false)
+	bool Enqueue(const Vst::VstEvent *event, bool insertFront = false)
 	{
-		MPT_ASSERT(event->type != kVstSysExType || event->byteSize == sizeof(VstMidiSysexEvent));
-		MPT_ASSERT(event->type != kVstMidiType || event->byteSize == sizeof(VstMidiEvent));
+		MPT_ASSERT(event->type != Vst::kVstSysExType || event->byteSize == sizeof(Vst::VstMidiSysexEvent));
+		MPT_ASSERT(event->type != Vst::kVstMidiType || event->byteSize == sizeof(Vst::VstMidiEvent));
 
 		Event copyEvent;
 		size_t copySize = std::min(size_t(event->byteSize), sizeof(copyEvent));
 		// randomid by Insert Piz Here sends events of type kVstMidiType, but with a claimed size of 24 bytes instead of 32.
-		if(event->type == kVstSysExType)
-			copySize = sizeof(VstMidiSysexEvent);
-		else if(event->type == kVstMidiType)
-			copySize = sizeof(VstMidiEvent);
+		if(event->type == Vst::kVstSysExType)
+			copySize = sizeof(Vst::VstMidiSysexEvent);
+		else if(event->type == Vst::kVstMidiType)
+			copySize = sizeof(Vst::VstMidiEvent);
 		memcpy(&copyEvent, event, copySize);
 
-		if(event->type == kVstSysExType)
+		if(event->type == Vst::kVstSysExType)
 		{
 			// SysEx messages need to be copied, as the space used for the dump might be freed in the meantime.
-			VstMidiSysexEvent &e = copyEvent.sysex;
-			e.sysexDump = new (std::nothrow) char[e.dumpBytes];
-			if(e.sysexDump == nullptr)
-			{
+			auto &e = copyEvent.sysex;
+			auto sysexDump = new (std::nothrow) mpt::byte[e.dumpBytes];
+			if(sysexDump == nullptr)
 				return false;
-			}
-			memcpy(e.sysexDump, reinterpret_cast<const VstMidiSysexEvent *>(event)->sysexDump, e.dumpBytes);
+			memcpy(sysexDump, reinterpret_cast<const Vst::VstMidiSysexEvent *>(event)->sysexDump, e.dumpBytes);
+			e.sysexDump = sysexDump;
 		}
 
 		MPT_LOCK_GUARD<mpt::mutex> lock(criticalSection);
@@ -115,11 +86,11 @@ public:
 	}
 
 	// Set up the queue for transmitting to the plugin. Returns number of elements that are going to be transmitted.
-	VstInt32 Finalise()
+	int32 Finalise()
 	{
 		MPT_LOCK_GUARD<mpt::mutex> lock(criticalSection);
-		numEvents = static_cast<VstInt32>(std::min(eventQueue.size(), N));
-		for(VstInt32 i = 0; i < numEvents; i++)
+		numEvents = static_cast<int32>(std::min(eventQueue.size(), MAX_EVENTS));
+		for(int32 i = 0; i < numEvents; i++)
 		{
 			events[i] = &eventQueue[i].event;
 		}
@@ -135,7 +106,7 @@ public:
 			// Release temporarily allocated buffer for SysEx messages
 			for(auto e = eventQueue.begin(); e != eventQueue.begin() + numEvents; ++e)
 			{
-				if(e->event.type == kVstSysExType)
+				if(e->event.type == Vst::kVstSysExType)
 				{
 					delete[] e->sysex.sysexDump;
 				}
@@ -146,14 +117,5 @@ public:
 	}
 
 };
-
-#if TARGET_API_MAC_CARBON
-	#pragma options align=reset
-#elif defined(WIN32) || defined(__FLAT__) || defined(__GNUC__)
-	#pragma pack(pop)
-#elif defined __BORLANDC__
-	#pragma -a-
-#endif
-
 
 OPENMPT_NAMESPACE_END

@@ -21,6 +21,8 @@
 #include "../common/mptStringBuffer.h"
 #include "../common/misc_util.h"
 
+using namespace Vst;
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -257,7 +259,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 	sharedMem->effect.setParameter = SetParameter;
 	sharedMem->effect.getParameter = GetParameter;
 	sharedMem->effect.process = Process;
-	memcpy(&(sharedMem->effect.resvd2), "OMPT", 4);
+	memcpy(&(sharedMem->effect.reservedForHost2), "OMPT", 4);
 
 	sigThreadExit.Create(true);
 	sigAutomation.Create(true);
@@ -474,7 +476,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		{
 			// If the song is playing, the rendering thread might be active at the moment,
 			// so we should keep the current processing memory alive until it is done for sure.
-			const CVstPlugin *plug = FromVstPtr<CVstPlugin>(sharedMem->effect.resvd1);
+			const CVstPlugin *plug = static_cast<CVstPlugin *>(sharedMem->effect.reservedForHost1);
 			const bool isPlaying = plug != nullptr && plug->IsResumed();
 			if(isPlaying)
 			{
@@ -502,7 +504,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		return;
 	}
 
-	VstIntPtr result = CVstPlugin::MasterCallBack(&sharedMem->effect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt);
+	intptr_t result = CVstPlugin::MasterCallBack(&sharedMem->effect, static_cast<VstOpcodeToHost>(msg->opcode), msg->index, static_cast<intptr_t>(msg->value), ptr, msg->opt);
 	msg->result = static_cast<int32>(result);
 
 	// Post-fix some opcodes
@@ -512,7 +514,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		// VstTimeInfo* in [return value]
 		if(msg->result != 0)
 		{
-			sharedMem->timeInfo = *FromVstPtr<VstTimeInfo>(result);
+			sharedMem->timeInfo = *FromIntPtr<VstTimeInfo>(result);
 		}
 		break;
 
@@ -521,7 +523,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		if(msg->result != 0)
 		{
 			char *target = static_cast<char *>(ptr);
-			strncpy(target, FromVstPtr<const char>(result), static_cast<size_t>(msg->ptr - 1));
+			strncpy(target, FromIntPtr<const char>(result), static_cast<size_t>(msg->ptr - 1));
 			target[msg->ptr - 1] = 0;
 		}
 		break;
@@ -529,7 +531,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 }
 
 
-VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+intptr_t VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstOpcodeToPlugin opcode, int32 index, intptr_t value, void *ptr, float opt)
 {
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
 	if(that != nullptr)
@@ -540,7 +542,7 @@ VstIntPtr VSTCALLBACK BridgeWrapper::DispatchToPlugin(AEffect *effect, VstInt32 
 }
 
 
-VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+intptr_t BridgeWrapper::DispatchToPlugin(VstOpcodeToPlugin opcode, int32 index, intptr_t value, void *ptr, float opt)
 {
 	std::vector<char> dispatchData(sizeof(DispatchMsg), 0);
 	int64 ptrOut = 0;
@@ -694,7 +696,7 @@ VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIn
 		// VstSpeakerArrangement* in [value] and [ptr]
 		ptrOut = sizeof(VstSpeakerArrangement) * 2;
 		PushToVector(dispatchData, *static_cast<VstSpeakerArrangement *>(ptr));
-		PushToVector(dispatchData, *FromVstPtr<VstSpeakerArrangement>(value));
+		PushToVector(dispatchData, *FromIntPtr<VstSpeakerArrangement>(value));
 		break;
 
 	case effVendorSpecific:
@@ -703,11 +705,11 @@ VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIn
 			switch(value)
 			{
 			case kGetWrapperPointer:
-				return ToVstPtr<BridgeWrapper>(this);
+				return ToIntPtr<BridgeWrapper>(this);
 
 			case kCloseOldProcessingMemory:
 				{
-					VstIntPtr result = oldProcessMem.Good();
+					intptr_t result = oldProcessMem.Good();
 					oldProcessMem.Close();
 					return result;
 				}
@@ -916,7 +918,7 @@ VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIn
 		speakers[0] = *reinterpret_cast<const VstSpeakerArrangement *>(extraData);
 		speakers[1] = *(reinterpret_cast<const VstSpeakerArrangement *>(extraData) + 1);
 		*static_cast<VstSpeakerArrangement *>(ptr) = speakers[0];
-		*FromVstPtr<VstSpeakerArrangement>(value) = speakers[1];
+		*FromIntPtr<VstSpeakerArrangement>(value) = speakers[1];
 		break;
 
 	default:
@@ -932,7 +934,7 @@ VstIntPtr BridgeWrapper::DispatchToPlugin(VstInt32 opcode, VstInt32 index, VstIn
 		InterlockedExchange(&auxMem->used, 0);
 	}
 
-	return static_cast<VstIntPtr>(resultMsg->result);
+	return static_cast<intptr_t>(resultMsg->result);
 }
 
 
@@ -998,7 +1000,7 @@ void BridgeWrapper::SendAutomationQueue()
 
 }
 
-void VSTCALLBACK BridgeWrapper::SetParameter(AEffect *effect, VstInt32 index, float parameter)
+void VSTCALLBACK BridgeWrapper::SetParameter(AEffect *effect, int32 index, float parameter)
 {
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
 	if(that)
@@ -1014,9 +1016,9 @@ void VSTCALLBACK BridgeWrapper::SetParameter(AEffect *effect, VstInt32 index, fl
 }
 
 
-void BridgeWrapper::SetParameter(VstInt32 index, float parameter)
+void BridgeWrapper::SetParameter(int32 index, float parameter)
 {
-	const CVstPlugin *plug = FromVstPtr<CVstPlugin>(sharedMem->effect.resvd1);
+	const CVstPlugin *plug = static_cast<CVstPlugin *>(sharedMem->effect.reservedForHost1);
 	AutomationQueue &autoQueue = sharedMem->automationQueue;
 	if(isSettingProgram || (plug && plug->IsResumed()))
 	{
@@ -1051,7 +1053,7 @@ void BridgeWrapper::SetParameter(VstInt32 index, float parameter)
 }
 
 
-float VSTCALLBACK BridgeWrapper::GetParameter(AEffect *effect, VstInt32 index)
+float VSTCALLBACK BridgeWrapper::GetParameter(AEffect *effect, int32 index)
 {
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
 	if(that)
@@ -1068,7 +1070,7 @@ float VSTCALLBACK BridgeWrapper::GetParameter(AEffect *effect, VstInt32 index)
 }
 
 
-float BridgeWrapper::GetParameter(VstInt32 index)
+float BridgeWrapper::GetParameter(int32 index)
 {
 	BridgeMessage msg;
 	msg.GetParameter(index);
@@ -1080,7 +1082,7 @@ float BridgeWrapper::GetParameter(VstInt32 index)
 }
 
 
-void VSTCALLBACK BridgeWrapper::Process(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleFrames)
+void VSTCALLBACK BridgeWrapper::Process(AEffect *effect, float **inputs, float **outputs, int32 sampleFrames)
 {
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
 	if(sampleFrames != 0 && that != nullptr)
@@ -1090,7 +1092,7 @@ void VSTCALLBACK BridgeWrapper::Process(AEffect *effect, float **inputs, float *
 }
 
 
-void VSTCALLBACK BridgeWrapper::ProcessReplacing(AEffect *effect, float **inputs, float **outputs, VstInt32 sampleFrames)
+void VSTCALLBACK BridgeWrapper::ProcessReplacing(AEffect *effect, float **inputs, float **outputs, int32 sampleFrames)
 {
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
 	if(sampleFrames != 0 && that != nullptr)
@@ -1100,7 +1102,7 @@ void VSTCALLBACK BridgeWrapper::ProcessReplacing(AEffect *effect, float **inputs
 }
 
 
-void VSTCALLBACK BridgeWrapper::ProcessDoubleReplacing(AEffect *effect, double **inputs, double **outputs, VstInt32 sampleFrames)
+void VSTCALLBACK BridgeWrapper::ProcessDoubleReplacing(AEffect *effect, double **inputs, double **outputs, int32 sampleFrames)
 {
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
 	if(sampleFrames != 0 && that != nullptr)
@@ -1111,7 +1113,7 @@ void VSTCALLBACK BridgeWrapper::ProcessDoubleReplacing(AEffect *effect, double *
 
 
 template<typename buf_t>
-void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 numInputs, VstInt32 numOutputs, buf_t **inputs, buf_t **outputs, VstInt32 sampleFrames)
+void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, int32 numInputs, int32 numOutputs, buf_t **inputs, buf_t **outputs, int32 sampleFrames)
 {
 	if(!processMem.Good())
 	{
@@ -1127,7 +1129,7 @@ void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 nu
 	sharedMem->timeInfo = *reinterpret_cast<VstTimeInfo *>(CVstPlugin::MasterCallBack(&sharedMem->effect, audioMasterGetTime, 0, kVstNanosValid | kVstPpqPosValid | kVstTempoValid | kVstBarsValid | kVstCyclePosValid | kVstTimeSigValid | kVstSmpteValid | kVstClockValid, nullptr, 0.0f));
 
 	buf_t *ptr = reinterpret_cast<buf_t *>(processMsg + 1);
-	for(VstInt32 i = 0; i < numInputs; i++)
+	for(int32 i = 0; i < numInputs; i++)
 	{
 		memcpy(ptr, inputs[i], sampleFrames * sizeof(buf_t));
 		ptr += sampleFrames;
@@ -1153,7 +1155,7 @@ void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, VstInt32 nu
 		}
 	} while (result == WAIT_TIMEOUT);
 
-	for(VstInt32 i = 0; i < numOutputs; i++)
+	for(int32 i = 0; i < numOutputs; i++)
 	{
 		//memcpy(outputs[i], ptr, sampleFrames * sizeof(buf_t));
 		outputs[i] = ptr;	// Exactly what you don't want plugins to do usually (bend your output pointers)... muahahaha!

@@ -309,11 +309,11 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 
 // Extract instrument and category information from plugin.
 #ifndef NO_VST
-static void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
+static void GetPluginInformation(Vst::AEffect *effect, VSTPluginLib &library)
 {
 	unsigned long exception = 0;
-	library.category = static_cast<VSTPluginLib::PluginCategory>(CVstPlugin::DispatchSEH(effect, effGetPlugCategory, 0, 0, nullptr, 0, exception));
-	library.isInstrument = ((effect->flags & effFlagsIsSynth) || !effect->numInputs);
+	library.category = static_cast<VSTPluginLib::PluginCategory>(CVstPlugin::DispatchSEH(effect, Vst::effGetPlugCategory, 0, 0, nullptr, 0, exception));
+	library.isInstrument = ((effect->flags & Vst::effFlagsIsSynth) || !effect->numInputs);
 
 	if(library.isInstrument)
 	{
@@ -325,7 +325,7 @@ static void GetPluginInformation(AEffect *effect, VSTPluginLib &library)
 
 #ifdef MODPLUG_TRACKER
 	std::vector<char> s(256, 0);
-	CVstPlugin::DispatchSEH(effect, effGetVendorString, 0, 0, s.data(), 0, exception);
+	CVstPlugin::DispatchSEH(effect, Vst::effGetVendorString, 0, 0, s.data(), 0, exception);
 	library.vendor = mpt::ToCString(mpt::CharsetLocale, s.data());
 #endif // MODPLUG_TRACKER
 }
@@ -417,11 +417,11 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	unsigned long exception = 0;
 	// Always scan plugins in a separate process
 	HINSTANCE hLib = NULL;
-	AEffect *pEffect = CVstPlugin::LoadPlugin(*plug, hLib, true);
+	Vst::AEffect *pEffect = CVstPlugin::LoadPlugin(*plug, hLib, true);
 
-	if(pEffect != nullptr && pEffect->magic == kEffectMagic && pEffect->dispatcher != nullptr)
+	if(pEffect != nullptr && pEffect->magic == Vst::kEffectMagic && pEffect->dispatcher != nullptr)
 	{
-		CVstPlugin::DispatchSEH(pEffect, effOpen, 0, 0, 0, 0, exception);
+		CVstPlugin::DispatchSEH(pEffect, Vst::effOpen, 0, 0, 0, 0, exception);
 
 		plug->pluginId1 = pEffect->magic;
 		plug->pluginId2 = pEffect->uniqueID;
@@ -438,7 +438,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 			pEffect->flags, pEffect->realQualities, pEffect->offQualities);
 #endif // VST_LOG
 
-		CVstPlugin::DispatchSEH(pEffect, effClose, 0, 0, 0, 0, exception);
+		CVstPlugin::DispatchSEH(pEffect, Vst::effClose, 0, 0, 0, 0, exception);
 
 		validPlug = true;
 	}
@@ -576,15 +576,15 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	}
 
 #ifndef NO_VST
-	if(pFound && mixPlugin.Info.dwPluginId1 == kEffectMagic)
+	if(pFound && mixPlugin.Info.dwPluginId1 == Vst::kEffectMagic)
 	{
-		AEffect *pEffect = nullptr;
+		Vst::AEffect *pEffect = nullptr;
 		HINSTANCE hLibrary = nullptr;
 		bool validPlugin = false;
 
 		pEffect = CVstPlugin::LoadPlugin(*pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins);
 
-		if(pEffect != nullptr && pEffect->dispatcher != nullptr && pEffect->magic == kEffectMagic)
+		if(pEffect != nullptr && pEffect->dispatcher != nullptr && pEffect->magic == Vst::kEffectMagic)
 		{
 			validPlugin = true;
 

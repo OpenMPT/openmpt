@@ -75,9 +75,6 @@ call :download_and_unpack "xmplay"    "https://www.un4seen.com/files/xmp-sdk.zip
 
 call :download_and_unpack "ASIOSDK2"  "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3"       "-" || goto error
 
-call :download_and_unpack "vstsdk2.4" "https://www.steinberg.net/sdk_downloads/vstsdk367_03_03_2017_build_352.zip" "vstsdk367_03_03_2017_build_352.zip" "VST_SDK\VST2_SDK" "-" || goto error
-rmdir /s /q include\VST_SDK || goto error
-
 call :download_and_unpack "htmlhelp" "https://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "htmlhelp.exe" "." "-" || goto error
 
 goto ok

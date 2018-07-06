@@ -634,6 +634,9 @@ mpt::ustring GetFullCreditsString()
 		"Hermann Seib for his example VST Host implementation\n"
 		"http://www.hermannseib.com/english/vsthost.htm\n"
 		"\n"
+		"Benjamin \"BeRo\" Rosseaux for his independent VST header\n"
+		"https://blog.rosseaux.net/\n"
+		"\n"
 #endif
 		"Storlek for all the IT compatibility hints and testcases\n"
 		"as well as the IMF, MDL, OKT and ULT loaders\n"

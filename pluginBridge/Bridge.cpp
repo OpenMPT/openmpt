@@ -9,7 +9,7 @@
 
 
 // TODO
-// Translate VstIntPtr size in remaining structs: VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow (all these are currently not supported by OpenMPT, so not urgent at all)
+// Translate pointer-sized members in remaining structs: VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow (all these are currently not supported by OpenMPT, so not urgent at all)
 // Optimize out audioMasterProcessEvents the same way as effProcessEvents?
 // Find a nice solution for audioMasterIdle that doesn't break TAL-Elek7ro-II
 // Kirnu and Combo F GUI deadlocks during playback
@@ -44,6 +44,7 @@
 
 #include "../common/WriteMemoryDump.h"
 #include "Bridge.h"
+using namespace Vst;
 
 
 // Crash handler for writing memory dumps
@@ -435,18 +436,17 @@ void PluginBridge::InitBridge(InitMsg *msg)
 		return;
 	}
 
-	typedef AEffect * (VSTCALLBACK * PVSTPLUGENTRY)(audioMasterCallback);
-	PVSTPLUGENTRY pMainProc = (PVSTPLUGENTRY)GetProcAddress(library, "VSTPluginMain");
-	if(pMainProc == nullptr)
+	auto mainProc = (Vst::MainProc)GetProcAddress(library, "VSTPluginMain");
+	if(mainProc == nullptr)
 	{
-		pMainProc = (PVSTPLUGENTRY)GetProcAddress(library, "main");
+		mainProc = (Vst::MainProc)GetProcAddress(library, "main");
 	}
 
-	if(pMainProc != nullptr)
+	if(mainProc != nullptr)
 	{
 		__try
 		{
-			nativeEffect = pMainProc(MasterCallback);
+			nativeEffect = mainProc(MasterCallback);
 		} __except(EXCEPTION_EXECUTE_HANDLER)
 		{
 			nativeEffect = nullptr;
@@ -463,7 +463,7 @@ void PluginBridge::InitBridge(InitMsg *msg)
 		return;
 	}
 
-	nativeEffect->resvd1 = ToVstPtr(this);
+	nativeEffect->reservedForHost1 = this;
 
 	msg->result = 1;
 
@@ -483,7 +483,7 @@ void PluginBridge::SendErrorMessage(const wchar_t *str)
 
 
 // Wrapper for VST dispatch call with structured exception handling.
-static VstIntPtr DispatchSEH(AEffect *effect, VstInt32 opCode, VstInt32 index, VstIntPtr value, void *ptr, float opt, bool &exception)
+static intptr_t DispatchSEH(AEffect *effect, VstOpcodeToPlugin opCode, int32 index, intptr_t value, void *ptr, float opt, bool &exception)
 {
 	__try
 	{
@@ -698,7 +698,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	//std::cout << "about to dispatch " << msg->opcode << " to effect...";
 	//std::flush(std::cout);
 	bool exception = false;
-	msg->result = static_cast<int32>(DispatchSEH(nativeEffect, msg->opcode, msg->index, static_cast<VstIntPtr>(msg->value), ptr, msg->opt, exception));
+	msg->result = static_cast<int32>(DispatchSEH(nativeEffect, static_cast<VstOpcodeToPlugin>(msg->opcode), msg->index, static_cast<intptr_t>(msg->value), ptr, msg->opt, exception));
 	if(exception)
 	{
 		msg->type = MsgHeader::exceptionMsg;
@@ -728,8 +728,13 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	case effGetProductString:
 	case effShellGetNextPlugin:
 		// Name in [ptr]
+		{
 		extraData.back() = 0;
-		vst_strncpy(static_cast<char *>(origPtr), extraData.data(), static_cast<size_t>(msg->ptr - 1));
+		char *dst = static_cast<char *>(origPtr);
+		size_t length = static_cast<size_t>(msg->ptr - 1);
+		strncpy(dst, extraData.data(), length);
+		dst[length] = 0;
+		}
 		break;
 
 	case effEditGetRect:
@@ -775,7 +780,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 }
 
 
-VstIntPtr PluginBridge::Dispatch(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+intptr_t PluginBridge::Dispatch(VstOpcodeToPlugin opcode, int32 index, intptr_t value, void *ptr, float opt)
 {
 	__try
 	{
@@ -962,7 +967,7 @@ int32 PluginBridge::BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPoi
 
 
 // Send a message to the host.
-VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+intptr_t PluginBridge::DispatchToHost(VstOpcodeToHost opcode, int32 index, intptr_t value, void *ptr, float opt)
 {
 	const bool processing = InterlockedExchangeAdd(&isProcessing, 0) != 0;
 
@@ -988,7 +993,7 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		{
 			// During processing, read the cached time info. It won't change during the call
 			// and we can save some valuable inter-process calls that way.
-			return ToVstPtr<VstTimeInfo>(&sharedMem->timeInfo);
+			return ToIntPtr<VstTimeInfo>(&sharedMem->timeInfo);
 		}
 		break;
 
@@ -1105,7 +1110,10 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	case audioMasterOpenFileSelector:
 	case audioMasterCloseFileSelector:
 		// VstFileSelect* in [ptr]
-		return VstFileSelector(opcode == audioMasterCloseFileSelector, static_cast<VstFileSelect *>(ptr));
+		if(ptr != nullptr)
+		{
+			return VstFileSelector(opcode == audioMasterCloseFileSelector, *static_cast<VstFileSelect *>(ptr));
+		}
 		break;
 
 	case audioMasterEditFile:
@@ -1170,13 +1178,13 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	{
 	case audioMasterGetTime:
 		// VstTimeInfo* in [return value]
-		return ToVstPtr<VstTimeInfo>(&sharedMem->timeInfo);
+		return ToIntPtr<VstTimeInfo>(&sharedMem->timeInfo);
 
 	case audioMasterGetOutputSpeakerArrangement:
 	case audioMasterGetInputSpeakerArrangement:
 		// VstSpeakerArrangement* in [return value]
 		memcpy(&host2PlugMem.speakerArrangement, extraData, sizeof(VstSpeakerArrangement));
-		return ToVstPtr<VstSpeakerArrangement>(&host2PlugMem.speakerArrangement);
+		return ToIntPtr<VstSpeakerArrangement>(&host2PlugMem.speakerArrangement);
 
 	case audioMasterGetVendorString:
 	case audioMasterGetProductString:
@@ -1186,8 +1194,9 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 	
 	case audioMasterGetDirectory:
 		// Name in [return value]
-		vst_strncpy(host2PlugMem.name, extraData, CountOf(host2PlugMem.name) - 1);
-		return ToVstPtr<char>(host2PlugMem.name);
+		strncpy(host2PlugMem.name, extraData, mpt::size(host2PlugMem.name) - 1);
+		host2PlugMem.name[mpt::size(host2PlugMem.name) - 1] = 0;
+		return ToIntPtr<char>(host2PlugMem.name);
 
 	case audioMasterGetChunkFile:
 		// Name in [ptr]
@@ -1195,43 +1204,38 @@ VstIntPtr PluginBridge::DispatchToHost(VstInt32 opcode, VstInt32 index, VstIntPt
 		break;
 	}
 
-	return static_cast<VstIntPtr>(resultMsg->result);
+	return static_cast<intptr_t>(resultMsg->result);
 }
 
 
 // Helper function for file selection dialog stuff.
 // Note: This has been mostly copied from Vstplug.cpp. Ugly, but serializing this over the bridge would be even uglier.
-VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
+intptr_t PluginBridge::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 {
-	if(fileSel == nullptr)
-	{
-		return 0;
-	}
-
 	if(!destructor)
 	{
-		fileSel->returnMultiplePaths = nullptr;
-		fileSel->nbReturnPath = 0;
-		fileSel->reserved = 0;
+		fileSel.returnMultiplePaths = nullptr;
+		fileSel.numReturnPaths = 0;
+		fileSel.reserved = 0;
 
-		if(fileSel->command != kVstDirectorySelect)
+		if(fileSel.command != kVstDirectorySelect)
 		{
 			// Plugin wants to load or save a file.
 			std::string extensions, workingDir;
-			for(VstInt32 i = 0; i < fileSel->nbFileTypes; i++)
+			for(int32 i = 0; i < fileSel.numFileTypes; i++)
 			{
-				VstFileType *pType = &(fileSel->fileTypes[i]);
-				extensions += pType->name;
+				const VstFileType &type = fileSel.fileTypes[i];
+				extensions += type.name;
 				extensions.push_back(0);
-#if (defined(WIN32) || (defined(WINDOWS) && WINDOWS == 1))
+#if MPT_OS_WINDOWS
 				extensions += "*.";
-				extensions += pType->dosType;
-#elif defined(MAC) && MAC == 1
+				extensions += type.dosType;
+#elif MPT_OS_MACOSX_OR_IOS
 				extensions += "*";
-				extensions += pType->macType;
-#elif defined(UNIX) && UNIX == 1
+				extensions += type.macType;
+#elif MPT_OS_GENERIC_UNIX
 				extensions += "*.";
-				extensions += pType->unixType;
+				extensions += type.unixType;
 #else
 #error Platform-specific code missing
 #endif
@@ -1239,9 +1243,9 @@ VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 			}
 			extensions.push_back(0);
 
-			if(fileSel->initialPath != nullptr)
+			if(fileSel.initialPath != nullptr)
 			{
-				workingDir = fileSel->initialPath;
+				workingDir = fileSel.initialPath;
 			} else
 			{
 				// Plugins are probably looking for presets...?
@@ -1250,10 +1254,9 @@ VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 
 			std::string filenameBuffer(uint16_max, 0);
 
-			const bool multiSelect = (fileSel->command == kVstMultipleFilesLoad);
-			const bool load = (fileSel->command != kVstFileSave);
-			OPENFILENAMEA ofn;
-			memset(&ofn, 0, sizeof(ofn));
+			const bool multiSelect = (fileSel.command == kVstMultipleFilesLoad);
+			const bool load = (fileSel.command != kVstFileSave);
+			OPENFILENAMEA ofn{};
 			ofn.lStructSize = sizeof(ofn);
 			ofn.hwndOwner = window;
 			ofn.hInstance = NULL;
@@ -1296,50 +1299,49 @@ VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 					currentFile += lstrlenA(currentFile) + 1;
 				}
 
-				fileSel->nbReturnPath = static_cast<VstInt32>(numFiles);
-				fileSel->returnMultiplePaths = new (std::nothrow) char *[fileSel->nbReturnPath];
+				fileSel.numReturnPaths = static_cast<int32>(numFiles);
+				fileSel.returnMultiplePaths = new (std::nothrow) char *[fileSel.numReturnPaths];
 
 				currentFile = ofn.lpstrFile + ofn.nFileOffset;
 				for(size_t i = 0; i < numFiles; i++)
 				{
 					int len = lstrlenA(currentFile);
-					char *fname = new (std::nothrow) char[ofn.nFileOffset + len + 1];
+					char *fname = new char[ofn.nFileOffset + len + 1];
 					lstrcpyA(fname, ofn.lpstrFile);
 					lstrcatA(fname, "\\");
 					lstrcpyA(fname + ofn.nFileOffset, currentFile);
-					fileSel->returnMultiplePaths[i] = fname;
+					fileSel.returnMultiplePaths[i] = fname;
 
 					currentFile += len + 1;
 				}
-				
 			} else
 			{
 				// Single path
 
 				// VOPM doesn't initialize required information properly (it doesn't memset the struct to 0)...
-				if(CCONST('V', 'O', 'P', 'M') == nativeEffect->uniqueID)
+				if(FourCC("VOPM") == nativeEffect->uniqueID)
 				{
-					fileSel->sizeReturnPath = _MAX_PATH;
+					fileSel.sizeReturnPath = _MAX_PATH;
 				}
 
-				if(fileSel->returnPath == nullptr || fileSel->sizeReturnPath == 0)
+				if(fileSel.returnPath == nullptr || fileSel.sizeReturnPath == 0)
 				{
 					// Provide some memory for the return path.
-					fileSel->sizeReturnPath = lstrlenA(ofn.lpstrFile) + 1;
-					fileSel->returnPath = new (std::nothrow) char[fileSel->sizeReturnPath];
-					if(fileSel->returnPath == nullptr)
+					fileSel.sizeReturnPath = lstrlenA(ofn.lpstrFile) + 1;
+					fileSel.returnPath = new (std::nothrow) char[fileSel.sizeReturnPath];
+					if(fileSel.returnPath == nullptr)
 					{
 						return 0;
 					}
-					fileSel->returnPath[fileSel->sizeReturnPath - 1] = '\0';
-					fileSel->reserved = 1;
+					fileSel.returnPath[fileSel.sizeReturnPath - 1] = '\0';
+					fileSel.reserved = 1;
 				} else
 				{
-					fileSel->reserved = 0;
+					fileSel.reserved = 0;
 				}
-				strncpy(fileSel->returnPath, ofn.lpstrFile, fileSel->sizeReturnPath - 1);
-				fileSel->nbReturnPath = 1;
-				fileSel->returnMultiplePaths = nullptr;
+				strncpy(fileSel.returnPath, ofn.lpstrFile, fileSel.sizeReturnPath - 1);
+				fileSel.numReturnPaths = 1;
+				fileSel.returnMultiplePaths = nullptr;
 			}
 			return 1;
 		} else
@@ -1347,10 +1349,9 @@ VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 			// Plugin wants a directory
 			CHAR path[MAX_PATH];
 
-			BROWSEINFOA bi;
-			memset(&bi, 0, sizeof(bi));
+			BROWSEINFOA bi{};
 			bi.hwndOwner = window;
-			bi.lpszTitle = fileSel->title;
+			bi.lpszTitle = fileSel.title;
 			bi.pszDisplayName = path;
 			bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
 			bi.lpfn = NULL;
@@ -1358,31 +1359,31 @@ VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 			LPITEMIDLIST pid = SHBrowseForFolderA(&bi);
 			if(pid != NULL && SHGetPathFromIDListA(pid, path))
 			{
-				if(CCONST('V', 'S', 'T', 'r') == nativeEffect->uniqueID && fileSel->returnPath != nullptr && fileSel->sizeReturnPath == 0)
+				if(Vst::FourCC("VSTr") == nativeEffect->uniqueID && fileSel.returnPath != nullptr && fileSel.sizeReturnPath == 0)
 				{
 					// old versions of reViSiT (which still relied on the host's file selection code) seem to be dodgy.
 					// They report a path size of 0, but when using an own buffer, they will crash.
 					// So we'll just assume that reViSiT can handle long enough (_MAX_PATH) paths here.
-					fileSel->sizeReturnPath = lstrlenA(path) + 1;
-					fileSel->returnPath[fileSel->sizeReturnPath - 1] = '\0';
+					fileSel.sizeReturnPath = lstrlenA(path) + 1;
+					fileSel.returnPath[fileSel.sizeReturnPath - 1] = '\0';
 				}
-				if(fileSel->returnPath == nullptr || fileSel->sizeReturnPath == 0)
+				if(fileSel.returnPath == nullptr || fileSel.sizeReturnPath == 0)
 				{
 					// Provide some memory for the return path.
-					fileSel->sizeReturnPath = lstrlenA(path) + 1;
-					fileSel->returnPath = new char[fileSel->sizeReturnPath];
-					if(fileSel->returnPath == nullptr)
+					fileSel.sizeReturnPath = lstrlenA(path) + 1;
+					fileSel.returnPath = new char[fileSel.sizeReturnPath];
+					if(fileSel.returnPath == nullptr)
 					{
 						return 0;
 					}
-					fileSel->returnPath[fileSel->sizeReturnPath - 1] = '\0';
-					fileSel->reserved = 1;
+					fileSel.returnPath[fileSel.sizeReturnPath - 1] = '\0';
+					fileSel.reserved = 1;
 				} else
 				{
-					fileSel->reserved = 0;
+					fileSel.reserved = 0;
 				}
-				strncpy(fileSel->returnPath, path, fileSel->sizeReturnPath - 1);
-				fileSel->nbReturnPath = 1;
+				strncpy(fileSel.returnPath, path, fileSel.sizeReturnPath - 1);
+				fileSel.numReturnPaths = 1;
 				return 1;
 			}
 			return 0;
@@ -1390,23 +1391,23 @@ VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 	} else
 	{
 		// Close file selector - delete allocated strings.
-		if(fileSel->command == kVstMultipleFilesLoad && fileSel->returnMultiplePaths != nullptr)
+		if(fileSel.command == kVstMultipleFilesLoad && fileSel.returnMultiplePaths != nullptr)
 		{
-			for(VstInt32 i = 0; i < fileSel->nbReturnPath; i++)
+			for(int32 i = 0; i < fileSel.numReturnPaths; i++)
 			{
-				if(fileSel->returnMultiplePaths[i] != nullptr)
+				if(fileSel.returnMultiplePaths[i] != nullptr)
 				{
-					delete[] fileSel->returnMultiplePaths[i];
+					delete[] fileSel.returnMultiplePaths[i];
 				}
 			}
-			delete[] fileSel->returnMultiplePaths;
-			fileSel->returnMultiplePaths = nullptr;
+			delete[] fileSel.returnMultiplePaths;
+			fileSel.returnMultiplePaths = nullptr;
 		} else
 		{
-			if(fileSel->reserved == 1 && fileSel->returnPath != nullptr)
+			if(fileSel.reserved == 1 && fileSel.returnPath != nullptr)
 			{
-				delete[] fileSel->returnPath;
-				fileSel->returnPath = nullptr;
+				delete[] fileSel.returnPath;
+				fileSel.returnPath = nullptr;
 			}
 		}
 		return 1;
@@ -1415,9 +1416,9 @@ VstIntPtr PluginBridge::VstFileSelector(bool destructor, VstFileSelect *fileSel)
 
 
 // Helper function for sending messages to the host.
-VstIntPtr VSTCALLBACK PluginBridge::MasterCallback(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt)
+intptr_t VSTCALLBACK PluginBridge::MasterCallback(AEffect *effect, VstOpcodeToHost opcode, int32 index, intptr_t value, void *ptr, float opt)
 {
-	PluginBridge *instance = (effect != nullptr && effect->resvd1 != 0) ? FromVstPtr<PluginBridge>(effect->resvd1) : PluginBridge::latestInstance;
+	PluginBridge *instance = (effect != nullptr && effect->reservedForHost1 != nullptr) ? static_cast<PluginBridge *>(effect->reservedForHost1) : PluginBridge::latestInstance;
 	return instance->DispatchToHost(opcode, index, value, ptr, opt);
 }
 

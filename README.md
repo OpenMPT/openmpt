@@ -36,46 +36,27 @@ How to compile
     selected explicitly during setup). In order to build OpenMPT for Windows XP,
     the XP targetting toolset also needs to be installed.
 
- -  The VST and ASIO SDKs are needed for compiling with VST and ASIO support.
+ -  The ASIO SDK is needed for compiling with ASIO support.
 
-    If you don't want this, uncomment `#define NO_VST` and comment out
-    `#define MPT_WITH_ASIO` in the file `common/BuildSettings.h`.
+    If you don't want this, comment out `#define MPT_WITH_ASIO` in the file
+    `common/BuildSettings.h`.
 
-    The ASIO and VST SDKs can be downloaded automatically on Windows 7 or later
+    The ASIO SDK can be downloaded automatically on Windows 7 or later
     with 7-Zip installed by just running the `build/download_externals.cmd`
     script.
 
     If you do not want to or cannot use this script, you may follow these manual
     steps instead:
 
-     -  ASIO:
-
-        If you use `#define MPT_WITH_ASIO`, you will need to put the ASIO SDK in
-        the `include/ASIOSDK2` folder. The top level directory of the SDK is
-        already named `ASIOSDK2`, so simply move that directory in the include
-        folder.
-
-        Please visit
+     -  Visit
         [steinberg.net](https://www.steinberg.net/en/company/developers.html) to
         download the SDK.
 
-     -  VST:
+     -  Put the ASIO SDK in the `include/ASIOSDK2` folder. The top level
+        directory of the SDK is already named `ASIOSDK2`, so simply move that
+        directory in the include folder.
 
-        If you don't use `#define NO_VST`, you will need to put the VST SDK in
-        the `include/vstsdk2.4` folder.
-        
-        Simply copy all files from the `VST3 SDK` folder in the SDK .zip file to
-        `include/vstsdk2.4/`.
-
-        Note: OpenMPT makes use of the VST 2.4 specification only. The VST3 SDK
-        still contains all necessary files in the right locations. If you still
-        have the old VST 2.4 SDK laying around, this should also work fine.
-
-        Please visit
-        [steinberg.net](https://www.steinberg.net/en/company/developers.html) to
-        download the SDK.
-
-    If you need further help with the VST and ASIO SDKs, get in touch with the
+    If you need further help with the ASIO SDK, get in touch with the
     main OpenMPT developers. 
 
  -  7-Zip is required to be installed in the default path in order to build the

@@ -11,8 +11,7 @@
 #pragma once
 
 #include <vector>
-#define VST_FORCE_DEPRECATED 0
-#include "../include/vstsdk2.4/pluginterfaces/vst2.x/aeffectx.h"
+#include "../mptrack/plugins/VstDefinitions.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -55,7 +54,7 @@ struct AEffectProto
 
 	// Convert native representation to bridge representation.
 	// Don't overwrite any values managed by the bridge wrapper or host in general.
-	void FromNative(const AEffect &in)
+	void FromNative(const Vst::AEffect &in)
 	{
 		magic = in.magic;
 
@@ -90,14 +89,13 @@ struct AEffectProto
 typedef AEffectProto<int32_t> AEffect32;
 typedef AEffectProto<int64_t> AEffect64;
 
-
 #pragma pack(pop)
 
 
 // Translate a VSTEvents struct to bridge format (placed in data vector)
-static void TranslateVSTEventsToBridge(std::vector<char> &data, const VstEvents *events, int32_t targetPtrSize)
+static void TranslateVSTEventsToBridge(std::vector<char> &data, const Vst::VstEvents *events, int32_t targetPtrSize)
 {
-	data.reserve(data.size() + sizeof(int32) + sizeof(VstEvent) * events->numEvents);
+	data.reserve(data.size() + sizeof(int32) + sizeof(Vst::VstEvent) * events->numEvents);
 	// Write number of events
 	if(data.size() >= sizeof(int32))
 	{
@@ -109,22 +107,22 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const VstEvents 
 	}
 
 	// Write events
-	for(VstInt32 i = 0; i < events->numEvents; i++)
+	for(decltype(events->numEvents) i = 0; i < events->numEvents; i++)
 	{
-		if(events->events[i]->type == kVstSysExType)
+		if(events->events[i]->type == Vst::kVstSysExType)
 		{
 			// This is going to be messy since the VstMidiSysexEvent event has a different size than other events on 64-bit platforms.
 			// We are going to write the event using the target process pointer size.
-			VstMidiSysexEvent event = *reinterpret_cast<const VstMidiSysexEvent *>(events->events[i]);
-			event.byteSize = 5 * sizeof(VstInt32) + 3 * targetPtrSize;
-			PushToVector(data, event, 5 * sizeof(VstInt32));	// Exclude the three pointers at the end for now
-			data.resize(data.size() + 3 * targetPtrSize);		// Make space for pointer + two reserved VstIntPtrs
+			auto sysExEvent = *static_cast<const Vst::VstMidiSysexEvent *>(events->events[i]);
+			sysExEvent.byteSize = 5 * sizeof(int32) + 3 * targetPtrSize;
+			PushToVector(data, sysExEvent, 5 * sizeof(int32));	// Exclude the three pointers at the end for now
+			data.resize(data.size() + 3 * targetPtrSize);		// Make space for pointer + two reserved intptr_ts
 			// Embed SysEx dump as well...
-			data.insert(data.end(), event.sysexDump, event.sysexDump + event.dumpBytes);
-		} else if(events->events[i]->type == kVstMidiType)
+			data.insert(data.end(), sysExEvent.sysexDump, sysExEvent.sysexDump + sysExEvent.dumpBytes);
+		} else if(events->events[i]->type == Vst::kVstMidiType)
 		{
 			// randomid by Insert Piz Here sends events of type kVstMidiType, but with a claimed size of 24 bytes instead of 32.
-			VstMidiEvent event;
+			Vst::VstMidiEvent event;
 			std::memcpy(&event, events->events[i], sizeof(event));
 			event.byteSize = sizeof(event);
 			PushToVector(data, event, sizeof(event));
@@ -141,9 +139,9 @@ static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 {
 	const int32_t numEvents = *static_cast<const int32_t *>(ptr);
 	
-	// First element is really a VstInt32, but in case of 64-bit builds, the next field gets aligned anyway.
-	const size_t headerSize = sizeof(VstIntPtr) + sizeof(VstIntPtr) + sizeof(VstEvent *) * numEvents;
-	data.reserve(headerSize + sizeof(VstEvent) * numEvents);
+	// First element is really a int32, but in case of 64-bit builds, the next field gets aligned anyway.
+	const size_t headerSize = sizeof(intptr_t) + sizeof(intptr_t) + sizeof(Vst::VstEvent *) * numEvents;
+	data.reserve(headerSize + sizeof(Vst::VstEvent) * numEvents);
 	data.resize(headerSize, 0);
 	if(numEvents == 0)
 	{
@@ -154,32 +152,32 @@ static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 	char *offset = static_cast<char *>(ptr) + sizeof(int32_t);
 	for(int32_t i = 0; i < numEvents; i++)
 	{
-		VstEvent *event = reinterpret_cast<VstEvent *>(offset);
+		Vst::VstEvent *event = reinterpret_cast<Vst::VstEvent *>(offset);
 		data.insert(data.end(), offset, offset + event->byteSize);
 		offset += event->byteSize;
 
-		if(event->type == kVstSysExType)
+		if(event->type == Vst::kVstSysExType)
 		{
 			// Copy over sysex dump
-			VstMidiSysexEvent *sysExEvent = reinterpret_cast<VstMidiSysexEvent *>(event);
+			auto sysExEvent = static_cast<Vst::VstMidiSysexEvent *>(event);
 			data.insert(data.end(), offset, offset + sysExEvent->dumpBytes);
 			offset += sysExEvent->dumpBytes;
 		}
 	}
 
 	// Write pointers
-	VstEvents *events = reinterpret_cast<VstEvents *>(data.data());
+	auto events = reinterpret_cast<Vst::VstEvents *>(data.data());
 	events->numEvents = numEvents;
 	offset = data.data() + headerSize;
 	for(int32_t i = 0; i < numEvents; i++)
 	{
-		events->events[i] = reinterpret_cast<VstEvent *>(offset);
+		events->events[i] = reinterpret_cast<Vst::VstEvent *>(offset);
 		offset += events->events[i]->byteSize;
-		if(events->events[i]->type == kVstSysExType)
+		if(events->events[i]->type == Vst::kVstSysExType)
 		{
-			VstMidiSysexEvent *event = reinterpret_cast<VstMidiSysexEvent *>(events->events[i]);
-			event->sysexDump = offset;
-			offset += event->dumpBytes;
+			auto sysExEvent = static_cast<Vst::VstMidiSysexEvent *>(events->events[i]);
+			sysExEvent->sysexDump = reinterpret_cast<const mpt::byte *>(offset);
+			offset += sysExEvent->dumpBytes;
 		}
 	}
 }
