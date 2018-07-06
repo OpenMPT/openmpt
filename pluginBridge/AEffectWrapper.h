@@ -118,7 +118,8 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const Vst::VstEv
 			PushToVector(data, sysExEvent, 5 * sizeof(int32));	// Exclude the three pointers at the end for now
 			data.resize(data.size() + 3 * targetPtrSize);		// Make space for pointer + two reserved intptr_ts
 			// Embed SysEx dump as well...
-			data.insert(data.end(), sysExEvent.sysexDump, sysExEvent.sysexDump + sysExEvent.dumpBytes);
+			auto sysex = reinterpret_cast<const char *>(sysExEvent.sysexDump);
+			data.insert(data.end(), sysex, sysex + sysExEvent.dumpBytes);
 		} else if(events->events[i]->type == Vst::kVstMidiType)
 		{
 			// randomid by Insert Piz Here sends events of type kVstMidiType, but with a claimed size of 24 bytes instead of 32.
