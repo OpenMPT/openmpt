@@ -58,12 +58,15 @@ public:
 		MPT_ASSERT(event->type != Vst::kVstMidiType || event->byteSize == sizeof(Vst::VstMidiEvent));
 
 		Event copyEvent;
-		size_t copySize = std::min(size_t(event->byteSize), sizeof(copyEvent));
+		size_t copySize;
 		// randomid by Insert Piz Here sends events of type kVstMidiType, but with a claimed size of 24 bytes instead of 32.
+		// Hence, we enforce the size of known events.
 		if(event->type == Vst::kVstSysExType)
 			copySize = sizeof(Vst::VstMidiSysexEvent);
 		else if(event->type == Vst::kVstMidiType)
 			copySize = sizeof(Vst::VstMidiEvent);
+		else
+			copySize = std::min(size_t(event->byteSize), sizeof(copyEvent));
 		memcpy(&copyEvent, event, copySize);
 
 		if(event->type == Vst::kVstSysExType)
@@ -73,7 +76,7 @@ public:
 			auto sysexDump = new (std::nothrow) mpt::byte[e.dumpBytes];
 			if(sysexDump == nullptr)
 				return false;
-			memcpy(sysexDump, reinterpret_cast<const Vst::VstMidiSysexEvent *>(event)->sysexDump, e.dumpBytes);
+			memcpy(sysexDump, e.sysexDump, e.dumpBytes);
 			e.sysexDump = sysexDump;
 		}
 
