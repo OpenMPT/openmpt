@@ -21,7 +21,7 @@ public:
 	{
 		kOnlyFiles = 0x01,
 		kOnlyDirectories = 0x02,
-		kFilesAndDirectories = kOnlyDirectories | kOnlyDirectories,
+		kFilesAndDirectories = kOnlyFiles | kOnlyDirectories,
 		kFindInSubDirectories = 0x04,
 	};
 
