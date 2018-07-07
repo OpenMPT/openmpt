@@ -1,8 +1,8 @@
 /*
- * PluginEventQueue.h
- * ------------------
+ * VstEventQueue.h
+ * ---------------
  * Purpose: Event queue for VST events.
- * Notes  : Modelled after an idea from http://www.kvraudio.com/forum/viewtopic.php?p=3043807#p3043807
+ * Notes  : Modelled after an idea from https://www.kvraudio.com/forum/viewtopic.php?p=3043807#p3043807
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -16,7 +16,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-class PluginEventQueue : public Vst::VstEvents
+class VstEventQueue : public Vst::VstEvents
 {
 protected:
 
@@ -37,11 +37,11 @@ protected:
 
 public:
 
-	PluginEventQueue()
+	VstEventQueue()
 	{
 		numEvents = 0;
 		reserved = 0;
-		events.fill(nullptr);
+		std::fill(std::begin(events), std::end(events), nullptr);
 	}
 
 	// Get the number of events that are currently queued, but not in the output buffer.

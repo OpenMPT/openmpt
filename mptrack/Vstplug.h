@@ -42,7 +42,7 @@ protected:
 	bool m_needIdle : 1;
 	bool m_positionChanged : 1;
 
-	PluginEventQueue vstEvents;	// MIDI events that should be sent to the plugin
+	VstEventQueue vstEvents;	// MIDI events that should be sent to the plugin
 
 	Vst::VstTimeInfo timeInfo;
 

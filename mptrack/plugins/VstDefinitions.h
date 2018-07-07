@@ -622,15 +622,15 @@ struct VstEvents
 
 	int32 numEvents;
 	intptr_t reserved;
-	std::array<VstEvent *, MAX_EVENTS> events;
+	VstEvent *events[MAX_EVENTS];
 
 	size_t size() { return numEvents; }
-	auto begin() { return events.begin(); }
-	auto end() { return events.begin() + numEvents; }
-	auto begin() const { return events.begin(); }
-	auto end() const { return events.begin() + numEvents; }
-	auto cbegin() const { return events.cbegin(); }
-	auto cend() const { return events.cbegin() + numEvents; }
+	auto begin() { return std::begin(events); }
+	auto end() { return std::begin(events) + numEvents; }
+	auto begin() const { return std::begin(events); }
+	auto end() const { return std::begin(events) + numEvents; }
+	auto cbegin() const { return std::cbegin(events); }
+	auto cend() const { return std::cbegin(events) + numEvents; }
 };
 
 struct VstMidiEvent : public VstEvent
