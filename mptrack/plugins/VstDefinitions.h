@@ -7,7 +7,7 @@
  *          The original header, licensed under the Zlib license, can be found at
  *          https://github.com/BeRo1985/br808/blob/master/VSTi/VST/VST.pas
  * Authors: OpenMPT Devs
- *          Bejamin "BeRo" Rosseaux
+ *          Benjamin "BeRo" Rosseaux
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -392,7 +392,6 @@ enum VstSpeakerArrangementType : int32
 	kNumSpeakerArr = 29,
 };
 
-
 enum VstOfflineTaskFlags : int32
 {
 	kVstOfflineUnvalidParameter = 1 << 0,
@@ -518,7 +517,6 @@ enum VstFileSelectType : int32
 {
 	kVstFileType = 0,
 };
-
 
 enum VstPanLaw : int32
 {
@@ -653,7 +651,6 @@ struct VstMidiSysexEvent : public VstEvent
 	const mpt::byte *sysexDump;
 	intptr_t reserved2;
 };
-
 
 struct VstTimeInfo
 {
