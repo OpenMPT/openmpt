@@ -40,8 +40,9 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 		}
 	} else if(sampleType == typeAdMel)
 	{
-		const uint8 *adlibBytes = reinterpret_cast<const uint8 *>(&length);
-		std::copy(adlibBytes, adlibBytes + 12, mptSmp.adlib.begin());
+		std::memcpy(mptSmp.adlib.data() + 0, mpt::as_raw_memory(length   ).data(), 4);
+		std::memcpy(mptSmp.adlib.data() + 4, mpt::as_raw_memory(loopStart).data(), 4);
+		std::memcpy(mptSmp.adlib.data() + 8, mpt::as_raw_memory(loopEnd  ).data(), 4);
 		// Bogus sample to make playback work
 		mptSmp.nLength = 4;
 		mptSmp.uFlags = CHN_ADLIB;
@@ -75,8 +76,9 @@ SmpLength S3MSampleHeader::ConvertToS3M(const ModSample &mptSmp)
 	{
 		memcpy(magic, "SCRI", 4);
 		sampleType = typeAdMel;
-		uint8 *adlibBytes = reinterpret_cast<uint8 *>(&length);
-		std::copy(mptSmp.adlib.begin(), mptSmp.adlib.end(), adlibBytes);
+		std::memcpy(mpt::as_raw_memory(length   ).data(), mptSmp.adlib.data() + 0, 4);
+		std::memcpy(mpt::as_raw_memory(loopStart).data(), mptSmp.adlib.data() + 4, 4);
+		std::memcpy(mpt::as_raw_memory(loopEnd  ).data(), mptSmp.adlib.data() + 8, 4);
 	} else if(mptSmp.HasSampleData())
 	{
 		sampleType = typePCM;
