@@ -104,20 +104,6 @@
 #include <cmath>
 #include <math.h>
 
-#ifndef NO_VST
-// VST SDK includes these headers after messing with default compiler structure
-// packing. No problem in practice as VST SDK sets packing matching the default
-// packing and we are compiling with default packing and standard headers should
-// be careful about structure packing anyway, but it is very much unclean
-// nonetheless. Pre-include the affected headers here as a future-proof
-// safe-guard and let their own include guards handle the further including by
-// VST SDK.
-#include <cstdint>
-#include <stdint.h>
-#include <cstring>
-#include <string.h>
-#endif
-
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.

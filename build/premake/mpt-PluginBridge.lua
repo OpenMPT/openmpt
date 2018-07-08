@@ -9,7 +9,6 @@
   dofile "../../build/premake/premake-defaults.lua"
 	dofile "../../build/premake/premake-defaults-strict.lua"
   local extincludedirs = {
-   "../include/vstsdk2.4",
   }
 	filter { "action:vs*" }
 		includedirs ( extincludedirs )

@@ -53,7 +53,6 @@ end
   filter {}
   local extincludedirs = {
    "../../include",
-   "../../include/vstsdk2.4",
    "../../include/ASIOSDK2/common",
    "../../include/flac/include",
    "../../include/lame/include",
