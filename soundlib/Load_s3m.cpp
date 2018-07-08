@@ -368,6 +368,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Channel setup
 	m_nChannels = 4;
+	std::bitset<32> isAdlibChannel;
 	for(CHANNELINDEX i = 0; i < 32; i++)
 	{
 		ChnSettings[i].Reset();
@@ -385,8 +386,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		if(ctype >= 16 && ctype <= 29)
 		{
 			// Adlib channel - except for OpenMPT 1.19 and older, which would write wrong channel types for PCM channels 16-32.
-			// However, MPT/OpenMPT always wrote the extra panning table, so there is no need to fix this here.
+			// However, MPT/OpenMPT always wrote the extra panning table, so there is no need to consider this here.
 			ChnSettings[i].nPan = 128;
+			isAdlibChannel[i] = true;
 		}
 	}
 	if(m_nChannels < 1)
@@ -410,7 +412,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadArray(pan);
 		for(CHANNELINDEX i = 0; i < 32; i++)
 		{
-			if((pan[i] & 0x20) != 0)
+			if((pan[i] & 0x20) != 0 && (!isST3 || !isAdlibChannel[i]))
 			{
 				ChnSettings[i].nPan = (static_cast<uint16>(pan[i] & 0x0F) * 256 + 8) / 15;
 			}
