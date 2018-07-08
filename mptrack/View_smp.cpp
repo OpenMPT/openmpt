@@ -569,6 +569,10 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		SetModified(UpdateHint::FromLPARAM(lParam).ToType<SampleHint>(), false, false);
 		break;
 
+	case VIEWMSG_PREPAREUNDO:
+		GetDocument()->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Edit OPL Patch");
+		break;
+
 	default:
 		return CModScrollView::OnModViewMsg(wParam, lParam);
 	}
@@ -591,6 +595,11 @@ void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
 	if(hintType[HINT_MPTOPTIONS | HINT_MODTYPE]
 		|| (hintType[HINT_SAMPLEDATA] && (m_nSample == updateSmp || updateSmp == 0)))
 	{
+		ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
+		if(hintType[HINT_SAMPLEDATA] && sample.uFlags[CHN_ADLIB] && m_oplEditor)
+		{
+			m_oplEditor->SetPatch(sample.adlib);
+		}
 		UpdateOPLEditor();
 		UpdateScrollSize();
 		UpdateNcButtonState();

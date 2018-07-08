@@ -12,8 +12,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-class CModDoc;
-
 class OPLInstrDlg : public CDialog
 {
 	CButton m_additive, m_sustain[2], m_scaleEnv[2], m_vibrato[2], m_tremolo[2];

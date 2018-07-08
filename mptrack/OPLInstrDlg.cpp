@@ -178,8 +178,12 @@ void OPLInstrDlg::ParamsChanged()
 		patch[8 + op] = static_cast<uint8>(m_waveform[op].GetCurSel());
 	}
 
-	*m_patch = patch;
-	m_parent.SendMessage(WM_MOD_VIEWMSG, VIEWMSG_SETMODIFIED, SampleHint().Data().AsLPARAM());
+	if(*m_patch != patch)
+	{
+		m_parent.SendMessage(WM_MOD_VIEWMSG, VIEWMSG_PREPAREUNDO);
+		*m_patch = patch;
+		m_parent.SendMessage(WM_MOD_VIEWMSG, VIEWMSG_SETMODIFIED, SampleHint().Data().AsLPARAM());
+	}
 }
 
 OPENMPT_NAMESPACE_END
