@@ -31,7 +31,12 @@ protected:
 	static const uintptr_t additionalBuffer = bufferAlignmentInBytes / sizeof(buffer_t);
 
 	// Return pointer to an aligned buffer
-	buffer_t *GetBuffer(size_t index) const
+	const buffer_t *GetBuffer(size_t index) const
+	{
+		MPT_ASSERT(index < inputs.size() + outputs.size());
+		return &alignedBuffer[bufferSize * index];
+	}
+	buffer_t *GetBuffer(size_t index)
 	{
 		MPT_ASSERT(index < inputs.size() + outputs.size());
 		return &alignedBuffer[bufferSize * index];
@@ -108,8 +113,10 @@ public:
 	}
 
 	// Return pointer to a given input or output buffer
-	buffer_t *GetInputBuffer(uint32 index) const { return GetBuffer(index); }
-	buffer_t *GetOutputBuffer(uint32 index) const { return GetBuffer(inputs.size() + index); }
+	const buffer_t *GetInputBuffer(uint32 index) const { return GetBuffer(index); }
+	const buffer_t *GetOutputBuffer(uint32 index) const { return GetBuffer(inputs.size() + index); }
+	buffer_t *GetInputBuffer(uint32 index) { return GetBuffer(index); }
+	buffer_t *GetOutputBuffer(uint32 index) { return GetBuffer(inputs.size() + index); }
 
 	// Return pointer array to all input or output buffers
 	buffer_t **GetInputBufferArray() { return inputs.empty() ? nullptr : inputs.data(); }

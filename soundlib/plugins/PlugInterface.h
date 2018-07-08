@@ -134,7 +134,7 @@ public:
 	// Restore parameters from module file
 	virtual void RestoreAllParameters(int32 program);
 	virtual void Process(float *pOutL, float *pOutR, uint32 numFrames) = 0;
-	void ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, uint32 numFrames) const;
+	void ProcessMixOps(float *pOutL, float *pOutR, float *leftPlugOutput, float *rightPlugOutput, uint32 numFrames);
 	// Render silence and return the highest resulting output level
 	virtual float RenderSilence(uint32 numSamples);
 
