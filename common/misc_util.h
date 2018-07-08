@@ -703,6 +703,25 @@ inline Tdst saturate_cast(float src)
 }
 
 
+template <typename T>
+MPT_CONSTEXPR14_FUN std::size_t weight(T val) noexcept
+{
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	typedef typename std::make_unsigned<T>::type Tunsigned;
+	Tunsigned uval = static_cast<Tunsigned>(val);
+	std::size_t result = 0;
+	while(uval > 0)
+	{
+		if(uval & 0x1)
+		{
+			result++;
+		}
+		uval >>= 1;
+	}
+	return result;
+}
+
+
 } // namespace mpt
 
 
@@ -1030,18 +1049,6 @@ namespace Util
 		return mpt::saturate_cast<T>(Round(val));
 	}
 
-	template<typename T>
-	T Weight(T x)
-	{
-		STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-		T c;
-		for(c = 0; x; x >>= 1)
-		{
-			c += x & 1;
-		}
-		return c;
-	}
-	
 }
 
 namespace Util {

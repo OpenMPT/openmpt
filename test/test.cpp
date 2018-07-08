@@ -878,6 +878,12 @@ static MPT_NOINLINE void TestMisc1()
 	VERIFY_EQUAL( Util::Round<int8>(110.1), 110 );
 	VERIFY_EQUAL( Util::Round<int8>(-110.1), -110 );
 
+	VERIFY_EQUAL(mpt::weight(int32(-1)), 32);
+	VERIFY_EQUAL(mpt::weight(0), 0);
+	VERIFY_EQUAL(mpt::weight(1), 1);
+	VERIFY_EQUAL(mpt::weight(2), 1);
+	VERIFY_EQUAL(mpt::weight(3), 2);
+
 	// trivials
 	VERIFY_EQUAL( mpt::saturate_cast<int>(-1), -1 );
 	VERIFY_EQUAL( mpt::saturate_cast<int>(0), 0 );
