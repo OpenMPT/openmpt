@@ -69,7 +69,7 @@ public:
 	~OPL();
 
 	void Initialize(uint32 samplerate);
-	void Mix(int *buffer, size_t count);
+	void Mix(int *buffer, size_t count, uint32 preamp);
 
 	void NoteOff(CHANNELINDEX c);
 	void NoteCut(CHANNELINDEX c);

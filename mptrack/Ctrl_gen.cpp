@@ -257,9 +257,9 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_EditSamplePA.EnableWindow(bIsNotMOD);
 		m_SpinSamplePA.EnableWindow(bIsNotMOD);
 		//m_SliderSamplePreAmp.EnableWindow(bIsNotMOD);
-		m_SliderVSTiVol.EnableWindow(bIsNotMOD_S3M);
-		m_EditVSTiVol.EnableWindow(bIsNotMOD_S3M);
-		m_SpinVSTiVol.EnableWindow(bIsNotMOD_S3M);
+		m_SliderVSTiVol.EnableWindow(bIsNotMOD);
+		m_EditVSTiVol.EnableWindow(bIsNotMOD);
+		m_SpinVSTiVol.EnableWindow(bIsNotMOD);
 		m_EditRestartPos.EnableWindow((specs.hasRestartPos || m_sndFile.Order().GetRestartPos() != 0));
 		m_SpinRestartPos.EnableWindow(m_EditRestartPos.IsWindowEnabled());
 
