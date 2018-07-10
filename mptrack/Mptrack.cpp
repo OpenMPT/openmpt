@@ -589,6 +589,11 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 	m_bPortableMode = portableMode;
 
+}
+
+
+void CTrackApp::CreatePaths()
+{
 	// Create missing diretories
 	if(!m_szConfigDirectory.IsDirectory())
 	{
@@ -605,7 +610,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 	// Handle updates from old versions.
 
-	if(!portableMode)
+	if(!m_bPortableMode)
 	{
 
 		// Move the config files if they're still in the old place.
@@ -777,6 +782,9 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 	// Parse command line for standard shell commands, DDE, file open
 	ParseCommandLine(cmdInfo);
 
+	// Set up paths to store configuration in
+	SetupPaths(cmdInfo.m_portable);
+
 	if(cmdInfo.m_nShellCommand == CCommandLineInfo::FileDDE && IPCWindow::SendToIPC(cmdInfo.m_fileNames))
 	{
 		ExitProcess(0);
@@ -880,8 +888,8 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		SetWineVersion(std::make_shared<mpt::Wine::VersionContext>());
 	}
 
-	// Set up paths to store configuration in
-	SetupPaths(cmdInfo.m_portable);
+	// Create paths to store configuration in
+	CreatePaths();
 
 	m_pSettingsIniFile = new IniFileSettingsBackend(m_szConfigFileName);
 	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
@@ -905,7 +913,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	m_pPluginCache = new IniFileSettingsContainer(m_szPluginCacheFileName);
 
 	// Load standard INI file options (without MRU)
-	// requires SetupPaths called
+	// requires SetupPaths+CreatePaths called
 	LoadStdProfileSettings(0);
 
 	// Set process priority class

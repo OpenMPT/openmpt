@@ -94,6 +94,22 @@ namespace IPCWindow
 					#endif
 				}
 				break;
+			case static_cast<ULONG>(Function::HasSameBinaryPath):
+				{
+					std::size_t count = copyData.cbData / sizeof(WCHAR);
+					const WCHAR* data = static_cast<const WCHAR *>(copyData.lpData);
+					const std::wstring path = std::wstring(data, data + count);
+					result = (theApp.GetAppDirPath().ToWide() == path) ? 1 : 0;
+				}
+				break;
+			case static_cast<ULONG>(Function::HasSameSettingsPath):
+				{
+					std::size_t count = copyData.cbData / sizeof(WCHAR);
+					const WCHAR* data = static_cast<const WCHAR *>(copyData.lpData);
+					const std::wstring path = std::wstring(data, data + count);
+					result = (theApp.GetConfigPath().ToWide() == path) ? 1 : 0;
+				}
+				break;
 			default:
 				result = 0;
 				break;
@@ -149,6 +165,72 @@ namespace IPCWindow
 	{
 		return ::FindWindow(ClassName, nullptr);
 	}
+
+	struct EnumWindowState
+	{
+		FlagSet<InstanceRequirements> require;
+		HWND result = nullptr;
+	};
+
+	static BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
+	{
+		EnumWindowState &state = *reinterpret_cast<EnumWindowState*>(lParam);
+		if(hwnd)
+		{
+			TCHAR className[256];
+			MemsetZero(className);
+			if(::GetClassName(hwnd, className, 256) > 0)
+			{
+				if(mpt::winstring(className) == mpt::winstring(IPCWindow::ClassName))
+				{
+					if(state.require[SameVersion])
+					{
+						if(Version(static_cast<uint32>(SendIPC(hwnd, Function::GetVersion))) != Version::Current())
+						{
+							return TRUE; // continue
+						}
+					}
+					if(state.require[SameArchitecture])
+					{
+						if(SendIPC(hwnd, Function::GetArchitecture) != static_cast<int>(mpt::Windows::GetProcessArchitecture()))
+						{
+							return TRUE; // continue
+						}
+					}
+					if(state.require[SamePath])
+					{
+						if(SendIPC(hwnd, Function::HasSameBinaryPath, mpt::as_span(theApp.GetAppDirPath().ToWide())) != 1)
+						{
+							return TRUE; // continue
+						}
+					}
+					if(state.require[SameSettings])
+					{
+						if(SendIPC(hwnd, Function::HasSameSettingsPath, mpt::as_span(theApp.GetConfigPath().ToWide())) != 1)
+						{
+							return TRUE; // continue
+						}
+					}
+					state.result = hwnd;
+					return TRUE; // continue
+					//return FALSE; // done
+				}
+			}
+		}
+		return TRUE; // continue
+	}
+
+	HWND FindIPCWindow(FlagSet<InstanceRequirements> require)
+	{
+		EnumWindowState state;
+		state.require = require;
+		if(::EnumWindows(&EnumWindowsProc, reinterpret_cast<LPARAM>(&state)) == 0)
+		{
+			return nullptr;
+		}
+		return state.result;
+	}
+
 
 
 	bool SendToIPC(const std::vector<mpt::PathString> &filenames)

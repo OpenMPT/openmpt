@@ -21,6 +21,8 @@ namespace IPCWindow
 		SetWindowForeground                = 0x02,
 		GetVersion                         = 0x03,  // returns Version::GewRawVersion()
 		GetArchitecture                    = 0x04,  // returns mpt::Windows::Architecture
+		HasSameBinaryPath                  = 0x05,
+		HasSameSettingsPath                = 0x06
 	};
 
 	void Open(HINSTANCE hInstance);
@@ -30,9 +32,20 @@ namespace IPCWindow
 	LRESULT SendIPC(HWND ipcWnd, Function function, mpt::const_byte_span data = mpt::const_byte_span());
 
 	template <typename Tdata> LRESULT SendIPC(HWND ipcWnd, Function function, mpt::span<const Tdata> data) { return SendIPC(ipcWnd, function, mpt::const_byte_span(reinterpret_cast<const mpt::byte*>(data.data()), data.size() * sizeof(Tdata))); }
-	
+
+	enum InstanceRequirements
+	{
+		SamePath         = 0x01u,
+		SameSettings     = 0x02u,
+		SameArchitecture = 0x04u,
+		SameVersion      = 0x08u
+	};
+	MPT_DECLARE_ENUM(InstanceRequirements)
+
 	HWND FindIPCWindow();
-	
+
+	HWND FindIPCWindow(FlagSet<InstanceRequirements> require);
+
 	// Send file open requests to other OpenMPT instance, if there is one
 	bool SendToIPC(const std::vector<mpt::PathString> &filenames);
 

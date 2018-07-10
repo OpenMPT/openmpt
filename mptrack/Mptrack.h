@@ -263,6 +263,7 @@ public:
 	/// Returns path to config folder including trailing '\'.
 	mpt::PathString GetConfigPath() const { return m_szConfigDirectory; }
 	void SetupPaths(bool overridePortable);
+	void CreatePaths();
 
 	CString SuggestModernBuildText();
 	bool CheckSystemSupport();
