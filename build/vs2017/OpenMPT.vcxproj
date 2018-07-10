@@ -1151,6 +1151,7 @@
     <ClCompile Include="..\..\mptrack\GeneralConfigDlg.cpp" />
     <ClCompile Include="..\..\mptrack\Globals.cpp" />
     <ClCompile Include="..\..\mptrack\HTTP.cpp" />
+    <ClCompile Include="..\..\mptrack\IPCWindow.cpp" />
     <ClCompile Include="..\..\mptrack\Image.cpp" />
     <ClCompile Include="..\..\mptrack\InputHandler.cpp" />
     <ClCompile Include="..\..\mptrack\KeyConfigDlg.cpp" />

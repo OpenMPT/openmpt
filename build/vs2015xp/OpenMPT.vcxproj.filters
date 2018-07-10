@@ -947,6 +947,9 @@
     <ClCompile Include="..\..\mptrack\HTTP.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mptrack\IPCWindow.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\mptrack\Image.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
