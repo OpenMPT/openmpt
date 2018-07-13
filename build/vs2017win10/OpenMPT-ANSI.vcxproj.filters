@@ -4,6 +4,9 @@
     <Filter Include="build">
       <UniqueIdentifier>{D5562E0F-416B-56C0-0AED-F91F76C052F1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="build\pch">
+      <UniqueIdentifier>{BF689319-2BD3-4790-7411-F935E0BA25E5}</UniqueIdentifier>
+    </Filter>
     <Filter Include="build\vs">
       <UniqueIdentifier>{4D3A0C18-3907-6723-6220-55CB4E4C9CB1}</UniqueIdentifier>
     </Filter>
@@ -801,6 +804,9 @@
     <ClInclude Include="..\..\unarchiver\unzip.h">
       <Filter>unarchiver</Filter>
     </ClInclude>
+    <ClInclude Include="..\pch\PCH.h">
+      <Filter>build\pch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp">
@@ -1555,6 +1561,9 @@
     </ClCompile>
     <ClCompile Include="..\..\unarchiver\unzip.cpp">
       <Filter>unarchiver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\pch\PCH.cpp">
+      <Filter>build\pch</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

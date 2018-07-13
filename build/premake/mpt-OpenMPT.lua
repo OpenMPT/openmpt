@@ -116,8 +116,21 @@ end
    "../../mptrack/mptrack.rc",
    "../../mptrack/res/*.*", -- resource data files
   }
-	pchheader "stdafx.h"
-	pchsource "../../common/stdafx.cpp"
+
+	defines { "MPT_BUILD_ENABLE_PCH" }
+	pchsource "../../build/pch/PCH.cpp"
+	pchheader "PCH.h"
+	files {
+		"../../build/pch/PCH.cpp",
+		"../../build/pch/PCH.h"
+	}
+	includedirs {
+		"../../build/pch"
+	}
+	forceincludes {
+		"PCH.h"
+	}
+
   defines { "MODPLUG_TRACKER" }
   largeaddressaware ( true )
   characterset(charset)

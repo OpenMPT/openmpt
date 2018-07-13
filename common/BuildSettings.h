@@ -614,6 +614,16 @@
 
 // platform configuration
 
+#if defined(MODPLUG_TRACKER)
+#if MPT_OS_WINDOWS
+#if !defined(MPT_BUILD_WINESUPPORT)
+#ifndef MPT_MFC_FULL
+#define _AFX_NO_MFC_CONTROLS_IN_DIALOGS	// Do not include support for MFC controls in dialogs (reduces binary bloat; remove this #define if you want to use MFC controls)
+#endif // !MPT_MFC_FULL
+#endif // !MPT_BUILD_WINESUPPORT
+#endif // MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
+
 #if MPT_OS_WINDOWS
 
 #define WIN32_LEAN_AND_MEAN

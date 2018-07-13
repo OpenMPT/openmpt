@@ -22,11 +22,10 @@
 
 #if !defined(MPT_BUILD_WINESUPPORT)
 
-#ifndef MPT_MFC_FULL
-#define _AFX_NO_MFC_CONTROLS_IN_DIALOGS	// Do not include support for MFC controls in dialogs (reduces binary bloat; remove this #define if you want to use MFC controls)
-#endif // !MPT_MFC_FULL
 // cppcheck-suppress missingInclude
-#include <afxwin.h>         // MFC core and standard components
+#include <afx.h>            // MFC core
+// cppcheck-suppress missingInclude
+#include <afxwin.h>         // MFC standard components
 // cppcheck-suppress missingInclude
 #include <afxext.h>         // MFC extensions
 // cppcheck-suppress missingInclude
@@ -140,8 +139,6 @@
 // <cstdlib>
 // <cstring>
 // <time.h>
-
-#include <array>
 
 // for std::abs
 #include <cstdlib>
