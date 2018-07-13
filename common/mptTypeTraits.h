@@ -19,27 +19,6 @@ OPENMPT_NAMESPACE_BEGIN
 namespace mpt {
 
 
-template <std::size_t size> struct int_of_size { };
-template <> struct int_of_size<1> { typedef int8  type; };
-template <> struct int_of_size<2> { typedef int16 type; };
-template <> struct int_of_size<3> { typedef int32 type; };
-template <> struct int_of_size<4> { typedef int32 type; };
-template <> struct int_of_size<5> { typedef int64 type; };
-template <> struct int_of_size<6> { typedef int64 type; };
-template <> struct int_of_size<7> { typedef int64 type; };
-template <> struct int_of_size<8> { typedef int64 type; };
-
-template <std::size_t size> struct uint_of_size { };
-template <> struct uint_of_size<1> { typedef uint8  type; };
-template <> struct uint_of_size<2> { typedef uint16 type; };
-template <> struct uint_of_size<3> { typedef uint32 type; };
-template <> struct uint_of_size<4> { typedef uint32 type; };
-template <> struct uint_of_size<5> { typedef uint64 type; };
-template <> struct uint_of_size<6> { typedef uint64 type; };
-template <> struct uint_of_size<7> { typedef uint64 type; };
-template <> struct uint_of_size<8> { typedef uint64 type; };
-
-
 // Tell which types are safe for mpt::byte_cast.
 // signed char is actually not allowed to alias into an object representation,
 // which means that, if the actual type is not itself signed char but char or
