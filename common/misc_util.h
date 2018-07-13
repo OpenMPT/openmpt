@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <numeric>
 #include <string>
 #include <vector>
 
@@ -328,6 +329,12 @@ namespace mpt
 
 // C++17 clamp
 
+#if MPT_CXX_AT_LEAST(17)
+
+using std::clamp;
+
+#else
+
 template<typename T, typename Compare>
 MPT_CONSTEXPR11_FUN const T & clamp(const T & v, const T & lo, const T & hi, Compare comp)
 {
@@ -339,6 +346,8 @@ MPT_CONSTEXPR11_FUN const T & clamp(const T & v, const T & lo, const T & hi)
 {
 	return mpt::clamp(v, lo, hi, std::less<T>());
 }
+
+#endif
 
 } // namespace mpt
 
@@ -671,6 +680,13 @@ namespace Util {
 namespace mpt
 {
 
+#if MPT_CXX_AT_LEAST(17)
+
+using std::gcd;
+using std::lcm;
+
+#else
+
 	// Greatest Common Divisor. Always returns non-negative number.
 	// compatible with C++17 std::gcd
 	template <typename A, typename B>
@@ -708,6 +724,8 @@ namespace mpt
 			return 0;
 		return a / mpt::gcd(a, b) * b;
 	}
+
+#endif
 
 } // namespace mpt
 

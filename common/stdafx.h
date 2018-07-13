@@ -131,6 +131,7 @@
 
 #include "../common/misc_util.h"
 // <algorithm>
+// <numeric>
 // <limits>
 // <string>
 // <type_traits>

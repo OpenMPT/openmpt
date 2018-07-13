@@ -97,6 +97,7 @@
 #include <map>
 #include <memory>
 #include <new>
+#include <numeric>
 #include <ostream>
 #include <random>
 #include <set>
