@@ -277,7 +277,7 @@ struct MO3Sample
 			if(frequencyIsHertz)
 				mptSmp.nC5Speed = static_cast<uint32>(freqFinetune);
 			else
-				mptSmp.nC5Speed = Util::Round<uint32>(8363.0 * std::pow(2.0, (freqFinetune + 1408) / 1536.0));
+				mptSmp.nC5Speed = mpt::saturate_round<uint32>(8363.0 * std::pow(2.0, (freqFinetune + 1408) / 1536.0));
 		} else
 		{
 			mptSmp.nFineTune = static_cast<int8>(freqFinetune);

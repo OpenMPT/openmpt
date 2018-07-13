@@ -390,7 +390,7 @@ void CWaveConvert::FillFormats()
 		{
 			int ndx = m_CbnSampleFormat.AddString(mpt::ToCString(m_Settings.GetEncoderFactory()->DescribeQuality(quality * 0.01f)));
 			m_CbnSampleFormat.SetItemData(ndx, (Encoder::ModeQuality<<24) | (quality<<0));
-			if(encSettings.Mode == Encoder::ModeQuality && Util::Round<int>(encSettings.Quality*100.0f) == quality)
+			if(encSettings.Mode == Encoder::ModeQuality && mpt::saturate_round<int>(encSettings.Quality*100.0f) == quality)
 			{
 				sel = ndx;
 			}
@@ -1071,7 +1071,7 @@ void CDoWaveConvert::Run()
 	{
 		m_SndFile.SetRepeatCount(std::max(0, m_Settings.repeatCount - 1));
 	}
-	uint64 l = Util::Round<uint64>(m_SndFile.GetLength(eNoAdjust, target).front().duration * samplerate * (1 + m_SndFile.GetRepeatCount()));
+	uint64 l = mpt::saturate_round<uint64>(m_SndFile.GetLength(eNoAdjust, target).front().duration * samplerate * (1 + m_SndFile.GetRepeatCount()));
 
 	m_SndFile.SetCurrentOrder(startOrder);
 	m_SndFile.GetLength(eAdjust, GetLengthTarget(startOrder, 0));	// adjust playback variables / visited rows vector

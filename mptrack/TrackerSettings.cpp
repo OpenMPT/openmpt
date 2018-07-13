@@ -246,7 +246,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, MixerVolumeRampDownMicroseconds(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("VolumeRampDownMicroseconds"), MixerSettings().GetVolumeRampDownMicroseconds())
 	, ResamplerMode(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("SrcMode"), GetDefaultResamplerMode())
 	, ResamplerSubMode(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("XMMSModplugResamplerWFIRType"), CResamplerSettings().gbWFIRType)
-	, ResamplerCutoffPercent(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ResamplerWFIRCutoff"), Util::Round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0))
+	, ResamplerCutoffPercent(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ResamplerWFIRCutoff"), mpt::saturate_round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0))
 	, ResamplerEmulateAmiga(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ResamplerEmulateAmiga"), false)
 	, SoundBoostedThreadPriority(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BoostedThreadPriority"), SoundDevice::AppInfo().BoostedThreadPriorityXP)
 	, SoundBoostedThreadMMCSSClass(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BoostedThreadMMCSSClass"), SoundDevice::AppInfo().BoostedThreadMMCSSClassVista)
@@ -494,8 +494,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		m_SoundDeviceID_DEPRECATED = conf.Read<SoundDevice::Legacy::ID>(MPT_USTRING("Sound Settings"), MPT_USTRING("WaveDevice"), SoundDevice::Legacy::ID());
 		Setting<uint32> m_BufferLength_DEPRECATED(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BufferLength"), 50);
-		Setting<uint32> m_LatencyMS(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("Latency"), Util::Round<int32>(SoundDevice::Settings().Latency * 1000.0));
-		Setting<uint32> m_UpdateIntervalMS(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("UpdateInterval"), Util::Round<int32>(SoundDevice::Settings().UpdateInterval * 1000.0));
+		Setting<uint32> m_LatencyMS(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("Latency"), mpt::saturate_round<int32>(SoundDevice::Settings().Latency * 1000.0));
+		Setting<uint32> m_UpdateIntervalMS(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("UpdateInterval"), mpt::saturate_round<int32>(SoundDevice::Settings().UpdateInterval * 1000.0));
 		Setting<SampleFormat> m_SampleFormat(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BitsPerSample"), SoundDevice::Settings().sampleFormat);
 		Setting<bool> m_SoundDeviceExclusiveMode(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ExclusiveMode"), SoundDevice::Settings().ExclusiveMode);
 		Setting<bool> m_SoundDeviceBoostThreadPriority(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BoostThreadPriority"), SoundDevice::Settings().BoostThreadPriority);
@@ -739,9 +739,9 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 				const mpt::ustring newIdentifierW = newIdentifier + MPT_USTRING("_");
 				const mpt::ustring oldIdentifierW = oldIdentifier + MPT_USTRING("_");
 				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("Latency"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("Latency"), Util::Round<int32>(defaults.Latency * 1000000.0)));
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("Latency"), mpt::saturate_round<int32>(defaults.Latency * 1000000.0)));
 				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("UpdateInterval"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("UpdateInterval"), Util::Round<int32>(defaults.UpdateInterval * 1000000.0)));
+					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("UpdateInterval"), mpt::saturate_round<int32>(defaults.UpdateInterval * 1000000.0)));
 				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("SampleRate"),
 					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("SampleRate"), defaults.Samplerate));
 				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("Channels"),
@@ -857,8 +857,8 @@ public:
 	StoredSoundDeviceSettings(SettingsContainer &conf, const SoundDevice::Info & deviceInfo, const SoundDevice::Settings & defaults)
 		: conf(conf)
 		, deviceInfo(deviceInfo)
-		, LatencyUS(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("Latency"), Util::Round<int32>(defaults.Latency * 1000000.0))
-		, UpdateIntervalUS(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("UpdateInterval"), Util::Round<int32>(defaults.UpdateInterval * 1000000.0))
+		, LatencyUS(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("Latency"), mpt::saturate_round<int32>(defaults.Latency * 1000000.0))
+		, UpdateIntervalUS(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("UpdateInterval"), mpt::saturate_round<int32>(defaults.UpdateInterval * 1000000.0))
 		, Samplerate(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("SampleRate"), defaults.Samplerate)
 		, ChannelsOld(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("Channels"), mpt::saturate_cast<uint8>((int)defaults.Channels))
 		, ChannelMapping(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("ChannelMapping"), defaults.Channels)
@@ -884,8 +884,8 @@ public:
 
 	StoredSoundDeviceSettings & operator = (const SoundDevice::Settings &settings)
 	{
-		LatencyUS = Util::Round<int32>(settings.Latency * 1000000.0);
-		UpdateIntervalUS = Util::Round<int32>(settings.UpdateInterval * 1000000.0);
+		LatencyUS = mpt::saturate_round<int32>(settings.Latency * 1000000.0);
+		UpdateIntervalUS = mpt::saturate_round<int32>(settings.UpdateInterval * 1000000.0);
 		Samplerate = settings.Samplerate;
 		ChannelsOld = mpt::saturate_cast<uint8>((int)settings.Channels);
 		ChannelMapping = settings.Channels;
@@ -998,7 +998,7 @@ void TrackerSettings::SetResamplerSettings(const CResamplerSettings &settings)
 {
 	ResamplerMode = settings.SrcMode;
 	ResamplerSubMode = settings.gbWFIRType;
-	ResamplerCutoffPercent = Util::Round<int32>(settings.gdWFIRCutoff * 100.0);
+	ResamplerCutoffPercent = mpt::saturate_round<int32>(settings.gdWFIRCutoff * 100.0);
 	ResamplerEmulateAmiga = settings.emulateAmiga;
 }
 

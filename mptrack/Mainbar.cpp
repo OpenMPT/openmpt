@@ -1209,23 +1209,23 @@ void CStereoVU::DrawVuMeters(CDC &dc, bool redraw)
 				float width = (rect.Width() - 2.0f) / 2.0f;
 				float height = rect.Height() / float(numChannels/2);
 
-				chanrect.top = Util::Round<int32>(rect.top + height * row);
-				chanrect.bottom = Util::Round<int32>(chanrect.top + height) - 1;
+				chanrect.top = mpt::saturate_round<int32>(rect.top + height * row);
+				chanrect.bottom = mpt::saturate_round<int32>(chanrect.top + height) - 1;
 				
-				chanrect.left = Util::Round<int32>(rect.left + width * col) + ((col == 1) ? 2 : 0);
-				chanrect.right = Util::Round<int32>(chanrect.left + width) - 1;
+				chanrect.left = mpt::saturate_round<int32>(rect.left + width * col) + ((col == 1) ? 2 : 0);
+				chanrect.right = mpt::saturate_round<int32>(chanrect.left + width) - 1;
 
 			} else
 			{
 				float height = rect.Height() / float(numChannels);
-				chanrect.top = Util::Round<int32>(rect.top + height * channel);
-				chanrect.bottom = Util::Round<int32>(chanrect.top + height) - 1;
+				chanrect.top = mpt::saturate_round<int32>(rect.top + height * channel);
+				chanrect.bottom = mpt::saturate_round<int32>(chanrect.top + height) - 1;
 			}
 		} else
 		{
 			float width = rect.Width() / float(numChannels);
-			chanrect.left = Util::Round<int32>(rect.left + width * channel);
-			chanrect.right = Util::Round<int32>(chanrect.left + width) - 1;
+			chanrect.left = mpt::saturate_round<int32>(rect.left + width * channel);
+			chanrect.right = mpt::saturate_round<int32>(chanrect.left + width) - 1;
 		}
 		DrawVuMeter(dc, chanrect, channel, redraw);
 	}

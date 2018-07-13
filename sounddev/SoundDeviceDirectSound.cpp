@@ -257,7 +257,7 @@ bool CDSoundDevice::InternalOpen()
 		return false;
 	}
 	m_bMixRunning = FALSE;
-	m_nDSoundBufferSize = Util::Round<int32>(m_Settings.Latency * pwfx->nAvgBytesPerSec);
+	m_nDSoundBufferSize = mpt::saturate_round<int32>(m_Settings.Latency * pwfx->nAvgBytesPerSec);
 	m_nDSoundBufferSize = Util::AlignUp<uint32>(m_nDSoundBufferSize, bytesPerFrame);
 	m_nDSoundBufferSize = mpt::clamp(m_nDSoundBufferSize, Util::AlignUp<uint32>(DSBSIZE_MIN, bytesPerFrame), Util::AlignDown<uint32>(DSBSIZE_MAX, bytesPerFrame));
 	if(!m_Settings.ExclusiveMode)

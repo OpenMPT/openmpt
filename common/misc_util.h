@@ -496,32 +496,37 @@ namespace Util
 	// Returns maximum value of given integer type.
 	template <class T> constexpr T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only integer types are allowed."); return (std::numeric_limits<T>::max)();}
 
-	/// Returns value rounded to nearest integer.
+}
+
+
+namespace mpt
+{
+
+	// C++11 std::round
 #if (MPT_OS_EMSCRIPTEN && MPT_OS_EMSCRIPTEN_ANCIENT)
-	// MSVC before 2013 does not support C99/C++11.
 	// Certain emscripten versions and/or combinations with nodejs (at least the following combination: emscripten 1.34.8, clang 3.7.0, nodejs 0.10.38) fail assert(std::round(1.5)==2.0). The work-around always works.
-	inline double Round(const double& val) {if(val >= 0.0) return std::floor(val + 0.5); else return std::ceil(val - 0.5);}
-	inline float Round(const float& val) {if(val >= 0.0f) return std::floor(val + 0.5f); else return std::ceil(val - 0.5f);}
+	inline double round(double val) {if(val >= 0.0) return std::floor(val + 0.5); else return std::ceil(val - 0.5);}
+	inline float round(float val) {if(val >= 0.0f) return std::floor(val + 0.5f); else return std::ceil(val - 0.5f);}
 #else
-	inline double Round(const double& val) { return std::round(val); }
-	inline float Round(const float& val) { return std::round(val); }
+	using std::round;
 #endif
 
 	// Rounds given double value to nearest integer value of type T.
 	// Out-of-range values are saturated to the specified integer type's limits.
-	template <class T> inline T Round(const double& val)
+	template <class T> inline T saturate_round(double val)
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
-		return mpt::saturate_cast<T>(Round(val));
+		return mpt::saturate_cast<T>(mpt::round(val));
 	}
 
-	template <class T> inline T Round(const float& val)
+	template <class T> inline T saturate_round(float val)
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
-		return mpt::saturate_cast<T>(Round(val));
+		return mpt::saturate_cast<T>(mpt::round(val));
 	}
 
 }
+
 
 namespace Util {
 

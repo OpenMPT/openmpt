@@ -301,8 +301,8 @@ struct Settings
 	bool operator == (const SoundDevice::Settings &cmp) const
 	{
 		return true
-			&& Util::Round<int64>(Latency * 1000000000.0) == Util::Round<int64>(cmp.Latency * 1000000000.0) // compare in nanoseconds
-			&& Util::Round<int64>(UpdateInterval * 1000000000.0) == Util::Round<int64>(cmp.UpdateInterval * 1000000000.0) // compare in nanoseconds
+			&& mpt::saturate_round<int64>(Latency * 1000000000.0) == mpt::saturate_round<int64>(cmp.Latency * 1000000000.0) // compare in nanoseconds
+			&& mpt::saturate_round<int64>(UpdateInterval * 1000000000.0) == mpt::saturate_round<int64>(cmp.UpdateInterval * 1000000000.0) // compare in nanoseconds
 			&& Samplerate == cmp.Samplerate
 			&& Channels == cmp.Channels
 			&& InputChannels == cmp.InputChannels

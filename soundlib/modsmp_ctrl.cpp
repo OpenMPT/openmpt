@@ -470,7 +470,7 @@ namespace
 		for(SmpLength i = 0; i < length; i++, p++)
 		{
 			double var = (*p) * amplify + offset;
-			*p = Util::Round<T>(var);
+			*p = mpt::saturate_round<T>(var);
 		}
 	}
 }
@@ -528,7 +528,7 @@ double RemoveDCOffset(ModSample &smp, SmpLength start, SmpLength end, CSoundFile
 	{
 		CriticalSection cs;
 
-		smp.nGlobalVol = std::min(Util::Round<uint16>(smp.nGlobalVol / amplify), uint16(64));
+		smp.nGlobalVol = std::min(mpt::saturate_round<uint16>(smp.nGlobalVol / amplify), uint16(64));
 		for(auto &chn : sndFile.m_PlayState.Chn)
 		{
 			if(chn.pModSample == &smp)
@@ -758,7 +758,7 @@ bool StereoSepSample(ModSample &smp, SmpLength start, SmpLength end, double sepa
 
 	const SmpLength length = end - start;
 	const uint8 numChn = smp.GetNumChannels();
-	const int32 sep32 = Util::Round<int32>(separation * (65536.0 / 100.0));
+	const int32 sep32 = mpt::saturate_round<int32>(separation * (65536.0 / 100.0));
 
 	if(smp.GetElementarySampleSize() == 2)
 		StereoSepSampleImpl(smp.sample16() + start * numChn, length, sep32);

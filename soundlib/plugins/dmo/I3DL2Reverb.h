@@ -149,7 +149,7 @@ protected:
 	float Diffusion() const { return m_param[kI3DL2ReverbDiffusion] * 100.0f; }
 	float Density() const { return m_param[kI3DL2ReverbDensity] * 100.0f; }
 	float HFReference() const { return 20.0f + m_param[kI3DL2ReverbHFReference] * 19980.0f; }
-	uint32 Quality() const { return Util::Round<uint32>(m_param[kI3DL2ReverbQuality] * 3.0f); }
+	uint32 Quality() const { return mpt::saturate_round<uint32>(m_param[kI3DL2ReverbQuality] * 3.0f); }
 
 	void RecalculateI3DL2ReverbParams();
 

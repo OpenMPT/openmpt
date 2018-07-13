@@ -519,7 +519,7 @@ bool CASIODevice::InternalOpen()
 		asioCall(getBufferSize(&minSize, &maxSize, &preferredSize, &granularity));
 		MPT_LOG(LogDebug, "sounddev", mpt::format(MPT_USTRING("ASIO: getBufferSize() => minSize=%1 maxSize=%2 preferredSize=%3 granularity=%4"))(
 			minSize, maxSize, preferredSize, granularity));
-		m_nAsioBufferLen = Util::Round<int32>(m_Settings.Latency * m_Settings.Samplerate / 2.0);
+		m_nAsioBufferLen = mpt::saturate_round<int32>(m_Settings.Latency * m_Settings.Samplerate / 2.0);
 		if(minSize <= 0 || maxSize <= 0 || minSize > maxSize)
 		{ // limits make no sense
 			if(preferredSize > 0)
@@ -1440,7 +1440,7 @@ void CASIODevice::ApplyAsioTimeInfo(AsioTimeInfo asioTimeInfo)
 		{ // spec violation or nothing provided at all, better to estimate this stuff ourselves
 			const uint64 asioNow = SourceLockedGetReferenceClockNowNanoseconds();
 			timeInfo.SyncPointStreamFrames = m_TotalFramesWritten + m_nAsioBufferLen - m_StreamPositionOffset;
-			timeInfo.SyncPointSystemTimestamp = asioNow + Util::Round<int64>(m_BufferLatency * 1000.0 * 1000.0 * 1000.0);
+			timeInfo.SyncPointSystemTimestamp = asioNow + mpt::saturate_round<int64>(m_BufferLatency * 1000.0 * 1000.0 * 1000.0);
 			timeInfo.Speed = 1.0;
 		}
 		timeInfo.RenderStreamPositionBefore = StreamPositionFromFrames(m_TotalFramesWritten - m_StreamPositionOffset);
@@ -1543,7 +1543,7 @@ ASIOTime* CASIODevice::BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferI
 void CASIODevice::SampleRateDidChange(ASIOSampleRate sRate)
 {
 	MPT_TRACE_SCOPE();
-	if(Util::Round<uint32>(sRate) == m_Settings.Samplerate)
+	if(mpt::saturate_round<uint32>(sRate) == m_Settings.Samplerate)
 	{
 		// not different, ignore it
 		return;
@@ -1792,7 +1792,7 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 		asioCall(getSampleRate(&samplerate));
 		if(samplerate > 0.0)
 		{
-			caps.currentSampleRate = Util::Round<uint32>(samplerate);
+			caps.currentSampleRate = mpt::saturate_round<uint32>(samplerate);
 		}
 	} catch(...)
 	{

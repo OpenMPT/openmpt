@@ -1716,7 +1716,7 @@ static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, SmpLength start, SmpLengt
 		}
 		l *= pSample[i];
 		Limit(l, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
-		pSample[i] = Util::Round<T>(l);
+		pSample[i] = mpt::saturate_round<T>(l);
 	}
 }
 
@@ -2344,14 +2344,14 @@ public:
 			ctrlSmp::ReplaceSample(sample, pNewSample, std::min(outPos, nNewSampleLength), sndFile);
 			// Update loops and wrap-around buffer
 			sample.SetLoop(
-				Util::Round<SmpLength>(sample.nLoopStart * m_ratio),
-				Util::Round<SmpLength>(sample.nLoopEnd * m_ratio),
+				mpt::saturate_round<SmpLength>(sample.nLoopStart * m_ratio),
+				mpt::saturate_round<SmpLength>(sample.nLoopEnd * m_ratio),
 				sample.uFlags[CHN_LOOP],
 				sample.uFlags[CHN_PINGPONGLOOP],
 				sndFile);
 			sample.SetSustainLoop(
-				Util::Round<SmpLength>(sample.nSustainStart * m_ratio),
-				Util::Round<SmpLength>(sample.nSustainEnd * m_ratio),
+				mpt::saturate_round<SmpLength>(sample.nSustainStart * m_ratio),
+				mpt::saturate_round<SmpLength>(sample.nSustainEnd * m_ratio),
 				sample.uFlags[CHN_SUSTAINLOOP],
 				sample.uFlags[CHN_PINGPONGSUSTAIN],
 				sndFile);
@@ -2876,7 +2876,7 @@ void CCtrlSamples::OnBaseNoteChanged()
 	if (m_sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
 		const int oldTransp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
-		const uint32 newTrans = Util::Round<uint32>(sample.nC5Speed * std::pow(2.0, (n - oldTransp) / 12.0));
+		const uint32 newTrans = mpt::saturate_round<uint32>(sample.nC5Speed * std::pow(2.0, (n - oldTransp) / 12.0));
 		if (newTrans > 0 && newTrans <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535u : 9999999u) && newTrans != sample.nC5Speed)
 		{
 			sample.nC5Speed = newTrans;

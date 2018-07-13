@@ -70,7 +70,7 @@ void CScaleEnvPointsDlg::Apply()
 		for(auto &pt : m_Env)
 		{
 			if(invert) pt.value = ENVELOPE_MAX - pt.value;
-			pt.value = Util::Round<EnvelopeNode::value_t>(Clamp((factor * (pt.value - m_nCenter)) + m_nCenter + m_offsetY, double(ENVELOPE_MIN), double(ENVELOPE_MAX)));
+			pt.value = mpt::saturate_round<EnvelopeNode::value_t>(Clamp((factor * (pt.value - m_nCenter)) + m_nCenter + m_offsetY, double(ENVELOPE_MIN), double(ENVELOPE_MAX)));
 		}
 	}
 }

@@ -181,7 +181,7 @@ void Base::SourceLockedAudioPreRead(std::size_t numFrames, std::size_t framesLat
 		} else
 		{
 			timeInfo.SyncPointStreamFrames = m_StreamPositionRenderFrames + numFrames;
-			timeInfo.SyncPointSystemTimestamp = SourceLockedGetReferenceClockNowNanoseconds() + Util::Round<int64>(GetEffectiveBufferAttributes().Latency * 1000000000.0);
+			timeInfo.SyncPointSystemTimestamp = SourceLockedGetReferenceClockNowNanoseconds() + mpt::saturate_round<int64>(GetEffectiveBufferAttributes().Latency * 1000000000.0);
 			timeInfo.Speed = 1.0;
 		}
 		timeInfo.RenderStreamPositionBefore = StreamPositionFromFrames(m_StreamPositionRenderFrames);
@@ -324,7 +324,7 @@ SoundDevice::StreamPosition Base::GetStreamPosition() const
 	{
 		const uint64 now = SourceGetReferenceClockNowNanoseconds();
 		const SoundDevice::TimeInfo timeInfo = GetTimeInfo();
-		frames = Util::Round<int64>(
+		frames = mpt::saturate_round<int64>(
 				timeInfo.SyncPointStreamFrames + (
 					static_cast<double>(static_cast<int64>(now - timeInfo.SyncPointSystemTimestamp)) * timeInfo.Speed * m_Settings.Samplerate * (1.0 / (1000.0 * 1000.0))
 				)

@@ -59,7 +59,7 @@ MidiInOut::~MidiInOut()
 uint32 MidiInOut::GetLatency() const
 {
 	// There is only a latency if the user-provided latency value is greater than the negative output latency.
-	return Util::Round<uint32>(std::min(0.0, m_latency + GetOutputLatency()) * m_SndFile.GetSampleRate());
+	return mpt::saturate_round<uint32>(std::min(0.0, m_latency + GetOutputLatency()) * m_SndFile.GetSampleRate());
 }
 
 

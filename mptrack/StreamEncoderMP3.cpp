@@ -247,7 +247,7 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 		content += std::string("REPLAYGAIN_TRACK_GAIN");
 		content += std::string(1, '\0');
 
-		int32 gainTimes100 = Util::Round<int32>(replayGain.TrackGaindB * 100.0f);
+		int32 gainTimes100 = mpt::saturate_round<int32>(replayGain.TrackGaindB * 100.0f);
 		if(gainTimes100 < 0)
 		{
 			content += "-";
@@ -284,7 +284,7 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 		content += std::string("REPLAYGAIN_TRACK_PEAK");
 		content += std::string(1, '\0');
 
-		int32 peakTimes1000000 = Util::Round<int32>(std::fabs(replayGain.TrackPeak) * 1000000.0f);
+		int32 peakTimes1000000 = mpt::saturate_round<int32>(std::fabs(replayGain.TrackPeak) * 1000000.0f);
 		std::string number;
 		number += mpt::fmt::dec(peakTimes1000000 / 1000000);
 		number += ".";
@@ -775,7 +775,7 @@ mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 	if(m_Type == MP3EncoderLame)
 	{
 		static const int q_table[11] = { 240, 220, 190, 170, 160, 130, 120, 100, 80, 70, 50 }; // http://wiki.hydrogenaud.io/index.php?title=LAME
-		int q = Util::Round<int>((1.0f - quality) * 10.0f);
+		int q = mpt::saturate_round<int>((1.0f - quality) * 10.0f);
 		if(q < 0) q = 0;
 		if(q >= 10)
 		{

@@ -963,7 +963,7 @@ void CViewGlobals::OnParamChanged()
 		if(cursel >= 0 && cursel < nParams) m_nCurrentParam = cursel;
 		if(m_nCurrentParam < nParams)
 		{
-			int nValue = Util::Round<int>(pPlugin->GetParameter(m_nCurrentParam) * 100.0f);
+			int nValue = mpt::saturate_round<int>(pPlugin->GetParameter(m_nCurrentParam) * 100.0f);
 			LockControls();
 			if(GetFocus() != GetDlgItem(IDC_EDIT14))
 			{
@@ -1081,13 +1081,13 @@ void CViewGlobals::UpdateDryWetDisplay()
 {
 	SNDMIXPLUGIN &plugin = GetDocument()->GetSoundFile().m_MixPlugins[m_nCurrentPlugin];
 	float wetRatio = 1.0f - plugin.fDryRatio, dryRatio = plugin.fDryRatio;
-	m_sbDryRatio.SetPos(Util::Round<int>(wetRatio * 100));
+	m_sbDryRatio.SetPos(mpt::saturate_round<int>(wetRatio * 100));
 	if(plugin.IsExpandedMix())
 	{
 		wetRatio = 2.0f * wetRatio - 1.0f;
 		dryRatio = -wetRatio;
 	}
-	int wetInt = Util::Round<int>(wetRatio * 100), dryInt = Util::Round<int>(dryRatio * 100);
+	int wetInt = mpt::saturate_round<int>(wetRatio * 100), dryInt = mpt::saturate_round<int>(dryRatio * 100);
 	TCHAR s[32];
 	wsprintf(s, _T("%d%% wet, %d%% dry"), wetInt, dryInt);
 	SetDlgItemText(IDC_STATIC8, s);

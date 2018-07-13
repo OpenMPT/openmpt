@@ -52,7 +52,7 @@ mpt::ustring FileHistory::AsISO8601() const
 		double openSeconds = static_cast<double>(openTime) / HISTORY_TIMER_PRECISION;
 		tm tmpLoadDate = loadDate;
 		int64 loadDateSinceEpoch = mpt::Date::Unix::FromUTC(tmpLoadDate);
-		int64 saveDateSinceEpoch = loadDateSinceEpoch + Util::Round<int64>(openSeconds);
+		int64 saveDateSinceEpoch = loadDateSinceEpoch + mpt::saturate_round<int64>(openSeconds);
 		date = mpt::Date::Unix(saveDateSinceEpoch).AsUTC();
 	}
 	return mpt::Date::ToShortenedISO8601(date);

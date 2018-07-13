@@ -53,8 +53,8 @@ bool MidiInOutEditor::OpenEditor(CWnd *parent)
 {
 	Create(IDD_MIDI_IO_PLUGIN, parent);
 	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
-	SetDlgItemInt(IDC_EDIT1, Util::Round<int>(plugin.m_latency * 1000.0), TRUE);
-	m_latencySpin.SetRange32(Util::Round<int>(plugin.GetOutputLatency() * -1000.0), int32_max);
+	SetDlgItemInt(IDC_EDIT1, mpt::saturate_round<int>(plugin.m_latency * 1000.0), TRUE);
+	m_latencySpin.SetRange32(mpt::saturate_round<int>(plugin.GetOutputLatency() * -1000.0), int32_max);
 	PopulateList(m_inputCombo, plugin.m_midiIn,  plugin.m_inputDevice, true);
 	PopulateList(m_outputCombo, plugin.m_midiOut, plugin.m_outputDevice, false);
 	CheckDlgButton(IDC_CHECK1, plugin.m_sendTimingInfo ? BST_CHECKED : BST_UNCHECKED);

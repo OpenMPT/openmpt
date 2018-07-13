@@ -59,7 +59,7 @@ static double NoteToFrequency(double note, double pitchReference)
 static SmpLength NoteToShift(uint32 sampleFreq, int note, double pitchReference)
 {
 	const double fundamentalFrequency = NoteToFrequency((double)note / BINS_PER_NOTE, pitchReference);
-	return std::max(Util::Round<SmpLength>((double)sampleFreq / fundamentalFrequency), SmpLength(1));
+	return std::max(mpt::saturate_round<SmpLength>((double)sampleFreq / fundamentalFrequency), SmpLength(1));
 }
 
 
@@ -426,7 +426,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 
 	const double newFundamentalFreq = NoteToFrequency(static_cast<double>(69 - targetNote) + static_cast<double>(minimumBin) / BINS_PER_NOTE, pitchReference);
 
-	sample.nC5Speed = Util::Round<uint32>(sampleFreq * pitchReference / newFundamentalFreq);
+	sample.nC5Speed = mpt::saturate_round<uint32>(sampleFreq * pitchReference / newFundamentalFreq);
 
 	if((modType & (MOD_TYPE_XM | MOD_TYPE_MOD)))
 	{

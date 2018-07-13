@@ -150,7 +150,7 @@ void CEffectVis::SetCommand(ROWINDEX row, EffectCommand command)
 int CEffectVis::RowToScreenX(ROWINDEX row) const
 {
 	if ((row >= m_startRow) || (row <= m_endRow))
-		return Util::Round<int>(m_rcDraw.left + m_innerBorder + (row - m_startRow) * m_pixelsPerRow);
+		return mpt::saturate_round<int>(m_rcDraw.left + m_innerBorder + (row - m_startRow) * m_pixelsPerRow);
 	return -1;
 }
 
@@ -179,14 +179,14 @@ int CEffectVis::RowToScreenY(ROWINDEX row) const
 int CEffectVis::FXParamToScreenY(uint16 param) const
 {
 	if ((param >= 0x00) || (param <= 0xFF))
-		return Util::Round<int>(m_rcDraw.bottom - param * m_pixelsPerFXParam);
+		return mpt::saturate_round<int>(m_rcDraw.bottom - param * m_pixelsPerFXParam);
 	return -1;
 }
 
 int CEffectVis::PCParamToScreenY(uint16 param) const
 {
 	if ((param >= 0x00) || (param <= ModCommand::maxColumnValue))
-		return Util::Round<int>(m_rcDraw.bottom - param*m_pixelsPerPCParam);
+		return mpt::saturate_round<int>(m_rcDraw.bottom - param*m_pixelsPerPCParam);
 	return -1;
 }
 
@@ -198,7 +198,7 @@ ModCommand::PARAM CEffectVis::ScreenYToFXParam(int y) const
 	if (y >= FXParamToScreenY(0x00))
 		return 0x00;
 
-	return Util::Round<ModCommand::PARAM>((m_rcDraw.bottom - y) / m_pixelsPerFXParam);
+	return mpt::saturate_round<ModCommand::PARAM>((m_rcDraw.bottom - y) / m_pixelsPerFXParam);
 }
 
 uint16 CEffectVis::ScreenYToPCParam(int y) const
@@ -209,7 +209,7 @@ uint16 CEffectVis::ScreenYToPCParam(int y) const
 	if (y >= PCParamToScreenY(0x00))
 		return 0x00;
 
-	return Util::Round<uint16>((m_rcDraw.bottom - y) / m_pixelsPerPCParam);
+	return mpt::saturate_round<uint16>((m_rcDraw.bottom - y) / m_pixelsPerPCParam);
 }
 
 ROWINDEX CEffectVis::ScreenXToRow(int x) const
@@ -220,7 +220,7 @@ ROWINDEX CEffectVis::ScreenXToRow(int x) const
 	if (x >= RowToScreenX(m_endRow))
 		return m_endRow;
 
-	return Util::Round<ROWINDEX>(m_startRow + (x - m_innerBorder) / m_pixelsPerRow);
+	return mpt::saturate_round<ROWINDEX>(m_startRow + (x - m_innerBorder) / m_pixelsPerRow);
 }
 
 
@@ -636,7 +636,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 			for (int i=1; i<=steps; i++)
 			{
 				currentRow = m_nLastDrawnRow+(direction*i);
-				int interpolatedY = Util::Round<int>(m_nLastDrawnY + ((float)i * factor));
+				int interpolatedY = mpt::saturate_round<int>(m_nLastDrawnY + ((float)i * factor));
 				MakeChange(currentRow, interpolatedY);
 			}
 

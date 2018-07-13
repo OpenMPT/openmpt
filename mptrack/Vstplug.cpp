@@ -330,7 +330,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 		// Screw it! Let's just return the tempo at this point in time (might be a bit wrong).
 		if (pVstPlugin != nullptr)
 		{
-			return Util::Round<int32>(pVstPlugin->GetSoundFile().GetCurrentBPM() * 10000);
+			return mpt::saturate_round<int32>(pVstPlugin->GetSoundFile().GetCurrentBPM() * 10000);
 		}
 		return (125 * 10000);
 
@@ -399,7 +399,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 	case audioMasterGetOutputLatency:
 		if(pVstPlugin)
 		{
-			return Util::Round<intptr_t>(pVstPlugin->GetOutputLatency() * pVstPlugin->GetSoundFile().GetSampleRate());
+			return mpt::saturate_round<intptr_t>(pVstPlugin->GetOutputLatency() * pVstPlugin->GetSoundFile().GetSampleRate());
 		}
 		break;
 

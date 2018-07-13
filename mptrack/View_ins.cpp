@@ -682,7 +682,7 @@ int CViewInstrument::ScreenToTick(int x) const
 {
 	int offset = m_nScrollPosX + x;
 	if(offset < m_envPointSize) return 0;
-	return Util::Round<int>((offset - m_envPointSize) / m_fZoom);
+	return mpt::saturate_round<int>((offset - m_envPointSize) / m_fZoom);
 }
 
 

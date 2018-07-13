@@ -142,7 +142,7 @@ protected:
 	IMixPlugin *GetOutputPlugin() const;
 
 public:
-	static LFOWaveform ParamToWaveform(float param) { return static_cast<LFOWaveform>(Util::Round<int>(param * 32.0f)); }
+	static LFOWaveform ParamToWaveform(float param) { return static_cast<LFOWaveform>(mpt::saturate_round<int>(param * 32.0f)); }
 	static float WaveformToParam(LFOWaveform waveform) { return waveform / 32.0f; }
 };
 

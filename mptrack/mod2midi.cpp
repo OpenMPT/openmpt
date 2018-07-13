@@ -66,7 +66,7 @@ namespace MidiExport
 		// Write delta tick count since last event
 		void WriteTicks()
 		{
-			uint32 ticks = (m_ticks <= 0) ? 0 : Util::Round<uint32>(m_ticks);
+			uint32 ticks = (m_ticks <= 0) ? 0 : mpt::saturate_round<uint32>(m_ticks);
 			mpt::IO::WriteVarInt(f, ticks);
 			m_ticks -= ticks;
 		}
@@ -142,7 +142,7 @@ namespace MidiExport
 				// Write MIDI tempo
 				WriteTicks();
 
-				uint32 mspq = Util::Round<uint32>(60000000.0 / curTempo);
+				uint32 mspq = mpt::saturate_round<uint32>(60000000.0 / curTempo);
 				uint8 msg[6] = { 0xFF, 0x51, 0x03, static_cast<uint8>(mspq >> 16), static_cast<uint8>(mspq >> 8), static_cast<uint8>(mspq) };
 				mpt::IO::WriteRaw(f, msg, 6);
 			}
@@ -723,8 +723,8 @@ void CDoMidiConvert::Run()
 	MidiExport::Conversion conv(m_sndFile, m_instrMap, f, CModToMidi::s_overlappingInstruments);
 
 	double duration = m_sndFile.GetLength(eNoAdjust).front().duration;
-	uint64 totalSamples = Util::Round<uint64>(duration * m_sndFile.m_MixerSettings.gdwMixingFreq);
-	SetRange(0, Util::Round<uint32>(duration));
+	uint64 totalSamples = mpt::saturate_round<uint64>(duration * m_sndFile.m_MixerSettings.gdwMixingFreq);
+	SetRange(0, mpt::saturate_round<uint32>(duration));
 	auto startTime = timeGetTime(), prevTime = startTime;
 
 	m_sndFile.SetCurrentOrder(0);

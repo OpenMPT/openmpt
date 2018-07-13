@@ -94,7 +94,7 @@ BOOL CAmpDlg::OnInitDialog()
 		int baseX = i * cx;
 		for(int x = 0; x < cx; x++)
 		{
-			int val = cy - 1 - Util::Round<int>(cy * fadeFunc(static_cast<double>(x) / cx));
+			int val = cy - 1 - mpt::saturate_round<int>(cy * fadeFunc(static_cast<double>(x) / cx));
 			Limit(val, 0, cy - 1);
 			if(oldVal > val && x > 0)
 			{

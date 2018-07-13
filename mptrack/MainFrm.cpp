@@ -932,7 +932,7 @@ const float VUMeter::dynamicRange = 48.0f; // corresponds to the current impleme
 void VUMeter::SetDecaySpeedDecibelPerSecond(float decibelPerSecond)
 {
 	float linearDecayRate = decibelPerSecond / dynamicRange;
-	decayParam = Util::Round<int32>(linearDecayRate * MIXING_CLIPMAX);
+	decayParam = mpt::saturate_round<int32>(linearDecayRate * MIXING_CLIPMAX);
 }
 
 
@@ -1269,7 +1269,7 @@ bool CMainFrame::StartPlayback()
 			m_NotifyTimer = SetTimer(TIMERID_NOTIFY, TrackerSettings::Instance().GUIUpdateInterval, NULL);
 		} else
 		{
-			m_NotifyTimer = SetTimer(TIMERID_NOTIFY, std::max<int>(1, Util::Round<int>(gpSoundDevice->GetEffectiveBufferAttributes().UpdateInterval * 1000.0)), NULL);
+			m_NotifyTimer = SetTimer(TIMERID_NOTIFY, std::max<int>(1, mpt::saturate_round<int>(gpSoundDevice->GetEffectiveBufferAttributes().UpdateInterval * 1000.0)), NULL);
 		}
 	}
 	return true;

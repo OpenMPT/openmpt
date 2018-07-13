@@ -899,21 +899,21 @@ static MPT_NOINLINE void TestMisc1()
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType("s2m"), MOD_TYPE_NONE);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(""), MOD_TYPE_NONE);
 
-	VERIFY_EQUAL( Util::Round(1.99), 2.0 );
-	VERIFY_EQUAL( Util::Round(1.5), 2.0 );
-	VERIFY_EQUAL( Util::Round(1.1), 1.0 );
-	VERIFY_EQUAL( Util::Round(-0.1), 0.0 );
-	VERIFY_EQUAL( Util::Round(-0.5), -1.0 );
-	VERIFY_EQUAL( Util::Round(-0.9), -1.0 );
-	VERIFY_EQUAL( Util::Round(-1.4), -1.0 );
-	VERIFY_EQUAL( Util::Round(-1.7), -2.0 );
-	VERIFY_EQUAL( Util::Round<int32>(int32_max + 0.1), int32_max );
-	VERIFY_EQUAL( Util::Round<int32>(int32_max - 0.4), int32_max );
-	VERIFY_EQUAL( Util::Round<int32>(int32_min + 0.1), int32_min );
-	VERIFY_EQUAL( Util::Round<int32>(int32_min - 0.1), int32_min );
-	VERIFY_EQUAL( Util::Round<uint32>(uint32_max + 0.499), uint32_max );
-	VERIFY_EQUAL( Util::Round<int8>(110.1), 110 );
-	VERIFY_EQUAL( Util::Round<int8>(-110.1), -110 );
+	VERIFY_EQUAL( mpt::round(1.99), 2.0 );
+	VERIFY_EQUAL( mpt::round(1.5), 2.0 );
+	VERIFY_EQUAL( mpt::round(1.1), 1.0 );
+	VERIFY_EQUAL( mpt::round(-0.1), 0.0 );
+	VERIFY_EQUAL( mpt::round(-0.5), -1.0 );
+	VERIFY_EQUAL( mpt::round(-0.9), -1.0 );
+	VERIFY_EQUAL( mpt::round(-1.4), -1.0 );
+	VERIFY_EQUAL( mpt::round(-1.7), -2.0 );
+	VERIFY_EQUAL( mpt::saturate_round<int32>(int32_max + 0.1), int32_max );
+	VERIFY_EQUAL( mpt::saturate_round<int32>(int32_max - 0.4), int32_max );
+	VERIFY_EQUAL( mpt::saturate_round<int32>(int32_min + 0.1), int32_min );
+	VERIFY_EQUAL( mpt::saturate_round<int32>(int32_min - 0.1), int32_min );
+	VERIFY_EQUAL( mpt::saturate_round<uint32>(uint32_max + 0.499), uint32_max );
+	VERIFY_EQUAL( mpt::saturate_round<int8>(110.1), 110 );
+	VERIFY_EQUAL( mpt::saturate_round<int8>(-110.1), -110 );
 
 	VERIFY_EQUAL(mpt::weight(int32(-1)), 32);
 	VERIFY_EQUAL(mpt::weight(0), 0);
@@ -1410,12 +1410,12 @@ static MPT_NOINLINE void TestMisc2()
 	VERIFY_EQUAL( mpt::String::Trim(std::string("\0\ta\0b\0",6),std::string("\0",1)), std::string("\ta\0b",4) );
 
 	// These should fail to compile
-	//Util::Round<std::string>(1.0);
-	//Util::Round<int64>(1.0);
-	//Util::Round<uint64>(1.0);
+	//mpt::saturate_round<std::string>(1.0);
+	//mpt::saturate_round<int64>(1.0);
+	//mpt::saturate_round<uint64>(1.0);
 
 	// This should trigger assert in Round.
-	//VERIFY_EQUAL( Util::Round<int8>(-129), 0 );
+	//VERIFY_EQUAL( mpt::saturate_round<int8>(-129), 0 );
 
 	// Check for completeness of supported effect list in mod specifications
 	for(const auto &spec : ModSpecs::Collection)
@@ -4096,7 +4096,7 @@ static double Rand01()
 template <class T>
 T Rand(const T min, const T max)
 {
-	return Util::Round<T>(min + Rand01() * (max - min));
+	return mpt::saturate_round<T>(min + Rand01() * (max - min));
 }
 
 static void GenerateCommands(CPattern& pat, const double dProbPcs, const double dProbPc)

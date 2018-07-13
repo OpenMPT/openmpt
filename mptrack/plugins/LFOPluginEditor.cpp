@@ -231,7 +231,7 @@ void LFOPluginEditor::SetSliderText(LFOPlugin::Parameters param)
 
 void LFOPluginEditor::SetSliderValue(CSliderCtrl &slider, float value)
 {
-	slider.SetPos(Util::Round<int>(value * SLIDER_GRANULARITY));
+	slider.SetPos(mpt::saturate_round<int>(value * SLIDER_GRANULARITY));
 }
 
 

@@ -951,7 +951,7 @@ static double PatchFreqToNote(uint32 nFreq)
 
 static int32 PatchFreqToNoteInt(uint32 nFreq)
 {
-	return Util::Round<int32>(PatchFreqToNote(nFreq));
+	return mpt::saturate_round<int32>(PatchFreqToNote(nFreq));
 }
 
 
@@ -1507,7 +1507,7 @@ struct SFZEnvelope
 
 	static EnvelopeNode::tick_t ToTicks(float duration, float tickDuration)
 	{
-		return std::max(EnvelopeNode::tick_t(1), Util::Round<EnvelopeNode::tick_t>(duration / tickDuration));
+		return std::max(EnvelopeNode::tick_t(1), mpt::saturate_round<EnvelopeNode::tick_t>(duration / tickDuration));
 	}
 
 	EnvelopeNode::value_t ToValue(float value, EnvelopeType envType) const
@@ -1519,7 +1519,7 @@ struct SFZEnvelope
 			value += ENVELOPE_MID;
 		}
 		Limit<float, float>(value, ENVELOPE_MIN, ENVELOPE_MAX);
-		return Util::Round<EnvelopeNode::value_t>(value);
+		return mpt::saturate_round<EnvelopeNode::value_t>(value);
 	}
 
 	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile, EnvelopeType envType) const
@@ -1613,7 +1613,7 @@ struct SFZRegion
 		double valueF = ConvertStrTo<double>(valueStr);
 		MPT_CONSTANT_IF(std::numeric_limits<T>::is_integer)
 		{
-			valueF = Util::Round(valueF);
+			valueF = mpt::round(valueF);
 		}
 		Limit(valueF, static_cast<double>(valueMin), static_cast<double>(valueMax));
 		value = static_cast<T>(valueF);
@@ -2024,7 +2024,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		//region.filterEnv.ConvertToMPT(pIns, *this, ENV_PITCH);
 
 		sample.rootNote = region.keyRoot + NOTE_MIN;
-		sample.nGlobalVol = Util::Round<decltype(sample.nGlobalVol)>(64 * std::pow(10.0, region.volume / 20.0));
+		sample.nGlobalVol = mpt::saturate_round<decltype(sample.nGlobalVol)>(64 * std::pow(10.0, region.volume / 20.0));
 		if(region.panning != -128)
 		{
 			sample.nPan = static_cast<decltype(sample.nPan)>(Util::muldivr_unsigned(region.panning + 100, 256, 200));
@@ -2036,7 +2036,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		{
 			sample.nVibSweep = 255;
 			if(region.pitchLfoFade > 0)
-				sample.nVibSweep = Util::Round<uint8>(255 / region.pitchLfoFade);
+				sample.nVibSweep = mpt::saturate_round<uint8>(255 / region.pitchLfoFade);
 			sample.nVibDepth = static_cast<uint8>(Util::muldivr(region.pitchLfoDepth, 32, 100));
 			sample.nVibRate = region.pitchLfoFreq * 4;
 		}
@@ -2099,7 +2099,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		}
 
 		// Loop cross-fade
-		SmpLength fadeSamples = Util::Round<SmpLength>(region.loopCrossfade * origSampleRate);
+		SmpLength fadeSamples = mpt::saturate_round<SmpLength>(region.loopCrossfade * origSampleRate);
 		LimitMax(fadeSamples, sample.uFlags[CHN_SUSTAINLOOP] ? sample.nSustainStart : sample.nLoopStart);
 		if(fadeSamples > 0)
 		{
@@ -2439,11 +2439,11 @@ bool CSoundFile::ReadCAFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		return false;
 	}
 
-	if(!Util::TypeCanHoldValue<uint32>(Util::Round<int64>(audioFormat.mSampleRate)))
+	if(!Util::TypeCanHoldValue<uint32>(mpt::saturate_round<int64>(audioFormat.mSampleRate)))
 	{
 		return false;
 	}
-	uint32 sampleRate = static_cast<uint32>(Util::Round<int64>(audioFormat.mSampleRate));
+	uint32 sampleRate = static_cast<uint32>(mpt::saturate_round<int64>(audioFormat.mSampleRate));
 	if(sampleRate <= 0)
 	{
 		return false;

@@ -5004,7 +5004,7 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 				chn.nCutOff = param;
 			} else
 			{
-				chn.nCutOff = Util::Round<uint8>(CalculateSmoothParamChange(chn.nCutOff, param));
+				chn.nCutOff = mpt::saturate_round<uint8>(CalculateSmoothParamChange(chn.nCutOff, param));
 			}
 			chn.nRestoreCutoffOnNewNote = 0;
 			SetupChannelFilter(&chn, !chn.dwFlags[CHN_FILTER]);

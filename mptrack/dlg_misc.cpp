@@ -1273,7 +1273,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 		else
 			_tcscpy(szDate, _T("<unknown date>"));
 		// Time + stuff
-		uint32 duration = Util::Round<uint32>(entry.openTime / HISTORY_TIMER_PRECISION);
+		uint32 duration = mpt::saturate_round<uint32>(entry.openTime / HISTORY_TIMER_PRECISION);
 		s.AppendFormat(_T("Loaded %s, open for %luh %02lum %02lus\r\n"),
 			szDate, duration / 3600, (duration / 60) % 60, duration % 60);
 	}
@@ -1287,7 +1287,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 	s.Empty();
 	if(totalTime)
 	{
-		totalTime = Util::Round<uint64>(totalTime / HISTORY_TIMER_PRECISION);
+		totalTime = mpt::saturate_round<uint64>(totalTime / HISTORY_TIMER_PRECISION);
 
 		s.Format(_T("Total edit time: %lluh %02llum %02llus (%zu session%s)"), totalTime / 3600, (totalTime / 60) % 60, totalTime % 60, editHistory.size(), (editHistory.size() != 1) ? _T("s") : _T(""));
 		SetDlgItemText(IDC_TOTAL_EDIT_TIME, s);

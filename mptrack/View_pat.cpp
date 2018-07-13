@@ -2989,7 +2989,7 @@ static void AmplifyFade(int &vol, int amp, ROWINDEX row, ROWINDEX numRows, int f
 	{
 		l = amp / 100.0;
 	}
-	vol = Util::Round<int>(vol * l);
+	vol = mpt::saturate_round<int>(vol * l);
 	LimitMax(vol, 64);
 }
 

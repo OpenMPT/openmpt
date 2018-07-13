@@ -1620,7 +1620,7 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 		if ( factor <= 0.0 || factor > 4.0 ) {
 			throw openmpt::exception("invalid tempo factor");
 		}
-		m_sndFile->m_nTempoFactor = Util::Round<uint32_t>( 65536.0 / factor );
+		m_sndFile->m_nTempoFactor = mpt::saturate_round<uint32_t>( 65536.0 / factor );
 		m_sndFile->RecalculateSamplesPerTick();
 	} else if ( ctl == "play.pitch_factor" ) {
 		if ( !is_loaded() ) {
@@ -1630,7 +1630,7 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 		if ( factor <= 0.0 || factor > 4.0 ) {
 			throw openmpt::exception("invalid pitch factor");
 		}
-		m_sndFile->m_nFreqFactor = Util::Round<uint32_t>( 65536.0 * factor );
+		m_sndFile->m_nFreqFactor = mpt::saturate_round<uint32_t>( 65536.0 * factor );
 		m_sndFile->RecalculateSamplesPerTick();
 	} else if ( ctl == "render.resampler.emulate_amiga" ) {
 		CResamplerSettings newsettings = m_sndFile->m_Resampler.m_Settings;

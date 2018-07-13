@@ -33,7 +33,7 @@ uint8 CSoundFile::FrequencyToCutOff(double frequency) const
 	//                                           <4.8737671609324025>
 	double cutoff = (std::log(frequency) - 4.8737671609324025) * (m_SongFlags[SONG_EXFILTERRANGE] ? (20.0 / M_LN2) : (24.0 / M_LN2));
 	Limit(cutoff, 0.0, 127.0);
-	return Util::Round<uint8>(cutoff);
+	return mpt::saturate_round<uint8>(cutoff);
 }
 
 
@@ -51,7 +51,7 @@ uint32 CSoundFile::CutOffToFrequency(uint32 nCutOff, int flt_modifier) const
 		// The first half of the sentence contradicts the second, though.
 		Fc = 125.0f * std::pow(2.0f, computedCutoff * 6.0f / (127.0f * 512.0f));
 	}
-	int freq = Util::Round<int>(Fc);
+	int freq = mpt::saturate_round<int>(Fc);
 	Limit(freq, 120, 20000);
 	if(freq * 2 > (int)m_MixerSettings.gdwMixingFreq) freq = m_MixerSettings.gdwMixingFreq / 2;
 	return static_cast<uint32>(freq);
@@ -117,7 +117,7 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 	float fb1 = -e / (1.0f + d + e);
 
 #if defined(MPT_INTMIXER)
-#define FILTER_CONVERT(x) Util::Round<mixsample_t>((x) * (1 << MIXING_FILTER_PRECISION))
+#define FILTER_CONVERT(x) mpt::saturate_round<mixsample_t>((x) * (1 << MIXING_FILTER_PRECISION))
 #else
 #define FILTER_CONVERT(x) (x)
 #endif

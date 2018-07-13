@@ -385,7 +385,7 @@ void DMOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value)
 			if (fMax > fMin) value *= (fMax - fMin);
 			value += fMin;
 			Limit(value, fMin, fMax);
-			if (mpi.mpType != MPT_FLOAT) value = Util::Round(value);
+			if (mpi.mpType != MPT_FLOAT) value = mpt::round(value);
 			m_pMediaParams->SetParam(index, value);
 		}
 	}
@@ -525,7 +525,7 @@ CString DMOPlugin::GetParamDisplay(PlugParamIndex param)
 						WCHAR *text = nullptr;
 						m_pParamInfo->GetParamText(param, &text);
 
-						const int nValue = Util::Round<int>(md * (mpi.mpdMaxValue - mpi.mpdMinValue));
+						const int nValue = mpt::saturate_round<int>(md * (mpi.mpdMaxValue - mpi.mpdMinValue));
 						// Always skip first two strings (param name, unit name)
 						for(int i = 0; i < nValue + 2; i++)
 						{
@@ -539,7 +539,7 @@ CString DMOPlugin::GetParamDisplay(PlugParamIndex param)
 				default:
 					{
 						CString s;
-						s.Format(_T("%d"), Util::Round<int>(md));
+						s.Format(_T("%d"), mpt::saturate_round<int>(md));
 						return s;
 					}
 					break;

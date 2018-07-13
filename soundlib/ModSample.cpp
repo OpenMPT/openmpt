@@ -306,7 +306,7 @@ void ModSample::SanitizeLoops()
 
 uint32 ModSample::TransposeToFrequency(int transpose, int finetune)
 {
-	return Util::Round<uint32>(std::pow(2.0, (transpose * 128.0 + finetune) * (1.0 / (12.0 * 128.0))) * 8363.0);
+	return mpt::saturate_round<uint32>(std::pow(2.0, (transpose * 128.0 + finetune) * (1.0 / (12.0 * 128.0))) * 8363.0);
 }
 
 
@@ -319,7 +319,7 @@ void ModSample::TransposeToFrequency()
 // Return tranpose.finetune as 25.7 fixed point value.
 int ModSample::FrequencyToTranspose(uint32 freq)
 {
-	return Util::Round<int>(std::log(freq * (1.0 / 8363.0)) * (12.0 * 128.0 * (1.0 / M_LN2)));
+	return mpt::saturate_round<int>(std::log(freq * (1.0 / 8363.0)) * (12.0 * 128.0 * (1.0 / M_LN2)));
 }
 
 
@@ -346,7 +346,7 @@ void ModSample::FrequencyToTranspose()
 // Transpose the sample by amount specified in octaves (i.e. amount=1 transposes one octave up)
 void ModSample::Transpose(double amount)
 {
-	nC5Speed = Util::Round<uint32>(nC5Speed * std::pow(2.0, amount));
+	nC5Speed = mpt::saturate_round<uint32>(nC5Speed * std::pow(2.0, amount));
 }
 
 

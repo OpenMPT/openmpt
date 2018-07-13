@@ -59,7 +59,7 @@ protected:
 	float Feedback() const override { return -99.0f + m_param[kFlangerFeedback] * 198.0f; }
 	float Delay() const override { return m_param[kFlangerDelay] * 4.0f; }
 	float FrequencyInHertz() const override { return m_param[kFlangerFrequency] * 10.0f; }
-	int Phase() const override { return Util::Round<uint32>(m_param[kFlangerPhase] * 4.0f); }
+	int Phase() const override { return mpt::saturate_round<uint32>(m_param[kFlangerPhase] * 4.0f); }
 };
 
 } // namespace DMO

@@ -812,7 +812,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					} else if(newTempo != tempo)
 					{
 						patRow[tempoChannel].command = CMD_TEMPO;
-						patRow[tempoChannel].param = Util::Round<ModCommand::PARAM>(std::max(32.0, newTempo.ToDouble()));
+						patRow[tempoChannel].param = mpt::saturate_round<ModCommand::PARAM>(std::max(32.0, newTempo.ToDouble()));
 					}
 					tempo = newTempo;
 				}

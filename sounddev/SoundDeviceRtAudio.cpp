@@ -154,9 +154,9 @@ bool CRtAudioDevice::InternalOpen()
 		m_InputStreamParameters.deviceId = GetDevice(GetDeviceInfo());
 		m_InputStreamParameters.nChannels = m_Settings.InputChannels;
 		m_InputStreamParameters.firstChannel = m_Settings.InputSourceID;
-		m_FramesPerChunk = Util::Round<int>(m_Settings.UpdateInterval * m_Settings.Samplerate);
+		m_FramesPerChunk = mpt::saturate_round<int>(m_Settings.UpdateInterval * m_Settings.Samplerate);
 		m_StreamOptions.flags = RtAudioStreamFlags();
-		m_StreamOptions.numberOfBuffers = Util::Round<int>(m_Settings.Latency * m_Settings.Samplerate / m_FramesPerChunk);
+		m_StreamOptions.numberOfBuffers = mpt::saturate_round<int>(m_Settings.Latency * m_Settings.Samplerate / m_FramesPerChunk);
 		m_StreamOptions.priority = 0;
 		m_StreamOptions.streamName = mpt::ToCharset(mpt::CharsetUTF8, m_AppInfo.GetName());
 		if(m_Settings.BoostThreadPriority)
@@ -238,7 +238,7 @@ void CRtAudioDevice::InternalFillAudioBuffer()
 
 int64 CRtAudioDevice::InternalGetStreamPositionFrames() const
 {
-	return Util::Round<int64>(m_RtAudio->getStreamTime() * m_RtAudio->getStreamSampleRate());
+	return mpt::saturate_round<int64>(m_RtAudio->getStreamTime() * m_RtAudio->getStreamSampleRate());
 }
 
 

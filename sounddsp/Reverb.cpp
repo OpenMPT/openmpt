@@ -75,7 +75,7 @@ static int32 OnePoleLowPassCoef(int32 scale, float g, float F_c, float F_s)
 	g *= g;
 	double scale_over_1mg = scale / (1.0 - g);
 	double cosw = std::cos(2.0 * M_PI * F_c / F_s);
-	return Util::Round<int32>((1.0 - (std::sqrt((g + g) * (1.0 - cosw) - g * g * (1.0 - cosw * cosw)) + g * cosw)) * scale_over_1mg);
+	return mpt::saturate_round<int32>((1.0 - (std::sqrt((g + g) * (1.0 - cosw) - g * g * (1.0 - cosw * cosw)) + g * cosw)) * scale_over_1mg);
 }
 
 static float mBToLinear(int32 value_mB)
@@ -89,7 +89,7 @@ static float mBToLinear(int32 value_mB)
 
 static int32 mBToLinear(int32 scale, int32 value_mB)
 {
-	return Util::Round<int32>(mBToLinear(value_mB) * scale);
+	return mpt::saturate_round<int32>(mBToLinear(value_mB) * scale);
 }
 
 

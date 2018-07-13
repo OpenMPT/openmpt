@@ -719,7 +719,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		if(bytesRead && srcPeak != 1.0f)
 		{
 			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
-			sample.nGlobalVol = Util::Round<uint16>(Clamp(sample.nGlobalVol * srcPeak, 1.0f, 64.0f));
+			sample.nGlobalVol = mpt::saturate_round<uint16>(Clamp(sample.nGlobalVol * srcPeak, 1.0f, 64.0f));
 			sample.uFlags.set(SMP_MODIFIED);
 		}
 	}
@@ -740,7 +740,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		if(bytesRead && srcPeak != 1.0)
 		{
 			// Adjust sample volume so we do not affect relative volume of the sample. Normalizing is only done to increase precision.
-			sample.nGlobalVol = Util::Round<uint16>(Clamp(sample.nGlobalVol * srcPeak, 1.0, 64.0));
+			sample.nGlobalVol = mpt::saturate_round<uint16>(Clamp(sample.nGlobalVol * srcPeak, 1.0, 64.0));
 			sample.uFlags.set(SMP_MODIFIED);
 		}
 	}

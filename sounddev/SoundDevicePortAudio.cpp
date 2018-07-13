@@ -191,7 +191,7 @@ bool CPortaudioDevice::InternalClose()
 		Pa_CloseStream(m_Stream);
 		if(Pa_GetDeviceInfo(m_StreamParameters.device)->hostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS))
 		{
-			Pa_Sleep(Util::Round<long>(bufferAttributes.Latency * 2.0 * 1000.0 + 0.5)); // wait for broken wdm drivers not closing the stream immediatly
+			Pa_Sleep(mpt::saturate_round<long>(bufferAttributes.Latency * 2.0 * 1000.0 + 0.5)); // wait for broken wdm drivers not closing the stream immediatly
 		}
 		MemsetZero(m_StreamParameters);
 		MemsetZero(m_InputStreamParameters);
@@ -220,7 +220,7 @@ void CPortaudioDevice::InternalStop()
 void CPortaudioDevice::InternalFillAudioBuffer()
 {
 	if(m_CurrentFrameCount == 0) return;
-	SourceLockedAudioPreRead(m_CurrentFrameCount, mpt::saturate_cast<std::size_t>(Util::Round<int64>(m_CurrentRealLatency * m_StreamInfo->sampleRate)));
+	SourceLockedAudioPreRead(m_CurrentFrameCount, mpt::saturate_cast<std::size_t>(mpt::saturate_round<int64>(m_CurrentRealLatency * m_StreamInfo->sampleRate)));
 	SourceLockedAudioRead(m_CurrentFrameBuffer, m_CurrentFrameBufferInput, m_CurrentFrameCount);
 	m_StatisticPeriodFrames.store(m_CurrentFrameCount);
 	SourceLockedAudioDone();
@@ -269,7 +269,7 @@ bool CPortaudioDevice::OnIdle()
 				// Sleeping too long would freeze the UI,
 				// but at least sleep a tiny bit of time to let things settle down.
 				const SoundDevice::BufferAttributes bufferAttributes = GetEffectiveBufferAttributes();
-				Pa_Sleep(Util::Round<long>(bufferAttributes.Latency * 2.0 * 1000.0 + 0.5));
+				Pa_Sleep(mpt::saturate_round<long>(bufferAttributes.Latency * 2.0 * 1000.0 + 0.5));
 				RequestReset();
 				return true;
 			}

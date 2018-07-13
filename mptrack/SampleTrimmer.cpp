@@ -69,7 +69,7 @@ public:
 			m_SndFile.Order.SetSequence(seq);
 			m_SndFile.ResetPlayPos();
 			const auto subSongs = m_SndFile.GetLength(eNoAdjust, GetLengthTarget(true));
-			SetRange(0, Util::Round<uint32>(std::accumulate(subSongs.begin(), subSongs.end(), 0.0, [](double acc, const GetLengthType &glt) { return acc + glt.duration; }) * m_SndFile.GetSampleRate()));
+			SetRange(0, mpt::saturate_round<uint32>(std::accumulate(subSongs.begin(), subSongs.end(), 0.0, [](double acc, const GetLengthType &glt) { return acc + glt.duration; }) * m_SndFile.GetSampleRate()));
 
 			size_t totalSamples = 0;
 			DummyAudioTarget target;
