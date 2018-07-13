@@ -842,4 +842,42 @@ static inline message_formatter<CString> cformat(const CString &format)
 } // namespace mpt
 
 
+
+namespace mpt { namespace String {
+
+// Combine a vector of values into a string, separated with the given separator.
+// No escaping is performed.
+template<typename T>
+mpt::ustring Combine(const std::vector<T> &vals, const mpt::ustring &sep=MPT_USTRING(","))
+{
+	mpt::ustring str;
+	for(std::size_t i = 0; i < vals.size(); ++i)
+	{
+		if(i > 0)
+		{
+			str += sep;
+		}
+		str += mpt::ufmt::val(vals[i]);
+	}
+	return str;
+}
+template<typename T>
+std::string Combine(const std::vector<T> &vals, const std::string &sep=std::string(","))
+{
+	std::string str;
+	for(std::size_t i = 0; i < vals.size(); ++i)
+	{
+		if(i > 0)
+		{
+			str += sep;
+		}
+		str += mpt::fmt::val(vals[i]);
+	}
+	return str;
+}
+
+} } // namespace mpt::String
+
+
+
 OPENMPT_NAMESPACE_END

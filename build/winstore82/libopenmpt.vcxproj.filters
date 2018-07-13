@@ -51,6 +51,18 @@
     <ClInclude Include="..\..\common\misc_util.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptAlloc.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptAssert.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptBaseMacros.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptBaseTypes.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptBufferIO.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -60,6 +72,12 @@
     <ClInclude Include="..\..\common\mptCRC.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptException.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptExceptionText.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptFileIO.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -67,6 +85,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptLibrary.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptMemory.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptMutex.h">
@@ -79,6 +100,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptRandom.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptSpan.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptString.h">
@@ -453,9 +477,6 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\stdafx.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\typedefs.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\version.cpp">

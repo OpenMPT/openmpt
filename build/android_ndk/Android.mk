@@ -106,7 +106,6 @@ LOCAL_SRC_FILES += \
 	common/mptWine.cpp \
 	common/Profiler.cpp \
 	common/serialization_utils.cpp \
-	common/typedefs.cpp \
 	common/version.cpp \
 	libopenmpt/libopenmpt_c.cpp \
 	libopenmpt/libopenmpt_cxx.cpp \

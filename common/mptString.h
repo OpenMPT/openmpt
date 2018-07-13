@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "mptAlloc.h"
+#include "mptSpan.h"
 #include "mptTypeTraits.h"
 
 #include <algorithm>
@@ -24,6 +26,16 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace mpt
 {
+
+
+
+template <typename T> inline span<T> as_span(std::basic_string<T> & str) { return span<T>(&(str[0]), str.length()); }
+
+template <typename T> inline span<const T> as_span(const std::basic_string<T> & str) { return span<const T>(&(str[0]), str.length()); }
+
+
+
+template <typename T> inline std::vector<typename std::remove_const<T>::type> make_vector(const std::basic_string<T> & str) { return std::vector<typename std::remove_const<T>::type>(str.begin(), str.end()); }
 
 
 

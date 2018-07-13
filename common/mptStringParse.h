@@ -202,4 +202,47 @@ inline T Hex(const mpt::ustring &str)
 } // namespace mpt
 
 
+
+namespace mpt { namespace String {
+
+// Split the given string at separator positions into individual values returned as a vector.
+// An empty string results in an empty vector.
+// Leading or trailing separators result in a default-constructed element being inserted before or after the other elements.
+template<typename T>
+std::vector<T> Split(const mpt::ustring &str, const mpt::ustring &sep=MPT_USTRING(","))
+{
+	std::vector<T> vals;
+	std::size_t pos = 0;
+	while(str.find(sep, pos) != std::string::npos)
+	{
+		vals.push_back(ConvertStrTo<T>(str.substr(pos, str.find(sep, pos) - pos)));
+		pos = str.find(sep, pos) + sep.length();
+	}
+	if(!vals.empty() || (str.substr(pos).length() > 0))
+	{
+		vals.push_back(ConvertStrTo<T>(str.substr(pos)));
+	}
+	return vals;
+}
+template<typename T>
+std::vector<T> Split(const std::string &str, const std::string &sep=std::string(","))
+{
+	std::vector<T> vals;
+	std::size_t pos = 0;
+	while(str.find(sep, pos) != std::string::npos)
+	{
+		vals.push_back(ConvertStrTo<T>(str.substr(pos, str.find(sep, pos) - pos)));
+		pos = str.find(sep, pos) + sep.length();
+	}
+	if(!vals.empty() || (str.substr(pos).length() > 0))
+	{
+		vals.push_back(ConvertStrTo<T>(str.substr(pos)));
+	}
+	return vals;
+}
+
+} } // namespace mpt::String
+
+
+
 OPENMPT_NAMESPACE_END

@@ -61,16 +61,48 @@
 
 // this will be available everywhere
 
-#include "../common/typedefs.h"
-// <limits>
-// <memory>
-// <new>
+#include "../common/mptBaseMacros.h"
+// <iterator>
 // <cstddef>
+
+#include "../common/mptAssert.h"
+// "mptBaseMacros.h"
+
+#include "../common/mptBaseTypes.h"
+// "mptAssert.h"
+// "mptBaseMacros.h"
+// <array>
+// <limits>
 // <cstdint>
-// <stdint.h>
+
+#include "../common/mptException.h"
+// <exception>
+// <new>
+// <afx.h>
+
+#include "../common/mptSpan.h"
+// "mptBaseTypes.h"
+// <array>
+// <iterator>
 
 #include "../common/mptTypeTraits.h"
 // <type_traits>
+
+#include "../common/mptMemory.h"
+// "mptAssert.h"
+// "mptBaseTypes.h"
+// "mptSpan.h"
+// "mptTypeTraits.h"
+// <utility>
+// <cstring>
+
+#include "../common/mptAlloc.h"
+// "mptBaseMacros.h"
+// "mptMemory.h"
+// "mptSpan.h"
+// <memory>
+// <utility>
+// <vector>
 
 #include "../common/mptString.h"
 // <algorithm>
@@ -78,6 +110,19 @@
 // <string>
 // <type_traits>
 // <cstring>
+
+#include "../common/mptExceptionText.h"
+// "mptException.h"
+// "mptString.h"
+// <exception>
+
+#include "../common/typedefs.h"
+// <limits>
+// <memory>
+// <new>
+// <cstddef>
+// <cstdint>
+// <stdint.h>
 
 #include "../common/mptStringFormat.h"
 
