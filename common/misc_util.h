@@ -516,15 +516,6 @@ namespace Util
 	// Certain emscripten versions and/or combinations with nodejs (at least the following combination: emscripten 1.34.8, clang 3.7.0, nodejs 0.10.38) fail assert(std::round(1.5)==2.0). The work-around always works.
 	inline double Round(const double& val) {if(val >= 0.0) return std::floor(val + 0.5); else return std::ceil(val - 0.5);}
 	inline float Round(const float& val) {if(val >= 0.0f) return std::floor(val + 0.5f); else return std::ceil(val - 0.5f);}
-#elif MPT_OS_ANDROID && defined(__GLIBCXX__) && !defined(_LIBCPP_VERSION)
-	// NDK 12b gnustl_shared armeabi-v7a only provides round() in ::.
-	// NDK 12b gnustl_shared arm64-v8a has round() in std::.
-	// NDK 12b c++_shared armeabi-v7a has round() in std::.
-	// Just fallback to :: for Android gnustl_shared.
-	// This work-around can be removed once Android switches to LLVM libc++.
-	// Currently (ndk-r12b), libc++ has problems with exceptions.
-	inline double Round(const double& val) { return ::round(val); }
-	inline float Round(const float& val) { return ::roundf(val); }
 #else
 	inline double Round(const double& val) { return std::round(val); }
 	inline float Round(const float& val) { return std::round(val); }
