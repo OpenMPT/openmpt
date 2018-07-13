@@ -528,7 +528,14 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 			if(!chunk.ReadStruct(header) || header.sampleIndex == 0)
 				continue;
 			#if 1
+				#if MPT_GCC_BEFORE(6,1,0)
+				#pragma GCC diagnostic push
+				#pragma GCC diagnostic ignored "-Wtype-limits"
+				#endif
 				STATIC_ASSERT((mpt::limits<decltype(header.sampleIndex)>::max)() < MAX_SAMPLES);
+				#if MPT_GCC_BEFORE(6,1,0)
+				#pragma GCC diagnostic pop
+				#endif
 			#else
 				MPT_MAYBE_CONSTANT_IF(header.sampleIndex >= MAX_SAMPLES)
 					continue;
@@ -617,7 +624,14 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				if(sampleHeader.smpNum == 0)
 					continue;
 				#if 1
+					#if MPT_GCC_BEFORE(6,1,0)
+					#pragma GCC diagnostic push
+					#pragma GCC diagnostic ignored "-Wtype-limits"
+					#endif
 					STATIC_ASSERT((mpt::limits<decltype(sampleHeader.smpNum)>::max)() < MAX_SAMPLES);
+					#if MPT_GCC_BEFORE(6,1,0)
+					#pragma GCC diagnostic pop
+					#endif
 				#else
 					MPT_MAYBE_CONSTANT_IF(sampleHeader.smpNum >= MAX_SAMPLES)
 						continue;
