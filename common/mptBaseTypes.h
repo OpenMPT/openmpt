@@ -98,4 +98,17 @@ MPT_STATIC_ASSERT(mpt::arch_bits == static_cast<int>(mpt::pointer_size) * 8);
 
 
 
+namespace mpt {
+
+template <typename T>
+struct limits
+{
+	static constexpr typename std::remove_cv<T>::type min() noexcept { return std::numeric_limits<typename std::remove_cv<T>::type>::min(); }
+	static constexpr typename std::remove_cv<T>::type max() noexcept { return std::numeric_limits<typename std::remove_cv<T>::type>::max(); }
+};
+
+} // namespace mpt
+
+
+
 OPENMPT_NAMESPACE_END

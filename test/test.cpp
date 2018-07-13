@@ -379,17 +379,54 @@ static MPT_NOINLINE void TestTypes()
 	VERIFY_EQUAL(uint64_max, (std::numeric_limits<uint64>::max)());
 
 
-	STATIC_ASSERT(int8_max == MPT_MAX_VALUE_OF_TYPE(int8));
-	STATIC_ASSERT(uint8_max == MPT_MAX_VALUE_OF_TYPE(uint8));
+	STATIC_ASSERT(int8_max == (std::numeric_limits<int8>::max)());
+	STATIC_ASSERT(uint8_max == (std::numeric_limits<uint8>::max)());
 
-	STATIC_ASSERT(int16_max == MPT_MAX_VALUE_OF_TYPE(int16));
-	STATIC_ASSERT(uint16_max == MPT_MAX_VALUE_OF_TYPE(uint16));
+	STATIC_ASSERT(int16_max == (std::numeric_limits<int16>::max)());
+	STATIC_ASSERT(uint16_max == (std::numeric_limits<uint16>::max)());
 
-	STATIC_ASSERT(int32_max == MPT_MAX_VALUE_OF_TYPE(int32));
-	STATIC_ASSERT(uint32_max == MPT_MAX_VALUE_OF_TYPE(uint32));
+	STATIC_ASSERT(int32_max == (std::numeric_limits<int32>::max)());
+	STATIC_ASSERT(uint32_max == (std::numeric_limits<uint32>::max)());
 
-	STATIC_ASSERT(int64_max == MPT_MAX_VALUE_OF_TYPE(int64));
-	STATIC_ASSERT(uint64_max == MPT_MAX_VALUE_OF_TYPE(uint64));
+	STATIC_ASSERT(int64_max == (std::numeric_limits<int64>::max)());
+	STATIC_ASSERT(uint64_max == (std::numeric_limits<uint64>::max)());
+
+
+	STATIC_ASSERT((mpt::limits<int8>::max)() == (std::numeric_limits<int8>::max)());
+	STATIC_ASSERT((mpt::limits<uint8>::max)() == (std::numeric_limits<uint8>::max)());
+
+	STATIC_ASSERT((mpt::limits<int16>::max)() == (std::numeric_limits<int16>::max)());
+	STATIC_ASSERT((mpt::limits<uint16>::max)() == (std::numeric_limits<uint16>::max)());
+
+	STATIC_ASSERT((mpt::limits<int32>::max)() == (std::numeric_limits<int32>::max)());
+	STATIC_ASSERT((mpt::limits<uint32>::max)() == (std::numeric_limits<uint32>::max)());
+
+	STATIC_ASSERT((mpt::limits<int64>::max)() == (std::numeric_limits<int64>::max)());
+	STATIC_ASSERT((mpt::limits<uint64>::max)() == (std::numeric_limits<uint64>::max)());
+
+	STATIC_ASSERT((mpt::limits<int8le>::min)() == (std::numeric_limits<int8>::min)());
+	STATIC_ASSERT((mpt::limits<uint8le>::min)() == (std::numeric_limits<uint8>::min)());
+
+	STATIC_ASSERT((mpt::limits<int16le>::min)() == (std::numeric_limits<int16>::min)());
+	STATIC_ASSERT((mpt::limits<uint16le>::min)() == (std::numeric_limits<uint16>::min)());
+
+	STATIC_ASSERT((mpt::limits<int32le>::min)() == (std::numeric_limits<int32>::min)());
+	STATIC_ASSERT((mpt::limits<uint32le>::min)() == (std::numeric_limits<uint32>::min)());
+
+	STATIC_ASSERT((mpt::limits<int64le>::min)() == (std::numeric_limits<int64>::min)());
+	STATIC_ASSERT((mpt::limits<uint64le>::min)() == (std::numeric_limits<uint64>::min)());
+
+	STATIC_ASSERT((mpt::limits<int8le>::max)() == (std::numeric_limits<int8>::max)());
+	STATIC_ASSERT((mpt::limits<uint8le>::max)() == (std::numeric_limits<uint8>::max)());
+
+	STATIC_ASSERT((mpt::limits<int16le>::max)() == (std::numeric_limits<int16>::max)());
+	STATIC_ASSERT((mpt::limits<uint16le>::max)() == (std::numeric_limits<uint16>::max)());
+
+	STATIC_ASSERT((mpt::limits<int32le>::max)() == (std::numeric_limits<int32>::max)());
+	STATIC_ASSERT((mpt::limits<uint32le>::max)() == (std::numeric_limits<uint32>::max)());
+
+	STATIC_ASSERT((mpt::limits<int64le>::max)() == (std::numeric_limits<int64>::max)());
+	STATIC_ASSERT((mpt::limits<uint64le>::max)() == (std::numeric_limits<uint64>::max)());
 
 }
 

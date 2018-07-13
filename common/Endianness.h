@@ -1022,6 +1022,10 @@ typedef packed<uint32, BigEndian_tag> uint32be;
 typedef packed<uint16, BigEndian_tag> uint16be;
 typedef packed<uint8 , BigEndian_tag> uint8be;
 
+namespace mpt {
+template <typename T, typename Tendian> struct limits<packed<T, Tendian>> : mpt::limits<T> {};
+} // namespace mpt
+
 MPT_BINARY_STRUCT(int64le, 8)
 MPT_BINARY_STRUCT(int32le, 4)
 MPT_BINARY_STRUCT(int16le, 2)

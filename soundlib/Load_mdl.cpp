@@ -528,7 +528,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 			if(!chunk.ReadStruct(header) || header.sampleIndex == 0)
 				continue;
 			#if 1
-				STATIC_ASSERT(MPT_MAX_UNSIGNED_VALUE(header.sampleIndex) < MAX_SAMPLES);
+				STATIC_ASSERT((mpt::limits<decltype(header.sampleIndex)>::max)() < MAX_SAMPLES);
 			#else
 				MPT_MAYBE_CONSTANT_IF(header.sampleIndex >= MAX_SAMPLES)
 					continue;
@@ -617,7 +617,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				if(sampleHeader.smpNum == 0)
 					continue;
 				#if 1
-					STATIC_ASSERT(MPT_MAX_UNSIGNED_VALUE(sampleHeader.smpNum) < MAX_SAMPLES);
+					STATIC_ASSERT((mpt::limits<decltype(sampleHeader.smpNum)>::max)() < MAX_SAMPLES);
 				#else
 					MPT_MAYBE_CONSTANT_IF(sampleHeader.smpNum >= MAX_SAMPLES)
 						continue;
