@@ -135,11 +135,33 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 
 
 // Compile time assert.
+#if MPT_COMPILER_GCC
+
+#if (MPT_CXX >= 17)
+#define MPT_STATIC_ASSERT(expr) \
+  _Pragma("GCC diagnostic push") \
+  _Pragma("GCC diagnostic ignored \"-Wtype-limits\"") \
+	static_assert(expr) \
+  _Pragma("GCC diagnostic pop") \
+/**/
+#else
+#define MPT_STATIC_ASSERT(expr) \
+  _Pragma("GCC diagnostic push") \
+  _Pragma("GCC diagnostic ignored \"-Wtype-limits\"") \
+	static_assert((expr), "compile time assertion failed: " #expr) \
+  _Pragma("GCC diagnostic pop") \
+/**/
+#endif
+
+#else // MPT_COMPILER
+
 #if (MPT_CXX >= 17)
 #define MPT_STATIC_ASSERT static_assert
 #else
 #define MPT_STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
 #endif
+
+#endif // MPT_COMPILER
 
 
 
