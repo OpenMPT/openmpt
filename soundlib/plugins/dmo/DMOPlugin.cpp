@@ -127,7 +127,7 @@ static const float _si2f = 1.0f / 32768.0f;
 
 static void InterleaveStereo(const float * MPT_RESTRICT inputL, const float * MPT_RESTRICT inputR, float * MPT_RESTRICT output, uint32 numFrames)
 {
-#if (defined(ENABLE_SSE) || defined(ENABLE_SSE2))
+#if defined(ENABLE_SSE)
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
@@ -161,7 +161,7 @@ static void InterleaveStereo(const float * MPT_RESTRICT inputL, const float * MP
 
 static void DeinterleaveStereo(const float * MPT_RESTRICT input, float * MPT_RESTRICT outputL, float * MPT_RESTRICT outputR, uint32 numFrames)
 {
-#if (defined(ENABLE_SSE) || defined(ENABLE_SSE2))
+#if defined(ENABLE_SSE)
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
