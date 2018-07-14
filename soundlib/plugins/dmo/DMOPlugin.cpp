@@ -196,10 +196,10 @@ static void DeinterleaveStereo(const float * MPT_RESTRICT input, float * MPT_RES
 // Interleave two float streams into one int16 stereo stream.
 static void InterleaveFloatToInt16(const float * MPT_RESTRICT inputL, const float * MPT_RESTRICT inputR, int16 * MPT_RESTRICT output, uint32 numFrames)
 {
-#ifdef ENABLE_SSE
+#if defined(ENABLE_MMX) && defined(ENABLE_SSE)
 	// This uses __m64, so it's not available on the MSVC 64-bit compiler.
 	// But if the user runs a 64-bit operating system, they will go the floating-point path anyway.
-	if(GetProcSupport() & PROCSUPPORT_SSE)
+	if((GetProcSupport() & (PROCSUPPORT_MMX | PROCSUPPORT_SSE)) == (PROCSUPPORT_MMX | PROCSUPPORT_SSE))
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
 		STATIC_ASSERT((MIXBUFFERSIZE & 7) == 0);
@@ -248,10 +248,10 @@ static void InterleaveFloatToInt16(const float * MPT_RESTRICT inputL, const floa
 // Deinterleave an int16 stereo stream into two float streams.
 static void DeinterleaveInt16ToFloat(const int16 * MPT_RESTRICT input, float * MPT_RESTRICT outputL, float * MPT_RESTRICT outputR, uint32 numFrames)
 {
-#ifdef ENABLE_SSE
+#if defined(ENABLE_MMX) && defined(ENABLE_SSE)
 	// This uses __m64, so it's not available on the MSVC 64-bit compiler.
 	// But if the user runs a 64-bit operating system, they will go the floating-point path anyway.
-	if(GetProcSupport() & PROCSUPPORT_SSE)
+	if((GetProcSupport() & (PROCSUPPORT_MMX | PROCSUPPORT_SSE)) == (PROCSUPPORT_MMX | PROCSUPPORT_SSE))
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
 		STATIC_ASSERT((MIXBUFFERSIZE & 7) == 0);
