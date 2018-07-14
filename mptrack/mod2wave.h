@@ -89,7 +89,6 @@ public:
 	CEdit m_EditGenre;
 
 private:
-	void OnShowEncoderInfo();
 	void FillFileTypes();
 	void FillSamplerates();
 	void FillChannels();

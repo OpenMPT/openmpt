@@ -120,10 +120,7 @@ namespace Encoder
 		mpt::ustring fileShortDescription;
 		mpt::ustring encoderSettingsName;
 
-		bool showEncoderInfo;
 		mpt::ustring fileDescription;
-		mpt::ustring encoderName;
-		mpt::ustring description;
 
 		bool canTags;
 		std::vector<mpt::ustring> genres;
@@ -148,8 +145,7 @@ namespace Encoder
 		int defaultDitherType;
 
 		Traits()
-			: showEncoderInfo(false)
-			, canTags(false)
+			: canTags(false)
 			, modesWithFixedGenres(0)
 			, canCues(false)
 			, maxChannels(0)

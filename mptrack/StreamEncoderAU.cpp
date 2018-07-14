@@ -168,6 +168,7 @@ AUEncoder::AUEncoder()
 	Encoder::Traits traits;
 	traits.fileExtension = MPT_PATHSTRING("au");
 	traits.fileShortDescription = MPT_USTRING("AU");
+	traits.fileDescription = MPT_USTRING("NeXT/Sun Audio");
 	traits.encoderSettingsName = MPT_USTRING("AU");
 	traits.canTags = true;
 	traits.canCues = false;

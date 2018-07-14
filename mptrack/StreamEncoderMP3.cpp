@@ -400,29 +400,10 @@ static void GenreEnumCallback(int num, const char *name, void *cookie)
 static Encoder::Traits BuildTraits(bool compatible)
 {
 	Encoder::Traits traits;
-	mpt::ustring version;
-	if(get_lame_version())
-	{
-		version = MPT_USTRING("Lame ") + mpt::ToUnicode(mpt::CharsetASCII, get_lame_version());
-	} else
-	{
-		version = MPT_USTRING("Lame");
-	}
 	traits.fileExtension = MPT_PATHSTRING("mp3");
-	traits.fileShortDescription = (compatible ? mpt::format(MPT_USTRING("compatible MP3 (%1)"))(version) : mpt::format(MPT_USTRING("MP3 (%1)"))(version));
+	traits.fileShortDescription = (compatible ? MPT_USTRING("compatible MP3") : MPT_USTRING("MP3"));
 	traits.encoderSettingsName = (compatible ? MPT_USTRING("MP3LameCompatible") : MPT_USTRING("MP3Lame"));
-	traits.showEncoderInfo = true;
 	traits.fileDescription = (compatible ? MPT_USTRING("MPEG-1 Layer 3") : MPT_USTRING("MPEG-1/2 Layer 3"));
-	traits.encoderName = MPT_USTRING("libMP3Lame");
-	traits.description += MPT_USTRING("Version: ");
-	traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_lame_version()?get_lame_version():"");
-	traits.description += MPT_USTRING("\n");
-	traits.description += MPT_USTRING("Psycho acoustic model version: ");
-	traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_psy_version()?get_psy_version():"");
-	traits.description += MPT_USTRING("\n");
-	traits.description += MPT_USTRING("URL: ");
-	traits.description += mpt::ToUnicode(mpt::CharsetASCII, get_lame_url()?get_lame_url():"");
-	traits.description += MPT_USTRING("\n");
 	traits.canTags = true;
 	traits.genres.clear();
 	id3tag_genre_list(&GenreEnumCallback, &traits);

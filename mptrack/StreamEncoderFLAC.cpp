@@ -201,6 +201,7 @@ FLACEncoder::FLACEncoder()
 	Encoder::Traits traits;
 	traits.fileExtension = MPT_PATHSTRING("flac");
 	traits.fileShortDescription = MPT_USTRING("FLAC");
+	traits.fileDescription = MPT_USTRING("Free Lossless Audio Codec");
 	traits.encoderSettingsName = MPT_USTRING("FLAC");
 	traits.canTags = true;
 	traits.maxChannels = 4;

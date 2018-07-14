@@ -71,7 +71,6 @@ BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
 	ON_COMMAND(IDC_RADIO4,			&CWaveConvert::OnExportModeChanged)
 	ON_COMMAND(IDC_RADIO5,			&CWaveConvert::OnExportModeChanged)
 	ON_COMMAND(IDC_PLAYEROPTIONS,	&CWaveConvert::OnPlayerOptions)
-	ON_COMMAND(IDC_BUTTON1,			&CWaveConvert::OnShowEncoderInfo)
 	ON_CBN_SELCHANGE(IDC_COMBO5,	&CWaveConvert::OnFileTypeChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO1,	&CWaveConvert::OnSamplerateChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO4,	&CWaveConvert::OnChannelsChanged)
@@ -158,8 +157,6 @@ BOOL CWaveConvert::OnInitDialog()
 
 	SetDlgItemInt(IDC_EDIT5, m_Settings.repeatCount, FALSE);
 	m_SpinLoopCount.SetRange32(1, int16_max);
-
-	GetDlgItem(IDC_BUTTON1)->EnableWindow(encTraits->showEncoderInfo ? TRUE : FALSE);
 
 	FillFileTypes();
 	FillSamplerates();
@@ -284,27 +281,13 @@ void CWaveConvert::FillTags()
 }
 
 
-void CWaveConvert::OnShowEncoderInfo()
-{
-	mpt::ustring info;
-	info += MPT_USTRING("Format: ");
-	info += encTraits->fileDescription;
-	info += MPT_USTRING("\r\n");
-	info += MPT_USTRING("Encoder: ");
-	info += encTraits->encoderName;
-	info += MPT_USTRING("\r\n");
-	info += mpt::String::Replace(encTraits->description, MPT_USTRING("\n"), MPT_USTRING("\r\n"));
-	Reporting::Information(info, "Encoder Information");
-}
-
-
 void CWaveConvert::FillFileTypes()
 {
 	m_CbnFileType.ResetContent();
 	int sel = 0;
 	for(std::size_t i = 0; i < m_Settings.EncoderFactories.size(); ++i)
 	{
-		int ndx = m_CbnFileType.AddString(mpt::ToCString(m_Settings.EncoderFactories[i]->GetTraits().fileShortDescription));
+		int ndx = m_CbnFileType.AddString(mpt::cformat(_T("%1 (%2)"))(mpt::ToCString(m_Settings.EncoderFactories[i]->GetTraits().fileShortDescription), mpt::ToCString(m_Settings.EncoderFactories[i]->GetTraits().fileDescription)));
 		m_CbnFileType.SetItemData(ndx, i);
 		if(m_Settings.EncoderIndex == i)
 		{
@@ -550,7 +533,6 @@ void CWaveConvert::OnFileTypeChanged()
 	DWORD_PTR dwFileType = m_CbnFileType.GetItemData(m_CbnFileType.GetCurSel());
 	m_Settings.SelectEncoder(dwFileType);
 	encTraits = m_Settings.GetTraits();
-	GetDlgItem(IDC_BUTTON1)->EnableWindow(encTraits->showEncoderInfo ? TRUE : FALSE);
 	FillSamplerates();
 	FillChannels();
 	FillFormats();
