@@ -451,30 +451,32 @@
 #if defined(ENABLE_ASM)
 #if MPT_COMPILER_MSVC && defined(_M_IX86)
 
-// Generate general x86 inline assembly / intrinsics.
+// Generate general x86 inline assembly and intrinsics.
 #define ENABLE_X86
-// Generate inline assembly using MMX instructions (only used when the CPU supports it).
+// Generate MMX instructions (only used when the CPU supports it).
 #define ENABLE_MMX
-// Generate inline assembly using SSE instructions (only used when the CPU supports it).
+// Generate SSE instructions (only used when the CPU supports it).
 #define ENABLE_SSE
-// Generate inline assembly using SSE2 instructions (only used when the CPU supports it).
+// Generate SSE2 instructions (only used when the CPU supports it).
 #define ENABLE_SSE2
-// Generate inline assembly using SSE3 instructions (only used when the CPU supports it).
+// Generate SSE3 instructions (only used when the CPU supports it).
 #define ENABLE_SSE3
-// Generate inline assembly using SSE4 instructions (only used when the CPU supports it).
+// Generate SSE4 instructions (only used when the CPU supports it).
 #define ENABLE_SSE4
-// Generate inline assembly using AMD specific instruction set extensions (only used when the CPU supports it).
+// Generate AMD specific instruction set extensions (only used when the CPU supports it).
 #define ENABLE_X86_AMD
 
 #elif MPT_COMPILER_MSVC && defined(_M_X64)
 
-// Generate general x64 inline assembly / intrinsics.
+// Generate general x64 intrinsics.
 #define ENABLE_X64
-// Generate inline assembly using SSE2 instructions (only used when the CPU supports it).
+// Generate SSE instructions (only used when the CPU supports it).
+#define ENABLE_SSE
+// Generate SSE2 instructions (only used when the CPU supports it).
 #define ENABLE_SSE2
-// Generate inline assembly using SSE3 instructions (only used when the CPU supports it).
+// Generate SSE3 instructions (only used when the CPU supports it).
 #define ENABLE_SSE3
-// Generate inline assembly using SSE4 instructions (only used when the CPU supports it).
+// Generate SSE4 instructions (only used when the CPU supports it).
 #define ENABLE_SSE4
 
 #endif // arch
