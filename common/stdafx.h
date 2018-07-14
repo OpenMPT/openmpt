@@ -72,7 +72,12 @@
 // "mptBaseMacros.h"
 // <array>
 // <limits>
+// <type_traits>
 // <cstdint>
+
+#include "../common/mptBaseUtils.h"
+// <algorithm>
+// <utility>
 
 #include "../common/mptException.h"
 // <exception>
@@ -84,14 +89,10 @@
 // <array>
 // <iterator>
 
-#include "../common/mptTypeTraits.h"
-// <type_traits>
-
 #include "../common/mptMemory.h"
 // "mptAssert.h"
 // "mptBaseTypes.h"
 // "mptSpan.h"
-// "mptTypeTraits.h"
 // <utility>
 // <cstring>
 
@@ -130,16 +131,6 @@
 #include "../common/Logging.h"
 
 #include "../common/misc_util.h"
-// <algorithm>
-// <numeric>
-// <limits>
-// <string>
-// <type_traits>
-// <vector>
-// <cmath>
-// <cstdlib>
-// <cstring>
-// <time.h>
 
 // for std::abs
 #include <cstdlib>

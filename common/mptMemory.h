@@ -14,7 +14,6 @@
 #include "mptAssert.h"
 #include "mptBaseTypes.h"
 #include "mptSpan.h"
-#include "mptTypeTraits.h"
 
 #include <utility>
 

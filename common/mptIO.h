@@ -13,7 +13,6 @@
 
 
 #include "../common/typedefs.h"
-#include "../common/mptTypeTraits.h"
 #include "../common/Endianness.h"
 #include <algorithm>
 #include <array>

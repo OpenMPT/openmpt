@@ -12,18 +12,18 @@
 		9793351A0323F7040C1FD81C /* Logging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E6858F97D2C192013BD4AAF8 /* Logging.cpp */; };
 		AD5EDAC799DBCD0AC258CE1E /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C5F3B20131AD1DACBA0C3886 /* Profiler.cpp */; };
 		F7641A63637F7D04ACA18D98 /* misc_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 06CF36CAF2B5F8C19B065FDF /* misc_util.cpp */; };
-		E638C573D28A9C63BBA9D973 /* mptCPU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52D6FEC619CC46BAA857F6B /* mptCPU.cpp */; };
-		DC749D73488F001591B110A9 /* mptFileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB1B4248B702044060536A5D /* mptFileIO.cpp */; };
-		F63BE46D6200E35D2B661328 /* mptIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 25D3314D11241D8F3A880B51 /* mptIO.cpp */; };
-		B6446E1CA2AC34EA0B184900 /* mptLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 453F720EB10371FE7A69A1C8 /* mptLibrary.cpp */; };
-		48D9CD09B49DCCF97D03FDC3 /* mptOS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37559D8523A688C74C0A7789 /* mptOS.cpp */; };
-		8481EFEEF0F1F167B9106CF0 /* mptPathString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F3161559DF93089C081109B0 /* mptPathString.cpp */; };
-		E445DDA85060404A998250DE /* mptRandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D3279103BF0E53FB685FB918 /* mptRandom.cpp */; };
-		3EB88B54AAD2EEF5F3F4FE89 /* mptString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED399E25D920601D8271C63A /* mptString.cpp */; };
-		923071B9FE6BD17C07614E0C /* mptStringBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 01495E7EEDB0244C561C3962 /* mptStringBuffer.cpp */; };
-		6479CB0AD0B42BCED9A9A85D /* mptStringFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9346C1047FAE87D2E8199CE8 /* mptStringFormat.cpp */; };
-		F9EA1A0FE5686BA8CE602940 /* mptStringParse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2897B63594B119D7DDD3296B /* mptStringParse.cpp */; };
-		91E7FA6BFD76BC5606739D6E /* mptTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A0F5D71D8C31DB87F543F37E /* mptTime.cpp */; };
+		07ECE7A2F33DBF92DC5CFCA2 /* mptCPU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76287C3DE296D1BC2B808CBC /* mptCPU.cpp */; };
+		5D60B949C97A1CEB129D2C7F /* mptFileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC922B179879ED0E41CA532C /* mptFileIO.cpp */; };
+		F78EFC196353FB092CB92BD4 /* mptIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 860159197252445B9BB6321D /* mptIO.cpp */; };
+		57A007B64308CE83AC73E299 /* mptLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46928ABAB25689AA7BBCB974 /* mptLibrary.cpp */; };
+		60A1152CCC65141C95CB44E6 /* mptOS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9883C45184D4AF93AD389E55 /* mptOS.cpp */; };
+		85452700F1B52979BAD4A301 /* mptPathString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5416B1DB4093A41E6910A532 /* mptPathString.cpp */; };
+		6531F97ED14B5C201A6E6CB4 /* mptRandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B49E7AD2A0853CCA49D6A2E7 /* mptRandom.cpp */; };
+		56CC2967C2E68C080B099D9C /* mptString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB087F4BA9749EC63E8AF09 /* mptString.cpp */; };
+		D3F8A9F73F340ABB4829874A /* mptStringBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A2A4F7178E0CBEE5F777D2FB /* mptStringBuffer.cpp */; };
+		A5410449117D640C1A72E19B /* mptStringFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A25A9E200A216C89753582 /* mptStringFormat.cpp */; };
+		1A2F4B4706AD9BE0EFA45978 /* mptStringParse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A982D20B159D35AD5EBF4541 /* mptStringParse.cpp */; };
+		D2FE737F3E8E356A478A1682 /* mptTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 414084902D7C87FA968E9FF1 /* mptTime.cpp */; };
 		1D4186AE89D0479992CC28B1 /* mptUUID.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AC27B6C79863B9310176D128 /* mptUUID.cpp */; };
 		9C94FED60824C0C11120A1D9 /* mptWine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB8FFDEAB7CB005520DE184C /* mptWine.cpp */; };
 		4052CA1CAC6372C335B50403 /* serialization_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F3D2B535BBB7BEC44B33984 /* serialization_utils.cpp */; };
@@ -210,39 +210,39 @@
 		C9B0DF4CB5ECE2B61EFFFAAD /* mptAssert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptAssert.h"; path = "../../common/mptAssert.h"; sourceTree = "<group>"; };
 		1830A2DE048279CEEDA0B6DE /* mptBaseMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptBaseMacros.h"; path = "../../common/mptBaseMacros.h"; sourceTree = "<group>"; };
 		89BD2509F58124F9BEE754C3 /* mptBaseTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptBaseTypes.h"; path = "../../common/mptBaseTypes.h"; sourceTree = "<group>"; };
-		63BA22AB4FA1E4A2F8F14AC0 /* mptBufferIO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptBufferIO.h"; path = "../../common/mptBufferIO.h"; sourceTree = "<group>"; };
-		F52D6FEC619CC46BAA857F6B /* mptCPU.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptCPU.cpp"; path = "../../common/mptCPU.cpp"; sourceTree = "<group>"; };
-		FC9F622B6883716B71869FA7 /* mptCPU.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptCPU.h"; path = "../../common/mptCPU.h"; sourceTree = "<group>"; };
-		6D5857DCD93B661CE23E9458 /* mptCRC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptCRC.h"; path = "../../common/mptCRC.h"; sourceTree = "<group>"; };
-		25A71A1C916B190C5AD149D6 /* mptException.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptException.h"; path = "../../common/mptException.h"; sourceTree = "<group>"; };
-		6B9F25ACD7B9884D20DC98E1 /* mptExceptionText.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptExceptionText.h"; path = "../../common/mptExceptionText.h"; sourceTree = "<group>"; };
-		CB1B4248B702044060536A5D /* mptFileIO.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptFileIO.cpp"; path = "../../common/mptFileIO.cpp"; sourceTree = "<group>"; };
-		12E977E8FE247B5267379349 /* mptFileIO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptFileIO.h"; path = "../../common/mptFileIO.h"; sourceTree = "<group>"; };
-		25D3314D11241D8F3A880B51 /* mptIO.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptIO.cpp"; path = "../../common/mptIO.cpp"; sourceTree = "<group>"; };
-		ECB0510AD8D61B71C11CA13C /* mptIO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptIO.h"; path = "../../common/mptIO.h"; sourceTree = "<group>"; };
-		453F720EB10371FE7A69A1C8 /* mptLibrary.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptLibrary.cpp"; path = "../../common/mptLibrary.cpp"; sourceTree = "<group>"; };
-		4C8E87A6B847F25041A70C2B /* mptLibrary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptLibrary.h"; path = "../../common/mptLibrary.h"; sourceTree = "<group>"; };
-		1133533EFD6E56A866816E9F /* mptMemory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptMemory.h"; path = "../../common/mptMemory.h"; sourceTree = "<group>"; };
-		AC0964EC1878B96B6161746B /* mptMutex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptMutex.h"; path = "../../common/mptMutex.h"; sourceTree = "<group>"; };
-		37559D8523A688C74C0A7789 /* mptOS.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptOS.cpp"; path = "../../common/mptOS.cpp"; sourceTree = "<group>"; };
-		75976EDF61BD38464A03BE11 /* mptOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptOS.h"; path = "../../common/mptOS.h"; sourceTree = "<group>"; };
-		F3161559DF93089C081109B0 /* mptPathString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptPathString.cpp"; path = "../../common/mptPathString.cpp"; sourceTree = "<group>"; };
-		3ACB6EC7261D46B70F3C83C7 /* mptPathString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptPathString.h"; path = "../../common/mptPathString.h"; sourceTree = "<group>"; };
-		D3279103BF0E53FB685FB918 /* mptRandom.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptRandom.cpp"; path = "../../common/mptRandom.cpp"; sourceTree = "<group>"; };
-		1A5304CF068F07396FA11F30 /* mptRandom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptRandom.h"; path = "../../common/mptRandom.h"; sourceTree = "<group>"; };
-		AC7EB18598CF9CC7C1338B89 /* mptSpan.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptSpan.h"; path = "../../common/mptSpan.h"; sourceTree = "<group>"; };
-		ED399E25D920601D8271C63A /* mptString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptString.cpp"; path = "../../common/mptString.cpp"; sourceTree = "<group>"; };
-		2BCB0C241707108E80192885 /* mptString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptString.h"; path = "../../common/mptString.h"; sourceTree = "<group>"; };
-		01495E7EEDB0244C561C3962 /* mptStringBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptStringBuffer.cpp"; path = "../../common/mptStringBuffer.cpp"; sourceTree = "<group>"; };
-		48BAFAC73437EE0A5DB4EE1E /* mptStringBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptStringBuffer.h"; path = "../../common/mptStringBuffer.h"; sourceTree = "<group>"; };
-		9346C1047FAE87D2E8199CE8 /* mptStringFormat.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptStringFormat.cpp"; path = "../../common/mptStringFormat.cpp"; sourceTree = "<group>"; };
-		5A2BFD4346A8F0866F25F19A /* mptStringFormat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptStringFormat.h"; path = "../../common/mptStringFormat.h"; sourceTree = "<group>"; };
-		2897B63594B119D7DDD3296B /* mptStringParse.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptStringParse.cpp"; path = "../../common/mptStringParse.cpp"; sourceTree = "<group>"; };
-		6F82852ADB114715E40D282D /* mptStringParse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptStringParse.h"; path = "../../common/mptStringParse.h"; sourceTree = "<group>"; };
-		2D5A674319966AAD82A882A4 /* mptThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptThread.h"; path = "../../common/mptThread.h"; sourceTree = "<group>"; };
-		A0F5D71D8C31DB87F543F37E /* mptTime.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptTime.cpp"; path = "../../common/mptTime.cpp"; sourceTree = "<group>"; };
-		2711A934136294763CC68238 /* mptTime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptTime.h"; path = "../../common/mptTime.h"; sourceTree = "<group>"; };
-		92F10B507E43E33F67622050 /* mptTypeTraits.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptTypeTraits.h"; path = "../../common/mptTypeTraits.h"; sourceTree = "<group>"; };
+		DDB9F686497EF57612E42541 /* mptBaseUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptBaseUtils.h"; path = "../../common/mptBaseUtils.h"; sourceTree = "<group>"; };
+		44310C7A3018CE71D968348F /* mptBufferIO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptBufferIO.h"; path = "../../common/mptBufferIO.h"; sourceTree = "<group>"; };
+		76287C3DE296D1BC2B808CBC /* mptCPU.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptCPU.cpp"; path = "../../common/mptCPU.cpp"; sourceTree = "<group>"; };
+		3D063DDCA9E94B1CB2EC7958 /* mptCPU.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptCPU.h"; path = "../../common/mptCPU.h"; sourceTree = "<group>"; };
+		AEBE318D1AA240CD23A56E09 /* mptCRC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptCRC.h"; path = "../../common/mptCRC.h"; sourceTree = "<group>"; };
+		26FA32C892BE31B85B246282 /* mptException.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptException.h"; path = "../../common/mptException.h"; sourceTree = "<group>"; };
+		EC8A418258A5A423A1C7B4B7 /* mptExceptionText.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptExceptionText.h"; path = "../../common/mptExceptionText.h"; sourceTree = "<group>"; };
+		AC922B179879ED0E41CA532C /* mptFileIO.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptFileIO.cpp"; path = "../../common/mptFileIO.cpp"; sourceTree = "<group>"; };
+		2AE89EA81624A2127F36BA09 /* mptFileIO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptFileIO.h"; path = "../../common/mptFileIO.h"; sourceTree = "<group>"; };
+		860159197252445B9BB6321D /* mptIO.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptIO.cpp"; path = "../../common/mptIO.cpp"; sourceTree = "<group>"; };
+		0DD367F8F9F8315FE23EB72A /* mptIO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptIO.h"; path = "../../common/mptIO.h"; sourceTree = "<group>"; };
+		46928ABAB25689AA7BBCB974 /* mptLibrary.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptLibrary.cpp"; path = "../../common/mptLibrary.cpp"; sourceTree = "<group>"; };
+		0D2DBD6E79E62719024642F3 /* mptLibrary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptLibrary.h"; path = "../../common/mptLibrary.h"; sourceTree = "<group>"; };
+		B27DFFB09EB9021B07CC1A12 /* mptMemory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptMemory.h"; path = "../../common/mptMemory.h"; sourceTree = "<group>"; };
+		2D04713D9972C6BCE25B81BC /* mptMutex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptMutex.h"; path = "../../common/mptMutex.h"; sourceTree = "<group>"; };
+		9883C45184D4AF93AD389E55 /* mptOS.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptOS.cpp"; path = "../../common/mptOS.cpp"; sourceTree = "<group>"; };
+		96B984CD82DF4E346B25D4FF /* mptOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptOS.h"; path = "../../common/mptOS.h"; sourceTree = "<group>"; };
+		5416B1DB4093A41E6910A532 /* mptPathString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptPathString.cpp"; path = "../../common/mptPathString.cpp"; sourceTree = "<group>"; };
+		5B7E91F647D068E630EFA5F6 /* mptPathString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptPathString.h"; path = "../../common/mptPathString.h"; sourceTree = "<group>"; };
+		B49E7AD2A0853CCA49D6A2E7 /* mptRandom.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptRandom.cpp"; path = "../../common/mptRandom.cpp"; sourceTree = "<group>"; };
+		BB9DB041A7D9B3AB10ECCBA2 /* mptRandom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptRandom.h"; path = "../../common/mptRandom.h"; sourceTree = "<group>"; };
+		0DADD851F9FDC3932262B255 /* mptSpan.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptSpan.h"; path = "../../common/mptSpan.h"; sourceTree = "<group>"; };
+		CEB087F4BA9749EC63E8AF09 /* mptString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptString.cpp"; path = "../../common/mptString.cpp"; sourceTree = "<group>"; };
+		CC15B996B851BC002164D4F7 /* mptString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptString.h"; path = "../../common/mptString.h"; sourceTree = "<group>"; };
+		A2A4F7178E0CBEE5F777D2FB /* mptStringBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptStringBuffer.cpp"; path = "../../common/mptStringBuffer.cpp"; sourceTree = "<group>"; };
+		A9B9964A95368A8DBEB38AA1 /* mptStringBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptStringBuffer.h"; path = "../../common/mptStringBuffer.h"; sourceTree = "<group>"; };
+		34A25A9E200A216C89753582 /* mptStringFormat.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptStringFormat.cpp"; path = "../../common/mptStringFormat.cpp"; sourceTree = "<group>"; };
+		BB2A99C6A7A78C09D0248D1D /* mptStringFormat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptStringFormat.h"; path = "../../common/mptStringFormat.h"; sourceTree = "<group>"; };
+		A982D20B159D35AD5EBF4541 /* mptStringParse.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptStringParse.cpp"; path = "../../common/mptStringParse.cpp"; sourceTree = "<group>"; };
+		87B0DFFDF33FA1E8FC3B8200 /* mptStringParse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptStringParse.h"; path = "../../common/mptStringParse.h"; sourceTree = "<group>"; };
+		CEA413B6BAE0162023F32E17 /* mptThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptThread.h"; path = "../../common/mptThread.h"; sourceTree = "<group>"; };
+		414084902D7C87FA968E9FF1 /* mptTime.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptTime.cpp"; path = "../../common/mptTime.cpp"; sourceTree = "<group>"; };
+		883FD0007490BB429DF4A904 /* mptTime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptTime.h"; path = "../../common/mptTime.h"; sourceTree = "<group>"; };
 		AC27B6C79863B9310176D128 /* mptUUID.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptUUID.cpp"; path = "../../common/mptUUID.cpp"; sourceTree = "<group>"; };
 		3350FB801FA1E6C24805D584 /* mptUUID.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "mptUUID.h"; path = "../../common/mptUUID.h"; sourceTree = "<group>"; };
 		CB8FFDEAB7CB005520DE184C /* mptWine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "mptWine.cpp"; path = "../../common/mptWine.cpp"; sourceTree = "<group>"; };
@@ -509,39 +509,39 @@
 				C9B0DF4CB5ECE2B61EFFFAAD /* mptAssert.h */,
 				1830A2DE048279CEEDA0B6DE /* mptBaseMacros.h */,
 				89BD2509F58124F9BEE754C3 /* mptBaseTypes.h */,
-				63BA22AB4FA1E4A2F8F14AC0 /* mptBufferIO.h */,
-				F52D6FEC619CC46BAA857F6B /* mptCPU.cpp */,
-				FC9F622B6883716B71869FA7 /* mptCPU.h */,
-				6D5857DCD93B661CE23E9458 /* mptCRC.h */,
-				25A71A1C916B190C5AD149D6 /* mptException.h */,
-				6B9F25ACD7B9884D20DC98E1 /* mptExceptionText.h */,
-				CB1B4248B702044060536A5D /* mptFileIO.cpp */,
-				12E977E8FE247B5267379349 /* mptFileIO.h */,
-				25D3314D11241D8F3A880B51 /* mptIO.cpp */,
-				ECB0510AD8D61B71C11CA13C /* mptIO.h */,
-				453F720EB10371FE7A69A1C8 /* mptLibrary.cpp */,
-				4C8E87A6B847F25041A70C2B /* mptLibrary.h */,
-				1133533EFD6E56A866816E9F /* mptMemory.h */,
-				AC0964EC1878B96B6161746B /* mptMutex.h */,
-				37559D8523A688C74C0A7789 /* mptOS.cpp */,
-				75976EDF61BD38464A03BE11 /* mptOS.h */,
-				F3161559DF93089C081109B0 /* mptPathString.cpp */,
-				3ACB6EC7261D46B70F3C83C7 /* mptPathString.h */,
-				D3279103BF0E53FB685FB918 /* mptRandom.cpp */,
-				1A5304CF068F07396FA11F30 /* mptRandom.h */,
-				AC7EB18598CF9CC7C1338B89 /* mptSpan.h */,
-				ED399E25D920601D8271C63A /* mptString.cpp */,
-				2BCB0C241707108E80192885 /* mptString.h */,
-				01495E7EEDB0244C561C3962 /* mptStringBuffer.cpp */,
-				48BAFAC73437EE0A5DB4EE1E /* mptStringBuffer.h */,
-				9346C1047FAE87D2E8199CE8 /* mptStringFormat.cpp */,
-				5A2BFD4346A8F0866F25F19A /* mptStringFormat.h */,
-				2897B63594B119D7DDD3296B /* mptStringParse.cpp */,
-				6F82852ADB114715E40D282D /* mptStringParse.h */,
-				2D5A674319966AAD82A882A4 /* mptThread.h */,
-				A0F5D71D8C31DB87F543F37E /* mptTime.cpp */,
-				2711A934136294763CC68238 /* mptTime.h */,
-				92F10B507E43E33F67622050 /* mptTypeTraits.h */,
+				DDB9F686497EF57612E42541 /* mptBaseUtils.h */,
+				44310C7A3018CE71D968348F /* mptBufferIO.h */,
+				76287C3DE296D1BC2B808CBC /* mptCPU.cpp */,
+				3D063DDCA9E94B1CB2EC7958 /* mptCPU.h */,
+				AEBE318D1AA240CD23A56E09 /* mptCRC.h */,
+				26FA32C892BE31B85B246282 /* mptException.h */,
+				EC8A418258A5A423A1C7B4B7 /* mptExceptionText.h */,
+				AC922B179879ED0E41CA532C /* mptFileIO.cpp */,
+				2AE89EA81624A2127F36BA09 /* mptFileIO.h */,
+				860159197252445B9BB6321D /* mptIO.cpp */,
+				0DD367F8F9F8315FE23EB72A /* mptIO.h */,
+				46928ABAB25689AA7BBCB974 /* mptLibrary.cpp */,
+				0D2DBD6E79E62719024642F3 /* mptLibrary.h */,
+				B27DFFB09EB9021B07CC1A12 /* mptMemory.h */,
+				2D04713D9972C6BCE25B81BC /* mptMutex.h */,
+				9883C45184D4AF93AD389E55 /* mptOS.cpp */,
+				96B984CD82DF4E346B25D4FF /* mptOS.h */,
+				5416B1DB4093A41E6910A532 /* mptPathString.cpp */,
+				5B7E91F647D068E630EFA5F6 /* mptPathString.h */,
+				B49E7AD2A0853CCA49D6A2E7 /* mptRandom.cpp */,
+				BB9DB041A7D9B3AB10ECCBA2 /* mptRandom.h */,
+				0DADD851F9FDC3932262B255 /* mptSpan.h */,
+				CEB087F4BA9749EC63E8AF09 /* mptString.cpp */,
+				CC15B996B851BC002164D4F7 /* mptString.h */,
+				A2A4F7178E0CBEE5F777D2FB /* mptStringBuffer.cpp */,
+				A9B9964A95368A8DBEB38AA1 /* mptStringBuffer.h */,
+				34A25A9E200A216C89753582 /* mptStringFormat.cpp */,
+				BB2A99C6A7A78C09D0248D1D /* mptStringFormat.h */,
+				A982D20B159D35AD5EBF4541 /* mptStringParse.cpp */,
+				87B0DFFDF33FA1E8FC3B8200 /* mptStringParse.h */,
+				CEA413B6BAE0162023F32E17 /* mptThread.h */,
+				414084902D7C87FA968E9FF1 /* mptTime.cpp */,
+				883FD0007490BB429DF4A904 /* mptTime.h */,
 				AC27B6C79863B9310176D128 /* mptUUID.cpp */,
 				3350FB801FA1E6C24805D584 /* mptUUID.h */,
 				CB8FFDEAB7CB005520DE184C /* mptWine.cpp */,
@@ -939,18 +939,18 @@
 				9793351A0323F7040C1FD81C /* Logging.cpp in Sources */,
 				AD5EDAC799DBCD0AC258CE1E /* Profiler.cpp in Sources */,
 				F7641A63637F7D04ACA18D98 /* misc_util.cpp in Sources */,
-				E638C573D28A9C63BBA9D973 /* mptCPU.cpp in Sources */,
-				DC749D73488F001591B110A9 /* mptFileIO.cpp in Sources */,
-				F63BE46D6200E35D2B661328 /* mptIO.cpp in Sources */,
-				B6446E1CA2AC34EA0B184900 /* mptLibrary.cpp in Sources */,
-				48D9CD09B49DCCF97D03FDC3 /* mptOS.cpp in Sources */,
-				8481EFEEF0F1F167B9106CF0 /* mptPathString.cpp in Sources */,
-				E445DDA85060404A998250DE /* mptRandom.cpp in Sources */,
-				3EB88B54AAD2EEF5F3F4FE89 /* mptString.cpp in Sources */,
-				923071B9FE6BD17C07614E0C /* mptStringBuffer.cpp in Sources */,
-				6479CB0AD0B42BCED9A9A85D /* mptStringFormat.cpp in Sources */,
-				F9EA1A0FE5686BA8CE602940 /* mptStringParse.cpp in Sources */,
-				91E7FA6BFD76BC5606739D6E /* mptTime.cpp in Sources */,
+				07ECE7A2F33DBF92DC5CFCA2 /* mptCPU.cpp in Sources */,
+				5D60B949C97A1CEB129D2C7F /* mptFileIO.cpp in Sources */,
+				F78EFC196353FB092CB92BD4 /* mptIO.cpp in Sources */,
+				57A007B64308CE83AC73E299 /* mptLibrary.cpp in Sources */,
+				60A1152CCC65141C95CB44E6 /* mptOS.cpp in Sources */,
+				85452700F1B52979BAD4A301 /* mptPathString.cpp in Sources */,
+				6531F97ED14B5C201A6E6CB4 /* mptRandom.cpp in Sources */,
+				56CC2967C2E68C080B099D9C /* mptString.cpp in Sources */,
+				D3F8A9F73F340ABB4829874A /* mptStringBuffer.cpp in Sources */,
+				A5410449117D640C1A72E19B /* mptStringFormat.cpp in Sources */,
+				1A2F4B4706AD9BE0EFA45978 /* mptStringParse.cpp in Sources */,
+				D2FE737F3E8E356A478A1682 /* mptTime.cpp in Sources */,
 				1D4186AE89D0479992CC28B1 /* mptUUID.cpp in Sources */,
 				9C94FED60824C0C11120A1D9 /* mptWine.cpp in Sources */,
 				4052CA1CAC6372C335B50403 /* serialization_utils.cpp in Sources */,

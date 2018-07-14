@@ -72,6 +72,9 @@
     <ClInclude Include="..\..\common\mptBaseTypes.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptBaseUtils.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptBufferIO.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -130,9 +133,6 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptTime.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\mptTypeTraits.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptUUID.h">

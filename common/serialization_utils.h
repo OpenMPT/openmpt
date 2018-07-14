@@ -11,7 +11,7 @@
 #pragma once
 
 #include "../common/typedefs.h"
-#include "../common/mptTypeTraits.h"
+#include "../common/mptBaseTypes.h"
 #include "../common/mptIO.h"
 #include "../common/Endianness.h"
 

@@ -12,7 +12,7 @@
 
 #include "mptAlloc.h"
 #include "mptSpan.h"
-#include "mptTypeTraits.h"
+#include "mptBaseTypes.h"
 
 #include <algorithm>
 #include <limits>

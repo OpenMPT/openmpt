@@ -12,7 +12,6 @@
 
 
 #include "typedefs.h"
-#include "mptTypeTraits.h"
 #include "mptStringBuffer.h"
 #include "misc_util.h"
 #include "Endianness.h"
