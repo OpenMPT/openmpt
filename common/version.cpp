@@ -743,11 +743,6 @@ mpt::ustring GetFullCreditsString()
 		"https://github.com/nlohmann/json\n"
 		"\n"
 #endif
-#if defined(MPT_WITH_PICOJSON)
-		"Cybozu Labs Inc. and Kazuho Oku et. al. for picojson\n"
-		"https://github.com/kazuho/picojson\n"
-		"\n"
-#endif
 #ifdef MODPLUG_TRACKER
 		"Lennart Poettering and David Henningsson for RealtimeKit\n"
 		"http://git.0pointer.net/rtkit.git/\n"

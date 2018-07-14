@@ -19,7 +19,6 @@ copy /y ..\include\opus\COPYING                           .\Licenses\License.Opu
 copy /y ..\include\opusenc\COPYING                        .\Licenses\License.Opusenc.txt || goto error
 copy /y ..\include\opusenc\AUTHORS                        .\Licenses\License.Opusenc.Authors.txt || goto error
 copy /y ..\include\opusfile\COPYING                       .\Licenses\License.Opusfile.txt || goto error
-copy /y ..\include\picojson\LICENSE                       .\Licenses\License.PicoJSON.txt || goto error
 copy /y ..\include\portaudio\LICENSE.txt                  .\Licenses\License.PortAudio.txt || goto error
 rem copy /y ..\include\portaudio\bindings\cpp\COPYING         .\Licenses\License.portaudiocpp.txt || goto error
 rem copy /y ..\include\pugixml\readme.txt                     .\Licenses\License.PugiXML.txt || goto error

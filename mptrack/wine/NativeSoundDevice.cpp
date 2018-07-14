@@ -28,15 +28,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:4706) // assignment within conditional expression
-#endif // MPT_COMPILER_MSVC
-#include "picojson/picojson.h"
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
-
 OPENMPT_NAMESPACE_BEGIN
 
 namespace C {
