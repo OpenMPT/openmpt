@@ -218,7 +218,7 @@ static void SSE2_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *p
 #endif // ENABLE_SSE2
 
 
-#ifdef ENABLE_SSE
+#if defined(ENABLE_X86) && defined(ENABLE_SSE)
 
 static void SSE_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
 {
@@ -275,7 +275,7 @@ mainloop:
 	}
 }
 
-#endif // ENABLE_SSE
+#endif // ENABLE_X86 && ENABLE_SSE
 
 
 
@@ -429,13 +429,13 @@ void StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCou
 		return;
 	}
 	#endif // ENABLE_SSE2
-	#ifdef ENABLE_SSE
+	#if defined(ENABLE_X86) && defined(ENABLE_SSE)
 		if(GetProcSupport() & PROCSUPPORT_SSE)
 		{
 			SSE_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
 			return;
 		}
-	#endif // ENABLE_SSE
+	#endif // ENABLE_X86 && ENABLE_SSE
 	#ifdef ENABLE_X86_AMD
 		if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
 		{
@@ -482,13 +482,13 @@ void FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 
 void MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _i2fc)
 {
 
-	#ifdef ENABLE_SSE
+	#if defined(ENABLE_X86) && defined(ENABLE_SSE)
 		if(GetProcSupport() & PROCSUPPORT_SSE)
 		{
 			SSE_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
 			return;
 		}
-	#endif // ENABLE_SSE
+	#endif // ENABLE_X86 && ENABLE_SSE
 	#ifdef ENABLE_X86_AMD
 		if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
 		{
