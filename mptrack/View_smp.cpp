@@ -683,7 +683,7 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 }
 
 
-#if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
+#if defined(ENABLE_MMX) && (defined(ENABLE_X86_AMD) || defined(ENABLE_SSE))
 
 OPENMPT_NAMESPACE_END
 #include <mmintrin.h>
@@ -820,7 +820,7 @@ static void amdmmxext_or_sse_findminmax8(const void *p, SmpLength scanlen, int c
 	_mm_empty();
 }
 
-#endif // defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
+#endif // defined(ENABLE_MMX) && (defined(ENABLE_X86_AMD) || defined(ENABLE_SSE))
 #if defined(ENABLE_SSE2)
 
 OPENMPT_NAMESPACE_END
@@ -975,8 +975,8 @@ std::pair<int, int> CViewSample::FindMinMax(const int8 *p, SmpLength numSamples,
 		sse2_findminmax8(p, numSamples, numChannels, minVal, maxVal);
 	} else
 #endif
-#if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
-	if(GetProcSupport() & (PROCSUPPORT_AMD_MMXEXT | PROCSUPPORT_SSE))
+#if defined(ENABLE_MMX) && (defined(ENABLE_X86_AMD) || defined(ENABLE_SSE))
+	if((GetProcSupport() & PROCSUPPORT_MMX) && (GetProcSupport() & (PROCSUPPORT_AMD_MMXEXT | PROCSUPPORT_SSE)))
 	{
 		amdmmxext_or_sse_findminmax8(p, numSamples, numChannels, minVal, maxVal);
 	} else
@@ -1005,8 +1005,8 @@ std::pair<int, int> CViewSample::FindMinMax(const int16 *p, SmpLength numSamples
 		sse2_findminmax16(p, numSamples, numChannels, minVal, maxVal);
 	} else
 #endif
-#if defined(ENABLE_X86_AMD) || defined(ENABLE_SSE)
-	if(GetProcSupport() & (PROCSUPPORT_AMD_MMXEXT | PROCSUPPORT_SSE))
+#if defined(ENABLE_MMX) && (defined(ENABLE_X86_AMD) || defined(ENABLE_SSE))
+	if((GetProcSupport() & PROCSUPPORT_MMX) && (GetProcSupport() & (PROCSUPPORT_AMD_MMXEXT | PROCSUPPORT_SSE)))
 	{
 		amdmmxext_or_sse_findminmax16(p, numSamples, numChannels, minVal, maxVal);
 	} else
