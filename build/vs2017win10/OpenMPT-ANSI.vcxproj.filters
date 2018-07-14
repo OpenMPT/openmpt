@@ -84,9 +84,6 @@
     <ClInclude Include="..\..\common\Profiler.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\WriteMemoryDump.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\misc_util.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -187,6 +184,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\misc\JSON.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\WriteMemoryDump.h">
       <Filter>misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\AboutDialog.h">

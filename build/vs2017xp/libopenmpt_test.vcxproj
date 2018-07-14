@@ -301,7 +301,6 @@
     <ClInclude Include="..\..\common\FlagSet.h" />
     <ClInclude Include="..\..\common\Logging.h" />
     <ClInclude Include="..\..\common\Profiler.h" />
-    <ClInclude Include="..\..\common\WriteMemoryDump.h" />
     <ClInclude Include="..\..\common\misc_util.h" />
     <ClInclude Include="..\..\common\mptAlloc.h" />
     <ClInclude Include="..\..\common\mptAssert.h" />

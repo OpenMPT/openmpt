@@ -42,7 +42,7 @@
 #define assert(x)
 #endif
 
-#include "../common/WriteMemoryDump.h"
+#include "../misc/WriteMemoryDump.h"
 #include "Bridge.h"
 using namespace Vst;
 

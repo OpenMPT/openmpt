@@ -1689,6 +1689,7 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win10\$(TargetN
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\versionNumber.h" />
+    <ClInclude Include="..\..\misc\WriteMemoryDump.h" />
     <ClInclude Include="..\..\pluginBridge\AEffectWrapper.h" />
     <ClInclude Include="..\..\pluginBridge\Bridge.h" />
     <ClInclude Include="..\..\pluginBridge\BridgeCommon.h" />

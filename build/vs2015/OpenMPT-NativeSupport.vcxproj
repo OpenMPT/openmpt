@@ -675,7 +675,6 @@
     <ClInclude Include="..\..\common\FlagSet.h" />
     <ClInclude Include="..\..\common\Logging.h" />
     <ClInclude Include="..\..\common\Profiler.h" />
-    <ClInclude Include="..\..\common\WriteMemoryDump.h" />
     <ClInclude Include="..\..\common\misc_util.h" />
     <ClInclude Include="..\..\common\mptAlloc.h" />
     <ClInclude Include="..\..\common\mptAssert.h" />
@@ -710,6 +709,7 @@
     <ClInclude Include="..\..\common\version.h" />
     <ClInclude Include="..\..\common\versionNumber.h" />
     <ClInclude Include="..\..\misc\JSON.h" />
+    <ClInclude Include="..\..\misc\WriteMemoryDump.h" />
     <ClInclude Include="..\..\mptrack\wine\Native.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeConfig.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeSoundDevice.h" />

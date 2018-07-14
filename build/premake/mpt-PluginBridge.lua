@@ -3,7 +3,7 @@
   uuid "1A147336-891E-49AC-9EAD-A750599A224C"
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
-  vpaths { ["*"] = "../../pluginBridge/" }
+  vpaths { ["*"] = "../../" }
   mpt_projectname = "PluginBridge"
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
@@ -26,6 +26,7 @@
    "../../pluginBridge/Bridge.h",
    "../../pluginBridge/BridgeCommon.h",
    "../../pluginBridge/BridgeOpCodes.h",
+   "../../misc/WriteMemoryDump.h",
    "../../common/versionNumber.h",
   }
   files {

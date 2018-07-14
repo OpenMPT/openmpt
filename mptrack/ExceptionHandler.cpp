@@ -16,7 +16,7 @@
 #include "Moddoc.h"
 #include <shlwapi.h>
 #include "ExceptionHandler.h"
-#include "../common/WriteMemoryDump.h"
+#include "../misc/WriteMemoryDump.h"
 #include "../common/version.h"
 #include "../common/mptFileIO.h"
 #include "../soundlib/mod_specifications.h"

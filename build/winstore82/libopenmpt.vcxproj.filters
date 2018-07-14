@@ -150,9 +150,6 @@
     <ClInclude Include="..\..\common\versionNumber.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\WriteMemoryDump.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\soundbase\SampleFormat.h">
       <Filter>soundbase</Filter>
     </ClInclude>
