@@ -921,6 +921,70 @@ static MPT_NOINLINE void TestMisc1()
 	VERIFY_EQUAL(mpt::weight(2), 1);
 	VERIFY_EQUAL(mpt::weight(3), 2);
 
+	VERIFY_EQUAL(mpt::ispow2(0u), false);
+	VERIFY_EQUAL(mpt::ispow2(1u), true);
+	VERIFY_EQUAL(mpt::ispow2(2u), true);
+	VERIFY_EQUAL(mpt::ispow2(3u), false);
+	VERIFY_EQUAL(mpt::ispow2(4u), true);
+	VERIFY_EQUAL(mpt::ispow2(5u), false);
+	VERIFY_EQUAL(mpt::ispow2(6u), false);
+	VERIFY_EQUAL(mpt::ispow2(7u), false);
+	VERIFY_EQUAL(mpt::ispow2(8u), true);
+	VERIFY_EQUAL(mpt::ispow2(9u), false);
+	VERIFY_EQUAL(mpt::ispow2(uint32(0x7fffffffu)), false);
+	VERIFY_EQUAL(mpt::ispow2(uint32(0x80000000u)), true);
+	VERIFY_EQUAL(mpt::ispow2(uint32(0x80000001u)), false);
+	VERIFY_EQUAL(mpt::ispow2(uint32(0xfffffffeu)), false);
+	VERIFY_EQUAL(mpt::ispow2(uint32(0xffffffffu)), false);
+
+	VERIFY_EQUAL(mpt::ceil2(0u), 1u);
+	VERIFY_EQUAL(mpt::ceil2(1u), 1u);
+	VERIFY_EQUAL(mpt::ceil2(2u), 2u);
+	VERIFY_EQUAL(mpt::ceil2(3u), 4u);
+	VERIFY_EQUAL(mpt::ceil2(4u), 4u);
+	VERIFY_EQUAL(mpt::ceil2(5u), 8u);
+	VERIFY_EQUAL(mpt::ceil2(6u), 8u);
+	VERIFY_EQUAL(mpt::ceil2(7u), 8u);
+	VERIFY_EQUAL(mpt::ceil2(8u), 8u);
+	VERIFY_EQUAL(mpt::ceil2(9u), 16u);
+	VERIFY_EQUAL(mpt::ceil2(uint32(0x7fffffffu)), 0x80000000u);
+	VERIFY_EQUAL(mpt::ceil2(uint32(0x80000000u)), 0x80000000u);
+	//VERIFY_EQUAL(mpt::ceil2(uint32(0x80000001u)), 0u);
+	//VERIFY_EQUAL(mpt::ceil2(uint32(0xfffffffeu)), 0u);
+	//VERIFY_EQUAL(mpt::ceil2(uint32(0xffffffffu)), 0u);
+
+	VERIFY_EQUAL(mpt::floor2(0u), 0u);
+	VERIFY_EQUAL(mpt::floor2(1u), 1u);
+	VERIFY_EQUAL(mpt::floor2(2u), 2u);
+	VERIFY_EQUAL(mpt::floor2(3u), 2u);
+	VERIFY_EQUAL(mpt::floor2(4u), 4u);
+	VERIFY_EQUAL(mpt::floor2(5u), 4u);
+	VERIFY_EQUAL(mpt::floor2(6u), 4u);
+	VERIFY_EQUAL(mpt::floor2(7u), 4u);
+	VERIFY_EQUAL(mpt::floor2(8u), 8u);
+	VERIFY_EQUAL(mpt::floor2(9u), 8u);
+	VERIFY_EQUAL(mpt::floor2(uint32(0x7fffffffu)), 0x40000000u);
+	VERIFY_EQUAL(mpt::floor2(uint32(0x80000000u)), 0x80000000u);
+	VERIFY_EQUAL(mpt::floor2(uint32(0x80000001u)), 0x80000000u);
+	VERIFY_EQUAL(mpt::floor2(uint32(0xfffffffeu)), 0x80000000u);
+	VERIFY_EQUAL(mpt::floor2(uint32(0xffffffffu)), 0x80000000u);
+
+	VERIFY_EQUAL(mpt::log2p1(0u), 0u);
+	VERIFY_EQUAL(mpt::log2p1(1u), 1u);
+	VERIFY_EQUAL(mpt::log2p1(2u), 2u);
+	VERIFY_EQUAL(mpt::log2p1(3u), 2u);
+	VERIFY_EQUAL(mpt::log2p1(4u), 3u);
+	VERIFY_EQUAL(mpt::log2p1(5u), 3u);
+	VERIFY_EQUAL(mpt::log2p1(6u), 3u);
+	VERIFY_EQUAL(mpt::log2p1(7u), 3u);
+	VERIFY_EQUAL(mpt::log2p1(8u), 4u);
+	VERIFY_EQUAL(mpt::log2p1(9u), 4u);
+	VERIFY_EQUAL(mpt::log2p1(uint32(0x7fffffffu)), 31u);
+	VERIFY_EQUAL(mpt::log2p1(uint32(0x80000000u)), 32u);
+	VERIFY_EQUAL(mpt::log2p1(uint32(0x80000001u)), 32u);
+	VERIFY_EQUAL(mpt::log2p1(uint32(0xfffffffeu)), 32u);
+	VERIFY_EQUAL(mpt::log2p1(uint32(0xffffffffu)), 32u);
+
 	// trivials
 	VERIFY_EQUAL( mpt::saturate_cast<int>(-1), -1 );
 	VERIFY_EQUAL( mpt::saturate_cast<int>(0), 0 );

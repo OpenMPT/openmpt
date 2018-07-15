@@ -16,6 +16,9 @@
 #include "mptBaseTypes.h"
 
 #include <algorithm>
+#if MPT_CXX_AT_LEAST(20)
+#include <bit>
+#endif
 #include <limits>
 #include <numeric>
 #include <utility>
@@ -205,6 +208,83 @@ MPT_CONSTEXPR14_FUN std::size_t weight(T val) noexcept
 	return result;
 }
 
+#if MPT_CXX_AT_LEAST(20)
+
+using std::ispow2;
+using std::ceil2;
+using std::floor2;
+using std::log2p1;
+
+#else
+
+// C++20 <bit> header.
+// Note that we do not use SFINAE here but instead rely on static_assert.
+// Also note that for C++11 compilers, these functions are not constexpr.
+// They could be implemented recursively to make them C++11 constexpr compatible if needed.
+
+template <typename T>
+MPT_CONSTEXPR14_FUN bool ispow2(T x) noexcept
+{
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
+	return mpt::weight(x) == 1;
+}
+
+template <typename T>
+MPT_CONSTEXPR14_FUN T ceil2(T x) noexcept
+{
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
+	T result = 1;
+	while(result < x)
+	{
+		T newresult = result << 1;
+		if(newresult < result)
+		{
+			return 0;
+		}
+		result = newresult;
+	}
+	return result;
+}
+
+template <typename T>
+MPT_CONSTEXPR14_FUN T floor2(T x) noexcept
+{
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
+	if(x == 0)
+	{
+		return 0;
+	}
+	T result = 1;
+	do
+	{
+		T newresult = result << 1;
+		if(newresult < result)
+		{
+			return result;
+		}
+		result = newresult;
+	} while(result <= x);
+	return result >> 1;
+}
+ 
+template <typename T>
+MPT_CONSTEXPR14_FUN T log2p1(T x) noexcept
+{
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
+	T result = 0;
+	while(x > 0)
+	{
+		x >>= 1;
+		result += 1;
+	}
+	return result;
+}
+
+#endif
 
 } // namespace mpt
 

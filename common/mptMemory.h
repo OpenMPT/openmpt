@@ -15,6 +15,9 @@
 #include "mptBaseTypes.h"
 #include "mptSpan.h"
 
+#if MPT_CXX_AT_LEAST(20)
+#include <bit>
+#endif
 #include <utility>
 
 #include <cstring>

@@ -77,6 +77,9 @@
 
 #include "../common/mptBaseUtils.h"
 // <algorithm>
+// <bit>
+// <limits>
+// <numeric>
 // <utility>
 
 #include "../common/mptException.h"
