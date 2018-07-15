@@ -394,10 +394,6 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 
 CEQ::CEQ()
 {
-	#if defined(ENABLE_SSE) || defined(ENABLE_X86_AMD)
-		MPT_ASSERT_ALWAYS(((uintptr_t)&(gEQ[0])) % 4 == 0);
-		MPT_ASSERT_ALWAYS(((uintptr_t)&(gEQ[1])) % 4 == 0);
-	#endif // ENABLE_SSE || ENABLE_X86_AMD
 	memcpy(gEQ, gEQDefaults, sizeof(gEQ));
 }
 
