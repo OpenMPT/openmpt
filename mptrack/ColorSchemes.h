@@ -11,6 +11,8 @@
 #pragma once
 
 
+OPENMPT_NAMESPACE_BEGIN
+
 struct ColorScheme
 {
 	const TCHAR *name;
@@ -2155,3 +2157,6 @@ static constexpr ColorScheme ColorSchemes[] =
 }
 },
 };
+
+
+OPENMPT_NAMESPACE_END
