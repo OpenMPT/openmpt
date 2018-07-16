@@ -177,14 +177,6 @@
 
 
 
-// C++11 constexpr
-
-#if MPT_COMPILER_MSVC
-#define MPT_COMPILER_QUIRK_CONSTEXPR_NO_STRING_LITERALS
-#endif
-
-
-
 #if MPT_COMPILER_MSVC
 // Compiler has multiplication/division semantics when shifting signed integers.
 #define MPT_COMPILER_SHIFT_SIGNED 1
