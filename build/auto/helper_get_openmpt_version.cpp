@@ -3,10 +3,8 @@
 #include <string>
 #include <vector>
 
-#define OPENMPT_NAMESPACE_BEGIN
-#define OPENMPT_NAMESPACE_END
+#define LIBOPENMPT_BUILD
 #include "common/versionNumber.h"
-
 #include "libopenmpt/libopenmpt_version.h"
 
 int main( int argc, char * argv [] ) {
