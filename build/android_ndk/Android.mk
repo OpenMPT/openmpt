@@ -85,7 +85,6 @@ LOCAL_LDLIBS     += -lvorbisfile
 endif
 
 LOCAL_SRC_FILES += \
-	common/stdafx.cpp \
 	common/ComponentManager.cpp \
 	common/FileReader.cpp \
 	common/Logging.cpp \
