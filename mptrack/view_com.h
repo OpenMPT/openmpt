@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "CListCtrl.h"
 
 OPENMPT_NAMESPACE_BEGIN

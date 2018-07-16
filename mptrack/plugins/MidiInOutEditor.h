@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #ifdef MODPLUG_TRACKER
 
 #include "../AbstractVstEditor.h"

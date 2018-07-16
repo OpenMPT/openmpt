@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 // struct Notification requires working copy constructor / copy assignment, keep in mind when extending

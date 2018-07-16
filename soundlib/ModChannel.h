@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "ModSample.h"
 #include "ModInstrument.h"
 #include "modcommand.h"

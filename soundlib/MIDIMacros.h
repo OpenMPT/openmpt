@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 enum
 {
 	NUM_MACROS = 16,	// number of parametered macros

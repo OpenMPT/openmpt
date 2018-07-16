@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "SoundFilePlayConfig.h"
 #include "MixerSettings.h"
 #include "../common/misc_util.h"

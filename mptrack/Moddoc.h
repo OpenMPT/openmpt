@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "Sndfile.h"
 #include "../common/misc_util.h"
 #include "Undo.h"

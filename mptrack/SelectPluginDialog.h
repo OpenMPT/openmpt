@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../common/ComponentManager.h"
 
 OPENMPT_NAMESPACE_BEGIN

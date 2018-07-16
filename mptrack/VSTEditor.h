@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "AbstractVstEditor.h"
 
 OPENMPT_NAMESPACE_BEGIN

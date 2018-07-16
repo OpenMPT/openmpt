@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "PatternCursor.h"
 
 #include "../common/FileReaderFwd.h"

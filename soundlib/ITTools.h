@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../soundlib/ModInstrument.h"
 #include "../soundlib/ModSample.h"
 #include "../soundlib/SampleIO.h"

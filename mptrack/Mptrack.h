@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "resource.h"       // main symbols
 #include "Settings.h"
 #include "MPTrackUtil.h"

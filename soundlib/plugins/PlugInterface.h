@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #ifndef NO_PLUGINS
 
 #include "../../soundlib/Snd_defs.h"

@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "Resampler.h"
 #include "MixerInterface.h"
 #include "Paula.h"

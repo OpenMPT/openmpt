@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 
 #ifdef MPT_WITH_NLOHMANNJSON
 #include "nlohmann-json/include/nlohmann/json.hpp"

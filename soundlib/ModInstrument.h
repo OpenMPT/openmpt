@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "tuningbase.h"
 #include "Snd_defs.h"
 #include "../common/FlagSet.h"

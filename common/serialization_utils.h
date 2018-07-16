@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../common/typedefs.h"
 #include "../common/mptBaseTypes.h"
 #include "../common/mptIO.h"

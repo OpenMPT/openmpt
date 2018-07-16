@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "tuning.h"
 #include <vector>
 #include <string>

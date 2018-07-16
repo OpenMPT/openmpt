@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include <vector>
 #include "../mptrack/plugins/VstDefinitions.h"
 

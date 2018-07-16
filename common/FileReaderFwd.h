@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "typedefs.h"
 
 OPENMPT_NAMESPACE_BEGIN

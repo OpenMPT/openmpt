@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../mptrack/plugins/VstDefinitions.h"
 
 OPENMPT_NAMESPACE_BEGIN

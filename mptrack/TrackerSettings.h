@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../common/Logging.h"
 #include "../common/version.h"
 #include "../common/mptUUID.h"

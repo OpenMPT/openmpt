@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include <vector>
 #include <bitset>
 #include "../common/mptThread.h"

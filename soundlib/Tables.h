@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 extern const MPT_UCHAR_TYPE NoteNamesSharp[12][4];

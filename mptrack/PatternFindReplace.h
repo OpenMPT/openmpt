@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 // Find/Replace data
 struct FindReplace
 {

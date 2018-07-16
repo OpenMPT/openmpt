@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "Settings.h"
 
 #include "../soundbase/SampleFormat.h"

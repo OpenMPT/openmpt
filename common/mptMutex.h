@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include <vector> // some C++ header in order to have the C++ standard library version information available
 
 #if !MPT_PLATFORM_MULTITHREADED

@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "NativeSoundDevice.h"
 
 #include "../../sounddev/SoundDevice.h"

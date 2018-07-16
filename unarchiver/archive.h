@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../common/FileReader.h"
 #include <string>
 #include <vector>

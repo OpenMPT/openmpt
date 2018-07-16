@@ -9,6 +9,8 @@
 
 
 #pragma once
+
+#include "BuildSettings.h"
 #include <string>
 #include "../common/FlagSet.h"
 #include <map>

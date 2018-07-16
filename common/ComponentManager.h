@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include <map>
 #include <vector>
 #include "../common/misc_util.h"

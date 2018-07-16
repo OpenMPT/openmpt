@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "StreamEncoder.h"
 
 #include "../common/ComponentManager.h"

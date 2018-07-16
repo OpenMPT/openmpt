@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include <ios>
 #include <istream>
 #include <ostream>

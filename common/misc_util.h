@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "mptAssert.h"
 #include "mptBaseMacros.h"
 #include "mptBaseTypes.h"

@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 class CSoundFile;
 #include "../soundlib/Snd_defs.h"
 

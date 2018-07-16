@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 //class CColourEdit;
 #include "ColourEdit.h"
 #include "../soundlib/MIDIMacros.h"

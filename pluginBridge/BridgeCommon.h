@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 
 #if !defined(assert) && defined(ASSERT)
 #define assert ASSERT

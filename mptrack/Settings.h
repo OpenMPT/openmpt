@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 
 #include "../common/misc_util.h"
 #include "../common/mptMutex.h"

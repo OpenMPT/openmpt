@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../soundlib/SampleIO.h"
 #include "FadeLaws.h"
 #include "CDecimalSupport.h"

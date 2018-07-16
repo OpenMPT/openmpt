@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #ifdef MPT_DISABLED_CODE
 
 #include "Mptrack.h"

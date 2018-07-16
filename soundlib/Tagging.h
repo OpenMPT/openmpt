@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include <string>
 
 OPENMPT_NAMESPACE_BEGIN

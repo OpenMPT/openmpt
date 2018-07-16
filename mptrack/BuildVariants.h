@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 
 #include "../common/mptCPU.h"
 #include "../common/mptOS.h"

@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include <deque>
 #include "../../common/mptMutex.h"
 #include "VstDefinitions.h"

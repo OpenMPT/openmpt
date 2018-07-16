@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../AbstractVstEditor.h"
 #include "../../soundlib/plugins/LFOPlugin.h"
 

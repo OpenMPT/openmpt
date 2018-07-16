@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "dlg_misc.h"	// for keyboard control
 #include "EffectInfo.h"
 #include "PatternCursor.h"

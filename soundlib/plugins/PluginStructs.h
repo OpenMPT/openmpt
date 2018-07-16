@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../Snd_defs.h"
 #ifndef NO_PLUGINS
 #include "../../common/Endianness.h"

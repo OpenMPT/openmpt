@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "CListCtrl.h"
 #if MPT_USTRING_MODE_WIDE
 #include <unordered_map>

@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #if defined(MPT_ENABLE_FILEIO)
 
 #include "../common/mptString.h"

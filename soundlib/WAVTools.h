@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "ChunkReader.h"
 #include "Loaders.h"
 #include "../common/mptUUID.h"

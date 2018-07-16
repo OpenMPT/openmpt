@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "tuningRatioMapWnd.h"
 #include "tuningcollection.h"
 #include <vector>

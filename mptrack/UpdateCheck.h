@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../common/mptUUID.h"
 
 #include <time.h>

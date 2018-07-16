@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include <iosfwd>
 #include "../common/FileReaderFwd.h"
 

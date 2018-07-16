@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include <algorithm>
 #include <vector>
 #include "Snd_defs.h"

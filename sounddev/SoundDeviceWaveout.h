@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "SoundDeviceBase.h"
 #include "SoundDeviceUtilities.h"
 

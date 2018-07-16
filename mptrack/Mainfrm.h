@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include <Msctf.h>
 #include "Mptrack.h"
 #include "AutoSaver.h"

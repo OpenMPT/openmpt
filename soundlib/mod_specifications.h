@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "Snd_defs.h"
 #include "modcommand.h"							// ModCommand::
 #include "../soundlib/SoundFilePlayConfig.h"	// mixlevel constants.

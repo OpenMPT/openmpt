@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../common/misc_util.h"
 #include "../common/FileReader.h"
 #include "Sndfile.h"

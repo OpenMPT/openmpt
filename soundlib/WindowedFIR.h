@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "Mixer.h"
 
 OPENMPT_NAMESPACE_BEGIN

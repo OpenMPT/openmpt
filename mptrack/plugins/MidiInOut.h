@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../../common/mptMutex.h"
 #include "../../common/mptTime.h"
 #include "../../soundlib/plugins/PlugInterface.h"

@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #ifndef NO_REVERB
 
 #include "../soundlib/Mixer.h"	// For MIXBUFFERSIZE

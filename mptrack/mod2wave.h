@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "StreamEncoder.h"
 #include "Settings.h"
 #include "ProgressDialog.h"

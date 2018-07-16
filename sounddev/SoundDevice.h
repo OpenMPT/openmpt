@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "../common/FlagSet.h"
 #include "../common/mptOS.h"
 #include "../common/mptThread.h"

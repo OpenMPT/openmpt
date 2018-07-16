@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "BuildSettings.h"
+
 #include "modsmp_ctrl.h"
 #include "Globals.h"
 
