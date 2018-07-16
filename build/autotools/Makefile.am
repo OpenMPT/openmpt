@@ -164,7 +164,6 @@ MPT_FILES_COMMON += common/serialization_utils.cpp
 MPT_FILES_COMMON += common/serialization_utils.h
 MPT_FILES_COMMON += common/stdafx.cpp
 MPT_FILES_COMMON += common/stdafx.h
-MPT_FILES_COMMON += common/typedefs.h
 MPT_FILES_COMMON += common/version.cpp
 MPT_FILES_COMMON += common/version.h
 MPT_FILES_COMMON += common/versionNumber.h

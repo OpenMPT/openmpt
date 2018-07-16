@@ -138,9 +138,6 @@
     <ClInclude Include="..\..\common\stdafx.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\typedefs.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\version.h">
       <Filter>common</Filter>
     </ClInclude>

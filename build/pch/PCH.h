@@ -52,7 +52,6 @@
 #include "../common/mptAlloc.h"
 #include "../common/mptString.h"
 #include "../common/mptExceptionText.h"
-#include "../common/typedefs.h"
 #include "../common/mptStringFormat.h"
 #include "../common/mptStringParse.h"
 #include "../common/mptPathString.h"

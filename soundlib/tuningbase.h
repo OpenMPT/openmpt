@@ -14,7 +14,6 @@
 
 
 #include <limits>
-#include "../common/typedefs.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

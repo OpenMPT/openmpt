@@ -903,7 +903,6 @@
     <ClInclude Include="..\..\common\mptWine.h" />
     <ClInclude Include="..\..\common\serialization_utils.h" />
     <ClInclude Include="..\..\common\stdafx.h" />
-    <ClInclude Include="..\..\common\typedefs.h" />
     <ClInclude Include="..\..\common\version.h" />
     <ClInclude Include="..\..\common\versionNumber.h" />
     <ClInclude Include="..\..\misc\JSON.h" />

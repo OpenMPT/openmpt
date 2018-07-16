@@ -14,7 +14,6 @@
 #include "BuildSettings.h"
 
 
-#include "../common/typedefs.h"
 #include "../common/Endianness.h"
 #include <algorithm>
 #include <array>

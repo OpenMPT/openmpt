@@ -119,14 +119,6 @@
 // "mptString.h"
 // <exception>
 
-#include "../common/typedefs.h"
-// <limits>
-// <memory>
-// <new>
-// <cstddef>
-// <cstdint>
-// <stdint.h>
-
 #include "../common/mptStringFormat.h"
 
 #include "../common/mptPathString.h"

@@ -13,7 +13,6 @@
 #include "BuildSettings.h"
 
 
-#include "typedefs.h"
 #include "mptStringBuffer.h"
 #include "misc_util.h"
 #include "Endianness.h"

@@ -19,7 +19,8 @@
 // Clean up code :)
 
 #include "../common/BuildSettings.h"
-#include "../common/typedefs.h"
+#include "../common/mptBaseMacros.h"
+#include "../common/mptBaseTypes.h"
 #include <Windows.h>
 #include <ShellAPI.h>
 #include <ShlObj.h>
