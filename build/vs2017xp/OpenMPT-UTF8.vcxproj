@@ -1131,7 +1131,6 @@
     <ClCompile Include="..\..\common\mptUUID.cpp" />
     <ClCompile Include="..\..\common\mptWine.cpp" />
     <ClCompile Include="..\..\common\serialization_utils.cpp" />
-    <ClCompile Include="..\..\common\stdafx.cpp" />
     <ClCompile Include="..\..\common\version.cpp" />
     <ClCompile Include="..\..\mptrack\AboutDialog.cpp" />
     <ClCompile Include="..\..\mptrack\AbstractVstEditor.cpp" />

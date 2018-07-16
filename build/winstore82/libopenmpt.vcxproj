@@ -833,8 +833,6 @@
     </ClCompile>
     <ClCompile Include="..\..\common\serialization_utils.cpp">
     </ClCompile>
-    <ClCompile Include="..\..\common\stdafx.cpp">
-    </ClCompile>
     <ClCompile Include="..\..\common\version.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp">

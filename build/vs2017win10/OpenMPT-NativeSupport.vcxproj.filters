@@ -272,9 +272,6 @@
     <ClCompile Include="..\..\common\serialization_utils.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\stdafx.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\common\version.cpp">
       <Filter>common</Filter>
     </ClCompile>

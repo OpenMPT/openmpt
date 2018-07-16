@@ -717,7 +717,6 @@
     <ClCompile Include="..\..\common\mptUUID.cpp" />
     <ClCompile Include="..\..\common\mptWine.cpp" />
     <ClCompile Include="..\..\common\serialization_utils.cpp" />
-    <ClCompile Include="..\..\common\stdafx.cpp" />
     <ClCompile Include="..\..\common\version.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_c.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_cxx.cpp" />
