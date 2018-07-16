@@ -463,8 +463,11 @@
 #define ENABLE_SSE3
 // Generate SSE4 instructions (only used when the CPU supports it).
 #define ENABLE_SSE4
+
+#if defined(MPT_BUILD_TARGET_XP)
 // Generate AMD specific instruction set extensions (only used when the CPU supports it).
 #define ENABLE_X86_AMD
+#endif
 
 #elif MPT_COMPILER_MSVC && defined(_M_X64)
 
