@@ -90,16 +90,16 @@ static int Warning_Building_libopenmpt_with_MinGW_w64_without_std_thread_support
 
 #if defined(MPT_ASSERT_HANDLER_NEEDED) && !defined(ENABLE_TESTS)
 
-MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
+MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *expr, const char *msg)
 {
 	if(msg)
 	{
-		mpt::log::Logger().SendLogMessage(mpt::log::Context(file, line, function), LogError, "ASSERT",
+		mpt::log::Logger().SendLogMessage(loc, LogError, "ASSERT",
 			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, msg) + MPT_USTRING(" (") + mpt::ToUnicode(mpt::CharsetASCII, expr) + MPT_USTRING(")")
 			);
 	} else
 	{
-		mpt::log::Logger().SendLogMessage(mpt::log::Context(file, line, function), LogError, "ASSERT",
+		mpt::log::Logger().SendLogMessage(loc, LogError, "ASSERT",
 			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, expr)
 			);
 	}

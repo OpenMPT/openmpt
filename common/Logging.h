@@ -130,28 +130,6 @@ static MPT_FORCEINLINE bool IsFacilityActive(const char * /*facility*/ ) { retur
 #endif // !NO_LOGGING
 
 
-struct Context
-{
-	const char * const file;
-	const int line;
-	const char * const function;
-	MPT_CONSTEXPR11_FUN Context(const char *file, int line, const char *function) noexcept
-		: file(file)
-		, line(line)
-		, function(function)
-	{
-	}
-	MPT_CONSTEXPR11_FUN Context(const Context &c) noexcept
-		: file(c.file)
-		, line(c.line)
-		, function(c.function)
-	{
-	}
-	Context & operator = (const Context &c) = delete;
-}; // class Context
-
-#define MPT_LOG_CURRENTCONTEXT() mpt::log::Context( __FILE__ , __LINE__ , __FUNCTION__ )
-
 
 #ifndef NO_LOGGING
 
@@ -160,7 +138,7 @@ class Logger
 {
 public:
 	// facility:ASCII
-	void SendLogMessage(const Context &context, LogLevel level, const char *facility, const mpt::ustring &text);
+	void SendLogMessage(const mpt::source_location &loc, LogLevel level, const char *facility, const mpt::ustring &text);
 };
 
 #define MPT_LOG(level, facility, text) \
@@ -170,7 +148,7 @@ public:
 		{ \
 			MPT_MAYBE_CONSTANT_IF(mpt::log::IsFacilityActive(( facility ))) \
 			{ \
-				mpt::log::Logger().SendLogMessage( MPT_LOG_CURRENTCONTEXT() , ( level ), ( facility ), ( text )); \
+				mpt::log::Logger().SendLogMessage( MPT_SOURCE_LOCATION_CURRENT() , ( level ), ( facility ), ( text )); \
 			} \
 		} \
 	} MPT_WHILE_0 \
@@ -182,15 +160,15 @@ public:
 class LegacyLogger : public Logger
 {
 private:
-	const Context context;
+	const mpt::source_location loc;
 public:
-	LegacyLogger(const Context &context) : context(context) {}
+	constexpr LegacyLogger(mpt::source_location loc) noexcept : loc(loc) {}
 	/* MPT_DEPRECATED */ void MPT_PRINTF_FUNC(2,3) operator () (const char *format, ...); // migrate to type-safe MPT_LOG
 	/* MPT_DEPRECATED */ void operator () (const AnyStringLocale &text); // migrate to properly namespaced MPT_LOG
 	/* MPT_DEPRECATED */ void operator () (LogLevel level, const mpt::ustring &text); // migrate to properly namespaced MPT_LOG
 };
 
-#define Log MPT_MAYBE_CONSTANT_IF(mpt::log::GlobalLogLevel < MPT_LEGACY_LOGLEVEL) { } else MPT_MAYBE_CONSTANT_IF(!mpt::log::IsFacilityActive("")) { } else mpt::log::LegacyLogger(MPT_LOG_CURRENTCONTEXT())
+#define Log MPT_MAYBE_CONSTANT_IF(mpt::log::GlobalLogLevel < MPT_LEGACY_LOGLEVEL) { } else MPT_MAYBE_CONSTANT_IF(!mpt::log::IsFacilityActive("")) { } else mpt::log::LegacyLogger(MPT_SOURCE_LOCATION_CURRENT())
 
 
 #else // !NO_LOGGING
@@ -231,7 +209,7 @@ enum class Direction : int8
 	Leave   = -1,
 };
 
-MPT_NOINLINE void Trace(const mpt::log::Context & context, Direction direction = Direction::Unknown) noexcept;
+MPT_NOINLINE void Trace(const mpt::source_location & loc, Direction direction = Direction::Unknown) noexcept;
 
 enum ThreadKind {
 	ThreadKindGUI,
@@ -252,21 +230,21 @@ bool Dump(const mpt::PathString &filename);
 class Scope
 {
 private:
-	const mpt::log::Context context;
+	const mpt::source_location loc;
 public:
-	MPT_FORCEINLINE Scope(const mpt::log::Context & context) noexcept
-		: context(context)
+	MPT_FORCEINLINE Scope(mpt::source_location loc) noexcept
+		: loc(loc)
 	{
 		if(mpt::log::Trace::g_Enabled)
 		{
-			mpt::log::Trace::Trace(context, mpt::log::Trace::Direction::Enter);
+			mpt::log::Trace::Trace(loc, mpt::log::Trace::Direction::Enter);
 		}
 	}
 	MPT_FORCEINLINE ~Scope() noexcept
 	{
 		if(mpt::log::Trace::g_Enabled)
 		{
-			mpt::log::Trace::Trace(context, mpt::log::Trace::Direction::Leave);
+			mpt::log::Trace::Trace(loc, mpt::log::Trace::Direction::Leave);
 		}
 	}
 };
@@ -274,9 +252,9 @@ public:
 #define MPT_TRACE_CONCAT_HELPER(x, y) x ## y
 #define MPT_TRACE_CONCAT(x, y) MPT_TRACE_CONCAT_HELPER(x, y)
 
-#define MPT_TRACE_SCOPE() mpt::log::Trace::Scope MPT_TRACE_CONCAT(MPT_TRACE_VAR, __LINE__)(MPT_LOG_CURRENTCONTEXT())
+#define MPT_TRACE_SCOPE() mpt::log::Trace::Scope MPT_TRACE_CONCAT(MPT_TRACE_VAR, __LINE__)(MPT_SOURCE_LOCATION_CURRENT())
 
-#define MPT_TRACE() MPT_DO { if(mpt::log::Trace::g_Enabled) { mpt::log::Trace::Trace(MPT_LOG_CURRENTCONTEXT()); } } MPT_WHILE_0
+#define MPT_TRACE() MPT_DO { if(mpt::log::Trace::g_Enabled) { mpt::log::Trace::Trace(MPT_SOURCE_LOCATION_CURRENT()); } } MPT_WHILE_0
 
 } // namespace Trace
 

@@ -37,19 +37,11 @@ static std::string remove_newlines(std::string str)
 }
 
 
-Context::Context(const char * file, int line)
-	: file(file)
-	, line(line)
-{
-	return;
-}
-
-
-Testcase::Testcase(Fatality fatality, Verbosity verbosity, const char * const desc, const Context &context)
+Testcase::Testcase(Fatality fatality, Verbosity verbosity, const char * const desc, const mpt::source_location &loc)
 	: fatality(fatality)
 	, verbosity(verbosity)
 	, desc(desc)
-	, context(context)
+	, loc(loc)
 {
 	return;
 }
@@ -57,7 +49,7 @@ Testcase::Testcase(Fatality fatality, Verbosity verbosity, const char * const de
 
 std::string Testcase::AsString() const
 {
-	return mpt::format(std::string("%1(%2): %3"))(context.file, context.line, remove_newlines(desc));
+	return mpt::format(std::string("%1(%2): %3"))(loc.file_name() ? loc.file_name() : "", loc.line(), remove_newlines(desc));
 }
 
 
@@ -187,17 +179,17 @@ void Testcase::ReportException()
 
 #if defined(MPT_ASSERT_HANDLER_NEEDED)
 
-MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
+MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *expr, const char *msg)
 {
 	Test::fail_count++;
 	if(msg)
 	{
-		mpt::log::Logger().SendLogMessage(mpt::log::Context(file, line, function), LogError, "ASSERT",
+		mpt::log::Logger().SendLogMessage(loc, LogError, "ASSERT",
 			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, msg) + MPT_USTRING(" (") + mpt::ToUnicode(mpt::CharsetASCII, expr) + MPT_USTRING(")")
 			);
 	} else
 	{
-		mpt::log::Logger().SendLogMessage(mpt::log::Context(file, line, function), LogError, "ASSERT",
+		mpt::log::Logger().SendLogMessage(loc, LogError, "ASSERT",
 			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, expr)
 			);
 	}

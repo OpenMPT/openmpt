@@ -51,18 +51,6 @@ enum Fatality
 };
 
 
-struct Context
-{
-public:
-	const char * const file;
-	const int line;
-public:
-	Context(const char * file, int line);
-};
-
-#define MPT_TEST_CONTEXT_CURRENT() (Test::Context( __FILE__ , __LINE__ ))
-
-
 struct TestFailed
 {
 	std::string values;
@@ -152,11 +140,11 @@ private:
 	Fatality const fatality;
 	Verbosity const verbosity;
 	const char * const desc;
-	Context const context;
+	mpt::source_location const loc;
 
 public:
 
-	Testcase(Fatality fatality, Verbosity verbosity, const char * const desc, const Context &context);
+	Testcase(Fatality fatality, Verbosity verbosity, const char * const desc, const mpt::source_location &loc);
 
 public:
 
@@ -271,11 +259,11 @@ public:
 		}
 	}
 
-	#define VERIFY_EQUAL(x,y)               Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
-	#define VERIFY_EQUAL_NONCONT(x,y)       Test::Testcase(Test::FatalityStop    , Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
-	#define VERIFY_EQUAL_QUIET_NONCONT(x,y) Test::Testcase(Test::FatalityStop    , Test::VerbosityQuiet , #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL(x,y)               Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_SOURCE_LOCATION_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL_NONCONT(x,y)       Test::Testcase(Test::FatalityStop    , Test::VerbosityNormal, #x " == " #y , MPT_SOURCE_LOCATION_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
+	#define VERIFY_EQUAL_QUIET_NONCONT(x,y) Test::Testcase(Test::FatalityStop    , Test::VerbosityQuiet , #x " == " #y , MPT_SOURCE_LOCATION_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;} )
 
-	#define VERIFY_EQUAL_EPS(x,y,eps)       Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;}, (eps) )
+	#define VERIFY_EQUAL_EPS(x,y,eps)       Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_SOURCE_LOCATION_CURRENT() )( [&](){return (x) ;}, [&](){return (y) ;}, (eps) )
 
 #else
 
@@ -317,11 +305,11 @@ public:
 		}
 	}
 
-	#define VERIFY_EQUAL(x,y)               Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
-	#define VERIFY_EQUAL_NONCONT(x,y)       Test::Testcase(Test::FatalityStop    , Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
-	#define VERIFY_EQUAL_QUIET_NONCONT(x,y) Test::Testcase(Test::FatalityStop    , Test::VerbosityQuiet , #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL(x,y)               Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_SOURCE_LOCATION_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL_NONCONT(x,y)       Test::Testcase(Test::FatalityStop    , Test::VerbosityNormal, #x " == " #y , MPT_SOURCE_LOCATION_CURRENT() )( (x) , (y) )
+	#define VERIFY_EQUAL_QUIET_NONCONT(x,y) Test::Testcase(Test::FatalityStop    , Test::VerbosityQuiet , #x " == " #y , MPT_SOURCE_LOCATION_CURRENT() )( (x) , (y) )
 
-	#define VERIFY_EQUAL_EPS(x,y,eps)       Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_TEST_CONTEXT_CURRENT() )( (x) , (y), (eps) )
+	#define VERIFY_EQUAL_EPS(x,y,eps)       Test::Testcase(Test::FatalityContinue, Test::VerbosityNormal, #x " == " #y , MPT_SOURCE_LOCATION_CURRENT() )( (x) , (y), (eps) )
 
 #endif
 
@@ -330,7 +318,7 @@ public:
 
 #define DO_TEST(func) \
 MPT_DO { \
-	Test::Testcase test(Test::FatalityStop, Test::VerbosityVerbose, #func , MPT_TEST_CONTEXT_CURRENT() ); \
+	Test::Testcase test(Test::FatalityStop, Test::VerbosityVerbose, #func , MPT_SOURCE_LOCATION_CURRENT() ); \
 	try { \
 		test.ShowStart(); \
 		fail_count = 0; \

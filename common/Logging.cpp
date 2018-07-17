@@ -88,10 +88,10 @@ bool IsFacilityActive(const char *facility)
 #endif
 
 
-void Logger::SendLogMessage(const Context &context, LogLevel level, const char *facility, const mpt::ustring &text)
+void Logger::SendLogMessage(const mpt::source_location &loc, LogLevel level, const char *facility, const mpt::ustring &text)
 {
 #ifdef MPT_LOG_IS_DISABLED
-	MPT_UNREFERENCED_PARAMETER(context);
+	MPT_UNREFERENCED_PARAMETER(loc);
 	MPT_UNREFERENCED_PARAMETER(level);
 	MPT_UNREFERENCED_PARAMETER(facility);
 	MPT_UNREFERENCED_PARAMETER(text);
@@ -110,9 +110,9 @@ void Logger::SendLogMessage(const Context &context, LogLevel level, const char *
 	#endif // MODPLUG_TRACKER
 	// remove eol if already present and add log level prefix
 	const mpt::ustring message = LogLevelToString(level) + MPT_USTRING(": ") + mpt::String::RTrim(text, MPT_USTRING("\r\n"));
-	const mpt::ustring file = mpt::ToUnicode(mpt::CharsetASCII, context.file);
-	const mpt::ustring function = mpt::ToUnicode(mpt::CharsetASCII, context.function);
-	const mpt::ustring line = mpt::ufmt::dec(context.line);
+	const mpt::ustring file = mpt::ToUnicode(mpt::CharsetASCII, loc.file_name() ? loc.file_name() : "");
+	const mpt::ustring function = mpt::ToUnicode(mpt::CharsetASCII, loc.function_name() ? loc.function_name() : "");
+	const mpt::ustring line = mpt::ufmt::dec(loc.line());
 	#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 #if MPT_OS_WINDOWS
 		static uint64 s_lastlogtime = 0;
@@ -185,7 +185,7 @@ void Logger::SendLogMessage(const Context &context, LogLevel level, const char *
 
 void LegacyLogger::operator () (const AnyStringLocale &text)
 {
-	SendLogMessage(context, MPT_LEGACY_LOGLEVEL, "", text);
+	SendLogMessage(loc, MPT_LEGACY_LOGLEVEL, "", text);
 }
 
 void LegacyLogger::operator () (const char *format, ...)
@@ -197,12 +197,12 @@ void LegacyLogger::operator () (const char *format, ...)
 	vsnprintf(message, LOGBUF_SIZE, format, va);
 	va_end(va);
 	message[LOGBUF_SIZE - 1] = '\0';
-	SendLogMessage(context, MPT_LEGACY_LOGLEVEL, "", mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, message));
+	SendLogMessage(loc, MPT_LEGACY_LOGLEVEL, "", mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, message));
 }
 
 void LegacyLogger::operator () (LogLevel level, const mpt::ustring &text)
 {
-	SendLogMessage(context, level, "", text);
+	SendLogMessage(loc, level, "", text);
 }
 
 
@@ -279,7 +279,7 @@ void Disable()
 	g_Enabled = false;
 }
 
-MPT_NOINLINE void Trace(const mpt::log::Context & context, Direction direction) noexcept
+MPT_NOINLINE void Trace(const mpt::source_location & loc, Direction direction) noexcept
 {
 	// This will get called in realtime contexts and hot paths.
 	// No blocking allowed here.
@@ -300,9 +300,9 @@ MPT_NOINLINE void Trace(const mpt::log::Context & context, Direction direction) 
 	entry.Index = index;
 	entry.ThreadId = threadid;
 	entry.Timestamp = timestamp;
-	entry.Function = context.function;
-	entry.File = context.file;
-	entry.Line = context.line;
+	entry.Function = loc.function_name();
+	entry.File = loc.file_name();
+	entry.Line = loc.line();
 	entry.Direction = direction;
 }
 

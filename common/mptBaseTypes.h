@@ -112,4 +112,61 @@ struct limits
 
 
 
+namespace mpt
+{
+
+// compatible with std::experimental::source_location from Library Fundamentals TS v2.
+struct source_location
+{
+private:
+	const char* m_file_name;
+	const char* m_function_name;
+	uint32 m_line;
+	uint32 m_column;
+public:
+	constexpr source_location() noexcept
+		: m_file_name("")
+		, m_function_name("")
+		, m_line(0)
+		, m_column(0)
+	{
+	}
+	constexpr source_location(const char* file, const char* function, uint32 line, uint32 column) noexcept
+		: m_file_name(file)
+		, m_function_name(function)
+		, m_line(line)
+		, m_column(column)
+	{
+	}
+	source_location(const source_location&) = default;
+	source_location(source_location&&) = default;
+	//static constexpr current() noexcept;  // use MPT_SOURCE_LOCATION_CURRENT()
+	static constexpr source_location current(const char* file, const char* function, uint32 line, uint32 column) noexcept
+	{
+		return source_location(file, function, line, column);
+	}
+	constexpr uint32 line() const noexcept
+	{
+		return m_line;
+	}
+	constexpr uint32 column() const noexcept
+	{
+		return m_column;
+	}
+	constexpr const char* file_name() const noexcept
+	{
+		return m_file_name;
+	}
+	constexpr const char* function_name() const noexcept
+	{
+		return m_function_name;
+	}
+};
+
+#define MPT_SOURCE_LOCATION_CURRENT() mpt::source_location::current( __FILE__ , __FUNCTION__ , __LINE__ , 0 )
+
+} // namespace mpt
+
+
+
 OPENMPT_NAMESPACE_END

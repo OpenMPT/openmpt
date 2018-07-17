@@ -63,6 +63,7 @@
 #include "../common/mptBaseMacros.h"
 // <iterator>
 // <cstddef>
+// <cstdint>
 
 #include "../common/mptBaseTypes.h"
 // "mptBaseMacros.h"

@@ -750,7 +750,7 @@ static void mpt_terminate_handler()
 
 #if defined(MPT_ASSERT_HANDLER_NEEDED)
 
-MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function, const char *expr, const char *msg)
+MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *expr, const char *msg)
 {
 	DebugReporter report(msg ? DumpModeWarning : DumpModeCrash, nullptr);
 	if(IsDebuggerPresent())
@@ -765,18 +765,18 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 		if(msg)
 		{
 			errorMessage = mpt::format(MPT_USTRING("Internal state inconsistency detected at %1(%2). This is just a warning that could potentially lead to a crash later on: %3 [%4]."))
-				( mpt::ToUnicode(mpt::CharsetASCII, file)
-				, line
+				( mpt::ToUnicode(mpt::CharsetASCII, loc.file_name() ? loc.file_name() : "")
+				, loc.line()
 				, mpt::ToUnicode(mpt::CharsetASCII, msg)
-				, mpt::ToUnicode(mpt::CharsetASCII, function)
+				, mpt::ToUnicode(mpt::CharsetASCII, loc.function_name() ? loc.function_name() : "")
 				);
 		} else
 		{
 			errorMessage = mpt::format(MPT_USTRING("Internal error occurred at %1(%2): ASSERT(%3) failed in [%4]."))
-				( mpt::ToUnicode(mpt::CharsetASCII, file)
-				, line
+				( mpt::ToUnicode(mpt::CharsetASCII, loc.file_name() ? loc.file_name() : "")
+				, loc.line()
 				, mpt::ToUnicode(mpt::CharsetASCII, expr)
-				, mpt::ToUnicode(mpt::CharsetASCII, function)
+				, mpt::ToUnicode(mpt::CharsetASCII, loc.function_name() ? loc.function_name() : "")
 				);
 		}
 		report.ReportError(errorMessage);
