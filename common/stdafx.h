@@ -64,16 +64,15 @@
 // <iterator>
 // <cstddef>
 
-#include "../common/mptAssert.h"
-// "mptBaseMacros.h"
-
 #include "../common/mptBaseTypes.h"
-// "mptAssert.h"
 // "mptBaseMacros.h"
 // <array>
 // <limits>
 // <type_traits>
 // <cstdint>
+
+#include "../common/mptAssert.h"
+// "mptBaseMacros.h"
 
 #include "../common/mptBaseUtils.h"
 // <algorithm>

@@ -14,7 +14,6 @@
 
 
 
-#include "mptAssert.h"
 #include "mptBaseMacros.h"
 
 #include <array>

@@ -136,15 +136,6 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 
 
 
-// Compile time assert.
-#if (MPT_CXX >= 17)
-#define MPT_STATIC_ASSERT static_assert
-#else
-#define MPT_STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
-#endif
-
-
-
 #define MPT_CONSTEXPR11_ASSERT MPT_STATIC_ASSERT
 #if MPT_CXX_AT_LEAST(14) && !MPT_MSVC_BEFORE(2017,5)
 #define MPT_CONSTEXPR14_ASSERT MPT_STATIC_ASSERT
@@ -156,11 +147,6 @@ MPT_NOINLINE void AssertHandler(const char *file, int line, const char *function
 #else
 #define MPT_CONSTEXPR17_ASSERT MPT_ASSERT
 #endif
-
-
-
-// legacy
-#define STATIC_ASSERT(x) MPT_STATIC_ASSERT(x)
 
 
 

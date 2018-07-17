@@ -26,6 +26,17 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
+// Compile time assert.
+#if (MPT_CXX >= 17)
+#define MPT_STATIC_ASSERT static_assert
+#else
+#define MPT_STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
+#endif
+// legacy
+#define STATIC_ASSERT(x) MPT_STATIC_ASSERT(x)
+
+
+
 // Advanced inline attributes
 #if MPT_COMPILER_MSVC
 #define MPT_FORCEINLINE __forceinline

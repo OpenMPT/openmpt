@@ -14,7 +14,6 @@
 
 
 #include "mptBaseMacros.h"
-#include "mptAssert.h"
 #include "mptBaseTypes.h"
 
 #include <algorithm>

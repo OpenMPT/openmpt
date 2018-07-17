@@ -43,8 +43,8 @@
 
 
 #include "../common/mptBaseMacros.h"
-#include "../common/mptAssert.h"
 #include "../common/mptBaseTypes.h"
+#include "../common/mptAssert.h"
 #include "../common/mptBaseUtils.h"
 #include "../common/mptException.h"
 #include "../common/mptSpan.h"
