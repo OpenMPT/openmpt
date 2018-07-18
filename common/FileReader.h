@@ -914,7 +914,7 @@ public:
 	// Read an array of binary-safe T values.
 	// If successful, the file cursor is advanced by the size of the array.
 	// Otherwise, the target is zeroed.
-	template<typename T, off_t destSize>
+	template<typename T, std::size_t destSize>
 	bool ReadArray(T (&destArray)[destSize])
 	{
 		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
@@ -931,7 +931,7 @@ public:
 			return false;
 		}
 	}
-	template<typename T, off_t destSize>
+	template<typename T, std::size_t destSize>
 	bool ReadArray(std::array<T, destSize> &destArray)
 	{
 		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
