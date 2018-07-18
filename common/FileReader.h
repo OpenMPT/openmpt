@@ -892,7 +892,7 @@ public:
 			char buffer[64];
 			char c = '\0';
 			off_t avail = 0;
-			while((avail = std::min(GetRaw(buffer), maxLength - dest.length())) != 0)
+			while((avail = std::min(GetRaw(buffer, mpt::size(buffer)), maxLength - dest.length())) != 0)
 			{
 				auto end = std::find_if(buffer, buffer + avail, mpt::String::Traits<std::string>::IsLineEnding);
 				dest.insert(dest.end(), buffer, end);
