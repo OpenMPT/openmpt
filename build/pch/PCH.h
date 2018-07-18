@@ -83,6 +83,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #if MPT_CXX_AT_LEAST(20)
 #include <bit>
 #endif
@@ -98,6 +99,7 @@
 #include <locale>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <new>
 #include <numeric>
 #include <ostream>
@@ -106,6 +108,7 @@
 #include <stdexcept>
 #include <streambuf>
 #include <string>
+#include <thread>
 #include <type_traits>
 #include <utility>
 #if MPT_CXX_AT_LEAST(17)
