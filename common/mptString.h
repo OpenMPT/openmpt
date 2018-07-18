@@ -103,15 +103,18 @@ namespace String
 
 
 template <typename Tstring> struct Traits {
-	static const char * GetDefaultWhitespace() { return " \n\r\t"; }
+	static MPT_FORCEINLINE const char * GetDefaultWhitespace() noexcept { return " \n\r\t"; }
+	static MPT_FORCEINLINE bool IsLineEnding(char c) noexcept { return c == '\r' || c == '\n'; }
 };
 
 template <> struct Traits<std::string> {
-	static const char * GetDefaultWhitespace() { return " \n\r\t"; }
+	static MPT_FORCEINLINE const char * GetDefaultWhitespace() noexcept { return " \n\r\t"; }
+	static MPT_FORCEINLINE bool IsLineEnding(char c) noexcept { return c == '\r' || c == '\n'; }
 };
 
 template <> struct Traits<std::wstring> {
-	static const wchar_t * GetDefaultWhitespace() { return L" \n\r\t"; }
+	static MPT_FORCEINLINE const wchar_t * GetDefaultWhitespace() noexcept { return L" \n\r\t"; }
+	static MPT_FORCEINLINE bool IsLineEnding(wchar_t c) noexcept { return c == L'\r' || c == L'\n'; }
 };
 
 

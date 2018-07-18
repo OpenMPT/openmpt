@@ -875,9 +875,6 @@ public:
 		return dest.length() != 0;
 	}
 
-private:
-	static MPT_FORCEINLINE bool IsLineEnding(char c) { return c == '\r' || c == '\n'; }
-public:
 	// Read a string up to the next line terminator into a std::string
 	bool ReadLine(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
 	{
@@ -891,7 +888,7 @@ public:
 			off_t avail = 0;
 			while((avail = std::min(DataContainer().Read(streamPos, mpt::byte_cast<mpt::byte_span>(mpt::as_span(buffer))), maxLength - dest.length())) != 0)
 			{
-				auto end = std::find_if(buffer, buffer + avail, IsLineEnding);
+				auto end = std::find_if(buffer, buffer + avail, mpt::String::Traits<std::string>::IsLineEnding);
 				dest.insert(dest.end(), buffer, end);
 				streamPos += (end - buffer);
 				if(end < buffer + avail)
