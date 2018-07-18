@@ -433,6 +433,12 @@ public:
 	}
 
 	template <typename T>
+	std::size_t GetRawOffset(std::size_t offset, T *dst, std::size_t count) const
+	{
+		return static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<mpt::byte*>(dst), streamPos + offset, count));
+	}
+
+	template <typename T>
 	std::size_t GetRaw(T *dst, std::size_t count) const
 	{
 		return static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<mpt::byte*>(dst), streamPos, count));
@@ -780,7 +786,7 @@ public:
 		{
 			copyBytes = BytesLeft();
 		}
-		DataContainer().Read(mpt::as_raw_memory(target).data(), streamPos, copyBytes);
+		GetRaw(mpt::as_raw_memory(target).data(), copyBytes);
 		std::memset(mpt::as_raw_memory(target).data() + copyBytes, 0, sizeof(target) - copyBytes);
 		Skip(partialSize);
 		return true;
@@ -856,15 +862,15 @@ public:
 		{
 			char buffer[64];
 			off_t avail = 0;
-			while((avail = std::min(DataContainer().Read(streamPos, mpt::byte_cast<mpt::byte_span>(mpt::as_span(buffer))), maxLength - dest.length())) != 0)
+			while((avail = std::min(GetRaw(buffer, mpt::size(buffer)), maxLength - dest.length())) != 0)
 			{
 				auto end = std::find(buffer, buffer + avail, '\0');
 				dest.insert(dest.end(), buffer, end);
-				streamPos += (end - buffer);
+				Skip(end - buffer);
 				if(end < buffer + avail)
 				{
 					// Found null char
-					streamPos++;
+					Skip(1);
 					break;
 				}
 			}
@@ -886,15 +892,15 @@ public:
 			char buffer[64];
 			char c = '\0';
 			off_t avail = 0;
-			while((avail = std::min(DataContainer().Read(streamPos, mpt::byte_cast<mpt::byte_span>(mpt::as_span(buffer))), maxLength - dest.length())) != 0)
+			while((avail = std::min(GetRaw(buffer), maxLength - dest.length())) != 0)
 			{
 				auto end = std::find_if(buffer, buffer + avail, mpt::String::Traits<std::string>::IsLineEnding);
 				dest.insert(dest.end(), buffer, end);
-				streamPos += (end - buffer);
+				Skip(end - buffer);
 				if(end < buffer + avail)
 				{
 					// Found line ending
-					streamPos++;
+					Skip(1);
 					// Handle CRLF line ending
 					if(*end == '\r')
 					{
@@ -985,10 +991,10 @@ public:
 		{
 			mpt::byte bytes[N - 1];
 			STATIC_ASSERT(sizeof(bytes) == sizeof(magic) - 1);
-			DataContainer().Read(bytes, streamPos, N - 1);
+			GetRaw(bytes, N - 1);
 			if(!std::memcmp(bytes, magic, N - 1))
 			{
-				streamPos += (N - 1);
+				Skip(N - 1);
 				return true;
 			}
 		}
@@ -1003,7 +1009,7 @@ public:
 			for(std::size_t i = 0; i < magicLength; ++i)
 			{
 				mpt::byte c = mpt::as_byte(0);
-				DataContainer().Read(&c, streamPos + i, 1);
+				GetRawOffset(i, &c, 1);
 				if(c != mpt::byte_cast<mpt::byte>(magic[i]))
 				{
 					identical = false;
@@ -1012,7 +1018,7 @@ public:
 			}
 			if(identical)
 			{
-				streamPos += magicLength;
+				Skip(magicLength);
 				return true;
 			} else
 			{
@@ -1042,7 +1048,8 @@ public:
 		}
 
 		mpt::byte bytes[16];	// More than enough for any valid VarInt
-		off_t avail = DataContainer().Read(bytes, streamPos, sizeof(bytes)), readPos = 1;
+		off_t avail = GetRaw(bytes, sizeof(bytes));
+		off_t readPos = 1;
 		
 		size_t writtenBits = 0;
 		uint8 b = mpt::byte_cast<uint8>(bytes[0]);
@@ -1065,12 +1072,12 @@ public:
 			writtenBits += 7;
 			if(readPos == avail)
 			{
-				streamPos += readPos;
-				avail = DataContainer().Read(bytes, streamPos, sizeof(bytes));
+				Skip(readPos);
+				avail = GetRaw(bytes, sizeof(bytes));
 				readPos = 0;
 			}
 		}
-		streamPos += readPos;
+		Skip(readPos);
 
 		if(writtenBits > sizeof(target) * 8u)
 		{
