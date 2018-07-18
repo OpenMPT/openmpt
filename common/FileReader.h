@@ -433,7 +433,7 @@ public:
 	}
 
 	template <typename T>
-	std::size_t GetRawOffset(std::size_t offset, T *dst, std::size_t count) const
+	std::size_t GetRawWithOffset(std::size_t offset, T *dst, std::size_t count) const
 	{
 		return static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<mpt::byte*>(dst), streamPos + offset, count));
 	}
@@ -1009,7 +1009,7 @@ public:
 			for(std::size_t i = 0; i < magicLength; ++i)
 			{
 				mpt::byte c = mpt::as_byte(0);
-				GetRawOffset(i, &c, 1);
+				GetRawWithOffset(i, &c, 1);
 				if(c != mpt::byte_cast<mpt::byte>(magic[i]))
 				{
 					identical = false;
