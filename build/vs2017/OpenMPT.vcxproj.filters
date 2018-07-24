@@ -1592,7 +1592,13 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\mptrack\res\About.png">
+      <Filter>mptrack\res</Filter>
+    </Image>
     <Image Include="..\..\mptrack\res\COLORS.BMP">
+      <Filter>mptrack\res</Filter>
+    </Image>
+    <Image Include="..\..\mptrack\res\Splash.png">
       <Filter>mptrack\res</Filter>
     </Image>
     <Image Include="..\..\mptrack\res\envelope_toolbar.png">
@@ -1604,16 +1610,10 @@
     <Image Include="..\..\mptrack\res\main_toolbar.png">
       <Filter>mptrack\res</Filter>
     </Image>
-    <Image Include="..\..\mptrack\res\mptrack.png">
-      <Filter>mptrack\res</Filter>
-    </Image>
     <Image Include="..\..\mptrack\res\pattern_toolbar.png">
       <Filter>mptrack\res</Filter>
     </Image>
     <Image Include="..\..\mptrack\res\sample_toolbar.png">
-      <Filter>mptrack\res</Filter>
-    </Image>
-    <Image Include="..\..\mptrack\res\splashno.png">
       <Filter>mptrack\res</Filter>
     </Image>
     <Image Include="..\..\mptrack\res\view_pat.bmp">

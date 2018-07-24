@@ -739,7 +739,7 @@ mpt::ustring GetFullCreditsString()
 		"http://lame.sourceforge.net/\n"
 #endif
 #if defined(MPT_WITH_NLOHMANNJSON)
-		"Niels Lohmann et. al. for nlohmann-json\n"
+		"Niels Lohmann et al. for nlohmann-json\n"
 		"https://github.com/nlohmann/json\n"
 		"\n"
 #endif
@@ -753,7 +753,10 @@ mpt::ustring GetFullCreditsString()
 		"Alexander Uckun for decimal input field\n"
 		"http://www.codeproject.com/Articles/21257/_\n"
 		"\n"
-		"Nobuyuki for application and file icon\n"
+		"\xc3\x9alfur Kolka for application icon, splash and about screen\n"
+		"https://www.behance.net/ulfurkolka\n"
+		"\n"
+		"Nobuyuki for file icon\n"
 		"https://twitter.com/nobuyukinyuu\n"
 		"\n"
 #endif

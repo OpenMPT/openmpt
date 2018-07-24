@@ -836,9 +836,9 @@ IDB_PATTERNS            PNG                     "res\\pattern_toolbar.png"
 
 IDB_SMPTOOLBAR          PNG                     "res\\sample_toolbar.png"
 
-IDB_SPLASHNOFOLDFIN     PNG                     "res\\splashno.png"
+IDB_SPLASHNOFOLDFIN     PNG                     "res\\Splash.png"
 
-IDB_MPTRACK             PNG                     "res\\mptrack.png"
+IDB_MPTRACK             PNG                     "res\\About.png"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -950,8 +950,8 @@ CAPTION "About OpenMPT"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,264,78,66,14,WS_GROUP
-    CONTROL         "",IDC_BITMAP1,"Static",SS_BLACKRECT | SS_NOTIFY | SS_CENTERIMAGE,6,6,173,81,WS_EX_CLIENTEDGE
-    EDITTEXT        IDC_EDIT3,186,12,144,60,ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    CONTROL         "",IDC_BITMAP1,"Static",SS_BLACKRECT | SS_NOTIFY | SS_CENTERIMAGE,6,6,205,81,WS_EX_CLIENTEDGE
+    EDITTEXT        IDC_EDIT3,213,7,121,70,ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | NOT WS_BORDER
     CONTROL         "",IDC_TABABOUT,"SysTabControl32",0x0,6,96,330,162
     EDITTEXT        IDC_EDITABOUT,12,114,318,138,ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_VSCROLL
 END
@@ -2425,6 +2425,11 @@ BEGIN
 END
 
 IDD_WAVECONVERT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_ABOUTBOX AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

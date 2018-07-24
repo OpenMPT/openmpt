@@ -1409,31 +1409,14 @@ CSplashScreen::~CSplashScreen()
 
 void CSplashScreen::OnPaint()
 {
-	#ifdef MPT_WITH_GDIPLUS
+	CPaintDC dc(this);
+	Gdiplus::Graphics gfx(dc);
 
-		CPaintDC dc(this);
-		Gdiplus::Graphics gfx(dc);
+	CRect rect;
+	GetClientRect(&rect);
+	gfx.DrawImage(m_Image.get(), 0, 0, rect.right, rect.bottom);
 
-		const int width = Util::ScalePixels(m_Image->GetWidth(), m_hWnd);
-		const int height = Util::ScalePixels(m_Image->GetHeight(), m_hWnd);
-		gfx.DrawImage(m_Image.get(), 0, 0, width, height);
-
-		CDialog::OnPaint();
-
-	#else // !MPT_WITH_GDIPLUS
-
-		CPaintDC dc(this);
-
-		CDC hdcMem;
-		hdcMem.CreateCompatibleDC(&dc);
-		CBitmap *oldBitmap = hdcMem.SelectObject(&m_Bitmap);
-		dc.BitBlt(0, 0, m_BitmapWidth, m_BitmapHeight, &hdcMem, 0, 0, SRCCOPY);
-		hdcMem.SelectObject(oldBitmap);
-		hdcMem.DeleteDC();
-
-		CDialog::OnPaint();
-
-	#endif // MPT_WITH_GDIPLUS
+	CDialog::OnPaint();
 }
 
 
@@ -1441,53 +1424,24 @@ BOOL CSplashScreen::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	#ifdef MPT_WITH_GDIPLUS
+	try
+	{
+		m_Image = GDIP::LoadPixelImage(GetResource(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN), _T("PNG")));
+	} catch(const bad_image &)
+	{
+		return FALSE;
+	}
 
-		try
-		{
-			m_Image = GDIP::LoadPixelImage(GetResource(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN), _T("PNG")));
-		} catch(const bad_image &)
-		{
-			return FALSE;
-		}
-
-		CRect rect;
-		GetWindowRect(&rect);
-		const int width = Util::ScalePixels(m_Image->GetWidth(), m_hWnd);
-		const int height = Util::ScalePixels(m_Image->GetHeight(), m_hWnd);
-		SetWindowPos(nullptr,
-			rect.left - ((width - rect.Width()) / 2),
-			rect.top - ((height - rect.Height()) / 2),
-			width,
-			height,
-			SWP_NOZORDER | SWP_NOCOPYBITS);
-
-	#else // !MPT_WITH_GDIPLUS
-	
-		std::unique_ptr<RawGDIDIB> bitmap;
-		try
-		{
-			bitmap = LoadPixelImage(GetResource(MAKEINTRESOURCE(IDB_SPLASHNOFOLDFIN), _T("PNG")));
-		} catch(const bad_image &)
-		{
-			return FALSE;
-		}
-		m_BitmapWidth = bitmap->Width();
-		m_BitmapHeight = bitmap->Height();
-		CDC *dc = GetDC();
-		CopyToCompatibleBitmap(m_Bitmap, *dc, *bitmap);
-		ReleaseDC(dc);
-	
-		CRect rect;
-		GetWindowRect(&rect);
-		SetWindowPos(nullptr,
-			rect.left - ((static_cast<int32>(m_BitmapWidth) - rect.Width()) / 2),
-			rect.top - ((static_cast<int32>(m_BitmapHeight) - rect.Height()) / 2),
-			m_BitmapWidth,
-			m_BitmapHeight,
-			SWP_NOZORDER | SWP_NOCOPYBITS);
-
-	#endif // MPT_WITH_GDIPLUS
+	CRect rect;
+	GetWindowRect(&rect);
+	const int width = Util::ScalePixels(m_Image->GetWidth(), m_hWnd) / 2;
+	const int height = Util::ScalePixels(m_Image->GetHeight(), m_hWnd) / 2;
+	SetWindowPos(nullptr,
+		rect.left - ((width - rect.Width()) / 2),
+		rect.top - ((height - rect.Height()) / 2),
+		width,
+		height,
+		SWP_NOZORDER | SWP_NOCOPYBITS);
 
 	return TRUE;
 }

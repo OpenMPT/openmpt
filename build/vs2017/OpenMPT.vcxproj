@@ -1383,14 +1383,14 @@
     <ResourceCompile Include="..\..\mptrack\mptrack.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\mptrack\res\About.png" />
     <Image Include="..\..\mptrack\res\COLORS.BMP" />
+    <Image Include="..\..\mptrack\res\Splash.png" />
     <Image Include="..\..\mptrack\res\envelope_toolbar.png" />
     <Image Include="..\..\mptrack\res\icons.png" />
     <Image Include="..\..\mptrack\res\main_toolbar.png" />
-    <Image Include="..\..\mptrack\res\mptrack.png" />
     <Image Include="..\..\mptrack\res\pattern_toolbar.png" />
     <Image Include="..\..\mptrack\res\sample_toolbar.png" />
-    <Image Include="..\..\mptrack\res\splashno.png" />
     <Image Include="..\..\mptrack\res\view_pat.bmp" />
     <Image Include="..\..\mptrack\res\vumeters.bmp" />
   </ItemGroup>
