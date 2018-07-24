@@ -25,15 +25,6 @@ BEGIN_MESSAGE_MAP(COwnerVstEditor, CAbstractVstEditor)
 END_MESSAGE_MAP()
 
 
-COwnerVstEditor::COwnerVstEditor(CVstPlugin &plugin)
-	: CAbstractVstEditor(plugin)
-	, m_width(0)
-	, m_height(0)
-{
-
-}
-
-
 void COwnerVstEditor::OnPaint()
 {
 	CAbstractVstEditor::OnPaint();

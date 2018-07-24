@@ -22,18 +22,18 @@ class COwnerVstEditor: public CAbstractVstEditor
 {
 protected:
 	CStatic m_plugWindow;
-	int m_width, m_height;
+	int m_width = 0, m_height = 0;
 
 public:
-	COwnerVstEditor(CVstPlugin &plugin);
-	virtual ~COwnerVstEditor() { };
+	COwnerVstEditor(CVstPlugin &plugin) : CAbstractVstEditor(plugin) { }
+	~COwnerVstEditor() override { }
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
 	afx_msg void OnPaint();
 
 	// Plugins may request to change the GUI size.
-	bool IsResizable() const override { return true; };
+	bool IsResizable() const override { return true; }
 	bool SetSize(int contentWidth, int contentHeight) override;
 
 	void UpdateParamDisplays() override;

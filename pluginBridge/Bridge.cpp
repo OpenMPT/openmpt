@@ -63,8 +63,6 @@ static LONG WINAPI CrashHandler(_EXCEPTION_POINTERS *pExceptionInfo)
 		const int ch = GetDateFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"'PluginBridge 'yyyy'-'MM'-'dd ", tempPath, CountOf(tempPath));
 		if(ch) GetTimeFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"HH'.'mm'.'ss'.dmp'", tempPath + ch - 1, CountOf(tempPath) - ch + 1);
 		filename += tempPath;
-		static_assert(CountOf(tempPath) > 3, "");
-
 		OPENMPT_NAMESPACE::WriteMemoryDump(pExceptionInfo, filename.c_str(), OPENMPT_NAMESPACE::PluginBridge::fullMemDump);
 	}
 
@@ -139,15 +137,6 @@ void PluginBridge::InitializeStaticVariables()
 
 
 PluginBridge::PluginBridge(const wchar_t *memName, HANDLE otherProcess_)
-	: nativeEffect(nullptr)
-	, library(NULL)
-	, window(NULL)
-	, windowParent(NULL)
-	, windowWidth(0)
-	, windowHeight(0)
-	, isProcessing(0)
-	, needIdle(false)
-	, closeInstance(false)
 {
 	PluginBridge::latestInstance = this;
 	InterlockedIncrement(&instanceCount);
@@ -223,7 +212,7 @@ void PluginBridge::MessageThread()
 		// Normally we would only need this block if there's an editor window, but the 4klang VSTi creates
 		// its custom window in the message thread, and it will freeze if we don't dispatch messages here...
 		MSG msg;
-		while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		while(::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
 			::TranslateMessage(&msg);
 			::DispatchMessage(&msg);
@@ -306,7 +295,7 @@ bool PluginBridge::SendToHost(BridgeMessage &sendMsg)
 			if(result == WAIT_TIMEOUT)
 			{
 				MSG msg;
-				while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+				while(::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 				{
 					::TranslateMessage(&msg);
 					::DispatchMessage(&msg);

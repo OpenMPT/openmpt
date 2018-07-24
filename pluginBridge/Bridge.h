@@ -29,11 +29,11 @@ protected:
 	static WNDCLASSEX windowClass;
 
 	// Plugin
-	Vst::AEffect *nativeEffect;
-	HMODULE library;
-	HWND window, windowParent;
-	int windowWidth, windowHeight;
-	LONG isProcessing;
+	Vst::AEffect *nativeEffect = nullptr;
+	HMODULE library = nullptr;
+	HWND window = nullptr, windowParent = nullptr;
+	int windowWidth = 0, windowHeight = 0;
+	LONG isProcessing = 0;
 
 	// Static memory for host-to-plugin pointers
 	union
@@ -45,10 +45,10 @@ protected:
 
 	// Pointers to sample data
 	std::vector<void *> samplePointers;
-	uint32 mixBufSize;
+	uint32 mixBufSize = 0;
 
-	bool needIdle : 1 ;	// Plugin needs idle time
-	bool closeInstance : 1;
+	bool needIdle = false;	// Plugin needs idle time
+	bool closeInstance = false;
 
 public:
 	PluginBridge(const wchar_t *memName, HANDLE otherProcess);

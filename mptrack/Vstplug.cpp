@@ -720,10 +720,11 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 					fileSel.sizeReturnPath = _MAX_PATH;
 				}
 
+				const auto localePath = dlg.GetFirstFile().ToLocale();
 				if(fileSel.returnPath == nullptr || fileSel.sizeReturnPath == 0)
 				{
 					// Provide some memory for the return path.
-					fileSel.sizeReturnPath = mpt::saturate_cast<int32>(dlg.GetFirstFile().ToLocale().length() + 1);
+					fileSel.sizeReturnPath = mpt::saturate_cast<int32>(localePath.length() + 1);
 					fileSel.returnPath = new (std::nothrow) char[fileSel.sizeReturnPath];
 					if(fileSel.returnPath == nullptr)
 					{
@@ -735,7 +736,7 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 				{
 					fileSel.reserved = 0;
 				}
-				strncpy(fileSel.returnPath, dlg.GetFirstFile().ToLocale().c_str(), fileSel.sizeReturnPath - 1);
+				strncpy(fileSel.returnPath, localePath.c_str(), fileSel.sizeReturnPath - 1);
 				fileSel.numReturnPaths = 1;
 				fileSel.returnMultiplePaths = nullptr;
 			}
