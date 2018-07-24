@@ -110,7 +110,7 @@ Root: HKCR; Subkey: "OpenMPTFile"; ValueType: string; ValueName: ""; ValueData: 
 Root: HKCR; SubKey: "OpenMPTFile"; ValueType: string; ValueName: "PerceivedType"; ValueData: "audio"; Tasks: associate_common or associate_exotic or not portable
 Root: HKCR; Subkey: "OpenMPTFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\mpt.ico,0"; Tasks: associate_common or associate_exotic or not portable
 Root: HKCR; Subkey: "OpenMPTFile\shell\Open"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: associate_common or associate_exotic or not portable
-Root: HKCR; Subkey: "OpenMPTFile\shell\Open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\mptrack.exe"" /dde ""%1"""; Tasks: associate_common or associate_exotic or not portable
+Root: HKCR; Subkey: "OpenMPTFile\shell\Open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\mptrack.exe"" /shared ""%1"""; Tasks: associate_common or associate_exotic or not portable
 ;Root: HKCR; Subkey: "OpenMPTFile\shell\Open\ddeexec"; ValueType: string; ValueName: ""; ValueData: "[Edit(""%1"")]"; Tasks: associate_common or associate_exotic or not portable
 
 ; Application capabilities

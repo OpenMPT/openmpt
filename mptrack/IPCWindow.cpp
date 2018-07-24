@@ -29,33 +29,9 @@ namespace IPCWindow
 		{
 			const auto &copyData = *reinterpret_cast<const COPYDATASTRUCT *>(lParam);
 			LRESULT result = 0;
-			switch(copyData.dwData)
+			switch(static_cast<Function>(copyData.dwData))
 			{
-			case static_cast<ULONG>(Function::OpenMultipleAndSetWindowForeground):
-				{
-					size_t remain = copyData.cbData / sizeof(WCHAR);
-					const auto *str = static_cast<const WCHAR *>(copyData.lpData);
-					while(remain > 0)
-					{
-						size_t length = ::wcsnlen(str, remain);
-						const std::wstring name(str, length);
-						theApp.OpenDocumentFile(mpt::PathString::FromWide(name).AsNative().c_str());
-						auto mainWnd = theApp.GetMainWnd();
-						if(mainWnd)
-						{
-							if(mainWnd->IsIconic()) mainWnd->ShowWindow(SW_RESTORE);
-							mainWnd->SetForegroundWindow();
-						}
-						// Skip null terminator between strings
-						if(length < remain)
-							length++;
-						str += length;
-						remain -= length;
-					}
-					result = 1;
-				}
-				break;
-			case static_cast<ULONG>(Function::Open):
+			case Function::Open:
 				{
 					std::size_t count = copyData.cbData / sizeof(WCHAR);
 					const WCHAR* data = static_cast<const WCHAR *>(copyData.lpData);
@@ -63,7 +39,7 @@ namespace IPCWindow
 					result = theApp.OpenDocumentFile(mpt::PathString::FromWide(name).AsNative().c_str()) ? 1 : 0;
 				}
 				break;
-			case static_cast<ULONG>(Function::SetWindowForeground):
+			case Function::SetWindowForeground:
 				{
 					auto mainWnd = theApp.GetMainWnd();
 					if(mainWnd)
@@ -80,12 +56,12 @@ namespace IPCWindow
 					}
 				}
 				break;
-			case static_cast<ULONG>(Function::GetVersion):
+			case Function::GetVersion:
 				{
 					result = Version::Current().GetRawVersion();
 				}
 				break;
-			case static_cast<ULONG>(Function::GetArchitecture):
+			case Function::GetArchitecture:
 				{
 					#if MPT_OS_WINDOWS
 						result = static_cast<int32>(mpt::Windows::GetProcessArchitecture());
@@ -94,7 +70,7 @@ namespace IPCWindow
 					#endif
 				}
 				break;
-			case static_cast<ULONG>(Function::HasSameBinaryPath):
+			case Function::HasSameBinaryPath:
 				{
 					std::size_t count = copyData.cbData / sizeof(WCHAR);
 					const WCHAR* data = static_cast<const WCHAR *>(copyData.lpData);
@@ -102,7 +78,7 @@ namespace IPCWindow
 					result = (theApp.GetAppDirPath().ToWide() == path) ? 1 : 0;
 				}
 				break;
-			case static_cast<ULONG>(Function::HasSameSettingsPath):
+			case Function::HasSameSettingsPath:
 				{
 					std::size_t count = copyData.cbData / sizeof(WCHAR);
 					const WCHAR* data = static_cast<const WCHAR *>(copyData.lpData);
@@ -248,6 +224,9 @@ namespace IPCWindow
 				result = false;
 			}
 		}
+		DWORD processID = 0;
+		GetWindowThreadProcessId(ipcWnd, &processID);
+		AllowSetForegroundWindow(processID);
 		SendIPC(ipcWnd, Function::SetWindowForeground);
 		return result;
 	}

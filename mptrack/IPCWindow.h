@@ -18,7 +18,6 @@ namespace IPCWindow
 
 	enum class Function : ULONG
 	{
-		OpenMultipleAndSetWindowForeground = 0x00,  // deprecated
 		Open                               = 0x01,
 		SetWindowForeground                = 0x02,
 		GetVersion                         = 0x03,  // returns Version::GewRawVersion()

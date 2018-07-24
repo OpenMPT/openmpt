@@ -132,7 +132,7 @@ class CMPTCommandLineInfo: public CCommandLineInfo
 public:
 	std::vector<mpt::PathString> m_fileNames;
 	bool m_noDls = false, m_noPlugins = false, m_noAssembly = false, m_noSysCheck = false, m_noWine = false,
-		m_portable = false, m_noCrashHandler = false, m_debugCrashHandler = false;
+		m_portable = false, m_noCrashHandler = false, m_debugCrashHandler = false, m_sharedInstance = false;
 #ifdef ENABLE_TESTS
 	bool m_noTests = false;
 #endif
@@ -152,6 +152,7 @@ public:
 			if(!lstrcmpi(param, _T("noWine"))) { m_noWine = true; return; }
 			if(!lstrcmpi(param, _T("noCrashHandler"))) { m_noCrashHandler = true; return; }
 			if(!lstrcmpi(param, _T("DebugCrashHandler"))) { m_debugCrashHandler = true; return; }
+			if(!lstrcmpi(param, _T("shared"))) { m_sharedInstance = true; return; }
 #ifdef ENABLE_TESTS
 			if (!lstrcmpi(param, _T("noTests"))) { m_noTests = true; return; }
 #endif
@@ -785,7 +786,7 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 	// Set up paths to store configuration in
 	SetupPaths(cmdInfo.m_portable);
 
-	if(cmdInfo.m_nShellCommand == CCommandLineInfo::FileDDE && IPCWindow::SendToIPC(cmdInfo.m_fileNames))
+	if(cmdInfo.m_sharedInstance && IPCWindow::SendToIPC(cmdInfo.m_fileNames))
 	{
 		ExitProcess(0);
 	}
