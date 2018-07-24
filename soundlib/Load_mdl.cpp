@@ -96,17 +96,6 @@ struct MDLSampleHeader
 MPT_BINARY_STRUCT(MDLSampleHeader, 14)
 
 
-// Part of the sample header that's common between v0 and v1.
-struct MDLSampleInfoCommon
-{
-	uint8le sampleIndex;
-	char    name[32];
-	char    filename[8];
-};
-
-MPT_BINARY_STRUCT(MDLSampleInfoCommon, 41)
-
-
 struct MDLEnvelope
 {
 	uint8 envNum;
@@ -524,31 +513,18 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		uint8 numSamples = chunk.ReadUint8();
 		for(uint8 smp = 0; smp < numSamples; smp++)
 		{
-			MDLSampleInfoCommon header;
-			if(!chunk.ReadStruct(header) || header.sampleIndex == 0)
-				continue;
-			#if 1
-				#if MPT_GCC_BEFORE(6,1,0)
-				#pragma GCC diagnostic push
-				#pragma GCC diagnostic ignored "-Wtype-limits"
-				#endif
-				STATIC_ASSERT((mpt::limits<decltype(header.sampleIndex)>::max)() < MAX_SAMPLES);
-				#if MPT_GCC_BEFORE(6,1,0)
-				#pragma GCC diagnostic pop
-				#endif
-			#else
-				MPT_MAYBE_CONSTANT_IF(header.sampleIndex >= MAX_SAMPLES)
-					continue;
-			#endif
+			const SAMPLEINDEX sampleIndex = chunk.ReadUint8();
+			if(sampleIndex == 0 || sampleIndex >= MAX_SAMPLES || !chunk.CanRead(32 + 8 + 2 + 12 + 2))
+				break;
 
-			if(header.sampleIndex > GetNumSamples())
-				m_nSamples = header.sampleIndex;
+			if(sampleIndex > GetNumSamples())
+				m_nSamples = sampleIndex;
 
-			ModSample &sample = Samples[header.sampleIndex];
+			ModSample &sample = Samples[sampleIndex];
 			sample.Initialize();
 
-			mpt::String::Read<mpt::String::spacePadded>(m_szNames[header.sampleIndex], header.name);
-			mpt::String::Read<mpt::String::spacePadded>(sample.filename, header.filename);
+			chunk.ReadString<mpt::String::spacePadded>(m_szNames[sampleIndex], 32);
+			chunk.ReadString<mpt::String::spacePadded>(sample.filename, 8);
 
 			uint32 c4speed;
 			if(fileHeader.version < 0x10)
