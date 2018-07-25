@@ -14,14 +14,13 @@
 
 #include "../common/FileReaderFwd.h"
 
-#ifdef MPT_WITH_GDIPLUS
+// GDI+
 namespace Gdiplus {
 #include <gdipluspixelformats.h>
 class Image;
 class Bitmap;
 class Metafile;
 }
-#endif // MPT_WITH_GDIPLUS
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -57,9 +56,6 @@ public:
 	std::vector<Pixel> &Pixels() { return pixels; }
 	const std::vector<Pixel> &Pixels() const { return pixels; }
 };
-
-
-#ifdef MPT_WITH_GDIPLUS
 
 
 class GdiplusRAII
@@ -118,18 +114,11 @@ namespace GDIP
 } // namespace GDIP
 
 
-#endif // MPT_WITH_GDIPLUS
-
-
-#ifdef MPT_WITH_GDIPLUS
 std::unique_ptr<RawGDIDIB> ToRawGDIDIB(Gdiplus::Bitmap &bitmap);
-#endif // MPT_WITH_GDIPLUS
 
 bool CopyToCompatibleBitmap(CBitmap &dst, CDC &dc, const RawGDIDIB &src);
 
-#ifdef MPT_WITH_GDIPLUS
 bool CopyToCompatibleBitmap(CBitmap &dst, CDC &dc, Gdiplus::Image &src);
-#endif // MPT_WITH_GDIPLUS
 
 std::unique_ptr<RawGDIDIB> LoadPixelImage(mpt::const_byte_span file);
 std::unique_ptr<RawGDIDIB> LoadPixelImage(FileReader file);

@@ -38,9 +38,7 @@ namespace mpt { namespace Wine {
 class VersionContext;
 class Context;
 } } // namespace mpt::Wine
-#ifdef MPT_WITH_GDIPLUS
 class GdiplusRAII;
-#endif // MPT_WITH_GDIPLUS
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -127,9 +125,7 @@ protected:
 	std::unique_ptr<mpt::thread_safe_prng<mpt::best_prng> > m_BestPRNG;
 	std::unique_ptr<mpt::thread_safe_prng<mpt::prng> > m_PRNG;
 
-#ifdef MPT_WITH_GDIPLUS
 	std::unique_ptr<GdiplusRAII> m_Gdiplus;
-#endif // MPT_WITH_GDIPLUS
 
 	std::shared_ptr<mpt::Wine::VersionContext> m_WineVersion;
 

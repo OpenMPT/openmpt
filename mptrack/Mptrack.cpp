@@ -35,14 +35,13 @@
 #include "../soundlib/plugins/PluginManager.h"
 #include "MPTrackWine.h"
 
-#ifdef MPT_WITH_GDIPLUS
+// GDI+
 #define max(a,b) (((a) > (b)) ? (a) : (b))
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 #pragma warning(push)
 #pragma warning(disable:4458) // declaration of 'x' hides class member
 #include <gdiplus.h>
 #pragma warning(pop)
-#endif // MPT_WITH_GDIPLUS
 
 // rewbs.memLeak
 #define _CRTDBG_MAP_ALLOC
@@ -867,9 +866,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// additionally, seed the C rand() PRNG, just in case any third party library calls rand()
 	mpt::rng::crand::reseed(RandomDevice());
 
-	#ifdef MPT_WITH_GDIPLUS
-		m_Gdiplus = mpt::make_unique<GdiplusRAII>();
-	#endif // MPT_WITH_GDIPLUS
+	m_Gdiplus = mpt::make_unique<GdiplusRAII>();
 
 	if(cmdInfo.m_noWine)
 	{
@@ -1246,9 +1243,7 @@ int CTrackApp::ExitInstanceImpl()
 		SetWineVersion(nullptr);
 	}
 
-	#ifdef MPT_WITH_GDIPLUS
-		m_Gdiplus.reset();
-	#endif // MPT_WITH_GDIPLUS
+	m_Gdiplus.reset();
 
 	m_PRNG.reset();
 	mpt::set_global_prng(nullptr);
@@ -1372,13 +1367,7 @@ void CTrackApp::OnAppAbout()
 class CSplashScreen: public CDialog
 {
 protected:
-#ifdef MPT_WITH_GDIPLUS
 	std::unique_ptr<Gdiplus::Image> m_Image;
-#else
-	CBitmap m_Bitmap;
-	uint32 m_BitmapWidth;
-	uint32 m_BitmapHeight;
-#endif
 
 public:
 	~CSplashScreen();
