@@ -54,6 +54,9 @@ Version changes:
 */
 
 
+MPT_STATIC_ASSERT(CTuningRTI::s_RatioTableFineSizeMaxDefault < static_cast<USTEPINDEXTYPE>(FINESTEPCOUNT_MAX));
+
+
 CTuningRTI::CTuningRTI()
 	: m_TuningType(TT_GENERAL)
 	, m_FineStepCount(0)
