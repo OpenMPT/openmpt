@@ -655,7 +655,7 @@ mpt::ustring GetFullCreditsString()
 		"https://bel.fi/alankila/modguide/interpolate.txt\n"
 		"\n"
 		"Shayde / Reality Productions for Opal OPL3 emulator\n"
-		"http://www.3eality.com/\n"
+		"https://www.3eality.com/\n"
 		"\n"
 #ifdef MPT_WITH_ZLIB
 		"Jean-loup Gailly and Mark Adler for zlib\n"
@@ -751,7 +751,7 @@ mpt::ustring GetFullCreditsString()
 		"https://www.music.mcgill.ca/~gary/rtmidi/\n"
 		"\n"
 		"Alexander Uckun for decimal input field\n"
-		"http://www.codeproject.com/Articles/21257/_\n"
+		"https://www.codeproject.com/Articles/21257/_\n"
 		"\n"
 		"\xc3\x9alfur Kolka for application icon, splash and about screen\n"
 		"https://www.behance.net/ulfurkolka\n"
