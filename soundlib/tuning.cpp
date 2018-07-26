@@ -412,6 +412,7 @@ SerializationResult CTuningRTI::InitDeserialize(std::istream& iStrm)
 	{
 		return SerializationResult::Failure;
 	}
+	m_FineStepCount = mpt::clamp(mpt::saturate_cast<STEPINDEXTYPE>(m_FineStepCount), 0, FINESTEPCOUNT_MAX);
 	if(m_RatioTable.size() > static_cast<size_t>(NOTEINDEXTYPE_MAX))
 	{
 		return SerializationResult::Failure;
@@ -670,6 +671,7 @@ SerializationResult CTuningRTI::InitDeserializeOLD(std::istream& inStrm)
 	{
 		m_FineStepCount -= 1;
 	}
+	m_FineStepCount = mpt::clamp(mpt::saturate_cast<STEPINDEXTYPE>(m_FineStepCount), 0, FINESTEPCOUNT_MAX);
 	UpdateFineStepTable();
 
 	if(m_TuningType == TT_GEOMETRIC)
