@@ -2219,11 +2219,11 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	IMixPlugin *pPlugin = nullptr;
 	if(srcChn.HasMIDIOutput() && ModCommand::IsNote(srcChn.nNote)) // instro sends to a midi chan
 	{
-		PLUGINDEX nPlugin = GetBestPlugin(nChn, PrioritiseInstrument, RespectMutes);
+		PLUGINDEX plugin = GetBestPlugin(nChn, PrioritiseInstrument, RespectMutes);
 
-		if(nPlugin > 0 && nPlugin <= MAX_MIXPLUGINS)
+		if(plugin > 0 && plugin <= MAX_MIXPLUGINS)
 		{
-			pPlugin =  m_MixPlugins[nPlugin-1].pMixPlugin;
+			pPlugin =  m_MixPlugins[plugin - 1].pMixPlugin;
 			if(pPlugin)
 			{
 				// apply NNA to this plugin iff it is currently playing a note on this tracker channel
@@ -2338,8 +2338,8 @@ bool CSoundFile::ProcessEffects()
 			const bool isFirstTick = m_SongFlags[SONG_FIRSTTICK];
 			if(isFirstTick)
 				pChn->m_RowPlug = pChn->rowCommand.instr;
-			const PLUGINDEX nPlug = pChn->m_RowPlug;
-			const bool hasValidPlug = (nPlug > 0 && nPlug <= MAX_MIXPLUGINS && m_MixPlugins[nPlug-1].pMixPlugin);
+			const PLUGINDEX plugin = pChn->m_RowPlug;
+			const bool hasValidPlug = (plugin > 0 && plugin <= MAX_MIXPLUGINS && m_MixPlugins[plugin - 1].pMixPlugin);
 			if(hasValidPlug)
 			{
 				if(isFirstTick)
@@ -2349,14 +2349,14 @@ bool CSoundFile::ProcessEffects()
 				{
 					PlugParamValue targetvalue = ModCommand::GetValueEffectCol(pChn->rowCommand.command, pChn->rowCommand.param) / PlugParamValue(ModCommand::maxColumnValue);
 					pChn->m_plugParamTargetValue = targetvalue;
-					pChn->m_plugParamValueStep = (targetvalue - m_MixPlugins[nPlug-1].pMixPlugin->GetParameter(plugparam)) / float(GetNumTicksOnCurrentRow());
+					pChn->m_plugParamValueStep = (targetvalue - m_MixPlugins[plugin-1].pMixPlugin->GetParameter(plugparam)) / float(GetNumTicksOnCurrentRow());
 				}
 				if(m_PlayState.m_nTickCount + 1 == GetNumTicksOnCurrentRow())
 				{	// On last tick, set parameter exactly to target value.
-					m_MixPlugins[nPlug-1].pMixPlugin->SetParameter(plugparam, pChn->m_plugParamTargetValue);
+					m_MixPlugins[plugin - 1].pMixPlugin->SetParameter(plugparam, pChn->m_plugParamTargetValue);
 				}
 				else
-					m_MixPlugins[nPlug-1].pMixPlugin->ModifyParameter(plugparam, pChn->m_plugParamValueStep);
+					m_MixPlugins[plugin - 1].pMixPlugin->ModifyParameter(plugparam, pChn->m_plugParamValueStep);
 			}
 #endif // NO_PLUGINS
 		}
@@ -4117,7 +4117,7 @@ void CSoundFile::Panning(ModChannel *pChn, uint32 param, PanningType panBits) co
 		pChn->nPan = param * 4;
 	} else
 	{
-		if(!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_DSM | MOD_TYPE_AMF | MOD_TYPE_MTM)))
+		if(!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_DSM | MOD_TYPE_AMF0 | MOD_TYPE_AMF | MOD_TYPE_MTM)))
 		{
 			// Real 8-bit panning
 			pChn->nPan = param;
@@ -5038,16 +5038,16 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 		} else if(macroCode == 0x03 && !isExtended)
 		{
 			// F0.F0.03.xx: Set plug dry/wet
-			const PLUGINDEX nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
-			if ((nPlug) && (nPlug <= MAX_MIXPLUGINS) && param < 0x80)
+			const PLUGINDEX plug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
+			if(plug > 0 && plug <= MAX_MIXPLUGINS && param < 0x80)
 			{
 				const float newRatio = (0x7F - (param & 0x7F)) / 127.0f;
 				if(!isSmooth)
 				{
-					m_MixPlugins[nPlug - 1].fDryRatio = newRatio;
+					m_MixPlugins[plug - 1].fDryRatio = newRatio;
 				} else
 				{
-					m_MixPlugins[nPlug - 1].fDryRatio = CalculateSmoothParamChange(m_MixPlugins[nPlug - 1].fDryRatio, newRatio);
+					m_MixPlugins[plug - 1].fDryRatio = CalculateSmoothParamChange(m_MixPlugins[plug - 1].fDryRatio, newRatio);
 				}
 			}
 
@@ -5055,11 +5055,11 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 		} else if((macroCode & 0x80) || isExtended)
 		{
 			// F0.F0.{80|n}.xx / F0.F1.n.xx: Set VST effect parameter n to xx
-			const PLUGINDEX nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
+			const PLUGINDEX plug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
 			const uint32 plugParam = isExtended ? (0x80 + macroCode) : (macroCode & 0x7F);
-			if((nPlug) && (nPlug <= MAX_MIXPLUGINS))
+			if(plug > 0 && plug <= MAX_MIXPLUGINS)
 			{
-				IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
+				IMixPlugin *pPlugin = m_MixPlugins[plug - 1].pMixPlugin;
 				if(pPlugin && param < 0x80)
 				{
 					const float fParam = param / 127.0f;
@@ -5086,15 +5086,15 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 		const CHANNELINDEX plugChannel = (nChn < GetNumChannels()) ? nChn + 1 : chn.nMasterChn;
 		if(plugChannel > 0 && plugChannel <= GetNumChannels())	// XXX do we need this? I guess it might be relevant for previewing notes in the pattern... Or when using this mechanism for volume/panning!
 		{
-			PLUGINDEX nPlug = 0;
+			PLUGINDEX plug = 0;
 			if(!chn.dwFlags[CHN_NOFX])
 			{
-				nPlug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
+				plug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
 			}
 
-			if(nPlug > 0 && nPlug <= MAX_MIXPLUGINS)
+			if(plug > 0 && plug <= MAX_MIXPLUGINS)
 			{
-				IMixPlugin *pPlugin = m_MixPlugins[nPlug - 1].pMixPlugin;
+				IMixPlugin *pPlugin = m_MixPlugins[plug - 1].pMixPlugin;
 				if (pPlugin != nullptr)
 				{
 					if(macro[0] == 0xF0)
@@ -5131,10 +5131,10 @@ void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
 	// instro sends to a midi chan
 	if (pIns && pIns->HasValidMIDIChannel())
 	{
-		PLUGINDEX nPlug = pIns->nMixPlug;
-		if ((nPlug) && (nPlug <= MAX_MIXPLUGINS))
+		PLUGINDEX plug = pIns->nMixPlug;
+		if(plug > 0 && plug <= MAX_MIXPLUGINS)
 		{
-			IMixPlugin *pPlug = m_MixPlugins[nPlug-1].pMixPlugin;
+			IMixPlugin *pPlug = m_MixPlugins[plug - 1].pMixPlugin;
 			if (pPlug != nullptr)
 			{
 				pPlug->MidiCommand(GetBestMidiChannel(chn), pIns->nMidiProgram, pIns->wMidiBank, note, volume, chn);
@@ -5874,32 +5874,32 @@ PLUGINDEX CSoundFile::GetBestPlugin(CHANNELINDEX nChn, PluginPriority priority, 
 	}
 
 	//Define search source order
-	PLUGINDEX nPlugin = 0;
+	PLUGINDEX plugin = 0;
 	switch (priority)
 	{
 		case ChannelOnly:
-			nPlugin = GetChannelPlugin(nChn, respectMutes);
+			plugin = GetChannelPlugin(nChn, respectMutes);
 			break;
 		case InstrumentOnly:
-			nPlugin  = GetActiveInstrumentPlugin(nChn, respectMutes);
+			plugin  = GetActiveInstrumentPlugin(nChn, respectMutes);
 			break;
 		case PrioritiseInstrument:
-			nPlugin  = GetActiveInstrumentPlugin(nChn, respectMutes);
-			if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
+			plugin  = GetActiveInstrumentPlugin(nChn, respectMutes);
+			if(!plugin || plugin > MAX_MIXPLUGINS)
 			{
-				nPlugin = GetChannelPlugin(nChn, respectMutes);
+				plugin = GetChannelPlugin(nChn, respectMutes);
 			}
 			break;
 		case PrioritiseChannel:
-			nPlugin  = GetChannelPlugin(nChn, respectMutes);
-			if ((!nPlugin) || (nPlugin > MAX_MIXPLUGINS))
+			plugin  = GetChannelPlugin(nChn, respectMutes);
+			if(!plugin || plugin > MAX_MIXPLUGINS)
 			{
-				nPlugin = GetActiveInstrumentPlugin(nChn, respectMutes);
+				plugin = GetActiveInstrumentPlugin(nChn, respectMutes);
 			}
 			break;
 	}
 
-	return nPlugin; // 0 Means no plugin found.
+	return plugin; // 0 Means no plugin found.
 }
 
 
@@ -5907,10 +5907,10 @@ PLUGINDEX CSoundFile::GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority res
 {
 	const ModChannel &channel = m_PlayState.Chn[nChn];
 
-	PLUGINDEX nPlugin;
+	PLUGINDEX plugin;
 	if((respectMutes == RespectMutes && channel.dwFlags[CHN_MUTE]) || channel.dwFlags[CHN_NOFX])
 	{
-		nPlugin = 0;
+		plugin = 0;
 	} else
 	{
 		// If it looks like this is an NNA channel, we need to find the master channel.
@@ -5923,13 +5923,13 @@ PLUGINDEX CSoundFile::GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority res
 
 		if(nChn < MAX_BASECHANNELS)
 		{
-			nPlugin = ChnSettings[nChn].nMixPlugin;
+			plugin = ChnSettings[nChn].nMixPlugin;
 		} else
 		{
-			nPlugin = 0;
+			plugin = 0;
 		}
 	}
-	return nPlugin;
+	return plugin;
 }
 
 
