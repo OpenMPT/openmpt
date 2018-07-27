@@ -30,8 +30,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.09.00 (* June 2018, revision 10500)
------------------------------------------
+v1.27.09.00 (28 July 2018, revision 10623)
+------------------------------------------
 Pattern tab
    [Fix] <js> Mix-pasting multiple patterns including +++ or --- patterns inserted those patterns at the beginning of the orderlist. They are now ignored completely.
    [Fix] <js> Entering a note, then pressing the chord modifier and releasing the key was interpreted as releasing a chord, which could lead to a crash when accessing bogus chord key channels.
@@ -40,8 +40,17 @@ Pattern tab
 Playback
    [Fix] <js> Channels whose volume envelope was playing at volume 0 while being moved to a NNA background channel were cut off completely since OpenMPT 1.27.07.00.
 
+MPTM
+   [Fix] <jh & js> Crash with some malformed tunings.
+
+Other formats
+   [Fix] <js> AMF (ASYLUM): Convert 7-bit panning to 8-bit panning for playback.
+
 Misc
    [Mod] <jh> The crash handler no longer includes the installation GUID in crash reports as it theoretically allows de-anonymizing update statistics.
+
+Third-Party Libraries
+   [Mod] Update UnRAR (v5.6.5)
 
 
 v1.27.08.00 (19 May 2018, revision 10245)
