@@ -7,8 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta34
 
- *  [**Sec**] Crash with some malformed custom tunings in MPTM files (r10615).
+ *  [**Sec**] Crash with some malformed custom tunings in MPTM files (r10617).
 
+ *  Channels whose volume envelope was playing at volume 0 while being moved to
+    a NNA background channel were cut off completely since libopenmpt 0.2-beta31
  *  AMF (ASYLUM): Convert 7-bit panning to 8-bit panning for playback.
 
 ### libopenmpt 0.2-beta33 (2018-06-17)
