@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.3.11-pre
+### libopenmpt 0.3.11 (2018-07-28)
 
  *  [**Sec**] Crash with some malformed custom tunings in MPTM files (r10615).
 
