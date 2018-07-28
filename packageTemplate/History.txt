@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.09.00 (28 July 2018, revision 10623)
+v1.27.09.00 (28 July 2018, revision 10630)
 ------------------------------------------
 Pattern tab
    [Fix] <js> Mix-pasting multiple patterns including +++ or --- patterns inserted those patterns at the beginning of the orderlist. They are now ignored completely.
