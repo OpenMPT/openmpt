@@ -172,10 +172,10 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 			p->param = data[3];
 			ConvertModCommand(*p);
 #ifdef MODPLUG_TRACKER
-			if(m.command == CMD_PANNING8)
+			if(p->command == CMD_PANNING8)
 			{
 				// Convert 7-bit panning to 8-bit
-				m.param = mpt::saturate_cast<ModCommand::PARAM>(m.param * 2u);
+				p->param = mpt::saturate_cast<ModCommand::PARAM>(p->param * 2u);
 			}
 #endif
 		}
