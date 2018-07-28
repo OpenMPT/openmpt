@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta34
+### libopenmpt 0.2-beta34 (2018-07-28)
 
  *  [**Sec**] Crash with some malformed custom tunings in MPTM files (r10616,
     r10617).
