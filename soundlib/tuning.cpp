@@ -214,6 +214,10 @@ CTuning::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const STE
 //-------------------------------------------------------------------------------------------------------------
 {
 	const STEPINDEXTYPE fsCount = static_cast<STEPINDEXTYPE>(GetFineStepCount());
+	if(fsCount < 0 || fsCount > FINESTEPCOUNT_MAX)
+	{
+		return s_DefaultFallbackRatio;
+	}
 	if(fsCount == 0 || baseStepDiff == 0)
 	{
 		return GetRatio(static_cast<NOTEINDEXTYPE>(baseNote + baseStepDiff));
@@ -249,8 +253,10 @@ CTuning::RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const STE
 CTuning::RATIOTYPE CTuningRTI::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE sd) const
 //---------------------------------------------------------------------------------------------
 {
-	if(GetFineStepCount() <= 0)
-		return 1;
+	if(GetFineStepCount() <= 0 || GetFineStepCount() > static_cast<USTEPINDEXTYPE>(FINESTEPCOUNT_MAX))
+	{
+		return s_DefaultFallbackRatio;
+	}
 
 	//Neither of these should happen.
 	if(sd <= 0) sd = 1;

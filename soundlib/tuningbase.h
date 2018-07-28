@@ -64,6 +64,7 @@ public:
 
 //END TYPEDEFS
 
+	#define FINESTEPCOUNT_MAX 0xffff
 
 //BEGIN PUBLIC STATICS
 	static const SERIALIZATION_VERSION s_SerializationVersion;
