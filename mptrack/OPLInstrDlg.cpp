@@ -29,6 +29,7 @@ BEGIN_MESSAGE_MAP(OPLInstrDlg, CDialog)
 	ON_COMMAND(IDC_CHECK9, &OPLInstrDlg::ParamsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO1, &OPLInstrDlg::ParamsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2, &OPLInstrDlg::ParamsChanged)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &OPLInstrDlg::OnToolTip)
 END_MESSAGE_MAP()
 
 
@@ -79,6 +80,7 @@ OPLInstrDlg::~OPLInstrDlg()
 BOOL OPLInstrDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+	EnableToolTips();
 	m_feedback.SetRange(0, 7);
 	for(int op = 0; op < 2; op++)
 	{
@@ -184,6 +186,58 @@ void OPLInstrDlg::ParamsChanged()
 		*m_patch = patch;
 		m_parent.SendMessage(WM_MOD_VIEWMSG, VIEWMSG_SETMODIFIED, SampleHint().Data().AsLPARAM());
 	}
+}
+
+
+BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
+{
+	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
+	UINT_PTR nID = pNMHDR->idFrom;
+	if(pTTT->uFlags & TTF_IDISHWND)
+	{
+		// idFrom is actually the HWND of the tool
+		nID = ::GetDlgCtrlID((HWND)nID);
+	}
+
+	static const TCHAR *ksl[] = { _T("disabled"), _T("1.5 dB / octave"), _T("3 dB / octave") , _T("6 dB / octave") };
+	static const char *feedback[] = { u8"0", u8"\u03C0/16", u8"\u03C0/8", u8"\u03C0/4", u8"\u03C0/2", u8"\u03C0", u8"2\u03C0", u8"4\u03C0" };
+
+	mpt::tstring text;
+	const CWnd *wnd = GetDlgItem(static_cast<int>(nID));
+	const CSliderCtrl *slider = static_cast<const CSliderCtrl *>(wnd);
+	switch(nID)
+	{
+	case IDC_SLIDER1:
+		// Feedback
+		text = mpt::ToWin(mpt::CharsetUTF8, feedback[slider->GetPos() & 7]);
+		break;
+	case IDC_SLIDER4:
+	case IDC_SLIDER11:
+		// Sustain Level
+		text = mpt::tfmt::val((-15 + slider->GetPos()) * 3) + _T(" dB");
+		break;
+	case IDC_SLIDER6:
+	case IDC_SLIDER13:
+		// Volume Level
+		text = mpt::tfmt::val((-63 + slider->GetPos()) * 0.75) + _T(" dB");
+		break;
+	case IDC_SLIDER7:
+	case IDC_SLIDER14:
+		// Key Scale Level
+		text = ksl[slider->GetPos() & 3];
+		break;
+	case IDC_SLIDER8:
+	case IDC_SLIDER15:
+		// Frequency Multiplier
+		if(slider->GetPos() == 0)
+			text = _T("0.5");
+		else
+			text = mpt::tfmt::val(slider->GetPos());
+		break;
+	}
+
+	lstrcpyn(pTTT->szText, text.c_str(), mpt::saturate_cast<int>(mpt::size(pTTT->szText)));
+	return TRUE;
 }
 
 OPENMPT_NAMESPACE_END

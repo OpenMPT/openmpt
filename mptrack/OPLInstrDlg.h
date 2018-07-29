@@ -37,6 +37,7 @@ protected:
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	void OnHScroll(UINT, UINT, CScrollBar *) { ParamsChanged(); }
 	LRESULT OnDragonDropping(WPARAM wParam, LPARAM lParam);
+	BOOL OnToolTip(UINT id, NMHDR *pNMHDR, LRESULT *pResult);
 	DECLARE_MESSAGE_MAP()
 };
 

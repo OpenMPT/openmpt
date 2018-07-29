@@ -530,7 +530,7 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "Additive Synthesis",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,7,174,10
     LTEXT           "Modulation Feedback:",IDC_STATIC,216,8,71,8
-    CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,288,6,108,12
+    CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,6,108,12
     GROUPBOX        "Carrier",IDC_STATIC,6,24,198,192
     LTEXT           "Attack Rate:",IDC_STATIC,12,38,42,8
     CONTROL         "",IDC_SLIDER9,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,36,108,12
