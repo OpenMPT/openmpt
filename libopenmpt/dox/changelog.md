@@ -7,7 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.12-pre
 
- *  [**Bug**] openmpt123: Prevent libsdl2 and libsdl form being enabled at the
+ *  [**Bug**] openmpt123: Prevent libsdl2 and libsdl from being enabled at the
     same time because they conflict with each other.
 
 ### libopenmpt 0.3.11 (2018-07-28)
