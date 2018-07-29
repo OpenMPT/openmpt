@@ -64,7 +64,11 @@ CDocument *CModDocTemplate::OpenTemplateFile(const mpt::PathString &filename, bo
 			sndFile.m_dwLastSavedWithVersion = Version();
 			sndFile.m_madeWithTracker.clear();
 			sndFile.m_songArtist = TrackerSettings::Instance().defaultArtist;
-			sndFile.m_playBehaviour = sndFile.GetDefaultPlaybackBehaviour(sndFile.GetType());
+			if(sndFile.GetType() != MOD_TYPE_MPT)
+			{
+				// Always enforce most compatible playback for legacy module types
+				sndFile.m_playBehaviour = sndFile.GetDefaultPlaybackBehaviour(sndFile.GetType());
+			}
 			doc->UpdateAllViews(nullptr, UpdateHint().ModType().AsLPARAM());
 		} else
 		{

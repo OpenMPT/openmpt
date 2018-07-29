@@ -1127,9 +1127,29 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kHertzInLinearMode);
 		playBehaviour.set(kPerChannelGlobalVolSlide);
 		playBehaviour.set(kPanOverride);
+		playBehaviour.set(kITArpeggio);
+		playBehaviour.set(kITPortaMemoryShare);
+		playBehaviour.set(kITPatternLoopTargetReset);
+		playBehaviour.set(kITFT2PatternLoop);
+		playBehaviour.set(kITPingPongNoReset);
+		playBehaviour.set(kITClearOldNoteAfterCut);
+		playBehaviour.set(kITVibratoTremoloPanbrello);
 		playBehaviour.set(kITMultiSampleBehaviour);
+		playBehaviour.set(kITPortaTargetReached);
+		playBehaviour.set(kITPatternLoopBreak);
+		playBehaviour.set(kITSwingBehaviour);
+		playBehaviour.set(kITSCxStopsSample);
+		playBehaviour.set(kITEnvelopePositionHandling);
+		playBehaviour.set(kITPingPongMode);
+		playBehaviour.set(kITRealNoteMapping);
+		playBehaviour.set(kITPortaNoNote);
+		playBehaviour.set(kITVolColMemory);
+		playBehaviour.set(kITFirstTickHandling);
+		playBehaviour.set(kITClearPortaTarget);
 		playBehaviour.set(kITSampleAndHoldPanbrello);
 		playBehaviour.set(kITPanbrelloHold);
+		playBehaviour.set(kITPanningReset);
+		playBehaviour.set(kITInstrWithNoteOff);
 		break;
 
 	case MOD_TYPE_XM:
