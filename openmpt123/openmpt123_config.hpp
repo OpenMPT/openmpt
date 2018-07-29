@@ -53,6 +53,10 @@
 
 #endif // _MSC_VER
 
+#if defined(MPT_WITH_SDL) && defined(MPT_WITH_SDL2)
+#error "MPT_WITH_SDL2 and MPT_WITH_SDL are mutually exclusive."
+#endif
+
 #if defined(MPT_WITH_SDL)
 #ifndef MPT_NEEDS_THREADS
 #define MPT_NEEDS_THREADS
