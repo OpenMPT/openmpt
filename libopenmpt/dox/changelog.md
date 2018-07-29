@@ -64,6 +64,8 @@ is just a high-level summary.
     applied correctly when using per-file settings.
  *  [**Bug**] Internal mixer state was not initialized properly when initially
     rendering in 44100kHz stereo format.
+ *  [**Bug**] openmpt123: Prevent libsdl2 and libsdl form being enabled at the
+    same time because they conflict with each other.
 
  *  IT: In Compatible Gxx mode, allow sample changes next to a tone portamento
     effect if a previous sample has already stopped playing.
