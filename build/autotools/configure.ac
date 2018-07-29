@@ -241,7 +241,7 @@ AS_IF([test "x$with_portaudiocpp" != "xno"],
 AM_CONDITIONAL([HAVE_PORTAUDIOCPP], [test x$have_portaudio = x1])
 
 # Optional disabled openmpt123 dependency: libsdl2
-AC_ARG_WITH([sdl2], AS_HELP_STRING([--with-sdl2], [Enable use of libsdl2.]))
+AC_ARG_WITH([sdl2], AS_HELP_STRING([--with-sdl2], [Enable use of libsdl2. Enabling libsdl2 automatically disables libsdl.]))
 AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_sdl2" = "xyes"],
  [
@@ -253,9 +253,14 @@ AS_IF([test "x$with_sdl2" = "xyes"],
 # Optional disabled openmpt123 dependency: libsdl
 AC_ARG_WITH([sdl], AS_HELP_STRING([--with-sdl], [Enable use of libsdl.]))
 AS_IF([test "x$enable_openmpt123" != "xno"],[
+AS_IF([test "x$with_sdl2" != "xno"],[
 AS_IF([test "x$with_sdl" = "xyes"],
  [
   PKG_CHECK_MODULES([SDL], [sdl], [AC_DEFINE([MPT_WITH_SDL], [], [with libsdl])], [AC_MSG_ERROR([Unable to find libsdl.])])
+ ]
+)],
+ [
+  AC_MSG_WARN([Skipping libsdl because libsdl2 is enabled.])
  ]
 )
 ])
