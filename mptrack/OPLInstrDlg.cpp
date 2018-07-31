@@ -211,6 +211,16 @@ BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 		// Feedback
 		text = mpt::ToWin(mpt::CharsetUTF8, feedback[slider->GetPos() & 7]);
 		break;
+
+	case IDC_SLIDER2:
+	case IDC_SLIDER3:
+	case IDC_SLIDER5:
+	case IDC_SLIDER9:
+	case IDC_SLIDER10:
+	case IDC_SLIDER12:
+		// Attack / Decay / Release
+		text = _T("faster < ") + mpt::tfmt::val(slider->GetPos()) + _T(" > slower");
+		break;
 	case IDC_SLIDER4:
 	case IDC_SLIDER11:
 		// Sustain Level
