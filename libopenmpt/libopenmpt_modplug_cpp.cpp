@@ -678,7 +678,7 @@ static int get_filter_length() {
 		return 8;
 	} else if ( ( CSoundFile::gdwSoundSetup & SNDMIX_HQRESAMPLER ) == SNDMIX_HQRESAMPLER ) {
 		return 4;
-	} else if ( ( CSoundFile::gdwSoundSetup & SNDMIX_HQRESAMPLER ) == SNDMIX_NORESAMPLING ) {
+	} else if ( ( CSoundFile::gdwSoundSetup & SNDMIX_NORESAMPLING ) == SNDMIX_NORESAMPLING ) {
 		return 1;
 	} else {
 		return 2;

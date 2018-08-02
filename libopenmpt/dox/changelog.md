@@ -13,6 +13,8 @@ is just a high-level summary.
     1.38.1 or later by disabling WebAssembly generation which generates a
     different set of output files. Emscripten 1.38.1 changed the default to
     WebAssembly.
+ *  [**Bug**] libmodplug: Setting `SNDMIX_NORESAMPLING` in the C++ API always
+    resulted in linear interpolation instead of nearest neighbour
 
  *  [**Change**] The old Emscripten configuration which is compatible with
     Emscripten before 1.38.0 has been renamed to `CONFIG=emscripten-old`.
