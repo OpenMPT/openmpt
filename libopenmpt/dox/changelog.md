@@ -66,7 +66,7 @@ is just a high-level summary.
     rendering in 44100kHz stereo format.
  *  [**Bug**] openmpt123: Prevent libsdl2 and libsdl from being enabled at the
     same time because they conflict with each other.
- *  [**Bug**] libmodplug: Setting `SNDMIX_NORESAMPLING` in the C++ aPI always
+ *  [**Bug**] libmodplug: Setting `SNDMIX_NORESAMPLING` in the C++ API always
     resulted in linear interpolation instead of nearest neighbour
 
  *  IT: In Compatible Gxx mode, allow sample changes next to a tone portamento
