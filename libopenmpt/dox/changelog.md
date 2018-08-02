@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**Bug**] openmpt123: Prevent libsdl2 and libsdl from being enabled at the
     same time because they conflict with each other.
+ *  [**Bug**] libmodplug: Setting `SNDMIX_NORESAMPLING` in the C++ API always
+    resulted in linear interpolation instead of nearest neighbour
 
 ### libopenmpt 0.2-beta34 (2018-07-28)
  *  [**Sec**] Crash with some malformed custom tunings in MPTM files (r10616,
