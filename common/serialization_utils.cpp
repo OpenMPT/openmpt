@@ -164,8 +164,8 @@ Ssb::Ssb()
 }
 
 
-SsbWrite::SsbWrite(std::ostream& oStrm)
-	: m_pOstrm(&oStrm)
+SsbWrite::SsbWrite(std::ostream& os)
+	: oStrm(os)
 	, m_posEntrycount(0)
 	, m_posMapPosField(0)
 {
@@ -173,8 +173,8 @@ SsbWrite::SsbWrite(std::ostream& oStrm)
 }
 
 
-SsbRead::SsbRead(std::istream& iStrm)
-	: m_pIstrm(&iStrm)
+SsbRead::SsbRead(std::istream& is)
+	: iStrm(is)
 	, m_nReadVersion(0)
 	, m_rposMapBegin(0)
 	, m_posMapEnd(0)
@@ -285,8 +285,6 @@ void SsbWrite::IncrementWriteCounter()
 
 void SsbWrite::BeginWrite(const ID &id, const uint64& nVersion)
 {
-	std::ostream& oStrm = *m_pOstrm;
-
 	SSB_LOG(mpt::format(mpt::ustring(tstrWriteHeader))(id.AsString()));
 
 	ResetWritestatus();
@@ -368,7 +366,7 @@ SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Po
 	{
 		ReadEntry e;
 		e.rposStart = static_cast<RposType>(posReadBegin - m_posStart);
-		e.nSize = static_cast<DataSize>(m_pIstrm->tellg() - posReadBegin);
+		e.nSize = static_cast<DataSize>(iStrm.tellg() - posReadBegin);
 		AddReadNote(&e, m_nCounter);
 	}
 	else // Entry not found.
@@ -386,7 +384,7 @@ SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Po
 
 void SsbWrite::OnWroteItem(const ID &id, const Postype& posBeforeWrite)
 {
-	const Offtype nRawEntrySize = m_pOstrm->tellp() - posBeforeWrite;
+	const Offtype nRawEntrySize = oStrm.tellp() - posBeforeWrite;
 
 	if (nRawEntrySize < 0 || static_cast<uint64>(nRawEntrySize) > std::numeric_limits<DataSize>::max())
 		{ AddWriteNote(SNW_INSUFFICIENT_DATASIZETYPE); return; }
@@ -402,7 +400,7 @@ void SsbWrite::OnWroteItem(const ID &id, const Postype& posBeforeWrite)
 		if(nEntrySize <= m_nFixedEntrySize)
 		{
 			for(uint32 i = 0; i<m_nFixedEntrySize-nEntrySize; i++)
-				m_pOstrm->put(0);
+				oStrm.put(0);
 			nEntrySize = m_nFixedEntrySize;
 		}
 		else
@@ -418,8 +416,6 @@ void SsbWrite::OnWroteItem(const ID &id, const Postype& posBeforeWrite)
 
 void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 {
-	std::istream& iStrm = *m_pIstrm;
-
 	SSB_LOG(mpt::format(mpt::ustring(tstrReadingHeader))(id.AsString()));
 
 	ResetReadstatus();
@@ -574,7 +570,6 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 
 void SsbRead::CacheMap()
 {
-	std::istream& iStrm = *m_pIstrm;
 	if(GetFlag(RwfRwHasMap) || m_nFixedEntrySize > 0)
 	{
 		iStrm.seekg(m_posStart + m_rposMapBegin);
@@ -649,7 +644,7 @@ void SsbRead::CacheMap()
 
 	SetFlag(RwfRMapCached, true);
 	m_posDataBegin = (m_rposMapBegin == m_rposEndofHdrData) ? m_posMapEnd : m_posStart + Postype(m_rposEndofHdrData);
-	m_pIstrm->seekg(m_posDataBegin);
+	iStrm.seekg(m_posDataBegin);
 
 	// If there are no positions in the map but there are entry sizes, rposStart will
 	// be relative to data start. Now that posDataBegin is known, make them relative to 
@@ -665,12 +660,12 @@ void SsbRead::CacheMap()
 
 const ReadEntry* SsbRead::Find(const ID &id)
 {
-	m_pIstrm->clear();
+	iStrm.clear();
 	if (GetFlag(RwfRMapCached) == false)
 		CacheMap();
 	
 	if (m_nFixedEntrySize > 0 && GetFlag(RwfRMapHasStartpos) == false && GetFlag(RwfRMapHasSize) == false)
-		m_pIstrm->seekg(m_posDataBegin + Postype(m_nFixedEntrySize * m_nCounter));
+		iStrm.seekg(m_posDataBegin + Postype(m_nFixedEntrySize * m_nCounter));
 
 	if (GetFlag(RwfRMapHasId) == true)
 	{
@@ -682,7 +677,7 @@ const ReadEntry* SsbRead::Find(const ID &id)
 			{
 				m_nNextReadHint = (i + 1) % nEntries;
 				if (mapData[i].rposStart != 0)
-					m_pIstrm->seekg(m_posStart + Postype(mapData[i].rposStart));
+					iStrm.seekg(m_posStart + Postype(mapData[i].rposStart));
 				return &mapData[i];
 			}
 		}
@@ -693,7 +688,6 @@ const ReadEntry* SsbRead::Find(const ID &id)
 
 void SsbWrite::FinishWrite()
 {
-	std::ostream& oStrm = *m_pOstrm;
 	const Postype posDataEnd = oStrm.tellp();
 		
 	Postype posMapStart = oStrm.tellp();
