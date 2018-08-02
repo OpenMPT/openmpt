@@ -9,6 +9,13 @@ is just a high-level summary.
 
  *  [**Bug**] openmpt123: Prevent libsdl2 and libsdl from being enabled at the
     same time because they conflict with each other.
+ *  [**Bug**] Make building the JavaScript package work with Emscripten version
+    1.38.1 or later by disabling WebAssembly generation which generates a
+    different set of output files. Emscripten 1.38.1 changed the default to
+    WebAssembly.
+
+ *  [**Change**] The old Emscripten configuration which is compatible with
+    Emscripten before 1.38.0 has been renamed to `CONFIG=emscripten-old`.
 
 ### libopenmpt 0.3.11 (2018-07-28)
 
