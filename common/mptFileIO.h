@@ -50,14 +50,7 @@ namespace mpt
 
 #if MPT_COMPILER_GCC && MPT_OS_WINDOWS
 // GCC C++ library has no wchar_t overloads
-#define MPT_FSTREAM_DO_CONVERSIONS
 #define MPT_FSTREAM_DO_CONVERSIONS_ANSI
-#endif
-
-#ifdef MPT_FSTREAM_DO_CONVERSIONS
-#define MPT_FSTREAM_OPEN(filename, mode) detail::fstream_open<Tbase>(*this, (filename), (mode))
-#else
-#define MPT_FSTREAM_OPEN(filename, mode) Tbase::open((filename), (mode))
 #endif
 
 namespace detail
@@ -72,34 +65,6 @@ inline void fstream_open(Tbase & base, const mpt::PathString & filename, std::io
 	base.open(filename.AsNativePrefixed().c_str(), mode);
 #endif
 }
-
-#ifdef MPT_FSTREAM_DO_CONVERSIONS
-
-template<typename Tbase>
-inline void fstream_open(Tbase & base, const std::wstring & filename, std::ios_base::openmode mode)
-{
-	detail::fstream_open<Tbase>(base, mpt::PathString::FromWide(filename), mode);
-}
-
-template<typename Tbase>
-inline void fstream_open(Tbase & base, const wchar_t * filename, std::ios_base::openmode mode)
-{
-	detail::fstream_open<Tbase>(base, mpt::PathString::FromWide(filename ? std::wstring(filename) : std::wstring()), mode);
-}
-
-template<typename Tbase>
-inline void fstream_open(Tbase & base, const std::string & filename, std::ios_base::openmode mode)
-{
-	detail::fstream_open<Tbase>(base, mpt::PathString::FromWide(mpt::ToWide(mpt::CharsetLocale, filename)), mode);
-}
-
-template<typename Tbase>
-inline void fstream_open(Tbase & base, const char * filename, std::ios_base::openmode mode)
-{
-	detail::fstream_open<Tbase>(base, mpt::PathString::FromWide(mpt::ToWide(mpt::CharsetLocale, filename ? std::string(filename) : std::string())), mode);
-}
-
-#endif
 
 } // namespace detail
 
@@ -118,23 +83,11 @@ public:
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
-	MPT_DEPRECATED_PATH void open(const char * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
-	{
-		MPT_FSTREAM_OPEN(filename, mode);
-	}
-	MPT_DEPRECATED_PATH void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
-	{
-		MPT_FSTREAM_OPEN(filename.c_str(), mode);
-	}
+	void open(const char * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
+	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
 #if MPT_OS_WINDOWS
-	MPT_DEPRECATED_PATH void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
-	{
-		MPT_FSTREAM_OPEN(filename, mode);
-	}
-	MPT_DEPRECATED_PATH void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
-	{
-		MPT_FSTREAM_OPEN(filename.c_str(), mode);
-	}
+	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
+	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
 #endif
 };
 
@@ -153,23 +106,11 @@ public:
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
-	MPT_DEPRECATED_PATH void open(const char * filename, std::ios_base::openmode mode = std::ios_base::in)
-	{
-		MPT_FSTREAM_OPEN(filename, mode);
-	}
-	MPT_DEPRECATED_PATH void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in)
-	{
-		MPT_FSTREAM_OPEN(filename.c_str(), mode);
-	}
+	void open(const char * filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
+	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
 #if MPT_OS_WINDOWS
-	MPT_DEPRECATED_PATH void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in)
-	{
-		MPT_FSTREAM_OPEN(filename, mode);
-	}
-	MPT_DEPRECATED_PATH void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in)
-	{
-		MPT_FSTREAM_OPEN(filename.c_str(), mode);
-	}
+	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
+	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
 #endif
 };
 
@@ -188,27 +129,13 @@ public:
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
-	MPT_DEPRECATED_PATH void open(const char * filename, std::ios_base::openmode mode = std::ios_base::out)
-	{
-		MPT_FSTREAM_OPEN(filename, mode);
-	}
-	MPT_DEPRECATED_PATH void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::out)
-	{
-		MPT_FSTREAM_OPEN(filename.c_str(), mode);
-	}
+	void open(const char * filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
+	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
 #if MPT_OS_WINDOWS
-	MPT_DEPRECATED_PATH void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::out)
-	{
-		MPT_FSTREAM_OPEN(filename, mode);
-	}
-	MPT_DEPRECATED_PATH void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::out)
-	{
-		MPT_FSTREAM_OPEN(filename.c_str(), mode);
-	}
+	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
+	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
 #endif
 };
-
-#undef MPT_FSTREAM_OPEN
 
 
 
