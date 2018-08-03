@@ -188,7 +188,7 @@ BOOL CSoundFile::Create( LPCBYTE lpStream, DWORD dwMemLength ) {
 	try {
 		openmpt::module * m = new openmpt::module( lpStream, dwMemLength );
 		set_self( this, m );
-		std::strncpy( m_szNames[0], mod->get_metadata("title").c_str(), sizeof( m_szNames[0] ) );
+		std::strncpy( m_szNames[0], mod->get_metadata("title").c_str(), sizeof( m_szNames[0] ) - 1 );
 		m_szNames[0][ sizeof( m_szNames[0] ) - 1 ] = '\0';
 		std::string type = mod->get_metadata("type");
 		m_nType = MOD_TYPE_NONE;
