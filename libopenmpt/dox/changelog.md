@@ -19,6 +19,8 @@ is just a high-level summary.
  *  [**Change**] The old Emscripten configuration which is compatible with
     Emscripten before 1.38.0 has been renamed to `CONFIG=emscripten-old`.
 
+ *  libopenmpt now compiles without warnings with GCC 8.
+
 ### libopenmpt 0.3.11 (2018-07-28)
 
  *  [**Sec**] Crash with some malformed custom tunings in MPTM files (r10615).
