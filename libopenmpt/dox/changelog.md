@@ -40,7 +40,11 @@ is just a high-level summary.
  *  [**Change**] xmp-openmpt: `openmpt-mpg123.dll` is no longer optional and
     must be placed into the same directory as `xmp-openmpt.dll`.
  *  [**Change**] in_openmpt: `openmpt-mpg123.dll` is no longer optional and must
-    be placed into the same directory as `in_openmpt.dll`.
+    be placed either into the directory of the player itself or into the same
+    directory as `in_openmpt.dll`. This is dependent on how the player loads its
+    plugins. For WinAMP 5, `openmpt-mpg123.dll` needs to be in the directory
+    which contains `winamp.exe`. `in_openmpt.dll` needs to be in the `Plugins`
+    directory.
  *  [**Change**] foo_openmpt: foo_openmpt is now packaged as a fb2k-component
     package for easier installation.
  *  [**Change**] When building libopenmpt with MinGW-w64, it is now recommended
