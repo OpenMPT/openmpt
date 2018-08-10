@@ -368,7 +368,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						}
 						break;
 					case INSLIST_PLUGIN:
-						if (pIns != nullptr && pIns->nMixPlug > 0 && sndFile.m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin != nullptr)
+						if (pIns != nullptr && pIns->nMixPlug > 0 && sndFile.m_MixPlugins[pIns->nMixPlug - 1].IsValidPlugin())
 						{
 							s.Format(_T("FX%02u: "), pIns->nMixPlug);
 							s += mpt::ToCString(mpt::CharsetUTF8, sndFile.m_MixPlugins[pIns->nMixPlug - 1].GetLibraryName());
