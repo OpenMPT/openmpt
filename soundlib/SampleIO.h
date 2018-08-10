@@ -26,27 +26,9 @@ struct ModSample;
 // Sample import / export formats
 class SampleIO
 {
-protected:
-	typedef uint32 format_type;
-	format_type format;
-
-	// Internal bitmasks
-	enum Offsets
-	{
-		bitOffset		= 0,
-		channelOffset	= 8,
-		endianOffset	= 16,
-		encodingOffset	= 24,
-
-		bitMask			= 0xFF << bitOffset,
-		channelMask		= 0xFF << channelOffset,
-		endianMask		= 0xFF << endianOffset,
-		encodingMask	= 0x7F << encodingOffset, // 0xff will overflow signed 32bit int, which is the base type for an enum that fits, causing warnings when shifted
-	};
-
 public:
 	// Bits per sample
-	enum Bitdepth
+	enum Bitdepth : uint8
 	{
 		_8bit	= 8,
 		_16bit	= 16,
@@ -56,22 +38,22 @@ public:
 	};
 
 	// Number of channels + channel format
-	enum Channels
+	enum Channels : uint8
 	{
-		mono = 0,
+		mono = 1,
 		stereoInterleaved,	// LRLRLR...
 		stereoSplit,		// LLL...RRR...
 	};
 
 	// Sample byte order
-	enum Endianness
+	enum Endianness : uint8
 	{
 		littleEndian = 0,
 		bigEndian = 1,
 	};
 
 	// Sample encoding
-	enum Encoding
+	enum Encoding : uint8
 	{
 		signedPCM = 0,      // Integer PCM, signed
 		unsignedPCM,        // Integer PCM, unsigned
@@ -94,38 +76,45 @@ public:
 		aLaw,               // 8-to-16 bit G.711 a-law compression
 	};
 
-	SampleIO(Bitdepth bits = _8bit, Channels channels = mono, Endianness endianness = littleEndian, Encoding encoding = signedPCM)
-	{
-		format = (bits << bitOffset) | (channels << channelOffset) | (endianness << endianOffset) | (encoding << encodingOffset);
-	}
+protected:
+	Bitdepth m_bitdepth;
+	Channels m_channels;
+	Endianness m_endianness;
+	Encoding m_encoding;
+
+public:
+	constexpr SampleIO(Bitdepth bits = _8bit, Channels channels = mono, Endianness endianness = littleEndian, Encoding encoding = signedPCM)
+		: m_bitdepth(bits), m_channels(channels), m_endianness(endianness), m_encoding(encoding)
+	{ }
 
 	bool operator== (const SampleIO &other) const
 	{
-		return format == other.format;
+		return memcmp(this, &other, sizeof(*this)) == 0;
 	}
+
 	bool operator!= (const SampleIO &other) const
 	{
-		return !(*this == other);
+		return memcmp(this, &other, sizeof(*this)) != 0;
 	}
 
 	void operator|= (Bitdepth bits)
 	{
-		format = (format & ~bitMask) | (bits << bitOffset);
+		m_bitdepth = bits;
 	}
 
 	void operator|= (Channels channels)
 	{
-		format = (format & ~channelMask) | (channels << channelOffset);
+		m_channels = channels;
 	}
 
 	void operator|= (Endianness endianness)
 	{
-		format = (format & ~endianMask) | (endianness << endianOffset);
+		m_endianness = endianness;
 	}
 
 	void operator|= (Encoding encoding)
 	{
-		format = (format & ~encodingMask) | (encoding << encodingOffset);
+		m_encoding = encoding;
 	}
 
 	void MayNormalize()
@@ -143,127 +132,111 @@ public:
 	}
 
 	// Return 0 in case of variable-length encoded samples.
-	uint8 GetEncodedBitsPerSample() const
+	MPT_CONSTEXPR14_FUN uint8 GetEncodedBitsPerSample() const
 	{
-		uint8 result = 0;
 		switch(GetEncoding())
 		{
 			case signedPCM:// Integer PCM, signed
-				result = GetBitDepth();
-				break;
+				return GetBitDepth();
 			case unsignedPCM://Integer PCM, unsigned
-				result = GetBitDepth();
-				break;
+				return GetBitDepth();
 			case deltaPCM:// Integer PCM, delta-encoded
-				result = GetBitDepth();
-				break;
+				return GetBitDepth();
 			case floatPCM:// Floating point PCM
-				result = GetBitDepth();
-				break;
+				return GetBitDepth();
 			case IT214:// Impulse Tracker 2.14 compressed
-				result = 0; // variable-length compressed
-				break;
+				return 0; // variable-length compressed
 			case IT215:// Impulse Tracker 2.15 compressed
-				result = 0; // variable-length compressed
-				break;
+				return 0; // variable-length compressed
 			case AMS:// AMS / Velvet Studio packed
-				result = 0; // variable-length compressed
-				break;
+				return 0; // variable-length compressed
 			case DMF:// DMF Huffman compression
-				result = 0; // variable-length compressed
-				break;
+				return 0; // variable-length compressed
 			case MDL:// MDL Huffman compression
-				result = 0; // variable-length compressed
-				break;
+				return 0; // variable-length compressed
 			case PTM8Dto16:// PTM 8-Bit delta value -> 16-Bit sample
-				result = 16;
-				break;
+				return 16;
 			case PCM7to8:// 8-Bit sample data with unused high bit
-				result = 8;
-				break;
+				return 8;
 			case ADPCM:// 4-Bit ADPCM-packed
-				result = 4;
-				break;
+				return 4;
 			case MT2:// MadTracker 2 stereo delta encoding
-				result = GetBitDepth();
-				break;
+				return GetBitDepth();
 			case floatPCM15:// Floating point PCM with 2^15 full scale
-				result = GetBitDepth();
-				break;
+				return GetBitDepth();
 			case floatPCM23:// Floating point PCM with 2^23 full scale
-				result = GetBitDepth();
-				break;
+				return GetBitDepth();
 			case floatPCMnormalize:// Floating point PCM and data will be normalized while reading
-				result = GetBitDepth();
-				break;
+				return GetBitDepth();
 			case signedPCMnormalize:// Integer PCM and data will be normalized while reading
-				result = GetBitDepth();
-				break;
+				return GetBitDepth();
 			case uLaw:// G.711 u-law
-				result = 8;
-				break;
+				return 8;
 			case aLaw:// G.711 a-law
-				result = 8;
-				break;
+				return 8;
+			default:
+				return 0;
 		}
-		return result;
 	}
 
 	// Return the static header size additional to the raw encoded sample data.
-	std::size_t GetEncodedHeaderSize() const
+	MPT_CONSTEXPR14_FUN std::size_t GetEncodedHeaderSize() const
 	{
-		std::size_t result = 0;
-		if(GetEncoding() == ADPCM)
+		switch(GetEncoding())
 		{
-			result = 16;
+		case ADPCM:
+			return 16;
+		default:
+			return 0;
 		}
-		return result;
 	}
 
 	// Returns true if the encoded size cannot be calculated apriori from the encoding format and the sample length.
-	bool IsVariableLengthEncoded() const
+	MPT_CONSTEXPR14_FUN bool IsVariableLengthEncoded() const
 	{
 		return GetEncodedBitsPerSample() == 0;
 	}
 
-	bool UsesFileReaderForDecoding() const
+	// Returns true if the decoder for a given format uses FileReader interface and thus do not need to call GetPinnedRawDataView()
+	MPT_CONSTEXPR14_FUN bool UsesFileReaderForDecoding() const
 	{
-		if(GetEncoding() == IT214 || GetEncoding() == IT215)
+		switch(GetEncoding())
 		{
-			// IT compressed samples use FileReader interface and thus do not need to call GetPinnedRawDataView()
+		case IT214:
+		case IT215:
+		case AMS:
+		case DMF:
+		case MDL:
 			return true;
+		default:
+			return false;
 		}
-		if(GetEncoding() == AMS || GetEncoding() == MDL)
-		{
-			return true;
-		}
-		return false;
 	}
 
 	// Get bits per sample
-	uint8 GetBitDepth() const
+	constexpr uint8 GetBitDepth() const
 	{
-		return static_cast<uint8>((format & bitMask) >> bitOffset);
+		return static_cast<uint8>(m_bitdepth);
 	}
 	// Get channel layout
-	Channels GetChannelFormat() const
+	constexpr Channels GetChannelFormat() const
 	{
-		return static_cast<Channels>((format & channelMask) >> channelOffset);
+		return m_channels;
 	}
 	// Get number of channels
-	uint8 GetNumChannels() const
+	constexpr uint8 GetNumChannels() const
 	{
 		return GetChannelFormat() == mono ? 1u : 2u;
 	}
 	// Get sample byte order
-	Endianness GetEndianness() const
+	constexpr Endianness GetEndianness() const
 	{
-		return static_cast<Endianness>((format & endianMask) >> endianOffset);
+		return m_endianness;
 	}
 	// Get sample format / encoding
-	Encoding GetEncoding() const
+	constexpr Encoding GetEncoding() const
 	{
-		return static_cast<Encoding>((format & encodingMask) >> encodingOffset);
+		return m_encoding;
 	}
 
 	// Returns the encoded size of the sample. In case of variable-length encoding returns 0.
@@ -273,12 +246,13 @@ public:
 		{
 			return 0;
 		}
-		if(GetEncodedBitsPerSample() % 8 != 0)
+		uint8 bps = GetEncodedBitsPerSample();
+		if(bps % 8u != 0)
 		{
-			MPT_ASSERT(GetEncoding() == ADPCM && GetEncodedBitsPerSample() == 4);
+			MPT_ASSERT(GetEncoding() == ADPCM && bps == 4);
 			return GetEncodedHeaderSize() + (((length + 1) / 2) * GetNumChannels()); // round up
 		}
-		return GetEncodedHeaderSize() + (length * (GetEncodedBitsPerSample()/8) * GetNumChannels());
+		return GetEncodedHeaderSize() + (length * (bps / 8) * GetNumChannels());
 	}
 
 	// Read a sample from memory

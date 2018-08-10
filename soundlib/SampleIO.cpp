@@ -60,6 +60,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	{
 		MPT_ASSERT_NOTREACHED();
 	}
+
 	if(!IsVariableLengthEncoded() && sample.nLength > 0x40000)
 	{
 		// Limit sample length to available bytes in file to avoid excessive memory allocation.
@@ -361,13 +362,14 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			bytesRead = CopyStereoSplitSample<SC::DecodeUint8>(sample, sourceBuf, fileSize);
 			break;
 		case deltaPCM:		// 8-Bit / Stereo Split / Delta / PCM
+		case MT2:			// same as deltaPCM, but right channel is stored as a difference from the left channel
 			bytesRead = CopyStereoSplitSample<SC::DecodeInt8Delta>(sample, sourceBuf, fileSize);
-			break;
-		case MT2:		// same as deltaPCM, but right channel is stored as a difference from the left channel
-			bytesRead = CopyStereoSplitSample<SC::DecodeInt8Delta>(sample, sourceBuf, fileSize);
-			for(SmpLength i = 0; i < sample.nLength * 2; i += 2)
+			if(GetEncoding() == MT2)
 			{
-				sample.sample8()[i + 1] = static_cast<int8>(static_cast<uint8>(sample.sample8()[i + 1]) + static_cast<uint8>(sample.sample8()[i]));
+				for(int8 *p = sample.sample8(), *pEnd = p + sample.nLength * 2; p < pEnd; p += 2)
+				{
+					p[1] = static_cast<int8>(static_cast<uint8>(p[0]) + static_cast<uint8>(p[1]));
+				}
 			}
 			break;
 		default:
@@ -453,13 +455,14 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			bytesRead = CopyStereoSplitSample<SC::DecodeInt16<0x8000u, littleEndian16> >(sample, sourceBuf, fileSize);
 			break;
 		case deltaPCM:		// 16-Bit / Stereo Split / Delta / PCM
-			bytesRead = CopyStereoSplitSample<SC::DecodeInt16Delta<littleEndian16> >(sample, sourceBuf, fileSize);
-			break;
 		case MT2:		// same as deltaPCM, but right channel is stored as a difference from the left channel
 			bytesRead = CopyStereoSplitSample<SC::DecodeInt16Delta<littleEndian16> >(sample, sourceBuf, fileSize);
-			for(SmpLength i = 0; i < sample.nLength * 2; i += 2)
+			if(GetEncoding() == MT2)
 			{
-				sample.sample16()[i + 1] = static_cast<int16>(static_cast<uint16>(sample.sample16()[i + 1]) + static_cast<uint16>(sample.sample16()[i]));
+				for(int16 *p = sample.sample16(), *pEnd = p + sample.nLength * 2; p < pEnd; p += 2)
+				{
+					p[1] = static_cast<int16>(static_cast<uint16>(p[0]) + static_cast<uint16>(p[1]));
+				}
 			}
 			break;
 		default:
