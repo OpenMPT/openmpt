@@ -103,6 +103,8 @@ is just a high-level summary.
     module that would require such a thorough subsong detection was found. The
     old mechanism caused way more false positives than intended with real-world
     modules, though.
+ *  Restrict the unpacked size of compressed DMF, IT, MDL and MO3 samples to
+    avoid huge allocations with malformed small files.
 
 ### libopenmpt 0.3 (2017-09-27)
 
