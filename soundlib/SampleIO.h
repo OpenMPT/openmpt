@@ -123,10 +123,10 @@ public:
 		{
 			if(GetEncoding() == SampleIO::signedPCM)
 			{
-				(*this) |= SampleIO::signedPCMnormalize;
+				m_encoding = SampleIO::signedPCMnormalize;
 			} else if(GetEncoding() == SampleIO::floatPCM)
 			{
-				(*this) |= SampleIO::floatPCMnormalize;
+				m_encoding = SampleIO::floatPCMnormalize;
 			}
 		}
 	}
@@ -136,44 +136,35 @@ public:
 	{
 		switch(GetEncoding())
 		{
-			case signedPCM:// Integer PCM, signed
+			case signedPCM:          // Integer PCM, signed
+			case unsignedPCM:        //Integer PCM, unsigned
+			case deltaPCM:           // Integer PCM, delta-encoded
+			case floatPCM:           // Floating point PCM
+			case MT2:                // MadTracker 2 stereo delta encoding
+			case floatPCM15:         // Floating point PCM with 2^15 full scale
+			case floatPCM23:         // Floating point PCM with 2^23 full scale
+			case floatPCMnormalize:  // Floating point PCM and data will be normalized while reading
+			case signedPCMnormalize: // Integer PCM and data will be normalized while reading
 				return GetBitDepth();
-			case unsignedPCM://Integer PCM, unsigned
-				return GetBitDepth();
-			case deltaPCM:// Integer PCM, delta-encoded
-				return GetBitDepth();
-			case floatPCM:// Floating point PCM
-				return GetBitDepth();
-			case IT214:// Impulse Tracker 2.14 compressed
+
+			case IT214:   // Impulse Tracker 2.14 compressed
+			case IT215:   // Impulse Tracker 2.15 compressed
+			case AMS:     // AMS / Velvet Studio packed
+			case DMF:     // DMF Huffman compression
+			case MDL:     // MDL Huffman compression
 				return 0; // variable-length compressed
-			case IT215:// Impulse Tracker 2.15 compressed
-				return 0; // variable-length compressed
-			case AMS:// AMS / Velvet Studio packed
-				return 0; // variable-length compressed
-			case DMF:// DMF Huffman compression
-				return 0; // variable-length compressed
-			case MDL:// MDL Huffman compression
-				return 0; // variable-length compressed
-			case PTM8Dto16:// PTM 8-Bit delta value -> 16-Bit sample
+
+			case PTM8Dto16: // PTM 8-Bit delta value -> 16-Bit sample
 				return 16;
-			case PCM7to8:// 8-Bit sample data with unused high bit
+			case PCM7to8:   // 8-Bit sample data with unused high bit
 				return 8;
-			case ADPCM:// 4-Bit ADPCM-packed
+			case ADPCM:     // 4-Bit ADPCM-packed
 				return 4;
-			case MT2:// MadTracker 2 stereo delta encoding
-				return GetBitDepth();
-			case floatPCM15:// Floating point PCM with 2^15 full scale
-				return GetBitDepth();
-			case floatPCM23:// Floating point PCM with 2^23 full scale
-				return GetBitDepth();
-			case floatPCMnormalize:// Floating point PCM and data will be normalized while reading
-				return GetBitDepth();
-			case signedPCMnormalize:// Integer PCM and data will be normalized while reading
-				return GetBitDepth();
-			case uLaw:// G.711 u-law
+			case uLaw:      // G.711 u-law
 				return 8;
-			case aLaw:// G.711 a-law
+			case aLaw:      // G.711 a-law
 				return 8;
+
 			default:
 				return 0;
 		}
