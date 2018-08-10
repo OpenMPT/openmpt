@@ -15,7 +15,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-
 // Add samples, instruments, plugins and patterns from another module to the current module
 void CModDoc::AppendModule(const CSoundFile &source)
 {
@@ -270,6 +269,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			} else if(source.m_tempoSwing != m_SndFile.m_tempoSwing)
 			{
 				// Try fixing differing swing settings by copying them to the newly created patterns
+				targetPat.SetSignature(source.m_nDefaultRowsPerBeat, source.m_nDefaultRowsPerMeasure);
 				targetPat.SetTempoSwing(source.m_tempoSwing);
 			}
 		}
@@ -310,6 +310,5 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		}
 	}
 }
-
 
 OPENMPT_NAMESPACE_END
