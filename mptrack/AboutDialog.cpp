@@ -403,6 +403,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				, ProcModel
 				, ProcStepping
 				);
+			text += mpt::format(MPT_USTRING("CPU Name: %1\n"))(mpt::ToUnicode(mpt::CharsetASCII, (std::strlen(ProcBrandID) > 0) ? std::string(ProcBrandID) : std::string("")));
 			text += mpt::format(MPT_USTRING("Available CPU features: %1\n"))(ProcSupportToString(GetRealProcSupport()));
 #endif // ENABLE_ASM
 			text += mpt::format(MPT_USTRING("Operating System: %1\n\n"))(mpt::Windows::Version::Current().GetName());

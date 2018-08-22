@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "mptCPU.h"
 
+#include "mptStringBuffer.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -21,6 +23,7 @@ OPENMPT_NAMESPACE_BEGIN
 uint32 RealProcSupport = 0;
 uint32 ProcSupport = 0;
 char ProcVendorID[16+1] = "";
+char ProcBrandID[32*4*3+1] = "";
 uint16 ProcFamily = 0;
 uint8 ProcModel = 0;
 uint8 ProcStepping = 0;
@@ -57,6 +60,27 @@ struct cpuid_result {
 		result[8+3] = (c >>24) & 0xff;
 		return std::string(result, result + 12);
 	}
+	std::string as_string4() const
+	{
+		std::string result;
+		result.push_back(static_cast<uint8>((a >>  0) & 0xff));
+		result.push_back(static_cast<uint8>((a >>  8) & 0xff));
+		result.push_back(static_cast<uint8>((a >> 16) & 0xff));
+		result.push_back(static_cast<uint8>((a >> 24) & 0xff));
+		result.push_back(static_cast<uint8>((b >>  0) & 0xff));
+		result.push_back(static_cast<uint8>((b >>  8) & 0xff));
+		result.push_back(static_cast<uint8>((b >> 16) & 0xff));
+		result.push_back(static_cast<uint8>((b >> 24) & 0xff));
+		result.push_back(static_cast<uint8>((c >>  0) & 0xff));
+		result.push_back(static_cast<uint8>((c >>  8) & 0xff));
+		result.push_back(static_cast<uint8>((c >> 16) & 0xff));
+		result.push_back(static_cast<uint8>((c >> 24) & 0xff));
+		result.push_back(static_cast<uint8>((d >>  0) & 0xff));
+		result.push_back(static_cast<uint8>((d >>  8) & 0xff));
+		result.push_back(static_cast<uint8>((d >> 16) & 0xff));
+		result.push_back(static_cast<uint8>((d >> 24) & 0xff));
+		return result;
+	}
 };
 
 
@@ -90,12 +114,28 @@ static cpuid_result cpuidex(uint32 function_a, uint32 function_c)
 #endif
 
 
+static std::string ReadBrand(cpuid_result VendorString)
+{
+	std::string result;
+	if(VendorString.as_string() == "GenuineIntel")
+	{
+		cpuid_result ExtendedVendorString = cpuid(0x80000000u);
+		if(ExtendedVendorString.a >= 0x80000004u)
+		{
+			result = cpuid(0x80000002u).as_string4() + cpuid(0x80000003u).as_string4() + cpuid(0x80000004u).as_string4();
+		}
+	}
+	return result;
+}
+
+
 void InitProcSupport()
 {
 
 	RealProcSupport = 0;
 	ProcSupport = 0;
 	MemsetZero(ProcVendorID);
+	MemsetZero(ProcBrandID);
 	ProcFamily = 0;
 	ProcModel = 0;
 	ProcStepping = 0;
@@ -103,7 +143,7 @@ void InitProcSupport()
 	{
 
 		cpuid_result VendorString = cpuid(0x00000000u);
-		std::strcpy(ProcVendorID, VendorString.as_string().c_str());
+		mpt::String::WriteAutoBuf(ProcVendorID) = VendorString.as_string();
 
 		// Cyrix 6x86 and 6x86MX do not specify the value returned in eax.
 		// They both support 0x00000001u however.
@@ -159,6 +199,11 @@ void InitProcSupport()
 			if(StandardFeatureFlags.c & (1<<20)) ProcSupport |= PROCSUPPORT_SSE4_2;
 		}
 
+		if(VendorString.as_string() == "GenuineIntel")
+		{
+			mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
+		}
+
 		// 3DNow! manual recommends to just execute 0x80000000u.
 		// It is totally unknown how earlier CPUs from other vendors
 		// would behave.
@@ -184,6 +229,7 @@ void InitProcSupport()
 					if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
 					if(ExtendedFeatureFlags.d & (1<<30)) ProcSupport |= PROCSUPPORT_AMD_3DNOWEXT;
 				}
+				mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
 			}
 
 		} else if(VendorString.as_string() == "CentaurHauls")
@@ -200,6 +246,7 @@ void InitProcSupport()
 						cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
 						if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
 					}
+					mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
 				}
 
 			} else if(ProcFamily >= 6)
@@ -213,6 +260,7 @@ void InitProcSupport()
 						cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
 						if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
 					}
+					mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
 				}
 
 			}
@@ -236,6 +284,7 @@ void InitProcSupport()
 					cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
 					if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
 				}
+				mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
 			}
 
 		} else if(VendorString.as_string() == "Geode by NSC")
@@ -249,6 +298,7 @@ void InitProcSupport()
 					cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
 					if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
 				}
+				mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
 			}
 
 		}

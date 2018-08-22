@@ -40,6 +40,7 @@ static const uint32 PROCSUPPORT_AMD64    = 0u | PROCSUPPORT_CMOV | PROCSUPPORT_S
 extern uint32 RealProcSupport;
 extern uint32 ProcSupport;
 extern char ProcVendorID[16+1];
+extern char ProcBrandID[32*4*3+1];
 extern uint16 ProcFamily;
 extern uint8 ProcModel;
 extern uint8 ProcStepping;
