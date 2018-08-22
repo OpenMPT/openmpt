@@ -1,0 +1,293 @@
+{
+	"targets": {
+
+
+
+		"trusty-amd64/autotools": {
+			"buildenv": "trusty-amd64",
+			"builddeps": [
+				"autoconf",
+				"autoconf-archive",
+				"automake",
+				"binutils",
+				"ccache",
+				"clang",
+				"doxygen",
+				"g++",
+				"gawk",
+				"gcc",
+				"git",
+				"git-svn",
+				"gzip",
+				"help2man",
+				"libc++-dev",
+				"libc++abi-dev",
+				"libflac-dev",
+				"libltdl-dev",
+				"libmpg123-dev",
+				"libogg-dev",
+				"libpulse-dev",
+				"libsdl1.2-dev",
+				"libsdl2-dev",
+				"libsndfile1-dev",
+				"libtool",
+				"libtool-bin",
+				"libvorbis-dev",
+				"libxml-xpath-perl",
+				"make",
+				"p7zip",
+				"p7zip-full",
+				"pkg-config",
+				"portaudio19-dev",
+				"subversion",
+				"subversion-tools",
+				"tar",
+				"tcc",
+				"unzip",
+				"zip",
+				"zlib1g-dev",
+				"build-essential"
+			],
+			"environment": {
+				"CCACHE_CPP2": "1"
+			},
+			"buildcmd": [
+				"./build/auto/dist.sh"
+			]
+		},
+		"trusty-amd64/gcc": {
+			"buildenv": "trusty-amd64",
+			"builddeps": [
+				"autoconf",
+				"autoconf-archive",
+				"automake",
+				"binutils",
+				"ccache",
+				"clang",
+				"doxygen",
+				"g++",
+				"gawk",
+				"gcc",
+				"git",
+				"git-svn",
+				"gzip",
+				"help2man",
+				"libc++-dev",
+				"libc++abi-dev",
+				"libflac-dev",
+				"libltdl-dev",
+				"libmpg123-dev",
+				"libogg-dev",
+				"libpulse-dev",
+				"libsdl1.2-dev",
+				"libsdl2-dev",
+				"libsndfile1-dev",
+				"libtool",
+				"libtool-bin",
+				"libvorbis-dev",
+				"libxml-xpath-perl",
+				"make",
+				"p7zip",
+				"p7zip-full",
+				"pkg-config",
+				"portaudio19-dev",
+				"subversion",
+				"subversion-tools",
+				"tar",
+				"tcc",
+				"unzip",
+				"zip",
+				"zlib1g-dev",
+				"build-essential"
+			],
+			"environment": {
+				"CCACHE_CPP2": "1"
+			},
+			"buildcmd": [
+				"make STRICT=1"
+			]
+		},
+		"trusty-amd64/clang": {
+			"buildenv": "trusty-amd64",
+			"builddeps": [
+				"autoconf",
+				"autoconf-archive",
+				"automake",
+				"binutils",
+				"ccache",
+				"clang",
+				"doxygen",
+				"g++",
+				"gawk",
+				"gcc",
+				"git",
+				"git-svn",
+				"gzip",
+				"help2man",
+				"libc++-dev",
+				"libc++abi-dev",
+				"libflac-dev",
+				"libltdl-dev",
+				"libmpg123-dev",
+				"libogg-dev",
+				"libpulse-dev",
+				"libsdl1.2-dev",
+				"libsdl2-dev",
+				"libsndfile1-dev",
+				"libtool",
+				"libtool-bin",
+				"libvorbis-dev",
+				"libxml-xpath-perl",
+				"make",
+				"p7zip",
+				"p7zip-full",
+				"pkg-config",
+				"portaudio19-dev",
+				"subversion",
+				"subversion-tools",
+				"tar",
+				"tcc",
+				"unzip",
+				"zip",
+				"zlib1g-dev",
+				"build-essential"
+			],
+			"environment": {
+				"CCACHE_CPP2": "1"
+			},
+			"buildcmd": [
+				"make STRICT=1 CONFIG=clang"
+			]
+		},
+
+
+
+		"jessie-i386/gcc": {
+			"buildenv": "jessie-i386",
+			"builddeps": [
+				"binutils",
+				"ccache",
+				"doxygen",
+				"g++",
+				"gawk",
+				"gcc",
+				"git",
+				"git-svn",
+				"help2man",
+				"libc++-dev",
+				"libc++abi-dev",
+				"libflac-dev",
+				"libltdl-dev",
+				"libmpg123-dev",
+				"libogg-dev",
+				"libpulse-dev",
+				"libsdl1.2-dev",
+				"libsdl2-dev",
+				"libsndfile1-dev",
+				"libvorbis-dev",
+				"libxml-xpath-perl",
+				"make",
+				"pkg-config",
+				"portaudio19-dev",
+				"subversion",
+				"subversion-tools",
+				"zlib1g-dev",
+				"build-essential"
+			],
+			"environment": {
+				"CCACHE_CPP2": "1"
+			},
+			"buildcmd": [
+				"make STRICT=1"
+			]
+		},
+
+
+
+		"xenial-amd64/gcc": {
+			"buildenv": "xenial-amd64",
+			"builddeps": [
+				"binutils",
+				"ccache",
+				"doxygen",
+				"g++",
+				"gawk",
+				"gcc",
+				"git",
+				"git-svn",
+				"help2man",
+				"libc++-dev",
+				"libc++abi-dev",
+				"libflac-dev",
+				"libltdl-dev",
+				"libmpg123-dev",
+				"libogg-dev",
+				"libpulse-dev",
+				"libsdl1.2-dev",
+				"libsdl2-dev",
+				"libsndfile1-dev",
+				"libvorbis-dev",
+				"libxml-xpath-perl",
+				"make",
+				"pkg-config",
+				"portaudio19-dev",
+				"subversion",
+				"subversion-tools",
+				"zlib1g-dev",
+				"build-essential"
+			],
+			"environment": {
+				"CCACHE_CPP2": "1"
+			},
+			"buildcmd": [
+				"make"
+			]
+		},
+
+
+
+		"raspbian-stretch/gcc": {
+			"buildenv": "raspbian-stretch",
+			"builddeps": [
+				"binutils",
+				"ccache",
+				"doxygen",
+				"g++",
+				"gawk",
+				"gcc",
+				"git",
+				"git-svn",
+				"help2man",
+				"libc++-dev",
+				"libc++abi-dev",
+				"libflac-dev",
+				"libltdl-dev",
+				"libmpg123-dev",
+				"libogg-dev",
+				"libpulse-dev",
+				"libsdl1.2-dev",
+				"libsdl2-dev",
+				"libsndfile1-dev",
+				"libvorbis-dev",
+				"libxml-xpath-perl",
+				"make",
+				"pkg-config",
+				"portaudio19-dev",
+				"subversion",
+				"subversion-tools",
+				"zlib1g-dev",
+				"build-essential"
+			],
+			"environment": {
+				"CCACHE_CPP2": "1"
+			},
+			"buildcmd": [
+				"make"
+			]
+		}
+
+
+
+	}
+}
+
