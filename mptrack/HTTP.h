@@ -125,18 +125,18 @@ enum class Method
 using Query = std::vector<std::pair<mpt::ustring, mpt::ustring>>;
 
 
+namespace MimeType {
+	static inline std::string Text() { return "text/plain"; }
+	static inline std::string JSON() { return "application/json"; }
+	static inline std::string Binary() { return "application/octet-stream"; }
+}
+
+
 using AcceptMimeTypes = std::vector<std::string>;
-static inline AcceptMimeTypes AcceptMimeTypesText()
-{
-	return {"text/*"};
-}
-static inline AcceptMimeTypes AcceptMimeTypesJSON()
-{
-	return {"application/json"};
-}
-static inline AcceptMimeTypes AcceptMimeTypesBinary()
-{
-	return {"application/octet-stream"};
+namespace MimeTypes {
+	static inline AcceptMimeTypes Text() { return {"text/*"}; }
+	static inline AcceptMimeTypes JSON() { return {MimeType::JSON()}; }
+	static inline AcceptMimeTypes Binary() { return {MimeType::Binary()}; }
 }
 
 
