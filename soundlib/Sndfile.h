@@ -690,7 +690,7 @@ public:
 	void InitAmigaResampler();
 
 	void InitOPL();
-	constexpr bool SupportsOPL() const { return m_nType == MOD_TYPE_S3M; }
+	MPT_CONSTEXPR14_FUN bool SupportsOPL() const { return m_nType == MOD_TYPE_S3M; }
 
 	static ProbeResult ProbeFileHeaderMMCMP(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderPP20(MemoryFileReader file, const uint64 *pfilesize);
