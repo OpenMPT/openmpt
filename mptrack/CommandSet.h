@@ -692,6 +692,7 @@ enum CommandID
 	kcSampleSave,
 	kcSampleNew,
 	kcSampleDuplicate,
+	kcSampleInitializeOPL,
 	kcSampleTransposeUp,
 	kcSampleTransposeDown,
 	kcSampleTransposeOctUp,

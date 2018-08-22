@@ -715,6 +715,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcInstrumentEnvelopeToggleLoop, 1983, _T("Toggle Envelope Loop"));
 	DefineKeyCommand(kcInstrumentEnvelopeToggleSustain, 1984, _T("Toggle Envelope Sustain Loop"));
 	DefineKeyCommand(kcInstrumentEnvelopeToggleCarry, 1985, _T("Toggle Envelope Carry"));
+	DefineKeyCommand(kcSampleInitializeOPL, 1986, _T("Initialize OPL Instrument"));
 
 	// Add new key commands here.
 
