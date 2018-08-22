@@ -1422,7 +1422,8 @@ bool CSoundFile::DestroySample(SAMPLEINDEX nSample)
 
 	sample.FreeSample();
 	sample.nLength = 0;
-	sample.uFlags.reset(CHN_16BIT | CHN_STEREO | CHN_ADLIB);
+	sample.uFlags.reset(CHN_16BIT | CHN_STEREO);
+	sample.SetAdlib(false);
 
 #ifdef MODPLUG_TRACKER
 	ResetSamplePath(nSample);
