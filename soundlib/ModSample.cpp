@@ -382,6 +382,9 @@ void ModSample::SetAdlib(bool enable, OPLPatch patch)
 	uFlags.set(CHN_ADLIB, enable);
 	if(enable)
 	{
+		// Bogus sample to make playback work
+		nLength = 4;
+		AllocateSample();
 		adlib = patch;
 	}
 }

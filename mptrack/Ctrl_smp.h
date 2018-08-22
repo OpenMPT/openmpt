@@ -157,6 +157,8 @@ protected:
 	afx_msg void OnEnableStretchToSize();
 	afx_msg void OnEstimateSampleSize();
 
+	afx_msg void OnInitOPLInstrument();
+
 	MPT_NOINLINE void SetModified(SampleHint hint, bool updateAll, bool waveformModified);
 	void PrepareUndo(const char *description, sampleUndoTypes type = sundo_none, SmpLength start = 0, SmpLength end = 0);
 

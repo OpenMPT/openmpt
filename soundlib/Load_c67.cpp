@@ -192,20 +192,16 @@ bool CSoundFile::ReadC67(FileReader &file, ModLoadingFlags loadFlags)
 		ModSample &mptSmp = Samples[smp + 33];
 		mptSmp.Initialize(MOD_TYPE_S3M);
 		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp + 33], fileHeader.fmInstrNames[smp]);
-		mptSmp.nLength = 4;
-		if(mptSmp.AllocateSample())
-		{
-			// Reorder OPL patch bytes (interleave modulator and carrier)
-			const auto &fm = fileHeader.fmInstr[smp];
-			OPLPatch patch{{}};
-			patch[0] = fm[1]; patch[1] = fm[6];
-			patch[2] = fm[2]; patch[3] = fm[7];
-			patch[4] = fm[3]; patch[5] = fm[8];
-			patch[6] = fm[4]; patch[7] = fm[9];
-			patch[8] = fm[5]; patch[9] = fm[10];
-			patch[10] = fm[0];
-			mptSmp.SetAdlib(true, patch);
-		}
+		// Reorder OPL patch bytes (interleave modulator and carrier)
+		const auto &fm = fileHeader.fmInstr[smp];
+		OPLPatch patch{{}};
+		patch[0] = fm[1]; patch[1] = fm[6];
+		patch[2] = fm[2]; patch[3] = fm[7];
+		patch[4] = fm[3]; patch[5] = fm[8];
+		patch[6] = fm[4]; patch[7] = fm[9];
+		patch[8] = fm[5]; patch[9] = fm[10];
+		patch[10] = fm[0];
+		mptSmp.SetAdlib(true, patch);
 	}
 
 	ReadOrderFromArray<uint8>(Order(), fileHeader.orders, 256, 0xFF);

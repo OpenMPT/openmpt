@@ -85,6 +85,7 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(IDC_BUTTON1,				&CCtrlSamples::OnPitchShiftTimeStretch)
 	ON_COMMAND(IDC_BUTTON2,				&CCtrlSamples::OnEstimateSampleSize)
 	ON_COMMAND(IDC_CHECK3,				&CCtrlSamples::OnEnableStretchToSize)
+	ON_COMMAND(IDC_SAMPLE_INITOPL,		&CCtrlSamples::OnInitOPLInstrument)
 	
 	ON_EN_CHANGE(IDC_SAMPLE_NAME,		&CCtrlSamples::OnNameChanged)
 	ON_EN_CHANGE(IDC_SAMPLE_FILENAME,	&CCtrlSamples::OnFileNameChanged)
@@ -1115,6 +1116,7 @@ void CCtrlSamples::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 		{
 			menu.CreatePopupMenu();
 			menu.AppendMenu(MF_STRING, IDC_SAMPLE_DUPLICATE, ih->GetKeyTextFromCommand(kcSampleDuplicate, _T("&Duplicate Sample")));
+			menu.AppendMenu(MF_STRING | (m_sndFile.SupportsOPL() ? 0 : MF_DISABLED), IDC_SAMPLE_INITOPL, _T("Initialize &OPL Instrument"));
 			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, x, y, this);
 			menu.DestroyMenu();
 		}
@@ -3613,5 +3615,20 @@ bool CCtrlSamples::IsOPLInstrument() const
 {
 	return m_nSample >= 1 && m_nSample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(m_nSample).uFlags[CHN_ADLIB];
 }
+
+
+void CCtrlSamples::OnInitOPLInstrument()
+{
+	if(m_sndFile.SupportsOPL())
+	{
+		CriticalSection cs;
+		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Initialize OPL Instrument");
+		m_sndFile.DestroySampleThreadsafe(m_nSample);
+		m_sndFile.InitOPL();
+		m_sndFile.GetSample(m_nSample).SetAdlib(true);
+		SetModified(SampleHint().Info().Data().Names(), true, true);
+	}
+}
+
 
 OPENMPT_NAMESPACE_END

@@ -850,6 +850,7 @@
 #define IDC_RADIO_ADDSILENCE_BEGIN      2380
 #define IDC_RADIO_ADDSILENCE_END        2381
 #define IDC_SPIN_ADDSILENCE             2382
+#define IDC_SAMPLE_INITOPL              2383
 #define IDC_RADIO_RESIZETO              2384
 #define IDC_CHECK_PATRECORD             2386
 #define IDC_LOAD_COLORSCHEME            2387

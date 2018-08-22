@@ -540,10 +540,9 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				sample.uFlags.set(CHN_LOOP);
 				sample.nLoopEnd += sample.nLoopStart;
 			}
+			uint8 volume = chunk.ReadUint8();
 			if(fileHeader.version < 0x10)
-				sample.nVolume = chunk.ReadUint8();
-			else
-				chunk.Skip(1);
+				sample.nVolume = volume;
 			uint8 flags = chunk.ReadUint8();
 
 			if(flags & 0x01)

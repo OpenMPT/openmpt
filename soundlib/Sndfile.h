@@ -688,7 +688,9 @@ public:
 
 	bool InitChannel(CHANNELINDEX nChn);
 	void InitAmigaResampler();
+
 	void InitOPL();
+	constexpr bool SupportsOPL() const { return m_nType == MOD_TYPE_S3M; }
 
 	static ProbeResult ProbeFileHeaderMMCMP(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderPP20(MemoryFileReader file, const uint64 *pfilesize);

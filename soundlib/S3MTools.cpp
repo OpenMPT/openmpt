@@ -40,13 +40,11 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 		}
 	} else if(sampleType == typeAdMel)
 	{
-		std::memcpy(mptSmp.adlib.data() + 0, mpt::as_raw_memory(length   ).data(), 4);
-		std::memcpy(mptSmp.adlib.data() + 4, mpt::as_raw_memory(loopStart).data(), 4);
-		std::memcpy(mptSmp.adlib.data() + 8, mpt::as_raw_memory(loopEnd  ).data(), 4);
-		// Bogus sample to make playback work
-		mptSmp.nLength = 4;
-		mptSmp.uFlags = CHN_ADLIB;
-		mptSmp.AllocateSample();
+		OPLPatch patch;
+		std::memcpy(patch.data() + 0, mpt::as_raw_memory(length).data(), 4);
+		std::memcpy(patch.data() + 4, mpt::as_raw_memory(loopStart).data(), 4);
+		std::memcpy(patch.data() + 8, mpt::as_raw_memory(loopEnd).data(), 4);
+		mptSmp.SetAdlib(true, patch);
 	}
 
 	// Volume / Panning

@@ -2955,15 +2955,15 @@ void CViewSample::OnAddSilence()
 
 	const SmpLength oldLength = IsOPLInstrument() ? 0 : sample.nLength;
 
-	AddSilenceDlg dlg(this, oldLength, sample.GetSampleRate(sndFile.GetType()), sndFile.GetType() == MOD_TYPE_S3M);
+	AddSilenceDlg dlg(this, oldLength, sample.GetSampleRate(sndFile.GetType()), sndFile.SupportsOPL());
 	if (dlg.DoModal() != IDOK) return;
 
 	if(dlg.m_editOption == AddSilenceDlg::kOPLInstrument)
 	{
 		if(!sample.uFlags[CHN_ADLIB])
 		{
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Delete Sample");
 			CriticalSection cs;
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Initialize OPL Instrument");
 			sndFile.DestroySampleThreadsafe(m_nSample);
 			sndFile.InitOPL();
 			sample.SetAdlib(true);
