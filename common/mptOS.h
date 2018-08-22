@@ -128,6 +128,7 @@ public:
 	bool IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack) const noexcept;
 	bool IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Version::Build build) const noexcept;
 
+	mpt::Windows::Version::System GetSystem() const noexcept;
 	mpt::Windows::Version::ServicePack GetServicePack() const noexcept;
 	mpt::Windows::Version::Build GetBuild() const noexcept;
 
@@ -226,6 +227,9 @@ private:
 public:
 	bool IsBefore(mpt::Wine::Version other) const;
 	bool IsAtLeast(mpt::Wine::Version other) const;
+	uint8 GetMajor() const;
+	uint8 GetMinor() const;
+	uint8 GetUpdate() const;
 };
 
 mpt::Wine::Version GetMinimumWineVersion();

@@ -266,6 +266,12 @@ bool Version::IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Ver
 }
 
 
+mpt::Windows::Version::System Version::GetSystem() const noexcept
+{
+	return m_System;
+}
+
+
 mpt::Windows::Version::ServicePack Version::GetServicePack() const noexcept
 {
 	return m_ServicePack;
@@ -772,6 +778,22 @@ bool Version::IsAtLeast(mpt::Wine::Version other) const
 		return false;
 	}
 	return (AsInteger() >= other.AsInteger());
+}
+
+
+uint8 Version::GetMajor() const
+{
+	return vmajor;
+}
+
+uint8 Version::GetMinor() const
+{
+	return vminor;
+}
+
+uint8 Version::GetUpdate() const
+{
+	return vupdate;
 }
 
 
