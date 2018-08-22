@@ -446,9 +446,15 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 	case sundo_insert:
 		// delete inserted data
 		MPT_ASSERT(changeLen == sample.nLength - undo.OldSample.nLength);
-		memcpy(pCurrentSample + undo.changeStart * bytesPerSample, pCurrentSample + undo.changeEnd * bytesPerSample, (sample.nLength - undo.changeEnd) * bytesPerSample);
-		// also clean the sample end
-		memset(pCurrentSample + undo.OldSample.nLength * bytesPerSample, 0, (sample.nLength - undo.OldSample.nLength) * bytesPerSample);
+		if(undo.OldSample.nLength > 0)
+		{
+			memcpy(pCurrentSample + undo.changeStart * bytesPerSample, pCurrentSample + undo.changeEnd * bytesPerSample, (sample.nLength - undo.changeEnd) * bytesPerSample);
+			// also clean the sample end
+			memset(pCurrentSample + undo.OldSample.nLength * bytesPerSample, 0, (sample.nLength - undo.OldSample.nLength) * bytesPerSample);
+		} else
+		{
+			replace = true;
+		}
 		break;
 
 	case sundo_update:
