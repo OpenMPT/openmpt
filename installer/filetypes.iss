@@ -111,7 +111,8 @@ Root: HKCR; SubKey: "OpenMPTFile"; ValueType: string; ValueName: "PerceivedType"
 Root: HKCR; Subkey: "OpenMPTFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\mpt.ico,0"; Tasks: associate_common or associate_exotic or not portable
 Root: HKCR; Subkey: "OpenMPTFile\shell\Open"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: associate_common or associate_exotic or not portable
 Root: HKCR; Subkey: "OpenMPTFile\shell\Open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\mptrack.exe"" /shared ""%1"""; Tasks: associate_common or associate_exotic or not portable
-;Root: HKCR; Subkey: "OpenMPTFile\shell\Open\ddeexec"; ValueType: string; ValueName: ""; ValueData: "[Edit(""%1"")]"; Tasks: associate_common or associate_exotic or not portable
+; remove DDE action if it still exists from OpenMPT 1.27 or earlier
+Root: HKCR; Subkey: "OpenMPTFile\shell\Open\ddeexec"; ValueType: none; Flags: deletekey; Tasks: associate_common or associate_exotic or not portable
 
 ; Application capabilities
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT"; Flags: uninsdeletekeyifempty; Tasks: not portable
