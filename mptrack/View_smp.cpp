@@ -2955,10 +2955,25 @@ void CViewSample::OnAddSilence()
 
 	const SmpLength oldLength = IsOPLInstrument() ? 0 : sample.nLength;
 
-	CAddSilenceDlg dlg(this, oldLength, sample.GetSampleRate(sndFile.GetType()));
+	AddSilenceDlg dlg(this, oldLength, sample.GetSampleRate(sndFile.GetType()), sndFile.GetType() == MOD_TYPE_S3M);
 	if (dlg.DoModal() != IDOK) return;
 
-	if(MAX_SAMPLE_LENGTH - oldLength < dlg.m_nSamples && dlg.m_nEditOption != CAddSilenceDlg::kResize)
+	if(dlg.m_editOption == AddSilenceDlg::kOPLInstrument)
+	{
+		if(!sample.uFlags[CHN_ADLIB])
+		{
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Delete Sample");
+			CriticalSection cs;
+			sndFile.DestroySampleThreadsafe(m_nSample);
+			sndFile.InitOPL();
+			sample.SetAdlib(true);
+			SetCurSel(0, 0);
+			SetModified(SampleHint().Info().Data().Names(), true, true);
+		}
+		return;
+	}
+
+	if(MAX_SAMPLE_LENGTH - oldLength < dlg.m_numSamples && dlg.m_editOption != AddSilenceDlg::kResize)
 	{
 		CString str; str.Format(_T("Cannot add silence because the new sample length would exceed maximum sample length %u."), MAX_SAMPLE_LENGTH);
 		Reporting::Information(str);
@@ -2971,38 +2986,35 @@ void CViewSample::OnAddSilence()
 	{
 		sample.nVolume = 256;
 	}
-
-	if(dlg.m_nEditOption == CAddSilenceDlg::kResize)
+	if(dlg.m_editOption == AddSilenceDlg::kResize)
 	{
 		// resize - dlg.m_nSamples = new size
-		if(dlg.m_nSamples == 0)
+		if(dlg.m_numSamples == 0)
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Delete Sample");
 			sndFile.DestroySampleThreadsafe(m_nSample);
-		} else if(dlg.m_nSamples != sample.nLength)
+		} else if(dlg.m_numSamples != sample.nLength)
 		{
 			CriticalSection cs;
 
-			if(dlg.m_nSamples < sample.nLength)	// make it shorter!
-				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Resize", dlg.m_nSamples, sample.nLength);
+			if(dlg.m_numSamples < sample.nLength)	// make it shorter!
+				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Resize", dlg.m_numSamples, sample.nLength);
 			else	// make it longer!
-				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, "Add Silence", sample.nLength, dlg.m_nSamples);
-			if(IsOPLInstrument())
-				GetDocument()->GetSoundFile().DestroySample(m_nSample);
-			ctrlSmp::ResizeSample(sample, dlg.m_nSamples, sndFile);
+				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, "Add Silence", sample.nLength, dlg.m_numSamples);
+			sample.SetAdlib(false);
+			ctrlSmp::ResizeSample(sample, dlg.m_numSamples, sndFile);
 		}
 	} else
 	{
 		// add silence - dlg.m_nSamples = amount of bytes to be added
-		if(dlg.m_nSamples > 0)
+		if(dlg.m_numSamples > 0)
 		{
 			CriticalSection cs;
 
-			SmpLength nStart = (dlg.m_nEditOption == CAddSilenceDlg::kSilenceAtEnd) ? sample.nLength : 0;
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, "Add Silence", nStart, nStart + dlg.m_nSamples);
-			if(IsOPLInstrument())
-				GetDocument()->GetSoundFile().DestroySample(m_nSample);
-			ctrlSmp::InsertSilence(sample, dlg.m_nSamples, nStart, sndFile);
+			SmpLength nStart = (dlg.m_editOption == AddSilenceDlg::kSilenceAtEnd) ? sample.nLength : 0;
+			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, "Add Silence", nStart, nStart + dlg.m_numSamples);
+			sample.SetAdlib(false);
+			ctrlSmp::InsertSilence(sample, dlg.m_numSamples, nStart, sndFile);
 		}
 	}
 

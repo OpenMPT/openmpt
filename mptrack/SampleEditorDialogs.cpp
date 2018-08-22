@@ -87,11 +87,10 @@ BOOL CAmpDlg::OnInitDialog()
 	m_list.Create(cx, cy, ILC_COLOR32 | ILC_MASK, 0, 1);
 	std::vector<COLORREF> bits(imgWidth * cy, RGB(255, 0, 255));
 	const COLORREF col = GetSysColor(COLOR_WINDOWTEXT);
-	for(int i = 0; i < static_cast<int>(mpt::size(fadeLaws)); i++)
+	for(int i = 0, baseX = 0; i < static_cast<int>(mpt::size(fadeLaws)); i++, baseX += cx)
 	{
-		Fade::Func fadeFunc = Fade::GetFadeFunc(static_cast<Fade::Law>(i));
+		Fade::Func fadeFunc = Fade::GetFadeFunc(fadeLaws[i].id);
 		int oldVal = cy - 1;
-		int baseX = i * cx;
 		for(int x = 0; x < cx; x++)
 		{
 			int val = cy - 1 - mpt::saturate_round<int>(cy * fadeFunc(static_cast<double>(x) / cx));
@@ -192,35 +191,36 @@ void CRawSampleDlg::UpdateDialog()
 /////////////////////////////////////////////////////////////////////////
 // Add silence / resize sample dialog
 
-BEGIN_MESSAGE_MAP(CAddSilenceDlg, CDialog)
-	ON_CBN_SELCHANGE(IDC_COMBO1,				&CAddSilenceDlg::OnUnitChanged)
-	ON_COMMAND(IDC_RADIO_ADDSILENCE_BEGIN,		&CAddSilenceDlg::OnEditModeChanged)
-	ON_COMMAND(IDC_RADIO_ADDSILENCE_END,		&CAddSilenceDlg::OnEditModeChanged)
-	ON_COMMAND(IDC_RADIO_RESIZETO,				&CAddSilenceDlg::OnEditModeChanged)
+BEGIN_MESSAGE_MAP(AddSilenceDlg, CDialog)
+	ON_CBN_SELCHANGE(IDC_COMBO1,           &AddSilenceDlg::OnUnitChanged)
+	ON_COMMAND(IDC_RADIO_ADDSILENCE_BEGIN, &AddSilenceDlg::OnEditModeChanged)
+	ON_COMMAND(IDC_RADIO_ADDSILENCE_END,   &AddSilenceDlg::OnEditModeChanged)
+	ON_COMMAND(IDC_RADIO_RESIZETO,         &AddSilenceDlg::OnEditModeChanged)
+	ON_COMMAND(IDC_RADIO1,                 &AddSilenceDlg::OnEditModeChanged)
 END_MESSAGE_MAP()
 
-SmpLength CAddSilenceDlg::m_addSamples = 32;
-SmpLength CAddSilenceDlg::m_createSamples = 64;
+SmpLength AddSilenceDlg::m_addSamples = 32;
+SmpLength AddSilenceDlg::m_createSamples = 64;
 
-CAddSilenceDlg::CAddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sampleRate)
+AddSilenceDlg::AddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sampleRate, bool allowOPL)
 	: CDialog(IDD_ADDSILENCE, parent)
-	, m_nSamples(m_addSamples)
+	, m_numSamples(m_addSamples)
 	, m_sampleRate(sampleRate)
-	, m_unit(kSamples)
+	, m_allowOPL(allowOPL)
 {
 	if(origLength > 0)
 	{
-		m_nLength = origLength;
-		m_nEditOption = kSilenceAtEnd;
+		m_length = origLength;
+		m_editOption = kSilenceAtEnd;
 	} else
 	{
-		m_nLength = m_createSamples;
-		m_nEditOption = kResize;
+		m_length = m_createSamples;
+		m_editOption = kResize;
 	}
 }
 
 
-BOOL CAddSilenceDlg::OnInitDialog()
+BOOL AddSilenceDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
@@ -228,7 +228,7 @@ BOOL CAddSilenceDlg::OnInitDialog()
 	if(spin)
 	{
 		spin->SetRange32(0, int32_max);
-		spin->SetPos32(m_nSamples);
+		spin->SetPos32(m_numSamples);
 	}
 
 	CComboBox *box = (CComboBox *)GetDlgItem(IDC_COMBO1);
@@ -245,7 +245,7 @@ BOOL CAddSilenceDlg::OnInitDialog()
 	}
 
 	int buttonID = IDC_RADIO_ADDSILENCE_END;
-	switch(m_nEditOption)
+	switch(m_editOption)
 	{
 	case kSilenceAtBeginning: buttonID = IDC_RADIO_ADDSILENCE_BEGIN; break;
 	case kSilenceAtEnd:       buttonID = IDC_RADIO_ADDSILENCE_END; break;
@@ -253,52 +253,54 @@ BOOL CAddSilenceDlg::OnInitDialog()
 	}
 	CheckDlgButton(buttonID, BST_CHECKED);
 
-	SetDlgItemInt(IDC_EDIT_ADDSILENCE, (m_nEditOption == kResize) ? m_nLength : m_nSamples, FALSE);
+	SetDlgItemInt(IDC_EDIT_ADDSILENCE, (m_editOption == kResize) ? m_length : m_numSamples, FALSE);
+	GetDlgItem(IDC_RADIO1)->EnableWindow(m_allowOPL ? TRUE : FALSE);
 
 	return TRUE;
 }
 
 
-void CAddSilenceDlg::OnOK()
+void AddSilenceDlg::OnOK()
 {
-	m_nSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE, nullptr, FALSE);
+	m_numSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE, nullptr, FALSE);
 	if(m_unit == kMilliseconds)
 	{
-		m_nSamples = Util::muldivr_unsigned(m_nSamples, m_sampleRate, 1000);
+		m_numSamples = Util::muldivr_unsigned(m_numSamples, m_sampleRate, 1000);
 	}
-	switch(m_nEditOption = GetEditMode())
+	switch(m_editOption = GetEditMode())
 	{
 	case kSilenceAtBeginning:
 	case kSilenceAtEnd:
-		m_addSamples = m_nSamples;
+		m_addSamples = m_numSamples;
 		break;
 	case kResize:
-		m_createSamples = m_nSamples;
+		m_createSamples = m_numSamples;
 		break;
 	}
 	CDialog::OnOK();
 }
 
 
-void CAddSilenceDlg::OnEditModeChanged()
+void AddSilenceDlg::OnEditModeChanged()
 {
 	AddSilenceOptions newEditOption = GetEditMode();
-	if(newEditOption != kResize && m_nEditOption == kResize)
+	GetDlgItem(IDC_EDIT_ADDSILENCE)->EnableWindow(m_allowOPL ? FALSE : TRUE);
+	if(newEditOption != kResize && m_editOption == kResize)
 	{
 		// Switch to "add silence"
-		m_nLength = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
-		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_nSamples);
-	} else if(newEditOption == kResize && m_nEditOption != kResize)
+		m_length = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
+		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_numSamples);
+	} else if(newEditOption == kResize && m_editOption != kResize)
 	{
 		// Switch to "resize"
-		m_nSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
-		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_nLength);
+		m_numSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
+		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_length);
 	}
-	m_nEditOption = newEditOption;
+	m_editOption = newEditOption;
 }
 
 
-void CAddSilenceDlg::OnUnitChanged()
+void AddSilenceDlg::OnUnitChanged()
 {
 	m_unit = static_cast<Unit>(static_cast<CComboBox *>(GetDlgItem(IDC_COMBO1))->GetCurSel());
 	SmpLength duration = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
@@ -315,11 +317,13 @@ void CAddSilenceDlg::OnUnitChanged()
 }
 
 
-CAddSilenceDlg::AddSilenceOptions CAddSilenceDlg::GetEditMode() const
+AddSilenceDlg::AddSilenceOptions AddSilenceDlg::GetEditMode() const
 {
 	if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_BEGIN)) return kSilenceAtBeginning;
 	else if(IsDlgButtonChecked(IDC_RADIO_ADDSILENCE_END)) return kSilenceAtEnd;
 	else if(IsDlgButtonChecked(IDC_RADIO_RESIZETO)) return kResize;
+	else if(IsDlgButtonChecked(IDC_RADIO1)) return kOPLInstrument;
+	MPT_ASSERT_NOTREACHED();
 	return kSilenceAtEnd;
 }
 

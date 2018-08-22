@@ -83,14 +83,15 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Add silence dialog - add silence to a sample
 
-class CAddSilenceDlg: public CDialog
+class AddSilenceDlg: public CDialog
 {
 public:
 	enum AddSilenceOptions
 	{
-		kSilenceAtBeginning,	// Add at beginning of sample
-		kSilenceAtEnd,			// Add at end of sample
-		kResize,			// Resize sample
+		kSilenceAtBeginning, // Add at beginning of sample
+		kSilenceAtEnd,       // Add at end of sample
+		kResize,             // Resize sample
+		kOPLInstrument,      // Initialize as OPL instrument
 	};
 
 	enum Unit
@@ -99,18 +100,19 @@ public:
 		kMilliseconds,
 	};
 
-	SmpLength m_nSamples;	// Add x samples (also containes the return value in all cases)
-	SmpLength m_nLength;	// Set size to x samples (init value: current sample size)
-	AddSilenceOptions m_nEditOption;	// See above
+	SmpLength m_numSamples; // Add x samples (also containes the return value in all cases)
+	SmpLength m_length;  // Set size to x samples (init value: current sample size)
+	AddSilenceOptions m_editOption; // See above
 
 protected:
 	static SmpLength m_addSamples;
 	static SmpLength m_createSamples;
 	uint32 m_sampleRate;
-	Unit m_unit;
+	Unit m_unit = kSamples;
+	bool m_allowOPL;
 
 public:
-	CAddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sampleRate);
+	AddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sampleRate, bool allowOPL);
 
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
