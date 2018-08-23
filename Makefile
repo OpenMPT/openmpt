@@ -205,6 +205,7 @@ TOOLCHAIN_SUFFIX=
 
 CPPCHECK = cppcheck
 
+MKDIR_P = mkdir
 RM = del /q /f
 RMTREE = del /q /f /s
 INSTALL = echo install
@@ -223,6 +224,7 @@ TOOLCHAIN_SUFFIX=
 
 CPPCHECK = cppcheck
 
+MKDIR_P = mkdir -p
 RM = rm -f
 RMTREE = rm -rf
 INSTALL = install
@@ -253,6 +255,11 @@ endif
 endif
 
 
+# early build setup
+
+BINDIR_MADE:=$(shell $(MKDIR_P) bin)
+
+
 # compiler setup
 
 ifeq ($(CONFIG)x,x)
@@ -267,8 +274,6 @@ endif
 
 
 # build setup
-
-BINDIR_MADE:=$(shell mkdir -p bin)
 
 ifeq ($(SOSUFFIXWINDOWS),1)
 LIBOPENMPT_SONAME=libopenmpt-$(LIBOPENMPT_SO_VERSION)$(SOSUFFIX)
@@ -894,6 +899,8 @@ ifeq ($(SHARED_SONAME),1)
 LIBOPENMPT_LDFLAGS += -Wl,-soname,$(LIBOPENMPT_SONAME)
 endif
 
+MISC_OUTPUTS += bin/empty.cpp
+MISC_OUTPUTS += bin/empty.out
 MISC_OUTPUTS += bin/openmpt123$(EXESUFFIX).norpath
 MISC_OUTPUTS += bin/libopenmpt_example_c$(EXESUFFIX).norpath
 MISC_OUTPUTS += bin/libopenmpt_example_c_mem$(EXESUFFIX).norpath
