@@ -108,7 +108,7 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
-				"make STRICT=1"
+				"PATH=/usr/lib/ccache:$PATH make STRICT=1"
 			]
 		},
 		"xenial-amd64/clang": {
@@ -162,7 +162,7 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
-				"make STRICT=1 CONFIG=clang"
+				"PATH=/usr/lib/ccache:$PATH make STRICT=1 CONFIG=clang"
 			]
 		},
 
@@ -219,7 +219,7 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
-				"make STRICT=1"
+				"PATH=/usr/lib/ccache:$PATH make STRICT=1"
 			]
 		},
 		"xenial-i386/clang": {
@@ -273,7 +273,7 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
-				"make STRICT=1 CONFIG=clang"
+				"PATH=/usr/lib/ccache:$PATH make STRICT=1 CONFIG=clang"
 			]
 		},
 
@@ -329,7 +329,7 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
-				"make STRICT=1"
+				"PATH=/usr/lib/ccache:$PATH make STRICT=1"
 			]
 		},
 		"xenial-arm64/clang": {
@@ -382,7 +382,7 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
-				"make STRICT=1 CONFIG=clang"
+				"PATH=/usr/lib/ccache:$PATH make STRICT=1 CONFIG=clang"
 			]
 		},
 
@@ -438,7 +438,7 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
-				"make STRICT=1"
+				"PATH=/usr/lib/ccache:$PATH make STRICT=1"
 			]
 		},
 		"xenial-armhf/clang": {
@@ -491,7 +491,7 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
-				"make STRICT=1 CONFIG=clang"
+				"PATH=/usr/lib/ccache:$PATH make STRICT=1 CONFIG=clang"
 			]
 		}
 
