@@ -1115,9 +1115,32 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			{
 				const ModSample &sample = sndFile.GetSample(nSmp);
 				const bool sampleExists = (sample.HasSampleData());
-				int nImage = (sampleExists) ? IMAGE_SAMPLES : IMAGE_NOSAMPLE;
-				if(sampleExists && info.samplesPlaying[nSmp]) nImage = IMAGE_SAMPLEACTIVE;
-				if(info.modDoc.IsSampleMuted(nSmp)) nImage = IMAGE_SAMPLEMUTE;
+
+				static constexpr int Images[] =
+				{
+					IMAGE_NOSAMPLE,  IMAGE_NOSAMPLE,        IMAGE_NOSAMPLE,
+					IMAGE_SAMPLES,   IMAGE_SAMPLEACTIVE,    IMAGE_SAMPLEMUTE,
+					IMAGE_EXTSAMPLE, IMAGE_EXTSAMPLEACTIVE, IMAGE_EXTSAMPLEMUTE,
+					IMAGE_OPLINSTR,  IMAGE_OPLINSTRACTIVE,  IMAGE_OPLINSTRMUTE,
+				};
+
+				int image = 0;
+				if(sampleExists)
+					image = 3;
+				if(sample.uFlags[SMP_KEEPONDISK])
+					image = 6;
+				if(sample.uFlags[CHN_ADLIB])
+					image = 9;
+
+				if(info.modDoc.IsSampleMuted(nSmp))
+					image += 2;
+				else if(info.samplesPlaying[nSmp])
+					image++;
+
+				if(sample.uFlags[SMP_KEEPONDISK] && !sampleExists) 
+					image = IMAGE_EXTSAMPLEMISSING;
+				else
+					image = Images[image];
 
 				if(sndFile.GetType() == MOD_TYPE_MPT)
 				{
@@ -1134,18 +1157,18 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 
 				if (!hChild)
 				{
-					hChild = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, nSmp, info.hSamples, TVI_LAST);
+					hChild = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, image, image, 0, 0, nSmp, info.hSamples, TVI_LAST);
 				} else
 				{
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
 					tvi.hItem = hChild;
 					tvi.pszText = stmp;
 					tvi.cchTextMax = CountOf(stmp);
-					tvi.iImage = tvi.iSelectedImage = nImage;
+					tvi.iImage = tvi.iSelectedImage = image;
 					GetItem(&tvi);
-					if(tvi.iImage != nImage || _tcscmp(s, stmp) || GetItemData(hChild) != nSmp)
+					if(tvi.iImage != image || _tcscmp(s, stmp) || GetItemData(hChild) != nSmp)
 					{
-						SetItem(hChild, TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, nSmp);
+						SetItem(hChild, TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, image, image, 0, 0, nSmp);
 					}
 				}
 			} else if(hChild != nullptr)
