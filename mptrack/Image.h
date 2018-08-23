@@ -77,6 +77,9 @@ namespace GDIP
 	std::unique_ptr<Gdiplus::Metafile> LoadVectorImage(mpt::const_byte_span file);
 	std::unique_ptr<Gdiplus::Metafile> LoadVectorImage(FileReader file);
 
+	std::unique_ptr<Gdiplus::Image> ResizeImage(Gdiplus::Image &src, double scaling);
+	std::unique_ptr<Gdiplus::Bitmap> ResizeImage(Gdiplus::Bitmap &src, double scaling);
+
 	typedef Gdiplus::ARGB Pixel;
 
 	template <typename TBitmapData>
@@ -106,7 +109,7 @@ namespace GDIP
 	MPT_CONSTEXPR11_FUN uint8 B(Pixel p) noexcept { return static_cast<uint8>(p >> BLUE_SHIFT); }
 	MPT_CONSTEXPR11_FUN uint8 A(Pixel p) noexcept { return static_cast<uint8>(p >> ALPHA_SHIFT); }
 
-	MPT_CONSTEXPR11_FUN RawGDIDIB::Pixel TORawGDIDIB(Pixel p) noexcept
+	MPT_CONSTEXPR11_FUN RawGDIDIB::Pixel ToRawGDIDIB(Pixel p) noexcept
 	{
 		return RawGDIDIB::Pixel(GDIP::R(p), GDIP::G(p), GDIP::B(p), GDIP::A(p));
 	}
@@ -120,8 +123,8 @@ bool CopyToCompatibleBitmap(CBitmap &dst, CDC &dc, const RawGDIDIB &src);
 
 bool CopyToCompatibleBitmap(CBitmap &dst, CDC &dc, Gdiplus::Image &src);
 
-std::unique_ptr<RawGDIDIB> LoadPixelImage(mpt::const_byte_span file);
-std::unique_ptr<RawGDIDIB> LoadPixelImage(FileReader file);
+std::unique_ptr<RawGDIDIB> LoadPixelImage(mpt::const_byte_span file, double scaling = 1.0);
+std::unique_ptr<RawGDIDIB> LoadPixelImage(FileReader file, double scaling = 1.0);
 
 bool LoadCompatibleBitmapFromPixelImage(CBitmap &dst, CDC &dc, mpt::const_byte_span file);
 bool LoadCompatibleBitmapFromPixelImage(CBitmap &dst, CDC &dc, FileReader file);

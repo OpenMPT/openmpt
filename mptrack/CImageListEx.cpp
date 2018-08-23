@@ -17,12 +17,14 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGrow, CDC *dc, bool disabled)
+bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGrow, CDC *dc, double scaling, bool disabled)
 {
 	std::unique_ptr<RawGDIDIB> bitmap;
 	try
 	{
-		bitmap = LoadPixelImage(GetResource(MAKEINTRESOURCE(resourceID), _T("PNG")));
+		bitmap = LoadPixelImage(GetResource(MAKEINTRESOURCE(resourceID), _T("PNG")), scaling);
+		cx = mpt::saturate_round<int>(cx * scaling);
+		cy = mpt::saturate_round<int>(cy * scaling);
 	} catch(...)
 	{
 		return false;

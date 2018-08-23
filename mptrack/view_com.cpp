@@ -28,7 +28,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#define DETAILS_TOOLBAR_CY	28
+#define DETAILS_TOOLBAR_CY	Util::ScalePixels(28, m_hWnd)
 
 enum
 {

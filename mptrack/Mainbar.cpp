@@ -129,6 +129,7 @@ void CToolBarEx::EnableFlatButtons(BOOL bFlat)
 // CMainToolBar
 
 #define SCALEWIDTH(x) (Util::ScalePixels(x, m_hWnd))
+#define SCALEHEIGHT(x) (Util::ScalePixels(x, m_hWnd))
 
 // Play Command
 #define PLAYCMD_INDEX		10
@@ -137,18 +138,18 @@ void CToolBarEx::EnableFlatButtons(BOOL bFlat)
 // Base octave
 #define EDITOCTAVE_INDEX	13
 #define EDITOCTAVE_WIDTH	SCALEWIDTH(55)
-#define EDITOCTAVE_HEIGHT	20
+#define EDITOCTAVE_HEIGHT	SCALEHEIGHT(20)
 #define SPINOCTAVE_INDEX	(EDITOCTAVE_INDEX+1)
 #define SPINOCTAVE_WIDTH	SCALEWIDTH(16)
 #define SPINOCTAVE_HEIGHT	(EDITOCTAVE_HEIGHT)
 // Static "Tempo:"
 #define TEMPOTEXT_INDEX		16
 #define TEMPOTEXT_WIDTH		SCALEWIDTH(45)
-#define TEMPOTEXT_HEIGHT	20
+#define TEMPOTEXT_HEIGHT	SCALEHEIGHT(20)
 // Edit Tempo
 #define EDITTEMPO_INDEX		(TEMPOTEXT_INDEX+1)
 #define EDITTEMPO_WIDTH		SCALEWIDTH(48)
-#define EDITTEMPO_HEIGHT	20
+#define EDITTEMPO_HEIGHT	SCALEHEIGHT(20)
 // Spin Tempo
 #define SPINTEMPO_INDEX		(EDITTEMPO_INDEX+1)
 #define SPINTEMPO_WIDTH		SCALEWIDTH(16)
@@ -180,7 +181,7 @@ void CToolBarEx::EnableFlatButtons(BOOL bFlat)
 // VU Meters
 #define VUMETER_INDEX		(SPINRPB_INDEX+5)
 #define VUMETER_WIDTH		SCALEWIDTH(255)
-#define VUMETER_HEIGHT		19
+#define VUMETER_HEIGHT		SCALEHEIGHT(19)
 
 static UINT MainButtons[] =
 {
@@ -239,9 +240,12 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	if (!CToolBar::Create(parent, dwStyle)) return FALSE;
 
 	CDC *dc = GetDC();
-	m_ImageList.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, dc);
-	m_ImageListDisabled.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, dc, true);
+	const double scaling = Util::GetDPIx(m_hWnd) / 96.0;
+	const int imgSize = mpt::saturate_round<int>(16 * scaling);
+	m_ImageList.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, dc, scaling, false);
+	m_ImageListDisabled.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, dc, scaling, true);
 	ReleaseDC(dc);
+	GetToolBarCtrl().SetBitmapSize(CSize(imgSize, imgSize));
 	GetToolBarCtrl().SetImageList(&m_ImageList);
 	GetToolBarCtrl().SetDisabledImageList(&m_ImageListDisabled);
 
@@ -249,7 +253,7 @@ BOOL CMainToolBar::Create(CWnd *parent)
 
 	CRect temp;
 	GetItemRect(0, temp);
-	SetSizes(CSize(temp.Width(), temp.Height()), CSize(16, 16));
+	SetSizes(CSize(temp.Width(), temp.Height()), CSize(imgSize, imgSize));
 
 	// Dropdown menus for New and MIDI buttons
 	LPARAM dwExStyle = GetToolBarCtrl().SendMessage(TB_GETEXTENDEDSTYLE) | TBSTYLE_EX_DRAWDDARROWS;

@@ -17,7 +17,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CImageListEx : public CImageList
 {
 public:
-	bool Create(UINT resourceID, int cx, int cy, int nInitial, int nGrow, CDC *dc, bool disabled = false);
+	bool Create(UINT resourceID, int cx, int cy, int nInitial, int nGrow, CDC *dc, double scaling, bool disabled);
 };
 
 OPENMPT_NAMESPACE_END

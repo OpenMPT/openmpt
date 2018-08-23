@@ -37,11 +37,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Non-client toolbar
-#define SMP_LEFTBAR_CY			29
-#define SMP_LEFTBAR_CXSEP		14
-#define SMP_LEFTBAR_CXSPC		3
-#define SMP_LEFTBAR_CXBTN		24
-#define SMP_LEFTBAR_CYBTN		22
+#define SMP_LEFTBAR_CY			Util::ScalePixels(29, m_hWnd)
+#define SMP_LEFTBAR_CXSEP		Util::ScalePixels(14, m_hWnd)
+#define SMP_LEFTBAR_CXSPC		Util::ScalePixels(3, m_hWnd)
+#define SMP_LEFTBAR_CXBTN		Util::ScalePixels(24, m_hWnd)
+#define SMP_LEFTBAR_CYBTN		Util::ScalePixels(22, m_hWnd)
 
 #define MIN_ZOOM	-6
 #define MAX_ZOOM	10

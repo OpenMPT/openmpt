@@ -22,6 +22,8 @@
 #pragma warning(disable:4458) // declaration of 'x' hides class member
 #include <gdiplus.h>
 #pragma warning(pop)
+#undef min
+#undef max
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -136,6 +138,34 @@ std::unique_ptr<Gdiplus::Metafile> LoadVectorImage(FileReader file)
 }
 
 
+std::unique_ptr<Gdiplus::Image> ResizeImage(Gdiplus::Image &src, double scaling)
+{
+	const int newWidth = mpt::saturate_round<int>(src.GetWidth() * scaling), newHeight = mpt::saturate_round<int>(src.GetHeight() * scaling);
+	std::unique_ptr<Gdiplus::Image> resizedImage = mpt::make_unique<Gdiplus::Bitmap>(newWidth, newHeight, PixelFormat32bppARGB);
+	std::unique_ptr<Gdiplus::Graphics> resizedGraphics(Gdiplus::Graphics::FromImage(resizedImage.get()));
+
+	resizedGraphics->SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);
+	resizedGraphics->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHalf);
+	resizedGraphics->SetSmoothingMode(Gdiplus::SmoothingModeNone);
+	resizedGraphics->DrawImage(&src, 0, 0, newWidth, newHeight);
+	return resizedImage;
+}
+
+
+std::unique_ptr<Gdiplus::Bitmap> ResizeImage(Gdiplus::Bitmap &src, double scaling)
+{
+	const int newWidth = mpt::saturate_round<int>(src.GetWidth() * scaling), newHeight = mpt::saturate_round<int>(src.GetHeight() * scaling);
+	std::unique_ptr<Gdiplus::Bitmap> resizedImage = mpt::make_unique<Gdiplus::Bitmap>(newWidth, newHeight, PixelFormat32bppARGB);
+	std::unique_ptr<Gdiplus::Graphics> resizedGraphics(Gdiplus::Graphics::FromImage(resizedImage.get()));
+
+	resizedGraphics->SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);
+	resizedGraphics->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHalf);
+	resizedGraphics->SetSmoothingMode(Gdiplus::SmoothingModeNone);
+	resizedGraphics->DrawImage(&src, 0, 0, newWidth, newHeight);
+	return resizedImage;
+}
+
+
 } // namespace GDPI
 
 
@@ -154,7 +184,7 @@ std::unique_ptr<RawGDIDIB> ToRawGDIDIB(Gdiplus::Bitmap &bitmap)
 		const GDIP::Pixel *src = GDIP::GetScanline(bitmapData, y);
 		for(uint32 x = 0; x < result->Width(); ++x)
 		{
-			*dst = GDIP::TORawGDIDIB(*src);
+			*dst = GDIP::ToRawGDIDIB(*src);
 			src++;
 			dst++;
 		}
@@ -164,15 +194,21 @@ std::unique_ptr<RawGDIDIB> ToRawGDIDIB(Gdiplus::Bitmap &bitmap)
 }
 
 
-std::unique_ptr<RawGDIDIB> LoadPixelImage(mpt::const_byte_span file)
+std::unique_ptr<RawGDIDIB> LoadPixelImage(mpt::const_byte_span file, double scaling)
 {
-	return ToRawGDIDIB(*GDIP::LoadPixelImage(file));
+	auto bitmap = GDIP::LoadPixelImage(file);
+	if(scaling != 1.0)
+		bitmap = GDIP::ResizeImage(*bitmap, scaling);
+	return ToRawGDIDIB(*bitmap);
 }
 
 
-std::unique_ptr<RawGDIDIB> LoadPixelImage(FileReader file)
+std::unique_ptr<RawGDIDIB> LoadPixelImage(FileReader file, double scaling)
 {
-	return ToRawGDIDIB(*GDIP::LoadPixelImage(file));
+	auto bitmap = GDIP::LoadPixelImage(file);
+	if(scaling != 1.0)
+		bitmap = GDIP::ResizeImage(*bitmap, scaling);
+	return ToRawGDIDIB(*bitmap);
 }
 
 

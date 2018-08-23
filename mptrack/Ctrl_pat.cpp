@@ -128,7 +128,9 @@ BOOL CCtrlPatterns::OnInitDialog()
 	rcOrderList.right = rect.right - 4;
 	m_OrderList.Init(rcOrderList, pMainFrm->GetGUIFont());
 	// Toolbar buttons
-	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
+	const int imgSize = Util::ScalePixels(16, m_hWnd);
+	m_ToolBar.SetBitmapSize(CSize(imgSize, imgSize));
+	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_PatternIcons, CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
 	m_ToolBar.AddButton(IDC_PATTERN_NEW, TIMAGE_PATTERN_NEW);
 	m_ToolBar.AddButton(IDC_PATTERN_PLAY, TIMAGE_PATTERN_PLAY);
 	m_ToolBar.AddButton(IDC_PATTERN_PLAYFROMSTART, TIMAGE_PATTERN_RESTART);

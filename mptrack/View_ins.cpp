@@ -37,11 +37,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Non-client toolbar
-#define ENV_LEFTBAR_CY			29
-#define ENV_LEFTBAR_CXSEP		14
-#define ENV_LEFTBAR_CXSPC		3
-#define ENV_LEFTBAR_CXBTN		24
-#define ENV_LEFTBAR_CYBTN		22
+#define ENV_LEFTBAR_CY			Util::ScalePixels(29, m_hWnd)
+#define ENV_LEFTBAR_CXSEP		Util::ScalePixels(14, m_hWnd)
+#define ENV_LEFTBAR_CXSPC		Util::ScalePixels(3, m_hWnd)
+#define ENV_LEFTBAR_CXBTN		Util::ScalePixels(24, m_hWnd)
+#define ENV_LEFTBAR_CYBTN		Util::ScalePixels(22, m_hWnd)
 
 
 static const UINT cLeftBarButtons[ENV_LEFTBAR_BUTTONS] =

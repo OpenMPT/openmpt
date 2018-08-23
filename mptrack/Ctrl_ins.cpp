@@ -952,6 +952,8 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_bInitialized = FALSE;
 	SetRedraw(FALSE);
 
+	const int imgSize = Util::ScalePixels(16, m_hWnd);
+	m_ToolBar.SetBitmapSize(CSize(imgSize, imgSize));
 	m_ToolBar.SetExtendedStyle(m_ToolBar.GetExtendedStyle() | TBSTYLE_EX_DRAWDDARROWS);
 	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
 	m_ToolBar.AddButton(IDC_INSTRUMENT_NEW, TIMAGE_INSTR_NEW, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
