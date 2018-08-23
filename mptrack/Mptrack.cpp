@@ -1403,6 +1403,8 @@ void CSplashScreen::OnPaint()
 
 	CRect rect;
 	GetClientRect(&rect);
+	gfx.SetInterpolationMode(Gdiplus::InterpolationModeHighQuality);
+	gfx.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
 	gfx.DrawImage(m_Image.get(), 0, 0, rect.right, rect.bottom);
 
 	CDialog::OnPaint();
