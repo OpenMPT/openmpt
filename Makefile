@@ -1248,6 +1248,7 @@ bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).dev.js.tar: bin/libopenmpt.js
 	mkdir -p bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses
 	svn export ./LICENSE                         bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/license.txt
+	svn export ./include/minimp3/LICENSE         bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses/license.minimp3.txt
 	svn export ./include/miniz/miniz.c           bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses/license.miniz.txt
 	svn export ./include/stb_vorbis/stb_vorbis.c bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses/license.stb_vorbis.txt
 	cp bin/libopenmpt.js                         bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt.js
