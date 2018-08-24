@@ -2149,6 +2149,8 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			// Duplicate Check Type
 			switch(chn.pModInstrument->nDCT)
 			{
+			case DCT_NONE:
+				break;
 			// Note
 			case DCT_NOTE:
 				if(note && chn.nNote == note && pIns == chn.pModInstrument) bOk = true;
@@ -2269,6 +2271,8 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 					// Switch off note played on this plugin, on this tracker channel and midi channel
 					SendMIDINote(nChn, NOTE_KEYOFF, 0);
 					srcChn.nArpeggioLastNote = NOTE_NONE;
+					break;
+				case NNA_CONTINUE:
 					break;
 				}
 			}
