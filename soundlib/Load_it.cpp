@@ -794,7 +794,15 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				continue;
 
 			lastSampleCompressed = false;
-			if(!sample.uFlags[SMP_KEEPONDISK])
+			if(sample.uFlags[CHN_ADLIB])
+			{
+				// FM instrument in MPTM
+				OPLPatch patch;
+				if(file.ReadArray(patch))
+				{
+					sample.SetAdlib(true, patch);
+				}
+			} else if(!sample.uFlags[SMP_KEEPONDISK])
 			{
 				SampleIO sampleIO = sampleHeader.GetSampleFormat(fileHeader.cwtv);
 				if(loadFlags & loadSampleData)
@@ -1787,16 +1795,17 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 	// Writing Sample Data
 	for(SAMPLEINDEX smp = 1; smp <= itHeader.smpnum; smp++)
 	{
+		const ModSample &sample = Samples[smp];
 #ifdef MODPLUG_TRACKER
 		uint32 type = GetType() == MOD_TYPE_IT ? 1 : 4;
 		if(compatibilityExport) type = 2;
-		bool compress = ((((Samples[smp].GetNumChannels() > 1) ? TrackerSettings::Instance().MiscITCompressionStereo : TrackerSettings::Instance().MiscITCompressionMono) & type) != 0);
+		bool compress = ((((sample.GetNumChannels() > 1) ? TrackerSettings::Instance().MiscITCompressionStereo : TrackerSettings::Instance().MiscITCompressionMono) & type) != 0);
 #else
 		bool compress = false;
 #endif // MODPLUG_TRACKER
 		// Old MPT, DUMB and probably other libraries will only consider the IT2.15 compression flag if the header version also indicates IT2.15.
 		// MilkyTracker <= 0.90.85 will only assume IT2.15 compression with cmwt == 0x215, ignoring the delta flag completely.
-		itss.ConvertToIT(Samples[smp], GetType(), compress, itHeader.cmwt >= 0x215, GetType() == MOD_TYPE_MPT);
+		itss.ConvertToIT(sample, GetType(), compress, itHeader.cmwt >= 0x215, GetType() == MOD_TYPE_MPT);
 		const bool isExternal = itss.cvt == ITSample::cvtExternalSample;
 
 		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[smp]);
@@ -1820,12 +1829,12 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		mpt::IO::SeekAbsolute(f, dwPos);
 		if(!isExternal)
 		{
-			if(Samples[smp].nLength != smpLength)
+			if(sample.nLength > smpLength)
 			{
 				// Sample length does not fit into IT header!
 				AddToLog(mpt::format("Truncating sample %1: Length exceeds exceeds 4 gigasamples.")(smp));
 			}
-			dwPos += itss.GetSampleFormat().WriteSample(f, Samples[smp], smpLength);
+			dwPos += itss.GetSampleFormat().WriteSample(f, sample, smpLength);
 		} else
 		{
 #ifdef MPT_EXTERNAL_SAMPLES

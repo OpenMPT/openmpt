@@ -35,7 +35,7 @@ struct ModSample
 	SampleFlags uFlags;						// Sample flags (see ChannelFlags enum)
 	int8   RelativeTone;					// Relative note to middle c (for MOD/XM)
 	int8   nFineTune;						// Finetune period (for MOD/XM), -128...127
-	uint8  nVibType;						// Auto vibrato type, see VibratoType enum
+	VibratoType nVibType;					// Auto vibrato type
 	uint8  nVibSweep;						// Auto vibrato sweep (i.e. how long it takes until the vibrato effect reaches its full strength)
 	uint8  nVibDepth;						// Auto vibrato depth
 	uint8  nVibRate;						// Auto vibrato rate (speed)

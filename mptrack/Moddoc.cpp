@@ -895,7 +895,7 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 		{
 			// Set instrument (or sample if there are no instruments)
 			chn.ResetEnvelopes();
-			m_SndFile.InstrumentChange(&chn, params.m_instr);
+			m_SndFile.InstrumentChange(chn, params.m_instr);
 		} else if(params.m_sample > 0 && params.m_sample <= GetNumSamples())	// Or set sample explicitely
 		{
 			ModSample &sample = m_SndFile.GetSample(params.m_sample);
@@ -918,7 +918,7 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 			m_SndFile.m_opl->Patch(channel, chn.pModSample->adlib);
 		}
 
-		m_SndFile.NoteChange(&chn, note, false, true, true);
+		m_SndFile.NoteChange(chn, note, false, true, true, channel);
 		if(params.m_volume >= 0) chn.nVolume = std::min(params.m_volume, 256);
 
 		// Handle sample looping.
@@ -972,13 +972,13 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 	{
 		CriticalSection cs;
 		// Apply note cut / off / fade (also on preview channels)
-		m_SndFile.NoteChange(&m_SndFile.m_PlayState.Chn[channel], note);
+		m_SndFile.NoteChange(m_SndFile.m_PlayState.Chn[channel], note);
 		for(CHANNELINDEX c = m_SndFile.GetNumChannels(); c < MAX_CHANNELS; c++)
 		{
 			ModChannel &chn = m_SndFile.m_PlayState.Chn[c];
 			if(chn.nMasterChn == 0 && (chn.pModSample || chn.pModInstrument))
 			{
-				m_SndFile.NoteChange(&chn, note);
+				m_SndFile.NoteChange(chn, note);
 			}
 		}
 	}
@@ -1022,7 +1022,7 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 		// Fade all channels > m_nChannels which are playing this note and aren't NNA channels.
 		if(!pChn->nMasterChn && !pChn->dwFlags[mask] && pChn->nLength && (note == pChn->nNewNote || !note))
 		{
-			m_SndFile.KeyOff(pChn);
+			m_SndFile.KeyOff(*pChn);
 			if (!m_SndFile.m_nInstruments) pChn->dwFlags.reset(CHN_LOOP);	// FIXME: If a sample with pingpong loop is playing backwards, stuff before the loop is played again!
 			if (fade) pChn->dwFlags.set(CHN_NOTEFADE);
 			// Instantly stop samples that would otherwise play forever

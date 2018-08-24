@@ -918,9 +918,9 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		if(fileHeader.version >= 0x0202) envMask = instrChunk.ReadUint32LE();
 
 		mptIns->nFadeOut = insHeader.fadeout;
-		const uint8 NNA[4] = { NNA_NOTECUT, NNA_CONTINUE, NNA_NOTEOFF, NNA_NOTEFADE };
-		const uint8 DCT[4] = { DCT_NONE, DCT_NOTE, DCT_SAMPLE, DCT_INSTRUMENT };
-		const uint8 DNA[4] = { DNA_NOTECUT, DNA_NOTEFADE /* actually continue, but IT doesn't have that */, DNA_NOTEOFF, DNA_NOTEFADE };
+		const NewNoteAction NNA[4]       = { NNA_NOTECUT, NNA_CONTINUE, NNA_NOTEOFF, NNA_NOTEFADE };
+		const DuplicateCheckType DCT[4]  = { DCT_NONE, DCT_NOTE, DCT_SAMPLE, DCT_INSTRUMENT };
+		const DuplicateNoteAction DNA[4] = { DNA_NOTECUT, DNA_NOTEFADE /* actually continue, but IT doesn't have that */, DNA_NOTEOFF, DNA_NOTEFADE };
 		mptIns->nNNA = NNA[insHeader.nna & 3];
 		mptIns->nDCT = DCT[(insHeader.nna >> 8) & 3];
 		mptIns->nDNA = DNA[(insHeader.nna >> 12) & 3];
@@ -1092,7 +1092,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					if(sample > 0 && sample <= m_nSamples)
 					{
 						ModSample &mptSmp = Samples[sample];
-						mptSmp.nVibType = insHeader.vibtype;
+						mptSmp.nVibType = static_cast<VibratoType>(insHeader.vibtype & 3); // In fact, MT2 only implements sine vibrato
 						mptSmp.nVibSweep = insHeader.vibsweep;
 						mptSmp.nVibDepth = insHeader.vibdepth;
 						mptSmp.nVibRate = insHeader.vibrate;

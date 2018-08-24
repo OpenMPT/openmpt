@@ -1720,7 +1720,7 @@ SAMPLEINDEX CSoundFile::GetNextFreeSample(INSTRUMENTINDEX targetInstrument, SAMP
 		for(SAMPLEINDEX i = start; i <= GetModSpecifications().samplesMax; i++)
 		{
 			// Early exit for FM instruments
-			if(Samples[i].uFlags[CHN_ADLIB])
+			if(Samples[i].uFlags[CHN_ADLIB] && (targetInstrument == INSTRUMENTINDEX_INVALID || !IsSampleReferencedByInstrument(i, targetInstrument)))
 				continue;
 
 			// When loading into an instrument, ignore non-empty sample names. Else, only use this slot if the sample name is empty or we're in second pass.
@@ -1887,7 +1887,7 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 }
 
 
-void CSoundFile::PropagateXMAutoVibrato(INSTRUMENTINDEX ins, uint8 type, uint8 sweep, uint8 depth, uint8 rate)
+void CSoundFile::PropagateXMAutoVibrato(INSTRUMENTINDEX ins, VibratoType type, uint8 sweep, uint8 depth, uint8 rate)
 {
 	if(ins > m_nInstruments || Instruments[ins] == nullptr)
 		return;

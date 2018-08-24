@@ -167,13 +167,13 @@ typedef FlagSet<ChannelFlags, uint16> SampleFlags;
 
 
 // Instrument envelope-specific flags
-enum EnvelopeFlags
+enum EnvelopeFlags : uint8
 {
-	ENV_ENABLED		= 0x01,	// env is enabled
-	ENV_LOOP		= 0x02,	// env loop
-	ENV_SUSTAIN		= 0x04,	// env sustain
-	ENV_CARRY		= 0x08,	// env carry
-	ENV_FILTER		= 0x10,	// filter env enabled (this has to be combined with ENV_ENABLED in the pitch envelope's flags)
+	ENV_ENABLED = 0x01,	// env is enabled
+	ENV_LOOP    = 0x02,	// env loop
+	ENV_SUSTAIN = 0x04,	// env sustain
+	ENV_CARRY   = 0x08,	// env carry
+	ENV_FILTER  = 0x10,	// filter env enabled (this has to be combined with ENV_ENABLED in the pitch envelope's flags)
 };
 DECLARE_FLAGSET(EnvelopeFlags)
 
@@ -186,16 +186,16 @@ DECLARE_FLAGSET(EnvelopeFlags)
 
 
 // Instrument-specific flags
-enum InstrumentFlags
+enum InstrumentFlags : uint8
 {
-	INS_SETPANNING	= 0x01,	// Panning enabled
-	INS_MUTE		= 0x02,	// Instrument is muted
+	INS_SETPANNING = 0x01,	// Panning enabled
+	INS_MUTE       = 0x02,	// Instrument is muted
 };
 DECLARE_FLAGSET(InstrumentFlags)
 
 
 // envelope types in instrument editor
-enum EnvelopeType
+enum EnvelopeType : uint8
 {
 	ENV_VOLUME = 0,
 	ENV_PANNING,
@@ -205,57 +205,65 @@ enum EnvelopeType
 };
 
 // Filter Modes
-#define FLTMODE_UNCHANGED		0xFF
-#define FLTMODE_LOWPASS			0
-#define FLTMODE_HIGHPASS		1
+enum InstrFilterMode : uint8
+{
+	FLTMODE_UNCHANGED = 0xFF,
+	FLTMODE_LOWPASS   = 0,
+	FLTMODE_HIGHPASS  = 1,
+};
 
 
 // NNA types (New Note Action)
-#define NNA_NOTECUT		0
-#define NNA_CONTINUE	1
-#define NNA_NOTEOFF		2
-#define NNA_NOTEFADE	3
+enum NewNoteAction : uint8
+{
+	NNA_NOTECUT  = 0,
+	NNA_CONTINUE = 1,
+	NNA_NOTEOFF  = 2,
+	NNA_NOTEFADE = 3,
+};
 
 // DCT types (Duplicate Check Types)
-#define DCT_NONE		0
-#define DCT_NOTE		1
-#define DCT_SAMPLE		2
-#define DCT_INSTRUMENT	3
-#define DCT_PLUGIN		4
+enum DuplicateCheckType : uint8
+{
+	DCT_NONE       = 0,
+	DCT_NOTE       = 1,
+	DCT_SAMPLE     = 2,
+	DCT_INSTRUMENT = 3,
+	DCT_PLUGIN     = 4,
+};
 
 // DNA types (Duplicate Note Action)
-#define DNA_NOTECUT		0
-#define DNA_NOTEOFF		1
-#define DNA_NOTEFADE	2
+enum DuplicateNoteAction : uint8
+{
+	DNA_NOTECUT  = 0,
+	DNA_NOTEOFF  = 1,
+	DNA_NOTEFADE = 2,
+};
 
 
 // Module flags - contains both song configuration and playback state... Use SONG_FILE_FLAGS and SONG_PLAY_FLAGS distinguish between the two.
 enum SongFlags
 {
-	//SONG_EMBEDMIDICFG	= 0x0001,		// Embed macros in file
-	SONG_FASTVOLSLIDES	= 0x0002,		// Old Scream Tracker 3.0 volume slides
-	SONG_ITOLDEFFECTS	= 0x0004,		// Old Impulse Tracker effect implementations
-	SONG_ITCOMPATGXX	= 0x0008,		// IT "Compatible Gxx" (IT's flag to behave more like other trackers w/r/t portamento effects)
-	SONG_LINEARSLIDES	= 0x0010,		// Linear slides vs. Amiga slides
-	SONG_PATTERNLOOP	= 0x0020,		// Loop current pattern (pattern editor)
-	SONG_STEP			= 0x0040,		// Song is in "step" mode (pattern editor)
-	SONG_PAUSED			= 0x0080,		// Song is paused (no tick processing, just rendering audio)
-	SONG_FADINGSONG		= 0x0100,		// Song is fading out
-	SONG_ENDREACHED		= 0x0200,		// Song is finished
-	//SONG_GLOBALFADE	= 0x0400,		// Song is fading out
-	//SONG_CPUVERYHIGH	= 0x0800,		// High CPU usage
-	SONG_FIRSTTICK		= 0x1000,		// Is set when the current tick is the first tick of the row
-	SONG_MPTFILTERMODE	= 0x2000,		// Local filter mode (reset filter on each note)
-	SONG_SURROUNDPAN	= 0x4000,		// Pan in the rear channels
-	SONG_EXFILTERRANGE	= 0x8000,		// Cutoff Filter has double frequency range (up to ~10Khz)
-	SONG_AMIGALIMITS	= 0x10000,		// Enforce amiga frequency limits
-	SONG_S3MOLDVIBRATO	= 0x20000,		// ScreamTracker 2 vibrato in S3M files
-	//SONG_ITPEMBEDIH	= 0x40000,		// Embed instrument headers in project file
-	SONG_BREAKTOROW		= 0x80000,		// Break to row command encountered (internal flag, do not touch)
-	SONG_POSJUMP		= 0x100000,		// Position jump encountered (internal flag, do not touch)
-	SONG_PT_MODE		= 0x200000,		// ProTracker 1/2 playback mode
-	SONG_PLAYALLSONGS	= 0x400000,		// Play all subsongs consecutively (libopenmpt)
-	SONG_ISAMIGA		= 0x800000,		// Is an Amiga module and thus qualifies to be played using the Paula BLEP resampler
+	SONG_FASTVOLSLIDES = 0x0002,    // Old Scream Tracker 3.0 volume slides
+	SONG_ITOLDEFFECTS  = 0x0004,    // Old Impulse Tracker effect implementations
+	SONG_ITCOMPATGXX   = 0x0008,    // IT "Compatible Gxx" (IT's flag to behave more like other trackers w/r/t portamento effects)
+	SONG_LINEARSLIDES  = 0x0010,    // Linear slides vs. Amiga slides
+	SONG_PATTERNLOOP   = 0x0020,    // Loop current pattern (pattern editor)
+	SONG_STEP          = 0x0040,    // Song is in "step" mode (pattern editor)
+	SONG_PAUSED        = 0x0080,    // Song is paused (no tick processing, just rendering audio)
+	SONG_FADINGSONG    = 0x0100,    // Song is fading out
+	SONG_ENDREACHED    = 0x0200,    // Song is finished
+	SONG_FIRSTTICK     = 0x1000,    // Is set when the current tick is the first tick of the row
+	SONG_MPTFILTERMODE = 0x2000,    // Local filter mode (reset filter on each note)
+	SONG_SURROUNDPAN   = 0x4000,    // Pan in the rear channels
+	SONG_EXFILTERRANGE = 0x8000,    // Cutoff Filter has double frequency range (up to ~10Khz)
+	SONG_AMIGALIMITS   = 0x10000,   // Enforce amiga frequency limits
+	SONG_S3MOLDVIBRATO = 0x20000,   // ScreamTracker 2 vibrato in S3M files
+	SONG_BREAKTOROW    = 0x80000,   // Break to row command encountered (internal flag, do not touch)
+	SONG_POSJUMP       = 0x100000,  // Position jump encountered (internal flag, do not touch)
+	SONG_PT_MODE       = 0x200000,  // ProTracker 1/2 playback mode
+	SONG_PLAYALLSONGS  = 0x400000,  // Play all subsongs consecutively (libopenmpt)
+	SONG_ISAMIGA       = 0x800000,  // Is an Amiga module and thus qualifies to be played using the Paula BLEP resampler
 };
 DECLARE_FLAGSET(SongFlags)
 
@@ -287,7 +295,7 @@ DECLARE_FLAGSET(SongFlags)
 #define MAX_GLOBAL_VOLUME 256u
 
 // Resampling modes
-enum ResamplingMode
+enum ResamplingMode : uint8
 {
 	// ATTENTION: Do not change ANY of these values, as they get written out to files in per instrument interpolation settings
 	// and old files have these exact values in them which should not change meaning.
@@ -344,7 +352,7 @@ enum PLUGVOLUMEHANDLING
 	PLUGIN_VOLUMEHANDLING_MAX,
 };
 
-enum MidiChannel
+enum MidiChannel : uint8
 {
 	MidiNoChannel		= 0,
 	MidiFirstChannel	= 1,
@@ -354,7 +362,7 @@ enum MidiChannel
 
 
 // Vibrato Types
-enum VibratoType
+enum VibratoType : uint8
 {
 	VIB_SINE = 0,
 	VIB_SQUARE,

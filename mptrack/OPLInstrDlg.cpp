@@ -229,7 +229,7 @@ BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 	case IDC_SLIDER6:
 	case IDC_SLIDER13:
 		// Volume Level
-		text = mpt::tfmt::val((-63 + slider->GetPos()) * 0.75) + _T(" dB");
+		text = mpt::tfmt::fmt((-63 + slider->GetPos()) * 0.75, mpt::FormatSpec().SetFlags(mpt::fmt::NotaFix | mpt::fmt::FillOff).SetPrecision(2)) + _T(" dB");
 		break;
 	case IDC_SLIDER7:
 	case IDC_SLIDER14:

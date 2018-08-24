@@ -2910,7 +2910,7 @@ void CCtrlSamples::OnVibTypeChanged()
 	if (n >= 0)
 	{
 		PrepareUndo("Set Vibrato Type");
-		m_sndFile.GetSample(m_nSample).nVibType = static_cast<uint8>(m_ComboAutoVib.GetItemData(n));
+		m_sndFile.GetSample(m_nSample).nVibType = static_cast<VibratoType>(m_ComboAutoVib.GetItemData(n));
 
 		PropagateAutoVibratoChanges();
 		SetModified(SampleHint().Info(), false, false);

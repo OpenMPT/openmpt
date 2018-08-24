@@ -375,7 +375,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			warnings.set(wMODSampleFrequency);
 		}
 
-		if(!newTypeIsS3M && sample.uFlags[CHN_ADLIB])
+		if(!CSoundFile::SupportsOPL(nNewType) && sample.uFlags[CHN_ADLIB])
 		{
 			warnings.set(wAdlibInstruments);
 		}

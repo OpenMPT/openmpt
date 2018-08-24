@@ -2244,7 +2244,7 @@ void CCtrlInstruments::OnNNAChanged()
 		if (pIns->nNNA != m_ComboNNA.GetCurSel())
 		{
 			PrepareUndo("Set New Note Action");
-			pIns->nNNA = static_cast<uint8>(m_ComboNNA.GetCurSel());
+			pIns->nNNA = static_cast<NewNoteAction>(m_ComboNNA.GetCurSel());
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}
@@ -2259,7 +2259,7 @@ void CCtrlInstruments::OnDCTChanged()
 		if (pIns->nDCT != m_ComboDCT.GetCurSel())
 		{
 			PrepareUndo("Set Duplicate Check Type");
-			pIns->nDCT = static_cast<uint8>(m_ComboDCT.GetCurSel());
+			pIns->nDCT = static_cast<DuplicateCheckType>(m_ComboDCT.GetCurSel());
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}
@@ -2274,7 +2274,7 @@ void CCtrlInstruments::OnDCAChanged()
 		if (pIns->nDNA != m_ComboDCA.GetCurSel())
 		{
 			PrepareUndo("Set Duplicate Check Action");
-			pIns->nDNA = static_cast<uint8>(m_ComboDCA.GetCurSel());
+			pIns->nDNA = static_cast<DuplicateNoteAction>(m_ComboDCA.GetCurSel());
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}
@@ -2599,7 +2599,7 @@ void CCtrlInstruments::OnFilterModeChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
-		int instFiltermode = m_CbnFilterMode.GetItemData(m_CbnFilterMode.GetCurSel());
+		InstrFilterMode instFiltermode = static_cast<InstrFilterMode>(m_CbnFilterMode.GetItemData(m_CbnFilterMode.GetCurSel()));
 
 		if(pIns->nFilterMode != instFiltermode)
 		{

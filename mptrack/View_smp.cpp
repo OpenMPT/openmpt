@@ -2635,7 +2635,7 @@ void CViewSample::NoteOff(ModCommand::NOTE note)
 {
 	CSoundFile &sndFile = GetDocument()->GetSoundFile();
 	ModChannel &chn = sndFile.m_PlayState.Chn[m_noteChannel[note - NOTE_MIN]];
-	sndFile.KeyOff(&chn);
+	sndFile.KeyOff(chn);
 	chn.dwFlags.set(CHN_NOTEFADE);
 	m_noteChannel[note - NOTE_MIN] = CHANNELINDEX_INVALID;
 }
@@ -3234,7 +3234,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				if(m_noteChannel[note - NOTE_MIN] != CHANNELINDEX_INVALID)
 				{
 					// Release sustain loop on key up
-					sndFile.KeyOff(&sndFile.m_PlayState.Chn[m_noteChannel[note - NOTE_MIN]]);
+					sndFile.KeyOff(sndFile.m_PlayState.Chn[m_noteChannel[note - NOTE_MIN]]);
 				}
 				break;
 			case seNoteOffOnKeyUp:

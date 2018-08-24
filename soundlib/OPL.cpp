@@ -113,6 +113,15 @@ uint8 OPL::AllocateVoice(CHANNELINDEX c)
 }
 
 
+void OPL::MoveChannel(CHANNELINDEX from, CHANNELINDEX to)
+{
+	uint8 oplCh = m_ChanToOPL[from];
+	m_OPLtoChan[oplCh] = to;
+	m_ChanToOPL[from] = OPL_CHANNEL_INVALID;
+	m_ChanToOPL[to] = oplCh;
+}
+
+
 void OPL::NoteOff(CHANNELINDEX c)
 {
 	uint8 oplCh = GetVoice(c);
@@ -126,7 +135,7 @@ void OPL::NoteOff(CHANNELINDEX c)
 void OPL::NoteCut(CHANNELINDEX c)
 {
 	NoteOff(c);
-	Volume(c, 0);
+	Volume(c, 0, false);
 }
 
 
@@ -180,7 +189,7 @@ uint8 OPL::CalcVolume(uint8 trackerVol, uint8 kslVolume)
 }
 
 
-void OPL::Volume(CHANNELINDEX c, uint8 vol)
+void OPL::Volume(CHANNELINDEX c, uint8 vol, bool applyToModulator)
 {
 	uint8 oplCh = GetVoice(c);
 	if(oplCh == OPL_CHANNEL_INVALID || m_opl == nullptr)
@@ -188,12 +197,15 @@ void OPL::Volume(CHANNELINDEX c, uint8 vol)
 
 	const auto &patch = m_Patches[oplCh];
 	const uint16 modulator = OperatorToRegister(oplCh), carrier = modulator + 3;
-	if(patch[10] & CONNECTION_BIT)
+	if((patch[10] & CONNECTION_BIT) || applyToModulator)
 	{
 		// Set volume of both operators in additive mode
 		m_opl->Port(KSL_LEVEL + modulator, CalcVolume(vol, patch[2]));
 	}
-	m_opl->Port(KSL_LEVEL + carrier, CalcVolume(vol, patch[3]));
+	if(!applyToModulator)
+	{
+		m_opl->Port(KSL_LEVEL + carrier, CalcVolume(vol, patch[3]));
+	}
 }
 
 

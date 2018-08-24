@@ -608,7 +608,7 @@ public:
 
 #ifdef MODPLUG_TRACKER
 	// Get parent CModDoc. Can be nullptr if previewing from tree view, and is always nullptr if we're not actually compiling OpenMPT.
-	CModDoc *GetpModDoc() const { return m_pModDoc; }
+	CModDoc *GetpModDoc() const noexcept { return m_pModDoc; }
 
 	bool Create(FileReader file, ModLoadingFlags loadFlags = loadCompleteModule, CModDoc *pModDoc = nullptr);
 #else
@@ -616,9 +616,9 @@ public:
 #endif // MODPLUG_TRACKER
 
 	bool Destroy();
-	Enum<MODTYPE> GetType() const { return m_nType; }
+	Enum<MODTYPE> GetType() const noexcept { return m_nType; }
 
-	MODCONTAINERTYPE GetContainerType() const { return m_ContainerType; }
+	MODCONTAINERTYPE GetContainerType() const noexcept { return m_ContainerType; }
 
 	// rough heuristic, could be improved
 	mpt::Charset GetCharsetFile() const // 8bit string encoding of strings in the on-disk file
@@ -690,7 +690,8 @@ public:
 	void InitAmigaResampler();
 
 	void InitOPL();
-	bool SupportsOPL() const { return m_nType == MOD_TYPE_S3M; }
+	static constexpr bool SupportsOPL(MODTYPE type) { return type & (MOD_TYPE_S3M | MOD_TYPE_MPT); }
+	bool SupportsOPL() const noexcept { return SupportsOPL(m_nType); }
 
 	static ProbeResult ProbeFileHeaderMMCMP(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderPP20(MemoryFileReader file, const uint64 *pfilesize);
@@ -869,13 +870,13 @@ public:
 	bool ProcessEffects();
 	CHANNELINDEX GetNNAChannel(CHANNELINDEX nChn) const;
 	CHANNELINDEX CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, bool forceCut);
-	void NoteChange(ModChannel *pChn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false) const;
-	void InstrumentChange(ModChannel *pChn, uint32 instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true) const;
-	void ApplyInstrumentPanning(ModChannel *pChn, const ModInstrument *instr, const ModSample *smp) const;
+	void NoteChange(ModChannel &chn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false, CHANNELINDEX channelHint = CHANNELINDEX_INVALID) const;
+	void InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true) const;
+	void ApplyInstrumentPanning(ModChannel &chn, const ModInstrument *instr, const ModSample *smp) const;
 	uint32 CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, bool *isExtended = nullptr) const;
 
 	// Channel Effects
-	void KeyOff(ModChannel *pChn) const;
+	void KeyOff(ModChannel &chn) const;
 	// Global Effects
 	void SetTempo(TEMPO param, bool setAsNonModcommand = false);
 	void SetSpeed(PlayState &playState, uint32 param) const;
@@ -890,31 +891,31 @@ protected:
 	// Channel effect processing
 	int GetVibratoDelta(int type, int position) const;
 
-	void ProcessVolumeSwing(ModChannel *pChn, int &vol) const;
-	void ProcessPanningSwing(ModChannel *pChn) const;
-	void ProcessTremolo(ModChannel *pChn, int &vol) const;
+	void ProcessVolumeSwing(ModChannel &chn, int &vol) const;
+	void ProcessPanningSwing(ModChannel &chn) const;
+	void ProcessTremolo(ModChannel &chn, int &vol) const;
 	void ProcessTremor(CHANNELINDEX nChn, int &vol);
 
-	bool IsEnvelopeProcessed(const ModChannel *pChn, EnvelopeType env) const;
-	void ProcessVolumeEnvelope(ModChannel *pChn, int &vol) const;
-	void ProcessPanningEnvelope(ModChannel *pChn) const;
-	void ProcessPitchFilterEnvelope(ModChannel *pChn, int &period) const;
+	bool IsEnvelopeProcessed(const ModChannel &chn, EnvelopeType env) const;
+	void ProcessVolumeEnvelope(ModChannel &chn, int &vol) const;
+	void ProcessPanningEnvelope(ModChannel &chn) const;
+	int ProcessPitchFilterEnvelope(ModChannel &chn, int &period) const;
 
-	void IncrementEnvelopePosition(ModChannel *pChn, EnvelopeType envType) const;
-	void IncrementEnvelopePositions(ModChannel *pChn) const;
+	void IncrementEnvelopePosition(ModChannel &chn, EnvelopeType envType) const;
+	void IncrementEnvelopePositions(ModChannel &chn) const;
 
-	void ProcessInstrumentFade(ModChannel *pChn, int &vol) const;
+	void ProcessInstrumentFade(ModChannel &chn, int &vol) const;
 
-	void ProcessPitchPanSeparation(ModChannel *pChn) const;
-	void ProcessPanbrello(ModChannel *pChn) const;
+	void ProcessPitchPanSeparation(ModChannel &chn) const;
+	void ProcessPanbrello(ModChannel &chn) const;
 
 	void ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEINDEXTYPE &arpeggioSteps);
 	void ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYPE &vibratoFactor);
-	void ProcessSampleAutoVibrato(ModChannel *pChn, int &period, Tuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const;
+	void ProcessSampleAutoVibrato(ModChannel &chn, int &period, Tuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const;
 
-	void ProcessRamping(ModChannel *pChn) const;
+	void ProcessRamping(ModChannel &chn) const;
 
-	SamplePosition GetChannelIncrement(ModChannel *pChn, uint32 period, int periodFrac) const;
+	SamplePosition GetChannelIncrement(const ModChannel &chn, uint32 period, int periodFrac) const;
 
 protected:
 	// Type of panning command
@@ -925,38 +926,38 @@ protected:
 		Pan8bit = 8,
 	};
 	// Channel Effects
-	void UpdateS3MEffectMemory(ModChannel *pChn, ModCommand::PARAM param) const;
+	void UpdateS3MEffectMemory(ModChannel &chn, ModCommand::PARAM param) const;
 	void PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular = false);
 	void PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular = false);
 	void MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides);
-	void FinePortamentoUp(ModChannel *pChn, ModCommand::PARAM param) const;
-	void FinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) const;
-	void ExtraFinePortamentoUp(ModChannel *pChn, ModCommand::PARAM param) const;
-	void ExtraFinePortamentoDown(ModChannel *pChn, ModCommand::PARAM param) const;
-	void PortamentoMPT(ModChannel*, int);
-	void PortamentoFineMPT(ModChannel*, int);
-	void PortamentoExtraFineMPT(ModChannel*, int);
-	void NoteSlide(ModChannel *pChn, uint32 param, bool slideUp, bool retrig) const;
-	void TonePortamento(ModChannel *pChn, uint32 param) const;
-	void Vibrato(ModChannel *pChn, uint32 param) const;
-	void FineVibrato(ModChannel *pChn, uint32 param) const;
-	void VolumeSlide(ModChannel *pChn, ModCommand::PARAM param);
-	void PanningSlide(ModChannel *pChn, ModCommand::PARAM param, bool memory = true);
-	void ChannelVolSlide(ModChannel *pChn, ModCommand::PARAM param) const;
-	void FineVolumeUp(ModChannel *pChn, ModCommand::PARAM param, bool volCol) const;
-	void FineVolumeDown(ModChannel *pChn, ModCommand::PARAM param, bool volCol) const;
-	void Tremolo(ModChannel *pChn, uint32 param) const;
-	void Panbrello(ModChannel *pChn, uint32 param) const;
-	void Panning(ModChannel *pChn, uint32 param, PanningType panBits) const;
+	void FinePortamentoUp(ModChannel &chn, ModCommand::PARAM param) const;
+	void FinePortamentoDown(ModChannel &chn, ModCommand::PARAM param) const;
+	void ExtraFinePortamentoUp(ModChannel &chn, ModCommand::PARAM param) const;
+	void ExtraFinePortamentoDown(ModChannel &chn, ModCommand::PARAM param) const;
+	void PortamentoMPT(ModChannel &chn, int);
+	void PortamentoFineMPT(ModChannel &chn, int);
+	void PortamentoExtraFineMPT(ModChannel &chn, int);
+	void NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool retrig) const;
+	void TonePortamento(ModChannel &chn, uint32 param) const;
+	void Vibrato(ModChannel &chn, uint32 param) const;
+	void FineVibrato(ModChannel &chn, uint32 param) const;
+	void VolumeSlide(ModChannel &chn, ModCommand::PARAM param);
+	void PanningSlide(ModChannel &chn, ModCommand::PARAM param, bool memory = true);
+	void ChannelVolSlide(ModChannel &chn, ModCommand::PARAM param) const;
+	void FineVolumeUp(ModChannel &chn, ModCommand::PARAM param, bool volCol) const;
+	void FineVolumeDown(ModChannel &chn, ModCommand::PARAM param, bool volCol) const;
+	void Tremolo(ModChannel &chn, uint32 param) const;
+	void Panbrello(ModChannel &chn, uint32 param) const;
+	void Panning(ModChannel &chn, uint32 param, PanningType panBits) const;
 	void RetrigNote(CHANNELINDEX nChn, int param, int offset = 0);
 	void SampleOffset(ModChannel &chn, SmpLength param) const;
 	void ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const;
 	void NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample);
-	ROWINDEX PatternLoop(ModChannel *, uint32 param);
+	ROWINDEX PatternLoop(ModChannel &chn, uint32 param);
 	void ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
 	void ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
-	void ExtendedChannelEffect(ModChannel *, uint32 param);
-	void InvertLoop(ModChannel* pChn);
+	void ExtendedChannelEffect(ModChannel &chn, uint32 param);
+	void InvertLoop(ModChannel &chn);
 	ROWINDEX PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 param) const;
 	void GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSlide);
 
@@ -966,17 +967,17 @@ protected:
 	uint32 SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, uint32 macroLen, PLUGINDEX plugin);
 	void SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume);
 
-	void SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modifier = 256) const;
+	int SetupChannelFilter(ModChannel &chn, bool bReset, int envModifier = 256) const;
 
 	// Low-Level effect processing
-	void DoFreqSlide(ModChannel *pChn, int32 nFreqSlide) const;
+	void DoFreqSlide(ModChannel &chn, int32 nFreqSlide) const;
 	void UpdateTimeSignature();
 
 public:
 	// Convert frequency to IT cutoff (0...127)
 	uint8 FrequencyToCutOff(double frequency) const;
 	// Convert IT cutoff (0...127 + modifier) to frequency
-	uint32 CutOffToFrequency(uint32 nCutOff, int flt_modifier = 256) const; // [0-127] => [1-10KHz]
+	uint32 CutOffToFrequency(uint32 nCutOff, int envModifier = 256) const; // [0-127] => [1-10KHz]
 
 	// Returns true if periods are actually plain frequency values in Hz.
 	bool PeriodsAreFrequencies() const
@@ -1019,7 +1020,7 @@ public:
 	SAMPLEINDEX RemoveSelectedSamples(const std::vector<bool> &keepSamples);
 
 	// Set the autovibrato settings for all samples associated to the given instrument.
-	void PropagateXMAutoVibrato(INSTRUMENTINDEX ins, uint8 type, uint8 sweep, uint8 depth, uint8 rate);
+	void PropagateXMAutoVibrato(INSTRUMENTINDEX ins, VibratoType type, uint8 sweep, uint8 depth, uint8 rate);
 
 	// Samples file I/O
 	bool ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize = false, bool includeInstrumentFormats = true);

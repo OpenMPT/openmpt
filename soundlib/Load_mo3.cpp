@@ -217,11 +217,11 @@ struct MO3Instrument
 			mptIns.nPan = panning;
 			mptIns.dwFlags.set(INS_SETPANNING);
 		}
-		mptIns.nNNA = nna;
+		mptIns.nNNA = static_cast<NewNoteAction>(nna.get());
 		mptIns.nPPS = pps;
 		mptIns.nPPC = ppc;
-		mptIns.nDCT = dct;
-		mptIns.nDNA = dca;
+		mptIns.nDCT = static_cast<DuplicateCheckType>(dct.get());
+		mptIns.nDNA = static_cast<DuplicateNoteAction>(dca.get());
 		mptIns.nVolSwing = static_cast<uint8>(std::min<uint16>(volSwing, 100));
 		mptIns.nPanSwing = static_cast<uint8>(std::min<uint16>(panSwing, 256) / 4u);
 		mptIns.SetCutoff(cutoff & 0x7F, (cutoff & 0x80) != 0);
@@ -298,7 +298,7 @@ struct MO3Sample
 		if(flags & smpSustain) mptSmp.uFlags.set(CHN_SUSTAINLOOP);
 		if(flags & smpSustainPingPong) mptSmp.uFlags.set(CHN_PINGPONGSUSTAIN);
 
-		mptSmp.nVibType = AutoVibratoIT2XM[vibType & 7];
+		mptSmp.nVibType = static_cast<VibratoType>(AutoVibratoIT2XM[vibType & 7]);
 		mptSmp.nVibSweep = vibSweep;
 		mptSmp.nVibDepth = vibDepth;
 		mptSmp.nVibRate = vibRate;
@@ -1724,7 +1724,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		// Transfer XM instrument vibrato to samples
 		for(INSTRUMENTINDEX ins = 0; ins < m_nInstruments; ins++)
 		{
-			PropagateXMAutoVibrato(ins + 1, instrVibrato[ins].type, instrVibrato[ins].sweep, instrVibrato[ins].depth, instrVibrato[ins].rate);
+			PropagateXMAutoVibrato(ins + 1, static_cast<VibratoType>(instrVibrato[ins].type.get()), instrVibrato[ins].sweep, instrVibrato[ins].depth, instrVibrato[ins].rate);
 		}
 	}
 

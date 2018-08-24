@@ -325,9 +325,9 @@ if(!writeAll)
 	WRITE_MPTHEADER_sized_member(	PitchEnv.nReleaseNode		, uint8		, MagicBE("PERN")	)
 	WRITE_MPTHEADER_sized_member(	PanEnv.nReleaseNode			, uint8		, MagicBE("AERN")	)
 	WRITE_MPTHEADER_sized_member(	VolEnv.nReleaseNode			, uint8		, MagicBE("VERN")	)
-	WRITE_MPTHEADER_sized_member(	PitchEnv.dwFlags			, uint32	, MagicBE("PFLG")	)
-	WRITE_MPTHEADER_sized_member(	PanEnv.dwFlags				, uint32	, MagicBE("AFLG")	)
-	WRITE_MPTHEADER_sized_member(	VolEnv.dwFlags				, uint32	, MagicBE("VFLG")	)
+	WRITE_MPTHEADER_sized_member(	PitchEnv.dwFlags			, uint8		, MagicBE("PFLG")	)
+	WRITE_MPTHEADER_sized_member(	PanEnv.dwFlags				, uint8		, MagicBE("AFLG")	)
+	WRITE_MPTHEADER_sized_member(	VolEnv.dwFlags				, uint8		, MagicBE("VFLG")	)
 	WRITE_MPTHEADER_sized_member(	midiPWD						, int8		, MagicBE("MPWD")	)
 }
 
@@ -540,7 +540,7 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 	switch(fcode)
 	{
 	GET_MPTHEADER_sized_member(	nFadeOut				, uint32		, MagicBE("FO..")	)
-	GET_MPTHEADER_sized_member(	dwFlags					, uint32		, MagicBE("dF..")	)
+	GET_MPTHEADER_sized_member(	dwFlags					, uint8			, MagicBE("dF..")	)
 	GET_MPTHEADER_sized_member(	nGlobalVol				, uint32		, MagicBE("GV..")	)
 	GET_MPTHEADER_sized_member(	nPan					, uint32		, MagicBE("P...")	)
 	GET_MPTHEADER_sized_member(	VolEnv.nLoopStart		, uint8			, MagicBE("VLS.")	)
@@ -588,9 +588,9 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 	GET_MPTHEADER_sized_member(	PitchEnv.nReleaseNode	, uint8			, MagicBE("PERN")	)
 	GET_MPTHEADER_sized_member(	PanEnv.nReleaseNode		, uint8			, MagicBE("AERN")	)
 	GET_MPTHEADER_sized_member(	VolEnv.nReleaseNode		, uint8			, MagicBE("VERN")	)
-	GET_MPTHEADER_sized_member(	PitchEnv.dwFlags		, uint32		, MagicBE("PFLG")	)
-	GET_MPTHEADER_sized_member(	PanEnv.dwFlags			, uint32		, MagicBE("AFLG")	)
-	GET_MPTHEADER_sized_member(	VolEnv.dwFlags			, uint32		, MagicBE("VFLG")	)
+	GET_MPTHEADER_sized_member(	PitchEnv.dwFlags		, uint8			, MagicBE("PFLG")	)
+	GET_MPTHEADER_sized_member(	PanEnv.dwFlags			, uint8			, MagicBE("AFLG")	)
+	GET_MPTHEADER_sized_member(	VolEnv.dwFlags			, uint8			, MagicBE("VFLG")	)
 	GET_MPTHEADER_sized_member(	midiPWD					, int8			, MagicBE("MPWD")	)
 	case MagicBE("PTTL"):
 	{

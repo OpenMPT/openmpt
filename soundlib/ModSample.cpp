@@ -109,8 +109,8 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 		uFlags.reset(SMP_KEEPONDISK);
 	}
 
-	// No Adlib instruments in formats other than S3M.
-	if(toType != MOD_TYPE_S3M && uFlags[CHN_ADLIB])
+	// No Adlib instruments in formats that can't handle it.
+	if(!CSoundFile::SupportsOPL(toType) && uFlags[CHN_ADLIB])
 	{
 		SetAdlib(false);
 	}

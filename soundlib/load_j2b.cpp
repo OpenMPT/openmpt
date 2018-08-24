@@ -29,7 +29,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // First off, a nice vibrato translation LUT.
-static const uint8 j2bAutoVibratoTrans[] = 
+static const VibratoType j2bAutoVibratoTrans[] = 
 {
 	VIB_SINE, VIB_SQUARE, VIB_RAMP_UP, VIB_RAMP_DOWN, VIB_RANDOM,
 };
@@ -257,7 +257,7 @@ struct AMFFSampleHeader
 		mptSmp.nLoopEnd = loopEnd;
 		mptSmp.nC5Speed = sampleRate;
 
-		if(instrHeader.vibratoType < CountOf(j2bAutoVibratoTrans))
+		if(instrHeader.vibratoType < mpt::size(j2bAutoVibratoTrans))
 			mptSmp.nVibType = j2bAutoVibratoTrans[instrHeader.vibratoType];
 		mptSmp.nVibSweep = static_cast<uint8>(instrHeader.vibratoSweep);
 		mptSmp.nVibRate = static_cast<uint8>(instrHeader.vibratoRate / 16);

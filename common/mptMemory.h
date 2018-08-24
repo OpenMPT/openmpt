@@ -81,6 +81,8 @@ template <> struct is_binary_safe<mpt::byte> : public std::true_type { };
 // Generic Specialization for arrays.
 template <typename T, std::size_t N> struct is_binary_safe<T[N]> : public is_binary_safe<T> { };
 template <typename T, std::size_t N> struct is_binary_safe<const T[N]> : public is_binary_safe<T> { };
+template <typename T, std::size_t N> struct is_binary_safe<std::array<T, N>> : public is_binary_safe<T> { };
+template <typename T, std::size_t N> struct is_binary_safe<const std::array<T, N>> : public is_binary_safe<T> { };
 
 
 } // namespace mpt

@@ -221,7 +221,7 @@ void XMInstrument::ApplyAutoVibratoToXM(const ModSample &mptSmp, MODTYPE fromTyp
 // Apply auto-vibrato settings from file to a sample.
 void XMInstrument::ApplyAutoVibratoToMPT(ModSample &mptSmp) const
 {
-	mptSmp.nVibType = vibType;
+	mptSmp.nVibType = static_cast<VibratoType>(vibType.get());
 	mptSmp.nVibSweep = vibSweep;
 	mptSmp.nVibDepth = vibDepth;
 	mptSmp.nVibRate = vibRate;

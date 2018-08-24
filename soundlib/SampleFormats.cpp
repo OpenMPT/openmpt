@@ -1198,16 +1198,14 @@ bool CSoundFile::ReadSBISample(SAMPLEINDEX sample, FileReader &file)
 		return false;
 
 	DestroySampleThreadsafe(sample);
+	InitOPL();
 
 	ModSample &mptSmp = Samples[sample];
 	mptSmp.Initialize(MOD_TYPE_S3M);
-	mptSmp.nLength = 4;
-	mptSmp.uFlags = CHN_ADLIB;
-	mptSmp.AllocateSample();
-
 	file.ReadString<mpt::String::nullTerminated>(m_szNames[sample], 32);
-	file.ReadArray(mptSmp.adlib);
-	InitOPL();
+	OPLPatch patch;
+	file.ReadArray(patch);
+	mptSmp.SetAdlib(true, patch);
 
 	mptSmp.Convert(MOD_TYPE_S3M, GetType());
 	return true;
@@ -1602,7 +1600,7 @@ struct SFZRegion
 	int8 finetune = 0;
 	uint8 keyLo = 0, keyHi = 127, keyRoot = 60;
 	uint8 resonance = 0;		// 0...40dB
-	uint8 filterType = FLTMODE_UNCHANGED;
+	InstrFilterMode filterType = FLTMODE_UNCHANGED;
 	uint8 polyphony = 255;
 	bool useSampleKeyRoot = false;
 	bool invertPhase = false;
@@ -2016,7 +2014,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		pIns->nNNA = NNA_NOTEOFF;
 		if(region.polyphony == 1)
 		{
-			pIns->nDNA = NNA_NOTECUT;
+			pIns->nDNA = DNA_NOTECUT;
 			pIns->nDCT = DCT_SAMPLE;
 		}
 		region.ampEnv.ConvertToMPT(pIns, *this, ENV_VOLUME);
@@ -3091,9 +3089,15 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 	file.Seek(sampleHeader.ConvertToMPT(sample));
 	mpt::String::Read<mpt::String::spacePaddedNull>(m_szNames[nSample], sampleHeader.name);
 
-	if(!sample.uFlags[SMP_KEEPONDISK])
+	if(sample.uFlags[CHN_ADLIB])
 	{
-		sampleHeader.GetSampleFormat().ReadSample(Samples[nSample], file);
+		OPLPatch patch;
+		file.ReadArray(patch);
+		sample.SetAdlib(true, patch);
+		InitOPL();
+	} else if(!sample.uFlags[SMP_KEEPONDISK])
+	{
+		sampleHeader.GetSampleFormat().ReadSample(sample, file);
 	} else
 	{
 		// External sample

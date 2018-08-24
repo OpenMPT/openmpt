@@ -851,6 +851,11 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 // Write a sample to file
 size_t SampleIO::WriteSample(std::ostream &f, const ModSample &sample, SmpLength maxSamples) const
 {
+	if(sample.uFlags[CHN_ADLIB])
+	{
+		mpt::IO::Write(f, sample.adlib);
+		return sizeof(sample.adlib);
+	}
 	if(!sample.HasSampleData())
 	{
 		return 0;
