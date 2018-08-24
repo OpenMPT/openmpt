@@ -13,6 +13,19 @@ offering the same playback quality and format support, and development of the
 two happens in parallel.
 
 
+License
+-------
+
+The OpenMPT/libopenmpt project is distributed under the *BSD-3-Clause* License.
+See [LICENSE](LICENSE) for the full license text.
+
+Files below the `include/` (external projects) and `contrib/` (related assets
+not directly considered integral part of the project) folders may be subject to
+other licenses. See the respective subfolders for license information. These
+folders are not distributed in all source packages, and in particular they are
+not distributed in the Autotools packages.
+
+
 How to compile
 --------------
 
