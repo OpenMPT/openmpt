@@ -2246,7 +2246,7 @@ bool CSoundFile::ReadNote()
 				auto oplmilliHertz = Util::muldivr_unsigned(freq, 261625, 8363 << FREQ_FRACBITS);
 				m_opl->Frequency(nChn, oplmilliHertz, chn.dwFlags[CHN_KEYOFF], m_playBehaviour[kOPLBeatingOscillators]);
 				// Scale volume to OPL range (0...63).
-				m_opl->Volume(nChn, static_cast<uint8>(chn.nCalcVolume * chn.nInsVol * 63 / (1 << 20)), false);
+				m_opl->Volume(nChn, static_cast<uint8>(Util::muldivr_unsigned(chn.nCalcVolume * chn.nGlobalVol * chn.nInsVol, 63, 1 << 26)), false);
 				m_opl->Pan(nChn, chn.nRealPan);
 			}
 
