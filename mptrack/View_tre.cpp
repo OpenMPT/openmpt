@@ -1267,13 +1267,21 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 		tvi.iImage = 0;
 		if (GetItem(&tvi))
 		{
-			// Sample ?
-			if (tvi.iImage == IMAGE_SAMPLES) return ModItem(MODITEM_INSLIB_SAMPLE);
-			// Instrument ?
-			if (tvi.iImage == IMAGE_INSTRUMENTS) return ModItem(MODITEM_INSLIB_INSTRUMENT);
-			// Song ?
-			if (tvi.iImage == IMAGE_FOLDERSONG) return ModItem(MODITEM_INSLIB_SONG);
-			return ModItem(MODITEM_INSLIB_FOLDER);
+			switch(tvi.iImage)
+			{
+			case IMAGE_SAMPLES:
+			case IMAGE_OPLINSTR:
+				// Sample
+				return ModItem(MODITEM_INSLIB_SAMPLE);
+			case IMAGE_INSTRUMENTS:
+				// Instrument
+				return ModItem(MODITEM_INSLIB_INSTRUMENT);
+			case IMAGE_FOLDERSONG:
+				// Song
+				return ModItem(MODITEM_INSLIB_SONG);
+			default:
+				return ModItem(MODITEM_INSLIB_FOLDER);
+			}
 		}
 		return ModItem(MODITEM_NULL);
 	}
@@ -1800,11 +1808,11 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 		for(SAMPLEINDEX smp = 1; smp <= m_SongFile->GetNumSamples(); smp++)
 		{
 			const ModSample &sample = m_SongFile->GetSample(smp);
-			if(sample.HasSampleData())
+			if(sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
 			{
 				TCHAR s[MAX_SAMPLENAME + 10];
 				_sntprintf(s, CountOf(s), _T("%3d: %s"), smp, mpt::ToWin(m_SongFile->GetCharsetInternal(), m_SongFile->m_szNames[smp]).c_str());
-				ModTreeInsert(s, IMAGE_SAMPLES, selectedItem);
+				ModTreeInsert(s, sample.uFlags[CHN_ADLIB] ? IMAGE_OPLINSTR : IMAGE_SAMPLES, selectedItem);
 			}
 		}
 	} else
@@ -2038,6 +2046,7 @@ void CModTree::ModTreeInsert(const TCHAR *name, int image, const TCHAR *selectIf
 		dwId = 3;
 		break;
 	case IMAGE_SAMPLES:
+	case IMAGE_OPLINSTR:
 		if(!m_SongFileName.empty()) { dwId = 5; break; }
 	case IMAGE_INSTRUMENTS:
 		dwId = 4;
