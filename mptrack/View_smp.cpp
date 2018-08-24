@@ -2964,8 +2964,9 @@ void CViewSample::OnAddSilence()
 		{
 			CriticalSection cs;
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Initialize OPL Instrument");
-			sndFile.DestroySampleThreadsafe(m_nSample);
+			sndFile.DestroySample(m_nSample);
 			sndFile.InitOPL();
+			sample.nC5Speed = 8363;
 			sample.SetAdlib(true);
 			SetCurSel(0, 0);
 			SetModified(SampleHint().Info().Data().Names(), true, true);

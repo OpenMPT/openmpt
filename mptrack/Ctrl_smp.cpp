@@ -3629,9 +3629,11 @@ void CCtrlSamples::OnInitOPLInstrument()
 	{
 		CriticalSection cs;
 		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Initialize OPL Instrument");
-		m_sndFile.DestroySampleThreadsafe(m_nSample);
+		m_sndFile.DestroySample(m_nSample);
 		m_sndFile.InitOPL();
-		m_sndFile.GetSample(m_nSample).SetAdlib(true);
+		ModSample &sample = m_sndFile.GetSample(m_nSample);
+		sample.nC5Speed = 8363;
+		sample.SetAdlib(true);
 		SetModified(SampleHint().Info().Data().Names(), true, true);
 	}
 }
