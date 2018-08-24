@@ -102,7 +102,8 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
-				"PATH=/usr/lib/ccache:$PATH make STRICT=1"
+				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1",
+				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1 check"
 			]
 		},
 		"trusty-amd64/clang": {
@@ -153,7 +154,8 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
-				"PATH=/usr/lib/ccache:$PATH make STRICT=1 CONFIG=clang"
+				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1 CONFIG=clang",
+				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1 CONFIG=clang check"
 			]
 		},
 
@@ -195,7 +197,8 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
-				"PATH=/usr/lib/ccache:$PATH make STRICT=1"
+				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1",
+				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1 check"
 			]
 		},
 
@@ -237,49 +240,8 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
-				"PATH=/usr/lib/ccache:$PATH make"
-			]
-		},
-
-
-
-		"raspbian-stretch/gcc": {
-			"buildenv": "raspbian-stretch",
-			"builddeps": [
-				"binutils",
-				"ccache",
-				"doxygen",
-				"g++",
-				"gawk",
-				"gcc",
-				"git",
-				"git-svn",
-				"help2man",
-				"libc++-dev",
-				"libc++abi-dev",
-				"libflac-dev",
-				"libltdl-dev",
-				"libmpg123-dev",
-				"libogg-dev",
-				"libpulse-dev",
-				"libsdl1.2-dev",
-				"libsdl2-dev",
-				"libsndfile1-dev",
-				"libvorbis-dev",
-				"libxml-xpath-perl",
-				"make",
-				"pkg-config",
-				"portaudio19-dev",
-				"subversion",
-				"subversion-tools",
-				"zlib1g-dev",
-				"build-essential"
-			],
-			"environment": {
-				"CCACHE_CPP2": "1"
-			},
-			"buildcmd": [
-				"PATH=/usr/lib/ccache:$PATH make"
+				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL}",
+				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} check"
 			]
 		}
 
