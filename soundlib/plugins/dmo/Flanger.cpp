@@ -53,7 +53,7 @@ void Flanger::SetParameter(PlugParamIndex index, PlugParamValue value)
 		if(index == kFlangerWaveShape && value < 1.0f)
 			value = 0.0f;
 		else if(index == kFlangerPhase)
-			value = mpt::round(value * 4.0f) / 4.0f;
+			value = std::round(value * 4.0f) / 4.0f;
 		m_param[index] = value;
 		RecalculateChorusParams();
 	}

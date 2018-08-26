@@ -142,7 +142,7 @@ void Chorus::SetParameter(PlugParamIndex index, PlugParamValue value)
 		if(index == kChorusWaveShape && value < 1.0f)
 			value = 0.0f;
 		else if(index == kChorusPhase)
-			value = mpt::round(value * 4.0f) / 4.0f;
+			value = std::round(value * 4.0f) / 4.0f;
 		m_param[index] = value;
 		RecalculateChorusParams();
 	}

@@ -308,7 +308,7 @@ void I3DL2Reverb::SetParameter(PlugParamIndex index, PlugParamValue value)
 	{
 		Limit(value, 0.0f, 1.0f);
 		if(index == kI3DL2ReverbQuality)
-			value = mpt::round(value * 3.0f) / 3.0f;
+			value = std::round(value * 3.0f) / 3.0f;
 		m_param[index] = value;
 		m_recalcParams = true;
 	}
