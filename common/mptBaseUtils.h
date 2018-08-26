@@ -581,13 +581,7 @@ namespace mpt
 {
 
 	// C++11 std::round
-#if (MPT_OS_EMSCRIPTEN && MPT_OS_EMSCRIPTEN_ANCIENT)
-	// Certain emscripten versions and/or combinations with nodejs (at least the following combination: emscripten 1.34.8, clang 3.7.0, nodejs 0.10.38) fail assert(std::round(1.5)==2.0). The work-around always works.
-	inline double round(double val) {if(val >= 0.0) return std::floor(val + 0.5); else return std::ceil(val - 0.5);}
-	inline float round(float val) {if(val >= 0.0f) return std::floor(val + 0.5f); else return std::ceil(val - 0.5f);}
-#else
 	using std::round;
-#endif
 
 	// Rounds given double value to nearest integer value of type T.
 	// Out-of-range values are saturated to the specified integer type's limits.

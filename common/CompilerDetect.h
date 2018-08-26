@@ -193,14 +193,12 @@
 	#define MPT_OS_EMSCRIPTEN 1
 	#if defined(__EMSCRIPTEN_major__) && defined(__EMSCRIPTEN_minor__)
 		#if (__EMSCRIPTEN_major__ > 1)
-			#define MPT_OS_EMSCRIPTEN_ANCIENT 0
-		#elif (__EMSCRIPTEN_major__ == 1) && (__EMSCRIPTEN_minor__ >= 36)
-			#define MPT_OS_EMSCRIPTEN_ANCIENT 0
+			// ok 
+		#elif (__EMSCRIPTEN_major__ == 1) && (__EMSCRIPTEN_minor__ >= 38)
+			// ok 		
 		#else
-			#define MPT_OS_EMSCRIPTEN_ANCIENT 1
+			#error "Emscripten >= 1.38 is required."
 		#endif
-	#else
-		#define MPT_OS_EMSCRIPTEN_ANCIENT 1
 	#endif
 #elif defined(_WIN32)
 	#define MPT_OS_WINDOWS 1

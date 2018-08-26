@@ -685,12 +685,7 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 3), "6.12");
 	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 3), "6.123");
 	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 4), "6.123");
-	#if !(MPT_OS_EMSCRIPTEN && MPT_OS_EMSCRIPTEN_ANCIENT)
 	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 4), "6.1235");
-	#else
-	// emscripten(1.21)/nodejs(v0.10.25) print 6.1234 instead of 6.1235 for unknown reasons.
-	// As this test case is not fatal, ignore it for now in order to make the test cases pass.
-	#endif
 
 #if MPT_WSTRING_FORMAT
 	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 3), L"6.12");

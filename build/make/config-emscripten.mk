@@ -4,7 +4,7 @@ CXX = em++
 LD  = em++
 AR  = emar
 
-EMSCRIPTEN_TARGET?=asmjs
+EMSCRIPTEN_TARGET?=default
 
 ifneq ($(STDCXX),)
 CXXFLAGS_STDCXX = -std=$(STDCXX)
@@ -25,55 +25,68 @@ CFLAGS_STDC = -std=c99
 CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)
 
-ifeq ($(EMSCRIPTEN_TARGET),js)
-
-CPPFLAGS += 
-CXXFLAGS += -fPIC -O2 -s WASM=0 -s ASM_JS=2 -s LEGACY_VM_SUPPORT=1 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
-CFLAGS   += -fPIC -O2 -s WASM=0 -s ASM_JS=2 -s LEGACY_VM_SUPPORT=1 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
-LDFLAGS  += -O2 -s WASM=0 -s ASM_JS=2 -s LEGACY_VM_SUPPORT=1 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
-LDLIBS   += 
+CPPFLAGS +=
+CXXFLAGS += -fPIC
+CFLAGS   += -fPIC
+LDFLAGS  +=
+LDLIBS   +=
 ARFLAGS  := rcs
 
-# allow growing heap (might be slower, especially with V8 (as used by Chrome))
-#LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
-# limit memory to 64MB, faster but loading modules bigger than about 16MB will not work
-#LDFLAGS += -s TOTAL_MEMORY=67108864
+CXXFLAGS += -Os
+CFLAGS   += -Os
+LDFLAGS  += -Os
 
-LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
-
-else ifeq ($(EMSCRIPTEN_TARGET),asmjs)
-
-CPPFLAGS += 
-CXXFLAGS += -fPIC -O2 -s WASM=0 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
-CFLAGS   += -fPIC -O2 -s WASM=0 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
-LDFLAGS  += -O2 -s WASM=0 -s DISABLE_EXCEPTION_CATCHING=0 -s PRECISE_F32=1 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
-LDLIBS   += 
-ARFLAGS  := rcs
-
-# allow growing heap (might be slower, especially with V8 (as used by Chrome))
-#LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
-# limit memory to 64MB, faster but loading modules bigger than about 16MB will not work
-#LDFLAGS += -s TOTAL_MEMORY=67108864
+ifeq ($(EMSCRIPTEN_TARGET),default)
+# emits whatever is emscripten's default, currently (1.38.8) this is the same as "wasm" below.
+CPPFLAGS += -DMPT_BUILD_WASM
+CXXFLAGS += 
+CFLAGS   += 
+LDFLAGS  += 
 
 LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
 else ifeq ($(EMSCRIPTEN_TARGET),wasm)
-
+# emits native wasm AND an emulator for running wasm in asmjs/js with full wasm optimizations.
+# as of emscripten 1.38, this is equivalent to default.
 CPPFLAGS += -DMPT_BUILD_WASM
-CXXFLAGS += -fPIC -Os -s WASM=1 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math 
-CFLAGS   += -fPIC -Os -s WASM=1 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing 
-LDFLAGS  += -Os -s WASM=1 -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
-LDLIBS   += 
-ARFLAGS  := rcs
+CXXFLAGS += -s WASM=1 -s BINARYEN_METHOD='native-wasm'
+CFLAGS   += -s WASM=1 -s BINARYEN_METHOD='native-wasm'
+LDFLAGS  += -s WASM=1 -s BINARYEN_METHOD='native-wasm'
 
-# allow growing heap (might be slower, especially with V8 (as used by Chrome))
-#LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
-# limit memory to 64MB, faster but loading modules bigger than about 16MB will not work
-#LDFLAGS += -s TOTAL_MEMORY=67108864
+LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
+
+else ifeq ($(EMSCRIPTEN_TARGET),asmjs128m)
+# emits only asmjs
+CPPFLAGS += -DMPT_BUILD_ASMJS
+CXXFLAGS += -s WASM=0 -s ASM_JS=1
+CFLAGS   += -s WASM=0 -s ASM_JS=1
+LDFLAGS  += -s WASM=0 -s ASM_JS=1
+
+LDFLAGS += -s ALLOW_MEMORY_GROWTH=0 -s ABORTING_MALLOC=0 -s TOTAL_MEMORY=134217728
+
+else ifeq ($(EMSCRIPTEN_TARGET),asmjs)
+# emits only asmjs
+CPPFLAGS += -DMPT_BUILD_ASMJS
+CXXFLAGS += -s WASM=0 -s ASM_JS=1
+CFLAGS   += -s WASM=0 -s ASM_JS=1
+LDFLAGS  += -s WASM=0 -s ASM_JS=1
+
+LDFLAGS += -s ALLOW_MEMORY_GROWTH=0 -s ABORTING_MALLOC=0
+
+else ifeq ($(EMSCRIPTEN_TARGET),js)
+# emits only plain javascript with plain javascript focused optimizations.
+CPPFLAGS += -DMPT_BUILD_ASMJS
+CXXFLAGS += -s WASM=0 -s ASM_JS=2 -s LEGACY_VM_SUPPORT=1
+CFLAGS   += -s WASM=0 -s ASM_JS=2 -s LEGACY_VM_SUPPORT=1
+LDFLAGS  += -s WASM=0 -s ASM_JS=2 -s LEGACY_VM_SUPPORT=1
 
 LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
 endif
+
+CXXFLAGS += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math
+CFLAGS   += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing
+LDFLAGS  += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
 
 CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual
 
@@ -82,22 +95,10 @@ CFLAGS_WARNINGS   += -Wmissing-prototypes
 
 REQUIRES_RUNPREFIX=1
 
-ifeq ($(EMSCRIPTEN_TARGET),wasm)
-
-EXESUFFIX=.html
-SOSUFFIX=.wasm
-SO_LDFLAGS=-s SIDE_MODULE=1
-BIN_LDFLAGS=-s SIDE_MODULE=0
-TEST_LDFLAGS=-s SIDE_MODULE=0 --emrun
-
-else
-
 EXESUFFIX=.js
 SOSUFFIX=.js
-RUNPREFIX=nodejs 
+RUNPREFIX=node 
 TEST_LDFLAGS= --pre-js build/make/test-pre.js 
-
-endif
 
 DYNLINK=0
 SHARED_LIB=1

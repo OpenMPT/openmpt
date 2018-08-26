@@ -192,15 +192,27 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
      -  emscripten (on Unix-like systems):
 
-        libopenmpt has been tested and verified to work with emscripten 1.31 or
-        later (earlier versions might or might not work).
+        libopenmpt has been tested and verified to work with emscripten 1.38.5
+        or later. Earlier versions are not supported.
 
         Run:
 
-            make CONFIG=emscripten
+            make CONFIG=emscripten EMSCRIPTEN_TARGET=wasm
+
+        or
+
+            make CONFIG=emscripten EMSCRIPTEN_TARGET=asmjs128m
+
+        or
+
+            make CONFIG=emscripten EMSCRIPTEN_TARGET=asmjs
+
+        or
+
+            make CONFIG=emscripten EMSCRIPTEN_TARGET=js
 
         Running the test suite on the command line is also supported by using
-        node.js. Version 0.10.25 or greater has been tested. Earlier versions
+        node.js. Version 8.9.1 or greater has been tested. Earlier versions
         might or might not work. Depending on how your distribution calls the
         `node.js` binary, you might have to edit
         `build/make/config-emscripten.mk`.

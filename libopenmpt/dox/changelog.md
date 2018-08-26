@@ -60,6 +60,8 @@ is just a high-level summary.
  *  [**Regression**] Support for Clang 3.4, 3.5 has been removed.
  *  [**Regression**] Building with Android NDK older than NDK r16b is not
     supported any more.
+ *  [**Regression**] Support for Emscripten versions older than 1.38.5 has been
+    removed.
  *  [**Regression**] Support for libmpg123 older than 1.14.0 has been removed.
  *  [**Regression**] Using MediaFoundation to decode MP3 samples is no longer
     supported. Use libmpg123 or minimp3 instead.
