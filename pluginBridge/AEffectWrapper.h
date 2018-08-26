@@ -78,11 +78,11 @@ struct AEffectProto
 
 		if(in.processReplacing == nullptr)
 		{
-			flags &= ~effFlagsCanReplacing;
+			flags &= ~Vst::effFlagsCanReplacing;
 		}
 		if(in.processDoubleReplacing == nullptr)
 		{
-			flags &= ~effFlagsCanDoubleReplacing;
+			flags &= ~Vst::effFlagsCanDoubleReplacing;
 		}
 	}
 
