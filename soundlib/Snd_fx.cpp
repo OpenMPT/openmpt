@@ -5463,7 +5463,12 @@ void CSoundFile::SetTempo(TEMPO param, bool setFromUI)
 		// ProTracker sets the tempo after the first tick.
 		// Note: The case of one tick per row is handled in ProcessRow() instead.
 		// Test case: TempoChange.mod
+#if MPT_MSVC_AT_LEAST(2017,8)
+		// Work-around MSVC getting confused about deduced const input type in noexcept operator inside noexcept condition.
+		m_PlayState.m_nMusicTempo.SetRaw(std::min(param.GetRaw(), specs.GetTempoMax().GetRaw()));
+#else
 		m_PlayState.m_nMusicTempo = std::min(param, specs.GetTempoMax());
+#endif
 	} else if(param < minTempo && !m_SongFlags[SONG_FIRSTTICK])
 	{
 		// Tempo Slide
