@@ -284,7 +284,7 @@ void AddSilenceDlg::OnOK()
 void AddSilenceDlg::OnEditModeChanged()
 {
 	AddSilenceOptions newEditOption = GetEditMode();
-	GetDlgItem(IDC_EDIT_ADDSILENCE)->EnableWindow(m_allowOPL ? FALSE : TRUE);
+	GetDlgItem(IDC_EDIT_ADDSILENCE)->EnableWindow((newEditOption == kOPLInstrument) ? FALSE : TRUE);
 	if(newEditOption != kResize && m_editOption == kResize)
 	{
 		// Switch to "add silence"
