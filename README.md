@@ -197,18 +197,24 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
         Run:
 
+            # generates WebAssembly with dynamic heap growth
             make CONFIG=emscripten EMSCRIPTEN_TARGET=wasm
 
         or
 
+            # generates asm.js with a fixed size 128MB heap
             make CONFIG=emscripten EMSCRIPTEN_TARGET=asmjs128m
 
         or
 
+            # generates asm.js with a fixed default size heap (as of Emscripten
+            # 1.38.11, this amounts to 16MB)
             make CONFIG=emscripten EMSCRIPTEN_TARGET=asmjs
 
         or
 
+            # generates JavaScript with dynamic heap growth and with
+            # compatibility for older VMs
             make CONFIG=emscripten EMSCRIPTEN_TARGET=js
 
         Running the test suite on the command line is also supported by using

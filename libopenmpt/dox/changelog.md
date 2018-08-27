@@ -26,6 +26,8 @@ is just a high-level summary.
         auto-detection and longer fadeouts.
      *  "stop": Returns 0 rendered frames when the song end is reached.
         Subsequent reads will return 0 rendered frames.
+ *  [**New**] `Makefile` `CONFIG=emscripten` now can generate WebAssembly via
+    the additional option `EMSCRIPTEN_TARGET=wasm`.
 
  *  [**Change**] minimp3: Instead of the LGPL-2.1-licensed minimp3 by KeyJ,
     libopenmpt now uses the CC0-1.0-licensed minimp3 by Lion (github.com/lieff)
@@ -56,7 +58,13 @@ is just a high-level summary.
     libopenmpt with MinGW-w64 without any `std::thread`/`std::mutex` support is
     deprecated and support for such configurations will be removed in libopenmpt
     0.5.
+ *  [**Change**] `Makefile` `CONFIG=emscripten` now has 4 `EMSCRIPTEN_TARGET=`
+    settings: `wasm` generates WebAssembly, `asmjs128m` generates asm.js with a
+    fixed size 128MB heap, `asmjs` generates asm.js with a fixed default size
+    heap (as of Emscripten 1.38.11, this amounts to 16MB), `js` generates
+    JavaScript with dynamic heap growth and with compatibility for older VMs.
 
+ 
  *  [**Regression**] Support for Clang 3.4, 3.5 has been removed.
  *  [**Regression**] Building with Android NDK older than NDK r16b is not
     supported any more.
