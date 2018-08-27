@@ -31,6 +31,7 @@
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/S3MTools.h"
+#include "../soundlib/OPL.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -196,7 +197,7 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 
 	GetClientRect(&m_rcClient);
 
-	if(m_oplEditor && (::GetWindowLong(m_oplEditor->m_hWnd, GWL_STYLE) & WS_VISIBLE))
+	if(m_oplEditor && IsOPLInstrument())
 	{
 		const auto size = m_oplEditor->GetMinimumSize();
 		m_oplEditor->SetWindowPos(nullptr, -m_nScrollPosX, -m_nScrollPosY, std::max(size.cx, m_rcClient.right), std::max(size.cy, m_rcClient.bottom), SWP_NOZORDER | SWP_NOACTIVATE);
@@ -365,11 +366,29 @@ void CViewSample::UpdateOPLEditor()
 }
 
 
+// Apply changes to OPL patch live playback
+void CViewSample::UpdateOPLPatch()
+{
+	CSoundFile &sndFile = GetDocument()->GetSoundFile();
+	if(IsOPLInstrument() && sndFile.m_opl && CMainFrame::GetMainFrame()->GetModPlaying() == GetDocument())
+	{
+		CriticalSection cs;
+		const auto &patch = sndFile.GetSample(m_nSample).adlib;
+		for(const auto chn : m_noteChannel)
+		{
+			if(chn < MAX_CHANNELS)
+			{
+				sndFile.m_opl->Patch(chn, patch);
+			}
+		}
+	}
+}
+
+
 void CViewSample::OnSetFocus(CWnd *pOldWnd)
 {
 	CScrollView::OnSetFocus(pOldWnd);
 	SetCurrentSample(m_nSample);
-
 }
 
 
@@ -566,7 +585,9 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case VIEWMSG_SETMODIFIED:
+		// Update from OPL editor
 		SetModified(UpdateHint::FromLPARAM(lParam).ToType<SampleHint>(), false, false);
+		UpdateOPLPatch();
 		break;
 
 	case VIEWMSG_PREPAREUNDO:

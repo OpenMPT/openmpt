@@ -76,6 +76,7 @@ protected:
 	void UpdateScrollSize() { UpdateScrollSize(m_nZoom, true); }
 	void UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength centeredSample = SmpLength(-1));
 	void UpdateOPLEditor();
+	void UpdateOPLPatch();
 	void SetCurrentSample(SAMPLEINDEX nSmp);
 	bool IsOPLInstrument() const;
 	void SetZoom(int nZoom, SmpLength centeredSample = SmpLength(-1));
