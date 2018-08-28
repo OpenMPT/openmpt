@@ -31,7 +31,6 @@
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/S3MTools.h"
-#include "../soundlib/OPL.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -366,25 +365,6 @@ void CViewSample::UpdateOPLEditor()
 }
 
 
-// Apply changes to OPL patch live playback
-void CViewSample::UpdateOPLPatch()
-{
-	CSoundFile &sndFile = GetDocument()->GetSoundFile();
-	if(IsOPLInstrument() && sndFile.m_opl && CMainFrame::GetMainFrame()->GetModPlaying() == GetDocument())
-	{
-		CriticalSection cs;
-		const auto &patch = sndFile.GetSample(m_nSample).adlib;
-		for(const auto chn : m_noteChannel)
-		{
-			if(chn < MAX_CHANNELS)
-			{
-				sndFile.m_opl->Patch(chn, patch);
-			}
-		}
-	}
-}
-
-
 void CViewSample::OnSetFocus(CWnd *pOldWnd)
 {
 	CScrollView::OnSetFocus(pOldWnd);
@@ -587,7 +567,7 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	case VIEWMSG_SETMODIFIED:
 		// Update from OPL editor
 		SetModified(UpdateHint::FromLPARAM(lParam).ToType<SampleHint>(), false, false);
-		UpdateOPLPatch();
+		GetDocument()->UpdateOPLInstrument(m_nSample);
 		break;
 
 	case VIEWMSG_PREPAREUNDO:

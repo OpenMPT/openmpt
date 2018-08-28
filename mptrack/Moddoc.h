@@ -358,6 +358,8 @@ protected:
 
 	uint8 GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const;
 
+	void UpdateOPLInstrument(SAMPLEINDEX smp);
+
 	// Get the sample index for the current pattern cell (resolves instrument note maps, etc)
 	SAMPLEINDEX GetSampleIndex(const ModCommand &m, ModCommand::INSTR lastInstr = 0) const;
 	// Get group (octave) size from given instrument (or sample in sample mode)

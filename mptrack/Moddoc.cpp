@@ -2932,6 +2932,26 @@ CString CModDoc::PanningToString(int32 value, int32 valueAtCenter)
 }
 
 
+// Apply OPL patch changes to live playback
+void CModDoc::UpdateOPLInstrument(SAMPLEINDEX smp)
+{
+	const ModSample &sample = m_SndFile.GetSample(smp);
+	if(!sample.uFlags[CHN_ADLIB] || !m_SndFile.m_opl || CMainFrame::GetMainFrame()->GetModPlaying() != this)
+		return;
+
+	CriticalSection cs;
+	const auto &patch = sample.adlib;
+	for(CHANNELINDEX chn = 0; chn < MAX_CHANNELS; chn++)
+	{
+		const auto &c = m_SndFile.m_PlayState.Chn[chn];
+		if(c.pModSample == &sample && c.IsSamplePlaying())
+		{
+			m_SndFile.m_opl->Patch(chn, patch);
+		}
+	}
+}
+
+
 // Store all view positions t settings file
 void CModDoc::SerializeViews() const
 {
