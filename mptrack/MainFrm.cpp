@@ -1497,6 +1497,10 @@ bool CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModComma
 		StopPlayback();
 		return false;
 	}
+	if(IsPlaying() && (m_pSndFile == &m_WaveFile))
+	{
+		return true;
+	}
 	return PlaySoundFile(&m_WaveFile);
 }
 
@@ -1550,6 +1554,10 @@ bool CMainFrame::PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE
 		StopPlayback();
 		return false;
 	}
+	if(IsPlaying() && (m_pSndFile == &m_WaveFile))
+	{
+		return true;
+	}
 	return PlaySoundFile(&m_WaveFile);
 }
 
@@ -1588,6 +1596,10 @@ bool CMainFrame::PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument,
 		UnsetPlaybackSoundFile();
 		StopPlayback();
 		return false;
+	}
+	if(IsPlaying() && (m_pSndFile == &m_WaveFile))
+	{
+		return true;
 	}
 	return PlaySoundFile(&m_WaveFile);
 }
@@ -1643,6 +1655,7 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note, int volume)
 		m[1 * 2 + 1].command = CMD_PATTERNBREAK;
 		m[1 * 2 + 1].param = 1;
 	}
+	m_WaveFile.InitPlayer(true);
 }
 
 
