@@ -167,7 +167,7 @@ CString Gargle::GetParamDisplay(PlugParamIndex param)
 	switch(param)
 	{
 	case kGargleRate:
-		s.Format(_T("%d"), RateInHertz());
+		s.Format(_T("%u"), RateInHertz());
 		break;
 	case kGargleWaveShape:
 		return (m_param[param] < 0.5) ? _T("Triangle") : _T("Square");
