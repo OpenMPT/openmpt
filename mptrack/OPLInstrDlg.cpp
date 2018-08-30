@@ -224,7 +224,12 @@ BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 	case IDC_SLIDER4:
 	case IDC_SLIDER11:
 		// Sustain Level
-		text = mpt::tfmt::val((-15 + slider->GetPos()) * 3) + _T(" dB");
+		{
+			int val = (-15 + slider->GetPos()) * 3;
+			if(val == -45)
+				val = -93;
+			text = mpt::tfmt::val(val) + _T(" dB");
+		}
 		break;
 	case IDC_SLIDER6:
 	case IDC_SLIDER13:
