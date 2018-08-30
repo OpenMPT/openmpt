@@ -108,7 +108,7 @@ inline int8_t * GlobalAllocPtr(unsigned int, size_t size)
   return p;
 }
 
-inline void ProcessPlugins(int n) {}
+inline void ProcessPlugins(int /* n */ ) {}
 
 #define GlobalFreePtr(p) free((void *)(p))
 
