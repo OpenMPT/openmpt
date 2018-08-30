@@ -456,7 +456,7 @@ typedef struct _MODCOMMAND
 // Mix Plugins
 #define MIXPLUG_MIXREADY			0x01	// Set when cleared
 
-class IMixPlugin
+class MODPLUG_EXPORT IMixPlugin
 {
 public:
 	virtual ~IMixPlugin();
@@ -535,7 +535,7 @@ typedef VOID (* LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffe
 
 
 //==============
-class CSoundFile
+class MODPLUG_EXPORT CSoundFile
 //==============
 {
 public:	// Static Members

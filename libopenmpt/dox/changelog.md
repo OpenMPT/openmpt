@@ -63,8 +63,9 @@ is just a high-level summary.
     fixed size 128MB heap, `asmjs` generates asm.js with a fixed default size
     heap (as of Emscripten 1.38.11, this amounts to 16MB), `js` generates
     JavaScript with dynamic heap growth and with compatibility for older VMs.
+ *  [**Change**] libmodplug: Update public headers to libmodplug 0.8.8.5. This
+    adds support for kind-of automatic MODPLUG_EXPORT decoration on Windows.
 
- 
  *  [**Regression**] Support for Clang 3.4, 3.5 has been removed.
  *  [**Regression**] Building with Android NDK older than NDK r16b is not
     supported any more.
@@ -73,6 +74,8 @@ is just a high-level summary.
  *  [**Regression**] Support for libmpg123 older than 1.14.0 has been removed.
  *  [**Regression**] Using MediaFoundation to decode MP3 samples is no longer
     supported. Use libmpg123 or minimp3 instead.
+ *  [**Regression**] libmodplug: Support for emulating libmodplug 0.8.7 API/ABI
+    has been removed.
 
  *  [**Bug**] xmp-openmpt: Sample rate and number of output channels were not
     applied correctly when using per-file settings.
