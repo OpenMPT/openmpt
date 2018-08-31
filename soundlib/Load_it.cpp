@@ -1183,6 +1183,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				&& m_nSamples > 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
 			{
 				m_madeWithTracker = MPT_USTRING("CheeseTracker");
+			} else if(fileHeader.cwtv == 0)
+			{
+				m_madeWithTracker = MPT_USTRING("Unknown");
 			} else if(fileHeader.cmwt < 0x0300)
 			{
 				if(fileHeader.cmwt > 0x0214)
