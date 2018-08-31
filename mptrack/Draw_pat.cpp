@@ -1345,9 +1345,6 @@ BOOL CViewPattern::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 	y += sizeScroll.cy;
 	if (y < 0) y = 0; else if (y > yMax) y = yMax;
 
-	// did anything change?
-	if (x == xOrig && y == yOrig) return FALSE;
-
 	if (!bDoScroll) return TRUE;
 	xNew = x;
 	yNew = y;
@@ -1421,7 +1418,7 @@ void CViewPattern::OnSize(UINT nType, int cx, int cy)
 
 void CViewPattern::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	if (nSBCode == (SB_THUMBTRACK|SB_THUMBPOSITION)) m_Status.set(psDragVScroll);
+	if (nSBCode == SB_THUMBTRACK) m_Status.set(psDragVScroll);
 	CModScrollView::OnVScroll(nSBCode, nPos, pScrollBar);
 	if (nSBCode == SB_ENDSCROLL) m_Status.reset(psDragVScroll);
 }
