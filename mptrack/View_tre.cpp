@@ -1860,7 +1860,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 		{
 			auto modExts = CSoundFile::GetSupportedExtensions(false);
 			auto instrExts = { "xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat" };
-			auto sampleExts = { "wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf", "sbi" };
+			auto sampleExts = { "wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf", "sb0", "sb2", "sbi" };
 			auto allExtsBlacklist = { "txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "mol" };
 
 			do

@@ -1214,6 +1214,7 @@ static constexpr struct
 	{ MPT_ULITERAL("XI Samples (*.xi)"), MPT_ULITERAL("*.xi") },
 	{ MPT_ULITERAL("Impulse Tracker Samples (*.its)"), MPT_ULITERAL("*.its") },
 	{ MPT_ULITERAL("ScreamTracker Samples (*.s3i,*.smp)"), MPT_ULITERAL("*.s3i;*.smp") },
+	{ MPT_ULITERAL("OPL Instruments (*.sb0,*.sb2,*.sbi)"), MPT_ULITERAL("*.sb0;*.sb2;*.sbi") },
 	{ MPT_ULITERAL("GF1 Patches (*.pat)"), MPT_ULITERAL("*.pat") },
 	{ MPT_ULITERAL("Wave64 Files (*.w64)"), MPT_ULITERAL("*.w64") },
 	{ MPT_ULITERAL("CAF Files (*.wav)"), MPT_ULITERAL("*.caf") },
