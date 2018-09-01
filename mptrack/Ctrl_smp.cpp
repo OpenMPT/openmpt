@@ -3634,7 +3634,8 @@ void CCtrlSamples::OnInitOPLInstrument()
 		m_sndFile.InitOPL();
 		ModSample &sample = m_sndFile.GetSample(m_nSample);
 		sample.nC5Speed = 8363;
-		sample.SetAdlib(true);
+		// Initialize with instant attack, release and enabled sustain for carrier
+		sample.SetAdlib(true, { 0x00, 0x20, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00 });
 		SetModified(SampleHint().Info().Data().Names(), true, true);
 	}
 }

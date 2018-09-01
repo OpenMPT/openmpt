@@ -35,6 +35,8 @@ protected:
 	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
+	void OnOK() override { }
+	void OnCancel() override { }
 	void OnHScroll(UINT, UINT, CScrollBar *) { ParamsChanged(); }
 	LRESULT OnDragonDropping(WPARAM wParam, LPARAM lParam);
 	BOOL OnToolTip(UINT id, NMHDR *pNMHDR, LRESULT *pResult);
