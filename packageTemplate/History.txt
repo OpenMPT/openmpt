@@ -30,15 +30,13 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.10.00 (* September 2018, revision 10727)
+v1.27.10.00 (* September 2018, revision 10738)
 ----------------------------------------------
 Tree view
    [Fix] <jh> Fix crackling, initial missing frames or sometimes even completely in audible instrument preview.
 
-Pattern tab
-   [Fix] <js> Scrolling with touch gestures did (on some, if not all devices) not scroll the pattern contents.
-
 Misc
+   [Fix] <js> Scrolling with touch gestures did not scroll the pattern, sample and instrument editor contents (despite changing the scrollbar position) on Windows 8 and later.
    [Fix] <js> When trying to append a module with differing global swing settings, the time signature was not overridden properly.
 
 

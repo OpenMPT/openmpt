@@ -233,6 +233,7 @@ protected:
 	virtual int SetScrollPos(int nBar, int nPos, BOOL bRedraw = TRUE);
 	virtual void SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& sizePage = CScrollView::sizeDefault, const SIZE& sizeLine = CScrollView::sizeDefault);
 
+	BOOL OnGesturePan(CPoint ptFrom, CPoint ptTo) override;
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

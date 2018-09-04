@@ -723,6 +723,16 @@ void CModScrollView::SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& si
 }
 
 
+BOOL CModScrollView::OnGesturePan(CPoint ptFrom, CPoint ptTo)
+{
+	// On Windows 8 and later, panning with touch gestures does not generate sensible WM_*SCROLL messages.
+	// OnScrollBy is only ever called with a size of 0/0 in this case.
+	// WM_GESTURE on the other hand gives us sensible data to work with.
+	OnScrollBy(ptTo - ptFrom, TRUE);
+	return TRUE;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////
 // 	CModControlBar
 
