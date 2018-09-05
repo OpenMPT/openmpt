@@ -61,37 +61,6 @@ static const VorbisLayout vorbis_mappings[8] = {
       {5, 3, {0, 6, 1, 2, 3, 4, 5, 7}}, /* 8: 7.1 surround */
 };
 
-typedef void (*opus_copy_channel_in_func)(
-  opus_val16 *dst,
-  int dst_stride,
-  const void *src,
-  int src_stride,
-  int src_channel,
-  int frame_size
-);
-
-typedef enum {
-  MAPPING_TYPE_NONE,
-  MAPPING_TYPE_SURROUND
-#ifdef ENABLE_EXPERIMENTAL_AMBISONICS
-  ,  /* Do not include comma at end of enumerator list */
-  MAPPING_TYPE_AMBISONICS
-#endif
-} MappingType;
-
-struct OpusMSEncoder {
-   ChannelLayout layout;
-   int arch;
-   int lfe_stream;
-   int application;
-   int variable_duration;
-   MappingType mapping_type;
-   opus_int32 bitrate_bps;
-   /* Encoder states go here */
-   /* then opus_val32 window_mem[channels*120]; */
-   /* then opus_val32 preemph_mem[channels]; */
-};
-
 static opus_val32 *ms_get_preemph_mem(OpusMSEncoder *st)
 {
    int s;
@@ -139,12 +108,14 @@ static int validate_ambisonics(int nb_channels, int *nb_streams, int *nb_coupled
    int acn_channels;
    int nondiegetic_channels;
 
+   if (nb_channels < 1 || nb_channels > 227)
+      return 0;
+
    order_plus_one = isqrt32(nb_channels);
    acn_channels = order_plus_one * order_plus_one;
    nondiegetic_channels = nb_channels - acn_channels;
 
-   if (order_plus_one < 1 || order_plus_one > 15 ||
-       (nondiegetic_channels != 0 && nondiegetic_channels != 2))
+   if (nondiegetic_channels != 0 && nondiegetic_channels != 2)
       return 0;
 
    if (nb_streams)
@@ -296,7 +267,7 @@ void surround_analysis(const CELTMode *celt_mode, const void *pcm, opus_val16 *b
       int nb_frames = frame_size/freq_size;
       celt_assert(nb_frames*freq_size == frame_size);
       OPUS_COPY(in, mem+c*overlap, overlap);
-      (*copy_channel_in)(x, 1, pcm, channels, c, len);
+      (*copy_channel_in)(x, 1, pcm, channels, c, len, NULL);
       celt_preemphasis(x, in+overlap, frame_size, 1, upsample, celt_mode->preemph, preemph_mem+c, 0);
 #ifndef FIXED_POINT
       {
@@ -884,7 +855,7 @@ static opus_int32 rate_allocation(
 
 /* Max size in case the encoder decides to return six frames (6 x 20 ms = 120 ms) */
 #define MS_FRAME_TMP (6*1275+12)
-static int opus_multistream_encode_native
+int opus_multistream_encode_native
 (
     OpusMSEncoder *st,
     opus_copy_channel_in_func copy_channel_in,
@@ -894,7 +865,8 @@ static int opus_multistream_encode_native
     opus_int32 max_data_bytes,
     int lsb_depth,
     downmix_func downmix,
-    int float_api
+    int float_api,
+    void *user_data
 )
 {
    opus_int32 Fs;
@@ -1028,9 +1000,9 @@ static int opus_multistream_encode_native
          left = get_left_channel(&st->layout, s, -1);
          right = get_right_channel(&st->layout, s, -1);
          (*copy_channel_in)(buf, 2,
-            pcm, st->layout.nb_channels, left, frame_size);
+            pcm, st->layout.nb_channels, left, frame_size, user_data);
          (*copy_channel_in)(buf+1, 2,
-            pcm, st->layout.nb_channels, right, frame_size);
+            pcm, st->layout.nb_channels, right, frame_size, user_data);
          ptr += align(coupled_size);
          if (st->mapping_type == MAPPING_TYPE_SURROUND)
          {
@@ -1046,7 +1018,7 @@ static int opus_multistream_encode_native
          int i;
          int chan = get_mono_channel(&st->layout, s, -1);
          (*copy_channel_in)(buf, 1,
-            pcm, st->layout.nb_channels, chan, frame_size);
+            pcm, st->layout.nb_channels, chan, frame_size, user_data);
          ptr += align(mono_size);
          if (st->mapping_type == MAPPING_TYPE_SURROUND)
          {
@@ -1105,11 +1077,13 @@ static void opus_copy_channel_in_float(
   const void *src,
   int src_stride,
   int src_channel,
-  int frame_size
+  int frame_size,
+  void *user_data
 )
 {
    const float *float_src;
    opus_int32 i;
+   (void)user_data;
    float_src = (const float *)src;
    for (i=0;i<frame_size;i++)
 #if defined(FIXED_POINT)
@@ -1126,11 +1100,13 @@ static void opus_copy_channel_in_short(
   const void *src,
   int src_stride,
   int src_channel,
-  int frame_size
+  int frame_size,
+  void *user_data
 )
 {
    const opus_int16 *short_src;
    opus_int32 i;
+   (void)user_data;
    short_src = (const opus_int16 *)src;
    for (i=0;i<frame_size;i++)
 #if defined(FIXED_POINT)
@@ -1151,7 +1127,7 @@ int opus_multistream_encode(
 )
 {
    return opus_multistream_encode_native(st, opus_copy_channel_in_short,
-      pcm, frame_size, data, max_data_bytes, 16, downmix_int, 0);
+      pcm, frame_size, data, max_data_bytes, 16, downmix_int, 0, NULL);
 }
 
 #ifndef DISABLE_FLOAT_API
@@ -1164,7 +1140,7 @@ int opus_multistream_encode_float(
 )
 {
    return opus_multistream_encode_native(st, opus_copy_channel_in_float,
-      pcm, frame_size, data, max_data_bytes, 16, downmix_float, 1);
+      pcm, frame_size, data, max_data_bytes, 16, downmix_float, 1, NULL);
 }
 #endif
 
@@ -1180,7 +1156,7 @@ int opus_multistream_encode_float
 )
 {
    return opus_multistream_encode_native(st, opus_copy_channel_in_float,
-      pcm, frame_size, data, max_data_bytes, 24, downmix_float, 1);
+      pcm, frame_size, data, max_data_bytes, 24, downmix_float, 1, NULL);
 }
 
 int opus_multistream_encode(
@@ -1192,18 +1168,16 @@ int opus_multistream_encode(
 )
 {
    return opus_multistream_encode_native(st, opus_copy_channel_in_short,
-      pcm, frame_size, data, max_data_bytes, 16, downmix_int, 0);
+      pcm, frame_size, data, max_data_bytes, 16, downmix_int, 0, NULL);
 }
 #endif
 
-int opus_multistream_encoder_ctl(OpusMSEncoder *st, int request, ...)
+int opus_multistream_encoder_ctl_va_list(OpusMSEncoder *st, int request,
+                                         va_list ap)
 {
-   va_list ap;
    int coupled_size, mono_size;
    char *ptr;
    int ret = OPUS_OK;
-
-   va_start(ap, request);
 
    coupled_size = opus_encoder_get_size(2);
    mono_size = opus_encoder_get_size(1);
@@ -1392,12 +1366,19 @@ int opus_multistream_encoder_ctl(OpusMSEncoder *st, int request, ...)
       ret = OPUS_UNIMPLEMENTED;
       break;
    }
-
-   va_end(ap);
    return ret;
 bad_arg:
-   va_end(ap);
    return OPUS_BAD_ARG;
+}
+
+int opus_multistream_encoder_ctl(OpusMSEncoder *st, int request, ...)
+{
+   int ret;
+   va_list ap;
+   va_start(ap, request);
+   ret = opus_multistream_encoder_ctl_va_list(st, request, ap);
+   va_end(ap);
+   return ret;
 }
 
 void opus_multistream_encoder_destroy(OpusMSEncoder *st)

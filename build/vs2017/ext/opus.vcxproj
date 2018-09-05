@@ -648,6 +648,7 @@
     <ClInclude Include="..\..\..\include\opus\include\opus_custom.h" />
     <ClInclude Include="..\..\..\include\opus\include\opus_defines.h" />
     <ClInclude Include="..\..\..\include\opus\include\opus_multistream.h" />
+    <ClInclude Include="..\..\..\include\opus\include\opus_projection.h" />
     <ClInclude Include="..\..\..\include\opus\include\opus_types.h" />
     <ClInclude Include="..\..\..\include\opus\silk\API.h" />
     <ClInclude Include="..\..\..\include\opus\silk\Inlines.h" />
@@ -676,6 +677,7 @@
     <ClInclude Include="..\..\..\include\opus\silk\x86\SigProc_FIX_sse.h" />
     <ClInclude Include="..\..\..\include\opus\silk\x86\main_sse.h" />
     <ClInclude Include="..\..\..\include\opus\src\analysis.h" />
+    <ClInclude Include="..\..\..\include\opus\src\mapping_matrix.h" />
     <ClInclude Include="..\..\..\include\opus\src\mlp.h" />
     <ClInclude Include="..\..\..\include\opus\src\opus_private.h" />
     <ClInclude Include="..\..\..\include\opus\src\tansig_table.h" />
@@ -699,7 +701,7 @@
     <ClCompile Include="..\..\..\include\opus\celt\quant_bands.c" />
     <ClCompile Include="..\..\..\include\opus\celt\rate.c" />
     <ClCompile Include="..\..\..\include\opus\celt\vq.c" />
-    <ClCompile Include="..\..\..\include\opus\celt\x86\celt_lpc_sse.c" />
+    <ClCompile Include="..\..\..\include\opus\celt\x86\celt_lpc_sse4_1.c" />
     <ClCompile Include="..\..\..\include\opus\celt\x86\pitch_sse.c" />
     <ClCompile Include="..\..\..\include\opus\celt\x86\pitch_sse2.c" />
     <ClCompile Include="..\..\..\include\opus\celt\x86\pitch_sse4_1.c" />
@@ -811,12 +813,13 @@
     <ClCompile Include="..\..\..\include\opus\silk\tables_other.c" />
     <ClCompile Include="..\..\..\include\opus\silk\tables_pitch_lag.c" />
     <ClCompile Include="..\..\..\include\opus\silk\tables_pulses_per_block.c" />
-    <ClCompile Include="..\..\..\include\opus\silk\x86\NSQ_del_dec_sse.c" />
-    <ClCompile Include="..\..\..\include\opus\silk\x86\NSQ_sse.c" />
-    <ClCompile Include="..\..\..\include\opus\silk\x86\VAD_sse.c" />
-    <ClCompile Include="..\..\..\include\opus\silk\x86\VQ_WMat_EC_sse.c" />
+    <ClCompile Include="..\..\..\include\opus\silk\x86\NSQ_del_dec_sse4_1.c" />
+    <ClCompile Include="..\..\..\include\opus\silk\x86\NSQ_sse4_1.c" />
+    <ClCompile Include="..\..\..\include\opus\silk\x86\VAD_sse4_1.c" />
+    <ClCompile Include="..\..\..\include\opus\silk\x86\VQ_WMat_EC_sse4_1.c" />
     <ClCompile Include="..\..\..\include\opus\silk\x86\x86_silk_map.c" />
     <ClCompile Include="..\..\..\include\opus\src\analysis.c" />
+    <ClCompile Include="..\..\..\include\opus\src\mapping_matrix.c" />
     <ClCompile Include="..\..\..\include\opus\src\mlp.c" />
     <ClCompile Include="..\..\..\include\opus\src\mlp_data.c" />
     <ClCompile Include="..\..\..\include\opus\src\opus.c" />
@@ -825,6 +828,8 @@
     <ClCompile Include="..\..\..\include\opus\src\opus_multistream.c" />
     <ClCompile Include="..\..\..\include\opus\src\opus_multistream_decoder.c" />
     <ClCompile Include="..\..\..\include\opus\src\opus_multistream_encoder.c" />
+    <ClCompile Include="..\..\..\include\opus\src\opus_projection_decoder.c" />
+    <ClCompile Include="..\..\..\include\opus\src\opus_projection_encoder.c" />
     <ClCompile Include="..\..\..\include\opus\src\repacketizer.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

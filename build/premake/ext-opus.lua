@@ -35,6 +35,7 @@
    "../../include/opus/include/opus_custom.h",
    "../../include/opus/include/opus_defines.h",
    "../../include/opus/include/opus_multistream.h",
+   "../../include/opus/include/opus_projection.h",
    "../../include/opus/include/opus_types.h",
   }
   files {
