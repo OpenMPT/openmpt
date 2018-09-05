@@ -503,7 +503,7 @@ LIBOPENMPT_API void * openmpt_error_func_errno_userdata( int * error );
  * \remarks openmpt_could_open_probability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability() returned 0.5.
  * \sa \ref libopenmpt_c_fileio
  * \sa openmpt_stream_callbacks
- * \deprecated Please use openmpt_module_could_open_probability2().
+ * \deprecated Please use openmpt_could_open_probability2().
  * \since 0.3.0
  */
 LIBOPENMPT_API LIBOPENMPT_DEPRECATED double openmpt_could_open_probability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * user );
@@ -520,7 +520,7 @@ LIBOPENMPT_API LIBOPENMPT_DEPRECATED double openmpt_could_open_probability( open
  * \remarks openmpt_could_open_probability() expects the complete file data to be eventually available to it, even if it is asked to just parse the header. Verification will be unreliable (both false positives and false negatives), if you pretend that the file is just some few bytes of initial data threshold in size. In order to really just access the first bytes of a file, check in your callback functions whether data or seeking is requested beyond your initial data threshold, and in that case, return an error. openmpt_could_open_probability() will treat this as any other I/O error and return 0.0. You must not expect the correct result in this case. You instead must remember that it asked for more data than you currently want to provide to it and treat this situation as if openmpt_could_open_probability() returned 0.5.
  * \sa \ref libopenmpt_c_fileio
  * \sa openmpt_stream_callbacks
- * \deprecated Please use openmpt_module_could_open_probability2().
+ * \deprecated Please use openmpt_could_open_probability2().
  */
 LIBOPENMPT_API LIBOPENMPT_DEPRECATED double openmpt_could_open_propability( openmpt_stream_callbacks stream_callbacks, void * stream, double effort, openmpt_log_func logfunc, void * user );
 
