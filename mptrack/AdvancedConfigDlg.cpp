@@ -245,6 +245,8 @@ BOOL COptionsAdvanced::OnSetActive()
 void COptionsAdvanced::OnOptionDblClick(NMHDR *, LRESULT *)
 {
 	const int index = m_List.GetSelectionMark();
+	if(index < 0)
+		return;
 	const SettingPath path = m_indexToPath[m_List.GetItemData(index)];
 	SettingValue val = theApp.GetSettings().GetMap().find(path)->second;
 	if(val.GetType() == SettingTypeBool)
