@@ -31,17 +31,16 @@
 #error A C++11 compiler is required!
 #endif
 
-#include <assert.h>
+#include <cassert>
 
 //    Use MinGW's shared_lock class template, if it's available. Requires C++14.
 //  If unavailable (eg. because this library is being used in C++11), then an
 //  implementation of shared_lock is provided by this header.
 #if (__cplusplus >= 201402L)
 #include <shared_mutex>
-#else
+#endif
 //  For defer_lock_t, adopt_lock_t, and try_to_lock_t
 #include "mingw.mutex.h"
-#endif
 
 //  For descriptive errors.
 #include <system_error>
@@ -69,11 +68,19 @@ class shared_mutex
     typedef uint_fast16_t counter_type;
     std::atomic<counter_type> mCounter;
     static constexpr counter_type kWriteBit = 1 << (sizeof(counter_type) * CHAR_BIT - 1);
+
+#if STDMUTEX_RECURSION_CHECKS
+//  Runtime checker for verifying owner threads. Note: Exclusive mode only.
+    _OwnerThread mOwnerThread;
+#endif
 public:
     typedef shared_mutex * native_handle_type;
 
     shared_mutex ()
         : mCounter(0)
+#if STDMUTEX_RECURSION_CHECKS
+        , mOwnerThread()
+#endif
     {
     }
 
@@ -134,31 +141,47 @@ public:
 //  Behavior is undefined if a lock was previously acquired.
     void lock (void)
     {
+#if STDMUTEX_RECURSION_CHECKS
+        DWORD self = mOwnerThread.checkOwnerBeforeLock();
+#endif
         using namespace std;
-        using namespace this_thread;
 //  Might be able to use relaxed memory order...
 //  Wait for the write-lock to be unlocked, then claim the write slot.
         counter_type current;
         while ((current = mCounter.fetch_or(kWriteBit, std::memory_order_acquire)) & kWriteBit)
-            yield();
+            this_thread::yield();
 //  Wait for readers to finish up.
         while (current != kWriteBit)
         {
-            yield();
+            this_thread::yield();
             current = mCounter.load(std::memory_order_acquire);
         }
+#if STDMUTEX_RECURSION_CHECKS
+        mOwnerThread.setOwnerAfterLock(self);
+#endif
     }
 
     bool try_lock (void)
     {
+#if STDMUTEX_RECURSION_CHECKS
+        DWORD self = mOwnerThread.checkOwnerBeforeLock();
+#endif
         counter_type expected = 0;
-        return mCounter.compare_exchange_strong(expected, kWriteBit,
-                                                std::memory_order_acquire,
-                                                std::memory_order_relaxed);
+        bool ret = mCounter.compare_exchange_strong(expected, kWriteBit,
+                                                    std::memory_order_acquire,
+                                                    std::memory_order_relaxed);
+#if STDMUTEX_RECURSION_CHECKS
+        if (ret)
+            mOwnerThread.setOwnerAfterLock(self);
+#endif
+        return ret;
     }
 
     void unlock (void)
     {
+#if STDMUTEX_RECURSION_CHECKS
+        mOwnerThread.checkSetOwnerBeforeUnlock();
+#endif
         using namespace std;
 #ifndef NDEBUG
         if (mCounter.load(memory_order_relaxed) != kWriteBit)
@@ -181,63 +204,44 @@ public:
 //  I define the class without try_* functions in that case.
 //    Only fully-featured implementations will be placed into namespace std.
 #if defined(_WIN32) && (WINVER >= _WIN32_WINNT_VISTA)
+namespace vista
+{
+class condition_variable_any;
+}
+
 namespace windows7
 {
-class shared_mutex
+//  We already #include "mingw.mutex.h". May as well reduce redundancy.
+class shared_mutex : windows7::mutex
 {
-    SRWLOCK mHandle;
+//    Allow condition_variable_any (and only condition_variable_any) to treat a
+//  shared_mutex as its base class.
+    friend class vista::condition_variable_any;
 public:
-    typedef PSRWLOCK native_handle_type;
-
-    shared_mutex ()
-        : mHandle(SRWLOCK_INIT)
-    {
-    }
-
-    ~shared_mutex () = default;
-
-//  No form of copying or moving should be allowed.
-    shared_mutex (const shared_mutex&) = delete;
-    shared_mutex & operator= (const shared_mutex&) = delete;
-
-//  Behavior is undefined if a lock was previously acquired by this thread.
-    void lock (void)
-    {
-        AcquireSRWLockExclusive(&mHandle);
-    }
+    using windows7::mutex::native_handle_type;
+    using windows7::mutex::lock;
+    using windows7::mutex::unlock;
+    using windows7::mutex::native_handle;
 
     void lock_shared (void)
     {
-        AcquireSRWLockShared(&mHandle);
+        AcquireSRWLockShared(native_handle());
     }
 
     void unlock_shared (void)
     {
-        ReleaseSRWLockShared(&mHandle);
-    }
-
-    void unlock (void)
-    {
-        ReleaseSRWLockExclusive(&mHandle);
+        ReleaseSRWLockShared(native_handle());
     }
 
 //  TryAcquireSRW functions are a Windows 7 feature.
 #if (WINVER >= _WIN32_WINNT_WIN7)
     bool try_lock_shared (void)
     {
-        return TryAcquireSRWLockShared(&mHandle) != 0;
+        return TryAcquireSRWLockShared(native_handle()) != 0;
     }
 
-    bool try_lock (void)
-    {
-        return TryAcquireSRWLockExclusive(&mHandle) != 0;
-    }
+    using windows7::mutex::try_lock;
 #endif
-
-    native_handle_type native_handle (void)
-    {
-        return &mHandle;
-    }
 };
 
 } //  Namespace windows7
@@ -248,7 +252,7 @@ using windows7::shared_mutex;
 using portable::shared_mutex;
 #endif
 
-class shared_timed_mutex : protected shared_mutex
+class shared_timed_mutex : shared_mutex
 {
     typedef shared_mutex Base;
 public:
