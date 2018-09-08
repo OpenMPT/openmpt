@@ -174,6 +174,7 @@ static const ModCharsetInfo ModCharsetInfos[] =
 	{ MOD_TYPE_AMS , mpt::CharsetCP437      },
 	{ MOD_TYPE_AMS2, mpt::CharsetCP437      },
 	{ MOD_TYPE_DSM , mpt::CharsetCP437      },
+	{ MOD_TYPE_PLM , mpt::CharsetCP437      },
 	// Windows
 	{ MOD_TYPE_MT2 , mpt::CharsetWindows1252},
 	{ MOD_TYPE_MPT , mpt::CharsetWindows1252},
