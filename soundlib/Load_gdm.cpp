@@ -229,21 +229,20 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 			sample.nLength /= 2;
 		}
 
-		sample.nLoopStart = gdmSample.loopBegin;	// in samples
-		sample.nLoopEnd = gdmSample.loopEnd - 1;	// ditto
-		sample.FrequencyToTranspose();	// set transpose + finetune for mod files
+		sample.nLoopStart = gdmSample.loopBegin;
+		sample.nLoopEnd = gdmSample.loopEnd - 1;
 
-		// Fix transpose + finetune for some rare cases where transpose is not C-5 (e.g. sample 4 in wander2.gdm)
-		if(m_nType == MOD_TYPE_MOD)
+		if(UseFinetuneAndTranspose())
 		{
-			if(sample.RelativeTone > 0)
+			// Use the same inaccurate table as 2GDM for translating back to finetune, as our own routines
+			// give slightly different results for the provided sample rates that may result in transpose != 0.
+			static const uint16 rate2finetune[] = { 8363, 8424, 8485, 8547, 8608, 8671, 8734, 8797, 7894, 7951, 8009, 8067, 8125, 8184, 8244, 8303 };
+			for(uint8 i = 0; i < 16; i++)
 			{
-				sample.RelativeTone -= 1;
-				sample.nFineTune += 128;
-			} else if(sample.RelativeTone < 0)
-			{
-				sample.RelativeTone += 1;
-				sample.nFineTune -= 128;
+				if(sample.nC5Speed == rate2finetune[i])
+				{
+					sample.nFineTune = MOD2XMFineTune(i);
+				}
 			}
 		}
 
