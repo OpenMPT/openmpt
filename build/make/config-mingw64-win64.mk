@@ -9,7 +9,7 @@ CFLAGS_STDC = -std=c99
 CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)
 
-CPPFLAGS += -DWIN32 -D_WIN32 -DWIN64 -D_WIN64 -Iinclude/mingw-std-threads -DMPT_WITH_MINGWSTDTHREADS
+CPPFLAGS += -DWIN32 -D_WIN32 -DWIN64 -D_WIN64
 CXXFLAGS += -municode -mconsole 
 CFLAGS   += -municode -mconsole 
 LDFLAGS  +=

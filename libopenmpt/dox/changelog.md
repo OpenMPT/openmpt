@@ -53,11 +53,9 @@ is just a high-level summary.
     to use the posix thread model (as opposed to the win32 threading model),
     because the former does support std::mutex while the latter does not. When
     building with win32 threading model with the Autotools build system, it is
-    recommended to provide the `mingw-std-threads` package. `mingw-std-threads`
-    is automatically included with the `Makefile` build system. Building
-    libopenmpt with MinGW-w64 without any `std::thread`/`std::mutex` support is
-    deprecated and support for such configurations will be removed in libopenmpt
-    0.5.
+    recommended to provide the `mingw-std-threads` package. Building libopenmpt
+    with MinGW-w64 without any `std::thread`/`std::mutex` support is deprecated
+    and support for such configurations will be removed in libopenmpt 0.5.
  *  [**Change**] `Makefile` `CONFIG=emscripten` now has 4 `EMSCRIPTEN_TARGET=`
     settings: `wasm` generates WebAssembly, `asmjs128m` generates asm.js with a
     fixed size 128MB heap, `asmjs` generates asm.js with a fixed default size
