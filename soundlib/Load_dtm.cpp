@@ -586,17 +586,22 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Is this accurate?
+	mpt::ustring tracker;
 	if(patternFormat == DTM_206_PATTERN_FORMAT)
 	{
-		m_madeWithTracker = MPT_USTRING("Digital Home Studio");
+		tracker = MPT_USTRING("Digital Home Studio");
 	} else if(FileReader chunk = chunks.GetChunk(DTMChunk::idVERS))
 	{
 		uint32 version = chunk.ReadUint32BE();
-		m_madeWithTracker = mpt::format(MPT_USTRING("Digital Tracker %1.%2"))(version >> 4, version & 0x0F);
+		tracker = mpt::format(MPT_USTRING("Digital Tracker %1.%2"))(version >> 4, version & 0x0F);
 	} else
 	{
-		m_madeWithTracker = MPT_USTRING("Digital Tracker");
+		tracker = MPT_USTRING("Digital Tracker");
 	}
+	m_modFormat.formatName = MPT_USTRING("Digital Tracker");
+	m_modFormat.type = MPT_USTRING("dtm");
+	m_modFormat.madeWithTracker = std::move(tracker);
+	m_modFormat.charset = mpt::CharsetISO8859_1;
 
 	return true;
 }

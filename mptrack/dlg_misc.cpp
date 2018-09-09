@@ -100,7 +100,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	// Version information
 
 	if(sndFile.m_dwCreatedWithVersion) SetDlgItemText(IDC_EDIT_CREATEDWITH, _T("OpenMPT ") + FormatVersionNumber(sndFile.m_dwCreatedWithVersion));
-	SetDlgItemText(IDC_EDIT_SAVEDWITH, mpt::ToCString(sndFile.m_madeWithTracker));
+	SetDlgItemText(IDC_EDIT_SAVEDWITH, mpt::ToCString(sndFile.m_modFormat.madeWithTracker.empty() ? sndFile.m_modFormat.formatName : sndFile.m_modFormat.madeWithTracker));
 
 	const int iconSize = Util::ScalePixels(32, m_hWnd);
 	m_warnIcon = (HICON)::LoadImage(NULL, IDI_EXCLAMATION, IMAGE_ICON, iconSize, iconSize, LR_SHARED);

@@ -586,6 +586,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 
 	// Microsoft MIDI files
+	bool isRIFF = false;
 	if(file.ReadMagic("RIFF"))
 	{
 		file.Skip(4);
@@ -606,6 +607,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				file.Skip(length);
 			} else
 			{
+				isRIFF = true;
 				break;
 			}
 		} while(file.CanRead(8));
@@ -644,7 +646,11 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 #endif
 
 	m_songArtist = MPT_USTRING("MIDI Conversion");
-	m_madeWithTracker = MPT_USTRING("Standard MIDI File");
+	m_modFormat.formatName = MPT_USTRING("Standard MIDI File");
+	m_modFormat.type = isRIFF ? MPT_ULITERAL("rmi") : MPT_ULITERAL("mid");
+	m_modFormat.madeWithTracker = MPT_USTRING("Standard MIDI File");
+	m_modFormat.charset = mpt::CharsetISO8859_1;
+
 	SetMixLevels(mixLevels1_17RC3);
 	m_nTempoMode = tempoModeModern;
 	m_SongFlags = SONG_LINEARSLIDES;

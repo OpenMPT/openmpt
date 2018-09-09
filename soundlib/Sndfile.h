@@ -245,6 +245,15 @@ struct TimingInfo
 };
 
 
+struct ModFormatDetails
+{
+	mpt::ustring formatName;      // "FastTracker 2"
+	mpt::ustring type;            // "xm"
+	mpt::ustring madeWithTracker; // "OpenMPT 1.28.01.00"
+	mpt::Charset charset = mpt::CharsetUTF8;
+};
+
+
 class IAudioReadTarget
 {
 protected:
@@ -521,8 +530,7 @@ public:
 	std::string m_songName;
 	mpt::ustring m_songArtist;
 	SongMessage m_songMessage;
-	mpt::ustring m_madeWithTracker;
-	mpt::ustring m_moduleFormat;
+	ModFormatDetails m_modFormat;
 
 protected:
 	std::vector<FileHistory> m_FileHistory;	// File edit history
@@ -623,7 +631,7 @@ public:
 	// rough heuristic, could be improved
 	mpt::Charset GetCharsetFile() const // 8bit string encoding of strings in the on-disk file
 	{
-		return GetCharsetFromModType(GetType());
+		return m_modFormat.charset;
 	}
 	mpt::Charset GetCharsetInternal() const // 8bit string encoding of strings internal in CSoundFile
 	{
@@ -787,10 +795,7 @@ public:
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
 	static bool IsExtensionSupported(const char *ext); // UTF8, casing of ext is ignored
-	static mpt::Charset GetCharsetFromModType(MODTYPE modtype);
-	static mpt::ustring ModTypeToString(MODTYPE modtype);
 	static mpt::ustring ModContainerTypeToString(MODCONTAINERTYPE containertype);
-	static mpt::ustring ModTypeToTracker(MODTYPE modtype);
 	static mpt::ustring ModContainerTypeToTracker(MODCONTAINERTYPE containertype);
 
 	void UpgradeModule();
@@ -1081,7 +1086,7 @@ public:
 
 	uint32 MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note, bool isXG, std::bitset<16> drumChns);
 	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);
-	void LoadMixPlugins(FileReader &file);
+	bool LoadMixPlugins(FileReader &file);
 #ifndef NO_PLUGINS
 	static void ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin);
 	void ProcessMidiOut(CHANNELINDEX nChn);

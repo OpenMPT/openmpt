@@ -736,11 +736,9 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo.Set(mainChunk.tempo);
 	m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
 
-	m_madeWithTracker = MPT_USTRING("Galaxy Sound System (");
-	if(isAM)
-		m_madeWithTracker += MPT_USTRING("new version)");
-	else
-		m_madeWithTracker += MPT_USTRING("old version)");
+	m_modFormat.formatName = isAM ? MPT_ULITERAL("Galaxy Sound System (new version)") : MPT_ULITERAL("Galaxy Sound System (old version)");
+	m_modFormat.type = MPT_USTRING("j2b");
+	m_modFormat.charset = mpt::CharsetCP437;
 	
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, mainChunk.songname);
 

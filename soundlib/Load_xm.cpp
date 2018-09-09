@@ -320,6 +320,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMixLevels = mixLevelsCompatible;
 
 	FlagSet<TrackerVersions> madeWith(verUnknown);
+	mpt::ustring madeWithTracker;
 
 	if(!memcmp(fileHeader.trackerName, "FastTracker ", 12))
 	{
@@ -340,14 +341,14 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// ???
 			madeWith.set(verConfirmed);
-			m_madeWithTracker = MPT_USTRING("FastTracker Clone");
+			madeWithTracker = MPT_USTRING("FastTracker Clone");
 		}
 	} else
 	{
 		// Something else!
 		madeWith = verUnknown | verConfirmed;
 
-		mpt::String::Read<mpt::String::spacePadded>(m_madeWithTracker, mpt::CharsetCP437, fileHeader.trackerName);
+		mpt::String::Read<mpt::String::spacePadded>(madeWithTracker, mpt::CharsetCP437, fileHeader.trackerName);
 
 		if(!memcmp(fileHeader.trackerName, "OpenMPT ", 8))
 		{
@@ -437,12 +438,12 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// ModPlug Tracker Alpha
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
-				m_madeWithTracker = MPT_USTRING("ModPlug Tracker 1.0 alpha");
+				madeWithTracker = MPT_USTRING("ModPlug Tracker 1.0 alpha");
 			} else if(instrHeader.size == 263)
 			{
 				// ModPlug Tracker Beta (Beta 1 still behaves like Alpha, but Beta 3.3 does it this way)
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, B3);
-				m_madeWithTracker = MPT_USTRING("ModPlug Tracker 1.0 beta");
+				madeWithTracker = MPT_USTRING("ModPlug Tracker 1.0 beta");
 			} else
 			{
 				// WTF?
@@ -639,11 +640,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		if(madeWith[verModPlug1_09])
 		{
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
-			m_madeWithTracker = MPT_USTRING("ModPlug Tracker 1.09");
+			madeWithTracker = MPT_USTRING("ModPlug Tracker 1.09");
 		} else if(madeWith[verNewModPlug])
 		{
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-			m_madeWithTracker = MPT_USTRING("ModPlug Tracker 1.10 - 1.16");
+			madeWithTracker = MPT_USTRING("ModPlug Tracker 1.10 - 1.16");
 		}
 	}
 
@@ -651,7 +652,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Hey, I know this tracker!
 		std::string mptVersion(fileHeader.trackerName + 8, 12);
-		m_dwLastSavedWithVersion = Version::Parse(mpt::ToUnicode(GetCharsetFile(), mptVersion));
+		m_dwLastSavedWithVersion = Version::Parse(mpt::ToUnicode(mpt::CharsetASCII, mptVersion));
 		madeWith = verOpenMPT | verConfirmed;
 
 		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 19))
@@ -660,7 +661,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			m_nMixLevels = mixLevelsCompatibleFT2;
 	}
 
-	if(m_dwLastSavedWithVersion != Version(0) && !madeWith[verOpenMPT])
+	if(m_dwLastSavedWithVersion && !madeWith[verOpenMPT])
 	{
 		m_nMixLevels = mixLevelsOriginal;
 		m_playBehaviour.reset();
@@ -688,32 +689,29 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	if(m_madeWithTracker.empty())
+	if(madeWithTracker.empty())
 	{
 		if(madeWith[verDigiTrakker] && sampleReserved == 0 && (instrType ? instrType : -1) == -1)
 		{
-			m_madeWithTracker = MPT_USTRING("DigiTrakker");
+			madeWithTracker = MPT_USTRING("DigiTrakker");
 		} else if(madeWith[verFT2Generic])
 		{
-			m_madeWithTracker = MPT_USTRING("FastTracker 2 or compatible");
+			madeWithTracker = MPT_USTRING("FastTracker 2 or compatible");
 		} else
 		{
-			m_madeWithTracker = MPT_USTRING("Unknown");
+			madeWithTracker = MPT_USTRING("Unknown");
 		}
 	}
 
-	// Leave if no extra instrument settings are available (end of file reached)
-	if(file.NoBytesLeft()) return true;
-
-	bool interpretOpenMPTMade = false; // specific for OpenMPT 1.17+ (bMadeWithModPlug is also for MPT 1.16)
+	bool isOpenMPTMade = false; // specific for OpenMPT 1.17+
 	if(GetNumInstruments())
 	{
-		interpretOpenMPTMade = LoadExtendedInstrumentProperties(file);
+		isOpenMPTMade = LoadExtendedInstrumentProperties(file);
 	}
 
-	LoadExtendedSongProperties(file, &interpretOpenMPTMade);
+	LoadExtendedSongProperties(file, &isOpenMPTMade);
 
-	if(interpretOpenMPTMade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 00, 00))
+	if(isOpenMPTMade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 00, 00))
 	{
 		// Up to OpenMPT 1.17.02.45 (r165), it was possible that the "last saved with" field was 0
 		// when saving a file in OpenMPT for the first time.
@@ -722,7 +720,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 00, 00))
 	{
-		m_madeWithTracker = MPT_USTRING("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
+		madeWithTracker = MPT_USTRING("OpenMPT ") + m_dwLastSavedWithVersion.ToUString();
 	}
 
 	// We no longer allow any --- or +++ items in the order list now.
@@ -733,6 +731,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		if(!Patterns.IsValidPat(0xFF))
 			Order().Replace(0xFF, Order.GetInvalidPatIndex());
 	}
+
+	m_modFormat.formatName = mpt::format(MPT_USTRING("FastTracker 2 v%1.%2"))(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
+	m_modFormat.type = MPT_USTRING("xm");
+	m_modFormat.madeWithTracker = std::move(madeWithTracker);
+	m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::CharsetWindows1252 : mpt::CharsetCP437;
 
 	return true;
 }

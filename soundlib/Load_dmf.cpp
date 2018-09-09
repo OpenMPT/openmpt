@@ -912,6 +912,11 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals(MOD_TYPE_DMF);
+
+	m_modFormat.formatName = mpt::format(MPT_USTRING("X-Tracker v%1"))(fileHeader.version);
+	m_modFormat.type = MPT_USTRING("dmf");
+	m_modFormat.charset = mpt::CharsetCP437;
+
 	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songname);
 	{
 		std::string artist;

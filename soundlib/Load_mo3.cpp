@@ -1755,6 +1755,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
+	mpt::ustring madeWithTracker;
 	uint16 cwtv = 0;
 	uint16 cmwt = 0;
 	MPT_UNUSED_VARIABLE(cmwt);
@@ -1781,12 +1782,12 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				cwtv = chunk.ReadUint16LE();
 				break;
 			case MOD_TYPE_XM:
-				chunk.ReadString<mpt::String::spacePadded>(m_madeWithTracker, mpt::CharsetCP437, std::min(FileReader::off_t(32), chunk.GetLength()));
+				chunk.ReadString<mpt::String::spacePadded>(madeWithTracker, mpt::CharsetCP437, std::min(FileReader::off_t(32), chunk.GetLength()));
 				break;
 			case MOD_TYPE_MTM:
 				{
 					uint8 mtmVersion = chunk.ReadUint8();
-					m_madeWithTracker = mpt::format(MPT_USTRING("MultiTracker %1.%2"))(mtmVersion >> 4, mtmVersion & 0x0F);
+					madeWithTracker = mpt::format(MPT_USTRING("MultiTracker %1.%2"))(mtmVersion >> 4, mtmVersion & 0x0F);
 				}
 				break;
 			default:
@@ -1834,7 +1835,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 			if(m_dwLastSavedWithVersion)
 			{
-				m_madeWithTracker = MPT_USTRING("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
+				madeWithTracker = MPT_USTRING("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
 			}
 			break;
 		}
@@ -1848,10 +1849,20 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		m_MidiCfg.ClearZxxMacros();
 	}
 
-	if(m_madeWithTracker.empty())
-		m_madeWithTracker = mpt::format(MPT_USTRING("MO3 v%1"))(version);
+	if(madeWithTracker.empty())
+		madeWithTracker = mpt::format(MPT_USTRING("MO3 v%1"))(version);
 	else
-		m_madeWithTracker = mpt::format(MPT_USTRING("MO3 v%1 (%2)"))(version, m_madeWithTracker);
+		madeWithTracker = mpt::format(MPT_USTRING("MO3 v%1 (%2)"))(version, madeWithTracker);
+
+	m_modFormat.formatName = mpt::format(MPT_USTRING("MO3 v%1"))(version);
+	m_modFormat.type = MPT_USTRING("mo3");
+	m_modFormat.madeWithTracker = std::move(madeWithTracker);
+	if(m_dwLastSavedWithVersion)
+		m_modFormat.charset = mpt::CharsetWindows1252;
+	else if(GetType() == MOD_TYPE_MOD)
+		m_modFormat.charset = mpt::CharsetISO8859_1;
+	else
+		m_modFormat.charset = mpt::CharsetCP437;
 
 	if(unsupportedSamples)
 	{

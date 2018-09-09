@@ -389,7 +389,10 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 		m_MidiCfg.Reset();
 	}
 
-	m_madeWithTracker = MPT_USTRING("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
+	m_modFormat.formatName = MPT_USTRING("Impulse Tracker Project");
+	m_modFormat.type = MPT_USTRING("itp");
+	m_modFormat.madeWithTracker = MPT_USTRING("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
+	m_modFormat.charset = mpt::CharsetWindows1252;
 
 	return true;
 #endif // MPT_EXTERNAL_SAMPLES

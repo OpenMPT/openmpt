@@ -94,6 +94,10 @@ static const MODTYPE gdmFormatOrigin[] =
 {
 	MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_MTM, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED, MOD_TYPE_PSM
 };
+static const char gdmFormatOriginStr[][4] =
+{
+	"???", "MOD", "MTM", "S3M", "669", "FAR", "ULT", "STM", "MED", "PSM"
+};
 
 
 static bool ValidateHeader(const GDMFileHeader &fileHeader)
@@ -146,8 +150,12 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals(gdmFormatOrigin[fileHeader.originalFormat]);
+
+	m_modFormat.formatName = MPT_USTRING("General Digital Music");
+	m_modFormat.type = MPT_USTRING("gdm");
+	m_modFormat.madeWithTracker = mpt::format(MPT_USTRING("BWSB 2GDM %1.%2 (converted from %3)"))(fileHeader.trackerMajorVer, fileHeader.formatMinorVer, mpt::ToUnicode(mpt::CharsetASCII, gdmFormatOriginStr[fileHeader.originalFormat]));
+	m_modFormat.charset = mpt::CharsetCP437;
 	m_ContainerType = MOD_CONTAINERTYPE_GDM;
-	m_madeWithTracker = mpt::format(MPT_USTRING("BWSB 2GDM %1.%2 (converted from %3)"))(fileHeader.trackerMajorVer, fileHeader.formatMinorVer, ModTypeToTracker(GetType()));
 
 	// Song name
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songTitle);

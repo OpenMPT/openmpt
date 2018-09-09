@@ -278,7 +278,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		case MOD_TYPE_XM:	modType = MPT_USTRING("XM (FastTracker 2)"); break;
 		case MOD_TYPE_IT:	modType = MPT_USTRING("IT (Impulse Tracker)"); break;
 		case MOD_TYPE_MPT:	modType = MPT_USTRING("MPTM (OpenMPT)"); break;
-		default:			modType = CSoundFile::ModTypeToString(m_sndFile.GetType()); break;
+		default:			modType = mpt::format(MPT_USTRING("%1 (%2)"))(mpt::ToUpperCase(m_sndFile.m_modFormat.type), m_sndFile.m_modFormat.formatName); break;
 		}
 		CString s;
 		s.Format(_T("%s, %u channel%s"), mpt::ToCString(modType).GetString(), m_sndFile.GetNumChannels(), (m_sndFile.GetNumChannels() != 1) ? _T("s") : _T(""));

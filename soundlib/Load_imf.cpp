@@ -459,6 +459,10 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_IMF);
 	m_nChannels = detectedChannels;
 
+	m_modFormat.formatName = MPT_USTRING("Imago Orpheus");
+	m_modFormat.type = MPT_USTRING("imf");
+	m_modFormat.charset = mpt::CharsetCP437;
+
 	//From mikmod: work around an Orpheus bug
 	if(fileHeader.channels[0].status == 0)
 	{

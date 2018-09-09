@@ -166,8 +166,7 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	m_songName.clear();
 	m_songArtist.clear();
 	m_songMessage.clear();
-	m_madeWithTracker.clear();
-	m_moduleFormat.clear();
+	m_modFormat = ModFormatDetails();
 	m_FileHistory.clear();
 	m_tempoSwing.clear();
 
@@ -436,11 +435,6 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 				m_ContainerType = packedContainerType;
 			}
 
-			if(m_madeWithTracker.empty())
-			{
-				m_madeWithTracker = ModTypeToTracker(GetType());
-			}
-
 #ifndef NO_ARCHIVE_SUPPORT
 			// Read archive comment if there is no song comment
 			if(m_songMessage.empty())
@@ -681,7 +675,6 @@ bool CSoundFile::Destroy()
 	m_songName.clear();
 	m_songArtist.clear();
 	m_songMessage.clear();
-	m_madeWithTracker.clear();
 	m_FileHistory.clear();
 
 	for(auto &smp : Samples)
@@ -1570,6 +1563,8 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 
 	Order.OnModTypeChanged(oldtype);
 	Patterns.OnModTypeChanged(oldtype);
+
+	m_modFormat.type = mpt::ToUnicode(mpt::CharsetUTF8, GetModSpecifications().fileExtension);
 }
 
 #endif // MODPLUG_TRACKER

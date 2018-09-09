@@ -128,7 +128,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSFX(MemoryFileReader file, co
 		{
 			return ProbeWantMoreData;
 		}
-		if(file.Seek(0x7c) && file.ReadMagic("SO31"))
+		if(file.Seek(0x7C) && file.ReadMagic("SO31"))
 		{
 			numSamples = 31;
 		}
@@ -459,6 +459,10 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 				.ReadSample(Samples[smp], file);
 		}
 	}
+
+	m_modFormat.formatName = m_nSamples == 15 ? MPT_ULITERAL("SoundFX") : MPT_ULITERAL("SoundFX 2.0 / MultiMedia Sound");
+	m_modFormat.type = m_nSamples == 15 ? MPT_ULITERAL("sfx") : MPT_ULITERAL("sfx2");
+	m_modFormat.charset = mpt::CharsetISO8859_1;
 
 	return true;
 }

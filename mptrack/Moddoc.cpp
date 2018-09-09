@@ -207,7 +207,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 	logcapturer.ShowLog(
 		mpt::cformat(_T("File: %1\nLast saved with: %2, you are using OpenMPT %3\n\n"))
-		(filename, m_SndFile.m_madeWithTracker, Version::Current()));
+		(filename, m_SndFile.m_modFormat.madeWithTracker, Version::Current()));
 
 	if ((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels())) return FALSE;
 

@@ -103,4 +103,4 @@ that need to be updated:
   (depending on your platform)
 * Add file extension to `installer/filetypes.iss` (in four places).
 * Add file extension to `CTrackApp::OpenModulesDialog` in `mptrack/Mptrack.cpp`.
-* Add file extension / `MODTYPE` to `soundlib/Tables.cpp`.
+* Add format information to `soundlib/Tables.cpp`.

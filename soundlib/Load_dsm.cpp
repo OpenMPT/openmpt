@@ -207,6 +207,11 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals(MOD_TYPE_DSM);
+
+	m_modFormat.formatName = MPT_USTRING("DSIK Format");
+	m_modFormat.type = MPT_USTRING("dsm");
+	m_modFormat.charset = mpt::CharsetCP437;
+
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, songHeader.songName);
 	m_nChannels = std::max<uint16>(songHeader.numChannels, 1);
 	m_nDefaultSpeed = songHeader.speed;

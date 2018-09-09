@@ -454,7 +454,12 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_MT2);
 	InitializeChannels();
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_madeWithTracker, mpt::CharsetWindows1252, fileHeader.trackerName);
+
+	m_modFormat.formatName = mpt::format(MPT_USTRING("MadTracker %1.%2"))(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
+	m_modFormat.type = MPT_USTRING("mt2");
+	mpt::String::Read<mpt::String::maybeNullTerminated>(m_modFormat.madeWithTracker, mpt::CharsetWindows1252, fileHeader.trackerName);
+	m_modFormat.charset = mpt::CharsetWindows1252;
+
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels;
 	m_nDefaultSpeed = Clamp<uint8, uint8>(fileHeader.ticksPerLine, 1, 31);
