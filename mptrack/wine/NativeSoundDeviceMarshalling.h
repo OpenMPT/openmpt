@@ -9,7 +9,15 @@
 
 #ifdef MPT_WITH_NLOHMANNJSON
 
+// https://github.com/nlohmann/json/issues/1204
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4127) // conditional expression is constant
+#endif // MPT_COMPILER_MSVC
 #include "../../misc/JSON.h"
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 
 #endif // MPT_WITH_NLOHMANNJSON
 
