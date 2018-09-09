@@ -196,8 +196,6 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 	case CMD_MODCMDEX:
 		switch(param & 0xF0)
 		{
-		case 0x00:	// Set filter
-			break;
 		case 0x30:	// Play backwards
 			command = CMD_S3MCMDEX;
 			param = 0x9F;
@@ -213,8 +211,6 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 				command = CMD_CHANNELVOLUME;
 				param = (param == 0x50) ? 0x00 : 0x40;
 			}
-			break;
-		case 0x60:	// Pattern loop
 			break;
 		case 0x70:	// Coarse offset
 			command = CMD_S3MCMDEX;
@@ -672,7 +668,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		if(ReadMP3Sample(0, chunk, true))
 		{
 			ModSample &srcSample = Samples[0];
-			const int8 *smpData = srcSample.pSample8;
+			const mpt::byte *smpData = srcSample.sampleb();
 			SmpLength predelay = Util::muldiv_unsigned(20116, srcSample.nC5Speed, 100000);
 			LimitMax(predelay, srcSample.nLength);
 			smpData += predelay * srcSample.GetBytesPerSample();
@@ -686,7 +682,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 				if(sample.nLength)
 				{
 					sample.AllocateSample();
-					memcpy(sample.pSample, smpData, sample.GetSampleSizeInBytes());
+					memcpy(sample.sampleb(), smpData, sample.GetSampleSizeInBytes());
 					smpData += sample.GetSampleSizeInBytes();
 					srcSample.nLength -= sample.nLength;
 					SmpLength gap = Util::muldiv_unsigned(454, srcSample.nC5Speed, 10000);

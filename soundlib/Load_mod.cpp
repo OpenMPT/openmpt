@@ -104,7 +104,7 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 	case CMD_TREMOLO:			command = 0x07; break;
 	case CMD_PANNING8:
 		command = 0x08;
-		if(m_nType & MOD_TYPE_S3M)
+		if(GetType() & MOD_TYPE_S3M)
 		{
 			if(param <= 0x80)
 			{
@@ -2017,9 +2017,9 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 
 struct PT36Header
 {
-	char    magicFORM[4];  // "FORM"
-	uint8be dummy1[4];
-	char    magicMODL[4];  // "MODL"
+	char     magicFORM[4]; // "FORM"
+	uint32be size;
+	char     magicMODL[4]; // "MODL"
 };
 
 MPT_BINARY_STRUCT(PT36Header, 12)

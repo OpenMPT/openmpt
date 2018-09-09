@@ -2425,9 +2425,9 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool *pInterpretMp
 					if(smp > 0 && smp <= GetNumSamples())
 					{
 						ModSample &sample = Samples[smp];
-						for(std::size_t i = 0; i < CountOf(sample.cues); i++)
+						for(auto &cue : sample.cues)
 						{
-							sample.cues[i] = chunk.ReadUint32LE();
+							cue = chunk.ReadUint32LE();
 						}
 					}
 				}

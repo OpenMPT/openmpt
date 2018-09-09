@@ -43,9 +43,9 @@ constexpr uint16 MagicBE(const char(&id)[3])
 
 
 // Read 'howMany' order items from an array.
-// 'stopIndex' is treated as '---', 'ignoreIndex' is treated as '+++'. If the format doesn't support such indices, just pass ORDERINDEX_INVALID.
+// 'stopIndex' is treated as '---', 'ignoreIndex' is treated as '+++'. If the format doesn't support such indices, just pass uint16_max.
 template<typename T, size_t arraySize>
-bool ReadOrderFromArray(ModSequence &order, const T(&orders)[arraySize], size_t howMany = arraySize, uint16 stopIndex = ORDERINDEX_INVALID, uint16 ignoreIndex = ORDERINDEX_INVALID)
+bool ReadOrderFromArray(ModSequence &order, const T(&orders)[arraySize], size_t howMany = arraySize, uint16 stopIndex = uint16_max, uint16 ignoreIndex = uint16_max)
 {
 	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 	LimitMax(howMany, arraySize);
@@ -65,9 +65,9 @@ bool ReadOrderFromArray(ModSequence &order, const T(&orders)[arraySize], size_t 
 
 
 // Read 'howMany' order items as integers with defined endianness from a file.
-// 'stopIndex' is treated as '---', 'ignoreIndex' is treated as '+++'. If the format doesn't support such indices, just pass ORDERINDEX_INVALID.
+// 'stopIndex' is treated as '---', 'ignoreIndex' is treated as '+++'. If the format doesn't support such indices, just pass uint16_max.
 template<typename T>
-bool ReadOrderFromFile(ModSequence &order, FileReader &file, size_t howMany, uint16 stopIndex = ORDERINDEX_INVALID, uint16 ignoreIndex = ORDERINDEX_INVALID)
+bool ReadOrderFromFile(ModSequence &order, FileReader &file, size_t howMany, uint16 stopIndex = uint16_max, uint16 ignoreIndex = uint16_max)
 {
 	STATIC_ASSERT(mpt::is_binary_safe<T>::value);
 	if(!file.CanRead(howMany * sizeof(T)))

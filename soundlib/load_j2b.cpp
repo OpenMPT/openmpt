@@ -739,7 +739,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.formatName = isAM ? MPT_ULITERAL("Galaxy Sound System (new version)") : MPT_ULITERAL("Galaxy Sound System (old version)");
 	m_modFormat.type = MPT_USTRING("j2b");
 	m_modFormat.charset = mpt::CharsetCP437;
-	
+
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, mainChunk.songname);
 
 	// It seems like there's no way to differentiate between

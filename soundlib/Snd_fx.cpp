@@ -4853,7 +4853,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 			{
 				// Interpolation for external MIDI messages - interpolation for internal messages
 				// is handled separately to allow for more than 7-bit granularity where it's possible
-				data = static_cast<uint8>(CalculateSmoothParamChange((float)lastZxxParam, (float)data));
+				data = static_cast<uint8>(CalculateSmoothParamChange(lastZxxParam, data));
 			}
 			chn.lastZxxParam = data;
 		} else if(macro[pos] == 's')

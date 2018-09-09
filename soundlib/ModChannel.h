@@ -74,8 +74,8 @@ struct ModChannel
 	int32 cachedPeriod, glissandoPeriod;
 	int32 nCalcVolume;								// Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
 	EnvInfo VolEnv, PanEnv, PitchEnv;				// Envelope playback info
-	int32 nGlobalVol;	// Channel volume (CV in ITTECH.TXT)
-	int32 nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT)
+	int32 nGlobalVol;	// Channel volume (CV in ITTECH.TXT) 0...64
+	int32 nInsVol;		// Sample / Instrument volume (SV * IV in ITTECH.TXT) 0...64
 	int32 nFineTune, nTranspose;
 	int32 nPortamentoSlide, nAutoVibDepth;
 	uint32 nEFxOffset; // offset memory for Invert Loop (EFx, .MOD only)
@@ -134,7 +134,7 @@ struct ModChannel
 	uint16 m_RowPlugParam;
 	PLUGINDEX m_RowPlug;
 
-	void ClearRowCmd() { rowCommand = ModCommand::Empty(); }
+	void ClearRowCmd() { rowCommand = ModCommand(); }
 
 	// Get a reference to a specific envelope of this channel
 	const EnvInfo &GetEnvelope(EnvelopeType envType) const
