@@ -30,14 +30,18 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.27.10.00 (* September 2018, revision 10738)
+v1.27.10.00 (* September 2018, revision 10764)
 ----------------------------------------------
+Pattern tab
+   [Fix] <js> With "always center active row" disabled, cancelling a pattern selection by clicking into the pattern did not set the cursor position correctly (http://bugs.openmpt.org/view.php?id=1142).
+
 Tree view
    [Fix] <jh> Fix crackling, initial missing frames or sometimes even completely in audible instrument preview.
 
 Misc
    [Fix] <js> Scrolling with touch gestures did not scroll the pattern, sample and instrument editor contents (despite changing the scrollbar position) on Windows 8 and later.
    [Fix] <js> When trying to append a module with differing global swing settings, the time signature was not overridden properly.
+   [Fix] <js> Advanced Settings: Crash when pressing Enter and there is no value to edit (http://bugs.openmpt.org/view.php?id=1140).
 
 
 v1.27.09.00 (28 July 2018, revision 10630)

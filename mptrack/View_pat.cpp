@@ -1234,7 +1234,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 
 		if(GetPositionFromPoint(point) == m_StartSel)
 		{
-			SetCurSel(m_StartSel);
+			SetCursorPosition(m_StartSel);
 		}
 		SetCursor(CMainFrame::curArrow);
 		m_Status.reset(psDragnDropEdit);
