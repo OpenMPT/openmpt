@@ -527,6 +527,11 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 		}
 	}
 
+	if((data.size() / channels) > MAX_SAMPLE_LENGTH)
+	{
+		return false;
+	}
+
 	FileTags tags;
 	mpg123_id3v1 *id3v1 = nullptr;
 	mpg123_id3v2 *id3v2 = nullptr;
@@ -631,6 +636,11 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 	} while(bytes_left > 0);
 
 	if(rate == 0 || channels == 0 || raw_sample_data.empty())
+	{
+		return false;
+	}
+
+	if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
 	{
 		return false;
 	}
