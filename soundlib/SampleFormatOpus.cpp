@@ -136,6 +136,10 @@ bool CSoundFile::ReadOpusSample(SAMPLEINDEX sample, FileReader &file)
 			// other errors are fatal, stop decoding
 			eof = true;
 		}
+		if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
+		{
+			break;
+		}
 	}
 
 	op_free(of);

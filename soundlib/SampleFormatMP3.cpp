@@ -512,6 +512,10 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 		int mpg123_read_result = mpg123_read(mh, mpt::byte_cast<unsigned char*>(buf_bytes.data()), buf_bytes.size(), &buf_bytes_decoded);
 		std::memcpy(buf_samples.data(), buf_bytes.data(), buf_bytes_decoded);
 		data.insert(data.end(), buf_samples.data(), buf_samples.data() + buf_bytes_decoded / sizeof(int16));
+		if((data.size() / channels) > MAX_SAMPLE_LENGTH)
+		{
+			break;
+		}
 		if(mpg123_read_result == MPG123_OK)
 		{
 			// continue
@@ -632,6 +636,10 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 					break;
 				}
 			}
+		}
+		if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
+		{
+			break;
 		}
 	} while(bytes_left > 0);
 
