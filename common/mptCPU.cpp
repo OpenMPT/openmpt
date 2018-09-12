@@ -23,7 +23,7 @@ OPENMPT_NAMESPACE_BEGIN
 uint32 RealProcSupport = 0;
 uint32 ProcSupport = 0;
 char ProcVendorID[16+1] = "";
-char ProcBrandID[32*4*3+1] = "";
+char ProcBrandID[4*4*3+1] = "";
 uint16 ProcFamily = 0;
 uint8 ProcModel = 0;
 uint8 ProcStepping = 0;
