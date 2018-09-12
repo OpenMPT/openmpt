@@ -3665,6 +3665,11 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		return false;
 	}
 
+	if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
+	{
+		return false;
+	}
+
 	DestroySampleThreadsafe(sample);
 	if(!mo3Decode)
 	{
@@ -3762,6 +3767,12 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 		length = mpg123->mpg123_length(mh);
 	}
 	if(length == 0)
+	{
+		mpg123->mpg123_delete(mh);
+		return false;
+	}
+
+	if(length > MAX_SAMPLE_LENGTH)
 	{
 		mpg123->mpg123_delete(mh);
 		return false;
