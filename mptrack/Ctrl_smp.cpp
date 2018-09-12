@@ -235,8 +235,9 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:512")), 10);
 	m_ComboZoom.SetCurSel(0);
 	// File ToolBar
-	const int imgSize = Util::ScalePixels(16, m_hWnd);
+	const int imgSize = Util::ScalePixels(16, m_hWnd), btnSizeX = Util::ScalePixels(23, m_hWnd), btnSizeY = Util::ScalePixels(22, m_hWnd);
 	m_ToolBar1.SetBitmapSize(CSize(imgSize, imgSize));
+	m_ToolBar1.SetButtonSize(CSize(btnSizeX, btnSizeY));
 	m_ToolBar1.SetExtendedStyle(m_ToolBar1.GetExtendedStyle() | TBSTYLE_EX_DRAWDDARROWS);
 	m_ToolBar1.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
 	m_ToolBar1.AddButton(IDC_SAMPLE_NEW, TIMAGE_SAMPLE_NEW, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
@@ -244,6 +245,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ToolBar1.AddButton(IDC_SAMPLE_SAVEAS, TIMAGE_SAVE, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
 	// Edit ToolBar
 	m_ToolBar2.SetBitmapSize(CSize(imgSize, imgSize));
+	m_ToolBar2.SetButtonSize(CSize(btnSizeX, btnSizeY));
 	m_ToolBar2.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
 	m_ToolBar2.AddButton(IDC_SAMPLE_PLAY, TIMAGE_PREVIEW);
 	m_ToolBar2.AddButton(IDC_SAMPLE_NORMALIZE, TIMAGE_SAMPLE_NORMALIZE);

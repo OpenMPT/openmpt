@@ -743,9 +743,10 @@ END_MESSAGE_MAP()
 
 BOOL CModControlBar::Init(CImageList &icons, CImageList &disabledIcons)
 {
+	const int imgSize = Util::ScalePixels(16, m_hWnd), btnSizeX = Util::ScalePixels(27, m_hWnd), btnSizeY = Util::ScalePixels(24, m_hWnd);
 	SetButtonStructSize(sizeof(TBBUTTON));
-	SetBitmapSize(CSize(16, 16));
-	SetButtonSize(CSize(27, 24));
+	SetBitmapSize(CSize(imgSize, imgSize));
+	SetButtonSize(CSize(btnSizeX, btnSizeY));
 
 	// Add bitmaps
 	SetImageList(&icons);

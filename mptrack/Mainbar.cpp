@@ -241,11 +241,12 @@ BOOL CMainToolBar::Create(CWnd *parent)
 
 	CDC *dc = GetDC();
 	const double scaling = Util::GetDPIx(m_hWnd) / 96.0;
-	const int imgSize = mpt::saturate_round<int>(16 * scaling);
+	const int imgSize = mpt::saturate_round<int>(16 * scaling), btnSizeX = mpt::saturate_round<int>(23 * scaling), btnSizeY = mpt::saturate_round<int>(22 * scaling);
 	m_ImageList.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, dc, scaling, false);
 	m_ImageListDisabled.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, dc, scaling, true);
 	ReleaseDC(dc);
 	GetToolBarCtrl().SetBitmapSize(CSize(imgSize, imgSize));
+	GetToolBarCtrl().SetButtonSize(CSize(btnSizeX, btnSizeY));
 	GetToolBarCtrl().SetImageList(&m_ImageList);
 	GetToolBarCtrl().SetDisabledImageList(&m_ImageListDisabled);
 
