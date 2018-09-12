@@ -18,7 +18,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifdef ENABLE_ASM
 
-#define PROCSUPPORT_TSC          0x00002 // Processor supports RDTSC instruction (i586)
 #define PROCSUPPORT_CMOV         0x00004 // Processor supports conditional move instructions (i686)
 #define PROCSUPPORT_MMX          0x00010 // Processor supports MMX instructions
 #define PROCSUPPORT_AMD_MMXEXT   0x00020 // Processor supports AMD MMX extensions

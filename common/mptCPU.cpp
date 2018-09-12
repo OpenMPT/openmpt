@@ -188,7 +188,6 @@ void InitProcSupport()
 				ProcModel = static_cast<uint8>(BaseModel);
 			}
 			ProcStepping = static_cast<uint8>(Stepping);
-			if(StandardFeatureFlags.d & (1<< 4)) ProcSupport |= PROCSUPPORT_TSC;
 			if(StandardFeatureFlags.d & (1<<15)) ProcSupport |= PROCSUPPORT_CMOV;
 			if(StandardFeatureFlags.d & (1<<23)) ProcSupport |= PROCSUPPORT_MMX;
 			if(StandardFeatureFlags.d & (1<<25)) ProcSupport |= PROCSUPPORT_SSE;
@@ -222,7 +221,6 @@ void InitProcSupport()
 				if(ExtendedVendorString.a >= 0x80000001u)
 				{
 					cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
-					if(ExtendedFeatureFlags.d & (1<< 4)) ProcSupport |= PROCSUPPORT_TSC;
 					if(ExtendedFeatureFlags.d & (1<<15)) ProcSupport |= PROCSUPPORT_CMOV;
 					if(ExtendedFeatureFlags.d & (1<<23)) ProcSupport |= PROCSUPPORT_MMX;
 					if(ExtendedFeatureFlags.d & (1<<22)) ProcSupport |= PROCSUPPORT_AMD_MMXEXT;
