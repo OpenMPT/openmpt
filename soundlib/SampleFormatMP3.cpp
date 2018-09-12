@@ -309,6 +309,10 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 				break;
 			}
 		}
+		if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
+		{
+			break;
+		}
 	} while((bytes_left >= 0) && (frame_size > 0));
 
 	mp3_free(mp3);
