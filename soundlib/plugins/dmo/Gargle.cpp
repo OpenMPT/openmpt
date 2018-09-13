@@ -123,7 +123,7 @@ void Gargle::SetParameter(PlugParamIndex index, PlugParamValue value)
 	{
 		Limit(value, 0.0f, 1.0f);
 		if(index == kGargleWaveShape)
-			value = std::round(value);
+			value = mpt::round(value);
 		m_param[index] = value;
 		RecalculateGargleParams();
 	}

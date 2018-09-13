@@ -397,8 +397,8 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 	if(m_nGridSegments > 0 && m_nGridSegments < sample.nLength)
 	{
 		auto sampsPerSegment = static_cast<double>(sample.nLength / m_nGridSegments);
-		nBegin = static_cast<SmpLength>(std::round((nBegin / sampsPerSegment)) * sampsPerSegment);
-		nEnd = static_cast<SmpLength>(std::round((nEnd / sampsPerSegment)) * sampsPerSegment);
+		nBegin = static_cast<SmpLength>(mpt::round((nBegin / sampsPerSegment)) * sampsPerSegment);
+		nEnd = static_cast<SmpLength>(mpt::round((nEnd / sampsPerSegment)) * sampsPerSegment);
 	}
 
 	if (nBegin > nEnd)

@@ -580,18 +580,21 @@ namespace Util
 namespace mpt
 {
 
+	// C++11 std::round
+	using std::round;
+
 	// Rounds given double value to nearest integer value of type T.
 	// Out-of-range values are saturated to the specified integer type's limits.
 	template <class T> inline T saturate_round(double val)
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
-		return mpt::saturate_cast<T>(std::round(val));
+		return mpt::saturate_cast<T>(mpt::round(val));
 	}
 
 	template <class T> inline T saturate_round(float val)
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Type is a not an integer");
-		return mpt::saturate_cast<T>(std::round(val));
+		return mpt::saturate_cast<T>(mpt::round(val));
 	}
 
 }

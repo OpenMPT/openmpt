@@ -2117,7 +2117,7 @@ void CModDoc::OnUpdateCompatExportableOnly(CCmdUI *p)
 
 static CString FormatSongLength(double length)
 {
-	length = std::round(length);
+	length = mpt::round(length);
 	double minutes = std::floor(length / 60.0), seconds = std::fmod(length, 60.0);
 	CString s;
 	s.Format(_T("%.0fmn%02.0fs"), minutes, seconds);
@@ -2140,7 +2140,7 @@ void CModDoc::OnEstimateSongLength()
 		}
 		if(songLength != std::numeric_limits<double>::infinity())
 		{
-			songLength = std::round(songLength);
+			songLength = mpt::round(songLength);
 			s += FormatSongLength(songLength);
 		} else
 		{

@@ -1611,7 +1611,7 @@ struct SFZRegion
 		double valueF = ConvertStrTo<double>(valueStr);
 		MPT_CONSTANT_IF(std::numeric_limits<T>::is_integer)
 		{
-			valueF = std::round(valueF);
+			valueF = mpt::round(valueF);
 		}
 		Limit(valueF, static_cast<double>(valueMin), static_cast<double>(valueMax));
 		value = static_cast<T>(valueF);

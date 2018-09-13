@@ -894,14 +894,14 @@ static MPT_NOINLINE void TestMisc1()
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType("s2m"), MOD_TYPE_NONE);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(""), MOD_TYPE_NONE);
 
-	VERIFY_EQUAL( std::round(1.99), 2.0 );
-	VERIFY_EQUAL( std::round(1.5), 2.0 );
-	VERIFY_EQUAL( std::round(1.1), 1.0 );
-	VERIFY_EQUAL( std::round(-0.1), 0.0 );
-	VERIFY_EQUAL( std::round(-0.5), -1.0 );
-	VERIFY_EQUAL( std::round(-0.9), -1.0 );
-	VERIFY_EQUAL( std::round(-1.4), -1.0 );
-	VERIFY_EQUAL( std::round(-1.7), -2.0 );
+	VERIFY_EQUAL( mpt::round(1.99), 2.0 );
+	VERIFY_EQUAL( mpt::round(1.5), 2.0 );
+	VERIFY_EQUAL( mpt::round(1.1), 1.0 );
+	VERIFY_EQUAL( mpt::round(-0.1), 0.0 );
+	VERIFY_EQUAL( mpt::round(-0.5), -1.0 );
+	VERIFY_EQUAL( mpt::round(-0.9), -1.0 );
+	VERIFY_EQUAL( mpt::round(-1.4), -1.0 );
+	VERIFY_EQUAL( mpt::round(-1.7), -2.0 );
 	VERIFY_EQUAL( mpt::saturate_round<int32>(int32_max + 0.1), int32_max );
 	VERIFY_EQUAL( mpt::saturate_round<int32>(int32_max - 0.4), int32_max );
 	VERIFY_EQUAL( mpt::saturate_round<int32>(int32_min + 0.1), int32_min );
