@@ -1188,7 +1188,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(fileHeader.cwtv == 0)
 			{
 				madeWithTracker = MPT_USTRING("Unknown");
-			} else if(fileHeader.cmwt < 0x0300)
+			} else if(fileHeader.cmwt < 0x0300 && madeWithTracker.empty())
 			{
 				if(fileHeader.cmwt > 0x0214)
 				{
