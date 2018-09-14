@@ -1345,7 +1345,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			else if (ich == MidiMappedChannel)
 				s = _T("Mapped");
 			else
-				s.Format(_T("%u"), ich);
+				s.Format(_T("%i"), ich);
 			m_CbnMidiCh.SetItemData(m_CbnMidiCh.AddString(s), ich);
 		}
 	}
@@ -1790,7 +1790,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 
 		case IDC_SLIDER4:
 			if(isEnabled)
-				wsprintf(pszText, _T("%u (%u dB)"), pIns->GetResonance(), Util::muldivr(pIns->GetResonance(), 24, 128));
+				wsprintf(pszText, _T("%u (%i dB)"), pIns->GetResonance(), Util::muldivr(pIns->GetResonance(), 24, 128));
 			else
 				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
 			return TRUE;
