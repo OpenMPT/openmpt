@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Usage: build/auto/cppcheck_openmpt.sh [win32W|win64|win32A]
+# Usage: build/auto/cppcheck_openmpt.sh [win32W|win64|win32A] [options]
 
 set -e
 
@@ -23,6 +23,8 @@ win32A)
 	;;
 esac
 
+CPPCHECK_OPTIONS=${2}
+
 CPPCHECK_FILES="common/ soundbase/ sounddev/ sounddsp/ soundlib/ test/ unarchiver/ mptrack/ pluginBridge/"
 
 NPROC=$(nproc)
@@ -30,7 +32,7 @@ NPROC=$(nproc)
 echo "Platform: $CPPCHECK_PLATFORM"
 
 echo "Checking config ..."
-cppcheck -j $NPROC -DCPPCHECK -DMPT_CPPCHECK_CUSTOM $CPPCHECK_PLATFORM --std=c99 --std=c++11 --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem  $CPPCHECK_DEFINES $CPPCHECK_INCLUDES --check-config --suppress=unmatchedSuppression $CPPCHECK_FILES
+cppcheck -j $NPROC -DCPPCHECK -DMPT_CPPCHECK_CUSTOM $CPPCHECK_PLATFORM --std=c99 --std=c++11 --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem $CPPCHECK_OPTIONS $CPPCHECK_DEFINES $CPPCHECK_INCLUDES --check-config --suppress=unmatchedSuppression $CPPCHECK_FILES
 echo "Checking C++ ..."
-cppcheck -j $NPROC -DCPPCHECK -DMPT_CPPCHECK_CUSTOM $CPPCHECK_PLATFORM --std=c99 --std=c++11 --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem  $CPPCHECK_DEFINES $CPPCHECK_INCLUDES $CPPCHECK_FILES
+cppcheck -j $NPROC -DCPPCHECK -DMPT_CPPCHECK_CUSTOM $CPPCHECK_PLATFORM --std=c99 --std=c++11 --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem $CPPCHECK_OPTIONS $CPPCHECK_DEFINES $CPPCHECK_INCLUDES $CPPCHECK_FILES
 
