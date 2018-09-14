@@ -176,11 +176,11 @@ size_t ModSample::AllocateSample()
 }
 
 
-// Allocate sample memory. On sucess, a pointer to the silenced sample buffer is returned. On failure, nullptr is returned.
-// numSamples must contain the sample length, bytesPerSample the size of a sampling point multiplied with the number of channels.
-void *ModSample::AllocateSample(SmpLength numSamples, size_t bytesPerSample)
+// Allocate sample memory. On success, a pointer to the silenced sample buffer is returned. On failure, nullptr is returned.
+// numFrames must contain the sample length, bytesPerSample the size of a sampling point multiplied with the number of channels.
+void *ModSample::AllocateSample(SmpLength numFrames, size_t bytesPerSample)
 {
-	const size_t allocSize = GetRealSampleBufferSize(numSamples, bytesPerSample);
+	const size_t allocSize = GetRealSampleBufferSize(numFrames, bytesPerSample);
 
 	if(allocSize != 0)
 	{
@@ -325,21 +325,11 @@ int ModSample::FrequencyToTranspose(uint32 freq)
 
 void ModSample::FrequencyToTranspose()
 {
-	int f2t;
+	int f2t = 0;
 	if(nC5Speed)
 		f2t = FrequencyToTranspose(nC5Speed);
-	else
-		f2t = 0;
-	int transpose = f2t >> 7;
-	int finetune = f2t & 0x7F;	//0x7F == 111 1111
-	if(finetune > 80)			// XXX Why is this 80?
-	{
-		transpose++;
-		finetune -= 128;
-	}
-	Limit(transpose, -127, 128);
-	RelativeTone = static_cast<int8>(transpose);
-	nFineTune = static_cast<int8>(finetune);
+	RelativeTone = static_cast<int8>(f2t >> 7);
+	nFineTune = static_cast<int8>(f2t & 0x7F);
 }
 
 
@@ -383,6 +373,7 @@ void ModSample::SetAdlib(bool enable, OPLPatch patch)
 	if(enable)
 	{
 		// Bogus sample to make playback work
+		uFlags.reset(CHN_16BIT | CHN_STEREO);
 		nLength = 4;
 		AllocateSample();
 		adlib = patch;
