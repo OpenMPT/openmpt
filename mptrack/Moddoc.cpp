@@ -2798,7 +2798,7 @@ void CModDoc::SafeFileClose()
 }
 
 
-// "Panic button". At the moment, it just resets all VSTi and sample notes.
+// "Panic button". This resets all VSTi, OPL and sample notes.
 void CModDoc::OnPanic()
 {
 	CriticalSection cs;

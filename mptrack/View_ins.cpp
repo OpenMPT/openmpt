@@ -1027,10 +1027,7 @@ bool CViewInstrument::EnvRemovePoint(uint32 nPoint)
 			if(envelope->size() <= 1)
 			{
 				// if only one node is left, just disable the envelope completely
-				envelope->clear();
-				envelope->nLoopStart = envelope->nLoopEnd = envelope->nSustainStart = envelope->nSustainEnd = 0;
-				envelope->dwFlags.reset();
-				envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
+				*envelope = InstrumentEnvelope();
 			}
 
 			SetModified(InstrumentHint().Envelope(), true);
@@ -1053,7 +1050,7 @@ uint32 CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 			nValue = Clamp(nValue, ENVELOPE_MIN, ENVELOPE_MAX);
 
 			if(std::binary_search(envelope->cbegin(), envelope->cend(), EnvelopeNode(static_cast<EnvelopeNode::tick_t>(nTick), 0),
-				[] (const EnvelopeNode &l, const EnvelopeNode &r) -> bool { return l.tick < r.tick; }))
+				[] (const EnvelopeNode &l, const EnvelopeNode &r) { return l.tick < r.tick; }))
 			{
 				// Don't want to insert a node at the same position as another node.
 				return 0;

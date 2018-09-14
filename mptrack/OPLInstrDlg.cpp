@@ -200,7 +200,7 @@ BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 	}
 
 	static const TCHAR *ksl[] = { _T("disabled"), _T("1.5 dB / octave"), _T("3 dB / octave") , _T("6 dB / octave") };
-	static const char *feedback[] = { u8"0", u8"\u03C0/16", u8"\u03C0/8", u8"\u03C0/4", u8"\u03C0/2", u8"\u03C0", u8"2\u03C0", u8"4\u03C0" };
+	static const char *feedback[] = { u8"disabled", u8"\u03C0/16", u8"\u03C0/8", u8"\u03C0/4", u8"\u03C0/2", u8"\u03C0", u8"2\u03C0", u8"4\u03C0" };
 
 	mpt::tstring text;
 	const CWnd *wnd = GetDlgItem(static_cast<int>(nID));
@@ -225,16 +225,14 @@ BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 	case IDC_SLIDER11:
 		// Sustain Level
 		{
-			int val = (-15 + slider->GetPos()) * 3;
-			if(val == -45)
-				val = -93;
-			text = mpt::tfmt::val(val) + _T(" dB");
+			const int pos = slider->GetPos();
+			text = mpt::tfmt::val((pos == 0) ? -93 : ((-15 + pos) * 3)) + _T(" dB");
 		}
 		break;
 	case IDC_SLIDER6:
 	case IDC_SLIDER13:
 		// Volume Level
-		text = mpt::tfmt::fmt((-63 + slider->GetPos()) * 0.75, mpt::FormatSpec().SetFlags(mpt::fmt::NotaFix | mpt::fmt::FillOff).SetPrecision(2)) + _T(" dB");
+		text = mpt::tfmt::fix((-63 + slider->GetPos()) * 0.75, 2) + _T(" dB");
 		break;
 	case IDC_SLIDER7:
 	case IDC_SLIDER14:
