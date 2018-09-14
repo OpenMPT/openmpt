@@ -718,7 +718,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 	m_VstPlugin.GetInputPlugList(inputPlugs);
 	for(auto plug : inputPlugs)
 	{
-		name.Format(_T("FX%02u: "), plug->m_nSlot + 1);
+		name.Format(_T("FX%02u: "), plug->m_nSlot + 1u);
 		name += plug->m_pMixStruct->GetName();
 		m_InputMenu.AppendMenu(MF_STRING, ID_PLUGSELECT + plug->m_nSlot, name);
 	}
