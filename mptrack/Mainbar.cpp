@@ -1048,7 +1048,7 @@ void CModTreeBar::OnNcPaint()
 	{
 		CDC *pDC = GetWindowDC();
 		HDC hdc = pDC->m_hDC;
-		if (rect.left < rect.right) FillRect(hdc, &rect, CMainFrame::brushGray);
+		FillRect(hdc, &rect, CMainFrame::brushGray);
 		ReleaseDC(pDC);
 	}
 }
