@@ -475,8 +475,10 @@ BOOL CMIDIMappingDialog::OnToolTipNotify(UINT, NMHDR * pNMHDR, LRESULT *)
 		break;
 	case IDC_COMBO_CHANNEL:
 		text = _T("The MIDI channel to listen on for this event.");
+		break;
 	case IDC_COMBO_EVENT:
 		text = _T("The MIDI event to listen for.");
+		break;
 	case IDC_COMBO_CONTROLLER:
 		text = _T("The MIDI controler to listen for.");
 		break;
