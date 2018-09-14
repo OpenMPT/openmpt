@@ -69,7 +69,7 @@
 #endif
 
 #define MPT_TEST_HAS_FILESYSTEM 1
-#if defined(MPT_BUILD_WASM)
+#if 0
 #undef MPT_TEST_HAS_FILESYSTEM
 #define MPT_TEST_HAS_FILESYSTEM 0
 #endif
