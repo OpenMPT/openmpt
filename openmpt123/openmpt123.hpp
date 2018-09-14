@@ -565,7 +565,7 @@ protected:
 		sampleQueueMaxFrames = frames;
 	}
 	template < typename Tsample >
-	float pop_queue() {
+	Tsample pop_queue() {
 		float val = 0.0f;
 		if ( !sampleQueue.empty() ) {
 			val = sampleQueue.front();
