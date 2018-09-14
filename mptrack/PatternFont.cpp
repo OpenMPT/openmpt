@@ -306,7 +306,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 
 	uint8_t *data = nullptr;
 	HBITMAP bitmap = ::CreateDIBSection(hDC, (BITMAPINFO *)&pf.dib->bmiHeader, DIB_RGB_COLORS, (void **)&data, nullptr, 0);
-	if(data == nullptr)
+	if(!bitmap)
 	{
 		hDC.SelectObject(oldFont);
 		gdiFont.DeleteObject();
