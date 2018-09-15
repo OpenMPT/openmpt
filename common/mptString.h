@@ -215,11 +215,7 @@ enum Charset {
 	CharsetWindows1252,
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-#if defined(MPT_LOCALE_ASSUME_CHARSET)
-	CharsetLocale = MPT_LOCALE_ASSUME_CHARSET,
-#else // !MPT_LOCALE_ASSUME_CHARSET
 	CharsetLocale, // CP_ACP on windows, current C locale otherwise
-#endif // MPT_LOCALE_ASSUME_CHARSET
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 };

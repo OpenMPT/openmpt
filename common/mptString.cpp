@@ -1020,7 +1020,7 @@ static bool HasCharset(Charset charset)
 	bool result = false;
 	switch(charset)
 	{
-#if defined(MPT_ENABLE_CHARSET_LOCALE) && !defined(MPT_LOCALE_ASSUME_CHARSET)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 		case CharsetLocale:      result = true; break;
 #endif
 		case CharsetUTF8:        result = TestCodePage(CP_UTF8); break;
@@ -1043,7 +1043,7 @@ static UINT CharsetToCodepage(Charset charset)
 {
 	switch(charset)
 	{
-#if defined(MPT_ENABLE_CHARSET_LOCALE) && !defined(MPT_LOCALE_ASSUME_CHARSET)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 		case CharsetLocale:      return CP_ACP;  break;
 #endif
 		case CharsetUTF8:        return CP_UTF8; break;
@@ -1066,7 +1066,7 @@ static const char * CharsetToString(Charset charset)
 {
 	switch(charset)
 	{
-#if defined(MPT_ENABLE_CHARSET_LOCALE) && !defined(MPT_LOCALE_ASSUME_CHARSET)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 		case CharsetLocale:      return "";            break; // "char" breaks with glibc when no locale is set
 #endif
 		case CharsetUTF8:        return "UTF-8";       break;
@@ -1085,7 +1085,7 @@ static const char * CharsetToStringTranslit(Charset charset)
 {
 	switch(charset)
 	{
-#if defined(MPT_ENABLE_CHARSET_LOCALE) && !defined(MPT_LOCALE_ASSUME_CHARSET)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 		case CharsetLocale:      return "//TRANSLIT";            break; // "char" breaks with glibc when no locale is set
 #endif
 		case CharsetUTF8:        return "UTF-8//TRANSLIT";       break;
@@ -1233,10 +1233,22 @@ template<typename Tdststring>
 static Tdststring EncodeImplFallback(Charset charset, const widestring &src)
 {
 		std::string out;
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+	#if defined(MPT_LOCALE_ASSUME_CHARSET)
+		if(charset == CharsetLocale)
+		{
+			charset = MPT_LOCALE_ASSUME_CHARSET;
+		}
+	#endif
+#endif
 		switch(charset)
 		{
-#if defined(MPT_ENABLE_CHARSET_LOCALE) && !defined(MPT_LOCALE_ASSUME_CHARSET)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+#if defined(MPT_LOCALE_ASSUME_CHARSET)
+			case CharsetLocale:      MPT_ASSERT_NOTREACHED(); break;
+#else
 			case CharsetLocale:      out = String::ToLocale(src); break;
+#endif
 #endif
 			case CharsetUTF8:        out = String::ToUTF8(src); break;
 			case CharsetASCII:       out = String::ToAscii(src); break;
@@ -1349,10 +1361,22 @@ static widestring DecodeImplFallback(Charset charset, const Tsrcstring &src)
 {
 		std::string in(src.begin(), src.end());
 		widestring out;
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+	#if defined(MPT_LOCALE_ASSUME_CHARSET)
+		if(charset == CharsetLocale)
+		{
+			charset = MPT_LOCALE_ASSUME_CHARSET;
+		}
+	#endif
+#endif
 		switch(charset)
 		{
-#if defined(MPT_ENABLE_CHARSET_LOCALE) && !defined(MPT_LOCALE_ASSUME_CHARSET)
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+#if defined(MPT_LOCALE_ASSUME_CHARSET)
+			case CharsetLocale:      MPT_ASSERT_NOTREACHED(); break;
+#else
 			case CharsetLocale:      out = String::FromLocale(in); break;
+#endif
 #endif
 			case CharsetUTF8:        out = String::FromUTF8(in); break;
 			case CharsetASCII:       out = String::FromAscii(in); break;
