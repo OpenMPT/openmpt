@@ -2989,6 +2989,11 @@ bool CSoundFile::ReadOpusSample(SAMPLEINDEX sample, FileReader &file)
 		return false;
 	}
 
+	if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
+	{
+		return false;
+	}
+
 	DestroySampleThreadsafe(sample);
 	strcpy(m_szNames[sample], "");
 	Samples[sample].Initialize();
@@ -3278,6 +3283,11 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 #if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
 
 	if(rate <= 0 || channels <= 0 || raw_sample_data.empty())
+	{
+		return false;
+	}
+
+	if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
 	{
 		return false;
 	}
@@ -4199,6 +4209,12 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	mptMFSafeRelease(&uncompressedAudioType);
 	mptMFSafeRelease(&partialType);
 	mptMFSafeRelease(&sourceReader);
+
+	if(rawData.size() / numChannels / (bitsPerSample / 8) > MAX_SAMPLE_LENGTH)
+	{
+		result = false;
+		goto fail;
+	}
 
 	sampleName = mpt::ToCharset(GetCharsetLocaleOrModule(), GetSampleNameFromTags(tags));
 
