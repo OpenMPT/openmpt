@@ -2975,6 +2975,10 @@ bool CSoundFile::ReadOpusSample(SAMPLEINDEX sample, FileReader &file)
 			// other errors are fatal, stop decoding
 			eof = true;
 		}
+		if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
+		{
+			break;
+		}
 	}
 
 	op_free(of);
@@ -3187,6 +3191,10 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 								CopyChannelToInterleaved<SC::Convert<int16, float> >(&(raw_sample_data[0]) + offset * channels, output[chn], channels, decodedSamples, chn);
 							}
 							offset += decodedSamples;
+							if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
+							{
+								break;
+							}
 						}
 					}
 				}
@@ -3256,6 +3264,10 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 				CopyChannelToInterleaved<SC::Convert<int16, float> >(&(raw_sample_data[0]) + offset * channels, output[chn], channels, decodedSamples, chn);
 			}
 			offset += decodedSamples;
+			if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
+			{
+				break;
+			}
 		}
 		error = stb_vorbis_get_error(vorb);
 	}
@@ -3655,6 +3667,10 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 			{
 				break;
 			}
+		}
+		if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
+		{
+			break;
 		}
 	} while((bytes_left >= 0) && (frame_size > 0));
 
@@ -4171,6 +4187,10 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 			MPT_MF_CHECKED(buffer->Lock(&data, NULL, &dataSize));
 			rawData.insert(rawData.end(), mpt::byte_cast<char*>(data), mpt::byte_cast<char*>(data + dataSize));
 			MPT_MF_CHECKED(buffer->Unlock());
+			if(rawData.size() / numChannels / (bitsPerSample / 8) > MAX_SAMPLE_LENGTH)
+			{
+				break;
+			}
 		}
 		mptMFSafeRelease(&buffer);
 		mptMFSafeRelease(&mfSample);
