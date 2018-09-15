@@ -573,10 +573,10 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	const MPT_UCHAR_TYPE *madeWithTracker = MPT_ULITERAL("");
 	switch(version)
 	{
-	case 0: madeWithTracker = m_nChannels > 4 ? MPT_ULITERAL("OctaMED v2.10 (MMD0)") : MPT_ULITERAL("MED v2 (MMD0)"); break;
-	case 1: madeWithTracker = MPT_ULITERAL("OctaMED v4 (MMD1)"); break;
-	case 2: madeWithTracker = MPT_ULITERAL("OctaMED v5 (MMD2)"); break;
-	case 3: madeWithTracker = MPT_ULITERAL("OctaMED Soundstudio (MMD3)"); break;
+	case '0': madeWithTracker = m_nChannels > 4 ? MPT_ULITERAL("OctaMED v2.10") : MPT_ULITERAL("MED v2"); break;
+	case '1': madeWithTracker = MPT_ULITERAL("OctaMED v4"); break;
+	case '2': madeWithTracker = MPT_ULITERAL("OctaMED v5"); break;
+	case '3': madeWithTracker = MPT_ULITERAL("OctaMED Soundstudio"); break;
 	}
 	m_modFormat.formatName = mpt::format(MPT_USTRING("OctaMED (MMD%1)"))(version - '0');
 	m_modFormat.type = MPT_USTRING("med");
