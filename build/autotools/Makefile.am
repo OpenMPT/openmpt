@@ -459,6 +459,7 @@ bin_openmpt123_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -I$(srcdir)/src/openmpt123
 bin_openmpt123_CXXFLAGS = $(WIN32_CONSOLE_CXXFLAGS)
 bin_openmpt123_LDADD = libopenmpt.la $(PORTAUDIO_LIBS) $(PULSEAUDIO_LIBS) $(SDL2_LIBS) $(SDL_LIBS) $(SNDFILE_LIBS) $(FLAC_LIBS) $(OPENMPT123_WIN32_LIBS)
 bin_openmpt123_SOURCES = 
+bin_openmpt123_SOURCES += openmpt123/openmpt123_allegro42.hpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123_config.hpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123.cpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123_flac.hpp
