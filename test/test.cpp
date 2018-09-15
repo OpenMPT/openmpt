@@ -69,7 +69,7 @@
 #endif
 
 #define MPT_TEST_HAS_FILESYSTEM 1
-#if 0
+#if MPT_OS_DJGPP
 #undef MPT_TEST_HAS_FILESYSTEM
 #define MPT_TEST_HAS_FILESYSTEM 0
 #endif
@@ -314,6 +314,7 @@ static MPT_NOINLINE void TestVersion()
 
 #ifdef LIBOPENMPT_BUILD
 #if MPT_TEST_HAS_FILESYSTEM
+#if !MPT_OS_DJGPP
 	mpt::PathString version_mk = GetPathPrefix() + MPT_PATHSTRING("libopenmpt/libopenmpt_version.mk");
 	mpt::ifstream f(version_mk, std::ios::in);
 	VERIFY_EQUAL(f ? true : false, true);
@@ -346,6 +347,7 @@ static MPT_NOINLINE void TestVersion()
 	VERIFY_EQUAL(fields["LIBOPENMPT_LTVER_CURRENT"].length() > 0, true);
 	VERIFY_EQUAL(fields["LIBOPENMPT_LTVER_REVISION"].length() > 0, true);
 	VERIFY_EQUAL(fields["LIBOPENMPT_LTVER_AGE"].length() > 0, true);
+#endif // !MPT_OS_DJGPP
 #endif // MPT_TEST_HAS_FILESYSTEM
 #endif // LIBOPENMPT_BUILD
 
@@ -643,11 +645,19 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(ConvertStrTo<uint64>("18446744073709551615"), uint64_max);
 
 	VERIFY_EQUAL(ConvertStrTo<float>("-87.0"), -87.0f);
+#if !MPT_OS_DJGPP
 	VERIFY_EQUAL(ConvertStrTo<double>("-0.5e-6"), -0.5e-6);
+#endif
+#if !MPT_OS_DJGPP
 	VERIFY_EQUAL(ConvertStrTo<double>("58.65403492763"), 58.65403492763);
+#else
+	VERIFY_EQUAL_EPS(ConvertStrTo<double>("58.65403492763"), 58.65403492763, 0.0001);
+#endif
 
 	VERIFY_EQUAL(ConvertStrTo<float>(mpt::fmt::val(-87.0)), -87.0f);
+#if !MPT_OS_DJGPP
 	VERIFY_EQUAL(ConvertStrTo<double>(mpt::fmt::val(-0.5e-6)), -0.5e-6);
+#endif
 
 	VERIFY_EQUAL(mpt::String::Parse::Hex<unsigned char>("fe"), 254);
 #if MPT_WSTRING_FORMAT

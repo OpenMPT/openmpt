@@ -95,7 +95,7 @@ bool CSoundFile::ReadWAV(FileReader &file, ModLoadingFlags loadFlags)
 	// Calculate sample length in ticks at tempo 125
 	const uint32 sampleRate = std::max(uint32(1), wavFile.GetSampleRate());
 	const uint32 sampleTicks = mpt::saturate_cast<uint32>(((sampleLength * 50) / sampleRate) + 1);
-	uint32 ticksPerRow = std::max((sampleTicks + 63u) / 63u, 1u);
+	uint32 ticksPerRow = std::max<uint32>((sampleTicks + 63u) / 63u, 1u);
 
 	Order().assign(1, 0);
 	ORDERINDEX numOrders = 1;

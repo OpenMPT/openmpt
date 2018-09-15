@@ -4806,11 +4806,11 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		} else if(macro[pos] == 'x')
 		{
 			// Pan set
-			data = static_cast<uint8>(std::min(chn.nPan / 2, 127));
+			data = static_cast<uint8>(std::min<int>(chn.nPan / 2, 127));
 		} else if(macro[pos] == 'y')
 		{
 			// Calculated pan
-			data = static_cast<uint8>(std::min(chn.nRealPan / 2, 127));
+			data = static_cast<uint8>(std::min<int>(chn.nRealPan / 2, 127));
 		} else if(macro[pos] == 'a')
 		{
 			// High byte of bank select

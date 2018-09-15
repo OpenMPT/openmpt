@@ -112,10 +112,12 @@ template <> struct Traits<std::string> {
 	static MPT_FORCEINLINE bool IsLineEnding(char c) noexcept { return c == '\r' || c == '\n'; }
 };
 
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 template <> struct Traits<std::wstring> {
 	static MPT_FORCEINLINE const wchar_t * GetDefaultWhitespace() noexcept { return L" \n\r\t"; }
 	static MPT_FORCEINLINE bool IsLineEnding(wchar_t c) noexcept { return c == L'\r' || c == L'\n'; }
 };
+#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 
 
 // Remove whitespace at start of string
@@ -198,9 +200,6 @@ static inline std::size_t strnlen(const char *str, std::size_t n)
 
 
 enum Charset {
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	CharsetLocale, // CP_ACP on windows, current C locale otherwise
-#endif
 
 	CharsetUTF8,
 
@@ -214,6 +213,14 @@ enum Charset {
 	CharsetCP437AMS2,
 
 	CharsetWindows1252,
+
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+#if defined(MPT_LOCALE_ASSUME_CHARSET)
+	CharsetLocale = MPT_LOCALE_ASSUME_CHARSET,
+#else // !MPT_LOCALE_ASSUME_CHARSET
+	CharsetLocale, // CP_ACP on windows, current C locale otherwise
+#endif // MPT_LOCALE_ASSUME_CHARSET
+#endif // MPT_ENABLE_CHARSET_LOCALE
 
 };
 

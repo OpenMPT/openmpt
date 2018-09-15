@@ -58,7 +58,15 @@ static const char * const license =
 #include <cstring>
 #include <ctime>
 
-#if defined(WIN32)
+#if defined(__DJGPP__)
+#include <conio.h>
+#include <fcntl.h>
+#include <io.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <termios.h>
+#include <unistd.h>
+#elif defined(WIN32)
 #include <conio.h>
 #include <fcntl.h>
 #include <io.h>
@@ -88,6 +96,7 @@ static const char * const license =
 #include "openmpt123_sndfile.hpp"
 #include "openmpt123_raw.hpp"
 #include "openmpt123_stdout.hpp"
+#include "openmpt123_allegro42.hpp"
 #include "openmpt123_portaudio.hpp"
 #include "openmpt123_pulseaudio.hpp"
 #include "openmpt123_sdl.hpp"
@@ -731,15 +740,15 @@ void ctl_set( Tmod & mod, const std::string & ctl, const T & val ) {
 
 template < typename Tmod >
 static void apply_mod_settings( commandlineflags & flags, Tmod & mod ) {
-	flags.separation = std::max( flags.separation,  0 );
-	flags.filtertaps = std::max( flags.filtertaps,  1 );
-	flags.filtertaps = std::min( flags.filtertaps,  8 );
-	flags.ramping    = std::max( flags.ramping,    -1 );
-	flags.ramping    = std::min( flags.ramping,    10 );
-	flags.tempo      = std::max( flags.tempo,     -48 );
-	flags.tempo      = std::min( flags.tempo,      48 );
-	flags.pitch      = std::max( flags.pitch,     -48 );
-	flags.pitch      = std::min( flags.pitch,      48 );
+	flags.separation = std::max( flags.separation, std::int32_t(   0 ) );
+	flags.filtertaps = std::max( flags.filtertaps, std::int32_t(   1 ) );
+	flags.filtertaps = std::min( flags.filtertaps, std::int32_t(   8 ) );
+	flags.ramping    = std::max( flags.ramping,    std::int32_t(  -1 ) );
+	flags.ramping    = std::min( flags.ramping,    std::int32_t(  10 ) );
+	flags.tempo      = std::max( flags.tempo,      std::int32_t( -48 ) );
+	flags.tempo      = std::min( flags.tempo,      std::int32_t(  48 ) );
+	flags.pitch      = std::max( flags.pitch,      std::int32_t( -48 ) );
+	flags.pitch      = std::min( flags.pitch,      std::int32_t(  48 ) );
 	mod.set_render_param( openmpt::module::RENDER_MASTERGAIN_MILLIBEL, flags.gain );
 	mod.set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, flags.separation );
 	mod.set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, flags.filtertaps );
@@ -1115,7 +1124,16 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 		if ( flags.mode == ModeUI ) {
 
-#if defined( WIN32 )
+#if defined( __DJGPP__ )
+
+			while ( kbhit() ) {
+				int c = getch();
+				if ( !handle_keypress( c, flags, mod, audio_stream ) ) {
+					return;
+				}
+			}
+
+#elif defined( WIN32 )
 
 			while ( _kbhit() ) {
 				int c = _getch();
@@ -2060,6 +2078,9 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 #if defined( WIN32 )
 					drivers << "    " << "waveout" << std::endl;
 #endif
+#if defined( MPT_WITH_ALLEGRO42 )
+					drivers << "    " << "allegro42" << std::endl;
+#endif
 					throw show_help_exception( drivers.str() );
 				} else if ( nextarg == "default" ) {
 					flags.driver = "";
@@ -2085,6 +2106,9 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 #endif
 #if defined( WIN32 )
 					devices << show_waveout_devices( log );
+#endif
+#if defined( MPT_WITH_ALLEGRO42 )
+					devices << show_allegro42_devices( log );
 #endif
 					throw show_help_exception( devices.str() );
 				} else if ( nextarg == "default" ) {
@@ -2442,6 +2466,11 @@ static int main( int argc, char * argv [] ) {
 					waveout_stream_raii waveout_stream( flags );
 					render_files( flags, log, waveout_stream, prng );
 #endif
+#if defined( MPT_WITH_ALLEGRO42 )
+				} else if ( flags.driver == "allegro42" || flags.driver.empty() ) {
+					allegro42_stream_raii allegro42_stream( flags, log );
+					render_files( flags, log, allegro42_stream, prng );
+#endif
 				} else {
 					if ( flags.driver.empty() ) {
 						throw exception( "openmpt123 is compiled without any audio driver" );
@@ -2465,6 +2494,12 @@ static int main( int argc, char * argv [] ) {
 	} catch ( args_error_exception & ) {
 		show_help( std_out );
 		return 1;
+#ifdef MPT_WITH_ALLEGRO42
+	} catch ( allegro42_exception & e ) {
+		std_err << "Allegro-4.2 error: " << e.what() << std::endl;
+		std_err.writeout();
+		return 1;
+#endif
 #ifdef MPT_WITH_PULSEAUDIO
 	} catch ( pulseaudio_exception & e ) {
 		std_err << "PulseAudio error: " << e.what() << std::endl;

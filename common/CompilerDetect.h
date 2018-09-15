@@ -191,7 +191,9 @@
 
 
 // The order of the checks matters!
-#if defined(__EMSCRIPTEN__)
+#if defined(__DJGPP__)
+	#define MPT_OS_DJGPP 1
+#elif defined(__EMSCRIPTEN__)
 	#define MPT_OS_EMSCRIPTEN 1
 	#if defined(__EMSCRIPTEN_major__) && defined(__EMSCRIPTEN_minor__)
 		#if (__EMSCRIPTEN_major__ > 1)
@@ -240,6 +242,9 @@
 	#define MPT_OS_UNKNOWN 1
 #endif
 
+#ifndef MPT_OS_DJGPP
+#define MPT_OS_DJGPP 0
+#endif
 #ifndef MPT_OS_EMSCRIPTEN
 #define MPT_OS_EMSCRIPTEN 0
 #endif
@@ -283,7 +288,12 @@
 
 
 
-#if MPT_OS_EMSCRIPTEN
+#if (MPT_OS_DJGPP || MPT_OS_EMSCRIPTEN)
 #undef MPT_PLATFORM_MULTITHREADED
 #define MPT_PLATFORM_MULTITHREADED 0
 #endif
+
+#if MPT_OS_DJGPP
+#define MPT_COMPILER_QUIRK_NO_WCHAR
+#endif
+

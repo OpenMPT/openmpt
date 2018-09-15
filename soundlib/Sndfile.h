@@ -259,7 +259,7 @@ class IAudioReadTarget
 protected:
 	virtual ~IAudioReadTarget() = default;
 public:
-	virtual void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) = 0;
+	virtual void DataCallback(int32 *MixSoundBuffer, std::size_t channels, std::size_t countChunk) = 0;
 };
 
 
@@ -268,7 +268,7 @@ class IAudioSource
 public:
 	virtual ~IAudioSource() = default;
 public:
-	virtual void FillCallback(int * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) = 0;
+	virtual void FillCallback(int32 * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) = 0;
 };
 
 
@@ -276,7 +276,7 @@ class AudioSourceNone
 	: public IAudioSource
 {
 public:
-	void FillCallback(int * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) override
+	void FillCallback(int32 * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) override
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{

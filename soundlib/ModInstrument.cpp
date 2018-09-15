@@ -110,7 +110,7 @@ int32 InstrumentEnvelope::GetValueFromPosition(int position, int32 rangeOut, int
 		}
 	}
 
-	Limit(value, 0, ENV_PRECISION);
+	Limit(value, int32(0), ENV_PRECISION);
 	return (value * rangeOut + ENV_PRECISION / 2) / ENV_PRECISION;
 }
 

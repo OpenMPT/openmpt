@@ -28,6 +28,8 @@ is just a high-level summary.
         Subsequent reads will return 0 rendered frames.
  *  [**New**] `Makefile` `CONFIG=emscripten` now can generate WebAssembly via
     the additional option `EMSCRIPTEN_TARGET=wasm`.
+ *  [**New**] Compiling for DOS is now experimentally supported via DJGPP GCC
+    7.2 or later.
 
  *  [**Change**] minimp3: Instead of the LGPL-2.1-licensed minimp3 by KeyJ,
     libopenmpt now uses the CC0-1.0-licensed minimp3 by Lion (github.com/lieff)

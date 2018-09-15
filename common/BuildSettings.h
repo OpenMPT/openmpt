@@ -367,6 +367,13 @@
 	//#define MPT_LOCALE_ASSUME_CHARSET CharsetUTF8
 	//#endif
 
+#elif MPT_OS_DJGPP
+
+	#define MPT_CHARSET_INTERNAL
+	#ifndef MPT_LOCALE_ASSUME_CHARSET
+	#define MPT_LOCALE_ASSUME_CHARSET CharsetCP437
+	#endif
+
 #elif defined(MPT_WITH_ICONV)
 
 	#define MPT_CHARSET_ICONV

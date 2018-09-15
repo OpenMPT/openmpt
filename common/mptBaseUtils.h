@@ -580,8 +580,18 @@ namespace Util
 namespace mpt
 {
 
+#if MPT_OS_DJGPP
+
+	inline double round(const double& val) { return ::round(val); }
+	inline float round(const float& val) { return ::roundf(val); }
+
+#else // !MPT_OS_DJGPP
+
 	// C++11 std::round
 	using std::round;
+
+#endif // MPT_OS_DJGPP
+
 
 	// Rounds given double value to nearest integer value of type T.
 	// Out-of-range values are saturated to the specified integer type's limits.

@@ -39,7 +39,7 @@ void OPL::Initialize(uint32 samplerate)
 }
 
 
-void OPL::Mix(int *target, size_t count, uint32 preamp)
+void OPL::Mix(int32 *target, size_t count, uint32 preamp)
 {
 	if(!m_isActive)
 		return;

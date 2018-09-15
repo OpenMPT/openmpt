@@ -456,7 +456,9 @@ static inline std::wstring FormatValWHelperFloat(const T & x, const FormatSpec &
 
 
 std::string FormatVal(const char & x, const FormatSpec & f) { return FormatValHelperInt(x, f); }
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 std::string FormatVal(const wchar_t & x, const FormatSpec & f) { return FormatValHelperInt(x, f); }
+#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 std::string FormatVal(const bool & x, const FormatSpec & f) { return FormatValHelperInt(static_cast<int>(x), f); }
 std::string FormatVal(const signed char & x, const FormatSpec & f) { return FormatValHelperInt(x, f); }
 std::string FormatVal(const unsigned char & x, const FormatSpec & f) { return FormatValHelperInt(x, f); }
@@ -492,7 +494,9 @@ mpt::ustring FormatValU(const long double & x, const FormatSpec & f) { return Fo
 #endif
 #if MPT_USTRING_MODE_UTF8
 mpt::ustring FormatValU(const char & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatValHelperInt(x, f)); }
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 mpt::ustring FormatValU(const wchar_t & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatValHelperInt(x, f)); }
+#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 mpt::ustring FormatValU(const bool & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatValHelperInt(static_cast<int>(x), f)); }
 mpt::ustring FormatValU(const signed char & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatValHelperInt(x, f)); }
 mpt::ustring FormatValU(const unsigned char & x, const FormatSpec & f) { return mpt::ToUnicode(mpt::CharsetUTF8, FormatValHelperInt(x, f)); }
@@ -511,7 +515,9 @@ mpt::ustring FormatValU(const long double & x, const FormatSpec & f) { return mp
 
 #if MPT_WSTRING_FORMAT
 std::wstring FormatValW(const char & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 std::wstring FormatValW(const wchar_t & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
+#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 std::wstring FormatValW(const bool & x, const FormatSpec & f) { return FormatValWHelperInt(static_cast<int>(x), f); }
 std::wstring FormatValW(const signed char & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }
 std::wstring FormatValW(const unsigned char & x, const FormatSpec & f) { return FormatValWHelperInt(x, f); }

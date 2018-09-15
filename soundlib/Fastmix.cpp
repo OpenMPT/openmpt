@@ -252,7 +252,7 @@ struct MixLoopState
 			}
 		}
 
-		Limit(nSmpCount, 1u, nSamples);
+		Limit(nSmpCount, uint32(1u), nSamples);
 
 #ifdef MPT_BUILD_DEBUG
 		{

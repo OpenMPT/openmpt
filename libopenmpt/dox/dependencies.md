@@ -16,6 +16,7 @@ Dependencies
         posix threading model as opposed to win32 threading model, or at least
         have mingw-std-threads available otherwise)
      *  **emscripten 1.38.5** or higher
+     *  **DJGPP GCC 7.2** or higher
      *  any other **C++11 compliant** compiler (full standard compliant mode is
         known to work with GCC >= 5.1 and Clang)
         
@@ -32,6 +33,8 @@ Dependencies
             assumed)
          *  representation of basic source character set is identical in char
             and `wchar_t` (implicitly assumed)
+         *  libopenmpt also has experimental support for platforms without
+            `wchar_t` support like DJGPP
         
         libopenmpt does not rely on any specific implementation defined or
         undefined behaviour (if it does, that's a bug in libopenmpt). In
@@ -73,6 +76,7 @@ Dependencies
      *  **GCC 4.8** or higher
      *  **Clang 3.6** or higher
      *  **MinGW-W64 4.8** or higher
+     *  **DJGPP GCC 7.2** or higher
      *  any **C++11 compliant** compiler
  *  Live sound output requires one of:
      *  **PulseAudio**
@@ -80,6 +84,7 @@ Dependencies
      *  **SDL 1.2**
      *  **PortAudio v19**
      *  **Win32**
+     *  **liballegro 4.2** on DJGPP/DOS
 
 
 Optional dependencies

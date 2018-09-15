@@ -44,7 +44,7 @@ public:
 	}
 	std::size_t GetRenderedCount() const { return countRendered; }
 public:
-	void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	void DataCallback(int32 *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		// Convert to output sample format and optionally perform dithering and clipping if needed
 
@@ -94,7 +94,7 @@ public:
 	{
 		MPT_ASSERT_ALWAYS(sampleFormat.IsValid());
 	}
-	void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	void DataCallback(int32 *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		switch(sampleFormat.value)
 		{
@@ -166,7 +166,7 @@ public:
 	std::size_t GetRenderedCount() const { return countRendered; }
 private:
 	template<typename Tsample>
-	void Fill(const Tsample *inputBuffer, int * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
+	void Fill(const Tsample *inputBuffer, int32 * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
@@ -179,7 +179,7 @@ private:
 		countRendered += countChunk;
 	}
 public:
-	virtual void FillCallback(int * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
+	virtual void FillCallback(int32 * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
 	{
 		switch(sampleFormat.value)
 		{
@@ -222,13 +222,13 @@ public:
 
 
 template<typename Tsample>
-void ApplyGainBeforeConversionIfAppropriate(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk, float gainFactor)
+void ApplyGainBeforeConversionIfAppropriate(int32 *MixSoundBuffer, std::size_t channels, std::size_t countChunk, float gainFactor)
 {
 	// Apply final output gain for non floating point output
 	ApplyGain(MixSoundBuffer, channels, countChunk, mpt::saturate_round<int32>(gainFactor * (1<<16)));
 }
 template<>
-void ApplyGainBeforeConversionIfAppropriate<float>(int * /*MixSoundBuffer*/, std::size_t /*channels*/, std::size_t /*countChunk*/, float /*gainFactor*/)
+void ApplyGainBeforeConversionIfAppropriate<float>(int32 * /*MixSoundBuffer*/, std::size_t /*channels*/, std::size_t /*countChunk*/, float /*gainFactor*/)
 {
 	// nothing
 }
@@ -261,7 +261,7 @@ public:
 		return;
 	}
 public:
-	void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	void DataCallback(int32 *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		const std::size_t countRendered_ = Tbase::GetRenderedCount();
 

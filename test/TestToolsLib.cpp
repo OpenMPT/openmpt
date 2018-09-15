@@ -60,10 +60,14 @@ void Testcase::ShowStart() const
 		case VerbosityQuiet:
 			break;
 		case VerbosityNormal:
+#if !MPT_OS_DJGPP
 			std::cout << "TEST..: " << AsString() << ": " << std::endl;
+#endif
 			break;
 		case VerbosityVerbose:
+#if !MPT_OS_DJGPP
 			std::cout << "TEST..: " << AsString() << ": " << std::endl;
+#endif
 			break;
 	}
 }
@@ -78,7 +82,11 @@ void Testcase::ShowProgress(const char * text) const
 		case VerbosityNormal:
 			break;
 		case VerbosityVerbose:
+#if !MPT_OS_DJGPP
 			std::cout << "TEST..: " << AsString() << ": " << text << std::endl;
+#else
+			MPT_UNUSED_VARIABLE(text);
+#endif
 			break;
 	}
 }
@@ -91,10 +99,14 @@ void Testcase::ShowPass() const
 		case VerbosityQuiet:
 			break;
 		case VerbosityNormal:
+#if !MPT_OS_DJGPP
 			std::cout << "RESULT: PASS" << std::endl;
+#endif
 			break;
 		case VerbosityVerbose:
+#if !MPT_OS_DJGPP
 			std::cout << "PASS..: " << AsString() << std::endl;
+#endif
 			break;
 	}
 }

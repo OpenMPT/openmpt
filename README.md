@@ -223,6 +223,24 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
         `node.js` binary, you might have to edit
         `build/make/config-emscripten.mk`.
 
+     -  DJGPP / DOS
+
+        Cross-compilation from Linux systems is supported with DJGPP GCC 7.2 or
+        later via
+
+            make CONFIG=djgpp
+
+        `openmpt123` can use liballegro 4.2 for sound output on DJGPP/DOS.
+        liballegro can either be installed system-wide in the DJGPP environment
+        or downloaded into the `libopenmpt` source tree.
+
+            make CONFIG=djgpp USE_ALLEGRO42=1    # use installed liballegro
+
+        or
+
+            ./build/download_externals.sh    # download liballegro binaries
+            make CONFIG=djgpp USE_ALLEGRO42=1 BUNDLED_ALLEGRO42=1
+
      -  American Fuzzy Lop:
 
         To compile libopenmpt with fuzzing instrumentation for afl-fuzz, run:

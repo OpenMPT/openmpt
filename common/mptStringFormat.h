@@ -223,7 +223,9 @@ STATIC_ASSERT(sizeof(FormatFlags) >= sizeof(fmt_base::FormatFlagsEnum));
 class FormatSpec;
 
 MPT_DEPRECATED std::string FormatVal(const char & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::string(1, x) instead
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 MPT_DEPRECATED std::string FormatVal(const wchar_t & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 std::string FormatVal(const bool & x, const FormatSpec & f);
 std::string FormatVal(const signed char & x, const FormatSpec & f);
 std::string FormatVal(const unsigned char & x, const FormatSpec & f);
@@ -240,7 +242,9 @@ std::string FormatVal(const double & x, const FormatSpec & f);
 std::string FormatVal(const long double & x, const FormatSpec & f);
 
 MPT_DEPRECATED mpt::ustring FormatValU(const char & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::string(1, x) instead
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 MPT_DEPRECATED mpt::ustring FormatValU(const wchar_t & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 mpt::ustring FormatValU(const bool & x, const FormatSpec & f);
 mpt::ustring FormatValU(const signed char & x, const FormatSpec & f);
 mpt::ustring FormatValU(const unsigned char & x, const FormatSpec & f);
@@ -258,7 +262,9 @@ mpt::ustring FormatValU(const long double & x, const FormatSpec & f);
 
 #if MPT_WSTRING_FORMAT
 MPT_DEPRECATED std::wstring FormatValW(const char & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::string(1, x) instead
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 MPT_DEPRECATED std::wstring FormatValW(const wchar_t & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 std::wstring FormatValW(const bool & x, const FormatSpec & f);
 std::wstring FormatValW(const signed char & x, const FormatSpec & f);
 std::wstring FormatValW(const unsigned char & x, const FormatSpec & f);
@@ -530,11 +536,13 @@ template <> struct to_string_type<char           > { typedef std::string  type; 
 template <> struct to_string_type<char *         > { typedef std::string  type; };
 template <> struct to_string_type<const char     > { typedef std::string  type; };
 template <> struct to_string_type<const char *   > { typedef std::string  type; };
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 template <> struct to_string_type<std::wstring   > { typedef std::wstring type; };
 template <> struct to_string_type<wchar_t        > { typedef std::wstring type; };
 template <> struct to_string_type<wchar_t *      > { typedef std::wstring type; };
 template <> struct to_string_type<const wchar_t  > { typedef std::wstring type; };
 template <> struct to_string_type<const wchar_t *> { typedef std::wstring type; };
+#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 #if MPT_USTRING_MODE_UTF8
 template <> struct to_string_type<mpt::ustring   > { typedef mpt::ustring type; };
 #endif

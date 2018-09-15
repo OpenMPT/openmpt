@@ -1910,7 +1910,7 @@ void CSoundFile::ProcessRamping(ModChannel &chn) const
 			if((chn.leftVol | chn.rightVol) && (chn.newLeftVol | chn.newRightVol) && !chn.dwFlags[CHN_FASTVOLRAMP])
 			{
 				rampLength = m_PlayState.m_nBufferCount;
-				Limit(rampLength, globalRampLength, 1 << (VOLUMERAMPPRECISION - 1));
+				Limit(rampLength, globalRampLength, int32(1 << (VOLUMERAMPPRECISION - 1)));
 			}
 		}
 
@@ -2567,7 +2567,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 
 
 template<int channels>
-MPT_FORCEINLINE void ApplyGlobalVolumeWithRamping(int *SoundBuffer, int *RearBuffer, int32 lCount, int32 m_nGlobalVolume, int32 step, int32 &m_nSamplesToGlobalVolRampDest, int32 &m_lHighResRampingGlobalVolume)
+MPT_FORCEINLINE void ApplyGlobalVolumeWithRamping(int32 *SoundBuffer, int32 *RearBuffer, int32 lCount, int32 m_nGlobalVolume, int32 step, int32 &m_nSamplesToGlobalVolRampDest, int32 &m_lHighResRampingGlobalVolume)
 {
 	const bool isStereo = (channels >= 2);
 	const bool hasRear = (channels >= 4);
@@ -2635,7 +2635,7 @@ void CSoundFile::ProcessGlobalVolume(long lCount)
 			// If step is too big (might cause click), extend ramp length.
 			// Warning: This increases the volume ramp length by EXTREME amounts (factors of 100 are easily reachable)
 			// compared to the user-defined setting, so this really should not be used!
-			int32 maxStep = std::max(50, (10000 / (m_PlayState.m_nGlobalVolumeRampAmount + 1)));
+			int32 maxStep = std::max<int>(50, (10000 / (m_PlayState.m_nGlobalVolumeRampAmount + 1)));
 			while(mpt::abs(step) > maxStep)
 			{
 				m_PlayState.m_nSamplesToGlobalVolRampDest += m_PlayState.m_nGlobalVolumeRampAmount;

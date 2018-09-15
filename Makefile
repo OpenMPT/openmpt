@@ -72,6 +72,9 @@
 #  NO_MINIMP3=1     Do not fallback to minimp3
 #  NO_STBVORBIS=1   Do not fallback to stb_vorbis
 #
+#  USE_ALLEGRO42=1  Use liballegro 4.2 (DJGPP only)
+#  BUNDLED_ALLEGRO42=1 Use liballegro 4.2 in libopenmpt source tree (DJGPP only)
+#
 # Build flags for libopenmpt examples and openmpt123
 #  (provide on each `make` invocation)
 #  (defaults are 0):
@@ -319,8 +322,13 @@ CFLAGS   += -Wall
 
 else
 
+ifeq ($(MPT_COMPILER_NOVISIBILITY),1)
+CXXFLAGS +=
+CFLAGS   +=
+else
 CXXFLAGS += -fvisibility=hidden
 CFLAGS   += -fvisibility=hidden
+endif
 LDFLAGS  += 
 LDLIBS   += 
 ARFLAGS  += 
@@ -331,9 +339,15 @@ CXXFLAGS += -O0 -g -fno-omit-frame-pointer
 CFLAGS   += -O0 -g -fno-omit-frame-pointer
 else
 ifeq ($(OPTIMIZE_SIZE),1)
-CXXFLAGS += -ffunction-sections -fdata-sections -Os -ffast-math
-CFLAGS   += -ffunction-sections -fdata-sections -Os -ffast-math -fno-strict-aliasing
+CXXFLAGS += -Os -ffast-math
+CFLAGS   += -Os -ffast-math -fno-strict-aliasing
+LDFLAGS  += 
+ifeq ($(MPT_COMPILER_NOGCSECTIONS),1)
+else
+CXXFLAGS += -ffunction-sections -fdata-sections
+CFLAGS   += -ffunction-sections -fdata-sections
 LDFLAGS  += -Wl,--gc-sections
+endif
 else
 ifeq ($(OPTIMIZE),1)
 CXXFLAGS += -O3 -ffast-math
@@ -603,6 +617,13 @@ NO_SNDFILE:=1
 endif
 endif
 
+ifeq ($(USE_ALLEGRO42),1)
+CPPFLAGS_ALLEGRO42 ?= 
+LDFLAGS_ALLEGRO42 ?= 
+LDLIBS_ALLEGRO42 ?= liballeg.a
+CPPFLAGS_ALLEGRO42 += -DMPT_WITH_ALLEGRO42
+endif
+
 ifeq ($(HACK_ARCHIVE_SUPPORT),1)
 CPPFLAGS += -DMPT_BUILD_HACK_ARCHIVE_SUPPORT
 endif
@@ -618,9 +639,9 @@ CPPFLAGS += $(CPPFLAGS_ZLIB) $(CPPFLAGS_MPG123) $(CPPFLAGS_OGG) $(CPPFLAGS_VORBI
 LDFLAGS += $(LDFLAGS_ZLIB) $(LDFLAGS_MPG123) $(LDFLAGS_OGG) $(LDFLAGS_VORBIS) $(LDFLAGS_VORBISFILE)
 LDLIBS += $(LDLIBS_ZLIB) $(LDLIBS_MPG123) $(LDLIBS_OGG) $(LDLIBS_VORBIS) $(LDLIBS_VORBISFILE)
 
-CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL2) $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_PULSEAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_SNDFILE)
-LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL2) $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_PULSEAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_SNDFILE)
-LDLIBS_OPENMPT123   += $(LDLIBS_SDL2) $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS_PULSEAUDIO) $(LDLIBS_FLAC) $(LDLIBS_SNDFILE)
+CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL2) $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_PULSEAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_SNDFILE) $(CPPFLAGS_ALLEGRO42)
+LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL2) $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_PULSEAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_SNDFILE) $(LDFLAGS_ALLEGRO42)
+LDLIBS_OPENMPT123   += $(LDLIBS_SDL2) $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS_PULSEAUDIO) $(LDLIBS_FLAC) $(LDLIBS_SNDFILE) $(LDLIBS_ALLEGRO42)
 
 
 %: %.o
@@ -949,6 +970,7 @@ DIST_OUTPUTS += bin/dist-zip.tar
 DIST_OUTPUTS += bin/dist-doc.tar
 DIST_OUTPUTS += bin/dist-autotools.tar
 DIST_OUTPUTS += bin/dist-js.tar
+DIST_OUTPUTS += bin/dist-dos.tar
 DIST_OUTPUTS += bin/made.docs
 
 DIST_OUTPUTDIRS += bin/dist
@@ -957,6 +979,7 @@ DIST_OUTPUTDIRS += bin/dist-tar
 DIST_OUTPUTDIRS += bin/dist-zip
 DIST_OUTPUTDIRS += bin/dist-autotools
 DIST_OUTPUTDIRS += bin/dist-js
+DIST_OUTPUTDIRS += bin/dist-dos
 DIST_OUTPUTDIRS += bin/docs
 
 
@@ -1133,6 +1156,16 @@ bin/dist-js.tar: bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).dev.js.tar.gz
 	cd bin/dist-js/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).dev.js.tar.gz libopenmpt/dev.js/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
 	cd bin/dist-js/ && tar cvf ../dist-js.tar libopenmpt
 
+.PHONY: dist-dos
+dist-dos: bin/dist-dos.tar
+
+bin/dist-dos.tar: bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip
+	rm -rf bin/dist-dos.tar
+	cd bin/dist-dos/ && rm -rf libopenmpt
+	cd bin/dist-dos/ && mkdir -p libopenmpt/bin.dos/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-dos/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip libopenmpt/bin.dos/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-dos/ && tar cvf ../dist-dos.tar libopenmpt
+
 .PHONY: bin/dist.mk
 bin/dist.mk:
 	rm -rf $@
@@ -1188,6 +1221,8 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/dist.mk bin
 	svn export ./examples           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/examples
 	svn export ./openmpt123         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123
 	svn export ./contrib            bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/contrib
+	svn export ./include/allegro42  bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/allegro42
+	svn export ./include/cwsdpmi    bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/cwsdpmi
 	svn export ./include/minimp3    bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/minimp3
 	svn export ./include/miniz      bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/miniz
 	svn export ./include/modplug    bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/modplug
@@ -1276,6 +1311,33 @@ bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).dev.js.tar:
 	cp bin/stage/js/libopenmpt.js                bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/js/libopenmpt.js
 	cp bin/stage/js/libopenmpt.js.mem            bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/js/libopenmpt.js.mem
 	cd bin/dist-js/ && tar cv libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).dev.js.tar
+
+.PHONY: bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip
+bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip:
+	mkdir -p bin/dist-dos
+	rm -rf                                       bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p                                     bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p                                     bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES
+	svn export ./LICENSE                         bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE.TXT          --native-eol CRLF
+	cd bin/dist-dos && unzip ../../build/externals/all422s.zip allegro/readme.txt
+	mv bin/dist-dos/allegro/readme.txt           bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/ALLEGRO.TXT
+	rmdir bin/dist-dos/allegro
+	cp include/cwsdpmi/bin/cwsdpmi.doc           bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/CWSDPMI.TXT
+	svn export ./include/minimp3/LICENSE         bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/MINIMP3.TXT --native-eol CRLF
+	svn export ./include/miniz/miniz.c           bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/MINIZ.TXT   --native-eol CRLF
+	svn export ./include/stb_vorbis/stb_vorbis.c bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/STBVORB.TXT --native-eol CRLF
+	mkdir -p                                     bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/SRC
+	cp build/externals/csdpmi7s.zip              bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/SRC/CSDPMI7S.ZIP
+	mkdir -p                                     bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN
+	cp bin/openmpt123.exe                        bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/OMPT123.EXE
+	cp include/cwsdpmi/bin/cwsdpmi.doc           bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/CWSDPMI.DOC
+	cp include/cwsdpmi/bin/CWSDPMI.EXE           bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/CWSDPMI.EXE
+	cp include/cwsdpmi/bin/CWSDPR0.EXE           bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/CWSDPR0.EXE
+	cp include/cwsdpmi/bin/cwsparam.doc          bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/CWSPARAM.DOC
+	cp include/cwsdpmi/bin/CWSPARAM.EXE          bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/CWSPARAM.EXE
+	cp include/cwsdpmi/bin/CWSDSTUB.EXE          bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/CWSDSTUB.EXE
+	cp include/cwsdpmi/bin/CWSDSTR0.EXE          bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/CWSDSTR0.EXE
+	cd bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip --compression-method deflate -9 *
 
 bin/libopenmpt.a: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [AR] $@
