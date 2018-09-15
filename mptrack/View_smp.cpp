@@ -2961,17 +2961,7 @@ void CViewSample::OnAddSilence()
 
 	if(dlg.m_editOption == AddSilenceDlg::kOPLInstrument)
 	{
-		if(!sample.uFlags[CHN_ADLIB])
-		{
-			CriticalSection cs;
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Initialize OPL Instrument");
-			sndFile.DestroySample(m_nSample);
-			sndFile.InitOPL();
-			sample.nC5Speed = 8363;
-			sample.SetAdlib(true);
-			SetCurSel(0, 0);
-			SetModified(SampleHint().Info().Data().Names(), true, true);
-		}
+		SendCtrlMessage(CTRLMSG_SMP_INITOPL);
 		return;
 	}
 

@@ -486,7 +486,10 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		SetCurrentSample((SAMPLEINDEX)lParam, -1, TRUE);
 		break;
 
-	//rewbs.customKeys
+	case CTRLMSG_SMP_INITOPL:
+		OnInitOPLInstrument();
+		break;
+
 	case IDC_SAMPLE_REVERSE:
 		OnReverse();
 		break;
@@ -542,7 +545,6 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case IDC_SAMPLE_NEW:
 		InsertSample(false);
 		break;
-	//end rewbs.customKeys
 
 	default:
 		return CModControlDlg::OnModCtrlMsg(wParam, lParam);
@@ -3636,8 +3638,8 @@ void CCtrlSamples::OnInitOPLInstrument()
 		m_sndFile.InitOPL();
 		ModSample &sample = m_sndFile.GetSample(m_nSample);
 		sample.nC5Speed = 8363;
-		// Initialize with instant attack, release and enabled sustain for carrier
-		sample.SetAdlib(true, { 0x00, 0x20, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00 });
+		// Initialize with instant attack, release and enabled sustain for carrier and instant attack for modulator
+		sample.SetAdlib(true, { 0x00, 0x20, 0x00, 0x00, 0xF0, 0xF0, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00 });
 		SetModified(SampleHint().Info().Data().Names(), true, true);
 	}
 }
