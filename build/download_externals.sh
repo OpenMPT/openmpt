@@ -76,6 +76,9 @@ function download () {
 if [ ! -d "build/externals" ]; then
  mkdir build/externals
 fi
+if [ ! -d "build/tools" ]; then
+ mkdir build/tools
+fi
 
 
 

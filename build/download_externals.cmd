@@ -26,6 +26,7 @@ goto error
 
 :main
 if not exist "build\externals" mkdir "build\externals"
+if not exist "build\tools"     mkdir "build\tools"
 
 if "%MPT_DOWNLOAD%" == "yes" (
 
