@@ -114,7 +114,7 @@ static MPT_NOINLINE void TestEditing();
 
 
 static mpt::PathString *PathPrefix = nullptr;
-static mpt::prng * s_PRNG = nullptr;
+static mpt::default_prng * s_PRNG = nullptr;
 
 
 
@@ -192,7 +192,7 @@ void DoTests()
 	#endif
 
 	mpt::random_device rd;
-	s_PRNG = new mpt::prng(mpt::make_prng<mpt::prng>(rd));
+	s_PRNG = new mpt::default_prng(mpt::make_prng<mpt::default_prng>(rd));
 
 	DO_TEST(TestVersion);
 	DO_TEST(TestTypes);
@@ -2254,7 +2254,7 @@ static MPT_NOINLINE void TestMisc2()
 
 static MPT_NOINLINE void TestRandom()
 {
-	mpt::prng & prng = *s_PRNG;
+	mpt::default_prng & prng = *s_PRNG;
 	for(std::size_t i = 0; i < 10000; ++i)
 	{
 		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16, 7>(prng), 0u, 127u), true);

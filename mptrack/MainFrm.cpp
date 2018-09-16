@@ -178,7 +178,7 @@ static UINT indicators[] =
 // CMainFrame construction/destruction
 CMainFrame::CMainFrame()
 	: m_SoundDeviceFillBufferCriticalSection(CriticalSection::InitialUnlocked)
-	, m_Dither(theApp.BestPRNG())
+	, m_Dither(theApp.PRNG())
 {
 	m_NotifyTimer = 0;
 	gpSoundDevice = NULL;

@@ -548,8 +548,7 @@ typedef mpt::prng_random_device<mpt::rng::lcg_musl> random_device;
 //  2. Use fast PRNGs in order to not waste time fuzzing more complex PRNG
 //     implementations.
 typedef mpt::rng::lcg_msvc fast_prng;
-typedef mpt::rng::lcg_c99  main_prng;
-typedef mpt::rng::lcg_musl best_prng;
+typedef mpt::rng::lcg_musl good_prng;
 
 #else // !MPT_BUILD_FUZZER
 
@@ -559,14 +558,12 @@ typedef mpt::sane_random_device random_device;
 // We cannot use std::minstd_rand here because it has not a power-of-2 sized
 // output domain which we rely upon.
 typedef mpt::rng::lcg_msvc fast_prng; // about 3 ALU operations, ~32bit of state, suited for inner loops
-typedef std::mt19937       main_prng;
-typedef std::ranlux48      best_prng;
+typedef std::ranlux48      good_prng;
 
 #endif // MPT_BUILD_FUZZER
 
 
-typedef mpt::main_prng default_prng;
-typedef mpt::main_prng prng;
+typedef mpt::good_prng default_prng;
 
 
 template <typename Trng, typename Trd>
@@ -619,11 +616,11 @@ public:
 
 
 mpt::random_device & global_random_device();
-mpt::thread_safe_prng<mpt::best_prng> & global_prng();
+mpt::thread_safe_prng<mpt::default_prng> & global_prng();
 
 #if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 void set_global_random_device(mpt::random_device *rd);
-void set_global_prng(mpt::thread_safe_prng<mpt::best_prng> *rng);
+void set_global_prng(mpt::thread_safe_prng<mpt::default_prng> *rng);
 #endif // MODPLUG_TRACKER && !MPT_BUILD_WINESUPPORT
 
 

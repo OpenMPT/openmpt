@@ -122,8 +122,7 @@ protected:
 	DWORD m_GuiThreadId = 0;
 
 	std::unique_ptr<mpt::random_device> m_RD;
-	std::unique_ptr<mpt::thread_safe_prng<mpt::best_prng> > m_BestPRNG;
-	std::unique_ptr<mpt::thread_safe_prng<mpt::prng> > m_PRNG;
+	std::unique_ptr<mpt::thread_safe_prng<mpt::default_prng> > m_PRNG;
 
 	std::unique_ptr<GdiplusRAII> m_Gdiplus;
 
@@ -193,8 +192,7 @@ public:
 	inline mpt::recursive_mutex_with_lock_count & GetGlobalMutexRef() { return m_GlobalMutex; }
 	bool InGuiThread() const { return GetCurrentThreadId() == m_GuiThreadId; }
 	mpt::random_device & RandomDevice() { return *m_RD; }
-	mpt::thread_safe_prng<mpt::best_prng> & BestPRNG() { return *m_BestPRNG; }
-	mpt::thread_safe_prng<mpt::prng> & PRNG() { return *m_PRNG; }
+	mpt::thread_safe_prng<mpt::default_prng> & PRNG() { return *m_PRNG; }
 	CModDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
 	SoundDevice::Manager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }

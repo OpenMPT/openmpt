@@ -439,7 +439,7 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 	m_sndFile = mpt::make_unique<CSoundFile>();
 	m_loaded = false;
 	m_mixer_initialized = false;
-	m_Dither = mpt::make_unique<Dither>(mpt::global_prng());
+	m_Dither = mpt::make_unique<Dither>( mpt::global_prng() );
 	m_LogForwarder = mpt::make_unique<log_forwarder>( *m_Log );
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	m_current_subsong = 0;
