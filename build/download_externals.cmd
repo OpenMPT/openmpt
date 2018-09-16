@@ -2,9 +2,6 @@
 
 if not "x%1" == "xauto" (
 	echo "WARNING: This script will unconditionally remove all files from the destination directories."
-	echo "This script requires Windows 7 or later (because of PowerShell)."
-	echo "This script requires 7-zip in 'C:\Program Files\7-Zip\' (the default path for a native install)."
-	echo "When running from a Subversion working copy, this script requires at least Subversion 1.7 (because it removes subdirectories which should not contain .svn metadata)."
 	pause
 )
 
@@ -21,61 +18,50 @@ cd %BATCH_DIR% || goto error
 cd .. || goto error
 goto main
 
-:download_and_unpack
- set MPT_GET_DESTDIR="%~1"
- set MPT_GET_URL="%~2"
- set MPT_GET_FILE="%~3"
- set MPT_GET_SUBDIR="%~4"
- set MPT_GET_UNPACK_INTERMEDIATE="%~5"
- if "%MPT_DOWNLOAD%" == "yes" (
-  if not exist "build\externals\%~3" (
-   powershell -Command "(New-Object Net.WebClient).DownloadFile('%MPT_GET_URL%', 'build/externals/%~3')" || exit /B 1
-  )
- )
- cd build\externals || exit /B 1
- if not "%~5" == "-" (
-  "C:\Program Files\7-Zip\7z.exe" x -y "%~3" || exit /B 1
- )
- cd ..\.. || exit /B 1
- cd include || exit /B 1
- if exist %MPT_GET_DESTDIR% rmdir /S /Q %MPT_GET_DESTDIR%
- if "%~4" == "." (
-  mkdir %MPT_GET_DESTDIR%
-  cd %MPT_GET_DESTDIR% || exit /B 1
-  if "%~5" == "-" (
-   "C:\Program Files\7-Zip\7z.exe" x -y "..\..\build\externals\%~3" || exit /B 1
-  )
-  if not "%~5" == "-" (
-   "C:\Program Files\7-Zip\7z.exe" x -y "..\..\build\externals\%~5" || exit /B 1
-  )
-  cd .. || exit /B 1
- )
- if not "%~4" == "." (
-  if "%~5" == "-" (
-   "C:\Program Files\7-Zip\7z.exe" x -y -ir!"%~4" "..\build\externals\%~3" || exit /B 1
-  )
-  if not "%~5" == "-" (
-   "C:\Program Files\7-Zip\7z.exe" x -y -ir!"%~4" "..\build\externals\%~5" || exit /B 1
-  )
-  choice /C y /N /T 2 /D y
-  if not "%~4" == "%~1" (
-   move /Y "%~4" %MPT_GET_DESTDIR% || exit /B 1
-  )
- )
- cd .. || exit /B 1
+:killdir
+ set MPT_KILLDIR_DIR="%~1"
+ if exist %MPT_KILLDIR_DIR% rmdir /S /Q %MPT_KILLDIR_DIR%
 exit /B 0
 goto error
 
 :main
 if not exist "build\externals" mkdir "build\externals"
 
-call :download_and_unpack "winamp"    "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"              "WA5.55_SDK.exe"                     "."                "-" || goto error
+if "%MPT_DOWNLOAD%" == "yes" (
 
-call :download_and_unpack "xmplay"    "https://www.un4seen.com/files/xmp-sdk.zip"                                  "xmp-sdk.zip"                        "."                "-" || goto error
+ call build\scriptlib\download.cmd "https://www.7-zip.org/a/7za920.zip"                                                              "build\externals\7za920.zip"      || goto error
+ call build\scriptlib\download.cmd "https://www.7-zip.org/a/7z1805-extra.7z"                                                         "build\externals\7z1805-extra.7z" || goto error
+ call build\scriptlib\download.cmd "https://www.7-zip.org/a/7z1805.exe"                                                              "build\externals\7z1805.exe"      || goto error
 
-call :download_and_unpack "ASIOSDK2"  "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3"       "-" || goto error
+ rem call build\scriptlib\download.cmd "https://github.com/bkaradzic/GENie/archive/78817a9707c1a02e845fb38b3adcc5353b02d377.zip"         "build\externals\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip"        || goto error
+ rem call build\scriptlib\download.cmd "https://github.com/premake/premake-core/archive/2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip"    "build\externals\premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" || goto error
+ copy /Y "build\externals-mirror\genie\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "build\externals\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip"               || goto error
+ copy /Y "build\externals-mirror\premake\premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "build\externals\premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" || goto error
 
-call :download_and_unpack "htmlhelp" "https://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "htmlhelp.exe" "." "-" || goto error
+ call build\scriptlib\download.cmd "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"                                   "build\externals\WA5.55_SDK.exe"  || goto error
+ call build\scriptlib\download.cmd "https://www.un4seen.com/files/xmp-sdk.zip"                                                       "build\externals\xmp-sdk.zip"     || goto error
+ call build\scriptlib\download.cmd "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                                          "build\externals\asiosdk2.3.zip"  || goto error
+
+ call build\scriptlib\download.cmd "https://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "build\externals\htmlhelp.exe"    || goto error
+
+)
+
+call :killdir "build\tools\7zipold" || goto error
+call :killdir "build\tools\7zipa" || goto error
+call :killdir "build\tools\7zip" || goto error
+rem Get old 7zip distributed as zip and unpack with built-in zip depacker
+rem Get current 7zip commandline version which can unpack 7zip and the 7zip installer but not other archive formats
+rem Get 7zip installer and unpack it with current commandline 7zip
+rem This is a mess for automatic. Oh well.
+cscript build\scriptlib\unpack-zip.vbs "build\externals\7za920.zip" "build\tools\7zipold" || goto error
+build\tools\7zipold\7za.exe x -y -obuild\tools\7zipa "build\externals\7z1805-extra.7z" || goto error
+build\tools\7zipa\7za.exe x -y -obuild\tools\7zip "build\externals\7z1805.exe" || goto error
+
+call build\scriptlib\unpack.cmd "build\tools\htmlhelp" "build\externals\htmlhelp.exe" "." || goto error
+
+call build\scriptlib\unpack.cmd "include\winamp"   "build\externals\WA5.55_SDK.exe" "."          || goto error
+call build\scriptlib\unpack.cmd "include\xmplay"   "build\externals\xmp-sdk.zip"    "."          || goto error
+call build\scriptlib\unpack.cmd "include\ASIOSDK2" "build\externals\asiosdk2.3.zip" "ASIOSDK2.3" || goto error
 
 goto ok
 

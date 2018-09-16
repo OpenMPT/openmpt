@@ -54,9 +54,8 @@ How to compile
     If you don't want this, comment out `#define MPT_WITH_ASIO` in the file
     `common/BuildSettings.h`.
 
-    The ASIO SDK can be downloaded automatically on Windows 7 or later
-    with 7-Zip installed by just running the `build/download_externals.cmd`
-    script.
+    The ASIO SDK can be downloaded automatically on Windows 7 or later by just
+    running the `build/download_externals.cmd` script.
 
     If you do not want to or cannot use this script, you may follow these manual
     steps instead:
@@ -71,11 +70,6 @@ How to compile
 
     If you need further help with the ASIO SDK, get in touch with the
     main OpenMPT developers. 
-
- -  7-Zip is required to be installed in the default path in order to build the
-    required files for OpenMPT Wine integration.
-
-    Please visit [7-zip.org](https://www.7-zip.org/) to download 7-Zip.
 
 
 ### libopenmpt and openmpt123
@@ -120,8 +114,8 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
      -  You will need the Winamp 5 SDK and the XMPlay SDK if you want to
         compile the plugins for these 2 players. They can be downloaded
-        automatically on Windows 7 or later with 7-Zip installed by just running
-        the `build/download_externals.cmd` script.
+        automatically on Windows 7 or later by just running the
+        `build/download_externals.cmd` script.
 
         If you do not want to or cannot use this script, you may follow these
         manual steps instead:
