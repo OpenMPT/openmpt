@@ -11,41 +11,33 @@ cd "${MY_DIR}"
 cd ..
 
 
-function download_and_unpack () {
+function unpack () {
  set -e
  MPT_GET_DESTDIR="$1"
- MPT_GET_URL="$2"
- MPT_GET_FILE="$3"
- MPT_GET_SUBDIR="$4"
- if [ ! -f "build/externals/$3" ]; then
-  wget "$2" -O "build/externals/$3"
- fi
+ MPT_GET_FILE="$2"
+ MPT_GET_SUBDIR="$3"
  cd include
   if [ -d "$1" ]; then
    rm -rf "$1"
   fi
-  if [ "$4" = "." ]; then
+  if [ "$3" = "." ]; then
    mkdir "$1"
    cd "$1"
-    unzip -x "../../build/externals/$3"
+    unzip "../../$2"
    cd ..
   else
-   unzip -x "../build/externals/$3"
-   if [ ! "$4" = "$1" ]; then
-    mv "$4" "$1"
+   unzip "../$2"
+   if [ ! "$3" = "$1" ]; then
+    mv "$3" "$1"
    fi
   fi
  cd ..
  return 0
 }
 
-if [ ! -d "build/externals" ]; then
- mkdir build/externals
-fi
 
 
-
-download_and_unpack "genie" "https://github.com/bkaradzic/GENie/archive/78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "GENie-78817a9707c1a02e845fb38b3adcc5353b02d377"
+unpack "genie" "build/externals/GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "GENie-78817a9707c1a02e845fb38b3adcc5353b02d377"
 
 cd include/genie
 
@@ -65,7 +57,7 @@ echo "78817a9707c1a02e845fb38b3adcc5353b02d377" > include/genie/OpenMPT-version.
 
 
 
-download_and_unpack "premake" "https://github.com/premake/premake-core/archive/2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6"
+unpack "premake" "build/externals/premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6"
 
 cd include/premake
 

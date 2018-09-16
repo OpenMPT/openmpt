@@ -13,8 +13,8 @@ function download_and_unpack_tar () {
  MPT_GET_URL="$2"
  MPT_GET_FILE="$3"
  MPT_GET_SUBDIR="$4"
- if [ ! -f "build/externals/$3" ]; then
-  wget "$2" -O "build/externals/$3"
+ if [ ! -f "$3" ]; then
+  wget "$2" -O "$3"
  fi
  cd include
   if [ -d "$1" ]; then
@@ -23,10 +23,10 @@ function download_and_unpack_tar () {
   if [ "$4" = "." ]; then
    mkdir "$1"
    cd "$1"
-    tar xvaf "../../build/externals/$3"
+    tar xvaf "../../$3"
    cd ..
   else
-   tar xvaf "../build/externals/$3"
+   tar xvaf "../$3"
    if [ ! "$4" = "$1" ]; then
     mv "$4" "$1"
    fi
@@ -41,8 +41,8 @@ function download_and_unpack_zip () {
  MPT_GET_URL="$2"
  MPT_GET_FILE="$3"
  MPT_GET_SUBDIR="$4"
- if [ ! -f "build/externals/$3" ]; then
-  wget "$2" -O "build/externals/$3"
+ if [ ! -f "$3" ]; then
+  wget "$2" -O "$3"
  fi
  cd include
   if [ -d "$1" ]; then
@@ -51,10 +51,10 @@ function download_and_unpack_zip () {
   if [ "$4" = "." ]; then
    mkdir "$1"
    cd "$1"
-    unzip "../../build/externals/$3"
+    unzip "../../$3"
    cd ..
   else
-   unzip "../build/externals/$3"
+   unzip "../$3"
    if [ ! "$4" = "$1" ]; then
     mv "$4" "$1"
    fi
@@ -67,8 +67,8 @@ function download () {
  set -e
  MPT_GET_URL="$1"
  MPT_GET_FILE="$2"
- if [ ! -f "build/externals/$2" ]; then
-  wget "$1" -O "build/externals/$2"
+ if [ ! -f "$2" ]; then
+  wget "$1" -O "$2"
  fi
  return 0
 }
@@ -77,12 +77,17 @@ if [ ! -d "build/externals" ]; then
  mkdir build/externals
 fi
 
-download_and_unpack_zip "allegro42" "http://na.mirror.garr.it/mirrors/djgpp/current/v2tk/allegro/all422ar2.zip" "all422ar2.zip" "."
-download "http://na.mirror.garr.it/mirrors/djgpp/current/v2tk/allegro/all422s.zip" "all422s.zip"
-#download_and_unpack_zip "allegro42" "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/allegro/all422ar2.zip" "all422ar2.zip" "."
-#download "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/allegro/all422s.zip" "all422s.zip"
-download_and_unpack_zip "cwsdpmi" "http://na.mirror.garr.it/mirrors/djgpp/current/v2misc/csdpmi7b.zip" "csdpmi7b.zip" "."
-download "http://na.mirror.garr.it/mirrors/djgpp/current/v2misc/csdpmi7s.zip" "csdpmi7s.zip"
-#download_and_unpack_zip "cwsdpmi" "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/cwsdpmi/csdpmi7b.zip" "csdpmi7b.zip" "."
-#download "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/cwsdpmi/csdpmi7s.zip" "csdpmi7s.zip"
+
+
+download "https://github.com/bkaradzic/GENie/archive/78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "build/externals/GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip"
+download "https://github.com/premake/premake-core/archive/2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "build/externals/premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip"
+
+download_and_unpack_zip "allegro42" "http://na.mirror.garr.it/mirrors/djgpp/current/v2tk/allegro/all422ar2.zip" "build/externals/all422ar2.zip" "."
+download "http://na.mirror.garr.it/mirrors/djgpp/current/v2tk/allegro/all422s.zip" "build/externals/all422s.zip"
+#download_and_unpack_zip "allegro42" "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/allegro/all422ar2.zip" "build/externals/all422ar2.zip" "."
+#download "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/allegro/all422s.zip" "build/externals/all422s.zip"
+download_and_unpack_zip "cwsdpmi" "http://na.mirror.garr.it/mirrors/djgpp/current/v2misc/csdpmi7b.zip" "build/externals/csdpmi7b.zip" "."
+download "http://na.mirror.garr.it/mirrors/djgpp/current/v2misc/csdpmi7s.zip" "build/externals/csdpmi7s.zip"
+#download_and_unpack_zip "cwsdpmi" "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/cwsdpmi/csdpmi7b.zip" "build/externals/csdpmi7b.zip" "."
+#download "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/cwsdpmi/csdpmi7s.zip" "build/externals/csdpmi7s.zip"
 
