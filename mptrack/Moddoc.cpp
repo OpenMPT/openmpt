@@ -862,14 +862,13 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 
 CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CHANNELINDEX channel = GetNumChannels();
 
 	ModCommand::NOTE note = params.m_note;
-	if(pMainFrm == nullptr || note == NOTE_NONE) return FALSE;
 	if(ModCommand::IsNote(ModCommand::NOTE(note)))
 	{
-
+		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+		if(pMainFrm == nullptr || note == NOTE_NONE) return CHANNELINDEX_INVALID;
 		if (pMainFrm->GetModPlaying() != this)
 		{
 			// All notes off when resuming paused playback
@@ -968,6 +967,16 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 				}
 			}
 		}
+
+		// Remove channel from list of mixed channels to fix https://bugs.openmpt.org/view.php?id=209
+		// This is required because a previous note on the same channel might have just stopped playing,
+		// but the channel is still in the mix list.
+		// Since the channel volume / etc is only updated every tick in CSoundFile::ReadNote, and we
+		// do not want to duplicate mixmode-dependant logic here, CSoundFile::CreateStereoMix may already
+		// try to mix our newly set up channel at volume 0 if we don't remove it from the list.
+		auto mixBegin = std::begin(m_SndFile.m_PlayState.ChnMix);
+		auto mixEnd = std::remove_if(mixBegin, mixBegin + m_SndFile.m_nMixChannels, [channel](CHANNELINDEX c) { return c == channel; });
+		m_SndFile.m_nMixChannels = static_cast<CHANNELINDEX>(std::distance(mixBegin, mixEnd));
 	} else
 	{
 		CriticalSection cs;
