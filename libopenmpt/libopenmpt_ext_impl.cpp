@@ -282,7 +282,7 @@ namespace openmpt {
 		// do not want to duplicate mixmode-dependant logic here, CSoundFile::CreateStereoMix may already
 		// try to mix our newly set up channel at volume 0 if we don't remove it from the list.
 		auto mix_begin = std::begin( m_sndFile->m_PlayState.ChnMix );
-		auto mix_end = std::remove_if( mix_begin, mix_begin + m_sndFile->m_nMixChannels, [channel] ( CHANNELINDEX c ) -> bool { return c == channel; } );
+		auto mix_end = std::remove_if( mix_begin, mix_begin + m_sndFile->m_nMixChannels, [free_channel] ( CHANNELINDEX c ) -> bool { return c == free_channel; } );
 		m_sndFile->m_nMixChannels = static_cast<CHANNELINDEX>( std::distance( mix_begin, mix_end ) );
 
 		return free_channel;
