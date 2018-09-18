@@ -30,6 +30,18 @@
       <Item Name="Column">(PatternCursor::Columns)(cursor &amp; 0x07)</Item>
     </Expand>
   </Type>
+  
+  <!-- GUI update hint -->
+  <Type Name="UpdateHint">
+    <DisplayString>{(HintCategory)category}, {(HintType)type}, {item}</DisplayString>
+  </Type>
+
+  <!-- Version number -->
+  <Type Name="Version">
+    <DisplayString>
+      {(m_Version >> 24) &amp; 0xF}.{(m_Version >> 20) &amp; 0xF}{(m_Version >> 16) &amp; 0xF}.{(m_Version >> 12) &amp; 0xF}{(m_Version >> 8) &amp; 0xF}.{(m_Version >> 4) &amp; 0xF}{(m_Version >> 0) &amp; 0xF}
+    </DisplayString>
+  </Type>
 
   <!-- Contents of memory-mapped files -->
   <Type Name="FileDataContainerMemory">
