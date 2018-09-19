@@ -75,15 +75,15 @@ private:
 	{
 		if(len < 0)
 		{
-			return 0;
+			return 1;
 		}
-		if(!ptr)
+		if(!ptr && len > 0)
 		{
-			return 0;
+			return 1;
 		}
 		buf.assign(ptr, ptr + len);
 		WriteBuffer();
-		return len;
+		return 0;
 	}
 	int CallbackCloseImpl()
 	{
