@@ -7,6 +7,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\openmpt123\openmpt123.hpp" />
+    <ClInclude Include="..\..\openmpt123\openmpt123_allegro42.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_config.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_flac.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_mmio.hpp" />
