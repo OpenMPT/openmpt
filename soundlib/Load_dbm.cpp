@@ -620,10 +620,10 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		for(uint32 i = 0; i < 32; i++)
 		{
 			uint32 param = (i * 127u) / 32u;
-			sprintf(m_MidiCfg.szMidiZXXExt[i     ], "F0F080%02X", param);
-			sprintf(m_MidiCfg.szMidiZXXExt[i + 32], "F0F081%02X", param);
-			sprintf(m_MidiCfg.szMidiZXXExt[i + 64], "F0F082%02X", param);
-			sprintf(m_MidiCfg.szMidiZXXExt[i + 96], "F0F083%02X", param);
+			mpt::String::WriteAutoBuf(m_MidiCfg.szMidiZXXExt[i     ]) = mpt::format("F0F080%1")(mpt::fmt::HEX0<2>(param));
+			mpt::String::WriteAutoBuf(m_MidiCfg.szMidiZXXExt[i + 32]) = mpt::format("F0F081%1")(mpt::fmt::HEX0<2>(param));
+			mpt::String::WriteAutoBuf(m_MidiCfg.szMidiZXXExt[i + 64]) = mpt::format("F0F082%1")(mpt::fmt::HEX0<2>(param));
+			mpt::String::WriteAutoBuf(m_MidiCfg.szMidiZXXExt[i + 96]) = mpt::format("F0F083%1")(mpt::fmt::HEX0<2>(param));
 		}
 	}
 #endif // NO_PLUGINS

@@ -78,34 +78,34 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 	switch(macroType)
 	{
 	case sfx_unused:
-		strcpy(parameteredMacro, "");
+		mpt::String::WriteAutoBuf(parameteredMacro) = "";
 		break;
 	case sfx_cutoff:
-		strcpy(parameteredMacro, "F0F000z");
+		mpt::String::WriteAutoBuf(parameteredMacro) = "F0F000z";
 		break;
 	case sfx_reso:
-		strcpy(parameteredMacro, "F0F001z");
+		mpt::String::WriteAutoBuf(parameteredMacro) = "F0F001z";
 		break;
 	case sfx_mode:
-		strcpy(parameteredMacro, "F0F002z");
+		mpt::String::WriteAutoBuf(parameteredMacro) = "F0F002z";
 		break;
 	case sfx_drywet:
-		strcpy(parameteredMacro, "F0F003z");
+		mpt::String::WriteAutoBuf(parameteredMacro) = "F0F003z";
 		break;
 	case sfx_cc:
-		sprintf(parameteredMacro, "Bc%02Xz", (subType & 0x7F));
+		mpt::String::WriteAutoBuf(parameteredMacro) = mpt::format("Bc%1z")(mpt::fmt::HEX0<2>(subType & 0x7F));
 		break;
 	case sfx_plug:
-		sprintf(parameteredMacro, "F0F%03Xz", std::min(subType, 0x17F) + 0x80);
+		mpt::String::WriteAutoBuf(parameteredMacro) = mpt::format("F0F%1z")(mpt::fmt::HEX0<3>(std::min(subType, 0x17F) + 0x80));
 		break;
 	case sfx_channelAT:
-		strcpy(parameteredMacro, "Dcz");
+		mpt::String::WriteAutoBuf(parameteredMacro) = "Dcz";
 		break;
 	case sfx_polyAT:
-		strcpy(parameteredMacro, "Acnz");
+		mpt::String::WriteAutoBuf(parameteredMacro) = "Acnz";
 		break;
 	case sfx_pitch:
-		strcpy(parameteredMacro, "Ec00z");
+		mpt::String::WriteAutoBuf(parameteredMacro) = "Ec00z";
 		break;
 	case sfx_custom:
 	default:
@@ -123,50 +123,50 @@ void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], f
 		switch(macroType)
 		{
 		case zxx_unused:
-			strcpy(fixedMacros[i], "");
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = "";
 			break;
 
 		case zxx_reso4Bit:
 			// Type 1 - Z80 - Z8F controls resonance
-			if (i < 16) sprintf(fixedMacros[i], "F0F001%02X", i * 8);
-			else strcpy(fixedMacros[i], "");
+			if (i < 16) mpt::String::WriteAutoBuf(fixedMacros[i]) = mpt::format("F0F001%1")(mpt::fmt::HEX0<2>(i * 8));
+			else mpt::String::WriteAutoBuf(fixedMacros[i]) = "";
 			break;
 
 		case zxx_reso7Bit:
 			// Type 2 - Z80 - ZFF controls resonance
-			sprintf(fixedMacros[i], "F0F001%02X", i);
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = mpt::format("F0F001%1")(mpt::fmt::HEX0<2>(i));
 			break;
 
 		case zxx_cutoff:
 			// Type 3 - Z80 - ZFF controls cutoff
-			sprintf(fixedMacros[i], "F0F000%02X", i);
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = mpt::format("F0F000%1")(mpt::fmt::HEX0<2>(i));
 			break;
 
 		case zxx_mode:
 			// Type 4 - Z80 - ZFF controls filter mode
-			sprintf(fixedMacros[i], "F0F002%02X", i);
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = mpt::format("F0F002%1")(mpt::fmt::HEX0<2>(i));
 			break;
 
 		case zxx_resomode:
 			// Type 5 - Z80 - Z9F controls resonance + filter mode
-			if (i < 16) sprintf(fixedMacros[i], "F0F001%02X", i * 8);
-			else if (i < 32) sprintf(fixedMacros[i], "F0F002%02X", (i - 16) * 8);
-			else strcpy(fixedMacros[i], "");
+			if (i < 16) mpt::String::WriteAutoBuf(fixedMacros[i]) = mpt::format("F0F001%1")(mpt::fmt::HEX0<2>(i * 8));
+			else if (i < 32) mpt::String::WriteAutoBuf(fixedMacros[i]) = mpt::format("F0F002%1")(mpt::fmt::HEX0<2>((i - 16) * 8));
+			else mpt::String::WriteAutoBuf(fixedMacros[i]) = "";
 			break;
 
 		case zxx_channelAT:
 			// Type 6 - Z80 - ZFF controls Channel Aftertouch
-			sprintf(fixedMacros[i], "Dc%02X", i);
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = mpt::format("Dc%1")(mpt::fmt::HEX0<2>(i));
 			break;
 
 		case zxx_polyAT:
 			// Type 7 - Z80 - ZFF controls Poly Aftertouch
-			sprintf(fixedMacros[i], "Acn%02X", i);
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = mpt::format("Acn%1")(mpt::fmt::HEX0<2>(i));
 			break;
 
 		case zxx_pitch:
 			// Type 7 - Z80 - ZFF controls Pitch Bend
-			sprintf(fixedMacros[i], "Ec00%02X", i);
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = mpt::format("Ec00%1")(mpt::fmt::HEX0<2>(i));
 			break;
 
 		case zxx_custom:
