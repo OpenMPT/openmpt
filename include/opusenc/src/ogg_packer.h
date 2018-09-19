@@ -24,8 +24,8 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#if !defined(_oggpacker_h)
-# define _oggpacker_h (1)
+#ifndef OGGPACKER_H
+# define OGGPACKER_H
 
 
 # if defined(__cplusplus)

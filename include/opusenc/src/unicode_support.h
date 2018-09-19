@@ -1,5 +1,8 @@
-/* Copyright (C)2007-2013 Xiph.Org Foundation
-   File: picture.h
+/* Copyright (c) 2004-2012 LoRd_MuldeR <mulder2@gmx.de>
+   File: unicode_support.h
+
+   This file was originally part of a patch included with LameXP,
+   released under the same license as the original audio tools.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
@@ -24,34 +27,13 @@
    NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#ifndef UNICODE_SUPPORT_H_INCLUDED
+#define UNICODE_SUPPORT_H_INCLUDED
 
-#ifndef PICTURE_H
-#define PICTURE_H
+#include <stdio.h>
 
-#include <opus.h>
-#include "opusenc.h"
+#define WIN_UNICODE 1
 
-typedef enum{
-  PIC_FORMAT_JPEG,
-  PIC_FORMAT_PNG,
-  PIC_FORMAT_GIF
-}picture_format;
+FILE *opeint_fopen(const char *filename_utf8, const char *mode_utf8);
 
-#define BASE64_LENGTH(len) (((len)+2)/3*4)
-
-char *opeint_parse_picture_specification(const char *filename, int picture_type, const char *description,
-                                  int *error, int *seen_file_icons);
-
-char *opeint_parse_picture_specification_from_memory(const char *mem, size_t size, int picture_type, const char *description,
-                                  int *error, int *seen_file_icons);
-
-#define WRITE_U32_BE(buf, val) \
-  do{ \
-    (buf)[0]=(unsigned char)((val)>>24); \
-    (buf)[1]=(unsigned char)((val)>>16); \
-    (buf)[2]=(unsigned char)((val)>>8); \
-    (buf)[3]=(unsigned char)(val); \
-  } \
-  while(0);
-
-#endif /* PICTURE_H */
+#endif

@@ -325,12 +325,9 @@ int oggp_flush_page(oggpacker *oggp) {
       /* Making sure we don't need to do that too often. */
       newsize = 1 + oggp->pages_size*3/2;
       newbuf = realloc(oggp->pages, newsize*sizeof(oggp_page));
-      if (newbuf != NULL) {
-        oggp->pages = newbuf;
-        oggp->pages_size = newsize;
-      } else {
-        assert(0);
-      }
+      assert(newbuf != NULL);
+      oggp->pages = newbuf;
+      oggp->pages_size = newsize;
     }
     p = &oggp->pages[oggp->pages_fill++];
     p->granulepos = oggp->curr_granule;
@@ -379,7 +376,8 @@ int oggp_get_next_page(oggpacker *oggp, unsigned char **page, oggp_int32 *bytes)
   }
   p = &oggp->pages[0];
   header_size = 27 + p->lacing_size;
-  ptr = &oggp->buf[p->buf_pos - header_size];
+  /* Don't use indexing in case header_size > p->buf_pos. */
+  ptr = oggp->buf + p->buf_pos - header_size;
   len = p->buf_size + header_size;
   memcpy(&ptr[27], &oggp->lacing[p->lacing_pos], p->lacing_size);
   memcpy(ptr, "OggS", 4);

@@ -46,7 +46,7 @@
    Smith, Julius O. Digital Audio Resampling Home Page
    Center for Computer Research in Music and Acoustics (CCRMA),
    Stanford University, 2007.
-   Web published at http://www-ccrma.stanford.edu/~jos/resample/.
+   Web published at https://ccrma.stanford.edu/~jos/resample/.
 
    There is one main difference, though. This resampler uses cubic
    interpolation instead of linear interpolation in the above paper. This
@@ -63,11 +63,12 @@
 
 #ifdef OUTSIDE_SPEEX
 #include <stdlib.h>
-static void *speex_alloc (int size) {return calloc(size,1);}
-static void *speex_realloc (void *ptr, int size) {return realloc(ptr, size);}
-static void speex_free (void *ptr) {free(ptr);}
-#define speex_assert(x)
+static void *speex_alloc(int size) {return calloc(size,1);}
+static void *speex_realloc(void *ptr, int size) {return realloc(ptr, size);}
+static void speex_free(void *ptr) {free(ptr);}
+#ifndef EXPORT
 #define EXPORT
+#endif
 #include "speex_resampler.h"
 #include "arch.h"
 #else /* OUTSIDE_SPEEX */
@@ -77,7 +78,6 @@ static void speex_free (void *ptr) {free(ptr);}
 #include "os_support.h"
 #endif /* OUTSIDE_SPEEX */
 
-#include "stack_alloc.h"
 #include <math.h>
 #include <limits.h>
 
@@ -93,14 +93,14 @@ static void speex_free (void *ptr) {free(ptr);}
 #endif
 
 #ifndef UINT32_MAX
-#define UINT32_MAX 4294967296U
+#define UINT32_MAX 4294967295U
 #endif
 
 #if defined(__SSE__) && !defined(FIXED_POINT)
 #include "resample_sse.h"
 #endif
 
-#ifdef _USE_NEON
+#ifdef USE_NEON
 #include "resample_neon.h"
 #endif
 
@@ -196,16 +196,14 @@ struct FuncDef {
    int oversample;
 };
 
-static const struct FuncDef _KAISER12 = {kaiser12_table, 64};
-#define KAISER12 (&_KAISER12)
-/*static struct FuncDef _KAISER12 = {kaiser12_table, 32};
-#define KAISER12 (&_KAISER12)*/
-static const struct FuncDef _KAISER10 = {kaiser10_table, 32};
-#define KAISER10 (&_KAISER10)
-static const struct FuncDef _KAISER8 = {kaiser8_table, 32};
-#define KAISER8 (&_KAISER8)
-static const struct FuncDef _KAISER6 = {kaiser6_table, 32};
-#define KAISER6 (&_KAISER6)
+static const struct FuncDef kaiser12_funcdef = {kaiser12_table, 64};
+#define KAISER12 (&kaiser12_funcdef)
+static const struct FuncDef kaiser10_funcdef = {kaiser10_table, 32};
+#define KAISER10 (&kaiser10_funcdef)
+static const struct FuncDef kaiser8_funcdef = {kaiser8_table, 32};
+#define KAISER8 (&kaiser8_funcdef)
+static const struct FuncDef kaiser6_funcdef = {kaiser6_table, 32};
+#define KAISER6 (&kaiser6_funcdef)
 
 struct QualityMapping {
    int base_length;
@@ -574,6 +572,7 @@ static int resampler_basic_zero(SpeexResamplerState *st, spx_uint32_t channel_in
    const int frac_advance = st->frac_advance;
    const spx_uint32_t den_rate = st->den_rate;
 
+   (void)in;
    while (!(last_sample >= (spx_int32_t)*in_len || out_sample >= (spx_int32_t)*out_len))
    {
       out[out_stride * out_sample++] = 0;
@@ -591,16 +590,15 @@ static int resampler_basic_zero(SpeexResamplerState *st, spx_uint32_t channel_in
    return out_sample;
 }
 
-static int _muldiv(spx_uint32_t *result, spx_uint32_t value, spx_uint32_t mul, spx_uint32_t div)
+static int multiply_frac(spx_uint32_t *result, spx_uint32_t value, spx_uint32_t num, spx_uint32_t den)
 {
-   speex_assert(result);
-   spx_uint32_t major = value / div;
-   spx_uint32_t remainder = value % div;
+   spx_uint32_t major = value / den;
+   spx_uint32_t remain = value % den;
    /* TODO: Could use 64 bits operation to check for overflow. But only guaranteed in C99+ */
-   if (remainder > UINT32_MAX / mul || major > UINT32_MAX / mul
-       || major * mul > UINT32_MAX - remainder * mul / div)
+   if (remain > UINT32_MAX / num || major > UINT32_MAX / num
+       || major * num > UINT32_MAX - remain * num / den)
       return RESAMPLER_ERR_OVERFLOW;
-   *result = remainder * mul / div + major * mul;
+   *result = remain * num / den + major * num;
    return RESAMPLER_ERR_SUCCESS;
 }
 
@@ -621,7 +619,7 @@ static int update_filter(SpeexResamplerState *st)
    {
       /* down-sampling */
       st->cutoff = quality_map[st->quality].downsample_bandwidth * st->den_rate / st->num_rate;
-      if (_muldiv(&st->filt_len,st->filt_len,st->num_rate,st->den_rate) != RESAMPLER_ERR_SUCCESS)
+      if (multiply_frac(&st->filt_len,st->filt_len,st->num_rate,st->den_rate) != RESAMPLER_ERR_SUCCESS)
          goto fail;
       /* Round up to make sure we have a multiple of 8 for SSE */
       st->filt_len = ((st->filt_len-1)&(~0x7))+8;
@@ -640,12 +638,12 @@ static int update_filter(SpeexResamplerState *st)
       st->cutoff = quality_map[st->quality].upsample_bandwidth;
    }
 
-   /* Choose the resampling type that requires the least amount of memory */
 #ifdef RESAMPLE_FULL_SINC_TABLE
    use_direct = 1;
    if (INT_MAX/sizeof(spx_word16_t)/st->den_rate < st->filt_len)
       goto fail;
 #else
+   /* Choose the resampling type that requires the least amount of memory */
    use_direct = st->filt_len*st->den_rate <= st->filt_len*st->oversample+8
                 && INT_MAX/sizeof(spx_word16_t)/st->den_rate >= st->filt_len;
 #endif
@@ -800,11 +798,10 @@ EXPORT SpeexResamplerState *speex_resampler_init(spx_uint32_t nb_channels, spx_u
 
 EXPORT SpeexResamplerState *speex_resampler_init_frac(spx_uint32_t nb_channels, spx_uint32_t ratio_num, spx_uint32_t ratio_den, spx_uint32_t in_rate, spx_uint32_t out_rate, int quality, int *err)
 {
-   spx_uint32_t i;
    SpeexResamplerState *st;
    int filter_err;
 
-   if (quality > 10 || quality < 0)
+   if (nb_channels == 0 || ratio_num == 0 || ratio_den == 0 || quality > 10 || quality < 0)
    {
       if (err)
          *err = RESAMPLER_ERR_INVALID_ARG;
@@ -980,8 +977,7 @@ EXPORT int speex_resampler_process_int(SpeexResamplerState *st, spx_uint32_t cha
    const spx_uint32_t xlen = st->mem_alloc_size - (st->filt_len - 1);
 #ifdef VAR_ARRAYS
    const unsigned int ylen = (olen < FIXED_STACK_ALLOC) ? olen : FIXED_STACK_ALLOC;
-   VARDECL(spx_word16_t *ystack);
-   ALLOC(ystack, ylen, spx_word16_t);
+   spx_word16_t ystack[ylen];
 #else
    const unsigned int ylen = FIXED_STACK_ALLOC;
    spx_word16_t ystack[FIXED_STACK_ALLOC];
@@ -1096,7 +1092,7 @@ EXPORT void speex_resampler_get_rate(SpeexResamplerState *st, spx_uint32_t *in_r
    *out_rate = st->out_rate;
 }
 
-static inline spx_uint32_t _gcd(spx_uint32_t a, spx_uint32_t b)
+static inline spx_uint32_t compute_gcd(spx_uint32_t a, spx_uint32_t b)
 {
    while (b != 0)
    {
@@ -1113,6 +1109,10 @@ EXPORT int speex_resampler_set_rate_frac(SpeexResamplerState *st, spx_uint32_t r
    spx_uint32_t fact;
    spx_uint32_t old_den;
    spx_uint32_t i;
+
+   if (ratio_num == 0 || ratio_den == 0)
+      return RESAMPLER_ERR_INVALID_ARG;
+
    if (st->in_rate == in_rate && st->out_rate == out_rate && st->num_rate == ratio_num && st->den_rate == ratio_den)
       return RESAMPLER_ERR_SUCCESS;
 
@@ -1122,7 +1122,7 @@ EXPORT int speex_resampler_set_rate_frac(SpeexResamplerState *st, spx_uint32_t r
    st->num_rate = ratio_num;
    st->den_rate = ratio_den;
 
-   fact = _gcd (st->num_rate, st->den_rate);
+   fact = compute_gcd(st->num_rate, st->den_rate);
 
    st->num_rate /= fact;
    st->den_rate /= fact;
@@ -1131,7 +1131,7 @@ EXPORT int speex_resampler_set_rate_frac(SpeexResamplerState *st, spx_uint32_t r
    {
       for (i=0;i<st->nb_channels;i++)
       {
-         if (_muldiv(&st->samp_frac_num[i],st->samp_frac_num[i],st->den_rate,old_den) != RESAMPLER_ERR_SUCCESS)
+         if (multiply_frac(&st->samp_frac_num[i],st->samp_frac_num[i],st->den_rate,old_den) != RESAMPLER_ERR_SUCCESS)
             return RESAMPLER_ERR_OVERFLOW;
          /* Safety net */
          if (st->samp_frac_num[i] >= st->den_rate)

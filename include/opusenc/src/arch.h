@@ -38,31 +38,15 @@
 /* A couple test to catch stupid option combinations */
 #ifdef FIXED_POINT
 
-#ifdef FLOATING_POINT
-#error You cannot compile as floating point and fixed point at the same time
-#endif
-#ifdef _USE_SSE
-#error SSE is only for floating-point
-#endif
 #if ((defined (ARM4_ASM)||defined (ARM4_ASM)) && defined(BFIN_ASM)) || (defined (ARM4_ASM)&&defined(ARM5E_ASM))
 #error Make up your mind. What CPU do you have?
-#endif
-#ifdef VORBIS_PSYCHO
-#error Vorbis-psy model currently not implemented in fixed-point
 #endif
 
 #else
 
-#ifndef FLOATING_POINT
-#error You now need to define either FIXED_POINT or FLOATING_POINT
-#endif
 #if defined (ARM4_ASM) || defined(ARM5E_ASM) || defined(BFIN_ASM)
 #error I suppose you can have a [ARM4/ARM5E/Blackfin] that has float instructions?
 #endif
-#ifdef FIXED_POINT_DEBUG
-#error "Don't you think enabling fixed-point is a good thing to do if you want to debug that?"
-#endif
-
 
 #endif
 
@@ -205,8 +189,8 @@ typedef float spx_word32_t;
 #define DIV32(a,b)     (((spx_word32_t)(a))/(spx_word32_t)(b))
 #define PDIV32(a,b)     (((spx_word32_t)(a))/(spx_word32_t)(b))
 
-#define WORD2INT(x) ((x) < -32767.5f ? -32768 : ((x) > 32766.5f ? 32767 : floor(.5+(x))))
-
+#define WORD2INT(x) ((x) < -32767.5f ? -32768 : \
+                    ((x) > 32766.5f ? 32767 : (spx_int16_t)floor(.5 + (x))))
 #endif
 
 
