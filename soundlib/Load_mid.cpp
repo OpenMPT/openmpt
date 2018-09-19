@@ -1233,11 +1233,11 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			channels.push_back(i);
 			if(modChnStatus[i].midiCh != ModChannelState::NOMIDI)
-				sprintf(ChnSettings[i].szName, "MIDI Ch %u", 1u + modChnStatus[i].midiCh);
+				mpt::String::WriteAutoBuf(ChnSettings[i].szName) = mpt::format("MIDI Ch %1")(1 + modChnStatus[i].midiCh);
 			else if(i == tempoChannel)
-				strcpy(ChnSettings[i].szName, "Tempo");
+				mpt::String::WriteAutoBuf(ChnSettings[i].szName) = "Tempo";
 			else if(i == globalVolChannel)
-				strcpy(ChnSettings[i].szName, "Global Volume");
+				mpt::String::WriteAutoBuf(ChnSettings[i].szName) = "Global Volume";
 		}
 	}
 	if(channels.empty())
