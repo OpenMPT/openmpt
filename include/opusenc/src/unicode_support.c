@@ -1,5 +1,8 @@
-/* Copyright (C)2007-2013 Xiph.Org Foundation
-   File: picture.h
+/* Copyright (c) 2004-2012 LoRd_MuldeR <mulder2@gmx.de>
+   File: unicode_support.c
+
+   This file was originally part of a patch included with LameXP,
+   released under the same license as the original audio tools.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
@@ -24,34 +27,52 @@
    NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "unicode_support.h"
 
-#ifndef PICTURE_H
-#define PICTURE_H
+#if defined WIN32 || defined _WIN32 || defined WIN64 || defined _WIN64
 
-#include <opus.h>
-#include "opusenc.h"
 
-typedef enum{
-  PIC_FORMAT_JPEG,
-  PIC_FORMAT_PNG,
-  PIC_FORMAT_GIF
-}picture_format;
+#include <windows.h>
+#include <io.h>
 
-#define BASE64_LENGTH(len) (((len)+2)/3*4)
+static wchar_t *utf8_to_utf16(const char *input)
+{
+	wchar_t *Buffer;
+	int BuffSize = 0, Result = 0;
 
-char *opeint_parse_picture_specification(const char *filename, int picture_type, const char *description,
-                                  int *error, int *seen_file_icons);
+	BuffSize = MultiByteToWideChar(CP_UTF8, 0, input, -1, NULL, 0);
+	Buffer = (wchar_t*) malloc(sizeof(wchar_t) * BuffSize);
+	if(Buffer)
+	{
+		Result = MultiByteToWideChar(CP_UTF8, 0, input, -1, Buffer, BuffSize);
+	}
 
-char *opeint_parse_picture_specification_from_memory(const char *mem, size_t size, int picture_type, const char *description,
-                                  int *error, int *seen_file_icons);
+	return ((Result > 0) && (Result <= BuffSize)) ? Buffer : NULL;
+}
 
-#define WRITE_U32_BE(buf, val) \
-  do{ \
-    (buf)[0]=(unsigned char)((val)>>24); \
-    (buf)[1]=(unsigned char)((val)>>16); \
-    (buf)[2]=(unsigned char)((val)>>8); \
-    (buf)[3]=(unsigned char)(val); \
-  } \
-  while(0);
+FILE *opeint_fopen(const char *filename_utf8, const char *mode_utf8)
+{
+	FILE *ret = NULL;
+	wchar_t *filename_utf16 = utf8_to_utf16(filename_utf8);
+	wchar_t *mode_utf16 = utf8_to_utf16(mode_utf8);
+	
+	if(filename_utf16 && mode_utf16)
+	{
+		ret = _wfopen(filename_utf16, mode_utf16);
+	}
 
-#endif /* PICTURE_H */
+	if(filename_utf16) free(filename_utf16);
+	if(mode_utf16) free(mode_utf16);
+
+	return ret;
+}
+
+#else
+
+#include <stdio.h>
+
+FILE *opeint_fopen(const char *filename_utf8, const char *mode_utf8) {
+  return fopen(filename_utf8, mode_utf8);
+}
+
+#endif

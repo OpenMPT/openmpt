@@ -41,12 +41,14 @@
   - Sampling rate (32 bits)
   - Gain in dB (16 bits, S7.8)
   - Mapping (8 bits, 0=single stream (mono/stereo) 1=Vorbis mapping,
-             2..254: reserved, 255: multistream with no mapping)
+             2=ambisonics, 3=projection ambisonics, 4..239: reserved,
+             240..254: experiments, 255: multistream with no mapping)
 
   - if (mapping != 0)
      - N = total number of streams (8 bits)
      - M = number of paired streams (8 bits)
-     - C times channel origin
+     - if (mapping != a projection family)
+       - C times channel origin
           - if (C<2*M)
              - stream = byte/2
              - if (byte&0x1 == 0)
@@ -55,6 +57,8 @@
                  - right
           - else
              - stream = byte-M
+    - else
+       - D demixing matrix (C*(N+M)*16 bits)
 */
 
 typedef struct {
@@ -62,12 +66,6 @@ typedef struct {
    int maxlen;
    int pos;
 } Packet;
-
-typedef struct {
-   const unsigned char *data;
-   int maxlen;
-   int pos;
-} ROPacket;
 
 static int write_uint32(Packet *p, opus_uint32 val)
 {
@@ -101,7 +99,49 @@ static int write_chars(Packet *p, const unsigned char *str, int nb_chars)
    return 1;
 }
 
-int opus_header_to_packet(const OpusHeader *h, unsigned char *packet, int len)
+static int write_matrix_chars(Packet *p, const OpusGenericEncoder *st)
+{
+#ifdef OPUS_HAVE_OPUS_PROJECTION_H
+  opus_int32 size;
+  int ret;
+  ret=opeint_encoder_ctl(st, OPUS_PROJECTION_GET_DEMIXING_MATRIX_SIZE(&size));
+  if (ret != OPUS_OK) return 0;
+  if (size>p->maxlen-p->pos) return 0;
+  ret=opeint_encoder_ctl(st, OPUS_PROJECTION_GET_DEMIXING_MATRIX(&p->data[p->pos], size));
+  if (ret != OPUS_OK) return 0;
+  p->pos += size;
+  return 1;
+#else
+  (void)p;
+  (void)st;
+  return 0;
+#endif
+}
+
+int opeint_opus_header_get_size(const OpusHeader *h)
+{
+  int len=0;
+  if (opeint_use_projection(h->channel_mapping))
+  {
+    /* 19 bytes from fixed header,
+     * 2 bytes for nb_streams & nb_coupled,
+     * 2 bytes per cell of demixing matrix, where:
+     *    rows=channels, cols=nb_streams+nb_coupled
+     */
+    len=21+(h->channels*(h->nb_streams+h->nb_coupled)*2);
+  }
+  else
+  {
+    /* 19 bytes from fixed header,
+     * 2 bytes for nb_streams & nb_coupled,
+     * 1 byte per channel
+     */
+    len=21+h->channels;
+  }
+  return len;
+}
+
+int opeint_opus_header_to_packet(const OpusHeader *h, unsigned char *packet, int len, const OpusGenericEncoder *st)
 {
    int i;
    Packet p;
@@ -128,8 +168,24 @@ int opus_header_to_packet(const OpusHeader *h, unsigned char *packet, int len)
    if (!write_uint32(&p, h->input_sample_rate))
       return 0;
 
-   if (!write_uint16(&p, h->gain))
+   if (opeint_use_projection(h->channel_mapping))
+   {
+#ifdef OPUS_HAVE_OPUS_PROJECTION_H
+      opus_int32 matrix_gain;
+      int ret;
+      ret=opeint_encoder_ctl(st, OPUS_PROJECTION_GET_DEMIXING_MATRIX_GAIN(&matrix_gain));
+      if (ret != OPUS_OK) return 0;
+      if (!write_uint16(&p, h->gain + matrix_gain))
+         return 0;
+#else
       return 0;
+#endif
+   }
+   else
+   {
+      if (!write_uint16(&p, h->gain))
+         return 0;
+   }
 
    ch = h->channel_mapping;
    if (!write_chars(&p, &ch, 1))
@@ -146,10 +202,18 @@ int opus_header_to_packet(const OpusHeader *h, unsigned char *packet, int len)
          return 0;
 
       /* Multi-stream support */
-      for (i=0;i<h->channels;i++)
+      if (opeint_use_projection(h->channel_mapping))
       {
-         if (!write_chars(&p, &h->stream_map[i], 1))
-            return 0;
+        if (!write_matrix_chars(&p, st))
+           return 0;
+      }
+      else
+      {
+        for (i=0;i<h->channels;i++)
+        {
+          if (!write_chars(&p, &h->stream_map[i], 1))
+             return 0;
+        }
       }
    }
 
@@ -184,23 +248,26 @@ The comment header is decoded as follows:
                                      buf[base]=(val)&0xff; \
                                  }while(0)
 
-void comment_init(char **comments, int* length, const char *vendor_string)
+void opeint_comment_init(char **comments, int* length, const char *vendor_string)
 {
   /*The 'vendor' field should be the actual encoding library used.*/
   int vendor_length=strlen(vendor_string);
   int user_comment_list_length=0;
   int len=8+4+vendor_length+4;
   char *p=(char*)malloc(len);
-  if (p == NULL) return;
-  memcpy(p, "OpusTags", 8);
-  writeint(p, 8, vendor_length);
-  memcpy(p+12, vendor_string, vendor_length);
-  writeint(p, 12+vendor_length, user_comment_list_length);
+  if (p == NULL) {
+    len=0;
+  } else {
+    memcpy(p, "OpusTags", 8);
+    writeint(p, 8, vendor_length);
+    memcpy(p+12, vendor_string, vendor_length);
+    writeint(p, 12+vendor_length, user_comment_list_length);
+  }
   *length=len;
   *comments=p;
 }
 
-int comment_add(char **comments, int* length, const char *tag, const char *val)
+int opeint_comment_add(char **comments, int* length, const char *tag, const char *val)
 {
   char* p=*comments;
   int vendor_length=readint(p, 8);
@@ -224,7 +291,7 @@ int comment_add(char **comments, int* length, const char *tag, const char *val)
   return 0;
 }
 
-void comment_pad(char **comments, int* length, int amount)
+void opeint_comment_pad(char **comments, int* length, int amount)
 {
   if(amount>0){
     int i;
@@ -241,24 +308,6 @@ void comment_pad(char **comments, int* length, int amount)
   }
 }
 
-int comment_replace_vendor_string(char **comments, int* length, const char *vendor_string)
-{
-  char* p=*comments;
-  int vendor_length;
-  int newlen;
-  int newvendor_length;
-  vendor_length=readint(p, 8);
-  newvendor_length=strlen(vendor_string);
-  newlen=*length+newvendor_length-vendor_length;
-  p=realloc(p, newlen);
-  if (p == NULL) return 1;
-  writeint(p, 8, newvendor_length);
-  memmove(p+12+newvendor_length, p+12+vendor_length, newlen-12-newvendor_length);
-  memcpy(p+12, vendor_string, newvendor_length);
-  *comments=p;
-  *length=newlen;
-  return 0;
-}
 #undef readint
 #undef writeint
 

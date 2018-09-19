@@ -24,8 +24,8 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#if !defined(_opusenc_h)
-# define _opusenc_h (1)
+#ifndef OPUSENC_H
+# define OPUSENC_H
 
 /**\mainpage
    \section Introduction
@@ -54,6 +54,7 @@
 extern "C" {
 # endif
 
+#include <stddef.h>
 #include <opus.h>
 
 #ifndef OPE_EXPORT
@@ -95,9 +96,11 @@ extern "C" {
 /* Specific to libopusenc. */
 #define OPE_CANNOT_OPEN -30
 #define OPE_TOO_LATE -31
-#define OPE_UNRECOVERABLE -32
-#define OPE_INVALID_PICTURE -33
-#define OPE_INVALID_ICON -34
+#define OPE_INVALID_PICTURE -32
+#define OPE_INVALID_ICON -33
+#define OPE_WRITE_FAIL -34
+#define OPE_CLOSE_FAIL -35
+
 /*@}*/
 /*@}*/
 
@@ -115,6 +118,8 @@ extern "C" {
 /*#define OPE_GET_PACKET_CALLBACK_REQUEST     14009*/
 #define OPE_SET_HEADER_GAIN_REQUEST         14010
 #define OPE_GET_HEADER_GAIN_REQUEST         14011
+#define OPE_GET_NB_STREAMS_REQUEST          14013
+#define OPE_GET_NB_COUPLED_STREAMS_REQUEST  14015
 
 /**\defgroup encoder_ctl Encoding Options*/
 /*@{*/
@@ -135,8 +140,10 @@ extern "C" {
 /* FIXME: Add type-checking macros to these. */
 #define OPE_SET_PACKET_CALLBACK(x,u) OPE_SET_PACKET_CALLBACK_REQUEST, (x), (u)
 /*#define OPE_GET_PACKET_CALLBACK(x,u) OPE_GET_PACKET_CALLBACK_REQUEST, (x), (u)*/
-#define OPE_SET_HEADER_GAIN(x,u) OPE_SET_HEADER_GAIN_REQUEST, __opus_check_int(x)
-#define OPE_GET_HEADER_GAIN(x,u) OPE_GET_HEADER_GAIN_REQUEST, __opus_check_int_ptr(x)
+#define OPE_SET_HEADER_GAIN(x) OPE_SET_HEADER_GAIN_REQUEST, __opus_check_int(x)
+#define OPE_GET_HEADER_GAIN(x) OPE_GET_HEADER_GAIN_REQUEST, __opus_check_int_ptr(x)
+#define OPE_GET_NB_STREAMS(x) OPE_GET_NB_STREAMS_REQUEST, __opus_check_int_ptr(x)
+#define OPE_GET_NB_COUPLED_STREAMS(x) OPE_GET_NB_COUPLED_STREAMS_REQUEST, __opus_check_int_ptr(x)
 /*@}*/
 /*@}*/
 
@@ -148,14 +155,31 @@ extern "C" {
    These are the callbacks that can be implemented for an encoder.*/
 /*@{*/
 
-/** Called for writing a page. */
+/** Called for writing a page.
+ \param user_data user-defined data passed to the callback
+ \param ptr       buffer to be written
+ \param len       number of bytes to be written
+ \return          error code
+ \retval 0        success
+ \retval 1        failure
+ */
 typedef int (*ope_write_func)(void *user_data, const unsigned char *ptr, opus_int32 len);
 
-/** Called for closing a stream. */
+/** Called for closing a stream.
+ \param user_data user-defined data passed to the callback
+ \return          error code
+ \retval 0        success
+ \retval 1        failure
+ */
 typedef int (*ope_close_func)(void *user_data);
 
-/** Called on every packet encoded (including header). */
-typedef int (*ope_packet_func)(void *user_data, const unsigned char *packet_ptr, opus_int32 packet_len, opus_uint32 flags);
+/** Called on every packet encoded (including header).
+ \param user_data   user-defined data passed to the callback
+ \param packet_ptr  packet data
+ \param packet_len  number of bytes in the packet
+ \param flags       optional flags (none defined for now so zero)
+ */
+typedef void (*ope_packet_func)(void *user_data, const unsigned char *packet_ptr, opus_int32 packet_len, opus_uint32 flags);
 
 /** Callback functions for accessing the stream. */
 typedef struct {
@@ -181,7 +205,7 @@ typedef struct OggOpusEnc OggOpusEnc;
    These functions make it possible to add comments and pictures to Ogg Opus files.*/
 /*@{*/
 
-/** Create a new comments object. 
+/** Create a new comments object.
     \return Newly-created comments object. */
 OPE_EXPORT OggOpusComments *ope_comments_create(void);
 
@@ -190,11 +214,11 @@ OPE_EXPORT OggOpusComments *ope_comments_create(void);
     \return Deep copy of input. */
 OPE_EXPORT OggOpusComments *ope_comments_copy(OggOpusComments *comments);
 
-/** Destroys a comments object. 
+/** Destroys a comments object.
     \param comments Comments object to destroy*/
 OPE_EXPORT void ope_comments_destroy(OggOpusComments *comments);
 
-/** Add a comment. 
+/** Add a comment.
     \param[in,out] comments Where to add the comments
     \param         tag      Tag for the comment (must not contain = char)
     \param         val      Value for the tag
@@ -202,14 +226,14 @@ OPE_EXPORT void ope_comments_destroy(OggOpusComments *comments);
  */
 OPE_EXPORT int ope_comments_add(OggOpusComments *comments, const char *tag, const char *val);
 
-/** Add a comment as a single tag=value string. 
+/** Add a comment as a single tag=value string.
     \param[in,out] comments    Where to add the comments
     \param         tag_and_val string of the form tag=value (must contain = char)
     \return Error code
  */
 OPE_EXPORT int ope_comments_add_string(OggOpusComments *comments, const char *tag_and_val);
 
-/** Add a picture. 
+/** Add a picture from a file.
     \param[in,out] comments     Where to add the comments
     \param         filename     File name for the picture
     \param         picture_type Type of picture (-1 for default)
@@ -217,6 +241,16 @@ OPE_EXPORT int ope_comments_add_string(OggOpusComments *comments, const char *ta
     \return Error code
  */
 OPE_EXPORT int ope_comments_add_picture(OggOpusComments *comments, const char *filename, int picture_type, const char *description);
+
+/** Add a picture already in memory.
+    \param[in,out] comments     Where to add the comments
+    \param         ptr          Pointer to picture in memory
+    \param         size         Size of picture pointed to by ptr
+    \param         picture_type Type of picture (-1 for default)
+    \param         description  Description (NULL means no comment)
+    \return Error code
+ */
+OPE_EXPORT int ope_comments_add_picture_from_memory(OggOpusComments *comments, const char *ptr, size_t size, int picture_type, const char *description);
 
 /*@}*/
 /*@}*/
@@ -263,6 +297,18 @@ OPE_EXPORT OggOpusEnc *ope_encoder_create_callbacks(const OpusEncCallbacks *call
     \return Newly-created encoder.
     */
 OPE_EXPORT OggOpusEnc *ope_encoder_create_pull(OggOpusComments *comments, opus_int32 rate, int channels, int family, int *error);
+
+/** Deferred initialization of the encoder to force an explicit channel mapping. This can be used to override the default channel coupling,
+    but using it for regular surround will almost certainly lead to worse quality.
+    \param[in,out] enc         Encoder
+    \param family              Mapping family (0 for mono/stereo, 1 for surround)
+    \param streams             Total number of streams
+    \param coupled_streams     Number of coupled streams
+    \param mapping             Channel mapping
+    \return Error code
+ */
+OPE_EXPORT int ope_encoder_deferred_init_with_mapping(OggOpusEnc *enc, int family, int streams,
+    int coupled_streams, const unsigned char *mapping);
 
 /** Add/encode any number of float samples to the stream.
     \param[in,out] enc         Encoder

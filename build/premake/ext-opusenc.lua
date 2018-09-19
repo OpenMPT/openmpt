@@ -20,6 +20,7 @@
 	filter {}
   includedirs {
    "../../include/opusenc/include",
+   "../../include/opusenc/win32",
   }
 	filter {}
 	filter { "action:vs*" }
@@ -31,10 +32,11 @@
   files {
    "../../include/opusenc/src/*.c",
    "../../include/opusenc/src/*.h",
+   "../../include/opusenc/win32/*.c",
+   "../../include/opusenc/win32/*.h",
   }
-	defines { "OPE_BUILD", "FLOATING_POINT" }
-	defines { "PACKAGE_NAME=\"libopusenc\"", "PACKAGE_VERSION=\"0.1\"" }
-	defines { "OUTSIDE_SPEEX", "SPX_RESAMPLE_EXPORT=", "RANDOM_PREFIX=libopusenc" }
+	defines { "HAVE_CONFIG_H" }
+	defines { "OUTSIDE_SPEEX", "RANDOM_PREFIX=libopusenc" }
   links { "ogg", "opus" }
   filter { "action:vs*" }
     buildoptions {

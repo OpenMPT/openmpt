@@ -7,6 +7,9 @@
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="win32">
+      <UniqueIdentifier>{98D2A310-04E7-CBC1-CD68-6F21393CC8F2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\opusenc\include\opusenc.h">
@@ -30,8 +33,14 @@
     <ClInclude Include="..\..\..\include\opusenc\src\speex_resampler.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\opusenc\src\stack_alloc.h">
+    <ClInclude Include="..\..\..\include\opusenc\src\unicode_support.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opusenc\win32\config.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opusenc\win32\version.h">
+      <Filter>win32</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -48,6 +57,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opusenc\src\resample.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\opusenc\src\unicode_support.c">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
