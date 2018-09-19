@@ -297,7 +297,9 @@
 #define MPT_COMPILER_QUIRK_NO_WCHAR
 #endif
 
-#if MPT_COMPILER_MSVC
+#if MPT_MSVC_BEFORE(2017,8)
+// fixed in VS2017 15.8
+// see <https://blogs.msdn.microsoft.com/vcblog/2018/09/18/stl-features-and-fixes-in-vs-2017-15-8/>
 #define MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 #endif
 
