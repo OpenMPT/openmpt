@@ -17,9 +17,9 @@
 #include <istream>
 #include <ostream>
 #include <sstream>
-#if MPT_COMPILER_MSVC
+#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 #include <typeinfo>
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -30,7 +30,7 @@ namespace mpt {
 namespace IO {
 
 
-#if MPT_COMPILER_MSVC
+#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 
 // MSVC std::stringbuf (and thereby std::ostringstream, std::istringstream and
 // std::stringstream) fail seekoff() when the stringbuf is currently empty.
@@ -118,7 +118,7 @@ static bool StreamIsStringStreamAndValidAndEmpty(std::iostream & f)
 	return dynamic_cast<std::stringbuf*>(f.rdbuf())->str().empty(); // slow
 }
 
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 
 //STATIC_ASSERT(sizeof(std::streamoff) == 8); // Assert 64bit file support.
 bool IsValid(std::ostream & f) { return !f.fail(); }
@@ -134,7 +134,7 @@ IO::Offset TellWrite(std::ostream & f)
 }
 bool SeekBegin(std::ostream & f)
 {
-	#if MPT_COMPILER_MSVC
+	#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 		if(StreamIsStringStreamAndValidAndEmpty(f))
 		{ // VS std::stringbuf fail seek when the internal buffer is empty. Work-around it in case the stream is not already in failed state.
 			f.seekp(0); f.clear(f.rdstate() & ~std::ios::failbit); return true;
@@ -144,7 +144,7 @@ bool SeekBegin(std::ostream & f)
 }
 bool SeekBegin(std::istream & f)
 {
-	#if MPT_COMPILER_MSVC
+	#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 		if(StreamIsStringStreamAndValidAndEmpty(f))
 		{
 			f.seekg(0); f.clear(f.rdstate() & ~std::ios::failbit); return true;
@@ -154,7 +154,7 @@ bool SeekBegin(std::istream & f)
 }
 bool SeekBegin(std::iostream & f)
 {
-	#if MPT_COMPILER_MSVC
+	#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 		if(StreamIsStringStreamAndValidAndEmpty(f))
 		{
 			f.seekg(0); f.clear(f.rdstate() & ~std::ios::failbit); f.seekp(0); f.clear(f.rdstate() & ~std::ios::failbit); return true;
@@ -164,7 +164,7 @@ bool SeekBegin(std::iostream & f)
 }
 bool SeekEnd(std::ostream & f)
 {
-	#if MPT_COMPILER_MSVC
+	#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 		if(StreamIsStringStreamAndValidAndEmpty(f))
 		{
 			f.seekp(0); f.clear(f.rdstate() & ~std::ios::failbit); return true;
@@ -174,7 +174,7 @@ bool SeekEnd(std::ostream & f)
 }
 bool SeekEnd(std::istream & f)
 {
-	#if MPT_COMPILER_MSVC
+	#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 		if(StreamIsStringStreamAndValidAndEmpty(f))
 		{
 			f.seekg(0); f.clear(f.rdstate() & ~std::ios::failbit); return true;
@@ -184,7 +184,7 @@ bool SeekEnd(std::istream & f)
 }
 bool SeekEnd(std::iostream & f)
 {
-	#if MPT_COMPILER_MSVC
+	#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 		if(StreamIsStringStreamAndValidAndEmpty(f))
 		{
 			f.seekg(0); f.clear(f.rdstate() & ~std::ios::failbit);  f.seekp(0); f.clear(f.rdstate() & ~std::ios::failbit); return true;
@@ -195,7 +195,7 @@ bool SeekEnd(std::iostream & f)
 bool SeekAbsolute(std::ostream & f, IO::Offset pos)
 {
 	if(!OffsetFits<std::streamoff>(pos)) { return false; }
-	#if MPT_COMPILER_MSVC
+	#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 		if(StreamIsStringStreamAndValidAndEmpty(f))
 		{
 			if(pos == 0)
@@ -209,7 +209,7 @@ bool SeekAbsolute(std::ostream & f, IO::Offset pos)
 bool SeekAbsolute(std::istream & f, IO::Offset pos)
 {
 	if(!OffsetFits<std::streamoff>(pos)) { return false; }
-	#if MPT_COMPILER_MSVC
+	#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 		if(StreamIsStringStreamAndValidAndEmpty(f))
 		{
 			if(pos == 0)
@@ -223,7 +223,7 @@ bool SeekAbsolute(std::istream & f, IO::Offset pos)
 bool SeekAbsolute(std::iostream & f, IO::Offset pos)
 {
 	if(!OffsetFits<std::streamoff>(pos)) { return false; }
-	#if MPT_COMPILER_MSVC
+	#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 		if(StreamIsStringStreamAndValidAndEmpty(f))
 		{
 			if(pos == 0)
@@ -237,7 +237,7 @@ bool SeekAbsolute(std::iostream & f, IO::Offset pos)
 bool SeekRelative(std::ostream & f, IO::Offset off)
 {
 	if(!OffsetFits<std::streamoff>(off)) { return false; }
-	#if MPT_COMPILER_MSVC
+	#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 		if(StreamIsStringStreamAndValidAndEmpty(f))
 		{
 			if(off == 0)
@@ -251,7 +251,7 @@ bool SeekRelative(std::ostream & f, IO::Offset off)
 bool SeekRelative(std::istream & f, IO::Offset off)
 {
 	if(!OffsetFits<std::streamoff>(off)) { return false; }
-	#if MPT_COMPILER_MSVC
+	#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 		if(StreamIsStringStreamAndValidAndEmpty(f))
 		{
 			if(off == 0)
@@ -265,7 +265,7 @@ bool SeekRelative(std::istream & f, IO::Offset off)
 bool SeekRelative(std::iostream & f, IO::Offset off)
 {
 	if(!OffsetFits<std::streamoff>(off)) { return false; }
-	#if MPT_COMPILER_MSVC
+	#ifdef MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 		if(StreamIsStringStreamAndValidAndEmpty(f))
 		{
 			if(off == 0)
