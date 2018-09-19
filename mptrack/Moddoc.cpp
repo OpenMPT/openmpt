@@ -975,7 +975,7 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 		// do not want to duplicate mixmode-dependant logic here, CSoundFile::CreateStereoMix may already
 		// try to mix our newly set up channel at volume 0 if we don't remove it from the list.
 		auto mixBegin = std::begin(m_SndFile.m_PlayState.ChnMix);
-		auto mixEnd = std::remove_if(mixBegin, mixBegin + m_SndFile.m_nMixChannels, [channel](CHANNELINDEX c) { return c == channel; });
+		auto mixEnd = std::remove(mixBegin, mixBegin + m_SndFile.m_nMixChannels, channel);
 		m_SndFile.m_nMixChannels = static_cast<CHANNELINDEX>(std::distance(mixBegin, mixEnd));
 	} else
 	{
@@ -2589,7 +2589,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 
 		mpt::PathString newPath = drive + dir;
 
-		//Catch case where we don't have a filename yet.
+		// Catch case where we don't have a filename yet.
 		if(fname.empty())
 		{
 			newPath += mpt::PathString::FromCString(GetTitle()).SanitizeComponent();
@@ -2600,8 +2600,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 
 		newPath += MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(CSoundFile::GetModSpecifications(nNewType).fileExtension);
 
-		//Forcing savedialog to appear after extension change - otherwise
-		//unnotified file overwriting may occur.
+		// Forcing save dialog to appear after extension change - otherwise unnotified file overwriting may occur.
 		m_ShowSavedialog = true;
 
 		SetPathNameMpt(newPath, FALSE);
@@ -2848,12 +2847,6 @@ void CModDoc::FixNullStrings()
 
 	// Macros
 	m_SndFile.m_MidiCfg.Sanitize();
-
-	// Pattern names
-	// std::string, doesn't need to be fixed.
-
-	// Sequence names.
-	// std::string, doesn't need to be fixed.
 }
 
 
