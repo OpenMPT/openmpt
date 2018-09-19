@@ -1,7 +1,5 @@
-libopus library version 1.3-rc.
+libopus library version 1.3-rc2.
 The following changes have been made:
-- The following commits have been applied:
-  - https://github.com/xiph/opus/commit/38fca4a203a6759f2c90b86c84c4db087982ca81
 - Obviously, unnecessary folders and files have been removed.
 - win32/version.h got added.
 - config.h has been fixed to support Clang/LLVM for Windows.

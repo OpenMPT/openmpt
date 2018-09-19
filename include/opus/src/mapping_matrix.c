@@ -35,8 +35,6 @@
 #include "opus_defines.h"
 #include "mapping_matrix.h"
 
-#ifdef ENABLE_EXPERIMENTAL_AMBISONICS
-
 #define MATRIX_INDEX(nb_rows, row, col) (nb_rows * col + row)
 
 opus_int32 mapping_matrix_get_size(int rows, int cols)
@@ -58,7 +56,8 @@ opus_int32 mapping_matrix_get_size(int rows, int cols)
 
 opus_int16 *mapping_matrix_get_data(const MappingMatrix *matrix)
 {
-  return (opus_int16*)((char*)matrix + align(sizeof(MappingMatrix)));
+  /* void* cast avoids clang -Wcast-align warning */
+  return (opus_int16*)(void*)((char*)matrix + align(sizeof(MappingMatrix)));
 }
 
 void mapping_matrix_init(MappingMatrix * const matrix,
@@ -377,4 +376,3 @@ const opus_int16 mapping_matrix_toa_demixing_data[324] = {
          0,      0,      0,  32767
 };
 
-#endif /* ENABLE_EXPERIMENTAL_AMBISONICS */
