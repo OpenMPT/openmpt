@@ -871,16 +871,16 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		for(uint32 i = 0; i < 16; i++)
 		{
 			if(fileHeader.sfxMacros[i])
-				sprintf(m_MidiCfg.szMidiSFXExt[i], "F0F0%02Xz", fileHeader.sfxMacros[i] - 1);
+				mpt::String::WriteAutoBuf(m_MidiCfg.szMidiSFXExt[i]) = mpt::format("F0F0%1z")(mpt::fmt::HEX0<2>(fileHeader.sfxMacros[i] - 1));
 			else
-				strcpy(m_MidiCfg.szMidiSFXExt[i], "");
+				mpt::String::WriteAutoBuf(m_MidiCfg.szMidiSFXExt[i]) = "";
 		}
 		for(uint32 i = 0; i < 128; i++)
 		{
 			if(fileHeader.fixedMacros[i][1])
-				sprintf(m_MidiCfg.szMidiZXXExt[i], "F0F0%02X%02X", fileHeader.fixedMacros[i][1] - 1, fileHeader.fixedMacros[i][0].get());
+				mpt::String::WriteAutoBuf(m_MidiCfg.szMidiZXXExt[i]) = mpt::format("F0F0%1%2")(mpt::fmt::HEX0<2>(fileHeader.fixedMacros[i][1] - 1), mpt::fmt::HEX0<2>(fileHeader.fixedMacros[i][0].get()));
 			else
-				strcpy(m_MidiCfg.szMidiZXXExt[i], "");
+				mpt::String::WriteAutoBuf(m_MidiCfg.szMidiZXXExt[i]) = "";
 		}
 	}
 
