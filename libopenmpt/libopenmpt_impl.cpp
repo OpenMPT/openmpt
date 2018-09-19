@@ -36,6 +36,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+#if !defined(MPT_BUILD_SILENCE_LIBOPENMPT_CONFIGURATION_WARNINGS)
+
 #if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
 #if defined(_WIN32_WINNT)
 #if (_WIN32_WINNT < 0x0602)
@@ -87,6 +89,8 @@ static int Warning_libopenmpt_built_in_non_thread_safe_mode_because_mutexes_are_
 static int Warning_Building_libopenmpt_with_MinGW_w64_without_std_thread_support_is_not_recommended_ans_is_deprecated_Please_use_MinGW_w64_with_posix_threading_model_as_opposed_to_win32_threading_model_or_build_with_mingw_std_threads;
 #endif
 #endif // MINGW
+
+#endif // !MPT_BUILD_SILENCE_LIBOPENMPT_CONFIGURATION_WARNINGS
 
 #if defined(MPT_ASSERT_HANDLER_NEEDED) && !defined(ENABLE_TESTS)
 
