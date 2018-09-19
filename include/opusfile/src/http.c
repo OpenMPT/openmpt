@@ -1517,8 +1517,8 @@ static long op_bio_retry_ctrl(BIO *_b,int _cmd,long _num,void *_ptr){
     case BIO_CTRL_RESET:
     case BIO_C_RESET_READ_REQUEST:{
       BIO_clear_retry_flags(_b);
-      /*Fall through.*/
     }
+    /*Fall through.*/
     case BIO_CTRL_EOF:
     case BIO_CTRL_SET:
     case BIO_CTRL_SET_CLOSE:
