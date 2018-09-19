@@ -1,7 +1,3 @@
-
-README
-======
-
 OpenMPT and libopenmpt
 ======================
 
