@@ -8,7 +8,7 @@ from subprocess import Popen
 from sys import executable
 import os, shutil, hashlib
 
-path7z = "build\\tools\\7zip\\7z.exe"
+path7z = "C:\\Program Files\\7-Zip\\7z.exe"
 pathISCC = "C:\\Program Files (x86)\\Inno Setup\\ISCC.exe"
 
 def get_version_number(filename):
