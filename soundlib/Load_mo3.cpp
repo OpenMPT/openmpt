@@ -801,16 +801,34 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo.Set(fileHeader.defaultTempo ? fileHeader.defaultTempo : 125, 0);
 
 	m_ContainerType = MOD_CONTAINERTYPE_MO3;
+	mpt::ustring formatType;
+	mpt::ustring formatName;
 	if(fileHeader.flags & MO3FileHeader::isIT)
+	{
 		SetType(MOD_TYPE_IT);
-	else if(fileHeader.flags & MO3FileHeader::isS3M)
+		formatType = MPT_USTRING("it");
+		formatName = MPT_USTRING("Impulse Tracker");
+	} else if(fileHeader.flags & MO3FileHeader::isS3M)
+	{
 		SetType(MOD_TYPE_S3M);
-	else if(fileHeader.flags & MO3FileHeader::isMOD)
+		formatType = MPT_USTRING("s3m");
+		formatName = MPT_USTRING("ScreamTracker 3");
+	} else if(fileHeader.flags & MO3FileHeader::isMOD)
+	{
 		SetType(MOD_TYPE_MOD);
-	else if(fileHeader.flags & MO3FileHeader::isMTM)
+		formatType = MPT_USTRING("mod");
+		formatName = MPT_USTRING("Generic MOD");
+	} else if(fileHeader.flags & MO3FileHeader::isMTM)
+	{
 		SetType(MOD_TYPE_MTM);
-	else
+		formatType = MPT_USTRING("mtm");
+		formatName = MPT_USTRING("MultiTracker");
+	} else
+	{
 		SetType(MOD_TYPE_XM);
+		formatType = MPT_USTRING("xm");
+		formatName = MPT_USTRING("FastTracker 2");
+	}
 
 	if(fileHeader.flags & MO3FileHeader::linearSlides)
 		m_SongFlags.set(SONG_LINEARSLIDES);
@@ -1854,8 +1872,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	else
 		madeWithTracker = mpt::format(MPT_USTRING("MO3 v%1 (%2)"))(version, madeWithTracker);
 
-	m_modFormat.formatName = mpt::format(MPT_USTRING("MO3 v%1"))(version);
-	m_modFormat.type = MPT_USTRING("mo3");
+	m_modFormat.formatName = mpt::format(MPT_USTRING("%1 (MO3 v%2 packed)"))(formatName, version);
+	m_modFormat.type = std::move(formatType);
 	m_modFormat.madeWithTracker = std::move(madeWithTracker);
 	if(m_dwLastSavedWithVersion)
 		m_modFormat.charset = mpt::CharsetWindows1252;
