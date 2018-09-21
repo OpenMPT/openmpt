@@ -21,8 +21,9 @@ is just a high-level summary.
 
  *  libopenmpt now compiles without warnings with GCC 8.
 
- *  Jump commands on the same row as the end of a pattern loop ends could cause
-    the module to loop even when looping was disabled.
+ *  Jump commands on the same row as the end of a pattern loop covering the
+    restart position of the module could cause the module to loop even when
+    looping was disabled
  *  Reject overly long MP3 and Vorbis samples in MO3.
  *  `play_note` from the libopenmpt_ext interface sometimes silenced the start
     of a triggered sample.

@@ -43,7 +43,7 @@ Tree view
 
 Playback 
    [Fix] <js> The first few frames of previewed notes in the sample, instrument and pattern editors were sometimes cut off (http://bugs.openmpt.org/view.php?id=209).
-   [Fix] <js> Jump commands on the same row as the end of a pattern loop ends could cause the module to loop even when looping was disabled.
+   [Fix] <js> Jump commands on the same row as the end of a pattern loop covering the restart position of the module could cause the module to loop even when looping was disabled (tx pulsewidth).
 
 Other formats
    [Fix] ITP: Possible crash with malformed files.
