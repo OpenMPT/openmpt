@@ -811,7 +811,7 @@ public:
 	void SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, std::ostream &f) const;
 	void SaveExtendedSongProperties(std::ostream &f) const;
 #endif // MODPLUG_NO_FILESAVE
-	void LoadExtendedSongProperties(FileReader &file, bool* pInterpretMptMade = nullptr);
+	void LoadExtendedSongProperties(FileReader &file, bool ignoreChannelCount, bool* pInterpretMptMade = nullptr);
 	void LoadMPTMProperties(FileReader &file, uint16 cwtv);
 
 	mpt::ustring GetSchismTrackerVersion(uint16 cwtv);

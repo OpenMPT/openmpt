@@ -377,7 +377,7 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 	if(code == MagicBE("MPTS"))
 	{
 		file.SkipBack(4);
-		LoadExtendedSongProperties(file);
+		LoadExtendedSongProperties(file, true);
 	}
 
 	m_nMaxPeriod = 0xF000;

@@ -709,7 +709,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		isOpenMPTMade = LoadExtendedInstrumentProperties(file);
 	}
 
-	LoadExtendedSongProperties(file, &isOpenMPTMade);
+	LoadExtendedSongProperties(file, true, &isOpenMPTMade);
 
 	if(isOpenMPTMade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 00, 00))
 	{
