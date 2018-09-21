@@ -226,7 +226,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		mpt::String::Read<mpt::String::maybeNullTerminated>(sample.filename, gdmSample.fileName);
 
 		sample.nC5Speed = gdmSample.c4Hertz;
-		sample.nGlobalVol = 256;	// Not supported in this format
+		sample.nGlobalVol = 64;	// Not supported in this format
 
 		sample.nLength = gdmSample.length; // in bytes
 
