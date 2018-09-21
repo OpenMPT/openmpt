@@ -34,10 +34,8 @@ if "%MPT_DOWNLOAD%" == "yes" (
  call build\scriptlib\download.cmd "https://www.7-zip.org/a/7z1805-extra.7z"                                                         "build\externals\7z1805-extra.7z" || goto error
  call build\scriptlib\download.cmd "https://www.7-zip.org/a/7z1805.exe"                                                              "build\externals\7z1805.exe"      || goto error
 
- rem call build\scriptlib\download.cmd "https://github.com/bkaradzic/GENie/archive/78817a9707c1a02e845fb38b3adcc5353b02d377.zip"         "build\externals\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip"        || goto error
- rem call build\scriptlib\download.cmd "https://github.com/premake/premake-core/archive/2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip"    "build\externals\premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" || goto error
- copy /Y "build\externals-mirror\genie\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip"          "build\externals\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip"               || goto error
- copy /Y "build\externals-mirror\premake\premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "build\externals\premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" || goto error
+ call build\scriptlib\download.cmd "https://github.com/bkaradzic/GENie/archive/78817a9707c1a02e845fb38b3adcc5353b02d377.zip"         "build\externals\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip"        || goto error
+ call build\scriptlib\download.cmd "https://github.com/premake/premake-core/archive/2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip"    "build\externals\premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" || goto error
 
  call build\scriptlib\download.cmd "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"                                   "build\externals\WA5.55_SDK.exe"  || goto error
  call build\scriptlib\download.cmd "https://www.un4seen.com/files/xmp-sdk.zip"                                                       "build\externals\xmp-sdk.zip"     || goto error
