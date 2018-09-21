@@ -3394,29 +3394,6 @@ bool CSoundFile::ProcessEffects()
 		const bool doBreakRow = (nBreakRow != ROWINDEX_INVALID);
 		const bool doPosJump = (nPosJump != ORDERINDEX_INVALID);
 
-		// Pattern Loop
-		if(doPatternLoop)
-		{
-			m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder;
-			m_PlayState.m_nNextRow = nPatLoopRow;
-			if(m_PlayState.m_nPatternDelay)
-			{
-				m_PlayState.m_nNextRow++;
-			}
-
-			// IT Compatibility: If the restart row is past the end of the current pattern
-			// (e.g. when continued from a previous pattern without explicit SB0 effect), continue the next pattern.
-			// Test case: LoopStartAfterPatternEnd.it
-			if(nPatLoopRow >= Patterns[m_PlayState.m_nPattern].GetNumRows())
-			{
-				m_PlayState.m_nNextOrder++;
-				m_PlayState.m_nNextRow = 0;
-			}
-
-			// As long as the pattern loop is running, mark the looped rows as not visited yet
-			visitedSongRows.ResetPatternLoop(m_PlayState.m_nCurrentOrder, nPatLoopRow);
-		}
-
 		// Pattern Break / Position Jump only if no loop running
 		// Exception: FastTracker 2 in all cases, Impulse Tracker in case of position jump
 		// Test case for FT2 exception: PatLoop-Jumps.xm, PatLoop-Various.xm
@@ -3447,8 +3424,28 @@ bool CSoundFile::ProcessEffects()
 			m_PlayState.m_nNextRow = nBreakRow;
 			if(!m_SongFlags[SONG_PATTERNLOOP])
 				m_PlayState.m_nNextOrder = nPosJump;
-		}
+		} else if(doPatternLoop)
+		{
+			// Pattern Loop
+			m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder;
+			m_PlayState.m_nNextRow = nPatLoopRow;
+			if(m_PlayState.m_nPatternDelay)
+			{
+				m_PlayState.m_nNextRow++;
+			}
 
+			// IT Compatibility: If the restart row is past the end of the current pattern
+			// (e.g. when continued from a previous pattern without explicit SB0 effect), continue the next pattern.
+			// Test case: LoopStartAfterPatternEnd.it
+			if(nPatLoopRow >= Patterns[m_PlayState.m_nPattern].GetNumRows())
+			{
+				m_PlayState.m_nNextOrder++;
+				m_PlayState.m_nNextRow = 0;
+			}
+
+			// As long as the pattern loop is running, mark the looped rows as not visited yet
+			visitedSongRows.ResetPatternLoop(m_PlayState.m_nCurrentOrder, nPatLoopRow);
+		}
 	}
 	return true;
 }
