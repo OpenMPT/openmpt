@@ -21,6 +21,12 @@ is just a high-level summary.
 
  *  libopenmpt now compiles without warnings with GCC 8.
 
+ *  Jump commands on the same row as the end of a pattern loop ends could cause
+    the module to loop even when looping was disabled.
+ *  Reject overly long MP3 and Vorbis samples in MO3.
+ *  `play_note` from the libopenmpt_ext interface sometimes silenced the start
+    of a triggered sample.
+
 ### libopenmpt 0.3.11 (2018-07-28)
 
  *  [**Sec**] Crash with some malformed custom tunings in MPTM files (r10615).
