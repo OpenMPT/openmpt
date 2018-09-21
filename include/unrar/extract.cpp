@@ -161,7 +161,7 @@ EXTRACT_ARC_CODE CmdExtract::ExtractArchive()
     // This size is necessary to display the correct total progress indicator.
 
     wchar NextName[NM];
-    wcscpy(NextName,Arc.FileName);
+    wcsncpyz(NextName,Arc.FileName,ASIZE(NextName));
 
     while (true)
     {
@@ -323,6 +323,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
 
     if (wcsicomp(ArcName,CurVolName)!=0 && FileExist(ArcName))
     {
+      wcsncpyz(Cmd->ArcName,ArcName,ASIZE(ArcName)); // For GUI "Delete archive after extraction".
       // If first volume name does not match the current name and if such
       // volume name really exists, let's unpack from this first volume.
       Repeat=true;
