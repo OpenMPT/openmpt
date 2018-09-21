@@ -1,10 +1,9 @@
 @echo off
 
-echo "Please only run this script if downloading files from GitHub fails."
+echo "Please only run this script if downloading files from GitHub or other sites fails."
 echo ""
 echo "This script needs to be run with admin rights."
-echo "On Windows 7, this may additionally need KB3154518 to be installed."
-echo "On Windows 8.1, this may additionally need KB3154520 to be installed."
+echo "It may additionally require KB3154520 to be installed."
 echo ""
 echo "For more information, see"
 echo "'https://developercommunity.visualstudio.com/content/problem/201610/unable-to-download-some-components-due-to-tls-12-o.html'"
