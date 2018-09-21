@@ -1311,7 +1311,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		{
 			Order.SetSequence(sequence);
 		}
-		visitedSongRows.Set(visitedRows);
+		visitedSongRows = std::move(visitedRows);
 	}
 
 	return results;

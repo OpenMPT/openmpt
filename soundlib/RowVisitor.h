@@ -34,6 +34,7 @@ protected:
 
 public:
 	RowVisitor(const CSoundFile &sf, SEQUENCEINDEX sequence = SEQUENCEINDEX_INVALID);
+	RowVisitor& operator=(RowVisitor &&other);
 
 	// Resize / Clear the row vector.
 	// If reset is true, the vector is not only resized to the required dimensions, but also completely cleared (i.e. all visited rows are unset).
@@ -64,12 +65,6 @@ public:
 	// If onlyUnplayedPatterns is true (default), only completely unplayed patterns are considered, otherwise a song can start anywhere.
 	// Function returns true on success.
 	bool GetFirstUnvisitedRow(ORDERINDEX &order, ROWINDEX &row, bool onlyUnplayedPatterns) const;
-
-	// Retrieve visited rows vector from another RowVisitor object.
-	void Set(const RowVisitor &other)
-	{
-		m_visitedRows = other.m_visitedRows;
-	}
 
 	// Set all rows of a previous pattern loop as unvisited.
 	void ResetPatternLoop(ORDERINDEX ord, ROWINDEX startRow);

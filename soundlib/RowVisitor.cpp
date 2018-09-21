@@ -35,6 +35,13 @@ RowVisitor::RowVisitor(const CSoundFile &sf, SEQUENCEINDEX sequence)
 }
 
 
+RowVisitor& RowVisitor::operator=(RowVisitor &&other)
+{
+	m_visitedRows = std::move(other.m_visitedRows);
+	return *this;
+}
+
+
 const ModSequence &RowVisitor::Order() const
 {
 	if(m_sequence >= m_sndFile.Order.GetNumSequences())
