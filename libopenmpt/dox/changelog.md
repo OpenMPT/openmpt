@@ -26,6 +26,9 @@ is just a high-level summary.
         auto-detection and longer fadeouts.
      *  "stop": Returns 0 rendered frames when the song end is reached.
         Subsequent reads will return 0 rendered frames.
+ *  [**New**] Add new metadata fields `"originaltype"` and `"originaltype_long"`
+    which allow more clearly reflecting what is going on with converted formats
+    like MO3 and GDM.
  *  [**New**] `Makefile` `CONFIG=emscripten` now can generate WebAssembly via
     the additional option `EMSCRIPTEN_TARGET=wasm`.
  *  [**New**] Compiling for DOS is now experimentally supported via DJGPP GCC

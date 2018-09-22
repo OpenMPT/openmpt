@@ -1029,6 +1029,9 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 		str << "\r";
 	}
 	str << "Format" << "\t" << sanitize_xmplay_info_string( self->mod->get_metadata("type") ) << " (" << sanitize_xmplay_info_string( self->mod->get_metadata("type_long") ) << ")" << "\r";
+	if ( !self->mod->get_metadata("originaltype").empty() ) {
+		str << "Original Type" << "\t"  << sanitize_xmplay_info_string( self->mod->get_metadata("originaltype") ) << " (" << sanitize_xmplay_info_string( self->mod->get_metadata("originaltype_long") ) << ")" << "\r";
+	}
 	if ( !self->mod->get_metadata("container").empty() ) {
 		str << "Container" << "\t"  << sanitize_xmplay_info_string( self->mod->get_metadata("container") ) << " (" << sanitize_xmplay_info_string( self->mod->get_metadata("container_long") ) << ")" << "\r";
 	}

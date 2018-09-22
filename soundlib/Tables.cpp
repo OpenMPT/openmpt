@@ -94,6 +94,9 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_STP,  MPT_ULITERAL("Soundtracker Pro II"),        "stp" },
 	{ MOD_TYPE_ULT,  MPT_ULITERAL("UltraTracker"),               "ult" },
 	{ MOD_TYPE_MOD,  MPT_ULITERAL("Grave Composer"),             "wow" },
+	// converted formats (no MODTYPE)
+	{ MOD_TYPE_NONE, MPT_ULITERAL("General Digital Music"),      "gdm" },
+	{ MOD_TYPE_NONE, MPT_ULITERAL("Un4seen MO3"),                "mo3" },
 #ifndef NO_ARCHIVE_SUPPORT
 	// Compressed modules
 	{ MOD_TYPE_MOD,  MPT_ULITERAL("Compressed ProTracker"),      "mdz" },
@@ -116,9 +119,7 @@ struct ModContainerInfo
 static constexpr ModContainerInfo modContainerInfo[] =
 {
 	// Container formats
-	{ MOD_CONTAINERTYPE_GDM,   MPT_ULITERAL("General Digital Music"),    "gdm"   },
 	{ MOD_CONTAINERTYPE_UMX,   MPT_ULITERAL("Unreal Music"),             "umx"   },
-	{ MOD_CONTAINERTYPE_MO3,   MPT_ULITERAL("Un4seen MO3"),              "mo3"   },
 	{ MOD_CONTAINERTYPE_XPK,   MPT_ULITERAL("XPK packed"),               "xpk"   },
 	{ MOD_CONTAINERTYPE_PP20,  MPT_ULITERAL("PowerPack PP20"),           "ppm"   },
 	{ MOD_CONTAINERTYPE_MMCMP, MPT_ULITERAL("Music Module Compressor"),  "mmcmp" }

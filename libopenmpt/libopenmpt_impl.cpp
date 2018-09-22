@@ -1100,6 +1100,8 @@ std::vector<std::string> module_impl::get_metadata_keys() const {
 	{
 		"type",
 		"type_long",
+		"originaltype",
+		"originaltype_long",
 		"container",
 		"container_long",
 		"tracker",
@@ -1116,6 +1118,10 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 		return mpt::ToCharset(mpt::CharsetUTF8, m_sndFile->m_modFormat.type );
 	} else if ( key == std::string("type_long") ) {
 		return mpt::ToCharset(mpt::CharsetUTF8, m_sndFile->m_modFormat.formatName );
+	} else if ( key == std::string("originaltype") ) {
+		return mpt::ToCharset(mpt::CharsetUTF8, m_sndFile->m_modFormat.originalType );
+	} else if ( key == std::string("originaltype_long") ) {
+		return mpt::ToCharset(mpt::CharsetUTF8, m_sndFile->m_modFormat.originalFormatName );
 	} else if ( key == std::string("container") ) {
 		return mpt::ToCharset(mpt::CharsetUTF8, CSoundFile::ModContainerTypeToString( m_sndFile->GetContainerType() ) );
 	} else if ( key == std::string("container_long") ) {

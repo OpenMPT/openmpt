@@ -1542,6 +1542,9 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 			set_field( fields, "Container" ).ostream() << mod.get_metadata( "container" ) << " (" << mod.get_metadata( "container_long" ) << ")";
 		}
 		set_field( fields, "Type" ).ostream() << mod.get_metadata( "type" ) << " (" << mod.get_metadata( "type_long" ) << ")";
+		if ( !mod.get_metadata( "originaltype" ).empty() ) {
+			set_field( fields, "Orig. Type" ).ostream() << mod.get_metadata( "originaltype" ) << " (" << mod.get_metadata( "originaltype_long" ) << ")";
+		}
 		if ( ( mod.get_num_subsongs() > 1 ) && ( flags.subsong != -1 ) ) {
 			set_field( fields, "Subsong" ).ostream() << flags.subsong;
 		}

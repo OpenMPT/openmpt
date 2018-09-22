@@ -1037,7 +1037,9 @@ Declare Function openmpt_module_get_metadata_keys_ Alias "openmpt_module_get_met
   \param key Metadata item key to query. Use openmpt_module_get_metadata_keys to check for available keys.
            Possible keys are:
            - type: Module format extension (e.g. it)
-           - type_long: Tracker name associated with the module format (e.g. Impulse Tracker)
+           - type_long: Format name associated with the module format (e.g. Impulse Tracker)
+           - originaltype: Module format extension (e.g. it) of the original module in case the actual type is a converted format (e.g. mo3 or gdm)
+           - originaltype_long: Format name associated with the module format (e.g. Impulse Tracker) of the original module in case the actual type is a converted format (e.g. mo3 or gdm)
            - container: Container format the module file is embedded in, if any (e.g. umx)
            - container_long: Full container name if the module is embedded in a container (e.g. Unreal Music)
            - tracker: Tracker that was (most likely) used to save the module file, if known

@@ -247,9 +247,11 @@ struct TimingInfo
 
 struct ModFormatDetails
 {
-	mpt::ustring formatName;      // "FastTracker 2"
-	mpt::ustring type;            // "xm"
-	mpt::ustring madeWithTracker; // "OpenMPT 1.28.01.00"
+	mpt::ustring formatName;         // "FastTracker 2"
+	mpt::ustring type;               // "xm"
+	mpt::ustring madeWithTracker;    // "OpenMPT 1.28.01.00"
+	mpt::ustring originalFormatName; // "FastTracker 2" in the case of converted formats like MO3 or GDM
+	mpt::ustring originalType;       // "xm" in the case of converted formats like MO3 or GDM
 	mpt::Charset charset = mpt::CharsetUTF8;
 };
 

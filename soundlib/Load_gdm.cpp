@@ -94,9 +94,22 @@ static const MODTYPE gdmFormatOrigin[] =
 {
 	MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_MTM, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED, MOD_TYPE_PSM
 };
-static const char gdmFormatOriginStr[][4] =
+static const MPT_UCHAR_TYPE gdmFormatOriginType[][4] =
 {
-	"???", "MOD", "MTM", "S3M", "669", "FAR", "ULT", "STM", "MED", "PSM"
+	MPT_ULITERAL(""), MPT_ULITERAL("mod"), MPT_ULITERAL("mtm"), MPT_ULITERAL("s3m"), MPT_ULITERAL("669"), MPT_ULITERAL("far"), MPT_ULITERAL("ult"), MPT_ULITERAL("stm"), MPT_ULITERAL("med"), MPT_ULITERAL("psm")
+};
+static const MPT_UCHAR_TYPE * const gdmFormatOriginFormat[] =
+{
+	MPT_ULITERAL(""),
+	MPT_ULITERAL("Generic MOD"),
+	MPT_ULITERAL("MultiTracker"),
+	MPT_ULITERAL("ScreamTracker 3"),
+	MPT_ULITERAL("Composer 669 / UNIS 669"),
+	MPT_ULITERAL("Farandole Composer"),
+	MPT_ULITERAL("UltraTracker"),
+	MPT_ULITERAL("ScreamTracker 2"),
+	MPT_ULITERAL("OctaMED"),
+	MPT_ULITERAL("Epic Megagames MASI")
 };
 
 
@@ -153,9 +166,10 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_modFormat.formatName = MPT_USTRING("General Digital Music");
 	m_modFormat.type = MPT_USTRING("gdm");
-	m_modFormat.madeWithTracker = mpt::format(MPT_USTRING("BWSB 2GDM %1.%2 (converted from %3)"))(fileHeader.trackerMajorVer, fileHeader.formatMinorVer, mpt::ToUnicode(mpt::CharsetASCII, gdmFormatOriginStr[fileHeader.originalFormat]));
+	m_modFormat.madeWithTracker = mpt::format(MPT_USTRING("BWSB 2GDM %1.%2"))(fileHeader.trackerMajorVer, fileHeader.formatMinorVer);
+	m_modFormat.originalType = gdmFormatOriginType[fileHeader.originalFormat];
+	m_modFormat.originalFormatName = gdmFormatOriginFormat[fileHeader.originalFormat];
 	m_modFormat.charset = mpt::CharsetCP437;
-	m_ContainerType = MOD_CONTAINERTYPE_GDM;
 
 	// Song name
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songTitle);
