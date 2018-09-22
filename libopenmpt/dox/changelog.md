@@ -12,6 +12,11 @@ is just a high-level summary.
  *  [**Bug**] libmodplug: Setting `SNDMIX_NORESAMPLING` in the C++ API always
     resulted in linear interpolation instead of nearest neighbour
 
+ *  Jump commands on the same row as the end of a pattern loop covering the
+    restart position of the module could cause the module to loop even when
+    looping was disabled
+ *  Reject overly long MP3 and Vorbis samples in MO3.
+
 ### libopenmpt 0.2-beta34 (2018-07-28)
  *  [**Sec**] Crash with some malformed custom tunings in MPTM files (r10616,
     r10617).
