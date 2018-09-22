@@ -321,6 +321,10 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 	}
 #endif
 
+	if(targetSmp.uFlags[CHN_ADLIB] && !SupportsOPL())
+	{
+		AddToLog("OPL instruments are not supported by this format.");
+	}
 	targetSmp.Convert(srcSong.GetType(), GetType());
 	if(targetSmp.uFlags[CHN_ADLIB])
 	{
@@ -1152,8 +1156,10 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
 
 	if(sampleHeader.sampleType < S3MSampleHeader::typeAdMel)
 		sampleHeader.GetSampleFormat(false).ReadSample(sample, file);
-	else
+	else if(SupportsOPL())
 		InitOPL();
+	else
+		AddToLog("OPL instruments are not supported by this format.");
 
 	sample.Convert(MOD_TYPE_S3M, GetType());
 	sample.PrecomputeLoops(*this, false);
@@ -1196,6 +1202,12 @@ bool CSoundFile::ReadSBISample(SAMPLEINDEX sample, FileReader &file)
 		|| !file.CanRead(32 + sizeof(OPLPatch))
 		|| file.CanRead(64))	// Arbitrary threshold to reject files that are unlikely to be SBI files
 		return false;
+
+	if(!SupportsOPL())
+	{
+		AddToLog("OPL instruments are not supported by this format.");
+		return true;
+	}
 
 	DestroySampleThreadsafe(sample);
 	InitOPL();
@@ -3095,6 +3107,10 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 		file.ReadArray(patch);
 		sample.SetAdlib(true, patch);
 		InitOPL();
+		if(!SupportsOPL())
+		{
+			AddToLog("OPL instruments are not supported by this format.");
+		}
 	} else if(!sample.uFlags[SMP_KEEPONDISK])
 	{
 		sampleHeader.GetSampleFormat().ReadSample(sample, file);
