@@ -14,7 +14,7 @@ is just a high-level summary.
     different set of output files. Emscripten 1.38.1 changed the default to
     WebAssembly.
  *  [**Bug**] libmodplug: Setting `SNDMIX_NORESAMPLING` in the C++ API always
-    resulted in linear interpolation instead of nearest neighbour
+    resulted in linear interpolation instead of nearest neighbour.
 
  *  [**Change**] The old Emscripten configuration which is compatible with
     Emscripten before 1.38.0 has been renamed to `CONFIG=emscripten-old`.
@@ -23,8 +23,8 @@ is just a high-level summary.
 
  *  Jump commands on the same row as the end of a pattern loop covering the
     restart position of the module could cause the module to loop even when
-    looping was disabled
- *  Reject overly long MP3 and Vorbis samples in MO3.
+    looping was disabled.
+ *  MO3: Reject overly long MP3 and Vorbis samples.
  *  `play_note` from the libopenmpt_ext interface sometimes silenced the start
     of a triggered sample.
 
