@@ -37,6 +37,8 @@
 #endif
 #endif // _MSC_VER
 
+#include <cctype>
+
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"
 
@@ -213,6 +215,11 @@ static inline Tstring StringReplace( Tstring str, const Tstring2 & oldStr_, cons
 		str.replace( pos, oldStr.length(), newStr );
 		pos += newStr.length();
 	}
+	return str;
+}
+
+static std::string StringUpperCase( std::string str ) {
+	std::transform( str.begin(), str.end(), str.begin(), std::toupper );
 	return str;
 }
 
@@ -649,7 +656,7 @@ static void append_xmplay_tag( std::string & tags, const std::string & tag, cons
 
 static char * build_xmplay_tags( const openmpt::module & mod ) {
 	std::string tags;
-	append_xmplay_tag( tags, "filetype", convert_to_native( mod.get_metadata("type") ) );
+	append_xmplay_tag( tags, "filetype", convert_to_native( StringUpperCase( mod.get_metadata("type") ) ) );
 	append_xmplay_tag( tags, "title", convert_to_native( mod.get_metadata("title") ) );
 	append_xmplay_tag( tags, "artist", convert_to_native( mod.get_metadata("artist") ) );
 	append_xmplay_tag( tags, "album", convert_to_native( mod.get_metadata("xmplay-album") ) ); // todo, libopenmpt does not support that
@@ -987,7 +994,7 @@ static void WINAPI openmpt_GetInfoText( char * format, char * length ) {
 	if ( format ) {
 		std::ostringstream str;
 		str
-			<< self->mod->get_metadata("type")
+			<< StringUpperCase( self->mod->get_metadata("type") )
 			<< " - "
 			<< self->mod->get_num_channels() << " ch"
 			<< " - "
