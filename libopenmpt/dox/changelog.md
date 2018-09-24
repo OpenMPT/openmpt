@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.13-pre
+
 ### libopenmpt 0.3.12 (2018-09-24)
 
  *  [**Bug**] openmpt123: Prevent libsdl2 and libsdl from being enabled at the
