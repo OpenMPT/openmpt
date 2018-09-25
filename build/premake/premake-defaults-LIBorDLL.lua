@@ -13,7 +13,5 @@
    kind "StaticLib"
   filter { "configurations:ReleaseShared" }
    kind "SharedLib"
-  filter { "configurations:ReleaseLTCG" }
-   kind "StaticLib"
 
   filter {}

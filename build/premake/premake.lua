@@ -334,7 +334,7 @@ if _OPTIONS["group"] == "PluginBridge" then
 solution "PluginBridge"
 	startproject "PluginBridge"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "ReleaseLTCG" }
+ configurations { "Debug", "Release" }
  platforms ( trkplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -350,7 +350,7 @@ layout = ""
 solution "OpenMPT-UTF8"
 	startproject "OpenMPT-UTF8"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "Checked", "ReleaseLTCG", "DebugShared", "ReleaseShared", "CheckedShared" }
+ configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -381,7 +381,7 @@ layout = ""
 solution "OpenMPT-ANSI"
 	startproject "OpenMPT-ANSI"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "Checked", "ReleaseLTCG", "DebugShared", "ReleaseShared", "CheckedShared" }
+ configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -412,7 +412,7 @@ layout = "custom"
 solution "OpenMPT-custom"
 	startproject "OpenMPT-custom"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "Checked", "ReleaseLTCG", "DebugShared", "ReleaseShared", "CheckedShared" }
+ configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -443,7 +443,7 @@ layout = ""
 solution "OpenMPT"
 	startproject "OpenMPT"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "Checked", "ReleaseLTCG", "DebugShared", "ReleaseShared", "CheckedShared" }
+ configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
@@ -475,7 +475,7 @@ if _OPTIONS["group"] == "all-externals" then
 
 solution "all-externals"
  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
- configurations { "Debug", "Release", "Checked", "ReleaseLTCG", "DebugShared", "ReleaseShared", "CheckedShared" }
+ configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 

@@ -39,8 +39,6 @@
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/Release" )
   filter { "kind:StaticLib", "configurations:ReleaseShared", "architecture:x86" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/ReleaseShared" )
-  filter { "kind:StaticLib", "configurations:ReleaseLTCG", "architecture:x86" }
-   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/ReleaseLTCG" )
   filter { "kind:StaticLib", "configurations:Debug", "architecture:x86_64" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/Debug" )
   filter { "kind:StaticLib", "configurations:DebugShared", "architecture:x86_64" }
@@ -53,8 +51,6 @@
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/Release" )
   filter { "kind:StaticLib", "configurations:ReleaseShared", "architecture:x86_64" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/ReleaseShared" )
-  filter { "kind:StaticLib", "configurations:ReleaseLTCG", "architecture:x86_64" }
-   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/ReleaseLTCG" )
 	 
   filter { "kind:StaticLib", "configurations:Debug", "architecture:ARM" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm/Debug" )
@@ -68,8 +64,6 @@
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm/Release" )
   filter { "kind:StaticLib", "configurations:ReleaseShared", "architecture:ARM" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm/ReleaseShared" )
-  filter { "kind:StaticLib", "configurations:ReleaseLTCG", "architecture:ARM" }
-   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm/ReleaseLTCG" )
   filter { "kind:StaticLib", "configurations:Debug", "architecture:ARM64" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm64/Debug" )
   filter { "kind:StaticLib", "configurations:DebugShared", "architecture:ARM64" }
@@ -82,8 +76,6 @@
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm64/Release" )
   filter { "kind:StaticLib", "configurations:ReleaseShared", "architecture:ARM64" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm64/ReleaseShared" )
-  filter { "kind:StaticLib", "configurations:ReleaseLTCG", "architecture:ARM64" }
-   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/arm64/ReleaseLTCG" )
   	
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-static/x86-32-" .. mpt_bindirsuffix32 )
@@ -97,8 +89,6 @@
 		targetdir ( "../../bin/release/" .. _ACTION .. "-static/x86-32-" .. mpt_bindirsuffix32 )
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:x86" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-shared/x86-32-" .. mpt_bindirsuffix32 )
-  filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86" }
-		targetdir ( "../../bin/release-LTCG/" .. _ACTION .. "-static/x86-32-" .. mpt_bindirsuffix32 )
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86_64" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-static/x86-64-" .. mpt_bindirsuffix64 )
   filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:x86_64" }
@@ -111,8 +101,6 @@
 		targetdir ( "../../bin/release/" .. _ACTION .. "-static/x86-64-" .. mpt_bindirsuffix64 )
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:x86_64" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-shared/x86-64-" .. mpt_bindirsuffix64 )
-  filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:x86_64" }
-		targetdir ( "../../bin/release-LTCG/" .. _ACTION .. "-static/x86-64-" .. mpt_bindirsuffix64 )
 		
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:ARM" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-static/arm-32-" .. mpt_bindirsuffix32 )
@@ -126,8 +114,6 @@
 		targetdir ( "../../bin/release/" .. _ACTION .. "-static/arm-32-" .. mpt_bindirsuffix32 )
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:ARM" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-shared/arm-32-" .. mpt_bindirsuffix32 )
-  filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:ARM" }
-		targetdir ( "../../bin/release-LTCG/" .. _ACTION .. "-static/arm-32-" .. mpt_bindirsuffix32 )
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:ARM64" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-static/arm-64-" .. mpt_bindirsuffix64 )
   filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:ARM64" }
@@ -140,8 +126,6 @@
 		targetdir ( "../../bin/release/" .. _ACTION .. "-static/arm-64-" .. mpt_bindirsuffix64 )
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:ARM64" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-shared/arm-64-" .. mpt_bindirsuffix64 )
-  filter { "kind:not StaticLib", "configurations:ReleaseLTCG", "architecture:ARM64" }
-		targetdir ( "../../bin/release-LTCG/" .. _ACTION .. "-static/arm-64-" .. mpt_bindirsuffix64 )
 
 
 	filter { "configurations:Debug" }
@@ -195,7 +179,7 @@
    defines { "NDEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
    symbols "On"
-   flags { "MultiProcessorCompile" }
+   flags { "MultiProcessorCompile", "LinkTimeOptimization" }
    staticruntime "On"
 	 runtime "Release"
    optimize "Speed"
@@ -205,18 +189,7 @@
    defines { "NDEBUG" }
    defines { "MPT_BUILD_MSVC_SHARED" }
    symbols "On"
-   flags { "MultiProcessorCompile" }
-	 runtime "Release"
-   optimize "Speed"
-   floatingpoint "Fast"
-
-	 
-  filter { "configurations:ReleaseLTCG" }
-   defines { "NDEBUG" }
-   defines { "MPT_BUILD_MSVC_STATIC" }
-   symbols "On"
    flags { "MultiProcessorCompile", "LinkTimeOptimization" }
-   staticruntime "On"
 	 runtime "Release"
    optimize "Speed"
    floatingpoint "Fast"
@@ -244,9 +217,6 @@
 			vectorextensions "SSE2"
 
 		filter { "architecture:x86", "configurations:ReleaseShared" }
-			vectorextensions "SSE2"
-
-		filter { "architecture:x86", "configurations:ReleaseLTCG" }
 			vectorextensions "SSE2"
 
 		filter {}
