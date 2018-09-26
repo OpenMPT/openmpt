@@ -536,6 +536,10 @@ LRESULT CModControlView::OnGetToolTipText(WPARAM uId, LPARAM pszText)
 //////////////////////////////////////////////////////////////////
 // CModScrollView
 
+#ifndef WM_MOUSEHWHEEL
+#define WM_MOUSEHWHEEL 0x20E // Only available on Vista and newer
+#endif
+
 IMPLEMENT_SERIAL(CModScrollView, CScrollView, 0)
 BEGIN_MESSAGE_MAP(CModScrollView, CScrollView)
 	//{{AFX_MSG_MAP(CModScrollView)
