@@ -541,6 +541,7 @@ BEGIN_MESSAGE_MAP(CModScrollView, CScrollView)
 	//{{AFX_MSG_MAP(CModScrollView)
 	ON_WM_DESTROY()
 	ON_WM_MOUSEWHEEL()
+	ON_WM_MOUSEHWHEEL()
 #ifdef WM_DPICHANGED
 	ON_MESSAGE(WM_DPICHANGED, &CModScrollView::OnDPIChanged)
 #else
@@ -557,6 +558,12 @@ LRESULT CModScrollView::SendCtrlMessage(UINT uMsg, LPARAM lParam) const
 {
 	if (m_hWndCtrl)	return ::SendMessage(m_hWndCtrl, WM_MOD_CTRLMSG, uMsg, lParam);
 	return 0;
+}
+
+
+void CModScrollView::SendCtrlCommand(int id) const
+{
+	::SendMessage(m_hWndCtrl, WM_COMMAND, id, 0);
 }
 
 
@@ -630,6 +637,20 @@ BOOL CModScrollView::OnMouseWheel(UINT fFlags, short zDelta, CPoint point)
 
 	// we can't get out of it--perform the scroll ourselves
 	return DoMouseWheel(fFlags, zDelta, point);
+}
+
+
+void CModScrollView::OnMouseHWheel(UINT fFlags, short zDelta, CPoint point)
+{
+	// we don't handle anything but scrolling just now
+	if (fFlags & (MK_SHIFT | MK_CONTROL))
+	{
+		CScrollView::OnMouseHWheel(fFlags, zDelta, point);
+		return;
+	}
+
+	if (OnScrollBy(CSize(zDelta * m_lineDev.cx / WHEEL_DELTA, 0), TRUE))
+		UpdateWindow();
 }
 
 
