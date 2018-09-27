@@ -77,7 +77,7 @@ public:
 	void NoteCut(CHANNELINDEX c);
 	void Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff, bool beatingOscillators);
 	void Volume(CHANNELINDEX c, uint8 vol, bool applyToModulator);
-	void Pan(CHANNELINDEX c, int32 pan);
+	int8 Pan(CHANNELINDEX c, int32 pan);
 	void Patch(CHANNELINDEX c, const OPLPatch &patch);
 	void Reset();
 	void MoveChannel(CHANNELINDEX from, CHANNELINDEX to);

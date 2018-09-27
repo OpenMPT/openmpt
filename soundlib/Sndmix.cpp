@@ -2247,7 +2247,7 @@ bool CSoundFile::ReadNote()
 				m_opl->Frequency(nChn, oplmilliHertz, chn.dwFlags[CHN_KEYOFF], m_playBehaviour[kOPLBeatingOscillators]);
 				// Scale volume to OPL range (0...63).
 				m_opl->Volume(nChn, static_cast<uint8>(Util::muldivr_unsigned(chn.nCalcVolume * chn.nGlobalVol * chn.nInsVol, 63, 1 << 26)), false);
-				m_opl->Pan(nChn, chn.nRealPan);
+				chn.nRealPan = m_opl->Pan(nChn, chn.nRealPan) * 128 + 128;
 			}
 
 			if(GetType() == MOD_TYPE_MPT && pIns != nullptr && pIns->pTuning != nullptr)

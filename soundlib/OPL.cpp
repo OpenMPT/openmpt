@@ -209,11 +209,11 @@ void OPL::Volume(CHANNELINDEX c, uint8 vol, bool applyToModulator)
 }
 
 
-void OPL::Pan(CHANNELINDEX c, int32 pan)
+int8 OPL::Pan(CHANNELINDEX c, int32 pan)
 {
 	uint8 oplCh = GetVoice(c);
 	if(oplCh == OPL_CHANNEL_INVALID || m_opl == nullptr)
-		return;
+		return 0;
 
 	const auto &patch = m_Patches[oplCh];
 	uint8 fbConn = patch[10] & ~STEREO_BITS;
@@ -226,6 +226,7 @@ void OPL::Pan(CHANNELINDEX c, int32 pan)
 		fbConn |= VOICE_TO_RIGHT;
 
 	m_opl->Port(FEEDBACK_CONNECTION | ChannelToRegister(oplCh), fbConn);
+	return ((fbConn & VOICE_TO_LEFT) ? -1 : 0) + ((fbConn & VOICE_TO_RIGHT) ? 1 : 0);
 }
 
 
