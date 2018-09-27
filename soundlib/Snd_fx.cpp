@@ -2047,7 +2047,7 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 	for (CHANNELINDEX i = m_nChannels; i < MAX_CHANNELS; i++)
 	{
 		const ModChannel &c = m_PlayState.Chn[i];
-		if (!c.IsSamplePlaying() && !c.HasMIDIOutput())
+		if (!c.nLength && !c.HasMIDIOutput())
 			return i;
 	}
 
