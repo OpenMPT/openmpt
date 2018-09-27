@@ -2617,9 +2617,9 @@ CHANNELINDEX CModDoc::FindAvailableChannel() const
 	for(CHANNELINDEX i = MAX_CHANNELS - 1; i >= m_SndFile.GetNumChannels(); i--)
 	{
 		const ModChannel &chn = m_SndFile.m_PlayState.Chn[i];
-		if(!chn.nLength)
+		if(!chn.IsSamplePlaying() && !chn.HasMIDIOutput())
 			return i;
-		else if(chn.dwFlags[CHN_NOTEFADE])
+		else if(chn.dwFlags[CHN_NOTEFADE | CHN_KEYOFF])
 			stoppedChannel = i;
 	}
 
