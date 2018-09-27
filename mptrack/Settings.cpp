@@ -461,7 +461,7 @@ static std::vector<char> ReadFile(const mpt::PathString &filename)
 static void WriteFileUTF16LE(const mpt::PathString &filename, const std::wstring &str)
 {
 	STATIC_ASSERT(sizeof(wchar_t) == 2);
-	mpt::ofstream inifile(filename, std::ios::binary | std::ios::trunc);
+	mpt::ofstream inifile(filename, std::ios::binary);
 	const uint8 UTF16LE_BOM[] = { 0xff, 0xfe };
 	inifile.write(reinterpret_cast<const char*>(UTF16LE_BOM), 2);
 	inifile.write(reinterpret_cast<const char*>(str.c_str()), str.length() * sizeof(std::wstring::value_type));

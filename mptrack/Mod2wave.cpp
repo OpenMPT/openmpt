@@ -949,7 +949,7 @@ void CDoWaveConvert::Run()
 		normalizeFile.open(normalizeFileName, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
 	}
 
-	mpt::ofstream fileStream(m_lpszFileName, std::ios::binary | std::ios::trunc);
+	mpt::ofstream fileStream(m_lpszFileName, std::ios::binary);
 
 	if(!fileStream)
 	{

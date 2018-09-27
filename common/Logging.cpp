@@ -336,7 +336,7 @@ bool Dump(const mpt::PathString &filename)
 	// sort according to index in case of overflows
 	std::stable_sort(Entries.begin(), Entries.end());
 
-	mpt::ofstream f(filename, std::ios::out);
+	mpt::ofstream f(filename);
 
 	f << "Build: OpenMPT " << mpt::ToCharset(mpt::CharsetUTF8, Build::GetVersionStringExtended()) << std::endl;
 
