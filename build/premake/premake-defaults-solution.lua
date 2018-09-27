@@ -8,10 +8,10 @@ end
 
 	filter { "platforms:x86" }
 		system "Windows"
-		architecture "x32"
+		architecture "x86"
 	filter { "platforms:x86_64" }
 		system "Windows"
-		architecture "x64"
+		architecture "x86_64"
 	filter { "platforms:arm" }
 		system "Windows"
 		architecture "ARM"
