@@ -2,14 +2,8 @@
  * MixerLoops.cpp
  * --------------
  * Purpose: Utility inner loops for mixer-related functionality.
- * Notes  : 
- *          x86 ( AMD/INTEL ) based low level based mixing functions:
- *          This file contains critical code. The basic X86 functions are
- *          defined at the bottom of the file. #define's are used to isolate
- *          the different flavours of functionality:
- *          ENABLE_MMX, ENABLE_3DNOW, ENABLE_SSE flags must be set to
- *          to compile the optimized sections of the code. In both cases the 
- *          X86_xxxxxx functions will compile.
+ * Notes  : This file contains performance-critical loops with variants
+ *          optimized for various instruction sets.
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -17,14 +11,15 @@
 
 
 #include "stdafx.h"
-
 #include "MixerLoops.h"
-
-#include "Sndfile.h"
+#include "Snd_defs.h"
+#include "ModChannel.h"
+#ifdef ENABLE_SSE2
+#include <emmintrin.h>
+#endif
 
 
 OPENMPT_NAMESPACE_BEGIN
-
 
 ////////////////////////////////////////////////////////////////////////////////////
 // 3DNow! optimizations
@@ -161,8 +156,6 @@ mainloop:
 // SSE Optimizations
 
 #ifdef ENABLE_SSE2
-
-#include <emmintrin.h>
 
 static void SSE2_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
 {
