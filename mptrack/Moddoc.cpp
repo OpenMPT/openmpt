@@ -2612,19 +2612,11 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 
 CHANNELINDEX CModDoc::FindAvailableChannel() const
 {
-	CHANNELINDEX stoppedChannel = m_SndFile.GetNumChannels();
-	// Search for available channel
-	for(CHANNELINDEX i = MAX_CHANNELS - 1; i >= m_SndFile.GetNumChannels(); i--)
-	{
-		const ModChannel &chn = m_SndFile.m_PlayState.Chn[i];
-		if(!chn.nLength && !chn.HasMIDIOutput())
-			return i;
-		else if(chn.dwFlags[CHN_NOTEFADE | CHN_KEYOFF])
-			stoppedChannel = i;
-	}
-
-	// Nothing found: return one that's stopped, or as a last resort, the first virtual channel.
-	return stoppedChannel;
+	CHANNELINDEX chn = m_SndFile.GetNNAChannel(CHANNELINDEX_INVALID);
+	if(chn != 0)
+		return chn;
+	else
+		return GetNumChannels();
 }
 
 
