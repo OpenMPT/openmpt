@@ -22,6 +22,10 @@
 
 #include "Sndfile.h"
 
+#ifdef ENABLE_SSE2
+#include <emmintrin.h>
+#endif
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -162,7 +166,6 @@ mainloop:
 
 #ifdef ENABLE_SSE2
 
-#include <emmintrin.h>
 
 static void SSE2_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
 {
