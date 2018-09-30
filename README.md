@@ -40,6 +40,8 @@ How to compile
         To compile the project, open `build/vs2017/OpenMPT.sln` and hit the
         compile button.
 
+ -  OpenMPT requires the compile host system to be 64bit x86-64.
+
  -  The Windows 8.1 SDK and Microsoft Foundation Classes (MFC) are required to
     build OpenMPT (both are included with Visual Studio, however may need to be
     selected explicitly during setup). In order to build OpenMPT for Windows XP,
@@ -107,6 +109,9 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
          -  in_openmpt: Requires Visual Studio with MFC.
 
          -  xmp-openmpt: Requires Visual Studio with MFC.
+
+     -  libopenmpt requires the compile host system to be 64bit x86-64 when
+        building with Visual Studio.
 
      -  You will need the Winamp 5 SDK and the XMPlay SDK if you want to
         compile the plugins for these 2 players. They can be downloaded
