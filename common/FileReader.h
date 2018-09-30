@@ -1101,8 +1101,6 @@ typedef detail::FileReader<FileReaderTraitsDefault> FileReader;
 typedef detail::FileReader<FileReaderTraitsMemory> MemoryFileReader;
 
 
-#if defined(LIBOPENMPT_BUILD)
-
 // Initialize file reader object with pointer to data and data length.
 template <typename Tbyte> static inline FileReader make_FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename = nullptr)
 {
@@ -1140,8 +1138,6 @@ static inline FileReader make_FileReader(std::istream *s, const mpt::PathString 
 
 #endif // MPT_FILEREADER_STD_ISTREAM
 
-#endif // LIBOPENMT_BUILD
-
 
 #if defined(MPT_ENABLE_FILEIO)
 // templated in order to reduce header inter-dependencies
@@ -1158,10 +1154,10 @@ FileReader GetFileReader(TInputFile &file)
 		{
 			return FileReader();
 		}
-		return FileReader(tmp.first, tmp.second);
+		return make_FileReader(tmp.first, tmp.second);
 	#else
 		typename TInputFile::ContentsRef tmp = file.Get();
-		return FileReader(mpt::as_span(tmp.first.data, tmp.first.size), tmp.second);
+		return make_FileReader(mpt::as_span(tmp.first.data, tmp.first.size), tmp.second);
 	#endif
 }
 #endif // MPT_ENABLE_FILEIO
