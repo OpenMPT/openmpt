@@ -102,7 +102,12 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
      -  You will find solutions for Visual Studio 2015 to 2017 in the
         corresponding `build/vsVERSION/` folder.
         Projects that target Windows versions before Windows 7 are available in
-        `build/vsVERSIONxp/`
+        `build/vsVERSIONxp/`.
+        Projects that target Windows 10 1709 Desktop (10.0.16299.0, including
+        ARM and ARM64) or later versions are available in
+        `build/vsVERSIONwin10/`.
+        Minimal projects that target Windows 10 UWP are available in
+        `build/winstore82/`.
         Most projects are supported with any of the mentioned Visual Studio
         verions, with the following exceptions:
 
