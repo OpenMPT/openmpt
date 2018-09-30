@@ -1760,7 +1760,7 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 		}
 	}
 
-	if(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2|MOD_TYPE_MED|MOD_TYPE_MOD))
+	if(UseFinetuneAndTranspose())
 	{
 		note += chn.nTranspose;
 		// RealNote = PatternNote + RelativeTone; (0..118, 0 = C-0, 118 = A#9)
