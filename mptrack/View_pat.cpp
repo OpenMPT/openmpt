@@ -2976,9 +2976,9 @@ static void AmplifyFade(int &vol, int amp, ROWINDEX row, ROWINDEX numRows, int f
 	{
 		ROWINDEX numRows2 = numRows / 2;
 		if(row < numRows2)
-			l = fadeStart + fadeFunc(static_cast<double>(row + 1) / numRows2) * fadeStartDiff;
+			l = fadeStart + fadeFunc(static_cast<double>(row) / numRows2) * fadeStartDiff;
 		else
-			l = fadeEnd + fadeFunc(static_cast<double>(numRows - row) / numRows - numRows2) * fadeEndDiff;
+			l = fadeEnd + fadeFunc(static_cast<double>(numRows - row) / (numRows - numRows2)) * fadeEndDiff;
 	} else if(doFadeIn)
 	{
 		l = fadeStart + fadeFunc(static_cast<double>(row + 1) / numRows) * fadeStartDiff;
@@ -2990,7 +2990,7 @@ static void AmplifyFade(int &vol, int amp, ROWINDEX row, ROWINDEX numRows, int f
 		l = amp / 100.0;
 	}
 	vol = Util::Round<int>(vol * l);
-	LimitMax(vol, 64);
+	Limit(vol, 0, 64);
 }
 
 
@@ -3014,8 +3014,8 @@ void CViewPattern::OnPatternAmplify()
 	PrepareUndo(m_Selection, "Amplify");
 
 	m_Selection.Sanitize(sndFile.Patterns[m_nPattern].GetNumRows(), sndFile.GetNumChannels());
-	CHANNELINDEX firstChannel = m_Selection.GetStartChannel(), lastChannel = m_Selection.GetEndChannel();
-	ROWINDEX firstRow = m_Selection.GetStartRow(), lastRow = m_Selection.GetEndRow();
+	const CHANNELINDEX firstChannel = m_Selection.GetStartChannel(), lastChannel = m_Selection.GetEndChannel();
+	const ROWINDEX firstRow = m_Selection.GetStartRow(), lastRow = m_Selection.GetEndRow();
 
 	// For partically selected start and end channels, we check if the start and end columns contain the relevant columns.
 	bool firstChannelValid, lastChannelValid;
@@ -3031,55 +3031,46 @@ void CViewPattern::OnPatternAmplify()
 		lastChannelValid = m_Selection.GetLowerRight().CompareColumn(PatternCursor(0, lastChannel, PatternCursor::effectColumn)) >= 0;
 	}
 
-	// adjust min/max channel if they're only partly selected (i.e. volume column or effect column (when using .MOD) is not covered)
+	// Adjust min/max channel if they're only partly selected (i.e. volume column or effect column (when using .MOD) is not covered)
 	// XXX if only the effect column is marked in the XM format, we cannot amplify volume commands there. Does anyone use that?
-	if(!firstChannelValid)
+	if((!firstChannelValid && firstChannel >= lastChannel) || (!lastChannelValid && lastChannel <= firstChannel))
 	{
-		if(firstChannel >= lastChannel)
-		{
-			// Selection too small!
-			EndWaitCursor();
-			return;
-		}
-		firstChannel++;
-	}
-	if(!lastChannelValid)
-	{
-		if(lastChannel <= firstChannel)
-		{
-			// Selection too small!
-			EndWaitCursor();
-			return;
-		}
-		lastChannel--;
+		EndWaitCursor();
+		return;
 	}
 
 	// Volume memory for each channel.
 	std::vector<ModCommand::VOL> chvol(lastChannel + 1, 64);
 
 	// First, fill the volume memory in case we start the selection before some note
-	ApplyToSelection([&] (ModCommand &m, ROWINDEX, CHANNELINDEX nChn)
+	ApplyToSelection([&] (ModCommand &m, ROWINDEX, CHANNELINDEX chn)
 	{
+		if((chn == firstChannel && !firstChannelValid) || (chn == lastChannel && !lastChannelValid))
+			return;
+
 		if(m.command == CMD_VOLUME)
-			chvol[nChn] = std::min(m.param, ModCommand::PARAM(64));
+			chvol[chn] = std::min(m.param, ModCommand::PARAM(64));
 		else if(m.volcmd == VOLCMD_VOLUME)
-			chvol[nChn] = m.vol;
+			chvol[chn] = m.vol;
 		else if(m.instr != 0)
-			chvol[nChn] = static_cast<ModCommand::VOL>(GetDefaultVolume(m));
+			chvol[chn] = static_cast<ModCommand::VOL>(GetDefaultVolume(m));
 	});
 
 	Fade::Func fadeFunc = GetFadeFunc(settings.fadeLaw);
 
 	// Now do the actual amplification
 	const int cy = lastRow - firstRow + 1; // total rows (for fading)
-	ApplyToSelection([&] (ModCommand &m, ROWINDEX nRow, CHANNELINDEX nChn)
+	ApplyToSelection([&] (ModCommand &m, ROWINDEX nRow, CHANNELINDEX chn)
 	{
+		if((chn == firstChannel && !firstChannelValid) || (chn == lastChannel && !lastChannelValid))
+			return;
+
 		if(m.command == CMD_VOLUME)
-			chvol[nChn] = std::min(m.param, ModCommand::PARAM(64));
+			chvol[chn] = std::min(m.param, ModCommand::PARAM(64));
 		else if(m.volcmd == VOLCMD_VOLUME)
-			chvol[nChn] = m.vol;
+			chvol[chn] = m.vol;
 		else if(m.instr != 0)
-			chvol[nChn] = static_cast<ModCommand::VOL>(GetDefaultVolume(m));
+			chvol[chn] = static_cast<ModCommand::VOL>(GetDefaultVolume(m));
 
 		if(settings.fadeIn || settings.fadeOut || (m.IsNote() && m.instr != 0))
 		{
@@ -3087,11 +3078,11 @@ void CViewPattern::OnPatternAmplify()
 			if(useVolCol && m.volcmd == VOLCMD_NONE)
 			{
 				m.volcmd = VOLCMD_VOLUME;
-				m.vol = chvol[nChn];
+				m.vol = chvol[chn];
 			} else if(!useVolCol && m.command == CMD_NONE)
 			{
 				m.command = CMD_VOLUME;
-				m.param = chvol[nChn];
+				m.param = chvol[chn];
 			}
 		}
 
@@ -3102,7 +3093,7 @@ void CViewPattern::OnPatternAmplify()
 			m.vol = static_cast<ModCommand::VOL>(vol);
 		}
 
-		if(m_Selection.ContainsHorizontal(PatternCursor(0, nChn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, nChn, PatternCursor::paramColumn)))
+		if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::paramColumn)))
 		{
 			if(m.command == CMD_VOLUME && m.param <= 64)
 			{

@@ -201,6 +201,7 @@ public:
 public:
 	CModDoc* GetDocument() const { return (CModDoc *)m_pDocument; }
 	LRESULT SendCtrlMessage(UINT uMsg, LPARAM lParam=0) const;
+	void SendCtrlCommand(int id) const;
 	BOOL PostCtrlMessage(UINT uMsg, LPARAM lParam=0) const;
 	void UpdateIndicator(LPCTSTR lpszText = nullptr);
 
@@ -223,6 +224,7 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnReceiveModViewMsg(WPARAM wParam, LPARAM lParam);
 	afx_msg BOOL OnMouseWheel(UINT fFlags, short zDelta, CPoint point);
+	afx_msg void OnMouseHWheel(UINT fFlags, short zDelta, CPoint point);
 	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam) { return OnDragonDrop((BOOL)bDoDrop, (const DRAGONDROP *)lParam); }
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM);
 	afx_msg LRESULT OnDPIChanged(WPARAM = 0, LPARAM = 0);
