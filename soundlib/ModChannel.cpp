@@ -40,6 +40,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		proTrackerOffset = 0;
 		lastZxxParam = 0xFF;
 		isFirstTick = false;
+		rowCommand.Clear();
 	}
 
 	if(resetMask & resetSetPosAdvanced)
