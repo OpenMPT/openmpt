@@ -15,6 +15,7 @@
 #include "Moddoc.h"
 #include "ProgressDialog.h"
 #include "../soundlib/modsmp_ctrl.h"
+#include "../soundlib/OPL.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -58,6 +59,7 @@ public:
 		auto prevTime = timeGetTime();
 		auto currentSeq = m_SndFile.Order.GetCurrentSequenceIndex();
 		auto currentRepeatCount = m_SndFile.GetRepeatCount();
+		auto opl = std::move(m_SndFile.m_opl);
 		m_SndFile.SetRepeatCount(0);
 		m_SndFile.m_bIsRendering = true;
 		for(SEQUENCEINDEX seq = 0; seq < m_SndFile.Order.GetNumSequences() && !m_abort; seq++)
@@ -106,6 +108,7 @@ public:
 		m_SndFile.ResetPlayPos();
 		m_SndFile.StopAllVsti();
 		m_SndFile.m_bIsRendering = false;
+		m_SndFile.m_opl = std::move(opl);
 
 		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 		{
