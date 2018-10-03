@@ -1849,6 +1849,13 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 		if(mode == SRCMODE_DEFAULT)
 		{
 			// Resample using r8brain
+			if(newRate / oldRate >= 512 || oldRate / newRate >= 512)
+			{
+				// r8brain currently crashes at extreme resampling ratios
+				MessageBeep(MB_ICONWARNING);
+				EndWaitCursor();
+				return;
+			}
 			const SmpLength bufferSize = std::min(std::max(selLength, SmpLength(oldRate)), SmpLength(1024 * 1024));
 			std::vector<double> convBuffer(bufferSize);
 			r8b::CDSPResampler16 resampler(oldRate, newRate, bufferSize);
@@ -2389,7 +2396,7 @@ public:
 
 		// Get number of channels & sample size
 		const uint8 smpsize = sample.GetElementarySampleSize();
-		const uint8 nChn = sample.GetNumChannels();
+		const uint8 numChans = sample.GetNumChannels();
 
 		// Get selected oversampling - quality - (also refered as FFT overlapping) factor
 		CComboBox *combo = (CComboBox *)m_parent.GetDlgItem(IDC_COMBO5);
@@ -2425,7 +2432,7 @@ public:
 		DWORD timeLast = 0;
 
 		// Process each channel separately
-		for(uint8 i = 0 ; i < nChn ; i++)
+		for(uint8 chn = 0; chn < numChans; chn++)
 		{
 
 			SmpLength pos = 0;
@@ -2457,7 +2464,7 @@ public:
 				if(timeNow - timeLast >= m_updateInterval)
 				{
 					TCHAR progress[32];
-					uint32 percent = static_cast<uint32>((float)i * 50.0f + (100.0f / nChn) * (pos + len) / sample.nLength);
+					uint32 percent = static_cast<uint32>((float)chn * 50.0f + (100.0f / numChans) * (pos + len) / sample.nLength);
 					wsprintf(progress, _T("Pitch Shift... %u%%"), percent);
 					SetText(progress);
 					SetProgress(percent);
@@ -2478,15 +2485,14 @@ public:
 				}
 
 				// Convert current channel's data chunk to float
-				int8 *ptr = sample.sample8() + pos * smpsize * nChn + i * smpsize;
-
+				SmpLength offset = pos * numChans + chn;
 				switch(smpsize)
 				{
 				case 1:
-					CopySample<SC::ConversionChain<SC::Convert<float, int8>, SC::DecodeIdentity<int8> > >(buffer.data(), len, 1, ptr, sizeof(int8) * len * nChn, nChn);
+					CopySample<SC::ConversionChain<SC::Convert<float, int8>, SC::DecodeIdentity<int8>>>(buffer.data(), len, 1, sample.sample8() + offset, sizeof(int8) * len * numChans, numChans);
 					break;
 				case 2:
-					CopySample<SC::ConversionChain<SC::Convert<float, int16>, SC::DecodeIdentity<int16> > >(buffer.data(), len, 1, (int16 *)ptr, sizeof(int16) * len * nChn, nChn);
+					CopySample<SC::ConversionChain<SC::Convert<float, int16>, SC::DecodeIdentity<int16>>>(buffer.data(), len, 1, sample.sample16() + offset, sizeof(int16) * len * numChans, numChans);
 					break;
 				}
 
@@ -2498,16 +2504,16 @@ public:
 				smbPitchShift(m_ratio, static_cast<long>(len + finaloffset), fft, ovs, sampleRate, buffer.data(), buffer.data());
 
 				// Restore pitched-shifted float sample into original sample buffer
-				ptr = pNewSample + (pos - inneroffset) * smpsize * nChn + i * smpsize;
+				void *ptr = pNewSample + (pos - inneroffset) * smpsize * numChans + chn * smpsize;
 				const SmpLength copyLength = len + finaloffset - startoffset + 1;
 
 				switch(smpsize)
 				{
 				case 1:
-					CopySample<SC::ConversionChain<SC::Convert<int8, float>, SC::DecodeIdentity<float> > >((int8 *)ptr, copyLength, nChn, buffer.data() + startoffset, sizeof(float) * bufferSize, 1);
+					CopySample<SC::ConversionChain<SC::Convert<int8, float>, SC::DecodeIdentity<float>>>(static_cast<int8 *>(ptr), copyLength, numChans, buffer.data() + startoffset, sizeof(float) * bufferSize, 1);
 					break;
 				case 2:
-					CopySample<SC::ConversionChain<SC::Convert<int16, float>, SC::DecodeIdentity<float> > >((int16 *)ptr, copyLength, nChn, buffer.data() + startoffset, sizeof(float) * bufferSize, 1);
+					CopySample<SC::ConversionChain<SC::Convert<int16, float>, SC::DecodeIdentity<float>>>(static_cast<int16 *>(ptr), copyLength, numChans, buffer.data() + startoffset, sizeof(float) * bufferSize, 1);
 					break;
 				}
 

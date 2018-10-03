@@ -529,7 +529,7 @@ BOOL CResamplingDlg::OnInitDialog()
 	if(!lastFrequency) lastFrequency = m_frequency;
 	SetDlgItemInt(IDC_EDIT1, lastFrequency, FALSE);
 	CSpinButtonCtrl *spin = static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1));
-	spin->SetRange32(100, 999999);
+	spin->SetRange32(1, 999999);
 	spin->SetPos32(lastFrequency);
 
 	CComboBox *cbnResampling = static_cast<CComboBox *>(GetDlgItem(IDC_COMBO_FILTER));
