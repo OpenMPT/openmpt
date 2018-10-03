@@ -1830,7 +1830,7 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 	const SmpLength newTotalLength = sample.nLength - selLength + newSelLength;
 	const uint8 numChannels = sample.GetNumChannels();
 
-	if(newRate < 1 || oldRate < 1)
+	if(newRate < 1 || oldRate < 1 || newTotalLength <= 1)
 	{
 		MessageBeep(MB_ICONWARNING);
 		EndWaitCursor();
