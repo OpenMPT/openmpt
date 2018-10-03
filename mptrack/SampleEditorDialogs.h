@@ -45,10 +45,10 @@ public:
 	CAmpDlg(CWnd *parent, AmpSettings &settings, int16 factorMin = int16_min, int16 factorMax = int16_max);
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnDestroy();
-	virtual void OnOK();
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	void OnDestroy();
 };
 
 
@@ -74,8 +74,8 @@ public:
 	}
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 	void UpdateDialog();
 };
 
@@ -114,8 +114,8 @@ protected:
 public:
 	AddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sampleRate, bool allowOPL);
 
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 	
 protected:
 	AddSilenceOptions GetEditMode() const;
@@ -141,9 +141,9 @@ public:
 	CSampleGridDlg(CWnd *parent, SmpLength nSegments, SmpLength nMaxSegments) : CDialog(IDD_SAMPLE_GRID_SIZE, parent) { m_nSegments = nSegments; m_nMaxSegments = nMaxSegments; };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 };
 
 
@@ -179,9 +179,9 @@ public:
 	uint32 SamplesToPercent(SmpLength samples) const { return Util::muldivr_unsigned(samples, 100000, m_loopLength); }
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 	afx_msg void OnLoopTypeChanged();
 	afx_msg void OnFadeLengthChanged();
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
@@ -203,19 +203,19 @@ protected:
 		Custom
 	};
 
-	ResamplingMode srcMode;
-	uint32 frequency;
+	ResamplingMode m_srcMode;
+	uint32 m_frequency;
 	static uint32 lastFrequency;
 	static ResamplingOption lastChoice;
 
 public:
-	CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode) : CDialog(IDD_RESAMPLE, parent), frequency(frequency), srcMode(srcMode) { };
-	uint32 GetFrequency() const { return frequency; }
-	ResamplingMode GetFilter() const { return srcMode; }
+	CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode) : CDialog(IDD_RESAMPLE, parent), m_frequency(frequency), m_srcMode(srcMode) { };
+	uint32 GetFrequency() const { return m_frequency; }
+	ResamplingMode GetFilter() const { return m_srcMode; }
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 
 	afx_msg void OnFocusEdit() { CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO3); }
 
@@ -244,9 +244,9 @@ public:
 	CMixSampleDlg(CWnd *parent);
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 };
 
 

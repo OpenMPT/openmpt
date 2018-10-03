@@ -521,12 +521,12 @@ BOOL CResamplingDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + lastChoice);
 	TCHAR s[32];
-	wsprintf(s, _T("&Upsample (%u Hz)"), frequency * 2);
+	wsprintf(s, _T("&Upsample (%u Hz)"), m_frequency * 2);
 	SetDlgItemText(IDC_RADIO1, s);
-	wsprintf(s, _T("&Downsample (%u Hz)"), frequency / 2);
+	wsprintf(s, _T("&Downsample (%u Hz)"), m_frequency / 2);
 	SetDlgItemText(IDC_RADIO2, s);
 	
-	if(!lastFrequency) lastFrequency = frequency;
+	if(!lastFrequency) lastFrequency = m_frequency;
 	SetDlgItemInt(IDC_EDIT1, lastFrequency, FALSE);
 	CSpinButtonCtrl *spin = static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1));
 	spin->SetRange32(100, 999999);
@@ -543,7 +543,7 @@ BOOL CResamplingDlg::OnInitDialog()
 
 		int index = cbnResampling->AddString(desc);
 		cbnResampling->SetItemData(index, mode);
-		if(srcMode == mode)
+		if(m_srcMode == mode)
 			cbnResampling->SetCurSel(index);
 	}
 	cbnResampling->SetRedraw(TRUE);
@@ -557,18 +557,18 @@ void CResamplingDlg::OnOK()
 	if(IsDlgButtonChecked(IDC_RADIO1))
 	{
 		lastChoice = Upsample;
-		frequency *= 2;
+		m_frequency *= 2;
 	} else if(IsDlgButtonChecked(IDC_RADIO2))
 	{
 		lastChoice = Downsample;
-		frequency /= 2;
+		m_frequency /= 2;
 	} else
 	{
 		lastChoice = Custom;
-		frequency = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
-		if(frequency >= 100)
+		uint32 newFrequency = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
+		if(newFrequency > 0)
 		{
-			lastFrequency = frequency;
+			lastFrequency = m_frequency = newFrequency;
 		} else
 		{
 			MessageBeep(MB_ICONWARNING);
@@ -578,7 +578,7 @@ void CResamplingDlg::OnOK()
 	}
 
 	CComboBox *cbnResampling = static_cast<CComboBox *>(GetDlgItem(IDC_COMBO_FILTER));
-	srcMode = static_cast<ResamplingMode>(cbnResampling->GetItemData(cbnResampling->GetCurSel()));
+	m_srcMode = static_cast<ResamplingMode>(cbnResampling->GetItemData(cbnResampling->GetCurSel()));
 
 	CDialog::OnOK();
 }
