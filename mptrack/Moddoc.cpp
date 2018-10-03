@@ -1149,6 +1149,7 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 	if (doMute)
 	{
 		m_SndFile.m_PlayState.Chn[nChn].dwFlags.set(muteType);
+		if(m_SndFile.m_opl) m_SndFile.m_opl->NoteCut(nChn);
 		// Kill VSTi notes on muted channel.
 		PLUGINDEX nPlug = m_SndFile.GetBestPlugin(nChn, PrioritiseInstrument, EvenIfMuted);
 		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))
@@ -1174,6 +1175,7 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 			if (doMute)
 			{
 				m_SndFile.m_PlayState.Chn[i].dwFlags.set(muteType);
+				if(m_SndFile.m_opl) m_SndFile.m_opl->NoteCut(i);
 			} else
 			{
 				// On unmute alway cater for both mute types - this way there's no probs if user changes mute mode.
