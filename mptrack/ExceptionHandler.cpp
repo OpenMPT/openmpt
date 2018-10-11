@@ -283,7 +283,8 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		f << mpt::format("WatchDir: %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindWatchdir))) << "\r\n";
 	}
 
-	static constexpr struct { const MPT_UCHAR_TYPE * section; const MPT_UCHAR_TYPE * key; } configAnonymize[] = {
+	static constexpr struct { const MPT_UCHAR_TYPE * section; const MPT_UCHAR_TYPE * key; } configAnonymize[] =
+	{
 		{ MPT_ULITERAL("Version"), MPT_ULITERAL("InstallGUID") },
 		{ MPT_ULITERAL("Recent File List"), nullptr },
 	};
@@ -293,13 +294,13 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		f.imbue(std::locale::classic());
 		if(&theApp.GetSettings())
 		{
-			SettingsContainer & settings = theApp.GetSettings();
+			SettingsContainer &settings = theApp.GetSettings();
 			for(const auto &it : settings)
 			{
 				bool skipPath = false;
 				for(const auto &path : configAnonymize)
 				{
-					if(((path.key == nullptr && path.section == it.first.GetRefSection())) // Omit entire section
+					if((path.key == nullptr && path.section == it.first.GetRefSection()) // Omit entire section
 						|| (path.key != nullptr && it.first == SettingPath(path.section, path.key))) // Omit specific key
 					{
 						skipPath = true;
@@ -326,7 +327,10 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		IniFileSettingsContainer crashStoredSettings{crashStoredSettingsFilename};
 		for(const auto &path : configAnonymize)
 		{
-			crashStoredSettings.Write(SettingPath(path.section, path.key), SettingValue(mpt::ustring()));
+			if(path.key != nullptr)
+			{
+				crashStoredSettings.Write(SettingPath(path.section, path.key), SettingValue(mpt::ustring()));
+			}
 		}
 		crashStoredSettings.Flush();
 	}
@@ -733,7 +737,7 @@ static void mpt_unexpected_handler()
 
 static void mpt_terminate_handler()
 {
-	DebugReporter(DumpModeCrash, nullptr).ReportError(MPT_USTRING("A C++ runtime crash occured: std::terminate() called."));
+	DebugReporter(DumpModeCrash, nullptr).ReportError(MPT_USTRING("A C++ runtime crash occurred: std::terminate() called."));
 #if 1
 	std::abort();
 #else
