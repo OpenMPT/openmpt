@@ -39,12 +39,12 @@ void OPL::Initialize(uint32 samplerate)
 }
 
 
-void OPL::Mix(int32 *target, size_t count, uint32 preamp)
+void OPL::Mix(int32 *target, size_t count, uint32 volumeFactorQ16)
 {
 	if(!m_isActive)
 		return;
 
-	const int factor = (preamp << 13) / 48;
+	const int factor = (volumeFactorQ16 << 13) / (1<<16);
 	while(count--)
 	{
 		int16 l, r;

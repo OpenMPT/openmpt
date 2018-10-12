@@ -408,6 +408,9 @@ public:
 #endif // MODPLUG_TRACKER
 
 	uint32 m_nSamplePreAmp, m_nVSTiVolume;
+	uint32 m_OPLVolumeFactor;  // 16.16
+	static const uint32 m_OPLVolumeFactorScale = (1 << 16);
+
 	bool IsGlobalVolumeUnset() const { return IsFirstTick(); }
 #ifndef MODPLUG_TRACKER
 	uint32 m_nFreqFactor = 65536; // Pitch shift factor (65536 = no pitch shifting). Only used in libopenmpt (openmpt::ext::interactive::set_pitch_factor)

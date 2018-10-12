@@ -148,6 +148,7 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	m_nSamples = 0;
 	m_nSamplePreAmp = 48;
 	m_nVSTiVolume = 48;
+	m_OPLVolumeFactor = m_OPLVolumeFactorScale;
 	m_nDefaultSpeed = 6;
 	m_nDefaultTempo.Set(125);
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;

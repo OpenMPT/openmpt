@@ -1356,6 +1356,7 @@ Declare Function openmpt_module_highlight_pattern_row_channel_ Alias "openmpt_mo
            - play.tempo_factor: Set a floating point tempo factor. "1.0" is the default tempo.
            - play.pitch_factor: Set a floating point pitch factor. "1.0" is the default pitch.
            - render.resampler.emulate_amiga: Set to "1" to enable the Amiga resampler for Amiga modules. This emulates the sound characteristics of the Paula chip and overrides the selected interpolation filter. Non-Amiga module formats are not affected by this setting.
+           - render.opl.volume_factor: Set volume factor applied to synthesized OPL sounds, relative to the default OPL volume.
            - dither: Set the dither algorithm that is used for the 16 bit versions of openmpt_module_read. Supported values are:
                      - 0: No dithering.
                      - 1: Default mode. Chosen by OpenMPT code, might change.
