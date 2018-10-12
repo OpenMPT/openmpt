@@ -327,9 +327,12 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		IniFileSettingsContainer crashStoredSettings{crashStoredSettingsFilename};
 		for(const auto &path : configAnonymize)
 		{
-			if(path.key != nullptr)
+			if(path.key)
 			{
 				crashStoredSettings.Write(SettingPath(path.section, path.key), SettingValue(mpt::ustring()));
+			} else
+			{
+				crashStoredSettings.Remove(path.section);
 			}
 		}
 		crashStoredSettings.Flush();
