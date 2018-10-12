@@ -588,6 +588,7 @@ public:
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
 	virtual void WriteSetting(const SettingPath &path, const SettingValue &val) = 0;
 	virtual void RemoveSetting(const SettingPath &path) = 0;
+	virtual void RemoveSection(const mpt::ustring &section) = 0;
 };
 
 
@@ -623,12 +624,14 @@ private:
 	SettingValue BackendsReadSetting(const SettingPath &path, const SettingValue &def) const;
 	void BackendsWriteSetting(const SettingPath &path, const SettingValue &val);
 	void BackendsRemoveSetting(const SettingPath &path);
+	void BackendsRemoveSection(const mpt::ustring &section);
 	void NotifyListeners(const SettingPath &path);
 	SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const;
 	bool IsDefaultSetting(const SettingPath &path) const;
 	void WriteSetting(const SettingPath &path, const SettingValue &val, SettingFlushMode flushMode);
 	void ForgetSetting(const SettingPath &path);
 	void RemoveSetting(const SettingPath &path);
+	void RemoveSection(const mpt::ustring &section);
 private:
 	SettingsContainer(const SettingsContainer &other); // disable
 	SettingsContainer& operator = (const SettingsContainer &other); // disable
@@ -679,6 +682,10 @@ public:
 	void Remove(mpt::ustring section, mpt::ustring key)
 	{
 		RemoveSetting(SettingPath(std::move(section), std::move(key)));
+	}
+	void Remove(const mpt::ustring &section)
+	{
+		RemoveSection(section);
 	}
 	void Flush();
 	~SettingsContainer();
@@ -870,6 +877,7 @@ private:
 	void WriteSettingRaw(const SettingPath &path, int32 val);
 	void WriteSettingRaw(const SettingPath &path, bool val);
 	void RemoveSettingRaw(const SettingPath &path);
+	void RemoveSectionRaw(const mpt::ustring &section);
 	static mpt::winstring GetSection(const SettingPath &path);
 	static mpt::winstring GetKey(const SettingPath &path);
 public:
@@ -879,6 +887,7 @@ public:
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const;
 	virtual void WriteSetting(const SettingPath &path, const SettingValue &val);
 	virtual void RemoveSetting(const SettingPath &path);
+	virtual void RemoveSection(const mpt::ustring &section);
 	const mpt::PathString& GetFilename() const { return filename; }
 };
 

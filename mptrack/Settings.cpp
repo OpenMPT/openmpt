@@ -192,6 +192,11 @@ void SettingsContainer::BackendsRemoveSetting(const SettingPath &path)
 	backend->RemoveSetting(path);
 }
 
+void SettingsContainer::BackendsRemoveSection(const mpt::ustring &section)
+{
+	backend->RemoveSection(section);
+}
+
 SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const SettingValue &def) const
 {
 	ASSERT(theApp.InGuiThread());
@@ -257,6 +262,25 @@ void SettingsContainer::RemoveSetting(const SettingPath &path)
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
 	map.erase(path);
 	BackendsRemoveSetting(path);
+}
+
+void SettingsContainer::RemoveSection(const mpt::ustring &section)
+{
+	ASSERT(theApp.InGuiThread());
+	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
+	std::vector<SettingPath> pathsToRemove;
+	for(const auto &entry : map)
+	{
+		if(entry.first.GetSection() == section)
+		{
+			pathsToRemove.push_back(entry.first);
+		}
+	}
+	for(const auto &path : pathsToRemove)
+	{
+		map.erase(path);
+	}
+	BackendsRemoveSection(section);
 }
 
 void SettingsContainer::NotifyListeners(const SettingPath &path)
@@ -421,6 +445,11 @@ void IniFileSettingsBackend::RemoveSettingRaw(const SettingPath &path)
 	::WritePrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), NULL, filename.AsNative().c_str());
 }
 
+void IniFileSettingsBackend::RemoveSectionRaw(const mpt::ustring &section)
+{
+	::WritePrivateProfileSection(mpt::ToWin(section).c_str(), _T("\0"), filename.AsNative().c_str());
+}
+
 
 mpt::winstring IniFileSettingsBackend::GetSection(const SettingPath &path)
 {
@@ -516,6 +545,11 @@ void IniFileSettingsBackend::WriteSetting(const SettingPath &path, const Setting
 void IniFileSettingsBackend::RemoveSetting(const SettingPath &path)
 {
 	RemoveSettingRaw(path);
+}
+
+void IniFileSettingsBackend::RemoveSection(const mpt::ustring &section)
+{
+	RemoveSectionRaw(section);
 }
 
 
