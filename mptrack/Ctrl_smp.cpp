@@ -1807,6 +1807,13 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 		if(mode == SRCMODE_DEFAULT)
 		{
 			// Resample using r8brain
+			if(newRate / oldRate >= 512 || oldRate / newRate >= 512)
+			{
+				// r8brain currently crashes at extreme resampling ratios
+				MessageBeep(MB_ICONWARNING);
+				EndWaitCursor();
+				return;
+			}
 			const SmpLength bufferSize = std::min(std::max(selLength, SmpLength(oldRate)), SmpLength(1024 * 1024));
 			std::vector<double> convBuffer(bufferSize);
 			r8b::CDSPResampler16 resampler(oldRate, newRate, convBuffer.size());
