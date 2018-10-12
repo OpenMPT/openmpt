@@ -807,8 +807,8 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	pdwTable = const_unaligned_ptr_le<uint32>(lpStream + dwSmplArr);
 	for (uint32 iSmp=0; iSmp<m_nSamples; iSmp++) if (pdwTable[iSmp])
 	{
-		uint32 dwPos = BigEndian(pdwTable[iSmp]);
-		if ((dwPos >= dwMemLength) || (dwPos + sizeof(MMDSAMPLEHEADER) >= dwMemLength)) continue;
+		const uint32 dwPos = BigEndian(pdwTable[iSmp]);
+		if ((dwPos >= dwMemLength) || (dwPos + sizeof(MMDSAMPLEHEADER) >= dwMemLength) || !(loadFlags & loadSampleData)) continue;
 		const MMDSAMPLEHEADER *psdh = (const MMDSAMPLEHEADER *)(lpStream + dwPos);
 		uint32 len = BigEndian(psdh->length);
 	#ifdef MED_LOG
@@ -816,7 +816,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 	#endif
 		if(dwPos + len + 6 > dwMemLength) len = 0;
 		uint32 stype = BigEndianW(psdh->type);
-		const char *psdata = (const char *)(lpStream + dwPos + 6);
+		FileReader chunk(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(lpStream + dwPos + 6, dwMemLength - dwPos - 6)));
 
 		SampleIO sampleIO(
 			SampleIO::_8bit,
@@ -826,7 +826,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 
 		if (stype & 0x80)
 		{
-			psdata += (stype & 0x20) ? 14 : 6;
+			chunk.Skip((stype & 0x20) ? 14 : 6);
 		} else
 		{
 			if(stype & 0x10)
@@ -841,11 +841,7 @@ bool CSoundFile::ReadMed(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 		Samples[iSmp + 1].nLength = len;
-		if(loadFlags & loadSampleData)
-		{
-			FileReader chunk(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(psdata, dwMemLength - dwPos - 6)));
-			sampleIO.ReadSample(Samples[iSmp + 1], chunk);
-		}
+		sampleIO.ReadSample(Samples[iSmp + 1], chunk);
 	}
 	// Reading patterns (blocks)
 	if(!(loadFlags & loadPatternData))
