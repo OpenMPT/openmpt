@@ -1652,7 +1652,7 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 			m_sndFile->SetResamplerSettings( newsettings );
 		}
 	} else if ( ctl == "render.opl.volume_factor" ) {
-		m_sndFile->m_OPLVolumeFactor = mpt::round<int32>( ConvertStrTo<double>( value ) * static_cast<double>( m_sndFile->m_OPLVolumeFactorScale ) );
+		m_sndFile->m_OPLVolumeFactor = mpt::saturate_round<int32>( ConvertStrTo<double>( value ) * static_cast<double>( m_sndFile->m_OPLVolumeFactorScale ) );
 	} else if ( ctl == "dither" ) {
 		int dither = ConvertStrTo<int>( value );
 		if ( dither < 0 || dither >= NumDitherModes ) {
