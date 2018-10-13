@@ -247,11 +247,11 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
         
             make CONFIG=afl
         
-        For more detailed instructions, read contrib/fuzzing/readme.md
+        For more detailed instructions, read `contrib/fuzzing/readme.md`.
 
      -  other compilers:
 
-        To compiler libopenmpt with other C++11 compliant compilers, run:
+        To compile libopenmpt with other C++11 compliant compilers, run:
         
             make CONFIG=generic
         
