@@ -1,4 +1,4 @@
-libopusenc library version 0.2.
+libopusenc library version 0.2.1.
 The following changes have been made:
 - win32/version.h got added.
 - Obviously unnecessary folders and files have been removed.
