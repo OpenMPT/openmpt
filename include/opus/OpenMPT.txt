@@ -1,4 +1,4 @@
-libopus library version 1.3-rc2.
+libopus library version 1.3.
 The following changes have been made:
 - Obviously, unnecessary folders and files have been removed.
 - win32/version.h got added.
