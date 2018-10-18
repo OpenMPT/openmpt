@@ -562,13 +562,14 @@ void CSoundFile::UpgradeModule()
 		// We do not store any of these flags in S3M files.
 		static constexpr PlayBehaviourVersion behaviours[] =
 		{
-			{ kST3NoMutedChannels,		MAKE_VERSION_NUMERIC(1, 18, 00, 00) },
-			{ kST3EffectMemory,			MAKE_VERSION_NUMERIC(1, 20, 00, 00) },
-			{ kRowDelayWithNoteDelay,	MAKE_VERSION_NUMERIC(1, 20, 00, 00) },
-			{ kST3PortaSampleChange,	MAKE_VERSION_NUMERIC(1, 22, 00, 00) },
-			{ kST3VibratoMemory,		MAKE_VERSION_NUMERIC(1, 26, 00, 00) },
-			{ kITPanbrelloHold,			MAKE_VERSION_NUMERIC(1, 26, 00, 00) },
-			{ KST3PortaAfterArpeggio,	MAKE_VERSION_NUMERIC(1, 27, 00, 00) },
+			{ kST3NoMutedChannels,         MAKE_VERSION_NUMERIC(1, 18, 00, 00) },
+			{ kST3EffectMemory,            MAKE_VERSION_NUMERIC(1, 20, 00, 00) },
+			{ kRowDelayWithNoteDelay,      MAKE_VERSION_NUMERIC(1, 20, 00, 00) },
+			{ kST3PortaSampleChange,       MAKE_VERSION_NUMERIC(1, 22, 00, 00) },
+			{ kST3VibratoMemory,           MAKE_VERSION_NUMERIC(1, 26, 00, 00) },
+			{ kITPanbrelloHold,            MAKE_VERSION_NUMERIC(1, 26, 00, 00) },
+			{ KST3PortaAfterArpeggio,      MAKE_VERSION_NUMERIC(1, 27, 00, 00) },
+			{ kST3OffsetWithoutInstrument, MAKE_VERSION_NUMERIC(1, 28, 00, 00) },
 		};
 
 		for(const auto &b : behaviours)
