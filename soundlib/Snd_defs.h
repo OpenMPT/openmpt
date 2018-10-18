@@ -477,6 +477,7 @@ enum PlayBehaviour
 	kFT2PanSustainRelease,			// If the sustain point of a panning envelope is reached before key-off, FT2 does not escape it anymore
 	kLegacyReleaseNode,				// Legacy release node volume processing
 	kOPLBeatingOscillators,			// Emulate beating FM oscillators from CDFM / Composer 670
+	kST3OffsetWithoutInstrument,	// Note without instrument uses same offset as previous note
 
 	// Add new play behaviours here.
 

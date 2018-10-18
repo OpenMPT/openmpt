@@ -600,8 +600,9 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2PanSustainRelease: desc = _T("If the sustain point of the panning envelope is reached before key-off, it is never released."); break;
 		case kLegacyReleaseNode: desc = _T("Old volume envelope release node scaling behaviour"); break;
 		case kOPLBeatingOscillators: desc = _T("Beating OPL oscillators"); break;
+		case kST3OffsetWithoutInstrument: desc = _T("Notes without instrument use the previous note's sample offset"); break;
 
-		default: MPT_ASSERT(0);
+		default: MPT_ASSERT_NOTREACHED();
 		}
 
 		if(m_playBehaviour[i] || allowedFlags[i])

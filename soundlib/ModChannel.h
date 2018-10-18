@@ -64,7 +64,7 @@ struct ModChannel
 
 	// Information not used in the mixer
 	const ModInstrument *pModInstrument;	// Currently assigned instrument slot
-	SmpLength proTrackerOffset;				// Offset for instrument-less notes in ProTracker mode
+	SmpLength prevNoteOffset;				// Offset for instrument-less notes for ProTracker/ScreamTracker
 	SmpLength oldOffset;
 	FlagSet<ChannelFlags> dwOldFlags;		// Flags from previous tick
 	int32 newLeftVol, newRightVol;

@@ -955,7 +955,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				bool porta = m.command == CMD_TONEPORTAMENTO || m.command == CMD_TONEPORTAVOL || m.volcmd == VOLCMD_TONEPORTAMENTO;
 				bool stopNote = patternLoopStartedOnThisRow;	// It's too much trouble to keep those pattern loops in sync...
 
-				if(m.instr) chn.proTrackerOffset = 0;
+				if(m.instr) chn.prevNoteOffset = 0;
 				if(m.IsNote())
 				{
 					if(porta && memory.chnSettings[nChn].incChanged)
@@ -1858,12 +1858,12 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 			chn.nLoopEnd = pSmp->nLength;
 			chn.nLoopStart = 0;
 			chn.position.Set(0);
-			if(m_SongFlags[SONG_PT_MODE] && !chn.rowCommand.instr)
+			if((m_SongFlags[SONG_PT_MODE] || m_playBehaviour[kST3OffsetWithoutInstrument]) && !chn.rowCommand.instr)
 			{
-				chn.position.SetInt(std::min<SmpLength>(chn.proTrackerOffset, chn.nLength - 1));
+				chn.position.SetInt(std::min<SmpLength>(chn.prevNoteOffset, chn.nLength - 1));
 			} else
 			{
-				chn.proTrackerOffset = 0;
+				chn.prevNoteOffset = 0;
 			}
 			chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | (pSmp->uFlags & CHN_SAMPLEFLAGS);
 			chn.dwFlags.reset(CHN_PORTAMENTO);
@@ -2553,7 +2553,7 @@ bool CSoundFile::ProcessEffects()
 		{
 			// Instrument number resets the stacked ProTracker offset.
 			// Test case: ptoffset.mod
-			chn.proTrackerOffset = 0;
+			chn.prevNoteOffset = 0;
 			// ProTracker compatibility: Sample properties are always loaded on the first tick, even when there is a note delay.
 			// Test case: InstrDelay.mod
 			if(!triggerNote && chn.IsSamplePlaying())
@@ -5194,7 +5194,12 @@ void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
 
 void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 {
-	chn.proTrackerOffset += param;
+	// ST3 compatibility: Instrument-less note recalls previous note's offset
+	// Test case: OxxMemory.s3m
+	if(m_playBehaviour[kST3OffsetWithoutInstrument])
+		chn.prevNoteOffset = 0;
+	
+	chn.prevNoteOffset += param;
 
 	if(param >= chn.nLoopEnd && GetType() == MOD_TYPE_MTM && chn.dwFlags[CHN_LOOP] && chn.nLoopEnd > 0)
 	{
@@ -5223,8 +5228,8 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 		{
 			// ProTracker compatbility: PT1/2-style funky 9xx offset command
 			// Test case: ptoffset.mod
-			chn.position.Set(chn.proTrackerOffset);
-			chn.proTrackerOffset += param;
+			chn.position.Set(chn.prevNoteOffset);
+			chn.prevNoteOffset += param;
 		} else
 		{
 			chn.position.Set(param);
