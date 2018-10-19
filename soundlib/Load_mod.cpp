@@ -58,8 +58,6 @@ void CSoundFile::ConvertModCommand(ModCommand &m)
 	case 'H' - 55:	m.command = CMD_GLOBALVOLSLIDE; break;
 	case 'K' - 55:	m.command = CMD_KEYOFF; break;
 	case 'L' - 55:	m.command = CMD_SETENVPOSITION; break;
-	case 'M' - 55:	m.command = CMD_CHANNELVOLUME; break;		// Wat. Luckily, MPT never allowed this to be entered in patterns...
-	case 'N' - 55:	m.command = CMD_CHANNELVOLSLIDE; break;		// Ditto.
 	case 'P' - 55:	m.command = CMD_PANNINGSLIDE; break;
 	case 'R' - 55:	m.command = CMD_RETRIG; break;
 	case 'T' - 55:	m.command = CMD_TREMOR; break;
