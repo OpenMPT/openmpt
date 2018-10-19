@@ -873,7 +873,6 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 			IDC_SAMPLE_RESAMPLE,    IDC_SAMPLE_REVERSE,
 			IDC_SAMPLE_SILENCE,     IDC_SAMPLE_INVERT,
 			IDC_SAMPLE_SIGN_UNSIGN, IDC_SAMPLE_XFADE,
-			IDC_SAMPLE_AUTOTUNE,
 		};
 		for(auto btn : sampleButtons)
 		{
@@ -3557,7 +3556,8 @@ void CCtrlSamples::OnAutotune()
 		selection.nStart = selection.nEnd = 0;
 	}
 
-	Autotune at(m_sndFile.GetSample(m_nSample), m_sndFile.GetType(), selection.nStart, selection.nEnd);
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	Autotune at(sample, m_sndFile.GetType(), selection.nStart, selection.nEnd);
 	if(at.CanApply())
 	{
 		CAutotuneDlg dlg(this);
@@ -3565,7 +3565,10 @@ void CCtrlSamples::OnAutotune()
 		{
 			BeginWaitCursor();
 			PrepareUndo("Automatic Sample Tuning");
-			at.Apply(static_cast<double>(dlg.GetPitchReference()), dlg.GetTargetNote());
+			if (IsOPLInstrument())
+				sample.nC5Speed = mpt::saturate_round<uint32>(dlg.GetPitchReference() * (8363.0 / 440.0) * std::pow(2.0, dlg.GetTargetNote() / 12.0));
+			else
+				at.Apply(static_cast<double>(dlg.GetPitchReference()), dlg.GetTargetNote());
 			SetModified(SampleHint().Info(), true, false);
 			EndWaitCursor();
 		}

@@ -67,11 +67,11 @@ static SmpLength NoteToShift(uint32 sampleFreq, int note, double pitchReference)
 template <class T>
 void Autotune::CopySamples(const T* origSample, SmpLength sampleLoopStart, SmpLength sampleLoopEnd)
 {
-	const uint8 channels = sample.GetNumChannels();
+	const uint8 channels = m_sample.GetNumChannels();
 	sampleLoopStart *= channels;
 	sampleLoopEnd *= channels;
 
-	for(SmpLength i = 0, pos = 0; i < sampleLength; i++, pos += channels)
+	for(SmpLength i = 0, pos = 0; i < m_sampleLength; i++, pos += channels)
 	{
 		if(pos >= sampleLoopEnd)
 		{
@@ -89,7 +89,7 @@ void Autotune::CopySamples(const T* origSample, SmpLength sampleLoopStart, SmpLe
 
 		data /= channels;
 
-		sampleData[i] = static_cast<int16>(data);
+		m_sampleData[i] = static_cast<int16>(data);
 	}
 }
 
@@ -99,50 +99,50 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 {
 
 	// Determine which parts of the sample should be examined.
-	SmpLength sampleOffset = 0, sampleLoopStart = 0, sampleLoopEnd = sample.nLength;
-	if(selectionEnd >= sampleLoopStart + MIN_SAMPLE_LENGTH)
+	SmpLength sampleOffset = 0, sampleLoopStart = 0, sampleLoopEnd = m_sample.nLength;
+	if(m_selectionEnd >= sampleLoopStart + MIN_SAMPLE_LENGTH)
 	{
 		// A selection has been specified: Examine selection
-		sampleOffset = selectionStart;
+		sampleOffset = m_selectionStart;
 		sampleLoopStart = 0;
-		sampleLoopEnd = selectionEnd - selectionStart;
-	} else if(sample.uFlags[CHN_SUSTAINLOOP] && sample.nSustainEnd >= sample.nSustainStart + MIN_SAMPLE_LENGTH)
+		sampleLoopEnd = m_selectionEnd - m_selectionStart;
+	} else if(m_sample.uFlags[CHN_SUSTAINLOOP] && m_sample.nSustainEnd >= m_sample.nSustainStart + MIN_SAMPLE_LENGTH)
 	{
 		// A sustain loop is set: Examine sample up to sustain loop and, if necessary, execute the loop several times
 		sampleOffset = 0;
-		sampleLoopStart = sample.nSustainStart;
-		sampleLoopEnd = sample.nSustainEnd;
-	} else if(sample.uFlags[CHN_LOOP] && sample.nLoopEnd >= sample.nLoopStart + MIN_SAMPLE_LENGTH)
+		sampleLoopStart = m_sample.nSustainStart;
+		sampleLoopEnd = m_sample.nSustainEnd;
+	} else if(m_sample.uFlags[CHN_LOOP] && m_sample.nLoopEnd >= m_sample.nLoopStart + MIN_SAMPLE_LENGTH)
 	{
 		// A normal loop is set: Examine sample up to loop and, if necessary, execute the loop several times
 		sampleOffset = 0;
-		sampleLoopStart = sample.nLoopStart;
-		sampleLoopEnd = sample.nLoopEnd;
+		sampleLoopStart = m_sample.nLoopStart;
+		sampleLoopEnd = m_sample.nLoopEnd;
 	}
 
 	// We should analyse at least a one second (= GetSampleRate() samples) long sample.
-	sampleLength = std::max<SmpLength>(sampleLoopEnd, sample.GetSampleRate(modType)) + maxShift;
-	sampleLength = (sampleLength + 7) & ~7;
+	m_sampleLength = std::max<SmpLength>(sampleLoopEnd, m_sample.GetSampleRate(m_modType)) + maxShift;
+	m_sampleLength = (m_sampleLength + 7) & ~7;
 
-	if(sampleData != nullptr)
+	if(m_sampleData != nullptr)
 	{
-		delete[] sampleData;
+		delete[] m_sampleData;
 	}
-	sampleData = new int16[sampleLength];
-	if(sampleData == nullptr)
+	m_sampleData = new int16[m_sampleLength];
+	if(m_sampleData == nullptr)
 	{
 		return false;
 	}
 
 	// Copy sample over.
-	switch(sample.GetElementarySampleSize())
+	switch(m_sample.GetElementarySampleSize())
 	{
 	case 1:
-		CopySamples(sample.sample8() + sampleOffset * sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
+		CopySamples(m_sample.sample8() + sampleOffset * m_sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
 		return true;
 
 	case 2:
-		CopySamples(sample.sample16() + sampleOffset * sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
+		CopySamples(m_sample.sample16() + sampleOffset * m_sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
 		return true;
 	}
 
@@ -153,7 +153,7 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 
 bool Autotune::CanApply() const
 {
-	return (sample.HasSampleData() && sample.nLength >= MIN_SAMPLE_LENGTH);
+	return (m_sample.HasSampleData() && m_sample.nLength >= MIN_SAMPLE_LENGTH) || m_sample.uFlags[CHN_ADLIB];
 }
 
 
@@ -174,7 +174,7 @@ struct AutotuneHistogram
 
 struct AutotuneContext
 {
-	int16 *sampleData;
+	int16 *m_sampleData;
 	double pitchReference;
 	SmpLength processLength;
 	uint32 sampleFreq;
@@ -185,8 +185,8 @@ static inline AutotuneHistogramEntry CalculateNoteHistogramSSE2(int note, Autotu
 	const SmpLength autocorrShift = NoteToShift(ctx.sampleFreq, note, ctx.pitchReference);
 	uint64 autocorrSum = 0;
 	{
-		const __m128i *normalData = reinterpret_cast<const __m128i *>(ctx.sampleData);
-		const __m128i *shiftedData = reinterpret_cast<const __m128i *>(ctx.sampleData + autocorrShift);
+		const __m128i *normalData = reinterpret_cast<const __m128i *>(ctx.m_sampleData);
+		const __m128i *shiftedData = reinterpret_cast<const __m128i *>(ctx.m_sampleData + autocorrShift);
 		for(SmpLength i = ctx.processLength / 8; i != 0; i--)
 		{
 			__m128i normal = _mm_loadu_si128(normalData++);
@@ -209,8 +209,8 @@ static inline AutotuneHistogramEntry CalculateNoteHistogram(int note, AutotuneCo
 	const SmpLength autocorrShift = NoteToShift(ctx.sampleFreq, note, ctx.pitchReference);
 	uint64 autocorrSum = 0;
 	{
-		const int16 *normalData = ctx.sampleData;
-		const int16 *shiftedData = ctx.sampleData + autocorrShift;
+		const int16 *normalData = ctx.m_sampleData;
+		const int16 *shiftedData = ctx.m_sampleData + autocorrShift;
 		// Add up squared differences of all values
 		for(SmpLength i = ctx.processLength; i != 0; i--, normalData++, shiftedData++)
 		{
@@ -320,7 +320,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 		return false;
 	}
 
-	const uint32 sampleFreq = sample.GetSampleRate(modType);
+	const uint32 sampleFreq = m_sample.GetSampleRate(m_modType);
 	// At the lowest frequency, we get the highest autocorrelation shift amount.
 	const SmpLength maxShift = NoteToShift(sampleFreq, START_NOTE, pitchReference);
 	if(!PrepareSample(maxShift))
@@ -328,10 +328,10 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 		return false;
 	}
 	// We don't process the autocorrelation overhead.
-	const SmpLength processLength = sampleLength - maxShift;
+	const SmpLength processLength = m_sampleLength - maxShift;
 
 	AutotuneContext ctx;
-	ctx.sampleData = sampleData;
+	ctx.m_sampleData = m_sampleData;
 	ctx.pitchReference = pitchReference;
 	ctx.processLength = processLength;
 	ctx.sampleFreq = sampleFreq;
@@ -426,14 +426,14 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 
 	const double newFundamentalFreq = NoteToFrequency(static_cast<double>(69 - targetNote) + static_cast<double>(minimumBin) / BINS_PER_NOTE, pitchReference);
 
-	sample.nC5Speed = mpt::saturate_round<uint32>(sampleFreq * pitchReference / newFundamentalFreq);
+	m_sample.nC5Speed = mpt::saturate_round<uint32>(sampleFreq * pitchReference / newFundamentalFreq);
 
-	if((modType & (MOD_TYPE_XM | MOD_TYPE_MOD)))
+	if((m_modType & (MOD_TYPE_XM | MOD_TYPE_MOD)))
 	{
-		sample.FrequencyToTranspose();
-		if((modType & MOD_TYPE_MOD))
+		m_sample.FrequencyToTranspose();
+		if((m_modType & MOD_TYPE_MOD))
 		{
-			sample.RelativeTone = 0;
+			m_sample.RelativeTone = 0;
 		}
 	}
 
@@ -444,8 +444,8 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 /////////////////////////////////////////////////////////////
 // CAutotuneDlg
 
-int CAutotuneDlg::pitchReference = 440;	// Pitch reference in Hz
-int CAutotuneDlg::targetNote = 0;		// Target note (C- = 0, C# = 1, etc...)
+int CAutotuneDlg::m_pitchReference = 440;	// Pitch reference in Hz
+int CAutotuneDlg::m_targetNote = 0;		// Target note (C- = 0, C# = 1, etc...)
 
 void CAutotuneDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -465,13 +465,13 @@ BOOL CAutotuneDlg::OnInitDialog()
 	{
 		const int item = m_CbnNoteBox.AddString(mpt::ToCString(CSoundFile::GetDefaultNoteName(note)));
 		m_CbnNoteBox.SetItemData(item, note);
-		if(note == targetNote)
+		if(note == m_targetNote)
 		{
 			m_CbnNoteBox.SetCurSel(item);
 		}
 	}
 
-	SetDlgItemInt(IDC_EDIT1, pitchReference, FALSE);
+	SetDlgItemInt(IDC_EDIT1, m_pitchReference, FALSE);
 
 	return TRUE;
 }
@@ -479,10 +479,16 @@ BOOL CAutotuneDlg::OnInitDialog()
 
 void CAutotuneDlg::OnOK()
 {
-	CDialog::OnOK();
+	int pitch = GetDlgItemInt(IDC_EDIT1);
+	if(pitch <= 0)
+	{
+		MessageBeep(MB_ICONWARNING);
+		return;
+	}
 
-	targetNote = (int)m_CbnNoteBox.GetItemData(m_CbnNoteBox.GetCurSel());
-	pitchReference = GetDlgItemInt(IDC_EDIT1);
+	CDialog::OnOK();
+	m_targetNote = (int)m_CbnNoteBox.GetItemData(m_CbnNoteBox.GetCurSel());
+	m_pitchReference = pitch;
 }
 
 
