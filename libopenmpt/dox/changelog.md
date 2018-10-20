@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta36
 
+ *  [**Sec**] Crash with malformed MED files (r10905).
+
 ### libopenmpt 0.2-beta35 (2018-09-24)
 
  *  [**Bug**] openmpt123: Prevent libsdl2 and libsdl from being enabled at the
