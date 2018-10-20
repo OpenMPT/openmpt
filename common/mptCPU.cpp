@@ -198,11 +198,7 @@ void InitProcSupport()
 			if(StandardFeatureFlags.c & (1<<20)) ProcSupport |= PROCSUPPORT_SSE4_2;
 		}
 
-		if(VendorString.as_string() == "GenuineIntel")
-		{
-			mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
-		}
-
+		bool canExtended = false;
 		// 3DNow! manual recommends to just execute 0x80000000u.
 		// It is totally unknown how earlier CPUs from other vendors
 		// would behave.
@@ -210,24 +206,24 @@ void InitProcSupport()
 		// that we found it documented for and that actually supports 3DNow!.
 		// We only need 0x80000000u in order to detect 3DNow!.
 		// Thus, this is enough for us.
-		if((VendorString.as_string() == "AuthenticAMD") || (VendorString.as_string() == "AMDisbetter!"))
+		if(VendorString.as_string() == "GenuineIntel")
+		{ // Intel
+
+			// 5.9.x : Quark
+			// 6.11.x: P3-S (Tualatin)
+			if((ProcFamily > 6) || ((ProcFamily == 6) && (ProcModel >= 11)) || ((ProcFamily == 5) && (ProcModel >= 9)))
+			{
+				canExtended = true;
+			}
+
+		} else if((VendorString.as_string() == "AuthenticAMD") || (VendorString.as_string() == "AMDisbetter!"))
 		{ // AMD
 
 			if((ProcFamily > 5) || ((ProcFamily == 5) && (ProcModel >= 8)))
 			{ // >= K6-2 (K6 = Family 5, K6-2 = Model 8)
 				// Not sure if earlier AMD CPUs support 0x80000000u.
 				// AMD 5k86 and AMD K5 manuals do not mention it.
-				cpuid_result ExtendedVendorString = cpuid(0x80000000u);
-				if(ExtendedVendorString.a >= 0x80000001u)
-				{
-					cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
-					if(ExtendedFeatureFlags.d & (1<<15)) ProcSupport |= PROCSUPPORT_CMOV;
-					if(ExtendedFeatureFlags.d & (1<<23)) ProcSupport |= PROCSUPPORT_MMX;
-					if(ExtendedFeatureFlags.d & (1<<22)) ProcSupport |= PROCSUPPORT_AMD_MMXEXT;
-					if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
-					if(ExtendedFeatureFlags.d & (1<<30)) ProcSupport |= PROCSUPPORT_AMD_3DNOWEXT;
-				}
-				mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
+				canExtended = true;
 			}
 
 		} else if(VendorString.as_string() == "CentaurHauls")
@@ -238,13 +234,7 @@ void InitProcSupport()
 
 				if(ProcModel >= 8)
 				{ // >= WinChip 2
-					cpuid_result ExtendedVendorString = cpuid(0x80000000u);
-					if(ExtendedVendorString.a >= 0x80000001u)
-					{
-						cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
-						if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
-					}
-					mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
+					canExtended = true;
 				}
 
 			} else if(ProcFamily >= 6)
@@ -252,13 +242,7 @@ void InitProcSupport()
 
 				if((ProcFamily >= 7) || ((ProcFamily == 6) && (ProcModel >= 7)))
 				{ // >= C3 Samuel 2
-					cpuid_result ExtendedVendorString = cpuid(0x80000000u);
-					if(ExtendedVendorString.a >= 0x80000001u)
-					{
-						cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
-						if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
-					}
-					mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
+					canExtended = true;
 				}
 
 			}
@@ -276,13 +260,7 @@ void InitProcSupport()
 
 			if((ProcFamily == 5) && (ProcModel >= 4))
 			{ // Cyrix MediaGXm
-				cpuid_result ExtendedVendorString = cpuid(0x80000000u);
-				if(ExtendedVendorString.a >= 0x80000001u)
-				{
-					cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
-					if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
-				}
-				mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
+				canExtended = true;
 			}
 
 		} else if(VendorString.as_string() == "Geode by NSC")
@@ -290,21 +268,40 @@ void InitProcSupport()
 
 			if((ProcFamily > 5) || ((ProcFamily == 5) && (ProcModel >= 5)))
 			{ // >= Geode GX2
-				cpuid_result ExtendedVendorString = cpuid(0x80000000u);
-				if(ExtendedVendorString.a >= 0x80000001u)
-				{
-					cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
-					if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
-				}
-				mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
+				canExtended = true;
 			}
 
+		} else
+		{ // unknown, which nowadays most likely means some virtualized CPU
+
+			// we assume extended flags present in this case
+			canExtended = true;
+
+		}
+
+		if(canExtended)
+		{
+			cpuid_result ExtendedVendorString = cpuid(0x80000000u);
+			if(ExtendedVendorString.a >= 0x80000001u)
+			{
+				cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
+				if(ExtendedFeatureFlags.d & (1<<29)) ProcSupport |= PROCSUPPORT_LM;
+				if((VendorString.as_string() == "AuthenticAMD") || (VendorString.as_string() == "AMDisbetter!"))
+				{
+					if(ExtendedFeatureFlags.d & (1<<15)) ProcSupport |= PROCSUPPORT_CMOV;
+					if(ExtendedFeatureFlags.d & (1<<23)) ProcSupport |= PROCSUPPORT_MMX;
+				}
+				if(ExtendedFeatureFlags.d & (1<<22)) ProcSupport |= PROCSUPPORT_AMD_MMXEXT;
+				if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
+				if(ExtendedFeatureFlags.d & (1<<30)) ProcSupport |= PROCSUPPORT_AMD_3DNOWEXT;
+			}
+			mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
 		}
 
 	}
 
 	// We do not have to check if SSE got enabled by the OS because we only do
-	// support Windows >= 98 SE which will always enable SSE if available.
+	// support Windows >= XP. Windows will always enable SSE since Windows 98 SE.
 
 	RealProcSupport = ProcSupport;
 
