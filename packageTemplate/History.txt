@@ -30,6 +30,36 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.27.11.00 (21 October 2018, revision 10938)
+---------------------------------------------
+Pattern tab
+   [Fix] <js> Amplification with both fade-in and fade-out enabled was broken.
+   [Fix] <js> Partially selected channels were sometimes amplified when they should not have been.
+
+Sample tab
+   [Fix] <js> Trying to apply an invalid sample rate and then choosing the upsample or downsample option instead caused the wrong sample rate to be chosen for resampling.
+   [Fix] <js> Reject resampling ratios greater than or equal to 512 when using r8brain for resampling as they resulted in a crash.
+
+Mod Conversion
+   [Mod] <js> When converting to MOD / XM, convert S8x to 8xx instead of E8x, as Fast Tracker does apparently not support E8x.
+
+Playback
+   [Fix] <js> Clicks when stopping channels that didn't end at zero volume in 64-bit builds.
+
+XM
+   [Fix] <js> Do not import commands N and M as channel volume commands (http://bugs.openmpt.org/view.php?id=1156).
+
+Other formats
+   [Fix] <js> MED: Possible crash with malformed files.
+ 
+Misc
+   [Imp] <js> Implement horizontal scrolling for pattern / sample / instrument editors. Useful e.g. for pattern navigation with some trackpoint drivers.
+   [Fix] <js> Notes triggered from any editor could be played with a panbrello effect if some other channel was previously playing with panbrello.
+
+Third-Party Libraries
+   [Var] Update libopusenc (v0.2.1)
+
+
 v1.27.10.00 (23 September 2018, revision 10852)
 -----------------------------------------------
 Pattern tab
