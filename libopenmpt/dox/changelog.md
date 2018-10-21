@@ -11,7 +11,7 @@ is just a high-level summary.
 
  *  [**Sec**] Crash with malformed MED files (r10904).
 
- *  Transposed samples in AMF ASYLUM modules were not played correctly.  
+ *  Transposed samples in AMF ASYLUM modules were not played correctly.
  *  Notes triggered by libopenmpt_ext play_note could be played with a panbrello
     effect if the same virtual channel was previously used with panbrello.
  *  Clicks when stopping channels that didn't end at zero volume.
