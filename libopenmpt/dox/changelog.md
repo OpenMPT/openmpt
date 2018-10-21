@@ -9,6 +9,12 @@ is just a high-level summary.
 
  *  [**Sec**] Crash with malformed MED files (r10905).
 
+ *  Transposed samples in AMF ASYLUM modules were not played correctly.  
+ *  Notes triggered libopenmpt_ext play_note could be played with a panbrello
+    effect if the same virtual channel was previously used with panbrello.
+ *  Clicks when stopping channels that didn't end at zero volume.
+ *  XM: Do not import non-standard commands N and M as channel volume commands.
+
 ### libopenmpt 0.2-beta35 (2018-09-24)
 
  *  [**Bug**] openmpt123: Prevent libsdl2 and libsdl from being enabled at the
