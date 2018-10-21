@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2-beta37
+
 ### libopenmpt 0.2-beta36 (2018-10-21)
 
  *  [**Sec**] Crash with malformed MED files (r10905).
