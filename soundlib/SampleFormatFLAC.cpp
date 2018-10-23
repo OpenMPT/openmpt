@@ -469,12 +469,12 @@ inline static void SampleToFLAC32(FLAC__int32 *dst, const T *src, SmpLength numS
 // RAII-style helper struct for FLAC encoder
 struct FLAC__StreamEncoder_RAII
 {
+	mpt::ofstream &f;
 	FLAC__StreamEncoder *encoder;
-	mpt::ofstream f;
 
 	operator FLAC__StreamEncoder *() { return encoder; }
 
-	FLAC__StreamEncoder_RAII() : encoder(FLAC__stream_encoder_new()) { }
+	FLAC__StreamEncoder_RAII(mpt::ofstream &f_) : f(f_), encoder(FLAC__stream_encoder_new()) { }
 	~FLAC__StreamEncoder_RAII()
 	{
 		FLAC__stream_encoder_delete(encoder);
@@ -532,7 +532,14 @@ struct FLAC__StreamEncoder_RAII
 bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
 {
 #ifdef MPT_WITH_FLAC
-	FLAC__StreamEncoder_RAII encoder;
+
+	mpt::ofstream f(filename, std::ios::binary);
+	if(!f)
+	{
+		return false;
+	}
+
+	FLAC__StreamEncoder_RAII encoder(f);
 	if(encoder == nullptr)
 	{
 		return false;
@@ -668,8 +675,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 	FLAC__int32 *sampleData = nullptr;
 	SmpLength numSamples = 0;
 
-	encoder.f.open(filename, std::ios::binary);
-	if(!encoder.f || FLAC__stream_encoder_init_stream(encoder, &FLAC__StreamEncoder_RAII::StreamEncoderWriteCallback, &FLAC__StreamEncoder_RAII::StreamEncoderSeekCallback, &FLAC__StreamEncoder_RAII::StreamEncoderTellCallback, nullptr, &encoder.f) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
+	if(FLAC__stream_encoder_init_stream(encoder, &FLAC__StreamEncoder_RAII::StreamEncoderWriteCallback, &FLAC__StreamEncoder_RAII::StreamEncoderSeekCallback, &FLAC__StreamEncoder_RAII::StreamEncoderTellCallback, nullptr, &encoder.f) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
 	{
 		goto fail;
 	}
