@@ -20,6 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 BEGIN_MESSAGE_MAP(CloseMainDialog, CDialog)
+	ON_WM_GETMINMAXINFO()
 	ON_COMMAND(IDC_BUTTON1,			&CloseMainDialog::OnSaveAll)
 	ON_COMMAND(IDC_BUTTON2,			&CloseMainDialog::OnSaveNone)
 	ON_COMMAND(IDC_CHECK1,			&CloseMainDialog::OnSwitchFullPaths)
@@ -47,12 +48,10 @@ CloseMainDialog::~CloseMainDialog()
 };
 
 
-// Format a list entry string - apparently list boxes in ANSI windows are ANSI too, so inserted unicode
-// strings are converted to ANSI. Thus, we will keep using CStrings here for ANSI builds.
-CString CloseMainDialog::FormatTitle(const CModDoc *pModDoc, bool fullPath)
+CString CloseMainDialog::FormatTitle(const CModDoc *modDoc, bool fullPath)
 {
-	const CString &path = (!fullPath || pModDoc->GetPathNameMpt().empty()) ? pModDoc->GetTitle() : pModDoc->GetPathNameMpt().ToCString();
-	return CString(pModDoc->GetSoundFile().GetTitle().c_str()) + CString(" (") + path + CString(")");
+	const CString &path = (!fullPath || modDoc->GetPathNameMpt().empty()) ? modDoc->GetTitle() : modDoc->GetPathNameMpt().ToCString();
+	return mpt::ToCString(modDoc->GetSoundFile().GetCharsetInternal(), modDoc->GetSoundFile().GetTitle()) + _T(" (") + path + _T(")");
 }
 
 
@@ -82,6 +81,10 @@ BOOL CloseMainDialog::OnInitDialog()
 		OnOK();
 	}
 
+	CRect rect;
+	GetWindowRect(rect);
+	m_minSize = rect.Size();
+
 	return TRUE;
 }
 
@@ -91,12 +94,12 @@ void CloseMainDialog::OnOK()
 	const int count = m_List.GetCount();
 	for(int i = 0; i < count; i++)
 	{
-		CModDoc *pModDoc = (CModDoc *)m_List.GetItemDataPtr(i);
-		ASSERT(pModDoc != nullptr);
+		CModDoc *modDoc = static_cast<CModDoc *>(m_List.GetItemDataPtr(i));
+		MPT_ASSERT(modDoc != nullptr);
 		if(m_List.GetSel(i))
 		{
-			pModDoc->ActivateWindow();
-			if(pModDoc->DoFileSave() == FALSE)
+			modDoc->ActivateWindow();
+			if(modDoc->DoFileSave() == FALSE)
 			{
 				// If something went wrong, or if the user decided to cancel saving (when using "Save As"), we'll better not proceed...
 				OnCancel();
@@ -104,17 +107,11 @@ void CloseMainDialog::OnOK()
 			}
 		} else
 		{
-			pModDoc->SetModified(FALSE);
+			modDoc->SetModified(FALSE);
 		}
 	}
 
 	CDialog::OnOK();
-}
-
-
-void CloseMainDialog::OnCancel()
-{
-	CDialog::OnCancel();
 }
 
 
@@ -145,13 +142,19 @@ void CloseMainDialog::OnSwitchFullPaths()
 	const bool fullPath = (IsDlgButtonChecked(IDC_CHECK1) == BST_CHECKED);
 	for(int i = 0; i < count; i++)
 	{
-		CModDoc *pModDoc = (CModDoc *)m_List.GetItemDataPtr(i);
-		int item = m_List.InsertString(i + 1, FormatTitle(pModDoc, fullPath));
-		m_List.SetItemDataPtr(item, pModDoc);
+		CModDoc *modDoc = static_cast<CModDoc *>(m_List.GetItemDataPtr(i));
+		int item = m_List.InsertString(i + 1, FormatTitle(modDoc, fullPath));
+		m_List.SetItemDataPtr(item, modDoc);
 		m_List.SetSel(item, m_List.GetSel(i));
 		m_List.DeleteString(i);
 	}
 }
 
+
+void CloseMainDialog::OnGetMinMaxInfo(MINMAXINFO *mmi)
+{
+	mmi->ptMinTrackSize = m_minSize;
+	CDialog::OnGetMinMaxInfo(mmi);
+}
 
 OPENMPT_NAMESPACE_END

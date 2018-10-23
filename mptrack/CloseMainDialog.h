@@ -19,23 +19,25 @@ class CloseMainDialog: public CDialog
 protected:
 	
 	CListBox m_List;
+	CPoint m_minSize;
 
-	CString FormatTitle(const CModDoc *pModDoc, bool fullPath);
+	static CString FormatTitle(const CModDoc *modDoc, bool fullPath);
 
 public:
 	CloseMainDialog();
 	~CloseMainDialog();
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual void OnCancel();
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 
 	afx_msg void OnSaveAll();
 	afx_msg void OnSaveNone();
 
 	afx_msg void OnSwitchFullPaths();
+
+	afx_msg void OnGetMinMaxInfo(MINMAXINFO *mmi);
 
 	DECLARE_MESSAGE_MAP()
 
