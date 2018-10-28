@@ -39,7 +39,7 @@
   <!-- Version number -->
   <Type Name="Version">
     <DisplayString>
-      {(m_Version >> 24) &amp; 0xF}.{(m_Version >> 20) &amp; 0xF}{(m_Version >> 16) &amp; 0xF}.{(m_Version >> 12) &amp; 0xF}{(m_Version >> 8) &amp; 0xF}.{(m_Version >> 4) &amp; 0xF}{(m_Version >> 0) &amp; 0xF}
+      {(m_Version >> 24) &amp; 0xFF}.{(m_Version >> 20) &amp; 0xF}{(m_Version >> 16) &amp; 0xF}.{(m_Version >> 12) &amp; 0xF}{(m_Version >> 8) &amp; 0xF}.{(m_Version >> 4) &amp; 0xF}{(m_Version >> 0) &amp; 0xF}
     </DisplayString>
   </Type>
 
