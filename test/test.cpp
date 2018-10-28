@@ -304,9 +304,6 @@ static MPT_NOINLINE void TestVersion()
 
 		mpt::ustring version = mpt::ToUnicode(szVer);
 
-		//version string should be like: 1,17,2,38  Change ',' to '.' to get format 1.17.2.38
-		version = mpt::String::Replace(version, MPT_USTRING(","), MPT_USTRING("."));
-
 		VERIFY_EQUAL( version, mpt::ufmt::val(Version::Current()) );
 		VERIFY_EQUAL( Version::Parse(version), Version::Current() );
 	}
