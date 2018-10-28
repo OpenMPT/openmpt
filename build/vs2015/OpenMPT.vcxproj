@@ -822,8 +822,10 @@
     <ClInclude Include="..\..\mptrack\PatternFindReplaceDlg.h" />
     <ClInclude Include="..\..\mptrack\PatternFont.h" />
     <ClInclude Include="..\..\mptrack\PatternGotoDialog.h" />
+    <ClInclude Include="..\..\mptrack\PlugNotFoundDlg.h" />
     <ClInclude Include="..\..\mptrack\ProgressDialog.h" />
     <ClInclude Include="..\..\mptrack\Reporting.h" />
+    <ClInclude Include="..\..\mptrack\ResizableDialog.h" />
     <ClInclude Include="..\..\mptrack\SampleConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\SampleEditorDialogs.h" />
     <ClInclude Include="..\..\mptrack\SampleGenerator.h" />
@@ -1052,8 +1054,10 @@
     <ClCompile Include="..\..\mptrack\PatternFindReplaceDlg.cpp" />
     <ClCompile Include="..\..\mptrack\PatternFont.cpp" />
     <ClCompile Include="..\..\mptrack\PatternGotoDialog.cpp" />
+    <ClCompile Include="..\..\mptrack\PlugNotFoundDlg.cpp" />
     <ClCompile Include="..\..\mptrack\ProgressDialog.cpp" />
     <ClCompile Include="..\..\mptrack\Reporting.cpp" />
+    <ClCompile Include="..\..\mptrack\ResizableDialog.cpp" />
     <ClCompile Include="..\..\mptrack\SampleConfigDlg.cpp" />
     <ClCompile Include="..\..\mptrack\SampleEditorDialogs.cpp" />
     <ClCompile Include="..\..\mptrack\SampleGenerator.cpp" />

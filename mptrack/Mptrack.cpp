@@ -24,6 +24,7 @@
 #include "../common/mptStringBuffer.h"
 #include "ExceptionHandler.h"
 #include "CloseMainDialog.h"
+#include "PlugNotFoundDlg.h"
 #include "AboutDialog.h"
 #include "AutoSaver.h"
 #include "FileDialog.h"
@@ -1850,13 +1851,12 @@ void CFastBitmap::SetSize(int x, int y)
 // DirectX Plugins
 //
 
-BOOL CTrackApp::InitializeDXPlugins()
+void CTrackApp::InitializeDXPlugins()
 {
 	m_pPluginManager = new CVstPluginManager;
-	if(!m_pPluginManager) return FALSE;
 	const size_t numPlugins = GetSettings().Read<int32>(MPT_USTRING("VST Plugins"), MPT_USTRING("NumPlugins"), 0);
 
-	mpt::ustring nonFoundPlugs;
+	std::vector<VSTPluginLib *> nonFoundPlugs;
 	const mpt::PathString failedPlugin = GetSettings().Read<mpt::PathString>(MPT_USTRING("VST Plugins"), MPT_USTRING("FailedPlugin"), MPT_PATHSTRING(""));
 
 	CDialog pluginScanDlg;
@@ -1919,7 +1919,12 @@ BOOL CTrackApp::InitializeDXPlugins()
 
 			mpt::ustring plugTags = GetSettings().Read<mpt::ustring>(MPT_USTRING("VST Plugins"), tagFormat(plug), mpt::ustring());
 
-			VSTPluginLib *lib = m_pPluginManager->AddPlugin(plugPath, plugTags, true, true, &nonFoundPlugs);
+			bool plugFound = true;
+			VSTPluginLib *lib = m_pPluginManager->AddPlugin(plugPath, plugTags, true, &plugFound);
+			if(!plugFound && lib != nullptr)
+			{
+				nonFoundPlugs.push_back(lib);
+			}
 			if(lib != nullptr && lib->libraryName == MPT_PATHSTRING("MIDI Input Output") && lib->pluginId1 == PLUGMAGIC('V','s','t','P') && lib->pluginId2 == PLUGMAGIC('M','M','I','D'))
 			{
 				// This appears to be an old version of our MIDI I/O plugin, which is now built right into the main executable.
@@ -1934,15 +1939,14 @@ BOOL CTrackApp::InitializeDXPlugins()
 	}
 	if(!nonFoundPlugs.empty())
 	{
-		Reporting::Notification(mpt::cformat(_T("Problems were encountered with plugins:\n%1"))(nonFoundPlugs), _T("OpenMPT"), CWnd::GetDesktopWindow());
+		PlugNotFoundDialog(nonFoundPlugs, nullptr).DoModal();
 	}
-	return FALSE;
 }
 
 
-BOOL CTrackApp::UninitializeDXPlugins()
+void CTrackApp::UninitializeDXPlugins()
 {
-	if(!m_pPluginManager) return FALSE;
+	if(!m_pPluginManager) return;
 
 #ifndef NO_PLUGINS
 
@@ -1972,7 +1976,6 @@ BOOL CTrackApp::UninitializeDXPlugins()
 
 	delete m_pPluginManager;
 	m_pPluginManager = nullptr;
-	return TRUE;
 }
 
 

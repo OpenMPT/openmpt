@@ -312,9 +312,8 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	BOOL InitializeDXPlugins();
-	BOOL UninitializeDXPlugins();
-
+	void InitializeDXPlugins();
+	void UninitializeDXPlugins();
 
 	bool MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDir = mpt::PathString(), mpt::PathString sNewFileName = mpt::PathString());
 

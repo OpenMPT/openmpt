@@ -12,6 +12,7 @@
 
 #include "BuildSettings.h"
 
+#include "ResizableDialog.h"
 #include "CListCtrl.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -19,13 +20,13 @@ OPENMPT_NAMESPACE_BEGIN
 class CModDoc;
 class CSoundFile;
 
-class ExternalSamplesDlg : public CDialog
+class ExternalSamplesDlg : public ResizableDialog
 {
 protected:
 	CModDoc &modDoc;
 	CSoundFile &sndFile;
 	CListCtrlEx m_List;
-	bool isScanning;
+	bool isScanning = false;
 
 public:
 	ExternalSamplesDlg(CModDoc &modDoc, CWnd *parent);
@@ -34,8 +35,8 @@ protected:
 	void GenerateList();
 	bool SetSample(SAMPLEINDEX smp, const mpt::PathString &fileName);
 	
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
+	void DoDataExchange(CDataExchange *pDX) override;
+	BOOL OnInitDialog() override;
 
 	afx_msg void OnSetPath(NMHDR *, LRESULT *);
 	afx_msg void OnScanFolder();

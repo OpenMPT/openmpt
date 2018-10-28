@@ -19,8 +19,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-BEGIN_MESSAGE_MAP(CloseMainDialog, CDialog)
-	ON_WM_GETMINMAXINFO()
+BEGIN_MESSAGE_MAP(CloseMainDialog, ResizableDialog)
 	ON_COMMAND(IDC_BUTTON1,			&CloseMainDialog::OnSaveAll)
 	ON_COMMAND(IDC_BUTTON2,			&CloseMainDialog::OnSaveNone)
 	ON_COMMAND(IDC_CHECK1,			&CloseMainDialog::OnSwitchFullPaths)
@@ -29,14 +28,14 @@ END_MESSAGE_MAP()
 
 void CloseMainDialog::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	ResizableDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(DoDataExchange)
 	DDX_Control(pDX, IDC_LIST1,		m_List);
 	//}}AFX_DATA_MAP
 }
 
 
-CloseMainDialog::CloseMainDialog() : CDialog(IDD_CLOSEDOCUMENTS)
+CloseMainDialog::CloseMainDialog() : ResizableDialog(IDD_CLOSEDOCUMENTS)
 {
 	CMainFrame::GetInputHandler()->Bypass(true);
 };
@@ -57,7 +56,7 @@ CString CloseMainDialog::FormatTitle(const CModDoc *modDoc, bool fullPath)
 
 BOOL CloseMainDialog::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	ResizableDialog::OnInitDialog();
 
 	// Create list of unsaved documents
 	m_List.ResetContent();
@@ -80,10 +79,6 @@ BOOL CloseMainDialog::OnInitDialog()
 		// No modified documents...
 		OnOK();
 	}
-
-	CRect rect;
-	GetWindowRect(rect);
-	m_minSize = rect.Size();
 
 	return TRUE;
 }
@@ -111,7 +106,7 @@ void CloseMainDialog::OnOK()
 		}
 	}
 
-	CDialog::OnOK();
+	ResizableDialog::OnOK();
 }
 
 
@@ -148,13 +143,6 @@ void CloseMainDialog::OnSwitchFullPaths()
 		m_List.SetSel(item, m_List.GetSel(i));
 		m_List.DeleteString(i);
 	}
-}
-
-
-void CloseMainDialog::OnGetMinMaxInfo(MINMAXINFO *mmi)
-{
-	mmi->ptMinTrackSize = m_minSize;
-	CDialog::OnGetMinMaxInfo(mmi);
 }
 
 OPENMPT_NAMESPACE_END

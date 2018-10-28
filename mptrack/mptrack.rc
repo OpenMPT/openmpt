@@ -25,7 +25,7 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 //
 
 IDD_MISSINGSAMPLES DIALOGEX 0, 0, 316, 185
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_THICKFRAME
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "&OK",IDOK,262,164,50,14
@@ -575,6 +575,18 @@ BEGIN
     CONTROL         "Tremolo",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,216,198,180,10
 END
 
+IDD_MISSINGPLUGS DIALOGEX 0, 0, 307, 170
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Plugins Not Found - OpenMPT"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&OK",IDOK,252,150,50,14
+    LTEXT           "The following plugins could not be found.\nYou can remove the checked plugins by pressing ""Remove"".\nPressing ""OK"" keeps the plugins in your library.",IDC_STATIC,6,6,300,24
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,6,36,294,108
+    PUSHBUTTON      "&Remove",IDC_BUTTON_REMOVE,198,150,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -807,6 +819,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 211
     END
+
+    IDD_MISSINGPLUGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 300
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 163
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -890,6 +910,25 @@ BEGIN
     0, 100, 0, 0,
     100, 100, 0, 0,
     100, 100, 0, 0
+END
+
+IDD_MISSINGPLUGS AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    100, 100, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 100, 100,
+    100, 100, 0, 0
+END
+
+IDD_MISSINGSAMPLES AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    100, 100, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 100, 100,
+    0, 100, 0, 0,
+    0, 100, 100, 0
 END
 
 

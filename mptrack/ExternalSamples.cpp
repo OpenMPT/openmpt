@@ -19,30 +19,32 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-BEGIN_MESSAGE_MAP(ExternalSamplesDlg, CDialog)
+BEGIN_MESSAGE_MAP(ExternalSamplesDlg, ResizableDialog)
 	//{{AFX_MSG_MAP(ExternalSamplesDlg)
 	ON_NOTIFY(NM_DBLCLK,	IDC_LIST1,	&ExternalSamplesDlg::OnSetPath)
 	ON_COMMAND(IDC_BUTTON1,				&ExternalSamplesDlg::OnScanFolder)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-void ExternalSamplesDlg::DoDataExchange(CDataExchange* pDX)
+
+void ExternalSamplesDlg::DoDataExchange(CDataExchange *pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CModTypeDlg)
+	ResizableDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST1,		m_List);
-	//}}AFX_DATA_MAP
 }
 
 
-ExternalSamplesDlg::ExternalSamplesDlg(CModDoc &modDoc, CWnd *parent) : CDialog(IDD_MISSINGSAMPLES, parent), modDoc(modDoc), sndFile(modDoc.GetSoundFile()), isScanning(false)
+ExternalSamplesDlg::ExternalSamplesDlg(CModDoc &modDoc, CWnd *parent)
+	: ResizableDialog(IDD_MISSINGSAMPLES, parent)
+	, modDoc(modDoc)
+	, sndFile(modDoc.GetSoundFile())
 {
 }
 
 
 BOOL ExternalSamplesDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	ResizableDialog::OnInitDialog();
 
 	// Initialize table
 	const CListCtrlEx::Header headers[] =

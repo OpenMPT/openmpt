@@ -11,10 +11,11 @@
 #pragma once
 
 #include "BuildSettings.h"
+#include "ResizableDialog.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
-class CloseMainDialog: public CDialog
+class CloseMainDialog: public ResizableDialog
 {
 protected:
 	
@@ -36,8 +37,6 @@ protected:
 	afx_msg void OnSaveNone();
 
 	afx_msg void OnSwitchFullPaths();
-
-	afx_msg void OnGetMinMaxInfo(MINMAXINFO *mmi);
 
 	DECLARE_MESSAGE_MAP()
 

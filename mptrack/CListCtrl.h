@@ -34,6 +34,16 @@ public:
 		}
 	}
 
+	void SetItemDataPtr(int item, void *value)
+	{
+		SetItemData(item, reinterpret_cast<DWORD_PTR>(value));
+	}
+
+	void *GetItemDataPtr(int item)
+	{
+		return reinterpret_cast<void *>(GetItemData(item));
+	}
+
 	// Unicode strings in ANSI builds
 #ifndef UNICODE
 	BOOL SetItemText(int nItem, int nSubItem, const WCHAR *lpszText)

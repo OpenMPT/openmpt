@@ -85,6 +85,7 @@
 #define IDR_VSTMENU                     436
 #define IDD_DEFAULTPLUGINEDITOR         438
 #define IDD_CHANNELMANAGER              440
+#define IDD_MISSINGPLUGS                441
 #define IDD_PITCHSHIFT                  442
 #define IDD_OPTIONS_AUTOSAVE            443
 #define IDD_EDIT_GOTO                   444
