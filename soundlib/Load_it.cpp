@@ -1848,6 +1848,8 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 				dwPos += intBytes + strSize;
 				mpt::IO::WriteRaw(f, filenameU8.data(), strSize);
 			}
+#else
+			MPT_UNREFERENCED_PARAMETER(filename);
 #endif // MPT_EXTERNAL_SAMPLES
 		}
 	}
