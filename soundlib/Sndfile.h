@@ -807,10 +807,10 @@ public:
 
 	// Save Functions
 #ifndef MODPLUG_NO_FILESAVE
-	bool SaveXM(const mpt::PathString &filename, bool compatibilityExport = false);
-	bool SaveS3M(const mpt::PathString &filename) const;
-	bool SaveMod(const mpt::PathString &filename) const;
-	bool SaveIT(const mpt::PathString &filename, bool compatibilityExport = false);
+	bool SaveXM(std::ostream &f, bool compatibilityExport = false);
+	bool SaveS3M(std::ostream &f) const;
+	bool SaveMod(std::ostream &f) const;
+	bool SaveIT(std::ostream &f, const mpt::PathString &filename, bool compatibilityExport = false);
 	uint32 SaveMixPlugins(std::ostream *file=nullptr, bool bUpdate=true);
 	void WriteInstrumentPropertyForAllInstruments(uint32 code,  uint16 size, std::ostream &f, INSTRUMENTINDEX nInstruments) const;
 	void SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, std::ostream &f) const;

@@ -159,28 +159,17 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 	ScopedLogCapturer logcapturer(modDoc, _T(""), nullptr, false);
 
 	bool success = false;
-	switch(modDoc.GetSoundFile().GetBestSaveFormat())
+	mpt::ofstream f(fileName, std::ios::binary);
+	if(f)
 	{
-	case MOD_TYPE_MOD:
-		success = sndFile.SaveMod(fileName);
-		break;
-
-	case MOD_TYPE_S3M:
-		success = sndFile.SaveS3M(fileName);
-		break;
-
-	case MOD_TYPE_XM:
-		success = sndFile.SaveXM(fileName);
-		break;
-
-	case MOD_TYPE_IT:
-		success = sndFile.SaveIT(fileName);
-		break;
-
-	case MOD_TYPE_MPT:
-		//Using IT save function also for MPT.
-		success = sndFile.SaveIT(fileName);
-		break;
+		switch(modDoc.GetSoundFile().GetBestSaveFormat())
+		{
+		case MOD_TYPE_MOD: success = sndFile.SaveMod(f); break;
+		case MOD_TYPE_S3M: success = sndFile.SaveS3M(f); break;
+		case MOD_TYPE_XM:  success = sndFile.SaveXM(f); break;
+		case MOD_TYPE_IT:  success = sndFile.SaveIT(f, fileName); break;
+		case MOD_TYPE_MPT: success = sndFile.SaveIT(f, fileName); break;
+		}
 	}
 
 	return success;

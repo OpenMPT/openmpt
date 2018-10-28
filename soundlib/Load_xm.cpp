@@ -747,17 +747,9 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 #define str_pattern				("pattern")
 
 
-bool CSoundFile::SaveXM(const mpt::PathString &filename, bool compatibilityExport)
+bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 {
-	if(filename.empty())
-	{
-		return false;
-	}
-	mpt::ofstream f(filename, std::ios::binary);
-	if(!f)
-	{
-		return false;
-	}
+	if(!f) return false;
 
 	bool addChannel = false; // avoid odd channel count for FT2 compatibility
 

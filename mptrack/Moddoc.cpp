@@ -274,24 +274,28 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTemplateFile)
 {
 	ScopedLogCapturer logcapturer(*this);
-	BOOL bOk = FALSE;
-	m_SndFile.m_dwLastSavedWithVersion = Version::Current();
 	if(filename.empty())
 		return FALSE;
 
-	BeginWaitCursor();
-	FixNullStrings();
-	switch(m_SndFile.GetType())
+	BOOL ok = FALSE;
+	mpt::ofstream f(filename, std::ios::binary);
+	if(f)
 	{
-	case MOD_TYPE_MOD:	bOk = m_SndFile.SaveMod(filename); break;
-	case MOD_TYPE_S3M:	bOk = m_SndFile.SaveS3M(filename); break;
-	case MOD_TYPE_XM:	bOk = m_SndFile.SaveXM(filename); break;
-	case MOD_TYPE_IT:	bOk = m_SndFile.SaveIT(filename); break;
-	case MOD_TYPE_MPT:	bOk = m_SndFile.SaveIT(filename); break;
-	default:			ASSERT(false);
+		BeginWaitCursor();
+		FixNullStrings();
+		m_SndFile.m_dwLastSavedWithVersion = Version::Current();
+		switch(m_SndFile.GetType())
+		{
+		case MOD_TYPE_MOD: ok = m_SndFile.SaveMod(f); break;
+		case MOD_TYPE_S3M: ok = m_SndFile.SaveS3M(f); break;
+		case MOD_TYPE_XM:  ok = m_SndFile.SaveXM(f); break;
+		case MOD_TYPE_IT:  ok = m_SndFile.SaveIT(f, filename); break;
+		case MOD_TYPE_MPT: ok = m_SndFile.SaveIT(f, filename); break;
+		default:           MPT_ASSERT_NOTREACHED();
+		}
+		EndWaitCursor();
 	}
-	EndWaitCursor();
-	if (bOk)
+	if (ok)
 	{
 		if (!bTemplateFile)
 		{
@@ -311,7 +315,7 @@ BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTempla
 	{
 		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
 	}
-	return bOk;
+	return ok;
 }
 
 
@@ -1905,16 +1909,17 @@ void CModDoc::OnFileCompatibilitySave()
 		.WorkingDirectory(TrackerSettings::Instance().PathSongs.GetWorkingDir());
 	if(!dlg.Show()) return;
 
+	filename = dlg.GetFirstFile();
+	mpt::ofstream f(filename, std::ios::binary);
+	if(!f)
+		return;
+
 	ScopedLogCapturer logcapturer(*this);
 	FixNullStrings();
 	switch (type)
 	{
-		case MOD_TYPE_XM:
-			m_SndFile.SaveXM(dlg.GetFirstFile(), true);
-			break;
-		case MOD_TYPE_IT:
-			m_SndFile.SaveIT(dlg.GetFirstFile(), true);
-			break;
+		case MOD_TYPE_XM: m_SndFile.SaveXM(f, true); break;
+		case MOD_TYPE_IT: m_SndFile.SaveIT(f, filename, true); break;
 	}
 }
 

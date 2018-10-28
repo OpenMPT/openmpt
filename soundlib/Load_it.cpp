@@ -1362,24 +1362,16 @@ static uint32 SaveITEditHistory(const CSoundFile &sndFile, std::ostream *file)
 }
 
 
-bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExport)
+bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool compatibilityExport)
 {
+	if(!f) return false;
+
 	const CModSpecifications &specs = (GetType() == MOD_TYPE_MPT ? ModSpecs::mptm : (compatibilityExport ? ModSpecs::it : ModSpecs::itEx));
 
 	uint32 dwChnNamLen;
 	ITFileHeader itHeader;
 	uint64 dwPos = 0;
 	uint32 dwHdrPos = 0, dwExtra = 0;
-
-	if(filename.empty())
-	{
-		return false;
-	}
-	mpt::ofstream f(filename, std::ios::binary);
-	if(!f)
-	{
-		return false;
-	}
 
 	// Writing Header
 	MemsetZero(itHeader);

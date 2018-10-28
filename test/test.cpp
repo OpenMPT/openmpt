@@ -3787,17 +3787,20 @@ static void DestroySoundFileContainer(TSoundFileContainer & /* sndFile */ )
 
 static void SaveIT(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->SaveIT(filename, false);
+	mpt::ofstream f(filename, std::ios::binary);
+	sndFile->SaveIT(f, filename, false);
 }
 
 static void SaveXM(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->SaveXM(filename, false);
+	mpt::ofstream f(filename, std::ios::binary);
+	sndFile->SaveXM(f, false);
 }
 
 static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	sndFile->SaveS3M(filename);
+	mpt::ofstream f(filename, std::ios::binary);
+	sndFile->SaveS3M(f);
 }
 
 #endif // !MODPLUG_NO_FILESAVE

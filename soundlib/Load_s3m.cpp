@@ -602,7 +602,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
+bool CSoundFile::SaveS3M(std::ostream &f) const
 {
 	static const uint8 filler[16] =
 	{
@@ -610,12 +610,7 @@ bool CSoundFile::SaveS3M(const mpt::PathString &filename) const
 		0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
 	};
 
-	if(m_nChannels == 0 || filename.empty()) return false;
-	mpt::ofstream f(filename, std::ios::binary);
-	if(!f)
-	{
-		return false;
-	}
+	if(!f || m_nChannels == 0) return false;
 
 	const bool saveMuteStatus =
 #ifdef MODPLUG_TRACKER

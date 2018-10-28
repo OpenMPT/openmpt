@@ -2182,15 +2182,9 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveMod(const mpt::PathString &filename) const
+bool CSoundFile::SaveMod(std::ostream &f) const
 {
-
-	if(m_nChannels == 0 || filename.empty()) return false;
-	mpt::ofstream f(filename, std::ios::binary);
-	if(!f)
-	{
-		return false;
-	}
+	if(!f || m_nChannels == 0) return false;
 
 	// Write song title
 	{
