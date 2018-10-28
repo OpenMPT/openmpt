@@ -1933,37 +1933,34 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 
 #ifndef MODPLUG_NO_FILESAVE
 
-uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool bUpdate)
+uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool updatePlugData)
 {
 #ifndef NO_PLUGINS
-	uint32 chinfo[MAX_BASECHANNELS];
-	char id[4];
-	uint32 nPluginSize;
-	uint32 nTotalSize = 0;
-	uint32 nChInfo = 0;
+	uint32 totalSize = 0;
 
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
 	{
 		const SNDMIXPLUGIN &plugin = m_MixPlugins[i];
 		if(plugin.IsValidPlugin())
 		{
-			nPluginSize = sizeof(SNDMIXPLUGININFO) + 4; // plugininfo+4 (datalen)
-			if((plugin.pMixPlugin) && (bUpdate))
+			uint32 pluginSize = sizeof(SNDMIXPLUGININFO) + 4; // plugininfo+4 (datalen)
+			if(plugin.pMixPlugin && updatePlugData)
 			{
 				plugin.pMixPlugin->SaveAllParameters();
 			}
 			const uint32 dataSize = mpt::saturate_cast<uint32>(plugin.pluginData.size());
-			nPluginSize += dataSize;
+			pluginSize += dataSize;
 
 			uint32 MPTxPlugDataSize = 4 + sizeof(float32) +		// 4 for ID and size of dryRatio
 									 4 + sizeof(int32);			// Default Program
 								// for each extra entity, add 4 for ID, plus 4 for size of entity, plus size of entity
 
-			nPluginSize += MPTxPlugDataSize + 4; //+4 is for size itself: sizeof(uint32) is 4
+			pluginSize += MPTxPlugDataSize + 4; //+4 is for size itself: sizeof(uint32) is 4
 			if(file)
 			{
 				std::ostream & f = *file;
 				// write plugin ID
+				char id[4];
 				id[0] = 'F';
 				id[1] = i < 100 ? 'X' : '0' + i / 100;
 				id[2] = '0' + (i / 10) % 10u;
@@ -1971,7 +1968,7 @@ uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool bUpdate)
 				mpt::IO::WriteRaw(f, id, 4);
 
 				// write plugin size:
-				mpt::IO::WriteIntLE<uint32>(f, nPluginSize);
+				mpt::IO::WriteIntLE<uint32>(f, pluginSize);
 				mpt::IO::Write(f, m_MixPlugins[i].Info);
 				mpt::IO::WriteIntLE<uint32>(f, dataSize);
 				if(dataSize)
@@ -1982,53 +1979,47 @@ uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool bUpdate)
 				mpt::IO::WriteIntLE<uint32>(f, MPTxPlugDataSize);
 
 				// Dry/Wet ratio
-				memcpy(id, "DWRT", 4);
-				mpt::IO::WriteRaw(f, id, 4);
+				mpt::IO::WriteRaw(f, "DWRT", 4);
 				// DWRT chunk does not include a size, so better make sure we always write 4 bytes here.
 				STATIC_ASSERT(sizeof(IEEE754binary32LE) == 4);
 				mpt::IO::Write(f, IEEE754binary32LE(m_MixPlugins[i].fDryRatio));
 
 				// Default program
-				memcpy(id, "PROG", 4);
-				mpt::IO::WriteRaw(f, id, 4);
+				mpt::IO::WriteRaw(f, "PROG", 4);
 				// PROG chunk does not include a size, so better make sure we always write 4 bytes here.
 				STATIC_ASSERT(sizeof(m_MixPlugins[i].defaultProgram) == sizeof(int32));
 				mpt::IO::WriteIntLE<int32>(f, m_MixPlugins[i].defaultProgram);
 
 				// Please, if you add any more chunks here, don't repeat history (see above) and *do* add a size field for your chunk, mmmkay?
 			}
-			nTotalSize += nPluginSize + 8;
+			totalSize += pluginSize + 8;
 		}
 	}
+	std::vector<uint32le> chinfo(GetNumChannels());
+	uint32 numChInfo = 0;
 	for(CHANNELINDEX j = 0; j < GetNumChannels(); j++)
 	{
-		if(j < MAX_BASECHANNELS)
+		if((chinfo[j] = ChnSettings[j].nMixPlugin) != 0)
 		{
-			if((chinfo[j] = ChnSettings[j].nMixPlugin) != 0)
-			{
-				nChInfo = j + 1;
-			}
+			numChInfo = j + 1;
 		}
 	}
-	if(nChInfo)
+	if(numChInfo)
 	{
 		if(file)
 		{
-			std::ostream & f = *file;
-			memcpy(id, "CHFX", 4);
-			mpt::IO::WriteRaw(f, id, 4);
-			mpt::IO::WriteIntLE<uint32>(f, nChInfo * 4);
-			for(uint32 i = 0; i < nChInfo; ++i)
-			{
-				mpt::IO::WriteIntLE<uint32>(f, chinfo[i]);
-			}
+			std::ostream &f = *file;
+			mpt::IO::WriteRaw(f, "CHFX", 4);
+			mpt::IO::WriteIntLE<uint32>(f, numChInfo * 4);
+			chinfo.resize(numChInfo);
+			mpt::IO::Write(f, chinfo);
 		}
-		nTotalSize += nChInfo * 4 + 8;
+		totalSize += numChInfo * 4 + 8;
 	}
-	return nTotalSize;
+	return totalSize;
 #else
-	MPT_UNREFERENCED_PARAMETER(f);
-	MPT_UNREFERENCED_PARAMETER(bUpdate);
+	MPT_UNREFERENCED_PARAMETER(file);
+	MPT_UNREFERENCED_PARAMETER(updatePlugData);
 	return 0;
 #endif // NO_PLUGINS
 }
