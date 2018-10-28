@@ -116,6 +116,8 @@ uint8 OPL::AllocateVoice(CHANNELINDEX c)
 void OPL::MoveChannel(CHANNELINDEX from, CHANNELINDEX to)
 {
 	uint8 oplCh = m_ChanToOPL[from];
+	if(oplCh == OPL_CHANNEL_INVALID)
+		return;
 	m_OPLtoChan[oplCh] = to;
 	m_ChanToOPL[from] = OPL_CHANNEL_INVALID;
 	m_ChanToOPL[to] = oplCh;

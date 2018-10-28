@@ -2854,15 +2854,17 @@ bool CSoundFile::ProcessEffects()
 			// New Note ?
 			if (note)
 			{
-				if ((!instr) && (chn.nNewIns) && (note < 0x80))
+				const bool instrChange = (!instr) && (chn.nNewIns) && (note < 0x80);
+				if(instrChange)
 				{
 					InstrumentChange(chn, chn.nNewIns, bPorta, chn.pModSample == nullptr && chn.pModInstrument == nullptr, !(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)));
-					if(chn.pModSample != nullptr && chn.pModSample->uFlags[CHN_ADLIB] && m_opl)
-					{
-						m_opl->Patch(nChn, chn.pModSample->adlib);
-					}
 					chn.nNewIns = 0;
 				}
+				if(chn.pModSample != nullptr && chn.pModSample->uFlags[CHN_ADLIB] && m_opl && (instrChange || !m_opl->IsActive(nChn)))
+				{
+					m_opl->Patch(nChn, chn.pModSample->adlib);
+				}
+
 				NoteChange(chn, note, bPorta, !(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)), false, nChn);
 				if ((bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (instr))
 				{
