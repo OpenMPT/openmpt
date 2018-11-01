@@ -67,12 +67,10 @@ BOOL CModTreeDropTarget::OnDrop(CWnd *pWnd, COleDataObject* pDataObject, DROPEFF
 }
 
 
-ModTreeDocInfo::ModTreeDocInfo(CModDoc &modDoc) : modDoc(modDoc)
+ModTreeDocInfo::ModTreeDocInfo(CModDoc &modDoc)
+	: modDoc(modDoc)
 {
-	CSoundFile &sndFile = modDoc.GetSoundFile();
-	nSeqSel = SEQUENCEINDEX_INVALID;
-	nOrdSel = ORDERINDEX_INVALID;
-	hSong = hPatterns = hSamples = hInstruments = hComments = hOrders = hEffects = nullptr;
+	const CSoundFile &sndFile = modDoc.GetSoundFile();
 	tiPatterns.resize(sndFile.Patterns.Size(), nullptr);
 	tiOrders.resize(sndFile.Order.GetNumSequences());
 	tiSequences.resize(sndFile.Order.GetNumSequences(), nullptr);
@@ -131,23 +129,16 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,		&CModTree::OnCustomKeyMsg)	//rewbs.customKeys
 	ON_MESSAGE(WM_MOD_MIDIMSG,			&CModTree::OnMidiMsg)
 	//}}AFX_MSG_MAP
-	ON_WM_KILLFOCUS()		//rewbs.customKeys
-	ON_WM_SETFOCUS()		//rewbs.customKeys
+	ON_WM_KILLFOCUS()
+	ON_WM_SETFOCUS()
 END_MESSAGE_MAP()
 
 
 /////////////////////////////////////////////////////////////////////////////
 // CViewModTree construction/destruction
 
-CModTree::CModTree(CModTree *pDataTree) :
-	m_pDataTree(pDataTree),
-	m_hDropWnd(nullptr),
-	m_WatchDir(),
-	m_dwStatus(0),
-	m_nDocNdx(0), m_nDragDocNdx(0),
-	m_hItemDrag(nullptr), m_hItemDrop(nullptr),
-	m_hInsLib(nullptr), m_hMidiLib(nullptr),
-	m_bShowAllFiles(false), doLabelEdit(false)
+CModTree::CModTree(CModTree *pDataTree)
+	: m_pDataTree(pDataTree)
 {
 	if(m_pDataTree != nullptr)
 	{
@@ -241,7 +232,7 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 {
 	if (!pMsg) return TRUE;
 
-	if(doLabelEdit)
+	if(m_doLabelEdit)
 	{
 		if(pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
 		{
@@ -1924,7 +1915,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 							ModTreeInsert(wfd.cFileName, IMAGE_FOLDERSONG, selectedItem);
 						}
 					} else if((!extPS.empty() && std::find(m_MediaFoundationExtensions.begin(), m_MediaFoundationExtensions.end(), extPS) != m_MediaFoundationExtensions.end())
-						|| (m_bShowAllFiles && std::find(allExtsBlacklist.begin(), allExtsBlacklist.end(), ext) == allExtsBlacklist.end()))
+						|| (m_showAllFiles && std::find(allExtsBlacklist.begin(), allExtsBlacklist.end(), ext) == allExtsBlacklist.end()))
 					{
 						// MediaFoundation samples / other files
 						if(showInstrs)
@@ -2893,8 +2884,8 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			{
 				if ((bSep) || (nDefault)) AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
 				AppendMenu(hMenu, TrackerSettings::Instance().showDirsInSampleBrowser ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_MODTREE_SHOWDIRS, _T("Show &Directories in Sample Browser"));
-				AppendMenu(hMenu, (m_bShowAllFiles) ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_MODTREE_SHOWALLFILES, _T("Show &All Files"));
-				AppendMenu(hMenu, (m_bShowAllFiles) ? MF_STRING : (MF_STRING|MF_CHECKED), ID_MODTREE_SOUNDFILESONLY, _T("Show &Sound Files"));
+				AppendMenu(hMenu, (m_showAllFiles) ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_MODTREE_SHOWALLFILES, _T("Show &All Files"));
+				AppendMenu(hMenu, (m_showAllFiles) ? MF_STRING : (MF_STRING|MF_CHECKED), ID_MODTREE_SOUNDFILESONLY, _T("Show &Sound Files"));
 				bSep = TRUE;
 			}
 			if ((bSep) || (nDefault)) AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
@@ -3606,9 +3597,9 @@ void CModTree::OnShowDirectories()
 
 void CModTree::OnShowAllFiles()
 {
-	if (!m_bShowAllFiles)
+	if (!m_showAllFiles)
 	{
-		m_bShowAllFiles = true;
+		m_showAllFiles = true;
 		OnRefreshInstrLib();
 	}
 }
@@ -3616,9 +3607,9 @@ void CModTree::OnShowAllFiles()
 
 void CModTree::OnShowSoundFiles()
 {
-	if (m_bShowAllFiles)
+	if (m_showAllFiles)
 	{
-		m_bShowAllFiles = false;
+		m_showAllFiles = false;
 		OnRefreshInstrLib();
 	}
 }
@@ -3808,7 +3799,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		const CSoundFile &sndFile = modDoc->GetSoundFile();
 		const CModSpecifications &modSpecs = sndFile.GetModSpecifications();
 		std::string text;
-		doLabelEdit = false;
+		m_doLabelEdit = false;
 
 		switch(modItem.type)
 		{
@@ -3821,7 +3812,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 					text = "+++";
 				else
 					text = mpt::fmt::val(pat);
-				doLabelEdit = true;
+				m_doLabelEdit = true;
 			}
 			break;
 
@@ -3835,7 +3826,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			if(modItem.val1 < sndFile.Order.GetNumSequences())
 			{
 				text = sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val1)).GetName();
-				doLabelEdit = true;
+				m_doLabelEdit = true;
 			}
 			break;
 
@@ -3844,7 +3835,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				text = sndFile.Patterns[modItem.val1].GetName();
 				editCtrl->SetLimitText(MAX_PATTERNNAME - 1);
-				doLabelEdit = true;
+				m_doLabelEdit = true;
 			}
 			break;
 
@@ -3853,7 +3844,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				text = sndFile.m_szNames[modItem.val1];
 				editCtrl->SetLimitText(modSpecs.sampleNameLengthMax);
-				doLabelEdit = true;
+				m_doLabelEdit = true;
 			}
 			break;
 
@@ -3862,12 +3853,12 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				text = sndFile.Instruments[modItem.val1]->name;
 				editCtrl->SetLimitText(modSpecs.instrNameLengthMax);
-				doLabelEdit = true;
+				m_doLabelEdit = true;
 			}
 			break;
 		}
 
-		if(doLabelEdit)
+		if(m_doLabelEdit)
 		{
 			CMainFrame::GetInputHandler()->Bypass(true);
 			editCtrl->SetWindowText(mpt::ToCString(sndFile.GetCharsetInternal(), text));
@@ -3883,7 +3874,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 {
 	CMainFrame::GetInputHandler()->Bypass(false);
-	doLabelEdit = false;
+	m_doLabelEdit = false;
 
 	NMTVDISPINFO *info = reinterpret_cast<NMTVDISPINFO *>(nmhdr);
 	const ModItem modItem = GetModItem(info->item.hItem);

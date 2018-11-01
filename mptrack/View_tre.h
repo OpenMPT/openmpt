@@ -23,22 +23,17 @@ class CModDoc;
 class CModTree;
 class CSoundFile;
 
-#define TREESTATUS_RDRAG			0x01
-#define TREESTATUS_LDRAG			0x02
-#define TREESTATUS_SINGLEEXPAND		0x04
-#define TREESTATUS_DRAGGING			(TREESTATUS_RDRAG|TREESTATUS_LDRAG)
-
 struct ModTreeDocInfo
 {
 	// Tree state variables
 	std::vector<std::vector<HTREEITEM>> tiOrders;
 	std::vector<HTREEITEM> tiSequences, tiPatterns;
 	CModDoc &modDoc;
-	HTREEITEM hSong, hPatterns, hSamples, hInstruments, hComments, hOrders, hEffects;
+	HTREEITEM hSong = nullptr, hPatterns = nullptr, hSamples = nullptr, hInstruments = nullptr, hComments = nullptr, hOrders = nullptr, hEffects = nullptr;
 
 	// Module information
-	ORDERINDEX nOrdSel;
-	SEQUENCEINDEX nSeqSel;
+	ORDERINDEX nOrdSel = ORDERINDEX_INVALID;
+	SEQUENCEINDEX nSeqSel = SEQUENCEINDEX_INVALID;
 
 	std::bitset<MAX_SAMPLES> samplesPlaying;
 	std::bitset<MAX_INSTRUMENTS> instrumentsPlaying;
@@ -66,8 +61,15 @@ public:
 class CModTree: public CTreeCtrl
 {
 protected:
+	enum TreeStatus
+	{
+		TREESTATUS_RDRAG			= 0x01,
+		TREESTATUS_LDRAG			= 0x02,
+		TREESTATUS_SINGLEEXPAND		= 0x04,
+		TREESTATUS_DRAGGING			= (TREESTATUS_RDRAG|TREESTATUS_LDRAG)
+	};
 
-	enum ModItemType
+	enum ModItemType : uint16
 	{
 		MODITEM_NULL = 0,
 
@@ -127,10 +129,10 @@ protected:
 	struct ModItem
 	{
 		uint32 val1;
-		uint16 type;	// see ModItemType
 		uint16 val2;
+		ModItemType type;
 
-		ModItem(ModItemType t = MODITEM_NULL, uint32 v1 = 0, uint16 v2 = 0) : type(uint16(t)), val1(v1), val2(v2) { }
+		ModItem(ModItemType t = MODITEM_NULL, uint32 v1 = 0, uint16 v2 = 0) : val1(v1), val2(v2), type(t) { }
 		bool IsSongItem() const { return type >= MODITEM_BEGIN_SONGITEMS && type <= MODITEM_END_SONGITEMS; }
 	};
 
@@ -148,20 +150,20 @@ protected:
 		static uint32 EncodeValueInstr(uint8 region, uint16 instr) { return DLS_TYPEINST | (region << DLS_REGIONSHIFT) | instr; }
 	};
 
-	static CSoundFile *m_SongFile;	// For browsing samples and instruments inside modules on disk
+	static CSoundFile *m_SongFile; // For browsing samples and instruments inside modules on disk
 	CModTreeDropTarget m_DropTarget;
-	CModTree *m_pDataTree;	// Pointer to instrument browser (lower part of tree view) - if it's a nullptr, this object is the instrument browser itself.
-	HWND m_hDropWnd;
+	CModTree *m_pDataTree = nullptr; // Pointer to instrument browser (lower part of tree view) - if it's a nullptr, this object is the instrument browser itself.
+	HWND m_hDropWnd = nullptr;
 	mpt::mutex m_WatchDirMutex;
-	HANDLE m_hSwitchWatchDir;
+	HANDLE m_hSwitchWatchDir = nullptr;
 	mpt::PathString m_WatchDir;
-	HANDLE m_hWatchDirKillThread;
+	HANDLE m_hWatchDirKillThread = nullptr;
 	std::thread m_WatchDirThread;
 	ModItem m_itemDrag;
-	DWORD m_dwStatus;
-	UINT m_nDocNdx, m_nDragDocNdx;
-	HTREEITEM m_hItemDrag, m_hItemDrop;
-	HTREEITEM m_hInsLib, m_hMidiLib;
+	DWORD m_dwStatus = 0;
+	UINT m_nDocNdx = 0, m_nDragDocNdx = 0;
+	HTREEITEM m_hItemDrag = nullptr, m_hItemDrop = nullptr;
+	HTREEITEM m_hInsLib = nullptr, m_hMidiLib = nullptr;
 	HTREEITEM m_tiMidi[128];
 	HTREEITEM m_tiPerc[128];
 	std::vector<HTREEITEM> m_tiDLS;
@@ -171,14 +173,14 @@ protected:
 	mpt::PathString m_InstrLibPath;				// Current path to be explored
 	mpt::PathString m_InstrLibHighlightPath;	// Folder to highlight in browser after a refresh
 	mpt::PathString m_SongFileName;				// Name of open module, without path (== m_szInstrLibPath).
-	bool m_bShowAllFiles;
-	std::vector<mpt::PathString> m_MediaFoundationExtensions;	// cached in order to avoid querying too ofter when changing browsed folder
-	
-	bool doLabelEdit;
+	std::vector<mpt::PathString> m_MediaFoundationExtensions;	// cached in order to avoid querying too often when changing browsed folder
+	bool m_showAllFiles = false;
+
+	bool m_doLabelEdit = false;
 
 public:
 	CModTree(CModTree *pDataTree);
-	virtual ~CModTree();
+	~CModTree();
 
 // Attributes
 public:
@@ -220,7 +222,7 @@ public:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CModTree)
-	public:
+public:
 	BOOL PreTranslateMessage(MSG* pMsg) override;
 	//}}AFX_VIRTUAL
 
@@ -297,8 +299,8 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnKillFocus(CWnd* pNewWnd);	//rewbs.customKeys
-	afx_msg void OnSetFocus(CWnd* pOldWnd);		//rewbs.customKeys
+	afx_msg void OnKillFocus(CWnd *pNewWnd);
+	afx_msg void OnSetFocus(CWnd *pOldWnd);
 };
 
 
