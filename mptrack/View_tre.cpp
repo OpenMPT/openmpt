@@ -528,7 +528,7 @@ void CModTree::RefreshMidiLibrary()
 	CString s;
 	CString stmp;
 	TVITEM tvi;
-	const MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
+	const MidiLibrary &midiLib = CTrackApp::GetMidiLibrary();
 
 	if (IsSampleBrowser()) return;
 	// Midi Programs
@@ -538,9 +538,9 @@ void CModTree::RefreshMidiLibrary()
 		DWORD dwImage = IMAGE_INSTRMUTE;
 		s = mpt::cfmt::val(iMidi) + _T(": ") + mpt::ToCString(mpt::CharsetASCII, szMidiProgramNames[iMidi]);
 		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
-		if(!midiLib.MidiMap[iMidi].empty())
+		if(!midiLib[iMidi].empty())
 		{
-			s += _T(": ") + midiLib.MidiMap[iMidi].GetFullFileName().ToCString();
+			s += _T(": ") + midiLib[iMidi].GetFullFileName().ToCString();
 			dwImage = IMAGE_INSTRUMENTS;
 		}
 		if (!m_tiMidi[iMidi])
@@ -574,9 +574,9 @@ void CModTree::RefreshMidiLibrary()
 		s = mpt::ToCString(CSoundFile::GetNoteName((ModCommand::NOTE)(iPerc + NOTE_MIN), CSoundFile::GetDefaultNoteNames()))
 			+ _T(": ") + mpt::ToCString(mpt::CharsetASCII, szMidiPercussionNames[iPerc - 24]);
 		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
-		if(!midiLib.MidiMap[iPerc | 0x80].empty())
+		if(!midiLib[iPerc | 0x80].empty())
 		{
-			s += _T(": ") + midiLib.MidiMap[iPerc | 0x80].GetFullFileName().ToCString();
+			s += _T(": ") + midiLib[iPerc | 0x80].GetFullFileName().ToCString();
 			dwImage = IMAGE_SAMPLES;
 		}
 		if (!m_tiPerc[iPerc])
@@ -635,7 +635,7 @@ void CModTree::RefreshDlsBanks()
 				UINT nInstr = pDlsBank->GetNumInstruments();
 				for (UINT iIns=0; iIns<nInstr; iIns++)
 				{
-					DLSINSTRUMENT *pDlsIns = pDlsBank->GetInstrument(iIns);
+					const DLSINSTRUMENT *pDlsIns = pDlsBank->GetInstrument(iIns);
 					if (pDlsIns)
 					{
 						TCHAR szName[256];
@@ -1427,7 +1427,23 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 }
 
 
-BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
+void CModTree::PlayDLSItem(CDLSBank &dlsBank, const DlsItem &item, ModCommand::NOTE note)
+{
+	UINT rgn = 0, instr = item.GetInstr();
+	if(item.IsPercussion())
+	{
+		// Drum
+		rgn = item.GetRegion();
+	} else if(item.IsInstr())
+	{
+		// Melodic
+		rgn = dlsBank.GetRegionFromKey(instr, note - NOTE_MIN);
+	}
+	CMainFrame::GetMainFrame()->PlayDLSInstrument(dlsBank, instr, rgn, note);
+}
+
+
+BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 {
 	if (hItem)
 	{
@@ -1440,16 +1456,16 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
 		case MODITEM_SAMPLE:
 			if (modDoc)
 			{
-				if (nParam == NOTE_NOTECUT)
+				if (note == NOTE_NOTECUT)
 				{
 					modDoc->NoteOff(0, true); // cut previous playing samples
-				} else if (nParam & 0x80)
+				} else if (note & 0x80)
 				{
-					modDoc->NoteOff(nParam & 0x7F, true);
+					modDoc->NoteOff(note & 0x7F, true);
 				} else
 				{
 					modDoc->NoteOff(0, true); // cut previous playing samples
-					modDoc->PlayNote(PlayNoteParam(nParam & 0x7F).Sample(static_cast<SAMPLEINDEX>(modItemID)).Volume(volume));
+					modDoc->PlayNote(PlayNoteParam(note & 0x7F).Sample(static_cast<SAMPLEINDEX>(modItemID)).Volume(volume));
 				}
 			}
 			return TRUE;
@@ -1457,16 +1473,16 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
 		case MODITEM_INSTRUMENT:
 			if (modDoc)
 			{
-				if (nParam == NOTE_NOTECUT)
+				if (note == NOTE_NOTECUT)
 				{
 					modDoc->NoteOff(0, true);
-				} else if (nParam & 0x80)
+				} else if (note & 0x80)
 				{
-					modDoc->NoteOff(nParam & 0x7F, true);
+					modDoc->NoteOff(note & 0x7F, true);
 				} else
 				{
 					modDoc->NoteOff(0, true);
-					modDoc->PlayNote(PlayNoteParam(nParam & 0x7F).Instrument(static_cast<INSTRUMENTINDEX>(modItemID)).Volume(volume));
+					modDoc->PlayNote(PlayNoteParam(note & 0x7F).Instrument(static_cast<INSTRUMENTINDEX>(modItemID)).Volume(volume));
 				}
 			}
 			return TRUE;
@@ -1480,7 +1496,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
 
 		case MODITEM_INSLIB_SAMPLE:
 		case MODITEM_INSLIB_INSTRUMENT:
-			if(nParam != NOTE_NOTECUT)
+			if(note != NOTE_NOTECUT)
 			{
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 				if(!m_SongFileName.empty())
@@ -1491,16 +1507,16 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
 					{
 						if (modItem.type == MODITEM_INSLIB_INSTRUMENT)
 						{
-							pMainFrm->PlaySoundFile(*m_SongFile, static_cast<INSTRUMENTINDEX>(n), SAMPLEINDEX_INVALID, nParam, volume);
+							pMainFrm->PlaySoundFile(*m_SongFile, static_cast<INSTRUMENTINDEX>(n), SAMPLEINDEX_INVALID, note, volume);
 						} else
 						{
-							pMainFrm->PlaySoundFile(*m_SongFile, INSTRUMENTINDEX_INVALID, static_cast<SAMPLEINDEX>(n), nParam, volume);
+							pMainFrm->PlaySoundFile(*m_SongFile, INSTRUMENTINDEX_INVALID, static_cast<SAMPLEINDEX>(n), note, volume);
 						}
 					}
 				} else
 				{
 					// Preview sample / instrument file
-					if (pMainFrm) pMainFrm->PlaySoundFile(InsLibGetFullPath(hItem), nParam, volume);
+					if (pMainFrm) pMainFrm->PlaySoundFile(InsLibGetFullPath(hItem), note, volume);
 				}
 			} else
 			{
@@ -1514,11 +1530,41 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
 			modItemID |= 0x80;
 		case MODITEM_MIDIINSTRUMENT:
 			{
-				MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
-				if(modItemID < CountOf(midiLib.MidiMap) && !midiLib.MidiMap[modItemID].empty())
+				const MidiLibrary &midiLib = CTrackApp::GetMidiLibrary();
+				if(modItemID < midiLib.size() && !midiLib[modItemID].empty())
 				{
 					CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-					if (pMainFrm) pMainFrm->PlaySoundFile(midiLib.MidiMap[modItemID], static_cast<ModCommand::NOTE>(nParam), volume);
+					CDLSBank *dlsBank = nullptr;
+					if(!mpt::PathString::CompareNoCase(m_cachedBankName, midiLib[modItemID]))
+					{
+						dlsBank = m_cachedBank.get();
+					}
+					if(dlsBank == nullptr && CDLSBank::IsDLSBank(midiLib[modItemID]))
+					{
+						m_cachedBank = std::make_unique<CDLSBank>();
+						if(m_cachedBank->Open(midiLib[modItemID]))
+						{
+							m_cachedBankName = midiLib[modItemID];
+							dlsBank = m_cachedBank.get();
+						}
+					}
+					if(dlsBank != nullptr)
+					{
+						uint32 item;
+						if(modItemID < 0x80)
+						{
+							item = modItemID | DLS_TYPEINST;
+						} else
+						{
+							dlsBank->FindInstrument(true, 0xFFFF, 0xFF, modItemID & 0x7F, &item);
+							item |= dlsBank->GetRegionFromKey(item, modItemID & 0x7F) << DLS_REGIONSHIFT;
+							item |= DLS_TYPEPERC;
+						}
+						PlayDLSItem(*dlsBank, DlsItem(0, item), note);
+					} else
+					{
+						pMainFrm->PlaySoundFile(midiLib[modItemID], note, volume);
+					}
 				}
 			}
 			return TRUE;
@@ -1530,19 +1576,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
 				uint32 bank = item.GetBankIndex();
 				if ((bank < CTrackApp::gpDLSBanks.size()) && (CTrackApp::gpDLSBanks[bank]) && (pMainFrm))
 				{
-					CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[bank];
-					UINT rgn = 0, instr = item.GetInstr();
-					// Drum
-					if (item.IsPercussion())
-					{
-						rgn = item.GetRegion();
-					} else
-					// Melodic
-					if (item.IsInstr())
-					{
-						rgn = pDLSBank->GetRegionFromKey(instr, nParam - NOTE_MIN);
-					}
-					pMainFrm->PlayDLSInstrument(bank, instr, rgn, static_cast<ModCommand::NOTE>(nParam));
+					PlayDLSItem(*CTrackApp::gpDLSBanks[bank], item, note);
 					return TRUE;
 				}
 			}
@@ -1554,10 +1588,10 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume)
 
 BOOL CModTree::SetMidiInstrument(UINT nIns, const mpt::PathString &fileName)
 {
-	MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
+	MidiLibrary &midiLib = CTrackApp::GetMidiLibrary();
 	if(nIns < 128)
 	{
-		midiLib.MidiMap[nIns] = fileName;
+		midiLib[nIns] = fileName;
 		RefreshMidiLibrary();
 		return TRUE;
 	}
@@ -1567,11 +1601,11 @@ BOOL CModTree::SetMidiInstrument(UINT nIns, const mpt::PathString &fileName)
 
 BOOL CModTree::SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName)
 {
-	MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
+	MidiLibrary &midiLib = CTrackApp::GetMidiLibrary();
 	if(nPerc < 128)
 	{
 		UINT nIns = nPerc | 0x80;
-		midiLib.MidiMap[nIns] = fileName;
+		midiLib[nIns] = fileName;
 		RefreshMidiLibrary();
 		return TRUE;
 	}
@@ -2218,10 +2252,10 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 		dropInfo.dwDropItem |= 0x80;
 	case MODITEM_MIDIINSTRUMENT:
 		{
-			MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
-			if(!midiLib.MidiMap[dropInfo.dwDropItem & 0xFF].empty())
+			MidiLibrary &midiLib = CTrackApp::GetMidiLibrary();
+			if(!midiLib[dropInfo.dwDropItem & 0xFF].empty())
 			{
-				fullPath = midiLib.MidiMap[dropInfo.dwDropItem & 0xFF];
+				fullPath = midiLib[dropInfo.dwDropItem & 0xFF];
 				dropInfo.dwDropType = DRAGONDROP_MIDIINSTR;
 				dropInfo.lDropParam = (LPARAM)&fullPath;
 			}

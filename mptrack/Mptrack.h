@@ -54,10 +54,7 @@ struct MODPLUGDIB
 /////////////////////////////////////////////////////////////////////////////
 // Midi Library
 
-struct MIDILIBSTRUCT
-{
-	mpt::PathString MidiMap[128*2];	// 128 instruments + 128 percussions
-};
+typedef std::array<mpt::PathString, 128 * 2> MidiLibrary; // 128 instruments + 128 percussions
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -110,7 +107,7 @@ class CTrackApp: public CWinApp
 // static data
 protected:
 	static MODTYPE m_nDefaultDocType;
-	static MIDILIBSTRUCT midiLibrary;
+	static MidiLibrary midiLibrary;
 
 public:
 	static std::vector<CDLSBank *> gpDLSBanks;
@@ -164,7 +161,7 @@ public:
 	mpt::PathString GetAppDirPath() {return m_szExePath;} // Returns '\'-ended executable directory path.
 	static MODTYPE GetDefaultDocType() { return m_nDefaultDocType; }
 	static void SetDefaultDocType(MODTYPE n) { m_nDefaultDocType = n; }
-	static MIDILIBSTRUCT &GetMidiLibrary() { return midiLibrary; }
+	static MidiLibrary &GetMidiLibrary() { return midiLibrary; }
 	static BOOL ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarning=FALSE);
 	static BOOL ExportMidiConfig(const mpt::PathString &filename);
 	static BOOL ImportMidiConfig(SettingsContainer &file, bool forgetSettings = false);

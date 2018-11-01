@@ -23,6 +23,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CDLSBank;
 class CInputHandler;
 class CModDoc;
 class CAutoSaver;
@@ -429,7 +430,7 @@ public:
 	bool PlaySoundFile(CSoundFile *);
 	bool PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE note, int volume = -1);
 	bool PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument, SAMPLEINDEX nSample, ModCommand::NOTE note, int volume = -1);
-	bool PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModCommand::NOTE note, int volume = -1);
+	bool PlayDLSInstrument(const CDLSBank &bank, UINT instr, UINT region, ModCommand::NOTE note, int volume = -1);
 
 	void InitPreview();
 	void PreparePreview(ModCommand::NOTE note, int volume);

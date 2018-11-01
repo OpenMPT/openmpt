@@ -1267,7 +1267,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 	ChangeModTypeTo(MOD_TYPE_MPT);
-	const MIDILIBSTRUCT &midiLib = CTrackApp::GetMidiLibrary();
+	const MidiLibrary &midiLib = CTrackApp::GetMidiLibrary();
 	mpt::PathString cachedBankName;
 	// Load Instruments
 	for (INSTRUMENTINDEX ins = 1; ins <= m_nInstruments; ins++) if (Instruments[ins])
@@ -1284,7 +1284,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		const mpt::PathString &midiMapName = midiLib.MidiMap[midiCode];
+		const mpt::PathString &midiMapName = midiLib[midiCode];
 		if(!midiMapName.empty())
 		{
 			// Load from DLS/SF2 Bank

@@ -1510,15 +1510,14 @@ bool CMainFrame::PlaySoundFile(CSoundFile *pSndFile)
 }
 
 
-bool CMainFrame::PlayDLSInstrument(UINT nDLSBank, UINT nIns, UINT nRgn, ModCommand::NOTE note, int volume)
+bool CMainFrame::PlayDLSInstrument(const CDLSBank &bank, UINT instr, UINT region, ModCommand::NOTE note, int volume)
 {
-	if(nDLSBank >= CTrackApp::gpDLSBanks.size() || !CTrackApp::gpDLSBanks[nDLSBank]) return FALSE;
 	bool ok = false;
 	BeginWaitCursor();
 	{
 		CriticalSection cs;
 		InitPreview();
-		if(CTrackApp::gpDLSBanks[nDLSBank]->ExtractInstrument(m_WaveFile, 1, nIns, nRgn))
+		if(bank.ExtractInstrument(m_WaveFile, 1, instr, region))
 		{
 			PreparePreview(note, volume);
 			ok = true;

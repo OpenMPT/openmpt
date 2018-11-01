@@ -22,6 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CModDoc;
 class CModTree;
 class CSoundFile;
+class CDLSBank;
 
 struct ModTreeDocInfo
 {
@@ -169,6 +170,9 @@ protected:
 	std::vector<HTREEITEM> m_tiDLS;
 	std::vector<std::unique_ptr<ModTreeDocInfo>> DocInfo;
 
+	std::unique_ptr<CDLSBank> m_cachedBank;
+	mpt::PathString m_cachedBankName;
+
 	// Instrument library
 	mpt::PathString m_InstrLibPath;				// Current path to be explored
 	mpt::PathString m_InstrLibHighlightPath;	// Folder to highlight in browser after a refresh
@@ -199,6 +203,7 @@ public:
 	BOOL SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName);
 	BOOL ExecuteItem(HTREEITEM hItem);
 	void DeleteTreeItem(HTREEITEM hItem);
+	static void PlayDLSItem(CDLSBank &dlsBank, const DlsItem &item, ModCommand::NOTE note);
 	BOOL PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume = -1);
 	BOOL OpenTreeItem(HTREEITEM hItem);
 	BOOL OpenMidiInstrument(DWORD dwItem);

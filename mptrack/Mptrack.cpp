@@ -176,7 +176,7 @@ static void TimeoutSplashScreen();
 /////////////////////////////////////////////////////////////////////////////
 // Midi Library
 
-MIDILIBSTRUCT CTrackApp::midiLibrary;
+MidiLibrary CTrackApp::midiLibrary;
 
 BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
 {
@@ -198,14 +198,14 @@ BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
 		{
 			for (uint32 iIns=0; iIns<256; iIns++)
 			{
-				if((bReplaceAll) || midiLibrary.MidiMap[iIns].empty())
+				if((bReplaceAll) || midiLibrary[iIns].empty())
 				{
 					uint32 dwProgram = (iIns < 128) ? iIns : 0xFF;
 					uint32 dwKey = (iIns < 128) ? 0xFF : iIns & 0x7F;
 					uint32 dwBank = (iIns < 128) ? 0 : F_INSTRUMENT_DRUMS;
 					if (dlsbank.FindInstrument((iIns < 128) ? FALSE : TRUE,	dwBank, dwProgram, dwKey))
 					{
-						midiLibrary.MidiMap[iIns] = filename;
+						midiLibrary[iIns] = filename;
 					}
 				}
 			}
@@ -261,7 +261,7 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 		if(!filename.empty())
 		{
 			filename = theApp.RelativePathToAbsolute(filename);
-			midiLibrary.MidiMap[iMidi] = filename;
+			midiLibrary[iMidi] = filename;
 		}
 	}
 	return FALSE;
@@ -277,9 +277,9 @@ BOOL CTrackApp::ExportMidiConfig(const mpt::PathString &filename)
 
 BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
 {
-	for(uint32 iMidi = 0; iMidi < 256; iMidi++) if (!midiLibrary.MidiMap[iMidi].empty())
+	for(uint32 iMidi = 0; iMidi < 256; iMidi++) if (!midiLibrary[iMidi].empty())
 	{
-		mpt::PathString szFileName = midiLibrary.MidiMap[iMidi];
+		mpt::PathString szFileName = midiLibrary[iMidi];
 
 		if(!szFileName.empty())
 		{

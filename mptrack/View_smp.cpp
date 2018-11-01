@@ -2718,7 +2718,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 			CDLSBank dlsbank;
 			if (dlsbank.Open(lpDropInfo->GetPath()))
 			{
-				DLSINSTRUMENT *pDlsIns;
+				const DLSINSTRUMENT *pDlsIns;
 				UINT nIns = 0, nRgn = 0xFF;
 				// Drums
 				if (lpDropInfo->dwDropItem & 0x80)
