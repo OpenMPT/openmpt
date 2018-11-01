@@ -605,6 +605,33 @@ DLSINSTRUMENT *CDLSBank::FindInstrument(bool bDrum, uint32 nBank, uint32 dwProgr
 }
 
 
+bool CDLSBank::FindAndExtract(CSoundFile &sndFile, const INSTRUMENTINDEX ins, const bool isDrum)
+{
+	ModInstrument *pIns = sndFile.Instruments[ins];
+	if(pIns == nullptr)
+		return false;
+
+	uint32 dlsIns = 0, drumRgn = 0;
+	const uint32 program = (pIns->nMidiProgram != 0) ? pIns->nMidiProgram - 1 : 0;
+	const uint32 key = isDrum ? (pIns->nMidiDrumKey & 0x7F) : 0xFF;
+	if(FindInstrument(isDrum, (pIns->wMidiBank - 1) & 0x3FFF, program, key, &dlsIns)
+		|| FindInstrument(isDrum, 0xFFFF, isDrum ? 0xFF : program, key, &dlsIns))
+	{
+		if(key < 0x80) drumRgn = GetRegionFromKey(dlsIns, key);
+		if(ExtractInstrument(sndFile, ins, dlsIns, drumRgn))
+		{
+			pIns = sndFile.Instruments[ins]; // Reset pointer because ExtractInstrument may delete the previous value.
+			if((key >= 24) && (key < 24 + mpt::size(szMidiPercussionNames)))
+			{
+				mpt::String::CopyN(pIns->name, szMidiPercussionNames[key - 24]);
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+
 ///////////////////////////////////////////////////////////////
 // Update DLS instrument definition from an IFF chunk
 
