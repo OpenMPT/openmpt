@@ -115,6 +115,7 @@ struct ModChannel
 	uint8 nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;	// IMF / PTM Note Slide
 	uint8 lastZxxParam;	// Memory for \xx slides
 	bool isFirstTick : 1;
+	bool isPreviewNote : 1;
 
 	//-->Variables used to make user-definable tuning modes work with pattern effects.
 	//If true, freq should be recalculated in ReadNote() on first tick.

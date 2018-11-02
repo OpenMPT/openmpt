@@ -228,11 +228,11 @@ namespace MidiExport
 		int32 GetCurrentProgram() override { return 0; }
 		void SetCurrentProgram(int32) override { }
 
-		PlugParamIndex GetNumParameters() const  override { return 0; }
-		PlugParamValue GetParameter(PlugParamIndex)  override { return 0; }
-		void SetParameter(PlugParamIndex, PlugParamValue)  override { }
+		PlugParamIndex GetNumParameters() const override { return 0; }
+		PlugParamValue GetParameter(PlugParamIndex) override { return 0; }
+		void SetParameter(PlugParamIndex, PlugParamValue) override { }
 
-		float RenderSilence(uint32)  override { return 0.0f; }
+		float RenderSilence(uint32) override { return 0.0f; }
 
 		bool MidiSend(uint32 dwMidiCode) override
 		{
@@ -243,11 +243,6 @@ namespace MidiExport
 			char midiData[4];
 			memcpy(midiData, &dwMidiCode, 4);
 			// TODO: If channels are shared between tracks, program change events need to be inserted!
-			if((midiData[0] & 0xF0) != 0xF0 && m_instr.nMidiChannel == MidiMappedChannel)
-			{
-				// Avoid putting things on channel 10, so we just put everything on the first 8 channels.
-				midiData[0] &= 0xF7;
-			}
 			mpt::IO::WriteRaw(f, midiData, MIDIEvents::GetEventLength(midiData[0]));
 			return true;
 		}
@@ -267,37 +262,27 @@ namespace MidiExport
 			return true;
 		}
 
-#if 0
-		void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) override
+		uint8 GetMidiChannel(CHANNELINDEX trackChannel) const override
 		{
-			if(m_instr.nMidiChannel == MidiMappedChannel)
+			if(m_instr.nMidiChannel == MidiMappedChannel && trackChannel < mpt::size(m_sndFile.m_PlayState.Chn))
 			{
-				// For "mapped" mode, distribute tracker channels evenly over MIDI channels, but avoid channel 10 (drums)
-				nMidiCh = trackChannel % 15u;
-				if(nMidiCh >= 9) nMidiCh++;
+				// For mapped channels, distribute tracker channels evenly over MIDI channels, but avoid channel 10 (drums)
+				uint8 midiCh = trackChannel % 15u;
+				if(midiCh >= 9) midiCh++;
+				return midiCh;
 			}
-			IMidiPlugin::MidiCC(nMidiCh, nController, nParam, trackChannel);
+			return IMidiPlugin::GetMidiChannel(trackChannel);
 		}
-#endif
 
-		void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) override
+		void MidiCommand(const ModInstrument &instr, uint16 note, uint16 vol, CHANNELINDEX trackChannel) override
 		{
-#if 0
-			if(m_instr.nMidiChannel == MidiMappedChannel)
-			{
-				// For "mapped" mode, distribute tracker channels evenly over MIDI channels, but avoid channel 10 (drums)
-				nMidiCh = trackChannel % 15u;
-				if(nMidiCh >= 9) nMidiCh++;
-			}
-#endif
 			if(note == NOTE_NOTECUT && (m_oldInstr == nullptr || !(m_oldInstr->nMixPlug != 0 && m_oldInstr->HasValidMIDIChannel())))
 			{
 				// The default implementation does things with Note Cut that we don't want here: it cuts all notes.
 				note = NOTE_KEYOFF;
 			}
-
 			if(!m_overlappingInstruments) m_MidiCh = m_tempoTrack->m_MidiCh;
-			IMidiPlugin::MidiCommand(nMidiCh, nMidiProg, wMidiBank, note, vol, trackChannel);
+			IMidiPlugin::MidiCommand(instr, note, vol, trackChannel);
 			if(!m_overlappingInstruments) m_tempoTrack->m_MidiCh = m_MidiCh;
 		}
 
@@ -306,7 +291,7 @@ namespace MidiExport
 			for(uint8 mc = 0; mc < m_MidiCh.size(); mc++)
 			{
 				PlugInstrChannel &channel = m_MidiCh[mc];
-				for(size_t i = 0; i < CountOf(channel.noteOnMap); i++)
+				for(size_t i = 0; i < mpt::size(channel.noteOnMap); i++)
 				{
 					for(auto &c : channel.noteOnMap[i])
 					{
@@ -720,7 +705,7 @@ void CDoMidiConvert::Run()
 
 	auto mainFrame = CMainFrame::GetMainFrame();
 	mainFrame->PauseMod(m_sndFile.GetpModDoc());
-	MidiExport::Conversion conv(m_sndFile, m_instrMap, f, CModToMidi::s_overlappingInstruments);
+	auto conv = mpt::make_unique<MidiExport::Conversion>(m_sndFile, m_instrMap, f, CModToMidi::s_overlappingInstruments);
 
 	double duration = m_sndFile.GetLength(eNoAdjust).front().duration;
 	uint64 totalSamples = mpt::saturate_round<uint64>(duration * m_sndFile.m_MixerSettings.gdwMixingFreq);
@@ -774,7 +759,7 @@ void CDoMidiConvert::Run()
 		}
 	}
 
-	conv.Finalise();
+	conv->Finalise();
 
 	m_sndFile.m_bIsRendering = false;
 	m_sndFile.SetRepeatCount(oldRepCount);

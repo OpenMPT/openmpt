@@ -227,34 +227,34 @@ bool LFOPlugin::MidiSysexSend(mpt::const_byte_span sysex)
 }
 
 
-void LFOPlugin::MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel)
+void LFOPlugin::MidiCC(MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel)
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
 	{
-		plugin->MidiCC(nMidiCh, nController, nParam, trackChannel);
+		plugin->MidiCC(nController, nParam, trackChannel);
 	}
 }
 
 
-void LFOPlugin::MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd)
+void LFOPlugin::MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackChannel)
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
 	{
-		plugin->MidiPitchBend(nMidiCh, increment, pwd);
+		plugin->MidiPitchBend(increment, pwd, trackChannel);
 	}
 }
 
 
-void LFOPlugin::MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd)
+void LFOPlugin::MidiVibrato(int32 depth, int8 pwd, CHANNELINDEX trackChannel)
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
 	{
-		plugin->MidiVibrato(nMidiCh, depth, pwd);
+		plugin->MidiVibrato(depth, pwd, trackChannel);
 	}
 }
 
 
-void LFOPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel)
+void LFOPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vol, CHANNELINDEX trackChannel)
 {
 	if(ModCommand::IsNote(static_cast<ModCommand::NOTE>(note)) && vol > 0)
 	{
@@ -262,7 +262,7 @@ void LFOPlugin::MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, ui
 	}
 	if(IMixPlugin *plugin = GetOutputPlugin())
 	{
-		plugin->MidiCommand(nMidiCh, nMidiProg, wMidiBank, note, vol, trackChannel);
+		plugin->MidiCommand(instr, note, vol, trackChannel);
 	}
 }
 
@@ -276,10 +276,10 @@ void LFOPlugin::HardAllNotesOff()
 }
 
 
-bool LFOPlugin::IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn)
+bool LFOPlugin::IsNotePlaying(uint32 note, CHANNELINDEX trackerChn)
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
-		return plugin->IsNotePlaying(note, midiChn, trackerChn);
+		return plugin->IsNotePlaying(note, trackerChn);
 	else
 		return false;
 }

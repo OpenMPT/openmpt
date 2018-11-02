@@ -3262,7 +3262,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		int activePlugParam  = -1;
 		BYTE activeMacro      = sndFile.m_PlayState.Chn[nChn].nActiveMacro;
 
-		if (sndFile.m_MidiCfg.GetParameteredMacroType(activeMacro) == sfx_plug)
+		if (sndFile.m_MidiCfg.GetParameteredMacroType(activeMacro) == kSFxPlugParam)
 		{
 			activePlugParam = sndFile.m_MidiCfg.MacroToPlugParam(activeMacro);
 		}
@@ -4811,7 +4811,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 				if(!newcmd.instr)
 					newcmd.instr = sndFile.ChnSettings[nChn].nMixPlugin;
 				auto activeMacro = sndFile.m_PlayState.Chn[nChn].nActiveMacro;
-				if(!newcmd.GetValueVolCol() && sndFile.m_MidiCfg.GetParameteredMacroType(activeMacro) == sfx_plug)
+				if(!newcmd.GetValueVolCol() && sndFile.m_MidiCfg.GetParameteredMacroType(activeMacro) == kSFxPlugParam)
 				{
 					PlugParamIndex plugParam = sndFile.m_MidiCfg.MacroToPlugParam(sndFile.m_PlayState.Chn[nChn].nActiveMacro);
 					if(plugParam < ModCommand::maxColumnValue)

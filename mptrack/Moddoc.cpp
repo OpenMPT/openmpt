@@ -771,22 +771,6 @@ UINT CModDoc::ShowLog(const CString &preamble, const CString &title, CWnd *paren
 }
 
 
-uint8 CModDoc::GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const
-{
-	if(pIns->nMidiChannel == MidiMappedChannel)
-	{
-		if(nChn != CHANNELINDEX_INVALID)
-		{
-			return nChn % 16;
-		}
-	} else if(pIns->HasValidMIDIChannel())
-	{
-		return pIns->nMidiChannel - 1;
-	}
-	return 0;
-}
-
-
 void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plugin, InputTargetContext ctx)
 {
 	static uint8 midiVolume = 127;
@@ -890,7 +874,6 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 
 		// reset channel properties; in theory the chan is completely unused anyway.
 		chn.Reset(ModChannel::resetTotal, m_SndFile, CHANNELINDEX_INVALID);
-		chn.nMasterChn = 0;	// remove NNA association
 		chn.nNewNote = chn.nLastNote = static_cast<uint8>(note);
 		chn.nVolume = 256;
 
@@ -915,6 +898,11 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 			chn.UpdateInstrumentVolume(&sample, nullptr);
 		}
 		chn.nFadeOutVol = 0x10000;
+		chn.isPreviewNote = true;
+		if(params.m_currentChannel != CHANNELINDEX_INVALID)
+			chn.nMasterChn = params.m_currentChannel + 1;
+		else
+			chn.nMasterChn = 0;
 
 		if(chn.dwFlags[CHN_ADLIB] && chn.pModSample && m_SndFile.m_opl)
 		{
@@ -966,7 +954,7 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 
 					if(pPlugin != nullptr)
 					{
-						pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, params.m_currentChannel), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1], static_cast<uint16>(chn.nVolume), MAX_BASECHANNELS);
+						pPlugin->MidiCommand(*pIns, pIns->NoteMap[note - NOTE_MIN], static_cast<uint16>(chn.nVolume), channel);
 					}
 				}
 			}
@@ -989,7 +977,7 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 		for(CHANNELINDEX c = m_SndFile.GetNumChannels(); c < MAX_CHANNELS; c++)
 		{
 			ModChannel &chn = m_SndFile.m_PlayState.Chn[c];
-			if(chn.nMasterChn == 0 && (chn.pModSample || chn.pModInstrument))
+			if(chn.isPreviewNote && (chn.pModSample || chn.pModInstrument))
 			{
 				m_SndFile.NoteChange(chn, note);
 			}
@@ -1022,7 +1010,7 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[plug - 1].pMixPlugin;
 				if(pPlugin)
 				{
-					pPlugin->MidiCommand(GetPlaybackMidiChannel(pIns, currentChn), pIns->nMidiProgram, pIns->wMidiBank, pIns->NoteMap[note - 1] + NOTE_KEYOFF, 0, MAX_BASECHANNELS);
+					pPlugin->MidiCommand(*pIns, pIns->NoteMap[note - NOTE_MIN] + NOTE_KEYOFF, 0, MAX_BASECHANNELS);
 				}
 			}
 		}
@@ -1033,7 +1021,7 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 	for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++)
 	{
 		// Fade all channels > m_nChannels which are playing this note and aren't NNA channels.
-		if(!pChn->nMasterChn && !pChn->dwFlags[mask] && pChn->nLength && (note == pChn->nNewNote || !note))
+		if(pChn->isPreviewNote && !pChn->dwFlags[mask] && pChn->nLength && (note == pChn->nNewNote || !note))
 		{
 			m_SndFile.KeyOff(*pChn);
 			if (!m_SndFile.m_nInstruments) pChn->dwFlags.reset(CHN_LOOP);	// FIXME: If a sample with pingpong loop is playing backwards, stuff before the loop is played again!
@@ -1064,7 +1052,7 @@ void CModDoc::CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, std::bitset<1
 	for(CHANNELINDEX chn = GetNumChannels(); chn < MAX_CHANNELS; chn++)
 	{
 		const ModChannel &channel = m_SndFile.m_PlayState.Chn[chn];
-		if(channel.pModInstrument == pIns && channel.nMasterChn == 0 && ModCommand::IsNote(channel.nLastNote)
+		if(channel.pModInstrument == pIns && channel.isPreviewNote && ModCommand::IsNote(channel.nLastNote)
 			&& (channel.nLength || pIns->HasValidMIDIChannel()) && !playingNotes[channel.nLastNote])
 		{
 			CHANNELINDEX nnaChn = m_SndFile.CheckNNA(chn, ins, note, false);
@@ -1096,12 +1084,12 @@ void CModDoc::CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, std::bitset<1
 }
 
 
-// Check if a given note of an instrument or sample is playing.
+// Check if a given note of an instrument or sample is playing from the editor.
 // If note == 0, just check if an instrument or sample is playing.
 bool CModDoc::IsNotePlaying(UINT note, SAMPLEINDEX nsmp, INSTRUMENTINDEX nins)
 {
 	ModChannel *pChn = &m_SndFile.m_PlayState.Chn[m_SndFile.GetNumChannels()];
-	for (CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++) if (!pChn->nMasterChn)
+	for (CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++) if (pChn->isPreviewNote)
 	{
 		if(pChn->nLength != 0 && !pChn->dwFlags[CHN_NOTEFADE | CHN_KEYOFF| CHN_MUTE]
 			&& (note == pChn->nNewNote || note == NOTE_NONE)
@@ -1162,7 +1150,7 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 			const ModInstrument* pIns = m_SndFile.m_PlayState.Chn[nChn].pModInstrument;
 			if (pPlug && pIns)
 			{
-				pPlug->MidiCommand(m_SndFile.GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, NOTE_KEYOFF, 0, nChn);
+				pPlug->MidiCommand(*pIns, NOTE_KEYOFF, 0, nChn);
 			}
 		}
 	} else
@@ -1946,7 +1934,7 @@ void CModDoc::OnPlayerPlay()
 		CriticalSection cs;
 
 		// Kill editor voices
-		for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++) if (!m_SndFile.m_PlayState.Chn[i].nMasterChn)
+		for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++) if (m_SndFile.m_PlayState.Chn[i].isPreviewNote)
 		{
 			m_SndFile.m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 			if (!isPlaying) m_SndFile.m_PlayState.Chn[i].nLength = 0;
@@ -2643,7 +2631,7 @@ void CModDoc::LearnMacro(int macroToSet, PlugParamIndex paramToUse)
 	// If macro already exists for this param, inform user and return
 	for (int checkMacro = 0; checkMacro < NUM_MACROS; checkMacro++)
 	{
-		if (m_SndFile.m_MidiCfg.GetParameteredMacroType(checkMacro) == sfx_plug
+		if (m_SndFile.m_MidiCfg.GetParameteredMacroType(checkMacro) == kSFxPlugParam
 			&& m_SndFile.m_MidiCfg.MacroToPlugParam(checkMacro) == paramToUse)
 		{
 			CString message;
@@ -2656,7 +2644,7 @@ void CModDoc::LearnMacro(int macroToSet, PlugParamIndex paramToUse)
 	// Set new macro
 	if(paramToUse < 384)
 	{
-		m_SndFile.m_MidiCfg.CreateParameteredMacro(macroToSet, sfx_plug, paramToUse);
+		m_SndFile.m_MidiCfg.CreateParameteredMacro(macroToSet, kSFxPlugParam, paramToUse);
 	} else
 	{
 		CString message;

@@ -991,12 +991,11 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 		IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin;
 		if(pPlugin)
 		{
-			uint8 midiChn = GetBestMidiChannel(nChn);
-			bool isPlaying = pPlugin->IsNotePlaying(chn.nLastNote, midiChn, nChn);
+			const bool isPlaying = pPlugin->IsNotePlaying(chn.nLastNote, nChn);
 			if(vol == 0 && isPlaying)
-				pPlugin->MidiCommand(midiChn, pIns->nMidiProgram, pIns->wMidiBank, chn.nLastNote + NOTE_MAX_SPECIAL, 0, nChn);
+				pPlugin->MidiCommand(*pIns, chn.nLastNote + NOTE_MAX_SPECIAL, 0, nChn);
 			else if(vol != 0 && !isPlaying)
-				pPlugin->MidiCommand(midiChn, pIns->nMidiProgram, pIns->wMidiBank, chn.nLastNote, static_cast<uint16>(chn.nVolume), nChn);
+				pPlugin->MidiCommand(*pIns, chn.nLastNote, static_cast<uint16>(chn.nVolume), nChn);
 		}
 	}
 #endif // NO_PLUGINS
@@ -1668,7 +1667,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 				{
 					pwd = chn.pModInstrument->midiPWD;
 				}
-				plugin->MidiVibrato(GetBestMidiChannel(nChn), midiDelta, pwd);
+				plugin->MidiVibrato(midiDelta, pwd, nChn);
 			}
 #endif // NO_PLUGINS
 		}
@@ -1687,7 +1686,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 		IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn);
 		if(plugin != nullptr)
 		{
-			plugin->MidiVibrato(GetBestMidiChannel(nChn), 0, 0);
+			plugin->MidiVibrato(0, 0, nChn);
 		}
 #endif // NO_PLUGINS
 	}
@@ -2511,7 +2510,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 			SendMIDINote(nChn, realNote, static_cast<uint16>(chn.nVolume));
 		} else if(hasVolCommand)
 		{
-			pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Fine, vol, nChn);
+			pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Fine, vol, nChn);
 		}
 		return;
 	}
@@ -2555,8 +2554,8 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 				break;
 
 			case PLUGIN_VOLUMEHANDLING_MIDI:
-				if(hasVolCommand) pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Coarse, std::min<uint8>(127u, 2u * vol), nChn);
-				else pPlugin->MidiCC(GetBestMidiChannel(nChn), MIDIEvents::MIDICC_Volume_Coarse, static_cast<uint8>(std::min<uint32>(127u, 2u * defaultVolume)), nChn);
+				if(hasVolCommand) pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Coarse, std::min<uint8>(127u, 2u * vol), nChn);
+				else pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Coarse, static_cast<uint8>(std::min<uint32>(127u, 2u * defaultVolume)), nChn);
 				break;
 
 		}

@@ -822,9 +822,9 @@ void CAbstractVstEditor::UpdateMacroMenu()
 
 		const MIDIMacroConfig &midiCfg = m_VstPlugin.GetSoundFile().m_MidiCfg;
 
-		const parameteredMacroType macroType = midiCfg.GetParameteredMacroType(nMacro);
+		const ParameteredMacro macroType = midiCfg.GetParameteredMacroType(nMacro);
 
-		if(macroType == sfx_unused)
+		if(macroType == kSFxUnused)
 		{
 			macroName = _T("Unused. Learn Param...");
 			action= ID_LEARN_MACRO_FROM_PLUGGUI + nMacro;
@@ -832,7 +832,7 @@ void CAbstractVstEditor::UpdateMacroMenu()
 		} else
 		{
 			macroName = midiCfg.GetParameteredMacroName(nMacro, &m_VstPlugin);
-			if(macroType != sfx_plug || macroName.Left(3) != _T("N/A"))
+			if(macroType != kSFxPlugParam || macroName.Left(3) != _T("N/A"))
 			{
 				greyed = false;
 			}

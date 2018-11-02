@@ -1353,7 +1353,7 @@ void CMainFrame::UnsetPlaybackSoundFile()
 			// Stop sample preview channels
 			for(CHANNELINDEX i = m_pSndFile->m_nChannels; i < MAX_CHANNELS; i++)
 			{
-				if(!(m_pSndFile->m_PlayState.Chn[i].nMasterChn))
+				if(m_pSndFile->m_PlayState.Chn[i].isPreviewNote)
 				{
 					m_pSndFile->m_PlayState.Chn[i].nLength = 0;
 					m_pSndFile->m_PlayState.Chn[i].position.Set(0);

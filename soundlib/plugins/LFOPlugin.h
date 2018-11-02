@@ -86,12 +86,12 @@ public:
 	// MIDI event handling (mostly passing it through to the follow-up plugin)
 	bool MidiSend(uint32 midiCode) override;
 	bool MidiSysexSend(mpt::const_byte_span sysex) override;
-	void MidiCC(uint8 nMidiCh, MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) override;
-	void MidiPitchBend(uint8 nMidiCh, int32 increment, int8 pwd) override;
-	void MidiVibrato(uint8 nMidiCh, int32 depth, int8 pwd) override;
-	void MidiCommand(uint8 nMidiCh, uint8 nMidiProg, uint16 wMidiBank, uint16 note, uint16 vol, CHANNELINDEX trackChannel) override;
+	void MidiCC(MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) override;
+	void MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackChannel) override;
+	void MidiVibrato(int32 depth, int8 pwd, CHANNELINDEX trackChannel) override;
+	void MidiCommand(const ModInstrument &instr, uint16 note, uint16 vol, CHANNELINDEX trackChannel) override;
 	void HardAllNotesOff() override;
-	bool IsNotePlaying(uint32 note, uint32 midiChn, uint32 trackerChn) override;
+	bool IsNotePlaying(uint32 note, CHANNELINDEX trackerChn) override;
 
 	int32 GetNumPrograms() const override { return 0; }
 	int32 GetCurrentProgram() override { return 0; }

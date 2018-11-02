@@ -29,39 +29,41 @@ OPENMPT_NAMESPACE_END
 OPENMPT_NAMESPACE_BEGIN
 
 // Parametered macro presets
-enum parameteredMacroType
+enum ParameteredMacro
 {
-	sfx_unused = 0,
-	sfx_cutoff,			// Type 1 - Z00 - Z7F controls resonant filter cutoff
-	sfx_reso,			// Type 2 - Z00 - Z7F controls resonant filter resonance
-	sfx_mode,			// Type 3 - Z00 - Z7F controls resonant filter mode (lowpass / highpass)
-	sfx_drywet,			// Type 4 - Z00 - Z7F controls plugin Dry / Wet ratio
-	sfx_plug,			// Type 5 - Z00 - Z7F controls a plugin parameter
-	sfx_cc,				// Type 6 - Z00 - Z7F controls MIDI CC
-	sfx_channelAT,		// Type 7 - Z00 - Z7F controls Channel Aftertouch
-	sfx_polyAT,			// Type 8 - Z00 - Z7F controls Poly Aftertouch
-	sfx_pitch,			// Type 9 - Z00 - Z7F controls Pitch Bend
-	sfx_custom,
+	kSFxUnused = 0,
+	kSFxCutoff,     // Z00 - Z7F controls resonant filter cutoff
+	kSFxReso,       // Z00 - Z7F controls resonant filter resonance
+	kSFxFltMode,    // Z00 - Z7F controls resonant filter mode (lowpass / highpass)
+	kSFxDryWet,     // Z00 - Z7F controls plugin Dry / Wet ratio
+	kSFxPlugParam,  // Z00 - Z7F controls a plugin parameter
+	kSFxCC,         // Z00 - Z7F controls MIDI CC
+	kSFxChannelAT,  // Z00 - Z7F controls Channel Aftertouch
+	kSFxPolyAT,     // Z00 - Z7F controls Poly Aftertouch
+	kSFxPitch,      // Z00 - Z7F controls Pitch Bend
+	kSFxProgChange, // Z00 - Z7F controls MIDI Program Change
+	kSFxCustom,
 
-	sfx_max
+	kSFxMax
 };
 
 
 // Fixed macro presets
-enum fixedMacroType
+enum FixedMacro
 {
-	zxx_unused = 0,
-	zxx_reso4Bit,		// Type 1 - Z80 - Z8F controls resonant filter resonance
-	zxx_reso7Bit,		// Type 2 - Z80 - ZFF controls resonant filter resonance
-	zxx_cutoff,			// Type 3 - Z80 - ZFF controls resonant filter cutoff
-	zxx_mode,			// Type 4 - Z80 - ZFF controls resonant filter mode (lowpass / highpass)
-	zxx_resomode,		// Type 5 - Z80 - Z9F controls resonance + filter mode
-	zxx_channelAT,		// Type 6 - Z80 - ZFF controls Channel Aftertouch
-	zxx_polyAT,			// Type 7 - Z80 - ZFF controls Poly Aftertouch
-	zxx_pitch,			// Type 8 - Z80 - ZFF controls Pitch Bend
-	zxx_custom,
+	kZxxUnused = 0,
+	kZxxReso4Bit,    // Z80 - Z8F controls resonant filter resonance
+	kZxxReso7Bit,    // Z80 - ZFF controls resonant filter resonance
+	kZxxCutoff,      // Z80 - ZFF controls resonant filter cutoff
+	kZxxFltMode,     // Z80 - ZFF controls resonant filter mode (lowpass / highpass)
+	kZxxResoFltMode, // Z80 - Z9F controls resonance + filter mode
+	kZxxChannelAT,   // Z80 - ZFF controls Channel Aftertouch
+	kZxxPolyAT,      // Z80 - ZFF controls Poly Aftertouch
+	kZxxPitch,       // Z80 - ZFF controls Pitch Bend
+	kZxxProgChange,  // Z80 - ZFF controls MIDI Program Change
+	kZxxCustom,
 
-	zxx_max
+	kZxxMax
 };
 
 
@@ -98,18 +100,18 @@ public:
 	MIDIMacroConfig() { Reset(); }
 
 	// Get macro type from a macro string
-	parameteredMacroType GetParameteredMacroType(uint32 macroIndex) const;
-	fixedMacroType GetFixedMacroType() const;
+	ParameteredMacro GetParameteredMacroType(uint32 macroIndex) const;
+	FixedMacro GetFixedMacroType() const;
 
 	// Create a new macro
 protected:
-	void CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENGTH], parameteredMacroType macroType, int subType) const;
+	void CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENGTH], ParameteredMacro macroType, int subType) const;
 public:
-	void CreateParameteredMacro(uint32 macroIndex, parameteredMacroType macroType, int subType = 0)
+	void CreateParameteredMacro(uint32 macroIndex, ParameteredMacro macroType, int subType = 0)
 	{
 		CreateParameteredMacro(szMidiSFXExt[macroIndex], macroType, subType);
 	}
-	std::string CreateParameteredMacro(parameteredMacroType macroType, int subType = 0) const
+	std::string CreateParameteredMacro(ParameteredMacro macroType, int subType = 0) const
 	{
 		char parameteredMacro[MACRO_LENGTH];
 		CreateParameteredMacro(parameteredMacro, macroType, subType);
@@ -117,9 +119,9 @@ public:
 	}
 
 protected:
-	void CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], fixedMacroType macroType) const;
+	void CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], FixedMacro macroType) const;
 public:
-	void CreateFixedMacro(fixedMacroType macroType)
+	void CreateFixedMacro(FixedMacro macroType)
 	{
 		CreateFixedMacro(szMidiZXXExt, macroType);
 	}
@@ -131,8 +133,8 @@ public:
 
 	// Translate macro type or macro string to macro name
 	CString GetParameteredMacroName(uint32 macroIndex, IMixPlugin *plugin = nullptr) const;
-	CString GetParameteredMacroName(parameteredMacroType macroType) const;
-	CString GetFixedMacroName(fixedMacroType macroType) const;
+	CString GetParameteredMacroName(ParameteredMacro macroType) const;
+	CString GetFixedMacroName(FixedMacro macroType) const;
 
 	// Extract information from a parametered macro string.
 	int MacroToPlugParam(uint32 macroIndex) const;

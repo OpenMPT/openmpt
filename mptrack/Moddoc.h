@@ -356,8 +356,6 @@ protected:
 	void DeleteContents() override;
 	//}}AFX_VIRTUAL
 
-	uint8 GetPlaybackMidiChannel(const ModInstrument *pIns, CHANNELINDEX nChn) const;
-
 	void UpdateOPLInstrument(SAMPLEINDEX smp);
 
 	// Get the sample index for the current pattern cell (resolves instrument note maps, etc)

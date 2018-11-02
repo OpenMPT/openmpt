@@ -2253,7 +2253,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			{
 				// apply NNA to this plugin iff it is currently playing a note on this tracker channel
 				// (and if it is playing a note, we know that would be the last note played on this chan).
-				applyNNAtoPlug = pPlugin->IsNotePlaying(srcChn.GetPluginNote(m_playBehaviour[kITRealNoteMapping]), GetBestMidiChannel(nChn), nChn);
+				applyNNAtoPlug = pPlugin->IsNotePlaying(srcChn.GetPluginNote(m_playBehaviour[kITRealNoteMapping]), nChn);
 			}
 		}
 	}
@@ -3797,7 +3797,7 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 			{
 				pwd = m_PlayState.Chn[nChn].pModInstrument->midiPWD;
 			}
-			plugin->MidiPitchBend(GetBestMidiChannel(nChn), pitchBend, pwd);
+			plugin->MidiPitchBend(pitchBend, pwd, nChn);
 		}
 #endif // NO_PLUGINS
 	}
@@ -4601,7 +4601,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 								IMixPlugin *pPlugin;
 								if(pIns != nullptr && pIns->nMixPlug && (pPlugin = m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin) != nullptr)
 								{
-									pPlugin->MidiCommand(GetBestMidiChannel(nChn), pIns->nMidiProgram, pIns->wMidiBank, bkChn.nNote + NOTE_MAX_SPECIAL, 0, nChn);
+									pPlugin->MidiCommand(*pIns, bkChn.nNote + NOTE_MAX_SPECIAL, 0, nChn);
 								}
 #endif // NO_PLUGINS
 							}
@@ -5184,7 +5184,7 @@ void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
 			IMixPlugin *pPlug = m_MixPlugins[plug - 1].pMixPlugin;
 			if (pPlug != nullptr)
 			{
-				pPlug->MidiCommand(GetBestMidiChannel(chn), pIns->nMidiProgram, pIns->wMidiBank, note, volume, chn);
+				pPlug->MidiCommand(*pIns, note, volume, chn);
 				if(note < NOTE_MIN_SPECIAL)
 					channel.nLeftVU = channel.nRightVU = 0xFF;
 			}
@@ -6041,23 +6041,24 @@ IMixPlugin *CSoundFile::GetChannelInstrumentPlugin(CHANNELINDEX chn) const
 
 
 // Get the MIDI channel currently associated with a given tracker channel
-uint8 CSoundFile::GetBestMidiChannel(CHANNELINDEX nChn) const
+uint8 CSoundFile::GetBestMidiChannel(CHANNELINDEX trackerChn) const
 {
-	if(nChn >= MAX_CHANNELS)
+	if(trackerChn >= mpt::size(m_PlayState.Chn))
 	{
 		return 0;
 	}
 
-	const ModInstrument *ins = m_PlayState.Chn[nChn].pModInstrument;
+	const ModChannel &chn = m_PlayState.Chn[trackerChn];
+	const ModInstrument *ins = chn.pModInstrument;
 	if(ins != nullptr)
 	{
 		if(ins->nMidiChannel == MidiMappedChannel)
 		{
 			// For mapped channels, return their pattern channel, modulo 16 (because there are only 16 MIDI channels)
-			return (m_PlayState.Chn[nChn].nMasterChn ? (m_PlayState.Chn[nChn].nMasterChn - 1) : nChn) % 16;
+			return static_cast<uint8>((chn.nMasterChn ? (chn.nMasterChn - 1u) : trackerChn) % 16u);
 		} else if(ins->HasValidMIDIChannel())
 		{
-			return (ins->nMidiChannel - 1) & 0x0F;
+			return (ins->nMidiChannel - 1u) % 16u;
 		}
 	}
 	return 0;
