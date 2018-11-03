@@ -100,7 +100,7 @@ namespace mpt
 
 
 
-#if MPT_CXX_AT_LEAST(17)
+#if MPT_CXX_AT_LEAST(17) && !(MPT_COMPILER_CLANG && defined(__GLIBCXX__))
 using std::launder;
 #else
 template <class T>
