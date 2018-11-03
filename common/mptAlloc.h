@@ -170,7 +170,7 @@ struct aligned_raw_objects
 template <typename T, std::size_t alignment>
 inline aligned_raw_objects<T> aligned_new(std::size_t count, T init = T())
 {
-	aligned_raw_buffer buf = aligned_alloc<T, alignment>(count);
+	aligned_raw_buffer<T> buf = aligned_alloc<T, alignment>(count);
 	std::size_t constructed = 0;
 	try
 	{
