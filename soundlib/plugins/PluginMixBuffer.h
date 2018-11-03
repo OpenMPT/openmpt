@@ -14,6 +14,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+
 // At least this part of the code is ready for double-precision rendering... :>
 // buffer_t: Sample buffer type (float, double, ...)
 // bufferSize: Buffer size in samples
@@ -22,15 +23,9 @@ class PluginMixBuffer
 {
 protected:
 
-	std::vector<buffer_t>   mixBuffer;	// Actual buffer, contains all input and output buffers
-	std::vector<buffer_t *> inputs;		// Pointers to input buffers
-	std::vector<buffer_t *> outputs;	// Pointers to output buffers
-	buffer_t *alignedBuffer;			// Aligned pointer to the buffer
-
-	// Align buffer to 16 bytes
-	static_assert(sizeof(buffer_t) < 16, "Check buffer alignment code");
-	static const uintptr_t bufferAlignmentInBytes = (16 - 1);
-	static const uintptr_t additionalBuffer = bufferAlignmentInBytes / sizeof(buffer_t);
+	std::vector<buffer_t *> inputs;                   // Pointers to input buffers
+	std::vector<buffer_t *> outputs;                  // Pointers to output buffers
+	mpt::aligned_buffer<buffer_t, 16> alignedBuffer;  // Aligned buffer pointed into
 
 	// Return pointer to an aligned buffer
 	const buffer_t *GetBuffer(size_t index) const
@@ -60,19 +55,17 @@ public:
 			inputs.resize(numInputs);
 			outputs.resize(numOutputs);
 
-			// Create inputs + outputs buffers with additional alignment.
-			const size_t totalBufferSize = bufferSize * (numInputs + numOutputs) + additionalBuffer;
-			mixBuffer.assign(totalBufferSize, 0);
+			// Create inputs + outputs buffers
+			alignedBuffer.destructive_resize(bufferSize * (numInputs + numOutputs));
 
-			// Align buffer start.
-			alignedBuffer = reinterpret_cast<buffer_t *>((reinterpret_cast<uintptr_t>(mixBuffer.data()) + bufferAlignmentInBytes) & ~bufferAlignmentInBytes);
 		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
 			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 			inputs.clear();
+			inputs.shrink_to_fit();
 			outputs.clear();
-			mixBuffer.clear();
-			alignedBuffer = nullptr;
+			outputs.shrink_to_fit();
+			alignedBuffer.destructive_resize(0);
 			return false;
 		}
 
@@ -95,7 +88,7 @@ public:
 		MPT_ASSERT(numSamples <= bufferSize);
 		for(size_t i = 0; i < inputs.size(); i++)
 		{
-			memset(inputs[i], 0, numSamples * sizeof(buffer_t));
+			std::memset(inputs[i], 0, numSamples * sizeof(buffer_t));
 		}
 	}
 
@@ -105,7 +98,7 @@ public:
 		MPT_ASSERT(numSamples <= bufferSize);
 		for(size_t i = 0; i < outputs.size(); i++)
 		{
-			memset(outputs[i], 0, numSamples * sizeof(buffer_t));
+			std::memset(outputs[i], 0, numSamples * sizeof(buffer_t));
 		}
 	}
 
@@ -124,7 +117,7 @@ public:
 	buffer_t **GetInputBufferArray() { return inputs.empty() ? nullptr : inputs.data(); }
 	buffer_t **GetOutputBufferArray() { return outputs.empty() ? nullptr : outputs.data(); }
 
-	bool Ok() const { return alignedBuffer != nullptr; }
+	bool Ok() const { return alignedBuffer.size() > 0; }
 };
 
 

@@ -95,4 +95,168 @@ std::unique_ptr<T> make_unique(Args&&... args)
 
 
 
+namespace mpt
+{
+
+
+
+#if MPT_CXX_AT_LEAST(17)
+using std::launder;
+#else
+template <class T>
+MPT_NOINLINE T* launder(T* p) noexcept
+{
+	return p;
+}
+#endif
+
+
+#if MPT_CXX_AT_LEAST(17)
+using std::align;
+#else
+// pre-C++17, std::align does not support over-alignement
+void* align(std::size_t alignment, std::size_t size, void* &ptr, std::size_t &space) noexcept;
+#endif
+
+
+
+struct aligned_raw_memory
+{
+	void* aligned;
+	void* mem;
+};
+
+aligned_raw_memory aligned_alloc_impl(std::size_t size, std::size_t count, std::size_t alignment);
+
+template <std::size_t alignment>
+inline aligned_raw_memory aligned_alloc(std::size_t size, std::size_t count)
+{
+	MPT_STATIC_ASSERT(alignment > 0);
+	MPT_CONSTEXPR14_ASSERT(mpt::weight(alignment) == 1);
+	return aligned_alloc_impl(size, count, alignment);
+}
+
+void aligned_free(aligned_raw_memory raw);
+
+template <typename T>
+struct aligned_raw_buffer
+{
+	T* elements;
+	void* mem;
+};
+
+template <typename T, std::size_t alignment>
+inline aligned_raw_buffer<T> aligned_alloc(std::size_t count)
+{
+	MPT_STATIC_ASSERT(alignment >= alignof(T));
+	aligned_raw_memory raw = aligned_alloc<alignment>(sizeof(T), count);
+	return aligned_raw_buffer<T>{mpt::launder(reinterpret_cast<T*>(raw.aligned)), raw.mem};
+}
+
+template <typename T>
+inline void aligned_free(aligned_raw_buffer<T> buf)
+{
+	aligned_free(aligned_raw_memory{buf.elements, buf.mem});
+}
+
+template <typename T>
+struct aligned_raw_objects
+{
+	T* elements;
+	std::size_t count;
+	void* mem;
+};
+
+template <typename T, std::size_t alignment>
+inline aligned_raw_objects<T> aligned_new(std::size_t count, T init = T())
+{
+	aligned_raw_buffer buf = aligned_alloc<T, alignment>(count);
+	std::size_t constructed = 0;
+	try
+	{
+		for(std::size_t i = 0; i < count; ++i)
+		{
+			new(&(buf.elements[i])) T(init);
+			constructed++;
+		}
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		while(constructed--)
+		{
+			mpt::launder(&(buf.elements[constructed - 1]))->~T();
+		}
+		aligned_free(buf);
+		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+	} catch(...)
+	{
+		while(constructed--)
+		{
+			mpt::launder(&(buf.elements[constructed - 1]))->~T();
+		}
+		aligned_free(buf);
+		throw;
+	}
+	return aligned_raw_objects<T>{mpt::launder(buf.elements), count, buf.mem};
+}
+
+template <typename T>
+inline void aligned_delete(aligned_raw_objects<T> objs)
+{
+	if(objs.elements)
+	{
+		std::size_t constructed = objs.count;
+		while(constructed--)
+		{
+			objs.elements[constructed - 1].~T();
+		}
+	}
+	aligned_free(aligned_raw_buffer<T>{objs.elements, objs.mem});
+}
+
+template <typename T, std::size_t alignment>
+class aligned_buffer
+{
+private:
+	aligned_raw_objects<T> objs;
+public:
+	explicit aligned_buffer(std::size_t count = 0)
+		: objs(aligned_new<T, alignment>(count))
+	{
+	}
+	aligned_buffer(const aligned_buffer&) = delete;
+	aligned_buffer& operator=(const aligned_buffer&) = delete;
+	~aligned_buffer()
+	{
+		aligned_delete(objs);
+	}
+public:
+	void destructive_resize(std::size_t count)
+	{
+		aligned_raw_objects<T> tmpobjs = aligned_new<T, alignment>(count);
+		{
+			using namespace std;
+			swap(objs, tmpobjs);
+		}
+		aligned_delete(tmpobjs);
+	}
+public:
+	T* begin() noexcept { return objs.elements; }
+	const T* begin() const noexcept { return objs.elements; }
+	T* end() noexcept { return objs.elements + objs.count; }
+	const T* end() const noexcept { return objs.elements + objs.count; }
+	const T* cbegin() const noexcept { return objs.elements; }
+	const T* cend() const noexcept { return objs.elements + objs.count; }
+	T& operator[](std::size_t i) noexcept { return objs.elements[i]; }
+	const T& operator[](std::size_t i) const noexcept { return objs.elements[i]; }
+	T* data() noexcept { return objs.elements; }
+	const T* data() const noexcept { return objs.elements; }
+	std::size_t size() const noexcept { return objs.count; }
+};
+
+
+
+} // namespace mpt
+
+
+
 OPENMPT_NAMESPACE_END

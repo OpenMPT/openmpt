@@ -89,6 +89,7 @@ LOCAL_SRC_FILES += \
 	common/FileReader.cpp \
 	common/Logging.cpp \
 	common/misc_util.cpp \
+	common/mptAlloc.cpp \
 	common/mptCPU.cpp \
 	common/mptFileIO.cpp \
 	common/mptIO.cpp \
