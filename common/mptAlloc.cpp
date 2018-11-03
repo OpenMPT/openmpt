@@ -16,6 +16,7 @@
 #include <memory>
 #include <new>
 
+#include <cstddef>
 #include <cstdlib>
 
 #if MPT_COMPILER_MSVC
