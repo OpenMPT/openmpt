@@ -19,6 +19,7 @@ struct MODPLUGDIB;
 struct PATTERNFONT
 {
 	MODPLUGDIB *dib;
+	MODPLUGDIB *dibASCII;  // optional
 	int nWidth, nHeight;		// Column Width & Height, including 4-pixels border
 	int nClrX, nClrY;			// Clear (empty note) location
 	int nSpaceX, nSpaceY;		// White location (must be big enough)

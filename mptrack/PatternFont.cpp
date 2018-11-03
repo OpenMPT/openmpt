@@ -24,6 +24,7 @@ OPENMPT_NAMESPACE_BEGIN
 const PATTERNFONT gDefaultPatternFont = 
 {
 	nullptr,
+	nullptr,
 	92,13,	// Column Width & Height
 	0,0,	// Clear location
 	130,8,	// Space Location.
@@ -52,6 +53,7 @@ const PATTERNFONT gDefaultPatternFont =
 
 const PATTERNFONT gSmallPatternFont = 
 {
+	nullptr,
 	nullptr,
 	70,11,	// Column Width & Height
 	92,0,	// Clear location
@@ -82,6 +84,7 @@ const PATTERNFONT gSmallPatternFont =
 const PATTERNFONT *PatternFont::currentFont = nullptr;
 
 static MODPLUGDIB customFontBitmap;
+static MODPLUGDIB customFontBitmapASCII;
 
 static void DrawChar(HDC hDC, WCHAR ch, int x, int y, int w, int h)
 {
@@ -135,6 +138,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 	previousFont = font;
 	DeleteFontData();
 	pf.dib = &customFontBitmap;
+	pf.dibASCII = nullptr;
 
 	// Upscale built-in font?
 	if(builtinFont != nullptr)
@@ -293,6 +297,8 @@ void PatternFont::UpdateFont(HWND hwnd)
 	pf.paramLoMargin = 0;				// Margin for second digit of parameter
 	pf.spacingY = charHeight;
 
+	{
+
 	pf.dib->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	pf.dib->bmiHeader.biWidth = ((width + 7) & ~7);	// 4-byte alignment
 	pf.dib->bmiHeader.biHeight = -(int32_t)height;
@@ -397,9 +403,58 @@ void PatternFont::UpdateFont(HWND hwnd)
 	}
 
 	hDC.SelectObject(oldBitmap);
+	DeleteBitmap(bitmap);
+
+	}
+
+	{
+
+		pf.dibASCII = &customFontBitmapASCII;
+
+		pf.dibASCII->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+		pf.dibASCII->bmiHeader.biWidth = ((charWidth * 128 + 7) & ~7);	// 4-byte alignment
+		pf.dibASCII->bmiHeader.biHeight = -(int32_t)charHeight;
+		pf.dibASCII->bmiHeader.biSizeImage = pf.dibASCII->bmiHeader.biWidth * charHeight / 2;
+		pf.dibASCII->bmiHeader.biPlanes = 1;
+		pf.dibASCII->bmiHeader.biBitCount = 4;
+		pf.dibASCII->bmiHeader.biCompression = BI_RGB;
+		pf.dibASCII->lpDibBits = new uint8_t[pf.dibASCII->bmiHeader.biSizeImage];
+		pf.dibASCII->bmiColors[0] = rgb2quad(RGB(0x00, 0x00, 0x00));
+		pf.dibASCII->bmiColors[15] = rgb2quad(RGB(0xFF, 0xFF, 0xFF));
+
+		uint8_t *data = nullptr;
+		HBITMAP bitmap = ::CreateDIBSection(hDC, (BITMAPINFO *)&pf.dibASCII->bmiHeader, DIB_RGB_COLORS, (void **)&data, nullptr, 0);
+		if(!bitmap)
+		{
+			hDC.SelectObject(oldFont);
+			gdiFont.DeleteObject();
+			hDC.DeleteDC();
+			currentFont = &gDefaultPatternFont;
+			return;
+		}
+		HGDIOBJ oldBitmap = hDC.SelectObject(bitmap);
+
+		hDC.FillSolidRect(0, 0, pf.dibASCII->bmiHeader.biWidth, pf.dibASCII->bmiHeader.biHeight, RGB(0xFF, 0xFF, 0xFF));
+		hDC.SetTextColor(RGB(0x00, 0x00, 0x00));
+		hDC.SetBkColor(RGB(0xFF, 0xFF, 0xFF));
+		hDC.SetTextAlign(TA_TOP | TA_LEFT);
+
+		for(uint32 c = 32; c < 128; ++c)
+		{
+			DrawChar(hDC, (char)(unsigned char)c, charWidth * c, 0, charWidth, charHeight);
+		}
+		::GdiFlush();
+
+		std::memcpy(pf.dibASCII->lpDibBits, data, pf.dibASCII->bmiHeader.biSizeImage);
+
+		hDC.SelectObject(oldBitmap);
+		DeleteBitmap(bitmap);
+
+	}
+
 	hDC.SelectObject(oldFont);
 	gdiFont.DeleteObject();
-	DeleteBitmap(bitmap);
+
 	hDC.DeleteDC();
 }
 
@@ -408,6 +463,8 @@ void PatternFont::DeleteFontData()
 {
 	delete[] customFontBitmap.lpDibBits;
 	customFontBitmap.lpDibBits = nullptr;
+	delete[] customFontBitmapASCII.lpDibBits;
+	customFontBitmapASCII.lpDibBits = nullptr;
 }
 
 OPENMPT_NAMESPACE_END

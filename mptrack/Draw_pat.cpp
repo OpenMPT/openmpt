@@ -272,6 +272,16 @@ PatternCursor CViewPattern::GetPositionFromPoint(POINT pt) const
 void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 {
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
+
+	if(pfnt->dibASCII)
+	{
+		if(32 <= letter && letter <= 127)
+		{
+			m_Dib.TextBlt(x, y, sizex, pfnt->spacingY, (((unsigned char)letter) * pfnt->nNoteWidth[0]) + ofsx, 0, pfnt->dibASCII);
+			return;
+		}
+	}
+
 	int srcx = pfnt->nSpaceX, srcy = pfnt->nSpaceY;
 
 	if ((letter >= '0') && (letter <= '9'))
