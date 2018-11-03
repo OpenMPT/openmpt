@@ -16,6 +16,8 @@
 #include <memory>
 #include <new>
 
+#include <cstdlib>
+
 #if MPT_COMPILER_MSVC
 #include <malloc.h>
 #endif
