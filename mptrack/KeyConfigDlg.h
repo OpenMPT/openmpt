@@ -44,43 +44,46 @@ class CCustEdit: public CEdit
 {
 protected:
 	COptionsKeyboard *m_pOptKeyDlg;
-	HWND m_hParent;
+	HWND m_hParent = nullptr;
 	UINT m_nCtrlId;
-	bool isFocussed, isDummy;
+	bool isFocussed = false, isDummy;
 
 public:
-	FlagSet<Modifiers> mod;
-	UINT code;
+	FlagSet<Modifiers> mod = ModNone;
+	UINT code = 0;
 
-	CCustEdit(bool dummyField) : m_hParent(nullptr), isFocussed(false), isDummy(dummyField), mod(0), code(0) { }
+	CCustEdit(bool dummyField) : isDummy(dummyField) { }
 	VOID SetParent(HWND h, UINT nID, COptionsKeyboard* pOKD) { m_hParent = h; m_nCtrlId = nID; m_pOptKeyDlg = pOKD;}
 	void SetKey(FlagSet<Modifiers> mod, UINT code);
-	virtual BOOL PreTranslateMessage(MSG *pMsg);
-	DECLARE_MESSAGE_MAP()
+	
+	BOOL PreTranslateMessage(MSG *pMsg) override;
+	
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
+	
+	DECLARE_MESSAGE_MAP()
 };
 
 class COptionsKeyboard: public CPropertyPage
 {
 protected:
 	CListBox m_lbnHotKeys;
-	CListBox m_lbnCommandKeys;		//rewbs.keys
-	CComboBox m_cmbKeyChoice;		//rewbs.keys
+	CListBox m_lbnCommandKeys;
+	CComboBox m_cmbKeyChoice;
 	CComboBox m_cmbCategory;
 	CButton m_bKeyDown, m_bKeyHold, m_bKeyUp;
 	CButton m_bnReset;
 	CCustEdit m_eCustHotKey, m_eFindHotKey;
 	CEdit m_eFind;
 	CEdit m_eReport, m_eChordWaitTime;
-	UINT m_nKeyboardCfg;
+	UINT m_nKeyboardCfg = 0;
 	int m_nCurHotKey, m_nCurCategory, m_nCurKeyChoice;
 	mpt::PathString m_sFullPathName;
 	CCommandSet *plocalCmdSet;
-	bool m_bForceUpdate;
-	bool m_bModified;
-	bool m_bChoiceModified;
+	bool m_bForceUpdate = false;
+	bool m_bModified = false;
+	bool m_bChoiceModified = false;
 
 	void ForceUpdateGUI();
 	void UpdateShortcutList(int category = -1);
@@ -88,26 +91,26 @@ protected:
 	int GetCategoryFromCommandID(CommandID command) const;
 
 public:
-	COptionsKeyboard() : CPropertyPage(IDD_OPTIONS_KEYBOARD), m_eCustHotKey(false), m_eFindHotKey(true), m_nKeyboardCfg(0) { }
+	COptionsKeyboard() : CPropertyPage(IDD_OPTIONS_KEYBOARD), m_eCustHotKey(false), m_eFindHotKey(true) { }
 	BOOL SetKey(UINT nId, UINT nChar, UINT nFlags);
 	std::vector<CommandCategory> commandCategories;
 	void DefineCommandCategories();
 
+	void OnSetKeyChoice();
 
-public:
-	afx_msg void OnSetKeyChoice();
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual BOOL OnSetActive();
-	virtual void DoDataExchange(CDataExchange* pDX);
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	BOOL OnSetActive() override;
+	void DoDataExchange(CDataExchange* pDX) override;
+
 	afx_msg void UpdateDialog();
 	afx_msg void OnKeyboardChanged();
 	afx_msg void OnKeyChoiceSelect();
 	afx_msg void OnCommandKeySelChanged();
 	afx_msg void OnCategorySelChanged();
 	afx_msg void OnSearchTermChanged();
-	afx_msg void OnChordWaitTimeChanged(); //rewbs.autochord
+	afx_msg void OnChordWaitTimeChanged();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnCheck() { OnSetKeyChoice(); };
 	afx_msg void OnNotesRepeat();
@@ -120,9 +123,8 @@ protected:
 	afx_msg void OnRestoreDefaultKeymap();
 	afx_msg void OnClearHotKey();
 	afx_msg void OnFindHotKey();
-	DECLARE_MESSAGE_MAP();
-public:
 	afx_msg void OnDestroy();
+	DECLARE_MESSAGE_MAP();
 };
 
 OPENMPT_NAMESPACE_END

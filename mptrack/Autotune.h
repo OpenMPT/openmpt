@@ -73,7 +73,6 @@ public:
 protected:
 	BOOL OnInitDialog() override;
 	void OnOK() override;
-	void OnCancel() override;
 	void DoDataExchange(CDataExchange* pDX) override;
 
 };

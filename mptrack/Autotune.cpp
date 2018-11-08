@@ -338,9 +338,9 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 	
 #if MPT_AUTOTUNE_MODERN
 	
-	// Note that we cannot use a fake integer interator here because of the requirement on ForwardIterator to return a reference to the elements.
+	// Note that we cannot use a fake integer iterator here because of the requirement on ForwardIterator to return a reference to the elements.
 	std::array<int, END_NOTE - START_NOTE> notes;
-	std::iota(std::begin(notes), std::end(notes), START_NOTE);
+	std::iota(notes.begin(), notes.end(), START_NOTE);
 
 	AutotuneHistogram autocorr =
 #ifdef ENABLE_SSE2
@@ -444,8 +444,8 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 /////////////////////////////////////////////////////////////
 // CAutotuneDlg
 
-int CAutotuneDlg::m_pitchReference = 440;	// Pitch reference in Hz
-int CAutotuneDlg::m_targetNote = 0;		// Target note (C- = 0, C# = 1, etc...)
+int CAutotuneDlg::m_pitchReference = 440; // Pitch reference in Hz
+int CAutotuneDlg::m_targetNote = 0;       // Target note (C- = 0, C# = 1, etc...)
 
 void CAutotuneDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -490,12 +490,5 @@ void CAutotuneDlg::OnOK()
 	m_targetNote = (int)m_CbnNoteBox.GetItemData(m_CbnNoteBox.GetCurSel());
 	m_pitchReference = pitch;
 }
-
-
-void CAutotuneDlg::OnCancel()
-{
-	CDialog::OnCancel();
-}
-
 
 OPENMPT_NAMESPACE_END

@@ -52,21 +52,22 @@ protected:
 #endif
 	std::vector<SettingPath> m_indexToPath;
 	GroupMap m_groups;
-	bool m_listGrouped;
+	bool m_listGrouped = false;
 
 public:
 #ifdef MPT_MFC_FULL
-	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED), m_List(m_indexToPath), m_listGrouped(false) {}
+	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED), m_List(m_indexToPath) {}
 #else // !MPT_MFC_FULL
-	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED), m_listGrouped(false) {}
+	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED) {}
 #endif // MPT_MFC_FULL
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual BOOL OnSetActive();
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL PreTranslateMessage(MSG *msg);
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	BOOL OnSetActive() override;
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL PreTranslateMessage(MSG *msg) override;
+
 	afx_msg void OnOptionDblClick(NMHDR *, LRESULT *);
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnFindStringChanged() { ReInit(); }

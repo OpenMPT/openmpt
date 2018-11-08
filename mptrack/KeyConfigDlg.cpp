@@ -211,20 +211,9 @@ void COptionsKeyboard::DefineCommandCategories()
 		commandCategories.push_back(newCat);
 	}
 
-	{
-		CommandCategory newCat(_T("  General [Top]"), kCtxCtrlGeneral);
-		commandCategories.push_back(newCat);
-	}
-
-	{
-		CommandCategory newCat(_T("  General [Bottom]"), kCtxViewGeneral);
-		commandCategories.push_back(newCat);
-	}
-
-	{
-		CommandCategory newCat(_T("  Pattern Editor [Top]"), kCtxCtrlPatterns);
-		commandCategories.push_back(newCat);
-	}
+	commandCategories.emplace_back(_T("  General [Top]"), kCtxCtrlGeneral);
+	commandCategories.emplace_back(_T("  General [Bottom]"), kCtxViewGeneral);
+	commandCategories.emplace_back(_T("  Pattern Editor [Top]"), kCtxCtrlPatterns);
 
 	{
 		CommandCategory newCat(_T("  Pattern Editor - Order List"), kCtxCtrlOrderlist);
@@ -338,15 +327,8 @@ void COptionsKeyboard::DefineCommandCategories()
 		commandCategories.push_back(newCat);
 	}
 
-	{
-		CommandCategory newCat(_T("  Comments [Top]"), kCtxCtrlComments);
-		commandCategories.push_back(newCat);
-	}
-
-	{
-		CommandCategory newCat(_T("  Comments [Bottom]"), kCtxViewComments);
-		commandCategories.push_back(newCat);
-	}
+	commandCategories.emplace_back(_T("  Comments [Top]"), kCtxCtrlComments);
+	commandCategories.emplace_back(_T("  Comments [Bottom]"), kCtxViewComments);
 
 	{
 		CommandCategory newCat(_T("  Plugin Editor"), kCtxVSTGUI);

@@ -24,10 +24,10 @@ public:
 
 protected:
 
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnSetActive();
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnSetActive() override;
 
 	void RecalcUndoSize();
 

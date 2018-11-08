@@ -18,26 +18,27 @@ class COptionsColors: public CPropertyPage
 {
 protected:
 	std::array<COLORREF, MAX_MODCOLORS> CustomColors;
-	UINT m_nColorItem;
+	UINT m_nColorItem = 0;
 	CComboBox m_ComboItem, m_ComboFont, m_ComboPreset;
 	CButton m_BtnColor1, m_BtnColor2, m_BtnColor3, m_BtnPreview;
 	CSpinButtonCtrl m_ColorSpin;
 	CStatic m_TxtColor1, m_TxtColor2, m_TxtColor3;
-	MODPLUGDIB *m_pPreviewDib;
+	MODPLUGDIB *m_pPreviewDib = nullptr;
 	FontSetting patternFont, commentFont;
 
 public:
-	COptionsColors():CPropertyPage(IDD_OPTIONS_COLORS) { m_nColorItem = 0; m_pPreviewDib = NULL; }
-	~COptionsColors() { if (m_pPreviewDib) delete m_pPreviewDib; m_pPreviewDib = NULL; }
+	COptionsColors():CPropertyPage(IDD_OPTIONS_COLORS) { }
+	~COptionsColors() { delete m_pPreviewDib; }
 	void SelectColor(COLORREF *);
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual BOOL OnKillActive();
-	virtual void OnOK();
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnSetActive();
-	virtual void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	BOOL OnInitDialog() override;
+	BOOL OnKillActive() override;
+	void OnOK() override;
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnSetActive() override;
+	void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+
 	afx_msg void OnChoosePatternFont();
 	afx_msg void OnChooseCommentFont();
 	afx_msg void OnUpdateDialog();

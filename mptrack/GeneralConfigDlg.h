@@ -25,10 +25,11 @@ public:
 	COptionsGeneral() : CPropertyPage(IDD_OPTIONS_GENERAL) {}
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual BOOL OnSetActive();
-	virtual void DoDataExchange(CDataExchange* pDX);
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	BOOL OnSetActive() override;
+	void DoDataExchange(CDataExchange* pDX) override;
+
 	afx_msg void OnOptionSelChanged();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnBrowseTemplate();

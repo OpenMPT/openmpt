@@ -157,7 +157,7 @@ namespace IPCWindow
 			MemsetZero(className);
 			if(::GetClassName(hwnd, className, 256) > 0)
 			{
-				if(mpt::winstring(className) == mpt::winstring(IPCWindow::ClassName))
+				if(!_tcscmp(className, IPCWindow::ClassName))
 				{
 					if(state.require[SameVersion])
 					{

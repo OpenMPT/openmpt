@@ -22,15 +22,12 @@ public:
 	PathConfigDlg();
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
-	DECLARE_MESSAGE_MAP()
-public:
-	virtual void OnOK();
-	virtual BOOL OnInitDialog();
-	virtual BOOL OnKillActive();
+	void OnOK() override;
+	BOOL OnInitDialog() override;
+	BOOL OnKillActive() override;
 
-protected:
 	afx_msg void OnAutosaveEnable();
 	afx_msg void OnAutosaveUseOrigDir();
 	afx_msg void OnBrowseAutosavePath()	{ BrowseFolder(IDC_AUTOSAVE_PATH); }
@@ -47,6 +44,7 @@ protected:
 
 	mpt::PathString GetPath(int id);
 
+	DECLARE_MESSAGE_MAP()
 };
 
 OPENMPT_NAMESPACE_END

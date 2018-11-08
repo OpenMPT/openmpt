@@ -111,13 +111,15 @@ public:
 	CUpdateSetupDlg();
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual BOOL OnSetActive();
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	BOOL OnSetActive() override;
+
+	void SettingChanged(const SettingPath &changedPath) override;
+
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnCheckNow();
 	afx_msg void OnResetURL();
-	virtual void SettingChanged(const SettingPath &changedPath);
 	DECLARE_MESSAGE_MAP()
 
 private:
