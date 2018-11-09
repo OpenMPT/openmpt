@@ -637,6 +637,7 @@ public:
 	CachedSetting<bool> MiscAllowMultipleCommandsPerKey;
 	CachedSetting<bool> MiscDistinguishModifiers;
 	Setting<ProcessPriorityClass> MiscProcessPriorityClass;
+	Setting<bool> MiscFlushFileBuffersOnSave;
 
 	// Sound Settings
 

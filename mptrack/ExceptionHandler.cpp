@@ -268,13 +268,13 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	errorMessage += MPT_ULITERAL("\n\n");
 
 	{
-		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("error.txt"), std::ios::binary);
+		mpt::SafeOutputFile f(crashDirectory.path + MPT_PATHSTRING("error.txt"), std::ios::binary, mpt::FlushMode::Full);
 		f.imbue(std::locale::classic());
 		f << mpt::String::Replace(mpt::ToCharset(mpt::CharsetUTF8, errorMessage), "\n", "\r\n");
 	}
 
 	{
-		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("threads.txt"), std::ios::binary);
+		mpt::SafeOutputFile f(crashDirectory.path + MPT_PATHSTRING("threads.txt"), std::ios::binary, mpt::FlushMode::Full);
 		f.imbue(std::locale::classic());
 		f << mpt::format("current : %1")(mpt::fmt::hex0<8>(GetCurrentThreadId())) << "\r\n";
 		f << mpt::format("GUI     : %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindGUI))) << "\r\n";
@@ -290,7 +290,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	};
 
 	{
-		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("active-settings.txt"), std::ios::binary);
+		mpt::SafeOutputFile f(crashDirectory.path + MPT_PATHSTRING("active-settings.txt"), std::ios::binary, mpt::FlushMode::Full);
 		f.imbue(std::locale::classic());
 		if(&theApp.GetSettings())
 		{
@@ -357,13 +357,13 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	*/
 
 	{
-		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("about-openmpt.txt"), std::ios::binary);
+		mpt::SafeOutputFile f(crashDirectory.path + MPT_PATHSTRING("about-openmpt.txt"), std::ios::binary, mpt::FlushMode::Full);
 		f.imbue(std::locale::classic());
 		f << mpt::ToCharset(mpt::CharsetUTF8, CAboutDlg::GetTabText(0));
 	}
 
 	{
-		mpt::ofstream f(crashDirectory.path + MPT_PATHSTRING("about-components.txt"), std::ios::binary);
+		mpt::SafeOutputFile f(crashDirectory.path + MPT_PATHSTRING("about-components.txt"), std::ios::binary, mpt::FlushMode::Full);
 		f.imbue(std::locale::classic());
 		f << mpt::ToCharset(mpt::CharsetUTF8, CAboutDlg::GetTabText(1));
 	}

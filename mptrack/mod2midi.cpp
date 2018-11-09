@@ -695,7 +695,7 @@ void CModToMidi::OnOverlapChanged()
 
 void CDoMidiConvert::Run()
 {
-	mpt::ofstream f(m_fileName, std::ios::binary);
+	mpt::SafeOutputFile f(m_fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 	if(!f.good())
 	{
 		Reporting::Error("Could not open file for writing. Is it open in another application?");

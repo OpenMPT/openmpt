@@ -749,7 +749,6 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 {
-	if(!f) return false;
 
 	bool addChannel = false; // avoid odd channel count for FT2 compatibility
 

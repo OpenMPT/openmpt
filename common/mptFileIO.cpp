@@ -18,6 +18,12 @@
 #endif // MPT_OS_WINDOWS
 #endif // MODPLUG_TRACKER
 
+#if defined(MPT_ENABLE_FILEIO)
+#if MPT_COMPILER_MSVC
+#include <tchar.h>
+#endif // MPT_COMPILER_MSVC
+#endif // MPT_ENABLE_FILEIO
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -76,6 +82,61 @@ bool SetFilesystemCompression(const mpt::PathString &filename)
 }
 #endif // MPT_OS_WINDOWS
 #endif // MODPLUG_TRACKER
+
+
+
+namespace mpt {
+	
+#if MPT_COMPILER_MSVC
+
+mpt::tstring SafeOutputFile::convert_mode(std::ios_base::openmode mode, FlushMode flushMode)
+{
+	mpt::tstring fopen_mode;
+	switch(mode & ~(std::ios_base::ate | std::ios_base::binary))
+	{
+	case std::ios_base::in:
+		fopen_mode = _T("r");
+		break;
+	case std::ios_base::out:
+		MPT_FALLTHROUGH;
+	case std::ios_base::out | std::ios_base::trunc:
+		fopen_mode = _T("w");
+		break;
+	case std::ios_base::app:
+		MPT_FALLTHROUGH;
+	case std::ios_base::out | std::ios_base::app:
+		fopen_mode = _T("a");
+		break;
+	case std::ios_base::out | std::ios_base::in:
+		fopen_mode = _T("r+");
+		break;
+	case std::ios_base::out | std::ios_base::in | std::ios_base::trunc:
+		fopen_mode = _T("w+");
+		break;
+	case std::ios_base::out | std::ios_base::in | std::ios_base::app:
+		MPT_FALLTHROUGH;
+	case std::ios_base::in | std::ios_base::app:
+		fopen_mode = _T("a+");
+		break;
+	}
+	if(fopen_mode.empty())
+	{
+		return fopen_mode;
+	}
+	if(mode & std::ios_base::binary)
+	{
+		fopen_mode += _T("b");
+	}
+	if(flushMode == FlushMode::Full)
+	{
+		fopen_mode += _T("c");  // force commit on fflush (MSVC specific)
+	}
+	return fopen_mode;
+}
+
+#endif // MPT_COMPILER_MSVC
+
+} // namespace mpt
 
 
 

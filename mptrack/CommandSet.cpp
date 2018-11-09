@@ -1510,7 +1510,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 ...
 */
 
-	mpt::ofstream f(filename);
+	mpt::SafeOutputFile f(filename, std::ios::out, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 	if(!f)
 	{
 		ErrorBox(IDS_CANT_OPEN_FILE_FOR_WRITING);

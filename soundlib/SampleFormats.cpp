@@ -39,6 +39,22 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+#ifndef MODPLUG_NO_FILESAVE
+
+static mpt::FlushMode GetSampleFileFlushMode()
+{
+	return
+		#ifdef MODPLUG_TRACKER
+			mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave)
+		#else
+			mpt::FlushMode::Full
+		#endif
+		;
+}
+
+#endif // !MODPLUG_NO_FILESAVE
+
+
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, bool includeInstrumentFormats)
 {
 	if(!nSample || nSample >= MAX_SAMPLES) return false;
@@ -539,7 +555,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 #ifndef MODPLUG_NO_FILESAVE
 bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
 {
-	mpt::ofstream f(filename, std::ios::binary);
+	mpt::SafeOutputFile f(filename, std::ios::binary, GetSampleFileFlushMode());
 	if(!f)
 	{
 		return false;
@@ -829,7 +845,7 @@ bool CSoundFile::ReadW64Sample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 
 bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
 {
-	mpt::ofstream f(filename, std::ios::binary);
+	mpt::SafeOutputFile f(filename, std::ios::binary, GetSampleFileFlushMode());
 	if(!f)
 	{
 		return false;
@@ -1170,7 +1186,7 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
 
 bool CSoundFile::SaveS3ISample(SAMPLEINDEX smp, const mpt::PathString &filename) const
 {
-	mpt::ofstream f(filename, std::ios::binary);
+	mpt::SafeOutputFile f(filename, std::ios::binary, GetSampleFileFlushMode());
 	if(!f)
 		return false;
 
@@ -1342,7 +1358,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString 
 		return false;
 	}
 
-	mpt::ofstream f(filename, std::ios::binary);
+	mpt::SafeOutputFile f(filename, std::ios::binary, GetSampleFileFlushMode());
 	if(!f)
 	{
 		return false;
@@ -2160,7 +2176,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 	{
 		return false;
 	}
-	mpt::ofstream f(filename, std::ios::binary);
+	mpt::SafeOutputFile f(filename, std::ios::binary, GetSampleFileFlushMode());
 	if(!f.good())
 	{
 		return false;
@@ -3255,7 +3271,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 	ModInstrument *pIns = Instruments[nInstr];
 
 	if((!pIns) || filename.empty()) return false;
-	mpt::ofstream f(filename, std::ios::binary);
+	mpt::SafeOutputFile f(filename, std::ios::binary, GetSampleFileFlushMode());
 	if(!f)
 	{
 		return false;

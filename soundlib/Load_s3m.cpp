@@ -610,7 +610,10 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 		0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
 	};
 
-	if(!f || m_nChannels == 0) return false;
+	if(m_nChannels == 0)
+	{
+		return false;
+	}
 
 	const bool saveMuteStatus =
 #ifdef MODPLUG_TRACKER

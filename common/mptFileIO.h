@@ -23,6 +23,14 @@
 #include <streambuf>
 #include <utility>
 
+#if MPT_COMPILER_MSVC
+#include <cstdio>
+#endif // !MPT_COMPILER_MSVC
+
+#if MPT_COMPILER_MSVC
+#include <stdio.h>
+#endif // !MPT_COMPILER_MSVC
+
 #endif // MPT_ENABLE_FILEIO
 
 
@@ -125,6 +133,14 @@ public:
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
+#if MPT_COMPILER_MSVC
+protected:
+	ofstream(FILE * file)
+		: std::ofstream(file)
+	{
+	}
+#endif // MPT_COMPILER_MSVC
+public:
 	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
@@ -135,6 +151,101 @@ public:
 	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
 	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
 #endif
+};
+
+enum class FlushMode
+{
+	None   = 0,  // no explicit flushes at all
+	Single = 1,  // explicitly flush higher-leverl API layers
+	Full   = 2,  // explicitly flush *all* layers, up to and including disk write caches
+};
+
+static inline FlushMode FlushModeFromBool(bool flush)
+{
+	return flush ? FlushMode::Full : FlushMode::None;
+}
+
+class SafeOutputFile
+	: public mpt::ofstream
+{
+private:
+	typedef std::ofstream Tbase;
+	FlushMode m_FlushMode;
+#if MPT_COMPILER_MSVC
+	FILE *m_f;
+#endif // MPT_COMPILER_MSVC
+#if MPT_COMPILER_MSVC
+	static mpt::tstring convert_mode(std::ios_base::openmode mode, FlushMode flushMode);
+	FILE * internal_fopen(const mpt::PathString &filename, std::ios_base::openmode mode, FlushMode flushMode)
+	{
+		mpt::tstring fopen_mode = convert_mode(mode, flushMode);
+		if(fopen_mode.empty())
+		{
+			return nullptr;
+		}
+		FILE *f =
+#ifdef UNICODE
+			_wfopen(filename.AsNativePrefixed().c_str(), fopen_mode.c_str())
+#else
+			fopen(filename.AsNativePrefixed().c_str(), fopen_mode.c_str())
+#endif
+			;
+		if(!f)
+		{
+			return nullptr;
+		}
+		if(mode & std::ios_base::ate)
+		{
+			if(fseek(f, 0, SEEK_END) != 0)
+			{
+				fclose(f);
+				f = nullptr;
+				return nullptr;
+			}
+		}
+		m_f = f;
+		return f;
+	}
+#endif // MPT_COMPILER_MSVC
+public:
+	SafeOutputFile() = delete;
+	explicit SafeOutputFile(const mpt::PathString &filename, std::ios_base::openmode mode = std::ios_base::out, FlushMode flushMode = FlushMode::Full)
+#if MPT_COMPILER_MSVC
+		: mpt::ofstream(internal_fopen(filename, mode | std::ios_base::out, flushMode))
+#else // !MPT_COMPILER_MSVC
+		: mpt::ofstream(filename, mode)
+#endif // MPT_COMPILER_MSVC
+		, m_FlushMode(flushMode)
+	{
+	}
+	~SafeOutputFile()
+	{
+		if(!*this)
+		{
+			return;
+		}
+		if(!rdbuf())
+		{
+			return;
+		}
+		#if MPT_COMPILER_MSVC
+			if(!m_f)
+			{
+				return;
+			}
+		#endif // MPT_COMPILER_MSVC
+		if(m_FlushMode != FlushMode::None)
+		{
+			rdbuf()->pubsync();
+		}
+		#if MPT_COMPILER_MSVC
+			if(m_FlushMode != FlushMode::None)
+			{
+				fflush(m_f);
+			}
+			fclose(m_f);
+		#endif // MPT_COMPILER_MSVC
+	}
 };
 
 
@@ -221,6 +332,7 @@ public:
 
 
 #endif // MPT_ENABLE_FILEIO
+
 
 
 OPENMPT_NAMESPACE_END

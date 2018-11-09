@@ -1099,7 +1099,7 @@ bool CModDoc::SaveEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::P
 	CStringA s;
 	EnvelopeToString(s, pIns->GetEnvelope(nEnv));
 
-	mpt::ofstream f(fileName, std::ios::binary);
+	mpt::SafeOutputFile f(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 	if(!f)
 	{
 		EndWaitCursor();

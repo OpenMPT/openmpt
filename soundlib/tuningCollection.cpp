@@ -15,6 +15,9 @@
 #include <algorithm>
 #include "../common/mptFileIO.h"
 #include "Loaders.h"
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/TrackerSettings.h"
+#endif //MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -281,7 +284,7 @@ bool UnpackTuningCollection(const CTuningCollection &tc, const mpt::PathString &
 			error = true;
 		} else
 		{
-			mpt::ofstream fout(fn, std::ios::binary);
+			mpt::SafeOutputFile fout(fn, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 			if(tuning.Serialize(fout) != Tuning::SerializationResult::Success)
 			{
 				error = true;

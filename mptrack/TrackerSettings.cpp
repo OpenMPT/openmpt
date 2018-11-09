@@ -222,6 +222,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, MiscAllowMultipleCommandsPerKey(conf, MPT_USTRING("Misc"), MPT_USTRING("AllowMultipleCommandsPerKey"), false)
 	, MiscDistinguishModifiers(conf, MPT_USTRING("Misc"), MPT_USTRING("DistinguishModifiers"), false)
 	, MiscProcessPriorityClass(conf, MPT_USTRING("Misc"), MPT_USTRING("ProcessPriorityClass"), ProcessPriorityClassNORMAL)
+	, MiscFlushFileBuffersOnSave(conf, MPT_USTRING("Misc"), MPT_USTRING("FlushFileBuffersOnSave"), true)
 	// Sound Settings
 	, m_SoundShowDeprecatedDevices(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ShowDeprecatedDevices"), true)
 	, m_SoundShowNotRecommendedDeviceWarning(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ShowNotRecommendedDeviceWarning"), true)
@@ -786,7 +787,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 		if(!fn.FileOrDirectoryExists())
 		{
 			CTuning * pT = CSoundFile::CreateTuning12TET("12TET");
-			mpt::ofstream f(fn, std::ios::binary);
+			mpt::SafeOutputFile f(fn, std::ios::binary, mpt::FlushMode::Full);
 			pT->Serialize(f);
 			f.close();
 			delete pT;
@@ -798,7 +799,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 		if(!fn.FileOrDirectoryExists())
 		{
 			CTuning * pT = CSoundFile::CreateTuning12TET("12TET [[fs15 1.17.02.49]]");
-			mpt::ofstream f(fn, std::ios::binary);
+			mpt::SafeOutputFile f(fn, std::ios::binary, mpt::FlushMode::Full);
 			pT->Serialize(f);
 			f.close();
 			delete pT;

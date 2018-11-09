@@ -1364,7 +1364,6 @@ static uint32 SaveITEditHistory(const CSoundFile &sndFile, std::ostream *file)
 
 bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool compatibilityExport)
 {
-	if(!f) return false;
 
 	const CModSpecifications &specs = (GetType() == MOD_TYPE_MPT ? ModSpecs::mptm : (compatibilityExport ? ModSpecs::it : ModSpecs::itEx));
 

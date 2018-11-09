@@ -533,7 +533,15 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &file
 {
 #ifdef MPT_WITH_FLAC
 
-	mpt::ofstream f(filename, std::ios::binary);
+	const mpt::FlushMode flushMode = 
+		#ifdef MODPLUG_TRACKER
+			mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave)
+		#else
+			mpt::FlushMode::Full
+		#endif
+		;
+
+	mpt::SafeOutputFile f(filename, std::ios::binary, flushMode);
 	if(!f)
 	{
 		return false;

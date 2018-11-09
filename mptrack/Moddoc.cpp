@@ -278,7 +278,7 @@ BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTempla
 		return FALSE;
 
 	BOOL ok = FALSE;
-	mpt::ofstream f(filename, std::ios::binary);
+	mpt::SafeOutputFile f(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 	if(f)
 	{
 		BeginWaitCursor();
@@ -1898,7 +1898,7 @@ void CModDoc::OnFileCompatibilitySave()
 	if(!dlg.Show()) return;
 
 	filename = dlg.GetFirstFile();
-	mpt::ofstream f(filename, std::ios::binary);
+	mpt::SafeOutputFile f(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 	if(!f)
 		return;
 

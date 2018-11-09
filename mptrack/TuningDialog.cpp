@@ -617,7 +617,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 		BeginWaitCursor();
 
-		mpt::ofstream fout(dlg.GetFirstFile(), std::ios::binary);
+		mpt::SafeOutputFile fout(dlg.GetFirstFile(), std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 
 		if(tuningFilter != -1 && filterIndex == tuningFilter)
 		{
@@ -691,7 +691,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 			SanitizeFilename(nameW);
 			fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%tuning_name%"), nameW);
 			fileName = mpt::PathString::FromUnicode(fileNameW);
-			mpt::ofstream fout(fileName, std::ios::binary);
+			mpt::SafeOutputFile fout(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 			if(tuning.Serialize(fout) != Tuning::SerializationResult::Success)
 			{
 				failure = true;

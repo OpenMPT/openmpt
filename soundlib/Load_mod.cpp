@@ -2184,7 +2184,10 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 
 bool CSoundFile::SaveMod(std::ostream &f) const
 {
-	if(!f || m_nChannels == 0) return false;
+	if(m_nChannels == 0)
+	{
+		return false;
+	}
 
 	// Write song title
 	{
