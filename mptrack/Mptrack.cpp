@@ -1077,19 +1077,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	} else
 	{
 
-		// ask if user wants to contribute system statistics
-		if(!TrackerSettings::Instance().UpdateStatisticsConsentAsked)
-		{
-			TrackerSettings::Instance().UpdateStatistics = (ConfirmAnswer::cnfYes == Reporting::Confirm(
-				MPT_USTRING("Do you want to contribute to OpenMPT by providing system statistics?\r\n") +
-				MPT_USTRING("\r\n") +
-				mpt::String::Replace(CUpdateCheck::GetStatisticsUserInformation(false), MPT_USTRING("\n"), MPT_USTRING("\r\n")) + MPT_USTRING("\r\n") +
-				MPT_USTRING("\r\n") +
-				mpt::format(MPT_USTRING("This option was previously %1 on your system.\r\n"))(TrackerSettings::Instance().UpdateStatistics ? MPT_USTRING("enabled") : MPT_USTRING("disabled")),
-				false, !TrackerSettings::Instance().UpdateStatistics.Get()));
-			TrackerSettings::Instance().UpdateStatisticsConsentAsked = true;
-		}
-
 		// Update check
 		CUpdateCheck::DoAutoUpdateCheck();
 
