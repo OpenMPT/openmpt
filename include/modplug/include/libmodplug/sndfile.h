@@ -10,8 +10,8 @@
 #define CONFIG_H_INCLUDED 1
 #endif
 
-#ifndef __SNDFILE_H
-#define __SNDFILE_H
+#ifndef MODPLUG_SNDFILE_H
+#define MODPLUG_SNDFILE_H
 
 #ifdef UNDER_CE
 int _strnicmp(const char *str1,const char *str2, int n);

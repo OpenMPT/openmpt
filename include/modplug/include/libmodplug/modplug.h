@@ -4,8 +4,8 @@
  * Authors: Kenton Varda <temporal@gauge3d.org> (C interface wrapper)
  */
 
-#ifndef MODPLUG_H__INCLUDED
-#define MODPLUG_H__INCLUDED
+#ifndef MODPLUG_MODPLUG_H
+#define MODPLUG_MODPLUG_H
 
 #ifdef __cplusplus
 extern "C" {

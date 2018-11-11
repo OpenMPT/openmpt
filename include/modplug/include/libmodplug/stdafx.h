@@ -6,8 +6,8 @@
  *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
  */
 
-#ifndef _STDAFX_H_
-#define _STDAFX_H_
+#ifndef MODPLUG_STDAFX_H
+#define MODPLUG_STDAFX_H
 
 /* Autoconf detection of stdint/inttypes */
 #if defined(HAVE_CONFIG_H) && !defined(CONFIG_H_INCLUDED)
