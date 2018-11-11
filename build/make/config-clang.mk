@@ -49,8 +49,10 @@ CFLAGS_WARNINGS   += -Wmissing-prototypes   -Wshift-count-negative -Wshift-count
 
 ifeq ($(MODERN),1)
 LDFLAGS  += -fuse-ld=lld
-CXXFLAGS_WARNINGS += -Wpedantic -Wdouble-promotion -Wframe-larger-than=16000
-CFLAGS_WARNINGS   += -Wpedantic -Wdouble-promotion -Wframe-larger-than=4000
+CXXFLAGS_WARNINGS += -Wpedantic -Wframe-larger-than=20000
+#CXXFLAGS_WARNINGS += -Wdouble-promotion -Wframe-larger-than=16000
+CFLAGS_WARNINGS   += -Wpedantic -Wframe-larger-than=4000
+#CFLAGS_WARNINGS   += -Wdouble-promotion
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
 CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wnon-virtual-dtor -Wreserved-id-macro
 endif
