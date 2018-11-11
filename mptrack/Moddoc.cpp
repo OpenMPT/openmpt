@@ -284,14 +284,21 @@ BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTempla
 		BeginWaitCursor();
 		FixNullStrings();
 		m_SndFile.m_dwLastSavedWithVersion = Version::Current();
-		switch(m_SndFile.GetType())
+		try
 		{
-		case MOD_TYPE_MOD: ok = m_SndFile.SaveMod(f); break;
-		case MOD_TYPE_S3M: ok = m_SndFile.SaveS3M(f); break;
-		case MOD_TYPE_XM:  ok = m_SndFile.SaveXM(f); break;
-		case MOD_TYPE_IT:  ok = m_SndFile.SaveIT(f, filename); break;
-		case MOD_TYPE_MPT: ok = m_SndFile.SaveIT(f, filename); break;
-		default:           MPT_ASSERT_NOTREACHED();
+			f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+			switch(m_SndFile.GetType())
+			{
+			case MOD_TYPE_MOD: ok = m_SndFile.SaveMod(f); break;
+			case MOD_TYPE_S3M: ok = m_SndFile.SaveS3M(f); break;
+			case MOD_TYPE_XM:  ok = m_SndFile.SaveXM(f); break;
+			case MOD_TYPE_IT:  ok = m_SndFile.SaveIT(f, filename); break;
+			case MOD_TYPE_MPT: ok = m_SndFile.SaveIT(f, filename); break;
+			default:           MPT_ASSERT_NOTREACHED();
+			}
+		} catch(const std::exception &)
+		{
+			ok = FALSE;
 		}
 		EndWaitCursor();
 	}
