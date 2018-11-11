@@ -152,8 +152,8 @@ protected:
 
 	afx_msg void OnSettingsChanged();
 	afx_msg void OnCheckNow();
+	afx_msg void OnShowStatisticsData();
 	void EnableDisableDialog();
-	void UpdateStatistics();
 	DECLARE_MESSAGE_MAP()
 
 private:

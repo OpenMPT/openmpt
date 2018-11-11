@@ -983,6 +983,7 @@
 #define IDC_CHECK_UPDATEENABLED         2509
 #define IDC_STATIC_UPDATEPRIVACYTEXT    2510
 #define IDC_STATIC_WELCOME_STATISTICS   2511
+#define IDC_BUTTON_STATISTICS           2512
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1279,7 +1280,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        544
 #define _APS_NEXT_COMMAND_VALUE         44646
-#define _APS_NEXT_CONTROL_VALUE         2512
+#define _APS_NEXT_CONTROL_VALUE         2513
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

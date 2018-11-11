@@ -89,7 +89,7 @@ mpt::ustring CUpdateCheck::GetStatisticsUserInformation(bool shortText)
 {
 	if(shortText)
 	{
-		return MPT_USTRING("A randomized user ID is created and transmitted alongside. This ID can only be linked to you or your computer by this very ID, which is stored solely on your computer. OpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions. The following information will be sent:");
+		return MPT_USTRING("A randomized user ID is created and transmitted alongside. This ID can only be linked to you or your computer by this very ID, which is stored solely on your computer. OpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions.");
 	} else
 	{
 		return MPT_USTRING("")
@@ -523,6 +523,7 @@ BEGIN_MESSAGE_MAP(CUpdateSetupDlg, CPropertyPage)
 	ON_COMMAND(IDC_BUTTON1,                     &CUpdateSetupDlg::OnCheckNow)
 	ON_CBN_SELCHANGE(IDC_COMBO_UPDATEFREQUENCY, &CUpdateSetupDlg::OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK1,                      &CUpdateSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_BUTTON_STATISTICS,           &CUpdateSetupDlg::OnShowStatisticsData)
 END_MESSAGE_MAP()
 
 
@@ -606,8 +607,6 @@ BOOL CUpdateSetupDlg::OnInitDialog()
 
 	GetDlgItem(IDC_STATIC_UPDATEPRIVACYTEXT)->SetWindowText(mpt::ToCString(CUpdateCheck::GetStatisticsUserInformation(true)));
 
-	UpdateStatistics();
-
 	EnableDisableDialog();
 
 	m_SettingChangedNotifyGuard.Register(this);
@@ -617,7 +616,7 @@ BOOL CUpdateSetupDlg::OnInitDialog()
 }
 
 
-void CUpdateSetupDlg::UpdateStatistics()
+void CUpdateSetupDlg::OnShowStatisticsData()
 {
 	CUpdateCheck::Settings settings;
 
@@ -627,9 +626,6 @@ void CUpdateSetupDlg::UpdateStatistics()
 	if(IsDlgButtonChecked(IDC_RADIO3)) updateChannel = UpdateChannelDevelopment;
 
 	int updateCheckPeriod = (m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()) == ~(DWORD_PTR)0) ? -1 : static_cast<int>(m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()));
-
-	CString updateURL;
-	GetDlgItemText(IDC_EDIT1, updateURL);
 
 	settings.periodDays = updateCheckPeriod;
 	settings.channel = updateChannel;
@@ -650,7 +646,8 @@ void CUpdateSetupDlg::UpdateStatistics()
 		statistics += mpt::String::Replace(mpt::ToUnicode(mpt::CharsetUTF8, CUpdateCheck::GetStatisticsDataV3(settings)), MPT_USTRING("\t"), MPT_USTRING("    "));
 		statistics += MPT_ULITERAL("\n");
 	}
-	SetDlgItemText(IDC_EDIT_STATISTICS, mpt::ToCString(mpt::String::Replace(statistics, MPT_USTRING("\n"), MPT_USTRING("\r\n"))));
+
+	Reporting::Information(mpt::ToCString(mpt::String::Replace(statistics, MPT_USTRING("\n"), MPT_USTRING("\r\n"))));
 }
 
 
@@ -697,7 +694,6 @@ void CUpdateSetupDlg::EnableDisableDialog()
 	GetDlgItem(IDC_STATIC_UPDATEPRIVACY)->EnableWindow(status);
 	GetDlgItem(IDC_CHECK1)->EnableWindow(status);
 	GetDlgItem(IDC_STATIC_UPDATEPRIVACYTEXT)->EnableWindow(status);
-	GetDlgItem(IDC_EDIT_STATISTICS)->EnableWindow(status);
 
 	// disabled features
 	GetDlgItem(IDC_CHECK_UPDATEENABLED)->EnableWindow(FALSE);
@@ -709,7 +705,6 @@ void CUpdateSetupDlg::EnableDisableDialog()
 void CUpdateSetupDlg::OnSettingsChanged()
 {
 	EnableDisableDialog();
-	UpdateStatistics();
 	SetModified(TRUE);
 }
 
