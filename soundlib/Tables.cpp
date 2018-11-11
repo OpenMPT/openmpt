@@ -256,9 +256,10 @@ const uint8 ImpulseTrackerPortaVolCmd[16] =
 	0x80, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
-// Period table for Protracker octaves 0-5:
-const uint16 ProTrackerPeriodTable[6*12] =
+// Period table for ProTracker octaves (1-7 in FastTracker 2, also used for file I/O):
+const uint16 ProTrackerPeriodTable[7*12] =
 {
+	2*1712,2*1616,2*1524,2*1440,2*1356,2*1280,2*1208,2*1140,2*1076,2*1016,2*960,2*906,
 	1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907,
 	856,808,762,720,678,640,604,570,538,508,480,453,
 	428,404,381,360,339,320,302,285,269,254,240,226,

@@ -79,13 +79,13 @@ static uint8 ClampSlideParam(uint8 value, uint8 lowNote, uint8 highNote)
 	uint16 lowPeriod, highPeriod;
 
 	if(lowNote  < highNote &&
-	   lowNote  >= 36 + NOTE_MIN &&
-	   highNote >= 36 + NOTE_MIN &&
-	   lowNote  < CountOf(ProTrackerPeriodTable) + 36 + NOTE_MIN &&
-	   highNote < CountOf(ProTrackerPeriodTable) + 36 + NOTE_MIN)
+	   lowNote  >= 24 + NOTE_MIN &&
+	   highNote >= 24 + NOTE_MIN &&
+	   lowNote  < CountOf(ProTrackerPeriodTable) + 24 + NOTE_MIN &&
+	   highNote < CountOf(ProTrackerPeriodTable) + 24 + NOTE_MIN)
 	{
-		lowPeriod  = ProTrackerPeriodTable[lowNote - 36 - NOTE_MIN];
-		highPeriod = ProTrackerPeriodTable[highNote - 36 - NOTE_MIN];
+		lowPeriod  = ProTrackerPeriodTable[lowNote - 24 - NOTE_MIN];
+		highPeriod = ProTrackerPeriodTable[highNote - 24 - NOTE_MIN];
 
 		// with a fixed speed of 6 ticks/row, and excluding the first row,
 		// 1xx/2xx param has a max value of (low-high)/5 to avoid sliding too far

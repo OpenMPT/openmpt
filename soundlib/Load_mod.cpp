@@ -629,11 +629,11 @@ void CSoundFile::ReadMODPatternEntry(const uint8 (&data)[4], ModCommand &m)
 {
 	// Read Period
 	uint16 period = (((static_cast<uint16>(data[0]) & 0x0F) << 8) | data[1]);
-	m.note = NOTE_NONE;
+	size_t note = NOTE_NONE;
 	if(period > 0 && period != 0xFFF)
 	{
-		m.note = 6 * 12 + 35 + NOTE_MIN;
-		for(int i = 0; i < 6 * 12; i++)
+		note = mpt::size(ProTrackerPeriodTable) + 23 + NOTE_MIN;
+		for(size_t i = 0; i < mpt::size(ProTrackerPeriodTable); i++)
 		{
 			if(period >= ProTrackerPeriodTable[i])
 			{
@@ -643,15 +643,16 @@ void CSoundFile::ReadMODPatternEntry(const uint8 (&data)[4], ModCommand &m)
 					uint16 p2 = ProTrackerPeriodTable[i];
 					if(p1 - period < (period - p2))
 					{
-						m.note = static_cast<ModCommand::NOTE>(i + 35 + NOTE_MIN);
+						note = i + 23 + NOTE_MIN;
 						break;
 					}
 				}
-				m.note = static_cast<ModCommand::NOTE>(i + 36 + NOTE_MIN);
+				note = i + 24 + NOTE_MIN;
 				break;
 			}
 		}
 	}
+	m.note = static_cast<ModCommand::NOTE>(note);
 	// Read Instrument
 	m.instr = (data[2] >> 4) | (data[0] & 0x10);
 	// Read Effect
@@ -2318,9 +2319,9 @@ bool CSoundFile::SaveMod(std::ostream &f) const
 
 				uint16 period = 0;
 				// Convert note to period
-				if(m.note >= 36 + NOTE_MIN && m.note < CountOf(ProTrackerPeriodTable) + 36 + NOTE_MIN)
+				if(m.note >= 24 + NOTE_MIN && m.note < mpt::size(ProTrackerPeriodTable) + 24 + NOTE_MIN)
 				{
-					period = ProTrackerPeriodTable[m.note - 36 - NOTE_MIN];
+					period = ProTrackerPeriodTable[m.note - 24 - NOTE_MIN];
 				}
 
 				uint8 instr = (m.instr <= 31) ? m.instr : 0;

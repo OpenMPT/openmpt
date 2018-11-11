@@ -83,7 +83,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mod_ =
 {
 	MOD_TYPE_MOD,								// Internal MODTYPE value
 	"mod",										// File extension
-	37,											// Minimum note index
+	25,											// Minimum note index
 	108,										// Maximum note index
 	128,										// Pattern max.
 	128,										// Order max.

@@ -5845,10 +5845,10 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 	} else
 	{
 		nFineTune = XM2MODFineTune(nFineTune);
-		if ((nFineTune) || (note < 36) || (note >= 36 + 6 * 12))
+		if ((nFineTune) || (note < 24) || (note >= 24 + mpt::size(ProTrackerPeriodTable)))
 			return (ProTrackerTunedPeriods[nFineTune * 12u + note % 12u] << 5) >> (note / 12u);
 		else
-			return (ProTrackerPeriodTable[note - 36] << 2);
+			return (ProTrackerPeriodTable[note - 24] << 2);
 	}
 }
 
