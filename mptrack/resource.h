@@ -975,6 +975,14 @@
 #define IDC_BUTTON_TUNING_REMOVE        2501
 #define IDC_STATIC_WINE_RTAUDIO         2502
 #define IDC_COMBO_WINE_RTAUDIO          2503
+#define IDC_STATIC_UPDATECHECK          2504
+#define IDC_STATIC_UPDATEPRIVACY        2505
+#define IDC_STATIC_UDATECHANNEL         2506
+#define IDC_COMBO_UPDATEFREQUENCY       2507
+#define IDC_STATIC_UPDATEFREQUENCY      2508
+#define IDC_CHECK_UPDATEENABLED         2509
+#define IDC_STATIC_UPDATEPRIVACYTEXT    2510
+#define IDC_STATIC_WELCOME_STATISTICS   2511
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1269,9 +1277,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        542
+#define _APS_NEXT_RESOURCE_VALUE        544
 #define _APS_NEXT_COMMAND_VALUE         44646
-#define _APS_NEXT_CONTROL_VALUE         2504
+#define _APS_NEXT_CONTROL_VALUE         2512
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

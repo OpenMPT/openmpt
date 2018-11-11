@@ -818,10 +818,19 @@ public:
 
 	// Update
 
+	Setting<bool> UpdateEnabled;
 	Setting<mpt::Date::Unix> UpdateLastUpdateCheck;
-	Setting<int32> UpdateUpdateCheckPeriod;
-	Setting<mpt::ustring> UpdateUpdateURL;
-	Setting<bool> UpdateSendGUID;
+	Setting<int32> UpdateUpdateCheckPeriod_DEPRECATED;
+	Setting<int32> UpdateIntervalDays;
+	Setting<uint32> UpdateChannel;
+	Setting<mpt::ustring> UpdateUpdateURL_DEPRECATED;
+	Setting<mpt::ustring> UpdateChannelReleaseURL;
+	Setting<mpt::ustring> UpdateChannelNextURL;
+	Setting<mpt::ustring> UpdateChannelDevelopmentURL;
+	Setting<mpt::ustring> UpdateAPIURL;
+	Setting<bool> UpdateStatisticsConsentAsked;
+	Setting<bool> UpdateStatistics;
+	Setting<bool> UpdateSendGUID_DEPRECATED;
 	Setting<bool> UpdateShowUpdateHint;
 	Setting<bool> UpdateSuggestDifferentBuildVariant;
 	Setting<CString> UpdateIgnoreVersion;

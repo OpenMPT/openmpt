@@ -183,10 +183,14 @@ Architecture GetProcessArchitecture() noexcept;
 
 EmulationLevel HostCanRun(Architecture host, Architecture process) noexcept;
 
+std::vector<Architecture> GetSupportedProcessArchitectures(Architecture host);
+
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 #if defined(MODPLUG_TRACKER)
+
+uint64 GetSystemMemorySize();
 
 void PreventWineDetection();
 

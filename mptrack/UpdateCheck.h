@@ -24,6 +24,13 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+enum UpdateChannel
+{
+	UpdateChannelRelease = 1,
+	UpdateChannelNext = 2,
+	UpdateChannelDevelopment = 3,
+};
+
 class CUpdateCheck
 {
 
@@ -33,7 +40,13 @@ private:
 
 public:
 
-	static mpt::ustring GetDefaultUpdateURL();
+	static mpt::ustring GetStatisticsUserInformation(bool shortText);
+
+	static mpt::ustring GetDefaultChannelReleaseURL();
+	static mpt::ustring GetDefaultChannelNextURL();
+	static mpt::ustring GetDefaultChannelDevelopmentURL();
+
+	static mpt::ustring GetDefaultAPIURL();
 	
 	int32 GetNumCurrentRunningInstances();
 
@@ -42,17 +55,27 @@ public:
 
 public:
 
-	struct Settings
+	struct Context
 	{
 		CWnd *window;
 		UINT msgProgress;
 		UINT msgSuccess;
 		UINT msgFailure;
 		bool autoUpdate;
-		mpt::ustring updateBaseURL;  // URL where the version check should be made.
+	};
+
+	struct Settings
+	{
+		int32 periodDays;
+		uint32 channel;
+		mpt::ustring channelReleaseURL;
+		mpt::ustring channelNextURL;
+		mpt::ustring channelDevelopmentURL;
+		mpt::ustring apiURL;
 		bool sendStatistics;
 		mpt::UUID statisticsUUID;
 		bool suggestDifferentBuilds;
+		Settings();
 	};
 
 	class Error
@@ -86,6 +109,14 @@ public:
 	static void ShowSuccessGUI(WPARAM wparam, LPARAM lparam);
 	static void ShowFailureGUI(WPARAM wparam, LPARAM lparam);
 
+public:
+
+	// v2
+	static mpt::ustring GetUpdateURLV2(const Settings &settings);
+
+	// v3
+	static std::string GetStatisticsDataV3(const Settings &settings);  // UTF8
+
 protected:
 
 	static void StartUpdateCheckAsync(bool autoUpdate);
@@ -93,11 +124,12 @@ protected:
 	struct ThreadFunc
 	{
 		CUpdateCheck::Settings settings;
-		ThreadFunc(const CUpdateCheck::Settings &settings);
+		CUpdateCheck::Context context;
+		ThreadFunc(const CUpdateCheck::Settings &settings, const CUpdateCheck::Context &context);
 		void operator () ();
 	};
 
-	static void CheckForUpdate(const CUpdateCheck::Settings &settings);
+	static void CheckForUpdate(const CUpdateCheck::Settings &settings, const CUpdateCheck::Context &context);
 
 	static CUpdateCheck::Result SearchUpdate(const CUpdateCheck::Settings &settings); // may throw
 	
@@ -111,19 +143,22 @@ public:
 	CUpdateSetupDlg();
 
 protected:
+	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;
 	void OnOK() override;
 	BOOL OnSetActive() override;
 
 	void SettingChanged(const SettingPath &changedPath) override;
 
-	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
+	afx_msg void OnSettingsChanged();
 	afx_msg void OnCheckNow();
-	afx_msg void OnResetURL();
+	void EnableDisableDialog();
+	void UpdateStatistics();
 	DECLARE_MESSAGE_MAP()
 
 private:
 	SettingChangedNotifyGuard m_SettingChangedNotifyGuard;
+	CComboBox m_CbnUpdateFrequency;
 };
 
 

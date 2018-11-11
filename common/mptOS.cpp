@@ -589,6 +589,20 @@ EmulationLevel HostCanRun(Architecture host, Architecture process) noexcept
 }
 
 
+std::vector<Architecture> GetSupportedProcessArchitectures(Architecture host)
+{
+	std::vector<Architecture> result;
+	for(const auto & entry : hostArchitectureCanRun)
+	{
+		if(entry.Host == host)
+		{
+			result.push_back(entry.Process);
+		}
+	}
+	return result;
+}
+
+
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
@@ -628,6 +642,18 @@ struct SystemIsWineCache
 }
 
 #endif // MPT_OS_WINDOWS
+
+uint64 GetSystemMemorySize()
+{
+	MEMORYSTATUSEX memoryStatus;
+	MemsetZero(memoryStatus);
+	memoryStatus.dwLength = sizeof(MEMORYSTATUSEX);
+	if(GlobalMemoryStatusEx(&memoryStatus) == 0)
+	{
+		return 0;
+	}
+	return memoryStatus.ullTotalPhys;
+}
 
 static bool SystemIsWine(bool allowDetection = true)
 {

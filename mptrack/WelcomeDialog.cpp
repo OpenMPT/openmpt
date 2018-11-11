@@ -119,6 +119,8 @@ BOOL WelcomeDlg::OnInitDialog()
 	combo->SetItemDataPtr(combo->AddString(_T("FastTracker 2")), (void*)("US_mpt-ft2_classic"));
 
 	CheckDlgButton(IDC_CHECK1, BST_CHECKED);
+	CheckDlgButton(IDC_CHECK3, BST_UNCHECKED);
+	GetDlgItem(IDC_STATIC_WELCOME_STATISTICS)->SetWindowText(mpt::ToCString(mpt::String::Replace(CUpdateCheck::GetStatisticsUserInformation(false), MPT_USTRING("\n"), MPT_USTRING(" "))));
 	CheckDlgButton(IDC_CHECK2, (TrackerSettings::Instance().patternFont.Get().name == PATTERNFONT_LARGE) ? BST_CHECKED : BST_UNCHECKED);
 
 	ShowWindow(SW_SHOW);
@@ -147,7 +149,8 @@ void WelcomeDlg::OnOK()
 	CDialog::OnOK();
 
 	bool runUpdates = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
-	TrackerSettings::Instance().UpdateUpdateCheckPeriod = (runUpdates ? 7 : 0);
+	TrackerSettings::Instance().UpdateIntervalDays = (runUpdates ? 7 : 0);
+	TrackerSettings::Instance().UpdateStatistics = (IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED);
 	if(IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED)
 	{
 		FontSetting font = TrackerSettings::Instance().patternFont;

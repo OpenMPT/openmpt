@@ -13,12 +13,14 @@
 #include "BuildVariants.h"
 #include "../common/version.h"
 #include "../common/misc_util.h"
+#include "../common/mptStringBuffer.h"
 #include "Mptrack.h"
 #include "TrackerSettings.h"
 // Setup dialog stuff
 #include "Mainfrm.h"
 #include "../common/mptThread.h"
 #include "HTTP.h"
+#include "../misc/JSON.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -83,10 +85,43 @@ END_MESSAGE_MAP()
 
 
 
+mpt::ustring CUpdateCheck::GetStatisticsUserInformation(bool shortText)
+{
+	if(shortText)
+	{
+		return MPT_USTRING("A randomized user ID is created and transmitted alongside. This ID can only be linked to you or your computer by this very ID, which is stored solely on your computer. OpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions. The following information will be sent:");
+	} else
+	{
+		return MPT_USTRING("")
+			+ MPT_USTRING("When checking for updates, OpenMPT can additionally collect some basic statistical information.") + MPT_USTRING(" ")
+			+ MPT_USTRING("A randomized user ID is created and transmitted alongside the update check. This ID can only be linked to you or your computer by this very ID, which is stored solely on your computer.") + MPT_USTRING(" ")
+			+ MPT_USTRING("OpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions.") + MPT_USTRING(" ")
+			+ MPT_USTRING("Without this statistical information, the OpenMPT developers would be blind with respect to what systems are used to run OpenMPT. This makes deciding where to focus development plain guesswork.") + MPT_USTRING("\n")
+			+ MPT_USTRING("OpenMPT would collect the following statistical data points: OpenMPT version, Windows version, type of CPU, amount of RAM, configured update check frequency of OpenMPT.")
+			;
+	}
+}
 
-mpt::ustring CUpdateCheck::GetDefaultUpdateURL()
+
+mpt::ustring CUpdateCheck::GetDefaultChannelReleaseURL()
 {
 	return MPT_USTRING("https://update.openmpt.org/check/$VERSION/$GUID");
+}
+
+mpt::ustring CUpdateCheck::GetDefaultChannelNextURL()
+{
+	return MPT_USTRING("https://update.openmpt.org/check/next/$VERSION/$GUID");
+}
+
+mpt::ustring CUpdateCheck::GetDefaultChannelDevelopmentURL()
+{
+	return MPT_USTRING("https://update.openmpt.org/check/testing/$VERSION/$GUID");
+}
+
+
+mpt::ustring CUpdateCheck::GetDefaultAPIURL()
+{
+	return MPT_USTRING("https://update.openmpt.org/api/v3/");
 }
 
 
@@ -104,16 +139,25 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 {
 	if(isAutoUpdate)
 	{
-		int updateCheckPeriod = TrackerSettings::Instance().UpdateUpdateCheckPeriod;
-		if(updateCheckPeriod == 0)
+		if(!TrackerSettings::Instance().UpdateEnabled)
+		{
+			return;
+		}
+		int updateCheckPeriod = TrackerSettings::Instance().UpdateIntervalDays;
+		if(updateCheckPeriod < 0)
 		{
 			return;
 		}
 		// Do we actually need to run the update check right now?
 		const time_t now = time(nullptr);
-		if(difftime(now, TrackerSettings::Instance().UpdateLastUpdateCheck.Get()) < (double)(updateCheckPeriod * 86400))
+		const time_t lastCheck = TrackerSettings::Instance().UpdateLastUpdateCheck.Get();
+		// Check update interval. Note that we always check for updates when the system time had gone backwards (i.e. when the last update check supposedly happened in the future).
+		if(difftime(now, lastCheck) > 0.0)
 		{
-			return;
+			if(difftime(now, lastCheck) < static_cast<double>(updateCheckPeriod * 86400))
+			{
+				return;
+			}
 		}
 
 		// Never ran update checks before, so we notify the user of automatic update checks.
@@ -121,10 +165,19 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 		{
 			TrackerSettings::Instance().UpdateShowUpdateHint = false;
 			CString msg;
-			msg.Format(_T("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %u days. If you do not want this, you can disable update checks in the setup."), TrackerSettings::Instance().UpdateUpdateCheckPeriod.Get());
+			msg.Format(_T("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %u days. If you do not want this, you can disable update checks in the setup."), TrackerSettings::Instance().UpdateIntervalDays.Get());
 			if(Reporting::Confirm(msg, _T("OpenMPT Internet Update")) == cnfNo)
 			{
 				TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(now);
+				return;
+			}
+		}
+	} else
+	{
+		if(!TrackerSettings::Instance().UpdateEnabled)
+		{
+			if(Reporting::Confirm(_T("Update Check is disabled. Do you want to check anyway?"), _T("OpenMPT Internet Update")) != cnfYes)
+			{
 				return;
 			}
 		}
@@ -137,22 +190,33 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 		return;
 	}
 
-	CUpdateCheck::Settings settings;
-	settings.window = CMainFrame::GetMainFrame();
-	settings.msgProgress = MPT_WM_APP_UPDATECHECK_PROGRESS;
-	settings.msgSuccess = MPT_WM_APP_UPDATECHECK_SUCCESS;
-	settings.msgFailure = MPT_WM_APP_UPDATECHECK_FAILURE;
-	settings.autoUpdate = isAutoUpdate;
-	settings.updateBaseURL = TrackerSettings::Instance().UpdateUpdateURL;
-	settings.sendStatistics = TrackerSettings::Instance().UpdateSendGUID;
-	settings.statisticsUUID = TrackerSettings::Instance().VersionInstallGUID;
-	settings.suggestDifferentBuilds = TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant;
-	std::thread(CUpdateCheck::ThreadFunc(settings)).detach();
+	CUpdateCheck::Context context;
+	context.window = CMainFrame::GetMainFrame();
+	context.msgProgress = MPT_WM_APP_UPDATECHECK_PROGRESS;
+	context.msgSuccess = MPT_WM_APP_UPDATECHECK_SUCCESS;
+	context.msgFailure = MPT_WM_APP_UPDATECHECK_FAILURE;
+	context.autoUpdate = isAutoUpdate;
+	std::thread(CUpdateCheck::ThreadFunc(CUpdateCheck::Settings(), context)).detach();
 }
 
 
-CUpdateCheck::ThreadFunc::ThreadFunc(const CUpdateCheck::Settings &settings)
+CUpdateCheck::Settings::Settings()
+	: periodDays(TrackerSettings::Instance().UpdateIntervalDays)
+	, channel(TrackerSettings::Instance().UpdateChannel)
+	, channelReleaseURL(TrackerSettings::Instance().UpdateChannelReleaseURL)
+	, channelNextURL(TrackerSettings::Instance().UpdateChannelNextURL)
+	, channelDevelopmentURL(TrackerSettings::Instance().UpdateChannelDevelopmentURL)
+	, apiURL(TrackerSettings::Instance().UpdateAPIURL)
+	, sendStatistics(TrackerSettings::Instance().UpdateStatistics)
+	, statisticsUUID(TrackerSettings::Instance().VersionInstallGUID)
+	, suggestDifferentBuilds(TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant)
+{
+}
+
+
+CUpdateCheck::ThreadFunc::ThreadFunc(const CUpdateCheck::Settings &settings, const CUpdateCheck::Context &context)
 	: settings(settings)
+	, context(context)
 {
 	return;
 }
@@ -160,8 +224,111 @@ CUpdateCheck::ThreadFunc::ThreadFunc(const CUpdateCheck::Settings &settings)
 
 void CUpdateCheck::ThreadFunc::operator () ()
 {
-	mpt::SetCurrentThreadPriority(settings.autoUpdate ? mpt::ThreadPriorityLower : mpt::ThreadPriorityNormal);
-	CUpdateCheck::CheckForUpdate(settings);
+	mpt::SetCurrentThreadPriority(context.autoUpdate ? mpt::ThreadPriorityLower : mpt::ThreadPriorityNormal);
+	CUpdateCheck::CheckForUpdate(settings, context);
+}
+
+
+std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
+{
+	JSON::value j;
+	j["OpenMPT"]["Version"] = mpt::ufmt::val(Version::Current());
+	j["OpenMPT"]["BuildVariant"] = BuildVariants().GuessCurrentBuildName();
+	j["OpenMPT"]["Architecture"] = mpt::Windows::Name(mpt::Windows::GetProcessArchitecture());
+	j["Update"]["PeriodDays"] = settings.periodDays;
+	j["System"]["Windows"]["Version"]["Name"] = mpt::Windows::Version::Current().GetName();
+	j["System"]["Windows"]["Version"]["Major"] = mpt::Windows::Version::Current().GetSystem().Major;
+	j["System"]["Windows"]["Version"]["Minor"] = mpt::Windows::Version::Current().GetSystem().Minor;
+	j["System"]["Windows"]["ServicePack"]["Major"] = mpt::Windows::Version::Current().GetServicePack().Major;
+	j["System"]["Windows"]["ServicePack"]["Minor"] = mpt::Windows::Version::Current().GetServicePack().Minor;
+	j["System"]["Windows"]["Build"] = mpt::Windows::Version::Current().GetBuild();
+	j["System"]["Windows"]["Architecture"] = mpt::Windows::Name(mpt::Windows::GetHostArchitecture());
+	j["System"]["Windows"]["IsWine"] = mpt::Windows::IsWine();
+	std::vector<mpt::Windows::Architecture> architectures = mpt::Windows::GetSupportedProcessArchitectures(mpt::Windows::GetHostArchitecture());
+	for(const auto & arch : architectures)
+	{
+		j["System"]["Windows"]["ProcessArchitectures"][mpt::ToCharset(mpt::CharsetUTF8, mpt::Windows::Name(arch))] = true;
+	}
+	j["System"]["Memory"] = mpt::Windows::GetSystemMemorySize() / 1024 / 1024;  // MB
+	if(mpt::Windows::IsWine())
+	{
+		mpt::Wine::VersionContext v;
+		j["System"]["Windows"]["Wine"]["Version"]["Raw"] = v.RawVersion();
+		if(v.Version().IsValid())
+		{
+			j["System"]["Windows"]["Wine"]["Version"]["Major"] = v.Version().GetMajor();
+			j["System"]["Windows"]["Wine"]["Version"]["Minor"] = v.Version().GetMinor();
+			j["System"]["Windows"]["Wine"]["Version"]["Update"] = v.Version().GetUpdate();
+		}
+		j["System"]["Windows"]["Wine"]["HostSysName"] = v.RawHostSysName();
+	}
+	#ifdef ENABLE_ASM
+		j["System"]["Processor"]["Vendor"] = std::string(mpt::String::ReadAutoBuf(ProcVendorID));
+		j["System"]["Processor"]["Brand"] = std::string(mpt::String::ReadAutoBuf(ProcBrandID));
+		j["System"]["Processor"]["Id"]["Family"] = ProcFamily;
+		j["System"]["Processor"]["Id"]["Model"] = ProcModel;
+		j["System"]["Processor"]["Id"]["Stepping"] = ProcStepping;
+		j["System"]["Processor"]["Features"]["lm"] = ((GetRealProcSupport() & PROCSUPPORT_LM) ? true : false);
+		j["System"]["Processor"]["Features"]["cmov"] = ((GetRealProcSupport() & PROCSUPPORT_CMOV) ? true : false);
+		j["System"]["Processor"]["Features"]["mmx"] = ((GetRealProcSupport() & PROCSUPPORT_MMX) ? true : false);
+		j["System"]["Processor"]["Features"]["mmxext"] = ((GetRealProcSupport() & PROCSUPPORT_AMD_MMXEXT) ? true : false);
+		j["System"]["Processor"]["Features"]["3dnow"] = ((GetRealProcSupport() & PROCSUPPORT_AMD_3DNOW) ? true : false);
+		j["System"]["Processor"]["Features"]["3dnowext"] = ((GetRealProcSupport() & PROCSUPPORT_AMD_3DNOWEXT) ? true : false);
+		j["System"]["Processor"]["Features"]["sse"] = ((GetRealProcSupport() & PROCSUPPORT_SSE) ? true : false);
+		j["System"]["Processor"]["Features"]["sse2"] = ((GetRealProcSupport() & PROCSUPPORT_SSE2) ? true : false);
+		j["System"]["Processor"]["Features"]["sse3"] = ((GetRealProcSupport() & PROCSUPPORT_SSE3) ? true : false);
+		j["System"]["Processor"]["Features"]["ssse3"] = ((GetRealProcSupport() & PROCSUPPORT_SSSE3) ? true : false);
+		j["System"]["Processor"]["Features"]["sse4_1"] = ((GetRealProcSupport() & PROCSUPPORT_SSE4_1) ? true : false);
+		j["System"]["Processor"]["Features"]["sse4_2"] = ((GetRealProcSupport() & PROCSUPPORT_SSE4_2) ? true : false);
+	#endif
+	return j.dump(1, '\t');
+}
+
+
+mpt::ustring CUpdateCheck::GetUpdateURLV2(const CUpdateCheck::Settings &settings)
+{
+	mpt::ustring updateURL;
+	if(settings.channel == UpdateChannelRelease)
+	{
+		updateURL = settings.channelReleaseURL;
+		if(updateURL.empty())
+		{
+			updateURL = GetDefaultChannelReleaseURL();
+		}
+	}	else if(settings.channel == UpdateChannelNext)
+	{
+		updateURL = settings.channelNextURL;
+		if(updateURL.empty())
+		{
+			updateURL = GetDefaultChannelNextURL();
+		}
+	}	else if(settings.channel == UpdateChannelDevelopment)
+	{
+		updateURL = settings.channelDevelopmentURL;
+		if(updateURL.empty())
+		{
+			updateURL = GetDefaultChannelDevelopmentURL();
+		}
+	}	else
+	{
+		updateURL = settings.channelReleaseURL;
+		if(updateURL.empty())
+		{
+			updateURL = GetDefaultChannelReleaseURL();
+		}
+	}
+	if(updateURL.find(MPT_USTRING("://")) == mpt::ustring::npos)
+	{
+		updateURL = MPT_USTRING("https://") + updateURL;
+	}
+	// Build update URL
+	updateURL = mpt::String::Replace(updateURL, MPT_USTRING("$VERSION"), mpt::uformat(MPT_USTRING("%1-%2-%3"))
+		( Version::Current()
+		, BuildVariants().GuessCurrentBuildName()
+		, settings.sendStatistics ? mpt::Windows::Version::Current().GetNameShort() : MPT_USTRING("unknown")
+		));
+	updateURL = mpt::String::Replace(updateURL, MPT_USTRING("$GUID"), settings.sendStatistics ? mpt::ufmt::val(settings.statisticsUUID) : MPT_USTRING("anonymous"));
+	return updateURL;
 }
 
 
@@ -171,31 +338,33 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	
 	HTTP::InternetSession internet(Version::Current().GetOpenMPTVersionString());
 
-	mpt::ustring updateURL = settings.updateBaseURL;
-	if(updateURL.empty())
-	{
-		updateURL = GetDefaultUpdateURL();
-	}
-	if(updateURL.find(MPT_USTRING("://")) == mpt::ustring::npos)
-	{
-		updateURL = MPT_USTRING("https://") + updateURL;
-	}
-
-	// Build update URL
-	updateURL = mpt::String::Replace(updateURL, MPT_USTRING("$VERSION"), mpt::uformat(MPT_USTRING("%1-%2-%3"))
-		( Version::Current()
-		, BuildVariants().GuessCurrentBuildName()
-		, settings.sendStatistics ? mpt::Windows::Version::Current().GetNameShort() : MPT_USTRING("unknown")
-		));
-	updateURL = mpt::String::Replace(updateURL, MPT_USTRING("$GUID"), settings.sendStatistics ? mpt::ufmt::val(settings.statisticsUUID) : MPT_USTRING("anonymous"));
-
 	// Establish a connection.
 	HTTP::Request request;
-	request.SetURI(ParseURI(updateURL));
+	request.SetURI(ParseURI(GetUpdateURLV2(settings)));
 	request.method = HTTP::Method::Get;
 	request.flags = HTTP::NoCache;
 
 	HTTP::Result resultHTTP = internet(request.InsecureTLSDowngradeWindowsXP());
+
+	if(settings.sendStatistics)
+	{
+		HTTP::Request requestStatistics;
+		if(settings.statisticsUUID.IsValid())
+		{
+			requestStatistics.SetURI(ParseURI(settings.apiURL + mpt::format(MPT_USTRING("statistics/%1"))(settings.statisticsUUID)));
+			requestStatistics.method = HTTP::Method::Put;
+		} else
+		{
+			requestStatistics.SetURI(ParseURI(settings.apiURL + MPT_USTRING("statistics/")));
+			requestStatistics.method = HTTP::Method::Post;
+		}
+		requestStatistics.dataMimeType = HTTP::MimeType::JSON();
+		requestStatistics.acceptMimeTypes = HTTP::MimeTypes::JSON();
+		std::string jsondata = GetStatisticsDataV3(settings);
+		MPT_LOG(LogInformation, "Update", mpt::ToUnicode(mpt::CharsetUTF8, jsondata));
+		requestStatistics.data = mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(jsondata));
+		internet(requestStatistics.InsecureTLSDowngradeWindowsXP());
+	}
 
 	// Retrieve HTTP status code.
 	if(resultHTTP.Status >= 400)
@@ -244,12 +413,12 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 }
 
 
-void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings)
+void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings, const CUpdateCheck::Context &context)
 {
 	// íncremented before starting the thread
 	MPT_ASSERT(s_InstanceCount.load() >= 1);
 	CUpdateCheck::Result result;
-	settings.window->SendMessage(settings.msgProgress, settings.autoUpdate ? 1 : 0, s_InstanceCount.load());
+	context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, s_InstanceCount.load());
 	try
 	{
 		try
@@ -264,12 +433,12 @@ void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings)
 		}
 	} catch(const CUpdateCheck::Error &e)
 	{
-		settings.window->SendMessage(settings.msgFailure, settings.autoUpdate ? 1 : 0, reinterpret_cast<LPARAM>(&e));
+		context.window->SendMessage(context.msgFailure, context.autoUpdate ? 1 : 0, reinterpret_cast<LPARAM>(&e));
 		s_InstanceCount.fetch_sub(1);
 		MPT_ASSERT(s_InstanceCount.load() >= 0);
 		return;
 	}
-	settings.window->SendMessage(settings.msgSuccess, settings.autoUpdate ? 1 : 0, reinterpret_cast<LPARAM>(&result));
+	context.window->SendMessage(context.msgSuccess, context.autoUpdate ? 1 : 0, reinterpret_cast<LPARAM>(&result));
 	s_InstanceCount.fetch_sub(1);
 	MPT_ASSERT(s_InstanceCount.load() >= 0);
 }
@@ -347,14 +516,13 @@ CString CUpdateCheck::Error::FormatErrorCode(CString errorMessage, DWORD errorCo
 // CUpdateSetupDlg
 
 BEGIN_MESSAGE_MAP(CUpdateSetupDlg, CPropertyPage)
-	ON_COMMAND(IDC_BUTTON1,			&CUpdateSetupDlg::OnCheckNow)
-	ON_COMMAND(IDC_BUTTON2,			&CUpdateSetupDlg::OnResetURL)
-	ON_COMMAND(IDC_RADIO1,			&CUpdateSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_RADIO2,			&CUpdateSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_RADIO3,			&CUpdateSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_RADIO4,			&CUpdateSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK1,			&CUpdateSetupDlg::OnSettingsChanged)
-	ON_EN_CHANGE(IDC_EDIT1,			&CUpdateSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK_UPDATEENABLED,         &CUpdateSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO1,                      &CUpdateSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO2,                      &CUpdateSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO3,                      &CUpdateSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_BUTTON1,                     &CUpdateSetupDlg::OnCheckNow)
+	ON_CBN_SELCHANGE(IDC_COMBO_UPDATEFREQUENCY, &CUpdateSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK1,                      &CUpdateSetupDlg::OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -366,33 +534,123 @@ CUpdateSetupDlg::CUpdateSetupDlg()
 }
 
 
+void CUpdateSetupDlg::DoDataExchange(CDataExchange *pDX)
+{
+	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_COMBO_UPDATEFREQUENCY, m_CbnUpdateFrequency);
+}
+
+
 BOOL CUpdateSetupDlg::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
+	CheckDlgButton(IDC_CHECK_UPDATEENABLED, TrackerSettings::Instance().UpdateEnabled ? BST_CHECKED : BST_UNCHECKED);
+
 	int radioID = 0;
-	int periodDays = TrackerSettings::Instance().UpdateUpdateCheckPeriod;
-	if(periodDays >= 30)
+	int updateChannel = TrackerSettings::Instance().UpdateChannel;
+	if(updateChannel == UpdateChannelRelease)
 	{
-		radioID = IDC_RADIO4;
-	} else if(periodDays >= 7)
-	{
-		radioID = IDC_RADIO3;
-	} else if(periodDays >= 1)
+		radioID = IDC_RADIO1;
+	} else if(updateChannel == UpdateChannelNext)
 	{
 		radioID = IDC_RADIO2;
+	} else if(updateChannel == UpdateChannelDevelopment)
+	{
+		radioID = IDC_RADIO3;
 	} else
 	{
 		radioID = IDC_RADIO1;
 	}
-	CheckRadioButton(IDC_RADIO1, IDC_RADIO4, radioID);
-	CheckDlgButton(IDC_CHECK1, TrackerSettings::Instance().UpdateSendGUID ? BST_CHECKED : BST_UNCHECKED);
-	SetDlgItemText(IDC_EDIT1, mpt::ToCString(TrackerSettings::Instance().UpdateUpdateURL.Get()));
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, radioID);
+
+	int32 periodDays = TrackerSettings::Instance().UpdateIntervalDays;
+	int ndx;
+
+	ndx = m_CbnUpdateFrequency.AddString(_T("always"));
+	m_CbnUpdateFrequency.SetItemData(ndx, 0);
+	if(periodDays >= 0)
+	{
+		m_CbnUpdateFrequency.SetCurSel(ndx);
+	}
+
+	ndx = m_CbnUpdateFrequency.AddString(_T("daily"));
+	m_CbnUpdateFrequency.SetItemData(ndx, 1);
+	if(periodDays >= 1)
+	{
+		m_CbnUpdateFrequency.SetCurSel(ndx);
+	}
+
+	ndx = m_CbnUpdateFrequency.AddString(_T("weekly"));
+	m_CbnUpdateFrequency.SetItemData(ndx, 7);
+	if(periodDays >= 7)
+	{
+		m_CbnUpdateFrequency.SetCurSel(ndx);
+	}
+
+	ndx = m_CbnUpdateFrequency.AddString(_T("monthly"));
+	m_CbnUpdateFrequency.SetItemData(ndx, 30);
+	if(periodDays >= 30)
+	{
+		m_CbnUpdateFrequency.SetCurSel(ndx);
+	}
+
+	ndx = m_CbnUpdateFrequency.AddString(_T("never"));
+	m_CbnUpdateFrequency.SetItemData(ndx, ~(DWORD_PTR)0);
+	if(periodDays < 0)
+	{		
+		m_CbnUpdateFrequency.SetCurSel(ndx);
+	}
+
+	CheckDlgButton(IDC_CHECK1, TrackerSettings::Instance().UpdateStatistics ? BST_CHECKED : BST_UNCHECKED);
+
+	GetDlgItem(IDC_STATIC_UPDATEPRIVACYTEXT)->SetWindowText(mpt::ToCString(CUpdateCheck::GetStatisticsUserInformation(true)));
+
+	UpdateStatistics();
+
+	EnableDisableDialog();
 
 	m_SettingChangedNotifyGuard.Register(this);
 	SettingChanged(TrackerSettings::Instance().UpdateLastUpdateCheck.GetPath());
 
 	return TRUE;
+}
+
+
+void CUpdateSetupDlg::UpdateStatistics()
+{
+	CUpdateCheck::Settings settings;
+
+	int updateChannel = TrackerSettings::Instance().UpdateChannel;
+	if(IsDlgButtonChecked(IDC_RADIO1)) updateChannel = UpdateChannelRelease;
+	if(IsDlgButtonChecked(IDC_RADIO2)) updateChannel = UpdateChannelNext;
+	if(IsDlgButtonChecked(IDC_RADIO3)) updateChannel = UpdateChannelDevelopment;
+
+	int updateCheckPeriod = (m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()) == ~(DWORD_PTR)0) ? -1 : static_cast<int>(m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()));
+
+	CString updateURL;
+	GetDlgItemText(IDC_EDIT1, updateURL);
+
+	settings.periodDays = updateCheckPeriod;
+	settings.channel = updateChannel;
+	settings.sendStatistics = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
+
+	mpt::ustring statistics;
+	statistics += MPT_USTRING("GET ") + CUpdateCheck::GetUpdateURLV2(settings) + MPT_ULITERAL("\n");
+	statistics += MPT_ULITERAL("\n");
+	if(settings.sendStatistics)
+	{
+		if(settings.statisticsUUID.IsValid())
+		{
+			statistics += MPT_USTRING("PUT ") + settings.apiURL + mpt::format(MPT_USTRING("statistics/%1"))(settings.statisticsUUID) + MPT_ULITERAL("\n");
+		} else
+		{
+			statistics += MPT_USTRING("POST ") + settings.apiURL + MPT_USTRING("statistics/") + MPT_ULITERAL("\n");
+		}
+		statistics += mpt::String::Replace(mpt::ToUnicode(mpt::CharsetUTF8, CUpdateCheck::GetStatisticsDataV3(settings)), MPT_USTRING("\t"), MPT_USTRING("    "));
+		statistics += MPT_ULITERAL("\n");
+	}
+	SetDlgItemText(IDC_EDIT_STATISTICS, mpt::ToCString(mpt::String::Replace(statistics, MPT_USTRING("\n"), MPT_USTRING("\r\n"))));
 }
 
 
@@ -420,20 +678,61 @@ void CUpdateSetupDlg::SettingChanged(const SettingPath &changedPath)
 }
 
 
+void CUpdateSetupDlg::EnableDisableDialog()
+{
+
+	BOOL status = ((IsDlgButtonChecked(IDC_CHECK_UPDATEENABLED) != BST_UNCHECKED) ? TRUE : FALSE);
+
+	GetDlgItem(IDC_STATIC_UDATECHANNEL)->EnableWindow(status);
+	GetDlgItem(IDC_RADIO1)->EnableWindow(status);
+	GetDlgItem(IDC_RADIO2)->EnableWindow(status);
+	GetDlgItem(IDC_RADIO3)->EnableWindow(status);
+
+	GetDlgItem(IDC_STATIC_UPDATECHECK)->EnableWindow(status);
+	GetDlgItem(IDC_STATIC_UPDATEFREQUENCY)->EnableWindow(status);
+	GetDlgItem(IDC_COMBO_UPDATEFREQUENCY)->EnableWindow(status);
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(status);
+	GetDlgItem(IDC_LASTUPDATE)->EnableWindow(status);
+
+	GetDlgItem(IDC_STATIC_UPDATEPRIVACY)->EnableWindow(status);
+	GetDlgItem(IDC_CHECK1)->EnableWindow(status);
+	GetDlgItem(IDC_STATIC_UPDATEPRIVACYTEXT)->EnableWindow(status);
+	GetDlgItem(IDC_EDIT_STATISTICS)->EnableWindow(status);
+
+	// disabled features
+	GetDlgItem(IDC_CHECK_UPDATEENABLED)->EnableWindow(FALSE);
+	GetDlgItem(IDC_RADIO2)->EnableWindow(FALSE);
+
+}
+
+
+void CUpdateSetupDlg::OnSettingsChanged()
+{
+	EnableDisableDialog();
+	UpdateStatistics();
+	SetModified(TRUE);
+}
+
+
 void CUpdateSetupDlg::OnOK()
 {
-	int updateCheckPeriod = TrackerSettings::Instance().UpdateUpdateCheckPeriod;
-	if(IsDlgButtonChecked(IDC_RADIO1)) updateCheckPeriod = 0;
-	if(IsDlgButtonChecked(IDC_RADIO2)) updateCheckPeriod = 1;
-	if(IsDlgButtonChecked(IDC_RADIO3)) updateCheckPeriod = 7;
-	if(IsDlgButtonChecked(IDC_RADIO4)) updateCheckPeriod = 31;
+	int updateChannel = TrackerSettings::Instance().UpdateChannel;
+	if(IsDlgButtonChecked(IDC_RADIO1)) updateChannel = UpdateChannelRelease;
+	if(IsDlgButtonChecked(IDC_RADIO2)) updateChannel = UpdateChannelNext;
+	if(IsDlgButtonChecked(IDC_RADIO3)) updateChannel = UpdateChannelDevelopment;
 
+	int updateCheckPeriod = (m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()) == ~(DWORD_PTR)0) ? -1 : static_cast<int>(m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()));
+	
 	CString updateURL;
 	GetDlgItemText(IDC_EDIT1, updateURL);
 
-	TrackerSettings::Instance().UpdateUpdateCheckPeriod = updateCheckPeriod;
-	TrackerSettings::Instance().UpdateUpdateURL = mpt::ToUnicode(updateURL);
-	TrackerSettings::Instance().UpdateSendGUID = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
+	if(GetDlgItem(IDC_CHECK_UPDATEENABLED)->IsWindowEnabled() != FALSE)
+	{
+		TrackerSettings::Instance().UpdateEnabled = (IsDlgButtonChecked(IDC_CHECK_UPDATEENABLED) != BST_UNCHECKED);
+	}
+	TrackerSettings::Instance().UpdateIntervalDays = updateCheckPeriod;
+	TrackerSettings::Instance().UpdateChannel = updateChannel;
+	TrackerSettings::Instance().UpdateStatistics = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
 	
 	CPropertyPage::OnOK();
 }
@@ -449,12 +748,6 @@ BOOL CUpdateSetupDlg::OnSetActive()
 void CUpdateSetupDlg::OnCheckNow()
 {
 	CMainFrame::GetMainFrame()->PostMessage(WM_COMMAND, ID_INTERNETUPDATE);
-}
-
-
-void CUpdateSetupDlg::OnResetURL()
-{
-	SetDlgItemText(IDC_EDIT1, mpt::ToCString(CUpdateCheck::GetDefaultUpdateURL()));
 }
 
 

@@ -244,22 +244,25 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "Update"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "Check for Updates",IDC_STATIC,6,6,276,66
-    CONTROL         "&Never",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,12,18,240,8
-    CONTROL         "&Daily",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,12,30,240,8
-    CONTROL         "&Weekly (recommended)",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,12,42,240,8
-    CONTROL         "&Monthly",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,12,54,240,8
-    GROUPBOX        "Privacy Settings",IDC_STATIC,6,78,276,54
-    CONTROL         "&Allow us to collect basic update statistics",IDC_CHECK1,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,90,246,12
-    LTEXT           "If enabled, a randomized user ID is created and transmitted with every update check. This ID can not be linked to you or your computer in any way.",IDC_STATIC,12,102,264,24
-    GROUPBOX        "Advanced Settings",IDC_STATIC,6,138,276,60
-    LTEXT           "&Update server URL:",IDC_STATIC,12,150,186,8
-    EDITTEXT        IDC_EDIT1,12,162,264,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "&Reset",IDC_BUTTON2,222,146,54,12
-    LTEXT           "Do not change this unless you are absolutely sure of what you are doing.",IDC_STATIC,12,180,264,12
-    PUSHBUTTON      "&Check for Updates",IDC_BUTTON1,6,204,84,18
-    LTEXT           "",IDC_LASTUPDATE,6,228,276,48
+    CONTROL         "Enable online Update &Check",IDC_CHECK_UPDATEENABLED,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,6,105,10
+    GROUPBOX        "Update Channel",IDC_STATIC_UDATECHANNEL,6,18,276,54
+    CONTROL         "release: official stable released versions only (recommended)",IDC_RADIO1,
+                    "Button",BS_AUTORADIOBUTTON,12,30,211,10
+    CONTROL         "next: previews of the next official stable release",IDC_RADIO2,
+                    "Button",BS_AUTORADIOBUTTON,12,42,171,10
+    CONTROL         "development: bleeding-edge development versions",IDC_RADIO3,
+                    "Button",BS_AUTORADIOBUTTON,12,54,179,10
+    GROUPBOX        "Check for Updates",IDC_STATIC_UPDATECHECK,6,72,276,48
+    LTEXT           "&Automatically check on program start:",IDC_STATIC_UPDATEFREQUENCY,12,84,126,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO_UPDATEFREQUENCY,138,84,42,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Check now...",IDC_BUTTON1,216,84,60,12
+    LTEXT           "",IDC_LASTUPDATE,12,102,264,12
+    GROUPBOX        "Privacy Settings",IDC_STATIC_UPDATEPRIVACY,6,120,276,156
+    CONTROL         "&Allow OpenMPT to collect basic statistics about your system configuration",IDC_CHECK1,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,132,264,12
+    LTEXT           "",IDC_STATIC_UPDATEPRIVACYTEXT,12,144,264,36
+    EDITTEXT        IDC_EDIT_STATISTICS,12,180,264,90,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | WS_VSCROLL | WS_HSCROLL
 END
 
 IDD_CLOSEDOCUMENTS DIALOGEX 0, 0, 370, 197
@@ -374,23 +377,26 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,138,24,50,14
 END
 
-IDD_WECLOME DIALOGEX 0, 0, 256, 137
+IDD_WECLOME DIALOGEX 0, 0, 257, 261
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Welcome to OpenMPT!"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "&OK",IDOK,198,116,50,14
+    DEFPUSHBUTTON   "&OK",IDOK,198,236,50,14
     LTEXT           "Please review the following settings before using this software:",IDC_STATIC,6,6,246,8
     CONTROL         "&Automatically check for new versions of OpenMPT",IDC_CHECK1,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,24,246,10
+    CONTROL         "Help OpenMPT development by providing basic s&tatistics",IDC_CHECK3,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,42,234,10
+    LTEXT           "Static",IDC_STATIC_WELCOME_STATISTICS,30,54,216,102
     CONTROL         "&Use a big font in the pattern editor",IDC_CHECK2,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,42,246,10
-    LTEXT           "&Default keyboard scheme:",IDC_STATIC,6,63,108,8
-    COMBOBOX        IDC_COMBO1,114,60,132,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Scan for existing VST plugins in the following location:",IDC_STATIC,6,82,172,8
-    PUSHBUTTON      "&Scan",IDC_BUTTON2,198,79,50,14
-    EDITTEXT        IDC_EDIT1,6,95,240,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
-    PUSHBUTTON      "&More Settings",IDC_BUTTON1,6,116,60,14
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,162,246,10
+    LTEXT           "&Default keyboard scheme:",IDC_STATIC,6,183,108,8
+    COMBOBOX        IDC_COMBO1,114,180,132,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Scan for existing VST plugins in the following location:",IDC_STATIC,6,202,172,8
+    PUSHBUTTON      "&Scan",IDC_BUTTON2,198,199,50,14
+    EDITTEXT        IDC_EDIT1,6,215,240,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    PUSHBUTTON      "&More Settings",IDC_BUTTON1,6,236,60,14
 END
 
 IDD_UPDATE DIALOGEX 0, 0, 196, 138
@@ -751,9 +757,9 @@ BEGIN
     IDD_WECLOME, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 249
+        RIGHTMARGIN, 250
         TOPMARGIN, 7
-        BOTTOMMARGIN, 130
+        BOTTOMMARGIN, 254
     END
 
     IDD_UPDATE, DIALOG
@@ -929,6 +935,16 @@ BEGIN
     0, 0, 100, 100,
     0, 100, 0, 0,
     0, 100, 100, 0
+END
+
+IDD_OPTIONS_UPDATE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_WECLOME AFX_DIALOG_LAYOUT
+BEGIN
+    0
 END
 
 

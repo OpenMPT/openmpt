@@ -332,10 +332,19 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, vstHostVendorString(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("HostVendorString"), "OpenMPT project")
 	, vstHostVendorVersion(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("HostVendorVersion"), Version::Current().GetRawVersion())
 	// Update
+	, UpdateEnabled(conf, MPT_USTRING("Update"), MPT_USTRING("Enabled"), true)
 	, UpdateLastUpdateCheck(conf, MPT_USTRING("Update"), MPT_USTRING("LastUpdateCheck"), mpt::Date::Unix(time_t()))
-	, UpdateUpdateCheckPeriod(conf, MPT_USTRING("Update"), MPT_USTRING("UpdateCheckPeriod"), 7)
-	, UpdateUpdateURL(conf, MPT_USTRING("Update"), MPT_USTRING("UpdateURL"), CUpdateCheck::GetDefaultUpdateURL())
-	, UpdateSendGUID(conf, MPT_USTRING("Update"), MPT_USTRING("SendGUID"), true)
+	, UpdateUpdateCheckPeriod_DEPRECATED(conf, MPT_USTRING("Update"), MPT_USTRING("UpdateCheckPeriod"), 7)
+	, UpdateIntervalDays(conf, MPT_USTRING("Update"), MPT_USTRING("UpdateCheckIntervalDays"), 7)
+	, UpdateChannel(conf, MPT_USTRING("Update"), MPT_USTRING("Channel"), UpdateChannelRelease)
+	, UpdateUpdateURL_DEPRECATED(conf, MPT_USTRING("Update"), MPT_USTRING("UpdateURL"), CUpdateCheck::GetDefaultChannelReleaseURL())
+	, UpdateChannelReleaseURL(conf, MPT_USTRING("Update"), MPT_USTRING("ChannelReleaseURL"), CUpdateCheck::GetDefaultChannelReleaseURL())
+	, UpdateChannelNextURL(conf, MPT_USTRING("Update"), MPT_USTRING("ChannelStableURL"), CUpdateCheck::GetDefaultChannelNextURL())
+	, UpdateChannelDevelopmentURL(conf, MPT_USTRING("Update"), MPT_USTRING("ChannelDevelopmentURL"), CUpdateCheck::GetDefaultChannelDevelopmentURL())
+	, UpdateAPIURL(conf, MPT_USTRING("Update"), MPT_USTRING("APIURL"), CUpdateCheck::GetDefaultAPIURL())
+	, UpdateStatisticsConsentAsked(conf, MPT_USTRING("Update"), MPT_USTRING("StatistisConsentAsked"), false)
+	, UpdateStatistics(conf, MPT_USTRING("Update"), MPT_USTRING("Statistis"), false)
+	, UpdateSendGUID_DEPRECATED(conf, MPT_USTRING("Update"), MPT_USTRING("SendGUID"), false)
 	, UpdateShowUpdateHint(conf, MPT_USTRING("Update"), MPT_USTRING("ShowUpdateHint"), true)
 	, UpdateSuggestDifferentBuildVariant(conf, MPT_USTRING("Update"), MPT_USTRING("SuggestDifferentBuildVariant"), true)
 	, UpdateIgnoreVersion(conf, MPT_USTRING("Update"), MPT_USTRING("IgnoreVersion"), _T(""))
@@ -643,6 +652,47 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		// Moving option out of pattern config
 		CreateBackupFiles = (m_dwPatternSetup & 0x200) != 0;
 		m_dwPatternSetup &= ~0x200;
+	}
+
+	// Update
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,28,00,39))
+	{
+		if(UpdateUpdateCheckPeriod_DEPRECATED <= 0)
+		{
+			UpdateEnabled = true;
+			UpdateIntervalDays = -1;
+		} else
+		{
+			UpdateEnabled = true;
+			UpdateIntervalDays = UpdateUpdateCheckPeriod_DEPRECATED.Get();
+		}
+		if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING(""))
+		{
+			UpdateChannel = UpdateChannelRelease;
+		} else if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING("http://www.soal.org/openmpt/OpenMPTversionCheck.php5"))
+		{
+			UpdateChannel = UpdateChannelRelease;
+		} else if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING("http://update.openmpt.org/check/$VERSION/$GUID"))
+		{
+			UpdateChannel = UpdateChannelRelease;
+		} else if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING("https://update.openmpt.org/check/$VERSION/$GUID"))
+		{
+			UpdateChannel = UpdateChannelRelease;
+		} else if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING("http://update.openmpt.org/check/testing/$VERSION/$GUID"))
+		{
+			UpdateChannel = UpdateChannelDevelopment;
+		} else if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING("https://update.openmpt.org/check/testing/$VERSION/$GUID"))
+		{
+			UpdateChannel = UpdateChannelDevelopment;
+		} else
+		{
+			UpdateChannel = UpdateChannelDevelopment;
+			UpdateChannelDevelopmentURL = UpdateUpdateURL_DEPRECATED.Get();
+		}
+		UpdateStatistics = UpdateSendGUID_DEPRECATED.Get();
+		conf.Forget(UpdateUpdateCheckPeriod_DEPRECATED.GetPath());
+		conf.Forget(UpdateUpdateURL_DEPRECATED.GetPath());
+		conf.Forget(UpdateSendGUID_DEPRECATED.GetPath());
 	}
 
 	// Effects
