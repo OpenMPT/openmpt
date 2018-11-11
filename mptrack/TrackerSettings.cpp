@@ -669,9 +669,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING(""))
 		{
 			UpdateChannel = UpdateChannelRelease;
-		} else if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING("http://www.soal.org/openmpt/OpenMPTversionCheck.php5"))
-		{
-			UpdateChannel = UpdateChannelRelease;
 		} else if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING("http://update.openmpt.org/check/$VERSION/$GUID"))
 		{
 			UpdateChannel = UpdateChannelRelease;
