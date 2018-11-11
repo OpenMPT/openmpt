@@ -611,7 +611,7 @@ mpt::ustring GetFullCreditsString()
 		"Additional patch submitters:\n"
 		"coda (https://coda.s3m.us/)\n"
 		"kode54 (https://kode54.net/)\n"
-		"Revenant (http://revenant1.net/)\n"
+		"Revenant (https://revenant1.net/)\n"
 		"xaimus (http://xaimus.com/)\n"
 		"\n"
 		"Thanks to:\n"
@@ -674,7 +674,7 @@ mpt::ustring GetFullCreditsString()
 #endif
 #ifdef MPT_WITH_UNRAR
 		"Alexander L. Roshal for UnRAR\n"
-		"http://rarlab.com/\n"
+		"https://rarlab.com/\n"
 		"\n"
 #endif
 #ifdef MPT_WITH_PORTAUDIO
@@ -769,7 +769,7 @@ mpt::ustring GetFullCreditsString()
 		"33, 8bitbubsy, Anboi, BooT-SectoR-ViruZ, Bvanoudtshoorn\n"
 		"christofori, cubaxd, Diamond, Ganja, Georg, Goor00,\n"
 		"Harbinger, jmkz, KrazyKatz, LPChip, Nofold, Rakib, Sam Zen\n"
-		"Skaven, Skilletaudio, Snu, Squirrel Havoc, Waxhead\n"
+		"Skaven, Skilletaudio, Snu, Squirrel Havoc, Teimoso, Waxhead\n"
 		"\n"
 #ifndef NO_VST
 		"VST PlugIn Technology by Steinberg Media Technologies GmbH\n"
