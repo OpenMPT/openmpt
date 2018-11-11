@@ -13,6 +13,7 @@
 #include "BuildSettings.h"
 
 #include "CDecimalSupport.h"
+#include "ResizableDialog.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -134,18 +135,28 @@ protected:
 };
 
 
+class InfoDialog : private ResizableDialog
+{
+private:
+	mpt::winstring m_caption, m_content;
+
+public:
+	InfoDialog(CWnd *parent = nullptr);
+	void SetCaption(mpt::winstring caption);
+	void SetContent(mpt::winstring content);
+	using ResizableDialog::DoModal;
+
+protected:
+	BOOL OnInitDialog() override;
+};
+
 ////////////////////////////////////////////////////////////////////////
 // Sound Banks
 
-class CSoundBankProperties: public CDialog
+class CSoundBankProperties: public InfoDialog
 {
-protected:
-	std::string m_szInfo;
-	mpt::PathString fileName;
-
 public:
-	CSoundBankProperties(const CDLSBank &bank, CWnd *parent = nullptr);
-	BOOL OnInitDialog() override;
+	CSoundBankProperties(const CDLSBank &bank, ::CWnd *parent = nullptr);
 };
 
 

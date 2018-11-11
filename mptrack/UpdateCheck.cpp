@@ -21,6 +21,7 @@
 #include "../common/mptThread.h"
 #include "HTTP.h"
 #include "../misc/JSON.h"
+#include "dlg_misc.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -536,7 +537,7 @@ BEGIN_MESSAGE_MAP(CUpdateSetupDlg, CPropertyPage)
 	ON_COMMAND(IDC_BUTTON1,                     &CUpdateSetupDlg::OnCheckNow)
 	ON_CBN_SELCHANGE(IDC_COMBO_UPDATEFREQUENCY, &CUpdateSetupDlg::OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK1,                      &CUpdateSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_BUTTON_STATISTICS,           &CUpdateSetupDlg::OnShowStatisticsData)
+	ON_NOTIFY(NM_CLICK, IDC_SYSLINK1,           &CUpdateSetupDlg::OnShowStatisticsData)
 END_MESSAGE_MAP()
 
 
@@ -629,7 +630,7 @@ BOOL CUpdateSetupDlg::OnInitDialog()
 }
 
 
-void CUpdateSetupDlg::OnShowStatisticsData()
+void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResult*/)
 {
 	CUpdateCheck::Settings settings;
 
@@ -657,10 +658,12 @@ void CUpdateSetupDlg::OnShowStatisticsData()
 			statistics += MPT_USTRING("POST ") + settings.apiURL + MPT_USTRING("statistics/") + MPT_ULITERAL("\n");
 		}
 		statistics += mpt::String::Replace(mpt::ToUnicode(mpt::CharsetUTF8, CUpdateCheck::GetStatisticsDataV3(settings)), MPT_USTRING("\t"), MPT_USTRING("    "));
-		statistics += MPT_ULITERAL("\n");
 	}
 
-	Reporting::Information(mpt::ToCString(mpt::String::Replace(statistics, MPT_USTRING("\n"), MPT_USTRING("\r\n"))));
+	InfoDialog dlg(this);
+	dlg.SetCaption(_T("Update Statistics Data"));
+	dlg.SetContent(mpt::ToWin(mpt::String::Replace(statistics, MPT_USTRING("\n"), MPT_USTRING("\r\n"))));
+	dlg.DoModal();
 }
 
 

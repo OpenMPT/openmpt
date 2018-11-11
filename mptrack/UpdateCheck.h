@@ -152,7 +152,7 @@ protected:
 
 	afx_msg void OnSettingsChanged();
 	afx_msg void OnCheckNow();
-	afx_msg void OnShowStatisticsData();
+	afx_msg void OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResult*/);
 	void EnableDisableDialog();
 	DECLARE_MESSAGE_MAP()
 

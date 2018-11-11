@@ -244,25 +244,26 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "Update"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "Enable online Update &Check",IDC_CHECK_UPDATEENABLED,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,6,105,10
-    GROUPBOX        "Update Channel",IDC_STATIC_UDATECHANNEL,6,18,276,54
-    CONTROL         "release: official stable released versions only (recommended)",IDC_RADIO1,
-                    "Button",BS_AUTORADIOBUTTON,12,30,211,10
-    CONTROL         "next: previews of the next official stable release",IDC_RADIO2,
-                    "Button",BS_AUTORADIOBUTTON,12,42,171,10
-    CONTROL         "development: bleeding-edge development versions",IDC_RADIO3,
-                    "Button",BS_AUTORADIOBUTTON,12,54,179,10
-    GROUPBOX        "Check for Updates",IDC_STATIC_UPDATECHECK,6,72,276,48
-    LTEXT           "&Automatically check on program start:",IDC_STATIC_UPDATEFREQUENCY,12,84,126,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_COMBO_UPDATEFREQUENCY,138,84,42,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "&Check now...",IDC_BUTTON1,216,84,60,12
-    LTEXT           "",IDC_LASTUPDATE,12,102,264,12
-    GROUPBOX        "Privacy Settings",IDC_STATIC_UPDATEPRIVACY,6,120,276,84
+    CONTROL         "Enable Online &Update Check",IDC_CHECK_UPDATEENABLED,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,6,106,10
+    GROUPBOX        "Update Channel",IDC_STATIC_UDATECHANNEL,6,20,276,52
+    CONTROL         "&Release: Official stable released versions only (recommended)",IDC_RADIO1,
+                    "Button",BS_AUTORADIOBUTTON,12,32,264,10
+    CONTROL         "&Next: Previews of the next official stable release",IDC_RADIO2,
+                    "Button",BS_AUTORADIOBUTTON,12,45,264,10
+    CONTROL         "&Development: Bleeding-edge development versions",IDC_RADIO3,
+                    "Button",BS_AUTORADIOBUTTON,12,58,264,10
+    GROUPBOX        "Check for Updates",IDC_STATIC_UPDATECHECK,6,76,276,48
+    LTEXT           "Automatically check on program &start:",IDC_STATIC_UPDATEFREQUENCY,12,88,126,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO_UPDATEFREQUENCY,138,88,48,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Check now...",IDC_BUTTON1,216,88,60,12
+    LTEXT           "",IDC_LASTUPDATE,12,107,264,12
+    GROUPBOX        "Privacy Settings",IDC_STATIC_UPDATEPRIVACY,6,126,276,84
     CONTROL         "&Allow OpenMPT to collect basic statistics about your system configuration",IDC_CHECK1,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,132,264,12
-    LTEXT           "",IDC_STATIC_UPDATEPRIVACYTEXT,12,144,264,36
-    PUSHBUTTON      "Show which information would be transmitted to OpenMPT...",IDC_BUTTON_STATISTICS,66,180,210,14
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,138,264,12
+    LTEXT           "",IDC_STATIC_UPDATEPRIVACYTEXT,12,150,264,36
+    CONTROL         "<a>Show which information would be transmitted to OpenMPT...</a>",IDC_SYSLINK1,
+                    "SysLink",WS_TABSTOP,12,192,264,12
 END
 
 IDD_CLOSEDOCUMENTS DIALOGEX 0, 0, 370, 197
@@ -1818,13 +1819,12 @@ BEGIN
     GROUPBOX        "",IDC_STATIC,6,6,138,84
 END
 
-IDD_SOUNDBANK_INFO DIALOGEX 0, 0, 271, 167
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Sound Bank Information"
+IDD_INFO_BOX DIALOGEX 0, 0, 273, 170
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "Close",IDOK,109,149,50,14
-    EDITTEXT        IDC_EDIT1,7,7,257,138,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    DEFPUSHBUTTON   "Close",IDOK,216,152,50,14
+    EDITTEXT        IDC_EDIT1,6,6,260,143,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER | WS_VSCROLL | WS_HSCROLL | NOT WS_TABSTOP,WS_EX_STATICEDGE
 END
 
 IDD_OPTIONS_GENERAL DIALOGEX 0, 0, 286, 281
@@ -2343,12 +2343,12 @@ BEGIN
         BOTTOMMARGIN, 89
     END
 
-    IDD_SOUNDBANK_INFO, DIALOG
+    IDD_INFO_BOX, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 264
+        RIGHTMARGIN, 266
         TOPMARGIN, 7
-        BOTTOMMARGIN, 163
+        BOTTOMMARGIN, 166
     END
 
     IDD_OPTIONS_GENERAL, DIALOG
@@ -2514,6 +2514,13 @@ END
 IDD_ADDSILENCE AFX_DIALOG_LAYOUT
 BEGIN
     0
+END
+
+IDD_INFO_BOX AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    100, 100, 0, 0,
+    0, 0, 100, 100
 END
 
 

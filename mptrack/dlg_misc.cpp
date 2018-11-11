@@ -705,19 +705,16 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 		if(sndFile.ChnSettings[n].szName[0] >= 0x20)
 		{
 			s += _T(": ");
-			s +=  sndFile.ChnSettings[n].szName;
+			s += sndFile.ChnSettings[n].szName;
 		}
 		m_RemChansList.SetItemData(m_RemChansList.AddString(s), n);
 		if (!m_bKeepMask[n]) m_RemChansList.SetSel(n);
 	}
 
 	if (m_nRemove > 0)
-	{
 		s.Format(_T("Select %u channel%s to remove:"), m_nRemove, (m_nRemove != 1) ? _T("s") : _T(""));
-	} else
-	{
+	else
 		s.Format(_T("Select channels to remove (the minimum number of remaining channels is %u)"), sndFile.GetModSpecifications().channelsMin);
-	}
 	
 	SetDlgItemText(IDC_QUESTION1, s);
 	if(GetDlgItem(IDCANCEL)) GetDlgItem(IDCANCEL)->ShowWindow(m_ShowCancel);
@@ -729,17 +726,17 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 
 void CRemoveChannelsDlg::OnOK()
 {
-	int nCount = m_RemChansList.GetSelCount();
-	CArray<int,int> aryListBoxSel;
-	aryListBoxSel.SetSize(nCount);
-	m_RemChansList.GetSelItems(nCount, aryListBoxSel.GetData()); 
+	int selCount = m_RemChansList.GetSelCount();
+	std::vector<int> selected(selCount);
+	m_RemChansList.GetSelItems(selCount, selected.data());
 
 	m_bKeepMask.assign(m_nChannels, true);
-	for (int n = 0; n < nCount; n++)
+	for (const auto sel : selected)
 	{
-		m_bKeepMask[aryListBoxSel[n]] = false;
+		m_bKeepMask[sel] = false;
 	}
-	if ((static_cast<CHANNELINDEX>(nCount) == m_nRemove && nCount > 0)  || (m_nRemove == 0 && (sndFile.GetNumChannels() >= nCount + sndFile.GetModSpecifications().channelsMin)))
+	if ((static_cast<CHANNELINDEX>(selCount) == m_nRemove && selCount > 0)
+		|| (m_nRemove == 0 && (sndFile.GetNumChannels() >= selCount + sndFile.GetModSpecifications().channelsMin)))
 		CDialog::OnOK();
 	else
 		CDialog::OnCancel();
@@ -748,46 +745,57 @@ void CRemoveChannelsDlg::OnOK()
 
 void CRemoveChannelsDlg::OnChannelChanged()
 {
-	UINT nr = 0;
-	nr = m_RemChansList.GetSelCount();
-	GetDlgItem(IDOK)->EnableWindow(((nr == m_nRemove && nr >0)  || (m_nRemove == 0 && (sndFile.GetNumChannels() >= nr + sndFile.GetModSpecifications().channelsMin) && nr > 0)) ? TRUE : FALSE);
+	const UINT selCount = m_RemChansList.GetSelCount();
+	GetDlgItem(IDOK)->EnableWindow(((selCount == m_nRemove && selCount > 0)  || (m_nRemove == 0 && (sndFile.GetNumChannels() >= selCount + sndFile.GetModSpecifications().channelsMin) && selCount > 0)) ? TRUE : FALSE);
 }
 
+
+InfoDialog::InfoDialog(CWnd *parent)
+	: ResizableDialog(IDD_INFO_BOX, parent)
+{ }
+
+BOOL InfoDialog::OnInitDialog()
+{
+	ResizableDialog::OnInitDialog();
+	SetWindowText(m_caption.c_str());
+	SetDlgItemText(IDC_EDIT1, m_content.c_str());
+	return TRUE;
+}
+
+void InfoDialog::SetContent(mpt::winstring content)
+{
+	m_content = std::move(content);
+}
+
+void InfoDialog::SetCaption(mpt::winstring caption)
+{
+	m_caption = std::move(caption);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Sound Bank Information
 
-CSoundBankProperties::CSoundBankProperties(const CDLSBank &bank, CWnd *parent) : CDialog(IDD_SOUNDBANK_INFO, parent)
+CSoundBankProperties::CSoundBankProperties(const CDLSBank &bank, ::CWnd *parent)
+	: InfoDialog(parent)
 {
-	
-	fileName = bank.GetFileName();
-
 	const SOUNDBANKINFO &bi = bank.GetBankInfo();
-	m_szInfo.reserve(128 + bi.szBankName.size() + bi.szDescription.size() + bi.szCopyRight.size() + bi.szEngineer.size() + bi.szSoftware.size() + bi.szComments.size());
-	m_szInfo = "Type:\t" + std::string((bank.GetBankType() & SOUNDBANK_TYPE_SF2) ? "Sound Font (SF2)" : "Downloadable Sound (DLS)");
+	std::string info;
+	info.reserve(128 + bi.szBankName.size() + bi.szDescription.size() + bi.szCopyRight.size() + bi.szEngineer.size() + bi.szSoftware.size() + bi.szComments.size());
+	info = "Type:\t" + std::string((bank.GetBankType() & SOUNDBANK_TYPE_SF2) ? "Sound Font (SF2)" : "Downloadable Sound (DLS)");
 	if (bi.szBankName.size())
-		m_szInfo += "\r\nName:\t" + bi.szBankName;
+		info += "\r\nName:\t" + bi.szBankName;
 	if (bi.szDescription.size())
-		m_szInfo += "\r\n\t" + bi.szDescription;
+		info += "\r\n\t" + bi.szDescription;
 	if (bi.szCopyRight.size())
-		m_szInfo += "\r\nCopyright:\t" + bi.szCopyRight;
+		info += "\r\nCopyright:\t" + bi.szCopyRight;
 	if (bi.szEngineer.size())
-		m_szInfo += "\r\nAuthor:\t" + bi.szEngineer;
+		info += "\r\nAuthor:\t" + bi.szEngineer;
 	if (bi.szSoftware.size())
-		m_szInfo += "\r\nSoftware:\t" + bi.szSoftware;
+		info += "\r\nSoftware:\t" + bi.szSoftware;
 	if (bi.szComments.size())
-	{
-		m_szInfo += "\r\n\r\nComments:\r\n" + bi.szComments;
-	}
-}
-
-
-BOOL CSoundBankProperties::OnInitDialog()
-{
-	CDialog::OnInitDialog();
-	::SetDlgItemTextA(m_hWnd, IDC_EDIT1, m_szInfo.c_str());
-	SetWindowText((fileName.AsNative() + _T(" - Sound Bank Information")).c_str());
-	return TRUE;
+		info += "\r\n\r\nComments:\r\n" + bi.szComments;
+	SetCaption((bank.GetFileName().AsNative() + _T(" - Sound Bank Information")));
+	SetContent(mpt::ToWin(mpt::CharsetLocale, info));
 }
 
 
