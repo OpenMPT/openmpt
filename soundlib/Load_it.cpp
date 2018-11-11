@@ -1954,7 +1954,11 @@ uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool updatePlugData)
 				std::ostream & f = *file;
 				// write plugin ID
 				char id[4];
+				// cppcheck false-positive
+				// cppcheck-suppress uninitvar
 				id[0] = 'F';
+				// cppcheck false-positive
+				// cppcheck-suppress uninitvar
 				id[1] = i < 100 ? 'X' : '0' + i / 100;
 				id[2] = '0' + (i / 10) % 10u;
 				id[3] = '0' + (i % 10u);
