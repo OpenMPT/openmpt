@@ -44,7 +44,8 @@ void OPL::Mix(int32 *target, size_t count, uint32 volumeFactorQ16)
 	if(!m_isActive)
 		return;
 
-	const int factor = (volumeFactorQ16 << 13) / (1<<16);
+	// This factor causes a sample voice to be more or less as loud as an OPL voice
+	const int32 factor = (volumeFactorQ16 * 6169) / (1 << 16);
 	while(count--)
 	{
 		int16 l, r;

@@ -380,6 +380,8 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Bit 7 = Stereo (we always use stereo)
 	m_nSamplePreAmp = std::max(fileHeader.masterVolume & 0x7F, 0x10);
+	// Approximately as loud as in DOSBox and a real SoundBlaster 16
+	m_nVSTiVolume = 36;
 
 	// Channel setup
 	m_nChannels = 4;
