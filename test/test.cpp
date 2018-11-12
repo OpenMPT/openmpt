@@ -3532,7 +3532,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, TEMPO(33, 0));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 254);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 32 * 4);
-	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 48);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 36);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 16);
 	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
 	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevelsCompatible);
