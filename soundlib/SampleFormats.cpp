@@ -1339,10 +1339,9 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		}
 	}
 
-	pIns->Convert(MOD_TYPE_XM, GetType());
-
 	// Read MPT crap
 	ReadExtendedInstrumentProperties(pIns, file);
+	pIns->Convert(MOD_TYPE_XM, GetType());
 	pIns->Sanitize(GetType());
 	return true;
 }
@@ -3250,13 +3249,13 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		}
 	}
 
-	pIns->Convert(MOD_TYPE_IT, GetType());
-
 	if(file.Seek(extraOffset))
 	{
 		// Read MPT crap
 		ReadExtendedInstrumentProperties(pIns, file);
 	}
+
+	pIns->Convert(MOD_TYPE_IT, GetType());
 	pIns->Sanitize(GetType());
 
 	return true;
