@@ -2264,14 +2264,14 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 
 		if(pasteMode != kReplace)
 		{
-			sndFile.GetSample(m_nSample).pData.pSample = nullptr;	// prevent old sample from being deleted.
+			sample.pData.pSample = nullptr;	// prevent old sample from being deleted.
 		}
 
 		FileReader file(data);
 		CriticalSection cs;
 		bool ok = sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 		clipboard.Close();
-		if(sample.uFlags[CHN_ADLIB] != oldSample.uFlags[CHN_ADLIB])
+		if(sample.uFlags[CHN_ADLIB] != oldSample.uFlags[CHN_ADLIB] && pasteMode != kReplace)
 		{
 			// Cannot mix PCM with FM
 			pasteMode = kReplace;
