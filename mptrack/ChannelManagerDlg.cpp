@@ -84,7 +84,7 @@ void CChannelManagerDlg::SetDocument(CModDoc *modDoc)
 	}
 }
 
-bool CChannelManagerDlg::IsDisplayed()
+bool CChannelManagerDlg::IsDisplayed() const
 {
 	return m_show;
 }
@@ -119,11 +119,8 @@ void CChannelManagerDlg::Hide()
 
 
 CChannelManagerDlg::CChannelManagerDlg()
-	: m_ModDoc(nullptr)
-	, m_drawableArea(0, 0, 0, 0)
+	: m_drawableArea(0, 0, 0, 0)
 	, m_buttonHeight(CM_BT_HEIGHT)
-	, m_currentTab(0)
-	, m_bkgnd(nullptr)
 	, m_leftButton(false)
 	, m_rightButton(false)
 	, m_moveRect(false)
@@ -142,7 +139,7 @@ CChannelManagerDlg::CChannelManagerDlg()
 	}
 }
 
-CChannelManagerDlg::~CChannelManagerDlg(void)
+CChannelManagerDlg::~CChannelManagerDlg()
 {
 	if(this == sharedInstance_) sharedInstance_ = nullptr;
 	if(m_bkgnd) DeleteBitmap(m_bkgnd);
@@ -536,16 +533,13 @@ void CChannelManagerDlg::OnTabSelchange(NMHDR* /*header*/, LRESULT* /*pResult*/)
 }
 
 
-void CChannelManagerDlg::DrawChannelButton(HDC hdc, LPRECT lpRect, const CString &text, bool activate, bool enable, DWORD dwFlags)
+void CChannelManagerDlg::DrawChannelButton(HDC hdc, CRect rect, const TCHAR *text, bool activate, bool enable, DWORD dwFlags)
 {
-	CRect rect = (*lpRect);
-
 	DrawEdge(hdc, rect, enable ? EDGE_RAISED : EDGE_SUNKEN, BF_RECT | BF_MIDDLE | BF_ADJUST);
 	if(activate)
 	{
 		::FillRect(hdc, rect, CMainFrame::brushWindow);
 	}
-
 
 	rect.left += Util::ScalePixels(13, m_hWnd);
 	rect.right -= Util::ScalePixels(5, m_hWnd);
@@ -757,7 +751,7 @@ void CChannelManagerDlg::OnPaint()
 }
 
 
-bool CChannelManagerDlg::ButtonHit(CPoint point, CHANNELINDEX * id, CRect * invalidate)
+bool CChannelManagerDlg::ButtonHit(CPoint point, CHANNELINDEX *id, CRect *invalidate) const
 {
 	const CRect &client = m_drawableArea;
 
@@ -903,7 +897,7 @@ void CChannelManagerDlg::OnLButtonDown(UINT nFlags,CPoint point)
 	if(!m_hWnd || m_show == false) return;
 	SetCapture();
 
-	if(!ButtonHit(point,NULL,NULL)) ResetState(true,  false, false, false);
+	if(!ButtonHit(point, nullptr, nullptr)) ResetState(true,  false, false, false);
 
 	m_leftButton = true;
 	m_buttonAction = kUndetermined;
@@ -935,7 +929,7 @@ void CChannelManagerDlg::OnRButtonDown(UINT nFlags,CPoint point)
 		InvalidateRect(m_drawableArea, FALSE);
 	} else
 	{
-		MouseEvent(nFlags,point,CM_BT_RIGHT);
+		MouseEvent(nFlags, point, CM_BT_RIGHT);
 		m_downX = point.x;
 		m_downY = point.y;
 	}

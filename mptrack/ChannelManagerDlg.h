@@ -20,12 +20,12 @@ class CChannelManagerDlg: public CDialog
 {
 public:
 
-	static CChannelManagerDlg * sharedInstance() { return sharedInstance_;  }
+	static CChannelManagerDlg * sharedInstance() { return sharedInstance_; }
 	static CChannelManagerDlg * sharedInstanceCreate();
 	static void DestroySharedInstance() { delete sharedInstance_; sharedInstance_ = nullptr; }
 	void SetDocument(CModDoc *modDoc);
 	CModDoc *GetDocument() const { return m_ModDoc; }
-	bool IsDisplayed();
+	bool IsDisplayed() const;
 	void Update();
 	void Show();
 	void Hide();
@@ -59,9 +59,9 @@ protected:
 	std::bitset<MAX_BASECHANNELS> state;
 	CRect move[MAX_BASECHANNELS];
 	CRect m_drawableArea;
-	CModDoc *m_ModDoc;
-	HBITMAP m_bkgnd;
-	int m_currentTab;
+	CModDoc *m_ModDoc = nullptr;
+	HBITMAP m_bkgnd = nullptr;
+	int m_currentTab = 0;
 	int m_downX, m_downY;
 	int m_moveX, m_moveY;
 	int m_buttonHeight;
@@ -71,25 +71,25 @@ protected:
 	bool m_moveRect : 1;
 	bool m_show : 1;
 
-	bool ButtonHit(CPoint point, CHANNELINDEX *id, CRect *invalidate);
-	void MouseEvent(UINT nFlags,CPoint point, MouseButton button);
+	bool ButtonHit(CPoint point, CHANNELINDEX *id, CRect *invalidate) const;
+	void MouseEvent(UINT nFlags, CPoint point, MouseButton button);
 	void ResetState(bool bSelection = true, bool bMove = true, bool bButton = true, bool bInternal = true, bool bOrder = false);
 	void ResizeWindow();
 
-	void DrawChannelButton(HDC hdc, LPRECT lpRect, const CString &text, bool activate, bool enable, DWORD dwFlags);
+	void DrawChannelButton(HDC hdc, CRect rect, const TCHAR *text, bool activate, bool enable, DWORD dwFlags);
 
 	//{{AFX_VIRTUAL(CChannelManagerDlg)
-	BOOL OnInitDialog();
-	void OnApply();
-	void OnClose();
-	void OnSelectAll();
-	void OnInvert();
-	void OnAction1();
-	void OnAction2();
-	void OnStore();
-	void OnRestore();
+	BOOL OnInitDialog() override;
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CChannelManagerDlg)
+	afx_msg void OnApply();
+	afx_msg void OnClose();
+	afx_msg void OnSelectAll();
+	afx_msg void OnInvert();
+	afx_msg void OnAction1();
+	afx_msg void OnAction2();
+	afx_msg void OnStore();
+	afx_msg void OnRestore();
 	afx_msg void OnTabSelchange(NMHDR*, LRESULT* pResult);
 	afx_msg void OnPaint();
 	afx_msg void OnMouseMove(UINT nFlags,CPoint point);
