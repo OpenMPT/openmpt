@@ -74,8 +74,6 @@ END_MESSAGE_MAP()
 
 CAbstractVstEditor::CAbstractVstEditor(IMixPlugin &plugin)
 	: m_VstPlugin(plugin)
-	, m_isMinimized(false)
-	, m_updateDisplay(false)
 {
 	m_Menu.LoadMenu(IDR_VSTMENU);
 	m_nInstrument = GetBestInstrumentCandidate();
@@ -432,8 +430,10 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
 		{
 
 			CInputHandler *ih = CMainFrame::GetInputHandler();
+			if(ih->IsKeyPressHandledByTextBox(static_cast<DWORD>(pMsg->wParam), ::GetFocus()))
+				return CDialog::PreTranslateMessage(pMsg);
 
-			//Translate message manually
+			// Translate message manually
 			UINT nChar = (UINT)pMsg->wParam;
 			UINT nRepCnt = LOWORD(pMsg->lParam);
 			UINT nFlags = HIWORD(pMsg->lParam);

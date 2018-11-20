@@ -497,21 +497,7 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 	if(code >= 0)
 	{
 		// Check if textbox has focus
-		bool textboxHasFocus = false;
-		bool handledByTextBox = false;
-
-		HWND hWnd = ::GetFocus();
-		if(hWnd != NULL)
-		{
-			TCHAR activeWindowClassName[6];
-			GetClassName(hWnd, activeWindowClassName, CountOf(activeWindowClassName));
-			textboxHasFocus = _tcsicmp(activeWindowClassName, _T("Edit")) == 0;
-			if(textboxHasFocus)
-			{
-				handledByTextBox = m_InputHandler->isKeyPressHandledByTextBox(static_cast<UINT>(wParam));
-			}
-		}
-
+		const bool handledByTextBox = m_InputHandler->IsKeyPressHandledByTextBox(static_cast<DWORD>(wParam), ::GetFocus());
 		if(!handledByTextBox && m_InputHandler->GeneralKeyEvent(kCtxAllContexts, code, wParam, lParam) != kcNull)
 		{
 			if(wParam != VK_ESCAPE)

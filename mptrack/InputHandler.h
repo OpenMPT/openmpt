@@ -27,8 +27,8 @@ class CInputHandler
 protected:
 	CWnd *m_pMainFrm;
 	KeyMap m_keyMap;
-	FlagSet<Modifiers> m_modifierMask;
-	int m_bypassCount;
+	FlagSet<Modifiers> m_modifierMask = ModNone;
+	int m_bypassCount = 0;
 	bool m_bInterceptWindowsKeys : 1, m_bInterceptNumLock : 1, m_bInterceptCapsLock : 1, m_bInterceptScrollLock : 1;
 
 public:
@@ -37,9 +37,9 @@ public:
 public:
 	CInputHandler(CWnd *mainframe);
 	CommandID GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam);
-	CommandID KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd=NULL);
+	CommandID KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType, CWnd *pSourceWnd = nullptr);
 	static KeyEventType GetKeyEventType(UINT nFlags);
-	bool isKeyPressHandledByTextBox(DWORD wparam);
+	bool IsKeyPressHandledByTextBox(DWORD wparam, HWND hWnd) const;
 	CommandID HandleMIDIMessage(InputTargetContext context, uint32 message);
 
 	int GetKeyListSize(CommandID cmd) const;
@@ -71,7 +71,7 @@ public:
 class BypassInputHandler
 {
 private:
-	bool bypassed;
+	bool bypassed = false;
 public:
 	BypassInputHandler();
 	~BypassInputHandler();

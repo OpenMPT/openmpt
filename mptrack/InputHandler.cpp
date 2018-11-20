@@ -65,9 +65,6 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	//Get Keymap
 	m_activeCommandSet->GenKeyMap(m_keyMap);
 	SetupSpecialKeyInterception(); // Feature: use Windows keys as modifier keys, intercept special keys
-
-	m_bypassCount = 0;
-	m_modifierMask = ModNone;
 }
 
 
@@ -141,14 +138,14 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 }
 
 
-CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &/*nRepCnt*/, UINT &nFlags, KeyEventType keyEventType, CWnd* pSourceWnd)
+CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &/*nRepCnt*/, UINT &nFlags, KeyEventType keyEventType, CWnd *pSourceWnd)
 {
 	if(InterceptSpecialKeys(nChar, nFlags, false))
 		return kcNull;
 	KeyMapRange cmd = m_keyMap.equal_range(KeyCombination(context, m_modifierMask, nChar, keyEventType));
 
 	if(pSourceWnd == nullptr)
-		pSourceWnd = m_pMainFrm;	//by default, send command message to main frame.
+		pSourceWnd = m_pMainFrm;	// By default, send command message to main frame.
 	return SendCommands(pSourceWnd, cmd, nChar);
 }
 
@@ -544,8 +541,18 @@ bool CInputHandler::SetEffectLetters(const CModSpecifications &modSpecs)
 }
 
 
-bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
+bool CInputHandler::IsKeyPressHandledByTextBox(DWORD key, HWND hWnd) const
 {
+	if(hWnd != nullptr)
+	{
+		TCHAR activeWindowClassName[6];
+		GetClassName(hWnd, activeWindowClassName, CountOf(activeWindowClassName));
+		const bool textboxHasFocus = _tcsicmp(activeWindowClassName, _T("Edit")) == 0;
+		if(!textboxHasFocus)
+		{
+			return false;
+		}
+	}
 
 	//Alpha-numerics (only shift or no modifier):
 	if(!GetModifierMask().test_any_except(ModShift)
@@ -569,7 +576,6 @@ bool CInputHandler::isKeyPressHandledByTextBox(DWORD key)
 
 
 BypassInputHandler::BypassInputHandler()
-	: bypassed(false)
 {
 	if(CMainFrame::GetInputHandler())
 	{

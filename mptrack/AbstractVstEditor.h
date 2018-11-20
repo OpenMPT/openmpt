@@ -38,14 +38,15 @@ protected:
 	int m_nLearnMacro = -1;
 	int m_nCurProg = -1;
 	INSTRUMENTINDEX m_nInstrument;
-	bool m_isMinimized : 1;
-	bool m_updateDisplay : 1;
+	bool m_isMinimized = false;
+	bool m_updateDisplay = false;
 
 public:
 	IMixPlugin &m_VstPlugin;
 
 	CAbstractVstEditor(IMixPlugin &plugin);
 	virtual ~CAbstractVstEditor();
+
 	void SetupMenu(bool force = false);
 	void SetTitle();
 	void SetLearnMacro(int inMacro);
@@ -76,19 +77,18 @@ public:
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnMove(int x, int y);
+	afx_msg void OnClose() { DoClose(); }
 
 	// Overridden methods:
-	virtual void OnOK() { DoClose(); }
-	virtual void OnCancel() { DoClose(); }
-	virtual void OnClose() { DoClose(); }
+	void PostNcDestroy() override;
+	void OnOK() override { DoClose(); }
+	void OnCancel() override { DoClose(); }
 
 	virtual bool OpenEditor(CWnd *parent);
 	virtual void DoClose();
 	virtual void UpdateParamDisplays() { if(m_updateDisplay) { SetupMenu(true); m_updateDisplay = false; } }
 	virtual void UpdateParam(int32 /*param*/) { }
 	virtual void UpdateView(UpdateHint &/*hint*/) { }
-	virtual void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
-	virtual void PostNcDestroy();
 
 	virtual bool IsResizable() const = 0;
 	virtual bool SetSize(int contentWidth, int contentHeight) = 0;
@@ -98,7 +98,7 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	BOOL PreTranslateMessage(MSG* pMsg) override;
 	void UpdatePresetMenu(bool force = false);
 	void GeneratePresetMenu(int32 offset, CMenu &parent);
 	void UpdateInputMenu();
@@ -113,6 +113,8 @@ protected:
 	void OnSetInputInstrument(UINT nID);
 	afx_msg void OnInitMenu(CMenu* pMenu);
 	void PrepareToLearnMacro(UINT nID);
+
+	void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
 
 	void StoreWindowPos();
 	void RestoreWindowPos();
