@@ -603,6 +603,19 @@ std::vector<Architecture> GetSupportedProcessArchitectures(Architecture host)
 }
 
 
+uint64 GetSystemMemorySize()
+{
+	MEMORYSTATUSEX memoryStatus;
+	MemsetZero(memoryStatus);
+	memoryStatus.dwLength = sizeof(MEMORYSTATUSEX);
+	if(GlobalMemoryStatusEx(&memoryStatus) == 0)
+	{
+		return 0;
+	}
+	return memoryStatus.ullTotalPhys;
+}
+
+
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
@@ -642,18 +655,6 @@ struct SystemIsWineCache
 }
 
 #endif // MPT_OS_WINDOWS
-
-uint64 GetSystemMemorySize()
-{
-	MEMORYSTATUSEX memoryStatus;
-	MemsetZero(memoryStatus);
-	memoryStatus.dwLength = sizeof(MEMORYSTATUSEX);
-	if(GlobalMemoryStatusEx(&memoryStatus) == 0)
-	{
-		return 0;
-	}
-	return memoryStatus.ullTotalPhys;
-}
 
 static bool SystemIsWine(bool allowDetection = true)
 {
