@@ -3,7 +3,7 @@ branching release braches
 
  1. adjust buildbot configuration by copying current trunk configuration to a
     new branch configuration and replace `trunk` with the branch version (i.e.
-    `127`)
+    `127`), remember to also adjust url of nondist externals
  2. add release build configuration to the buildbot branch configuration file,
     adjust buildbot config of release build configurations to output to the
     separate auto-release directory and change the archive format from 7z to zip
