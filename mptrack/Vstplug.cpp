@@ -112,7 +112,7 @@ AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool for
 			if(isNative)
 			{
 				const CString msg =
-					mpt::cformat(_T("The following error occurred while trying to load\n%1\n\n%2\n\nnDo you want to try to load the plugin natively?"))
+					mpt::cformat(_T("The following error occurred while trying to load\n%1\n\n%2\n\nDo you want to try to load the plugin natively?"))
 					(plugin.dllPath, mpt::get_exception_text<mpt::ustring>(e));
 				if(Reporting::Confirm(msg, _T("OpenMPT Plugin Bridge")) == cnfNo)
 				{
