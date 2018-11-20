@@ -165,8 +165,13 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 		if(TrackerSettings::Instance().UpdateShowUpdateHint)
 		{
 			TrackerSettings::Instance().UpdateShowUpdateHint = false;
-			CString msg;
-			msg.Format(_T("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates every %u days. If you do not want this, you can disable update checks in the setup."), TrackerSettings::Instance().UpdateIntervalDays.Get());
+			const auto checkIntervalDays = TrackerSettings::Instance().UpdateIntervalDays.Get();
+			CString msg = mpt::cformat(_T("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates %1. If you do not want this, you can disable update checks in the setup."))
+				(
+					checkIntervalDays == 0 ? CString(_T("on every program start")) :
+					checkIntervalDays == 1 ? CString(_T("every day")) :
+					mpt::cformat(_T("every %1 days"))(checkIntervalDays)
+				);
 			if(Reporting::Confirm(msg, _T("OpenMPT Internet Update")) == cnfNo)
 			{
 				TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(now);
