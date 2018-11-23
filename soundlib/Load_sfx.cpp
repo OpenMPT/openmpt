@@ -208,7 +208,6 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Setup channel pan positions and volume
 	SetupMODPanning(true);
-	m_playBehaviour.set(kMODIgnorePanning);
 
 	file.Skip(4);
 	uint16 speed = file.ReadUint16BE();
@@ -227,11 +226,11 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 		sampleHeader.ConvertToMPT(Samples[smp], sampleLen[smp - 1]);
 
 		// Get rid of weird characters in sample names.
-		for(uint32 i = 0; i < CountOf(sampleHeader.name); i++)
+		for(char &c : sampleHeader.name)
 		{
-			if(sampleHeader.name[i] > 0 && sampleHeader.name[i] < ' ')
+			if(c > 0 && c < ' ')
 			{
-				sampleHeader.name[i] = ' ';
+				c = ' ';
 				invalidChars++;
 			}
 		}
@@ -239,6 +238,11 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 			return false;
 		mpt::String::Read<mpt::String::spacePadded>(m_szNames[smp], sampleHeader.name);
 	}
+
+	// Broken conversions of the "Operation Stealth" soundtrack (BOND23 / BOND32)
+	// There is a converter that shifts all note values except FFFD (empty note) to the left by 1 bit,
+	// but it should not do that for FFFE (STP) notes - as a consequence, they turn into pattern breaks (FFFC).
+	const bool fixPatternBreaks = !strcmp(m_szNames[1], "BASSE2.AMI") || !strcmp(m_szNames[1], "PRA1.AMI");
 
 	SFXFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
@@ -274,6 +278,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 	uint8 lastNote[4] = {0};
 	uint8 slideTo[4] = {0};
 	uint8 slideRate[4] = {0};
+	uint8 version = 0;
 
 	// Reading patterns
 	if(loadFlags & loadPatternData)
@@ -299,17 +304,19 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					lastNote[chn] = slideRate[chn] = 0;
 
+					if(fixPatternBreaks && data[1] == 0xFC)
+						data[1] = 0xFE;
+
 					switch(data[1])
 					{
 					case 0xFE: // STP (note cut)
 						m.command = CMD_VOLUME;
 						continue;
-
 					case 0xFD: // PIC (null)
 						continue;
-
 					case 0xFC: // BRK (pattern break)
 						m.command = CMD_PATTERNBREAK;
+						version = 9;
 						continue;
 					}
 				}
@@ -319,17 +326,21 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					lastNote[chn] = m.note;
 					slideRate[chn] = 0;
+					if(m.note < NOTE_MIDDLEC - 12)
+					{
+						version = std::max(version, uint8(8));
+					}
 				}
 
 				if(m.command || m.param)
 				{
 					switch(m.command)
 					{
-					case 0x1: // arpeggio
+					case 0x1: // Arpeggio
 						m.command = CMD_ARPEGGIO;
 						break;
 
-					case 0x2: // portamento (like Ultimate Soundtracker)
+					case 0x2: // Portamento (like Ultimate Soundtracker)
 						if(m.param & 0xF0)
 						{
 							m.command = CMD_PORTAMENTODOWN;
@@ -344,8 +355,8 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 						}
 						break;
 
-					case 0x3: // enable filter/LED
-						// give precedence to 7xy/8xy slides
+					case 0x3: // Enable LED filter
+						// Give precedence to 7xy/8xy slides
 						if(slideRate[chn])
 						{
 							m.command = m.param = 0;
@@ -355,8 +366,8 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 						m.param = 0;
 						break;
 
-					case 0x4: // disable filter/LED
-						// give precedence to 7xy/8xy slides
+					case 0x4: // Disable LED filter
+						// Give precedence to 7xy/8xy slides
 						if(slideRate[chn])
 						{
 							m.command = m.param = 0;
@@ -366,13 +377,13 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 						m.param = 1;
 						break;
 
-					case 0x5: // increase volume
+					case 0x5: // Increase volume
 						if(m.instr)
 						{
 							m.command = CMD_VOLUME;
 							m.param = std::min(ModCommand::PARAM(0x3F), static_cast<ModCommand::PARAM>((Samples[m.instr].nVolume / 4u) + m.param));
 
-							// give precedence to 7xy/8xy slides (and move this to the volume column)
+							// Give precedence to 7xy/8xy slides (and move this to the volume column)
 							if(slideRate[chn])
 							{
 								m.volcmd = VOLCMD_VOLUME;
@@ -386,7 +397,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 						}
 						break;
 
-					case 0x6: // decrease volume
+					case 0x6: // Decrease volume
 						if(m.instr)
 						{
 							m.command = CMD_VOLUME;
@@ -395,7 +406,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 							else
 								m.param = 0;
 
-							// give precedence to 7xy/8xy slides (and move this to the volume column)
+							// Give precedence to 7xy/8xy slides (and move this to the volume column)
 							if(slideRate[chn])
 							{
 								m.volcmd = VOLCMD_VOLUME;
@@ -409,7 +420,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 						}
 						break;
 
-					case 0x7: // 7xy: slide down x semitones at speed y
+					case 0x7: // 7xy: Slide down x semitones at speed y
 						slideTo[chn] = lastNote[chn] - (m.param >> 4);
 
 						m.command = CMD_PORTAMENTODOWN;
@@ -417,7 +428,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 						m.param = ClampSlideParam(slideRate[chn], slideTo[chn], lastNote[chn]);
 						break;
 
-					case 0x8: // 8xy: slide up x semitones at speed y
+					case 0x8: // 8xy: Slide up x semitones at speed y
 						slideTo[chn] = lastNote[chn] + (m.param >> 4);
 
 						m.command = CMD_PORTAMENTOUP;
@@ -425,13 +436,16 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 						m.param = ClampSlideParam(slideRate[chn], lastNote[chn], slideTo[chn]);
 						break;
 
+					case 0x9: // 9xy: Auto slide
+						version = std::max(version, uint8(8));
+						MPT_FALLTHROUGH;
 					default:
 						m.command = CMD_NONE;
 						break;
 					}
 				}
 
-				// continue 7xy/8xy slides if needed
+				// Continue 7xy/8xy slides if needed
 				if(m.command == CMD_NONE && slideRate[chn])
 				{
 					if(slideTo[chn])
@@ -460,7 +474,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	m_modFormat.formatName = m_nSamples == 15 ? MPT_ULITERAL("SoundFX") : MPT_ULITERAL("SoundFX 2.0 / MultiMedia Sound");
+	m_modFormat.formatName = m_nSamples == 15 ? mpt::format(MPT_USTRING("SoundFX 1.%1"))(version) : MPT_USTRING("SoundFX 2.0 / MultiMedia Sound");
 	m_modFormat.type = m_nSamples == 15 ? MPT_ULITERAL("sfx") : MPT_ULITERAL("sfx2");
 	m_modFormat.charset = mpt::CharsetISO8859_1;
 
