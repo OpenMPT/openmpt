@@ -1,1 +1,1 @@
-https://github.com/nlohmann/json version 3.3.0
+https://github.com/nlohmann/json version 3.4.0
