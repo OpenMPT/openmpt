@@ -716,6 +716,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcInstrumentEnvelopeToggleSustain, 1984, _T("Toggle Envelope Sustain Loop"));
 	DefineKeyCommand(kcInstrumentEnvelopeToggleCarry, 1985, _T("Toggle Envelope Carry"));
 	DefineKeyCommand(kcSampleInitializeOPL, 1986, _T("Initialize OPL Instrument"));
+	DefineKeyCommand(kcFileSaveCopy, 1987, _T("File/Save Copy"));
 
 	// Add new key commands here.
 
@@ -1124,7 +1125,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	}
 
 
-	//# Lock Notes to Chords
+	// Lock Notes to Chords
 	if (enforceRule[krLockNotesToChords])
 	{
 		if (inCmd>=kcVPStartNotes && inCmd<=kcVPEndNotes)
@@ -1171,7 +1172,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	}
 
 
-	//# Auto set note off on release
+	// Auto set note off on release
 	if (enforceRule[krNoteOffOnKeyRelease])
 	{
 		if (inCmd>=kcVPStartNotes && inCmd<=kcVPEndNotes)
@@ -1224,7 +1225,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		}
 	}
 
-	//# Reassign freed number keys to octaves
+	// Reassign freed number keys to octaves
 	if (enforceRule[krReassignDigitsToOctaves] && !adding)
 	{
 		if ( (inKc.Modifier() == ModNone) &&	//no modifier
@@ -1239,7 +1240,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	// Add spacing
 	if (enforceRule[krAutoSpacing])
 	{
-		if (inCmd==kcSetSpacing && adding)
+		if (inCmd == kcSetSpacing && adding)
 		{
 			newKc = KeyCombination(kCtxViewPatterns, inKc.Modifier(), 0, kKeyEventDown);
 			for (char i = 0; i <= 9; i++)
@@ -1250,16 +1251,17 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				Add(newKc, (CommandID)(kcSetSpacing0 + i), false);
 			}
 		}
-		else if (!adding && (inCmd<kcSetSpacing && kcSetSpacing9<inCmd))
+		else if (!adding && (inCmd < kcSetSpacing || inCmd > kcSetSpacing9))
 		{
-			for(const auto &spacing : commands[kcSetSpacing].kcList)
+			// Re-add combinations that might have been overwritten by another command
+			if(('0' <= inKc.KeyCode() && inKc.KeyCode() <= '9') || (VK_NUMPAD0 <= inKc.KeyCode() && inKc.KeyCode() <= VK_NUMPAD9))
 			{
-				if ((('0'<=inKc.KeyCode() && inKc.KeyCode()<='9')||(VK_NUMPAD0<=inKc.KeyCode() && inKc.KeyCode()<=VK_NUMPAD9)) && !adding)
+				for(const auto &spacing : commands[kcSetSpacing].kcList)
 				{
 					newKc = KeyCombination(kCtxViewPatterns, spacing.Modifier(), inKc.KeyCode(), spacing.EventType());
-					if ('0'<=inKc.KeyCode() && inKc.KeyCode()<='9')
+					if('0' <= inKc.KeyCode() && inKc.KeyCode() <= '9')
 						Add(newKc, (CommandID)(kcSetSpacing0 + inKc.KeyCode() - '0'), false);
-					else if (VK_NUMPAD0<=inKc.KeyCode() && inKc.KeyCode()<=VK_NUMPAD9)
+					else if(VK_NUMPAD0 <= inKc.KeyCode() && inKc.KeyCode() <= VK_NUMPAD9)
 						Add(newKc, (CommandID)(kcSetSpacing0 + inKc.KeyCode() - VK_NUMPAD0), false);
 				}
 			}

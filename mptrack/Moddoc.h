@@ -345,11 +345,11 @@ protected:
 	bool SaveAllSamples();
 	bool SaveSample(SAMPLEINDEX smp);
 
-	BOOL DoSave(LPCTSTR lpszPathName, BOOL bSaveAs = TRUE) override
+	BOOL DoSave(LPCTSTR lpszPathName, BOOL /*bSaveAs*/ = TRUE) override
 	{
-		return DoSave(lpszPathName ? mpt::PathString::FromCString(lpszPathName) : mpt::PathString(), bSaveAs);
+		return DoSave(lpszPathName ? mpt::PathString::FromCString(lpszPathName) : mpt::PathString());
 	}
-	BOOL DoSave(const mpt::PathString &filename, BOOL bSaveAs = TRUE);
+	BOOL DoSave(const mpt::PathString &filename, bool setPath = true);
 	void DeleteContents() override;
 	//}}AFX_VIRTUAL
 
@@ -405,6 +405,7 @@ public:
 	afx_msg void OnViewEditHistory();
 	afx_msg void OnViewMPTHacks();
 	afx_msg void OnViewTempoSwingSettings();
+	afx_msg void OnSaveCopy();
 	afx_msg void OnSaveTemplateModule();
 	afx_msg void OnAppendModule();
 	afx_msg void OnViewMIDIMapping() { ViewMIDIMapping(); }

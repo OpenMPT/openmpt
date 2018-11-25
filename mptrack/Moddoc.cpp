@@ -85,6 +85,7 @@ IMPLEMENT_DYNCREATE(CModDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	//{{AFX_MSG_MAP(CModDoc)
+	ON_COMMAND(ID_FILE_SAVE_COPY,		&CModDoc::OnSaveCopy)
 	ON_COMMAND(ID_FILE_SAVEASTEMPLATE,	&CModDoc::OnSaveTemplateModule)
 	ON_COMMAND(ID_FILE_SAVEASWAVE,		&CModDoc::OnFileWaveConvert)
 	ON_COMMAND(ID_FILE_SAVEMIDI,		&CModDoc::OnFileMidiConvert)
@@ -410,7 +411,7 @@ void CModDoc::DeleteContents()
 }
 
 
-BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
+BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 {
 	const mpt::PathString docFileName = GetPathNameMpt();
 	const std::string defaultExtension = m_SndFile.GetModSpecifications().fileExtension;
@@ -479,7 +480,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 			MoveFile(saveFileName.AsNative().c_str(), backupFileName.AsNative().c_str());
 		}
 	}
-	if(OnSaveDocument(saveFileName))
+	if(OnSaveDocument(saveFileName, setPath))
 	{
 		SetModified(false);
 		m_bHasValidPath=true;
@@ -2504,8 +2505,9 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcFileExportCompat:  OnFileCompatibilitySave(); break;
 		case kcEstimateSongLength: OnEstimateSongLength(); break;
 		case kcApproxRealBPM:	OnApproximateBPM(); break;
-		case kcFileSave:		DoSave(GetPathNameMpt(), 0); break;
-		case kcFileSaveAs:		DoSave(mpt::PathString(), TRUE); break;
+		case kcFileSave:		DoSave(GetPathNameMpt()); break;
+		case kcFileSaveAs:		DoSave(mpt::PathString()); break;
+		case kcFileSaveCopy:	OnSaveCopy(); break;
 		case kcFileSaveTemplate: OnSaveTemplateModule(); break;
 		case kcFileClose:		SafeFileClose(); break;
 		case kcFileAppend:		OnAppendModule(); break;
@@ -2835,6 +2837,12 @@ void CModDoc::FixNullStrings()
 }
 
 
+void CModDoc::OnSaveCopy()
+{
+	DoSave(mpt::PathString(), false);
+}
+
+
 void CModDoc::OnSaveTemplateModule()
 {
 	// Create template folder if doesn't exist already.
@@ -2867,13 +2875,11 @@ void CModDoc::OnSaveTemplateModule()
 	if(!dlg.Show())
 		return;
 
-	const CString sOldPath = m_strPathName;
 	if (OnSaveDocument(dlg.GetFirstFile(), false))
 	{
 		// Update template menu.
 		CMainFrame::GetMainFrame()->CreateTemplateModulesMenu();
 	}
-	m_strPathName = sOldPath;
 }
 
 

@@ -404,6 +404,7 @@ CString CInputHandler::GetMenuText(UINT id) const
 		case ID_FILE_APPENDMODULE:	s = _T("Appen&d Module..."); c = kcFileAppend; break;
 		case ID_FILE_SAVE:			s = _T("&Save"); c = kcFileSave; break;
 		case ID_FILE_SAVE_AS:		s = _T("Save &As..."); c = kcFileSaveAs; break;
+		case ID_FILE_SAVE_COPY:		s = _T("Save Cop&y..."); c = kcFileSaveCopy; break;
 		case ID_FILE_SAVEASTEMPLATE:s = _T("Sa&ve as Template"); c = kcFileSaveTemplate; break;
 		case ID_FILE_SAVEASWAVE:	s = _T("Stream Export (&WAV, FLAC, MP3, etc.)..."); c = kcFileSaveAsWave; break;
 		case ID_FILE_SAVEMIDI:		s = _T("Export as M&IDI..."); c = kcFileSaveMidi; break;

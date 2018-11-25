@@ -2611,6 +2611,7 @@ BEGIN
         MENUITEM "C&lose All",                  ID_FILE_CLOSEALL
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM "Save Cop&y...",               ID_FILE_SAVE_COPY
         MENUITEM "Save as Template...",         ID_FILE_SAVEASTEMPLATE
         MENUITEM "Export &unraped...",          ID_FILE_SAVECOMPAT
         MENUITEM "Export as &PCM...",           ID_FILE_SAVEASWAVE
