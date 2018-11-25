@@ -1936,44 +1936,42 @@ uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool updatePlugData)
 		const SNDMIXPLUGIN &plugin = m_MixPlugins[i];
 		if(plugin.IsValidPlugin())
 		{
-			uint32 pluginSize = sizeof(SNDMIXPLUGININFO) + 4; // plugininfo+4 (datalen)
+			uint32 chunkSize = sizeof(SNDMIXPLUGININFO) + 4; // plugininfo+4 (datalen)
 			if(plugin.pMixPlugin && updatePlugData)
 			{
 				plugin.pMixPlugin->SaveAllParameters();
 			}
-			const uint32 dataSize = mpt::saturate_cast<uint32>(plugin.pluginData.size());
-			pluginSize += dataSize;
 
-			uint32 MPTxPlugDataSize = 4 + sizeof(float32) +		// 4 for ID and size of dryRatio
-									 4 + sizeof(int32);			// Default Program
-								// for each extra entity, add 4 for ID, plus 4 for size of entity, plus size of entity
+			const uint32 extraDataSize =
+				4 + sizeof(float32) + // 4 for ID and size of dryRatio
+				4 + sizeof(int32);    // Default Program
+			// For each extra entity, add 4 for ID, plus 4 for size of entity, plus size of entity
 
-			pluginSize += MPTxPlugDataSize + 4; //+4 is for size itself: sizeof(uint32) is 4
+			chunkSize += extraDataSize + 4; // +4 is for size field itself
+
+			const uint32 plugDataSize = std::min(mpt::saturate_cast<uint32>(plugin.pluginData.size()), uint32_max - chunkSize);
+			chunkSize += plugDataSize;
+
 			if(file)
 			{
-				std::ostream & f = *file;
-				// write plugin ID
-				char id[4];
-				// cppcheck false-positive
-				// cppcheck-suppress uninitvar
-				id[0] = 'F';
-				// cppcheck false-positive
-				// cppcheck-suppress uninitvar
-				id[1] = i < 100 ? 'X' : '0' + i / 100;
-				id[2] = '0' + (i / 10) % 10u;
-				id[3] = '0' + (i % 10u);
+				std::ostream &f = *file;
+				// Chunk ID (= plugin ID)
+				char id[4] = { 'F', 'X', '0', '0' };
+				if(i >= 100) id[1] = '0' + (i / 100u);
+				id[2] += (i / 10u) % 10u;
+				id[3] += (i % 10u);
 				mpt::IO::WriteRaw(f, id, 4);
 
-				// write plugin size:
-				mpt::IO::WriteIntLE<uint32>(f, pluginSize);
+				// Write chunk size, plugin info and plugin data chunk
+				mpt::IO::WriteIntLE<uint32>(f, chunkSize);
 				mpt::IO::Write(f, m_MixPlugins[i].Info);
-				mpt::IO::WriteIntLE<uint32>(f, dataSize);
-				if(dataSize)
+				mpt::IO::WriteIntLE<uint32>(f, plugDataSize);
+				if(plugDataSize)
 				{
-					mpt::IO::WriteRaw(f, m_MixPlugins[i].pluginData.data(), dataSize);
+					mpt::IO::WriteRaw(f, m_MixPlugins[i].pluginData.data(), plugDataSize);
 				}
 
-				mpt::IO::WriteIntLE<uint32>(f, MPTxPlugDataSize);
+				mpt::IO::WriteIntLE<uint32>(f, extraDataSize);
 
 				// Dry/Wet ratio
 				mpt::IO::WriteRaw(f, "DWRT", 4);
@@ -1989,7 +1987,7 @@ uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool updatePlugData)
 
 				// Please, if you add any more chunks here, don't repeat history (see above) and *do* add a size field for your chunk, mmmkay?
 			}
-			totalSize += pluginSize + 8;
+			totalSize += chunkSize + 8;
 		}
 	}
 	std::vector<uint32le> chinfo(GetNumChannels());
