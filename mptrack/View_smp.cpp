@@ -1841,7 +1841,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						}
 						wsprintf(s, _T("Set Sample Cu&e to:\t%s"), pos.GetString());
 						::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hCueMenu), s);
-						::AppendMenu(hMenu, MF_STRING | (hasValidCues ? 0 : MF_GRAYED), ID_SAMPLE_SLICE, ih->GetKeyTextFromCommand(kcSampleSlice, _T("Slice &at cue points")));
+						::AppendMenu(hMenu, MF_STRING | (hasValidCues ? 0 : MF_GRAYED), ID_SAMPLE_SLICE, ih->GetKeyTextFromCommand(kcSampleSlice, _T("Slice at cue points")));
 					}
 
 					::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
