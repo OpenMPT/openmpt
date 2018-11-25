@@ -311,9 +311,9 @@ enum ResamplingMode : uint8
 namespace Resampling
 {
 
-static inline std::array<ResamplingMode, 5> AllModes() noexcept { return { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_CUBIC, SRCMODE_SINC8, SRCMODE_SINC8LP }; }
+static inline std::array<ResamplingMode, 5> AllModes() noexcept { return { { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_CUBIC, SRCMODE_SINC8, SRCMODE_SINC8LP } }; }
 
-static inline std::array<ResamplingMode, 6> AllModesWithDefault() noexcept { return { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_CUBIC, SRCMODE_SINC8, SRCMODE_SINC8LP, SRCMODE_DEFAULT }; }
+static inline std::array<ResamplingMode, 6> AllModesWithDefault() noexcept { return { { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_CUBIC, SRCMODE_SINC8, SRCMODE_SINC8LP, SRCMODE_DEFAULT } }; }
 
 static MPT_CONSTEXPR11_FUN ResamplingMode Default() noexcept { return SRCMODE_SINC8LP; }
 
