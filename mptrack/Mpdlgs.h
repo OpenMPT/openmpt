@@ -90,8 +90,6 @@ class COptionsMixer: public CPropertyPage
 protected:
 
 	CComboBox m_CbnResampling;
-	CEdit m_CEditWFIRCutoff;
-	CComboBox m_CbnWFIRType;
 
 	CEdit m_CEditRampUp;
 	CEdit m_CEditRampDown;

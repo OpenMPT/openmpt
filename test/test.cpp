@@ -3077,7 +3077,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(pIns->nPPC, NOTE_MIDDLEC - 1);
 
 	VERIFY_EQUAL_NONCONT(pIns->nVolRampUp, 1200);
-	VERIFY_EQUAL_NONCONT(pIns->nResampling, (unsigned)SRCMODE_POLYPHASE);
+	VERIFY_EQUAL_NONCONT(pIns->nResampling, (unsigned)SRCMODE_SINC8LP);
 
 	VERIFY_EQUAL_NONCONT(pIns->IsCutoffEnabled(), false);
 	VERIFY_EQUAL_NONCONT(pIns->GetCutoff(), 0);
@@ -3207,7 +3207,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerBeat, 6);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
-	VERIFY_EQUAL_NONCONT(sndFile.m_nResampling, SRCMODE_POLYPHASE);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nResampling, SRCMODE_SINC8LP);
 	VERIFY_EQUAL_NONCONT(sndFile.m_songArtist, MPT_USTRING("Tester"));
 	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing.size(), 6);
 	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing[0], 29360125);
@@ -3370,7 +3370,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(pIns->nPPC, (NOTE_MIDDLEC - NOTE_MIN) + 6);	// F#5
 
 		VERIFY_EQUAL_NONCONT(pIns->nVolRampUp, 1200);
-		VERIFY_EQUAL_NONCONT(pIns->nResampling, (unsigned)SRCMODE_POLYPHASE);
+		VERIFY_EQUAL_NONCONT(pIns->nResampling, (unsigned)SRCMODE_SINC8LP);
 
 		VERIFY_EQUAL_NONCONT(pIns->IsCutoffEnabled(), true);
 		VERIFY_EQUAL_NONCONT(pIns->GetCutoff(), 0x32);

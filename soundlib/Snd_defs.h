@@ -297,20 +297,53 @@ enum ResamplingMode : uint8
 {
 	// ATTENTION: Do not change ANY of these values, as they get written out to files in per instrument interpolation settings
 	// and old files have these exact values in them which should not change meaning.
-	SRCMODE_NEAREST   = 0,
-	SRCMODE_LINEAR    = 1,
-	SRCMODE_SPLINE    = 2,
-	SRCMODE_POLYPHASE = 3,
-	SRCMODE_FIRFILTER = 4,
-	SRCMODE_DEFAULT   = 5,
+	SRCMODE_NEAREST   = 0,  // 1 tap, no AA
+	SRCMODE_LINEAR    = 1,  // 2 tap, no AA
+	SRCMODE_CUBIC     = 2,  // 4 tap, no AA
+	SRCMODE_SINC8     = 4,  // 8 tap, no AA   (yes, index 4) (XMMS-ModPlug)
+	SRCMODE_SINC8LP   = 3,  // 8 tap, with AA (yes, index 3) (Polyphase)
 
-	SRCMODE_AMIGA = 0xFF,	// Not explicitely user-selectable
+	SRCMODE_DEFAULT   = 5,  // only used for instrument settings, not used inside the mixer
+
+	SRCMODE_AMIGA  = 0xFF,  // Not explicitely user-selectable
 };
 
-static inline bool IsKnownResamplingMode(int mode)
+namespace Resampling
 {
-	return (mode >= 0) && (mode < SRCMODE_DEFAULT);
+
+static inline std::array<ResamplingMode, 5> AllModes() noexcept { return { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_CUBIC, SRCMODE_SINC8, SRCMODE_SINC8LP }; }
+
+static inline std::array<ResamplingMode, 6> AllModesWithDefault() noexcept { return { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_CUBIC, SRCMODE_SINC8, SRCMODE_SINC8LP, SRCMODE_DEFAULT }; }
+
+static MPT_CONSTEXPR11_FUN ResamplingMode Default() noexcept { return SRCMODE_SINC8LP; }
+
+static MPT_CONSTEXPR11_FUN bool IsKnownMode(int mode) noexcept { return (mode >= 0) && (mode < SRCMODE_DEFAULT); }
+
+static MPT_CONSTEXPR11_FUN ResamplingMode ToKnownMode(int mode) noexcept
+{
+	return Resampling::IsKnownMode(mode) ? static_cast<ResamplingMode>(mode)
+		: (mode == SRCMODE_AMIGA) ? SRCMODE_LINEAR
+		: Resampling::Default();
 }
+
+static MPT_CONSTEXPR11_FUN int Length(ResamplingMode mode) noexcept
+{
+	return mode == SRCMODE_NEAREST ? 1
+		: mode == SRCMODE_LINEAR ? 2
+		: mode == SRCMODE_CUBIC ? 4
+		: mode == SRCMODE_SINC8 ? 8
+		: mode == SRCMODE_SINC8LP ? 8
+		: 0;
+}
+
+static MPT_CONSTEXPR11_FUN bool HasAA(ResamplingMode mode) noexcept { return (mode == SRCMODE_SINC8LP); }
+
+static MPT_CONSTEXPR11_FUN ResamplingMode AddAA(ResamplingMode mode) noexcept { return (mode == SRCMODE_SINC8) ? SRCMODE_SINC8LP : mode; }
+
+static MPT_CONSTEXPR11_FUN ResamplingMode RemoveAA(ResamplingMode mode) noexcept { return (mode == SRCMODE_SINC8LP) ? SRCMODE_SINC8 : mode; }
+
+}
+
 
 
 // Release node defines

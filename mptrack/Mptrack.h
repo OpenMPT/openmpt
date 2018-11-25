@@ -269,7 +269,7 @@ public:
 
 public:
 	// Get name of resampling mode. addTaps = true also adds the number of taps the filter uses.
-	static const TCHAR *GetResamplingModeName(ResamplingMode mode, bool addTaps);
+	static CString GetResamplingModeName(ResamplingMode mode, int length, bool addTaps);
 
 // Overrides
 public:

@@ -202,21 +202,21 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 	FlagSet<HintType> hintType = hint.GetType();
 	const bool updateAll = hintType[HINT_MODTYPE];
 
-	const ResamplingMode resamplingModes[] = { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_SPLINE, SRCMODE_POLYPHASE, SRCMODE_FIRFILTER };
+	const auto resamplingModes = Resampling::AllModes();
 
 	if (hintType == HINT_MPTOPTIONS || updateAll)
 	{
-		const TCHAR *defaultResampler;
+		CString defaultResampler;
 		if(m_sndFile.m_SongFlags[SONG_ISAMIGA] && TrackerSettings::Instance().ResamplerEmulateAmiga)
 			defaultResampler = _T("Amiga Resampler");
 		else
-			defaultResampler = CTrackApp::GetResamplingModeName(TrackerSettings::Instance().ResamplerMode, false);
+			defaultResampler = CTrackApp::GetResamplingModeName(TrackerSettings::Instance().ResamplerMode, 1, false);
 
 		m_CbnResampling.ResetContent();
-		m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Default (") + CString(defaultResampler) + _T(")")), SRCMODE_DEFAULT);
+		m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Default (") + defaultResampler + _T(")")), SRCMODE_DEFAULT);
 		for(auto mode : resamplingModes)
 		{
-			m_CbnResampling.SetItemData(m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(mode, false)), mode);
+			m_CbnResampling.SetItemData(m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(mode, 2, true)), mode);
 		}
 		m_CbnResampling.Invalidate(FALSE);
 	}
@@ -312,12 +312,13 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 
 	if(updateAll || hintType == HINT_MPTOPTIONS || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
 	{
+
 		int srcMode = 0;
-		for(int i = 0; i < CountOf(resamplingModes); i++)
+		for(int i = 0; i < m_CbnResampling.GetCount(); ++i)
 		{
-			if(m_sndFile.m_nResampling == resamplingModes[i]) srcMode = i + 1;
+			if(m_sndFile.m_nResampling == static_cast<int>(m_CbnResampling.GetItemData(i)))
+				m_CbnResampling.SetCurSel(i);
 		}
-		m_CbnResampling.SetCurSel(srcMode);
 	}
 
 	CheckDlgButton(IDC_CHECK_LOOPSONG, (TrackerSettings::Instance().gbLoopSong) ? TRUE : FALSE);

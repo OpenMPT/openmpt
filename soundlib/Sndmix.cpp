@@ -2375,11 +2375,11 @@ bool CSoundFile::ReadNote()
 			//if (chn.nNewRightVol > 0xFFFF) chn.nNewRightVol = 0xFFFF;
 			//if (chn.nNewLeftVol > 0xFFFF) chn.nNewLeftVol = 0xFFFF;
 
-			if(chn.pModInstrument && IsKnownResamplingMode(chn.pModInstrument->nResampling))
+			if(chn.pModInstrument && Resampling::IsKnownMode(chn.pModInstrument->nResampling))
 			{
 				// For defined resampling modes, use per-instrument resampling mode if set
 				chn.resamplingMode = static_cast<uint8>(chn.pModInstrument->nResampling);
-			} else if(IsKnownResamplingMode(m_nResampling))
+			} else if(Resampling::IsKnownMode(m_nResampling))
 			{
 				chn.resamplingMode = static_cast<uint8>(m_nResampling);
 			} else if(m_SongFlags[SONG_ISAMIGA] && m_Resampler.m_Settings.emulateAmiga)

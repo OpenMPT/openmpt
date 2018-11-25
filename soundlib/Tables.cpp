@@ -750,41 +750,6 @@ static void getsinc(SINC_TYPE *psinc, double beta, double lowpass_factor)
 	}
 }
 
-#if 0
-
-// this code is currently unused
-
-static double GetSpline(double x, double c0, double c1, double c2, double c3)
-{
-	double Xo = c1;
-	double Xa = c0 - Xo;
-	double Xb = c2 - Xo;
-	double Ux = (Xb-Xa)/2;
-	double Vx = (c3 - Xo)/2;
-	double a = Vx+Ux-2*Xb;
-	double b = 3*Xb-2*Ux-Vx;
-	return (((a*x+b)*x)+Ux)*x+Xo;
-}
-
-
-static void getdownsample2x(short int *psinc)
-{
-	for (int i=0; i<SINC_PHASES; i++)
-	{
-		double x = (double)i * (double)(0.5/SINC_PHASES);
-		psinc[i*8+7] = (short int)(GetSpline(x,     0, 0, 0, 1) * 8192);
-		psinc[i*8+6] = (short int)(GetSpline(x+0.5, 0, 0, 0, 1) * 8192);
-		psinc[i*8+5] = (short int)(GetSpline(x,     0, 0, 1, 0) * 8192);
-		psinc[i*8+4] = (short int)(GetSpline(x+0.5, 0, 0, 1, 0) * 8192);
-		psinc[i*8+3] = (short int)(GetSpline(x,     0, 1, 0, 0) * 8192);
-		psinc[i*8+2] = (short int)(GetSpline(x+0.5, 0, 1, 0, 0) * 8192);
-		psinc[i*8+1] = (short int)(GetSpline(x,     1, 0, 0, 0) * 8192);
-		psinc[i*8+0] = (short int)(GetSpline(x+0.5, 1, 0, 0, 0) * 8192);
-	}
-}
-
-#endif
-
 
 #ifdef MODPLUG_TRACKER
 bool CResampler::StaticTablesInitialized = false;
@@ -835,12 +800,8 @@ void CResampler::InitializeTablesFromScratch(bool force)
 		InitFloatmixerTables();
 
 		getsinc(gKaiserSinc, 9.6377, 0.97);
-		//ericus' downsampling improvement.
-		//getsinc(gDownsample13x, 8.5, 3.0/4.0);
-		//getdownsample2x(gDownsample2x);
 		getsinc(gDownsample13x, 8.5, 0.5);
 		getsinc(gDownsample2x, 2.7625, 0.425);
-		//end ericus' downsampling improvement.
 
 		#ifdef MODPLUG_TRACKER
 			StaticTablesInitialized = true;

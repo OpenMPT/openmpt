@@ -992,12 +992,12 @@ BOOL CCtrlInstruments::OnInitDialog()
 	m_EditPWD.SubclassDlgItem(IDC_PITCHWHEELDEPTH, this);
 	m_EditPWD.AllowFractions(false);
 
+	const auto resamplingModes = Resampling::AllModes();
 	m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Default")), SRCMODE_DEFAULT);
-	m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("None")), SRCMODE_NEAREST);
-	m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Linear")), SRCMODE_LINEAR);
-	m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Spline")), SRCMODE_SPLINE);
-	m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("Polyphase")), SRCMODE_POLYPHASE);
-	m_CbnResampling.SetItemData(m_CbnResampling.AddString(_T("XMMS")), SRCMODE_FIRFILTER);
+	for(auto mode : resamplingModes)
+	{
+		m_CbnResampling.SetItemData(m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(mode, 1, false)), mode);
+	}
 
 	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString(_T("Channel default")), FLTMODE_UNCHANGED);
 	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString(_T("Force lowpass")), FLTMODE_LOWPASS);

@@ -2367,7 +2367,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 			case MagicBE("RP.."): if(GetType() != MOD_TYPE_XM) { ORDERINDEX restartPos; ReadField(chunk, size, restartPos); Order().SetRestartPos(restartPos); } break;
 			case MagicLE("RSMP"):
 				ReadFieldCast(chunk, size, m_nResampling);
-				if(!IsKnownResamplingMode(m_nResampling)) m_nResampling = SRCMODE_DEFAULT;
+				if(!Resampling::IsKnownMode(m_nResampling)) m_nResampling = SRCMODE_DEFAULT;
 				break;
 #ifdef MODPLUG_TRACKER
 			case MagicBE("MIMA"): GetMIDIMapper().Deserialize(chunk); break;

@@ -2026,24 +2026,39 @@ bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
 }
 
 
-const TCHAR *CTrackApp::GetResamplingModeName(ResamplingMode mode, bool addTaps)
+CString CTrackApp::GetResamplingModeName(ResamplingMode mode, int length, bool addTaps)
 {
+	CString result;
 	switch(mode)
 	{
 	case SRCMODE_NEAREST:
-		return addTaps ? _T("No Interpolation (1 tap)") : _T("No Interpolation");
+		result = (length > 1) ? _T("No Interpolation") : _T("None") ;
+		break;
 	case SRCMODE_LINEAR:
-		return addTaps ? _T("Linear (2 tap)") : _T("Linear");
-	case SRCMODE_SPLINE:
-		return addTaps ? _T("Cubic Spline (4 tap)") :  _T("Cubic Spline");
-	case SRCMODE_POLYPHASE:
-		return addTaps ? _T("Polyphase (8 tap)") : _T("Polyphase");
-	case SRCMODE_FIRFILTER:
-		return addTaps ? _T("XMMS-ModPlug (8 tap)") : _T("XMMS-ModPlug");
+		result = _T("Linear");
+		break;
+	case SRCMODE_CUBIC:
+		result = _T("Cubic");
+		break;
+	case SRCMODE_SINC8:
+		result = _T("Sinc");
+		break;
+	case SRCMODE_SINC8LP:
+		result = _T("Sinc");
+		break;
 	default:
 		MPT_ASSERT_NOTREACHED();
+		break;
 	}
-	return _T("");
+	if(Resampling::HasAA(mode))
+	{
+		result += (length > 1) ? _T(" + Low-Pass") : _T(" + LP");
+	}
+	if(addTaps)
+	{
+		result += mpt::cformat(_T(" (%1 tap%2)"))(Resampling::Length(mode), (Resampling::Length(mode) != 1) ? CString(_T("s")) : CString(_T("")));
+	}
+	return result;
 }
 
 

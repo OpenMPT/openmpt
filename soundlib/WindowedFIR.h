@@ -50,25 +50,20 @@ typedef mixsample_t WFIR_TYPE;
 #define WFIR_LOG2WIDTH		3
 #define WFIR_WIDTH			(1L<<WFIR_LOG2WIDTH)
 // cutoff (1.0 == pi/2)
-//float WFIR_CUTOFF			= 0.5f;//0.75f;	//0.90f;
 // wfir type
 enum WFIRType
 {
-	WFIR_HANN			= 0,
-	WFIR_HAMMING		= 1,
-	WFIR_BLACKMANEXACT	= 2,
-	WFIR_BLACKMAN3T61	= 3,
-	WFIR_BLACKMAN3T67	= 4,
-	WFIR_BLACKMAN4T92	= 5,
-	WFIR_BLACKMAN4T74	= 6,
-	WFIR_KAISER4T		= 7,
+	WFIR_HANN          = 0,  // Hann
+	WFIR_HAMMING       = 1,  // Hamming
+	WFIR_BLACKMANEXACT = 2,  // Blackman Exact
+	WFIR_BLACKMAN3T61  = 3,  // Blackman 3-Tap 61
+	WFIR_BLACKMAN3T67  = 4,  // Blackman 3-Tap 67
+	WFIR_BLACKMAN4T92  = 5,  // Blackman-Harris
+	WFIR_BLACKMAN4T74  = 6,  // Blackman 4-Tap 74
+	WFIR_KAISER4T      = 7,  // Kaiser a=7.5
 };
-//int WFIR_TYPE				= WFIR_KAISER4T;//WFIR_BLACKMANEXACT;
-//int WFIR_TYPE				= TrackerSettings::Instance().gbWFIRType;
 // wfir help
-#ifndef M_zPI
 #define M_zPI				3.1415926535897932384626433832795
-#endif
 #define M_zEPS				1e-8
 
 

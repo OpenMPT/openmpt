@@ -332,13 +332,13 @@ module_impl::subsong_data::subsong_data( double duration, std::int32_t start_row
 }
 
 static ResamplingMode filterlength_to_resamplingmode(std::int32_t length) {
-	ResamplingMode result = SRCMODE_POLYPHASE;
+	ResamplingMode result = SRCMODE_SINC8LP;
 	if ( length == 0 ) {
-		result = SRCMODE_POLYPHASE;
+		result = SRCMODE_SINC8LP;
 	} else if ( length >= 8 ) {
-		result = SRCMODE_POLYPHASE;
+		result = SRCMODE_SINC8LP;
 	} else if ( length >= 3 ) {
-		result = SRCMODE_SPLINE;
+		result = SRCMODE_CUBIC;
 	} else if ( length >= 2 ) {
 		result = SRCMODE_LINEAR;
 	} else if ( length >= 1 ) {
@@ -356,11 +356,11 @@ static std::int32_t resamplingmode_to_filterlength(ResamplingMode mode) {
 	case SRCMODE_LINEAR:
 		return 2;
 		break;
-	case SRCMODE_SPLINE:
+	case SRCMODE_CUBIC:
 		return 4;
 		break;
-	case SRCMODE_POLYPHASE:
-	case SRCMODE_FIRFILTER:
+	case SRCMODE_SINC8:
+	case SRCMODE_SINC8LP:
 	case SRCMODE_DEFAULT:
 		return 8;
 	default:

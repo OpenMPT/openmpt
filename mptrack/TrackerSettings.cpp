@@ -74,29 +74,6 @@ MODTYPE SettingsStringToModType(const mpt::ustring &str)
 }
 
 
-static ResamplingMode GetDefaultResamplerMode()
-{
-	ResamplingMode result = CResamplerSettings().SrcMode;
-#ifdef ENABLE_ASM
-	// rough heuristic to select less cpu consuming defaults for old CPUs
-	if(GetRealProcSupport() & PROCSUPPORT_SSE)
-	{
-		result = SRCMODE_POLYPHASE;
-	} else if(GetRealProcSupport() & PROCSUPPORT_MMX)
-	{
-		result = SRCMODE_SPLINE;
-	} else
-	{
-		result = SRCMODE_LINEAR;
-	}
-#else
-	// just use a sane default
-	result = CResamplerSettings().SrcMode;
-#endif
-	return result;
-}
-
-
 static uint32 GetDefaultPatternSetup()
 {
 	return PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
@@ -245,7 +222,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, MixerStereoSeparation(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("StereoSeparation"), MixerSettings().m_nStereoSeparation)
 	, MixerVolumeRampUpMicroseconds(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("VolumeRampUpMicroseconds"), MixerSettings().GetVolumeRampUpMicroseconds())
 	, MixerVolumeRampDownMicroseconds(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("VolumeRampDownMicroseconds"), MixerSettings().GetVolumeRampDownMicroseconds())
-	, ResamplerMode(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("SrcMode"), GetDefaultResamplerMode())
+	, ResamplerMode(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("SrcMode"), CResamplerSettings().SrcMode)
 	, ResamplerSubMode(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("XMMSModplugResamplerWFIRType"), CResamplerSettings().gbWFIRType)
 	, ResamplerCutoffPercent(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ResamplerWFIRCutoff"), mpt::saturate_round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0))
 	, ResamplerEmulateAmiga(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ResamplerEmulateAmiga"), true)
@@ -556,6 +533,13 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		m_SoundDeviceSettingsDefaults.UseHardwareTiming = m_SoundDeviceUseHardwareTiming;
 		m_SoundDeviceSettingsUseOldDefaults = true;
 	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,28,00,41))
+	{
+		// reset this setting to the default when updating,
+		// because we do not provide a GUI any more,
+		// and in general, it should not get changed anyway
+		ResamplerCutoffPercent = mpt::saturate_round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0);
+	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,25,00,04))
 	{
 		m_SoundDeviceDirectSoundOldDefaultIdentifier = true;
@@ -726,7 +710,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 
 	// Sanitize resampling mode for sample editor
-	if(!IsKnownResamplingMode(sampleEditorDefaultResampler) && sampleEditorDefaultResampler != SRCMODE_DEFAULT)
+	if(!Resampling::IsKnownMode(sampleEditorDefaultResampler) && sampleEditorDefaultResampler != SRCMODE_DEFAULT)
 	{
 		sampleEditorDefaultResampler = SRCMODE_DEFAULT;
 	}

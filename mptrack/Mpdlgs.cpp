@@ -928,9 +928,7 @@ BEGIN_MESSAGE_MAP(COptionsMixer, CPropertyPage)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
 	ON_CBN_SELCHANGE(IDC_COMBO_FILTER,			&COptionsMixer::OnResamplerChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO_FILTERWINDOW,	&COptionsMixer::OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO_POLYPHONY,		&COptionsMixer::OnSettingsChanged)
-	ON_EN_UPDATE(IDC_WFIRCUTOFF,				&COptionsMixer::OnSettingsChanged)
 	ON_EN_UPDATE(IDC_RAMPING_IN,				&COptionsMixer::OnRampingChanged)
 	ON_EN_UPDATE(IDC_RAMPING_OUT,				&COptionsMixer::OnRampingChanged)
 	ON_COMMAND(IDC_CHECK_SOFTPAN,				&COptionsMixer::OnSettingsChanged)
@@ -943,8 +941,6 @@ void COptionsMixer::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsSoundcard)
 	DDX_Control(pDX, IDC_COMBO_FILTER, m_CbnResampling);
-	DDX_Control(pDX, IDC_WFIRCUTOFF, m_CEditWFIRCutoff);
-	DDX_Control(pDX, IDC_COMBO_FILTERWINDOW, m_CbnWFIRType);
 	DDX_Control(pDX, IDC_RAMPING_IN, m_CEditRampUp);
 	DDX_Control(pDX, IDC_RAMPING_OUT, m_CEditRampDown);
 	DDX_Control(pDX, IDC_EDIT_VOLRAMP_SAMPLES_UP, m_CInfoRampUp);
@@ -963,24 +959,16 @@ BOOL COptionsMixer::OnInitDialog()
 
 	// Resampling type
 	{
-		for(auto mode : { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_SPLINE, SRCMODE_POLYPHASE, SRCMODE_FIRFILTER })
+		const auto resamplingModes = Resampling::AllModes();
+		for(auto mode : resamplingModes)
 		{
-			int index = m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(mode, true));
+			int index = m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(mode, 2, true));
 			m_CbnResampling.SetItemData(index, mode);
 			if(TrackerSettings::Instance().ResamplerMode == mode)
+			{
 				m_CbnResampling.SetCurSel(index);
+			}
 		}
-	}
-
-	// Resampler bandwidth
-	{
-		m_CEditWFIRCutoff.SetWindowText(mpt::ToCString(mpt::ufmt::val(TrackerSettings::Instance().ResamplerCutoffPercent)));
-		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, 99);
-	}
-
-	// Resampler filter window
-	{
-		// done in OnResamplerChanged()
 	}
 
 	// Amiga Resampler
@@ -1037,7 +1025,6 @@ BOOL COptionsMixer::OnInitDialog()
 		m_SliderPreAmp.SetPos(n);
 	}
 
-	OnResamplerChanged();
 	m_initialized = true;
 
 	return TRUE;
@@ -1053,61 +1040,6 @@ BOOL COptionsMixer::OnSetActive()
 
 void COptionsMixer::OnResamplerChanged()
 {
-	ResamplingMode srcMode = static_cast<ResamplingMode>(m_CbnResampling.GetItemData(m_CbnResampling.GetCurSel()));
-	m_CbnWFIRType.ResetContent();
-	switch(srcMode)
-	{
-		case SRCMODE_FIRFILTER:
-			m_CbnWFIRType.AddString(_T("Hann"));
-			m_CbnWFIRType.AddString(_T("Hamming"));
-			m_CbnWFIRType.AddString(_T("Blackman Exact"));
-			m_CbnWFIRType.AddString(_T("Blackman 3 Tap 61"));
-			m_CbnWFIRType.AddString(_T("Blackman 3 Tap 67"));
-			m_CbnWFIRType.AddString(_T("Blackman Harris"));
-			m_CbnWFIRType.AddString(_T("Blackman 4 Tap 74"));
-			m_CbnWFIRType.AddString(_T("Kaiser a=7.5"));
-			break;
-		case SRCMODE_POLYPHASE:
-			m_CbnWFIRType.AddString(_T("Auto"));
-			m_CbnWFIRType.AddString(_T("Auto"));
-			m_CbnWFIRType.AddString(_T("Auto"));
-			m_CbnWFIRType.AddString(_T("Auto"));
-			m_CbnWFIRType.AddString(_T("Auto"));
-			m_CbnWFIRType.AddString(_T("Auto"));
-			m_CbnWFIRType.AddString(_T("Auto"));
-			m_CbnWFIRType.AddString(_T("Auto"));
-			break;
-		default:
-			m_CbnWFIRType.AddString(_T("none"));
-			m_CbnWFIRType.AddString(_T("none"));
-			m_CbnWFIRType.AddString(_T("none"));
-			m_CbnWFIRType.AddString(_T("none"));
-			m_CbnWFIRType.AddString(_T("none"));
-			m_CbnWFIRType.AddString(_T("none"));
-			m_CbnWFIRType.AddString(_T("none"));
-			m_CbnWFIRType.AddString(_T("none"));
-			break;
-	}
-	m_CbnWFIRType.SetCurSel(TrackerSettings::Instance().ResamplerSubMode);
-	CSpinButtonCtrl *spinWFIRCutoff = static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1));
-	switch(srcMode)
-	{
-		case SRCMODE_POLYPHASE:
-			m_CEditWFIRCutoff.EnableWindow(FALSE);
-			spinWFIRCutoff->EnableWindow(FALSE);
-			m_CbnWFIRType.EnableWindow(FALSE);
-			break;
-		case SRCMODE_FIRFILTER:
-			m_CEditWFIRCutoff.EnableWindow(TRUE);
-			spinWFIRCutoff->EnableWindow(TRUE);
-			m_CbnWFIRType.EnableWindow(TRUE);
-			break;
-		default:
-			m_CEditWFIRCutoff.EnableWindow(FALSE);
-			spinWFIRCutoff->EnableWindow(FALSE);
-			m_CbnWFIRType.EnableWindow(FALSE);
-			break;
-	}
 	OnSettingsChanged();
 }
 
@@ -1160,27 +1092,6 @@ void COptionsMixer::OnOK()
 	// resampler mode
 	{
 		TrackerSettings::Instance().ResamplerMode = static_cast<ResamplingMode>(m_CbnResampling.GetItemData(m_CbnResampling.GetCurSel()));
-	}
-
-	// resampler bandwidth
-	{
-		CString s;
-		m_CEditWFIRCutoff.GetWindowText(s);
-		if(s != "")
-		{
-			int newCutoff = ConvertStrTo<int>(s);
-			Limit(newCutoff, 0, 100);
-			TrackerSettings::Instance().ResamplerCutoffPercent = newCutoff;
-		}
-		{
-			s.Format(_T("%d"), TrackerSettings::Instance().ResamplerCutoffPercent.Get());
-			m_CEditWFIRCutoff.SetWindowText(s);
-		}
-	}
-
-	// resampler filter window
-	{
-		TrackerSettings::Instance().ResamplerSubMode = (uint8)m_CbnWFIRType.GetCurSel();
 	}
 
 	// Amiga Resampler
