@@ -121,7 +121,7 @@ protected:
 	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
 	time_t m_creationTime;
 
-	long m_modifiedAutosave = false; // Modified since last autosave?
+	std::atomic<bool> m_modifiedAutosave = false; // Modified since last autosave?
 public:
 	bool m_ShowSavedialog = false;
 	bool m_bHasValidPath = false; //becomes true if document is loaded or saved.
@@ -227,6 +227,7 @@ public:
 	CHANNELINDEX PlayNote(PlayNoteParam &params);
 	bool NoteOff(UINT note, bool fade = false, INSTRUMENTINDEX ins = INSTRUMENTINDEX_INVALID, CHANNELINDEX currentChn = CHANNELINDEX_INVALID, CHANNELINDEX stopChn = CHANNELINDEX_INVALID); //rewbs.vstiLive: add params
 	void CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, std::bitset<128> &playingNotes);
+	void UpdateOPLInstrument(SAMPLEINDEX smp);
 
 	bool IsNotePlaying(UINT note, SAMPLEINDEX nsmp = 0, INSTRUMENTINDEX nins = 0);
 	bool MuteChannel(CHANNELINDEX nChn, bool bMute);
@@ -325,19 +326,15 @@ protected:
 	BOOL OnOpenDocument(LPCTSTR lpszPathName) override;
 	BOOL OnSaveDocument(LPCTSTR lpszPathName) override
 	{
-		return OnSaveDocument(lpszPathName ? mpt::PathString::FromCString(lpszPathName) : mpt::PathString(), false);
-	}
-	BOOL OnSaveDocument(const mpt::PathString &filename)
-	{
-		return OnSaveDocument(filename, false);
+		return OnSaveDocument(lpszPathName ? mpt::PathString::FromCString(lpszPathName) : mpt::PathString()) ? TRUE : FALSE;
 	}
 	void OnCloseDocument() override;
 	void SafeFileClose();
-	BOOL OnSaveDocument(const mpt::PathString &filename, const bool bTemplateFile);
+	bool OnSaveDocument(const mpt::PathString &filename, const bool setPath = true);
 
-	void SetPathNameMpt(const mpt::PathString &filename, BOOL bAddToMRU = 1)
+	void SetPathName(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
 	{
-		SetPathName(filename.ToCString(), bAddToMRU);
+		CDocument::SetPathName(filename.ToCString(), bAddToMRU);
 	}
 	mpt::PathString GetPathNameMpt() const
 	{
@@ -348,15 +345,13 @@ protected:
 	bool SaveAllSamples();
 	bool SaveSample(SAMPLEINDEX smp);
 
-	BOOL DoSave(LPCTSTR lpszPathName, BOOL bSaveAs=TRUE) override;
-	BOOL DoSave(const mpt::PathString &filename, BOOL bSaveAs=TRUE)
+	BOOL DoSave(LPCTSTR lpszPathName, BOOL bSaveAs = TRUE) override
 	{
-		return DoSave(filename.ToCString(), bSaveAs);
+		return DoSave(lpszPathName ? mpt::PathString::FromCString(lpszPathName) : mpt::PathString(), bSaveAs);
 	}
+	BOOL DoSave(const mpt::PathString &filename, BOOL bSaveAs = TRUE);
 	void DeleteContents() override;
 	//}}AFX_VIRTUAL
-
-	void UpdateOPLInstrument(SAMPLEINDEX smp);
 
 	// Get the sample index for the current pattern cell (resolves instrument note maps, etc)
 	SAMPLEINDEX GetSampleIndex(const ModCommand &m, ModCommand::INSTR lastInstr = 0) const;

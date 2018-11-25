@@ -151,7 +151,7 @@ CModDoc::~CModDoc()
 void CModDoc::SetModified(bool modified)
 {
 	STATIC_ASSERT(sizeof(long) == sizeof(m_bModified));
-	InterlockedExchange(&m_modifiedAutosave, modified);
+	m_modifiedAutosave = modified;
 	if(!!InterlockedExchange(reinterpret_cast<long *>(&m_bModified), modified ? TRUE : FALSE) != modified)
 	{
 		// Update window titles in GUI thread
@@ -163,7 +163,7 @@ void CModDoc::SetModified(bool modified)
 // Return "modified since last autosave" status and reset it until the next SetModified() (as this is only used for polling during autosave)
 bool CModDoc::ModifiedSinceLastAutosave()
 {
-	return !!InterlockedExchange(&m_modifiedAutosave, false);
+	return m_modifiedAutosave.exchange(false);
 }
 
 
@@ -199,7 +199,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	{
 		FileReader file = GetFileReader(f);
 		ASSERT(GetPathNameMpt() == mpt::PathString());
-		SetPathNameMpt(filename, FALSE);	// Path is not set yet, but ITP loader needs this for relative paths.
+		SetPathName(filename, FALSE);	// Path is not set yet, but loaders processing external samples/instruments (ITP/MPTM) need this for relative paths.
 		m_SndFile.Create(file, CSoundFile::loadCompleteModule, this);
 	}
 
@@ -271,13 +271,13 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 }
 
 
-BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTemplateFile)
+bool CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool setPath)
 {
 	ScopedLogCapturer logcapturer(*this);
 	if(filename.empty())
-		return FALSE;
+		return false;
 
-	BOOL ok = FALSE;
+	bool ok = false;
 	mpt::SafeOutputFile f(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 	if(f)
 	{
@@ -298,25 +298,18 @@ BOOL CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool bTempla
 			}
 		} catch(const std::exception &)
 		{
-			ok = FALSE;
+			ok = false;
 		}
 		EndWaitCursor();
 	}
 	if (ok)
 	{
-		if (!bTemplateFile)
+		if (setPath)
 		{
-			// Set new path for this file, unless we are saving a template, in which case we want to keep the old file path.
-			SetPathNameMpt(filename);
+			// Set new path for this file, unless we are saving a template or a copy, in which case we want to keep the old file path.
+			SetPathName(filename);
 		}
 		logcapturer.ShowLog(true);
-		if (bTemplateFile)
-		{
-			// Update template menu.
-			CMainFrame* const pMainFrame = CMainFrame::GetMainFrame();
-			if (pMainFrame)
-				pMainFrame->CreateTemplateModulesMenu();
-		}
 		if(TrackerSettings::Instance().rememberSongWindows) SerializeViews();
 	} else
 	{
@@ -417,10 +410,8 @@ void CModDoc::DeleteContents()
 }
 
 
-BOOL CModDoc::DoSave(LPCTSTR lpszPathName, BOOL)
+BOOL CModDoc::DoSave(const mpt::PathString &filename, BOOL)
 {
-	const mpt::PathString filename = lpszPathName ? mpt::PathString::FromCString(lpszPathName) : mpt::PathString();
-
 	const mpt::PathString docFileName = GetPathNameMpt();
 	const std::string defaultExtension = m_SndFile.GetModSpecifications().fileExtension;
 
@@ -493,7 +484,7 @@ BOOL CModDoc::DoSave(LPCTSTR lpszPathName, BOOL)
 		SetModified(false);
 		m_bHasValidPath=true;
 		m_ShowSavedialog = false;
-		CMainFrame::GetMainFrame()->UpdateTree(this, GeneralHint().General()); // Update treeview (e.g. filename might have changed).
+		CMainFrame::GetMainFrame()->UpdateTree(this, GeneralHint().General()); // Update treeview (e.g. filename might have changed)
 		return TRUE;
 	} else
 	{
@@ -1031,7 +1022,7 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 		if(pChn->isPreviewNote && !pChn->dwFlags[mask] && pChn->nLength && (note == pChn->nNewNote || !note))
 		{
 			m_SndFile.KeyOff(*pChn);
-			if (!m_SndFile.m_nInstruments) pChn->dwFlags.reset(CHN_LOOP);	// FIXME: If a sample with pingpong loop is playing backwards, stuff before the loop is played again!
+			if (!m_SndFile.m_nInstruments) pChn->dwFlags.reset(CHN_LOOP | CHN_PINGPONGFLAG);
 			if (fade) pChn->dwFlags.set(CHN_NOTEFADE);
 			// Instantly stop samples that would otherwise play forever
 			if (pChn->pModInstrument && !pChn->pModInstrument->nFadeOut)
@@ -2605,7 +2596,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 		// Forcing save dialog to appear after extension change - otherwise unnotified file overwriting may occur.
 		m_ShowSavedialog = true;
 
-		SetPathNameMpt(newPath, FALSE);
+		SetPathName(newPath, FALSE);
 	}
 
 	UpdateAllViews(NULL, UpdateHint().ModType());
@@ -2877,7 +2868,11 @@ void CModDoc::OnSaveTemplateModule()
 		return;
 
 	const CString sOldPath = m_strPathName;
-	OnSaveDocument(dlg.GetFirstFile(), true/*template file*/);
+	if (OnSaveDocument(dlg.GetFirstFile(), false))
+	{
+		// Update template menu.
+		CMainFrame::GetMainFrame()->CreateTemplateModulesMenu();
+	}
 	m_strPathName = sOldPath;
 }
 
