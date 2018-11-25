@@ -71,8 +71,8 @@ RAWEncoder::RAWEncoder()
 {
 	Encoder::Traits traits;
 	traits.fileExtension = MPT_PATHSTRING("raw");
-	traits.fileShortDescription = MPT_USTRING("raw PCM");
-	traits.fileDescription = MPT_USTRING("headerless raw little-endian PCM");
+	traits.fileShortDescription = MPT_USTRING("Raw PCM");
+	traits.fileDescription = MPT_USTRING("Headerless raw little-endian PCM");
 	traits.encoderSettingsName = MPT_USTRING("RAW");
 	traits.canTags = false;
 	traits.canCues = false;

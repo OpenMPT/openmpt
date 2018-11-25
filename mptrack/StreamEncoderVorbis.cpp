@@ -37,7 +37,7 @@ static Encoder::Traits VorbisBuildTraits()
 #if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
 		traits.fileExtension = MPT_PATHSTRING("ogg");
 		traits.fileShortDescription = MPT_USTRING("Vorbis");
-		traits.fileDescription = MPT_USTRING("OggVorbis");
+		traits.fileDescription = MPT_USTRING("Ogg Vorbis");
 		traits.encoderSettingsName = MPT_USTRING("Vorbis");
 		traits.canTags = true;
 		traits.maxChannels = 4;

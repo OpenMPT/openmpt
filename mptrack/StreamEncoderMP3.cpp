@@ -401,7 +401,7 @@ static Encoder::Traits BuildTraits(bool compatible)
 {
 	Encoder::Traits traits;
 	traits.fileExtension = MPT_PATHSTRING("mp3");
-	traits.fileShortDescription = (compatible ? MPT_USTRING("compatible MP3") : MPT_USTRING("MP3"));
+	traits.fileShortDescription = (compatible ? MPT_USTRING("Compatible MP3") : MPT_USTRING("MP3"));
 	traits.encoderSettingsName = (compatible ? MPT_USTRING("MP3LameCompatible") : MPT_USTRING("MP3Lame"));
 	traits.fileDescription = (compatible ? MPT_USTRING("MPEG-1 Layer 3") : MPT_USTRING("MPEG-1/2 Layer 3"));
 	traits.canTags = true;

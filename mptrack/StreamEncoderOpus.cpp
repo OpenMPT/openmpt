@@ -35,7 +35,7 @@ static Encoder::Traits BuildTraits()
 #if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
 		traits.fileExtension = MPT_PATHSTRING("opus");
 		traits.fileShortDescription = MPT_USTRING("Opus");
-		traits.fileDescription = MPT_USTRING("OggOpus (RFC 6716, RFC 7845)");
+		traits.fileDescription = MPT_USTRING("Ogg Opus");
 		traits.encoderSettingsName = MPT_USTRING("Opus");
 		traits.canTags = true;
 		traits.maxChannels = 4;
