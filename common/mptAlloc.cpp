@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "mptAlloc.h"
 
+#include "mptBaseTypes.h"
 
 #include <memory>
 #include <new>
@@ -72,7 +73,7 @@ aligned_raw_memory aligned_alloc_impl(std::size_t size, std::size_t count, std::
 		}
 		return aligned_raw_memory{mem, mem};
 	#else
-		if(alignment > alignof(std::max_align_t))
+		if(alignment > alignof(mpt::max_align_t))
 		{
 			std::size_t space = count * size + (alignment - 1);
 			void* mem = std::malloc(space);

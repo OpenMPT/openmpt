@@ -19,8 +19,12 @@
 #include <array>
 #include <limits>
 
+#include <cstddef>
 #include <cstdint>
 
+#if MPT_GCC_BEFORE(4,9,0)
+#include <stddef.h>
+#endif
 #include <stdint.h>
 
 
@@ -69,9 +73,6 @@ MPT_STATIC_ASSERT(std::numeric_limits<unsigned char>::digits == 8);
 MPT_STATIC_ASSERT(sizeof(char) == 1);
 
 #if MPT_CXX_AT_LEAST(17)
-OPENMPT_NAMESPACE_END
-#include <cstddef>
-OPENMPT_NAMESPACE_BEGIN
 namespace mpt {
 using byte = std::byte;
 } // namespace mpt
@@ -88,6 +89,14 @@ typedef unsigned char byte;
 MPT_STATIC_ASSERT(sizeof(mpt::byte) == 1);
 MPT_STATIC_ASSERT(alignof(mpt::byte) == 1);
 
+
+namespace mpt {
+#if MPT_GCC_BEFORE(4,9,0)
+typedef ::max_align_t max_align_t;
+#else
+typedef std::max_align_t max_align_t;
+#endif
+} // namespace mpt
 
 
 namespace mpt {
