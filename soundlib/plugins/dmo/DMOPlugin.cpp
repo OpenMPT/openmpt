@@ -51,11 +51,11 @@ IMixPlugin* DMOPlugin::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIX
 				return p;
 			}
 #ifdef DMO_LOG
-			Log(factory.libraryName.ToUnicode() + MPT_USTRING(": Unable to use this DMO"));
+			Log(factory.libraryName.ToUnicode() + U_(": Unable to use this DMO"));
 #endif
 		}
 #ifdef DMO_LOG
-		else Log(factory.libraryName.ToUnicode() + MPT_USTRING(": Failed to get IMediaObject & IMediaObjectInPlace interfaces"));
+		else Log(factory.libraryName.ToUnicode() + U_(": Failed to get IMediaObject & IMediaObjectInPlace interfaces"));
 #endif
 		if (pMO) pMO->Release();
 		if (pMOIP) pMOIP->Release();
@@ -433,7 +433,7 @@ void DMOPlugin::Resume()
 			|| FAILED(m_pMediaObject->SetOutputType(0, &mt, 0)))
 		{
 #ifdef DMO_LOG
-		Log(MPT_USTRING("DMO: Failed to set I/O media type"));
+		Log(U_("DMO: Failed to set I/O media type"));
 #endif
 		}
 	}

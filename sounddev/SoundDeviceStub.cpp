@@ -40,13 +40,13 @@ namespace SoundDevice {
 
 static mpt::ustring GetTypePrefix()
 {
-	return MPT_USTRING("Wine");
+	return U_("Wine");
 }
 
 static SoundDevice::Info AddTypePrefix(SoundDevice::Info info)
 {
-	info.type = GetTypePrefix() + MPT_USTRING("-") + info.type;
-	info.apiPath.insert(info.apiPath.begin(), MPT_USTRING("Wine"));
+	info.type = GetTypePrefix() + U_("-") + info.type;
+	info.apiPath.insert(info.apiPath.begin(), U_("Wine"));
 	return info;
 }
 

@@ -151,7 +151,7 @@ void COptionsAdvanced::ReInit()
 
 		if(!findStr.empty())
 		{
-			mpt::ustring str = path.FormatAsString() + MPT_USTRING("=") + value.FormatValueAsString();
+			mpt::ustring str = path.FormatAsString() + U_("=") + value.FormatValueAsString();
 			str = mpt::ToLowerCase(str);
 			if(str.find(findStr) == mpt::ustring::npos)
 			{

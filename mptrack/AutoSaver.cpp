@@ -127,7 +127,7 @@ mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
 		} else
 		{
 			// if it doesn't, put it in settings dir
-			name = theApp.GetConfigPath() + MPT_PATHSTRING("Autosave\\");
+			name = theApp.GetConfigPath() + P_("Autosave\\");
 			if(!CreateDirectory(name.AsNative().c_str(), nullptr) && GetLastError() == ERROR_PATH_NOT_FOUND)
 			{
 				name = theApp.GetConfigPath();
@@ -189,7 +189,7 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 		} else
 		{
 			// if it doesn't, put it in settings dir
-			path = theApp.GetConfigPath() + MPT_PATHSTRING("Autosave\\");
+			path = theApp.GetConfigPath() + P_("Autosave\\");
 		}
 	} else
 	{
@@ -197,7 +197,7 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
 	}
 
 	std::vector<mpt::RawPathString> foundfiles;
-	mpt::PathString searchPattern = path + mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent() + MPT_PATHSTRING(".AutoSave.*");
+	mpt::PathString searchPattern = path + mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent() + P_(".AutoSave.*");
 
 	// Find all autosave files for this document, and delete the oldest ones if there are more than the user wants.
 	WIN32_FIND_DATA findData;

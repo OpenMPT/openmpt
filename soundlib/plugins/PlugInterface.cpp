@@ -650,7 +650,7 @@ bool IMixPlugin::SaveProgram()
 		TrackerSettings::Instance().PathPluginPresets.SetWorkingDir(dlg.GetWorkingDirectory());
 	}
 
-	bool bank = (dlg.GetExtension() == MPT_PATHSTRING("fxb"));
+	bool bank = (dlg.GetExtension() == P_("fxb"));
 
 	mpt::SafeOutputFile f(dlg.GetFirstFile(), std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 	if(f.good() && VSTPresets::SaveFile(f, *this, bank))

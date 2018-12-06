@@ -402,10 +402,10 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_ULT);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
 
-	const MPT_UCHAR_TYPE *versions[] = {MPT_ULITERAL("<1.4"), MPT_ULITERAL("1.4"), MPT_ULITERAL("1.5"), MPT_ULITERAL("1.6")};
-	m_modFormat.formatName = MPT_USTRING("UltraTracker");
-	m_modFormat.type = MPT_USTRING("ult");
-	m_modFormat.madeWithTracker = MPT_USTRING("UltraTracker ") + versions[fileHeader.version - '1'];
+	const MPT_UCHAR_TYPE *versions[] = {UL_("<1.4"), UL_("1.4"), UL_("1.5"), UL_("1.6")};
+	m_modFormat.formatName = U_("UltraTracker");
+	m_modFormat.type = U_("ult");
+	m_modFormat.madeWithTracker = U_("UltraTracker ") + versions[fileHeader.version - '1'];
 	m_modFormat.charset = mpt::CharsetCP437;
 
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;	// this will be converted to IT format by MPT.

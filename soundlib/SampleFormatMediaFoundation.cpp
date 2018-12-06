@@ -153,10 +153,10 @@ public:
 		}
 #if !MPT_OS_WINDOWS_WINRT
 		if(!(true
-			&& AddLibrary("mf", mpt::LibraryPath::System(MPT_PATHSTRING("mf")))
-			&& AddLibrary("mfplat", mpt::LibraryPath::System(MPT_PATHSTRING("mfplat")))
-			&& AddLibrary("mfreadwrite", mpt::LibraryPath::System(MPT_PATHSTRING("mfreadwrite")))
-			&& AddLibrary("propsys", mpt::LibraryPath::System(MPT_PATHSTRING("propsys")))
+			&& AddLibrary("mf", mpt::LibraryPath::System(P_("mf")))
+			&& AddLibrary("mfplat", mpt::LibraryPath::System(P_("mfplat")))
+			&& AddLibrary("mfreadwrite", mpt::LibraryPath::System(P_("mfreadwrite")))
+			&& AddLibrary("propsys", mpt::LibraryPath::System(P_("propsys")))
 			))
 		{
 			return false;
@@ -250,11 +250,11 @@ std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 			std::wstring guid = std::wstring(valueNameBuf);
 
 			mpt::ustring description = mpt::ToUnicode(std::wstring(reinterpret_cast<WCHAR*>(valueData)));
-			description = mpt::String::Replace(description, MPT_USTRING("Byte Stream Handler"), MPT_USTRING("Files"));
-			description = mpt::String::Replace(description, MPT_USTRING("ByteStreamHandler"), MPT_USTRING("Files"));
+			description = mpt::String::Replace(description, U_("Byte Stream Handler"), U_("Files"));
+			description = mpt::String::Replace(description, U_("ByteStreamHandler"), U_("Files"));
 
 			guidMap[guid]
-				.ShortName(MPT_USTRING("mf"))
+				.ShortName(U_("mf"))
 				.Description(description)
 				;
 
@@ -309,7 +309,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	file.Rewind();
 	// When using MF to decode MP3 samples in MO3 files, we need the mp3 file extension
 	// for some of them or otherwise MF refuses to recognize them.
-	mpt::PathString tmpfileExtension = (mo3Decode ? MPT_PATHSTRING("mp3") : MPT_PATHSTRING("tmp"));
+	mpt::PathString tmpfileExtension = (mo3Decode ? P_("mp3") : P_("tmp"));
 	OnDiskFileWrapper diskfile(file, tmpfileExtension);
 	if(!diskfile.IsValid())
 	{

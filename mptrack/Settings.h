@@ -570,7 +570,7 @@ public:
 	}
 	mpt::ustring FormatAsString() const
 	{
-		return section + MPT_USTRING(".") + key;
+		return section + U_(".") + key;
 	}
 };
 

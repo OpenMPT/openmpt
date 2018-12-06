@@ -109,7 +109,7 @@ void Logger::SendLogMessage(const mpt::source_location &loc, LogLevel level, con
 		MPT_UNREFERENCED_PARAMETER(facility);
 	#endif // MODPLUG_TRACKER
 	// remove eol if already present and add log level prefix
-	const mpt::ustring message = LogLevelToString(level) + MPT_USTRING(": ") + mpt::String::RTrim(text, MPT_USTRING("\r\n"));
+	const mpt::ustring message = LogLevelToString(level) + U_(": ") + mpt::String::RTrim(text, U_("\r\n"));
 	const mpt::ustring file = mpt::ToUnicode(mpt::CharsetASCII, loc.file_name() ? loc.file_name() : "");
 	const mpt::ustring function = mpt::ToUnicode(mpt::CharsetASCII, loc.function_name() ? loc.function_name() : "");
 	const mpt::ustring line = mpt::ufmt::dec(loc.line());
@@ -128,11 +128,11 @@ void Logger::SendLogMessage(const mpt::source_location &loc, LogLevel level, con
 			static mpt::ofstream s_logfile;
 			if(!s_logfile)
 			{
-				s_logfile.open(MPT_PATHSTRING("mptrack.log"), std::ios::app);
+				s_logfile.open(P_("mptrack.log"), std::ios::app);
 			}
 			if(s_logfile)
 			{
-				mpt::IO::WriteText(s_logfile, mpt::ToCharset(mpt::CharsetUTF8, mpt::format(MPT_USTRING("%1+%2 %3(%4): %5 [%6]\n"))
+				mpt::IO::WriteText(s_logfile, mpt::ToCharset(mpt::CharsetUTF8, mpt::format(U_("%1+%2 %3(%4): %5 [%6]\n"))
 					( mpt::Date::ANSI::ToUString(cur)
 					, mpt::ufmt::right(6, mpt::ufmt::dec(diff))
 					, file
@@ -145,7 +145,7 @@ void Logger::SendLogMessage(const mpt::source_location &loc, LogLevel level, con
 		}
 		if(mpt::log::DebuggerEnabled)
 		{
-			OutputDebugStringW(mpt::ToWide(mpt::format(MPT_USTRING("%1(%2): +%3 %4 [%5]\n"))
+			OutputDebugStringW(mpt::ToWide(mpt::format(U_("%1(%2): +%3 %4 [%5]\n"))
 				( file
 				, line
 				, mpt::ufmt::right(6, mpt::ufmt::dec(diff))

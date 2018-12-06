@@ -247,33 +247,33 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// MPT 1.16 and older versions of OpenMPT - Simply keep default (filter) MIDI macros
 			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-			madeWithTracker = MPT_USTRING("ModPlug Tracker / OpenMPT");
+			madeWithTracker = U_("ModPlug Tracker / OpenMPT");
 			keepMidiMacros = true;
 			nonCompatTracker = true;
 			m_playBehaviour.set(kST3LimitPeriod);
 		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 0 && fileHeader.usePanningTable == 0)
 		{
-			madeWithTracker = MPT_USTRING("Velvet Studio");
+			madeWithTracker = U_("Velvet Studio");
 		} else
 		{
-			madeWithTracker = MPT_USTRING("Scream Tracker");
+			madeWithTracker = U_("Scream Tracker");
 			formatTrackerStr = true;
 			isST3 = true;
 		}
 		break;
 	case S3MFileHeader::trkImagoOrpheus:
-		madeWithTracker = MPT_USTRING("Imago Orpheus");
+		madeWithTracker = U_("Imago Orpheus");
 		formatTrackerStr = true;
 		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkImpulseTracker:
 		if(fileHeader.cwtv <= S3MFileHeader::trkIT2_14)
 		{
-			madeWithTracker = MPT_USTRING("Impulse Tracker");
+			madeWithTracker = U_("Impulse Tracker");
 			formatTrackerStr = true;
 		} else
 		{
-			madeWithTracker = mpt::format(MPT_USTRING("Impulse Tracker 2.14p%1"))(fileHeader.cwtv - S3MFileHeader::trkIT2_14);
+			madeWithTracker = mpt::format(U_("Impulse Tracker 2.14p%1"))(fileHeader.cwtv - S3MFileHeader::trkIT2_14);
 		}
 		nonCompatTracker = true;
 		m_nMinPeriod = 1;
@@ -281,7 +281,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	case S3MFileHeader::trkSchismTracker:
 		if(fileHeader.cwtv == S3MFileHeader::trkBeRoTrackerOld)
 		{
-			madeWithTracker = MPT_USTRING("BeRoTracker");
+			madeWithTracker = U_("BeRoTracker");
 			m_playBehaviour.set(kST3LimitPeriod);
 		} else
 		{
@@ -291,29 +291,29 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkOpenMPT:
-		madeWithTracker = MPT_USTRING("OpenMPT");
+		madeWithTracker = U_("OpenMPT");
 		formatTrackerStr = true;
 		m_dwLastSavedWithVersion = Version((fileHeader.cwtv & S3MFileHeader::versionMask) << 16);
 		break; 
 	case S3MFileHeader::trkBeRoTracker:
-		madeWithTracker = MPT_USTRING("BeRoTracker");
+		madeWithTracker = U_("BeRoTracker");
 		m_playBehaviour.set(kST3LimitPeriod);
 		break;
 	case S3MFileHeader::trkCreamTracker:
-		madeWithTracker = MPT_USTRING("CreamTracker");
+		madeWithTracker = U_("CreamTracker");
 		break;
 	default:
 		if(fileHeader.cwtv == S3MFileHeader::trkCamoto)
-			madeWithTracker = MPT_USTRING("Camoto");
+			madeWithTracker = U_("Camoto");
 		break;
 	}
 	if(formatTrackerStr)
 	{
-		madeWithTracker = mpt::format(MPT_USTRING("%1 %2.%3"))(madeWithTracker, (fileHeader.cwtv & 0xF00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
+		madeWithTracker = mpt::format(U_("%1 %2.%3"))(madeWithTracker, (fileHeader.cwtv & 0xF00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
 	}
 
-	m_modFormat.formatName = MPT_USTRING("ScreamTracker 3");
-	m_modFormat.type = MPT_USTRING("s3m");
+	m_modFormat.formatName = U_("ScreamTracker 3");
+	m_modFormat.type = U_("s3m");
 	m_modFormat.madeWithTracker = std::move(madeWithTracker);
 	m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::CharsetWindows1252 : mpt::CharsetCP437;
 
@@ -754,7 +754,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 		mpt::IO::Offset patOffset = mpt::IO::TellWrite(f);
 		if(patOffset > 0xFFFF0)
 		{
-			AddToLog(LogError, mpt::format(MPT_USTRING("Too much pattern data! Writing patterns failed starting from pattern %1."))(pat));
+			AddToLog(LogError, mpt::format(U_("Too much pattern data! Writing patterns failed starting from pattern %1."))(pat));
 			break;
 		}
 		MPT_ASSERT((patOffset % 16) == 0);
@@ -893,7 +893,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 	}
 	if(globalCmdOnMutedChn)
 	{
-		//AddToLog(LogWarning, MPT_USTRING("Global commands on muted channels are interpreted by only some S3M players."));
+		//AddToLog(LogWarning, U_("Global commands on muted channels are interpreted by only some S3M players."));
 	}
 
 	mpt::IO::Offset sampleDataOffset = mpt::IO::TellWrite(f);
@@ -930,7 +930,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 			// Write sample data
 			if(sampleDataOffset > 0xFFFFFF0)
 			{
-				AddToLog(LogError, mpt::format(MPT_USTRING("Too much sample data! Writing samples failed starting from sample %1."))(realSmp));
+				AddToLog(LogError, mpt::format(U_("Too much sample data! Writing samples failed starting from sample %1."))(realSmp));
 				break;
 			}
 
@@ -957,7 +957,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 		{
 			if(channelType[chn][S3MChannelType::kPCM] && channelType[chn][S3MChannelType::kAdlib])
 			{
-				AddToLog(LogWarning, mpt::format(MPT_USTRING("Pattern channel %1 constains both samples and OPL instruments, which is not supported by Scream Tracker 3."))(chn + 1));
+				AddToLog(LogWarning, mpt::format(U_("Pattern channel %1 constains both samples and OPL instruments, which is not supported by Scream Tracker 3."))(chn + 1));
 			}
 			// ST3 only supports 16 PCM channels, so if channels 17-32 are used,
 			// they must be mapped to the same "internal channels" as channels 1-16.
@@ -985,11 +985,11 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 	}
 	if(sampleCh > 16)
 	{
-		AddToLog(LogWarning, mpt::format(MPT_USTRING("This module has more than 16 (%1) sample channels, which is not supported by Scream Tracker 3."))(sampleCh));
+		AddToLog(LogWarning, mpt::format(U_("This module has more than 16 (%1) sample channels, which is not supported by Scream Tracker 3."))(sampleCh));
 	}
 	if(adlibCh > 9)
 	{
-		AddToLog(LogWarning, mpt::format(MPT_USTRING("This module has more than 9 (%1) OPL channels, which is not supported by Scream Tracker 3."))(adlibCh));
+		AddToLog(LogWarning, mpt::format(U_("This module has more than 9 (%1) OPL channels, which is not supported by Scream Tracker 3."))(adlibCh));
 	}
 
 	mpt::IO::SeekAbsolute(f, 0);

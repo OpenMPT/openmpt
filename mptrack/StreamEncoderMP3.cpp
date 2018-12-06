@@ -362,7 +362,7 @@ class ComponentLame
 public:
 	ComponentLame()
 #if defined(MPT_ENABLE_LAME_DELAYLOAD)
-		: ComponentBundledDLL(MPT_PATHSTRING("openmpt-lame"))
+		: ComponentBundledDLL(P_("openmpt-lame"))
 #else
 		: ComponentBuiltin()
 #endif
@@ -400,10 +400,10 @@ static void GenreEnumCallback(int num, const char *name, void *cookie)
 static Encoder::Traits BuildTraits(bool compatible)
 {
 	Encoder::Traits traits;
-	traits.fileExtension = MPT_PATHSTRING("mp3");
-	traits.fileShortDescription = (compatible ? MPT_USTRING("Compatible MP3") : MPT_USTRING("MP3"));
-	traits.encoderSettingsName = (compatible ? MPT_USTRING("MP3LameCompatible") : MPT_USTRING("MP3Lame"));
-	traits.fileDescription = (compatible ? MPT_USTRING("MPEG-1 Layer 3") : MPT_USTRING("MPEG-1/2 Layer 3"));
+	traits.fileExtension = P_("mp3");
+	traits.fileShortDescription = (compatible ? U_("Compatible MP3") : U_("MP3"));
+	traits.encoderSettingsName = (compatible ? U_("MP3LameCompatible") : U_("MP3Lame"));
+	traits.fileDescription = (compatible ? U_("MPEG-1 Layer 3") : U_("MPEG-1/2 Layer 3"));
 	traits.canTags = true;
 	traits.genres.clear();
 	id3tag_genre_list(&GenreEnumCallback, &traits);
@@ -760,10 +760,10 @@ mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 		if(q < 0) q = 0;
 		if(q >= 10)
 		{
-			return mpt::format(MPT_USTRING("VBR -V%1 (~%2 kbit)"))(MPT_USTRING("9.999"), q_table[q]);
+			return mpt::format(U_("VBR -V%1 (~%2 kbit)"))(U_("9.999"), q_table[q]);
 		} else
 		{
-			return mpt::format(MPT_USTRING("VBR -V%1 (~%2 kbit)"))(q, q_table[q]);
+			return mpt::format(U_("VBR -V%1 (~%2 kbit)"))(q, q_table[q]);
 		}
 	}
 #endif // MPT_WITH_LAME

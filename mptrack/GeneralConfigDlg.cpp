@@ -111,7 +111,7 @@ BOOL COptionsGeneral::OnInitDialog()
 		}
 	}
 
-	const mpt::PathString basePath = theApp.GetConfigPath() + MPT_PATHSTRING("TemplateModules\\");
+	const mpt::PathString basePath = theApp.GetConfigPath() + P_("TemplateModules\\");
 	FolderScanner scanner(basePath, FolderScanner::kOnlyFiles | FolderScanner::kFindInSubDirectories);
 	mpt::PathString file;
 	while(scanner.Next(file))
@@ -193,7 +193,7 @@ void COptionsGeneral::OnOptionSelChanged()
 
 void COptionsGeneral::OnBrowseTemplate()
 {
-	mpt::PathString basePath = theApp.GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\");
+	mpt::PathString basePath = theApp.GetAppDirPath() + P_("TemplateModules\\");
 	mpt::PathString defaultFile = mpt::PathString::FromCString(GetWindowTextString(m_defaultTemplate));
 	if(defaultFile.empty()) defaultFile = TrackerSettings::Instance().defaultTemplateFile;
 

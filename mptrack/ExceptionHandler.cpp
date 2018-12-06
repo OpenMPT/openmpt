@@ -89,7 +89,7 @@ struct CrashOutputDirectory
 	{
 		const mpt::PathString timestampDir = mpt::PathString::FromCString((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\"));
 		// Create a crash directory
-		path = mpt::GetTempDirectory() + MPT_PATHSTRING("OpenMPT Crash Files\\");
+		path = mpt::GetTempDirectory() + P_("OpenMPT Crash Files\\");
 		if(!path.IsDirectory())
 		{
 			CreateDirectory(path.AsNative().c_str(), nullptr);
@@ -168,13 +168,13 @@ DebugReporter::~DebugReporter()
 
 bool DebugReporter::GenerateDump(_EXCEPTION_POINTERS *pExceptionInfo)
 {
-	return WriteMemoryDump(pExceptionInfo, (crashDirectory.path + MPT_PATHSTRING("crash.dmp")).AsNative().c_str(), ExceptionHandler::fullMemDump);
+	return WriteMemoryDump(pExceptionInfo, (crashDirectory.path + P_("crash.dmp")).AsNative().c_str(), ExceptionHandler::fullMemDump);
 }
 
 
 bool DebugReporter::GenerateTraceLog()
 {
-	return mpt::log::Trace::Dump(crashDirectory.path + MPT_PATHSTRING("trace.log"));
+	return mpt::log::Trace::Dump(crashDirectory.path + P_("trace.log"));
 }
 
 
@@ -208,9 +208,9 @@ int DebugReporter::RescueFiles()
 			mpt::PathString filename;
 			filename += crashDirectory.path;
 			filename += mpt::PathString::FromUnicode(mpt::ufmt::val(++numFiles));
-			filename += MPT_PATHSTRING("_");
+			filename += P_("_");
 			filename += mpt::PathString::FromCString(modDoc->GetTitle()).SanitizeComponent();
-			filename += MPT_PATHSTRING(".");
+			filename += P_(".");
 			filename += mpt::PathString::FromUTF8(modDoc->GetSoundFile().GetModSpecifications().fileExtension);
 
 			try
@@ -231,50 +231,50 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 
 	if(!crashDirectory.valid)
 	{
-		errorMessage += MPT_ULITERAL("\n\n");
-		errorMessage += MPT_ULITERAL("Could not create the following directory for saving debug information and modified files to:\n");
+		errorMessage += UL_("\n\n");
+		errorMessage += UL_("Could not create the following directory for saving debug information and modified files to:\n");
 		errorMessage += crashDirectory.path.ToUnicode();
 	}
 
 	if(HasWrittenDebug())
 	{
-		errorMessage += MPT_ULITERAL("\n\n");
-		errorMessage += MPT_ULITERAL("Debug information has been saved to\n");
+		errorMessage += UL_("\n\n");
+		errorMessage += UL_("Debug information has been saved to\n");
 		errorMessage += crashDirectory.path.ToUnicode();
 	}
 
 	if(rescuedFiles > 0)
 	{
-		errorMessage += MPT_ULITERAL("\n\n");
+		errorMessage += UL_("\n\n");
 		if(rescuedFiles == 1)
 		{
-			errorMessage += MPT_ULITERAL("1 modified file has been rescued, but it cannot be guaranteed that it is still intact.");
+			errorMessage += UL_("1 modified file has been rescued, but it cannot be guaranteed that it is still intact.");
 		} else
 		{
-			errorMessage += mpt::format(MPT_USTRING("%1 modified files have been rescued, but it cannot be guaranteed that they are still intact."))(rescuedFiles);
+			errorMessage += mpt::format(U_("%1 modified files have been rescued, but it cannot be guaranteed that they are still intact."))(rescuedFiles);
 		}
 	}
 
-	errorMessage += MPT_ULITERAL("\n\n");
-	errorMessage += mpt::format(MPT_USTRING("OpenMPT %1 (%2 (%3))"))
+	errorMessage += UL_("\n\n");
+	errorMessage += mpt::format(U_("OpenMPT %1 (%2 (%3))"))
 		( Build::GetVersionStringExtended()
 		, SourceInfo::Current().GetUrlWithRevision()
 		, SourceInfo::Current().GetStateString()
 		);
 
-	errorMessage += MPT_ULITERAL("\n\n");
-	errorMessage += mpt::format(MPT_USTRING("Session error count: %1"))(crashCount);
+	errorMessage += UL_("\n\n");
+	errorMessage += mpt::format(U_("Session error count: %1"))(crashCount);
 
-	errorMessage += MPT_ULITERAL("\n\n");
+	errorMessage += UL_("\n\n");
 
 	{
-		mpt::SafeOutputFile f(crashDirectory.path + MPT_PATHSTRING("error.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::SafeOutputFile f(crashDirectory.path + P_("error.txt"), std::ios::binary, mpt::FlushMode::Full);
 		f.imbue(std::locale::classic());
 		f << mpt::String::Replace(mpt::ToCharset(mpt::CharsetUTF8, errorMessage), "\n", "\r\n");
 	}
 
 	{
-		mpt::SafeOutputFile f(crashDirectory.path + MPT_PATHSTRING("threads.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::SafeOutputFile f(crashDirectory.path + P_("threads.txt"), std::ios::binary, mpt::FlushMode::Full);
 		f.imbue(std::locale::classic());
 		f << mpt::format("current : %1")(mpt::fmt::hex0<8>(GetCurrentThreadId())) << "\r\n";
 		f << mpt::format("GUI     : %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindGUI))) << "\r\n";
@@ -285,12 +285,12 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 
 	static constexpr struct { const MPT_UCHAR_TYPE * section; const MPT_UCHAR_TYPE * key; } configAnonymize[] =
 	{
-		{ MPT_ULITERAL("Version"), MPT_ULITERAL("InstallGUID") },
-		{ MPT_ULITERAL("Recent File List"), nullptr },
+		{ UL_("Version"), UL_("InstallGUID") },
+		{ UL_("Recent File List"), nullptr },
 	};
 
 	{
-		mpt::SafeOutputFile f(crashDirectory.path + MPT_PATHSTRING("active-settings.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::SafeOutputFile f(crashDirectory.path + P_("active-settings.txt"), std::ios::binary, mpt::FlushMode::Full);
 		f.imbue(std::locale::classic());
 		if(&theApp.GetSettings())
 		{
@@ -311,14 +311,14 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 					continue;
 				}
 				f
-					<< mpt::ToCharset(mpt::CharsetUTF8, it.first.FormatAsString() + MPT_USTRING(" = ") + it.second.GetRefValue().FormatValueAsString())
+					<< mpt::ToCharset(mpt::CharsetUTF8, it.first.FormatAsString() + U_(" = ") + it.second.GetRefValue().FormatValueAsString())
 					<< std::endl;
 			}
 		}
 	}
 
 	{
-		const mpt::PathString crashStoredSettingsFilename = crashDirectory.path + MPT_PATHSTRING("stored-mptrack.ini");
+		const mpt::PathString crashStoredSettingsFilename = crashDirectory.path + P_("stored-mptrack.ini");
 		CopyFile
 			( theApp.GetConfigFileName().AsNative().c_str()
 			, crashStoredSettingsFilename.AsNative().c_str()
@@ -341,7 +341,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	/*
 	// This is very slow, we instead write active-settings.txt above.
 	{
-		IniFileSettingsBackend f(crashDirectory.path + MPT_PATHSTRING("active-mptrack.ini"));
+		IniFileSettingsBackend f(crashDirectory.path + P_("active-mptrack.ini"));
 		if(&theApp.GetSettings())
 		{
 			if(&theApp.GetSettings())
@@ -357,13 +357,13 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	*/
 
 	{
-		mpt::SafeOutputFile f(crashDirectory.path + MPT_PATHSTRING("about-openmpt.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::SafeOutputFile f(crashDirectory.path + P_("about-openmpt.txt"), std::ios::binary, mpt::FlushMode::Full);
 		f.imbue(std::locale::classic());
 		f << mpt::ToCharset(mpt::CharsetUTF8, CAboutDlg::GetTabText(0));
 	}
 
 	{
-		mpt::SafeOutputFile f(crashDirectory.path + MPT_PATHSTRING("about-components.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::SafeOutputFile f(crashDirectory.path + P_("about-components.txt"), std::ios::binary, mpt::FlushMode::Full);
 		f.imbue(std::locale::classic());
 		f << mpt::ToCharset(mpt::CharsetUTF8, CAboutDlg::GetTabText(1));
 	}
@@ -563,13 +563,13 @@ void ExceptionHandler::UnhandledMFCException(CException * e, const MSG * pMsg)
 		if(dynamic_cast<CSimpleException*>(e)->GetErrorMessage(tmp, static_cast<UINT>(mpt::size(tmp) - 1)) != 0)
 		{
 			tmp[1024] = 0;
-			errorMessage = mpt::format(MPT_USTRING("Unhandled MFC exception occurred while processming window message '%1': %2."))
+			errorMessage = mpt::format(U_("Unhandled MFC exception occurred while processming window message '%1': %2."))
 				(mpt::ufmt::dec(pMsg ? pMsg->message : 0)
 				, mpt::ToUnicode(CString(tmp))
 				);
 		} else
 		{
-			errorMessage = mpt::format(MPT_USTRING("Unhandled MFC exception occurred while processming window message '%1': %2."))
+			errorMessage = mpt::format(U_("Unhandled MFC exception occurred while processming window message '%1': %2."))
 				(mpt::ufmt::dec(pMsg ? pMsg->message : 0)
 				, mpt::ToUnicode(CString(tmp))
 				);
@@ -577,7 +577,7 @@ void ExceptionHandler::UnhandledMFCException(CException * e, const MSG * pMsg)
 	}
 	else
 	{
-		errorMessage = mpt::format(MPT_USTRING("Unhandled MFC exception occurred while processming window message '%1'."))
+		errorMessage = mpt::format(U_("Unhandled MFC exception occurred while processming window message '%1'."))
 			( mpt::ufmt::dec(pMsg ? pMsg->message : 0)
 			);
 	}
@@ -594,14 +594,14 @@ static void UnhandledExceptionFilterImpl(_EXCEPTION_POINTERS *pExceptionInfo)
 	if(pE)
 	{
 		const std::exception & e = *pE;
-		errorMessage = mpt::format(MPT_USTRING("Unhandled C++ exception '%1' occurred at address 0x%2: '%3'."))
+		errorMessage = mpt::format(U_("Unhandled C++ exception '%1' occurred at address 0x%2: '%3'."))
 			( mpt::ToUnicode(mpt::CharsetASCII, typeid(e).name())
 			, mpt::ufmt::hex0<mpt::pointer_size*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
 			, mpt::get_exception_text<mpt::ustring>(e)
 			);
 	} else
 	{
-		errorMessage = mpt::format(MPT_USTRING("Unhandled exception 0x%1 at address 0x%2 occurred."))
+		errorMessage = mpt::format(U_("Unhandled exception 0x%1 at address 0x%2 occurred."))
 			( mpt::ufmt::HEX0<8>(pExceptionInfo->ExceptionRecord->ExceptionCode)
 			, mpt::ufmt::hex0<mpt::pointer_size*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
 			);
@@ -720,7 +720,7 @@ void ExceptionHandler::Unregister()
 #if MPT_CXX_BEFORE(17)
 static void mpt_unexpected_handler()
 {
-	DebugReporter(DumpModeCrash, nullptr).ReportError(MPT_USTRING("An unexpected C++ exception occured: std::unexpected() called."));
+	DebugReporter(DumpModeCrash, nullptr).ReportError(U_("An unexpected C++ exception occured: std::unexpected() called."));
 	// We disable the call to std::terminate() as that would re-renter the crash
 	// handler another time, but with less information available.
 #if 1
@@ -740,7 +740,7 @@ static void mpt_unexpected_handler()
 
 static void mpt_terminate_handler()
 {
-	DebugReporter(DumpModeCrash, nullptr).ReportError(MPT_USTRING("A C++ runtime crash occurred: std::terminate() called."));
+	DebugReporter(DumpModeCrash, nullptr).ReportError(U_("A C++ runtime crash occurred: std::terminate() called."));
 #if 1
 	std::abort();
 #else
@@ -771,7 +771,7 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 		mpt::ustring errorMessage;
 		if(msg)
 		{
-			errorMessage = mpt::format(MPT_USTRING("Internal state inconsistency detected at %1(%2). This is just a warning that could potentially lead to a crash later on: %3 [%4]."))
+			errorMessage = mpt::format(U_("Internal state inconsistency detected at %1(%2). This is just a warning that could potentially lead to a crash later on: %3 [%4]."))
 				( mpt::ToUnicode(mpt::CharsetASCII, loc.file_name() ? loc.file_name() : "")
 				, loc.line()
 				, mpt::ToUnicode(mpt::CharsetASCII, msg)
@@ -779,7 +779,7 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 				);
 		} else
 		{
-			errorMessage = mpt::format(MPT_USTRING("Internal error occurred at %1(%2): ASSERT(%3) failed in [%4]."))
+			errorMessage = mpt::format(U_("Internal error occurred at %1(%2): ASSERT(%3) failed in [%4]."))
 				( mpt::ToUnicode(mpt::CharsetASCII, loc.file_name() ? loc.file_name() : "")
 				, loc.line()
 				, mpt::ToUnicode(mpt::CharsetASCII, expr)
@@ -795,7 +795,7 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 
 void DebugInjectCrash()
 {
-	DebugReporter(DumpModeCrash, nullptr).ReportError(MPT_USTRING("Injected crash."));
+	DebugReporter(DumpModeCrash, nullptr).ReportError(U_("Injected crash."));
 }
 
 

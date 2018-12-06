@@ -45,7 +45,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 static mpt::ustring WineGetWindowTitle()
 {
-	return MPT_USTRING("OpenMPT Wine integration");
+	return U_("OpenMPT Wine integration");
 }
 
 
@@ -57,7 +57,7 @@ static std::string WineGetWindowTitleUTF8()
 
 static mpt::PathString WineGetSupportZipFilename()
 {
-	return MPT_PATHSTRING("openmpt-wine-support.zip");
+	return P_("openmpt-wine-support.zip");
 }
 
 
@@ -135,11 +135,11 @@ mpt::ustring WineGetSystemInfoString(mpt::Wine::VersionContext & wineVersion)
 
 	msg += CAboutDlg::GetTabText(5);
 
-	msg += MPT_USTRING("\n");
+	msg += U_("\n");
 
-	msg += mpt::format(MPT_USTRING("OpenMPT detected Wine %1 running on %2.\n"))
+	msg += mpt::format(U_("OpenMPT detected Wine %1 running on %2.\n"))
 		( wineVersion.Version().AsString()
-		, wineVersion.HostIsLinux() ? MPT_USTRING("Linux") : MPT_USTRING("unknown system")
+		, wineVersion.HostIsLinux() ? U_("Linux") : U_("unknown system")
 		);
 
 	return msg;
@@ -252,7 +252,7 @@ void Initialize()
 		return;
 	}
 
-	mpt::ustring lf = MPT_USTRING("\n");
+	mpt::ustring lf = U_("\n");
 
 	if(!TrackerSettings::Instance().WineSupportEnabled)
 	{
@@ -263,7 +263,7 @@ void Initialize()
 	if(!WineSetupIsSupported(wineVersion))
 	{
 		mpt::ustring msg;
-		msg += MPT_USTRING("OpenMPT does not support Wine integration on your current Wine setup.") + lf;
+		msg += U_("OpenMPT does not support Wine integration on your current Wine setup.") + lf;
 		Reporting::Notification(msg, WineGetWindowTitle());
 		return;
 	}
@@ -274,7 +274,7 @@ void Initialize()
 		if(!WineSetupIsSupported(wine))
 		{
 			mpt::ustring msg;
-			msg += MPT_USTRING("OpenMPT does not support Wine integration on your current Wine setup.") + lf;
+			msg += U_("OpenMPT does not support Wine integration on your current Wine setup.") + lf;
 			Reporting::Notification(msg, WineGetWindowTitle());
 			return;
 		}
@@ -282,9 +282,9 @@ void Initialize()
 	} catch(const std::exception & e)
 	{
 		mpt::ustring msg;
-		msg += MPT_USTRING("OpenMPT was not able to determine Wine configuration details on your current Wine setup:") + lf;
+		msg += U_("OpenMPT was not able to determine Wine configuration details on your current Wine setup:") + lf;
 		msg += mpt::get_exception_text<mpt::ustring>(e) + lf;
-		msg += MPT_USTRING("OpenMPT native Wine Integration will not be available.") + lf;
+		msg += U_("OpenMPT native Wine Integration will not be available.") + lf;
 		Reporting::Error(msg, WineGetWindowTitle());
 		return;
 	}
@@ -329,7 +329,7 @@ void Initialize()
 			Paths(mpt::Wine::Context & wine)
 			{
 				AppData = theApp.GetConfigPath().WithoutTrailingSlash();
-				AppData_Wine = AppData.WithTrailingSlash() + MPT_PATHSTRING("Wine");
+				AppData_Wine = AppData.WithTrailingSlash() + P_("Wine");
 				AppData_Wine_WineVersion = AppData_Wine.WithTrailingSlash() + mpt::PathString::FromUTF8(SanitizeBuildID(wine.VersionContext().RawBuildID()));
 				AppData_Wine_WineVersion_OpenMPTVersion = AppData_Wine_WineVersion.WithTrailingSlash() + mpt::PathString::FromUTF8(GetOpenMPTVersion());
 				CreatePath(AppData);
@@ -350,9 +350,9 @@ void Initialize()
 
 		if(!TrackerSettings::Instance().WineSupportAlwaysRecompile)
 		{
-			if((paths.AppData_Wine_WineVersion_OpenMPTVersion.WithTrailingSlash() + MPT_PATHSTRING("success.txt")).IsFile())
+			if((paths.AppData_Wine_WineVersion_OpenMPTVersion.WithTrailingSlash() + P_("success.txt")).IsFile())
 			{
-				theApp.SetWineWrapperDllFilename(paths.AppData_Wine_WineVersion_OpenMPTVersion.WithTrailingSlash() + MPT_PATHSTRING("openmpt_wine_wrapper.dll"));
+				theApp.SetWineWrapperDllFilename(paths.AppData_Wine_WineVersion_OpenMPTVersion.WithTrailingSlash() + P_("openmpt_wine_wrapper.dll"));
 				return;
 			}
 		}
@@ -360,8 +360,8 @@ void Initialize()
 		if(TrackerSettings::Instance().WineSupportAskCompile)
 		{
 			mpt::ustring msg;
-			msg += MPT_USTRING("OpenMPT Wine integration requires recompilation and will not work otherwise.\n");
-			msg += MPT_USTRING("Recompile now?\n");
+			msg += U_("OpenMPT Wine integration requires recompilation and will not work otherwise.\n");
+			msg += U_("Recompile now?\n");
 			if(Reporting::Confirm(msg, WineGetWindowTitle(), false, false) != cnfYes)
 			{
 				return;
@@ -700,7 +700,7 @@ void Initialize()
 
 		{
 			std::string fn = "libopenmpt_native_support.so";
-			mpt::ofstream f(wine.PathToWindows(nativeSearchPath) + MPT_PATHSTRING("\\") + mpt::PathString::FromUTF8(fn), std::ios::binary);
+			mpt::ofstream f(wine.PathToWindows(nativeSearchPath) + P_("\\") + mpt::PathString::FromUTF8(fn), std::ios::binary);
 			f.write(&result.filetree[fn][0], result.filetree[fn].size());
 			f.flush();
 			if(!f)
@@ -710,7 +710,7 @@ void Initialize()
 		}
 		{
 			std::string fn = "openmpt_wine_wrapper.dll";
-			mpt::ofstream f(paths.AppData_Wine_WineVersion_OpenMPTVersion + MPT_PATHSTRING("\\") + mpt::PathString::FromUTF8(fn), std::ios::binary);
+			mpt::ofstream f(paths.AppData_Wine_WineVersion_OpenMPTVersion + P_("\\") + mpt::PathString::FromUTF8(fn), std::ios::binary);
 			f.write(&result.filetree[fn][0], result.filetree[fn].size());
 			f.flush();
 			if(!f)
@@ -720,7 +720,7 @@ void Initialize()
 		}
 		{
 			std::string fn = "success.txt";
-			mpt::ofstream f(paths.AppData_Wine_WineVersion_OpenMPTVersion + MPT_PATHSTRING("\\") + mpt::PathString::FromUTF8(fn), std::ios::binary);
+			mpt::ofstream f(paths.AppData_Wine_WineVersion_OpenMPTVersion + P_("\\") + mpt::PathString::FromUTF8(fn), std::ios::binary);
 			f.imbue(std::locale::classic());
 			f << std::string("1");
 			f.flush();
@@ -730,11 +730,11 @@ void Initialize()
 			}
 		}
 
-		theApp.SetWineWrapperDllFilename(paths.AppData_Wine_WineVersion_OpenMPTVersion + MPT_PATHSTRING("\\") + MPT_PATHSTRING("openmpt_wine_wrapper.dll"));
+		theApp.SetWineWrapperDllFilename(paths.AppData_Wine_WineVersion_OpenMPTVersion + P_("\\") + P_("openmpt_wine_wrapper.dll"));
 
 	} catch(const mpt::Wine::Exception &e)
 	{
-		Reporting::Error(MPT_USTRING("Setting up OpenMPT Wine integration failed: ") + mpt::get_exception_text<mpt::ustring>(e), WineGetWindowTitle());
+		Reporting::Error(U_("Setting up OpenMPT Wine integration failed: ") + mpt::get_exception_text<mpt::ustring>(e), WineGetWindowTitle());
 	}
 
 }

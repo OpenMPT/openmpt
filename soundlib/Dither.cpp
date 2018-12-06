@@ -27,11 +27,11 @@ mpt::ustring Dither::GetModeName(DitherMode mode)
 {
 	switch(mode)
 	{
-		case DitherNone   : return MPT_USTRING("no"     ); break;
-		case DitherDefault: return MPT_USTRING("default"); break;
-		case DitherModPlug: return MPT_USTRING("0.5 bit"); break;
-		case DitherSimple : return MPT_USTRING("1 bit"  ); break;
-		default           : return MPT_USTRING(""       ); break;
+		case DitherNone   : return U_("no"     ); break;
+		case DitherDefault: return U_("default"); break;
+		case DitherModPlug: return U_("0.5 bit"); break;
+		case DitherSimple : return U_("1 bit"  ); break;
+		default           : return U_(""       ); break;
 	}
 }
 

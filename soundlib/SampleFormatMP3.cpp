@@ -91,7 +91,7 @@ public:
 public:
 	ComponentMPG123()
 #if defined(MPT_ENABLE_MPG123_DELAYLOAD)
-		: ComponentBundledDLL(MPT_PATHSTRING("openmpt-mpg123"))
+		: ComponentBundledDLL(P_("openmpt-mpg123"))
 #else
 		: ComponentBuiltin()
 #endif

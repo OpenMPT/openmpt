@@ -89,13 +89,13 @@ public:
 };
 
 
-static const MPT_UCHAR_TYPE TypeWAVEOUT          [] = MPT_ULITERAL("WaveOut");
-static const MPT_UCHAR_TYPE TypeDSOUND           [] = MPT_ULITERAL("DirectSound");
-static const MPT_UCHAR_TYPE TypeASIO             [] = MPT_ULITERAL("ASIO");
-static const MPT_UCHAR_TYPE TypePORTAUDIO_WASAPI [] = MPT_ULITERAL("WASAPI");
-static const MPT_UCHAR_TYPE TypePORTAUDIO_WDMKS  [] = MPT_ULITERAL("WDM-KS");
-static const MPT_UCHAR_TYPE TypePORTAUDIO_WMME   [] = MPT_ULITERAL("MME");
-static const MPT_UCHAR_TYPE TypePORTAUDIO_DS     [] = MPT_ULITERAL("DS");
+static const MPT_UCHAR_TYPE TypeWAVEOUT          [] = UL_("WaveOut");
+static const MPT_UCHAR_TYPE TypeDSOUND           [] = UL_("DirectSound");
+static const MPT_UCHAR_TYPE TypeASIO             [] = UL_("ASIO");
+static const MPT_UCHAR_TYPE TypePORTAUDIO_WASAPI [] = UL_("WASAPI");
+static const MPT_UCHAR_TYPE TypePORTAUDIO_WDMKS  [] = UL_("WDM-KS");
+static const MPT_UCHAR_TYPE TypePORTAUDIO_WMME   [] = UL_("MME");
+static const MPT_UCHAR_TYPE TypePORTAUDIO_DS     [] = UL_("DS");
 
 typedef mpt::ustring Type;
 
@@ -127,7 +127,7 @@ struct Info
 		}
 		mpt::ustring result = mpt::ustring();
 		result += type;
-		result += MPT_USTRING("_");
+		result += U_("_");
 		if(useNameAsIdentifier)
 		{
 			// UTF8-encode the name and convert the utf8 to hex.
@@ -254,7 +254,7 @@ struct AppInfo
 	AppInfo()
 		: UIHandle(0)
 		, BoostedThreadPriorityXP(mpt::ThreadPriorityHighest)
-		, BoostedThreadMMCSSClassVista(MPT_USTRING("Pro Audio"))
+		, BoostedThreadMMCSSClassVista(U_("Pro Audio"))
 		, BoostedThreadRealtimePosix(false)
 		, BoostedThreadNicenessPosix(-5)
 		, BoostedThreadRtprioPosix(10)
@@ -388,7 +388,7 @@ struct Caps
 		, HasNamedInputSources(false)
 		, CanDriverPanel(false)
 		, HasInternalDither(false)
-		, ExclusiveModeDescription(MPT_USTRING("Use device exclusively"))
+		, ExclusiveModeDescription(U_("Use device exclusively"))
 		, LatencyMin(0.002) // 2ms
 		, LatencyMax(0.5) // 500ms
 		, UpdateIntervalMin(0.001) // 1ms

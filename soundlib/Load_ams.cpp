@@ -406,9 +406,9 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = fileHeader.numSamps;
 	SetupMODPanning(true);
 
-	m_modFormat.formatName = MPT_USTRING("Extreme's Tracker");
-	m_modFormat.type = MPT_USTRING("ams");
-	m_modFormat.madeWithTracker = mpt::format(MPT_USTRING("Extreme's Tracker %1.%2"))(fileHeader.versionHigh, fileHeader.versionLow);
+	m_modFormat.formatName = U_("Extreme's Tracker");
+	m_modFormat.type = U_("ams");
+	m_modFormat.madeWithTracker = mpt::format(U_("Extreme's Tracker %1.%2"))(fileHeader.versionHigh, fileHeader.versionLow);
 	m_modFormat.charset = mpt::CharsetCP437;
 
 	std::vector<bool> packSample(fileHeader.numSamps);
@@ -781,9 +781,9 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = 32;
 	SetupMODPanning(true);
 
-	m_modFormat.formatName = MPT_USTRING("Velvet Studio");
-	m_modFormat.type = MPT_USTRING("ams");
-	m_modFormat.madeWithTracker = mpt::format(MPT_USTRING("Velvet Studio %1.%2"))(fileHeader.versionHigh.get(), mpt::ufmt::dec0<2>(fileHeader.versionLow.get()));
+	m_modFormat.formatName = U_("Velvet Studio");
+	m_modFormat.type = U_("ams");
+	m_modFormat.madeWithTracker = mpt::format(U_("Velvet Studio %1.%2"))(fileHeader.versionHigh.get(), mpt::ufmt::dec0<2>(fileHeader.versionLow.get()));
 	m_modFormat.charset = mpt::CharsetCP437;
 
 	uint16 headerFlags;

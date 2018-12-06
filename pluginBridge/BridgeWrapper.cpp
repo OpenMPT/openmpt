@@ -45,11 +45,11 @@ bool ComponentPluginBridge::DoInitialize()
 	exeName = theApp.GetAppDirPath();
 	if(bitness == 32)
 	{
-		exeName += MPT_PATHSTRING("PluginBridge32.exe");
+		exeName += P_("PluginBridge32.exe");
 	}
 	if(bitness == 64)
 	{
-		exeName += MPT_PATHSTRING("PluginBridge64.exe");
+		exeName += P_("PluginBridge64.exe");
 	}
 	// First, check for validity of the bridge executable.
 	if(!exeName.IsFile())

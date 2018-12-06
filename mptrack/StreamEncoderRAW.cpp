@@ -70,10 +70,10 @@ public:
 RAWEncoder::RAWEncoder()
 {
 	Encoder::Traits traits;
-	traits.fileExtension = MPT_PATHSTRING("raw");
-	traits.fileShortDescription = MPT_USTRING("Raw PCM");
-	traits.fileDescription = MPT_USTRING("Headerless raw little-endian PCM");
-	traits.encoderSettingsName = MPT_USTRING("RAW");
+	traits.fileExtension = P_("raw");
+	traits.fileShortDescription = U_("Raw PCM");
+	traits.fileDescription = U_("Headerless raw little-endian PCM");
+	traits.encoderSettingsName = U_("RAW");
 	traits.canTags = false;
 	traits.canCues = false;
 	traits.maxChannels = 4;
@@ -92,11 +92,11 @@ RAWEncoder::RAWEncoder()
 				if(bytes == 5)
 				{
 					format.Sampleformat = SampleFormatFloat32;
-					format.Description = MPT_USTRING("Floating Point Little-Endian");
+					format.Description = U_("Floating Point Little-Endian");
 				} else
 				{
 					format.Sampleformat = (SampleFormat)(bytes * 8);
-					format.Description = mpt::format(MPT_USTRING("%1 Bit Little-Endian"))(bytes * 8);
+					format.Description = mpt::format(U_("%1 Bit Little-Endian"))(bytes * 8);
 				}
 				format.Bitrate = 0;
 				traits.formats.push_back(format);

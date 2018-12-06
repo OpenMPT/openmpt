@@ -450,16 +450,16 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 				mpt::ustring (*fmt)(unsigned int, char, const SmpLength &) = &mpt::ufmt::dec<SmpLength>;
 				if(TrackerSettings::Instance().cursorPositionInHex)
 					fmt = &mpt::ufmt::HEX<SmpLength>;
-				s = mpt::format(MPT_USTRING("[%1-%2] (%3 sample%4, "))(fmt(3, ',', m_dwBeginSel), fmt(3, ',', m_dwEndSel), fmt(3, ',', selLength), (selLength == 1) ? MPT_USTRING("") : MPT_USTRING("s"));
+				s = mpt::format(U_("[%1-%2] (%3 sample%4, "))(fmt(3, ',', m_dwBeginSel), fmt(3, ',', m_dwEndSel), fmt(3, ',', selLength), (selLength == 1) ? U_("") : U_("s"));
 
 				// Length in seconds
 				auto sampleRate = sample.GetSampleRate(sndFile.GetType());
 				if(sampleRate <= 0) sampleRate = 8363;
 				double sec = selLength / static_cast<double>(sampleRate);
 				if(sec < 1)
-					s += mpt::format(MPT_USTRING("%1ms"))(mpt::ufmt::flt(sec * 1000.0, 3));
+					s += mpt::format(U_("%1ms"))(mpt::ufmt::flt(sec * 1000.0, 3));
 				else
-					s += mpt::format(MPT_USTRING("%1s"))(mpt::ufmt::flt(sec, 3));
+					s += mpt::format(U_("%1s"))(mpt::ufmt::flt(sec, 3));
 
 				// Length in beats
 				double beats = selLength;
@@ -471,7 +471,7 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 					sndFile.RecalculateSamplesPerTick();
 					beats *= sndFile.GetSampleRate() / static_cast<double>(Util::mul32to64_unsigned(sndFile.m_PlayState.m_nCurrentRowsPerBeat, sndFile.m_PlayState.m_nMusicSpeed) * Util::mul32to64_unsigned(sndFile.m_PlayState.m_nSamplesPerTick, sampleRate));
 				}
-				s += mpt::format(MPT_USTRING(", %1 beats)"))(mpt::ufmt::flt(beats, 5));
+				s += mpt::format(U_(", %1 beats)"))(mpt::ufmt::flt(beats, 5));
 			}
 			pMainFrm->SetInfoText(mpt::ToCString(s));
 		}

@@ -131,7 +131,7 @@ AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool for
 
 	if(!LoadLibrarySEH(pluginPath.AsNative(), library))
 	{
-		CVstPluginManager::ReportPlugException(mpt::format(MPT_USTRING("Exception caught while loading %1"))(pluginPath));
+		CVstPluginManager::ReportPlugException(mpt::format(U_("Exception caught while loading %1"))(pluginPath));
 	}
 	if(library == nullptr)
 	{
@@ -142,7 +142,7 @@ AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool for
 		}
 
 #ifdef _DEBUG
-		mpt::ustring buf = mpt::format(MPT_USTRING("Warning: encountered problem when loading plugin dll. Error %1: %2"))
+		mpt::ustring buf = mpt::format(U_("Warning: encountered problem when loading plugin dll. Error %1: %2"))
 			( mpt::ufmt::hex(error)
 			, mpt::ToUnicode(GetErrorMessage(error))
 			);
@@ -605,7 +605,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 		if(pVstPlugin && pVstPlugin->GetModDoc())
 		{
 			mpt::ustring formatStr = TrackerSettings::Instance().pluginProjectPath;
-			if(formatStr.empty()) formatStr = MPT_USTRING("%1");
+			if(formatStr.empty()) formatStr = U_("%1");
 			const mpt::PathString projectPath = pVstPlugin->GetModDoc()->GetPathNameMpt();
 			const mpt::PathString projectFile = projectPath.GetFullFileName();
 			mpt::PathString path = mpt::PathString::FromUnicode(mpt::format(formatStr)(projectPath.GetPath(), projectFile));
@@ -1047,7 +1047,7 @@ intptr_t CVstPlugin::Dispatch(VstOpcodeToPlugin opCode, int32 index, intptr_t va
 			codeStr = mpt::ToUnicode(mpt::CharsetASCII, VstOpCodes[opCode]);
 		else
 			codeStr = mpt::ufmt::val(opCode);
-		Log(mpt::format(MPT_USTRING("About to Dispatch(%1) (Plugin=\"%2\"), index: %3, value: %4, ptr: %5, opt: %6!\n"))(codeStr, m_Factory.libraryName, index, mpt::ufmt::HEX0<sizeof(intptr_t) * 2>(value), mpt::ufmt::Ptr(ptr), mpt::ufmt::flt(opt, 0, 3)));
+		Log(mpt::format(U_("About to Dispatch(%1) (Plugin=\"%2\"), index: %3, value: %4, ptr: %5, opt: %6!\n"))(codeStr, m_Factory.libraryName, index, mpt::ufmt::HEX0<sizeof(intptr_t) * 2>(value), mpt::ufmt::Ptr(ptr), mpt::ufmt::flt(opt, 0, 3)));
 	}
 #endif
 	intptr_t result = DispatchSEH(&m_Effect, opCode, index, value, ptr, opt, exception);
@@ -1059,7 +1059,7 @@ intptr_t CVstPlugin::Dispatch(VstOpcodeToPlugin opCode, int32 index, intptr_t va
 			codeStr = mpt::ToUnicode(mpt::CharsetASCII, VstOpCodes[opCode]);
 		else
 			codeStr = mpt::ufmt::val(opCode);
-		ReportPlugException(mpt::format(MPT_USTRING("Exception %1 in Dispatch(%2)"))(mpt::ufmt::HEX0<8>(exception), codeStr));
+		ReportPlugException(mpt::format(U_("Exception %1 in Dispatch(%2)"))(mpt::ufmt::HEX0<8>(exception), codeStr));
 	}
 
 	return result;
@@ -1154,7 +1154,7 @@ PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 			fResult = m_Effect.getParameter(&m_Effect, nIndex);
 		} __except(EXCEPTION_EXECUTE_HANDLER)
 		{
-			//ReportPlugException(MPT_USTRING("Exception in getParameter (Plugin=\"%1\")!\n"), m_Factory.szLibraryName);
+			//ReportPlugException(U_("Exception in getParameter (Plugin=\"%1\")!\n"), m_Factory.szLibraryName);
 		}
 	}
 	return fResult;
@@ -1172,7 +1172,7 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 		ResetSilence();
 	} __except(EXCEPTION_EXECUTE_HANDLER)
 	{
-		//ReportPlugException(mpt::format(MPT_USTRING("Exception in SetParameter(%1, %2)!"))(nIndex, fValue));
+		//ReportPlugException(mpt::format(U_("Exception in SetParameter(%1, %2)!"))(nIndex, fValue));
 	}
 }
 
@@ -1264,7 +1264,7 @@ void CVstPlugin::ProcessVSTEvents()
 		ResetSilence();
 		if(exception)
 		{
-			ReportPlugException(mpt::format(MPT_USTRING("Exception %1 in ProcessVSTEvents(numEvents:%2)!"))(
+			ReportPlugException(mpt::format(U_("Exception %1 in ProcessVSTEvents(numEvents:%2)!"))(
 				mpt::ufmt::HEX0<8>(exception),
 				vstEvents.size()));
 		}
@@ -1374,8 +1374,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		if(exception)
 		{
 			Bypass();
-			mpt::ustring processMethod = (m_Effect.flags & effFlagsCanReplacing) ? MPT_USTRING("processReplacing") : MPT_USTRING("process");
-			ReportPlugException(mpt::format(MPT_USTRING("The plugin threw an exception (%1) in %2. It has automatically been set to \"Bypass\"."))(mpt::ufmt::HEX0<8>(exception), processMethod));
+			mpt::ustring processMethod = (m_Effect.flags & effFlagsCanReplacing) ? U_("processReplacing") : U_("process");
+			ReportPlugException(mpt::format(U_("The plugin threw an exception (%1) in %2. It has automatically been set to \"Bypass\"."))(mpt::ufmt::HEX0<8>(exception), processMethod));
 		}
 
 		// Mix outputs of multi-output VSTs:
@@ -1603,7 +1603,7 @@ CAbstractVstEditor *CVstPlugin::OpenEditor()
 	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
 		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
-		ReportPlugException(MPT_USTRING("Exception in OpenEditor()"));
+		ReportPlugException(U_("Exception in OpenEditor()"));
 		return nullptr;
 	}
 }
@@ -1636,7 +1636,7 @@ bool CVstPlugin::CanRecieveMidiEvents()
 
 void CVstPlugin::ReportPlugException(const mpt::ustring &text) const
 {
-	CVstPluginManager::ReportPlugException(mpt::format(MPT_USTRING("%1 (Plugin: %2)"))(text, m_Factory.libraryName));
+	CVstPluginManager::ReportPlugException(mpt::format(U_("%1 (Plugin: %2)"))(text, m_Factory.libraryName));
 }
 
 

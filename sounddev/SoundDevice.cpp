@@ -44,7 +44,7 @@ SysInfo SysInfo::Current()
 
 SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
 {
-	std::vector<mpt::ustring> tmp = mpt::String::Split<mpt::ustring>(identifier, MPT_USTRING("_"));
+	std::vector<mpt::ustring> tmp = mpt::String::Split<mpt::ustring>(identifier, U_("_"));
 	if(tmp.size() == 0)
 	{
 		return SoundDevice::Type();
@@ -114,13 +114,13 @@ bool ChannelMapping::IsValid(const std::vector<int32> &mapping)
 
 mpt::ustring ChannelMapping::ToUString() const
 {
-	return mpt::String::Combine<int32>(ChannelToDeviceChannel, MPT_USTRING(","));
+	return mpt::String::Combine<int32>(ChannelToDeviceChannel, U_(","));
 }
 
 
 ChannelMapping ChannelMapping::FromString(const mpt::ustring &str)
 {
-	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(str, MPT_USTRING(",")));
+	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(str, U_(",")));
 }
 
 

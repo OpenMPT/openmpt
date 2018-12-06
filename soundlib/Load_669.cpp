@@ -145,9 +145,9 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.set(SONG_LINEARSLIDES);
 #endif // MODPLUG_TRACKER
 
-	m_modFormat.formatName = MPT_USTRING("Composer 669");
-	m_modFormat.type = MPT_USTRING("669");
-	m_modFormat.madeWithTracker = !memcmp(fileHeader.magic, "if", 2) ? MPT_ULITERAL("Composer 669") : MPT_ULITERAL("UNIS 669");
+	m_modFormat.formatName = U_("Composer 669");
+	m_modFormat.type = U_("669");
+	m_modFormat.madeWithTracker = !memcmp(fileHeader.magic, "if", 2) ? UL_("Composer 669") : UL_("UNIS 669");
 	m_modFormat.charset = mpt::CharsetCP437;
 
 	m_nSamples = fileHeader.samples;

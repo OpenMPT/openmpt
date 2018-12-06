@@ -858,7 +858,7 @@ namespace mpt { namespace String {
 // Combine a vector of values into a string, separated with the given separator.
 // No escaping is performed.
 template<typename T>
-mpt::ustring Combine(const std::vector<T> &vals, const mpt::ustring &sep=MPT_USTRING(","))
+mpt::ustring Combine(const std::vector<T> &vals, const mpt::ustring &sep=U_(","))
 {
 	mpt::ustring str;
 	for(std::size_t i = 0; i < vals.size(); ++i)

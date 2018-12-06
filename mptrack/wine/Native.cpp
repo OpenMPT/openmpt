@@ -33,12 +33,12 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 	if(msg)
 	{
 		mpt::log::Logger().SendLogMessage(loc, LogError, "ASSERT",
-			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, msg) + MPT_USTRING(" (") + mpt::ToUnicode(mpt::CharsetASCII, expr) + MPT_USTRING(")")
+			U_("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, msg) + U_(" (") + mpt::ToUnicode(mpt::CharsetASCII, expr) + U_(")")
 			);
 	} else
 	{
 		mpt::log::Logger().SendLogMessage(loc, LogError, "ASSERT",
-			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, expr)
+			U_("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, expr)
 			);
 	}
 }

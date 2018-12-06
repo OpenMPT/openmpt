@@ -1175,7 +1175,7 @@ private:
 
 public:
 
-	OnDiskFileWrapper(FileReader &file, const mpt::PathString &fileNameExtension = MPT_PATHSTRING("tmp"));
+	OnDiskFileWrapper(FileReader &file, const mpt::PathString &fileNameExtension = P_("tmp"));
 
 	~OnDiskFileWrapper();
 

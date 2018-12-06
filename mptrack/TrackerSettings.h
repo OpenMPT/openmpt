@@ -123,8 +123,8 @@ enum ModColor
 #define PATTERN_LIVEUPDATETREE		0x40000000	// update active sample / instr icons in treeview
 #define PATTERN_SYNCSAMPLEPOS		0x80000000	// sync sample positions when seeking
 
-#define PATTERNFONT_SMALL MPT_ULITERAL("@1")
-#define PATTERNFONT_LARGE MPT_ULITERAL("@2")
+#define PATTERNFONT_SMALL UL_("@1")
+#define PATTERNFONT_LARGE UL_("@2")
 
 // MIDI Setup
 #define MIDISETUP_RECORDVELOCITY			0x01	// Record MIDI velocity
@@ -285,8 +285,8 @@ template<> inline PLUGVOLUMEHANDLING FromSettingValue(const SettingValue &val)
 	return static_cast<PLUGVOLUMEHANDLING>(val.as<int32>());
 }
 
-template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::String::Combine(val, MPT_USTRING(",")); }
-template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) { return mpt::String::Split<uint32>(val, MPT_USTRING(",")); }
+template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::String::Combine(val, U_(",")); }
+template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) { return mpt::String::Split<uint32>(val, U_(",")); }
 
 template<> inline SettingValue ToSettingValue(const SampleFormat &val) { return SettingValue(int32(val.value)); }
 template<> inline SampleFormat FromSettingValue(const SettingValue &val) { return SampleFormatEnum(val.as<int32>()); }
@@ -316,25 +316,25 @@ template<> inline SettingValue ToSettingValue(const SampleEditorDefaultFormat &v
 	switch(val)
 	{
 	case dfWAV:
-		format = MPT_USTRING("wav");
+		format = U_("wav");
 		break;
 	case dfFLAC:
 	default:
-		format = MPT_USTRING("flac");
+		format = U_("flac");
 		break;
 	case dfRAW:
-		format = MPT_USTRING("raw");
+		format = U_("raw");
 	}
 	return SettingValue(format);
 }
 template<> inline SampleEditorDefaultFormat FromSettingValue(const SettingValue &val)
 {
 	mpt::ustring format = mpt::ToLowerCase(val.as<mpt::ustring>());
-	if(format == MPT_USTRING("wav"))
+	if(format == U_("wav"))
 		return dfWAV;
-	if(format == MPT_USTRING("raw"))
+	if(format == U_("raw"))
 		return dfRAW;
-	else // if(format == MPT_USTRING("flac"))
+	else // if(format == U_("flac"))
 		return dfFLAC;
 }
 
@@ -370,25 +370,25 @@ template<> inline SettingValue ToSettingValue(const ProcessPriorityClass &val)
 	switch(val)
 	{
 	case ProcessPriorityClassIDLE:
-		s = MPT_USTRING("idle");
+		s = U_("idle");
 		break;
 	case ProcessPriorityClassBELOW:
-		s = MPT_USTRING("below");
+		s = U_("below");
 		break;
 	case ProcessPriorityClassNORMAL:
-		s = MPT_USTRING("normal");
+		s = U_("normal");
 		break;
 	case ProcessPriorityClassABOVE:
-		s = MPT_USTRING("above");
+		s = U_("above");
 		break;
 	case ProcessPriorityClassHIGH:
-		s = MPT_USTRING("high");
+		s = U_("high");
 		break;
 	case ProcessPriorityClassREALTIME:
-		s = MPT_USTRING("realtime");
+		s = U_("realtime");
 		break;
 	default:
-		s = MPT_USTRING("normal");
+		s = U_("normal");
 		break;
 	}
 	return SettingValue(s);
@@ -400,22 +400,22 @@ template<> inline ProcessPriorityClass FromSettingValue(const SettingValue &val)
 	if(s.empty())
 	{
 		result = ProcessPriorityClassNORMAL;
-	} else if(s == MPT_USTRING("idle"))
+	} else if(s == U_("idle"))
 	{
 		result = ProcessPriorityClassIDLE;
-	} else if(s == MPT_USTRING("below"))
+	} else if(s == U_("below"))
 	{
 		result = ProcessPriorityClassBELOW;
-	} else if(s == MPT_USTRING("normal"))
+	} else if(s == U_("normal"))
 	{
 		result = ProcessPriorityClassNORMAL;
-	} else if(s == MPT_USTRING("above"))
+	} else if(s == U_("above"))
 	{
 		result = ProcessPriorityClassABOVE;
-	} else if(s == MPT_USTRING("high"))
+	} else if(s == U_("high"))
 	{
 		result = ProcessPriorityClassHIGH;
-	} else if(s == MPT_USTRING("realtime"))
+	} else if(s == U_("realtime"))
 	{
 		result = ProcessPriorityClassREALTIME;
 	} else
@@ -469,7 +469,7 @@ struct FontSetting
 	int32 size;
 	FlagSet<FontFlags> flags;
 
-	FontSetting(const mpt::ustring &name = MPT_USTRING(""), int32_t size = 120, FontFlags flags = None) : name(name), size(size), flags(flags) { }
+	FontSetting(const mpt::ustring &name = U_(""), int32_t size = 120, FontFlags flags = None) : name(name), size(size), flags(flags) { }
 
 	bool operator== (const FontSetting &other) const
 	{
@@ -486,15 +486,15 @@ MPT_DECLARE_ENUM(FontSetting::FontFlags)
 
 template<> inline SettingValue ToSettingValue(const FontSetting &val)
 {
-	return SettingValue(mpt::ToUnicode(val.name) + MPT_USTRING(",") + mpt::ufmt::val(val.size) + MPT_USTRING("|") + mpt::ufmt::val(val.flags.GetRaw()));
+	return SettingValue(mpt::ToUnicode(val.name) + U_(",") + mpt::ufmt::val(val.size) + U_("|") + mpt::ufmt::val(val.flags.GetRaw()));
 }
 template<> inline FontSetting FromSettingValue(const SettingValue &val)
 {
 	FontSetting setting(val.as<mpt::ustring>());
-	std::size_t sizeStart = setting.name.rfind(MPT_UCHAR(','));
+	std::size_t sizeStart = setting.name.rfind(UC_(','));
 	if(sizeStart != std::string::npos)
 	{
-		const std::vector<mpt::ustring> fields = mpt::String::Split<mpt::ustring>(setting.name.substr(sizeStart + 1), MPT_USTRING("|"));
+		const std::vector<mpt::ustring> fields = mpt::String::Split<mpt::ustring>(setting.name.substr(sizeStart + 1), U_("|"));
 		if(fields.size() >= 1)
 		{
 			setting.size = ConvertStrTo<int32>(fields[0]);

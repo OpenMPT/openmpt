@@ -165,7 +165,7 @@ struct Request
 	mpt::ustring username;
 	mpt::ustring password;
 	Method method = Method::Get;
-	mpt::ustring path = MPT_USTRING("/");
+	mpt::ustring path = U_("/");
 	Query query;
 	mpt::ustring referrer;
 	AcceptMimeTypes acceptMimeTypes;

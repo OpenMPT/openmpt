@@ -467,7 +467,7 @@ void UUID::MakeRFC4122(uint8 version) noexcept
 
 UUID UUID::FromString(const mpt::ustring &str)
 {
-	std::vector<mpt::ustring> segments = mpt::String::Split<mpt::ustring>(str, MPT_USTRING("-"));
+	std::vector<mpt::ustring> segments = mpt::String::Split<mpt::ustring>(str, U_("-"));
 	if(segments.size() != 5)
 	{
 		return UUID();
@@ -504,13 +504,13 @@ mpt::ustring UUID::ToUString() const
 {
 	return mpt::ustring()
 		+ mpt::ufmt::hex0<8>(GetData1())
-		+ MPT_USTRING("-")
+		+ U_("-")
 		+ mpt::ufmt::hex0<4>(GetData2())
-		+ MPT_USTRING("-")
+		+ U_("-")
 		+ mpt::ufmt::hex0<4>(GetData3())
-		+ MPT_USTRING("-")
+		+ U_("-")
 		+ mpt::ufmt::hex0<4>(static_cast<uint16>(GetData4() >> 48))
-		+ MPT_USTRING("-")
+		+ U_("-")
 		+ mpt::ufmt::hex0<4>(static_cast<uint16>(GetData4() >> 32))
 		+ mpt::ufmt::hex0<8>(static_cast<uint32>(GetData4() >>  0))
 		;

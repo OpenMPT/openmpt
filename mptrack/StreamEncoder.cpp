@@ -28,16 +28,16 @@ StreamEncoderSettings &StreamEncoderSettings::Instance()
 
 
 StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const mpt::ustring &section)
-	: FLACCompressionLevel(conf, section, MPT_USTRING("FLACCompressionLevel"), 5)
-	, AUPaddingAlignHint(conf, section, MPT_USTRING("AUPaddingAlignHint"), 4096)
-	, MP3ID3v2MinPadding(conf, section, MPT_USTRING("MP3ID3v2MinPadding"), 1024)
-	, MP3ID3v2PaddingAlignHint(conf, section, MPT_USTRING("MP3ID3v2PaddingAlignHint"), 4096)
-	, MP3ID3v2WriteReplayGainTXXX(conf, section, MPT_USTRING("MP3ID3v2WriteReplayGainTXXX"), true)
-	, MP3LameQuality(conf, section, MPT_USTRING("MP3LameQuality"), 3)
-	, MP3LameID3v2UseLame(conf, section, MPT_USTRING("MP3LameID3v2UseLame"), false)
-	, MP3LameCalculateReplayGain(conf, section, MPT_USTRING("MP3LameCalculateReplayGain"), true)
-	, MP3LameCalculatePeakSample(conf, section, MPT_USTRING("MP3LameCalculatePeakSample"), true)
-	, OpusComplexity(conf, section, MPT_USTRING("OpusComplexity"), -1)
+	: FLACCompressionLevel(conf, section, U_("FLACCompressionLevel"), 5)
+	, AUPaddingAlignHint(conf, section, U_("AUPaddingAlignHint"), 4096)
+	, MP3ID3v2MinPadding(conf, section, U_("MP3ID3v2MinPadding"), 1024)
+	, MP3ID3v2PaddingAlignHint(conf, section, U_("MP3ID3v2PaddingAlignHint"), 4096)
+	, MP3ID3v2WriteReplayGainTXXX(conf, section, U_("MP3ID3v2WriteReplayGainTXXX"), true)
+	, MP3LameQuality(conf, section, U_("MP3LameQuality"), 3)
+	, MP3LameID3v2UseLame(conf, section, U_("MP3LameID3v2UseLame"), false)
+	, MP3LameCalculateReplayGain(conf, section, U_("MP3LameCalculateReplayGain"), true)
+	, MP3LameCalculatePeakSample(conf, section, U_("MP3LameCalculatePeakSample"), true)
+	, OpusComplexity(conf, section, U_("OpusComplexity"), -1)
 {
 	return;
 }
@@ -107,22 +107,22 @@ bool EncoderFactoryBase::IsBitrateSupported(int samplerate, int channels, int bi
 
 mpt::ustring EncoderFactoryBase::DescribeQuality(float quality) const
 {
-	return mpt::format(MPT_USTRING("VBR %1%%"))(static_cast<int>(quality * 100.0f));
+	return mpt::format(U_("VBR %1%%"))(static_cast<int>(quality * 100.0f));
 }
 
 mpt::ustring EncoderFactoryBase::DescribeBitrateVBR(int bitrate) const
 {
-	return mpt::format(MPT_USTRING("VBR %1 kbit"))(bitrate);
+	return mpt::format(U_("VBR %1 kbit"))(bitrate);
 }
 
 mpt::ustring EncoderFactoryBase::DescribeBitrateABR(int bitrate) const
 {
-	return mpt::format(MPT_USTRING("ABR %1 kbit"))(bitrate);
+	return mpt::format(U_("ABR %1 kbit"))(bitrate);
 }
 
 mpt::ustring EncoderFactoryBase::DescribeBitrateCBR(int bitrate) const
 {
-	return mpt::format(MPT_USTRING("CBR %1 kbit"))(bitrate);
+	return mpt::format(U_("CBR %1 kbit"))(bitrate);
 }
 
 

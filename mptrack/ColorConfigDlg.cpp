@@ -93,7 +93,7 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 
 static CString FormatFontName(const FontSetting &font)
 {
-	return mpt::ToCString(font.name + MPT_USTRING(", ") + mpt::ufmt::val(font.size / 10));
+	return mpt::ToCString(font.name + U_(", ") + mpt::ufmt::val(font.size / 10));
 }
 
 
@@ -562,7 +562,7 @@ void COptionsColors::OnLoadColorScheme()
 		IniFileSettingsContainer file(dlg.GetFirstFile());
 		for(uint32 i = 0; i < MAX_MODCOLORS; i++)
 		{
-			CustomColors[i] = file.Read<int32>(MPT_USTRING("Colors"), mpt::format(MPT_USTRING("Color%1"))(mpt::ufmt::dec0<2>(i)), CustomColors[i]);
+			CustomColors[i] = file.Read<int32>(U_("Colors"), mpt::format(U_("Color%1"))(mpt::ufmt::dec0<2>(i)), CustomColors[i]);
 		}
 	}
 	OnPreviewChanged();
@@ -580,7 +580,7 @@ void COptionsColors::OnSaveColorScheme()
 		IniFileSettingsContainer file(dlg.GetFirstFile());
 		for(uint32 i = 0; i < MAX_MODCOLORS; i++)
 		{
-			file.Write<int32>(MPT_USTRING("Colors"), mpt::format(MPT_USTRING("Color%1"))(mpt::ufmt::dec0<2>(i)), CustomColors[i]);
+			file.Write<int32>(U_("Colors"), mpt::format(U_("Color%1"))(mpt::ufmt::dec0<2>(i)), CustomColors[i]);
 		}
 	}
 }

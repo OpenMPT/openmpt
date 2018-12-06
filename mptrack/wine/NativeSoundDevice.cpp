@@ -58,13 +58,13 @@ MPT_REGISTERED_COMPONENT(ComponentSoundDeviceManager, "SoundDeviceManager")
 
 static mpt::ustring GetTypePrefix()
 {
-	return MPT_USTRING("Native");
+	return U_("Native");
 }
 
 static SoundDevice::Info AddTypePrefix(SoundDevice::Info info)
 {
-	info.type = GetTypePrefix() + MPT_USTRING("-") + info.type;
-	info.apiPath.insert(info.apiPath.begin(), MPT_USTRING("Native"));
+	info.type = GetTypePrefix() + U_("-") + info.type;
+	info.apiPath.insert(info.apiPath.begin(), U_("Native"));
 	return info;
 }
 
@@ -92,7 +92,7 @@ std::string SoundDevice_EnumerateDevices()
 
 SoundDevice::IBase * SoundDevice_Construct(std::string info_)
 {
-	MPT_LOG(LogDebug, "NativeSupport", mpt::format(MPT_USTRING("Contruct: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, info_)));
+	MPT_LOG(LogDebug, "NativeSupport", mpt::format(U_("Contruct: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, info_)));
 	ComponentHandle<ComponentSoundDeviceManager> manager;
 	if(!IsComponentAvailable(manager))
 	{

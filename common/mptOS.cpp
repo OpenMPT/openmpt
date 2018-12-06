@@ -286,16 +286,16 @@ mpt::Windows::Version::Build Version::GetBuild() const noexcept
 
 static MPT_CONSTEXPR11_VAR struct { Version::System version; const MPT_UCHAR_TYPE * name; bool showDetails; } versionMap[] =
 {
-	{ mpt::Windows::Version::WinNewer, MPT_ULITERAL("Windows 10 (or newer)"), false },
-	{ mpt::Windows::Version::Win10, MPT_ULITERAL("Windows 10"), true },
-	{ mpt::Windows::Version::Win81, MPT_ULITERAL("Windows 8.1"), true },
-	{ mpt::Windows::Version::Win8, MPT_ULITERAL("Windows 8"), true },
-	{ mpt::Windows::Version::Win7, MPT_ULITERAL("Windows 7"), true },
-	{ mpt::Windows::Version::WinVista, MPT_ULITERAL("Windows Vista"), true },
-	{ mpt::Windows::Version::WinXP64, MPT_ULITERAL("Windows XP x64 / Windows Server 2003"), true },
-	{ mpt::Windows::Version::WinXP, MPT_ULITERAL("Windows XP"), true },
-	{ mpt::Windows::Version::Win2000, MPT_ULITERAL("Windows 2000"), true },
-	{ mpt::Windows::Version::WinNT4, MPT_ULITERAL("Windows NT4"), true }
+	{ mpt::Windows::Version::WinNewer, UL_("Windows 10 (or newer)"), false },
+	{ mpt::Windows::Version::Win10, UL_("Windows 10"), true },
+	{ mpt::Windows::Version::Win81, UL_("Windows 8.1"), true },
+	{ mpt::Windows::Version::Win8, UL_("Windows 8"), true },
+	{ mpt::Windows::Version::Win7, UL_("Windows 7"), true },
+	{ mpt::Windows::Version::WinVista, UL_("Windows Vista"), true },
+	{ mpt::Windows::Version::WinXP64, UL_("Windows XP x64 / Windows Server 2003"), true },
+	{ mpt::Windows::Version::WinXP, UL_("Windows XP"), true },
+	{ mpt::Windows::Version::Win2000, UL_("Windows 2000"), true },
+	{ mpt::Windows::Version::WinNT4, UL_("Windows NT4"), true }
 };
 
 
@@ -306,7 +306,7 @@ mpt::ustring Version::VersionToString(mpt::Windows::Version::System version)
 	{
 		if(version > v.version)
 		{
-			result = MPT_USTRING("> ") + v.name;
+			result = U_("> ") + v.name;
 			break;
 		} else if(version == v.version)
 		{
@@ -316,7 +316,7 @@ mpt::ustring Version::VersionToString(mpt::Windows::Version::System version)
 	}
 	if(result.empty())
 	{
-		result = mpt::format(MPT_USTRING("0x%1"))(mpt::ufmt::hex0<16>(static_cast<uint64>(version)));
+		result = mpt::format(U_("0x%1"))(mpt::ufmt::hex0<16>(static_cast<uint64>(version)));
 	}
 	return result;
 }
@@ -324,7 +324,7 @@ mpt::ustring Version::VersionToString(mpt::Windows::Version::System version)
 
 mpt::ustring Version::GetName() const
 {
-	mpt::ustring name = MPT_USTRING("Generic Windows NT");
+	mpt::ustring name = U_("Generic Windows NT");
 	bool showDetails = false;
 	for(const auto &v : versionMap)
 	{
@@ -335,26 +335,26 @@ mpt::ustring Version::GetName() const
 			break;
 		}
 	}
-	name += MPT_USTRING(" (");
-	name += mpt::format(MPT_USTRING("Version %1.%2"))(m_System.Major, m_System.Minor);
+	name += U_(" (");
+	name += mpt::format(U_("Version %1.%2"))(m_System.Major, m_System.Minor);
 	if(showDetails)
 	{
 		if(m_ServicePack.HasServicePack())
 		{
 			if(m_ServicePack.Minor)
 			{
-				name += mpt::format(MPT_USTRING(" Service Pack %1.%2"))(m_ServicePack.Major, m_ServicePack.Minor);
+				name += mpt::format(U_(" Service Pack %1.%2"))(m_ServicePack.Major, m_ServicePack.Minor);
 			} else
 			{
-				name += mpt::format(MPT_USTRING(" Service Pack %1"))(m_ServicePack.Major);
+				name += mpt::format(U_(" Service Pack %1"))(m_ServicePack.Major);
 			}
 		}
 		if(m_Build != 0)
 		{
-			name += mpt::format(MPT_USTRING(" (Build %1)"))(m_Build);
+			name += mpt::format(U_(" (Build %1)"))(m_Build);
 		}
 	}
-	name += MPT_USTRING(")");
+	name += U_(")");
 	mpt::ustring result = name;
 	#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 		if(mpt::Windows::IsWine())
@@ -362,13 +362,13 @@ mpt::ustring Version::GetName() const
 			mpt::Wine::VersionContext v;
 			if(v.Version().IsValid())
 			{
-				result = mpt::format(MPT_USTRING("Wine %1 (%2)"))(
+				result = mpt::format(U_("Wine %1 (%2)"))(
 					  v.Version().AsString()
 					, name
 					);
 			} else
 			{
-				result = mpt::format(MPT_USTRING("Wine (unknown version: '%1') (%2)"))(
+				result = mpt::format(U_("Wine (unknown version: '%1') (%2)"))(
 					  mpt::ToUnicode(mpt::CharsetUTF8, v.RawVersion())
 					, name
 					);
@@ -388,18 +388,18 @@ mpt::ustring Version::GetNameShort() const
 		mpt::Wine::VersionContext v;
 		if(v.Version().IsValid())
 		{
-			name = mpt::format(MPT_USTRING("wine-%1"))(v.Version().AsString());
+			name = mpt::format(U_("wine-%1"))(v.Version().AsString());
 		} else if(v.RawVersion().length() > 0)
 		{
-			name = MPT_USTRING("wine-") + Util::BinToHex(mpt::as_span(v.RawVersion()));
+			name = U_("wine-") + Util::BinToHex(mpt::as_span(v.RawVersion()));
 		} else
 		{
-			name = MPT_USTRING("wine-");
+			name = U_("wine-");
 		}
-		name += MPT_USTRING("-") + Util::BinToHex(mpt::as_span(v.RawHostSysName()));
+		name += U_("-") + Util::BinToHex(mpt::as_span(v.RawHostSysName()));
 	} else
 	{
-		name = mpt::format(MPT_USTRING("%1.%2"))(mpt::ufmt::dec(m_System.Major), mpt::ufmt::dec0<2>(m_System.Minor));
+		name = mpt::format(U_("%1.%2"))(mpt::ufmt::dec(m_System.Major), mpt::ufmt::dec0<2>(m_System.Minor));
 	}
 	return name;
 }
@@ -505,16 +505,16 @@ struct ArchitectureInfo
 	const MPT_UCHAR_TYPE * Name;
 };
 static constexpr ArchitectureInfo architectureInfo [] = {
-	{ Architecture::x86    , 32, MPT_ULITERAL("x86")     },
-	{ Architecture::amd64  , 64, MPT_ULITERAL("amd64")   },
-	{ Architecture::arm    , 32, MPT_ULITERAL("arm")     },
-	{ Architecture::arm64  , 64, MPT_ULITERAL("arm64")   },
-	{ Architecture::mips   , 32, MPT_ULITERAL("mips")    },
-	{ Architecture::ppc    , 32, MPT_ULITERAL("ppc")     },
-	{ Architecture::shx    , 32, MPT_ULITERAL("shx")     },
-	{ Architecture::alpha  , 32, MPT_ULITERAL("alpha")   },
-	{ Architecture::alpha64, 64, MPT_ULITERAL("alpha64") },
-	{ Architecture::ia64   , 64, MPT_ULITERAL("ia64")    }
+	{ Architecture::x86    , 32, UL_("x86")     },
+	{ Architecture::amd64  , 64, UL_("amd64")   },
+	{ Architecture::arm    , 32, UL_("arm")     },
+	{ Architecture::arm64  , 64, UL_("arm64")   },
+	{ Architecture::mips   , 32, UL_("mips")    },
+	{ Architecture::ppc    , 32, UL_("ppc")     },
+	{ Architecture::shx    , 32, UL_("shx")     },
+	{ Architecture::alpha  , 32, UL_("alpha")   },
+	{ Architecture::alpha64, 64, UL_("alpha64") },
+	{ Architecture::ia64   , 64, UL_("ia64")    }
 };
 
 
@@ -723,12 +723,12 @@ Version::Version(const mpt::ustring &rawVersion)
 	{
 		return;
 	}
-	std::vector<uint8> version = mpt::String::Split<uint8>(rawVersion, MPT_USTRING("."));
+	std::vector<uint8> version = mpt::String::Split<uint8>(rawVersion, U_("."));
 	if(version.size() < 2)
 	{
 		return;
 	}
-	mpt::ustring parsedVersion = mpt::String::Combine(version, MPT_USTRING("."));
+	mpt::ustring parsedVersion = mpt::String::Combine(version, U_("."));
 	std::size_t len = std::min(parsedVersion.length(), rawVersion.length());
 	if(len == 0)
 	{
@@ -774,7 +774,7 @@ bool Version::IsValid() const
 
 mpt::ustring Version::AsString() const
 {
-	return mpt::ufmt::dec(vmajor) + MPT_USTRING(".") + mpt::ufmt::dec(vminor) + MPT_USTRING(".") + mpt::ufmt::dec(vupdate);
+	return mpt::ufmt::dec(vmajor) + U_(".") + mpt::ufmt::dec(vminor) + U_(".") + mpt::ufmt::dec(vupdate);
 }
 
 
@@ -845,7 +845,7 @@ VersionContext::VersionContext()
 		{
 			return;
 		}
-		m_NTDLL = mpt::Library(mpt::LibraryPath::FullPath(MPT_PATHSTRING("ntdll.dll")));
+		m_NTDLL = mpt::Library(mpt::LibraryPath::FullPath(P_("ntdll.dll")));
 		if(m_NTDLL.IsValid())
 		{
 			const char * (__cdecl * wine_get_version)(void) = nullptr;

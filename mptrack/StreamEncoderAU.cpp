@@ -37,7 +37,7 @@ private:
 		{
 			return std::string();
 		}
-		return mpt::format("%1=%2\n")(field, mpt::ToCharset(mpt::CharsetUTF8, mpt::String::Replace(tag, MPT_USTRING("="), MPT_UTF8("\xEF\xBF\xBD")))); // U+FFFD
+		return mpt::format("%1=%2\n")(field, mpt::ToCharset(mpt::CharsetUTF8, mpt::String::Replace(tag, U_("="), MPT_UTF8("\xEF\xBF\xBD")))); // U+FFFD
 	}
 
 public:
@@ -166,10 +166,10 @@ public:
 AUEncoder::AUEncoder()
 {
 	Encoder::Traits traits;
-	traits.fileExtension = MPT_PATHSTRING("au");
-	traits.fileShortDescription = MPT_USTRING("AU");
-	traits.fileDescription = MPT_USTRING("NeXT/Sun Audio");
-	traits.encoderSettingsName = MPT_USTRING("AU");
+	traits.fileExtension = P_("au");
+	traits.fileShortDescription = U_("AU");
+	traits.fileDescription = U_("NeXT/Sun Audio");
+	traits.encoderSettingsName = U_("AU");
 	traits.canTags = true;
 	traits.canCues = false;
 	traits.maxChannels = 4;
@@ -188,11 +188,11 @@ AUEncoder::AUEncoder()
 				if(bytes == 5)
 				{
 					format.Sampleformat = SampleFormatFloat32;
-					format.Description = MPT_USTRING("Floating Point");
+					format.Description = U_("Floating Point");
 				} else
 				{
 					format.Sampleformat = (SampleFormat)(bytes * 8);
-					format.Description = mpt::format(MPT_USTRING("%1 Bit"))(bytes * 8);
+					format.Description = mpt::format(U_("%1 Bit"))(bytes * 8);
 				}
 				format.Bitrate = 0;
 				traits.formats.push_back(format);

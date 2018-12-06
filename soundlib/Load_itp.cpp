@@ -339,10 +339,10 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 		FileReader instrFile = GetFileReader(f);
 		if(!ReadInstrumentFromFile(ins + 1, instrFile, true))
 		{
-			AddToLog(LogWarning, MPT_USTRING("Unable to open instrument: ") + instrPaths[ins].ToUnicode());
+			AddToLog(LogWarning, U_("Unable to open instrument: ") + instrPaths[ins].ToUnicode());
 		}
 #else
-		AddToLog(LogWarning, mpt::format(MPT_USTRING("Loading external instrument %1 ('%2') failed: External instruments are not supported."))(ins, instrPaths[ins].ToUnicode()));
+		AddToLog(LogWarning, mpt::format(U_("Loading external instrument %1 ('%2') failed: External instruments are not supported."))(ins, instrPaths[ins].ToUnicode()));
 #endif // MPT_EXTERNAL_SAMPLES
 	}
 
@@ -389,9 +389,9 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 		m_MidiCfg.Reset();
 	}
 
-	m_modFormat.formatName = MPT_USTRING("Impulse Tracker Project");
-	m_modFormat.type = MPT_USTRING("itp");
-	m_modFormat.madeWithTracker = MPT_USTRING("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
+	m_modFormat.formatName = U_("Impulse Tracker Project");
+	m_modFormat.type = U_("itp");
+	m_modFormat.madeWithTracker = U_("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
 	m_modFormat.charset = mpt::CharsetWindows1252;
 
 	return true;

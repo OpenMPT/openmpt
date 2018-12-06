@@ -133,22 +133,22 @@ const char Ssb::s_EntryID[3] = {'2','2','8'};
 
 
 #ifdef SSB_LOGGING
-static const MPT_UCHAR_TYPE tstrWriteHeader[] = MPT_ULITERAL("Write header with ID = %1\n");
-static const MPT_UCHAR_TYPE tstrWriteProgress[] = MPT_ULITERAL("Wrote entry: {num, id, rpos, size} = {%1, %2, %3, %4}\n");
-static const MPT_UCHAR_TYPE tstrWritingMap[] = MPT_ULITERAL("Writing map to rpos: %1\n");
-static const MPT_UCHAR_TYPE tstrMapEntryWrite[] = MPT_ULITERAL("Writing map entry: id=%1, rpos=%2, size=%3\n");
-static const MPT_UCHAR_TYPE strWriteNote[] = MPT_ULITERAL("Write note: ");
-static const MPT_UCHAR_TYPE tstrEndOfStream[] = MPT_ULITERAL("End of stream(rpos): %1\n");
+static const MPT_UCHAR_TYPE tstrWriteHeader[] = UL_("Write header with ID = %1\n");
+static const MPT_UCHAR_TYPE tstrWriteProgress[] = UL_("Wrote entry: {num, id, rpos, size} = {%1, %2, %3, %4}\n");
+static const MPT_UCHAR_TYPE tstrWritingMap[] = UL_("Writing map to rpos: %1\n");
+static const MPT_UCHAR_TYPE tstrMapEntryWrite[] = UL_("Writing map entry: id=%1, rpos=%2, size=%3\n");
+static const MPT_UCHAR_TYPE strWriteNote[] = UL_("Write note: ");
+static const MPT_UCHAR_TYPE tstrEndOfStream[] = UL_("End of stream(rpos): %1\n");
 
-static const MPT_UCHAR_TYPE tstrReadingHeader[] = MPT_ULITERAL("Read header with expected ID = %1\n");
-static const MPT_UCHAR_TYPE strNoMapInFile[] = MPT_ULITERAL("No map in the file.\n");
-static const MPT_UCHAR_TYPE strIdMismatch[] = MPT_ULITERAL("ID mismatch, terminating read.\n");
-static const MPT_UCHAR_TYPE strIdMatch[] = MPT_ULITERAL("ID match, continuing reading.\n");
-static const MPT_UCHAR_TYPE tstrReadingMap[] = MPT_ULITERAL("Reading map from rpos: %1\n");
-static const MPT_UCHAR_TYPE tstrEndOfMap[] = MPT_ULITERAL("End of map(rpos): %1\n");
-static const MPT_UCHAR_TYPE tstrReadProgress[] = MPT_ULITERAL("Read entry: {num, id, rpos, size, desc} = {%1, %2, %3, %4, %5}\n");
-static const MPT_UCHAR_TYPE tstrNoEntryFound[] = MPT_ULITERAL("No entry with id %1 found.\n");
-static const MPT_UCHAR_TYPE strReadNote[] = MPT_ULITERAL("Read note: ");
+static const MPT_UCHAR_TYPE tstrReadingHeader[] = UL_("Read header with expected ID = %1\n");
+static const MPT_UCHAR_TYPE strNoMapInFile[] = UL_("No map in the file.\n");
+static const MPT_UCHAR_TYPE strIdMismatch[] = UL_("ID mismatch, terminating read.\n");
+static const MPT_UCHAR_TYPE strIdMatch[] = UL_("ID match, continuing reading.\n");
+static const MPT_UCHAR_TYPE tstrReadingMap[] = UL_("Reading map from rpos: %1\n");
+static const MPT_UCHAR_TYPE tstrEndOfMap[] = UL_("End of map(rpos): %1\n");
+static const MPT_UCHAR_TYPE tstrReadProgress[] = UL_("Read entry: {num, id, rpos, size, desc} = {%1, %2, %3, %4, %5}\n");
+static const MPT_UCHAR_TYPE tstrNoEntryFound[] = UL_("No entry with id %1 found.\n");
+static const MPT_UCHAR_TYPE strReadNote[] = UL_("Read note: ");
 #endif
 
 
@@ -190,13 +190,13 @@ SsbRead::SsbRead(std::istream& is)
 void SsbWrite::AddWriteNote(const SsbStatus s)
 {
 	m_Status |= s;
-	SSB_LOG(mpt::format(MPT_USTRING("%1: 0x%2\n"))(strWriteNote, mpt::ufmt::hex(s)));
+	SSB_LOG(mpt::format(U_("%1: 0x%2\n"))(strWriteNote, mpt::ufmt::hex(s)));
 }
 
 void SsbRead::AddReadNote(const SsbStatus s)
 {
 	m_Status |= s;
-	SSB_LOG(mpt::format(MPT_USTRING("%1: 0x%2\n"))(strReadNote, mpt::ufmt::hex(s)));
+	SSB_LOG(mpt::format(U_("%1: 0x%2\n"))(strReadNote, mpt::ufmt::hex(s)));
 }
 
 void SsbRead::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
@@ -204,10 +204,10 @@ void SsbRead::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 	m_Status |= SNT_PROGRESS;
 	SSB_LOG(mpt::format(mpt::ustring(tstrReadProgress))(
 				 nNum,
-				 (pRe && pRe->nIdLength < 30 && m_Idarray.size() > 0) ?  ID(&m_Idarray[pRe->nIdpos], pRe->nIdLength).AsString() : MPT_USTRING(""),
+				 (pRe && pRe->nIdLength < 30 && m_Idarray.size() > 0) ?  ID(&m_Idarray[pRe->nIdpos], pRe->nIdLength).AsString() : U_(""),
 				 (pRe) ? pRe->rposStart : 0,
-				 (pRe && pRe->nSize != invalidDatasize) ? mpt::ufmt::val(pRe->nSize) : MPT_USTRING(""),
-				 MPT_USTRING("")));
+				 (pRe && pRe->nSize != invalidDatasize) ? mpt::ufmt::val(pRe->nSize) : U_(""),
+				 U_("")));
 #ifndef SSB_LOGGING
 	MPT_UNREFERENCED_PARAMETER(pRe);
 	MPT_UNREFERENCED_PARAMETER(nNum);
@@ -242,7 +242,7 @@ void SsbWrite::WriteMapItem(const ID &id,
 						const char* pszDesc)
 {
 	SSB_LOG(mpt::format(mpt::ustring(tstrMapEntryWrite))(
-					(id.GetSize() > 0) ? id.AsString() : MPT_USTRING(""),
+					(id.GetSize() > 0) ? id.AsString() : U_(""),
 					rposDataStart,
 					nDatasize));
 

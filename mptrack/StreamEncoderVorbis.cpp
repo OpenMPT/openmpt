@@ -35,10 +35,10 @@ static Encoder::Traits VorbisBuildTraits()
 	{
 		Encoder::Traits traits;
 #if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
-		traits.fileExtension = MPT_PATHSTRING("ogg");
-		traits.fileShortDescription = MPT_USTRING("Vorbis");
-		traits.fileDescription = MPT_USTRING("Ogg Vorbis");
-		traits.encoderSettingsName = MPT_USTRING("Vorbis");
+		traits.fileExtension = P_("ogg");
+		traits.fileShortDescription = U_("Vorbis");
+		traits.fileDescription = U_("Ogg Vorbis");
+		traits.encoderSettingsName = U_("Vorbis");
 		traits.canTags = true;
 		traits.maxChannels = 4;
 		traits.samplerates = mpt::make_vector(vorbis_samplerates);
@@ -109,7 +109,7 @@ public:
 		if(settings.Tags)
 		{
 			AddCommentField("ENCODER",     tags.encoder);
-			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
+			AddCommentField("SOURCEMEDIA", U_("tracked music file"));
 			AddCommentField("TITLE",       tags.title          );
 			AddCommentField("ARTIST",      tags.artist         );
 			AddCommentField("ALBUM",       tags.album          );
@@ -241,7 +241,7 @@ mpt::ustring VorbisEncoder::DescribeQuality(float quality) const
 {
 	static const int q_table[11] = { 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 500 }; // http://wiki.hydrogenaud.io/index.php?title=Recommended_Ogg_Vorbis
 	int q = Clamp(mpt::saturate_round<int>(quality * 10.0f), 0, 10);
-	return mpt::format(MPT_USTRING("Q%1 (~%2 kbit)"))(mpt::ufmt::fix(quality * 10.0f, 1), q_table[q]);
+	return mpt::format(U_("Q%1 (~%2 kbit)"))(mpt::ufmt::fix(quality * 10.0f, 1), q_table[q]);
 }
 
 

@@ -249,7 +249,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	// Show warning if file was made with more recent version of OpenMPT except
 	if(m_SndFile.m_dwLastSavedWithVersion.WithoutTestNumber() > Version::Current())
 	{
-		Reporting::Notification(mpt::format(MPT_USTRING("Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%1. Current version: v%2.\r\n"))(
+		Reporting::Notification(mpt::format(U_("Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%1. Current version: v%2.\r\n"))(
 			m_SndFile.m_dwLastSavedWithVersion,
 			Version::Current()));
 	}
@@ -334,20 +334,20 @@ BOOL CModDoc::SaveModified()
 
 bool CModDoc::SaveAllSamples()
 {
-	mpt::ustring prompt = MPT_USTRING("The following external samples have been modified:\n");
+	mpt::ustring prompt = U_("The following external samples have been modified:\n");
 	bool modified = false;
 	for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 	{
 		if(m_SndFile.GetSample(i).uFlags.test_all(SMP_KEEPONDISK | SMP_MODIFIED))
 		{
 			modified = true;
-			prompt += mpt::ufmt::dec0<2>(i) + MPT_USTRING(": ") + m_SndFile.GetSamplePath(i).ToUnicode() + MPT_USTRING("\n");
+			prompt += mpt::ufmt::dec0<2>(i) + U_(": ") + m_SndFile.GetSamplePath(i).ToUnicode() + U_("\n");
 		}
 	}
 
 	ConfirmAnswer ans = cnfYes;
 	bool success = true;
-	if(modified && (ans = Reporting::Confirm(prompt + MPT_USTRING("Do you want to save them?"), MPT_USTRING("External Samples"), true)) == cnfYes)
+	if(modified && (ans = Reporting::Confirm(prompt + U_("Do you want to save them?"), U_("External Samples"), true)) == cnfYes)
 	{
 		for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 		{
@@ -376,8 +376,8 @@ bool CModDoc::SaveSample(SAMPLEINDEX smp)
 		if(!filename.empty())
 		{
 			const mpt::PathString dotExt = filename.GetFileExt();
-			const bool wav = !mpt::PathString::CompareNoCase(dotExt, MPT_PATHSTRING(".wav"));
-			const bool flac  = !mpt::PathString::CompareNoCase(dotExt, MPT_PATHSTRING(".flac"));
+			const bool wav = !mpt::PathString::CompareNoCase(dotExt, P_(".wav"));
+			const bool flac  = !mpt::PathString::CompareNoCase(dotExt, P_(".flac"));
 
 			if(flac || (!wav && TrackerSettings::Instance().m_defaultSampleFormat != dfWAV))
 				success = m_SndFile.SaveFLACSample(smp, filename);
@@ -436,7 +436,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 		return FALSE;
 	}
 
-	mpt::PathString ext = MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(defaultExtension);
+	mpt::PathString ext = P_(".") + mpt::PathString::FromUTF8(defaultExtension);
 
 	mpt::PathString saveFileName;
 
@@ -472,7 +472,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 	{
 		if(saveFileName.IsFile())
 		{
-			mpt::PathString backupFileName = saveFileName.ReplaceExt(MPT_PATHSTRING(".bak"));
+			mpt::PathString backupFileName = saveFileName.ReplaceExt(P_(".bak"));
 			if(backupFileName.IsFile())
 			{
 				DeleteFile(backupFileName.AsNative().c_str());
@@ -728,7 +728,7 @@ mpt::ustring CModDoc::GetLogString() const
 	for(const auto &i : m_Log)
 	{
 		ret += i.message;
-		ret += MPT_USTRING("\r\n");
+		ret += U_("\r\n");
 	}
 	return ret;
 }
@@ -1526,8 +1526,8 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(extension)
-		.DefaultFilename(GetPathNameMpt().GetFileName() + MPT_PATHSTRING(".") + extension)
-		.ExtensionFilter(encFactory->GetTraits().fileDescription + MPT_USTRING(" (*.") + extension.ToUnicode() + MPT_USTRING(")|*.") + extension.ToUnicode() + MPT_USTRING("||"))
+		.DefaultFilename(GetPathNameMpt().GetFileName() + P_(".") + extension)
+		.ExtensionFilter(encFactory->GetTraits().fileDescription + U_(" (*.") + extension.ToUnicode() + U_(")|*.") + extension.ToUnicode() + U_("||"))
 		.WorkingDirectory(TrackerSettings::Instance().PathExport.GetWorkingDir());
 	if(!wsdlg.m_Settings.outputToSample && !dlg.Show()) return;
 
@@ -1693,7 +1693,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			thisName += fileExt;
 			if(wsdlg.m_Settings.outputToSample)
 			{
-				thisName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
+				thisName = mpt::CreateTempFileName(P_("OpenMPT"));
 				// Ensure this temporary file is marked as temporary in the file system, to increase the chance it will never be written to disk
 				::CloseHandle(::CreateFile(thisName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
 			}
@@ -1824,7 +1824,7 @@ void CModDoc::OnFileMidiConvert()
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
 
-	mpt::PathString filename = GetPathNameMpt().ReplaceExt(MPT_PATHSTRING(".mid"));
+	mpt::PathString filename = GetPathNameMpt().ReplaceExt(P_(".mid"));
 
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("mid")
@@ -1883,9 +1883,9 @@ void CModDoc::OnFileCompatibilitySave()
 		filename += dir;
 		filename += fileName;
 		if(!strstr(fileName.ToUTF8().c_str(), "compat"))
-			filename += MPT_PATHSTRING(".compat.");
+			filename += P_(".compat.");
 		else
-			filename += MPT_PATHSTRING(".");
+			filename += P_(".");
 		filename += mpt::PathString::FromUTF8(ext);
 	}
 
@@ -2593,7 +2593,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 			newPath += fname;
 		}
 
-		newPath += MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(CSoundFile::GetModSpecifications(nNewType).fileExtension);
+		newPath += P_(".") + mpt::PathString::FromUTF8(CSoundFile::GetModSpecifications(nNewType).fileExtension);
 
 		// Forcing save dialog to appear after extension change - otherwise unnotified file overwriting may occur.
 		m_ShowSavedialog = true;
@@ -2860,8 +2860,8 @@ void CModDoc::OnSaveTemplateModule()
 	mpt::PathString sName;
 	for(size_t i = 0; i < 1000; ++i)
 	{
-		sName += MPT_PATHSTRING("newTemplate") + mpt::PathString::FromUnicode(mpt::ufmt::val(i));
-		sName += MPT_PATHSTRING(".") + mpt::PathString::FromUTF8(m_SndFile.GetModSpecifications().fileExtension);
+		sName += P_("newTemplate") + mpt::PathString::FromUnicode(mpt::ufmt::val(i));
+		sName += P_(".") + mpt::PathString::FromUTF8(m_SndFile.GetModSpecifications().fileExtension);
 		if (!(templateFolder + sName).FileOrDirectoryExists())
 			break;
 	}
@@ -3014,8 +3014,8 @@ void CModDoc::SerializeViews() const
 
 	SettingsContainer &settings = theApp.GetSongSettings();
 	const std::string s = f.str();
-	settings.Write(MPT_USTRING("WindowSettings"), pathName.GetFullFileName().ToUnicode(), pathName);
-	settings.Write(MPT_USTRING("WindowSettings"), pathName.ToUnicode(), Util::BinToHex(mpt::as_span(s)));
+	settings.Write(U_("WindowSettings"), pathName.GetFullFileName().ToUnicode(), pathName);
+	settings.Write(U_("WindowSettings"), pathName.ToUnicode(), Util::BinToHex(mpt::as_span(s)));
 }
 
 
@@ -3026,17 +3026,17 @@ void CModDoc::DeserializeViews()
 	if(pathName.empty()) return;
 
 	SettingsContainer &settings = theApp.GetSongSettings();
-	mpt::ustring s = settings.Read<mpt::ustring>(MPT_USTRING("WindowSettings"), pathName.ToUnicode());
+	mpt::ustring s = settings.Read<mpt::ustring>(U_("WindowSettings"), pathName.ToUnicode());
 	if(s.size() < 2)
 	{
 		// Try relative path
 		pathName = pathName.RelativePathToAbsolute(theApp.GetAppDirPath());
-		s = settings.Read<mpt::ustring>(MPT_USTRING("WindowSettings"), pathName.ToUnicode());
+		s = settings.Read<mpt::ustring>(U_("WindowSettings"), pathName.ToUnicode());
 		if(s.size() < 2)
 		{
 			// Try searching for filename instead of full path name
-			const mpt::ustring altName = settings.Read<mpt::ustring>(MPT_USTRING("WindowSettings"), pathName.GetFullFileName().ToUnicode());
-			s = settings.Read<mpt::ustring>(MPT_USTRING("WindowSettings"), altName);
+			const mpt::ustring altName = settings.Read<mpt::ustring>(U_("WindowSettings"), pathName.GetFullFileName().ToUnicode());
+			s = settings.Read<mpt::ustring>(U_("WindowSettings"), altName);
 			if(s.size() < 2) return;
 		}
 	}

@@ -44,20 +44,20 @@ namespace mpt
 
 RawPathString PathString::AsNativePrefixed() const
 {
-	if(path.length() <= MAX_PATH || path.substr(0, 4) == MPT_PATHSTRING_LITERAL("\\\\?\\"))
+	if(path.length() <= MAX_PATH || path.substr(0, 4) == PL_("\\\\?\\"))
 	{
 		// Path is short enough or already in prefixed form
 		return path;
 	}
 	const RawPathString absPath = mpt::GetAbsolutePath(*this).AsNative();
-	if(absPath.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\\\"))
+	if(absPath.substr(0, 2) == PL_("\\\\"))
 	{
 		// Path is a network share: \\server\foo.bar -> \\?\UNC\server\foo.bar
-		return MPT_PATHSTRING_LITERAL("\\\\?\\UNC") + absPath.substr(1);
+		return PL_("\\\\?\\UNC") + absPath.substr(1);
 	} else
 	{
 		// Regular file: C:\foo.bar -> \\?\C:\foo.bar
-		return MPT_PATHSTRING_LITERAL("\\\\?\\") + absPath;
+		return PL_("\\\\?\\") + absPath;
 	}
 }
 
@@ -84,42 +84,42 @@ PathString PathString::Simplify() const
 	std::vector<RawPathString> components;
 	RawPathString root;
 	RawPathString::size_type startPos = 0;
-	if(path.size() >= 2 && path[1] == MPT_PATHSTRING_LITERAL(':'))
+	if(path.size() >= 2 && path[1] == PC_(':'))
 	{
 		// Drive letter
-		root = path.substr(0, 2) + MPT_PATHSTRING_LITERAL('\\');
+		root = path.substr(0, 2) + PC_('\\');
 		startPos = 2;
-	} else if(path.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\\\"))
+	} else if(path.substr(0, 2) == PL_("\\\\"))
 	{
 		// Network share
-		root = MPT_PATHSTRING_LITERAL("\\\\");
+		root = PL_("\\\\");
 		startPos = 2;
-	} else if(path.substr(0, 2) == MPT_PATHSTRING_LITERAL(".\\") || path.substr(0, 2) == MPT_PATHSTRING_LITERAL("./"))
+	} else if(path.substr(0, 2) == PL_(".\\") || path.substr(0, 2) == PL_("./"))
 	{
 		// Special case for relative paths
-		root = MPT_PATHSTRING_LITERAL(".\\");
+		root = PL_(".\\");
 		startPos = 2;
-	} else if(path.size() >= 1 && (path[0] == MPT_PATHSTRING_LITERAL('\\') || path[0] == MPT_PATHSTRING_LITERAL('/')))
+	} else if(path.size() >= 1 && (path[0] == PC_('\\') || path[0] == PC_('/')))
 	{
 		// Special case for relative paths
-		root = MPT_PATHSTRING_LITERAL("\\");
+		root = PL_("\\");
 		startPos = 1;
 	}
 
 	while(startPos < path.size())
 	{
-		auto pos = path.find_first_of(MPT_PATHSTRING_LITERAL("\\/"), startPos);
+		auto pos = path.find_first_of(PL_("\\/"), startPos);
 		if(pos == RawPathString::npos)
 			pos = path.size();
 		mpt::RawPathString dir = path.substr(startPos, pos - startPos);
-		if(dir == MPT_PATHSTRING_LITERAL(".."))
+		if(dir == PL_(".."))
 		{
 			// Go back one directory
 			if(!components.empty())
 			{
 				components.pop_back();
 			}
-		} else if(dir == MPT_PATHSTRING_LITERAL("."))
+		} else if(dir == PL_("."))
 		{
 			// nop
 		} else if(!dir.empty())
@@ -133,7 +133,7 @@ PathString PathString::Simplify() const
 	result.reserve(path.size());
 	for(const auto &component : components)
 	{
-		result += component + MPT_PATHSTRING_LITERAL("\\");
+		result += component + PL_("\\");
 	}
 	if(!components.empty())
 		result.pop_back();
@@ -166,25 +166,25 @@ void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname
 	mpt::RawPathString p = path;
 
 	// remove \\?\\ prefix
-	if(p.substr(0, 8) == MPT_PATHSTRING_LITERAL("\\\\?\\UNC\\"))
+	if(p.substr(0, 8) == PL_("\\\\?\\UNC\\"))
 	{
-		p = MPT_PATHSTRING_LITERAL("\\\\") + p.substr(8);
-	} else if(p.substr(0, 4) == MPT_PATHSTRING_LITERAL("\\\\?\\"))
+		p = PL_("\\\\") + p.substr(8);
+	} else if(p.substr(0, 4) == PL_("\\\\?\\"))
 	{
 		p = p.substr(4);
 	}
 
 	if (p.length() >= 2 && (
-		p.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\\\")
-		|| p.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\/")
-		|| p.substr(0, 2) == MPT_PATHSTRING_LITERAL("/\\")
-		|| p.substr(0, 2) == MPT_PATHSTRING_LITERAL("//")
+		p.substr(0, 2) == PL_("\\\\")
+		|| p.substr(0, 2) == PL_("\\/")
+		|| p.substr(0, 2) == PL_("/\\")
+		|| p.substr(0, 2) == PL_("//")
 		))
 	{ // UNC
-		mpt::RawPathString::size_type first_slash = p.substr(2).find_first_of(MPT_PATHSTRING_LITERAL("\\/"));
+		mpt::RawPathString::size_type first_slash = p.substr(2).find_first_of(PL_("\\/"));
 		if(first_slash != mpt::RawPathString::npos)
 		{
-			mpt::RawPathString::size_type second_slash = p.substr(2 + first_slash + 1).find_first_of(MPT_PATHSTRING_LITERAL("\\/"));
+			mpt::RawPathString::size_type second_slash = p.substr(2 + first_slash + 1).find_first_of(PL_("\\/"));
 			if(second_slash != mpt::RawPathString::npos)
 			{
 				if(drive) *drive = mpt::PathString::FromNative(p.substr(0, 2 + first_slash + 1 + second_slash));
@@ -201,7 +201,7 @@ void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname
 		}
 	} else
 	{ // local
-		if(p.length() >= 2 && (p[1] == MPT_PATHSTRING_LITERAL(':')))
+		if(p.length() >= 2 && (p[1] == PC_(':')))
 		{
 			if(drive) *drive = mpt::PathString::FromNative(p.substr(0, 2));
 			p = p.substr(2);
@@ -210,7 +210,7 @@ void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname
 			if(drive) *drive = mpt::PathString();
 		}
 	}
-	mpt::RawPathString::size_type last_slash = p.find_last_of(MPT_PATHSTRING_LITERAL("\\/"));
+	mpt::RawPathString::size_type last_slash = p.find_last_of(PL_("\\/"));
 	if(last_slash != mpt::RawPathString::npos)
 	{
 		if(dir) *dir = mpt::PathString::FromNative(p.substr(0, last_slash + 1));
@@ -219,7 +219,7 @@ void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname
 	{
 		if(dir) *dir = mpt::PathString();
 	}
-	mpt::RawPathString::size_type last_dot = p.find_last_of(MPT_PATHSTRING_LITERAL("."));
+	mpt::RawPathString::size_type last_dot = p.find_last_of(PL_("."));
 	if(last_dot == mpt::RawPathString::npos)
 	{
 		if(fname) *fname = mpt::PathString::FromNative(p);
@@ -344,7 +344,7 @@ PathString PathString::AbsolutePathToRelative(const PathString &relativeTo) cons
 	if(!_tcsncicmp(relativeTo.AsNative().c_str(), AsNative().c_str(), relativeTo.AsNative().length()))
 	{
 		// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
-		result = MPT_PATHSTRING(".\\"); // ".\"
+		result = P_(".\\"); // ".\"
 		result += mpt::PathString::FromNative(AsNative().substr(relativeTo.AsNative().length()));
 	} else if(!_tcsncicmp(relativeTo.AsNative().c_str(), AsNative().c_str(), 2))
 	{
@@ -363,12 +363,12 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 	{
 		return result;
 	}
-	if(path.length() >= 2 && path.at(0) == MPT_PATHSTRING_LITERAL('\\') && path.at(1) != MPT_PATHSTRING_LITERAL('\\'))
+	if(path.length() >= 2 && path.at(0) == PC_('\\') && path.at(1) != PC_('\\'))
 	{
 		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
 		result = mpt::PathString::FromNative(relativeTo.AsNative().substr(0, 2));
 		result += mpt::PathString(path);
-	} else if(path.length() >= 2 && path.substr(0, 2) == MPT_PATHSTRING_LITERAL(".\\"))
+	} else if(path.length() >= 2 && path.substr(0, 2) == PL_(".\\"))
 	{
 		// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
 		result = relativeTo; // "C:\OpenMPT\"
@@ -384,18 +384,18 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 bool PathString::IsPathSeparator(RawPathString::value_type c)
 {
 #if MPT_OS_WINDOWS
-	return (c == MPT_PATHSTRING_LITERAL('\\')) || (c == MPT_PATHSTRING_LITERAL('/'));
+	return (c == PC_('\\')) || (c == PC_('/'));
 #else
-	return c == MPT_PATHSTRING_LITERAL('/');
+	return c == PC_('/');
 #endif
 }
 
 RawPathString::value_type PathString::GetDefaultPathSeparator()
 {
 #if MPT_OS_WINDOWS
-	return MPT_PATHSTRING_LITERAL('\\');
+	return PC_('\\');
 #else
-	return MPT_PATHSTRING_LITERAL('/');
+	return PC_('/');
 #endif
 }
 
@@ -409,19 +409,19 @@ namespace mpt
 bool PathIsAbsolute(const mpt::PathString &path) {
 	mpt::RawPathString rawpath = path.AsNative();
 #if MPT_OS_WINDOWS
-	if(rawpath.substr(0, 8) == MPT_PATHSTRING_LITERAL("\\\\?\\UNC\\"))
+	if(rawpath.substr(0, 8) == PL_("\\\\?\\UNC\\"))
 	{
 		return true;
 	}
-	if(rawpath.substr(0, 4) == MPT_PATHSTRING_LITERAL("\\\\?\\"))
+	if(rawpath.substr(0, 4) == PL_("\\\\?\\"))
 	{
 		return true;
 	}
-	if(rawpath.substr(0, 2) == MPT_PATHSTRING_LITERAL("\\\\"))
+	if(rawpath.substr(0, 2) == PL_("\\\\"))
 	{
 		return true; // UNC
 	}
-	if(rawpath.substr(0, 2) == MPT_PATHSTRING_LITERAL("//"))
+	if(rawpath.substr(0, 2) == PL_("//"))
 	{
 		return true; // UNC
 	}
@@ -473,13 +473,13 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 	HANDLE hFind = NULL;
 	WIN32_FIND_DATA wfd;
 	MemsetZero(wfd);
-	hFind = FindFirstFile((path + MPT_PATHSTRING("*.*")).AsNative().c_str(), &wfd);
+	hFind = FindFirstFile((path + P_("*.*")).AsNative().c_str(), &wfd);
 	if(hFind != NULL && hFind != INVALID_HANDLE_VALUE)
 	{
 		do
 		{
 			mpt::PathString filename = mpt::PathString::FromNative(wfd.cFileName);
-			if(filename != MPT_PATHSTRING(".") && filename != MPT_PATHSTRING(".."))
+			if(filename != P_(".") && filename != P_(".."))
 			{
 				filename = path + filename;
 				if(filename.IsDirectory())
@@ -545,7 +545,7 @@ mpt::PathString GetSystemPath()
 	{
 		return mpt::PathString();
 	}
-	return mpt::PathString::FromNative(path.data()) + MPT_PATHSTRING("\\");
+	return mpt::PathString::FromNative(path.data()) + P_("\\");
 }
 
 #endif // !MPT_OS_WINDOWS_WINRT
@@ -577,9 +577,9 @@ mpt::PathString GetTempDirectory()
 mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)
 {
 	mpt::PathString filename = mpt::GetTempDirectory();
-	filename += (!fileNamePrefix.empty() ? fileNamePrefix + MPT_PATHSTRING("_") : mpt::PathString());
+	filename += (!fileNamePrefix.empty() ? fileNamePrefix + P_("_") : mpt::PathString());
 	filename += mpt::PathString::FromUnicode(mpt::UUID::GenerateLocalUseOnly().ToUString());
-	filename += (!fileNameExtension.empty() ? MPT_PATHSTRING(".") + fileNameExtension : mpt::PathString());
+	filename += (!fileNameExtension.empty() ? P_(".") + fileNameExtension : mpt::PathString());
 	return filename;
 }
 
@@ -760,7 +760,7 @@ mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
 	const auto extensions = GetExtensions();
 	if(format[FileTypeFormatShowExtensions])
 	{
-		filter += MPT_PATHSTRING(" (");
+		filter += P_(" (");
 		bool first = true;
 		for(const auto &ext : extensions)
 		{
@@ -769,14 +769,14 @@ mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
 				first = false;
 			} else
 			{
-				filter += MPT_PATHSTRING(",");
+				filter += P_(",");
 			}
-			filter += MPT_PATHSTRING("*.");
+			filter += P_("*.");
 			filter += ext;
 		}
-		filter += MPT_PATHSTRING(")");
+		filter += P_(")");
 	}
-	filter += MPT_PATHSTRING("|");
+	filter += P_("|");
 	{
 		bool first = true;
 		for(const auto &ext : extensions)
@@ -786,13 +786,13 @@ mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
 				first = false;
 			} else
 			{
-				filter += MPT_PATHSTRING(";");
+				filter += P_(";");
 			}
-			filter += MPT_PATHSTRING("*.");
+			filter += P_("*.");
 			filter += ext;
 		}
 	}
-	filter += MPT_PATHSTRING("|");
+	filter += P_("|");
 	return filter;
 }
 
@@ -810,9 +810,9 @@ mpt::PathString FileType::AsFilterOnlyString() const
 				first = false;
 			} else
 			{
-				filter += MPT_PATHSTRING(";");
+				filter += P_(";");
 			}
-			filter += MPT_PATHSTRING("*.");
+			filter += P_("*.");
 			filter += ext;
 		}
 	}
@@ -840,7 +840,7 @@ mpt::PathString ToFilterString(const std::vector<FileType> &fileTypes, FlagSet<F
 mpt::PathString ToFilterOnlyString(const FileType &fileType, bool prependSemicolonWhenNotEmpty)
 {
 	mpt::PathString filter = fileType.AsFilterOnlyString();
-	return filter.empty() ? filter : (prependSemicolonWhenNotEmpty ? MPT_PATHSTRING(";") : MPT_PATHSTRING("")) + filter;
+	return filter.empty() ? filter : (prependSemicolonWhenNotEmpty ? P_(";") : P_("")) + filter;
 }
 
 
@@ -851,7 +851,7 @@ mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool 
 	{
 		filter += type.AsFilterOnlyString();
 	}
-	return filter.empty() ? filter : (prependSemicolonWhenNotEmpty ? MPT_PATHSTRING(";") : MPT_PATHSTRING("")) + filter;
+	return filter.empty() ? filter : (prependSemicolonWhenNotEmpty ? P_(";") : P_("")) + filter;
 }
 
 

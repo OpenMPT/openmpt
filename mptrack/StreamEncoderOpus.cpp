@@ -33,10 +33,10 @@ static Encoder::Traits BuildTraits()
 	{
 		Encoder::Traits traits;
 #if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
-		traits.fileExtension = MPT_PATHSTRING("opus");
-		traits.fileShortDescription = MPT_USTRING("Opus");
-		traits.fileDescription = MPT_USTRING("Ogg Opus");
-		traits.encoderSettingsName = MPT_USTRING("Opus");
+		traits.fileExtension = P_("opus");
+		traits.fileShortDescription = U_("Opus");
+		traits.fileDescription = U_("Ogg Opus");
+		traits.encoderSettingsName = U_("Opus");
 		traits.canTags = true;
 		traits.maxChannels = 4;
 		traits.samplerates = mpt::make_vector(opus_all_samplerates);
@@ -110,7 +110,7 @@ public:
 		if(settings.Tags)
 		{
 			AddCommentField("ENCODER",     tags.encoder);
-			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
+			AddCommentField("SOURCEMEDIA", U_("tracked music file"));
 			AddCommentField("TITLE",       tags.title          );
 			AddCommentField("ARTIST",      tags.artist         );
 			AddCommentField("ALBUM",       tags.album          );

@@ -1393,7 +1393,7 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 	if(nSeq == MAX_SEQUENCES + 2)
 	{
 		SEQUENCEINDEX curSeq = sndFile.Order.GetCurrentSequenceIndex();
-		mpt::ustring str = mpt::format(MPT_USTRING("Delete sequence %1: %2?"))(curSeq, mpt::ToUnicode(mpt::CharsetLocale, Order().GetName()));
+		mpt::ustring str = mpt::format(U_("Delete sequence %1: %2?"))(curSeq, mpt::ToUnicode(mpt::CharsetLocale, Order().GetName()));
 		if (Reporting::Confirm(str) == cnfYes)
 			sndFile.Order.RemoveSequence(curSeq);
 		else

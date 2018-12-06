@@ -96,20 +96,20 @@ static const MODTYPE gdmFormatOrigin[] =
 };
 static const MPT_UCHAR_TYPE gdmFormatOriginType[][4] =
 {
-	MPT_ULITERAL(""), MPT_ULITERAL("mod"), MPT_ULITERAL("mtm"), MPT_ULITERAL("s3m"), MPT_ULITERAL("669"), MPT_ULITERAL("far"), MPT_ULITERAL("ult"), MPT_ULITERAL("stm"), MPT_ULITERAL("med"), MPT_ULITERAL("psm")
+	UL_(""), UL_("mod"), UL_("mtm"), UL_("s3m"), UL_("669"), UL_("far"), UL_("ult"), UL_("stm"), UL_("med"), UL_("psm")
 };
 static const MPT_UCHAR_TYPE * const gdmFormatOriginFormat[] =
 {
-	MPT_ULITERAL(""),
-	MPT_ULITERAL("Generic MOD"),
-	MPT_ULITERAL("MultiTracker"),
-	MPT_ULITERAL("ScreamTracker 3"),
-	MPT_ULITERAL("Composer 669 / UNIS 669"),
-	MPT_ULITERAL("Farandole Composer"),
-	MPT_ULITERAL("UltraTracker"),
-	MPT_ULITERAL("ScreamTracker 2"),
-	MPT_ULITERAL("OctaMED"),
-	MPT_ULITERAL("Epic Megagames MASI")
+	UL_(""),
+	UL_("Generic MOD"),
+	UL_("MultiTracker"),
+	UL_("ScreamTracker 3"),
+	UL_("Composer 669 / UNIS 669"),
+	UL_("Farandole Composer"),
+	UL_("UltraTracker"),
+	UL_("ScreamTracker 2"),
+	UL_("OctaMED"),
+	UL_("Epic Megagames MASI")
 };
 
 
@@ -164,9 +164,9 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(gdmFormatOrigin[fileHeader.originalFormat]);
 
-	m_modFormat.formatName = MPT_USTRING("General Digital Music");
-	m_modFormat.type = MPT_USTRING("gdm");
-	m_modFormat.madeWithTracker = mpt::format(MPT_USTRING("BWSB 2GDM %1.%2"))(fileHeader.trackerMajorVer, fileHeader.formatMinorVer);
+	m_modFormat.formatName = U_("General Digital Music");
+	m_modFormat.type = U_("gdm");
+	m_modFormat.madeWithTracker = mpt::format(U_("BWSB 2GDM %1.%2"))(fileHeader.trackerMajorVer, fileHeader.formatMinorVer);
 	m_modFormat.originalType = gdmFormatOriginType[fileHeader.originalFormat];
 	m_modFormat.originalFormatName = gdmFormatOriginFormat[fileHeader.originalFormat];
 	m_modFormat.charset = mpt::CharsetCP437;

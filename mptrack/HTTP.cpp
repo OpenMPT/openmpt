@@ -31,30 +31,30 @@ URI ParseURI(mpt::ustring str)
 	}
 	uri.scheme = str.substr(0, scheme_delim_pos);
 	str = str.substr(scheme_delim_pos + 1);
-	if(str.substr(0, 2) == MPT_USTRING("//"))
+	if(str.substr(0, 2) == U_("//"))
 	{
 		str = str.substr(2);
-		std::size_t authority_delim_pos = str.find_first_of(MPT_USTRING("/?#"));
+		std::size_t authority_delim_pos = str.find_first_of(U_("/?#"));
 		if(authority_delim_pos == mpt::ustring::npos)
 		{
 			throw bad_uri("no path");
 		}
 		mpt::ustring authority = str.substr(0, authority_delim_pos);
-		std::size_t userinfo_delim_pos = authority.find(MPT_USTRING("@"));
+		std::size_t userinfo_delim_pos = authority.find(U_("@"));
 		if(userinfo_delim_pos != mpt::ustring::npos)
 		{
 			mpt::ustring userinfo = authority.substr(0, userinfo_delim_pos);
 			authority = authority.substr(userinfo_delim_pos + 1);
-			std::size_t username_delim_pos = userinfo.find(MPT_USTRING(":"));
+			std::size_t username_delim_pos = userinfo.find(U_(":"));
 			uri.username = userinfo.substr(0, username_delim_pos);
 			if(username_delim_pos != mpt::ustring::npos)
 			{
 				uri.password = userinfo.substr(username_delim_pos + 1);
 			}
 		}
-		std::size_t beg_bracket_pos = authority.find(MPT_USTRING("["));
-		std::size_t end_bracket_pos = authority.find(MPT_USTRING("]"));
-		std::size_t port_delim_pos = authority.find_last_of(MPT_USTRING(":"));
+		std::size_t beg_bracket_pos = authority.find(U_("["));
+		std::size_t end_bracket_pos = authority.find(U_("]"));
+		std::size_t port_delim_pos = authority.find_last_of(U_(":"));
 		if(beg_bracket_pos != mpt::ustring::npos && end_bracket_pos != mpt::ustring::npos)
 		{
 			if(port_delim_pos != mpt::ustring::npos && port_delim_pos > end_bracket_pos)
@@ -75,7 +75,7 @@ URI ParseURI(mpt::ustring str)
 		}
 		str = str.substr(authority_delim_pos);
 	}
-	std::size_t path_delim_pos = str.find_first_of(MPT_USTRING("?#"));
+	std::size_t path_delim_pos = str.find_first_of(U_("?#"));
 	uri.path = str.substr(0, path_delim_pos);
 	if(uri.path.empty())
 	{
@@ -84,7 +84,7 @@ URI ParseURI(mpt::ustring str)
 	str = str.substr(path_delim_pos + 1);
 	if(path_delim_pos != mpt::ustring::npos)
 	{
-		std::size_t fragment_delim_pos = str.find(MPT_USTRING("#"));
+		std::size_t fragment_delim_pos = str.find(U_("#"));
 		uri.query = str.substr(0, fragment_delim_pos);
 		if(fragment_delim_pos != mpt::ustring::npos)
 		{
@@ -314,13 +314,13 @@ Result Request::operator()(InternetSession &internet) const
 		{
 			if(!argument.second.empty())
 			{
-				arguments.push_back(mpt::format(MPT_USTRING("%1=%2"))(argument.first, argument.second));
+				arguments.push_back(mpt::format(U_("%1=%2"))(argument.first, argument.second));
 			} else
 			{
-				arguments.push_back(mpt::format(MPT_USTRING("%1"))(argument.first));
+				arguments.push_back(mpt::format(U_("%1"))(argument.first));
 			}
 		}
-		queryPath += MPT_USTRING("?") + mpt::String::Combine(arguments, MPT_USTRING("&"));
+		queryPath += U_("?") + mpt::String::Combine(arguments, U_("&"));
 	}
 	Handle request = NativeHandle(HttpOpenRequest(
 		NativeHandle(connection),
@@ -399,13 +399,13 @@ Result Request::operator()(InternetSession &internet) const
 
 Request &Request::SetURI(const URI &uri)
 {
-	if(uri.scheme == MPT_USTRING(""))
+	if(uri.scheme == U_(""))
 	{
 		throw bad_uri("no scheme");
-	} else if(uri.scheme == MPT_USTRING("http"))
+	} else if(uri.scheme == U_("http"))
 	{
 		protocol = HTTP::Protocol::HTTP;
-	} else if(uri.scheme == MPT_USTRING("https"))
+	} else if(uri.scheme == U_("https"))
 	{
 		protocol = HTTP::Protocol::HTTPS;
 	} else
@@ -424,16 +424,16 @@ Request &Request::SetURI(const URI &uri)
 	password = uri.password;
 	if(uri.path.empty())
 	{
-		path = MPT_USTRING("/");
+		path = U_("/");
 	} else
 	{
 		path = uri.path;
 	}
 	query.clear();
-	auto keyvals = mpt::String::Split<mpt::ustring>(uri.query, MPT_USTRING("&"));
+	auto keyvals = mpt::String::Split<mpt::ustring>(uri.query, U_("&"));
 	for(const auto &keyval : keyvals)
 	{
-		std::size_t delim_pos = keyval.find(MPT_USTRING("="));
+		std::size_t delim_pos = keyval.find(U_("="));
 		mpt::ustring key = keyval.substr(0, delim_pos);
 		mpt::ustring val;
 		if(delim_pos != mpt::ustring::npos)

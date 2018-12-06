@@ -36,7 +36,7 @@ WelcomeDlg::WelcomeDlg(CWnd *parent)
 
 static mpt::PathString GetFullKeyPath(const char *keyFile)
 {
-	return theApp.GetAppDirPath() + MPT_PATHSTRING("extraKeymaps\\") + mpt::PathString::FromUTF8(keyFile) + MPT_PATHSTRING(".mkb");
+	return theApp.GetAppDirPath() + P_("extraKeymaps\\") + mpt::PathString::FromUTF8(keyFile) + P_(".mkb");
 }
 
 
@@ -57,7 +57,7 @@ BOOL WelcomeDlg::OnInitDialog()
 	} else if(SHGetSpecialFolderPath(0, str, CSIDL_PROGRAM_FILES, FALSE))
 	{
 		mpt::String::SetNullTerminator(str);
-		vstPath = mpt::PathString::FromNative(str) + MPT_PATHSTRING("\\Steinberg\\VstPlugins\\");
+		vstPath = mpt::PathString::FromNative(str) + P_("\\Steinberg\\VstPlugins\\");
 		if(!vstPath.IsDirectory())
 		{
 			vstPath = mpt::PathString();
@@ -120,7 +120,7 @@ BOOL WelcomeDlg::OnInitDialog()
 
 	CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 	CheckDlgButton(IDC_CHECK3, BST_UNCHECKED);
-	GetDlgItem(IDC_STATIC_WELCOME_STATISTICS)->SetWindowText(mpt::ToCString(mpt::String::Replace(CUpdateCheck::GetStatisticsUserInformation(false), MPT_USTRING("\n"), MPT_USTRING(" "))));
+	GetDlgItem(IDC_STATIC_WELCOME_STATISTICS)->SetWindowText(mpt::ToCString(mpt::String::Replace(CUpdateCheck::GetStatisticsUserInformation(false), U_("\n"), U_(" "))));
 	CheckDlgButton(IDC_CHECK2, (TrackerSettings::Instance().patternFont.Get().name == PATTERNFONT_LARGE) ? BST_CHECKED : BST_UNCHECKED);
 
 	ShowWindow(SW_SHOW);

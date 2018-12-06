@@ -1735,7 +1735,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 bool CCommandSet::LoadDefaultKeymap()
 {
 	mpt::istringstream ss{ GetDefaultKeymap() };
-	return LoadFile(ss, MPT_USTRING("\"executable resource\""));
+	return LoadFile(ss, U_("\"executable resource\""));
 }
 
 

@@ -121,7 +121,7 @@ CDocument *CModDocManager::OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU
 		return pDoc;
 	}
 
-	if(!mpt::PathString::CompareNoCase(filename.GetFileExt(), MPT_PATHSTRING(".dll")))
+	if(!mpt::PathString::CompareNoCase(filename.GetFileExt(), P_(".dll")))
 	{
 		CVstPluginManager *pPluginManager = theApp.GetPluginManager();
 		if(pPluginManager && pPluginManager->AddPlugin(filename) != nullptr)

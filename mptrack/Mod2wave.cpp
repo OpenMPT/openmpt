@@ -47,12 +47,12 @@ static mpt::ustring GetDefaultYear()
 
 
 StoredTags::StoredTags(SettingsContainer &conf)
-	: artist(conf, MPT_USTRING("Export"), MPT_USTRING("TagArtist"), TrackerSettings::Instance().defaultArtist)
-	, album(conf, MPT_USTRING("Export"), MPT_USTRING("TagAlbum"), MPT_USTRING(""))
-	, trackno(conf, MPT_USTRING("Export"), MPT_USTRING("TagTrackNo"), MPT_USTRING(""))
-	, year(conf, MPT_USTRING("Export"), MPT_USTRING("TagYear"), GetDefaultYear())
-	, url(conf, MPT_USTRING("Export"), MPT_USTRING("TagURL"), MPT_USTRING(""))
-	, genre(conf, MPT_USTRING("Export"), MPT_USTRING("TagGenre"), MPT_USTRING(""))
+	: artist(conf, U_("Export"), U_("TagArtist"), TrackerSettings::Instance().defaultArtist)
+	, album(conf, U_("Export"), U_("TagAlbum"), U_(""))
+	, trackno(conf, U_("Export"), U_("TagTrackNo"), U_(""))
+	, year(conf, U_("Export"), U_("TagYear"), GetDefaultYear())
+	, url(conf, U_("Export"), U_("TagURL"), U_(""))
+	, genre(conf, U_("Export"), U_("TagGenre"), U_(""))
 {
 	return;
 }
@@ -511,7 +511,7 @@ void CWaveConvert::FillDither()
 		m_CbnDither.EnableWindow(TRUE);
 		for(int dither = 0; dither < NumDitherModes; ++dither)
 		{
-			int ndx = m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName((DitherMode)dither) + MPT_USTRING(" dither")));
+			int ndx = m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName((DitherMode)dither) + U_(" dither")));
 			m_CbnDither.SetItemData(ndx, dither);
 		}
 	} else
@@ -519,7 +519,7 @@ void CWaveConvert::FillDither()
 		m_CbnDither.EnableWindow(FALSE);
 		for(int dither = 0; dither < NumDitherModes; ++dither)
 		{
-			int ndx = m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + MPT_USTRING(" dither")));
+			int ndx = m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + U_(" dither")));
 			m_CbnDither.SetItemData(ndx, dither);
 		}
 	}
@@ -775,7 +775,7 @@ void CWaveConvert::OnOK()
 
 		m_EditYear.GetWindowText(tmp);
 		m_Settings.Tags.year = mpt::ToUnicode(tmp);
-		if(m_Settings.Tags.year == MPT_USTRING("0"))
+		if(m_Settings.Tags.year == U_("0"))
 		{
 			m_Settings.Tags.year = mpt::ustring();
 		}
@@ -884,7 +884,7 @@ Encoder::Settings &CWaveConvertSettings::GetEncoderSettings() const
 
 CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::vector<EncoderFactoryBase*> &encFactories)
 	: EncoderFactories(encFactories)
-	, EncoderName(conf, MPT_USTRING("Export"), MPT_USTRING("Encoder"), MPT_USTRING(""))
+	, EncoderName(conf, U_("Export"), U_("Encoder"), U_(""))
 	, EncoderIndex(FindEncoder(EncoderName))
 	, FinalSampleFormat(SampleFormatInt16)
 	, storedTags(conf)
@@ -939,7 +939,7 @@ void CDoWaveConvert::Run()
 	}
 
 	float normalizePeak = 0.0f;
-	const mpt::PathString normalizeFileName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"));
+	const mpt::PathString normalizeFileName = mpt::CreateTempFileName(P_("OpenMPT"));
 	mpt::fstream normalizeFile;
 	if(m_Settings.normalize)
 	{

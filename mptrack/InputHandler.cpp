@@ -29,7 +29,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	//Init CommandSet and Load defaults
 	m_activeCommandSet = std::make_unique<CCommandSet>();
 
-	mpt::PathString sDefaultPath = theApp.GetConfigPath() + MPT_PATHSTRING("Keybindings.mkb");
+	mpt::PathString sDefaultPath = theApp.GetConfigPath() + P_("Keybindings.mkb");
 
 	const bool bNoExistingKbdFileSetting = TrackerSettings::Instance().m_szKbdFile.empty();
 
@@ -49,7 +49,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 		if (!bSuccess)
 		{
 			// Load keybindings from resources.
-			Log(LogDebug, MPT_USTRING("Loading keybindings from resources\n"));
+			Log(LogDebug, U_("Loading keybindings from resources\n"));
 			bSuccess = m_activeCommandSet->LoadDefaultKeymap();
 			if (bSuccess && bNoExistingKbdFileSetting)
 			{
@@ -287,11 +287,11 @@ int CInputHandler::GetKeyListSize(CommandID cmd) const
 
 void CInputHandler::LogModifiers()
 {
-	Log(LogDebug, MPT_USTRING("----------------------------------\n"));
-	if (m_modifierMask[ModCtrl])  Log(LogDebug, MPT_USTRING("Ctrl On")); else Log(LogDebug, MPT_USTRING("Ctrl --"));
-	if (m_modifierMask[ModShift]) Log(LogDebug, MPT_USTRING("\tShft On")); else Log(LogDebug, MPT_USTRING("\tShft --"));
-	if (m_modifierMask[ModAlt])   Log(LogDebug, MPT_USTRING("\tAlt  On")); else Log(LogDebug, MPT_USTRING("\tAlt  --"));
-	if (m_modifierMask[ModWin])   Log(LogDebug, MPT_USTRING("\tWin  On\n")); else Log(LogDebug, MPT_USTRING("\tWin  --\n")); // Feature: use Windows keys as modifier keys
+	Log(LogDebug, U_("----------------------------------\n"));
+	if (m_modifierMask[ModCtrl])  Log(LogDebug, U_("Ctrl On")); else Log(LogDebug, U_("Ctrl --"));
+	if (m_modifierMask[ModShift]) Log(LogDebug, U_("\tShft On")); else Log(LogDebug, U_("\tShft --"));
+	if (m_modifierMask[ModAlt])   Log(LogDebug, U_("\tAlt  On")); else Log(LogDebug, U_("\tAlt  --"));
+	if (m_modifierMask[ModWin])   Log(LogDebug, U_("\tWin  On\n")); else Log(LogDebug, U_("\tWin  --\n")); // Feature: use Windows keys as modifier keys
 }
 
 

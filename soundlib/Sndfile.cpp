@@ -490,7 +490,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			{
 #ifndef MODPLUG_TRACKER
 				// OpenMPT has its own way of reporting this error in CModDoc.
-				AddToLog(LogError, mpt::format(MPT_USTRING("Unable to load sample %1: %2"))(i, filename.ToUnicode()));
+				AddToLog(LogError, mpt::format(U_("Unable to load sample %1: %2"))(i, filename.ToUnicode()));
 #endif // MODPLUG_TRACKER
 			}
 		} else
@@ -582,7 +582,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #ifdef MODPLUG_TRACKER
 				// Provide some visual feedback
 				{
-					mpt::ustring s = mpt::format(MPT_USTRING("Loading Plugin FX%1: %2 (%3)"))(
+					mpt::ustring s = mpt::format(U_("Loading Plugin FX%1: %2 (%3)"))(
 						mpt::ufmt::dec0<2>(plug + 1),
 						mpt::ToUnicode(mpt::CharsetUTF8, plugin.Info.szLibraryName),
 						mpt::ToUnicode(mpt::CharsetLocale, plugin.Info.szName));
@@ -607,7 +607,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 						notFoundText.append(plugin.GetLibraryName());
 						notFoundText.append("\n");
 #else
-						AddToLog(LogWarning, MPT_USTRING("Plugin not found: ") + mpt::ToUnicode(mpt::CharsetUTF8, plugin.GetLibraryName()));
+						AddToLog(LogWarning, U_("Plugin not found: ") + mpt::ToUnicode(mpt::CharsetUTF8, plugin.GetLibraryName()));
 #endif // MODPLUG_TRACKER
 					}
 				}
@@ -627,7 +627,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		{
 			notFoundText = "The following plugins have not been found:\n\n" + notFoundText + "\nDo you want to search for them online?";
 		}
-		if(Reporting::Confirm(mpt::ToUnicode(mpt::CharsetUTF8, notFoundText), MPT_USTRING("OpenMPT - Plugins missing"), false, true) == cnfYes)
+		if(Reporting::Confirm(mpt::ToUnicode(mpt::CharsetUTF8, notFoundText), U_("OpenMPT - Plugins missing"), false, true) == cnfYes)
 		{
 			std::string url = "https://resources.openmpt.org/plugins/search.php?p=";
 			for(const auto &id : notFoundIDs)
@@ -1470,20 +1470,20 @@ mpt::ustring CSoundFile::GetNoteName(const ModCommand::NOTE note, const NoteName
 	{
 		// cppcheck false-positive
 		// cppcheck-suppress constStatement
-		const MPT_UCHAR_TYPE specialNoteNames[][4] = { MPT_ULITERAL("PCs"), MPT_ULITERAL("PC "), MPT_ULITERAL("~~~"), MPT_ULITERAL("^^^"), MPT_ULITERAL("===") };
+		const MPT_UCHAR_TYPE specialNoteNames[][4] = { UL_("PCs"), UL_("PC "), UL_("~~~"), UL_("^^^"), UL_("===") };
 		STATIC_ASSERT(CountOf(specialNoteNames) == NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1);
 		return specialNoteNames[note - NOTE_MIN_SPECIAL];
 	} else if(ModCommand::IsNote(note))
 	{
 		return mpt::ustring()
 			.append(noteNames[(note - NOTE_MIN) % 12])
-			.append(1, MPT_UCHAR('0') + (note - NOTE_MIN) / 12)
+			.append(1, UC_('0') + (note - NOTE_MIN) / 12)
 			;	// e.g. "C#" + "5"
 	} else if(note == NOTE_NONE)
 	{
-		return MPT_ULITERAL("...");
+		return UL_("...");
 	}
-	return MPT_ULITERAL("???");
+	return UL_("???");
 }
 
 

@@ -805,28 +805,28 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.flags & MO3FileHeader::isIT)
 	{
 		SetType(MOD_TYPE_IT);
-		originalFormatType = MPT_USTRING("it");
-		originalFormatName = MPT_USTRING("Impulse Tracker");
+		originalFormatType = U_("it");
+		originalFormatName = U_("Impulse Tracker");
 	} else if(fileHeader.flags & MO3FileHeader::isS3M)
 	{
 		SetType(MOD_TYPE_S3M);
-		originalFormatType = MPT_USTRING("s3m");
-		originalFormatName = MPT_USTRING("ScreamTracker 3");
+		originalFormatType = U_("s3m");
+		originalFormatName = U_("ScreamTracker 3");
 	} else if(fileHeader.flags & MO3FileHeader::isMOD)
 	{
 		SetType(MOD_TYPE_MOD);
-		originalFormatType = MPT_USTRING("mod");
-		originalFormatName = MPT_USTRING("Generic MOD");
+		originalFormatType = U_("mod");
+		originalFormatName = U_("Generic MOD");
 	} else if(fileHeader.flags & MO3FileHeader::isMTM)
 	{
 		SetType(MOD_TYPE_MTM);
-		originalFormatType = MPT_USTRING("mtm");
-		originalFormatName = MPT_USTRING("MultiTracker");
+		originalFormatType = U_("mtm");
+		originalFormatName = U_("MultiTracker");
 	} else
 	{
 		SetType(MOD_TYPE_XM);
-		originalFormatType = MPT_USTRING("xm");
-		originalFormatName = MPT_USTRING("FastTracker 2");
+		originalFormatType = U_("xm");
+		originalFormatName = U_("FastTracker 2");
 	}
 
 	if(fileHeader.flags & MO3FileHeader::linearSlides)
@@ -1558,13 +1558,13 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 				if(headStreamSerials.size() > 1)
 				{
-					AddToLog(LogWarning, mpt::format(MPT_USTRING("Sample %1: Ogg Vorbis data with shared header and multiple logical bitstreams in header chunk found. This may be handled incorrectly."))(smp));
+					AddToLog(LogWarning, mpt::format(U_("Sample %1: Ogg Vorbis data with shared header and multiple logical bitstreams in header chunk found. This may be handled incorrectly."))(smp));
 				} else if(dataStreamSerials.size() > 1)
 				{
-					AddToLog(LogWarning, mpt::format(MPT_USTRING("Sample %1: Ogg Vorbis sample with shared header and multiple logical bitstreams found. This may be handled incorrectly."))(smp));
+					AddToLog(LogWarning, mpt::format(U_("Sample %1: Ogg Vorbis sample with shared header and multiple logical bitstreams found. This may be handled incorrectly."))(smp));
 				} else if((dataStreamSerials.size() == 1) && (headStreamSerials.size() == 1) && (dataStreamSerials[0] != headStreamSerials[0]))
 				{
-					AddToLog(LogInformation, mpt::format(MPT_USTRING("Sample %1: Ogg Vorbis data with shared header and different logical bitstream serials found."))(smp));
+					AddToLog(LogInformation, mpt::format(U_("Sample %1: Ogg Vorbis data with shared header and different logical bitstream serials found."))(smp));
 				}
 
 				std::string mergedStreamData = mergedStream.str();
@@ -1656,7 +1656,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					}
 				} else
 				{
-					AddToLog(LogWarning, mpt::format(MPT_USTRING("Sample %1: Unsupported Ogg Vorbis chained stream found."))(smp));
+					AddToLog(LogWarning, mpt::format(U_("Sample %1: Unsupported Ogg Vorbis chained stream found."))(smp));
 					unsupportedSamples = true;
 				}
 				ov_clear(&vf);
@@ -1804,7 +1804,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			case MOD_TYPE_MTM:
 				{
 					uint8 mtmVersion = chunk.ReadUint8();
-					madeWithTracker = mpt::format(MPT_USTRING("MultiTracker %1.%2"))(mtmVersion >> 4, mtmVersion & 0x0F);
+					madeWithTracker = mpt::format(U_("MultiTracker %1.%2"))(mtmVersion >> 4, mtmVersion & 0x0F);
 				}
 				break;
 			default:
@@ -1852,7 +1852,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 			if(m_dwLastSavedWithVersion)
 			{
-				madeWithTracker = MPT_USTRING("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
+				madeWithTracker = U_("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
 			}
 			break;
 		}
@@ -1867,12 +1867,12 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	if(madeWithTracker.empty())
-		madeWithTracker = mpt::format(MPT_USTRING("MO3 v%1"))(version);
+		madeWithTracker = mpt::format(U_("MO3 v%1"))(version);
 	else
-		madeWithTracker = mpt::format(MPT_USTRING("MO3 v%1 (%2)"))(version, madeWithTracker);
+		madeWithTracker = mpt::format(U_("MO3 v%1 (%2)"))(version, madeWithTracker);
 
-	m_modFormat.formatName = mpt::format(MPT_USTRING("Un4seen MO3 v%1"))(version);
-	m_modFormat.type = MPT_USTRING("mo3");
+	m_modFormat.formatName = mpt::format(U_("Un4seen MO3 v%1"))(version);
+	m_modFormat.type = U_("mo3");
 	m_modFormat.originalType = std::move(originalFormatType);
 	m_modFormat.originalFormatName = std::move(originalFormatName);
 	m_modFormat.madeWithTracker = std::move(madeWithTracker);
@@ -1885,7 +1885,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(unsupportedSamples)
 	{
-		AddToLog(LogWarning, MPT_USTRING("Some compressed samples could not be loaded because they use an unsupported codec."));
+		AddToLog(LogWarning, U_("Some compressed samples could not be loaded because they use an unsupported codec."));
 	}
 
 	return true;

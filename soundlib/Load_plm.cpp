@@ -149,8 +149,8 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeChannels();
 	m_SongFlags = SONG_ITOLDEFFECTS;
 
-	m_modFormat.formatName = MPT_USTRING("Disorder Tracker 2");
-	m_modFormat.type = MPT_USTRING("plm");
+	m_modFormat.formatName = U_("Disorder Tracker 2");
+	m_modFormat.type = U_("plm");
 	m_modFormat.charset = mpt::CharsetCP437;
 
 	// Some PLMs use ASCIIZ, some space-padding strings...weird. Oh, and the file browser stops at 0 bytes in the name, the main GUI doesn't.

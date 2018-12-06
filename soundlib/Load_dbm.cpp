@@ -351,9 +351,9 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
 	m_playBehaviour.reset(kITArpeggio);
 
-	m_modFormat.formatName = MPT_USTRING("DigiBooster Pro");
-	m_modFormat.type = MPT_USTRING("dbm");
-	m_modFormat.madeWithTracker = mpt::format(MPT_USTRING("DigiBooster Pro %1.%2"))(mpt::ufmt::hex(fileHeader.trkVerHi), mpt::ufmt::hex(fileHeader.trkVerLo));
+	m_modFormat.formatName = U_("DigiBooster Pro");
+	m_modFormat.type = U_("dbm");
+	m_modFormat.madeWithTracker = mpt::format(U_("DigiBooster Pro %1.%2"))(mpt::ufmt::hex(fileHeader.trkVerHi), mpt::ufmt::hex(fileHeader.trkVerLo));
 	m_modFormat.charset = mpt::CharsetISO8859_1;
 
 	// Name chunk

@@ -85,7 +85,7 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 	caps.HasNamedInputSources = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = false;
-	caps.ExclusiveModeDescription = MPT_USTRING("Use direct mode");
+	caps.ExclusiveModeDescription = U_("Use direct mode");
 	if(GetSysInfo().IsWine)
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
@@ -233,7 +233,7 @@ bool CWaveDevice::InternalClose()
 	#ifdef MPT_BUILD_DEBUG
 		if(m_DriverBugs.load())
 		{
-				SendDeviceMessage(LogError, MPT_USTRING("Errors were detected while playing sound:\n") + GetStatistics().text);
+				SendDeviceMessage(LogError, U_("Errors were detected while playing sound:\n") + GetStatistics().text);
 		}
 	#endif
 	m_DriverBugs = 0;
@@ -296,7 +296,7 @@ bool CWaveDevice::CheckResult(MMRESULT result)
 		TCHAR errortext[MAXERRORLENGTH + 1];
 		MemsetZero(errortext);
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
-		SendDeviceMessage(LogError, mpt::format(MPT_USTRING("WaveOut error: 0x%1: %2"))
+		SendDeviceMessage(LogError, mpt::format(U_("WaveOut error: 0x%1: %2"))
 			( mpt::ufmt::hex0<8>(result)
 			, mpt::ToUnicode(mpt::String::ReadWinBuf(errortext))
 			));
@@ -318,7 +318,7 @@ bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
 		TCHAR errortext[MAXERRORLENGTH + 1];
 		MemsetZero(errortext);
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
-		SendDeviceMessage(LogError, mpt::format(MPT_USTRING("WaveOut error: 0x%1 (param 0x%2): %3"))
+		SendDeviceMessage(LogError, mpt::format(U_("WaveOut error: 0x%1 (param 0x%2): %3"))
 			( mpt::ufmt::hex0<8>(result)
 			, mpt::ufmt::hex0<8>(param)
 			, mpt::ToUnicode(mpt::String::ReadWinBuf(errortext))
@@ -536,10 +536,10 @@ SoundDevice::Statistics CWaveDevice::GetStatistics() const
 	uint32 bugs = m_DriverBugs.load();
 	if(bugs != 0)
 	{
-		result.text = mpt::format(MPT_USTRING("Problematic driver detected! Error flags: %1"))(mpt::ufmt::hex0<8>(bugs));
+		result.text = mpt::format(U_("Problematic driver detected! Error flags: %1"))(mpt::ufmt::hex0<8>(bugs));
 	} else
 	{
-		result.text = mpt::format(MPT_USTRING("Driver working as expected."))();
+		result.text = mpt::format(U_("Driver working as expected."))();
 	}
 	return result;
 }
@@ -555,21 +555,21 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInf
 		SoundDevice::Info info;
 		info.type = TypeWAVEOUT;
 		info.internalID = mpt::ufmt::dec(index);
-		info.apiName = MPT_USTRING("WaveOut");
+		info.apiName = U_("WaveOut");
 		info.useNameAsIdentifier = true;
 		WAVEOUTCAPS woc;
 		MemsetZero(woc);
 		if(waveOutGetDevCaps((index == 0) ? WAVE_MAPPER : (index - 1), &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 		{
 			info.name = mpt::ToUnicode(mpt::String::ReadWinBuf(woc.szPname));
-			info.extraData[MPT_USTRING("DriverID")] = mpt::format(MPT_USTRING("%1:%2"))(mpt::ufmt::hex0<4>(woc.wMid), mpt::ufmt::hex0<4>(woc.wPid));
-			info.extraData[MPT_USTRING("DriverVersion")] = mpt::format(MPT_USTRING("%3.%4"))(mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
+			info.extraData[U_("DriverID")] = mpt::format(U_("%1:%2"))(mpt::ufmt::hex0<4>(woc.wMid), mpt::ufmt::hex0<4>(woc.wPid));
+			info.extraData[U_("DriverVersion")] = mpt::format(U_("%3.%4"))(mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
 		} else if(index == 0)
 		{
-			info.name = mpt::format(MPT_USTRING("Auto (Wave Mapper)"))();
+			info.name = mpt::format(U_("Auto (Wave Mapper)"))();
 		} else
 		{
-			info.name = mpt::format(MPT_USTRING("Device %1"))(index - 1);
+			info.name = mpt::format(U_("Device %1"))(index - 1);
 		}
 		info.isDefault = (index == 0);
 		devices.push_back(info);

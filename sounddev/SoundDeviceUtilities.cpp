@@ -147,7 +147,7 @@ bool ComponentAvRt::DoInitialize()
 	{
 		return false;
 	}
-	AddLibrary("avrt", mpt::LibraryPath::System(MPT_PATHSTRING("avrt")));
+	AddLibrary("avrt", mpt::LibraryPath::System(P_("avrt")));
 	MPT_COMPONENT_BINDWIN("avrt", AvSetMmThreadCharacteristics);
 	MPT_COMPONENT_BIND("avrt", AvRevertMmThreadCharacteristics);
 	if(HasBindFailed())
@@ -513,9 +513,9 @@ public:
 						} else
 						{
 							#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
-								MPT_LOG(LogNotification, "sounddev", mpt::format(MPT_USTRING("sched_setscheduler: %1"))(errno));
+								MPT_LOG(LogNotification, "sounddev", mpt::format(U_("sched_setscheduler: %1"))(errno));
 							#else
-								MPT_LOG(LogError, "sounddev", mpt::format(MPT_USTRING("sched_setscheduler: %1"))(errno));
+								MPT_LOG(LogError, "sounddev", mpt::format(U_("sched_setscheduler: %1"))(errno));
 							#endif
 						}
 					#else
@@ -525,9 +525,9 @@ public:
 						} else
 						{
 							#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
-								MPT_LOG(LogNotification, "sounddev", mpt::format(MPT_USTRING("sched_setscheduler: %1"))(errno));
+								MPT_LOG(LogNotification, "sounddev", mpt::format(U_("sched_setscheduler: %1"))(errno));
 							#else
-								MPT_LOG(LogError, "sounddev", mpt::format(MPT_USTRING("sched_setscheduler: %1"))(errno));
+								MPT_LOG(LogError, "sounddev", mpt::format(U_("sched_setscheduler: %1"))(errno));
 							#endif
 						}
 					#endif
@@ -540,9 +540,9 @@ public:
 				} else
 				{
 					#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
-						MPT_LOG(LogNotification, "sounddev", mpt::format(MPT_USTRING("setpriority: %1"))(errno));
+						MPT_LOG(LogNotification, "sounddev", mpt::format(U_("setpriority: %1"))(errno));
 					#else
-						MPT_LOG(LogError, "sounddev", mpt::format(MPT_USTRING("setpriority: %1"))(errno));
+						MPT_LOG(LogError, "sounddev", mpt::format(U_("setpriority: %1"))(errno));
 					#endif
 				}
 			}
@@ -554,7 +554,7 @@ public:
 					bus = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
 					if(!bus)
 					{
-						MPT_LOG(LogError, "sounddev", mpt::format(MPT_USTRING("DBus: dbus_bus_get: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, error.message)));
+						MPT_LOG(LogError, "sounddev", mpt::format(U_("DBus: dbus_bus_get: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, error.message)));
 					}
 					dbus_error_free(&error);
 					if(bus)
@@ -563,7 +563,7 @@ public:
 						{
 							int e = rtkit_make_realtime(bus, 0, rt_priority);
 							if(e != 0) {
-								MPT_LOG(LogError, "sounddev", mpt::format(MPT_USTRING("RtKit: rtkit_make_realtime: %1"))(e));
+								MPT_LOG(LogError, "sounddev", mpt::format(U_("RtKit: rtkit_make_realtime: %1"))(e));
 							} else
 							{
 								successfull = true;
@@ -572,7 +572,7 @@ public:
 						{
 							int e = rtkit_make_high_priority(bus, 0, niceness);
 							if(e != 0) {
-								MPT_LOG(LogError, "sounddev", mpt::format(MPT_USTRING("RtKit: rtkit_make_high_priority: %1"))(e));
+								MPT_LOG(LogError, "sounddev", mpt::format(U_("RtKit: rtkit_make_high_priority: %1"))(e));
 							} else
 							{
 								successfull = true;

@@ -44,12 +44,12 @@ CSoundfile::AddToLog.
 
 Logging a simple message:
 MPT_LOG(LogWarning, "sounddev", "some message");
-MPT_LOG(LogWarning, "sounddev", MPT_USTRING("some message"));
+MPT_LOG(LogWarning, "sounddev", U_("some message"));
 Facility is some course grained code section identifier (more coarse grained
 than the current file name probably), useful to do some selective logging.
 
 Logging a more complex message:
-MPT_LOG(LogWarning, "sounddev", mpt::format(MPT_USTRING("Some message: foo=%1, bar=0x%2"))(foo, mpt::ufmt::hex0<8>(bar)));
+MPT_LOG(LogWarning, "sounddev", mpt::format(U_("Some message: foo=%1, bar=0x%2"))(foo, mpt::ufmt::hex0<8>(bar)));
 
 Note that even with full enabled logging and a runtime configurable logging
 level, the runtime overhead of a MPT_LOG(level, facility, text) call is just a
@@ -74,13 +74,13 @@ inline mpt::ustring LogLevelToString(LogLevel level)
 {
 	switch(level)
 	{
-	case LogError:        return MPT_USTRING("error");   break;
-	case LogWarning:      return MPT_USTRING("warning"); break;
-	case LogNotification: return MPT_USTRING("notify");  break;
-	case LogInformation:  return MPT_USTRING("info");    break;
-	case LogDebug:        return MPT_USTRING("debug");   break;
+	case LogError:        return U_("error");   break;
+	case LogWarning:      return U_("warning"); break;
+	case LogNotification: return U_("notify");  break;
+	case LogInformation:  return U_("info");    break;
+	case LogDebug:        return U_("debug");   break;
 	}
-	return MPT_USTRING("unknown");
+	return U_("unknown");
 }
 
 

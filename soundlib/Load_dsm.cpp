@@ -208,8 +208,8 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_DSM);
 
-	m_modFormat.formatName = MPT_USTRING("DSIK Format");
-	m_modFormat.type = MPT_USTRING("dsm");
+	m_modFormat.formatName = U_("DSIK Format");
+	m_modFormat.type = U_("dsm");
 	m_modFormat.charset = mpt::CharsetCP437;
 
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, songHeader.songName);

@@ -211,7 +211,7 @@ namespace mpt { namespace String {
 // An empty string results in an empty vector.
 // Leading or trailing separators result in a default-constructed element being inserted before or after the other elements.
 template<typename T>
-std::vector<T> Split(const mpt::ustring &str, const mpt::ustring &sep=MPT_USTRING(","))
+std::vector<T> Split(const mpt::ustring &str, const mpt::ustring &sep=U_(","))
 {
 	std::vector<T> vals;
 	std::size_t pos = 0;

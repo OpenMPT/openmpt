@@ -102,13 +102,13 @@ List of string types
 
  *  mpt::PathString (OpenMPT, libopenmpt)
     String type representing paths and filenames. Always use for these in order
-    to avoid potentially lossy conversions. Use MPT_PATHSTRING("") macro for
+    to avoid potentially lossy conversions. Use P_("") macro for
     literals.
 
  *  mpt::ustring (OpenMPT, libopenmpt)
     The default unicode string type. Can be encoded in UTF8 or UTF16 or UTF32,
     depending on MPT_USTRING_MODE_* and sizeof(wchar_t). Literals can written as
-    MPT_USTRING(""). Use as your default string type if no other string type is
+    U_(""). Use as your default string type if no other string type is
     a measurably better fit.
 
  *  MPT_UTF8 (OpenMPT, libopenmpt)

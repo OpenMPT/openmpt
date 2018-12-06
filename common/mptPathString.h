@@ -362,7 +362,7 @@ mpt::PathString GetSystemPath();
 mpt::PathString GetTempDirectory();
 
 // Returns a new unique absolute path.
-mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = MPT_PATHSTRING("tmp"));
+mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = P_("tmp"));
 
 
 
@@ -466,7 +466,7 @@ public:
 	}
 	static FileType Any()
 	{
-		return FileType().ShortName(MPT_USTRING("*")).Description(MPT_USTRING("All Files")).AddExtension(MPT_PATHSTRING("*"));
+		return FileType().ShortName(U_("*")).Description(U_("All Files")).AddExtension(P_("*"));
 	}
 public:
 	FileType& ShortName(const mpt::ustring &shortName) { m_ShortName = shortName; return *this; }

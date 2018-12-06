@@ -157,9 +157,9 @@ bool CSoundFile::ReadC67(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_S3M);
 	InitializeChannels();
 
-	m_modFormat.formatName = MPT_USTRING("CDFM");
-	m_modFormat.type = MPT_USTRING("c67");
-	m_modFormat.madeWithTracker = MPT_USTRING("Composer 670");
+	m_modFormat.formatName = U_("CDFM");
+	m_modFormat.type = U_("c67");
+	m_modFormat.madeWithTracker = U_("Composer 670");
 	m_modFormat.charset = mpt::CharsetCP437;
 
 	m_nDefaultSpeed = fileHeader.speed;

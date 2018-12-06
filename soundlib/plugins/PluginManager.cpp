@@ -64,7 +64,7 @@ OPENMPT_NAMESPACE_BEGIN
 //#define DMO_LOG
 
 #ifdef MODPLUG_TRACKER
-static const MPT_UCHAR_TYPE *const cacheSection = MPT_ULITERAL("PluginCache");
+static const MPT_UCHAR_TYPE *const cacheSection = UL_("PluginCache");
 #endif // MODPLUG_TRACKER
 
 
@@ -106,8 +106,8 @@ void VSTPluginLib::WriteToCache() const
 	}
 
 	cacheFile.Write<mpt::ustring>(cacheSection, writePath.ToUnicode(), IDs);
-	cacheFile.Write<CString>(cacheSection, IDs + MPT_USTRING(".Vendor"), vendor);
-	cacheFile.Write<int32>(cacheSection, IDs + MPT_USTRING(".Flags"), EncodeCacheFlags());
+	cacheFile.Write<CString>(cacheSection, IDs + U_(".Vendor"), vendor);
+	cacheFile.Write<int32>(cacheSection, IDs + U_(".Flags"), EncodeCacheFlags());
 }
 #endif // MODPLUG_TRACKER
 
@@ -287,7 +287,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 									delete plug;
 								}
 #ifdef DMO_LOG
-								Log(mpt::format(MPT_USTRING("Found \"%1\" clsid=%2\n"))(plug->libraryName, plug->dllPath));
+								Log(mpt::format(U_("Found \"%1\" clsid=%2\n"))(plug->libraryName, plug->dllPath));
 #endif
 							}
 						}
@@ -350,12 +350,12 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	{
 		SettingsContainer & cacheFile = theApp.GetPluginCache();
 		// First try finding the full path
-		mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, dllPath.ToUnicode(), MPT_USTRING(""));
+		mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, dllPath.ToUnicode(), U_(""));
 		if(IDs.length() < 16)
 		{
 			// If that didn't work out, find relative path
 			mpt::PathString relPath = theApp.AbsolutePathToRelative(dllPath);
-			IDs = cacheFile.Read<mpt::ustring>(cacheSection, relPath.ToUnicode(), MPT_USTRING(""));
+			IDs = cacheFile.Read<mpt::ustring>(cacheSection, relPath.ToUnicode(), U_(""));
 		}
 
 		if(IDs.length() >= 16)
@@ -382,9 +382,9 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 				}
 			}
 
-			const mpt::ustring flagKey = IDs + MPT_USTRING(".Flags");
+			const mpt::ustring flagKey = IDs + U_(".Flags");
 			plug->DecodeCacheFlags(cacheFile.Read<int32>(cacheSection, flagKey, 0));
-			plug->vendor = cacheFile.Read<CString>(cacheSection, IDs + MPT_USTRING(".Vendor"), CString());
+			plug->vendor = cacheFile.Read<CString>(cacheSection, IDs + U_(".Vendor"), CString());
 
 #ifdef VST_LOG
 			Log("Plugin \"%s\" found in PluginCache\n", plug->libraryName.ToLocale().c_str());
@@ -399,7 +399,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	}
 
 	// If this key contains a file name on program launch, a plugin previously crashed OpenMPT.
-	theApp.GetSettings().Write<mpt::PathString>(MPT_USTRING("VST Plugins"), MPT_USTRING("FailedPlugin"), dllPath, SettingWriteThrough);
+	theApp.GetSettings().Write<mpt::PathString>(U_("VST Plugins"), U_("FailedPlugin"), dllPath, SettingWriteThrough);
 
 	bool validPlug = false;
 
@@ -442,12 +442,12 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	FreeLibrary(hLib);
 	if(exception != 0)
 	{
-		CVstPluginManager::ReportPlugException(mpt::format(MPT_USTRING("Exception %1 while trying to load plugin \"%2\"!\n"))(mpt::ufmt::HEX0<8>(exception), plug->libraryName));
+		CVstPluginManager::ReportPlugException(mpt::format(U_("Exception %1 while trying to load plugin \"%2\"!\n"))(mpt::ufmt::HEX0<8>(exception), plug->libraryName));
 	}
 #endif // NO_VST
 
 	// Now it should be safe to assume that this plugin loaded properly. :)
-	theApp.GetSettings().Remove(MPT_USTRING("VST Plugins"), MPT_USTRING("FailedPlugin"));
+	theApp.GetSettings().Remove(U_("VST Plugins"), U_("FailedPlugin"));
 
 	// If OK, write the information in PluginCache
 	if(validPlug)
@@ -546,19 +546,19 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		mpt::PathString fullPath = TrackerSettings::Instance().PathPlugins.GetDefaultDir();
 		if(fullPath.empty())
 		{
-			fullPath = theApp.GetAppDirPath() + MPT_PATHSTRING("Plugins\\");
+			fullPath = theApp.GetAppDirPath() + P_("Plugins\\");
 		}
-		fullPath += mpt::PathString::FromUTF8(mixPlugin.GetLibraryName()) + MPT_PATHSTRING(".dll");
+		fullPath += mpt::PathString::FromUTF8(mixPlugin.GetLibraryName()) + P_(".dll");
 
 		pFound = AddPlugin(fullPath);
 		if(!pFound)
 		{
 			// Try plugin cache (search for library name)
 			SettingsContainer &cacheFile = theApp.GetPluginCache();
-			mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, mpt::ToUnicode(mpt::CharsetUTF8, mixPlugin.GetLibraryName()), MPT_USTRING(""));
+			mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, mpt::ToUnicode(mpt::CharsetUTF8, mixPlugin.GetLibraryName()), U_(""));
 			if(IDs.length() >= 16)
 			{
-				fullPath = cacheFile.Read<mpt::PathString>(cacheSection, IDs, MPT_PATHSTRING(""));
+				fullPath = cacheFile.Read<mpt::PathString>(cacheSection, IDs, P_(""));
 				if(!fullPath.empty())
 				{
 					fullPath = theApp.RelativePathToAbsolute(fullPath);
@@ -599,7 +599,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		if(!validPlugin)
 		{
 			FreeLibrary(hLibrary);
-			CVstPluginManager::ReportPlugException(mpt::format(MPT_USTRING("Unable to create plugin \"%1\"!\n"))(pFound->libraryName));
+			CVstPluginManager::ReportPlugException(mpt::format(U_("Unable to create plugin \"%1\"!\n"))(pFound->libraryName));
 		}
 		return validPlugin;
 	} else

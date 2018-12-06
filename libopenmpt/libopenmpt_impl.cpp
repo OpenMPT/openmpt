@@ -99,12 +99,12 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 	if(msg)
 	{
 		mpt::log::Logger().SendLogMessage(loc, LogError, "ASSERT",
-			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, msg) + MPT_USTRING(" (") + mpt::ToUnicode(mpt::CharsetASCII, expr) + MPT_USTRING(")")
+			U_("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, msg) + U_(" (") + mpt::ToUnicode(mpt::CharsetASCII, expr) + U_(")")
 			);
 	} else
 	{
 		mpt::log::Logger().SendLogMessage(loc, LogError, "ASSERT",
-			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, expr)
+			U_("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetASCII, expr)
 			);
 	}
 	#if defined(MPT_BUILD_FATAL_ASSERTS)
@@ -194,7 +194,7 @@ static std::string get_credits_string() {
 }
 
 static std::string get_contact_string() {
-	return mpt::ToCharset(mpt::CharsetUTF8, MPT_USTRING("Forum: ") +  Build::GetURL(Build::Url::Forum));
+	return mpt::ToCharset(mpt::CharsetUTF8, U_("Forum: ") +  Build::GetURL(Build::Url::Forum));
 }
 
 static std::string get_license_string() {
@@ -295,7 +295,7 @@ public:
 	}
 private:
 	void AddToLog( LogLevel level, const mpt::ustring & text ) const override {
-		destination.log( mpt::ToCharset( mpt::CharsetUTF8, LogLevelToString( level ) + MPT_USTRING(": ") + text ) );
+		destination.log( mpt::ToCharset( mpt::CharsetUTF8, LogLevelToString( level ) + U_(": ") + text ) );
 	}
 }; // class log_forwarder
 

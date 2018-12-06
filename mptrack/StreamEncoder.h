@@ -92,23 +92,23 @@ template<> inline SettingValue ToSettingValue(const Encoder::Mode &val)
 {
 	switch(val)
 	{
-		case Encoder::ModeCBR: return SettingValue(MPT_USTRING("CBR"), "Encoder::Mode"); break;
-		case Encoder::ModeABR: return SettingValue(MPT_USTRING("ABR"), "Encoder::Mode"); break;
-		case Encoder::ModeVBR: return SettingValue(MPT_USTRING("VBR"), "Encoder::Mode"); break;
-		case Encoder::ModeQuality: return SettingValue(MPT_USTRING("Quality"), "Encoder::Mode"); break;
-		case Encoder::ModeEnumerated: return SettingValue(MPT_USTRING("Enumerated"), "Encoder::Mode"); break;
-		default: return SettingValue(MPT_USTRING("Invalid"), "Encoder::Mode"); break;
+		case Encoder::ModeCBR: return SettingValue(U_("CBR"), "Encoder::Mode"); break;
+		case Encoder::ModeABR: return SettingValue(U_("ABR"), "Encoder::Mode"); break;
+		case Encoder::ModeVBR: return SettingValue(U_("VBR"), "Encoder::Mode"); break;
+		case Encoder::ModeQuality: return SettingValue(U_("Quality"), "Encoder::Mode"); break;
+		case Encoder::ModeEnumerated: return SettingValue(U_("Enumerated"), "Encoder::Mode"); break;
+		default: return SettingValue(U_("Invalid"), "Encoder::Mode"); break;
 	}
 }
 template<> inline Encoder::Mode FromSettingValue(const SettingValue &val)
 {
 	ASSERT(val.GetTypeTag() == "Encoder::Mode");
-	if(val.as<mpt::ustring>() == MPT_USTRING("")) { return Encoder::ModeInvalid; }
-	else if(val.as<mpt::ustring>() == MPT_USTRING("CBR")) { return Encoder::ModeCBR; }
-	else if(val.as<mpt::ustring>() == MPT_USTRING("ABR")) { return Encoder::ModeABR; }
-	else if(val.as<mpt::ustring>() == MPT_USTRING("VBR")) { return Encoder::ModeVBR; }
-	else if(val.as<mpt::ustring>() == MPT_USTRING("Quality")) { return Encoder::ModeQuality; }
-	else if(val.as<mpt::ustring>() == MPT_USTRING("Enumerated")) { return Encoder::ModeEnumerated; }
+	if(val.as<mpt::ustring>() == U_("")) { return Encoder::ModeInvalid; }
+	else if(val.as<mpt::ustring>() == U_("CBR")) { return Encoder::ModeCBR; }
+	else if(val.as<mpt::ustring>() == U_("ABR")) { return Encoder::ModeABR; }
+	else if(val.as<mpt::ustring>() == U_("VBR")) { return Encoder::ModeVBR; }
+	else if(val.as<mpt::ustring>() == U_("Quality")) { return Encoder::ModeQuality; }
+	else if(val.as<mpt::ustring>() == U_("Enumerated")) { return Encoder::ModeEnumerated; }
 	else { return Encoder::ModeInvalid; }
 }
 
@@ -181,15 +181,15 @@ namespace Encoder
 		Setting<int> Dither;
 		
 		Settings(SettingsContainer &conf, const mpt::ustring &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format, int dither)
-			: Cues(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Cues"), cues)
-			, Tags(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Tags"), tags)
-			, Samplerate(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Samplerate"), samplerate)
-			, Channels(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Channels"), channels)
-			, Mode(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Mode"), mode)
-			, Bitrate(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Bitrate"), bitrate)
-			, Quality(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Quality"), quality)
-			, Format(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Format"), format)
-			, Dither(conf, MPT_USTRING("Export"), encoderName + MPT_USTRING("_") + MPT_USTRING("Dither"), dither)
+			: Cues(conf, U_("Export"), encoderName + U_("_") + U_("Cues"), cues)
+			, Tags(conf, U_("Export"), encoderName + U_("_") + U_("Tags"), tags)
+			, Samplerate(conf, U_("Export"), encoderName + U_("_") + U_("Samplerate"), samplerate)
+			, Channels(conf, U_("Export"), encoderName + U_("_") + U_("Channels"), channels)
+			, Mode(conf, U_("Export"), encoderName + U_("_") + U_("Mode"), mode)
+			, Bitrate(conf, U_("Export"), encoderName + U_("_") + U_("Bitrate"), bitrate)
+			, Quality(conf, U_("Export"), encoderName + U_("_") + U_("Quality"), quality)
+			, Format(conf, U_("Export"), encoderName + U_("_") + U_("Format"), format)
+			, Dither(conf, U_("Export"), encoderName + U_("_") + U_("Dither"), dither)
 		{
 			return;
 		}

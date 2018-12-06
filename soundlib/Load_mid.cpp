@@ -633,10 +633,10 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	const ORDERINDEX MPT_MIDI_IMPORT_MAX_ORDERS = MAX_ORDERS;
 #endif
 
-	m_songArtist = MPT_USTRING("MIDI Conversion");
-	m_modFormat.formatName = MPT_USTRING("Standard MIDI File");
-	m_modFormat.type = isRIFF ? MPT_ULITERAL("rmi") : MPT_ULITERAL("mid");
-	m_modFormat.madeWithTracker = MPT_USTRING("Standard MIDI File");
+	m_songArtist = U_("MIDI Conversion");
+	m_modFormat.formatName = U_("Standard MIDI File");
+	m_modFormat.type = isRIFF ? UL_("rmi") : UL_("mid");
+	m_modFormat.madeWithTracker = U_("Standard MIDI File");
 	m_modFormat.charset = mpt::CharsetISO8859_1;
 
 	SetMixLevels(mixLevels1_17RC3);
@@ -1255,7 +1255,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	} else
 	{
 		// Soundfont with same name as MIDI file
-		for(const auto &ext : { MPT_PATHSTRING(".sf2"), MPT_PATHSTRING(".sbk"), MPT_PATHSTRING(".dls") })
+		for(const auto &ext : { P_(".sf2"), P_(".sbk"), P_(".dls") })
 		{
 			mpt::PathString filename = file.GetFileName().ReplaceExt(ext);
 			if(filename.IsFile())

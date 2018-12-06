@@ -221,9 +221,9 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 {
 	mpt::PathString UltraSndPath;
 
-	UltraSndPath = file.Read<mpt::PathString>(MPT_USTRING("Ultrasound"), MPT_USTRING("PatchDir"), mpt::PathString());
-	if(forgetSettings) file.Forget(MPT_USTRING("Ultrasound"), MPT_USTRING("PatchDir"));
-	if(UltraSndPath.empty() || UltraSndPath == MPT_PATHSTRING(".\\"))
+	UltraSndPath = file.Read<mpt::PathString>(U_("Ultrasound"), U_("PatchDir"), mpt::PathString());
+	if(forgetSettings) file.Forget(U_("Ultrasound"), U_("PatchDir"));
+	if(UltraSndPath.empty() || UltraSndPath == P_(".\\"))
 	{
 		std::vector<TCHAR> curDir(::GetCurrentDirectory(0, nullptr), '\0');
 		::GetCurrentDirectory(static_cast<DWORD>(curDir.size()), curDir.data());
@@ -232,18 +232,18 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 	for(uint32 iMidi = 0; iMidi < 256; iMidi++)
 	{
 		mpt::PathString filename;
-		mpt::ustring key = mpt::format(MPT_USTRING("%1%2"))((iMidi < 128) ? MPT_USTRING("Midi") : MPT_USTRING("Perc"), iMidi & 0x7f);
-		filename = file.Read<mpt::PathString>(MPT_USTRING("Midi Library"), key, mpt::PathString());
+		mpt::ustring key = mpt::format(U_("%1%2"))((iMidi < 128) ? U_("Midi") : U_("Perc"), iMidi & 0x7f);
+		filename = file.Read<mpt::PathString>(U_("Midi Library"), key, mpt::PathString());
 		// Check for ULTRASND.INI
 		if(filename.empty())
 		{
-			mpt::ustring section = (iMidi < 128) ? MPT_ULITERAL("Melodic Patches") : MPT_ULITERAL("Drum Patches");
+			mpt::ustring section = (iMidi < 128) ? UL_("Melodic Patches") : UL_("Drum Patches");
 			key = mpt::ufmt::val(iMidi & 0x7f);
 			filename = file.Read<mpt::PathString>(section, key, mpt::PathString());
 			if(forgetSettings) file.Forget(section, key);
 			if(filename.empty())
 			{
-				section = (iMidi < 128) ? MPT_ULITERAL("Melodic Bank 0") : MPT_ULITERAL("Drum Bank 0");
+				section = (iMidi < 128) ? UL_("Melodic Bank 0") : UL_("Drum Bank 0");
 				filename = file.Read<mpt::PathString>(section, key, mpt::PathString());
 				if(forgetSettings) file.Forget(section, key);
 			}
@@ -255,7 +255,7 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 					tmp = UltraSndPath;
 					tmp.EnsureTrailingSlash();
 				}
-				filename = tmp + filename + MPT_PATHSTRING(".pat");
+				filename = tmp + filename + P_(".pat");
 			}
 		}
 		if(!filename.empty())
@@ -286,8 +286,8 @@ BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
 			if(theApp.IsPortableMode())
 				szFileName = theApp.AbsolutePathToRelative(szFileName);
 
-			mpt::ustring key = mpt::format(MPT_USTRING("%1%2"))((iMidi < 128) ? MPT_USTRING("Midi") : MPT_USTRING("Perc"), iMidi & 0x7f);
-			file.Write<mpt::PathString>(MPT_USTRING("Midi Library"), key, szFileName);
+			mpt::ustring key = mpt::format(U_("%1%2"))((iMidi < 128) ? U_("Midi") : U_("Perc"), iMidi & 0x7f);
+			file.Write<mpt::PathString>(U_("Midi Library"), key, szFileName);
 		}
 	}
 	return TRUE;
@@ -302,11 +302,11 @@ std::vector<CDLSBank *> CTrackApp::gpDLSBanks;
 
 void CTrackApp::LoadDefaultDLSBanks()
 {
-	uint32 numBanks = theApp.GetSettings().Read<uint32>(MPT_USTRING("DLS Banks"), MPT_USTRING("NumBanks"), 0);
+	uint32 numBanks = theApp.GetSettings().Read<uint32>(U_("DLS Banks"), U_("NumBanks"), 0);
 	gpDLSBanks.reserve(numBanks);
 	for(uint32 i = 0; i < numBanks; i++)
 	{
-		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>(MPT_USTRING("DLS Banks"), mpt::format(MPT_USTRING("Bank%1"))(i + 1), mpt::PathString());
+		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>(U_("DLS Banks"), mpt::format(U_("Bank%1"))(i + 1), mpt::PathString());
 		path = theApp.RelativePathToAbsolute(path);
 		AddDLSBank(path);
 	}
@@ -347,12 +347,12 @@ void CTrackApp::SaveDefaultDLSBanks()
 			path = theApp.AbsolutePathToRelative(path);
 		}
 
-		mpt::ustring key = mpt::format(MPT_USTRING("Bank%1"))(nBanks + 1);
-		theApp.GetSettings().Write<mpt::PathString>(MPT_USTRING("DLS Banks"), key, path);
+		mpt::ustring key = mpt::format(U_("Bank%1"))(nBanks + 1);
+		theApp.GetSettings().Write<mpt::PathString>(U_("DLS Banks"), key, path);
 		nBanks++;
 
 	}
-	theApp.GetSettings().Write<uint32>(MPT_USTRING("DLS Banks"), MPT_USTRING("NumBanks"), nBanks);
+	theApp.GetSettings().Write<uint32>(U_("DLS Banks"), U_("NumBanks"), nBanks);
 }
 
 
@@ -504,7 +504,7 @@ public:
 		{
 			return mpt::PathString();
 		}
-		return configPath + MPT_PATHSTRING("Components\\") + BuildVariants::GetComponentArch() + MPT_PATHSTRING("\\");
+		return configPath + P_("Components\\") + BuildVariants::GetComponentArch() + P_("\\");
 	}
 };
 
@@ -554,7 +554,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 			|| (SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK))
 		{
 			// Store our app settings in %APPDATA% or "My Documents"
-			configPathGlobal = mpt::PathString::FromNative(dir) + MPT_PATHSTRING("\\OpenMPT\\");
+			configPathGlobal = mpt::PathString::FromNative(dir) + P_("\\OpenMPT\\");
 		}
 	}
 
@@ -567,7 +567,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	}
 
 	// Check if the user prefers to use the app's directory
-	bool configAppPortable = (GetPrivateProfileInt(_T("Paths"), _T("UseAppDataDirectory"), 1, (configPathApp + MPT_PATHSTRING("mptrack.ini")).AsNative().c_str()) == 0);
+	bool configAppPortable = (GetPrivateProfileInt(_T("Paths"), _T("UseAppDataDirectory"), 1, (configPathApp + P_("mptrack.ini")).AsNative().c_str()) == 0);
 	if(configAppPortable)
 	{
 		portableMode = true;
@@ -578,8 +578,8 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	m_szConfigDirectory = portableMode ? configPathApp : configPathGlobal;
 
 	// Set up default file locations
-	m_szConfigFileName = m_szConfigDirectory + MPT_PATHSTRING("mptrack.ini"); // config file
-	m_szPluginCacheFileName = m_szConfigDirectory + MPT_PATHSTRING("plugin.cache"); // plugin cache
+	m_szConfigFileName = m_szConfigDirectory + P_("mptrack.ini"); // config file
+	m_szPluginCacheFileName = m_szConfigDirectory + P_("plugin.cache"); // plugin cache
 
 	// Force use of custom ini file rather than windowsDir\executableName.ini
 	if(m_pszProfileName)
@@ -600,13 +600,13 @@ void CTrackApp::CreatePaths()
 	{
 		CreateDirectory(m_szConfigDirectory.AsNative().c_str(), 0);
 	}
-	if(!(GetConfigPath() + MPT_PATHSTRING("Components")).IsDirectory())
+	if(!(GetConfigPath() + P_("Components")).IsDirectory())
 	{
-		CreateDirectory((GetConfigPath() + MPT_PATHSTRING("Components")).AsNative().c_str(), 0);
+		CreateDirectory((GetConfigPath() + P_("Components")).AsNative().c_str(), 0);
 	}
-	if(!(GetConfigPath() + MPT_PATHSTRING("Components\\") + BuildVariants::GetComponentArch()).IsDirectory())
+	if(!(GetConfigPath() + P_("Components\\") + BuildVariants::GetComponentArch()).IsDirectory())
 	{
-		CreateDirectory((GetConfigPath() + MPT_PATHSTRING("Components\\") + BuildVariants::GetComponentArch()).AsNative().c_str(), 0);
+		CreateDirectory((GetConfigPath() + P_("Components\\") + BuildVariants::GetComponentArch()).AsNative().c_str(), 0);
 	}
 
 	// Handle updates from old versions.
@@ -615,19 +615,19 @@ void CTrackApp::CreatePaths()
 	{
 
 		// Move the config files if they're still in the old place.
-		MoveConfigFile(MPT_PATHSTRING("mptrack.ini"));
-		MoveConfigFile(MPT_PATHSTRING("plugin.cache"));
+		MoveConfigFile(P_("mptrack.ini"));
+		MoveConfigFile(P_("plugin.cache"));
 	
 		// Import old tunings
 		mpt::PathString sOldTunings;
 		sOldTunings = GetAppDirPath();
-		sOldTunings += MPT_PATHSTRING("tunings\\");
+		sOldTunings += P_("tunings\\");
 
 		if(sOldTunings.IsDirectory())
 		{
 			mpt::PathString sSearchPattern;
 			sSearchPattern = sOldTunings;
-			sSearchPattern += MPT_PATHSTRING("*.*");
+			sSearchPattern += P_("*.*");
 			WIN32_FIND_DATA FindFileData;
 			HANDLE hFind;
 			hFind = FindFirstFile(sSearchPattern.AsNative().c_str(), &FindFileData);
@@ -635,7 +635,7 @@ void CTrackApp::CreatePaths()
 			{
 				do
 				{
-					MoveConfigFile(mpt::PathString::FromNative(FindFileData.cFileName), MPT_PATHSTRING("tunings\\"));
+					MoveConfigFile(mpt::PathString::FromNative(FindFileData.cFileName), P_("tunings\\"));
 				} while(FindNextFile(hFind, &FindFileData) != 0);
 			}
 			FindClose(hFind);
@@ -667,18 +667,18 @@ CString CTrackApp::SuggestModernBuildText()
 
 bool CTrackApp::CheckSystemSupport()
 {
-	const mpt::ustring lf = MPT_USTRING("\n");
+	const mpt::ustring lf = U_("\n");
 	const mpt::ustring url = Build::GetURL(Build::Url::Download);
 	if(!BuildVariants::ProcessorCanRunCurrentBuild())
 	{
 		mpt::ustring text;
-		text += MPT_USTRING("Your CPU is too old to run this variant of OpenMPT.") + lf;
+		text += U_("Your CPU is too old to run this variant of OpenMPT.") + lf;
 		if(BuildVariants::GetRecommendedBuilds().size() > 0)
 		{
-			text += MPT_USTRING("The following OpenMPT variants are supported on your system:") + lf;
+			text += U_("The following OpenMPT variants are supported on your system:") + lf;
 			text += mpt::String::Combine(BuildVariants::GetBuildNames(BuildVariants::GetRecommendedBuilds()), lf);
-			text += MPT_USTRING("OpenMPT will exit now.") + lf;
-			text += MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" to download a suitable OpenMPT variant now?") + lf;
+			text += U_("OpenMPT will exit now.") + lf;
+			text += U_("Do you want to visit ") + url + U_(" to download a suitable OpenMPT variant now?") + lf;
 			if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONERROR, CMainFrame::GetMainFrame()) == IDYES)
 			{
 				OpenURL(url);
@@ -686,13 +686,13 @@ bool CTrackApp::CheckSystemSupport()
 			return false;
 		} else if(BuildVariants::IsKnownSystem())
 		{
-			text += MPT_USTRING("There is no OpenMPT variant available for your system.") + lf;
-			text += MPT_USTRING("OpenMPT will exit now.") + lf;
+			text += U_("There is no OpenMPT variant available for your system.") + lf;
+			text += U_("OpenMPT will exit now.") + lf;
 			Reporting::Error(text, "OpenMPT");
 			return false;
 		} else
 		{
-			text += MPT_USTRING("OpenMPT will exit now.") + lf;
+			text += U_("OpenMPT will exit now.") + lf;
 			Reporting::Error(text, "OpenMPT");
 			return false;
 		}
@@ -702,13 +702,13 @@ bool CTrackApp::CheckSystemSupport()
 		if(!BuildVariants::CanRunBuild(BuildVariants::GetCurrentBuildVariant()))
 		{
 			mpt::ustring text;
-			text += MPT_USTRING("Your system does not meet the minimum requirements for this variant of OpenMPT.") + lf;
+			text += U_("Your system does not meet the minimum requirements for this variant of OpenMPT.") + lf;
 			if(BuildVariants::GetRecommendedBuilds().size() > 0)
 			{
-				text += MPT_USTRING("The following OpenMPT variants are supported on your system:") + lf;
+				text += U_("The following OpenMPT variants are supported on your system:") + lf;
 				text += mpt::String::Combine(BuildVariants::GetBuildNames(BuildVariants::GetRecommendedBuilds()), lf) + lf;
-				text += MPT_USTRING("OpenMPT will exit now.") + lf;
-				text += MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" to download a suitable OpenMPT variant now?") + lf;
+				text += U_("OpenMPT will exit now.") + lf;
+				text += U_("Do you want to visit ") + url + U_(" to download a suitable OpenMPT variant now?") + lf;
 				if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONERROR, CMainFrame::GetMainFrame()) == IDYES)
 				{
 					OpenURL(url);
@@ -716,8 +716,8 @@ bool CTrackApp::CheckSystemSupport()
 				return true; // may work though
 			} else
 			{
-				text += MPT_USTRING("There is no OpenMPT variant available for your system.") + lf;
-				text += MPT_USTRING("OpenMPT will exit now.") + lf;
+				text += U_("There is no OpenMPT variant available for your system.") + lf;
+				text += U_("OpenMPT will exit now.") + lf;
 				Reporting::Error(text, "OpenMPT");
 				return true; // may work though
 			}
@@ -728,10 +728,10 @@ bool CTrackApp::CheckSystemSupport()
 				if(TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant)
 				{
 					mpt::ustring text = mpt::ustring();
-					text += MPT_USTRING("You are running an OpenMPT variant which does not support your system in the most optimal way.") + lf;
-					text += MPT_USTRING("The following OpenMPT variants are more suitable for your system:") + lf;
+					text += U_("You are running an OpenMPT variant which does not support your system in the most optimal way.") + lf;
+					text += U_("The following OpenMPT variants are more suitable for your system:") + lf;
 					text += mpt::String::Combine(BuildVariants::GetBuildNames(BuildVariants::GetRecommendedBuilds()), lf) + lf;
-					text += MPT_USTRING("Do you want to visit ") + url + MPT_USTRING(" now to upgrade?") + lf;
+					text += U_("Do you want to visit ") + url + U_(" now to upgrade?") + lf;
 					if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONINFORMATION, CMainFrame::GetMainFrame()) == IDYES)
 					{
 						OpenURL(url);
@@ -852,7 +852,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// Start loading
 	BeginWaitCursor();
 
-	MPT_LOG(LogInformation, "", MPT_USTRING("OpenMPT Start"));
+	MPT_LOG(LogInformation, "", U_("OpenMPT Start"));
 
 	// create the tracker-global random device
 	m_RD = mpt::make_unique<mpt::random_device>();
@@ -895,14 +895,14 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
 
-	MPT_LOG(LogInformation, "", MPT_USTRING("OpenMPT settings initialized."));
+	MPT_LOG(LogInformation, "", U_("OpenMPT settings initialized."));
 
 	if(ExceptionHandler::useAnyCrashHandler)
 	{
 		ExceptionHandler::ConfigureSystemHandler();
 	}
 
-	m_pSongSettingsIniFile = new IniFileSettingsBackend(m_szConfigDirectory + MPT_PATHSTRING("SongSettings.ini"));
+	m_pSongSettingsIniFile = new IniFileSettingsBackend(m_szConfigDirectory + P_("SongSettings.ini"));
 	m_pSongSettings = new SettingsContainer(m_pSongSettingsIniFile);
 
 	m_pComponentManagerSettings = new ComponentManagerSettings(TrackerSettings::Instance(), GetConfigPath());
@@ -922,7 +922,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	bool setDPI = false;
 	// For Windows 8.1 and newer
 	{
-		mpt::Library shcore(mpt::LibraryPath::System(MPT_PATHSTRING("SHCore")));
+		mpt::Library shcore(mpt::LibraryPath::System(P_("SHCore")));
 		if(shcore.IsValid())
 		{
 			typedef HRESULT (WINAPI * PSETPROCESSDPIAWARENESS)(int);
@@ -936,7 +936,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// For Vista and newer
 	if(!setDPI && TrackerSettings::Instance().highResUI)
 	{
-		mpt::Library user32(mpt::LibraryPath::System(MPT_PATHSTRING("user32")));
+		mpt::Library user32(mpt::LibraryPath::System(P_("user32")));
 		if(user32.IsValid())
 		{
 			typedef BOOL (WINAPI * PSETPROCESSDPIAWARE)();
@@ -994,7 +994,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// requires TrackerSettings
 	SoundDevice::SysInfo sysInfo = SoundDevice::SysInfo::Current();
 	SoundDevice::AppInfo appInfo;
-	appInfo.SetName(MPT_USTRING("OpenMPT"));
+	appInfo.SetName(U_("OpenMPT"));
 	appInfo.SetHWND(*m_pMainWnd);
 	appInfo.BoostedThreadPriorityXP = TrackerSettings::Instance().SoundBoostedThreadPriority;
 	appInfo.BoostedThreadMMCSSClassVista = TrackerSettings::Instance().SoundBoostedThreadMMCSSClass;
@@ -1276,7 +1276,7 @@ CModDoc *CTrackApp::NewDocument(MODTYPE newType)
 		if(TrackerSettings::Instance().defaultNewFileAction == nfDefaultTemplate && !templateFile.empty())
 		{
 			// Template file can be either a filename inside one of the preset and user TemplateModules folders, or a full path.
-			const mpt::PathString dirs[] = { GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"), GetAppDirPath() + MPT_PATHSTRING("TemplateModules\\"), mpt::PathString() };
+			const mpt::PathString dirs[] = { GetConfigPath() + P_("TemplateModules\\"), GetAppDirPath() + P_("TemplateModules\\"), mpt::PathString() };
 			for(const auto &dir : dirs)
 			{
 				if((dir + templateFile).IsFile())
@@ -1858,10 +1858,10 @@ void CFastBitmap::SetSize(int x, int y)
 void CTrackApp::InitializeDXPlugins()
 {
 	m_pPluginManager = new CVstPluginManager;
-	const size_t numPlugins = GetSettings().Read<int32>(MPT_USTRING("VST Plugins"), MPT_USTRING("NumPlugins"), 0);
+	const size_t numPlugins = GetSettings().Read<int32>(U_("VST Plugins"), U_("NumPlugins"), 0);
 
 	std::vector<VSTPluginLib *> nonFoundPlugs;
-	const mpt::PathString failedPlugin = GetSettings().Read<mpt::PathString>(MPT_USTRING("VST Plugins"), MPT_USTRING("FailedPlugin"), MPT_PATHSTRING(""));
+	const mpt::PathString failedPlugin = GetSettings().Read<mpt::PathString>(U_("VST Plugins"), U_("FailedPlugin"), P_(""));
 
 	CDialog pluginScanDlg;
 	CWnd *textWnd = nullptr;
@@ -1870,8 +1870,8 @@ void CTrackApp::InitializeDXPlugins()
 	// Read tags for built-in plugins
 	for(auto plug : *m_pPluginManager)
 	{
-		mpt::ustring key = mpt::format(MPT_USTRING("Plugin%1%2.Tags"))(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2));
-		plug->tags = GetSettings().Read<mpt::ustring>(MPT_USTRING("VST Plugins"), key, mpt::ustring());
+		mpt::ustring key = mpt::format(U_("Plugin%1%2.Tags"))(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2));
+		plug->tags = GetSettings().Read<mpt::ustring>(U_("VST Plugins"), key, mpt::ustring());
 	}
 
 	// Restructured plugin cache
@@ -1882,12 +1882,12 @@ void CTrackApp::InitializeDXPlugins()
 	}
 
 	m_pPluginManager->reserve(numPlugins);
-	auto plugIDFormat = mpt::format(MPT_USTRING("Plugin%1"));
+	auto plugIDFormat = mpt::format(U_("Plugin%1"));
 	auto scanFormat = mpt::cformat(_T("Scanning Plugin %1 / %2...\n%3"));
-	auto tagFormat = mpt::format(MPT_USTRING("Plugin%1.Tags"));
+	auto tagFormat = mpt::format(U_("Plugin%1.Tags"));
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
-		mpt::PathString plugPath = GetSettings().Read<mpt::PathString>(MPT_USTRING("VST Plugins"), plugIDFormat(plug), mpt::PathString());
+		mpt::PathString plugPath = GetSettings().Read<mpt::PathString>(U_("VST Plugins"), plugIDFormat(plug), mpt::PathString());
 		if(!plugPath.empty())
 		{
 			plugPath = RelativePathToAbsolute(plugPath);
@@ -1913,7 +1913,7 @@ void CTrackApp::InitializeDXPlugins()
 
 			if(plugPath == failedPlugin)
 			{
-				GetSettings().Remove(MPT_USTRING("VST Plugins"), MPT_USTRING("FailedPlugin"));
+				GetSettings().Remove(U_("VST Plugins"), U_("FailedPlugin"));
 				const CString text = _T("The following plugin has previously crashed OpenMPT during initialisation:\n\n") + failedPlugin.ToCString() + _T("\n\nDo you still want to load it?");
 				if(Reporting::Confirm(text, false, true, &pluginScanDlg) == cnfNo)
 				{
@@ -1921,7 +1921,7 @@ void CTrackApp::InitializeDXPlugins()
 				}
 			}
 
-			mpt::ustring plugTags = GetSettings().Read<mpt::ustring>(MPT_USTRING("VST Plugins"), tagFormat(plug), mpt::ustring());
+			mpt::ustring plugTags = GetSettings().Read<mpt::ustring>(U_("VST Plugins"), tagFormat(plug), mpt::ustring());
 
 			bool plugFound = true;
 			VSTPluginLib *lib = m_pPluginManager->AddPlugin(plugPath, plugTags, true, &plugFound);
@@ -1929,7 +1929,7 @@ void CTrackApp::InitializeDXPlugins()
 			{
 				nonFoundPlugs.push_back(lib);
 			}
-			if(lib != nullptr && lib->libraryName == MPT_PATHSTRING("MIDI Input Output") && lib->pluginId1 == PLUGMAGIC('V','s','t','P') && lib->pluginId2 == PLUGMAGIC('M','M','I','D'))
+			if(lib != nullptr && lib->libraryName == P_("MIDI Input Output") && lib->pluginId1 == PLUGMAGIC('V','s','t','P') && lib->pluginId2 == PLUGMAGIC('M','M','I','D'))
 			{
 				// This appears to be an old version of our MIDI I/O plugin, which is now built right into the main executable.
 				m_pPluginManager->RemovePlugin(lib);
@@ -1964,18 +1964,18 @@ void CTrackApp::UninitializeDXPlugins()
 			{
 				plugPath = AbsolutePathToRelative(plugPath);
 			}
-			theApp.GetSettings().Write<mpt::PathString>(MPT_USTRING("VST Plugins"), mpt::format(MPT_USTRING("Plugin%1"))(plugIndex), plugPath);
+			theApp.GetSettings().Write<mpt::PathString>(U_("VST Plugins"), mpt::format(U_("Plugin%1"))(plugIndex), plugPath);
 
-			theApp.GetSettings().Write(MPT_USTRING("VST Plugins"), mpt::format(MPT_USTRING("Plugin%1.Tags"))(plugIndex), plug->tags);
+			theApp.GetSettings().Write(U_("VST Plugins"), mpt::format(U_("Plugin%1.Tags"))(plugIndex), plug->tags);
 
 			plugIndex++;
 		} else
 		{
-			mpt::ustring key = mpt::format(MPT_USTRING("Plugin%1%2.Tags"))(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2));
-			theApp.GetSettings().Write(MPT_USTRING("VST Plugins"), key, plug->tags);
+			mpt::ustring key = mpt::format(U_("Plugin%1%2.Tags"))(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2));
+			theApp.GetSettings().Write(U_("VST Plugins"), key, plug->tags);
 		}
 	}
-	theApp.GetSettings().Write(MPT_USTRING("VST Plugins"), MPT_USTRING("NumPlugins"), static_cast<uint32>(plugIndex));
+	theApp.GetSettings().Write(U_("VST Plugins"), U_("NumPlugins"), static_cast<uint32>(plugIndex));
 #endif // NO_PLUGINS
 
 	delete m_pPluginManager;
@@ -2064,11 +2064,11 @@ CString CTrackApp::GetResamplingModeName(ResamplingMode mode, int length, bool a
 
 mpt::ustring CTrackApp::GetFriendlyMIDIPortName(const mpt::ustring &deviceName, bool isInputPort, bool addDeviceName)
 {
-	auto friendlyName = GetSettings().Read<mpt::ustring>(isInputPort ? MPT_USTRING("MIDI Input Ports") : MPT_USTRING("MIDI Output Ports"), deviceName, deviceName);
+	auto friendlyName = GetSettings().Read<mpt::ustring>(isInputPort ? U_("MIDI Input Ports") : U_("MIDI Output Ports"), deviceName, deviceName);
 	if(friendlyName.empty())
 		return deviceName;
 	else if(addDeviceName && friendlyName != deviceName)
-		return friendlyName + MPT_ULITERAL(" (") + deviceName + MPT_ULITERAL(")");
+		return friendlyName + UL_(" (") + deviceName + UL_(")");
 	else
 		return friendlyName;
 }

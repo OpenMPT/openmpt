@@ -1201,39 +1201,39 @@ static constexpr struct
 	const MPT_UCHAR_TYPE *exts;
 } SampleFormats[]
 {
-	{ MPT_ULITERAL("Wave Files (*.wav)"), MPT_ULITERAL("*.wav") },
+	{ UL_("Wave Files (*.wav)"), UL_("*.wav") },
 #ifdef MPT_WITH_FLAC
-	{ MPT_ULITERAL("FLAC Files (*.flac,*.oga)"), MPT_ULITERAL("*.flac;*.oga") },
+	{ UL_("FLAC Files (*.flac,*.oga)"), UL_("*.flac;*.oga") },
 #endif // MPT_WITH_FLAC
 #if defined(MPT_WITH_OPUSFILE)
-	{ MPT_ULITERAL("Opus Files (*.opus,*.oga)"), MPT_ULITERAL("*.opus;*.oga") },
+	{ UL_("Opus Files (*.opus,*.oga)"), UL_("*.opus;*.oga") },
 #endif // MPT_WITH_OPUSFILE
 #if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
-	{ MPT_ULITERAL("Ogg Vorbis Files (*.ogg,*.oga)"), MPT_ULITERAL("*.ogg;*.oga") },
+	{ UL_("Ogg Vorbis Files (*.ogg,*.oga)"), UL_("*.ogg;*.oga") },
 #endif // VORBIS
 #if defined(MPT_ENABLE_MP3_SAMPLES)
-	{ MPT_ULITERAL("MPEG Files (*.mp1,*.mp2,*.mp3)"), MPT_ULITERAL("*.mp1;*.mp2;*.mp3") },
+	{ UL_("MPEG Files (*.mp1,*.mp2,*.mp3)"), UL_("*.mp1;*.mp2;*.mp3") },
 #endif // MPT_ENABLE_MP3_SAMPLES
-	{ MPT_ULITERAL("XI Samples (*.xi)"), MPT_ULITERAL("*.xi") },
-	{ MPT_ULITERAL("Impulse Tracker Samples (*.its)"), MPT_ULITERAL("*.its") },
-	{ MPT_ULITERAL("ScreamTracker Samples (*.s3i,*.smp)"), MPT_ULITERAL("*.s3i;*.smp") },
-	{ MPT_ULITERAL("OPL Instruments (*.sb0,*.sb2,*.sbi)"), MPT_ULITERAL("*.sb0;*.sb2;*.sbi") },
-	{ MPT_ULITERAL("GF1 Patches (*.pat)"), MPT_ULITERAL("*.pat") },
-	{ MPT_ULITERAL("Wave64 Files (*.w64)"), MPT_ULITERAL("*.w64") },
-	{ MPT_ULITERAL("CAF Files (*.wav)"), MPT_ULITERAL("*.caf") },
-	{ MPT_ULITERAL("AIFF Files (*.aiff,*.8svx)"), MPT_ULITERAL("*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx") },
-	{ MPT_ULITERAL("Sun Audio (*.au,*.snd)"), MPT_ULITERAL("*.au;*.snd") },
+	{ UL_("XI Samples (*.xi)"), UL_("*.xi") },
+	{ UL_("Impulse Tracker Samples (*.its)"), UL_("*.its") },
+	{ UL_("ScreamTracker Samples (*.s3i,*.smp)"), UL_("*.s3i;*.smp") },
+	{ UL_("OPL Instruments (*.sb0,*.sb2,*.sbi)"), UL_("*.sb0;*.sb2;*.sbi") },
+	{ UL_("GF1 Patches (*.pat)"), UL_("*.pat") },
+	{ UL_("Wave64 Files (*.w64)"), UL_("*.w64") },
+	{ UL_("CAF Files (*.wav)"), UL_("*.caf") },
+	{ UL_("AIFF Files (*.aiff,*.8svx)"), UL_("*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx") },
+	{ UL_("Sun Audio (*.au,*.snd)"), UL_("*.au;*.snd") },
 };
 
 
 static mpt::ustring ConstructFileFilter(bool includeRaw)
 {
-	mpt::ustring s = MPT_USTRING("All Samples|");
+	mpt::ustring s = U_("All Samples|");
 	bool first = true;
 	for(const auto &fmt : SampleFormats)
 	{
 		if(!first)
-			s += MPT_USTRING(";");
+			s += U_(";");
 		else
 			first = false;
 		s += fmt.exts;
@@ -1244,22 +1244,22 @@ static mpt::ustring ConstructFileFilter(bool includeRaw)
 #endif
 	if(includeRaw)
 	{
-		s += MPT_USTRING(";*.raw;*.snd;*.pcm");
+		s += U_(";*.raw;*.snd;*.pcm");
 	}
-	s += MPT_USTRING("|");
+	s += U_("|");
 	for(const auto &fmt : SampleFormats)
 	{
-		s += fmt.name + MPT_USTRING("|");
-		s += fmt.exts + MPT_USTRING("|");
+		s += fmt.name + U_("|");
+		s += fmt.exts + U_("|");
 	}
 #if defined(MPT_WITH_MEDIAFOUNDATION)
 	s += ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToUnicode();
 #endif
 	if(includeRaw)
 	{
-		s += MPT_USTRING("Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|");
+		s += U_("Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|");
 	}
-	s += MPT_USTRING("All Files (*.*)|*.*||");
+	s += U_("All Files (*.*)|*.*||");
 	return s;
 }
 
@@ -1371,24 +1371,24 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		}
 		if(fileName.empty()) fileName = mpt::PathString::FromLocale(sample.filename);
 		if(fileName.empty()) fileName = mpt::PathString::FromLocale(m_sndFile.m_szNames[m_nSample]);
-		if(fileName.empty()) fileName = MPT_PATHSTRING("untitled");
+		if(fileName.empty()) fileName = P_("untitled");
 
 		const mpt::PathString ext = fileName.GetFileExt();
-		if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING(".flac"))) defaultFormat = dfFLAC;
-		else if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING(".wav"))) defaultFormat = dfWAV;
+		if(!mpt::PathString::CompareNoCase(ext, P_(".flac"))) defaultFormat = dfFLAC;
+		else if(!mpt::PathString::CompareNoCase(ext, P_(".wav"))) defaultFormat = dfWAV;
 
 		hasAdlib = sample.uFlags[CHN_ADLIB];
 	} else
 	{
 		// Save all samples
 		fileName = m_sndFile.GetpModDoc()->GetPathNameMpt().GetFileName();
-		if(fileName.empty()) fileName = MPT_PATHSTRING("untitled");
+		if(fileName.empty()) fileName = P_("untitled");
 
-		fileName += MPT_PATHSTRING(" - %sample_number% - ");
+		fileName += P_(" - %sample_number% - ");
 		if(m_sndFile.GetModSpecifications().sampleFilenameLengthMax == 0)
-			fileName += MPT_PATHSTRING("%sample_name%");
+			fileName += P_("%sample_name%");
 		else
-			fileName += MPT_PATHSTRING("%sample_filename%");
+			fileName += P_("%sample_filename%");
 	}
 	SanitizeFilename(fileName);
 
@@ -1449,16 +1449,16 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 				SanitizeFilename(sSampleFilename);
 
 				mpt::ustring fileNameW = fileName.ToUnicode();
-				fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%sample_number%"), mpt::ufmt::fmt(smp, numberFmt));
-				fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%sample_filename%"), mpt::ToUnicode(sSampleFilename));
-				fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%sample_name%"), mpt::ToUnicode(sSampleName));
+				fileNameW = mpt::String::Replace(fileNameW, U_("%sample_number%"), mpt::ufmt::fmt(smp, numberFmt));
+				fileNameW = mpt::String::Replace(fileNameW, U_("%sample_filename%"), mpt::ToUnicode(sSampleFilename));
+				fileNameW = mpt::String::Replace(fileNameW, U_("%sample_name%"), mpt::ToUnicode(sSampleName));
 				fileName = mpt::PathString::FromUnicode(fileNameW);
 			}
-			if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING("raw")))
+			if(!mpt::PathString::CompareNoCase(ext, P_("raw")))
 				ok = m_sndFile.SaveRAWSample(smp, fileName);
-			else if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING("flac")))
+			else if(!mpt::PathString::CompareNoCase(ext, P_("flac")))
 				ok = m_sndFile.SaveFLACSample(smp, fileName);
-			else if(!mpt::PathString::CompareNoCase(ext, MPT_PATHSTRING("s3i")))
+			else if(!mpt::PathString::CompareNoCase(ext, P_("s3i")))
 				ok = m_sndFile.SaveS3ISample(smp, fileName);
 			else
 				ok = m_sndFile.SaveWAVSample(smp, fileName);
@@ -2109,7 +2109,7 @@ class ComponentSoundTouch
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
 	ComponentSoundTouch()
-		: ComponentBundledDLL(MPT_PATHSTRING("OpenMPT_SoundTouch_f32"))
+		: ComponentBundledDLL(P_("OpenMPT_SoundTouch_f32"))
 	{
 	}
 };

@@ -143,13 +143,13 @@ void CModDoc::OnShowSampleTrimmer()
 		return;
 	}
 
-	mpt::ustring s = mpt::uformat(MPT_USTRING("%1 sample%2 can be trimmed, saving %3 bytes."))(numTrimmed, (numTrimmed == 1) ? MPT_USTRING("") : MPT_USTRING("s"), mpt::ufmt::dec(3, ',', numBytes));
+	mpt::ustring s = mpt::uformat(U_("%1 sample%2 can be trimmed, saving %3 bytes."))(numTrimmed, (numTrimmed == 1) ? U_("") : U_("s"), mpt::ufmt::dec(3, ',', numBytes));
 	if(dlg.m_abort)
 	{
-		s += MPT_USTRING("\n\nWARNING: Only partial results are available, possibly causing used sample parts to be trimmed.\nContinue anyway?");
+		s += U_("\n\nWARNING: Only partial results are available, possibly causing used sample parts to be trimmed.\nContinue anyway?");
 	} else
 	{
-		s += MPT_USTRING(" Continue?");
+		s += U_(" Continue?");
 	}
 	if(Reporting::Confirm(s, false, dlg.m_abort) == cnfYes)
 	{

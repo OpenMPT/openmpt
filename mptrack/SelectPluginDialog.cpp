@@ -330,7 +330,7 @@ void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
 	bool foundCurrentPlug = false;
 
 	const bool nameFilterActive = !m_nameFilter.empty();
-	auto currentTags = mpt::String::Split<mpt::ustring>(m_nameFilter, MPT_USTRING(" "));
+	auto currentTags = mpt::String::Split<mpt::ustring>(m_nameFilter, U_(" "));
 
 	if(pManager)
 	{
@@ -692,7 +692,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 	int files = 0;
 	while(scan.Next(fileName) && pluginScanDlg.IsWindowVisible())
 	{
-		if(!mpt::PathString::CompareNoCase(fileName.GetFileExt(), MPT_PATHSTRING(".dll")))
+		if(!mpt::PathString::CompareNoCase(fileName.GetFileExt(), P_(".dll")))
 		{
 			CWnd *text = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
 			CString scanStr = _T("Scanning Plugin...\n") + fileName.ToCString();

@@ -90,15 +90,15 @@ mpt::ustring CUpdateCheck::GetStatisticsUserInformation(bool shortText)
 {
 	if(shortText)
 	{
-		return MPT_USTRING("A randomized user ID is created and transmitted alongside. This ID can only be linked to you or your computer by this very ID, which is stored solely on your computer. OpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions.");
+		return U_("A randomized user ID is created and transmitted alongside. This ID can only be linked to you or your computer by this very ID, which is stored solely on your computer. OpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions.");
 	} else
 	{
-		return MPT_USTRING("")
-			+ MPT_USTRING("When checking for updates, OpenMPT can additionally collect some basic statistical information.") + MPT_USTRING(" ")
-			+ MPT_USTRING("A randomized user ID is created and transmitted alongside the update check. This ID can only be linked to you or your computer by this very ID, which is stored solely on your computer.") + MPT_USTRING(" ")
-			+ MPT_USTRING("OpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions.") + MPT_USTRING(" ")
-			+ MPT_USTRING("Without this statistical information, the OpenMPT developers would be blind with respect to what systems are used to run OpenMPT. This makes deciding where to focus development plain guesswork.") + MPT_USTRING("\n")
-			+ MPT_USTRING("OpenMPT would collect the following statistical data points: OpenMPT version, Windows version, type of CPU, amount of RAM, configured update check frequency of OpenMPT.")
+		return U_("")
+			+ U_("When checking for updates, OpenMPT can additionally collect some basic statistical information.") + U_(" ")
+			+ U_("A randomized user ID is created and transmitted alongside the update check. This ID can only be linked to you or your computer by this very ID, which is stored solely on your computer.") + U_(" ")
+			+ U_("OpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions.") + U_(" ")
+			+ U_("Without this statistical information, the OpenMPT developers would be blind with respect to what systems are used to run OpenMPT. This makes deciding where to focus development plain guesswork.") + U_("\n")
+			+ U_("OpenMPT would collect the following statistical data points: OpenMPT version, Windows version, type of CPU, amount of RAM, configured update check frequency of OpenMPT.")
 			;
 	}
 }
@@ -106,23 +106,23 @@ mpt::ustring CUpdateCheck::GetStatisticsUserInformation(bool shortText)
 
 mpt::ustring CUpdateCheck::GetDefaultChannelReleaseURL()
 {
-	return MPT_USTRING("https://update.openmpt.org/check/$VERSION/$GUID");
+	return U_("https://update.openmpt.org/check/$VERSION/$GUID");
 }
 
 mpt::ustring CUpdateCheck::GetDefaultChannelNextURL()
 {
-	return MPT_USTRING("https://update.openmpt.org/check/next/$VERSION/$GUID");
+	return U_("https://update.openmpt.org/check/next/$VERSION/$GUID");
 }
 
 mpt::ustring CUpdateCheck::GetDefaultChannelDevelopmentURL()
 {
-	return MPT_USTRING("https://update.openmpt.org/check/testing/$VERSION/$GUID");
+	return U_("https://update.openmpt.org/check/testing/$VERSION/$GUID");
 }
 
 
 mpt::ustring CUpdateCheck::GetDefaultAPIURL()
 {
-	return MPT_USTRING("https://update.openmpt.org/api/v3/");
+	return U_("https://update.openmpt.org/api/v3/");
 }
 
 
@@ -194,11 +194,11 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 	if(!TrackerSettings::Instance().UpdateStatisticsConsentAsked)
 	{
 		TrackerSettings::Instance().UpdateStatistics = (ConfirmAnswer::cnfYes == Reporting::Confirm(
-			MPT_USTRING("Do you want to contribute to OpenMPT by providing system statistics?\r\n") +
-			MPT_USTRING("\r\n") +
-			mpt::String::Replace(CUpdateCheck::GetStatisticsUserInformation(false), MPT_USTRING("\n"), MPT_USTRING("\r\n")) + MPT_USTRING("\r\n") +
-			MPT_USTRING("\r\n") +
-			mpt::format(MPT_USTRING("This option was previously %1 on your system.\r\n"))(TrackerSettings::Instance().UpdateStatistics ? MPT_USTRING("enabled") : MPT_USTRING("disabled")),
+			U_("Do you want to contribute to OpenMPT by providing system statistics?\r\n") +
+			U_("\r\n") +
+			mpt::String::Replace(CUpdateCheck::GetStatisticsUserInformation(false), U_("\n"), U_("\r\n")) + U_("\r\n") +
+			U_("\r\n") +
+			mpt::format(U_("This option was previously %1 on your system.\r\n"))(TrackerSettings::Instance().UpdateStatistics ? U_("enabled") : U_("disabled")),
 			false, !TrackerSettings::Instance().UpdateStatistics.Get()));
 		TrackerSettings::Instance().UpdateStatisticsConsentAsked = true;
 	}
@@ -336,17 +336,17 @@ mpt::ustring CUpdateCheck::GetUpdateURLV2(const CUpdateCheck::Settings &settings
 			updateURL = GetDefaultChannelReleaseURL();
 		}
 	}
-	if(updateURL.find(MPT_USTRING("://")) == mpt::ustring::npos)
+	if(updateURL.find(U_("://")) == mpt::ustring::npos)
 	{
-		updateURL = MPT_USTRING("https://") + updateURL;
+		updateURL = U_("https://") + updateURL;
 	}
 	// Build update URL
-	updateURL = mpt::String::Replace(updateURL, MPT_USTRING("$VERSION"), mpt::uformat(MPT_USTRING("%1-%2-%3"))
+	updateURL = mpt::String::Replace(updateURL, U_("$VERSION"), mpt::uformat(U_("%1-%2-%3"))
 		( Version::Current()
 		, BuildVariants().GuessCurrentBuildName()
-		, settings.sendStatistics ? mpt::Windows::Version::Current().GetNameShort() : MPT_USTRING("unknown")
+		, settings.sendStatistics ? mpt::Windows::Version::Current().GetNameShort() : U_("unknown")
 		));
-	updateURL = mpt::String::Replace(updateURL, MPT_USTRING("$GUID"), settings.sendStatistics ? mpt::ufmt::val(settings.statisticsUUID) : MPT_USTRING("anonymous"));
+	updateURL = mpt::String::Replace(updateURL, U_("$GUID"), settings.sendStatistics ? mpt::ufmt::val(settings.statisticsUUID) : U_("anonymous"));
 	return updateURL;
 }
 
@@ -370,11 +370,11 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 		HTTP::Request requestStatistics;
 		if(settings.statisticsUUID.IsValid())
 		{
-			requestStatistics.SetURI(ParseURI(settings.apiURL + mpt::format(MPT_USTRING("statistics/%1"))(settings.statisticsUUID)));
+			requestStatistics.SetURI(ParseURI(settings.apiURL + mpt::format(U_("statistics/%1"))(settings.statisticsUUID)));
 			requestStatistics.method = HTTP::Method::Put;
 		} else
 		{
-			requestStatistics.SetURI(ParseURI(settings.apiURL + MPT_USTRING("statistics/")));
+			requestStatistics.SetURI(ParseURI(settings.apiURL + U_("statistics/")));
 			requestStatistics.method = HTTP::Method::Post;
 		}
 		requestStatistics.dataMimeType = HTTP::MimeType::JSON();
@@ -490,7 +490,7 @@ void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 		}
 	} else if(!result.UpdateAvailable && !autoUpdate)
 	{
-		Reporting::Information(MPT_USTRING("You already have the latest version of OpenMPT installed."), MPT_USTRING("OpenMPT Internet Update"));
+		Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Internet Update"));
 	}
 }
 
@@ -501,7 +501,7 @@ void CUpdateCheck::ShowFailureGUI(WPARAM wparam, LPARAM lparam)
 	bool autoUpdate = wparam != 0;
 	if(!autoUpdate)
 	{
-		Reporting::Error(mpt::get_exception_text<mpt::ustring>(error), MPT_USTRING("OpenMPT Internet Update Error"));
+		Reporting::Error(mpt::get_exception_text<mpt::ustring>(error), U_("OpenMPT Internet Update Error"));
 	}
 }
 
@@ -651,23 +651,23 @@ void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResu
 	settings.sendStatistics = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
 
 	mpt::ustring statistics;
-	statistics += MPT_USTRING("GET ") + CUpdateCheck::GetUpdateURLV2(settings) + MPT_ULITERAL("\n");
-	statistics += MPT_ULITERAL("\n");
+	statistics += U_("GET ") + CUpdateCheck::GetUpdateURLV2(settings) + UL_("\n");
+	statistics += UL_("\n");
 	if(settings.sendStatistics)
 	{
 		if(settings.statisticsUUID.IsValid())
 		{
-			statistics += MPT_USTRING("PUT ") + settings.apiURL + mpt::format(MPT_USTRING("statistics/%1"))(settings.statisticsUUID) + MPT_ULITERAL("\n");
+			statistics += U_("PUT ") + settings.apiURL + mpt::format(U_("statistics/%1"))(settings.statisticsUUID) + UL_("\n");
 		} else
 		{
-			statistics += MPT_USTRING("POST ") + settings.apiURL + MPT_USTRING("statistics/") + MPT_ULITERAL("\n");
+			statistics += U_("POST ") + settings.apiURL + U_("statistics/") + UL_("\n");
 		}
-		statistics += mpt::String::Replace(mpt::ToUnicode(mpt::CharsetUTF8, CUpdateCheck::GetStatisticsDataV3(settings)), MPT_USTRING("\t"), MPT_USTRING("    "));
+		statistics += mpt::String::Replace(mpt::ToUnicode(mpt::CharsetUTF8, CUpdateCheck::GetStatisticsDataV3(settings)), U_("\t"), U_("    "));
 	}
 
 	InfoDialog dlg(this);
 	dlg.SetCaption(_T("Update Statistics Data"));
-	dlg.SetContent(mpt::ToWin(mpt::String::Replace(statistics, MPT_USTRING("\n"), MPT_USTRING("\r\n"))));
+	dlg.SetContent(mpt::ToWin(mpt::String::Replace(statistics, U_("\n"), U_("\r\n"))));
 	dlg.DoModal();
 }
 

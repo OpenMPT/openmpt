@@ -330,7 +330,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 	// Empty cells (dots - i-th bit set = dot in the i-th column of a cell)
 	const uint8 dots[5] = { 1 | 2 | 4, 2 | 4, 2 | 4, 1, 1 | 2 };
 	const auto dotStr = TrackerSettings::Instance().patternFontDot.Get();
-	auto dotChar = dotStr.empty() ? MPT_UCHAR(' ') : dotStr[0];
+	auto dotChar = dotStr.empty() ? UC_(' ') : dotStr[0];
 	for(int cell = 0, offset = 0; cell < static_cast<int>(mpt::size(dots)); cell++)
 	{
 		uint8 dot = dots[cell];

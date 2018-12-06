@@ -1989,13 +1989,13 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 	{
 		// Save all samples
 		fileName = m_sndFile.GetpModDoc()->GetPathNameMpt().GetFileName();
-		if(fileName.empty()) fileName = MPT_PATHSTRING("untitled");
+		if(fileName.empty()) fileName = P_("untitled");
 
-		fileName += MPT_PATHSTRING(" - %instrument_number% - ");
+		fileName += P_(" - %instrument_number% - ");
 		if(m_sndFile.GetModSpecifications().sampleFilenameLengthMax == 0)
-			fileName += MPT_PATHSTRING("%instrument_name%");
+			fileName += P_("%instrument_name%");
 		else
-			fileName += MPT_PATHSTRING("%instrument_filename%");
+			fileName += P_("%instrument_filename%");
 
 	}
 	SanitizeFilename(fileName);
@@ -2034,8 +2034,8 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 	CString instrName, instrFilename;
 
 	bool ok = false;
-	const bool saveXI = !mpt::PathString::CompareNoCase(dlg.GetExtension(), MPT_PATHSTRING("xi"));
-	const bool saveSFZ = !mpt::PathString::CompareNoCase(dlg.GetExtension(), MPT_PATHSTRING("sfz"));
+	const bool saveXI = !mpt::PathString::CompareNoCase(dlg.GetExtension(), P_("xi"));
+	const bool saveSFZ = !mpt::PathString::CompareNoCase(dlg.GetExtension(), P_("sfz"));
 	const bool doCompress = index == 2 || index == 6;
 	const bool allowExternal = index == 3;
 
@@ -2053,9 +2053,9 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 				SanitizeFilename(instrFilename);
 
 				mpt::ustring fileNameW = fileName.ToUnicode();
-				fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%instrument_number%"), mpt::ufmt::fmt(ins, numberFmt));
-				fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%instrument_filename%"), mpt::ToUnicode(instrFilename));
-				fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%instrument_name%"), mpt::ToUnicode(instrName));
+				fileNameW = mpt::String::Replace(fileNameW, U_("%instrument_number%"), mpt::ufmt::fmt(ins, numberFmt));
+				fileNameW = mpt::String::Replace(fileNameW, U_("%instrument_filename%"), mpt::ToUnicode(instrFilename));
+				fileNameW = mpt::String::Replace(fileNameW, U_("%instrument_name%"), mpt::ToUnicode(instrName));
 				fileName = mpt::PathString::FromUnicode(fileNameW);
 			}
 

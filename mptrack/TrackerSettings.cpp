@@ -107,19 +107,19 @@ DebugSettings::DebugSettings(SettingsContainer &conf)
 	: conf(conf)
 	// Debug
 #if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)
-	, DebugLogLevel(conf, MPT_USTRING("Debug"), MPT_USTRING("LogLevel"), static_cast<int>(mpt::log::GlobalLogLevel))
-	, DebugLogFacilitySolo(conf, MPT_USTRING("Debug"), MPT_USTRING("LogFacilitySolo"), std::string())
-	, DebugLogFacilityBlocked(conf, MPT_USTRING("Debug"), MPT_USTRING("LogFacilityBlocked"), std::string())
-	, DebugLogFileEnable(conf, MPT_USTRING("Debug"), MPT_USTRING("LogFileEnable"), mpt::log::FileEnabled)
-	, DebugLogDebuggerEnable(conf, MPT_USTRING("Debug"), MPT_USTRING("LogDebuggerEnable"), mpt::log::DebuggerEnabled)
-	, DebugLogConsoleEnable(conf, MPT_USTRING("Debug"), MPT_USTRING("LogConsoleEnable"), mpt::log::ConsoleEnabled)
+	, DebugLogLevel(conf, U_("Debug"), U_("LogLevel"), static_cast<int>(mpt::log::GlobalLogLevel))
+	, DebugLogFacilitySolo(conf, U_("Debug"), U_("LogFacilitySolo"), std::string())
+	, DebugLogFacilityBlocked(conf, U_("Debug"), U_("LogFacilityBlocked"), std::string())
+	, DebugLogFileEnable(conf, U_("Debug"), U_("LogFileEnable"), mpt::log::FileEnabled)
+	, DebugLogDebuggerEnable(conf, U_("Debug"), U_("LogDebuggerEnable"), mpt::log::DebuggerEnabled)
+	, DebugLogConsoleEnable(conf, U_("Debug"), U_("LogConsoleEnable"), mpt::log::ConsoleEnabled)
 #endif
-	, DebugTraceEnable(conf, MPT_USTRING("Debug"), MPT_USTRING("TraceEnable"), false)
-	, DebugTraceSize(conf, MPT_USTRING("Debug"), MPT_USTRING("TraceSize"), 1000000)
-	, DebugTraceAlwaysDump(conf, MPT_USTRING("Debug"), MPT_USTRING("TraceAlwaysDump"), false)
-	, DebugStopSoundDeviceOnCrash(conf, MPT_USTRING("Debug"), MPT_USTRING("StopSoundDeviceOnCrash"), true)
-	, DebugStopSoundDeviceBeforeDump(conf, MPT_USTRING("Debug"), MPT_USTRING("StopSoundDeviceBeforeDump"), false)
-	, DebugDelegateToWindowsHandler(conf, MPT_USTRING("Debug"), MPT_USTRING("DelegateToWindowsHandler"), false)
+	, DebugTraceEnable(conf, U_("Debug"), U_("TraceEnable"), false)
+	, DebugTraceSize(conf, U_("Debug"), U_("TraceSize"), 1000000)
+	, DebugTraceAlwaysDump(conf, U_("Debug"), U_("TraceAlwaysDump"), false)
+	, DebugStopSoundDeviceOnCrash(conf, U_("Debug"), U_("StopSoundDeviceOnCrash"), true)
+	, DebugStopSoundDeviceBeforeDump(conf, U_("Debug"), U_("StopSoundDeviceBeforeDump"), false)
+	, DebugDelegateToWindowsHandler(conf, U_("Debug"), U_("DelegateToWindowsHandler"), false)
 {
 
 	// Duplicate state for debug stuff in order to avoid calling into settings framework from crash context.
@@ -157,201 +157,201 @@ DebugSettings::~DebugSettings()
 TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	: conf(conf)
 	// Version
-	, IniVersion(conf, MPT_USTRING("Version"), MPT_USTRING("Version"), mpt::ustring())
+	, IniVersion(conf, U_("Version"), U_("Version"), mpt::ustring())
 	, FirstRun(IniVersion.Get() == mpt::ustring())
 	, PreviousSettingsVersion(GetPreviousSettingsVersion(IniVersion))
-	, VersionInstallGUID(conf, MPT_USTRING("Version"), MPT_USTRING("InstallGUID"), mpt::UUID())
+	, VersionInstallGUID(conf, U_("Version"), U_("InstallGUID"), mpt::UUID())
 	// Display
-	, m_ShowSplashScreen(conf, MPT_USTRING("Display"), MPT_USTRING("ShowSplashScreen"), true)
-	, gbMdiMaximize(conf, MPT_USTRING("Display"), MPT_USTRING("MDIMaximize"), true)
-	, highResUI(conf, MPT_USTRING("Display"), MPT_USTRING("HighResUI"), false)
-	, glTreeSplitRatio(conf, MPT_USTRING("Display"), MPT_USTRING("MDITreeRatio"), 128)
-	, glTreeWindowWidth(conf, MPT_USTRING("Display"), MPT_USTRING("MDITreeWidth"), 160)
-	, glGeneralWindowHeight(conf, MPT_USTRING("Display"), MPT_USTRING("MDIGeneralHeight"), 222)
-	, glPatternWindowHeight(conf, MPT_USTRING("Display"), MPT_USTRING("MDIPatternHeight"), 152)
-	, glSampleWindowHeight(conf, MPT_USTRING("Display"), MPT_USTRING("MDISampleHeight"), 190)
-	, glInstrumentWindowHeight(conf, MPT_USTRING("Display"), MPT_USTRING("MDIInstrumentHeight"), 300)
-	, glCommentsWindowHeight(conf, MPT_USTRING("Display"), MPT_USTRING("MDICommentsHeight"), 288)
-	, glGraphWindowHeight(conf, MPT_USTRING("Display"), MPT_USTRING("MDIGraphHeight"), 288)
-	, gnPlugWindowX(conf, MPT_USTRING("Display"), MPT_USTRING("PlugSelectWindowX"), 243)
-	, gnPlugWindowY(conf, MPT_USTRING("Display"), MPT_USTRING("PlugSelectWindowY"), 273)
-	, gnPlugWindowWidth(conf, MPT_USTRING("Display"), MPT_USTRING("PlugSelectWindowWidth"), 450)
-	, gnPlugWindowHeight(conf, MPT_USTRING("Display"), MPT_USTRING("PlugSelectWindowHeight"), 540)
-	, gnPlugWindowLast(conf, MPT_USTRING("Display"), MPT_USTRING("PlugSelectWindowLast"), 0)
-	, gnMsgBoxVisiblityFlags(conf, MPT_USTRING("Display"), MPT_USTRING("MsgBoxVisibilityFlags"), uint32_max)
-	, GUIUpdateInterval(conf, MPT_USTRING("Display"), MPT_USTRING("GUIUpdateInterval"), 0)
-	, FSUpdateInterval(conf, MPT_USTRING("Display"), MPT_USTRING("FSUpdateInterval"), 500)
-	, VuMeterUpdateInterval(conf, MPT_USTRING("Display"), MPT_USTRING("VuMeterUpdateInterval"), 15)
-	, VuMeterDecaySpeedDecibelPerSecond(conf, MPT_USTRING("Display"), MPT_USTRING("VuMeterDecaySpeedDecibelPerSecond"), 88.0f)
-	, accidentalFlats(conf, MPT_USTRING("Display"), MPT_USTRING("AccidentalFlats"), false)
-	, rememberSongWindows(conf, MPT_USTRING("Display"), MPT_USTRING("RememberSongWindows"), true)
-	, showDirsInSampleBrowser(conf, MPT_USTRING("Display"), MPT_USTRING("ShowDirsInSampleBrowser"), false)
-	, commentsFont(conf, MPT_USTRING("Display"), MPT_USTRING("Comments Font"), FontSetting(MPT_USTRING("Courier New"), 120))
+	, m_ShowSplashScreen(conf, U_("Display"), U_("ShowSplashScreen"), true)
+	, gbMdiMaximize(conf, U_("Display"), U_("MDIMaximize"), true)
+	, highResUI(conf, U_("Display"), U_("HighResUI"), false)
+	, glTreeSplitRatio(conf, U_("Display"), U_("MDITreeRatio"), 128)
+	, glTreeWindowWidth(conf, U_("Display"), U_("MDITreeWidth"), 160)
+	, glGeneralWindowHeight(conf, U_("Display"), U_("MDIGeneralHeight"), 222)
+	, glPatternWindowHeight(conf, U_("Display"), U_("MDIPatternHeight"), 152)
+	, glSampleWindowHeight(conf, U_("Display"), U_("MDISampleHeight"), 190)
+	, glInstrumentWindowHeight(conf, U_("Display"), U_("MDIInstrumentHeight"), 300)
+	, glCommentsWindowHeight(conf, U_("Display"), U_("MDICommentsHeight"), 288)
+	, glGraphWindowHeight(conf, U_("Display"), U_("MDIGraphHeight"), 288)
+	, gnPlugWindowX(conf, U_("Display"), U_("PlugSelectWindowX"), 243)
+	, gnPlugWindowY(conf, U_("Display"), U_("PlugSelectWindowY"), 273)
+	, gnPlugWindowWidth(conf, U_("Display"), U_("PlugSelectWindowWidth"), 450)
+	, gnPlugWindowHeight(conf, U_("Display"), U_("PlugSelectWindowHeight"), 540)
+	, gnPlugWindowLast(conf, U_("Display"), U_("PlugSelectWindowLast"), 0)
+	, gnMsgBoxVisiblityFlags(conf, U_("Display"), U_("MsgBoxVisibilityFlags"), uint32_max)
+	, GUIUpdateInterval(conf, U_("Display"), U_("GUIUpdateInterval"), 0)
+	, FSUpdateInterval(conf, U_("Display"), U_("FSUpdateInterval"), 500)
+	, VuMeterUpdateInterval(conf, U_("Display"), U_("VuMeterUpdateInterval"), 15)
+	, VuMeterDecaySpeedDecibelPerSecond(conf, U_("Display"), U_("VuMeterDecaySpeedDecibelPerSecond"), 88.0f)
+	, accidentalFlats(conf, U_("Display"), U_("AccidentalFlats"), false)
+	, rememberSongWindows(conf, U_("Display"), U_("RememberSongWindows"), true)
+	, showDirsInSampleBrowser(conf, U_("Display"), U_("ShowDirsInSampleBrowser"), false)
+	, commentsFont(conf, U_("Display"), U_("Comments Font"), FontSetting(U_("Courier New"), 120))
 	// Misc
-	, ShowSettingsOnNewVersion(conf, MPT_USTRING("Misc"), MPT_USTRING("ShowSettingsOnNewVersion"), true)
-	, defaultModType(conf, MPT_USTRING("Misc"), MPT_USTRING("DefaultModType"), MOD_TYPE_IT)
-	, defaultNewFileAction(conf, MPT_USTRING("Misc"), MPT_USTRING("DefaultNewFileAction"), nfDefaultFormat)
-	, DefaultPlugVolumeHandling(conf, MPT_USTRING("Misc"), MPT_USTRING("DefaultPlugVolumeHandling"), PLUGIN_VOLUMEHANDLING_IGNORE)
-	, autoApplySmoothFT2Ramping(conf, MPT_USTRING("Misc"), MPT_USTRING("SmoothFT2Ramping"), false)
-	, MiscITCompressionStereo(conf, MPT_USTRING("Misc"), MPT_USTRING("ITCompressionStereo"), 4)
-	, MiscITCompressionMono(conf, MPT_USTRING("Misc"), MPT_USTRING("ITCompressionMono"), 4)
-	, MiscSaveChannelMuteStatus(conf, MPT_USTRING("Misc"), MPT_USTRING("SaveChannelMuteStatus"), true)
-	, MiscAllowMultipleCommandsPerKey(conf, MPT_USTRING("Misc"), MPT_USTRING("AllowMultipleCommandsPerKey"), false)
-	, MiscDistinguishModifiers(conf, MPT_USTRING("Misc"), MPT_USTRING("DistinguishModifiers"), false)
-	, MiscProcessPriorityClass(conf, MPT_USTRING("Misc"), MPT_USTRING("ProcessPriorityClass"), ProcessPriorityClassNORMAL)
-	, MiscFlushFileBuffersOnSave(conf, MPT_USTRING("Misc"), MPT_USTRING("FlushFileBuffersOnSave"), true)
+	, ShowSettingsOnNewVersion(conf, U_("Misc"), U_("ShowSettingsOnNewVersion"), true)
+	, defaultModType(conf, U_("Misc"), U_("DefaultModType"), MOD_TYPE_IT)
+	, defaultNewFileAction(conf, U_("Misc"), U_("DefaultNewFileAction"), nfDefaultFormat)
+	, DefaultPlugVolumeHandling(conf, U_("Misc"), U_("DefaultPlugVolumeHandling"), PLUGIN_VOLUMEHANDLING_IGNORE)
+	, autoApplySmoothFT2Ramping(conf, U_("Misc"), U_("SmoothFT2Ramping"), false)
+	, MiscITCompressionStereo(conf, U_("Misc"), U_("ITCompressionStereo"), 4)
+	, MiscITCompressionMono(conf, U_("Misc"), U_("ITCompressionMono"), 4)
+	, MiscSaveChannelMuteStatus(conf, U_("Misc"), U_("SaveChannelMuteStatus"), true)
+	, MiscAllowMultipleCommandsPerKey(conf, U_("Misc"), U_("AllowMultipleCommandsPerKey"), false)
+	, MiscDistinguishModifiers(conf, U_("Misc"), U_("DistinguishModifiers"), false)
+	, MiscProcessPriorityClass(conf, U_("Misc"), U_("ProcessPriorityClass"), ProcessPriorityClassNORMAL)
+	, MiscFlushFileBuffersOnSave(conf, U_("Misc"), U_("FlushFileBuffersOnSave"), true)
 	// Sound Settings
-	, m_SoundShowDeprecatedDevices(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ShowDeprecatedDevices"), true)
-	, m_SoundShowNotRecommendedDeviceWarning(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ShowNotRecommendedDeviceWarning"), true)
-	, m_SoundSampleRates(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("SampleRates"), GetDefaultSampleRates())
-	, m_MorePortaudio(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("MorePortaudio"), false)
-	, m_MoreRtaudio(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("MoreRtaudio"), false)
-	, m_SoundSettingsOpenDeviceAtStartup(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("OpenDeviceAtStartup"), false)
-	, m_SoundSettingsStopMode(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("StopMode"), SoundDeviceStopModeClosed)
+	, m_SoundShowDeprecatedDevices(conf, U_("Sound Settings"), U_("ShowDeprecatedDevices"), true)
+	, m_SoundShowNotRecommendedDeviceWarning(conf, U_("Sound Settings"), U_("ShowNotRecommendedDeviceWarning"), true)
+	, m_SoundSampleRates(conf, U_("Sound Settings"), U_("SampleRates"), GetDefaultSampleRates())
+	, m_MorePortaudio(conf, U_("Sound Settings"), U_("MorePortaudio"), false)
+	, m_MoreRtaudio(conf, U_("Sound Settings"), U_("MoreRtaudio"), false)
+	, m_SoundSettingsOpenDeviceAtStartup(conf, U_("Sound Settings"), U_("OpenDeviceAtStartup"), false)
+	, m_SoundSettingsStopMode(conf, U_("Sound Settings"), U_("StopMode"), SoundDeviceStopModeClosed)
 	, m_SoundDeviceSettingsUseOldDefaults(false)
 	, m_SoundDeviceID_DEPRECATED(SoundDevice::Legacy::ID())
 	, m_SoundDeviceDirectSoundOldDefaultIdentifier(false)
-	, m_SoundDeviceIdentifier(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("Device"), SoundDevice::Identifier())
-	, m_SoundDevicePreferSameTypeIfDeviceUnavailable(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("PreferSameTypeIfDeviceUnavailable"), false)
-	, MixerMaxChannels(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("MixChannels"), MixerSettings().m_nMaxMixChannels)
-	, MixerDSPMask(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("Quality"), MixerSettings().DSPMask)
-	, MixerFlags(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("SoundSetup"), MixerSettings().MixerFlags)
-	, MixerSamplerate(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("Mixing_Rate"), MixerSettings().gdwMixingFreq)
-	, MixerOutputChannels(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ChannelMode"), MixerSettings().gnChannels)
-	, MixerPreAmp(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("PreAmp"), MixerSettings().m_nPreAmp)
-	, MixerStereoSeparation(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("StereoSeparation"), MixerSettings().m_nStereoSeparation)
-	, MixerVolumeRampUpMicroseconds(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("VolumeRampUpMicroseconds"), MixerSettings().GetVolumeRampUpMicroseconds())
-	, MixerVolumeRampDownMicroseconds(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("VolumeRampDownMicroseconds"), MixerSettings().GetVolumeRampDownMicroseconds())
-	, ResamplerMode(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("SrcMode"), CResamplerSettings().SrcMode)
-	, ResamplerSubMode(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("XMMSModplugResamplerWFIRType"), CResamplerSettings().gbWFIRType)
-	, ResamplerCutoffPercent(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ResamplerWFIRCutoff"), mpt::saturate_round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0))
-	, ResamplerEmulateAmiga(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ResamplerEmulateAmiga"), true)
-	, SoundBoostedThreadPriority(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BoostedThreadPriority"), SoundDevice::AppInfo().BoostedThreadPriorityXP)
-	, SoundBoostedThreadMMCSSClass(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BoostedThreadMMCSSClass"), SoundDevice::AppInfo().BoostedThreadMMCSSClassVista)
-	, SoundBoostedThreadRealtimePosix(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BoostedThreadRealtimeLinux"), SoundDevice::AppInfo().BoostedThreadRealtimePosix)
-	, SoundBoostedThreadNicenessPosix(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BoostedThreadNicenessPosix"), SoundDevice::AppInfo().BoostedThreadNicenessPosix)
-	, SoundBoostedThreadRtprioPosix(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BoostedThreadRtprioLinux"), SoundDevice::AppInfo().BoostedThreadRtprioPosix)
+	, m_SoundDeviceIdentifier(conf, U_("Sound Settings"), U_("Device"), SoundDevice::Identifier())
+	, m_SoundDevicePreferSameTypeIfDeviceUnavailable(conf, U_("Sound Settings"), U_("PreferSameTypeIfDeviceUnavailable"), false)
+	, MixerMaxChannels(conf, U_("Sound Settings"), U_("MixChannels"), MixerSettings().m_nMaxMixChannels)
+	, MixerDSPMask(conf, U_("Sound Settings"), U_("Quality"), MixerSettings().DSPMask)
+	, MixerFlags(conf, U_("Sound Settings"), U_("SoundSetup"), MixerSettings().MixerFlags)
+	, MixerSamplerate(conf, U_("Sound Settings"), U_("Mixing_Rate"), MixerSettings().gdwMixingFreq)
+	, MixerOutputChannels(conf, U_("Sound Settings"), U_("ChannelMode"), MixerSettings().gnChannels)
+	, MixerPreAmp(conf, U_("Sound Settings"), U_("PreAmp"), MixerSettings().m_nPreAmp)
+	, MixerStereoSeparation(conf, U_("Sound Settings"), U_("StereoSeparation"), MixerSettings().m_nStereoSeparation)
+	, MixerVolumeRampUpMicroseconds(conf, U_("Sound Settings"), U_("VolumeRampUpMicroseconds"), MixerSettings().GetVolumeRampUpMicroseconds())
+	, MixerVolumeRampDownMicroseconds(conf, U_("Sound Settings"), U_("VolumeRampDownMicroseconds"), MixerSettings().GetVolumeRampDownMicroseconds())
+	, ResamplerMode(conf, U_("Sound Settings"), U_("SrcMode"), CResamplerSettings().SrcMode)
+	, ResamplerSubMode(conf, U_("Sound Settings"), U_("XMMSModplugResamplerWFIRType"), CResamplerSettings().gbWFIRType)
+	, ResamplerCutoffPercent(conf, U_("Sound Settings"), U_("ResamplerWFIRCutoff"), mpt::saturate_round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0))
+	, ResamplerEmulateAmiga(conf, U_("Sound Settings"), U_("ResamplerEmulateAmiga"), true)
+	, SoundBoostedThreadPriority(conf, U_("Sound Settings"), U_("BoostedThreadPriority"), SoundDevice::AppInfo().BoostedThreadPriorityXP)
+	, SoundBoostedThreadMMCSSClass(conf, U_("Sound Settings"), U_("BoostedThreadMMCSSClass"), SoundDevice::AppInfo().BoostedThreadMMCSSClassVista)
+	, SoundBoostedThreadRealtimePosix(conf, U_("Sound Settings"), U_("BoostedThreadRealtimeLinux"), SoundDevice::AppInfo().BoostedThreadRealtimePosix)
+	, SoundBoostedThreadNicenessPosix(conf, U_("Sound Settings"), U_("BoostedThreadNicenessPosix"), SoundDevice::AppInfo().BoostedThreadNicenessPosix)
+	, SoundBoostedThreadRtprioPosix(conf, U_("Sound Settings"), U_("BoostedThreadRtprioLinux"), SoundDevice::AppInfo().BoostedThreadRtprioPosix)
 	// MIDI Settings
-	, m_nMidiDevice(conf, MPT_USTRING("MIDI Settings"), MPT_USTRING("MidiDevice"), 0)
-	, midiDeviceName(conf, MPT_USTRING("MIDI Settings"), MPT_USTRING("MidiDeviceName"), "")
-	, m_dwMidiSetup(conf, MPT_USTRING("MIDI Settings"), MPT_USTRING("MidiSetup"), MIDISETUP_RECORDVELOCITY | MIDISETUP_RECORDNOTEOFF | MIDISETUP_TRANSPOSEKEYBOARD | MIDISETUP_MIDITOPLUG)
-	, aftertouchBehaviour(conf, MPT_USTRING("MIDI Settings"), MPT_USTRING("AftertouchBehaviour"), atDoNotRecord)
-	, midiVelocityAmp(conf, MPT_USTRING("MIDI Settings"), MPT_USTRING("MidiVelocityAmp"), 100)
-	, midiIgnoreCCs(conf, MPT_USTRING("MIDI Settings"), MPT_USTRING("IgnoredCCs"), std::bitset<128>())
-	, midiImportPatternLen(conf, MPT_USTRING("MIDI Settings"), MPT_USTRING("MidiImportPatLen"), 128)
-	, midiImportQuantize(conf, MPT_USTRING("MIDI Settings"), MPT_USTRING("MidiImportQuantize"), 32)
-	, midiImportTicks(conf, MPT_USTRING("MIDI Settings"), MPT_USTRING("MidiImportTicks"), 6)
+	, m_nMidiDevice(conf, U_("MIDI Settings"), U_("MidiDevice"), 0)
+	, midiDeviceName(conf, U_("MIDI Settings"), U_("MidiDeviceName"), "")
+	, m_dwMidiSetup(conf, U_("MIDI Settings"), U_("MidiSetup"), MIDISETUP_RECORDVELOCITY | MIDISETUP_RECORDNOTEOFF | MIDISETUP_TRANSPOSEKEYBOARD | MIDISETUP_MIDITOPLUG)
+	, aftertouchBehaviour(conf, U_("MIDI Settings"), U_("AftertouchBehaviour"), atDoNotRecord)
+	, midiVelocityAmp(conf, U_("MIDI Settings"), U_("MidiVelocityAmp"), 100)
+	, midiIgnoreCCs(conf, U_("MIDI Settings"), U_("IgnoredCCs"), std::bitset<128>())
+	, midiImportPatternLen(conf, U_("MIDI Settings"), U_("MidiImportPatLen"), 128)
+	, midiImportQuantize(conf, U_("MIDI Settings"), U_("MidiImportQuantize"), 32)
+	, midiImportTicks(conf, U_("MIDI Settings"), U_("MidiImportTicks"), 6)
 	// Pattern Editor
-	, gbLoopSong(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("LoopSong"), true)
-	, gnPatternSpacing(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("Spacing"), 0)
-	, gbPatternVUMeters(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("VU-Meters"), true)
-	, gbPatternPluginNames(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("Plugin-Names"), true)
-	, gbPatternRecord(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("Record"), true)
-	, patternNoEditPopup(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("NoEditPopup"), false)
-	, patternStepCommands(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("EditStepAppliesToCommands"), false)
-	, m_dwPatternSetup(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("PatternSetup"), GetDefaultPatternSetup())
-	, m_nRowHighlightMeasures(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("RowSpacing"), 16)
-	, m_nRowHighlightBeats(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("RowSpacing2"), 4)
-	, recordQuantizeRows(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("RecordQuantize"), 0)
-	, gnAutoChordWaitTime(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("AutoChordWaitTime"), 60)
-	, orderlistMargins(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("DefaultSequenceMargins"), 0)
-	, rowDisplayOffset(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("RowDisplayOffset"), 0)
-	, patternFont(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("Font"), FontSetting(PATTERNFONT_SMALL, 0))
-	, patternFontDot(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("FontDot"), MPT_USTRING("."))
-	, effectVisWidth(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("EffectVisWidth"), -1)
-	, effectVisHeight(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("EffectVisHeight"), -1)
-	, patternAccessibilityFormat(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("AccessibilityFormat"), _T("Row %row%, Channel %channel%, %column_type%: %column_description%"))
-	, patternAlwaysDrawWholePatternOnScrollSlow(conf, MPT_USTRING("Pattern Editor"), MPT_USTRING("AlwaysDrawWholePatternOnScrollSlow"), false)
+	, gbLoopSong(conf, U_("Pattern Editor"), U_("LoopSong"), true)
+	, gnPatternSpacing(conf, U_("Pattern Editor"), U_("Spacing"), 0)
+	, gbPatternVUMeters(conf, U_("Pattern Editor"), U_("VU-Meters"), true)
+	, gbPatternPluginNames(conf, U_("Pattern Editor"), U_("Plugin-Names"), true)
+	, gbPatternRecord(conf, U_("Pattern Editor"), U_("Record"), true)
+	, patternNoEditPopup(conf, U_("Pattern Editor"), U_("NoEditPopup"), false)
+	, patternStepCommands(conf, U_("Pattern Editor"), U_("EditStepAppliesToCommands"), false)
+	, m_dwPatternSetup(conf, U_("Pattern Editor"), U_("PatternSetup"), GetDefaultPatternSetup())
+	, m_nRowHighlightMeasures(conf, U_("Pattern Editor"), U_("RowSpacing"), 16)
+	, m_nRowHighlightBeats(conf, U_("Pattern Editor"), U_("RowSpacing2"), 4)
+	, recordQuantizeRows(conf, U_("Pattern Editor"), U_("RecordQuantize"), 0)
+	, gnAutoChordWaitTime(conf, U_("Pattern Editor"), U_("AutoChordWaitTime"), 60)
+	, orderlistMargins(conf, U_("Pattern Editor"), U_("DefaultSequenceMargins"), 0)
+	, rowDisplayOffset(conf, U_("Pattern Editor"), U_("RowDisplayOffset"), 0)
+	, patternFont(conf, U_("Pattern Editor"), U_("Font"), FontSetting(PATTERNFONT_SMALL, 0))
+	, patternFontDot(conf, U_("Pattern Editor"), U_("FontDot"), U_("."))
+	, effectVisWidth(conf, U_("Pattern Editor"), U_("EffectVisWidth"), -1)
+	, effectVisHeight(conf, U_("Pattern Editor"), U_("EffectVisHeight"), -1)
+	, patternAccessibilityFormat(conf, U_("Pattern Editor"), U_("AccessibilityFormat"), _T("Row %row%, Channel %channel%, %column_type%: %column_description%"))
+	, patternAlwaysDrawWholePatternOnScrollSlow(conf, U_("Pattern Editor"), U_("AlwaysDrawWholePatternOnScrollSlow"), false)
 	// Sample Editor
-	, m_SampleUndoBufferSize(conf, MPT_USTRING("Sample Editor"), MPT_USTRING("UndoBufferSize"), SampleUndoBufferSize())
-	, sampleEditorKeyBehaviour(conf, MPT_USTRING("Sample Editor"), MPT_USTRING("KeyBehaviour"), seNoteOffOnNewKey)
-	, m_defaultSampleFormat(conf, MPT_USTRING("Sample Editor"), MPT_USTRING("DefaultFormat"), dfFLAC)
-	, sampleEditorDefaultResampler(conf, MPT_USTRING("Sample Editor"), MPT_USTRING("DefaultResampler"), SRCMODE_DEFAULT)
-	, m_nFinetuneStep(conf, MPT_USTRING("Sample Editor"), MPT_USTRING("FinetuneStep"), 10)
-	, m_FLACCompressionLevel(conf, MPT_USTRING("Sample Editor"), MPT_USTRING("FLACCompressionLevel"), 5)
-	, compressITI(conf, MPT_USTRING("Sample Editor"), MPT_USTRING("CompressITI"), true)
-	, m_MayNormalizeSamplesOnLoad(conf, MPT_USTRING("Sample Editor"), MPT_USTRING("MayNormalizeSamplesOnLoad"), true)
-	, previewInFileDialogs(conf, MPT_USTRING("Sample Editor"), MPT_USTRING("PreviewInFileDialogs"), false)
-	, cursorPositionInHex(conf, MPT_USTRING("Sample Editor"), MPT_USTRING("CursorPositionInHex"), false)
+	, m_SampleUndoBufferSize(conf, U_("Sample Editor"), U_("UndoBufferSize"), SampleUndoBufferSize())
+	, sampleEditorKeyBehaviour(conf, U_("Sample Editor"), U_("KeyBehaviour"), seNoteOffOnNewKey)
+	, m_defaultSampleFormat(conf, U_("Sample Editor"), U_("DefaultFormat"), dfFLAC)
+	, sampleEditorDefaultResampler(conf, U_("Sample Editor"), U_("DefaultResampler"), SRCMODE_DEFAULT)
+	, m_nFinetuneStep(conf, U_("Sample Editor"), U_("FinetuneStep"), 10)
+	, m_FLACCompressionLevel(conf, U_("Sample Editor"), U_("FLACCompressionLevel"), 5)
+	, compressITI(conf, U_("Sample Editor"), U_("CompressITI"), true)
+	, m_MayNormalizeSamplesOnLoad(conf, U_("Sample Editor"), U_("MayNormalizeSamplesOnLoad"), true)
+	, previewInFileDialogs(conf, U_("Sample Editor"), U_("PreviewInFileDialogs"), false)
+	, cursorPositionInHex(conf, U_("Sample Editor"), U_("CursorPositionInHex"), false)
 	// Export
-	, ExportDefaultToSoundcardSamplerate(conf, MPT_USTRING("Export"), MPT_USTRING("DefaultToSoundcardSamplerate"), true)
-	, ExportStreamEncoderSettings(conf, MPT_USTRING("Export"))
+	, ExportDefaultToSoundcardSamplerate(conf, U_("Export"), U_("DefaultToSoundcardSamplerate"), true)
+	, ExportStreamEncoderSettings(conf, U_("Export"))
 	// Components
-	, ComponentsLoadOnStartup(conf, MPT_USTRING("Components"), MPT_USTRING("LoadOnStartup"), ComponentManagerSettingsDefault().LoadOnStartup())
-	, ComponentsKeepLoaded(conf, MPT_USTRING("Components"), MPT_USTRING("KeepLoaded"), ComponentManagerSettingsDefault().KeepLoaded())
+	, ComponentsLoadOnStartup(conf, U_("Components"), U_("LoadOnStartup"), ComponentManagerSettingsDefault().LoadOnStartup())
+	, ComponentsKeepLoaded(conf, U_("Components"), U_("KeepLoaded"), ComponentManagerSettingsDefault().KeepLoaded())
 	// AutoSave
-	, CreateBackupFiles(conf, MPT_USTRING("AutoSave"), MPT_USTRING("CreateBackupFiles"), true)
-	, AutosaveEnabled(conf, MPT_USTRING("AutoSave"), MPT_USTRING("Enabled"), true)
-	, AutosaveIntervalMinutes(conf, MPT_USTRING("AutoSave"), MPT_USTRING("IntervalMinutes"), 10)
-	, AutosaveHistoryDepth(conf, MPT_USTRING("AutoSave"), MPT_USTRING("BackupHistory"), 3)
-	, AutosaveUseOriginalPath(conf, MPT_USTRING("AutoSave"), MPT_USTRING("UseOriginalPath"), true)
-	, AutosavePath(conf, MPT_USTRING("AutoSave"), MPT_USTRING("Path"), mpt::GetTempDirectory())
+	, CreateBackupFiles(conf, U_("AutoSave"), U_("CreateBackupFiles"), true)
+	, AutosaveEnabled(conf, U_("AutoSave"), U_("Enabled"), true)
+	, AutosaveIntervalMinutes(conf, U_("AutoSave"), U_("IntervalMinutes"), 10)
+	, AutosaveHistoryDepth(conf, U_("AutoSave"), U_("BackupHistory"), 3)
+	, AutosaveUseOriginalPath(conf, U_("AutoSave"), U_("UseOriginalPath"), true)
+	, AutosavePath(conf, U_("AutoSave"), U_("Path"), mpt::GetTempDirectory())
 	// Paths
-	, PathSongs(conf, MPT_USTRING("Paths"), MPT_USTRING("Songs_Directory"), mpt::PathString())
-	, PathSamples(conf, MPT_USTRING("Paths"), MPT_USTRING("Samples_Directory"), mpt::PathString())
-	, PathInstruments(conf, MPT_USTRING("Paths"), MPT_USTRING("Instruments_Directory"), mpt::PathString())
-	, PathPlugins(conf, MPT_USTRING("Paths"), MPT_USTRING("Plugins_Directory"), mpt::PathString())
-	, PathPluginPresets(conf, MPT_USTRING("Paths"), MPT_USTRING("Plugin_Presets_Directory"), mpt::PathString())
-	, PathExport(conf, MPT_USTRING("Paths"), MPT_USTRING("Export_Directory"), mpt::PathString())
-	, PathTunings(theApp.GetConfigPath() + MPT_PATHSTRING("tunings\\"))
-	, PathUserTemplates(theApp.GetConfigPath() + MPT_PATHSTRING("TemplateModules\\"))
+	, PathSongs(conf, U_("Paths"), U_("Songs_Directory"), mpt::PathString())
+	, PathSamples(conf, U_("Paths"), U_("Samples_Directory"), mpt::PathString())
+	, PathInstruments(conf, U_("Paths"), U_("Instruments_Directory"), mpt::PathString())
+	, PathPlugins(conf, U_("Paths"), U_("Plugins_Directory"), mpt::PathString())
+	, PathPluginPresets(conf, U_("Paths"), U_("Plugin_Presets_Directory"), mpt::PathString())
+	, PathExport(conf, U_("Paths"), U_("Export_Directory"), mpt::PathString())
+	, PathTunings(theApp.GetConfigPath() + P_("tunings\\"))
+	, PathUserTemplates(theApp.GetConfigPath() + P_("TemplateModules\\"))
 	// Default template
-	, defaultTemplateFile(conf, MPT_USTRING("Paths"), MPT_USTRING("DefaultTemplate"), mpt::PathString())
-	, defaultArtist(conf, MPT_USTRING("Misc"), MPT_USTRING("DefaultArtist"), mpt::ToUnicode(mpt::CharsetLocale, mpt::getenv("USERNAME")))
+	, defaultTemplateFile(conf, U_("Paths"), U_("DefaultTemplate"), mpt::PathString())
+	, defaultArtist(conf, U_("Misc"), U_("DefaultArtist"), mpt::ToUnicode(mpt::CharsetLocale, mpt::getenv("USERNAME")))
 	// MRU List
-	, mruListLength(conf, MPT_USTRING("Misc"), MPT_USTRING("MRUListLength"), 10)
+	, mruListLength(conf, U_("Misc"), U_("MRUListLength"), 10)
 	// Plugins
-	, bridgeAllPlugins(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("BridgeAllPlugins"), false)
-	, enableAutoSuspend(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("EnableAutoSuspend"), false)
-	, midiMappingInPluginEditor(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("EnableMidiMappingInEditor"), true)
-	, pluginProjectPath(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("ProjectPath"), mpt::ustring())
-	, vstHostProductString(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("HostProductString"), "OpenMPT")
-	, vstHostVendorString(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("HostVendorString"), "OpenMPT project")
-	, vstHostVendorVersion(conf, MPT_USTRING("VST Plugins"), MPT_USTRING("HostVendorVersion"), Version::Current().GetRawVersion())
+	, bridgeAllPlugins(conf, U_("VST Plugins"), U_("BridgeAllPlugins"), false)
+	, enableAutoSuspend(conf, U_("VST Plugins"), U_("EnableAutoSuspend"), false)
+	, midiMappingInPluginEditor(conf, U_("VST Plugins"), U_("EnableMidiMappingInEditor"), true)
+	, pluginProjectPath(conf, U_("VST Plugins"), U_("ProjectPath"), mpt::ustring())
+	, vstHostProductString(conf, U_("VST Plugins"), U_("HostProductString"), "OpenMPT")
+	, vstHostVendorString(conf, U_("VST Plugins"), U_("HostVendorString"), "OpenMPT project")
+	, vstHostVendorVersion(conf, U_("VST Plugins"), U_("HostVendorVersion"), Version::Current().GetRawVersion())
 	// Update
-	, UpdateEnabled(conf, MPT_USTRING("Update"), MPT_USTRING("Enabled"), true)
-	, UpdateLastUpdateCheck(conf, MPT_USTRING("Update"), MPT_USTRING("LastUpdateCheck"), mpt::Date::Unix(time_t()))
-	, UpdateUpdateCheckPeriod_DEPRECATED(conf, MPT_USTRING("Update"), MPT_USTRING("UpdateCheckPeriod"), 7)
-	, UpdateIntervalDays(conf, MPT_USTRING("Update"), MPT_USTRING("UpdateCheckIntervalDays"), 7)
-	, UpdateChannel(conf, MPT_USTRING("Update"), MPT_USTRING("Channel"), UpdateChannelRelease)
-	, UpdateUpdateURL_DEPRECATED(conf, MPT_USTRING("Update"), MPT_USTRING("UpdateURL"), CUpdateCheck::GetDefaultChannelReleaseURL())
-	, UpdateChannelReleaseURL(conf, MPT_USTRING("Update"), MPT_USTRING("ChannelReleaseURL"), CUpdateCheck::GetDefaultChannelReleaseURL())
-	, UpdateChannelNextURL(conf, MPT_USTRING("Update"), MPT_USTRING("ChannelStableURL"), CUpdateCheck::GetDefaultChannelNextURL())
-	, UpdateChannelDevelopmentURL(conf, MPT_USTRING("Update"), MPT_USTRING("ChannelDevelopmentURL"), CUpdateCheck::GetDefaultChannelDevelopmentURL())
-	, UpdateAPIURL(conf, MPT_USTRING("Update"), MPT_USTRING("APIURL"), CUpdateCheck::GetDefaultAPIURL())
-	, UpdateStatisticsConsentAsked(conf, MPT_USTRING("Update"), MPT_USTRING("StatistisConsentAsked"), false)
-	, UpdateStatistics(conf, MPT_USTRING("Update"), MPT_USTRING("Statistis"), false)
-	, UpdateSendGUID_DEPRECATED(conf, MPT_USTRING("Update"), MPT_USTRING("SendGUID"), false)
-	, UpdateShowUpdateHint(conf, MPT_USTRING("Update"), MPT_USTRING("ShowUpdateHint"), true)
-	, UpdateSuggestDifferentBuildVariant(conf, MPT_USTRING("Update"), MPT_USTRING("SuggestDifferentBuildVariant"), true)
-	, UpdateIgnoreVersion(conf, MPT_USTRING("Update"), MPT_USTRING("IgnoreVersion"), _T(""))
+	, UpdateEnabled(conf, U_("Update"), U_("Enabled"), true)
+	, UpdateLastUpdateCheck(conf, U_("Update"), U_("LastUpdateCheck"), mpt::Date::Unix(time_t()))
+	, UpdateUpdateCheckPeriod_DEPRECATED(conf, U_("Update"), U_("UpdateCheckPeriod"), 7)
+	, UpdateIntervalDays(conf, U_("Update"), U_("UpdateCheckIntervalDays"), 7)
+	, UpdateChannel(conf, U_("Update"), U_("Channel"), UpdateChannelRelease)
+	, UpdateUpdateURL_DEPRECATED(conf, U_("Update"), U_("UpdateURL"), CUpdateCheck::GetDefaultChannelReleaseURL())
+	, UpdateChannelReleaseURL(conf, U_("Update"), U_("ChannelReleaseURL"), CUpdateCheck::GetDefaultChannelReleaseURL())
+	, UpdateChannelNextURL(conf, U_("Update"), U_("ChannelStableURL"), CUpdateCheck::GetDefaultChannelNextURL())
+	, UpdateChannelDevelopmentURL(conf, U_("Update"), U_("ChannelDevelopmentURL"), CUpdateCheck::GetDefaultChannelDevelopmentURL())
+	, UpdateAPIURL(conf, U_("Update"), U_("APIURL"), CUpdateCheck::GetDefaultAPIURL())
+	, UpdateStatisticsConsentAsked(conf, U_("Update"), U_("StatistisConsentAsked"), false)
+	, UpdateStatistics(conf, U_("Update"), U_("Statistis"), false)
+	, UpdateSendGUID_DEPRECATED(conf, U_("Update"), U_("SendGUID"), false)
+	, UpdateShowUpdateHint(conf, U_("Update"), U_("ShowUpdateHint"), true)
+	, UpdateSuggestDifferentBuildVariant(conf, U_("Update"), U_("SuggestDifferentBuildVariant"), true)
+	, UpdateIgnoreVersion(conf, U_("Update"), U_("IgnoreVersion"), _T(""))
 	// Wine suppport
-	, WineSupportEnabled(conf, MPT_USTRING("WineSupport"), MPT_USTRING("Enabled"), false)
-	, WineSupportAlwaysRecompile(conf, MPT_USTRING("WineSupport"), MPT_USTRING("AlwaysRecompile"), false)
-	, WineSupportAskCompile(conf, MPT_USTRING("WineSupport"), MPT_USTRING("AskCompile"), false)
-	, WineSupportCompileVerbosity(conf, MPT_USTRING("WineSupport"), MPT_USTRING("CompileVerbosity"), 2) // 0=silent 1=silentmake 2=progresswindow 3=standard 4=verbosemake 5=veryverbosemake 6=msgboxes
-	, WineSupportForeignOpenMPT(conf, MPT_USTRING("WineSupport"), MPT_USTRING("ForeignOpenMPT"), false)
-	, WineSupportAllowUnknownHost(conf, MPT_USTRING("WineSupport"), MPT_USTRING("AllowUnknownHost"), false)
-	, WineSupportEnablePulseAudio(conf, MPT_USTRING("WineSupport"), MPT_USTRING("EnablePulseAudio"), 1)
-	, WineSupportEnablePortAudio(conf, MPT_USTRING("WineSupport"), MPT_USTRING("EnablePortAudio"), 1)
-	, WineSupportEnableRtAudio(conf, MPT_USTRING("WineSupport"), MPT_USTRING("EnableRtAudio"), 1)
+	, WineSupportEnabled(conf, U_("WineSupport"), U_("Enabled"), false)
+	, WineSupportAlwaysRecompile(conf, U_("WineSupport"), U_("AlwaysRecompile"), false)
+	, WineSupportAskCompile(conf, U_("WineSupport"), U_("AskCompile"), false)
+	, WineSupportCompileVerbosity(conf, U_("WineSupport"), U_("CompileVerbosity"), 2) // 0=silent 1=silentmake 2=progresswindow 3=standard 4=verbosemake 5=veryverbosemake 6=msgboxes
+	, WineSupportForeignOpenMPT(conf, U_("WineSupport"), U_("ForeignOpenMPT"), false)
+	, WineSupportAllowUnknownHost(conf, U_("WineSupport"), U_("AllowUnknownHost"), false)
+	, WineSupportEnablePulseAudio(conf, U_("WineSupport"), U_("EnablePulseAudio"), 1)
+	, WineSupportEnablePortAudio(conf, U_("WineSupport"), U_("EnablePortAudio"), 1)
+	, WineSupportEnableRtAudio(conf, U_("WineSupport"), U_("EnableRtAudio"), 1)
 {
 
 	// Effects
 #ifndef NO_DSP
-	m_MegaBassSettings.m_nXBassDepth = conf.Read<int32>(MPT_USTRING("Effects"), MPT_USTRING("XBassDepth"), m_MegaBassSettings.m_nXBassDepth);
-	m_MegaBassSettings.m_nXBassRange = conf.Read<int32>(MPT_USTRING("Effects"), MPT_USTRING("XBassRange"), m_MegaBassSettings.m_nXBassRange);
+	m_MegaBassSettings.m_nXBassDepth = conf.Read<int32>(U_("Effects"), U_("XBassDepth"), m_MegaBassSettings.m_nXBassDepth);
+	m_MegaBassSettings.m_nXBassRange = conf.Read<int32>(U_("Effects"), U_("XBassRange"), m_MegaBassSettings.m_nXBassRange);
 #endif
 #ifndef NO_REVERB
-	m_ReverbSettings.m_nReverbDepth = conf.Read<int32>(MPT_USTRING("Effects"), MPT_USTRING("ReverbDepth"), m_ReverbSettings.m_nReverbDepth);
-	m_ReverbSettings.m_nReverbType = conf.Read<int32>(MPT_USTRING("Effects"), MPT_USTRING("ReverbType"), m_ReverbSettings.m_nReverbType);
+	m_ReverbSettings.m_nReverbDepth = conf.Read<int32>(U_("Effects"), U_("ReverbDepth"), m_ReverbSettings.m_nReverbDepth);
+	m_ReverbSettings.m_nReverbType = conf.Read<int32>(U_("Effects"), U_("ReverbType"), m_ReverbSettings.m_nReverbType);
 #endif
 #ifndef NO_DSP
-	m_SurroundSettings.m_nProLogicDepth = conf.Read<int32>(MPT_USTRING("Effects"), MPT_USTRING("ProLogicDepth"), m_SurroundSettings.m_nProLogicDepth);
-	m_SurroundSettings.m_nProLogicDelay = conf.Read<int32>(MPT_USTRING("Effects"), MPT_USTRING("ProLogicDelay"), m_SurroundSettings.m_nProLogicDelay);
+	m_SurroundSettings.m_nProLogicDepth = conf.Read<int32>(U_("Effects"), U_("ProLogicDepth"), m_SurroundSettings.m_nProLogicDepth);
+	m_SurroundSettings.m_nProLogicDelay = conf.Read<int32>(U_("Effects"), U_("ProLogicDelay"), m_SurroundSettings.m_nProLogicDelay);
 #endif
 #ifndef NO_EQ
-	m_EqSettings = conf.Read<EQPreset>(MPT_USTRING("Effects"), MPT_USTRING("EQ_Settings"), FlatEQPreset);
+	m_EqSettings = conf.Read<EQPreset>(U_("Effects"), U_("EQ_Settings"), FlatEQPreset);
 	const EQPreset userPresets[] =
 	{
 		FlatEQPreset,																// User1
@@ -360,21 +360,21 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		{ "User 3",	{16,16,16,16,16,16}, { 250, 450, 900, 2000, 5000, 10000 } }		// User4
 	};
 
-	m_EqUserPresets[0] = conf.Read<EQPreset>(MPT_USTRING("Effects"), MPT_USTRING("EQ_User1"), userPresets[0]);
-	m_EqUserPresets[1] = conf.Read<EQPreset>(MPT_USTRING("Effects"), MPT_USTRING("EQ_User2"), userPresets[1]);
-	m_EqUserPresets[2] = conf.Read<EQPreset>(MPT_USTRING("Effects"), MPT_USTRING("EQ_User3"), userPresets[2]);
-	m_EqUserPresets[3] = conf.Read<EQPreset>(MPT_USTRING("Effects"), MPT_USTRING("EQ_User4"), userPresets[3]);
+	m_EqUserPresets[0] = conf.Read<EQPreset>(U_("Effects"), U_("EQ_User1"), userPresets[0]);
+	m_EqUserPresets[1] = conf.Read<EQPreset>(U_("Effects"), U_("EQ_User2"), userPresets[1]);
+	m_EqUserPresets[2] = conf.Read<EQPreset>(U_("Effects"), U_("EQ_User3"), userPresets[2]);
+	m_EqUserPresets[3] = conf.Read<EQPreset>(U_("Effects"), U_("EQ_User4"), userPresets[3]);
 #endif
 	// Display (Colors)
 	GetDefaultColourScheme(rgbCustomColors);
 	for(int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
 	{
-		const mpt::ustring colorName = mpt::format(MPT_USTRING("Color%1"))(mpt::ufmt::dec0<2>(ncol));
-		rgbCustomColors[ncol] = conf.Read<uint32>(MPT_USTRING("Display"), colorName, rgbCustomColors[ncol]);
+		const mpt::ustring colorName = mpt::format(U_("Color%1"))(mpt::ufmt::dec0<2>(ncol));
+		rgbCustomColors[ncol] = conf.Read<uint32>(U_("Display"), colorName, rgbCustomColors[ncol]);
 	}
 	// Paths
-	m_szKbdFile = conf.Read<mpt::PathString>(MPT_USTRING("Paths"), MPT_USTRING("Key_Config_File"), mpt::PathString());
-	conf.Forget(MPT_USTRING("Paths"), MPT_USTRING("Key_Config_File"));
+	m_szKbdFile = conf.Read<mpt::PathString>(U_("Paths"), U_("Key_Config_File"), mpt::PathString());
+	conf.Forget(U_("Paths"), U_("Key_Config_File"));
 
 	// init old and messy stuff:
 
@@ -405,7 +405,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 
 	// load old and messy stuff:
 
-	PatternClipboard::SetClipboardSize(conf.Read<int32>(MPT_USTRING("Pattern Editor"), MPT_USTRING("NumClipboards"), mpt::saturate_cast<int32>(PatternClipboard::GetClipboardSize())));
+	PatternClipboard::SetClipboardSize(conf.Read<int32>(U_("Pattern Editor"), U_("NumClipboards"), mpt::saturate_cast<int32>(PatternClipboard::GetClipboardSize())));
 
 	// Chords
 	LoadChords(Chords);
@@ -415,11 +415,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	theApp.GetDefaultMidiMacro(macros);
 	for(int isfx = 0; isfx < 16; isfx++)
 	{
-		mpt::String::Copy(macros.szMidiSFXExt[isfx], conf.Read<std::string>(MPT_USTRING("Zxx Macros"), mpt::format(MPT_USTRING("SF%1"))(mpt::ufmt::HEX(isfx)), macros.szMidiSFXExt[isfx]));
+		mpt::String::Copy(macros.szMidiSFXExt[isfx], conf.Read<std::string>(U_("Zxx Macros"), mpt::format(U_("SF%1"))(mpt::ufmt::HEX(isfx)), macros.szMidiSFXExt[isfx]));
 	}
 	for(int izxx = 0; izxx < 128; izxx++)
 	{
-		mpt::String::Copy(macros.szMidiZXXExt[izxx], conf.Read<std::string>(MPT_USTRING("Zxx Macros"), mpt::format(MPT_USTRING("Z%1"))(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]));
+		mpt::String::Copy(macros.szMidiZXXExt[izxx], conf.Read<std::string>(U_("Zxx Macros"), mpt::format(U_("Z%1"))(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]));
 	}
 
 
@@ -428,9 +428,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	mruFiles.reserve(mruListLength);
 	for(uint32 i = 0; i < mruListLength; i++)
 	{
-		mpt::ustring key = mpt::format(MPT_USTRING("File%1"))(i);
+		mpt::ustring key = mpt::format(U_("File%1"))(i);
 
-		mpt::PathString path = theApp.RelativePathToAbsolute(conf.Read<mpt::PathString>(MPT_USTRING("Recent File List"), key, mpt::PathString()));
+		mpt::PathString path = theApp.RelativePathToAbsolute(conf.Read<mpt::PathString>(U_("Recent File List"), key, mpt::PathString()));
 		if(!path.empty())
 		{
 			mruFiles.push_back(path);
@@ -458,7 +458,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Sound Settings
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,30))
 	{
-		if(conf.Read<bool>(MPT_USTRING("Sound Settings"), MPT_USTRING("KeepDeviceOpen"), false))
+		if(conf.Read<bool>(U_("Sound Settings"), U_("KeepDeviceOpen"), false))
 		{
 			m_SoundSettingsStopMode = SoundDeviceStopModePlaying;
 		} else
@@ -479,15 +479,15 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,04))
 	{
-		m_SoundDeviceID_DEPRECATED = conf.Read<SoundDevice::Legacy::ID>(MPT_USTRING("Sound Settings"), MPT_USTRING("WaveDevice"), SoundDevice::Legacy::ID());
-		Setting<uint32> m_BufferLength_DEPRECATED(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BufferLength"), 50);
-		Setting<uint32> m_LatencyMS(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("Latency"), mpt::saturate_round<int32>(SoundDevice::Settings().Latency * 1000.0));
-		Setting<uint32> m_UpdateIntervalMS(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("UpdateInterval"), mpt::saturate_round<int32>(SoundDevice::Settings().UpdateInterval * 1000.0));
-		Setting<SampleFormat> m_SampleFormat(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BitsPerSample"), SoundDevice::Settings().sampleFormat);
-		Setting<bool> m_SoundDeviceExclusiveMode(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ExclusiveMode"), SoundDevice::Settings().ExclusiveMode);
-		Setting<bool> m_SoundDeviceBoostThreadPriority(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("BoostThreadPriority"), SoundDevice::Settings().BoostThreadPriority);
-		Setting<bool> m_SoundDeviceUseHardwareTiming(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("UseHardwareTiming"), SoundDevice::Settings().UseHardwareTiming);
-		Setting<SoundDevice::ChannelMapping> m_SoundDeviceChannelMapping(conf, MPT_USTRING("Sound Settings"), MPT_USTRING("ChannelMapping"), SoundDevice::Settings().Channels);
+		m_SoundDeviceID_DEPRECATED = conf.Read<SoundDevice::Legacy::ID>(U_("Sound Settings"), U_("WaveDevice"), SoundDevice::Legacy::ID());
+		Setting<uint32> m_BufferLength_DEPRECATED(conf, U_("Sound Settings"), U_("BufferLength"), 50);
+		Setting<uint32> m_LatencyMS(conf, U_("Sound Settings"), U_("Latency"), mpt::saturate_round<int32>(SoundDevice::Settings().Latency * 1000.0));
+		Setting<uint32> m_UpdateIntervalMS(conf, U_("Sound Settings"), U_("UpdateInterval"), mpt::saturate_round<int32>(SoundDevice::Settings().UpdateInterval * 1000.0));
+		Setting<SampleFormat> m_SampleFormat(conf, U_("Sound Settings"), U_("BitsPerSample"), SoundDevice::Settings().sampleFormat);
+		Setting<bool> m_SoundDeviceExclusiveMode(conf, U_("Sound Settings"), U_("ExclusiveMode"), SoundDevice::Settings().ExclusiveMode);
+		Setting<bool> m_SoundDeviceBoostThreadPriority(conf, U_("Sound Settings"), U_("BoostThreadPriority"), SoundDevice::Settings().BoostThreadPriority);
+		Setting<bool> m_SoundDeviceUseHardwareTiming(conf, U_("Sound Settings"), U_("UseHardwareTiming"), SoundDevice::Settings().UseHardwareTiming);
+		Setting<SoundDevice::ChannelMapping> m_SoundDeviceChannelMapping(conf, U_("Sound Settings"), U_("ChannelMapping"), SoundDevice::Settings().Channels);
 		if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
 		{
 			if(m_BufferLength_DEPRECATED != 0)
@@ -517,7 +517,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		}
 		if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,03))
 		{
-			m_SoundDeviceChannelMapping = SoundDevice::ChannelMapping::BaseChannel(MixerOutputChannels, conf.Read<int>(MPT_USTRING("Sound Settings"), MPT_USTRING("ASIOBaseChannel"), 0));
+			m_SoundDeviceChannelMapping = SoundDevice::ChannelMapping::BaseChannel(MixerOutputChannels, conf.Read<int>(U_("Sound Settings"), U_("ASIOBaseChannel"), 0));
 		}
 		m_SoundDeviceSettingsDefaults.Latency = m_LatencyMS / 1000.0;
 		m_SoundDeviceSettingsDefaults.UpdateInterval = m_UpdateIntervalMS / 1000.0;
@@ -563,15 +563,15 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,22))
 	{
 		MixerSettings settings = GetMixerSettings();
-		settings.SetVolumeRampUpSamples(conf.Read<int32>(MPT_USTRING("Sound Settings"), MPT_USTRING("VolumeRampSamples"), 42));
-		settings.SetVolumeRampDownSamples(conf.Read<int32>(MPT_USTRING("Sound Settings"), MPT_USTRING("VolumeRampSamples"), 42));
+		settings.SetVolumeRampUpSamples(conf.Read<int32>(U_("Sound Settings"), U_("VolumeRampSamples"), 42));
+		settings.SetVolumeRampDownSamples(conf.Read<int32>(U_("Sound Settings"), U_("VolumeRampSamples"), 42));
 		SetMixerSettings(settings);
-		conf.Remove(MPT_USTRING("Sound Settings"), MPT_USTRING("VolumeRampSamples"));
+		conf.Remove(U_("Sound Settings"), U_("VolumeRampSamples"));
 	} else if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,18))
 	{
 		MixerSettings settings = GetMixerSettings();
-		settings.SetVolumeRampUpSamples(conf.Read<int32>(MPT_USTRING("Sound Settings"), MPT_USTRING("VolumeRampUpSamples"), MixerSettings().GetVolumeRampUpSamples()));
-		settings.SetVolumeRampDownSamples(conf.Read<int32>(MPT_USTRING("Sound Settings"), MPT_USTRING("VolumeRampDownSamples"), MixerSettings().GetVolumeRampDownSamples()));
+		settings.SetVolumeRampUpSamples(conf.Read<int32>(U_("Sound Settings"), U_("VolumeRampUpSamples"), MixerSettings().GetVolumeRampUpSamples()));
+		settings.SetVolumeRampDownSamples(conf.Read<int32>(U_("Sound Settings"), U_("VolumeRampDownSamples"), MixerSettings().GetVolumeRampDownSamples()));
 		SetMixerSettings(settings);
 	}
 	Limit(ResamplerCutoffPercent, 0, 100);
@@ -617,7 +617,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,24,01,04))
 	{
-		commentsFont = FontSetting(MPT_USTRING("Courier New"), (m_dwPatternSetup & 0x02) ? 120 : 90);
+		commentsFont = FontSetting(U_("Courier New"), (m_dwPatternSetup & 0x02) ? 120 : 90);
 		patternFont = FontSetting((m_dwPatternSetup & 0x08) ? PATTERNFONT_SMALL : PATTERNFONT_LARGE, 0);
 		m_dwPatternSetup &= ~(0x08 | 0x02);
 	}
@@ -650,19 +650,19 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 			UpdateEnabled = true;
 			UpdateIntervalDays = UpdateUpdateCheckPeriod_DEPRECATED.Get();
 		}
-		if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING(""))
+		if(UpdateUpdateURL_DEPRECATED.Get() == U_(""))
 		{
 			UpdateChannel = UpdateChannelRelease;
-		} else if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING("http://update.openmpt.org/check/$VERSION/$GUID"))
+		} else if(UpdateUpdateURL_DEPRECATED.Get() == U_("http://update.openmpt.org/check/$VERSION/$GUID"))
 		{
 			UpdateChannel = UpdateChannelRelease;
-		} else if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING("https://update.openmpt.org/check/$VERSION/$GUID"))
+		} else if(UpdateUpdateURL_DEPRECATED.Get() == U_("https://update.openmpt.org/check/$VERSION/$GUID"))
 		{
 			UpdateChannel = UpdateChannelRelease;
-		} else if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING("http://update.openmpt.org/check/testing/$VERSION/$GUID"))
+		} else if(UpdateUpdateURL_DEPRECATED.Get() == U_("http://update.openmpt.org/check/testing/$VERSION/$GUID"))
 		{
 			UpdateChannel = UpdateChannelDevelopment;
-		} else if(UpdateUpdateURL_DEPRECATED.Get() == MPT_USTRING("https://update.openmpt.org/check/testing/$VERSION/$GUID"))
+		} else if(UpdateUpdateURL_DEPRECATED.Get() == U_("https://update.openmpt.org/check/testing/$VERSION/$GUID"))
 		{
 			UpdateChannel = UpdateChannelDevelopment;
 		} else
@@ -768,30 +768,30 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 					:
 						manager.GetDeviceCaps(newIdentifier).DefaultSettings
 					;
-				const mpt::ustring newIdentifierW = newIdentifier + MPT_USTRING("_");
-				const mpt::ustring oldIdentifierW = oldIdentifier + MPT_USTRING("_");
-				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("Latency"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("Latency"), mpt::saturate_round<int32>(defaults.Latency * 1000000.0)));
-				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("UpdateInterval"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("UpdateInterval"), mpt::saturate_round<int32>(defaults.UpdateInterval * 1000000.0)));
-				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("SampleRate"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("SampleRate"), defaults.Samplerate));
-				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("Channels"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("Channels"), defaults.Channels.GetNumHostChannels()));
-				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("SampleFormat"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("SampleFormat"), defaults.sampleFormat));
-				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("ExclusiveMode"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("ExclusiveMode"), defaults.ExclusiveMode));
-				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("BoostThreadPriority"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("BoostThreadPriority"), defaults.BoostThreadPriority));
-				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("KeepDeviceRunning"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("KeepDeviceRunning"), defaults.KeepDeviceRunning));
-				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("UseHardwareTiming"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("UseHardwareTiming"), defaults.UseHardwareTiming));
-				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("DitherType"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("DitherType"), defaults.DitherType));
-				conf.Write(MPT_USTRING("Sound Settings"), newIdentifierW + MPT_USTRING("ChannelMapping"),
-					conf.Read(MPT_USTRING("Sound Settings"), oldIdentifierW + MPT_USTRING("ChannelMapping"), defaults.Channels));
+				const mpt::ustring newIdentifierW = newIdentifier + U_("_");
+				const mpt::ustring oldIdentifierW = oldIdentifier + U_("_");
+				conf.Write(U_("Sound Settings"), newIdentifierW + U_("Latency"),
+					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("Latency"), mpt::saturate_round<int32>(defaults.Latency * 1000000.0)));
+				conf.Write(U_("Sound Settings"), newIdentifierW + U_("UpdateInterval"),
+					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("UpdateInterval"), mpt::saturate_round<int32>(defaults.UpdateInterval * 1000000.0)));
+				conf.Write(U_("Sound Settings"), newIdentifierW + U_("SampleRate"),
+					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("SampleRate"), defaults.Samplerate));
+				conf.Write(U_("Sound Settings"), newIdentifierW + U_("Channels"),
+					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("Channels"), defaults.Channels.GetNumHostChannels()));
+				conf.Write(U_("Sound Settings"), newIdentifierW + U_("SampleFormat"),
+					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("SampleFormat"), defaults.sampleFormat));
+				conf.Write(U_("Sound Settings"), newIdentifierW + U_("ExclusiveMode"),
+					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("ExclusiveMode"), defaults.ExclusiveMode));
+				conf.Write(U_("Sound Settings"), newIdentifierW + U_("BoostThreadPriority"),
+					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("BoostThreadPriority"), defaults.BoostThreadPriority));
+				conf.Write(U_("Sound Settings"), newIdentifierW + U_("KeepDeviceRunning"),
+					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("KeepDeviceRunning"), defaults.KeepDeviceRunning));
+				conf.Write(U_("Sound Settings"), newIdentifierW + U_("UseHardwareTiming"),
+					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("UseHardwareTiming"), defaults.UseHardwareTiming));
+				conf.Write(U_("Sound Settings"), newIdentifierW + U_("DitherType"),
+					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("DitherType"), defaults.DitherType));
+				conf.Write(U_("Sound Settings"), newIdentifierW + U_("ChannelMapping"),
+					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("ChannelMapping"), defaults.Channels));
 			}
 		}
 	}
@@ -805,16 +805,16 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 	{
 		CreateDirectory(PathTunings.GetDefaultDir().AsNative().c_str(), 0);
 	}
-	if(!(PathTunings.GetDefaultDir() + MPT_PATHSTRING("Built-in\\")).IsDirectory())
+	if(!(PathTunings.GetDefaultDir() + P_("Built-in\\")).IsDirectory())
 	{
-		CreateDirectory((PathTunings.GetDefaultDir() + MPT_PATHSTRING("Built-in\\")).AsNative().c_str(), 0);
+		CreateDirectory((PathTunings.GetDefaultDir() + P_("Built-in\\")).AsNative().c_str(), 0);
 	}
-	if(!(PathTunings.GetDefaultDir() + MPT_PATHSTRING("Locale\\")).IsDirectory())
+	if(!(PathTunings.GetDefaultDir() + P_("Locale\\")).IsDirectory())
 	{
-		CreateDirectory((PathTunings.GetDefaultDir() + MPT_PATHSTRING("Local\\")).AsNative().c_str(), 0);
+		CreateDirectory((PathTunings.GetDefaultDir() + P_("Local\\")).AsNative().c_str(), 0);
 	}
 	{
-		mpt::PathString fn = PathTunings.GetDefaultDir() + MPT_PATHSTRING("Built-in\\12TET.tun");
+		mpt::PathString fn = PathTunings.GetDefaultDir() + P_("Built-in\\12TET.tun");
 		if(!fn.FileOrDirectoryExists())
 		{
 			CTuning * pT = CSoundFile::CreateTuning12TET("12TET");
@@ -826,7 +826,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 		}
 	}
 	{
-		mpt::PathString fn = PathTunings.GetDefaultDir() + MPT_PATHSTRING("Built-in\\12TET [[fs15 1.17.02.49]].tun");
+		mpt::PathString fn = PathTunings.GetDefaultDir() + P_("Built-in\\12TET [[fs15 1.17.02.49]].tun");
 		if(!fn.FileOrDirectoryExists())
 		{
 			CTuning * pT = CSoundFile::CreateTuning12TET("12TET [[fs15 1.17.02.49]]");
@@ -840,7 +840,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 	oldLocalTunings = LoadLocalTunings();
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,27,00,56))
 	{
-		UnpackTuningCollection(*oldLocalTunings, PathTunings.GetDefaultDir() + MPT_PATHSTRING("Local\\"));
+		UnpackTuningCollection(*oldLocalTunings, PathTunings.GetDefaultDir() + P_("Local\\"));
 	}
 }
 
@@ -850,7 +850,7 @@ std::unique_ptr<CTuningCollection> TrackerSettings::LoadLocalTunings()
 	std::unique_ptr<CTuningCollection> s_pTuningsSharedLocal = mpt::make_unique<CTuningCollection>();
 	mpt::ifstream f(
 			PathTunings.GetDefaultDir()
-			+ MPT_PATHSTRING("local_tunings")
+			+ P_("local_tunings")
 			+ mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)
 		, std::ios::binary);
 	if(f.good())
@@ -889,17 +889,17 @@ public:
 	StoredSoundDeviceSettings(SettingsContainer &conf, const SoundDevice::Info & deviceInfo, const SoundDevice::Settings & defaults)
 		: conf(conf)
 		, deviceInfo(deviceInfo)
-		, LatencyUS(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("Latency"), mpt::saturate_round<int32>(defaults.Latency * 1000000.0))
-		, UpdateIntervalUS(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("UpdateInterval"), mpt::saturate_round<int32>(defaults.UpdateInterval * 1000000.0))
-		, Samplerate(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("SampleRate"), defaults.Samplerate)
-		, ChannelsOld(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("Channels"), mpt::saturate_cast<uint8>((int)defaults.Channels))
-		, ChannelMapping(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("ChannelMapping"), defaults.Channels)
-		, sampleFormat(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("SampleFormat"), defaults.sampleFormat)
-		, ExclusiveMode(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("ExclusiveMode"), defaults.ExclusiveMode)
-		, BoostThreadPriority(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("BoostThreadPriority"), defaults.BoostThreadPriority)
-		, KeepDeviceRunning(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("KeepDeviceRunning"), defaults.KeepDeviceRunning)
-		, UseHardwareTiming(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("UseHardwareTiming"), defaults.UseHardwareTiming)
-		, DitherType(conf, MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("DitherType"), defaults.DitherType)
+		, LatencyUS(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("Latency"), mpt::saturate_round<int32>(defaults.Latency * 1000000.0))
+		, UpdateIntervalUS(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("UpdateInterval"), mpt::saturate_round<int32>(defaults.UpdateInterval * 1000000.0))
+		, Samplerate(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("SampleRate"), defaults.Samplerate)
+		, ChannelsOld(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("Channels"), mpt::saturate_cast<uint8>((int)defaults.Channels))
+		, ChannelMapping(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("ChannelMapping"), defaults.Channels)
+		, sampleFormat(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("SampleFormat"), defaults.sampleFormat)
+		, ExclusiveMode(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("ExclusiveMode"), defaults.ExclusiveMode)
+		, BoostThreadPriority(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("BoostThreadPriority"), defaults.BoostThreadPriority)
+		, KeepDeviceRunning(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("KeepDeviceRunning"), defaults.KeepDeviceRunning)
+		, UseHardwareTiming(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("UseHardwareTiming"), defaults.UseHardwareTiming)
+		, DitherType(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("DitherType"), defaults.DitherType)
 	{
 		if(ChannelMapping.Get().GetNumHostChannels() != ChannelsOld)
 		{
@@ -908,10 +908,10 @@ public:
 			ChannelMapping = SoundDevice::ChannelMapping(ChannelsOld);
 		}
 		// store informational data (not read back, just to allow the user to mock with the raw ini file)
-		conf.Write(MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("Type"), deviceInfo.type);
-		conf.Write(MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("InternalID"), deviceInfo.internalID);
-		conf.Write(MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("API"), deviceInfo.apiName);
-		conf.Write(MPT_USTRING("Sound Settings"), deviceInfo.GetIdentifier() + MPT_USTRING("_") + MPT_USTRING("Name"), deviceInfo.name);
+		conf.Write(U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("Type"), deviceInfo.type);
+		conf.Write(U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("InternalID"), deviceInfo.internalID);
+		conf.Write(U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("API"), deviceInfo.apiName);
+		conf.Write(U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("Name"), deviceInfo.name);
 	}
 
 	StoredSoundDeviceSettings & operator = (const SoundDevice::Settings &settings)
@@ -1097,41 +1097,41 @@ void TrackerSettings::SaveSettings()
 	WINDOWPLACEMENT wpl;
 	wpl.length = sizeof(WINDOWPLACEMENT);
 	CMainFrame::GetMainFrame()->GetWindowPlacement(&wpl);
-	conf.Write<WINDOWPLACEMENT>(MPT_USTRING("Display"), MPT_USTRING("WindowPlacement"), wpl);
+	conf.Write<WINDOWPLACEMENT>(U_("Display"), U_("WindowPlacement"), wpl);
 
-	conf.Write<int32>(MPT_USTRING("Pattern Editor"), MPT_USTRING("NumClipboards"), mpt::saturate_cast<int32>(PatternClipboard::GetClipboardSize()));
+	conf.Write<int32>(U_("Pattern Editor"), U_("NumClipboards"), mpt::saturate_cast<int32>(PatternClipboard::GetClipboardSize()));
 
 	// Effects
 #ifndef NO_DSP
-	conf.Write<int32>(MPT_USTRING("Effects"), MPT_USTRING("XBassDepth"), m_MegaBassSettings.m_nXBassDepth);
-	conf.Write<int32>(MPT_USTRING("Effects"), MPT_USTRING("XBassRange"), m_MegaBassSettings.m_nXBassRange);
+	conf.Write<int32>(U_("Effects"), U_("XBassDepth"), m_MegaBassSettings.m_nXBassDepth);
+	conf.Write<int32>(U_("Effects"), U_("XBassRange"), m_MegaBassSettings.m_nXBassRange);
 #endif
 #ifndef NO_REVERB
-	conf.Write<int32>(MPT_USTRING("Effects"), MPT_USTRING("ReverbDepth"), m_ReverbSettings.m_nReverbDepth);
-	conf.Write<int32>(MPT_USTRING("Effects"), MPT_USTRING("ReverbType"), m_ReverbSettings.m_nReverbType);
+	conf.Write<int32>(U_("Effects"), U_("ReverbDepth"), m_ReverbSettings.m_nReverbDepth);
+	conf.Write<int32>(U_("Effects"), U_("ReverbType"), m_ReverbSettings.m_nReverbType);
 #endif
 #ifndef NO_DSP
-	conf.Write<int32>(MPT_USTRING("Effects"), MPT_USTRING("ProLogicDepth"), m_SurroundSettings.m_nProLogicDepth);
-	conf.Write<int32>(MPT_USTRING("Effects"), MPT_USTRING("ProLogicDelay"), m_SurroundSettings.m_nProLogicDelay);
+	conf.Write<int32>(U_("Effects"), U_("ProLogicDepth"), m_SurroundSettings.m_nProLogicDepth);
+	conf.Write<int32>(U_("Effects"), U_("ProLogicDelay"), m_SurroundSettings.m_nProLogicDelay);
 #endif
 #ifndef NO_EQ
-	conf.Write<EQPreset>(MPT_USTRING("Effects"), MPT_USTRING("EQ_Settings"), m_EqSettings);
-	conf.Write<EQPreset>(MPT_USTRING("Effects"), MPT_USTRING("EQ_User1"), m_EqUserPresets[0]);
-	conf.Write<EQPreset>(MPT_USTRING("Effects"), MPT_USTRING("EQ_User2"), m_EqUserPresets[1]);
-	conf.Write<EQPreset>(MPT_USTRING("Effects"), MPT_USTRING("EQ_User3"), m_EqUserPresets[2]);
-	conf.Write<EQPreset>(MPT_USTRING("Effects"), MPT_USTRING("EQ_User4"), m_EqUserPresets[3]);
+	conf.Write<EQPreset>(U_("Effects"), U_("EQ_Settings"), m_EqSettings);
+	conf.Write<EQPreset>(U_("Effects"), U_("EQ_User1"), m_EqUserPresets[0]);
+	conf.Write<EQPreset>(U_("Effects"), U_("EQ_User2"), m_EqUserPresets[1]);
+	conf.Write<EQPreset>(U_("Effects"), U_("EQ_User3"), m_EqUserPresets[2]);
+	conf.Write<EQPreset>(U_("Effects"), U_("EQ_User4"), m_EqUserPresets[3]);
 #endif
 
 	// Display (Colors)
 	for(int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
 	{
-		conf.Write<uint32>(MPT_USTRING("Display"), mpt::format(MPT_USTRING("Color%1"))(mpt::ufmt::dec0<2>(ncol)), rgbCustomColors[ncol]);
+		conf.Write<uint32>(U_("Display"), mpt::format(U_("Color%1"))(mpt::ufmt::dec0<2>(ncol)), rgbCustomColors[ncol]);
 	}
 
 	// Paths
 	// Obsolete, since we always write to Keybindings.mkb now.
 	// Older versions of OpenMPT 1.18+ will look for this file if this entry is missing, so removing this entry after having read it is kind of backwards compatible.
-	conf.Remove(MPT_USTRING("Paths"), MPT_USTRING("Key_Config_File"));
+	conf.Remove(U_("Paths"), U_("Key_Config_File"));
 
 	// Chords
 	SaveChords(Chords);
@@ -1141,17 +1141,17 @@ void TrackerSettings::SaveSettings()
 	theApp.GetDefaultMidiMacro(macros);
 	for(int isfx = 0; isfx < 16; isfx++)
 	{
-		conf.Write<std::string>(MPT_USTRING("Zxx Macros"), mpt::format(MPT_USTRING("SF%1"))(mpt::ufmt::HEX(isfx)), macros.szMidiSFXExt[isfx]);
+		conf.Write<std::string>(U_("Zxx Macros"), mpt::format(U_("SF%1"))(mpt::ufmt::HEX(isfx)), macros.szMidiSFXExt[isfx]);
 	}
 	for(int izxx = 0; izxx < 128; izxx++)
 	{
-		conf.Write<std::string>(MPT_USTRING("Zxx Macros"), mpt::format(MPT_USTRING("Z%1"))(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]);
+		conf.Write<std::string>(U_("Zxx Macros"), mpt::format(U_("Z%1"))(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]);
 	}
 
 	// MRU list
 	for(uint32 i = 0; i < (ID_MRU_LIST_LAST - ID_MRU_LIST_FIRST + 1); i++)
 	{
-		mpt::ustring key = mpt::format(MPT_USTRING("File%1"))(i);
+		mpt::ustring key = mpt::format(U_("File%1"))(i);
 
 		if(i < mruFiles.size())
 		{
@@ -1160,10 +1160,10 @@ void TrackerSettings::SaveSettings()
 			{
 				path = theApp.AbsolutePathToRelative(path);
 			}
-			conf.Write<mpt::PathString>(MPT_USTRING("Recent File List"), key, path);
+			conf.Write<mpt::PathString>(U_("Recent File List"), key, path);
 		} else
 		{
-			conf.Remove(MPT_USTRING("Recent File List"), key);
+			conf.Remove(U_("Recent File List"), key);
 		}
 	}
 }
@@ -1171,7 +1171,7 @@ void TrackerSettings::SaveSettings()
 
 bool TrackerSettings::IsComponentBlocked(const std::string &key)
 {
-	return Setting<bool>(conf, MPT_USTRING("Components"), MPT_USTRING("Block") + mpt::ToUnicode(mpt::CharsetASCII, key), ComponentManagerSettingsDefault().IsBlocked(key));
+	return Setting<bool>(conf, U_("Components"), U_("Block") + mpt::ToUnicode(mpt::CharsetASCII, key), ComponentManagerSettingsDefault().IsBlocked(key));
 }
 
 
@@ -1208,8 +1208,8 @@ void TrackerSettings::LoadChords(MPTChords &chords)
 	for(std::size_t i = 0; i < mpt::size(chords); i++)
 	{
 		uint32 chord;
-		mpt::ustring note = mpt::format(MPT_USTRING("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
-		if((chord = conf.Read<int32>(MPT_USTRING("Chords"), note, -1)) != uint32(-1))
+		mpt::ustring note = mpt::format(U_("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
+		if((chord = conf.Read<int32>(U_("Chords"), note, -1)) != uint32(-1))
 		{
 			if((chord & 0xFFFFFFC0) || (!chords[i].notes[0]))
 			{
@@ -1228,8 +1228,8 @@ void TrackerSettings::SaveChords(MPTChords &chords)
 	for(std::size_t i = 0; i < mpt::size(chords); i++)
 	{
 		int32 s = (chords[i].key) | (chords[i].notes[0] << 6) | (chords[i].notes[1] << 12) | (chords[i].notes[2] << 18);
-		mpt::ustring note = mpt::format(MPT_USTRING("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
-		conf.Write<int32>(MPT_USTRING("Chords"), note, s);
+		mpt::ustring note = mpt::format(U_("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
+		conf.Write<int32>(U_("Chords"), note, s);
 	}
 }
 
@@ -1297,7 +1297,7 @@ mpt::ustring IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs)
 		{
 			if(!first)
 			{
-				cc += MPT_USTRING(",");
+				cc += U_(",");
 			}
 			cc += mpt::ufmt::val(i);
 			first = false;

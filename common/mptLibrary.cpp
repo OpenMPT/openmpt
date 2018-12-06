@@ -432,15 +432,15 @@ mpt::PathString LibraryPath::GetFileName() const
 mpt::PathString LibraryPath::GetDefaultPrefix()
 {
 	#if MPT_OS_WINDOWS
-		return MPT_PATHSTRING("");
+		return P_("");
 	#elif MPT_OS_ANDROID
-		return MPT_PATHSTRING("lib");
+		return P_("lib");
 	#elif defined(MPT_WITH_LTDL)
-		return MPT_PATHSTRING("lib");
+		return P_("lib");
 	#elif defined(MPT_WITH_DL)
-		return MPT_PATHSTRING("lib");
+		return P_("lib");
 	#else
-		return MPT_PATHSTRING("lib");
+		return P_("lib");
 	#endif
 }
 
@@ -448,13 +448,13 @@ mpt::PathString LibraryPath::GetDefaultPrefix()
 mpt::PathString LibraryPath::GetDefaultSuffix()
 {
 	#if MPT_OS_WINDOWS
-		return MPT_PATHSTRING(".dll");
+		return P_(".dll");
 	#elif MPT_OS_ANDROID
-		return MPT_PATHSTRING(".so");
+		return P_(".so");
 	#elif defined(MPT_WITH_LTDL)
-		return MPT_PATHSTRING("");  // handled by libltdl
+		return P_("");  // handled by libltdl
 	#elif defined(MPT_WITH_DL)
-		return MPT_PATHSTRING(".so");
+		return P_(".so");
 	#else
 		return mpt::PathString();
 	#endif
@@ -479,7 +479,7 @@ LibraryPath LibraryPath::AppDataFullName(const mpt::PathString &fullname, const 
 {
 	if(appdata.empty())
 	{
-		return LibraryPath(mpt::LibrarySearchPathInvalid, MPT_PATHSTRING(""));
+		return LibraryPath(mpt::LibrarySearchPathInvalid, P_(""));
 	}
 	return LibraryPath(mpt::LibrarySearchPathFullPath, appdata.WithTrailingSlash() + fullname + GetDefaultSuffix());
 }

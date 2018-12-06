@@ -122,9 +122,9 @@ mpt::PathString GetPathPrefix()
 {
 	if((*PathPrefix).empty())
 	{
-		return MPT_PATHSTRING("");
+		return P_("");
 	}
-	return *PathPrefix + MPT_PATHSTRING("/");
+	return *PathPrefix + P_("/");
 }
 
 
@@ -249,11 +249,11 @@ static MPT_NOINLINE void TestVersion()
 	{
 		VERIFY_EQUAL( Version::Parse(Version::Current().ToUString()), Version::Current() );
 		VERIFY_EQUAL( Version::Parse(Version::Current().ToUString()).ToUString(), Version::Current().ToUString() );
-		VERIFY_EQUAL( Version(18285096).ToUString(), MPT_USTRING("1.17.02.28") );
-		VERIFY_EQUAL( Version::Parse(MPT_USTRING("1.17.02.28")), Version(18285096) );
-		VERIFY_EQUAL( Version::Parse(MPT_USTRING("1.fe.02.28")), Version(0x01fe0228) );
-		VERIFY_EQUAL( Version::Parse(MPT_USTRING("01.fe.02.28")), Version(0x01fe0228) );
-		VERIFY_EQUAL( Version::Parse(MPT_USTRING("1.22")), Version(0x01220000) );
+		VERIFY_EQUAL( Version(18285096).ToUString(), U_("1.17.02.28") );
+		VERIFY_EQUAL( Version::Parse(U_("1.17.02.28")), Version(18285096) );
+		VERIFY_EQUAL( Version::Parse(U_("1.fe.02.28")), Version(0x01fe0228) );
+		VERIFY_EQUAL( Version::Parse(U_("01.fe.02.28")), Version(0x01fe0228) );
+		VERIFY_EQUAL( Version::Parse(U_("1.22")), Version(0x01220000) );
 		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,19,02,00).WithoutTestNumber(), MAKE_VERSION_NUMERIC(1,19,02,00));
 		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,03,20).WithoutTestNumber(), MAKE_VERSION_NUMERIC(1,18,03,00));
 		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,01,13).IsTestVersion(), true);
@@ -312,7 +312,7 @@ static MPT_NOINLINE void TestVersion()
 #ifdef LIBOPENMPT_BUILD
 #if MPT_TEST_HAS_FILESYSTEM
 #if !MPT_OS_DJGPP
-	mpt::PathString version_mk = GetPathPrefix() + MPT_PATHSTRING("libopenmpt/libopenmpt_version.mk");
+	mpt::PathString version_mk = GetPathPrefix() + P_("libopenmpt/libopenmpt_version.mk");
 	mpt::ifstream f(version_mk, std::ios::in);
 	VERIFY_EQUAL(f ? true : false, true);
 	std::map<std::string, std::string> fields;
@@ -566,10 +566,10 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::fmt::dec0<2>(-1), "-01");
 	VERIFY_EQUAL(mpt::fmt::dec0<3>(-1), "-001");
 
-	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(0xa2345678), MPT_USTRING("A2345678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(0xa2345678), MPT_USTRING("A2345678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(0xa2345678), MPT_USTRING("0A2345678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(0xa2345678), MPT_USTRING("00A2345678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(0xa2345678), U_("A2345678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(0xa2345678), U_("A2345678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(0xa2345678), U_("0A2345678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(0xa2345678), U_("00A2345678"));
 
 #if MPT_WSTRING_FORMAT
 	VERIFY_EQUAL(mpt::wfmt::hex(0x123e), L"123e");
@@ -594,28 +594,28 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::fmt::dec(2, ';', 12345678), std::string("12;34;56;78"));
 	VERIFY_EQUAL(mpt::fmt::hex(3, ':', 0xa2345678), std::string("a2:345:678"));
 
-	VERIFY_EQUAL(mpt::ufmt::dec(2, ';', 12345678), MPT_USTRING("12;34;56;78"));
-	VERIFY_EQUAL(mpt::ufmt::hex(3, ':', 0xa2345678), MPT_USTRING("a2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::dec(2, ';', 12345678), U_("12;34;56;78"));
+	VERIFY_EQUAL(mpt::ufmt::hex(3, ':', 0xa2345678), U_("a2:345:678"));
 
-	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', 0xa2345678), MPT_USTRING("A2:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(3, ':', 0xa2345678), MPT_USTRING("A2:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(3, ':', 0xa2345678), MPT_USTRING("0A2:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(3, ':', 0xa2345678), MPT_USTRING("0:0A2:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, ':', 0xa2345678), MPT_USTRING("00:0A2:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, ':', 0xa2345678), MPT_USTRING("000:0A2:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', -0x12345678), MPT_USTRING("-12:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(3, ':', -0x12345678), MPT_USTRING("-12:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(3, ':', -0x12345678), MPT_USTRING("-012:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(3, ':', -0x12345678), MPT_USTRING("-0:012:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, ':', -0x12345678), MPT_USTRING("-00:012:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, ':', -0x12345678), MPT_USTRING("-000:012:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', 0xa2345678), U_("A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(3, ':', 0xa2345678), U_("A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(3, ':', 0xa2345678), U_("0A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(3, ':', 0xa2345678), U_("0:0A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, ':', 0xa2345678), U_("00:0A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, ':', 0xa2345678), U_("000:0A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', -0x12345678), U_("-12:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(3, ':', -0x12345678), U_("-12:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(3, ':', -0x12345678), U_("-012:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(3, ':', -0x12345678), U_("-0:012:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, ':', -0x12345678), U_("-00:012:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, ':', -0x12345678), U_("-000:012:345:678"));
 
-	VERIFY_EQUAL(mpt::ufmt::HEX0<5>(3, ':', 0x345678), MPT_USTRING("345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<6>(3, ':', 0x345678), MPT_USTRING("345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', 0x345678), MPT_USTRING("0:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<5>(3, ':', -0x345678), MPT_USTRING("-345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<6>(3, ':', -0x345678), MPT_USTRING("-345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', -0x345678), MPT_USTRING("-0:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<5>(3, ':', 0x345678), U_("345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<6>(3, ':', 0x345678), U_("345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', 0x345678), U_("0:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<5>(3, ':', -0x345678), U_("-345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<6>(3, ':', -0x345678), U_("-345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', -0x345678), U_("-0:345:678"));
 
 	VERIFY_EQUAL(mpt::fmt::left(3, "a"), "a  ");
 	VERIFY_EQUAL(mpt::fmt::right(3, "a"), "  a");
@@ -660,7 +660,7 @@ static MPT_NOINLINE void TestStringFormatting()
 #if MPT_WSTRING_FORMAT
 	VERIFY_EQUAL(mpt::String::Parse::Hex<unsigned char>(L"fe"), 254);
 #endif
-	VERIFY_EQUAL(mpt::String::Parse::Hex<unsigned int>(MPT_USTRING("ffff")), 65535);
+	VERIFY_EQUAL(mpt::String::Parse::Hex<unsigned int>(U_("ffff")), 65535);
 
 	TestFloatFormats(0.0f);
 	TestFloatFormats(1.0f);
@@ -725,8 +725,8 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::format("%b")("a"), "%b");
 
 #if defined(_MFC_VER)
-	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), MPT_USTRING("foobar"));
-	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), MPT_USTRING("foobar"));
+	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), U_("foobar"));
+	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), U_("foobar"));
 	VERIFY_EQUAL(mpt::format(CString(_T("%1%2%3")))(1,2,3), _T("123"));
 	VERIFY_EQUAL(mpt::format(CString(_T("%1%2%3")))(1,mpt::cfmt::dec0<3>(2),3), _T("10023"));
 #endif
@@ -1492,7 +1492,7 @@ static MPT_NOINLINE void TestMisc2()
 
 	// UUID
 	{
-		VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull).ToUString(), MPT_USTRING("2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"));
+		VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull).ToUString(), U_("2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"));
 		#if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
 			VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), "2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"_uuid);
 			VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), mpt::UUID(Util::StringToGUID(L"{2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32}")));
@@ -1529,7 +1529,7 @@ static MPT_NOINLINE void TestMisc2()
 	STATIC_ASSERT(sizeof(mpt::UUID) == 16);
 	UUIDbin uuid2;
 	std::memcpy(&uuid2, uuiddata, 16);
-	VERIFY_EQUAL(mpt::UUID(uuid2).ToUString(), MPT_USTRING("00010203-0405-0607-0809-0a0b0c0d0e0f"));
+	VERIFY_EQUAL(mpt::UUID(uuid2).ToUString(), U_("00010203-0405-0607-0809-0a0b0c0d0e0f"));
 	}
 
 	constexpr mpt::UUID uuid3 = "2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"_uuid;
@@ -1957,7 +1957,7 @@ static MPT_NOINLINE void TestMisc2()
 		data.push_back(mpt::as_byte(255));
 		data.push_back(mpt::as_byte(1));
 		data.push_back(mpt::as_byte(2));
-		mpt::PathString fn = GetTempFilenameBase() + MPT_PATHSTRING("lazy");
+		mpt::PathString fn = GetTempFilenameBase() + P_("lazy");
 		RemoveFile(fn);
 		mpt::LazyFileRef f(fn);
 		f = data;
@@ -2033,13 +2033,13 @@ static MPT_NOINLINE void TestMisc2()
 
 #if defined(MODPLUG_TRACKER)
 
-	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("1.1.44" )).AsString() , MPT_USTRING("1.1.44"));
-	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("1.6.2"  )).AsString() , MPT_USTRING("1.6.2" ));
-	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("1.8"    )).AsString() , MPT_USTRING("1.8.0" ));
-	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("2.0-rc" )).AsString() , MPT_USTRING("2.0.0" ));
-	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("2.0-rc4")).AsString() , MPT_USTRING("2.0.0" ));
-	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("2.0"    )).AsString() , MPT_USTRING("2.0.0" ));
-	VERIFY_EQUAL(mpt::Wine::Version(MPT_USTRING("2.4"    )).AsString() , MPT_USTRING("2.4.0" ));
+	VERIFY_EQUAL(mpt::Wine::Version(U_("1.1.44" )).AsString() , U_("1.1.44"));
+	VERIFY_EQUAL(mpt::Wine::Version(U_("1.6.2"  )).AsString() , U_("1.6.2" ));
+	VERIFY_EQUAL(mpt::Wine::Version(U_("1.8"    )).AsString() , U_("1.8.0" ));
+	VERIFY_EQUAL(mpt::Wine::Version(U_("2.0-rc" )).AsString() , U_("2.0.0" ));
+	VERIFY_EQUAL(mpt::Wine::Version(U_("2.0-rc4")).AsString() , U_("2.0.0" ));
+	VERIFY_EQUAL(mpt::Wine::Version(U_("2.0"    )).AsString() , U_("2.0.0" ));
+	VERIFY_EQUAL(mpt::Wine::Version(U_("2.4"    )).AsString() , U_("2.4.0" ));
 
 #endif // MODPLUG_TRACKER
 
@@ -2101,136 +2101,136 @@ static MPT_NOINLINE void TestMisc2()
 	// URI & HTTP
 
 	{
-		URI uri = ParseURI(MPT_USTRING("scheme://username:password@host:port/path?query#fragment"));
-		VERIFY_EQUAL(uri.scheme, MPT_USTRING("scheme"));
-		VERIFY_EQUAL(uri.username, MPT_USTRING("username"));
-		VERIFY_EQUAL(uri.password, MPT_USTRING("password"));
-		VERIFY_EQUAL(uri.host, MPT_USTRING("host"));
-		VERIFY_EQUAL(uri.port, MPT_USTRING("port"));
-		VERIFY_EQUAL(uri.path, MPT_USTRING("/path"));
-		VERIFY_EQUAL(uri.query, MPT_USTRING("query"));
-		VERIFY_EQUAL(uri.fragment, MPT_USTRING("fragment"));
+		URI uri = ParseURI(U_("scheme://username:password@host:port/path?query#fragment"));
+		VERIFY_EQUAL(uri.scheme, U_("scheme"));
+		VERIFY_EQUAL(uri.username, U_("username"));
+		VERIFY_EQUAL(uri.password, U_("password"));
+		VERIFY_EQUAL(uri.host, U_("host"));
+		VERIFY_EQUAL(uri.port, U_("port"));
+		VERIFY_EQUAL(uri.path, U_("/path"));
+		VERIFY_EQUAL(uri.query, U_("query"));
+		VERIFY_EQUAL(uri.fragment, U_("fragment"));
 	}
 	{
-		URI uri = ParseURI(MPT_USTRING("scheme://host/path"));
-		VERIFY_EQUAL(uri.scheme, MPT_USTRING("scheme"));
-		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.host, MPT_USTRING("host"));
-		VERIFY_EQUAL(uri.port, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.path, MPT_USTRING("/path"));
-		VERIFY_EQUAL(uri.query, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+		URI uri = ParseURI(U_("scheme://host/path"));
+		VERIFY_EQUAL(uri.scheme, U_("scheme"));
+		VERIFY_EQUAL(uri.username, U_(""));
+		VERIFY_EQUAL(uri.password, U_(""));
+		VERIFY_EQUAL(uri.host, U_("host"));
+		VERIFY_EQUAL(uri.port, U_(""));
+		VERIFY_EQUAL(uri.path, U_("/path"));
+		VERIFY_EQUAL(uri.query, U_(""));
+		VERIFY_EQUAL(uri.fragment, U_(""));
 	}
 	{
-		URI uri = ParseURI(MPT_USTRING("scheme://username:password@[2001:db8::1]:port/path?query#fragment"));
-		VERIFY_EQUAL(uri.scheme, MPT_USTRING("scheme"));
-		VERIFY_EQUAL(uri.username, MPT_USTRING("username"));
-		VERIFY_EQUAL(uri.password, MPT_USTRING("password"));
-		VERIFY_EQUAL(uri.host, MPT_USTRING("[2001:db8::1]"));
-		VERIFY_EQUAL(uri.port, MPT_USTRING("port"));
-		VERIFY_EQUAL(uri.path, MPT_USTRING("/path"));
-		VERIFY_EQUAL(uri.query, MPT_USTRING("query"));
-		VERIFY_EQUAL(uri.fragment, MPT_USTRING("fragment"));
+		URI uri = ParseURI(U_("scheme://username:password@[2001:db8::1]:port/path?query#fragment"));
+		VERIFY_EQUAL(uri.scheme, U_("scheme"));
+		VERIFY_EQUAL(uri.username, U_("username"));
+		VERIFY_EQUAL(uri.password, U_("password"));
+		VERIFY_EQUAL(uri.host, U_("[2001:db8::1]"));
+		VERIFY_EQUAL(uri.port, U_("port"));
+		VERIFY_EQUAL(uri.path, U_("/path"));
+		VERIFY_EQUAL(uri.query, U_("query"));
+		VERIFY_EQUAL(uri.fragment, U_("fragment"));
 	}
 
 	{
-		URI uri = ParseURI(MPT_USTRING("https://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top"));
-		VERIFY_EQUAL(uri.scheme, MPT_USTRING("https"));
-		VERIFY_EQUAL(uri.username, MPT_USTRING("john.doe"));
-		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.host, MPT_USTRING("www.example.com"));
-		VERIFY_EQUAL(uri.port, MPT_USTRING("123"));
-		VERIFY_EQUAL(uri.path, MPT_USTRING("/forum/questions/"));
-		VERIFY_EQUAL(uri.query, MPT_USTRING("tag=networking&order=newest"));
-		VERIFY_EQUAL(uri.fragment, MPT_USTRING("top"));
+		URI uri = ParseURI(U_("https://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top"));
+		VERIFY_EQUAL(uri.scheme, U_("https"));
+		VERIFY_EQUAL(uri.username, U_("john.doe"));
+		VERIFY_EQUAL(uri.password, U_(""));
+		VERIFY_EQUAL(uri.host, U_("www.example.com"));
+		VERIFY_EQUAL(uri.port, U_("123"));
+		VERIFY_EQUAL(uri.path, U_("/forum/questions/"));
+		VERIFY_EQUAL(uri.query, U_("tag=networking&order=newest"));
+		VERIFY_EQUAL(uri.fragment, U_("top"));
 	}
 	{
-		URI uri = ParseURI(MPT_USTRING("ldap://[2001:db8::7]/c=GB?objectClass?one"));
-		VERIFY_EQUAL(uri.scheme, MPT_USTRING("ldap"));
-		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.host, MPT_USTRING("[2001:db8::7]"));
-		VERIFY_EQUAL(uri.port, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.path, MPT_USTRING("/c=GB"));
-		VERIFY_EQUAL(uri.query, MPT_USTRING("objectClass?one"));
-		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+		URI uri = ParseURI(U_("ldap://[2001:db8::7]/c=GB?objectClass?one"));
+		VERIFY_EQUAL(uri.scheme, U_("ldap"));
+		VERIFY_EQUAL(uri.username, U_(""));
+		VERIFY_EQUAL(uri.password, U_(""));
+		VERIFY_EQUAL(uri.host, U_("[2001:db8::7]"));
+		VERIFY_EQUAL(uri.port, U_(""));
+		VERIFY_EQUAL(uri.path, U_("/c=GB"));
+		VERIFY_EQUAL(uri.query, U_("objectClass?one"));
+		VERIFY_EQUAL(uri.fragment, U_(""));
 	}
 	{
-		URI uri = ParseURI(MPT_USTRING("mailto:John.Doe@example.com"));
-		VERIFY_EQUAL(uri.scheme, MPT_USTRING("mailto"));
-		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.host, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.port, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.path, MPT_USTRING("John.Doe@example.com"));
-		VERIFY_EQUAL(uri.query, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+		URI uri = ParseURI(U_("mailto:John.Doe@example.com"));
+		VERIFY_EQUAL(uri.scheme, U_("mailto"));
+		VERIFY_EQUAL(uri.username, U_(""));
+		VERIFY_EQUAL(uri.password, U_(""));
+		VERIFY_EQUAL(uri.host, U_(""));
+		VERIFY_EQUAL(uri.port, U_(""));
+		VERIFY_EQUAL(uri.path, U_("John.Doe@example.com"));
+		VERIFY_EQUAL(uri.query, U_(""));
+		VERIFY_EQUAL(uri.fragment, U_(""));
 	}
 	{
-		URI uri = ParseURI(MPT_USTRING("news:comp.infosystems.www.servers.unix"));
-		VERIFY_EQUAL(uri.scheme, MPT_USTRING("news"));
-		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.host, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.port, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.path, MPT_USTRING("comp.infosystems.www.servers.unix"));
-		VERIFY_EQUAL(uri.query, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+		URI uri = ParseURI(U_("news:comp.infosystems.www.servers.unix"));
+		VERIFY_EQUAL(uri.scheme, U_("news"));
+		VERIFY_EQUAL(uri.username, U_(""));
+		VERIFY_EQUAL(uri.password, U_(""));
+		VERIFY_EQUAL(uri.host, U_(""));
+		VERIFY_EQUAL(uri.port, U_(""));
+		VERIFY_EQUAL(uri.path, U_("comp.infosystems.www.servers.unix"));
+		VERIFY_EQUAL(uri.query, U_(""));
+		VERIFY_EQUAL(uri.fragment, U_(""));
 	}
 	{
-		URI uri = ParseURI(MPT_USTRING("tel:+1-816-555-1212"));
-		VERIFY_EQUAL(uri.scheme, MPT_USTRING("tel"));
-		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.host, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.port, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.path, MPT_USTRING("+1-816-555-1212"));
-		VERIFY_EQUAL(uri.query, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+		URI uri = ParseURI(U_("tel:+1-816-555-1212"));
+		VERIFY_EQUAL(uri.scheme, U_("tel"));
+		VERIFY_EQUAL(uri.username, U_(""));
+		VERIFY_EQUAL(uri.password, U_(""));
+		VERIFY_EQUAL(uri.host, U_(""));
+		VERIFY_EQUAL(uri.port, U_(""));
+		VERIFY_EQUAL(uri.path, U_("+1-816-555-1212"));
+		VERIFY_EQUAL(uri.query, U_(""));
+		VERIFY_EQUAL(uri.fragment, U_(""));
 	}
 	{
-		URI uri = ParseURI(MPT_USTRING("telnet://192.0.2.16:80/"));
-		VERIFY_EQUAL(uri.scheme, MPT_USTRING("telnet"));
-		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.host, MPT_USTRING("192.0.2.16"));
-		VERIFY_EQUAL(uri.port, MPT_USTRING("80"));
-		VERIFY_EQUAL(uri.path, MPT_USTRING("/"));
-		VERIFY_EQUAL(uri.query, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+		URI uri = ParseURI(U_("telnet://192.0.2.16:80/"));
+		VERIFY_EQUAL(uri.scheme, U_("telnet"));
+		VERIFY_EQUAL(uri.username, U_(""));
+		VERIFY_EQUAL(uri.password, U_(""));
+		VERIFY_EQUAL(uri.host, U_("192.0.2.16"));
+		VERIFY_EQUAL(uri.port, U_("80"));
+		VERIFY_EQUAL(uri.path, U_("/"));
+		VERIFY_EQUAL(uri.query, U_(""));
+		VERIFY_EQUAL(uri.fragment, U_(""));
 	}
 	{
-		URI uri = ParseURI(MPT_USTRING("urn:oasis:names:specification:docbook:dtd:xml:4.1.2"));
-		VERIFY_EQUAL(uri.scheme, MPT_USTRING("urn"));
-		VERIFY_EQUAL(uri.username, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.password, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.host, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.port, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.path, MPT_USTRING("oasis:names:specification:docbook:dtd:xml:4.1.2"));
-		VERIFY_EQUAL(uri.query, MPT_USTRING(""));
-		VERIFY_EQUAL(uri.fragment, MPT_USTRING(""));
+		URI uri = ParseURI(U_("urn:oasis:names:specification:docbook:dtd:xml:4.1.2"));
+		VERIFY_EQUAL(uri.scheme, U_("urn"));
+		VERIFY_EQUAL(uri.username, U_(""));
+		VERIFY_EQUAL(uri.password, U_(""));
+		VERIFY_EQUAL(uri.host, U_(""));
+		VERIFY_EQUAL(uri.port, U_(""));
+		VERIFY_EQUAL(uri.path, U_("oasis:names:specification:docbook:dtd:xml:4.1.2"));
+		VERIFY_EQUAL(uri.query, U_(""));
+		VERIFY_EQUAL(uri.fragment, U_(""));
 	}
 
 	{
 		HTTP::Request req;
-		req.SetURI(ParseURI(MPT_USTRING("https://host/path?a1=a&a2=b")));
+		req.SetURI(ParseURI(U_("https://host/path?a1=a&a2=b")));
 		VERIFY_EQUAL(req.protocol, HTTP::Protocol::HTTPS);
-		VERIFY_EQUAL(req.host, MPT_USTRING("host"));
-		VERIFY_EQUAL(req.path, MPT_USTRING("/path"));
+		VERIFY_EQUAL(req.host, U_("host"));
+		VERIFY_EQUAL(req.path, U_("/path"));
 		VERIFY_EQUAL(req.query.size(), 2u);
 		if(req.query.size() == 2)
 		{
-			VERIFY_EQUAL(req.query[0], std::make_pair(MPT_USTRING("a1"), MPT_USTRING("a")));
-			VERIFY_EQUAL(req.query[1], std::make_pair(MPT_USTRING("a2"), MPT_USTRING("b")));
+			VERIFY_EQUAL(req.query[0], std::make_pair(U_("a1"), U_("a")));
+			VERIFY_EQUAL(req.query[1], std::make_pair(U_("a2"), U_("b")));
 		}
 	}
 	{
 		HTTP::Request req;
-		req.SetURI(ParseURI(MPT_USTRING("https://host/")));
+		req.SetURI(ParseURI(U_("https://host/")));
 		VERIFY_EQUAL(req.protocol, HTTP::Protocol::HTTPS);
-		VERIFY_EQUAL(req.host, MPT_USTRING("host"));
-		VERIFY_EQUAL(req.path, MPT_USTRING("/"));
+		VERIFY_EQUAL(req.host, U_("host"));
+		VERIFY_EQUAL(req.path, U_("/"));
 	}
 
 #endif // MODPLUG_TRACKER
@@ -2332,15 +2332,15 @@ static MPT_NOINLINE void TestCharsets()
 	// MPT_UTF8 version
 
 	// Charset conversions (basic sanity checks)
-	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetUTF8, MPT_USTRING("a")), "a");
-	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetISO8859_1, MPT_USTRING("a")), "a");
-	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetASCII, MPT_USTRING("a")), "a");
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetUTF8, "a"), MPT_USTRING("a"));
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetISO8859_1, "a"), MPT_USTRING("a"));
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetASCII, "a"), MPT_USTRING("a"));
+	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetUTF8, U_("a")), "a");
+	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetISO8859_1, U_("a")), "a");
+	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetASCII, U_("a")), "a");
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetUTF8, "a"), U_("a"));
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetISO8859_1, "a"), U_("a"));
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetASCII, "a"), U_("a"));
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetLocale, MPT_USTRING("a")), "a");
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetLocale, "a"), MPT_USTRING("a"));
+	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetLocale, U_("a")), "a");
+	VERIFY_EQUAL(mpt::ToUnicode(mpt::CharsetLocale, "a"), U_("a"));
 #endif
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetUTF8, MPT_UTF8("a")), "a");
 	VERIFY_EQUAL(mpt::ToCharset(mpt::CharsetISO8859_1, MPT_UTF8("a")), "a");
@@ -2382,30 +2382,30 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::CharsetLocale,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"abc"),true);
 #endif
 
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetASCII,"abc\xC3\xA4xyz"),MPT_USTRING("xyz")),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xC3\xA4xyz"),MPT_USTRING("xyz")),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetCP437,"abc\xC3\xA4xyz"),MPT_USTRING("xyz")),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetUTF8,"abc\xC3\xA4xyz"),MPT_USTRING("xyz")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetASCII,"abc\xC3\xA4xyz"),MPT_USTRING("abc")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xC3\xA4xyz"),MPT_USTRING("abc")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetCP437,"abc\xC3\xA4xyz"),MPT_USTRING("abc")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetUTF8,"abc\xC3\xA4xyz"),MPT_USTRING("abc")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetASCII,"abc\xC3\xA4xyz"),U_("xyz")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xC3\xA4xyz"),U_("xyz")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetCP437,"abc\xC3\xA4xyz"),U_("xyz")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetUTF8,"abc\xC3\xA4xyz"),U_("xyz")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetASCII,"abc\xC3\xA4xyz"),U_("abc")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xC3\xA4xyz"),U_("abc")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetCP437,"abc\xC3\xA4xyz"),U_("abc")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetUTF8,"abc\xC3\xA4xyz"),U_("abc")),true);
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetLocale,"abc\xC3\xA4xyz"),MPT_USTRING("xyz")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetLocale,"abc\xC3\xA4xyz"),MPT_USTRING("abc")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetLocale,"abc\xC3\xA4xyz"),U_("xyz")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetLocale,"abc\xC3\xA4xyz"),U_("abc")),true);
 #endif
 
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetASCII,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("xyz")),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("xyz")),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetCP437,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("xyz")),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("xyz")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetASCII,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("abc")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("abc")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetCP437,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("abc")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("abc")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetASCII,"abc\xE5\xAE\xB6xyz"),U_("xyz")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xE5\xAE\xB6xyz"),U_("xyz")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetCP437,"abc\xE5\xAE\xB6xyz"),U_("xyz")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"),U_("xyz")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetASCII,"abc\xE5\xAE\xB6xyz"),U_("abc")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetISO8859_1,"abc\xE5\xAE\xB6xyz"),U_("abc")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetCP437,"abc\xE5\xAE\xB6xyz"),U_("abc")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetUTF8,"abc\xE5\xAE\xB6xyz"),U_("abc")),true);
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("xyz")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),MPT_USTRING("abc")),true);
+	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),U_("xyz")),true);
+	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::CharsetLocale,"abc\xE5\xAE\xB6xyz"),U_("abc")),true);
 #endif
 
 	// Check that characters are correctly converted
@@ -2568,137 +2568,137 @@ static MPT_NOINLINE void TestCharsets()
 
 #if MPT_OS_WINDOWS && defined(MPT_ENABLE_DYNBIND)
 
-	VERIFY_EQUAL(MPT_PATHSTRING("").GetDrive(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("").GetDir(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("").GetPath(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("").GetFileName(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("").GetFileExt(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("").GetFullFileName(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(P_("").GetDrive(), P_(""));
+	VERIFY_EQUAL(P_("").GetDir(), P_(""));
+	VERIFY_EQUAL(P_("").GetPath(), P_(""));
+	VERIFY_EQUAL(P_("").GetFileName(), P_(""));
+	VERIFY_EQUAL(P_("").GetFileExt(), P_(""));
+	VERIFY_EQUAL(P_("").GetFullFileName(), P_(""));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\").GetDrive(), MPT_PATHSTRING("C:"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\").GetDir(), MPT_PATHSTRING("\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\").GetPath(), MPT_PATHSTRING("C:\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\").GetFileName(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\").GetFileExt(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\").GetFullFileName(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(P_("C:\\").GetDrive(), P_("C:"));
+	VERIFY_EQUAL(P_("C:\\").GetDir(), P_("\\"));
+	VERIFY_EQUAL(P_("C:\\").GetPath(), P_("C:\\"));
+	VERIFY_EQUAL(P_("C:\\").GetFileName(), P_(""));
+	VERIFY_EQUAL(P_("C:\\").GetFileExt(), P_(""));
+	VERIFY_EQUAL(P_("C:\\").GetFullFileName(), P_(""));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("\\directory\\").GetDrive(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\directory\\").GetDir(), MPT_PATHSTRING("\\directory\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\directory\\").GetPath(), MPT_PATHSTRING("\\directory\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\directory\\").GetFileName(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\directory\\").GetFileExt(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\directory\\").GetFullFileName(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(P_("\\directory\\").GetDrive(), P_(""));
+	VERIFY_EQUAL(P_("\\directory\\").GetDir(), P_("\\directory\\"));
+	VERIFY_EQUAL(P_("\\directory\\").GetPath(), P_("\\directory\\"));
+	VERIFY_EQUAL(P_("\\directory\\").GetFileName(), P_(""));
+	VERIFY_EQUAL(P_("\\directory\\").GetFileExt(), P_(""));
+	VERIFY_EQUAL(P_("\\directory\\").GetFullFileName(), P_(""));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("\\directory\\file.txt").GetDrive(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\directory\\file.txt").GetDir(), MPT_PATHSTRING("\\directory\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\directory\\file.txt").GetPath(), MPT_PATHSTRING("\\directory\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\directory\\file.txt").GetFileName(), MPT_PATHSTRING("file"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\directory\\file.txt").GetFileExt(), MPT_PATHSTRING(".txt"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\directory\\file.txt").GetFullFileName(), MPT_PATHSTRING("file.txt"));
+	VERIFY_EQUAL(P_("\\directory\\file.txt").GetDrive(), P_(""));
+	VERIFY_EQUAL(P_("\\directory\\file.txt").GetDir(), P_("\\directory\\"));
+	VERIFY_EQUAL(P_("\\directory\\file.txt").GetPath(), P_("\\directory\\"));
+	VERIFY_EQUAL(P_("\\directory\\file.txt").GetFileName(), P_("file"));
+	VERIFY_EQUAL(P_("\\directory\\file.txt").GetFileExt(), P_(".txt"));
+	VERIFY_EQUAL(P_("\\directory\\file.txt").GetFullFileName(), P_("file.txt"));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("C:tmp.txt").GetDrive(), MPT_PATHSTRING("C:"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:tmp.txt").GetDir(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:tmp.txt").GetPath(), MPT_PATHSTRING("C:"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:tmp.txt").GetFileName(), MPT_PATHSTRING("tmp"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:tmp.txt").GetFileExt(), MPT_PATHSTRING(".txt"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:tmp.txt").GetFullFileName(), MPT_PATHSTRING("tmp.txt"));
+	VERIFY_EQUAL(P_("C:tmp.txt").GetDrive(), P_("C:"));
+	VERIFY_EQUAL(P_("C:tmp.txt").GetDir(), P_(""));
+	VERIFY_EQUAL(P_("C:tmp.txt").GetPath(), P_("C:"));
+	VERIFY_EQUAL(P_("C:tmp.txt").GetFileName(), P_("tmp"));
+	VERIFY_EQUAL(P_("C:tmp.txt").GetFileExt(), P_(".txt"));
+	VERIFY_EQUAL(P_("C:tmp.txt").GetFullFileName(), P_("tmp.txt"));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("C:tempdir\\tmp.txt").GetDrive(), MPT_PATHSTRING("C:"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:tempdir\\tmp.txt").GetDir(), MPT_PATHSTRING("tempdir\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:tempdir\\tmp.txt").GetPath(), MPT_PATHSTRING("C:tempdir\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:tempdir\\tmp.txt").GetFileName(), MPT_PATHSTRING("tmp"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:tempdir\\tmp.txt").GetFileExt(), MPT_PATHSTRING(".txt"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:tempdir\\tmp.txt").GetFullFileName(), MPT_PATHSTRING("tmp.txt"));
+	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetDrive(), P_("C:"));
+	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetDir(), P_("tempdir\\"));
+	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetPath(), P_("C:tempdir\\"));
+	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetFileName(), P_("tmp"));
+	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetFileExt(), P_(".txt"));
+	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetFullFileName(), P_("tmp.txt"));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\tempdir\\tmp.txt").GetDrive(), MPT_PATHSTRING("C:"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\tempdir\\tmp.txt").GetDir(), MPT_PATHSTRING("\\tempdir\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\tempdir\\tmp.txt").GetPath(), MPT_PATHSTRING("C:\\tempdir\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\tempdir\\tmp.txt").GetFileName(), MPT_PATHSTRING("tmp"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\tempdir\\tmp.txt").GetFileExt(), MPT_PATHSTRING(".txt"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\tempdir\\tmp.txt").GetFullFileName(), MPT_PATHSTRING("tmp.txt"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetDrive(), P_("C:"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetDir(), P_("\\tempdir\\"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetPath(), P_("C:\\tempdir\\"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetFileName(), P_("tmp"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetFileExt(), P_(".txt"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetFullFileName(), P_("tmp.txt"));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\tempdir\\tmp.foo.txt").GetFileName(), MPT_PATHSTRING("tmp.foo"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\tempdir\\tmp.foo.txt").GetFileExt(), MPT_PATHSTRING(".txt"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.foo.txt").GetFileName(), P_("tmp.foo"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.foo.txt").GetFileExt(), P_(".txt"));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server").GetDrive(), MPT_PATHSTRING("\\\\server"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server").GetDir(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server").GetPath(), MPT_PATHSTRING("\\\\server"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server").GetFileName(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server").GetFileExt(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server").GetFullFileName(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(P_("\\\\server").GetDrive(), P_("\\\\server"));
+	VERIFY_EQUAL(P_("\\\\server").GetDir(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server").GetPath(), P_("\\\\server"));
+	VERIFY_EQUAL(P_("\\\\server").GetFileName(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server").GetFileExt(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server").GetFullFileName(), P_(""));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\").GetDrive(), MPT_PATHSTRING("\\\\server\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\").GetDir(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\").GetPath(), MPT_PATHSTRING("\\\\server\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\").GetFileName(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\").GetFileExt(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\").GetFullFileName(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(P_("\\\\server\\").GetDrive(), P_("\\\\server\\"));
+	VERIFY_EQUAL(P_("\\\\server\\").GetDir(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\").GetPath(), P_("\\\\server\\"));
+	VERIFY_EQUAL(P_("\\\\server\\").GetFileName(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\").GetFileExt(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\").GetFullFileName(), P_(""));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share").GetDrive(), MPT_PATHSTRING("\\\\server\\share"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share").GetDir(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share").GetPath(), MPT_PATHSTRING("\\\\server\\share"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share").GetFileName(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share").GetFileExt(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share").GetFullFileName(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(P_("\\\\server\\share").GetDrive(), P_("\\\\server\\share"));
+	VERIFY_EQUAL(P_("\\\\server\\share").GetDir(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\share").GetPath(), P_("\\\\server\\share"));
+	VERIFY_EQUAL(P_("\\\\server\\share").GetFileName(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\share").GetFileExt(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\share").GetFullFileName(), P_(""));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\").GetDrive(), MPT_PATHSTRING("\\\\server\\share"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\").GetDir(), MPT_PATHSTRING("\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\").GetPath(), MPT_PATHSTRING("\\\\server\\share\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\").GetFileName(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\").GetFileExt(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\").GetFullFileName(), MPT_PATHSTRING(""));
+	VERIFY_EQUAL(P_("\\\\server\\share\\").GetDrive(), P_("\\\\server\\share"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\").GetDir(), P_("\\"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\").GetPath(), P_("\\\\server\\share\\"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\").GetFileName(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\share\\").GetFileExt(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\share\\").GetFullFileName(), P_(""));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDrive(), MPT_PATHSTRING("\\\\server\\share"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDir(), MPT_PATHSTRING("\\dir1\\dir2\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetPath(), MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileName(), MPT_PATHSTRING("name.foo"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileExt(), MPT_PATHSTRING(".ext"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFullFileName(), MPT_PATHSTRING("name.foo.ext"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDrive(), P_("\\\\server\\share"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDir(), P_("\\dir1\\dir2\\"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetPath(), P_("\\\\server\\share\\dir1\\dir2\\"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileName(), P_("name.foo"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileExt(), P_(".ext"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFullFileName(), P_("name.foo.ext"));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDrive(), MPT_PATHSTRING("C:"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDir(), MPT_PATHSTRING("\\tempdir\\dir.2\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetPath(), MPT_PATHSTRING("C:\\tempdir\\dir.2\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFileName(), MPT_PATHSTRING("tmp.foo"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFileExt(), MPT_PATHSTRING(".txt"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFullFileName(), MPT_PATHSTRING("tmp.foo.txt"));
+	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDrive(), P_("C:"));
+	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDir(), P_("\\tempdir\\dir.2\\"));
+	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetPath(), P_("C:\\tempdir\\dir.2\\"));
+	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFileName(), P_("tmp.foo"));
+	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFileExt(), P_(".txt"));
+	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFullFileName(), P_("tmp.foo.txt"));
 	
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDrive(), MPT_PATHSTRING("\\\\server\\share"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDir(), MPT_PATHSTRING("\\dir1\\dir2\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetPath(), MPT_PATHSTRING("\\\\server\\share\\dir1\\dir2\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileName(), MPT_PATHSTRING("name.foo"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileExt(), MPT_PATHSTRING(".ext"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFullFileName(), MPT_PATHSTRING("name.foo.ext"));
+	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDrive(), P_("\\\\server\\share"));
+	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDir(), P_("\\dir1\\dir2\\"));
+	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetPath(), P_("\\\\server\\share\\dir1\\dir2\\"));
+	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileName(), P_("name.foo"));
+	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileExt(), P_(".ext"));
+	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFullFileName(), P_("name.foo.ext"));
 #endif
 
 
 
 	// Path conversions
 #ifdef MODPLUG_TRACKER
-	const mpt::PathString exePath = MPT_PATHSTRING("C:\\OpenMPT\\");
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\OpenMPT\\").AbsolutePathToRelative(exePath), MPT_PATHSTRING(".\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("c:\\OpenMPT\\foo").AbsolutePathToRelative(exePath), MPT_PATHSTRING(".\\foo"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\foo").AbsolutePathToRelative(exePath), MPT_PATHSTRING("\\foo"));
-	VERIFY_EQUAL(MPT_PATHSTRING(".\\").RelativePathToAbsolute(exePath), MPT_PATHSTRING("C:\\OpenMPT\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING(".\\foo").RelativePathToAbsolute(exePath), MPT_PATHSTRING("C:\\OpenMPT\\foo"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\foo").RelativePathToAbsolute(exePath), MPT_PATHSTRING("C:\\foo"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\path\\file").AbsolutePathToRelative(exePath), MPT_PATHSTRING("\\\\server\\path\\file"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\server\\path\\file").RelativePathToAbsolute(exePath), MPT_PATHSTRING("\\\\server\\path\\file"));
+	const mpt::PathString exePath = P_("C:\\OpenMPT\\");
+	VERIFY_EQUAL(P_("C:\\OpenMPT\\").AbsolutePathToRelative(exePath), P_(".\\"));
+	VERIFY_EQUAL(P_("c:\\OpenMPT\\foo").AbsolutePathToRelative(exePath), P_(".\\foo"));
+	VERIFY_EQUAL(P_("C:\\foo").AbsolutePathToRelative(exePath), P_("\\foo"));
+	VERIFY_EQUAL(P_(".\\").RelativePathToAbsolute(exePath), P_("C:\\OpenMPT\\"));
+	VERIFY_EQUAL(P_(".\\foo").RelativePathToAbsolute(exePath), P_("C:\\OpenMPT\\foo"));
+	VERIFY_EQUAL(P_("\\foo").RelativePathToAbsolute(exePath), P_("C:\\foo"));
+	VERIFY_EQUAL(P_("\\\\server\\path\\file").AbsolutePathToRelative(exePath), P_("\\\\server\\path\\file"));
+	VERIFY_EQUAL(P_("\\\\server\\path\\file").RelativePathToAbsolute(exePath), P_("\\\\server\\path\\file"));
 
-	VERIFY_EQUAL(MPT_PATHSTRING("").Simplify(), MPT_PATHSTRING(""));
-	VERIFY_EQUAL(MPT_PATHSTRING(" ").Simplify(), MPT_PATHSTRING(" "));
-	VERIFY_EQUAL(MPT_PATHSTRING("foo\\bar").Simplify(), MPT_PATHSTRING("foo\\bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING(".\\foo\\bar").Simplify(), MPT_PATHSTRING(".\\foo\\bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING(".\\\\foo\\bar").Simplify(), MPT_PATHSTRING(".\\foo\\bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING("./\\foo\\bar").Simplify(), MPT_PATHSTRING(".\\foo\\bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\foo\\bar").Simplify(), MPT_PATHSTRING("\\foo\\bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING("A:\\name_1\\.\\name_2\\..\\name_3\\").Simplify(), MPT_PATHSTRING("A:\\name_1\\name_3"));
-	VERIFY_EQUAL(MPT_PATHSTRING("A:\\name_1\\..\\name_2\\./name_3").Simplify(), MPT_PATHSTRING("A:\\name_2\\name_3"));
-	VERIFY_EQUAL(MPT_PATHSTRING("A:\\name_1\\.\\name_2\\.\\name_3\\..\\name_4\\..").Simplify(), MPT_PATHSTRING("A:\\name_1\\name_2"));
-	VERIFY_EQUAL(MPT_PATHSTRING("A:foo\\\\bar").Simplify(), MPT_PATHSTRING("A:\\foo\\bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\..").Simplify(), MPT_PATHSTRING("C:\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("C:\\.").Simplify(), MPT_PATHSTRING("C:\\"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\foo\\..\\.bar").Simplify(), MPT_PATHSTRING("\\\\.bar"));
-	VERIFY_EQUAL(MPT_PATHSTRING("\\\\foo\\..\\..\\bar").Simplify(), MPT_PATHSTRING("\\\\bar"));
+	VERIFY_EQUAL(P_("").Simplify(), P_(""));
+	VERIFY_EQUAL(P_(" ").Simplify(), P_(" "));
+	VERIFY_EQUAL(P_("foo\\bar").Simplify(), P_("foo\\bar"));
+	VERIFY_EQUAL(P_(".\\foo\\bar").Simplify(), P_(".\\foo\\bar"));
+	VERIFY_EQUAL(P_(".\\\\foo\\bar").Simplify(), P_(".\\foo\\bar"));
+	VERIFY_EQUAL(P_("./\\foo\\bar").Simplify(), P_(".\\foo\\bar"));
+	VERIFY_EQUAL(P_("\\foo\\bar").Simplify(), P_("\\foo\\bar"));
+	VERIFY_EQUAL(P_("A:\\name_1\\.\\name_2\\..\\name_3\\").Simplify(), P_("A:\\name_1\\name_3"));
+	VERIFY_EQUAL(P_("A:\\name_1\\..\\name_2\\./name_3").Simplify(), P_("A:\\name_2\\name_3"));
+	VERIFY_EQUAL(P_("A:\\name_1\\.\\name_2\\.\\name_3\\..\\name_4\\..").Simplify(), P_("A:\\name_1\\name_2"));
+	VERIFY_EQUAL(P_("A:foo\\\\bar").Simplify(), P_("A:\\foo\\bar"));
+	VERIFY_EQUAL(P_("C:\\..").Simplify(), P_("C:\\"));
+	VERIFY_EQUAL(P_("C:\\.").Simplify(), P_("C:\\"));
+	VERIFY_EQUAL(P_("\\\\foo\\..\\.bar").Simplify(), P_("\\\\.bar"));
+	VERIFY_EQUAL(P_("\\\\foo\\..\\..\\bar").Simplify(), P_("\\\\bar"));
 #endif
 
 
@@ -2843,7 +2843,7 @@ inline Test::CustomSettingsTestType FromSettingValue(const SettingValue &val)
 	{
 		return Test::CustomSettingsTestType(0.0f, 0.0f);
 	}
-	std::size_t pos = xy.find(MPT_USTRING("|"));
+	std::size_t pos = xy.find(U_("|"));
 	mpt::ustring x = xy.substr(0, pos);
 	mpt::ustring y = xy.substr(pos + 1);
 	return Test::CustomSettingsTestType(ConvertStrTo<float>(x), ConvertStrTo<float>(y));
@@ -2852,7 +2852,7 @@ inline Test::CustomSettingsTestType FromSettingValue(const SettingValue &val)
 template <>
 inline SettingValue ToSettingValue(const Test::CustomSettingsTestType &val)
 {
-	return SettingValue(mpt::ufmt::val(val.x) + MPT_USTRING("|") + mpt::ufmt::val(val.y), "myType");
+	return SettingValue(mpt::ufmt::val(val.x) + U_("|") + mpt::ufmt::val(val.y), "myType");
 }
 
 namespace Test {
@@ -2864,39 +2864,39 @@ static MPT_NOINLINE void TestSettings()
 
 #ifdef MODPLUG_TRACKER
 
-	VERIFY_EQUAL(SettingPath(MPT_USTRING("a"),MPT_USTRING("b")) < SettingPath(MPT_USTRING("a"),MPT_USTRING("c")), true);
-	VERIFY_EQUAL(!(SettingPath(MPT_USTRING("c"),MPT_USTRING("b")) < SettingPath(MPT_USTRING("a"),MPT_USTRING("c"))), true);
+	VERIFY_EQUAL(SettingPath(U_("a"),U_("b")) < SettingPath(U_("a"),U_("c")), true);
+	VERIFY_EQUAL(!(SettingPath(U_("c"),U_("b")) < SettingPath(U_("a"),U_("c"))), true);
 
 	{
 		DefaultSettingsContainer conf;
 
-		int32 foobar = conf.Read(MPT_USTRING("Test"), MPT_USTRING("bar"), 23);
-		conf.Write(MPT_USTRING("Test"), MPT_USTRING("bar"), 64);
-		conf.Write(MPT_USTRING("Test"), MPT_USTRING("bar"), 42);
-		conf.Read(MPT_USTRING("Test"), MPT_USTRING("baz"), 4711);
-		foobar = conf.Read(MPT_USTRING("Test"), MPT_USTRING("bar"), 28);
+		int32 foobar = conf.Read(U_("Test"), U_("bar"), 23);
+		conf.Write(U_("Test"), U_("bar"), 64);
+		conf.Write(U_("Test"), U_("bar"), 42);
+		conf.Read(U_("Test"), U_("baz"), 4711);
+		foobar = conf.Read(U_("Test"), U_("bar"), 28);
 	}
 
 	{
 		DefaultSettingsContainer conf;
 
-		int32 foobar = conf.Read(MPT_USTRING("Test"), MPT_USTRING("bar"), 28);
+		int32 foobar = conf.Read(U_("Test"), U_("bar"), 28);
 		VERIFY_EQUAL(foobar, 42);
-		conf.Write(MPT_USTRING("Test"), MPT_USTRING("bar"), 43);
+		conf.Write(U_("Test"), U_("bar"), 43);
 	}
 
 	{
 		DefaultSettingsContainer conf;
 
-		int32 foobar = conf.Read(MPT_USTRING("Test"), MPT_USTRING("bar"), 123);
+		int32 foobar = conf.Read(U_("Test"), U_("bar"), 123);
 		VERIFY_EQUAL(foobar, 43);
-		conf.Write(MPT_USTRING("Test"), MPT_USTRING("bar"), 88);
+		conf.Write(U_("Test"), U_("bar"), 88);
 	}
 
 	{
 		DefaultSettingsContainer conf;
 
-		Setting<int> foo(conf, MPT_USTRING("Test"), MPT_USTRING("bar"), 99);
+		Setting<int> foo(conf, U_("Test"), U_("bar"), 99);
 
 		VERIFY_EQUAL(foo, 88);
 
@@ -2906,27 +2906,27 @@ static MPT_NOINLINE void TestSettings()
 
 	{
 		DefaultSettingsContainer conf;
-		Setting<int> foo(conf, MPT_USTRING("Test"), MPT_USTRING("bar"), 99);
+		Setting<int> foo(conf, U_("Test"), U_("bar"), 99);
 		VERIFY_EQUAL(foo, 7);
 	}
 
 
 	{
 		DefaultSettingsContainer conf;
-		conf.Read(MPT_USTRING("Test"), MPT_USTRING("struct"), std::string(""));
-		conf.Write(MPT_USTRING("Test"), MPT_USTRING("struct"), std::string(""));
+		conf.Read(U_("Test"), U_("struct"), std::string(""));
+		conf.Write(U_("Test"), U_("struct"), std::string(""));
 	}
 
 	{
 		DefaultSettingsContainer conf;
-		CustomSettingsTestType dummy = conf.Read(MPT_USTRING("Test"), MPT_USTRING("struct"), CustomSettingsTestType(1.0f, 1.0f));
+		CustomSettingsTestType dummy = conf.Read(U_("Test"), U_("struct"), CustomSettingsTestType(1.0f, 1.0f));
 		dummy = CustomSettingsTestType(0.125f, 32.0f);
-		conf.Write(MPT_USTRING("Test"), MPT_USTRING("struct"), dummy);
+		conf.Write(U_("Test"), U_("struct"), dummy);
 	}
 
 	{
 		DefaultSettingsContainer conf;
-		Setting<CustomSettingsTestType> dummyVar(conf, MPT_USTRING("Test"), MPT_USTRING("struct"), CustomSettingsTestType(1.0f, 1.0f));
+		Setting<CustomSettingsTestType> dummyVar(conf, U_("Test"), U_("struct"), CustomSettingsTestType(1.0f, 1.0f));
 		CustomSettingsTestType dummy = dummyVar;
 		VERIFY_EQUAL(dummy.x, 0.125f);
 		VERIFY_EQUAL(dummy.y, 32.0f);
@@ -3208,7 +3208,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nResampling, SRCMODE_SINC8LP);
-	VERIFY_EQUAL_NONCONT(sndFile.m_songArtist, MPT_USTRING("Tester"));
+	VERIFY_EQUAL_NONCONT(sndFile.m_songArtist, U_("Tester"));
 	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing.size(), 6);
 	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing[0], 29360125);
 	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing[1], 4194305);
@@ -3662,17 +3662,17 @@ static bool ShouldRunTests()
 {
 	mpt::PathString theFile = theApp.GetAppDirPath();
 	// Only run the tests when we're in the project directory structure.
-	std::size_t pathComponents = mpt::String::Split<mpt::ustring>(theFile.ToUnicode(), MPT_USTRING("\\")).size() - 1;
+	std::size_t pathComponents = mpt::String::Split<mpt::ustring>(theFile.ToUnicode(), U_("\\")).size() - 1;
 	for(std::size_t i = 0; i < pathComponents; ++i)
 	{
-		if(theFile.IsDirectory() && (theFile + MPT_PATHSTRING("test")).IsDirectory())
+		if(theFile.IsDirectory() && (theFile + P_("test")).IsDirectory())
 		{
-			if((theFile + MPT_PATHSTRING("test\\test.mptm")).IsFile())
+			if((theFile + P_("test\\test.mptm")).IsFile())
 			{
 				return true;
 			}
 		}
-		theFile += MPT_PATHSTRING("..\\");
+		theFile += P_("..\\");
 	}
 	return false;
 }
@@ -3680,19 +3680,19 @@ static bool ShouldRunTests()
 static mpt::PathString GetTestFilenameBase()
 {
 	mpt::PathString theFile = theApp.GetAppDirPath();
-	std::size_t pathComponents = mpt::String::Split<mpt::ustring>(theFile.ToUnicode(), MPT_USTRING("\\")).size() - 1;
+	std::size_t pathComponents = mpt::String::Split<mpt::ustring>(theFile.ToUnicode(), U_("\\")).size() - 1;
 	for(std::size_t i = 0; i < pathComponents; ++i)
 	{
-		if(theFile.IsDirectory() && (theFile + MPT_PATHSTRING("test")).IsDirectory())
+		if(theFile.IsDirectory() && (theFile + P_("test")).IsDirectory())
 		{
-			if((theFile + MPT_PATHSTRING("test\\test.mptm")).IsFile())
+			if((theFile + P_("test\\test.mptm")).IsFile())
 			{
 				break;
 			}
 		}
-		theFile += MPT_PATHSTRING("..\\");
+		theFile += P_("..\\");
 	}
-	theFile += MPT_PATHSTRING("test/test.");
+	theFile += P_("test/test.");
 	return theFile;
 }
 
@@ -3754,12 +3754,12 @@ static bool ShouldRunTests()
 
 static mpt::PathString GetTestFilenameBase()
 {
-	return Test::GetPathPrefix() + MPT_PATHSTRING("./test/test.");
+	return Test::GetPathPrefix() + P_("./test/test.");
 }
 
 static mpt::PathString GetTempFilenameBase()
 {
-	return MPT_PATHSTRING("./test.");
+	return P_("./test.");
 }
 
 typedef std::shared_ptr<CSoundFile> TSoundFileContainer;
@@ -3827,14 +3827,14 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 	// Test MPTM file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + MPT_PATHSTRING("mptm"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + P_("mptm"));
 
 		TestLoadMPTMFile(GetSoundFile(sndFileContainer));
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
 			GetSoundFile(sndFileContainer).m_dwLastSavedWithVersion = Version::Current();
-			SaveIT(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.mptm"));
+			SaveIT(sndFileContainer, filenameBase + P_("saved.mptm"));
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -3843,19 +3843,19 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.mptm"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + P_("saved.mptm"));
 
 		TestLoadMPTMFile(GetSoundFile(sndFileContainer));
 
 		DestroySoundFileContainer(sndFileContainer);
 
-		RemoveFile(filenameBase + MPT_PATHSTRING("saved.mptm"));
+		RemoveFile(filenameBase + P_("saved.mptm"));
 	}
 	#endif
 
 	// Test XM file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + MPT_PATHSTRING("xm"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + P_("xm"));
 
 		TestLoadXMFile(GetSoundFile(sndFileContainer));
 
@@ -3870,7 +3870,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
 			GetSoundFile(sndFileContainer).m_dwLastSavedWithVersion = Version::Current();
-			SaveXM(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.xm"));
+			SaveXM(sndFileContainer, filenameBase + P_("saved.xm"));
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -3879,19 +3879,19 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.xm"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + P_("saved.xm"));
 
 		TestLoadXMFile(GetSoundFile(sndFileContainer));
 
 		DestroySoundFileContainer(sndFileContainer);
 
-		RemoveFile(filenameBase + MPT_PATHSTRING("saved.xm"));
+		RemoveFile(filenameBase + P_("saved.xm"));
 	}
 	#endif
 
 	// Test S3M file loading
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + MPT_PATHSTRING("s3m"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + P_("s3m"));
 		auto &sndFile = GetSoundFile(sndFileContainer);
 
 		TestLoadS3MFile(sndFile, false);
@@ -3915,7 +3915,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 			// Test file saving
 			sndFile.ChnSettings[1].dwFlags.set(CHN_MUTE);
 			sndFile.m_dwLastSavedWithVersion = Version::Current();
-			SaveS3M(sndFileContainer, filenameBase + MPT_PATHSTRING("saved.s3m"));
+			SaveS3M(sndFileContainer, filenameBase + P_("saved.s3m"));
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -3924,13 +3924,13 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
-		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + MPT_PATHSTRING("saved.s3m"));
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + P_("saved.s3m"));
 
 		TestLoadS3MFile(GetSoundFile(sndFileContainer), true);
 
 		DestroySoundFileContainer(sndFileContainer);
 
-		RemoveFile(filenameBase + MPT_PATHSTRING("saved.s3m"));
+		RemoveFile(filenameBase + P_("saved.s3m"));
 	}
 	#endif
 

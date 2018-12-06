@@ -1884,7 +1884,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				}
 			} else if(s.substr(0, 9) == "#include " || s.substr(0, 9) == "#include\t")
 			{
-				AddToLog(LogWarning, MPT_USTRING("#include directive is not supported."));
+				AddToLog(LogWarning, U_("#include directive is not supported."));
 				auto fileStart = s.find("\"", 9);	// Yes, there can be arbitrary characters before the opening quote, at least that's how sforzando does it.
 				auto fileEnd = s.find("\"", fileStart + 1);
 				if(fileStart != std::string::npos && fileEnd != std::string::npos)
@@ -1996,7 +1996,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			FileReader smpFile = GetFileReader(f);
 			if(!ReadSampleFromFile(smp, smpFile, false))
 			{
-				AddToLog(LogWarning, MPT_USTRING("Unable to load sample: ") + filename.ToUnicode());
+				AddToLog(LogWarning, U_("Unable to load sample: ") + filename.ToUnicode());
 				prevSmp--;
 				continue;
 			}
@@ -2181,7 +2181,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 		return false;
 	}
 	const mpt::PathString sampleBaseName = filename.GetFileName();
-	const mpt::PathString sampleDirName = sampleBaseName + MPT_PATHSTRING("/");
+	const mpt::PathString sampleDirName = sampleBaseName + P_("/");
 	const mpt::PathString sampleBasePath = filename.GetPath() + sampleDirName;
 	if(!::CreateDirectory(sampleBasePath.AsNative().c_str(), nullptr))
 	{
@@ -2234,14 +2234,14 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 		}
 		endOfRegion--;
 
-		mpt::PathString sampleName = sampleBasePath + sampleBaseName + MPT_PATHSTRING(" ") + mpt::PathString::FromUnicode(mpt::ufmt::val(numSamples));
+		mpt::PathString sampleName = sampleBasePath + sampleBaseName + P_(" ") + mpt::PathString::FromUnicode(mpt::ufmt::val(numSamples));
 		if(useFLACsamples)
 		{
-			sampleName += MPT_PATHSTRING(".flac");
+			sampleName += P_(".flac");
 			SaveFLACSample(ins->Keyboard[i], sampleName);
 		} else
 		{
-			sampleName += MPT_PATHSTRING(".wav");
+			sampleName += P_(".wav");
 			SaveWAVSample(ins->Keyboard[i], sampleName);
 		}
 
@@ -3147,7 +3147,7 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 			}
 			if(!LoadExternalSample(nSample, filename))
 			{
-				AddToLog(LogWarning, MPT_USTRING("Unable to load sample: ") + filename.ToUnicode());
+				AddToLog(LogWarning, U_("Unable to load sample: ") + filename.ToUnicode());
 			}
 		} else
 		{

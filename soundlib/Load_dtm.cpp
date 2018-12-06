@@ -589,17 +589,17 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::ustring tracker;
 	if(patternFormat == DTM_206_PATTERN_FORMAT)
 	{
-		tracker = MPT_USTRING("Digital Home Studio");
+		tracker = U_("Digital Home Studio");
 	} else if(FileReader chunk = chunks.GetChunk(DTMChunk::idVERS))
 	{
 		uint32 version = chunk.ReadUint32BE();
-		tracker = mpt::format(MPT_USTRING("Digital Tracker %1.%2"))(version >> 4, version & 0x0F);
+		tracker = mpt::format(U_("Digital Tracker %1.%2"))(version >> 4, version & 0x0F);
 	} else
 	{
-		tracker = MPT_USTRING("Digital Tracker");
+		tracker = U_("Digital Tracker");
 	}
-	m_modFormat.formatName = MPT_USTRING("Digital Tracker");
-	m_modFormat.type = MPT_USTRING("dtm");
+	m_modFormat.formatName = U_("Digital Tracker");
+	m_modFormat.type = U_("dtm");
 	m_modFormat.madeWithTracker = std::move(tracker);
 	m_modFormat.charset = mpt::CharsetISO8859_1;
 

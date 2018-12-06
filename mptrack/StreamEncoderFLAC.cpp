@@ -107,7 +107,7 @@ public:
 		{
 			flac_metadata[0] = FLAC__metadata_object_new(FLAC__METADATA_TYPE_VORBIS_COMMENT);
 			AddCommentField("ENCODER",     tags.encoder);
-			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
+			AddCommentField("SOURCEMEDIA", U_("tracked music file"));
 			AddCommentField("TITLE",       tags.title          );
 			AddCommentField("ARTIST",      tags.artist         );
 			AddCommentField("ALBUM",       tags.album          );
@@ -199,10 +199,10 @@ public:
 FLACEncoder::FLACEncoder()
 {
 	Encoder::Traits traits;
-	traits.fileExtension = MPT_PATHSTRING("flac");
-	traits.fileShortDescription = MPT_USTRING("FLAC");
-	traits.fileDescription = MPT_USTRING("Free Lossless Audio Codec");
-	traits.encoderSettingsName = MPT_USTRING("FLAC");
+	traits.fileExtension = P_("flac");
+	traits.fileShortDescription = U_("FLAC");
+	traits.fileDescription = U_("Free Lossless Audio Codec");
+	traits.encoderSettingsName = U_("FLAC");
 	traits.canTags = true;
 	traits.maxChannels = 4;
 	traits.samplerates = TrackerSettings::Instance().GetSampleRates();
@@ -218,7 +218,7 @@ FLACEncoder::FLACEncoder()
 				format.Samplerate = samplerate;
 				format.Channels = channels;
 				format.Sampleformat = (SampleFormat)(bytes * 8);
-				format.Description = mpt::format(MPT_USTRING("%1 Bit"))(bytes * 8);
+				format.Description = mpt::format(U_("%1 Bit"))(bytes * 8);
 				format.Bitrate = 0;
 				traits.formats.push_back(format);
 			}

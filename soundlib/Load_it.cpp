@@ -380,13 +380,13 @@ mpt::ustring CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 			ddd = date - (365 * y + y / 4 - y / 100 + y / 400);
 		}
 		int32 mi = (100 * ddd + 52) / 3060;
-		version = mpt::format(MPT_USTRING("Schism Tracker %1-%2-%3"))(
+		version = mpt::format(U_("Schism Tracker %1-%2-%3"))(
 			mpt::ufmt::dec0<4>(y + (mi + 2) / 12),
 			mpt::ufmt::dec0<2>((mi + 2) % 12 + 1),
 			mpt::ufmt::dec0<2>(ddd - (mi * 306 + 5) / 10 + 1));
 	} else
 	{
-		version = mpt::format(MPT_USTRING("Schism Tracker 0.%1"))(mpt::ufmt::hex(cwtv));
+		version = mpt::format(U_("Schism Tracker 0.%1"))(mpt::ufmt::hex(cwtv));
 	}
 	return version;
 }
@@ -508,20 +508,20 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					// ModPlug Tracker 1.16 (semi-raped IT format) or BeRoTracker (will be determined later)
 					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
-					madeWithTracker = MPT_USTRING("ModPlug Tracker 1.09 - 1.16");
+					madeWithTracker = U_("ModPlug Tracker 1.09 - 1.16");
 				} else
 				{
 					// OpenMPT 1.17 disguised as this in compatible mode,
 					// but never writes 0xFF in the pan map for unused channels (which is an invalid value).
 					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
-					madeWithTracker = MPT_USTRING("OpenMPT 1.17 (compatibility export)");
+					madeWithTracker = U_("OpenMPT 1.17 (compatibility export)");
 				}
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0202 && fileHeader.reserved == 0)
 			{
 				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
-				madeWithTracker = MPT_USTRING("ModPlug Tracker b3.3 - 1.09");
+				madeWithTracker = U_("ModPlug Tracker b3.3 - 1.09");
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0300 && fileHeader.cmwt == 0x0300 && fileHeader.reserved == 0 && fileHeader.ordnum == 256 && fileHeader.sep == 128 && fileHeader.pwd == 0)
 			{
@@ -645,7 +645,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		if(oldUNMO3)
 		{
-			madeWithTracker = MPT_USTRING("UNMO3 <= 2.4");
+			madeWithTracker = U_("UNMO3 <= 2.4");
 		}
 	}
 
@@ -672,9 +672,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(possiblyUNMO3 && nflt == 0)
 			{
 				if(fileHeader.special & ITFileHeader::embedPatternHighlights)
-					madeWithTracker = MPT_USTRING("UNMO3 <= 2.4.0.1");	// Set together with MIDI macro embed flag
+					madeWithTracker = U_("UNMO3 <= 2.4.0.1");	// Set together with MIDI macro embed flag
 				else
-					madeWithTracker = MPT_USTRING("UNMO3");	// Either 2.4.0.2+ or no MIDI macros embedded
+					madeWithTracker = U_("UNMO3");	// Either 2.4.0.2+ or no MIDI macros embedded
 			}
 		} else
 		{
@@ -689,7 +689,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		// Otherwise we end up here and might have to read the edit history length.
 		if(file.ReadUint16LE() == 0)
 		{
-			madeWithTracker = MPT_USTRING("UNMO3 <= 2.4");
+			madeWithTracker = U_("UNMO3 <= 2.4");
 		} else
 		{
 			// These were not zero bytes, but potentially belong to the upcoming MIDI config - need to skip back.
@@ -834,7 +834,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 #if defined(MPT_EXTERNAL_SAMPLES)
 					SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
 #elif !defined(LIBOPENMPT_BUILD_TEST)
-					AddToLog(LogWarning, mpt::format(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."))(i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
+					AddToLog(LogWarning, mpt::format(U_("Loading external sample %1 ('%2') failed: External samples are not supported."))(i, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
 #endif // MPT_EXTERNAL_SAMPLES
 				} else
 				{
@@ -866,7 +866,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				possibleXMconversion = false;
 		}
 		if(possibleXMconversion)
-			madeWithTracker = MPT_USTRING("XM Conversion");
+			madeWithTracker = U_("XM Conversion");
 	}
 
 	m_nMinPeriod = 0;
@@ -1147,13 +1147,13 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(m_dwLastSavedWithVersion && madeWithTracker.empty())
 	{
-		madeWithTracker = MPT_USTRING("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
+		madeWithTracker = U_("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
 		if(memcmp(&fileHeader.reserved, "OMPT", 4) && (fileHeader.cwtv & 0xF000) == 0x5000)
 		{
-			madeWithTracker += MPT_USTRING(" (compatibility export)");
+			madeWithTracker += U_(" (compatibility export)");
 		} else if(m_dwLastSavedWithVersion.IsTestVersion())
 		{
-			madeWithTracker += MPT_USTRING(" (test build)");
+			madeWithTracker += U_(" (test build)");
 		}
 	} else
 	{
@@ -1163,45 +1163,45 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(isBeRoTracker)
 			{
 				// Old versions
-				madeWithTracker = MPT_USTRING("BeRoTracker");
+				madeWithTracker = U_("BeRoTracker");
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.flags == 9 && fileHeader.special == 0
 				&& fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0
 				&& fileHeader.insnum == 0 && fileHeader.patnum + 1 == fileHeader.ordnum
 				&& fileHeader.globalvol == 128 && fileHeader.mv == 100 && fileHeader.speed == 1 && fileHeader.sep == 128 && fileHeader.pwd == 0
 				&& fileHeader.msglength == 0 && fileHeader.msgoffset == 0 && fileHeader.reserved == 0)
 			{
-				madeWithTracker = MPT_USTRING("OpenSPC conversion");
+				madeWithTracker = U_("OpenSPC conversion");
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0 && fileHeader.reserved == 0)
 			{
 				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
 				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
-				madeWithTracker = MPT_USTRING("ModPlug Tracker 1.00a5");
+				madeWithTracker = U_("ModPlug Tracker 1.00a5");
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(&fileHeader.reserved, "CHBI", 4))
 			{
-				madeWithTracker = MPT_USTRING("ChibiTracker");
+				madeWithTracker = U_("ChibiTracker");
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && fileHeader.special <= 1 && fileHeader.pwd == 0 && fileHeader.reserved == 0
 				&& (fileHeader.flags & (ITFileHeader::vol0Optimisations | ITFileHeader::instrumentMode | ITFileHeader::useMIDIPitchController | ITFileHeader::reqEmbeddedMIDIConfig | ITFileHeader::extendedFilterRange)) == ITFileHeader::instrumentMode
 				&& m_nSamples > 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
 			{
-				madeWithTracker = MPT_USTRING("CheeseTracker");
+				madeWithTracker = U_("CheeseTracker");
 			} else if(fileHeader.cwtv == 0)
 			{
-				madeWithTracker = MPT_USTRING("Unknown");
+				madeWithTracker = U_("Unknown");
 			} else if(fileHeader.cmwt < 0x0300 && madeWithTracker.empty())
 			{
 				if(fileHeader.cmwt > 0x0214)
 				{
-					madeWithTracker = MPT_USTRING("Impulse Tracker 2.15");
+					madeWithTracker = U_("Impulse Tracker 2.15");
 				} else if(fileHeader.cwtv > 0x0214)
 				{
 					// Patched update of IT 2.14 (0x0215 - 0x0217 == p1 - p3)
 					// p4 (as found on modland) adds the ITVSOUND driver, but doesn't seem to change
 					// anything as far as file saving is concerned.
-					madeWithTracker = mpt::format(MPT_USTRING("Impulse Tracker 2.14p%1"))(fileHeader.cwtv - 0x0214);
+					madeWithTracker = mpt::format(U_("Impulse Tracker 2.14p%1"))(fileHeader.cwtv - 0x0214);
 				} else
 				{
-					madeWithTracker = mpt::format(MPT_USTRING("Impulse Tracker %1.%2"))((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>((fileHeader.cwtv & 0xFF)));
+					madeWithTracker = mpt::format(U_("Impulse Tracker %1.%2"))((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>((fileHeader.cwtv & 0xFF)));
 				}
 				if(m_FileHistory.empty() && fileHeader.reserved != 0)
 				{
@@ -1232,19 +1232,19 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				m_playBehaviour.reset(kITShortSampleRetrig);
 			break;
 		case 4:
-			madeWithTracker = mpt::format(MPT_USTRING("pyIT %1.%2"))((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
+			madeWithTracker = mpt::format(U_("pyIT %1.%2"))((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
 			break;
 		case 6:
-			madeWithTracker = MPT_USTRING("BeRoTracker");
+			madeWithTracker = U_("BeRoTracker");
 			break;
 		case 7:
 			if(fileHeader.cwtv == 0x7FFF && fileHeader.cmwt == 0x0215)
-				madeWithTracker = MPT_USTRING("munch.py");
+				madeWithTracker = U_("munch.py");
 			else
-				madeWithTracker = mpt::format(MPT_USTRING("ITMCK %1.%2.%3"))((fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
+				madeWithTracker = mpt::format(U_("ITMCK %1.%2.%3"))((fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
 			break;
 		case 0xD:
-			madeWithTracker = MPT_USTRING("spc2it");
+			madeWithTracker = U_("spc2it");
 			break;
 		}
 	}
@@ -1258,8 +1258,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	m_modFormat.formatName = (GetType() == MOD_TYPE_MPT) ? MPT_USTRING("OpenMPT MPTM") : mpt::format(MPT_USTRING("Impulse Tracker %1.%2"))(fileHeader.cmwt >> 8, mpt::ufmt::hex0<2>(fileHeader.cmwt & 0xFF));
-	m_modFormat.type = (GetType() == MOD_TYPE_MPT) ? MPT_USTRING("mptm") : MPT_USTRING("it");
+	m_modFormat.formatName = (GetType() == MOD_TYPE_MPT) ? U_("OpenMPT MPTM") : mpt::format(U_("Impulse Tracker %1.%2"))(fileHeader.cmwt >> 8, mpt::ufmt::hex0<2>(fileHeader.cmwt & 0xFF));
+	m_modFormat.type = (GetType() == MOD_TYPE_MPT) ? U_("mptm") : U_("it");
 	m_modFormat.madeWithTracker = std::move(madeWithTracker);
 	m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::CharsetWindows1252 : mpt::CharsetCP437;
 
@@ -1283,7 +1283,7 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 
 		if(ssb.GetStatus() & srlztn::SNT_FAILURE)
 		{
-			AddToLog(LogError, MPT_USTRING("Unknown error occurred while deserializing file."));
+			AddToLog(LogError, U_("Unknown error occurred while deserializing file."));
 		}
 	} else
 	{
@@ -1291,7 +1291,7 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 		std::string name;
 		if(GetTuneSpecificTunings().Deserialize(iStrm, name) != Tuning::SerializationResult::Success)
 		{
-			AddToLog(LogError, MPT_USTRING("Loading tune specific tunings failed."));
+			AddToLog(LogError, U_("Loading tune specific tunings failed."));
 		} else
 		{
 			ReadTuningMapImpl(iStrm, *this, 0, cwtv < 0x88C);
@@ -1900,7 +1900,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 
 	if(ssb.GetStatus() & srlztn::SNT_FAILURE)
 	{
-		AddToLog(LogError, MPT_USTRING("Error occurred in writing MPTM extensions."));
+		AddToLog(LogError, U_("Error occurred in writing MPTM extensions."));
 	}
 
 	//Last 4 bytes should tell where the hack mpt things begin.

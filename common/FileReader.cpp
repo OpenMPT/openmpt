@@ -31,7 +31,7 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 		file.Rewind();
 		if(file.GetFileName().empty())
 		{
-			const mpt::PathString tempName = mpt::CreateTempFileName(MPT_PATHSTRING("OpenMPT"), fileNameExtension);
+			const mpt::PathString tempName = mpt::CreateTempFileName(P_("OpenMPT"), fileNameExtension);
 
 #if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
 #if (_WIN32_WINNT < 0x0602)

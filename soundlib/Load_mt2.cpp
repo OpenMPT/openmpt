@@ -455,8 +455,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_MT2);
 	InitializeChannels();
 
-	m_modFormat.formatName = mpt::format(MPT_USTRING("MadTracker %1.%2"))(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
-	m_modFormat.type = MPT_USTRING("mt2");
+	m_modFormat.formatName = mpt::format(U_("MadTracker %1.%2"))(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
+	m_modFormat.type = U_("mt2");
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_modFormat.madeWithTracker, mpt::CharsetWindows1252, fileHeader.trackerName);
 	m_modFormat.charset = mpt::CharsetWindows1252;
 
@@ -1156,7 +1156,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			SetSamplePath(i + 1, mpt::PathString::FromLocaleSilent(filename));
 #elif !defined(LIBOPENMPT_BUILD_TEST)
-			AddToLog(LogWarning, mpt::format(MPT_USTRING("Loading external sample %1 ('%2') failed: External samples are not supported."))(i, mpt::ToUnicode(GetCharsetFile(), filename)));
+			AddToLog(LogWarning, mpt::format(U_("Loading external sample %1 ('%2') failed: External samples are not supported."))(i, mpt::ToUnicode(GetCharsetFile(), filename)));
 #endif // MPT_EXTERNAL_SAMPLES
 		}
 	}

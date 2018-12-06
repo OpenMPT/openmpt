@@ -570,16 +570,16 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	// Setup channel pan positions and volume
 	SetupMODPanning(true);
 
-	const MPT_UCHAR_TYPE *madeWithTracker = MPT_ULITERAL("");
+	const MPT_UCHAR_TYPE *madeWithTracker = UL_("");
 	switch(version)
 	{
-	case '0': madeWithTracker = m_nChannels > 4 ? MPT_ULITERAL("OctaMED v2.10") : MPT_ULITERAL("MED v2"); break;
-	case '1': madeWithTracker = MPT_ULITERAL("OctaMED v4"); break;
-	case '2': madeWithTracker = MPT_ULITERAL("OctaMED v5"); break;
-	case '3': madeWithTracker = MPT_ULITERAL("OctaMED Soundstudio"); break;
+	case '0': madeWithTracker = m_nChannels > 4 ? UL_("OctaMED v2.10") : UL_("MED v2"); break;
+	case '1': madeWithTracker = UL_("OctaMED v4"); break;
+	case '2': madeWithTracker = UL_("OctaMED v5"); break;
+	case '3': madeWithTracker = UL_("OctaMED Soundstudio"); break;
 	}
-	m_modFormat.formatName = mpt::format(MPT_USTRING("OctaMED (MMD%1)"))(version - '0');
-	m_modFormat.type = MPT_USTRING("med");
+	m_modFormat.formatName = mpt::format(U_("OctaMED (MMD%1)"))(version - '0');
+	m_modFormat.type = U_("med");
 	m_modFormat.madeWithTracker = madeWithTracker;
 	m_modFormat.charset = mpt::CharsetISO8859_1;
 

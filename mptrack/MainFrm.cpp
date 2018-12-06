@@ -2200,7 +2200,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool isTemplateFile)
 	{
 		MPT_ASSERT(nId == UINT(isTemplateFile ? ID_FILE_OPENTEMPLATE_LASTINRANGE : ID_EXAMPLE_MODULES_LASTINRANGE));
 		FileDialog::PathList files;
-		theApp.OpenModulesDialog(files, isTemplateFile ? theApp.GetConfigPath() + MPT_PATHSTRING("TemplateModules") : theApp.GetAppDirPath() + MPT_PATHSTRING("ExampleSongs"));
+		theApp.OpenModulesDialog(files, isTemplateFile ? theApp.GetConfigPath() + P_("TemplateModules") : theApp.GetAppDirPath() + P_("ExampleSongs"));
 		for(const auto &file : files)
 		{
 			theApp.OpenDocumentFile(file.ToCString());
@@ -2537,7 +2537,7 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
 		firstShow = false;
 		WINDOWPLACEMENT wpl;
 		GetWindowPlacement(&wpl);
-		wpl = theApp.GetSettings().Read<WINDOWPLACEMENT>(MPT_USTRING("Display"), MPT_USTRING("WindowPlacement"), wpl);
+		wpl = theApp.GetSettings().Read<WINDOWPLACEMENT>(U_("Display"), U_("WindowPlacement"), wpl);
 		SetWindowPlacement(&wpl);
 	}
 }
@@ -2609,7 +2609,7 @@ void CMainFrame::OnHelp()
 		else if(!strcmp("CModControlView", className))	page = "::/Comments.html";
 	}
 
-	const mpt::PathString helpFile = theApp.GetAppDirPath() + MPT_PATHSTRING("OpenMPT Manual.chm") + mpt::PathString::FromUTF8(page) + MPT_PATHSTRING(">OpenMPT");
+	const mpt::PathString helpFile = theApp.GetAppDirPath() + P_("OpenMPT Manual.chm") + mpt::PathString::FromUTF8(page) + P_(">OpenMPT");
 	if(!::HtmlHelp(m_hWnd, helpFile.AsNative().c_str(), strcmp(page, "") ? HH_DISPLAY_TOC : HH_DISPLAY_TOPIC, NULL))
 	{
 		Reporting::Error(_T("Could not find help file:\n") + helpFile.ToCString());
@@ -2676,7 +2676,7 @@ void CMainFrame::CreateExampleModulesMenu()
 {
 	static_assert(nMaxItemsInExampleModulesMenu == ID_EXAMPLE_MODULES_LASTINRANGE - ID_EXAMPLE_MODULES,
 				  "Make sure that there's a proper range for menu commands in resources.");
-	HMENU hMenu = CreateFileMenu(nMaxItemsInExampleModulesMenu, m_ExampleModulePaths, MPT_PATHSTRING("ExampleSongs\\"), ID_EXAMPLE_MODULES);
+	HMENU hMenu = CreateFileMenu(nMaxItemsInExampleModulesMenu, m_ExampleModulePaths, P_("ExampleSongs\\"), ID_EXAMPLE_MODULES);
 	CMenu* const pMainMenu = GetMenu();
 	if (hMenu && pMainMenu && m_InputHandler)
 		VERIFY(pMainMenu->ModifyMenu(ID_EXAMPLE_MODULES, MF_BYCOMMAND | MF_POPUP, (UINT_PTR)hMenu, m_InputHandler->GetMenuText(ID_EXAMPLE_MODULES)));
@@ -2705,7 +2705,7 @@ void CMainFrame::CreateTemplateModulesMenu()
 {
 	static_assert(nMaxItemsInTemplateModulesMenu == ID_FILE_OPENTEMPLATE_LASTINRANGE - ID_FILE_OPENTEMPLATE,
 				  "Make sure that there's a proper range for menu commands in resources.");
-	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, m_TemplateModulePaths, MPT_PATHSTRING("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
+	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, m_TemplateModulePaths, P_("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
 	CMenu *pFileMenu = GetFileMenu();
 	if (hMenu && pFileMenu && m_InputHandler)
 	{
@@ -2889,16 +2889,16 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 	{
 		const SNDMIXPLUGIN &plugin = plugarray[iPlug];
 		str.clear();
-		str += mpt::format(MPT_USTRING("FX%1: "))(iPlug + 1);
+		str += mpt::format(U_("FX%1: "))(iPlug + 1);
 		const size_t size0 = str.size();
 		str += (librarynames) ? mpt::ToUnicode(mpt::CharsetUTF8, plugin.GetLibraryName()) : mpt::ToUnicode(mpt::CharsetLocale, plugin.GetName());
-		if(str.size() <= size0) str += MPT_USTRING("--");
+		if(str.size() <= size0) str += U_("--");
 		
 		CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 		if(vstPlug != nullptr && vstPlug->isBridged)
 		{
 			VSTPluginLib &lib = vstPlug->GetPluginFactory();
-			str += mpt::format(MPT_USTRING(" (%1-Bit Bridged)"))(lib.GetDllBits());
+			str += mpt::format(U_(" (%1-Bit Bridged)"))(lib.GetDllBits());
 		}
 
 		CBox.SetItemData(static_cast<int>(::SendMessageW(CBox.m_hWnd, CB_ADDSTRING, 0, (LPARAM)str.c_str())), iPlug + 1);

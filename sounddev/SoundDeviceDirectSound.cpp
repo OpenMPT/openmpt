@@ -64,11 +64,11 @@ mpt::ustring GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04()
 	}
 	std::string utf8String = mpt::ToCharset(mpt::CharsetUTF8, name);
 	mpt::ustring hexString = Util::BinToHex(mpt::as_span(utf8String));
-	return MPT_USTRING("DirectSound") + MPT_USTRING("_") + hexString;
+	return U_("DirectSound") + U_("_") + hexString;
 }
 mpt::ustring GetDirectSoundDefaultDeviceIdentifier_1_25_00_04()
 {
-	return MPT_USTRING("DirectSound_{00000000-0000-0000-0000-000000000000}");
+	return U_("DirectSound_{00000000-0000-0000-0000-000000000000}");
 }
 }
 
@@ -88,13 +88,13 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 	info.name = mpt::ToUnicode(mpt::winstring(lpstrDescription));
 	if(lpstrDriver)
 	{
-		info.extraData[MPT_USTRING("DriverName")] = mpt::ToUnicode(mpt::winstring(lpstrDriver));
+		info.extraData[U_("DriverName")] = mpt::ToUnicode(mpt::winstring(lpstrDriver));
 	}
 	if(lpGuid)
 	{
-		info.extraData[MPT_USTRING("UUID")] = mpt::ufmt::val(mpt::UUID(guid));
+		info.extraData[U_("UUID")] = mpt::ufmt::val(mpt::UUID(guid));
 	}
-	info.apiName = MPT_USTRING("DirectSound");
+	info.apiName = U_("DirectSound");
 	info.useNameAsIdentifier = false;
 	devices.push_back(info);
 	return TRUE;
@@ -143,7 +143,7 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 	caps.CanInput = false;
 	caps.HasNamedInputSources = false;
 	caps.CanDriverPanel = false;
-	caps.ExclusiveModeDescription = MPT_USTRING("Use primary buffer");
+	caps.ExclusiveModeDescription = U_("Use primary buffer");
 	caps.DefaultSettings.sampleFormat = SampleFormatInt16;
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;

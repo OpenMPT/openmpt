@@ -327,7 +327,7 @@ void COptionsSoundcard::UpdateEverything()
 		for(const auto &it : *theApp.GetSoundDevicesManager())
 		{
 			auto extraData = it.extraData;
-			int priority = ConvertStrTo<int>(extraData[MPT_USTRING("priority")]);
+			int priority = ConvertStrTo<int>(extraData[U_("priority")]);
 
 			if(!TrackerSettings::Instance().m_MorePortaudio)
 			{
@@ -340,7 +340,7 @@ void COptionsSoundcard::UpdateEverything()
 			}
 			if(!TrackerSettings::Instance().m_MoreRtaudio)
 			{
-				if(it.type == MPT_USTRING("RtAudio-WINDOWS_DS") || it.type == MPT_USTRING("RtAudio-WINDOWS_WASAPI") || it.type == MPT_USTRING("RtAudio-WINDOWS_ASIO"))
+				if(it.type == U_("RtAudio-WINDOWS_DS") || it.type == U_("RtAudio-WINDOWS_WASAPI") || it.type == U_("RtAudio-WINDOWS_ASIO"))
 				{
 					// skip rtaudio apis that are already implemented via our own SoundDevice class
 					// can be overwritten via [Sound Settings]MoreRtaudio=1
@@ -363,20 +363,20 @@ void COptionsSoundcard::UpdateEverything()
 				cbi.cchTextMax = 0;
 				cbi.mask = CBEIF_LPARAM | CBEIF_TEXT;
 				cbi.lParam = theApp.GetSoundDevicesManager()->GetGlobalID(it.GetIdentifier());
-				mpt::ustring TypeWineNative = MPT_USTRING("Wine-Native");
+				mpt::ustring TypeWineNative = U_("Wine-Native");
 				if(it.type == SoundDevice::TypeWAVEOUT || it.type == SoundDevice::TypePORTAUDIO_WMME)
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_WAVEOUT;
-				} else if(it.type == SoundDevice::TypeDSOUND || it.type == SoundDevice::TypePORTAUDIO_DS || it.type == MPT_USTRING("RtAudio-WINDOWS_DS"))
+				} else if(it.type == SoundDevice::TypeDSOUND || it.type == SoundDevice::TypePORTAUDIO_DS || it.type == U_("RtAudio-WINDOWS_DS"))
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_DIRECTX;
-				} else if(it.type == SoundDevice::TypeASIO || it.type == MPT_USTRING("RtAudio-WINDOWS_ASIO"))
+				} else if(it.type == SoundDevice::TypeASIO || it.type == U_("RtAudio-WINDOWS_ASIO"))
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_ASIO;
-				} else if(it.type == SoundDevice::TypePORTAUDIO_WASAPI || it.type == MPT_USTRING("RtAudio-WINDOWS_WASAPI"))
+				} else if(it.type == SoundDevice::TypePORTAUDIO_WASAPI || it.type == U_("RtAudio-WINDOWS_WASAPI"))
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_SAMPLEMUTE; // // No real image available for now,
@@ -384,7 +384,7 @@ void COptionsSoundcard::UpdateEverything()
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_CHIP; // No real image available for now,
-				} else if(it.type.find(TypeWineNative + MPT_USTRING("-")) == 0)
+				} else if(it.type.find(TypeWineNative + U_("-")) == 0)
 				{
 					if(theApp.GetWineVersion() && theApp.GetWineVersion()->HostIsLinux())
 					{
@@ -400,27 +400,27 @@ void COptionsSoundcard::UpdateEverything()
 				}
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
-				mpt::ustring name = it.name + (it.isDefault ? MPT_USTRING(" [default]") : MPT_USTRING(""));
+				mpt::ustring name = it.name + (it.isDefault ? U_(" [default]") : U_(""));
 				if(TrackerSettings::Instance().m_SoundShowNotRecommendedDeviceWarning && (priority < 0))
 				{
-					name += MPT_USTRING(" [not recommended]");
+					name += U_(" [not recommended]");
 				}
 				if(it.type == SoundDevice::TypeWAVEOUT || it.type == SoundDevice::TypeDSOUND || it.type == SoundDevice::TypeASIO)
 				{
 					// leave name alone
 				} else if(it.type == SoundDevice::TypePORTAUDIO_WASAPI || it.type == SoundDevice::TypePORTAUDIO_WDMKS)
 				{
-					name = it.apiName + MPT_USTRING(" - ") + name;
+					name = it.apiName + U_(" - ") + name;
 				/*
-				} else if(it->type.find(TypeWineNative + MPT_USTRING("-")) == 0 && it->apiPath.size() > 0)
+				} else if(it->type.find(TypeWineNative + U_("-")) == 0 && it->apiPath.size() > 0)
 				{
 					std::vector<mpt::ustring> apiPath = it->apiPath;
 					apiPath.erase(apiPath.begin());
-					name = ((apiPath.size() > 0) ? mpt::String::Combine(apiPath, MPT_USTRING(" - ")) + MPT_USTRING(" - ") : MPT_USTRING("")) + it->apiName + MPT_USTRING(" - ") + name;
+					name = ((apiPath.size() > 0) ? mpt::String::Combine(apiPath, U_(" - ")) + U_(" - ") : U_("")) + it->apiName + U_(" - ") + name;
 				*/
 				} else
 				{
-					name = ((it.apiPath.size() > 0) ? mpt::String::Combine(it.apiPath, MPT_USTRING(" - ")) + MPT_USTRING(" - ") : MPT_USTRING("")) + it.apiName + MPT_USTRING(" - ") + name;
+					name = ((it.apiPath.size() > 0) ? mpt::String::Combine(it.apiPath, U_(" - ")) + U_(" - ") : U_("")) + it.apiName + U_(" - ") + name;
 				}
 				CString tmp = mpt::ToCString(name);
 				cbi.pszText = const_cast<TCHAR *>(tmp.GetString());
@@ -540,19 +540,19 @@ void COptionsSoundcard::UpdateDither()
 		m_CbnDither.EnableWindow(TRUE);
 		for(int i=0; i<NumDitherModes; ++i)
 		{
-			m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName((DitherMode)i) + MPT_USTRING(" dithering")));
+			m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName((DitherMode)i) + U_(" dithering")));
 		}
 	} else if(m_CurrentDeviceCaps.HasInternalDither)
 	{
 		m_CbnDither.EnableWindow(TRUE);
-		m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + MPT_USTRING(" dithering")));
-		m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherDefault) + MPT_USTRING(" dithering")));
+		m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + U_(" dithering")));
+		m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherDefault) + U_(" dithering")));
 	} else
 	{
 		m_CbnDither.EnableWindow(FALSE);
 		for(int i=0; i<NumDitherModes; ++i)
 		{
-			m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + MPT_USTRING(" dithering")));
+			m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + U_(" dithering")));
 		}
 	}
 	if(m_Settings.DitherType < 0 || m_Settings.DitherType >= m_CbnDither.GetCount())
@@ -899,13 +899,13 @@ void COptionsSoundcard::UpdateStatistics()
 		mpt::ustring s;
 		if(bufferAttributes.NumBuffers > 2)
 		{
-			s += mpt::format(MPT_USTRING("Buffer: %1%% (%2/%3)\r\n"))((bufferAttributes.Latency > 0.0) ? mpt::saturate_round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0, (stats.LastUpdateInterval > 0.0) ? mpt::saturate_round<int64>(bufferAttributes.Latency / stats.LastUpdateInterval) : 0, bufferAttributes.NumBuffers);
+			s += mpt::format(U_("Buffer: %1%% (%2/%3)\r\n"))((bufferAttributes.Latency > 0.0) ? mpt::saturate_round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0, (stats.LastUpdateInterval > 0.0) ? mpt::saturate_round<int64>(bufferAttributes.Latency / stats.LastUpdateInterval) : 0, bufferAttributes.NumBuffers);
 		} else
 		{
-			s += mpt::format(MPT_USTRING("Buffer: %1%%\r\n"))((bufferAttributes.Latency > 0.0) ? mpt::saturate_round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0);
+			s += mpt::format(U_("Buffer: %1%%\r\n"))((bufferAttributes.Latency > 0.0) ? mpt::saturate_round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0);
 		}
-		s += mpt::format(MPT_USTRING("Latency: %1 ms (current: %2 ms, %3 frames)\r\n"))(mpt::ufmt::fix(bufferAttributes.Latency * 1000.0, 1), mpt::ufmt::fix(stats.InstantaneousLatency * 1000.0, 1), mpt::saturate_round<int64>(stats.InstantaneousLatency * samplerate));
-		s += mpt::format(MPT_USTRING("Period: %1 ms (current: %2 ms, %3 frames)\r\n"))(mpt::ufmt::fix(bufferAttributes.UpdateInterval * 1000.0, 1), mpt::ufmt::fix(stats.LastUpdateInterval * 1000.0, 1), mpt::saturate_round<int64>(stats.LastUpdateInterval * samplerate));
+		s += mpt::format(U_("Latency: %1 ms (current: %2 ms, %3 frames)\r\n"))(mpt::ufmt::fix(bufferAttributes.Latency * 1000.0, 1), mpt::ufmt::fix(stats.InstantaneousLatency * 1000.0, 1), mpt::saturate_round<int64>(stats.InstantaneousLatency * samplerate));
+		s += mpt::format(U_("Period: %1 ms (current: %2 ms, %3 frames)\r\n"))(mpt::ufmt::fix(bufferAttributes.UpdateInterval * 1000.0, 1), mpt::ufmt::fix(stats.LastUpdateInterval * 1000.0, 1), mpt::saturate_round<int64>(stats.LastUpdateInterval * samplerate));
 		s += stats.text;
 		m_EditStatistics.SetWindowText(mpt::ToCString(s));
 	}	else
@@ -1731,14 +1731,14 @@ void CMidiSetupDlg::OnRenameDevice()
 		mic.szPname[0] = 0;
 		midiInGetDevCaps(device, &mic, sizeof(mic));
 		CString name = mic.szPname;
-		CString friendlyName = theApp.GetSettings().Read(MPT_USTRING("MIDI Input Ports"), mpt::ToUnicode(name), name);
+		CString friendlyName = theApp.GetSettings().Read(U_("MIDI Input Ports"), mpt::ToUnicode(name), name);
 		CInputDlg dlg(this, _T("New name for ") + name + _T(":"), friendlyName);
 		if(dlg.DoModal() == IDOK)
 		{
 			if(dlg.resultAsString.IsEmpty() || dlg.resultAsString == name)
-				theApp.GetSettings().Remove(MPT_USTRING("MIDI Input Ports"), mpt::ToUnicode(name));
+				theApp.GetSettings().Remove(U_("MIDI Input Ports"), mpt::ToUnicode(name));
 			else
-				theApp.GetSettings().Write(MPT_USTRING("MIDI Input Ports"), mpt::ToUnicode(name), dlg.resultAsString);
+				theApp.GetSettings().Write(U_("MIDI Input Ports"), mpt::ToUnicode(name), dlg.resultAsString);
 			RefreshDeviceList(device);
 		}
 	}

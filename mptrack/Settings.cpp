@@ -29,34 +29,34 @@ mpt::ustring SettingValue::FormatTypeAsString() const
 {
 	if(GetType() == SettingTypeNone)
 	{
-		return MPT_USTRING("nil");
+		return U_("nil");
 	}
 	mpt::ustring result;
 	switch(GetType())
 	{
 		case SettingTypeBool:
-			result += MPT_USTRING("bool");
+			result += U_("bool");
 			break;
 		case SettingTypeInt:
-			result += MPT_USTRING("int");
+			result += U_("int");
 			break;
 		case SettingTypeFloat:
-			result += MPT_USTRING("float");
+			result += U_("float");
 			break;
 		case SettingTypeString:
-			result += MPT_USTRING("string");
+			result += U_("string");
 			break;
 		case SettingTypeBinary:
-			result += MPT_USTRING("binary");
+			result += U_("binary");
 			break;
 		case SettingTypeNone:
 		default:
-			result += MPT_USTRING("nil");
+			result += U_("nil");
 			break;
 	}
 	if(HasTypeTag() && !GetTypeTag().empty())
 	{
-		result += MPT_USTRING(":") + mpt::ToUnicode(mpt::CharsetASCII, GetTypeTag());
+		result += U_(":") + mpt::ToUnicode(mpt::CharsetASCII, GetTypeTag());
 	}
 	return result;
 }
@@ -510,7 +510,7 @@ void IniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
 	{
 		return;
 	}
-	const mpt::PathString backupFilename = filename + mpt::PathString::FromUnicode(backupTag.empty() ? MPT_USTRING(".ansi.bak") : MPT_USTRING(".ansi.") + backupTag + MPT_USTRING(".bak"));
+	const mpt::PathString backupFilename = filename + mpt::PathString::FromUnicode(backupTag.empty() ? U_(".ansi.bak") : U_(".ansi.") + backupTag + U_(".bak"));
 	CopyFile(filename.AsNative().c_str(), backupFilename.AsNative().c_str(), FALSE);
 	WriteFileUTF16LE(filename, mpt::ToWide(mpt::CharsetLocale, std::string(data.data(), data.data() + data.size())));
 }

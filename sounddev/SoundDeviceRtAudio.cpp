@@ -31,17 +31,17 @@ static mpt::ustring RtAudioApiToString(RtAudio::Api api)
 	mpt::ustring result;
 	switch(api)
 	{
-	case RtAudio::UNSPECIFIED: result = MPT_USTRING("UNSPECIFIED"); break;
-	case RtAudio::LINUX_ALSA: result = MPT_USTRING("LINUX_ALSA"); break;
-	case RtAudio::LINUX_PULSE: result = MPT_USTRING("LINUX_PULSE"); break;
-	case RtAudio::LINUX_OSS: result = MPT_USTRING("LINUX_OSS"); break;
-	case RtAudio::UNIX_JACK: result = MPT_USTRING("UNIX_JACK"); break;
-	case RtAudio::MACOSX_CORE: result = MPT_USTRING("MACOSX_CORE"); break;
-	case RtAudio::WINDOWS_WASAPI: result = MPT_USTRING("WINDOWS_WASAPI"); break;
-	case RtAudio::WINDOWS_ASIO: result = MPT_USTRING("WINDOWS_ASIO"); break;
-	case RtAudio::WINDOWS_DS: result = MPT_USTRING("WINDOWS_DS"); break;
-	case RtAudio::RTAUDIO_DUMMY: result = MPT_USTRING("RTAUDIO_DUMMY"); break;
-	default: result = MPT_USTRING(""); break;
+	case RtAudio::UNSPECIFIED: result = U_("UNSPECIFIED"); break;
+	case RtAudio::LINUX_ALSA: result = U_("LINUX_ALSA"); break;
+	case RtAudio::LINUX_PULSE: result = U_("LINUX_PULSE"); break;
+	case RtAudio::LINUX_OSS: result = U_("LINUX_OSS"); break;
+	case RtAudio::UNIX_JACK: result = U_("UNIX_JACK"); break;
+	case RtAudio::MACOSX_CORE: result = U_("MACOSX_CORE"); break;
+	case RtAudio::WINDOWS_WASAPI: result = U_("WINDOWS_WASAPI"); break;
+	case RtAudio::WINDOWS_ASIO: result = U_("WINDOWS_ASIO"); break;
+	case RtAudio::WINDOWS_DS: result = U_("WINDOWS_DS"); break;
+	case RtAudio::RTAUDIO_DUMMY: result = U_("RTAUDIO_DUMMY"); break;
+	default: result = U_(""); break;
 	}
 	return result;
 }
@@ -52,17 +52,17 @@ static mpt::ustring RtAudioApiToDescription(RtAudio::Api api)
 	mpt::ustring result;
 	switch(api)
 	{
-	case RtAudio::UNSPECIFIED: result = MPT_USTRING("default"); break;
-	case RtAudio::LINUX_ALSA: result = MPT_USTRING("ALSA"); break;
-	case RtAudio::LINUX_PULSE: result = MPT_USTRING("PulseAudio"); break;
-	case RtAudio::LINUX_OSS: result = MPT_USTRING("OSS"); break;
-	case RtAudio::UNIX_JACK: result = MPT_USTRING("Jack"); break;
-	case RtAudio::MACOSX_CORE: result = MPT_USTRING("CoreAudio"); break;
-	case RtAudio::WINDOWS_WASAPI: result = MPT_USTRING("WASAPI"); break;
-	case RtAudio::WINDOWS_ASIO: result = MPT_USTRING("ASIO"); break;
-	case RtAudio::WINDOWS_DS: result = MPT_USTRING("DirectSound"); break;
-	case RtAudio::RTAUDIO_DUMMY: result = MPT_USTRING("Dummy"); break;
-	default: result = MPT_USTRING(""); break;
+	case RtAudio::UNSPECIFIED: result = U_("default"); break;
+	case RtAudio::LINUX_ALSA: result = U_("ALSA"); break;
+	case RtAudio::LINUX_PULSE: result = U_("PulseAudio"); break;
+	case RtAudio::LINUX_OSS: result = U_("OSS"); break;
+	case RtAudio::UNIX_JACK: result = U_("Jack"); break;
+	case RtAudio::MACOSX_CORE: result = U_("CoreAudio"); break;
+	case RtAudio::WINDOWS_WASAPI: result = U_("WASAPI"); break;
+	case RtAudio::WINDOWS_ASIO: result = U_("ASIO"); break;
+	case RtAudio::WINDOWS_DS: result = U_("DirectSound"); break;
+	case RtAudio::RTAUDIO_DUMMY: result = U_("Dummy"); break;
+	default: result = U_(""); break;
 	}
 	return result;
 }
@@ -71,17 +71,17 @@ static mpt::ustring RtAudioApiToDescription(RtAudio::Api api)
 static RtAudio::Api StringToRtAudioApi(const mpt::ustring &str)
 {
 	RtAudio::Api result = RtAudio::RTAUDIO_DUMMY;
-	if(str == MPT_USTRING("")) result = RtAudio::RTAUDIO_DUMMY;
-	if(str == MPT_USTRING("UNSPECIFIED")) result = RtAudio::UNSPECIFIED;
-	if(str == MPT_USTRING("LINUX_ALSA")) result = RtAudio::LINUX_ALSA;
-	if(str == MPT_USTRING("LINUX_PULSE")) result = RtAudio::LINUX_PULSE;
-	if(str == MPT_USTRING("LINUX_OSS")) result = RtAudio::LINUX_OSS;
-	if(str == MPT_USTRING("UNIX_JACK")) result = RtAudio::UNIX_JACK;
-	if(str == MPT_USTRING("MACOSX_CORE")) result = RtAudio::MACOSX_CORE;
-	if(str == MPT_USTRING("WINDOWS_WASAPI")) result = RtAudio::WINDOWS_WASAPI;
-	if(str == MPT_USTRING("WINDOWS_ASIO")) result = RtAudio::WINDOWS_ASIO;
-	if(str == MPT_USTRING("WINDOWS_DS")) result = RtAudio::WINDOWS_DS;
-	if(str == MPT_USTRING("RTAUDIO_DUMMY")) result = RtAudio::RTAUDIO_DUMMY;
+	if(str == U_("")) result = RtAudio::RTAUDIO_DUMMY;
+	if(str == U_("UNSPECIFIED")) result = RtAudio::UNSPECIFIED;
+	if(str == U_("LINUX_ALSA")) result = RtAudio::LINUX_ALSA;
+	if(str == U_("LINUX_PULSE")) result = RtAudio::LINUX_PULSE;
+	if(str == U_("LINUX_OSS")) result = RtAudio::LINUX_OSS;
+	if(str == U_("UNIX_JACK")) result = RtAudio::UNIX_JACK;
+	if(str == U_("MACOSX_CORE")) result = RtAudio::MACOSX_CORE;
+	if(str == U_("WINDOWS_WASAPI")) result = RtAudio::WINDOWS_WASAPI;
+	if(str == U_("WINDOWS_ASIO")) result = RtAudio::WINDOWS_ASIO;
+	if(str == U_("WINDOWS_DS")) result = RtAudio::WINDOWS_DS;
+	if(str == U_("RTAUDIO_DUMMY")) result = RtAudio::RTAUDIO_DUMMY;
 	return result;
 }
 
@@ -337,7 +337,7 @@ SoundDevice::Caps CRtAudioDevice::InternalGetDeviceCaps()
 	caps.HasNamedInputSources = true;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = false;
-	caps.ExclusiveModeDescription = MPT_USTRING("Exclusive Mode");
+	caps.ExclusiveModeDescription = U_("Exclusive Mode");
 	return caps;
 }
 
@@ -361,17 +361,17 @@ SoundDevice::DynamicCaps CRtAudioDevice::GetDeviceDynamicCaps(const std::vector<
 	caps.inputSourceNames.clear();
 	for(unsigned int channel = 0; channel < rtinfo.inputChannels; ++channel)
 	{
-		caps.inputSourceNames.push_back(std::make_pair(channel, MPT_USTRING("Channel ") + mpt::ufmt::dec(channel + 1)));
+		caps.inputSourceNames.push_back(std::make_pair(channel, U_("Channel ") + mpt::ufmt::dec(channel + 1)));
 	}
 	caps.supportedSampleRates.insert(caps.supportedSampleRates.end(), rtinfo.sampleRates.begin(), rtinfo.sampleRates.end());
 	caps.supportedExclusiveSampleRates.insert(caps.supportedExclusiveSampleRates.end(), rtinfo.sampleRates.begin(), rtinfo.sampleRates.end());
 	for(unsigned int channel = 0; channel < rtinfo.outputChannels; ++channel)
 	{
-		caps.channelNames.push_back(mpt::format(MPT_USTRING("Output Channel %1"))(channel));
+		caps.channelNames.push_back(mpt::format(U_("Output Channel %1"))(channel));
 	}
 	for(unsigned int channel = 0; channel < rtinfo.inputChannels; ++channel)
 	{
-		caps.inputSourceNames.push_back(std::make_pair(static_cast<uint32>(channel), mpt::format(MPT_USTRING("Input Channel %1"))(channel)));
+		caps.inputSourceNames.push_back(std::make_pair(static_cast<uint32>(channel), mpt::format(U_("Input Channel %1"))(channel)));
 	}
 	return caps;
 }
@@ -425,7 +425,7 @@ void CRtAudioDevice::SendError(const RtAudioError &e)
 
 RtAudio::Api CRtAudioDevice::GetApi(SoundDevice::Info info)
 {
-	std::vector<mpt::ustring> apidev = mpt::String::Split<mpt::ustring>(info.internalID, MPT_USTRING(","));
+	std::vector<mpt::ustring> apidev = mpt::String::Split<mpt::ustring>(info.internalID, U_(","));
 	if(apidev.size() != 2)
 	{
 		return RtAudio::UNSPECIFIED;
@@ -436,7 +436,7 @@ RtAudio::Api CRtAudioDevice::GetApi(SoundDevice::Info info)
 
 unsigned int CRtAudioDevice::GetDevice(SoundDevice::Info info)
 {
-	std::vector<mpt::ustring> apidev = mpt::String::Split<mpt::ustring>(info.internalID, MPT_USTRING(","));
+	std::vector<mpt::ustring> apidev = mpt::String::Split<mpt::ustring>(info.internalID, U_(","));
 	if(apidev.size() != 2)
 	{
 		return 0;
@@ -478,14 +478,14 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 					continue;
 				}
 				SoundDevice::Info info = SoundDevice::Info();
-				info.type = MPT_USTRING("RtAudio") + MPT_USTRING("-") + RtAudioApiToString(rtaudio.getCurrentApi());
+				info.type = U_("RtAudio") + U_("-") + RtAudioApiToString(rtaudio.getCurrentApi());
 				std::vector<mpt::ustring> apidev;
 				apidev.push_back(RtAudioApiToString(rtaudio.getCurrentApi()));
 				apidev.push_back(mpt::ufmt::val(device));
-				info.internalID = mpt::String::Combine(apidev, MPT_USTRING(","));
+				info.internalID = mpt::String::Combine(apidev, U_(","));
 				info.name = mpt::ToUnicode(mpt::CharsetUTF8, rtinfo.name);
 				info.apiName = RtAudioApiToDescription(rtaudio.getCurrentApi());
-				info.apiPath.push_back(MPT_USTRING("RtAudio"));
+				info.apiPath.push_back(U_("RtAudio"));
 				info.isDefault = rtinfo.isDefaultOutput;
 				info.useNameAsIdentifier = true;
 				devices.push_back(info);

@@ -115,7 +115,7 @@ BOOL CModTypeDlg::OnInitDialog()
 
 CString CModTypeDlg::FormatVersionNumber(Version version)
 {
-	return mpt::ToCString(version.ToUString() + (version.IsTestVersion() ? MPT_USTRING(" (test build)") : MPT_USTRING("")));
+	return mpt::ToCString(version.ToUString() + (version.IsTestVersion() ? U_(" (test build)") : U_("")));
 }
 
 

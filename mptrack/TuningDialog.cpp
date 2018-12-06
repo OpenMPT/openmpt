@@ -648,15 +648,15 @@ void CTuningDialog::OnBnClickedButtonExport()
 		mpt::PathString fileName;
 		if(!m_TuningCollectionsFilenames[pTC].empty())
 		{
-			fileName = m_TuningCollectionsFilenames[pTC] + MPT_PATHSTRING(" - ");
+			fileName = m_TuningCollectionsFilenames[pTC] + P_(" - ");
 		}
 		if(!m_TuningCollectionsNames[pTC].IsEmpty())
 		{
 			mpt::PathString name = mpt::PathString::FromUnicode(mpt::ToUnicode(m_TuningCollectionsNames[pTC]));
 			SanitizeFilename(name);
-			fileName += name + MPT_PATHSTRING(" - ");
+			fileName += name + P_(" - ");
 		}
-		fileName += MPT_PATHSTRING("%tuning_number% - %tuning_name%");
+		fileName += P_("%tuning_number% - %tuning_name%");
 
 		int filterIndex = 0;
 		FileDialog dlg = SaveFileDialog()
@@ -681,15 +681,15 @@ void CTuningDialog::OnBnClickedButtonExport()
 			mpt::ustring tuningName = mpt::ToUnicode(TuningCharset, tuning.GetName());
 			if(tuningName.empty())
 			{
-				tuningName = MPT_USTRING("untitled");
+				tuningName = U_("untitled");
 			}
 			mpt::ustring fileNameW = fileName.ToUnicode();
 			mpt::ustring numberW = mpt::ufmt::fmt(i + 1, numberFmt);
 			SanitizeFilename(numberW);
-			fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%tuning_number%"), numberW);
+			fileNameW = mpt::String::Replace(fileNameW, U_("%tuning_number%"), numberW);
 			mpt::ustring nameW = mpt::ToUnicode(tuningName);
 			SanitizeFilename(nameW);
-			fileNameW = mpt::String::Replace(fileNameW, MPT_USTRING("%tuning_name%"), nameW);
+			fileNameW = mpt::String::Replace(fileNameW, U_("%tuning_name%"), nameW);
 			fileName = mpt::PathString::FromUnicode(fileNameW);
 			mpt::SafeOutputFile fout(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 			if(tuning.Serialize(fout) != Tuning::SerializationResult::Success)
@@ -777,7 +777,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 		const mpt::ustring fileNameExt = (fileName + fileExt).ToUnicode();
 
 		const bool bIsTun = (mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuning::s_FileExtension)) == 0);
-		const bool bIsScl = (mpt::PathString::CompareNoCase(fileExt, MPT_PATHSTRING(".scl")) == 0);
+		const bool bIsScl = (mpt::PathString::CompareNoCase(fileExt, P_(".scl")) == 0);
 		const bool bIsTc = (mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)) == 0);
 
 		mpt::ifstream fin(file, std::ios::binary);
@@ -812,14 +812,14 @@ void CTuningDialog::OnBnClickedButtonImport()
 			{ // success
 				if(pTC->GetNumTunings() == 1)
 				{
-					Reporting::Message(LogInformation, MPT_USTRING("- Tuning Collection with a Tuning file extension (.tun) detected. It only contains a single Tuning, importing the file as a Tuning.\n"), this);
+					Reporting::Message(LogInformation, U_("- Tuning Collection with a Tuning file extension (.tun) detected. It only contains a single Tuning, importing the file as a Tuning.\n"), this);
 					pT = new CTuning(pTC->GetTuning(0));
 					delete pTC;
 					pTC = nullptr;
 					// ok
 				} else
 				{
-					Reporting::Message(LogNotification, MPT_USTRING("- Tuning Collection with a Tuning file extension (.tun) detected. It only contains multiple Tunings, importing the file as a Tuning Collection.\n"), this);
+					Reporting::Message(LogNotification, U_("- Tuning Collection with a Tuning file extension (.tun) detected. It only contains multiple Tunings, importing the file as a Tuning Collection.\n"), this);
 					// ok
 				}
 			} else
@@ -880,10 +880,10 @@ void CTuningDialog::OnBnClickedButtonImport()
 				pT = nullptr;
 				if(tc.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 				{
-					sLoadReport += mpt::format(MPT_USTRING("- Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n"))(fileNameExt, CTuningCollection::s_nMaxTuningCount);
+					sLoadReport += mpt::format(U_("- Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n"))(fileNameExt, CTuningCollection::s_nMaxTuningCount);
 				} else 
 				{
-					sLoadReport += mpt::format(MPT_USTRING("- Unable to import file \"%1\": unknown reason.\n"))(fileNameExt);
+					sLoadReport += mpt::format(U_("- Unable to import file \"%1\": unknown reason.\n"))(fileNameExt);
 				}
 			} else
 			{
@@ -903,7 +903,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 		if(!pT && !pTC)
 		{
-			sLoadReport += mpt::format(MPT_USTRING("- Unable to load \"%1\": unrecognized file format.\n"))(fileNameExt);
+			sLoadReport += mpt::format(U_("- Unable to load \"%1\": unrecognized file format.\n"))(fileNameExt);
 		}
 	}
 
@@ -1686,7 +1686,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		tuningName = name;
 	} else
 	{
-		tuningName = mpt::format(MPT_USTRING("%1 notes: %2:%3"))(nNotes - 1, mpt::ufmt::fix(groupRatio), 1);
+		tuningName = mpt::format(U_("%1 notes: %2:%3"))(nNotes - 1, mpt::ufmt::fix(groupRatio), 1);
 	}
 
 	CTuning* pT = CTuning::CreateGroupGeometric(mpt::ToCharset(mpt::CharsetLocale, tuningName), fRatios, groupRatio, 15);

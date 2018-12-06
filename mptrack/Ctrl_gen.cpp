@@ -273,12 +273,12 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		mpt::ustring modType;
 		switch(m_sndFile.GetType())
 		{
-		case MOD_TYPE_MOD:	modType = MPT_USTRING("MOD (ProTracker)"); break;
-		case MOD_TYPE_S3M:	modType = MPT_USTRING("S3M (ScreamTracker)"); break;
-		case MOD_TYPE_XM:	modType = MPT_USTRING("XM (FastTracker 2)"); break;
-		case MOD_TYPE_IT:	modType = MPT_USTRING("IT (Impulse Tracker)"); break;
-		case MOD_TYPE_MPT:	modType = MPT_USTRING("MPTM (OpenMPT)"); break;
-		default:			modType = mpt::format(MPT_USTRING("%1 (%2)"))(mpt::ToUpperCase(m_sndFile.m_modFormat.type), m_sndFile.m_modFormat.formatName); break;
+		case MOD_TYPE_MOD:	modType = U_("MOD (ProTracker)"); break;
+		case MOD_TYPE_S3M:	modType = U_("S3M (ScreamTracker)"); break;
+		case MOD_TYPE_XM:	modType = U_("XM (FastTracker 2)"); break;
+		case MOD_TYPE_IT:	modType = U_("IT (Impulse Tracker)"); break;
+		case MOD_TYPE_MPT:	modType = U_("MPTM (OpenMPT)"); break;
+		default:			modType = mpt::format(U_("%1 (%2)"))(mpt::ToUpperCase(m_sndFile.m_modFormat.type), m_sndFile.m_modFormat.formatName); break;
 		}
 		CString s;
 		s.Format(_T("%s, %u channel%s"), mpt::ToCString(modType).GetString(), m_sndFile.GetNumChannels(), (m_sndFile.GetNumChannels() != 1) ? _T("s") : _T(""));
