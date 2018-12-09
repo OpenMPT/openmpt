@@ -455,6 +455,23 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 			m_SndFile.SetMixLevels(modType == MOD_TYPE_XM ? mixLevelsCompatibleFT2 : mixLevelsCompatible);
 	}
 
+	// Check for extended MIDI macros
+	if(modType == MOD_TYPE_IT)
+	{
+		for(const auto &macro : m_SndFile.m_MidiCfg)
+		{
+			for(const auto c : macro)
+			{
+				if(c == 's')
+				{
+					foundHacks = true;
+					AddToLog("Found SysEx checksum variable in MIDI macro");
+					break;
+				}
+			}
+		}
+	}
+
 	if(autofix && foundHacks)
 		SetModified();
 

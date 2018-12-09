@@ -84,10 +84,16 @@ enum
 
 struct MIDIMacroConfigData
 {
+	typedef char Macro[MACRO_LENGTH];
 	// encoding is ASCII
-	char szMidiGlb[9][MACRO_LENGTH];       // Global MIDI macros
-	char szMidiSFXExt[16][MACRO_LENGTH];   // Parametric MIDI macros
-	char szMidiZXXExt[128][MACRO_LENGTH];  // Fixed MIDI macros
+	Macro szMidiGlb[9];      // Global MIDI macros
+	Macro szMidiSFXExt[16];  // Parametric MIDI macros
+	Macro szMidiZXXExt[128]; // Fixed MIDI macros
+
+	Macro *begin() { return std::begin(szMidiGlb); }
+	const Macro *begin() const { return std::begin(szMidiGlb); }
+	Macro *end() { return std::end(szMidiZXXExt); }
+	const Macro *end() const { return std::end(szMidiZXXExt); }
 };
 
 MPT_BINARY_STRUCT(MIDIMacroConfigData, 4896) // this is directly written to files, so the size must be correct!
@@ -105,7 +111,7 @@ public:
 
 	// Create a new macro
 protected:
-	void CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENGTH], ParameteredMacro macroType, int subType) const;
+	void CreateParameteredMacro(Macro &parameteredMacro, ParameteredMacro macroType, int subType) const;
 public:
 	void CreateParameteredMacro(uint32 macroIndex, ParameteredMacro macroType, int subType = 0)
 	{
@@ -113,13 +119,13 @@ public:
 	}
 	std::string CreateParameteredMacro(ParameteredMacro macroType, int subType = 0) const
 	{
-		char parameteredMacro[MACRO_LENGTH];
+		Macro parameteredMacro;
 		CreateParameteredMacro(parameteredMacro, macroType, subType);
 		return std::string(parameteredMacro);
 	}
 
 protected:
-	void CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], FixedMacro macroType) const;
+	void CreateFixedMacro(Macro (&fixedMacros)[128], FixedMacro macroType) const;
 public:
 	void CreateFixedMacro(FixedMacro macroType)
 	{
@@ -163,10 +169,10 @@ public:
 protected:
 
 	// Helper function for FixMacroFormat()
-	void UpgradeMacroString(char *macro) const;
+	void UpgradeMacroString(Macro &macro) const;
 
 	// Remove blanks and other unwanted characters from macro strings for internal usage.
-	std::string GetSafeMacro(const char *macro) const;
+	std::string GetSafeMacro(const Macro &macro) const;
 
 };
 

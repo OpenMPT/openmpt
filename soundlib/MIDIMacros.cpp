@@ -54,7 +54,7 @@ FixedMacro MIDIMacroConfig::GetFixedMacroType() const
 		if(zxx != kZxxCustom)
 		{
 			// Prepare macro pattern to compare
-			char macros[128][MACRO_LENGTH];
+			Macro macros[128];
 			CreateFixedMacro(macros, zxx);
 
 			bool found = true;
@@ -73,7 +73,7 @@ FixedMacro MIDIMacroConfig::GetFixedMacroType() const
 }
 
 
-void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENGTH], ParameteredMacro macroType, int subType) const
+void MIDIMacroConfig::CreateParameteredMacro(Macro &parameteredMacro, ParameteredMacro macroType, int subType) const
 {
 	switch(macroType)
 	{
@@ -97,7 +97,7 @@ void MIDIMacroConfig::CreateParameteredMacro(char (&parameteredMacro)[MACRO_LENG
 
 
 // Create Zxx (Z80 - ZFF) from preset
-void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], FixedMacro macroType) const
+void MIDIMacroConfig::CreateFixedMacro(Macro (&fixedMacros)[128], FixedMacro macroType) const
 {
 	for(uint32 i = 0; i < 128; i++)
 	{
@@ -145,19 +145,9 @@ void MIDIMacroConfig::CreateFixedMacro(char (&fixedMacros)[128][MACRO_LENGTH], F
 
 bool MIDIMacroConfig::operator== (const MIDIMacroConfig &other) const
 {
-	for(uint32 i = 0; i < CountOf(szMidiGlb); i++)
+	for(auto left = begin(), right = other.begin(); left != end(); left++, right++)
 	{
-		if(strncmp(szMidiGlb[i], other.szMidiGlb[i], MACRO_LENGTH))
-			return false;
-	}
-	for(uint32 i = 0; i < CountOf(szMidiSFXExt); i++)
-	{
-		if(strncmp(szMidiSFXExt[i], other.szMidiSFXExt[i], MACRO_LENGTH))
-			return false;
-	}
-	for(uint32 i = 0; i < CountOf(szMidiZXXExt); i++)
-	{
-		if(strncmp(szMidiZXXExt[i], other.szMidiZXXExt[i], MACRO_LENGTH))
+		if(strncmp(*left, *right, MACRO_LENGTH))
 			return false;
 	}
 	return true;
@@ -357,15 +347,7 @@ void MIDIMacroConfig::ClearZxxMacros()
 // Sanitize all macro config strings.
 void MIDIMacroConfig::Sanitize()
 {
-	for(auto &macro : szMidiGlb)
-	{
-		mpt::String::FixNullString(macro);
-	}
-	for(auto &macro : szMidiSFXExt)
-	{
-		mpt::String::FixNullString(macro);
-	}
-	for(auto &macro : szMidiZXXExt)
+	for(auto &macro : *this)
 	{
 		mpt::String::FixNullString(macro);
 	}
@@ -373,7 +355,7 @@ void MIDIMacroConfig::Sanitize()
 
 
 // Helper function for UpgradeMacros()
-void MIDIMacroConfig::UpgradeMacroString(char *macro) const
+void MIDIMacroConfig::UpgradeMacroString(Macro &macro) const
 {
 	for(uint32 i = 0; i < MACRO_LENGTH; i++)
 	{
@@ -394,11 +376,7 @@ void MIDIMacroConfig::UpgradeMacroString(char *macro) const
 // Fix old-format (not conforming to IT's MIDI macro definitions) MIDI config strings.
 void MIDIMacroConfig::UpgradeMacros()
 {
-	for(auto &macro : szMidiSFXExt)
-	{
-		UpgradeMacroString(macro);
-	}
-	for(auto &macro : szMidiZXXExt)
+	for(auto &macro : *this)
 	{
 		UpgradeMacroString(macro);
 	}
@@ -406,7 +384,7 @@ void MIDIMacroConfig::UpgradeMacros()
 
 
 // Normalize by removing blanks and other unwanted characters from macro strings for internal usage.
-std::string MIDIMacroConfig::GetSafeMacro(const char *macro) const
+std::string MIDIMacroConfig::GetSafeMacro(const Macro &macro) const
 {
 	std::string sanitizedMacro = macro;
 
