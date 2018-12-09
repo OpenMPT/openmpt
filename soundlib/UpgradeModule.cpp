@@ -21,7 +21,6 @@ struct UpgradePatternData
 {
 	UpgradePatternData(CSoundFile &sf)
 		: sndFile(sf)
-		, chn(0)
 		, compatPlay(sf.m_playBehaviour[MSF_COMPATIBLE_PLAY]) { }
 
 	void operator() (ModCommand &m)
@@ -222,7 +221,7 @@ struct UpgradePatternData
 	}
 
 	const CSoundFile &sndFile;
-	CHANNELINDEX chn;
+	CHANNELINDEX chn = 0;
 	const bool compatPlay;
 };
 
@@ -336,14 +335,14 @@ void CSoundFile::UpgradeModule()
 	if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 01))
 	{
 		// Convert ANSI plugin path names to UTF-8 (irrelevant in probably 99% of all cases anyway, I think I've never seen a VST plugin with a non-ASCII file name)
-		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+		for(auto &plugin : m_MixPlugins)
 		{
 #if defined(MODPLUG_TRACKER)
-			const std::string name = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, m_MixPlugins[i].Info.szLibraryName);
+			const std::string name = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, plugin.Info.szLibraryName);
 #else
-			const std::string name = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetWindows1252, m_MixPlugins[i].Info.szLibraryName);
+			const std::string name = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetWindows1252, plugin.Info.szLibraryName);
 #endif
-			mpt::String::Copy(m_MixPlugins[i].Info.szLibraryName, name);
+			mpt::String::Copy(plugin.Info.szLibraryName, name);
 		}
 	}
 #endif // NO_PLUGINS
@@ -369,9 +368,9 @@ void CSoundFile::UpgradeModule()
 			if(Instruments[i] != nullptr && Instruments[i]->nVolSwing != 0 && Instruments[i]->nMidiChannel != MidiNoChannel)
 			{
 				bool hasSample = false;
-				for(size_t k = 0; k < CountOf(Instruments[k]->Keyboard); k++)
+				for(auto smp : Instruments[i]->Keyboard)
 				{
-					if(Instruments[i]->Keyboard[k] != 0)
+					if(smp != 0)
 					{
 						hasSample = true;
 						break;
@@ -611,7 +610,22 @@ void CSoundFile::UpgradeModule()
 		// Frequency slides were always in Hz rather than periods in this version range.
 		m_playBehaviour.set(kHertzInLinearMode);
 	}
-}
 
+	if(m_playBehaviour[kITEnvelopePositionHandling]
+		&& m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 23, 01, 02) && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 28, 00, 43))
+	{
+		// Bug that effectively clamped the release node to the sustain end
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
+		{
+			if(Instruments[i]->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
+				&& Instruments[i]->VolEnv.dwFlags[ENV_SUSTAIN]
+				&& Instruments[i]->VolEnv.nReleaseNode > Instruments[i]->VolEnv.nSustainEnd)
+			{
+				m_playBehaviour.set(kReleaseNodePastSustainBug);
+				break;
+			}
+		}
+	}
+}
 
 OPENMPT_NAMESPACE_END
