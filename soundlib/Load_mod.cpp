@@ -661,6 +661,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 
 	LimitMax(m_nChannels, MAX_BASECHANNELS);
 
+	bool hasRepLen0 = false;
 	// Startrekker 8 channel mod (needs special treatment, see below)
 	const bool isFLT8 = IsMagic(magic, "FLT8") || IsMagic(magic, "EXO8");
 	// Only apply VBlank tests to M.K. (ProTracker) modules.
@@ -688,6 +689,10 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		} else if(Samples[smp].nLength > 65535)
 		{
 			isNoiseTracker = false;
+		}
+		if(sampleHeader.length && !sampleHeader.loopLength)
+		{
+			hasRepLen0 = true;
 		}
 	}
 	// If there is too much binary garbage in the sample headers, reject the file.
@@ -911,7 +916,7 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	if(onlyAmigaNotes && (IsMagic(magic, "M.K.") || IsMagic(magic, "M!K!") || IsMagic(magic, "PATT")))
+	if(onlyAmigaNotes && !hasRepLen0 && (IsMagic(magic, "M.K.") || IsMagic(magic, "M!K!") || IsMagic(magic, "PATT")))
 	{
 		// M.K. files that don't exceed the Amiga note limit (fixes mod.mothergoose)
 		m_SongFlags.set(SONG_AMIGALIMITS);
