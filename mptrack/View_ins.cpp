@@ -30,10 +30,12 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-#define ENV_ZOOM				4.0f
-#define ENV_MIN_ZOOM			2.0f
-#define ENV_MAX_ZOOM			256.0f
+namespace
+{
+	const int ENV_POINT_SIZE = 4;
+	const float ENV_MIN_ZOOM = 2.0f;
+	const float ENV_MAX_ZOOM = 256.0f;
+}
 
 
 // Non-client toolbar
@@ -142,19 +144,6 @@ END_MESSAGE_MAP()
 // CViewInstrument operations
 
 CViewInstrument::CViewInstrument()
-	: m_nInstrument(1)
-	, m_nEnv(ENV_VOLUME)
-	, m_dwStatus(0)
-	, m_nBtnMouseOver(0xFFFF)
-
-	, m_bGrid(true)
-	, m_bGridForceRedraw(false)
-	, m_GridSpeed(-1)
-	, m_GridScrollPos(-1)
-
-	, m_nDragItem(1)
-	, m_fZoom(ENV_ZOOM)
-	, m_envPointSize(4)
 {
 	EnableActiveAccessibility();
 	m_rcClient.bottom = 2;
@@ -171,8 +160,8 @@ void CViewInstrument::OnInitialUpdate()
 {
 	CModScrollView::OnInitialUpdate();
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
-	m_fZoom = (ENV_ZOOM * m_nDPIx) / 96.0f;
-	m_envPointSize = Util::ScalePixels(4, m_hWnd);
+	m_zoom = (ENV_POINT_SIZE * m_nDPIx) / 96.0f;
+	m_envPointSize = Util::ScalePixels(ENV_POINT_SIZE, m_hWnd);
 	UpdateScrollSize();
 	UpdateNcButtonState();
 }
@@ -186,11 +175,11 @@ void CViewInstrument::UpdateScrollSize()
 	if (pModDoc)
 	{
 		SIZE sizeTotal, sizePage, sizeLine;
-		uint32 ntickmax = EnvGetTick(EnvGetLastPoint());
+		uint32 maxTick = EnvGetTick(EnvGetLastPoint());
 
-		sizeTotal.cx = (int)((ntickmax + 2) * m_fZoom);
+		sizeTotal.cx = mpt::saturate_round<int>((maxTick + 2) * m_zoom);
 		sizeTotal.cy = 1;
-		sizeLine.cx = (int)m_fZoom;
+		sizeLine.cx = mpt::saturate_round<int>(m_zoom);
 		sizeLine.cy = 2;
 		sizePage.cx = sizeLine.cx * 4;
 		sizePage.cy = sizeLine.cy;
@@ -669,7 +658,7 @@ uint32 CViewInstrument::DragItemToEnvPoint() const
 
 int CViewInstrument::TickToScreen(int tick) const
 {
-	return static_cast<int>((tick * m_fZoom) - m_nScrollPosX + m_envPointSize);
+	return static_cast<int>((tick * m_zoom) - m_nScrollPosX + m_envPointSize);
 }
 
 int CViewInstrument::PointToScreen(int nPoint) const
@@ -682,7 +671,7 @@ int CViewInstrument::ScreenToTick(int x) const
 {
 	int offset = m_nScrollPosX + x;
 	if(offset < m_envPointSize) return 0;
-	return mpt::saturate_round<int>((offset - m_envPointSize) / m_fZoom);
+	return mpt::saturate_round<int>((offset - m_envPointSize) / m_zoom);
 }
 
 
@@ -778,8 +767,8 @@ void CViewInstrument::UpdateNcButtonState()
 		case ID_ENVELOPE_FILTER:	if (!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED; else
 									if (EnvGetFilterEnv()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_VIEWGRID:	if (m_bGrid) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_ZOOM_IN:	if (m_fZoom >= ENV_MAX_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
-		case ID_ENVELOPE_ZOOM_OUT:	if (m_fZoom <= ENV_MIN_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
+		case ID_ENVELOPE_ZOOM_IN:	if (m_zoom >= ENV_MAX_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
+		case ID_ENVELOPE_ZOOM_OUT:	if (m_zoom <= ENV_MIN_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
 		case ID_ENVELOPE_LOAD:
 		case ID_ENVELOPE_SAVE:		if (GetInstrumentPtr() == nullptr) dwStyle |= NCBTNS_DISABLED; break;
 		}
@@ -842,12 +831,12 @@ void CViewInstrument::DrawGrid(CDC *pDC, uint32 speed)
 		// create a memory based dc for drawing the grid
 		m_dcGrid.CreateCompatibleDC(pDC);
 		m_bmpGrid.CreateCompatibleBitmap(pDC,  m_rcClient.Width(), m_rcClient.Height());
-		m_pbmpOldGrid = m_dcGrid.SelectObject(&m_bmpGrid);
+		m_pbmpOldGrid = *m_dcGrid.SelectObject(&m_bmpGrid);
 
 		// Do draw
 		const int width = m_rcClient.Width();
 		int rowsPerBeat = 1, rowsPerMeasure = 1;
-		CModDoc *modDoc = GetDocument();
+		const CModDoc *modDoc = GetDocument();
 		if(modDoc != nullptr)
 		{
 			rowsPerBeat = modDoc->GetSoundFile().m_nDefaultRowsPerBeat;
@@ -857,8 +846,8 @@ void CViewInstrument::DrawGrid(CDC *pDC, uint32 speed)
 		// Paint it black!
 		m_dcGrid.FillSolidRect(&m_rcClient, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKENV]);
 
-		uint32 startTick = (ScreenToTick(0) / speed) * speed;
-		uint32 endTick = (ScreenToTick(width) / speed) * speed;
+		const uint32 startTick = (ScreenToTick(0) / speed) * speed;
+		const uint32 endTick = (ScreenToTick(width) / speed) * speed;
 
 		for (uint32 tick = startTick, row = startTick / speed; tick <= endTick; tick += speed, row++)
 		{
@@ -907,7 +896,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		m_bmpMemMain.CreateCompatibleBitmap(pDC, m_rcClient.Width(), m_rcClient.Height());
 	}
 	m_rcOldClient = m_rcClient;
-	oldBitmap = (CBitmap *)m_dcMemMain.SelectObject(&m_bmpMemMain);
+	oldBitmap = *m_dcMemMain.SelectObject(&m_bmpMemMain);
 
 	oldpen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
 	if (m_bGrid)
@@ -1451,12 +1440,12 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 			if (pt.x <= 0)
 			{
 				UpdateScrollSize();
-				OnScrollBy(CSize(pt.x - (int)m_fZoom, 0), TRUE);
+				OnScrollBy(CSize(pt.x - (int)m_zoom, 0), TRUE);
 			}
 			if (pt.x >= m_rcClient.right-1)
 			{
 				UpdateScrollSize();
-				OnScrollBy(CSize((int)m_fZoom + pt.x - m_rcClient.right, 0), TRUE);
+				OnScrollBy(CSize((int)m_zoom + pt.x - m_rcClient.right, 0), TRUE);
 			}
 			SetModified(InstrumentHint().Envelope(), true);
 			UpdateWindow(); //rewbs: TODO - optimisation here so we don't redraw whole view.
@@ -2309,10 +2298,9 @@ void CViewInstrument::OnEnvelopeScalePoints()
 }
 
 
-void CViewInstrument::EnvSetZoom(float fNewZoom)
+void CViewInstrument::EnvSetZoom(float newZoom)
 {
-	m_fZoom = fNewZoom;
-	Limit(m_fZoom, ENV_MIN_ZOOM, ENV_MAX_ZOOM);
+	m_zoom = Clamp(newZoom, ENV_MIN_ZOOM, ENV_MAX_ZOOM);
 	InvalidateRect(NULL, FALSE);
 	UpdateScrollSize();
 	UpdateNcButtonState();
@@ -2622,8 +2610,8 @@ BOOL CViewInstrument::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	if (nFlags == MK_CONTROL)
 	{
 		// Speed up zoom scrolling by some factor (might need some tuning).
-		const float speedUpFactor = std::max(1.0f, m_fZoom * 7.0f / ENV_MAX_ZOOM);
-		EnvSetZoom(m_fZoom + speedUpFactor * (zDelta / WHEEL_DELTA));
+		const float speedUpFactor = std::max(1.0f, m_zoom * 7.0f / ENV_MAX_ZOOM);
+		EnvSetZoom(m_zoom + speedUpFactor * (zDelta / WHEEL_DELTA));
 	}
 
 	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);

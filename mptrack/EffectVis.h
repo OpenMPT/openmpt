@@ -47,8 +47,9 @@ protected:
 	EffectInfo effectInfo;
 
 	CBitmap m_bGrid, m_bNodes, m_bPlayPos;
-	CBitmap *m_pbOldGrid, *m_pbOldNodes, *m_pbOldPlayPos;
+	HBITMAP m_pbOldGrid = nullptr, m_pbOldNodes = nullptr, m_pbOldPlayPos = nullptr;
 	CDC m_dcGrid, m_dcNodes, m_dcPlayPos;
+
 	void DrawNodes();
 	void DrawGrid();
 

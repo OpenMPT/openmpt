@@ -53,22 +53,22 @@ BOOL WelcomeDlg::OnInitDialog()
 		&& RegQueryValueEx(hkEnum, _T("VSTPluginsPath"), 0, &datatype, (LPBYTE)str, &datasize) == ERROR_SUCCESS)
 	{
 		mpt::String::SetNullTerminator(str);
-		vstPath = mpt::PathString::FromNative(str);
+		m_vstPath = mpt::PathString::FromNative(str);
 	} else if(SHGetSpecialFolderPath(0, str, CSIDL_PROGRAM_FILES, FALSE))
 	{
 		mpt::String::SetNullTerminator(str);
-		vstPath = mpt::PathString::FromNative(str) + P_("\\Steinberg\\VstPlugins\\");
-		if(!vstPath.IsDirectory())
+		m_vstPath = mpt::PathString::FromNative(str) + P_("\\Steinberg\\VstPlugins\\");
+		if(!m_vstPath.IsDirectory())
 		{
-			vstPath = mpt::PathString();
+			m_vstPath = mpt::PathString();
 		}
 	}
-	if(!vstPath.empty())
+	if(!m_vstPath.empty())
 	{
-		SetDlgItemText(IDC_EDIT1, vstPath.AsNative().c_str());
+		SetDlgItemText(IDC_EDIT1, m_vstPath.AsNative().c_str());
 		if(TrackerSettings::Instance().PathPlugins.GetDefaultDir().empty())
 		{
-			TrackerSettings::Instance().PathPlugins.SetDefaultDir(vstPath);
+			TrackerSettings::Instance().PathPlugins.SetDefaultDir(m_vstPath);
 		}
 	} else
 #endif
@@ -139,7 +139,7 @@ void WelcomeDlg::OnOptions()
 void WelcomeDlg::OnScanPlugins()
 {
 #ifndef NO_VST
-	CSelectPluginDlg::ScanPlugins(vstPath, this);
+	CSelectPluginDlg::ScanPlugins(m_vstPath, this);
 #endif
 }
 
@@ -171,6 +171,14 @@ void WelcomeDlg::OnOK()
 		CUpdateCheck::DoAutoUpdateCheck();
 	}
 	CMainFrame::GetMainFrame()->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);
+
+	DestroyWindow();
+}
+
+void WelcomeDlg::OnCancel()
+{
+	CDialog::OnCancel();
+	DestroyWindow();
 }
 
 OPENMPT_NAMESPACE_END

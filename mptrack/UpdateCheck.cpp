@@ -34,8 +34,6 @@ protected:
 	const CString &m_releaseDate;
 	const CString &m_releaseURL;
 	CFont m_boldFont;
-public:
-	bool ignoreVersion;
 
 public:
 	UpdateDialog(const CString &releaseVersion, const CString &releaseDate, const CString &releaseURL)
@@ -43,10 +41,9 @@ public:
 		, m_releaseVersion(releaseVersion)
 		, m_releaseDate(releaseDate)
 		, m_releaseURL(releaseURL)
-		, ignoreVersion(false)
 	{ }
 
-	BOOL OnInitDialog()
+	BOOL OnInitDialog() override
 	{
 		CDialog::OnInitDialog();
 
@@ -65,11 +62,11 @@ public:
 		return FALSE;
 	}
 
-	void OnClose()
+	void OnDestroy()
 	{
+		TrackerSettings::Instance().UpdateIgnoreVersion = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED ? m_releaseVersion : CString();
 		m_boldFont.DeleteObject();
-		CDialog::OnClose();
-		TrackerSettings::Instance().UpdateIgnoreVersion = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED ? m_releaseVersion : CString(_T(""));
+		CDialog::OnDestroy();
 	}
 
 	void OnClickURL(NMHDR * /*pNMHDR*/, LRESULT * /*pResult*/)
@@ -82,8 +79,8 @@ public:
 
 BEGIN_MESSAGE_MAP(UpdateDialog, CDialog)
 	ON_NOTIFY(NM_CLICK, IDC_SYSLINK1, &UpdateDialog::OnClickURL)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
-
 
 
 mpt::ustring CUpdateCheck::GetStatisticsUserInformation(bool shortText)

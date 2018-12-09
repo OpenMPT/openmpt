@@ -36,32 +36,32 @@ class CViewInstrument: public CModScrollView
 {
 protected:
 	CImageList m_bmpEnvBar;
-	POINT m_ptMenu;
+	CPoint m_ptMenu;
 	CRect m_rcClient, m_rcOldClient;
 
 	CBitmap m_bmpGrid;
 	CBitmap m_bmpMemMain;
-	CBitmap *m_pbmpOldGrid;
-	CBitmap *oldBitmap;
+	HBITMAP m_pbmpOldGrid = nullptr;
+	HBITMAP oldBitmap = nullptr;
 
-	EnvelopeType m_nEnv;
-	uint32 m_nDragItem, m_nBtnMouseOver;
-	DWORD m_dwStatus;
+	EnvelopeType m_nEnv = ENV_VOLUME;
+	uint32 m_nDragItem = 1, m_nBtnMouseOver = 0xFFFF;
+	DWORD m_dwStatus = 0;
 	DWORD m_NcButtonState[ENV_LEFTBAR_BUTTONS];
 
-	INSTRUMENTINDEX m_nInstrument;
+	INSTRUMENTINDEX m_nInstrument = 1;
 
 	CDC m_dcMemMain;
 	CDC m_dcGrid;
-	int m_GridScrollPos;
-	int m_GridSpeed;
+	int m_GridScrollPos = -1;
+	int m_GridSpeed = -1;
 
-	float m_fZoom;
-	int m_envPointSize;
+	float m_zoom = 4;
+	int m_envPointSize = 4;
 
-	bool m_bGrid : 1;
-	bool m_bGridForceRedraw : 1;
-	bool m_mouseMoveModified : 1;
+	bool m_bGrid = true;
+	bool m_bGridForceRedraw = false;
+	bool m_mouseMoveModified = false;
 
 	std::bitset<128> m_baPlayingNote;
 	std::array<uint32, MAX_CHANNELS> m_dwNotifyPos;
@@ -170,8 +170,8 @@ protected:
 	void UpdateIndicator(int tick, int val);
 	CString EnvValueToString(int tick, int val) const;
 
-	void OnEnvZoomIn() { EnvSetZoom(m_fZoom + 1); };
-	void OnEnvZoomOut() { EnvSetZoom(m_fZoom - 1); };
+	void OnEnvZoomIn() { EnvSetZoom(m_zoom + 1); };
+	void OnEnvZoomOut() { EnvSetZoom(m_zoom - 1); };
 	void EnvSetZoom(float fNewZoom);
 
 public:
@@ -179,8 +179,9 @@ public:
 	void OnDraw(CDC *) override;
 	void OnInitialUpdate() override;
 	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
-	LRESULT OnModViewMsg(WPARAM, LPARAM) override;
+	BOOL PreTranslateMessage(MSG *pMsg) override;
 	BOOL OnDragonDrop(BOOL, const DRAGONDROP *) override;
+	LRESULT OnModViewMsg(WPARAM, LPARAM) override;
 	LRESULT OnPlayerNotify(Notification *) override;
 	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override;
 	//}}AFX_VIRTUAL
@@ -237,7 +238,6 @@ protected:
 	afx_msg void OnEditRedo();
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
-	virtual BOOL PreTranslateMessage(MSG *pMsg);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
