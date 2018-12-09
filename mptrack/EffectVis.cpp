@@ -326,17 +326,17 @@ void CEffectVis::ShowVis(CDC *pDC)
 		// create a memory based dc for drawing the grid
 		m_dcGrid.CreateCompatibleDC(pDC);
 		m_bGrid.CreateCompatibleBitmap(pDC, m_rcDraw.Width(), m_rcDraw.Height());
-		m_pbOldGrid = m_dcGrid.SelectObject(&m_bGrid);
+		m_pbOldGrid = *m_dcGrid.SelectObject(&m_bGrid);
 
 		// create a memory based dc for drawing the nodes
 		m_dcNodes.CreateCompatibleDC(pDC);
 		m_bNodes.CreateCompatibleBitmap(pDC, m_rcDraw.Width(), m_rcDraw.Height());
-		m_pbOldNodes = m_dcNodes.SelectObject(&m_bNodes);
+		m_pbOldNodes = *m_dcNodes.SelectObject(&m_bNodes);
 
 		// create a memory based dc for drawing the nodes
 		m_dcPlayPos.CreateCompatibleDC(pDC);
 		m_bPlayPos.CreateCompatibleBitmap(pDC, m_rcDraw.Width(), m_rcDraw.Height());
-		m_pbOldPlayPos = m_dcPlayPos.SelectObject(&m_bPlayPos);
+		m_pbOldPlayPos = *m_dcPlayPos.SelectObject(&m_bPlayPos);
 
 		SetPlayCursor(m_nPattern, m_nOldPlayPos);
 		DrawGrid();
@@ -351,17 +351,16 @@ void CEffectVis::ShowVis(CDC *pDC)
 
 void CEffectVis::ShowVisImage(CDC *pDC)
 {
-	CDC memDC;
-	CBitmap memBitmap;
-	CBitmap* oldBitmap; // bitmap originally found in CMemDC
-
 	// to avoid flicker, establish a memory dc, draw to it
 	// and then BitBlt it to the destination "pDC"
+	CDC memDC;
 	memDC.CreateCompatibleDC(pDC);
 	if (!memDC)
 		return;
+
+	CBitmap memBitmap;
 	memBitmap.CreateCompatibleBitmap(pDC, m_rcDraw.Width(), m_rcDraw.Height());
-	oldBitmap = (CBitmap *)memDC.SelectObject(&memBitmap);
+	CBitmap *oldBitmap = memDC.SelectObject(&memBitmap);
 
 	// make sure we have the bitmaps
 	if (!m_dcGrid.m_hDC)
@@ -371,7 +370,7 @@ void CEffectVis::ShowVisImage(CDC *pDC)
 	if (!m_dcPlayPos.m_hDC)
 		return;
 
-	if (memDC.m_hDC != NULL)
+	if (memDC.m_hDC != nullptr)
 	{
 		// draw the grid
 		memDC.BitBlt(0, 0, m_rcDraw.Width(), m_rcDraw.Height(), &m_dcGrid, 0, 0, SRCCOPY);
@@ -417,10 +416,10 @@ void CEffectVis::DrawNodes()
 		COLORREF col = IsPcNote(row) ? RGB(0xFF, 0xFF, 0x00) : RGB(0xD0, 0xFF, 0xFF);
 		int x = RowToScreenX(row);
 		int y = RowToScreenY(row);
-		m_dcNodes.FillSolidRect(x - nodeSizeHalf, y - nodeSizeHalf, nodeSize, lineWidth, col);	// Top
-		m_dcNodes.FillSolidRect(x + nodeSizeHalf2, y - nodeSizeHalf, lineWidth, nodeSize, col);	// Right
-		m_dcNodes.FillSolidRect(x - nodeSizeHalf, y + nodeSizeHalf2, nodeSize, lineWidth, col);	// Bottom
-		m_dcNodes.FillSolidRect(x - nodeSizeHalf, y - nodeSizeHalf, lineWidth, nodeSize, col);	// Left
+		m_dcNodes.FillSolidRect(x - nodeSizeHalf, y - nodeSizeHalf, nodeSize, lineWidth, col);  // Top
+		m_dcNodes.FillSolidRect(x + nodeSizeHalf2, y - nodeSizeHalf, lineWidth, nodeSize, col); // Right
+		m_dcNodes.FillSolidRect(x - nodeSizeHalf, y + nodeSizeHalf2, nodeSize, lineWidth, col); // Bottom
+		m_dcNodes.FillSolidRect(x - nodeSizeHalf, y - nodeSizeHalf, lineWidth, nodeSize, col);  // Left
 	}
 
 }
@@ -493,10 +492,7 @@ void CEffectVis::DoClose()
 	m_bNodes.DeleteObject();
 	m_bPlayPos.DeleteObject();
 
-	if (m_hWnd)
-	{
-		DestroyWindow();
-	}
+	DestroyWindow();
 }
 
 
