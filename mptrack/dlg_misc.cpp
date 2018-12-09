@@ -601,6 +601,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kLegacyReleaseNode: desc = _T("Old volume envelope release node scaling behaviour"); break;
 		case kOPLBeatingOscillators: desc = _T("Beating OPL oscillators"); break;
 		case kST3OffsetWithoutInstrument: desc = _T("Notes without instrument use the previous note's sample offset"); break;
+		case kReleaseNodePastSustainBug: desc = _T("Broken release node after sustain end behaviour"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}
