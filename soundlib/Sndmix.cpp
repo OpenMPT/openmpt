@@ -1239,7 +1239,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel &chn, EnvelopeType envType
 
 		// IT compatiblity: OpenMPT processes the key-off flag earlier than IT. Grab the flag from the previous tick instead.
 		// Test case: EnvOffLength.it
-		if(insEnv.dwFlags[ENV_SUSTAIN] && !chn.dwOldFlags[CHN_KEYOFF] && (insEnv.nReleaseNode == ENV_RELEASE_NODE_UNSET || m_playBehaviour[kReleaseNodePastSustainBug]))
+		if(insEnv.dwFlags[ENV_SUSTAIN] && !chn.dwOldFlags[CHN_KEYOFF] && (chnEnv.nEnvValueAtReleaseJump == NOT_YET_RELEASED || m_playBehaviour[kReleaseNodePastSustainBug]))
 		{
 			// Envelope sustained
 			start = insEnv[insEnv.nSustainStart].tick;
