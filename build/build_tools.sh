@@ -57,14 +57,14 @@ echo "78817a9707c1a02e845fb38b3adcc5353b02d377" > include/genie/OpenMPT-version.
 
 
 
-unpack "premake" "build/externals/premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6"
+unpack "premake" "build/externals/premake-5.0.0-alpha13-src.zip" "premake-5.0.0-alpha13"
 
 cd include/premake
 
-make -f Bootstrap.mak linux
-#bin/release/premake5 test
-bin/release/premake5 embed --bytecode
-bin/release/premake5 --to=build/gmake.unix gmake --no-curl --no-zlib --no-luasocket
+#make -f Bootstrap.mak linux
+##bin/release/premake5 test
+#bin/release/premake5 embed --bytecode
+#bin/release/premake5 --to=build/gmake.unix gmake --no-curl --no-zlib --no-luasocket
 cd build/gmake.unix
 make
 cd ../..

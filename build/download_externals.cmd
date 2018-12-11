@@ -35,7 +35,7 @@ if "%MPT_DOWNLOAD%" == "yes" (
  call build\scriptlib\download.cmd "https://www.7-zip.org/a/7z1805.exe"                                                              "build\externals\7z1805.exe"      || goto error
 
  call build\scriptlib\download.cmd "https://github.com/bkaradzic/GENie/archive/78817a9707c1a02e845fb38b3adcc5353b02d377.zip"         "build\externals\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip"        || goto error
- call build\scriptlib\download.cmd "https://github.com/premake/premake-core/archive/2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip"    "build\externals\premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" || goto error
+ call build\scriptlib\download.cmd "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-src.zip" "build\externals\premake-5.0.0-alpha13-src.zip" || goto error
 
  call build\scriptlib\download.cmd "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"                                   "build\externals\WA5.55_SDK.exe"  || goto error
  call build\scriptlib\download.cmd "https://www.un4seen.com/files/xmp-sdk.zip"                                                       "build\externals\xmp-sdk.zip"     || goto error
@@ -51,7 +51,7 @@ powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hash
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue aba21883cd026a789395757f7dcc127d7d6372965693ddc3794c8adfc3a9675c255cedf2a87177729fa0b094e1bdb4de9d2e47555c61ddd6976c24d71cbd5e38 -filesize  422934 -filename build/externals/asiosdk2.3.zip || goto error
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue d93650059cf10faff343e28a5eda60a9e78c123574f1ff479ecea85a179912f3241a36734e9f54ca3041ebcf80b732a9d21a3433b0da6c48b95bed16677af0cb -filesize  685026 -filename build/externals/GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip || goto error
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856 -filesize 3509072 -filename build/externals/htmlhelp.exe || goto error
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue ec3e56e3fe452accafbb89096112119dc737913f4b533d2f19347ebe1d42099d80f0b6cd1a5b0b3bdb5e7c5cd68348613211f3e3d93493893c6143d15935b14f -filesize 5106004 -filename build/externals/premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip || goto error
+powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 406bd108bb16450ad34d49a0c8111bdfbed4efef4923ba3f1ee8c437ca9ea4e8b453c5a2d298ac69a79a22a9309a83403954d271d26f051f26dc5e7b5ac65b6f -filesize 5565797 -filename build/externals/premake-5.0.0-alpha13-src.zip || goto error
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5 -filesize  336166 -filename build/externals/WA5.55_SDK.exe || goto error
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue ddaea1ba4b3ead2b3c870652c6a2ce0a9bdab2f0d2f01030214959dd4ab9ca0f9d34c88c817a1a2847b3c39597215e0e3b749a0489a0e6ce806a4d7e0d44ef9b -filesize   28971 -filename build/externals/xmp-sdk.zip || goto error
 

@@ -67,15 +67,15 @@ echo "78817a9707c1a02e845fb38b3adcc5353b02d377" > include\genie\OpenMPT-version.
 
 
 
-call build\scriptlib\unpack.cmd "include\premake" "build\externals\premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6.zip" "premake-core-2e7ca5fb18acdbcd5755fb741710622b20f2e0f6" || goto error
+call build\scriptlib\unpack.cmd "include\premake" "build\externals\premake-5.0.0-alpha13-src.zip" "premake-5.0.0-alpha13" || goto error
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2017.cmd || goto error
- cd include\premake || goto error
-  nmake -f Bootstrap.mak windows MSDEV=vs2017 || goto error
-  bin\release\premake5 embed --bytecode || goto error
-  bin\release\premake5 --to=build/vs2017 vs2017 --no-curl --no-zlib --no-luasocket || goto error
- cd ..\.. || goto error
+ rem cd include\premake || goto error
+ rem  nmake -f Bootstrap.mak windows MSDEV=vs2017 || goto error
+ rem  bin\release\premake5 embed --bytecode || goto error
+ rem  bin\release\premake5 --to=build/vs2017 vs2017 --no-curl --no-zlib --no-luasocket || goto error
+ rem cd ..\.. || goto error
  cd include\premake\build\vs2017 || goto error
   msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
   msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
@@ -84,11 +84,11 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxil
 )
 if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2017.cmd || goto error
- cd include\premake || goto error
-  nmake -f Bootstrap.mak windows MSDEV=vs2017 || goto error
-  bin\release\premake5 embed --bytecode || goto error
-  bin\release\premake5 --to=build/vs2017 vs2017 --no-curl --no-zlib --no-luasocket || goto error
- cd ..\.. || goto error
+ rem cd include\premake || goto error
+ rem  nmake -f Bootstrap.mak windows MSDEV=vs2017 || goto error
+ rem  bin\release\premake5 embed --bytecode || goto error
+ rem  bin\release\premake5 --to=build/vs2017 vs2017 --no-curl --no-zlib --no-luasocket || goto error
+ rem cd ..\.. || goto error
  cd include\premake\build\vs2017 || goto error
   msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
   msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
@@ -98,11 +98,11 @@ if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\B
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
- cd include\premake || goto error
-  nmake -f Bootstrap.mak windows MSDEV=vs2015 || goto error
-  bin\release\premake5 embed --bytecode || goto error
-  bin\release\premake5 --to=build/vs2015 vs2015 --no-curl --no-zlib --no-luasocket || goto error
- cd ..\.. || goto error
+ rem cd include\premake || goto error
+ rem  nmake -f Bootstrap.mak windows MSDEV=vs2015 || goto error
+ rem  bin\release\premake5 embed --bytecode || goto error
+ rem  bin\release\premake5 --to=build/vs2015 vs2015 --no-curl --no-zlib --no-luasocket || goto error
+ rem cd ..\.. || goto error
  cd include\premake\build\vs2015 || goto error
   msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
   msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
@@ -111,11 +111,11 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" 
 )
 if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
  call build\auto\setup_vs2015.cmd || goto error
- cd include\premake || goto error
-  nmake -f Bootstrap.mak windows MSDEV=vs2015 || goto error
-  bin\release\premake5 embed --bytecode || goto error
-  bin\release\premake5 --to=build/vs2015 vs2015 --no-curl --no-zlib --no-luasocket || goto error
- cd ..\.. || goto error
+ rem cd include\premake || goto error
+ rem  nmake -f Bootstrap.mak windows MSDEV=vs2015 || goto error
+ rem  bin\release\premake5 embed --bytecode || goto error
+ rem  bin\release\premake5 --to=build/vs2015 vs2015 --no-curl --no-zlib --no-luasocket || goto error
+ rem cd ..\.. || goto error
  cd include\premake\build\vs2015 || goto error
   msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
   msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
