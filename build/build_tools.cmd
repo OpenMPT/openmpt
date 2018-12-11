@@ -127,7 +127,7 @@ goto error
 
 :premakedone
 
-echo "2e7ca5fb18acdbcd5755fb741710622b20f2e0f6" > include\premake\OpenMPT-version.txt
+echo "5.0.0-alpha13" > include\premake\OpenMPT-version.txt
 
 goto ok
 

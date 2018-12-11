@@ -19,7 +19,7 @@ set GENIE=include\genie\bin\windows\genie.exe
 echo "78817a9707c1a02e845fb38b3adcc5353b02d377" > include\genie\OpenMPT-expected.txt
 fc include\genie\OpenMPT-expected.txt include\genie\OpenMPT-version.txt
 if errorlevel 1 goto errversion
-echo "2e7ca5fb18acdbcd5755fb741710622b20f2e0f6" > include\premake\OpenMPT-expected.txt
+echo "5.0.0-alpha13" > include\premake\OpenMPT-expected.txt
 fc include\premake\OpenMPT-expected.txt include\premake\OpenMPT-version.txt
 if errorlevel 1 goto errversion
 
