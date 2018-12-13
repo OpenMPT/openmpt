@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "S3MTools.h"
+#include "ITTools.h"
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
 #ifdef MODPLUG_TRACKER
@@ -240,6 +241,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	bool formatTrackerStr = false;
 	bool nonCompatTracker = false;
 	bool isST3 = false;
+	bool isSchism = false;
 	switch(fileHeader.cwtv & S3MFileHeader::trackerMask)
 	{
 	case S3MFileHeader::trkScreamTracker:
@@ -287,6 +289,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv);
 			m_nMinPeriod = 1;
+			isSchism = true;
 		}
 		nonCompatTracker = true;
 		break;
@@ -382,6 +385,8 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamplePreAmp = std::max(fileHeader.masterVolume & 0x7F, 0x10);
 	// Approximately as loud as in DOSBox and a real SoundBlaster 16
 	m_nVSTiVolume = 36;
+	if(isSchism && fileHeader.cwtv < SchismVersionFromDate<2018, 11, 12>::Version(S3MFileHeader::trkSchismTracker))
+		m_nVSTiVolume = 64;
 
 	// Channel setup
 	m_nChannels = 4;
