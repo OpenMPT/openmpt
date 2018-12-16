@@ -1036,9 +1036,7 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel &chn, int &vol) const
 		// if we are in the release portion of the envelope,
 		// rescale envelope factor so that it is proportional to the release point
 		// and release envelope beginning.
-		if(pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
-			&& envpos >= pIns->VolEnv[pIns->VolEnv.nReleaseNode].tick
-			&& chn.VolEnv.nEnvValueAtReleaseJump != NOT_YET_RELEASED)
+		if(chn.VolEnv.nEnvValueAtReleaseJump != NOT_YET_RELEASED)
 		{
 			int envValueAtReleaseJump = chn.VolEnv.nEnvValueAtReleaseJump;
 			int envValueAtReleaseNode = pIns->VolEnv[pIns->VolEnv.nReleaseNode].value * 4;
@@ -1241,7 +1239,7 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel &chn, EnvelopeType envType
 
 		// IT compatiblity: OpenMPT processes the key-off flag earlier than IT. Grab the flag from the previous tick instead.
 		// Test case: EnvOffLength.it
-		if(insEnv.dwFlags[ENV_SUSTAIN] && !chn.dwOldFlags[CHN_KEYOFF] && (insEnv.nReleaseNode == ENV_RELEASE_NODE_UNSET || m_playBehaviour[kReleaseNodePastSustainBug]))
+		if(insEnv.dwFlags[ENV_SUSTAIN] && !chn.dwOldFlags[CHN_KEYOFF] && (chnEnv.nEnvValueAtReleaseJump == NOT_YET_RELEASED || m_playBehaviour[kReleaseNodePastSustainBug]))
 		{
 			// Envelope sustained
 			start = insEnv[insEnv.nSustainStart].tick;
