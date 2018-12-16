@@ -1071,9 +1071,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		font.size = Clamp(Util::GetDPIy(m_pMainWnd->m_hWnd) / 96 - 1, 0, 9);
 		TrackerSettings::Instance().patternFont = font;
 		new WelcomeDlg(m_pMainWnd);
-
-		TrackerSettings::Instance().UpdateStatisticsConsentAsked = true;
-
 	} else
 	{
 

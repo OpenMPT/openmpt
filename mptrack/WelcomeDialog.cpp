@@ -119,7 +119,7 @@ BOOL WelcomeDlg::OnInitDialog()
 	combo->SetItemDataPtr(combo->AddString(_T("FastTracker 2")), (void*)("US_mpt-ft2_classic"));
 
 	CheckDlgButton(IDC_CHECK1, BST_CHECKED);
-	CheckDlgButton(IDC_CHECK3, BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK3, BST_CHECKED);
 	GetDlgItem(IDC_STATIC_WELCOME_STATISTICS)->SetWindowText(mpt::ToCString(mpt::String::Replace(CUpdateCheck::GetStatisticsUserInformation(false), U_("\n"), U_(" "))));
 	CheckDlgButton(IDC_CHECK2, (TrackerSettings::Instance().patternFont.Get().name == PATTERNFONT_LARGE) ? BST_CHECKED : BST_UNCHECKED);
 
