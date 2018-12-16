@@ -312,12 +312,13 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 
 	if(updateAll || hintType == HINT_MPTOPTIONS || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
 	{
-
-		int srcMode = 0;
 		for(int i = 0; i < m_CbnResampling.GetCount(); ++i)
 		{
-			if(m_sndFile.m_nResampling == static_cast<int>(m_CbnResampling.GetItemData(i)))
+			if(m_sndFile.m_nResampling == static_cast<ResamplingMode>(m_CbnResampling.GetItemData(i)))
+			{
 				m_CbnResampling.SetCurSel(i);
+				break;
+			}
 		}
 	}
 
