@@ -253,10 +253,7 @@ int PASCAL RARReadHeaderEx(HANDLE hArcData,struct RARHeaderDataEx *D)
     D->UnpSize=uint(hd->UnpSize & 0xffffffff);
     D->UnpSizeHigh=uint(hd->UnpSize>>32);
     D->HostOS=hd->HSType==HSYS_WINDOWS ? HOST_WIN32:HOST_UNIX;
-    if (Data->Arc.Format==RARFMT50)
-      D->UnpVer=Data->Arc.FileHead.UnpVer==0 ? 50 : 200; // If it is not 0, just set it to something big.
-    else
-      D->UnpVer=Data->Arc.FileHead.UnpVer;
+    D->UnpVer=Data->Arc.FileHead.UnpVer;
     D->FileCRC=hd->FileHash.CRC32;
     D->FileTime=hd->mtime.GetDos();
     

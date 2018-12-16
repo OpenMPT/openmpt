@@ -85,6 +85,7 @@ void uiProcessProgress(const char *Command,int64 CurSize,int64 TotalSize);
 
 enum UIPASSWORD_TYPE {UIPASSWORD_GLOBAL,UIPASSWORD_FILE,UIPASSWORD_ARCHIVE};
 bool uiGetPassword(UIPASSWORD_TYPE Type,const wchar *FileName,SecPassword *Password);
+bool uiIsGlobalPasswordSet();
 
 enum UIALARM_TYPE {UIALARM_ERROR, UIALARM_INFO, UIALARM_QUESTION};
 void uiAlarm(UIALARM_TYPE Type);

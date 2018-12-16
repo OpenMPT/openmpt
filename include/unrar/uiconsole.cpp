@@ -219,6 +219,7 @@ void uiMsgStore::Msg()
       break;
     case UIERROR_INVALIDNAME:
       Log(Str[0],St(MInvalidName),Str[1]);
+      mprintf(L"\n"); // Needed when called from CmdExtract::ExtractCurrentFile.
       break;
 #ifndef SFX_MODULE
     case UIERROR_NEWRARFORMAT:
@@ -351,6 +352,12 @@ bool uiGetPassword(UIPASSWORD_TYPE Type,const wchar *FileName,SecPassword *Passw
   // password to abort. Otherwise user not knowing a password would need to
   // press Ctrl+C multiple times to quit from infinite password request loop.
   return GetConsolePassword(Type,FileName,Password) && Password->IsSet();
+}
+
+
+bool uiIsGlobalPasswordSet()
+{
+  return false;
 }
 
 
