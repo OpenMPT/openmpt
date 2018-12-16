@@ -87,16 +87,16 @@ mpt::ustring CUpdateCheck::GetStatisticsUserInformation(bool shortText)
 {
 	if(shortText)
 	{
-		return U_("A randomized user ID is created and transmitted alongside. This ID can only be linked to you or your computer by this very ID, which is stored solely on your computer. OpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions.");
+		return U_("A randomized user ID is sent together with basic system information."
+			" This ID cannot be linked to you personally in any way."
+			"\nOpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions.");
 	} else
 	{
-		return U_("")
-			+ U_("When checking for updates, OpenMPT can additionally collect some basic statistical information.") + U_(" ")
-			+ U_("A randomized user ID is created and transmitted alongside the update check. This ID can only be linked to you or your computer by this very ID, which is stored solely on your computer.") + U_(" ")
-			+ U_("OpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions.") + U_(" ")
-			+ U_("Without this statistical information, the OpenMPT developers would be blind with respect to what systems are used to run OpenMPT. This makes deciding where to focus development plain guesswork.") + U_("\n")
-			+ U_("OpenMPT would collect the following statistical data points: OpenMPT version, Windows version, type of CPU, amount of RAM, configured update check frequency of OpenMPT.")
-			;
+		return U_(
+			"When checking for updates, OpenMPT can additionally collect basic statistical information."
+			" A randomized user ID is sent alongside the update check. This ID and the transmitted statistics cannot be linked to you personally in any way."
+			" OpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions."
+			"\nOpenMPT would collect the following statistical data points: OpenMPT version, Windows version, type of CPU, amount of RAM, configured update check frequency of OpenMPT.");
 	}
 }
 
@@ -397,7 +397,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	{
 		CString token;
 		int parseStep = 0, parsePos = 0;
-		while((token = resultData.Tokenize(_T("\n"), parsePos)) != "")
+		while(!(token = resultData.Tokenize(_T("\n"), parsePos)).IsEmpty())
 		{
 			token.Trim();
 			switch(parseStep++)
@@ -431,7 +431,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 
 void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings, const CUpdateCheck::Context &context)
 {
-	// íncremented before starting the thread
+	// incremented before starting the thread
 	MPT_ASSERT(s_InstanceCount.load() >= 1);
 	CUpdateCheck::Result result;
 	context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, s_InstanceCount.load());
