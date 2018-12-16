@@ -1076,6 +1076,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kFT2TremoloRampWaveform);
 		playBehaviour.set(kFT2PortaUpDownMemory);
 		playBehaviour.set(kFT2PanSustainRelease);
+		playBehaviour.set(kFT2NoteDelayWithoutInstr);
 		break;
 
 	case MOD_TYPE_S3M:

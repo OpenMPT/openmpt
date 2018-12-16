@@ -602,6 +602,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kOPLBeatingOscillators: desc = _T("Beating OPL oscillators"); break;
 		case kST3OffsetWithoutInstrument: desc = _T("Notes without instrument use the previous note's sample offset"); break;
 		case kReleaseNodePastSustainBug: desc = _T("Broken release node after sustain end behaviour"); break;
+		case kFT2NoteDelayWithoutInstr: desc = _T("Delayed instrument-less notes should not recall volume and panning"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

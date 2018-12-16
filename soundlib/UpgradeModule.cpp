@@ -549,6 +549,7 @@ void CSoundFile::UpgradeModule()
 			{ kFT2TremoloRampWaveform,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 			{ kFT2PortaUpDownMemory,			MAKE_VERSION_NUMERIC(1, 27, 00, 37) },
 			{ kFT2PanSustainRelease,			MAKE_VERSION_NUMERIC(1, 28, 00, 09) },
+			{ kFT2NoteDelayWithoutInstr,		MAKE_VERSION_NUMERIC(1, 28, 00, 44) },
 		};
 
 		for(const auto &b : behaviours)
@@ -576,6 +577,12 @@ void CSoundFile::UpgradeModule()
 			if(m_dwLastSavedWithVersion < b.version)
 				m_playBehaviour.reset(b.behaviour);
 		}
+	}
+
+	if(GetType() == MOD_TYPE_XM && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 19, 00, 00))
+	{
+		// This bug was introduced sometime between 1.18.03.00 and 1.19.01.00
+		m_playBehaviour.set(kFT2NoteDelayWithoutInstr);
 	}
 
 	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 27, 00, 27) && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 27, 00, 49))
