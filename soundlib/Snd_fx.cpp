@@ -2677,9 +2677,9 @@ bool CSoundFile::ProcessEffects()
 						note = NOTE_NONE;
 						keepInstr = false;
 						reloadSampleSettings = true;
-					} else
+					} else if(instr || !m_playBehaviour[kFT2NoteDelayWithoutInstr])
 					{
-						// Normal note
+						// Normal note (only if there is an instrument, test case: DelayVolume.xm)
 						keepInstr = true;
 						reloadSampleSettings = true;
 					}
