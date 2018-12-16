@@ -343,21 +343,6 @@ static void CopyPatternName(CPattern &pattern, FileReader &file)
 }
 
 
-// Date calculation derived from https://alcor.concordia.ca/~gpkatch/gdate-algorithm.html
-template<int32 y, int32 m, int32 d>
-struct SchismVersionFromDate
-{
-	static const int32 mm = (m + 9) % 12;
-	static const int32 yy = y - mm / 10;
-	static const int32 date = yy * 365 + yy / 4 - yy / 100 + yy / 400 + (mm * 306 + 5) / 10 + (d - 1);
-
-	static constexpr int32 Version()
-	{
-		return 0x1050 + date - SchismVersionFromDate<2009, 10, 31>::date;
-	}
-};
-
-
 // Get version of Schism Tracker that was used to create an IT/S3M file.
 mpt::ustring CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 {
