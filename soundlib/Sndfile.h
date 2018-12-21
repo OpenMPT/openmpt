@@ -409,7 +409,7 @@ public:
 
 	uint32 m_nSamplePreAmp, m_nVSTiVolume;
 	uint32 m_OPLVolumeFactor;  // 16.16
-	static const uint32 m_OPLVolumeFactorScale = (1 << 16);
+	enum : uint32 { m_OPLVolumeFactorScale = (1 << 16) };
 
 	bool IsGlobalVolumeUnset() const { return IsFirstTick(); }
 #ifndef MODPLUG_TRACKER

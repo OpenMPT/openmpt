@@ -40,7 +40,7 @@ public:
 	// user to additionally import both built-in tunings.
 	// Older OpenMPT versions will silently skip loading tunings beyond index
 	// 255.
-	static const size_t s_nMaxTuningCount = 255 + 255 + 2;
+	enum : size_t { s_nMaxTuningCount = 255 + 255 + 2 };
 
 public:
 

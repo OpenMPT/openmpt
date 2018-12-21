@@ -26,12 +26,20 @@ struct IT16BitParams
 	typedef int16 sample_t;
 	static const int16 lowerTab[];
 	static const int16 upperTab[];
-	static const int8 fetchA = 4, lowerB = -8, upperB = 7, defWidth = 17;
-	static const int mask = 0xFFFF;
+	static const int8 fetchA;
+	static const int8 lowerB;
+	static const int8 upperB;
+	static const int8 defWidth;
+	static const int mask;
 };
 
 const int16 IT16BitParams::lowerTab[] = { 0, -1, -3, -7, -15, -31, -56, -120, -248, -504, -1016, -2040, -4088, -8184, -16376, -32760, -32768 };
 const int16 IT16BitParams::upperTab[] = { 0, 1, 3, 7, 15, 31, 55, 119, 247, 503, 1015, 2039, 4087, 8183, 16375, 32759, 32767 };
+const int8 IT16BitParams::fetchA = 4;
+const int8 IT16BitParams::lowerB = -8;
+const int8 IT16BitParams::upperB = 7;
+const int8 IT16BitParams::defWidth = 17;
+const int IT16BitParams::mask = 0xFFFF;
 
 // Algorithm parameters for 8-Bit samples
 struct IT8BitParams
@@ -39,12 +47,20 @@ struct IT8BitParams
 	typedef int8 sample_t;
 	static const int8 lowerTab[];
 	static const int8 upperTab[];
-	static const int8 fetchA = 3, lowerB = -4, upperB = 3, defWidth = 9;
-	static const int mask = 0xFF;
+	static const int8 fetchA;
+	static const int8 lowerB;
+	static const int8 upperB;
+	static const int8 defWidth;
+	static const int mask;
 };
 
 const int8 IT8BitParams::lowerTab[] = { 0, -1, -3, -7, -15, -31, -60, -124, -128 };
 const int8 IT8BitParams::upperTab[] = { 0, 1, 3, 7, 15, 31, 59, 123, 127 };
+const int8 IT8BitParams::fetchA = 3;
+const int8 IT8BitParams::lowerB = -4;
+const int8 IT8BitParams::upperB = 3;
+const int8 IT8BitParams::defWidth = 9;
+const int IT8BitParams::mask = 0xFF;
 
 static const int8 ITWidthChangeSize[] = { 4, 5, 6, 7, 8, 9, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 
@@ -137,17 +153,15 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 		Deltafy<typename Properties::sample_t>();
 	}
 
-	const int8 defWidth = Properties::defWidth; // gcc static const member reference workaround
-
 	// Initialise bit width table with initial values
-	bwt.assign(baseLength, defWidth);
+	bwt.assign(baseLength, Properties::defWidth);
 
 	// Recurse!
-	SquishRecurse<Properties>(defWidth, defWidth, defWidth, defWidth - 2, 0, baseLength);
+	SquishRecurse<Properties>(Properties::defWidth, Properties::defWidth, Properties::defWidth, Properties::defWidth - 2, 0, baseLength);
 	
 	// Write those bits!
 	const typename Properties::sample_t *p = static_cast<typename Properties::sample_t *>(sampleData);
-	int8 width = defWidth;
+	int8 width = Properties::defWidth;
 	for(size_t i = 0; i < baseLength; i++)
 	{
 		if(bwt[i] != width)
@@ -158,7 +172,7 @@ void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actua
 				MPT_ASSERT(width);
 				WriteBits(width, (1 << (width - 1)));
 				WriteBits(Properties::fetchA, ConvertWidth(width, bwt[i]));
-			} else if(width < defWidth)
+			} else if(width < Properties::defWidth)
 			{
 				// Mode B: 7 to 8 / 16 bits
 				int xv = (1 << (width - 1)) + Properties::lowerB + ConvertWidth(width, bwt[i]);
@@ -348,12 +362,10 @@ void ITDecompression::Uncompress(typename Properties::sample_t *target)
 {
 	curLength = std::min(mptSample.nLength - writtenSamples, SmpLength(ITCompression::blockSize / sizeof(typename Properties::sample_t)));
 
-	const int defWidth = Properties::defWidth; // gcc static const member reference workaround
-
-	int width = defWidth;
+	int width = Properties::defWidth;
 	while(curLength > 0)
 	{
-		if(width > defWidth)
+		if(width > Properties::defWidth)
 		{
 			// Error!
 			return;
@@ -368,7 +380,7 @@ void ITDecompression::Uncompress(typename Properties::sample_t *target)
 				ChangeWidth(width, bitFile.ReadBits(Properties::fetchA));
 			else
 				Write<Properties>(v, topBit, target);
-		} else if(width < defWidth)
+		} else if(width < Properties::defWidth)
 		{
 			// Mode B: 7 to 8 / 16 bits
 			if(v >= topBit + Properties::lowerB && v <= topBit + Properties::upperB)

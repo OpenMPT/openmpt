@@ -287,7 +287,7 @@ protected:
 
 protected:
 
-	static const uint8 s_DefaultFlagbyte = 0;
+	enum : uint8 { s_DefaultFlagbyte = 0 };
 	static const char s_EntryID[3];
 
 };

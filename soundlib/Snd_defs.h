@@ -543,7 +543,7 @@ protected:
 	value_t v;
 
 public:
-	static const uint32 fractMax = 0xFFFFFFFFu;
+	enum : uint32 { fractMax = 0xFFFFFFFFu };
 	static MPT_FORCEINLINE uint32 GetFractMax() { return fractMax; }
 
 	SamplePosition() : v(0) { }
@@ -620,7 +620,7 @@ protected:
 	MPT_CONSTEXPR11_FUN FPInt(T rawValue) : v(rawValue) { }
 
 public:
-	static const size_t fractFact = FFact;
+	enum : size_t { fractFact = FFact };
 	typedef T store_t;
 
 	MPT_CONSTEXPR11_FUN FPInt() : v(0) { }

@@ -28,8 +28,8 @@ public:
 	ITCompression(const ModSample &sample, bool it215, std::ostream *f, SmpLength maxLength = 0);
 	size_t GetCompressedSize() const { return packedTotalLength; }
 
-	static const size_t bufferSize = 2 + 0xFFFF;	// Our output buffer can't be longer than this.
-	static const size_t blockSize = 0x8000;			// Block size (in bytes) in which samples are being processed
+	enum : size_t { bufferSize = 2 + 0xFFFF };	// Our output buffer can't be longer than this.
+	enum : size_t { blockSize = 0x8000 };			// Block size (in bytes) in which samples are being processed
 
 protected:
 	std::vector<int8> bwt;			// Bit width table for each sampling point

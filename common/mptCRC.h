@@ -29,9 +29,9 @@ public:
 	typedef T value_type;
 	typedef uint8 byte_type;
 
-	static const std::size_t size_bytes = sizeof(value_type);
-	static const std::size_t size_bits = sizeof(value_type) * 8;
-	static const value_type top_bit = static_cast<value_type>(1) << ((sizeof(value_type) * 8) - 1);
+	enum : std::size_t { size_bytes = sizeof(value_type) };
+	enum : std::size_t { size_bits = sizeof(value_type) * 8 };
+	enum : value_type { top_bit = static_cast<value_type>(1) << ((sizeof(value_type) * 8) - 1) };
 
 private:
 	
