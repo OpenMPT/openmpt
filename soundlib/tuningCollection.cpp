@@ -285,12 +285,10 @@ bool UnpackTuningCollection(const CTuningCollection &tc, const mpt::PathString &
 		} else
 		{
 			mpt::SafeOutputFile sfout(fn, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-			mpt::ofstream& fout = sfout;
-			if(tuning.Serialize(fout) != Tuning::SerializationResult::Success)
+			if(tuning.Serialize(sfout) != Tuning::SerializationResult::Success)
 			{
 				error = true;
 			}
-			fout.close();
 		}
 	}
 	return !error;
