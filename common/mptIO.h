@@ -578,23 +578,24 @@ class WriteBuffer
 {
 private:
 	mpt::byte_span buffer;
-	std::size_t size;
+	std::size_t size = 0;
 	Tfile & f;
-	bool writeError;
+	bool writeError = false;
 public:
 	WriteBuffer(const WriteBuffer &) = delete;
 	WriteBuffer & operator=(const WriteBuffer &) = delete;
 public:
 	inline WriteBuffer(Tfile & f_, mpt::byte_span buffer_)
 		: buffer(buffer_)
-		, size(0)
 		, f(f_)
-		, writeError(false)
 	{
 	}
-	inline ~WriteBuffer()
+	inline ~WriteBuffer() noexcept(false)
 	{
-		FlushLocal();
+		if(!writeError)
+		{
+			FlushLocal();
+		}
 	}
 public:
 	inline Tfile & file() const
@@ -646,9 +647,16 @@ public:
 		{
 			return;
 		}
-		if(!mpt::IO::WriteRaw(f, mpt::as_span(buffer.data(), size)))
+		try
+		{
+			if(!mpt::IO::WriteRaw(f, mpt::as_span(buffer.data(), size)))
+			{
+				writeError = true;
+			}
+		} catch (const std::exception &)
 		{
 			writeError = true;
+			throw;
 		}
 		size = 0;
 	}
