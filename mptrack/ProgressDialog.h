@@ -17,9 +17,10 @@ OPENMPT_NAMESPACE_BEGIN
 class CProgressDialog : public CDialog
 {
 public:
-	bool m_abort;
+	bool m_abort = false;
 
 	CProgressDialog(CWnd *parent = nullptr);
+	~CProgressDialog();
 
 	// Set the window title
 	void SetTitle(const TCHAR *title);

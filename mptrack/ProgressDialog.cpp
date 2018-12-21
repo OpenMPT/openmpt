@@ -20,8 +20,17 @@ END_MESSAGE_MAP()
 
 CProgressDialog::CProgressDialog(CWnd *parent)
 	: CDialog(IDD_PROGRESS, parent)
-	, m_abort(false)
 { }
+
+CProgressDialog::~CProgressDialog()
+{
+	if(IsWindow(m_hWnd))
+	{
+		// This should only happen if this dialog gets destroyed as part of stack unwinding
+		EndDialog(IDCANCEL);
+		DestroyWindow();
+	}
+}
 
 BOOL CProgressDialog::OnInitDialog()
 {
