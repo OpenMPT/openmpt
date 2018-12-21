@@ -30,6 +30,7 @@ class CInputHandler;
 #define DRAGITEM_CHNHEADER		0x01000000
 #define DRAGITEM_PATTERNHEADER	0x02000000
 #define DRAGITEM_PLUGNAME		0x04000000
+typedef uint32 DragItem;
 
 
 // Edit Step aka Row Spacing
@@ -153,8 +154,8 @@ protected:
 	PatternRect m_Selection;				// Upper-left / Lower-right corners of selection.
 
 	// Drag&Drop
-	DWORD m_nDragItem;	// Currently dragged item
-	DWORD m_nDropItem;	// Currently hovered item during dragondrop
+	DragItem m_nDragItem;	// Currently dragged item
+	DragItem m_nDropItem;	// Currently hovered item during dragondrop
 	RECT m_rcDragItem, m_rcDropItem;
 	bool m_bInItemRect : 1;
 
@@ -177,10 +178,11 @@ protected:
 
 	std::bitset<128> m_baPlayingNote;
 	CModDoc::NoteToChannelMap m_noteChannel;	// Note -> Preview channel assignment
-	ModCommand::NOTE octaveKeyMemory[10];
+	std::array<ModCommand::NOTE, 10> m_octaveKeyMemory;
 	std::array<ModCommand::NOTE, MAX_BASECHANNELS> previousNote;
 	std::array<uint8, NOTE_MAX + NOTE_MIN> activeNoteChannel;
 	std::array<uint8, NOTE_MAX + NOTE_MIN> splitActiveNoteChannel;
+	enum { NOTE_CHANNEL_MAP_INVALID = 0xFF };
 
 public:
 	std::unique_ptr<CEffectVis> m_pEffectVis;
@@ -224,7 +226,7 @@ public:
 	POINT GetPointFromPosition(PatternCursor cursor) const;
 	PatternCursor GetPositionFromPoint(POINT pt) const;
 
-	DWORD GetDragItem(CPoint point, RECT &rect);
+	DragItem GetDragItem(CPoint point, RECT &rect) const;
 
 	ROWINDEX GetRowsPerBeat() const;
 	ROWINDEX GetRowsPerMeasure() const;

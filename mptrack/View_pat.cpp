@@ -1,5 +1,5 @@
 /*
- * view_pat.cpp
+ * View_pat.cpp
  * ------------
  * Purpose: Pattern tab, lower panel.
  * Notes  : Welcome to about 7000 lines of, err, very beautiful code.
@@ -151,11 +151,7 @@ CViewPattern::CViewPattern()
 	m_Dib.Init(CMainFrame::bmpNotes);
 	UpdateColors();
 	m_PCNoteEditMemory = ModCommand::Empty();
-
-	for(auto &oct : octaveKeyMemory)
-	{
-		oct = NOTE_NONE;
-	}
+	m_octaveKeyMemory.fill(NOTE_NONE);
 }
 
 
@@ -172,8 +168,8 @@ void CViewPattern::OnInitialUpdate()
 	ChnVUMeters.fill(0);
 	OldVUMeters.fill(0);
 	previousNote.fill(NOTE_NONE);
-	splitActiveNoteChannel.fill(0xFF);
-	activeNoteChannel.fill(0xFF);
+	splitActiveNoteChannel.fill(NOTE_CHANNEL_MAP_INVALID);
+	activeNoteChannel.fill(NOTE_CHANNEL_MAP_INVALID);
 	m_nPlayPat = PATTERNINDEX_INVALID;
 	m_nPlayRow = m_nNextPlayRow = 0;
 	m_nPlayTick = 0;
@@ -472,7 +468,7 @@ bool CViewPattern::UpdateScrollbarPositions(bool updateHorizontalScrollbar)
 	return true;
 }
 
-DWORD CViewPattern::GetDragItem(CPoint point, RECT &outRect)
+DragItem CViewPattern::GetDragItem(CPoint point, RECT &outRect) const
 {
 	const CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile == nullptr)
@@ -480,7 +476,7 @@ DWORD CViewPattern::GetDragItem(CPoint point, RECT &outRect)
 		return 0;
 	}
 
-	CRect rcClient, rect, plugRect; 	//rewbs.patPlugNames
+	CRect rcClient, rect, plugRect;
 	UINT n;
 	int xofs, yofs;
 
@@ -4493,7 +4489,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 	if (!pModDoc || !pMainFrm || !(IsEditingEnabled()))
 		return;
 
-	activeNoteMap[note] = 0xFF;	//unlock channel
+	activeNoteMap[note] = NOTE_CHANNEL_MAP_INVALID;	//unlock channel
 
 	if(!((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_KBDNOTEOFF) || fromMidi))
 	{
@@ -4621,8 +4617,8 @@ void CViewPattern::TempEnterOctave(int val)
 		Limit(note, NOTE_MIN, NOTE_MAX);
 		TempEnterNote(static_cast<ModCommand::NOTE>(note));
 		// Memorize note for key-up
-		ASSERT(size_t(val) < CountOf(octaveKeyMemory));
-		octaveKeyMemory[val] = target.note;
+		ASSERT(size_t(val) < m_octaveKeyMemory.size());
+		m_octaveKeyMemory[val] = target.note;
 	}
 }
 
@@ -4630,11 +4626,11 @@ void CViewPattern::TempEnterOctave(int val)
 // Stop note that has been triggered by entering an octave in the pattern.
 void CViewPattern::TempStopOctave(int val)
 {
-	ASSERT(size_t(val) < CountOf(octaveKeyMemory));
-	if(octaveKeyMemory[val] != NOTE_NONE)
+	ASSERT(size_t(val) < m_octaveKeyMemory.size());
+	if(m_octaveKeyMemory[val] != NOTE_NONE)
 	{
-		TempStopNote(octaveKeyMemory[val]);
-		octaveKeyMemory[val] = NOTE_NONE;
+		TempStopNote(m_octaveKeyMemory[val]);
+		m_octaveKeyMemory[val] = NOTE_NONE;
 	}
 }
 
