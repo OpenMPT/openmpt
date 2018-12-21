@@ -2245,6 +2245,18 @@ bool CSoundFile::ReadNote()
 				// Scale volume to OPL range (0...63).
 				m_opl->Volume(nChn, static_cast<uint8>(Util::muldivr_unsigned(chn.nCalcVolume * chn.nGlobalVol * chn.nInsVol, 63, 1 << 26)), false);
 				chn.nRealPan = m_opl->Pan(nChn, chn.nRealPan) * 128 + 128;
+
+				// Deallocate OPL channels for notes that are most definitely never going to play again.
+				const auto *ins = chn.pModInstrument;
+				if(ins != nullptr
+					&& (ins->VolEnv.dwFlags & (ENV_ENABLED | ENV_LOOP | ENV_SUSTAIN)) == ENV_ENABLED
+					&& !ins->VolEnv.empty()
+					&& chn.GetEnvelope(ENV_VOLUME).nEnvPosition >= ins->VolEnv.back().tick
+					&& ins->VolEnv.back().value == 0)
+				{
+					m_opl->NoteCut(nChn);
+					chn.dwFlags.set(CHN_NOTEFADE);
+				}
 			}
 
 			if(GetType() == MOD_TYPE_MPT && pIns != nullptr && pIns->pTuning != nullptr)
