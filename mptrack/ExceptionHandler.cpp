@@ -268,13 +268,15 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	errorMessage += UL_("\n\n");
 
 	{
-		mpt::SafeOutputFile f(crashDirectory.path + P_("error.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::SafeOutputFile sf(crashDirectory.path + P_("error.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
 		f << mpt::String::Replace(mpt::ToCharset(mpt::CharsetUTF8, errorMessage), "\n", "\r\n");
 	}
 
 	{
-		mpt::SafeOutputFile f(crashDirectory.path + P_("threads.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::SafeOutputFile sf(crashDirectory.path + P_("threads.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
 		f << mpt::format("current : %1")(mpt::fmt::hex0<8>(GetCurrentThreadId())) << "\r\n";
 		f << mpt::format("GUI     : %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindGUI))) << "\r\n";
@@ -290,7 +292,8 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	};
 
 	{
-		mpt::SafeOutputFile f(crashDirectory.path + P_("active-settings.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::SafeOutputFile sf(crashDirectory.path + P_("active-settings.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
 		if(&theApp.GetSettings())
 		{
@@ -357,13 +360,15 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	*/
 
 	{
-		mpt::SafeOutputFile f(crashDirectory.path + P_("about-openmpt.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::SafeOutputFile sf(crashDirectory.path + P_("about-openmpt.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
 		f << mpt::ToCharset(mpt::CharsetUTF8, CAboutDlg::GetTabText(0));
 	}
 
 	{
-		mpt::SafeOutputFile f(crashDirectory.path + P_("about-components.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::SafeOutputFile sf(crashDirectory.path + P_("about-components.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
 		f << mpt::ToCharset(mpt::CharsetUTF8, CAboutDlg::GetTabText(1));
 	}

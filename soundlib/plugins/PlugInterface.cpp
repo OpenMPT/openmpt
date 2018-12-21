@@ -652,7 +652,8 @@ bool IMixPlugin::SaveProgram()
 
 	bool bank = (dlg.GetExtension() == P_("fxb"));
 
-	mpt::SafeOutputFile f(dlg.GetFirstFile(), std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+	mpt::SafeOutputFile sf(dlg.GetFirstFile(), std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+	mpt::ofstream& f = sf;
 	if(f.good() && VSTPresets::SaveFile(f, *this, bank))
 	{
 		return true;

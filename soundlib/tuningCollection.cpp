@@ -284,7 +284,8 @@ bool UnpackTuningCollection(const CTuningCollection &tc, const mpt::PathString &
 			error = true;
 		} else
 		{
-			mpt::SafeOutputFile fout(fn, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+			mpt::SafeOutputFile sfout(fn, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+			mpt::ofstream& fout = sfout;
 			if(tuning.Serialize(fout) != Tuning::SerializationResult::Success)
 			{
 				error = true;

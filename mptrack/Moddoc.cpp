@@ -277,7 +277,8 @@ bool CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool setPath
 		return false;
 
 	bool ok = false;
-	mpt::SafeOutputFile f(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+	mpt::SafeOutputFile sf(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+	mpt::ofstream& f = sf;
 	if(f)
 	{
 		BeginWaitCursor();

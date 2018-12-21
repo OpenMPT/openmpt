@@ -818,7 +818,8 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 		if(!fn.FileOrDirectoryExists())
 		{
 			CTuning * pT = CSoundFile::CreateTuning12TET("12TET");
-			mpt::SafeOutputFile f(fn, std::ios::binary, mpt::FlushMode::Full);
+			mpt::SafeOutputFile sf(fn, std::ios::binary, mpt::FlushMode::Full);
+			mpt::ofstream& f = sf;
 			pT->Serialize(f);
 			f.close();
 			delete pT;
@@ -830,7 +831,8 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 		if(!fn.FileOrDirectoryExists())
 		{
 			CTuning * pT = CSoundFile::CreateTuning12TET("12TET [[fs15 1.17.02.49]]");
-			mpt::SafeOutputFile f(fn, std::ios::binary, mpt::FlushMode::Full);
+			mpt::SafeOutputFile sf(fn, std::ios::binary, mpt::FlushMode::Full);
+			mpt::ofstream& f = sf;
 			pT->Serialize(f);
 			f.close();
 			delete pT;
