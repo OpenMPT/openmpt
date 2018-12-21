@@ -362,7 +362,7 @@ struct TrackState
 
 struct ModChannelState
 {
-	static const uint8 NOMIDI = 0xFF;	// No MIDI channel assigned.
+	enum : uint8 { NOMIDI = 0xFF };	// No MIDI channel assigned.
 
 	tick_t age = 0;						// At which MIDI tick the channel was triggered
 	int32 porta = 0;					// Current portamento position in extra-fine slide units (1/64th of a semitone)

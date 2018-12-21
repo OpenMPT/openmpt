@@ -875,8 +875,10 @@ protected:
 
 private:
 
-	static const std::size_t QUANTUM_SIZE = mpt::IO::BUFFERSIZE_SMALL;
-	static const std::size_t BUFFER_SIZE = mpt::IO::BUFFERSIZE_NORMAL;
+	enum : std::size_t {
+		QUANTUM_SIZE = mpt::IO::BUFFERSIZE_SMALL,
+		BUFFER_SIZE = mpt::IO::BUFFERSIZE_NORMAL
+	};
 
 	void EnsureCacheBuffer(std::size_t requiredbuffersize) const;
 	void CacheStream() const;
@@ -928,9 +930,11 @@ private:
 
 struct CallbackStream
 {
-	static const int SeekSet = 0;
-	static const int SeekCur = 1;
-	static const int SeekEnd = 2;
+	enum : int {
+		SeekSet = 0,
+		SeekCur = 1,
+		SeekEnd = 2
+	};
 	void *stream;
 	std::size_t (*read)( void * stream, void * dst, std::size_t bytes );
 	int (*seek)( void * stream, int64 offset, int whence );

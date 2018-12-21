@@ -25,8 +25,8 @@ class CResampler;
 template<int channelsOut, int channelsIn, typename out, typename in>
 struct MixerTraits
 {
-	static const int numChannelsIn = channelsIn;	// Number of channels in sample
-	static const int numChannelsOut = channelsOut;	// Number of mixer output channels
+	enum : int { numChannelsIn = channelsIn };	// Number of channels in sample
+	enum : int { numChannelsOut = channelsOut };	// Number of mixer output channels
 	typedef out output_t;							// Output buffer sample type
 	typedef in input_t;								// Input buffer sample type
 	typedef out outbuf_t[channelsOut];				// Output buffer sampling point type

@@ -40,8 +40,10 @@ struct J2BFileHeader
 {
 	// Magic Bytes
 	// 32-Bit J2B header identifiers
-	static const uint32 magicDEADBEAF = 0xAFBEADDEu;
-	static const uint32 magicDEADBABE = 0xBEBAADDEu;
+	enum : uint32 {
+		magicDEADBEAF = 0xAFBEADDEu,
+		magicDEADBABE = 0xBEBAADDEu
+	};
 
 	char     signature[4];		// MUSE
 	uint32le deadbeaf;			// 0xDEADBEAF (AM) or 0xDEADBABE (AMFF)

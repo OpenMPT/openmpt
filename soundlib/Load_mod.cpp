@@ -320,14 +320,14 @@ struct MODSampleHeader
 	}
 
 	// Suggested threshold for rejecting invalid files based on cumulated score returned by GetInvalidByteScore
-	static const uint32 INVALID_BYTE_THRESHOLD = 40;
+	enum : uint32 { INVALID_BYTE_THRESHOLD = 40 };
 	
 	// This threshold is used for files where the file magic only gives a
 	// fragile result which alone would lead to too many false positives.
 	// In particular, the files from Inconexia demo by Iguana
 	// (https://www.pouet.net/prod.php?which=830) which have 3 \0 bytes in
 	// the file magic tend to cause misdetection of random files.
-	static const uint32 INVALID_BYTE_FRAGILE_THRESHOLD = 1;
+	enum : uint32 { INVALID_BYTE_FRAGILE_THRESHOLD = 1 };
 
 	// Retrieve the internal sample format flags for this sample.
 	static SampleIO GetSampleFormat()

@@ -66,7 +66,7 @@ protected:
 	mpt::fast_prng m_PRNG;
 
 #ifdef MODPLUG_TRACKER
-	static const int WM_PARAM_UDPATE = WM_USER + 500;
+	enum : int { WM_PARAM_UDPATE = WM_USER + 500 };
 #endif
 
 public:

@@ -39,7 +39,7 @@ namespace CTuningS11n
 
 		void operator()(std::ostream& oStrm, const std::vector<float>& v);
 		uint16 m_nWriteCount;
-		static const uint16 s_nDefaultWriteCount = (uint16_max >> 2);
+		enum : uint16 { s_nDefaultWriteCount = (uint16_max >> 2) };
 	};
 }
 

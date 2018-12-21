@@ -461,8 +461,8 @@ struct MO3Delta8BitParams
 {
 	typedef int8 sample_t;
 	typedef uint8 unsigned_t;
-	static const int shift = 7;
-	static const uint8 dhInit = 4;
+	enum : int { shift = 7 };
+	enum : uint8 { dhInit = 4 };
 
 	static inline void Decode(FileReader &file, int8 &carry, uint16 &data, uint8 &/*dh*/, unsigned_t &val)
 	{
@@ -479,8 +479,8 @@ struct MO3Delta16BitParams
 {
 	typedef int16 sample_t;
 	typedef uint16 unsigned_t;
-	static const int shift = 15;
-	static const uint8 dhInit = 8;
+	enum : int { shift = 15 };
+	enum : uint8 { dhInit = 8 };
 
 	static inline void Decode(FileReader &file, int8 &carry, uint16 &data, uint8 &dh, unsigned_t &val)
 	{

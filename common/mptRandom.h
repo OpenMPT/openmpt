@@ -186,15 +186,15 @@ inline T random(Trng & rng, std::size_t required_entropy_bits)
 template <typename Tf> struct float_traits { };
 template <> struct float_traits<float> {
 	typedef uint32 mantissa_uint_type;
-	static const int mantissa_bits = 24;
+	enum : int { mantissa_bits = 24 };
 };
 template <> struct float_traits<double> {
 	typedef uint64 mantissa_uint_type;
-	static const int mantissa_bits = 53;
+	enum : int { mantissa_bits = 53 };
 };
 template <> struct float_traits<long double> {
 	typedef uint64 mantissa_uint_type;
-	static const int mantissa_bits = 63;
+	enum : int { mantissa_bits = 63 };
 };
 
 template <typename T>
@@ -404,7 +404,7 @@ public:
 // List the ones we are likely to use.
 
 template <> struct engine_traits<std::mt19937> {
-	static const std::size_t seed_bits = sizeof(std::mt19937::result_type) * 8 * std::mt19937::state_size;
+	enum : std::size_t { seed_bits = sizeof(std::mt19937::result_type) * 8 * std::mt19937::state_size };
 	typedef std::mt19937 rng_type;
 	typedef rng_type::result_type result_type;
 	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
@@ -417,7 +417,7 @@ template <> struct engine_traits<std::mt19937> {
 };
 
 template <> struct engine_traits<std::mt19937_64> {
-	static const std::size_t seed_bits = sizeof(std::mt19937_64::result_type) * 8 * std::mt19937_64::state_size;
+	enum : std::size_t { seed_bits = sizeof(std::mt19937_64::result_type) * 8 * std::mt19937_64::state_size };
 	typedef std::mt19937_64 rng_type;
 	typedef rng_type::result_type result_type;
 	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
@@ -430,7 +430,7 @@ template <> struct engine_traits<std::mt19937_64> {
 };
 
 template <> struct engine_traits<std::ranlux24_base> {
-	static const std::size_t seed_bits = std::ranlux24_base::word_size;
+	enum : std::size_t { seed_bits = std::ranlux24_base::word_size };
 	typedef std::ranlux24_base rng_type;
 	typedef rng_type::result_type result_type;
 	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
@@ -443,7 +443,7 @@ template <> struct engine_traits<std::ranlux24_base> {
 };
 
 template <> struct engine_traits<std::ranlux48_base> {
-	static const std::size_t seed_bits = std::ranlux48_base::word_size;
+	enum : std::size_t { seed_bits = std::ranlux48_base::word_size };
 	typedef std::ranlux48_base rng_type;
 	typedef rng_type::result_type result_type;
 	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
@@ -456,7 +456,7 @@ template <> struct engine_traits<std::ranlux48_base> {
 };
 
 template <> struct engine_traits<std::ranlux24> {
-	static const std::size_t seed_bits = std::ranlux24_base::word_size;
+	enum : std::size_t { seed_bits = std::ranlux24_base::word_size };
 	typedef std::ranlux24 rng_type;
 	typedef rng_type::result_type result_type;
 	static MPT_CONSTEXPR11_FUN int result_bits() { return std::ranlux24_base::word_size; }
@@ -469,7 +469,7 @@ template <> struct engine_traits<std::ranlux24> {
 };
 
 template <> struct engine_traits<std::ranlux48> {
-	static const std::size_t seed_bits = std::ranlux48_base::word_size;
+	enum : std::size_t { seed_bits = std::ranlux48_base::word_size };
 	typedef std::ranlux48 rng_type;
 	typedef rng_type::result_type result_type;
 	static MPT_CONSTEXPR11_FUN int result_bits() { return std::ranlux48_base::word_size; }
