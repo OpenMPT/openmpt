@@ -61,14 +61,14 @@ class CDoMidiConvert: public CProgressDialog
 {
 public:
 	CSoundFile &m_sndFile;
-	const mpt::PathString m_fileName;
+	mpt::ofstream &m_file;
 	const MidiExport::InstrMap &m_instrMap;
 
 public:
-	CDoMidiConvert(CSoundFile &sndFile, const mpt::PathString &filename, const MidiExport::InstrMap &instrMap, CWnd *parent = nullptr)
+	CDoMidiConvert(CSoundFile &sndFile, mpt::ofstream &f, const MidiExport::InstrMap &instrMap, CWnd *parent = nullptr)
 		: CProgressDialog(parent)
 		, m_sndFile(sndFile)
-		, m_fileName(filename)
+		, m_file(f)
 		, m_instrMap(instrMap)
 	{ }
 	void Run() override;

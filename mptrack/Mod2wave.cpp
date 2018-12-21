@@ -932,12 +932,6 @@ void CDoWaveConvert::Run()
 	UINT ok = IDOK, pos = 0;
 	uint64 ullSamples = 0;
 
-	if(m_lpszFileName.empty())
-	{
-		EndDialog(IDCANCEL);
-		return;
-	}
-
 	float normalizePeak = 0.0f;
 	const mpt::PathString normalizeFileName = mpt::CreateTempFileName(P_("OpenMPT"));
 	mpt::fstream normalizeFile;
@@ -947,16 +941,6 @@ void CDoWaveConvert::Run()
 		::CloseHandle(::CreateFile(normalizeFileName.AsNative().c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
 
 		normalizeFile.open(normalizeFileName, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
-	}
-
-	mpt::SafeOutputFile safeFileStream(m_lpszFileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-	mpt::ofstream& fileStream = safeFileStream;
-
-	if(!fileStream)
-	{
-		Reporting::Error("Could not open file for writing. Is it open in another application?");
-		EndDialog(IDCANCEL);
-		return;
 	}
 
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
@@ -1326,9 +1310,6 @@ void CDoWaveConvert::Run()
 	m_SndFile.m_PatternCuePoints = nullptr;
 
 	fileEnc = nullptr;
-
-	fileStream.flush();
-	fileStream.close();
 
 	if(taskBarList)
 	{

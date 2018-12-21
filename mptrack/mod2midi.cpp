@@ -695,18 +695,9 @@ void CModToMidi::OnOverlapChanged()
 
 void CDoMidiConvert::Run()
 {
-	mpt::SafeOutputFile sf(m_fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-	mpt::ofstream& f = sf;
-	if(!f.good())
-	{
-		Reporting::Error("Could not open file for writing. Is it open in another application?");
-		EndDialog(IDCANCEL);
-		return;
-	}
-
 	auto mainFrame = CMainFrame::GetMainFrame();
 	mainFrame->PauseMod(m_sndFile.GetpModDoc());
-	auto conv = mpt::make_unique<MidiExport::Conversion>(m_sndFile, m_instrMap, f, CModToMidi::s_overlappingInstruments);
+	auto conv = mpt::make_unique<MidiExport::Conversion>(m_sndFile, m_instrMap, m_file, CModToMidi::s_overlappingInstruments);
 
 	double duration = m_sndFile.GetLength(eNoAdjust).front().duration;
 	uint64 totalSamples = mpt::saturate_round<uint64>(duration * m_sndFile.m_MixerSettings.gdwMixingFreq);

@@ -1713,12 +1713,29 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			}
 
 			// Render song (or current channel, or current sample/instrument)
-			CDoWaveConvert dwcdlg(m_SndFile, thisName, caption, wsdlg.m_Settings, pMainFrm);
-			dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
-			dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
+			bool cancel = true;
+			try
+			{
+				mpt::SafeOutputFile safeFileStream(thisName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				mpt::ofstream &f = safeFileStream;
+				// Do not enable yet, WAVWriter destructor may throw
+				//f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
 
-			BypassInputHandler bih;
-			bool cancel = dwcdlg.DoModal() != IDOK;
+				if(!f)
+				{
+					Reporting::Error("Could not open file for writing. Is it open in another application?");
+				} else
+				{
+					BypassInputHandler bih;
+					CDoWaveConvert dwcdlg(m_SndFile, f, caption, wsdlg.m_Settings, pMainFrm);
+					dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
+					dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
+					cancel = dwcdlg.DoModal() != IDOK;
+				}
+			} catch(const std::exception &)
+			{
+				Reporting::Error(_T("Error while writing file!"));
+			}
 
 			if(wsdlg.m_Settings.outputToSample)
 			{
@@ -1850,8 +1867,24 @@ void CModDoc::OnFileMidiConvert()
 	BypassInputHandler bih;
 	if(mididlg.DoModal() == IDOK)
 	{
-		CDoMidiConvert doconv(m_SndFile, dlg.GetFirstFile(), mididlg.m_instrMap);
-		doconv.DoModal();
+		try
+		{
+			mpt::SafeOutputFile sf(dlg.GetFirstFile(), std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+			mpt::ofstream &f = sf;
+			f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+
+			if(!f.good())
+			{
+				Reporting::Error("Could not open file for writing. Is it open in another application?");
+				return;
+			}
+			
+			CDoMidiConvert doconv(m_SndFile, f, mididlg.m_instrMap);
+			doconv.DoModal();
+		} catch(const std::exception &)
+		{
+			Reporting::Error(_T("Error while writing file!"));
+		}
 	}
 #else
 	Reporting::Error("In order to use MIDI export, OpenMPT must be built with plugin support.");
