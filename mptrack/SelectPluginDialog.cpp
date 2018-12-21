@@ -289,7 +289,7 @@ void CSelectPluginDlg::OnNameFilterChanged()
 }
 
 
-void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
+void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 {
 	CVstPluginManager *pManager = theApp.GetPluginManager();
 
@@ -302,19 +302,19 @@ void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
 		const TCHAR *description;
 	} categories[] =
 	{
-		{ VSTPluginLib::catEffect,			_T("Audio Effects") },
-		{ VSTPluginLib::catGenerator,		_T("Tone Generators") },
-		{ VSTPluginLib::catRestoration,		_T("Audio Restauration") },
-		{ VSTPluginLib::catSurroundFx,		_T("Surround Effects") },
-		{ VSTPluginLib::catRoomFx,			_T("Room Effects") },
-		{ VSTPluginLib::catSpacializer,		_T("Spacializers") },
-		{ VSTPluginLib::catMastering,		_T("Mastering Plugins") },
-		{ VSTPluginLib::catAnalysis,		_T("Analysis Plugins") },
-		{ VSTPluginLib::catOfflineProcess,	_T("Offline Processing") },
-		{ VSTPluginLib::catShell,			_T("Shell Plugins") },
-		{ VSTPluginLib::catUnknown,			_T("Unsorted") },
-		{ VSTPluginLib::catDMO,				_T("DirectX Media Audio Effects") },
-		{ VSTPluginLib::catSynth,			_T("Instrument Plugins") },
+		{ VSTPluginLib::catEffect,         _T("Audio Effects") },
+		{ VSTPluginLib::catGenerator,      _T("Tone Generators") },
+		{ VSTPluginLib::catRestoration,    _T("Audio Restauration") },
+		{ VSTPluginLib::catSurroundFx,     _T("Surround Effects") },
+		{ VSTPluginLib::catRoomFx,         _T("Room Effects") },
+		{ VSTPluginLib::catSpacializer,    _T("Spacializers") },
+		{ VSTPluginLib::catMastering,      _T("Mastering Plugins") },
+		{ VSTPluginLib::catAnalysis,       _T("Analysis Plugins") },
+		{ VSTPluginLib::catOfflineProcess, _T("Offline Processing") },
+		{ VSTPluginLib::catShell,          _T("Shell Plugins") },
+		{ VSTPluginLib::catUnknown,        _T("Unsorted") },
+		{ VSTPluginLib::catDMO,            _T("DirectX Media Audio Effects") },
+		{ VSTPluginLib::catSynth,          _T("Instrument Plugins") },
 	};
 
 	std::bitset<VSTPluginLib::numCategories> categoryUsed;
@@ -327,10 +327,19 @@ void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
 
 	HTREEITEM noPlug = AddTreeItem(_T("No plugin (empty slot)"), IMAGE_NOPLUGIN, false);
 	HTREEITEM currentPlug = noPlug;
-	bool foundCurrentPlug = false;
+	enum PlugMatchQuality
+	{
+		kNoMatch,
+		kSameIdAsLast,
+		kSameIdAsLastWithPlatformMatch,
+		kSameIdAsCurrent,
+		kFoundCurrentPlugin,
+	};
+	PlugMatchQuality foundPlugin = kNoMatch;
 
+	const int32 lastPluginID = TrackerSettings::Instance().gnPlugWindowLast;
 	const bool nameFilterActive = !m_nameFilter.empty();
-	auto currentTags = mpt::String::Split<mpt::ustring>(m_nameFilter, U_(" "));
+	const auto currentTags = mpt::String::Split<mpt::ustring>(m_nameFilter, U_(" "));
 
 	if(pManager)
 	{
@@ -396,41 +405,39 @@ void CSelectPluginDlg::UpdatePluginsList(int32 forceSelect /* = 0*/)
 				}
 			}
 
-			if(forceSelect != 0 && plug.pluginId2 == forceSelect)
+			if(forceSelect != nullptr && &plug == forceSelect)
 			{
 				// Forced selection (e.g. just after add plugin)
 				currentPlug = h;
-				foundCurrentPlug = true;
+				foundPlugin = kFoundCurrentPlugin;
 			}
 
-			if(m_pPlugin && !foundCurrentPlug)
+			if(m_pPlugin && foundPlugin < kFoundCurrentPlugin)
 			{
 				//Which plugin should be selected?
 				if(m_pPlugin->pMixPlugin)
 				{
-					//Current slot's plugin
+					// Current slot's plugin
 					IMixPlugin *pPlugin = m_pPlugin->pMixPlugin;
 					if (&pPlugin->GetPluginFactory() == &plug)
 					{
 						currentPlug = h;
+						foundPlugin = kFoundCurrentPlugin;
 					}
 				} else if(m_pPlugin->Info.dwPluginId1 != 0 || m_pPlugin->Info.dwPluginId2 != 0)
 				{
-					//Plugin with matching ID to current slot's plug
+					// Plugin with matching ID to current slot's plug
 					if(plug.pluginId1 == m_pPlugin->Info.dwPluginId1
 						&& plug.pluginId2 == m_pPlugin->Info.dwPluginId2)
 					{
 						currentPlug = h;
+						foundPlugin = kSameIdAsCurrent;
 					}
-				} else if(plug.pluginId2 == TrackerSettings::Instance().gnPlugWindowLast)
+				} else if(plug.pluginId2 == lastPluginID && foundPlugin < kSameIdAsLastWithPlatformMatch)
 				{
 					// Previously selected plugin
+					foundPlugin = plug.IsNativeFromCache() ? kSameIdAsLastWithPlatformMatch : kSameIdAsLast;
 					currentPlug = h;
-				}
-
-				if(currentPlug == h)
-				{
-					foundCurrentPlug = true;
 				}
 			}
 		}
@@ -649,7 +656,7 @@ void CSelectPluginDlg::OnAddPlugin()
 	if(update)
 	{
 		// Force selection to last added plug.
-		UpdatePluginsList(plugLib ? plugLib->pluginId2 : 0);
+		UpdatePluginsList(plugLib);
 	} else
 	{
 		Reporting::Error("At least one selected file was not a valid VST Plugin.");
@@ -664,7 +671,7 @@ void CSelectPluginDlg::OnScanFolder()
 
 	TrackerSettings::Instance().PathPlugins.SetWorkingDir(dlg.GetDirectory());
 	VSTPluginLib *plugLib = ScanPlugins(dlg.GetDirectory(), this);
-	UpdatePluginsList(plugLib ? plugLib->pluginId2 : 0);
+	UpdatePluginsList(plugLib);
 
 	// If any of the plugins was missing anywhere, try loading it
 	const CVstPluginManager *pManager = theApp.GetPluginManager();

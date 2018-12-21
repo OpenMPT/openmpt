@@ -51,14 +51,14 @@ protected:
 
 	void ReloadMissingPlugins(const VSTPluginLib *lib) const;
 
-	void DoClose();
-	void UpdatePluginsList(int32 forceSelect = 0);
+	void UpdatePluginsList(const VSTPluginLib *forceSelect = nullptr);
 	static bool VerifyPlug(VSTPluginLib *plug, CWnd *parent);
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual void OnCancel();
-	virtual BOOL PreTranslateMessage(MSG *pMsg);
+	
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	void OnCancel() override;
+	BOOL PreTranslateMessage(MSG *pMsg) override;
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnAddPlugin();
