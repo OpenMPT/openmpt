@@ -708,7 +708,7 @@ fail:
 	return result;
 #else
 	MPT_UNREFERENCED_PARAMETER(nSample);
-	MPT_UNREFERENCED_PARAMETER(filename);
+	MPT_UNREFERENCED_PARAMETER(f);
 	return false;
 #endif // MPT_WITH_FLAC
 }
