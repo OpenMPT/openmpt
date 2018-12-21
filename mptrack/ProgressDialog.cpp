@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "ProgressDialog.h"
+#include "Mptrack.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -24,6 +25,12 @@ CProgressDialog::CProgressDialog(CWnd *parent)
 
 CProgressDialog::~CProgressDialog()
 {
+	if(m_taskBarList)
+	{
+		m_taskBarList->SetProgressState(*theApp.m_pMainWnd, TBPF_NOPROGRESS);
+		m_taskBarList->Release();
+	}
+
 	if(IsWindow(m_hWnd))
 	{
 		// This should only happen if this dialog gets destroyed as part of stack unwinding
@@ -52,15 +59,39 @@ void CProgressDialog::SetText(const TCHAR *text)
 }
 
 
-void CProgressDialog::SetRange(uint32 min, uint32 max)
+void CProgressDialog::SetRange(uint64 min, uint64 max)
 {
-	::SendMessage(::GetDlgItem(m_hWnd, IDC_PROGRESS1), PBM_SETRANGE32, min, max);
+	MPT_ASSERT(min <= max);
+	m_min = min;
+	m_max = max;
+	m_shift = 0;
+	// Is the range too big for 32-bit values?
+	while(max > int32_max)
+	{
+		m_shift++;
+		max >>= 1;
+	}
+	::SendMessage(::GetDlgItem(m_hWnd, IDC_PROGRESS1), PBM_SETRANGE32, static_cast<uint32>(m_min >> m_shift), static_cast<uint32>(m_max >> m_shift));
 }
 
 
-void CProgressDialog::SetProgress(uint32 progress)
+void CProgressDialog::SetProgress(uint64 progress)
 {
-	::SendMessage(::GetDlgItem(m_hWnd, IDC_PROGRESS1), PBM_SETPOS, progress, 0);
+	::SendMessage(::GetDlgItem(m_hWnd, IDC_PROGRESS1), PBM_SETPOS, static_cast<uint32>(progress >> m_shift), 0);
+	if(m_taskBarList != nullptr)
+	{
+		m_taskBarList->SetProgressValue(*theApp.m_pMainWnd, progress - m_min, m_max - m_min);
+	}
+}
+
+
+void CProgressDialog::EnableTaskbarProgress()
+{
+	CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_ALL, IID_ITaskbarList3, (void**)&m_taskBarList);
+	if(m_taskBarList != nullptr)
+	{
+		m_taskBarList->SetProgressState(*theApp.m_pMainWnd, TBPF_NORMAL);
+	}
 }
 
 

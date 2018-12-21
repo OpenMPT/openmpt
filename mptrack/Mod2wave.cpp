@@ -929,7 +929,7 @@ void CDoWaveConvert::Run()
 	static int mixbuffer[MIXBUFFERSIZE * 4]; // channels
 
 	TCHAR s[80];
-	UINT ok = IDOK, pos = 0;
+	UINT ok = IDOK;
 	uint64 ullSamples = 0;
 
 	float normalizePeak = 0.0f;
@@ -1046,7 +1046,7 @@ void CDoWaveConvert::Run()
 
 	if (l < max) max = l;
 
-	SetRange(0, static_cast<uint32>(max >> 14));
+	SetRange(0, max);
 
 	// No pattern cue points yet
 	std::vector<PatternCuePoint> patternCuePoints;
@@ -1071,13 +1071,6 @@ void CDoWaveConvert::Run()
 	mainFrame->PauseMod();
 	m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
 	mainFrame->InitRenderer(&m_SndFile);
-
-	ITaskbarList3 *taskBarList = nullptr;
-	CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_ALL, IID_ITaskbarList3, (void**)&taskBarList);
-	if(taskBarList != nullptr)
-	{
-		taskBarList->SetProgressState(mainFrame->m_hWnd, TBPF_NORMAL);
-	}
 
 	for (UINT n = 0; ; n++)
 	{
@@ -1176,16 +1169,7 @@ void CDoWaveConvert::Run()
 				_stprintf(s, progressStr, bytesWritten >> 10, seconds / 60, seconds % 60u, timeRemaining / 60, timeRemaining % 60u);
 			SetText(s);
 
-			if(static_cast<uint32>(ullSamples >> 14) != pos)
-			{
-				pos = static_cast<uint32>(ullSamples >> 14);
-				SetProgress(pos);
-			}
-
-			if(taskBarList != nullptr)
-			{
-				taskBarList->SetProgressValue(mainFrame->m_hWnd, ullSamples, max);
-			}
+			SetProgress(ullSamples);
 		}
 		ProcessMessages();
 
@@ -1202,8 +1186,6 @@ void CDoWaveConvert::Run()
 
 	if(m_Settings.normalize)
 	{
-		SetRange(0, 100);
-
 		const float normalizeFactor = (normalizePeak != 0.0f) ? (1.0f / normalizePeak) : 1.0f;
 
 		const uint64 framesTotal = ullSamples;
@@ -1213,6 +1195,9 @@ void CDoWaveConvert::Run()
 
 		uint64 framesProcessed = 0;
 		uint64 framesToProcess = framesTotal;
+
+		SetRange(0, framesTotal);
+
 		while(framesToProcess)
 		{
 			const std::size_t framesChunk = std::min<std::size_t>(mpt::saturate_cast<std::size_t>(framesToProcess), MIXBUFFERSIZE);
@@ -1265,13 +1250,8 @@ void CDoWaveConvert::Run()
 				{
 					_stprintf(s, _T("Normalizing... (%d%%)"), percent);
 					SetText(s);
-					SetProgress(percent);
+					SetProgress(framesProcessed);
 					lastPercent = percent;
-
-					if(taskBarList != nullptr)
-					{
-						taskBarList->SetProgressValue(mainFrame->m_hWnd, percent, 100);
-					}
 				}
 				ProcessMessages();
 			}
@@ -1310,12 +1290,6 @@ void CDoWaveConvert::Run()
 	m_SndFile.m_PatternCuePoints = nullptr;
 
 	fileEnc = nullptr;
-
-	if(taskBarList)
-	{
-		taskBarList->SetProgressState(mainFrame->m_hWnd, TBPF_NOPROGRESS);
-		taskBarList->Release();
-	}
 
 	CMainFrame::UpdateAudioParameters(m_SndFile, TRUE);
 	EndDialog(ok);
