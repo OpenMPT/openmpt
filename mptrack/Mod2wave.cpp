@@ -949,7 +949,8 @@ void CDoWaveConvert::Run()
 		normalizeFile.open(normalizeFileName, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
 	}
 
-	mpt::SafeOutputFile fileStream(m_lpszFileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+	mpt::SafeOutputFile safeFileStream(m_lpszFileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+	mpt::ofstream& fileStream = safeFileStream;
 
 	if(!fileStream)
 	{

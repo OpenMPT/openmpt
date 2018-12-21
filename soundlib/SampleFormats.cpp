@@ -555,7 +555,8 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 #ifndef MODPLUG_NO_FILESAVE
 bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
 {
-	mpt::SafeOutputFile f(filename, std::ios::binary, GetSampleFileFlushMode());
+	mpt::SafeOutputFile sf(filename, std::ios::binary, GetSampleFileFlushMode());
+	mpt::ofstream& f = sf;
 	if(!f)
 	{
 		return false;
@@ -2175,7 +2176,8 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 	{
 		return false;
 	}
-	mpt::SafeOutputFile f(filename, std::ios::binary, GetSampleFileFlushMode());
+	mpt::SafeOutputFile sf(filename, std::ios::binary, GetSampleFileFlushMode());
+	mpt::ofstream& f = sf;
 	if(!f.good())
 	{
 		return false;

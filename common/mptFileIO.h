@@ -76,11 +76,15 @@ inline void fstream_open(Tbase & base, const mpt::PathString & filename, std::io
 
 } // namespace detail
 
+class SafeOutputFile;
+
 class fstream
 	: public std::fstream
 {
 private:
 	typedef std::fstream Tbase;
+public:
+	friend SafeOutputFile;
 public:
 	fstream() {}
 	fstream(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
@@ -105,6 +109,8 @@ class ifstream
 private:
 	typedef std::ifstream Tbase;
 public:
+	friend SafeOutputFile;
+public:
 	ifstream() {}
 	ifstream(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in)
 	{
@@ -128,6 +134,8 @@ class ofstream
 private:
 	typedef std::ofstream Tbase;
 public:
+	friend SafeOutputFile;
+public:
 	ofstream() {}
 	ofstream(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
@@ -139,6 +147,7 @@ protected:
 		: std::ofstream(file)
 	{
 	}
+
 #endif // MPT_COMPILER_MSVC
 public:
 	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::out)
@@ -166,14 +175,13 @@ static inline FlushMode FlushModeFromBool(bool flush)
 }
 
 class SafeOutputFile
-	: public mpt::ofstream
 {
 private:
-	typedef std::ofstream Tbase;
 	FlushMode m_FlushMode;
 #if MPT_COMPILER_MSVC
 	FILE *m_f;
 #endif // MPT_COMPILER_MSVC
+	mpt::ofstream m_s;
 #if MPT_COMPILER_MSVC
 	static mpt::tstring convert_mode(std::ios_base::openmode mode, FlushMode flushMode);
 	FILE * internal_fopen(const mpt::PathString &filename, std::ios_base::openmode mode, FlushMode flushMode)
@@ -210,21 +218,45 @@ private:
 public:
 	SafeOutputFile() = delete;
 	explicit SafeOutputFile(const mpt::PathString &filename, std::ios_base::openmode mode = std::ios_base::out, FlushMode flushMode = FlushMode::Full)
+		: m_FlushMode(flushMode)
 #if MPT_COMPILER_MSVC
-		: mpt::ofstream(internal_fopen(filename, mode | std::ios_base::out, flushMode))
+		, m_s(internal_fopen(filename, mode | std::ios_base::out, flushMode))
 #else // !MPT_COMPILER_MSVC
-		: mpt::ofstream(filename, mode)
+		, m_s(filename, mode)
 #endif // MPT_COMPILER_MSVC
-		, m_FlushMode(flushMode)
 	{
 	}
-	~SafeOutputFile()
+	mpt::ofstream& stream()
 	{
-		if(!*this)
+		return m_s;
+	}
+	operator mpt::ofstream& ()
+	{
+		return stream();
+	}
+	const mpt::ofstream& stream() const
+	{
+		return m_s;
+	}
+	operator const mpt::ofstream& () const
+	{
+		return stream();
+	}
+	operator bool() const
+	{
+		return stream().operator bool();
+	}
+	bool operator!() const
+	{
+		return stream().operator!();
+	}
+	~SafeOutputFile() noexcept(false)
+	{
+		if(!stream())
 		{
 			return;
 		}
-		if(!rdbuf())
+		if(!stream().rdbuf())
 		{
 			return;
 		}
@@ -234,17 +266,52 @@ public:
 				return;
 			}
 		#endif // MPT_COMPILER_MSVC
+		bool errorOnFlush = false;
 		if(m_FlushMode != FlushMode::None)
 		{
-			rdbuf()->pubsync();
+			try
+			{
+				if(stream().rdbuf()->pubsync() != 0)
+				{
+					errorOnFlush = true;
+				}
+			} catch(const std::exception &)
+			{
+				errorOnFlush = true;
+				#if MPT_COMPILER_MSVC
+					if(m_FlushMode != FlushMode::None)
+					{
+						if(fflush(m_f) != 0)
+						{
+							errorOnFlush = true;
+						}
+					}
+					if(fclose(m_f) != 0)
+					{
+						errorOnFlush = true;
+					}
+				#endif // MPT_COMPILER_MSVC
+				// ignore errorOnFlush here, and re-throw the earlier exception
+				throw;
+			}
 		}
 		#if MPT_COMPILER_MSVC
 			if(m_FlushMode != FlushMode::None)
 			{
-				fflush(m_f);
+				if(fflush(m_f) != 0)
+				{
+					errorOnFlush = true;
+				}
 			}
-			fclose(m_f);
+			if(fclose(m_f) != 0)
+			{
+				errorOnFlush = true;
+			}
 		#endif // MPT_COMPILER_MSVC
+		if(errorOnFlush)
+		{
+			throw std::ios_base::failure("Error flushing file buffers.");
+		}
 	}
 };
 
