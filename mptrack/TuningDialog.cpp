@@ -880,7 +880,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				pT = nullptr;
 				if(tc.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 				{
-					sLoadReport += mpt::format(U_("- Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n"))(fileNameExt, CTuningCollection::s_nMaxTuningCount);
+					sLoadReport += mpt::format(U_("- Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n"))(fileNameExt, static_cast<std::size_t>(CTuningCollection::s_nMaxTuningCount));
 				} else 
 				{
 					sLoadReport += mpt::format(U_("- Unable to import file \"%1\": unknown reason.\n"))(fileNameExt);
