@@ -46,7 +46,7 @@ struct NoInterpolation
 
 	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32)
 	{
-		static_assert(Traits::numChannelsIn <= Traits::numChannelsOut, "Too many input channels");
+		static_assert(static_cast<int>(Traits::numChannelsIn) <= static_cast<int>(Traits::numChannelsOut), "Too many input channels");
 
 		for(int i = 0; i < Traits::numChannelsIn; i++)
 		{
