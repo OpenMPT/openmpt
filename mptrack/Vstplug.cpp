@@ -516,17 +516,17 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 		//"editFile"
 		//"startStopProcess"
 		//"sendVstMidiEventFlagIsRealtime"
-		if(!strcmp((char*)ptr,"sendVstEvents")
-			|| !strcmp((char*)ptr,"sendVstMidiEvent")
-			|| !strcmp((char*)ptr,"sendVstTimeInfo")
-			|| !strcmp((char*)ptr,"receiveVstEvents")
-			|| !strcmp((char*)ptr,"receiveVstMidiEvent")
-			|| !strcmp((char*)ptr,"supplyIdle")
-			|| !strcmp((char*)ptr,"sizeWindow")
-			|| !strcmp((char*)ptr,"openFileSelector")
-			|| !strcmp((char*)ptr,"closeFileSelector")
-			|| !strcmp((char*)ptr,"acceptIOChanges")
-			|| !strcmp((char*)ptr,"reportConnectionChanges"))
+		if(!strcmp((char*)ptr, canDoSendVstEvents)
+			|| !strcmp((char*)ptr, canDoSendVstMidiEvent)
+			|| !strcmp((char*)ptr, canDoSendVstTimeInfo)
+			|| !strcmp((char*)ptr, canDoReceiveVstEvents)
+			|| !strcmp((char*)ptr, canDoReceiveVstMidiEvent)
+			|| !strcmp((char*)ptr, "supplyIdle")
+			|| !strcmp((char*)ptr, canDoSizeWindow)
+			|| !strcmp((char*)ptr, canDoOpenFileSelector)
+			|| !strcmp((char*)ptr, canDoCloseFileSelector)
+			|| !strcmp((char*)ptr, canDoAcceptIOChanges)
+			|| !strcmp((char*)ptr, canDoReportConnectionChanges))
 		{
 			return HostCanDo;
 		} else

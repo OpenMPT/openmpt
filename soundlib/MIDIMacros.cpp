@@ -357,17 +357,17 @@ void MIDIMacroConfig::Sanitize()
 // Helper function for UpgradeMacros()
 void MIDIMacroConfig::UpgradeMacroString(Macro &macro) const
 {
-	for(uint32 i = 0; i < MACRO_LENGTH; i++)
+	for(auto &c : macro)
 	{
-		if(macro[i] >= 'a' && macro[i] <= 'f')		// both A-F and a-f were treated as hex constants
+		if(c >= 'a' && c <= 'f') // Both A-F and a-f were treated as hex constants
 		{
-			macro[i] = macro[i] - 'a' + 'A';
-		} else if(macro[i] == 'K' || macro[i] == 'k')	// channel was K or k
+			c = c - 'a' + 'A';
+		} else if(c == 'K' || c == 'k') // Channel was K or k
 		{
-			macro[i] = 'c';
-		} else if(macro[i] == 'X' || macro[i] == 'x' || macro[i] == 'Y' || macro[i] == 'y')	// those were pointless
+			c = 'c';
+		} else if(c == 'X' || c == 'x' || c == 'Y' || c == 'y') // Those were pointless
 		{
-			macro[i] = 'z';
+			c = 'z';
 		}
 	}
 }

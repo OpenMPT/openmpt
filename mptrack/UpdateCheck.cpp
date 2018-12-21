@@ -150,12 +150,10 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 		const time_t now = time(nullptr);
 		const time_t lastCheck = TrackerSettings::Instance().UpdateLastUpdateCheck.Get();
 		// Check update interval. Note that we always check for updates when the system time had gone backwards (i.e. when the last update check supposedly happened in the future).
-		if(difftime(now, lastCheck) > 0.0)
+		const double secsSinceLastCheck = difftime(now, lastCheck);
+		if(secsSinceLastCheck > 0.0 && secsSinceLastCheck < updateCheckPeriod * 86400.0)
 		{
-			if(difftime(now, lastCheck) < static_cast<double>(updateCheckPeriod * 86400))
-			{
-				return;
-			}
+			return;
 		}
 
 		// Never ran update checks before, so we notify the user of automatic update checks.
@@ -190,13 +188,12 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 	// ask if user wants to contribute system statistics
 	if(!TrackerSettings::Instance().UpdateStatisticsConsentAsked)
 	{
-		TrackerSettings::Instance().UpdateStatistics = (ConfirmAnswer::cnfYes == Reporting::Confirm(
-			U_("Do you want to contribute to OpenMPT by providing system statistics?\r\n") +
-			U_("\r\n") +
-			mpt::String::Replace(CUpdateCheck::GetStatisticsUserInformation(false), U_("\n"), U_("\r\n")) + U_("\r\n") +
-			U_("\r\n") +
+		const auto enableStatistics = Reporting::Confirm(
+			U_("Do you want to contribute to OpenMPT by providing system statistics?\r\n\r\n") +
+			mpt::String::Replace(CUpdateCheck::GetStatisticsUserInformation(false), U_("\n"), U_("\r\n")) + U_("\r\n\r\n") +
 			mpt::format(U_("This option was previously %1 on your system.\r\n"))(TrackerSettings::Instance().UpdateStatistics ? U_("enabled") : U_("disabled")),
-			false, !TrackerSettings::Instance().UpdateStatistics.Get()));
+			false, !TrackerSettings::Instance().UpdateStatistics.Get());
+		TrackerSettings::Instance().UpdateStatistics = (enableStatistics == ConfirmAnswer::cnfYes);
 		TrackerSettings::Instance().UpdateStatisticsConsentAsked = true;
 	}
 
@@ -284,19 +281,19 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 		j["System"]["Processor"]["Id"]["Family"] = ProcFamily;
 		j["System"]["Processor"]["Id"]["Model"] = ProcModel;
 		j["System"]["Processor"]["Id"]["Stepping"] = ProcStepping;
-		j["System"]["Processor"]["Features"]["lm"] = ((GetRealProcSupport() & PROCSUPPORT_LM) ? true : false);
-		j["System"]["Processor"]["Features"]["cmov"] = ((GetRealProcSupport() & PROCSUPPORT_CMOV) ? true : false);
-		j["System"]["Processor"]["Features"]["mmx"] = ((GetRealProcSupport() & PROCSUPPORT_MMX) ? true : false);
-		j["System"]["Processor"]["Features"]["mmxext"] = ((GetRealProcSupport() & PROCSUPPORT_AMD_MMXEXT) ? true : false);
-		j["System"]["Processor"]["Features"]["3dnow"] = ((GetRealProcSupport() & PROCSUPPORT_AMD_3DNOW) ? true : false);
-		j["System"]["Processor"]["Features"]["3dnowext"] = ((GetRealProcSupport() & PROCSUPPORT_AMD_3DNOWEXT) ? true : false);
-		j["System"]["Processor"]["Features"]["sse"] = ((GetRealProcSupport() & PROCSUPPORT_SSE) ? true : false);
-		j["System"]["Processor"]["Features"]["sse2"] = ((GetRealProcSupport() & PROCSUPPORT_SSE2) ? true : false);
-		j["System"]["Processor"]["Features"]["sse3"] = ((GetRealProcSupport() & PROCSUPPORT_SSE3) ? true : false);
-		j["System"]["Processor"]["Features"]["ssse3"] = ((GetRealProcSupport() & PROCSUPPORT_SSSE3) ? true : false);
-		j["System"]["Processor"]["Features"]["sse4_1"] = ((GetRealProcSupport() & PROCSUPPORT_SSE4_1) ? true : false);
-		j["System"]["Processor"]["Features"]["sse4_2"] = ((GetRealProcSupport() & PROCSUPPORT_SSE4_2) ? true : false);
-	#endif
+		j["System"]["Processor"]["Features"]["lm"] = ((GetRealProcSupport() & PROCSUPPORT_LM) != 0);
+		j["System"]["Processor"]["Features"]["cmov"] = ((GetRealProcSupport() & PROCSUPPORT_CMOV) != 0);
+		j["System"]["Processor"]["Features"]["mmx"] = ((GetRealProcSupport() & PROCSUPPORT_MMX) != 0);
+		j["System"]["Processor"]["Features"]["mmxext"] = ((GetRealProcSupport() & PROCSUPPORT_AMD_MMXEXT) != 0);
+		j["System"]["Processor"]["Features"]["3dnow"] = ((GetRealProcSupport() & PROCSUPPORT_AMD_3DNOW) != 0);
+		j["System"]["Processor"]["Features"]["3dnowext"] = ((GetRealProcSupport() & PROCSUPPORT_AMD_3DNOWEXT) != 0);
+		j["System"]["Processor"]["Features"]["sse"] = ((GetRealProcSupport() & PROCSUPPORT_SSE) != 0);
+		j["System"]["Processor"]["Features"]["sse2"] = ((GetRealProcSupport() & PROCSUPPORT_SSE2) != 0);
+		j["System"]["Processor"]["Features"]["sse3"] = ((GetRealProcSupport() & PROCSUPPORT_SSE3) != 0);
+		j["System"]["Processor"]["Features"]["ssse3"] = ((GetRealProcSupport() & PROCSUPPORT_SSSE3) != 0);
+		j["System"]["Processor"]["Features"]["sse4_1"] = ((GetRealProcSupport() & PROCSUPPORT_SSE4_1) != 0);
+		j["System"]["Processor"]["Features"]["sse4_2"] = ((GetRealProcSupport() & PROCSUPPORT_SSE4_2) != 0);
+#endif
 	return j.dump(1, '\t');
 }
 
