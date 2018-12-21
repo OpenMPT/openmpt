@@ -1454,14 +1454,29 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 				fileNameW = mpt::String::Replace(fileNameW, U_("%sample_name%"), mpt::ToUnicode(sSampleName));
 				fileName = mpt::PathString::FromUnicode(fileNameW);
 			}
-			if(!mpt::PathString::CompareNoCase(ext, P_("raw")))
-				ok = m_sndFile.SaveRAWSample(smp, fileName);
-			else if(!mpt::PathString::CompareNoCase(ext, P_("flac")))
-				ok = m_sndFile.SaveFLACSample(smp, fileName);
-			else if(!mpt::PathString::CompareNoCase(ext, P_("s3i")))
-				ok = m_sndFile.SaveS3ISample(smp, fileName);
-			else
-				ok = m_sndFile.SaveWAVSample(smp, fileName);
+
+			try
+			{
+				mpt::SafeOutputFile f(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				if(!f)
+				{
+					ok = false;
+					continue;
+				}
+				//f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+
+				if (!mpt::PathString::CompareNoCase(ext, P_("raw")))
+					ok = m_sndFile.SaveRAWSample(smp, f);
+				else if (!mpt::PathString::CompareNoCase(ext, P_("flac")))
+					ok = m_sndFile.SaveFLACSample(smp, f);
+				else if (!mpt::PathString::CompareNoCase(ext, P_("s3i")))
+					ok = m_sndFile.SaveS3ISample(smp, f);
+				else
+					ok = m_sndFile.SaveWAVSample(smp, f);
+			} catch(const std::exception &)
+			{
+				ok = false;
+			}
 
 			if(ok)
 			{
