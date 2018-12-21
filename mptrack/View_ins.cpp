@@ -99,8 +99,6 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_WM_NCLBUTTONDOWN()
 	ON_WM_NCLBUTTONUP()
 	ON_WM_NCLBUTTONDBLCLK()
-	ON_WM_CHAR()
-	ON_WM_KEYUP()
 	ON_WM_DROPFILES()
 	ON_COMMAND(ID_PREVINSTRUMENT,			&CViewInstrument::OnPrevInstrument)
 	ON_COMMAND(ID_NEXTINSTRUMENT,			&CViewInstrument::OnNextInstrument)
@@ -1945,7 +1943,7 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 				}
 				CriticalSection cs;
 				pModDoc->CheckNNA(note, m_nInstrument, m_baPlayingNote);
-				pModDoc->PlayNote(PlayNoteParam(note).Instrument(m_nInstrument));
+				pModDoc->PlayNote(PlayNoteParam(note).Instrument(m_nInstrument), &m_noteChannel);
 			}
 			CString noteName;
 			if(ModCommand::IsNote(note))
@@ -1958,17 +1956,6 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 	{
 		pModDoc->PlayNote(PlayNoteParam(note).Instrument(m_nInstrument));
 	}
-}
-
-void CViewInstrument::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
-{
-	CModScrollView::OnChar(nChar, nRepCnt, nFlags);
-}
-
-
-void CViewInstrument::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
-{
-	CModScrollView::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
 
@@ -2265,7 +2252,7 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	{
 		ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcInstrumentStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12);
 		if(ModCommand::IsNote(note)) m_baPlayingNote[note] = false;
-		pModDoc->NoteOff(note, false, m_nInstrument);
+		pModDoc->NoteOff(note, false, m_nInstrument, m_noteChannel[note - NOTE_MIN]);
 		return wParam;
 	}
 

@@ -16,6 +16,7 @@
 
 #include <vector>
 #include "../soundlib/Snd_defs.h"
+#include "Moddoc.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -27,7 +28,7 @@ class CAbstractVstEditor: public CDialog
 protected:
 	CMenu m_Menu;
 	CMenu m_PresetMenu;
-	std::vector<CMenu *> m_pPresetMenuGroup;
+	std::vector<std::unique_ptr<CMenu>> m_presetMenuGroup;
 	CMenu m_InputMenu;
 	CMenu m_OutputMenu;
 	CMenu m_MacroMenu;
@@ -40,6 +41,7 @@ protected:
 	INSTRUMENTINDEX m_nInstrument;
 	bool m_isMinimized = false;
 	bool m_updateDisplay = false;
+	CModDoc::NoteToChannelMap m_noteChannel;	// Note -> Preview channel assignment
 
 public:
 	IMixPlugin &m_VstPlugin;

@@ -113,7 +113,7 @@ protected:
 	HWND m_hWndFollow = nullptr;
 	FlagSet<Notification::Type, uint16> m_notifyType;
 	Notification::Item m_notifyItem = 0;
-	CSize m_szOldPatternScrollbarsPos;
+	CSize m_szOldPatternScrollbarsPos = { -10, -10 };
 
 	CPatternUndo m_PatternUndo;
 	CSampleUndo m_SampleUndo;
@@ -122,7 +122,15 @@ protected:
 	time_t m_creationTime;
 
 	std::atomic<bool> m_modifiedAutosave = false; // Modified since last autosave?
+
 public:
+	class NoteToChannelMap : public std::array<CHANNELINDEX, NOTE_MAX - NOTE_MIN + 1>
+	{
+	public:
+		NoteToChannelMap() { fill(CHANNELINDEX_INVALID); }
+	};
+	NoteToChannelMap m_noteChannel;	// Note -> Preview channel assignment
+
 	bool m_ShowSavedialog = false;
 	bool m_bHasValidPath = false; //becomes true if document is loaded or saved.
 
@@ -224,8 +232,8 @@ public:
 	bool RemoveInstrument(INSTRUMENTINDEX nIns);
 
 	void ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plugin, InputTargetContext ctx);
-	CHANNELINDEX PlayNote(PlayNoteParam &params);
-	bool NoteOff(UINT note, bool fade = false, INSTRUMENTINDEX ins = INSTRUMENTINDEX_INVALID, CHANNELINDEX currentChn = CHANNELINDEX_INVALID, CHANNELINDEX stopChn = CHANNELINDEX_INVALID); //rewbs.vstiLive: add params
+	CHANNELINDEX PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChannel = nullptr);
+	bool NoteOff(UINT note, bool fade = false, INSTRUMENTINDEX ins = INSTRUMENTINDEX_INVALID, CHANNELINDEX currentChn = CHANNELINDEX_INVALID);
 	void CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, std::bitset<128> &playingNotes);
 	void UpdateOPLInstrument(SAMPLEINDEX smp);
 

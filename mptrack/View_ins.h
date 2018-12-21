@@ -64,6 +64,7 @@ protected:
 	bool m_mouseMoveModified = false;
 
 	std::bitset<128> m_baPlayingNote;
+	CModDoc::NoteToChannelMap m_noteChannel;	// Note -> Preview channel assignment
 	std::array<uint32, MAX_CHANNELS> m_dwNotifyPos;
 
 public:
@@ -207,8 +208,6 @@ protected:
 	afx_msg void OnNcLButtonDown(UINT, CPoint);
 	afx_msg void OnNcLButtonUp(UINT, CPoint);
 	afx_msg void OnNcLButtonDblClk(UINT, CPoint);
-	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnEnvLoopChanged();
 	afx_msg void OnEnvSustainChanged();
 	afx_msg void OnEnvCarryChanged();

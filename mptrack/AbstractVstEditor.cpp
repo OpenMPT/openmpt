@@ -10,7 +10,6 @@
 
 #include "stdafx.h"
 #include "Mptrack.h"
-#include "Moddoc.h"
 #include "Mainfrm.h"
 #include "Clipboard.h"
 #include "../soundlib/Sndfile.h"
@@ -82,24 +81,6 @@ CAbstractVstEditor::CAbstractVstEditor(IMixPlugin &plugin)
 
 CAbstractVstEditor::~CAbstractVstEditor()
 {
-	m_Menu.DestroyMenu();
-	m_PresetMenu.DestroyMenu();
-	m_InputMenu.DestroyMenu();
-	m_OutputMenu.DestroyMenu();
-	m_MacroMenu.DestroyMenu();
-
-	m_OptionsMenu.DestroyMenu();
-
-	for(size_t i = 0; i < m_pPresetMenuGroup.size(); i++)
-	{
-		if(m_pPresetMenuGroup[i]->m_hMenu)
-		{
-			m_pPresetMenuGroup[i]->DestroyMenu();
-			delete m_pPresetMenuGroup[i];
-		}
-	}
-	m_pPresetMenuGroup.clear();
-
 	m_VstPlugin.m_pEditor = nullptr;
 }
 
@@ -247,7 +228,7 @@ void CAbstractVstEditor::OnRandomizePreset()
 	if(dlg.DoModal() == IDOK)
 	{
 		randomFactor = dlg.resultAsDouble;
-		PlugParamValue factor = PlugParamValue(randomFactor) / 100.0f;
+		PlugParamValue factor = PlugParamValue(randomFactor / 100.0);
 		PlugParamIndex numParams = m_VstPlugin.GetNumParameters();
 		for(PlugParamIndex p = 0; p < numParams; p++)
 		{
@@ -288,6 +269,7 @@ bool CAbstractVstEditor::OpenEditor(CWnd *)
 void CAbstractVstEditor::DoClose()
 {
 	StoreWindowPos();
+	m_presetMenuGroup.clear();
 	DestroyWindow();
 }
 
@@ -505,7 +487,11 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		{
 			CModDoc* pModDoc = m_VstPlugin.GetModDoc();
 			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
-			pModDoc->PlayNote(PlayNoteParam(static_cast<ModCommand::NOTE>(wParam - kcVSTGUIStartNotes + NOTE_MIN + pMainFrm->GetBaseOctave() * 12)).Instrument(m_nInstrument));
+			const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcVSTGUIStartNotes + NOTE_MIN + pMainFrm->GetBaseOctave() * 12);
+			if(ModCommand::IsNote(note))
+			{
+				pModDoc->PlayNote(PlayNoteParam(note).Instrument(m_nInstrument), &m_noteChannel);
+			}
 		}
 		return wParam;
 	}
@@ -514,8 +500,12 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		if(ValidateCurrentInstrument())
 		{
 			CModDoc* pModDoc = m_VstPlugin.GetModDoc();
-			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
-			pModDoc->NoteOff(static_cast<UINT>(wParam) - kcVSTGUIStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12, false, m_nInstrument);
+			CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+			const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcVSTGUIStartNoteStops + NOTE_MIN + pMainFrm->GetBaseOctave() * 12);
+			if(ModCommand::IsNote(note))
+			{
+				pModDoc->NoteOff(note, false, m_nInstrument, m_noteChannel[note - NOTE_MIN]);
+			}
 		}
 		return wParam;
 	}
@@ -594,7 +584,7 @@ void CAbstractVstEditor::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
 	{
 		// Preset menu
 		m_currentPresetMenu = nItemID;
-		GeneratePresetMenu(nItemID * PRESETS_PER_GROUP, *m_pPresetMenuGroup[nItemID]);
+		GeneratePresetMenu(nItemID * PRESETS_PER_GROUP, *m_presetMenuGroup[nItemID]);
 	}
 }
 
@@ -609,16 +599,7 @@ void CAbstractVstEditor::UpdatePresetMenu(bool force)
 		if(curProg == m_nCurProg && !force)			// ... unless menu exists and is accurate,
 			return;									// in which case we are done.
 
-		for(size_t i = 0; i < m_pPresetMenuGroup.size(); i++)
-		{
-			// Destroy any submenus
-			if (m_pPresetMenuGroup[i]->m_hMenu)
-			{
-				m_pPresetMenuGroup[i]->DestroyMenu();
-				delete m_pPresetMenuGroup[i];
-			}
-		}
-		m_pPresetMenuGroup.clear();
+		m_presetMenuGroup.clear();
 
 		m_PresetMenu.DestroyMenu();				// Destroy Factory preset menu
 		m_Menu.DeleteMenu(1, MF_BYPOSITION);
@@ -645,18 +626,18 @@ void CAbstractVstEditor::UpdatePresetMenu(bool force)
 	{
 		// Depending on the plugin and its number of presets, filling the sub menus can take quite a while (e.g. Synth1),
 		// so we fill the menus only on demand (when they  are opened), so that the editor GUI creation doesn't take forever.
-		m_pPresetMenuGroup.resize(numSubMenus);
+		m_presetMenuGroup.resize(numSubMenus);
 		for(int bank = 0, prog = 0; bank < numSubMenus; bank++, prog += PRESETS_PER_GROUP)
 		{
-			m_pPresetMenuGroup[bank] = new CMenu();
-			m_pPresetMenuGroup[bank]->CreatePopupMenu();
+			m_presetMenuGroup[bank] = std::make_unique<CMenu>();
+			m_presetMenuGroup[bank]->CreatePopupMenu();
 
 			CString label;
 			label.Format(_T("Bank %d (%d-%d)"), bank + 1, prog + 1, std::min(prog + PRESETS_PER_GROUP, numProgs));
 			m_PresetMenu.AppendMenu(MF_POPUP
 				| (bank % 32 == 0 ? MF_MENUBREAK : 0)
 				| (curProg >= prog && curProg < prog + PRESETS_PER_GROUP ? MF_CHECKED : MF_UNCHECKED),
-				reinterpret_cast<UINT_PTR>(m_pPresetMenuGroup[bank]->m_hMenu), label);
+				reinterpret_cast<UINT_PTR>(m_presetMenuGroup[bank]->m_hMenu), label);
 		}
 	}
 

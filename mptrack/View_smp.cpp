@@ -136,7 +136,6 @@ CViewSample::CViewSample()
 {
 	MemsetZero(m_NcButtonState);
 	m_dwNotifyPos.fill(Notification::PosInvalid);
-	m_noteChannel.fill(CHANNELINDEX_INVALID);
 	m_bmpEnvBar.Create(&CMainFrame::GetMainFrame()->m_SampleIcons);
 }
 
@@ -992,7 +991,7 @@ std::pair<int, int> CViewSample::FindMinMax(const int8 *p, SmpLength numSamples,
 			p += numChannels;
 		}
 	}
-	return std::make_pair(minVal, maxVal);
+	return { minVal, maxVal };
 }
 
 
@@ -1021,7 +1020,7 @@ std::pair<int, int> CViewSample::FindMinMax(const int16 *p, SmpLength numSamples
 			p += numChannels;
 		}
 	}
-	return std::make_pair(minVal, maxVal);
+	return { minVal, maxVal };
 }
 
 
@@ -2601,7 +2600,7 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 		} else
 		{
 			if(m_dwStatus[SMPSTATUS_KEYDOWN])
-				pModDoc->NoteOff(note, true);
+				pModDoc->NoteOff(note, true, m_noteChannel[note - NOTE_MIN]);
 			else
 				pModDoc->NoteOff(0, true);
 
@@ -2617,7 +2616,7 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 				loopend = loopstart = 0;
 			}
 
-			m_noteChannel[note - NOTE_MIN] = pModDoc->PlayNote(PlayNoteParam(note).Sample(m_nSample).Volume(volume).LoopStart(loopstart).LoopEnd(loopend).Offset(nStartPos));
+			pModDoc->PlayNote(PlayNoteParam(note).Sample(m_nSample).Volume(volume).LoopStart(loopstart).LoopEnd(loopend).Offset(nStartPos), &m_noteChannel);
 
 			m_dwStatus.set(SMPSTATUS_KEYDOWN);
 

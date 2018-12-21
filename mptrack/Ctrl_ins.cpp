@@ -114,7 +114,7 @@ BOOL CNoteMapWnd::PreTranslateMessage(MSG* pMsg)
 		if (((pMsg->wParam >= '0') && (pMsg->wParam <= '9')) || (pMsg->wParam == ' ') ||
 			((pMsg->wParam >= VK_NUMPAD0) && (pMsg->wParam <= VK_NUMPAD9)))
 		{
-			StopNote(m_nPlayingNote);
+			StopNote();
 			return true;
 		}
 	}
@@ -563,9 +563,9 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	// Handle notes
 
-	if (wParam>=kcInsNoteMapStartNotes && wParam<=kcInsNoteMapEndNotes)
+	if (wParam >= kcInsNoteMapStartNotes && wParam <= kcInsNoteMapEndNotes)
 	{
-		//Special case: number keys override notes if we're in the sample # column.
+		// Special case: number keys override notes if we're in the sample # column.
 		if ((m_bIns) && (((lParam >= '0') && (lParam <= '9')) || (lParam == ' ')))
 			HandleChar(lParam);
 		else
@@ -574,9 +574,9 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		return wParam;
 	}
 
-	if (wParam>=kcInsNoteMapStartNoteStops && wParam<=kcInsNoteMapEndNoteStops)
+	if (wParam >= kcInsNoteMapStartNoteStops && wParam <= kcInsNoteMapEndNoteStops)
 	{
-		StopNote(m_nPlayingNote);
+		StopNote();
 		return wParam;
 	}
 
@@ -623,6 +623,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 			}
 			if (n != pIns->NoteMap[m_nNote])
 			{
+				StopNote(); // Stop old note according to current instrument settings
 				pIns->NoteMap[m_nNote] = static_cast<ModCommand::NOTE>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				InvalidateRect(NULL, FALSE);
@@ -630,7 +631,6 @@ void CNoteMapWnd::EnterNote(UINT note)
 			if (bOk)
 			{
 				PlayNote(m_nNote);
-				//SetCurrentNote(m_nNote+1);
 			}
 
 		}
@@ -662,6 +662,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 					PrepareUndo("Enter Instrument");
 					m_undo = false;
 				}
+				StopNote(); // Stop old note according to current instrument settings
 				pIns->Keyboard[m_nNote] = static_cast<SAMPLEINDEX>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				InvalidateRect(NULL, FALSE);
@@ -700,6 +701,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 					m_undo = false;
 				}
 
+				StopNote(); // Stop old note according to current instrument settings
 				pIns->NoteMap[m_nNote] = static_cast<ModCommand::NOTE>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				InvalidateRect(NULL, FALSE);
@@ -783,21 +785,24 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 }
 
 
-void CNoteMapWnd::PlayNote(int note)
+void CNoteMapWnd::PlayNote(UINT note)
 {
-	if(m_nPlayingNote >= 0) return; //no polyphony in notemap window
-	m_modDoc.PlayNote(PlayNoteParam(static_cast<ModCommand::NOTE>(note + NOTE_MIN)).Instrument(m_nInstrument));
-	m_nPlayingNote = note;
+	if(m_nPlayingNote != NOTE_NONE)
+	{
+		// No polyphony in notemap window
+		StopNote();
+	}
+	m_nPlayingNote = static_cast<ModCommand::NOTE>(note + NOTE_MIN);
+	m_noteChannel = m_modDoc.PlayNote(PlayNoteParam(m_nPlayingNote).Instrument(m_nInstrument));
 }
 
 
-void CNoteMapWnd::StopNote(int note = -1)
+void CNoteMapWnd::StopNote()
 {
-	if(note < 0) note = m_nPlayingNote;
-	if(note < 0) return;
+	if(!ModCommand::IsNote(m_nPlayingNote)) return;
 
-	m_modDoc.NoteOff(note, true, m_nInstrument);
-	m_nPlayingNote = -1;
+	m_modDoc.NoteOff(m_nPlayingNote, true, m_nInstrument, m_noteChannel);
+	m_nPlayingNote = NOTE_NONE;
 }
 
 
@@ -926,11 +931,6 @@ CCtrlInstruments::CCtrlInstruments(CModControlView &parent, CModDoc &document)
 	, m_startedEdit(false)
 {
 	m_nLockCount = 1;
-}
-
-
-CCtrlInstruments::~CCtrlInstruments()
-{
 }
 
 

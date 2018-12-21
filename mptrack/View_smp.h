@@ -61,7 +61,7 @@ protected:
 
 	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
 	std::array<SmpLength, MAX_CHANNELS> m_dwNotifyPos;
-	std::array<CHANNELINDEX, NOTE_MAX - NOTE_MIN + 1> m_noteChannel;	// Note -> Preview channel assignment
+	CModDoc::NoteToChannelMap m_noteChannel;	// Note -> Preview channel assignment
 
 public:
 	CViewSample();
@@ -191,6 +191,12 @@ protected:
 	afx_msg void OnSampleSlice();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+	BOOL OnGestureZoom(CPoint ptCenter, long lDelta) override
+	{
+		DoZoom(lDelta / 10, ptCenter);
+		return TRUE;
+	}
 };
 
 DECLARE_FLAGSET(CViewSample::Flags)
