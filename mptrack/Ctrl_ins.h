@@ -1,5 +1,5 @@
 /*
- * ctrl_ins.h
+ * Ctrl_ins.h
  * ----------
  * Purpose: Instrument tab, upper panel.
  * Notes  : (currently none)
@@ -20,20 +20,21 @@ OPENMPT_NAMESPACE_BEGIN
 class CNoteMapWnd;
 class CCtrlInstruments;
 
-
 class CNoteMapWnd: public CStatic
 {
 protected:
 	CModDoc &m_modDoc;
 	CCtrlInstruments &m_pParent;
-	HFONT m_hFont;
-	UINT m_nNote, m_nOldNote, m_nOldIns;
-	INSTRUMENTINDEX m_nInstrument;
-	int m_nPlayingNote;
-	int m_cxFont, m_cyFont;
+	HFONT m_hFont = nullptr;
+	UINT m_nNote = (NOTE_MIDDLEC - NOTE_MIN), m_nOldNote = 0, m_nOldIns = 0;
+	INSTRUMENTINDEX m_nInstrument = 0;
+	int m_cxFont = 0, m_cyFont = 0;
 	COLORREF colorText, colorTextSel;
-	bool m_bIns : 1;
-	bool m_undo : 1;
+	CHANNELINDEX m_noteChannel = 0;
+	ModCommand::NOTE m_nPlayingNote = NOTE_NONE;
+
+	bool m_bIns = false;
+	bool m_undo = true;
 
 private:
 	void MapTranspose(int nAmount);
@@ -43,28 +44,18 @@ public:
 	CNoteMapWnd(CCtrlInstruments &parent, CModDoc &document)
 		: m_pParent(parent)
 		, m_modDoc(document)
-		, m_nPlayingNote(-1)
-		, m_nNote(NOTE_MIDDLEC - NOTE_MIN)
-		, m_nInstrument(0)
-		, m_cxFont(0)
-		, m_cyFont(0)
-		, m_hFont(NULL)
-		, m_nOldNote(0)
-		, m_nOldIns(0)
-		, m_bIns(false)
-		, m_undo(true)
 	{ }
 	void SetCurrentInstrument(INSTRUMENTINDEX nIns);
 	void SetCurrentNote(UINT nNote);
-	void EnterNote(UINT note); //rewbs.customKeys - handle notes separately from other input.
-	bool HandleChar(WPARAM c); //rewbs.customKeys
-	bool HandleNav(WPARAM k);  //rewbs.customKeys
-	void PlayNote(int note); //rewbs.customKeys
-	void StopNote(int note); //rewbs.customKeys
+	void EnterNote(UINT note);
+	bool HandleChar(WPARAM c);
+	bool HandleNav(WPARAM k);
+	void PlayNote(UINT note);
+	void StopNote();
 
 public:
 	//{{AFX_VIRTUAL(CNoteMapWnd)
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	BOOL PreTranslateMessage(MSG* pMsg) override;
 	//}}AFX_VIRTUAL
 
 protected:
@@ -131,7 +122,6 @@ protected:
 	
 public:
 	CCtrlInstruments(CModControlView &parent, CModDoc &document);
-	virtual ~CCtrlInstruments();
 
 public:
 	void SetModified(InstrumentHint hint, bool updateAll);
@@ -141,21 +131,21 @@ public:
 	bool OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
 	void SaveInstrument(bool doBatchSave);
 	BOOL EditSample(UINT nSample);
-	VOID UpdateFilterText();
+	void UpdateFilterText();
 	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glInstrumentWindowHeight;} 	//rewbs.varWindowSize
 
 public:
 	//{{AFX_VIRTUAL(CCtrlInstruments)
-	virtual BOOL OnInitDialog();
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-	virtual CRuntimeClass *GetAssociatedViewClass();
-	virtual void RecalcLayout();
-	virtual void OnActivatePage(LPARAM);
-	virtual void OnDeactivatePage();
-	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
-	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
-	virtual BOOL GetToolTipText(UINT uId, LPTSTR pszText);
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	BOOL OnInitDialog() override;
+	void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV support
+	CRuntimeClass *GetAssociatedViewClass() override;
+	void RecalcLayout() override;
+	void OnActivatePage(LPARAM) override;
+	void OnDeactivatePage() override;
+	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
+	LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam) override;
+	BOOL GetToolTipText(UINT uId, LPTSTR pszText) override;
+	BOOL PreTranslateMessage(MSG* pMsg) override;
 	//}}AFX_VIRTUAL
 protected:
 	void PrepareUndo(const char *description);

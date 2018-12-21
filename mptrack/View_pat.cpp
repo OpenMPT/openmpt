@@ -171,9 +171,9 @@ void CViewPattern::OnInitialUpdate()
 	CModScrollView::OnInitialUpdate();
 	ChnVUMeters.fill(0);
 	OldVUMeters.fill(0);
-	memset(previousNote, NOTE_NONE, sizeof(previousNote));
-	memset(splitActiveNoteChannel, 0xFF, sizeof(splitActiveNoteChannel));
-	memset(activeNoteChannel, 0xFF, sizeof(activeNoteChannel));
+	previousNote.fill(NOTE_NONE);
+	splitActiveNoteChannel.fill(0xFF);
+	activeNoteChannel.fill(0xFF);
 	m_nPlayPat = PATTERNINDEX_INVALID;
 	m_nPlayRow = m_nNextPlayRow = 0;
 	m_nPlayTick = 0;
@@ -2497,17 +2497,7 @@ bool CViewPattern::TransposeSelection(int transp)
 	if(m_Selection.GetNumChannels() == 1 && m_Selection.GetNumRows() == 1 && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYTRANSPOSE))
 	{
 		// Preview a single transposed note
-		ModCommand &m = *pSndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
-		if(m.IsNote() && m.instr)
-		{
-			int vol = -1;
-			if(m.command == CMD_VOLUME)
-				vol = m.param * 4u;
-			else if(m.volcmd == VOLCMD_VOLUME)
-				vol = m.vol * 4u;
-			GetDocument()->NoteOff(NOTE_NONE, false, m.instr, m_Selection.GetStartChannel());
-			PlayNote(m.note, m.instr, vol, m_Selection.GetStartChannel());
-		}
+		PreviewNote(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
 	}
 
 	return true;
@@ -2627,17 +2617,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 	if(column == PatternCursor::noteColumn && m_Selection.GetNumChannels() == 1 && m_Selection.GetNumRows() == 1 && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYTRANSPOSE))
 	{
 		// Preview a single transposed note
-		ModCommand &m = *pSndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
-		if(m.IsNote() && m.instr)
-		{
-			int vol = -1;
-			if(m.command == CMD_VOLUME)
-				vol = m.param * 4u;
-			else if(m.volcmd == VOLCMD_VOLUME)
-				vol = m.vol * 4u;
-			GetDocument()->NoteOff(NOTE_NONE, false, m.instr, m_Selection.GetStartChannel());
-			PlayNote(m.note, m.instr, vol, m_Selection.GetStartChannel());
-		}
+		PreviewNote(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
 	}
 
 	return true;
@@ -4454,7 +4434,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 	UINT ins = 0;
 	chordMode = chordMode && (prevChordNote != NOTE_NONE);
 
-	BYTE *activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
+	auto &activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
 	const CHANNELINDEX nChnCursor = GetCurrentChannel();
 	const CHANNELINDEX nChn = chordMode ? chordPatternChannels[0] : (activeNoteMap[note] < sndFile.GetNumChannels() ? activeNoteMap[note] : nChnCursor);
 
@@ -4480,7 +4460,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 			ins = m_nFoundInstrument;
 
 		const bool playWholeRow = ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !liveRecord);
-		if(chordMode == true)
+		if(chordMode)
 		{
 			m_Status.reset(psChordPlaying);
 
@@ -4491,7 +4471,8 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 			}
 			for(int i = 0; i < numNotes; i++)
 			{
-				pModDoc->NoteOff(notes[i], true, static_cast<INSTRUMENTINDEX>(ins), GetCurrentChannel(), playWholeRow ? chordPatternChannels[i] : CHANNELINDEX_INVALID);
+				pModDoc->NoteOff(notes[i], true, static_cast<INSTRUMENTINDEX>(ins), m_noteChannel[notes[i] - NOTE_MIN]);
+				m_noteChannel[notes[i] - NOTE_MIN] = CHANNELINDEX_INVALID;
 				m_baPlayingNote.reset(notes[i]);
 				noteChannels[i] = chordPatternChannels[i];
 			}
@@ -4499,7 +4480,8 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 		} else
 		{
 			m_baPlayingNote.reset(note);
-			pModDoc->NoteOff(note, ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOTEFADE) || sndFile.GetNumInstruments() == 0), static_cast<INSTRUMENTINDEX>(ins), nChnCursor, playWholeRow ? nChn : CHANNELINDEX_INVALID);
+			pModDoc->NoteOff(note, ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOTEFADE) || sndFile.GetNumInstruments() == 0), static_cast<INSTRUMENTINDEX>(ins), m_noteChannel[note - NOTE_MIN]);
+			m_noteChannel[note - NOTE_MIN] = CHANNELINDEX_INVALID;
 		}
 	}
 
@@ -4905,6 +4887,8 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 		{
 			// play the whole row in "step mode"
 			PatternStep(editPos.row);
+			if (recordEnabled && newcmd.IsNote())
+				m_noteChannel[newcmd.note - NOTE_MIN] = nChn;
 		}
 		if (!playWholeRow || !recordEnabled)
 		{
@@ -4990,7 +4974,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 			return;
 		}
 			
-		BYTE *activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
+		auto &activeNoteMap = isSplit ? splitActiveNoteChannel : activeNoteChannel;
 		if (newcmd.note <= NOTE_MAX)
 			activeNoteMap[newcmd.note] = static_cast<BYTE>(nChn);
 
@@ -5011,7 +4995,33 @@ void CViewPattern::PlayNote(ModCommand::NOTE note, ModCommand::INSTR instr, int 
 {
 	CModDoc *modDoc = GetDocument();
 	modDoc->CheckNNA(note, instr, m_baPlayingNote);
-	modDoc->PlayNote(PlayNoteParam(note).Instrument(instr).Volume(volume).Channel(channel));
+	modDoc->PlayNote(PlayNoteParam(note).Instrument(instr).Volume(volume).Channel(channel), &m_noteChannel);
+}
+
+
+void CViewPattern::PreviewNote(ROWINDEX row, CHANNELINDEX channel)
+{
+	const ModCommand &m = *GetSoundFile()->Patterns[m_nPattern].GetpModCommand(row, channel);
+	if(m.IsNote() && m.instr)
+	{
+		int vol = -1;
+		if(m.command == CMD_VOLUME)
+			vol = m.param * 4u;
+		else if(m.volcmd == VOLCMD_VOLUME)
+			vol = m.vol * 4u;
+		// Note-off any previews from this channel first
+		ModCommand::NOTE note = NOTE_MIN;
+		const auto &channels = GetSoundFile()->m_PlayState.Chn;
+		for(auto &chn : m_noteChannel)
+		{
+			if(chn != CHANNELINDEX_INVALID && channels[chn].isPreviewNote && channels[chn].nMasterChn == channel + 1)
+			{
+				GetDocument()->NoteOff(note, false, m.instr, chn);
+			}
+			note++;
+		}
+		PlayNote(m.note, m.instr, vol, channel);
+	}
 }
 
 
@@ -5178,6 +5188,13 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 		{
 			// play the whole row in "step mode"
 			PatternStep(GetCurrentRow());
+			if(recordEnabled)
+			{
+				for(int i = 0; i < numNotes; i++)
+				{
+					m_noteChannel[chordNotes[i] - NOTE_MIN] = chordPatternChannels[i];
+				}
+			}
 		}
 		if(!playWholeRow || !recordEnabled)
 		{
@@ -5208,10 +5225,10 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 					}
 				}
 			}
-			for(auto chordNote : chordNotes)
+			for(int i = 0; i < numNotes; i++)
 			{
-				pModDoc->CheckNNA(chordNote, nPlayIns, m_baPlayingNote);
-				pModDoc->PlayNote(PlayNoteParam(chordNote).Instrument(nPlayIns).Channel(chn));
+				pModDoc->CheckNNA(chordNotes[i], nPlayIns, m_baPlayingNote);
+				pModDoc->PlayNote(PlayNoteParam(chordNotes[i]).Instrument(nPlayIns).Channel(chn), &m_noteChannel);
 			}
 		}
 	} // end play note
@@ -5246,7 +5263,7 @@ void CViewPattern::EnterAftertouch(ModCommand::NOTE note, int atValue)
 	if(ModCommand::IsNote(note))
 	{
 		// For polyphonic aftertouch, map the aftertouch note to the correct pattern channel.
-		BYTE *activeNoteMap = IsNoteSplit(note) ? splitActiveNoteChannel : activeNoteChannel;
+		const auto &activeNoteMap = IsNoteSplit(note) ? splitActiveNoteChannel : activeNoteChannel;
 		if(activeNoteMap[note] < GetSoundFile()->GetNumChannels())
 		{
 			cursor.SetColumn(activeNoteMap[note], PatternCursor::firstColumn);
@@ -5454,7 +5471,7 @@ CHANNELINDEX CViewPattern::FindGroupRecordChannel(BYTE recordGroup, bool forceFr
 		{
 			// Check if any notes are playing on this channel
 			bool channelLocked = false;
-			for(size_t k = 0; k < CountOf(activeNoteChannel); k++)
+			for(size_t k = 0; k < activeNoteChannel.size(); k++)
 			{
 				if (activeNoteChannel[k] == nChn || splitActiveNoteChannel[k] == nChn)
 				{

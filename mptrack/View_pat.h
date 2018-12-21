@@ -15,6 +15,7 @@
 
 #include "Globals.h"
 #include "PatternCursor.h"
+#include "Moddoc.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -175,10 +176,11 @@ protected:
 	std::array<uint16, MAX_BASECHANNELS> OldVUMeters;
 
 	std::bitset<128> m_baPlayingNote;
+	CModDoc::NoteToChannelMap m_noteChannel;	// Note -> Preview channel assignment
 	ModCommand::NOTE octaveKeyMemory[10];
-	ModCommand::NOTE previousNote[MAX_BASECHANNELS];
-	BYTE activeNoteChannel[NOTE_MAX + NOTE_MIN];
-	BYTE splitActiveNoteChannel[NOTE_MAX + NOTE_MIN];
+	std::array<ModCommand::NOTE, MAX_BASECHANNELS> previousNote;
+	std::array<uint8, NOTE_MAX + NOTE_MIN> activeNoteChannel;
+	std::array<uint8, NOTE_MAX + NOTE_MIN> splitActiveNoteChannel;
 
 public:
 	std::unique_ptr<CEffectVis> m_pEffectVis;
@@ -523,6 +525,7 @@ private:
 	void ApplyToSelection(Func func);
 
 	void PlayNote(ModCommand::NOTE note, ModCommand::INSTR instr, int volume, CHANNELINDEX channel);
+	void PreviewNote(ROWINDEX row, CHANNELINDEX channel);
 
 public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);

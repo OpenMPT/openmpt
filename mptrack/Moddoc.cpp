@@ -135,8 +135,6 @@ CModDoc::CModDoc()
 	// Set the creation date of this file (or the load time if we're loading an existing file)
 	time(&m_creationTime);
 
-	// Fix: save pattern scrollbar position when switching to other tab
-	m_szOldPatternScrollbarsPos = CSize(-10,-10);
 	ReinitRecordState();
 
 	CMainFrame::UpdateAudioParameters(m_SndFile, true);
@@ -805,18 +803,24 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 	switch(event)
 	{
 	case MIDIEvents::evNoteOff:
-		midiByte2 = 0;
+		if(ins > 0 && ins <= GetNumInstruments())
+		{
+			LimitMax(note, NOTE_MAX);
+			NoteOff(note, false, ins, m_noteChannel[note - NOTE_MIN]);
+			return;
+		} else if(plugin != nullptr)
+		{
+			plugin->MidiSend(midiData);
+		}
+		break;
 
 	case MIDIEvents::evNoteOn:
 		if(ins > 0 && ins <= GetNumInstruments())
 		{
 			LimitMax(note, NOTE_MAX);
 			NoteOff(note, false, ins);
-			if(midiByte2 & 0x7F)
-			{
-				vol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
-				PlayNote(PlayNoteParam(note).Instrument(ins).Volume(vol));
-			}
+			vol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
+			PlayNote(PlayNoteParam(note).Instrument(ins).Volume(vol), &m_noteChannel);
 			return;
 		} else if(plugin != nullptr)
 		{
@@ -847,7 +851,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 }
 
 
-CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
+CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChannel)
 {
 	CHANNELINDEX channel = GetNumChannels();
 
@@ -968,6 +972,11 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 		auto mixBegin = std::begin(m_SndFile.m_PlayState.ChnMix);
 		auto mixEnd = std::remove(mixBegin, mixBegin + m_SndFile.m_nMixChannels, channel);
 		m_SndFile.m_nMixChannels = static_cast<CHANNELINDEX>(std::distance(mixBegin, mixEnd));
+
+		if(noteChannel)
+		{
+			noteChannel->at(note - NOTE_MIN) = channel;
+		}
 	} else
 	{
 		CriticalSection cs;
@@ -986,20 +995,19 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params)
 }
 
 
-bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX currentChn, CHANNELINDEX stopChn)
+bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX currentChn)
 {
 	CriticalSection cs;
 
 	if(ins != INSTRUMENTINDEX_INVALID && ins <= m_SndFile.GetNumInstruments() && ModCommand::IsNote(ModCommand::NOTE(note)))
 	{
-
-		ModInstrument *pIns = m_SndFile.Instruments[ins];
+		const ModInstrument *pIns = m_SndFile.Instruments[ins];
 		if(pIns && pIns->HasValidMIDIChannel())	// instro sends to a midi chan
 		{
 
-			PLUGINDEX plug = pIns->nMixPlug;		// First try intrument VST
-			if((!plug || plug > MAX_MIXPLUGINS)		// No good plug yet
-				&& currentChn < MAX_BASECHANNELS)	// Chan OK
+			PLUGINDEX plug = pIns->nMixPlug;      // First try intrument VST
+			if((!plug || plug > MAX_MIXPLUGINS)   // No good plug yet
+				&& currentChn < MAX_BASECHANNELS) // Chan OK
 			{
 				plug = m_SndFile.ChnSettings[currentChn].nMixPlugin;// Then try Channel VST
 			}
@@ -1009,18 +1017,23 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[plug - 1].pMixPlugin;
 				if(pPlugin)
 				{
-					pPlugin->MidiCommand(*pIns, pIns->NoteMap[note - NOTE_MIN] + NOTE_KEYOFF, 0, MAX_BASECHANNELS);
+					pPlugin->MidiCommand(*pIns, pIns->NoteMap[note - NOTE_MIN] + NOTE_KEYOFF, 0, currentChn);
 				}
 			}
 		}
 	}
 
 	const FlagSet<ChannelFlags> mask = (fade ? CHN_NOTEFADE : (CHN_NOTEFADE | CHN_KEYOFF));
-	ModChannel *pChn = &m_SndFile.m_PlayState.Chn[stopChn != CHANNELINDEX_INVALID ? stopChn : m_SndFile.m_nChannels];
-	for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++)
+	const CHANNELINDEX startChn = currentChn != CHANNELINDEX_INVALID ? currentChn : m_SndFile.m_nChannels;
+	const CHANNELINDEX endChn = currentChn != CHANNELINDEX_INVALID ? currentChn + 1 : MAX_CHANNELS;
+	ModChannel *pChn = &m_SndFile.m_PlayState.Chn[startChn];
+	for(CHANNELINDEX i = startChn; i < endChn; i++, pChn++)
 	{
 		// Fade all channels > m_nChannels which are playing this note and aren't NNA channels.
-		if(pChn->isPreviewNote && !pChn->dwFlags[mask] && pChn->nLength && (note == pChn->nNewNote || !note))
+		if((pChn->isPreviewNote || i < m_SndFile.GetNumChannels())
+			&& !pChn->dwFlags[mask]
+			&& (pChn->nLength || pChn->dwFlags[CHN_ADLIB])
+			&& (note == pChn->nNewNote || note == NOTE_NONE))
 		{
 			m_SndFile.KeyOff(*pChn);
 			if (!m_SndFile.m_nInstruments) pChn->dwFlags.reset(CHN_LOOP | CHN_PINGPONGFLAG);

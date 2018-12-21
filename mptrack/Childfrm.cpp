@@ -172,11 +172,7 @@ void CChildFrame::ActivateFrame(int nCmdShow)
 		{
 			if(!pModDoc->GetSoundFile().Order().empty())
 				m_ViewPatterns.nPattern = pModDoc->GetSoundFile().Order()[0];
-			else
-				m_ViewPatterns.nPattern = 0;
-			m_ViewPatterns.nOrder = 0; //just in case (should already be 0)
-			m_ViewPatterns.cursor.SetRow(0);   //just in case
-			m_bInitialActivation=false;
+			m_bInitialActivation = false;
 		}
 	}
 }

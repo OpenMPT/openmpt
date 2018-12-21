@@ -18,6 +18,7 @@
 #include "../soundlib/modsmp_ctrl.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/tuning.h"
+#include "../soundlib/OPL.h"
 #include "../common/misc_util.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/mptFileIO.h"
@@ -270,6 +271,8 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 			if(recordStates[srcChn] == 1) Record1Channel(chn, true);
 			if(recordStates[srcChn] == 2) Record2Channel(chn, true);
 			m_SndFile.m_bChannelMuteTogglePending[chn] = chnMutePendings[srcChn];
+			if (m_SndFile.m_opl)
+				m_SndFile.m_opl->MoveChannel(srcChn, chn);
 		} else
 		{
 			m_SndFile.InitChannel(chn);
