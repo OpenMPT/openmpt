@@ -351,7 +351,7 @@ public:
 	// Output to clipboard: Initialize with pointer to memory and size of reserved memory.
 	WAVWriter(mpt::byte_span data);
 
-	~WAVWriter();
+	~WAVWriter() noexcept(false);
 
 	// Check if anything can be written to the file.
 	bool IsValid() const { return s != nullptr || !memory.empty(); }

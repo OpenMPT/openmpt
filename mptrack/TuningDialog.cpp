@@ -634,9 +634,6 @@ void CTuningDialog::OnBnClickedButtonExport()
 				}
 			}
 		}
-
-		fout.close();
-
 		EndWaitCursor();
 
 	} else
@@ -698,7 +695,6 @@ void CTuningDialog::OnBnClickedButtonExport()
 			{
 				failure = true;
 			}
-			fout.close();
 		}
 
 		EndWaitCursor();

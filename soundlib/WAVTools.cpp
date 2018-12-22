@@ -350,9 +350,12 @@ WAVWriter::WAVWriter(mpt::byte_span data) : memory(data)
 }
 
 
-WAVWriter::~WAVWriter()
+WAVWriter::~WAVWriter() noexcept(false)
 {
-	Finalize();
+	if(!s || s->good())
+	{
+		Finalize();
+	}
 }
 
 

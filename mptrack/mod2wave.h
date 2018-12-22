@@ -108,9 +108,9 @@ public:
 
 public:
 	void UpdateDialog();
-	virtual BOOL OnInitDialog();
-	virtual void DoDataExchange(CDataExchange *pDX);
-	virtual void OnOK();
+	BOOL OnInitDialog() override;
+	void DoDataExchange(CDataExchange *pDX) override;
+	void OnOK() override;
 	afx_msg void OnCheckTimeLimit();
 	afx_msg void OnCheckChannelMode();
 	afx_msg void OnCheckInstrMode();
@@ -131,21 +131,21 @@ class CDoWaveConvert: public CProgressDialog
 public:
 	const CWaveConvertSettings &m_Settings;
 	CSoundFile &m_SndFile;
-	const mpt::PathString &m_lpszFileName;
+	mpt::ofstream &fileStream;
 	const CString &caption;
 	uint64 m_dwSongLimit;
 	bool m_bGivePlugsIdleTime;
 
 public:
-	CDoWaveConvert(CSoundFile &sndFile, const mpt::PathString &filename, const CString &caption, const CWaveConvertSettings &settings, CWnd *parent = NULL)
+	CDoWaveConvert(CSoundFile &sndFile, mpt::ofstream &f, const CString &caption, const CWaveConvertSettings &settings, CWnd *parent = NULL)
 		: CProgressDialog(parent)
 		, m_SndFile(sndFile)
 		, m_Settings(settings)
-		, m_lpszFileName(filename)
+		, fileStream(f)
 		, caption(caption)
 		, m_dwSongLimit(0)
 	{ }
-	void Run();
+	void Run() override;
 };
 
 

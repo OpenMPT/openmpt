@@ -134,7 +134,102 @@ mpt::tstring SafeOutputFile::convert_mode(std::ios_base::openmode mode, FlushMod
 	return fopen_mode;
 }
 
+FILE * SafeOutputFile::internal_fopen(const mpt::PathString &filename, std::ios_base::openmode mode, FlushMode flushMode)
+{
+	mpt::tstring fopen_mode = convert_mode(mode, flushMode);
+	if(fopen_mode.empty())
+	{
+		return nullptr;
+	}
+	FILE *f =
+#ifdef UNICODE
+		_wfopen(filename.AsNativePrefixed().c_str(), fopen_mode.c_str())
+#else
+		fopen(filename.AsNativePrefixed().c_str(), fopen_mode.c_str())
+#endif
+		;
+	if(!f)
+	{
+		return nullptr;
+	}
+	if(mode & std::ios_base::ate)
+	{
+		if(fseek(f, 0, SEEK_END) != 0)
+		{
+			fclose(f);
+			f = nullptr;
+			return nullptr;
+		}
+	}
+	m_f = f;
+	return f;
+}
+
 #endif // MPT_COMPILER_MSVC
+
+SafeOutputFile::~SafeOutputFile() noexcept(false)
+{
+	if(!stream())
+	{
+		return;
+	}
+	if(!stream().rdbuf())
+	{
+		return;
+	}
+#if MPT_COMPILER_MSVC
+	if(!m_f)
+	{
+		return;
+	}
+#endif // MPT_COMPILER_MSVC
+	bool errorOnFlush = false;
+	if(m_FlushMode != FlushMode::None)
+	{
+		try
+		{
+			if(stream().rdbuf()->pubsync() != 0)
+			{
+				errorOnFlush = true;
+			}
+		} catch(const std::exception &)
+		{
+			errorOnFlush = true;
+#if MPT_COMPILER_MSVC
+			if(m_FlushMode != FlushMode::None)
+			{
+				if(fflush(m_f) != 0)
+				{
+					errorOnFlush = true;
+				}
+			}
+			if(fclose(m_f) != 0)
+			{
+				errorOnFlush = true;
+			}
+#endif // MPT_COMPILER_MSVC
+			// ignore errorOnFlush here, and re-throw the earlier exception
+			throw;
+		}
+	}
+#if MPT_COMPILER_MSVC
+	if(m_FlushMode != FlushMode::None)
+	{
+		if(fflush(m_f) != 0)
+		{
+			errorOnFlush = true;
+		}
+	}
+	if(fclose(m_f) != 0)
+	{
+		errorOnFlush = true;
+	}
+#endif // MPT_COMPILER_MSVC
+	if(errorOnFlush && (stream().exceptions() & (std::ios::badbit | std::ios::failbit)))
+	{
+		throw std::ios_base::failure("Error flushing file buffers.");
+	}
+}
 
 } // namespace mpt
 

@@ -430,7 +430,10 @@ namespace MidiExport
 					mpt::IO::WriteRaw(m_file, data.data(), mpt::saturate_cast<uint32>(data.size()));
 				}
 			}
+		}
 
+		~Conversion()
+		{
 			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 			{
 				m_sndFile.Instruments[i] = m_wasInstrumentMode ? m_oldInstruments[i - 1] : nullptr;
@@ -695,22 +698,12 @@ void CModToMidi::OnOverlapChanged()
 
 void CDoMidiConvert::Run()
 {
-	mpt::SafeOutputFile sf(m_fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-	mpt::ofstream& f = sf;
-	if(!f.good())
-	{
-		Reporting::Error("Could not open file for writing. Is it open in another application?");
-		EndDialog(IDCANCEL);
-		return;
-	}
-
-	auto mainFrame = CMainFrame::GetMainFrame();
-	mainFrame->PauseMod(m_sndFile.GetpModDoc());
-	auto conv = mpt::make_unique<MidiExport::Conversion>(m_sndFile, m_instrMap, f, CModToMidi::s_overlappingInstruments);
+	CMainFrame::GetMainFrame()->PauseMod(m_sndFile.GetpModDoc());
+	auto conv = mpt::make_unique<MidiExport::Conversion>(m_sndFile, m_instrMap, m_file, CModToMidi::s_overlappingInstruments);
 
 	double duration = m_sndFile.GetLength(eNoAdjust).front().duration;
 	uint64 totalSamples = mpt::saturate_round<uint64>(duration * m_sndFile.m_MixerSettings.gdwMixingFreq);
-	SetRange(0, mpt::saturate_round<uint32>(duration));
+	SetRange(0, totalSamples);
 	auto startTime = timeGetTime(), prevTime = startTime;
 
 	m_sndFile.SetCurrentOrder(0);
@@ -720,12 +713,7 @@ void CDoMidiConvert::Run()
 	m_sndFile.SetRepeatCount(0);
 	m_sndFile.m_bIsRendering = true;
 
-	ITaskbarList3 *taskBarList = nullptr;
-	CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_ALL, IID_ITaskbarList3, (void**)&taskBarList);
-	if(taskBarList != nullptr)
-	{
-		taskBarList->SetProgressState(mainFrame->m_hWnd, TBPF_NORMAL);
-	}
+	EnableTaskbarProgress();
 
 	MidiExport::DummyAudioTarget target;
 	UINT ok = IDOK;
@@ -744,18 +732,13 @@ void CDoMidiConvert::Run()
 				timeRemaining = static_cast<uint32>(((currentTime - startTime) * (totalSamples - curSamples) / curSamples) / 1000u);
 			}
 			SetText(fmt(curTime / 60u, mpt::tfmt::dec0<2>(curTime % 60u), timeRemaining / 60u, mpt::tfmt::dec0<2>(timeRemaining % 60u)).c_str());
-			SetProgress(curTime);
+			SetProgress(curSamples);
 			ProcessMessages();
 
 			if(m_abort)
 			{
 				ok = IDCANCEL;
 				break;
-			}
-
-			if(taskBarList != nullptr)
-			{
-				taskBarList->SetProgressValue(mainFrame->m_hWnd, curSamples, totalSamples);
 			}
 		}
 	}
@@ -764,12 +747,6 @@ void CDoMidiConvert::Run()
 
 	m_sndFile.m_bIsRendering = false;
 	m_sndFile.SetRepeatCount(oldRepCount);
-
-	if(taskBarList)
-	{
-		taskBarList->SetProgressState(mainFrame->m_hWnd, TBPF_NOPROGRESS);
-		taskBarList->Release();
-	}
 
 	EndDialog(ok);
 }
