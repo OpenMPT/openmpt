@@ -1,4 +1,4 @@
-OpenMPT 1.27
+OpenMPT 1.28
 ============
 
 
@@ -54,7 +54,7 @@ Package contents
 * ExampleSongs\Samples (folder): A set of samples used by some of the example
   songs. You may use them for your own songs as well!
 * History.txt: Version history.
-* License.txt: OpenMPT license.
+* License.txt: OpenMPT license text.
 * Licenses (folder): Licenses of various other open source libraries used by
   OpenMPT.
 * mptrack.exe: Main executable.
@@ -65,7 +65,7 @@ Package contents
 * readme.txt: This document.
 * openmpt-mpg123.dll: Optional component for MPEG sample support in the sample editor and MO3 format if Media Foundation codecs are not available.
 * openmpt-wine-support.zip: Optional component for sound device integration into Wine on Linux systems
-* OMPT_1.27_ReleaseNotes.html: Release notes for this version.
+* OMPT_1.28_ReleaseNotes.html: Release notes for this version.
 
 
 License

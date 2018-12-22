@@ -58,7 +58,7 @@ Instrument tab
 - [Fix] <js> Fixed possible rare crash that could occur when redrawing the envelope editor (http://bugs.openmpt.org/view.php?id=1175).
 
 Tree view
-- [Imp] <js> Show exteral samples with different icons.
+- [Imp] <js> Show external samples with different icons.
 - [Mod] <js> Sample / instrument play status update is now enabled by default on new installations.
 - [Fix] <js> Previewing MIDI Library items associated with soundfonts now previews the correct instrument inside that soundfont.
 
@@ -75,7 +75,7 @@ Playback
 - [Fix] <js> Release node volume scaling was not applied properly if an envelope loop started before the release node.
 
 MPTM
-- [New] <js> AdLib (OPL) instruments are now supported. Up to 18 simulatenous voices with OPL3-style panning (hard left / center right) and all OPL3 waveforms can be used. 4-operator instruments are not available for now, though.
+- [New] <js> AdLib (OPL) instruments are now supported. Up to 18 simultaneous voices with OPL3-style panning (hard left / center right) and all OPL3 waveforms can be used. 4-operator instruments are not available for now, though.
 - [Imp] <js> More logical release node behaviour. The release part is now scaled by the ratio between the value of the key-off point and the release node. The old behaviour is retained through a compatibility flag.
 - [Mod] <js> A few more sensible IT compatibility flags are now enabled by default to be more consistent with IT.
 
@@ -121,7 +121,7 @@ Misc
 - [Imp] <js> On Windows Vista and later, the new file dialog style is now also used when audio file preview is enabled.
 - [Imp] <jh> Advanced Settings: Use a different background color for settings that have non-default values.
 - [Mod] <js> Subsong search is now less thorough, finding less unwanted subsongs in partially played patterns.
-- [Mod] <js> Allow compatibility flags to be part of MPTM templates. They are still reset for legacy module types to always enforce maximum compatbility even when opening templates saved with an older OpenMPT version.
+- [Mod] <js> Allow compatibility flags to be part of MPTM templates. They are still reset for legacy module types to always enforce maximum compatibility even when opening templates saved with an older OpenMPT version.
 - [Mod] <js> When showing a list of missing plugins on startup, offer the user to remove all or some of them (http://bugs.openmpt.org/view.php?id=1153).
 - [Mod] <jh & js> Merge lossy and lossless stream export into a single menu entry and keyboard shortcut (http://bugs.openmpt.org/view.php?id=801).
 - [Mod] <jh & js> Format various numbers with thousands separators to make them more readable.
