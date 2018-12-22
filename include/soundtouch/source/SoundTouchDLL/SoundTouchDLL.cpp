@@ -9,10 +9,6 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: SoundTouchDLL.cpp 248 2017-03-05 16:36:35Z oparviai $
-//
-////////////////////////////////////////////////////////////////////////////////
-//
 // License :
 //
 //  SoundTouch audio processing library
@@ -34,34 +30,39 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <windows.h>
+
+#if defined(_WIN32) || defined(WIN32)
+    #include <windows.h>
+
+    // DLL main in Windows compilation
+    BOOL APIENTRY DllMain( HANDLE hModule,
+                           DWORD  ul_reason_for_call,
+                           LPVOID lpReserved
+                         )
+    {
+        switch (ul_reason_for_call)
+        {
+        case DLL_PROCESS_ATTACH:
+        case DLL_THREAD_ATTACH:
+        case DLL_THREAD_DETACH:
+        case DLL_PROCESS_DETACH:
+            break;
+        }
+        return TRUE;
+    }
+#endif
+
+#include <limits.h>
 #include <string.h>
 #include "SoundTouchDLL.h"
-#include "soundtouch.h"
+#include "SoundTouch.h"
+#include "BPMDetect.h"
 
 using namespace soundtouch;
 
 #ifdef SOUNDTOUCH_INTEGER_SAMPLES
     #error "error - compile the dll version with float samples"
 #endif // SOUNDTOUCH_INTEGER_SAMPLES
-
-
-BOOL APIENTRY DllMain( HANDLE hModule, 
-                       DWORD  ul_reason_for_call, 
-                       LPVOID lpReserved
-                     )
-{
-    switch (ul_reason_for_call)
-    {
-    case DLL_PROCESS_ATTACH:
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-        break;
-    }
-    return TRUE;
-}
-
 
 //////////////
 
@@ -71,7 +72,15 @@ typedef struct
     SoundTouch *pst;
 } STHANDLE;
 
-#define STMAGIC 0x1770C001
+typedef struct
+{
+    DWORD dwMagic;
+    BPMDetect *pbpm;
+    uint numChannels;
+} BPMHANDLE;
+
+#define STMAGIC  0x1770C001
+#define BPMMAGIC 0x1771C10a
 
 SOUNDTOUCHDLL_API HANDLE __cdecl soundtouch_createInstance()
 {
@@ -295,7 +304,7 @@ SOUNDTOUCHDLL_API void __cdecl soundtouch_clear(HANDLE h)
 /// Changes a setting controlling the processing system behaviour. See the
 /// 'SETTING_...' defines for available setting ID's.
 /// 
-/// \return 'nonzero' if the setting was succesfully changed
+/// \return 'nonzero' if the setting was successfully changed
 SOUNDTOUCHDLL_API int __cdecl soundtouch_setSetting(HANDLE h, 
         int settingId,   ///< Setting ID number. see SETTING_... defines.
         int value        ///< New setting value.
@@ -354,6 +363,7 @@ SOUNDTOUCHDLL_API uint __cdecl soundtouch_receiveSamples(HANDLE h,
         return sth->pst->receiveSamples(maxSamples);
     }
 }
+
 
 /// int16 version of soundtouch_receiveSamples(): This converts internal float samples
 /// into int16 (short) return data type
@@ -424,4 +434,94 @@ SOUNDTOUCHDLL_API int __cdecl soundtouch_isEmpty(HANDLE h)
     if (sth->dwMagic != STMAGIC) return -1;
 
     return sth->pst->isEmpty();
+}
+
+
+SOUNDTOUCHDLL_API HANDLE __cdecl bpm_createInstance(int numChannels, int sampleRate)
+{
+    BPMHANDLE *tmp = new BPMHANDLE;
+
+    if (tmp)
+    {
+        tmp->dwMagic = BPMMAGIC;
+        tmp->pbpm = new BPMDetect(numChannels, sampleRate);
+        if (tmp->pbpm == NULL)
+        {
+            delete tmp;
+            tmp = NULL;
+        }
+    }
+    return (HANDLE)tmp;
+}
+
+
+SOUNDTOUCHDLL_API void __cdecl bpm_destroyInstance(HANDLE h)
+{
+    BPMHANDLE *sth = (BPMHANDLE*)h;
+    if (sth->dwMagic != BPMMAGIC) return;
+
+    sth->dwMagic = 0;
+    if (sth->pbpm) delete sth->pbpm;
+    sth->pbpm = NULL;
+    delete sth;
+}
+
+
+/// Feed 'numSamples' sample frames from 'samples' into the BPM detection handler
+SOUNDTOUCHDLL_API void __cdecl bpm_putSamples(HANDLE h, 
+        const float *samples,
+        unsigned int numSamples)
+{
+    BPMHANDLE *bpmh = (BPMHANDLE*)h;
+    if (bpmh->dwMagic != BPMMAGIC) return;
+
+    bpmh->pbpm->inputSamples(samples, numSamples);
+}
+
+
+/// Feed 'numSamples' sample frames from 'samples' into the BPM detection handler.
+/// 16bit int sample format version.
+SOUNDTOUCHDLL_API void __cdecl bpm_putSamples_i16(HANDLE h, 
+        const short *samples,
+        unsigned int numSamples)
+{
+    BPMHANDLE *bpmh = (BPMHANDLE*)h;
+    if (bpmh->dwMagic != BPMMAGIC) return;
+
+    uint numChannels = bpmh->numChannels;
+
+    // iterate until all samples converted & put to SoundTouch object
+    while (numSamples > 0)
+    {
+        float convert[8192];    // allocate temporary conversion buffer from stack
+
+        // how many multichannel samples fit into 'convert' buffer:
+        uint convSamples = 8192 / numChannels;
+
+        // convert max 'nround' values at a time to guarantee that these fit in the 'convert' buffer
+        uint n = (numSamples > convSamples) ? convSamples : numSamples;
+        for (uint i = 0; i < n * numChannels; i++)
+        {
+            convert[i] = samples[i];
+        }
+        // put the converted samples into SoundTouch
+        bpmh->pbpm->inputSamples(convert, n);
+
+        numSamples -= n;
+        samples += n * numChannels;
+    }
+}
+
+
+/// Analyzes the results and returns the BPM rate. Use this function to read result
+/// after whole song data has been input to the class by consecutive calls of
+/// 'inputSamples' function.
+///
+/// \return Beats-per-minute rate, or zero if detection failed.
+SOUNDTOUCHDLL_API float __cdecl bpm_getBpm(HANDLE h)
+{
+    BPMHANDLE *bpmh = (BPMHANDLE*)h;
+    if (bpmh->dwMagic != BPMMAGIC) return 0;
+
+    return bpmh->pbpm->getBpm();
 }

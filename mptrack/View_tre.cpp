@@ -1612,14 +1612,22 @@ BOOL CModTree::SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName)
 	return FALSE;
 }
 
+static mpt::ustring TreeDeletionString(const CSoundFile &sndFile, const MPT_UCHAR_TYPE *type, uint32 id, const std::string &name)
+{
+	mpt::ustring s = mpt::format(U_("Remove %1 %2"))(type, id);
+	if(!name.empty())
+		s += U_(": ") + mpt::ToUnicode(sndFile.GetCharsetInternal(), name);
+	s.append(1, UC_('?'));
+	return s;
+}
 
 void CModTree::DeleteTreeItem(HTREEITEM hItem)
 {
 	const ModItem modItem = GetModItem(hItem);
 	uint32 modItemID = modItem.val1;
-	TCHAR s[64];
 
 	CModDoc *modDoc = m_nDocNdx < DocInfo.size() ? &(DocInfo[m_nDocNdx]->modDoc) : nullptr;
+	CSoundFile *sndFile = modDoc ? &modDoc->GetSoundFile() : nullptr;
 	if(modItem.IsSongItem() && modDoc == nullptr)
 	{
 		return;
@@ -1628,15 +1636,17 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 	switch(modItem.type)
 	{
 	case MODITEM_SEQUENCE:
-		wsprintf(s, _T("Remove sequence %u?"), modItemID);
-		if(Reporting::Confirm(s, false, true) == cnfNo) break;
-		modDoc->GetSoundFile().Order.RemoveSequence((SEQUENCEINDEX)(modItemID));
-		modDoc->UpdateAllViews(nullptr, SequenceHint().Data());
+		{
+			const SEQUENCEINDEX seq = static_cast<SEQUENCEINDEX>(modItemID);
+			if(Reporting::Confirm(TreeDeletionString(*sndFile, UL_("sequence"), seq, sndFile->Order(seq).GetName()), false, true) == cnfNo) break;
+			sndFile->Order.RemoveSequence(seq);
+			modDoc->UpdateAllViews(nullptr, SequenceHint().Data());
+		}
 		break;
 
 	case MODITEM_ORDER:
 		// might be slightly annoying to ask for confirmation here, and it's rather easy to restore the orderlist anyway.
-		if(modDoc->RemoveOrder((SEQUENCEINDEX)(modItem.val2), (ORDERINDEX)(modItem.val1)))
+		if(modDoc->RemoveOrder(static_cast<SEQUENCEINDEX>(modItem.val2), static_cast<ORDERINDEX>(modItem.val1)))
 		{
 			modDoc->UpdateAllViews(nullptr, SequenceHint().Data());
 		}
@@ -1644,18 +1654,19 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_PATTERN:
 		{
-			PATTERNINDEX pat = static_cast<PATTERNINDEX>(modItemID);
+			const PATTERNINDEX pat = static_cast<PATTERNINDEX>(modItemID);
 			bool isUsed = false;
 			// First, find all used patterns in all sequences.
-			for(const auto &sequence : modDoc->GetSoundFile().Order)
+			for(const auto &sequence : sndFile->Order)
 			{
-				if(std::find(sequence.cbegin(), sequence.cend(), pat) != sequence.cend())
+				if(sequence.FindOrder(pat) != ORDERINDEX_INVALID)
 				{
 					isUsed = true;
 					break;
 				}
 			}
-			wsprintf(s, _T("Remove pattern %u?\nThis pattern is currently%s used."), modItemID, isUsed ? _T("") : _T(" not"));
+			mpt::ustring s = TreeDeletionString(*sndFile, UL_("pattern"), modItemID, sndFile->Patterns[pat].GetName());
+			s += mpt::format(U_("\nThis pattern is currently %1used."))(isUsed ? UL_("") : UL_("un"));
 			if(Reporting::Confirm(s, false, isUsed) == cnfYes && modDoc->RemovePattern(pat))
 			{
 				modDoc->UpdateAllViews(nullptr, PatternHint(pat).Data().Names());
@@ -1664,27 +1675,29 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 		break;
 
 	case MODITEM_SAMPLE:
-		wsprintf(s, _T("Remove sample %u?"), modItemID);
-		if(!modDoc->GetSoundFile().GetSample(static_cast<SAMPLEINDEX>(modItemID)).HasSampleData() || Reporting::Confirm(s, false, true) == cnfYes)
+		if(!sndFile->GetSample(static_cast<SAMPLEINDEX>(modItemID)).HasSampleData()
+			|| Reporting::Confirm(TreeDeletionString(*sndFile, UL_("sample"), modItemID, sndFile->m_szNames[modItemID]), false, true) == cnfYes)
 		{
-			modDoc->GetSampleUndo().PrepareUndo((SAMPLEINDEX)modItemID, sundo_replace, "Delete");
+			const SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(modItemID);
+			modDoc->GetSampleUndo().PrepareUndo(smp, sundo_replace, "Delete");
 			const SAMPLEINDEX oldNumSamples = modDoc->GetNumSamples();
-			if (modDoc->RemoveSample((SAMPLEINDEX)modItemID))
+			if(modDoc->RemoveSample(smp))
 			{
-				modDoc->UpdateAllViews(nullptr, SampleHint(modDoc->GetNumSamples() != oldNumSamples ? 0 : (SAMPLEINDEX)modItemID).Info().Data().Names());
+				modDoc->UpdateAllViews(nullptr, SampleHint(modDoc->GetNumSamples() != oldNumSamples ? 0 : smp).Info().Data().Names());
 			}
 		}
 		break;
 
 	case MODITEM_INSTRUMENT:
-		wsprintf(s, _T("Remove instrument %u?"), modItemID);
-		if(Reporting::Confirm(s, false, true) == cnfYes)
+		if(sndFile->Instruments[modItemID] == nullptr
+			|| Reporting::Confirm(TreeDeletionString(*sndFile, UL_("instrument"), modItemID, sndFile->Instruments[modItemID]->name), false, true) == cnfYes)
 		{
-			modDoc->GetInstrumentUndo().PrepareUndo((INSTRUMENTINDEX)modItemID, "Delete");
+			const INSTRUMENTINDEX ins = static_cast<INSTRUMENTINDEX>(modItemID);
+			modDoc->GetInstrumentUndo().PrepareUndo(ins, "Delete");
 			const INSTRUMENTINDEX oldNumInstrs = modDoc->GetNumInstruments();
-			if(modDoc->RemoveInstrument((INSTRUMENTINDEX)modItemID))
+			if(modDoc->RemoveInstrument(ins))
 			{
-				modDoc->UpdateAllViews(nullptr, InstrumentHint(modDoc->GetNumInstruments() != oldNumInstrs ? 0 : INSTRUMENTINDEX(modItemID)).Info().Envelope().ModType());
+				modDoc->UpdateAllViews(nullptr, InstrumentHint(modDoc->GetNumInstruments() != oldNumInstrs ? 0 : ins).Info().Envelope().ModType());
 			}
 		}
 		break;

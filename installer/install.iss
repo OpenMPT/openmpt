@@ -164,6 +164,7 @@ Type: dirifempty; Name: {userappdata}\OpenMPT\Components; Tasks: portable
 [Code]
 var
     BitnessPage: TInputOptionWizardPage;
+    ShouldSkipBitnessPage: Boolean;
     BuildType: Integer;
 
 // Copy old config files to the AppData directory, if there are any (and if the files don't exist already)
@@ -238,18 +239,20 @@ var
 begin
     BitnessPage := CreateInputOptionPage(wpWelcome, 'OpenMPT Version', 'Select the version of OpenMPT you want to install.',
         'Select the version of OpenMPT you want to install. Setup already determined the most suitable version for your system.', True, False);
+    ShouldSkipBitnessPage := False;
 
     // Add items
     try
         // Check if installing on Wine 1.8 or later
         WineVersion := IsWine();
-        IsModernSystem := ((WineVersion <> nil) and (CompareStr(AnsiString(WineVersion), '1.8') >= 0));
+        IsModernSystem := True; //((WineVersion <> nil) and (CompareStr(AnsiString(WineVersion), '1.8') >= 0));
 #if PlatformName == "32-Bit"
-        BitnessPage.Add('32-Bit, for Wine 1.8 or newer and CPU with SSE2 instruction set');
-        BitnessPage.Add('32-Bit, for Wine 1.6 or CPU without SSE2 instruction set');
+        BitnessPage.Add('32-Bit, for CPU with SSE2 instruction set');
+        BitnessPage.Add('32-Bit, for CPU without SSE2 instruction set');
 #else
         BitnessPage.Add('64-Bit, for Wine 1.8 or newer');
-        BitnessPage.Add('64-Bit, for Wine 1.6');
+        BitnessPage.Add('64-Bit, for Wine 1.8 or newer');
+        ShouldSkipBitnessPage := True;
 #endif
     except
         // Installing on Windows 7 or later
@@ -275,7 +278,13 @@ begin
         except
         end;
     end else
+end;
 
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  Result := False;
+  if PageID = BitnessPage.ID then
+    Result := ShouldSkipBitnessPage;
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
