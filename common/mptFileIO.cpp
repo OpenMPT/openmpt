@@ -43,7 +43,7 @@ bool SetFilesystemCompression(HANDLE hFile)
 	USHORT format = COMPRESSION_FORMAT_DEFAULT;
 	DWORD dummy = 0;
 	BOOL result = DeviceIoControl(hFile, FSCTL_SET_COMPRESSION, (LPVOID)&format, sizeof(format), NULL, 0, &dummy /*required*/ , NULL);
-	return result ? true : false;
+	return result != FALSE;
 }
 bool SetFilesystemCompression(int fd)
 {
@@ -77,7 +77,6 @@ bool SetFilesystemCompression(const mpt::PathString &filename)
 	}
 	bool result = SetFilesystemCompression(hFile);
 	CloseHandle(hFile);
-	hFile = INVALID_HANDLE_VALUE;
 	return result;
 }
 #endif // MPT_OS_WINDOWS

@@ -469,12 +469,12 @@ inline static void SampleToFLAC32(FLAC__int32 *dst, const T *src, SmpLength numS
 // RAII-style helper struct for FLAC encoder
 struct FLAC__StreamEncoder_RAII
 {
-	mpt::ofstream &f;
-	FLAC__StreamEncoder *encoder;
+	std::ostream &f;
+	FLAC__StreamEncoder *encoder = nullptr;
 
 	operator FLAC__StreamEncoder *() { return encoder; }
 
-	FLAC__StreamEncoder_RAII(mpt::ofstream &f_) : f(f_), encoder(FLAC__stream_encoder_new()) { }
+	FLAC__StreamEncoder_RAII(std::ostream &f_) : f(f_), encoder(FLAC__stream_encoder_new()) { }
 	~FLAC__StreamEncoder_RAII()
 	{
 		FLAC__stream_encoder_delete(encoder);
@@ -529,24 +529,9 @@ struct FLAC__StreamEncoder_RAII
 
 
 #ifndef MODPLUG_NO_FILESAVE
-bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
+bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 {
 #ifdef MPT_WITH_FLAC
-
-	const mpt::FlushMode flushMode = 
-		#ifdef MODPLUG_TRACKER
-			mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave)
-		#else
-			mpt::FlushMode::Full
-		#endif
-		;
-
-	mpt::SafeOutputFile f(filename, std::ios::binary, flushMode);
-	if(!f)
-	{
-		return false;
-	}
-
 	FLAC__StreamEncoder_RAII encoder(f);
 	if(encoder == nullptr)
 	{
@@ -723,7 +708,7 @@ fail:
 	return result;
 #else
 	MPT_UNREFERENCED_PARAMETER(nSample);
-	MPT_UNREFERENCED_PARAMETER(filename);
+	MPT_UNREFERENCED_PARAMETER(f);
 	return false;
 #endif // MPT_WITH_FLAC
 }

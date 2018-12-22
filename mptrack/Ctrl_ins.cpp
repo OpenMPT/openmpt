@@ -2033,7 +2033,7 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 	auto numberFmt = mpt::FormatSpec().Dec().FillNul().Width(1 + static_cast<int>(std::log10(maxIns)));
 	CString instrName, instrFilename;
 
-	bool ok = false;
+	bool ok = true;
 	const bool saveXI = !mpt::PathString::CompareNoCase(dlg.GetExtension(), P_("xi"));
 	const bool saveSFZ = !mpt::PathString::CompareNoCase(dlg.GetExtension(), P_("sfz"));
 	const bool doCompress = index == 2 || index == 6;
@@ -2059,12 +2059,27 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 				fileName = mpt::PathString::FromUnicode(fileNameW);
 			}
 
-			if(saveXI)
-				ok = m_sndFile.SaveXIInstrument(ins, fileName);
-			else if(saveSFZ)
-				ok = m_sndFile.SaveSFZInstrument(ins, fileName, doCompress);
-			else
-				ok = m_sndFile.SaveITIInstrument(ins, fileName, doCompress, allowExternal);
+			try
+			{
+				ScopedLogCapturer logcapturer(m_modDoc);
+				mpt::SafeOutputFile f(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				if(!f)
+				{
+					ok = false;
+					continue;
+				}
+				//f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+
+				if (saveXI)
+					ok &= m_sndFile.SaveXIInstrument(ins, f);
+				else if (saveSFZ)
+					ok &= m_sndFile.SaveSFZInstrument(ins, f, fileName, doCompress);
+				else
+					ok &= m_sndFile.SaveITIInstrument(ins, f, fileName, doCompress, allowExternal);
+			} catch(const std::exception &)
+			{
+				ok = false;
+			}
 		}
 	}
 

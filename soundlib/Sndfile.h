@@ -1058,10 +1058,10 @@ public:
 	static std::vector<FileType> GetMediaFoundationFileTypes();
 #endif // MODPLUG_TRACKER
 #ifndef MODPLUG_NO_FILESAVE
-	bool SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const;
-	bool SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const;
-	bool SaveFLACSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const;
-	bool SaveS3ISample(SAMPLEINDEX smp, const mpt::PathString &filename) const;
+	bool SaveWAVSample(SAMPLEINDEX nSample, std::ostream &f) const;
+	bool SaveRAWSample(SAMPLEINDEX nSample, std::ostream &f) const;
+	bool SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const;
+	bool SaveS3ISample(SAMPLEINDEX smp, std::ostream &f) const;
 #endif
 	static bool CanReadMP3();
 	static bool CanReadVorbis();
@@ -1077,9 +1077,9 @@ protected:
 	bool ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 public:
 #ifndef MODPLUG_NO_FILESAVE
-	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename) const;
-	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool compress, bool allowExternal) const;
-	bool SaveSFZInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool useFLACsamples) const;
+	bool SaveXIInstrument(INSTRUMENTINDEX nInstr, std::ostream &f) const;
+	bool SaveITIInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, const mpt::PathString &filename, bool compress, bool allowExternal) const;
+	bool SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, const mpt::PathString &filename, bool useFLACsamples) const;
 #endif
 
 	// I/O from another sound file

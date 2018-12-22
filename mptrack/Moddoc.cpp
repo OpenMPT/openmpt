@@ -378,10 +378,22 @@ bool CModDoc::SaveSample(SAMPLEINDEX smp)
 			const bool wav = !mpt::PathString::CompareNoCase(dotExt, P_(".wav"));
 			const bool flac  = !mpt::PathString::CompareNoCase(dotExt, P_(".flac"));
 
-			if(flac || (!wav && TrackerSettings::Instance().m_defaultSampleFormat != dfWAV))
-				success = m_SndFile.SaveFLACSample(smp, filename);
-			else
-				success = m_SndFile.SaveWAVSample(smp, filename);
+			try
+			{
+				mpt::SafeOutputFile f(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				if(f)
+				{
+					//f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+
+					if(flac || (!wav && TrackerSettings::Instance().m_defaultSampleFormat != dfWAV))
+						success = m_SndFile.SaveFLACSample(smp, f);
+					else
+						success = m_SndFile.SaveWAVSample(smp, f);
+				}
+			} catch(const std::exception &)
+			{
+				success = false;
+			}
 
 			if(success)
 				m_SndFile.GetSample(smp).uFlags.reset(SMP_MODIFIED);

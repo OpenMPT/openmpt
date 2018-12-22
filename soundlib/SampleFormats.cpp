@@ -38,23 +38,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-#ifndef MODPLUG_NO_FILESAVE
-
-static mpt::FlushMode GetSampleFileFlushMode()
-{
-	return
-		#ifdef MODPLUG_TRACKER
-			mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave)
-		#else
-			mpt::FlushMode::Full
-		#endif
-		;
-}
-
-#endif // !MODPLUG_NO_FILESAVE
-
-
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, bool includeInstrumentFormats)
 {
 	if(!nSample || nSample >= MAX_SAMPLES) return false;
@@ -553,15 +536,8 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 
 
 #ifndef MODPLUG_NO_FILESAVE
-bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
+bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, std::ostream &f) const
 {
-	mpt::SafeOutputFile sf(filename, std::ios::binary, GetSampleFileFlushMode());
-	mpt::ofstream& f = sf;
-	if(!f)
-	{
-		return false;
-	}
-
 	WAVWriter file(&f);
 
 	if(!file.IsValid())
@@ -844,14 +820,8 @@ bool CSoundFile::ReadW64Sample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 ///////////////////////////////////////////////////////////////
 // Save RAW
 
-bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, const mpt::PathString &filename) const
+bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, std::ostream &f) const
 {
-	mpt::SafeOutputFile f(filename, std::ios::binary, GetSampleFileFlushMode());
-	if(!f)
-	{
-		return false;
-	}
-
 	const ModSample &sample = Samples[nSample];
 	SampleIO(
 		sample.uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
@@ -1185,12 +1155,8 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveS3ISample(SAMPLEINDEX smp, const mpt::PathString &filename) const
+bool CSoundFile::SaveS3ISample(SAMPLEINDEX smp, std::ostream &f) const
 {
-	mpt::SafeOutputFile f(filename, std::ios::binary, GetSampleFileFlushMode());
-	if(!f)
-		return false;
-
 	const ModSample &sample = Samples[smp];
 	S3MSampleHeader sampleHeader;
 	MemsetZero(sampleHeader);
@@ -1350,16 +1316,10 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename) const
+bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, std::ostream &f) const
 {
 	ModInstrument *pIns = Instruments[nInstr];
-	if(pIns == nullptr || filename.empty())
-	{
-		return false;
-	}
-
-	mpt::SafeOutputFile f(filename, std::ios::binary, GetSampleFileFlushMode());
-	if(!f)
+	if(pIns == nullptr)
 	{
 		return false;
 	}
@@ -2169,16 +2129,15 @@ static double SFZLinear2dB(double volume)
 	return (volume > 0.0 ? 20.0 * std::log10(volume) : -144.0);
 }
 
-bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool useFLACsamples) const
+bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, const mpt::PathString &filename, bool useFLACsamples) const
 {
+#ifdef MODPLUG_TRACKER
+	const mpt::FlushMode flushMode = mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave);
+#else
+	const mpt::FlushMode flushMode = mpt::FlushMode::Full;
+#endif
 	const ModInstrument *ins = Instruments[nInstr];
 	if(ins == nullptr)
-	{
-		return false;
-	}
-	mpt::SafeOutputFile sf(filename, std::ios::binary, GetSampleFileFlushMode());
-	mpt::ofstream& f = sf;
-	if(!f.good())
 	{
 		return false;
 	}
@@ -2238,13 +2197,25 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString
 
 		mpt::PathString sampleName = sampleBasePath + sampleBaseName + P_(" ") + mpt::PathString::FromUnicode(mpt::ufmt::val(numSamples));
 		if(useFLACsamples)
-		{
 			sampleName += P_(".flac");
-			SaveFLACSample(ins->Keyboard[i], sampleName);
-		} else
-		{
+		else
 			sampleName += P_(".wav");
-			SaveWAVSample(ins->Keyboard[i], sampleName);
+
+		try
+		{
+			mpt::SafeOutputFile fSmp(sampleName, std::ios::binary, flushMode);
+			if(fSmp)
+			{
+				//fSmp.exceptions(fSmp.exceptions() | std::ios::badbit | std::ios::failbit);
+
+				if(useFLACsamples)
+					SaveFLACSample(ins->Keyboard[i], fSmp);
+				else
+					SaveWAVSample(ins->Keyboard[i], fSmp);
+			}
+		} catch(const std::exception &)
+		{
+			AddToLog(LogError, MPT_USTRING("Unable to save sample: ") + sampleName.ToUnicode());
 		}
 
 		const ModSample &sample = Samples[ins->Keyboard[i]];
@@ -3266,17 +3237,12 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, const mpt::PathString &filename, bool compress, bool allowExternal) const
+bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, const mpt::PathString &filename, bool compress, bool allowExternal) const
 {
 	ITInstrument iti;
 	ModInstrument *pIns = Instruments[nInstr];
 
-	if((!pIns) || filename.empty()) return false;
-	mpt::SafeOutputFile f(filename, std::ios::binary, GetSampleFileFlushMode());
-	if(!f)
-	{
-		return false;
-	}
+	if((!pIns) || (filename.empty() && allowExternal)) return false;
 
 	auto instSize = iti.ConvertToIT(*pIns, false, *this);
 
