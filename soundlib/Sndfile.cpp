@@ -402,6 +402,8 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 					}
 					if(!containerItems.empty())
 					{
+						// cppcheck false-positive
+						// cppcheck-suppress containerOutOfBounds
 						file = containerItems[0].file;
 					}
 				}

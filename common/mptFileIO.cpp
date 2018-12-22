@@ -166,6 +166,7 @@ FILE * SafeOutputFile::internal_fopen(const mpt::PathString &filename, std::ios_
 
 #endif // MPT_COMPILER_MSVC
 
+// cppcheck-suppress exceptThrowInDestructor
 SafeOutputFile::~SafeOutputFile() noexcept(false)
 {
 	if(!stream())

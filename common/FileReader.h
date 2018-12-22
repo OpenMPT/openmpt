@@ -335,6 +335,8 @@ public:
 				cache.resize(size_);
 				if(!cache.empty())
 				{
+					// cppcheck false-positive
+					// cppcheck-suppress containerOutOfBounds
 					file.GetRaw(&(cache[0]), size);
 				}
 			}
