@@ -246,24 +246,24 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "Enable Online &Update Check",IDC_CHECK_UPDATEENABLED,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,6,106,10
-    GROUPBOX        "Update Channel",IDC_STATIC_UDATECHANNEL,6,20,276,52
-    CONTROL         "&Release: Official stable released versions only (recommended)",IDC_RADIO1,
-                    "Button",BS_AUTORADIOBUTTON,12,32,264,10
-    CONTROL         "&Next: Previews of the next official stable release",IDC_RADIO2,
-                    "Button",BS_AUTORADIOBUTTON,12,45,264,10
-    CONTROL         "&Development: Bleeding-edge development versions",IDC_RADIO3,
-                    "Button",BS_AUTORADIOBUTTON,12,58,264,10
-    GROUPBOX        "Check for Updates",IDC_STATIC_UPDATECHECK,6,76,276,48
-    LTEXT           "Automatically check on program &start:",IDC_STATIC_UPDATEFREQUENCY,12,88,126,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_COMBO_UPDATEFREQUENCY,138,88,48,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "&Check now...",IDC_BUTTON1,216,88,60,12
-    LTEXT           "",IDC_LASTUPDATE,12,107,264,12
-    GROUPBOX        "Privacy Settings",IDC_STATIC_UPDATEPRIVACY,6,126,276,84
+    GROUPBOX        "Check for Updates",IDC_STATIC_UPDATECHECK,6,24,276,48
+    LTEXT           "Automatically check on program &start:",IDC_STATIC_UPDATEFREQUENCY,12,36,126,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO_UPDATEFREQUENCY,138,36,48,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Check now...",IDC_BUTTON1,216,36,60,12
+    LTEXT           "",IDC_LASTUPDATE,12,55,264,12
+    GROUPBOX        "Privacy Settings",IDC_STATIC_UPDATEPRIVACY,6,78,276,84
     CONTROL         "&Allow OpenMPT to collect basic statistics about your system configuration",IDC_CHECK1,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,138,264,12
-    LTEXT           "",IDC_STATIC_UPDATEPRIVACYTEXT,12,150,264,36
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,90,264,12
+    LTEXT           "",IDC_STATIC_UPDATEPRIVACYTEXT,12,102,264,36
     CONTROL         "<a>Show which information would be transmitted to OpenMPT...</a>",IDC_SYSLINK1,
-                    "SysLink",WS_TABSTOP,12,192,264,12
+                    "SysLink",WS_TABSTOP,12,144,264,12
+    GROUPBOX        "Update Channel",IDC_STATIC_UDATECHANNEL,6,174,276,52
+    CONTROL         "&Release: Official stable released versions only (recommended)",IDC_RADIO1,
+                    "Button",BS_AUTORADIOBUTTON,12,186,264,10
+    CONTROL         "&Next: Previews of the next official stable release",IDC_RADIO2,
+                    "Button",BS_AUTORADIOBUTTON,12,199,264,10
+    CONTROL         "&Development: Bleeding-edge development versions",IDC_RADIO3,
+                    "Button",BS_AUTORADIOBUTTON,12,212,264,10
 END
 
 IDD_CLOSEDOCUMENTS DIALOGEX 0, 0, 370, 197
