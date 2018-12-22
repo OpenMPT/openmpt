@@ -85,7 +85,7 @@ bool SetFilesystemCompression(const mpt::PathString &filename)
 
 
 namespace mpt {
-	
+
 #if MPT_COMPILER_MSVC
 
 mpt::tstring SafeOutputFile::convert_mode(std::ios_base::openmode mode, FlushMode flushMode)
