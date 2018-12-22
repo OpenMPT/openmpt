@@ -456,15 +456,6 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 
 
 #ifdef MPT_WITH_FLAC
-// Helper function for copying OpenMPT's sample data to FLAC's int32 buffer.
-template<typename T>
-inline static void SampleToFLAC32(FLAC__int32 *dst, const T *src, SmpLength numSamples)
-{
-	for(SmpLength i = 0; i < numSamples; i++)
-	{
-		dst[i] = src[i];
-	}
-};
 
 // RAII-style helper struct for FLAC encoder
 struct FLAC__StreamEncoder_RAII
@@ -665,41 +656,39 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 #endif // MODPLUG_TRACKER
 
 	bool result = false;
-	FLAC__int32 *sampleData = nullptr;
-	SmpLength numSamples = 0;
 
 	if(FLAC__stream_encoder_init_stream(encoder, &FLAC__StreamEncoder_RAII::StreamEncoderWriteCallback, &FLAC__StreamEncoder_RAII::StreamEncoderSeekCallback, &FLAC__StreamEncoder_RAII::StreamEncoderTellCallback, nullptr, &encoder.f) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
 	{
 		goto fail;
 	}
 
-	// Convert sample data to signed 32-Bit integer array.
-	numSamples = sample.nLength * sample.GetNumChannels();
-	sampleData = new (std::nothrow) FLAC__int32[numSamples];
-	if(sampleData == nullptr)
+	// Convert and encode sample data
+	SmpLength framesRemain = sample.nLength, framesRead = 0;
+	const uint8 numChannels = sample.GetNumChannels();
+	FLAC__int32 buffer[mpt::IO::BUFFERSIZE_TINY];
+	while(framesRemain)
 	{
-		goto fail;
-	}
+		const SmpLength copyFrames = std::min<SmpLength>(framesRemain, mpt::saturate_cast<SmpLength>(mpt::size(buffer)) / numChannels);
+		
+		// First, convert to a 32-bit integer buffer
+		switch(sample.GetElementarySampleSize())
+		{
+		case 1: std::copy(sample.sample8() + framesRead * numChannels, sample.sample8() + (framesRead + copyFrames) * numChannels, std::begin(buffer)); break;
+		case 2: std::copy(sample.sample16() + framesRead * numChannels, sample.sample16() + (framesRead + copyFrames) * numChannels, std::begin(buffer)); break;
+		default: MPT_ASSERT_NOTREACHED();
+		}
 
-	if(sample.GetElementarySampleSize() == 1)
-	{
-		SampleToFLAC32(sampleData, sample.sample8(), numSamples);
-	} else if(sample.GetElementarySampleSize() == 2)
-	{
-		SampleToFLAC32(sampleData, sample.sample16(), numSamples);
-	} else
-	{
-		MPT_ASSERT_NOTREACHED();
-	}
+		// Now do the actual encoding
+		FLAC__stream_encoder_process_interleaved(encoder, buffer, copyFrames);
 
-	// Do the actual conversion.
-	FLAC__stream_encoder_process_interleaved(encoder, sampleData, sample.nLength);
+		framesRead += copyFrames;
+		framesRemain -= copyFrames;
+	}
 	result = true;
 
 fail:
 	FLAC__stream_encoder_finish(encoder);
 
-	delete[] sampleData;
 	for(auto m : metadata)
 	{
 		FLAC__metadata_object_delete(m);
