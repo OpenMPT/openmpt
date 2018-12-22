@@ -1,9 +1,5 @@
 ## Process this file with automake to create Makefile.in
 ##
-## $Id: Makefile.am 38 2008-12-25 17:00:23Z oparviai $
-##
-## Copyright (C) 2003 - David W. Durham
-## 
 ## This file is part of SoundTouch, an audio processing library for pitch/time adjustments
 ## 
 ## SoundTouch is free software; you can redistribute it and/or modify it under the

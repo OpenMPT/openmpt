@@ -1,7 +1,5 @@
 ## Process this file with automake to create Makefile.in
 ##
-## $Id: Makefile.am 230 2015-09-20 07:38:32Z oparviai $
-##
 ## This file is part of SoundTouch, an audio processing library for pitch/time adjustments
 ## 
 ## SoundTouch is free software; you can redistribute it and/or modify it under the
@@ -22,9 +20,10 @@ include $(top_srcdir)/config/am_include.mk
 
 
 # set to something if you want other stuff to be included in the distribution tarball
-EXTRA_DIST=SoundTouch.dsp SoundTouch.dsw SoundTouch.sln SoundTouch.vcproj
+EXTRA_DIST=SoundTouch.sln SoundTouch.vcxproj
 
-noinst_HEADERS=AAFilter.h cpu_detect.h cpu_detect_x86.cpp FIRFilter.h RateTransposer.h TDStretch.h PeakFinder.h
+noinst_HEADERS=AAFilter.h cpu_detect.h cpu_detect_x86.cpp FIRFilter.h RateTransposer.h TDStretch.h PeakFinder.h \
+    InterpolateCubic.h InterpolateLinear.h InterpolateShannon.h
 
 lib_LTLIBRARIES=libSoundTouch.la
 #
