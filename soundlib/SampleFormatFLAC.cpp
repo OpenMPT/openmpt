@@ -655,38 +655,33 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 	FLAC__stream_encoder_set_compression_level(encoder, TrackerSettings::Instance().m_FLACCompressionLevel);
 #endif // MODPLUG_TRACKER
 
-	bool result = false;
-
-	if(FLAC__stream_encoder_init_stream(encoder, &FLAC__StreamEncoder_RAII::StreamEncoderWriteCallback, &FLAC__StreamEncoder_RAII::StreamEncoderSeekCallback, &FLAC__StreamEncoder_RAII::StreamEncoderTellCallback, nullptr, &encoder.f) != FLAC__STREAM_ENCODER_INIT_STATUS_OK)
+	bool success = FLAC__stream_encoder_init_stream(encoder, &FLAC__StreamEncoder_RAII::StreamEncoderWriteCallback, &FLAC__StreamEncoder_RAII::StreamEncoderSeekCallback, &FLAC__StreamEncoder_RAII::StreamEncoderTellCallback, nullptr, &encoder.f) == FLAC__STREAM_ENCODER_INIT_STATUS_OK;
+	if(success)
 	{
-		goto fail;
-	}
-
-	// Convert and encode sample data
-	SmpLength framesRemain = sample.nLength, framesRead = 0;
-	const uint8 numChannels = sample.GetNumChannels();
-	FLAC__int32 buffer[mpt::IO::BUFFERSIZE_TINY];
-	while(framesRemain)
-	{
-		const SmpLength copyFrames = std::min<SmpLength>(framesRemain, mpt::saturate_cast<SmpLength>(mpt::size(buffer)) / numChannels);
-		
-		// First, convert to a 32-bit integer buffer
-		switch(sample.GetElementarySampleSize())
+		// Convert and encode sample data
+		SmpLength framesRemain = sample.nLength, framesRead = 0;
+		const uint8 numChannels = sample.GetNumChannels();
+		FLAC__int32 buffer[mpt::IO::BUFFERSIZE_TINY];
+		while(framesRemain && success)
 		{
-		case 1: std::copy(sample.sample8() + framesRead * numChannels, sample.sample8() + (framesRead + copyFrames) * numChannels, std::begin(buffer)); break;
-		case 2: std::copy(sample.sample16() + framesRead * numChannels, sample.sample16() + (framesRead + copyFrames) * numChannels, std::begin(buffer)); break;
-		default: MPT_ASSERT_NOTREACHED();
+			const SmpLength copyFrames = std::min(framesRemain, mpt::saturate_cast<SmpLength>(mpt::size(buffer) / numChannels));
+
+			// First, convert to a 32-bit integer buffer
+			switch(sample.GetElementarySampleSize())
+			{
+			case 1: std::copy(sample.sample8() + framesRead * numChannels, sample.sample8() + (framesRead + copyFrames) * numChannels, std::begin(buffer)); break;
+			case 2: std::copy(sample.sample16() + framesRead * numChannels, sample.sample16() + (framesRead + copyFrames) * numChannels, std::begin(buffer)); break;
+			default: MPT_ASSERT_NOTREACHED();
+			}
+
+			// Now do the actual encoding
+			success = FLAC__stream_encoder_process_interleaved(encoder, buffer, copyFrames);
+
+			framesRead += copyFrames;
+			framesRemain -= copyFrames;
 		}
-
-		// Now do the actual encoding
-		FLAC__stream_encoder_process_interleaved(encoder, buffer, copyFrames);
-
-		framesRead += copyFrames;
-		framesRemain -= copyFrames;
 	}
-	result = true;
 
-fail:
 	FLAC__stream_encoder_finish(encoder);
 
 	for(auto m : metadata)
@@ -694,7 +689,7 @@ fail:
 		FLAC__metadata_object_delete(m);
 	}
 
-	return result;
+	return success;
 #else
 	MPT_UNREFERENCED_PARAMETER(nSample);
 	MPT_UNREFERENCED_PARAMETER(f);
