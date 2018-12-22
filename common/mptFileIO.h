@@ -174,6 +174,8 @@ static inline FlushMode FlushModeFromBool(bool flush)
 	return flush ? FlushMode::Full : FlushMode::None;
 }
 
+#ifdef MODPLUG_TRACKER
+
 class SafeOutputFile
 {
 private:
@@ -224,7 +226,11 @@ public:
 	~SafeOutputFile() noexcept(false);
 };
 
+#endif // MODPLUG_TRACKER
 
+
+
+#ifdef MODPLUG_TRACKER
 
 // LazyFileRef is a simple reference to an on-disk file by the means of a
 // filename which allows easy assignment of the whole file contents to and from
@@ -246,6 +252,8 @@ public:
 	operator std::vector<char> () const;
 	operator std::string () const;
 };
+
+#endif // MODPLUG_TRACKER
 
 
 } // namespace mpt

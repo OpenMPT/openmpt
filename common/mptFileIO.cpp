@@ -84,6 +84,8 @@ bool SetFilesystemCompression(const mpt::PathString &filename)
 
 
 
+#ifdef MODPLUG_TRACKER
+
 namespace mpt {
 
 #if MPT_COMPILER_MSVC
@@ -233,7 +235,11 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 
 } // namespace mpt
 
+#endif // MODPLUG_TRACKER
 
+
+
+#ifdef MODPLUG_TRACKER
 
 namespace mpt {
 
@@ -310,6 +316,8 @@ LazyFileRef::operator std::string () const
 }
 
 } // namespace mpt
+
+#endif // MODPLUG_TRACKER
 
 
 
