@@ -1949,6 +1949,7 @@ static MPT_NOINLINE void TestMisc2()
 	
 	}
 
+#ifdef MODPLUG_TRACKER
 #ifdef MPT_ENABLE_FILEIO
 
 	{
@@ -1972,6 +1973,7 @@ static MPT_NOINLINE void TestMisc2()
 	}
 
 #endif
+#endif // MODPLUG_TRACKER
 
 #ifdef MPT_WITH_ZLIB
 	VERIFY_EQUAL(crc32(0, mpt::byte_cast<const unsigned char*>(std::string("123456789").c_str()), 9), 0xCBF43926u);
