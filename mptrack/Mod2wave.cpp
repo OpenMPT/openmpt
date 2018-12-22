@@ -1047,6 +1047,7 @@ void CDoWaveConvert::Run()
 	if (l < max) max = l;
 
 	SetRange(0, max);
+	EnableTaskbarProgress();
 
 	// No pattern cue points yet
 	std::vector<PatternCuePoint> patternCuePoints;
