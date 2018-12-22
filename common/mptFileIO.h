@@ -215,11 +215,7 @@ public:
 	}
 	operator bool() const
 	{
-#if MPT_GCC_BEFORE(5,0,0)
-		return stream().operator void*() ? true : false;
-#else
-		return stream().operator bool();
-#endif
+		return stream() ? true : false;
 	}
 	bool operator!() const
 	{
