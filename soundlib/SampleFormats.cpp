@@ -2144,7 +2144,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	const mpt::PathString sampleBaseName = filename.GetFileName();
 	const mpt::PathString sampleDirName = sampleBaseName + P_("/");
 	const mpt::PathString sampleBasePath = filename.GetPath() + sampleDirName;
-	if(!::CreateDirectory(sampleBasePath.AsNative().c_str(), nullptr))
+	if(!sampleBasePath.IsDirectory() && !::CreateDirectory(sampleBasePath.AsNative().c_str(), nullptr))
 	{
 		return false;
 	}
