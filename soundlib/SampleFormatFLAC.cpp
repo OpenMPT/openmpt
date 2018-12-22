@@ -690,7 +690,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 		}
 
 		// Now do the actual encoding
-		success = FLAC__stream_encoder_process_interleaved(encoder, buffer, copyFrames);
+		success = FLAC__stream_encoder_process_interleaved(encoder, buffer, copyFrames) != false;
 
 		framesRead += copyFrames;
 		framesRemain -= copyFrames;
