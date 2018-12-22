@@ -227,7 +227,7 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 #endif // MPT_COMPILER_MSVC
 	if(errorOnFlush && (stream().exceptions() & (std::ios::badbit | std::ios::failbit)))
 	{
-		throw std::ios_base::failure("Error flushing file buffers.");
+		throw std::ios_base::failure(std::string("Error flushing file buffers."));
 	}
 }
 
