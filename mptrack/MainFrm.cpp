@@ -2653,7 +2653,9 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 			while(filesAdded < nMaxCount && scanner.Next(fileName))
 			{
 				vPaths.push_back(fileName);
-				AppendMenu(hMenu, MF_STRING, nIdRangeBegin + filesAdded, fileName.GetFullFileName().ToCString());
+				CString file = fileName.GetFullFileName().ToCString();
+				file.Replace(_T("&"), _T("&&"));
+				AppendMenu(hMenu, MF_STRING, nIdRangeBegin + filesAdded, file);
 				filesAdded++;
 			}
 		}
