@@ -11,6 +11,13 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.26/doc/libopenmpt_rele
 0.3
 ---
 
+For libopenmpt 0.3, see
+https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.27/doc/libopenmpt_release.txt
+.
+
+0.4
+---
+
  1. ensure that the OpenMPT version is preferrably at a aa.bb.cc.00 version,
     otherwise increment the minorminor part to a new value used specifically for
     the libopenmpt release
@@ -31,7 +38,7 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.26/doc/libopenmpt_rele
  5. wait for buildbot
  6. run
         cd build/release/libopenmpt-website
-        ./release-0.3.sh $NEWVER +release
+        ./release-0.4.sh $NEWVER +release
         cd ../../..
  7. update foo_openmpt.fb2k-component (winold version, because foobar2000 still
     supports XP) on https://foobar2000.org/components
