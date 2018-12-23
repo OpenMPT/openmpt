@@ -149,7 +149,7 @@ void WelcomeDlg::OnOK()
 	CDialog::OnOK();
 
 	bool runUpdates = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
-	TrackerSettings::Instance().UpdateIntervalDays = (runUpdates ? 7 : 0);
+	TrackerSettings::Instance().UpdateIntervalDays = (runUpdates ? 7 : -1);
 	TrackerSettings::Instance().UpdateStatistics = (IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED);
 	TrackerSettings::Instance().UpdateStatisticsConsentAsked = true;
 	if(IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED)
