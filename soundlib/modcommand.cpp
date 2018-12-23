@@ -79,6 +79,7 @@ void ModCommand::ExtendedMODtoS3MEffect()
 	command = CMD_S3MCMDEX;
 	switch(param & 0xF0)
 	{
+	case 0x00: command = CMD_NONE; break; // No filter control
 	case 0x10: command = CMD_PORTAMENTOUP; param |= 0xF0; break;
 	case 0x20: command = CMD_PORTAMENTODOWN; param |= 0xF0; break;
 	case 0x30: param = (param & 0x0F) | 0x10; break;
@@ -320,12 +321,12 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 	{
 		if(note == NOTE_NOTECUT)
 		{
-			// convert note cut to EC0 if possible or volume command otherwise (MOD/XM has no real way of cutting notes that cannot be "undone" by volume commands)
+			// convert note cut to C00 if possible or volume command otherwise (MOD/XM has no real way of cutting notes that cannot be "undone" by volume commands)
 			note = NOTE_NONE;
 			if(command == CMD_NONE || !newTypeIsXM)
 			{
-				command = CMD_MODCMDEX;
-				param = 0xC0;
+				command = CMD_VOLUME;
+				param = 0;
 			} else
 			{
 				volcmd = VOLCMD_VOLUME;
