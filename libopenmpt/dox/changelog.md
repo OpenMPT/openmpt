@@ -12,7 +12,7 @@ is just a high-level summary.
  *  [**New**] libopenmpt now includes emulation of the OPL chip and thus plays
     OPL instruments in S3M, C67 and MPTM files. OPL chip emulation volume can be
     changed with the new ctl `render.opl.volume_factor`.
- *  [**New**] libopenmpt now supports C67 (CDFM Composer) files.
+ *  [**New**] libopenmpt now supports CDFM / Composer 670 module files.
  *  [**New**] Autotools `configure` and plain `Makefile` now honor the variable
     `CXXSTDLIB_PCLIBSPRIVATE` which serves the sole purpose of listing the
     standard library (or libraries) required for static linking. The contents of
