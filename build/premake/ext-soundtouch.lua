@@ -56,4 +56,6 @@
    "../../include/soundtouch/source/SoundTouchDLL/SoundTouchDLL.cpp",
    "../../include/soundtouch/source/SoundTouchDLL/SoundTouchDLL.h",
   }
+	filter { "action:vs*" }
+		buildoptions { "/wd4267" }
   defines { "DLL_EXPORTS" }
