@@ -18,6 +18,13 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.27/doc/libopenmpt_rele
 0.4
 ---
 
+For libopenmpt 0.4, see
+https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.28/doc/libopenmpt_release.txt
+.
+
+0.5
+---
+
  1. ensure that the OpenMPT version is preferrably at a aa.bb.cc.00 version,
     otherwise increment the minorminor part to a new value used specifically for
     the libopenmpt release
@@ -28,7 +35,7 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.27/doc/libopenmpt_rele
         svn up
         NEWVER=$(make distversion-pure)
         NEWREV=$(svn info --xml . | xpath -e '/info/entry/commit/@revision' -q | sed 's/revision//g' | tr '"' ' ' | tr '=' ' ' | sed 's/ //g')
-        svn cp -m "tag libopenmpt-${NEWVER}" -r ${NEWREV} https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.27 https://source.openmpt.org/svn/openmpt/tags/libopenmpt-${NEWVER}
+        svn cp -m "tag libopenmpt-${NEWVER}" -r ${NEWREV} https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.29 https://source.openmpt.org/svn/openmpt/tags/libopenmpt-${NEWVER}
         build/update_libopenmpt_version.sh bumppatch
         build/update_libopenmpt_version.sh bumpltrev
         svn ci -m "[Mod] libopenmpt: Bump patch version."
