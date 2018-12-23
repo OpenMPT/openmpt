@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.01.00 (23 December 2018, revision 11086)
+v1.28.01.00 (23 December 2018, revision 11100)
 ----------------------------------------------
 Pattern tab
 - [Imp] <js> Effect memory is now also used for volume column input.
@@ -62,6 +62,10 @@ Tree view
 - [Mod] <js> Sample / instrument play status update is now enabled by default on new installations.
 - [Fix] <js> Previewing MIDI Library items associated with soundfonts now previews the correct instrument inside that soundfont.
 
+Mod Conversion
+- [Mod] <js> Remove E0x commands when converting from MOD / XM to S3M / IT / MPTM.
+- [Mod] <js> Convert Note Cut (^^^) to C00 instead of EC0 when converting to MOD / XM.
+
 VST / DMO Plugins
 - [Mod] <js> "Pass keys to plugin" is no longer required to be activated when a standard input field is focussed in a plugin GUI to be able to enter texts.
 
@@ -77,7 +81,7 @@ Playback
 MPTM
 - [New] <js> AdLib (OPL) instruments are now supported. Up to 18 simultaneous voices with OPL3-style panning (hard left / center right) and all OPL3 waveforms can be used. 4-operator instruments are not available for now, though.
 - [Imp] <js> More logical release node behaviour. The release part is now scaled by the ratio between the value of the key-off point and the release node. The old behaviour is retained through a compatibility flag.
-- [Mod] <js> A few more sensible IT compatibility flags are now enabled by default to be more consistent with IT.
+- [Mod] <js> When creating a new MPTM file, a few more sensible IT compatibility flags are now enabled by default to be more consistent with IT.
 
 XM::Compatible Playback Mode
 - [Fix] <js> If the sustain point of the panning envelope is reached before key-off, it is never released.

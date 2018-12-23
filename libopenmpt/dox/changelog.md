@@ -101,7 +101,9 @@ is just a high-level summary.
     row delay (fixes "ode to protracker").
  *  XM: If the sustain point of the panning envelope is reached before key-off,
     it is never released.
- *  XM E60 loop bug was not considered in song length calucation.
+ *  XM: Do not default recall volume / panning for delayed instrument-less notes
+ *  XM :E60 loop bug was not considered in song length calucation.
+ *  S3M: Notes without instrument number use previous note's sample offset.
  *  Tighten M15 and MOD file rejection heuristics.
  *  J2B: Ignore frequency limits from file header. Fixes Medivo.j2b, broken
     since libopenmpt-0.2.6401-beta17.
@@ -109,6 +111,8 @@ is just a high-level summary.
  *  STM: Better support for early format revisions (no such files have been
     found in the wild, though).
  *  STM: Last character of sample name was missing.
+ *  SFX: Work around bad conversions of the "Operation Stealth" soundtrack by
+    turning pattern breaks into note stops.
  *  IMF: Filter cutoff was upside down and the cutoff range was too small.
  *  ParamEq plugin center frequency was not limited correctly.
  *  Keep track of active SFx macro during seeking.
@@ -117,6 +121,10 @@ is just a high-level summary.
  *  A song starting with non-existing patterns could not be played.
  *  DSM: Support restart position and 16-bit samples.
  *  DTM: Import global volume.
+ *  MOD: Support notes in octave 2, like in FastTracker 2 (fixes DOPE.MOD).
+ *  Do not apply Amiga playback heuristics to MOD files that have clearly been
+    written with a PC tracker.
+ *  MPTM: More logical release node behaviour.
  *  Subsong search is now less thorough. It could previously find many subsongs
     that are technically correct (unplayed rows at the beginning of patterns
     that have been jumped over due to pattern breaks), but so far no real-world
