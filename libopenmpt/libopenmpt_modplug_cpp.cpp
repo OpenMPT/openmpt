@@ -51,14 +51,14 @@ Metadata and other state is not provided or updated.
 /* libmodplug C++ header is broken for MSVC DLL builds */
 #define MODPLUG_STATIC
 #endif /* _MSC_VER */
-#include "libmodplug/stdafx.h"
-#include "libmodplug/sndfile.h"
-
 #ifdef _MSC_VER
 #define LIBOPENMPT_MODPLUG_API
 #else /* !_MSC_VER */
 #define LIBOPENMPT_MODPLUG_API LIBOPENMPT_API_HELPER_EXPORT
 #endif /* _MSC_VER */
+class LIBOPENMPT_MODPLUG_API CSoundFile;
+#include "libmodplug/stdafx.h"
+#include "libmodplug/sndfile.h"
 
 namespace {
 template <class T>
