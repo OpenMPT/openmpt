@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.1-pre
 
+ *  [**Bug**] Binaries compiled for winold (Windows XP, Vista, 7, for CPUs
+    without SSE2 support) did not actually work on CPUs without SSE2 support.
  *  [**Bug**] libmodplug: Public symbols of the C++ API had `visibility=hidden`
     set on non-MSVC systems, which made them not publicly accessible.
 
