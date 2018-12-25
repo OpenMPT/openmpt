@@ -37,13 +37,12 @@
 #define MODPLUG_STATIC
 #endif /* MPT_BUILD_MSVC_STATIC */
 #endif /* _MSC_VER */
-#include "libmodplug/modplug.h"
-
 #ifdef _MSC_VER
 #define LIBOPENMPT_MODPLUG_API
 #else /* !_MSC_VER */
 #define LIBOPENMPT_MODPLUG_API LIBOPENMPT_API_HELPER_EXPORT
 #endif /* _MSC_VER */
+#include "libmodplug/modplug.h"
 
 /* from libmodplug/sndfile.h */
 /* header is not c clean */
