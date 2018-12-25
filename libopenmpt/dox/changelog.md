@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.1-pre
 
+ *  [**Bug**] libmodplug: Public symbols of the C++ API had `visibility=hidden`
+    set on non-MSVC systems, which made them not publicly accessible.
+
 ### libopenmpt 0.4.0 (2018-12-23)
 
  *  [**New**] libopenmpt now includes emulation of the OPL chip and thus plays
