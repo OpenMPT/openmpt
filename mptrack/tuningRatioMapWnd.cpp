@@ -31,13 +31,11 @@ END_MESSAGE_MAP()
 
 void CTuningRatioMapWnd::OnPaint()
 {
-	HGDIOBJ oldfont = NULL;
-	CRect rcClient;
 	CPaintDC dc(this);
-	HDC hdc;
 
 	if(!m_pTuning) return;
 
+	CRect rcClient;
 	GetClientRect(&rcClient);
 	if (!m_hFont)
 	{
@@ -45,8 +43,8 @@ void CTuningRatioMapWnd::OnPaint()
 		colorText = GetSysColor(COLOR_WINDOWTEXT);
 		colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
 	}
-	hdc = dc.m_hDC;
-	oldfont = ::SelectObject(hdc, m_hFont);
+	HDC hdc = dc.m_hDC;
+	HGDIOBJ oldfont = ::SelectObject(hdc, m_hFont);
 	dc.SetBkMode(TRANSPARENT);
 	if ((m_cxFont <= 0) || (m_cyFont <= 0))
 	{
@@ -58,7 +56,7 @@ void CTuningRatioMapWnd::OnPaint()
 	dc.IntersectClipRect(&rcClient);
 	if ((m_cxFont > 0) && (m_cyFont > 0))
 	{
-		BOOL bFocus = (::GetFocus() == m_hWnd) ? TRUE : FALSE;
+		const bool focus = (::GetFocus() == m_hWnd);
 		CRect rect;
 
 		NOTEINDEXTYPE nNotes = static_cast<NOTEINDEXTYPE>((rcClient.bottom + m_cyFont - 1) / m_cyFont);
@@ -68,7 +66,6 @@ void CTuningRatioMapWnd::OnPaint()
 
 		for (int ynote=0; ynote<nNotes; ynote++, ypaint+=m_cyFont, nPos++)
 		{
-			BOOL bHighLight;
 			// Note
 			NOTEINDEXTYPE noteToDraw = nPos - m_nNoteCentre;
 			const bool isValidNote = m_pTuning->IsValidNote(noteToDraw);
@@ -77,26 +74,26 @@ void CTuningRatioMapWnd::OnPaint()
 			DrawButtonRect(hdc, &rect, isValidNote ? mpt::cfmt::val(noteToDraw) : CString(_T("...")), FALSE, FALSE);
 
 			// Mapped Note
-			bHighLight = ((bFocus) && (nPos == (int)m_nNote) ) ? TRUE : FALSE;
+			const bool highLight = (focus && (nPos == (int)m_nNote) ) ? TRUE : FALSE;
 			rect.left = rect.right;
 			rect.right = m_cxFont*4-1;
-			FillRect(hdc, &rect, (bHighLight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
+			FillRect(hdc, &rect, highLight ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
 			if(nPos == (int)m_nNote)
 			{
 				rect.InflateRect(-1, -1);
 				dc.DrawFocusRect(&rect);
 				rect.InflateRect(1, 1);
 			}
-			dc.SetTextColor((bHighLight) ? colorTextSel : colorText);
+			dc.SetTextColor(highLight ? colorTextSel : colorText);
 
 			rect.SetRect(m_cxFont * 1, ypaint, m_cxFont * 2 - 1, ypaint + m_cyFont);
-			dc.DrawText(mpt::ToCString(mpt::CharsetLocale, m_pTuning->GetNoteName(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.DrawText(mpt::ToCString(mpt::CharsetLocale, m_pTuning->GetNoteName(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 
 			rect.SetRect(m_cxFont * 2, ypaint, m_cxFont * 3 - 1, ypaint + m_cyFont);
-			dc.DrawText(mpt::cfmt::val(m_pTuning->GetRatio(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.DrawText(mpt::cfmt::val(m_pTuning->GetRatio(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 
 			rect.SetRect(m_cxFont * 3, ypaint, m_cxFont * 4 - 1, ypaint + m_cyFont);
-			dc.DrawText(mpt::cfmt::fix(std::log2(static_cast<double>(m_pTuning->GetRatio(noteToDraw))) * 1200.0, 1), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.DrawText(mpt::cfmt::fix(std::log2(static_cast<double>(m_pTuning->GetRatio(noteToDraw))) * 1200.0, 1), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 
 		}
 		rect.SetRect(rcClient.left+m_cxFont*4-1, rcClient.top, rcClient.left+m_cxFont*4+3, ypaint);
