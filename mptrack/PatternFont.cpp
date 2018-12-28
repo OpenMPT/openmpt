@@ -89,13 +89,13 @@ static MODPLUGDIB customFontBitmapASCII;
 static void DrawChar(HDC hDC, WCHAR ch, int x, int y, int w, int h)
 {
 	CRect rect(x, y, x + w, y + h);
-	::DrawTextW(hDC, &ch, 1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	::DrawTextW(hDC, &ch, 1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
 }
 
 static void DrawChar(HDC hDC, CHAR ch, int x, int y, int w, int h)
 {
 	CRect rect(x, y, x + w, y + h);
-	::DrawTextA(hDC, &ch, 1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	::DrawTextA(hDC, &ch, 1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
 }
 
 template<typename char_t>
