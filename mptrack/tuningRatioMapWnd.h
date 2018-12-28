@@ -25,28 +25,20 @@ class CTuningRatioMapWnd: public CStatic
 {
 	friend class CTuningDialog;
 protected:
-	const CTuning* m_pTuning;
+	const CTuning* m_pTuning = nullptr;
 
-	CTuningDialog* m_pParent;
+	CTuningDialog* m_pParent = nullptr;
 
-	HFONT m_hFont;
-	int m_cxFont, m_cyFont;
+	HFONT m_hFont = nullptr;
+	int m_cxFont = 0, m_cyFont = 0;
 	COLORREF colorText, colorTextSel;
-	NOTEINDEXTYPE m_nNote;
+	NOTEINDEXTYPE m_nNote = NOTE_MIDDLEC;
 
-	NOTEINDEXTYPE m_nNoteCentre;
+	NOTEINDEXTYPE m_nNoteCentre = NOTE_MIDDLEC;
 
 
 public:
-	CTuningRatioMapWnd() : m_cxFont(0),
-		m_cyFont(0),
-		m_hFont(NULL),
-		m_pTuning(NULL),
-		m_pParent(NULL),
-		m_nNoteCentre(61),
-		m_nNote(61) {}
-
-	VOID Init(CTuningDialog* const pParent, CTuning* const pTun) { m_pParent = pParent; m_pTuning = pTun;}
+	void Init(CTuningDialog* const pParent, CTuning* const tuning) { m_pParent = pParent; m_pTuning = tuning;}
 
 	NOTEINDEXTYPE GetShownCentre() const;
 
