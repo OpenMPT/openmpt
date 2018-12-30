@@ -1614,7 +1614,7 @@ BOOL CModTree::SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName)
 
 static mpt::ustring TreeDeletionString(const CSoundFile &sndFile, const MPT_UCHAR_TYPE *type, uint32 id, const std::string &name)
 {
-	mpt::ustring s = mpt::format(U_("Remove %1 %2"))(type, id);
+	mpt::ustring s = mpt::format(U_("Remove %1 %2"))(mpt::ustring(type), id);
 	if(!name.empty())
 		s += U_(": ") + mpt::ToUnicode(sndFile.GetCharsetInternal(), name);
 	s.append(1, UC_('?'));
@@ -1666,7 +1666,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 				}
 			}
 			mpt::ustring s = TreeDeletionString(*sndFile, UL_("pattern"), modItemID, sndFile->Patterns[pat].GetName());
-			s += mpt::format(U_("\nThis pattern is currently %1used."))(isUsed ? UL_("") : UL_("un"));
+			s += mpt::format(U_("\nThis pattern is currently %1used."))(isUsed ? U_("") : U_("un"));
 			if(Reporting::Confirm(s, false, isUsed) == cnfYes && modDoc->RemovePattern(pat))
 			{
 				modDoc->UpdateAllViews(nullptr, PatternHint(pat).Data().Names());
