@@ -12,6 +12,9 @@ is just a high-level summary.
  *  [**Bug**] libmodplug: Public symbols of the C++ API had `visibility=hidden`
     set on non-MSVC systems, which made them not publicly accessible.
 
+ *  minimp3: Update to commit e9df0760e94044caded36a55d70ab4152134adc5
+    (2018-12-23).
+
 ### libopenmpt 0.4.0 (2018-12-23)
 
  *  [**New**] libopenmpt now includes emulation of the OPL chip and thus plays
