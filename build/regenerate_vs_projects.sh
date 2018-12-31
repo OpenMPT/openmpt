@@ -30,8 +30,11 @@ fi
 
 echo dofile \"build/genie/genie.lua\" > genie.lua
 
-${GENIE} --target="windesktop81" vs2015
-${GENIE} --target="winstore82"   vs2015
+${GENIE} --target="windesktop81" vs2017
+${GENIE} --target="winstore82"   vs2017
+
+${GENIE} --target="windesktop81" postprocess
+${GENIE} --target="winstore82"   postprocess
 
 rm genie.lua
 

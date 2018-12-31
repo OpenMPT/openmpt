@@ -1,6 +1,8 @@
 
 configuration {}
 
+	if _ACTION ~= "postprocess" then
+
 	if _OPTIONS["target"] == "windesktop81" then
 		defines { "_WIN32_WINNT=0x0603" }
 		
@@ -24,5 +26,7 @@ configuration {}
 		local action = premake.action.current()
 		action.vstudio.windowsTargetPlatformVersion = "10.0.10240.0"
 		action.vstudio.windowsTargetPlatformMinVersion = "10.0.10240.0"
+
+	end
 
 	end
