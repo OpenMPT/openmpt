@@ -1248,9 +1248,9 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/dist.mk bin/svn
 	svn export ./build/vs2015                 bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2015                 --native-eol CRLF
 	svn export ./build/vs2015xp               bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2015xp               --native-eol CRLF
 	svn export ./build/vs2017                 bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2017                 --native-eol CRLF
+	svn export ./build/vs2017uwp              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2017uwp              --native-eol CRLF
+	svn export ./build/vs2017win81            bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2017win81            --native-eol CRLF
 	svn export ./build/vs2017xp               bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2017xp               --native-eol CRLF
-	svn export ./build/windesktop81           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/windesktop81           --native-eol CRLF
-	svn export ./build/winstore82             bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/winstore82             --native-eol CRLF
 	svn export ./build/download_externals.cmd bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/download_externals.cmd --native-eol CRLF
 	svn export ./common                bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common                --native-eol CRLF
 	svn export ./soundbase             bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundbase             --native-eol CRLF
