@@ -289,14 +289,14 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)openmpt-mpg123.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)openmpt-mpg123.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -306,7 +306,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ProgramDatabaseFile>$(OutDir)openmpt-mpg123.pdb</ProgramDatabaseFile>
+      <AdditionalDependencies>shlwapi.lib;;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-mpg123.dll</OutputFile>
       <ImportLibrary>..\..\..\bin\debug\winstore82-static\x86-32\openmpt-mpg123.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
@@ -319,14 +321,14 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)openmpt-mpg123.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)openmpt-mpg123.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -336,7 +338,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ProgramDatabaseFile>$(OutDir)openmpt-mpg123.pdb</ProgramDatabaseFile>
+      <AdditionalDependencies>shlwapi.lib;;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-mpg123.dll</OutputFile>
       <ImportLibrary>..\..\..\bin\debug\winstore82-static\x86-64\openmpt-mpg123.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
@@ -349,14 +353,14 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)openmpt-mpg123.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)openmpt-mpg123.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -366,7 +370,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ProgramDatabaseFile>$(OutDir)openmpt-mpg123.pdb</ProgramDatabaseFile>
+      <AdditionalDependencies>shlwapi.lib;;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-mpg123.dll</OutputFile>
       <ImportLibrary>..\..\..\bin\debug\winstore82-static\arm\openmpt-mpg123.lib</ImportLibrary>
     </Link>
@@ -379,14 +385,14 @@
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)openmpt-mpg123.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)openmpt-mpg123.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -396,9 +402,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)openmpt-mpg123.pdb</ProgramDatabaseFile>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-mpg123.dll</OutputFile>
       <ImportLibrary>..\..\..\bin\release\winstore82-static\x86-32\openmpt-mpg123.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
@@ -412,14 +420,14 @@
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)openmpt-mpg123.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)openmpt-mpg123.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -429,9 +437,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)openmpt-mpg123.pdb</ProgramDatabaseFile>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-mpg123.dll</OutputFile>
       <ImportLibrary>..\..\..\bin\release\winstore82-static\x86-64\openmpt-mpg123.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
@@ -445,14 +455,14 @@
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)openmpt-mpg123.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)openmpt-mpg123.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -462,9 +472,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)openmpt-mpg123.pdb</ProgramDatabaseFile>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-mpg123.dll</OutputFile>
       <ImportLibrary>..\..\..\bin\release\winstore82-static\arm\openmpt-mpg123.lib</ImportLibrary>
     </Link>
@@ -476,14 +488,14 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)openmpt-mpg123.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)openmpt-mpg123.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -493,7 +505,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ProgramDatabaseFile>$(OutDir)openmpt-mpg123.pdb</ProgramDatabaseFile>
+      <AdditionalDependencies>shlwapi.lib;;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-mpg123.dll</OutputFile>
       <ImportLibrary>..\..\..\bin\debug\winstore82-shared\x86-32\openmpt-mpg123.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
@@ -506,14 +520,14 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)openmpt-mpg123.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)openmpt-mpg123.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -523,7 +537,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ProgramDatabaseFile>$(OutDir)openmpt-mpg123.pdb</ProgramDatabaseFile>
+      <AdditionalDependencies>shlwapi.lib;;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-mpg123.dll</OutputFile>
       <ImportLibrary>..\..\..\bin\debug\winstore82-shared\x86-64\openmpt-mpg123.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
@@ -536,14 +552,14 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)openmpt-mpg123.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)openmpt-mpg123.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -553,7 +569,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ProgramDatabaseFile>$(OutDir)openmpt-mpg123.pdb</ProgramDatabaseFile>
+      <AdditionalDependencies>shlwapi.lib;;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-mpg123.dll</OutputFile>
       <ImportLibrary>..\..\..\bin\debug\winstore82-shared\arm\openmpt-mpg123.lib</ImportLibrary>
     </Link>
@@ -566,14 +584,14 @@
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)openmpt-mpg123.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)openmpt-mpg123.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -583,9 +601,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)openmpt-mpg123.pdb</ProgramDatabaseFile>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-mpg123.dll</OutputFile>
       <ImportLibrary>..\..\..\bin\release\winstore82-shared\x86-32\openmpt-mpg123.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
@@ -599,14 +619,14 @@
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)openmpt-mpg123.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)openmpt-mpg123.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -616,9 +636,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)openmpt-mpg123.pdb</ProgramDatabaseFile>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-mpg123.dll</OutputFile>
       <ImportLibrary>..\..\..\bin\release\winstore82-shared\x86-64\openmpt-mpg123.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
@@ -632,14 +654,14 @@
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC_STATIC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)openmpt-mpg123.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)openmpt-mpg123.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <ResourceCompile>
@@ -649,9 +671,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)openmpt-mpg123.pdb</ProgramDatabaseFile>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-mpg123.dll</OutputFile>
       <ImportLibrary>..\..\..\bin\release\winstore82-shared\arm\openmpt-mpg123.lib</ImportLibrary>
     </Link>

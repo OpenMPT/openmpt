@@ -82,7 +82,7 @@ fi
 
 
 
-download "https://github.com/bkaradzic/GENie/archive/78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "build/externals/GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip"
+download "https://github.com/bkaradzic/GENie/archive/ec0a4a89d8dad4d251fc7195784a275c0c322a4d.zip" "build/externals/GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d.zip"
 download "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-src.zip" "build/externals/premake-5.0.0-alpha13-src.zip"
 
 download_and_unpack_zip "allegro42" "http://na.mirror.garr.it/mirrors/djgpp/current/v2tk/allegro/all422ar2.zip" "build/externals/all422ar2.zip" "."

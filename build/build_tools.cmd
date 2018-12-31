@@ -24,7 +24,7 @@ goto main
 
 
 
-call build\scriptlib\unpack.cmd "include\genie" "build\externals\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "GENie-78817a9707c1a02e845fb38b3adcc5353b02d377" || goto error
+call build\scriptlib\unpack.cmd "include\genie" "build\externals\GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d.zip" "GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d" || goto error
 
 xcopy /E /I /Y build\genie\genie\build\vs2015 include\genie\build\vs2015 || goto error
 xcopy /E /I /Y build\genie\genie\build\vs2017 include\genie\build\vs2017 || goto error
@@ -63,7 +63,7 @@ if exist "C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" (
 
 :geniedone
 
-echo "78817a9707c1a02e845fb38b3adcc5353b02d377" > include\genie\OpenMPT-version.txt
+echo "ec0a4a89d8dad4d251fc7195784a275c0c322a4d" > include\genie\OpenMPT-version.txt
 
 
 

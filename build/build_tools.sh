@@ -37,7 +37,7 @@ function unpack () {
 
 
 
-unpack "genie" "build/externals/GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip" "GENie-78817a9707c1a02e845fb38b3adcc5353b02d377"
+unpack "genie" "build/externals/GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d.zip" "GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d"
 
 cd include/genie
 
@@ -53,7 +53,7 @@ cd ../..
 
 cp -ar include/genie/build/vs* build/genie/genie/build/
 
-echo "78817a9707c1a02e845fb38b3adcc5353b02d377" > include/genie/OpenMPT-version.txt
+echo "ec0a4a89d8dad4d251fc7195784a275c0c322a4d" > include/genie/OpenMPT-version.txt
 
 
 

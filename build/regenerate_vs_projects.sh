@@ -15,7 +15,7 @@ PREMAKE=include/premake/bin/release/premake5
 
 
 
-echo "78817a9707c1a02e845fb38b3adcc5353b02d377" > include/genie/OpenMPT-expected.txt
+echo "ec0a4a89d8dad4d251fc7195784a275c0c322a4d" > include/genie/OpenMPT-expected.txt
 if ! diff include/genie/OpenMPT-expected.txt include/genie/OpenMPT-version.txt >/dev/null ; then
 	echo "Genie version mismatch"
 	exit 1
