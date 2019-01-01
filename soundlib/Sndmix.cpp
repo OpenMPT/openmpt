@@ -2256,6 +2256,7 @@ bool CSoundFile::ReadNote()
 				{
 					m_opl->NoteCut(nChn);
 					chn.dwFlags.set(CHN_NOTEFADE);
+					chn.nFadeOutVol = 0;
 				}
 			}
 
