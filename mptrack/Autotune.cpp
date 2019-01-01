@@ -180,6 +180,8 @@ struct AutotuneContext
 	uint32 sampleFreq;
 };
 
+#if defined(ENABLE_SSE2)
+
 static inline AutotuneHistogramEntry CalculateNoteHistogramSSE2(int note, AutotuneContext ctx)
 {
 	const SmpLength autocorrShift = NoteToShift(ctx.sampleFreq, note, ctx.pitchReference);
@@ -203,6 +205,8 @@ static inline AutotuneHistogramEntry CalculateNoteHistogramSSE2(int note, Autotu
 	}
 	return {note % HISTORY_BINS, autocorrSum};
 }
+
+#endif // ENABLE_SSE2
 
 static inline AutotuneHistogramEntry CalculateNoteHistogram(int note, AutotuneContext ctx)
 {
