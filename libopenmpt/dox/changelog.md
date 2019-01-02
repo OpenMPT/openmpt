@@ -9,6 +9,7 @@ is just a high-level summary.
 
  *  [**Regression**] Support for C++11 has been removed. C++14 is now required.
  *  [**Regression**] Support for GCC 4.8, 4.9 has been removed.
+ *  [**Regression**] Support for Clang 3.6, 3.7 has been removed.
 
 ### libopenmpt 0.4.0
 
