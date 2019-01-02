@@ -293,6 +293,9 @@ typedef int64_t (*openmpt_stream_tell_func)( void * stream );
 /*! \brief Stream callbacks
  *
  * Stream callbacks used by libopenmpt for stream operations.
+ * \sa openmpt_stream_get_file_callbacks
+ * \sa openmpt_stream_get_fd_callbacks
+ * \sa openmpt_stream_get_buffer_callbacks
  */
 typedef struct openmpt_stream_callbacks {
 
