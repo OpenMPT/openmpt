@@ -132,13 +132,8 @@ template <class T>
 inline void MemsetZero(T &a)
 {
 	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
-#if MPT_COMPILER_CLANG && defined(__GLIBCXX__)
 	MPT_STATIC_ASSERT(std::is_standard_layout<T>::value);
-	MPT_STATIC_ASSERT(std::is_trivial<T>::value || mpt::is_binary_safe<T>::value); // approximation
-#else // default
-	MPT_STATIC_ASSERT(std::is_standard_layout<T>::value);
-	MPT_STATIC_ASSERT((std::is_trivially_default_constructible<T>::value && std::is_trivially_copyable<T>::value) || mpt::is_binary_safe<T>::value); // C++11, but not supported on most compilers we care about
-#endif
+	MPT_STATIC_ASSERT((std::is_trivially_default_constructible<T>::value && std::is_trivially_copyable<T>::value) || mpt::is_binary_safe<T>::value);
 	std::memset(&a, 0, sizeof(T));
 }
 
@@ -158,13 +153,8 @@ template <typename Tdst, typename Tsrc>
 MPT_FORCEINLINE Tdst bit_cast(const Tsrc & src) noexcept
 {
 	MPT_STATIC_ASSERT(sizeof(Tdst) == sizeof(Tsrc));
-#if MPT_COMPILER_CLANG && defined(__GLIBCXX__)
-	MPT_STATIC_ASSERT(std::is_trivial<Tdst>::value); // approximation
-	MPT_STATIC_ASSERT(std::is_trivial<Tsrc>::value); // approximation
-#else // default
 	MPT_STATIC_ASSERT(std::is_trivially_copyable<Tdst>::value);
 	MPT_STATIC_ASSERT(std::is_trivially_copyable<Tsrc>::value);
-#endif
 	#if MPT_COMPILER_GCC || MPT_COMPILER_MSVC
 		// Compiler supports type-punning through unions. This is not stricly standard-conforming.
 		// For GCC, this is documented, for MSVC this is apparently not documented, but we assume it.
