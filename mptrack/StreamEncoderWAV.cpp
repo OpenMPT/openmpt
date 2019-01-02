@@ -44,7 +44,7 @@ public:
 		ASSERT(formatInfo.Samplerate > 0);
 		ASSERT(formatInfo.Channels > 0);
 
-		fileWAV = mpt::make_unique<WAVWriter>(&f);
+		fileWAV = std::make_unique<WAVWriter>(&f);
 		fileWAV->WriteFormat(formatInfo.Samplerate, formatInfo.Sampleformat.GetBitsPerSample(), (uint16)formatInfo.Channels, formatInfo.Sampleformat.IsFloat() ? WAVFormatChunk::fmtFloat : WAVFormatChunk::fmtPCM);
 
 		if(settings.Tags)
@@ -173,7 +173,7 @@ std::unique_ptr<IAudioStreamEncoder> WAVEncoder::ConstructStreamEncoder(std::ost
 	{
 		return nullptr;
 	}
-	return mpt::make_unique<WavStreamWriter>(*this, file, settings, tags);
+	return std::make_unique<WavStreamWriter>(*this, file, settings, tags);
 }
 
 

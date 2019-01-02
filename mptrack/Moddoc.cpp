@@ -513,7 +513,7 @@ void CModDoc::OnAppendModule()
 	ScopedLogCapturer logcapture(*this, _T("Append Failures"));
 	try
 	{
-		auto source = mpt::make_unique<CSoundFile>();
+		auto source = std::make_unique<CSoundFile>();
 		for(const auto &file : files)
 		{
 			InputFile f;

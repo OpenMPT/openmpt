@@ -4208,7 +4208,7 @@ static void GenerateCommands(CPattern& pat, const double dProbPcs, const double 
 static MPT_NOINLINE void TestPCnoteSerialization()
 {
 	FileReader file;
-	std::unique_ptr<CSoundFile> pSndFile = mpt::make_unique<CSoundFile>();
+	std::unique_ptr<CSoundFile> pSndFile = std::make_unique<CSoundFile>();
 	CSoundFile &sndFile = *pSndFile.get();
 	sndFile.m_nType = MOD_TYPE_MPT;
 	sndFile.Patterns.DestroyPatterns();

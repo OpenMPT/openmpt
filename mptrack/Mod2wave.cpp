@@ -900,7 +900,7 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 	{
 		const Encoder::Traits &encTraits = factory->GetTraits();
 		EncoderSettings.push_back(
-			mpt::make_unique<Encoder::Settings>(
+			std::make_unique<Encoder::Settings>(
 				conf,
 				encTraits.encoderSettingsName,
 				encTraits.canCues,

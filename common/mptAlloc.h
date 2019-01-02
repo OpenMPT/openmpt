@@ -79,12 +79,6 @@ struct GetRawBytesFunctor<const std::vector<T>>
 
 
 
-namespace mpt {
-using std::make_unique;
-} // namespace mpt
-
-
-
 namespace mpt
 {
 

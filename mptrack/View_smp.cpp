@@ -348,7 +348,7 @@ void CViewSample::UpdateOPLEditor()
 		{
 			try
 			{
-				m_oplEditor = mpt::make_unique<OPLInstrDlg>(*this);
+				m_oplEditor = std::make_unique<OPLInstrDlg>(*this);
 			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 			{
 				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);

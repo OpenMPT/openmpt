@@ -163,7 +163,7 @@ void WelcomeDlg::OnOK()
 	const char *keyFile = static_cast<char *>(combo->GetItemDataPtr(combo->GetCurSel()));
 	if(keyFile != nullptr)
 	{
-		auto cmdSet = mpt::make_unique<CCommandSet>();
+		auto cmdSet = std::make_unique<CCommandSet>();
 		cmdSet->LoadFile(GetFullKeyPath(keyFile));
 		CMainFrame::GetInputHandler()->SetNewCommandSet(cmdSet.get());
 	}

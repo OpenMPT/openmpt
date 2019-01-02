@@ -1294,7 +1294,7 @@ void CSoundFile::InitAmigaResampler()
 
 void CSoundFile::InitOPL()
 {
-	if(!m_opl) m_opl = mpt::make_unique<OPL>();
+	if(!m_opl) m_opl = std::make_unique<OPL>();
 }
 
 

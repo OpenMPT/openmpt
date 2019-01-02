@@ -178,7 +178,7 @@ bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, Co
 	}
 
 	containerItems.emplace_back();
-	containerItems.back().data_cache = mpt::make_unique<std::vector<char> >();
+	containerItems.back().data_cache = std::make_unique<std::vector<char> >();
 	std::vector<char> & unpackedData = *(containerItems.back().data_cache);
 
 	FileReader::off_t length = file.GetLength();

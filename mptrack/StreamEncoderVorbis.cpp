@@ -220,7 +220,7 @@ bool VorbisEncoder::IsAvailable() const
 std::unique_ptr<IAudioStreamEncoder> VorbisEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
 {
 #if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
-	return mpt::make_unique<VorbisStreamWriter>(file, settings, tags);
+	return std::make_unique<VorbisStreamWriter>(file, settings, tags);
 #else
 	return nullptr;
 #endif

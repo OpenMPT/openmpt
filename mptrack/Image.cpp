@@ -95,7 +95,7 @@ static CComPtr<IStream> GetStream(mpt::const_byte_span data)
 std::unique_ptr<Gdiplus::Bitmap> LoadPixelImage(mpt::const_byte_span file)
 {
 	CComPtr<IStream> stream = GetStream(file);
-	std::unique_ptr<Gdiplus::Bitmap> result = mpt::make_unique<Gdiplus::Bitmap>(stream, FALSE);
+	std::unique_ptr<Gdiplus::Bitmap> result = std::make_unique<Gdiplus::Bitmap>(stream, FALSE);
 	if(result->GetLastStatus() != Gdiplus::Ok)
 	{
 		throw bad_image();
@@ -118,7 +118,7 @@ std::unique_ptr<Gdiplus::Bitmap> LoadPixelImage(FileReader file)
 std::unique_ptr<Gdiplus::Metafile> LoadVectorImage(mpt::const_byte_span file)
 {
 	CComPtr<IStream> stream = GetStream(file);
-	std::unique_ptr<Gdiplus::Metafile> result = mpt::make_unique<Gdiplus::Metafile>(stream);
+	std::unique_ptr<Gdiplus::Metafile> result = std::make_unique<Gdiplus::Metafile>(stream);
 	if(result->GetLastStatus() != Gdiplus::Ok)
 	{
 		throw bad_image();
@@ -141,7 +141,7 @@ std::unique_ptr<Gdiplus::Metafile> LoadVectorImage(FileReader file)
 std::unique_ptr<Gdiplus::Image> ResizeImage(Gdiplus::Image &src, double scaling)
 {
 	const int newWidth = mpt::saturate_round<int>(src.GetWidth() * scaling), newHeight = mpt::saturate_round<int>(src.GetHeight() * scaling);
-	std::unique_ptr<Gdiplus::Image> resizedImage = mpt::make_unique<Gdiplus::Bitmap>(newWidth, newHeight, PixelFormat32bppARGB);
+	std::unique_ptr<Gdiplus::Image> resizedImage = std::make_unique<Gdiplus::Bitmap>(newWidth, newHeight, PixelFormat32bppARGB);
 	std::unique_ptr<Gdiplus::Graphics> resizedGraphics(Gdiplus::Graphics::FromImage(resizedImage.get()));
 
 	resizedGraphics->SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);
@@ -155,7 +155,7 @@ std::unique_ptr<Gdiplus::Image> ResizeImage(Gdiplus::Image &src, double scaling)
 std::unique_ptr<Gdiplus::Bitmap> ResizeImage(Gdiplus::Bitmap &src, double scaling)
 {
 	const int newWidth = mpt::saturate_round<int>(src.GetWidth() * scaling), newHeight = mpt::saturate_round<int>(src.GetHeight() * scaling);
-	std::unique_ptr<Gdiplus::Bitmap> resizedImage = mpt::make_unique<Gdiplus::Bitmap>(newWidth, newHeight, PixelFormat32bppARGB);
+	std::unique_ptr<Gdiplus::Bitmap> resizedImage = std::make_unique<Gdiplus::Bitmap>(newWidth, newHeight, PixelFormat32bppARGB);
 	std::unique_ptr<Gdiplus::Graphics> resizedGraphics(Gdiplus::Graphics::FromImage(resizedImage.get()));
 
 	resizedGraphics->SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);
@@ -173,7 +173,7 @@ std::unique_ptr<RawGDIDIB> ToRawGDIDIB(Gdiplus::Bitmap &bitmap)
 {
 	Gdiplus::BitmapData bitmapData;
 	Gdiplus::Rect rect{Gdiplus::Point{0, 0}, Gdiplus::Size{static_cast<INT>(bitmap.GetWidth()), static_cast<INT>(bitmap.GetHeight())}};
-	std::unique_ptr<RawGDIDIB> result = mpt::make_unique<RawGDIDIB>(bitmap.GetWidth(), bitmap.GetHeight());
+	std::unique_ptr<RawGDIDIB> result = std::make_unique<RawGDIDIB>(bitmap.GetWidth(), bitmap.GetHeight());
 	if(bitmap.LockBits(&rect, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &bitmapData) != Gdiplus::Ok)
 	{
 		throw bad_image();

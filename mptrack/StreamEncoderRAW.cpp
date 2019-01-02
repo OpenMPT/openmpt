@@ -123,7 +123,7 @@ std::unique_ptr<IAudioStreamEncoder> RAWEncoder::ConstructStreamEncoder(std::ost
 	{
 		return nullptr;
 	}
-	return mpt::make_unique<RawStreamWriter>(*this, file, settings, tags);
+	return std::make_unique<RawStreamWriter>(*this, file, settings, tags);
 }
 
 

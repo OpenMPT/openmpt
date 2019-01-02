@@ -603,7 +603,7 @@ public:
 
 
 ThreadPriorityGuard::ThreadPriorityGuard(bool active, bool realtime, int niceness, int rt_priority)
-	: impl(mpt::make_unique<ThreadPriorityGuardImpl>(active, realtime, niceness, rt_priority))
+	: impl(std::make_unique<ThreadPriorityGuardImpl>(active, realtime, niceness, rt_priority))
 {
 	return;
 }

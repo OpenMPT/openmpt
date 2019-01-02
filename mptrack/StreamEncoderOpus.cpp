@@ -209,7 +209,7 @@ std::unique_ptr<IAudioStreamEncoder> OggOpusEncoder::ConstructStreamEncoder(std:
 		return nullptr;
 	}
 #if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
-	return mpt::make_unique<OpusStreamWriter>(file, settings, tags);
+	return std::make_unique<OpusStreamWriter>(file, settings, tags);
 #else
 	return nullptr;
 #endif

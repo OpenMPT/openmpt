@@ -855,17 +855,17 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	MPT_LOG(LogInformation, "", U_("OpenMPT Start"));
 
 	// create the tracker-global random device
-	m_RD = mpt::make_unique<mpt::random_device>();
+	m_RD = std::make_unique<mpt::random_device>();
 	// make the device available to non-tracker-only code
 	mpt::set_global_random_device(m_RD.get());
 	// create and seed the traker-global best PRNG with the random device
-	m_PRNG = mpt::make_unique<mpt::thread_safe_prng<mpt::default_prng> >(mpt::make_prng<mpt::default_prng>(RandomDevice()));
+	m_PRNG = std::make_unique<mpt::thread_safe_prng<mpt::default_prng> >(mpt::make_prng<mpt::default_prng>(RandomDevice()));
 	// make the best PRNG available to non-tracker-only code
 	mpt::set_global_prng(m_PRNG.get());
 	// additionally, seed the C rand() PRNG, just in case any third party library calls rand()
 	mpt::rng::crand::reseed(RandomDevice());
 
-	m_Gdiplus = mpt::make_unique<GdiplusRAII>();
+	m_Gdiplus = std::make_unique<GdiplusRAII>();
 
 	if(cmdInfo.m_noWine)
 	{

@@ -845,7 +845,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 
 std::unique_ptr<CTuningCollection> TrackerSettings::LoadLocalTunings()
 {
-	std::unique_ptr<CTuningCollection> s_pTuningsSharedLocal = mpt::make_unique<CTuningCollection>();
+	std::unique_ptr<CTuningCollection> s_pTuningsSharedLocal = std::make_unique<CTuningCollection>();
 	mpt::ifstream f(
 			PathTunings.GetDefaultDir()
 			+ P_("local_tunings")

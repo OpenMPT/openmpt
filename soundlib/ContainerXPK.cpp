@@ -410,7 +410,7 @@ bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, Con
 	}
 
 	containerItems.emplace_back();
-	containerItems.back().data_cache = mpt::make_unique<std::vector<char> >();
+	containerItems.back().data_cache = std::make_unique<std::vector<char> >();
 	std::vector<char> & unpackedData = *(containerItems.back().data_cache);
 
 #ifdef MMCMP_LOG

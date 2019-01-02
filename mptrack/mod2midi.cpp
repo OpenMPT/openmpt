@@ -699,7 +699,7 @@ void CModToMidi::OnOverlapChanged()
 void CDoMidiConvert::Run()
 {
 	CMainFrame::GetMainFrame()->PauseMod(m_sndFile.GetpModDoc());
-	auto conv = mpt::make_unique<MidiExport::Conversion>(m_sndFile, m_instrMap, m_file, CModToMidi::s_overlappingInstruments);
+	auto conv = std::make_unique<MidiExport::Conversion>(m_sndFile, m_instrMap, m_file, CModToMidi::s_overlappingInstruments);
 
 	double duration = m_sndFile.GetLength(eNoAdjust).front().duration;
 	uint64 totalSamples = mpt::saturate_round<uint64>(duration * m_sndFile.m_MixerSettings.gdwMixingFreq);

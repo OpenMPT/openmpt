@@ -107,7 +107,7 @@ CRarArchive::CRarArchive(FileReader &file)
 	}
 	inFile.Rewind();
 
-	diskFile = mpt::make_unique<OnDiskFileWrapper>(inFile);
+	diskFile = std::make_unique<OnDiskFileWrapper>(inFile);
 	if(!diskFile->IsValid())
 	{
 		return;

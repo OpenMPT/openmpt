@@ -440,11 +440,11 @@ bool module_impl::has_subsongs_inited() const {
 	return !m_subsongs.empty();
 }
 void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
-	m_sndFile = mpt::make_unique<CSoundFile>();
+	m_sndFile = std::make_unique<CSoundFile>();
 	m_loaded = false;
 	m_mixer_initialized = false;
-	m_Dither = mpt::make_unique<Dither>( mpt::global_prng() );
-	m_LogForwarder = mpt::make_unique<log_forwarder>( *m_Log );
+	m_Dither = std::make_unique<Dither>( mpt::global_prng() );
+	m_LogForwarder = std::make_unique<log_forwarder>( *m_Log );
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	m_current_subsong = 0;
 	m_currentPositionSeconds = 0.0;
@@ -602,8 +602,8 @@ bool module_impl::is_extension_supported( const std::string & extension ) {
 double module_impl::could_open_probability( const OpenMPT::FileReader & file, double effort, std::unique_ptr<log_interface> log ) {
 	try {
 		if ( effort >= 0.8 ) {
-			std::unique_ptr<CSoundFile> sndFile = mpt::make_unique<CSoundFile>();
-			std::unique_ptr<log_forwarder> logForwarder = mpt::make_unique<log_forwarder>( *log );
+			std::unique_ptr<CSoundFile> sndFile = std::make_unique<CSoundFile>();
+			std::unique_ptr<log_forwarder> logForwarder = std::make_unique<log_forwarder>( *log );
 			sndFile->SetCustomLog( logForwarder.get() );
 			if ( !sndFile->Create( file, CSoundFile::loadCompleteModule ) ) {
 				return 0.0;
@@ -611,8 +611,8 @@ double module_impl::could_open_probability( const OpenMPT::FileReader & file, do
 			sndFile->Destroy();
 			return 1.0;
 		} else if ( effort >= 0.6 ) {
-			std::unique_ptr<CSoundFile> sndFile = mpt::make_unique<CSoundFile>();
-			std::unique_ptr<log_forwarder> logForwarder = mpt::make_unique<log_forwarder>( *log );
+			std::unique_ptr<CSoundFile> sndFile = std::make_unique<CSoundFile>();
+			std::unique_ptr<log_forwarder> logForwarder = std::make_unique<log_forwarder>( *log );
 			sndFile->SetCustomLog( logForwarder.get() );
 			if ( !sndFile->Create( file, CSoundFile::loadNoPatternOrPluginData ) ) {
 				return 0.0;
@@ -620,8 +620,8 @@ double module_impl::could_open_probability( const OpenMPT::FileReader & file, do
 			sndFile->Destroy();
 			return 0.8;
 		} else if ( effort >= 0.2 ) {
-			std::unique_ptr<CSoundFile> sndFile = mpt::make_unique<CSoundFile>();
-			std::unique_ptr<log_forwarder> logForwarder = mpt::make_unique<log_forwarder>( *log );
+			std::unique_ptr<CSoundFile> sndFile = std::make_unique<CSoundFile>();
+			std::unique_ptr<log_forwarder> logForwarder = std::make_unique<log_forwarder>( *log );
 			sndFile->SetCustomLog( logForwarder.get() );
 			if ( !sndFile->Create( file, CSoundFile::onlyVerifyHeader ) ) {
 				return 0.0;
@@ -1012,7 +1012,7 @@ std::size_t module_impl::read_interleaved_quad( std::int32_t samplerate, std::si
 
 
 double module_impl::get_duration_seconds() const {
-	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : mpt::make_unique<subsongs_type>( get_subsongs() );
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	if ( m_current_subsong == all_subsongs ) {
 		// Play all subsongs consecutively.
@@ -1025,7 +1025,7 @@ double module_impl::get_duration_seconds() const {
 	return subsongs[m_current_subsong].duration;
 }
 void module_impl::select_subsong( std::int32_t subsong ) {
-	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : mpt::make_unique<subsongs_type>( get_subsongs() );
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	if ( subsong != all_subsongs && ( subsong < 0 || subsong >= static_cast<std::int32_t>( subsongs.size() ) ) ) {
 		throw openmpt::exception("invalid subsong");
@@ -1052,7 +1052,7 @@ double module_impl::get_position_seconds() const {
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_seconds( double seconds ) {
-	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : mpt::make_unique<subsongs_type>( get_subsongs() );
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	const subsong_data * subsong = 0;
 	double base_seconds = 0.0;
@@ -1250,7 +1250,7 @@ float module_impl::get_current_channel_vu_rear_right( std::int32_t channel ) con
 }
 
 std::int32_t module_impl::get_num_subsongs() const {
-	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : mpt::make_unique<subsongs_type>( get_subsongs() );
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	return static_cast<std::int32_t>( subsongs.size() );
 }
@@ -1272,7 +1272,7 @@ std::int32_t module_impl::get_num_samples() const {
 
 std::vector<std::string> module_impl::get_subsong_names() const {
 	std::vector<std::string> retval;
-	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : mpt::make_unique<subsongs_type>( get_subsongs() );
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	for ( const auto & subsong : subsongs ) {
 		retval.push_back( mod_string_to_utf8( m_sndFile->Order( static_cast<SEQUENCEINDEX>( subsong.sequence ) ).GetName() ) );

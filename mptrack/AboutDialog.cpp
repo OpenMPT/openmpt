@@ -36,7 +36,7 @@ END_MESSAGE_MAP()
 CRippleBitmap::CRippleBitmap()
 {
 	m_bitmapSrc = LoadPixelImage(GetResource(MAKEINTRESOURCE(IDB_MPTRACK), _T("PNG")));
-	m_bitmapTarget = mpt::make_unique<RawGDIDIB>(m_bitmapSrc->Width(), m_bitmapSrc->Height());
+	m_bitmapTarget = std::make_unique<RawGDIDIB>(m_bitmapSrc->Width(), m_bitmapSrc->Height());
 	m_offset1.assign(m_bitmapSrc->Pixels().size(), 0);
 	m_offset2.assign(m_bitmapSrc->Pixels().size(), 0);
 	m_frontBuf = m_offset2.data();

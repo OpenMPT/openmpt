@@ -219,7 +219,7 @@ std::unique_ptr<IAudioStreamEncoder> AUEncoder::ConstructStreamEncoder(std::ostr
 	{
 		return nullptr;
 	}
-	return mpt::make_unique<AUStreamWriter>(*this, file, settings, tags);
+	return std::make_unique<AUStreamWriter>(*this, file, settings, tags);
 }
 
 

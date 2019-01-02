@@ -154,7 +154,7 @@ struct NativeHandle
 
 
 Handle::Handle()
-	: handle(mpt::make_unique<NativeHandle>(HINTERNET(NULL)))
+	: handle(std::make_unique<NativeHandle>(HINTERNET(NULL)))
 {
 }
 
@@ -169,7 +169,7 @@ bool Handle::operator!() const
 }
 
 Handle::Handle(NativeHandle h)
-	: handle(mpt::make_unique<NativeHandle>(HINTERNET(NULL)))
+	: handle(std::make_unique<NativeHandle>(HINTERNET(NULL)))
 {
 	handle->native_handle = h.native_handle;
 }

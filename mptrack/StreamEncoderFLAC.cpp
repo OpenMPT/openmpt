@@ -244,7 +244,7 @@ std::unique_ptr<IAudioStreamEncoder> FLACEncoder::ConstructStreamEncoder(std::os
 	{
 		return nullptr;
 	}
-	return mpt::make_unique<FLACStreamWriter>(*this, file, settings, tags);
+	return std::make_unique<FLACStreamWriter>(*this, file, settings, tags);
 }
 
 

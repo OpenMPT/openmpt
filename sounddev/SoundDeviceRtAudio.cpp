@@ -122,7 +122,7 @@ CRtAudioDevice::CRtAudioDevice(SoundDevice::Info info, SoundDevice::SysInfo sysI
 	m_StatisticPeriodFrames.store(0);
 	try
 	{
-		m_RtAudio = mpt::make_unique<RtAudio>(GetApi(info));
+		m_RtAudio = std::make_unique<RtAudio>(GetApi(info));
 	} catch (const RtAudioError &)
 	{
 		// nothing

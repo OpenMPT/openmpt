@@ -2101,7 +2101,7 @@ void CViewPattern::OnVisualizeEffect()
 			CriticalSection cs;
 			try
 			{
-				m_pEffectVis = mpt::make_unique<CEffectVis>(this, row0, row1, nchn, *pModDoc, m_nPattern);
+				m_pEffectVis = std::make_unique<CEffectVis>(this, row0, row1, nchn, *pModDoc, m_nPattern);
 				m_pEffectVis->OpenEditor(CMainFrame::GetMainFrame());
 				// HACK: to get status window set up; must create clear destinction between
 				// construction, 1st draw code and all draw code.

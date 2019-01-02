@@ -32,7 +32,7 @@ OPL::~OPL()
 void OPL::Initialize(uint32 samplerate)
 {
 	if(m_opl == nullptr)
-		m_opl = mpt::make_unique<Opal>(samplerate);
+		m_opl = std::make_unique<Opal>(samplerate);
 	else
 		m_opl->SetSampleRate(samplerate);
 	Reset();

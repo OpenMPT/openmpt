@@ -153,7 +153,7 @@ void CCtrlGeneral::OnTapTempo()
 	static uint32 tapLength[16], lastTap = 0;
 	if(m_tapTimer == nullptr)
 	{
-		m_tapTimer = mpt::make_unique<Util::MultimediaClock>(1);
+		m_tapTimer = std::make_unique<Util::MultimediaClock>(1);
 	}
 
 	// Shift back the previously recorded tap history

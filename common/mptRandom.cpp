@@ -160,7 +160,7 @@ void sane_random_device::init_fallback()
 				seeds.push_back(static_cast<unsigned int>(static_cast<unsigned char>(token[i])));
 			}
 			std::seed_seq seed(seeds.begin(), seeds.end());
-			rd_fallback = mpt::make_unique<std::mt19937>(seed);
+			rd_fallback = std::make_unique<std::mt19937>(seed);
 		} else
 		{
 			uint64 seed_val = mpt::generate_timeseed<uint64>();
@@ -168,7 +168,7 @@ void sane_random_device::init_fallback()
 			seeds[0] = static_cast<uint32>(seed_val >> 32);
 			seeds[1] = static_cast<uint32>(seed_val >>  0);
 			std::seed_seq seed(seeds + 0, seeds + 2);
-			rd_fallback = mpt::make_unique<std::mt19937>(seed);
+			rd_fallback = std::make_unique<std::mt19937>(seed);
 		}
 	}
 }
