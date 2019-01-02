@@ -88,11 +88,6 @@ MPT_STATIC_ASSERT(alignof(mpt::byte) == 1);
 
 
 namespace mpt {
-typedef std::max_align_t max_align_t;
-} // namespace mpt
-
-
-namespace mpt {
 constexpr int arch_bits = sizeof(void*) * 8;
 constexpr std::size_t pointer_size = sizeof(void*);
 } // namespace mpt
