@@ -29,7 +29,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Compile time assert.
-#if (MPT_CXX >= 17)
+#if MPT_CXX_AT_LEAST(17)
 #define MPT_STATIC_ASSERT static_assert
 #else
 #define MPT_STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
@@ -56,7 +56,7 @@ OPENMPT_NAMESPACE_BEGIN
 // constexpr
 #define MPT_CONSTEXPR11_FUN constexpr MPT_FORCEINLINE
 #define MPT_CONSTEXPR11_VAR constexpr
-#if MPT_CXX_AT_LEAST(14) && !MPT_MSVC_BEFORE(2017,5)
+#if !MPT_MSVC_BEFORE(2017,5)
 #define MPT_CONSTEXPR14_FUN constexpr MPT_FORCEINLINE
 #define MPT_CONSTEXPR14_VAR constexpr
 #else
@@ -218,7 +218,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Macro for marking intentional fall-throughs in switch statements - can be used for static analysis if supported.
-#if (MPT_CXX >= 17)
+#if MPT_CXX_AT_LEAST(17)
 	#define MPT_FALLTHROUGH [[fallthrough]]
 #elif MPT_COMPILER_MSVC
 	#define MPT_FALLTHROUGH __fallthrough
