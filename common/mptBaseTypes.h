@@ -22,9 +22,6 @@
 #include <cstddef>
 #include <cstdint>
 
-#if MPT_GCC_BEFORE(4,9,0)
-#include <stddef.h>
-#endif
 #include <stdint.h>
 
 
@@ -91,11 +88,7 @@ MPT_STATIC_ASSERT(alignof(mpt::byte) == 1);
 
 
 namespace mpt {
-#if MPT_GCC_BEFORE(4,9,0)
-typedef ::max_align_t max_align_t;
-#else
 typedef std::max_align_t max_align_t;
-#endif
 } // namespace mpt
 
 

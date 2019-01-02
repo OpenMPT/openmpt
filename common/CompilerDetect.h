@@ -51,8 +51,8 @@
 #define MPT_GCC_AT_LEAST(major,minor,patch)          (MPT_COMPILER_GCC_VERSION >= MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 #define MPT_GCC_BEFORE(major,minor,patch)            (MPT_COMPILER_GCC_VERSION <  MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 
-#if MPT_GCC_BEFORE(4,8,0)
-#error "GCC version 4.8 required"
+#if MPT_GCC_BEFORE(5,1,0)
+#error "GCC version 5.1 required"
 #endif
 
 #elif defined(_MSC_VER)
@@ -136,7 +136,7 @@
 #elif (__cplusplus >= 201402)
 #define MPT_CXX 14
 #else
-#define MPT_CXX 11
+#define MPT_CXX 14
 #endif
 
 #elif MPT_COMPILER_MSVC
@@ -147,15 +147,15 @@
 #elif (_MSVC_LANG >= 201402)
 #define MPT_CXX 14
 #else
-#define MPT_CXX 11
+#define MPT_CXX 14
 #endif
 #else
-#define MPT_CXX 11
+#define MPT_CXX 14
 #endif
 
 #else
 
-#define MPT_CXX 11
+#define MPT_CXX 14
 
 #endif
 

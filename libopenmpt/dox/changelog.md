@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.0-pre
 
+ *  [**Regression**] Support for C++11 has been removed. C++14 is now required.
+ *  [**Regression**] Support for GCC 4.8, 4.9 has been removed.
+
 ### libopenmpt 0.4.0
 
  *  [**New**] libopenmpt now includes emulation of the OPL chip and thus plays

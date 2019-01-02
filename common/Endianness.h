@@ -85,7 +85,7 @@
 
 
 
-#if MPT_PLATFORM_ENDIAN_KNOWN && MPT_CXX_AT_LEAST(14)
+#if MPT_PLATFORM_ENDIAN_KNOWN
 //#define MPT_ENDIAN_IS_CONSTEXPR 1
 // For now, we do not want to use constexpr endianness functions and types.
 // It bloats the binary size somewhat (possibly because of either the zeroing
