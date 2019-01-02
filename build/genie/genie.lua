@@ -48,7 +48,7 @@ function remove_pattern_in_file (filename, pattern)
 	outfile = io.open(filename .. ".new", "wb")
   for line in io.lines(filename) do 
 		if string.find(line, pattern) then
-			outfile:write('    <IntDir>obj\\$(PlatformName)\\$(Configuration)\\$(ProjectName)</IntDir>' .. "\r\n")
+			outfile:write('    <IntDir>obj\\$(PlatformName)\\$(Configuration)\\$(ProjectName)\\</IntDir>' .. "\r\n")
 		else
 			outfile:write(line .. "\r\n")
 		end
