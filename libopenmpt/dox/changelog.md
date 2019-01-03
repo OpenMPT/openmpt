@@ -13,6 +13,8 @@ is just a high-level summary.
     set on non-MSVC systems, which made them not publicly accessible.
  *  [**Bug**] Project files for Windows 10 desktop builds on ARM and ARM64
     (`build/vs2017win10`) were missing from Windows source package.
+ *  [**Bug**] MSVC project files in Windows source package lacked additional
+    files required to build DLLs.
 
  *  minimp3: Update to commit e9df0760e94044caded36a55d70ab4152134adc5
     (2018-12-23).
