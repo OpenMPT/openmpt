@@ -615,7 +615,7 @@ public:
 	template<typename ...Ts>
 	Tstring operator() (const Ts&... xs) const
 	{
-		const std::array<Tstring, sizeof...(xs)> vals{ToStringTFunctor<Tstring>()(xs)...};
+		const std::array<Tstring, sizeof...(xs)> vals{{ToStringTFunctor<Tstring>()(xs)...}};
 		return do_format(mpt::as_span(vals));
 	}
 
