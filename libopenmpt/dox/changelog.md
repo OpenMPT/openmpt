@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.14-pre
 
+ *  [**Bug**] MSVC project files in Windows source package lacked additional
+    files required to build DLLs.
+
 ### libopenmpt 0.3.13 (2018-10-21)
 
  *  [**Sec**] Crash with malformed MED files (r10904).
