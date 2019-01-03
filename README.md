@@ -107,7 +107,7 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
         ARM and ARM64) or later versions are available in
         `build/vsVERSIONwin10/`.
         Minimal projects that target Windows 10 UWP are available in
-        `build/winstore82/`.
+        `build/vsVERSIONuwp/`.
         Most projects are supported with any of the mentioned Visual Studio
         verions, with the following exceptions:
 
