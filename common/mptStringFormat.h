@@ -554,130 +554,110 @@ template <> struct to_string_type<CString        > { typedef CString      type; 
 #endif
 template <typename T, std::size_t N> struct to_string_type<T [N]> { typedef typename to_string_type<T>::type type; };
 
-std::string PrintImpl(const std::string & format
-	, const std::string & x1 = std::string()
-	, const std::string & x2 = std::string()
-	, const std::string & x3 = std::string()
-	, const std::string & x4 = std::string()
-	, const std::string & x5 = std::string()
-	, const std::string & x6 = std::string()
-	, const std::string & x7 = std::string()
-	, const std::string & x8 = std::string()
-	);
-
-#if MPT_WSTRING_FORMAT
-std::wstring PrintImpl(const std::wstring & format
-	, const std::wstring & x1 = std::wstring()
-	, const std::wstring & x2 = std::wstring()
-	, const std::wstring & x3 = std::wstring()
-	, const std::wstring & x4 = std::wstring()
-	, const std::wstring & x5 = std::wstring()
-	, const std::wstring & x6 = std::wstring()
-	, const std::wstring & x7 = std::wstring()
-	, const std::wstring & x8 = std::wstring()
-	);
-#endif
-
-#if MPT_USTRING_MODE_UTF8
-mpt::ustring PrintImpl(const mpt::ustring & format
-	, const mpt::ustring & x1 = mpt::ustring()
-	, const mpt::ustring & x2 = mpt::ustring()
-	, const mpt::ustring & x3 = mpt::ustring()
-	, const mpt::ustring & x4 = mpt::ustring()
-	, const mpt::ustring & x5 = mpt::ustring()
-	, const mpt::ustring & x6 = mpt::ustring()
-	, const mpt::ustring & x7 = mpt::ustring()
-	, const mpt::ustring & x8 = mpt::ustring()
-	);
-#endif
-
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-mpt::lstring PrintImpl(const mpt::lstring & format
-	, const mpt::lstring & x1 = mpt::lstring()
-	, const mpt::lstring & x2 = mpt::lstring()
-	, const mpt::lstring & x3 = mpt::lstring()
-	, const mpt::lstring & x4 = mpt::lstring()
-	, const mpt::lstring & x5 = mpt::lstring()
-	, const mpt::lstring & x6 = mpt::lstring()
-	, const mpt::lstring & x7 = mpt::lstring()
-	, const mpt::lstring & x8 = mpt::lstring()
-	);
-#endif // MPT_ENABLE_CHARSET_LOCALE
-
-#if defined(_MFC_VER)
-CString PrintImpl(const CString & format
-	, const CString & x1 = CString()
-	, const CString & x2 = CString()
-	, const CString & x3 = CString()
-	, const CString & x4 = CString()
-	, const CString & x5 = CString()
-	, const CString & x6 = CString()
-	, const CString & x7 = CString()
-	, const CString & x8 = CString()
-	);
-#endif
-
 } // namespace detail
 
 } // namespace String
 
 template<typename Tformat>
-struct message_formatter
+class message_formatter
 {
-typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-Tstring format;
-message_formatter(const Tstring & format) : format(format) {}
 
-Tstring operator() () const
-{
-	return mpt::String::detail::PrintImpl(format);
-}
+public:
 
-template<typename ...Ts>
-Tstring operator() (const Ts&... xs) const
-{
-	return mpt::String::detail::PrintImpl(format, ToStringTFunctor<Tstring>()(xs)...);
-}
+	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
+
+private:
+
+	Tstring format;
+
+private:
+
+	MPT_NOINLINE Tstring do_format(mpt::span<const Tstring> vals) const
+	{
+		typedef typename mpt::string_traits<Tstring> traits;
+		Tstring result;
+		const typename traits::size_type len = traits::length(format);
+		traits::reserve(result, len);
+		for(typename traits::size_type pos = 0; pos != len; ++pos)
+		{
+			typename traits::char_type c = format[pos];
+			if(pos + 1 != len && c == typename traits::char_type('%'))
+			{
+				pos++;
+				c = format[pos];
+				if(typename traits::char_type('1') <= c && c <= typename traits::char_type('9'))
+				{
+					const std::size_t n = c - typename traits::char_type('0') - 1;
+					if(n < mpt::size(vals))
+					{
+						traits::append(result, vals[n]);
+					}
+					continue;
+				} else if(c != typename traits::char_type('%'))
+				{
+					traits::append(result, 1, typename traits::char_type('%'));
+				}
+			}
+			traits::append(result, 1, c);
+		}
+		return result;
+	}
+
+public:
+
+	message_formatter(Tstring format_)
+		: format(std::move(format_))
+	{
+	}
+
+public:
+
+	template<typename ...Ts>
+	Tstring operator() (const Ts&... xs) const
+	{
+		const std::array<Tstring, sizeof...(xs)> vals{ToStringTFunctor<Tstring>()(xs)...};
+		return do_format(mpt::as_span(vals));
+	}
 
 }; // struct message_formatter<Tformat>
 
 template<typename Tformat>
-message_formatter<typename mpt::String::detail::to_string_type<Tformat>::type> format(const Tformat &format)
+message_formatter<typename mpt::String::detail::to_string_type<Tformat>::type> format(Tformat format)
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return message_formatter<Tstring>(Tstring(format));
+	return message_formatter<Tstring>(Tstring(std::move(format)));
 }
 
 #if MPT_WSTRING_FORMAT
-static inline message_formatter<std::wstring> wformat(const std::wstring &format)
+static inline message_formatter<std::wstring> wformat(std::wstring format)
 {
-	return message_formatter<std::wstring>(format);
+	return message_formatter<std::wstring>(std::move(format));
 }
 #endif
 
-static inline message_formatter<mpt::ustring> uformat(const mpt::ustring &format)
+static inline message_formatter<mpt::ustring> uformat(mpt::ustring format)
 {
-	return message_formatter<mpt::ustring>(format);
+	return message_formatter<mpt::ustring>(std::move(format));
 }
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-static inline message_formatter<mpt::lstring> lformat(const mpt::lstring &format)
+static inline message_formatter<mpt::lstring> lformat(mpt::lstring format)
 {
-	return message_formatter<mpt::lstring>(format);
+	return message_formatter<mpt::lstring>(std::move(format));
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 #if MPT_OS_WINDOWS
-static inline message_formatter<mpt::tstring> tformat(const mpt::tstring &format)
+static inline message_formatter<mpt::tstring> tformat(mpt::tstring format)
 {
-	return message_formatter<mpt::tstring>(format);
+	return message_formatter<mpt::tstring>(std::move(format));
 }
 #endif
 
 #if defined(_MFC_VER)
-static inline message_formatter<CString> cformat(const CString &format)
+static inline message_formatter<CString> cformat(CString format)
 {
-	return message_formatter<CString>(format);
+	return message_formatter<CString>(std::move(format));
 }
 #endif
 
