@@ -7,6 +7,12 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta37
 
+ *  Do not apply Amiga playback heuristics to MOD files that have clearly been
+    written with a PC tracker.
+ *  SFX: Work around bad conversions of the "Operation Stealth" soundtrack by
+    turning pattern breaks into note stops.
+ *  MO3: Apply playback changes based on "ModPlug-made" header flag.
+
 ### libopenmpt 0.2-beta36 (2018-10-21)
 
  *  [**Sec**] Crash with malformed MED files (r10905).
