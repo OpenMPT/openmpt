@@ -235,6 +235,7 @@ struct SysInfo
 	bool IsWine;
 	bool WineHostIsLinux;
 	mpt::Wine::Version WineVersion;
+	bool IsOriginal() const { return !IsWine; }
 public:
 	static SysInfo Current();
 private:
