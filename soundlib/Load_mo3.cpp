@@ -1835,6 +1835,32 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		m_MidiCfg.ClearZxxMacros();
 	}
 
+	if(fileHeader.flags & MO3FileHeader::modplugMode)
+	{
+		// Apply some old ModPlug (mis-)behaviour
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
+		{
+			if(ModInstrument *ins = Instruments[i])
+			{
+				// Fix pitch / filter envelope being shortened by one tick
+				if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+					ins->GetEnvelope(ENV_PITCH).Convert(MOD_TYPE_XM, GetType());
+				// Fix excessive pan swing range
+				if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
+					ins->nPanSwing = (ins->nPanSwing + 3) / 4u;
+			}
+		}
+		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00))
+		{
+			m_playBehaviour.reset(kITOffset);
+			m_playBehaviour.reset(kFT2OffsetOutOfRange);
+		}
+		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 23, 00, 00))
+			m_playBehaviour.reset(kFT2Periods);
+		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
+			m_playBehaviour.reset(kITInstrWithNoteOff);
+	}
+
 	if(m_madeWithTracker.empty())
 		m_madeWithTracker = mpt::format(MPT_USTRING("MO3 v%1"))(version);
 	else
