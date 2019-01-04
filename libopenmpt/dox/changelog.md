@@ -10,6 +10,12 @@ is just a high-level summary.
  *  [**Bug**] MSVC project files in Windows source package lacked additional
     files required to build DLLs.
 
+ *  Do not apply Amiga playback heuristics to MOD files that have clearly been
+    written with a PC tracker.
+ *  SFX: Work around bad conversions of the "Operation Stealth" soundtrack by
+    turning pattern breaks into note stops.
+ *  MO3: Apply playback changes based on "ModPlug-made" header flag.
+
 ### libopenmpt 0.3.13 (2018-10-21)
 
  *  [**Sec**] Crash with malformed MED files (r10904).
