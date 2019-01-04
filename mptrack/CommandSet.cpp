@@ -24,13 +24,14 @@ OPENMPT_NAMESPACE_BEGIN
 enum { KEYMAP_VERSION = 1 };	// Version of the .mkb format
 
 
-#define ENABLE_LOGGING 0
+#ifdef MPT_ALL_LOGGING
+#define MPT_COMMANDSET_LOGGING
+#endif
 
-#if(ENABLE_LOGGING)
-	//
+#ifdef MPT_COMMANDSET_LOGGING
+#define LOG_COMMANDSET(x) MPT_LOG(LogDebug, "CommandSet", x)
 #else
-	#undef Log
-	#define Log(...) MPT_DO { } MPT_WHILE_0
+#define LOG_COMMANDSET(x) MPT_DO { } MPT_WHILE_0
 #endif
 
 
@@ -729,7 +730,7 @@ void CCommandSet::SetupCommands()
 			{
 				if(commands[i].UID == commands[j].UID)
 				{
-					Log("Duplicate command UID: %d\n", commands[i].UID);
+					LOG_COMMANDSET(mpt::format(U_("Duplicate command UID: %1\n"))(commands[i].UID));
 					ASSERT(false);
 				}
 			}
@@ -766,13 +767,13 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 			if (IsCrossContextConflict(kc, conflictCmd.second))
 			{
 				report += _T("The following commands may conflict:\r\n   >") + GetCommandText(conflictCmd.first) + _T(" in ") + conflictCmd.second.GetContextText() + _T("\r\n   >") + GetCommandText(cmd) + _T(" in ") + kc.GetContextText() + _T("\r\n\r\n");
-				Log(report);
+				LOG_COMMANDSET(mpt::ToUnicode(report));
 			} else
 			{
 				//if(!TrackerSettings::Instance().MiscAllowMultipleCommandsPerKey)
 				//	Remove(conflictCmd.second, conflictCmd.first);
 				report += _T("The following commands in same context share the same key combination:\r\n   >") + GetCommandText(conflictCmd.first) + _T(" in ") + conflictCmd.second.GetContextText() + _T("\r\n\r\n");
-				Log(report);
+				LOG_COMMANDSET(mpt::ToUnicode(report));
 			}
 		}
 	}
@@ -831,7 +832,7 @@ CString CCommandSet::Remove(int pos, CommandID cmd)
 		return Remove(commands[cmd].kcList[pos], cmd);
 	}
 
-	Log("Failed to remove a key: keychoice out of range.\n");
+	LOG_COMMANDSET(U_("Failed to remove a key: keychoice out of range."));
 	return "";
 }
 
@@ -844,11 +845,11 @@ CString CCommandSet::Remove(KeyCombination kc, CommandID cmd)
 	if (index != kcList.end())
 	{
 		kcList.erase(index);
-		Log("Removed a key\n");
+		LOG_COMMANDSET(U_("Removed a key"));
 		return EnforceAll(kc, cmd, false);
 	} else
 	{
-		Log("Failed to remove a key as it was not found\n");
+		LOG_COMMANDSET(U_("Failed to remove a key as it was not found"));
 		return CString();
 	}
 
@@ -876,11 +877,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKc.Modifier(kc);	//Add selection modifier's modifiers to this command
 				if(adding)
 				{
-					Log("Enforcing rule krAllowNavigationWithSelection - adding key with modifier:%d to command: %d\n", newKc.Modifier(), cmdNavSelection);
+					LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - adding key with modifier:%1 to command: %2"))(newKc.Modifier(), cmdNavSelection));
 					Add(newKc, cmdNavSelection, false);
 				} else
 				{
-					Log("Enforcing rule krAllowNavigationWithSelection - removing key with modifier:%d to command: %d\n", newKc.Modifier(), cmdNavSelection);
+					LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - removing key with modifier:%1 to command: %2"))(newKc.Modifier(), cmdNavSelection));
 					Remove(newKc, cmdNavSelection);
 				}
 			}
@@ -895,11 +896,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKc.AddModifier(kc);	//Add selection modifier's modifiers to this command
 				if(adding)
 				{
-					Log("Enforcing rule krAllowNavigationWithSelection - adding key with modifier:%d to command: %d\n", newKc.Modifier(), cmdNavSelection);
+					LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - adding key with modifier:%1 to command: %2"))(newKc.Modifier(), cmdNavSelection));
 					Add(newKc, cmdNavSelection, false);
 				} else
 				{
-					Log("Enforcing rule krAllowNavigationWithSelection - removing key with modifier:%d to command: %d\n", newKc.Modifier(), cmdNavSelection);
+					LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - removing key with modifier:%1 to command: %2"))(newKc.Modifier(), cmdNavSelection));
 					Remove(newKc, cmdNavSelection);
 				}
 			}
@@ -920,11 +921,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					newKc.AddModifier(inKc);	// and the new selection modifier
 					if(adding)
 					{
-						Log("Enforcing rule krAllowNavigationWithSelection - adding key:%d with modifier:%d to command: %d\n", curCmd, inKc.Modifier(), cmdNavSelection);
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - adding key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), cmdNavSelection));
 						Add(newKc, cmdNavSelection, false);
 					} else
 					{
-						Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.Modifier(), cmdNavSelection);
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - removing key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), cmdNavSelection));
 						Remove(newKc, cmdNavSelection);
 					}
 				}
@@ -938,11 +939,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					newKc.AddModifier(inKc);	// and the new selection modifier
 					if(adding)
 					{
-						Log("Enforcing rule krAllowNavigationWithSelection - adding key:%d with modifier:%d to command: %d\n", curCmd, inKc.Modifier(), cmdNavSelection);
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - adding key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), cmdNavSelection));
 						Add(newKc, cmdNavSelection, false);
 					} else
 					{
-						Log("Enforcing rule krAllowNavigationWithSelection - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.Modifier(), cmdNavSelection);
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - removing key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), cmdNavSelection));
 						Remove(newKc, cmdNavSelection);
 					}
 				}
@@ -964,11 +965,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKcSel.AddModifier(inKc);	// add modifiers from the new nav command
 				if(adding)
 				{
-					Log("Enforcing rule krAllowSelectionWithNavigation: adding  removing kcSelectWithNav and kcSelectOffWithNav\n");
+					LOG_COMMANDSET(U_("Enforcing rule krAllowSelectionWithNavigation: adding  removing kcSelectWithNav and kcSelectOffWithNav"));
 					Add(newKcSel, kcSelectWithNav, false);
 				} else
 				{
-					Log("Enforcing rule krAllowSelectionWithNavigation: removing kcSelectWithNav and kcSelectOffWithNav\n");
+					LOG_COMMANDSET(U_("Enforcing rule krAllowSelectionWithNavigation: removing kcSelectWithNav and kcSelectOffWithNav"));
 					Remove(newKcSel, kcSelectWithNav);
 				}
 			}
@@ -982,11 +983,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKcSel.AddModifier(inKc);	// add modifiers from the new nav command
 				if(adding)
 				{
-					Log("Enforcing rule krAllowSelectionWithNavigation: adding  removing kcSelectWithNav and kcSelectOffWithNav\n");
+					LOG_COMMANDSET(U_("Enforcing rule krAllowSelectionWithNavigation: adding  removing kcSelectWithNav and kcSelectOffWithNav"));
 					Add(newKcSel, kcSelectWithNav, false);
 				} else
 				{
-					Log("Enforcing rule krAllowSelectionWithNavigation: removing kcSelectWithNav and kcSelectOffWithNav\n");
+					LOG_COMMANDSET(U_("Enforcing rule krAllowSelectionWithNavigation: removing kcSelectWithNav and kcSelectOffWithNav"));
 					Remove(newKcSel, kcSelectWithNav);
 				}
 			}
@@ -1003,11 +1004,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					newKcSel.AddModifier(kc);	//add the nav keys' modifiers
 					if(adding)
 					{
-						Log("Enforcing rule krAllowSelectionWithNavigation - adding key:%d with modifier:%d to command: %d\n", curCmd, inKc.Modifier(), kcSelectWithNav);
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowSelectionWithNavigation - adding key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), kcSelectWithNav));
 						Add(newKcSel, kcSelectWithNav, false);
 					} else
 					{
-						Log("Enforcing rule krAllowSelectionWithNavigation - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.Modifier(), kcSelectWithNav);
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowSelectionWithNavigation - removing key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), kcSelectWithNav));
 						Remove(newKcSel, kcSelectWithNav);
 					}
 				}
@@ -1021,11 +1022,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					newKcSel.AddModifier(kc);	//add the nav keys' modifiers
 					if(adding)
 					{
-						Log("Enforcing rule krAllowSelectionWithNavigation - adding key:%d with modifier:%d to command: %d\n", curCmd, inKc.Modifier(), kcSelectWithNav);
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowSelectionWithNavigation - adding key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), kcSelectWithNav));
 						Add(newKcSel, kcSelectWithNav, false);
 					} else
 					{
-						Log("Enforcing rule krAllowSelectionWithNavigation - removing key:%d with modifier:%d to command: %d\n", curCmd, inKc.Modifier(), kcSelectWithNav);
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowSelectionWithNavigation - removing key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), kcSelectWithNav));
 						Remove(newKcSel, kcSelectWithNav);
 					}
 				}
@@ -1088,7 +1089,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKcSel.AddModifier(kc);
 				newKcCopySel = kc;
 				newKcCopySel.AddModifier(inKc);
-				Log("Enforcing rule krAllowSelectCopySelectCombos\n");
+				LOG_COMMANDSET(U_("Enforcing rule krAllowSelectCopySelectCombos"));
 				if(adding)
 				{
 					Add(newKcSel, kcSelectWithCopySelect, false);
@@ -1110,7 +1111,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKcSel.AddModifier(inKc);
 				newKcCopySel = inKc;
 				newKcCopySel.AddModifier(kc);
-				Log("Enforcing rule krAllowSelectCopySelectCombos\n");
+				LOG_COMMANDSET(U_("Enforcing rule krAllowSelectCopySelectCombos"));
 				if(adding)
 				{
 					Add(newKcSel, kcSelectWithCopySelect, false);
@@ -1137,12 +1138,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKc.AddModifier(kc);
 				if (adding)
 				{
-					Log("Enforcing rule krLockNotesToChords: auto adding in a chord command\n");
+					LOG_COMMANDSET(U_("Enforcing rule krLockNotesToChords: auto adding in a chord command"));
 					Add(newKc, (CommandID)(kcVPStartChords+noteOffset), false);
 				}
 				else
 				{
-					Log("Enforcing rule krLockNotesToChords: auto removing a chord command\n");
+					LOG_COMMANDSET(U_("Enforcing rule krLockNotesToChords: auto removing a chord command"));
 					Remove(newKc, (CommandID)(kcVPStartChords+noteOffset));
 				}
 			}
@@ -1158,12 +1159,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					kc.AddModifier(inKc);
 					if (adding)
 					{
-						Log("Enforcing rule krLockNotesToChords: auto adding in a chord command\n");
+						LOG_COMMANDSET(U_("Enforcing rule krLockNotesToChords: auto adding in a chord command"));
 						Add(kc, (CommandID)(kcVPStartChords+noteOffset), false);
 					}
 					else
 					{
-						Log("Enforcing rule krLockNotesToChords: auto removing a chord command\n");
+						LOG_COMMANDSET(U_("Enforcing rule krLockNotesToChords: auto removing a chord command"));
 						Remove(kc, (CommandID)(kcVPStartChords+noteOffset));
 					}
 				}
@@ -1182,12 +1183,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			newKc.EventType(kKeyEventUp);
 			if (adding)
 			{
-				Log("Enforcing rule krNoteOffOnKeyRelease: adding note off command\n");
+				LOG_COMMANDSET(U_("Enforcing rule krNoteOffOnKeyRelease: adding note off command"));
 				Add(newKc, (CommandID)(kcVPStartNoteStops+noteOffset), false);
 			}
 			else
 			{
-				Log("Enforcing rule krNoteOffOnKeyRelease: removing note off command\n");
+				LOG_COMMANDSET(U_("Enforcing rule krNoteOffOnKeyRelease: removing note off command"));
 				Remove(newKc, (CommandID)(kcVPStartNoteStops+noteOffset));
 			}
 		}
@@ -1198,12 +1199,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			newKc.EventType(kKeyEventUp);
 			if (adding)
 			{
-				Log("Enforcing rule krNoteOffOnKeyRelease: adding Chord off command\n");
+				LOG_COMMANDSET(U_("Enforcing rule krNoteOffOnKeyRelease: adding Chord off command"));
 				Add(newKc, (CommandID)(kcVPStartChordStops+noteOffset), false);
 			}
 			else
 			{
-				Log("Enforcing rule krNoteOffOnKeyRelease: removing Chord off command\n");
+				LOG_COMMANDSET(U_("Enforcing rule krNoteOffOnKeyRelease: removing Chord off command"));
 				Remove(newKc, (CommandID)(kcVPStartChordStops+noteOffset));
 			}
 		}
@@ -1214,12 +1215,12 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			newKc.EventType(kKeyEventUp);
 			if (adding)
 			{
-				Log("Enforcing rule krNoteOffOnKeyRelease: adding Chord off command\n");
+				LOG_COMMANDSET(U_("Enforcing rule krNoteOffOnKeyRelease: adding Chord off command"));
 				Add(newKc, (CommandID)(kcSetOctaveStop0+noteOffset), false);
 			}
 			else
 			{
-				Log("Enforcing rule krNoteOffOnKeyRelease: removing Chord off command\n");
+				LOG_COMMANDSET(U_("Enforcing rule krNoteOffOnKeyRelease: removing Chord off command"));
 				Remove(newKc, (CommandID)(kcSetOctaveStop0+noteOffset));
 			}
 		}
@@ -1290,7 +1291,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			noteOffset = inCmd - kcVPStartNotes;
 			if (adding)
 			{
-				Log("Enforcing rule krPropagateNotesToSampAndIns: adding Note on in samp ctx\n");
+				LOG_COMMANDSET(U_("Enforcing rule krPropagateNotesToSampAndIns: adding Note on in samp ctx"));
 				Add(newKcSamp, (CommandID)(kcSampStartNotes+noteOffset), false);
 				Add(newKcIns, (CommandID)(kcInstrumentStartNotes+noteOffset), false);
 				Add(newKcTree, (CommandID)(kcTreeViewStartNotes+noteOffset), false);
@@ -1299,7 +1300,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			}
 			else
 			{
-				Log("Enforcing rule krPropagateNotesToSampAndIns: removing Note on in samp ctx\n");
+				LOG_COMMANDSET(U_("Enforcing rule krPropagateNotesToSampAndIns: removing Note on in samp ctx"));
 				Remove(newKcSamp, (CommandID)(kcSampStartNotes+noteOffset));
 				Remove(newKcIns, (CommandID)(kcInstrumentStartNotes+noteOffset));
 				Remove(newKcTree, (CommandID)(kcTreeViewStartNotes+noteOffset));
@@ -1323,7 +1324,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			noteOffset = inCmd - kcVPStartNoteStops;
 			if (adding)
 			{
-				Log("Enforcing rule krPropagateNotesToSampAndIns: adding Note stop on in samp ctx\n");
+				LOG_COMMANDSET(U_("Enforcing rule krPropagateNotesToSampAndIns: adding Note stop on in samp ctx"));
 				Add(newKcSamp, (CommandID)(kcSampStartNoteStops+noteOffset), false);
 				Add(newKcIns, (CommandID)(kcInstrumentStartNoteStops+noteOffset), false);
 				Add(newKcTree, (CommandID)(kcTreeViewStartNoteStops+noteOffset), false);
@@ -1332,7 +1333,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			}
 			else
 			{
-				Log("Enforcing rule krPropagateNotesToSampAndIns: removing Note stop on in samp ctx\n");
+				LOG_COMMANDSET(U_("Enforcing rule krPropagateNotesToSampAndIns: removing Note stop on in samp ctx"));
 				Remove(newKcSamp, (CommandID)(kcSampStartNoteStops+noteOffset));
 				Remove(newKcIns, (CommandID)(kcInstrumentStartNoteStops+noteOffset));
 				Remove(newKcTree, (CommandID)(kcTreeViewStartNoteStops+noteOffset));

@@ -15,7 +15,9 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-//#define MED_LOG
+#ifdef MPT_ALL_LOGGING
+#define MED_LOG
+#endif
 
 #define MED_MAX_COMMENT_LENGTH 5*1024 //: Is 5 kB enough?
 
@@ -401,7 +403,7 @@ static void MedConvert(ModCommand &p, const MMD0SONGHEADER *pmsh)
 			break;
 		default:
 #ifdef MED_LOG
-			Log("Unknown Fxx command: cmd=0x%02X param=0x%02X\n", command, param);
+			MPT_LOG(LogDebug, "MED", mpt::format(U_("Unknown Fxx command: cmd=0x%1 param=0x%2"))(mpt::ufmt::HEX0<2>(command), mpt::ufmt::HEX0<2>(param)));
 #endif
 			command = CMD_NONE;
 			param = 0;
@@ -482,7 +484,7 @@ static void MedConvert(ModCommand &p, const MMD0SONGHEADER *pmsh)
 	default:
 #ifdef MED_LOG
 		// 0x2E ?
-		Log("Unknown command: cmd=0x%02X param=0x%02X\n", command, param);
+		MPT_LOG(LogDebug, "MED", mpt::format(U_("Unknown command: cmd=0x%1 param=0x%2"))(mpt::ufmt::HEX0<2>(command), mpt::ufmt::HEX0<2>(param)));
 #endif
 		command = CMD_NONE;
 		param = 0;
@@ -609,7 +611,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		deftempo *= tempo_tpl;
 		deftempo /= 4;
 	#ifdef MED_LOG
-		Log("newtempo: %3d bpm (bpm=%3d lpb=%2d)\n", deftempo, pmsh->deftempo, (pmsh->flags2 & MMD_FLAG2_BMASK)+1);
+		MPT_LOG(LogDebug, "MED", mpt::format(U_("newtempo: %1 bpm (bpm=%2 lpb=%3)"))(deftempo, static_cast<uint16>(pmsh->deftempo), (pmsh->flags2 & MMD_FLAG2_BMASK)+1));
 	#endif
 	} else
 	{
@@ -618,7 +620,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		else
 			deftempo = Util::muldiv(deftempo, 5 * 715909, 2 * 474326);
 	#ifdef MED_LOG
-		Log("oldtempo: %3d bpm (bpm=%3d)\n", deftempo, pmsh->deftempo);
+		MPT_LOG(LogDebug, "MED", mpt::format(U_("oldtempo: %1 bpm (bpm=%2)\n"))(deftempo, static_cast<uint16>(pmsh->deftempo)));
 	#endif
 	}
 	// Speed
@@ -789,7 +791,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		const MMDSAMPLEHEADER *psdh = (const MMDSAMPLEHEADER *)(lpStream + dwPos);
 		uint32 len = psdh->length;
 	#ifdef MED_LOG
-		Log("SampleData %d: stype=0x%02X len=%d\n", iSmp, psdh->type, len);
+		MPT_LOG(LogDebug, "MED", mpt::format(U_("SampleData %1: stype=0x%2 len=%3"))(iSmp, mpt::ufmt::HEX0<2>(static_cast<uint16>(psdh->type)), len));
 	#endif
 		if(dwPos + len + 6 > dwMemLength) len = 0;
 		uint32 stype = psdh->type;
@@ -868,8 +870,8 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			const MMD1BLOCK *pmb = (const MMD1BLOCK *)(lpStream + dwPos);
 		#ifdef MED_LOG
-			Log("MMD1BLOCK:   lines=%2d, tracks=%2d, offset=0x%04X\n",
-				pmb->lines, pmb->numtracks, pmb->info);
+			MPT_LOG(LogDebug, "MED", mpt::format(U_("MMD1BLOCK:   lines=%1, tracks=%2, offset=0x%3"))(
+				static_cast<uint16>(pmb->lines), static_cast<uint16>(pmb->numtracks), mpt::ufmt::HEX0<4>(static_cast<uint32>(pmb->info))));
 		#endif
 			const MMD1BLOCKINFO *pbi = NULL;
 			const uint8 *pcmdext = NULL;
@@ -882,8 +884,8 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				pbi = (const MMD1BLOCKINFO *)(lpStream + dwBlockInfo);
 			#ifdef MED_LOG
-				Log("  BLOCKINFO: blockname=0x%04X namelen=%d pagetable=0x%04X &cmdexttable=0x%04X\n",
-					pbi->blockname, pbi->blocknamelen, pbi->pagetable, pbi->cmdexttable);
+				MPT_LOG(LogDebug, "MED", mpt::format(U_("  BLOCKINFO: blockname=0x%1 namelen=%2 pagetable=0x%3 &cmdexttable=0x%4"))(
+					mpt::ufmt::HEX0<4>(static_cast<uint32>(pbi->blockname)), static_cast<uint32>(pbi->blocknamelen), mpt::ufmt::HEX0<4>(static_cast<uint32>(pbi->pagetable)), mpt::ufmt::HEX0<4>(static_cast<uint32>(pbi->cmdexttable))));
 			#endif
 				if ((pbi->blockname) && (pbi->blocknamelen))
 				{

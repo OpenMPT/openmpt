@@ -22,7 +22,9 @@
 #endif
 
 
-//#define J2B_LOG
+#ifdef MPT_ALL_LOGGING
+#define J2B_LOG
+#endif
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -534,7 +536,7 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 				} else
 				{
 #ifdef J2B_LOG
-					Log(mpt::format("J2B: Unknown command: 0x%1, param 0x%2")(mpt::fmt::HEX0<2>(command), mpt::fmt::HEX0<2>(m.param)));
+					MPT_LOG(LogDebug, "J2B", mpt::uformat(U_("J2B: Unknown command: 0x%1, param 0x%2"))(mpt::ufmt::HEX0<2>(command), mpt::ufmt::HEX0<2>(m.param)));
 #endif
 					m.command = CMD_NONE;
 				}

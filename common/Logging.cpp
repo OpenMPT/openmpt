@@ -183,27 +183,6 @@ void Logger::SendLogMessage(const mpt::source_location &loc, LogLevel level, con
 #endif // MPT_LOG_IS_DISABLED
 }
 
-void LegacyLogger::operator () (const AnyStringLocale &text)
-{
-	SendLogMessage(loc, MPT_LEGACY_LOGLEVEL, "", text);
-}
-
-void LegacyLogger::operator () (const char *format, ...)
-{
-	static const std::size_t LOGBUF_SIZE = 1024;
-	char message[LOGBUF_SIZE];
-	va_list va;
-	va_start(va, format);
-	vsnprintf(message, LOGBUF_SIZE, format, va);
-	va_end(va);
-	message[LOGBUF_SIZE - 1] = '\0';
-	SendLogMessage(loc, MPT_LEGACY_LOGLEVEL, "", mpt::ToUnicode(mpt::CharsetLocaleOrUTF8, message));
-}
-
-void LegacyLogger::operator () (LogLevel level, const mpt::ustring &text)
-{
-	SendLogMessage(loc, level, "", text);
-}
 
 
 

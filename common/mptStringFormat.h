@@ -356,6 +356,28 @@ public:
 	MPT_CONSTEXPR14_FUN FormatSpec & Precision(int p) noexcept { return Prec(p); }
 };
 
+template <typename Tdst, typename Tsrc>
+struct pointer_cast_helper
+{
+	Tdst operator()(const Tsrc & src) const { return src; }
+};
+template <typename Tdst, typename Tptr>
+struct pointer_cast_helper<Tdst, const Tptr*>
+{
+	Tdst operator()(const Tptr * const & src) const { return reinterpret_cast<const Tdst>(src); }
+};
+template <typename Tdst, typename Tptr>
+struct pointer_cast_helper<Tdst, Tptr*>
+{
+	Tdst operator()(const Tptr * const & src) const { return reinterpret_cast<const Tdst>(src); }
+};
+
+
+template <typename Tdst, typename Tsrc>
+Tdst pointer_cast(const Tsrc & src)
+{
+	return pointer_cast_helper<Tdst, Tsrc>()(src);
+}
 
 template <typename Tstring>
 struct fmtT : fmt_base
@@ -466,6 +488,19 @@ static inline Tstring sci(const T& x, int precision = -1)
 {
 	STATIC_ASSERT(std::is_floating_point<T>::value);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaSci().FillOff().Precision(precision));
+}
+
+template<typename T>
+static inline Tstring ptr(const T& x)
+{
+	static_assert(std::is_pointer<T>::value || std::is_same<T, std::uintptr_t>::value || std::is_same<T, std::intptr_t>::value, "");
+	return hex0<mpt::pointer_size * 2>(pointer_cast<const std::uintptr_t>(x));
+}
+template<typename T>
+static inline Tstring PTR(const T& x)
+{
+	static_assert(std::is_pointer<T>::value || std::is_same<T, std::uintptr_t>::value || std::is_same<T, std::intptr_t>::value, "");
+	return HEX0<mpt::pointer_size * 2>(pointer_cast<const std::uintptr_t>(x));
 }
 
 static inline Tstring pad_left(std::size_t width_, const Tstring &str)

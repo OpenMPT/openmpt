@@ -155,34 +155,10 @@ public:
 /**/
 
 
-#define MPT_LEGACY_LOGLEVEL LogDebug
-
-class LegacyLogger : public Logger
-{
-private:
-	const mpt::source_location loc;
-public:
-	constexpr LegacyLogger(mpt::source_location loc) noexcept : loc(loc) {}
-	/* MPT_DEPRECATED */ void MPT_PRINTF_FUNC(2,3) operator () (const char *format, ...); // migrate to type-safe MPT_LOG
-	/* MPT_DEPRECATED */ void operator () (const AnyStringLocale &text); // migrate to properly namespaced MPT_LOG
-	/* MPT_DEPRECATED */ void operator () (LogLevel level, const mpt::ustring &text); // migrate to properly namespaced MPT_LOG
-};
-
-#define Log MPT_MAYBE_CONSTANT_IF(mpt::log::GlobalLogLevel < MPT_LEGACY_LOGLEVEL) { } else MPT_MAYBE_CONSTANT_IF(!mpt::log::IsFacilityActive("")) { } else mpt::log::LegacyLogger(MPT_SOURCE_LOCATION_CURRENT())
-
-
 #else // !NO_LOGGING
 
 
 #define MPT_LOG(level, facility, text) MPT_DO { } MPT_WHILE_0
-
-struct LegacyLogger
-{
-	inline void MPT_PRINTF_FUNC(2,3) operator () (const char * /*format*/ , ...) {}
-	inline void operator () (const AnyStringLocale & /*text*/ ) {}
-	inline void operator () (LogLevel /*level*/ , const mpt::ustring & /*text*/ ) {}
-};
-#define Log MPT_CONSTANT_IF(true) {} else mpt::log::LegacyLogger() // completely compile out arguments to Log() so that they do not even get evaluated
 
 
 #endif // NO_LOGGING

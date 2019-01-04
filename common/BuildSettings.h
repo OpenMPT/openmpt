@@ -229,6 +229,9 @@
 #define MPT_LOG_GLOBAL_LEVEL 0
 #endif
 
+// Enable all individual logging macros and MPT_LOG calls
+//#define MPT_ALL_LOGGING
+
 // Disable all runtime asserts
 #if !defined(MPT_BUILD_DEBUG) && !defined(MPT_BUILD_CHECKED) && !defined(MPT_BUILD_WINESUPPORT)
 #define NO_ASSERTS
@@ -300,6 +303,7 @@
 #define NO_ASSERTS
 #endif
 //#define NO_LOGGING
+//#define MPT_ALL_LOGGING
 #define MPT_FILEREADER_STD_ISTREAM
 #define MPT_FILEREADER_CALLBACK_STREAM
 //#define MPT_EXTERNAL_SAMPLES

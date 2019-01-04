@@ -238,14 +238,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-#define MPT_PRINTF_FUNC(formatstringindex,varargsindex) __attribute__((format(printf, formatstringindex, varargsindex)))
-#else
-#define MPT_PRINTF_FUNC(formatstringindex,varargsindex)
-#endif
-
-
-
 #if MPT_COMPILER_MSVC
 // warning LNK4221: no public symbols found; archive member will be inaccessible
 // There is no way to selectively disable linker warnings.

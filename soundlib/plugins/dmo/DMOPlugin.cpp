@@ -28,7 +28,12 @@ OPENMPT_NAMESPACE_BEGIN
 #ifndef NO_DMO
 
 
+#ifdef MPT_ALL_LOGGING
 #define DMO_LOG
+#else
+#define DMO_LOG
+#endif
+
 
 IMixPlugin* DMOPlugin::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 {
@@ -51,11 +56,11 @@ IMixPlugin* DMOPlugin::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIX
 				return p;
 			}
 #ifdef DMO_LOG
-			Log(factory.libraryName.ToUnicode() + U_(": Unable to use this DMO"));
+			MPT_LOG(LogDebug, "DMO", factory.libraryName.ToUnicode() + U_(": Unable to use this DMO"));
 #endif
 		}
 #ifdef DMO_LOG
-		else Log(factory.libraryName.ToUnicode() + U_(": Failed to get IMediaObject & IMediaObjectInPlace interfaces"));
+		else MPT_LOG(LogDebug, "DMO", factory.libraryName.ToUnicode() + U_(": Failed to get IMediaObject & IMediaObjectInPlace interfaces"));
 #endif
 		if (pMO) pMO->Release();
 		if (pMOIP) pMOIP->Release();
@@ -433,7 +438,7 @@ void DMOPlugin::Resume()
 			|| FAILED(m_pMediaObject->SetOutputType(0, &mt, 0)))
 		{
 #ifdef DMO_LOG
-		Log(U_("DMO: Failed to set I/O media type"));
+			MPT_LOG(LogDebug, "DMO", U_("DMO: Failed to set I/O media type"));
 #endif
 		}
 	}

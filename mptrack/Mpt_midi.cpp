@@ -19,7 +19,10 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//#define MPTMIDI_RECORDLOG
+#ifdef MPT_ALL_LOGGING
+#define MPTMIDI_RECORDLOG
+#endif
+
 
 // Midi Input globals
 HMIDIIN CMainFrame::shMidiIn = NULL;
@@ -85,8 +88,8 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, 
 	DWORD dwMidiStatus = dwParam1 & 0xFF;
 	DWORD dwMidiByte1 = (dwParam1 >> 8) & 0xFF;
 	DWORD dwMidiByte2 = (dwParam1 >> 16) & 0xFF;
-	DWORD dwTimeStamp = dwParam2;
-	Log("time=%8dms status=%02X data=%02X.%02X\n", dwTimeStamp, dwMidiStatus, dwMidiByte1, dwMidiByte2);
+	DWORD dwTimeStamp = (DWORD)dwParam2;
+	MPT_LOG(LogDebug, "MIDI", mpt::format(U_("time=%1ms status=%2 data=%3.%4"))(mpt::ufmt::dec(dwTimeStamp), mpt::ufmt::HEX0<2>(dwMidiStatus), mpt::ufmt::HEX0<2>(dwMidiByte1), mpt::ufmt::HEX0<2>(dwMidiByte2)));
 #endif
 
 	hWndMidi = pMainFrm->GetMidiRecordWnd();

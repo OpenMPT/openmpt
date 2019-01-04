@@ -26,11 +26,13 @@ namespace srlztn
 {
 
 
-//#define SSB_LOGGING
+#ifdef MPT_ALL_LOGGING
+#define SSB_LOGGING
+#endif
 
 
 #ifdef SSB_LOGGING
-#define SSB_LOG(x) Log(x)
+#define SSB_LOG(x) MPT_LOG(LogDebug, "serialization", x)
 #else
 #define SSB_LOG(x) MPT_DO { } MPT_WHILE_0
 #endif

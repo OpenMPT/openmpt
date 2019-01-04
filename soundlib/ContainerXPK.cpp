@@ -21,7 +21,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//#define MMCMP_LOG
+#ifdef MPT_ALL_LOGGING
+#define MMCMP_LOG
+#endif
 
 
 struct XPKFILEHEADER
@@ -157,9 +159,9 @@ static bool XPK_DoUnpack(const uint8 *src_, uint32 srcLen, std::vector<char> &un
 
 		if (type != 1)
 		{
-		#ifdef MMCMP_LOG
-			Log("Invalid XPK type! (%d bytes left)\n", len);
-		#endif
+			#ifdef MMCMP_LOG
+				MPT_LOG(LogDebug, "XPK", mpt::format(U_("Invalid XPK type! (%1 bytes left)"))(len));
+			#endif
 			break;
 		}
 		len -= cup1;
@@ -413,9 +415,9 @@ bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, Con
 	containerItems.back().data_cache = std::make_unique<std::vector<char> >();
 	std::vector<char> & unpackedData = *(containerItems.back().data_cache);
 
-#ifdef MMCMP_LOG
-	Log("XPK detected (SrcLen=%d DstLen=%d) filesize=%d\n", header.SrcLen, header.DstLen, file.GetLength());
-#endif
+	#ifdef MMCMP_LOG
+		MPT_LOG(LogDebug, "XPK", mpt::uformat(U_("XPK detected (SrcLen=%1 DstLen=%2) filesize=%3"))(static_cast<uint32>(header.SrcLen), static_cast<uint32>(header.DstLen), file.GetLength()));
+	#endif
 	bool result = false;
 	try
 	{

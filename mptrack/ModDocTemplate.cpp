@@ -18,6 +18,12 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+
+#ifdef MPT_ALL_LOGGING
+#define DDEDEBUG
+#endif
+
+
 CDocument *CModDocTemplate::OpenDocumentFile(LPCTSTR lpszPathName, BOOL addToMru, BOOL makeVisible)
 {
 	const mpt::PathString filename = (lpszPathName ? mpt::PathString::FromCString(lpszPathName) : mpt::PathString());
@@ -156,7 +162,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 {
 	BOOL bResult, bActivate;
 #ifdef DDEDEBUG
-	Log("OnDDECommand: %s\n", lpszCommand);
+	MPT_LOG(LogDebug, "DDE", U_("OnDDECommand: ") + mpt::ToUnicode(mpt::winstring(lpszCommand)));
 #endif
 	// Handle any DDE commands recognized by your application
 	// and return TRUE.  See implementation of CWinApp::OnDDEComand
@@ -205,7 +211,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 			bActivate = TRUE;
 		}
 	#ifdef DDEDEBUG
-		Log("%s(%s)\n", pszCmd, pszData);
+		MPT_LOG(LogDebug, "DDE", mpt::format(U_("%1(%2)"))(mpt::winstring(pszCmd), mpt::winstring(pszData)));
 	#endif
 		if ((bActivate) && (theApp.m_pMainWnd->m_hWnd))
 		{
@@ -217,7 +223,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 #ifdef DDEDEBUG
 	if (!bResult)
 	{
-		Log("WARNING: failure in CModDocManager::OnDDECommand()\n");
+		MPT_LOG(LogDebug, "DDE", U_("WARNING: failure in CModDocManager::OnDDECommand()"));
 	}
 #endif
 	return bResult;

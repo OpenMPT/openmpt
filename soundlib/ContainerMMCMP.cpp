@@ -20,7 +20,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//#define MMCMP_LOG
+#ifdef MPT_ALL_LOGGING
+#define MMCMP_LOG
+#endif
 
 
 struct MMCMPFILEHEADER
@@ -224,9 +226,9 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 		uint32 memPos = blkPos + sizeof(MMCMPBLOCK) + blk.sub_blk * sizeof(MMCMPSUBBLOCK);
 
 #ifdef MMCMP_LOG
-		Log("block %d: flags=%04X sub_blocks=%d", nBlock, (uint32)pblk->flags, (uint32)pblk->sub_blk);
-		Log(" pksize=%d unpksize=%d", pblk->pk_size, pblk->unpk_size);
-		Log(" tt_entries=%d num_bits=%d\n", pblk->tt_entries, pblk->num_bits);
+		MPT_LOG(LogDebug, "MMCMP", mpt::format(U_("block %1: flags=%2 sub_blocks=%3"))(nBlock, mpt::ufmt::HEX0<4>(static_cast<uint16>(blk.flags)), static_cast<uint16>(blk.sub_blk)));
+		MPT_LOG(LogDebug, "MMCMP", mpt::format(U_(" pksize=%1 unpksize=%2"))(static_cast<uint32>(blk.pk_size), static_cast<uint32>(blk.unpk_size)));
+		MPT_LOG(LogDebug, "MMCMP", mpt::format(U_(" tt_entries=%1 num_bits=%2"))(static_cast<uint16>(blk.tt_entries), static_cast<uint16>(blk.num_bits)));
 #endif
 		// Data is not packed
 		if (!(blk.flags & MMCMP_COMP))
@@ -236,7 +238,7 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 				if(!psubblk) return false;
 				if(!MMCMP_IsDstBlockValid(unpackedData, *psubblk)) return false;
 #ifdef MMCMP_LOG
-				Log("  Unpacked sub-block %d: offset %d, size=%d\n", i, psubblk->unpk_pos, psubblk->unpk_size);
+				MPT_LOG(LogDebug, "MMCMP", mpt::format(U_("  Unpacked sub-block %1: offset %2, size=%3"))(i, static_cast<uint32>(psubblk->unpk_pos), static_cast<uint32>(psubblk->unpk_size)));
 #endif
 				if(!file.Seek(memPos)) return false;
 				if(file.ReadRaw(&(unpackedData[psubblk->unpk_pos]), psubblk->unpk_size) != psubblk->unpk_size) return false;
@@ -256,10 +258,7 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 			uint32 oldval = 0;
 
 #ifdef MMCMP_LOG
-			Log("  16-bit block: pos=%d size=%d ", psubblk->unpk_pos, psubblk->unpk_size);
-			if (pblk->flags & MMCMP_DELTA) Log("DELTA ");
-			if (pblk->flags & MMCMP_ABS16) Log("ABS16 ");
-			Log("\n");
+			MPT_LOG(LogDebug, "MMCMP", mpt::format(U_("  16-bit block: pos=%1 size=%2 %3 %4"))(psubblk->unpk_pos, psubblk->unpk_size, (blk.flags & MMCMP_DELTA) ? U_("DELTA ") : U_(""), (blk.flags & MMCMP_ABS16) ? U_("ABS16 ") : U_("")));
 #endif
 			if(!file.Seek(memPos + blk.tt_entries)) return false;
 			if(!file.CanRead(blk.pk_size - blk.tt_entries)) return false;
