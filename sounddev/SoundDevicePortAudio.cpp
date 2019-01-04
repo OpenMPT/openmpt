@@ -116,7 +116,7 @@ bool CPortaudioDevice::InternalOpen()
 #endif // MPT_OS_WINDOWS
 		} else
 		{
-			m_Flags.NeedsClippedFloat = true;
+			m_Flags.NeedsClippedFloat = GetSysInfo().IsOriginal();
 		}
 	} else if(m_HostApiType == paWDMKS)
 	{
@@ -124,10 +124,10 @@ bool CPortaudioDevice::InternalOpen()
 		framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 	} else if(m_HostApiType == paMME)
 	{
-		m_Flags.NeedsClippedFloat = GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
+		m_Flags.NeedsClippedFloat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista));
 	} else if(m_HostApiType == paDirectSound)
 	{
-		m_Flags.NeedsClippedFloat = GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
+		m_Flags.NeedsClippedFloat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista));
 	} else
 	{
 		m_Flags.NeedsClippedFloat = false;

@@ -332,7 +332,7 @@ bool CDSoundDevice::InternalOpen()
 	}
 	m_dwWritePos = 0xFFFFFFFF;
 	SetWakeupInterval(std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
-	m_Flags.NeedsClippedFloat = GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista);
+	m_Flags.NeedsClippedFloat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista));
 	return true;
 }
 
