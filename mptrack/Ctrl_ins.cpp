@@ -234,7 +234,7 @@ void CNoteMapWnd::OnPaint()
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor(highlight ? colorTextSel : colorText);
-			dc.DrawText(mpt::ToCString(s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.DrawText(mpt::ToCString(s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 			// Sample
 			highlight = ((bFocus) && (nPos == (int)m_nNote) /*&& (m_bIns)*/);
 			rect.left = rcClient.left + m_cxFont*2+3;
@@ -252,7 +252,7 @@ void CNoteMapWnd::OnPaint()
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor((highlight) ? colorTextSel : colorText);
-			dc.DrawText(mpt::ToCString(s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+			dc.DrawText(mpt::ToCString(s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 		}
 		rect.SetRect(rcClient.left+m_cxFont*2-1, rcClient.top, rcClient.left+m_cxFont*2+3, ypaint);
 		DrawButtonRect(hdc, &rect, _T(""), FALSE, FALSE);
