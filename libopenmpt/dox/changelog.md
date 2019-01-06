@@ -17,6 +17,7 @@ is just a high-level summary.
     files required to build DLLs.
 
  *  MO3: Apply playback changes based on "ModPlug-made" header flag.
+
  *  minimp3: Update to commit e9df0760e94044caded36a55d70ab4152134adc5
     (2018-12-23).
 
