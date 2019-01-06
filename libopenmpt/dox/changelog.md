@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.15-pre
+
 ### libopenmpt 0.3.14 (2019-01-06)
 
  *  [**Bug**] MSVC project files in Windows source package lacked additional
