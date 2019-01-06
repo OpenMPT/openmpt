@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.4.2-pre
+
 ### libopenmpt 0.4.1 (2019-01-06)
 
  *  [**Bug**] Binaries compiled for winold (Windows XP, Vista, 7, for CPUs
