@@ -30,6 +30,31 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.28.02.00 (6 January 2019, revision 11185)
+--------------------------------------------
+Pattern tab
+- [Fix] <js> Properly render & character in custom fonts (http://bugs.openmpt.org/view.php?id=1114).
+
+Playback
+- [Mod] <js> Improve OPL silent note optimization.
+
+MPTM::Custom Tuning
+- [Fix] <js> Tuning Dialog: Properly render & character in note name list (http://bugs.openmpt.org/view.php?id=1114).
+
+Other formats
+- [Imp] <js> MO3: Apply playback changes based on "ModPlug-made" header flag.
+
+Audio I/O
+- [Fix] <jh> Only clip WASAPI non-exclusive floating-point output on real Windows systems. Wine does not need it.
+
+Misc
+- [Fix] <jh> Builds for Windows XP / Vista no longer worked on CPUs without SSE2 support (http://forum.openmpt.org/index.php?topic=6055.0).
+- [Fix] <js> Open / Save file dialogs looked strange on some Wine setups (http://bugs.openmpt.org/view.php?id=1181).
+
+Third-Party Libraries
+- [Imp] Update nlohmann json (v3.5.0)
+
+
 v1.28.01.00 (23 December 2018, revision 11100)
 ----------------------------------------------
 Pattern tab
