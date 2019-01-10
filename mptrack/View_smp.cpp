@@ -338,11 +338,14 @@ bool CViewSample::IsOPLInstrument() const
 
 void CViewSample::UpdateOPLEditor()
 {
-	ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
-	if(m_oplEditor && !sample.uFlags[CHN_ADLIB])
+	if(!IsOPLInstrument())
 	{
-		m_oplEditor->ShowWindow(SW_HIDE);
-	} else if(sample.uFlags[CHN_ADLIB])
+		if(m_oplEditor)
+			m_oplEditor->ShowWindow(SW_HIDE);
+		return;
+	}
+	ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
+	if(sample.uFlags[CHN_ADLIB])
 	{
 		if(!m_oplEditor)
 		{
@@ -595,10 +598,11 @@ void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
 	if(hintType[HINT_MPTOPTIONS | HINT_MODTYPE]
 		|| (hintType[HINT_SAMPLEDATA] && (m_nSample == updateSmp || updateSmp == 0)))
 	{
-		ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
-		if(hintType[HINT_SAMPLEDATA] && sample.uFlags[CHN_ADLIB] && m_oplEditor)
+		if(hintType[HINT_SAMPLEDATA] && m_oplEditor && m_nSample <= GetDocument()->GetNumSamples())
 		{
-			m_oplEditor->SetPatch(sample.adlib);
+			ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
+			if(sample.uFlags[CHN_ADLIB])
+				m_oplEditor->SetPatch(sample.adlib);
 		}
 		UpdateOPLEditor();
 		UpdateScrollSize();
@@ -607,7 +611,7 @@ void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
 	}
 	if(hintType[HINT_SAMPLEINFO])
 	{
-		if(!GetDocument()->GetSoundFile().GetSample(m_nSample).HasSampleData())
+		if(m_nSample > GetDocument()->GetNumSamples() || !GetDocument()->GetSoundFile().GetSample(m_nSample).HasSampleData())
 		{
 			// Disable sample drawing if we cannot actually draw anymore.
 			m_dwStatus.reset(SMPSTATUS_DRAWING);
