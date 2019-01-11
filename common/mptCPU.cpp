@@ -114,21 +114,6 @@ static cpuid_result cpuidex(uint32 function_a, uint32 function_c)
 #endif
 
 
-static std::string ReadBrand(cpuid_result VendorString)
-{
-	std::string result;
-	if(VendorString.as_string() == "GenuineIntel")
-	{
-		cpuid_result ExtendedVendorString = cpuid(0x80000000u);
-		if(ExtendedVendorString.a >= 0x80000004u)
-		{
-			result = cpuid(0x80000002u).as_string4() + cpuid(0x80000003u).as_string4() + cpuid(0x80000004u).as_string4();
-		}
-	}
-	return result;
-}
-
-
 void InitProcSupport()
 {
 
@@ -295,7 +280,10 @@ void InitProcSupport()
 				if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
 				if(ExtendedFeatureFlags.d & (1<<30)) ProcSupport |= PROCSUPPORT_AMD_3DNOWEXT;
 			}
-			mpt::String::WriteAutoBuf(ProcBrandID) = ReadBrand(VendorString);
+			if(ExtendedVendorString.a >= 0x80000004u)
+			{
+				mpt::String::WriteAutoBuf(ProcBrandID) = cpuid(0x80000002u).as_string4() + cpuid(0x80000003u).as_string4() + cpuid(0x80000004u).as_string4();
+			}
 		}
 
 	}
