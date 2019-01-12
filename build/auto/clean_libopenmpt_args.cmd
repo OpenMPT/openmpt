@@ -21,7 +21,6 @@ cd "build\%MPT_VS_WITHTARGET%" || goto error
  if "%MPT_VS_ARCH%" == "Win32" (
   msbuild in_openmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH%;XPDeprecationWarning=false /maxcpucount /verbosity:minimal || goto error
   msbuild xmp-openmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH%;XPDeprecationWarning=false /maxcpucount /verbosity:minimal || goto error
-  msbuild foo_openmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH%;XPDeprecationWarning=false /maxcpucount /verbosity:minimal || goto error
  )
  msbuild libopenmpt.sln /target:Clean /property:Configuration=ReleaseShared;Platform=%MPT_VS_ARCH%;XPDeprecationWarning=false /maxcpucount /verbosity:minimal || goto error
  
