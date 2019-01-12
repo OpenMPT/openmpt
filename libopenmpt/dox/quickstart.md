@@ -34,9 +34,9 @@ Quick Start {#quickstart}
      -  **Winamp SDK**
      -  **XMPlay SDK**
  3. Checkout `https://source.openmpt.org/svn/openmpt/trunk/OpenMPT/` .
- 4. Open `build\vs2015\openmpt123.sln` or `build\vs2015\libopenmpt.sln` or `build\vs2015\xmp-openmpt.sln` or `build\vs2015\in_openmpt.sln` or `build\vs2015\foo_openmpt.sln` in *Microsoft Visual Studio 2015*.
+ 4. Open `build\vs2015\openmpt123.sln` or `build\vs2015\libopenmpt.sln` or `build\vs2015\xmp-openmpt.sln` or `build\vs2015\in_openmpt.sln` in *Microsoft Visual Studio 2015*.
  5. Select appropriate configuration and build. Binaries are generated in `bin\`
- 6. Drag a module onto `openmpt123.exe` or copy the player plugin DLLs (`in_openmpt.dll`, `xmp-openmpt.dll` or `foo_openmpt.dll`) into the respective player directory.
+ 6. Drag a module onto `openmpt123.exe` or copy the player plugin DLLs (`in_openmpt.dll` or `xmp-openmpt.dll`) into the respective player directory.
 
 ### Unix-like
 

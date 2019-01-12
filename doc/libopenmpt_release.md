@@ -47,9 +47,7 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.28/doc/libopenmpt_rele
         cd build/release/libopenmpt-website
         ./release-0.4.sh $NEWVER +release
         cd ../../..
- 7. update foo_openmpt.fb2k-component (winold version, because foobar2000 still
-    supports XP) on https://foobar2000.org/components
- 8. increment OpenMPT version minorminor in `common/versionNumber.h` when all
+ 7. increment OpenMPT version minorminor in `common/versionNumber.h` when all
     releases are done on the svn side (either libopenmpt only, or both
     libopenmpt and OpenMPT)
 
