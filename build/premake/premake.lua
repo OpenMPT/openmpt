@@ -17,7 +17,6 @@ newoption {
   { "libopenmpt_test", "libopenmpt_test" },
   { "libopenmpt", "libopenmpt" },
   { "libopenmpt-small", "libopenmpt-small" },
-  { "foo_openmpt", "foo_openmpt" },
   { "in_openmpt", "in_openmpt" },
   { "xmp-openmpt", "xmp-openmpt" },
   { "openmpt123", "openmpt123" },
@@ -180,12 +179,10 @@ solution "libopenmpt-all"
  dofile "../../build/premake/mpt-libopenmpt_examples.lua"
  dofile "../../build/premake/mpt-libopenmpt-small.lua"
  dofile "../../build/premake/mpt-libopenmpt_modplug.lua"
- dofile "../../build/premake/mpt-foo_openmpt.lua"
  dofile "../../build/premake/mpt-in_openmpt.lua"
  dofile "../../build/premake/mpt-xmp-openmpt.lua"
  dofile "../../build/premake/mpt-openmpt123.lua"
  dofile "../../build/premake/ext-flac.lua"
- dofile "../../build/premake/ext-foobar2000sdk.lua"
  dofile "../../build/premake/ext-minimp3.lua"
  dofile "../../build/premake/ext-miniz.lua"
  dofile "../../build/premake/ext-mpg123.lua"
@@ -208,25 +205,6 @@ solution "libopenmpt_test"
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
- dofile "../../build/premake/ext-mpg123.lua"
- dofile "../../build/premake/ext-ogg.lua"
- dofile "../../build/premake/ext-vorbis.lua"
- dofile "../../build/premake/ext-zlib.lua"
-
-end
-
-if _OPTIONS["group"] == "foo_openmpt" then
-
-solution "foo_openmpt"
-	startproject "foo_openmpt"
- location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "Checked" }
- platforms { "x86" }
-	dofile "../../build/premake/premake-defaults-solution.lua"
-	
- dofile "../../build/premake/mpt-foo_openmpt.lua"
- dofile "../../build/premake/mpt-libopenmpt.lua"
- dofile "../../build/premake/ext-foobar2000sdk.lua"
  dofile "../../build/premake/ext-mpg123.lua"
  dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-vorbis.lua"
@@ -480,7 +458,6 @@ solution "all-externals"
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/ext-flac.lua"
- dofile "../../build/premake/ext-foobar2000sdk.lua"
  dofile "../../build/premake/ext-lame.lua"
  dofile "../../build/premake/ext-lhasa.lua"
  dofile "../../build/premake/ext-minimp3.lua"

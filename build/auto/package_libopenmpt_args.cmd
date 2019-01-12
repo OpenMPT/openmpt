@@ -38,12 +38,9 @@ mkdir openmpt123\x86
 mkdir openmpt123\x86_64
 mkdir XMPlay
 mkdir Winamp
-mkdir foobar2000
 rmdir /s /q Licenses
 mkdir Licenses
 copy /y ..\..\include\flac\COPYING.Xiph                      .\Licenses\License.FLAC.txt || goto error
-copy /y ..\..\include\foobar2000sdk\sdk-license.txt          .\Licenses\License.Foobar2000SDK.txt || goto error
-copy /y ..\..\include\foobar2000sdk\pfc\pfc-license.txt      .\Licenses\License.Foobar2000SDK-pfc.txt || goto error
 rem copy /y ..\..\include\lame\COPYING                           .\Licenses\License.lame.txt || goto error
 rem copy /y ..\..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
 rem copy /y ..\..\include\minimp3\LICENSE                        .\Licenses\License.minimp3.txt || goto error
@@ -73,7 +70,6 @@ copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\libopenmpt\dox\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\XMPlay\ || goto error
 copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\Winamp\ || goto error
-copy /y ..\..\libopenmpt\doc\foo_openmpt.txt .\foobar2000\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\openmpt123.exe .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\openmpt-mpg123.dll .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-64-%MPT_BIN_TARGET64%\openmpt123.exe .\openmpt123\x86_64\ || goto error
@@ -82,7 +78,6 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\xmp-open
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\openmpt-mpg123.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\in_openmpt.dll .\Winamp\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\openmpt-mpg123.dll .\Winamp\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\foo_openmpt.fb2k-component .\foobar2000\ || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 ..\libopenmpt\bin.%MPT_PKG_TAG%\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.%MPT_PKG_TAG%.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
@@ -97,8 +92,6 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\foo_open
  Winamp\in_openmpt.txt ^
  Winamp\in_openmpt.dll ^
  Winamp\openmpt-mpg123.dll ^
- foobar2000\foo_openmpt.txt ^
- foobar2000\foo_openmpt.fb2k-component ^
  || goto error
 cd .. || goto error
 rmdir /s /q libopenmpt-%MPT_PKG_TAG%
@@ -129,8 +122,6 @@ copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 rmdir /s /q Licenses
 mkdir Licenses
 rem copy /y ..\..\include\flac\COPYING.Xiph                      .\Licenses\License.FLAC.txt || goto error
-rem copy /y ..\..\include\foobar2000sdk\sdk-license.txt          .\Licenses\License.Foobar2000SDK.txt || goto error
-rem copy /y ..\..\include\foobar2000sdk\pfc\pfc-license.txt      .\Licenses\License.Foobar2000SDK-pfc.txt || goto error
 rem copy /y ..\..\include\lame\COPYING                           .\Licenses\License.lame.txt || goto error
 rem copy /y ..\..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
 rem copy /y ..\..\include\minimp3\LICENSE                        .\Licenses\License.minimp3.txt || goto error
