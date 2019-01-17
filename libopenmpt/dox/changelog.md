@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.15-pre
 
+ *  [**Sec**] DSM: Assertion failure during file parsing with debug STLs
+    (r11210).
+
 ### libopenmpt 0.3.14 (2019-01-06)
 
  *  [**Bug**] MSVC project files in Windows source package lacked additional
