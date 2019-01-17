@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta37
 
+ *  [**Sec**] DSM: Assertion failure during file parsing with debug STLs
+    (r11211).
+
  *  Do not apply Amiga playback heuristics to MOD files that have clearly been
     written with a PC tracker.
  *  SFX: Work around bad conversions of the "Operation Stealth" soundtrack by
