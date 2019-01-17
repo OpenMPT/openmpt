@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.2-pre
 
+ *  [**Sec**] DSM: Assertion failure during file parsing with debug STLs
+    (r11209).
+
 ### libopenmpt 0.4.1 (2019-01-06)
 
  *  [**Bug**] Binaries compiled for winold (Windows XP, Vista, 7, for CPUs
