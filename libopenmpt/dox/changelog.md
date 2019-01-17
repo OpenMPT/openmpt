@@ -53,7 +53,7 @@ is just a high-level summary.
 ### libopenmpt 0.2-beta32 (2018-04-29)
 
  *  [**Sec**] Possible write near address 0 in out-of-memory situations when
-    reading AMS files (r10151, r10154).
+    reading AMS files (r10151, r10154). (CVE-2018-11710)
 
  *  STM: Having both Bxx and Cxx commands in a pattern imported the Bxx command
     incorrectly.
@@ -64,7 +64,7 @@ is just a high-level summary.
 ### libopenmpt 0.2-beta31 (2018-04-08)
 
  *  [**Sec**] Possible out-of-bounds memory read with IT / MO3 files containing
-    pattern loops (r10029, r10030).
+    pattern loops (r10029, r10030). (CVE-2018-10017)
 
  *  Keep track of active SFx macro during seeking.
  *  The "note cut" duplicate note action did not volume-ramp the previously
@@ -124,6 +124,7 @@ is just a high-level summary.
 ### libopenmpt 0.2-beta26 (2017-07-07)
 
  *  [**Bug**] Possible crashes with malformed PLM and PSM files.
+    (CVE-2017-11311)
  *  [**Bug**] mktime() and localtime() were used for song date parsing.
     These functions are not guaranteed to be thread-safe by the standard.
     Furthermore, some standard library implementations are buggy and may cause
