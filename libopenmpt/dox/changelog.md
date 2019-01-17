@@ -73,7 +73,7 @@ is just a high-level summary.
 ### libopenmpt 0.3.9 (2018-04-29)
 
  *  [**Sec**] Possible write near address 0 in out-of-memory situations when
-    reading AMS files (r10149).
+    reading AMS files (r10149). (CVE-2018-11710)
 
  *  [**Bug**] openmpt123: Fixed build failure in C++17 due to use of removed
     feature `std::random_shuffle`.
@@ -89,7 +89,7 @@ is just a high-level summary.
 ### libopenmpt 0.3.8 (2018-04-08)
 
  *  [**Sec**] Possible out-of-bounds memory read with IT and MO3 files
-    containing many nested pattern loops (r10028).
+    containing many nested pattern loops (r10028). (CVE-2018-10017)
 
  *  Keep track of active SFx macro during seeking.
  *  The "note cut" duplicate note action did not volume-ramp the previously
@@ -122,7 +122,7 @@ is just a high-level summary.
 ### libopenmpt 0.3.6 (2018-02-03)
 
  *  [**Sec**] Possible out-of-bounds memory read with malformed STP files.
-    (r9576)
+    (r9576) (CVE-2018-6611)
 
  *  [**Bug**] Small memory leak with malformed STP files.
 
