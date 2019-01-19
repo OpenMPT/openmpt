@@ -1703,12 +1703,19 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 		// Note Cut
 		if (note == NOTE_NOTECUT)
 		{
-			chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
-			// IT compatibility: Stopping sample playback by setting sample increment to 0 rather than volume
-			// Test case: NoteOffInstr.it
-			if ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || (m_nInstruments != 0 && !m_playBehaviour[kITInstrWithNoteOff])) chn.nVolume = 0;
-			if(m_playBehaviour[kITInstrWithNoteOff]) chn.increment.Set(0);
-			chn.nFadeOutVol = 0;
+			if(chn.dwFlags[CHN_ADLIB] && (GetType() == MOD_TYPE_S3M || m_playBehaviour[kMPTMOldOPLNoteOff]))
+			{
+				// OPL voices are not cut but enter the release portion of their envelope
+				chn.dwFlags.set(CHN_KEYOFF);
+			} else
+			{
+				chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+				// IT compatibility: Stopping sample playback by setting sample increment to 0 rather than volume
+				// Test case: NoteOffInstr.it
+				if ((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) || (m_nInstruments != 0 && !m_playBehaviour[kITInstrWithNoteOff])) chn.nVolume = 0;
+				if (m_playBehaviour[kITInstrWithNoteOff]) chn.increment.Set(0);
+				chn.nFadeOutVol = 0;
+			}
 		}
 
 		// IT compatibility tentative fix: Clear channel note memory.

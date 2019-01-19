@@ -198,16 +198,16 @@ void CModTypeDlg::UpdateDialog()
 	// Mix levels
 	const MixLevels oldMixLevels = initialized ? static_cast<MixLevels>(m_PlugMixBox.GetItemData(m_PlugMixBox.GetCurSel())) : sndFile.GetMixLevels();
 	m_PlugMixBox.ResetContent();
-	if(m_nType == MOD_TYPE_MPT || (sndFile.GetType() != MOD_TYPE_MPT && sndFile.GetMixLevels() == mixLevels1_17RC3))	// In XM/IT, this is only shown for backwards compatibility with existing tunes
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC3")),	mixLevels1_17RC3);
-	if(sndFile.GetMixLevels() == mixLevels1_17RC2)	// Only shown for backwards compatibility with existing tunes
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC2")),	mixLevels1_17RC2);
-	if(sndFile.GetMixLevels() == mixLevels1_17RC1)	// Ditto
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC1")),	mixLevels1_17RC1);
-	if(sndFile.GetMixLevels() == mixLevelsOriginal)	// Ditto
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Original (MPT 1.16)")),	mixLevelsOriginal);
+	if(m_nType == MOD_TYPE_MPT || sndFile.GetMixLevels() == mixLevels1_17RC3) // In XM/IT, this is only shown for backwards compatibility with existing tunes
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC3")), mixLevels1_17RC3);
+	if(sndFile.GetMixLevels() == mixLevels1_17RC2) // Only shown for backwards compatibility with existing tunes
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC2")), mixLevels1_17RC2);
+	if(sndFile.GetMixLevels() == mixLevels1_17RC1) // Ditto
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC1")), mixLevels1_17RC1);
+	if(sndFile.GetMixLevels() == mixLevelsOriginal) // Ditto
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Original (MPT 1.16)")), mixLevelsOriginal);
 	int compatMixMode = m_PlugMixBox.AddString(_T("Compatible"));
-	m_PlugMixBox.SetItemData(compatMixMode,										mixLevelsCompatible);
+	m_PlugMixBox.SetItemData(compatMixMode, mixLevelsCompatible);
 	if(m_nType == MOD_TYPE_XM)
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Compatible (FT2 Pan Law)")), mixLevelsCompatibleFT2);
 
@@ -224,6 +224,7 @@ void CModTypeDlg::UpdateDialog()
 	}
 
 	const bool XMorITorMPT = (m_nType & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT));
+	const bool isMPTM = (m_nType == MOD_TYPE_MPT);
 
 	// Mixmode Box
 	GetDlgItem(IDC_TEXT_MIXMODE)->EnableWindow(XMorITorMPT);
@@ -239,9 +240,9 @@ void CModTypeDlg::UpdateDialog()
 	GetDlgItem(IDC_FRAME_TEMPOMODE)->EnableWindow(XMorITorMPT);
 
 	// Compatibility settings
-	PlayBehaviourSet defaultBehaviour = CSoundFile::GetDefaultPlaybackBehaviour(m_nType);
-	bool usesDefaultBehaviour = true;
-	const bool isMPTM = (m_nType == MOD_TYPE_MPT);
+	const PlayBehaviourSet defaultBehaviour = CSoundFile::GetDefaultPlaybackBehaviour(m_nType);
+	const PlayBehaviourSet supportedBehaviour = CSoundFile::GetSupportedPlaybackBehaviour(m_nType);
+	bool enableSetDefaults = false, showWarning = false;
 	if(m_nType & (MOD_TYPE_MPT | MOD_TYPE_IT | MOD_TYPE_XM))
 	{
 		for(size_t i = 0; i < m_playBehaviour.size(); i++)
@@ -251,16 +252,25 @@ void CModTypeDlg::UpdateDialog()
 				&& i != MSF_COMPATIBLE_PLAY
 				&& i != kFT2VolumeRamping)
 			{
-				usesDefaultBehaviour = false;
+				enableSetDefaults = true;
+				if(!isMPTM)
+					showWarning = true;
+				break;
+			}
+			// For MPTM, only warn about unsupported / legacy behaviour
+			else if(isMPTM && m_playBehaviour[i] && !supportedBehaviour[i])
+			{
+				enableSetDefaults = true;
+				showWarning = true;
 				break;
 			}
 		}
 	}
-	static_cast<CStatic *>(GetDlgItem(IDC_STATIC1))->SetIcon((usesDefaultBehaviour || isMPTM) ? NULL : m_warnIcon);
-	GetDlgItem(IDC_STATIC2)->SetWindowText((usesDefaultBehaviour || isMPTM)
-		? _T("Compatibility settings are currently optimal. It is advised to not edit them.")
-		: _T("Playback settings have been set to compatibility mode. Click \"Set Defaults\" to use the recommended settings instead."));
-	GetDlgItem(IDC_BUTTON3)->EnableWindow(usesDefaultBehaviour ? FALSE : TRUE);
+	static_cast<CStatic *>(GetDlgItem(IDC_STATIC1))->SetIcon(showWarning ? m_warnIcon : nullptr);
+	GetDlgItem(IDC_STATIC2)->SetWindowText(showWarning
+		? _T("Playback settings have been set to legacy compatibility mode. Click \"Set Defaults\" to use the recommended settings instead.")
+		: _T("Compatibility settings are currently optimal. It is advised to not edit them."));
+	GetDlgItem(IDC_BUTTON3)->EnableWindow(enableSetDefaults ? TRUE : FALSE);
 }
 
 
@@ -603,6 +613,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kST3OffsetWithoutInstrument: desc = _T("Notes without instrument use the previous note's sample offset"); break;
 		case kReleaseNodePastSustainBug: desc = _T("Broken release node after sustain end behaviour"); break;
 		case kFT2NoteDelayWithoutInstr: desc = _T("Delayed instrument-less notes should not recall volume and panning"); break;
+		case kMPTMOldOPLNoteOff: desc = _T("Legacy OPL note-off behaviour"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

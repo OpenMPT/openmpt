@@ -512,6 +512,7 @@ enum PlayBehaviour
 	kST3OffsetWithoutInstrument,    // Note without instrument uses same offset as previous note
 	kReleaseNodePastSustainBug,     // OpenMPT 1.23.01.02 / r4009 broke release nodes past the sustain point, fixed in OpenMPT 1.28
 	kFT2NoteDelayWithoutInstr,      // Sometime between OpenMPT 1.18.03.00 and 1.19.01.00, delayed instrument-less notes in XM started recalling the default sample volume and panning
+	kMPTMOldOPLNoteOff,             // No control after note-off over OPL voices, ^^^ sends note-off instead of note cut
 
 	// Add new play behaviours here.
 
@@ -540,13 +541,12 @@ struct SamplePosition
 	typedef uint64 unsigned_value_t;
 
 protected:
-	value_t v;
+	value_t v = 0;
 
 public:
 	enum : uint32 { fractMax = 0xFFFFFFFFu };
-	static MPT_FORCEINLINE uint32 GetFractMax() { return fractMax; }
 
-	SamplePosition() : v(0) { }
+	SamplePosition() { }
 	explicit SamplePosition(value_t pos) : v(pos) { }
 	SamplePosition(int32 intPart, uint32 fractPart) : v((static_cast<value_t>(intPart) * (1ll<<32)) | fractPart) { }
 	static SamplePosition Ratio(uint32 dividend, uint32 divisor) { return SamplePosition((static_cast<int64>(dividend) << 32) / divisor); }
