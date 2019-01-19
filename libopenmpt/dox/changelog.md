@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**Sec**] DSM: Assertion failure during file parsing with debug STLs
     (r11210).
+ *  [**Sec**] J2B: Assertion failure during file parsing with debug STLs
+    (r11216).
 
 ### libopenmpt 0.3.14 (2019-01-06)
 
