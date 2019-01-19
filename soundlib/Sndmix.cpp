@@ -2235,16 +2235,23 @@ bool CSoundFile::ReadNote()
 				period = m_nMinPeriod;
 			}
 
-			if((chn.dwFlags & (CHN_ADLIB | CHN_NOTEFADE | CHN_MUTE | CHN_SYNCMUTE)) == CHN_ADLIB && !chn.pModSample->uFlags[CHN_MUTE] && m_opl)
+			if((chn.dwFlags & (CHN_ADLIB | CHN_MUTE | CHN_SYNCMUTE)) == CHN_ADLIB && !chn.pModSample->uFlags[CHN_MUTE] && m_opl)
 			{
-				// In ST3, a sample rate of 8363 Hz is mapped to middle-C, which is 261.625 Hz in a tempered scale at A4 = 440.
-				// Hence, we have to translate our "sample rate" into pitch.
-				auto freq = GetFreqFromPeriod(period, chn.nC5Speed, nPeriodFrac);
-				auto oplmilliHertz = Util::muldivr_unsigned(freq, 261625, 8363 << FREQ_FRACBITS);
-				m_opl->Frequency(nChn, oplmilliHertz, chn.dwFlags[CHN_KEYOFF], m_playBehaviour[kOPLBeatingOscillators]);
-				// Scale volume to OPL range (0...63).
-				m_opl->Volume(nChn, static_cast<uint8>(Util::muldivr_unsigned(chn.nCalcVolume * chn.nGlobalVol * chn.nInsVol, 63, 1 << 26)), false);
-				chn.nRealPan = m_opl->Pan(nChn, chn.nRealPan) * 128 + 128;
+				const bool isActive = !chn.dwFlags[CHN_KEYOFF];
+				if((GetType() != MOD_TYPE_S3M && !m_playBehaviour[kMPTMOldOPLNoteOff]) || isActive)
+				{
+					// In ST3, a sample rate of 8363 Hz is mapped to middle-C, which is 261.625 Hz in a tempered scale at A4 = 440.
+					// Hence, we have to translate our "sample rate" into pitch.
+					auto freq = GetFreqFromPeriod(period, chn.nC5Speed, nPeriodFrac);
+					auto oplmilliHertz = Util::muldivr_unsigned(freq, 261625, 8363 << FREQ_FRACBITS);
+					m_opl->Frequency(nChn, oplmilliHertz, !isActive, m_playBehaviour[kOPLBeatingOscillators]);
+				}
+				if(!m_playBehaviour[kMPTMOldOPLNoteOff] || isActive)
+				{
+					// Scale volume to OPL range (0...63).
+					m_opl->Volume(nChn, static_cast<uint8>(Util::muldivr_unsigned(chn.nCalcVolume * chn.nGlobalVol * chn.nInsVol, 63, 1 << 26)), false);
+					chn.nRealPan = m_opl->Pan(nChn, chn.nRealPan) * 128 + 128;
+				}
 
 				// Deallocate OPL channels for notes that are most definitely never going to play again.
 				const auto *ins = chn.pModInstrument;

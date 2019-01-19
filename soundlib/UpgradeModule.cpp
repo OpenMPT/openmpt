@@ -413,6 +413,12 @@ void CSoundFile::UpgradeModule()
 		}
 	}
 
+	if(GetType() == MOD_TYPE_MPT && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 28, 02, 02) && m_opl)
+	{
+		// Old OPL note-off behaviour (m_opl is only initialized if there are any OPL instruments)
+		m_playBehaviour.set(kMPTMOldOPLNoteOff);
+	}
+
 	Patterns.ForEachModCommand(UpgradePatternData(*this));
 
 	// Convert compatibility flags
