@@ -12,6 +12,8 @@ is just a high-level summary.
  *  [**Sec**] J2B: Assertion failure during file parsing with debug STLs
     (r11216).
 
+ *  S3M: Allow volume change of OPL instruments after Note Cut.
+
 ### libopenmpt 0.4.1 (2019-01-06)
 
  *  [**Bug**] Binaries compiled for winold (Windows XP, Vista, 7, for CPUs
