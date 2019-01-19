@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**Sec**] DSM: Assertion failure during file parsing with debug STLs
     (r11211).
+ *  [**Sec**] J2B: Assertion failure during file parsing with debug STLs
+    (r11216).
 
  *  Do not apply Amiga playback heuristics to MOD files that have clearly been
     written with a PC tracker.
