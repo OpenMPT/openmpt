@@ -2722,6 +2722,8 @@ void CMainFrame::CreateTemplateModulesMenu()
 void CMainFrame::UpdateMRUList()
 {
 	CMenu *pMenu = GetFileMenu();
+	if(!pMenu) return;
+
 	static int firstMenu = -1;
 	if(firstMenu == -1)
 	{
@@ -2749,8 +2751,8 @@ void CMainFrame::UpdateMRUList()
 	} else
 	{
 		const mpt::PathString workDir = TrackerSettings::Instance().PathSongs.GetWorkingDir();
-
-		for(int i = 0; i < mpt::saturate_cast<int>(TrackerSettings::Instance().mruFiles.size()); i++)
+		const int entries = mpt::saturate_cast<int>(TrackerSettings::Instance().mruFiles.size());
+		for(int i = 0; i < entries; i++)
 		{
 			mpt::winstring s = mpt::tfmt::val(i + 1) + _T(" ");
 			// Add mnemonics
