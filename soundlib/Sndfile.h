@@ -300,7 +300,7 @@ class CSoundFile
 
 public:
 #ifdef MODPLUG_TRACKER
-	void ChangeModTypeTo(const MODTYPE& newType);
+	void ChangeModTypeTo(const MODTYPE newType);
 #endif // MODPLUG_TRACKER
 
 	// Returns value in seconds. If given position won't be played at all, returns -1.

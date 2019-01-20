@@ -512,7 +512,7 @@ enum PlayBehaviour
 	kST3OffsetWithoutInstrument,    // Note without instrument uses same offset as previous note
 	kReleaseNodePastSustainBug,     // OpenMPT 1.23.01.02 / r4009 broke release nodes past the sustain point, fixed in OpenMPT 1.28
 	kFT2NoteDelayWithoutInstr,      // Sometime between OpenMPT 1.18.03.00 and 1.19.01.00, delayed instrument-less notes in XM started recalling the default sample volume and panning
-	kMPTMOldOPLNoteOff,             // No control after note-off over OPL voices, ^^^ sends note-off instead of note cut
+	kOPLFlexibleNoteOff,            // Full control after note-off over OPL voices, ^^^ sends note cut instead of just note-off
 
 	// Add new play behaviours here.
 

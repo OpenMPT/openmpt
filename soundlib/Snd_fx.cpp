@@ -1703,9 +1703,10 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 		// Note Cut
 		if (note == NOTE_NOTECUT)
 		{
-			if(chn.dwFlags[CHN_ADLIB] && (GetType() == MOD_TYPE_S3M || m_playBehaviour[kMPTMOldOPLNoteOff]))
+			if(chn.dwFlags[CHN_ADLIB] && GetType() == MOD_TYPE_S3M)
 			{
 				// OPL voices are not cut but enter the release portion of their envelope
+				// In S3M we can still modify the volume after note-off, in legacy MPTM mode we can't
 				chn.dwFlags.set(CHN_KEYOFF);
 			} else
 			{
@@ -2881,7 +2882,7 @@ bool CSoundFile::ProcessEffects()
 					chn.nAutoVibPos = 0;
 				}
 				if(chn.dwFlags[CHN_ADLIB] && m_opl
-					&& ((note == NOTE_NOTECUT || note == NOTE_KEYOFF) || (note == NOTE_FADE && m_playBehaviour[kMPTMOldOPLNoteOff])))
+					&& ((note == NOTE_NOTECUT || note == NOTE_KEYOFF) || (note == NOTE_FADE && !m_playBehaviour[kOPLFlexibleNoteOff])))
 				{
 					m_opl->NoteOff(nChn);
 				}

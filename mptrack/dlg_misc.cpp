@@ -540,7 +540,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kITRetrigger: desc = _T("Qxx behaves like in IT"); break;
 		case kITMultiSampleBehaviour: desc = _T("Properly update C-5 frequency when changing note in multisampled instrument"); break;
 		case kITPortaTargetReached: desc = _T("Clear portamento target after it has been reached"); break;
-		case kITPatternLoopBreak: desc = _T("Do not reset loop count on pattern break."); break;
+		case kITPatternLoopBreak: desc = _T("Do not reset loop count on pattern break"); break;
 		case kITOffset: desc = _T("Offset after sample end is treated like in IT"); break;
 		case kITSwingBehaviour: desc = _T("Volume and panning random variation work more like in IT"); break;
 		case kITNNAReset: desc = _T("NNA is reset on every note change, not every instrument change"); break;
@@ -591,29 +591,29 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2PanWithDelayedNoteOff: desc = _T("Panning command with delayed note-off is ignored"); break;
 		case kFT2VolColDelay: desc = _T("FT2-style volume column handling if there is a note delay"); break;
 		case kFT2FinetunePrecision: desc = _T("Round sample finetune to multiples of 8"); break;
-		case kFT2NoteOffFlags: desc = _T("Fade instrument on note-off when there is no volume envelope; instrument numbers reset note-off status."); break;
-		case kITMultiSampleInstrumentNumber: desc = _T("Lone instrument number after portamento within multi-sampled instrument sets the target sample's settings."); break;
-		case kRowDelayWithNoteDelay: desc = _T("Note delays next to a row delay are repeated on every row repetition."); break;
+		case kFT2NoteOffFlags: desc = _T("Fade instrument on note-off when there is no volume envelope; instrument numbers reset note-off status"); break;
+		case kITMultiSampleInstrumentNumber: desc = _T("Lone instrument number after portamento within multi-sampled instrument sets the target sample's settings"); break;
+		case kRowDelayWithNoteDelay: desc = _T("Note delays next to a row delay are repeated on every row repetition"); break;
 		case kFT2TremoloRampWaveform: desc = _T("Emulate FT2's tremolo ramp down / triangle waveform"); break;
 		case kFT2PortaUpDownMemory: desc = _T("Portamento Up and Down have separate effect memory"); break;
 		case kST3NoMutedChannels: desc = _T("Do not process any effects on muted S3M channels"); break;
 		case kST3EffectMemory: desc = _T("Most effects share the same memory"); break;
-		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself."); break;
+		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself"); break;
 		case kST3VibratoMemory: desc = _T("Do not remember vibrato type in effect memory"); break;
 		case kST3LimitPeriod: desc = _T("ModPlug Tracker frequency limits"); break;
-		case KST3PortaAfterArpeggio: desc = _T("Portamento immediately following an arpeggio effect continues at the last arpeggiated note."); break;
+		case KST3PortaAfterArpeggio: desc = _T("Portamento immediately following an arpeggio effect continues at the last arpeggiated note"); break;
 		case kMODOneShotLoops: desc = _T("ProTracker one-shot loops"); break;
-		case kMODIgnorePanning: desc = _T("Ignore panning commands."); break;
+		case kMODIgnorePanning: desc = _T("Ignore panning commands"); break;
 		case kMODSampleSwap: desc = _T("Enable on-the-fly sample swapping"); break;
-		case kMODOutOfRangeNoteDelay: desc = _T("Out-of-range note delay is played on next row."); break;
-		case kMODTempoOnSecondTick: desc = _T("Tempo changes are handled on second tick instead of first."); break;
-		case kFT2PanSustainRelease: desc = _T("If the sustain point of the panning envelope is reached before key-off, it is never released."); break;
+		case kMODOutOfRangeNoteDelay: desc = _T("Out-of-range note delay is played on next row"); break;
+		case kMODTempoOnSecondTick: desc = _T("Tempo changes are handled on second tick instead of first"); break;
+		case kFT2PanSustainRelease: desc = _T("If the sustain point of the panning envelope is reached before key-off, it is never released"); break;
 		case kLegacyReleaseNode: desc = _T("Old volume envelope release node scaling behaviour"); break;
 		case kOPLBeatingOscillators: desc = _T("Beating OPL oscillators"); break;
 		case kST3OffsetWithoutInstrument: desc = _T("Notes without instrument use the previous note's sample offset"); break;
 		case kReleaseNodePastSustainBug: desc = _T("Broken release node after sustain end behaviour"); break;
 		case kFT2NoteDelayWithoutInstr: desc = _T("Delayed instrument-less notes should not recall volume and panning"); break;
-		case kMPTMOldOPLNoteOff: desc = _T("Legacy OPL note-off behaviour"); break;
+		case kOPLFlexibleNoteOff: desc = _T("Full control over OPL notes after note-off"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}
