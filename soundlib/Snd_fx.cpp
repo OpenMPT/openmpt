@@ -2859,9 +2859,9 @@ bool CSoundFile::ProcessEffects()
 				}
 			}
 			// New Note ?
-			if (note)
+			if (note != NOTE_NONE)
 			{
-				const bool instrChange = (!instr) && (chn.nNewIns) && (note < 0x80);
+				const bool instrChange = (!instr) && (chn.nNewIns) && ModCommand::IsNote(note);
 				if(instrChange)
 				{
 					InstrumentChange(chn, chn.nNewIns, bPorta, chn.pModSample == nullptr && chn.pModInstrument == nullptr, !(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)));
@@ -2880,8 +2880,11 @@ bool CSoundFile::ProcessEffects()
 					chn.nAutoVibDepth = 0;
 					chn.nAutoVibPos = 0;
 				}
-				if(chn.dwFlags[CHN_ADLIB] && (note == NOTE_NOTECUT || note == NOTE_FADE || note == NOTE_KEYOFF) && m_opl)
+				if(chn.dwFlags[CHN_ADLIB] && m_opl
+					&& (note == NOTE_NOTECUT || note == NOTE_KEYOFF) || (note == NOTE_FADE && m_playBehaviour[kMPTMOldOPLNoteOff]))
+				{
 					m_opl->NoteOff(nChn);
+				}
 			}
 			// Tick-0 only volume commands
 			if (volcmd == VOLCMD_VOLUME)
