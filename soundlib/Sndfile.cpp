@@ -1038,6 +1038,10 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kITInstrWithNoteOff);
 		playBehaviour.set(kITMultiSampleInstrumentNumber);
 		playBehaviour.set(kRowDelayWithNoteDelay);
+		if(type == MOD_TYPE_MPT)
+		{
+			playBehaviour.set(kOPLFlexibleNoteOff);
+		}
 		break;
 
 	case MOD_TYPE_XM:
@@ -1148,6 +1152,7 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kITPanbrelloHold);
 		playBehaviour.set(kITPanningReset);
 		playBehaviour.set(kITInstrWithNoteOff);
+		playBehaviour.set(kOPLFlexibleNoteOff);
 		break;
 
 	case MOD_TYPE_XM:
@@ -1543,19 +1548,19 @@ void CSoundFile::SetType(MODTYPE type)
 
 #ifdef MODPLUG_TRACKER
 
-void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
+void CSoundFile::ChangeModTypeTo(const MODTYPE newType)
 {
-	const MODTYPE oldtype = GetType();
+	const MODTYPE oldType = GetType();
 	m_nType = newType;
 	SetModSpecsPointer(m_pModSpecs, m_nType);
 
-	if(oldtype == newType)
+	if(oldType == newType)
 		return;
 
 	SetupMODPanning(); // Setup LRRL panning scheme if needed
 
 	// Only keep supported play behaviour flags
-	PlayBehaviourSet oldAllowedFlags = GetSupportedPlaybackBehaviour(oldtype);
+	PlayBehaviourSet oldAllowedFlags = GetSupportedPlaybackBehaviour(oldType);
 	PlayBehaviourSet newAllowedFlags = GetSupportedPlaybackBehaviour(newType);
 	PlayBehaviourSet newDefaultFlags = GetDefaultPlaybackBehaviour(newType);
 	for(size_t i = 0; i < m_playBehaviour.size(); i++)
@@ -1565,9 +1570,12 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE& newType)
 		// Set allowed flags to their defaults if they were not supported in the old format
 		if(!oldAllowedFlags[i]) m_playBehaviour.set(i, newDefaultFlags[i]);
 	}
+	// Special case for OPL behaviour when converting from S3M to MPTM to retain S3M-like note-off behaviour
+	if(oldType == MOD_TYPE_S3M && newType == MOD_TYPE_MPT && m_opl)
+		m_playBehaviour.reset(kOPLFlexibleNoteOff);
 
-	Order.OnModTypeChanged(oldtype);
-	Patterns.OnModTypeChanged(oldtype);
+	Order.OnModTypeChanged(oldType);
+	Patterns.OnModTypeChanged(oldType);
 
 	m_modFormat.type = mpt::ToUnicode(mpt::CharsetUTF8, GetModSpecifications().fileExtension);
 }

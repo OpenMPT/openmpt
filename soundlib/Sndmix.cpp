@@ -2237,16 +2237,17 @@ bool CSoundFile::ReadNote()
 
 			if((chn.dwFlags & (CHN_ADLIB | CHN_MUTE | CHN_SYNCMUTE)) == CHN_ADLIB && !chn.pModSample->uFlags[CHN_MUTE] && m_opl)
 			{
-				const bool isActive = !chn.dwFlags[CHN_KEYOFF];
-				if((GetType() != MOD_TYPE_S3M && !m_playBehaviour[kMPTMOldOPLNoteOff]) || isActive)
+				const bool doProcess = m_playBehaviour[kOPLFlexibleNoteOff] || !chn.dwFlags[CHN_NOTEFADE] || GetType() == MOD_TYPE_S3M;
+				if(doProcess && !(GetType() == MOD_TYPE_S3M && chn.dwFlags[CHN_KEYOFF]))
 				{
 					// In ST3, a sample rate of 8363 Hz is mapped to middle-C, which is 261.625 Hz in a tempered scale at A4 = 440.
 					// Hence, we have to translate our "sample rate" into pitch.
-					auto freq = GetFreqFromPeriod(period, chn.nC5Speed, nPeriodFrac);
-					auto oplmilliHertz = Util::muldivr_unsigned(freq, 261625, 8363 << FREQ_FRACBITS);
-					m_opl->Frequency(nChn, oplmilliHertz, !isActive, m_playBehaviour[kOPLBeatingOscillators]);
+					const auto freq = GetFreqFromPeriod(period, chn.nC5Speed, nPeriodFrac);
+					const auto oplmilliHertz = Util::muldivr_unsigned(freq, 261625, 8363 << FREQ_FRACBITS);
+					const bool keyOff = chn.dwFlags[CHN_KEYOFF] || (chn.dwFlags[CHN_NOTEFADE] && chn.nFadeOutVol == 0);
+					m_opl->Frequency(nChn, oplmilliHertz, keyOff, m_playBehaviour[kOPLBeatingOscillators]);
 				}
-				if(!m_playBehaviour[kMPTMOldOPLNoteOff] || isActive)
+				if(doProcess)
 				{
 					// Scale volume to OPL range (0...63).
 					m_opl->Volume(nChn, static_cast<uint8>(Util::muldivr_unsigned(chn.nCalcVolume * chn.nGlobalVol * chn.nInsVol, 63, 1 << 26)), false);
