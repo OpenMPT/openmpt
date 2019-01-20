@@ -2881,7 +2881,7 @@ bool CSoundFile::ProcessEffects()
 					chn.nAutoVibPos = 0;
 				}
 				if(chn.dwFlags[CHN_ADLIB] && m_opl
-					&& (note == NOTE_NOTECUT || note == NOTE_KEYOFF) || (note == NOTE_FADE && m_playBehaviour[kMPTMOldOPLNoteOff]))
+					&& ((note == NOTE_NOTECUT || note == NOTE_KEYOFF) || (note == NOTE_FADE && m_playBehaviour[kMPTMOldOPLNoteOff])))
 				{
 					m_opl->NoteOff(nChn);
 				}
