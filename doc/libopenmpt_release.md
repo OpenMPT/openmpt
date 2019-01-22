@@ -22,7 +22,7 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.27/doc/libopenmpt_rele
     otherwise increment the minorminor part to a new value used specifically for
     the libopenmpt release
  2. from a clean checkout, run (requires xpath!!!)
-        ./builds/svn/do_libopenmpt_release.sh
+        ./build/svn/do_libopenmpt_release.sh
  3. website: add release announcement
  4. website: update download links
  5. wait for buildbot
