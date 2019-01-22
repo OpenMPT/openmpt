@@ -619,6 +619,7 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 	if(channels == 0)
 		return false;
 
+	PatternRow rowBase = sndFile.Patterns[pat].GetRow(0);
 	ROWINDEX row = 0;
 
 	while(row < numRows && chunk.CanRead(1))
@@ -628,10 +629,11 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 		if(flags == rowDone)
 		{
 			row++;
+			rowBase = sndFile.Patterns[pat].GetRow(row);
 			continue;
 		}
 
-		ModCommand &m = *sndFile.Patterns[pat].GetpModCommand(row, std::min<CHANNELINDEX>((flags & channelMask), channels - 1));
+		ModCommand &m = rowBase[std::min<CHANNELINDEX>((flags & channelMask), channels - 1)];
 
 		if(flags & dataFlag)
 		{
