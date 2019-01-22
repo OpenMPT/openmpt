@@ -12,7 +12,6 @@ svn cp -m "tag libopenmpt-${NEWVER}" -r ${NEWREV} https://source.openmpt.org/svn
 build/update_libopenmpt_version.sh bumppatch
 build/update_libopenmpt_version.sh bumpltrev
 svn ci -m "[Mod] libopenmpt: Bump patch version."
-svn checkout https://source.openmpt.org/svn/libopenmpt-website/trunk build/release/libopenmpt-website
 
 echo "ALL DONE."
 echo "run './release-0.3.sh $NEWVER +release' in a website checkout after buildbot has finished."
