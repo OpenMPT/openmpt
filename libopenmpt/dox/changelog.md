@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.2-pre
+### libopenmpt 0.4.2 (2019-01-22)
 
  *  [**Sec**] DSM: Assertion failure during file parsing with debug STLs
     (r11209).
