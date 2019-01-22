@@ -222,20 +222,18 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 			chunk.Skip(2);
 
 			ROWINDEX row = 0;
-			PatternRow rowBase = Patterns[patNum];
 			while(chunk.CanRead(1) && row < 64)
 			{
 				uint8 flag = chunk.ReadUint8();
 				if(!flag)
 				{
 					row++;
-					rowBase = Patterns[patNum].GetRow(row);
 					continue;
 				}
 
 				CHANNELINDEX chn = (flag & 0x0F);
 				ModCommand dummy = ModCommand();
-				ModCommand &m = (chn < GetNumChannels() ? rowBase[chn] : dummy);
+				ModCommand &m = (chn < GetNumChannels() ? *Patterns[patNum].GetpModCommand(row, chn) : dummy);
 
 				if(flag & 0x80)
 				{
