@@ -80,7 +80,7 @@ MPT_TRY_PULSEAUDIO?=1
 MPT_TRY_RTAUDIO?=1
 
 CPPFLAGS += $(MPT_ARCH_TARGET) -Icommon -Iinclude/nlohmann-json/include -Iinclude
-CXXFLAGS += $(MPT_ARCH_TARGET) -std=c++11 -fPIC -fvisibility=hidden
+CXXFLAGS += $(MPT_ARCH_TARGET) -std=c++14 -fPIC -fvisibility=hidden
 CFLAGS   += $(MPT_ARCH_TARGET) -std=c99   -fPIC -fvisibility=hidden
 LDFLAGS  += $(MPT_ARCH_TARGET) 
 LDLIBS   += -lm -lpthread
