@@ -124,6 +124,7 @@
 #include "../common/mptPathString.h"
 
 #include "../common/Logging.h"
+// <atomic>
 
 #include "../common/misc_util.h"
 
