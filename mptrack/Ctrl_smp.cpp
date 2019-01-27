@@ -659,7 +659,8 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 
 	const CModSpecifications &specs = m_sndFile.GetModSpecifications();
 	const bool isOPL = IsOPLInstrument();
-	
+	const bool hasSustainLoop = !isOPL && (m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT));
+
 	LockControls();
 	// Updating Ranges
 	if (hintType[HINT_MODTYPE])
@@ -703,8 +704,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		m_SpinSustainEnd.SetPos(0);
 
 		// Sustain Loops only available in IT
-		BOOL b;
-		b = (m_sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
+		BOOL b = hasSustainLoop ? TRUE : FALSE;
 		m_ComboSustainType.EnableWindow(b);
 		m_SpinSustainStart.EnableWindow(b);
 		m_SpinSustainEnd.EnableWindow(b);
@@ -883,6 +883,13 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		m_SpinLoopEnd.EnableWindow(b);
 		m_EditLoopStart.EnableWindow(b);
 		m_EditLoopEnd.EnableWindow(b);
+
+		b = hasSustainLoop ? TRUE : FALSE;
+		m_ComboSustainType.EnableWindow(b);
+		m_SpinSustainStart.EnableWindow(b);
+		m_SpinSustainEnd.EnableWindow(b);
+		m_EditSustainStart.EnableWindow(b);
+		m_EditSustainEnd.EnableWindow(b);
 	}
 
 	if (!m_bInitialized)
@@ -3657,7 +3664,7 @@ void CCtrlSamples::OnInitOPLInstrument()
 	if(m_sndFile.SupportsOPL())
 	{
 		CriticalSection cs;
-		m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Initialize OPL Instrument");
+		PrepareUndo("Initialize OPL Instrument", sundo_replace);
 		m_sndFile.DestroySample(m_nSample);
 		m_sndFile.InitOPL();
 		ModSample &sample = m_sndFile.GetSample(m_nSample);
@@ -3665,6 +3672,7 @@ void CCtrlSamples::OnInitOPLInstrument()
 		// Initialize with instant attack, release and enabled sustain for carrier and instant attack for modulator
 		sample.SetAdlib(true, { 0x00, 0x20, 0x00, 0x00, 0xF0, 0xF0, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00 });
 		SetModified(SampleHint().Info().Data().Names(), true, true);
+		SwitchToView();
 	}
 }
 
