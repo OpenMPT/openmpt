@@ -176,15 +176,15 @@ void Manager::ReEnumerate()
 	{ // Wine on Linux
 		typePriorities[U_("Wine-Native-PulseAudio")] = 31;
 		typePriorities[SoundDevice::TypePORTAUDIO_WASAPI] = 29;
-		typePriorities[SoundDevice::TypeWAVEOUT] = 28;
+		typePriorities[SoundDevice::TypeDSOUND] = 28;
+		typePriorities[SoundDevice::TypeWAVEOUT] = 27;
 		typePriorities[U_("Wine-Native-PulseAudio-Simple")] = 25;
 		typePriorities[SoundDevice::TypeASIO] = 21;
 		typePriorities[SoundDevice::TypePORTAUDIO_WMME] = 19;
+		typePriorities[U_("RtAudio-WINDOWS_DS")] = 18;
+		typePriorities[SoundDevice::TypePORTAUDIO_DS] = 17;
 		typePriorities[U_("Wine-Native-PortAudio-8")] = 9; // ALSA
 		typePriorities[SoundDevice::TypePORTAUDIO_WDMKS] = -1;
-		typePriorities[U_("RtAudio-WINDOWS_DS")] = -2;
-		typePriorities[SoundDevice::TypeDSOUND] = -3;
-		typePriorities[SoundDevice::TypePORTAUDIO_DS] = -4;
 	} else if(GetSysInfo().IsWine)
 	{ // Wine
 		typePriorities[U_("Wine-Native-PulseAudio")] = 32;
