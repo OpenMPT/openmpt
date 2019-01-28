@@ -1327,6 +1327,7 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 {
 	const ModInstrument *pIns = instr <= GetNumInstruments() ? Instruments[instr] : nullptr;
 	const ModSample *pSmp = &Samples[instr];
+	const auto oldInsVol = chn.nInsVol;
 	ModCommand::NOTE note = chn.nNewNote;
 
 	if(note == NOTE_NONE && m_playBehaviour[kITInstrWithoutNote]) return;
@@ -1608,8 +1609,8 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 		if(chn.pModSample)
 		{
 			chn.dwFlags |= (chn.pModSample->uFlags & CHN_SAMPLEFLAGS);
-			chn.UpdateInstrumentVolume(chn.pModSample, pIns);
 		}
+		chn.nInsVol = oldInsVol;
 		chn.nVolume = pSmp->nVolume;
 		if(pSmp->uFlags[CHN_PANNING]) chn.nPan = pSmp->nPan;
 		return;
