@@ -1608,9 +1608,10 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 		if(chn.pModSample)
 		{
 			chn.dwFlags |= (chn.pModSample->uFlags & CHN_SAMPLEFLAGS);
-			chn.nVolume = pSmp->nVolume;
-			if(pSmp->uFlags[CHN_PANNING]) chn.nPan = pSmp->nPan;
+			chn.UpdateInstrumentVolume(chn.pModSample, pIns);
 		}
+		chn.nVolume = pSmp->nVolume;
+		if(pSmp->uFlags[CHN_PANNING]) chn.nPan = pSmp->nPan;
 		return;
 	}
 
