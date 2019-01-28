@@ -614,6 +614,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kReleaseNodePastSustainBug: desc = _T("Broken release node after sustain end behaviour"); break;
 		case kFT2NoteDelayWithoutInstr: desc = _T("Delayed instrument-less notes should not recall volume and panning"); break;
 		case kOPLFlexibleNoteOff: desc = _T("Full control over OPL notes after note-off"); break;
+		case kITInstrWithNoteOffOldEffects: desc = _T("Instrument number with note-off retriggers envelopes with Old Effects enabled"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}
