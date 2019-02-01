@@ -236,7 +236,7 @@ void RarTime::GetText(wchar *DateStr,size_t MaxSize,bool FullMS)
   else
   {
     // We use escape before '?' to avoid weird C trigraph characters.
-    wcscpy(DateStr,L"\?\?\?\?-\?\?-\?\? \?\?:\?\?");
+    wcsncpyz(DateStr,L"\?\?\?\?-\?\?-\?\? \?\?:\?\?",MaxSize);
   }
 }
 

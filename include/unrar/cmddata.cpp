@@ -280,7 +280,11 @@ void CommandData::ProcessSwitch(const wchar *Switch)
           ClearArc=true;
           break;
         case 'D':
-          AppendArcNameToPath=true;
+          if (Switch[2]==0)
+            AppendArcNameToPath=APPENDARCNAME_DESTPATH;
+          else
+            if (Switch[2]=='1')
+              AppendArcNameToPath=APPENDARCNAME_OWNDIR;
           break;
 #ifndef SFX_MODULE
         case 'G':
@@ -302,7 +306,7 @@ void CommandData::ProcessSwitch(const wchar *Switch)
           AddArcOnly=true;
           break;
         case 'P':
-          wcscpy(ArcPath,Switch+2);
+          wcsncpyz(ArcPath,Switch+2,ASIZE(ArcPath));
           break;
         case 'S':
           SyncFiles=true;
@@ -805,16 +809,40 @@ void CommandData::ProcessSwitch(const wchar *Switch)
           ArcTime=ARCTIME_LATEST;
           break;
         case 'O':
-          FileTimeBefore.SetAgeText(Switch+2);
+          switch(toupperw(Switch[2]))
+          {
+            case 'M': FileMtimeBefore.SetAgeText(Switch+3); break;
+            case 'C': FileCtimeBefore.SetAgeText(Switch+3); break;
+            case 'A': FileAtimeBefore.SetAgeText(Switch+3); break;
+            default:  FileMtimeBefore.SetAgeText(Switch+2); break;
+          }
           break;
         case 'N':
-          FileTimeAfter.SetAgeText(Switch+2);
+          switch(toupperw(Switch[2]))
+          {
+            case 'M': FileMtimeAfter.SetAgeText(Switch+3); break;
+            case 'C': FileCtimeAfter.SetAgeText(Switch+3); break;
+            case 'A': FileAtimeAfter.SetAgeText(Switch+3); break;
+            default:  FileMtimeAfter.SetAgeText(Switch+2); break;
+          }
           break;
         case 'B':
-          FileTimeBefore.SetIsoText(Switch+2);
+          switch(toupperw(Switch[2]))
+          {
+            case 'M': FileMtimeBefore.SetIsoText(Switch+3); break;
+            case 'C': FileCtimeBefore.SetIsoText(Switch+3); break;
+            case 'A': FileAtimeBefore.SetIsoText(Switch+3); break;
+            default:  FileMtimeBefore.SetIsoText(Switch+2); break;
+          }
           break;
         case 'A':
-          FileTimeAfter.SetIsoText(Switch+2);
+          switch(toupperw(Switch[2]))
+          {
+            case 'M': FileMtimeAfter.SetIsoText(Switch+3); break;
+            case 'C': FileCtimeAfter.SetIsoText(Switch+3); break;
+            case 'A': FileAtimeAfter.SetIsoText(Switch+3); break;
+            default:  FileMtimeAfter.SetIsoText(Switch+2); break;
+          }
           break;
         case 'S':
           {
@@ -897,7 +925,7 @@ void CommandData::ProcessSwitch(const wchar *Switch)
       if (Switch[1]==0)
       {
         // If comment file is not specified, we read data from stdin.
-        wcscpy(CommentFile,L"stdin");
+        wcsncpyz(CommentFile,L"stdin",ASIZE(CommentFile));
       }
       else
         wcsncpyz(CommentFile,Switch+1,ASIZE(CommentFile));
@@ -1058,7 +1086,7 @@ bool CommandData::ExclCheck(const wchar *CheckName,bool Dir,bool CheckFullPath,b
 
 bool CommandData::CheckArgs(StringList *Args,bool Dir,const wchar *CheckName,bool CheckFullPath,int MatchMode)
 {
-  wchar *Name=ConvertPath(CheckName,NULL);
+  wchar *Name=ConvertPath(CheckName,NULL,0);
   wchar FullName[NM];
   wchar CurMask[NM];
   *FullName=0;
@@ -1121,7 +1149,7 @@ bool CommandData::CheckArgs(StringList *Args,bool Dir,const wchar *CheckName,boo
 
       // Important to convert before "*\" check below, so masks like
       // d:*\something are processed properly.
-      wchar *CmpMask=ConvertPath(CurMask,NULL);
+      wchar *CmpMask=ConvertPath(CurMask,NULL,0);
 
       if (CmpMask[0]=='*' && IsPathDiv(CmpMask[1]))
       {
@@ -1166,11 +1194,19 @@ bool CommandData::ExclDirByAttr(uint FileAttr)
 
 #ifndef SFX_MODULE
 // Return 'true' if we need to exclude the file from processing.
-bool CommandData::TimeCheck(RarTime &ft)
+bool CommandData::TimeCheck(RarTime &ftm,RarTime &ftc,RarTime &fta)
 {
-  if (FileTimeBefore.IsSet() && ft>=FileTimeBefore)
+  if (FileMtimeBefore.IsSet() && ftm>=FileMtimeBefore)
     return true;
-  if (FileTimeAfter.IsSet() && ft<=FileTimeAfter)
+  if (FileMtimeAfter.IsSet() && ftm<=FileMtimeAfter)
+    return true;
+  if (FileCtimeBefore.IsSet() && ftc>=FileCtimeBefore)
+    return true;
+  if (FileCtimeAfter.IsSet() && ftc<=FileCtimeAfter)
+    return true;
+  if (FileAtimeBefore.IsSet() && fta>=FileAtimeBefore)
+    return true;
+  if (FileAtimeAfter.IsSet() && fta<=FileAtimeAfter)
     return true;
   return false;
 }
@@ -1203,7 +1239,7 @@ int CommandData::IsProcessFile(FileHeader &FileHead,bool *ExactMatch,int MatchTy
   if (ExclCheck(FileHead.FileName,Dir,false,true))
     return 0;
 #ifndef SFX_MODULE
-  if (TimeCheck(FileHead.mtime))
+  if (TimeCheck(FileHead.mtime,FileHead.ctime,FileHead.atime))
     return 0;
   if ((FileHead.FileAttr & ExclFileAttr)!=0 || InclAttrSet && (FileHead.FileAttr & InclFileAttr)==0)
     return 0;

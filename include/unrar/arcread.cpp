@@ -10,7 +10,10 @@ size_t Archive::ReadHeader()
 
   CurBlockPos=Tell();
 
-  size_t ReadSize;
+  // Other developers asked us to initialize it to suppress "may be used
+  // uninitialized" warning in code below in some compilers.
+  size_t ReadSize=0;
+
   switch(Format)
   {
 #ifndef SFX_MODULE
@@ -113,9 +116,9 @@ void Archive::BrokenHeaderMsg()
 }
 
 
-void Archive::UnkEncVerMsg(const wchar *Name)
+void Archive::UnkEncVerMsg(const wchar *Name,const wchar *Info)
 {
-  uiMsg(UIERROR_UNKNOWNENCMETHOD,FileName,Name);
+  uiMsg(UIERROR_UNKNOWNENCMETHOD,FileName,Name,Info);
   ErrHandler.SetErrorCode(RARX_WARNING);
 }
 
@@ -702,7 +705,9 @@ size_t Archive::ReadHeader50()
         uint CryptVersion=(uint)Raw.GetV();
         if (CryptVersion>CRYPT_VERSION)
         {
-          UnkEncVerMsg(FileName);
+          wchar Info[20];
+          swprintf(Info,ASIZE(Info),L"h%u",CryptVersion);
+          UnkEncVerMsg(FileName,Info);
           return 0;
         }
         uint EncFlags=(uint)Raw.GetV();
@@ -710,7 +715,9 @@ size_t Archive::ReadHeader50()
         CryptHead.Lg2Count=Raw.Get1();
         if (CryptHead.Lg2Count>CRYPT5_KDF_LG2_COUNT_MAX)
         {
-          UnkEncVerMsg(FileName);
+          wchar Info[20];
+          swprintf(Info,ASIZE(Info),L"hc%u",CryptHead.Lg2Count);
+          UnkEncVerMsg(FileName,Info);
           return 0;
         }
         Raw.GetB(CryptHead.Salt,SIZE_SALT50);
@@ -991,8 +998,12 @@ void Archive::ProcessExtra50(RawRead *Raw,size_t ExtraSize,BaseBlock *bb)
           {
             FileHeader *hd=(FileHeader *)bb;
             uint EncVersion=(uint)Raw->GetV();
-            if (EncVersion > CRYPT_VERSION)
-              UnkEncVerMsg(hd->FileName);
+            if (EncVersion>CRYPT_VERSION)
+            {
+              wchar Info[20];
+              swprintf(Info,ASIZE(Info),L"x%u",EncVersion);
+              UnkEncVerMsg(hd->FileName,Info);
+            }
             else
             {
               uint Flags=(uint)Raw->GetV();
@@ -1000,7 +1011,11 @@ void Archive::ProcessExtra50(RawRead *Raw,size_t ExtraSize,BaseBlock *bb)
               hd->UseHashKey=(Flags & FHEXTRA_CRYPT_HASHMAC)!=0;
               hd->Lg2Count=Raw->Get1();
               if (hd->Lg2Count>CRYPT5_KDF_LG2_COUNT_MAX)
-                UnkEncVerMsg(hd->FileName);
+              {
+                wchar Info[20];
+                swprintf(Info,ASIZE(Info),L"xc%u",hd->Lg2Count);
+                UnkEncVerMsg(hd->FileName,Info);
+              }
               Raw->GetB(hd->Salt,SIZE_SALT50);
               Raw->GetB(hd->InitV,SIZE_INITV);
               if (hd->UsePswCheck)

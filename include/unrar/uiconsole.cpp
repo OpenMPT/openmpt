@@ -18,7 +18,10 @@ UIASKREP_RESULT uiAskReplace(wchar *Name,size_t MaxNameSize,int64 FileSize,RarTi
   {
     itoa(FileSize,SizeText2,ASIZE(SizeText2));
     FileTime->GetText(DateStr2,ASIZE(DateStr2),false);
-    eprintf(St(MAskReplace),Name,SizeText1,DateStr1,SizeText2,DateStr2);
+    if ((Flags & UIASKREP_F_EXCHSRCDEST)==0)
+      eprintf(St(MAskReplace),Name,SizeText1,DateStr1,SizeText2,DateStr2);
+    else
+      eprintf(St(MAskReplace),Name,SizeText2,DateStr2,SizeText1,DateStr1);
   }
 
   bool AllowRename=(Flags & UIASKREP_F_NORENAME)==0;
@@ -186,7 +189,11 @@ void uiMsgStore::Msg()
       Log(Str[0],St(MUnknownMeth),Str[1]);
       break;
     case UIERROR_UNKNOWNENCMETHOD:
-      Log(Str[0],St(MUnkEncMethod),Str[1]);
+      {
+        wchar Msg[256];
+        swprintf(Msg,ASIZE(Msg),St(MUnkEncMethod),Str[1]);
+        Log(Str[0],L"%s: %s",Msg,Str[2]);
+      }
       break;
 #ifndef SFX_MODULE
    case UIERROR_RENAMING:

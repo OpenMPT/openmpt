@@ -30,16 +30,28 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.03.00 (* February 2019, revision 11228)
+v1.28.03.00 (* February 2019, revision 11288)
 --------------------------------------------
+Sample tab
+- [Fix] <js> When initializing an OPL instrument, the undo state of the sample slot was not updated (http://bugs.openmpt.org/view.php?id=1194).
+
 Instrument tab
 - [Fix] <js> Properly render & character in custom note names in note map (http://bugs.openmpt.org/view.php?id=1114).
 
 MPTM
 - [Mod] <js> OPL notes can now be controlled (volume / pan / pitch) after they have been released. Note Cut (^^^) now really cuts OPL notes, use === to release them instead. For existing MPTM files, the legacy behaviour is used.
 
+IT::Compatible Playback Mode
+- [Fix] <js> Various fixes for note-off + instrument number in Old Effects mode.
+
 S3M
 - [Fix] <js> Allow volume of OPL notes to be controlled after note-off (fixes gotoandplay_-_losing_sanctuary.s3m).
+
+Audio I/O
+- [Mod] <jh> On Wine on Linux, prefer DirectSound over WaveOut because there are still systems with winealsa.drv where WaveOut occasionally breaks. This change only affect new installs of OpenMPT (http://bugs.openmpt.org/view.php?id=1193).
+
+Misc
+- [Fix] <js> MIDI Export: Pitch bend was not reset when two instruments shared a MIDI channel (http://bugs.openmpt.org/view.php?id=1195).
 
 
 v1.28.02.00 (6 January 2019, revision 11185)
