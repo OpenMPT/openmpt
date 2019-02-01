@@ -1646,7 +1646,6 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 		chn.nFineTune = pSmp->nFineTune;
 	}
 
-
 	chn.nTranspose = pSmp->RelativeTone;
 
 	// FT2 compatibility: Don't reset portamento target with new instrument numbers.
@@ -1712,6 +1711,10 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 		if(note == NOTE_KEYOFF || !(GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			KeyOff(chn);
+			// IT compatibility: Note-off + instrument releases sample sustain but does not release envelopes or fade the instrument
+			// Test case: noteoff3.it, ResetEnvNoteOffOldFx2.it
+			if(!bPorta && m_playBehaviour[kITInstrWithNoteOffOldEffects] && m_SongFlags[SONG_ITOLDEFFECTS] && chn.rowCommand.instr)
+				chn.dwFlags.reset(CHN_NOTEFADE | CHN_KEYOFF);
 		} else // Invalid Note -> Note Fade
 		{
 			if(/*note == NOTE_FADE && */ GetNumInstruments())
