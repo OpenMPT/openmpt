@@ -45,6 +45,7 @@ namespace MidiExport
 		const ModInstrument *m_oldInstr;
 		const CSoundFile &m_sndFile;
 		MidiTrack *m_tempoTrack;	// Pointer to tempo track, nullptr if this is the tempo track
+		decltype(m_MidiCh) *m_lastMidiCh = nullptr;
 
 		std::ostringstream f;
 		double m_tempo = 0.0;
@@ -69,6 +70,17 @@ namespace MidiExport
 			uint32 ticks = (m_ticks <= 0) ? 0 : mpt::saturate_round<uint32>(m_ticks);
 			mpt::IO::WriteVarInt(f, ticks);
 			m_ticks -= ticks;
+		}
+
+		// Update MIDI channel states in non-overlapping export mode so that all plugins have the same view
+		void SynchronizeMidiChannelState()
+		{
+			if(m_tempoTrack != nullptr && !m_overlappingInstruments)
+			{
+				if(m_tempoTrack->m_lastMidiCh != nullptr && m_tempoTrack->m_lastMidiCh != &m_MidiCh)
+					m_MidiCh = *m_tempoTrack->m_lastMidiCh;
+				m_tempoTrack->m_lastMidiCh = &m_MidiCh;
+			}
 		}
 
 	public:
@@ -281,16 +293,26 @@ namespace MidiExport
 				// The default implementation does things with Note Cut that we don't want here: it cuts all notes.
 				note = NOTE_KEYOFF;
 			}
-			if(!m_overlappingInstruments) m_MidiCh = m_tempoTrack->m_MidiCh;
+			SynchronizeMidiChannelState();
 			IMidiPlugin::MidiCommand(instr, note, vol, trackChannel);
-			if(!m_overlappingInstruments) m_tempoTrack->m_MidiCh = m_MidiCh;
 		}
 
 		void MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackerChn) override
 		{
-			if(!m_overlappingInstruments) m_MidiCh = m_tempoTrack->m_MidiCh;
+			SynchronizeMidiChannelState();
 			IMidiPlugin::MidiPitchBend(increment, pwd, trackerChn);
-			if(!m_overlappingInstruments) m_tempoTrack->m_MidiCh = m_MidiCh;
+		}
+
+		void MidiVibrato(int32 depth, int8 pwd, CHANNELINDEX trackerChn) override
+		{
+			SynchronizeMidiChannelState();
+			IMidiPlugin::MidiVibrato(depth, pwd, trackerChn);
+		}
+
+		bool IsNotePlaying(uint32 note, CHANNELINDEX trackerChn)
+		{
+			SynchronizeMidiChannelState();
+			return IMidiPlugin::IsNotePlaying(note, trackerChn);
 		}
 
 		void HardAllNotesOff() override
