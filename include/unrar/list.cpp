@@ -215,7 +215,7 @@ void ListFileHeader(Archive &Arc,FileHeader &hd,bool &TitleShown,bool Verbose,bo
 
   wchar UnpSizeText[30],PackSizeText[30];
   if (hd.UnpSize==INT64NDF)
-    wcscpy(UnpSizeText,L"?");
+    wcsncpyz(UnpSizeText,L"?",ASIZE(UnpSizeText));
   else
     itoa(hd.UnpSize,UnpSizeText,ASIZE(UnpSizeText));
   itoa(hd.PackSize,PackSizeText,ASIZE(PackSizeText));
@@ -229,13 +229,13 @@ void ListFileHeader(Archive &Arc,FileHeader &hd,bool &TitleShown,bool Verbose,bo
   wchar RatioStr[10];
 
   if (hd.SplitBefore && hd.SplitAfter)
-    wcscpy(RatioStr,L"<->");
+    wcsncpyz(RatioStr,L"<->",ASIZE(RatioStr));
   else
     if (hd.SplitBefore)
-      wcscpy(RatioStr,L"<--");
+      wcsncpyz(RatioStr,L"<--",ASIZE(RatioStr));
     else
       if (hd.SplitAfter)
-        wcscpy(RatioStr,L"-->");
+        wcsncpyz(RatioStr,L"-->",ASIZE(RatioStr));
       else
         swprintf(RatioStr,ASIZE(RatioStr),L"%d%%",ToPercentUnlim(hd.PackSize,hd.UnpSize));
 
@@ -467,7 +467,7 @@ void ListFileAttr(uint A,HOST_SYSTEM_TYPE HostType,wchar *AttrStr,size_t AttrSiz
               (A & 0x0001) ? ((A & 0x200)!=0 ? 't' : 'x') : '-');
       break;
     case HSYS_UNKNOWN:
-      wcscpy(AttrStr,L"?");
+      wcsncpyz(AttrStr,L"?",AttrSize);
       break;
   }
 }

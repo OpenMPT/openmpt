@@ -345,7 +345,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
 #endif
 
   wchar ArcFileName[NM];
-  ConvertPath(Arc.FileHead.FileName,ArcFileName);
+  ConvertPath(Arc.FileHead.FileName,ArcFileName,ASIZE(ArcFileName));
 
   if (Arc.FileHead.Version)
   {
@@ -859,9 +859,12 @@ void CmdExtract::ExtrPrepareName(Archive &Arc,const wchar *ArcFileName,wchar *De
   }
 
 #ifndef SFX_MODULE
-  if (Cmd->AppendArcNameToPath)
+  if (Cmd->AppendArcNameToPath!=APPENDARCNAME_NONE)
   {
-    wcsncatz(DestName,PointToName(Arc.FirstVolumeName),DestSize);
+    if (Cmd->AppendArcNameToPath==APPENDARCNAME_DESTPATH)
+      wcsncatz(DestName,PointToName(Arc.FirstVolumeName),DestSize);
+    else
+      wcsncpyz(DestName,Arc.FirstVolumeName,DestSize); // To archive own dir.
     SetExt(DestName,NULL,DestSize);
     AddEndSlash(DestName,DestSize);
   }

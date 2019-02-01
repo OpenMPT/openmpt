@@ -59,6 +59,11 @@ enum SAVECOPY_MODE {
   SAVECOPY_DUPLISTEXIT
 };
 
+enum APPENDARCNAME_MODE
+{
+  APPENDARCNAME_NONE=0,APPENDARCNAME_DESTPATH,APPENDARCNAME_OWNDIR
+};
+
 enum POWER_MODE {
   POWERMODE_KEEP=0,POWERMODE_OFF,POWERMODE_HIBERNATE,POWERMODE_SLEEP,
   POWERMODE_RESTART
@@ -159,8 +164,12 @@ class RAROptions
     bool SaveStreams;
     bool SetCompressedAttr;
     bool IgnoreGeneralAttr;
-    RarTime FileTimeBefore;
-    RarTime FileTimeAfter;
+    RarTime FileMtimeBefore;
+    RarTime FileMtimeAfter;
+    RarTime FileCtimeBefore;
+    RarTime FileCtimeAfter;
+    RarTime FileAtimeBefore;
+    RarTime FileAtimeAfter;
     int64 FileSizeLess;
     int64 FileSizeMore;
     bool Lock;
@@ -169,9 +178,9 @@ class RAROptions
     FilterMode FilterModes[MAX_FILTER_TYPES];
     wchar EmailTo[NM];
     uint VersionControl;
-    bool AppendArcNameToPath;
+    APPENDARCNAME_MODE AppendArcNameToPath;
     POWER_MODE Shutdown;
-    EXTTIME_MODE xmtime;
+    EXTTIME_MODE xmtime; // Extended time modes (time precision to store).
     EXTTIME_MODE xctime;
     EXTTIME_MODE xatime;
     wchar CompressStdin[NM];

@@ -42,6 +42,7 @@ HANDLE PASCAL RAROpenArchiveEx(struct RAROpenArchiveDataEx *r)
     Data->Cmd.DllError=0;
     Data->OpenMode=r->OpenMode;
     Data->Cmd.FileArgs.AddString(L"*");
+    Data->Cmd.KeepBroken=(r->OpFlags&ROADOF_KEEPBROKEN)!=0;
 
     char AnsiArcName[NM];
     *AnsiArcName=0;
@@ -369,7 +370,7 @@ int PASCAL ProcessFile(HANDLE hArcData,int Operation,char *DestPath,char *DestNa
       if (DestNameW!=NULL)
         wcsncpyz(Data->Cmd.DllDestName,DestNameW,ASIZE(Data->Cmd.DllDestName));
 
-      wcscpy(Data->Cmd.Command,Operation==RAR_EXTRACT ? L"X":L"T");
+      wcsncpyz(Data->Cmd.Command,Operation==RAR_EXTRACT ? L"X":L"T",ASIZE(Data->Cmd.Command));
       Data->Cmd.Test=Operation!=RAR_EXTRACT;
       bool Repeat=false;
       Data->Extract.ExtractCurrentFile(Data->Arc,Data->HeaderSize,Repeat);

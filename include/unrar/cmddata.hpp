@@ -34,7 +34,7 @@ class CommandData:public RAROptions
     bool ExclCheck(const wchar *CheckName,bool Dir,bool CheckFullPath,bool CheckInclList);
     static bool CheckArgs(StringList *Args,bool Dir,const wchar *CheckName,bool CheckFullPath,int MatchMode);
     bool ExclDirByAttr(uint FileAttr);
-    bool TimeCheck(RarTime &ft);
+    bool TimeCheck(RarTime &ftm,RarTime &ftc,RarTime &fta);
     bool SizeCheck(int64 Size);
     bool AnyFiltersActive();
     int IsProcessFile(FileHeader &FileHead,bool *ExactMatch=NULL,int MatchType=MATCH_WILDSUBPATH,
