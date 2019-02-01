@@ -1492,12 +1492,9 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 		if(m_playBehaviour[kITEnvelopeReset])
 		{
 			const bool insNumber = (instr != 0);
-			// IT compatibility: Note-off with instrument number + Old Effects retriggers envelopes.
-			// Test case: ResetEnvNoteOffOldFx.it
-			const bool isKeyOff = chn.dwFlags[CHN_NOTEFADE | CHN_KEYOFF] || (chn.rowCommand.note == NOTE_KEYOFF && m_playBehaviour[kITInstrWithNoteOffOldEffects]);
 			reset = (!chn.nLength
 				|| (insNumber && bPorta && m_SongFlags[SONG_ITCOMPATGXX])
-				|| (insNumber && !bPorta && isKeyOff && m_SongFlags[SONG_ITOLDEFFECTS]));
+				|| (insNumber && !bPorta && chn.dwFlags[CHN_NOTEFADE | CHN_KEYOFF] && m_SongFlags[SONG_ITOLDEFFECTS]));
 			// NOTE: IT2.14 with SB/GUS/etc. output is different. We are going after IT's WAV writer here.
 			// For SB/GUS/etc. emulation, envelope carry should only apply when the NNA isn't set to "Note Cut".
 			// Test case: CarryNNA.it
@@ -2415,7 +2412,7 @@ bool CSoundFile::ProcessEffects()
 				{
 					PlugParamValue targetvalue = ModCommand::GetValueEffectCol(chn.rowCommand.command, chn.rowCommand.param) / PlugParamValue(ModCommand::maxColumnValue);
 					chn.m_plugParamTargetValue = targetvalue;
-					chn.m_plugParamValueStep = (targetvalue - m_MixPlugins[plugin-1].pMixPlugin->GetParameter(plugparam)) / float(GetNumTicksOnCurrentRow());
+					chn.m_plugParamValueStep = (targetvalue - m_MixPlugins[plugin - 1].pMixPlugin->GetParameter(plugparam)) / PlugParamValue(GetNumTicksOnCurrentRow());
 				}
 				if(m_PlayState.m_nTickCount + 1 == GetNumTicksOnCurrentRow())
 				{	// On last tick, set parameter exactly to target value.
@@ -2746,6 +2743,26 @@ bool CSoundFile::ProcessEffects()
 			if(m_playBehaviour[kFT2Tremor] && instr != 0)
 			{
 				chn.nTremorCount = 0x20;
+			}
+
+			// IT compatibility: Envelope retriggering with instrument number based on Old Effects and Compatible Gxx flags:
+			// OldFX CompatGxx Env Behaviour
+			// ----- --------- -------------
+			//  off     off    never reset
+			//  on      off    reset on instrument without portamento
+			//  off     on     reset on instrument with portamento
+			//  on      on     always reset
+			// Test case: ins-xx.it, ins-ox.it, ins-oc.it, ins-xc.it, ResetEnvNoteOffOldFx.it, ResetEnvNoteOffOldFx2.it, noteoff3.it
+			if(GetNumInstruments() && m_playBehaviour[kITInstrWithNoteOffOldEffects]
+				&& instr && !ModCommand::IsNote(note))
+			{
+				if((bPorta && m_SongFlags[SONG_ITCOMPATGXX])
+					|| (!bPorta && m_SongFlags[SONG_ITOLDEFFECTS]))
+				{
+					chn.ResetEnvelopes();
+					chn.dwFlags.set(CHN_FASTVOLRAMP);
+					chn.nFadeOutVol = 65536;
+				}
 			}
 
 			if(retrigEnv) //Case: instrument with no note data.
