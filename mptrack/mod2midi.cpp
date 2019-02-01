@@ -286,6 +286,13 @@ namespace MidiExport
 			if(!m_overlappingInstruments) m_tempoTrack->m_MidiCh = m_MidiCh;
 		}
 
+		void MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackerChn) override
+		{
+			if(!m_overlappingInstruments) m_MidiCh = m_tempoTrack->m_MidiCh;
+			IMidiPlugin::MidiPitchBend(increment, pwd, trackerChn);
+			if(!m_overlappingInstruments) m_tempoTrack->m_MidiCh = m_MidiCh;
+		}
+
 		void HardAllNotesOff() override
 		{
 			for(uint8 mc = 0; mc < m_MidiCh.size(); mc++)
