@@ -42,9 +42,11 @@ OPENMPT_NAMESPACE_BEGIN
 #pragma comment(lib, "propsys.lib")
 #endif
 
+#if MPT_COMPILER_MSVC
 #pragma comment( linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df'\"" )
+#endif // MPT_COMPILER_MSVC
 
-#endif // MPT_COMPILER_MSVC || MPT_COMPILER_MSVC
+#endif // MPT_COMPILER_MSVC || MPT_COMPILER_CLANG
 #endif // MPT_BUILD_MSVC
 
 
