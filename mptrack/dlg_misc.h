@@ -135,7 +135,7 @@ protected:
 };
 
 
-class InfoDialog : private ResizableDialog
+class InfoDialog : protected ResizableDialog
 {
 private:
 	mpt::winstring m_caption, m_content;
