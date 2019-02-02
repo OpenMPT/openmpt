@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.3-pre
 
+ *  [**Bug**] libopenmpt did not compile on Apple platforms in C++17 mode.
+
 ### libopenmpt 0.4.2 (2019-01-22)
 
  *  [**Sec**] DSM: Assertion failure during file parsing with debug STLs
