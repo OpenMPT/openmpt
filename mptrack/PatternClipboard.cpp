@@ -1005,7 +1005,7 @@ void PatternClipboardDialog::DoDataExchange(CDataExchange *pDX)
 }
 
 
-PatternClipboardDialog::PatternClipboardDialog() : editNameBox(*this), posX(-1), posY(-1), isLocked(true), isCreated(false),  
+PatternClipboardDialog::PatternClipboardDialog() : editNameBox(*this), posX(-1), posY(-1), isLocked(true), isCreated(false)
 {
 }
 
