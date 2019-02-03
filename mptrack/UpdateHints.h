@@ -88,7 +88,7 @@ protected:
 		store_t rawData;
 	};
 	
-	UpdateHint(HintCategory category, store_t item = 0) : category(category), type(HINT_NONE), item(item)
+	UpdateHint(HintCategory category, store_t item = 0) : type(HINT_NONE), category(category), item(item)
 	{
 		static_assert(sizeof(UpdateHint) == sizeof(store_t), "Internal UpdateHint size inconsistency");
 		static_assert(sizeof(UpdateHint) <= sizeof(LPARAM), "Update hints are currently tunnelled through LPARAMs in MFC");
@@ -100,7 +100,7 @@ protected:
 	MPT_FORCEINLINE T GetData() const { return static_cast<T>(item); }
 
 public:
-	UpdateHint() : category(HINTCAT_GLOBAL), type(HINT_NONE), item(0) { }
+	UpdateHint() : type(HINT_NONE), category(HINTCAT_GLOBAL), item(0) { }
 
 	template<typename T>
 	MPT_FORCEINLINE UpdateHint &SetData(T i) { item = i; MPT_ASSERT(item == i); return *this; }

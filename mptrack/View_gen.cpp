@@ -1272,7 +1272,7 @@ void CViewGlobals::OnMovePlugToSlot()
 struct PlugIndexModifier
 {
 	PlugIndexModifier(PLUGINDEX nMin, PLUGINDEX nMax, int nDiff) :
-		m_nInstrMin(nMin), m_nInstrMax(nMax), m_nDiff(nDiff) {}
+		m_nDiff(nDiff), m_nInstrMin(nMin), m_nInstrMax(nMax) {}
 	void operator()(ModCommand& m)
 	{
 		if (m.IsInstrPlug() && m.instr >= m_nInstrMin && m.instr <= m_nInstrMax)

@@ -143,7 +143,7 @@ protected:
 public:
 	SplitKeyboardSettings &m_Settings;
 
-	CSplitKeyboadSettings(CWnd *parent, CSoundFile &sf, SplitKeyboardSettings &settings) : CDialog(IDD_KEYBOARD_SPLIT, parent), m_Settings(settings), sndFile(sf) { }
+	CSplitKeyboadSettings(CWnd *parent, CSoundFile &sf, SplitKeyboardSettings &settings) : CDialog(IDD_KEYBOARD_SPLIT, parent), sndFile(sf), m_Settings(settings) { }
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);

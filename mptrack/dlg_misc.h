@@ -230,7 +230,7 @@ protected:
 	MouseAction mouseAction;
 
 public:
-	CSampleMapDlg(CSoundFile &sf, INSTRUMENTINDEX nInstr, CWnd *parent=NULL) : CDialog(IDD_EDITSAMPLEMAP, parent), mouseAction(mouseUnknown), sndFile(sf)
+	CSampleMapDlg(CSoundFile &sf, INSTRUMENTINDEX nInstr, CWnd *parent=NULL) : CDialog(IDD_EDITSAMPLEMAP, parent), sndFile(sf), mouseAction(mouseUnknown)
 		{ m_nInstrument = nInstr; }
 
 protected:
@@ -274,38 +274,36 @@ protected:
 	CNumberEdit m_edit;
 	CSpinButtonCtrl m_spin;
 	CString m_description;
-	double m_minValueDbl, m_maxValueDbl;
-	int32 m_minValueInt, m_maxValueInt;
+	double m_minValueDbl = 0.0, m_maxValueDbl = 0.0;
+	int32 m_minValueInt = 0, m_maxValueInt = 0;
 
 public:
 	CString resultAsString;
-	double resultAsDouble;
-	int32 resultAsInt;
+	double resultAsDouble = 0.0;
+	int32 resultAsInt = 0;
 
 public:
 	// Initialize text input box
 	CInputDlg(CWnd *parent, const TCHAR *desc, const TCHAR *defaultString) : CDialog(IDD_INPUT, parent)
 		, m_description(desc)
 		, resultAsString(defaultString)
-		, m_minValueDbl(0), m_maxValueDbl(0), resultAsDouble(0)
-		, m_minValueInt(0), m_maxValueInt(0), resultAsInt(0)
 	{ }
 	// Initialize numeric input box (float)
 	CInputDlg(CWnd *parent, const TCHAR *desc, double minVal, double maxVal, double defaultNumber) : CDialog(IDD_INPUT, parent)
 		, m_description(desc)
-		, m_minValueDbl(minVal), m_maxValueDbl(maxVal), resultAsDouble(defaultNumber)
-		, m_minValueInt(0), m_maxValueInt(0), resultAsInt(0)
+		, m_minValueDbl(minVal), m_maxValueDbl(maxVal)
+		, resultAsDouble(defaultNumber)
 	{ }
 	CInputDlg(CWnd *parent, const TCHAR *desc, float minVal, float maxVal, float defaultNumber) : CDialog(IDD_INPUT, parent)
 		, m_description(desc)
-		, m_minValueDbl(minVal), m_maxValueDbl(maxVal), resultAsDouble(defaultNumber)
-		, m_minValueInt(0), m_maxValueInt(0), resultAsInt(0)
+		, m_minValueDbl(minVal), m_maxValueDbl(maxVal)
+		, resultAsDouble(defaultNumber)
 	{ }
 	// Initialize numeric input box (int)
 	CInputDlg(CWnd *parent, const TCHAR *desc, int32 minVal, int32 maxVal, int32 defaultNumber) : CDialog(IDD_INPUT, parent)
 		, m_description(desc)
-		, m_minValueDbl(0), m_maxValueDbl(0), resultAsDouble(0)
-		, m_minValueInt(minVal), m_maxValueInt(maxVal), resultAsInt(defaultNumber)
+		, m_minValueInt(minVal), m_maxValueInt(maxVal)
+		, resultAsInt(defaultNumber)
 	{ }
 
 protected:

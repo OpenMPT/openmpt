@@ -42,8 +42,8 @@ private:
 
 public:
 	CNoteMapWnd(CCtrlInstruments &parent, CModDoc &document)
-		: m_pParent(parent)
-		, m_modDoc(document)
+		: m_modDoc(document)
+		, m_pParent(parent)
 	{ }
 	void SetCurrentInstrument(INSTRUMENTINDEX nIns);
 	void SetCurrentNote(UINT nNote);

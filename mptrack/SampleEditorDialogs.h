@@ -209,7 +209,7 @@ protected:
 	static ResamplingOption lastChoice;
 
 public:
-	CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode) : CDialog(IDD_RESAMPLE, parent), m_frequency(frequency), m_srcMode(srcMode) { };
+	CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode) : CDialog(IDD_RESAMPLE, parent), m_srcMode(srcMode), m_frequency(frequency) { };
 	uint32 GetFrequency() const { return m_frequency; }
 	ResamplingMode GetFilter() const { return m_srcMode; }
 

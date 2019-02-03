@@ -528,8 +528,8 @@ void CModToMidi::DoDataExchange(CDataExchange *pDX)
 
 CModToMidi::CModToMidi(CSoundFile &sndFile, CWnd *pWndParent)
 	: CDialog(IDD_MOD2MIDI, pWndParent)
-	, m_instrMap((sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples()) + 1)
 	, m_sndFile(sndFile)
+	, m_instrMap((sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples()) + 1)
 {
 	for (INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 	{

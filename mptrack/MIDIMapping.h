@@ -24,9 +24,14 @@ OPENMPT_NAMESPACE_BEGIN
 class CMIDIMappingDirective
 {
 public:
-	CMIDIMappingDirective() :
-		m_Active(true), m_CaptureMIDI(false), m_AllowPatternEdit(true), m_AnyChannel(true),
-		m_ChnEvent(0xB << 4), m_MIDIByte1(0), m_PluginIndex(1), m_Parameter(0) {}
+	CMIDIMappingDirective()
+		: m_Parameter(0)
+		, m_PluginIndex(1)
+		, m_MIDIByte1(0)
+		, m_ChnEvent(0xB << 4)
+		, m_Active(true), m_CaptureMIDI(false), m_AllowPatternEdit(true), m_AnyChannel(true)
+	{
+	}
 
 	void SetActive(const bool b) {m_Active = b;}
 	bool IsActive() const {return m_Active;}
