@@ -147,7 +147,14 @@ public:
 	CSoundFile &GetSoundFile() { return m_SndFile; }
 	const CSoundFile &GetSoundFile() const { return m_SndFile; }
 
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif // MPT_COMPILER_CLANG
 	bool IsModified() const { return m_bModified != FALSE; }	// Work-around: CDocument::IsModified() is not const...
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 	void SetModified(bool modified = true);
 	bool ModifiedSinceLastAutosave();
 	void SetShowSaveDialog(bool b) {m_ShowSavedialog = b;}
@@ -340,10 +347,17 @@ protected:
 	void SafeFileClose();
 	bool OnSaveDocument(const mpt::PathString &filename, const bool setPath = true);
 
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif // MPT_COMPILER_CLANG
 	void SetPathName(const mpt::PathString &filename, BOOL bAddToMRU = TRUE)
 	{
 		CDocument::SetPathName(filename.ToCString(), bAddToMRU);
 	}
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 	mpt::PathString GetPathNameMpt() const
 	{
 		return mpt::PathString::FromCString(GetPathName());

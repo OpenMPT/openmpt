@@ -97,7 +97,14 @@ public:
 	//}}AFX_VIRTUAL
 
 public:
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif // MPT_COMPILER_CLANG
 	BOOL Create(CWnd *parent);
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 	void Init(CMainFrame *);
 	UINT GetBaseOctave() const;
 	BOOL SetBaseOctave(UINT nOctave);
