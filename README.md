@@ -32,13 +32,15 @@ How to compile
 
      -  Visual Studio 2015 Update 3 Community/Professional/Enterprise
 
-        To compile the project, open `build/vs2015/OpenMPT.sln` and hit the
-        compile button.
+        To compile the project, open `build/vs2015win7/OpenMPT.sln` and hit the
+        compile button. Alternatively, the `vs2015winxp` folder contains a
+        solution with Windows XP / Vista support.
 
      -  Visual Studio 2017 Community/Professional/Enterprise
 
-        To compile the project, open `build/vs2017/OpenMPT.sln` and hit the
-        compile button.
+        To compile the project, open `build/vs2017win7/OpenMPT.sln` and hit the
+        compile button. Other target systems can be found in the `vs2017*`
+        sibling folders.
 
  -  OpenMPT requires the compile host system to be 64bit x86-64.
 
