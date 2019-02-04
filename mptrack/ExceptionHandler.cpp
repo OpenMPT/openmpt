@@ -295,7 +295,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		mpt::SafeOutputFile sf(crashDirectory.path + P_("active-settings.txt"), std::ios::binary, mpt::FlushMode::Full);
 		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
-		if(&theApp.GetSettings())
+		if(theApp.GetpSettings())
 		{
 			SettingsContainer &settings = theApp.GetSettings();
 			for(const auto &it : settings)
@@ -345,15 +345,12 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	// This is very slow, we instead write active-settings.txt above.
 	{
 		IniFileSettingsBackend f(crashDirectory.path + P_("active-mptrack.ini"));
-		if(&theApp.GetSettings())
+		if(theApp.GetpSettings())
 		{
-			if(&theApp.GetSettings())
+			SettingsContainer & settings = theApp.GetSettings();
+			for(const auto &it : settings)
 			{
-				SettingsContainer & settings = theApp.GetSettings();
-				for(const auto &it : settings)
-				{
-					f.WriteSetting(it.first, it.second.GetRefValue());
-				}
+				f.WriteSetting(it.first, it.second.GetRefValue());
 			}
 		}
 	}

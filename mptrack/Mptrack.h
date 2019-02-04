@@ -196,6 +196,10 @@ public:
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
 	mpt::PathString GetConfigFileName() const { return m_szConfigFileName; }
+	SettingsContainer * GetpSettings()
+	{
+		return m_pSettings;
+	}
 	SettingsContainer & GetSettings()
 	{
 		ASSERT(m_pSettings);
