@@ -71,8 +71,8 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 		case 4:  WaveFormat.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT | SPEAKER_BACK_LEFT | SPEAKER_BACK_RIGHT; break;
 		default: WaveFormat.dwChannelMask = 0; return false; break;
 		}
-		const GUID guid_MEDIASUBTYPE_PCM = {0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x0, 0xAA, 0x0, 0x38, 0x9B, 0x71};
-		const GUID guid_MEDIASUBTYPE_IEEE_FLOAT = {0x00000003, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71};
+		const GUID guid_MEDIASUBTYPE_PCM = {0x00000001, 0x0000, 0x0010, {0x80, 0x00, 0x0, 0xAA, 0x0, 0x38, 0x9B, 0x71}};
+		const GUID guid_MEDIASUBTYPE_IEEE_FLOAT = {0x00000003, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
 		WaveFormat.SubFormat = m_Settings.sampleFormat.IsFloat() ? guid_MEDIASUBTYPE_IEEE_FLOAT : guid_MEDIASUBTYPE_PCM;
 	}
 	return true;
@@ -187,7 +187,7 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle
 		} else
 		{
 			oldPriority = GetThreadPriority(GetCurrentThread());
-			SetThreadPriority(GetCurrentThread(), priority);
+			SetThreadPriority(GetCurrentThread(), m_Priority);
 		}
 	}
 }
@@ -217,7 +217,6 @@ CPriorityBooster::~CPriorityBooster()
 class CPeriodicWaker
 {
 private:
-	CAudioThread &self;
 
 	double sleepSeconds;
 	long sleepMilliseconds;
@@ -229,9 +228,8 @@ private:
 
 public:
 
-	CPeriodicWaker(CAudioThread &self_, double sleepSeconds_)
-		: self(self_)
-		, sleepSeconds(sleepSeconds_)
+	explicit CPeriodicWaker(double sleepSeconds_)
+		: sleepSeconds(sleepSeconds_)
 	{
 
 		MPT_TRACE_SCOPE();
@@ -325,7 +323,7 @@ DWORD CAudioThread::AudioThread()
 		{
 
 			CPriorityBooster priorityBooster(m_SoundDevice.GetSysInfo(), m_AvRt, m_SoundDevice.m_Settings.BoostThreadPriority, m_MMCSSClass, m_SoundDevice.m_AppInfo.BoostedThreadPriorityXP);
-			CPeriodicWaker periodicWaker(*this, m_WakeupInterval);
+			CPeriodicWaker periodicWaker(m_WakeupInterval);
 
 			m_SoundDevice.StartFromSoundThread();
 
