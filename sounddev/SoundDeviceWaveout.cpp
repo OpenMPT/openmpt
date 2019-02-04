@@ -37,6 +37,13 @@ static const std::size_t WAVEOUT_MINBUFFERFRAMECOUNT = 8;
 static const std::size_t WAVEOUT_MAXBUFFERSIZE = 16384; // fits in int16
 
 
+static inline LONG* interlocked_access(DWORD* p)
+{
+	MPT_STATIC_ASSERT(sizeof(LONG) == sizeof(DWORD));
+	return reinterpret_cast<LONG*>(p);
+}
+
+
 CWaveDevice::CWaveDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: CSoundDeviceWithThread(info, sysInfo)
 	, m_DriverBugs(0)
@@ -345,18 +352,20 @@ void CWaveDevice::InternalFillAudioBuffer()
 	ULONG nBytesWritten = 0;
 	while((oldBuffersPending < m_nPreparedHeaders) && !m_Failed)
 	{
-		DWORD oldFlags = static_cast<volatile WAVEHDR*>(&(m_WaveBuffers[m_nWriteBuffer]))->dwFlags;
-		if((oldFlags & WHDR_INQUEUE))
+		DWORD oldFlags = InterlockedOr(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), 0);
+		uint32 driverBugs = 0;
+		if(oldFlags & WHDR_INQUEUE)
 		{
-			m_DriverBugs.fetch_or(DriverBugBufferFillAndHeaderInQueue);
+			driverBugs |= DriverBugBufferFillAndHeaderInQueue;
 		}
 		if(!(oldFlags & WHDR_DONE))
 		{
-			m_DriverBugs.fetch_or(DriverBugBufferFillAndHeaderNotDone);
+			driverBugs |= DriverBugBufferFillAndHeaderNotDone;
 		}
-		if((oldFlags & WHDR_INQUEUE))
+		driverBugs |= m_DriverBugs.fetch_or(driverBugs);
+		if(oldFlags & WHDR_INQUEUE)
 		{
-			if(m_DriverBugs.load() & DriverBugDoneNotificationOutOfOrder)
+			if(driverBugs & DriverBugDoneNotificationOutOfOrder)
 			{
 				//  Some drivers/setups can return WaveHeader notifications out of
 				// order. WaveHeaders which have not yet been notified to be ready stay
@@ -378,8 +387,8 @@ void CWaveDevice::InternalFillAudioBuffer()
 		SourceLockedAudioPreRead(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
 		SourceLockedAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, nullptr, m_nWaveBufferSize / bytesPerFrame);
 		nBytesWritten += m_nWaveBufferSize;
-		m_WaveBuffers[m_nWriteBuffer].dwFlags &= ~(WHDR_INQUEUE|WHDR_DONE);
-		m_WaveBuffers[m_nWriteBuffer].dwBufferLength = m_nWaveBufferSize;
+		InterlockedAnd(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), ~static_cast<DWORD>(WHDR_INQUEUE|WHDR_DONE));
+		InterlockedExchange(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwBufferLength), m_nWaveBufferSize);
 		InterlockedIncrement(&m_nBuffersPending);
 		oldBuffersPending++; // increment separately to avoid looping without leaving at all when rendering takes more than 100% CPU
 		CheckResult(waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR)), oldFlags);
@@ -485,19 +494,24 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 void CWaveDevice::HandleWaveoutDone(WAVEHDR *hdr)
 {
 	MPT_TRACE_SCOPE();
-	DWORD flags = static_cast<volatile WAVEHDR*>(hdr)->dwFlags;
+	DWORD flags = InterlockedOr(interlocked_access(&hdr->dwFlags), 0);
 	std::size_t hdrIndex = hdr - &(m_WaveBuffers[0]);
+	uint32 driverBugs = 0;
 	if(hdrIndex != m_nDoneBuffer)
 	{
-		m_DriverBugs.fetch_or(DriverBugDoneNotificationOutOfOrder);
+		driverBugs |= DriverBugDoneNotificationOutOfOrder;
 	}
 	if(!(flags & WHDR_DONE))
 	{
-		m_DriverBugs.fetch_or(DriverBugDoneNotificationAndHeaderNotDone);
+		driverBugs |= DriverBugDoneNotificationAndHeaderNotDone;
 	}
-	if((flags & WHDR_INQUEUE))
+	if(flags & WHDR_INQUEUE)
 	{
-		m_DriverBugs.fetch_or(DriverBugDoneNotificationAndHeaderInQueue);
+		driverBugs |= DriverBugDoneNotificationAndHeaderInQueue;
+	}
+	if(driverBugs)
+	{
+		m_DriverBugs.fetch_or(driverBugs);
 	}
 	m_nDoneBuffer += 1;
 	m_nDoneBuffer %= m_nPreparedHeaders;
