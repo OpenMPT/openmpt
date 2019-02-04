@@ -733,6 +733,16 @@
 
 #endif // MPT_COMPILER_MSVC
 
+#if MPT_COMPILER_CLANG
+
+#if defined(MODPLUG_TRACKER)
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif // MODPLUG_TRACKER
+
+#endif // MPT_COMPILER_CLANG
+
+
+
 
 
 // third-party library configuration
