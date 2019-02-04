@@ -63,18 +63,19 @@ static mpt::PathString WineGetSupportZipFilename()
 
 static char SanitizeBuildIdChar(char c)
 {
-	if (c == '\0') c = '_';
-	else if (c >= 'a' && c <= 'z') c = c;
-	else if (c >= 'A' && c <= 'Z') c = c;
-	else if (c >= '0' && c <= '9') c = c;
-	else if (c == '!') c = c;
-	else if (c == '+') c = c;
-	else if (c == '-') c = c;
-	else if (c == '.') c = c;
-	else if (c == '~') c = c;
-	else if (c == '_') c = c;
-	else c = '_';
-	return c;
+	char result = c;
+	if (c == '\0') result = '_';
+	else if (c >= 'a' && c <= 'z') result = c;
+	else if (c >= 'A' && c <= 'Z') result = c;
+	else if (c >= '0' && c <= '9') result = c;
+	else if (c == '!') result = c;
+	else if (c == '+') result = c;
+	else if (c == '-') result = c;
+	else if (c == '.') result = c;
+	else if (c == '~') result = c;
+	else if (c == '_') result = c;
+	else result = '_';
+	return result;
 }
 
 

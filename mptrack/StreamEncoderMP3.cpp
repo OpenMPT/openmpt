@@ -746,7 +746,7 @@ std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ost
 		result = std::make_unique<MP3LameStreamWriter>(*m_Lame, file, (m_Type == MP3EncoderLameCompatible), settings, tags);
 #endif // MPT_WITH_LAME
 	}
-	return std::move(result);
+	return result;
 }
 
 

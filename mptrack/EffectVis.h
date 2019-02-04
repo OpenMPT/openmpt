@@ -117,7 +117,7 @@ protected:
 
 
 	DECLARE_MESSAGE_MAP()
-	BOOL OnInitDialog();
+	BOOL OnInitDialog() override;
 	afx_msg void OnPaint();
 
 public:

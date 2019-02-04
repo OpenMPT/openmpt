@@ -139,8 +139,8 @@ public:
 public:
 	CDoWaveConvert(CSoundFile &sndFile, mpt::ofstream &f, const CString &caption, const CWaveConvertSettings &settings, CWnd *parent = NULL)
 		: CProgressDialog(parent)
-		, m_SndFile(sndFile)
 		, m_Settings(settings)
+		, m_SndFile(sndFile)
 		, fileStream(f)
 		, caption(caption)
 		, m_dwSongLimit(0)

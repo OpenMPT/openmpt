@@ -87,7 +87,7 @@ public:
 	void Normalize(bool allSamples);
 	void RemoveDCOffset(bool allSamples);
 
-	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glSampleWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG> &GetSplitPosRef() override {return TrackerSettings::Instance().glSampleWindowHeight;}
 
 public:
 	//{{AFX_VIRTUAL(CCtrlSamples)

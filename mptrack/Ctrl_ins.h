@@ -132,7 +132,7 @@ public:
 	void SaveInstrument(bool doBatchSave);
 	BOOL EditSample(UINT nSample);
 	void UpdateFilterText();
-	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glInstrumentWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG> &GetSplitPosRef() override {return TrackerSettings::Instance().glInstrumentWindowHeight;}
 
 public:
 	//{{AFX_VIRTUAL(CCtrlInstruments)

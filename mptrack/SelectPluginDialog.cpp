@@ -59,9 +59,9 @@ void CSelectPluginDlg::DoDataExchange(CDataExchange* pDX)
 
 CSelectPluginDlg::CSelectPluginDlg(CModDoc *pModDoc, PLUGINDEX nPlugSlot, CWnd *parent)
 	: CDialog(IDD_SELECTMIXPLUGIN, parent)
+	, m_pPlugin(nullptr)
 	, m_pModDoc(pModDoc)
 	, m_nPlugSlot(nPlugSlot)
-	, m_pPlugin(nullptr)
 {
 	if(m_pModDoc && 0 <= m_nPlugSlot && m_nPlugSlot < MAX_MIXPLUGINS)
 	{

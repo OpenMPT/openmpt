@@ -25,8 +25,8 @@ void CMoveFXSlotDialog::DoDataExchange(CDataExchange* pDX)
 
 CMoveFXSlotDialog::CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex, bool clone, bool hasChain) :
 	CDialog(CMoveFXSlotDialog::IDD, pParent),
-	m_nDefaultSlot(defaultIndex),
 	m_EmptySlots(emptySlots),
+	m_nDefaultSlot(defaultIndex),
 	moveChain(hasChain)
 {
 	if(clone)

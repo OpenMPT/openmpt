@@ -39,8 +39,8 @@ protected:
 	inline void LockControls() { m_bControlLock = true; }
 	inline void UnlockControls() { m_bControlLock = false; }
 
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-	virtual void OnOK();
+	void DoDataExchange(CDataExchange* pDX) override;
+	void OnOK() override;
 
 	afx_msg void OnPatternChanged();
 	afx_msg void OnOrderChanged();

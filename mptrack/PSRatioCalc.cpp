@@ -22,7 +22,9 @@ OPENMPT_NAMESPACE_BEGIN
 IMPLEMENT_DYNAMIC(CPSRatioCalc, CDialog)
 CPSRatioCalc::CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double ratio, CWnd* pParent /*=NULL*/)
 	: CDialog(IDD_PITCHSHIFT, pParent)
-	, sndFile(sndFile), sampleIndex(sample), m_dRatio(ratio)
+	, m_dRatio(ratio)
+	, sndFile(sndFile)
+	, sampleIndex(sample)
 {
 	// Calculate/verify samplerate at C5.
 	const ModSample &smp = sndFile.GetSample(sampleIndex);

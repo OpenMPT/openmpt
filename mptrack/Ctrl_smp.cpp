@@ -179,13 +179,13 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 CCtrlSamples::CCtrlSamples(CModControlView &parent, CModDoc &document)
 	: CModControlDlg(parent, document)
 	, m_nSequenceMs(0)
+	, m_dTimeStretchRatio(100)
 	, m_nSeekWindowMs(0)
 	, m_nOverlapMs(0)
-	, m_dTimeStretchRatio(100)
 	, m_nPreviousRawFormat(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::unsignedPCM)
+	, m_nSample(1)
 	, m_rememberRawFormat(false)
 	, m_startedEdit(false)
-	, m_nSample(1)
 {
 	m_nLockCount = 1;
 }

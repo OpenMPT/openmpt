@@ -423,6 +423,8 @@ OPENMPT_WINESUPPORT_API uintptr_t OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_O
 typedef struct OpenMPT_PriorityBooster {
 #ifndef _MSC_VER
 	OPENMPT_NAMESPACE::SoundDevice::ThreadPriorityGuard * impl;
+#else
+	void * dummy;
 #endif
 } OpenMPT_PriorityBooster;
 

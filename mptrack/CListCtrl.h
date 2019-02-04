@@ -28,7 +28,7 @@ public:
 	template<size_t numItems>
 	void SetHeaders(const Header (&header)[numItems])
 	{
-		for(int i = 0; i < numItems; i++)
+		for(size_t i = 0; i < numItems; i++)
 		{
 			InsertColumn(i, header[i].text, header[i].mask, Util::ScalePixels(header[i].width, m_hWnd));
 		}

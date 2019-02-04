@@ -112,7 +112,7 @@ protected:
 	void ScrollToSample(SmpLength centeredSample, bool refresh = true);
 
 	SmpLength ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
-	inline SmpLength ScrollPosToSamplePos(int nZoom) const;
+	SmpLength ScrollPosToSamplePos(int nZoom) const;
 
 	void OnMonoConvert(ctrlSmp::StereoToMonoMode convert);
 	void TrimSample(bool trimToLoopEnd);

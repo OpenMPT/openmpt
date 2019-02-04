@@ -41,11 +41,11 @@ typedef Tuning::NOTEINDEXTYPE NOTEINDEXTYPE;
 CTuningDialog::CTuningDialog(CWnd* pParent, INSTRUMENTINDEX inst, CSoundFile &csf)
 	: CDialog(CTuningDialog::IDD, pParent),
 	m_sndFile(csf),
+	m_pActiveTuningCollection(NULL),
+	m_TreeCtrlTuning(this),
+	m_TreeItemTuningItemMap(s_notFoundItemTree, s_notFoundItemTuning),
 	m_NoteEditApply(true),
 	m_RatioEditApply(true),
-	m_pActiveTuningCollection(NULL),
-	m_TreeItemTuningItemMap(s_notFoundItemTree, s_notFoundItemTuning),
-	m_TreeCtrlTuning(this),
 	m_DoErrorExit(false)
 {
 	m_TuningCollections.push_back(&(m_sndFile.GetTuneSpecificTunings()));

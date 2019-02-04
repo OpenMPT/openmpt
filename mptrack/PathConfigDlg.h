@@ -38,7 +38,7 @@ protected:
 	afx_msg void OnBrowsePresets()		{ BrowseFolder(IDC_OPTIONS_DIR_VSTPRESETS); }
 
 	void OnSettingsChanged();
-	BOOL OnSetActive();
+	BOOL OnSetActive() override;
 
 	void BrowseFolder(UINT nID);
 

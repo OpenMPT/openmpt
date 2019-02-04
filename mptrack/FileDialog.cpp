@@ -29,9 +29,9 @@ public:
 		BOOL bVistaStyle,
 		bool preview)
 		: CFileDialog(bOpenFileDialog ? TRUE : FALSE, lpszDefExt, lpszFileName, dwFlags, lpszFilter, pParentWnd, dwSize, bVistaStyle)
+		, m_fileNameBuf(65536)
 		, doPreview(preview)
 		, played(false)
-		, m_fileNameBuf(65536)
 	{
 		// MFC's filename buffer is way too small for multi-selections of a large number of files.
 		_tcsncpy(m_fileNameBuf.data(), lpszFileName, m_fileNameBuf.size());

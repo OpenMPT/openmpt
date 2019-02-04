@@ -342,6 +342,8 @@ static mpt::ustring ProcSupportToString(uint32 procSupport)
 	{
 		if(procSupport & f.flag) features.push_back(mpt::ToUnicode(mpt::CharsetASCII, f.name));
 	}
+#else
+	MPT_UNUSED_VARIABLE(procSupport);
 #endif
 	return mpt::String::Combine(features, U_(" "));
 }

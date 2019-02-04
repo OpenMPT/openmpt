@@ -82,8 +82,8 @@ END_MESSAGE_MAP()
 
 CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile &sndFile, const std::vector<EncoderFactoryBase*> &encFactories)
 	: CDialog(IDD_WAVECONVERT, parent)
-	, m_SndFile(sndFile)
 	, m_Settings(theApp.GetSettings(), encFactories)
+	, m_SndFile(sndFile)
 {
 	ASSERT(!encFactories.empty());
 	encTraits = m_Settings.GetTraits();

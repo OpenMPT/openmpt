@@ -589,6 +589,8 @@ public:
 	virtual void WriteSetting(const SettingPath &path, const SettingValue &val) = 0;
 	virtual void RemoveSetting(const SettingPath &path) = 0;
 	virtual void RemoveSection(const mpt::ustring &section) = 0;
+protected:
+	virtual ~ISettingsBackend() = default;
 };
 
 
@@ -596,6 +598,8 @@ class ISettingChanged
 {
 public:
 	virtual void SettingChanged(const SettingPath &changedPath) = 0;
+protected:
+	virtual ~ISettingChanged() = default;
 };
 
 enum SettingFlushMode
@@ -882,12 +886,12 @@ private:
 	static mpt::winstring GetKey(const SettingPath &path);
 public:
 	IniFileSettingsBackend(const mpt::PathString &filename);
-	~IniFileSettingsBackend();
+	~IniFileSettingsBackend() override;
 	void ConvertToUnicode(const mpt::ustring &backupTag = mpt::ustring());
-	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const;
-	virtual void WriteSetting(const SettingPath &path, const SettingValue &val);
-	virtual void RemoveSetting(const SettingPath &path);
-	virtual void RemoveSection(const mpt::ustring &section);
+	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const override;
+	virtual void WriteSetting(const SettingPath &path, const SettingValue &val) override;
+	virtual void RemoveSetting(const SettingPath &path) override;
+	virtual void RemoveSection(const mpt::ustring &section) override;
 	const mpt::PathString& GetFilename() const { return filename; }
 };
 
@@ -895,14 +899,14 @@ class IniFileSettingsContainer : private IniFileSettingsBackend, public Settings
 {
 public:
 	IniFileSettingsContainer(const mpt::PathString &filename);
-	~IniFileSettingsContainer();
+	~IniFileSettingsContainer() override;
 };
 
 class DefaultSettingsContainer : public IniFileSettingsContainer
 {
 public:
 	DefaultSettingsContainer();
-	~DefaultSettingsContainer();
+	~DefaultSettingsContainer() override;
 };
 
 
