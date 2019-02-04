@@ -318,6 +318,8 @@ public:
 	virtual bool KeepLoaded() const = 0;
 	virtual bool IsBlocked(const std::string &key) const = 0;
 	virtual mpt::PathString Path() const = 0;
+protected:
+	virtual ~IComponentManagerSettings() = default;
 };
 
 
