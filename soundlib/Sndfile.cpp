@@ -73,10 +73,10 @@ CSoundFile::CSoundFile() :
 	m_pModSpecs(&ModSpecs::itEx),
 	m_nType(MOD_TYPE_NONE),
 	Patterns(*this),
-	Order(*this),
 #ifdef MODPLUG_TRACKER
 	m_MIDIMapper(*this),
 #endif
+	Order(*this),
 	m_PRNG(mpt::make_prng<mpt::fast_prng>(mpt::global_prng())),
 	visitedSongRows(*this)
 {
