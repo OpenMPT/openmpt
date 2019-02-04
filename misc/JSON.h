@@ -5,7 +5,14 @@
 
 
 #ifdef MPT_WITH_NLOHMANNJSON
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmismatched-tags"
+#endif // MPT_COMPILER_CLANG
 #include "nlohmann-json/include/nlohmann/json.hpp"
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 #endif // MPT_WITH_NLOHMANNJSON
 
 #ifdef MPT_WITH_NLOHMANNJSON
