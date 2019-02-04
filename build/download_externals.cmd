@@ -30,6 +30,18 @@ if not exist "build\tools"     mkdir "build\tools"
 
 if "%MPT_DOWNLOAD%" == "yes" (
 
+ if "x%1" == "xauto" (
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue e81805f2039c18d4311fb1e04297656f6efbbe600a7eda91c835375dad03dbe805dc6f704355cfd085600a0f755392e96df7a1d80d4b6f416e177314cc20d666 -filesize 1181017 -filename build/externals/7z1805.exe || del /Q build\externals\7z1805.exe
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 09bca8018272c3a4e7dd68f62a832acfe0581d3713f29473463725fa5c1708bc34b30a126b069e741e0e4939b645f6818e1f100cf1b2b021e851d132a6abcca5 -filesize  923870 -filename build/externals/7z1805-extra.7z || del /Q build\externals\7z1805-extra.7z
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 84e830c91a0e8ae499cc4814080da6569d8a6acbddc585c8b62abc86c809793aeb669b0a741063a379fd281ade85f120bc27efeb67d63bf961be893eec8bc3b3 -filesize  384846 -filename build/externals/7za920.zip || del /Q build\externals\7za920.zip
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue aba21883cd026a789395757f7dcc127d7d6372965693ddc3794c8adfc3a9675c255cedf2a87177729fa0b094e1bdb4de9d2e47555c61ddd6976c24d71cbd5e38 -filesize  422934 -filename build/externals/asiosdk2.3.zip || del /Q build\externals\asiosdk2.3.zip
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 429b485903c3323c69a99822a68889d29678915f41ae6eb84428f262f1a6d8e147e1a4206c8466f0e7c30901c6ed9af497d8f60ae2c2f8c287faa73667435895 -filesize  684658 -filename build/externals/GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d.zip || del /Q build\externals\GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d.zip
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856 -filesize 3509072 -filename build/externals/htmlhelp.exe || del /Q build\externals\htmlhelp.exe
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 406bd108bb16450ad34d49a0c8111bdfbed4efef4923ba3f1ee8c437ca9ea4e8b453c5a2d298ac69a79a22a9309a83403954d271d26f051f26dc5e7b5ac65b6f -filesize 5565797 -filename build/externals/premake-5.0.0-alpha13-src.zip || del /Q build\externals\premake-5.0.0-alpha13-src.zip
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5 -filesize  336166 -filename build/externals/WA5.55_SDK.exe || del /Q build\externals\WA5.55_SDK.exe
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 62c442d656d4bb380360368a0f5f01da11b4ed54333d7f54f875a9a5ec390b08921e00bd08e62cd7a0a5fe642e3377023f20a950cc2a42898ff4cda9ab88fc91 -filesize  322744 -filename build/externals/xmp-sdk.zip || del /Q build\externals\xmp-sdk.zip
+ )
+
  call build\scriptlib\download.cmd "https://www.7-zip.org/a/7za920.zip"                                                              "build\externals\7za920.zip"      || goto error
  call build\scriptlib\download.cmd "https://www.7-zip.org/a/7z1805-extra.7z"                                                         "build\externals\7z1805-extra.7z" || goto error
  call build\scriptlib\download.cmd "https://www.7-zip.org/a/7z1805.exe"                                                              "build\externals\7z1805.exe"      || goto error
