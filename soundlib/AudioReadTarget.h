@@ -139,6 +139,9 @@ public:
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
+			case SampleFormatInvalid:
+				// nothing
+				break;
 		}
 		// increment output buffer for potentially next callback
 		buffer = reinterpret_cast<char*>(buffer) + (sampleFormat.GetBitsPerSample()/8) * channels * countChunk;
@@ -212,6 +215,9 @@ public:
 				typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
 				Fill(reinterpret_cast<const Tsample*>(inputBuffer), MixInputBuffers, channels, countChunk);
 			}
+			break;
+		case SampleFormatInvalid:
+			// nothing
 			break;
 		}
 	}
