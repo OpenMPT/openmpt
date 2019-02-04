@@ -792,7 +792,7 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 	}
 }
 
-#endif MPT_ASSERT_HANDLER_NEEDED
+#endif // MPT_ASSERT_HANDLER_NEEDED
 
 
 void DebugInjectCrash()
