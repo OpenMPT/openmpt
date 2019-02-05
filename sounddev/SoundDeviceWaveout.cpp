@@ -352,7 +352,11 @@ void CWaveDevice::InternalFillAudioBuffer()
 	ULONG nBytesWritten = 0;
 	while((oldBuffersPending < m_nPreparedHeaders) && !m_Failed)
 	{
+#if (_WIN32_WINNT >= 0x0600)
 		DWORD oldFlags = InterlockedOr(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), 0);
+#else
+		DWORD oldFlags = _InterlockedOr(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), 0);
+#endif
 		uint32 driverBugs = 0;
 		if(oldFlags & WHDR_INQUEUE)
 		{
@@ -387,7 +391,11 @@ void CWaveDevice::InternalFillAudioBuffer()
 		SourceLockedAudioPreRead(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
 		SourceLockedAudioRead(m_WaveBuffers[m_nWriteBuffer].lpData, nullptr, m_nWaveBufferSize / bytesPerFrame);
 		nBytesWritten += m_nWaveBufferSize;
+#if (_WIN32_WINNT >= 0x0600)
 		InterlockedAnd(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), ~static_cast<DWORD>(WHDR_INQUEUE|WHDR_DONE));
+#else
+		_InterlockedAnd(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), ~static_cast<DWORD>(WHDR_INQUEUE|WHDR_DONE));
+#endif
 		InterlockedExchange(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwBufferLength), m_nWaveBufferSize);
 		InterlockedIncrement(&m_nBuffersPending);
 		oldBuffersPending++; // increment separately to avoid looping without leaving at all when rendering takes more than 100% CPU
@@ -494,7 +502,11 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 void CWaveDevice::HandleWaveoutDone(WAVEHDR *hdr)
 {
 	MPT_TRACE_SCOPE();
+#if (_WIN32_WINNT >= 0x0600)
 	DWORD flags = InterlockedOr(interlocked_access(&hdr->dwFlags), 0);
+#else
+	DWORD flags = _InterlockedOr(interlocked_access(&hdr->dwFlags), 0);
+#endif
 	std::size_t hdrIndex = hdr - &(m_WaveBuffers[0]);
 	uint32 driverBugs = 0;
 	if(hdrIndex != m_nDoneBuffer)
