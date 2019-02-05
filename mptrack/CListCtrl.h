@@ -25,10 +25,10 @@ public:
 		int width;
 		UINT mask;
 	};
-	template<size_t numItems>
+	template<int numItems>
 	void SetHeaders(const Header (&header)[numItems])
 	{
-		for(size_t i = 0; i < numItems; i++)
+		for(int i = 0; i < numItems; i++)
 		{
 			InsertColumn(i, header[i].text, header[i].mask, Util::ScalePixels(header[i].width, m_hWnd));
 		}
