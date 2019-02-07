@@ -38,7 +38,7 @@
 #include "vq.h"
 #include "x86cpu.h"
 
-
+#if defined(OPUS_X86_MAY_HAVE_SSE2) /* OpenMPT */
 #ifndef FIXED_POINT
 
 opus_val16 op_pvq_search_sse2(celt_norm *_X, int *iy, int K, int N, int arch)
@@ -215,3 +215,4 @@ opus_val16 op_pvq_search_sse2(celt_norm *_X, int *iy, int K, int N, int arch)
 }
 
 #endif
+#endif /* OpenMPT */

@@ -29,6 +29,8 @@
 #include "config.h"
 #endif
 
+#if defined(OPUS_X86_MAY_HAVE_SSE4_1) /* OpenMPT */
+
 #include <xmmintrin.h>
 #include <emmintrin.h>
 #include <smmintrin.h>
@@ -140,3 +142,5 @@ void silk_VQ_WMat_EC_sse4_1(
         cb_row_Q7 += LTP_ORDER;
     }
 }
+
+#endif /* OpenMPT */

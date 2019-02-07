@@ -4,5 +4,7 @@ The following changes have been made:
 - win32/version.h got added.
 - config.h has been fixed to support Clang/LLVM for Windows.
 - OpenMPT modifications are marked with "// OpenMPT".
+- celt/x86/vq_sse2.c has been modified to check for OPUS_X86_MAY_HAVE_SSE2.
+- silk/x86/*sse4_1.c has been modified to check for OPUS_X86_MAY_HAVE_SSE4_1.
 - For building, premake is used to generate Visual Studio project files.
   See ../build/premake/ for details.
