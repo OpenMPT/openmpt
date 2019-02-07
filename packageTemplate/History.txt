@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.03.00 (* February 2019, revision 11288)
+v1.28.03.00 (* February 2019, revision 11331)
 --------------------------------------------
 Sample tab
 - [Fix] <js> When initializing an OPL instrument, the undo state of the sample slot was not updated (http://bugs.openmpt.org/view.php?id=1194).
@@ -47,11 +47,18 @@ IT::Compatible Playback Mode
 S3M
 - [Fix] <js> Allow volume of OPL notes to be controlled after note-off (fixes gotoandplay_-_losing_sanctuary.s3m).
 
+Other formats
+- [Imp] <js> MO3: Import IT row highlights as written by MO3 2.4.1.2 or newer. Properly import MIDI program and bank info.
+
 Audio I/O
 - [Mod] <jh> On Wine on Linux, prefer DirectSound over WaveOut because there are still systems with winealsa.drv where WaveOut occasionally breaks. This change only affect new installs of OpenMPT (http://bugs.openmpt.org/view.php?id=1193).
 
 Misc
+- [Fix] <jh> Builds for Windows XP / Vista no longer worked on CPUs without SSE2 support (http://forum.openmpt.org/index.php?topic=6055.0).
 - [Fix] <js> MIDI Export: Pitch bend was not reset when two instruments shared a MIDI channel (http://bugs.openmpt.org/view.php?id=1195).
+
+Third-Party Libraries
+- [Imp] Update UnRAR (v5.7.1)
 
 
 v1.28.02.00 (6 January 2019, revision 11185)
@@ -72,7 +79,6 @@ Audio I/O
 - [Fix] <jh> Only clip WASAPI non-exclusive floating-point output on real Windows systems. Wine does not need it.
 
 Misc
-- [Fix] <jh> Builds for Windows XP / Vista no longer worked on CPUs without SSE2 support (http://forum.openmpt.org/index.php?topic=6055.0).
 - [Fix] <js> Open / Save file dialogs looked strange on some Wine setups (http://bugs.openmpt.org/view.php?id=1181).
 
 Third-Party Libraries
