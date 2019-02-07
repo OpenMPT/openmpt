@@ -211,7 +211,18 @@ struct MO3Instrument
 		mptIns.nMidiProgram = midiPatch;
 		mptIns.midiPWD =  midiBend;
 		if(type == MOD_TYPE_IT)
+		{
 			mptIns.nGlobalVol = std::min<uint8>(globalVol, 128) / 2u;
+
+			if(mptIns.wMidiBank >= 128 || mptIns.nMidiChannel == MidiNoChannel)
+				mptIns.wMidiBank = 0;
+			else
+				mptIns.wMidiBank++;
+			if(mptIns.nMidiProgram >= 128 || mptIns.nMidiChannel == MidiNoChannel)
+				mptIns.nMidiProgram = 0;
+			else
+				mptIns.nMidiProgram++;
+		}
 		if(panning <= 256)
 		{
 			mptIns.nPan = panning;
@@ -1810,6 +1821,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			default:
 				break;
 			}
+			break;
+		case MagicLE("PRHI"):
+			m_nDefaultRowsPerBeat = chunk.ReadUint8();
+			m_nDefaultRowsPerMeasure = chunk.ReadUint8();
 			break;
 		case MagicLE("MIDI"):
 			// Full MIDI config
