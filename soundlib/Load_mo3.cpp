@@ -194,35 +194,31 @@ struct MO3Instrument
 		panEnv.ConvertToMPT(mptIns.PanEnv, 0);
 		pitchEnv.ConvertToMPT(mptIns.PitchEnv, 5);
 		mptIns.nFadeOut = fadeOut;
+
 		if(midiChannel >= 128)
 		{
 			// Plugin
 			mptIns.nMixPlug = midiChannel - 127;
 		} else if(midiChannel < 17 && (flags & playOnMIDI))
 		{
-			// XM / IT with recent encoder
+			// XM, or IT with recent encoder
 			mptIns.nMidiChannel = midiChannel + MidiFirstChannel;
 		} else if(midiChannel > 0 && midiChannel < 17)
 		{
 			// IT encoded with MO3 version prior to 2.4.1 (yes, channel 0 is represented the same way as "no channel")
 			mptIns.nMidiChannel = midiChannel + MidiFirstChannel;
 		}
-		mptIns.wMidiBank = midiBank;
-		mptIns.nMidiProgram = midiPatch;
-		mptIns.midiPWD =  midiBend;
-		if(type == MOD_TYPE_IT)
+		if(mptIns.nMidiChannel != MidiNoChannel)
 		{
-			mptIns.nGlobalVol = std::min<uint8>(globalVol, 128) / 2u;
-
-			if(mptIns.wMidiBank >= 128 || mptIns.nMidiChannel == MidiNoChannel)
-				mptIns.wMidiBank = 0;
-			else
-				mptIns.wMidiBank++;
-			if(mptIns.nMidiProgram >= 128 || mptIns.nMidiChannel == MidiNoChannel)
-				mptIns.nMidiProgram = 0;
-			else
-				mptIns.nMidiProgram++;
+			if(mptIns.wMidiBank < 128)
+				mptIns.wMidiBank = midiBank + 1;
+			if(mptIns.nMidiProgram < 128)
+				mptIns.nMidiProgram = midiPatch + 1;
+			mptIns.midiPWD = midiBend;
 		}
+
+		if(type == MOD_TYPE_IT)
+			mptIns.nGlobalVol = std::min<uint8>(globalVol, 128) / 2u;
 		if(panning <= 256)
 		{
 			mptIns.nPan = panning;
