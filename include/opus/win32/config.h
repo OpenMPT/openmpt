@@ -35,12 +35,14 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define OPUS_BUILD            1
 
-#if defined(_MSC_VER) && !defined(__clang__) /* OpenMPT */
+#if defined(_MSC_VER) /* OpenMPT */
 #if defined(_M_IX86) || defined(_M_X64)
 /* Can always compile SSE intrinsics (no special compiler flags necessary) */
+#if !defined(__clang__) /* OpenMPT */
 #define OPUS_X86_MAY_HAVE_SSE
 #define OPUS_X86_MAY_HAVE_SSE2
 #define OPUS_X86_MAY_HAVE_SSE4_1
+#endif /* OpenMPT */
 
 /* Presume SSE functions, if compiled to use SSE/SSE2/AVX (note that AMD64 implies SSE2, and AVX
    implies SSE4.1) */
