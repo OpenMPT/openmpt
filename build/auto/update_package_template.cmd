@@ -8,7 +8,7 @@ copy /y ..\include\flac\COPYING.Xiph                      .\Licenses\License.FLA
 copy /y ..\include\lame\COPYING                           .\Licenses\License.lame.txt || goto error
 copy /y ..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
 rem copy /y ..\include\minimp3\LICENSE                        .\Licenses\License.minimp3.txt || goto error
-rem copy /y ..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
+rem copy /y ..\include\miniz\LICENSE                          .\Licenses\License.miniz.txt || goto error
 copy /y ..\include\mpg123\COPYING                         .\Licenses\License.mpg123.txt || goto error
 copy /y ..\include\mpg123\AUTHORS                         .\Licenses\License.mpg123.Authors.txt || goto error
 copy /y ..\include\nlohmann-json\LICENSE.MIT              .\Licenses\License.nlohmann-json.txt || goto error
