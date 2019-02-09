@@ -131,7 +131,7 @@ rem copy /y ..\..\include\flac\COPYING.Xiph                      .\Licenses\Lice
 rem copy /y ..\..\include\foobar2000sdk\sdk-license.txt          .\Licenses\License.Foobar2000SDK.txt || goto error
 rem copy /y ..\..\include\foobar2000sdk\pfc\pfc-license.txt      .\Licenses\License.Foobar2000SDK-pfc.txt || goto error
 rem copy /y ..\..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
-rem copy /y ..\..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
+rem copy /y ..\..\include\miniz\LICENSE                          .\Licenses\License.miniz.txt || goto error
 copy /y ..\..\include\mpg123\COPYING                         .\Licenses\License.mpg123.txt || goto error
 copy /y ..\..\include\mpg123\AUTHORS                         .\Licenses\License.mpg123.Authors.txt || goto error
 copy /y ..\..\include\ogg\COPYING                            .\Licenses\License.ogg.txt || goto error
