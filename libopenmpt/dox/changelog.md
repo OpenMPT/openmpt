@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.16-pre
 
+ *  stb_vorbis: Update to v1.15 (2019-02-07).
+
 ### libopenmpt 0.3.15 (2019-01-22)
 
  *  [**Sec**] DSM: Assertion failure during file parsing with debug STLs
