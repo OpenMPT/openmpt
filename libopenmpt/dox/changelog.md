@@ -9,6 +9,7 @@ is just a high-level summary.
 
  *  [**Bug**] libopenmpt did not compile on Apple platforms in C++17 mode.
 
+ *  miniz: Update to v2.0.8 (2018-09-19).
  *  stb_vorbis: Update to v1.15 (2019-02-07).
 
 ### libopenmpt 0.4.2 (2019-01-22)
