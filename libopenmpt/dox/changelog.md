@@ -7,6 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.16-pre
 
+ *  miniz: Update to v2.0.8 (2018-09-19).
  *  stb_vorbis: Update to v1.15 (2019-02-07).
 
 ### libopenmpt 0.3.15 (2019-01-22)
