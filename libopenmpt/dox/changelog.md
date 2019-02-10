@@ -7,7 +7,11 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.3-pre
 
+ *  [**Sec**] Possible crash due to null-pointer access when doing a portamento
+    from an OPL instrument to an empty instrument note map slot (r11348).
  *  [**Bug**] libopenmpt did not compile on Apple platforms in C++17 mode.
+
+ *  IT: Various fixes for note-off + instrument number in Old Effects mode.
 
  *  miniz: Update to v2.0.8 (2018-09-19).
  *  stb_vorbis: Update to v1.15 (2019-02-07).

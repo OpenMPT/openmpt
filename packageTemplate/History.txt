@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.03.00 (10 February 2019, revision 11350)
+v1.28.03.00 (10 February 2019, revision 11351)
 ----------------------------------------------
 Sample tab
 - [Fix] <js> When initializing an OPL instrument, the undo state of the sample slot was not updated (http://bugs.openmpt.org/view.php?id=1194).
@@ -52,7 +52,7 @@ Other formats
 - [Imp] <js> MO3: Import IT row highlights as written by MO3 2.4.1.2 or newer. Properly import MIDI program and bank info.
 
 Audio I/O
-- [Mod] <jh> On Wine on Linux, prefer DirectSound over WaveOut because there are still systems with winealsa.drv where WaveOut occasionally breaks. This change only affect new installs of OpenMPT (http://bugs.openmpt.org/view.php?id=1193).
+- [Mod] <jh> On Wine on Linux, prefer DirectSound over WaveOut because there are still systems with winealsa.drv where WaveOut occasionally breaks. This change only affects new installations of OpenMPT (http://bugs.openmpt.org/view.php?id=1193).
 
 Misc
 - [Fix] <jh> Builds for Windows XP / Vista no longer worked on CPUs without SSE2 support (http://forum.openmpt.org/index.php?topic=6055.0).
