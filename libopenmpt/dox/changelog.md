@@ -12,6 +12,8 @@ is just a high-level summary.
  *  [**Bug**] libopenmpt did not compile on Apple platforms in C++17 mode.
 
  *  IT: Various fixes for note-off + instrument number in Old Effects mode.
+ *  MO3: Import IT row highlights as written by MO3 2.4.1.2 or newer. Required
+    for modules using modern tempo mode.
 
  *  miniz: Update to v2.0.8 (2018-09-19).
  *  stb_vorbis: Update to v1.15 (2019-02-07).
