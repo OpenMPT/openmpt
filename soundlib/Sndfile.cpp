@@ -531,12 +531,13 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	// Set default play state values
 	if (!m_nDefaultTempo.GetInt()) m_nDefaultTempo.Set(125);
 	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
+	if (m_nDefaultRowsPerMeasure < m_nDefaultRowsPerBeat) m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat;
 	m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
 	m_PlayState.m_nMusicTempo = m_nDefaultTempo;
 	m_PlayState.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
 	m_PlayState.m_nCurrentRowsPerMeasure = m_nDefaultRowsPerMeasure;
 	m_PlayState.m_nGlobalVolume = static_cast<int32>(m_nDefaultGlobalVolume);
-	m_PlayState.m_lHighResRampingGlobalVolume = m_PlayState.m_nGlobalVolume<<VOLUMERAMPPRECISION;
+	m_PlayState.m_lHighResRampingGlobalVolume = m_PlayState.m_nGlobalVolume << VOLUMERAMPPRECISION;
 	m_PlayState.m_nGlobalVolumeDestination = m_PlayState.m_nGlobalVolume;
 	m_PlayState.m_nSamplesToGlobalVolRampDest = 0;
 	m_PlayState.m_nGlobalVolumeRampAmount = 0;
