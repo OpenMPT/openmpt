@@ -30,8 +30,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.03.00 (* February 2019, revision 11331)
---------------------------------------------
+v1.28.03.00 (10 February 2019, revision 11350)
+----------------------------------------------
 Sample tab
 - [Fix] <js> When initializing an OPL instrument, the undo state of the sample slot was not updated (http://bugs.openmpt.org/view.php?id=1194).
 
@@ -40,6 +40,7 @@ Instrument tab
 
 MPTM
 - [Mod] <js> OPL notes can now be controlled (volume / pan / pitch) after they have been released. Note Cut (^^^) now really cuts OPL notes, use === to release them instead. For existing MPTM files, the legacy behaviour is used.
+- [Fix] <js> Possible crash when doing a portamento from an OPL instrument to an empty instrument note map slot.
 
 IT::Compatible Playback Mode
 - [Fix] <js> Various fixes for note-off + instrument number in Old Effects mode.
