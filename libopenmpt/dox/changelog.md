@@ -9,6 +9,7 @@ is just a high-level summary.
 
  *  [**Sec**] Possible crash due to null-pointer access when doing a portamento
     from an OPL instrument to an empty instrument note map slot (r11348).
+
  *  [**Bug**] libopenmpt did not compile on Apple platforms in C++17 mode.
 
  *  IT: Various fixes for note-off + instrument number in Old Effects mode.
