@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.4.4-pre
+
 ### libopenmpt 0.4.3 (2019-02-11)
 
  *  [**Sec**] Possible crash due to null-pointer access when doing a portamento
