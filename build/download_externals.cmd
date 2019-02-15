@@ -36,7 +36,10 @@ if "%MPT_DOWNLOAD%" == "yes" (
   powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 84e830c91a0e8ae499cc4814080da6569d8a6acbddc585c8b62abc86c809793aeb669b0a741063a379fd281ade85f120bc27efeb67d63bf961be893eec8bc3b3 -filesize  384846 -filename build/externals/7za920.zip || del /Q build\externals\7za920.zip
   powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue aba21883cd026a789395757f7dcc127d7d6372965693ddc3794c8adfc3a9675c255cedf2a87177729fa0b094e1bdb4de9d2e47555c61ddd6976c24d71cbd5e38 -filesize  422934 -filename build/externals/asiosdk2.3.zip || del /Q build\externals\asiosdk2.3.zip
   powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 429b485903c3323c69a99822a68889d29678915f41ae6eb84428f262f1a6d8e147e1a4206c8466f0e7c30901c6ed9af497d8f60ae2c2f8c287faa73667435895 -filesize  684658 -filename build/externals/GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d.zip || del /Q build\externals\GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d.zip
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 5cd234f89e89ccda5c3b65fb7dd554967213bcfecd538e29bb185a5c61da681701c5f2550233d7008e398d54cb12dcb6f24b6dac88b658c09b15ac5878f968ad -filesize 6533256 -filename build/externals/python-3.7.2.post1-embed-win32.zip || del /Q build\externals\python-3.7.2.post1-embed-win32.zip
   powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856 -filesize 3509072 -filename build/externals/htmlhelp.exe || del /Q build\externals\htmlhelp.exe
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue cb978a4c1b8641f9c85c65d37c774896d16ddb525c3835db0d351881282b62df0b5faa8fd6dcf460e8353a0f7686f3ad3d875fe40846e71b01ee94ac93cd567c -filesize 2359768 -filename build/externals/innosetup-5.6.1-unicode.exe || del /Q build\externals\innosetup-5.6.1-unicode.exe
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 99d468de185dd62aba845410babe04f70bc4a32ea71a86763c8ad1b8adb04d8425a8cf2e8c581b3e42bc555abc27facd07862ef74b4c322db26c9f388b2f44c4 -filesize  141049 -filename build/externals/innounp047.rar || del /Q build\externals\innounp048.rar
   powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 406bd108bb16450ad34d49a0c8111bdfbed4efef4923ba3f1ee8c437ca9ea4e8b453c5a2d298ac69a79a22a9309a83403954d271d26f051f26dc5e7b5ac65b6f -filesize 5565797 -filename build/externals/premake-5.0.0-alpha13-src.zip || del /Q build\externals\premake-5.0.0-alpha13-src.zip
   powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5 -filesize  336166 -filename build/externals/WA5.55_SDK.exe || del /Q build\externals\WA5.55_SDK.exe
   powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 62c442d656d4bb380360368a0f5f01da11b4ed54333d7f54f875a9a5ec390b08921e00bd08e62cd7a0a5fe642e3377023f20a950cc2a42898ff4cda9ab88fc91 -filesize  322744 -filename build/externals/xmp-sdk.zip || del /Q build\externals\xmp-sdk.zip
@@ -55,6 +58,11 @@ if "%MPT_DOWNLOAD%" == "yes" (
 
  call build\scriptlib\download.cmd "https://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "build\externals\htmlhelp.exe"    || goto error
 
+ call build\scriptlib\download.cmd "https://www.python.org/ftp/python/3.7.2/python-3.7.2.post1-embed-win32.zip"                      "build\externals\python-3.7.2.post1-embed-win32.zip" || goto error
+
+ call build\scriptlib\download.cmd "https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.48/innounp048.rar"  "build\externals\innounp048.rar"               || goto error
+ call build\scriptlib\download.cmd "http://files.jrsoftware.org/is/5/innosetup-5.6.1-unicode.exe"                                    "build\externals\innosetup-5.6.1-unicode.exe"  || goto error
+
 )
 
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue e81805f2039c18d4311fb1e04297656f6efbbe600a7eda91c835375dad03dbe805dc6f704355cfd085600a0f755392e96df7a1d80d4b6f416e177314cc20d666 -filesize 1181017 -filename build/externals/7z1805.exe || goto error
@@ -62,7 +70,10 @@ powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hash
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 84e830c91a0e8ae499cc4814080da6569d8a6acbddc585c8b62abc86c809793aeb669b0a741063a379fd281ade85f120bc27efeb67d63bf961be893eec8bc3b3 -filesize  384846 -filename build/externals/7za920.zip || goto error
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue aba21883cd026a789395757f7dcc127d7d6372965693ddc3794c8adfc3a9675c255cedf2a87177729fa0b094e1bdb4de9d2e47555c61ddd6976c24d71cbd5e38 -filesize  422934 -filename build/externals/asiosdk2.3.zip || goto error
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 429b485903c3323c69a99822a68889d29678915f41ae6eb84428f262f1a6d8e147e1a4206c8466f0e7c30901c6ed9af497d8f60ae2c2f8c287faa73667435895 -filesize  684658 -filename build/externals/GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d.zip || goto error
+powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 5cd234f89e89ccda5c3b65fb7dd554967213bcfecd538e29bb185a5c61da681701c5f2550233d7008e398d54cb12dcb6f24b6dac88b658c09b15ac5878f968ad -filesize 6533256 -filename build/externals/python-3.7.2.post1-embed-win32.zip || goto error
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856 -filesize 3509072 -filename build/externals/htmlhelp.exe || goto error
+powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue cb978a4c1b8641f9c85c65d37c774896d16ddb525c3835db0d351881282b62df0b5faa8fd6dcf460e8353a0f7686f3ad3d875fe40846e71b01ee94ac93cd567c -filesize 2359768 -filename build/externals/innosetup-5.6.1-unicode.exe || goto error
+powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 99d468de185dd62aba845410babe04f70bc4a32ea71a86763c8ad1b8adb04d8425a8cf2e8c581b3e42bc555abc27facd07862ef74b4c322db26c9f388b2f44c4 -filesize  141049 -filename build/externals/innounp048.rar || goto error
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 406bd108bb16450ad34d49a0c8111bdfbed4efef4923ba3f1ee8c437ca9ea4e8b453c5a2d298ac69a79a22a9309a83403954d271d26f051f26dc5e7b5ac65b6f -filesize 5565797 -filename build/externals/premake-5.0.0-alpha13-src.zip || goto error
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5 -filesize  336166 -filename build/externals/WA5.55_SDK.exe || goto error
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 62c442d656d4bb380360368a0f5f01da11b4ed54333d7f54f875a9a5ec390b08921e00bd08e62cd7a0a5fe642e3377023f20a950cc2a42898ff4cda9ab88fc91 -filesize  322744 -filename build/externals/xmp-sdk.zip || goto error
@@ -83,6 +94,13 @@ call build\scriptlib\unpack.cmd "build\tools\htmlhelp" "build\externals\htmlhelp
 call build\scriptlib\unpack.cmd "include\winamp"   "build\externals\WA5.55_SDK.exe" "."          || goto error
 call build\scriptlib\unpack.cmd "include\xmplay"   "build\externals\xmp-sdk.zip"    "."          || goto error
 call build\scriptlib\unpack.cmd "include\ASIOSDK2" "build\externals\asiosdk2.3.zip" "ASIOSDK2.3" || goto error
+
+call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.7.2.post1-embed-win32.zip" "." || goto error
+
+call :killdir "build\tools\innounp"   || goto error
+call :killdir "build\tools\innosetup" || goto error
+call build\scriptlib\unpack.cmd "build\tools\innounp" "build\externals\innounp048.rar" "." || goto error
+build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-5.6.1-unicode.exe" || goto error
 
 goto ok
 
