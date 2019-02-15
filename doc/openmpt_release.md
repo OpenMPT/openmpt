@@ -10,9 +10,9 @@ OpenMPT release process
    * Check if any files have to be added to or removed from the listing in
      `readme.txt`
    * If year changed, see `doc/year_changed.md`
-2. Compile OpenMPT.
-3. Install latest InnoSetup.
-4. Run `build/auto/build_openmpt_release_packages.py` to build the manual and
+2. Download latest pinned externals via build/download_externals.cmd.
+3. Compile OpenMPT.
+4. Run `build/auto/build_openmpt_release_packages.cmd` to build the manual and
    release packages.
 5. Upload release packages (openmpt.org, ftp.untergrund.net, SourceForge)
 6. Upload `OMPT_X.YY_ReleaseNotes.html` and `History.txt` to
