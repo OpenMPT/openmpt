@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="utf-8">
+  <meta name="language" content="en">
+  <title>OpenMPT 1.29 Release Notes</title>
+  <style type="text/css">
+    * { font-family: Calibri, sans-serif; }
+    body
+    {
+        color: #222;
+        background: #eee;
+        font-size: 13pt;
+        margin: 0 0 1em 0;
+        padding: 0;
+        border: none;
+    }
+
+    a { color: #b30; text-decoration: none; }
+    a:visited { color: #910; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .screenshots
+    {
+        float:right;
+        text-align:right;
+    }
+
+    .screenshots img, h1
+    {
+        border: 1px solid #ccc;
+        padding: 3px;
+        background: #f0f0f0;
+        margin: 0 0 3px 3px;
+    }
+
+    p { margin: 0.5em 1em; padding: 0; }
+
+    h1
+    {
+        margin: 0 0 1em 0;
+        padding: 10px;
+        font-size: 24pt;
+        color: #444;
+        text-shadow: 1px 1px 1px #999;
+        background: #ddd;
+        background-image: linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -o-linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -moz-linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -webkit-linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -ms-linear-gradient(bottom, #ddd 20%, #eee 60%);
+        background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.2, #ddd), color-stop(0.6, #eee));
+        border-width: 0 0 1px 0;
+    }
+
+    h1 img { vertical-align: middle; margin-right: 0.5em; }
+
+    h2, h3, h4
+    {
+        border: 1px solid #ccc;
+        border-width: 0 0 0 3em;
+        margin: 1em 0.5em;
+        padding: 0px 5px;
+        font-size: 18pt;
+        color: #333;
+        text-shadow: 1px 1px #fff;
+    }
+
+    h3 { border-left-width: 2em; }
+    h4 { border-left-width: 1em; }
+
+    li {list-style-type: none; padding: 0 0 0.5em 0; }
+    li:before { content: "» "; }
+
+    li li { padding: 0; }
+
+    /* use this for pattern data */
+    pre
+    {
+        font-family: monospace;
+        display: inline;
+        color: #006;
+    }
+
+    tt
+    {
+        font-family: monospace;
+    }
+
+  </style>
+  </head>
+  <body>
+
+    <h1>
+        <img src="ReleaseNotesImages/general/modplug.png" width="64" height="64" alt="OpenMPT Logo">
+        OpenMPT 1.29 - Release Notes
+    </h1>
+
+    <p>
+        It's been a while since the last major feature update, and we have been working on a bunch of great new features for this new version.
+        This document should give a rough overview about the greatest changes in OpenMPT 1.29.
+    </p>
+
+    <h2>What's new?</h2>
+
+    <h3>General</h3>
+    <ul>
+    </ul>
+
+    <h3>Pattern Editor</h3>
+    <ul>
+    </ul>
+    
+    <h3>Plugins</h3>
+    <ul>
+    </ul>
+
+    <h3>Sample / Instrument Editor</h3>
+    <ul>
+    </ul>
+
+    <h3>Playback</h3>
+    <p>
+        A couple of playback behaviours have been changed and improved:
+    </p>
+    <ul>
+    </ul>
+
+    <h3>File Format Support</h3>
+    <ul>
+    </ul>
+
+    <h3>There's more...</h3>
+    <p>
+        For a detailed description of what has changed, check <a href="History.txt">History.txt</a>. If you are new to OpenMPT, be sure to read the manual as well.
+    </p>
+
+    <h2>Known Issues</h2>
+    <p>
+        <i>This list has mostly been copied over from the old OpenMPT 1.17 RC2 release notes, so this not very comprehensive... :-)</i>
+    </p>
+    <ul>
+        <li>The plugin bridge is still rather experimental. It is known that some plugins don't work in it at all. Custom plugin GUIs are known to not work in Wine. Please report any issues you may be having with the plugin bridge!</li>
+        <li>Far from perfect VST support (no buses for audio / MIDI routing, not all tracker effects are supported, etc...)</li>
+        <li>Previewing samples from the tree view's file browser stops the playing module.</li>
+        <li>There is no really <em>convenient</em> way to find out what features of the tracker are supported by the original trackers (Impulse Tracker, Fasttracker 2, etc...) when working with those file formats...</li>
+    </ul>
+    <p>
+        Known issues regarding specific VST plugins can be found in the <a href="https://wiki.openmpt.org/Manual:_Known_Issues">manual</a>.
+    </p>
+
+    <h2>Contact</h2>
+    <p>
+        Helpful bug reports, new ideas and brave volunteers to test early development builds or contribute to the code are more than welcome!<br>
+        Our issue tracker is located at <a href="https://bugs.openmpt.org/">https://bugs.openmpt.org/</a> and can be used to report bugs and feature requests.<br>
+        You can also meet us at the ModPlug Central forums: <a href="https://forum.openmpt.org/">https://forum.openmpt.org/</a>.
+    </p>
+
+  </body>
+</html>
