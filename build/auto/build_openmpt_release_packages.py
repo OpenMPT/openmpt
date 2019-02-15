@@ -115,12 +115,14 @@ if(p7z32.returncode != 0 or p7z32old.returncode != 0 or p7z64.returncode != 0 or
 def hash_file(filename):
     md5 = hashlib.md5()
     sha1 = hashlib.sha1()
+    sha512 = hashlib.sha512()
     with open(filename, "rb") as f:
         buf = f.read()
         md5.update(buf)
         sha1.update(buf)
+        sha512.update(buf)
     with open(filename + ".digests", "wb") as f:
-        f.write(("MD5: " + md5.hexdigest() + "\nSHA-1: " + sha1.hexdigest()).encode('utf-8'))
+        f.write(("MD5: " + md5.hexdigest() + "\nSHA-1: " + sha1.hexdigest() + "\nSHA-512: " + sha512.hexdigest()).encode('utf-8'))
         f.close()
 
 hash_file("installer/" + openmpt_version_name + "-Setup.exe")
