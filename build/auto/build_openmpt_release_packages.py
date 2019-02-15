@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # OpenMPT packaging script by Saga Musix
 # https://openmpt.org/
-# Requires pywin32 (pip install pypiwin32 or https://sourceforge.net/projects/pywin32/)
 
-from win32api import GetFileVersionInfo
 from subprocess import Popen
 from sys import executable
 import os, shutil, hashlib
@@ -11,16 +9,37 @@ import os, shutil, hashlib
 path7z = "C:\\Program Files\\7-Zip\\7z.exe"
 pathISCC = "C:\\Program Files (x86)\\Inno Setup\\ISCC.exe"
 
-def get_version_number(filename):
-    info = GetFileVersionInfo (filename, "\\")
-    ms = info['FileVersionMS']
-    ls = info['FileVersionLS']
-    return ("%d.%02d.%02d.%02d" % (ms / 65536, ms % 65536, ls / 65536, ls % 65536), "%d.%02d" % (ms / 65536, ms % 65536))
+def get_version_number():
+    with open('common/versionNumber.h', 'r') as f:
+        lines = f.readlines()
+    majormajor = 0
+    major = 0
+    minor = 0
+    minorminor = 0
+    for line in lines:
+        tokens = line.split()
+        if len(tokens) == 3:
+            if tokens[0] == '#define':
+                if tokens[1] == 'VER_MAJORMAJOR':
+                    majormajor = int(tokens[2])
+                if tokens[1] == 'VER_MAJOR':
+                    major = int(tokens[2])
+                if tokens[1] == 'VER_MINOR':
+                    minor = int(tokens[2])
+                if tokens[1] == 'VER_MINORMINOR':
+                    minorminor = int(tokens[2])
+    if majormajor < 1:
+        raise Exception("Could not parse version!")
+    if major < 1:
+        raise Exception("Could not parse version!")
+    if minor == 0 and minorminor == 0:
+        raise Exception("Could not parse version!")
+    return ("%d.%02d.%02d.%02d" % (majormajor, major, minor, minorminor), "%d.%02d" % (majormajor, major))
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 os.chdir("../..")
 
-(openmpt_version, openmpt_version_short) =  get_version_number("bin/release/vs2017-static/x86-32-win7/mptrack.exe")
+(openmpt_version, openmpt_version_short) = get_version_number()
 
 openmpt_version_name = "OpenMPT-" + openmpt_version
 openmpt_zip_32bit_basepath = "installer/OpenMPT-" + openmpt_version + "/"
