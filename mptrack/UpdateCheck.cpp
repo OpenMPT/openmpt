@@ -263,6 +263,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 		j["System"]["Windows"]["ProcessArchitectures"][mpt::ToCharset(mpt::CharsetUTF8, mpt::Windows::Name(arch))] = true;
 	}
 	j["System"]["Memory"] = mpt::Windows::GetSystemMemorySize() / 1024 / 1024;  // MB
+	j["System"]["Threads"] = std::thread::hardware_concurrency();
 	if(mpt::Windows::IsWine())
 	{
 		mpt::Wine::VersionContext v;
