@@ -26,6 +26,9 @@ install:
 
 
 
+before_build:
+  - build\auto\appveyor_set_version.cmd
+
 build_script:
   - build\auto\build_openmpt_args.cmd vs2017 default Win32 Release 7z default
   - build\auto\build_openmpt_args.cmd vs2017 default x64   Release 7z default
