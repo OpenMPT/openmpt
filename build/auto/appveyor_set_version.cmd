@@ -13,6 +13,6 @@ call build\auto\helper_get_openmpt_version.cmd
 
 set MPT_REVISION=%OPENMPT_VERSION%-%SVNVERSION%
 
-appveyor UpdateBuild -Version "%OPENMPT_VERSION%-%SVNVERSION%-appveyor{build}"
+appveyor UpdateBuild -Version "%OPENMPT_VERSION%-%SVNVERSION%-appveyor%APPVEYOR_BUILD_NUMBER%"
 
 cd "%MY_DIR%"
