@@ -10,6 +10,10 @@ skip_branch_with_pr: true
 
 
 
+version: 1.29-appveyor{build}
+
+
+
 image: Visual Studio 2017
 
 clone_depth: 2500
