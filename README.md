@@ -253,7 +253,7 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
      -  other compilers:
 
-        To compile libopenmpt with other C++11 compliant compilers, run:
+        To compile libopenmpt with other C++14 compliant compilers, run:
         
             make CONFIG=generic
         
