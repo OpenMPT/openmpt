@@ -439,17 +439,31 @@ public:
 	{
 		return static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<mpt::byte*>(dst), streamPos + offset, count));
 	}
+	std::size_t GetRawWithOffset(std::size_t offset, mpt::byte_span dst) const
+	{
+		return static_cast<std::size_t>(DataContainer().Read(streamPos + offset, dst));
+	}
 
 	template <typename T>
 	std::size_t GetRaw(T *dst, std::size_t count) const
 	{
 		return static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<mpt::byte*>(dst), streamPos, count));
 	}
+	std::size_t GetRaw(mpt::byte_span dst) const
+	{
+		return static_cast<std::size_t>(DataContainer().Read(streamPos, dst));
+	}
 
 	template <typename T>
 	std::size_t ReadRaw(T *dst, std::size_t count)
 	{
 		std::size_t result = static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<mpt::byte*>(dst), streamPos, count));
+		streamPos += result;
+		return result;
+	}
+	std::size_t ReadRaw(mpt::byte_span dst)
+	{
+		std::size_t result = static_cast<std::size_t>(DataContainer().Read(streamPos, dst));
 		streamPos += result;
 		return result;
 	}
