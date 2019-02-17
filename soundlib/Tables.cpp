@@ -851,7 +851,14 @@ struct ResampleCacheInitializer
 		GetCachedResampler();
 	}
 };
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif // MPT_COMPILER_CLANG
 static ResampleCacheInitializer g_ResamplerCachePrimer;
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 
 #endif // MPT_RESAMPLER_TABLES_CACHED_ONSTARTUP
 
