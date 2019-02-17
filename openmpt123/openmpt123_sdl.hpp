@@ -15,7 +15,14 @@
 
 #if defined(MPT_WITH_SDL)
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
+#endif // __clang__
 #include <SDL.h>
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif // __clang__
 #ifdef main
 #undef main
 #endif
