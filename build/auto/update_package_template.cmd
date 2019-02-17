@@ -2,7 +2,9 @@
 
 cd packageTemplate || goto error
 copy /y ..\LICENSE .\License.txt || goto error
+choice /C y /N /T 1 /D y
 rmdir /s /q Licenses
+choice /C y /N /T 1 /D y
 mkdir Licenses
 copy /y ..\include\flac\COPYING.Xiph                      .\Licenses\License.FLAC.txt || goto error
 rem copy /y ..\include\foobar2000sdk\sdk-license.txt          .\Licenses\License.Foobar2000SDK.txt || goto error
