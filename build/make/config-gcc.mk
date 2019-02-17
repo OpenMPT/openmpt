@@ -36,12 +36,13 @@ CXXFLAGS += -fsanitize=undefined
 CFLAGS   += -fsanitize=undefined
 endif
 
+CXXFLAGS_WARNINGS += -Wsuggest-override
+
 ifeq ($(MODERN),1)
 LDFLAGS  += -fuse-ld=gold
 CXXFLAGS_WARNINGS += -Wpedantic -Wlogical-op -Wdouble-promotion -Wframe-larger-than=16000
 CFLAGS_WARNINGS   += -Wpedantic -Wlogical-op -Wdouble-promotion -Wframe-larger-than=4000
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
-CXXFLAGS_WARNINGS += -Wsuggest-override
 endif
 
 CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual -Wno-old-style-declaration -Wno-type-limits -Wno-unused-but-set-variable
