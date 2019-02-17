@@ -5,9 +5,21 @@
 from subprocess import Popen
 from sys import executable
 import os, shutil, hashlib
+import sys
 
 path7z = "C:\\Program Files\\7-Zip\\7z.exe"
 pathISCC = "C:\\Program Files (x86)\\Inno Setup\\ISCC.exe"
+singleThreaded = False
+interactive = True
+
+for arg in sys.argv:
+	if arg == '--localtools':
+		path7z = "build\\tools\\7zip\\7z.exe"
+		pathISCC = "build\\tools\\innosetup\\{app}\\ISCC.exe"
+	if arg == '--singlethreaded':
+		singleThreaded = True
+	if arg == '--noninteractive':
+		interactive = False
 
 def get_version_number():
     with open('common/versionNumber.h', 'r') as f:
@@ -84,6 +96,10 @@ def copy_other(to_path, openmpt_version_short):
 
 print("Generating manual...")
 pManual = Popen([executable, "wiki.py"], cwd="mptrack/manual_generator/")
+if singleThreaded:
+	pManual.communicate()
+	if(pManual.returncode != 0):
+			raise Exception("Something went wrong during manual creation!")
 
 print("Copying 32-bit binaries...")
 shutil.rmtree(openmpt_zip_32bit_basepath, ignore_errors=True)
@@ -98,9 +114,10 @@ print("Copying 64-bit legacy binaries...")
 shutil.rmtree(openmpt_zip_64bitold_basepath, ignore_errors=True)
 copy_binaries("bin/release/vs2017-static/x86-64-winxp64/", openmpt_zip_64bitold_path)
 
-pManual.communicate()
-if(pManual.returncode != 0):
-    raise Exception("Something went wrong during manual creation!")
+if not singleThreaded:
+	pManual.communicate()
+	if(pManual.returncode != 0):
+			raise Exception("Something went wrong during manual creation!")
 
 print("Updating package template...")
 pTemplate = Popen(["build\\auto\\update_package_template.cmd"], cwd="./")
@@ -116,17 +133,30 @@ copy_other(openmpt_zip_64bitold_path,    openmpt_version_short)
 
 print("Creating zip files and installers...")
 p7z32    = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + ".zip",            openmpt_version_name + "/"], cwd=openmpt_zip_32bit_basepath)
+if singleThreaded:
+	p7z32.communicate()
 p7z32old = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-legacy.zip",     openmpt_version_name + "/"], cwd=openmpt_zip_32bitold_basepath)
+if singleThreaded:
+	p7z32old.communicate()
 p7z64    = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-x64.zip",        openmpt_version_name + "/"], cwd=openmpt_zip_64bit_basepath)
+if singleThreaded:
+	p7z64.communicate()
 p7z64old = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-x64-legacy.zip", openmpt_version_name + "/"], cwd=openmpt_zip_64bitold_basepath)
+if singleThreaded:
+	p7z64old.communicate()
 pInno32  = Popen([pathISCC, "win32.iss"], cwd="installer/")
+if singleThreaded:
+	pInno32.communicate()
 pInno64  = Popen([pathISCC, "win64.iss"], cwd="installer/")
-p7z32.communicate()
-p7z32old.communicate()
-p7z64.communicate()
-p7z64old.communicate()
-pInno32.communicate()
-pInno64.communicate()
+if singleThreaded:
+	pInno64.communicate()
+if not singleThreaded:
+	p7z32.communicate()
+	p7z32old.communicate()
+	p7z64.communicate()
+	p7z64old.communicate()
+	pInno32.communicate()
+	pInno64.communicate()
 
 if(p7z32.returncode != 0 or p7z32old.returncode != 0 or p7z64.returncode != 0 or p7z64old.returncode != 0 or pInno32.returncode != 0 or pInno64.returncode != 0):
     raise Exception("Something went wrong during packaging!")
@@ -154,4 +184,5 @@ shutil.rmtree(openmpt_zip_32bitold_basepath)
 shutil.rmtree(openmpt_zip_64bit_basepath)
 shutil.rmtree(openmpt_zip_64bitold_basepath)
 
-input(openmpt_version_name + " has been packaged successfully.")
+if interactive:
+	input(openmpt_version_name + " has been packaged successfully.")
