@@ -8,11 +8,7 @@
   dofile "../../build/premake/premake-defaults.lua"
 	dofile "../../build/premake/premake-defaults-strict.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
-  filter { "configurations:*Shared" }
-   targetname "openmpt-soundtouch"
-  filter { "not configurations:*Shared" }
-   targetname "OpenMPT_SoundTouch_f32"
-  filter {}
+  targetname "openmpt-soundtouch"
   includedirs { "../../include/soundtouch/include" }
 	filter {}
 	filter { "action:vs*" }

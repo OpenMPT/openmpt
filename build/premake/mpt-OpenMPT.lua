@@ -164,7 +164,7 @@ end
    linkoptions {
     "/DELAYLOAD:openmpt-lame.dll",
     "/DELAYLOAD:openmpt-mpg123.dll",
-    "/DELAYLOAD:OpenMPT_SoundTouch_f32.dll",
+    "/DELAYLOAD:openmpt-soundtouch.dll",
    }
   filter {}
 	if not _OPTIONS["xp"] then

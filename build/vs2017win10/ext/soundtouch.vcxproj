@@ -351,84 +351,84 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\..\bin\debug\vs2017-static\x86-32-win10\</OutDir>
     <IntDir>..\..\obj\vs2017win10\soundtouch\x86\Debug\</IntDir>
-    <TargetName>OpenMPT_SoundTouch_f32</TargetName>
+    <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\..\bin\debug\vs2017-static\x86-64-win10\</OutDir>
     <IntDir>..\..\obj\vs2017win10\soundtouch\x86_64\Debug\</IntDir>
-    <TargetName>OpenMPT_SoundTouch_f32</TargetName>
+    <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\..\bin\debug\vs2017-static\arm-32-win10\</OutDir>
     <IntDir>..\..\obj\vs2017win10\soundtouch\arm\Debug\</IntDir>
-    <TargetName>OpenMPT_SoundTouch_f32</TargetName>
+    <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\..\bin\debug\vs2017-static\arm-64-win10\</OutDir>
     <IntDir>..\..\obj\vs2017win10\soundtouch\arm64\Debug\</IntDir>
-    <TargetName>OpenMPT_SoundTouch_f32</TargetName>
+    <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\bin\release\vs2017-static\x86-32-win10\</OutDir>
     <IntDir>..\..\obj\vs2017win10\soundtouch\x86\Release\</IntDir>
-    <TargetName>OpenMPT_SoundTouch_f32</TargetName>
+    <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\bin\release\vs2017-static\x86-64-win10\</OutDir>
     <IntDir>..\..\obj\vs2017win10\soundtouch\x86_64\Release\</IntDir>
-    <TargetName>OpenMPT_SoundTouch_f32</TargetName>
+    <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\bin\release\vs2017-static\arm-32-win10\</OutDir>
     <IntDir>..\..\obj\vs2017win10\soundtouch\arm\Release\</IntDir>
-    <TargetName>OpenMPT_SoundTouch_f32</TargetName>
+    <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\bin\release\vs2017-static\arm-64-win10\</OutDir>
     <IntDir>..\..\obj\vs2017win10\soundtouch\arm64\Release\</IntDir>
-    <TargetName>OpenMPT_SoundTouch_f32</TargetName>
+    <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\bin\checked\vs2017-static\x86-32-win10\</OutDir>
     <IntDir>..\..\obj\vs2017win10\soundtouch\x86\Checked\</IntDir>
-    <TargetName>OpenMPT_SoundTouch_f32</TargetName>
+    <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\bin\checked\vs2017-static\x86-64-win10\</OutDir>
     <IntDir>..\..\obj\vs2017win10\soundtouch\x86_64\Checked\</IntDir>
-    <TargetName>OpenMPT_SoundTouch_f32</TargetName>
+    <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\bin\checked\vs2017-static\arm-32-win10\</OutDir>
     <IntDir>..\..\obj\vs2017win10\soundtouch\arm\Checked\</IntDir>
-    <TargetName>OpenMPT_SoundTouch_f32</TargetName>
+    <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\bin\checked\vs2017-static\arm-64-win10\</OutDir>
     <IntDir>..\..\obj\vs2017win10\soundtouch\arm64\Checked\</IntDir>
-    <TargetName>OpenMPT_SoundTouch_f32</TargetName>
+    <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
@@ -531,7 +531,7 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2017-static\x86-32-win10\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2017-static\x86-32-win10\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -550,7 +550,7 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2017-static\x86-64-win10\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2017-static\x86-64-win10\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -569,7 +569,7 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2017-static\arm-32-win10\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2017-static\arm-32-win10\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
@@ -588,7 +588,7 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2017-static\arm-64-win10\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2017-static\arm-64-win10\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -615,7 +615,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2017-static\x86-32-win10\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2017-static\x86-32-win10\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -641,7 +641,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2017-static\x86-64-win10\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2017-static\x86-64-win10\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -667,7 +667,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2017-static\arm-32-win10\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2017-static\arm-32-win10\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
@@ -693,7 +693,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2017-static\arm-64-win10\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2017-static\arm-64-win10\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
@@ -720,7 +720,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\checked\vs2017-static\x86-32-win10\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\checked\vs2017-static\x86-32-win10\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
@@ -746,7 +746,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\checked\vs2017-static\x86-64-win10\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\checked\vs2017-static\x86-64-win10\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM'">
@@ -772,7 +772,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\checked\vs2017-static\arm-32-win10\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\checked\vs2017-static\arm-32-win10\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'">
@@ -798,7 +798,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\checked\vs2017-static\arm-64-win10\OpenMPT_SoundTouch_f32.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\checked\vs2017-static\arm-64-win10\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">

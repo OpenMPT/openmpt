@@ -290,7 +290,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:openmpt-lame.dll /DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:openmpt-lame.dll /DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:openmpt-soundtouch.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
@@ -321,7 +321,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:openmpt-lame.dll /DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:openmpt-lame.dll /DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:openmpt-soundtouch.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
@@ -361,7 +361,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:openmpt-lame.dll /DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:openmpt-lame.dll /DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:openmpt-soundtouch.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
@@ -400,7 +400,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:openmpt-lame.dll /DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:openmpt-lame.dll /DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:openmpt-soundtouch.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
@@ -440,7 +440,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:openmpt-lame.dll /DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:openmpt-lame.dll /DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:openmpt-soundtouch.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
@@ -479,7 +479,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:openmpt-lame.dll /DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:OpenMPT_SoundTouch_f32.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/DELAYLOAD:openmpt-lame.dll /DELAYLOAD:openmpt-mpg123.dll /DELAYLOAD:openmpt-soundtouch.dll /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
