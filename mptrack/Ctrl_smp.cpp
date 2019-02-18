@@ -2131,7 +2131,7 @@ class ComponentSoundTouch
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
 	ComponentSoundTouch()
-		: ComponentBundledDLL(P_("OpenMPT_SoundTouch_f32"))
+		: ComponentBundledDLL(P_("openmpt-soundtouch"))
 	{
 	}
 };
