@@ -176,84 +176,84 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2015-static\x86-32-win7\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2015-win7-static\x86\</OutDir>
     <IntDir>..\..\obj\vs2015win7\lame\x86\Debug\</IntDir>
     <TargetName>openmpt-lame</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2015-static\x86-64-win7\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2015-win7-static\amd64\</OutDir>
     <IntDir>..\..\obj\vs2015win7\lame\x86_64\Debug\</IntDir>
     <TargetName>openmpt-lame</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2015-static\x86-32-win7\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2015-win7-static\x86\</OutDir>
     <IntDir>..\..\obj\vs2015win7\lame\x86\Release\</IntDir>
     <TargetName>openmpt-lame</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2015-static\x86-64-win7\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2015-win7-static\amd64\</OutDir>
     <IntDir>..\..\obj\vs2015win7\lame\x86_64\Release\</IntDir>
     <TargetName>openmpt-lame</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\checked\vs2015-static\x86-32-win7\</OutDir>
+    <OutDir>..\..\..\bin\checked\vs2015-win7-static\x86\</OutDir>
     <IntDir>..\..\obj\vs2015win7\lame\x86\Checked\</IntDir>
     <TargetName>openmpt-lame</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\checked\vs2015-static\x86-64-win7\</OutDir>
+    <OutDir>..\..\..\bin\checked\vs2015-win7-static\amd64\</OutDir>
     <IntDir>..\..\obj\vs2015win7\lame\x86_64\Checked\</IntDir>
     <TargetName>openmpt-lame</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2015-shared\x86-32-win7\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2015-win7-shared\x86\</OutDir>
     <IntDir>..\..\obj\vs2015win7\lame\x86\DebugShared\</IntDir>
     <TargetName>openmpt-lame</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2015-shared\x86-64-win7\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2015-win7-shared\amd64\</OutDir>
     <IntDir>..\..\obj\vs2015win7\lame\x86_64\DebugShared\</IntDir>
     <TargetName>openmpt-lame</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2015-shared\x86-32-win7\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2015-win7-shared\x86\</OutDir>
     <IntDir>..\..\obj\vs2015win7\lame\x86\ReleaseShared\</IntDir>
     <TargetName>openmpt-lame</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2015-shared\x86-64-win7\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2015-win7-shared\amd64\</OutDir>
     <IntDir>..\..\obj\vs2015win7\lame\x86_64\ReleaseShared\</IntDir>
     <TargetName>openmpt-lame</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\checked\vs2015-shared\x86-32-win7\</OutDir>
+    <OutDir>..\..\..\bin\checked\vs2015-win7-shared\x86\</OutDir>
     <IntDir>..\..\obj\vs2015win7\lame\x86\CheckedShared\</IntDir>
     <TargetName>openmpt-lame</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\checked\vs2015-shared\x86-64-win7\</OutDir>
+    <OutDir>..\..\..\bin\checked\vs2015-win7-shared\amd64\</OutDir>
     <IntDir>..\..\obj\vs2015win7\lame\x86_64\CheckedShared\</IntDir>
     <TargetName>openmpt-lame</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -272,7 +272,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2015-static\x86-32-win7\openmpt-lame.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2015-win7-static\x86\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -290,7 +290,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2015-static\x86-64-win7\openmpt-lame.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2015-win7-static\amd64\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -317,7 +317,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2015-static\x86-32-win7\openmpt-lame.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2015-win7-static\x86\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -343,7 +343,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2015-static\x86-64-win7\openmpt-lame.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2015-win7-static\amd64\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -370,7 +370,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\checked\vs2015-static\x86-32-win7\openmpt-lame.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\checked\vs2015-win7-static\x86\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -396,7 +396,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\checked\vs2015-static\x86-64-win7\openmpt-lame.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\checked\vs2015-win7-static\amd64\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -416,7 +416,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2015-shared\x86-32-win7\openmpt-lame.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2015-win7-shared\x86\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -436,7 +436,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2015-shared\x86-64-win7\openmpt-lame.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2015-win7-shared\amd64\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -463,7 +463,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2015-shared\x86-32-win7\openmpt-lame.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2015-win7-shared\x86\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -489,7 +489,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2015-shared\x86-64-win7\openmpt-lame.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2015-win7-shared\amd64\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -516,7 +516,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\checked\vs2015-shared\x86-32-win7\openmpt-lame.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\checked\vs2015-win7-shared\x86\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -542,7 +542,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\checked\vs2015-shared\x86-64-win7\openmpt-lame.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\checked\vs2015-win7-shared\amd64\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>

@@ -212,42 +212,42 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2015-shared\x86-32-winxp\</OutDir>
+    <OutDir>..\..\bin\debug\vs2015-winxp-shared\x86\</OutDir>
     <IntDir>..\obj\vs2015winxp\libopenmpt_modplug\x86\DebugShared\</IntDir>
     <TargetName>libmodplug</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2015-shared\x86-64-winxp64\</OutDir>
+    <OutDir>..\..\bin\debug\vs2015-winxp64-shared\amd64\</OutDir>
     <IntDir>..\obj\vs2015winxp\libopenmpt_modplug\x86_64\DebugShared\</IntDir>
     <TargetName>libmodplug</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2015-shared\x86-32-winxp\</OutDir>
+    <OutDir>..\..\bin\release\vs2015-winxp-shared\x86\</OutDir>
     <IntDir>..\obj\vs2015winxp\libopenmpt_modplug\x86\ReleaseShared\</IntDir>
     <TargetName>libmodplug</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2015-shared\x86-64-winxp64\</OutDir>
+    <OutDir>..\..\bin\release\vs2015-winxp64-shared\amd64\</OutDir>
     <IntDir>..\obj\vs2015winxp\libopenmpt_modplug\x86_64\ReleaseShared\</IntDir>
     <TargetName>libmodplug</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2015-shared\x86-32-winxp\</OutDir>
+    <OutDir>..\..\bin\checked\vs2015-winxp-shared\x86\</OutDir>
     <IntDir>..\obj\vs2015winxp\libopenmpt_modplug\x86\CheckedShared\</IntDir>
     <TargetName>libmodplug</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2015-shared\x86-64-winxp64\</OutDir>
+    <OutDir>..\..\bin\checked\vs2015-winxp64-shared\amd64\</OutDir>
     <IntDir>..\obj\vs2015winxp\libopenmpt_modplug\x86_64\CheckedShared\</IntDir>
     <TargetName>libmodplug</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -418,7 +418,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\debug\vs2015-shared\x86-32-winxp\libmodplug.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\debug\vs2015-winxp-shared\x86\libmodplug.lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -440,7 +440,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\debug\vs2015-shared\x86-64-winxp64\libmodplug.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\debug\vs2015-winxp64-shared\amd64\libmodplug.lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -469,7 +469,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\release\vs2015-shared\x86-32-winxp\libmodplug.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\release\vs2015-winxp-shared\x86\libmodplug.lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -497,7 +497,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\release\vs2015-shared\x86-64-winxp64\libmodplug.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\release\vs2015-winxp64-shared\amd64\libmodplug.lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -526,7 +526,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\checked\vs2015-shared\x86-32-winxp\libmodplug.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\checked\vs2015-winxp-shared\x86\libmodplug.lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -554,7 +554,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\checked\vs2015-shared\x86-64-winxp64\libmodplug.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\checked\vs2015-winxp64-shared\amd64\libmodplug.lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>

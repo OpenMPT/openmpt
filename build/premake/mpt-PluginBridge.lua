@@ -50,43 +50,79 @@
 	filter {}
 
 	if _OPTIONS["win10"] then
-		filter { "architecture:x86" }
+		filter { "architecture:x86", "configurations:*Shared" }
 			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-64-win10\" mkdir \"$(TargetDir)\\..\\x86-64-win10\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-win10\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\x86-64-win10\\$(TargetName).pdb\"",
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\amd64\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\amd64\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\amd64\\$(TargetName).pdb\"",
 			}
-		filter { "architecture:x86_64" }
+		filter { "architecture:x86_64", "configurations:*Shared" }
 			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-32-win10\" mkdir \"$(TargetDir)\\..\\x86-32-win10\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-win10\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\x86-32-win10\\$(TargetName).pdb\"",
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\x86\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\x86\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\x86\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\x86\\$(TargetName).pdb\"",
+			}
+		filter { "architecture:x86", "not configurations:*Shared" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\amd64\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\amd64\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\amd64\\$(TargetName).pdb\"",
+			}
+		filter { "architecture:x86_64", "not configurations:*Shared" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\x86\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\x86\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\x86\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\x86\\$(TargetName).pdb\"",
 			}
 	elseif _OPTIONS["xp"] then
-		filter { "architecture:x86" }
+		filter { "architecture:x86", "configurations:*Shared" }
 			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-64-winxp64\" mkdir \"$(TargetDir)\\..\\x86-64-winxp64\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-winxp64\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\x86-64-winxp64\\$(TargetName).pdb\"",
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-shared\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-shared\\amd64\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-shared\\amd64\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-shared\\amd64\\$(TargetName).pdb\"",
 			}
-		filter { "architecture:x86_64" }
+		filter { "architecture:x86_64", "configurations:*Shared" }
 			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-32-winxp\" mkdir \"$(TargetDir)\\..\\x86-32-winxp\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-winxp\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\x86-32-winxp\\$(TargetName).pdb\"",
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\x86\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\x86\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\x86\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\x86\\$(TargetName).pdb\"",
+			}
+		filter { "architecture:x86", "not configurations:*Shared" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-static\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-static\\amd64\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-static\\amd64\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-static\\amd64\\$(TargetName).pdb\"",
+			}
+		filter { "architecture:x86_64", "not configurations:*Shared" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\x86\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\x86\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\x86\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\x86\\$(TargetName).pdb\"",
 			}
 	else
-		filter { "architecture:x86" }
+		filter { "architecture:x86", "configurations:*Shared" }
 			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-64-win7\" mkdir \"$(TargetDir)\\..\\x86-64-win7\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-64-win7\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\x86-64-win7\\$(TargetName).pdb\"",
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\amd64\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\amd64\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\amd64\\$(TargetName).pdb\"",
 			}
-		filter { "architecture:x86_64" }
+		filter { "architecture:x86_64", "configurations:*Shared" }
 			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\x86-32-win7\" mkdir \"$(TargetDir)\\..\\x86-32-win7\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\x86-32-win7\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\x86-32-win7\\$(TargetName).pdb\"",
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\x86\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\x86\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\x86\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\x86\\$(TargetName).pdb\"",
+			}
+		filter { "architecture:x86", "not configurations:*Shared" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\amd64\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\amd64\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\amd64\\$(TargetName).pdb\"",
+			}
+		filter { "architecture:x86_64", "not configurations:*Shared" }
+			postbuildcommands {
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\x86\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\x86\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\x86\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\x86\\$(TargetName).pdb\"",
 			}
 	end
 

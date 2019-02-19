@@ -35,7 +35,7 @@ mkdir libopenmpt-%MPT_PKG_TAG%
 cd libopenmpt-%MPT_PKG_TAG% || goto error
 mkdir openmpt123
 mkdir openmpt123\x86
-mkdir openmpt123\x86_64
+mkdir openmpt123\amd64
 mkdir XMPlay
 mkdir Winamp
 rmdir /s /q Licenses
@@ -70,22 +70,22 @@ copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\libopenmpt\dox\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\XMPlay\ || goto error
 copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\Winamp\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\openmpt123.exe .\openmpt123\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\openmpt-mpg123.dll .\openmpt123\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-64-%MPT_BIN_TARGET64%\openmpt123.exe .\openmpt123\x86_64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-64-%MPT_BIN_TARGET64%\openmpt-mpg123.dll .\openmpt123\x86_64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\xmp-openmpt.dll .\XMPlay\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\openmpt-mpg123.dll .\XMPlay\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\in_openmpt.dll .\Winamp\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-static\x86-32-%MPT_BIN_TARGET32%\openmpt-mpg123.dll .\Winamp\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET32%-static\x86\openmpt123.exe .\openmpt123\x86\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET32%-static\x86\openmpt-mpg123.dll .\openmpt123\x86\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET64%-static\amd64\openmpt123.exe .\openmpt123\amd64\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET64%-static\amd64\openmpt-mpg123.dll .\openmpt123\amd64\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET32%-static\x86\xmp-openmpt.dll .\XMPlay\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET32%-static\x86\openmpt-mpg123.dll .\XMPlay\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET32%-static\x86\in_openmpt.dll .\Winamp\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET32%-static\x86\openmpt-mpg123.dll .\Winamp\ || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 ..\libopenmpt\bin.%MPT_PKG_TAG%\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.%MPT_PKG_TAG%.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
  changelog.md ^
  openmpt123\x86\openmpt123.exe ^
  openmpt123\x86\openmpt-mpg123.dll ^
- openmpt123\x86_64\openmpt123.exe ^
- openmpt123\x86_64\openmpt-mpg123.dll ^
+ openmpt123\amd64\openmpt123.exe ^
+ openmpt123\amd64\openmpt-mpg123.dll ^
  XMPlay\xmp-openmpt.txt ^
  XMPlay\xmp-openmpt.dll ^
  XMPlay\openmpt-mpg123.dll ^
@@ -114,10 +114,10 @@ mkdir inc
 mkdir inc\libopenmpt
 mkdir lib
 mkdir lib\x86
-mkdir lib\x86_64
+mkdir lib\amd64
 mkdir bin
 mkdir bin\x86
-mkdir bin\x86_64
+mkdir bin\amd64
 copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 rmdir /s /q Licenses
 mkdir Licenses
@@ -157,18 +157,18 @@ copy /y ..\..\libopenmpt\libopenmpt_ext.hpp inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_buffer.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_file.h inc\libopenmpt\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-32-%MPT_BIN_TARGET32%\libopenmpt.lib lib\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-32-%MPT_BIN_TARGET32%\libopenmpt.dll bin\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-32-%MPT_BIN_TARGET32%\openmpt-mpg123.dll bin\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-32-%MPT_BIN_TARGET32%\openmpt-ogg.dll bin\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-32-%MPT_BIN_TARGET32%\openmpt-vorbis.dll bin\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-32-%MPT_BIN_TARGET32%\openmpt-zlib.dll bin\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\libopenmpt.lib lib\x86_64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\libopenmpt.dll bin\x86_64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-mpg123.dll bin\x86_64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-ogg.dll bin\x86_64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-vorbis.dll bin\x86_64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-zlib.dll bin\x86_64\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET32%-shared\x86\libopenmpt.lib lib\x86\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET32%-shared\x86\libopenmpt.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET32%-shared\x86\openmpt-mpg123.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET32%-shared\x86\openmpt-ogg.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET32%-shared\x86\openmpt-vorbis.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET32%-shared\x86\openmpt-zlib.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET64%-shared\amd64\libopenmpt.lib lib\amd64\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET64%-shared\amd64\libopenmpt.dll bin\amd64\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET64%-shared\amd64\openmpt-mpg123.dll bin\amd64\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET64%-shared\amd64\openmpt-ogg.dll bin\amd64\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET64%-shared\amd64\openmpt-vorbis.dll bin\amd64\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-%MPT_BIN_TARGET64%-shared\amd64\openmpt-zlib.dll bin\amd64\ || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 ..\libopenmpt\dev.%MPT_PKG_TAG%.%MPT_VS_VER%\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.dev.%MPT_PKG_TAG%.%MPT_VS_VER%.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
@@ -183,17 +183,17 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-shared\x86-64-%MPT_BIN_TARGET64%\openmpt-
  inc\libopenmpt\libopenmpt_stream_callbacks_fd.h ^
  inc\libopenmpt\libopenmpt_stream_callbacks_file.h ^
  lib\x86\libopenmpt.lib ^
- lib\x86_64\libopenmpt.lib ^
+ lib\amd64\libopenmpt.lib ^
  bin\x86\libopenmpt.dll ^
  bin\x86\openmpt-mpg123.dll ^
  bin\x86\openmpt-ogg.dll ^
  bin\x86\openmpt-vorbis.dll ^
  bin\x86\openmpt-zlib.dll ^
- bin\x86_64\libopenmpt.dll ^
- bin\x86_64\openmpt-mpg123.dll ^
- bin\x86_64\openmpt-ogg.dll ^
- bin\x86_64\openmpt-vorbis.dll ^
- bin\x86_64\openmpt-zlib.dll ^
+ bin\amd64\libopenmpt.dll ^
+ bin\amd64\openmpt-mpg123.dll ^
+ bin\amd64\openmpt-ogg.dll ^
+ bin\amd64\openmpt-vorbis.dll ^
+ bin\amd64\openmpt-zlib.dll ^
  || goto error
 cd .. || goto error
 rmdir /s /q libopenmpt-dev-%MPT_PKG_TAG%-%MPT_VS_VER%

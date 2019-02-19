@@ -2,31 +2,31 @@
   configuration {}
 
 	configuration { "Debug", "x32" }
-		targetdir ( "../../bin/debug/" .. _OPTIONS["target"] .. "-static/x86-32" )
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/x86" )
 	configuration { "DebugShared", "x32" }
-		targetdir ( "../../bin/debug/" .. _OPTIONS["target"] .. "-shared/x86-32" )
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/x86" )
 	configuration { "Release", "x32" }
-		targetdir ( "../../bin/release/" .. _OPTIONS["target"] .. "-static/x86-32" )
+		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/x86" )
 	configuration { "ReleaseShared", "x32" }
-		targetdir ( "../../bin/release/" .. _OPTIONS["target"] .. "-shared/x86-32" )
+		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/x86" )
 
 	configuration { "Debug", "x64" }
-		targetdir ( "../../bin/debug/" .. _OPTIONS["target"] .. "-static/x86-64" )
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/amd64" )
 	configuration { "DebugShared", "x64" }
-		targetdir ( "../../bin/debug/" .. _OPTIONS["target"] .. "-shared/x86-64" )
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/amd64" )
 	configuration { "Release", "x64" }
-		targetdir ( "../../bin/release/" .. _OPTIONS["target"] .. "-static/x86-64" )
+		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/amd64" )
 	configuration { "ReleaseShared", "x64" }
-		targetdir ( "../../bin/release/" .. _OPTIONS["target"] .. "-shared/x86-64" )
+		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/amd64" )
 
 	configuration { "Debug", "ARM" }
-		targetdir ( "../../bin/debug/" .. _OPTIONS["target"] .. "-static/arm" )
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm" )
 	configuration { "DebugShared", "ARM" }
-		targetdir ( "../../bin/debug/" .. _OPTIONS["target"] .. "-shared/arm" )
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm" )
 	configuration { "Release", "ARM" }
-		targetdir ( "../../bin/release/" .. _OPTIONS["target"] .. "-static/arm" )
+		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm" )
 	configuration { "ReleaseShared", "ARM" }
-		targetdir ( "../../bin/release/" .. _OPTIONS["target"] .. "-shared/arm" )
+		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm" )
   
   configuration "Debug"
    defines { "DEBUG" }

@@ -199,43 +199,43 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\..\..\bin\debug\winstore82-static\x86-32\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2017-uwp-static\x86\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>openmpt-zlib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>..\..\..\bin\debug\winstore82-static\x86-64\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2017-uwp-static\amd64\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>openmpt-zlib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>..\..\..\bin\debug\winstore82-static\arm\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2017-uwp-static\arm\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>openmpt-zlib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\..\..\bin\release\winstore82-static\x86-32\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2017-uwp-static\x86\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>openmpt-zlib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\..\..\bin\release\winstore82-static\x86-64\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2017-uwp-static\amd64\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>openmpt-zlib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>..\..\..\bin\release\winstore82-static\arm\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2017-uwp-static\arm\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>openmpt-zlib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
-    <OutDir>..\..\..\bin\debug\winstore82-shared\x86-32\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2017-uwp-shared\x86\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>openmpt-zlib</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -243,7 +243,7 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
-    <OutDir>..\..\..\bin\debug\winstore82-shared\x86-64\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2017-uwp-shared\amd64\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>openmpt-zlib</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -251,7 +251,7 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
-    <OutDir>..\..\..\bin\debug\winstore82-shared\arm\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2017-uwp-shared\arm\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>openmpt-zlib</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -259,7 +259,7 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
-    <OutDir>..\..\..\bin\release\winstore82-shared\x86-32\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2017-uwp-shared\x86\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>openmpt-zlib</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -267,7 +267,7 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
-    <OutDir>..\..\..\bin\release\winstore82-shared\x86-64\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2017-uwp-shared\amd64\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>openmpt-zlib</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -275,7 +275,7 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
-    <OutDir>..\..\..\bin\release\winstore82-shared\arm\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2017-uwp-shared\arm\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>openmpt-zlib</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -502,7 +502,7 @@
       <ProgramDatabaseFile>$(OutDir)openmpt-zlib.pdb</ProgramDatabaseFile>
       <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-zlib.dll</OutputFile>
-      <ImportLibrary>..\..\..\bin\debug\winstore82-shared\x86-32\openmpt-zlib.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2017-uwp-shared\x86\openmpt-zlib.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
@@ -533,7 +533,7 @@
       <ProgramDatabaseFile>$(OutDir)openmpt-zlib.pdb</ProgramDatabaseFile>
       <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-zlib.dll</OutputFile>
-      <ImportLibrary>..\..\..\bin\debug\winstore82-shared\x86-64\openmpt-zlib.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2017-uwp-shared\amd64\openmpt-zlib.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
@@ -564,7 +564,7 @@
       <ProgramDatabaseFile>$(OutDir)openmpt-zlib.pdb</ProgramDatabaseFile>
       <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-zlib.dll</OutputFile>
-      <ImportLibrary>..\..\..\bin\debug\winstore82-shared\arm\openmpt-zlib.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2017-uwp-shared\arm\openmpt-zlib.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -597,7 +597,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-zlib.dll</OutputFile>
-      <ImportLibrary>..\..\..\bin\release\winstore82-shared\x86-32\openmpt-zlib.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2017-uwp-shared\x86\openmpt-zlib.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
@@ -631,7 +631,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-zlib.dll</OutputFile>
-      <ImportLibrary>..\..\..\bin\release\winstore82-shared\x86-64\openmpt-zlib.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2017-uwp-shared\amd64\openmpt-zlib.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
@@ -665,7 +665,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)openmpt-zlib.dll</OutputFile>
-      <ImportLibrary>..\..\..\bin\release\winstore82-shared\arm\openmpt-zlib.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2017-uwp-shared\arm\openmpt-zlib.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

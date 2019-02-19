@@ -194,43 +194,43 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\..\bin\debug\windesktop81-static\x86-32\</OutDir>
+    <OutDir>..\..\bin\debug\vs2017-win81-static\x86\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>..\..\bin\debug\windesktop81-static\x86-64\</OutDir>
+    <OutDir>..\..\bin\debug\vs2017-win81-static\amd64\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>..\..\bin\debug\windesktop81-static\arm\</OutDir>
+    <OutDir>..\..\bin\debug\vs2017-win81-static\arm\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\..\bin\release\windesktop81-static\x86-32\</OutDir>
+    <OutDir>..\..\bin\release\vs2017-win81-static\x86\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\..\bin\release\windesktop81-static\x86-64\</OutDir>
+    <OutDir>..\..\bin\release\vs2017-win81-static\amd64\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>..\..\bin\release\windesktop81-static\arm\</OutDir>
+    <OutDir>..\..\bin\release\vs2017-win81-static\arm\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
-    <OutDir>..\..\bin\debug\windesktop81-shared\x86-32\</OutDir>
+    <OutDir>..\..\bin\debug\vs2017-win81-shared\x86\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -238,7 +238,7 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
-    <OutDir>..\..\bin\debug\windesktop81-shared\x86-64\</OutDir>
+    <OutDir>..\..\bin\debug\vs2017-win81-shared\amd64\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -246,7 +246,7 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
-    <OutDir>..\..\bin\debug\windesktop81-shared\arm\</OutDir>
+    <OutDir>..\..\bin\debug\vs2017-win81-shared\arm\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -254,7 +254,7 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
-    <OutDir>..\..\bin\release\windesktop81-shared\x86-32\</OutDir>
+    <OutDir>..\..\bin\release\vs2017-win81-shared\x86\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -262,7 +262,7 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
-    <OutDir>..\..\bin\release\windesktop81-shared\x86-64\</OutDir>
+    <OutDir>..\..\bin\release\vs2017-win81-shared\amd64\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -270,7 +270,7 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
-    <OutDir>..\..\bin\release\windesktop81-shared\arm\</OutDir>
+    <OutDir>..\..\bin\release\vs2017-win81-shared\arm\</OutDir>
     <IntDir>obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>libopenmpt</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -508,7 +508,7 @@
       <ProgramDatabaseFile>$(OutDir)libopenmpt.pdb</ProgramDatabaseFile>
       <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)libopenmpt.dll</OutputFile>
-      <ImportLibrary>..\..\bin\debug\windesktop81-shared\x86-32\libopenmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\debug\vs2017-win81-shared\x86\libopenmpt.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PreBuildEvent>
@@ -541,7 +541,7 @@
       <ProgramDatabaseFile>$(OutDir)libopenmpt.pdb</ProgramDatabaseFile>
       <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)libopenmpt.dll</OutputFile>
-      <ImportLibrary>..\..\bin\debug\windesktop81-shared\x86-64\libopenmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\debug\vs2017-win81-shared\amd64\libopenmpt.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PreBuildEvent>
@@ -574,7 +574,7 @@
       <ProgramDatabaseFile>$(OutDir)libopenmpt.pdb</ProgramDatabaseFile>
       <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)libopenmpt.dll</OutputFile>
-      <ImportLibrary>..\..\bin\debug\windesktop81-shared\arm\libopenmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\debug\vs2017-win81-shared\arm\libopenmpt.lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -609,7 +609,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)libopenmpt.dll</OutputFile>
-      <ImportLibrary>..\..\bin\release\windesktop81-shared\x86-32\libopenmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\release\vs2017-win81-shared\x86\libopenmpt.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PreBuildEvent>
@@ -645,7 +645,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)libopenmpt.dll</OutputFile>
-      <ImportLibrary>..\..\bin\release\windesktop81-shared\x86-64\libopenmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\release\vs2017-win81-shared\amd64\libopenmpt.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PreBuildEvent>
@@ -681,7 +681,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)libopenmpt.dll</OutputFile>
-      <ImportLibrary>..\..\bin\release\windesktop81-shared\arm\libopenmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\release\vs2017-win81-shared\arm\libopenmpt.lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>

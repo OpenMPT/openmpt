@@ -1,5 +1,5 @@
-#define PlatformFolder    "release\vs2017-static\x86-32-win7"
-#define PlatformFolderOld "release\vs2017-static\x86-32-winxp"
+#define PlatformFolder    "release\vs2017-win7-static\x86"
+#define PlatformFolderOld "release\vs2017-winxp-static\x86"
 #define PlatformName "32-Bit"
 #define PlatformArchitecture "x86"
 

@@ -77,10 +77,10 @@ if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET64=win7
 if "%MPT_VS_TARGET%" == "win10"   set MPT_BIN_TARGET64=win10
 if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET64=win7
 
-if "%MPT_VS_ARCH%" == "Win32" set MPT_BIN_ARCH_TRK=x86-32
-if "%MPT_VS_ARCH%" == "x64"   set MPT_BIN_ARCH_TRK=x86-64
-if "%MPT_VS_ARCH%" == "ARM"   set MPT_BIN_ARCH_TRK=arm-32
-if "%MPT_VS_ARCH%" == "ARM64" set MPT_BIN_ARCH_TRK=arm-64
+if "%MPT_VS_ARCH%" == "Win32" set MPT_BIN_ARCH_TRK=x86
+if "%MPT_VS_ARCH%" == "x64"   set MPT_BIN_ARCH_TRK=amd64
+if "%MPT_VS_ARCH%" == "ARM"   set MPT_BIN_ARCH_TRK=arm
+if "%MPT_VS_ARCH%" == "ARM64" set MPT_BIN_ARCH_TRK=arm64
 
 if "%MPT_VS_ARCH%" == "Win32" set MPT_BIN_ARCH=x86
 if "%MPT_VS_ARCH%" == "x64"   set MPT_BIN_ARCH=amd64

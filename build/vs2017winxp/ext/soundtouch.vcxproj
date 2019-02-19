@@ -176,84 +176,84 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2017-static\x86-32-winxp\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2017-winxp-static\x86\</OutDir>
     <IntDir>..\..\obj\vs2017winxp\soundtouch\x86\Debug\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2017-static\x86-64-winxp64\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2017-winxp64-static\amd64\</OutDir>
     <IntDir>..\..\obj\vs2017winxp\soundtouch\x86_64\Debug\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2017-static\x86-32-winxp\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2017-winxp-static\x86\</OutDir>
     <IntDir>..\..\obj\vs2017winxp\soundtouch\x86\Release\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2017-static\x86-64-winxp64\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2017-winxp64-static\amd64\</OutDir>
     <IntDir>..\..\obj\vs2017winxp\soundtouch\x86_64\Release\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\checked\vs2017-static\x86-32-winxp\</OutDir>
+    <OutDir>..\..\..\bin\checked\vs2017-winxp-static\x86\</OutDir>
     <IntDir>..\..\obj\vs2017winxp\soundtouch\x86\Checked\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\checked\vs2017-static\x86-64-winxp64\</OutDir>
+    <OutDir>..\..\..\bin\checked\vs2017-winxp64-static\amd64\</OutDir>
     <IntDir>..\..\obj\vs2017winxp\soundtouch\x86_64\Checked\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2017-shared\x86-32-winxp\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2017-winxp-shared\x86\</OutDir>
     <IntDir>..\..\obj\vs2017winxp\soundtouch\x86\DebugShared\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2017-shared\x86-64-winxp64\</OutDir>
+    <OutDir>..\..\..\bin\debug\vs2017-winxp64-shared\amd64\</OutDir>
     <IntDir>..\..\obj\vs2017winxp\soundtouch\x86_64\DebugShared\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2017-shared\x86-32-winxp\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2017-winxp-shared\x86\</OutDir>
     <IntDir>..\..\obj\vs2017winxp\soundtouch\x86\ReleaseShared\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2017-shared\x86-64-winxp64\</OutDir>
+    <OutDir>..\..\..\bin\release\vs2017-winxp64-shared\amd64\</OutDir>
     <IntDir>..\..\obj\vs2017winxp\soundtouch\x86_64\ReleaseShared\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\checked\vs2017-shared\x86-32-winxp\</OutDir>
+    <OutDir>..\..\..\bin\checked\vs2017-winxp-shared\x86\</OutDir>
     <IntDir>..\..\obj\vs2017winxp\soundtouch\x86\CheckedShared\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\checked\vs2017-shared\x86-64-winxp64\</OutDir>
+    <OutDir>..\..\..\bin\checked\vs2017-winxp64-shared\amd64\</OutDir>
     <IntDir>..\..\obj\vs2017winxp\soundtouch\x86_64\CheckedShared\</IntDir>
     <TargetName>openmpt-soundtouch</TargetName>
     <TargetExt>.dll</TargetExt>
@@ -275,7 +275,7 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2017-static\x86-32-winxp\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2017-winxp-static\x86\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -294,7 +294,7 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2017-static\x86-64-winxp64\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2017-winxp64-static\amd64\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -321,7 +321,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2017-static\x86-32-winxp\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2017-winxp-static\x86\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -347,7 +347,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2017-static\x86-64-winxp64\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2017-winxp64-static\amd64\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
@@ -374,7 +374,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\checked\vs2017-static\x86-32-winxp\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\checked\vs2017-winxp-static\x86\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
@@ -400,7 +400,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\checked\vs2017-static\x86-64-winxp64\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\checked\vs2017-winxp64-static\amd64\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
@@ -421,7 +421,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2017-shared\x86-32-winxp\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2017-winxp-shared\x86\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
@@ -441,7 +441,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\..\bin\debug\vs2017-shared\x86-64-winxp64\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\debug\vs2017-winxp64-shared\amd64\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -468,7 +468,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2017-shared\x86-32-winxp\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2017-winxp-shared\x86\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
@@ -494,7 +494,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\release\vs2017-shared\x86-64-winxp64\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\release\vs2017-winxp64-shared\amd64\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
@@ -521,7 +521,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\checked\vs2017-shared\x86-32-winxp\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\checked\vs2017-winxp-shared\x86\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
@@ -547,7 +547,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\..\bin\checked\vs2017-shared\x86-64-winxp64\openmpt-soundtouch.lib</ImportLibrary>
+      <ImportLibrary>..\..\..\bin\checked\vs2017-winxp64-shared\amd64\openmpt-soundtouch.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

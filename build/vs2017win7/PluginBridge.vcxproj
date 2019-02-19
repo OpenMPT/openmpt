@@ -176,84 +176,84 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2017-static\x86-32-win7\</OutDir>
+    <OutDir>..\..\bin\debug\vs2017-win7-static\x86\</OutDir>
     <IntDir>..\obj\vs2017win7\PluginBridge\x86\Debug\</IntDir>
     <TargetName>PluginBridge32</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2017-static\x86-64-win7\</OutDir>
+    <OutDir>..\..\bin\debug\vs2017-win7-static\amd64\</OutDir>
     <IntDir>..\obj\vs2017win7\PluginBridge\x86_64\Debug\</IntDir>
     <TargetName>PluginBridge64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2017-static\x86-32-win7\</OutDir>
+    <OutDir>..\..\bin\release\vs2017-win7-static\x86\</OutDir>
     <IntDir>..\obj\vs2017win7\PluginBridge\x86\Release\</IntDir>
     <TargetName>PluginBridge32</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2017-static\x86-64-win7\</OutDir>
+    <OutDir>..\..\bin\release\vs2017-win7-static\amd64\</OutDir>
     <IntDir>..\obj\vs2017win7\PluginBridge\x86_64\Release\</IntDir>
     <TargetName>PluginBridge64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2017-static\x86-32-win7\</OutDir>
+    <OutDir>..\..\bin\checked\vs2017-win7-static\x86\</OutDir>
     <IntDir>..\obj\vs2017win7\PluginBridge\x86\Checked\</IntDir>
     <TargetName>PluginBridge32</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2017-static\x86-64-win7\</OutDir>
+    <OutDir>..\..\bin\checked\vs2017-win7-static\amd64\</OutDir>
     <IntDir>..\obj\vs2017win7\PluginBridge\x86_64\Checked\</IntDir>
     <TargetName>PluginBridge64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2017-shared\x86-32-win7\</OutDir>
+    <OutDir>..\..\bin\debug\vs2017-win7-shared\x86\</OutDir>
     <IntDir>..\obj\vs2017win7\PluginBridge\x86\DebugShared\</IntDir>
     <TargetName>PluginBridge32</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2017-shared\x86-64-win7\</OutDir>
+    <OutDir>..\..\bin\debug\vs2017-win7-shared\amd64\</OutDir>
     <IntDir>..\obj\vs2017win7\PluginBridge\x86_64\DebugShared\</IntDir>
     <TargetName>PluginBridge64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2017-shared\x86-32-win7\</OutDir>
+    <OutDir>..\..\bin\release\vs2017-win7-shared\x86\</OutDir>
     <IntDir>..\obj\vs2017win7\PluginBridge\x86\ReleaseShared\</IntDir>
     <TargetName>PluginBridge32</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2017-shared\x86-64-win7\</OutDir>
+    <OutDir>..\..\bin\release\vs2017-win7-shared\amd64\</OutDir>
     <IntDir>..\obj\vs2017win7\PluginBridge\x86_64\ReleaseShared\</IntDir>
     <TargetName>PluginBridge64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2017-shared\x86-32-win7\</OutDir>
+    <OutDir>..\..\bin\checked\vs2017-win7-shared\x86\</OutDir>
     <IntDir>..\obj\vs2017win7\PluginBridge\x86\CheckedShared\</IntDir>
     <TargetName>PluginBridge32</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2017-shared\x86-64-win7\</OutDir>
+    <OutDir>..\..\bin\checked\vs2017-win7-shared\amd64\</OutDir>
     <IntDir>..\obj\vs2017win7\PluginBridge\x86_64\CheckedShared\</IntDir>
     <TargetName>PluginBridge64</TargetName>
     <TargetExt>.exe</TargetExt>
@@ -289,9 +289,9 @@
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-64-win7" mkdir "$(TargetDir)\..\x86-64-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"
-copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetName).pdb"</Command>
+      <Command>if not exist "$(TargetDir)\..\..\vs2017-win7-static\amd64" mkdir "$(TargetDir)\..\..\vs2017-win7-static\amd64"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\..\vs2017-win7-static\amd64\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\..\vs2017-win7-static\amd64\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -326,9 +326,9 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-32-win7" mkdir "$(TargetDir)\..\x86-32-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"
-copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetName).pdb"</Command>
+      <Command>if not exist "$(TargetDir)\..\..\vs2017-win7-static\x86" mkdir "$(TargetDir)\..\..\vs2017-win7-static\x86"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\..\vs2017-win7-static\x86\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\..\vs2017-win7-static\x86\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -370,9 +370,9 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-64-win7" mkdir "$(TargetDir)\..\x86-64-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"
-copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetName).pdb"</Command>
+      <Command>if not exist "$(TargetDir)\..\..\vs2017-win7-static\amd64" mkdir "$(TargetDir)\..\..\vs2017-win7-static\amd64"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\..\vs2017-win7-static\amd64\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\..\vs2017-win7-static\amd64\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -414,9 +414,9 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-32-win7" mkdir "$(TargetDir)\..\x86-32-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"
-copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetName).pdb"</Command>
+      <Command>if not exist "$(TargetDir)\..\..\vs2017-win7-static\x86" mkdir "$(TargetDir)\..\..\vs2017-win7-static\x86"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\..\vs2017-win7-static\x86\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\..\vs2017-win7-static\x86\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
@@ -458,9 +458,9 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-64-win7" mkdir "$(TargetDir)\..\x86-64-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"
-copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetName).pdb"</Command>
+      <Command>if not exist "$(TargetDir)\..\..\vs2017-win7-static\amd64" mkdir "$(TargetDir)\..\..\vs2017-win7-static\amd64"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\..\vs2017-win7-static\amd64\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\..\vs2017-win7-static\amd64\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
@@ -502,9 +502,9 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-32-win7" mkdir "$(TargetDir)\..\x86-32-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"
-copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetName).pdb"</Command>
+      <Command>if not exist "$(TargetDir)\..\..\vs2017-win7-static\x86" mkdir "$(TargetDir)\..\..\vs2017-win7-static\x86"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\..\vs2017-win7-static\x86\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\..\vs2017-win7-static\x86\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
@@ -539,9 +539,9 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-64-win7" mkdir "$(TargetDir)\..\x86-64-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"
-copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetName).pdb"</Command>
+      <Command>if not exist "$(TargetDir)\..\..\vs2017-win7-shared\amd64" mkdir "$(TargetDir)\..\..\vs2017-win7-shared\amd64"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\..\vs2017-win7-shared\amd64\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\..\vs2017-win7-shared\amd64\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
@@ -577,9 +577,9 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-32-win7" mkdir "$(TargetDir)\..\x86-32-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"
-copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetName).pdb"</Command>
+      <Command>if not exist "$(TargetDir)\..\..\vs2017-win7-shared\x86" mkdir "$(TargetDir)\..\..\vs2017-win7-shared\x86"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\..\vs2017-win7-shared\x86\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\..\vs2017-win7-shared\x86\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -621,9 +621,9 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-64-win7" mkdir "$(TargetDir)\..\x86-64-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"
-copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetName).pdb"</Command>
+      <Command>if not exist "$(TargetDir)\..\..\vs2017-win7-shared\amd64" mkdir "$(TargetDir)\..\..\vs2017-win7-shared\amd64"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\..\vs2017-win7-shared\amd64\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\..\vs2017-win7-shared\amd64\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
@@ -665,9 +665,9 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-32-win7" mkdir "$(TargetDir)\..\x86-32-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"
-copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetName).pdb"</Command>
+      <Command>if not exist "$(TargetDir)\..\..\vs2017-win7-shared\x86" mkdir "$(TargetDir)\..\..\vs2017-win7-shared\x86"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\..\vs2017-win7-shared\x86\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\..\vs2017-win7-shared\x86\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
@@ -709,9 +709,9 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetNa
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-64-win7" mkdir "$(TargetDir)\..\x86-64-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-64-win7\$(TargetFileName)"
-copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetName).pdb"</Command>
+      <Command>if not exist "$(TargetDir)\..\..\vs2017-win7-shared\amd64" mkdir "$(TargetDir)\..\..\vs2017-win7-shared\amd64"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\..\vs2017-win7-shared\amd64\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\..\vs2017-win7-shared\amd64\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
@@ -753,9 +753,9 @@ copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-64-win7\$(TargetNa
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>if not exist "$(TargetDir)\..\x86-32-win7" mkdir "$(TargetDir)\..\x86-32-win7"
-copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\x86-32-win7\$(TargetFileName)"
-copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\x86-32-win7\$(TargetName).pdb"</Command>
+      <Command>if not exist "$(TargetDir)\..\..\vs2017-win7-shared\x86" mkdir "$(TargetDir)\..\..\vs2017-win7-shared\x86"
+copy /y "$(TargetDir)\$(TargetFileName)" "$(TargetDir)\..\..\vs2017-win7-shared\x86\$(TargetFileName)"
+copy /y "$(TargetDir)\$(TargetName).pdb" "$(TargetDir)\..\..\vs2017-win7-shared\x86\$(TargetName).pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

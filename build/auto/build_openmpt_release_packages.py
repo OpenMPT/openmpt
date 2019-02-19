@@ -103,16 +103,16 @@ if singleThreaded:
 
 print("Copying 32-bit binaries...")
 shutil.rmtree(openmpt_zip_32bit_basepath, ignore_errors=True)
-copy_binaries("bin/release/vs2017-static/x86-32-win7/", openmpt_zip_32bit_path)
+copy_binaries("bin/release/vs2017-win7-static/x86/", openmpt_zip_32bit_path)
 print("Copying 32-bit legacy binaries...")
 shutil.rmtree(openmpt_zip_32bitold_basepath, ignore_errors=True)
-copy_binaries("bin/release/vs2017-static/x86-32-winxp/", openmpt_zip_32bitold_path)
+copy_binaries("bin/release/vs2017-winxp-static/x86/", openmpt_zip_32bitold_path)
 print("Copying 64-bit binaries...")
 shutil.rmtree(openmpt_zip_64bit_basepath, ignore_errors=True)
-copy_binaries("bin/release/vs2017-static/x86-64-win7/", openmpt_zip_64bit_path)
+copy_binaries("bin/release/vs2017-win7-static/amd64/", openmpt_zip_64bit_path)
 print("Copying 64-bit legacy binaries...")
 shutil.rmtree(openmpt_zip_64bitold_basepath, ignore_errors=True)
-copy_binaries("bin/release/vs2017-static/x86-64-winxp64/", openmpt_zip_64bitold_path)
+copy_binaries("bin/release/vs2017-winxp64-static/amd64/", openmpt_zip_64bitold_path)
 
 if not singleThreaded:
 	pManual.communicate()

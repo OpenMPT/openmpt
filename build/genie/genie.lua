@@ -31,11 +31,11 @@ newoption {
 
 if _OPTIONS["target"] == "windesktop81" then
 	mpt_projectpathname = "vs2017win81"
-	mpt_bindirsuffix = "vs2017win81"
+	mpt_bindirsuffix = "win81"
 end
 if _OPTIONS["target"] == "winstore82" then
 	mpt_projectpathname = "vs2017uwp"
-	mpt_bindirsuffix = "vs2017uwp"
+	mpt_bindirsuffix = "uwp"
 end
 --mpt_projectpathname = _OPTIONS["target"]
 --mpt_bindirsuffix = _OPTIONS["target"]
