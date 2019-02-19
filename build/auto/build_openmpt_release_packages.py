@@ -74,9 +74,9 @@ def copy_binaries(from_path, to_path):
     copy_file(from_path, to_path, "mptrack.exe")
     copy_file(from_path, to_path, "PluginBridge32.exe")
     copy_file(from_path, to_path, "PluginBridge64.exe")
-    copy_file(from_path, to_path, "OpenMPT_SoundTouch_f32.dll")
     copy_file(from_path, to_path, "openmpt-lame.dll")
     copy_file(from_path, to_path, "openmpt-mpg123.dll")
+    copy_file(from_path, to_path, "openmpt-soundtouch.dll")
     copy_file(from_path, to_path, "openmpt-wine-support.zip")
 
 def copy_other(to_path, openmpt_version_short):
