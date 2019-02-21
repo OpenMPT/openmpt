@@ -1,5 +1,5 @@
 #define PlatformFolder    "release\vs2017-win7-static\amd64"
-#define PlatformFolderOld "release\vs2017-winxp64-static\amd64"
+#define PlatformFolderOld "release\vs2017-winxp-static\amd64"
 #define PlatformName "64-Bit"
 #define BaseNameAddition "-x64"
 #define PlatformArchitecture "x64"

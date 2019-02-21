@@ -63,7 +63,7 @@ elseif _OPTIONS["xp"] then
 	mpt_projectpathname = _ACTION .. "winxp"
 	mpt_bindirsuffix = "winxp"
 	mpt_bindirsuffix32 = "winxp"
-	mpt_bindirsuffix64 = "winxp64"
+	mpt_bindirsuffix64 = "winxp"
 else
 	allplatforms = { "x86", "x86_64" }
 	trkplatforms = { "x86", "x86_64" }

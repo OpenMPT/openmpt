@@ -77,9 +77,9 @@
 	elseif _OPTIONS["xp"] then
 		filter { "architecture:x86", "configurations:*Shared" }
 			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-shared\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-shared\\amd64\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-shared\\amd64\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-shared\\amd64\\$(TargetName).pdb\"",
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\amd64\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\amd64\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\amd64\\$(TargetName).pdb\"",
 			}
 		filter { "architecture:x86_64", "configurations:*Shared" }
 			postbuildcommands {
@@ -89,9 +89,9 @@
 			}
 		filter { "architecture:x86", "not configurations:*Shared" }
 			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-static\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-static\\amd64\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-static\\amd64\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp64-static\\amd64\\$(TargetName).pdb\"",
+				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\amd64\"",
+				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\amd64\\$(TargetFileName)\"",
+				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\amd64\\$(TargetName).pdb\"",
 			}
 		filter { "architecture:x86_64", "not configurations:*Shared" }
 			postbuildcommands {
