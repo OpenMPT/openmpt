@@ -220,7 +220,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 
 		const mpt::PathString exeName = (binType == bin32Bit) ? pluginBridge32->GetFileName() : pluginBridge64->GetFileName();
 	
-		otherPtrSize = binType;
+		otherPtrSize = binType / 8;
 
 		// Command-line must be a modifiable string...
 		wchar_t cmdLine[128];
