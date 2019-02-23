@@ -370,7 +370,7 @@ bool uiIsGlobalPasswordSet()
 
 void uiAlarm(UIALARM_TYPE Type)
 {
-  if (uiSoundEnabled)
+  if (uiSoundNotify==SOUND_NOTIFY_ON)
   {
     static clock_t LastTime=-10; // Negative to always beep first time.
     if ((MonoClock()-LastTime)/CLOCKS_PER_SEC>5)

@@ -87,7 +87,7 @@ void CmdExtract::ExtractArchiveInit(Archive &Arc)
   FirstFile=true;
 #endif
 
-  GlobalPassword=Cmd->Password.IsSet();
+  GlobalPassword=Cmd->Password.IsSet() || uiIsGlobalPasswordSet();
 
   DataIO.UnpVolume=false;
 
@@ -298,7 +298,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
 
   bool EqualNames=false;
   wchar MatchedArg[NM];
-  int MatchNumber=Cmd->IsProcessFile(Arc.FileHead,&EqualNames,MatchType,MatchedArg,ASIZE(MatchedArg));
+  int MatchNumber=Cmd->IsProcessFile(Arc.FileHead,&EqualNames,MatchType,0,MatchedArg,ASIZE(MatchedArg));
   bool MatchFound=MatchNumber!=0;
 #ifndef SFX_MODULE
   if (Cmd->ExclPath==EXCL_BASEPATH)
@@ -475,7 +475,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
           memcmp(Arc.FileHead.PswCheck,PswCheck,SIZE_PSWCHECK)!=0 &&
           !Arc.BrokenHeader)
       {
-        if (GlobalPassword) // For -p<pwd> or Ctrl+P.
+        if (GlobalPassword) // For -p<pwd> or Ctrl+P to avoid the infinite loop.
         {
           // This message is used by Android GUI to reset cached passwords.
           // Update appropriate code if changed.

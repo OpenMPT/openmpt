@@ -271,7 +271,7 @@ void RarTime::SetIsoText(const wchar *TimeText)
 void RarTime::SetAgeText(const wchar *TimeText)
 {
   uint Seconds=0,Value=0;
-  for (int I=0;TimeText[I]!=0;I++)
+  for (uint I=0;TimeText[I]!=0;I++)
   {
     int Ch=TimeText[I];
     if (IsDigit(Ch))

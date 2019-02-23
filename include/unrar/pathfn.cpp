@@ -121,7 +121,14 @@ bool CmpExt(const wchar *Name,const wchar *Ext)
 
 bool IsWildcard(const wchar *Str)
 {
-  return Str==NULL ? false:wcspbrk(Str,L"*?")!=NULL;
+  if (Str==NULL)
+    return false;
+#ifdef _WIN_ALL
+  // Not treat the special NTFS \\?\d: path prefix as a wildcard.
+  if (Str[0]=='\\' && Str[1]=='\\' && Str[2]=='?' && Str[3]=='\\')
+    Str+=4;
+#endif
+  return wcspbrk(Str,L"*?")!=NULL;
 }
 
 

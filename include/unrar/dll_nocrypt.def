@@ -5,11 +5,9 @@ EXPORTS
   RARReadHeader
   RARReadHeaderEx
   RARProcessFile
+  RARProcessFileW
   RARSetCallback
   RARSetChangeVolProc
   RARSetProcessDataProc
-  RARSetPassword
+;  RARSetPassword
   RARGetDllVersion
-  ; OPENMPT ADDITION
-  RARProcessFileW
-  RARGetCommentW

@@ -147,5 +147,5 @@
 		buildoptions { "/wd4996" }
   filter {}
   filter { "kind:SharedLib" }
-   files { "../../include/unrar/dll.def" }
+   files { "../../include/unrar/dll_nocrypt.def" }
   filter {}

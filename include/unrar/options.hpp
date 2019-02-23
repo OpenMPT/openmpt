@@ -69,6 +69,10 @@ enum POWER_MODE {
   POWERMODE_RESTART
 };
 
+
+// Need "forced off" state to turn off sound in GUI command line.
+enum SOUND_NOTIFY_MODE {SOUND_NOTIFY_DEFAULT=0,SOUND_NOTIFY_ON,SOUND_NOTIFY_OFF};
+
 struct FilterMode
 {
   FilterState State;
@@ -113,7 +117,7 @@ class RAROptions
 
     wchar LogName[NM];
     MESSAGE_TYPE MsgStream;
-    bool Sound;
+    SOUND_NOTIFY_MODE Sound;
     OVERWRITE_MODE Overwrite;
     int Method;
     HASH_TYPE HashType;
@@ -164,12 +168,10 @@ class RAROptions
     bool SaveStreams;
     bool SetCompressedAttr;
     bool IgnoreGeneralAttr;
-    RarTime FileMtimeBefore;
-    RarTime FileMtimeAfter;
-    RarTime FileCtimeBefore;
-    RarTime FileCtimeAfter;
-    RarTime FileAtimeBefore;
-    RarTime FileAtimeAfter;
+    RarTime FileMtimeBefore,FileCtimeBefore,FileAtimeBefore;
+    bool FileMtimeBeforeOR,FileCtimeBeforeOR,FileAtimeBeforeOR;
+    RarTime FileMtimeAfter,FileCtimeAfter,FileAtimeAfter;
+    bool FileMtimeAfterOR,FileCtimeAfterOR,FileAtimeAfterOR;
     int64 FileSizeLess;
     int64 FileSizeMore;
     bool Lock;

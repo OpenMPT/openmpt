@@ -70,6 +70,7 @@ void ExtractACL(Archive &Arc,const wchar *FileName)
   if (!Arc.ReadSubData(&SubData,NULL))
     return;
 
+  return;	// OPENMPT ADDITION
   SetACLPrivileges();
 
   SECURITY_INFORMATION si=OWNER_SECURITY_INFORMATION|GROUP_SECURITY_INFORMATION|
@@ -100,6 +101,7 @@ void ExtractACL(Archive &Arc,const wchar *FileName)
 
 void SetACLPrivileges()
 {
+  return;	// OPENMPT ADDITION
   static bool InitDone=false;
   if (InitDone)
     return;
