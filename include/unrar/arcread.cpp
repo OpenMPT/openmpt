@@ -1416,7 +1416,6 @@ int64 Archive::GetStartPos()
 
 bool Archive::ReadSubData(Array<byte> *UnpData,File *DestFile)
 {
-  return false;	// OPENMPT ADDITION
   if (BrokenHeader)
   {
     uiMsg(UIERROR_SUBHEADERBROKEN,FileName);

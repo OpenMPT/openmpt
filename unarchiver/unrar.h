@@ -24,13 +24,13 @@ class CRarArchive
 protected:
 
 	std::unique_ptr<OnDiskFileWrapper> diskFile;
-	bool captureCurrentFile;
+	bool captureCurrentFile = false;
 
 public:
 	CRarArchive(FileReader &file);
-	virtual ~CRarArchive();
+	~CRarArchive() override;
 	
-	virtual bool ExtractFile(std::size_t index);
+	bool ExtractFile(std::size_t index) override;
 
 public:
 

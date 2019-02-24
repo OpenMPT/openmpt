@@ -157,8 +157,7 @@ bool File::WOpen(const wchar *Name)
 
 bool File::Create(const wchar *Name,uint Mode)
 {
-  return false;	// OPENMPT ADDITION
-  /*	// OPENMPT ADDITION
+  return false;	/* // OPENMPT ADDITION
   // OpenIndiana based NAS and CIFS shares fail to set the file time if file
   // was created in read+write mode and some data was written and not flushed
   // before SetFileTime call. So we should use the write only mode if we plan
@@ -282,8 +281,7 @@ bool File::Rename(const wchar *NewName)
 
 bool File::Write(const void *Data,size_t Size)
 {
-  return true;	// OPENMPT ADDITION
-  /* 	// OPENMPT ADDITION
+  return true;	/* // OPENMPT ADDITION
   if (Size==0)
     return true;
   if (HandleType==FILE_HANDLESTD)
@@ -532,7 +530,7 @@ int64 File::Tell()
 
 void File::Prealloc(int64 Size)
 {
-  /*	// OPENMPT ADDITION
+  /* // OPENMPT ADDITION
 #ifdef _WIN_ALL
   if (RawSeek(Size,SEEK_SET))
   {
@@ -568,8 +566,7 @@ void File::PutByte(byte Byte)
 
 bool File::Truncate()
 {
-  return false;	// OPENMPT ADDITION
-  /*	// OPENMPT ADDITION
+  return false;	/* // OPENMPT ADDITION
 #ifdef _WIN_ALL
   return SetEndOfFile(hFile)==TRUE;
 #else
@@ -581,8 +578,7 @@ bool File::Truncate()
 
 void File::Flush()
 {
-  return; // OPENMPT ADDITION
-  /*	// OPENMPT ADDITION
+  return; /* // OPENMPT ADDITION
 #ifdef _WIN_ALL
   FlushFileBuffers(hFile);
 #else

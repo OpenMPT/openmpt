@@ -76,7 +76,7 @@ enum UIASKREP_RESULT {
 UIASKREP_RESULT uiAskReplace(wchar *Name,size_t MaxNameSize,int64 FileSize,RarTime *FileTime,uint Flags);
 UIASKREP_RESULT uiAskReplaceEx(RAROptions *Cmd,wchar *Name,size_t MaxNameSize,int64 FileSize,RarTime *FileTime,uint Flags);
 
-void uiInit(bool Sound);
+void uiInit(SOUND_NOTIFY_MODE Sound);
 
 
 void uiStartArchiveExtract(bool Extract,const wchar *ArcName);

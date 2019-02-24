@@ -91,7 +91,7 @@ void ListArchive(CommandData *Cmd)
           switch(HeaderType)
           {
             case HEAD_FILE:
-              FileMatched=Cmd->IsProcessFile(Arc.FileHead)!=0;
+              FileMatched=Cmd->IsProcessFile(Arc.FileHead,NULL,MATCH_WILDSUBPATH,0,NULL,0)!=0;
               if (FileMatched)
               {
                 ListFileHeader(Arc,Arc.FileHead,TitleShown,Verbose,Technical,Bare);

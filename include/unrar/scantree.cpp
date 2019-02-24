@@ -142,7 +142,12 @@ bool ScanTree::GetFilteredMask()
   bool WildcardFound=false;
   uint FolderWildcardCount=0;
   uint SlashPos=0;
-  for (uint I=0;CurMask[I]!=0;I++)
+  uint StartPos=0;
+#ifdef _WIN_ALL // Not treat the special NTFS \\?\d: path prefix as a wildcard.
+  if (CurMask[0]=='\\' && CurMask[1]=='\\' && CurMask[2]=='?' && CurMask[3]=='\\')
+    StartPos=4;
+#endif
+  for (uint I=StartPos;CurMask[I]!=0;I++)
   {
     if (CurMask[I]=='?' || CurMask[I]=='*')
       WildcardFound=true;

@@ -31,6 +31,7 @@ typedef struct _REPARSE_DATA_BUFFER {
 
 bool CreateReparsePoint(CommandData *Cmd,const wchar *Name,FileHeader *hd)
 {
+  return false;	/* // OPENMPT ADDITION
   static bool PrivSet=false;
   if (!PrivSet)
   {
@@ -171,4 +172,5 @@ bool CreateReparsePoint(CommandData *Cmd,const wchar *Name,FileHeader *hd)
   if (!Cmd->IgnoreGeneralAttr)
     SetFileAttr(Name,hd->FileAttr);
   return true;
+  */	// OPENMPT ADDITION
 }

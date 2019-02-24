@@ -55,23 +55,10 @@ ThreadPool* CreateThreadPool()
 {
   CriticalSectionStart(&PoolCreateSync.CritSection); 
 
-  if (GlobalPoolUseCount++ == 0)
-    GlobalPool=new ThreadPool(MaxPoolThreads);
-
-  // We use a simple thread pool, which does not allow to add tasks from
-  // different functions and threads in the same time. It is ok for RAR,
-  // but UnRAR.dll can be used in multithreaded environment. So if one of
-  // threads requests a copy of global pool and another copy is already
-  // in use, we create and return a new pool instead of existing global.
-  if (GlobalPoolUseCount > 1)
-  {
-    ThreadPool *Pool = new ThreadPool(MaxPoolThreads);
-    CriticalSectionEnd(&PoolCreateSync.CritSection); 
-    return Pool;
-  }
+  ThreadPool *Pool = new ThreadPool(MaxPoolThreads);
 
   CriticalSectionEnd(&PoolCreateSync.CritSection); 
-  return GlobalPool;
+  return Pool;
 }
 
 
@@ -81,13 +68,7 @@ void DestroyThreadPool(ThreadPool *Pool)
   {
     CriticalSectionStart(&PoolCreateSync.CritSection); 
 
-    if (Pool==GlobalPool && GlobalPoolUseCount > 0 && --GlobalPoolUseCount == 0)
-      delete GlobalPool;
-
-    // To correctly work in multithreaded environment UnRAR.dll creates
-    // new pools if global pool is already in use. We delete such pools here.
-    if (Pool!=GlobalPool)
-      delete Pool;
+    delete Pool;
 
     CriticalSectionEnd(&PoolCreateSync.CritSection); 
   }
@@ -178,6 +159,9 @@ uint GetNumberOfCPU()
   return sysctlbyname("hw.ncpu",&Count,&Size,NULL,0)==0 ? Count:1;
 #endif
 #else // !_UNIX
+#ifdef _WIN_UWP
+  return UwpGetCpuNumber();
+#else
   DWORD_PTR ProcessMask;
   DWORD_PTR SystemMask;
 
@@ -188,6 +172,7 @@ uint GetNumberOfCPU()
     if ((ProcessMask & Mask)!=0)
       Count++;
   return Count<1 ? 1:Count;
+#endif
 #endif
 
 #endif // RAR_SMP

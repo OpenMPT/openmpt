@@ -32,9 +32,12 @@
 #define STRICT 1
 #endif
 
-#ifndef UNICODE // OPENMPT ADDITION
+// 'ifndef' check here is needed for unrar.dll header to avoid macro
+// re-definition warnings in third party projects.
+#ifndef UNICODE
 #define UNICODE
-#endif // OPENMPT ADDITION
+#endif
+
 #undef WINVER
 #undef _WIN32_WINNT
 #define WINVER 0x0501

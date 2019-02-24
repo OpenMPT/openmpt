@@ -813,7 +813,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2017-shared\x86-32-win10\openmpt-unrar.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/unrar/dll.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
@@ -834,7 +834,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2017-shared\x86-64-win10\openmpt-unrar.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/unrar/dll.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
@@ -856,7 +856,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>advapi32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\..\bin\debug\vs2017-shared\arm-32-win10\openmpt-unrar.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/unrar/dll.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'">
@@ -878,7 +878,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>advapi32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\..\bin\debug\vs2017-shared\arm-64-win10\openmpt-unrar.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/unrar/dll.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -906,7 +906,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2017-shared\x86-32-win10\openmpt-unrar.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/unrar/dll.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
@@ -933,7 +933,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2017-shared\x86-64-win10\openmpt-unrar.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/unrar/dll.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
@@ -961,7 +961,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>advapi32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\..\bin\release\vs2017-shared\arm-32-win10\openmpt-unrar.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/unrar/dll.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'">
@@ -989,7 +989,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>advapi32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\..\bin\release\vs2017-shared\arm-64-win10\openmpt-unrar.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/unrar/dll.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
@@ -1017,7 +1017,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2017-shared\x86-32-win10\openmpt-unrar.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/unrar/dll.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
@@ -1044,7 +1044,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2017-shared\x86-64-win10\openmpt-unrar.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/unrar/dll.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM'">
@@ -1072,7 +1072,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>advapi32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\..\bin\checked\vs2017-shared\arm-32-win10\openmpt-unrar.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/unrar/dll.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'">
@@ -1100,7 +1100,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>advapi32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\..\bin\checked\vs2017-shared\arm-64-win10\openmpt-unrar.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/unrar/dll.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -1222,7 +1222,7 @@
     <ClCompile Include="..\..\..\include\unrar\volume.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\include\unrar\dll.def" />
+    <None Include="..\..\..\include\unrar\dll_nocrypt.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

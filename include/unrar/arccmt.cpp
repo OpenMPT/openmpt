@@ -34,7 +34,7 @@ bool Archive::GetComment(Array<wchar> *CmtData)
 #ifndef SFX_MODULE
     // Old style (RAR 2.9) comment header embedded into the main 
     // archive header.
-    if (BrokenHeader)
+    if (BrokenHeader || CommHead.HeadSize<SIZEOF_COMMHEAD)
     {
       uiMsg(UIERROR_CMTBROKEN,FileName);
       return false;
@@ -57,6 +57,8 @@ bool Archive::GetComment(Array<wchar> *CmtData)
 #else
       UnpCmtLength=GetByte();
       UnpCmtLength+=(GetByte()<<8);
+      if (CmtLength<2)
+        return false;
       CmtLength-=2;
       DataIO.SetCmt13Encryption();
       CommHead.UnpVer=15;
