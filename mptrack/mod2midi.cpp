@@ -28,7 +28,7 @@ namespace MidiExport
 	// MIDI file resolution
 	const int32 ppq = 480;
 
-	enum StringType
+	enum StringType : uint8
 	{
 		kText = 1,
 		kCopyright = 2,
@@ -46,6 +46,7 @@ namespace MidiExport
 		const CSoundFile &m_sndFile;
 		MidiTrack *m_tempoTrack;	// Pointer to tempo track, nullptr if this is the tempo track
 		decltype(m_MidiCh) *m_lastMidiCh = nullptr;
+		std::array<decltype(m_instr.midiPWD), 16> m_pitchWheelDepth = { 0 };
 
 		std::ostringstream f;
 		double m_tempo = 0.0;
@@ -83,6 +84,13 @@ namespace MidiExport
 			}
 		}
 
+		void SynchronizeMidiPitchWheelDepth(CHANNELINDEX trackerChn)
+		{
+			const auto midiCh = GetMidiChannel(trackerChn);
+			if (!m_overlappingInstruments && m_tempoTrack && m_tempoTrack->m_pitchWheelDepth[midiCh] != m_instr.midiPWD)
+				WritePitchWheelDepth(static_cast<MidiChannel>(midiCh + MidiFirstChannel));
+		}
+
 	public:
 
 		operator ModInstrument& () { return m_instr; }
@@ -104,23 +112,23 @@ namespace MidiExport
 			m_pMixStruct->pMixPlugin = this;
 		}
 
-		void WritePitchWheelDepth()
+		void WritePitchWheelDepth(MidiChannel midiChOverride = MidiNoChannel)
 		{
 			// Set up MIDI pitch wheel depth
-			uint8 firstCh = m_instr.nMidiChannel, lastCh = m_instr.nMidiChannel;
-			if(firstCh == MidiMappedChannel || firstCh == MidiNoChannel)
+			uint8 firstCh = 0, lastCh = 15;
+			if(midiChOverride != MidiNoChannel)
+				firstCh = lastCh = midiChOverride - MidiFirstChannel;
+			else if(m_instr.nMidiChannel != MidiMappedChannel && m_instr.nMidiChannel != MidiNoChannel)
+				firstCh = lastCh = m_instr.nMidiChannel - MidiFirstChannel;
+			
+			for(uint8 i = firstCh; i <= lastCh; i++)
 			{
-				firstCh = 0;
-				lastCh = 16;
-			} else
-			{
-				firstCh--;
-			}
-			for(uint8 i = firstCh; i < lastCh; i++)
-			{
-				uint8 ch = 0xB0 | i;
-				uint8 msg[12] = { 0x00, ch, 0x64, 0x00, 0x00, ch, 0x65, 0x00, 0x00, ch, 0x06, static_cast<uint8>(mpt::abs(m_instr.midiPWD)) };
-				mpt::IO::WriteRaw(f, msg, 12);
+				const uint8 ch = 0xB0 | i;
+				const uint8 msg[] = { ch, 0x64, 0x00, 0x00, ch, 0x65, 0x00, 0x00, ch, 0x06, static_cast<uint8>(mpt::abs(m_instr.midiPWD)) };
+				WriteTicks();
+				mpt::IO::WriteRaw(f, msg, sizeof(msg));
+				if(m_tempoTrack)
+					m_tempoTrack->m_pitchWheelDepth[i] = m_instr.midiPWD;
 			}
 		}
 
@@ -211,7 +219,7 @@ namespace MidiExport
 		{
 			if(str.length() > 0)
 			{
-				uint8 msg[3] = { 0x00, 0xFF, static_cast<uint8>(strType) };
+				uint8 msg[3] = { 0x00, 0xFF, strType };
 				mpt::IO::WriteRaw(f, msg, 3);
 				mpt::IO::WriteVarInt(f, str.length());
 				mpt::IO::WriteRaw(f, str.c_str(), str.length());
@@ -223,7 +231,7 @@ namespace MidiExport
 			const size_t len = strlen(str);
 			if(len > 0)
 			{
-				uint8 msg[3] = { 0x00, 0xFF, static_cast<uint8>(strType) };
+				uint8 msg[3] = { 0x00, 0xFF, strType };
 				mpt::IO::WriteRaw(f, msg, 3);
 				mpt::IO::WriteVarInt(f, len);
 				mpt::IO::WriteRaw(f, str, len);
@@ -254,7 +262,6 @@ namespace MidiExport
 			WriteTicks();
 			char midiData[4];
 			memcpy(midiData, &dwMidiCode, 4);
-			// TODO: If channels are shared between tracks, program change events need to be inserted!
 			mpt::IO::WriteRaw(f, midiData, MIDIEvents::GetEventLength(midiData[0]));
 			return true;
 		}
@@ -300,12 +307,14 @@ namespace MidiExport
 		void MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackerChn) override
 		{
 			SynchronizeMidiChannelState();
+			SynchronizeMidiPitchWheelDepth(trackerChn);
 			IMidiPlugin::MidiPitchBend(increment, pwd, trackerChn);
 		}
 
 		void MidiVibrato(int32 depth, int8 pwd, CHANNELINDEX trackerChn) override
 		{
 			SynchronizeMidiChannelState();
+			SynchronizeMidiPitchWheelDepth(trackerChn);
 			IMidiPlugin::MidiVibrato(depth, pwd, trackerChn);
 		}
 
@@ -397,7 +406,7 @@ namespace MidiExport
 			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 			{
 				m_sndFile.Instruments[i] = nullptr;
-				if(instrMap[i].channel == MidiNoChannel || !m_sndFile.GetpModDoc()->IsInstrumentUsed(i) || (m_wasInstrumentMode && m_oldInstruments[i - 1] == nullptr) || nextPlug >= MAX_MIXPLUGINS)
+				if(!m_sndFile.GetpModDoc()->IsInstrumentUsed(i) || (m_wasInstrumentMode && m_oldInstruments[i - 1] == nullptr) || nextPlug >= MAX_MIXPLUGINS)
 				{
 					continue;
 				}
@@ -421,7 +430,11 @@ namespace MidiExport
 				}
 
 				instr.nMidiChannel = instrMap[i].channel;
-				if(instrMap[i].channel != MidiFirstChannel + 9)
+				if (instrMap[i].channel == MidiNoChannel)
+				{
+					// Do not export
+					instr.nMidiProgram = MidiNoChannel;
+				} else if(instrMap[i].channel != MidiFirstChannel + 9)
 				{
 					// Melodic instrument
 					instr.nMidiProgram = instrMap[i].program + 1;
