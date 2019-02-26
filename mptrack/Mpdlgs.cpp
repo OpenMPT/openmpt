@@ -1654,11 +1654,7 @@ BOOL CMidiSetupDlg::OnInitDialog()
 
 	// Aftertouch behaviour
 	m_ATBehaviour.ResetContent();
-	static const struct
-	{
-		const TCHAR *text;
-		RecordAftertouchOptions option;
-	} aftertouchOptions[] =
+	static constexpr std::pair<const TCHAR *, RecordAftertouchOptions> aftertouchOptions[] =
 	{
 		{ _T("Do not record Aftertouch"), atDoNotRecord },
 		{ _T("Record as Volume Commands"), atRecordAsVolume },
@@ -1667,9 +1663,9 @@ BOOL CMidiSetupDlg::OnInitDialog()
 
 	for(const auto &atOpt : aftertouchOptions)
 	{
-		int item = m_ATBehaviour.AddString(atOpt.text);
-		m_ATBehaviour.SetItemData(item, atOpt.option);
-		if(atOpt.option == TrackerSettings::Instance().aftertouchBehaviour)
+		int item = m_ATBehaviour.AddString(atOpt.first);
+		m_ATBehaviour.SetItemData(item, atOpt.second);
+		if(atOpt.second == TrackerSettings::Instance().aftertouchBehaviour)
 		{
 			m_ATBehaviour.SetCurSel(item);
 		}
@@ -1684,11 +1680,25 @@ BOOL CMidiSetupDlg::OnInitDialog()
 	// Midi Import settings
 	SetDlgItemInt(IDC_EDIT1, TrackerSettings::Instance().midiImportTicks);
 	SetDlgItemInt(IDC_EDIT2, TrackerSettings::Instance().midiImportPatternLen);
-	for(uint32 i = 2; i < 7; i++)
+
+	// Note quantization
+	m_Quantize.ResetContent();
+	static constexpr std::pair<const TCHAR *, uint32> quantizeOptions[] =
 	{
-		if((1u << i) == TrackerSettings::Instance().midiImportQuantize)
+		{ _T("1/4th Notes"),  4 },  { _T("1/6th Notes"),  6 },
+		{ _T("1/8th Notes"),  8 },  { _T("1/12th Notes"), 12 },
+		{ _T("1/16th Notes"), 16 }, { _T("1/24th Notes"), 24 },
+		{ _T("1/32nd Notes"), 32 }, { _T("1/48th Notes"), 48 },
+		{ _T("1/64th Notes"), 64 }, { _T("1/96th Notes"), 96 },
+	};
+
+	for(const auto &quantOpt : quantizeOptions)
+	{
+		int item = m_Quantize.AddString(quantOpt.first);
+		m_Quantize.SetItemData(item, quantOpt.second);
+		if(quantOpt.second == TrackerSettings::Instance().midiImportQuantize)
 		{
-			m_Quantize.SetCurSel(i - 2);
+			m_Quantize.SetCurSel(item);
 		}
 	}
 	m_SpinSpd.SetRange(2, 16);
@@ -1776,7 +1786,7 @@ void CMidiSetupDlg::OnOK()
 	TrackerSettings::Instance().midiImportPatternLen = Clamp(GetDlgItemInt(IDC_EDIT2), ROWINDEX(1), MAX_PATTERN_ROWS);
 	if(m_Quantize.GetCurSel() != -1)
 	{
-		TrackerSettings::Instance().midiImportQuantize = 1 << (m_Quantize.GetCurSel() + 2);
+		TrackerSettings::Instance().midiImportQuantize = static_cast<uint32>(m_Quantize.GetItemData(m_Quantize.GetCurSel()));
 	}
 
 	if (pMainFrm) pMainFrm->SetupMidi(m_dwMidiSetup, m_nMidiDevice);
