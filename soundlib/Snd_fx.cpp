@@ -1452,7 +1452,6 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 
 	if(returnAfterVolumeAdjust) return;
 
-
 	// Instrument adjust
 	chn.nNewIns = 0;
 
@@ -4504,6 +4503,15 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 				{
 					chn.nFineTune = MOD2XMFineTune(param);
 					if(chn.nPeriod && chn.rowCommand.IsNote()) chn.nPeriod = GetPeriodFromNote(chn.nNote, chn.nFineTune, chn.nC5Speed);
+				} else if(GetType() == MOD_TYPE_MTM)
+				{
+					if(chn.rowCommand.IsNote() && chn.pModSample != nullptr)
+					{
+						// Effect is permanent in MultiTracker
+						const_cast<ModSample *>(chn.pModSample)->nFineTune = param;
+						chn.nFineTune = param;
+						if(chn.nPeriod) chn.nPeriod = GetPeriodFromNote(chn.nNote, chn.nFineTune, chn.nC5Speed);
+					}
 				} else if(chn.rowCommand.IsNote())
 				{
 					chn.nFineTune = MOD2XMFineTune(param - 8);
@@ -5854,15 +5862,18 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 			return Util::muldiv_unsigned(8363, (FreqS3MTable[note % 12u] << 5), nC5Speed << (note / 12u));
 			//8363 * freq[note%12] / nC5Speed * 2^(5-note/12)
 		}
-	} else if (GetType() == MOD_TYPE_XM)
+	} else if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MTM))
 	{
 		if (note < 12) note = 12;
 		note -= 12;
 
-		// FT2 Compatibility: The lower three bits of the finetune are truncated.
-		// Test case: Finetune-Precision.xm
-		if(m_playBehaviour[kFT2FinetunePrecision])
+		if(GetType() == MOD_TYPE_MTM)
 		{
+			nFineTune *= 16;
+		} else if(m_playBehaviour[kFT2FinetunePrecision])
+		{
+			// FT2 Compatibility: The lower three bits of the finetune are truncated.
+			// Test case: Finetune-Precision.xm
 			nFineTune &= ~7;
 		}
 
@@ -5909,7 +5920,7 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPeriodFrac) const
 {
 	if (!period) return 0;
-	if (GetType() == MOD_TYPE_XM)
+	if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MTM))
 	{
 		if(m_playBehaviour[kFT2Periods])
 		{
