@@ -662,10 +662,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				
 				case 0xB0:
 					// Pattern Loop
-					if (param & 0x0F)
-					{
-						patternLoopEndedOnThisRow = true;
-					} else
 					{
 						CHANNELINDEX firstChn = nChn, lastChn = nChn;
 						if(GetType() == MOD_TYPE_S3M)
@@ -674,13 +670,28 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							firstChn = 0;
 							lastChn = GetNumChannels() - 1;
 						}
-						for(CHANNELINDEX c = firstChn; c <= lastChn; c++)
+						if(param & 0x0F)
 						{
-							memory.chnSettings[c].patLoop = memory.elapsedTime;
-							memory.chnSettings[c].patLoopSmp = playState.m_lTotalSampleCount;
-							memory.chnSettings[c].patLoopStart = playState.m_nRow;
+							if(m_playBehaviour[kITPatternLoopTargetReset] || (GetType() == MOD_TYPE_S3M))
+							{
+								for(CHANNELINDEX c = firstChn; c <= lastChn; c++)
+								{
+									playState.Chn[c].nPatternLoop = playState.m_nRow + 1;
+								}
+							}
+							patternLoopEndedOnThisRow = true;
 						}
-						patternLoopStartedOnThisRow = true;
+						else
+						{
+							for(CHANNELINDEX c = firstChn; c <= lastChn; c++)
+							{
+								memory.chnSettings[c].patLoop = memory.elapsedTime;
+								memory.chnSettings[c].patLoopSmp = playState.m_lTotalSampleCount;
+								memory.chnSettings[c].patLoopStart = playState.m_nRow;
+								playState.Chn[c].nPatternLoop = playState.m_nRow;
+							}
+							patternLoopStartedOnThisRow = true;
+						}
 					}
 					break;
 
@@ -706,6 +717,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
 						memory.chnSettings[nChn].patLoopSmp = playState.m_lTotalSampleCount;
 						memory.chnSettings[nChn].patLoopStart = playState.m_nRow;
+						playState.Chn[nChn].nPatternLoop = playState.m_nRow;
 					}
 					break;
 
