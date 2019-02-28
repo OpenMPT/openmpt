@@ -1163,7 +1163,6 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 		break;
 
 	case MOD_TYPE_MOD:
-		playBehaviour.set(kMODSampleSwap);
 		playBehaviour.set(kRowDelayWithNoteDelay);
 		break;
 
