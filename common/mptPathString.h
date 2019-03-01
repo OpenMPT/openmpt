@@ -339,8 +339,8 @@ bool DeleteWholeDirectoryTree(mpt::PathString path);
 
 #if defined(MPT_ENABLE_DYNBIND) || defined(MPT_ENABLE_TEMPFILE)
 
-// Returns the application path or an empty string (if unknown), e.g. "C:\mptrack\"
-mpt::PathString GetAppPath();
+// Returns the application executable path or an empty string (if unknown), e.g. "C:\mptrack\"
+mpt::PathString GetExecutablePath();
 
 #endif // MPT_ENABLE_DYNBIND || MPT_ENABLE_TEMPFILE
 

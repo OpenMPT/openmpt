@@ -516,7 +516,7 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 
 #if defined(MPT_ENABLE_DYNBIND) || defined(MPT_ENABLE_TEMPFILE)
 
-mpt::PathString GetAppPath()
+mpt::PathString GetExecutablePath()
 {
 	std::vector<TCHAR> exeFileName(MAX_PATH);
 	while(GetModuleFileName(0, exeFileName.data(), mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size())
@@ -570,8 +570,8 @@ mpt::PathString GetTempDirectory()
 			return mpt::PathString::FromNative(tempPath.data());
 		}
 	}
-	// use app directory as fallback
-	return mpt::GetAppPath();
+	// use exe directory as fallback
+	return mpt::GetExecutablePath();
 }
 
 mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)

@@ -546,7 +546,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 	// Determine paths, portable mode, first run. Do not yet update any state.
 
-	mpt::PathString configPathApp = mpt::GetAppPath(); // config path in portable mode
+	mpt::PathString configPathApp = mpt::GetExecutablePath(); // config path in portable mode
 	mpt::PathString configPathGlobal; // config path in default non-portable mode
 	{
 		// Try to find a nice directory where we should store our settings (default: %APPDATA%)
@@ -574,7 +574,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	}
 
 	// Update executable and config dirs
-	m_szExePath = mpt::GetAppPath();
+	m_szExePath = mpt::GetExecutablePath();
 	m_szConfigDirectory = portableMode ? configPathApp : configPathGlobal;
 
 	// Set up default file locations
