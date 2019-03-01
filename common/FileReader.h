@@ -415,7 +415,7 @@ namespace FileReader
 	{
 		typename TFileCursor::PinnedRawDataView source = f.ReadPinnedRawDataView(srcSize); // Make sure the string is cached properly.
 		typename TFileCursor::off_t realSrcSize = source.size();	// In case fewer bytes are available
-		mpt::String::Read<mode, destSize>(destBuffer, mpt::byte_cast<const char*>(source.data()), realSrcSize);
+		mpt::String::WriteAutoBuf(destBuffer) = mpt::String::ReadBuf(mode, mpt::byte_cast<const char*>(source.data()), realSrcSize);
 		return (realSrcSize > 0 || srcSize == 0);
 	}
 
@@ -425,9 +425,10 @@ namespace FileReader
 	template<mpt::String::ReadWriteMode mode, typename TFileCursor>
 	bool ReadString(TFileCursor &f, std::string &dest, const typename TFileCursor::off_t srcSize)
 	{
+		dest.clear();
 		typename TFileCursor::PinnedRawDataView source = f.ReadPinnedRawDataView(srcSize);	// Make sure the string is cached properly.
 		typename TFileCursor::off_t realSrcSize = source.size();	// In case fewer bytes are available
-		mpt::String::Read<mode>(dest, mpt::byte_cast<const char*>(source.data()), realSrcSize);
+		dest = mpt::String::ReadBuf(mode, mpt::byte_cast<const char*>(source.data()), realSrcSize);
 		return (realSrcSize > 0 || srcSize == 0);
 	}
 
@@ -437,9 +438,10 @@ namespace FileReader
 	template<mpt::String::ReadWriteMode mode, typename TFileCursor>
 	bool ReadString(TFileCursor &f, mpt::ustring &dest, mpt::Charset charset, const typename TFileCursor::off_t srcSize)
 	{
+		dest.clear();
 		typename TFileCursor::PinnedRawDataView source = f.ReadPinnedRawDataView(srcSize);	// Make sure the string is cached properly.
 		typename TFileCursor::off_t realSrcSize = source.size();	// In case fewer bytes are available
-		mpt::String::Read<mode>(dest, charset, mpt::byte_cast<const char*>(source.data()), realSrcSize);
+		dest = mpt::ToUnicode(charset, mpt::String::ReadBuf(mode, mpt::byte_cast<const char*>(source.data()), realSrcSize));
 		return (realSrcSize > 0 || srcSize == 0);
 	}
 
