@@ -18,8 +18,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifdef ENABLE_ASM
 
-#define PROCSUPPORT_LM           0x00001 // Processor supports long mode (amd64)
-#define PROCSUPPORT_CMOV         0x00004 // Processor supports conditional move instructions (i686)
+#define PROCSUPPORT_ASM_INTRIN   0x00001 // assembly and intrinsics are enabled at runtime
+#define PROCSUPPORT_LM           0x00004 // Processor supports long mode (amd64)
+#define PROCSUPPORT_CMOV         0x00008 // Processor supports conditional move instructions (i686)
 #define PROCSUPPORT_MMX          0x00010 // Processor supports MMX instructions
 #define PROCSUPPORT_AMD_MMXEXT   0x00020 // Processor supports AMD MMX extensions
 #define PROCSUPPORT_AMD_3DNOW    0x00040 // Processor supports AMD 3DNow! instructions

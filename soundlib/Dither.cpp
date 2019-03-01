@@ -128,11 +128,15 @@ static void C_Dither(int32 *pBuffer, std::size_t count, uint32 nBits, DitherModP
 
 static void Dither_ModPlug(int32 *pBuffer, std::size_t count, std::size_t channels, uint32 nBits, DitherModPlugState &state)
 {
-	#ifdef ENABLE_X86
+#ifdef ENABLE_X86
+	if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+	{
 		X86_Dither(pBuffer, count * channels, nBits, &state);
-	#else // !ENABLE_X86
+	} else
+#endif // ENABLE_X86
+	{
 		C_Dither(pBuffer, count * channels, nBits, &state);
-	#endif // ENABLE_X86
+	}
 }
 
 

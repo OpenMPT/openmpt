@@ -438,10 +438,16 @@ void StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCou
 	#endif // ENABLE_X86_AMD
 
 	#ifdef ENABLE_X86
-		X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
-	#else // !ENABLE_X86
-		C_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
+		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		{
+			X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
+			return;
+		}
 	#endif // ENABLE_X86
+
+	{
+		C_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
+	}
 
 }
 
@@ -464,10 +470,16 @@ void FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 
 	#endif // ENABLE_X86_AMD
 
 	#ifdef ENABLE_X86
-		X86_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
-	#else // !ENABLE_X86
-		C_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
+		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		{
+			X86_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
+			return;
+		}
 	#endif // ENABLE_X86
+
+	{
+		C_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
+	}
 
 }
 
@@ -491,10 +503,16 @@ void MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _
 	#endif // ENABLE_X86_AMD
 
 	#ifdef ENABLE_X86
-		X86_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
-	#else // !ENABLE_X86
-		C_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
+		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		{
+			X86_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
+			return;
+		}
 	#endif // ENABLE_X86
+
+	{
+		C_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
+	}
 
 }
 
@@ -511,10 +529,16 @@ void FloatToMonoMix(const float *pIn, int32 *pOut, uint32 nCount, const float _f
 	#endif // ENABLE_X86_AMD
 
 	#ifdef ENABLE_X86
-		X86_FloatToMonoMix(pIn, pOut, nCount, _f2ic);
-	#else // !ENABLE_X86
-		C_FloatToMonoMix(pIn, pOut, nCount, _f2ic);
+		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		{
+			X86_FloatToMonoMix(pIn, pOut, nCount, _f2ic);
+			return;
+		}
 	#endif // ENABLE_X86
+
+	{
+		C_FloatToMonoMix(pIn, pOut, nCount, _f2ic);
+	}
 
 }
 
@@ -577,10 +601,15 @@ static void C_InterleaveFrontRear(mixsample_t *pFrontBuf, mixsample_t *pRearBuf,
 void InterleaveFrontRear(mixsample_t *pFrontBuf, mixsample_t *pRearBuf, uint32 nFrames)
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
-		X86_InterleaveFrontRear(pFrontBuf, pRearBuf, nFrames);
-	#else
-		C_InterleaveFrontRear(pFrontBuf, pRearBuf, nFrames);
+		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		{
+			X86_InterleaveFrontRear(pFrontBuf, pRearBuf, nFrames);
+			return;
+		}
 	#endif
+	{
+		C_InterleaveFrontRear(pFrontBuf, pRearBuf, nFrames);
+	}
 }
 
 
@@ -616,10 +645,15 @@ static void C_MonoFromStereo(mixsample_t *pMixBuf, uint32 nSamples)
 void MonoFromStereo(mixsample_t *pMixBuf, uint32 nSamples)
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
-		X86_MonoFromStereo(pMixBuf, nSamples);
-	#else
-		C_MonoFromStereo(pMixBuf, nSamples);
+		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		{
+			X86_MonoFromStereo(pMixBuf, nSamples);
+			return;
+		}
 	#endif
+	{
+		C_MonoFromStereo(pMixBuf, nSamples);
+	}
 }
 
 
@@ -740,10 +774,15 @@ static void C_StereoFill(mixsample_t *pBuffer, uint32 nSamples, mixsample_t &rof
 void StereoFill(mixsample_t *pBuffer, uint32 nSamples, mixsample_t &rofs, mixsample_t &lofs)
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
-		X86_StereoFill(pBuffer, nSamples, &rofs, &lofs);
-	#else
-		C_StereoFill(pBuffer, nSamples, rofs, lofs);
+		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		{
+			X86_StereoFill(pBuffer, nSamples, &rofs, &lofs);
+			return;
+		}
 	#endif
+	{
+		C_StereoFill(pBuffer, nSamples, rofs, lofs);
+	}
 }
 
 
@@ -829,10 +868,15 @@ static void C_EndChannelOfs(ModChannel &chn, mixsample_t *pBuffer, uint32 nSampl
 void EndChannelOfs(ModChannel &chn, mixsample_t *pBuffer, uint32 nSamples)
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
-		X86_EndChannelOfs(&chn, pBuffer, nSamples);
-	#else
-		C_EndChannelOfs(chn, pBuffer, nSamples);
+		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		{
+			X86_EndChannelOfs(&chn, pBuffer, nSamples);
+			return;
+		}
 	#endif
+	{
+		C_EndChannelOfs(chn, pBuffer, nSamples);
+	}
 }
 
 

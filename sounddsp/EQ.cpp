@@ -69,7 +69,7 @@ static const EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 #define PBS_Y1	DWORD PTR [eax + EQBANDSTRUCT.y1]
 #define PBS_Y2	DWORD PTR [eax + EQBANDSTRUCT.y2]
 
-static void EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
+static void X86_EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
 {
 	_asm {
 	mov eax, pbs		// eax = pbs
@@ -299,7 +299,7 @@ done:;
 #pragma warning(pop)
 #endif // MPT_COMPILER_MSVC
 
-#else
+#endif
 
 static void EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
 {
@@ -315,15 +315,21 @@ static void EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
 	}
 }
 
-#endif
-
 
 void CEQ::ProcessMono(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 {
 	MonoMixToFloat(pbuffer, MixFloatBuffer, nCount, 1.0f/MIXING_SCALEF);
 	for (UINT b=0; b<MAX_EQ_BANDS; b++)
 	{
-		if ((gEQ[b].bEnable) && (gEQ[b].Gain != 1.0f)) EQFilter(&gEQ[b], MixFloatBuffer, nCount);
+		#ifdef ENABLE_X86
+			if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+			{
+				if ((gEQ[b].bEnable) && (gEQ[b].Gain != 1.0f)) X86_EQFilter(&gEQ[b], MixFloatBuffer, nCount);
+			} else
+		#endif // ENABLE_X86
+			{
+				if ((gEQ[b].bEnable) && (gEQ[b].Gain != 1.0f)) EQFilter(&gEQ[b], MixFloatBuffer, nCount);
+			}
 	}
 	FloatToMonoMix(MixFloatBuffer, pbuffer, nCount, MIXING_SCALEF);
 }
@@ -373,7 +379,27 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 	} else
 #endif // ENABLE_X86_AMD
 
-	{	
+#ifdef ENABLE_X86
+	if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+	{
+
+		StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount, 1.0f/MIXING_SCALEF);
+		
+		for (UINT bl=0; bl<MAX_EQ_BANDS; bl++)
+		{
+			if ((gEQ[bl].bEnable) && (gEQ[bl].Gain != 1.0f)) X86_EQFilter(&gEQ[bl], MixFloatBuffer, nCount);
+		}
+		for (UINT br=MAX_EQ_BANDS; br<MAX_EQ_BANDS*2; br++)
+		{
+			if ((gEQ[br].bEnable) && (gEQ[br].Gain != 1.0f)) X86_EQFilter(&gEQ[br], MixFloatBuffer+MIXBUFFERSIZE, nCount);
+		}
+
+		FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount, MIXING_SCALEF);
+
+	} else
+#endif // ENABLE_X86
+
+	{
 
 		StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount, 1.0f/MIXING_SCALEF);
 		

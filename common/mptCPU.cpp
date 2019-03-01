@@ -125,6 +125,8 @@ void InitProcSupport()
 	ProcModel = 0;
 	ProcStepping = 0;
 
+	ProcSupport |= PROCSUPPORT_ASM_INTRIN;
+
 	{
 
 		cpuid_result VendorString = cpuid(0x00000000u);
