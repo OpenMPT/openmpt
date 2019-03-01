@@ -3662,7 +3662,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 
 static bool ShouldRunTests()
 {
-	mpt::PathString theFile = theApp.GetAppDirPath();
+	mpt::PathString theFile = theApp.GetExePath();
 	// Only run the tests when we're in the project directory structure.
 	std::size_t pathComponents = mpt::String::Split<mpt::ustring>(theFile.ToUnicode(), U_("\\")).size() - 1;
 	for(std::size_t i = 0; i < pathComponents; ++i)
@@ -3681,7 +3681,7 @@ static bool ShouldRunTests()
 
 static mpt::PathString GetTestFilenameBase()
 {
-	mpt::PathString theFile = theApp.GetAppDirPath();
+	mpt::PathString theFile = theApp.GetExePath();
 	std::size_t pathComponents = mpt::String::Split<mpt::ustring>(theFile.ToUnicode(), U_("\\")).size() - 1;
 	for(std::size_t i = 0; i < pathComponents; ++i)
 	{

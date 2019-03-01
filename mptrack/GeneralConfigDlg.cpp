@@ -193,7 +193,7 @@ void COptionsGeneral::OnOptionSelChanged()
 
 void COptionsGeneral::OnBrowseTemplate()
 {
-	mpt::PathString basePath = theApp.GetAppDirPath() + P_("TemplateModules\\");
+	mpt::PathString basePath = theApp.GetExePath() + P_("TemplateModules\\");
 	mpt::PathString defaultFile = mpt::PathString::FromCString(GetWindowTextString(m_defaultTemplate));
 	if(defaultFile.empty()) defaultFile = TrackerSettings::Instance().defaultTemplateFile;
 

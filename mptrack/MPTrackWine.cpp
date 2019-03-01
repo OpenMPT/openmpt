@@ -169,8 +169,8 @@ bool WineSetupIsSupported(mpt::Wine::VersionContext & wineVersion)
 bool WineSetupIsSupported(mpt::Wine::Context & wine)
 {
 	bool supported = true;
-	if(theApp.GetAppDirPath().empty()) supported = false;
-	if(wine.PathToPosix(theApp.GetAppDirPath()).empty()) supported = false;
+	if(theApp.GetExePath().empty()) supported = false;
+	if(wine.PathToPosix(theApp.GetExePath()).empty()) supported = false;
 	if(wine.PathToPosix(theApp.GetConfigPath()).empty()) supported = false;
 	if(wine.PathToWindows("/").empty()) supported = false;
 	if(supported)
@@ -322,7 +322,7 @@ void Initialize()
 				ver += mpt::String::Replace(mpt::ToCharset(mpt::CharsetUTF8, Build::GetVersionStringPure()), std::string(" "), std::string("_"));
 				mpt::checksum::crc64_jones crc;
 				crc = WineHashVersion(crc);
-				crc = WineHashFile(crc, theApp.GetAppDirPath() + WineGetSupportZipFilename());
+				crc = WineHashFile(crc, theApp.GetExePath() + WineGetSupportZipFilename());
 				crc = WineHashSettings(crc);
 				ver += std::string("-") + mpt::fmt::hex0<16>(crc.result());
 				return ver;
@@ -370,7 +370,7 @@ void Initialize()
 		}
 
 		std::map<std::string, std::vector<char> > filetree;
-		filetree = UnzipToMap(theApp.GetAppDirPath() + WineGetSupportZipFilename());
+		filetree = UnzipToMap(theApp.GetExePath() + WineGetSupportZipFilename());
 
 		Util::Wine::Dialog dialog(WineGetWindowTitleUTF8(), TrackerSettings::Instance().WineSupportCompileVerbosity < 6);
 

@@ -158,7 +158,7 @@ public:
 
 public:
 
-	mpt::PathString GetAppDirPath() {return m_szExePath;} // Returns '\'-ended executable directory path.
+	mpt::PathString GetExePath() {return m_szExePath;} // Returns '\'-ended executable directory path.
 	static MODTYPE GetDefaultDocType() { return m_nDefaultDocType; }
 	static void SetDefaultDocType(MODTYPE n) { m_nDefaultDocType = n; }
 	static MidiLibrary &GetMidiLibrary() { return midiLibrary; }
@@ -266,8 +266,8 @@ public:
 	bool CheckSystemSupport();
 
 	// Relative / absolute paths conversion
-	mpt::PathString AbsolutePathToRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetAppDirPath()); }
-	mpt::PathString RelativePathToAbsolute(const mpt::PathString &path) { return path.RelativePathToAbsolute(GetAppDirPath()); }
+	mpt::PathString AbsolutePathToRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetExePath()); }
+	mpt::PathString RelativePathToAbsolute(const mpt::PathString &path) { return path.RelativePathToAbsolute(GetExePath()); }
 
 	static void OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt::PathString &overridePath = mpt::PathString());
 

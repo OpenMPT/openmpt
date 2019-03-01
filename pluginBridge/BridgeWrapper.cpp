@@ -42,7 +42,7 @@ bool ComponentPluginBridge::DoInitialize()
 	{
 		return false;
 	}
-	exeName = theApp.GetAppDirPath();
+	exeName = theApp.GetExePath();
 	if(bitness == 32)
 	{
 		exeName += P_("PluginBridge32.exe");

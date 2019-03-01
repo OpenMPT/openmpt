@@ -548,7 +548,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		mpt::PathString fullPath = TrackerSettings::Instance().PathPlugins.GetDefaultDir();
 		if(fullPath.empty())
 		{
-			fullPath = theApp.GetAppDirPath() + P_("Plugins\\");
+			fullPath = theApp.GetExePath() + P_("Plugins\\");
 		}
 		fullPath += mpt::PathString::FromUTF8(mixPlugin.GetLibraryName()) + P_(".dll");
 

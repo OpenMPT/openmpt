@@ -3011,7 +3011,7 @@ void CModDoc::UpdateOPLInstrument(SAMPLEINDEX smp)
 // Store all view positions t settings file
 void CModDoc::SerializeViews() const
 {
-	const mpt::PathString pathName = theApp.IsPortableMode() ? GetPathNameMpt().AbsolutePathToRelative(theApp.GetAppDirPath()) : GetPathNameMpt();
+	const mpt::PathString pathName = theApp.IsPortableMode() ? GetPathNameMpt().AbsolutePathToRelative(theApp.GetExePath()) : GetPathNameMpt();
 	if(pathName.empty())
 	{
 		return;
@@ -3089,7 +3089,7 @@ void CModDoc::DeserializeViews()
 	if(s.size() < 2)
 	{
 		// Try relative path
-		pathName = pathName.RelativePathToAbsolute(theApp.GetAppDirPath());
+		pathName = pathName.RelativePathToAbsolute(theApp.GetExePath());
 		s = settings.Read<mpt::ustring>(U_("WindowSettings"), pathName.ToUnicode());
 		if(s.size() < 2)
 		{

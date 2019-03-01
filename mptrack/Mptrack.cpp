@@ -517,7 +517,7 @@ bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDi
 	// copy a config file from the exe directory to the new config dirs
 	mpt::PathString sOldPath;
 	mpt::PathString sNewPath;
-	sOldPath = GetAppDirPath();
+	sOldPath = GetExePath();
 	sOldPath += sSubDir;
 	sOldPath += sFileName;
 
@@ -620,7 +620,7 @@ void CTrackApp::CreatePaths()
 	
 		// Import old tunings
 		mpt::PathString sOldTunings;
-		sOldTunings = GetAppDirPath();
+		sOldTunings = GetExePath();
 		sOldTunings += P_("tunings\\");
 
 		if(sOldTunings.IsDirectory())
@@ -1273,7 +1273,7 @@ CModDoc *CTrackApp::NewDocument(MODTYPE newType)
 		if(TrackerSettings::Instance().defaultNewFileAction == nfDefaultTemplate && !templateFile.empty())
 		{
 			// Template file can be either a filename inside one of the preset and user TemplateModules folders, or a full path.
-			const mpt::PathString dirs[] = { GetConfigPath() + P_("TemplateModules\\"), GetAppDirPath() + P_("TemplateModules\\"), mpt::PathString() };
+			const mpt::PathString dirs[] = { GetConfigPath() + P_("TemplateModules\\"), GetExePath() + P_("TemplateModules\\"), mpt::PathString() };
 			for(const auto &dir : dirs)
 			{
 				if((dir + templateFile).IsFile())

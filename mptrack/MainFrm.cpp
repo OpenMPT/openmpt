@@ -2200,7 +2200,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool isTemplateFile)
 	{
 		MPT_ASSERT(nId == UINT(isTemplateFile ? ID_FILE_OPENTEMPLATE_LASTINRANGE : ID_EXAMPLE_MODULES_LASTINRANGE));
 		FileDialog::PathList files;
-		theApp.OpenModulesDialog(files, isTemplateFile ? theApp.GetConfigPath() + P_("TemplateModules") : theApp.GetAppDirPath() + P_("ExampleSongs"));
+		theApp.OpenModulesDialog(files, isTemplateFile ? theApp.GetConfigPath() + P_("TemplateModules") : theApp.GetExePath() + P_("ExampleSongs"));
 		for(const auto &file : files)
 		{
 			theApp.OpenDocumentFile(file.ToCString());
@@ -2609,7 +2609,7 @@ void CMainFrame::OnHelp()
 		else if(!strcmp("CModControlView", className))	page = "::/Comments.html";
 	}
 
-	const mpt::PathString helpFile = theApp.GetAppDirPath() + P_("OpenMPT Manual.chm") + mpt::PathString::FromUTF8(page) + P_(">OpenMPT");
+	const mpt::PathString helpFile = theApp.GetExePath() + P_("OpenMPT Manual.chm") + mpt::PathString::FromUTF8(page) + P_(">OpenMPT");
 	if(!::HtmlHelp(m_hWnd, helpFile.AsNative().c_str(), strcmp(page, "") ? HH_DISPLAY_TOC : HH_DISPLAY_TOPIC, NULL))
 	{
 		Reporting::Error(_T("Could not find help file:\n") + helpFile.ToCString());
@@ -2639,11 +2639,11 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 		for(size_t i = 0; i < 2; i++) // 0: app items, 1: user items
 		{
 			// To avoid duplicates, check whether app path and config path are the same.
-			if (i == 1 && mpt::PathString::CompareNoCase(theApp.GetAppDirPath(), theApp.GetConfigPath()) == 0)
+			if (i == 1 && mpt::PathString::CompareNoCase(theApp.GetExePath(), theApp.GetConfigPath()) == 0)
 				break;
 
 			mpt::PathString basePath;
-			basePath = (i == 0) ? theApp.GetAppDirPath() : theApp.GetConfigPath();
+			basePath = (i == 0) ? theApp.GetExePath() : theApp.GetConfigPath();
 			basePath += pszFolderName;
 			if(!basePath.IsDirectory())
 				continue;
