@@ -400,6 +400,8 @@ namespace String
 		buffer[size - 1] = 0;
 	}
 
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
+
 	template <size_t size>
 	void SetNullTerminator(wchar_t (&buffer)[size])
 	{
@@ -412,6 +414,8 @@ namespace String
 		MPT_ASSERT(size > 0);
 		buffer[size - 1] = 0;
 	}
+
+#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 
 
 	// Remove any chars after the first null char
