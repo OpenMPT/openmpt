@@ -1081,27 +1081,12 @@ void CModDoc::CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, std::bitset<1
 			&& (channel.nLength || pIns->HasValidMIDIChannel()) && !playingNotes[channel.nLastNote])
 		{
 			CHANNELINDEX nnaChn = m_SndFile.CheckNNA(chn, ins, note, false);
-			// We need to update this mix channel immediately since new notes may be triggered between ticks, in which case
-			// ChnMix may not contain the moved channel yet and the past note will stop playing for the rest of this tick!
-			if(nnaChn != CHANNELINDEX_INVALID)
+			if(nnaChn != CHANNELINDEX_INVALID && nnaChn != chn)
 			{
-				CHANNELINDEX origChnPos = CHANNELINDEX_INVALID;
-				for(CHANNELINDEX i = 0; i < m_SndFile.m_nMixChannels; i++)
-				{
-					if(m_SndFile.m_PlayState.ChnMix[i] == nnaChn)
-					{
-						// Nothing to do
-						origChnPos = CHANNELINDEX_INVALID;
-						break;
-					} else if(m_SndFile.m_PlayState.ChnMix[i] == chn)
-					{
-						origChnPos = i;
-					}
-				}
-				if(origChnPos != CHANNELINDEX_INVALID)
-				{
-					m_SndFile.m_PlayState.ChnMix[origChnPos] = nnaChn;
-				}
+				// Keep the new NNA channel playing in the same channel slot.
+				// That way, we do not need to touch the ChnMix array, and we avoid the same channel being checked twice.
+				m_SndFile.m_PlayState.Chn[chn] = std::move(m_SndFile.m_PlayState.Chn[nnaChn]);
+				m_SndFile.m_PlayState.Chn[nnaChn] = ModChannel();
 			}
 		}
 	}
