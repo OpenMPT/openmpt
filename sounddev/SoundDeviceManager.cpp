@@ -147,29 +147,75 @@ void Manager::ReEnumerate()
 #ifdef MPT_BUILD_WINESUPPORT
 	MPT_CONSTANT_IF(true)
 	{
+#if defined(MPT_WITH_PULSEAUDIO)
 		typePriorities[U_("PulseAudio")] = 42;
+#endif
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
 		typePriorities[U_("PulseAudio-Simple")] = 41;
+#endif
+#if defined(MPT_WITH_RTAUDIO)
 		typePriorities[mpt::format(U_("RtAudio-%1"))(U_("LINUX_PULSE"))] = 32;
+#endif
+#if defined(MPT_WITH_RTAUDIO)
 		typePriorities[mpt::format(U_("RtAudio-%1"))(U_("MACOSX_CORE"))] = 31;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paAL)] = 29;
+#endif
+#if defined(MPT_WITH_RTAUDIO)
 		typePriorities[mpt::format(U_("RtAudio-%1"))(U_("LINUX_ALSA"))] = 28;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paOSS)] = 27;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paCoreAudio)] = 22;
+#endif
+#if defined(MPT_WITH_RTAUDIO)
 		typePriorities[mpt::format(U_("RtAudio-%1"))(U_("UNIX_JACK"))] = 21;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paALSA)] = 18;
+#endif
+#if defined(MPT_WITH_RTAUDIO)
 		typePriorities[mpt::format(U_("RtAudio-%1"))(U_("LINUX_OSS"))] = 17;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paJACK)] = 11;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paAudioScienceHPI)] = 1;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paBeOS)] = -1;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paWASAPI)] = -3;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paMME)] = -4;
+#endif
+#if defined(MPT_WITH_RTAUDIO)
 		typePriorities[mpt::format(U_("RtAudio-%1"))(U_("WINDOWS_DS"))] = -5;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paDirectSound)] = -6;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paSoundManager)] = -7;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paWDMKS)] = -8;
+#endif
+#if defined(MPT_WITH_RTAUDIO)
 		typePriorities[mpt::format(U_("RtAudio-%1"))(U_("WINDOWS_ASIO"))] = -9;
+#endif
+#if defined(MPT_WITH_PORTAUDIO)
 		typePriorities[mpt::format(U_("PortAudio-%1"))(paASIO)] = -10;
+#endif
+#if defined(MPT_WITH_RTAUDIO)
 		typePriorities[mpt::format(U_("RtAudio-%1"))(U_("WINDOWS_WASAPI"))] = -30;
+#endif
 	} else
 #endif
 	if(GetSysInfo().IsWine && GetSysInfo().WineHostIsLinux)
