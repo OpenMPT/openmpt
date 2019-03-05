@@ -1862,7 +1862,7 @@ BOOL COptionsWine::OnInitDialog()
 	index = m_CbnRtAudio.AddString(_T("Disabled")); m_CbnRtAudio.SetItemData(index, 0);
 	for(index = 0; index < 3; ++index)
 	{
-		if(m_CbnRtAudio.GetItemData(index) == static_cast<uint32>(TrackerSettings::Instance().WineSupportEnablePortAudio))
+		if(m_CbnRtAudio.GetItemData(index) == static_cast<uint32>(TrackerSettings::Instance().WineSupportEnableRtAudio))
 		{
 			m_CbnRtAudio.SetCurSel(index);
 		}
