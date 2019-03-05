@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.4-pre
 
+ *  stb_vorbis: Update to v1.16 (2019-03-05).
+
 ### libopenmpt 0.4.3 (2019-02-11)
 
  *  [**Sec**] Possible crash due to null-pointer access when doing a portamento
