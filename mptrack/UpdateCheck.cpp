@@ -285,9 +285,6 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 		j["System"]["Processor"]["Features"]["lm"] = ((GetRealProcSupport() & PROCSUPPORT_LM) != 0);
 		j["System"]["Processor"]["Features"]["cmov"] = ((GetRealProcSupport() & PROCSUPPORT_CMOV) != 0);
 		j["System"]["Processor"]["Features"]["mmx"] = ((GetRealProcSupport() & PROCSUPPORT_MMX) != 0);
-		j["System"]["Processor"]["Features"]["mmxext"] = ((GetRealProcSupport() & PROCSUPPORT_AMD_MMXEXT) != 0);
-		j["System"]["Processor"]["Features"]["3dnow"] = ((GetRealProcSupport() & PROCSUPPORT_AMD_3DNOW) != 0);
-		j["System"]["Processor"]["Features"]["3dnowext"] = ((GetRealProcSupport() & PROCSUPPORT_AMD_3DNOWEXT) != 0);
 		j["System"]["Processor"]["Features"]["sse"] = ((GetRealProcSupport() & PROCSUPPORT_SSE) != 0);
 		j["System"]["Processor"]["Features"]["sse2"] = ((GetRealProcSupport() & PROCSUPPORT_SSE2) != 0);
 		j["System"]["Processor"]["Features"]["sse3"] = ((GetRealProcSupport() & PROCSUPPORT_SSE3) != 0);

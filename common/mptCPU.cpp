@@ -278,9 +278,6 @@ void InitProcSupport()
 					if(ExtendedFeatureFlags.d & (1<<15)) ProcSupport |= PROCSUPPORT_CMOV;
 					if(ExtendedFeatureFlags.d & (1<<23)) ProcSupport |= PROCSUPPORT_MMX;
 				}
-				if(ExtendedFeatureFlags.d & (1<<22)) ProcSupport |= PROCSUPPORT_AMD_MMXEXT;
-				if(ExtendedFeatureFlags.d & (1<<31)) ProcSupport |= PROCSUPPORT_AMD_3DNOW;
-				if(ExtendedFeatureFlags.d & (1<<30)) ProcSupport |= PROCSUPPORT_AMD_3DNOWEXT;
 			}
 			if(ExtendedVendorString.a >= 0x80000004u)
 			{

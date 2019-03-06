@@ -332,11 +332,6 @@ static mpt::ustring ProcSupportToString(uint32 procSupport)
 		{ PROCSUPPORT_SSE4_1, "sse4.1" },
 		{ PROCSUPPORT_SSE4_2, "sse4.2" },
 #endif
-#if defined(ENABLE_X86_AMD)
-		{ PROCSUPPORT_AMD_MMXEXT, "mmxext" },
-		{ PROCSUPPORT_AMD_3DNOW, "3dnow" },
-		{ PROCSUPPORT_AMD_3DNOWEXT, "3dnowext" },
-#endif
 	};
 	for(const auto &f : flags)
 	{

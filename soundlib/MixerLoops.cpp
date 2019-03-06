@@ -21,137 +21,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-////////////////////////////////////////////////////////////////////////////////////
-// 3DNow! optimizations
-
-#ifdef ENABLE_X86_AMD
-
-// Convert integer mix to floating-point
-static void AMD_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
-{
-	_asm {
-	movd mm0, _i2fc
-	mov edx, pSrc
-	mov edi, pOut1
-	mov ebx, pOut2
-	mov ecx, nCount
-	punpckldq mm0, mm0
-	inc ecx
-	shr ecx, 1
-mainloop:
-	movq mm1, qword ptr [edx]
-	movq mm2, qword ptr [edx+8]
-	add edi, 8
-	pi2fd mm1, mm1
-	pi2fd mm2, mm2
-	add ebx, 8
-	pfmul mm1, mm0
-	pfmul mm2, mm0
-	add edx, 16
-	movq mm3, mm1
-	punpckldq mm3, mm2
-	punpckhdq mm1, mm2
-	dec ecx
-	movq qword ptr [edi-8], mm3
-	movq qword ptr [ebx-8], mm1
-	jnz mainloop
-	emms
-	}
-}
-
-static void AMD_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 nCount, const float _f2ic)
-{
-	_asm {
-	movd mm0, _f2ic
-	mov eax, pIn1
-	mov ebx, pIn2
-	mov edx, pOut
-	mov ecx, nCount
-	punpckldq mm0, mm0
-	inc ecx
-	shr ecx, 1
-	sub edx, 16
-mainloop:
-	movq mm1, [eax]
-	movq mm2, [ebx]
-	add edx, 16
-	movq mm3, mm1
-	punpckldq mm1, mm2
-	punpckhdq mm3, mm2
-	add eax, 8
-	pfmul mm1, mm0
-	pfmul mm3, mm0
-	add ebx, 8
-	pf2id mm1, mm1
-	pf2id mm3, mm3
-	dec ecx
-	movq qword ptr [edx], mm1
-	movq qword ptr [edx+8], mm3
-	jnz mainloop
-	emms
-	}
-}
-
-
-static void AMD_FloatToMonoMix(const float *pIn, int32 *pOut, uint32 nCount, const float _f2ic)
-{
-	_asm {
-	movd mm0, _f2ic
-	mov eax, pIn
-	mov edx, pOut
-	mov ecx, nCount
-	punpckldq mm0, mm0
-	add ecx, 3
-	shr ecx, 2
-	sub edx, 16
-mainloop:
-	movq mm1, [eax]
-	movq mm2, [eax+8]
-	add edx, 16
-	pfmul mm1, mm0
-	pfmul mm2, mm0
-	add eax, 16
-	pf2id mm1, mm1
-	pf2id mm2, mm2
-	dec ecx
-	movq qword ptr [edx], mm1
-	movq qword ptr [edx+8], mm2
-	jnz mainloop
-	emms
-	}
-}
-
-
-static void AMD_MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _i2fc)
-{
-	_asm {
-	movd mm0, _i2fc
-	mov eax, pSrc
-	mov edx, pOut
-	mov ecx, nCount
-	punpckldq mm0, mm0
-	add ecx, 3
-	shr ecx, 2
-	sub edx, 16
-mainloop:
-	movq mm1, qword ptr [eax]
-	movq mm2, qword ptr [eax+8]
-	add edx, 16
-	pi2fd mm1, mm1
-	pi2fd mm2, mm2
-	add eax, 16
-	pfmul mm1, mm0
-	pfmul mm2, mm0
-	dec ecx
-	movq qword ptr [edx], mm1
-	movq qword ptr [edx+8], mm2
-	jnz mainloop
-	emms
-	}
-}
-
-#endif // ENABLE_X86_AMD
-
 ///////////////////////////////////////////////////////////////////////////////////////
 // SSE Optimizations
 
@@ -429,13 +298,6 @@ void StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCou
 			return;
 		}
 	#endif // ENABLE_X86 && ENABLE_SSE
-	#ifdef ENABLE_X86_AMD
-		if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
-		{
-			AMD_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
-			return;
-		}
-	#endif // ENABLE_X86_AMD
 
 	#ifdef ENABLE_X86
 		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
@@ -461,13 +323,6 @@ void FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 
 		return;
 	}
 	#endif // ENABLE_SSE2
-	#ifdef ENABLE_X86_AMD
-		if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
-		{
-			AMD_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
-			return;
-		}
-	#endif // ENABLE_X86_AMD
 
 	#ifdef ENABLE_X86
 		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
@@ -494,13 +349,6 @@ void MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _
 			return;
 		}
 	#endif // ENABLE_X86 && ENABLE_SSE
-	#ifdef ENABLE_X86_AMD
-		if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
-		{
-			AMD_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
-			return;
-		}
-	#endif // ENABLE_X86_AMD
 
 	#ifdef ENABLE_X86
 		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
@@ -519,14 +367,6 @@ void MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _
 
 void FloatToMonoMix(const float *pIn, int32 *pOut, uint32 nCount, const float _f2ic)
 {
-
-	#ifdef ENABLE_X86_AMD
-		if(GetProcSupport() & PROCSUPPORT_AMD_3DNOW)
-		{
-			AMD_FloatToMonoMix(pIn, pOut, nCount, _f2ic);
-			return;
-		}
-	#endif // ENABLE_X86_AMD
 
 	#ifdef ENABLE_X86
 		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
