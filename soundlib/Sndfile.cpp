@@ -710,11 +710,6 @@ bool CSoundFile::Destroy()
 
 void CSoundFile::SetDspEffects(uint32 DSPMask)
 {
-#ifdef ENABLE_ASM
-#ifndef NO_REVERB
-	if(!(GetRealProcSupport() & PROCSUPPORT_MMX)) DSPMask &= ~SNDDSP_REVERB;
-#endif
-#endif
 	m_MixerSettings.DSPMask = DSPMask;
 	InitPlayer(false);
 }
