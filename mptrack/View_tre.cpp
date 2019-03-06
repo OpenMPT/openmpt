@@ -1550,10 +1550,11 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 					}
 					if(dlsBank != nullptr)
 					{
-						uint32 item;
+						uint32 item = 0;
 						if(modItemID < 0x80)
 						{
-							item = modItemID | DLS_TYPEINST;
+							dlsBank->FindInstrument(false, 0xFFFF, modItemID, note - NOTE_MIN, &item);
+							item |= DLS_TYPEINST;
 						} else
 						{
 							dlsBank->FindInstrument(true, 0xFFFF, 0xFF, modItemID & 0x7F, &item);
