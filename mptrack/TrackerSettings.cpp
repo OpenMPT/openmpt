@@ -575,6 +575,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		SetMixerSettings(settings);
 	}
 	Limit(ResamplerCutoffPercent, 0, 100);
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,29,00,11))
+	{
+		MixerMaxChannels = MixerSettings().m_nMaxMixChannels;  // reset to default on update because we removed the setting in the GUI
+	}
 
 	// Misc
 	if(defaultModType == MOD_TYPE_NONE)

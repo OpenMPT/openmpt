@@ -96,8 +96,6 @@ protected:
 	CEdit m_CInfoRampUp;
 	CEdit m_CInfoRampDown;
 
-	CComboBox m_CbnPolyphony;
-
 	CSliderCtrl m_SliderStereoSep;
 
 	// check box soft pan

@@ -24,33 +24,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-static const TCHAR * const PolyphonyNames[] =
-{
-	_T("133MHz"),
-	_T("166MHz"),
-	_T("200MHz"),
-	_T("233MHz"),
-	_T("266MHz"),
-	_T("300MHz"),
-	_T("333MHz"),
-	_T("400+MHz")
-};
-
-static const CHANNELINDEX PolyphonyChannels[] =
-{
-	16,
-	24,
-	32,
-	40,
-	64,
-	96,
-	128,
-	MAX_CHANNELS
-};
-
-STATIC_ASSERT(CountOf(PolyphonyNames) == CountOf(PolyphonyChannels));
-
-
 const TCHAR *gszChnCfgNames[3] =
 {
 	_T("Mono"),
@@ -928,7 +901,6 @@ BEGIN_MESSAGE_MAP(COptionsMixer, CPropertyPage)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
 	ON_CBN_SELCHANGE(IDC_COMBO_FILTER,			&COptionsMixer::OnResamplerChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO_POLYPHONY,		&COptionsMixer::OnSettingsChanged)
 	ON_EN_UPDATE(IDC_RAMPING_IN,				&COptionsMixer::OnRampingChanged)
 	ON_EN_UPDATE(IDC_RAMPING_OUT,				&COptionsMixer::OnRampingChanged)
 	ON_COMMAND(IDC_CHECK_SOFTPAN,				&COptionsMixer::OnSettingsChanged)
@@ -945,7 +917,6 @@ void COptionsMixer::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_RAMPING_OUT, m_CEditRampDown);
 	DDX_Control(pDX, IDC_EDIT_VOLRAMP_SAMPLES_UP, m_CInfoRampUp);
 	DDX_Control(pDX, IDC_EDIT_VOLRAMP_SAMPLES_DOWN, m_CInfoRampDown);
-	DDX_Control(pDX, IDC_COMBO_POLYPHONY, m_CbnPolyphony);
 	DDX_Control(pDX, IDC_SLIDER_STEREOSEP, m_SliderStereoSep);
 	// check box soft pan
 	DDX_Control(pDX, IDC_SLIDER_PREAMP, m_SliderPreAmp);
@@ -981,19 +952,6 @@ BOOL COptionsMixer::OnInitDialog()
 		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(0, int32_max);
 		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN3))->SetRange32(0, int32_max);
 		UpdateRamping();
-	}
-
-	// Max Mixing Channels
-	{
-		m_CbnPolyphony.ResetContent();
-		for(int n = 0; n < CountOf(PolyphonyChannels); ++n)
-		{
-			m_CbnPolyphony.AddString(mpt::cformat(_T("%1 (%2)"))(PolyphonyChannels[n], CString(PolyphonyNames[n])));
-			if(TrackerSettings::Instance().MixerMaxChannels == PolyphonyChannels[n])
-			{
-				m_CbnPolyphony.SetCurSel(n);
-			}
-		}
 	}
 
 	// Stereo Separation
@@ -1106,15 +1064,6 @@ void COptionsMixer::OnOK()
 		m_CEditRampDown.GetWindowText(s);
 		settings.SetVolumeRampDownMicroseconds(ConvertStrTo<int>(s));
 		TrackerSettings::Instance().SetMixerSettings(settings);
-	}
-
-	// Polyphony
-	{
-		int polyphony = m_CbnPolyphony.GetCurSel();
-		if(polyphony >= 0 && polyphony < CountOf(PolyphonyChannels))
-		{
-			TrackerSettings::Instance().MixerMaxChannels = PolyphonyChannels[polyphony];
-		}
 	}
 
 	// stereo sep
