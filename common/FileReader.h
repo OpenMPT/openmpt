@@ -602,25 +602,15 @@ namespace FileReader
 	// Compare a magic string with the current stream position.
 	// Returns true if they are identical and advances the file cursor by the the length of the "magic" string.
 	// Returns false if the string could not be found. The file cursor is not advanced in this case.
-	template<size_t N, typename TFileCursor>
-	bool ReadMagic(TFileCursor &f, const char (&magic)[N])
-	{
-		MPT_ASSERT(magic[N - 1] == '\0');
-		for(std::size_t i = 0; i < N - 1; ++i)
-		{
-			MPT_ASSERT(magic[i] != '\0');
-		}
-		return ReadMagic(f, magic, static_cast<TFileCursor::off_t>(N - 1));
-	}
-
 	template <typename TFileCursor>
 	bool ReadMagic(TFileCursor &f, const char *const magic, typename TFileCursor::off_t magicLength)
 	{
 		mpt::byte buffer[16] = { mpt::byte(0) };
-		TFileCursor::off_t bytesRead = 0, bytesRemain = magicLength;
+		typename TFileCursor::off_t bytesRead = 0;
+		typename TFileCursor::off_t bytesRemain = magicLength;
 		while(bytesRemain)
 		{
-			TFileCursor::off_t numBytes = std::min(static_cast<TFileCursor::off_t>(sizeof(buffer)), bytesRemain);
+			typename TFileCursor::off_t numBytes = std::min(static_cast<typename TFileCursor::off_t>(sizeof(buffer)), bytesRemain);
 			if(f.GetRawWithOffset(bytesRead, buffer, numBytes) != numBytes)
 				return false;
 			if(memcmp(buffer, magic + bytesRead, numBytes))
@@ -630,6 +620,16 @@ namespace FileReader
 		}
 		f.Skip(magicLength);
 		return true;
+	}
+	template<size_t N, typename TFileCursor>
+	bool ReadMagic(TFileCursor &f, const char (&magic)[N])
+	{
+		MPT_ASSERT(magic[N - 1] == '\0');
+		for(std::size_t i = 0; i < N - 1; ++i)
+		{
+			MPT_ASSERT(magic[i] != '\0');
+		}
+		return ReadMagic(f, static_cast<const char*>(magic), static_cast<typename TFileCursor::off_t>(N - 1));
 	}
 
 	// Read variable-length unsigned integer (as found in MIDI files).
