@@ -610,48 +610,26 @@ namespace FileReader
 		{
 			MPT_ASSERT(magic[i] != '\0');
 		}
-		if(f.CanRead(N - 1))
-		{
-			mpt::byte bytes[N - 1];
-			STATIC_ASSERT(sizeof(bytes) == sizeof(magic) - 1);
-			f.GetRaw(bytes, N - 1);
-			if(!std::memcmp(bytes, magic, N - 1))
-			{
-				f.Skip(N - 1);
-				return true;
-			}
-		}
-		return false;
+		return ReadMagic(f, magic, static_cast<TFileCursor::off_t>(N - 1));
 	}
 
 	template <typename TFileCursor>
 	bool ReadMagic(TFileCursor &f, const char *const magic, typename TFileCursor::off_t magicLength)
 	{
-		if(f.CanRead(magicLength))
+		mpt::byte buffer[16] = { mpt::byte(0) };
+		TFileCursor::off_t bytesRead = 0, bytesRemain = magicLength;
+		while(bytesRemain)
 		{
-			bool identical = true;
-			for(std::size_t i = 0; i < magicLength; ++i)
-			{
-				mpt::byte c = mpt::as_byte(0);
-				f.GetRawWithOffset(i, &c, 1);
-				if(c != mpt::byte_cast<mpt::byte>(magic[i]))
-				{
-					identical = false;
-					break;
-				}
-			}
-			if(identical)
-			{
-				f.Skip(magicLength);
-				return true;
-			} else
-			{
+			TFileCursor::off_t numBytes = std::min(static_cast<TFileCursor::off_t>(sizeof(buffer)), bytesRemain);
+			if(f.GetRawWithOffset(bytesRead, buffer, numBytes) != numBytes)
 				return false;
-			}
-		} else
-		{
-			return false;
+			if(memcmp(buffer, magic + bytesRead, numBytes))
+				return false;
+			bytesRemain -= numBytes;
+			bytesRead += numBytes;
 		}
+		f.Skip(magicLength);
+		return true;
 	}
 
 	// Read variable-length unsigned integer (as found in MIDI files).
