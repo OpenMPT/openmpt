@@ -2544,7 +2544,9 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		{
 			case PLUGIN_VELOCITYHANDLING_CHANNEL:
 				velocity = chn.nVolume;
-			break;
+				break;
+			default:
+				break;
 		}
 
 		int32 swing = chn.nVolSwing;
@@ -2571,12 +2573,12 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 				if(hasVolCommand) pPlugin->SetDryRatio(2 * vol);
 				else pPlugin->SetDryRatio(2 * defaultVolume);
 				break;
-
 			case PLUGIN_VOLUMEHANDLING_MIDI:
 				if(hasVolCommand) pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Coarse, std::min<uint8>(127u, 2u * vol), nChn);
 				else pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Coarse, static_cast<uint8>(std::min<uint32>(127u, 2u * defaultVolume)), nChn);
 				break;
-
+			default:
+				break;
 		}
 	}
 }
