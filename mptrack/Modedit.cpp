@@ -763,7 +763,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX du
 // Load default instrument values for inserting new instrument during editing
 void CModDoc::InitializeInstrument(ModInstrument *pIns)
 {
-	pIns->nPluginVolumeHandling = static_cast<uint8>(TrackerSettings::Instance().DefaultPlugVolumeHandling);
+	pIns->pluginVolumeHandling = TrackerSettings::Instance().DefaultPlugVolumeHandling;
 }
 
 

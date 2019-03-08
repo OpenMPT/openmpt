@@ -174,7 +174,7 @@ struct AutotuneHistogram
 
 struct AutotuneContext
 {
-	int16 *m_sampleData;
+	const int16 *m_sampleData;
 	double pitchReference;
 	SmpLength processLength;
 	uint32 sampleFreq;

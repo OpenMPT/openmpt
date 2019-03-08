@@ -2223,8 +2223,7 @@ void CMainFrame::OnExampleSong(UINT nId)
 
 void CMainFrame::OnOpenMRUItem(UINT nId)
 {
-	mpt::PathString file = TrackerSettings::Instance().mruFiles[nId - ID_MRU_LIST_FIRST];
-	theApp.OpenDocumentFile(file.ToCString());
+	theApp.OpenDocumentFile(TrackerSettings::Instance().mruFiles[nId - ID_MRU_LIST_FIRST].ToCString());
 }
 
 
