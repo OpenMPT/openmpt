@@ -87,7 +87,7 @@ struct ModChannel
 	CHANNELINDEX nMasterChn;
 	ModCommand rowCommand;
 	// 8-bit members
-	uint8 resamplingMode;
+	ResamplingMode resamplingMode;
 	uint8 nRestoreResonanceOnNewNote;	// See nRestorePanOnNewNote
 	uint8 nRestoreCutoffOnNewNote;		// ditto
 	uint8 nNote;

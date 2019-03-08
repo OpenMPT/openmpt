@@ -3079,7 +3079,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(pIns->nPPC, NOTE_MIDDLEC - 1);
 
 	VERIFY_EQUAL_NONCONT(pIns->nVolRampUp, 1200);
-	VERIFY_EQUAL_NONCONT(pIns->nResampling, (unsigned)SRCMODE_SINC8LP);
+	VERIFY_EQUAL_NONCONT(pIns->resampling, SRCMODE_SINC8LP);
 
 	VERIFY_EQUAL_NONCONT(pIns->IsCutoffEnabled(), false);
 	VERIFY_EQUAL_NONCONT(pIns->GetCutoff(), 0);
@@ -3105,8 +3105,8 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 
 	VERIFY_EQUAL_NONCONT(pIns->pitchToTempoLock, TEMPO(0, 0));
 
-	VERIFY_EQUAL_NONCONT(pIns->nPluginVelocityHandling, PLUGIN_VELOCITYHANDLING_VOLUME);
-	VERIFY_EQUAL_NONCONT(pIns->nPluginVolumeHandling, PLUGIN_VOLUMEHANDLING_MIDI);
+	VERIFY_EQUAL_NONCONT(pIns->pluginVelocityHandling, PLUGIN_VELOCITYHANDLING_VOLUME);
+	VERIFY_EQUAL_NONCONT(pIns->pluginVolumeHandling, PLUGIN_VOLUMEHANDLING_MIDI);
 
 	for(size_t i = sndFile.GetModSpecifications().noteMin; i < sndFile.GetModSpecifications().noteMax; i++)
 	{
@@ -3372,7 +3372,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(pIns->nPPC, (NOTE_MIDDLEC - NOTE_MIN) + 6);	// F#5
 
 		VERIFY_EQUAL_NONCONT(pIns->nVolRampUp, 1200);
-		VERIFY_EQUAL_NONCONT(pIns->nResampling, (unsigned)SRCMODE_SINC8LP);
+		VERIFY_EQUAL_NONCONT(pIns->resampling, SRCMODE_SINC8LP);
 
 		VERIFY_EQUAL_NONCONT(pIns->IsCutoffEnabled(), true);
 		VERIFY_EQUAL_NONCONT(pIns->GetCutoff(), 0x32);
@@ -3399,8 +3399,8 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 
 		VERIFY_EQUAL_NONCONT(pIns->pitchToTempoLock, TEMPO(130, 2000));
 
-		VERIFY_EQUAL_NONCONT(pIns->nPluginVelocityHandling, PLUGIN_VELOCITYHANDLING_VOLUME);
-		VERIFY_EQUAL_NONCONT(pIns->nPluginVolumeHandling, PLUGIN_VOLUMEHANDLING_MIDI);
+		VERIFY_EQUAL_NONCONT(pIns->pluginVelocityHandling, PLUGIN_VELOCITYHANDLING_VOLUME);
+		VERIFY_EQUAL_NONCONT(pIns->pluginVolumeHandling, PLUGIN_VOLUMEHANDLING_MIDI);
 
 		for(size_t i = 0; i < NOTE_MAX; i++)
 		{

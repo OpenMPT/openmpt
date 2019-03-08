@@ -1358,7 +1358,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		m_SliderCutSwing.EnableWindow(pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nCutSwing != 0));
 		m_SliderResSwing.EnableWindow(pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nResSwing != 0));
 		m_CbnFilterMode.EnableWindow (pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nFilterMode != FLTMODE_UNCHANGED));
-		m_CbnResampling.EnableWindow (pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nResampling != SRCMODE_DEFAULT));
+		m_CbnResampling.EnableWindow (pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->resampling != SRCMODE_DEFAULT));
 		m_SliderAttack.EnableWindow  (pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nVolRampUp));
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nVolRampUp));
 
@@ -1401,7 +1401,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			for(int nRes = 0; nRes<m_CbnResampling.GetCount(); nRes++)
 			{
 				DWORD v = m_CbnResampling.GetItemData(nRes);
-				if (pIns->nResampling == v)
+				if (pIns->resampling == v)
 				{
 					m_CbnResampling.SetCurSel(nRes);
 					break;
@@ -2388,11 +2388,11 @@ void CCtrlInstruments::OnResamplingChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
-		uint32 n = m_CbnResampling.GetItemData(m_CbnResampling.GetCurSel());
-		if (pIns->nResampling != n)
+		ResamplingMode n = static_cast<ResamplingMode>(m_CbnResampling.GetItemData(m_CbnResampling.GetCurSel()));
+		if (pIns->resampling != n)
 		{
 			PrepareUndo("Set Resampling");
-			pIns->nResampling = n;
+			pIns->resampling = n;
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}
@@ -2423,8 +2423,8 @@ void CCtrlInstruments::OnMixPlugChanged()
 				SetModified(InstrumentHint().Info(), false);
 			}
 
-			velocityStyle.SetCheck(pIns->nPluginVelocityHandling == PLUGIN_VELOCITYHANDLING_CHANNEL ? BST_CHECKED : BST_UNCHECKED);
-			m_CbnPluginVolumeHandling.SetCurSel(pIns->nPluginVolumeHandling);
+			velocityStyle.SetCheck(pIns->pluginVelocityHandling == PLUGIN_VELOCITYHANDLING_CHANNEL ? BST_CHECKED : BST_UNCHECKED);
+			m_CbnPluginVolumeHandling.SetCurSel(pIns->pluginVolumeHandling);
 
 #ifndef NO_PLUGINS
 			if(pIns->nMixPlug)
@@ -2952,8 +2952,8 @@ void CCtrlInstruments::OnPluginVelocityHandlingChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if(!IsLocked() && pIns != nullptr)
 	{
-		uint8 n = static_cast<uint8>(velocityStyle.GetCheck() != BST_UNCHECKED ? PLUGIN_VELOCITYHANDLING_CHANNEL : PLUGIN_VELOCITYHANDLING_VOLUME);
-		if(n != pIns->nPluginVelocityHandling)
+		PlugVelocityHandling n = velocityStyle.GetCheck() != BST_UNCHECKED ? PLUGIN_VELOCITYHANDLING_CHANNEL : PLUGIN_VELOCITYHANDLING_VOLUME;
+		if(n != pIns->pluginVelocityHandling)
 		{
 			PrepareUndo("Set Velocity Handling");
 			if(n == PLUGIN_VELOCITYHANDLING_VOLUME && m_CbnPluginVolumeHandling.GetCurSel() == PLUGIN_VOLUMEHANDLING_IGNORE)
@@ -2962,7 +2962,7 @@ void CCtrlInstruments::OnPluginVelocityHandlingChanged()
 				m_CbnPluginVolumeHandling.SetCurSel(PLUGIN_VOLUMEHANDLING_MIDI);
 			}
 
-			pIns->nPluginVelocityHandling = n;
+			pIns->pluginVelocityHandling = n;
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}
@@ -2974,8 +2974,8 @@ void CCtrlInstruments::OnPluginVolumeHandlingChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if(!IsLocked() && pIns != nullptr)
 	{
-		uint8 n = static_cast<uint8>(m_CbnPluginVolumeHandling.GetCurSel());
-		if(n != pIns->nPluginVolumeHandling)
+		PlugVolumeHandling n = static_cast<PlugVolumeHandling>(m_CbnPluginVolumeHandling.GetCurSel());
+		if(n != pIns->pluginVolumeHandling)
 		{
 			PrepareUndo("Set Volume Handling");
 
@@ -2985,7 +2985,7 @@ void CCtrlInstruments::OnPluginVolumeHandlingChanged()
 				velocityStyle.SetCheck(BST_CHECKED);
 			}
 
-			pIns->nPluginVolumeHandling = n;
+			pIns->pluginVolumeHandling = n;
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}

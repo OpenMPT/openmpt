@@ -254,12 +254,14 @@ void CModTypeDlg::UpdateDialog()
 			{
 				enableSetDefaults = true;
 				if(!isMPTM)
+				{
 					showWarning = true;
-				break;
+					break;
+				}
 			}
-			// For MPTM, only warn about unsupported / legacy behaviour
-			else if(isMPTM && m_playBehaviour[i] && !supportedBehaviour[i])
+			if(isMPTM && m_playBehaviour[i] && !supportedBehaviour[i])
 			{
+
 				enableSetDefaults = true;
 				showWarning = true;
 				break;
@@ -615,6 +617,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2NoteDelayWithoutInstr: desc = _T("Delayed instrument-less notes should not recall volume and panning"); break;
 		case kOPLFlexibleNoteOff: desc = _T("Full control over OPL notes after note-off"); break;
 		case kITInstrWithNoteOffOldEffects: desc = _T("Instrument number with note-off retriggers envelopes with Old Effects enabled"); break;
+		case kMIDIVolumeOnNoteOffBug: desc = _T("Reset VST volume on note-off"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

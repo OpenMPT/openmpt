@@ -271,18 +271,18 @@ template<> inline SampleEditorKeyBehaviour FromSettingValue(const SettingValue &
 template<> inline SettingValue ToSettingValue(const MODTYPE &val) { return SettingValue(SettingsModTypeToString(val), "MODTYPE"); }
 template<> inline MODTYPE FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "MODTYPE"); return SettingsStringToModType(val.as<mpt::ustring>()); }
 
-template<> inline SettingValue ToSettingValue(const PLUGVOLUMEHANDLING &val)
+template<> inline SettingValue ToSettingValue(const PlugVolumeHandling &val)
 {
-	return SettingValue(int32(val), "PLUGVOLUMEHANDLING");
+	return SettingValue(int32(val), "PlugVolumeHandling");
 }
-template<> inline PLUGVOLUMEHANDLING FromSettingValue(const SettingValue &val)
+template<> inline PlugVolumeHandling FromSettingValue(const SettingValue &val)
 {
-	ASSERT(val.GetTypeTag() == "PLUGVOLUMEHANDLING");
+	ASSERT(val.GetTypeTag() == "PlugVolumeHandling");
 	if((uint32)val.as<int32>() > PLUGIN_VOLUMEHANDLING_MAX)
 	{
 		return PLUGIN_VOLUMEHANDLING_IGNORE;
 	}
-	return static_cast<PLUGVOLUMEHANDLING>(val.as<int32>());
+	return static_cast<PlugVolumeHandling>(val.as<int32>());
 }
 
 template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::String::Combine(val, U_(",")); }
@@ -629,7 +629,7 @@ public:
 	Setting<bool> ShowSettingsOnNewVersion;
 	Setting<MODTYPE> defaultModType;
 	Setting<NewFileAction> defaultNewFileAction;
-	Setting<PLUGVOLUMEHANDLING> DefaultPlugVolumeHandling;
+	Setting<PlugVolumeHandling> DefaultPlugVolumeHandling;
 	Setting<bool> autoApplySmoothFT2Ramping;
 	CachedSetting<uint32> MiscITCompressionStereo; // Mask: bit0: IT, bit1: Compat IT, bit2: MPTM
 	CachedSetting<uint32> MiscITCompressionMono;   // Mask: bit0: IT, bit1: Compat IT, bit2: MPTM
