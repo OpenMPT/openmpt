@@ -56,6 +56,14 @@ os.chdir("../..")
 
 (openmpt_version, openmpt_version_short) = get_version_number()
 
+def remove_file(filename):
+	if os.path.isfile(filename):
+		os.remove(filename)
+
+def remove_dir(dirname):
+	if os.path.isdir(dirname):
+		shutil.rmtree(dirname)
+
 openmpt_version_name = "OpenMPT-" + openmpt_version
 openmpt_zip_32bit_basepath = "installer/OpenMPT-" + openmpt_version + "/"
 openmpt_zip_32bitold_basepath = "installer/OpenMPT-" + openmpt_version + "-legacy/"
@@ -96,6 +104,24 @@ def copy_other(to_path, openmpt_version_short):
     copy_file("packageTemplate/", to_path, "open_settings_folder.bat")
     copy_file("packageTemplate/", to_path, "OpenMPT Manual.chm")
     copy_file("packageTemplate/", to_path, "readme.txt")
+
+remove_dir(openmpt_zip_32bit_basepath)
+remove_dir(openmpt_zip_32bitold_basepath)
+remove_dir(openmpt_zip_64bit_basepath)
+remove_dir(openmpt_zip_64bitold_basepath)
+
+remove_file("installer/" + openmpt_version_name + "-Setup.exe")
+remove_file("installer/" + openmpt_version_name + "-Setup-x64.exe")
+remove_file("installer/" + openmpt_version_name + ".zip")
+remove_file("installer/" + openmpt_version_name + "-legacy.zip")
+remove_file("installer/" + openmpt_version_name + "-x64.zip")
+remove_file("installer/" + openmpt_version_name + "-x64-legacy.zip")
+remove_file("installer/" + openmpt_version_name + "-Setup.exe.digests")
+remove_file("installer/" + openmpt_version_name + "-Setup-x64.exe.digests")
+remove_file("installer/" + openmpt_version_name + ".zip.digests")
+remove_file("installer/" + openmpt_version_name + "-legacy.zip.digests")
+remove_file("installer/" + openmpt_version_name + "-x64.zip.digests")
+remove_file("installer/" + openmpt_version_name + "-x64-legacy.zip.digests")
 
 print("Generating manual...")
 pManual = Popen([executable, "wiki.py"], cwd="mptrack/manual_generator/")
