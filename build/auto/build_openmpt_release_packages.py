@@ -151,6 +151,7 @@ if not singleThreaded:
 if os.path.isfile('packageTemplate/ExampleSongs/nosongs.txt'):
 	os.remove('packageTemplate/ExampleSongs/nosongs.txt')
 if not exampleSongs:
+	os.makedirs('packageTemplate/ExampleSongs', exist_ok=True)
 	with open('packageTemplate/ExampleSongs/nosongs.txt', 'w') as f:
 		f.write('Installer for OpenMPT test versions contains no example songs.')
 		f.write('\n')
