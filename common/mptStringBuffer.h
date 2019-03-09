@@ -185,7 +185,6 @@ public:
 		, mode(mode)
 	{
 		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
-		MPT_ASSERT(size > 0);
 	}
 	StringModeBufRefImpl(const StringModeBufRefImpl &) = delete;
 	StringModeBufRefImpl(StringModeBufRefImpl &&) = default;
@@ -218,7 +217,6 @@ public:
 		, mode(mode)
 	{
 		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
-		MPT_ASSERT(size > 0);
 	}
 	StringModeBufRefImpl(const StringModeBufRefImpl &) = delete;
 	StringModeBufRefImpl(StringModeBufRefImpl &&) = default;
