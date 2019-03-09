@@ -35,7 +35,7 @@ copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-x64.zip                openmpt\pk
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-x64.zip.digests        openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%OPENMPT_VERSION%-%SVNVERSION%-x64.zip.digests
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-x64-legacy.zip         openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%OPENMPT_VERSION%-%SVNVERSION%-x64-legacy.zip
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-x64-legacy.zip.digests openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%OPENMPT_VERSION%-%SVNVERSION%-x64-legacy.zip.digests
-..\build\tools\7zip\7z.exe a -ttar openmpt-pkg.tar openmpt || goto error
+..\build\tools\7zip\7z.exe a -ttar openmpt-pkg.win.tar openmpt || goto error
 rmdir /s /q openmpt
 cd .. || goto error
 
