@@ -17,7 +17,6 @@ set MPT_REVISION=%OPENMPT_VERSION%-%SVNVERSION%
 
 
 
-cmd /c build\auto\update_package_template.cmd || goto error
 cd bin || goto error
 rmdir /s /q openmpt
 mkdir openmpt
