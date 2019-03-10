@@ -52,7 +52,7 @@ static mpt::Windows::Version VersionFromNTDDI_VERSION() noexcept
 			mpt::Windows::Version::WinNT4
 		#endif
 		;
-	return mpt::Windows::Version(System, mpt::Windows::Version::ServicePack(((NTDDI_VERSION & 0xffffu) >> 8) & 0xffu, ((NTDDI_VERSION & 0xffffu) >> 0) & 0xffu), 0);
+	return mpt::Windows::Version(System, mpt::Windows::Version::ServicePack(((NTDDI_VERSION & 0xffffu) >> 8) & 0xffu, ((NTDDI_VERSION & 0xffffu) >> 0) & 0xffu), 0, 0);
 }
 
 
@@ -96,10 +96,19 @@ static mpt::Windows::Version GatherWindowsVersion() noexcept
 	{
 		return VersionFromNTDDI_VERSION();
 	}
+	DWORD dwProductType = 0;
+	#if (_WIN32_WINNT >= 0x0600) // _WIN32_WINNT_VISTA
+		dwProductType = PRODUCT_UNDEFINED;
+		if(GetProductInfo(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion, versioninfoex.wServicePackMajor, versioninfoex.wServicePackMinor, &dwProductType) == FALSE)
+		{
+			dwProductType = PRODUCT_UNDEFINED;
+		}
+	#endif
 	return mpt::Windows::Version(
 		mpt::Windows::Version::System(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion),
 		mpt::Windows::Version::ServicePack(versioninfoex.wServicePackMajor, versioninfoex.wServicePackMinor),
-		versioninfoex.dwBuildNumber
+		versioninfoex.dwBuildNumber,
+		dwProductType
 		);
 #endif // MPT_OS_WINDOWS_WINRT
 }
@@ -145,11 +154,12 @@ Version Version::NoWindows() noexcept
 }
 
 
-Version::Version(mpt::Windows::Version::System system, mpt::Windows::Version::ServicePack servicePack, mpt::Windows::Version::Build build) noexcept
+Version::Version(mpt::Windows::Version::System system, mpt::Windows::Version::ServicePack servicePack, mpt::Windows::Version::Build build, mpt::Windows::Version::TypeId type) noexcept
 	: m_SystemIsWindows(true)
 	, m_System(system)
 	, m_ServicePack(servicePack)
 	, m_Build(build)
+	, m_Type(type)
 {
 }
 
@@ -281,6 +291,12 @@ mpt::Windows::Version::ServicePack Version::GetServicePack() const noexcept
 mpt::Windows::Version::Build Version::GetBuild() const noexcept
 {
 	return m_Build;
+}
+
+
+mpt::Windows::Version::TypeId Version::GetTypeId() const noexcept
+{
+	return m_Type;
 }
 
 
