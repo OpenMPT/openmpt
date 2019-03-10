@@ -257,6 +257,16 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	j["System"]["Windows"]["Build"] = mpt::Windows::Version::Current().GetBuild();
 	j["System"]["Windows"]["Architecture"] = mpt::Windows::Name(mpt::Windows::GetHostArchitecture());
 	j["System"]["Windows"]["IsWine"] = mpt::Windows::IsWine();
+	DWORD dwProductType = 0;
+	#if (_WIN32_WINNT >= 0x0600) // _WIN32_WINNT_VISTA
+		const auto version = mpt::Windows::Version::Current();
+		dwProductType = PRODUCT_UNDEFINED;
+		if(GetProductInfo(version.GetSystem().Major, version.GetSystem().Minor, version.GetServicePack().Major, version.GetServicePack().Minor, &dwProductType) == FALSE)
+		{
+			dwProductType = PRODUCT_UNDEFINED;
+		}
+	#endif
+	j["System"]["Windows"]["TypeRaw"] = mpt::format("0x%1")(mpt::fmt::HEX0<8>(static_cast<uint32>(dwProductType)));
 	std::vector<mpt::Windows::Architecture> architectures = mpt::Windows::GetSupportedProcessArchitectures(mpt::Windows::GetHostArchitecture());
 	for(const auto & arch : architectures)
 	{
