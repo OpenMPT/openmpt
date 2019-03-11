@@ -2598,6 +2598,41 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(P_("\\directory\\file.txt").GetFileExt(), P_(".txt"));
 	VERIFY_EQUAL(P_("\\directory\\file.txt").GetFullFileName(), P_("file.txt"));
 
+	VERIFY_EQUAL(P_(".").GetDrive(), P_(""));
+	VERIFY_EQUAL(P_(".").GetDir(), P_(""));
+	VERIFY_EQUAL(P_(".").GetPath(), P_(""));
+	VERIFY_EQUAL(P_(".").GetFileName(), P_("."));
+	VERIFY_EQUAL(P_(".").GetFileExt(), P_(""));
+	VERIFY_EQUAL(P_(".").GetFullFileName(), P_("."));
+
+	VERIFY_EQUAL(P_("..").GetDrive(), P_(""));
+	VERIFY_EQUAL(P_("..").GetDir(), P_(""));
+	VERIFY_EQUAL(P_("..").GetPath(), P_(""));
+	VERIFY_EQUAL(P_("..").GetFileName(), P_(".."));
+	VERIFY_EQUAL(P_("..").GetFileExt(), P_(""));
+	VERIFY_EQUAL(P_("..").GetFullFileName(), P_(".."));
+
+	VERIFY_EQUAL(P_("dir\\.").GetDrive(), P_(""));
+	VERIFY_EQUAL(P_("dir\\.").GetDir(), P_("dir\\"));
+	VERIFY_EQUAL(P_("dir\\.").GetPath(), P_("dir\\"));
+	VERIFY_EQUAL(P_("dir\\.").GetFileName(), P_("."));
+	VERIFY_EQUAL(P_("dir\\.").GetFileExt(), P_(""));
+	VERIFY_EQUAL(P_("dir\\.").GetFullFileName(), P_("."));
+
+	VERIFY_EQUAL(P_("dir\\..").GetDrive(), P_(""));
+	VERIFY_EQUAL(P_("dir\\..").GetDir(), P_("dir\\"));
+	VERIFY_EQUAL(P_("dir\\..").GetPath(), P_("dir\\"));
+	VERIFY_EQUAL(P_("dir\\..").GetFileName(), P_(".."));
+	VERIFY_EQUAL(P_("dir\\..").GetFileExt(), P_(""));
+	VERIFY_EQUAL(P_("dir\\..").GetFullFileName(), P_(".."));
+
+	VERIFY_EQUAL(P_(".txt").GetDrive(), P_(""));
+	VERIFY_EQUAL(P_(".txt").GetDir(), P_(""));
+	VERIFY_EQUAL(P_(".txt").GetPath(), P_(""));
+	VERIFY_EQUAL(P_(".txt").GetFileName(), P_(".txt"));
+	VERIFY_EQUAL(P_(".txt").GetFileExt(), P_(""));
+	VERIFY_EQUAL(P_(".txt").GetFullFileName(), P_(".txt"));
+
 	VERIFY_EQUAL(P_("C:tmp.txt").GetDrive(), P_("C:"));
 	VERIFY_EQUAL(P_("C:tmp.txt").GetDir(), P_(""));
 	VERIFY_EQUAL(P_("C:tmp.txt").GetPath(), P_("C:"));
