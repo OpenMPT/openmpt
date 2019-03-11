@@ -82,36 +82,6 @@ static void SSE2_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *p
 
 #if defined(ENABLE_X86) && defined(ENABLE_SSE)
 
-static void SSE_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
-{
-	_asm {
-	movss xmm0, _i2fc
-	mov edx, pSrc
-	mov eax, pOut1
-	mov ebx, pOut2
-	mov ecx, nCount
-	shufps xmm0, xmm0, 0x00
-	xorps xmm1, xmm1
-	xorps xmm2, xmm2
-	inc ecx
-	shr ecx, 1
-mainloop:
-	cvtpi2ps xmm1, [edx]
-	cvtpi2ps xmm2, [edx+8]
-	add eax, 8
-	add ebx, 8
-	movlhps xmm1, xmm2
-	mulps xmm1, xmm0
-	add edx, 16
-	shufps xmm1, xmm1, 0xD8
-	dec ecx
-	movlps qword ptr [eax-8], xmm1
-	movhps qword ptr [ebx-8], xmm1
-	jnz mainloop
-	}
-}
-
-
 static void SSE_MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _i2fc)
 {
 	_asm {
@@ -143,60 +113,6 @@ mainloop:
 
 #ifdef ENABLE_X86
 
-// Convert floating-point mix to integer
-
-static void X86_FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 nCount, const float _f2ic)
-{
-	_asm {
-	mov esi, pIn1
-	mov ebx, pIn2
-	mov edi, pOut
-	mov ecx, nCount
-	fld _f2ic
-mainloop:
-	fld dword ptr [ebx]
-	add edi, 8
-	fld dword ptr [esi]
-	add ebx, 4
-	add esi, 4
-	fmul st(0), st(2)
-	fistp dword ptr [edi-8]
-	fmul st(0), st(1)
-	fistp dword ptr [edi-4]
-	dec ecx
-	jnz mainloop
-	fstp st(0)
-	}
-}
-
-
-// Convert integer mix to floating-point
-
-static void X86_StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCount, const float _i2fc)
-{
-	_asm {
-	mov esi, pSrc
-	mov edi, pOut1
-	mov ebx, pOut2
-	mov ecx, nCount
-	fld _i2fc
-mainloop:
-	fild dword ptr [esi]
-	fild dword ptr [esi+4]
-	add ebx, 4
-	add edi, 4
-	fmul st(0), st(2)
-	add esi, 8
-	fstp dword ptr [ebx-4]
-	fmul st(0), st(1)
-	fstp dword ptr [edi-4]
-	dec ecx
-	jnz mainloop
-	fstp st(0)
-	}
-}
-
-
 static void X86_FloatToMonoMix(const float *pIn, int32 *pOut, uint32 nCount, const float _f2ic)
 {
 	_asm {
@@ -213,27 +129,6 @@ R2I_Loop:
 	lea edx, [edx+4]
 	fistp DWORD PTR [eax]
 	jnz R2I_Loop
-	fstp st(0)
-	}
-}
-
-
-static void X86_MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _i2fc)
-{
-	_asm {
-	mov edx, pOut
-	mov eax, pSrc
-	mov ecx, nCount
-	fld _i2fc
-	sub edx, 4
-I2R_Loop:
-	fild DWORD PTR [eax]
-	add edx, 4
-	fmul ST(0), ST(1)
-	dec ecx
-	lea eax, [eax+4]
-	fstp DWORD PTR [edx]
-	jnz I2R_Loop
 	fstp st(0)
 	}
 }
@@ -291,21 +186,6 @@ void StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCou
 		return;
 	}
 	#endif // ENABLE_SSE2
-	#if defined(ENABLE_X86) && defined(ENABLE_SSE)
-		if(GetProcSupport() & PROCSUPPORT_SSE)
-		{
-			SSE_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
-			return;
-		}
-	#endif // ENABLE_X86 && ENABLE_SSE
-
-	#ifdef ENABLE_X86
-		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
-		{
-			X86_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
-			return;
-		}
-	#endif // ENABLE_X86
 
 	{
 		C_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
@@ -324,14 +204,6 @@ void FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 
 	}
 	#endif // ENABLE_SSE2
 
-	#ifdef ENABLE_X86
-		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
-		{
-			X86_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
-			return;
-		}
-	#endif // ENABLE_X86
-
 	{
 		C_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
 	}
@@ -349,14 +221,6 @@ void MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _
 			return;
 		}
 	#endif // ENABLE_X86 && ENABLE_SSE
-
-	#ifdef ENABLE_X86
-		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
-		{
-			X86_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
-			return;
-		}
-	#endif // ENABLE_X86
 
 	{
 		C_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);

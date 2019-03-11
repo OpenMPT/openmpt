@@ -687,144 +687,6 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 }
 
 
-#if defined(ENABLE_MMX) && defined(ENABLE_SSE)
-
-OPENMPT_NAMESPACE_END
-#include <mmintrin.h>
-OPENMPT_NAMESPACE_BEGIN
-
-// AMD MMX/SSE implementation for min/max finder, packs 4*int16 in a 64-bit MMX register.
-// scanlen = How many samples to process on this channel
-static void amdmmxext_or_sse_findminmax16(const void *p, SmpLength scanlen, int channels, int &smin, int &smax)
-{
-	scanlen *= channels;
-
-	// Put minimum / maximum in 4 packed int16 values
-	__m64 minVal = _mm_set1_pi16(static_cast<int16>(smin));
-	__m64 maxVal = _mm_set1_pi16(static_cast<int16>(smax));
-
-	SmpLength scanlen4 = scanlen / 4;
-	if(scanlen4)
-	{
-		const __m64 *v = static_cast<const __m64 *>(p);
-		p = static_cast<const __m64 *>(p) + scanlen4;
-
-		while(scanlen4--)
-		{
-			__m64 curVals = *(v++);
-			minVal = _mm_min_pi16(minVal, curVals);
-			maxVal = _mm_max_pi16(maxVal, curVals);
-		}
-
-		// Now we have 4 minima and maxima each, in case of stereo they are interleaved L/R values.
-		// Move the upper 2 values to the lower half and compute the minima/maxima of that.
-		__m64 minVal2 = _mm_unpackhi_pi32(minVal, minVal);
-		__m64 maxVal2 = _mm_unpackhi_pi32(maxVal, maxVal);
-		minVal = _mm_min_pi16(minVal, minVal2);
-		maxVal = _mm_max_pi16(maxVal, maxVal2);
-
-		if(channels < 2)
-		{
-			// Mono: Compute the minima/maxima of the both remaining values
-			minVal2 = _mm_sra_pi32(minVal, _mm_cvtsi32_si64(16));
-			maxVal2 = _mm_sra_pi32(maxVal, _mm_cvtsi32_si64(16));
-			minVal = _mm_min_pi16(minVal, minVal2);
-			maxVal = _mm_max_pi16(maxVal, maxVal2);
-		}
-
-		ASSERT(p == v);
-	}
-
-	const int16 *p16 = static_cast<const int16 *>(p);
-	while(scanlen & 3)
-	{
-		scanlen -= channels;
-		__m64 curVals = _mm_cvtsi32_si64(*p16);
-		p16 += channels;
-		minVal = _mm_min_pi16(minVal, curVals);
-		maxVal = _mm_max_pi16(maxVal, curVals);
-	}
-
-	smin = static_cast<int16>(_mm_cvtsi64_si32(minVal));
-	smax = static_cast<int16>(_mm_cvtsi64_si32(maxVal));
-
-	_mm_empty();
-}
-
-
-// AMD MMX/SSE implementation for min/max finder, packs 8*int8 in a 64-bit MMX register.
-// scanlen = How many samples to process on this channel
-static void amdmmxext_or_sse_findminmax8(const void *p, SmpLength scanlen, int channels, int &smin, int &smax)
-{
-	scanlen *= channels;
-
-	// For signed <-> unsigned conversion (min/max only exists for unsigned 8-bit values)
-	__m64 xorVal = _mm_set1_pi8(0x80u);
-
-	// Put minimum / maximum in 8 packed uint8 values
-	__m64 minVal = _mm_set1_pi8(static_cast<int8>(smin));
-	__m64 maxVal = _mm_set1_pi8(static_cast<int8>(smax));
-	minVal = _mm_xor_si64(minVal, xorVal);
-	maxVal = _mm_xor_si64(maxVal, xorVal);
-
-	SmpLength scanlen8 = scanlen / 8;
-	if(scanlen8)
-	{
-		const __m64 *v = static_cast<const __m64 *>(p);
-		p = static_cast<const __m64 *>(p) + scanlen8;
-
-		while(scanlen8--)
-		{
-			__m64 curVals = _mm_xor_si64(*(v++), xorVal);
-			minVal = _mm_min_pu8(minVal, curVals);
-			maxVal = _mm_max_pu8(maxVal, curVals);
-		}
-
-		// Now we have 8 minima and maxima each, in case of stereo they are interleaved L/R values.
-		// Move the upper 4 values to the lower half and compute the minima/maxima of that.
-		__m64 minVal2 = _mm_unpackhi_pi32(minVal, minVal);
-		__m64 maxVal2 = _mm_unpackhi_pi32(maxVal, maxVal);
-		minVal = _mm_min_pu8(minVal, minVal2);
-		maxVal = _mm_max_pu8(maxVal, maxVal2);
-
-		// Now we have 4 minima and maxima each, in case of stereo they are interleaved L/R values.
-		// Move the upper 2 values to the lower half and compute the minima/maxima of that.
-		minVal2 = _mm_srl_pi32(minVal, _mm_cvtsi32_si64(16));
-		maxVal2 = _mm_srl_pi32(maxVal, _mm_cvtsi32_si64(16));
-		minVal = _mm_min_pu8(minVal, minVal2);
-		maxVal = _mm_max_pu8(maxVal, maxVal2);
-
-		if(channels < 2)
-		{
-			// Mono: Compute the minima/maxima of the both remaining values
-			minVal2 = _mm_srl_pi32(minVal, _mm_cvtsi32_si64(8));
-			maxVal2 = _mm_srl_pi32(maxVal, _mm_cvtsi32_si64(8));
-			minVal = _mm_min_pu8(minVal, minVal2);
-			maxVal = _mm_max_pu8(maxVal, maxVal2);
-		}
-
-		ASSERT(p == v);
-	}
-
-	const int8 *p8 = static_cast<const int8 *>(p);
-	while(scanlen & 7)
-	{
-		scanlen -= channels;
-		__m64 curVals = _mm_xor_si64(_mm_cvtsi32_si64(*p8), xorVal);
-		p8 += channels;
-		minVal = _mm_min_pu8(minVal, curVals);
-		maxVal = _mm_max_pu8(maxVal, curVals);
-	}
-
-	minVal = _mm_xor_si64(minVal, xorVal);
-	maxVal = _mm_xor_si64(maxVal, xorVal);
-	smin = static_cast<int8>(_mm_cvtsi64_si32(minVal));
-	smax = static_cast<int8>(_mm_cvtsi64_si32(maxVal));
-
-	_mm_empty();
-}
-
-#endif // defined(ENABLE_MMX) && defined(ENABLE_SSE)
 #if defined(ENABLE_SSE2)
 
 OPENMPT_NAMESPACE_END
@@ -979,12 +841,6 @@ std::pair<int, int> CViewSample::FindMinMax(const int8 *p, SmpLength numSamples,
 		sse2_findminmax8(p, numSamples, numChannels, minVal, maxVal);
 	} else
 #endif
-#if defined(ENABLE_MMX) && defined(ENABLE_SSE)
-	if((GetProcSupport() & PROCSUPPORT_MMX) && (GetProcSupport() & PROCSUPPORT_SSE))
-	{
-		amdmmxext_or_sse_findminmax8(p, numSamples, numChannels, minVal, maxVal);
-	} else
-#endif
 	{
 		while(numSamples--)
 		{
@@ -1007,12 +863,6 @@ std::pair<int, int> CViewSample::FindMinMax(const int16 *p, SmpLength numSamples
 	if(GetProcSupport() & PROCSUPPORT_SSE2)
 	{
 		sse2_findminmax16(p, numSamples, numChannels, minVal, maxVal);
-	} else
-#endif
-#if defined(ENABLE_MMX) && defined(ENABLE_SSE)
-	if((GetProcSupport() & PROCSUPPORT_MMX) && (GetProcSupport() & PROCSUPPORT_SSE))
-	{
-		amdmmxext_or_sse_findminmax16(p, numSamples, numChannels, minVal, maxVal);
 	} else
 #endif
 	{
