@@ -284,7 +284,6 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 		j["System"]["Processor"]["Id"]["Model"] = ProcModel;
 		j["System"]["Processor"]["Id"]["Stepping"] = ProcStepping;
 		j["System"]["Processor"]["Features"]["lm"] = ((GetRealProcSupport() & PROCSUPPORT_LM) != 0);
-		j["System"]["Processor"]["Features"]["cmov"] = ((GetRealProcSupport() & PROCSUPPORT_CMOV) != 0);
 		j["System"]["Processor"]["Features"]["mmx"] = ((GetRealProcSupport() & PROCSUPPORT_MMX) != 0);
 		j["System"]["Processor"]["Features"]["sse"] = ((GetRealProcSupport() & PROCSUPPORT_SSE) != 0);
 		j["System"]["Processor"]["Features"]["sse2"] = ((GetRealProcSupport() & PROCSUPPORT_SSE2) != 0);

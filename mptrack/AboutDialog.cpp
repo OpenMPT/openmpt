@@ -312,9 +312,6 @@ static mpt::ustring ProcSupportToString(uint32 procSupport)
 	static constexpr ProcFlag flags[] =
 	{
 		{ 0, "" },
-#if defined(ENABLE_X86)
-		{ PROCSUPPORT_CMOV, "cmov" },
-#endif
 #if defined(ENABLE_MMX)
 		{ PROCSUPPORT_MMX, "mmx" },
 #endif

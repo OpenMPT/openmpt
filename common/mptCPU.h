@@ -20,7 +20,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 #define PROCSUPPORT_ASM_INTRIN   0x00001 // assembly and intrinsics are enabled at runtime
 #define PROCSUPPORT_LM           0x00004 // Processor supports long mode (amd64)
-#define PROCSUPPORT_CMOV         0x00008 // Processor supports conditional move instructions (i686)
 #define PROCSUPPORT_MMX          0x00010 // Processor supports MMX instructions
 #define PROCSUPPORT_SSE          0x00100 // Processor supports SSE instructions
 #define PROCSUPPORT_SSE2         0x00200 // Processor supports SSE2 instructions
@@ -29,11 +28,10 @@ OPENMPT_NAMESPACE_BEGIN
 #define PROCSUPPORT_SSE4_1       0x01000 // Processor supports SSE4.1 instructions
 #define PROCSUPPORT_SSE4_2       0x02000 // Processor supports SSE4.2 instructions
 
-static const uint32 PROCSUPPORT_i586     = 0u                                                                         ;
-static const uint32 PROCSUPPORT_i686     = 0u | PROCSUPPORT_CMOV                                                      ;
-static const uint32 PROCSUPPORT_x86_SSE  = 0u | PROCSUPPORT_CMOV | PROCSUPPORT_SSE                                    ;
-static const uint32 PROCSUPPORT_x86_SSE2 = 0u | PROCSUPPORT_CMOV | PROCSUPPORT_SSE | PROCSUPPORT_SSE2                 ;
-static const uint32 PROCSUPPORT_AMD64    = 0u | PROCSUPPORT_CMOV | PROCSUPPORT_SSE | PROCSUPPORT_SSE2 | PROCSUPPORT_LM;
+static const uint32 PROCSUPPORT_i586     = 0u                                                      ;
+static const uint32 PROCSUPPORT_x86_SSE  = 0u | PROCSUPPORT_SSE                                    ;
+static const uint32 PROCSUPPORT_x86_SSE2 = 0u | PROCSUPPORT_SSE | PROCSUPPORT_SSE2                 ;
+static const uint32 PROCSUPPORT_AMD64    = 0u | PROCSUPPORT_SSE | PROCSUPPORT_SSE2 | PROCSUPPORT_LM;
 
 extern uint32 RealProcSupport;
 extern uint32 ProcSupport;

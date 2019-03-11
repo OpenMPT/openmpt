@@ -175,7 +175,6 @@ void InitProcSupport()
 				ProcModel = static_cast<uint8>(BaseModel);
 			}
 			ProcStepping = static_cast<uint8>(Stepping);
-			if(StandardFeatureFlags.d & (1<<15)) ProcSupport |= PROCSUPPORT_CMOV;
 			if(StandardFeatureFlags.d & (1<<23)) ProcSupport |= PROCSUPPORT_MMX;
 			if(StandardFeatureFlags.d & (1<<25)) ProcSupport |= PROCSUPPORT_SSE;
 			if(StandardFeatureFlags.d & (1<<26)) ProcSupport |= PROCSUPPORT_SSE2;
@@ -275,7 +274,6 @@ void InitProcSupport()
 				if(ExtendedFeatureFlags.d & (1<<29)) ProcSupport |= PROCSUPPORT_LM;
 				if((VendorString.as_string() == "AuthenticAMD") || (VendorString.as_string() == "AMDisbetter!"))
 				{
-					if(ExtendedFeatureFlags.d & (1<<15)) ProcSupport |= PROCSUPPORT_CMOV;
 					if(ExtendedFeatureFlags.d & (1<<23)) ProcSupport |= PROCSUPPORT_MMX;
 				}
 			}
