@@ -473,6 +473,10 @@
 #define ENABLE_SSE3
 // Generate SSE4 instructions (only used when the CPU supports it).
 #define ENABLE_SSE4
+// Generate AVX instructions (only used when the CPU supports it).
+#define ENABLE_AVX
+// Generate AVX2 instructions (only used when the CPU supports it).
+#define ENABLE_AVX2
 
 #elif MPT_COMPILER_MSVC && defined(_M_X64)
 
@@ -486,6 +490,10 @@
 #define ENABLE_SSE3
 // Generate SSE4 instructions (only used when the CPU supports it).
 #define ENABLE_SSE4
+// Generate AVX instructions (only used when the CPU supports it).
+#define ENABLE_AVX
+// Generate AVX2 instructions (only used when the CPU supports it).
+#define ENABLE_AVX2
 
 #endif // arch
 #endif // ENABLE_ASM

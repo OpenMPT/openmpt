@@ -329,6 +329,12 @@ static mpt::ustring ProcSupportToString(uint32 procSupport)
 		{ PROCSUPPORT_SSE4_1, "sse4.1" },
 		{ PROCSUPPORT_SSE4_2, "sse4.2" },
 #endif
+#if defined(ENABLE_AVX)
+		{ PROCSUPPORT_AVX, "avx" },
+#endif
+#if defined(ENABLE_AVX2)
+		{ PROCSUPPORT_AVX2, "avx2" },
+#endif
 	};
 	for(const auto &f : flags)
 	{

@@ -182,6 +182,7 @@ void InitProcSupport()
 			if(StandardFeatureFlags.c & (1<< 9)) ProcSupport |= PROCSUPPORT_SSSE3;
 			if(StandardFeatureFlags.c & (1<<19)) ProcSupport |= PROCSUPPORT_SSE4_1;
 			if(StandardFeatureFlags.c & (1<<20)) ProcSupport |= PROCSUPPORT_SSE4_2;
+			if(StandardFeatureFlags.c & (1<<28)) ProcSupport |= PROCSUPPORT_AVX;
 		}
 
 		bool canExtended = false;
@@ -280,6 +281,11 @@ void InitProcSupport()
 			if(ExtendedVendorString.a >= 0x80000004u)
 			{
 				mpt::String::WriteAutoBuf(ProcBrandID) = cpuid(0x80000002u).as_string4() + cpuid(0x80000003u).as_string4() + cpuid(0x80000004u).as_string4();
+			}
+			if(ExtendedVendorString.a >= 0x80000007u)
+			{
+				cpuid_result ExtendedFeatures = cpuid(0x80000007u);
+				if(ExtendedFeatures.b & (1<< 5)) ProcSupport |= PROCSUPPORT_AVX2;
 			}
 		}
 

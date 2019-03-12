@@ -291,6 +291,8 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 		j["System"]["Processor"]["Features"]["ssse3"] = ((GetRealProcSupport() & PROCSUPPORT_SSSE3) != 0);
 		j["System"]["Processor"]["Features"]["sse4_1"] = ((GetRealProcSupport() & PROCSUPPORT_SSE4_1) != 0);
 		j["System"]["Processor"]["Features"]["sse4_2"] = ((GetRealProcSupport() & PROCSUPPORT_SSE4_2) != 0);
+		j["System"]["Processor"]["Features"]["avx"] = ((GetRealProcSupport() & PROCSUPPORT_AVX) != 0);
+		j["System"]["Processor"]["Features"]["avx2"] = ((GetRealProcSupport() & PROCSUPPORT_AVX2) != 0);
 #endif
 	return j.dump(1, '\t');
 }

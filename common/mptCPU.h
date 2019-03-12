@@ -27,6 +27,8 @@ OPENMPT_NAMESPACE_BEGIN
 #define PROCSUPPORT_SSSE3        0x00800 // Processor supports SSSE3 instructions
 #define PROCSUPPORT_SSE4_1       0x01000 // Processor supports SSE4.1 instructions
 #define PROCSUPPORT_SSE4_2       0x02000 // Processor supports SSE4.2 instructions
+#define PROCSUPPORT_AVX          0x10000 // Processor supports AVX instructions
+#define PROCSUPPORT_AVX2         0x20000 // Processor supports AVX2 instructions
 
 static const uint32 PROCSUPPORT_i586     = 0u                                                      ;
 static const uint32 PROCSUPPORT_x86_SSE  = 0u | PROCSUPPORT_SSE                                    ;
