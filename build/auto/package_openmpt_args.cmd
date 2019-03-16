@@ -46,10 +46,10 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\openmpt-mpg123.pdb .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\openmpt-soundtouch.dll .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\openmpt-soundtouch.pdb .\ || goto error
-copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\PluginBridge32.exe .\ || goto error
-copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\PluginBridge32.pdb .\ || goto error
-copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\PluginBridge64.exe .\ || goto error
-copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\PluginBridge64.pdb .\ || goto error
+copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\x86\PluginBridge-x86.exe .\ || goto error
+copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\x86\PluginBridge-x86.pdb .\ || goto error
+copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\amd64\PluginBridge-amd64.exe .\ || goto error
+copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\amd64\PluginBridge-amd64.pdb .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\openmpt-wine-support.zip .\ || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 ..\openmpt\bin.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
@@ -58,8 +58,8 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%
  openmpt-lame.dll ^
  openmpt-mpg123.dll ^
  openmpt-soundtouch.dll ^
- PluginBridge32.exe ^
- PluginBridge64.exe ^
+ PluginBridge-x86.exe ^
+ PluginBridge-amd64.exe ^
  openmpt-wine-support.zip ^
  extraKeymaps ^
  || goto error
@@ -68,8 +68,8 @@ mkdir ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMP
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols\openmpt-lame.pdb.%MPT_PKG_FORMAT_SYMBOLS% openmpt-lame.pdb || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols\openmpt-mpg123.pdb.%MPT_PKG_FORMAT_SYMBOLS% openmpt-mpg123.pdb || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols\openmpt-soundtouch.pdb.%MPT_PKG_FORMAT_SYMBOLS% openmpt-soundtouch.pdb || goto error
-..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols\PluginBridge32.pdb.%MPT_PKG_FORMAT_SYMBOLS% PluginBridge32.pdb || goto error
-..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols\PluginBridge64.pdb.%MPT_PKG_FORMAT_SYMBOLS% PluginBridge64.pdb || goto error
+..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols\PluginBridge-x86.pdb.%MPT_PKG_FORMAT_SYMBOLS% PluginBridge-x86.pdb || goto error
+..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols\PluginBridge-amd64.pdb.%MPT_PKG_FORMAT_SYMBOLS% PluginBridge-amd64.pdb || goto error
 cd .. || goto error
 ..\build\tools\7zip\7z.exe a -ttar openmpt-%MPT_DIST_VARIANT_TRK%.tar openmpt || goto error
 del /f /q openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%.%MPT_PKG_FORMAT%

@@ -41,90 +41,14 @@
   warnings "Extra"
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   filter { "architecture:x86" }
-   targetsuffix "32"
+   targetsuffix "-x86"
   filter { "architecture:x86_64" }
-   targetsuffix "64"
+   targetsuffix "-amd64"
+  filter { "architecture:ARM" }
+   targetsuffix "-arm"
+  filter { "architecture:ARM64" }
+   targetsuffix "-arm64"
   filter {}
 	filter { "action:vs*", "architecture:x86_64" }
 		linkoptions { "/HIGHENTROPYVA:NO" }
 	filter {}
-
-	if _OPTIONS["win10"] then
-		filter { "architecture:x86", "configurations:*Shared" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\amd64\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\amd64\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\amd64\\$(TargetName).pdb\"",
-			}
-		filter { "architecture:x86_64", "configurations:*Shared" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\x86\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\x86\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\x86\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-shared\\x86\\$(TargetName).pdb\"",
-			}
-		filter { "architecture:x86", "not configurations:*Shared" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\amd64\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\amd64\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\amd64\\$(TargetName).pdb\"",
-			}
-		filter { "architecture:x86_64", "not configurations:*Shared" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\x86\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\x86\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\x86\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win10-static\\x86\\$(TargetName).pdb\"",
-			}
-	elseif _OPTIONS["xp"] then
-		filter { "architecture:x86", "configurations:*Shared" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\amd64\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\amd64\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\amd64\\$(TargetName).pdb\"",
-			}
-		filter { "architecture:x86_64", "configurations:*Shared" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\x86\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\x86\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\x86\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-shared\\x86\\$(TargetName).pdb\"",
-			}
-		filter { "architecture:x86", "not configurations:*Shared" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\amd64\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\amd64\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\amd64\\$(TargetName).pdb\"",
-			}
-		filter { "architecture:x86_64", "not configurations:*Shared" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\x86\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\x86\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\x86\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-winxp-static\\x86\\$(TargetName).pdb\"",
-			}
-	else
-		filter { "architecture:x86", "configurations:*Shared" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\amd64\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\amd64\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\amd64\\$(TargetName).pdb\"",
-			}
-		filter { "architecture:x86_64", "configurations:*Shared" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\x86\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\x86\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\x86\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-shared\\x86\\$(TargetName).pdb\"",
-			}
-		filter { "architecture:x86", "not configurations:*Shared" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\amd64\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\amd64\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\amd64\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\amd64\\$(TargetName).pdb\"",
-			}
-		filter { "architecture:x86_64", "not configurations:*Shared" }
-			postbuildcommands {
-				"if not exist \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\x86\" mkdir \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\x86\"",
-				"copy /y \"$(TargetDir)\\$(TargetFileName)\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\x86\\$(TargetFileName)\"",
-				"copy /y \"$(TargetDir)\\$(TargetName).pdb\" \"$(TargetDir)\\..\\..\\" .. _ACTION .. "-win7-static\\x86\\$(TargetName).pdb\"",
-			}
-	end
-
-	filter {}
-

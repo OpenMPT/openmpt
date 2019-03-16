@@ -20,8 +20,12 @@ OPENMPT_NAMESPACE_BEGIN
 class CModDoc;
 struct SNDMIXPLUGIN;
 struct VSTPluginLib;
-class ComponentPluginBridge32;
-class ComponentPluginBridge64;
+class ComponentPluginBridge_x86;
+class ComponentPluginBridge_amd64;
+#if defined(MPT_WITH_WINDOWS10)
+class ComponentPluginBridge_arm;
+class ComponentPluginBridge_arm64;
+#endif // MPT_WITH_WINDOWS10
 
 class CSelectPluginDlg: public CDialog
 {
@@ -32,8 +36,12 @@ protected:
 	CButton m_chkBridge, m_chkShare;
 	mpt::ustring m_nameFilter;
 #ifndef NO_VST
-	ComponentHandle<ComponentPluginBridge32> pluginBridge32;
-	ComponentHandle<ComponentPluginBridge64> pluginBridge64;
+	ComponentHandle<ComponentPluginBridge_x86> pluginBridge_x86;
+	ComponentHandle<ComponentPluginBridge_amd64> pluginBridge_amd64;
+#if defined(MPT_WITH_WINDOWS10)
+	ComponentHandle<ComponentPluginBridge_arm> pluginBridge_arm;
+	ComponentHandle<ComponentPluginBridge_arm64> pluginBridge_arm64;
+#endif // MPT_WITH_WINDOWS10
 #endif
 	PLUGINDEX m_nPlugSlot;
 

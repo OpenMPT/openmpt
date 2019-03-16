@@ -21,6 +21,17 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct VSTPluginLib;
 
+enum PluginArch : int
+{
+	PluginArch_unknown =        0,
+	PluginArch_x86     =       32,
+	PluginArch_amd64   =       64,
+	PluginArch_arm     = 128 + 32,
+	PluginArch_arm64   = 128 + 64,
+};
+
+std::size_t GetPluginArchPointerSize(PluginArch arch);
+
 class ComponentPluginBridge
 	: public ComponentBase
 {
@@ -33,11 +44,11 @@ public:
 		AvailabilityWrongVersion = -2,
 	};
 private:
-	const int bitness;
+	const PluginArch arch;
 	mpt::PathString exeName;
 	Availability availability;
 protected:
-	ComponentPluginBridge(int bitness);
+	ComponentPluginBridge(PluginArch arch);
 protected:
 	bool DoInitialize() override;
 public:
@@ -45,21 +56,41 @@ public:
 	mpt::PathString GetFileName() const { return exeName; }
 };
 
-class ComponentPluginBridge32
+class ComponentPluginBridge_x86
 	: public ComponentPluginBridge
 {
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
-	ComponentPluginBridge32() : ComponentPluginBridge(32) { }
+	ComponentPluginBridge_x86() : ComponentPluginBridge(PluginArch_x86) { }
 };
 
-class ComponentPluginBridge64
+class ComponentPluginBridge_amd64
 	: public ComponentPluginBridge
 {
 	MPT_DECLARE_COMPONENT_MEMBERS
 public:
-	ComponentPluginBridge64() : ComponentPluginBridge(64) { }
+	ComponentPluginBridge_amd64() : ComponentPluginBridge(PluginArch_amd64) { }
 };
+
+#if defined(MPT_WITH_WINDOWS10)
+
+class ComponentPluginBridge_arm
+	: public ComponentPluginBridge
+{
+	MPT_DECLARE_COMPONENT_MEMBERS
+public:
+	ComponentPluginBridge_arm() : ComponentPluginBridge(PluginArch_arm) { }
+};
+
+class ComponentPluginBridge_arm64
+	: public ComponentPluginBridge
+{
+	MPT_DECLARE_COMPONENT_MEMBERS
+public:
+	ComponentPluginBridge_arm64() : ComponentPluginBridge(PluginArch_arm64) { }
+};
+
+#endif // MPT_WITH_WINDOWS10
 
 class BridgeWrapper : protected BridgeCommon
 {
@@ -88,16 +119,14 @@ protected:
 	Vst::ERect editRect;
 	Vst::VstSpeakerArrangement speakers[2];
 
-	ComponentHandle<ComponentPluginBridge32> pluginBridge32;
-	ComponentHandle<ComponentPluginBridge64> pluginBridge64;
+	ComponentHandle<ComponentPluginBridge_x86> pluginBridge_x86;
+	ComponentHandle<ComponentPluginBridge_amd64> pluginBridge_amd64;
+#if defined(MPT_WITH_WINDOWS10)
+	ComponentHandle<ComponentPluginBridge_arm> pluginBridge_arm;
+	ComponentHandle<ComponentPluginBridge_arm64> pluginBridge_arm64;
+#endif // MPT_WITH_WINDOWS10
 
 public:
-	enum BinaryType
-	{
-		binUnknown = 0,
-		bin32Bit = 32,
-		bin64Bit = 64,
-	};
 
 	// Generic bridge exception
 	class BridgeException : public std::exception
@@ -120,8 +149,9 @@ public:
 	};
 
 public:
-	static BinaryType GetPluginBinaryType(const mpt::PathString &pluginPath);
-	static bool IsPluginNative(const mpt::PathString &pluginPath) { return GetPluginBinaryType(pluginPath) == mpt::arch_bits; }
+	static PluginArch GetNativePluginBinaryType();
+	static PluginArch GetPluginBinaryType(const mpt::PathString &pluginPath);
+	static bool IsPluginNative(const mpt::PathString &pluginPath) { return GetPluginBinaryType(pluginPath) == GetNativePluginBinaryType(); }
 	static uint64 GetFileVersion(const WCHAR *exePath);
 
 	static Vst::AEffect *Create(const VSTPluginLib &plugin);

@@ -59,15 +59,15 @@ Name: english; MessagesFile: compiler:Default.isl
 ; preserve file type order for best solid compression results (first binary, then text)
 ; base folder
 Source: ..\bin\{#PlatformFolder}\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
-Source: ..\bin\{#PlatformFolder}\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
-Source: ..\bin\{#PlatformFolder}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
+Source: ..\bin\{#PlatformFolder}\..\x86\PluginBridge-x86.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
+Source: ..\bin\{#PlatformFolder}\..\amd64\PluginBridge-amd64.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 Source: ..\bin\{#PlatformFolder}\openmpt-lame.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 Source: ..\bin\{#PlatformFolder}\openmpt-mpg123.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 Source: ..\bin\{#PlatformFolder}\openmpt-soundtouch.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 ; Additional binaries for XP-/Vista-compatible version
 Source: ..\bin\{#PlatformFolderOld}\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
-Source: ..\bin\{#PlatformFolderOld}\PluginBridge32.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
-Source: ..\bin\{#PlatformFolderOld}\PluginBridge64.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
+Source: ..\bin\{#PlatformFolderOld}\..\x86\PluginBridge-x86.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
+Source: ..\bin\{#PlatformFolderOld}\..\amd64\PluginBridge-amd64.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
 Source: ..\bin\{#PlatformFolderOld}\openmpt-lame.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
 Source: ..\bin\{#PlatformFolderOld}\openmpt-mpg123.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
 Source: ..\bin\{#PlatformFolderOld}\openmpt-soundtouch.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
@@ -143,6 +143,9 @@ Type: dirifempty; Name: {app}\SoundTouch
 Type: files; Name: {app}\Plugins\MIDI\MIDI Input Output.dll
 Type: dirifempty; Name: {app}\Plugins\MIDI
 Type: dirifempty; Name: {app}\Plugins
+; PLuginBridge uses arch naming now
+Type: files; Name: {app}\PluginBridge32.exe
+Type: files; Name: {app}\PluginBridge64.exe
 
 [UninstallDelete]
 ; internet shortcut has to be deleted manually

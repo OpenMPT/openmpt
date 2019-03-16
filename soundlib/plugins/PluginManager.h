@@ -23,6 +23,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CSoundFile;
 class IMixPlugin;
 struct SNDMIXPLUGIN;
+enum PluginArch : int;
 
 struct VSTPluginLib
 {
@@ -66,7 +67,7 @@ public:
 	bool isInstrument : 1;
 	bool useBridge : 1, shareBridgeInstance : 1;
 protected:
-	mutable uint8 dllBits = 0;
+	mutable uint8 dllArch = 0;
 
 public:
 	VSTPluginLib(CreateProc factoryProc, bool isBuiltIn, const mpt::PathString &dllPath, const mpt::PathString &libraryName
@@ -86,23 +87,28 @@ public:
 	{
 	}
 
+	// GEt native phost process arch encoded as plugin arch
+	static uint8 GetNativePluginArch();
+	static mpt::ustring GetPluginArchName(uint8 arch);
+
 	// Check whether a plugin can be hosted inside OpenMPT or requires bridging
-	uint8 GetDllBits(bool fromCache = true) const;
-	bool IsNative(bool fromCache = true) const { return GetDllBits(fromCache) == mpt::arch_bits; }
+	uint8 GetDllArch(bool fromCache = true) const;
+	mpt::ustring GetDllArchName(bool fromCache = true) const;
+	bool IsNative(bool fromCache = true) const;
 	// Check if a plugin is native, and if it is currently unknown, assume that it is native. Use this function only for performance reasons
 	// (e.g. if tons of unscanned plugins would slow down generation of the plugin selection dialog)
-	bool IsNativeFromCache() const { return dllBits == mpt::arch_bits || dllBits == 0; }
+	bool IsNativeFromCache() const;
 
 	void WriteToCache() const;
 
 	uint32 EncodeCacheFlags() const
 	{
-		// Format: 00000000.00000000.DDDDDDSB.CCCCCCCI
+		// Format: 00000000.00000000.AAAAAASB.CCCCCCCI
 		return (isInstrument ? 1 : 0)
 			| (category << 1)
 			| (useBridge ? 0x100 : 0)
 			| (shareBridgeInstance ? 0x200 : 0)
-			| ((dllBits / 8) << 10);
+			| ((dllArch / 8) << 10);
 	}
 
 	void DecodeCacheFlags(uint32 flags)
@@ -119,7 +125,7 @@ public:
 		}
 		useBridge = (flags & 0x100) != 0;
 		shareBridgeInstance = (flags & 0x200) != 0;
-		dllBits = ((flags >> 10) & 0x3F) * 8;
+		dllArch = ((flags >> 10) & 0x3F) * 8;
 	}
 };
 

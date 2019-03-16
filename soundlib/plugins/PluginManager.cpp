@@ -70,20 +70,88 @@ static const MPT_UCHAR_TYPE *const cacheSection = UL_("PluginCache");
 #endif // MODPLUG_TRACKER
 
 
-uint8 VSTPluginLib::GetDllBits(bool fromCache) const
+uint8 VSTPluginLib::GetNativePluginArch()
+{
+	uint8 result = 0;
+	switch(mpt::Windows::GetProcessArchitecture())
+	{
+	case mpt::Windows::Architecture::x86:
+		result = PluginArch_x86;
+		break;
+	case mpt::Windows::Architecture::amd64:
+		result = PluginArch_amd64;
+		break;
+	case mpt::Windows::Architecture::arm:
+		result = PluginArch_arm;
+		break;
+	case mpt::Windows::Architecture::arm64:
+		result = PluginArch_arm64;
+		break;
+	default:
+		result = 0;
+		break;
+	}
+	return result;
+}
+
+
+mpt::ustring VSTPluginLib::GetPluginArchName(uint8 arch)
+{
+	mpt::ustring result;
+	switch(arch)
+	{
+	case PluginArch_x86:
+		result = U_("x86");
+		break;
+	case PluginArch_amd64:
+		result = U_("amd64");
+		break;
+	case PluginArch_arm:
+		result = U_("arm");
+		break;
+	case PluginArch_arm64:
+		result = U_("arm64");
+		break;
+	default:
+		result = U_("");
+		break;
+	}
+	return result;
+}
+
+
+uint8 VSTPluginLib::GetDllArch(bool fromCache) const
 {
 	// Built-in plugins are always native.
 	if(dllPath.empty())
-		return mpt::arch_bits;
+		return GetNativePluginArch();
 #ifndef NO_VST
-	if(!dllBits || !fromCache)
+	if(!dllArch || !fromCache)
 	{
-		dllBits = static_cast<uint8>(BridgeWrapper::GetPluginBinaryType(dllPath));
+		dllArch = static_cast<uint8>(BridgeWrapper::GetPluginBinaryType(dllPath));
 	}
 #else
 	MPT_UNREFERENCED_PARAMETER(fromCache);
 #endif // NO_VST
-	return dllBits;
+	return dllArch;
+}
+
+
+mpt::ustring VSTPluginLib::GetDllArchName(bool fromCache) const
+{
+	return GetPluginArchName(GetDllArch(fromCache));
+}
+
+
+bool VSTPluginLib::IsNative(bool fromCache) const
+{
+	return GetDllArch(fromCache) == GetNativePluginArch();
+}
+
+
+bool VSTPluginLib::IsNativeFromCache() const
+{
+	return dllArch == GetNativePluginArch() || dllArch == 0;
 }
 
 

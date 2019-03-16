@@ -83,12 +83,13 @@ def copy_tree(from_path, to_path, pathname):
 def copy_binaries(from_path, to_path):
     os.makedirs(to_path)
     copy_file(from_path, to_path, "mptrack.exe")
-    copy_file(from_path, to_path, "PluginBridge32.exe")
-    copy_file(from_path, to_path, "PluginBridge64.exe")
     copy_file(from_path, to_path, "openmpt-lame.dll")
     copy_file(from_path, to_path, "openmpt-mpg123.dll")
     copy_file(from_path, to_path, "openmpt-soundtouch.dll")
     copy_file(from_path, to_path, "openmpt-wine-support.zip")
+
+def copy_pluginbridge(from_path, arch, to_path):
+    copy_file(from_path + arch + "/", to_path, "PluginBridge-" + arch + ".exe")
 
 def copy_other(to_path, openmpt_version_short):
     copy_tree("packageTemplate/", to_path, "ExampleSongs")
@@ -133,15 +134,23 @@ if singleThreaded:
 print("Copying 32-bit binaries...")
 shutil.rmtree(openmpt_zip_32bit_basepath, ignore_errors=True)
 copy_binaries("bin/release/vs2017-win7-static/x86/", openmpt_zip_32bit_path)
+copy_pluginbridge("bin/release/vs2017-win7-static/", "x86", openmpt_zip_32bit_path)
+copy_pluginbridge("bin/release/vs2017-win7-static/", "amd64", openmpt_zip_32bit_path)
 print("Copying 32-bit legacy binaries...")
 shutil.rmtree(openmpt_zip_32bitold_basepath, ignore_errors=True)
 copy_binaries("bin/release/vs2017-winxp-static/x86/", openmpt_zip_32bitold_path)
+copy_pluginbridge("bin/release/vs2017-winxp-static/", "x86", openmpt_zip_32bitold_path)
+copy_pluginbridge("bin/release/vs2017-winxp-static/", "amd64", openmpt_zip_32bitold_path)
 print("Copying 64-bit binaries...")
 shutil.rmtree(openmpt_zip_64bit_basepath, ignore_errors=True)
 copy_binaries("bin/release/vs2017-win7-static/amd64/", openmpt_zip_64bit_path)
+copy_pluginbridge("bin/release//vs2017-win7-static/", "x86", openmpt_zip_64bit_path)
+copy_pluginbridge("bin/release//vs2017-win7-static/", "amd64", openmpt_zip_64bit_path)
 print("Copying 64-bit legacy binaries...")
 shutil.rmtree(openmpt_zip_64bitold_basepath, ignore_errors=True)
 copy_binaries("bin/release/vs2017-winxp-static/amd64/", openmpt_zip_64bitold_path)
+copy_pluginbridge("bin/release//vs2017-winxp-static/", "x86", openmpt_zip_64bitold_path)
+copy_pluginbridge("bin/release//vs2017-winxp-static/", "amd64", openmpt_zip_64bitold_path)
 
 if not singleThreaded:
 	pManual.communicate()

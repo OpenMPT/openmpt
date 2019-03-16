@@ -132,6 +132,11 @@
 //#define MPT_WITH_STBVORBIS
 #define MPT_WITH_VORBIS
 #define MPT_WITH_VORBISFILE
+#if MPT_OS_WINDOWS
+#if (_WIN32_WINNT >= 0x0A00)
+#define MPT_WITH_WINDOWS10
+#endif
+#endif
 #define MPT_WITH_ZLIB
 
 #endif // MODPLUG_TRACKER

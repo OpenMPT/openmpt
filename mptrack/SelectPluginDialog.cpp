@@ -389,7 +389,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 			CString title = plug.libraryName.ToCString();
 			if(!plug.IsNativeFromCache())
 			{
-				title += mpt::cformat(_T(" (%1-Bit)"))(plug.GetDllBits());
+				title += mpt::cformat(_T(" (%1)"))(plug.GetDllArchName());
 			}
 			HTREEITEM h = AddTreeItem(title, plug.isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[plug.category], reinterpret_cast<LPARAM>(&plug));
 			categoryUsed[plug.category] = true;
@@ -512,9 +512,15 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 		if(pPlug->pluginId1 == Vst::kEffectMagic && !pPlug->isBuiltIn)
 		{
 			bool isBridgeAvailable =
-					((pPlug->GetDllBits() == 32) && IsComponentAvailable(pluginBridge32))
+					((pPlug->GetDllArch() == PluginArch_x86) && IsComponentAvailable(pluginBridge_x86))
 				||
-					((pPlug->GetDllBits() == 64) && IsComponentAvailable(pluginBridge64))
+					((pPlug->GetDllArch() == PluginArch_amd64) && IsComponentAvailable(pluginBridge_amd64))
+#if defined(MPT_WITH_WINDOWS10)
+				||
+					((pPlug->GetDllArch() == PluginArch_arm) && IsComponentAvailable(pluginBridge_arm))
+				||
+					((pPlug->GetDllArch() == PluginArch_arm64) && IsComponentAvailable(pluginBridge_arm64))
+#endif // MPT_WITH_WINDOWS10
 				;
 			if(TrackerSettings::Instance().bridgeAllPlugins || !isBridgeAvailable)
 			{

@@ -27,9 +27,34 @@ using namespace Vst;
 OPENMPT_NAMESPACE_BEGIN
 
 
-ComponentPluginBridge::ComponentPluginBridge(int bitness)
+std::size_t GetPluginArchPointerSize(PluginArch arch)
+{
+	std::size_t result = 0;
+	switch(arch)
+	{
+	case PluginArch_x86:
+		result = 4;
+		break;
+	case PluginArch_amd64:
+		result = 8;
+		break;
+	case PluginArch_arm:
+		result = 4;
+		break;
+	case PluginArch_arm64:
+		result = 8;
+		break;
+	default:
+		result = 0;
+		break;
+	}
+	return result;
+}
+
+
+ComponentPluginBridge::ComponentPluginBridge(PluginArch arch)
 	: ComponentBase(ComponentTypeBundled)
-	, bitness(bitness)
+	, arch(arch)
 	, availability(AvailabilityUnknown)
 {
 	return;
@@ -38,21 +63,70 @@ ComponentPluginBridge::ComponentPluginBridge(int bitness)
 
 bool ComponentPluginBridge::DoInitialize()
 {
-	if(bitness != 32 && bitness != 64)
+	mpt::PathString archName;
+	switch(arch)
+	{
+	case PluginArch_x86:
+		if(mpt::Windows::HostCanRun(mpt::Windows::GetHostArchitecture(), mpt::Windows::Architecture::x86) == mpt::Windows::EmulationLevel::NA)
+		{
+			return false;
+		}
+		archName = P_("x86");
+		break;
+	case PluginArch_amd64:
+		if(mpt::Windows::HostCanRun(mpt::Windows::GetHostArchitecture(), mpt::Windows::Architecture::amd64) == mpt::Windows::EmulationLevel::NA)
+		{
+			return false;
+		}
+		archName = P_("amd64");
+		break;
+	case PluginArch_arm:
+		if(mpt::Windows::HostCanRun(mpt::Windows::GetHostArchitecture(), mpt::Windows::Architecture::arm) == mpt::Windows::EmulationLevel::NA)
+		{
+			return false;
+		}
+		archName = P_("arm");
+		break;
+	case PluginArch_arm64:
+		if(mpt::Windows::HostCanRun(mpt::Windows::GetHostArchitecture(), mpt::Windows::Architecture::arm64) == mpt::Windows::EmulationLevel::NA)
+		{
+			return false;
+		}
+		archName = P_("arm64");
+		break;
+	default:
+		break;
+	}
+	if(archName.empty())
 	{
 		return false;
 	}
-	exeName = theApp.GetExePath();
-	if(bitness == 32)
+	exeName = mpt::PathString();
+	if(exeName.empty())
 	{
-		exeName += P_("PluginBridge32.exe");
+		mpt::PathString exeNameLocal = theApp.GetExePath() + P_("PluginBridge-") + archName + P_(".exe");
+		if(exeNameLocal.IsFile())
+		{
+			exeName = exeNameLocal;
+		}
 	}
-	if(bitness == 64)
+	if(exeName.empty())
 	{
-		exeName += P_("PluginBridge64.exe");
+		mpt::PathString exeNameMultiArch = theApp.GetExePath() + P_("..") + P_("\\") + archName + P_("\\") + P_("PluginBridge.exe");
+		if(exeNameMultiArch.IsFile())
+		{
+			exeName = exeNameMultiArch;
+		}
 	}
-	// First, check for validity of the bridge executable.
-	if(!exeName.IsFile())
+	if(exeName.empty())
+	{
+		mpt::PathString exeNameMultiArchTransitional = theApp.GetExePath() + P_("..") + P_("\\") + archName + P_("\\") + P_("PluginBridge-") + archName + P_(".exe");
+		if(exeNameMultiArchTransitional.IsFile())
+		{
+			exeName = exeNameMultiArchTransitional;
+		}
+	}
+	if(exeName.empty())
 	{
 		availability = AvailabilityMissing;
 		return false;
@@ -74,15 +148,48 @@ bool ComponentPluginBridge::DoInitialize()
 }
 
 
-MPT_REGISTERED_COMPONENT(ComponentPluginBridge32, "PluginBridge32")
+MPT_REGISTERED_COMPONENT(ComponentPluginBridge_x86, "PluginBridge-x86")
 
-MPT_REGISTERED_COMPONENT(ComponentPluginBridge64, "PluginBridge64")
+MPT_REGISTERED_COMPONENT(ComponentPluginBridge_amd64, "PluginBridge-amd64")
+
+#if defined(MPT_WITH_WINDOWS10)
+
+MPT_REGISTERED_COMPONENT(ComponentPluginBridge_arm, "PluginBridge-arm")
+
+MPT_REGISTERED_COMPONENT(ComponentPluginBridge_arm64, "PluginBridge-arm64")
+
+#endif // MPT_WITH_WINDOWS10
+
+
+PluginArch BridgeWrapper::GetNativePluginBinaryType()
+{
+	PluginArch result = PluginArch_unknown;
+	switch(mpt::Windows::GetProcessArchitecture())
+	{
+	case mpt::Windows::Architecture::x86:
+		result = PluginArch_x86;
+		break;
+	case mpt::Windows::Architecture::amd64:
+		result = PluginArch_amd64;
+		break;
+	case mpt::Windows::Architecture::arm:
+		result = PluginArch_arm;
+		break;
+	case mpt::Windows::Architecture::arm64:
+		result = PluginArch_arm64;
+		break;
+	default:
+		result = PluginArch_unknown;
+		break;
+	}
+	return result;
+}
 
 
 // Check whether we need to load a 32-bit or 64-bit wrapper.
-BridgeWrapper::BinaryType BridgeWrapper::GetPluginBinaryType(const mpt::PathString &pluginPath)
+PluginArch BridgeWrapper::GetPluginBinaryType(const mpt::PathString &pluginPath)
 {
-	BinaryType type = binUnknown;
+	PluginArch type = PluginArch_unknown;
 	mpt::ifstream file(pluginPath, std::ios::in | std::ios::binary);
 	if(file.is_open())
 	{
@@ -95,10 +202,26 @@ BridgeWrapper::BinaryType BridgeWrapper::GetPluginBinaryType(const mpt::PathStri
 			file.read(reinterpret_cast<char *>(&ntHeader), sizeof(ntHeader));
 
 			ASSERT((ntHeader.FileHeader.Characteristics & IMAGE_FILE_DLL) != 0);
-			if(ntHeader.FileHeader.Machine == IMAGE_FILE_MACHINE_I386)
-				type = bin32Bit;
-			else if(ntHeader.FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64)
-				type = bin64Bit;
+			switch(ntHeader.FileHeader.Machine)
+			{
+			case IMAGE_FILE_MACHINE_I386:
+				type = PluginArch_x86;
+				break;
+			case IMAGE_FILE_MACHINE_AMD64:
+				type = PluginArch_amd64;
+				break;
+#if defined(MPT_WITH_WINDOWS10)
+			case IMAGE_FILE_MACHINE_ARM:
+				type = PluginArch_arm;
+				break;
+			case IMAGE_FILE_MACHINE_ARM64:
+				type = PluginArch_arm64;
+				break;
+#endif // MPT_WITH_WINDOWS10
+			default:
+				type = PluginArch_unknown;
+				break;
+			}
 		}
 	}
 	return type;
@@ -193,16 +316,41 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 	if(sharedInstace == nullptr)
 	{
 		// Create a new bridge instance
-		BinaryType binType;
-		if((binType = GetPluginBinaryType(pluginPath)) == binUnknown)
+		const PluginArch arch = GetPluginBinaryType(pluginPath);
+		bool available = false;
+		switch(arch)
+		{
+		case PluginArch_x86:
+			available = IsComponentAvailable(pluginBridge_x86);
+			break;
+		case PluginArch_amd64:
+			available = IsComponentAvailable(pluginBridge_amd64);
+			break;
+#if defined(MPT_WITH_WINDOWS10)
+		case PluginArch_arm:
+			available = IsComponentAvailable(pluginBridge_arm);
+			break;
+		case PluginArch_arm64:
+			available = IsComponentAvailable(pluginBridge_arm64);
+			break;
+#endif // MPT_WITH_WINDOWS10
+		default:
+			break;
+		}
+		if(arch == PluginArch_unknown)
 		{
 			return false;
 		}
-
-		const bool available = (binType == bin32Bit) ? IsComponentAvailable(pluginBridge32) : IsComponentAvailable(pluginBridge64);
 		if(!available)
 		{
-			ComponentPluginBridge::Availability availability = (binType == bin32Bit) ? pluginBridge32->GetAvailability() : pluginBridge64->GetAvailability();
+			ComponentPluginBridge::Availability availability =
+				(arch == PluginArch_x86) ? pluginBridge_x86->GetAvailability() :
+				(arch == PluginArch_amd64) ? pluginBridge_amd64->GetAvailability() :
+#if defined(MPT_WITH_WINDOWS10)
+				(arch == PluginArch_arm) ? pluginBridge_arm->GetAvailability() :
+				(arch == PluginArch_arm64) ? pluginBridge_arm64->GetAvailability() :
+#endif // MPT_WITH_WINDOWS10
+				ComponentPluginBridge::AvailabilityUnknown;
 			switch(availability)
 			{
 				case ComponentPluginBridge::AvailabilityMissing:
@@ -217,10 +365,17 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 					break;
 			}
 		}
-
-		const mpt::PathString exeName = (binType == bin32Bit) ? pluginBridge32->GetFileName() : pluginBridge64->GetFileName();
+		const ComponentPluginBridge * const pluginBridge =
+			(arch == PluginArch_x86) ? static_cast<const ComponentPluginBridge*>(pluginBridge_x86.get()) :
+			(arch == PluginArch_amd64) ? static_cast<const ComponentPluginBridge*>(pluginBridge_amd64.get()) :
+#if defined(MPT_WITH_WINDOWS10)
+			(arch == PluginArch_arm) ? static_cast<const ComponentPluginBridge*>(pluginBridge_arm.get()) :
+			(arch == PluginArch_arm64) ? static_cast<const ComponentPluginBridge*>(pluginBridge_arm64.get()) :
+#endif // MPT_WITH_WINDOWS10
+			nullptr;
+		const mpt::PathString exeName = pluginBridge->GetFileName();
 	
-		otherPtrSize = binType / 8;
+		otherPtrSize = static_cast<int32>(GetPluginArchPointerSize(arch));
 
 		// Command-line must be a modifiable string...
 		wchar_t cmdLine[128];
