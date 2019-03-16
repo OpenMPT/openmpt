@@ -73,6 +73,8 @@ Source: ..\bin\{#PlatformFolderOld}\openmpt-mpg123.dll; DestDir: {app}; Flags: i
 Source: ..\bin\{#PlatformFolderOld}\openmpt-soundtouch.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
 ; Wine support
 Source: ..\bin\{#PlatformFolder}\openmpt-wine-support.zip; DestDir: {app}; Flags: ignoreversion
+; portable mode
+Source: ..\packageTemplate\OpenMPT.portable; DestDir: {app}; Flags: ignoreversion; Tasks: portable
 
 Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension recursesubdirs
 
@@ -118,8 +120,6 @@ Name: {userdesktop}\OpenMPT; Filename: {app}\mptrack.exe; Tasks: desktopicon
 Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenMPT; Filename: {app}\mptrack.exe; Tasks: quicklaunchicon
 
 [INI]
-; enable portable mode
-Filename: {app}\mptrack.ini; Section: Paths; Key: UseAppDataDirectory; String: 0; Flags: createkeyifdoesntexist; Tasks: portable
 ; internet shortcut
 Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String: https://forum.openmpt.org/; Flags: createkeyifdoesntexist
 

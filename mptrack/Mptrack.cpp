@@ -567,10 +567,20 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	}
 
 	// Check if the user prefers to use the app's directory
-	bool configAppPortable = (GetPrivateProfileInt(_T("Paths"), _T("UseAppDataDirectory"), 1, (configPathApp + P_("mptrack.ini")).AsNative().c_str()) == 0);
+	bool configAppPortable = false;
+	mpt::PathString portableFlagFile = (configPathApp + P_("OpenMPT.portable"));
+	bool configPortableFile = portableFlagFile.IsFile();
+	configAppPortable = configAppPortable || configPortableFile;
+	// before 1.29.00.13:
+	configAppPortable = configAppPortable || (GetPrivateProfileInt(_T("Paths"), _T("UseAppDataDirectory"), 1, (configPathApp + P_("mptrack.ini")).AsNative().c_str()) == 0);
 	if(configAppPortable)
 	{
 		portableMode = true;
+	}
+	// convert to new style
+	if(configAppPortable && !configPortableFile)
+	{
+		mpt::SafeOutputFile f(portableFlagFile);
 	}
 
 	// Update executable and config dirs
