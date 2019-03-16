@@ -70,6 +70,9 @@ static const MPT_UCHAR_TYPE *const cacheSection = UL_("PluginCache");
 #endif // MODPLUG_TRACKER
 
 
+#ifndef NO_VST
+
+
 uint8 VSTPluginLib::GetNativePluginArch()
 {
 	uint8 result = 0;
@@ -153,6 +156,9 @@ bool VSTPluginLib::IsNativeFromCache() const
 {
 	return dllArch == GetNativePluginArch() || dllArch == 0;
 }
+
+
+#endif // !NO_VST
 
 
 // PluginCache format:
@@ -586,10 +592,12 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		if(matchID && matchName)
 		{
 			pFound = plug;
+#ifndef NO_VST
 			if(plug->IsNative(false))
 			{
 				break;
 			}
+#endif //!NO_VST
 			// If the plugin isn't native, first check if a native version can be found.
 			match = 3;
 		} else if(matchID && match < 2)

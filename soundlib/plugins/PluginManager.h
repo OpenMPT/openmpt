@@ -87,7 +87,9 @@ public:
 	{
 	}
 
-	// GEt native phost process arch encoded as plugin arch
+#ifndef NO_VST
+
+	// Get native phost process arch encoded as plugin arch
 	static uint8 GetNativePluginArch();
 	static mpt::ustring GetPluginArchName(uint8 arch);
 
@@ -98,6 +100,8 @@ public:
 	// Check if a plugin is native, and if it is currently unknown, assume that it is native. Use this function only for performance reasons
 	// (e.g. if tons of unscanned plugins would slow down generation of the plugin selection dialog)
 	bool IsNativeFromCache() const;
+
+#endif // !NO_VST
 
 	void WriteToCache() const;
 
