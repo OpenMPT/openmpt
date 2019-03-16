@@ -1322,6 +1322,7 @@ void CMainFrame::GenerateStopNotification()
 
 void CMainFrame::UnsetPlaybackSoundFile()
 {
+	MPT_ASSERT_ALWAYS(!gpSoundDevice || !gpSoundDevice->IsPlaying());
 	if(m_pSndFile)
 	{
 		m_pSndFile->SuspendPlugins();
@@ -1355,6 +1356,7 @@ void CMainFrame::UnsetPlaybackSoundFile()
 
 void CMainFrame::SetPlaybackSoundFile(CSoundFile *pSndFile)
 {
+	MPT_ASSERT_ALWAYS(pSndFile);
 	m_pSndFile = pSndFile;
 }
 
