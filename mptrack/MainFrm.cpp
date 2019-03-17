@@ -2903,7 +2903,7 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 		if(vstPlug != nullptr && vstPlug->isBridged)
 		{
 			VSTPluginLib &lib = vstPlug->GetPluginFactory();
-			str += mpt::format(U_(" (%1 Bridged)"))(lib.GetDllArchName());
+			str += mpt::format(U_(" (%1 Bridged)"))(lib.GetDllArchNameUser());
 		}
 
 		CBox.SetItemData(static_cast<int>(::SendMessageW(CBox.m_hWnd, CB_ADDSTRING, 0, (LPARAM)str.c_str())), iPlug + 1);

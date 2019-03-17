@@ -389,7 +389,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 			CString title = plug.libraryName.ToCString();
 			if(!plug.IsNativeFromCache())
 			{
-				title += mpt::cformat(_T(" (%1)"))(plug.GetDllArchName());
+				title += mpt::cformat(_T(" (%1)"))(plug.GetDllArchNameUser());
 			}
 			HTREEITEM h = AddTreeItem(title, plug.isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[plug.category], reinterpret_cast<LPARAM>(&plug));
 			categoryUsed[plug.category] = true;

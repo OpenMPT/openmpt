@@ -457,7 +457,7 @@ void CAbstractVstEditor::SetTitle()
 #ifndef NO_VST
 		const CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(&m_VstPlugin);
 		if(vstPlugin != nullptr && vstPlugin->isBridged)
-			title += mpt::cformat(_T(" (%1 Bridged)"))(m_VstPlugin.GetPluginFactory().GetDllArchName());
+			title += mpt::cformat(_T(" (%1 Bridged)"))(m_VstPlugin.GetPluginFactory().GetDllArchNameUser());
 #endif // NO_VST
 
 		SetWindowText(title);
