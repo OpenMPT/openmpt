@@ -14,6 +14,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CSoundFile;
+
 class OPLInstrDlg : public CDialog
 {
 	CButton m_additive, m_sustain[2], m_scaleEnv[2], m_vibrato[2], m_tremolo[2];
@@ -21,10 +23,11 @@ class OPLInstrDlg : public CDialog
 	CComboBox m_waveform[2];
 	CSize m_windowSize;
 	CWnd &m_parent;
+	const CSoundFile &m_sndFile;
 	OPLPatch *m_patch;
 
 public:
-	OPLInstrDlg(CWnd &parent);
+	OPLInstrDlg(CWnd &parent, const CSoundFile &sndFile);
 	~OPLInstrDlg();
 	void SetPatch(OPLPatch &patch);
 	CSize GetMinimumSize() const { return m_windowSize; }
