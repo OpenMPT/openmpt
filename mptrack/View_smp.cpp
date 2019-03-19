@@ -344,14 +344,15 @@ void CViewSample::UpdateOPLEditor()
 			m_oplEditor->ShowWindow(SW_HIDE);
 		return;
 	}
-	ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
+	CSoundFile &sndFile = GetDocument()->GetSoundFile();
+	ModSample &sample = sndFile.GetSample(m_nSample);
 	if(sample.uFlags[CHN_ADLIB])
 	{
 		if(!m_oplEditor)
 		{
 			try
 			{
-				m_oplEditor = std::make_unique<OPLInstrDlg>(*this);
+				m_oplEditor = std::make_unique<OPLInstrDlg>(*this, sndFile);
 			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 			{
 				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);

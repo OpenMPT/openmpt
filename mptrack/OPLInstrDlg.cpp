@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "OPLInstrDlg.h"
 #include "../soundlib/OPL.h"
+#include "../soundlib/Sndfile.h"
 #include "resource.h"
 #include "Mainfrm.h"
 
@@ -59,8 +60,9 @@ void OPLInstrDlg::DoDataExchange(CDataExchange *pDX)
 }
 
 
-OPLInstrDlg::OPLInstrDlg(CWnd &parent)
+OPLInstrDlg::OPLInstrDlg(CWnd &parent, const CSoundFile &sndFile)
 	: m_parent(parent)
+	, m_sndFile(sndFile)
 {
 	Create(IDD_OPL_PARAMS, &parent);
 	CRect rect;
@@ -138,6 +140,7 @@ static uint8 KeyScaleLevel(uint8 kslVolume)
 void OPLInstrDlg::SetPatch(OPLPatch &patch)
 {
 	SetRedraw(FALSE);
+
 	m_additive.SetCheck((patch[10] & OPL::CONNECTION_BIT) ? BST_CHECKED : BST_UNCHECKED);
 	m_feedback.SetPos((patch[10] & OPL::FEEDBACK_MASK) >> 1);
 	for(int op = 0; op < 2; op++)
@@ -155,7 +158,22 @@ void OPLInstrDlg::SetPatch(OPLPatch &patch)
 		m_vibrato[op].SetCheck((patch[0 + op] & OPL::VIBRATO_ON) ? BST_CHECKED : BST_UNCHECKED);
 		m_tremolo[op].SetCheck((patch[0 + op] & OPL::TREMOLO_ON) ? BST_CHECKED : BST_UNCHECKED);
 
-		m_waveform[op].SetCurSel(patch[8 + op]);
+		const auto waveform = patch[8 + op];
+		const int numWaveforms = (m_sndFile.GetType() == MOD_TYPE_S3M && waveform < 4) ? 4 : 8;
+		if(numWaveforms != m_waveform[op].GetCount())
+		{
+			m_waveform[op].ResetContent();
+			static const TCHAR *waveformNames[] =
+			{
+				_T("Sine"), _T("Half Sine"), _T("Absolute Sine"), _T("Pulse Sine"),
+				_T("Sine (Even Periods)"), _T("Absolute Sine (Even Periods)"), _T("Square"), _T("Derived Square")
+			};
+			for(int i = 0; i < numWaveforms; i++)
+			{
+				m_waveform[op].AddString(waveformNames[i]);
+			}
+		}
+		m_waveform[op].SetCurSel(waveform);
 	}
 	SetRedraw(TRUE);
 	m_patch = &patch;
