@@ -4555,6 +4555,127 @@ static MPT_NOINLINE void TestStringIO()
 	VERIFY_EQUAL_NONCONT(strncmp(src2, "XYZ", mpt::size(src2)), 0);
 	VERIFY_EQUAL_NONCONT(strncmp(src3, "XYZ", mpt::size(src3)), 0);
 
+	{
+	
+		char s0[4] = {'\0', 'X', ' ', 'X' };
+		char s2[4] = { 'X', ' ','\0', 'X' };
+		char s4[4] = { 'X', 'Y', 'Z', ' ' };
+	
+		char d2[2] = {'\0','\0'};
+		char d3[3] = {'\0','\0','\0'};
+		char d4[4] = {'\0','\0','\0','\0'};
+		char d5[5] = {'\0','\0','\0','\0','\0'};
+	
+		#define CopyTest(dst, src, expectedResult) \
+			std::memset(dst, 0x7f, sizeof(dst)); \
+			mpt::String::Copy(dst, src); \
+			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
+			/*for(size_t i = strlen(dst); i < mpt::size(dst); i++)*/ \
+				/*VERIFY_EQUAL_NONCONT(dst[i], '\0');*/ /* Ensure that rest of the buffer is completely nulled */ \
+			std::memset(dst, 0x7f, sizeof(dst)); \
+			mpt::String::WriteAutoBuf(dst) = mpt::String::ReadAutoBuf(src); \
+			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
+			for(size_t i = strlen(dst); i < mpt::size(dst); i++) \
+				VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
+			/**/
+
+		CopyTest(d2, s0, "");
+		CopyTest(d2, s2, "X");
+		CopyTest(d2, s4, "X");
+		CopyTest(d3, s0, "");
+		CopyTest(d3, s2, "X ");
+		CopyTest(d3, s4, "XY");
+		CopyTest(d4, s0, "");
+		CopyTest(d4, s2, "X ");
+		CopyTest(d4, s4, "XYZ");
+		CopyTest(d5, s0, "");
+		CopyTest(d5, s2, "X ");
+		CopyTest(d5, s4, "XYZ ");
+
+		#undef CopyTest
+
+		#define CopyTestN(dst, src, len, expectedResult) \
+			std::memset(dst, 0x7f, sizeof(dst)); \
+			mpt::String::CopyN(dst, src, len); \
+			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
+			/*for(size_t i = strlen(dst); i < mpt::size(dst); i++)*/ \
+				/*VERIFY_EQUAL_NONCONT(dst[i], '\0');*/ /* Ensure that rest of the buffer is completely nulled */ \
+			std::memset(dst, 0x7f, sizeof(dst)); \
+			mpt::String::WriteAutoBuf(dst) = mpt::String::ReadAutoBuf(src, len); \
+			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
+			for(size_t i = strlen(dst); i < mpt::size(dst); i++) \
+				VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
+			/**/
+
+		CopyTestN(d2, s0, 1, "");
+		CopyTestN(d2, s2, 1, "X");
+		CopyTestN(d2, s4, 1, "X");
+		CopyTestN(d3, s0, 1, "");
+		CopyTestN(d3, s2, 1, "X");
+		CopyTestN(d3, s4, 1, "X");
+		CopyTestN(d4, s0, 1, "");
+		CopyTestN(d4, s2, 1, "X");
+		CopyTestN(d4, s4, 1, "X");
+		CopyTestN(d5, s0, 1, "");
+		CopyTestN(d5, s2, 1, "X");
+		CopyTestN(d5, s4, 1, "X");
+
+		CopyTestN(d2, s0, 2, "");
+		CopyTestN(d2, s2, 2, "X");
+		CopyTestN(d2, s4, 2, "X");
+		CopyTestN(d3, s0, 2, "");
+		CopyTestN(d3, s2, 2, "X ");
+		CopyTestN(d3, s4, 2, "XY");
+		CopyTestN(d4, s0, 2, "");
+		CopyTestN(d4, s2, 2, "X ");
+		CopyTestN(d4, s4, 2, "XY");
+		CopyTestN(d5, s0, 2, "");
+		CopyTestN(d5, s2, 2, "X ");
+		CopyTestN(d5, s4, 2, "XY");
+
+		CopyTestN(d2, s0, 3, "");
+		CopyTestN(d2, s2, 3, "X");
+		CopyTestN(d2, s4, 3, "X");
+		CopyTestN(d3, s0, 3, "");
+		CopyTestN(d3, s2, 3, "X ");
+		CopyTestN(d3, s4, 3, "XY");
+		CopyTestN(d4, s0, 3, "");
+		CopyTestN(d4, s2, 3, "X ");
+		CopyTestN(d4, s4, 3, "XYZ");
+		CopyTestN(d5, s0, 3, "");
+		CopyTestN(d5, s2, 3, "X ");
+		CopyTestN(d5, s4, 3, "XYZ");
+
+		CopyTestN(d2, s0, 4, "");
+		CopyTestN(d2, s2, 4, "X");
+		CopyTestN(d2, s4, 4, "X");
+		CopyTestN(d3, s0, 4, "");
+		CopyTestN(d3, s2, 4, "X ");
+		CopyTestN(d3, s4, 4, "XY");
+		CopyTestN(d4, s0, 4, "");
+		CopyTestN(d4, s2, 4, "X ");
+		CopyTestN(d4, s4, 4, "XYZ");
+		CopyTestN(d5, s0, 4, "");
+		CopyTestN(d5, s2, 4, "X ");
+		CopyTestN(d5, s4, 4, "XYZ ");
+
+		CopyTestN(d2, s0, 5, "");
+		CopyTestN(d2, s2, 5, "X");
+		CopyTestN(d2, s4, 5, "X");
+		CopyTestN(d3, s0, 5, "");
+		CopyTestN(d3, s2, 5, "X ");
+		CopyTestN(d3, s4, 5, "XY");
+		CopyTestN(d4, s0, 5, "");
+		CopyTestN(d4, s2, 5, "X ");
+		CopyTestN(d4, s4, 5, "XYZ");
+		CopyTestN(d5, s0, 5, "");
+		CopyTestN(d5, s2, 5, "X ");
+		CopyTestN(d5, s4, 5, "XYZ ");
+
+		#undef CopyTest
+
+	}
+
 }
 
 
