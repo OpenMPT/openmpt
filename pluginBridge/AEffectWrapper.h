@@ -109,29 +109,29 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const Vst::VstEv
 	}
 
 	// Write events
-	for(decltype(events->numEvents) i = 0; i < events->numEvents; i++)
+	for(const auto event : *events)
 	{
-		if(events->events[i]->type == Vst::kVstSysExType)
+		if(event->type == Vst::kVstSysExType)
 		{
 			// This is going to be messy since the VstMidiSysexEvent event has a different size than other events on 64-bit platforms.
 			// We are going to write the event using the target process pointer size.
-			auto sysExEvent = *static_cast<const Vst::VstMidiSysexEvent *>(events->events[i]);
+			auto sysExEvent = *static_cast<const Vst::VstMidiSysexEvent *>(event);
 			sysExEvent.byteSize = 5 * sizeof(int32) + 3 * targetPtrSize;
-			PushToVector(data, sysExEvent, 5 * sizeof(int32));	// Exclude the three pointers at the end for now
-			data.resize(data.size() + 3 * targetPtrSize);		// Make space for pointer + two reserved intptr_ts
+			PushToVector(data, sysExEvent, 5 * sizeof(int32)); // Exclude the three pointers at the end for now
+			data.resize(data.size() + 3 * targetPtrSize);      // Make space for pointer + two reserved intptr_ts
 			// Embed SysEx dump as well...
 			auto sysex = reinterpret_cast<const char *>(sysExEvent.sysexDump);
 			data.insert(data.end(), sysex, sysex + sysExEvent.dumpBytes);
-		} else if(events->events[i]->type == Vst::kVstMidiType)
+		} else if(event->type == Vst::kVstMidiType)
 		{
 			// randomid by Insert Piz Here sends events of type kVstMidiType, but with a claimed size of 24 bytes instead of 32.
-			Vst::VstMidiEvent event;
-			std::memcpy(&event, events->events[i], sizeof(event));
-			event.byteSize = sizeof(event);
-			PushToVector(data, event, sizeof(event));
+			Vst::VstMidiEvent midiEvent;
+			std::memcpy(&midiEvent, event, sizeof(midiEvent));
+			midiEvent.byteSize = sizeof(midiEvent);
+			PushToVector(data, midiEvent, sizeof(midiEvent));
 		} else
 		{
-			PushToVector(data, *events->events[i], events->events[i]->byteSize);
+			PushToVector(data, *event, event->byteSize);
 		}
 	}
 }
