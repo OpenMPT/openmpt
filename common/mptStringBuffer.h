@@ -647,7 +647,7 @@ namespace String
 	// Copy at most srcSize characters from srcBuffer to a std::string.
 	static inline void CopyN(std::string &dest, const char *srcBuffer, const size_t srcSize = std::numeric_limits<size_t>::max())
 	{
-		dest.assign(srcBuffer, srcBuffer + mpt::strnlen(srcBuffer, srcSize));
+		dest = mpt::truncate(srcBuffer, srcSize);
 	}
 
 

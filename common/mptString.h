@@ -178,24 +178,13 @@ inline Tstring Replace(Tstring str, const Tstring2 &oldStr_, const Tstring3 &new
 } // namespace String
 
 
-static inline std::size_t strnlen(const char *str, std::size_t n)
+static inline std::string truncate(std::string str, std::size_t maxLen)
 {
-#if MPT_COMPILER_MSVC
-	return ::strnlen(str, n);
-#else
-	if(n >= std::numeric_limits<std::size_t>::max())
+	if(str.length() > maxLen)
 	{
-		return std::strlen(str);
+		str.resize(maxLen);
 	}
-	for(std::size_t i = 0; i < n; ++i)
-	{
-		if(str[i] == '\0')
-		{
-			return i;
-		}
-	}
-	return n;
-#endif
+	return str;
 }
 
 

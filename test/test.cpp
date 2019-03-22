@@ -4282,6 +4282,27 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 }
 
 
+static inline std::size_t strnlen(const char *str, std::size_t n)
+{
+#if MPT_COMPILER_MSVC
+	return ::strnlen(str, n);
+#else
+	if(n >= std::numeric_limits<std::size_t>::max())
+	{
+		return std::strlen(str);
+	}
+	for(std::size_t i = 0; i < n; ++i)
+	{
+		if(str[i] == '\0')
+		{
+			return i;
+		}
+	}
+	return n;
+#endif
+}
+
+
 // Test String I/O functionality
 static MPT_NOINLINE void TestStringIO()
 {
@@ -4310,12 +4331,12 @@ static MPT_NOINLINE void TestStringIO()
 	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::Write<mpt::String:: mode >(dst, src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0);  /* Ensure that the strings are identical */ \
-	for(size_t i = mpt::strnlen(dst, mpt::size(dst)); i < mpt::size(dst); i++) \
+	for(size_t i = Test::strnlen(dst, mpt::size(dst)); i < mpt::size(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::WriteBuf(mpt::String:: mode , dst) = mpt::String::ReadAutoBuf(src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0);  /* Ensure that the strings are identical */ \
-	for(size_t i = mpt::strnlen(dst, mpt::size(dst)); i < mpt::size(dst); i++) \
+	for(size_t i = Test::strnlen(dst, mpt::size(dst)); i < mpt::size(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 	/**/
 
@@ -4451,12 +4472,12 @@ static MPT_NOINLINE void TestStringIO()
 	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::Write<mpt::String:: mode >(dst, src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0);  /* Ensure that the strings are identical */ \
-	for(size_t i = mpt::strnlen(dst, mpt::size(dst)); i < mpt::size(dst); i++) \
+	for(size_t i = Test::strnlen(dst, mpt::size(dst)); i < mpt::size(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::WriteBuf(mpt::String:: mode , dst) = src; \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0);  /* Ensure that the strings are identical */ \
-	for(size_t i = mpt::strnlen(dst, mpt::size(dst)); i < mpt::size(dst); i++) \
+	for(size_t i = Test::strnlen(dst, mpt::size(dst)); i < mpt::size(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 	/**/
 

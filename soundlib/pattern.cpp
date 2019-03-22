@@ -262,7 +262,7 @@ bool CPattern::SetName(const char *newName, size_t maxChars)
 	{
 		return false;
 	}
-	m_PatternName.assign(newName, mpt::strnlen(newName, maxChars));
+	m_PatternName = mpt::truncate(newName, maxChars);
 	return true;
 }
 
