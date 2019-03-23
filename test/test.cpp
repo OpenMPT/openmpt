@@ -4622,7 +4622,7 @@ static MPT_NOINLINE void TestStringIO()
 			/*for(size_t i = strlen(dst); i < mpt::size(dst); i++)*/ \
 				/*VERIFY_EQUAL_NONCONT(dst[i], '\0');*/ /* Ensure that rest of the buffer is completely nulled */ \
 			std::memset(dst, 0x7f, sizeof(dst)); \
-			mpt::String::WriteAutoBuf(dst) = mpt::String::ReadAutoBuf(src, len); \
+			mpt::String::WriteAutoBuf(dst) = mpt::String::ReadAutoBuf(src, std::min<std::size_t>(mpt::size(src), len)); \
 			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
 			for(size_t i = strlen(dst); i < mpt::size(dst); i++) \
 				VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
