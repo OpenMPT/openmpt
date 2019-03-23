@@ -21,7 +21,7 @@ OPENMPT_NAMESPACE_BEGIN
 // Font Definitions
 
 // Medium Font (Default)
-const PATTERNFONT gDefaultPatternFont = 
+static constexpr PATTERNFONT gDefaultPatternFont = 
 {
 	nullptr,
 	nullptr,
@@ -51,7 +51,7 @@ const PATTERNFONT gDefaultPatternFont =
 //////////////////////////////////////////////////
 // Small Font
 
-const PATTERNFONT gSmallPatternFont = 
+static constexpr PATTERNFONT gSmallPatternFont =
 {
 	nullptr,
 	nullptr,

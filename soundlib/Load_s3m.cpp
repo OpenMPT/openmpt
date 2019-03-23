@@ -898,7 +898,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 	}
 	if(globalCmdOnMutedChn)
 	{
-		//AddToLog(LogWarning, U_("Global commands on muted channels are interpreted by only some S3M players."));
+		//AddToLog(LogWarning, U_("Global commands on muted channels are interpreted only by some S3M players."));
 	}
 
 	mpt::IO::Offset sampleDataOffset = mpt::IO::TellWrite(f);

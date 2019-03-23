@@ -264,12 +264,11 @@ std::set<SAMPLEINDEX> ModInstrument::GetSamples() const
 {
 	std::set<SAMPLEINDEX> referencedSamples;
 
-	for(size_t i = 0; i < CountOf(Keyboard); i++)
+	for(const auto sample : Keyboard)
 	{
-		// 0 isn't a sample.
-		if(Keyboard[i] != 0)
+		if(sample)
 		{
-			referencedSamples.insert(Keyboard[i]);
+			referencedSamples.insert(sample);
 		}
 	}
 
@@ -281,12 +280,11 @@ std::set<SAMPLEINDEX> ModInstrument::GetSamples() const
 // The caller has to initialize the vector.
 void ModInstrument::GetSamples(std::vector<bool> &referencedSamples) const
 {
-	for(size_t i = 0; i < CountOf(Keyboard); i++)
+	for(const auto sample : Keyboard)
 	{
-		// 0 isn't a sample.
-		if(Keyboard[i] != 0 && Keyboard[i] < referencedSamples.size())
+		if(sample != 0 && sample < referencedSamples.size())
 		{
-			referencedSamples[Keyboard[i]] = true;
+			referencedSamples[sample] = true;
 		}
 	}
 }
@@ -329,6 +327,9 @@ void ModInstrument::Sanitize(MODTYPE modType)
 		if(NoteMap[i] < NOTE_MIN || NoteMap[i] > NOTE_MAX)
 			NoteMap[i] = static_cast<uint8>(i + NOTE_MIN);
 	}
+
+	if(!Resampling::IsKnownMode(resampling))
+		resampling = SRCMODE_DEFAULT;
 }
 
 

@@ -625,7 +625,15 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 #endif // MODPLUG_TRACKER
 
 	// Find plugin in library
-	int8 match = 0;	// "Match quality" of found plugin. Higher value = better match.
+	enum PlugMatchQuality
+	{
+		kNoMatch,
+		kMatchName,
+		kMatchId,
+		kMatchNameAndId,
+	};
+
+	PlugMatchQuality match = kNoMatch;	// "Match quality" of found plugin. Higher value = better match.
 #if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 	const mpt::PathString libraryName = mpt::PathString::FromUTF8(mixPlugin.GetLibraryName());
 #else
@@ -651,15 +659,15 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 			}
 #endif //!NO_VST
 			// If the plugin isn't native, first check if a native version can be found.
-			match = 3;
-		} else if(matchID && match < 2)
+			match = kMatchNameAndId;
+		} else if(matchID && match < kMatchId)
 		{
 			pFound = plug;
-			match = 2;
-		} else if(matchName && match < 1)
+			match = kMatchId;
+		} else if(matchName && match < kMatchName)
 		{
 			pFound = plug;
-			match = 1;
+			match = kMatchName;
 		}
 	}
 

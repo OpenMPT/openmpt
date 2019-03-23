@@ -80,7 +80,7 @@ public:
 	int8 Pan(CHANNELINDEX c, int32 pan);
 	void Patch(CHANNELINDEX c, const OPLPatch &patch);
 	void Reset();
-	bool IsActive(CHANNELINDEX c) { return GetVoice(c) != OPL_CHANNEL_INVALID; }
+	bool IsActive(CHANNELINDEX c) const { return GetVoice(c) != OPL_CHANNEL_INVALID; }
 	void MoveChannel(CHANNELINDEX from, CHANNELINDEX to);
 
 protected:
