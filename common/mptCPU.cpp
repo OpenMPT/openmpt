@@ -97,23 +97,6 @@ static cpuid_result cpuid(uint32 function)
 }
 
 
-#if 0
-
-static cpuid_result cpuidex(uint32 function_a, uint32 function_c)
-{
-	cpuid_result result;
-	int CPUInfo[4];
-	__cpuidex(CPUInfo, function_a, function_c);
-	result.a = CPUInfo[0];
-	result.b = CPUInfo[1];
-	result.c = CPUInfo[2];
-	result.d = CPUInfo[3];
-	return result;
-}
-
-#endif
-
-
 void InitProcSupport()
 {
 
