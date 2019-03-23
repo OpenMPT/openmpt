@@ -635,6 +635,11 @@ namespace String
 	}
 
 
+#if MPT_GCC_AT_LEAST(8,1,0)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
+
 	// Copy from a char array to a fixed size char array.
 	template <size_t destSize>
 	void CopyN(char (&destBuffer)[destSize], const char *srcBuffer, const size_t srcSize = std::numeric_limits<size_t>::max())
@@ -677,6 +682,10 @@ namespace String
 	{
 		dest.assign(src);
 	}
+
+#if MPT_GCC_AT_LEAST(8,1,0)
+#pragma GCC diagnostic pop
+#endif
 
 
 #if MPT_COMPILER_MSVC
