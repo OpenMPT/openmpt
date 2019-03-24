@@ -47,7 +47,9 @@ protected:
 	const bool wasOpen;
 
 public:
-	TemporaryASIODriverOpener(CASIODevice &d) : device(d), wasOpen(d.IsDriverOpen())
+	TemporaryASIODriverOpener(CASIODevice &d)
+		: device(d)
+		, wasOpen(d.IsDriverOpen())
 	{
 		if(!wasOpen)
 		{
@@ -267,6 +269,26 @@ struct SafeASIO
 	} \
 	if(e != ASE_OK) { \
 		throw ASIOCallError( #asiocall , e); \
+	} \
+} MPT_WHILE_0
+
+
+#define asioCallVoid(asiocall) MPT_DO { \
+	try { \
+		SafeASIO(m_pAsioDrv). asiocall ; \
+	} catch(const ASIOCrash &) { \
+		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
+		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
+	} \
+} MPT_WHILE_0
+
+
+#define asioCallResult(presult, asiocall) MPT_DO { \
+	try { \
+		*(presult) = SafeASIO(m_pAsioDrv). asiocall ; \
+	} catch(const ASIOCrash &) { \
+		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
+		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
 	} \
 } MPT_WHILE_0
 
@@ -958,6 +980,41 @@ void CASIODevice::OpenDriver()
 		CloseDriver();
 		return;
 	}
+	char driverNameBuffer[32];
+	Clear(driverNameBuffer);
+	try
+	{
+		asioCallVoid(getDriverName(driverNameBuffer));
+	} catch(...)
+	{
+		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("ASIO: getDriverName() crashed!"))());
+		CloseDriver();
+		return;
+	}
+	std::string driverName = mpt::String::ReadAutoBuf(driverNameBuffer);
+	long driverVersion = 0;
+	try
+	{
+		asioCallResult(&driverVersion, getDriverVersion());
+	} catch(...)
+	{
+		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("ASIO: getDriverVersion() crashed!"))());
+		CloseDriver();
+		return;
+	}
+	char driverErrorMessageBuffer[124];
+	Clear(driverErrorMessageBuffer);
+	try
+	{
+		asioCallVoid(getErrorMessage(driverErrorMessageBuffer));
+	} catch(...)
+	{
+		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("ASIO: getErrorMessage() crashed!"))());
+		CloseDriver();
+		return;
+	}
+	std::string driverErrorMessage = mpt::String::ReadAutoBuf(driverErrorMessageBuffer);
+	MPT_LOG(LogInformation, "sounddev", mpt::format(U_("ASIO: Opened driver %1 Version 0x%2: %3"))(mpt::ToUnicode(mpt::CharsetLocale, driverName), mpt::ufmt::HEX0<8>(driverVersion), mpt::ToUnicode(mpt::CharsetLocale, driverErrorMessage)));
 }
 
 
