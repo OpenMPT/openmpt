@@ -3697,38 +3697,20 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 
 static bool ShouldRunTests()
 {
-	mpt::PathString theFile = theApp.GetExePath();
-	// Only run the tests when we're in the project directory structure.
-	std::size_t pathComponents = mpt::String::Split<mpt::ustring>(theFile.ToUnicode(), U_("\\")).size() - 1;
-	for(std::size_t i = 0; i < pathComponents; ++i)
+	mpt::PathString theFile = theApp.GetInstallPath();
+	if(theFile.IsDirectory() && (theFile + P_("test")).IsDirectory())
 	{
-		if(theFile.IsDirectory() && (theFile + P_("test")).IsDirectory())
+		if((theFile + P_("test\\test.mptm")).IsFile())
 		{
-			if((theFile + P_("test\\test.mptm")).IsFile())
-			{
-				return true;
-			}
+			return true;
 		}
-		theFile += P_("..\\");
 	}
 	return false;
 }
 
 static mpt::PathString GetTestFilenameBase()
 {
-	mpt::PathString theFile = theApp.GetExePath();
-	std::size_t pathComponents = mpt::String::Split<mpt::ustring>(theFile.ToUnicode(), U_("\\")).size() - 1;
-	for(std::size_t i = 0; i < pathComponents; ++i)
-	{
-		if(theFile.IsDirectory() && (theFile + P_("test")).IsDirectory())
-		{
-			if((theFile + P_("test\\test.mptm")).IsFile())
-			{
-				break;
-			}
-		}
-		theFile += P_("..\\");
-	}
+	mpt::PathString theFile = theApp.GetInstallPath();
 	theFile += P_("test/test.");
 	return theFile;
 }

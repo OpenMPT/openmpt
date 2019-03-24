@@ -104,7 +104,7 @@ bool ComponentPluginBridge::DoInitialize()
 	exeName = mpt::PathString();
 	if(exeName.empty())
 	{
-		mpt::PathString exeNameLocal = theApp.GetExePath() + P_("PluginBridge-") + archName + P_(".exe");
+		mpt::PathString exeNameLocal = theApp.GetInstallPath() + P_("PluginBridge-") + archName + P_(".exe");
 		if(exeNameLocal.IsFile())
 		{
 			exeName = exeNameLocal;
@@ -112,7 +112,7 @@ bool ComponentPluginBridge::DoInitialize()
 	}
 	if(exeName.empty())
 	{
-		mpt::PathString exeNameMultiArch = theApp.GetExePath() + P_("..") + P_("\\") + archName + P_("\\") + P_("PluginBridge.exe");
+		mpt::PathString exeNameMultiArch = theApp.GetInstallBinPath() + archName + P_("\\") + P_("PluginBridge.exe");
 		if(exeNameMultiArch.IsFile())
 		{
 			exeName = exeNameMultiArch;
@@ -120,7 +120,7 @@ bool ComponentPluginBridge::DoInitialize()
 	}
 	if(exeName.empty())
 	{
-		mpt::PathString exeNameMultiArchTransitional = theApp.GetExePath() + P_("..") + P_("\\") + archName + P_("\\") + P_("PluginBridge-") + archName + P_(".exe");
+		mpt::PathString exeNameMultiArchTransitional = theApp.GetInstallBinPath() + archName + P_("\\") + P_("PluginBridge-") + archName + P_(".exe");
 		if(exeNameMultiArchTransitional.IsFile())
 		{
 			exeName = exeNameMultiArchTransitional;

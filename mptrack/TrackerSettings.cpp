@@ -430,7 +430,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		mpt::ustring key = mpt::format(U_("File%1"))(i);
 
-		mpt::PathString path = theApp.RelativePathToAbsolute(conf.Read<mpt::PathString>(U_("Recent File List"), key, mpt::PathString()));
+		mpt::PathString path = theApp.PathInstallRelativeToAbsolute(conf.Read<mpt::PathString>(U_("Recent File List"), key, mpt::PathString()));
 		if(!path.empty())
 		{
 			mruFiles.push_back(path);
@@ -698,7 +698,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	theApp.SetDefaultMidiMacro(macros);
 
 	// Paths
-	m_szKbdFile = theApp.RelativePathToAbsolute(m_szKbdFile);
+	m_szKbdFile = theApp.PathInstallRelativeToAbsolute(m_szKbdFile);
 
 	// Sample undo buffer size (used to be a hidden, absolute setting in MiB)
 	int64 oldUndoSize = m_SampleUndoBufferSize.Get().GetSizeInPercent();
@@ -1160,7 +1160,7 @@ void TrackerSettings::SaveSettings()
 			mpt::PathString path = mruFiles[i];
 			if(theApp.IsPortableMode())
 			{
-				path = theApp.AbsolutePathToRelative(path);
+				path = theApp.PathAbsoluteToInstallRelative(path);
 			}
 			conf.Write<mpt::PathString>(U_("Recent File List"), key, path);
 		} else
@@ -1384,12 +1384,12 @@ ConfigurableDirectory::ConfigurableDirectory(SettingsContainer &conf, const AnyS
 	: conf(conf)
 	, m_Setting(conf, section, key, def)
 {
-	SetDefaultDir(theApp.RelativePathToAbsolute(m_Setting), false);
+	SetDefaultDir(theApp.PathInstallRelativeToAbsolute(m_Setting), false);
 }
 
 ConfigurableDirectory::~ConfigurableDirectory()
 {
-	m_Setting = theApp.IsPortableMode() ? theApp.AbsolutePathToRelative(m_Default) : m_Default;
+	m_Setting = theApp.IsPortableMode() ? theApp.PathAbsoluteToInstallRelative(m_Default) : m_Default;
 }
 
 

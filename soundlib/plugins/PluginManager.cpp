@@ -230,7 +230,7 @@ void VSTPluginLib::WriteToCache() const
 	mpt::PathString writePath = dllPath;
 	if(theApp.IsPortableMode())
 	{
-		writePath = theApp.AbsolutePathToRelative(writePath);
+		writePath = theApp.PathAbsoluteToInstallRelative(writePath);
 	}
 
 	cacheFile.Write<mpt::ustring>(cacheSection, writePath.ToUnicode(), IDs);
@@ -482,7 +482,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 		if(IDs.length() < 16)
 		{
 			// If that didn't work out, find relative path
-			mpt::PathString relPath = theApp.AbsolutePathToRelative(dllPath);
+			mpt::PathString relPath = theApp.PathAbsoluteToInstallRelative(dllPath);
 			IDs = cacheFile.Read<mpt::ustring>(cacheSection, relPath.ToUnicode(), U_(""));
 		}
 
@@ -684,7 +684,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		mpt::PathString fullPath = TrackerSettings::Instance().PathPlugins.GetDefaultDir();
 		if(fullPath.empty())
 		{
-			fullPath = theApp.GetExePath() + P_("Plugins\\");
+			fullPath = theApp.GetInstallPath() + P_("Plugins\\");
 		}
 		fullPath += mpt::PathString::FromUTF8(mixPlugin.GetLibraryName()) + P_(".dll");
 
@@ -699,7 +699,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 				fullPath = cacheFile.Read<mpt::PathString>(cacheSection, IDs, P_(""));
 				if(!fullPath.empty())
 				{
-					fullPath = theApp.RelativePathToAbsolute(fullPath);
+					fullPath = theApp.PathInstallRelativeToAbsolute(fullPath);
 					if(fullPath.IsFile())
 					{
 						pFound = AddPlugin(fullPath);

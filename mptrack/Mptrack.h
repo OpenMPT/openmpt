@@ -136,10 +136,16 @@ protected:
 	CModDocTemplate *m_pModTemplate = nullptr;
 	CVstPluginManager *m_pPluginManager = nullptr;
 	SoundDevice::Manager *m_pSoundDevicesManager = nullptr;
-	mpt::PathString m_szExePath;
-	mpt::PathString m_szConfigDirectory;
+	
+	mpt::PathString m_InstallPath; // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)
+	mpt::PathString m_InstallBinPath; // i.e. "C:\Program Files\OpenMPT\bin\" (multi-arch mode) or InstallPath (legacy mode)
+	mpt::PathString m_InstallBinArchPath; // i.e. "C:\Program Files\OpenMPT\bin\amd64\" (multi-arch mode) or InstallPath (legacy mode)
+
+	mpt::PathString m_ConfigPath; // InstallPath (portable mode) or "%AppData%\OpenMPT\"
+
 	mpt::PathString m_szConfigFileName;
 	mpt::PathString m_szPluginCacheFileName;
+
 	std::shared_ptr<mpt::Wine::Context> m_Wine;
 	mpt::PathString m_WineWrapperDllName;
 	// Default macro configuration
@@ -158,7 +164,11 @@ public:
 
 public:
 
-	mpt::PathString GetExePath() {return m_szExePath;} // Returns '\'-ended executable directory path.
+	bool IsMultiArchInstall() const { return m_InstallPath == m_InstallBinArchPath; }
+	mpt::PathString GetInstallPath() const { return m_InstallPath; } // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)
+	mpt::PathString GetInstallBinPath() const { return m_InstallBinPath; } // i.e. "C:\Program Files\OpenMPT\bin\" (multi-arch mode) or InstallPath (legacy mode)
+	mpt::PathString GetInstallBinArchPath() const { return m_InstallBinArchPath; } // i.e. "C:\Program Files\OpenMPT\bin\amd64\" (multi-arch mode) or InstallPath (legacy mode)
+	
 	static MODTYPE GetDefaultDocType() { return m_nDefaultDocType; }
 	static void SetDefaultDocType(MODTYPE n) { m_nDefaultDocType = n; }
 	static MidiLibrary &GetMidiLibrary() { return midiLibrary; }
@@ -258,7 +268,7 @@ public:
 	}
 
 	/// Returns path to config folder including trailing '\'.
-	mpt::PathString GetConfigPath() const { return m_szConfigDirectory; }
+	mpt::PathString GetConfigPath() const { return m_ConfigPath; }
 	void SetupPaths(bool overridePortable);
 	void CreatePaths();
 
@@ -266,8 +276,10 @@ public:
 	bool CheckSystemSupport();
 
 	// Relative / absolute paths conversion
-	mpt::PathString AbsolutePathToRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetExePath()); }
-	mpt::PathString RelativePathToAbsolute(const mpt::PathString &path) { return path.RelativePathToAbsolute(GetExePath()); }
+	mpt::PathString PathAbsoluteToInstallRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetInstallPath()); }
+	mpt::PathString PathInstallRelativeToAbsolute(const mpt::PathString &path) { return path.RelativePathToAbsolute(GetInstallPath()); }
+	mpt::PathString PathAbsoluteToInstallBinArchRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetInstallBinArchPath()); }
+	mpt::PathString PathInstallBinArchRelativeToAbsolute(const mpt::PathString &path) { return path.RelativePathToAbsolute(GetInstallBinArchPath()); }
 
 	static void OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt::PathString &overridePath = mpt::PathString());
 

@@ -260,7 +260,7 @@ BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
 		}
 		if(!filename.empty())
 		{
-			filename = theApp.RelativePathToAbsolute(filename);
+			filename = theApp.PathInstallRelativeToAbsolute(filename);
 			midiLibrary[iMidi] = filename;
 		}
 	}
@@ -284,7 +284,7 @@ BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
 		if(!szFileName.empty())
 		{
 			if(theApp.IsPortableMode())
-				szFileName = theApp.AbsolutePathToRelative(szFileName);
+				szFileName = theApp.PathAbsoluteToInstallRelative(szFileName);
 
 			mpt::ustring key = mpt::format(U_("%1%2"))((iMidi < 128) ? U_("Midi") : U_("Perc"), iMidi & 0x7f);
 			file.Write<mpt::PathString>(U_("Midi Library"), key, szFileName);
@@ -307,7 +307,7 @@ void CTrackApp::LoadDefaultDLSBanks()
 	for(uint32 i = 0; i < numBanks; i++)
 	{
 		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>(U_("DLS Banks"), mpt::format(U_("Bank%1"))(i + 1), mpt::PathString());
-		path = theApp.RelativePathToAbsolute(path);
+		path = theApp.PathInstallRelativeToAbsolute(path);
 		AddDLSBank(path);
 	}
 
@@ -344,7 +344,7 @@ void CTrackApp::SaveDefaultDLSBanks()
 		mpt::PathString path = bank->GetFileName();
 		if(theApp.IsPortableMode())
 		{
-			path = theApp.AbsolutePathToRelative(path);
+			path = theApp.PathAbsoluteToInstallRelative(path);
 		}
 
 		mpt::ustring key = mpt::format(U_("Bank%1"))(nBanks + 1);
@@ -517,11 +517,11 @@ bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDi
 	// copy a config file from the exe directory to the new config dirs
 	mpt::PathString sOldPath;
 	mpt::PathString sNewPath;
-	sOldPath = GetExePath();
+	sOldPath = GetInstallPath();
 	sOldPath += sSubDir;
 	sOldPath += sFileName;
 
-	sNewPath = m_szConfigDirectory;
+	sNewPath = GetConfigPath();
 	sNewPath += sSubDir;
 	if(!sNewFileName.empty())
 	{
@@ -542,54 +542,86 @@ bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDi
 // Set up paths were configuration data is written to. Set overridePortable to true if application's own directory should always be used.
 void CTrackApp::SetupPaths(bool overridePortable)
 {
-	TCHAR dir[MAX_PATH] = { 0 };
+
+	// First, determine if the executable is installed in multi-arch mode or in the old standard mode.
+	bool modeMultiArch = false;
+	bool modeSourceProject = false;
+	const mpt::PathString exePath = mpt::GetExecutablePath();
+	auto exePathComponents = mpt::String::Split<mpt::ustring>(exePath.GetDir().WithoutTrailingSlash().ToUnicode(), P_("\\").ToUnicode());
+	if(exePathComponents.size() >= 2)
+	{
+		if(exePathComponents[exePathComponents.size()-1] == mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()))
+		{
+			if(exePathComponents[exePathComponents.size()-2] == U_("bin"))
+			{
+				modeMultiArch = true;
+			}
+		}
+	}
+	// Check if we are running from the source tree.
+	if(!modeMultiArch && exePathComponents.size() >= 4)
+	{
+		if(exePathComponents[exePathComponents.size()-1] == mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()))
+		{
+			if(exePathComponents[exePathComponents.size()-4] == U_("bin"))
+			{
+				modeSourceProject = true;
+			}
+		}
+	}
+	if(modeSourceProject)
+	{
+		m_InstallPath = mpt::GetAbsolutePath(exePath + P_("..\\") + P_("..\\") + P_("..\\") + P_("..\\"));
+		m_InstallBinPath = mpt::GetAbsolutePath(exePath + P_("..\\"));
+		m_InstallBinArchPath = exePath;
+	} else if(modeMultiArch)
+	{
+		m_InstallPath = mpt::GetAbsolutePath(exePath + P_("..\\") + P_("..\\"));
+		m_InstallBinPath = mpt::GetAbsolutePath(exePath + P_("..\\"));
+		m_InstallBinArchPath = exePath;
+	} else
+	{
+		m_InstallPath = exePath;
+		m_InstallBinPath = exePath;
+		m_InstallBinArchPath = exePath;
+	}
 
 	// Determine paths, portable mode, first run. Do not yet update any state.
-
-	mpt::PathString configPathApp = mpt::GetExecutablePath(); // config path in portable mode
-	mpt::PathString configPathGlobal; // config path in default non-portable mode
+	mpt::PathString configPathPortable = m_InstallPath; // config path in portable mode
+	mpt::PathString configPathUser; // config path in default non-portable mode
 	{
 		// Try to find a nice directory where we should store our settings (default: %APPDATA%)
+		TCHAR dir[MAX_PATH] = { 0 };
 		if((SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK)
 			|| (SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK))
 		{
 			// Store our app settings in %APPDATA% or "My Documents"
-			configPathGlobal = mpt::PathString::FromNative(dir) + P_("\\OpenMPT\\");
+			configPathUser = mpt::PathString::FromNative(dir) + P_("\\OpenMPT\\");
 		}
 	}
 
-	bool portableMode = overridePortable;
-
-	if(configPathGlobal.empty())
-	{
-		// no usable global directory found
-		portableMode = true;
-	}
-
-	// Check if the user prefers to use the app's directory
-	bool configAppPortable = false;
-	mpt::PathString portableFlagFile = (configPathApp + P_("OpenMPT.portable"));
-	bool configPortableFile = portableFlagFile.IsFile();
-	configAppPortable = configAppPortable || configPortableFile;
+	// Check if the user has configured portable mode.
+	bool configInstallPortable = false;
+	mpt::PathString portableFlagFilename = (configPathPortable + P_("OpenMPT.portable"));
+	bool configPortableFlag = portableFlagFilename.IsFile();
+	configInstallPortable = configInstallPortable || configPortableFlag;
 	// before 1.29.00.13:
-	configAppPortable = configAppPortable || (GetPrivateProfileInt(_T("Paths"), _T("UseAppDataDirectory"), 1, (configPathApp + P_("mptrack.ini")).AsNative().c_str()) == 0);
-	if(configAppPortable)
-	{
-		portableMode = true;
-	}
+	configInstallPortable = configInstallPortable || (GetPrivateProfileInt(_T("Paths"), _T("UseAppDataDirectory"), 1, (configPathPortable + P_("mptrack.ini")).AsNative().c_str()) == 0);
 	// convert to new style
-	if(configAppPortable && !configPortableFile)
+	if(configInstallPortable && !configPortableFlag)
 	{
-		mpt::SafeOutputFile f(portableFlagFile);
+		mpt::SafeOutputFile f(portableFlagFilename);
 	}
 
-	// Update executable and config dirs
-	m_szExePath = mpt::GetExecutablePath();
-	m_szConfigDirectory = portableMode ? configPathApp : configPathGlobal;
+	// Determine portable mode.
+	bool portableMode = overridePortable || configInstallPortable || configPathUser.empty();
+
+	// Update config dir
+	m_ConfigPath = portableMode ? configPathPortable : configPathUser;
 
 	// Set up default file locations
-	m_szConfigFileName = m_szConfigDirectory + P_("mptrack.ini"); // config file
-	m_szPluginCacheFileName = m_szConfigDirectory + P_("plugin.cache"); // plugin cache
+	m_szConfigFileName = m_ConfigPath + P_("mptrack.ini"); // config file
+	m_szPluginCacheFileName = m_ConfigPath + P_("plugin.cache"); // plugin cache
 
 	// Force use of custom ini file rather than windowsDir\executableName.ini
 	if(m_pszProfileName)
@@ -606,9 +638,12 @@ void CTrackApp::SetupPaths(bool overridePortable)
 void CTrackApp::CreatePaths()
 {
 	// Create missing diretories
-	if(!m_szConfigDirectory.IsDirectory())
+	if(!IsPortableMode())
 	{
-		CreateDirectory(m_szConfigDirectory.AsNative().c_str(), 0);
+		if(!m_ConfigPath.IsDirectory())
+		{
+			CreateDirectory(m_ConfigPath.AsNative().c_str(), 0);
+		}
 	}
 	if(!(GetConfigPath() + P_("Components")).IsDirectory())
 	{
@@ -621,7 +656,7 @@ void CTrackApp::CreatePaths()
 
 	// Handle updates from old versions.
 
-	if(!m_bPortableMode)
+	if(!IsPortableMode())
 	{
 
 		// Move the config files if they're still in the old place.
@@ -629,9 +664,7 @@ void CTrackApp::CreatePaths()
 		MoveConfigFile(P_("plugin.cache"));
 	
 		// Import old tunings
-		mpt::PathString sOldTunings;
-		sOldTunings = GetExePath();
-		sOldTunings += P_("tunings\\");
+		mpt::PathString sOldTunings = GetInstallPath() + P_("tunings\\");
 
 		if(sOldTunings.IsDirectory())
 		{
@@ -651,6 +684,7 @@ void CTrackApp::CreatePaths()
 			FindClose(hFind);
 			RemoveDirectory(sOldTunings.AsNative().c_str());
 		}
+
 	}
 
 }
@@ -912,7 +946,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		ExceptionHandler::ConfigureSystemHandler();
 	}
 
-	m_pSongSettingsIniFile = new IniFileSettingsBackend(m_szConfigDirectory + P_("SongSettings.ini"));
+	m_pSongSettingsIniFile = new IniFileSettingsBackend(GetConfigPath() + P_("SongSettings.ini"));
 	m_pSongSettings = new SettingsContainer(m_pSongSettingsIniFile);
 
 	m_pComponentManagerSettings = new ComponentManagerSettings(TrackerSettings::Instance(), GetConfigPath());
@@ -1283,7 +1317,7 @@ CModDoc *CTrackApp::NewDocument(MODTYPE newType)
 		if(TrackerSettings::Instance().defaultNewFileAction == nfDefaultTemplate && !templateFile.empty())
 		{
 			// Template file can be either a filename inside one of the preset and user TemplateModules folders, or a full path.
-			const mpt::PathString dirs[] = { GetConfigPath() + P_("TemplateModules\\"), GetExePath() + P_("TemplateModules\\"), mpt::PathString() };
+			const mpt::PathString dirs[] = { GetConfigPath() + P_("TemplateModules\\"), GetInstallPath() + P_("TemplateModules\\"), mpt::PathString() };
 			for(const auto &dir : dirs)
 			{
 				if((dir + templateFile).IsFile())
@@ -1897,7 +1931,7 @@ void CTrackApp::InitializeDXPlugins()
 		mpt::PathString plugPath = GetSettings().Read<mpt::PathString>(U_("VST Plugins"), plugIDFormat(plug), mpt::PathString());
 		if(!plugPath.empty())
 		{
-			plugPath = RelativePathToAbsolute(plugPath);
+			plugPath = PathInstallRelativeToAbsolute(plugPath);
 
 			if(!pluginScanDlg.m_hWnd && GetTickCount() >= scanStart + 2000)
 			{
@@ -1969,7 +2003,7 @@ void CTrackApp::UninitializeDXPlugins()
 			mpt::PathString plugPath = plug->dllPath;
 			if(theApp.IsPortableMode())
 			{
-				plugPath = AbsolutePathToRelative(plugPath);
+				plugPath = PathAbsoluteToInstallRelative(plugPath);
 			}
 			theApp.GetSettings().Write<mpt::PathString>(U_("VST Plugins"), mpt::format(U_("Plugin%1"))(plugIndex), plugPath);
 

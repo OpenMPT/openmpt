@@ -75,7 +75,7 @@ namespace IPCWindow
 					std::size_t count = copyData.cbData / sizeof(WCHAR);
 					const WCHAR* data = static_cast<const WCHAR *>(copyData.lpData);
 					const std::wstring path = std::wstring(data, data + count);
-					result = (theApp.GetExePath().ToWide() == path) ? 1 : 0;
+					result = (theApp.GetInstallBinArchPath().ToWide() == path) ? 1 : 0;
 				}
 				break;
 			case Function::HasSameSettingsPath:
@@ -175,7 +175,7 @@ namespace IPCWindow
 					}
 					if(state.require[SamePath])
 					{
-						if(SendIPC(hwnd, Function::HasSameBinaryPath, mpt::as_span(theApp.GetExePath().ToWide())) != 1)
+						if(SendIPC(hwnd, Function::HasSameBinaryPath, mpt::as_span(theApp.GetInstallBinArchPath().ToWide())) != 1)
 						{
 							return TRUE; // continue
 						}

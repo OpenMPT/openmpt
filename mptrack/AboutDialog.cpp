@@ -407,7 +407,8 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += mpt::format(U_("Available CPU features: %1\n"))(ProcSupportToString(GetRealProcSupport()));
 #endif // ENABLE_ASM
 			text += mpt::format(U_("Operating System: %1\n\n"))(mpt::Windows::Version::Current().GetName());
-			text += mpt::format(U_("OpenMPT Path%2: %1\n"))(theApp.GetExePath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
+			text += mpt::format(U_("OpenMPT Install Path%2: %1\n"))(theApp.GetInstallPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
+			text += mpt::format(U_("OpenMPT Executable Path%2: %1\n"))(theApp.GetInstallBinArchPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
 			text += mpt::format(U_("Settings%2: %1\n"))(theApp.GetConfigFileName(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
 			break;
 		case 1:
@@ -553,10 +554,10 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 					text += U_("\n");
 
 					text += mpt::format(U_("OpenMPT folder: %1\n"))
-						( theApp.GetExePath().ToUnicode()
+						( theApp.GetInstallPath().ToUnicode()
 						);
 					text += mpt::format(U_("OpenMPT folder (host): %1\n"))
-						( mpt::ToUnicode(mpt::CharsetUTF8, wine.PathToPosix(theApp.GetExePath()))
+						( mpt::ToUnicode(mpt::CharsetUTF8, wine.PathToPosix(theApp.GetInstallPath()))
 						);
 					text += mpt::format(U_("OpenMPT config folder: %1\n"))
 						( theApp.GetConfigPath().ToUnicode()
