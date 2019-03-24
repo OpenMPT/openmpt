@@ -285,7 +285,7 @@ struct SafeASIO
 
 #define asioCallResult(presult, asiocall) MPT_DO { \
 	try { \
-		*(presult) = SafeASIO(m_pAsioDrv). asiocall ; \
+		*( presult ) = SafeASIO(m_pAsioDrv). asiocall ; \
 	} catch(const ASIOCrash &) { \
 		CASIODevice::ReportASIOException( #asiocall + std::string(" crashed!")); \
 		throw ASIOException(std::string("Exception in '") + #asiocall + std::string("'!")); \
@@ -307,7 +307,7 @@ struct SafeASIO
 } while(0)
 
 
-#define asioCallUnchecked(pasioresult, asiocall) do { \
+#define asioCallUnchecked(pasioresult, asiocall) MPT_DO { \
 	if(( pasioresult )) { \
 		*( pasioresult ) = ASE_InvalidParameter; \
 	} \
