@@ -304,7 +304,7 @@ struct SafeASIO
 	if(e != ASIOTrue) { \
 		throw ASIOCallBoolResult( #asiocall , e); \
 	} \
-} while(0)
+} MPT_WHILE_0
 
 
 #define asioCallUnchecked(pasioresult, asiocall) MPT_DO { \
