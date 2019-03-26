@@ -495,7 +495,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 
 	progress(userdata);
 
-	// Work around Wine being able to execute PIE binaries on Debian 9.
+	// Work around Wine being unable to execute PIE binaries on Debian 9.
 	// Luckily, /bin/bash is still non-PIE on Debian 9.
 
 	if(!createProcessSuccess)
