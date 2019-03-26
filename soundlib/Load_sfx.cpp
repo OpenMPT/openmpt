@@ -236,13 +236,13 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		if(invalidChars >= 128)
 			return false;
-		mpt::String::Read<mpt::String::spacePadded>(m_szNames[smp], sampleHeader.name);
+		m_szNames[smp] = mpt::String::ReadBuf(mpt::String::spacePadded, sampleHeader.name);
 	}
 
 	// Broken conversions of the "Operation Stealth" soundtrack (BOND23 / BOND32)
 	// There is a converter that shifts all note values except FFFD (empty note) to the left by 1 bit,
 	// but it should not do that for FFFE (STP) notes - as a consequence, they turn into pattern breaks (FFFC).
-	const bool fixPatternBreaks = !strcmp(m_szNames[1], "BASSE2.AMI") || !strcmp(m_szNames[1], "PRA1.AMI");
+	const bool fixPatternBreaks = (m_szNames[1] == "BASSE2.AMI") || (m_szNames[1] == "PRA1.AMI");
 
 	SFXFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))

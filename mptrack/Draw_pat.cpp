@@ -1641,7 +1641,7 @@ CString CViewPattern::GetCursorDescription() const
 					if((m->instr <= sndFile.GetNumInstruments()) && (sndFile.Instruments[m->instr]))
 					{
 						ModInstrument *pIns = sndFile.Instruments[m->instr];
-						s += pIns->name;
+						s += mpt::ToCString(sndFile.GetCharsetInternal(), pIns->name);
 						if((m->note) && (m->note <= NOTE_MAX))
 						{
 							const SAMPLEINDEX nsmp = pIns->Keyboard[m->note - 1];
@@ -1650,7 +1650,7 @@ CString CViewPattern::GetCursorDescription() const
 								if(sndFile.m_szNames[nsmp][0])
 								{
 									s.AppendFormat(_T(" (%d: "), nsmp);
-									s += sndFile.m_szNames[nsmp];
+									s += mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[nsmp]);
 									s.AppendChar(_T(')'));
 								}
 							}
@@ -1658,7 +1658,7 @@ CString CViewPattern::GetCursorDescription() const
 					}
 				} else if(m->instr <= sndFile.GetNumSamples())
 				{
-					s += sndFile.m_szNames[m->instr];
+					s += mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[m->instr]);
 				}
 
 			}

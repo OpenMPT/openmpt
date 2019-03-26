@@ -364,7 +364,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 				SetDlgItemInt(IDC_EDIT2+ichn*2, pan);
 
 				// Channel name
-				s = sndFile.ChnSettings[nChn].szName;
+				s = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[nChn].szName);
 				SetDlgItemText(IDC_EDIT9 + ichn, s);
 				((CEdit*)(GetDlgItem(IDC_EDIT9 + ichn)))->LimitText(MAX_CHANNELNAME - 1);
 			}
@@ -816,7 +816,7 @@ void CViewGlobals::OnEditName(const CHANNELINDEX chnMod4, const UINT itemID)
 		const std::string s = mpt::ToCharset(sndFile.GetCharsetInternal(), tmp);
 		if ((sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < sndFile.GetNumChannels()) && (s != sndFile.ChnSettings[nChn].szName))
 		{
-			mpt::String::Copy(sndFile.ChnSettings[nChn].szName, s);
+			sndFile.ChnSettings[nChn].szName = s;
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, GeneralHint(nChn).Channels());
 		}
@@ -868,7 +868,7 @@ void CViewGlobals::OnPluginNameChanged()
 		GetDlgItemText(IDC_EDIT13, s);
 		if (s != plugin.GetName())
 		{
-			mpt::String::Copy(plugin.Info.szName, mpt::ToCharset(mpt::CharsetLocale, s));
+			plugin.Info.szName = mpt::ToCharset(mpt::CharsetLocale, s);
 			if(sndFile.GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, PluginHint(m_nCurrentPlugin + 1).Info().Names(), this);

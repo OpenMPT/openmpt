@@ -722,7 +722,7 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 		if(sndFile.ChnSettings[n].szName[0] >= 0x20)
 		{
 			s += _T(": ");
-			s += sndFile.ChnSettings[n].szName;
+			s += mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[n].szName);
 		}
 		m_RemChansList.SetItemData(m_RemChansList.AddString(s), n);
 		if (!m_bKeepMask[n]) m_RemChansList.SetSel(n);

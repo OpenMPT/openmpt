@@ -870,11 +870,11 @@ void CVstPlugin::Initialize()
 			{
 			case 0:
 				sa.speakers[i].type = kSpeakerL;
-				mpt::String::Copy(sa.speakers[i].name, "Left");
+				mpt::String::WriteAutoBuf(sa.speakers[i].name) = "Left";
 				break;
 			case 1:
 				sa.speakers[i].type = kSpeakerR;
-				mpt::String::Copy(sa.speakers[i].name, "Right");
+				mpt::String::WriteAutoBuf(sa.speakers[i].name) = "Right";
 				break;
 			default:
 				sa.speakers[i].type = kSpeakerUndefined;

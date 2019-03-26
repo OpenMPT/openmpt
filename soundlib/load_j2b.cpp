@@ -205,7 +205,7 @@ struct AMFFInstrumentHeader
 	// Convert instrument data to OpenMPT's internal format.
 	void ConvertToMPT(ModInstrument &mptIns, SAMPLEINDEX baseSample)
 	{
-		mpt::String::Read<mpt::String::maybeNullTerminated>(mptIns.name, name);
+		mptIns.name = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, name);
 
 		STATIC_ASSERT(CountOf(sampleMap) <= CountOf(mptIns.Keyboard));
 		for(size_t i = 0; i < CountOf(sampleMap); i++)
@@ -382,7 +382,7 @@ struct AMInstrumentHeader
 	// Convert instrument data to OpenMPT's internal format.
 	void ConvertToMPT(ModInstrument &mptIns, SAMPLEINDEX baseSample)
 	{
-		mpt::String::Read<mpt::String::maybeNullTerminated>(mptIns.name, name);
+		mptIns.name = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, name);
 
 		STATIC_ASSERT(CountOf(sampleMap) <= CountOf(mptIns.Keyboard));
 		for(uint8 i = 0; i < CountOf(sampleMap); i++)
@@ -742,7 +742,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.type = U_("j2b");
 	m_modFormat.charset = mpt::CharsetCP437;
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, mainChunk.songname);
+	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, mainChunk.songname);
 
 	// It seems like there's no way to differentiate between
 	// Muted and Surround channels (they're all 0xA0) - might
@@ -836,7 +836,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 					continue;
 				}
 
-				mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+				m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sampleHeader.name);
 				sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
 				if(loadFlags & loadSampleData)
 					sampleHeader.GetSampleFormat().ReadSample(Samples[smp], chunk);
@@ -914,7 +914,7 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 					break;
 				}
 
-				mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+				m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sampleHeader.name);
 
 				sampleHeader.ConvertToMPT(instrHeader, Samples[smp]);
 

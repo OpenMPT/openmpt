@@ -103,8 +103,8 @@ void ITOldInstrument::ConvertToMPT(ModInstrument &mptIns) const
 		return;
 	}
 
-	mpt::String::Read<mpt::String::spacePadded>(mptIns.name, name);
-	mpt::String::Read<mpt::String::nullTerminated>(mptIns.filename, filename);
+	mptIns.name = mpt::String::ReadBuf(mpt::String::spacePadded, name);
+	mptIns.filename = mpt::String::ReadBuf(mpt::String::nullTerminated, filename);
 
 	// Volume / Panning
 	mptIns.nFadeOut = fadeout << 6;
@@ -170,8 +170,8 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	memcpy(id, "IMPI", 4);
 	trkvers = 0x5000 | static_cast<uint16>(Version::Current().GetRawVersion() >> 16);
 
-	mpt::String::Write<mpt::String::nullTerminated>(filename, mptIns.filename);
-	mpt::String::Write<mpt::String::nullTerminated>(name, mptIns.name);
+	mpt::String::WriteBuf(mpt::String::nullTerminated, filename) = mptIns.filename;
+	mpt::String::WriteBuf(mpt::String::nullTerminated, name) = mptIns.name;
 
 	// Volume / Panning
 	fadeout = static_cast<uint16>(std::min<uint32>(mptIns.nFadeOut >> 5, 256u));
@@ -261,8 +261,8 @@ uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 		return 0;
 	}
 
-	mpt::String::Read<mpt::String::spacePadded>(mptIns.name, name);
-	mpt::String::Read<mpt::String::nullTerminated>(mptIns.filename, filename);
+	mptIns.name = mpt::String::ReadBuf(mpt::String::spacePadded, name);
+	mptIns.filename = mpt::String::ReadBuf(mpt::String::nullTerminated, filename);
 
 	// Volume / Panning
 	mptIns.nFadeOut = fadeout << 5;
@@ -441,8 +441,8 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 	// Header
 	memcpy(id, "IMPS", 4);
 
-	mpt::String::Write<mpt::String::nullTerminated>(filename, mptSmp.filename);
-	//mpt::String::Write<mpt::String::nullTerminated>(name, m_szNames[nsmp]);
+	mpt::String::WriteBuf(mpt::String::nullTerminated, filename) = mptSmp.filename;
+	//mpt::String::WriteBuf(mpt::String::nullTerminated, name) = m_szNames[nsmp];
 
 	// Volume / Panning
 	gvl = static_cast<uint8>(mptSmp.nGlobalVol);
@@ -535,7 +535,7 @@ uint32 ITSample::ConvertToMPT(ModSample &mptSmp) const
 	}
 
 	mptSmp.Initialize(MOD_TYPE_IT);
-	mpt::String::Read<mpt::String::nullTerminated>(mptSmp.filename, filename);
+	mptSmp.filename = mpt::String::ReadBuf(mpt::String::nullTerminated, filename);
 
 	// Volume / Panning
 	mptSmp.nVolume = vol * 4;

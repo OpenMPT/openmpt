@@ -154,7 +154,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.charset = mpt::CharsetCP437;
 
 	// Some PLMs use ASCIIZ, some space-padding strings...weird. Oh, and the file browser stops at 0 bytes in the name, the main GUI doesn't.
-	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songName);
+	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels + 1;	// Additional channel for writing pattern breaks
 	m_nSamplePreAmp = fileHeader.amplify;
 	m_nDefaultTempo.Set(fileHeader.tempo);
@@ -183,8 +183,8 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 			|| !file.ReadStruct(sampleHeader))
 				continue;
 
-		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp + 1], sampleHeader.name);
-		mpt::String::Read<mpt::String::maybeNullTerminated>(sample.filename, sampleHeader.filename);
+		m_szNames[smp + 1] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sampleHeader.name);
+		sample.filename = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sampleHeader.filename);
 		if(sampleHeader.panning <= 15)
 		{
 			sample.uFlags.set(CHN_PANNING);

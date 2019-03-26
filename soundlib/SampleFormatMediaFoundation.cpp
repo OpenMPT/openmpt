@@ -408,7 +408,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	DestroySampleThreadsafe(sample);
 	if(!mo3Decode)
 	{
-		mpt::String::Copy(m_szNames[sample], sampleName);
+		m_szNames[sample] = sampleName;
 		Samples[sample].Initialize();
 		Samples[sample].nC5Speed = samplesPerSecond;
 	}

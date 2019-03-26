@@ -572,7 +572,7 @@ BOOL CModDoc::InitializeMod()
 			m_SndFile.Patterns.Insert(0, 64);
 		}
 
-		MemsetZero(m_SndFile.m_szNames);
+		Clear(m_SndFile.m_szNames);
 
 		m_SndFile.m_PlayState.m_nMusicTempo.Set(125);
 		m_SndFile.m_nDefaultTempo.Set(125);
@@ -594,7 +594,7 @@ BOOL CModDoc::InitializeMod()
 	}
 	if (!m_SndFile.m_nSamples)
 	{
-		strcpy(m_SndFile.m_szNames[1], "untitled");
+		m_SndFile.m_szNames[1] = "untitled";
 		m_SndFile.m_nSamples = (GetModType() == MOD_TYPE_MOD) ? 31 : 1;
 
 		ctrlSmp::ResetSamples(m_SndFile, ctrlSmp::SmpResetInit);
@@ -1636,11 +1636,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 					continue;
 
 				// Add channel number & name (if available) to path string
-				if(strcmp(m_SndFile.ChnSettings[i].szName, ""))
+				if(!m_SndFile.ChnSettings[i].szName.empty())
 				{
 					fileNameAdd += mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.ChnSettings[i].szName);
 					caption.Format(_T("%u:"), i + 1);
-					caption += m_SndFile.ChnSettings[i].szName;
+					caption += mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.ChnSettings[i].szName);
 				} else
 				{
 					fileNameAdd += mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
@@ -1661,11 +1661,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 						continue;
 
 					// Add sample number & name (if available) to path string
-					if(strcmp(m_SndFile.m_szNames[i + 1], ""))
+					if(!m_SndFile.m_szNames[i + 1].empty())
 					{
 						fileNameAdd += mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.m_szNames[i + 1]);
 						caption.Format(_T("%u: "), i + 1);
-						caption += m_SndFile.m_szNames[i + 1];
+						caption += mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.m_szNames[i + 1]);
 					} else
 					{
 						fileNameAdd += mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
@@ -1681,11 +1681,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 					if(m_SndFile.Instruments[i + 1] == nullptr || !IsInstrumentUsed(static_cast<SAMPLEINDEX>(i + 1), false) || instrMuteState[i])
 						continue;
 
-					if(strcmp(m_SndFile.Instruments[i + 1]->name, ""))
+					if(!m_SndFile.Instruments[i + 1]->name.empty())
 					{
 						fileNameAdd += mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.Instruments[i + 1]->name);
 						caption.Format(_T("%u:"), i + 1);
-						caption += m_SndFile.Instruments[i + 1]->name;
+						caption += mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.Instruments[i + 1]->name);
 					} else
 					{
 						fileNameAdd += mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
@@ -1755,8 +1755,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 							GetSampleUndo().PrepareUndo(smp, sundo_replace, "Render To Sample");
 							if(m_SndFile.ReadSampleFromFile(smp, file, false))
 							{
-								strcpy(m_SndFile.m_szNames[smp], "Render To Sample");
-								strncat(m_SndFile.m_szNames[smp], fileNameAdd.c_str(), MPT_ARRAY_COUNT(m_SndFile.m_szNames[smp]) - strlen("Render To Sample") - 1);
+								m_SndFile.m_szNames[smp] = "Render To Sample" + fileNameAdd;
 								UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
 								if(m_SndFile.GetNumInstruments() && !IsSampleUsed(smp))
 								{
@@ -2850,32 +2849,6 @@ void CModDoc::OnPanic()
 // Else, garbage might end up in various text strings that wasn't supposed to be there.
 void CModDoc::FixNullStrings()
 {
-	// Song title
-	// std::string, doesn't need to be fixed.
-
-	// Sample names + filenames
-	for(SAMPLEINDEX nSmp = 1; nSmp <= m_SndFile.GetNumSamples(); nSmp++)
-	{
-		mpt::String::FixNullString(m_SndFile.m_szNames[nSmp]);
-		mpt::String::FixNullString(m_SndFile.GetSample(nSmp).filename);
-	}
-
-	// Instrument names
-	for(INSTRUMENTINDEX nIns = 1; nIns <= m_SndFile.GetNumInstruments(); nIns++)
-	{
-		if(m_SndFile.Instruments[nIns] != nullptr)
-		{
-			mpt::String::FixNullString(m_SndFile.Instruments[nIns]->name);
-			mpt::String::FixNullString(m_SndFile.Instruments[nIns]->filename);
-		}
-	}
-
-	// Channel names
-	for(CHANNELINDEX nChn = 0; nChn < m_SndFile.GetNumChannels(); nChn++)
-	{
-		mpt::String::FixNullString(m_SndFile.ChnSettings[nChn].szName);
-	}
-
 	// Macros
 	m_SndFile.m_MidiCfg.Sanitize();
 }

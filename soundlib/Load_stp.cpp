@@ -306,12 +306,12 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 			std::string str;
 			// Read path
 			chunk.ReadNullString(str, 257);
-			mpt::String::Copy(mptSmp.filename, str);
+			mptSmp.filename = str;
 			// Ignore flags, they are all not relevant for us
 			chunk.Skip(1);
 			// Read filename / sample text
 			chunk.ReadNullString(str, 31);
-			mpt::String::Copy(m_szNames[actualSmp], str);
+			m_szNames[actualSmp] = str;
 			// Seek to even boundary
 			if(chunk.GetPosition() % 2u)
 				chunk.Skip(1);

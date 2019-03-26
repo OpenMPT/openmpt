@@ -102,7 +102,7 @@ struct PSMSampleHeader
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, fileName);
+		mptSmp.filename = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileName);
 
 		mptSmp.nC5Speed = c5Freq;
 		mptSmp.nLength = sampleLength;
@@ -143,7 +143,7 @@ struct PSMSinariaSampleHeader
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, fileName);
+		mptSmp.filename = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileName);
 
 		mptSmp.nC5Speed = c5Freq;
 		mptSmp.nLength = sampleLength;
@@ -329,7 +329,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		m_nChannels = Clamp(static_cast<CHANNELINDEX>(songHeader.numChannels), m_nChannels, MAX_BASECHANNELS);
 
 		PSMSubSong subsong;
-		mpt::String::Read<mpt::String::nullTerminated>(subsong.songName, songHeader.songType);
+		mpt::String::WriteAutoBuf(subsong.songName) = mpt::String::ReadBuf(mpt::String::nullTerminated, songHeader.songType);
 
 #ifdef MPT_PSM_USE_REAL_SUBSONGS
 		if(!Order().empty())
@@ -589,7 +589,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				if(smp > 0 && smp < MAX_SAMPLES)
 				{
 					m_nSamples = std::max(m_nSamples, smp);
-					mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
+					m_szNames[smp] = mpt::String::ReadBuf(mpt::String::nullTerminated, sampleHeader.sampleName);
 
 					sampleHeader.ConvertToMPT(Samples[smp]);
 				}
@@ -606,7 +606,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				if(smp > 0 && smp < MAX_SAMPLES)
 				{
 					m_nSamples = std::max(m_nSamples, smp);
-					mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.sampleName);
+					m_szNames[smp] = mpt::String::ReadBuf(mpt::String::nullTerminated, sampleHeader.sampleName);
 
 					sampleHeader.ConvertToMPT(Samples[smp]);
 				}
@@ -1012,7 +1012,7 @@ struct PSM16SampleHeader
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mpt::String::Read<mpt::String::nullTerminated>(mptSmp.filename, filename);
+		mptSmp.filename = mpt::String::ReadBuf(mpt::String::nullTerminated, filename);
 
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
@@ -1142,7 +1142,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultSpeed = fileHeader.songSpeed;
 	m_nDefaultTempo.Set(fileHeader.songTempo);
 
-	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songName);
+	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songName);
 
 	// Read orders
 	if(fileHeader.orderOffset > 4 && file.Seek(fileHeader.orderOffset - 4) && file.ReadMagic("PORD"))
@@ -1180,7 +1180,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 				m_nSamples = std::max(m_nSamples, smp);
 
 				sampleHeader.ConvertToMPT(Samples[smp]);
-				mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp], sampleHeader.name);
+				m_szNames[smp] = mpt::String::ReadBuf(mpt::String::nullTerminated, sampleHeader.name);
 
 				if(loadFlags & loadSampleData)
 				{

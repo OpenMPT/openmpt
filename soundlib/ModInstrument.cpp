@@ -175,9 +175,6 @@ ModInstrument::ModInstrument(SAMPLEINDEX sample)
 
 	AssignSample(sample);
 	ResetNoteMap();
-
-	MemsetZero(name);
-	MemsetZero(filename);
 }
 
 

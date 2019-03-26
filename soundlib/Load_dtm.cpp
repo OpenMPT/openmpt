@@ -348,7 +348,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 			m_nSamples = std::max(m_nSamples, realSample);
 			ModSample &mptSmp = Samples[realSample];
 			dtmSample.ConvertToMPT(mptSmp, fileHeader.forcedSampleRate, patternFormat);
-			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[realSample], dtmSample.name);
+			m_szNames[realSample] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, dtmSample.name);
 		}
 	
 		if(chunk.ReadUint16BE() == 0x0004)
@@ -564,7 +564,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		while(chunk.CanRead(1) && chn < GetNumChannels())
 		{
 			chunk.ReadNullString(name, 32);
-			mpt::String::Copy(ChnSettings[chn].szName, name);
+			ChnSettings[chn].szName = name;
 			chn++;
 		}
 	}

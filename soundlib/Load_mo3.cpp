@@ -1264,11 +1264,11 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 		std::string name;
 		musicChunk.ReadNullString(name);
-		mpt::String::Copy(pIns->name, name);
+		pIns->name = name;
 		if(version >= 5)
 		{
 			musicChunk.ReadNullString(name);
-			mpt::String::Copy(pIns->filename, name);
+			pIns->filename = name;
 		}
 
 		MO3Instrument insHeader;
@@ -1291,11 +1291,11 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		ModSample &sample = Samples[smp];
 		std::string name;
 		musicChunk.ReadNullString(name);
-		mpt::String::Copy(m_szNames[smp], name);
+		m_szNames[smp] = name;
 		if(version >= 5)
 		{
 			musicChunk.ReadNullString(name);
-			mpt::String::Copy(sample.filename, name);
+			sample.filename = name;
 		}
 
 		MO3Sample smpHeader;

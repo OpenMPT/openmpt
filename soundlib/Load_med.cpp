@@ -689,7 +689,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			if (pseq && pseq < dwMemLength && sizeof(MMD2PLAYSEQ) <= dwMemLength - pseq)
 			{
 				const MMD2PLAYSEQ *pmps = (const MMD2PLAYSEQ *)(lpStream + pseq);
-				if(m_songName.empty()) mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, pmps->name);
+				if(m_songName.empty()) m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, pmps->name);
 				ORDERINDEX n = std::min<ORDERINDEX>(pmps->length, MAX_ORDERS - nOrders);
 				if (n <= (dwMemLength - pseq + 42) / 2u && n < MPT_ARRAY_COUNT(pmps->seq))
 				{
@@ -731,7 +731,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		uint32 songnamelen = pmex->songnamelen;
 		if ((songname) && (songnamelen) && (songname <= dwMemLength) && (songnamelen <= dwMemLength-songname))
 		{
-			mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, lpStream + songname, songnamelen);
+			m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, mpt::byte_cast<const char*>(lpStream) + songname, songnamelen);
 		}
 		// Sample Names
 		uint32 smpinfoex = pmex->iinfo;
@@ -746,7 +746,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				const char *psznames = (const char *)(lpStream + iinfoptr);
 				for (uint32 i=0; i<ientries; i++) if (i < m_nSamples)
 				{
-					mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[i + 1], (psznames + i * ientrysz), ientrysz);
+					m_szNames[i + 1] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, (psznames + i * ientrysz), ientrysz);
 				}
 			}
 		}
@@ -775,7 +775,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 					}
 					if ((trknameofs) && (trknameofs < dwMemLength - trknamelen) && trknamelen < dwMemLength)
 					{
-						mpt::String::Read<mpt::String::maybeNullTerminated>(ChnSettings[i].szName, lpStream + trknameofs, trknamelen);
+						ChnSettings[i].szName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, mpt::byte_cast<const char*>(lpStream) + trknameofs, trknamelen);
 					}
 				}
 			}

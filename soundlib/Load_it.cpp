@@ -522,7 +522,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.set(SONG_ITCOMPATGXX, (fileHeader.flags & ITFileHeader::itCompatGxx) != 0);
 	m_SongFlags.set(SONG_EXFILTERRANGE, (fileHeader.flags & ITFileHeader::extendedFilterRange) != 0);
 
-	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songname);
+	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songname);
 
 	// Read row highlights
 	if((fileHeader.special & ITFileHeader::embedPatternHighlights))
@@ -774,7 +774,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			ModSample &sample = Samples[i + 1];
 			size_t sampleOffset = sampleHeader.ConvertToMPT(sample);
 
-			mpt::String::Read<mpt::String::spacePadded>(m_szNames[i + 1], sampleHeader.name);
+			m_szNames[i + 1] = mpt::String::ReadBuf(mpt::String::spacePadded, sampleHeader.name);
 
 			if(!file.Seek(sampleOffset))
 				continue;
@@ -1167,7 +1167,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				madeWithTracker = U_("ChibiTracker");
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && fileHeader.special <= 1 && fileHeader.pwd == 0 && fileHeader.reserved == 0
 				&& (fileHeader.flags & (ITFileHeader::vol0Optimisations | ITFileHeader::instrumentMode | ITFileHeader::useMIDIPitchController | ITFileHeader::reqEmbeddedMIDIConfig | ITFileHeader::extendedFilterRange)) == ITFileHeader::instrumentMode
-				&& m_nSamples > 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
+				&& m_nSamples > 0 && (Samples[1].filename == "XXXXXXXX.YYY"))
 			{
 				madeWithTracker = U_("CheeseTracker");
 			} else if(fileHeader.cwtv == 0)
@@ -1361,7 +1361,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 	MemsetZero(itHeader);
 	dwChnNamLen = 0;
 	memcpy(itHeader.id, "IMPM", 4);
-	mpt::String::Write<mpt::String::nullTerminated>(itHeader.songname, m_songName);
+	mpt::String::WriteBuf(mpt::String::nullTerminated, itHeader.songname) = m_songName;
 
 	itHeader.highlight_minor = (uint8)std::min(m_nDefaultRowsPerBeat, ROWINDEX(uint8_max));
 	itHeader.highlight_major = (uint8)std::min(m_nDefaultRowsPerMeasure, ROWINDEX(uint8_max));
@@ -1530,7 +1530,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 		for(PATTERNINDEX pat = 0; pat < numNamedPats; pat++)
 		{
 			char name[MAX_PATTERNNAME];
-			mpt::String::Write<mpt::String::maybeNullTerminated>(name, Patterns[pat].GetName());
+			mpt::String::WriteBuf(mpt::String::maybeNullTerminated, name) = Patterns[pat].GetName();
 			mpt::IO::Write(f, name);
 		}
 	}
@@ -1544,7 +1544,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 		for(uint32 inam = 0; inam < nChnNames; inam++)
 		{
 			char name[MAX_CHANNELNAME];
-			mpt::String::Write<mpt::String::maybeNullTerminated>(name, ChnSettings[inam].szName);
+			mpt::String::WriteBuf(mpt::String::maybeNullTerminated, name) = ChnSettings[inam].szName;
 			mpt::IO::Write(f, name);
 		}
 	}
@@ -1794,7 +1794,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 		itss.ConvertToIT(sample, GetType(), compress, itHeader.cmwt >= 0x215, GetType() == MOD_TYPE_MPT);
 		const bool isExternal = itss.cvt == ITSample::cvtExternalSample;
 
-		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[smp]);
+		mpt::String::WriteBuf(mpt::String::nullTerminated, itss.name) = m_szNames[smp];
 
 		itss.samplepointer = static_cast<uint32>(dwPos);
 		if(dwPos > uint32_max)
@@ -2063,8 +2063,8 @@ void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
 {
 	// MPT's standard plugin data. Size not specified in file.. grrr..
 	file.ReadStruct(plugin.Info);
-	mpt::String::SetNullTerminator(plugin.Info.szName);
-	mpt::String::SetNullTerminator(plugin.Info.szLibraryName);
+	mpt::String::SetNullTerminator(plugin.Info.szName.buf);
+	mpt::String::SetNullTerminator(plugin.Info.szLibraryName.buf);
 	plugin.editorX = plugin.editorY = int32_min;
 
 	// Plugin user data

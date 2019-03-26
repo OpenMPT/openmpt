@@ -20,7 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 {
 	mptSmp.Initialize(MOD_TYPE_S3M);
-	mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
+	mptSmp.filename = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, filename);
 
 	if(sampleType == typePCM || sampleType == typeNone)
 	{
@@ -67,7 +67,7 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 SmpLength S3MSampleHeader::ConvertToS3M(const ModSample &mptSmp)
 {
 	SmpLength smpLength = 0;
-	mpt::String::Write<mpt::String::maybeNullTerminated>(filename, mptSmp.filename);
+	mpt::String::WriteBuf(mpt::String::maybeNullTerminated, filename) = mptSmp.filename;
 	memcpy(magic, "SCRS", 4);
 
 	if(mptSmp.uFlags[CHN_ADLIB])

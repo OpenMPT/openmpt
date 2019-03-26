@@ -715,7 +715,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 			addSeparator = false;
 		}
 		name.Format(_T("Chn%02u: "), chn + 1);
-		name += sndFile.ChnSettings[chn].szName;
+		name += mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[chn].szName);
 		m_InputMenu.AppendMenu(MF_STRING, NULL, name);
 	}
 

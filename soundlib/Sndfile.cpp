@@ -95,7 +95,7 @@ CSoundFile::CSoundFile() :
 #endif // MODPLUG_TRACKER
 
 	MemsetZero(Instruments);
-	MemsetZero(m_szNames);
+	Clear(m_szNames);
 
 	m_pTuningsTuneSpecific = new CTuningCollection();
 }
@@ -364,7 +364,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #endif
 
 	MemsetZero(Instruments);
-	MemsetZero(m_szNames);
+	Clear(m_szNames);
 #ifndef NO_PLUGINS
 	std::fill(std::begin(m_MixPlugins), std::end(m_MixPlugins), SNDMIXPLUGIN());
 #endif // NO_PLUGINS
@@ -473,8 +473,6 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	// Checking samples, load external samples
 	for(SAMPLEINDEX nSmp = 1; nSmp <= m_nSamples; nSmp++)
 	{
-		// Sanitize sample names
-		mpt::String::SetNullTerminator(m_szNames[nSmp]);
 		ModSample &sample = Samples[nSmp];
 
 #ifdef MPT_EXTERNAL_SAMPLES
@@ -1239,7 +1237,7 @@ const char *CSoundFile::GetSampleName(SAMPLEINDEX nSample) const
 	MPT_ASSERT(nSample <= GetNumSamples());
 	if (nSample < MAX_SAMPLES)
 	{
-		return m_szNames[nSample];
+		return m_szNames[nSample].buf;
 	} else
 	{
 		return "";
@@ -1253,7 +1251,7 @@ const char *CSoundFile::GetInstrumentName(INSTRUMENTINDEX nInstr) const
 		return "";
 
 	MPT_ASSERT(nInstr <= GetNumInstruments());
-	return Instruments[nInstr]->name;
+	return Instruments[nInstr]->name.buf;
 }
 
 
@@ -1386,7 +1384,7 @@ SAMPLEINDEX CSoundFile::RemoveSelectedSamples(const std::vector<bool> &keepSampl
 
 			if(DestroySample(nSmp))
 			{
-				strcpy(m_szNames[nSmp], "");
+				m_szNames[nSmp] = "";
 				nRemoved++;
 			}
 			if((nSmp == GetNumSamples()) && (nSmp > 1)) m_nSamples--;
@@ -1844,8 +1842,8 @@ bool CSoundFile::LoadExternalSample(SAMPLEINDEX smp, const mpt::PathString &file
 	if(f.IsValid())
 	{
 		const ModSample origSample = Samples[smp];
-		char origName[MAX_SAMPLENAME];
-		mpt::String::Copy(origName, m_szNames[smp]);
+		mpt::charbuf<MAX_SAMPLENAME> origName;
+		origName = m_szNames[smp];
 
 		FileReader file = GetFileReader(f);
 		ok = ReadSampleFromFile(smp, file, false);
@@ -1865,7 +1863,7 @@ bool CSoundFile::LoadExternalSample(SAMPLEINDEX smp, const mpt::PathString &file
 			sample.uFlags.reset(SMP_MODIFIED);
 			sample.SanitizeLoops();
 		}
-		mpt::String::Copy(m_szNames[smp], origName);
+		m_szNames[smp] = origName;
 	}
 	SetSamplePath(smp, filename);
 	return ok;

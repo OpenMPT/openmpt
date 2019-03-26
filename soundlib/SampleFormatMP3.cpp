@@ -564,7 +564,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 	DestroySampleThreadsafe(sample);
 	if(!mo3Decode)
 	{
-		mpt::String::Copy(m_szNames[sample], mpt::ToCharset(GetCharsetInternal(), sampleName));
+		m_szNames[sample] = mpt::ToCharset(GetCharsetInternal(), sampleName);
 		Samples[sample].Initialize();
 		Samples[sample].nC5Speed = rate;
 	}

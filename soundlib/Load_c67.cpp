@@ -180,7 +180,7 @@ bool CSoundFile::ReadC67(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		ModSample &mptSmp = Samples[smp + 1];
 		mptSmp.Initialize(MOD_TYPE_S3M);
-		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp + 1], fileHeader.sampleNames[smp]);
+		m_szNames[smp + 1] = mpt::String::ReadBuf(mpt::String::nullTerminated, fileHeader.sampleNames[smp]);
 		mptSmp.nLength = fileHeader.samples[smp].length;
 		if(fileHeader.samples[smp].loopEnd <= fileHeader.samples[smp].length)
 		{
@@ -195,7 +195,7 @@ bool CSoundFile::ReadC67(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		ModSample &mptSmp = Samples[smp + 33];
 		mptSmp.Initialize(MOD_TYPE_S3M);
-		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp + 33], fileHeader.fmInstrNames[smp]);
+		m_szNames[smp + 33] = mpt::String::ReadBuf(mpt::String::nullTerminated, fileHeader.fmInstrNames[smp]);
 		// Reorder OPL patch bytes (interleave modulator and carrier)
 		const auto &fm = fileHeader.fmInstr[smp];
 		OPLPatch patch{{}};

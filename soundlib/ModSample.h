@@ -42,7 +42,9 @@ struct ModSample
 	uint8  rootNote;						// For multisample import
 
 	//char name[MAX_SAMPLENAME];			// Maybe it would be nicer to have sample names here, but that would require some refactoring.
-	char filename[MAX_SAMPLEFILENAME];
+	mpt::charbuf<MAX_SAMPLEFILENAME> filename;
+	std::string GetFilename() const { return filename; }
+
 	union
 	{
 		SmpLength cues[9];

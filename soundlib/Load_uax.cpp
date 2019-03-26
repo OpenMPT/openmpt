@@ -175,7 +175,7 @@ bool CSoundFile::ReadUAX(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					if(static_cast<size_t>(objName) < names.size())
 					{
-						mpt::String::Copy(m_szNames[GetNumSamples()], names[objName]);
+						m_szNames[GetNumSamples()] = names[objName];
 					}
 				}
 			}

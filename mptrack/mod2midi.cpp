@@ -95,7 +95,7 @@ namespace MidiExport
 
 		operator ModInstrument& () { return m_instr; }
 
-		MidiTrack(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct, MidiTrack *tempoTrack, const char *name, const ModInstrument *oldInstr, bool overlappingInstruments)
+		MidiTrack(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct, MidiTrack *tempoTrack, const std::string &name, const ModInstrument *oldInstr, bool overlappingInstruments)
 			: IMidiPlugin(factory, sndFile, mixStruct)
 			, m_oldInstr(oldInstr)
 			, m_sndFile(sndFile)
@@ -415,7 +415,7 @@ namespace MidiExport
 				SNDMIXPLUGIN &mixPlugin = m_sndFile.m_MixPlugins[nextPlug++];
 
 				ModInstrument *oldInstr = m_wasInstrumentMode ? m_oldInstruments[i - 1] : nullptr;
-				MidiTrack &midiInstr = *(new MidiTrack(m_plugFactory, m_sndFile, &mixPlugin, &tempoTrack, m_wasInstrumentMode ? oldInstr->name : m_sndFile.GetSampleName(i), oldInstr, overlappingInstruments));
+				MidiTrack &midiInstr = *(new MidiTrack(m_plugFactory, m_sndFile, &mixPlugin, &tempoTrack, m_wasInstrumentMode ? std::string(oldInstr->name) : m_sndFile.GetSampleName(i), oldInstr, overlappingInstruments));
 				ModInstrument &instr = midiInstr;
 				mixPlugin.pMixPlugin = &midiInstr;
 				
@@ -594,7 +594,7 @@ BOOL CModToMidi::OnInitDialog()
 			if (m_sndFile.GetSample(nSmp).HasSampleData() && m_sndFile.GetpModDoc()->IsSampleUsed(nSmp, false))
 			{
 				s.Format(_T("%02d: "), nSmp);
-				s += m_sndFile.m_szNames[nSmp];
+				s += mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[nSmp]);
 				m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(s), nSmp);
 			}
 		}

@@ -346,7 +346,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_MidiCfg.ClearZxxMacros();
 	}
 
-	mpt::String::Read<mpt::String::nullTerminated>(m_songName, fileHeader.name);
+	m_songName = mpt::String::ReadBuf(mpt::String::nullTerminated, fileHeader.name);
 
 	if(fileHeader.flags & S3MFileHeader::amigaLimits) m_SongFlags.set(SONG_AMIGALIMITS);
 	if(fileHeader.flags & S3MFileHeader::st2Vibrato) m_SongFlags.set(SONG_S3MOLDVIBRATO);
@@ -453,7 +453,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		sampleHeader.ConvertToMPT(Samples[smp + 1]);
-		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp + 1], sampleHeader.name);
+		m_szNames[smp + 1] = mpt::String::ReadBuf(mpt::String::nullTerminated, sampleHeader.name);
 
 		if(sampleHeader.sampleType < S3MSampleHeader::typeAdMel)
 		{
@@ -632,7 +632,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 	S3MFileHeader fileHeader;
 	MemsetZero(fileHeader);
 
-	mpt::String::Write<mpt::String::nullTerminated>(fileHeader.name, m_songName);
+	mpt::String::WriteBuf(mpt::String::nullTerminated, fileHeader.name) = m_songName;
 	fileHeader.dosEof = S3MFileHeader::idEOF;
 	fileHeader.fileType = S3MFileHeader::idS3MType;
 
@@ -928,7 +928,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 		}
 
 		const SmpLength smpLength = sampleHeader[smp].ConvertToS3M(Samples[realSmp]);
-		mpt::String::Write<mpt::String::nullTerminated>(sampleHeader[smp].name, m_szNames[realSmp]);
+		mpt::String::WriteBuf(mpt::String::nullTerminated, sampleHeader[smp].name) = m_szNames[realSmp];
 
 		if(smpLength != 0)
 		{

@@ -50,7 +50,7 @@ struct UltSample
 	{
 		mptSmp.Initialize();
 
-		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
+		mptSmp.filename = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, filename);
 
 		if(sizeEnd <= sizeStart)
 		{
@@ -400,7 +400,7 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals(MOD_TYPE_ULT);
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
+	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);
 
 	const MPT_UCHAR_TYPE *versions[] = {UL_("<1.4"), UL_("1.4"), UL_("1.5"), UL_("1.6")};
 	m_modFormat.formatName = U_("UltraTracker");
@@ -433,7 +433,7 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		sampleHeader.ConvertToMPT(Samples[smp]);
-		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+		m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sampleHeader.name);
 	}
 
 	ReadOrderFromFile<uint8>(Order(), file, 256, 0xFF, 0xFE);

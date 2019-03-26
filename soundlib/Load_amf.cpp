@@ -161,7 +161,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 		AsylumSampleHeader sampleHeader;
 		file.ReadStruct(sampleHeader);
 		sampleHeader.ConvertToMPT(Samples[smp]);
-		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+		m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sampleHeader.name);
 	}
 
 	file.Skip((64 - fileHeader.numSamples) * sizeof(AsylumSampleHeader));
@@ -446,7 +446,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = fileHeader.numChannels;
 	m_nSamples = fileHeader.numSamples;
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.title);
+	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.title);
 
 	if(fileHeader.version < 10)
 	{

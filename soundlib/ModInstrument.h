@@ -105,8 +105,11 @@ struct ModInstrument
 	uint8 NoteMap[128];                          // Note mapping, e.g. C-5 => D-5.
 	SAMPLEINDEX Keyboard[128];                   // Sample mapping, e.g. C-5 => Sample 1
 
-	char name[MAX_INSTRUMENTNAME];
-	char filename[MAX_INSTRUMENTFILENAME];
+	mpt::charbuf<MAX_INSTRUMENTNAME> name;
+	mpt::charbuf<MAX_INSTRUMENTFILENAME> filename;
+
+	std::string GetName() const { return name; }
+	std::string GetFilename() const { return filename; }
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// WHEN adding new members here, ALSO update InstrumentExtensions.cpp

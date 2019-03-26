@@ -114,6 +114,8 @@
 // <type_traits>
 // <cstring>
 
+#include "../common/mptStringBuffer.h"
+
 #include "../common/mptExceptionText.h"
 // "mptException.h"
 // "mptString.h"

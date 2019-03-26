@@ -396,8 +396,8 @@ void ResetSamples(CSoundFile &sndFile, ResetFlag resetflag, SAMPLEINDEX minSampl
 		switch(resetflag)
 		{
 		case SmpResetInit:
-			strcpy(sndFile.m_szNames[i], "");
-			strcpy(sample.filename, "");
+			sndFile.m_szNames[i] = "";
+			sample.filename = "";
 			sample.nC5Speed = 8363;
 			// note: break is left out intentionally. keep this order or c&p the stuff from below if you change anything!
 			MPT_FALLTHROUGH;

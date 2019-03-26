@@ -457,10 +457,10 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_modFormat.formatName = mpt::format(U_("MadTracker %1.%2"))(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
 	m_modFormat.type = U_("mt2");
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_modFormat.madeWithTracker, mpt::CharsetWindows1252, fileHeader.trackerName);
+	m_modFormat.madeWithTracker = mpt::ToUnicode(mpt::CharsetWindows1252, mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.trackerName));
 	m_modFormat.charset = mpt::CharsetWindows1252;
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
+	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels;
 	m_nDefaultSpeed = Clamp<uint8, uint8>(fileHeader.ticksPerLine, 1, 31);
 	m_nDefaultTempo.Set(125);
@@ -621,7 +621,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				std::string name;
 				chunk.ReadNullString(name);
-				mpt::String::Read<mpt::String::spacePadded>(ChnSettings[i].szName, name.c_str(), name.length());
+				ChnSettings[i].szName = mpt::String::ReadBuf(mpt::String::spacePadded, name.c_str(), name.length());
 			}
 			break;
 
@@ -679,14 +679,14 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 					SNDMIXPLUGIN &mixPlug = m_MixPlugins[i];
 					mixPlug.Destroy();
-					mpt::String::Read<mpt::String::maybeNullTerminated>(mixPlug.Info.szLibraryName, vstHeader.dll);
-					mpt::String::Read<mpt::String::maybeNullTerminated>(mixPlug.Info.szName, vstHeader.programName);
-					const size_t len = strlen(mixPlug.Info.szLibraryName);
-					if(len > 4 && mixPlug.Info.szLibraryName[len - 4] == '.')
+					std::string libraryName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, vstHeader.dll);
+					mixPlug.Info.szName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, vstHeader.programName);
+					if(libraryName.length() > 4 && libraryName[libraryName.length() - 4] == '.')
 					{
 						// Remove ".dll" from library name
-						mixPlug.Info.szLibraryName[len - 4] = '\0';
+						libraryName.resize(libraryName.length() - 4 );
 					}
+					mixPlug.Info.szLibraryName = libraryName;
 					mixPlug.Info.dwPluginId1 = Vst::kEffectMagic;
 					mixPlug.Info.dwPluginId2 = vstHeader.fxID;
 					if(vstHeader.track >= m_nChannels)
@@ -797,8 +797,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				ModInstrument *mptIns = AllocateInstrument(drumMap[i], drumHeader.DrumSamples[i] + 1);
 				if(mptIns != nullptr)
 				{
-					strcpy(mptIns->name, "Drum #x");
-					mptIns->name[6] = '1' + char(i);
+					mptIns->name = mpt::format("Drum #%1")(i+1);
 				}
 			} else
 			{
@@ -910,7 +909,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		if(mptIns == nullptr)
 			continue;
 
-		mpt::String::Read<mpt::String::maybeNullTerminated>(mptIns->name, instrName);
+		mptIns->name = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, instrName);
 
 		if(!dataLength)
 			continue;
@@ -1015,7 +1014,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(i < fileHeader.numSamples)
 		{
-			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[i + 1], sampleName);
+			m_szNames[i + 1] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sampleName);
 		}
 
 		if(dataLength && i < fileHeader.numSamples)
@@ -1144,7 +1143,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			file.Skip(12); // Reserved
 			std::string filename;
 			file.ReadString<mpt::String::maybeNullTerminated>(filename, filenameSize);
-			mpt::String::Copy(mptSmp.filename, filename);
+			mptSmp.filename = filename;
 
 #if defined(MPT_EXTERNAL_SAMPLES)
 			if(filename.length() >= 2

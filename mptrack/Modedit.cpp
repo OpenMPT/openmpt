@@ -333,7 +333,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 	{
 		m_SndFile.GetSample(i).pData.pSample = nullptr;
 		m_SndFile.GetSample(i).nLength = 0;
-		strcpy(m_SndFile.m_szNames[i], "");
+		m_SndFile.m_szNames[i] = "";
 	}
 
 	// Now, create new sample list.
@@ -359,14 +359,14 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 					Reporting::Error("Cannot duplicate sample - out of memory!");
 				}
 			}
-			strcpy(m_SndFile.m_szNames[i + 1], sampleNames[origSlot].c_str());
+			m_SndFile.m_szNames[i + 1] = sampleNames[origSlot];
 			m_SndFile.SetSamplePath(i + 1, samplePaths[origSlot]);
 		} else
 		{
 			// Invalid sample reference.
 			target.Initialize(m_SndFile.GetType());
 			target.pData.pSample = nullptr;
-			strcpy(m_SndFile.m_szNames[i + 1], "");
+			m_SndFile.m_szNames[i + 1] = "";
 			m_SndFile.ResetSamplePath(i + 1);
 		}
 	}
@@ -566,7 +566,7 @@ bool CModDoc::ConvertSamplesToInstruments()
 		}
 
 		InitializeInstrument(instrument);
-		mpt::String::Copy(instrument->name, m_SndFile.m_szNames[smp]);
+		instrument->name = m_SndFile.m_szNames[smp];
 		MuteInstrument(smp, muted);
 	}
 
@@ -661,7 +661,7 @@ SAMPLEINDEX CModDoc::InsertSample()
 		return SAMPLEINDEX_INVALID;
 	}
 	const bool newSlot = (i > m_SndFile.GetNumSamples());
-	if(newSlot || !m_SndFile.m_szNames[i][0]) strcpy(m_SndFile.m_szNames[i], "untitled");
+	if(newSlot || !m_SndFile.m_szNames[i][0]) m_SndFile.m_szNames[i] = "untitled";
 	if(newSlot) m_SndFile.m_nSamples = i;
 	m_SndFile.GetSample(i).Initialize(m_SndFile.GetType());
 	
@@ -776,8 +776,8 @@ INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 	if(instr == INSTRUMENTINDEX_INVALID) return INSTRUMENTINDEX_INVALID;
 
 	ModInstrument &ins = *m_SndFile.Instruments[instr];
-	mpt::String::Copy(ins.name, mpt::format("%1: %2")(plug + 1, m_SndFile.m_MixPlugins[plug].GetName()));
-	mpt::String::Copy(ins.filename, mpt::ToCharset(m_SndFile.GetCharsetInternal(), mpt::CharsetUTF8, m_SndFile.m_MixPlugins[plug].GetLibraryName()));
+	ins.name = mpt::format("%1: %2")(plug + 1, m_SndFile.m_MixPlugins[plug].GetName());
+	ins.filename = mpt::ToCharset(m_SndFile.GetCharsetInternal(), mpt::CharsetUTF8, m_SndFile.m_MixPlugins[plug].GetLibraryName());
 	ins.nMixPlug = plug + 1;
 	ins.nMidiChannel = 1;
 
@@ -845,7 +845,7 @@ bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
 		CriticalSection cs;
 
 		m_SndFile.DestroySample(nSmp);
-		m_SndFile.m_szNames[nSmp][0] = 0;
+		m_SndFile.m_szNames[nSmp] = "";
 		while ((m_SndFile.GetNumSamples() > 1)
 			&& (!m_SndFile.m_szNames[m_SndFile.GetNumSamples()][0])
 			&& (!m_SndFile.GetSample(m_SndFile.GetNumSamples()).HasSampleData()))

@@ -1954,8 +1954,8 @@ void CViewSample::OnEditCopy()
 		{
 			MemsetZero(*sampleHeader);
 			sampleHeader->ConvertToS3M(sample);
-			mpt::String::Write<mpt::String::nullTerminated>(sampleHeader->name, sndFile.m_szNames[m_nSample]);
-			mpt::String::Write<mpt::String::maybeNullTerminated>(sampleHeader->reserved2, mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString()));
+			mpt::String::WriteBuf(mpt::String::nullTerminated, sampleHeader->name) = sndFile.m_szNames[m_nSample];
+			mpt::String::WriteBuf(mpt::String::maybeNullTerminated, sampleHeader->reserved2) = mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString());
 		}
 		return;
 	}
@@ -2133,11 +2133,11 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 		}
 		if (!sndFile.m_szNames[m_nSample][0] || pasteMode != kReplace)
 		{
-			mpt::String::Copy(sndFile.m_szNames[m_nSample], oldSampleName);
+			sndFile.m_szNames[m_nSample] = oldSampleName;
 		}
 		if (!sample.filename[0])
 		{
-			mpt::String::Copy(sample.filename, oldSample.filename);
+			sample.filename = oldSample.filename;
 		}
 
 		if(pasteMode == kMixPaste && ok)
@@ -2237,7 +2237,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			if(pasteMode == kMixPaste)
 				ModSample::FreeSample(oldSample.samplev());
 			pModDoc->GetSampleUndo().Undo(m_nSample);
-			mpt::String::Copy(sndFile.m_szNames[m_nSample], oldSampleName);
+			sndFile.m_szNames[m_nSample] = oldSampleName;
 		}
 	}
 	EndWaitCursor();
@@ -3144,7 +3144,7 @@ void CViewSample::OnSampleSlice()
 			newSample = sample;
 			newSample.nLength = cues[i + 1] - cues[i];
 			newSample.pData.pSample = nullptr;
-			mpt::String::Copy(sndFile.m_szNames[nextSmp], sndFile.m_szNames[m_nSample]);
+			sndFile.m_szNames[nextSmp] = sndFile.m_szNames[m_nSample];
 			if(newSample.AllocateSample() > 0)
 			{
 				Util::DeleteRange(SmpLength(0), cues[i] - SmpLength(1), newSample.nLoopStart, newSample.nLoopEnd);

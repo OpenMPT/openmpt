@@ -499,14 +499,14 @@ static bool IsMagic(const char *magic1, const char (&magic2)[5])
 }
 
 
-static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSample &sample, char (&sampleName)[MAX_SAMPLENAME], bool is4Chn)
+static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSample &sample, mpt::charbuf<MAX_SAMPLENAME> &sampleName, bool is4Chn)
 {
 	file.ReadStruct(sampleHeader);
 	sampleHeader.ConvertToMPT(sample, is4Chn);
 
-	mpt::String::Read<mpt::String::spacePadded>(sampleName, sampleHeader.name);
+	sampleName = mpt::String::ReadBuf(mpt::String::spacePadded, sampleHeader.name);
 	// Get rid of weird characters in sample names.
-	for(auto &c : sampleName)
+	for(auto &c : sampleName.buf)
 	{
 		if(c > 0 && c < ' ')
 		{
@@ -1213,7 +1213,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				break;
 			}
-			mpt::String::Copy(ins->name, m_szNames[smp]);
+			ins->name = m_szNames[smp];
 
 			AMInstrument am;
 			// Allow partial reads for fa.worse face.mod
@@ -1476,7 +1476,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 		totalSampleLen += Samples[smp].nLength;
 
-		if(m_szNames[smp][0] && ((memcmp(m_szNames[smp], "st-", 3) && memcmp(m_szNames[smp], "ST-", 3)) || m_szNames[smp][5] != ':'))
+		if(m_szNames[smp][0] && ((memcmp(m_szNames[smp].buf, "st-", 3) && memcmp(m_szNames[smp].buf, "ST-", 3)) || m_szNames[smp][5] != ':'))
 		{
 			// Ultimate Soundtracker 1.8 and D.O.C. SoundTracker IX always have sample names containing disk names.
 			hasDiskNames = false;
@@ -1542,7 +1542,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMaxPeriod = 856 * 4;
 	m_nSamplePreAmp = 64;
 	m_SongFlags.set(SONG_PT_MODE);
-	mpt::String::Read<mpt::String::spacePadded>(m_songName, songname);
+	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, songname);
 
 	// Setup channel pan positions and volume
 	SetupMODPanning();
@@ -2152,7 +2152,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 			m_nDefaultTempo.Set(info.tempo);
 	
 		if(info.name[0])
-			mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, info.name);
+			m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, info.name);
 	
 		if(IsInRange(info.dateMonth, 1, 12) && IsInRange(info.dateDay, 1, 31) && IsInRange(info.dateHour, 0, 23)
 			&& IsInRange(info.dateMinute, 0, 59) && IsInRange(info.dateSecond, 0, 59))
@@ -2204,7 +2204,7 @@ bool CSoundFile::SaveMod(std::ostream &f) const
 	// Write song title
 	{
 		char name[20];
-		mpt::String::Write<mpt::String::maybeNullTerminated>(name, m_songName);
+		mpt::String::WriteBuf(mpt::String::maybeNullTerminated, name) = m_songName;
 		mpt::IO::Write(f, name);
 	}
 
@@ -2238,7 +2238,7 @@ bool CSoundFile::SaveMod(std::ostream &f) const
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		mpt::String::Write<mpt::String::maybeNullTerminated>(sampleHeader.name, m_szNames[sampleSource[smp]]);
+		mpt::String::WriteBuf(mpt::String::maybeNullTerminated, sampleHeader.name) = m_szNames[sampleSource[smp]];
 		sampleLength[smp] = sampleHeader.ConvertToMOD(sampleSource[smp] <= GetNumSamples() ? GetSample(sampleSource[smp]) : ModSample(MOD_TYPE_MOD));
 		mpt::IO::Write(f, sampleHeader);
 	}

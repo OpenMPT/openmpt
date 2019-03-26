@@ -625,7 +625,7 @@ bool CDLSBank::FindAndExtract(CSoundFile &sndFile, const INSTRUMENTINDEX ins, co
 			pIns = sndFile.Instruments[ins]; // Reset pointer because ExtractInstrument may delete the previous value.
 			if((key >= 24) && (key < 24 + mpt::size(szMidiPercussionNames)))
 			{
-				mpt::String::CopyN(pIns->name, szMidiPercussionNames[key - 24]);
+				pIns->name = szMidiPercussionNames[key - 24];
 			}
 			return true;
 		}
@@ -822,7 +822,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, const IFFCHUNK
 			break;
 
 		case IFFID_INAM:
-			mpt::String::CopyN(pDlsIns->szName, ((const char *)pchunk) + 8, pchunk->len);
+			mpt::String::WriteAutoBuf(pDlsIns->szName) = mpt::String::ReadAutoBuf(((const char *)pchunk) + 8, pchunk->len);
 			break;
 	#if 0
 		default:
@@ -863,7 +863,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 			chunk.ReadStruct(psfh);
 			for (auto &dlsIns : m_Instruments)
 			{
-				mpt::String::Copy(dlsIns.szName, psfh.achPresetName);
+				mpt::String::WriteAutoBuf(dlsIns.szName) = mpt::String::ReadAutoBuf(psfh.achPresetName);
 				dlsIns.ulInstrument = psfh.wPreset & 0x7F;
 				dlsIns.ulBank = (psfh.wBank >= 128) ? F_INSTRUMENT_DRUMS : (psfh.wBank << 8);
 				dlsIns.wPresetBagNdx = psfh.wPresetBagNdx;
@@ -953,7 +953,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 				SFSAMPLE p;
 				chunk.ReadStruct(p);
 				DLSSAMPLEEX &dlsSmp = m_SamplesEx[i];
-				mpt::String::Copy(dlsSmp.szName, p.achSampleName);
+				mpt::String::WriteAutoBuf(dlsSmp.szName) = mpt::String::ReadAutoBuf(p.achSampleName);
 				dlsSmp.dwLen = 0;
 				dlsSmp.dwSampleRate = p.dwSampleRate;
 				dlsSmp.byOriginalPitch = p.byOriginalPitch;
@@ -1553,9 +1553,9 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 			sample.RelativeTone = p.byOriginalPitch;
 			sample.nFineTune = p.chPitchCorrection;
 			if (p.szName[0])
-				mpt::String::Copy(sndFile.m_szNames[nSample], p.szName);
+				sndFile.m_szNames[nSample] = mpt::String::ReadAutoBuf(p.szName);
 			else if(pDlsIns->szName[0])
-				mpt::String::Copy(sndFile.m_szNames[nSample], pDlsIns->szName);
+				sndFile.m_szNames[nSample] = mpt::String::ReadAutoBuf(pDlsIns->szName);
 
 			FileReader chunk(mpt::as_span(pWaveForm.data(), dwLen));
 			SampleIO(
@@ -1571,7 +1571,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 		FileReader file(mpt::as_span(pWaveForm.data(), dwLen));
 		bWaveForm = sndFile.ReadWAVSample(nSample, file, false, &wsmpChunk);
 		if(pDlsIns->szName[0])
-			mpt::String::Copy(sndFile.m_szNames[nSample], pDlsIns->szName);
+			sndFile.m_szNames[nSample] = mpt::String::ReadAutoBuf(pDlsIns->szName);
 	}
 	if (bWaveForm)
 	{
@@ -1717,10 +1717,10 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			}
 			lstrcatA(s, ")");
 		}
-		mpt::String::Copy(pIns->name, s);
+		pIns->name = mpt::String::ReadAutoBuf(s);
 	} else
 	{
-		mpt::String::Copy(pIns->name, pDlsIns->szName);
+		pIns->name = mpt::String::ReadAutoBuf(pDlsIns->szName);
 	}
 	int nTranspose = 0;
 	if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)

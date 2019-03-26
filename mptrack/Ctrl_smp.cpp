@@ -1012,8 +1012,8 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampl
 				sample.nVolume = 256;
 				sample.nPan = 128;
 				sample.uFlags.reset(CHN_LOOP | CHN_SUSTAINLOOP | SMP_MODIFIED);
-				strcpy(sample.filename, "");
-				strcpy(m_sndFile.m_szNames[m_nSample], "");
+				sample.filename = "";
+				m_sndFile.m_szNames[m_nSample] = "";
 				if(!sample.nC5Speed) sample.nC5Speed = 22050;
 				sample.PrecomputeLoops(m_sndFile, false);
 			} else
@@ -1034,15 +1034,15 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampl
 	if (bOk)
 	{
 		TrackerSettings::Instance().PathSamples.SetWorkingDir(fileName, true);
-		if (!strcmp(sample.filename, ""))
+		if(sample.filename.empty())
 		{
 			mpt::PathString name, ext;
 			fileName.SplitPath(nullptr, nullptr, &name, &ext);
 
-			if(!strcmp(m_sndFile.m_szNames[m_nSample], "")) mpt::String::Copy(m_sndFile.m_szNames[m_nSample], name.ToLocale());
+			if(m_sndFile.m_szNames[m_nSample].empty()) m_sndFile.m_szNames[m_nSample] = name.ToLocale();
 
 			if(name.AsNative().length() < 9) name += ext;
-			mpt::String::Copy(sample.filename, name.ToLocale());
+			sample.filename = name.ToLocale();
 		}
 		if ((m_sndFile.GetType() & MOD_TYPE_XM) && !sample.uFlags[CHN_PANNING])
 		{
@@ -1450,8 +1450,8 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 			fileName = dlg.GetFirstFile();
 			if(doBatchSave)
 			{
-				sSampleName = mpt::ToCString(m_sndFile.GetCharsetInternal(), (strcmp(m_sndFile.m_szNames[smp], "")) ? m_sndFile.m_szNames[smp] : "untitled");
-				sSampleFilename = mpt::ToCString(m_sndFile.GetCharsetInternal(), strcmp(sample.filename, "") ? sample.filename : m_sndFile.m_szNames[smp]);
+				sSampleName = mpt::ToCString(m_sndFile.GetCharsetInternal(), (!m_sndFile.m_szNames[smp].empty()) ? std::string(m_sndFile.m_szNames[smp]) : "untitled");
+				sSampleFilename = mpt::ToCString(m_sndFile.GetCharsetInternal(), (!sample.filename.empty()) ? sample.GetFilename() : m_sndFile.m_szNames[smp]);
 				SanitizeFilename(sSampleName);
 				SanitizeFilename(sSampleFilename);
 
@@ -2738,7 +2738,7 @@ void CCtrlSamples::OnNameChanged()
 	if(s != m_sndFile.m_szNames[m_nSample])
 	{
 		if(!m_startedEdit) PrepareUndo("Set Name");
-		mpt::String::Copy(m_sndFile.m_szNames[m_nSample], s);
+		m_sndFile.m_szNames[m_nSample] = s;
 		SetModified(SampleHint().Info().Names(), false, false);
 	}
 }
@@ -2753,7 +2753,7 @@ void CCtrlSamples::OnFileNameChanged()
 	if(s != m_sndFile.GetSample(m_nSample).filename)
 	{
 		if(!m_startedEdit) PrepareUndo("Set Filename");
-		mpt::String::Copy(m_sndFile.GetSample(m_nSample).filename, s);
+		m_sndFile.GetSample(m_nSample).filename = s;
 		SetModified(SampleHint().Info(), false, false);
 	}
 }

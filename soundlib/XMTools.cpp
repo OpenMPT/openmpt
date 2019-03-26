@@ -248,7 +248,7 @@ void XMInstrumentHeader::Finalise()
 void XMInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibilityExport)
 {
 	numSamples = instrument.ConvertToXM(mptIns, compatibilityExport);
-	mpt::String::Write<mpt::String::spacePadded>(name, mptIns.name);
+	mpt::String::WriteBuf(mpt::String::spacePadded, name) = mptIns.name;
 
 	type = mptIns.nMidiProgram;	// If FT2 writes crap here, we can do so, too! (we probably shouldn't, though. This is just for backwards compatibility with old MPT versions.)
 }
@@ -271,7 +271,7 @@ void XMInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
 		}
 	}
 
-	mpt::String::Read<mpt::String::spacePadded>(mptIns.name, name);
+	mptIns.name = mpt::String::ReadBuf(mpt::String::spacePadded, name);
 
 	// Old MPT backwards compatibility
 	if(!instrument.midiEnabled)
@@ -287,11 +287,11 @@ void XIInstrumentHeader::ConvertToXM(const ModInstrument &mptIns, bool compatibi
 	numSamples = instrument.ConvertToXM(mptIns, compatibilityExport);
 
 	memcpy(signature, "Extended Instrument: ", 21);
-	mpt::String::Write<mpt::String::spacePadded>(name, mptIns.name);
+	mpt::String::WriteBuf(mpt::String::spacePadded, name) = mptIns.name;
 	eof = 0x1A;
 
 	const std::string openMptTrackerName = mpt::ToCharset(mpt::CharsetCP437, Version::Current().GetOpenMPTVersionString());
-	mpt::String::Write<mpt::String::spacePadded>(trackerName, openMptTrackerName);
+	mpt::String::WriteBuf(mpt::String::spacePadded, trackerName) = openMptTrackerName;
 
 	version = 0x102;
 }
@@ -311,7 +311,7 @@ void XIInstrumentHeader::ConvertToMPT(ModInstrument &mptIns) const
 		}
 	}
 
-	mpt::String::Read<mpt::String::spacePadded>(mptIns.name, name);
+	mptIns.name = mpt::String::ReadBuf(mpt::String::spacePadded, name);
 }
 
 
@@ -410,7 +410,7 @@ void XMSample::ConvertToMPT(ModSample &mptSmp) const
 		}
 	}
 
-	strcpy(mptSmp.filename, "");
+	mptSmp.filename = "";
 }
 
 

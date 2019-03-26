@@ -321,7 +321,7 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 		if(realSample >= 1 && realSample <= GetNumSamples() && !memcmp(sampleHeader.id, "IMPS", 4) && (loadFlags & loadSampleData))
 		{
 			sampleHeader.ConvertToMPT(Samples[realSample]);
-			mpt::String::Read<mpt::String::nullTerminated>(m_szNames[realSample], sampleHeader.name);
+			m_szNames[realSample] = mpt::String::ReadBuf(mpt::String::nullTerminated, sampleHeader.name);
 
 			// Read sample data
 			sampleHeader.GetSampleFormat().ReadSample(Samples[realSample], sampleData);

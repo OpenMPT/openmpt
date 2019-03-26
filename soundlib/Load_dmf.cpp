@@ -917,12 +917,8 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.type = U_("dmf");
 	m_modFormat.charset = mpt::CharsetCP437;
 
-	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songname);
-	{
-		std::string artist;
-		mpt::String::Read<mpt::String::spacePadded>(artist, fileHeader.composer);
-		m_songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
-	}
+	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songname);
+	m_songArtist = mpt::ToUnicode(mpt::CharsetCP437, mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.composer));
 
 	FileHistory mptHistory;
 	mptHistory.loadDate.tm_mday = Clamp(fileHeader.creationDay, uint8(1), uint8(31));

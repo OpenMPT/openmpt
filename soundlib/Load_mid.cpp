@@ -327,13 +327,13 @@ uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChann
 	// Set GM program / drum name
 	if (!isDrum)
 	{
-		strcpy(pIns->name, szMidiProgramNames[program]);
+		pIns->name = szMidiProgramNames[program];
 	} else
 	{
 		if (note >= 24 && note <= 84)
-			strcpy(pIns->name, szMidiPercussionNames[note - 24]);
+			pIns->name = szMidiPercussionNames[note - 24];
 		else
-			strcpy(pIns->name, "Percussions");
+			pIns->name = "Percussions";
 	}
 	return m_nInstruments;
 }
@@ -1221,11 +1221,11 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			channels.push_back(i);
 			if(modChnStatus[i].midiCh != ModChannelState::NOMIDI)
-				mpt::String::WriteAutoBuf(ChnSettings[i].szName) = mpt::format("MIDI Ch %1")(1 + modChnStatus[i].midiCh);
+				ChnSettings[i].szName = mpt::format("MIDI Ch %1")(1 + modChnStatus[i].midiCh);
 			else if(i == tempoChannel)
-				mpt::String::WriteAutoBuf(ChnSettings[i].szName) = "Tempo";
+				ChnSettings[i].szName = "Tempo";
 			else if(i == globalVolChannel)
-				mpt::String::WriteAutoBuf(ChnSettings[i].szName) = "Global Volume";
+				ChnSettings[i].szName = "Global Volume";
 		}
 	}
 	if(channels.empty())
@@ -1315,17 +1315,17 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					{
 						mpt::PathString filename = midiMapName.GetFullFileName();
 						pIns = Instruments[ins];
-						if(!pIns->filename[0]) mpt::String::Copy(pIns->filename, filename.ToLocale().c_str());
+						if(!pIns->filename[0]) pIns->filename = filename.ToLocale();
 						if(!pIns->name[0])
 						{
 							if(midiCode < 0x80)
 							{
-								mpt::String::CopyN(pIns->name, szMidiProgramNames[midiCode]);
+								pIns->name = szMidiProgramNames[midiCode];
 							} else
 							{
 								uint32 key = midiCode & 0x7F;
 								if((key >= 24) && (key < 24 + mpt::size(szMidiPercussionNames)))
-									mpt::String::CopyN(pIns->name, szMidiPercussionNames[key - 24]);
+									pIns->name = szMidiPercussionNames[key - 24];
 							}
 						}
 					}

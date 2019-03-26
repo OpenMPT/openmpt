@@ -68,7 +68,7 @@ struct PTMSampleHeader
 		mptSmp.nVolume = std::min<uint8>(volume, 64) * 4;
 		mptSmp.nC5Speed = c4speed * 2;
 
-		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
+		mptSmp.filename = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, filename);
 
 		SampleIO sampleIO(
 			SampleIO::_8bit,
@@ -168,7 +168,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_PTM);
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songname);
+	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songname);
 
 	m_modFormat.formatName = U_("PolyTracker");
 	m_modFormat.type = U_("ptm");
@@ -195,7 +195,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 		sampleHeaderChunk.ReadStruct(sampleHeader);
 
 		ModSample &sample = Samples[smp + 1];
-		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp + 1], sampleHeader.samplename);
+		m_szNames[smp + 1] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sampleHeader.samplename);
 		SampleIO sampleIO = sampleHeader.ConvertToMPT(sample);
 
 		if((loadFlags & loadSampleData) && sample.nLength && file.Seek(sampleHeader.dataOffset))

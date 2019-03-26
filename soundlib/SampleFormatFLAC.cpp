@@ -167,7 +167,7 @@ struct FLACDecoder
 		{
 			// Init sample information
 			client.sndFile.DestroySampleThreadsafe(client.sample);
-			strcpy(client.sndFile.m_szNames[client.sample], "");
+			client.sndFile.m_szNames[client.sample] = "";
 			sample.Initialize();
 			sample.uFlags.set(CHN_16BIT, metadata->data.stream_info.bits_per_sample > 8);
 			sample.uFlags.set(CHN_STEREO, metadata->data.stream_info.channels > 1);
@@ -195,9 +195,7 @@ struct FLACDecoder
 				const FLAC__uint32 length = metadata->data.vorbis_comment.comments[i].length;
 				if(length > 6 && !mpt::CompareNoCaseAscii(tag, "TITLE=", 6))
 				{
-					mpt::ustring sampleName;
-					mpt::String::Read<mpt::String::maybeNullTerminated>(sampleName, mpt::CharsetUTF8, tag + 6, length - 6);
-					mpt::String::Copy(client.sndFile.m_szNames[client.sample], mpt::ToCharset(client.sndFile.GetCharsetInternal(), sampleName));
+					client.sndFile.m_szNames[client.sample] = mpt::ToCharset(client.sndFile.GetCharsetInternal(), mpt::CharsetUTF8, mpt::String::ReadBuf(mpt::String::maybeNullTerminated, tag + 6, length - 6));
 				} else if(length > 11 && !mpt::CompareNoCaseAscii(tag, "SAMPLERATE=", 11))
 				{
 					uint32 sampleRate = ConvertStrTo<uint32>(tag + 11);

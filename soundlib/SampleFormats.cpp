@@ -261,9 +261,9 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 	}
 
 #ifdef MODPLUG_TRACKER
-	if(!strcmp(pIns->filename, "") && srcSong.GetpModDoc() != nullptr && &srcSong != this)
+	if(pIns->filename.empty() && srcSong.GetpModDoc() != nullptr && &srcSong != this)
 	{
-		mpt::String::Copy(pIns->filename, srcSong.GetpModDoc()->GetPathNameMpt().GetFullFileName().ToLocale());
+		pIns->filename = srcSong.GetpModDoc()->GetPathNameMpt().GetFullFileName().ToLocale();
 	}
 #endif
 	pIns->Convert(srcSong.GetType(), GetType());
@@ -294,7 +294,7 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 
 	if(GetNumSamples() < targetSample) m_nSamples = targetSample;
 	targetSmp = sourceSmp;
-	strcpy(m_szNames[targetSample], srcSong.m_szNames[sourceSample]);
+	m_szNames[targetSample] = srcSong.m_szNames[sourceSample];
 
 	if(sourceSmp.HasSampleData())
 	{
@@ -314,9 +314,9 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 	}
 
 #ifdef MODPLUG_TRACKER
-	if(!strcmp(targetSmp.filename, "") && srcSong.GetpModDoc() != nullptr && &srcSong != this)
+	if((targetSmp.filename.empty()) && srcSong.GetpModDoc() != nullptr && &srcSong != this)
 	{
-		mpt::String::Copy(targetSmp.filename, mpt::ToCharset(GetCharsetInternal(), srcSong.GetpModDoc()->GetTitle()));
+		targetSmp.filename = mpt::ToCharset(GetCharsetInternal(), srcSong.GetpModDoc()->GetTitle());
 	}
 #endif
 
@@ -431,7 +431,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 	}
 
 	DestroySampleThreadsafe(nSample);
-	strcpy(m_szNames[nSample], "");
+	m_szNames[nSample] = "";
 	ModSample &sample = Samples[nSample];
 	sample.Initialize();
 	sample.nLength = wavFile.GetSampleLength();
@@ -804,7 +804,7 @@ bool CSoundFile::ReadW64Sample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 
 	sampleIO.ReadSample(mptSample, audioData);
 
-	mpt::String::Copy(m_szNames[nSample], mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(tags)));
+	m_szNames[nSample] = mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(tags));
 
 	mptSample.Convert(MOD_TYPE_IT, GetType());
 	mptSample.PrecomputeLoops(*this, false);
@@ -989,7 +989,7 @@ static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, GF1SampleHeader
 	sample.Convert(MOD_TYPE_IT, that->GetType());
 	sample.PrecomputeLoops(*that, false);
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(that->m_szNames[nSample], sampleHeader.name);
+	that->m_szNames[nSample] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sampleHeader.name);
 }
 
 
@@ -1018,7 +1018,7 @@ bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, FileReader &file)
 
 	if(instrHeader.name[0] > ' ')
 	{
-		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[nSample], instrHeader.name);
+		m_szNames[nSample] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, instrHeader.name);
 	}
 	return true;
 }
@@ -1054,7 +1054,7 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	if (nInstr > m_nInstruments) m_nInstruments = nInstr;
 	Instruments[nInstr] = pIns;
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(pIns->name, instrHeader.name);
+	pIns->name = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, instrHeader.name);
 	pIns->nFadeOut = 2048;
 	if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 	{
@@ -1139,7 +1139,7 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
 
 	ModSample &sample = Samples[nSample];
 	sampleHeader.ConvertToMPT(sample);
-	mpt::String::Read<mpt::String::nullTerminated>(m_szNames[nSample], sampleHeader.name);
+	m_szNames[nSample] = mpt::String::ReadBuf(mpt::String::nullTerminated, sampleHeader.name);
 
 	if(sampleHeader.sampleType < S3MSampleHeader::typeAdMel)
 		sampleHeader.GetSampleFormat(false).ReadSample(sample, file);
@@ -1161,8 +1161,8 @@ bool CSoundFile::SaveS3ISample(SAMPLEINDEX smp, std::ostream &f) const
 	S3MSampleHeader sampleHeader;
 	MemsetZero(sampleHeader);
 	SmpLength length = sampleHeader.ConvertToS3M(sample);
-	mpt::String::Write<mpt::String::nullTerminated>(sampleHeader.name, m_szNames[smp]);
-	mpt::String::Write<mpt::String::maybeNullTerminated>(sampleHeader.reserved2, mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString()));
+	mpt::String::WriteBuf(mpt::String::nullTerminated, sampleHeader.name) = m_szNames[smp];
+	mpt::String::WriteBuf(mpt::String::maybeNullTerminated, sampleHeader.reserved2) = mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString());
 	if(length)
 		sampleHeader.dataPointer[1] = sizeof(S3MSampleHeader) >> 4;
 	mpt::IO::Write(f, sampleHeader);
@@ -1290,8 +1290,8 @@ bool CSoundFile::ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			mptSample.uFlags &= ~CHN_PANNING;
 		}
 
-		mpt::String::Read<mpt::String::spacePadded>(mptSample.filename, sampleHeader.name);
-		mpt::String::Read<mpt::String::spacePadded>(m_szNames[sampleMap[i]], sampleHeader.name);
+		mptSample.filename = mpt::String::ReadBuf(mpt::String::spacePadded, sampleHeader.name);
+		m_szNames[sampleMap[i]] = mpt::String::ReadBuf(mpt::String::spacePadded, sampleHeader.name);
 
 		sampleFlags[i] = sampleHeader.GetSampleFormat();
 	}
@@ -1352,7 +1352,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, std::ostream &f) const
 		}
 		sampleFlags[i] = xmSample.GetSampleFormat();
 
-		mpt::String::Write<mpt::String::spacePadded>(xmSample.name, m_szNames[samples[i]]);
+		mpt::String::WriteBuf(mpt::String::spacePadded, xmSample.name) = m_szNames[samples[i]];
 
 		mpt::IO::Write(f, xmSample);
 	}
@@ -1425,8 +1425,8 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 	fileHeader.instrument.ApplyAutoVibratoToMPT(mptSample);
 	mptSample.Convert(MOD_TYPE_XM, GetType());
 
-	mpt::String::Read<mpt::String::spacePadded>(mptSample.filename, sampleHeader.name);
-	mpt::String::Read<mpt::String::spacePadded>(m_szNames[nSample], sampleHeader.name);
+	mptSample.filename = mpt::String::ReadBuf(mpt::String::spacePadded, sampleHeader.name);
+	m_szNames[nSample] = mpt::String::ReadBuf(mpt::String::spacePadded, sampleHeader.name);
 
 	// Read sample data
 	sampleHeader.GetSampleFormat().ReadSample(Samples[nSample], file);
@@ -1963,11 +1963,11 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			}
 			if(!region.name.empty())
 			{
-				mpt::String::Copy(m_szNames[smp], mpt::ToCharset(GetCharsetInternal(), mpt::CharsetUTF8, region.name));
+				m_szNames[smp] = mpt::ToCharset(GetCharsetInternal(), mpt::CharsetUTF8, region.name);
 			}
 			if(!m_szNames[smp][0])
 			{
-				mpt::String::Copy(m_szNames[smp], filename.GetFileName().ToLocale());
+				m_szNames[smp] = filename.GetFileName().ToLocale();
 			}
 		}
 		sample.uFlags.set(SMP_KEEPONDISK, sample.HasSampleData());
@@ -2149,7 +2149,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		return false;
 	}
 
-	if(strcmp(ins->name, ""))
+	if(!ins->name.empty())
 	{
 		f << "// Name: " << mpt::ToCharset(mpt::CharsetUTF8, GetCharsetInternal(), ins->name) << "\n";
 	}
@@ -2220,7 +2220,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 
 		const ModSample &sample = Samples[ins->Keyboard[i]];
 		f << "\n\n<region>";
-		if(strcmp(m_szNames[ins->Keyboard[i]], ""))
+		if(!m_szNames[ins->Keyboard[i]].empty())
 		{
 			f << "\nregion_label=" << mpt::ToCharset(mpt::CharsetUTF8, GetCharsetInternal(), m_szNames[ins->Keyboard[i]]);
 		}
@@ -2591,7 +2591,7 @@ bool CSoundFile::ReadCAFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 
 	sampleIO.ReadSample(mptSample, audioData);
 
-	mpt::String::Copy(m_szNames[nSample], mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(tags)));
+	m_szNames[nSample] = mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(tags));
 
 	mptSample.Convert(MOD_TYPE_IT, GetType());
 	mptSample.PrecomputeLoops(*this, false);
@@ -2883,7 +2883,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 		nameChunk.ReadString<mpt::String::spacePadded>(m_szNames[nSample], nameChunk.GetLength());
 	} else
 	{
-		strcpy(m_szNames[nSample], "");
+		m_szNames[nSample] = "";
 	}
 
 	mptSample.Convert(MOD_TYPE_IT, GetType());
@@ -3051,7 +3051,7 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 		LimitMax(length, dataSize);
 	mptSample.nLength = (length * 8u) / (sampleIO.GetEncodedBitsPerSample() * channels);
 	mptSample.nC5Speed = sampleRate;
-	mpt::String::Copy(m_szNames[nSample], mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(tags)));
+	m_szNames[nSample] = mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(tags));
 
 	if(mayNormalize)
 	{
@@ -3087,7 +3087,7 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 
 	ModSample &sample = Samples[nSample];
 	file.Seek(sampleHeader.ConvertToMPT(sample));
-	mpt::String::Read<mpt::String::spacePaddedNull>(m_szNames[nSample], sampleHeader.name);
+	m_szNames[nSample] = mpt::String::ReadBuf(mpt::String::spacePaddedNull, sampleHeader.name);
 
 	if(sample.uFlags[CHN_ADLIB])
 	{
@@ -3282,7 +3282,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		itss.ConvertToIT(Samples[smp], GetType(), compress, compress, allowExternal);
 		const bool isExternal = itss.cvt == ITSample::cvtExternalSample;
 
-		mpt::String::Write<mpt::String::nullTerminated>(itss.name, m_szNames[smp]);
+		mpt::String::WriteBuf(mpt::String::nullTerminated, itss.name) = m_szNames[smp];
 
 		itss.samplepointer = filePos;
 		mpt::IO::Write(f, itss);
@@ -3423,7 +3423,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 		nameChunk.ReadString<mpt::String::maybeNullTerminated>(m_szNames[nSample], nameChunk.GetLength());
 	} else
 	{
-		strcpy(m_szNames[nSample], "");
+		m_szNames[nSample] = "";
 	}
 
 	sample.nLength = mpt::saturate_cast<SmpLength>(bodyChunk.GetLength() / bytesPerSample);

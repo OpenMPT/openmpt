@@ -475,12 +475,8 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		: U_(""));
 	m_modFormat.charset = mpt::CharsetCP437;
 
-	mpt::String::Read<mpt::String::spacePadded>(m_songName, info.title);
-	{
-		std::string artist;
-		mpt::String::Read<mpt::String::spacePadded>(artist, info.composer);
-		m_songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
-	}
+	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, info.title);
+	m_songArtist = mpt::ToUnicode(mpt::CharsetCP437, mpt::String::ReadBuf(mpt::String::spacePadded, info.composer));
 
 	m_nDefaultGlobalVolume = info.globalVol + 1;
 	m_nDefaultSpeed = Clamp<uint8, uint8>(info.speed, 1, 255);
@@ -703,14 +699,14 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			CHANNELINDEX numChans = 32;
 			ROWINDEX numRows = 64;
-			char name[17] = "";
+			std::string name;
 			if(fileHeader.version >= 0x10)
 			{
 				MDLPatternHeader patHead;
 				chunk.ReadStruct(patHead);
 				numChans = patHead.channels;
 				numRows = patHead.lastRow + 1;
-				mpt::String::Read<mpt::String::spacePadded>(name, patHead.name);
+				name = mpt::String::ReadBuf(mpt::String::spacePadded, patHead.name);
 			}
 
 			if(!Patterns.Insert(pat, numRows))

@@ -311,7 +311,7 @@ void CMidiMacroSetup::OnSFxEditChanged()
 		{
 			CString s;
 			m_EditSFx.GetWindowText(s);
-			mpt::String::Copy(m_MidiCfg.szMidiSFXExt[sfx], mpt::ToCharset(mpt::CharsetASCII, s));
+			mpt::String::WriteAutoBuf(m_MidiCfg.szMidiSFXExt[sfx]) = mpt::ToCharset(mpt::CharsetASCII, s);
 
 			int sfx_preset = m_MidiCfg.GetParameteredMacroType(sfx);
 			m_CbnSFxPreset.SetCurSel(sfx_preset);
@@ -331,7 +331,7 @@ void CMidiMacroSetup::OnZxxEditChanged()
 		{
 			CString s;
 			m_EditZxx.GetWindowText(s);
-			mpt::String::Copy(m_MidiCfg.szMidiZXXExt[zxx], mpt::ToCharset(mpt::CharsetASCII, s));
+			mpt::String::WriteAutoBuf(m_MidiCfg.szMidiZXXExt[zxx]) = mpt::ToCharset(mpt::CharsetASCII, s);
 			m_CbnZxxPreset.SetCurSel(m_MidiCfg.GetFixedMacroType());
 		}
 	}

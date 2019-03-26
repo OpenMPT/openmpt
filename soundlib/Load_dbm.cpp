@@ -415,8 +415,8 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			ModSample &mptSmp = Samples[instrHeader.sample];
 
-			mpt::String::Read<mpt::String::maybeNullTerminated>(mptIns->name, instrHeader.name);
-			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[instrHeader.sample], instrHeader.name);
+			mptIns->name = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, instrHeader.name);
+			m_szNames[instrHeader.sample] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, instrHeader.name);
 
 			mptIns->nFadeOut = 0;
 			mptIns->nPan = static_cast<uint16>(instrHeader.panning + 128);
@@ -605,8 +605,8 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			plugin.Info.reserved = 0;
 			plugin.Info.dwOutputRouting = 0;
 			std::fill(plugin.Info.dwReserved, plugin.Info.dwReserved + mpt::size(plugin.Info.dwReserved), 0);
-			mpt::String::Write<mpt::String::nullTerminated>(plugin.Info.szName, "Echo");
-			mpt::String::Write<mpt::String::nullTerminated>(plugin.Info.szLibraryName, "DigiBooster Pro Echo");
+			plugin.Info.szName = "Echo";
+			plugin.Info.szLibraryName = "DigiBooster Pro Echo";
 
 			plugin.pluginData.resize(sizeof(DigiBoosterEcho::PluginChunk));
 			DigiBoosterEcho::PluginChunk chunk = DigiBoosterEcho::PluginChunk::Create(settings[1], settings[3], settings[5], settings[7]);

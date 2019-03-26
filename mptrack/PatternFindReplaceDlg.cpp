@@ -380,7 +380,7 @@ void CFindReplaceTab::UpdateInstrumentList()
 			if(m_sndFile.GetNumInstruments())
 				s += m_sndFile.GetInstrumentName(n);
 			else
-				s += m_sndFile.m_szNames[n];
+				s += mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[n]);
 			m_cbnInstr.SetItemData(m_cbnInstr.AddString(s), n);
 		}
 	}

@@ -243,11 +243,11 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	foundHere = false;
 	for(CHANNELINDEX i = 0; i < m_SndFile.GetNumChannels(); i++)
 	{
-		if(strcmp(m_SndFile.ChnSettings[i].szName, "") != 0)
+		if(!m_SndFile.ChnSettings[i].szName.empty())
 		{
 			foundHere = foundHacks = true;
 			if(autofix)
-				strcpy(m_SndFile.ChnSettings[i].szName, "");
+				m_SndFile.ChnSettings[i].szName = "";
 			else
 				break;
 		}

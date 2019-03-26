@@ -144,7 +144,7 @@ void ModSample::Initialize(MODTYPE type)
 	nVibDepth = 0;
 	nVibRate = 0;
 	rootNote = 0;
-	filename[0] = '\0';
+	filename = "";
 
 	SetDefaultCuePoints();
 }

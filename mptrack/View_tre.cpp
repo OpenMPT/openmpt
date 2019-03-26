@@ -3989,7 +3989,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_SAMPLE:
 			if(modItem.val1 <= sndFile.GetNumSamples() && sndFile.m_szNames[modItem.val1] != itemText)
 			{
-				mpt::String::CopyN(sndFile.m_szNames[modItem.val1], itemText.c_str(), modSpecs.sampleNameLengthMax);
+				sndFile.m_szNames[modItem.val1] = mpt::truncate(itemText, modSpecs.sampleNameLengthMax);
 				modDoc->SetModified();
 				modDoc->UpdateAllViews(nullptr, SampleHint(static_cast<SAMPLEINDEX>(modItem.val1)).Info().Names());
 			}
@@ -3998,7 +3998,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_INSTRUMENT:
 			if(modItem.val1 <= sndFile.GetNumInstruments() && sndFile.Instruments[modItem.val1] != nullptr && sndFile.Instruments[modItem.val1]->name != itemText)
 			{
-				mpt::String::CopyN(sndFile.Instruments[modItem.val1]->name, itemText.c_str(), modSpecs.instrNameLengthMax);
+				sndFile.Instruments[modItem.val1]->name = mpt::truncate(itemText, modSpecs.instrNameLengthMax);
 				modDoc->SetModified();
 				modDoc->UpdateAllViews(nullptr, InstrumentHint(static_cast<INSTRUMENTINDEX>(modItem.val1)).Info().Names());
 			}

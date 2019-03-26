@@ -342,7 +342,7 @@ void CSoundFile::UpgradeModule()
 #else
 			const std::string name = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetWindows1252, plugin.Info.szLibraryName);
 #endif
-			mpt::String::Copy(plugin.Info.szLibraryName, name);
+			plugin.Info.szLibraryName = name;
 		}
 	}
 #endif // NO_PLUGINS

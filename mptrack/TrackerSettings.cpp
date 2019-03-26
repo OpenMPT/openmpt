@@ -415,11 +415,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	theApp.GetDefaultMidiMacro(macros);
 	for(int isfx = 0; isfx < 16; isfx++)
 	{
-		mpt::String::Copy(macros.szMidiSFXExt[isfx], conf.Read<std::string>(U_("Zxx Macros"), mpt::format(U_("SF%1"))(mpt::ufmt::HEX(isfx)), macros.szMidiSFXExt[isfx]));
+		mpt::String::WriteAutoBuf(macros.szMidiSFXExt[isfx]) = conf.Read<std::string>(U_("Zxx Macros"), mpt::format(U_("SF%1"))(mpt::ufmt::HEX(isfx)), macros.szMidiSFXExt[isfx]);
 	}
 	for(int izxx = 0; izxx < 128; izxx++)
 	{
-		mpt::String::Copy(macros.szMidiZXXExt[izxx], conf.Read<std::string>(U_("Zxx Macros"), mpt::format(U_("Z%1"))(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]));
+		mpt::String::WriteAutoBuf(macros.szMidiZXXExt[izxx]) = conf.Read<std::string>(U_("Zxx Macros"), mpt::format(U_("Z%1"))(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]);
 	}
 
 

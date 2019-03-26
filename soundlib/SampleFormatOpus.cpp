@@ -156,7 +156,7 @@ bool CSoundFile::ReadOpusSample(SAMPLEINDEX sample, FileReader &file)
 	}
 
 	DestroySampleThreadsafe(sample);
-	mpt::String::Copy(m_szNames[sample], sampleName);
+	m_szNames[sample] = sampleName;
 	Samples[sample].Initialize();
 	Samples[sample].nC5Speed = rate;
 	Samples[sample].nLength = mpt::saturate_cast<SmpLength>(raw_sample_data.size() / channels);

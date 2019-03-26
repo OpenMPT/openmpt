@@ -497,18 +497,20 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, uint16 si
 	} break;
 
 // --------------------------------------------------------------------------------------------
-// Convenient macro to help GET_HEADER declaration for character array members ONLY
+// Convenient macro to help GET_HEADER declaration for character buffer members ONLY
 // --------------------------------------------------------------------------------------------
-#define GET_MPTHEADER_chararray_member(name,type,code) \
+#define GET_MPTHEADER_charbuf_member(name,type,code) \
 	case code: \
 	{\
-		if( fsize <= sizeof( type ) * CountOf(input-> name) ) \
+		if( fsize <= sizeof( type ) * input-> name .static_length() ) \
 		{ \
 			FileReader arrayChunk = file.ReadChunk(fsize); \
-			for(std::size_t i = 0; i < CountOf(input-> name); ++i) \
+			std::string tmp; \
+			for(std::size_t i = 0; i < fsize; ++i) \
 			{ \
-				input-> name [i] = arrayChunk.ReadChar(); \
+				tmp += arrayChunk.ReadChar(); \
 			} \
+			input-> name = tmp; \
 			result = true; \
 		} \
 	} break;
@@ -575,8 +577,8 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 	GET_MPTHEADER_envelope_member(ENV_PITCH		, value	, uint8			, MagicBE("PiE[")	)
 	GET_MPTHEADER_array_member(	NoteMap					, uint8			, MagicBE("NM[.")	)
 	GET_MPTHEADER_array_member(	Keyboard				, uint16		, MagicBE("K[..")	)
-	GET_MPTHEADER_chararray_member(	name				, char			, MagicBE("n[..")	)
-	GET_MPTHEADER_chararray_member(	filename			, char			, MagicBE("fn[.")	)
+	GET_MPTHEADER_charbuf_member(	name				, char			, MagicBE("n[..")	)
+	GET_MPTHEADER_charbuf_member(	filename			, char			, MagicBE("fn[.")	)
 	GET_MPTHEADER_sized_member(	nMixPlug				, uint8			, MagicBE("MiP.")	)
 	GET_MPTHEADER_sized_member(	nVolRampUp				, uint16		, MagicBE("VR..")	)
 	GET_MPTHEADER_sized_member(	nCutSwing				, uint8			, MagicBE("CS..")	)
@@ -694,11 +696,6 @@ void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const 
 		file.Skip(size);
 		return;
 	}
-
-	if(code == MagicBE("n[.."))
-		mpt::String::SetNullTerminator(pIns->name);
-	if(code == MagicBE("fn[."))
-		mpt::String::SetNullTerminator(pIns->filename);
 
 	if(code == MagicBE("dF..")) // 'dF..' field requires additional processing.
 		ConvertReadExtendedFlags(pIns);

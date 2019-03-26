@@ -1117,7 +1117,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 			if(sndFile.GetSample(nSmp).HasSampleData())
 			{
 				s.Format(_T("%02d: "), nSmp);
-				s += sndFile.m_szNames[nSmp];
+				s += mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[nSmp]);
 				int n = m_CbnSplitInstrument.AddString(s);
 				m_CbnSplitInstrument.SetItemData(n, nSmp);
 			}
@@ -1414,7 +1414,7 @@ void QuickChannelProperties::OnNameChanged()
 	if(newName != settings.szName)
 	{
 		PrepareUndo();
-		mpt::String::Copy(settings.szName, newName);
+		settings.szName = newName;
 		document->SetModified();
 		document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
 	}

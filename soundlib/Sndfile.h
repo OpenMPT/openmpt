@@ -439,7 +439,7 @@ public:
 #ifndef NO_PLUGINS
 	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
 #endif
-	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Sample names
+	mpt::charbuf<MAX_SAMPLENAME> m_szNames[MAX_SAMPLES];  // Sample names
 
 	Version m_dwCreatedWithVersion;
 	Version m_dwLastSavedWithVersion;

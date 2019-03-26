@@ -172,12 +172,11 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.charset = mpt::CharsetCP437;
 
 	// Song name
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songTitle);
+	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songTitle);
 
 	// Artist name
 	{
-		std::string artist;
-		mpt::String::Read<mpt::String::maybeNullTerminated>(artist, fileHeader.songMusician);
+		std::string artist = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songMusician);
 		if(artist != "Unknown")
 		{
 			m_songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
@@ -236,8 +235,8 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 		ModSample &sample = Samples[smp];
 		sample.Initialize();
-		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], gdmSample.name);
-		mpt::String::Read<mpt::String::maybeNullTerminated>(sample.filename, gdmSample.fileName);
+		m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, gdmSample.name);
+		sample.filename = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, gdmSample.fileName);
 
 		sample.nC5Speed = gdmSample.c4Hertz;
 		sample.nGlobalVol = 64;	// Not supported in this format

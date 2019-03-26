@@ -1595,12 +1595,12 @@ bool CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 
 			if (!pIns->name[0] && m_sndFile.GetModSpecifications().instrNameLengthMax > 0)
 			{
-				mpt::String::CopyN(pIns->name, name.ToLocale().c_str(), m_sndFile.GetModSpecifications().instrNameLengthMax);
+				pIns->name = mpt::truncate(name.ToLocale(), m_sndFile.GetModSpecifications().instrNameLengthMax);
 			}
 			if (!pIns->filename[0] && m_sndFile.GetModSpecifications().instrFilenameLengthMax > 0)
 			{
 				name += ext;
-				mpt::String::CopyN(pIns->filename, name.ToLocale().c_str(), m_sndFile.GetModSpecifications().instrFilenameLengthMax);
+				pIns->filename = mpt::truncate(name.ToLocale(), m_sndFile.GetModSpecifications().instrFilenameLengthMax);
 			}
 
 			SetCurrentInstrument(m_nInstrument);
@@ -2047,8 +2047,8 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 			fileName = dlg.GetFirstFile();
 			if(doBatchSave)
 			{
-				instrName = mpt::ToCString(m_sndFile.GetCharsetInternal(), pIns->name[0] ? pIns->name : "untitled");
-				instrFilename = mpt::ToCString(m_sndFile.GetCharsetInternal(), pIns->filename[0] ? pIns->filename : pIns->name);
+				instrName = mpt::ToCString(m_sndFile.GetCharsetInternal(), pIns->name[0] ? pIns->GetName() : "untitled");
+				instrFilename = mpt::ToCString(m_sndFile.GetCharsetInternal(), pIns->filename[0] ? pIns->GetFilename() : pIns->GetName());
 				SanitizeFilename(instrName);
 				SanitizeFilename(instrFilename);
 
@@ -2116,7 +2116,7 @@ void CCtrlInstruments::OnNameChanged()
 		if ((pIns) && (s != pIns->name))
 		{
 			if(!m_startedEdit) PrepareUndo("Set Name");
-			mpt::String::Copy(pIns->name, s);
+			pIns->name = s;
 			SetModified(InstrumentHint().Names(), false);
 		}
 	}
@@ -2134,7 +2134,7 @@ void CCtrlInstruments::OnFileNameChanged()
 		if ((pIns) && (s != pIns->filename))
 		{
 			if(!m_startedEdit) PrepareUndo("Set Filename");
-			mpt::String::Copy(pIns->filename, s);
+			pIns->filename = s;
 			SetModified(InstrumentHint().Names(), false);
 		}
 	}

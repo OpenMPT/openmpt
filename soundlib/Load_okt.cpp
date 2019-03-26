@@ -61,7 +61,7 @@ static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSo
 		chunk.ReadStruct(oktSmp);
 
 		mptSmp.Initialize();
-		mpt::String::Read<mpt::String::maybeNullTerminated>(sndFile.m_szNames[smp], oktSmp.name);
+		sndFile.m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, oktSmp.name);
 
 		mptSmp.nC5Speed = 8287;
 		mptSmp.nGlobalVol = 64;

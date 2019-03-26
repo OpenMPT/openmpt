@@ -160,8 +160,8 @@ void CSelectPluginDlg::OnOK()
 			}
 #endif // NO_VST
 
-			mpt::String::Copy(m_pPlugin->Info.szName, pFactory->libraryName.ToLocale().c_str());
-			mpt::String::Copy(m_pPlugin->Info.szLibraryName, pFactory->libraryName.ToUTF8().c_str());
+			m_pPlugin->Info.szName = pFactory->libraryName.ToLocale();
+			m_pPlugin->Info.szLibraryName = pFactory->libraryName.ToUTF8();
 
 			cs.Leave();
 
@@ -175,7 +175,7 @@ void CSelectPluginDlg::OnOK()
 					const CString name = p->GetDefaultEffectName();
 					if(!name.IsEmpty())
 					{
-						mpt::String::Copy(m_pPlugin->Info.szName, mpt::ToCharset(mpt::CharsetLocale, name));
+						m_pPlugin->Info.szName = mpt::ToCharset(mpt::CharsetLocale, name);
 					}
 					// Check if plugin slot is already assigned to any instrument, and if not, create one.
 					if(p->IsInstrument() && m_pModDoc->HasInstrumentForPlugin(m_nPlugSlot) == INSTRUMENTINDEX_INVALID)

@@ -73,7 +73,7 @@ struct DSMSampleHeader
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mpt::String::Read<mpt::String::nullTerminated>(mptSmp.filename, filename);
+		mptSmp.filename = mpt::String::ReadBuf(mpt::String::nullTerminated, filename);
 
 		mptSmp.nC5Speed = sampleRate;
 		mptSmp.uFlags.set(CHN_LOOP, (flags & 1) != 0);
@@ -212,7 +212,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.type = U_("dsm");
 	m_modFormat.charset = mpt::CharsetCP437;
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, songHeader.songName);
+	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, songHeader.songName);
 	m_nChannels = std::max<uint16>(songHeader.numChannels, 1);
 	m_nDefaultSpeed = songHeader.speed;
 	m_nDefaultTempo.Set(songHeader.bpm);
@@ -324,7 +324,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 			chunk.ReadStruct(sampleHeader);
 			sampleHeader.ConvertToMPT(sample);
 
-			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[m_nSamples], sampleHeader.sampleName);
+			m_szNames[m_nSamples] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sampleHeader.sampleName);
 
 			if(loadFlags & loadSampleData)
 			{

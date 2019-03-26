@@ -308,7 +308,7 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 
 	// Save old sample header
 	undo.OldSample = oldSample;
-	mpt::String::Copy(undo.oldName, sndFile.m_szNames[smp]);
+	undo.oldName = sndFile.m_szNames[smp];
 	undo.changeType = changeType;
 	undo.description = description;
 
@@ -488,7 +488,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 	// Restore old sample header
 	sample = undo.OldSample;
 	sample.pData.pSample = mpt::void_cast<void*>(pCurrentSample); // select the "correct" old sample
-	mpt::String::Copy(sndFile.m_szNames[smp], undo.oldName);
+	sndFile.m_szNames[smp] = undo.oldName;
 
 	if(replace)
 	{

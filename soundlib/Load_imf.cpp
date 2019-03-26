@@ -119,7 +119,7 @@ struct IMFInstrument
 	// Convert an IMFInstrument to OpenMPT's internal instrument representation.
 	void ConvertToMPT(ModInstrument &mptIns, SAMPLEINDEX firstSample) const
 	{
-		mpt::String::Read<mpt::String::nullTerminated>(mptIns.name, name);
+		mptIns.name = mpt::String::ReadBuf(mpt::String::nullTerminated, name);
 
 		if(smpNum)
 		{
@@ -175,7 +175,7 @@ struct IMFSample
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mpt::String::Read<mpt::String::nullTerminated>(mptSmp.filename, filename);
+		mptSmp.filename = mpt::String::ReadBuf(mpt::String::nullTerminated, filename);
 
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
@@ -435,7 +435,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 		ChnSettings[chn].Reset();
 		ChnSettings[chn].nPan = fileHeader.channels[chn].panning * 256 / 255;
 
-		mpt::String::Read<mpt::String::nullTerminated>(ChnSettings[chn].szName, fileHeader.channels[chn].name);
+		ChnSettings[chn].szName = mpt::String::ReadBuf(mpt::String::nullTerminated, fileHeader.channels[chn].name);
 
 		// TODO: reverb/chorus?
 		switch(fileHeader.channels[chn].status)
@@ -476,7 +476,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Song Name
-	mpt::String::Read<mpt::String::nullTerminated>(m_songName, fileHeader.title);
+	m_songName = mpt::String::ReadBuf(mpt::String::nullTerminated, fileHeader.title);
 
 	m_SongFlags.set(SONG_LINEARSLIDES, fileHeader.flags & IMFFileHeader::linearSlides);
 	m_nDefaultSpeed = fileHeader.tempo;
@@ -625,7 +625,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 			ModSample &sample = Samples[smpID];
 
 			sampleHeader.ConvertToMPT(sample);
-			mpt::String::Copy(m_szNames[smpID], sample.filename);
+			m_szNames[smpID] = sample.filename;
 
 			if(sampleHeader.length)
 			{

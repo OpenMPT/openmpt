@@ -946,7 +946,7 @@ void CChannelManagerDlg::OnMButtonDown(UINT /*nFlags*/, CPoint point)
 		CInputDlg dlg(this, s, mpt::ToCString(m_ModDoc->GetSoundFile().GetCharsetInternal(), m_ModDoc->GetSoundFile().ChnSettings[chn].szName));
 		if(dlg.DoModal() == IDOK)
 		{
-			mpt::String::Copy(m_ModDoc->GetSoundFile().ChnSettings[chn].szName, mpt::ToCharset(m_ModDoc->GetSoundFile().GetCharsetInternal(), dlg.resultAsString));
+			m_ModDoc->GetSoundFile().ChnSettings[chn].szName = mpt::ToCharset(m_ModDoc->GetSoundFile().GetCharsetInternal(), dlg.resultAsString);
 			InvalidateRect(rect, FALSE);
 			m_ModDoc->SetModified();
 			m_ModDoc->UpdateAllViews(nullptr, GeneralHint(chn).Channels(), this);

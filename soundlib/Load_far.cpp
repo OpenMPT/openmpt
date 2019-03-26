@@ -173,7 +173,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.type = U_("far");
 	m_modFormat.charset = mpt::CharsetCP437;
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
+	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);
 
 	// Read channel settings
 	for(CHANNELINDEX chn = 0; chn < 16; chn++)
@@ -328,7 +328,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 
 		m_nSamples = smp + 1;
 		ModSample &sample = Samples[m_nSamples];
-		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[m_nSamples], sampleHeader.name);
+		m_szNames[m_nSamples] = mpt::String::ReadBuf(mpt::String::nullTerminated, sampleHeader.name);
 		sampleHeader.ConvertToMPT(sample);
 		sampleHeader.GetSampleFormat().ReadSample(sample, file);
 	}

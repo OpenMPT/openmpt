@@ -106,7 +106,7 @@ protected:
 	struct UndoInfo
 	{
 		ModSample OldSample;
-		char oldName[MAX_SAMPLENAME];
+		mpt::charbuf<MAX_SAMPLENAME> oldName;
 		void *samplePtr;
 		const char *description;
 		SmpLength changeStart, changeEnd;

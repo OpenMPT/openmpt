@@ -33,7 +33,7 @@ struct STMSampleHeader
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
+		mptSmp.filename = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, filename);
 
 		mptSmp.nC5Speed = sampleRate;
 		mptSmp.nVolume = std::min<uint8>(volume, 64) * 4;
@@ -144,7 +144,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_STM);
 
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songname);
+	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songname);
 
 	m_modFormat.formatName = U_("Scream Tracker 2");
 	m_modFormat.type = U_("stm");
@@ -183,7 +183,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 		if(sampleHeader.zero != 0 && sampleHeader.zero != 46)	// putup10.stm has zero = 46
 			return false;
 		sampleHeader.ConvertToMPT(Samples[smp]);
-		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.filename);
+		m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sampleHeader.filename);
 		sampleOffsets[smp - 1] = sampleHeader.offset;
 	}
 

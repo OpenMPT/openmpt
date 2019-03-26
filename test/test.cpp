@@ -3053,21 +3053,21 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 
 	// Channels
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumChannels(), 2);
-	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[0].szName, "First Channel"), 0);
+	VERIFY_EQUAL_NONCONT((sndFile.ChnSettings[0].szName == "First Channel"), true);
 #ifndef NO_PLUGINS
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nMixPlugin, 0);
 #endif // NO_PLUGINS
 
-	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[1].szName, "Second Channel"), 0);
+	VERIFY_EQUAL_NONCONT((sndFile.ChnSettings[1].szName == "Second Channel"), true);
 #ifndef NO_PLUGINS
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nMixPlugin, 1);
 #endif // NO_PLUGINS
 
 	// Samples
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 3);
-	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[1], "Pulse Sample"), 0);
-	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[2], "Empty Sample"), 0);
-	VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[3], "Unassigned Sample"), 0);
+	VERIFY_EQUAL_NONCONT((sndFile.m_szNames[1] == "Pulse Sample"), true);
+	VERIFY_EQUAL_NONCONT((sndFile.m_szNames[2] == "Empty Sample"), true);
+	VERIFY_EQUAL_NONCONT((sndFile.m_szNames[3] == "Unassigned Sample"), true);
 #ifdef MODPLUG_TRACKER
 	VERIFY_EQUAL_NONCONT(pModDoc->FindSampleParent(1), 1);
 	VERIFY_EQUAL_NONCONT(pModDoc->FindSampleParent(2), 1);
@@ -3273,7 +3273,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 
 	// Channels
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumChannels(), 70);
-	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[0].szName, "First Channel"), 0);
+	VERIFY_EQUAL_NONCONT((sndFile.ChnSettings[0].szName == "First Channel"), true);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nPan, 32);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nVolume, 32);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].dwFlags, CHN_MUTE);
@@ -3281,7 +3281,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[0].nMixPlugin, 0);
 #endif // NO_PLUGINS
 
-	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[1].szName, "Second Channel"), 0);
+	VERIFY_EQUAL_NONCONT((sndFile.ChnSettings[1].szName == "Second Channel"), true);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nPan, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nVolume, 16);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].dwFlags, CHN_SURROUND);
@@ -3289,7 +3289,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[1].nMixPlugin, 1);
 #endif // NO_PLUGINS
 
-	VERIFY_EQUAL_NONCONT(strcmp(sndFile.ChnSettings[69].szName, "Last Channel______X"), 0);
+	VERIFY_EQUAL_NONCONT((sndFile.ChnSettings[69].szName == "Last Channel______X"), true);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].nPan, 256);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].nVolume, 7);
 	VERIFY_EQUAL_NONCONT(sndFile.ChnSettings[69].dwFlags, ChannelFlags(0));
@@ -3336,7 +3336,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 
 	{
 		const ModSample &sample = sndFile.GetSample(2);
-		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[2], "Stereo / 16-Bit"), 0);
+		VERIFY_EQUAL_NONCONT((sndFile.m_szNames[2] == "Stereo / 16-Bit"), true);
 		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 4);
 		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 2);
 		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 2);
@@ -3357,8 +3357,8 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	// External sample
 	{
 		const ModSample &sample = sndFile.GetSample(4);
-		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[4], "Overridden Name"), 0);
-		VERIFY_EQUAL_NONCONT(strcmp(sample.filename, "External"), 0);
+		VERIFY_EQUAL_NONCONT((sndFile.m_szNames[4] == "Overridden Name"), true);
+		VERIFY_EQUAL_NONCONT((sample.filename == "External"), true);
 #ifdef MPT_EXTERNAL_SAMPLES
 		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
 		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
@@ -3595,8 +3595,8 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 4);
 	{
 		const ModSample &sample = sndFile.GetSample(1);
-		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[1], "Sample_1__________________X"), 0);
-		VERIFY_EQUAL_NONCONT(strcmp(sample.filename, "Filename_1_X"), 0);
+		VERIFY_EQUAL_NONCONT((sndFile.m_szNames[1] == "Sample_1__________________X"), true);
+		VERIFY_EQUAL_NONCONT((sample.filename == "Filename_1_X"), true);
 		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
 		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
 		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
@@ -3622,15 +3622,15 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 
 	{
 		const ModSample &sample = sndFile.GetSample(2);
-		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[2], "Empty"), 0);
+		VERIFY_EQUAL_NONCONT((sndFile.m_szNames[2] == "Empty"), true);
 		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_S3M), 16384);
 		VERIFY_EQUAL_NONCONT(sample.nVolume, 2 * 4);
 	}
 
 	{
 		const ModSample &sample = sndFile.GetSample(3);
-		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[3], "Stereo / 16-Bit"), 0);
-		VERIFY_EQUAL_NONCONT(strcmp(sample.filename, "Filename_3_X"), 0);
+		VERIFY_EQUAL_NONCONT((sndFile.m_szNames[3] == "Stereo / 16-Bit"), true);
+		VERIFY_EQUAL_NONCONT((sample.filename == "Filename_3_X"), true);
 		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 4);
 		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 2);
 		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 2);
@@ -3651,8 +3651,8 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 
 	{
 		const ModSample &sample = sndFile.GetSample(4);
-		VERIFY_EQUAL_NONCONT(strcmp(sndFile.m_szNames[4], "adlib"), 0);
-		VERIFY_EQUAL_NONCONT(strcmp(sample.filename, ""), 0);
+		VERIFY_EQUAL_NONCONT((sndFile.m_szNames[4] == "adlib"), true);
+		VERIFY_EQUAL_NONCONT((sample.filename == ""), true);
 		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_S3M), 8363);
 		VERIFY_EQUAL_NONCONT(sample.nVolume, 58 * 4);
 		VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_ADLIB);
@@ -4050,10 +4050,10 @@ static MPT_NOINLINE void TestEditing()
 
 	// Rearrange samples
 	sndFile.m_nSamples = 2;
-	mpt::String::Copy(sndFile.GetSample(1).filename, "1");
-	mpt::String::Copy(sndFile.m_szNames[1], "1");
-	mpt::String::Copy(sndFile.GetSample(2).filename, "2");
-	mpt::String::Copy(sndFile.m_szNames[2], "2");
+	sndFile.GetSample(1).filename = "1";
+	sndFile.m_szNames[1] = "1";
+	sndFile.GetSample(2).filename = "2";
+	sndFile.m_szNames[2] = "2";
 	sndFile.GetSample(2).nLength = 16;
 	sndFile.GetSample(2).AllocateSample();
 	modDoc->ReArrangeSamples({ 2, SAMPLEINDEX_INVALID, 1 });
@@ -4298,11 +4298,6 @@ static MPT_NOINLINE void TestStringIO()
 
 #define ReadTest(mode, dst, src, expectedResult) \
 	std::memset(dst, 0x7f, sizeof(dst)); \
-	mpt::String::Read<mpt::String:: mode >(dst, src); \
-	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
-	for(size_t i = strlen(dst); i < mpt::size(dst); i++) \
-		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
-	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::WriteAutoBuf(dst) = mpt::String::ReadBuf(mpt::String:: mode , src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
 	for(size_t i = strlen(dst); i < mpt::size(dst); i++) \
@@ -4310,11 +4305,6 @@ static MPT_NOINLINE void TestStringIO()
 	/**/
 
 #define WriteTest(mode, dst, src, expectedResult) \
-	std::memset(dst, 0x7f, sizeof(dst)); \
-	mpt::String::Write<mpt::String:: mode >(dst, src); \
-	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0);  /* Ensure that the strings are identical */ \
-	for(size_t i = Test::strnlen(dst, mpt::size(dst)); i < mpt::size(dst); i++) \
-		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::WriteBuf(mpt::String:: mode , dst) = mpt::String::ReadAutoBuf(src); \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0);  /* Ensure that the strings are identical */ \
@@ -4444,18 +4434,11 @@ static MPT_NOINLINE void TestStringIO()
 		std::string src3string = std::string(src3, mpt::size(src3));
 
 #define ReadTest(mode, dst, src, expectedResult) \
-	mpt::String::Read<mpt::String:: mode >(dst, src); \
-	VERIFY_EQUAL_NONCONT(dst, expectedResult); /* Ensure that the strings are identical */ \
 	dst = mpt::String::ReadBuf(mpt::String:: mode , src); \
 	VERIFY_EQUAL_NONCONT(dst, expectedResult); /* Ensure that the strings are identical */ \
 	/**/
 
 #define WriteTest(mode, dst, src, expectedResult) \
-	std::memset(dst, 0x7f, sizeof(dst)); \
-	mpt::String::Write<mpt::String:: mode >(dst, src); \
-	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0);  /* Ensure that the strings are identical */ \
-	for(size_t i = Test::strnlen(dst, mpt::size(dst)); i < mpt::size(dst); i++) \
-		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::WriteBuf(mpt::String:: mode , dst) = src; \
 	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0);  /* Ensure that the strings are identical */ \
@@ -4571,11 +4554,6 @@ static MPT_NOINLINE void TestStringIO()
 	
 		#define CopyTest(dst, src, expectedResult) \
 			std::memset(dst, 0x7f, sizeof(dst)); \
-			mpt::String::Copy(dst, src); \
-			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
-			/*for(size_t i = strlen(dst); i < mpt::size(dst); i++)*/ \
-				/*VERIFY_EQUAL_NONCONT(dst[i], '\0');*/ /* Ensure that rest of the buffer is completely nulled */ \
-			std::memset(dst, 0x7f, sizeof(dst)); \
 			mpt::String::WriteAutoBuf(dst) = mpt::String::ReadAutoBuf(src); \
 			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
 			for(size_t i = strlen(dst); i < mpt::size(dst); i++) \
@@ -4598,11 +4576,6 @@ static MPT_NOINLINE void TestStringIO()
 		#undef CopyTest
 
 		#define CopyTestN(dst, src, len, expectedResult) \
-			std::memset(dst, 0x7f, sizeof(dst)); \
-			mpt::String::CopyN(dst, src, len); \
-			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
-			/*for(size_t i = strlen(dst); i < mpt::size(dst); i++)*/ \
-				/*VERIFY_EQUAL_NONCONT(dst[i], '\0');*/ /* Ensure that rest of the buffer is completely nulled */ \
 			std::memset(dst, 0x7f, sizeof(dst)); \
 			mpt::String::WriteAutoBuf(dst) = mpt::String::ReadAutoBuf(src, std::min<std::size_t>(mpt::size(src), len)); \
 			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \

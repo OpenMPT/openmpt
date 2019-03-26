@@ -186,7 +186,7 @@ uint16 WAVReader::GetFileCodePage(ChunkReader::ChunkList<RIFFChunk> &chunks)
 }
 
 
-void WAVReader::ApplySampleSettings(ModSample &sample, mpt::Charset sampleCharset, char (&sampleName)[MAX_SAMPLENAME])
+void WAVReader::ApplySampleSettings(ModSample &sample, mpt::Charset sampleCharset, mpt::charbuf<MAX_SAMPLENAME> &sampleName)
 {
 	// Read sample name
 	FileReader textChunk = infoChunk.GetChunk(RIFFChunk::idINAM);
@@ -194,12 +194,12 @@ void WAVReader::ApplySampleSettings(ModSample &sample, mpt::Charset sampleCharse
 	{
 		std::string sampleNameEncoded;
 		textChunk.ReadString<mpt::String::nullTerminated>(sampleNameEncoded, textChunk.GetLength());
-		mpt::String::Copy(sampleName, mpt::ToCharset(sampleCharset, mpt::ToUnicode(codePage, mpt::CharsetWindows1252, sampleNameEncoded)));
+		sampleName = mpt::ToCharset(sampleCharset, mpt::ToUnicode(codePage, mpt::CharsetWindows1252, sampleNameEncoded));
 	}
 	if(isDLS)
 	{
 		// DLS sample -> sample filename
-		mpt::String::Copy(sample.filename, sampleName);
+		sample.filename = sampleName;
 	}
 
 	// Read software name
@@ -624,11 +624,11 @@ void WAVWriter::WriteExtraInformation(const ModSample &sample, MODTYPE modType, 
 		// also specify encoding.
 
 		char name[MAX_SAMPLENAME];
-		mpt::String::Write<mpt::String::nullTerminated>(name, sampleName, MAX_SAMPLENAME);
+		mpt::String::WriteBuf(mpt::String::nullTerminated, name) = sampleName;
 		WriteArray(name);
 
 		char filename[MAX_SAMPLEFILENAME];
-		mpt::String::Write<mpt::String::nullTerminated>(filename, sample.filename);
+		mpt::String::WriteBuf(mpt::String::nullTerminated, filename) = sample.filename;
 		WriteArray(filename);
 	}
 }

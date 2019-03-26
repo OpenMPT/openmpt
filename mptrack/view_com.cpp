@@ -237,7 +237,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 					switch(iCol)
 					{
 					case SMPLIST_SAMPLENAME:
-						s = sndFile.m_szNames[iSmp + 1];
+						s = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[iSmp + 1]);
 						break;
 					case SMPLIST_SAMPLENO:
 						s.Format(_T("%02u"), iSmp + 1);
@@ -281,7 +281,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						}
 						break;
 					case SMPLIST_FILENAME:
-						s = sample.filename;
+						s = mpt::ToCString(sndFile.GetCharsetInternal(), sample.filename);
 						break;
 					case SMPLIST_PATH:
 						s = sndFile.GetSamplePath(iSmp + 1).ToCString();
@@ -334,7 +334,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 					switch(iCol)
 					{
 					case INSLIST_INSTRUMENTNAME:
-						if (pIns) s = pIns->name;
+						if (pIns) s = mpt::ToCString(sndFile.GetCharsetInternal(), pIns->name);
 						break;
 					case INSLIST_INSTRUMENTNO:
 						s.Format(_T("%02u"), iIns+1);
@@ -364,7 +364,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 					case INSLIST_FILENAME:
 						if (pIns)
 						{
-							s = pIns->filename;
+							s = mpt::ToCString(sndFile.GetCharsetInternal(), pIns->filename);
 						}
 						break;
 					case INSLIST_PLUGIN:
@@ -465,7 +465,7 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 		{
 			if(iItem < sndFile.GetNumSamples())
 			{
-				mpt::String::Copy(sndFile.m_szNames[iItem + 1], mpt::ToCharset(sndFile.GetCharsetInternal(), CString(lvItem.pszText)));
+				sndFile.m_szNames[iItem + 1] = mpt::ToCharset(sndFile.GetCharsetInternal(), CString(lvItem.pszText));
 				pModDoc->UpdateAllViews(this, SampleHint(static_cast<SAMPLEINDEX>(iItem + 1)).Info().Names(), this);
 				pModDoc->SetModified();
 			}
@@ -474,7 +474,7 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 			if((iItem < sndFile.GetNumInstruments()) && (sndFile.Instruments[iItem + 1]))
 			{
 				ModInstrument *pIns = sndFile.Instruments[iItem + 1];
-				mpt::String::Copy(pIns->name, mpt::ToCharset(sndFile.GetCharsetInternal(), CString(lvItem.pszText)));
+				pIns->name = mpt::ToCharset(sndFile.GetCharsetInternal(), CString(lvItem.pszText));
 				pModDoc->UpdateAllViews(this, InstrumentHint(static_cast<INSTRUMENTINDEX>(iItem + 1)).Info().Names(), this);
 				pModDoc->SetModified();
 			}
