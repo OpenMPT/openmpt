@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta38
 
+ *  [**Bug**] Channel VU meters were swapped.
+
 ### libopenmpt 0.2-beta37 (2019-01-22)
 
  *  [**Sec**] DSM: Assertion failure during file parsing with debug STLs
