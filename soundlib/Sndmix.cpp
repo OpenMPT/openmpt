@@ -2220,12 +2220,12 @@ bool CSoundFile::ReadNote()
 		if (pChn->pCurrentSample || (pChn->HasMIDIOutput() && !pChn->dwFlags[CHN_KEYOFF | CHN_NOTEFADE]))
 		{
 			// Update VU-Meter (nRealVolume is 14-bit)
-			uint32 vul = (pChn->nRealVolume * pChn->nRealPan) / (1 << 14);
+			uint32 vul = (pChn->nRealVolume * (256-pChn->nRealPan)) / (1 << 14);
 			if (vul > 127) vul = 127;
 			if (pChn->nLeftVU > 127) pChn->nLeftVU = (uint8)vul;
 			vul /= 2;
 			if (pChn->nLeftVU < vul) pChn->nLeftVU = (uint8)vul;
-			uint32 vur = (pChn->nRealVolume * (256-pChn->nRealPan)) / (1 << 14);
+			uint32 vur = (pChn->nRealVolume * pChn->nRealPan) / (1 << 14);
 			if (vur > 127) vur = 127;
 			if (pChn->nRightVU > 127) pChn->nRightVU = (uint8)vur;
 			vur /= 2;
