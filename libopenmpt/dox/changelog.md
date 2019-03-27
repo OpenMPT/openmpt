@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.16-pre
 
+ *  [**Bug**] Channel VU meters were swapped.
+
  *  miniz: Update to v2.0.8 (2018-09-19).
  *  stb_vorbis: Update to v1.16 (2019-03-05).
 
