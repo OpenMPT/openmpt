@@ -1125,8 +1125,8 @@ void CViewPattern::DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn)
 	if (ChnVUMeters[nChn] != OldVUMeters[nChn])
 	{
 		UINT vul, vur;
-		vul = ChnVUMeters[nChn] & 0xFF;
-		vur = (ChnVUMeters[nChn] & 0xFF00) >> 8;
+		vul = (ChnVUMeters[nChn] & 0xFF00) >> 8;
+		vur = ChnVUMeters[nChn] & 0xFF;
 		vul /= 15;
 		vur /= 15;
 		if (vul > 8) vul = 8;
