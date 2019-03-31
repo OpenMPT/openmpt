@@ -1069,7 +1069,9 @@ static const KSTOPOLOGY_CONNECTION* FindStartConnectionFrom(ULONG startPin, PaWi
     }
 
     PA_DEBUG(("FindStartConnectionFrom: returning NULL\n"));
+#if 0 // OpenMPT
     assert(FALSE);
+#endif // OpenMPT
     return 0;
 }
 
@@ -1089,7 +1091,9 @@ static const KSTOPOLOGY_CONNECTION* FindStartConnectionTo(ULONG startPin, PaWinW
     }
 
     PA_DEBUG(("FindStartConnectionTo: returning NULL\n"));
+#if 0 // OpenMPT
     assert(FALSE);
+#endif // OpenMPT
     return 0;
 }
 
