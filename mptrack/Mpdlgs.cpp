@@ -473,6 +473,15 @@ void COptionsSoundcard::UpdateSampleFormat()
 		{
 			if(m_CurrentDeviceCaps.CanSampleFormat || (SampleFormatFloat32 == m_Settings.sampleFormat))
 			{
+				if(m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.size() > 0
+					&& std::find(
+						m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.begin(),
+						m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.end(),
+						static_cast<SampleFormat>(SampleFormatFloat32)) == m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.end()
+					)
+				{
+					continue;
+				}
 				UINT ndx = m_CbnSampleFormat.AddString(_T("Float"));
 				m_CbnSampleFormat.SetItemData(ndx, (32+128));
 				if(SampleFormatFloat32 == m_Settings.sampleFormat)
@@ -484,6 +493,15 @@ void COptionsSoundcard::UpdateSampleFormat()
 		{
 			if(m_CurrentDeviceCaps.CanSampleFormat || ((SampleFormat)bits == m_Settings.sampleFormat))
 			{
+				if(m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.size() > 0
+					&& std::find(
+						m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.begin(),
+						m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.end(),
+						static_cast<SampleFormat>(bits)) == m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.end()
+					)
+				{
+					continue;
+				}
 				UINT ndx = m_CbnSampleFormat.AddString(mpt::cformat(_T("%1 Bit"))(bits));
 				m_CbnSampleFormat.SetItemData(ndx, bits);
 				if((SampleFormat)bits == m_Settings.sampleFormat)
@@ -615,6 +633,7 @@ void COptionsSoundcard::OnDeviceChanged()
 void COptionsSoundcard::OnExclusiveModeChanged()
 {
 	UpdateSampleRates();
+	UpdateSampleFormat();
 	OnSettingsChanged();
 }
 

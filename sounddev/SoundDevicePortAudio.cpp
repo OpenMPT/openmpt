@@ -147,12 +147,8 @@ bool CPortaudioDevice::InternalOpen()
 		{
 			if(m_Settings.ExclusiveMode)
 			{
-				return false;
-			}
-			if(!GetSysInfo().IsWine && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::Win7))
-			{ // retry with automatic stream format conversion (i.e. resampling)
 #if MPT_OS_WINDOWS
-				m_WasapiStreamInfo.flags |= paWinWasapiAutoConvert;
+				m_WasapiStreamInfo.flags &= ~paWinWasapiExplicitSampleFormat;
 				m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
 #endif // MPT_OS_WINDOWS
 				if(Pa_IsFormatSupported((m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported)
@@ -161,7 +157,20 @@ bool CPortaudioDevice::InternalOpen()
 				}
 			} else
 			{
-				return false;
+				if(!GetSysInfo().IsWine && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::Win7))
+				{ // retry with automatic stream format conversion (i.e. resampling)
+	#if MPT_OS_WINDOWS
+					m_WasapiStreamInfo.flags |= paWinWasapiAutoConvert;
+					m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
+	#endif // MPT_OS_WINDOWS
+					if(Pa_IsFormatSupported((m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported)
+					{
+						return false;
+					}
+				} else
+				{
+					return false;
+				}
 			}
 		} else
 		{
@@ -292,12 +301,24 @@ SoundDevice::Statistics CPortaudioDevice::GetStatistics() const
 #if MPT_OS_WINDOWS
 	if(m_HostApiType == paWASAPI)
 	{
-		if(m_StreamParameters.hostApiSpecificStreamInfo && (m_WasapiStreamInfo.flags & paWinWasapiAutoConvert))
+		if(m_Settings.ExclusiveMode)
 		{
-			result.text += U_("WASAPI stream resampling.");
+			if(m_StreamParameters.hostApiSpecificStreamInfo && (m_WasapiStreamInfo.flags & paWinWasapiExplicitSampleFormat))
+			{
+				result.text += U_("Exclusive stream.");
+			} else
+			{
+				result.text += U_("Exclusive stream with sample format conversion.");
+			}
 		} else
 		{
-			result.text += U_("No resampling.");
+			if(m_StreamParameters.hostApiSpecificStreamInfo && (m_WasapiStreamInfo.flags & paWinWasapiAutoConvert))
+			{
+				result.text += U_("WASAPI stream resampling.");
+			} else
+			{
+				result.text += U_("No resampling.");
+			}
 		}
 	}
 #endif // MPT_OS_WINDOWS
@@ -405,6 +426,49 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 			caps.supportedExclusiveSampleRates.push_back(baseSampleRates[n]);
 		}
 	}
+#if MPT_OS_WINDOWS
+	if((m_HostApiType == paWASAPI) && m_Settings.ExclusiveMode)
+	{
+		const std::array<SampleFormat, 5> sampleFormats { SampleFormatUnsigned8, SampleFormatInt16, SampleFormatInt24, SampleFormatInt32, SampleFormatFloat32 };
+		for(const SampleFormat sampleFormat : sampleFormats)
+		{
+			for(std::size_t n = 0; n<baseSampleRates.size(); n++)
+			{
+				PaStreamParameters StreamParameters;
+				MemsetZero(StreamParameters);
+				StreamParameters.device = device;
+				StreamParameters.channelCount = 2;
+				if(sampleFormat.IsFloat())
+				{
+					StreamParameters.sampleFormat = paFloat32;
+				} else
+				{
+					switch(sampleFormat.GetBitsPerSample())
+					{
+					case 8: StreamParameters.sampleFormat = paUInt8; break;
+					case 16: StreamParameters.sampleFormat = paInt16; break;
+					case 24: StreamParameters.sampleFormat = paInt24; break;
+					case 32: StreamParameters.sampleFormat = paInt32; break;
+					}
+				}
+				StreamParameters.suggestedLatency = 0.0;
+				StreamParameters.hostApiSpecificStreamInfo = NULL;
+				PaWasapiStreamInfo wasapiStreamInfo;
+				MemsetZero(wasapiStreamInfo);
+				wasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
+				wasapiStreamInfo.hostApiType = paWASAPI;
+				wasapiStreamInfo.version = 1;
+				wasapiStreamInfo.flags = paWinWasapiExclusive | paWinWasapiExplicitSampleFormat;
+				StreamParameters.hostApiSpecificStreamInfo = &wasapiStreamInfo;
+				if(Pa_IsFormatSupported(NULL, &StreamParameters, baseSampleRates[n]) == paFormatIsSupported)
+				{
+					caps.supportedExclusiveModeSampleFormats.push_back(sampleFormat);
+					break;
+				}
+			}
+		}
+	}
+#endif // MPT_OS_WINDOWS
 #if MPT_OS_WINDOWS
 	if((m_HostApiType == paWASAPI) && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::Win7))
 	{

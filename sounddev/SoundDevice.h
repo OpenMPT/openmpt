@@ -405,6 +405,7 @@ struct DynamicCaps
 	uint32 currentSampleRate;
 	std::vector<uint32> supportedSampleRates;
 	std::vector<uint32> supportedExclusiveSampleRates;
+	std::vector<SampleFormat> supportedExclusiveModeSampleFormats;
 	std::vector<mpt::ustring> channelNames;
 	std::vector<std::pair<uint32, mpt::ustring> > inputSourceNames;
 	DynamicCaps()
