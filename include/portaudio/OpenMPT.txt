@@ -7,6 +7,8 @@
  *  A small modification to portaudio code has been made in
     `src/hostapi/wdmks/pa_win_wdmks.c` to facilitate linking against
     `strmiids.lib`. Modifications have been marked with `// OpenMPT`.
+ *  Non-fatal assertions in `src/hostapi/wdmks/pa_win_wdmks.c` concerning pin
+    conections which trigger with some Windows 10 drivers have been removed.
  *  `include/pa_win_wasapi.h` and `src/hostapi/wasapi/pa_win_wasapi.c` have been
     modified to include a new option which enables automated stream resampling
     on Windows 7 or later. Modifications have been marked with `// OpenMPT`.
