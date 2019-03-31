@@ -587,7 +587,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	}
 
 	// Determine paths, portable mode, first run. Do not yet update any state.
-	mpt::PathString configPathPortable = m_InstallPath; // config path in portable mode
+	mpt::PathString configPathPortable = (modeSourceProject ? exePath : m_InstallPath); // config path in portable mode
 	mpt::PathString configPathUser; // config path in default non-portable mode
 	{
 		// Try to find a nice directory where we should store our settings (default: %APPDATA%)
