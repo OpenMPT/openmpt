@@ -532,6 +532,7 @@ protected:
 	afx_msg LRESULT OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam);
 	afx_msg void OnHelp();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
+	afx_msg BOOL OnQueryEndSession();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:

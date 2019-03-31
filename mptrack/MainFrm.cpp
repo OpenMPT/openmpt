@@ -73,6 +73,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_DROPFILES()
+	ON_WM_QUERYENDSESSION()
 	ON_COMMAND(ID_VIEW_OPTIONS,				&CMainFrame::OnViewOptions)
 
 	ON_COMMAND(ID_PLUGIN_SETUP,				&CMainFrame::OnPluginManager)
@@ -2786,6 +2787,26 @@ void CMainFrame::UpdateMRUList()
 			pMenu->InsertMenu(firstMenu + i, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST + i, mpt::ToCString(s));
 		}
 	}
+}
+
+
+BOOL CMainFrame::OnQueryEndSession()
+{
+	int modifiedCount = 0;
+	for(const auto &modDoc : theApp.GetOpenDocuments())
+	{
+		if(modDoc->IsModified())
+			modifiedCount++;
+	}
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+	ShutdownBlockReasonDestroy(m_hWnd);
+	if(modifiedCount > 0)
+	{
+		ShutdownBlockReasonCreate(m_hWnd,
+			mpt::format(L"There %1 %2 unsaved file%3.")(modifiedCount == 1 ? L"is" : L"are", modifiedCount, modifiedCount == 1 ? L"" : L"s").c_str());
+	}
+#endif
+	return modifiedCount ? FALSE : TRUE;
 }
 
 
