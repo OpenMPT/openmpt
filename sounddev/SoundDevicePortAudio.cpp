@@ -114,7 +114,7 @@ bool CPortaudioDevice::InternalOpen()
 			m_StreamParameters.suggestedLatency = 0.0; // let portaudio choose
 			framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 #if MPT_OS_WINDOWS
-			m_WasapiStreamInfo.flags |= paWinWasapiExclusive;
+			m_WasapiStreamInfo.flags |= paWinWasapiExclusive | paWinWasapiExplicitSampleFormat;
 			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
 #endif // MPT_OS_WINDOWS
 		} else
