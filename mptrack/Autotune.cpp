@@ -9,23 +9,13 @@
 
 
 #include "stdafx.h"
-#if MPT_CXX_AT_LEAST(17)
-#define MPT_AUTOTUNE_MODERN 1
-#else
-#define MPT_AUTOTUNE_MODERN 0
-#endif
 #include "Autotune.h"
 #include <math.h>
 #include "../common/misc_util.h"
-#if !MPT_AUTOTUNE_MODERN
-#include "../common/mptThread.h"
-#endif // !MPT_AUTOTUNE_MODERN
 #include "../soundlib/Sndfile.h"
-#if MPT_AUTOTUNE_MODERN
 #include <algorithm>
 #include <execution>
 #include <numeric>
-#endif // MPT_AUTOTUNE_MODERN
 #ifdef ENABLE_SSE2
 #include <emmintrin.h>
 #endif
@@ -253,9 +243,6 @@ static inline AutotuneHistogram &operator+=(AutotuneHistogram &a, AutotuneHistog
 }
 
 
-#if MPT_AUTOTUNE_MODERN
-
-
 struct AutotuneHistogramReduce
 {
 	inline AutotuneHistogram operator()(AutotuneHistogram a, AutotuneHistogram b) noexcept
@@ -280,37 +267,6 @@ struct AutotuneHistogramReduce
 		return a;
 	}
 };
-
-
-#else // !MPT_AUTOTUNE_MODERN
-
-
-struct AutotuneThreadData
-{
-	AutotuneHistogram histogram;
-	AutotuneContext ctx;
-	int startNote, endNote;
-};
-
-
-static void AutotuneThread(AutotuneThreadData & info)
-{
-#ifdef ENABLE_SSE2
-	const bool useSSE = (GetProcSupport() & PROCSUPPORT_SSE2) != 0;
-#endif
-	// Do autocorrelation and save results in a note histogram (restriced to one octave).
-	for(int note = info.startNote; note < info.endNote; note++)
-	{
-		info.histogram +=
-#ifdef ENABLE_SSE2
-			useSSE ? CalculateNoteHistogramSSE2(note, info.ctx) :
-#endif
-			CalculateNoteHistogram(note, info.ctx);
-	}
-}
-
-
-#endif // !MPT_AUTOTUNE_MODERN
 
 
 } // local
@@ -340,8 +296,6 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 	ctx.processLength = processLength;
 	ctx.sampleFreq = sampleFreq;
 	
-#if MPT_AUTOTUNE_MODERN
-	
 	// Note that we cannot use a fake integer iterator here because of the requirement on ForwardIterator to return a reference to the elements.
 	std::array<int, END_NOTE - START_NOTE> notes;
 	std::iota(notes.begin(), notes.end(), START_NOTE);
@@ -352,47 +306,6 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 #endif
 		std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogram(note, ctx); } );
 	
-#else // !MPT_AUTOTUNE_MODERN
-	
-	// Set up the autocorrelation threads
-	const uint32 numProcs = std::max<unsigned int>(std::thread::hardware_concurrency(), 1);
-	const uint32 notesPerThread = (END_NOTE - START_NOTE + 1) / numProcs;
-	std::vector<AutotuneThreadData> threadInfo(numProcs);
-
-	// Setup.
-	for(uint32 p = 0; p < numProcs; p++)
-	{
-		threadInfo[p].ctx = ctx;
-		threadInfo[p].startNote = START_NOTE + p * notesPerThread;
-		threadInfo[p].endNote = START_NOTE + (p + 1) * notesPerThread;
-		if(p == numProcs - 1)
-			threadInfo[p].endNote = END_NOTE;
-	}
-
-	{
-		std::vector<std::thread> threads(numProcs);
-		// Start threads.
-		for(uint32 p = 0; p < numProcs; p++)
-		{
-			threads[p] = std::move(std::thread([p, &threadInfo]() { AutotuneThread(threadInfo[p]); }));
-		}
-		// Wait for threads to finish.
-		for(uint32 p = 0; p < numProcs; p++)
-		{
-			threads[p].join();
-		}
-	}
-
-	// Histogram for all notes.
-	AutotuneHistogram autocorr;
-
-	for(uint32 p = 0; p < numProcs; p++)
-	{
-		autocorr += threadInfo[p].histogram;
-	}
-
-#endif // MPT_AUTOTUNE_MODERN
-
 	// Interpolate the histogram...
 	AutotuneHistogram interpolated;
 	for(int i = 0; i < HISTORY_BINS; i++)

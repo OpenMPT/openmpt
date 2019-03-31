@@ -43,9 +43,6 @@ cd include/genie
 
 make
 
-mkdir -p build/vs2015
-./bin/linux/genie --to=../build/vs2015 vs2015
-
 mkdir -p build/vs2017
 ./bin/linux/genie --to=../build/vs2017 vs2015
 

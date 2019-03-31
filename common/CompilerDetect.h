@@ -90,8 +90,8 @@
 #define MPT_MSVC_AT_LEAST(version,sp)                (MPT_COMPILER_MSVC_VERSION >= MPT_COMPILER_MAKE_VERSION2((version),(sp)))
 #define MPT_MSVC_BEFORE(version,sp)                  (MPT_COMPILER_MSVC_VERSION <  MPT_COMPILER_MAKE_VERSION2((version),(sp)))
 
-#if MPT_MSVC_BEFORE(2015,0)
-#error "MSVC version 2015 required"
+#if MPT_MSVC_BEFORE(2017,9)
+#error "MSVC version 2017 15.9 required"
 #endif
 
 #if defined(_PREFAST_)
@@ -141,14 +141,10 @@
 
 #elif MPT_COMPILER_MSVC
 
-#if MPT_MSVC_AT_LEAST(2015,3)
 #if (_MSVC_LANG >= 201703)
 #define MPT_CXX 17
 #elif (_MSVC_LANG >= 201402)
 #define MPT_CXX 14
-#else
-#define MPT_CXX 14
-#endif
 #else
 #define MPT_CXX 14
 #endif
@@ -297,11 +293,5 @@
 
 #if MPT_OS_DJGPP
 #define MPT_COMPILER_QUIRK_NO_WCHAR
-#endif
-
-#if MPT_MSVC_BEFORE(2017,8)
-// fixed in VS2017 15.8
-// see <https://blogs.msdn.microsoft.com/vcblog/2018/09/18/stl-features-and-fixes-in-vs-2017-15-8/>
-#define MPT_COMPILER_QUIRK_MSVC_STRINGSTREAM
 #endif
 

@@ -11,6 +11,7 @@ is just a high-level summary.
     Kode54's fork foo_openmpt54:
     <https://www.foobar2000.org/components/view/foo_openmpt54>.
  *  [**Regression**] Support for C++11 has been removed. C++14 is now required.
+ *  [**Regression**] Support for Visual Studio 2015 has been removed.
  *  [**Regression**] Support for GCC 4.8, 4.9 has been removed.
  *  [**Regression**] Support for Clang 3.6, 3.7 has been removed.
 

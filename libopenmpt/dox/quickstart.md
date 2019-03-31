@@ -29,7 +29,7 @@ Quick Start {#quickstart}
 ### Windows
 
  1. Get dependencies:
-     -  **Microsoft Visual Studio >= 2015**
+     -  **Microsoft Visual Studio >= 2017**
  2. *Optionally* get dependencies:
      -  **Winamp SDK**
      -  **XMPlay SDK**

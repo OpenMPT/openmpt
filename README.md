@@ -35,12 +35,6 @@ How to compile
 
  -  Supported Visual Studio versions:
 
-     -  Visual Studio 2015 Update 3 Community/Professional/Enterprise
-
-        To compile the project, open `build/vs2015win7/OpenMPT.sln` and hit the
-        compile button. Alternatively, the `vs2015winxp` folder contains a
-        solution with Windows XP / Vista support.
-
      -  Visual Studio 2017 Community/Professional/Enterprise
 
         To compile the project, open `build/vs2017win7/OpenMPT.sln` and hit the
@@ -106,8 +100,8 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
  -  Visual Studio:
 
-     -  You will find solutions for Visual Studio 2015 to 2017 in the
-        corresponding `build/vsVERSIONwin7/` folder.
+     -  You will find solutions for Visual Studio 2017 in the corresponding
+        `build/vsVERSIONwin7/` folder.
         Projects that target Windows versions before Windows 7 are available in
         `build/vsVERSIONwinxp/`.
         Projects that target Windows 10 1709 Desktop (10.0.16299.0, including
