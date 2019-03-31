@@ -1,4 +1,4 @@
- *  Portaudio GIT 2016-10-30, commit 396fe4b6699ae929d3a685b3ef8a7e97396139a4
+ *  Portaudio GIT 2019-02-23, commit 7bfa11f463cfa943aced5ea2f3542f5307417afb
  *  `build/msvc/portaudio.def` has been modified. Modifications are marked with
     `;OpenMPT`.
  *  `src/hostapi/dsound/pa_win_ds.c` unconditionally defined `_WIN32_WINNT`.
