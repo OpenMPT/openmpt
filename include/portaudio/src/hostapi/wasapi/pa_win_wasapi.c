@@ -3144,22 +3144,12 @@ static HRESULT CreateAudioClient(PaWasapiStream *pStream, PaWasapiSubStream *pSu
 		switch (pSub->params.wasapi_params.streamOption)
 		{
 		case eStreamOptionRaw:
-#if 1 // OpenMPT
-			if (GetWindowsVersion() >= WINDOWS_8_1_SERVER2012R2 && pSub->shareMode == AUDCLNT_SHAREMODE_EXCLUSIVE) // OpenMPT
-				audioProps.Options |= pa_AUDCLNT_STREAMOPTIONS_RAW; // OpenMPT
-#else // OpenMPT
 			if (GetWindowsVersion() >= WINDOWS_8_1_SERVER2012R2)
 				audioProps.Options = pa_AUDCLNT_STREAMOPTIONS_RAW;
-#endif // OpenMPT
 			break;
 		case eStreamOptionMatchFormat:
-#if 1 // OpenMPT
-			if (GetWindowsVersion() >= WINDOWS_10_SERVER2016 && pSub->shareMode == AUDCLNT_SHAREMODE_EXCLUSIVE) // OpenMPT
-				audioProps.Options |= pa_AUDCLNT_STREAMOPTIONS_MATCH_FORMAT; // OpenMPT
-#else // OpenMPT
 			if (GetWindowsVersion() >= WINDOWS_10_SERVER2016)
 				audioProps.Options = pa_AUDCLNT_STREAMOPTIONS_MATCH_FORMAT;
-#endif // OpenMPT
 			break;
 		}
 
