@@ -82,6 +82,10 @@ typedef enum PaWasapiFlags
 
 #if 1 // OpenMPT
     , // OpenMPT
+    /* allow API to insert system-level channel matrix mixer and sample rate converters to allow // OpenMPT
+       playback formats that do not match the current configured system settings. // OpenMPT
+       this is in particular required for streams not matching the system mixer samplerate. // OpenMPT
+       only applies in Shared mode. */ // OpenMPT
     paWinWasapiAutoConvert              = (1 << 6) // OpenMPT
 #endif // OpenMPT
 }
