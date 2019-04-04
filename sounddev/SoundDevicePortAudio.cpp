@@ -521,8 +521,10 @@ int CPortaudioDevice::StreamCallback(
 	PaStreamCallbackFlags statusFlags
 	)
 {
-	MPT_UNREFERENCED_PARAMETER(input);
-	if(!output) return paAbort;
+	if(!input && !output)
+	{
+		return paAbort;
+	}
 	if(m_HostApiType == paWDMKS)
 	{
 		// For WDM-KS, timeInfo->outputBufferDacTime seems to contain bogus values.
