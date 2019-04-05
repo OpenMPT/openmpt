@@ -287,7 +287,7 @@ typedef struct _pa_AudioClientProperties {
 PA_THREAD_FUNC ProcThreadEvent(void *param);
 PA_THREAD_FUNC ProcThreadPoll(void *param);
 
-// Availabe from Windows 7
+// Error codes (availabe since Windows 7)
 #ifndef AUDCLNT_E_BUFFER_ERROR
 	#define AUDCLNT_E_BUFFER_ERROR AUDCLNT_ERR(0x018)
 #endif
@@ -296,6 +296,14 @@ PA_THREAD_FUNC ProcThreadPoll(void *param);
 #endif
 #ifndef AUDCLNT_E_INVALID_DEVICE_PERIOD
 	#define AUDCLNT_E_INVALID_DEVICE_PERIOD AUDCLNT_ERR(0x020)
+#endif
+
+// Stream flags (availabe since Windows 7)
+#ifndef AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY
+	#define AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY 0x08000000
+#endif
+#ifndef AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM
+	#define AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM 0x80000000
 #endif
 
 #define MAX_STR_LEN 512
@@ -1576,13 +1584,54 @@ error:
 #endif
 
 // ------------------------------------------------------------------------------------------
-static HRESULT ActivateAudioInterface(const PaWasapiDeviceInfo *deviceInfo, IAudioClient **client)
+static HRESULT ActivateAudioInterface(const PaWasapiDeviceInfo *deviceInfo, const PaWasapiStreamInfo *streamInfo, 
+	IAudioClient **client)
 {
+	HRESULT hr;
+
 #ifndef PA_WINRT
-	return IMMDevice_Activate(deviceInfo->device, GetAudioClientIID(), CLSCTX_ALL, NULL, (void **)client);
+	if (FAILED(hr = IMMDevice_Activate(deviceInfo->device, GetAudioClientIID(), CLSCTX_ALL, NULL, (void **)client)))
+		return hr;
 #else
-	return ActivateAudioInterface_WINRT(deviceInfo->flow, GetAudioClientIID(), (void **)client);
+	if (FAILED(hr = ActivateAudioInterface_WINRT(deviceInfo->flow, GetAudioClientIID(), (void **)client)))
+		return hr;
 #endif
+
+	// Set audio client options (applicable only to IAudioClient2+): options may affect the audio format
+	// support by IAudioClient implementation and therefore we should set them before GetClosestFormat()
+	// in order to correctly match the requested format
+#ifdef __IAudioClient2_INTERFACE_DEFINED__
+	if ((streamInfo != NULL) && (GetAudioClientVersion() >= 2))
+	{
+		pa_AudioClientProperties audioProps = { 0 };
+		audioProps.cbSize     = sizeof(pa_AudioClientProperties);
+		audioProps.bIsOffload = FALSE;
+		audioProps.eCategory  = (AUDIO_STREAM_CATEGORY)streamInfo->streamCategory;
+		switch (streamInfo->streamOption)
+		{
+		case eStreamOptionRaw:
+			if (GetWindowsVersion() >= WINDOWS_8_1_SERVER2012R2)
+				audioProps.Options = pa_AUDCLNT_STREAMOPTIONS_RAW;
+			break;
+		case eStreamOptionMatchFormat:
+			if (GetWindowsVersion() >= WINDOWS_10_SERVER2016)
+				audioProps.Options = pa_AUDCLNT_STREAMOPTIONS_MATCH_FORMAT;
+			break;
+		}
+
+		if (FAILED(hr = IAudioClient2_SetClientProperties((IAudioClient2 *)(*client), (AudioClientProperties *)&audioProps)))
+		{
+			PRINT(("WASAPI: IAudioClient2_SetClientProperties(IsOffload = %d, Category = %d, Options = %d) failed\n", audioProps.bIsOffload, audioProps.eCategory, audioProps.Options));
+			LogHostError(hr);
+		}
+		else
+		{
+			PRINT(("WASAPI: IAudioClient2 set properties: IsOffload = %d, Category = %d, Options = %d\n", audioProps.bIsOffload, audioProps.eCategory, audioProps.Options));
+		}
+	}
+#endif
+
+	return S_OK;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1878,7 +1927,7 @@ static PaError CreateDeviceList(PaWasapiHostApiRepresentation *paWasapi, PaHostA
 			#endif
 
 				// Create temp Audio Client instance to query additional details
-                hr = ActivateAudioInterface(&paWasapi->devInfo[i], &tmpClient);
+                hr = ActivateAudioInterface(&paWasapi->devInfo[i], NULL, &tmpClient);
 				// We need to set the result to a value otherwise we will return paNoError
 				// [IF_FAILED_JUMP(hResult, error);]
 				IF_FAILED_INTERNAL_ERROR_JUMP(hr, result, error);
@@ -2631,12 +2680,13 @@ static PaError GetClosestFormat(IAudioClient *client, double sampleRate, const P
 
 	// Try standard approach, e.g. if data is > 16 bits it will be packed into 32-bit containers
     MakeWaveFormatFromParams(outWavex, &params, sampleRate, FALSE);
-#if 1 // OpenMPT
-	if ((GetWindowsVersion() >= WINDOWS_7_SERVER2008R2) && (shareMode == AUDCLNT_SHAREMODE_SHARED) && _params->hostApiSpecificStreamInfo && ((PaWasapiStreamInfo *)_params->hostApiSpecificStreamInfo)->flags & paWinWasapiAutoConvert) // OpenMPT
-	{ // OpenMPT
-		return paFormatIsSupported; // OpenMPT
-	} // OpenMPT
-#endif // OpenMPT
+	
+	// If built-in PCM converter requested then shared mode format will always succeed
+	if ((GetWindowsVersion() >= WINDOWS_7_SERVER2008R2) && 
+		(shareMode == AUDCLNT_SHAREMODE_SHARED) && 
+		((streamInfo != NULL) && (streamInfo->flags & paWinWasapiAutoConvert)))
+		return paFormatIsSupported;
+
 	hr = IAudioClient_IsFormatSupported(client, shareMode, &outWavex->Format, (shareMode == AUDCLNT_SHAREMODE_SHARED ? &sharedClosestMatch : NULL));
 	
 	// Exclusive mode can require packed format for some devices
@@ -2812,9 +2862,9 @@ static PaError IsFormatSupported( struct PaUtilHostApiRepresentation *hostApi,
 		inputStreamInfo = (PaWasapiStreamInfo *)inputParameters->hostApiSpecificStreamInfo;
 
 		if (inputStreamInfo && (inputStreamInfo->flags & paWinWasapiExclusive))
-			shareMode  = AUDCLNT_SHAREMODE_EXCLUSIVE;
+			shareMode = AUDCLNT_SHAREMODE_EXCLUSIVE;
 
-		hr = ActivateAudioInterface(&paWasapi->devInfo[inputParameters->device], &tmpClient);
+		hr = ActivateAudioInterface(&paWasapi->devInfo[inputParameters->device], inputStreamInfo, &tmpClient);
 		if (hr != S_OK)
 		{
 			LogHostError(hr);
@@ -2837,9 +2887,9 @@ static PaError IsFormatSupported( struct PaUtilHostApiRepresentation *hostApi,
         outputStreamInfo = (PaWasapiStreamInfo *)outputParameters->hostApiSpecificStreamInfo;
 
 		if (outputStreamInfo && (outputStreamInfo->flags & paWinWasapiExclusive))
-			shareMode  = AUDCLNT_SHAREMODE_EXCLUSIVE;
+			shareMode = AUDCLNT_SHAREMODE_EXCLUSIVE;
 
-		hr = ActivateAudioInterface(&paWasapi->devInfo[outputParameters->device], &tmpClient);
+		hr = ActivateAudioInterface(&paWasapi->devInfo[outputParameters->device], outputStreamInfo, &tmpClient);
 		if (hr != S_OK)
 		{
 			LogHostError(hr);
@@ -2983,7 +3033,7 @@ static HRESULT CreateAudioClient(PaWasapiStream *pStream, PaWasapiSubStream *pSu
 	}
 
     // Get the audio client
-	if (FAILED(hr = ActivateAudioInterface(pInfo, &audioClient)))
+	if (FAILED(hr = ActivateAudioInterface(pInfo, &pSub->params.wasapi_params, &audioClient)))
 	{
 		(*pa_error) = paInsufficientMemory;
 		LogHostError(hr);
@@ -3133,38 +3183,6 @@ static HRESULT CreateAudioClient(PaWasapiStream *pStream, PaWasapiSubStream *pSu
 		}
 	}
 
-	// Set Raw mode (applicable only to IAudioClient2)
-#ifdef __IAudioClient2_INTERFACE_DEFINED__
-	if (GetAudioClientVersion() >= 2)
-	{
-		pa_AudioClientProperties audioProps = { 0 };
-		audioProps.cbSize     = sizeof(pa_AudioClientProperties);
-		audioProps.bIsOffload = FALSE;
-		audioProps.eCategory  = (AUDIO_STREAM_CATEGORY)pSub->params.wasapi_params.streamCategory;
-		switch (pSub->params.wasapi_params.streamOption)
-		{
-		case eStreamOptionRaw:
-			if (GetWindowsVersion() >= WINDOWS_8_1_SERVER2012R2)
-				audioProps.Options = pa_AUDCLNT_STREAMOPTIONS_RAW;
-			break;
-		case eStreamOptionMatchFormat:
-			if (GetWindowsVersion() >= WINDOWS_10_SERVER2016)
-				audioProps.Options = pa_AUDCLNT_STREAMOPTIONS_MATCH_FORMAT;
-			break;
-		}
-
-		if (FAILED(hr = IAudioClient2_SetClientProperties((IAudioClient2 *)audioClient, (AudioClientProperties *)&audioProps)))
-		{
-			PRINT(("WASAPI: IAudioClient2_SetClientProperties(IsOffload = %d, Category = %d, Options = %d) failed\n", audioProps.bIsOffload, audioProps.eCategory, audioProps.Options));
-			LogHostError(hr);
-		}
-		else
-		{
-			PRINT(("WASAPI: IAudioClient2 set properties: IsOffload = %d, Category = %d, Options = %d\n", audioProps.bIsOffload, audioProps.eCategory, audioProps.Options));
-		}
-	}
-#endif
-
 	// Set device scheduling period (always 0 in Shared mode according Microsoft docs)
 	_CalculatePeriodicity(pSub, output, &eventPeriodicity);
 	
@@ -3212,7 +3230,7 @@ static HRESULT CreateAudioClient(PaWasapiStream *pStream, PaWasapiSubStream *pSu
 			SAFE_RELEASE(audioClient);
 
 			// Create a new audio client
-    		if (FAILED(hr = ActivateAudioInterface(pInfo, &audioClient)))
+    		if (FAILED(hr = ActivateAudioInterface(pInfo, &pSub->params.wasapi_params, &audioClient)))
 			{
 				(*pa_error) = paInsufficientMemory;
 				LogHostError(hr);
@@ -3252,7 +3270,7 @@ static HRESULT CreateAudioClient(PaWasapiStream *pStream, PaWasapiSubStream *pSu
         SAFE_RELEASE(audioClient);
 
         // Create a new audio client
-    	if (FAILED(hr = ActivateAudioInterface(pInfo, &audioClient)))
+    	if (FAILED(hr = ActivateAudioInterface(pInfo, &pSub->params.wasapi_params, &audioClient)))
 		{
 			(*pa_error) = paInsufficientMemory;
 			LogHostError(hr);
@@ -3285,7 +3303,7 @@ static HRESULT CreateAudioClient(PaWasapiStream *pStream, PaWasapiSubStream *pSu
         SAFE_RELEASE(audioClient);
 
         // Create a new audio client
-    	if (FAILED(hr = ActivateAudioInterface(pInfo, &audioClient)))
+    	if (FAILED(hr = ActivateAudioInterface(pInfo, &pSub->params.wasapi_params, &audioClient)))
 		{
 			(*pa_error) = paInsufficientMemory;
 			LogHostError(hr);
@@ -3588,10 +3606,11 @@ static PaError OpenStream( struct PaUtilHostApiRepresentation *hostApi,
 		if (fullDuplex)
 			stream->in.streamFlags = 0; // polling interface is implemented for full-duplex mode also
 
-#if 1 // OpenMPT
-		if ((GetWindowsVersion() >= WINDOWS_7_SERVER2008R2) && (stream->in.shareMode == AUDCLNT_SHAREMODE_SHARED) && inputStreamInfo && (inputStreamInfo->flags & paWinWasapiAutoConvert)) // OpenMPT
-			stream->in.streamFlags |= 0x80000000 | 0x08000000; // AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM | AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY // OpenMPT
-#endif // OpenMPT
+		// Use built-in PCM converter (channel count and sample rate) if requested
+		if ((GetWindowsVersion() >= WINDOWS_7_SERVER2008R2) && 
+			(stream->in.shareMode == AUDCLNT_SHAREMODE_SHARED) && 
+			((inputStreamInfo != NULL) && (inputStreamInfo->flags & paWinWasapiAutoConvert)))
+			stream->in.streamFlags |= (AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM | AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY);
 
 		// Fill parameters for Audio Client creation
 		stream->in.params.device_info       = info;
@@ -3721,10 +3740,11 @@ static PaError OpenStream( struct PaUtilHostApiRepresentation *hostApi,
 		if (fullDuplex)
 			stream->out.streamFlags = 0; // polling interface is implemented for full-duplex mode also
 
-#if 1 // OpenMPT
-		if ((GetWindowsVersion() >= WINDOWS_7_SERVER2008R2) && (stream->out.shareMode == AUDCLNT_SHAREMODE_SHARED) && outputStreamInfo && (outputStreamInfo->flags & paWinWasapiAutoConvert)) // OpenMPT
-			stream->out.streamFlags |= 0x80000000 | 0x08000000; // AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM | AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY // OpenMPT
-#endif // OpenMPT
+		// Use built-in PCM converter (channel count and sample rate) if requested
+		if ((GetWindowsVersion() >= WINDOWS_7_SERVER2008R2) && 
+			(stream->out.shareMode == AUDCLNT_SHAREMODE_SHARED) && 
+			((outputStreamInfo != NULL) && (outputStreamInfo->flags & paWinWasapiAutoConvert)))
+			stream->out.streamFlags |= (AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM | AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY);
 
 		// Fill parameters for Audio Client creation
 		stream->out.params.device_info       = info;

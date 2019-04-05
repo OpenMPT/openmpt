@@ -78,16 +78,13 @@ typedef enum PaWasapiFlags
     /* force explicit sample format and do not allow PA to select suitable working format, API will
        fail if provided sample format is not supported by audio hardware in Exclusive mode
        or system mixer in Shared mode */
-    paWinWasapiExplicitSampleFormat     = (1 << 5)
+    paWinWasapiExplicitSampleFormat     = (1 << 5),
 
-#if 1 // OpenMPT
-    , // OpenMPT
-    /* allow API to insert system-level channel matrix mixer and sample rate converters to allow // OpenMPT
-       playback formats that do not match the current configured system settings. // OpenMPT
-       this is in particular required for streams not matching the system mixer samplerate. // OpenMPT
-       only applies in Shared mode. */ // OpenMPT
-    paWinWasapiAutoConvert              = (1 << 6) // OpenMPT
-#endif // OpenMPT
+    /* allow API to insert system-level channel matrix mixer and sample rate converter to allow
+       playback formats that do not match the current configured system settings.
+       this is in particular required for streams not matching the system mixer sample rate.
+       only applies in Shared mode. */
+    paWinWasapiAutoConvert              = (1 << 6)
 }
 PaWasapiFlags;
 #define paWinWasapiExclusive             (paWinWasapiExclusive)
@@ -96,9 +93,8 @@ PaWasapiFlags;
 #define paWinWasapiPolling               (paWinWasapiPolling)
 #define paWinWasapiThreadPriority        (paWinWasapiThreadPriority)
 #define paWinWasapiExplicitSampleFormat  (paWinWasapiExplicitSampleFormat)
-#if 1 // OpenMPT
-#define paWinWasapiAutoConvert           (paWinWasapiAutoConvert) // OpenMPT
-#endif // OpenMPT
+#define paWinWasapiAutoConvert           (paWinWasapiAutoConvert)
+
 
 /* Stream state.
 
