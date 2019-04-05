@@ -21,6 +21,7 @@
 
 #include "MPEGFrame.h"
 #include "OggStream.h"
+
 #if defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
 #include "../common/mptBufferIO.h"
 #endif

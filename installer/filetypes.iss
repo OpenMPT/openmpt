@@ -41,6 +41,7 @@ Name: "associate_exotic\mo3"; Description: "MO3 compressed modules (MO3)";
 Name: "associate_exotic\mt2"; Description: "MadTracker 2 (MT2)";
 Name: "associate_exotic\mtm"; Description: "MultiTracker Modules (MTM)";
 Name: "associate_exotic\okt"; Description: "Oktalyzer (OKT)";
+Name: "associate_exotic\oxm"; Description: "OggMod compressed (OXM)";
 Name: "associate_exotic\plm"; Description: "Disorder Tracker 2 (PLM)";
 Name: "associate_exotic\psm"; Description: "Epic Megagames MASI (PSM)";
 Name: "associate_exotic\pt36"; Description: "ProTracker 3.6 (PT36)";
@@ -92,6 +93,7 @@ Root: HKCR; Subkey: ".mo3"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 Root: HKCR; Subkey: ".mt2"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\mt2
 Root: HKCR; Subkey: ".mtm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\mtm
 Root: HKCR; Subkey: ".okt"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\okt
+Root: HKCR; Subkey: ".oxm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\oxm
 Root: HKCR; Subkey: ".plm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\plm
 Root: HKCR; Subkey: ".psm"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\psm
 Root: HKCR; Subkey: ".pt36"; ValueType: string; ValueName: ""; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: associate_exotic\pt36
@@ -167,6 +169,7 @@ Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociation
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mt2"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mtm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".okt"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".oxm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".plm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".psm"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Clients\Media\OpenMPT\Capabilities\FileAssociations"; ValueType: string; ValueName: ".pt36"; ValueData: "OpenMPTFile"; Flags: uninsdeletevalue; Tasks: not portable
@@ -216,6 +219,7 @@ Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; 
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".mt2"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".mtm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".okt"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
+Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".oxm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".plm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".psm"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable
 Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe\SupportedTypes"; ValueType: string; ValueName: ".pt36"; ValueData: ""; Flags: uninsdeletevalue; Tasks: not portable

@@ -97,6 +97,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	// converted formats (no MODTYPE)
 	{ MOD_TYPE_NONE, UL_("General Digital Music"),      "gdm" },
 	{ MOD_TYPE_NONE, UL_("Un4seen MO3"),                "mo3" },
+	{ MOD_TYPE_NONE, UL_("OggMod FastTracker 2"),       "oxm" },
 #ifndef NO_ARCHIVE_SUPPORT
 	// Compressed modules
 	{ MOD_TYPE_MOD,  UL_("Compressed ProTracker"),      "mdz" },

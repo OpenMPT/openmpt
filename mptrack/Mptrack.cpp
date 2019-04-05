@@ -1362,7 +1362,7 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt
 		.AllowMultiSelect()
 		.ExtensionFilter("All Modules|" + exts + ";mod.*"
 		"|"
-		"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz;*.mo3)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.pma;*.lzs;*.gz;*.mo3"
+		"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz;*.mo3)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.pma;*.lzs;*.gz;*.mo3;*.oxm"
 		"|"
 		"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15;*.stk;*.pt36|"
 		"ScreamTracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z|"
