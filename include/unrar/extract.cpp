@@ -616,10 +616,14 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
       }
 #endif
 
-      if (!TestMode && !Arc.BrokenHeader &&
-          (Arc.FileHead.PackSize<<11)>Arc.FileHead.UnpSize &&
+      uint64 Preallocated=0;
+      if (!TestMode && !Arc.BrokenHeader && Arc.FileHead.UnpSize>1000000 &&
+          Arc.FileHead.PackSize*1024>Arc.FileHead.UnpSize &&
           (Arc.FileHead.UnpSize<100000000 || Arc.FileLength()>Arc.FileHead.PackSize))
+      {
         CurFile.Prealloc(Arc.FileHead.UnpSize);
+        Preallocated=Arc.FileHead.UnpSize;
+      }
 
       CurFile.SetAllowDelete(!Cmd->KeepBroken);
 
@@ -739,8 +743,9 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
           (!LinkEntry || Arc.FileHead.RedirType==FSREDIR_FILECOPY && LinkSuccess) && 
           (!BrokenFile || Cmd->KeepBroken))
       {
-        // We could preallocate more space that really written to broken file.
-        if (BrokenFile)
+        // We could preallocate more space that really written to broken file
+        // or file with crafted header.
+        if (Preallocated>0 && (BrokenFile || DataIO.CurUnpWrite!=Preallocated))
           CurFile.Truncate();
 
 #if defined(_WIN_ALL) || defined(_EMX)
@@ -978,7 +983,11 @@ bool CmdExtract::ExtrGetPassword(Archive &Arc,const wchar *ArcFileName)
     if (!uiGetPassword(UIPASSWORD_FILE,ArcFileName,&Cmd->Password)/* || !Cmd->Password.IsSet()*/)
     {
       // Suppress "test is ok" message if user cancelled the password prompt.
-      uiMsg(UIERROR_INCERRCOUNT);
+// 2019.03.23: If some archives are tested ok and prompt is cancelled for others,
+// do we really need to suppress "test is ok"? Also if we set an empty password
+// and "Use for all archives" in WinRAR Ctrl+P and skip some encrypted archives.
+// We commented out this UIERROR_INCERRCOUNT for now.
+//      uiMsg(UIERROR_INCERRCOUNT);
       return false;
     }
     Cmd->ManualPassword=true;
@@ -1095,7 +1104,7 @@ void CmdExtract::ExtrCreateDir(Archive &Arc,const wchar *ArcFileName)
   {
 #if defined(_WIN_ALL) && !defined(SFX_MODULE)
     if (Cmd->SetCompressedAttr &&
-        (Arc.FileHead.FileAttr & FILE_ATTRIBUTE_COMPRESSED)!=0 && WinNT())
+        (Arc.FileHead.FileAttr & FILE_ATTRIBUTE_COMPRESSED)!=0 && WinNT()!=WNT_NONE)
       SetFileCompression(DestFileName,true);
 #endif
     SetFileHeaderExtra(Cmd,Arc,DestFileName);

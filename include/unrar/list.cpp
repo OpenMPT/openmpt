@@ -71,6 +71,7 @@ void ListArchive(CommandData *Cmd)
         *VolNumText=0;
         while(Arc.ReadHeader()>0)
         {
+          Wait(); // Allow quit listing with Ctrl+C.
           HEADER_TYPE HeaderType=Arc.GetHeaderType();
           if (HeaderType==HEAD_ENDARC)
           {

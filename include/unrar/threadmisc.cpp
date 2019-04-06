@@ -53,12 +53,22 @@ static struct GlobalPoolCreateSync
 
 ThreadPool* CreateThreadPool()
 {
+#ifdef RARDLL
+  // We use a simple thread pool, which does not allow to add tasks from
+  // different functions and threads in the same time. It is ok for RAR,
+  // but UnRAR.dll can be used in multithreaded environment. So we return
+  // a new pool for UnRAR.dll every time.
+  return new ThreadPool(MaxPoolThreads);
+#else
+  // Reuse the existing pool for RAR.
   CriticalSectionStart(&PoolCreateSync.CritSection); 
-
-  ThreadPool *Pool = new ThreadPool(MaxPoolThreads);
+  
+  if (GlobalPoolUseCount++ == 0)
+    GlobalPool=new ThreadPool(MaxPoolThreads);
 
   CriticalSectionEnd(&PoolCreateSync.CritSection); 
-  return Pool;
+  return GlobalPool;
+#endif
 }
 
 
@@ -66,11 +76,16 @@ void DestroyThreadPool(ThreadPool *Pool)
 {
   if (Pool!=NULL)
   {
+#ifdef RARDLL
+    delete Pool;
+#else
     CriticalSectionStart(&PoolCreateSync.CritSection); 
 
-    delete Pool;
+    if (Pool==GlobalPool && GlobalPoolUseCount > 0 && --GlobalPoolUseCount == 0)
+      delete GlobalPool;
 
     CriticalSectionEnd(&PoolCreateSync.CritSection); 
+#endif
   }
 }
 
@@ -159,9 +174,6 @@ uint GetNumberOfCPU()
   return sysctlbyname("hw.ncpu",&Count,&Size,NULL,0)==0 ? Count:1;
 #endif
 #else // !_UNIX
-#ifdef _WIN_UWP
-  return UwpGetCpuNumber();
-#else
   DWORD_PTR ProcessMask;
   DWORD_PTR SystemMask;
 
@@ -172,7 +184,6 @@ uint GetNumberOfCPU()
     if ((ProcessMask & Mask)!=0)
       Count++;
   return Count<1 ? 1:Count;
-#endif
 #endif
 
 #endif // RAR_SMP
