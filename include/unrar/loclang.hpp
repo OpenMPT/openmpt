@@ -85,7 +85,7 @@
 #define   MCHelpSwILOG       L"\n  ilog[name]    Log errors to file"
 #define   MCHelpSwINUL       L"\n  inul          Disable all messages"
 #define   MCHelpSwIOFF       L"\n  ioff[n]       Turn PC off after completing an operation"
-#define   MCHelpSwISND       L"\n  isnd          Control notification sounds"
+#define   MCHelpSwISND       L"\n  isnd[-]       Control notification sounds"
 #define   MCHelpSwIVER       L"\n  iver          Display the version number"
 #define   MCHelpSwK          L"\n  k             Lock archive"
 #define   MCHelpSwKB         L"\n  kb            Keep broken extracted files"

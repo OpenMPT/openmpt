@@ -128,16 +128,22 @@ void CommandData::SetTimeFilters(const wchar *Mod,bool Before,bool Age)
 {
   bool ModeOR=false,TimeMods=false;
   const wchar *S=Mod;
-  for (;wcschr(L"MCAOmcao",*S)!=NULL;S++)
+  // Check if any 'mca' modifiers are present, set OR mode if 'o' is present,
+  // skip modifiers and set S to beginning of time string. Be sure to check
+  // *S!=0, because termination 0 is a part of string for wcschr.
+  for (;*S!=0 && wcschr(L"MCAOmcao",*S)!=NULL;S++)
     if (*S=='o' || *S=='O')
       ModeOR=true;
     else
       TimeMods=true;
 
-  if (!TimeMods)
+  if (!TimeMods) // Assume 'm' if no modifiers are specified.
     Mod=L"m";
 
-  for (;wcschr(L"MCAOmcao",*Mod)!=NULL;Mod++)
+  // Set the specified time for every modifier. Be sure to check *Mod!=0,
+  // because termination 0 is a part of string for wcschr. This check is
+  // important when we set Mod to "m" above.
+  for (;*Mod!=0 && wcschr(L"MCAOmcao",*Mod)!=NULL;Mod++)
     switch(toupperw(*Mod))
     {
       case 'M': 

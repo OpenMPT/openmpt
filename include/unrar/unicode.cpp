@@ -70,7 +70,7 @@ bool WideToChar(const wchar *Src,char *Dest,size_t DestSize)
 #endif
   if (DestSize>0)
     Dest[DestSize-1]=0;
-  
+
   // We tried to return the empty string if conversion is failed,
   // but it does not work well. WideCharToMultiByte returns 'failed' code
   // and partially converted string even if we wanted to convert only a part
@@ -178,7 +178,7 @@ bool WideToCharMap(const wchar *Src,char *Dest,size_t DestSize,bool &Success)
 
 
 #if defined(_UNIX) && defined(MBFUNCTIONS)
-// Convert and map inconvertible Unicode characters. 
+// Convert and map inconvertible Unicode characters.
 // We use it for extended ASCII names in Unix.
 void CharToWideMap(const char *Src,wchar *Dest,size_t DestSize,bool &Success)
 {

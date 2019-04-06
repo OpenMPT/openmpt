@@ -204,7 +204,7 @@ size_t Archive::ReadHeader15()
     if (ShortBlock.HeaderType==HEAD_MAIN && (ShortBlock.Flags & MHD_COMMENT)!=0)
     {
       // Old style (up to RAR 2.9) main archive comment embedded into
-      // the main archive header found. While we can read the entire 
+      // the main archive header found. While we can read the entire
       // ShortBlock.HeadSize here and remove this part of "if", it would be
       // waste of memory, because we'll read and process this comment data
       // in other function anyway and we do not need them here now.
@@ -230,7 +230,7 @@ size_t Archive::ReadHeader15()
       Encrypted=(MainHead.Flags & MHD_PASSWORD)!=0;
       Signed=MainHead.PosAV!=0 || MainHead.HighPosAV!=0;
       MainHead.CommentInHeader=(MainHead.Flags & MHD_COMMENT)!=0;
-    
+
       // Only for encrypted 3.0+ archives. 2.x archives did not have this
       // flag, so for non-encrypted archives, we'll set it later based on
       // file attributes.
@@ -257,7 +257,7 @@ size_t Archive::ReadHeader15()
         hd->WinSize=hd->Dir ? 0:0x10000<<((hd->Flags & LHD_WINDOWMASK)>>5);
         hd->CommentInHeader=(hd->Flags & LHD_COMMENT)!=0;
         hd->Version=(hd->Flags & LHD_VERSION)!=0;
-        
+
         hd->DataSize=Raw.Get4();
         uint LowUnpSize=Raw.Get4();
         hd->HostOS=Raw.Get1();
@@ -282,7 +282,7 @@ size_t Archive::ReadHeader15()
           {
             case 13: hd->CryptMethod=CRYPT_RAR13; break;
             case 15: hd->CryptMethod=CRYPT_RAR15; break;
-            case 20: 
+            case 20:
             case 26: hd->CryptMethod=CRYPT_RAR20; break;
             default: hd->CryptMethod=CRYPT_RAR30; break;
           }
@@ -304,7 +304,7 @@ size_t Archive::ReadHeader15()
         }
 
         hd->Inherited=!FileBlock && (hd->SubFlags & SUBHEAD_FLAGS_INHERITED)!=0;
-        
+
         hd->LargeFile=(hd->Flags & LHD_LARGE)!=0;
 
         uint HighPackSize,HighUnpSize;
@@ -314,7 +314,7 @@ size_t Archive::ReadHeader15()
           HighUnpSize=Raw.Get4();
           hd->UnknownUnpSize=(LowUnpSize==0xffffffff && HighUnpSize==0xffffffff);
         }
-        else 
+        else
         {
           HighPackSize=HighUnpSize=0;
           // UnpSize equal to 0xffffffff without LHD_LARGE flag indicates
@@ -509,7 +509,7 @@ size_t Archive::ReadHeader15()
         NextBlockPos+=Raw.Get4();
       break;
   }
-  
+
   ushort HeaderCRC=Raw.GetCRC15(false);
 
   // Old AV header does not have header CRC properly set.
@@ -644,7 +644,7 @@ size_t Archive::ReadHeader50()
     BrokenHeaderMsg();
     return 0;
   }
-  
+
   Raw.Read(SizeToRead);
 
   if (Raw.Size()<HeaderSize)
@@ -677,7 +677,7 @@ size_t Archive::ReadHeader50()
       return 0;
     }
   }
-  
+
   uint64 ExtraSize=0;
   if ((ShortBlock.Flags & HFL_EXTRA)!=0)
   {
@@ -770,7 +770,7 @@ size_t Archive::ReadHeader50()
           // to not break normal archive processing by calling function.
           int64 SaveCurBlockPos=CurBlockPos,SaveNextBlockPos=NextBlockPos;
           HEADER_TYPE SaveCurHeaderType=CurHeaderType;
-          
+
           QOpen.Init(this,false);
           QOpen.Load(MainHead.QOpenOffset);
 
@@ -795,7 +795,7 @@ size_t Archive::ReadHeader50()
         hd->PackSize=DataSize;
         hd->FileFlags=(uint)Raw.GetV();
         hd->UnpSize=Raw.GetV();
-        
+
         hd->UnknownUnpSize=(hd->FileFlags & FHFL_UNPUNKNOWN)!=0;
         if (hd->UnknownUnpSize)
           hd->UnpSize=INT64NDF;
@@ -882,7 +882,7 @@ size_t Archive::ReadHeader50()
           RecoverySize=Header.RecSectionSize*Header.RecCount;
         }
 #endif
-          
+
         if (BadCRC) // Add the file name to broken header message displayed above.
           uiMsg(UIERROR_FHEADERBROKEN,Archive::FileName,hd->FileName);
       }
@@ -1307,7 +1307,7 @@ void Archive::ConvertAttributes()
 
   if (mask == (mode_t) -1)
   {
-    // umask call returns the current umask value. Argument (022) is not 
+    // umask call returns the current umask value. Argument (022) is not
     // really important here.
     mask = umask(022);
 
@@ -1384,8 +1384,8 @@ void Archive::ConvertFileHeader(FileHeader *hd)
 
     // ':' in file names is allowed in Unix, but not in Windows.
     // Even worse, file data will be written to NTFS stream on NTFS,
-    // so automatic name correction on file create error in extraction 
-    // routine does not work. In Windows and DOS versions we better 
+    // so automatic name correction on file create error in extraction
+    // routine does not work. In Windows and DOS versions we better
     // replace ':' now.
     if (*s==':')
       *s='_';
