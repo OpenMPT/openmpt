@@ -30,6 +30,43 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.28.04.00 (7 April 2019, revision 11524)
+------------------------------------------
+Tree view
+- [Fix] <js> MIDI Library preview did not preview the correct instruments for many soundfonts including GM.DLS.
+
+Sample tab
+- [Fix] <jh> FLAC: Tags were imported with incorrect character set.
+
+VST / DMO Plugins
+- [Fix] <js> Do not send MIDI volume or set dry / wet ratio on note-off. Old behaviour (this bug has gone unnoticed for more than ten years!) is retained through a compatibility setting that is only available for legacy files (http://forum.openmpt.org/index.php?topic=6115.0).
+
+S3M
+- [Mod] <js> Do not allow OPL3 waveforms in S3M files. Existing files with OPL3 waveforms are not affected.
+
+MOD
+- [Fix] <js> Sample swapping was always enabled since it has been separated from the ProTracker 1/2 compatibility flag. Now it is always enabled for Amiga-style modules and otherwise the old heuristic is used again (http://bugs.openmpt.org/view.php?id=1199).
+- [Fix] <js> Saving 16-bit stereo samples (which should be converted to 8-bit mono) was broken since OpenMPT 1.28.01.00.
+
+Other formats
+- [Imp] <js> M15: SoundTracker default tempo is no longer rounded.
+- [Fix] <js> MTM: Ignore some Exy commands on import (http://bugs.openmpt.org/view.php?id=1204).
+- [Fix] <js> Startrekker: Clamp speed to 31 ticks per row (http://bugs.openmpt.org/view.php?id=1201).
+
+Audio I/O
+- [Fix] <jh> Fix building Wine wrapper when RtAudio or PortAudio is not available (http://bugs.openmpt.org/view.php?id=1210).
+- [Fix] <jh> Fix RtAudio configuration for Wine wrapper (http://bugs.openmpt.org/view.php?id=1211).
+
+Misc
+- [Mod] <js> On Windows 10, OpenMPT prevented Windows from shutting down even when there were no unsaved files. On Windows Vista and newer, OpenMPT now shows the number of unsaved files when preventing a shutdown.
+- [Fix] <js> MIDI Export: Synchronize pitch wheel depth between instruments.
+- [Fix] <js> MIDI Export: "Don't export" didn't work as intended when the ignored instrument shared pattern channels with exported instruments.
+- [Fix] <js> Do not disable Reverb if /noAssembly command line switch is passed.
+
+Third-Party Libraries
+- [Imp] Update UnRAR (v5.7.4)
+
+
 v1.28.03.00 (10 February 2019, revision 11351)
 ----------------------------------------------
 Sample tab

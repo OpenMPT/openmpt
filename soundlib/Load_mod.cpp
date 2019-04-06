@@ -1526,8 +1526,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.restartPos != 0x78)
 	{
 		// Convert to CIA timing
-		//m_nDefaultTempo = TEMPO(((709378.92 / 50.0) * 125.0) / ((240 - fileHeader.restartPos) * 122.0));
-		m_nDefaultTempo.Set((709379 / ((240 - fileHeader.restartPos) * 122)) * 125 / 50);
+		m_nDefaultTempo = TEMPO((709379.0 * 125.0 / 50.0) / ((240 - fileHeader.restartPos) * 122.0));
 		if(minVersion > UST1_80)
 		{
 			// D.O.C. SoundTracker IX re-introduced the variable tempo after some other versions dropped it.
