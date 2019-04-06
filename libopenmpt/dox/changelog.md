@@ -9,6 +9,13 @@ is just a high-level summary.
 
  *  [**Bug**] Channel VU meters were swapped.
 
+ *  Startrekker: Clamp speed to 31 ticks per row.
+ *  MTM: Ignore unused Exy commands on import. Command E5x (Set Finetune) is now
+    applied correctly.
+ *  MOD: Sample swapping was always enabled since it has been separated from the
+    ProTracker 1/2 compatibility flag. Now it is always enabled for Amiga-style
+    modules and otherwise the old heuristic is used again.
+
  *  stb_vorbis: Update to v1.16 (2019-03-05).
 
 ### libopenmpt 0.4.3 (2019-02-11)

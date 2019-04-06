@@ -50,7 +50,7 @@ MOD
 
 Other formats
 - [Imp] <js> M15: SoundTracker default tempo is no longer rounded.
-- [Fix] <js> MTM: Ignore some Exy commands on import (http://bugs.openmpt.org/view.php?id=1204).
+- [Fix] <js> MTM: Ignore unused Exy commands on import (http://bugs.openmpt.org/view.php?id=1204).
 - [Fix] <js> Startrekker: Clamp speed to 31 ticks per row (http://bugs.openmpt.org/view.php?id=1201).
 
 Audio I/O
