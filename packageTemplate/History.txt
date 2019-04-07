@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.04.00 (7 April 2019, revision 11524)
+v1.28.04.00 (7 April 2019, revision 11527)
 ------------------------------------------
 Tree view
 - [Fix] <js> MIDI Library preview did not preview the correct instruments for many soundfonts including GM.DLS.
@@ -61,7 +61,7 @@ Misc
 - [Mod] <js> On Windows 10, OpenMPT prevented Windows from shutting down even when there were no unsaved files. On Windows Vista and newer, OpenMPT now shows the number of unsaved files when preventing a shutdown.
 - [Fix] <js> MIDI Export: Synchronize pitch wheel depth between instruments.
 - [Fix] <js> MIDI Export: "Don't export" didn't work as intended when the ignored instrument shared pattern channels with exported instruments.
-- [Fix] <js> Do not disable Reverb if /noAssembly command line switch is passed.
+- [Fix] <jh> Do not disable Reverb if /noAssembly command line switch is passed.
 
 Third-Party Libraries
 - [Imp] Update UnRAR (v5.7.4)
