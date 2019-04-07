@@ -1,4 +1,4 @@
-OpenMPT - Full Version History
+﻿OpenMPT - Full Version History
 ------------------------------
 
 - [New]    : new feature
@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.04.00 (7 April 2019, revision 11527)
+v1.28.04.00 (7 April 2019, revision 11528)
 ------------------------------------------
 Tree view
 - [Fix] <js> MIDI Library preview did not preview the correct instruments for many soundfonts including GM.DLS.

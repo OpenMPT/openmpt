@@ -1,5 +1,5 @@
-OpenMPT 1.27
-============
+Open ModPlug Tracker
+====================
 
 
 Uninstallation
@@ -52,9 +52,10 @@ Package contents
 * Configuration Files (link): Opens settings folder (%APPDATA\OpenMPT) if not installed in portable mode.
 * OpenMPT_SoundTouch_f32.dll: SoundTouch library used for time stretching.
 * readme.txt: This document.
+* openmpt-lame.dll: MP3 encoder for stream export.
 * openmpt-mpg123.dll: Optional component for MPEG sample support in the sample editor and MO3 format if Media Foundation codecs are not available.
 * openmpt-wine-support.zip: Optional component for sound device integration into Wine on Linux systems
-* OMPT_1.27_ReleaseNotes.html: Release notes for this version.
+* OMPT_1.28_ReleaseNotes.html: Release notes for this version.
 
 
 License
