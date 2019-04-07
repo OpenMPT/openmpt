@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.2-beta39
+
 ### libopenmpt 0.2-beta38 (2019-04-07)
 
  *  [**Bug**] Channel VU meters were swapped.
