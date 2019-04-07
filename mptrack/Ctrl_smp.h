@@ -28,7 +28,7 @@ MPT_DECLARE_ENUM(OpenSampleTypes)
 class CCtrlSamples: public CModControlDlg
 {
 protected:
-	friend class CDoPitchShiftTimeStretch;
+	friend class DoPitchShiftTimeStretch;
 
 	struct SampleSelectionPoints
 	{
