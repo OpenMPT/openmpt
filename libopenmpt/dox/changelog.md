@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**Bug**] Channel VU meters were swapped.
 
+ *  Startrekker: Clamp speed to 31 ticks per row.
+
  *  miniz: Update to v2.0.8 (2018-09-19).
  *  stb_vorbis: Update to v1.16 (2019-03-05).
 
