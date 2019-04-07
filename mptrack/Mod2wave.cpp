@@ -150,10 +150,10 @@ BOOL CWaveConvert::OnInitDialog()
 	const SEQUENCEINDEX numSequences = m_SndFile.Order.GetNumSequences();
 	const BOOL enableSeq = numSequences > 1 ? TRUE : FALSE;
 	GetDlgItem(IDC_RADIO3)->EnableWindow(enableSeq);
-	m_SpinMinSequence.SetRange32(0, numSequences - 1);
-	m_SpinMaxSequence.SetRange32(0, numSequences - 1);
-	SetDlgItemInt(IDC_EDIT12, m_Settings.minSequence);
-	SetDlgItemInt(IDC_EDIT13, m_Settings.maxSequence);
+	m_SpinMinSequence.SetRange32(1, numSequences);
+	m_SpinMaxSequence.SetRange32(1, numSequences);
+	SetDlgItemInt(IDC_EDIT12, m_Settings.minSequence + 1);
+	SetDlgItemInt(IDC_EDIT13, m_Settings.maxSequence + 1);
 
 	SetDlgItemInt(IDC_EDIT5, m_Settings.repeatCount, FALSE);
 	m_SpinLoopCount.SetRange32(1, int16_max);
@@ -701,16 +701,19 @@ void CWaveConvert::OnOK()
 		// Play selection
 		m_Settings.minOrder = static_cast<ORDERINDEX>(GetDlgItemInt(IDC_EDIT3, NULL, FALSE));
 		m_Settings.maxOrder = static_cast<ORDERINDEX>(GetDlgItemInt(IDC_EDIT4, NULL, FALSE));
-	}
-	if(!selection || m_Settings.maxOrder < m_Settings.minOrder)
+		if(m_Settings.minOrder > m_Settings.maxOrder)
+			std::swap(m_Settings.minOrder, m_Settings.maxOrder);
+	} else
 	{
 		m_Settings.minOrder = m_Settings.maxOrder = ORDERINDEX_INVALID;
 	}
 	if(IsDlgButtonChecked(IDC_RADIO3))
 	{
-		SEQUENCEINDEX maxSequence = m_SndFile.Order.GetNumSequences() - 1;
-		m_Settings.minSequence = std::min(mpt::saturate_cast<SEQUENCEINDEX>(GetDlgItemInt(IDC_EDIT12, NULL, FALSE)), maxSequence);
-		m_Settings.maxSequence = std::min(mpt::saturate_cast<SEQUENCEINDEX>(GetDlgItemInt(IDC_EDIT13, NULL, FALSE)), maxSequence);
+		const UINT maxSequence = m_SndFile.Order.GetNumSequences();
+		m_Settings.minSequence = static_cast<SEQUENCEINDEX>(std::clamp(GetDlgItemInt(IDC_EDIT12, NULL, FALSE), 1u, maxSequence) - 1u);
+		m_Settings.maxSequence = static_cast<SEQUENCEINDEX>(std::clamp(GetDlgItemInt(IDC_EDIT13, NULL, FALSE), 1u, maxSequence) - 1u);
+		if(m_Settings.minSequence > m_Settings.maxSequence)
+			std::swap(m_Settings.minSequence, m_Settings.maxSequence);
 	} else
 	{
 		m_Settings.minSequence = m_Settings.maxSequence = m_SndFile.Order.GetCurrentSequenceIndex();

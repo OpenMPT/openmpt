@@ -443,7 +443,7 @@ bool ModSequenceSet::MergeSequences()
 		const ORDERINDEX lengthTrimmed = seq.GetLengthTailTrimmed();
 		if(firstOrder + lengthTrimmed > m_sndFile.GetModSpecifications().ordersMax)
 		{
-			m_sndFile.AddToLog(mpt::format("WARNING: Cannot merge Sequence %1 (too long!)")(seqNum));
+			m_sndFile.AddToLog(mpt::format("WARNING: Cannot merge Sequence %1 (too long!)")(seqNum + 1));
 			continue;
 		}
 		firstSeq.reserve(firstOrder + lengthTrimmed);

@@ -1069,9 +1069,9 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 			{
 				CString str;
 				if(sndFile.Order(i).GetName().empty())
-					str.Format(_T("Sequence %u"), i);
+					str.Format(_T("Sequence %u"), i + 1);
 				else
-					str.Format(_T("%u: %s"), i, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Order(i).GetName()).GetString());
+					str.Format(_T("%u: %s"), i + 1, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Order(i).GetName()).GetString());
 				const UINT flags = (sndFile.Order.GetCurrentSequenceIndex() == i) ? MF_STRING|MF_CHECKED : MF_STRING;
 				AppendMenu(menuSequence, flags, ID_SEQUENCE_ITEM + i, str);
 			}
@@ -1393,7 +1393,7 @@ void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
 	if(nSeq == MAX_SEQUENCES + 2)
 	{
 		SEQUENCEINDEX curSeq = sndFile.Order.GetCurrentSequenceIndex();
-		mpt::ustring str = mpt::format(U_("Delete sequence %1: %2?"))(curSeq, mpt::ToUnicode(mpt::CharsetLocale, Order().GetName()));
+		mpt::ustring str = mpt::format(U_("Delete sequence %1: %2?"))(curSeq + 1, mpt::ToUnicode(mpt::CharsetLocale, Order().GetName()));
 		if (Reporting::Confirm(str) == cnfYes)
 			sndFile.Order.RemoveSequence(curSeq);
 		else

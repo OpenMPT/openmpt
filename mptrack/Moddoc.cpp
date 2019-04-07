@@ -1617,7 +1617,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			fileNameAdd.clear();
 			if(wsdlg.m_Settings.minSequence != wsdlg.m_Settings.maxSequence)
 			{
-				fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<2>(seq));
+				fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<2>(seq + 1));
 				std::string seqName = m_SndFile.Order(seq).GetName();
 				if(!seqName.empty())
 				{

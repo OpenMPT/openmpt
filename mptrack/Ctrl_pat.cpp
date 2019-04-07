@@ -173,8 +173,8 @@ BOOL CCtrlPatterns::OnInitDialog()
 	SetDlgItemInt(IDC_EDIT_SPACING, TrackerSettings::Instance().gnPatternSpacing);
 	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));
 
-	m_SpinSequence.SetRange32(0, m_sndFile.Order.GetNumSequences() - 1);
-	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
+	m_SpinSequence.SetRange32(1, m_sndFile.Order.GetNumSequences());
+	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex() + 1);
 	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.Order().GetName()));
 
 	m_OrderList.SetFocus();
@@ -229,8 +229,8 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 	{
 		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.Order().GetName()));
 
-		m_SpinSequence.SetRange(0, m_sndFile.Order.GetNumSequences() - 1);
-		m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex());
+		m_SpinSequence.SetRange(1, m_sndFile.Order.GetNumSequences());
+		m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex() + 1);
 
 		// Enable/disable multisequence controls according the current modtype.
 		const BOOL isMultiSeqAvail = (m_sndFile.GetModSpecifications().sequencesMax > 1 || m_sndFile.Order.GetNumSequences() > 1) ? TRUE : FALSE;
@@ -554,14 +554,14 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		PATTERNINDEX nPat = (PATTERNINDEX)(lParam & 0x7FFF);
 		if(m_sndFile.Patterns.IsValidIndex(nPat))
 		{
-			for (SEQUENCEINDEX nSeq = 0; nSeq < m_sndFile.Order.GetNumSequences(); nSeq++)
+			for (SEQUENCEINDEX seq = 0; seq < m_sndFile.Order.GetNumSequences(); seq++)
 			{
-				for (ORDERINDEX nOrd = 0; nOrd < m_sndFile.Order(nSeq).GetLength(); nOrd++)
+				for (ORDERINDEX ord = 0; ord < m_sndFile.Order(seq).GetLength(); ord++)
 				{
-					if (m_sndFile.Order(nSeq)[nOrd] == nPat)
+					if (m_sndFile.Order(seq)[ord] == nPat)
 					{
-						m_OrderList.SelectSequence(nSeq);
-						m_OrderList.SetCurSel(nOrd, true);
+						m_OrderList.SelectSequence(seq);
+						m_OrderList.SetCurSel(ord, true);
 						break;
 					}
 				}
@@ -572,15 +572,15 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 	else if ((lParam & 0x80000000))
 	{
 		// Order item
-		ORDERINDEX nOrd = (ORDERINDEX)(lParam & 0xFFFF);
-		SEQUENCEINDEX nSeq = (SEQUENCEINDEX)((lParam >> 16) & 0x7FFF);
-		if(nSeq < m_sndFile.Order.GetNumSequences())
+		auto ord = static_cast<ORDERINDEX>(lParam & 0xFFFF);
+		auto  seq = static_cast<SEQUENCEINDEX>((lParam >> 16) & 0x7FFF);
+		if(seq < m_sndFile.Order.GetNumSequences())
 		{
-			m_OrderList.SelectSequence(nSeq);
-			if((nOrd < m_sndFile.Order().size()))
+			m_OrderList.SelectSequence(seq);
+			if((ord < m_sndFile.Order().size()))
 			{
-				m_OrderList.SetCurSel(nOrd);
-				SetCurrentPattern(m_sndFile.Order()[nOrd]);
+				m_OrderList.SetCurSel(ord);
+				SetCurrentPattern(m_sndFile.Order()[ord]);
 			}
 		}
 	}
@@ -1141,16 +1141,15 @@ void CCtrlPatterns::OnSequenceNumChanged()
 {
 	if ((m_EditSequence.m_hWnd) && (m_EditSequence.GetWindowTextLength() > 0))
 	{
-		SEQUENCEINDEX newSeq = (SEQUENCEINDEX)GetDlgItemInt(IDC_EDIT_SEQNUM);
+		SEQUENCEINDEX newSeq = static_cast<SEQUENCEINDEX>(GetDlgItemInt(IDC_EDIT_SEQNUM) - 1);
 
-		// avoid reloading the order list and thus setting the document modified
 		if(newSeq == m_sndFile.Order.GetCurrentSequenceIndex())
 			return;
 
-		if (newSeq >= MAX_SEQUENCES)
+		if(newSeq >= m_sndFile.Order.GetNumSequences())
 		{
-			newSeq = MAX_SEQUENCES - 1;
-			SetDlgItemInt(IDC_EDIT_SEQNUM, MAX_SEQUENCES - 1, FALSE);
+			newSeq = m_sndFile.Order.GetNumSequences() - 1;
+			SetDlgItemInt(IDC_EDIT_SEQNUM, newSeq + 1, FALSE);
 		}
 		m_OrderList.SelectSequence(newSeq);
 	}

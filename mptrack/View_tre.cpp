@@ -908,13 +908,13 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		}
 
 		// If there are too many sequences, delete them.
-		for(size_t nSeq = sndFile.Order.GetNumSequences(); nSeq < info.tiSequences.size(); nSeq++) if (info.tiSequences[nSeq])
+		for(size_t seq = sndFile.Order.GetNumSequences(); seq < info.tiSequences.size(); seq++) if (info.tiSequences[seq])
 		{
-			for(auto &ord : info.tiOrders[nSeq]) if (ord)
+			for(auto &ord : info.tiOrders[seq]) if (ord)
 			{
 				DeleteItem(ord); ord = nullptr;
 			}
-			DeleteItem(info.tiSequences[nSeq]); info.tiSequences[nSeq] = nullptr;
+			DeleteItem(info.tiSequences[seq]); info.tiSequences[seq] = nullptr;
 		}
 		if (info.tiSequences.size() < sndFile.Order.GetNumSequences()) // Resize tiSequences if needed.
 		{
@@ -941,75 +941,75 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 
 		// go through all sequences
 		CString seqName;
-		for(SEQUENCEINDEX nSeq = nSeqMin; nSeq <= nSeqMax; nSeq++)
+		for(SEQUENCEINDEX seq = nSeqMin; seq <= nSeqMax; seq++)
 		{
 			if(sndFile.Order.GetNumSequences() > 1)
 			{
 				// more than one sequence -> add folder
-				if(sndFile.Order(nSeq).GetName().empty())
+				if(sndFile.Order(seq).GetName().empty())
 				{
-					seqName.Format(_T("Sequence %u"), nSeq);
+					seqName.Format(_T("Sequence %u"), seq + 1);
 				} else
 				{
-					seqName.Format(_T("%u: "), nSeq);
-					seqName += sndFile.Order(nSeq).GetName().c_str();
+					seqName.Format(_T("%u: "), seq + 1);
+					seqName += sndFile.Order(seq).GetName().c_str();
 				}
 
-				UINT state = (nSeq == sndFile.Order.GetCurrentSequenceIndex()) ? TVIS_BOLD : 0;
+				UINT state = (seq == sndFile.Order.GetCurrentSequenceIndex()) ? TVIS_BOLD : 0;
 
-				if(info.tiSequences[nSeq] == NULL)
+				if(info.tiSequences[seq] == NULL)
 				{
-					info.tiSequences[nSeq] = InsertItem(seqName, IMAGE_FOLDER, IMAGE_FOLDER, info.hOrders, TVI_LAST);
+					info.tiSequences[seq] = InsertItem(seqName, IMAGE_FOLDER, IMAGE_FOLDER, info.hOrders, TVI_LAST);
 				}
 				// Update bold item
 				_tcscpy(stmp, seqName);
 				tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE | TVIF_PARAM;
 				tvi.state = 0;
 				tvi.stateMask = TVIS_BOLD;
-				tvi.hItem = info.tiSequences[nSeq];
+				tvi.hItem = info.tiSequences[seq];
 				tvi.pszText = stmp;
 				tvi.cchTextMax = CountOf(stmp);
-				LPARAM param = (nSeq << SEQU_SHIFT) | ORDERINDEX_INVALID;
+				LPARAM param = (seq << SEQU_SHIFT) | ORDERINDEX_INVALID;
 				GetItem(&tvi);
 				if(tvi.state != state || tvi.pszText != seqName || tvi.lParam != param)
-					SetItem(info.tiSequences[nSeq], TVIF_TEXT | TVIF_STATE | TVIF_PARAM, seqName, 0, 0, state, TVIS_BOLD, param);
+					SetItem(info.tiSequences[seq], TVIF_TEXT | TVIF_STATE | TVIF_PARAM, seqName, 0, 0, state, TVIS_BOLD, param);
 
-				hAncestorNode = info.tiSequences[nSeq];
+				hAncestorNode = info.tiSequences[seq];
 			}
 
-			const ORDERINDEX ordLength = sndFile.Order(nSeq).GetLengthTailTrimmed();
+			const ORDERINDEX ordLength = sndFile.Order(seq).GetLengthTailTrimmed();
 			// If there are items past the new sequence length, delete them.
-			for(size_t nOrd = ordLength; nOrd < info.tiOrders[nSeq].size(); nOrd++) if (info.tiOrders[nSeq][nOrd])
+			for(size_t nOrd = ordLength; nOrd < info.tiOrders[seq].size(); nOrd++) if (info.tiOrders[seq][nOrd])
 			{
-				DeleteItem(info.tiOrders[nSeq][nOrd]); info.tiOrders[nSeq][nOrd] = NULL;
+				DeleteItem(info.tiOrders[seq][nOrd]); info.tiOrders[seq][nOrd] = NULL;
 			}
-			if (info.tiOrders[nSeq].size() < ordLength) // Resize tiOrders if needed.
-				info.tiOrders[nSeq].resize(ordLength, nullptr);
+			if (info.tiOrders[seq].size() < ordLength) // Resize tiOrders if needed.
+				info.tiOrders[seq].resize(ordLength, nullptr);
 			const bool patNamesOnly = patternHint.GetType()[HINT_PATNAMES];
 
 			//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < sndFile.Order().GetLength())) imin = imax = dwHintParam;
 			CString patName;
 			for (ORDERINDEX iOrd = 0; iOrd < ordLength; iOrd++)
 			{
-				if(patNamesOnly && sndFile.Order(nSeq)[iOrd] != nPat)
+				if(patNamesOnly && sndFile.Order(seq)[iOrd] != nPat)
 					continue;
-				UINT state = (iOrd == info.nOrdSel && nSeq == info.nSeqSel) ? TVIS_BOLD : 0;
-				if (sndFile.Order(nSeq)[iOrd] < sndFile.Patterns.Size())
+				UINT state = (iOrd == info.nOrdSel && seq == info.nSeqSel) ? TVIS_BOLD : 0;
+				if (sndFile.Order(seq)[iOrd] < sndFile.Patterns.Size())
 				{
-					patName = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Patterns[sndFile.Order(nSeq)[iOrd]].GetName());
+					patName = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Patterns[sndFile.Order(seq)[iOrd]].GetName());
 					if(!patName.IsEmpty())
 					{
 						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? _T("[%02Xh] %u: ") : _T("[%02u] %u: "),
-							iOrd, sndFile.Order(nSeq)[iOrd]);
+							iOrd, sndFile.Order(seq)[iOrd]);
 						_tcscat(s, patName.GetString());
 					} else
 					{
 						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? _T("[%02Xh] Pattern %u") : _T("[%02u] Pattern %u"),
-							iOrd, sndFile.Order(nSeq)[iOrd]);
+							iOrd, sndFile.Order(seq)[iOrd]);
 					}
 				} else
 				{
-					if(sndFile.Order(nSeq)[iOrd] == sndFile.Order.GetIgnoreIndex())
+					if(sndFile.Order(seq)[iOrd] == sndFile.Order.GetIgnoreIndex())
 					{
 						// +++ Item
 						wsprintf(s, _T("[%02u] Skip"), iOrd);
@@ -1020,21 +1020,21 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					}
 				}
 
-				LPARAM param = (nSeq << SEQU_SHIFT) | iOrd;
-				if (info.tiOrders[nSeq][iOrd])
+				LPARAM param = (seq << SEQU_SHIFT) | iOrd;
+				if (info.tiOrders[seq][iOrd])
 				{
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE;
 					tvi.state = 0;
 					tvi.stateMask = TVIS_BOLD;
-					tvi.hItem = info.tiOrders[nSeq][iOrd];
+					tvi.hItem = info.tiOrders[seq][iOrd];
 					tvi.pszText = stmp;
 					tvi.cchTextMax = CountOf(stmp);
 					GetItem(&tvi);
 					if(tvi.state != state || _tcscmp(s, stmp))
-						SetItem(info.tiOrders[nSeq][iOrd], TVIF_TEXT | TVIF_STATE | TVIF_PARAM, s, 0, 0, state, TVIS_BOLD, param);
+						SetItem(info.tiOrders[seq][iOrd], TVIF_TEXT | TVIF_STATE | TVIF_PARAM, s, 0, 0, state, TVIS_BOLD, param);
 				} else
 				{
-					info.tiOrders[nSeq][iOrd] = InsertItem(TVIF_HANDLE | TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, IMAGE_PARTITION, IMAGE_PARTITION, 0, 0, param, hAncestorNode, TVI_LAST);
+					info.tiOrders[seq][iOrd] = InsertItem(TVIF_HANDLE | TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, IMAGE_PARTITION, IMAGE_PARTITION, 0, 0, param, hAncestorNode, TVI_LAST);
 				}
 			}
 		}
@@ -1639,7 +1639,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 	case MODITEM_SEQUENCE:
 		{
 			const SEQUENCEINDEX seq = static_cast<SEQUENCEINDEX>(modItemID);
-			if(Reporting::Confirm(TreeDeletionString(*sndFile, UL_("sequence"), seq, sndFile->Order(seq).GetName()), false, true) == cnfNo) break;
+			if(Reporting::Confirm(TreeDeletionString(*sndFile, UL_("sequence"), seq + 1, sndFile->Order(seq).GetName()), false, true) == cnfNo) break;
 			sndFile->Order.RemoveSequence(seq);
 			modDoc->UpdateAllViews(nullptr, SequenceHint().Data());
 		}
@@ -1872,13 +1872,12 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 			// Avoid adding the same images again and again...
 			images.SetImageCount(IMGLIST_NUMIMAGES);
 
-			TCHAR s[16];
-			_tcscpy(s, _T("?:\\"));
-			for(UINT iDrive = 'A'; iDrive <= 'Z'; iDrive++)
+			TCHAR s[] = _T("?:\\");
+			for(int drive = 'A'; drive <= 'Z'; drive++)
 			{
-				s[0] = (TCHAR)iDrive;
-				UINT nDriveType = GetDriveType(s);
-				if(nDriveType != DRIVE_UNKNOWN && nDriveType != DRIVE_NO_ROOT_DIR)
+				s[0] = static_cast<TCHAR>(drive);
+				auto driveType = GetDriveType(s);
+				if(driveType != DRIVE_UNKNOWN && driveType != DRIVE_NO_ROOT_DIR)
 				{
 					SHFILEINFO fileInfo;
 					SHGetFileInfo(s, 0, &fileInfo, sizeof(fileInfo), SHGFI_ICON | SHGFI_SMALLICON);
