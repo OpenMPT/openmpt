@@ -535,6 +535,12 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	CriticalSection cs;
 	m_SndFile.ChangeModTypeTo(nNewType);
 
+	if(m_SndFile.Order.CanSplitSubsongs() && Reporting::Confirm("The order list contains separator items.\nThe new format supports multiple sequences. Do you want to split the sequence at the separators into multiple song sequences?",
+		"Order list conversion", false, true) == cnfYes)
+	{
+		m_SndFile.Order.SplitSubsongsToMultipleSequences();
+	}
+
 	// In case we need to update IT bidi loop handling pre-computation or loops got changed...
 	m_SndFile.PrecomputeSampleLoops(false);
 

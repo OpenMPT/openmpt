@@ -108,6 +108,8 @@ public:
 #ifdef MODPLUG_TRACKER
 	// Check if a playback position is currently locked (inaccessible)
 	bool IsPositionLocked(ORDERINDEX position) const;
+	// Check if this sequence has subsongs separated by invalid ("---" or non-existing) patterns
+	bool HasSubsongs() const;
 #endif // MODPLUG_TRACKER
 
 	// Sequence name setter / getter
@@ -164,11 +166,13 @@ public:
 #ifdef MODPLUG_TRACKER
 	// Adjust sequence when converting between module formats
 	void OnModTypeChanged(MODTYPE oldType);
+	// Check if there is a single sequences that qualifies for subsong splitting
+	bool CanSplitSubsongs() const;
 	// If there are subsongs (separated by "---" patterns) in the module,
 	// asks user whether to convert these into multiple sequences (given that the 
 	// modformat supports multiple sequences).
 	// Returns true if sequences were modified, false otherwise.
-	bool ConvertSubsongsToMultipleSequences();
+	bool SplitSubsongsToMultipleSequences();
 
 	// Convert the sequence's restart position information to a pattern command.
 	bool RestartPosToPattern(SEQUENCEINDEX seq);

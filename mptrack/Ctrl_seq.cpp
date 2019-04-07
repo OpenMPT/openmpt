@@ -24,6 +24,15 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+enum SequenceAction : SEQUENCEINDEX
+{
+	kAddSequence = MAX_SEQUENCES,
+	kDuplicateSequence,
+	kDeleteSequence,
+	kSplitSequence,
+
+	kMaxSequenceActions
+};
 
 // Little helper function to avoid copypasta
 static bool IsSelectionKeyPressed() { return CMainFrame::GetInputHandler()->SelectionPressed(); }
@@ -86,7 +95,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_SETRESTARTPOS,				&COrderList::OnSetRestartPos)
 	ON_COMMAND(ID_ORDERLIST_LOCKPLAYBACK,		&COrderList::OnLockPlayback)
 	ON_COMMAND(ID_ORDERLIST_UNLOCKPLAYBACK,		&COrderList::OnUnlockPlayback)
-	ON_COMMAND_RANGE(ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 2, &COrderList::OnSelectSequence)
+	ON_COMMAND_RANGE(ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + kMaxSequenceActions - 1, &COrderList::OnSelectSequence)
 	ON_MESSAGE(WM_MOD_DRAGONDROPPING,			&COrderList::OnDragonDropping)
 	ON_MESSAGE(WM_HELPHITTEST,					&COrderList::OnHelpHitTest)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,				&COrderList::OnCustomKeyMsg)
@@ -1062,7 +1071,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 			AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
 
 			HMENU menuSequence = ::CreatePopupMenu();
-			AppendMenu(hMenu, MF_POPUP, (UINT_PTR)menuSequence, _T("Sequences"));
+			AppendMenu(hMenu, MF_POPUP, (UINT_PTR)menuSequence, _T("&Sequences"));
 			
 			const SEQUENCEINDEX numSequences = sndFile.Order.GetNumSequences();
 			for(SEQUENCEINDEX i = 0; i < numSequences; i++)
@@ -1075,13 +1084,15 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 				const UINT flags = (sndFile.Order.GetCurrentSequenceIndex() == i) ? MF_STRING|MF_CHECKED : MF_STRING;
 				AppendMenu(menuSequence, flags, ID_SEQUENCE_ITEM + i, str);
 			}
-			if (sndFile.Order.GetNumSequences() < MAX_SEQUENCES)
+			if (sndFile.Order.GetNumSequences() < sndFile.GetModSpecifications().sequencesMax)
 			{
-				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES, _T("&Duplicate current sequence"));
-				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 1, _T("&Create empty sequence"));
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + kDuplicateSequence, _T("&Duplicate current sequence"));
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + kAddSequence, _T("&Create empty sequence"));
 			}
 			if (sndFile.Order.GetNumSequences() > 1)
-				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + MAX_SEQUENCES + 2, _T("D&elete current sequence"));
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + kDeleteSequence, _T("D&elete current sequence"));
+			else
+				AppendMenu(menuSequence, MF_STRING, ID_SEQUENCE_ITEM + kSplitSequence, _T("&Split sub songs into sequences"));
 		}
 	}
 	AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
@@ -1383,30 +1394,41 @@ ORDERINDEX COrderList::SetMargins(int i)
 }
 
 
-void COrderList::SelectSequence(const SEQUENCEINDEX nSeq)
+void COrderList::SelectSequence(const SEQUENCEINDEX seq)
 {
 	CriticalSection cs;
 
 	CMainFrame::GetMainFrame()->ResetNotificationBuffer();
 	CSoundFile &sndFile = m_pModDoc.GetSoundFile();
-	const bool editSequence = nSeq >= sndFile.Order.GetNumSequences();
-	if(nSeq == MAX_SEQUENCES + 2)
+	const bool editSequence = seq >= sndFile.Order.GetNumSequences();
+	if(seq == kSplitSequence)
+	{
+		if(!sndFile.Order.CanSplitSubsongs())
+		{
+			Reporting::Information(U_("No sub songs have been found in this sequence."));
+			return;
+		}
+		if(Reporting::Confirm(U_("The order list contains separator items.\nDo you want to split the sequence at the separators into multiple song sequences?")) != cnfYes)
+			return;
+		if(!sndFile.Order.SplitSubsongsToMultipleSequences())
+			return;
+	} else if(seq == kDeleteSequence)
 	{
 		SEQUENCEINDEX curSeq = sndFile.Order.GetCurrentSequenceIndex();
-		mpt::ustring str = mpt::format(U_("Delete sequence %1: %2?"))(curSeq + 1, mpt::ToUnicode(mpt::CharsetLocale, Order().GetName()));
+		mpt::ustring str = mpt::format(U_("Remove sequence %1: %2?"))(curSeq + 1, mpt::ToUnicode(mpt::CharsetLocale, Order().GetName()));
 		if (Reporting::Confirm(str) == cnfYes)
 			sndFile.Order.RemoveSequence(curSeq);
 		else
 			return;
 	}
-	else if(nSeq == sndFile.Order.GetCurrentSequenceIndex())
+	else if(seq == sndFile.Order.GetCurrentSequenceIndex())
 		return;
-	else if(nSeq == MAX_SEQUENCES || nSeq == MAX_SEQUENCES + 1)
-		sndFile.Order.AddSequence((nSeq == MAX_SEQUENCES));
-	else if(nSeq < sndFile.Order.GetNumSequences())
-		sndFile.Order.SetSequence(nSeq);
-	ORDERINDEX nPosCandidate = Order().GetLengthTailTrimmed() - 1;
-	SetCurSel(std::min(m_nScrollPos, nPosCandidate), true, false, true);
+	else if(seq == kAddSequence || seq == kDuplicateSequence)
+		sndFile.Order.AddSequence((seq == kDuplicateSequence));
+	else if(seq < sndFile.Order.GetNumSequences())
+		sndFile.Order.SetSequence(seq);
+	ORDERINDEX posCandidate = Order().GetLengthTailTrimmed() - 1;
+	SetCurSel(std::min(m_nScrollPos, posCandidate), true, false, true);
 	m_pParent.SetCurrentPattern(Order()[m_nScrollPos]);
 
 	UpdateScrollInfo();
