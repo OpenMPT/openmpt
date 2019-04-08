@@ -144,6 +144,7 @@ Version::Version() noexcept
 	, m_System()
 	, m_ServicePack()
 	, m_Build()
+	, m_Type()
 {
 }
 
