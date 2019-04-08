@@ -24,11 +24,18 @@
 //#include "../common/mptCRC.h"
 #include "OggStream.h"
 #ifdef MPT_WITH_OGG
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
+#endif // MPT_COMPILER_CLANG
 #include <ogg/ogg.h>
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 #endif // MPT_WITH_OGG
 #if defined(MPT_WITH_OPUSFILE)
 #include <opusfile.h>
-#endif
+#endif // MPT_WITH_OPUSFILE
 
 
 OPENMPT_NAMESPACE_BEGIN
