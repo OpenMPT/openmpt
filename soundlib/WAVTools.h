@@ -322,7 +322,7 @@ public:
 	SmpLength GetSampleLength() const { return mpt::saturate_cast<SmpLength>(sampleLength); }
 
 	// Apply sample settings from file (loop points, MPT extra settings, ...) to a sample.
-	void ApplySampleSettings(ModSample &sample, mpt::Charset charset, mpt::charbuf<MAX_SAMPLENAME> &sampleCharset);
+	void ApplySampleSettings(ModSample &sample, mpt::Charset sampleCharset, mpt::charbuf<MAX_SAMPLENAME> &sampleName);
 };
 
 
