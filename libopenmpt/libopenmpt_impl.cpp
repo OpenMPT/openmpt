@@ -1529,6 +1529,8 @@ std::vector<std::string> module_impl::get_ctls() const {
 }
 std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const {
 	if ( !ctl.empty() ) {
+		// cppcheck false-positive
+		// cppcheck-suppress containerOutOfBounds
 		char rightmost = ctl.back();
 		if ( rightmost == '!' || rightmost == '?' ) {
 			if ( rightmost == '!' ) {
@@ -1591,6 +1593,8 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 }
 void module_impl::ctl_set( std::string ctl, const std::string & value, bool throw_if_unknown ) {
 	if ( !ctl.empty() ) {
+		// cppcheck false-positive
+		// cppcheck-suppress containerOutOfBounds
 		char rightmost = ctl.back();
 		if ( rightmost == '!' || rightmost == '?' ) {
 			if ( rightmost == '!' ) {
