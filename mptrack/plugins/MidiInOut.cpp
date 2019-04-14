@@ -166,7 +166,7 @@ static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::strin
 			{
 				id = i;
 			}
-		} catch(RtMidiError &)
+		} catch(const RtMidiError &)
 		{
 		}
 	}
@@ -296,7 +296,12 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 		auto message = m_outQueue.begin();
 		while(message != m_outQueue.end() && message->m_time <= now)
 		{
-			m_midiOut.sendMessage(message->m_message, message->m_size);
+			try
+			{
+				m_midiOut.sendMessage(message->m_message, message->m_size);
+			} catch(const RtMidiError &)
+			{
+			}
 			message++;
 		}
 		m_outQueue.erase(m_outQueue.begin(), message);
@@ -363,8 +368,13 @@ void MidiInOut::Suspend()
 	// Suspend MIDI I/O
 	if(m_midiOut.isPortOpen() && m_sendTimingInfo)
 	{
-		unsigned char message[1] = { 0xFC };	// Stop
-		m_midiOut.sendMessage(message, 1);
+		try
+		{
+			unsigned char message[1] = { 0xFC };	// Stop
+			m_midiOut.sendMessage(message, 1);
+		} catch(const RtMidiError &)
+		{
+		}
 	}
 	//CloseDevice(inputDevice);
 	CloseDevice(m_outputDevice);
