@@ -466,6 +466,11 @@
 #if defined(ENABLE_ASM)
 #if MPT_COMPILER_MSVC && defined(_M_IX86)
 
+#if defined(MPT_BUILD_TARGET_XP)
+//#define ENABLE_CPUID // disable cpuid for legacy 32bit builds, because our cpuid check expects more modern cpus
+#else // !MPT_BUILD_TARGET_XP
+#define ENABLE_CPUID
+#endif // MPT_BUILD_TARGET_XP
 // Generate general x86 inline assembly and intrinsics.
 #define ENABLE_X86
 // Generate MMX instructions (only used when the CPU supports it).
@@ -485,6 +490,7 @@
 
 #elif MPT_COMPILER_MSVC && defined(_M_X64)
 
+#define ENABLE_CPUID
 // Generate general x64 intrinsics.
 #define ENABLE_X64
 // Generate SSE instructions (only used when the CPU supports it).

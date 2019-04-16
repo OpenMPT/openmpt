@@ -19,6 +19,7 @@ OPENMPT_NAMESPACE_BEGIN
 #ifdef MODPLUG_TRACKER
 
 #define PROCSUPPORT_ASM_INTRIN   0x00001 // assembly and intrinsics are enabled at runtime
+#define PROCSUPPORT_CPUID        0x00002 // Processor supports modern cpuid
 #define PROCSUPPORT_LM           0x00004 // Processor supports long mode (amd64)
 #define PROCSUPPORT_MMX          0x00010 // Processor supports MMX instructions
 #define PROCSUPPORT_SSE          0x00100 // Processor supports SSE instructions

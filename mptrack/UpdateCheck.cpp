@@ -278,6 +278,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 		j["System"]["Windows"]["Wine"]["HostSysName"] = v.RawHostSysName();
 	}
 	#ifdef ENABLE_ASM
+		j["OpenMPT"]["cpuid"] = ((GetRealProcSupport() & PROCSUPPORT_CPUID) != 0);
 		j["System"]["Processor"]["Vendor"] = std::string(mpt::String::ReadAutoBuf(ProcVendorID));
 		j["System"]["Processor"]["Brand"] = std::string(mpt::String::ReadAutoBuf(ProcBrandID));
 		j["System"]["Processor"]["Id"]["Family"] = ProcFamily;
@@ -293,7 +294,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 		j["System"]["Processor"]["Features"]["sse4_2"] = ((GetRealProcSupport() & PROCSUPPORT_SSE4_2) != 0);
 		j["System"]["Processor"]["Features"]["avx"] = ((GetRealProcSupport() & PROCSUPPORT_AVX) != 0);
 		j["System"]["Processor"]["Features"]["avx2"] = ((GetRealProcSupport() & PROCSUPPORT_AVX2) != 0);
-#endif
+	#endif
 	return j.dump(1, '\t');
 }
 
