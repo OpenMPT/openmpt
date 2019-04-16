@@ -422,9 +422,7 @@ static bool ReadSampleData(ModSample &sample, SampleIO sampleFlags, FileReader &
 		// The fast-path for regular PCM will only check "OggS" magic and do no other work after failing that check.
 		while(!sampleChunk.EndOfFile())
 		{
-			Ogg::PageInfo pageInfo;
-			std::vector<uint8> pageData;
-			if(!Ogg::ReadPage(sampleChunk, pageInfo, pageData))
+			if(!Ogg::ReadPage(sampleChunk))
 			{
 				isOGG = false;
 				break;
