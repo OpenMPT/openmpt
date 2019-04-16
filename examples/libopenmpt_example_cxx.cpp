@@ -36,11 +36,10 @@ int main( int argc, char * argv[] ) {
 		if ( argc != 2 ) {
 			throw std::runtime_error( "Usage: libopenmpt_example_cxx SOMEMODULE" );
 		}
-		const std::size_t buffersize = 480;
-		const std::int32_t samplerate = 48000;
+		constexpr std::size_t buffersize = 480;
+		constexpr std::int32_t samplerate = 48000;
 		std::vector<float> left( buffersize );
 		std::vector<float> right( buffersize );
-		const float * const buffers[2] = { left.data(), right.data() };
 		std::ifstream file( argv[1], std::ios::binary );
 		openmpt::module mod( file );
 		portaudio::AutoSystem portaudio_initializer;
@@ -55,6 +54,7 @@ int main( int argc, char * argv[] ) {
 				break;
 			}
 			try {
+				const float * const buffers[2] = { left.data(), right.data() };
 				stream.write( buffers, static_cast<unsigned long>( count ) );
 			} catch ( const portaudio::PaException & pa_exception ) {
 				if ( pa_exception.paError() != paOutputUnderflowed ) {
