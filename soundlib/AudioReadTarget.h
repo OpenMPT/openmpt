@@ -36,7 +36,7 @@ public:
 		, outputBuffer(buffer)
 		, outputBuffers(buffers)
 	{
-		MPT_ASSERT(SampleFormat(SampleFormatTraits<Tsample>::sampleFormat).IsValid());
+		MPT_ASSERT(SampleFormat(SampleFormatTraits<Tsample>::sampleFormat()).IsValid());
 	}
 	virtual ~AudioReadTargetBuffer() { }
 	std::size_t GetRenderedCount() const { return countRendered; }
@@ -45,7 +45,7 @@ public:
 	{
 		// Convert to output sample format and optionally perform dithering and clipping if needed
 
-		const SampleFormat sampleFormat = SampleFormatTraits<Tsample>::sampleFormat;
+		const SampleFormat sampleFormat = SampleFormatTraits<Tsample>::sampleFormat();
 
 		if(sampleFormat.IsInt())
 		{

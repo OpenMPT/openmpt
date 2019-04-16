@@ -24,11 +24,11 @@ enum SampleFormatEnum
 };
 
 template<typename Tsample> struct SampleFormatTraits;
-template<> struct SampleFormatTraits<uint8>     { static const SampleFormatEnum sampleFormat = SampleFormatUnsigned8; };
-template<> struct SampleFormatTraits<int16>     { static const SampleFormatEnum sampleFormat = SampleFormatInt16;     };
-template<> struct SampleFormatTraits<int24>     { static const SampleFormatEnum sampleFormat = SampleFormatInt24;     };
-template<> struct SampleFormatTraits<int32>     { static const SampleFormatEnum sampleFormat = SampleFormatInt32;     };
-template<> struct SampleFormatTraits<float>     { static const SampleFormatEnum sampleFormat = SampleFormatFloat32;   };
+template<> struct SampleFormatTraits<uint8>     { static SampleFormatEnum sampleFormat() { return SampleFormatUnsigned8; } };
+template<> struct SampleFormatTraits<int16>     { static SampleFormatEnum sampleFormat() { return SampleFormatInt16;     } };
+template<> struct SampleFormatTraits<int24>     { static SampleFormatEnum sampleFormat() { return SampleFormatInt24;     } };
+template<> struct SampleFormatTraits<int32>     { static SampleFormatEnum sampleFormat() { return SampleFormatInt32;     } };
+template<> struct SampleFormatTraits<float>     { static SampleFormatEnum sampleFormat() { return SampleFormatFloat32;   } };
 
 template<SampleFormatEnum sampleFormat> struct SampleFormatToType;
 template<> struct SampleFormatToType<SampleFormatUnsigned8> { typedef uint8     type; };
