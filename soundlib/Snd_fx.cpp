@@ -1025,7 +1025,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 				if(m.note == NOTE_KEYOFF || m.note == NOTE_NOTECUT || (m.note == NOTE_FADE && GetNumInstruments())
 					|| ((m.command == CMD_MODCMDEX || m.command == CMD_S3MCMDEX) && (m.param & 0xF0) == 0xC0 && paramLo < numTicks)
-					|| (m.command == CMD_DELAYCUT && paramLo != 0 && startTick + paramLo < numTicks))
+					|| (m.command == CMD_DELAYCUT && paramLo != 0 && startTick + paramLo < numTicks)
+					|| m.command == CMD_KEYOFF)
 				{
 					stopNote = true;
 				}
