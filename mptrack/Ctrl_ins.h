@@ -25,11 +25,9 @@ class CNoteMapWnd: public CStatic
 protected:
 	CModDoc &m_modDoc;
 	CCtrlInstruments &m_pParent;
-	HFONT m_hFont = nullptr;
 	UINT m_nNote = (NOTE_MIDDLEC - NOTE_MIN), m_nOldNote = 0, m_nOldIns = 0;
 	INSTRUMENTINDEX m_nInstrument = 0;
 	int m_cxFont = 0, m_cyFont = 0;
-	COLORREF colorText, colorTextSel;
 	CHANNELINDEX m_noteChannel = 0;
 	ModCommand::NOTE m_nPlayingNote = NOTE_NONE;
 

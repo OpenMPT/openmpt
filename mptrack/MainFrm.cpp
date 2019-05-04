@@ -282,8 +282,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_SampleIcons.Create(IDB_SMPTOOLBAR, 20, 18, SAMPLEIMG_NUMIMAGES, 1, dc, scaling, false);
 	ReleaseDC(dc);
 
-	m_hGUIFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
-	if (m_hGUIFont == NULL) m_hGUIFont = (HFONT)GetStockObject(ANSI_VAR_FONT);
+	NONCLIENTMETRICS metrics;
+	metrics.cbSize = sizeof(metrics);
+	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0);
+	m_hGUIFont = CreateFontIndirect(&metrics.lfMessageFont);
+
 	brushBlack = (HBRUSH)::GetStockObject(BLACK_BRUSH);
 	brushWhite = (HBRUSH)::GetStockObject(WHITE_BRUSH);
 	brushText = ::CreateSolidBrush(GetSysColor(COLOR_BTNTEXT));
@@ -391,6 +394,7 @@ BOOL CMainFrame::DestroyWindow()
 	DeleteGDIObject(penLightGray);
 	DeleteGDIObject(penDarkGray);
 	DeleteGDIObject(penSample);
+	DeleteGDIObject(m_hGUIFont);
 	DeleteGDIObject(m_hFixedFont);
 	DeleteGDIObject(penScratch);
 	DeleteGDIObject(penGray00);

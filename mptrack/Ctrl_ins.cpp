@@ -166,14 +166,9 @@ void CNoteMapWnd::OnPaint()
 
 	CRect rcClient;
 	GetClientRect(&rcClient);
-	if (!m_hFont)
-	{
-		m_hFont = CMainFrame::GetGUIFont();
-		colorText = GetSysColor(COLOR_WINDOWTEXT);
-		colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
-	}
-	HDC hdc = dc.m_hDC;
-	HGDIOBJ oldfont = ::SelectObject(hdc, m_hFont);
+	const auto colorText = GetSysColor(COLOR_WINDOWTEXT);
+	const auto colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
+	auto oldFont = dc.SelectObject(CMainFrame::GetGUIFont());
 	dc.SetBkMode(TRANSPARENT);
 	if ((m_cxFont <= 0) || (m_cyFont <= 0))
 	{
@@ -208,7 +203,7 @@ void CNoteMapWnd::OnPaint()
 				s.clear();
 			}
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
-			DrawButtonRect(hdc, &rect, s.c_str(), FALSE, FALSE);
+			DrawButtonRect(dc, &rect, s.c_str(), FALSE, FALSE);
 			// Mapped Note
 			bool highlight = ((bFocus) && (nPos == (int)m_nNote));
 			rect.left = rect.right;
@@ -226,7 +221,7 @@ void CNoteMapWnd::OnPaint()
 					s = _T("???");
 				}
 			}
-			FillRect(hdc, &rect, highlight ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
+			FillRect(dc, &rect, highlight ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
 			if ((nPos == (int)m_nNote) && (!m_bIns))
 			{
 				rect.InflateRect(-1, -1);
@@ -244,7 +239,7 @@ void CNoteMapWnd::OnPaint()
 			{
 				s = mpt::tfmt::right(3, mpt::tfmt::dec(pIns->Keyboard[nPos]));
 			}
-			FillRect(hdc, &rect, (highlight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
+			FillRect(dc, &rect, (highlight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
 			if ((nPos == (int)m_nNote) && (m_bIns))
 			{
 				rect.InflateRect(-1, -1);
@@ -255,14 +250,14 @@ void CNoteMapWnd::OnPaint()
 			dc.DrawText(mpt::ToCString(s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 		}
 		rect.SetRect(rcClient.left+m_cxFont*2-1, rcClient.top, rcClient.left+m_cxFont*2+3, ypaint);
-		DrawButtonRect(hdc, &rect, _T(""), FALSE, FALSE);
+		DrawButtonRect(dc, &rect, _T(""), FALSE, FALSE);
 		if (ypaint < rcClient.bottom)
 		{
 			rect.SetRect(rcClient.left, ypaint, rcClient.right, rcClient.bottom);
-			FillRect(hdc, &rect, CMainFrame::brushGray);
+			FillRect(dc, &rect, CMainFrame::brushGray);
 		}
 	}
-	if (oldfont) ::SelectObject(hdc, oldfont);
+	dc.SelectObject(oldFont);
 }
 
 

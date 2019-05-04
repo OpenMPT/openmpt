@@ -26,19 +26,16 @@ class CTuningRatioMapWnd: public CStatic
 	friend class CTuningDialog;
 protected:
 	const CTuning* m_pTuning = nullptr;
-
 	CTuningDialog* m_pParent = nullptr;
 
-	HFONT m_hFont = nullptr;
 	int m_cxFont = 0, m_cyFont = 0;
-	COLORREF colorText, colorTextSel;
 	NOTEINDEXTYPE m_nNote = NOTE_MIDDLEC;
 
 	NOTEINDEXTYPE m_nNoteCentre = NOTE_MIDDLEC;
 
 
 public:
-	void Init(CTuningDialog* const pParent, CTuning* const tuning) { m_pParent = pParent; m_pTuning = tuning;}
+	void Init(CTuningDialog* const pParent, CTuning* const tuning);
 
 	NOTEINDEXTYPE GetShownCentre() const;
 

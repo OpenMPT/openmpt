@@ -28,6 +28,11 @@ BEGIN_MESSAGE_MAP(CTuningRatioMapWnd, CStatic)
 END_MESSAGE_MAP()
 
 
+void CTuningRatioMapWnd::Init(CTuningDialog* const pParent, CTuning* const tuning)
+{
+	m_pParent = pParent;
+	m_pTuning = tuning;
+}
 
 void CTuningRatioMapWnd::OnPaint()
 {
@@ -37,19 +42,16 @@ void CTuningRatioMapWnd::OnPaint()
 
 	CRect rcClient;
 	GetClientRect(&rcClient);
-	if (!m_hFont)
-	{
-		m_hFont = CMainFrame::GetGUIFont();
-		colorText = GetSysColor(COLOR_WINDOWTEXT);
-		colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
-	}
-	HDC hdc = dc.m_hDC;
-	HGDIOBJ oldfont = ::SelectObject(hdc, m_hFont);
+	
+	const auto colorText = GetSysColor(COLOR_WINDOWTEXT);
+	const auto colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
+
+	auto oldFont = dc.SelectObject(CMainFrame::GetGUIFont());
 	dc.SetBkMode(TRANSPARENT);
 	if ((m_cxFont <= 0) || (m_cyFont <= 0))
 	{
 		CSize sz;
-		sz = dc.GetTextExtent(CString("123456789"));
+		sz = dc.GetTextExtent(_T("123456789"));
 		m_cyFont = sz.cy + 2;
 		m_cxFont = rcClient.right / 4;
 	}
@@ -70,14 +72,15 @@ void CTuningRatioMapWnd::OnPaint()
 			NOTEINDEXTYPE noteToDraw = nPos - m_nNoteCentre;
 			const bool isValidNote = m_pTuning->IsValidNote(noteToDraw);
 
-			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
-			DrawButtonRect(hdc, &rect, isValidNote ? mpt::cfmt::val(noteToDraw) : CString(_T("...")), FALSE, FALSE);
+			rect.SetRect(0, ypaint, m_cxFont, ypaint + m_cyFont);
+			const auto noteStr = isValidNote ? mpt::tfmt::val(noteToDraw) : mpt::tstring(_T("..."));
+			DrawButtonRect(dc, &rect, noteStr.c_str(), FALSE, FALSE);
 
 			// Mapped Note
 			const bool highLight = (focus && (nPos == (int)m_nNote) ) ? TRUE : FALSE;
 			rect.left = rect.right;
 			rect.right = m_cxFont*4-1;
-			FillRect(hdc, &rect, highLight ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
+			FillRect(dc, &rect, highLight ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
 			if(nPos == (int)m_nNote)
 			{
 				rect.InflateRect(-1, -1);
@@ -96,15 +99,15 @@ void CTuningRatioMapWnd::OnPaint()
 			dc.DrawText(mpt::cfmt::fix(std::log2(static_cast<double>(m_pTuning->GetRatio(noteToDraw))) * 1200.0, 1), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 
 		}
-		rect.SetRect(rcClient.left+m_cxFont*4-1, rcClient.top, rcClient.left+m_cxFont*4+3, ypaint);
-		DrawButtonRect(hdc, &rect, "", FALSE, FALSE);
+		rect.SetRect(rcClient.left + m_cxFont * 4 - 1, rcClient.top, rcClient.left + m_cxFont * 4 + 3, ypaint);
+		DrawButtonRect(dc, &rect, "", FALSE, FALSE);
 		if (ypaint < rcClient.bottom)
 		{
 			rect.SetRect(rcClient.left, ypaint, rcClient.right, rcClient.bottom);
-			FillRect(hdc, &rect, CMainFrame::brushGray);
+			FillRect(dc, &rect, CMainFrame::brushGray);
 		}
 	}
-	if (oldfont) ::SelectObject(hdc, oldfont);
+	dc.SelectObject(oldFont);
 }
 
 void CTuningRatioMapWnd::OnSetFocus(CWnd *pOldWnd)
