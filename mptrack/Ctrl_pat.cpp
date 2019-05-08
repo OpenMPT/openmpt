@@ -110,10 +110,10 @@ CCtrlPatterns::CCtrlPatterns(CModControlView &parent, CModDoc &document) : CModC
 
 BOOL CCtrlPatterns::OnInitDialog()
 {
-	CWnd::EnableToolTips(true);
 	CRect rect, rcOrderList;
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModControlDlg::OnInitDialog();
+	EnableToolTips();
 
 	if(!pMainFrm) return TRUE;
 	SetRedraw(FALSE);
@@ -1134,6 +1134,54 @@ BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 	}
 
 	return FALSE;
+}
+
+
+BOOL CCtrlPatterns::GetToolTipText(UINT id, LPTSTR str)
+{
+	CString fmt;
+	const TCHAR *s = nullptr;
+	CommandID cmd = kcNull;
+	switch(id)
+	{
+	case IDC_PATTERN_NEW: s = _T("Insert Pattern"); cmd = kcNewPattern; break;
+	case IDC_PATTERN_PLAY: s = _T("Play Pattern"); cmd = kcPlayPatternFromCursor; break;
+	case IDC_PATTERN_PLAYFROMSTART: s = _T("Replay Pattern"); cmd = kcPlayPatternFromStart; break;
+	case IDC_PATTERN_STOP: s = _T("Stop"); cmd = kcPauseSong; break;
+	case ID_PATTERN_PLAYROW: s = _T("Play Row"); cmd = kcPatternPlayRow; break;
+	case IDC_PATTERN_RECORD: s = _T("Record"); cmd = kcPatternRecord; break;
+	case ID_PATTERN_VUMETERS: s = _T("VU-Meters"); break;
+	case ID_VIEWPLUGNAMES: s = _T("Show Plugins"); break;
+	case ID_PATTERN_CHANNELMANAGER: s = _T("Channel Manager"); cmd = kcViewChannelManager; break;
+	case ID_PATTERN_MIDIMACRO: s = _T("Zxx Macro Configuration"); cmd = kcShowMacroConfig; break;
+	case ID_PATTERN_CHORDEDIT: s = _T("Chord Editor"); cmd = kcChordEditor; break;
+	case ID_EDIT_UNDO:
+		fmt = _T("Undo");
+		if(m_modDoc.GetPatternUndo().CanUndo())
+			fmt += _T(" ") + m_modDoc.GetPatternUndo().GetUndoName();
+		cmd = kcEditUndo;
+		break;
+	case ID_PATTERN_PROPERTIES: s = _T("Pattern Properties"); cmd = kcShowPatternProperties; break;
+	case ID_PATTERN_EXPAND: s = _T("Expand Pattern"); break;
+	case ID_PATTERN_SHRINK: s = _T("Shrink Pattern"); break;
+	case ID_PATTERNDETAIL_LO: s = _T("Low Pattern Detail Level"); break;
+	case ID_PATTERNDETAIL_MED: s = _T("Medium Pattern Detail Level"); break;
+	case ID_PATTERNDETAIL_HI: s = _T("High Pattern Detail Level"); break;
+	case ID_OVERFLOWPASTE: s = _T("Toggle Overflow Paste"); cmd = kcToggleOverflowPaste; break;
+	default:
+		return FALSE;
+	}
+
+	if(s != nullptr)
+		fmt = s;
+	if(cmd != kcNull)
+	{
+		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
+		if(!keyText.IsEmpty())
+			fmt += mpt::cformat(_T(" (%1)"))(keyText);
+	}
+	_tcscpy(str, fmt.GetString());
+	return TRUE;
 }
 
 

@@ -88,13 +88,13 @@ BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	if (!m_wndSplitter.CreateStatic(this, 2, 1)) return FALSE;
 
 	// add the first splitter pane - the default view in row 0
-	int cy = TrackerSettings::Instance().glGeneralWindowHeight;	//rewbs.varWindowSize - default to general tab.
+	int cy = Util::ScalePixels(TrackerSettings::Instance().glGeneralWindowHeight, m_hWnd);	//rewbs.varWindowSize - default to general tab.
 	if (cy <= 1) cy = (lpcs->cy*2) / 3;
 	if (!m_wndSplitter.CreateView(0, 0, pContext->m_pNewViewClass, CSize(0, cy), pContext)) return FALSE;
 
 	// Get 2nd window handle
 	CModControlView *pModView;
-	if ((pModView = GetModControlView()) != NULL)
+	if ((pModView = GetModControlView()) != nullptr)
 	{
 		m_hWndCtrl = pModView->m_hWnd;
 		pModView->SetMDIParentFrame(m_hWnd);
