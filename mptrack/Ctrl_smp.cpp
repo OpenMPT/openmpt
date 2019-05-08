@@ -638,6 +638,7 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 			if(val == 0)
 			{
 				s = _T("Stopped");
+				break;
 			} else
 			{
 				uint32 ticksPerCycle = 256 / val;
@@ -648,10 +649,10 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 
 		case IDC_EDIT_STRETCHPARAMS:
 			s = _T("SequenceMs SeekwindowMs OverlapMs");
-			return TRUE;
+			break;
 		case IDC_CHECK2:
 			s = _T("Keep a reference to the original waveform instead of saving it in the module.");
-			return TRUE;
+			break;
 		}
 		if(s != nullptr)
 		{

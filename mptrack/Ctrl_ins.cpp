@@ -1670,7 +1670,7 @@ BOOL CCtrlInstruments::EditSample(UINT nSample)
 
 BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 {
-	//Note: pszText seems to point to char array of length 256 (Noverber 2006).
+	//Note: pszText points to a TCHAR array of length 256 (see CChildFrame::OnToolTipText).
 	//Note2: If there's problems in getting tooltips showing for certain tools,
 	//		 setting the tab order may have effect.
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
@@ -1680,16 +1680,23 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 	{
 		CWnd *wnd = GetDlgItem(uId);
 		bool isEnabled = wnd != nullptr && wnd->IsWindowEnabled() != FALSE;
-		const CString plusMinus = mpt::ToCString(mpt::CharsetUTF8, "\xC2\xB1");
+		const auto plusMinus = mpt::ToWin(mpt::CharsetUTF8, "\xC2\xB1");
+		const TCHAR *s = nullptr;
+		CommandID cmd = kcNull;
 		switch(uId)
 		{
+		case IDC_INSTRUMENT_NEW: s = _T("Insert Instrument (Hold Shift to duplicate)"); cmd = kcInstrumentNew; break;
+		case IDC_INSTRUMENT_OPEN: s = _T("Import Instrument"); cmd = kcInstrumentLoad; break;
+		case IDC_INSTRUMENT_SAVEAS: s = _T("Save Instrument"); cmd = kcInstrumentSave; break;
+		case IDC_INSTRUMENT_PLAY: s = _T("Play Instrument"); break;
+
 		case IDC_EDIT_PITCHTEMPOLOCK:
 		case IDC_CHECK_PITCHTEMPOLOCK:
 			// Pitch/Tempo lock
 			if(isEnabled)
 			{
 				const CModSpecifications& specs = m_sndFile.GetModSpecifications();
-				wsprintf(pszText, _T("Tempo range: %u - %u"), specs.GetTempoMin().GetInt(), specs.GetTempoMax().GetInt());
+				wsprintf(pszText, _T("Tempo Range: %u - %u"), specs.GetTempoMin().GetInt(), specs.GetTempoMax().GetInt());
 			} else
 			{
 				_tcscpy(pszText, _T("Only available in MPTM format"));
@@ -1759,19 +1766,19 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 
 		case IDC_COMBO5:
 			// MIDI Channel
-			_tcscpy(pszText, _T("Mapped: MIDI channel corresponds to pattern channel modulo 16"));
-			return TRUE;
+			s = _T("Mapped: MIDI channel corresponds to pattern channel modulo 16");
+			break;
 
 		case IDC_SLIDER1:
 			if(isEnabled)
-				wsprintf(pszText, _T("%s%d%% volume variation"), plusMinus.GetString(), pIns->nVolSwing);
+				wsprintf(pszText, _T("%s%d%% volume variation"), plusMinus.c_str(), pIns->nVolSwing);
 			else
 				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
 			return TRUE;
 
 		case IDC_SLIDER2:
 			if(isEnabled)
-				wsprintf(pszText, _T("%s%d panning variation"), plusMinus.GetString(), pIns->nPanSwing);
+				wsprintf(pszText, _T("%s%d panning variation"), plusMinus.c_str(), pIns->nPanSwing);
 			else
 				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
 			return TRUE;
@@ -1792,28 +1799,25 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 
 		case IDC_SLIDER6:
 			if(isEnabled)
-				wsprintf(pszText, _T("%s%d cutoff variation"), plusMinus.GetString(), pIns->nCutSwing);
+				wsprintf(pszText, _T("%s%d cutoff variation"), plusMinus.c_str(), pIns->nCutSwing);
 			else
 				_tcscpy(pszText, _T("Only available in MPTM format"));
 			return TRUE;
 
 		case IDC_SLIDER7:
 			if(isEnabled)
-				wsprintf(pszText, _T("%s%d resonance variation"), plusMinus.GetString(), pIns->nResSwing);
+				wsprintf(pszText, _T("%s%d resonance variation"), plusMinus.c_str(), pIns->nResSwing);
 			else
 				_tcscpy(pszText, _T("Only available in MPTM format"));
 			return TRUE;
 
 		case IDC_PITCHWHEELDEPTH:
-			_tcscpy(pszText, _T("Set this to the actual Pitch Wheel Depth used in your plugin on this channel."));
-			return TRUE;
+			s = _T("Set this to the actual Pitch Wheel Depth used in your plugin on this channel.");
+			break;
 
 		case IDC_INSVIEWPLG:	// Open Editor
 			if(!isEnabled)
-			{
-				_tcscpy(pszText, _T("No plugin loaded"));
-				return TRUE;
-			}
+				s = _T("No Plugin Loaded");
 			break;
 
 		case IDC_SPIN9:		// Pan
@@ -1825,10 +1829,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 		case IDC_SPIN12:	// PPS
 		case IDC_EDIT15:	// PPS
 			if(!isEnabled)
-			{
-				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
-				return TRUE;
-			}
+				s = _T("Only available in IT / MPTM format");
 			break;
 
 		case IDC_COMBOTUNING:	// Tuning
@@ -1837,12 +1838,21 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 		case IDC_SPIN1:			// Ramping
 		case IDC_EDIT2:			// Ramping
 			if(!isEnabled)
-			{
-				_tcscpy(pszText, _T("Only available in MPTM format"));
-				return TRUE;
-			}
+				s = _T("Only available in MPTM format");
 			break;
 
+		}
+
+		if(s != nullptr)
+		{
+			_tcscpy(pszText, s);
+			if(cmd != kcNull)
+			{
+				auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
+				if (!keyText.IsEmpty())
+					_tcscat(pszText, mpt::tformat(_T(" (%1)"))(keyText).c_str());
+			}
+			return TRUE;
 		}
 	}
 	return FALSE;
