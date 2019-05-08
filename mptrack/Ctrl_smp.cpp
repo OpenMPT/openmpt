@@ -558,8 +558,26 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 	if ((pszText) && (uId))
 	{
 		UINT val = GetDlgItemInt(uId);
+		const TCHAR *s = nullptr;
+		CommandID cmd = kcNull;
 		switch(uId)
 		{
+		case IDC_SAMPLE_NEW: s = _T("Insert Sample"); cmd = kcSampleNew; break;
+		case IDC_SAMPLE_OPEN: s = _T("Import Sample"); cmd = kcSampleLoad; break;
+		case IDC_SAMPLE_SAVEAS: s = _T("Save Sample"); cmd = kcSampleSave; break;
+		case IDC_SAMPLE_PLAY: s = _T("Play Sample"); break;
+		case IDC_SAMPLE_NORMALIZE: s = _T("Normalize (hold shift to normalize all samples)"); cmd = kcSampleNormalize; break;
+		case IDC_SAMPLE_AMPLIFY: s = _T("Amplify"); cmd = kcSampleAmplify; break;
+		case IDC_SAMPLE_DCOFFSET: s = _T("Remove DC Offset and Normalize (hold shift to process all samples)"); cmd = kcSampleRemoveDCOffset; break;
+		case IDC_SAMPLE_STEREOSEPARATION: s = _T("Change Stereo Separation / Stereo Width of the sample"); cmd = kcSampleStereoSep; break;
+		case IDC_SAMPLE_RESAMPLE: s = _T("Resample"); cmd = kcSampleResample; break;
+		case IDC_SAMPLE_REVERSE: s = _T("Reverse"); cmd = kcSampleReverse; break;
+		case IDC_SAMPLE_SILENCE: s = _T("Silence"); cmd = kcSampleSilence; break;
+		case IDC_SAMPLE_INVERT: s = _T("Invert Phase"); cmd = kcSampleInvert; break;
+		case IDC_SAMPLE_SIGN_UNSIGN: s = _T("Signed/Unsigned Conversion"); cmd = kcSampleSignUnsign; break;
+		case IDC_SAMPLE_XFADE: s = _T("Crossfade Sample Loops"); cmd = kcSampleXFade; break;
+		case IDC_SAMPLE_AUTOTUNE: s = _T("Tune the sample to a given note"); cmd = kcSampleAutotune; break;
+
 		case IDC_EDIT7:
 		case IDC_EDIT8:
 			// Volume to dB
@@ -619,7 +637,7 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 			// Vibrato Rate
 			if(val == 0)
 			{
-				_tcscpy(pszText, _T("Stopped"));
+				s = _T("Stopped");
 			} else
 			{
 				uint32 ticksPerCycle = 256 / val;
@@ -629,10 +647,21 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 			return TRUE;
 
 		case IDC_EDIT_STRETCHPARAMS:
-			_tcscpy(pszText, _T("SequenceMs SeekwindowMs OverlapMs"));
+			s = _T("SequenceMs SeekwindowMs OverlapMs");
 			return TRUE;
 		case IDC_CHECK2:
-			_tcscpy(pszText, _T("Keep a reference to the original waveform instead of saving it in the module."));
+			s = _T("Keep a reference to the original waveform instead of saving it in the module.");
+			return TRUE;
+		}
+		if(s != nullptr)
+		{
+			_tcscpy(pszText, s);
+			if(cmd != kcNull)
+			{
+				auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
+				if (!keyText.IsEmpty())
+					_tcscat(pszText, mpt::tformat(_T(" (%1)"))(keyText).c_str());
+			}
 			return TRUE;
 		}
 	}
