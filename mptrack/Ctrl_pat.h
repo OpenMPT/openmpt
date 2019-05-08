@@ -216,14 +216,15 @@ public:
 	BOOL GetFollowSong() { return IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG); }
 	BOOL GetLoopPattern() {return IsDlgButtonChecked(IDC_PATTERN_LOOP);}
 	//{{AFX_VIRTUAL(CCtrlPatterns)
-	virtual BOOL OnInitDialog();
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-	virtual void RecalcLayout();
-	virtual void UpdateView(UpdateHint hint = UpdateHint(), CObject *pObj = nullptr);
-	virtual CRuntimeClass *GetAssociatedViewClass();
-	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
-	virtual void OnActivatePage(LPARAM);
-	virtual void OnDeactivatePage();
+	BOOL OnInitDialog() override;
+	void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV support
+	void RecalcLayout() override;
+	void UpdateView(UpdateHint hint = UpdateHint(), CObject *pObj = nullptr) override;
+	CRuntimeClass *GetAssociatedViewClass() override;
+	LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam) override;
+	void OnActivatePage(LPARAM) override;
+	void OnDeactivatePage() override;
+	BOOL GetToolTipText(UINT, LPTSTR) override;
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlPatterns)
