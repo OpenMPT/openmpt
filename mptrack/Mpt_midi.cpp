@@ -25,7 +25,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Midi Input globals
-HMIDIIN CMainFrame::shMidiIn = NULL;
+HMIDIIN CMainFrame::shMidiIn = nullptr;
 
 //Get Midi message(dwParam1), apply MIDI settings having effect on volume, and return
 //the volume value [0, 256]. In addition value -1 is used as 'use default value'-indicator.
@@ -114,7 +114,15 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, 
 		CMainFrame::GetInputHandler()->HandleMIDIMessage(kCtxAllContexts, data);
 	} else if(wMsg == MIM_LONGDATA)
 	{
-		// Sysex...
+		// SysEx...
+	} else if (wMsg == MIM_CLOSE)
+	{
+		// midiInClose will trigger this, but also disconnecting a USB MIDI device (although delayed, seems to be coupled to calling something like midiInGetNumDevs).
+		// In the latter case, we need to inform the UI.
+		if(CMainFrame::shMidiIn != nullptr)
+		{
+			pMainFrm->SendMessage(WM_COMMAND, ID_MIDI_RECORD);
+		}
 	}
 }
 
@@ -125,7 +133,7 @@ bool CMainFrame::midiOpenDevice(bool showSettings)
 	
 	if (midiInOpen(&shMidiIn, TrackerSettings::Instance().GetCurrentMIDIDevice(), (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 	{
-		shMidiIn = NULL;
+		shMidiIn = nullptr;
 
 		// Show MIDI configuration on fail.
 		if(showSettings)
@@ -137,7 +145,7 @@ bool CMainFrame::midiOpenDevice(bool showSettings)
 		// Let's see if the user updated the settings.
 		if(midiInOpen(&shMidiIn, TrackerSettings::Instance().GetCurrentMIDIDevice(), (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 		{
-			shMidiIn = NULL;
+			shMidiIn = nullptr;
 			return false;
 		}
 	}
@@ -150,8 +158,10 @@ void CMainFrame::midiCloseDevice()
 {
 	if (shMidiIn)
 	{
-		midiInClose(shMidiIn);
-		shMidiIn = NULL;
+		// Prevent infinite loop in MIM_CLOSE
+		auto handle = shMidiIn;
+		shMidiIn = nullptr;
+		midiInClose(handle);
 	}
 }
 
