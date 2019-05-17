@@ -4825,7 +4825,7 @@ void CSoundFile::InvertLoop(ModChannel &chn)
 	// TRASH IT!!! (Yes, the sample!)
 	uint8 &sample = mpt::byte_cast<uint8 *>(pModSample->sampleb())[pModSample->nLoopStart + chn.nEFxOffset];
 	sample = ~sample;
-	ctrlSmp::PrecomputeLoops(*pModSample, *this, false);
+	pModSample->PrecomputeLoops(*this, false);
 }
 
 

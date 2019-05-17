@@ -12,9 +12,8 @@
 #pragma once
 
 #include "BuildSettings.h"
-
-#include "modsmp_ctrl.h"
 #include "Globals.h"
+#include "../soundlib/modsmp_ctrl.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

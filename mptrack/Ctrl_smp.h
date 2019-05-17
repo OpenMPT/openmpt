@@ -14,7 +14,7 @@
 #include "BuildSettings.h"
 
 #include "../soundlib/SampleIO.h"
-#include "FadeLaws.h"
+#include "../tracklib/FadeLaws.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

@@ -52,6 +52,9 @@
     <Filter Include="test">
       <UniqueIdentifier>{65689E7C-519F-9F0D-FA8B-8510E6A11B0F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tracklib">
+      <UniqueIdentifier>{B13277BA-9DFF-D1C5-C618-C06DB2440754}</UniqueIdentifier>
+    </Filter>
     <Filter Include="unarchiver">
       <UniqueIdentifier>{DCBADFD6-C872-2124-317A-FA7F1D51BC14}</UniqueIdentifier>
     </Filter>
@@ -268,9 +271,6 @@
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\ExternalSamples.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mptrack\FadeLaws.h">
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\FileDialog.h">
@@ -788,6 +788,12 @@
     </ClInclude>
     <ClInclude Include="..\..\test\test.h">
       <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tracklib\FadeLaws.h">
+      <Filter>tracklib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tracklib\SampleEdit.h">
+      <Filter>tracklib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\unarchiver\archive.h">
       <Filter>unarchiver</Filter>
@@ -1555,6 +1561,9 @@
     </ClCompile>
     <ClCompile Include="..\..\test\test.cpp">
       <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tracklib\SampleEdit.cpp">
+      <Filter>tracklib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\unarchiver\unarchiver.cpp">
       <Filter>unarchiver</Filter>

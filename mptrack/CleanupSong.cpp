@@ -12,10 +12,11 @@
 #include "stdafx.h"
 #include "Moddoc.h"
 #include "Mainfrm.h"
-#include "modsmp_ctrl.h"
 #include "CleanupSong.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/modsmp_ctrl.h"
+#include "../tracklib/SampleEdit.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -642,7 +643,7 @@ bool CModCleanupDlg::OptimizeSamples()
 		if(sample.nLength > loopLength && loopLength >= 2)
 		{
 			modDoc.GetSampleUndo().PrepareUndo(smp, sundo_delete, "Trim Unused Data", loopLength, sample.nLength);
-			ctrlSmp::ResizeSample(sample, loopLength, sndFile);
+			SampleEdit::ResizeSample(sample, loopLength, sndFile);
 		}
 
 		// Convert stereo samples with identical channels to mono
@@ -885,7 +886,7 @@ bool CModCleanupDlg::ResetVariables()
 	}
 
 	// reset samples
-	ctrlSmp::ResetSamples(sndFile, ctrlSmp::SmpResetCompo);
+	SampleEdit::ResetSamples(sndFile, SampleEdit::SmpResetCompo);
 
 	cs.Leave();
 	EndWaitCursor();
@@ -938,7 +939,7 @@ bool CModCleanupDlg::RemoveAllSamples()
 	std::vector<bool> keepSamples(sndFile.GetNumSamples() + 1, false);
 	sndFile.RemoveSelectedSamples(keepSamples);
 
-	ctrlSmp::ResetSamples(sndFile, ctrlSmp::SmpResetInit, 1, MAX_SAMPLES - 1);
+	SampleEdit::ResetSamples(sndFile, SampleEdit::SmpResetInit, 1, MAX_SAMPLES - 1);
 
 	return true;
 }

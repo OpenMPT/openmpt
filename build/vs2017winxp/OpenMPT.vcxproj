@@ -808,7 +808,6 @@
     <ClInclude Include="..\..\mptrack\EffectVis.h" />
     <ClInclude Include="..\..\mptrack\ExceptionHandler.h" />
     <ClInclude Include="..\..\mptrack\ExternalSamples.h" />
-    <ClInclude Include="..\..\mptrack\FadeLaws.h" />
     <ClInclude Include="..\..\mptrack\FileDialog.h" />
     <ClInclude Include="..\..\mptrack\FolderScanner.h" />
     <ClInclude Include="..\..\mptrack\GeneralConfigDlg.h" />
@@ -981,6 +980,8 @@
     <ClInclude Include="..\..\test\TestToolsLib.h" />
     <ClInclude Include="..\..\test\TestToolsTracker.h" />
     <ClInclude Include="..\..\test\test.h" />
+    <ClInclude Include="..\..\tracklib\FadeLaws.h" />
+    <ClInclude Include="..\..\tracklib\SampleEdit.h" />
     <ClInclude Include="..\..\unarchiver\archive.h" />
     <ClInclude Include="..\..\unarchiver\unarchiver.h" />
     <ClInclude Include="..\..\unarchiver\ungzip.h" />
@@ -1238,6 +1239,7 @@
     <ClCompile Include="..\..\soundlib\tuningbase.cpp" />
     <ClCompile Include="..\..\test\TestToolsLib.cpp" />
     <ClCompile Include="..\..\test\test.cpp" />
+    <ClCompile Include="..\..\tracklib\SampleEdit.cpp" />
     <ClCompile Include="..\..\unarchiver\unarchiver.cpp" />
     <ClCompile Include="..\..\unarchiver\ungzip.cpp" />
     <ClCompile Include="..\..\unarchiver\unlha.cpp" />

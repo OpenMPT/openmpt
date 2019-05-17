@@ -33,6 +33,7 @@
 #include "StreamEncoderWAV.h"
 #include "mod2midi.h"
 #include "../common/version.h"
+#include "../tracklib/SampleEdit.h"
 #include "../soundlib/modsmp_ctrl.h"
 #include "CleanupSong.h"
 #include "../common/mptStringBuffer.h"
@@ -597,7 +598,7 @@ BOOL CModDoc::InitializeMod()
 		m_SndFile.m_szNames[1] = "untitled";
 		m_SndFile.m_nSamples = (GetModType() == MOD_TYPE_MOD) ? 31 : 1;
 
-		ctrlSmp::ResetSamples(m_SndFile, ctrlSmp::SmpResetInit);
+		SampleEdit::ResetSamples(m_SndFile, SampleEdit::SmpResetInit);
 
 		m_SndFile.GetSample(1).Initialize(m_SndFile.GetType());
 

@@ -14,7 +14,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "ProgressDialog.h"
-#include "../soundlib/modsmp_ctrl.h"
+#include "../tracklib/SampleEdit.h"
 #include "../soundlib/OPL.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -159,7 +159,7 @@ void CModDoc::OnShowSampleTrimmer()
 			if(dlg.m_SamplePlayLengths[smp] != 0 && sample.nLength > dlg.m_SamplePlayLengths[smp])
 			{
 				GetSampleUndo().PrepareUndo(smp, sundo_delete, "Automatic Sample Trimming", dlg.m_SamplePlayLengths[smp], sample.nLength);
-				ctrlSmp::ResizeSample(sample, dlg.m_SamplePlayLengths[smp], m_SndFile);
+				SampleEdit::ResizeSample(sample, dlg.m_SamplePlayLengths[smp], m_SndFile);
 				sample.uFlags.set(SMP_MODIFIED);
 			}
 		}

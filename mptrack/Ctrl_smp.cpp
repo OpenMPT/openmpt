@@ -26,7 +26,7 @@
 #include <soundtouch/include/SoundTouch.h>
 #include <soundtouch/source/SoundTouchDLL/SoundTouchDLL.h>
 #include <smbPitchShift/smbPitchShift.h>
-#include "modsmp_ctrl.h"
+#include "../tracklib/SampleEdit.h"
 #include "Autotune.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/mptFileIO.h"
@@ -1702,7 +1702,7 @@ void CCtrlSamples::RemoveDCOffset(bool allSamples)
 
 		m_modDoc.GetSampleUndo().PrepareUndo(smp, sundo_update, "Remove DC Offset", selStart, selEnd);
 
-		const double offset = ctrlSmp::RemoveDCOffset(m_sndFile.GetSample(smp), selStart, selEnd, m_sndFile);
+		const double offset = SampleEdit::RemoveDCOffset(m_sndFile.GetSample(smp), selStart, selEnd, m_sndFile);
 
 		if(offset == 0.0f) // No offset removed.
 			continue;
@@ -2671,7 +2671,7 @@ void CCtrlSamples::OnReverse()
 	SampleSelectionPoints selection = GetSelectionPoints();
 
 	PrepareUndo("Reverse", sundo_reverse, selection.nStart, selection.nEnd);
-	if(ctrlSmp::ReverseSample(sample, selection.nStart, selection.nEnd, m_sndFile))
+	if(SampleEdit::ReverseSample(sample, selection.nStart, selection.nEnd, m_sndFile))
 	{
 		SetModified(SampleHint().Data(), false, true);
 	} else
@@ -2690,7 +2690,7 @@ void CCtrlSamples::OnInvert()
 	SampleSelectionPoints selection = GetSelectionPoints();
 
 	PrepareUndo("Invert", sundo_invert, selection.nStart, selection.nEnd);
-	if(ctrlSmp::InvertSample(sample, selection.nStart, selection.nEnd, m_sndFile) == true)
+	if(SampleEdit::InvertSample(sample, selection.nStart, selection.nEnd, m_sndFile) == true)
 	{
 		SetModified(SampleHint().Data(), false, true);
 	} else
@@ -2714,7 +2714,7 @@ void CCtrlSamples::OnSignUnSign()
 	SampleSelectionPoints selection = GetSelectionPoints();
 
 	PrepareUndo("Unsign", sundo_unsign, selection.nStart, selection.nEnd);
-	if(ctrlSmp::UnsignSample(sample, selection.nStart, selection.nEnd, m_sndFile) == true)
+	if(SampleEdit::UnsignSample(sample, selection.nStart, selection.nEnd, m_sndFile) == true)
 	{
 		SetModified(SampleHint().Data(), false, true);
 	} else
@@ -2738,7 +2738,7 @@ void CCtrlSamples::OnSilence()
 	{
 		ModSample &sample = m_sndFile.GetSample(m_nSample);
 		PrepareUndo("Silence", sundo_update, selection.nStart, selection.nEnd);
-		if(ctrlSmp::SilenceSample(sample, selection.nStart, selection.nEnd, m_sndFile))
+		if(SampleEdit::SilenceSample(sample, selection.nStart, selection.nEnd, m_sndFile))
 		{
 			SetModified(SampleHint().Data(), false, true);
 		}
@@ -3561,7 +3561,7 @@ void CCtrlSamples::OnXFade()
 			loopEnd - fadeSamples,
 			loopEnd + (dlg.m_afterloopFade ? std::min(sample.nLength - loopEnd, fadeSamples) : 0));
 
-		if(ctrlSmp::XFadeSample(sample, fadeSamples, dlg.m_fadeLaw, dlg.m_afterloopFade, dlg.m_useSustainLoop, m_sndFile))
+		if(SampleEdit::XFadeSample(sample, fadeSamples, dlg.m_fadeLaw, dlg.m_afterloopFade, dlg.m_useSustainLoop, m_sndFile))
 		{
 			SetModified(SampleHint().Info().Data(), true, true);
 		} else
@@ -3596,7 +3596,7 @@ void CCtrlSamples::OnStereoSeparation()
 		PrepareUndo("Stereo Separation", sundo_update,
 			selection.nStart, selection.nEnd);
 
-		if(ctrlSmp::StereoSepSample(sample, selection.nStart, selection.nEnd, separation, m_sndFile))
+		if(SampleEdit::StereoSepSample(sample, selection.nStart, selection.nEnd, separation, m_sndFile))
 		{
 			SetModified(SampleHint().Info().Data(), true, true);
 		} else

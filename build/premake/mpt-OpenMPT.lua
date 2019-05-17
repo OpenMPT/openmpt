@@ -102,6 +102,8 @@ end
    "../../unarchiver/*.h",
    "../../misc/*.cpp",
    "../../misc/*.h",
+   "../../tracklib/*.cpp",
+   "../../tracklib/*.h",
    "../../mptrack/*.cpp",
    "../../mptrack/*.h",
    "../../mptrack/plugins/*.cpp",

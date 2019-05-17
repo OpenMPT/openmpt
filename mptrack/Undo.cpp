@@ -12,9 +12,10 @@
 #include "stdafx.h"
 #include "Moddoc.h"
 #include "Mainfrm.h"
-#include "modsmp_ctrl.h"
 #include "Undo.h"
 #include "../common/mptStringBuffer.h"
+#include "../tracklib/SampleEdit.h"
+#include "../soundlib/modsmp_ctrl.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -430,17 +431,17 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 
 	case sundo_invert:
 		// invert again
-		ctrlSmp::InvertSample(sample, undo.changeStart, undo.changeEnd, sndFile);
+		SampleEdit::InvertSample(sample, undo.changeStart, undo.changeEnd, sndFile);
 		break;
 
 	case sundo_reverse:
 		// reverse again
-		ctrlSmp::ReverseSample(sample, undo.changeStart, undo.changeEnd, sndFile);
+		SampleEdit::ReverseSample(sample, undo.changeStart, undo.changeEnd, sndFile);
 		break;
 
 	case sundo_unsign:
 		// unsign again
-		ctrlSmp::UnsignSample(sample, undo.changeStart, undo.changeEnd, sndFile);
+		SampleEdit::UnsignSample(sample, undo.changeStart, undo.changeEnd, sndFile);
 		break;
 
 	case sundo_insert:

@@ -1,0 +1,542 @@
+/*
+ * SamplEdit.cpp
+ * -------------
+ * Purpose: Basic sample editing code (resizing, adding silence, normalizing, ...).
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
+
+
+#include "stdafx.h"
+#include "SampleEdit.h"
+#include "../soundlib/AudioCriticalSection.h"
+#include "../soundlib/Sndfile.h"
+#include "../soundlib/modsmp_ctrl.h"
+#include "../soundbase/SampleFormatConverters.h"
+#include "../soundbase/SampleFormatCopy.h"
+
+OPENMPT_NAMESPACE_BEGIN
+
+namespace SampleEdit
+{
+
+SmpLength InsertSilence(ModSample &smp, const SmpLength silenceLength, const SmpLength startFrom, CSoundFile &sndFile)
+{
+	if(silenceLength == 0 || silenceLength > MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - silenceLength || startFrom > smp.nLength)
+		return smp.nLength;
+
+	const bool wasEmpty = !smp.HasSampleData();
+	const SmpLength newLength = smp.nLength + silenceLength;
+
+	char *pNewSmp = nullptr;
+
+	pNewSmp = static_cast<char *>(ModSample::AllocateSample(newLength, smp.GetBytesPerSample()));
+	if(pNewSmp == nullptr)
+		return smp.nLength; //Sample allocation failed.
+
+	if(!wasEmpty)
+	{
+		// Copy over old sample
+		const SmpLength silenceOffset = startFrom * smp.GetBytesPerSample();
+		const SmpLength silenceBytes = silenceLength * smp.GetBytesPerSample();
+		if(startFrom > 0)
+		{
+			memcpy(pNewSmp, smp.samplev(), silenceOffset);
+		}
+		if(startFrom < smp.nLength)
+		{
+			memcpy(pNewSmp + silenceOffset + silenceBytes, smp.sampleb() + silenceOffset, smp.GetSampleSizeInBytes() - silenceOffset);
+		}
+
+		// Update loop points if necessary.
+		if(smp.nLoopStart >= startFrom) smp.nLoopStart += silenceLength;
+		if(smp.nLoopEnd >= startFrom) smp.nLoopEnd += silenceLength;
+		if(smp.nSustainStart >= startFrom) smp.nSustainStart += silenceLength;
+		if(smp.nSustainEnd >= startFrom) smp.nSustainEnd += silenceLength;
+		for(auto &cue : smp.cues)
+		{
+			if(cue >= startFrom) cue += silenceLength;
+		}
+	} else
+	{
+		// Set loop points automatically
+		smp.nLoopStart = 0;
+		smp.nLoopEnd = newLength;
+		smp.uFlags.set(CHN_LOOP);
+	}
+
+	ctrlSmp::ReplaceSample(smp, pNewSmp, newLength, sndFile);
+	smp.PrecomputeLoops(sndFile, true);
+
+	return smp.nLength;
+}
+
+
+namespace
+{
+	// Update loop points and cues after deleting a sample selection
+	static void AdjustLoopPoints(SmpLength selStart, SmpLength selEnd, SmpLength &loopStart, SmpLength &loopEnd, SmpLength length)
+	{
+		Util::DeleteRange(selStart, selEnd - 1, loopStart, loopEnd);
+
+		LimitMax(loopEnd, length);
+		if(loopStart + 2 >= loopEnd)
+		{
+			loopStart = loopEnd = 0;
+		}
+	}
+}
+
+SmpLength RemoveRange(ModSample &smp, SmpLength selStart, SmpLength selEnd, CSoundFile &sndFile)
+{
+	LimitMax(selEnd, smp.nLength);
+	if(selEnd <= selStart)
+	{
+		return smp.nLength;
+	}
+	const uint8 bps = smp.GetBytesPerSample();
+	memmove(smp.sampleb() + selStart * bps, smp.sampleb() + selEnd * bps, (smp.nLength - selEnd) * bps);
+	smp.nLength -= (selEnd - selStart);
+
+	// Did loops or cue points cover the deleted selection?
+	AdjustLoopPoints(selStart, selEnd, smp.nLoopStart, smp.nLoopEnd, smp.nLength);
+	AdjustLoopPoints(selStart, selEnd, smp.nSustainStart, smp.nSustainEnd, smp.nLength);
+
+	if(smp.nLoopEnd == 0) smp.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
+	if(smp.nSustainEnd == 0) smp.uFlags.reset(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+
+	for(auto &cue : smp.cues)
+	{
+		Util::DeleteItem(selStart, selEnd - 1, cue);
+	}
+
+	smp.PrecomputeLoops(sndFile);
+	return smp.nLength;
+}
+
+
+SmpLength ResizeSample(ModSample &smp, const SmpLength newLength, CSoundFile &sndFile)
+{
+	// Invalid sample size
+	if(newLength > MAX_SAMPLE_LENGTH || newLength == smp.nLength)
+		return smp.nLength;
+
+	// New sample will be bigger so we'll just use "InsertSilence" as it's already there.
+	if(newLength > smp.nLength)
+		return InsertSilence(smp, newLength - smp.nLength, smp.nLength, sndFile);
+
+	// Else: Shrink sample
+
+	const SmpLength newSmpBytes = newLength * smp.GetBytesPerSample();
+
+	void *pNewSmp = ModSample::AllocateSample(newLength, smp.GetBytesPerSample());
+	if(pNewSmp == nullptr)
+		return smp.nLength; //Sample allocation failed.
+
+	// Copy over old data and replace sample by the new one
+	memcpy(pNewSmp, smp.sampleb(), newSmpBytes);
+	ctrlSmp::ReplaceSample(smp, pNewSmp, newLength, sndFile);
+
+	// Adjust loops
+	if(smp.nLoopStart > newLength)
+	{
+		smp.nLoopStart = smp.nLoopEnd = 0;
+		smp.uFlags.reset(CHN_LOOP);
+	}
+	if(smp.nLoopEnd > newLength) smp.nLoopEnd = newLength;
+	if(smp.nSustainStart > newLength)
+	{
+		smp.nSustainStart = smp.nSustainEnd = 0;
+		smp.uFlags.reset(CHN_SUSTAINLOOP);
+	}
+	if(smp.nSustainEnd > newLength) smp.nSustainEnd = newLength;
+
+	smp.PrecomputeLoops(sndFile);
+
+	return smp.nLength;
+}
+
+
+void ResetSamples(CSoundFile &sndFile, ResetFlag resetflag, SAMPLEINDEX minSample, SAMPLEINDEX maxSample)
+{
+	if(minSample == SAMPLEINDEX_INVALID)
+	{
+		minSample = 1;
+	}
+	if(maxSample == SAMPLEINDEX_INVALID)
+	{
+		maxSample = sndFile.GetNumSamples();
+	}
+	Limit(minSample, SAMPLEINDEX(1), SAMPLEINDEX(MAX_SAMPLES - 1));
+	Limit(maxSample, SAMPLEINDEX(1), SAMPLEINDEX(MAX_SAMPLES - 1));
+
+	if(minSample > maxSample)
+	{
+		std::swap(minSample, maxSample);
+	}
+
+	for(SAMPLEINDEX i = minSample; i <= maxSample; i++)
+	{
+		ModSample &sample = sndFile.GetSample(i);
+		switch(resetflag)
+		{
+		case SmpResetInit:
+			sndFile.m_szNames[i] = "";
+			sample.filename = "";
+			sample.nC5Speed = 8363;
+			// note: break is left out intentionally. keep this order or c&p the stuff from below if you change anything!
+			MPT_FALLTHROUGH;
+		case SmpResetCompo:
+			sample.nPan = 128;
+			sample.nGlobalVol = 64;
+			sample.nVolume = 256;
+			sample.nVibDepth = 0;
+			sample.nVibRate = 0;
+			sample.nVibSweep = 0;
+			sample.nVibType = VIB_SINE;
+			sample.uFlags.reset(CHN_PANNING | SMP_NODEFAULTVOLUME);
+			break;
+		case SmpResetVibrato:
+			sample.nVibDepth = 0;
+			sample.nVibRate = 0;
+			sample.nVibSweep = 0;
+			sample.nVibType = VIB_SINE;
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+
+namespace
+{
+	struct OffsetData
+	{
+		double max = 0.0, min = 0.0, offset = 0.0;
+	};
+
+	// Returns maximum sample amplitude for given sample type (int8/int16).
+	template <class T>
+	double GetMaxAmplitude() {return 1.0 + (std::numeric_limits<T>::max)();}
+
+	// Calculates DC offset and returns struct with DC offset, max and min values.
+	// DC offset value is average of [-1.0, 1.0[-normalized offset values.
+	template<class T>
+	OffsetData CalculateOffset(const T *pStart, const SmpLength length)
+	{
+		OffsetData offsetVals;
+
+		if(length < 1)
+			return offsetVals;
+
+		const double maxAmplitude = GetMaxAmplitude<T>();
+		double max = -1, min = 1, sum = 0;
+
+		const T *p = pStart;
+		for(SmpLength i = 0; i < length; i++, p++)
+		{
+			const double val = double(*p) / maxAmplitude;
+			sum += val;
+			if(val > max) max = val;
+			if(val < min) min = val;
+		}
+
+		offsetVals.max = max;
+		offsetVals.min = min;
+		offsetVals.offset = (-sum / (double)(length));
+		return offsetVals;
+	}
+
+	template <class T>
+	void RemoveOffsetAndNormalize(T *pStart, const SmpLength length, const double offset, const double amplify)
+	{
+		T *p = pStart;
+		for(SmpLength i = 0; i < length; i++, p++)
+		{
+			double var = (*p) * amplify + offset;
+			*p = mpt::saturate_round<T>(var);
+		}
+	}
+}
+
+
+// Remove DC offset
+double RemoveDCOffset(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
+{
+	if(!smp.HasSampleData())
+		return 0;
+
+	if(end > smp.nLength) end = smp.nLength;
+	if(start > end) start = end;
+	if(start == end)
+	{
+		start = 0;
+		end = smp.nLength;
+	}
+
+	start *= smp.GetNumChannels();
+	end *= smp.GetNumChannels();
+
+	const double maxAmplitude = (smp.GetElementarySampleSize() == 2) ? GetMaxAmplitude<int16>() : GetMaxAmplitude<int8>();
+
+	// step 1: Calculate offset.
+	OffsetData oData;
+	if(smp.GetElementarySampleSize() == 2)
+		oData = CalculateOffset(smp.sample16() + start, end - start);
+	else if(smp.GetElementarySampleSize() == 1)
+		oData = CalculateOffset(smp.sample8() + start, end - start);
+	else
+		return 0;
+
+	double offset = oData.offset;
+
+	if((int)(offset * maxAmplitude) == 0)
+		return 0;
+
+	// those will be changed...
+	oData.max += offset;
+	oData.min += offset;
+
+	// ... and that might cause distortion, so we will normalize this.
+	const double amplify = 1 / std::max(oData.max, -oData.min);
+
+	// step 2: centralize + normalize sample
+	offset *= maxAmplitude * amplify;
+	if(smp.GetElementarySampleSize() == 2)
+		RemoveOffsetAndNormalize(smp.sample16() + start, end - start, offset, amplify);
+	else if(smp.GetElementarySampleSize() == 1)
+		RemoveOffsetAndNormalize(smp.sample8() + start, end - start, offset, amplify);
+
+	// step 3: adjust global vol (if available)
+	if((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (start == 0) && (end == smp.nLength * smp.GetNumChannels()))
+	{
+		CriticalSection cs;
+
+		smp.nGlobalVol = std::min(mpt::saturate_round<uint16>(smp.nGlobalVol / amplify), uint16(64));
+		for(auto &chn : sndFile.m_PlayState.Chn)
+		{
+			if(chn.pModSample == &smp)
+			{
+				chn.UpdateInstrumentVolume(&smp, chn.pModInstrument);
+			}
+		}
+	}
+
+	smp.PrecomputeLoops(sndFile, false);
+
+	return oData.offset;
+}
+
+
+template<typename T>
+static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, const SmpLength length, const double amplifyStart, const double amplifyEnd, const Fade::Law fadeLaw)
+{
+	Fade::Func fadeFunc = Fade::GetFadeFunc(fadeLaw);
+
+	if(amplifyStart != amplifyEnd)
+	{
+		// Fade-In
+		const bool fadeIn = amplifyStart < amplifyEnd;
+		const double fadeOffset = fadeIn ? amplifyStart : amplifyEnd;
+		const double fadeDiff = mpt::abs(amplifyEnd - amplifyStart);
+		for(SmpLength i = 0; i < length; i++)
+		{
+			const double amp = fadeOffset + fadeFunc(static_cast<double>(fadeIn ? i : (length - i)) / length) * fadeDiff;
+			pSample[i] = mpt::saturate_round<T>(amp * pSample[i]);
+		}
+	} else
+	{
+		const double amp = fadeFunc(amplifyStart);
+		for(SmpLength i = 0; i < length; i++)
+		{
+			pSample[i] = mpt::saturate_round<T>(amp * pSample[i]);
+		}
+	}
+}
+
+
+bool AmplifySample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile, double amplifyStart, double amplifyEnd, Fade::Law fadeLaw)
+{
+	if(!smp.HasSampleData()) return false;
+	if(end == 0 || start > smp.nLength || end > smp.nLength)
+	{
+		start = 0;
+		end = smp.nLength;
+	}
+
+	if(end - start < 2) return false;
+
+	if (smp.GetElementarySampleSize() == 2)
+		ApplyAmplifyImpl(smp.sample16() + start, end - start, amplifyStart, amplifyEnd, fadeLaw);
+	else if (smp.GetElementarySampleSize() == 1)
+		ApplyAmplifyImpl(smp.sample8() + start, end - start, amplifyStart, amplifyEnd, fadeLaw);
+	else
+		return false;
+
+	smp.PrecomputeLoops(sndFile, false);
+	return true;
+}
+
+
+template <class T>
+static void ReverseSampleImpl(T *pStart, const SmpLength nLength)
+{
+	for(SmpLength i = 0; i < nLength / 2; i++)
+	{
+		std::swap(pStart[i], pStart[nLength - 1 - i]);
+	}
+}
+
+// Reverse sample data
+bool ReverseSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
+{
+	if(!smp.HasSampleData()) return false;
+	if(end == 0 || start > smp.nLength || end > smp.nLength)
+	{
+		start = 0;
+		end = smp.nLength;
+	}
+
+	if(end - start < 2) return false;
+
+	STATIC_ASSERT(MaxSamplingPointSize <= 4);
+	if(smp.GetBytesPerSample() == 4)	// 16 bit stereo
+		ReverseSampleImpl(static_cast<int32 *>(smp.samplev()) + start, end - start);
+	else if(smp.GetBytesPerSample() == 2)	// 16 bit mono / 8 bit stereo
+		ReverseSampleImpl(static_cast<int16 *>(smp.samplev()) + start, end - start);
+	else if(smp.GetBytesPerSample() == 1)	// 8 bit mono
+		ReverseSampleImpl(static_cast<int8 *>(smp.samplev()) + start, end - start);
+	else
+		return false;
+
+	smp.PrecomputeLoops(sndFile, false);
+	return true;
+}
+
+
+template <class T>
+static void UnsignSampleImpl(T *pStart, const SmpLength length)
+{
+	const T offset = (std::numeric_limits<T>::min)();
+	for(SmpLength i = 0; i < length; i++)
+	{
+		pStart[i] += offset;
+	}
+}
+
+// Virtually unsign sample data
+bool UnsignSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
+{
+	if(!smp.HasSampleData()) return false;
+	if(end == 0 || start > smp.nLength || end > smp.nLength)
+	{
+		start = 0;
+		end = smp.nLength;
+	}
+	start *= smp.GetNumChannels();
+	end *= smp.GetNumChannels();
+	if(smp.GetElementarySampleSize() == 2)
+		UnsignSampleImpl(smp.sample16() + start, end - start);
+	else if(smp.GetElementarySampleSize() == 1)
+		UnsignSampleImpl(smp.sample8() + start, end - start);
+	else
+		return false;
+
+	smp.PrecomputeLoops(sndFile, false);
+	return true;
+}
+
+
+// Invert sample data (flip by 180 degrees)
+bool InvertSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
+{
+	return ctrlSmp::InvertSample(smp, start, end, sndFile);
+}
+
+// Crossfade sample data to create smooth loops
+bool XFadeSample(ModSample &smp, SmpLength fadeLength, int fadeLaw, bool afterloopFade, bool useSustainLoop, CSoundFile &sndFile)
+{
+	return ctrlSmp::XFadeSample(smp, fadeLength, fadeLaw, afterloopFade, useSustainLoop, sndFile);
+}
+
+
+template <class T>
+static void SilenceSampleImpl(T *p, SmpLength length, SmpLength inc, bool fromStart, bool toEnd)
+{
+	const int dest = toEnd ? 0 : p[(length - 1) * inc];
+	const int base = fromStart ? 0 :p[0];
+	const int delta = dest - base;
+	const int64 len_m1 = length - 1;
+	for(SmpLength i = 0; i < length; i++)
+	{
+		int n = base + static_cast<int>((static_cast<int64>(delta) * static_cast<int64>(i)) / len_m1);
+		*p = static_cast<T>(n);
+		p += inc;
+	}
+}
+
+// Silence parts of the sample data
+bool SilenceSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
+{
+	LimitMax(end, smp.nLength);
+	if(!smp.HasSampleData() || start >= end) return false;
+
+	const SmpLength length = end - start;
+	const bool fromStart = start == 0;
+	const bool toEnd = end == smp.nLength;
+	const uint8 numChn = smp.GetNumChannels();
+
+	for(uint8 chn = 0; chn < numChn; chn++)
+	{
+		if(smp.GetElementarySampleSize() == 2)
+			SilenceSampleImpl(smp.sample16() + start * numChn + chn, length, numChn, fromStart, toEnd);
+		else if(smp.GetElementarySampleSize() == 1)
+			SilenceSampleImpl(smp.sample8() + start * numChn + chn, length, numChn, fromStart, toEnd);
+		else
+			return false;
+	}
+
+	smp.PrecomputeLoops(sndFile, false);
+	return true;
+}
+
+
+template <class T>
+static void StereoSepSampleImpl(T *p, SmpLength length, int32 separation)
+{
+	const int32 fac1 = static_cast<int32>(32768 + separation / 2), fac2 = static_cast<int32>(32768 - separation / 2);
+	while(length--)
+	{
+		const int32 l = p[0], r = p[1];
+		p[0] = mpt::saturate_cast<T>((Util::mul32to64(l, fac1) + Util::mul32to64(r, fac2)) >> 16);
+		p[1] = mpt::saturate_cast<T>((Util::mul32to64(l, fac2) + Util::mul32to64(r, fac1)) >> 16);
+		p += 2;
+	}
+}
+
+// Change stereo separation
+bool StereoSepSample(ModSample &smp, SmpLength start, SmpLength end, double separation, CSoundFile &sndFile)
+{
+	LimitMax(end, smp.nLength);
+	if(!smp.HasSampleData() || start >= end || smp.GetNumChannels() != 2) return false;
+
+	const SmpLength length = end - start;
+	const uint8 numChn = smp.GetNumChannels();
+	const int32 sep32 = mpt::saturate_round<int32>(separation * (65536.0 / 100.0));
+
+	if(smp.GetElementarySampleSize() == 2)
+		StereoSepSampleImpl(smp.sample16() + start * numChn, length, sep32);
+	else if(smp.GetElementarySampleSize() == 1)
+		StereoSepSampleImpl(smp.sample8() + start * numChn, length, sep32);
+	else
+		return false;
+
+	smp.PrecomputeLoops(sndFile, false);
+	return true;
+}
+
+} // namespace ctrlSmp
+
+OPENMPT_NAMESPACE_END

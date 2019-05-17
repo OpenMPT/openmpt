@@ -27,6 +27,7 @@
 #include "SampleEditorDialogs.h"
 #include "../soundlib/WAVTools.h"
 #include "../common/FileReader.h"
+#include "../tracklib/SampleEdit.h"
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/mod_specifications.h"
@@ -1921,7 +1922,7 @@ void CViewSample::OnEditDelete()
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Delete Selection", m_dwBeginSel, m_dwEndSel);
 
 		CriticalSection cs;
-		ctrlSmp::RemoveRange(sample, m_dwBeginSel, m_dwEndSel, sndFile);
+		SampleEdit::RemoveRange(sample, m_dwBeginSel, m_dwEndSel, sndFile);
 	}
 	SetCurSel(0, 0);
 	SetModified(updateHint, true, true);
@@ -2178,11 +2179,11 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 				if(selLength >= sample.nLength)
 					ok = true;
 				else
-					ok = ctrlSmp::InsertSilence(oldSample, sample.nLength - selLength, m_dwBeginSel, sndFile) > oldLength;
+					ok = SampleEdit::InsertSilence(oldSample, sample.nLength - selLength, m_dwBeginSel, sndFile) > oldLength;
 			} else
 			{
 				m_dwBeginSel = m_dwBeginDrag;
-				ok = ctrlSmp::InsertSilence(oldSample, sample.nLength, m_dwBeginSel, sndFile) > oldLength;
+				ok = SampleEdit::InsertSilence(oldSample, sample.nLength, m_dwBeginSel, sndFile) > oldLength;
 			}
 			if(ok && sample.GetNumChannels() > oldSample.GetNumChannels())
 			{
@@ -2848,7 +2849,7 @@ void CViewSample::OnAddSilence()
 			else	// make it longer!
 				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, "Add Silence", sample.nLength, dlg.m_numSamples);
 			sample.SetAdlib(false);
-			ctrlSmp::ResizeSample(sample, dlg.m_numSamples, sndFile);
+			SampleEdit::ResizeSample(sample, dlg.m_numSamples, sndFile);
 		}
 	} else
 	{
@@ -2860,7 +2861,7 @@ void CViewSample::OnAddSilence()
 			SmpLength nStart = (dlg.m_editOption == AddSilenceDlg::kSilenceAtEnd) ? sample.nLength : 0;
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, "Add Silence", nStart, nStart + dlg.m_numSamples);
 			sample.SetAdlib(false);
-			ctrlSmp::InsertSilence(sample, dlg.m_numSamples, nStart, sndFile);
+			SampleEdit::InsertSilence(sample, dlg.m_numSamples, nStart, sndFile);
 		}
 	}
 
@@ -3158,7 +3159,7 @@ void CViewSample::OnSampleSlice()
 	}
 	
 	pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Slice Sample", cues[1], sample.nLength);
-	ctrlSmp::ResizeSample(sample, cues[1], sndFile);
+	SampleEdit::ResizeSample(sample, cues[1], sndFile);
 	sample.PrecomputeLoops(sndFile, true);
 	SetModified(SampleHint().Info().Data().Names(), true, true);
 	pModDoc->UpdateAllViews(this, SampleHint().Info().Data().Names(), this);
