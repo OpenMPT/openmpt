@@ -14,11 +14,11 @@
 
 #include "Snd_defs.h"
 
+OPENMPT_NAMESPACE_BEGIN
+
 class CSoundFile;
 struct ModSample;
 struct ModChannel;
-
-OPENMPT_NAMESPACE_BEGIN
 
 namespace ctrlSmp
 {
