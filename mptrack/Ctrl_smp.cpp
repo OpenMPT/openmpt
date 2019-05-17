@@ -1745,63 +1745,33 @@ void CCtrlSamples::OnRemoveDCOffset()
 }
 
 
-template<typename T>
-static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, SmpLength start, SmpLength end, int32 amp, int32 fadeIn, int32 fadeOut, Fade::Law fadeLaw)
+void CCtrlSamples::ApplyAmplify(const double amp, const double fadeInStart, const double fadeOutEnd, const bool fadeIn, const bool fadeOut, const Fade::Law fadeLaw)
 {
-	pSample += start;
-	SmpLength len = end - start, len2 = len / 2;
-	Fade::Func fadeFunc = Fade::GetFadeFunc(fadeLaw);
-	const bool doFadeIn = fadeIn != amp, doFadeOut = fadeOut != amp;
-	const double fadeStart = fadeIn / 100.0, fadeStartDiff = (amp - fadeIn) / 100.0;
-	const double fadeEnd = fadeOut / 100.0, fadeEndDiff = (amp - fadeOut) / 100.0;
-	const double ampD = amp / 100.0;
-
-	for(SmpLength i = 0; i < len; i++)
-	{
-		double l;
-		if(doFadeIn && doFadeOut)
-		{
-			if(i < len2)
-				l = fadeStart + fadeFunc(static_cast<double>(i) / len2) * fadeStartDiff;
-			else
-				l = fadeEnd + fadeFunc(static_cast<double>(len - i) / (len - len2)) * fadeEndDiff;
-		} else if(doFadeIn)
-		{
-			l = fadeStart + fadeFunc(static_cast<double>(i) / len) * fadeStartDiff;
-		} else if(doFadeOut)
-		{
-			l = fadeEnd + fadeFunc(static_cast<double>(len - i) / len) * fadeEndDiff;
-		} else
-		{
-			l = ampD;
-		}
-		l *= pSample[i];
-		Limit(l, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
-		pSample[i] = mpt::saturate_round<T>(l);
-	}
-}
-
-
-void CCtrlSamples::ApplyAmplify(int32 lAmp, int32 fadeIn, int32 fadeOut, Fade::Law fadeLaw)
-{
-	if(!m_sndFile.GetSample(m_nSample).HasSampleData()) return;
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB]) return;
 
 	BeginWaitCursor();
-	ModSample &sample = m_sndFile.GetSample(m_nSample);
 
 	SampleSelectionPoints selection = GetSelectionPoints();
+	const auto start = selection.nStart, end = selection.nEnd, mid = start + end / 2;
 
-	PrepareUndo("Amplify", sundo_update, selection.nStart, selection.nEnd);
+	PrepareUndo("Amplify", sundo_update, start, end);
 
-	selection.nStart *= sample.GetNumChannels();
-	selection.nEnd *= sample.GetNumChannels();
-	if (sample.uFlags[CHN_16BIT])
+	if(fadeIn && fadeOut)
 	{
-		ApplyAmplifyImpl(sample.sample16(), selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut, fadeLaw);
+		SampleEdit::AmplifySample(sample, start, mid, fadeInStart, amp, true, fadeLaw, m_sndFile);
+		SampleEdit::AmplifySample(sample, mid, end, amp, fadeOutEnd, false, fadeLaw, m_sndFile);
+	} else if(fadeIn)
+	{
+		SampleEdit::AmplifySample(sample, start, end, fadeInStart, amp, true, fadeLaw, m_sndFile);
+	} else if(fadeOut)
+	{
+		SampleEdit::AmplifySample(sample, start, end, amp, fadeOutEnd, false, fadeLaw, m_sndFile);
 	} else
 	{
-		ApplyAmplifyImpl(sample.sample8(), selection.nStart, selection.nEnd, lAmp, fadeIn, fadeOut, fadeLaw);
+		SampleEdit::AmplifySample(sample, start, end, amp, amp, true, Fade::kLinear, m_sndFile);
 	}
+
 	sample.PrecomputeLoops(m_sndFile, false);
 	SetModified(SampleHint().Data(), false, true);
 	EndWaitCursor();
@@ -1815,7 +1785,8 @@ void CCtrlSamples::OnAmplify()
 
 	CAmpDlg dlg(this, settings);
 	if (dlg.DoModal() != IDOK) return;
-	ApplyAmplify(settings.factor, settings.fadeIn ? settings.fadeInStart : settings.factor, settings.fadeOut ? settings.fadeOutEnd : settings.factor, settings.fadeLaw);
+
+	ApplyAmplify(settings.factor / 100.0, settings.fadeInStart / 100.0, settings.fadeOutEnd / 100.0, settings.fadeIn, settings.fadeOut, settings.fadeLaw);
 }
 
 
@@ -1830,7 +1801,7 @@ void CCtrlSamples::OnQuickFade()
 	SampleSelectionPoints sel = GetSelectionPoints();
 	if(sel.selectionActive && (sel.nStart == 0 || sel.nEnd == sample.nLength))
 	{
-		ApplyAmplify(100, (sel.nStart == 0) ? 0 : 100, (sel.nEnd == sample.nLength) ? 0 : 100, Fade::kLinear);
+		ApplyAmplify(1.0, (sel.nStart == 0) ? 0.0 : 1.0, (sel.nEnd == sample.nLength) ? 0.0 : 1.0, sel.nStart == 0, sel.nEnd == sample.nLength, Fade::kLinear);
 	} else
 	{
 		// Can't apply quick fade as no appropriate selection has been made, so ask the user to amplify the whole sample instead.

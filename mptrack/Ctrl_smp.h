@@ -61,9 +61,7 @@ protected:
 	void UpdateTimeStretchParameterString();
 	void ReadTimeStretchParameters();
 
-	// Applies amplification to sample. Negative values
-	// can be used to invert phase.
-	void ApplyAmplify(int32 nAmp, int32 fadeIn, int32 fadeOut, Fade::Law fadeLaw);
+	void ApplyAmplify(const double amp, const double fadeInStart, const double fadeOutEnd, const bool fadeIn, const bool fadeOut, const Fade::Law fadeLaw);
 	void ApplyResample(uint32_t newRate, ResamplingMode mode);
 
 	SampleSelectionPoints GetSelectionPoints();

@@ -26,7 +26,7 @@ namespace SampleEdit
 
 enum ResetFlag
 {
-	SmpResetCompo = 1,
+	SmpResetCompo,
 	SmpResetInit,
 	SmpResetVibrato,
 };
@@ -54,7 +54,7 @@ void ResetSamples(CSoundFile &sndFile, ResetFlag resetflag, SAMPLEINDEX minSampl
 double RemoveDCOffset(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile);
 
 // Amplify / fade  sample data
-bool AmplifySample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile, double amplifyStart, double amplifyEnd, Fade::Law fadeLaw);
+bool AmplifySample(ModSample &smp, SmpLength start, SmpLength end, double amplifyStart, double amplifyEnd, bool isFadeIn, Fade::Law fadeLaw, CSoundFile &sndFile);
 
 // Reverse sample data
 bool ReverseSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile);
@@ -75,19 +75,5 @@ bool SilenceSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &s
 bool StereoSepSample(ModSample &smp, SmpLength start, SmpLength end, double separation, CSoundFile &sndFile);
 
 } // namespace SampleEdit
-
-namespace ctrlChn
-{
-
-// Replaces sample from sound channels by given sample.
-void ReplaceSample( CSoundFile &sndFile,
-					const ModSample &sample,
-					const void * const pNewSample,
-					const SmpLength newLength,
-					FlagSet<ChannelFlags> setFlags,
-					FlagSet<ChannelFlags> resetFlags);
-
-} // namespace ctrlChn
-
 
 OPENMPT_NAMESPACE_END

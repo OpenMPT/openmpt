@@ -29,9 +29,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength silenceLength, const Smp
 	const bool wasEmpty = !smp.HasSampleData();
 	const SmpLength newLength = smp.nLength + silenceLength;
 
-	char *pNewSmp = nullptr;
-
-	pNewSmp = static_cast<char *>(ModSample::AllocateSample(newLength, smp.GetBytesPerSample()));
+	char *pNewSmp = static_cast<char *>(ModSample::AllocateSample(newLength, smp.GetBytesPerSample()));
 	if(pNewSmp == nullptr)
 		return smp.nLength; //Sample allocation failed.
 
@@ -138,20 +136,7 @@ SmpLength ResizeSample(ModSample &smp, const SmpLength newLength, CSoundFile &sn
 	memcpy(pNewSmp, smp.sampleb(), newSmpBytes);
 	ctrlSmp::ReplaceSample(smp, pNewSmp, newLength, sndFile);
 
-	// Adjust loops
-	if(smp.nLoopStart > newLength)
-	{
-		smp.nLoopStart = smp.nLoopEnd = 0;
-		smp.uFlags.reset(CHN_LOOP);
-	}
-	if(smp.nLoopEnd > newLength) smp.nLoopEnd = newLength;
-	if(smp.nSustainStart > newLength)
-	{
-		smp.nSustainStart = smp.nSustainEnd = 0;
-		smp.uFlags.reset(CHN_SUSTAINLOOP);
-	}
-	if(smp.nSustainEnd > newLength) smp.nSustainEnd = newLength;
-
+	// Sanitize loops and update loop wrap-around buffers
 	smp.PrecomputeLoops(sndFile);
 
 	return smp.nLength;
@@ -331,19 +316,17 @@ double RemoveDCOffset(ModSample &smp, SmpLength start, SmpLength end, CSoundFile
 
 
 template<typename T>
-static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, const SmpLength length, const double amplifyStart, const double amplifyEnd, const Fade::Law fadeLaw)
+static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, const SmpLength length, const double amplifyStart, const double amplifyEnd, const bool isFadeIn, const Fade::Law fadeLaw)
 {
 	Fade::Func fadeFunc = Fade::GetFadeFunc(fadeLaw);
 
 	if(amplifyStart != amplifyEnd)
 	{
-		// Fade-In
-		const bool fadeIn = amplifyStart < amplifyEnd;
-		const double fadeOffset = fadeIn ? amplifyStart : amplifyEnd;
-		const double fadeDiff = mpt::abs(amplifyEnd - amplifyStart);
+		const double fadeOffset = isFadeIn ? amplifyStart : amplifyEnd;
+		const double fadeDiff = isFadeIn ? (amplifyEnd - amplifyStart) : (amplifyStart - amplifyEnd);
 		for(SmpLength i = 0; i < length; i++)
 		{
-			const double amp = fadeOffset + fadeFunc(static_cast<double>(fadeIn ? i : (length - i)) / length) * fadeDiff;
+			const double amp = fadeOffset + fadeFunc(static_cast<double>(isFadeIn ? i : (length - i)) / length) * fadeDiff;
 			pSample[i] = mpt::saturate_round<T>(amp * pSample[i]);
 		}
 	} else
@@ -356,8 +339,7 @@ static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, const SmpLength length, c
 	}
 }
 
-
-bool AmplifySample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile, double amplifyStart, double amplifyEnd, Fade::Law fadeLaw)
+bool AmplifySample(ModSample &smp, SmpLength start, SmpLength end, double amplifyStart, double amplifyEnd, bool isFadeIn, Fade::Law fadeLaw, CSoundFile &sndFile)
 {
 	if(!smp.HasSampleData()) return false;
 	if(end == 0 || start > smp.nLength || end > smp.nLength)
@@ -368,10 +350,13 @@ bool AmplifySample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &s
 
 	if(end - start < 2) return false;
 
+	start *= smp.GetNumChannels();
+	end *= smp.GetNumChannels();
+
 	if (smp.GetElementarySampleSize() == 2)
-		ApplyAmplifyImpl(smp.sample16() + start, end - start, amplifyStart, amplifyEnd, fadeLaw);
+		ApplyAmplifyImpl(smp.sample16() + start, end - start, amplifyStart, amplifyEnd, isFadeIn, fadeLaw);
 	else if (smp.GetElementarySampleSize() == 1)
-		ApplyAmplifyImpl(smp.sample8() + start, end - start, amplifyStart, amplifyEnd, fadeLaw);
+		ApplyAmplifyImpl(smp.sample8() + start, end - start, amplifyStart, amplifyEnd, isFadeIn, fadeLaw);
 	else
 		return false;
 
@@ -537,6 +522,6 @@ bool StereoSepSample(ModSample &smp, SmpLength start, SmpLength end, double sepa
 	return true;
 }
 
-} // namespace ctrlSmp
+} // namespace SampleEdit
 
 OPENMPT_NAMESPACE_END
