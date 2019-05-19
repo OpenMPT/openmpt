@@ -20,7 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 class FileDialog
 {
 public:
-	typedef std::vector<mpt::PathString> PathList;
+	using PathList = std::vector<mpt::PathString>;
 
 protected:
 	mpt::RawPathString m_defaultExtension;

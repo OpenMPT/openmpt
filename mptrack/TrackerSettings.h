@@ -41,7 +41,7 @@ class Manager;
 namespace Tuning {
 class CTuningCollection;
 } // namespace Tuning
-typedef Tuning::CTuningCollection CTuningCollection;
+using CTuningCollection = Tuning::CTuningCollection;
 
 
 // User-defined colors
@@ -196,7 +196,7 @@ struct MPTChord
 	uint8 notes[3];		// Additional chord notes
 };
 
-typedef MPTChord MPTChords[3 * 12];	// 3 octaves
+using MPTChords = std::array<MPTChord, 3 * 12>;	// 3 octaves
 
 // MIDI recording
 enum RecordAftertouchOptions

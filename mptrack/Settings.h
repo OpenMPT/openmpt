@@ -614,8 +614,8 @@ class SettingsContainer
 {
 
 public:
-	typedef std::map<SettingPath,SettingState> SettingsMap;
-	typedef std::map<SettingPath,std::set<ISettingChanged*> > SettingsListenerMap;
+	using SettingsMap = std::map<SettingPath,SettingState>;
+	using SettingsListenerMap = std::map<SettingPath,std::set<ISettingChanged*>>;
 	void WriteSettings();
 private:
 	mutable SettingsMap map;
@@ -624,7 +624,7 @@ private:
 private:
 	ISettingsBackend *backend;
 private:
-	bool immediateFlush;
+	bool immediateFlush = false;
 	SettingValue BackendsReadSetting(const SettingPath &path, const SettingValue &def) const;
 	void BackendsWriteSetting(const SettingPath &path, const SettingValue &val);
 	void BackendsRemoveSetting(const SettingPath &path);

@@ -55,8 +55,6 @@ CCommandSet::CCommandSet()
 
 	SetupCommands();
 	SetupContextHierarchy();
-
-	oldSpecs = nullptr;
 }
 
 
@@ -1452,16 +1450,16 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 			contexts.clear();
 
 			// Handle keyEventType mask.
-			if (curKc.EventType() & kKeyEventDown)
+			if(curKc.EventType() & kKeyEventDown)
 				eventTypes.push_back(kKeyEventDown);
-			if (curKc.EventType() & kKeyEventUp)
+			if(curKc.EventType() & kKeyEventUp)
 				eventTypes.push_back(kKeyEventUp);
-			if (curKc.EventType() & kKeyEventRepeat)
+			if(curKc.EventType() & kKeyEventRepeat)
 				eventTypes.push_back(kKeyEventRepeat);
 			//ASSERT(eventTypes.GetSize()>0);
 
 			// Handle super-contexts (contexts that represent a set of sub contexts)
-			if (curKc.Context() == kCtxViewPatterns)
+			if(curKc.Context() == kCtxViewPatterns)
 			{
 				contexts.push_back(kCtxViewPatternsNote);
 				contexts.push_back(kCtxViewPatternsIns);
@@ -1476,9 +1474,9 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 				contexts.push_back(curKc.Context());
 			}
 
-			for (auto ctx : contexts)
+			for(auto ctx : contexts)
 			{
-				for (auto event : eventTypes)
+				for(auto event : eventTypes)
 				{
 					KeyCombination kc(ctx, curKc.Modifier(), curKc.KeyCode(), event);
 					if(!allowDupes)

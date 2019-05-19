@@ -210,7 +210,7 @@ class CTuningDialog : public CDialog
 	};
 
 public:
-	typedef std::vector<CTuningCollection*> TUNINGVECTOR;
+	using TUNINGVECTOR = std::vector<CTuningCollection*>;
 
 public:
 	CTuningDialog(CWnd* pParent, INSTRUMENTINDEX inst, CSoundFile &csf);
@@ -297,8 +297,8 @@ private:
 	CTuningTreeCtrl m_TreeCtrlTuning;
 
 private:
-	typedef CTuningTreeItem TUNINGTREEITEM;
-	typedef CBijectiveMap<HTREEITEM, TUNINGTREEITEM> TREETUNING_MAP;
+	using TUNINGTREEITEM = CTuningTreeItem;
+	using TREETUNING_MAP = CBijectiveMap<HTREEITEM, TUNINGTREEITEM>;
 	TREETUNING_MAP m_TreeItemTuningItemMap;
 
 	TUNINGTREEITEM m_DragItem;
@@ -308,7 +308,7 @@ private:
 	//m_CommandItemDest is used when the command really need only
 	//one argument.
 
-	typedef std::map<const CTuningCollection* const, bool> MODIFIED_MAP;
+	using MODIFIED_MAP = std::map<const CTuningCollection* const, bool>;
 	MODIFIED_MAP m_ModifiedTCs;
 	//If tuning collection seems to have been modified, its address
 	//is added to this map.

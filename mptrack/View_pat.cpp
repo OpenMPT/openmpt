@@ -5028,7 +5028,7 @@ int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord
 	UINT baseOctave = CMainFrame::GetMainFrame()->GetBaseOctave();
 	UINT chordNum = note - baseOctave * 12 - NOTE_MIN;
 
-	if(chordNum >= CountOf(chords))
+	if(chordNum >= chords.size())
 	{
 		return 0;
 	}

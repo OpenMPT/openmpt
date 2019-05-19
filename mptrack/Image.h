@@ -80,7 +80,7 @@ namespace GDIP
 	std::unique_ptr<Gdiplus::Image> ResizeImage(Gdiplus::Image &src, double scaling);
 	std::unique_ptr<Gdiplus::Bitmap> ResizeImage(Gdiplus::Bitmap &src, double scaling);
 
-	typedef Gdiplus::ARGB Pixel;
+	using Pixel = Gdiplus::ARGB;
 
 	template <typename TBitmapData>
 	inline Pixel * GetScanline(const TBitmapData &bitmapData, std::size_t y) noexcept

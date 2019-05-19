@@ -86,7 +86,6 @@ class CSoundFile;
 class CMIDIMapper
 {
 public:
-	typedef std::vector<CMIDIMappingDirective>::const_iterator const_iterator;
 	CMIDIMapper(CSoundFile& sndfile) : m_rSndFile(sndfile) {}
 
 	//If mapping found:

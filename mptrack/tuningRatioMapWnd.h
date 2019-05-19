@@ -18,7 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 class CTuningDialog;
 
-typedef Tuning::NOTEINDEXTYPE NOTEINDEXTYPE;
+using NOTEINDEXTYPE = Tuning::NOTEINDEXTYPE;
 
 //Copied from CNoteMapWnd.
 class CTuningRatioMapWnd: public CStatic

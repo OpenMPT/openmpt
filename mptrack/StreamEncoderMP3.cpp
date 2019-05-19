@@ -347,7 +347,7 @@ void ID3V2Tagger::WriteID3v2Frame(const char cFrameID[4], std::string sFramecont
 #ifdef MPT_WITH_LAME
 
 
-typedef lame_global_flags *lame_t;
+using lame_t = lame_global_flags *;
 
 
 class ComponentLame

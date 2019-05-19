@@ -343,9 +343,8 @@ SettingsContainer::~SettingsContainer()
 
 SettingsContainer::SettingsContainer(ISettingsBackend *backend)
 	: backend(backend)
-	, immediateFlush(false)
 {
-	ASSERT(backend);
+	MPT_ASSERT(backend);
 }
 
 

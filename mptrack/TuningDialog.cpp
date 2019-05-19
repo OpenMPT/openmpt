@@ -29,12 +29,15 @@ const mpt::Charset TuningCharset = mpt::CharsetLocale;
 const CTuningDialog::TUNINGTREEITEM CTuningDialog::s_notFoundItemTuning = TUNINGTREEITEM();
 const HTREEITEM CTuningDialog::s_notFoundItemTree = NULL;
 
-typedef Tuning::UNOTEINDEXTYPE UNOTEINDEXTYPE;
-typedef Tuning::RATIOTYPE RATIOTYPE;
-typedef Tuning::NOTEINDEXTYPE NOTEINDEXTYPE;
-#define TT_GENERAL CTuning::TT_GENERAL
-#define TT_GROUPGEOMETRIC CTuning::TT_GROUPGEOMETRIC
-#define TT_GEOMETRIC CTuning::TT_GEOMETRIC
+using UNOTEINDEXTYPE = Tuning::UNOTEINDEXTYPE;
+using RATIOTYPE = Tuning::RATIOTYPE;
+using NOTEINDEXTYPE = Tuning::NOTEINDEXTYPE;
+enum TuningType
+{
+	TT_GENERAL = CTuning::TT_GENERAL,
+	TT_GROUPGEOMETRIC = CTuning::TT_GROUPGEOMETRIC,
+	TT_GEOMETRIC = CTuning::TT_GEOMETRIC,
+};
 
 
 // CTuningDialog dialog
@@ -1485,7 +1488,7 @@ void CTuningTreeCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 //
 ////////////////////////////////////////////////////////
 
-typedef double SclFloat;
+using SclFloat = double;
 
 CString CTuningDialog::GetSclImportFailureMsg(EnSclImport id)
 {

@@ -14,8 +14,9 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-FolderScanner::FolderScanner(const mpt::PathString &path, FlagSet<ScanType> type)
+FolderScanner::FolderScanner(const mpt::PathString &path, FlagSet<ScanType> type, mpt::PathString filter)
 	: m_paths(1, path)
+	, m_filter(std::move(filter))
 	, m_hFind(INVALID_HANDLE_VALUE)
 	, m_type(type)
 {
@@ -44,7 +45,7 @@ bool FolderScanner::Next(mpt::PathString &file)
 			m_currentPath = m_paths.back();
 			m_paths.pop_back();
 			m_currentPath.EnsureTrailingSlash();
-			m_hFind = FindFirstFile((m_currentPath + P_("*.*")).AsNative().c_str(), &m_wfd);
+			m_hFind = FindFirstFile((m_currentPath + m_filter).AsNative().c_str(), &m_wfd);
 		}
 
 		BOOL nextFile = FALSE;

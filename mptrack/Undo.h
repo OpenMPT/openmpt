@@ -41,7 +41,7 @@ protected:
 		bool linkToPrevious;			// This undo information is linked with the previous undo information
 	};
 
-	typedef std::vector<UndoInfo> undobuf_t;
+	using undobuf_t = std::vector<UndoInfo>;
 
 	undobuf_t UndoBuffer;
 	undobuf_t RedoBuffer;
@@ -113,7 +113,7 @@ protected:
 		sampleUndoTypes changeType;
 	};
 
-	typedef std::vector<std::vector<UndoInfo>> undobuf_t;
+	using undobuf_t = std::vector<std::vector<UndoInfo>>;
 	undobuf_t UndoBuffer;
 	undobuf_t RedoBuffer;
 
@@ -171,7 +171,7 @@ protected:
 		EnvelopeType editedEnvelope;
 	};
 
-	typedef std::vector<std::vector<UndoInfo>> undobuf_t;
+	using undobuf_t = std::vector<std::vector<UndoInfo>>;
 	undobuf_t UndoBuffer;
 	undobuf_t RedoBuffer;
 

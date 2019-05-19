@@ -30,7 +30,7 @@ class CInputHandler;
 #define DRAGITEM_CHNHEADER		0x01000000
 #define DRAGITEM_PATTERNHEADER	0x02000000
 #define DRAGITEM_PLUGNAME		0x04000000
-typedef uint32 DragItem;
+using DragItem = uint32;
 
 
 // Edit Step aka Row Spacing

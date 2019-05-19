@@ -919,7 +919,7 @@ MPTChord &CChordEditor::GetChord()
 	MPTChords &chords = TrackerSettings::GetChords();
 	int chord = m_CbnShortcut.GetCurSel();
 	if(chord >= 0) chord = static_cast<int>(m_CbnShortcut.GetItemData(chord)) - NOTE_MIN;
-	if(chord < 0 || chord >= CountOf(chords)) chord = 0;
+	if(chord < 0 || chord >= static_cast<int>(chords.size())) chord = 0;
 	return chords[chord];
 }
 

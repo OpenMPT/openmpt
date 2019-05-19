@@ -76,7 +76,7 @@ DECLARE_FLAGSET(HintType)
 struct UpdateHint
 {
 protected:
-	typedef uint32_t store_t;
+	using store_t = uint32_t;
 	union
 	{
 		struct

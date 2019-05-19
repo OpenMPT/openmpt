@@ -46,9 +46,9 @@ protected:
 	CListCtrlEx m_List;
 #endif // !MPT_MFC_FULL
 #if MPT_USTRING_MODE_WIDE
-	typedef std::unordered_map<mpt::ustring, int> GroupMap;
+	using GroupMap = std::unordered_map<mpt::ustring, int>;
 #else
-	typedef std::map<mpt::ustring, int> GroupMap;
+	using GroupMap = std::map<mpt::ustring, int>;
 #endif
 	std::vector<SettingPath> m_indexToPath;
 	GroupMap m_groups;

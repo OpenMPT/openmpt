@@ -30,7 +30,7 @@ public:
 
 	static const char s_FileExtension[5];
 
-	enum
+	enum TuningType
 	{
 		TT_GENERAL        = 0,
 		TT_GROUPGEOMETRIC = 1,

@@ -30,12 +30,13 @@ public:
 protected:
 	std::vector<mpt::PathString> m_paths;
 	mpt::PathString m_currentPath;
+	mpt::PathString m_filter;
 	HANDLE m_hFind;
 	WIN32_FIND_DATA m_wfd;
 	FlagSet<ScanType> m_type;
 
 public:
-	FolderScanner(const mpt::PathString &path, FlagSet<ScanType> type);
+	FolderScanner(const mpt::PathString &path, FlagSet<ScanType> type, mpt::PathString filter = MPT_PATHSTRING("*.*"));
 	~FolderScanner();
 
 	// Return one file or directory at a time in parameter file. Returns true if a file was found (file parameter is valid), false if no more files can be found (file parameter is not touched).

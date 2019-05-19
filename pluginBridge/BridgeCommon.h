@@ -428,7 +428,7 @@ struct SharedMemLayout
 	{
 		queueSize = 8u,	// Must be 2^n
 	};
-	typedef BridgeMessage MsgQueue[queueSize];
+	using MsgQueue = BridgeMessage[queueSize];
 
 	union
 	{

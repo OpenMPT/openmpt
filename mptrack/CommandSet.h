@@ -66,9 +66,10 @@ DECLARE_FLAGSET(KeyEventType)
 enum CommandID
 {
 	kcNull = -1,
+	kcFirst,
 
 	//Global
-	kcGlobalStart,
+	kcGlobalStart = kcFirst,
 	kcStartFile=kcGlobalStart,
 	kcFileNew=kcGlobalStart,
 	kcFileOpen,
@@ -1210,7 +1211,7 @@ protected:
 	uint8 code;
 	FlagSet<KeyEventType> event;
 
-	MPT_CONSTEXPR11_FUN uint32 AsUint32() const
+	constexpr uint32 AsUint32() const
 	{
 		STATIC_ASSERT(sizeof(KeyCombination) == sizeof(uint32));
 		return static_cast<uint32>(0)
@@ -1229,31 +1230,31 @@ public:
 		, event(type)
 	{ }
 
-	MPT_CONSTEXPR11_FUN bool operator== (const KeyCombination &other) const
+	constexpr bool operator== (const KeyCombination &other) const
 	{
 		return ctx == other.ctx && mod == other.mod && code == other.code && event == other.event;
 	}
 
-	MPT_CONSTEXPR11_FUN bool operator < (const KeyCombination &kc) const
+	constexpr bool operator < (const KeyCombination &kc) const
 	{
 		return AsUint32() < kc.AsUint32();
 	}
 
 	// Getters / Setters
 	void Context(InputTargetContext context) { ctx = context; }
-	MPT_CONSTEXPR11_FUN InputTargetContext Context() const { return ctx; }
+	constexpr InputTargetContext Context() const { return ctx; }
 
 	void Modifier(FlagSet<Modifiers> modifier) { mod = modifier; }
-	MPT_CONSTEXPR11_FUN FlagSet<Modifiers> Modifier() const { return mod; }
+	constexpr FlagSet<Modifiers> Modifier() const { return mod; }
 	void Modifier(const KeyCombination &other) { mod = other.mod; }
 	void AddModifier(FlagSet<Modifiers> modifier) { mod |= modifier; }
 	void AddModifier(const KeyCombination &other) { mod |= other.mod; }
 
 	void KeyCode(UINT key) { code = static_cast<uint8>(key); }
-	MPT_CONSTEXPR11_FUN UINT KeyCode() const { return code; }
+	constexpr UINT KeyCode() const { return code; }
 
 	void EventType(FlagSet<KeyEventType> type) { event = type; }
-	MPT_CONSTEXPR11_FUN FlagSet<KeyEventType> EventType() const { return event; }
+	constexpr FlagSet<KeyEventType> EventType() const { return event; }
 
 	// Key combination to string
 	static CString GetContextText(InputTargetContext ctx);
@@ -1271,8 +1272,8 @@ public:
 	static bool IsExtended(UINT code);
 };
 
-typedef std::multimap<KeyCombination, CommandID> KeyMap;
-typedef std::pair<KeyMap::const_iterator, KeyMap::const_iterator> KeyMapRange;
+using KeyMap = std::multimap<KeyCombination, CommandID>;
+using KeyMapRange = std::pair<KeyMap::const_iterator, KeyMap::const_iterator>;
 
 //KeyMap
 
@@ -1333,16 +1334,15 @@ protected:
 	CommandID FindCmd(UINT uid) const;
 	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool checkEventConflict = true) const;
 
-	const CModSpecifications *oldSpecs;
+	const CModSpecifications *oldSpecs = nullptr;
 	CommandStruct commands[kcNumCommands];
 	std::bitset<kCtxMaxInputContexts> m_isParentContext[kCtxMaxInputContexts];
 	std::bitset<kNumRules> enforceRule;
 
 public:
-
 	CCommandSet();
 
-	//Population
+	// Population
 	CString Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos = -1, bool checkEventConflict = true);
 	CString Remove(KeyCombination kc, CommandID cmd);
 	CString Remove(int pos, CommandID cmd);
@@ -1350,20 +1350,20 @@ public:
 	std::pair<CommandID, KeyCombination> IsConflicting(KeyCombination kc, CommandID cmd, bool checkEventConflict = true) const;
 	bool IsCrossContextConflict(KeyCombination kc1, KeyCombination kc2) const;
 
-	//Tranformation
+	// Tranformation
 	bool QuickChange_SetEffects(const CModSpecifications &modSpecs);
 	bool QuickChange_NotesRepeat(bool repeat);
 
-	//Communication
+	// Communication
 	KeyCombination GetKey(CommandID cmd, UINT key) const { return commands[cmd].kcList[key]; }
 	bool isHidden(UINT c) const { return commands[c].isHidden; }
 	int GetKeyListSize(CommandID cmd) const { return (int)commands[cmd].kcList.size(); }
 	CString GetCommandText(CommandID cmd) const { return commands[cmd].Message; }
 	CString GetKeyTextFromCommand(CommandID c, UINT key) const;
 
-	//Pululation ;)
-	void Copy(const CCommandSet *source);	// copy the contents of a commandset into this command set
-	void GenKeyMap(KeyMap &km);		// Generate a keymap from this command set
+	// Pululation ;)
+	void Copy(const CCommandSet *source); // Copy the contents of a commandset into this command set
+	void GenKeyMap(KeyMap &km);           // Generate a keymap from this command set
 	bool SaveFile(const mpt::PathString &filename);
 	bool LoadFile(const mpt::PathString &filename);
 	bool LoadFile(std::istream& iStrm, const mpt::ustring &filenameDescription, CCommandSet *commandSet = nullptr);
