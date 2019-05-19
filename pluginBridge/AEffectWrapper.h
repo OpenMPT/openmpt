@@ -88,8 +88,8 @@ struct AEffectProto
 
 };
 
-typedef AEffectProto<int32_t> AEffect32;
-typedef AEffectProto<int64_t> AEffect64;
+using AEffect32 = AEffectProto<int32_t>;
+using AEffect64 = AEffectProto<int64_t>;
 
 #pragma pack(pop)
 

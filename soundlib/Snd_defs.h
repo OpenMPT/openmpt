@@ -19,25 +19,25 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-typedef uint32 ROWINDEX;
+using ROWINDEX = uint32;
 	const ROWINDEX ROWINDEX_INVALID = uint32_max;
-typedef uint16 CHANNELINDEX;
+using CHANNELINDEX = uint16;
 	const CHANNELINDEX CHANNELINDEX_INVALID = uint16_max;
-typedef uint16 ORDERINDEX;
+using ORDERINDEX = uint16;
 	const ORDERINDEX ORDERINDEX_INVALID = uint16_max;
 	const ORDERINDEX ORDERINDEX_MAX = uint16_max - 1;
-typedef uint16 PATTERNINDEX;
+using PATTERNINDEX = uint16;
 	const PATTERNINDEX PATTERNINDEX_INVALID = uint16_max;
-typedef uint8  PLUGINDEX;
+using PLUGINDEX = uint8;
 	const PLUGINDEX PLUGINDEX_INVALID = uint8_max;
-typedef uint16 SAMPLEINDEX;
+using SAMPLEINDEX = uint16;
 	const SAMPLEINDEX SAMPLEINDEX_INVALID = uint16_max;
-typedef uint16 INSTRUMENTINDEX;
+using INSTRUMENTINDEX = uint16;
 	const INSTRUMENTINDEX INSTRUMENTINDEX_INVALID = uint16_max;
-typedef uint8 SEQUENCEINDEX;
+using SEQUENCEINDEX = uint8;
 	const SEQUENCEINDEX SEQUENCEINDEX_INVALID = uint8_max;
 
-typedef uint32 SmpLength;
+using SmpLength = uint32;
 
 
 const SmpLength MAX_SAMPLE_LENGTH = 0x10000000; // Sample length in frames. Sample size in bytes can be more than this (= 256 MB).
@@ -54,15 +54,18 @@ const SEQUENCEINDEX MAX_SEQUENCES     = 50;
 const CHANNELINDEX MAX_BASECHANNELS   = 127; // Maximum pattern channels.
 const CHANNELINDEX MAX_CHANNELS       = 256; // Maximum number of mixing channels.
 
-#define FREQ_FRACBITS           4 // Number of fractional bits in return value of CSoundFile::GetFreqFromPeriod()
+enum { FREQ_FRACBITS = 4 }; // Number of fractional bits in return value of CSoundFile::GetFreqFromPeriod()
 
 // String lengths (including trailing null char)
-#define MAX_SAMPLENAME          32
-#define MAX_SAMPLEFILENAME      22
-#define MAX_INSTRUMENTNAME      32
-#define MAX_INSTRUMENTFILENAME  32
-#define MAX_PATTERNNAME         32
-#define MAX_CHANNELNAME         20
+enum
+{
+	MAX_SAMPLENAME         = 32,
+	MAX_SAMPLEFILENAME     = 22,
+	MAX_INSTRUMENTNAME     = 32,
+	MAX_INSTRUMENTFILENAME = 32,
+	MAX_PATTERNNAME        = 32,
+	MAX_CHANNELNAME        = 20,
+};
 
 enum MODTYPE
 {
@@ -160,7 +163,7 @@ DECLARE_FLAGSET(ChannelFlags)
 #define CHN_CHANNELFLAGS (~CHN_SAMPLEFLAGS | CHN_SURROUND)
 
 // Sample flags fit into the first 16 bits, and with the current memory layout, storing them as a 16-bit integer packs struct ModSample nicely.
-typedef FlagSet<ChannelFlags, uint16> SampleFlags;
+using SampleFlags = FlagSet<ChannelFlags, uint16>;
 
 
 // Instrument envelope-specific flags
@@ -314,18 +317,18 @@ static inline std::array<ResamplingMode, 5> AllModes() noexcept { return { { SRC
 
 static inline std::array<ResamplingMode, 6> AllModesWithDefault() noexcept { return { { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_CUBIC, SRCMODE_SINC8, SRCMODE_SINC8LP, SRCMODE_DEFAULT } }; }
 
-static MPT_CONSTEXPR11_FUN ResamplingMode Default() noexcept { return SRCMODE_SINC8LP; }
+static constexpr ResamplingMode Default() noexcept { return SRCMODE_SINC8LP; }
 
-static MPT_CONSTEXPR11_FUN bool IsKnownMode(int mode) noexcept { return (mode >= 0) && (mode < SRCMODE_DEFAULT); }
+static constexpr bool IsKnownMode(int mode) noexcept { return (mode >= 0) && (mode < SRCMODE_DEFAULT); }
 
-static MPT_CONSTEXPR11_FUN ResamplingMode ToKnownMode(int mode) noexcept
+static constexpr ResamplingMode ToKnownMode(int mode) noexcept
 {
 	return Resampling::IsKnownMode(mode) ? static_cast<ResamplingMode>(mode)
 		: (mode == SRCMODE_AMIGA) ? SRCMODE_LINEAR
 		: Resampling::Default();
 }
 
-static MPT_CONSTEXPR11_FUN int Length(ResamplingMode mode) noexcept
+static constexpr int Length(ResamplingMode mode) noexcept
 {
 	return mode == SRCMODE_NEAREST ? 1
 		: mode == SRCMODE_LINEAR ? 2
@@ -335,11 +338,11 @@ static MPT_CONSTEXPR11_FUN int Length(ResamplingMode mode) noexcept
 		: 0;
 }
 
-static MPT_CONSTEXPR11_FUN bool HasAA(ResamplingMode mode) noexcept { return (mode == SRCMODE_SINC8LP); }
+static constexpr bool HasAA(ResamplingMode mode) noexcept { return (mode == SRCMODE_SINC8LP); }
 
-static MPT_CONSTEXPR11_FUN ResamplingMode AddAA(ResamplingMode mode) noexcept { return (mode == SRCMODE_SINC8) ? SRCMODE_SINC8LP : mode; }
+static constexpr ResamplingMode AddAA(ResamplingMode mode) noexcept { return (mode == SRCMODE_SINC8) ? SRCMODE_SINC8LP : mode; }
 
-static MPT_CONSTEXPR11_FUN ResamplingMode RemoveAA(ResamplingMode mode) noexcept { return (mode == SRCMODE_SINC8LP) ? SRCMODE_SINC8 : mode; }
+static constexpr ResamplingMode RemoveAA(ResamplingMode mode) noexcept { return (mode == SRCMODE_SINC8LP) ? SRCMODE_SINC8 : mode; }
 
 }
 

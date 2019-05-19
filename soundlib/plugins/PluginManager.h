@@ -149,14 +149,15 @@ public:
 	CVstPluginManager();
 	~CVstPluginManager();
 
-	typedef std::vector<VSTPluginLib *>::iterator iterator;
-	typedef std::vector<VSTPluginLib *>::const_iterator const_iterator;
+	using iterator = std::vector<VSTPluginLib *>::iterator;
+	using const_iterator = std::vector<VSTPluginLib *>::const_iterator;
 
 	iterator begin() { return pluginList.begin(); }
 	const_iterator begin() const { return pluginList.begin(); }
 	iterator end() { return pluginList.end(); }
 	const_iterator end() const { return pluginList.end(); }
 	void reserve(size_t num) { pluginList.reserve(num); }
+	size_t size() const { return pluginList.size(); }
 
 	bool IsValidPlugin(const VSTPluginLib *pLib) const;
 	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, const mpt::ustring &tags = mpt::ustring(), bool fromCache = true, bool *fileFound = nullptr);
@@ -173,6 +174,7 @@ public:
 	const VSTPluginLib **begin() const { return nullptr; }
 	const VSTPluginLib **end() const { return nullptr; }
 	void reserve(size_t) { }
+	size_t size() const { return 0; }
 
 	void OnIdle() {}
 #endif // NO_PLUGINS

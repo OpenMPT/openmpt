@@ -47,7 +47,7 @@ struct ArchiveFileInfo
 class IArchive
 {
 public:
-	typedef std::vector<ArchiveFileInfo>::const_iterator const_iterator;
+	using const_iterator = std::vector<ArchiveFileInfo>::const_iterator;
 protected:
 	IArchive() {}
 public:
@@ -78,29 +78,29 @@ public:
 	{
 		return;
 	}
-	virtual ~ArchiveBase()
+	~ArchiveBase() override
 	{
 		return;
 	}
-	virtual bool ExtractFile(std::size_t index) { MPT_UNREFERENCED_PARAMETER(index); return false; } // overwrite this
+	bool ExtractFile(std::size_t index) override { MPT_UNREFERENCED_PARAMETER(index); return false; } // overwrite this
 public:
-	virtual bool IsArchive() const
+	bool IsArchive() const override
 	{
 		return !contents.empty();
 	}
-	virtual mpt::ustring GetComment() const
+	mpt::ustring GetComment() const override
 	{
 		return comment;
 	}
-	virtual FileReader GetOutputFile() const
+	FileReader GetOutputFile() const override
 	{
 		return FileReader(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(data)));
 	}
-	virtual std::size_t size() const { return contents.size(); }
-	virtual IArchive::const_iterator begin() const { return contents.begin(); }
-	virtual IArchive::const_iterator end() const { return contents.end(); }
-	virtual const ArchiveFileInfo & at(std::size_t index) const { return contents.at(index); }
-	virtual const ArchiveFileInfo & operator [] (std::size_t index) const { return contents[index]; }
+	std::size_t size() const override { return contents.size(); }
+	IArchive::const_iterator begin() const override { return contents.begin(); }
+	IArchive::const_iterator end() const override { return contents.end(); }
+	const ArchiveFileInfo & at(std::size_t index) const override { return contents.at(index); }
+	const ArchiveFileInfo & operator [] (std::size_t index) const override { return contents[index]; }
 };
 
 

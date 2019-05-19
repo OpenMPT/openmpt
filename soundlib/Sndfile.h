@@ -70,8 +70,6 @@ extern bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, uint1
 // --------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------
 
-typedef void (* LPSNDMIXHOOKPROC)(int *, unsigned long, unsigned long); // buffer, samples, channels
-
 
 #ifdef LIBOPENMPT_BUILD
 #ifndef NO_PLUGINS
@@ -80,7 +78,7 @@ class CVstPluginManager;
 #endif
 
 
-typedef std::bitset<kMaxPlayBehaviours> PlayBehaviourSet;
+using PlayBehaviourSet = std::bitset<kMaxPlayBehaviours>;
 
 #ifdef MODPLUG_TRACKER
 
@@ -210,7 +208,7 @@ enum deleteInstrumentSamples
 namespace Tuning {
 class CTuningCollection;
 } // namespace Tuning
-typedef Tuning::CTuningCollection CTuningCollection;
+using CTuningCollection = Tuning::CTuningCollection;
 struct CModSpecifications;
 class OPL;
 #ifdef MODPLUG_TRACKER
@@ -291,7 +289,7 @@ public:
 };
 
 
-typedef MPT_UCHAR_TYPE NoteName[4];
+using NoteName = MPT_UCHAR_TYPE[4];
 
 
 class CSoundFile
@@ -377,7 +375,7 @@ public:
 	CAGC m_AGC;
 #endif
 
-	typedef uint32 samplecount_t; // Number of rendered samples
+	using samplecount_t = uint32; // Number of rendered samples
 
 public:	// for Editing
 #ifdef MODPLUG_TRACKER
