@@ -53,8 +53,7 @@ BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 	ON_MESSAGE(WM_MOD_CHANGEVIEWCLASS,	&CChildFrame::OnChangeViewClass)
 	ON_MESSAGE(WM_MOD_INSTRSELECTED,	&CChildFrame::OnInstrumentSelected)
 	// toolbar "tooltip" notification
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CChildFrame::OnToolTipText)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CChildFrame::OnToolTipText)
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, &CChildFrame::OnToolTipText)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -315,7 +314,7 @@ LRESULT CChildFrame::OnInstrumentSelected(WPARAM wParam, LPARAM lParam)
 	if (pView) pModDoc = (CModDoc *)pView->GetDocument();
 	if ((m_hWndCtrl) && (pModDoc))
 	{
-		UINT_PTR nIns = lParam;
+		auto nIns = lParam;
 
 		if ((!wParam) && (pModDoc->GetNumInstruments() > 0))
 		{
@@ -343,20 +342,18 @@ void CChildFrame::OnDestroy()
 
 BOOL CChildFrame::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 {
-	// need to handle both ANSI and UNICODE versions of the message
-	TOOLTIPTEXT* pTTT = (TOOLTIPTEXT*)pNMHDR;
-	TCHAR szFullText[256];
+	auto pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
+	TCHAR szFullText[256] = _T("");
 	CString strTipText;
 
-	szFullText[0] = 0;
 	UINT_PTR nID = pNMHDR->idFrom;
 	if (pTTT->uFlags & TTF_IDISHWND)
 	{
 		// idFrom is actually the HWND of the tool
-		nID = (UINT_PTR)::GetDlgCtrlID((HWND)nID);
+		nID = static_cast<UINT_PTR>(::GetDlgCtrlID(reinterpret_cast<HWND>(nID)));
 	}
 
-	if ((nID >= 1000) && (nID < 10000) && (m_hWndCtrl) && (::SendMessage(m_hWndCtrl, WM_MOD_GETTOOLTIPTEXT, nID, (LPARAM)szFullText)))
+	if ((nID >= 1000) && (nID < 65536) && (m_hWndCtrl) && (::SendMessage(m_hWndCtrl, WM_MOD_GETTOOLTIPTEXT, nID, (LPARAM)szFullText)))
 	{
 		strTipText = szFullText;
 	} else

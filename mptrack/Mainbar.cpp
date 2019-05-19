@@ -1,5 +1,5 @@
 /*
- * mainbar.cpp
+ * Mainbar.cpp
  * -----------
  * Purpose: Implementation of OpenMPT's window toolbar.
  * Notes  : (currently none)
@@ -25,18 +25,16 @@ OPENMPT_NAMESPACE_BEGIN
 /////////////////////////////////////////////////////////////////////
 // CToolBarEx: custom toolbar base class
 
-BOOL CToolBarEx::SetHorizontal()
+void CToolBarEx::SetHorizontal()
 {
-	m_bVertical = FALSE;
+	m_bVertical = false;
 	SetBarStyle(GetBarStyle() | CBRS_ALIGN_TOP);
-	return TRUE;
 }
 
 
-BOOL CToolBarEx::SetVertical()
+void CToolBarEx::SetVertical()
 {
-	m_bVertical = TRUE;
-	return TRUE;
+	m_bVertical = true;
 }
 
 
@@ -58,12 +56,12 @@ CSize CToolBarEx::CalcDynamicLayout(int nLength, DWORD dwMode)
 		sizeResult = CToolBar::CalcDynamicLayout(nLength, dwMode);
 	} else
 	{
-		BOOL bOld = m_bVertical;
-		BOOL bSwitch = (dwMode & LM_HORZ) ? bOld : !bOld;
+		const bool wasVertical = m_bVertical;
+		const bool doSwitch = (dwMode & LM_HORZ) ? wasVertical : !wasVertical;
 
-		if (bSwitch)
+		if (doSwitch)
 		{
-			if (bOld)
+			if (wasVertical)
 				SetHorizontal();
 			else
 				SetVertical();
@@ -71,9 +69,9 @@ CSize CToolBarEx::CalcDynamicLayout(int nLength, DWORD dwMode)
 
 		sizeResult = CToolBar::CalcDynamicLayout(nLength, dwMode);
 
-		if (bSwitch)
+		if (doSwitch)
 		{
-			if (bOld)
+			if (wasVertical)
 				SetHorizontal();
 			else
 				SetVertical();
@@ -226,6 +224,7 @@ enum { MAX_MIDI_DEVICES = 256 };
 
 BEGIN_MESSAGE_MAP(CMainToolBar, CToolBarEx)
 	ON_WM_VSCROLL()
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, &CMainToolBar::OnToolTipText)
 	ON_NOTIFY_REFLECT(TBN_DROPDOWN, &CMainToolBar::OnTbnDropDownToolBar)
 	ON_COMMAND_RANGE(ID_SELECT_MIDI_DEVICE, ID_SELECT_MIDI_DEVICE + MAX_MIDI_DEVICES, &CMainToolBar::OnSelectMIDIDevice)
 END_MESSAGE_MAP()
@@ -346,7 +345,7 @@ void CMainToolBar::Init(CMainFrame *pMainFrm)
 }
 
 
-BOOL CMainToolBar::SetHorizontal()
+void CMainToolBar::SetHorizontal()
 {
 	CToolBarEx::SetHorizontal();
 	m_VuMeter.SetOrientation(true);
@@ -380,12 +379,10 @@ BOOL CMainToolBar::SetHorizontal()
 	EnableControl(m_EditRowsPerBeat, EDITRPB_INDEX, EDITRPB_HEIGHT);
 	EnableControl(m_SpinRowsPerBeat, SPINRPB_INDEX, SPINRPB_HEIGHT);
 	EnableControl(m_VuMeter, VUMETER_INDEX, VUMETER_HEIGHT);
-
-	return TRUE;
 }
 
 
-BOOL CMainToolBar::SetVertical()
+void CMainToolBar::SetVertical()
 {
 	CToolBarEx::SetVertical();
 	m_VuMeter.SetOrientation(false);
@@ -417,7 +414,6 @@ BOOL CMainToolBar::SetVertical()
 	if (m_SpinRowsPerBeat.m_hWnd != NULL) m_SpinRowsPerBeat.ShowWindow(SW_HIDE);
 	EnableControl(m_VuMeter, VUMETER_INDEX, VUMETER_HEIGHT);
 	//if (m_StaticBPM.m_hWnd != NULL) m_StaticBPM.ShowWindow(SW_HIDE);
-	return TRUE;
 }
 
 
@@ -662,6 +658,56 @@ void CMainToolBar::SetRowsPerBeat(ROWINDEX nNewRPB)
 }
 
 
+BOOL CMainToolBar::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
+{
+	auto pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
+	UINT_PTR id = pNMHDR->idFrom;
+	if(pTTT->uFlags & TTF_IDISHWND)
+	{
+		// idFrom is actually the HWND of the tool
+		id = (UINT_PTR)::GetDlgCtrlID((HWND)id);
+	}
+
+	TCHAR *s = nullptr;
+	CommandID cmd = kcNull;
+	switch(id)
+	{
+	case ID_FILE_NEW: s = _T("New"); cmd = kcFileNew; break;
+	case ID_FILE_OPEN: s = _T("Open"); cmd = kcFileOpen; break;
+	case ID_FILE_SAVE: s = _T("Save"); cmd = kcFileSave; break;
+	case ID_EDIT_CUT: s = _T("Cut"); cmd = kcEditCut; break;
+	case ID_EDIT_COPY: s = _T("Copy"); cmd = kcEditCopy; break;
+	case ID_EDIT_PASTE: s = _T("Paste"); cmd = kcEditPaste; break;
+	case ID_MIDI_RECORD: s = _T("MIDI Record"); cmd = kcMidiRecord; break;
+	case ID_PLAYER_STOP: s = _T("Stop"); cmd = kcStopSong; break;
+	case ID_PLAYER_PLAY: s = _T("Play"); cmd = kcPlayPauseSong; break;
+	case ID_PLAYER_PAUSE: s = _T("Pause"); cmd = kcPlayPauseSong; break;
+	case ID_PLAYER_PLAYFROMSTART: s = _T("Play From Start"); cmd = kcPlaySongFromStart; break;
+	case ID_VIEW_OPTIONS: s = _T("Setup"); cmd = kcViewOptions; break;
+	case ID_PANIC: s = _T("Stop all hanging VSTi and sample voices"); cmd = kcPanic; break;
+	}
+
+	if(s == nullptr)
+		return FALSE;
+	
+	mpt::tstring text = s;
+	if(cmd != kcNull)
+	{
+		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
+		if(!keyText.IsEmpty())
+			text += mpt::tformat(_T(" (%1)"))(keyText);
+	}
+	lstrcpyn(pTTT->szText, text.c_str(), mpt::saturate_cast<int>(mpt::size(pTTT->szText)));
+	*pResult = 0;
+
+	// bring the tooltip window above other popup windows
+	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0,
+		SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER);
+
+	return TRUE;    // message was handled
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // CModTreeBar
 
@@ -684,7 +730,6 @@ END_MESSAGE_MAP()
 
 CModTreeBar::CModTreeBar()
 {
-	m_pModTree = m_pModTreeData = NULL;
 	m_nTreeSplitRatio = TrackerSettings::Instance().glTreeSplitRatio;
 }
 
@@ -729,25 +774,25 @@ void CModTreeBar::Init()
 }
 
 
-VOID CModTreeBar::RefreshDlsBanks()
+void CModTreeBar::RefreshDlsBanks()
 {
 	if (m_pModTree) m_pModTree->RefreshDlsBanks();
 }
 
 
-VOID CModTreeBar::RefreshMidiLibrary()
+void CModTreeBar::RefreshMidiLibrary()
 {
 	if (m_pModTree) m_pModTree->RefreshMidiLibrary();
 }
 
 
-VOID CModTreeBar::OnOptionsChanged()
+void CModTreeBar::OnOptionsChanged()
 {
 	if (m_pModTree) m_pModTree->OnOptionsChanged();
 }
 
 
-VOID CModTreeBar::RecalcLayout()
+void CModTreeBar::RecalcLayout()
 {
 	CRect rect;
 
@@ -779,7 +824,7 @@ CSize CModTreeBar::CalcFixedLayout(BOOL, BOOL)
 }
 
 
-VOID CModTreeBar::DoMouseMove(CPoint pt)
+void CModTreeBar::DoMouseMove(CPoint pt)
 {
 	CRect rect;
 
@@ -871,7 +916,7 @@ VOID CModTreeBar::DoMouseMove(CPoint pt)
 }
 
 
-VOID CModTreeBar::DoLButtonDown(CPoint pt)
+void CModTreeBar::DoLButtonDown(CPoint pt)
 {
 	if ((m_dwStatus & MTB_CAPTURE) && (!(m_dwStatus & MTB_DRAGGING)))
 	{
@@ -886,7 +931,7 @@ VOID CModTreeBar::DoLButtonDown(CPoint pt)
 }
 
 
-VOID CModTreeBar::DoLButtonUp()
+void CModTreeBar::DoLButtonUp()
 {
 	if (m_dwStatus & MTB_DRAGGING)
 	{
@@ -927,7 +972,7 @@ VOID CModTreeBar::DoLButtonUp()
 }
 
 
-VOID CModTreeBar::CancelTracking()
+void CModTreeBar::CancelTracking()
 {
 	if (m_dwStatus & MTB_TRACKER)
 	{
@@ -979,25 +1024,25 @@ void CModTreeBar::OnInvertTracker(UINT x)
 }
 
 
-VOID CModTreeBar::OnDocumentCreated(CModDoc *pModDoc)
+void CModTreeBar::OnDocumentCreated(CModDoc *pModDoc)
 {
 	if (m_pModTree && pModDoc) m_pModTree->AddDocument(*pModDoc);
 }
 
 
-VOID CModTreeBar::OnDocumentClosed(CModDoc *pModDoc)
+void CModTreeBar::OnDocumentClosed(CModDoc *pModDoc)
 {
 	if (m_pModTree && pModDoc) m_pModTree->RemoveDocument(*pModDoc);
 }
 
 
-VOID CModTreeBar::OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
+void CModTreeBar::OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
 {
 	if (m_pModTree) m_pModTree->OnUpdate(pModDoc, hint, pHint);
 }
 
 
-VOID CModTreeBar::UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify)
+void CModTreeBar::UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify)
 {
 	if (m_pModTree && pModDoc) m_pModTree->UpdatePlayPos(*pModDoc, pNotify);
 }
@@ -1017,11 +1062,7 @@ void CModTreeBar::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
 }
 
 
-#if _MFC_VER > 0x0710
 LRESULT CModTreeBar::OnNcHitTest(CPoint point)
-#else
-UINT CModTreeBar::OnNcHitTest(CPoint point)
-#endif
 {
 	CRect rect;
 
