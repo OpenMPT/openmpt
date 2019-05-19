@@ -1,5 +1,5 @@
 /*
- * mainbar.h
+ * Mainbar.h
  * ---------
  * Purpose: Implementation of OpenMPT's window toolbar.
  * Notes  : (currently none)
@@ -51,11 +51,11 @@ class CMainFrame;
 class CToolBarEx: public CToolBar
 {
 protected:
-	BOOL m_bVertical, m_bFlatButtons;
+	bool m_bVertical = false, m_bFlatButtons = false;
 
 public:
-	CToolBarEx() { m_bVertical = m_bFlatButtons = FALSE; }
-	virtual ~CToolBarEx() {}
+	CToolBarEx() {}
+	~CToolBarEx() override {}
 
 public:
 	BOOL EnableControl(CWnd &wnd, UINT nIndex, UINT nHeight=0);
@@ -64,9 +64,9 @@ public:
 
 public:
 	//{{AFX_VIRTUAL(CToolBarEx)
-	virtual CSize CalcDynamicLayout(int nLength, DWORD dwMode);
-	virtual BOOL SetHorizontal();
-	virtual BOOL SetVertical();
+	CSize CalcDynamicLayout(int nLength, DWORD dwMode) override;
+	virtual void SetHorizontal();
+	virtual void SetVertical();
 	//}}AFX_VIRTUAL
 };
 
@@ -85,15 +85,15 @@ public:
 
 public:
 	CMainToolBar() {}
-	virtual ~CMainToolBar() {}
+	~CMainToolBar() override {}
 
 protected:
 	void SetRowsPerBeat(ROWINDEX nNewRPB);
 
 public:
 	//{{AFX_VIRTUAL(CMainToolBar)
-	virtual BOOL SetHorizontal();
-	virtual BOOL SetVertical();
+	void SetHorizontal() override;
+	void SetVertical() override;
 	//}}AFX_VIRTUAL
 
 public:
@@ -114,65 +114,65 @@ protected:
 	//{{AFX_MSG(CMainToolBar)
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
 	afx_msg void OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg BOOL OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelectMIDIDevice(UINT id);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
 
 
-#define MTB_VERTICAL	0x01
-#define MTB_CAPTURE		0x02
-#define MTB_DRAGGING	0x04
-#define MTB_TRACKER		0x08
-
 class CModTreeBar: public CDialogBar
 {
 protected:
-	DWORD m_dwStatus; // MTB_XXXX
-	UINT m_nCursorDrag;
+	enum Status
+	{
+		MTB_VERTICAL = 0x01,
+		MTB_CAPTURE = 0x02,
+		MTB_DRAGGING = 0x04,
+		MTB_TRACKER = 0x08,
+	};
+
+	DWORD m_dwStatus = 0; // MTB_XXXX
+	UINT m_nCursorDrag = 0;
 	CPoint ptDragging;
-	UINT m_cxOriginal, m_cyOriginal, m_nTrackPos;
-	UINT m_nTreeSplitRatio;
+	UINT m_cxOriginal = 0, m_cyOriginal = 0, m_nTrackPos = 0;
+	UINT m_nTreeSplitRatio = 0;
 
 public:
-	CModTree *m_pModTree, *m_pModTreeData;
+	CModTree *m_pModTree = nullptr, *m_pModTreeData = nullptr;
 
 	CModTreeBar();
-	virtual ~CModTreeBar();
+	~CModTreeBar() override;
 
 public:
-	VOID Init();
-	VOID RecalcLayout();
-	VOID DoMouseMove(CPoint point);
-	VOID DoLButtonDown(CPoint point);
-	VOID DoLButtonUp();
-	VOID CancelTracking();
-	VOID OnInvertTracker(UINT x);
-	VOID RefreshDlsBanks();
-	VOID RefreshMidiLibrary();
-	VOID OnOptionsChanged();
-	VOID OnDocumentCreated(CModDoc *pModDoc);
-	VOID OnDocumentClosed(CModDoc *pModDoc);
-	VOID OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint=NULL);
-	VOID UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify);
+	void Init();
+	void RecalcLayout();
+	void DoMouseMove(CPoint point);
+	void DoLButtonDown(CPoint point);
+	void DoLButtonUp();
+	void CancelTracking();
+	void OnInvertTracker(UINT x);
+	void RefreshDlsBanks();
+	void RefreshMidiLibrary();
+	void OnOptionsChanged();
+	void OnDocumentCreated(CModDoc *pModDoc);
+	void OnDocumentClosed(CModDoc *pModDoc);
+	void OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint = nullptr);
+	void UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify);
 	HWND GetModTreeHWND(); //rewbs.customKeys
-	LRESULT PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam); //rewbs.customKeys
+	LRESULT PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam);
 	bool SetTreeSoundfile(FileReader &file);
 
 
 protected:
 	//{{AFX_VIRTUAL(CModTreeBar)
-	virtual CSize CalcFixedLayout(BOOL bStretch, BOOL bHorz);
+	CSize CalcFixedLayout(BOOL bStretch, BOOL bHorz) override;
 	//}}AFX_VIRTUAL
 
 protected:
 	//{{AFX_MSG(CModTreeBar)
 	afx_msg void OnNcPaint();
-#if _MFC_VER > 0x0710
 	afx_msg LRESULT OnNcHitTest(CPoint point);
-#else
-	afx_msg UINT OnNcHitTest(CPoint point);
-#endif 
 	afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnNcMouseMove(UINT nHitTest, CPoint point);
