@@ -74,7 +74,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength silenceLength, const Smp
 namespace
 {
 	// Update loop points and cues after deleting a sample selection
-	static void AdjustLoopPoints(SmpLength selStart, SmpLength selEnd, SmpLength &loopStart, SmpLength &loopEnd, SmpLength length)
+	void AdjustLoopPoints(SmpLength selStart, SmpLength selEnd, SmpLength &loopStart, SmpLength &loopEnd, SmpLength length)
 	{
 		Util::DeleteRange(selStart, selEnd - 1, loopStart, loopEnd);
 
@@ -128,13 +128,14 @@ SmpLength ResizeSample(ModSample &smp, const SmpLength newLength, CSoundFile &sn
 
 	const SmpLength newSmpBytes = newLength * smp.GetBytesPerSample();
 
-	void *pNewSmp = ModSample::AllocateSample(newLength, smp.GetBytesPerSample());
-	if(pNewSmp == nullptr)
+	void *newData = ModSample::AllocateSample(newLength, smp.GetBytesPerSample());
+	if(newData == nullptr && newLength > 0)
 		return smp.nLength; //Sample allocation failed.
 
 	// Copy over old data and replace sample by the new one
-	memcpy(pNewSmp, smp.sampleb(), newSmpBytes);
-	ctrlSmp::ReplaceSample(smp, pNewSmp, newLength, sndFile);
+	if(newData != nullptr)
+		memcpy(newData, smp.sampleb(), newSmpBytes);
+	ctrlSmp::ReplaceSample(smp, newData, newLength, sndFile);
 
 	// Sanitize loops and update loop wrap-around buffers
 	smp.PrecomputeLoops(sndFile);
@@ -146,20 +147,14 @@ SmpLength ResizeSample(ModSample &smp, const SmpLength newLength, CSoundFile &sn
 void ResetSamples(CSoundFile &sndFile, ResetFlag resetflag, SAMPLEINDEX minSample, SAMPLEINDEX maxSample)
 {
 	if(minSample == SAMPLEINDEX_INVALID)
-	{
 		minSample = 1;
-	}
 	if(maxSample == SAMPLEINDEX_INVALID)
-	{
 		maxSample = sndFile.GetNumSamples();
-	}
 	Limit(minSample, SAMPLEINDEX(1), SAMPLEINDEX(MAX_SAMPLES - 1));
 	Limit(maxSample, SAMPLEINDEX(1), SAMPLEINDEX(MAX_SAMPLES - 1));
 
 	if(minSample > maxSample)
-	{
 		std::swap(minSample, maxSample);
-	}
 
 	for(SAMPLEINDEX i = minSample; i <= maxSample; i++)
 	{
