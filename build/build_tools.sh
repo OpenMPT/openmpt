@@ -54,7 +54,7 @@ echo "ec0a4a89d8dad4d251fc7195784a275c0c322a4d" > include/genie/OpenMPT-version.
 
 
 
-unpack "premake" "build/externals/premake-5.0.0-alpha13-src.zip" "premake-5.0.0-alpha13"
+unpack "premake" "build/externals/premake-5.0.0-alpha14-src-fixed-scripts-c.zip" "premake-5.0.0-alpha14"
 
 cd include/premake
 
@@ -69,5 +69,5 @@ cd ../..
 
 cd ../..
 
-echo "5.0.0-alpha13" > include/premake/OpenMPT-version.txt
+echo "5.0.0-alpha14" > include/premake/OpenMPT-version.txt
 
