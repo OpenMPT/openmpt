@@ -173,7 +173,7 @@ namespace detail {
 
 	static MPT_FORCEINLINE mpt::endian endian_probe() noexcept
 	{
-		typedef uint32 endian_probe_type;
+		using endian_probe_type = uint32;
 		MPT_STATIC_ASSERT(sizeof(endian_probe_type) == 4);
 		constexpr endian_probe_type endian_probe_big    = 0x12345678u;
 		constexpr endian_probe_type endian_probe_little = 0x78563412u;
@@ -340,9 +340,9 @@ static MPT_CONSTEXPR17_FUN std::array<mpt::byte, size> EndianEncode(T val) noexc
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	STATIC_ASSERT(!std::numeric_limits<T>::is_signed);
 	STATIC_ASSERT(sizeof(T) == size);
-	typedef T base_type;
-	typedef typename std::make_unsigned<base_type>::type unsigned_base_type;
-	typedef Tendian endian_type;
+	using base_type = T;
+	using unsigned_base_type = typename std::make_unsigned<base_type>::type;
+	using endian_type = Tendian;
 	unsigned_base_type uval = static_cast<unsigned_base_type>(val);
 	std::array<mpt::byte, size> data;
 	MPT_CONSTANT_IF(endian_type::endian == mpt::endian::little)
@@ -368,9 +368,9 @@ static MPT_CONSTEXPR17_FUN T EndianDecode(std::array<mpt::byte, size> data) noex
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	STATIC_ASSERT(!std::numeric_limits<T>::is_signed);
 	STATIC_ASSERT(sizeof(T) == size);
-	typedef T base_type;
-	typedef typename std::make_unsigned<base_type>::type unsigned_base_type;
-	typedef Tendian endian_type;
+	using base_type = T;
+	using unsigned_base_type = typename std::make_unsigned<base_type>::type;
+	using endian_type = Tendian;
 	base_type val = base_type();
 	unsigned_base_type uval = unsigned_base_type();
 	MPT_CONSTANT_IF(endian_type::endian == mpt::endian::little)
@@ -545,7 +545,7 @@ template<std::size_t hihi, std::size_t hilo, std::size_t lohi, std::size_t lolo>
 struct IEEE754binary32Emulated
 {
 public:
-	typedef IEEE754binary32Emulated<hihi,hilo,lohi,lolo> self_t;
+	using self_t = IEEE754binary32Emulated<hihi,hilo,lohi,lolo>;
 	mpt::byte bytes[4];
 public:
 	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
@@ -606,7 +606,7 @@ template<std::size_t hihihi, std::size_t hihilo, std::size_t hilohi, std::size_t
 struct IEEE754binary64Emulated
 {
 public:
-	typedef IEEE754binary64Emulated<hihihi,hihilo,hilohi,hilolo,lohihi,lohilo,lolohi,lololo> self_t;
+	using self_t = IEEE754binary64Emulated<hihihi,hihilo,hilohi,hilolo,lohihi,lohilo,lolohi,lololo>;
 	mpt::byte bytes[8];
 public:
 	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
@@ -677,10 +677,10 @@ public:
 	}
 };
 
-typedef IEEE754binary32Emulated<0,1,2,3> IEEE754binary32EmulatedBE;
-typedef IEEE754binary32Emulated<3,2,1,0> IEEE754binary32EmulatedLE;
-typedef IEEE754binary64Emulated<0,1,2,3,4,5,6,7> IEEE754binary64EmulatedBE;
-typedef IEEE754binary64Emulated<7,6,5,4,3,2,1,0> IEEE754binary64EmulatedLE;
+using IEEE754binary32EmulatedBE = IEEE754binary32Emulated<0,1,2,3>;
+using IEEE754binary32EmulatedLE = IEEE754binary32Emulated<3,2,1,0>;
+using IEEE754binary64EmulatedBE = IEEE754binary64Emulated<0,1,2,3,4,5,6,7>;
+using IEEE754binary64EmulatedLE = IEEE754binary64Emulated<7,6,5,4,3,2,1,0>;
 
 MPT_BINARY_STRUCT(IEEE754binary32EmulatedBE, 4)
 MPT_BINARY_STRUCT(IEEE754binary32EmulatedLE, 4)
@@ -843,28 +843,28 @@ template <> struct is_binary_safe< IEEE754binary64Native<> > : public std::true_
 }
 
 template <bool is_iec559, mpt::endian endian = mpt::endian::native> struct IEEE754binary_types {
-	typedef IEEE754binary32EmulatedLE IEEE754binary32LE;
-	typedef IEEE754binary32EmulatedBE IEEE754binary32BE;
-	typedef IEEE754binary64EmulatedLE IEEE754binary64LE;
-	typedef IEEE754binary64EmulatedBE IEEE754binary64BE;
+	using IEEE754binary32LE = IEEE754binary32EmulatedLE;
+	using IEEE754binary32BE = IEEE754binary32EmulatedBE;
+	using IEEE754binary64LE = IEEE754binary64EmulatedLE;
+	using IEEE754binary64BE = IEEE754binary64EmulatedBE;
 };
 template <> struct IEEE754binary_types<true, mpt::endian::little> {
-	typedef IEEE754binary32Native<>   IEEE754binary32LE;
-	typedef IEEE754binary32EmulatedBE IEEE754binary32BE;
-	typedef IEEE754binary64Native<>   IEEE754binary64LE;
-	typedef IEEE754binary64EmulatedBE IEEE754binary64BE;
+	using IEEE754binary32LE = IEEE754binary32Native<>;
+	using IEEE754binary32BE = IEEE754binary32EmulatedBE;
+	using IEEE754binary64LE = IEEE754binary64Native<>;
+	using IEEE754binary64BE = IEEE754binary64EmulatedBE;
 };
 template <> struct IEEE754binary_types<true, mpt::endian::big> {
-	typedef IEEE754binary32EmulatedLE IEEE754binary32LE;
-	typedef IEEE754binary32Native<>   IEEE754binary32BE;
-	typedef IEEE754binary64EmulatedLE IEEE754binary64LE;
-	typedef IEEE754binary64Native<>   IEEE754binary64BE;
+	using IEEE754binary32LE = IEEE754binary32EmulatedLE;
+	using IEEE754binary32BE = IEEE754binary32Native<>;
+	using IEEE754binary64LE = IEEE754binary64EmulatedLE;
+	using IEEE754binary64BE = IEEE754binary64Native<>;
 };
 
-typedef IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary32LE IEEE754binary32LE;
-typedef IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary32BE IEEE754binary32BE;
-typedef IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary64LE IEEE754binary64LE;
-typedef IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary64BE IEEE754binary64BE;
+using IEEE754binary32LE = IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary32LE;
+using IEEE754binary32BE = IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary32BE;
+using IEEE754binary64LE = IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary64LE;
+using IEEE754binary64BE = IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary64BE;
 
 STATIC_ASSERT(sizeof(IEEE754binary32LE) == 4);
 STATIC_ASSERT(sizeof(IEEE754binary32BE) == 4);
@@ -874,10 +874,10 @@ STATIC_ASSERT(sizeof(IEEE754binary64BE) == 8);
 
 // unaligned
 
-typedef IEEE754binary32EmulatedLE float32le;
-typedef IEEE754binary32EmulatedBE float32be;
-typedef IEEE754binary64EmulatedLE float64le;
-typedef IEEE754binary64EmulatedBE float64be;
+using float32le = IEEE754binary32EmulatedLE;
+using float32be = IEEE754binary32EmulatedBE;
+using float64le = IEEE754binary64EmulatedLE;
+using float64be = IEEE754binary64EmulatedBE;
 
 STATIC_ASSERT(sizeof(float32le) == 4);
 STATIC_ASSERT(sizeof(float32be) == 4);
@@ -887,10 +887,10 @@ STATIC_ASSERT(sizeof(float64be) == 8);
 
 // potentially aligned
 
-typedef IEEE754binary32LE float32le_fast;
-typedef IEEE754binary32BE float32be_fast;
-typedef IEEE754binary64LE float64le_fast;
-typedef IEEE754binary64BE float64be_fast;
+using float32le_fast = IEEE754binary32LE;
+using float32be_fast = IEEE754binary32BE;
+using float64le_fast = IEEE754binary64LE;
+using float64be_fast = IEEE754binary64BE;
 
 STATIC_ASSERT(sizeof(float32le_fast) == 4);
 STATIC_ASSERT(sizeof(float32be_fast) == 4);
@@ -908,8 +908,8 @@ template<typename T, typename Tendian>
 struct packed
 {
 public:
-	typedef T base_type;
-	typedef Tendian endian_type;
+	using base_type = T;
+	using endian_type = Tendian;
 public:
 #if MPT_ENDIAN_IS_CONSTEXPR
 	mpt::byte data[sizeof(base_type)]{};
@@ -946,7 +946,7 @@ public:
 				std::memcpy(data.data(), &val, sizeof(val));
 			} else
 			{
-				typedef typename std::make_unsigned<base_type>::type unsigned_base_type;
+				using unsigned_base_type = typename std::make_unsigned<base_type>::type;
 				data = EndianEncode<unsigned_base_type, Tendian, sizeof(T)>(val);
 			}
 		#endif // MPT_ENDIAN_IS_CONSTEXPR
@@ -984,7 +984,7 @@ public:
 				return val;
 			} else
 			{
-				typedef typename std::make_unsigned<base_type>::type unsigned_base_type;
+				using unsigned_base_type = typename std::make_unsigned<base_type>::type;
 				return EndianDecode<unsigned_base_type, Tendian, sizeof(T)>(data);
 			}
 		#endif // MPT_ENDIAN_IS_CONSTEXPR
@@ -1006,23 +1006,23 @@ public:
 	MPT_ENDIAN_CONSTEXPR_FUN base_type operator -- (int) noexcept { base_type old = get(); set(old - 1); return old; } // postfix
 };
 
-typedef packed< int64, LittleEndian_tag> int64le;
-typedef packed< int32, LittleEndian_tag> int32le;
-typedef packed< int16, LittleEndian_tag> int16le;
-typedef packed< int8 , LittleEndian_tag> int8le;
-typedef packed<uint64, LittleEndian_tag> uint64le;
-typedef packed<uint32, LittleEndian_tag> uint32le;
-typedef packed<uint16, LittleEndian_tag> uint16le;
-typedef packed<uint8 , LittleEndian_tag> uint8le;
+using int64le  = packed< int64, LittleEndian_tag>;
+using int32le  = packed< int32, LittleEndian_tag>;
+using int16le  = packed< int16, LittleEndian_tag>;
+using int8le   = packed< int8 , LittleEndian_tag>;
+using uint64le = packed<uint64, LittleEndian_tag>;
+using uint32le = packed<uint32, LittleEndian_tag>;
+using uint16le = packed<uint16, LittleEndian_tag>;
+using uint8le  = packed<uint8 , LittleEndian_tag>;
 
-typedef packed< int64, BigEndian_tag> int64be;
-typedef packed< int32, BigEndian_tag> int32be;
-typedef packed< int16, BigEndian_tag> int16be;
-typedef packed< int8 , BigEndian_tag> int8be;
-typedef packed<uint64, BigEndian_tag> uint64be;
-typedef packed<uint32, BigEndian_tag> uint32be;
-typedef packed<uint16, BigEndian_tag> uint16be;
-typedef packed<uint8 , BigEndian_tag> uint8be;
+using int64be  = packed< int64, BigEndian_tag>;
+using int32be  = packed< int32, BigEndian_tag>;
+using int16be  = packed< int16, BigEndian_tag>;
+using int8be   = packed< int8 , BigEndian_tag>;
+using uint64be = packed<uint64, BigEndian_tag>;
+using uint32be = packed<uint32, BigEndian_tag>;
+using uint16be = packed<uint16, BigEndian_tag>;
+using uint8be  = packed<uint8 , BigEndian_tag>;
 
 namespace mpt {
 template <typename T, typename Tendian> struct limits<packed<T, Tendian>> : mpt::limits<T> {};
@@ -1048,8 +1048,8 @@ MPT_BINARY_STRUCT(uint8be , 1)
 
 namespace mpt {
 
-template <typename T> struct make_le { typedef packed<typename std::remove_const<T>::type, LittleEndian_tag> type; };
-template <typename T> struct make_be { typedef packed<typename std::remove_const<T>::type, BigEndian_tag> type; };
+template <typename T> struct make_le { using type = packed<typename std::remove_const<T>::type, LittleEndian_tag>; };
+template <typename T> struct make_be { using type = packed<typename std::remove_const<T>::type, BigEndian_tag>; };
 
 template <typename T>
 MPT_ENDIAN_CONSTEXPR_FUN auto as_le(T v) noexcept -> typename mpt::make_le<typename std::remove_const<T>::type>::type
@@ -1124,7 +1124,7 @@ template <typename T>
 class const_unaligned_ptr_le
 {
 public:
-	typedef T value_type;
+	using value_type = T;
 private:
 	const mpt::byte *mem;
 	value_type Read() const
@@ -1155,7 +1155,7 @@ template <typename T>
 class const_unaligned_ptr_be
 {
 public:
-	typedef T value_type;
+	using value_type = T;
 private:
 	const mpt::byte *mem;
 	value_type Read() const
@@ -1186,7 +1186,7 @@ template <typename T>
 class const_unaligned_ptr
 {
 public:
-	typedef T value_type;
+	using value_type = T;
 private:
 	const mpt::byte *mem;
 	value_type Read() const

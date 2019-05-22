@@ -38,12 +38,12 @@ class FileReaderTraitsMemory
 
 public:
 
-	typedef FileDataContainerMemory::off_t off_t;
+	using off_t = FileDataContainerMemory::off_t;
 
-	typedef FileDataContainerMemory data_type;
-	typedef const FileDataContainerMemory & ref_data_type;
-	typedef const FileDataContainerMemory & shared_data_type;
-	typedef FileDataContainerMemory value_data_type;
+	using data_type = FileDataContainerMemory;
+	using ref_data_type = const FileDataContainerMemory &;
+	using shared_data_type = const FileDataContainerMemory &;
+	using value_data_type = FileDataContainerMemory;
 
 	static shared_data_type get_shared(const data_type & data) { return data; }
 	static ref_data_type get_ref(const data_type & data) { return data; }
@@ -65,12 +65,12 @@ class FileReaderTraitsStdStream
 
 public:
 
-	typedef IFileDataContainer::off_t off_t;
+	using off_t = IFileDataContainer::off_t;
 
-	typedef std::shared_ptr<const IFileDataContainer> data_type;
-	typedef const IFileDataContainer & ref_data_type;
-	typedef std::shared_ptr<const IFileDataContainer> shared_data_type;
-	typedef std::shared_ptr<const IFileDataContainer> value_data_type;
+	using data_type = std::shared_ptr<const IFileDataContainer>;
+	using ref_data_type = const IFileDataContainer &;
+	using shared_data_type = std::shared_ptr<const IFileDataContainer>;
+	using value_data_type = std::shared_ptr<const IFileDataContainer>;
 
 	static shared_data_type get_shared(const data_type & data) { return data; }
 	static ref_data_type get_ref(const data_type & data) { return *data; }
@@ -85,11 +85,11 @@ public:
 
 };
 
-typedef FileReaderTraitsStdStream FileReaderTraitsDefault;
+using FileReaderTraitsDefault = FileReaderTraitsStdStream;
 
 #else // !MPT_FILEREADER_STD_ISTREAM
 
-typedef FileReaderTraitsMemory FileReaderTraitsDefault;
+using FileReaderTraitsDefault = FileReaderTraitsMemory;
 
 #endif // MPT_FILEREADER_STD_ISTREAM
 
@@ -731,16 +731,16 @@ class FileReader
 
 private:
 
-	typedef Ttraits traits_type;
+	using traits_type = Ttraits;
 	
 public:
 
-	typedef typename traits_type::off_t off_t;
+	using off_t = typename traits_type::off_t;
 
-	typedef typename traits_type::data_type        data_type;
-	typedef typename traits_type::ref_data_type    ref_data_type;
-	typedef typename traits_type::shared_data_type shared_data_type;
-	typedef typename traits_type::value_data_type  value_data_type;
+	using data_type        = typename traits_type::data_type;
+	using ref_data_type    = typename traits_type::ref_data_type;
+	using shared_data_type = typename traits_type::shared_data_type;
+	using value_data_type  = typename traits_type::value_data_type;
 
 protected:
 
@@ -1348,9 +1348,9 @@ public:
 
 } // namespace detail
 
-typedef detail::FileReader<FileReaderTraitsDefault> FileReader;
+using FileReader = detail::FileReader<FileReaderTraitsDefault>;
 
-typedef detail::FileReader<FileReaderTraitsMemory> MemoryFileReader;
+using MemoryFileReader = detail::FileReader<FileReaderTraitsMemory>;
 
 
 // Initialize file reader object with pointer to data and data length.

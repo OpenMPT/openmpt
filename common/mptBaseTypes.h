@@ -30,14 +30,14 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-typedef std::int8_t   int8;
-typedef std::int16_t  int16;
-typedef std::int32_t  int32;
-typedef std::int64_t  int64;
-typedef std::uint8_t  uint8;
-typedef std::uint16_t uint16;
-typedef std::uint32_t uint32;
-typedef std::uint64_t uint64;
+using int8   = std::int8_t;
+using int16  = std::int16_t;
+using int32  = std::int32_t;
+using int64  = std::int64_t;
+using uint8  = std::uint8_t;
+using uint16 = std::uint16_t;
+using uint32 = std::uint32_t;
+using uint64 = std::uint64_t;
 
 constexpr int8 int8_min     = std::numeric_limits<int8>::min();
 constexpr int16 int16_min   = std::numeric_limits<int16>::min();
@@ -55,10 +55,10 @@ constexpr uint32 uint32_max = std::numeric_limits<uint32>::max();
 constexpr uint64 uint64_max = std::numeric_limits<uint64>::max();
 
 
-typedef float float32;
+using float32 = float;
 MPT_STATIC_ASSERT(sizeof(float32) == 4);
 
-typedef double float64;
+using float64 = double;
 MPT_STATIC_ASSERT(sizeof(float64) == 8);
 
 
@@ -79,7 +79,7 @@ using byte = std::byte;
 // thus just use a typedef for unsigned char which is guaranteed to be allowed to alias.
 //enum class byte : unsigned char { };
 namespace mpt {
-typedef unsigned char byte;
+using byte = unsigned char;
 } // namespace mpt
 #define MPT_BYTE_IS_STD_BYTE 0
 #endif

@@ -20,11 +20,11 @@ class FileReaderTraitsMemory;
 
 class FileReaderTraitsStdStream;
 
-typedef FileReaderTraitsStdStream FileReaderTraitsDefault;
+using FileReaderTraitsDefault = FileReaderTraitsStdStream;
 
 #else // !MPT_FILEREADER_STD_ISTREAM
 
-typedef FileReaderTraitsMemory FileReaderTraitsDefault;
+using FileReaderTraitsDefault = FileReaderTraitsMemory;
 
 #endif // MPT_FILEREADER_STD_ISTREAM
 
@@ -35,9 +35,9 @@ class FileReader;
 
 } // namespace detail
 
-typedef detail::FileReader<FileReaderTraitsDefault> FileReader;
+using FileReader = detail::FileReader<FileReaderTraitsDefault>;
 
-typedef detail::FileReader<FileReaderTraitsMemory> MemoryFileReader;
+using MemoryFileReader = detail::FileReader<FileReaderTraitsMemory>;
 
 OPENMPT_NAMESPACE_END
 
