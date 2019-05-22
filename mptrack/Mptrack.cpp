@@ -964,12 +964,43 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	// Dynamic DPI-awareness. Some users might want to disable DPI-awareness because of their DPI-unaware VST plugins.
 	bool setDPI = false;
+	// For Windows 10, Creators Update (1703) and newer
+	{
+		mpt::Library user32(mpt::LibraryPath::System(P_("user32")));
+		if (user32.IsValid())
+		{
+			enum MPT_DPI_AWARENESS_CONTEXT
+			{
+				MPT_DPI_AWARENESS_CONTEXT_UNAWARE = -1,
+				MPT_DPI_AWARENESS_CONTEXT_SYSTEM_AWARE = -2,
+				MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE = -3,
+				MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = -4,
+				MPT_DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED = -5, // 1809 update and newer
+			};
+			using PSETPROCESSDPIAWARENESSCONTEXT = BOOL(WINAPI *)(HANDLE);
+			PSETPROCESSDPIAWARENESSCONTEXT SetProcessDpiAwarenessContext = nullptr;
+			if(user32.Bind(SetProcessDpiAwarenessContext, "SetProcessDpiAwarenessContext"))
+			{
+				if (TrackerSettings::Instance().highResUI)
+				{
+					setDPI = (SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)) == TRUE);
+				} else
+				{
+					if (SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED)) == TRUE)
+						setDPI = true;
+					else
+						setDPI = (SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_UNAWARE)) == TRUE);
+				}
+			}
+		}
+	}
 	// For Windows 8.1 and newer
+	if(!setDPI)
 	{
 		mpt::Library shcore(mpt::LibraryPath::System(P_("SHCore")));
 		if(shcore.IsValid())
 		{
-			typedef HRESULT (WINAPI * PSETPROCESSDPIAWARENESS)(int);
+			using PSETPROCESSDPIAWARENESS = HRESULT (WINAPI *)(int);
 			PSETPROCESSDPIAWARENESS SetProcessDPIAwareness = nullptr;
 			if(shcore.Bind(SetProcessDPIAwareness, "SetProcessDpiAwareness"))
 			{
@@ -983,7 +1014,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		mpt::Library user32(mpt::LibraryPath::System(P_("user32")));
 		if(user32.IsValid())
 		{
-			typedef BOOL (WINAPI * PSETPROCESSDPIAWARE)();
+			using PSETPROCESSDPIAWARE = BOOL (WINAPI *)();
 			PSETPROCESSDPIAWARE SetProcessDPIAware = nullptr;
 			if(user32.Bind(SetProcessDPIAware, "SetProcessDPIAware"))
 			{
@@ -1619,13 +1650,13 @@ void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bDisabled, BOO
 	} else
 	{
 		HGDIOBJ oldpen = SelectPen(hdc, (bPushed) ? CMainFrame::penDarkGray : CMainFrame::penLightGray);
+		::FillRect(hdc, lpRect, CMainFrame::brushGray);
 		::MoveToEx(hdc, lpRect->left, lpRect->bottom-1, NULL);
 		::LineTo(hdc, lpRect->left, lpRect->top);
 		::LineTo(hdc, lpRect->right-1, lpRect->top);
 		SelectPen(hdc, (bPushed) ? CMainFrame::penLightGray : CMainFrame::penDarkGray);
 		::LineTo(hdc, lpRect->right-1, lpRect->bottom-1);
 		::LineTo(hdc, lpRect->left, lpRect->bottom-1);
-		::FillRect(hdc, rect, CMainFrame::brushGray);
 		SelectPen(hdc, oldpen);
 	}
 	
