@@ -78,7 +78,7 @@ struct MO3FileHeader
 		itCompatGxx		= 0x0400,
 		itOldFX			= 0x0800,
 		modplugMode		= 0x10000,
-		unknown			= 0x20000,	// Always set
+		unknown			= 0x20000,	// Always set (internal BASS flag to designate modules)
 		modVBlank		= 0x80000,
 		hasPlugins		= 0x100000,
 		extFilterRange	= 0x200000,

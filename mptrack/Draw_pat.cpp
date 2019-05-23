@@ -1062,7 +1062,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 						if(m->command != CMD_NONE)
 						{
 							char n = sndFile.GetModSpecifications().GetEffectLetter(m->command);
-							ASSERT(n > ' ');
+							MPT_ASSERT(n >= ' ');
 							DrawLetter(xbmp+x, 0, n, pfnt->nEltWidths[3], pfnt->nCmdOfs);
 						} else
 						{

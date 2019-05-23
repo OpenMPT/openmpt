@@ -129,6 +129,7 @@ static const MPTEFFECTINFO gFXInfo[] =
 	{CMD_REVERSEOFFSET,		0,0,	0,	MOD_TYPE_PTM,	_T("Revert Sample + Offset")}, // PTM effect
 	{CMD_DBMECHO,			0,0,	0,	MOD_TYPE_DBM,	_T("Echo Enable")}, // DBM effect
 	{CMD_OFFSETPERCENTAGE,	0,0,	0,	MOD_TYPE_PLM,	_T("Offset (Percentage)")}, // PLM effect
+	{CMD_DUMMY,	0,0,	0,	MOD_TYPE_NONE,	_T("Empty") },
 };
 
 
