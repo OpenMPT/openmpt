@@ -1001,11 +1001,11 @@ static bool EnvelopeToString(CStringA &s, const InstrumentEnvelope &env)
 }
 
 
-static bool StringToEnvelope(const std::string &s, InstrumentEnvelope &env, const CModSpecifications &specs)
+static bool StringToEnvelope(const std::string_view &s, InstrumentEnvelope &env, const CModSpecifications &specs)
 {
 	uint32 susBegin = 0, susEnd = 0, loopBegin = 0, loopEnd = 0, bSus = 0, bLoop = 0, bCarry = 0, nPoints = 0, releaseNode = ENV_RELEASE_NODE_UNSET;
 	size_t length = s.size(), pos = strlen(pszEnvHdr);
-	if(length <= pos || mpt::CompareNoCaseAscii(s.c_str(), pszEnvHdr, pos - 2))
+	if(length <= pos || mpt::CompareNoCaseAscii(s.data(), pszEnvHdr, pos - 2))
 	{
 		return false;
 	}
@@ -1092,15 +1092,15 @@ bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 }
 
 
-bool CModDoc::SaveEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName)
+bool CModDoc::SaveEnvelope(INSTRUMENTINDEX ins, EnvelopeType env, const mpt::PathString &fileName)
 {
-	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns]) return false;
+	if (ins < 1 || ins > m_SndFile.m_nInstruments || !m_SndFile.Instruments[ins]) return false;
 	BeginWaitCursor();
-	const ModInstrument *pIns = m_SndFile.Instruments[nIns];
+	const ModInstrument *pIns = m_SndFile.Instruments[ins];
 	if(pIns == nullptr) return false;
 	
 	CStringA s;
-	EnvelopeToString(s, pIns->GetEnvelope(nEnv));
+	EnvelopeToString(s, pIns->GetEnvelope(env));
 
 	mpt::SafeOutputFile sf(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 	mpt::ofstream& f = sf;
@@ -1109,25 +1109,25 @@ bool CModDoc::SaveEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::P
 		EndWaitCursor();
 		return false;
 	}
-	mpt::IO::WriteText(f, std::string(s.GetString(), s.GetString() + s.GetLength()));
+	mpt::IO::WriteRaw(f, s.GetString(), s.GetLength());
 	EndWaitCursor();
 	return true;
 }
 
 
-bool CModDoc::PasteEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
+bool CModDoc::PasteEnvelope(INSTRUMENTINDEX ins, EnvelopeType env)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns] || !pMainFrm) return false;
+	if (ins < 1 || ins > m_SndFile.m_nInstruments || !m_SndFile.Instruments[ins] || !pMainFrm) return false;
 	BeginWaitCursor();
 	Clipboard clipboard(CF_TEXT);
-	mpt::span<char> data = mpt::byte_cast<mpt::span<char>>(clipboard.Get());
-	if(!data)
+	auto data = clipboard.GetString();
+	if(!data.length())
 	{
 		EndWaitCursor();
 		return false;
 	}
-	bool result = StringToEnvelope(std::string(data.begin(), data.end()), m_SndFile.Instruments[nIns]->GetEnvelope(nEnv), m_SndFile.GetModSpecifications());
+	bool result = StringToEnvelope(data, m_SndFile.Instruments[ins]->GetEnvelope(env), m_SndFile.GetModSpecifications());
 	EndWaitCursor();
 	return result;
 }

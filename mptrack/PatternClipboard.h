@@ -99,7 +99,7 @@ protected:
 
 	// System-specific clipboard functions
 	static bool ToSystemClipboard(const PatternClipboardElement &clipboard) { return ToSystemClipboard(clipboard.content); };
-	static bool ToSystemClipboard(const std::string &data);
+	static bool ToSystemClipboard(const std::string_view &data);
 	static bool FromSystemClipboard(std::string &data);
 };
 

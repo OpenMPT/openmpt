@@ -959,13 +959,13 @@ bool PatternClipboard::CanPaste()
 
 
 // System-specific clipboard functions
-bool PatternClipboard::ToSystemClipboard(const std::string &data)
+bool PatternClipboard::ToSystemClipboard(const std::string_view &data)
 {
-	size_t clipLength = data.size() + 1;
+	const size_t clipLength = data.size() + 1;
 	Clipboard clipboard(CF_TEXT, clipLength);
 	if(auto dst = clipboard.As<char>())
 	{
-		memcpy(dst, data.c_str(), data.size() + 1);
+		memcpy(dst, data.data(), clipLength);
 		return true;
 	} else
 	{

@@ -48,6 +48,14 @@ public:
 		return m_data;
 	}
 
+	std::string_view GetString() const
+	{
+		if(m_data)
+			return { mpt::byte_cast<const char *>(m_data.data()), m_data.size() };
+		else
+			return {};
+	}
+
 	void Close()
 	{
 		if(m_hCpy)
