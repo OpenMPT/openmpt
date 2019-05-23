@@ -46,13 +46,8 @@ newoption {
 --end
 
 if _OPTIONS["win10"] then
-	if _ACTION == "vs2017" then
-		allplatforms = { "x86", "x86_64", "arm", "arm64" }
-		trkplatforms = { "x86", "x86_64", "arm", "arm64" }
-	else
-		allplatforms = { "x86", "x86_64" }
-		trkplatforms = { "x86", "x86_64" }
-	end
+	allplatforms = { "x86", "x86_64", "arm", "arm64" }
+	trkplatforms = { "x86", "x86_64", "arm", "arm64" }
 	mpt_projectpathname = _ACTION .. "win10"
 	mpt_bindirsuffix = "win10"
 	mpt_bindirsuffix32 = "win10"
@@ -139,6 +134,28 @@ newaction {
   postprocess_vs2010_disabledpiaware("build/vs2017win10/OpenMPT-UTF8.vcxproj")
   postprocess_vs2010_nonxcompat("build/vs2017win10/PluginBridge.vcxproj")
   postprocess_vs2010_disabledpiaware("build/vs2017win10/PluginBridge.vcxproj")
+
+  postprocess_vs2010_nonxcompat("build/vs2019win7/OpenMPT.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2019win7/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2019win7/OpenMPT-custom.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2019win7/OpenMPT-custom.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2019win7/OpenMPT-ANSI.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2019win7/OpenMPT-ANSI.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2019win7/OpenMPT-UTF8.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2019win7/OpenMPT-UTF8.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2019win7/PluginBridge.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2019win7/PluginBridge.vcxproj")
+
+  postprocess_vs2010_nonxcompat("build/vs2019win10/OpenMPT.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2019win10/OpenMPT.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2019win10/OpenMPT-custom.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2019win10/OpenMPT-custom.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2019win10/OpenMPT-ANSI.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2019win10/OpenMPT-ANSI.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2019win10/OpenMPT-UTF8.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2019win10/OpenMPT-UTF8.vcxproj")
+  postprocess_vs2010_nonxcompat("build/vs2019win10/PluginBridge.vcxproj")
+  postprocess_vs2010_disabledpiaware("build/vs2019win10/PluginBridge.vcxproj")
 
  end
 }

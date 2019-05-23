@@ -85,6 +85,26 @@ ${PREMAKE} --group=PluginBridge vs2017 --win10
 ${PREMAKE} --group=OpenMPT vs2017 --win10
 ${PREMAKE} --group=all-externals vs2017 --win10
 
+${PREMAKE} --group=libopenmpt_test vs2019
+${PREMAKE} --group=in_openmpt vs2019
+${PREMAKE} --group=xmp-openmpt vs2019
+${PREMAKE} --group=libopenmpt-small vs2019
+${PREMAKE} --group=libopenmpt vs2019
+${PREMAKE} --group=openmpt123 vs2019
+${PREMAKE} --group=PluginBridge vs2019
+${PREMAKE} --group=OpenMPT vs2019
+${PREMAKE} --group=all-externals vs2019
+
+${PREMAKE} --group=libopenmpt_test vs2019 --win10
+${PREMAKE} --group=in_openmpt vs2019 --win10
+${PREMAKE} --group=xmp-openmpt vs2019 --win10
+${PREMAKE} --group=libopenmpt-small vs2019 --win10
+${PREMAKE} --group=libopenmpt vs2019 --win10
+${PREMAKE} --group=openmpt123 vs2019 --win10
+${PREMAKE} --group=PluginBridge vs2019 --win10
+${PREMAKE} --group=OpenMPT vs2019 --win10
+${PREMAKE} --group=all-externals vs2019 --win10
+
 ${PREMAKE} postprocess
 
 rm premake5.lua

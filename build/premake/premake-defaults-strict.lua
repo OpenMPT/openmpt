@@ -3,6 +3,6 @@
 			buildoptions { "/permissive-" }
 		end
 	filter {}
-	filter { "action:vs*", "language:C++", "not action:vs2015" }
+	filter { "action:vs*", "language:C++" }
 		cppdialect "C++17"
 	filter {}

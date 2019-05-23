@@ -12,10 +12,10 @@
 
 	filter {}
 		if _OPTIONS["xp"] then
-			if _ACTION == "vs2015" then
-				toolset "v140_xp"
-			elseif _ACTION == "vs2017" then
+			if _ACTION == "vs2017" then
 				toolset "v141_xp"
+			elseif _ACTION == "vs2019" then
+				toolset "v142_xp"
 			end
 			defines { "MPT_BUILD_TARGET_XP" }
 			filter { "action:vs*" }
@@ -24,11 +24,11 @@
 		end
 
 	if _OPTIONS["xp"] then
-		filter { "not action:vs2015", "action:vs*", "not architecture:x86" }
+		filter { "action:vs*", "not architecture:x86" }
 			buildoptions { "/Qspectre" }
 		filter {}
 	else
-		filter { "not action:vs2015", "action:vs*" }
+		filter { "action:vs*" }
 			buildoptions { "/Qspectre" }
 		filter {}
 	end
@@ -138,11 +138,7 @@
    defines { "DEBUG" }
    defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
-		if _ACTION == "vs2015" then
-			symbols "On"
-		else
-			symbols "FastLink"
-		end
+		symbols "FastLink"
    staticruntime "On"
 	 runtime "Debug"
    optimize "Debug"
