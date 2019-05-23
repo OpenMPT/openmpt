@@ -47,7 +47,7 @@ struct ITPModCommand
 	operator ModCommand() const
 	{
 		ModCommand result;
-		result.note = (ModCommand::IsNote(note) || ModCommand::IsSpecialNote(note)) ? note.get() : NOTE_NONE;
+		result.note = (ModCommand::IsNote(note) || ModCommand::IsSpecialNote(note)) ? static_cast<ModCommand::NOTE>(note.get()) : static_cast<ModCommand::NOTE>(NOTE_NONE);
 		result.instr = instr;
 		result.command = (command < MAX_EFFECTS) ? static_cast<EffectCommand>(command.get()) : CMD_NONE;
 		result.volcmd = (volcmd < MAX_VOLCMDS) ? static_cast<VolumeCommand>(volcmd.get()) : VOLCMD_NONE;
