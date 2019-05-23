@@ -1121,7 +1121,7 @@ bool CModDoc::PasteEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns] || !pMainFrm) return false;
 	BeginWaitCursor();
 	Clipboard clipboard(CF_TEXT);
-	auto data = clipboard.Get();
+	mpt::span<char> data = mpt::byte_cast<mpt::span<char>>(clipboard.Get());
 	if(!data)
 	{
 		EndWaitCursor();
