@@ -762,7 +762,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 						if(x & MDLNOTE_NOTE)
 						{
 							b = track.ReadUint8();
-							m->note = (b > 120) ? NOTE_KEYOFF : b;
+							m->note = (b > 120) ? static_cast<ModCommand::NOTE>(NOTE_KEYOFF) : static_cast<ModCommand::NOTE>(b);
 						}
 						if(x & MDLNOTE_SAMPLE)
 						{
