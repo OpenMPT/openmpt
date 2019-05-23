@@ -1392,7 +1392,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEIND
 		{
 			uint8 step = 0;
 			const bool arpOnRow = (chn.rowCommand.command == CMD_ARPEGGIO);
-			const ModCommand::NOTE lastNote = ModCommand::IsNote(chn.nLastNote) ? pIns->NoteMap[chn.nLastNote - NOTE_MIN] : NOTE_NONE;
+			const ModCommand::NOTE lastNote = ModCommand::IsNote(chn.nLastNote) ? static_cast<ModCommand::NOTE>(pIns->NoteMap[chn.nLastNote - NOTE_MIN]) : static_cast<ModCommand::NOTE>(NOTE_NONE);
 			if(arpOnRow)
 			{
 				switch(m_PlayState.m_nTickCount % 3)
