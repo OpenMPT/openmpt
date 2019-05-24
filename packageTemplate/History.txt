@@ -30,6 +30,29 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.28.05.00 (* May 2019, revision 11614)
+----------------------------------------
+Pattern tab
+- [Fix] <js> Seeking with sample sync did not stop notes with XM Key Off (Kxx) effect (http://bugs.openmpt.org/view.php?id=1223).
+
+Mod Conversion
+- [Fix] <js> Sequence splitting when converting to MPTM was broken (http://bugs.openmpt.org/view.php?id=1218).
+
+Playback
+- [Fix] <js> Possible crash when playing some XM files (introduced in OpenMPT 1.28.01.00).
+- [Fix] <js> Breaking out of a sustain loop through Note-Off sometimes didn't continue in the regular sample loop, or not at the correct position.
+
+Misc
+- [Imp] <js> Show keyboard shortcuts in various tooltips (http://bugs.openmpt.org/view.php?id=980).
+- [Fix] <js> In High-DPI mode, scale initial size of the upper panel of child windows properly.
+
+Bundled plugins
+- [Fix] <js> MIDI I/O Plugin: Do not crash when sending a MIDI message fails (e.g. with Coolsoft Virtual MIDI Synth, http://bugs.openmpt.org/view.php?id=1219).
+
+Third-Party Libraries
+- [Imp] Update opus (v1.3.1) and UnRAR (v5.7.5)
+
+
 v1.28.04.00 (7 April 2019, revision 11528)
 ------------------------------------------
 Tree view
@@ -235,7 +258,7 @@ Misc
 - [Reg] <jh> Wine 1.6 is no longer supported. The minimum required version is Wine 1.8.
 
 Third-Party Libraries
-- [Imp] Update SoundTouch (v2.1.1) and UnRAR (v5.6.8)
+- [Imp] Update opus (v1.3), SoundTouch (v2.1.1) and UnRAR (v5.6.8)
 
 
 v1.27.11.00 (21 October 2018, revision 10938)
