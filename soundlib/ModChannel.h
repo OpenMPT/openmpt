@@ -28,8 +28,8 @@ struct ModChannel
 	struct EnvInfo
 	{
 		FlagSet<EnvelopeFlags> flags;
-		uint32 nEnvPosition;
-		int32 nEnvValueAtReleaseJump;
+		uint32 nEnvPosition = 0;
+		int32 nEnvValueAtReleaseJump = NOT_YET_RELEASED;
 
 		void Reset()
 		{
