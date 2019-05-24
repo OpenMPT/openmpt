@@ -1036,7 +1036,8 @@ void CSoundFile::ProcessVolumeEnvelope(ModChannel &chn, int &vol) const
 		// if we are in the release portion of the envelope,
 		// rescale envelope factor so that it is proportional to the release point
 		// and release envelope beginning.
-		if(chn.VolEnv.nEnvValueAtReleaseJump != NOT_YET_RELEASED)
+		if(pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
+			&& chn.VolEnv.nEnvValueAtReleaseJump != NOT_YET_RELEASED)
 		{
 			int envValueAtReleaseJump = chn.VolEnv.nEnvValueAtReleaseJump;
 			int envValueAtReleaseNode = pIns->VolEnv[pIns->VolEnv.nReleaseNode].value * 4;
