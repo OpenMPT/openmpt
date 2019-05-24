@@ -5326,7 +5326,7 @@ void CSoundFile::KeyOff(ModChannel *pChn) const
 			if(pChn->nPos > pChn->nLength)
 			{
 				// Test case: SusAfterLoop.it
-				pChn->nPos = pChn->nPos - pChn->nLength + pChn->nLoopStart;
+				pChn->nPos = pChn->nLoopStart + ((pChn->nPos - pChn->nLoopStart) % (pChn->nLoopEnd - pChn->nLoopStart));
 				pChn->nPosLo = 0;
 			}
 		} else
