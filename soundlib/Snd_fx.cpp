@@ -5382,7 +5382,7 @@ void CSoundFile::KeyOff(ModChannel *pChn) const
 			if(pChn->position.GetUInt() > pChn->nLength)
 			{
 				// Test case: SusAfterLoop.it
-				pChn->position.Set(pChn->position.GetInt() - pChn->nLength + pChn->nLoopStart);
+				pChn->position.Set(pChn->nLoopStart + ((pChn->position.GetInt() - pChn->nLoopStart) % (pChn->nLoopEnd - pChn->nLoopStart)));
 			}
 		} else
 		{
