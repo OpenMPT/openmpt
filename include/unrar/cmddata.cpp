@@ -123,6 +123,7 @@ void CommandData::ParseArg(wchar *Arg)
         wchar CmdChar=toupperw(*Command);
         bool Add=wcschr(L"AFUM",CmdChar)!=NULL;
         bool Extract=CmdChar=='X' || CmdChar=='E';
+        bool Repair=CmdChar=='R' && Command[1]==0;
         if (EndSeparator && !Add)
           wcsncpyz(ExtrPath,Arg,ASIZE(ExtrPath));
         else
@@ -140,8 +141,8 @@ void CommandData::ParseArg(wchar *Arg)
               ReadTextFile(Arg+1,&FileArgs,false,true,FilelistCharset,true,true,true);
 
             }
-            else
-              if (Found && FileData.IsDir && Extract && *ExtrPath==0)
+            else // We use 'destpath\' when extracting and reparing.
+              if (Found && FileData.IsDir && (Extract || Repair) && *ExtrPath==0)
               {
                 wcsncpyz(ExtrPath,Arg,ASIZE(ExtrPath));
                 AddEndSlash(ExtrPath,ASIZE(ExtrPath));
