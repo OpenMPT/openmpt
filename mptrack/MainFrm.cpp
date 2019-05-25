@@ -2018,6 +2018,13 @@ void CMainFrame::OnTimer(UINT_PTR timerID)
 
 void CMainFrame::OnTimerGUI()
 {
+	// Calling this (or most other MIDI input related functions) periodically makes the MIDI driver realize
+	// that the connection to USB MIDI devices was lost and send a MIM_CLOSE message.
+	// Otherwise, after disconnecting a USB MIDI device, the MIDI callback will stay alive forever but return no data.
+	if(shMidiIn)
+	{
+		midiInGetNumDevs();
+	}
 
 	IdleHandlerSounddevice();
 

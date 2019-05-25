@@ -50,7 +50,7 @@ Bundled plugins
 - [Fix] <js> MIDI I/O Plugin: Do not crash when sending a MIDI message fails (e.g. with Coolsoft Virtual MIDI Synth, http://bugs.openmpt.org/view.php?id=1219).
 
 Third-Party Libraries
-- [Imp] Update opus (v1.3.1) and UnRAR (v5.7.5)
+- [Imp] Update opus (v1.3.1), RtMidi (4.0.0) and UnRAR (v5.7.5)
 
 
 v1.28.04.00 (7 April 2019, revision 11528)

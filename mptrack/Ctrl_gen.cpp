@@ -635,6 +635,11 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPTSTR pszText)
 		{
 		case IDC_BUTTON_MODTYPE:
 			_tcscpy(pszText, _T("Song Properties"));
+			{
+				const auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(kcViewSongProperties, 0);
+				if (!keyText.IsEmpty())
+					_tcscat(pszText, mpt::tformat(_T(" (%1)"))(keyText).c_str());
+			}
 			return TRUE;
 		case IDC_BUTTON1:
 			_tcscpy(pszText, _T("Click button multiple times to tap in the desired tempo."));

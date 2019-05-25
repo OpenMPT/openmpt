@@ -1168,6 +1168,8 @@ BOOL CCtrlPatterns::GetToolTipText(UINT id, LPTSTR str)
 	case ID_PATTERNDETAIL_MED: s = _T("Medium Pattern Detail Level"); break;
 	case ID_PATTERNDETAIL_HI: s = _T("High Pattern Detail Level"); break;
 	case ID_OVERFLOWPASTE: s = _T("Toggle Overflow Paste"); cmd = kcToggleOverflowPaste; break;
+	case IDC_PATTERN_LOOP: s = _T("Toggle Loop Pattern"); cmd = kcChangeLoopStatus; break;
+	case IDC_PATTERN_FOLLOWSONG: s = _T("Toggle Follow Song"); cmd = kcToggleFollowSong; break;
 	default:
 		return FALSE;
 	}
