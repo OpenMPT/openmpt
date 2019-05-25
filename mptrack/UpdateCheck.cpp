@@ -720,10 +720,6 @@ void CUpdateSetupDlg::EnableDisableDialog()
 	GetDlgItem(IDC_CHECK1)->EnableWindow(status);
 	GetDlgItem(IDC_STATIC_UPDATEPRIVACYTEXT)->EnableWindow(status);
 	GetDlgItem(IDC_SYSLINK1)->EnableWindow(status);
-
-	// disabled features
-	GetDlgItem(IDC_RADIO2)->EnableWindow(FALSE);
-
 }
 
 
