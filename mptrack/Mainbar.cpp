@@ -118,7 +118,7 @@ void CToolBarEx::ChangeCtrlStyle(LONG lStyle, BOOL bSetStyle)
 
 void CToolBarEx::EnableFlatButtons(BOOL bFlat)
 {
-	m_bFlatButtons = bFlat;
+	m_bFlatButtons = bFlat ? true : false;
 	ChangeCtrlStyle(TBSTYLE_FLAT, bFlat);
 }
 
