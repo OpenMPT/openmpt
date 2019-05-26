@@ -9,7 +9,8 @@
 from urllib.request import urlopen, urlretrieve
 import re, os, shutil, subprocess
 
-base_url = 'http://wiki.openmpt.org'
+base_url = 'https://wiki.openmpt.org'
+base_url_regex = 'https?://wiki.openmpt.org'
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -26,7 +27,7 @@ style_file.close()
 
 toc_page = urlopen(base_url + '/index.php?title=Manual:_CHM_TOC&action=render').read().decode('UTF-8')
 
-pages = re.findall('href="' + base_url + '/(.+?)"', toc_page)
+pages = re.findall('href="' + base_url_regex + '/(.+?)"', toc_page)
 
 def destname(p):
     p = p.split(':_')[1]
@@ -92,8 +93,8 @@ for p in pages:
     # Remove comments
     content = re.sub(r'<!--(.+?)-->', '', content, flags = re.DOTALL)
     # Fix local URLs
-    content = re.sub(r'<a href="' + base_url + '/File:', '<a href="', content)
-    content = re.sub(r'<a href="' + base_url + '/(Manual:.+?)"', fix_internal_links, content)
+    content = re.sub(r'<a href="' + base_url_regex + '/File:', '<a href="', content)
+    content = re.sub(r'<a href="' + base_url_regex + '/(Manual:.+?)"', fix_internal_links, content)
     content = re.sub(r'<a href="/(Manual:.+?)"', fix_internal_links, content)
     # Remove templates that shouldn't turn up in the manual
     content = re.sub(r'<div class="todo".+?</div>', '', content, flags = re.DOTALL);
@@ -157,7 +158,7 @@ def toc_parse_chapter(m):
 toc_text = re.sub(r'<!--(.+?)-->', '', toc_page, flags = re.DOTALL)
 toc_text = re.sub(r'<div(.+?)>', '', toc_text, flags = re.DOTALL)
 toc_text = re.sub(r'</div>', '', toc_text, flags = re.DOTALL)
-toc_text = re.sub(r'<a href="' + base_url + '/(.+?)".*?>(.+?)</a>', toc_parse, toc_text)
+toc_text = re.sub(r'<a href="' + base_url_regex + '/(.+?)".*?>(.+?)</a>', toc_parse, toc_text)
 toc_text = re.sub(r'<li> ([^<]+)$', toc_parse_chapter, toc_text, flags = re.MULTILINE)
 toc.write(toc_text)
 
