@@ -30,8 +30,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.05.00 (* May 2019, revision 11614)
-----------------------------------------
+v1.28.05.00 (26 May 2019, revision 11622)
+-----------------------------------------
 Pattern tab
 - [Fix] <js> Seeking with sample sync did not stop notes with XM Key Off (Kxx) effect (http://bugs.openmpt.org/view.php?id=1223).
 
@@ -44,6 +44,8 @@ Playback
 
 Misc
 - [Imp] <js> Show keyboard shortcuts in various tooltips (http://bugs.openmpt.org/view.php?id=980).
+- [Imp] <js> Try to figure out when a USB MIDI device is disconnected and disable the MIDI record button if this device was being used for recording.
+- [Imp] <js> In addition to checking for the latest development builds, it is now also possible to receive update notifications for upcoming minor updates.
 - [Fix] <js> In High-DPI mode, scale initial size of the upper panel of child windows properly.
 
 Bundled plugins
