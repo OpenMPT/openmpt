@@ -736,14 +736,22 @@ void CModTree::RefreshInstrumentLibrary()
 {
 	SetRedraw(FALSE);
 	// Check if the currently selected item should be selected after refreshing
-	CString oldItem;
+	CString selectedName;
 	if((IsSampleBrowser() || GetParentRootItem(GetSelectedItem()) == m_hInsLib)
 		&& GetItemText(GetSampleBrowser()->m_hInsLib) == (m_SongFileName.empty() ? m_InstrLibPath : m_SongFileName).ToCString())
 	{
-		oldItem = GetItemText(GetSelectedItem());
+		selectedName = GetItemText(GetSelectedItem());
 	}
+	if(!m_InstrLibHighlightPath.empty() && (!IsSampleBrowser() || TrackerSettings::Instance().showDirsInSampleBrowser))
+	{
+		selectedName = m_InstrLibHighlightPath.ToCString();
+	}
+	m_InstrLibHighlightPath = mpt::PathString();
 	EmptyInstrumentLibrary();
-	FillInstrumentLibrary(oldItem);
+	FillInstrumentLibrary(selectedName);
+	auto selectedItem = GetSelectedItem();
+	if(selectedItem)
+		EnsureVisible(selectedItem);
 	SetRedraw(TRUE);
 	if(!IsSampleBrowser())
 	{
@@ -2100,6 +2108,7 @@ void CModTree::ModTreeInsert(const TCHAR *name, int image, const TCHAR *selectIf
 	if(selectIfMatch != nullptr && !_tcscmp(name, selectIfMatch))
 	{
 		SelectItem(item);
+		EnsureVisible(item);
 	}
 }
 
@@ -2198,6 +2207,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 			delete m_SongFile;
 			m_SongFile = nullptr;
 			m_InstrLibPath = dir;
+			GetSampleBrowser()->m_InstrLibHighlightPath = m_InstrLibHighlightPath;
 			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
 			ok = true;
 		}
@@ -3606,31 +3616,8 @@ BOOL CModTree::OnDrop(COleDataObject* pDataObject, DROPEFFECT, CPoint)
 
 void CModTree::OnRefreshInstrLib()
 {
-	HTREEITEM hActive;
-
 	BeginWaitCursor();
 	RefreshInstrumentLibrary();
-	if (!IsSampleBrowser())
-	{
-		hActive = NULL;
-		if(!m_InstrLibHighlightPath.empty() || !m_SongFileName.empty())
-		{
-			HTREEITEM hItem = GetChildItem(m_hInsLib);
-			while (hItem != NULL)
-			{
-				const mpt::PathString str = mpt::PathString::FromCString(GetItemText(hItem));
-				if(!mpt::PathString::CompareNoCase(str, m_InstrLibHighlightPath))
-				{
-					hActive = hItem;
-					break;
-				}
-				hItem = GetNextItem(hItem, TVGN_NEXT);
-			}
-			if(m_SongFileName.empty()) m_InstrLibHighlightPath = P_("");
-		}
-		SelectSetFirstVisible(m_hInsLib);
-		if (hActive != NULL) SelectItem(hActive);
-	}
 	EndWaitCursor();
 }
 
