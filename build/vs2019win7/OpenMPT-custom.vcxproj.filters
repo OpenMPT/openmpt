@@ -52,53 +52,11 @@
     <Filter Include="Headers\unarchiver">
       <UniqueIdentifier>{A75E1480-9342-D5D5-FCA2-CF28E8A5BF57}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources">
-      <UniqueIdentifier>{89565304-F535-D29F-FE4D-5D766AAC3801}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\build">
-      <UniqueIdentifier>{8825B86D-F4E5-33A4-BD20-7D2129A07880}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\build\pch">
-      <UniqueIdentifier>{F258FB30-5E6F-F9C6-A7E6-84E8133CCA4E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\common">
-      <UniqueIdentifier>{C1A3A726-AD71-9B2C-9605-0C5382727791}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\mptrack">
-      <UniqueIdentifier>{EAD03800-565C-A6C4-5F6D-29B9CB7702C5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\mptrack\plugins">
-      <UniqueIdentifier>{DB63C55F-479B-0DF7-50A5-711ABC5B34F0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\pluginBridge">
-      <UniqueIdentifier>{34E2A00F-2071-2AD9-C98F-3ED4B5FD3A7F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\sounddev">
-      <UniqueIdentifier>{601EF245-4C17-1198-7549-F61C61A1F0A3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\sounddsp">
-      <UniqueIdentifier>{2820F245-1419-1198-3D4B-F61C29A3F0A3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\soundlib">
-      <UniqueIdentifier>{D840F245-C439-1198-ED6B-F61CD9C3F0A3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\soundlib\plugins">
-      <UniqueIdentifier>{C9E12E8F-B506-7E0F-DE51-639FCAD57C2D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\soundlib\plugins\dmo">
-      <UniqueIdentifier>{F81B086C-E4D6-F717-8D8E-7062792842A8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\test">
-      <UniqueIdentifier>{B8ACFF8E-A40F-8F33-4D95-C7E939D75AB6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\tracklib">
-      <UniqueIdentifier>{8468B8E9-7061-D73B-9993-BCC085EBB647}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\unarchiver">
-      <UniqueIdentifier>{6FB145DB-5B95-0631-C4F5-0084B0F8F0B2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="build">
       <UniqueIdentifier>{D5562E0F-416B-56C0-0AED-F91F76C052F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="build\pch">
+      <UniqueIdentifier>{BF689319-2BD3-4790-7411-F935E0BA25E5}</UniqueIdentifier>
     </Filter>
     <Filter Include="build\vs">
       <UniqueIdentifier>{4D3A0C18-3907-6723-6220-55CB4E4C9CB1}</UniqueIdentifier>
@@ -106,11 +64,44 @@
     <Filter Include="build\vs\debug">
       <UniqueIdentifier>{A31A013F-8FE8-F444-787C-656B64E9D0A9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{AEFEE3F6-9AA0-0ECD-835B-22216F9C951D}</UniqueIdentifier>
+    </Filter>
     <Filter Include="mptrack">
       <UniqueIdentifier>{778900D8-E368-7F73-EC80-0A4A58DFE5D4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="mptrack\plugins">
+      <UniqueIdentifier>{68594FA8-D4E4-BC6C-DDF5-3F614900196D}</UniqueIdentifier>
+    </Filter>
     <Filter Include="mptrack\res">
       <UniqueIdentifier>{3025A28F-9CDA-1A85-25CF-145C91831189}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pluginBridge">
+      <UniqueIdentifier>{E1FAE259-CD5D-72FE-76E3-AAB462253E81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sounddev">
+      <UniqueIdentifier>{8DE8B016-79B5-0B22-A2CE-F9C98EFA40B0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sounddsp">
+      <UniqueIdentifier>{55EAB016-41B7-0B22-6AD0-F9C956FC40B0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="soundlib">
+      <UniqueIdentifier>{050BB116-F1D7-0B22-1AF1-F9C9061D41B0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="soundlib\plugins">
+      <UniqueIdentifier>{F688F7E8-E281-163B-0BB4-FBBFF70BF646}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="soundlib\plugins\dmo">
+      <UniqueIdentifier>{A591FA3A-9120-8404-3A3F-98FF26AD94AA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{65689E7C-519F-9F0D-FA8B-8510E6A11B0F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tracklib">
+      <UniqueIdentifier>{B13277BA-9DFF-D1C5-C618-C06DB2440754}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="unarchiver">
+      <UniqueIdentifier>{DCBADFD6-C872-2124-317A-FA7F1D51BC14}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -873,769 +864,769 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\FileReader.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\Logging.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\Profiler.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\misc_util.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptAlloc.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptCPU.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptFileIO.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptIO.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptLibrary.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptOS.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptPathString.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptRandom.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptString.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptStringBuffer.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptStringFormat.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptStringParse.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptTime.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptUUID.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptWine.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\serialization_utils.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\version.cpp">
-      <Filter>Sources\common</Filter>
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\AboutDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\AbstractVstEditor.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\AdvancedConfigDlg.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\AppendModule.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\AutoSaver.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Autotune.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\BuildVariants.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\CDecimalSupport.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\CImageListEx.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ChannelManagerDlg.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Childfrm.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\CleanupSong.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\CloseMainDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ColorConfigDlg.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ColourEdit.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\CommandSet.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Ctrl_com.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Ctrl_gen.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Ctrl_ins.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Ctrl_pat.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Ctrl_seq.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Ctrl_smp.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\DefaultVstEditor.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Draw_pat.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\EffectInfo.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\EffectVis.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ExceptionHandler.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ExternalSamples.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\FileDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\FolderScanner.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\GeneralConfigDlg.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Globals.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\HTTP.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\IPCWindow.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Image.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\InputHandler.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\KeyConfigDlg.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MIDIMacroDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MIDIMapping.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MIDIMappingDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MPTHacks.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MPTrackLink.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MPTrackUtil.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MPTrackUtilWine.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MPTrackWine.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MainFrm.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Mainbar.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Mod2wave.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ModConvert.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ModDocTemplate.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Moddoc.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Modedit.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MoveFXSlotDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Mpdlgs.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Mpt_midi.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Mptrack.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\OPLInstrDlg.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PSRatioCalc.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PathConfigDlg.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PatternClipboard.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PatternEditorDialogs.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PatternFindReplace.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PatternFindReplaceDlg.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PatternFont.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PatternGotoDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PlugNotFoundDlg.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ProgressDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Reporting.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ResizableDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\SampleConfigDlg.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\SampleEditorDialogs.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\SampleGenerator.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\SampleTrimmer.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ScaleEnvPointsDlg.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\SelectPluginDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Settings.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoder.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoderAU.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoderFLAC.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoderMP3.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoderOpus.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoderRAW.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoderVorbis.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoderWAV.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\TempoSwingDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\TrackerSettings.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\TuningDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Undo.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\UpdateCheck.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\VSTEditor.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\View_gen.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\View_ins.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\View_pat.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\View_smp.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\View_tre.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\VstPresets.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Vstplug.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\WelcomeDialog.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\dlg_misc.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\mod2midi.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\plugins\LFOPluginEditor.cpp">
-      <Filter>Sources\mptrack\plugins</Filter>
+      <Filter>mptrack\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\plugins\MidiInOut.cpp">
-      <Filter>Sources\mptrack\plugins</Filter>
+      <Filter>mptrack\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\plugins\MidiInOutEditor.cpp">
-      <Filter>Sources\mptrack\plugins</Filter>
+      <Filter>mptrack\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\tuningRatioMapWnd.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\view_com.cpp">
-      <Filter>Sources\mptrack</Filter>
+      <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\pluginBridge\BridgeWrapper.cpp">
-      <Filter>Sources\pluginBridge</Filter>
+      <Filter>pluginBridge</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDevice.cpp">
-      <Filter>Sources\sounddev</Filter>
+      <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceASIO.cpp">
-      <Filter>Sources\sounddev</Filter>
+      <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp">
-      <Filter>Sources\sounddev</Filter>
+      <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceDirectSound.cpp">
-      <Filter>Sources\sounddev</Filter>
+      <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceManager.cpp">
-      <Filter>Sources\sounddev</Filter>
+      <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDevicePortAudio.cpp">
-      <Filter>Sources\sounddev</Filter>
+      <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDevicePulseSimple.cpp">
-      <Filter>Sources\sounddev</Filter>
+      <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDevicePulseaudio.cpp">
-      <Filter>Sources\sounddev</Filter>
+      <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceRtAudio.cpp">
-      <Filter>Sources\sounddev</Filter>
+      <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceStub.cpp">
-      <Filter>Sources\sounddev</Filter>
+      <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceUtilities.cpp">
-      <Filter>Sources\sounddev</Filter>
+      <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceWaveout.cpp">
-      <Filter>Sources\sounddev</Filter>
+      <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddsp\AGC.cpp">
-      <Filter>Sources\sounddsp</Filter>
+      <Filter>sounddsp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddsp\DSP.cpp">
-      <Filter>Sources\sounddsp</Filter>
+      <Filter>sounddsp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddsp\EQ.cpp">
-      <Filter>Sources\sounddsp</Filter>
+      <Filter>sounddsp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddsp\Reverb.cpp">
-      <Filter>Sources\sounddsp</Filter>
+      <Filter>sounddsp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ContainerMMCMP.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ContainerPP20.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ContainerUMX.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ContainerXPK.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Dither.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Dlsbank.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Fastmix.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ITCompression.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ITTools.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\InstrumentExtensions.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_669.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_amf.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_ams.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_c67.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_dbm.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_digi.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_dmf.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_dsm.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_dtm.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_far.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_gdm.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_imf.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_it.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_itp.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_mdl.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_med.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_mid.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_mo3.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_mod.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_mt2.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_mtm.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_okt.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_plm.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_psm.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_ptm.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_s3m.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_sfx.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_stm.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_stp.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_uax.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_ult.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_wav.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_xm.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\MIDIEvents.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\MIDIMacros.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\MPEGFrame.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Message.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\MixFuncTable.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\MixerLoops.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\MixerSettings.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ModChannel.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ModInstrument.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ModSample.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ModSequence.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\OPL.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\OggStream.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Paula.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\RowVisitor.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\S3MTools.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleFormatFLAC.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleFormatMP3.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleFormatMediaFoundation.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleFormatOpus.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleFormatVorbis.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleFormats.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleIO.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Snd_flt.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Snd_fx.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Sndfile.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Sndmix.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\SoundFilePlayConfig.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Tables.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Tagging.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\UMXTools.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\UpgradeModule.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\WAVTools.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\WindowedFIR.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\XMTools.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\load_j2b.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\mod_specifications.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\modcommand.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\modsmp_ctrl.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\pattern.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\patternContainer.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\DigiBoosterEcho.cpp">
-      <Filter>Sources\soundlib\plugins</Filter>
+      <Filter>soundlib\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\LFOPlugin.cpp">
-      <Filter>Sources\soundlib\plugins</Filter>
+      <Filter>soundlib\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PlugInterface.cpp">
-      <Filter>Sources\soundlib\plugins</Filter>
+      <Filter>soundlib\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PluginManager.cpp">
-      <Filter>Sources\soundlib\plugins</Filter>
+      <Filter>soundlib\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Chorus.cpp">
-      <Filter>Sources\soundlib\plugins\dmo</Filter>
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Compressor.cpp">
-      <Filter>Sources\soundlib\plugins\dmo</Filter>
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\DMOPlugin.cpp">
-      <Filter>Sources\soundlib\plugins\dmo</Filter>
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Distortion.cpp">
-      <Filter>Sources\soundlib\plugins\dmo</Filter>
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp">
-      <Filter>Sources\soundlib\plugins\dmo</Filter>
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Flanger.cpp">
-      <Filter>Sources\soundlib\plugins\dmo</Filter>
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Gargle.cpp">
-      <Filter>Sources\soundlib\plugins\dmo</Filter>
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\I3DL2Reverb.cpp">
-      <Filter>Sources\soundlib\plugins\dmo</Filter>
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\ParamEq.cpp">
-      <Filter>Sources\soundlib\plugins\dmo</Filter>
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\WavesReverb.cpp">
-      <Filter>Sources\soundlib\plugins\dmo</Filter>
+      <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\tuning.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\tuningbase.cpp">
-      <Filter>Sources\soundlib</Filter>
+      <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\TestToolsLib.cpp">
-      <Filter>Sources\test</Filter>
+      <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\test.cpp">
-      <Filter>Sources\test</Filter>
+      <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\tracklib\SampleEdit.cpp">
-      <Filter>Sources\tracklib</Filter>
+      <Filter>tracklib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\unarchiver\unarchiver.cpp">
-      <Filter>Sources\unarchiver</Filter>
+      <Filter>unarchiver</Filter>
     </ClCompile>
     <ClCompile Include="..\..\unarchiver\ungzip.cpp">
-      <Filter>Sources\unarchiver</Filter>
+      <Filter>unarchiver</Filter>
     </ClCompile>
     <ClCompile Include="..\..\unarchiver\unlha.cpp">
-      <Filter>Sources\unarchiver</Filter>
+      <Filter>unarchiver</Filter>
     </ClCompile>
     <ClCompile Include="..\..\unarchiver\unrar.cpp">
-      <Filter>Sources\unarchiver</Filter>
+      <Filter>unarchiver</Filter>
     </ClCompile>
     <ClCompile Include="..\..\unarchiver\unzip.cpp">
-      <Filter>Sources\unarchiver</Filter>
+      <Filter>unarchiver</Filter>
     </ClCompile>
     <ClCompile Include="..\pch\PCH.cpp">
-      <Filter>Sources\build\pch</Filter>
+      <Filter>build\pch</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

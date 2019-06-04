@@ -51,7 +51,7 @@ echo "ec0a4a89d8dad4d251fc7195784a275c0c322a4d" > include\genie\OpenMPT-version.
 
 
 
-call build\scriptlib\unpack.cmd "include\premake" "build\externals\premake-5.0.0-alpha14-src-fixed-scripts-c.zip" "premake-5.0.0-alpha14" || goto error
+call build\scriptlib\unpack.cmd "include\premake" "build\externals\premake-5.0.0-alpha14-src.zip" "premake-5.0.0-alpha14" || goto error
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2017.cmd || goto error
