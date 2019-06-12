@@ -337,7 +337,7 @@ static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, const SmpLength length, c
 bool AmplifySample(ModSample &smp, SmpLength start, SmpLength end, double amplifyStart, double amplifyEnd, bool isFadeIn, Fade::Law fadeLaw, CSoundFile &sndFile)
 {
 	if(!smp.HasSampleData()) return false;
-	if(end == 0 || start > smp.nLength || end > smp.nLength)
+	if(end == 0 || start >= end || end > smp.nLength)
 	{
 		start = 0;
 		end = smp.nLength;

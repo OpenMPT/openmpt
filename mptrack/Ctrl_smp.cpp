@@ -1748,7 +1748,7 @@ void CCtrlSamples::ApplyAmplify(const double amp, const double fadeInStart, cons
 	BeginWaitCursor();
 
 	SampleSelectionPoints selection = GetSelectionPoints();
-	const auto start = selection.nStart, end = selection.nEnd, mid = start + end / 2;
+	const auto start = selection.nStart, end = selection.nEnd, mid = (start + end) / 2;
 
 	PrepareUndo("Amplify", sundo_update, start, end);
 
