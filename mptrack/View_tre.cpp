@@ -1849,7 +1849,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 			{
 				TCHAR s[MAX_INSTRUMENTNAME + 10];
 				_sntprintf(s, CountOf(s), _T("%3d: %s"), ins, mpt::ToWin(m_SongFile->GetCharsetInternal(), pIns->name).c_str());
-				ModTreeInsert(s, IMAGE_INSTRUMENTS, selectedItem);
+				InsertInsLibItem(s, IMAGE_INSTRUMENTS, selectedItem);
 			}
 		}
 		for(SAMPLEINDEX smp = 1; smp <= m_SongFile->GetNumSamples(); smp++)
@@ -1859,7 +1859,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 			{
 				TCHAR s[MAX_SAMPLENAME + 10];
 				_sntprintf(s, CountOf(s), _T("%3d: %s"), smp, mpt::ToWin(m_SongFile->GetCharsetInternal(), m_SongFile->m_szNames[smp]).c_str());
-				ModTreeInsert(s, sample.uFlags[CHN_ADLIB] ? IMAGE_OPLINSTR : IMAGE_SAMPLES, selectedItem);
+				InsertInsLibItem(s, sample.uFlags[CHN_ADLIB] ? IMAGE_OPLINSTR : IMAGE_SAMPLES, selectedItem);
 			}
 		}
 	} else
@@ -1889,7 +1889,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 				{
 					SHFILEINFO fileInfo;
 					SHGetFileInfo(s, 0, &fileInfo, sizeof(fileInfo), SHGFI_ICON | SHGFI_SMALLICON);
-					ModTreeInsert(s, images.Add(fileInfo.hIcon), selectedItem);
+					InsertInsLibItem(s, images.Add(fileInfo.hIcon), selectedItem);
 					DestroyIcon(fileInfo.hIcon);
 				}
 			}
@@ -1916,7 +1916,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 				{
 					if(showDirs)
 					{
-						ModTreeInsert(wfd.cFileName, IMAGE_FOLDERPARENT, selectedItem);
+						InsertInsLibItem(wfd.cFileName, IMAGE_FOLDERPARENT, selectedItem);
 					}
 				} else if (wfd.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_OFFLINE | FILE_ATTRIBUTE_SYSTEM))
 				{
@@ -1927,7 +1927,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 					// Directory
 					if(_tcscmp(wfd.cFileName, _T(".")) && showDirs)
 					{
-						ModTreeInsert(wfd.cFileName, IMAGE_FOLDER, selectedItem);
+						InsertInsLibItem(wfd.cFileName, IMAGE_FOLDER, selectedItem);
 					}
 				} else if(wfd.nFileSizeHigh > 0 || wfd.nFileSizeLow >= 16)
 				{
@@ -1953,21 +1953,21 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 						// Instruments
 						if(showInstrs)
 						{
-							ModTreeInsert(wfd.cFileName, IMAGE_INSTRUMENTS, selectedItem);
+							InsertInsLibItem(wfd.cFileName, IMAGE_INSTRUMENTS, selectedItem);
 						}
 					} else if(std::find(sampleExts.begin(), sampleExts.end(), ext) != sampleExts.end())
 					{
 						// Samples
 						if(showInstrs)
 						{
-							ModTreeInsert(wfd.cFileName, IMAGE_SAMPLES, selectedItem);
+							InsertInsLibItem(wfd.cFileName, IMAGE_SAMPLES, selectedItem);
 						}
 					} else if(std::find(modExts.begin(), modExts.end(), ext) != modExts.end() || std::find(modExts.begin(), modExts.end(), prefixExt) != modExts.end())
 					{
 						// Songs
 						if(showDirs)
 						{
-							ModTreeInsert(wfd.cFileName, IMAGE_FOLDERSONG, selectedItem);
+							InsertInsLibItem(wfd.cFileName, IMAGE_FOLDERSONG, selectedItem);
 						}
 					} else if((!extPS.empty() && std::find(m_MediaFoundationExtensions.begin(), m_MediaFoundationExtensions.end(), extPS) != m_MediaFoundationExtensions.end())
 						|| (m_showAllFiles && std::find(allExtsBlacklist.begin(), allExtsBlacklist.end(), ext) == allExtsBlacklist.end()))
@@ -1975,7 +1975,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 						// MediaFoundation samples / other files
 						if(showInstrs)
 						{
-							ModTreeInsert(wfd.cFileName, IMAGE_SAMPLES, selectedItem);
+							InsertInsLibItem(wfd.cFileName, IMAGE_SAMPLES, selectedItem);
 						}
 					}
 				}
@@ -2077,32 +2077,34 @@ void CModTree::MonitorInstrumentLibrary()
 
 
 // Insert sample browser item.
-void CModTree::ModTreeInsert(const TCHAR *name, int image, const TCHAR *selectIfMatch)
+void CModTree::InsertInsLibItem(const TCHAR *name, int image, const TCHAR *selectIfMatch)
 {
-	DWORD dwId = 0;
+	LPARAM sortOrder = 0; // The order in which item groups appear in the instrument library
 	switch(image)
 	{
 	case IMAGE_FOLDERPARENT:
-		dwId = 1;
+		sortOrder = 1;
 		break;
 	case IMAGE_FOLDER:
-		dwId = 2;
+		sortOrder = 2;
 		break;
 	case IMAGE_FOLDERSONG:
-		dwId = 3;
+		sortOrder = 3;
 		break;
 	case IMAGE_SAMPLES:
 	case IMAGE_OPLINSTR:
-		if(!m_SongFileName.empty()) { dwId = 5; break; }
+		// Only group instruments and samples separately if we're browsing inside a module file
+		if(!m_SongFileName.empty()) { sortOrder = 5; break; }
+		MPT_FALLTHROUGH;
 	case IMAGE_INSTRUMENTS:
-		dwId = 4;
+		sortOrder = 4;
 		break;
 	}
 	HTREEITEM item = InsertItem(TVIF_IMAGE | TVIF_PARAM | TVIF_SELECTEDIMAGE | TVIF_TEXT,
 		name,
 		image, image,
 		0, 0,
-		(LPARAM)dwId,
+		sortOrder,
 		(!IsSampleBrowser()) ? m_hInsLib : TVI_ROOT,
 		TVI_LAST);
 	if(selectIfMatch != nullptr && !_tcscmp(name, selectIfMatch))
