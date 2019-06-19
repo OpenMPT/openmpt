@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.6-pre
 
+ *  [**Bug**] Compilation fix for OpenBSD.
+
 ### libopenmpt 0.4.5 (2019-05-27)
 
  *  [**Sec**] Possible crash during playback due out-of-bounds read in XM and
