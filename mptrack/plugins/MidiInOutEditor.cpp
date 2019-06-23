@@ -53,7 +53,9 @@ bool MidiInOutEditor::OpenEditor(CWnd *parent)
 {
 	Create(IDD_MIDI_IO_PLUGIN, parent);
 	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
-	SetDlgItemInt(IDC_EDIT1, mpt::saturate_round<int>(plugin.m_latency * 1000.0), TRUE);
+	m_latencyEdit.AllowFractions(true);
+	m_latencyEdit.AllowNegative(true);
+	m_latencyEdit.SetDecimalValue(plugin.m_latency * 1000.0, 4);
 	m_latencySpin.SetRange32(mpt::saturate_round<int>(plugin.GetOutputLatency() * -1000.0), int32_max);
 	PopulateList(m_inputCombo, plugin.m_midiIn,  plugin.m_inputDevice, true);
 	PopulateList(m_outputCombo, plugin.m_midiOut, plugin.m_outputDevice, false);
@@ -135,11 +137,10 @@ void MidiInOutEditor::OnOutputChanged()
 void MidiInOutEditor::OnLatencyChanged()
 {
 	MidiInOut &plugin = static_cast<MidiInOut &>(m_VstPlugin);
-	BOOL success = FALSE;
-	int value = static_cast<int>(GetDlgItemInt(IDC_EDIT1, &success, TRUE));
-	if(success && !m_locked)
+	double latency = 0.0;
+	if(!m_locked && m_latencyEdit.GetDecimalValue(latency))
 	{
-		plugin.m_latency = value * (1.0 / 1000.0);
+		plugin.m_latency = latency * (1.0 / 1000.0);
 		plugin.SetModified();
 	}
 }

@@ -15,6 +15,7 @@
 #ifdef MODPLUG_TRACKER
 
 #include "../AbstractVstEditor.h"
+#include "../CDecimalSupport.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -24,7 +25,7 @@ class MidiInOutEditor : public CAbstractVstEditor
 {
 protected:
 	CComboBox m_inputCombo, m_outputCombo;
-	CEdit m_latencyEdit;
+	CNumberEdit m_latencyEdit;
 	CSpinButtonCtrl m_latencySpin;
 	bool m_locked : 1;
 
