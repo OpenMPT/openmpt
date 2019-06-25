@@ -34,6 +34,33 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifndef NO_PLUGINS
 
+// Adjust window size if menu bar height changes
+class WindowSizeAdjuster
+{
+	CWnd &m_wnd;
+	CRect m_windowRect;
+	MENUBARINFO m_mbi;
+
+public:
+	WindowSizeAdjuster(CWnd &wnd)
+		: m_wnd(wnd)
+	{
+		wnd.GetWindowRect(&m_windowRect);
+		MemsetZero(m_mbi);
+		m_mbi.cbSize = sizeof(m_mbi);
+		GetMenuBarInfo(wnd, OBJID_MENU, 0, &m_mbi);
+		m_windowRect.bottom -= (m_mbi.rcBar.bottom - m_mbi.rcBar.top);
+	}
+
+	~WindowSizeAdjuster()
+	{
+		// Extend window height by the menu size
+		GetMenuBarInfo(m_wnd, OBJID_MENU, 0, &m_mbi);
+		m_windowRect.bottom += (m_mbi.rcBar.bottom - m_mbi.rcBar.top);
+		m_wnd.MoveWindow(&m_windowRect);
+	}
+};
+
 #define PRESETS_PER_COLUMN 32
 #define PRESETS_PER_GROUP 128
 
@@ -247,20 +274,7 @@ bool CAbstractVstEditor::OpenEditor(CWnd *)
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
 	RestoreWindowPos();
 	SetTitle();
-
-	CRect window;
-	GetWindowRect(&window);
-	MENUBARINFO mbi;
-	MemsetZero(mbi);
-	mbi.cbSize = sizeof(mbi);
-	GetMenuBarInfo(m_hWnd, OBJID_MENU, 0, &mbi);
-	window.bottom -= (mbi.rcBar.bottom - mbi.rcBar.top);
 	SetupMenu();
-	// Extend window height by the menu size
-	GetMenuBarInfo(m_hWnd, OBJID_MENU, 0, &mbi);
-	window.bottom += (mbi.rcBar.bottom - mbi.rcBar.top);
-	MoveWindow(&window);
-
 	ShowWindow(SW_SHOW);
 	return true;
 }
@@ -276,6 +290,8 @@ void CAbstractVstEditor::DoClose()
 
 void CAbstractVstEditor::SetupMenu(bool force)
 {
+	::SetMenu(m_hWnd, m_Menu.m_hMenu);
+	WindowSizeAdjuster adjuster(*this);
 	//TODO: create menus on click so they are only updated when required
 	UpdatePresetMenu(force);
 	UpdateInputMenu();
@@ -283,7 +299,6 @@ void CAbstractVstEditor::SetupMenu(bool force)
 	UpdateMacroMenu();
 	UpdateOptionsMenu();
 	UpdatePresetField();
-	::SetMenu(m_hWnd, m_Menu.m_hMenu);
 	return;
 }
 
@@ -346,6 +361,7 @@ void CAbstractVstEditor::SetPreset(int32 preset)
 	if(preset >= 0 && preset < m_VstPlugin.GetNumPrograms())
 	{
 		m_VstPlugin.SetCurrentProgram(preset);
+		WindowSizeAdjuster adjuster(*this);
 		UpdatePresetField();
 
 		if(m_VstPlugin.GetSoundFile().GetModSpecifications().supportsPlugins)
@@ -366,6 +382,7 @@ void CAbstractVstEditor::OnVSTPresetRename()
 		if(m_VstPlugin.GetCurrentProgramName() != currentName)
 		{
 			m_VstPlugin.SetModified();
+			WindowSizeAdjuster adjuster(*this);
 			UpdatePresetField();
 			UpdatePresetMenu(true);
 		}
