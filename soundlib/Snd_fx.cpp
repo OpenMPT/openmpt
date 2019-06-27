@@ -25,6 +25,7 @@
 #include "modsmp_ctrl.h"	// For updating the loop wraparound data with the invert loop effect
 #include "plugins/PlugInterface.h"
 #include "OPL.h"
+#include "MIDIEvents.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -83,7 +84,9 @@ public:
 
 	void Reset()
 	{
+#ifndef NO_PLUGINS
 		plugParams.clear();
+#endif
 		elapsedTime = 0.0;
 		state->m_lTotalSampleCount = 0;
 		state->m_nMusicSpeed = sndFile.m_nDefaultSpeed;
