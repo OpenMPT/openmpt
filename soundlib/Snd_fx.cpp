@@ -91,7 +91,9 @@ public:
 
 	void Reset()
 	{
+#ifndef NO_PLUGINS
 		plugParams.clear();
+#endif
 		elapsedTime = 0.0;
 		state.m_lTotalSampleCount = 0;
 		state.m_nMusicSpeed = sndFile.m_nDefaultSpeed;
