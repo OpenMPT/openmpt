@@ -40,8 +40,9 @@ FindReplace::FindReplace()
 
 void CViewPattern::OnEditFind()
 {
+	static bool dialogOpen = false;
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
+	if (pModDoc && !dialogOpen)
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		FindReplace settings = FindReplace::instance;
@@ -63,6 +64,7 @@ void CViewPattern::OnEditFind()
 
 		dlg.AddPage(&pageFind);
 		dlg.AddPage(&pageReplace);
+		dialogOpen = true;
 		if(dlg.DoModal() == IDOK)
 		{
 			FindReplace::instance = settings;
@@ -70,6 +72,7 @@ void CViewPattern::OnEditFind()
 			m_bContinueSearch = false;
 			OnEditFindNext();
 		}
+		dialogOpen = false;
 	}
 }
 
