@@ -36,15 +36,6 @@ newoption {
 	description = "Generate Windows 10 Desktop targetting projects",
 }
 
---newoption {
---	trigger = "layout-custom",
---	description = "Generate legay OpenmPT project layout",
---}
---
---if _OPTIONS["layout-custom"] then
---	layout = custom
---end
-
 if _OPTIONS["win10"] then
 	allplatforms = { "x86", "x86_64", "arm", "arm64" }
 	trkplatforms = { "x86", "x86_64", "arm", "arm64" }
@@ -256,7 +247,6 @@ if _OPTIONS["group"] == "OpenMPT" then
 
 charset = "Unicode"
 stringmode = "UTF8"
-layout = ""
 solution "OpenMPT-UTF8"
 	startproject "OpenMPT-UTF8"
  location ( "../../build/" .. mpt_projectpathname )
@@ -287,7 +277,6 @@ solution "OpenMPT-UTF8"
 
 charset = "MBCS"
 stringmode = "WCHAR"
-layout = ""
 solution "OpenMPT-ANSI"
 	startproject "OpenMPT-ANSI"
  location ( "../../build/" .. mpt_projectpathname )
@@ -318,38 +307,6 @@ solution "OpenMPT-ANSI"
 
 charset = "Unicode"
 stringmode = "WCHAR"
-layout = "custom"
-solution "OpenMPT-custom"
-	startproject "OpenMPT-custom"
- location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( trkplatforms )
-	dofile "../../build/premake/premake-defaults-solution.lua"
-
- dofile "../../build/premake/mpt-OpenMPT.lua"
- dofile "../../build/premake/mpt-PluginBridge.lua"
- dofile "../../build/premake/ext-flac.lua"
- dofile "../../build/premake/ext-lame.lua"
- dofile "../../build/premake/ext-lhasa.lua"
- dofile "../../build/premake/ext-minizip.lua"
- dofile "../../build/premake/ext-mpg123.lua"
- dofile "../../build/premake/ext-ogg.lua"
- dofile "../../build/premake/ext-opus.lua"
- dofile "../../build/premake/ext-opusenc.lua"
- dofile "../../build/premake/ext-opusfile.lua"
- dofile "../../build/premake/ext-portaudio.lua"
- dofile "../../build/premake/ext-r8brain.lua"
- dofile "../../build/premake/ext-rtaudio.lua"
- dofile "../../build/premake/ext-rtmidi.lua"
- dofile "../../build/premake/ext-smbPitchShift.lua"
- dofile "../../build/premake/ext-soundtouch.lua"
- dofile "../../build/premake/ext-UnRAR.lua"
- dofile "../../build/premake/ext-vorbis.lua"
- dofile "../../build/premake/ext-zlib.lua"
-
-charset = "Unicode"
-stringmode = "WCHAR"
-layout = ""
 solution "OpenMPT"
 	startproject "OpenMPT"
  location ( "../../build/" .. mpt_projectpathname )
