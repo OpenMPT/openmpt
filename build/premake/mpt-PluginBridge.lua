@@ -36,6 +36,7 @@
    "../../pluginBridge/PluginBridge.manifest",
   }
   defines { "MODPLUG_TRACKER" }
+  dpiawareness "None"
   largeaddressaware ( true )
   characterset "Unicode"
   warnings "Extra"
