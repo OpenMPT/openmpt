@@ -54,8 +54,6 @@ echo "ec0a4a89d8dad4d251fc7195784a275c0c322a4d" > include/genie/OpenMPT-version.
 
 
 
-unpack "premake" "build/externals/premake-5.0.0-alpha14-src.zip" "premake-5.0.0-alpha14"
-
 cd include/premake
 
 #make -f Bootstrap.mak linux
