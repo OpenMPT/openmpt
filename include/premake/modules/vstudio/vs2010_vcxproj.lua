@@ -191,6 +191,7 @@
 				m.characterSet,
 				m.platformToolset,
 				m.wholeProgramOptimization,
+				m.spectreMitigations,  --OpenMPT
 				m.nmakeOutDirs,
 				m.windowsSDKDesktopARMSupport,
 			}
@@ -379,6 +380,7 @@
 			m.compileAs,
 			m.callingConvention,
 			m.languageStandard,
+			m.standardConformance,  --OpenMPT
 			m.structMemberAlignment,
 		}
 
@@ -502,6 +504,7 @@
 				m.moduleDefinitionFile,
 				m.treatLinkerWarningAsErrors,
 				m.ignoreDefaultLibraries,
+				m.dataExecutionPrevention,  --OpenMPT
 				m.largeAddressAware,
 				m.targetMachine,
 				m.additionalLinkOptions,
@@ -1393,6 +1396,13 @@
 	end
 
 
+	function m.dataExecutionPrevention(cfg)  --OpenMPT
+		if (cfg.dataexecutionprevention == 'Off') then  --OpenMPT
+			m.element("DataExecutionPrevention", nil, 'false')  --OpenMPT
+		end  --OpenMPT
+	end  --OpenMPT
+
+
 	function m.largeAddressAware(cfg)
 		if (cfg.largeaddressaware == true) then
 			m.element("LargeAddressAware", nil, 'true')
@@ -1411,6 +1421,14 @@
 			end
 		end
 	end
+
+	function m.standardConformance(cfg)  --OpenMPT
+		if _ACTION >= "vs2017" then  --OpenMPT
+			if (cfg.standardconformance == "On") then  --OpenMPT
+				m.element("ConformanceMode", nil, 'true')  --OpenMPT
+			end  --OpenMPT
+		end  --OpenMPT
+	end  --OpenMPT
 
 	function m.structMemberAlignment(cfg)
 		local map = {
@@ -1543,6 +1561,14 @@
 			m.element("WholeProgramOptimization", nil, "true")
 		end
 	end
+
+	function m.spectreMitigations(cfg)  --OpenMPT
+		if (cfg.spectremitigations == 'On') then  --OpenMPT
+			if _ACTION >= "vs2017" then  --OpenMPT
+				m.element("SpectreMitigation", nil, "Spectre")  --OpenMPT
+			end  --OpenMPT
+		end  --OpenMPT
+	end  --OpenMPT
 
 	function m.clCompileAdditionalIncludeDirectories(cfg)
 		m.additionalIncludeDirectories(cfg, cfg.includedirs)

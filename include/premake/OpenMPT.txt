@@ -1,1 +1,6 @@
 Premake version 5.0-alpha14
+The following changes have been made:
+ *  Modifications have been marked with --OpenMPT
+ *  standardconformance option added
+ *  spectremitigations option added
+ *  dataexecutionprevention option added
