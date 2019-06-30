@@ -135,6 +135,12 @@ end
 
   defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
+	filter {}
+	filter { "action:vs*", "architecture:x86" }
+		dataexecutionprevention "Off"
+	filter { "action:vs*", "architecture:x86_64" }
+		dataexecutionprevention "Off"
+	filter {}
   largeaddressaware ( true )
   characterset(charset)
 if stringmode == "UTF8" then

@@ -25,11 +25,11 @@
 
 	if _OPTIONS["xp"] then
 		filter { "action:vs*", "not architecture:x86" }
-			buildoptions { "/Qspectre" }
+			spectremitigations "On"
 		filter {}
 	else
 		filter { "action:vs*" }
-			buildoptions { "/Qspectre" }
+			spectremitigations "On"
 		filter {}
 	end
 

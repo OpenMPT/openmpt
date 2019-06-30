@@ -38,6 +38,12 @@
   defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
   largeaddressaware ( true )
+	filter {}
+	filter { "action:vs*", "architecture:x86" }
+		dataexecutionprevention "Off"
+	filter { "action:vs*", "architecture:x86_64" }
+		dataexecutionprevention "Off"
+	filter {}
   characterset "Unicode"
   warnings "Extra"
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
@@ -50,6 +56,9 @@
   filter { "architecture:ARM64" }
    targetsuffix "-arm64"
   filter {}
+	filter {}
 	filter { "action:vs*", "architecture:x86_64" }
+		linkoptions { "/HIGHENTROPYVA:NO" }
+	filter { "action:vs*", "architecture:ARM64" }
 		linkoptions { "/HIGHENTROPYVA:NO" }
 	filter {}

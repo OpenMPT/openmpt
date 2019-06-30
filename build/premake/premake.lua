@@ -89,44 +89,10 @@ function replace_in_file (filename, from, to)
 	outfile:close()
 end
 
-function postprocess_vs2010_nonxcompat (filename)
-	replace_in_file(filename, "    </Link>\r\n", "      <DataExecutionPrevention>false</DataExecutionPrevention>\r\n    </Link>\r\n")
-end
-
 newaction {
  trigger     = "postprocess",
  description = "OpenMPT postprocess the project files to mitigate premake problems",
  execute     = function ()
-
-  postprocess_vs2010_nonxcompat("build/vs2017win7/OpenMPT.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2017win7/OpenMPT-custom.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2017win7/OpenMPT-ANSI.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2017win7/OpenMPT-UTF8.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2017win7/PluginBridge.vcxproj")
-
-  postprocess_vs2010_nonxcompat("build/vs2017winxp/OpenMPT.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2017winxp/OpenMPT-custom.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2017winxp/OpenMPT-ANSI.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2017winxp/OpenMPT-UTF8.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2017winxp/PluginBridge.vcxproj")
-
-  postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT-custom.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT-ANSI.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2017win10/OpenMPT-UTF8.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2017win10/PluginBridge.vcxproj")
-
-  postprocess_vs2010_nonxcompat("build/vs2019win7/OpenMPT.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2019win7/OpenMPT-custom.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2019win7/OpenMPT-ANSI.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2019win7/OpenMPT-UTF8.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2019win7/PluginBridge.vcxproj")
-
-  postprocess_vs2010_nonxcompat("build/vs2019win10/OpenMPT.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2019win10/OpenMPT-custom.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2019win10/OpenMPT-ANSI.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2019win10/OpenMPT-UTF8.vcxproj")
-  postprocess_vs2010_nonxcompat("build/vs2019win10/PluginBridge.vcxproj")
 
  end
 }

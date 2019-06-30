@@ -1,6 +1,6 @@
 	filter {}
 		if _OPTIONS["win10"] then
-			buildoptions { "/permissive-" }
+			standardconformance "On"
 		end
 	filter {}
 	filter { "action:vs*", "language:C++" }
