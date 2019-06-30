@@ -34,32 +34,28 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifndef NO_PLUGINS
 
-// Adjust window size if menu bar height changes
-class WindowSizeAdjuster
+CAbstractVstEditor::WindowSizeAdjuster::WindowSizeAdjuster(CWnd &wnd)
+	: m_wnd(wnd)
 {
-	CWnd &m_wnd;
-	CRect m_windowRect;
-	MENUBARINFO m_mbi;
+	MENUBARINFO mbi = { sizeof(mbi) };
+	if(GetMenuBarInfo(m_wnd, OBJID_MENU, 0, &mbi))
+		m_menuHeight = (mbi.rcBar.bottom - mbi.rcBar.top);
+}
 
-public:
-	WindowSizeAdjuster(CWnd &wnd)
-		: m_wnd(wnd)
+CAbstractVstEditor::WindowSizeAdjuster::~WindowSizeAdjuster()
+{
+	// Extend window height by the menu size if it changed
+	MENUBARINFO mbi = { sizeof(mbi) };
+	if(m_menuHeight >= 0 && GetMenuBarInfo(m_wnd, OBJID_MENU, 0, &mbi))
 	{
-		wnd.GetWindowRect(&m_windowRect);
-		MemsetZero(m_mbi);
-		m_mbi.cbSize = sizeof(m_mbi);
-		GetMenuBarInfo(wnd, OBJID_MENU, 0, &m_mbi);
-		m_windowRect.bottom -= (m_mbi.rcBar.bottom - m_mbi.rcBar.top);
+		CRect windowRect;
+		m_wnd.GetWindowRect(&windowRect);
+		windowRect.bottom += (mbi.rcBar.bottom - mbi.rcBar.top) - m_menuHeight;
+		m_wnd.SetWindowPos(nullptr, 0, 0,
+			windowRect.Width(), windowRect.Height(),
+			SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
 	}
-
-	~WindowSizeAdjuster()
-	{
-		// Extend window height by the menu size
-		GetMenuBarInfo(m_wnd, OBJID_MENU, 0, &m_mbi);
-		m_windowRect.bottom += (m_mbi.rcBar.bottom - m_mbi.rcBar.top);
-		m_wnd.MoveWindow(&m_windowRect);
-	}
-};
+}
 
 #define PRESETS_PER_COLUMN 32
 #define PRESETS_PER_GROUP 128

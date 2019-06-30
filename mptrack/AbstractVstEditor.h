@@ -43,6 +43,16 @@ protected:
 	bool m_updateDisplay = false;
 	CModDoc::NoteToChannelMap m_noteChannel;	// Note -> Preview channel assignment
 
+	// Adjust window size if menu bar height changes
+	class WindowSizeAdjuster
+	{
+		CWnd &m_wnd;
+		int m_menuHeight = -1;
+	public:
+		WindowSizeAdjuster(CWnd &wnd);
+		~WindowSizeAdjuster();
+	};
+
 public:
 	IMixPlugin &m_VstPlugin;
 
