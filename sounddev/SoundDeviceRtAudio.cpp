@@ -41,7 +41,7 @@ static mpt::ustring RtAudioApiToString(RtAudio::Api api)
 	case RtAudio::WINDOWS_ASIO: result = U_("WINDOWS_ASIO"); break;
 	case RtAudio::WINDOWS_DS: result = U_("WINDOWS_DS"); break;
 	case RtAudio::RTAUDIO_DUMMY: result = U_("RTAUDIO_DUMMY"); break;
-	default: result = U_(""); break;
+	default: result = mpt::ToUnicode(mpt::CharsetASCII, RtAudio::getApiName(api)); break;
 	}
 	return result;
 }
@@ -62,7 +62,7 @@ static mpt::ustring RtAudioApiToDescription(RtAudio::Api api)
 	case RtAudio::WINDOWS_ASIO: result = U_("ASIO"); break;
 	case RtAudio::WINDOWS_DS: result = U_("DirectSound"); break;
 	case RtAudio::RTAUDIO_DUMMY: result = U_("Dummy"); break;
-	default: result = U_(""); break;
+	default: result = mpt::ToUnicode(mpt::CharsetASCII, RtAudio::getApiDisplayName(api)); break;
 	}
 	return result;
 }
@@ -72,16 +72,17 @@ static RtAudio::Api StringToRtAudioApi(const mpt::ustring &str)
 {
 	RtAudio::Api result = RtAudio::RTAUDIO_DUMMY;
 	if(str == U_("")) result = RtAudio::RTAUDIO_DUMMY;
-	if(str == U_("UNSPECIFIED")) result = RtAudio::UNSPECIFIED;
-	if(str == U_("LINUX_ALSA")) result = RtAudio::LINUX_ALSA;
-	if(str == U_("LINUX_PULSE")) result = RtAudio::LINUX_PULSE;
-	if(str == U_("LINUX_OSS")) result = RtAudio::LINUX_OSS;
-	if(str == U_("UNIX_JACK")) result = RtAudio::UNIX_JACK;
-	if(str == U_("MACOSX_CORE")) result = RtAudio::MACOSX_CORE;
-	if(str == U_("WINDOWS_WASAPI")) result = RtAudio::WINDOWS_WASAPI;
-	if(str == U_("WINDOWS_ASIO")) result = RtAudio::WINDOWS_ASIO;
-	if(str == U_("WINDOWS_DS")) result = RtAudio::WINDOWS_DS;
-	if(str == U_("RTAUDIO_DUMMY")) result = RtAudio::RTAUDIO_DUMMY;
+	else if(str == U_("UNSPECIFIED")) result = RtAudio::UNSPECIFIED;
+	else if(str == U_("LINUX_ALSA")) result = RtAudio::LINUX_ALSA;
+	else if(str == U_("LINUX_PULSE")) result = RtAudio::LINUX_PULSE;
+	else if(str == U_("LINUX_OSS")) result = RtAudio::LINUX_OSS;
+	else if(str == U_("UNIX_JACK")) result = RtAudio::UNIX_JACK;
+	else if(str == U_("MACOSX_CORE")) result = RtAudio::MACOSX_CORE;
+	else if(str == U_("WINDOWS_WASAPI")) result = RtAudio::WINDOWS_WASAPI;
+	else if(str == U_("WINDOWS_ASIO")) result = RtAudio::WINDOWS_ASIO;
+	else if(str == U_("WINDOWS_DS")) result = RtAudio::WINDOWS_DS;
+	else if(str == U_("RTAUDIO_DUMMY")) result = RtAudio::RTAUDIO_DUMMY;
+	else result = RtAudio::getCompiledApiByName(mpt::ToCharset(mpt::CharsetASCII, str));
 	return result;
 }
 
@@ -169,6 +170,13 @@ bool CRtAudioDevice::InternalOpen()
 			//m_FramesPerChunk = 0; // auto
 			m_StreamOptions.flags |= RTAUDIO_MINIMIZE_LATENCY | RTAUDIO_HOG_DEVICE;
 			m_StreamOptions.numberOfBuffers = 2;
+		}
+		if(m_RtAudio->getCurrentApi() == RtAudio::Api::WINDOWS_DS)
+		{
+			m_Flags.NeedsClippedFloat = true;
+		} else if (m_RtAudio->getCurrentApi() == RtAudio::Api::WINDOWS_DS)
+		{
+			m_Flags.NeedsClippedFloat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista));
 		}
 		m_RtAudio->openStream((m_OutputStreamParameters.nChannels > 0) ? &m_OutputStreamParameters : nullptr, (m_InputStreamParameters.nChannels > 0) ? &m_InputStreamParameters : nullptr, SampleFormatToRtAudioFormat(m_Settings.sampleFormat), m_Settings.Samplerate, &m_FramesPerChunk, &RtAudioCallback, this, &m_StreamOptions, nullptr);
 	} catch (const RtAudioError &e)
@@ -454,10 +462,6 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 	{
 		if(api == RtAudio::RTAUDIO_DUMMY)
 		{
-			continue;
-		}
-		if(api == RtAudio::WINDOWS_WASAPI)
-		{ // WASAPI is broken in RtAudio 5.0.0
 			continue;
 		}
 		try

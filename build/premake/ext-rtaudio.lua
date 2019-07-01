@@ -15,7 +15,7 @@
 	filter {}
   defines {
    "__WINDOWS_DS__",
---   "__WINDOWS_WASAPI__",
+   "__WINDOWS_WASAPI__",
   }
   files {
    "../../include/rtaudio/RtAudio.cpp",
