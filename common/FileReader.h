@@ -58,8 +58,6 @@ public:
 
 };
 
-#if defined(MPT_FILEREADER_STD_ISTREAM)
-
 class FileReaderTraitsStdStream
 {
 
@@ -86,12 +84,6 @@ public:
 };
 
 using FileReaderTraitsDefault = FileReaderTraitsStdStream;
-
-#else // !MPT_FILEREADER_STD_ISTREAM
-
-using FileReaderTraitsDefault = FileReaderTraitsMemory;
-
-#endif // MPT_FILEREADER_STD_ISTREAM
 
 namespace mpt
 {
@@ -1359,8 +1351,6 @@ template <typename Tbyte> static inline FileReader make_FileReader(mpt::span<Tby
 	return FileReader(mpt::byte_cast<mpt::const_byte_span>(bytedata), filename);
 }
 
-#if defined(MPT_FILEREADER_STD_ISTREAM)
-
 #if defined(MPT_FILEREADER_CALLBACK_STREAM)
 
 // Initialize file reader object with a CallbackStream.
@@ -1387,8 +1377,6 @@ static inline FileReader make_FileReader(std::istream *s, const mpt::PathString 
 			, filename
 		);
 }
-
-#endif // MPT_FILEREADER_STD_ISTREAM
 
 
 #if defined(MPT_ENABLE_FILEIO)

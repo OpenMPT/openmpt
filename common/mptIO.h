@@ -679,8 +679,6 @@ public:
 
 
 
-#if defined(MPT_FILEREADER_STD_ISTREAM)
-
 class IFileDataContainer {
 public:
 	typedef std::size_t off_t;
@@ -1014,25 +1012,9 @@ private:
 #endif // MPT_FILEREADER_CALLBACK_STREAM
 
 
-#endif
-
-
 class FileDataContainerMemory
-#if defined(MPT_FILEREADER_STD_ISTREAM)
 	: public IFileDataContainer
-#endif
 {
-
-#if defined(MPT_FILEREADER_STD_ISTREAM)
-#define MPT_FILEDATACONTAINERMEMORY_OVERRIDE override
-#else
-#define MPT_FILEDATACONTAINERMEMORY_OVERRIDE
-#endif
-
-#if !defined(MPT_FILEREADER_STD_ISTREAM)
-public:
-	typedef std::size_t off_t;
-#endif
 
 private:
 
@@ -1045,32 +1027,32 @@ public:
 
 public:
 
-	bool IsValid() const MPT_FILEDATACONTAINERMEMORY_OVERRIDE
+	bool IsValid() const override
 	{
 		return streamData != nullptr;
 	}
 
-	bool HasFastGetLength() const MPT_FILEDATACONTAINERMEMORY_OVERRIDE
+	bool HasFastGetLength() const override
 	{
 		return true;
 	}
 
-	bool HasPinnedView() const MPT_FILEDATACONTAINERMEMORY_OVERRIDE
+	bool HasPinnedView() const override
 	{
 		return true;
 	}
 
-	const mpt::byte *GetRawData() const MPT_FILEDATACONTAINERMEMORY_OVERRIDE
+	const mpt::byte *GetRawData() const override
 	{
 		return streamData;
 	}
 
-	off_t GetLength() const MPT_FILEDATACONTAINERMEMORY_OVERRIDE
+	off_t GetLength() const override
 	{
 		return streamLength;
 	}
 
-	off_t Read(mpt::byte *dst, off_t pos, off_t count) const MPT_FILEDATACONTAINERMEMORY_OVERRIDE
+	off_t Read(mpt::byte *dst, off_t pos, off_t count) const override
 	{
 		if(pos >= streamLength)
 		{
@@ -1081,12 +1063,12 @@ public:
 		return avail;
 	}
 
-	off_t Read(off_t pos, mpt::byte_span dst) const MPT_FILEDATACONTAINERMEMORY_OVERRIDE
+	off_t Read(off_t pos, mpt::byte_span dst) const override
 	{
 		return Read(dst.data(), pos, dst.size());
 	}
 
-	bool CanRead(off_t pos, off_t length) const MPT_FILEDATACONTAINERMEMORY_OVERRIDE
+	bool CanRead(off_t pos, off_t length) const override
 	{
 		if((pos == streamLength) && (length == 0))
 		{
@@ -1099,7 +1081,7 @@ public:
 		return (length <= streamLength - pos);
 	}
 
-	off_t GetReadableLength(off_t pos, off_t length) const MPT_FILEDATACONTAINERMEMORY_OVERRIDE
+	off_t GetReadableLength(off_t pos, off_t length) const override
 	{
 		if(pos >= streamLength)
 		{

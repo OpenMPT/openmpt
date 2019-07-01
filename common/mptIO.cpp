@@ -180,10 +180,6 @@ bool Flush(std::ostream & f) { f.flush(); return !f.fail(); }
 
 
 
-#if defined(MPT_FILEREADER_STD_ISTREAM)
-
-
-
 FileDataContainerSeekable::FileDataContainerSeekable(off_t streamLength, bool buffered)
 	: streamLength(streamLength)
 	, cached(false)
@@ -669,9 +665,6 @@ IFileDataContainer::off_t FileDataContainerCallbackStream::InternalRead(mpt::byt
 
 
 #endif // MPT_FILEREADER_CALLBACK_STREAM
-
-
-#endif
 
 
 

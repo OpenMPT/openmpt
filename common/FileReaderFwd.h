@@ -16,17 +16,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 class FileReaderTraitsMemory;
 
-#if defined(MPT_FILEREADER_STD_ISTREAM)
-
 class FileReaderTraitsStdStream;
 
 using FileReaderTraitsDefault = FileReaderTraitsStdStream;
-
-#else // !MPT_FILEREADER_STD_ISTREAM
-
-using FileReaderTraitsDefault = FileReaderTraitsMemory;
-
-#endif // MPT_FILEREADER_STD_ISTREAM
 
 namespace detail {
 
