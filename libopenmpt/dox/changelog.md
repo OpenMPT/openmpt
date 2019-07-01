@@ -10,6 +10,8 @@ is just a high-level summary.
  *  [**New**] OggMod compressed FastTracker 2 XM (OXM) modules are now
     supported.
 
+ *  [**Change**] std::istream based file I/O has been speed up.
+
  *  [**Regression**] foo_openmpt: foo_openmpt is discontinued. Please use
     Kode54's fork foo_openmpt54:
     <https://www.foobar2000.org/components/view/foo_openmpt54>.
