@@ -114,7 +114,7 @@ FileDataContainerSeekable::FileDataContainerSeekable(off_t streamLength, bool bu
 	: streamLength(streamLength)
 	, cached(false)
 	, m_Buffered(buffered)
-	, m_Buffer(m_Buffered ? BUFFER_SIZE : 0)
+	, m_Buffer(m_Buffered ? static_cast<off_t>(BUFFER_SIZE) : 0)
 {
 	if(m_Buffered)
 	{
