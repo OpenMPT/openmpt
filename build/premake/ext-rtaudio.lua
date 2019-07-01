@@ -13,10 +13,17 @@
 	filter { "action:vs*" }
 		characterset "Unicode"
 	filter {}
-  defines {
-   "__WINDOWS_DS__",
-   "__WINDOWS_WASAPI__",
-  }
+	filter { "action:vs2017" }
+		defines {
+			"__WINDOWS_DS__",
+			-- WASAPI causes link failure due to confused SDK headers
+		}
+	filter { "not action:vs2017" }
+		defines {
+			"__WINDOWS_DS__",
+			"__WINDOWS_WASAPI__",
+		}
+	filter {}
   files {
    "../../include/rtaudio/RtAudio.cpp",
    "../../include/rtaudio/RtAudio.h",
