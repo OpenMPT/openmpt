@@ -275,7 +275,7 @@ public:
 	bool Open(const mpt::PathString &filename, bool allowWholeFileCaching = DefaultToLargeAddressSpaceUsage());
 	bool IsValid() const;
 	bool IsCached() const;
-	const mpt::PathString& InputFile::GetFilenameRef() const;
+	const mpt::PathString& GetFilenameRef() const;
 	std::istream* GetStream();
 	mpt::const_byte_span GetCache();
 };
