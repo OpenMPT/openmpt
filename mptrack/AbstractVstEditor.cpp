@@ -25,7 +25,7 @@
 #include "../common/FileReader.h"
 #include "InputHandler.h"
 #include "dlg_misc.h"
-#include "../common/mptBufferIO.h"
+#include <sstream>
 #include "Globals.h"
 
 
@@ -200,7 +200,7 @@ void CAbstractVstEditor::OnCopyParameters()
 	if(CMainFrame::GetMainFrame() == nullptr) return;
 
 	BeginWaitCursor();
-	mpt::ostringstream f(std::ios::out | std::ios::binary);
+	std::ostringstream f(std::ios::out | std::ios::binary);
 	if(VSTPresets::SaveFile(f, m_VstPlugin, false))
 	{
 		const std::string data = f.str();

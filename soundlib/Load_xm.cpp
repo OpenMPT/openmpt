@@ -23,7 +23,7 @@
 #endif // MODPLUG_TRACKER
 
 #if defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
-#include "../common/mptBufferIO.h"
+#include <sstream>
 #endif
 
 #if defined(MPT_WITH_VORBIS)

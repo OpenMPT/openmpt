@@ -401,7 +401,6 @@
     <ClInclude Include="..\..\common\mptBaseMacros.h" />
     <ClInclude Include="..\..\common\mptBaseTypes.h" />
     <ClInclude Include="..\..\common\mptBaseUtils.h" />
-    <ClInclude Include="..\..\common\mptBufferIO.h" />
     <ClInclude Include="..\..\common\mptCPU.h" />
     <ClInclude Include="..\..\common\mptCRC.h" />
     <ClInclude Include="..\..\common\mptException.h" />

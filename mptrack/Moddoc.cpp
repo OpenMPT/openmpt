@@ -38,7 +38,7 @@
 #include "CleanupSong.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/mptFileIO.h"
-#include "../common/mptBufferIO.h"
+#include <sstream>
 #include "../common/FileReader.h"
 #include "FileDialog.h"
 #include "ExternalSamples.h"
@@ -2983,7 +2983,7 @@ void CModDoc::SerializeViews() const
 	{
 		return;
 	}
-	mpt::ostringstream f(std::ios::out | std::ios::binary);
+	std::ostringstream f(std::ios::out | std::ios::binary);
 
 	CRect mdiRect;
 	::GetClientRect(CMainFrame::GetMainFrame()->m_hWndMDIClient, &mdiRect);

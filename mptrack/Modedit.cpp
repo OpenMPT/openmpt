@@ -22,7 +22,7 @@
 #include "../common/misc_util.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/mptFileIO.h"
-#include "../common/mptBufferIO.h"
+#include <sstream>
 // Plugin cloning
 #include "../soundlib/plugins/PluginManager.h"
 #include "../soundlib/plugins/PlugInterface.h"
@@ -624,7 +624,7 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 		IMixPlugin *newVstPlug = target.pMixPlugin;
 		newVstPlug->SetCurrentProgram(srcVstPlug->GetCurrentProgram());
 
-		mpt::ostringstream f(std::ios::out | std::ios::binary);
+		std::ostringstream f(std::ios::out | std::ios::binary);
 		if(VSTPresets::SaveFile(f, *srcVstPlug, false))
 		{
 			const std::string data = f.str();

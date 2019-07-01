@@ -14,7 +14,7 @@
 #include "StreamEncoderOpus.h"
 
 #include "../common/mptIO.h"
-#include "../common/mptBufferIO.h"
+#include <sstream>
 
 #include "Mptrack.h"
 

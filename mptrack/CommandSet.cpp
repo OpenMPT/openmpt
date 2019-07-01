@@ -15,7 +15,7 @@
 #include "../soundlib/mod_specifications.h"
 #include "../mptrack/Reporting.h"
 #include "../common/mptFileIO.h"
-#include "../common/mptBufferIO.h"
+#include <sstream>
 #include "TrackerSettings.h"
 
 
@@ -1693,7 +1693,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const mpt::ustring &filenameDesc
 	if(!fillExistingSet)
 	{
 		// Add the default command set to our freshly loaded command set.
-		mpt::istringstream ss{ GetDefaultKeymap() };
+		std::istringstream ss{ GetDefaultKeymap() };
 		LoadFile(ss, mpt::ustring(), pTempCS);
 	} else
 	{
@@ -1734,7 +1734,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 
 bool CCommandSet::LoadDefaultKeymap()
 {
-	mpt::istringstream ss{ GetDefaultKeymap() };
+	std::istringstream ss{ GetDefaultKeymap() };
 	return LoadFile(ss, U_("\"executable resource\""));
 }
 

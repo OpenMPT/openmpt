@@ -23,7 +23,7 @@
 #include "OggStream.h"
 
 #if defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
-#include "../common/mptBufferIO.h"
+#include <sstream>
 #endif
 
 #if defined(MPT_WITH_VORBIS)
@@ -1469,7 +1469,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				// We could in theory only adjust the header and pass 2 chunks to libvorbisfile.
 				// Another option would be to demux both chunks on our own (or using libogg) and pass the raw packet data to libvorbis directly.
 
-				mpt::ostringstream mergedStream(std::ios::binary);
+				std::ostringstream mergedStream(std::ios::binary);
 				mergedStream.imbue(std::locale::classic());
 
 				sampleChunks[sharedOggHeader - 1].chunk.Rewind();
@@ -1518,7 +1518,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				// We assume same ordering of streams in both header and data if
 				// multiple streams are present.
 
-				mpt::ostringstream mergedStream(std::ios::binary);
+				std::ostringstream mergedStream(std::ios::binary);
 				mergedStream.imbue(std::locale::classic());
 
 				sampleChunks[sharedOggHeader - 1].chunk.Rewind();

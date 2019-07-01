@@ -47,7 +47,7 @@
 #ifndef NO_PLUGINS
 #include "../soundlib/plugins/PlugInterface.h"
 #endif
-#include "../common/mptBufferIO.h"
+#include <sstream>
 #include <limits>
 #ifdef LIBOPENMPT_BUILD
 #include <iostream>
@@ -1537,17 +1537,17 @@ static MPT_NOINLINE void TestMisc2()
 
 	// check that empty stringstream behaves correctly with our MSVC workarounds when using iostream interface directly
 
-	{ mpt::ostringstream ss; VERIFY_EQUAL(ss.tellp(), std::streampos(0)); }
-	{ mpt::ostringstream ss; ss.seekp(0); VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
-	{ mpt::ostringstream ss; ss.seekp(0, std::ios_base::beg); VERIFY_EQUAL(!ss.fail(), true); }
-	{ mpt::ostringstream ss; ss.seekp(0, std::ios_base::cur); VERIFY_EQUAL(!ss.fail(), true); }
-	{ mpt::istringstream ss; VERIFY_EQUAL(ss.tellg(), std::streampos(0)); }
-	{ mpt::istringstream ss; ss.seekg(0); VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
-	{ mpt::istringstream ss; ss.seekg(0, std::ios_base::beg); VERIFY_EQUAL(!ss.fail(), true); }
-	{ mpt::istringstream ss; ss.seekg(0, std::ios_base::cur); VERIFY_EQUAL(!ss.fail(), true); }
+	{ std::ostringstream ss; VERIFY_EQUAL(ss.tellp(), std::streampos(0)); }
+	{ std::ostringstream ss; ss.seekp(0); VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
+	{ std::ostringstream ss; ss.seekp(0, std::ios_base::beg); VERIFY_EQUAL(!ss.fail(), true); }
+	{ std::ostringstream ss; ss.seekp(0, std::ios_base::cur); VERIFY_EQUAL(!ss.fail(), true); }
+	{ std::istringstream ss; VERIFY_EQUAL(ss.tellg(), std::streampos(0)); }
+	{ std::istringstream ss; ss.seekg(0); VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
+	{ std::istringstream ss; ss.seekg(0, std::ios_base::beg); VERIFY_EQUAL(!ss.fail(), true); }
+	{ std::istringstream ss; ss.seekg(0, std::ios_base::cur); VERIFY_EQUAL(!ss.fail(), true); }
 
 	{
-		mpt::ostringstream s;
+		std::ostringstream s;
 		char b = 23;
 		VERIFY_EQUAL(!s.fail(), true);
 		VERIFY_EQUAL(s.tellp(), std::streampos(0));
@@ -1572,7 +1572,7 @@ static MPT_NOINLINE void TestMisc2()
 	}
 
 	{
-		mpt::istringstream s;
+		std::istringstream s;
 		VERIFY_EQUAL(!s.fail(), true);
 		VERIFY_EQUAL(s.tellg(), std::streampos(0));
 		VERIFY_EQUAL(!s.fail(), true);
@@ -1587,7 +1587,7 @@ static MPT_NOINLINE void TestMisc2()
 	}
 
 	{
-		mpt::istringstream s("a");
+		std::istringstream s("a");
 		char a = 0;
 		VERIFY_EQUAL(!s.fail(), true);
 		VERIFY_EQUAL(s.tellg(), std::streampos(0));
@@ -1614,14 +1614,14 @@ static MPT_NOINLINE void TestMisc2()
 
 	// check that empty native and fixed stringstream both behaves correctly with out IO functions
 
-	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::TellWrite(ss), 0); }
-	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekBegin(ss), true); }
-	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
-	{ mpt::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekRelative(ss, 0), true); }
-	{ mpt::istringstream ss; VERIFY_EQUAL(mpt::IO::TellRead(ss), 0); }
-	{ mpt::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekBegin(ss), true); }
-	{ mpt::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
-	{ mpt::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekRelative(ss, 0), true); }
+	{ std::ostringstream ss; VERIFY_EQUAL(mpt::IO::TellWrite(ss), 0); }
+	{ std::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekBegin(ss), true); }
+	{ std::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
+	{ std::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekRelative(ss, 0), true); }
+	{ std::istringstream ss; VERIFY_EQUAL(mpt::IO::TellRead(ss), 0); }
+	{ std::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekBegin(ss), true); }
+	{ std::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekAbsolute(ss, 0), true); }
+	{ std::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekRelative(ss, 0), true); }
 
 	{ std::ostringstream ss; VERIFY_EQUAL(mpt::IO::TellWrite(ss), 0); }
 	{ std::ostringstream ss; VERIFY_EQUAL(mpt::IO::SeekBegin(ss), true); }
@@ -1633,7 +1633,7 @@ static MPT_NOINLINE void TestMisc2()
 	{ std::istringstream ss; VERIFY_EQUAL(mpt::IO::SeekRelative(ss, 0), true); }
 
 	{
-		mpt::ostringstream s;
+		std::ostringstream s;
 		char b = 23;
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
 		VERIFY_EQUAL(mpt::IO::TellWrite(s), 0);
@@ -1658,7 +1658,7 @@ static MPT_NOINLINE void TestMisc2()
 	}
 
 	{
-		mpt::istringstream s;
+		std::istringstream s;
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
 		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
@@ -1673,7 +1673,7 @@ static MPT_NOINLINE void TestMisc2()
 	}
 
 	{
-		mpt::istringstream s("a");
+		std::istringstream s("a");
 		char a = 0;
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
 		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
@@ -1765,7 +1765,7 @@ static MPT_NOINLINE void TestMisc2()
 	{
 		auto TestAdaptive16 = [](uint16 value, mpt::IO::Offset expected_size, std::size_t fixedSize, const char * bytes)
 		{
-			mpt::stringstream f;
+			std::stringstream f;
 			VERIFY_EQUAL(mpt::IO::WriteAdaptiveInt16LE(f, value, fixedSize), true);
 			VERIFY_EQUAL(mpt::IO::TellWrite(f), expected_size);
 			if(bytes)
@@ -1785,7 +1785,7 @@ static MPT_NOINLINE void TestMisc2()
 		};
 		auto TestAdaptive32 = [](uint32 value, mpt::IO::Offset expected_size, std::size_t fixedSize, const char * bytes)
 		{
-			mpt::stringstream f;
+			std::stringstream f;
 			VERIFY_EQUAL(mpt::IO::WriteAdaptiveInt32LE(f, value, fixedSize), true);
 			VERIFY_EQUAL(mpt::IO::TellWrite(f), expected_size);
 			if(bytes)
@@ -1805,7 +1805,7 @@ static MPT_NOINLINE void TestMisc2()
 		};
 		auto TestAdaptive64 = [](uint64 value, mpt::IO::Offset expected_size, std::size_t fixedSize, const char * bytes)
 		{
-			mpt::stringstream f;
+			std::stringstream f;
 			VERIFY_EQUAL(mpt::IO::WriteAdaptiveInt64LE(f, value, fixedSize), true);
 			VERIFY_EQUAL(mpt::IO::TellWrite(f), expected_size);
 			if(bytes)
@@ -3955,7 +3955,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 	// General file I/O tests
 	{
-		mpt::ostringstream f;
+		std::ostringstream f;
 		size_t bytesWritten;
 		mpt::IO::WriteVarInt(f, uint16(0), &bytesWritten);		VERIFY_EQUAL_NONCONT(bytesWritten, 1);
 		mpt::IO::WriteVarInt(f, uint16(127), &bytesWritten);	VERIFY_EQUAL_NONCONT(bytesWritten, 1);
@@ -3980,7 +3980,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		// This is both, compile-time and run-time cheking.
 		// Run-time in case some weird compiler gets confused by our templates
 		// and only writes the first array element.
-		mpt::ostringstream f;
+		std::ostringstream f;
 		uint16be data[2];
 		data[0] = 0x1234;
 		data[1] = 0x5678;
@@ -3988,7 +3988,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		VERIFY_EQUAL(f.str(), std::string("\x12\x34\x56\x78"));
 	}
 	{
-		mpt::ostringstream f;
+		std::ostringstream f;
 		std::vector<int16be> data;
 		data.resize(3);
 		data[0] = 0x1234;
@@ -3998,7 +3998,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		VERIFY_EQUAL(f.str(), std::string("\x12\x34\x56\x78\x12\x34"));
 	}
 	{
-		mpt::ostringstream f;
+		std::ostringstream f;
 		int16be data[3];
 		data[0] = 0x1234;
 		data[1] = 0x5678;
@@ -4099,7 +4099,7 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<Ch
 	std::string data;
 
 	{
-		mpt::ostringstream f;
+		std::ostringstream f;
 		ITCompression compression(smp, it215, &f);
 		data = f.str();
 	}
@@ -4240,7 +4240,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 	// Copy pattern data for comparison.
 	CPatternContainer patterns{ sndFile.Patterns };
 
-	mpt::stringstream mem;
+	std::stringstream mem;
 	WriteModPatterns(mem, sndFile.Patterns);
 
 	VERIFY_EQUAL_NONCONT( mem.good(), true );

@@ -28,7 +28,7 @@
 
 #include "../common/FileReader.h"
 #include "../common/mptIO.h"
-#include "../common/mptBufferIO.h"
+#include <sstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -399,7 +399,7 @@ const char *CChildFrame::GetCurrentViewClassName() const
 
 std::string CChildFrame::SerializeView() const
 {
-	mpt::ostringstream f(std::ios::out | std::ios::binary);
+	std::ostringstream f(std::ios::out | std::ios::binary);
 	// Version
 	mpt::IO::WriteVarInt(f, 0u);
 	// Current page

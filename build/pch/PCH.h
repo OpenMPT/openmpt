@@ -62,7 +62,6 @@
 #include "../common/Endianness.h"
 #include "../common/FileReader.h"
 #include "../common/FlagSet.h"
-#include "../common/mptBufferIO.h"
 #include "../common/mptCPU.h"
 #include "../common/mptCRC.h"
 #include "../common/mptFileIO.h"
@@ -105,6 +104,7 @@
 #include <ostream>
 #include <random>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 #include <streambuf>
 #include <string>
