@@ -243,7 +243,7 @@
 #endif
 
 // Enable std::istream support in class FileReader (this is generally not needed for the tracker, local files can easily be mmapped as they have been before introducing std::istream support)
-//#define MPT_FILEREADER_STD_ISTREAM
+#define MPT_FILEREADER_STD_ISTREAM
 
 // Enable callback stream wrapper for FileReader (required by libopenmpt C API).
 //#define MPT_FILEREADER_CALLBACK_STREAM
