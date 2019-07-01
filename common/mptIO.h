@@ -825,9 +825,34 @@ private:
 	mutable bool cached;
 	mutable std::vector<mpt::byte> cache;
 
+private:
+
+	mutable bool m_Buffered;
+	enum : std::size_t {
+		CHUNK_SIZE = mpt::IO::BUFFERSIZE_SMALL,
+		BUFFER_SIZE = mpt::IO::BUFFERSIZE_NORMAL
+	};
+	enum : std::size_t {
+		NUM_CHUNKS = BUFFER_SIZE / CHUNK_SIZE
+	};
+	struct chunk_info {
+		off_t ChunkOffset = 0;
+		off_t ChunkLength = 0;
+		bool ChunkValid = false;
+	};
+	mutable std::vector<mpt::byte> m_Buffer;
+	mpt::byte_span chunk_data(std::size_t chunkIndex) const
+	{
+		return mpt::byte_span(m_Buffer.data() + (chunkIndex * CHUNK_SIZE), CHUNK_SIZE);
+	}
+	mutable std::array<chunk_info, NUM_CHUNKS> m_ChunkInfo;
+	mutable std::array<std::size_t, NUM_CHUNKS> m_ChunkIndexLRU;
+
+	std::size_t InternalFillPageAndReturnIndex(off_t pos) const;
+
 protected:
 
-	FileDataContainerSeekable(off_t length);
+	FileDataContainerSeekable(off_t length, bool buffered);
 
 private:
 	
@@ -843,6 +868,8 @@ public:
 	off_t Read(mpt::byte *dst, off_t pos, off_t count) const override;
 
 private:
+
+	off_t InternalReadBuffered(mpt::byte* dst, off_t pos, off_t count) const;
 
 	virtual off_t InternalRead(mpt::byte *dst, off_t pos, off_t count) const = 0;
 

@@ -110,11 +110,19 @@ bool Flush(std::ostream & f) { f.flush(); return !f.fail(); }
 
 
 
-FileDataContainerSeekable::FileDataContainerSeekable(off_t streamLength)
+FileDataContainerSeekable::FileDataContainerSeekable(off_t streamLength, bool buffered)
 	: streamLength(streamLength)
 	, cached(false)
+	, m_Buffered(buffered)
+	, m_Buffer(m_Buffered ? BUFFER_SIZE : 0)
 {
-	return;
+	if(m_Buffered)
+	{
+		for(std::size_t chunkIndex = 0; chunkIndex < NUM_CHUNKS; ++chunkIndex)
+		{
+			m_ChunkIndexLRU[chunkIndex] = chunkIndex;
+		}
+	}
 }
 
 void FileDataContainerSeekable::CacheStream() const
@@ -123,9 +131,46 @@ void FileDataContainerSeekable::CacheStream() const
 	{
 		return;
 	}
+	if(m_Buffered)
+	{
+		m_Buffered = false;
+		for (std::size_t chunkIndex = 0; chunkIndex < NUM_CHUNKS; ++chunkIndex)
+		{
+			m_ChunkInfo[chunkIndex].ChunkValid = false;
+		}
+		m_Buffer.resize(0);
+		m_Buffer.shrink_to_fit();
+	}
 	cache.resize(streamLength);
 	InternalRead(cache.data(), 0, streamLength);
 	cached = true;
+}
+
+std::size_t FileDataContainerSeekable::InternalFillPageAndReturnIndex(off_t pos) const
+{
+	pos = Util::AlignDown(pos, static_cast<off_t>(CHUNK_SIZE));
+	for(std::size_t chunkLRUIndex = 0; chunkLRUIndex < NUM_CHUNKS; ++chunkLRUIndex)
+	{
+		std::size_t chunkIndex = m_ChunkIndexLRU[chunkLRUIndex];
+		if(m_ChunkInfo[chunkIndex].ChunkValid && (m_ChunkInfo[chunkIndex].ChunkOffset == pos))
+		{
+			std::size_t chunk = std::move(m_ChunkIndexLRU[chunkLRUIndex]);
+			std::move_backward(m_ChunkIndexLRU.begin(), m_ChunkIndexLRU.begin() + chunkLRUIndex, m_ChunkIndexLRU.begin() + (chunkLRUIndex + 1));
+			m_ChunkIndexLRU[0] = std::move(chunk);
+			return chunkIndex;
+		}
+	}
+	{
+		std::size_t chunk = std::move(m_ChunkIndexLRU[NUM_CHUNKS - 1]);
+		std::move_backward(m_ChunkIndexLRU.begin(), m_ChunkIndexLRU.begin() + (NUM_CHUNKS - 1), m_ChunkIndexLRU.begin() + NUM_CHUNKS);
+		m_ChunkIndexLRU[0] = std::move(chunk);
+	}
+	std::size_t chunkIndex = m_ChunkIndexLRU[0];
+	chunk_info& chunk = m_ChunkInfo[chunkIndex];
+	chunk.ChunkOffset = pos;
+	chunk.ChunkLength = InternalRead(chunk_data(chunkIndex).data(), pos, CHUNK_SIZE);
+	chunk.ChunkValid = true;
+	return chunkIndex;
 }
 
 bool FileDataContainerSeekable::IsValid() const
@@ -163,8 +208,35 @@ IFileDataContainer::off_t FileDataContainerSeekable::Read(mpt::byte *dst, IFileD
 		return cache_avail;
 	} else
 	{
+		return InternalReadBuffered(dst, pos, count);
+	}
+}
+
+IFileDataContainer::off_t FileDataContainerSeekable::InternalReadBuffered(mpt::byte* dst, off_t pos, off_t count) const
+{
+	if(!m_Buffered)
+	{
 		return InternalRead(dst, pos, count);
 	}
+	off_t totalRead = 0;
+	while (count > 0)
+	{
+		std::size_t chunkIndex = InternalFillPageAndReturnIndex(pos);
+		off_t pageSkip = pos - m_ChunkInfo[chunkIndex].ChunkOffset;
+		off_t chunkWanted = std::min(static_cast<off_t>(CHUNK_SIZE) - pageSkip, count);
+		off_t chunkGot = (m_ChunkInfo[chunkIndex].ChunkLength > pageSkip) ? (m_ChunkInfo[chunkIndex].ChunkLength - pageSkip) : 0;
+		off_t chunk = std::min(chunkWanted, chunkGot);
+		std::copy(chunk_data(chunkIndex).data() + pageSkip, chunk_data(chunkIndex).data() + pageSkip + chunk, dst);
+		pos += chunk;
+		dst += chunk;
+		totalRead += chunk;
+		count -= chunk;
+		if (chunkWanted > chunk)
+		{
+			return totalRead;
+		}
+	}
+	return totalRead;
 }
 
 
@@ -218,7 +290,7 @@ IFileDataContainer::off_t FileDataContainerStdStreamSeekable::GetLength(std::ist
 }
 
 FileDataContainerStdStreamSeekable::FileDataContainerStdStreamSeekable(std::istream *s)
-	: FileDataContainerSeekable(GetLength(s))
+	: FileDataContainerSeekable(GetLength(s), true)
 	, stream(s)
 {
 	return;
@@ -481,7 +553,7 @@ IFileDataContainer::off_t FileDataContainerCallbackStreamSeekable::GetLength(Cal
 }
 
 FileDataContainerCallbackStreamSeekable::FileDataContainerCallbackStreamSeekable(CallbackStream s)
-	: FileDataContainerSeekable(GetLength(s))
+	: FileDataContainerSeekable(GetLength(s), false)
 	, stream(s)
 {
 	return;
