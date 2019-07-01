@@ -1535,7 +1535,7 @@ void CCtrlInstruments::UpdateFilterText()
 bool CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 {
 	BeginWaitCursor();
-	InputFile f(fileName);
+	InputFile f(fileName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 	if(!f.IsValid())
 	{
 		EndWaitCursor();

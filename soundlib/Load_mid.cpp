@@ -1308,7 +1308,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// Load from Instrument or Sample file
 				InputFile f;
-				if(f.Open(midiMapName))
+				if(f.Open(midiMapName, SettingCacheCompleteFileBeforeLoading()))
 				{
 					FileReader insFile = GetFileReader(f);
 					if(ReadInstrumentFromFile(ins, insFile, false))

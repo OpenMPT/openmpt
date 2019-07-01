@@ -60,6 +60,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+bool SettingCacheCompleteFileBeforeLoading();
+
+
 // -----------------------------------------------------------------------------
 // MODULAR ModInstrument FIELD ACCESS : body content in InstrumentExtensions.cpp
 // -----------------------------------------------------------------------------

@@ -958,7 +958,7 @@ void CCtrlSamples::PrepareUndo(const char *description, sampleUndoTypes type, Sm
 bool CCtrlSamples::OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampleTypes> types)
 {
 	BeginWaitCursor();
-	InputFile f(fileName);
+	InputFile f(fileName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 	if(!f.IsValid())
 	{
 		EndWaitCursor();

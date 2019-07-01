@@ -1135,7 +1135,7 @@ bool CModDoc::PasteEnvelope(INSTRUMENTINDEX ins, EnvelopeType env)
 
 bool CModDoc::LoadEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName)
 {
-	InputFile f(fileName);
+	InputFile f(fileName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns] || !f.IsValid()) return false;
 	BeginWaitCursor();
 	FileReader file = GetFileReader(f);

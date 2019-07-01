@@ -1179,7 +1179,7 @@ bool CDLSBank::Open(const mpt::PathString &filename)
 {
 	if(filename.empty()) return false;
 	m_szFileName = filename;
-	InputFile f(filename);
+	InputFile f(filename, SettingCacheCompleteFileBeforeLoading());
 	if(!f.IsValid()) return false;
 	return Open(GetFileReader(f));
 }

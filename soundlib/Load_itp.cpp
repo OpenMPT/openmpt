@@ -335,7 +335,7 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 
 #ifdef MPT_EXTERNAL_SAMPLES
-		InputFile f(instrPaths[ins]);
+		InputFile f(instrPaths[ins], SettingCacheCompleteFileBeforeLoading());
 		FileReader instrFile = GetFileReader(f);
 		if(!ReadInstrumentFromFile(ins + 1, instrFile, true))
 		{

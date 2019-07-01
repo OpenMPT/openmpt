@@ -194,13 +194,21 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 	BeginWaitCursor();
 
-	InputFile f(filename);
-	if(f.IsValid())
 	{
-		FileReader file = GetFileReader(f);
-		ASSERT(GetPathNameMpt() == mpt::PathString());
-		SetPathName(filename, FALSE);	// Path is not set yet, but loaders processing external samples/instruments (ITP/MPTM) need this for relative paths.
-		m_SndFile.Create(file, CSoundFile::loadCompleteModule, this);
+
+		MPT_LOG(LogDebug, "Loader", U_("Open..."));
+
+		InputFile f(filename, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+		if (f.IsValid())
+		{
+			FileReader file = GetFileReader(f);
+			ASSERT(GetPathNameMpt() == mpt::PathString());
+			SetPathName(filename, FALSE);	// Path is not set yet, but loaders processing external samples/instruments (ITP/MPTM) need this for relative paths.
+			m_SndFile.Create(file, CSoundFile::loadCompleteModule, this);
+		}
+
+		MPT_LOG(LogDebug, "Loader", U_("Open."));
+
 	}
 
 	EndWaitCursor();
@@ -518,7 +526,7 @@ void CModDoc::OnAppendModule()
 		for(const auto &file : files)
 		{
 			InputFile f;
-			if(f.Open(file) && source->Create(GetFileReader(f), CSoundFile::loadCompleteModule))
+			if(f.Open(file, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading) && source->Create(GetFileReader(f), CSoundFile::loadCompleteModule))
 			{
 				AppendModule(*source);
 				source->Destroy();
@@ -1739,7 +1747,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			{
 				if(!cancel)
 				{
-					InputFile f(thisName);
+					InputFile f(thisName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 					if(f.IsValid())
 					{
 						FileReader file = GetFileReader(f);

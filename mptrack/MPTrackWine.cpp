@@ -107,7 +107,7 @@ static mpt::checksum::crc64_jones WineHashVersion(mpt::checksum::crc64_jones crc
 
 static mpt::checksum::crc64_jones WineHashFile(mpt::checksum::crc64_jones crc, mpt::PathString filename)
 {
-	InputFile file(filename);
+	InputFile file(filename, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 	if(!file.IsValid())
 	{
 		return crc;

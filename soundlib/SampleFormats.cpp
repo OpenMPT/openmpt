@@ -1953,7 +1953,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				filename = file.GetFileName().GetPath() + filename;
 			}
 			SetSamplePath(smp, filename);
-			InputFile f(filename);
+			InputFile f(filename, SettingCacheCompleteFileBeforeLoading());
 			FileReader smpFile = GetFileReader(f);
 			if(!ReadSampleFromFile(smp, smpFile, false))
 			{

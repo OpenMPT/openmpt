@@ -1179,7 +1179,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				mpt::PathString infoName = filename + ext;
 				char stMagic[16];
-				if(infoName.IsFile() && amFile.Open(infoName) && (amData = GetFileReader(amFile)).IsValid() && amData.ReadArray(stMagic))
+				if(infoName.IsFile() && amFile.Open(infoName, SettingCacheCompleteFileBeforeLoading()) && (amData = GetFileReader(amFile)).IsValid() && amData.ReadArray(stMagic))
 				{
 					if(!memcmp(stMagic, "ST1.2 ModuleINFO", 16))
 						modMagicResult.madeWithTracker = UL_("Startrekker 1.2");

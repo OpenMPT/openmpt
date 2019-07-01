@@ -638,6 +638,7 @@ public:
 	CachedSetting<bool> MiscDistinguishModifiers;
 	Setting<ProcessPriorityClass> MiscProcessPriorityClass;
 	Setting<bool> MiscFlushFileBuffersOnSave;
+	Setting<bool> MiscCacheCompleteFileBeforeLoading;
 
 	// Sound Settings
 

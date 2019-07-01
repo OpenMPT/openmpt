@@ -377,7 +377,7 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 	if(!songName.empty() && mpt::PathString::CompareNoCase(m_SongFileName, songName))
 	{
 		// Load module for previewing its instruments
-		InputFile f(libPath + songName);
+		InputFile f(libPath + songName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 		if(f.IsValid())
 		{
 			FileReader file = GetFileReader(f);

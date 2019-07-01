@@ -50,6 +50,8 @@ inline bool OffsetFits(IO::Offset off)
 bool IsValid(std::ostream & f);
 bool IsValid(std::istream & f);
 bool IsValid(std::iostream & f);
+bool IsReadSeekable(std::istream& f);
+bool IsWriteSeekable(std::ostream& f);
 IO::Offset TellRead(std::istream & f);
 IO::Offset TellWrite(std::ostream & f);
 bool SeekBegin(std::ostream & f);
@@ -74,6 +76,8 @@ bool Flush(std::ostream & f);
 template <typename Tfile> class WriteBuffer;
 
 template <typename Tfile> bool IsValid(WriteBuffer<Tfile> & f) { return IsValid(f.file()); }
+template <typename Tfile> bool IsReadSeekable(WriteBuffer<Tfile> & f) { return IsReadSeekable(f.file()); }
+template <typename Tfile> bool IsWriteSeekable(WriteBuffer<Tfile> & f) { return IsWriteSeekable(f.file()); }
 template <typename Tfile> IO::Offset TellRead(WriteBuffer<Tfile> & f) { f.FlushLocal(); return TellRead(f.file()); }
 template <typename Tfile> IO::Offset TellWrite(WriteBuffer<Tfile> & f) { return TellWrite(f.file()) + f.GetCurrentSize(); }
 template <typename Tfile> bool SeekBegin(WriteBuffer<Tfile> & f) { f.FlushLocal(); return SeekBegin(f.file()); }

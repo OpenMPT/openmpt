@@ -31,6 +31,80 @@ namespace IO {
 bool IsValid(std::ostream & f) { return !f.fail(); }
 bool IsValid(std::istream & f) { return !f.fail(); }
 bool IsValid(std::iostream & f) { return !f.fail(); }
+bool IsReadSeekable(std::istream & f)
+{
+	f.clear();
+	std::streampos oldpos = f.tellg();
+	if(f.fail() || oldpos == std::streampos(-1))
+	{
+		f.clear();
+		return false;
+	}
+	f.seekg(0, std::ios::beg);
+	if(f.fail())
+	{
+		f.clear();
+		f.seekg(oldpos);
+		f.clear();
+		return false;
+	}
+	f.seekg(0, std::ios::end);
+	if(f.fail())
+	{
+		f.clear();
+		f.seekg(oldpos);
+		f.clear();
+		return false;
+	}
+	std::streampos length = f.tellg();
+	if(f.fail() || length == std::streampos(-1))
+	{
+		f.clear();
+		f.seekg(oldpos);
+		f.clear();
+		return false;
+	}
+	f.seekg(oldpos);
+	f.clear();
+	return true;
+}
+bool IsWriteSeekable(std::ostream & f)
+{
+	f.clear();
+	std::streampos oldpos = f.tellp();
+	if(f.fail() || oldpos == std::streampos(-1))
+	{
+		f.clear();
+		return false;
+	}
+	f.seekp(0, std::ios::beg);
+	if(f.fail())
+	{
+		f.clear();
+		f.seekp(oldpos);
+		f.clear();
+		return false;
+	}
+	f.seekp(0, std::ios::end);
+	if(f.fail())
+	{
+		f.clear();
+		f.seekp(oldpos);
+		f.clear();
+		return false;
+	}
+	std::streampos length = f.tellp();
+	if(f.fail() || length == std::streampos(-1))
+	{
+		f.clear();
+		f.seekp(oldpos);
+		f.clear();
+		return false;
+	}
+	f.seekp(oldpos);
+	f.clear();
+	return true;
+}
 IO::Offset TellRead(std::istream & f)
 {
 	return f.tellg();
@@ -243,40 +317,7 @@ IFileDataContainer::off_t FileDataContainerSeekable::InternalReadBuffered(mpt::b
 
 bool FileDataContainerStdStreamSeekable::IsSeekable(std::istream *stream)
 {
-	stream->clear();
-	std::streampos oldpos = stream->tellg();
-	if(stream->fail() || oldpos == std::streampos(-1))
-	{
-		stream->clear();
-		return false;
-	}
-	stream->seekg(0, std::ios::beg);
-	if(stream->fail())
-	{
-		stream->clear();
-		stream->seekg(oldpos);
-		stream->clear();
-		return false;
-	}
-	stream->seekg(0, std::ios::end);
-	if(stream->fail())
-	{
-		stream->clear();
-		stream->seekg(oldpos);
-		stream->clear();
-		return false;
-	}
-	std::streampos length = stream->tellg();
-	if(stream->fail() || length == std::streampos(-1))
-	{
-		stream->clear();
-		stream->seekg(oldpos);
-		stream->clear();
-		return false;
-	}
-	stream->seekg(oldpos);
-	stream->clear();
-	return true;
+	return mpt::IO::IsReadSeekable(*stream);
 }
 
 IFileDataContainer::off_t FileDataContainerStdStreamSeekable::GetLength(std::istream *stream)

@@ -694,7 +694,7 @@ bool IMixPlugin::LoadProgram(mpt::PathString fileName)
 	}
 
 	const char *errorStr = nullptr;
-	InputFile f(fileName);
+	InputFile f(fileName, SettingCacheCompleteFileBeforeLoading());
 	if(f.IsValid())
 	{
 		FileReader file = GetFileReader(f);

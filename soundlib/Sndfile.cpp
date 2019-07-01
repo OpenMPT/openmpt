@@ -43,6 +43,16 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+bool SettingCacheCompleteFileBeforeLoading()
+{
+	#ifdef MODPLUG_TRACKER
+		return TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading;
+	#else
+		return false;
+	#endif
+}
+
+
 mpt::ustring FileHistory::AsISO8601() const
 {
 	tm date = loadDate;
@@ -1837,7 +1847,7 @@ void CSoundFile::PrecomputeSampleLoops(bool updateChannels)
 bool CSoundFile::LoadExternalSample(SAMPLEINDEX smp, const mpt::PathString &filename)
 {
 	bool ok = false;
-	InputFile f(filename);
+	InputFile f(filename, SettingCacheCompleteFileBeforeLoading());
 
 	if(f.IsValid())
 	{

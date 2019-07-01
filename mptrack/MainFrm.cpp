@@ -1544,7 +1544,7 @@ bool CMainFrame::PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE
 
 		if(!ok && !filename.empty())
 		{
-			InputFile f(filename);
+			InputFile f(filename, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 			if(f.IsValid())
 			{
 				FileReader file = GetFileReader(f);

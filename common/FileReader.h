@@ -1396,21 +1396,17 @@ static inline FileReader make_FileReader(std::istream *s, const mpt::PathString 
 template <typename TInputFile>
 FileReader GetFileReader(TInputFile &file)
 {
-	#if defined(MPT_FILEREADER_STD_ISTREAM)
-		typename TInputFile::ContentsRef tmp = file.Get();
-		if(!tmp.first)
-		{
-			return FileReader();
-		}
-		if(!tmp.first->good())
-		{
-			return FileReader();
-		}
-		return make_FileReader(tmp.first, tmp.second);
-	#else
-		typename TInputFile::ContentsRef tmp = file.Get();
-		return make_FileReader(mpt::as_span(tmp.first.data, tmp.first.size), tmp.second);
-	#endif
+	if(!file.IsValid())
+	{
+		return FileReader();
+	}
+	if(file.IsCached())
+	{
+		return make_FileReader(file.GetCache(), &file.GetFilenameRef());
+	} else
+	{
+		return make_FileReader(file.GetStream(), &file.GetFilenameRef());
+	}
 }
 #endif // MPT_ENABLE_FILEIO
 
