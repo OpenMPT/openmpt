@@ -107,6 +107,8 @@ OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_String_Free( char 
 typedef struct OpenMPT_Semaphore {
 #ifndef _MSC_VER
 	OPENMPT_NAMESPACE::mpt::semaphore * impl;
+#else
+	void * dummy;
 #endif
 } OpenMPT_Semaphore;
 
