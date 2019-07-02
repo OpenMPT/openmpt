@@ -24,8 +24,6 @@ goto main
 
 
 
-xcopy /E /I /Y build\genie\genie\build\vs2017 include\genie\build\vs2017 || goto error
-
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2019.cmd || goto error
  cd include\genie\build\vs2017 || goto error

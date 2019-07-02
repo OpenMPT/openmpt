@@ -46,8 +46,6 @@ mkdir -p build/vs2017
 
 cd ../..
 
-cp -ar include/genie/build/vs* build/genie/genie/build/
-
 echo "ec0a4a89d8dad4d251fc7195784a275c0c322a4d" > include/genie/OpenMPT-version.txt
 
 
