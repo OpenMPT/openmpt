@@ -24,8 +24,6 @@ goto main
 
 
 
-call build\scriptlib\unpack.cmd "include\genie" "build\externals\GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d.zip" "GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d" || goto error
-
 xcopy /E /I /Y build\genie\genie\build\vs2017 include\genie\build\vs2017 || goto error
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" (
