@@ -7,20 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		EAABCACD563B8CB85F376DD0 /* bitwise.c in Sources */ = {isa = PBXBuildFile; fileRef = 79BDACA965F9AF13CE0BC80A /* bitwise.c */; };
-		D0C215F43C52D7DE454EB8F6 /* framing.c in Sources */ = {isa = PBXBuildFile; fileRef = 9F6CEE2F8BA8F199F4BA0991 /* framing.c */; };
+		DA0F0D564675A0DCCF4D42B5 /* ogg.h in Headers */ = {isa = PBXBuildFile; fileRef = E912D981D564B071BE83ED81 /* ogg.h */; };
+		95EB3FEB8194A71AAA2AC399 /* os_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 2445CAEB90AA5D721983FF4A /* os_types.h */; };
+		2353814A8FE2423598DE234D /* bitwise.c in Sources */ = {isa = PBXBuildFile; fileRef = 12BD6692FEF869FC670B82F3 /* bitwise.c */; };
+		124B76647EDA374F87D61867 /* framing.c in Sources */ = {isa = PBXBuildFile; fileRef = A14326DC8D7F2946F691413D /* framing.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		E912D981D564B071BE83ED81 /* ogg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "ogg.h"; path = "../../../include/ogg/include/ogg/ogg.h"; sourceTree = "<group>"; };
-		83D8C24AEF3D56D17816F8A9 /* os_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "os_types.h"; path = "../../../include/ogg/include/ogg/os_types.h"; sourceTree = "<group>"; };
-		79BDACA965F9AF13CE0BC80A /* bitwise.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "bitwise.c"; path = "../../../include/ogg/src/bitwise.c"; sourceTree = "<group>"; };
-		9F6CEE2F8BA8F199F4BA0991 /* framing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "framing.c"; path = "../../../include/ogg/src/framing.c"; sourceTree = "<group>"; };
+		E912D981D564B071BE83ED81 /* ogg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "ogg.h"; path = "ogg.h"; sourceTree = "<group>"; };
+		2445CAEB90AA5D721983FF4A /* os_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "os_types.h"; path = "os_types.h"; sourceTree = "<group>"; };
+		12BD6692FEF869FC670B82F3 /* bitwise.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "bitwise.c"; path = "bitwise.c"; sourceTree = "<group>"; };
+		A14326DC8D7F2946F691413D /* framing.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "framing.c"; path = "framing.c"; sourceTree = "<group>"; };
 		F4DBB09760F497C129A1275B /* libopenmpt-ogg.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = "libopenmpt-ogg.dylib"; path = "libopenmpt-ogg.dylib"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		C5F5887E31354D973A1514AF /* Frameworks */ = {
+		07066A7F73452E987C25F5AF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -34,9 +36,10 @@
 			isa = PBXGroup;
 			children = (
 				B8CE717CA4C790CECDF97553 /* include */,
-				CAA8EF6436BFEDFA7F36791C /* Products */,
+				8C63D6C6F879D45C41F15F7E /* Products */,
 			);
 			name = "ogg";
+			path = "../../..";
 			sourceTree = "<group>";
 		};
 		B8CE717CA4C790CECDF97553 /* include */ = {
@@ -45,15 +48,17 @@
 				A587F78D911681573A359552 /* ogg */,
 			);
 			name = "include";
+			path = "include";
 			sourceTree = "<group>";
 		};
 		A587F78D911681573A359552 /* ogg */ = {
 			isa = PBXGroup;
 			children = (
 				392DABFB25E89AA7CE9F13F2 /* include */,
-				61E058BD4D05A83D76508DCD /* src */,
+				E3AC0D1FCFD15C9FF81C422F /* src */,
 			);
 			name = "ogg";
+			path = "ogg";
 			sourceTree = "<group>";
 		};
 		392DABFB25E89AA7CE9F13F2 /* include */ = {
@@ -62,27 +67,30 @@
 				26E8FF1F1239EB613B9DD923 /* ogg */,
 			);
 			name = "include";
+			path = "include";
 			sourceTree = "<group>";
 		};
 		26E8FF1F1239EB613B9DD923 /* ogg */ = {
 			isa = PBXGroup;
 			children = (
 				E912D981D564B071BE83ED81 /* ogg.h */,
-				83D8C24AEF3D56D17816F8A9 /* os_types.h */,
+				2445CAEB90AA5D721983FF4A /* os_types.h */,
 			);
 			name = "ogg";
+			path = "ogg";
 			sourceTree = "<group>";
 		};
-		61E058BD4D05A83D76508DCD /* src */ = {
+		E3AC0D1FCFD15C9FF81C422F /* src */ = {
 			isa = PBXGroup;
 			children = (
-				79BDACA965F9AF13CE0BC80A /* bitwise.c */,
-				9F6CEE2F8BA8F199F4BA0991 /* framing.c */,
+				12BD6692FEF869FC670B82F3 /* bitwise.c */,
+				A14326DC8D7F2946F691413D /* framing.c */,
 			);
 			name = "src";
+			path = "src";
 			sourceTree = "<group>";
 		};
-		CAA8EF6436BFEDFA7F36791C /* Products */ = {
+		8C63D6C6F879D45C41F15F7E /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				F4DBB09760F497C129A1275B /* libopenmpt-ogg.dylib */,
@@ -95,11 +103,11 @@
 /* Begin PBXNativeTarget section */
 		5A1D66B746D85563EF8FCEAD /* ogg */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 414E377DAD8DFB95B66DC2AD /* Build configuration list for PBXNativeTarget "ogg" */;
+			buildConfigurationList = 835E187EEF9DDC96F87DA3AE /* Build configuration list for PBXNativeTarget "ogg" */;
 			buildPhases = (
-				2316A87D8F556C96983533AE /* Resources */,
-				1BA4187E87E3DC9690C3A3AE /* Sources */,
-				C5F5887E31354D973A1514AF /* Frameworks */,
+				6526897ED1654D97DA4514AF /* Resources */,
+				5DB4F97EC9F3BD97D2D384AF /* Sources */,
+				07066A7F73452E987C25F5AF /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -128,7 +136,7 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		2316A87D8F556C96983533AE /* Resources */ = {
+		6526897ED1654D97DA4514AF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -138,12 +146,12 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		1BA4187E87E3DC9690C3A3AE /* Sources */ = {
+		5DB4F97EC9F3BD97D2D384AF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EAABCACD563B8CB85F376DD0 /* bitwise.c in Sources */,
-				D0C215F43C52D7DE454EB8F6 /* framing.c in Sources */,
+				2353814A8FE2423598DE234D /* bitwise.c in Sources */,
+				124B76647EDA374F87D61867 /* framing.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,7 +292,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		414E377DAD8DFB95B66DC2AD /* Build configuration list for PBXNativeTarget "libopenmpt-ogg.dylib" */ = {
+		835E187EEF9DDC96F87DA3AE /* Build configuration list for PBXNativeTarget "libopenmpt-ogg.dylib" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5C3A174348B70A8671340B9A /* Debug */,

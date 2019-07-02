@@ -35,31 +35,31 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		F0D5BBC0DC530C5AC54BCAF1 /* compat.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "compat.c"; path = "../../../include/mpg123/src/compat/compat.c"; sourceTree = "<group>"; };
-		4A1F32A136B327499F7781FD /* compat_str.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "compat_str.c"; path = "../../../include/mpg123/src/compat/compat_str.c"; sourceTree = "<group>"; };
-		9A08B51786B11C47AF4738C6 /* dct64.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "dct64.c"; path = "../../../include/mpg123/src/libmpg123/dct64.c"; sourceTree = "<group>"; };
-		49A0F44735DF9EC3DE617BF5 /* equalizer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "equalizer.c"; path = "../../../include/mpg123/src/libmpg123/equalizer.c"; sourceTree = "<group>"; };
-		45FD496B31913F139A5599C7 /* feature.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "feature.c"; path = "../../../include/mpg123/src/libmpg123/feature.c"; sourceTree = "<group>"; };
-		844F6167F015BE8339714CE6 /* format.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "format.c"; path = "../../../include/mpg123/src/libmpg123/format.c"; sourceTree = "<group>"; };
-		0827374FF4CF9E7E1D66BAFD /* frame.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "frame.c"; path = "../../../include/mpg123/src/libmpg123/frame.c"; sourceTree = "<group>"; };
-		BBE06D00A75EBE9990567C31 /* icy.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "icy.c"; path = "../../../include/mpg123/src/libmpg123/icy.c"; sourceTree = "<group>"; };
-		B61413E52226BB8BAB774DCB /* icy2utf8.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "icy2utf8.c"; path = "../../../include/mpg123/src/libmpg123/icy2utf8.c"; sourceTree = "<group>"; };
-		3A49778426C7C71D0FBF85B5 /* id3.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "id3.c"; path = "../../../include/mpg123/src/libmpg123/id3.c"; sourceTree = "<group>"; };
-		F4D69AF8E07F022809161EA7 /* index.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "index.c"; path = "../../../include/mpg123/src/libmpg123/index.c"; sourceTree = "<group>"; };
-		CCD79EE0389EFBFC81F9895F /* layer1.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "layer1.c"; path = "../../../include/mpg123/src/libmpg123/layer1.c"; sourceTree = "<group>"; };
-		46911CC1B25779DDFBB20740 /* layer2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "layer2.c"; path = "../../../include/mpg123/src/libmpg123/layer2.c"; sourceTree = "<group>"; };
-		A9878DE7154EEA035EA97866 /* layer3.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "layer3.c"; path = "../../../include/mpg123/src/libmpg123/layer3.c"; sourceTree = "<group>"; };
-		CCBE1A6DB8FDC4E86180A11A /* libmpg123.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "libmpg123.c"; path = "../../../include/mpg123/src/libmpg123/libmpg123.c"; sourceTree = "<group>"; };
-		9BB5744207F1D40510E65195 /* ntom.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "ntom.c"; path = "../../../include/mpg123/src/libmpg123/ntom.c"; sourceTree = "<group>"; };
-		50A568C7BCB6106E4508A3AD /* optimize.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "optimize.c"; path = "../../../include/mpg123/src/libmpg123/optimize.c"; sourceTree = "<group>"; };
-		B38C3FCA9F35A7F9C8CBC278 /* parse.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "parse.c"; path = "../../../include/mpg123/src/libmpg123/parse.c"; sourceTree = "<group>"; };
-		80E3A8F86C779EA0D53BF854 /* readers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "readers.c"; path = "../../../include/mpg123/src/libmpg123/readers.c"; sourceTree = "<group>"; };
-		F0AF733ADCEE1DB68571FAE7 /* stringbuf.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "stringbuf.c"; path = "../../../include/mpg123/src/libmpg123/stringbuf.c"; sourceTree = "<group>"; };
-		D46DB8C0C01620F0E9AC3B6F /* synth.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "synth.c"; path = "../../../include/mpg123/src/libmpg123/synth.c"; sourceTree = "<group>"; };
-		6CA82164D8C41355A19C80C2 /* synth_8bit.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "synth_8bit.c"; path = "../../../include/mpg123/src/libmpg123/synth_8bit.c"; sourceTree = "<group>"; };
-		92D04DE2FEEC3FD3C7C4AC40 /* synth_real.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "synth_real.c"; path = "../../../include/mpg123/src/libmpg123/synth_real.c"; sourceTree = "<group>"; };
-		E855C19BD4946B177D174849 /* synth_s32.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "synth_s32.c"; path = "../../../include/mpg123/src/libmpg123/synth_s32.c"; sourceTree = "<group>"; };
-		6887E466541BDA0EBDDF33C3 /* tabinit.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "tabinit.c"; path = "../../../include/mpg123/src/libmpg123/tabinit.c"; sourceTree = "<group>"; };
+		F0D5BBC0DC530C5AC54BCAF1 /* compat.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "compat.c"; path = "compat.c"; sourceTree = "<group>"; };
+		4A1F32A136B327499F7781FD /* compat_str.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "compat_str.c"; path = "compat_str.c"; sourceTree = "<group>"; };
+		9A08B51786B11C47AF4738C6 /* dct64.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "dct64.c"; path = "dct64.c"; sourceTree = "<group>"; };
+		49A0F44735DF9EC3DE617BF5 /* equalizer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "equalizer.c"; path = "equalizer.c"; sourceTree = "<group>"; };
+		45FD496B31913F139A5599C7 /* feature.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "feature.c"; path = "feature.c"; sourceTree = "<group>"; };
+		844F6167F015BE8339714CE6 /* format.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "format.c"; path = "format.c"; sourceTree = "<group>"; };
+		0827374FF4CF9E7E1D66BAFD /* frame.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "frame.c"; path = "frame.c"; sourceTree = "<group>"; };
+		BBE06D00A75EBE9990567C31 /* icy.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "icy.c"; path = "icy.c"; sourceTree = "<group>"; };
+		B61413E52226BB8BAB774DCB /* icy2utf8.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "icy2utf8.c"; path = "icy2utf8.c"; sourceTree = "<group>"; };
+		3A49778426C7C71D0FBF85B5 /* id3.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "id3.c"; path = "id3.c"; sourceTree = "<group>"; };
+		F4D69AF8E07F022809161EA7 /* index.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "index.c"; path = "index.c"; sourceTree = "<group>"; };
+		CCD79EE0389EFBFC81F9895F /* layer1.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "layer1.c"; path = "layer1.c"; sourceTree = "<group>"; };
+		46911CC1B25779DDFBB20740 /* layer2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "layer2.c"; path = "layer2.c"; sourceTree = "<group>"; };
+		A9878DE7154EEA035EA97866 /* layer3.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "layer3.c"; path = "layer3.c"; sourceTree = "<group>"; };
+		CCBE1A6DB8FDC4E86180A11A /* libmpg123.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "libmpg123.c"; path = "libmpg123.c"; sourceTree = "<group>"; };
+		9BB5744207F1D40510E65195 /* ntom.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "ntom.c"; path = "ntom.c"; sourceTree = "<group>"; };
+		50A568C7BCB6106E4508A3AD /* optimize.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "optimize.c"; path = "optimize.c"; sourceTree = "<group>"; };
+		B38C3FCA9F35A7F9C8CBC278 /* parse.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "parse.c"; path = "parse.c"; sourceTree = "<group>"; };
+		80E3A8F86C779EA0D53BF854 /* readers.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "readers.c"; path = "readers.c"; sourceTree = "<group>"; };
+		F0AF733ADCEE1DB68571FAE7 /* stringbuf.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "stringbuf.c"; path = "stringbuf.c"; sourceTree = "<group>"; };
+		D46DB8C0C01620F0E9AC3B6F /* synth.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "synth.c"; path = "synth.c"; sourceTree = "<group>"; };
+		6CA82164D8C41355A19C80C2 /* synth_8bit.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "synth_8bit.c"; path = "synth_8bit.c"; sourceTree = "<group>"; };
+		92D04DE2FEEC3FD3C7C4AC40 /* synth_real.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "synth_real.c"; path = "synth_real.c"; sourceTree = "<group>"; };
+		E855C19BD4946B177D174849 /* synth_s32.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "synth_s32.c"; path = "synth_s32.c"; sourceTree = "<group>"; };
+		6887E466541BDA0EBDDF33C3 /* tabinit.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "tabinit.c"; path = "tabinit.c"; sourceTree = "<group>"; };
 		F1D10A7EDD22F6BF0687E481 /* libopenmpt-mpg123.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = "libopenmpt-mpg123.dylib"; path = "libopenmpt-mpg123.dylib"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -81,6 +81,7 @@
 				2FB6A6691B453033C463442E /* Products */,
 			);
 			name = "mpg123";
+			path = "../../..";
 			sourceTree = "<group>";
 		};
 		F5F8D9B2615AB7C0EAC7FD72 /* include */ = {
@@ -89,6 +90,7 @@
 				9F350FAE8B45BB7EF4FE1F9D /* mpg123 */,
 			);
 			name = "include";
+			path = "include";
 			sourceTree = "<group>";
 		};
 		9F350FAE8B45BB7EF4FE1F9D /* mpg123 */ = {
@@ -97,6 +99,7 @@
 				B746935BA36C5DC28CB2E28D /* src */,
 			);
 			name = "mpg123";
+			path = "mpg123";
 			sourceTree = "<group>";
 		};
 		B746935BA36C5DC28CB2E28D /* src */ = {
@@ -106,6 +109,7 @@
 				7D1C41B9699934FC92163510 /* libmpg123 */,
 			);
 			name = "src";
+			path = "src";
 			sourceTree = "<group>";
 		};
 		8B650DE8F7290CD8C08F3CA2 /* compat */ = {
@@ -115,6 +119,7 @@
 				4A1F32A136B327499F7781FD /* compat_str.c */,
 			);
 			name = "compat";
+			path = "compat";
 			sourceTree = "<group>";
 		};
 		7D1C41B9699934FC92163510 /* libmpg123 */ = {
@@ -145,6 +150,7 @@
 				6887E466541BDA0EBDDF33C3 /* tabinit.c */,
 			);
 			name = "libmpg123";
+			path = "libmpg123";
 			sourceTree = "<group>";
 		};
 		2FB6A6691B453033C463442E /* Products */ = {
