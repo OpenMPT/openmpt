@@ -30,8 +30,8 @@ echo dofile "build/genie/genie.lua" > genie.lua || goto err
 %GENIE% --target="windesktop81" vs2017 || goto err
 %GENIE% --target="winstore82"   vs2017 || goto err
 
-%GENIE% --target="windesktop81" postprocess || goto err
-%GENIE% --target="winstore82"   postprocess || goto err
+%GENIE% --target="windesktop81" vs2019 || goto err
+%GENIE% --target="winstore82"   vs2019 || goto err
 
 del genie.lua || goto err
 

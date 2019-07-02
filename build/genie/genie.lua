@@ -29,42 +29,28 @@ newoption {
 
 
 
-if _OPTIONS["target"] == "windesktop81" then
-	mpt_projectpathname = "vs2017win81"
-	mpt_bindirsuffix = "win81"
+if _ACTION == "vs2019" then
+	if _OPTIONS["target"] == "windesktop81" then
+		mpt_projectpathname = "vs2019win81"
+		mpt_bindirsuffix = "win81"
+	end
+	if _OPTIONS["target"] == "winstore82" then
+		mpt_projectpathname = "vs2019uwp"
+		mpt_bindirsuffix = "uwp"
+	end
 end
-if _OPTIONS["target"] == "winstore82" then
-	mpt_projectpathname = "vs2017uwp"
-	mpt_bindirsuffix = "uwp"
+if _ACTION == "vs2017" then
+	if _OPTIONS["target"] == "windesktop81" then
+		mpt_projectpathname = "vs2017win81"
+		mpt_bindirsuffix = "win81"
+	end
+	if _OPTIONS["target"] == "winstore82" then
+		mpt_projectpathname = "vs2017uwp"
+		mpt_bindirsuffix = "uwp"
+	end
 end
 --mpt_projectpathname = _OPTIONS["target"]
 --mpt_bindirsuffix = _OPTIONS["target"]
-
-
-
-function remove_pattern_in_file (filename, pattern)
-	local outfile
-  oldlines = {}
-	outfile = io.open(filename .. ".new", "wb")
-  for line in io.lines(filename) do 
-		if string.find(line, pattern) then
-			outfile:write('    <IntDir>obj\\$(PlatformName)\\$(Configuration)\\$(ProjectName)\\</IntDir>' .. "\r\n")
-		else
-			outfile:write(line .. "\r\n")
-		end
-  end
-	outfile:close()
-	os.remove(filename)
-	os.rename(filename .. ".new", filename)
-end
-
-newaction {
- trigger     = "postprocess",
- description = "OpenMPT postprocess the project files to mitigate premake problems",
- execute     = function ()
-
- end
-}
 
 
 
