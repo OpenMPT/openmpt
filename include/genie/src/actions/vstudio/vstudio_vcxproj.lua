@@ -67,6 +67,10 @@
 			_p(2, '<Keyword>Win32Proj</Keyword>')
 		end
 
+		if not vstudio.xpwarning then
+			_p(2, '<XPDeprecationWarning>false</XPDeprecationWarning>')
+		end
+
 		_p(1,'</PropertyGroup>')
 	end
 
@@ -110,10 +114,17 @@
 	function vc2010.configurationPropertyGroup(cfg, cfginfo)
 		_p(1, '<PropertyGroup '..if_config_and_platform() ..' Label="Configuration">'
 			, premake.esc(cfginfo.name))
-		_p(2, '<ConfigurationType>%s</ConfigurationType>',vc2010.config_type(cfg))
-		_p(2, '<UseDebugLibraries>%s</UseDebugLibraries>', iif(optimisation(cfg) == "Disabled","true","false"))
 
-		_p(2, '<PlatformToolset>%s</PlatformToolset>', premake.vstudio.toolset)
+		local is2019 = premake.action.current() == premake.action.get("vs2019")
+		if is2019 then
+		    _p(2, '<VCProjectVersion>%s</VCProjectVersion>', action.vstudio.toolsVersion)
+			if cfg.flags.UnitySupport then
+			    _p(2, '<EnableUnitySupport>true</EnableUnitySupport>')
+			end
+		end
+		_p(2, '<ConfigurationType>%s</ConfigurationType>', vc2010.config_type(cfg))
+		_p(2, '<UseDebugLibraries>%s</UseDebugLibraries>', iif(optimisation(cfg) == "Disabled","true","false"))
+		_p(2, '<PlatformToolset>%s</PlatformToolset>',     premake.vstudio.toolset)
 
 		if os.is64bit() then
 			_p(2, '<PreferredToolArchitecture>x64</PreferredToolArchitecture>')
@@ -153,8 +164,8 @@
 			end
 		end
 
-		if cfg.platform == "NX64" then
-			_p(2,'<NintendoSdkRoot>$(NINTENDO_SDK_ROOT)</NintendoSdkRoot>')
+		if cfg.platform == "NX32" or cfg.platform == "NX64" then
+			_p(2,'<NintendoSdkRoot>$(NINTENDO_SDK_ROOT)\\</NintendoSdkRoot>')
 			_p(2,'<NintendoSdkSpec>NX</NintendoSdkSpec>')
 			--TODO: Allow specification of the 'Develop' build type
 			if premake.config.isdebugbuild(cfg) then
@@ -165,7 +176,7 @@
 		end
 
 		-- Workaround for https://github.com/Microsoft/msbuild/issues/2353
-		if cfg.flags.Symbols and premake.action.current() == premake.action.get("vs2017") then
+		if cfg.flags.Symbols and (premake.action.current() == premake.action.get("vs2017") or is2019) then
 			_p(2, '<DebugSymbols>true</DebugSymbols>')
 		end
 
@@ -323,7 +334,7 @@
 
 	end
 
-	local function cppstandard_vs2017(cfg)
+	local function cppstandard_vs2017_or_2019(cfg)
 		if cfg.flags.CppLatest then
 			_p(3, '<LanguageStandard>stdcpplatest</LanguageStandard>')
 			_p(3, '<EnableModules>true</EnableModules>')
@@ -604,8 +615,9 @@
 			_p(3, '<TreatWarningAsError>true</TreatWarningAsError>')
 		end
 
-		if premake.action.current() == premake.action.get("vs2017") then
-			cppstandard_vs2017(cfg)
+		if premake.action.current() == premake.action.get("vs2017") or
+		   premake.action.current() == premake.action.get("vs2019") then
+			cppstandard_vs2017_or_2019(cfg)
 		end
 
 		exceptions(cfg)
@@ -633,6 +645,10 @@
 			end
 		end
 
+		if cfg.flags.Hotpatchable then
+			_p(3, '<CreateHotpatchableImage>true</CreateHotpatchableImage>')
+		end
+
 		if cfg.flags.NoFramePointer then
 			_p(3, '<OmitFramePointers>true</OmitFramePointers>')
 		end
@@ -641,9 +657,20 @@
 			_p(3, '<UseFullPaths>true</UseFullPaths>')
 		end
 
+		if cfg.flags.NoJMC then
+			_p(3,'<SupportJustMyCode>false</SupportJustMyCode>' )
+		end
+
 		compile_language(cfg)
 
 		forcedinclude_files(3,cfg);
+
+		if vstudio.diagformat then
+			_p(3, '<DiagnosticsFormat>%s</DiagnosticsFormat>', vstudio.diagformat)
+		else
+			_p(3, '<DiagnosticsFormat>Caret</DiagnosticsFormat>')
+		end
+
 		_p(2,'</ClCompile>')
 	end
 
@@ -807,18 +834,35 @@
 		end
 	end
 
+	local function additional_manifest(cfg)
+		if(cfg.dpiawareness ~= nil) then
+			_p(2,'<Manifest>')
+				if(cfg.dpiawareness == "None") then
+					_p(3, '<EnableDpiAwareness>false</EnableDpiAwareness>')
+				end
+				if(cfg.dpiawareness == "High") then
+					_p(3, '<EnableDpiAwareness>true</EnableDpiAwareness>')
+				end
+				if(cfg.dpiawareness == "HighPerMonitor") then
+					_p(3, '<EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>')
+				end
+			_p(2,'</Manifest>')
+		end
+	end
+
 --
 -- Generate the <Link> element and its children.
 --
 
 	function vc2010.link(cfg)
-		local vs2017 = premake.action.current() == premake.action.get("vs2017")
+		local vs2017OrLater = premake.action.current() == premake.action.get("vs2017") or
+		    premake.action.current() == premake.action.get("vs2019")
 		local links  = getcfglinks(cfg)
 
 		_p(2,'<Link>')
 		_p(3,'<SubSystem>%s</SubSystem>', iif(cfg.kind == "ConsoleApp", "Console", "Windows"))
 
-		if vs2017 and cfg.flags.FullSymbols then
+		if vs2017OrLater and cfg.flags.FullSymbols then
 			_p(3,'<GenerateDebugInformation>DebugFull</GenerateDebugInformation>')
 		else
 			_p(3,'<GenerateDebugInformation>%s</GenerateDebugInformation>', tostring(cfg.flags.Symbols ~= nil))
@@ -878,6 +922,10 @@
 			if cfg.androidlinker then
 				_p(3,'<UseLinker>%s</UseLinker>',cfg.androidlinker)
 			end
+		end
+
+		if cfg.flags.Hotpatchable then
+			_p(3, '<CreateHotPatchableImage>Enabled</CreateHotPatchableImage>')
 		end
 
 		_p(2,'</Link>')
@@ -1014,6 +1062,7 @@
 				ant_build(prj, cfg)
 				event_hooks(cfg)
 				vs10_masm(prj, cfg)
+				additional_manifest(cfg)
 			_p(1,'</ItemDefinitionGroup>')
 		end
 	end
@@ -1140,16 +1189,20 @@
 		if #files > 0  then
 			_p(1,'<ItemGroup>')
 			local groupedBuildTasks = {}
+			local buildTaskNames = {}
+
 			for _, custombuildtask in ipairs(prj.custombuildtask or {}) do
 				for _, buildtask in ipairs(custombuildtask or {}) do
 					if (groupedBuildTasks[buildtask[1]] == nil) then
 						groupedBuildTasks[buildtask[1]] = {}
+						table.insert(buildTaskNames, buildtask[1])
 					end
 					table.insert(groupedBuildTasks[buildtask[1]], buildtask)
 				end
 			end
 
-			for name, custombuildtask in pairs(groupedBuildTasks or {}) do
+			for _, name in ipairs(buildTaskNames) do
+				custombuildtask = groupedBuildTasks[name]
 				_p(2,'<CustomBuild Include=\"%s\">', path.translate(path.getrelative(prj.location,name), "\\"))
 				_p(3,'<FileType>Text</FileType>')
 				local cmd = ""
@@ -1179,18 +1232,62 @@
 	end
 
 	function vc2010.simplefilesgroup(prj, section, subtype)
+		local configs = prj.solution.vstudio_configs
 		local files = vc2010.getfilegroup(prj, section)
+
 		if #files > 0  then
-			_p(1,'<ItemGroup>')
-			for _, file in ipairs(files) do
-				if subtype then
-					_p(2,'<%s Include=\"%s\">', section, path.translate(file.name, "\\"))
-					_p(3,'<SubType>%s</SubType>', subtype)
-					_p(2,'</%s>', section)
-				else
-					_p(2,'<%s Include=\"%s\" />', section, path.translate(file.name, "\\"))
+			local config_mappings = {}
+
+			for _, cfginfo in ipairs(configs) do
+				local cfg = premake.getconfig(prj, cfginfo.src_buildcfg, cfginfo.src_platform)
+				if cfg.pchheader and cfg.pchsource and not cfg.flags.NoPCH then
+					config_mappings[cfginfo] = path.translate(cfg.pchsource, "\\")
 				end
 			end
+
+			_p(1,'<ItemGroup>')
+
+			for _, file in ipairs(files) do
+				local prjexcluded = table.icontains(prj.excludes, file.name)
+				local excludedcfgs = {}
+
+				if not prjexcluded then
+					for _, vsconfig in ipairs(configs) do
+						local cfg = premake.getconfig(prj, vsconfig.src_buildcfg, vsconfig.src_platform)
+						local fileincfg = table.icontains(cfg.files, file.name)
+						local cfgexcluded = table.icontains(cfg.excludes, file.name)
+
+						if not fileincfg or cfgexcluded then
+							table.insert(excludedcfgs, vsconfig.name)
+						end
+					end
+				end
+
+				if subtype or prjexcluded or #excludedcfgs > 0 then
+					_p(2, '<%s Include=\"%s\">', section, path.translate(file.name, "\\"))
+
+					if prjexcluded then
+						_p(3, '<ExcludedFromBuild>true</ExcludedFromBuild>')
+					else
+						for _, cfgname in ipairs(excludedcfgs) do
+							_p(3, '<ExcludedFromBuild '
+								.. if_config_and_platform()
+								.. '>true</ExcludedFromBuild>'
+								, premake.esc(cfgname)
+								)
+						end
+					end
+
+					if subtype then
+						_p(3, '<SubType>%s</SubType>', subtype)
+					end
+
+					_p(2,'</%s>', section)
+				else
+					_p(2, '<%s Include=\"%s\" />', section, path.translate(file.name, "\\"))
+				end
+			end
+
 			_p(1,'</ItemGroup>')
 		end
 	end
@@ -1444,6 +1541,12 @@
 			return
 		end
 
+		-- Sort dependencies by uuid to keep the project files from changing
+		-- unnecessarily.
+		local function compareuuid(a, b) return a.uuid < b.uuid end
+		table.sort(deps, compareuuid)
+		table.sort(table.join(prj.vsimportreferences), compareuuid)
+
 		_p(1,'<ItemGroup>')
 
 		for _, dep in ipairs(deps) do
@@ -1489,13 +1592,15 @@
 --
 
 	function vc2010.debugdir(cfg)
+		local isnx = (cfg.platform == "NX32" or cfg.platform == "NX64")
 		local debuggerFlavor =
-			  iif(cfg.platform == "Orbis",        'ORBISDebugger'
+			  iif(isnx,                           'OasisNXDebugger'
+			, iif(cfg.platform == "Orbis",        'ORBISDebugger'
 			, iif(cfg.platform == "Durango",      'XboxOneVCppDebugger'
 			, iif(cfg.platform == "TegraAndroid", 'AndroidDebugger'
 			, iif(vstudio.iswinrt(),              'AppHostLocalDebugger'
 			,                                     'WindowsLocalDebugger'
-			))))
+			)))))
 		_p(2, '<DebuggerFlavor>%s</DebuggerFlavor>', debuggerFlavor)
 
 		if cfg.debugdir and not vstudio.iswinrt() then

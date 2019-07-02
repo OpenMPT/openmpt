@@ -21,8 +21,8 @@
 		language "C"
 		kind "ConsoleApp"
 		flags {
-			"No64BitChecks",
 			"ExtraWarnings",
+			"No64BitChecks",
 			"StaticRuntime"
 		}
 
@@ -43,6 +43,10 @@
 			"../src/host/lua-5.3.0/src/luac.c",
 			"../src/host/lua-5.3.0/**.lua",
 			"../src/host/lua-5.3.0/etc/*.c",
+		}
+
+		buildoptions {
+			"-m64",
 		}
 
 		configuration "Debug"

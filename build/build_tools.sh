@@ -40,13 +40,17 @@ function unpack () {
 cd include/genie
 
 make
+./bin/linux/genie embed
+make clean
+make
 
 mkdir -p build/vs2017
-./bin/linux/genie --to=../build/vs2017 vs2015
+./bin/linux/genie --to=../build/vs2017 vs2017
+./bin/linux/genie --to=../build/vs2019 vs2019
 
 cd ../..
 
-echo "ec0a4a89d8dad4d251fc7195784a275c0c322a4d" > include/genie/OpenMPT-version.txt
+echo "d6f834f7f4a0dc2b6e4f133227ce056f08a845b8" > include/genie/OpenMPT-version.txt
 
 
 

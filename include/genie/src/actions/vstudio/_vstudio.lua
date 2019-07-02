@@ -16,9 +16,11 @@
 		vs2013 = "v120",
 		vs2015 = "v140",
 		vs2017 = "v141",
+		vs2019 = "v142",
 	}
 	premake.vstudio.toolset = toolsets[_ACTION] or "unknown?"
 	premake.vstudio.splashpath = ''
+	premake.vstudio.xpwarning = true
 
 	local vstudio = premake.vstudio
 
@@ -41,6 +43,7 @@
 		Orbis   = "ORBIS",
 		Durango = "Durango",
 		TegraAndroid = "Tegra-Android",
+		NX32    = "NX32",
 		NX64    = "NX64",
 		Emscripten = "Emscripten",
 	}

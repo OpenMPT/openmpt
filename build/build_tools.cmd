@@ -26,16 +26,14 @@ goto main
 
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2019.cmd || goto error
- cd include\genie\build\vs2017 || goto error
- devenv genie.sln /Upgrade || goto error
+ cd include\genie\build\vs2019 || goto error
  msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto geniedone
 )
 if exist "C:\Program Files\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2019.cmd || goto error
- cd include\genie\build\vs2017 || goto error
- devenv genie.sln /Upgrade || goto error
+ cd include\genie\build\vs2019 || goto error
  msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto geniedone
@@ -43,7 +41,6 @@ if exist "C:\Program Files\Microsoft Visual Studio\2019\Community\VC\Auxiliary\B
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2017.cmd || goto error
  cd include\genie\build\vs2017 || goto error
- devenv genie.sln /Upgrade || goto error
  msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto geniedone
@@ -51,7 +48,6 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxil
 if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2017.cmd || goto error
  cd include\genie\build\vs2017 || goto error
- devenv genie.sln /Upgrade || goto error
  msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto geniedone
@@ -59,7 +55,7 @@ if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\B
 
 :geniedone
 
-echo "ec0a4a89d8dad4d251fc7195784a275c0c322a4d" > include\genie\OpenMPT-version.txt
+echo "d6f834f7f4a0dc2b6e4f133227ce056f08a845b8" > include\genie\OpenMPT-version.txt
 
 
 

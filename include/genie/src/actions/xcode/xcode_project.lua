@@ -112,6 +112,44 @@
 			tree.insert(tr, tr.projects)
 		end
 
+		-- Add intermediate paths so groups have sensible locations
+
+		-- find common prefixes going up the tree
+		tree.traverse(tr, {
+			onbranchexit = function(node)
+				for _, child in ipairs(node.children) do
+					if (child.location) then
+						if (node.location) then
+							while (not string.startswith(child.location, node.location)) do
+								node.location = path.getdirectory(node.location)
+							end
+						else
+							node.location = path.getdirectory(child.location)
+						end
+					end
+				end
+			end,
+			onleaf = function(node)
+				if (node.cfg) then
+					node.location = node.cfg.name
+				end
+			end
+		}, true)
+
+		-- now convert to relative where possible
+		tree.traverse(tr, {
+			onbranchexit = function(node, depth)
+				if (node.location and node.parent and node.parent.location) then
+					node.location = path.getrelative(node.parent.location, node.location)
+				end
+			end,
+			onleaf = function(node, depth)
+				if (node.location and node.parent and node.parent.location) then
+					node.location = path.getrelative(node.parent.location, node.location)
+				end
+			end
+		}, true)
+
 		-- Final setup
 		tree.traverse(tr, {
 			onnode = function(node)
@@ -145,17 +183,4 @@
 		node.fxstageid  = xcode.newid(node, "fxs")
 
 		return tr
-	end
-
-
---
--- Generate the XCode scheme for the given project.
---
-
-	function xcode.project_scheme(prj)
-		if prj.options and prj.options.XcodeScheme then
-			xcode.scheme({prj}, prj)
-		else
-			return false
-		end
 	end

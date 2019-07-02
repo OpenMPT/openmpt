@@ -1,2 +1,3 @@
-GENie commit ec0a4a89d8dad4d251fc7195784a275c0c322a4d (2018-12-11)
-No further changes have been made.
+GENie commit d6f834f7f4a0dc2b6e4f133227ce056f08a845b8 (2019-06-29)
+ *  Absolute IntDir paths for VS2017 and VS2019 have been disabled.
+ *  Changes are marked with --OpenMPT

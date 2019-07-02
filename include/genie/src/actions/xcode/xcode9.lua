@@ -40,6 +40,7 @@
 		xcode.PBXReferenceProxy(tr)
 		xcode.PBXResourcesBuildPhase(tr)
 		xcode.PBXShellScriptBuildPhase(tr)
+		xcode.PBXCopyFilesBuildPhase(tr)
 		xcode.PBXSourcesBuildPhase(tr,prj)
 		xcode.PBXVariantGroup(tr)
 		xcode.PBXTargetDependency(tr)
@@ -88,7 +89,7 @@
 
 		onproject = function(prj)
 			premake.generate(prj, "%%.xcodeproj/project.pbxproj", xcode9.project)
-			premake.generate(prj, "%%.xcodeproj/xcshareddata/xcschemes/%%.xcscheme", xcode.project_scheme)
+			xcode.generate_schemes(prj, "%%.xcodeproj/xcshareddata/xcschemes")
 		end,
 
 		oncleanproject = function(prj)

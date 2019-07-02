@@ -13,7 +13,7 @@ Supported project generators:
  * GNU Makefile
  * Ninja (experimental)
  * Qbs / QtCreator (experimental)
- * Visual Studio 2010, 2012, 2013, 2015, 2017
+ * Visual Studio 2010, 2012, 2013, 2015, 2017, 2019
  * XCode
 
 Download (stable)
@@ -21,7 +21,7 @@ Download (stable)
 
 [![Build Status](https://travis-ci.org/bkaradzic/GENie.svg?branch=master)](https://travis-ci.org/bkaradzic/GENie)
 
-	version 991 (commit 0883ed7e5aa3409f48f5cf3bf0e5a96e9dad13fe)
+	version 1065 (commit 75f665a4092172b075c3599c20a532510a1bdf1d)
 
 Linux:  
 https://github.com/bkaradzic/bx/raw/master/tools/bin/linux/genie
@@ -129,6 +129,8 @@ of Premake 4.4 beta 5, and there is no intention to keep it compatible with it.
  - Added flags for selecting C++ standard: `Cpp11`, `Cpp14`, `Cpp17`,
    and `CppLatest`.
  - Added `xcodeprojectopts` and `xcodetargetopts`.
+ - Added vs2019 support.
+ - Added UnitySupport flag to enable Unity (Jumbo) builds in Visual Studio 2019
 
 build - GENie build system scripts
 ----------------------------------
@@ -192,7 +194,7 @@ https://github.com/andr3wmac/Torque6 Torque 6 is an MIT licensed 3D engine
 loosely based on Torque2D. Being neither Torque2D or Torque3D it is the 6th
 derivative of the original Torque Engine.
 
-http://mtuner.net/ is a memory profiler and memory leak finder for Windows, PS4,
+https://milostosic.github.io/MTuner MTuner is a memory profiler and memory leak finder for Windows, PS4,
 PS3.
 
 Developer Crackshell used GENie for development of games
@@ -208,7 +210,7 @@ Developer Crackshell used GENie for development of games
 	Terry Hendrix II, Ryan Juckett, Andrew Johnson, Johan Sköld,
 	Alastair Murray, Patrick Munns, Jan-Eric Duden, Phil Stevens, Stuart Carnie,
 	Nikolay Aleksiev, Jon Olson, Mike Fitzgerald, Anders Stenberg, Violets,
-	Hugo Amnov.
+	Hugo Amnov, Christian Helmich.
 	All rights reserved.
 
 	https://github.com/bkaradzic/genie

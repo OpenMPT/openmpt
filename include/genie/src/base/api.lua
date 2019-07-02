@@ -205,6 +205,8 @@
 					FloatFast = 1,
 					FloatStrict = 1,
 					FullSymbols = 1,
+					Hotpatchable = 1,
+					LinkSupportCircularDependencies = 1,
 					Managed = 1,
 					MinimumWarnings = 1,
 					MFC = 1,
@@ -216,6 +218,7 @@
 					NoFramePointer = 1,
 					NoImportLib = 1,
 					NoIncrementalLink = 1,
+					NoJMC = 1,
 					NoManifest = 1,
 					NoMultiProcessorCompilation = 1,
 					NoNativeWChar = 1,
@@ -239,10 +242,13 @@
 					StaticRuntime = 1,
 					Symbols = 1,
 					Unicode = 1,
+					UnitySupport = 1,
 					Unsafe = 1,
 					UnsignedChar = 1,
 					UseFullPaths = 1,
-					WinMain = 1,
+					UseLDResponseFile = 1,
+					UseObjectResponseFile = 1,
+					WinMain = 1
 				}
 
 				local englishToAmericanSpelling =
@@ -535,7 +541,8 @@
 					ForceCPP = 1,
 					ArchiveSplit = 1,
 					SkipBundling = 1,
-					XcodeScheme = 1,
+					XcodeLibrarySchemes = 1,
+					XcodeSchemeNoConfigs = 1,
 				}
 
 				local lowervalue = value:lower()
@@ -733,6 +740,17 @@
 			scope = "container",
 		},
 
+		dpiawareness =
+		{
+			kind = "string",
+			scope = "config",
+			allowed = {
+				"None",
+				"High",
+				"HighPerMonitor",
+			}
+		},
+
 		xcodeprojectopts =
 		{
 			kind = "table",
@@ -743,6 +761,24 @@
 		{
 			kind = "table",
 			scope = "config",
+		},
+
+		xcodescriptphases =
+		{
+			kind  = "table",
+			scope = "config",
+		},
+
+		xcodecopyresources =
+		{
+			kind  = "table",
+			scope = "project",
+		},
+
+		xcodecopyframeworks =
+		{
+			kind  = "filelist",
+			scope = "project",
 		},
 
 		wholearchive =
