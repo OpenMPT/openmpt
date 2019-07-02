@@ -102,8 +102,6 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=OpenMPT vs2019 --win10 || goto err
 %PREMAKE% --group=all-externals vs2019 --win10 || goto err
 
-%PREMAKE% postprocess || goto err
-
 del premake5.lua || goto err
 
 

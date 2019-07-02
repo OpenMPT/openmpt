@@ -105,7 +105,5 @@ ${PREMAKE} --group=PluginBridge vs2019 --win10
 ${PREMAKE} --group=OpenMPT vs2019 --win10
 ${PREMAKE} --group=all-externals vs2019 --win10
 
-${PREMAKE} postprocess
-
 rm premake5.lua
 
