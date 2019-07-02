@@ -82,8 +82,6 @@ fi
 
 
 
-download "https://github.com/bkaradzic/GENie/archive/ec0a4a89d8dad4d251fc7195784a275c0c322a4d.zip" "build/externals/GENie-ec0a4a89d8dad4d251fc7195784a275c0c322a4d.zip"
-
 download_and_unpack_zip "allegro42" "http://na.mirror.garr.it/mirrors/djgpp/current/v2tk/allegro/all422ar2.zip" "build/externals/all422ar2.zip" "."
 download "http://na.mirror.garr.it/mirrors/djgpp/current/v2tk/allegro/all422s.zip" "build/externals/all422s.zip"
 #download_and_unpack_zip "allegro42" "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/allegro/all422ar2.zip" "build/externals/all422ar2.zip" "."
