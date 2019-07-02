@@ -1,6 +1,8 @@
 
   configuration {}
 
+	objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. mpt_projectname )
+
 	configuration { "Debug", "x32" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/x86" )
 	configuration { "DebugShared", "x32" }

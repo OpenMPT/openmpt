@@ -58,20 +58,10 @@ function remove_pattern_in_file (filename, pattern)
 	os.rename(filename .. ".new", filename)
 end
 
-function postprocess_vs2017_nointdir (filename)
-	remove_pattern_in_file(filename, "<IntDir>")
-end
-
 newaction {
  trigger     = "postprocess",
  description = "OpenMPT postprocess the project files to mitigate premake problems",
  execute     = function ()
-
-  postprocess_vs2017_nointdir("build/" .. mpt_projectpathname .. "/libopenmpt.vcxproj")
-  postprocess_vs2017_nointdir("build/" .. mpt_projectpathname .. "/ext/mpg123.vcxproj")
-  postprocess_vs2017_nointdir("build/" .. mpt_projectpathname .. "/ext/ogg.vcxproj")
-  postprocess_vs2017_nointdir("build/" .. mpt_projectpathname .. "/ext/vorbis.vcxproj")
-  postprocess_vs2017_nointdir("build/" .. mpt_projectpathname .. "/ext/zlib.vcxproj")
 
  end
 }
