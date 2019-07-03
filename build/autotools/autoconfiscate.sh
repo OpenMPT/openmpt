@@ -31,6 +31,7 @@ if `svn info . > /dev/null 2>&1` ; then
 echo "Exporting svn ..."
 svn export ./LICENSE         bin/dist-autotools/LICENSE
 svn export ./README.md       bin/dist-autotools/README.md
+svn export ./.clang-format   bin/dist-autotools/.clang-format
 svn export ./common          bin/dist-autotools/common
 mkdir bin/dist-autotools/doc
 svn export ./doc/contributing.md          bin/dist-autotools/doc/contributing.md
@@ -57,6 +58,7 @@ else
 echo "Exporting git ..."
 cp -r ./LICENSE         bin/dist-autotools/LICENSE
 cp -r ./README.md       bin/dist-autotools/README.md
+cp -r ./.clang-format   bin/dist-autotools/.clang-format
 cp -r ./common          bin/dist-autotools/common
 mkdir bin/dist-autotools/doc
 cp -r ./doc/contributing.md          bin/dist-autotools/doc/contributing.md
