@@ -78,17 +78,17 @@ template <typename T> auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt:
 
 static inline std::string ToString(const std::string & x) { return x; }
 static inline std::string ToString(const char * const & x) { return x; }
-MPT_DEPRECATED static inline std::string ToString(const char & x) { return std::string(1, x); } // deprecated to catch potential API mis-use, use std::string(1, x) instead
+std::string ToString(const char &x) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
 #if MPT_WSTRING_FORMAT
-MPT_DEPRECATED std::string ToString(const std::wstring & x); // Unknown encoding.
-MPT_DEPRECATED std::string ToString(const wchar_t * const & x); // Unknown encoding.
-MPT_DEPRECATED std::string ToString(const wchar_t & x); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+std::string ToString(const std::wstring & x) = delete; // Unknown encoding.
+std::string ToString(const wchar_t * const & x) = delete; // Unknown encoding.
+std::string ToString(const wchar_t &x ) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #endif
 #if MPT_USTRING_MODE_UTF8
-MPT_DEPRECATED std::string ToString(const mpt::ustring & x); // Unknown encoding.
+std::string ToString(const mpt::ustring & x) = delete; // Unknown encoding.
 #endif
 #if defined(_MFC_VER)
-MPT_DEPRECATED std::string ToString(const CString & x);
+std::string ToString(const CString & x) = delete; // unknown encoding
 #endif
 std::string ToString(const bool & x);
 std::string ToString(const signed char & x);
@@ -109,15 +109,15 @@ std::string ToString(const long double & x);
 template <typename T> auto ToUString(const T & x) -> decltype(x.ToUString()) { return x.ToUString(); }
 
 static inline mpt::ustring ToUString(const mpt::ustring & x) { return x; }
-MPT_DEPRECATED mpt::ustring ToUString(const std::string & x); // Unknown encoding.
-MPT_DEPRECATED mpt::ustring ToUString(const char * const & x); // Unknown encoding. Note that this also applies to TCHAR in !UNICODE builds as the type is indistinguishable from char. Wrap with CString or FromTcharStr in this case.
-MPT_DEPRECATED mpt::ustring ToUString(const char & x); // deprecated to catch potential API mis-use, use std::string(1, x) instead
+mpt::ustring ToUString(const std::string & x) = delete; // Unknown encoding.
+mpt::ustring ToUString(const char * const & x) = delete; // Unknown encoding. Note that this also applies to TCHAR in !UNICODE builds as the type is indistinguishable from char. Wrap with CString or FromTcharStr in this case.
+mpt::ustring ToUString(const char & x) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
 #if MPT_WSTRING_FORMAT
 #if MPT_USTRING_MODE_UTF8
 mpt::ustring ToUString(const std::wstring & x);
 #endif
 mpt::ustring ToUString(const wchar_t * const & x);
-MPT_DEPRECATED mpt::ustring ToUString(const wchar_t & x); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+mpt::ustring ToUString(const wchar_t & x) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #endif
 #if defined(_MFC_VER)
 mpt::ustring ToUString(const CString & x);
@@ -138,12 +138,12 @@ mpt::ustring ToUString(const double & x);
 mpt::ustring ToUString(const long double & x);
 
 #if MPT_WSTRING_FORMAT
-MPT_DEPRECATED std::wstring ToWString(const std::string & x); // Unknown encoding.
-MPT_DEPRECATED std::wstring ToWString(const char * const & x); // Unknown encoding. Note that this also applies to TCHAR in !UNICODE builds as the type is indistinguishable from char. Wrap with CString or FromTcharStr in this case.
-MPT_DEPRECATED std::wstring ToWString(const char & x); // deprecated to catch potential API mis-use, use std::string(1, x) instead
+std::wstring ToWString(const std::string & x) = delete; // Unknown encoding.
+std::wstring ToWString(const char * const & x) = delete; // Unknown encoding. Note that this also applies to TCHAR in !UNICODE builds as the type is indistinguishable from char. Wrap with CString or FromTcharStr in this case.
+std::wstring ToWString(const char & x) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
 static inline std::wstring ToWString(const std::wstring & x) { return x; }
 static inline std::wstring ToWString(const wchar_t * const & x) { return x; }
-MPT_DEPRECATED static inline std::wstring ToWString(const wchar_t & x) { return std::wstring(1, x); } // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+std::wstring ToWString(const wchar_t & x) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #if MPT_USTRING_MODE_UTF8
 std::wstring ToWString(const mpt::ustring & x);
 #endif
@@ -219,9 +219,9 @@ STATIC_ASSERT(sizeof(FormatFlags) >= sizeof(fmt_base::FormatFlagsEnum));
 
 class FormatSpec;
 
-MPT_DEPRECATED std::string FormatVal(const char & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::string(1, x) instead
+std::string FormatVal(const char & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-MPT_DEPRECATED std::string FormatVal(const wchar_t & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+std::string FormatVal(const wchar_t & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 std::string FormatVal(const bool & x, const FormatSpec & f);
 std::string FormatVal(const signed char & x, const FormatSpec & f);
@@ -238,9 +238,9 @@ std::string FormatVal(const float & x, const FormatSpec & f);
 std::string FormatVal(const double & x, const FormatSpec & f);
 std::string FormatVal(const long double & x, const FormatSpec & f);
 
-MPT_DEPRECATED mpt::ustring FormatValU(const char & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::string(1, x) instead
+mpt::ustring FormatValU(const char & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-MPT_DEPRECATED mpt::ustring FormatValU(const wchar_t & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+mpt::ustring FormatValU(const wchar_t & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 mpt::ustring FormatValU(const bool & x, const FormatSpec & f);
 mpt::ustring FormatValU(const signed char & x, const FormatSpec & f);
@@ -258,9 +258,9 @@ mpt::ustring FormatValU(const double & x, const FormatSpec & f);
 mpt::ustring FormatValU(const long double & x, const FormatSpec & f);
 
 #if MPT_WSTRING_FORMAT
-MPT_DEPRECATED std::wstring FormatValW(const char & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::string(1, x) instead
+std::wstring FormatValW(const char & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-MPT_DEPRECATED std::wstring FormatValW(const wchar_t & x, const FormatSpec & f); // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+std::wstring FormatValW(const wchar_t & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 std::wstring FormatValW(const bool & x, const FormatSpec & f);
 std::wstring FormatValW(const signed char & x, const FormatSpec & f);
