@@ -16,7 +16,10 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MPT_BUILD_MSVC)
 #if MPT_COMPILER_MSVC || MPT_COMPILER_CLANG
 
+#if !defined(MPT_BUILD_TARGET_XP)
 #pragma comment(lib, "delayimp.lib")
+#endif // !MPT_BUILD_TARGET_XP
+
 #pragma comment(lib, "version.lib")
 #pragma comment(lib, "rpcrt4.lib")
 #pragma comment(lib, "shlwapi.lib")

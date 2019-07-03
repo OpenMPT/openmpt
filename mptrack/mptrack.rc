@@ -2714,7 +2714,6 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_SOUNDTOUCH_LOADFAILURE "Unable to load OpenMPT_soundtouch_f32.dll."
     IDS_ERR_FILEOPEN        "Unable to open file."
     IDS_ERR_FILETYPE        "Unsupported file type"
     IDS_ERR_SAVEINS         "Unable to save instrument"

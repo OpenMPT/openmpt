@@ -145,13 +145,6 @@ end
    "soundtouch",
    "vorbis",
   }
-  filter { "configurations:*Shared" }
-  filter { "not configurations:*Shared" }
-   linkoptions {
-    "/DELAYLOAD:openmpt-lame.dll",
-    "/DELAYLOAD:openmpt-mpg123.dll",
-    "/DELAYLOAD:openmpt-soundtouch.dll",
-   }
   filter {}
 	if not _OPTIONS["xp"] then
   linkoptions {

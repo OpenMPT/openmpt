@@ -505,14 +505,6 @@
 #endif // arch
 #endif // ENABLE_ASM
 
-#if defined(MPT_WITH_LAME) && defined(MPT_BUILD_MSVC) && defined(MPT_BUILD_MSVC_STATIC) && defined(MODPLUG_TRACKER) && !MPT_OS_WINDOWS_WINRT
-#define MPT_ENABLE_LAME_DELAYLOAD
-#endif
-
-#if defined(MPT_WITH_MPG123) && defined(MPT_BUILD_MSVC) && defined(MPT_BUILD_MSVC_STATIC) && defined(MODPLUG_TRACKER) && !MPT_OS_WINDOWS_WINRT
-#define MPT_ENABLE_MPG123_DELAYLOAD
-#endif
-
 #if defined(ENABLE_TESTS) && defined(MODPLUG_NO_FILESAVE)
 #undef MODPLUG_NO_FILESAVE // tests recommend file saving
 #endif
@@ -548,14 +540,6 @@
 
 #if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_DYNBIND)
 #define MPT_ENABLE_DYNBIND // Tracker requires dynamic library loading for export codecs
-#endif
-
-#if defined(MPT_ENABLE_LAME_DELAYLOAD) && !defined(MPT_ENABLE_DYNBIND)
-#define MPT_ENABLE_DYNBIND // static MSVC builds require dynbind to load delay-loaded DLLs
-#endif
-
-#if defined(MPT_ENABLE_MPG123_DELAYLOAD) && !defined(MPT_ENABLE_DYNBIND)
-#define MPT_ENABLE_DYNBIND // static MSVC builds require dynbind to load delay-loaded DLLs
 #endif
 
 #if defined(MPT_WITH_MEDIAFOUNDATION) && !defined(MPT_ENABLE_DYNBIND)

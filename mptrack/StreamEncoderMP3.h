@@ -14,8 +14,6 @@
 
 #include "StreamEncoder.h"
 
-#include "../common/ComponentManager.h"
-
 OPENMPT_NAMESPACE_BEGIN
 
 
@@ -33,10 +31,6 @@ class MP3Encoder : public EncoderFactoryBase
 {
 
 private:
-
-#ifdef MPT_WITH_LAME
-	ComponentHandle<ComponentLame> m_Lame;
-#endif
 
 	MP3EncoderType m_Type;
 

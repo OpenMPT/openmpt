@@ -35,7 +35,6 @@
 #include "../soundbase/SampleFormatCopy.h"
 #include "FileDialog.h"
 #include "ProgressDialog.h"
-#include "../common/ComponentManager.h"
 #include "../include/r8brain/CDSPResampler.h"
 #include "../soundlib/MixFuncTable.h"
 
@@ -2105,37 +2104,6 @@ void CCtrlSamples::OnEstimateSampleSize()
 }
 
 
-#ifdef MPT_BUILD_MSVC_SHARED
-
-class ComponentSoundTouch
-	: public ComponentBuiltin
-{
-	MPT_DECLARE_COMPONENT_MEMBERS
-public:
-	ComponentSoundTouch()
-		: ComponentBuiltin()
-	{
-	}
-};
-MPT_REGISTERED_COMPONENT(ComponentSoundTouch, "")
-
-#else
-
-class ComponentSoundTouch
-	: public ComponentBundledDLL
-{
-	MPT_DECLARE_COMPONENT_MEMBERS
-public:
-	ComponentSoundTouch()
-		: ComponentBundledDLL(P_("openmpt-soundtouch"))
-	{
-	}
-};
-MPT_REGISTERED_COMPONENT(ComponentSoundTouch, "")
-
-#endif
-
-
 enum TimeStretchPitchShiftResult
 {
 	kUnknown,
@@ -2193,19 +2161,10 @@ public:
 		if(m_ratio < 0.5f) return kStretchTooShort;
 		if(m_ratio > 2.0f) return kStretchTooLong;
 
-		// Check whether the DLL file exists.
-		ComponentHandle<ComponentSoundTouch> soundTouch;
-		if(!IsComponentAvailable(soundTouch))
-		{
-			MsgBox(IDS_SOUNDTOUCH_LOADFAILURE);
-			return kAbort;
-		}
-
 		HANDLE handleSt = soundtouch_createInstance();
 		if(handleSt == NULL)
 		{
-			MsgBox(IDS_SOUNDTOUCH_LOADFAILURE);
-			return kAbort;
+			MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
 		}
 
 		const uint8 smpSize = sample.GetElementarySampleSize();

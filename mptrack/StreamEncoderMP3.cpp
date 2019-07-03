@@ -13,8 +13,6 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderMP3.h"
 
-#include "../common/ComponentManager.h"
-
 #include "Mptrack.h"
 
 #include "../soundlib/Sndfile.h"
@@ -350,42 +348,6 @@ void ID3V2Tagger::WriteID3v2Frame(const char cFrameID[4], std::string sFramecont
 using lame_t = lame_global_flags *;
 
 
-class ComponentLame
-#if defined(MPT_ENABLE_LAME_DELAYLOAD)
-	: public ComponentBundledDLL
-#else
-	: public ComponentBuiltin
-#endif
-{
-	MPT_DECLARE_COMPONENT_MEMBERS
-
-public:
-	ComponentLame()
-#if defined(MPT_ENABLE_LAME_DELAYLOAD)
-		: ComponentBundledDLL(P_("openmpt-lame"))
-#else
-		: ComponentBuiltin()
-#endif
-	{
-		return;
-	}
-	bool DoInitialize() override
-	{
-#if defined(MPT_ENABLE_LAME_DELAYLOAD)
-		if(!ComponentBundledDLL::DoInitialize())
-		{
-			return false;
-		}
-#endif
-		return true;
-	}
-	virtual ~ComponentLame()
-	{
-	}
-};
-MPT_REGISTERED_COMPONENT(ComponentLame, "")
-
-
 static void GenreEnumCallback(int num, const char *name, void *cookie)
 {
 	MPT_UNREFERENCED_PARAMETER(num);
@@ -430,7 +392,6 @@ static Encoder::Traits BuildTraits(bool compatible)
 class MP3LameStreamWriter : public StreamWriterBase
 {
 private:
-	const ComponentLame &lame;
 	bool compatible;
 	Encoder::Mode Mode;
 	bool gfp_inited;
@@ -446,9 +407,8 @@ private:
 	std::streamoff id3v2Size;
 	FileTags Tags;
 public:
-	MP3LameStreamWriter(const ComponentLame &lame_, std::ostream &stream, bool compatible, const Encoder::Settings &settings, const FileTags &tags)
+	MP3LameStreamWriter(std::ostream &stream, bool compatible, const Encoder::Settings &settings, const FileTags &tags)
 		: StreamWriterBase(stream)
-		, lame(lame_)
 		, compatible(compatible)
 	{
 		Mode = Encoder::ModeInvalid;
@@ -703,21 +663,15 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 #ifdef MPT_WITH_LAME
 	if(type == MP3EncoderLame)
 	{
-		if(IsComponentAvailable(m_Lame))
-		{
-			m_Type = MP3EncoderLame;
-			SetTraits(BuildTraits(false));
-			return;
-		}
+		m_Type = MP3EncoderLame;
+		SetTraits(BuildTraits(false));
+		return;
 	}
 	if(type == MP3EncoderLameCompatible)
 	{
-		if(IsComponentAvailable(m_Lame))
-		{
-			m_Type = MP3EncoderLameCompatible;
-			SetTraits(BuildTraits(true));
-			return;
-		}
+		m_Type = MP3EncoderLameCompatible;
+		SetTraits(BuildTraits(true));
+		return;
 	}
 #endif // MPT_WITH_LAME
 }
@@ -727,8 +681,8 @@ bool MP3Encoder::IsAvailable() const
 {
 	return false
 #ifdef MPT_WITH_LAME
-		|| ((m_Type == MP3EncoderLame) && IsComponentAvailable(m_Lame))
-		|| ((m_Type == MP3EncoderLameCompatible) && IsComponentAvailable(m_Lame))
+		|| (m_Type == MP3EncoderLame)
+		|| (m_Type == MP3EncoderLameCompatible)
 #endif // MPT_WITH_LAME
 		;
 }
@@ -743,7 +697,7 @@ std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ost
 #ifdef MPT_WITH_LAME
 	} else if(m_Type == MP3EncoderLame || m_Type == MP3EncoderLameCompatible)
 	{
-		result = std::make_unique<MP3LameStreamWriter>(*m_Lame, file, (m_Type == MP3EncoderLameCompatible), settings, tags);
+		result = std::make_unique<MP3LameStreamWriter>(file, (m_Type == MP3EncoderLameCompatible), settings, tags);
 #endif // MPT_WITH_LAME
 	}
 	return result;
