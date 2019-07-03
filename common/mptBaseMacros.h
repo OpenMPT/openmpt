@@ -123,6 +123,16 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 #if MPT_CXX_AT_LEAST(17)
+#define MPT_NODISCARD [[nodiscard]]
+#define MPT_DISCARD(expr) static_cast<void>(expr)
+#else
+#define MPT_NODISCARD
+#define MPT_DISCARD(expr) expr
+#endif
+
+
+
+#if MPT_CXX_AT_LEAST(17)
 #define MPT_CONSTANT_IF if constexpr
 #endif
 
