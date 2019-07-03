@@ -21,7 +21,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 #define MPT_DEPRECATED_PATH
-//#define MPT_DEPRECATED_PATH MPT_DEPRECATED
+//#define MPT_DEPRECATED_PATH [[deprecated]]
 
 
 
@@ -266,7 +266,7 @@ public:
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 	// Convert a path to its simplified form (currently only implemented on Windows)
-	MPT_DEPRECATED mpt::PathString Simplify() const { return PathString(path); }
+	[[deprecated]] mpt::PathString Simplify() const { return PathString(path); }
 
 #endif // MPT_OS_WINDOWS
 
@@ -277,7 +277,7 @@ public:
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 #if MPT_OS_WINDOWS
 #ifdef UNICODE
-MPT_DEPRECATED static inline std::string ToString(const mpt::PathString & x) { return mpt::ToCharset(mpt::CharsetLocale, x.ToUnicode()); }
+[[deprecated]] static inline std::string ToString(const mpt::PathString & x) { return mpt::ToCharset(mpt::CharsetLocale, x.ToUnicode()); }
 #else
 MPT_DEPRECATED_PATH static inline std::string ToString(const mpt::PathString & x) { return mpt::ToCharset(mpt::CharsetLocale, x.AsNative()); }
 #endif

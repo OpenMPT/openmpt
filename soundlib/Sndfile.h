@@ -574,7 +574,7 @@ public:
 	// logging
 	void SetCustomLog(ILog *pLog) { m_pCustomLog = pLog; }
 	void AddToLog(LogLevel level, const mpt::ustring &text) const;
-	/*MPT_DEPRECATED*/ void AddToLog(const AnyStringLocale &text) const { AddToLog(LogInformation, mpt::ToUnicode(text)); }
+	/*[[deprecated]]*/ void AddToLog(const AnyStringLocale &text) const { AddToLog(LogInformation, mpt::ToUnicode(text)); }
 
 public:
 

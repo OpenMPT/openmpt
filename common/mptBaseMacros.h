@@ -110,18 +110,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-// Some functions might be deprecated although they are still in use.
-// Tag them with "MPT_DEPRECATED".
-#if MPT_COMPILER_MSVC
-#define MPT_DEPRECATED __declspec(deprecated)
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-#define MPT_DEPRECATED __attribute__((deprecated))
-#else
-#define MPT_DEPRECATED
-#endif
-
-
-
 #if MPT_CXX_AT_LEAST(17)
 #define MPT_NODISCARD [[nodiscard]]
 #define MPT_DISCARD(expr) static_cast<void>(expr)

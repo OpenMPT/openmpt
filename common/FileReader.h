@@ -29,7 +29,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // change to show warnings for functions which trigger pre-caching the whole file for unseekable streams
-//#define FILEREADER_DEPRECATED MPT_DEPRECATED
+//#define FILEREADER_DEPRECATED [[deprecated]]
 #define FILEREADER_DEPRECATED
 
 

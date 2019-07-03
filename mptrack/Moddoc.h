@@ -75,7 +75,7 @@ public:
 	~ScopedLogCapturer();
 	void ShowLog(bool force = false);
 	void ShowLog(const CString &preamble, bool force = false);
-	MPT_DEPRECATED void ShowLog(const std::string &preamble, bool force = false);
+	[[deprecated]] void ShowLog(const std::string &preamble, bool force = false);
 	void ShowLog(const mpt::ustring &preamble, bool force = false);
 };
 
@@ -166,9 +166,9 @@ public:
 
 	// Logging for general progress and error events.
 	void AddToLog(LogLevel level, const mpt::ustring &text) const;
-	/*MPT_DEPRECATED*/ void AddToLog(const CString &text) const { AddToLog(LogInformation, mpt::ToUnicode(text)); }
-	/*MPT_DEPRECATED*/ void AddToLog(const std::string &text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetLocale, text)); }
-	/*MPT_DEPRECATED*/ void AddToLog(const char *text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetLocale, text?text:"")); }
+	/*[[deprecated]]*/ void AddToLog(const CString &text) const { AddToLog(LogInformation, mpt::ToUnicode(text)); }
+	/*[[deprecated]]*/ void AddToLog(const std::string &text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetLocale, text)); }
+	/*[[deprecated]]*/ void AddToLog(const char *text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetLocale, text?text:"")); }
 
 	const std::vector<LogEntry> & GetLog() const { return m_Log; }
 	mpt::ustring GetLogString() const;
