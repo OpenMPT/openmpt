@@ -46,7 +46,7 @@ CAbstractVstEditor::WindowSizeAdjuster::~WindowSizeAdjuster()
 {
 	// Extend window height by the menu size if it changed
 	MENUBARINFO mbi = { sizeof(mbi) };
-	if(m_menuHeight >= 0 && GetMenuBarInfo(m_wnd, OBJID_MENU, 0, &mbi))
+	if(GetMenuBarInfo(m_wnd, OBJID_MENU, 0, &mbi))
 	{
 		CRect windowRect;
 		m_wnd.GetWindowRect(&windowRect);
@@ -286,16 +286,14 @@ void CAbstractVstEditor::DoClose()
 
 void CAbstractVstEditor::SetupMenu(bool force)
 {
-	::SetMenu(m_hWnd, m_Menu.m_hMenu);
 	WindowSizeAdjuster adjuster(*this);
-	//TODO: create menus on click so they are only updated when required
+	SetMenu(&m_Menu);
 	UpdatePresetMenu(force);
 	UpdateInputMenu();
 	UpdateOutputMenu();
 	UpdateMacroMenu();
 	UpdateOptionsMenu();
 	UpdatePresetField();
-	return;
 }
 
 
@@ -607,31 +605,24 @@ void CAbstractVstEditor::UpdatePresetMenu(bool force)
 	const int32 numProgs = m_VstPlugin.GetNumPrograms();
 	const int32 curProg  = m_VstPlugin.GetCurrentProgram();
 
-	if(m_PresetMenu.m_hMenu)						// We rebuild the menu from scratch, so remove any exiting menus...
+	if(m_PresetMenu.m_hMenu) // We rebuild the menu from scratch, so remove any exiting menus...
 	{
-		if(curProg == m_nCurProg && !force)			// ... unless menu exists and is accurate,
-			return;									// in which case we are done.
+		if(curProg == m_nCurProg && !force) // ... unless menu exists and is accurate, in which case we are done.
+			return;
 
 		m_presetMenuGroup.clear();
 
-		m_PresetMenu.DestroyMenu();				// Destroy Factory preset menu
-		m_Menu.DeleteMenu(1, MF_BYPOSITION);
-
-	}
-	if(!m_PresetMenu.m_hMenu)
+		// If there were no preset groups, delete the remaining content so that it can be refilled dynamically
+		while(m_PresetMenu.GetMenuItemCount() > 0)
+			m_PresetMenu.RemoveMenu(0, MF_BYPOSITION);
+	} else
 	{
 		// Create Factory preset menu
 		m_PresetMenu.CreatePopupMenu();
+		m_Menu.InsertMenu(1, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_PresetMenu.m_hMenu), _T("&Presets"));
 	}
 
-	// Add Factory menu to main menu
-	m_Menu.InsertMenu(1, MF_BYPOSITION | MF_POPUP | (numProgs ? 0 : MF_GRAYED), reinterpret_cast<UINT_PTR>(m_PresetMenu.m_hMenu), _T("&Presets"));
-
-	if(m_PresetMenu.GetMenuItemCount() != 0)
-	{
-		// Already filled...
-		return;
-	}
+	m_Menu.EnableMenuItem(1, MF_BYPOSITION | (numProgs ? 0 : MF_GRAYED));
 
 	const int numSubMenus = GetNumSubMenus(numProgs);
 

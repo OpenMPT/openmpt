@@ -47,7 +47,7 @@ protected:
 	class WindowSizeAdjuster
 	{
 		CWnd &m_wnd;
-		int m_menuHeight = -1;
+		int m_menuHeight = 0;
 	public:
 		WindowSizeAdjuster(CWnd &wnd);
 		~WindowSizeAdjuster();
