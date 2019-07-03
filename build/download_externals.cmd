@@ -88,7 +88,7 @@ call build\scriptlib\unpack.cmd "include\winamp"   "build\externals\WA5.55_SDK.e
 call build\scriptlib\unpack.cmd "include\xmplay"   "build\externals\xmp-sdk.zip"    "."          || goto error
 call build\scriptlib\unpack.cmd "include\ASIOSDK2" "build\externals\asiosdk2.3.zip" "ASIOSDK2.3" || goto error
 
-call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.7.2.post1-embed-win32.zip" "." || goto error
+call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.7.3-embed-win32.zip" "." || goto error
 
 call :killdir "build\tools\innounp"   || goto error
 call :killdir "build\tools\innosetup" || goto error
