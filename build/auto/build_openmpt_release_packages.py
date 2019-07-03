@@ -82,7 +82,7 @@ def copy_tree(from_path, to_path, pathname):
 
 def copy_binaries(from_path, to_path):
     os.makedirs(to_path)
-    copy_file(from_path, to_path, "mptrack.exe")
+    copy_file(from_path, to_path, "OpenMPT.exe")
     copy_file(from_path, to_path, "openmpt-lame.dll")
     copy_file(from_path, to_path, "openmpt-mpg123.dll")
     copy_file(from_path, to_path, "openmpt-soundtouch.dll")

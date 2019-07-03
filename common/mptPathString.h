@@ -120,9 +120,9 @@ public:
 	PathString GetDrive() const;		// Drive letter + colon, e.g. "C:" or \\server\\share
 	PathString GetDir() const;			// Directory, e.g. "\OpenMPT\"
 	PathString GetPath() const;			// Drive + Dir, e.g. "C:\OpenMPT\"
-	PathString GetFileName() const;		// File name without extension, e.g. "mptrack"
+	PathString GetFileName() const;		// File name without extension, e.g. "OpenMPT"
 	PathString GetFileExt() const;		// Extension including dot, e.g. ".exe"
-	PathString GetFullFileName() const;	// File name + extension, e.g. "mptrack.exe"
+	PathString GetFullFileName() const;	// File name + extension, e.g. "OpenMPT.exe"
 
 	// Verify if this path represents a valid directory on the file system.
 	bool IsDirectory() const;

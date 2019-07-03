@@ -11,7 +11,7 @@
 #error You must specify which installer to build by compiling either win32.iss or win64.iss
 #endif
 
-#define GetAppVersion StringChange(GetFileProductVersion("..\bin\" + PlatformFolder + "\mptrack.exe"), ",", ".")
+#define GetAppVersion StringChange(GetFileProductVersion("..\bin\" + PlatformFolder + "\OpenMPT.exe"), ",", ".")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
 
 #ifndef BaseNameAddition
@@ -37,7 +37,7 @@ WizardImageFile=install-big.bmp
 WizardSmallImageFile=install-small.bmp
 CreateUninstallRegKey=not IsTaskSelected('portable')
 Uninstallable=not IsTaskSelected('portable')
-UninstallDisplayIcon={app}\mptrack.exe
+UninstallDisplayIcon={app}\OpenMPT.exe
 DisableWelcomePage=yes
 
 [Tasks]
@@ -58,14 +58,14 @@ Name: english; MessagesFile: compiler:Default.isl
 
 ; preserve file type order for best solid compression results (first binary, then text)
 ; base folder
-Source: ..\bin\{#PlatformFolder}\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
+Source: ..\bin\{#PlatformFolder}\OpenMPT.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 Source: ..\bin\{#PlatformFolder}\..\x86\PluginBridge-x86.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 Source: ..\bin\{#PlatformFolder}\..\amd64\PluginBridge-amd64.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 Source: ..\bin\{#PlatformFolder}\openmpt-lame.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 Source: ..\bin\{#PlatformFolder}\openmpt-mpg123.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 Source: ..\bin\{#PlatformFolder}\openmpt-soundtouch.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
 ; Additional binaries for XP-/Vista-compatible version
-Source: ..\bin\{#PlatformFolderOld}\mptrack.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
+Source: ..\bin\{#PlatformFolderOld}\OpenMPT.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
 Source: ..\bin\{#PlatformFolderOld}\..\x86\PluginBridge-x86.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
 Source: ..\bin\{#PlatformFolderOld}\..\amd64\PluginBridge-amd64.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
 Source: ..\bin\{#PlatformFolderOld}\openmpt-lame.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
@@ -109,15 +109,15 @@ Name: {app}\tunings; Tasks: portable
 
 [Icons]
 ; start menu
-Name: {userprograms}\OpenMPT; Filename: {app}\mptrack.exe; Tasks: startmenuicon
+Name: {userprograms}\OpenMPT; Filename: {app}\OpenMPT.exe; Tasks: startmenuicon
 
 ; app's directory and keymaps directory (for ease of use)
 Name: {app}\Configuration files; Filename: {userappdata}\OpenMPT\; Tasks: not portable
 Name: {userappdata}\OpenMPT\More Keymaps; Filename: {app}\extraKeymaps\; Tasks: not portable
 
 ; desktop, quick launch
-Name: {userdesktop}\OpenMPT; Filename: {app}\mptrack.exe; Tasks: desktopicon
-Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenMPT; Filename: {app}\mptrack.exe; Tasks: quicklaunchicon
+Name: {userdesktop}\OpenMPT; Filename: {app}\OpenMPT.exe; Tasks: desktopicon
+Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenMPT; Filename: {app}\OpenMPT.exe; Tasks: quicklaunchicon
 
 [INI]
 ; internet shortcut
@@ -126,7 +126,7 @@ Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String
 [Run]
 ; duh
 Filename: "{app}\OMPT_{#GetAppVersionShort}_ReleaseNotes.html"; Description: "View Release Notes"; Flags: shellexec nowait postinstall skipifsilent
-Filename: {app}\mptrack.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
+Filename: {app}\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
 
 [InstallDelete]
 ; We no longer require unmo3
@@ -146,6 +146,8 @@ Type: dirifempty; Name: {app}\Plugins
 ; PLuginBridge uses arch naming now
 Type: files; Name: {app}\PluginBridge32.exe
 Type: files; Name: {app}\PluginBridge64.exe
+; mptrack got finally renamed to OpenMPT
+Type: files; Name: {app}\mptrack.exe
 
 [UninstallDelete]
 ; internet shortcut has to be deleted manually

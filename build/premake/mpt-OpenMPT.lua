@@ -21,20 +21,11 @@ end
   dofile "../../build/premake/premake-defaults.lua"
 	dofile "../../build/premake/premake-defaults-strict.lua"
 if stringmode == "UTF8" then
-  filter { "configurations:*Shared" }
    targetname "OpenMPT-UTF8"
-  filter { "not configurations:*Shared" }
-   targetname "mptrack-UTF8"
 elseif charset == "MBCS" then
-  filter { "configurations:*Shared" }
    targetname "OpenMPT-ANSI"
-  filter { "not configurations:*Shared" }
-   targetname "mptrack-ANSI"
 else
-  filter { "configurations:*Shared" }
    targetname "OpenMPT"
-  filter { "not configurations:*Shared" }
-   targetname "mptrack"
 end
   filter {}
   local extincludedirs = {

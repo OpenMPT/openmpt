@@ -38,8 +38,8 @@ copy /y ..\..\packageTemplate\Licenses\*.* .\Licenses\ || goto error
 rmdir /s /q extraKeymaps
 mkdir extraKeymaps
 copy /y ..\..\packageTemplate\extraKeymaps\*.* .\extraKeymaps\ || goto error
-copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\mptrack%MPT_VS_FLAVOUR%.exe .\ || goto error
-copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\mptrack%MPT_VS_FLAVOUR%.pdb .\ || goto error
+copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\OpenMPT%MPT_VS_FLAVOUR%.exe .\ || goto error
+copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\OpenMPT%MPT_VS_FLAVOUR%.pdb .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\openmpt-lame.dll .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\openmpt-lame.pdb .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\openmpt-mpg123.dll .\ || goto error
@@ -54,7 +54,7 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 ..\openmpt\bin.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
- mptrack%MPT_VS_FLAVOUR%.exe ^
+ OpenMPT%MPT_VS_FLAVOUR%.exe ^
  openmpt-lame.dll ^
  openmpt-mpg123.dll ^
  openmpt-soundtouch.dll ^
@@ -64,7 +64,7 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%
  extraKeymaps ^
  || goto error
 mkdir ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols || goto error
-..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols\mptrack%MPT_VS_FLAVOUR%.pdb.%MPT_PKG_FORMAT_SYMBOLS% mptrack%MPT_VS_FLAVOUR%.pdb || goto error
+..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols\OpenMPT%MPT_VS_FLAVOUR%.pdb.%MPT_PKG_FORMAT_SYMBOLS% OpenMPT%MPT_VS_FLAVOUR%.pdb || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols\openmpt-lame.pdb.%MPT_PKG_FORMAT_SYMBOLS% openmpt-lame.pdb || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols\openmpt-mpg123.pdb.%MPT_PKG_FORMAT_SYMBOLS% openmpt-mpg123.pdb || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT_SYMBOLS% -mx=9 ..\openmpt\dbg.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols\openmpt-soundtouch.pdb.%MPT_PKG_FORMAT_SYMBOLS% openmpt-soundtouch.pdb || goto error

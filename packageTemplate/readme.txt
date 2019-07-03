@@ -10,7 +10,7 @@ Installation
   plugin.cache to the directory into which you extract the archive.
 * If there is no previous installation or if you have an existing *standard*
   installation of OpenMPT, you're done: just extract the archive and launch
-  mptrack.exe.
+  OpenMPT.exe.
 * Hints on making an OpenMPT installation portable can be found in the
   System Setup chapter of the manual (OpenMPT Manual.chm).
 
@@ -57,7 +57,7 @@ Package contents
 * License.txt: OpenMPT license text.
 * Licenses (folder): Licenses of various other open source libraries used by
   OpenMPT.
-* mptrack.exe: Main executable.
+* OpenMPT.exe: Main executable.
 * PluginBridge-x86.exe: Plugin bridge server for 32-bit (x86) VST plugins.
 * PluginBridge-amd64.exe: Plugin bridge server for 64-bit (amd64) VST plugins.
 * open_settings_folder.bat: Opens settings folder (%APPDATA\OpenMPT).
