@@ -2114,6 +2114,7 @@ enum TimeStretchPitchShiftResult
 	kStretchTooLong,
 	kOutOfMemory,
 	kSampleTooShort,
+	kStretchInvalidSampleRate,
 };
 
 class DoPitchShiftTimeStretch : public CProgressDialog
@@ -2160,6 +2161,7 @@ public:
 		if(m_ratio == 1.0) return kAbort;
 		if(m_ratio < 0.5f) return kStretchTooShort;
 		if(m_ratio > 2.0f) return kStretchTooLong;
+		if(sampleRate > 192000) return kStretchInvalidSampleRate;
 
 		HANDLE handleSt = soundtouch_createInstance();
 		if(handleSt == NULL)
@@ -2579,6 +2581,9 @@ error:
 			break;
 		case kSampleTooShort:
 			_tcscpy(str, _T("Sample too short."));
+			break;
+		case kStretchInvalidSampleRate:
+			_tcscpy(str, _T("Sample rate must be 192,000 Hz or lower."));
 			break;
 		default:
 			_tcscpy(str, _T("Unknown Error."));
