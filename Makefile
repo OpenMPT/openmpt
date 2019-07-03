@@ -1209,6 +1209,7 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/dist.mk bin
 	svn export ./LICENSE            bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE
 	svn export ./README.md          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/README.md
 	svn export ./Makefile           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Makefile
+	svn export ./.clang-format      bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/.clang-format
 	svn export ./bin                bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin
 	svn export ./build/android_ndk  bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/android_ndk
 	svn export ./build/make         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/make
@@ -1248,6 +1249,7 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/dist.mk bin/svn
 	svn export ./LICENSE               bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE               --native-eol CRLF
 	svn export ./README.md             bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/README.md             --native-eol CRLF
 	svn export ./Makefile              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Makefile              --native-eol CRLF
+	svn export ./.clang-format         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/.clang-format         --native-eol CRLF
 	svn export ./bin                   bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin                   --native-eol CRLF
 	svn export ./build/genie/def              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/genie/def              --native-eol CRLF
 	svn export ./build/premake/def            bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/premake/def            --native-eol CRLF
