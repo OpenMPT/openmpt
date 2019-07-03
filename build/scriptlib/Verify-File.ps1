@@ -8,9 +8,11 @@ Function Get-FileHashWin7([String] $FileName, $HashName) {
 }
 Write-Output "Verify " $filename
 if ((Get-Item $filename).length -ne $filesize) {
+	Write-Output "Failed " $filename
 	exit 1
 }
 if ((Get-FileHashWin7 $filename $hashname) -ne $hashvalue) {
+	Write-Output "Failed " $filename
 	exit 1
 }
 exit 0

@@ -28,48 +28,31 @@ goto error
 if not exist "build\externals" mkdir "build\externals"
 if not exist "build\tools"     mkdir "build\tools"
 
-if "%MPT_DOWNLOAD%" == "yes" (
 
- if "x%1" == "xauto" (
-  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue e81805f2039c18d4311fb1e04297656f6efbbe600a7eda91c835375dad03dbe805dc6f704355cfd085600a0f755392e96df7a1d80d4b6f416e177314cc20d666 -filesize 1181017 -filename build/externals/7z1805.exe || del /Q build\externals\7z1805.exe
-  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 09bca8018272c3a4e7dd68f62a832acfe0581d3713f29473463725fa5c1708bc34b30a126b069e741e0e4939b645f6818e1f100cf1b2b021e851d132a6abcca5 -filesize  923870 -filename build/externals/7z1805-extra.7z || del /Q build\externals\7z1805-extra.7z
-  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 84e830c91a0e8ae499cc4814080da6569d8a6acbddc585c8b62abc86c809793aeb669b0a741063a379fd281ade85f120bc27efeb67d63bf961be893eec8bc3b3 -filesize  384846 -filename build/externals/7za920.zip || del /Q build\externals\7za920.zip
-  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue aba21883cd026a789395757f7dcc127d7d6372965693ddc3794c8adfc3a9675c255cedf2a87177729fa0b094e1bdb4de9d2e47555c61ddd6976c24d71cbd5e38 -filesize  422934 -filename build/externals/asiosdk2.3.zip || del /Q build\externals\asiosdk2.3.zip
-  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 2c1b1f0a29d40a91771ae21a5f733eedc10984cd182cb10c2793bbd24191a89f20612a3f23c34047f37fb06369016bfd4a52915ed1b4a56f8bd2b4ca6994eb31 -filesize 6526486 -filename build/externals/python-3.7.3-embed-win32.zip || del /Q build\externals\python-3.7.3-embed-win32.zip
-  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856 -filesize 3509072 -filename build/externals/htmlhelp.exe || del /Q build\externals\htmlhelp.exe
-  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue cb978a4c1b8641f9c85c65d37c774896d16ddb525c3835db0d351881282b62df0b5faa8fd6dcf460e8353a0f7686f3ad3d875fe40846e71b01ee94ac93cd567c -filesize 2359768 -filename build/externals/innosetup-5.6.1-unicode.exe || del /Q build\externals\innosetup-5.6.1-unicode.exe
-  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 99d468de185dd62aba845410babe04f70bc4a32ea71a86763c8ad1b8adb04d8425a8cf2e8c581b3e42bc555abc27facd07862ef74b4c322db26c9f388b2f44c4 -filesize  141049 -filename build/externals/innounp048.rar || del /Q build\externals\innounp048.rar
-  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5 -filesize  336166 -filename build/externals/WA5.55_SDK.exe || del /Q build\externals\WA5.55_SDK.exe
-  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 62c442d656d4bb380360368a0f5f01da11b4ed54333d7f54f875a9a5ec390b08921e00bd08e62cd7a0a5fe642e3377023f20a950cc2a42898ff4cda9ab88fc91 -filesize  322744 -filename build/externals/xmp-sdk.zip || del /Q build\externals\xmp-sdk.zip
- )
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.7-zip.org/a/7za920.zip"                                                              "build\externals\7za920.zip"                   84e830c91a0e8ae499cc4814080da6569d8a6acbddc585c8b62abc86c809793aeb669b0a741063a379fd281ade85f120bc27efeb67d63bf961be893eec8bc3b3  384846 || goto error
 
- call build\scriptlib\download.cmd "https://www.7-zip.org/a/7za920.zip"                                                              "build\externals\7za920.zip"      || goto error
- call build\scriptlib\download.cmd "https://www.7-zip.org/a/7z1805-extra.7z"                                                         "build\externals\7z1805-extra.7z" || goto error
- call build\scriptlib\download.cmd "https://www.7-zip.org/a/7z1805.exe"                                                              "build\externals\7z1805.exe"      || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.7-zip.org/a/7z1805-extra.7z"                                                         "build\externals\7z1805-extra.7z"              09bca8018272c3a4e7dd68f62a832acfe0581d3713f29473463725fa5c1708bc34b30a126b069e741e0e4939b645f6818e1f100cf1b2b021e851d132a6abcca5  923870 || goto error
 
- call build\scriptlib\download.cmd "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"                                   "build\externals\WA5.55_SDK.exe"  || goto error
- call build\scriptlib\download.cmd "https://www.un4seen.com/files/xmp-sdk.zip"                                                       "build\externals\xmp-sdk.zip"     || goto error
- call build\scriptlib\download.cmd "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                                          "build\externals\asiosdk2.3.zip"  || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.7-zip.org/a/7z1805.exe"                                                              "build\externals\7z1805.exe"                   e81805f2039c18d4311fb1e04297656f6efbbe600a7eda91c835375dad03dbe805dc6f704355cfd085600a0f755392e96df7a1d80d4b6f416e177314cc20d666 1181017 || goto error
 
- call build\scriptlib\download.cmd "https://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "build\externals\htmlhelp.exe"    || goto error
 
- call build\scriptlib\download.cmd "https://www.python.org/ftp/python/3.7.3/python-3.7.3-embed-win32.zip"                            "build\externals\python-3.7.3-embed-win32.zip" || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"                                   "build\externals\WA5.55_SDK.exe"               394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5  336166 || goto error
 
- call build\scriptlib\download.cmd "https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.48/innounp048.rar"  "build\externals\innounp048.rar"               || goto error
- call build\scriptlib\download.cmd "http://files.jrsoftware.org/is/5/innosetup-5.6.1-unicode.exe"                                    "build\externals\innosetup-5.6.1-unicode.exe"  || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.un4seen.com/files/xmp-sdk.zip"                                                       "build\externals\xmp-sdk.zip"                  62c442d656d4bb380360368a0f5f01da11b4ed54333d7f54f875a9a5ec390b08921e00bd08e62cd7a0a5fe642e3377023f20a950cc2a42898ff4cda9ab88fc91  322744 || goto error
 
-)
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                                          "build\externals\asiosdk2.3.zip"               aba21883cd026a789395757f7dcc127d7d6372965693ddc3794c8adfc3a9675c255cedf2a87177729fa0b094e1bdb4de9d2e47555c61ddd6976c24d71cbd5e38  422934 || goto error
 
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue e81805f2039c18d4311fb1e04297656f6efbbe600a7eda91c835375dad03dbe805dc6f704355cfd085600a0f755392e96df7a1d80d4b6f416e177314cc20d666 -filesize 1181017 -filename build/externals/7z1805.exe || goto error
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 09bca8018272c3a4e7dd68f62a832acfe0581d3713f29473463725fa5c1708bc34b30a126b069e741e0e4939b645f6818e1f100cf1b2b021e851d132a6abcca5 -filesize  923870 -filename build/externals/7z1805-extra.7z || goto error
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 84e830c91a0e8ae499cc4814080da6569d8a6acbddc585c8b62abc86c809793aeb669b0a741063a379fd281ade85f120bc27efeb67d63bf961be893eec8bc3b3 -filesize  384846 -filename build/externals/7za920.zip || goto error
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue aba21883cd026a789395757f7dcc127d7d6372965693ddc3794c8adfc3a9675c255cedf2a87177729fa0b094e1bdb4de9d2e47555c61ddd6976c24d71cbd5e38 -filesize  422934 -filename build/externals/asiosdk2.3.zip || goto error
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 2c1b1f0a29d40a91771ae21a5f733eedc10984cd182cb10c2793bbd24191a89f20612a3f23c34047f37fb06369016bfd4a52915ed1b4a56f8bd2b4ca6994eb31 -filesize 6526486 -filename build/externals/python-3.7.3-embed-win32.zip || goto error
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856 -filesize 3509072 -filename build/externals/htmlhelp.exe || goto error
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue cb978a4c1b8641f9c85c65d37c774896d16ddb525c3835db0d351881282b62df0b5faa8fd6dcf460e8353a0f7686f3ad3d875fe40846e71b01ee94ac93cd567c -filesize 2359768 -filename build/externals/innosetup-5.6.1-unicode.exe || goto error
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 99d468de185dd62aba845410babe04f70bc4a32ea71a86763c8ad1b8adb04d8425a8cf2e8c581b3e42bc555abc27facd07862ef74b4c322db26c9f388b2f44c4 -filesize  141049 -filename build/externals/innounp048.rar || goto error
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5 -filesize  336166 -filename build/externals/WA5.55_SDK.exe || goto error
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 62c442d656d4bb380360368a0f5f01da11b4ed54333d7f54f875a9a5ec390b08921e00bd08e62cd7a0a5fe642e3377023f20a950cc2a42898ff4cda9ab88fc91 -filesize  322744 -filename build/externals/xmp-sdk.zip || goto error
+
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "build\externals\htmlhelp.exe"                 d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856 3509072 || goto error
+
+
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.python.org/ftp/python/3.7.3/python-3.7.3-embed-win32.zip"                            "build\externals\python-3.7.3-embed-win32.zip" 2c1b1f0a29d40a91771ae21a5f733eedc10984cd182cb10c2793bbd24191a89f20612a3f23c34047f37fb06369016bfd4a52915ed1b4a56f8bd2b4ca6994eb31 6526486 || goto error
+
+
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.48/innounp048.rar"  "build\externals\innounp048.rar"               99d468de185dd62aba845410babe04f70bc4a32ea71a86763c8ad1b8adb04d8425a8cf2e8c581b3e42bc555abc27facd07862ef74b4c322db26c9f388b2f44c4  141049 || goto error
+
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "http://files.jrsoftware.org/is/5/innosetup-5.6.1-unicode.exe"                                    "build\externals\innosetup-5.6.1-unicode.exe"  cb978a4c1b8641f9c85c65d37c774896d16ddb525c3835db0d351881282b62df0b5faa8fd6dcf460e8353a0f7686f3ad3d875fe40846e71b01ee94ac93cd567c 2359768 || goto error
+
 
 call :killdir "build\tools\7zipold" || goto error
 call :killdir "build\tools\7zipa" || goto error
