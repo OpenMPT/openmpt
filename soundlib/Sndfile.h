@@ -61,9 +61,9 @@ OPENMPT_NAMESPACE_BEGIN
 // MODULAR ModInstrument FIELD ACCESS : body content in InstrumentExtensions.cpp
 // -----------------------------------------------------------------------------
 #ifndef MODPLUG_NO_FILESAVE
-extern void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code = -1 /* -1 for all */, uint16 fixedsize = 0);
+void WriteInstrumentHeaderStructOrField(ModInstrument * input, FILE * file, uint32 only_this_code = -1 /* -1 for all */, uint16 fixedsize = 0);
 #endif // !MODPLUG_NO_FILESAVE
-extern bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, uint16 fsize, FileReader &file);
+bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, uint16 fsize, FileReader &file);
 // --------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------
 
