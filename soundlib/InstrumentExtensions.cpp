@@ -180,7 +180,7 @@ bool IsNegative(const T &val)
 	} \
 	if(only_this_code == fcode || only_this_code == Util::MaxValueOfType(only_this_code)) \
 	{ \
-		type tmp = input-> name; \
+		type tmp = (type)(input-> name ); \
 		mpt::IO::WriteIntLE(file, tmp); \
 	} \
 /**/
@@ -287,16 +287,16 @@ bool IsNegative(const T &val)
 // Write (in 'file') 'input' ModInstrument with 'code' & 'size' extra field infos for each member
 void WriteInstrumentHeaderStructOrField(ModInstrument * input, std::ostream &file, uint32 only_this_code, uint16 fixedsize)
 {
-uint32 fcode;
-uint16 fsize;
-// If true, all extension are written to the file; otherwise only the specified extension is written.
-// writeAll is true iff we are saving an instrument (or, hypothetically, the legacy ITP format)
-const bool writeAll = only_this_code == Util::MaxValueOfType(only_this_code);
+	uint32 fcode;
+	uint16 fsize;
+	// If true, all extension are written to the file; otherwise only the specified extension is written.
+	// writeAll is true iff we are saving an instrument (or, hypothetically, the legacy ITP format)
+	const bool writeAll = only_this_code == Util::MaxValueOfType(only_this_code);
 
-if(!writeAll)
-{
-	MPT_ASSERT(fixedsize > 0);
-}
+	if(!writeAll)
+	{
+		MPT_ASSERT(fixedsize > 0);
+	}
 
 	WRITE_MPTHEADER_sized_member(	nFadeOut					, uint32	, MagicBE("FO..")	)
 	WRITE_MPTHEADER_sized_member(	nPan						, uint32	, MagicBE("P...")	)

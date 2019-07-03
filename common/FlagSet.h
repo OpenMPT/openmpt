@@ -195,8 +195,7 @@ public:
 	{
 		return load();
 	}
-	// The macro-based extended instrument fields writer in InstrumentExtensions.cpp currently needs this conversion.
-	/*MPT_DEPRECATED*/ MPT_CONSTEXPR11_FUN operator store_type () const noexcept
+	MPT_CONSTEXPR11_FUN explicit operator store_type () const noexcept
 	{
 		return load().as_bits();
 	}
