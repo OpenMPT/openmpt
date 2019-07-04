@@ -2221,7 +2221,7 @@ public:
 	TimeStretchPitchShiftResult TimeStretch()
 	{
 		ModSample &sample = m_modDoc.GetSoundFile().GetSample(m_sample);
-		const uint32 nSampleRate = sample.GetSampleRate(m_modDoc.GetModType());
+		const uint32 sampleRate = sample.GetSampleRate(m_modDoc.GetModType());
 
 		if(!sample.HasSampleData()) return kAbort;
 
@@ -2250,7 +2250,7 @@ public:
 		const uint8 nChn = sample.GetNumChannels();
 
 		// Initialize soundtouch object.
-		soundtouch_setSampleRate(handleSt, nSampleRate);
+		soundtouch_setSampleRate(handleSt, sampleRate);
 		soundtouch_setChannels(handleSt, nChn);
 
 		// Given ratio is time stretch ratio, and must be converted to
