@@ -35,11 +35,11 @@ How to compile
 
  -  Supported Visual Studio versions:
 
-     -  Visual Studio 2017 Community/Professional/Enterprise
+     -  Visual Studio 2017 and 2019 Community/Professional/Enterprise
 
-        To compile the project, open `build/vs2017win7/OpenMPT.sln` and hit the
-        compile button. Other target systems can be found in the `vs2017*`
-        sibling folders.
+        To compile the project, open `build/vsVERSIONwin7/OpenMPT.sln` (VERSION
+        being 2017 or 2019) and hit the compile button. Other target systems can
+        be found in the `vs2017*` and `vs2019*` sibling folders.
 
  -  OpenMPT requires the compile host system to be 64bit x86-64.
 
@@ -100,8 +100,8 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
  -  Visual Studio:
 
-     -  You will find solutions for Visual Studio 2017 in the corresponding
-        `build/vsVERSIONwin7/` folder.
+     -  You will find solutions for Visual Studio 2017 and 2019 in the
+        corresponding `build/vsVERSIONwin7/` folder.
         Projects that target Windows versions before Windows 7 are available in
         `build/vsVERSIONwinxp/`.
         Projects that target Windows 10 1709 Desktop (10.0.16299.0, including
