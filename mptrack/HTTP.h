@@ -102,10 +102,12 @@ enum class Protocol
 };
 
 
-using Port = uint16;
-constexpr Port PortDefault = 0;
-constexpr Port PortHTTP = 80;
-constexpr Port PortHTTPS = 443;
+enum class Port : uint16
+{
+	Default = 0,
+	HTTP    = 80,
+	HTTPS   = 443,
+};
 
 
 enum class Method
@@ -161,7 +163,7 @@ struct Request
 {
 	Protocol protocol = Protocol::HTTPS;
 	mpt::ustring host;
-	Port port = PortDefault;
+	Port port = Port::Default;
 	mpt::ustring username;
 	mpt::ustring password;
 	Method method = Method::Get;

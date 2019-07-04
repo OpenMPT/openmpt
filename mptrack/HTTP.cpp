@@ -289,14 +289,14 @@ public:
 Result Request::operator()(InternetSession &internet) const
 {
 	Port actualPort = port;
-	if(actualPort == PortDefault)
+	if(actualPort == Port::Default)
 	{
-		actualPort = (protocol != Protocol::HTTP) ? PortHTTPS : PortHTTP;
+		actualPort = (protocol != Protocol::HTTP) ? Port::HTTPS : Port::HTTP;
 	}
 	Handle connection = NativeHandle(InternetConnect(
 		NativeHandle(internet),
 		mpt::ToWin(host).c_str(),
-		actualPort,
+		static_cast<uint16>(actualPort),
 		!username.empty() ? mpt::ToWin(username).c_str() : NULL,
 		!password.empty() ? mpt::ToWin(password).c_str() : NULL,
 		INTERNET_SERVICE_HTTP,
@@ -415,10 +415,10 @@ Request &Request::SetURI(const URI &uri)
 	host = uri.host;
 	if(!uri.port.empty())
 	{
-		port = ConvertStrTo<HTTP::Port>(uri.port);
+		port = HTTP::Port(ConvertStrTo<uint16>(uri.port));
 	} else
 	{
-		port = HTTP::PortDefault;
+		port = HTTP::Port::Default;
 	}
 	username = uri.username;
 	password = uri.password;
@@ -457,9 +457,9 @@ Request &Request::InsecureTLSDowngradeWindowsXP()
 		{
 			protocol = Protocol::HTTP;
 		}
-		if(port == PortHTTPS)
+		if(port == Port::HTTPS)
 		{
-			port = PortHTTP;
+			port = Port::HTTP;
 		}
 	}
 	return *this;
