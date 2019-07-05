@@ -2070,7 +2070,7 @@ static void MixSampleLoop(SmpLength numSamples, const Tsrc *src, uint8 srcInc, i
 }
 
 
-static void MixSample(const ModSample &sample, SmpLength offset, int amplify, uint8 chn, uint8 newNumChannels, int16 *pNewSample)
+static void MixSampleOnto(const ModSample &sample, SmpLength offset, int amplify, uint8 chn, uint8 newNumChannels, int16 *pNewSample)
 {
 	uint8 numChannels = sample.GetNumChannels();
 	switch(sample.GetElementarySampleSize())
@@ -2159,8 +2159,8 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 				selEnd = selBegin + sample.nLength;
 				for(uint8 chn = 0; chn < newNumChannels; chn++)
 				{
-					MixSample(oldSample, 0, CMixSampleDlg::amplifyOriginal, chn, newNumChannels, pNewSample);
-					MixSample(sample, CMixSampleDlg::sampleOffset, CMixSampleDlg::amplifyMix, chn, newNumChannels, pNewSample);
+					MixSampleOnto(oldSample, 0, CMixSampleDlg::amplifyOriginal, chn, newNumChannels, pNewSample);
+					MixSampleOnto(sample, CMixSampleDlg::sampleOffset, CMixSampleDlg::amplifyMix, chn, newNumChannels, pNewSample);
 				}
 				sndFile.DestroySample(m_nSample);
 				sample = oldSample;

@@ -176,6 +176,7 @@ MPT_FILES_SOUNDBASE =
 MPT_FILES_SOUNDBASE += soundbase/SampleFormat.h
 MPT_FILES_SOUNDBASE += soundbase/SampleFormatConverters.h
 MPT_FILES_SOUNDBASE += soundbase/SampleFormatCopy.h
+MPT_FILES_SOUNDBASE += soundbase/SampleTypes.h
 MPT_FILES_SOUNDLIB = 
 MPT_FILES_SOUNDLIB += soundlib/AudioCriticalSection.cpp
 MPT_FILES_SOUNDLIB += soundlib/AudioCriticalSection.h
