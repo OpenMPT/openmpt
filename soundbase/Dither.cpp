@@ -38,7 +38,7 @@ mpt::ustring Dither::GetModeName(DitherMode mode)
 #pragma warning(disable : 4731)  // ebp modified
 #endif
 
-void X86_Dither(int32 *pBuffer, uint32 nSamples, uint32 nBits, DitherModPlugState *state)
+static void X86_Dither(int32 *pBuffer, uint32 nSamples, uint32 nBits, DitherModPlugState &state)
 {
 	const int MIXING_ATTENUATION = MixSampleIntTraits::mix_headroom_bits();
 	if(nBits + MIXING_ATTENUATION + 1 >= 32) //if(nBits>16)
@@ -46,10 +46,8 @@ void X86_Dither(int32 *pBuffer, uint32 nSamples, uint32 nBits, DitherModPlugStat
 		return;
 	}
 
-	static int gDitherA_global, gDitherB_global;
-
-	int gDitherA = state ? state->rng_a : gDitherA_global;
-	int gDitherB = state ? state->rng_b : gDitherB_global;
+	int gDitherA = state.rng_a;
+	int gDitherB = state.rng_b;
 
 	_asm {
 	mov esi, pBuffer	// esi = pBuffer+i
@@ -81,8 +79,8 @@ noiseloop:
 	mov gDitherB, ebx
 	}
 
-	if(state) state->rng_a = gDitherA; else gDitherA_global = gDitherA;
-	if(state) state->rng_b = gDitherB; else gDitherB_global = gDitherB;
+	state.rng_a = gDitherA;
+	state.rng_b = gDitherB;
 
 }
 
@@ -102,18 +100,15 @@ static MPT_FORCEINLINE int32 dither_rand(uint32 &a, uint32 &b)
 	return static_cast<int32>(b);
 }
 
-static void C_Dither(MixSampleInt *pBuffer, std::size_t count, uint32 nBits, DitherModPlugState *state)
+static void C_Dither(MixSampleInt *pBuffer, std::size_t count, uint32 nBits, DitherModPlugState &state)
 {
 	if(nBits + MixSampleIntTraits::mix_headroom_bits() + 1 >= 32)  //if(nBits>16)
 	{
 		return;
 	}
 
-	static uint32 global_a = 0;
-	static uint32 global_b = 0;
-
-	uint32 a = state ? state->rng_a : global_a;
-	uint32 b = state ? state->rng_b : global_b;
+	uint32 a = state.rng_a;
+	uint32 b = state.rng_b;
 
 	while(count--)
 	{
@@ -121,8 +116,8 @@ static void C_Dither(MixSampleInt *pBuffer, std::size_t count, uint32 nBits, Dit
 		pBuffer++;
 	}
 
-	if(state) state->rng_a = a; else global_a = a;
-	if(state) state->rng_b = b; else global_b = b;
+	state.rng_a = a;
+	state.rng_b = b;
 
 }
 
@@ -131,11 +126,11 @@ static void Dither_ModPlug(MixSampleInt *pBuffer, std::size_t count, std::size_t
 #ifdef ENABLE_X86
 	if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
 	{
-		X86_Dither(pBuffer, count * channels, nBits, &state);
+		X86_Dither(pBuffer, count * channels, nBits, state);
 	} else
 #endif // ENABLE_X86
 	{
-		C_Dither(pBuffer, count * channels, nBits, &state);
+		C_Dither(pBuffer, count * channels, nBits, state);
 	}
 }
 
