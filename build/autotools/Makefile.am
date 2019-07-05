@@ -190,7 +190,6 @@ MPT_FILES_SOUNDLIB += soundlib/ContainerPP20.cpp
 MPT_FILES_SOUNDLIB += soundlib/ContainerUMX.cpp
 MPT_FILES_SOUNDLIB += soundlib/ContainerXPK.cpp
 MPT_FILES_SOUNDLIB += soundlib/Container.h
-MPT_FILES_SOUNDLIB += soundlib/Dither.h
 MPT_FILES_SOUNDLIB += soundlib/Dlsbank.cpp
 MPT_FILES_SOUNDLIB += soundlib/Dlsbank.h
 MPT_FILES_SOUNDLIB += soundlib/Fastmix.cpp
