@@ -27,8 +27,6 @@ Dependencies
             static_assert)
          *  `sizeof(char) == 1` (enforced by static_assert)
          *  existence of `std::uintptr_t` (enforced by static_assert)
-         *  `sizeof(float) == 4` (enforced by static_assert)
-         *  `sizeof(double) == 8` (enforced by static_assert)
          *  `wchar_t` encoding is either UTF-16 or UTF-32 (implicitly assumed)
          *  representation of basic source character set is ASCII (implicitly
             assumed)
