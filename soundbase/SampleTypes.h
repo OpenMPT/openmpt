@@ -37,13 +37,13 @@ struct MixSampleIntTraitsImpl
 	using sample_base_type = Tsample;
 	enum class sample_type : sample_base_type {};
 	static constexpr int mix_headroom_bits() noexcept { return static_cast<int>(MIX_HEADROOM_BITS); }
-	static constexpr int mix_precision_bits() noexcept { return static_cast<int>((sizeof(Tsample) * 8) - MIX_HEADROOM_BITS); }       // include sign bit
-	static constexpr int mix_fractional_bits() noexcept { return static_cast<int>((sizeof(Tsample) * 8) - 1 - MIX_HEADROOM_BITS); }  // exclusing sign bit
+	static constexpr int mix_precision_bits() noexcept { return static_cast<int>((sizeof(Tsample) * 8) - MIX_HEADROOM_BITS); }       // including sign bit
+	static constexpr int mix_fractional_bits() noexcept { return static_cast<int>((sizeof(Tsample) * 8) - 1 - MIX_HEADROOM_BITS); }  // excluding sign bit
 	static constexpr sample_base_type mix_clip_max() noexcept { return ((sample_base_type(1) << mix_fractional_bits()) - sample_base_type(1)); }
 	static constexpr sample_base_type mix_clip_min() noexcept { return -((sample_base_type(1) << mix_fractional_bits()) - sample_base_type(1)); }
 	static constexpr int filter_headroom_bits() noexcept { return static_cast<int>(FILTER_HEADROOM_BITS); }
-	static constexpr int filter_precision_bits() noexcept { return static_cast<int>((sizeof(Tsample) * 8) - FILTER_HEADROOM_BITS); }       // include sign bit
-	static constexpr int filter_fractional_bits() noexcept { return static_cast<int>((sizeof(Tsample) * 8) - 1 - FILTER_HEADROOM_BITS); }  // exclusing sign bit
+	static constexpr int filter_precision_bits() noexcept { return static_cast<int>((sizeof(Tsample) * 8) - FILTER_HEADROOM_BITS); }       // including sign bit
+	static constexpr int filter_fractional_bits() noexcept { return static_cast<int>((sizeof(Tsample) * 8) - 1 - FILTER_HEADROOM_BITS); }  // excluding sign bit
 	template <typename Tfloat>
 	static constexpr Tfloat mix_scale() noexcept { return static_cast<Tfloat>(sample_base_type(1) << mix_fractional_bits()); };
 };
