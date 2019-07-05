@@ -31,12 +31,12 @@ mpt::ustring Dither::GetModeName(DitherMode mode)
 }
 
 
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4731) // ebp modified
-#endif
-
-
 #ifdef ENABLE_X86
+
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4731)  // ebp modified
+#endif
 
 void X86_Dither(int32 *pBuffer, uint32 nSamples, uint32 nBits, DitherModPlugState *state)
 {
@@ -85,6 +85,10 @@ noiseloop:
 	if(state) state->rng_b = gDitherB; else gDitherB_global = gDitherB;
 
 }
+
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #endif // ENABLE_X86
 
