@@ -18,10 +18,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//////////////////////////////////////////////////////////////////////////
-// Noise Shaping (Dithering)
-
-
 mpt::ustring Dither::GetModeName(DitherMode mode)
 {
 	switch(mode)
