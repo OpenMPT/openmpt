@@ -45,7 +45,7 @@ struct MixSampleIntTraitsImpl
 	static constexpr int filter_precision_bits() noexcept { return static_cast<int>((sizeof(Tsample) * 8) - FILTER_HEADROOM_BITS); }       // including sign bit
 	static constexpr int filter_fractional_bits() noexcept { return static_cast<int>((sizeof(Tsample) * 8) - 1 - FILTER_HEADROOM_BITS); }  // excluding sign bit
 	template <typename Tfloat>
-	static constexpr Tfloat mix_scale() noexcept { return static_cast<Tfloat>(sample_base_type(1) << mix_fractional_bits()); };
+	static constexpr Tfloat mix_scale() noexcept { return static_cast<Tfloat>(sample_base_type(1) << mix_fractional_bits()); }
 };
 
 using MixSampleIntTraits = MixSampleIntTraitsImpl<int32, 4, 8>;
