@@ -183,6 +183,9 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h">
       <Filter>libopenmpt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundbase\Dither.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundbase\SampleFormat.h">
       <Filter>soundbase</Filter>
     </ClInclude>
@@ -220,9 +223,6 @@
       <Filter>soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\Container.h">
-      <Filter>soundlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\soundlib\Dither.h">
       <Filter>soundlib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\Dlsbank.h">
@@ -506,6 +506,9 @@
     <ClCompile Include="..\..\libopenmpt\libopenmpt_test.cpp">
       <Filter>libopenmpt</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundbase\Dither.cpp">
+      <Filter>soundbase</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\sounddsp\AGC.cpp">
       <Filter>sounddsp</Filter>
     </ClCompile>
@@ -531,9 +534,6 @@
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ContainerXPK.cpp">
-      <Filter>soundlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Dither.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Dlsbank.cpp">

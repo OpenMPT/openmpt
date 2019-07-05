@@ -19,7 +19,7 @@
 #include "../soundlib/AudioCriticalSection.h"
 #include "../common/mptMutex.h"
 #include "../soundlib/Sndfile.h"
-#include "../soundlib/Dither.h"
+#include "../soundbase/Dither.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

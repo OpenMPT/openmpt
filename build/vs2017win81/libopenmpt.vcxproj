@@ -740,6 +740,7 @@
     <ClInclude Include="..\..\common\stdafx.h" />
     <ClInclude Include="..\..\common\version.h" />
     <ClInclude Include="..\..\common\versionNumber.h" />
+    <ClInclude Include="..\..\soundbase\Dither.h" />
     <ClInclude Include="..\..\soundbase\SampleFormat.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatConverters.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />
@@ -749,7 +750,6 @@
     <ClInclude Include="..\..\soundlib\BitReader.h" />
     <ClInclude Include="..\..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\..\soundlib\Container.h" />
-    <ClInclude Include="..\..\soundlib\Dither.h" />
     <ClInclude Include="..\..\soundlib\Dlsbank.h" />
     <ClInclude Include="..\..\soundlib\FloatMixer.h" />
     <ClInclude Include="..\..\soundlib\IntMixer.h" />
@@ -874,6 +874,8 @@
     </ClCompile>
     <ClCompile Include="..\..\common\version.cpp">
     </ClCompile>
+    <ClCompile Include="..\..\soundbase\Dither.cpp">
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ContainerMMCMP.cpp">
@@ -883,8 +885,6 @@
     <ClCompile Include="..\..\soundlib\ContainerUMX.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ContainerXPK.cpp">
-    </ClCompile>
-    <ClCompile Include="..\..\soundlib\Dither.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Dlsbank.cpp">
     </ClCompile>

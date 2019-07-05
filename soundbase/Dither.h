@@ -14,7 +14,7 @@
 #include "BuildSettings.h"
 
 
-#include "../soundbase/SampleTypes.h"
+#include "SampleTypes.h"
 #include "../common/mptRandom.h"
 
 

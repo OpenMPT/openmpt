@@ -20,7 +20,7 @@
 #include "../common/version.h"
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/MixerLoops.h"
-#include "../soundlib/Dither.h"
+#include "../soundbase/Dither.h"
 #include "../soundlib/AudioReadTarget.h"
 #include "../soundlib/plugins/PlugInterface.h"
 

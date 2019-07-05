@@ -652,6 +652,7 @@
     <ClInclude Include="..\..\mptrack\wine\NativeSoundDevice.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeSoundDeviceMarshalling.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeUtils.h" />
+    <ClInclude Include="..\..\soundbase\Dither.h" />
     <ClInclude Include="..\..\soundbase\SampleFormat.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatConverters.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />
@@ -695,6 +696,7 @@
     <ClCompile Include="..\..\mptrack\wine\Native.cpp" />
     <ClCompile Include="..\..\mptrack\wine\NativeSoundDevice.cpp" />
     <ClCompile Include="..\..\mptrack\wine\NativeUtils.cpp" />
+    <ClCompile Include="..\..\soundbase\Dither.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDevice.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceASIO.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp" />

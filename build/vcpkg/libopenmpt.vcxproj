@@ -438,6 +438,7 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h" />
+    <ClInclude Include="..\..\soundbase\Dither.h" />
     <ClInclude Include="..\..\soundbase\SampleFormat.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatConverters.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />
@@ -451,7 +452,6 @@
     <ClInclude Include="..\..\soundlib\BitReader.h" />
     <ClInclude Include="..\..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\..\soundlib\Container.h" />
-    <ClInclude Include="..\..\soundlib\Dither.h" />
     <ClInclude Include="..\..\soundlib\Dlsbank.h" />
     <ClInclude Include="..\..\soundlib\FloatMixer.h" />
     <ClInclude Include="..\..\soundlib\ITCompression.h" />
@@ -542,6 +542,7 @@
     <ClCompile Include="..\..\libopenmpt\libopenmpt_cxx.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_ext_impl.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_impl.cpp" />
+    <ClCompile Include="..\..\soundbase\Dither.cpp" />
     <ClCompile Include="..\..\sounddsp\AGC.cpp" />
     <ClCompile Include="..\..\sounddsp\DSP.cpp" />
     <ClCompile Include="..\..\sounddsp\EQ.cpp" />
@@ -551,7 +552,6 @@
     <ClCompile Include="..\..\soundlib\ContainerPP20.cpp" />
     <ClCompile Include="..\..\soundlib\ContainerUMX.cpp" />
     <ClCompile Include="..\..\soundlib\ContainerXPK.cpp" />
-    <ClCompile Include="..\..\soundlib\Dither.cpp" />
     <ClCompile Include="..\..\soundlib\Dlsbank.cpp" />
     <ClCompile Include="..\..\soundlib\Fastmix.cpp" />
     <ClCompile Include="..\..\soundlib\ITCompression.cpp" />

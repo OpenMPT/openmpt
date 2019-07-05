@@ -888,6 +888,7 @@
     <ClInclude Include="..\..\mptrack\view_com.h" />
     <ClInclude Include="..\..\pluginBridge\BridgeCommon.h" />
     <ClInclude Include="..\..\pluginBridge\BridgeWrapper.h" />
+    <ClInclude Include="..\..\soundbase\Dither.h" />
     <ClInclude Include="..\..\soundbase\SampleFormat.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatConverters.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />
@@ -913,7 +914,6 @@
     <ClInclude Include="..\..\soundlib\BitReader.h" />
     <ClInclude Include="..\..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\..\soundlib\Container.h" />
-    <ClInclude Include="..\..\soundlib\Dither.h" />
     <ClInclude Include="..\..\soundlib\Dlsbank.h" />
     <ClInclude Include="..\..\soundlib\FloatMixer.h" />
     <ClInclude Include="..\..\soundlib\ITCompression.h" />
@@ -1119,6 +1119,7 @@
     <ClCompile Include="..\..\mptrack\tuningRatioMapWnd.cpp" />
     <ClCompile Include="..\..\mptrack\view_com.cpp" />
     <ClCompile Include="..\..\pluginBridge\BridgeWrapper.cpp" />
+    <ClCompile Include="..\..\soundbase\Dither.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDevice.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceASIO.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp" />
@@ -1140,7 +1141,6 @@
     <ClCompile Include="..\..\soundlib\ContainerPP20.cpp" />
     <ClCompile Include="..\..\soundlib\ContainerUMX.cpp" />
     <ClCompile Include="..\..\soundlib\ContainerXPK.cpp" />
-    <ClCompile Include="..\..\soundlib\Dither.cpp" />
     <ClCompile Include="..\..\soundlib\Dlsbank.cpp" />
     <ClCompile Include="..\..\soundlib\Fastmix.cpp" />
     <ClCompile Include="..\..\soundlib\ITCompression.cpp" />

@@ -111,12 +111,12 @@ LOCAL_SRC_FILES += \
 	libopenmpt/libopenmpt_cxx.cpp \
 	libopenmpt/libopenmpt_impl.cpp \
 	libopenmpt/libopenmpt_ext_impl.cpp \
+	soundbase/Dither.cpp \
 	soundlib/AudioCriticalSection.cpp \
 	soundlib/ContainerMMCMP.cpp \
 	soundlib/ContainerPP20.cpp \
 	soundlib/ContainerUMX.cpp \
 	soundlib/ContainerXPK.cpp \
-	soundlib/Dither.cpp \
 	soundlib/Dlsbank.cpp \
 	soundlib/Fastmix.cpp \
 	soundlib/InstrumentExtensions.cpp \

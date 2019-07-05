@@ -12,10 +12,10 @@
 #include "BuildSettings.h"
 
 #include "Sndfile.h"
-#include "Dither.h"
 #include "../soundbase/SampleFormat.h"
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
+#include "../soundbase/Dither.h"
 #include "MixerLoops.h"
 #include "Mixer.h"
 
