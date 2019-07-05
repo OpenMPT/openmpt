@@ -422,7 +422,7 @@ static MPT_ENDIAN_CONSTEXPR_FUN char   SwapBytes(char   value) noexcept { return
 // 1.0f --> 0x3f800000u
 static MPT_FORCEINLINE uint32 EncodeIEEE754binary32(float32 f)
 {
-	MPT_CONSTANT_IF(std::numeric_limits<float32>::is_iec559 && mpt::endian_known())
+	MPT_CONSTANT_IF(mpt::float_traits<float32>::is_ieee754_binary32ne)
 	{
 		return mpt::bit_cast<uint32>(f);
 	} else
@@ -454,7 +454,7 @@ static MPT_FORCEINLINE uint32 EncodeIEEE754binary32(float32 f)
 }
 static MPT_FORCEINLINE uint64 EncodeIEEE754binary64(float64 f)
 {
-	MPT_CONSTANT_IF(std::numeric_limits<float64>::is_iec559 && mpt::endian_known())
+	MPT_CONSTANT_IF(mpt::float_traits<float64>::is_ieee754_binary64ne)
 	{
 		return mpt::bit_cast<uint64>(f);
 	} else
@@ -488,7 +488,7 @@ static MPT_FORCEINLINE uint64 EncodeIEEE754binary64(float64 f)
 // 0x3f800000u --> 1.0f
 static MPT_FORCEINLINE float32 DecodeIEEE754binary32(uint32 i)
 {
-	MPT_CONSTANT_IF(std::numeric_limits<float32>::is_iec559 && mpt::endian_known())
+	MPT_CONSTANT_IF(mpt::float_traits<float32>::is_ieee754_binary32ne)
 	{
 		return mpt::bit_cast<float32>(i);
 	} else
@@ -514,7 +514,7 @@ static MPT_FORCEINLINE float32 DecodeIEEE754binary32(uint32 i)
 }
 static MPT_FORCEINLINE float64 DecodeIEEE754binary64(uint64 i)
 {
-	MPT_CONSTANT_IF(std::numeric_limits<float64>::is_iec559 && mpt::endian_known())
+	MPT_CONSTANT_IF(mpt::float_traits<float64>::is_ieee754_binary64ne)
 	{
 		return mpt::bit_cast<float64>(i);
 	} else
@@ -842,7 +842,7 @@ template <> struct is_binary_safe< IEEE754binary32Native<> > : public std::true_
 template <> struct is_binary_safe< IEEE754binary64Native<> > : public std::true_type { };
 }
 
-template <bool is_iec559, mpt::endian endian = mpt::endian::native> struct IEEE754binary_types {
+template <bool is_ieee754, mpt::endian endian = mpt::endian::native> struct IEEE754binary_types {
 	using IEEE754binary32LE = IEEE754binary32EmulatedLE;
 	using IEEE754binary32BE = IEEE754binary32EmulatedBE;
 	using IEEE754binary64LE = IEEE754binary64EmulatedLE;
@@ -861,10 +861,10 @@ template <> struct IEEE754binary_types<true, mpt::endian::big> {
 	using IEEE754binary64BE = IEEE754binary64Native<>;
 };
 
-using IEEE754binary32LE = IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary32LE;
-using IEEE754binary32BE = IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary32BE;
-using IEEE754binary64LE = IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary64LE;
-using IEEE754binary64BE = IEEE754binary_types<std::numeric_limits<float32>::is_iec559 && std::numeric_limits<float64>::is_iec559, mpt::endian::native>::IEEE754binary64BE;
+using IEEE754binary32LE = IEEE754binary_types<mpt::float_traits<float32>::is_ieee754_binary32ne, mpt::endian::native>::IEEE754binary32LE;
+using IEEE754binary32BE = IEEE754binary_types<mpt::float_traits<float32>::is_ieee754_binary32ne, mpt::endian::native>::IEEE754binary32BE;
+using IEEE754binary64LE = IEEE754binary_types<mpt::float_traits<float64>::is_ieee754_binary64ne, mpt::endian::native>::IEEE754binary64LE;
+using IEEE754binary64BE = IEEE754binary_types<mpt::float_traits<float64>::is_ieee754_binary64ne, mpt::endian::native>::IEEE754binary64BE;
 
 STATIC_ASSERT(sizeof(IEEE754binary32LE) == 4);
 STATIC_ASSERT(sizeof(IEEE754binary32BE) == 4);

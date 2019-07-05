@@ -30,6 +30,26 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
+namespace mpt
+{
+template <bool cond, typename Ta, typename Tb>
+struct select_type
+{
+};
+template <typename Ta, typename Tb>
+struct select_type<true, Ta, Tb>
+{
+	using type = Ta;
+};
+template <typename Ta, typename Tb>
+struct select_type<false, Ta, Tb>
+{
+	using type = Tb;
+};
+} // namespace mpt
+
+
+
 using int8   = std::int8_t;
 using int16  = std::int16_t;
 using int32  = std::int32_t;
@@ -55,14 +75,116 @@ constexpr uint32 uint32_max = std::numeric_limits<uint32>::max();
 constexpr uint64 uint64_max = std::numeric_limits<uint64>::max();
 
 
-using float32 = float;
-MPT_STATIC_ASSERT(sizeof(float32) == 4);
 
-using float64 = double;
-MPT_STATIC_ASSERT(sizeof(float64) == 8);
+// fp half
+// n/a
+
+// fp single
+using single = float;
+constexpr single operator"" _fs(long double lit)
+{
+	return static_cast<single>(lit);
+}
+
+// fp double
+constexpr double operator"" _fd(long double lit)
+{
+	return static_cast<double>(lit);
+}
+
+// fp extended
+constexpr long double operator"" _fe(long double lit)
+{
+	return static_cast<long double>(lit);
+}
+
+// fp quad
+// n/a
+
+using float32 = mpt::select_type<sizeof(float) == 4,
+		float
+	,
+		mpt::select_type<sizeof(double) == 4,
+			double
+		,
+      mpt::select_type<sizeof(long double) == 4,
+				long double
+			,
+				float
+			>::type
+		>::type
+	>::type;
+constexpr float32 operator"" _f32(long double lit)
+{
+	return static_cast<float32>(lit);
+}
+
+using float64 = mpt::select_type<sizeof(float) == 8,
+		float
+	,
+		mpt::select_type<sizeof(double) == 8,
+			double
+		,
+      mpt::select_type<sizeof(long double) == 8,
+				long double
+			,
+				double
+			>::type
+		>::type
+	>::type;
+constexpr float64 operator"" _f64(long double lit)
+{
+	return static_cast<float64>(lit);
+}
+
+namespace mpt
+{
+template <typename T>
+struct float_traits
+{
+	static constexpr bool is_float = !std::numeric_limits<T>::is_integer;
+	static constexpr bool is_hard = is_float && !MPT_COMPILER_QUIRK_FLOAT_EMULATED;
+	static constexpr bool is_soft = is_float && MPT_COMPILER_QUIRK_FLOAT_EMULATED;
+	static constexpr bool is_float32 = is_float && (sizeof(T) == 4);
+	static constexpr bool is_float64 = is_float && (sizeof(T) == 8);
+	static constexpr bool is_native_endian = is_float && !MPT_COMPILER_QUIRK_FLOAT_NOTNATIVEENDIAN;
+	static constexpr bool is_ieee754_binary = is_float && std::numeric_limits<T>::is_iec559 && !MPT_COMPILER_QUIRK_FLOAT_NOTIEEE754;
+	static constexpr bool is_ieee754_binary32 = is_float && is_ieee754_binary && is_float32;
+	static constexpr bool is_ieee754_binary64 = is_float && is_ieee754_binary && is_float64;
+	static constexpr bool is_ieee754_binary32ne = is_float && is_ieee754_binary && is_float32 && is_native_endian;
+	static constexpr bool is_ieee754_binary64ne = is_float && is_ieee754_binary && is_float64 && is_native_endian;
+};
+}  // namespace mpt
+
+#if MPT_COMPILER_QUIRK_FLOAT_PREFER32
+using nativefloat = float32;
+#elif MPT_COMPILER_QUIRK_FLOAT_PREFER64
+using nativefloat = float64;
+#else
+// prefer smaller floats, but try to use IEEE754 floats
+using nativefloat = mpt::select_type<std::numeric_limits<float>::is_iec559,
+		float
+	,
+		mpt::select_type<std::numeric_limits<double>::is_iec559,
+			double
+		,
+			mpt::select_type<std::numeric_limits<long double>::is_iec559,
+				long double
+			,
+				float
+			>::type
+		>::type
+	>::type;	
+#endif
+constexpr nativefloat operator"" _nf(long double lit)
+{
+	return static_cast<nativefloat>(lit);
+}
+
 
 
 MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
+
 
 
 MPT_STATIC_ASSERT(std::numeric_limits<unsigned char>::digits == 8);

@@ -183,20 +183,6 @@ inline T random(Trng & rng, std::size_t required_entropy_bits)
 	}
 }
 
-template <typename Tf> struct float_traits { };
-template <> struct float_traits<float> {
-	typedef uint32 mantissa_uint_type;
-	enum : int { mantissa_bits = 24 };
-};
-template <> struct float_traits<double> {
-	typedef uint64 mantissa_uint_type;
-	enum : int { mantissa_bits = 53 };
-};
-template <> struct float_traits<long double> {
-	typedef uint64 mantissa_uint_type;
-	enum : int { mantissa_bits = 63 };
-};
-
 template <typename T>
 struct uniform_real_distribution
 {
@@ -213,9 +199,8 @@ public:
 	template <typename Trng>
 	inline T operator()(Trng & rng) const
 	{
-		typedef typename float_traits<T>::mantissa_uint_type uint_type;
-		const int bits = float_traits<T>::mantissa_bits;
-		return ((b - a) * static_cast<T>(mpt::random<uint_type, bits>(rng)) / static_cast<T>((static_cast<uint_type>(1u) << bits))) + a;
+		const int mantissa_bits = std::numeric_limits<T>::digits;
+		return ((b - a) * static_cast<T>(mpt::random<uint64, mantissa_bits>(rng)) / static_cast<T>((static_cast<uint64>(1u) << mantissa_bits))) + a;
 	}
 };
 
