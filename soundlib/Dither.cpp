@@ -11,7 +11,6 @@
 #include "stdafx.h"
 
 #include "Dither.h"
-#include "Mixer.h"
 
 #include "../common/misc_util.h"
 
@@ -45,6 +44,7 @@ mpt::ustring Dither::GetModeName(DitherMode mode)
 
 void X86_Dither(int32 *pBuffer, uint32 nSamples, uint32 nBits, DitherModPlugState *state)
 {
+	const int MIXING_ATTENUATION = MixSampleIntTraits::mix_headroom_bits();
 	if(nBits + MIXING_ATTENUATION + 1 >= 32) //if(nBits>16)
 	{
 		return;
@@ -102,9 +102,9 @@ static MPT_FORCEINLINE int32 dither_rand(uint32 &a, uint32 &b)
 	return static_cast<int32>(b);
 }
 
-static void C_Dither(int32 *pBuffer, std::size_t count, uint32 nBits, DitherModPlugState *state)
+static void C_Dither(MixSampleInt *pBuffer, std::size_t count, uint32 nBits, DitherModPlugState *state)
 {
-	if(nBits + MIXING_ATTENUATION + 1 >= 32) //if(nBits>16)
+	if(nBits + MixSampleIntTraits::mix_headroom_bits() + 1 >= 32)  //if(nBits>16)
 	{
 		return;
 	}
@@ -117,7 +117,7 @@ static void C_Dither(int32 *pBuffer, std::size_t count, uint32 nBits, DitherModP
 
 	while(count--)
 	{
-		*pBuffer += dither_rand(a, b) >> (nBits + MIXING_ATTENUATION + 1);
+		*pBuffer += dither_rand(a, b) >> (nBits + MixSampleIntTraits::mix_headroom_bits() + 1);
 		pBuffer++;
 	}
 
@@ -126,7 +126,7 @@ static void C_Dither(int32 *pBuffer, std::size_t count, uint32 nBits, DitherModP
 
 }
 
-static void Dither_ModPlug(int32 *pBuffer, std::size_t count, std::size_t channels, uint32 nBits, DitherModPlugState &state)
+static void Dither_ModPlug(MixSampleInt *pBuffer, std::size_t count, std::size_t channels, uint32 nBits, DitherModPlugState &state)
 {
 #ifdef ENABLE_X86
 	if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
@@ -143,10 +143,10 @@ static void Dither_ModPlug(int32 *pBuffer, std::size_t count, std::size_t channe
 template<int targetbits, int channels, int ditherdepth = 1, bool triangular = false, bool shaped = true>
 struct Dither_SimpleTemplate
 {
-MPT_NOINLINE void operator () (int32 *mixbuffer, std::size_t count, DitherSimpleState &state, mpt::fast_prng &prng)
+MPT_NOINLINE void operator () (MixSampleInt *mixbuffer, std::size_t count, DitherSimpleState &state, mpt::fast_prng &prng)
 {
 	STATIC_ASSERT(sizeof(int) == 4);
-	const int rshift = (32-targetbits) - MIXING_ATTENUATION;
+	const int rshift = (32-targetbits) - MixSampleIntTraits::mix_headroom_bits();
 	MPT_CONSTANT_IF(rshift <= 0)
 	{
 		// nothing to dither
@@ -185,7 +185,7 @@ MPT_NOINLINE void operator () (int32 *mixbuffer, std::size_t count, DitherSimple
 }
 };
 
-static void Dither_Simple(int32 *mixbuffer, std::size_t count, std::size_t channels, int bits, DitherSimpleState &state, mpt::fast_prng &prng)
+static void Dither_Simple(MixSampleInt *mixbuffer, std::size_t count, std::size_t channels, int bits, DitherSimpleState &state, mpt::fast_prng &prng)
 {
 	switch(bits)
 	{
@@ -253,7 +253,7 @@ DitherMode Dither::GetMode() const
 }
 
 
-void Dither::Process(int32 *mixbuffer, std::size_t count, std::size_t channels, int bits)
+void Dither::Process(MixSampleInt *mixbuffer, std::size_t count, std::size_t channels, int bits)
 {
 	switch(mode)
 	{
