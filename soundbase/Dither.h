@@ -255,7 +255,6 @@ public:
 		return ditherSimple;
 	}
 
-#if 1
 	template <typename Tfn>
 	auto WithDither(Tfn fn)
 	{
@@ -268,7 +267,6 @@ public:
 		default:            return fn(DefaultDither()); break;
 		}
 	}
-#endif
 
 	void SetMode(DitherMode mode_)
 	{
