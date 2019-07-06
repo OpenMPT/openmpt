@@ -61,7 +61,8 @@ void X86_Dither(int32 *pBuffer, uint32 nSamples, uint32 nBits, DitherModPlugStat
 	mov ecx, nBits		// ecx = number of bits of noise
 	mov edi, gDitherA	// Noise generation
 	mov ebx, gDitherB
-	add ecx, MIXING_ATTENUATION+1
+	add ecx, MIXING_ATTENUATION
+	add ecx, 1
 	push ebp
 	mov ebp, eax
 noiseloop:
