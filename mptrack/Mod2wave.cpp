@@ -928,8 +928,8 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 void CDoWaveConvert::Run()
 {
 	static char buffer[MIXBUFFERSIZE * 4 * 4]; // channels * sizeof(biggestsample)
-	static float floatbuffer[MIXBUFFERSIZE * 4]; // channels
-	static int mixbuffer[MIXBUFFERSIZE * 4]; // channels
+	static MixSampleFloat floatbuffer[MIXBUFFERSIZE * 4]; // channels
+	static MixSampleInt mixbuffer[MIXBUFFERSIZE * 4]; // channels
 
 	TCHAR s[80];
 	UINT ok = IDOK;

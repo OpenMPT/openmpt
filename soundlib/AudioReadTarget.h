@@ -44,7 +44,7 @@ public:
 	}
 	std::size_t GetRenderedCount() const { return countRendered; }
 public:
-	void DataCallback(int32 *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		// Convert to output sample format and optionally perform dithering and clipping if needed
 
@@ -97,7 +97,7 @@ public:
 	{
 		MPT_ASSERT_ALWAYS(sampleFormat.IsValid());
 	}
-	void DataCallback(int32 *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		switch(sampleFormat.value)
 		{
@@ -172,11 +172,11 @@ public:
 	std::size_t GetRenderedCount() const { return countRendered; }
 private:
 	template<typename Tsample>
-	void Fill(const Tsample *inputBuffer, int32 * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
+	void Fill(const Tsample *inputBuffer, MixSampleInt * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
-			SC::ConvertToFixedPoint<int32, Tsample, MIXING_FRACTIONAL_BITS> conv;
+			SC::ConvertToFixedPoint<MixSampleInt, Tsample, MIXING_FRACTIONAL_BITS> conv;
 			for(std::size_t frame = 0; frame < countChunk; ++frame)
 			{
 				MixInputBuffers[channel][frame] = conv(inputBuffer[channel + ((countRendered + frame) * channels)]);
@@ -185,7 +185,7 @@ private:
 		countRendered += countChunk;
 	}
 public:
-	virtual void FillCallback(int32 * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
+	virtual void FillCallback(MixSampleInt * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
 	{
 		switch(sampleFormat.value)
 		{
@@ -270,7 +270,7 @@ public:
 		return;
 	}
 public:
-	void DataCallback(int32 *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		const std::size_t countRendered_ = Tbase::GetRenderedCount();
 
