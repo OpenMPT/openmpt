@@ -15,6 +15,7 @@
 
 #include "../common/Endianness.h"
 #include "SampleFormatConverters.h"
+#include "SampleFormat.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -78,26 +79,36 @@ void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_REST
 
 
 
-template<int fractionalBits, bool clipOutput, typename Tsample, typename Tfixed>
-void ConvertInterleavedFixedPointToInterleaved(Tsample * MPT_RESTRICT p, const Tfixed * MPT_RESTRICT mixbuffer, std::size_t channels, std::size_t count)
+template<int fractionalBits, bool clipOutput, typename Tsample, typename Tfixed, typename Tdither>
+void ConvertInterleavedFixedPointToInterleaved(Tsample * MPT_RESTRICT p, const Tfixed * MPT_RESTRICT mixbuffer, Tdither & dither, std::size_t channels, std::size_t count)
 {
-	SC::ConvertFixedPoint<Tsample, int32, fractionalBits, clipOutput> conv;
-	count *= channels;
-	for(std::size_t i = 0; i < count; ++i)
-	{
-		p[i] = conv(mixbuffer[i]);
-	}
-}
-
-template<int fractionalBits, bool clipOutput, typename Tsample, typename Tfixed>
-void ConvertInterleavedFixedPointToNonInterleaved(Tsample * const * const MPT_RESTRICT buffers, const Tfixed * MPT_RESTRICT mixbuffer, std::size_t channels, std::size_t count)
-{
+	constexpr int ditherBits = SampleFormat(SampleFormatTraits<Tsample>::sampleFormat()).IsInt()
+		? SampleFormat(SampleFormatTraits<Tsample>::sampleFormat()).GetBitsPerSample()
+		: 0;
 	SC::ConvertFixedPoint<Tsample, int32, fractionalBits, clipOutput> conv;
 	for(std::size_t i = 0; i < count; ++i)
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
-			buffers[channel][i] = conv(*mixbuffer);
+			*p = conv(dither.template process<ditherBits>(channel, *mixbuffer));
+			mixbuffer++;
+			p++;
+		}
+	}
+}
+
+template<int fractionalBits, bool clipOutput, typename Tsample, typename Tfixed, typename Tdither>
+void ConvertInterleavedFixedPointToNonInterleaved(Tsample * const * const MPT_RESTRICT buffers, const Tfixed * MPT_RESTRICT mixbuffer, Tdither & dither, std::size_t channels, std::size_t count)
+{
+	constexpr int ditherBits = SampleFormat(SampleFormatTraits<Tsample>::sampleFormat()).IsInt()
+		? SampleFormat(SampleFormatTraits<Tsample>::sampleFormat()).GetBitsPerSample()
+		: 0;
+	SC::ConvertFixedPoint<Tsample, int32, fractionalBits, clipOutput> conv;
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			buffers[channel][i] = conv(dither.template process<ditherBits>(channel, *mixbuffer));
 			mixbuffer++;
 		}
 	}

@@ -4821,7 +4821,10 @@ static MPT_NOINLINE void TestSampleConversion()
 		std::vector<MixSampleInt> buffer(64);
 		Dither dither(mpt::global_random_device());
 		dither.SetMode(DitherModPlug);
-		dither.Process(buffer.data(), 64, 1, 16);
+		for(std::size_t i = 0; i < 64; ++i)
+		{
+			buffer[i] = dither.ModPlugDither().process<16>(0, buffer[i]);
+		}
 		std::vector<MixSampleInt> expected = {
 		    727,
 		    -557,

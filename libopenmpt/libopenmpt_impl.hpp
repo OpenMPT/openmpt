@@ -31,7 +31,8 @@ class FileReader;
 } // namespace detail
 typedef detail::FileReader<FileReaderTraitsDefault> FileReader;
 class CSoundFile;
-class Dither;
+template <std::size_t channels> class DitherChannels;
+using Dither = DitherChannels<4>;
 } // namespace OpenMPT
 
 namespace openmpt {

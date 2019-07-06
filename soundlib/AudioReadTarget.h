@@ -48,16 +48,14 @@ public:
 	{
 		// Convert to output sample format and optionally perform dithering and clipping if needed
 
-		const SampleFormat sampleFormat = SampleFormatTraits<Tsample>::sampleFormat();
-
-		if(sampleFormat.IsInt())
-		{
-			dither.Process(MixSoundBuffer, countChunk, channels, sampleFormat.GetBitsPerSample());
-		}
-
 		if(outputBuffer)
 		{
-			ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS, clipOutput>(outputBuffer + (channels * countRendered), MixSoundBuffer, channels, countChunk);
+			dither.WithDither(
+				[&](auto &ditherInstance)
+				{
+					return ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS, clipOutput>(outputBuffer + (channels * countRendered), MixSoundBuffer, ditherInstance, channels, countChunk);
+				}
+			);
 		}
 		if(outputBuffers)
 		{
@@ -66,7 +64,12 @@ public:
 			{
 				buffers[channel] = outputBuffers[channel] + countRendered;
 			}
-			ConvertInterleavedFixedPointToNonInterleaved<MIXING_FRACTIONAL_BITS, clipOutput>(buffers, MixSoundBuffer, channels, countChunk);
+			dither.WithDither(
+				[&](auto &ditherInstance)
+				{
+					return ConvertInterleavedFixedPointToNonInterleaved<MIXING_FRACTIONAL_BITS, clipOutput>(buffers, MixSoundBuffer, ditherInstance, channels, countChunk);
+				}
+			);
 		}
 
 		countRendered += countChunk;
