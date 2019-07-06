@@ -31,108 +31,22 @@ mpt::ustring Dither::GetModeName(DitherMode mode)
 }
 
 
-#ifdef ENABLE_X86
-
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable : 4731)  // ebp modified
-#endif
-
-static void X86_Dither(int32 *pBuffer, uint32 nSamples, uint32 nBits, DitherModPlugState &state)
-{
-	const int MIXING_ATTENUATION = MixSampleIntTraits::mix_headroom_bits();
-	if(nBits + MIXING_ATTENUATION + 1 >= 32) //if(nBits>16)
-	{
-		return;
-	}
-
-	int gDitherA = state.rng_a;
-	int gDitherB = state.rng_b;
-
-	_asm {
-	mov esi, pBuffer	// esi = pBuffer+i
-	mov eax, nSamples	// ebp = i
-	mov ecx, nBits		// ecx = number of bits of noise
-	mov edi, gDitherA	// Noise generation
-	mov ebx, gDitherB
-	add ecx, MIXING_ATTENUATION
-	add ecx, 1
-	push ebp
-	mov ebp, eax
-noiseloop:
-	rol edi, 1
-	mov eax, dword ptr [esi]
-	xor edi, 0x10204080
-	add esi, 4
-	lea edi, [ebx*4+edi+0x78649E7D]
-	mov edx, edi
-	rol edx, 16
-	lea edx, [edx*4+edx]
-	add ebx, edx
-	mov edx, ebx
-	sar edx, cl
-	add eax, edx
-	dec ebp
-	mov dword ptr [esi-4], eax
-	jnz noiseloop
-	pop ebp
-	mov gDitherA, edi
-	mov gDitherB, ebx
-	}
-
-	state.rng_a = gDitherA;
-	state.rng_b = gDitherB;
-
-}
-
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
-#endif // ENABLE_X86
-
-
-static MPT_FORCEINLINE int32 dither_rand(uint32 &a, uint32 &b)
-{
-	a = (a << 1) | (a >> 31);
-	a ^= 0x10204080u;
-	a += 0x78649E7Du + (b * 4);
-	b += ((a << 16 ) | (a >> 16)) * 5;
-	return static_cast<int32>(b);
-}
-
 static void C_Dither(MixSampleInt *pBuffer, std::size_t count, uint32 nBits, DitherModPlugState &state)
 {
-	if(nBits + MixSampleIntTraits::mix_headroom_bits() + 1 >= 32)  //if(nBits>16)
+	if(nBits + MixSampleIntTraits::mix_headroom_bits() + 1 >= 32)
 	{
 		return;
 	}
-
-	uint32 a = state.rng_a;
-	uint32 b = state.rng_b;
-
 	while(count--)
 	{
-		*pBuffer += mpt::rshift_signed(dither_rand(a, b), (nBits + MixSampleIntTraits::mix_headroom_bits() + 1));
+		*pBuffer += mpt::rshift_signed(static_cast<int32>(state.rng()), (nBits + MixSampleIntTraits::mix_headroom_bits() + 1));
 		pBuffer++;
 	}
-
-	state.rng_a = a;
-	state.rng_b = b;
-
 }
 
 static void Dither_ModPlug(MixSampleInt *pBuffer, std::size_t count, std::size_t channels, uint32 nBits, DitherModPlugState &state)
 {
-#ifdef ENABLE_X86
-	if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
-	{
-		X86_Dither(pBuffer, count * channels, nBits, state);
-	} else
-#endif // ENABLE_X86
-	{
-		C_Dither(pBuffer, count * channels, nBits, state);
-	}
+	C_Dither(pBuffer, count * channels, nBits, state);
 }
 
 
@@ -141,8 +55,8 @@ struct Dither_SimpleTemplate
 {
 MPT_NOINLINE void operator () (MixSampleInt *mixbuffer, std::size_t count, DitherSimpleState &state, mpt::fast_prng &prng)
 {
-	STATIC_ASSERT(sizeof(int) == 4);
-	const int rshift = (32-targetbits) - MixSampleIntTraits::mix_headroom_bits();
+	STATIC_ASSERT(sizeof(MixSampleInt) == 4);
+	constexpr int rshift = (32-targetbits) - MixSampleIntTraits::mix_headroom_bits();
 	MPT_CONSTANT_IF(rshift <= 0)
 	{
 		// nothing to dither

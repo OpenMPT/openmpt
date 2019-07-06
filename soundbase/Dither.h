@@ -23,12 +23,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct DitherModPlugState
 {
-	uint32 rng_a;
-	uint32 rng_b;
+	mpt::rng::modplug_dither rng;
 	DitherModPlugState()
+		: rng(0, 0) 
 	{
-		rng_a = 0;
-		rng_b = 0;
 	}
 };
 
