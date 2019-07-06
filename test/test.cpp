@@ -32,6 +32,7 @@
 #include "../soundlib/ITCompression.h"
 #include "../soundlib/tuningcollection.h"
 #include "../soundlib/tuning.h"
+#include "../soundlib/Dither.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Mptrack.h"
 #include "../mptrack/Moddoc.h"
@@ -4714,6 +4715,82 @@ static MPT_NOINLINE void TestSampleConversion()
 		VERIFY_EQUAL_NONCONT(signed8[3], 0);
 	}
 
+	// Dither
+	{
+		std::vector<MixSampleInt> buffer(64);
+		Dither dither(mpt::global_random_device());
+		dither.SetMode(DitherModPlug);
+		dither.Process(buffer.data(), 64, 1, 16);
+		std::vector<MixSampleInt> expected = {
+		    727,
+		    -557,
+		    -552,
+		    -727,
+		    439,
+		    405,
+		    703,
+		    -337,
+		    235,
+		    -776,
+		    -458,
+		    905,
+		    -110,
+		    158,
+		    374,
+		    -362,
+		    283,
+		    306,
+		    710,
+		    304,
+		    -608,
+		    536,
+		    -501,
+		    -593,
+		    -349,
+		    812,
+		    916,
+		    53,
+		    -953,
+		    881,
+		    -236,
+		    -20,
+		    -623,
+		    -895,
+		    -302,
+		    -415,
+		    899,
+		    -948,
+		    -766,
+		    -186,
+		    -390,
+		    -169,
+		    253,
+		    -622,
+		    -769,
+		    -1001,
+		    1019,
+		    787,
+		    -239,
+		    718,
+		    -423,
+		    988,
+		    -91,
+		    763,
+		    -933,
+		    -510,
+		    484,
+		    794,
+		    -340,
+		    552,
+		    866,
+		    -608,
+		    35,
+		    395};
+		for(std::size_t i = 0; i < 64; ++i)
+		{
+			VERIFY_EQUAL_QUIET_NONCONT(buffer[i], expected[i]);
+		}
+	}
 }
 
 
