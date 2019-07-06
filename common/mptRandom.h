@@ -311,7 +311,7 @@ public:
 	{
 		MPT_STATIC_ASSERT(std::is_integral<result_type>::value);
 		MPT_STATIC_ASSERT(std::is_unsigned<result_type>::value);
-		return std::numeric_limits<result_type>::digits();
+		return std::numeric_limits<result_type>::digits;
 	}
 	inline result_type operator()()
 	{
