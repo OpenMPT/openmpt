@@ -31,22 +31,18 @@ mpt::ustring Dither::GetModeName(DitherMode mode)
 }
 
 
-static void C_Dither(MixSampleInt *pBuffer, std::size_t count, uint32 nBits, DitherModPlugState &state)
+static void Dither_ModPlug(MixSampleInt *pBuffer, std::size_t count, std::size_t channels, uint32 nBits, DitherModPlugState &state)
 {
 	if(nBits + MixSampleIntTraits::mix_headroom_bits() + 1 >= 32)
 	{
 		return;
 	}
+	count *= channels;
 	while(count--)
 	{
 		*pBuffer += mpt::rshift_signed(static_cast<int32>(state.rng()), (nBits + MixSampleIntTraits::mix_headroom_bits() + 1));
 		pBuffer++;
 	}
-}
-
-static void Dither_ModPlug(MixSampleInt *pBuffer, std::size_t count, std::size_t channels, uint32 nBits, DitherModPlugState &state)
-{
-	C_Dither(pBuffer, count * channels, nBits, state);
 }
 
 
