@@ -91,6 +91,7 @@
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -123,6 +124,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -156,6 +158,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>

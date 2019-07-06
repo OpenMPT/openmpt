@@ -5,7 +5,7 @@
 
   filter {}
 	filter { "not action:vs*", "language:C++" }
-		buildoptions { "-std=c++11" }
+		buildoptions { "-std=c++14" }
 	filter { "not action:vs*", "language:C" }
 		buildoptions { "-std=c99" }
 	filter {}
