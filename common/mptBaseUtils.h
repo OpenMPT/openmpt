@@ -568,6 +568,33 @@ MPT_FORCEINLINE auto lshift_signed(T x, int y) -> decltype(x << y)
 
 
 
+namespace mpt
+{
+
+template <typename T>
+MPT_CONSTEXPR14_FUN auto ror(T x, int y) -> decltype(x >> y)
+{
+	using result_type = decltype(x >> y);
+	using unsigned_result_type = std::make_unsigned<result_type>::type;
+	unsigned_result_type urx = static_cast<unsigned_result_type>(x);
+	urx = (urx << (std::numeric_limits<unsigned_result_type>::digits - y)) | (urx >> y);
+	return static_cast<result_type>(urx);
+}
+
+template <typename T>
+MPT_CONSTEXPR14_FUN auto rol(T x, int y) -> decltype(x << y)
+{
+	using result_type = decltype(x << y);
+	using unsigned_result_type = std::make_unsigned<result_type>::type;
+	unsigned_result_type urx = static_cast<unsigned_result_type>(x);
+	urx = (urx >> (std::numeric_limits<unsigned_result_type>::digits - y)) | (urx << y);
+	return static_cast<result_type>(urx);
+}
+
+}  // namespace mpt
+
+
+
 namespace Util
 {
 
@@ -575,7 +602,6 @@ namespace Util
 	template <class T> constexpr T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only integer types are allowed."); return (std::numeric_limits<T>::max)();}
 
 }
-
 
 namespace mpt
 {
