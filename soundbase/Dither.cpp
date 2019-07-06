@@ -113,7 +113,7 @@ static void C_Dither(MixSampleInt *pBuffer, std::size_t count, uint32 nBits, Dit
 
 	while(count--)
 	{
-		*pBuffer += dither_rand(a, b) >> (nBits + MixSampleIntTraits::mix_headroom_bits() + 1);
+		*pBuffer += mpt::rshift_signed(dither_rand(a, b), (nBits + MixSampleIntTraits::mix_headroom_bits() + 1));
 		pBuffer++;
 	}
 
