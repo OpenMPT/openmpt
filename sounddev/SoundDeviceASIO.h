@@ -41,6 +41,17 @@ public:
 	bool DoInitialize() override { return true; }
 };
 
+class ASIOException
+	: public std::runtime_error
+{
+public:
+	ASIOException(const std::string &msg)
+		: std::runtime_error(msg)
+	{
+		return;
+	}
+};
+
 enum AsioFeatures
 {
 	AsioFeatureResetRequest     = 1<<0,
@@ -61,6 +72,24 @@ class CASIODevice: public SoundDevice::Base
 protected:
 
 	IASIO *m_pAsioDrv;
+	IASIO &AsioDriver()
+	{
+		MPT_ASSERT(m_pAsioDrv);
+		return *m_pAsioDrv;
+	}
+	template <typename Tfn>
+	auto CallDriverImpl(Tfn fn, const char * funcName) -> decltype(fn())
+	{
+		try
+		{
+			return fn();
+		} catch(const Windows::StructuredException &)
+		{
+			// nothing
+		}
+		ReportASIOException(std::string(funcName) + std::string("() crashed!"));
+		throw ASIOException(std::string("Exception in '") + std::string(funcName) + std::string("'!"));
+	}
 
 	double m_BufferLatency;
 	long m_nAsioBufferLen;
