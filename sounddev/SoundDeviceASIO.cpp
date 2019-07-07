@@ -1651,8 +1651,7 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 	{
 		try
 		{
-			ASIOError asioresult = ASE_InvalidParameter;
-			asioresult = AsioCallUnchecked(AsioDriver(), canSampleRate((ASIOSampleRate)baseSampleRates[i]));
+			ASIOError asioresult = AsioCallUnchecked(AsioDriver(), canSampleRate((ASIOSampleRate)baseSampleRates[i]));
 			if(asioresult == ASE_OK)
 			{
 				caps.supportedSampleRates.push_back(baseSampleRates[i]);
