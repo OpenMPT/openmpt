@@ -38,14 +38,21 @@ namespace SC { // SC = _S_ample_C_onversion
 #if MPT_COMPILER_MSVC
 #if defined(_M_IX86) && !(defined(_M_X64)) && (_M_IX86_FP < 2)
 #define MPT_SC_AVOID_FLOOR 1
+#define MPT_SC_AVOID_ROUND 1
 #else
 #define MPT_SC_AVOID_FLOOR 0
+#define MPT_SC_AVOID_ROUND 1
 #endif
 #else
 #define MPT_SC_AVOID_FLOOR 0
+#define MPT_SC_AVOID_ROUND 0
 #endif
 
-
+#if MPT_SC_AVOID_ROUND
+#define MPT_SC_FASTROUND(x) std::floor((x) + 0.5f)
+#else
+#define MPT_SC_FASTROUND(x) mpt::round(x)
+#endif
 
 #if MPT_COMPILER_SHIFT_SIGNED
 
@@ -54,39 +61,8 @@ namespace SC { // SC = _S_ample_C_onversion
 
 #else
 
-//#define MPT_SC_USE_MULDIV
-
-#ifdef MPT_SC_USE_MULDIV
-
-// just use mul and div
-
-template <typename T>
-MPT_FORCEINLINE auto rshift_signed_muldiv(T x, int y) -> decltype(x >> y)
-{
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_signed);
-	typedef decltype(x >> y) result_type;
-	return x / (static_cast<result_type>(1) << y);
-}
-
-template <typename T>
-MPT_FORCEINLINE auto lshift_signed_muldiv(T x, int y) -> decltype(x << y)
-{
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_signed);
-	typedef decltype(x << y) result_type;
-	return x * (static_cast<result_type>(1) << y);
-}
-
-#define MPT_SC_RSHIFT_SIGNED(val, shift) SC::rshift_signed_muldiv((val), (shift))
-#define MPT_SC_LSHIFT_SIGNED(val, shift) SC::lshift_signed_muldiv((val), (shift))
-
-#else
-
 #define MPT_SC_RSHIFT_SIGNED(val, shift) mpt::rshift_signed((val), (shift))
 #define MPT_SC_LSHIFT_SIGNED(val, shift) mpt::lshift_signed((val), (shift))
-
-#endif
 
 #endif
 
@@ -397,7 +373,7 @@ struct Convert<int8, float32>
 		// MSVC with x87 floating point math calls floor for the more intuitive version
 		return mpt::saturate_cast<int8>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val * 2.0f + 1.0f), 1));
 #else
-		return mpt::saturate_cast<int8>(static_cast<int>(std::floor(val + 0.5f)));
+		return mpt::saturate_cast<int8>(static_cast<int>(MPT_SC_FASTROUND(val)));
 #endif
 	}
 };
@@ -459,7 +435,7 @@ struct Convert<int16, float32>
 		// MSVC with x87 floating point math calls floor for the more intuitive version
 		return mpt::saturate_cast<int16>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val * 2.0f + 1.0f), 1));
 #else
-		return mpt::saturate_cast<int16>(static_cast<int>(std::floor(val + 0.5f)));
+		return mpt::saturate_cast<int16>(static_cast<int>(MPT_SC_FASTROUND(val)));
 #endif
 	}
 };
@@ -477,7 +453,7 @@ struct Convert<int8, double>
 		// MSVC with x87 floating point math calls floor for the more intuitive version
 		return mpt::saturate_cast<int8>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val * 2.0 + 1.0), 1));
 #else
-		return mpt::saturate_cast<int8>(static_cast<int>(std::floor(val + 0.5)));
+		return mpt::saturate_cast<int8>(static_cast<int>(MPT_SC_FASTROUND(val)));
 #endif
 	}
 };
@@ -495,7 +471,7 @@ struct Convert<int16, double>
 		// MSVC with x87 floating point math calls floor for the more intuitive version
 		return mpt::saturate_cast<int16>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val * 2.0 + 1.0), 1));
 #else
-		return mpt::saturate_cast<int16>(static_cast<int>(std::floor(val + 0.5)));
+		return mpt::saturate_cast<int16>(static_cast<int>(MPT_SC_FASTROUND(val)));
 #endif
 	}
 };
@@ -601,7 +577,7 @@ struct Convert<int32, float32>
 		// MSVC with x87 floating point math calls floor for the more intuitive version
 		return mpt::saturate_cast<int32>(MPT_SC_RSHIFT_SIGNED(static_cast<int64>(val * 2.0f + 1.0f), 1));
 #else
-		return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5f)));
+		return mpt::saturate_cast<int32>(static_cast<int64>(MPT_SC_FASTROUND(val)));
 #endif
 	}
 };
@@ -619,7 +595,7 @@ struct Convert<int32, double>
 		// MSVC with x87 floating point math calls floor for the more intuitive version
 		return mpt::saturate_cast<int32>(MPT_SC_RSHIFT_SIGNED(static_cast<int64>(val * 2.0 + 1.0), 1));
 #else
-		return mpt::saturate_cast<int32>(static_cast<int64>(std::floor(val + 0.5)));
+		return mpt::saturate_cast<int32>(static_cast<int64>(MPT_SC_FASTROUND(val)));
 #endif
 	}
 };
@@ -677,7 +653,7 @@ struct Convert<int64, float32>
 	{
 		Limit(val, -1.0f, 1.0f);
 		val *= static_cast<float>(uint64(1)<<63);
-		return mpt::saturate_cast<int64>(std::floor(val + 0.5f));
+		return mpt::saturate_cast<int64>(MPT_SC_FASTROUND(val));
 	}
 };
 
@@ -690,7 +666,7 @@ struct Convert<int64, double>
 	{
 		Limit(val, -1.0, 1.0);
 		val *= static_cast<double>(uint64(1)<<63);
-		return mpt::saturate_cast<int64>(std::floor(val + 0.5));
+		return mpt::saturate_cast<int64>(MPT_SC_FASTROUND(val));
 	}
 };
 
@@ -987,7 +963,7 @@ struct ConvertToFixedPoint<int32, float32, fractionalBits>
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
-		return mpt::saturate_cast<output_t>(std::floor(val * factor + 0.5f));
+		return mpt::saturate_cast<output_t>(MPT_SC_FASTROUND(val * factor));
 	}
 };
 
