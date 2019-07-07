@@ -104,7 +104,7 @@ static void AsioCheckResultASIOBool(ASIOBool b, const char * funcName)
 {
 	if(b != ASIOTrue)
 	{
-		throw ASIOCallError(funcName, b);
+		throw ASIOCallBoolResult(funcName, b);
 	}
 }
 
