@@ -891,6 +891,33 @@ struct ConvertFixedPoint<float32, int32, fractionalBits, clipOutput>
 	}
 };
 
+template <int fractionalBits, bool clipOutput>
+struct ConvertFixedPoint<float64, int32, fractionalBits, clipOutput>
+{
+	typedef int32 input_t;
+	typedef float64 output_t;
+	const double factor;
+	MPT_FORCEINLINE ConvertFixedPoint()
+		: factor( 1.0 / static_cast<double>(1 << fractionalBits) )
+	{
+		return;
+	}
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		MPT_CONSTANT_IF(clipOutput)
+		{
+			float64 out = val * factor;
+			if(out < -1.0) out = -1.0;
+			if(out > 1.0) out = 1.0;
+			return out;
+		} else
+		{
+			return val * factor;
+		}
+	}
+};
+
 
 template <typename Tdst, typename Tsrc, int fractionalBits>
 struct ConvertToFixedPoint;
@@ -957,6 +984,24 @@ struct ConvertToFixedPoint<int32, float32, fractionalBits>
 	const float factor;
 	MPT_FORCEINLINE ConvertToFixedPoint()
 		: factor( static_cast<float>(1 << fractionalBits) )
+	{
+		return;
+	}
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		return mpt::saturate_cast<output_t>(MPT_SC_FASTROUND(val * factor));
+	}
+};
+
+template <int fractionalBits>
+struct ConvertToFixedPoint<int32, float64, fractionalBits>
+{
+	typedef float64 input_t;
+	typedef int32 output_t;
+	const double factor;
+	MPT_FORCEINLINE ConvertToFixedPoint()
+		: factor( static_cast<double>(1 << fractionalBits) )
 	{
 		return;
 	}
@@ -1157,6 +1202,7 @@ struct NormalizationChain
 
 #undef MPT_SC_RSHIFT_SIGNED
 #undef MPT_SC_LSHIFT_SIGNED
+#undef MPT_SC_FASTROUND
 
 
 
