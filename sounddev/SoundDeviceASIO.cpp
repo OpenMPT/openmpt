@@ -1113,7 +1113,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		}
 	} else
 	{
-		SourceLockedAudioPreRead(countChunk, m_nAsioBufferLen);
+		SourceLockedAudioReadPrepare(countChunk, m_nAsioBufferLen);
 		if(m_Settings.sampleFormat == SampleFormatFloat32)
 		{
 			SourceLockedAudioRead(m_SampleBufferFloat.data(), (m_SampleInputBufferFloat.size() > 0) ? m_SampleInputBufferFloat.data() : nullptr, countChunk);
@@ -1243,7 +1243,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 	}
 	if(!rendersilence)
 	{
-		SourceLockedAudioDone();
+		SourceLockedAudioReadDone();
 	}
 }
 
@@ -1293,6 +1293,7 @@ void CASIODevice::ApplyAsioTimeInfo(AsioTimeInfo asioTimeInfo)
 		}
 		timeInfo.RenderStreamPositionBefore = StreamPositionFromFrames(m_TotalFramesWritten - m_StreamPositionOffset);
 		timeInfo.RenderStreamPositionAfter = StreamPositionFromFrames(m_TotalFramesWritten - m_StreamPositionOffset + m_nAsioBufferLen);
+		timeInfo.Latency = GetEffectiveBufferAttributes().Latency;
 		SetTimeInfo(timeInfo);
 	}
 }

@@ -215,6 +215,7 @@ inline OpenMPT_SoundDevice_TimeInfo encode(SoundDevice::TimeInfo src) {
 	dst.Speed = src.Speed;
 	dst.RenderStreamPositionBefore = encode(src.RenderStreamPositionBefore);
 	dst.RenderStreamPositionAfter = encode(src.RenderStreamPositionAfter);
+	dst.Latency = src.Latency;
 	return dst;
 }
 inline SoundDevice::TimeInfo decode(OpenMPT_SoundDevice_TimeInfo src) {
@@ -224,6 +225,7 @@ inline SoundDevice::TimeInfo decode(OpenMPT_SoundDevice_TimeInfo src) {
 	dst.Speed = src.Speed;
 	dst.RenderStreamPositionBefore = decode(src.RenderStreamPositionBefore);
 	dst.RenderStreamPositionAfter = decode(src.RenderStreamPositionAfter);
+	dst.Latency = src.Latency;
 	return dst;
 }
 

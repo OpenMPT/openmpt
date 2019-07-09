@@ -100,9 +100,9 @@ protected:
 	bool SourceIsLockedByCurrentThread() const;
 	void SourceFillAudioBufferLocked();
 	uint64 SourceLockedGetReferenceClockNowNanoseconds() const;
-	void SourceLockedAudioPreRead(std::size_t numFrames, std::size_t framesLatency);
+	void SourceLockedAudioReadPrepare(std::size_t numFrames, std::size_t framesLatency);
 	void SourceLockedAudioRead(void *buffer, const void *inputBuffer, std::size_t numFrames);
-	void SourceLockedAudioDone();
+	void SourceLockedAudioReadDone();
 
 	void RequestClose() { m_RequestFlags.fetch_or(RequestFlagClose); }
 	void RequestReset() { m_RequestFlags.fetch_or(RequestFlagReset); }

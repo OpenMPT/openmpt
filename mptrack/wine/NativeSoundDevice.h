@@ -23,6 +23,7 @@ typedef struct OpenMPT_SoundDevice_TimeInfo {
 	double Speed;
 	OpenMPT_SoundDevice_StreamPosition RenderStreamPositionBefore;
 	OpenMPT_SoundDevice_StreamPosition RenderStreamPositionAfter;
+	double Latency;
 } OpenMPT_SoundDevice_TimeInfo;
 
 typedef struct OpenMPT_SoundDevice_Flags {
@@ -74,8 +75,9 @@ typedef struct OpenMPT_SoundDevice_ISource {
 	// audio thread
 	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockFunc)( void * inst );
 	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedGetReferenceClockNowNanosecondsFunc)( void * inst, uint64_t * result );
-	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, const OpenMPT_SoundDevice_TimeInfo * timeInfo, uintptr_t numFrames, void * buffer, const void * inputBuffer );
-	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedDoneFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
+	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadPrepareFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
+	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, uintptr_t numFrames, void * buffer, const void * inputBuffer );
+	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadDoneFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
 	void (OPENMPT_WINESUPPORT_CALL * SoundSourceUnlockFunc)( void * inst );
 } OpenMPT_SoundDevice_ISource;
 

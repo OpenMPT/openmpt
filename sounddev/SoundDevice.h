@@ -55,10 +55,13 @@ struct TimeInfo
 	SoundDevice::StreamPosition RenderStreamPositionAfter;
 	// int64 chunkSize = After - Before
 	
+	double Latency; // seconds
+
 	TimeInfo()
 		: SyncPointStreamFrames(0)
 		, SyncPointSystemTimestamp(0)
 		, Speed(1.0)
+		, Latency(0.0)
 	{
 		return;
 	}
@@ -83,8 +86,9 @@ public:
 	// audio thread
 	virtual void SoundSourceLock() = 0;
 	virtual uint64 SoundSourceLockedGetReferenceClockNowNanoseconds() const = 0; // timeGetTime()*1000000 on Windows
-	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer) = 0;
-	virtual void SoundSourceLockedDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo) = 0;
+	virtual void SoundSourceLockedReadPrepare(SoundDevice::TimeInfo timeInfo) = 0;
+	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, std::size_t numFrames, void *buffer, const void *inputBuffer) = 0;
+	virtual void SoundSourceLockedReadDone(SoundDevice::TimeInfo timeInfo) = 0;
 	virtual void SoundSourceUnlock() = 0;
 };
 

@@ -68,20 +68,22 @@ typedef struct OpenMPT_Wine_Wrapper_SoundDevice_ISource {
 	// audio thread
 	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockFunc)( void * inst );
 	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockedGetReferenceClockNowNanosecondsFunc)( void * inst, uint64_t * result );
-	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockedReadFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, const OpenMPT_SoundDevice_TimeInfo * timeInfo, uintptr_t numFrames, void * buffer, const void * inputBuffer );
-	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockedDoneFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
+	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockedReadPrepareFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
+	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockedReadFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, uintptr_t numFrames, void * buffer, const void * inputBuffer );
+	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockedReadDoneFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
 	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceUnlockFunc)( void * inst );
 } OpenMPT_Wine_Wrapper_SoundDevice_ISource;
 
 #ifdef WINE_THREAD
 typedef enum OpenMPT_Wine_Wrapper_AudioThreadCommand {
-	AudioThreadCommandInvalid  = -1
-	, AudioThreadCommandExit   = 0
-	, AudioThreadCommandLock   = 1
-	, AudioThreadCommandClock  = 2
-	, AudioThreadCommandRead   = 3
-	, AudioThreadCommandDone   = 4
-	, AudioThreadCommandUnlock = 5
+	AudioThreadCommandInvalid       = -1
+	, AudioThreadCommandExit        = 0
+	, AudioThreadCommandLock        = 1
+	, AudioThreadCommandClock       = 2
+	, AudioThreadCommandReadPrepare = 3
+	, AudioThreadCommandRead        = 4
+	, AudioThreadCommandReadDone    = 5
+	, AudioThreadCommandUnlock      = 6
 } OpenMPT_Wine_Wrapper_AudioThreadCommand;
 #endif
 
@@ -96,9 +98,9 @@ typedef struct OpenMPT_Wine_Wrapper_SoundDevice {
 	OpenMPT_Semaphore * audiothread_sem_request;
 	OpenMPT_Semaphore * audiothread_sem_done;
 	OpenMPT_Wine_Wrapper_AudioThreadCommand audiothread_command;
+	const OpenMPT_SoundDevice_TimeInfo * audiothread_command_timeInfo;
 	const OpenMPT_SoundDevice_BufferFormat * audiothread_command_bufferFormat;
 	const OpenMPT_SoundDevice_BufferAttributes * audiothread_command_bufferAttributes;
-	const OpenMPT_SoundDevice_TimeInfo * audiothread_command_timeInfo;
 	uintptr_t audiothread_command_numFrames;
 	void * audiothread_command_buffer;
 	const void * audiothread_command_inputBuffer;
@@ -171,7 +173,21 @@ static void OPENMPT_WINESUPPORT_CALL SoundSourceLockedGetReferenceClockNowNanose
 	return sd->wine_source.SoundSourceLockedGetReferenceClockNowNanosecondsFunc( sd->wine_source.inst, result );
 #endif
 }
-static void OPENMPT_WINESUPPORT_CALL SoundSourceLockedReadFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, const OpenMPT_SoundDevice_TimeInfo * timeInfo, uintptr_t numFrames, void * buffer, const void * inputBuffer ) {
+static void OPENMPT_WINESUPPORT_CALL SoundSourceLockedReadPrepareFunc( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo ) {
+	OpenMPT_Wine_Wrapper_SoundDevice * sd = (OpenMPT_Wine_Wrapper_SoundDevice*)inst;
+	if ( !sd ) {
+		return;
+	}
+#ifdef WINE_THREAD
+	sd->audiothread_command = AudioThreadCommandReadPrepare;
+	sd->audiothread_command_timeInfo = timeInfo;
+	OpenMPT_Semaphore_Post( sd->audiothread_sem_request );
+	OpenMPT_Semaphore_Wait( sd->audiothread_sem_done );
+#else
+	return sd->wine_source.SoundSourceLockedReadPrepareFunc( sd->wine_source.inst, timeInfo );
+#endif
+}
+static void OPENMPT_WINESUPPORT_CALL SoundSourceLockedReadFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, uintptr_t numFrames, void * buffer, const void * inputBuffer ) {
 	OpenMPT_Wine_Wrapper_SoundDevice * sd = (OpenMPT_Wine_Wrapper_SoundDevice*)inst;
 	if ( !sd ) {
 		return;
@@ -180,30 +196,27 @@ static void OPENMPT_WINESUPPORT_CALL SoundSourceLockedReadFunc( void * inst, con
 	sd->audiothread_command = AudioThreadCommandRead;
 	sd->audiothread_command_bufferFormat = bufferFormat;
 	sd->audiothread_command_bufferAttributes = bufferAttributes;
-	sd->audiothread_command_timeInfo = timeInfo;
 	sd->audiothread_command_numFrames = numFrames;
 	sd->audiothread_command_buffer = buffer;
 	sd->audiothread_command_inputBuffer = inputBuffer;
 	OpenMPT_Semaphore_Post( sd->audiothread_sem_request );
 	OpenMPT_Semaphore_Wait( sd->audiothread_sem_done );
 #else
-	return sd->wine_source.SoundSourceLockedReadFunc( sd->wine_source.inst, bufferFormat, bufferAttributes, timeInfo, numFrames, buffer, inputBuffer );
+	return sd->wine_source.SoundSourceLockedReadFunc( sd->wine_source.inst, bufferFormat, bufferAttributes, numFrames, buffer, inputBuffer );
 #endif
 }
-static void OPENMPT_WINESUPPORT_CALL SoundSourceLockedDoneFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, const OpenMPT_SoundDevice_TimeInfo * timeInfo ) {
+static void OPENMPT_WINESUPPORT_CALL SoundSourceLockedReadDoneFunc( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo ) {
 	OpenMPT_Wine_Wrapper_SoundDevice * sd = (OpenMPT_Wine_Wrapper_SoundDevice*)inst;
 	if ( !sd ) {
 		return;
 	}
 #ifdef WINE_THREAD
-	sd->audiothread_command = AudioThreadCommandDone;
-	sd->audiothread_command_bufferFormat = bufferFormat;
-	sd->audiothread_command_bufferAttributes = bufferAttributes;
+	sd->audiothread_command = AudioThreadCommandReadDone;
 	sd->audiothread_command_timeInfo = timeInfo;
 	OpenMPT_Semaphore_Post( sd->audiothread_sem_request );
 	OpenMPT_Semaphore_Wait( sd->audiothread_sem_done );
 #else
-	return sd->wine_source.SoundSourceLockedDoneFunc( sd->wine_source.inst, bufferFormat, bufferAttributes, timeInfo );
+	return sd->wine_source.SoundSourceLockedReadDoneFunc( sd->wine_source.inst, timeInfo );
 #endif
 }
 static void OPENMPT_WINESUPPORT_CALL SoundSourceUnlockFunc( void * inst ) {
@@ -242,24 +255,28 @@ static DWORD WINAPI AudioThread( LPVOID userdata ) {
 				if(sd->wine_source.SoundSourceLockedGetReferenceClockNowNanosecondsFunc)
 					sd->wine_source.SoundSourceLockedGetReferenceClockNowNanosecondsFunc( sd->wine_source.inst, sd->audiothread_command_result );
 				break;
+			case AudioThreadCommandReadPrepare:
+				if(sd->wine_source.SoundSourceLockedReadPrepareFunc)
+					sd->wine_source.SoundSourceLockedReadPrepareFunc
+						( sd->wine_source.inst
+						, sd->audiothread_command_timeInfo
+						);
+				break;
 			case AudioThreadCommandRead:
 				if(sd->wine_source.SoundSourceLockedReadFunc)
 					sd->wine_source.SoundSourceLockedReadFunc
 						( sd->wine_source.inst
 						, sd->audiothread_command_bufferFormat
 						, sd->audiothread_command_bufferAttributes
-						, sd->audiothread_command_timeInfo
 						, sd->audiothread_command_numFrames
 						, sd->audiothread_command_buffer
 						, sd->audiothread_command_inputBuffer
 						);
 				break;
-			case AudioThreadCommandDone:
-				if(sd->wine_source.SoundSourceLockedDoneFunc)
-					sd->wine_source.SoundSourceLockedDoneFunc
+			case AudioThreadCommandReadDone:
+				if(sd->wine_source.SoundSourceLockedReadDoneFunc)
+					sd->wine_source.SoundSourceLockedReadDoneFunc
 						( sd->wine_source.inst
-						, sd->audiothread_command_bufferFormat
-						, sd->audiothread_command_bufferAttributes
 						, sd->audiothread_command_timeInfo
 						);
 				break;
@@ -317,8 +334,9 @@ OPENMPT_WINESUPPORT_WRAPPER_API void OPENMPT_WINESUPPORT_WRAPPER_CALL OpenMPT_Wi
 	sd->native_source.SoundSourceIsLockedByCurrentThreadFunc = &SoundSourceIsLockedByCurrentThreadFunc;
 	sd->native_source.SoundSourceLockFunc = &SoundSourceLockFunc;
 	sd->native_source.SoundSourceLockedGetReferenceClockNowNanosecondsFunc = &SoundSourceLockedGetReferenceClockNowNanosecondsFunc;
+	sd->native_source.SoundSourceLockedReadPrepareFunc = &SoundSourceLockedReadPrepareFunc;
 	sd->native_source.SoundSourceLockedReadFunc = &SoundSourceLockedReadFunc;
-	sd->native_source.SoundSourceLockedDoneFunc = &SoundSourceLockedDoneFunc;
+	sd->native_source.SoundSourceLockedReadDoneFunc = &SoundSourceLockedReadDoneFunc;
 	sd->native_source.SoundSourceUnlockFunc = &SoundSourceUnlockFunc;
 	OpenMPT_SoundDevice_SetSource( sd->impl, &sd->native_source );
 }

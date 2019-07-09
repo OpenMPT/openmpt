@@ -747,19 +747,26 @@ public:
 };
 
 
-void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo, std::size_t numFrames, void *buffer, const void *inputBuffer)
+void CMainFrame::SoundSourceLockedReadPrepare(SoundDevice::TimeInfo timeInfo)
+{
+	MPT_TRACE_SCOPE();
+	MPT_ASSERT(InAudioThread());
+	TimingInfo timingInfo;
+	timingInfo.OutputLatency = timeInfo.Latency;
+	timingInfo.StreamFrames = timeInfo.SyncPointStreamFrames;
+	timingInfo.SystemTimestamp = timeInfo.SyncPointSystemTimestamp;
+	timingInfo.Speed = timeInfo.Speed;
+	m_pSndFile->m_TimingInfo = timingInfo;
+}
+
+
+void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, std::size_t numFrames, void *buffer, const void *inputBuffer)
 {
 	MPT_TRACE_SCOPE();
 	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	MPT_ASSERT(numFrames <= std::numeric_limits<CSoundFile::samplecount_t>::max());
 	CSoundFile::samplecount_t framesToRender = static_cast<CSoundFile::samplecount_t>(numFrames);
-	TimingInfo timingInfo;
-	timingInfo.OutputLatency = bufferAttributes.Latency;
-	timingInfo.StreamFrames = timeInfo.SyncPointStreamFrames;
-	timingInfo.SystemTimestamp = timeInfo.SyncPointSystemTimestamp;
-	timingInfo.Speed = timeInfo.Speed;
-	m_pSndFile->m_TimingInfo = timingInfo;
 	m_Dither.SetMode((DitherMode)bufferFormat.DitherType);
 	StereoVuMeterSourceWrapper source(bufferFormat.sampleFormat, inputBuffer, m_VUMeterInput);
 	StereoVuMeterTargetWrapper target(bufferFormat.sampleFormat, bufferFormat.NeedsClippedFloat, m_Dither, buffer, m_VUMeterOutput);
@@ -782,11 +789,9 @@ void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, S
 }
 
 
-void CMainFrame::SoundSourceLockedDone(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, SoundDevice::TimeInfo timeInfo)
+void CMainFrame::SoundSourceLockedReadDone(SoundDevice::TimeInfo timeInfo)
 {
 	MPT_TRACE_SCOPE();
-	MPT_UNREFERENCED_PARAMETER(bufferFormat);
-	MPT_UNREFERENCED_PARAMETER(bufferAttributes);
 	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
 	MPT_ASSERT((timeInfo.RenderStreamPositionAfter.Frames - timeInfo.RenderStreamPositionBefore.Frames) < std::numeric_limits<CSoundFile::samplecount_t>::max());

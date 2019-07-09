@@ -41,8 +41,9 @@ typedef struct OpenMPT_Wine_Wrapper_SoundDevice_ISource {
 	// audio thread
 	void (__cdecl * SoundSourceLockFunc)( void * inst );
 	void (__cdecl * SoundSourceLockedGetReferenceClockNowNanosecondsFunc)( void * inst, uint64_t * result );
-	void (__cdecl * SoundSourceLockedReadFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, const OpenMPT_SoundDevice_TimeInfo * timeInfo, uintptr_t numFrames, void * buffer, const void * inputBuffer );
-	void (__cdecl * SoundSourceLockedDoneFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
+	void (__cdecl * SoundSourceLockedReadPrepareFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
+	void (__cdecl * SoundSourceLockedReadFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, uintptr_t numFrames, void * buffer, const void * inputBuffer );
+	void (__cdecl * SoundSourceLockedReadDoneFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
 	void (__cdecl * SoundSourceUnlockFunc)( void * inst );
 } OpenMPT_Wine_Wrapper_SoundDevice_ISource;
 

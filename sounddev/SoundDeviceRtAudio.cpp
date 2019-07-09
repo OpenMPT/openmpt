@@ -236,11 +236,11 @@ void CRtAudioDevice::InternalFillAudioBuffer()
 	{
 		return;
 	}
-	SourceLockedAudioPreRead(m_CurrentFrameBufferCount, m_FramesPerChunk * m_StreamOptions.numberOfBuffers);
+	SourceLockedAudioReadPrepare(m_CurrentFrameBufferCount, m_FramesPerChunk * m_StreamOptions.numberOfBuffers);
 	SourceLockedAudioRead(m_CurrentFrameBufferOutput, m_CurrentFrameBufferInput, m_CurrentFrameBufferCount);
 	m_StatisticLatencyFrames.store(m_CurrentFrameBufferCount * m_StreamOptions.numberOfBuffers);
 	m_StatisticPeriodFrames.store(m_CurrentFrameBufferCount);
-	SourceLockedAudioDone();
+	SourceLockedAudioReadDone();
 }
 
 

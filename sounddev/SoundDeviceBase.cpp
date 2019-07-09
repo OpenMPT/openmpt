@@ -167,7 +167,7 @@ void Base::SourceFillAudioBufferLocked()
 }
 
 
-void Base::SourceLockedAudioPreRead(std::size_t numFrames, std::size_t framesLatency)
+void Base::SourceLockedAudioReadPrepare(std::size_t numFrames, std::size_t framesLatency)
 {
 	MPT_TRACE_SCOPE();
 	if(!InternalHasTimeInfo())
@@ -186,6 +186,7 @@ void Base::SourceLockedAudioPreRead(std::size_t numFrames, std::size_t framesLat
 		}
 		timeInfo.RenderStreamPositionBefore = StreamPositionFromFrames(m_StreamPositionRenderFrames);
 		timeInfo.RenderStreamPositionAfter = StreamPositionFromFrames(m_StreamPositionRenderFrames + numFrames);
+		timeInfo.Latency = GetEffectiveBufferAttributes().Latency;
 		SetTimeInfo(timeInfo);
 	}
 	m_StreamPositionRenderFrames += numFrames;
@@ -196,6 +197,10 @@ void Base::SourceLockedAudioPreRead(std::size_t numFrames, std::size_t framesLat
 	{
 		// unused, no locking
 		m_StreamPositionOutputFrames = 0;
+	}
+	if(m_Source)
+	{
+		m_Source->SoundSourceLockedReadPrepare(m_TimeInfo);
 	}
 }
 
@@ -209,17 +214,17 @@ void Base::SourceLockedAudioRead(void *buffer, const void *inputBuffer, std::siz
 	}
 	if(m_Source)
 	{
-		m_Source->SoundSourceLockedRead(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo, numFrames, buffer, inputBuffer);
+		m_Source->SoundSourceLockedRead(GetBufferFormat(), GetEffectiveBufferAttributes(), numFrames, buffer, inputBuffer);
 	}
 }
 
 
-void Base::SourceLockedAudioDone()
+void Base::SourceLockedAudioReadDone()
 {
 	MPT_TRACE_SCOPE();
 	if(m_Source)
 	{
-		m_Source->SoundSourceLockedDone(GetBufferFormat(), GetEffectiveBufferAttributes(), m_TimeInfo);
+		m_Source->SoundSourceLockedReadDone(m_TimeInfo);
 	}
 }
 
