@@ -41,7 +41,7 @@ static MPT_CONSTEXPR11_FUN int lower_bound_entropy_bits(unsigned int x)
 
 
 template <typename T>
-static inline bool is_mask(T x)
+static MPT_CONSTEXPR14_FUN bool is_mask(T x)
 {
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
 	typedef typename std::make_unsigned<T>::type unsigned_T;
@@ -179,12 +179,12 @@ sane_random_device::result_type sane_random_device::operator()()
 	result_type result = 0;
 	try
 	{
-		if(rd.min() != 0 || !mpt::is_mask(rd.max()))
+		MPT_CONSTANT_IF(decltype(rd)::min() != 0 || !mpt::is_mask(decltype(rd)::max()))
 		{ // insane std::random_device
 			//  This implementation is not exactly uniformly distributed but good enough
 			// for OpenMPT.
-			double rd_min = static_cast<double>(rd.min());
-			double rd_max = static_cast<double>(rd.max());
+			double rd_min = static_cast<double>(decltype(rd)::min());
+			double rd_max = static_cast<double>(decltype(rd)::max());
 			double rd_range = rd_max - rd_min;
 			double rd_size = rd_range + 1.0;
 			double rd_entropy = mpt::log2(rd_size);
@@ -199,7 +199,7 @@ sane_random_device::result_type sane_random_device::operator()()
 		} else
 		{ // sane std::random_device
 			result = 0;
-			std::size_t rd_bits = mpt::lower_bound_entropy_bits(rd.max());
+			std::size_t rd_bits = mpt::lower_bound_entropy_bits(decltype(rd)::max());
 			for(std::size_t entropy = 0; entropy < (sizeof(result_type) * 8); entropy += rd_bits)
 			{
 				if(rd_bits < (sizeof(result_type) * 8))
