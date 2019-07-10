@@ -760,7 +760,7 @@ void CMainFrame::SoundSourceLockedReadPrepare(SoundDevice::TimeInfo timeInfo)
 }
 
 
-void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, std::size_t numFrames, void *buffer, const void *inputBuffer)
+void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, void *buffer, const void *inputBuffer)
 {
 	MPT_TRACE_SCOPE();
 	MPT_ASSERT(InAudioThread());

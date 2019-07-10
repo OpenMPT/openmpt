@@ -168,15 +168,14 @@ static void __cdecl SoundSourceLockedReadPrepareFunc( void * inst, const OpenMPT
 	}
 	source->SoundSourceLockedReadPrepare(ti);
 }
-static void __cdecl SoundSourceLockedReadFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, uintptr_t numFrames, void * buffer, const void * inputBuffer ) {
+static void __cdecl SoundSourceLockedReadFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, void * buffer, const void * inputBuffer ) {
 	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
 	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
-	SoundDevice::BufferAttributes ba = C::decode(*bufferAttributes);
 	if(!source)
 	{
 		return;
 	}
-	source->SoundSourceLockedRead(bf, ba, numFrames, buffer, inputBuffer);
+	source->SoundSourceLockedRead(bf, numFrames, buffer, inputBuffer);
 }
 static void __cdecl SoundSourceLockedReadDoneFunc( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo ) {
 	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);

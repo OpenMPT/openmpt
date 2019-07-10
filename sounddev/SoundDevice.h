@@ -87,7 +87,7 @@ public:
 	virtual void SoundSourceLock() = 0;
 	virtual uint64 SoundSourceLockedGetReferenceClockNowNanoseconds() const = 0; // timeGetTime()*1000000 on Windows
 	virtual void SoundSourceLockedReadPrepare(SoundDevice::TimeInfo timeInfo) = 0;
-	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, std::size_t numFrames, void *buffer, const void *inputBuffer) = 0;
+	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, void *buffer, const void *inputBuffer) = 0;
 	virtual void SoundSourceLockedReadDone(SoundDevice::TimeInfo timeInfo) = 0;
 	virtual void SoundSourceUnlock() = 0;
 };

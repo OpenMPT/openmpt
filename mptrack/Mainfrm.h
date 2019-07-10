@@ -335,7 +335,7 @@ public:
 	void SoundSourceLock() override;
 	uint64 SoundSourceLockedGetReferenceClockNowNanoseconds() const override;
 	void SoundSourceLockedReadPrepare(SoundDevice::TimeInfo timeInfo) override;
-	void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, std::size_t numFrames, void *buffer, const void *inputBuffer) override;
+	void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, void *buffer, const void *inputBuffer) override;
 	void SoundSourceLockedReadDone(SoundDevice::TimeInfo timeInfo) override;
 	void SoundSourceUnlock() override;
 

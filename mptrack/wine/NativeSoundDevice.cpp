@@ -216,15 +216,14 @@ public:
 		OpenMPT_SoundDevice_TimeInfo c_timeInfo = C::encode(timeInfo);
 		return impl.SoundSourceLockedReadPrepareFunc(impl.inst, &c_timeInfo);
 	}
-	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, SoundDevice::BufferAttributes bufferAttributes, std::size_t numFrames, void *buffer, const void *inputBuffer)
+	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, void *buffer, const void *inputBuffer)
 	{
 		if(!impl.SoundSourceLockedReadFunc)
 		{
 			return;
 		}
 		OpenMPT_SoundDevice_BufferFormat c_bufferFormat = C::encode(bufferFormat);
-		OpenMPT_SoundDevice_BufferAttributes c_bufferAttributes = C::encode(bufferAttributes);
-		return impl.SoundSourceLockedReadFunc(impl.inst, &c_bufferFormat, &c_bufferAttributes, numFrames, buffer, inputBuffer);
+		return impl.SoundSourceLockedReadFunc(impl.inst, &c_bufferFormat, numFrames, buffer, inputBuffer);
 	}
 	virtual void SoundSourceLockedReadDone(SoundDevice::TimeInfo timeInfo)
 	{

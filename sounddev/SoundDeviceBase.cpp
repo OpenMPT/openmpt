@@ -214,7 +214,7 @@ void Base::SourceLockedAudioRead(void *buffer, const void *inputBuffer, std::siz
 	}
 	if(m_Source)
 	{
-		m_Source->SoundSourceLockedRead(GetBufferFormat(), GetEffectiveBufferAttributes(), numFrames, buffer, inputBuffer);
+		m_Source->SoundSourceLockedRead(GetBufferFormat(), numFrames, buffer, inputBuffer);
 	}
 }
 

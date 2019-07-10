@@ -69,7 +69,7 @@ typedef struct OpenMPT_Wine_Wrapper_SoundDevice_ISource {
 	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockFunc)( void * inst );
 	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockedGetReferenceClockNowNanosecondsFunc)( void * inst, uint64_t * result );
 	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockedReadPrepareFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
-	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockedReadFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, uintptr_t numFrames, void * buffer, const void * inputBuffer );
+	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockedReadFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, void * buffer, const void * inputBuffer );
 	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceLockedReadDoneFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
 	void (OPENMPT_WINESUPPORT_WRAPPER_CALL * SoundSourceUnlockFunc)( void * inst );
 } OpenMPT_Wine_Wrapper_SoundDevice_ISource;
@@ -187,7 +187,7 @@ static void OPENMPT_WINESUPPORT_CALL SoundSourceLockedReadPrepareFunc( void * in
 	return sd->wine_source.SoundSourceLockedReadPrepareFunc( sd->wine_source.inst, timeInfo );
 #endif
 }
-static void OPENMPT_WINESUPPORT_CALL SoundSourceLockedReadFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, const OpenMPT_SoundDevice_BufferAttributes * bufferAttributes, uintptr_t numFrames, void * buffer, const void * inputBuffer ) {
+static void OPENMPT_WINESUPPORT_CALL SoundSourceLockedReadFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, void * buffer, const void * inputBuffer ) {
 	OpenMPT_Wine_Wrapper_SoundDevice * sd = (OpenMPT_Wine_Wrapper_SoundDevice*)inst;
 	if ( !sd ) {
 		return;
@@ -195,7 +195,6 @@ static void OPENMPT_WINESUPPORT_CALL SoundSourceLockedReadFunc( void * inst, con
 #ifdef WINE_THREAD
 	sd->audiothread_command = AudioThreadCommandRead;
 	sd->audiothread_command_bufferFormat = bufferFormat;
-	sd->audiothread_command_bufferAttributes = bufferAttributes;
 	sd->audiothread_command_numFrames = numFrames;
 	sd->audiothread_command_buffer = buffer;
 	sd->audiothread_command_inputBuffer = inputBuffer;
@@ -267,7 +266,6 @@ static DWORD WINAPI AudioThread( LPVOID userdata ) {
 					sd->wine_source.SoundSourceLockedReadFunc
 						( sd->wine_source.inst
 						, sd->audiothread_command_bufferFormat
-						, sd->audiothread_command_bufferAttributes
 						, sd->audiothread_command_numFrames
 						, sd->audiothread_command_buffer
 						, sd->audiothread_command_inputBuffer
