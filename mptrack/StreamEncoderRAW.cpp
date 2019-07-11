@@ -84,7 +84,7 @@ RAWEncoder::RAWEncoder()
 		int samplerate = traits.samplerates[i];
 		for(int channels = 1; channels <= traits.maxChannels; channels *= 2)
 		{
-			for(int bytes = 5; bytes >= 1; --bytes)
+			for(int bytes = 5; bytes >= 0; --bytes)
 			{
 				Encoder::Format format;
 				format.Samplerate = samplerate;
@@ -93,6 +93,10 @@ RAWEncoder::RAWEncoder()
 				{
 					format.Sampleformat = SampleFormatFloat32;
 					format.Description = U_("Floating Point Little-Endian");
+				} else if(bytes == 0)
+				{
+					format.Sampleformat = SampleFormatUnsigned8;
+					format.Description = mpt::format(U_("%1 Bit Little-Endian (unsigned)"))(8);
 				} else
 				{
 					format.Sampleformat = (SampleFormat)(bytes * 8);

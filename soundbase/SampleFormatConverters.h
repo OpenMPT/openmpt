@@ -937,6 +937,20 @@ struct ConvertToFixedPoint<int32, uint8, fractionalBits>
 };
 
 template <int fractionalBits>
+struct ConvertToFixedPoint<int32, int8, fractionalBits>
+{
+	typedef int8 input_t;
+	typedef int32 output_t;
+	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
+		STATIC_ASSERT(shiftBits >= 1);
+		return MPT_SC_LSHIFT_SIGNED(static_cast<output_t>(val), shiftBits);
+	}
+};
+
+template <int fractionalBits>
 struct ConvertToFixedPoint<int32, int16, fractionalBits>
 {
 	typedef int16 input_t;

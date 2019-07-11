@@ -1235,6 +1235,14 @@ void CDoWaveConvert::Run()
 						}
 					);
 					break;
+				case SampleFormatInt8:
+					dither.WithDither(
+						[&](auto &ditherInstance)
+						{
+							return ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<int8*>(buffer), mixbuffer, ditherInstance, channels, framesChunk);
+						}
+					);
+					break;
 				case SampleFormatInt16:
 					dither.WithDither(
 						[&](auto &ditherInstance)

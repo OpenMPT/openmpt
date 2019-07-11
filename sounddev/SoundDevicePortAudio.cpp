@@ -90,7 +90,7 @@ bool CPortaudioDevice::InternalOpen()
 	{
 		switch(m_Settings.sampleFormat.GetBitsPerSample())
 		{
-		case 8: m_StreamParameters.sampleFormat = paUInt8; break;
+		case 8: m_StreamParameters.sampleFormat = paInt8; break;
 		case 16: m_StreamParameters.sampleFormat = paInt16; break;
 		case 24: m_StreamParameters.sampleFormat = paInt24; break;
 		case 32: m_StreamParameters.sampleFormat = paInt32; break;
@@ -429,7 +429,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 #if MPT_OS_WINDOWS
 	if((m_HostApiType == paWASAPI) && m_Settings.ExclusiveMode)
 	{
-		const std::array<SampleFormat, 5> sampleFormats { SampleFormatUnsigned8, SampleFormatInt16, SampleFormatInt24, SampleFormatInt32, SampleFormatFloat32 };
+		const std::array<SampleFormat, 5> sampleFormats { SampleFormatInt8, SampleFormatInt16, SampleFormatInt24, SampleFormatInt32, SampleFormatFloat32 };
 		for(const SampleFormat sampleFormat : sampleFormats)
 		{
 			for(std::size_t n = 0; n<baseSampleRates.size(); n++)
@@ -445,7 +445,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 				{
 					switch(sampleFormat.GetBitsPerSample())
 					{
-					case 8: StreamParameters.sampleFormat = paUInt8; break;
+					case 8: StreamParameters.sampleFormat = paInt8; break;
 					case 16: StreamParameters.sampleFormat = paInt16; break;
 					case 24: StreamParameters.sampleFormat = paInt24; break;
 					case 32: StreamParameters.sampleFormat = paInt32; break;

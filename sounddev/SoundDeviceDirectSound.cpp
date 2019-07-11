@@ -316,6 +316,10 @@ bool CDSoundDevice::InternalOpen()
 		m_pMixBuffer = m_pPrimary;
 		m_pMixBuffer->AddRef();
 	}
+	if(m_Settings.sampleFormat == SampleFormatInt8)
+	{
+		m_Settings.sampleFormat  = SampleFormatUnsigned8;
+	}
 	LPVOID lpBuf1, lpBuf2;
 	DWORD dwSize1, dwSize2;
 	if (m_pMixBuffer->Lock(0, m_nDSoundBufferSize, &lpBuf1, &dwSize1, &lpBuf2, &dwSize2, 0) == DS_OK)

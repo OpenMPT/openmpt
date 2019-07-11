@@ -140,7 +140,7 @@ public:
 				{
 					for(int channel = 0; channel < formatInfo.Channels; ++channel)
 					{
-						sampleBuf[frame * formatInfo.Channels + channel] = *p - 0x80;
+						sampleBuf[frame * formatInfo.Channels + channel] = *p;
 						p++;
 					}
 				}

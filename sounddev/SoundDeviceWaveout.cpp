@@ -204,6 +204,10 @@ bool CWaveDevice::InternalOpen()
 		InternalClose();
 		return false;
 	}
+	if(m_Settings.sampleFormat == SampleFormatInt8)
+	{
+		m_Settings.sampleFormat  = SampleFormatUnsigned8;
+	}
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;
 	m_nDoneBuffer = 0;

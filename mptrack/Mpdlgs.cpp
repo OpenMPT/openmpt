@@ -491,7 +491,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 			}
 		} else
 		{
-			if(m_CurrentDeviceCaps.CanSampleFormat || ((SampleFormat)bits == m_Settings.sampleFormat))
+			if(m_CurrentDeviceCaps.CanSampleFormat || (bits == m_Settings.sampleFormat.GetBitsPerSample()))
 			{
 				if(m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.size() > 0
 					&& std::find(
@@ -504,7 +504,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 				}
 				UINT ndx = m_CbnSampleFormat.AddString(mpt::cformat(_T("%1 Bit"))(bits));
 				m_CbnSampleFormat.SetItemData(ndx, bits);
-				if((SampleFormat)bits == m_Settings.sampleFormat)
+				if(bits == m_Settings.sampleFormat.GetBitsPerSample())
 				{
 					n = ndx;
 				}

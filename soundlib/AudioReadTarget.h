@@ -108,6 +108,13 @@ public:
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
+			case SampleFormatInt8:
+				{
+					typedef SampleFormatToType<SampleFormatInt8>::type Tsample;
+					AudioReadTargetBuffer<Tsample> target(dither, reinterpret_cast<Tsample*>(buffer), nullptr);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
 			case SampleFormatInt16:
 				{
 					typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
@@ -192,6 +199,12 @@ public:
 		case SampleFormatUnsigned8:
 			{
 				typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
+				Fill(reinterpret_cast<const Tsample*>(inputBuffer), MixInputBuffers, channels, countChunk);
+			}
+			break;
+		case SampleFormatInt8:
+			{
+				typedef SampleFormatToType<SampleFormatInt8>::type Tsample;
 				Fill(reinterpret_cast<const Tsample*>(inputBuffer), MixInputBuffers, channels, countChunk);
 			}
 			break;

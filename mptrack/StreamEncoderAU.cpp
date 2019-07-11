@@ -189,6 +189,10 @@ AUEncoder::AUEncoder()
 				{
 					format.Sampleformat = SampleFormatFloat32;
 					format.Description = U_("Floating Point");
+				} else if(bytes == 1)
+				{
+					format.Sampleformat = (SampleFormat)(0 - (bytes * 8));
+					format.Description = mpt::format(U_("%1 Bit (unsigned)"))(bytes * 8);
 				} else
 				{
 					format.Sampleformat = (SampleFormat)(bytes * 8);

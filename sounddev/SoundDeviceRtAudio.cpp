@@ -101,6 +101,7 @@ static RtAudioFormat SampleFormatToRtAudioFormat(SampleFormat sampleFormat)
 	{
 		switch(sampleFormat.GetBitsPerSample())
 		{
+		case 8: result = RTAUDIO_SINT8; break;
 		case 16: result = RTAUDIO_SINT16; break;
 		case 24: result = RTAUDIO_SINT24; break;
 		case 32: result = RTAUDIO_SINT32; break;

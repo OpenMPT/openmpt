@@ -20,7 +20,8 @@ struct int24;
 
 enum SampleFormatEnum
 {
-	SampleFormatUnsigned8 =  8,       // do not change value (for compatibility with old configuration settings)
+	SampleFormatUnsigned8 = -8,       // do not change value (for compatibility with old configuration settings)
+	SampleFormatInt8      =  8,       // do not change value (for compatibility with old configuration settings)
 	SampleFormatInt16     = 16,       // do not change value (for compatibility with old configuration settings)
 	SampleFormatInt24     = 24,       // do not change value (for compatibility with old configuration settings)
 	SampleFormatInt32     = 32,       // do not change value (for compatibility with old configuration settings)
@@ -29,18 +30,20 @@ enum SampleFormatEnum
 };
 
 template<typename Tsample> struct SampleFormatTraits;
-template<> struct SampleFormatTraits<uint8>     { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatUnsigned8; } };
-template<> struct SampleFormatTraits<int16>     { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatInt16;     } };
-template<> struct SampleFormatTraits<int24>     { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatInt24;     } };
-template<> struct SampleFormatTraits<int32>     { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatInt32;     } };
-template<> struct SampleFormatTraits<float>     { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatFloat32;   } };
+template<> struct SampleFormatTraits<uint8> { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatUnsigned8; } };
+template<> struct SampleFormatTraits<int8>  { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatInt8;      } };
+template<> struct SampleFormatTraits<int16> { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatInt16;     } };
+template<> struct SampleFormatTraits<int24> { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatInt24;     } };
+template<> struct SampleFormatTraits<int32> { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatInt32;     } };
+template<> struct SampleFormatTraits<float> { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatFloat32;   } };
 
 template<SampleFormatEnum sampleFormat> struct SampleFormatToType;
-template<> struct SampleFormatToType<SampleFormatUnsigned8> { typedef uint8     type; };
-template<> struct SampleFormatToType<SampleFormatInt16>     { typedef int16     type; };
-template<> struct SampleFormatToType<SampleFormatInt24>     { typedef int24     type; };
-template<> struct SampleFormatToType<SampleFormatInt32>     { typedef int32     type; };
-template<> struct SampleFormatToType<SampleFormatFloat32>   { typedef float     type; };
+template<> struct SampleFormatToType<SampleFormatUnsigned8> { typedef uint8 type; };
+template<> struct SampleFormatToType<SampleFormatInt8>      { typedef int8  type; };
+template<> struct SampleFormatToType<SampleFormatInt16>     { typedef int16 type; };
+template<> struct SampleFormatToType<SampleFormatInt24>     { typedef int24 type; };
+template<> struct SampleFormatToType<SampleFormatInt32>     { typedef int32 type; };
+template<> struct SampleFormatToType<SampleFormatFloat32>   { typedef float type; };
 
 
 struct SampleFormat
@@ -76,6 +79,7 @@ struct SampleFormat
 		return
 			!IsValid() ? 0 :
 			(value == SampleFormatUnsigned8) ?  8 :
+			(value == SampleFormatInt8)      ?  8 :
 			(value == SampleFormatInt16)     ? 16 :
 			(value == SampleFormatInt24)     ? 24 :
 			(value == SampleFormatInt32)     ? 32 :
