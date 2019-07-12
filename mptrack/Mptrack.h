@@ -12,7 +12,7 @@
 
 #include "BuildSettings.h"
 
-#include "resource.h"       // main symbols
+#include "resource.h"  // main symbols
 #include "Settings.h"
 #include "MPTrackUtil.h"
 #include "Reporting.h"
@@ -27,17 +27,22 @@ OPENMPT_NAMESPACE_BEGIN
 class CModDoc;
 class CModDocTemplate;
 class CVstPluginManager;
-namespace SoundDevice {
+namespace SoundDevice
+{
 class Manager;
-} // namespace SoundDevice
+}  // namespace SoundDevice
 class CDLSBank;
 class DebugSettings;
 class TrackerSettings;
 class ComponentManagerSettings;
-namespace mpt { namespace Wine {
+namespace mpt
+{
+namespace Wine
+{
 class VersionContext;
 class Context;
-} } // namespace mpt::Wine
+}  // namespace Wine
+}  // namespace mpt
 class GdiplusRAII;
 
 
@@ -54,7 +59,7 @@ struct MODPLUGDIB
 /////////////////////////////////////////////////////////////////////////////
 // Midi Library
 
-using MidiLibrary = std::array<mpt::PathString, 128 * 2>; // 128 instruments + 128 percussions
+using MidiLibrary = std::array<mpt::PathString, 128 * 2>;  // 128 instruments + 128 percussions
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -62,16 +67,16 @@ using MidiLibrary = std::array<mpt::PathString, 128 * 2>; // 128 instruments + 1
 
 enum DragonDropType
 {
-	DRAGONDROP_NOTHING=0,	// |------< Drop Type >-------------|--< dwDropItem >---|--< lDropParam >---|
-	DRAGONDROP_DLS,			// | Instrument from a DLS bank     |     DLS Bank #    |   DLS Instrument  |
-	DRAGONDROP_SAMPLE,		// | Sample from a song             |     Sample #      |       NULL        |
-	DRAGONDROP_INSTRUMENT,	// | Instrument from a song         |     Instrument #  |       NULL        |
-	DRAGONDROP_SOUNDFILE,	// | File from instrument library   |        ?          |     File Name     |
-	DRAGONDROP_MIDIINSTR,	// | File from midi library         | Midi Program/Perc |     File Name     |
-	DRAGONDROP_PATTERN,		// | Pattern from a song            |      Pattern #    |       NULL        |
-	DRAGONDROP_ORDER,		// | Pattern index in a song        |       Order #     |       NULL        |
-	DRAGONDROP_SONG,		// | Song file (mod/s3m/xm/it)      |       0           |     File Name     |
-	DRAGONDROP_SEQUENCE		// | Sequence (a set of orders)     |    Sequence #     |       NULL        |
+	DRAGONDROP_NOTHING = 0,  // |------< Drop Type >-------------|--< dwDropItem >---|--< lDropParam >---|
+	DRAGONDROP_DLS,          // | Instrument from a DLS bank     |     DLS Bank #    |   DLS Instrument  |
+	DRAGONDROP_SAMPLE,       // | Sample from a song             |     Sample #      |       NULL        |
+	DRAGONDROP_INSTRUMENT,   // | Instrument from a song         |     Instrument #  |       NULL        |
+	DRAGONDROP_SOUNDFILE,    // | File from instrument library   |        ?          |     File Name     |
+	DRAGONDROP_MIDIINSTR,    // | File from midi library         | Midi Program/Perc |     File Name     |
+	DRAGONDROP_PATTERN,      // | Pattern from a song            |      Pattern #    |       NULL        |
+	DRAGONDROP_ORDER,        // | Pattern index in a song        |       Order #     |       NULL        |
+	DRAGONDROP_SONG,         // | Song file (mod/s3m/xm/it)      |       0           |     File Name     |
+	DRAGONDROP_SEQUENCE      // | Sequence (a set of orders)     |    Sequence #     |       NULL        |
 };
 
 struct DRAGONDROP
@@ -101,10 +106,10 @@ struct DRAGONDROP
 
 class CMPTCommandLineInfo;
 
-class CTrackApp: public CWinApp
+class CTrackApp : public CWinApp
 {
 	friend class CMainFrame;
-// static data
+	// static data
 protected:
 	static MODTYPE m_nDefaultDocType;
 	static MidiLibrary midiLibrary;
@@ -113,13 +118,12 @@ public:
 	static std::vector<CDLSBank *> gpDLSBanks;
 
 protected:
-
 	mpt::recursive_mutex_with_lock_count m_GlobalMutex;
 
 	DWORD m_GuiThreadId = 0;
 
 	std::unique_ptr<mpt::random_device> m_RD;
-	std::unique_ptr<mpt::thread_safe_prng<mpt::default_prng> > m_PRNG;
+	std::unique_ptr<mpt::thread_safe_prng<mpt::default_prng>> m_PRNG;
 
 	std::unique_ptr<GdiplusRAII> m_Gdiplus;
 
@@ -136,12 +140,12 @@ protected:
 	CModDocTemplate *m_pModTemplate = nullptr;
 	CVstPluginManager *m_pPluginManager = nullptr;
 	SoundDevice::Manager *m_pSoundDevicesManager = nullptr;
-	
-	mpt::PathString m_InstallPath; // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)
-	mpt::PathString m_InstallBinPath; // i.e. "C:\Program Files\OpenMPT\bin\" (multi-arch mode) or InstallPath (legacy mode)
-	mpt::PathString m_InstallBinArchPath; // i.e. "C:\Program Files\OpenMPT\bin\amd64\" (multi-arch mode) or InstallPath (legacy mode)
 
-	mpt::PathString m_ConfigPath; // InstallPath (portable mode) or "%AppData%\OpenMPT\"
+	mpt::PathString m_InstallPath;         // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)
+	mpt::PathString m_InstallBinPath;      // i.e. "C:\Program Files\OpenMPT\bin\" (multi-arch mode) or InstallPath (legacy mode)
+	mpt::PathString m_InstallBinArchPath;  // i.e. "C:\Program Files\OpenMPT\bin\amd64\" (multi-arch mode) or InstallPath (legacy mode)
+
+	mpt::PathString m_ConfigPath;  // InstallPath (portable mode) or "%AppData%\OpenMPT\"
 
 	mpt::PathString m_szConfigFileName;
 	mpt::PathString m_szPluginCacheFileName;
@@ -163,25 +167,24 @@ public:
 	void RemoveMruItem(const mpt::PathString &path);
 
 public:
-
 	bool IsMultiArchInstall() const { return m_InstallPath == m_InstallBinArchPath; }
-	mpt::PathString GetInstallPath() const { return m_InstallPath; } // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)
-	mpt::PathString GetInstallBinPath() const { return m_InstallBinPath; } // i.e. "C:\Program Files\OpenMPT\bin\" (multi-arch mode) or InstallPath (legacy mode)
-	mpt::PathString GetInstallBinArchPath() const { return m_InstallBinArchPath; } // i.e. "C:\Program Files\OpenMPT\bin\amd64\" (multi-arch mode) or InstallPath (legacy mode)
-	
+	mpt::PathString GetInstallPath() const { return m_InstallPath; }                // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)
+	mpt::PathString GetInstallBinPath() const { return m_InstallBinPath; }          // i.e. "C:\Program Files\OpenMPT\bin\" (multi-arch mode) or InstallPath (legacy mode)
+	mpt::PathString GetInstallBinArchPath() const { return m_InstallBinArchPath; }  // i.e. "C:\Program Files\OpenMPT\bin\amd64\" (multi-arch mode) or InstallPath (legacy mode)
+
 	static MODTYPE GetDefaultDocType() { return m_nDefaultDocType; }
 	static void SetDefaultDocType(MODTYPE n) { m_nDefaultDocType = n; }
 	static MidiLibrary &GetMidiLibrary() { return midiLibrary; }
-	static BOOL ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarning=FALSE);
-	static BOOL ExportMidiConfig(const mpt::PathString &filename);
-	static BOOL ImportMidiConfig(SettingsContainer &file, bool forgetSettings = false);
-	static BOOL ExportMidiConfig(SettingsContainer &file);
+	static void ImportMidiConfig(const mpt::PathString &filename, bool hideWarning = false);
+	static void ExportMidiConfig(const mpt::PathString &filename);
+	static void ImportMidiConfig(SettingsContainer &file, const mpt::PathString &path, bool forgetSettings = false);
+	static void ExportMidiConfig(SettingsContainer &file);
 	static void LoadDefaultDLSBanks();
 	static void SaveDefaultDLSBanks();
 	static void RemoveDLSBank(UINT nBank);
 	static bool AddDLSBank(const mpt::PathString &filename);
-	static bool OpenURL(const char *url); // UTF8
-	static bool OpenURL(const std::string &url); // UTF8
+	static bool OpenURL(const char *url);         // UTF8
+	static bool OpenURL(const std::string &url);  // UTF8
 	static bool OpenURL(const CString &url);
 	static bool OpenURL(const mpt::ustring &url);
 	static bool OpenURL(const mpt::PathString &lpszURL);
@@ -196,43 +199,43 @@ public:
 	std::vector<CModDoc *> GetOpenDocuments() const;
 
 public:
-	inline mpt::recursive_mutex_with_lock_count & GetGlobalMutexRef() { return m_GlobalMutex; }
+	inline mpt::recursive_mutex_with_lock_count &GetGlobalMutexRef() { return m_GlobalMutex; }
 	bool InGuiThread() const { return GetCurrentThreadId() == m_GuiThreadId; }
-	mpt::random_device & RandomDevice() { return *m_RD; }
-	mpt::thread_safe_prng<mpt::default_prng> & PRNG() { return *m_PRNG; }
+	mpt::random_device &RandomDevice() { return *m_RD; }
+	mpt::thread_safe_prng<mpt::default_prng> &PRNG() { return *m_PRNG; }
 	CModDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
 	SoundDevice::Manager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
 	mpt::PathString GetConfigFileName() const { return m_szConfigFileName; }
-	SettingsContainer * GetpSettings()
+	SettingsContainer *GetpSettings()
 	{
 		return m_pSettings;
 	}
-	SettingsContainer & GetSettings()
+	SettingsContainer &GetSettings()
 	{
 		ASSERT(m_pSettings);
 		return *m_pSettings;
 	}
-	TrackerSettings & GetTrackerSettings()
+	TrackerSettings &GetTrackerSettings()
 	{
 		ASSERT(m_pTrackerSettings);
 		return *m_pTrackerSettings;
 	}
 	bool IsPortableMode() { return m_bPortableMode; }
-	SettingsContainer & GetPluginCache()
+	SettingsContainer &GetPluginCache()
 	{
 		ASSERT(m_pPluginCache);
 		return *m_pPluginCache;
 	}
 
-	SettingsContainer & GetSongSettings()
+	SettingsContainer &GetSongSettings()
 	{
 		ASSERT(m_pSongSettings);
 		return *m_pSongSettings;
 	}
-	const mpt::PathString& GetSongSettingsFilename() const
+	const mpt::PathString &GetSongSettingsFilename() const
 	{
 		return m_pSongSettingsIniFile->GetFilename();
 	}
@@ -245,7 +248,7 @@ public:
 	std::shared_ptr<mpt::Wine::VersionContext> GetWineVersion() const
 	{
 		MPT_ASSERT_ALWAYS(mpt::Windows::IsWine());
-		MPT_ASSERT_ALWAYS(m_WineVersion); // Verify initialization order. We should not should reach this until after Wine is detected.
+		MPT_ASSERT_ALWAYS(m_WineVersion);  // Verify initialization order. We should not should reach this until after Wine is detected.
 		return m_WineVersion;
 	}
 
@@ -287,7 +290,7 @@ public:
 	// Get name of resampling mode. addTaps = true also adds the number of taps the filter uses.
 	static CString GetResamplingModeName(ResamplingMode mode, int length, bool addTaps);
 
-// Overrides
+	// Overrides
 public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTrackApp)
@@ -297,13 +300,13 @@ public:
 	BOOL InitInstanceLate(CMPTCommandLineInfo &cmdInfo);
 	BOOL InitInstanceImpl(CMPTCommandLineInfo &cmdInfo);
 	int Run() override;
-	LRESULT ProcessWndProcException(CException* e, const MSG* pMsg) override;
+	LRESULT ProcessWndProcException(CException *e, const MSG *pMsg) override;
 	int ExitInstance() override;
 	int ExitInstanceImpl();
 	BOOL OnIdle(LONG lCount) override;
 	//}}AFX_VIRTUAL
 
-// Implementation
+	// Implementation
 
 	//{{AFX_MSG(CTrackApp)
 	CModDoc *NewDocument(MODTYPE newType = MOD_TYPE_NONE);
@@ -328,8 +331,7 @@ protected:
 	void InitializeDXPlugins();
 	void UninitializeDXPlugins();
 
-	bool MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDir = mpt::PathString(), mpt::PathString sNewFileName = mpt::PathString());
-
+	bool MoveConfigFile(const mpt::PathString &fileName, mpt::PathString subDir = {}, mpt::PathString newFileName = {});
 };
 
 
@@ -385,28 +387,27 @@ MODPLUGDIB *LoadDib(LPCTSTR lpszName);
 RGBQUAD rgb2quad(COLORREF c);
 
 // Other bitmap functions
-void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText=NULL, BOOL bDisabled=FALSE, BOOL bPushed=FALSE, DWORD dwFlags=(DT_CENTER|DT_VCENTER));
-void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCWSTR lpszText=NULL, BOOL bDisabled=FALSE, BOOL bPushed=FALSE, DWORD dwFlags=(DT_CENTER|DT_VCENTER));
+void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText = NULL, BOOL bDisabled = FALSE, BOOL bPushed = FALSE, DWORD dwFlags = (DT_CENTER | DT_VCENTER));
+void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCWSTR lpszText = NULL, BOOL bDisabled = FALSE, BOOL bPushed = FALSE, DWORD dwFlags = (DT_CENTER | DT_VCENTER));
 
 // Misc functions
-UINT MsgBox(UINT nStringID, CWnd *p=NULL, LPCSTR lpszTitle=NULL, UINT n=MB_OK);
-void ErrorBox(UINT nStringID, CWnd*p=NULL);
+void ErrorBox(UINT nStringID, CWnd *p = nullptr);
 
 // Helper function declarations.
 struct SNDMIXPLUGIN;
 class IMixPlugin;
-void AddPluginNamesToCombobox(CComboBox& CBox, const SNDMIXPLUGIN *plugarray, const bool librarynames = false);
-void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plugarray);
-void AddPluginParameternamesToCombobox(CComboBox& CBox, IMixPlugin& plug);
+void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, const bool librarynames = false);
+void AddPluginParameternamesToCombobox(CComboBox &CBox, SNDMIXPLUGIN &plugarray);
+void AddPluginParameternamesToCombobox(CComboBox &CBox, IMixPlugin &plug);
 
 // Append note names in range [noteStart, noteEnd] to given combobox. Index starts from 0.
-void AppendNotesToControl(CComboBox& combobox, ModCommand::NOTE noteStart, ModCommand::NOTE noteEnd);
+void AppendNotesToControl(CComboBox &combobox, ModCommand::NOTE noteStart, ModCommand::NOTE noteEnd);
 
 // Append note names to combo box.
 // If nInstr is given, instrument-specific note names are used instead of default note names.
 // A custom note range may also be specified using the noteStart and noteEnd parameters.
 // If they are left out, only notes that are available in the module type, plus any supported "special notes" are added.
-void AppendNotesToControlEx(CComboBox& combobox, const CSoundFile &sndFile, INSTRUMENTINDEX nInstr = MAX_INSTRUMENTS, ModCommand::NOTE noteStart = 0, ModCommand::NOTE noteEnd = 0);
+void AppendNotesToControlEx(CComboBox &combobox, const CSoundFile &sndFile, INSTRUMENTINDEX nInstr = MAX_INSTRUMENTS, ModCommand::NOTE noteStart = 0, ModCommand::NOTE noteEnd = 0);
 
 // Get window text (e.g. edit box content) as a CString
 CString GetWindowTextString(const CWnd &wnd);
@@ -423,8 +424,8 @@ extern const char *szHexChar;
 
 // Defined in load_mid.cpp
 extern const char *szMidiProgramNames[128];
-extern const char *szMidiPercussionNames[61];	// notes 25..85
-extern const char *szMidiGroupNames[17];		// 16 groups + Percussions
+extern const char *szMidiPercussionNames[61];  // notes 25..85
+extern const char *szMidiGroupNames[17];       // 16 groups + Percussions
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -178,119 +178,115 @@ static void TimeoutSplashScreen();
 
 MidiLibrary CTrackApp::midiLibrary;
 
-BOOL CTrackApp::ImportMidiConfig(const mpt::PathString &filename, BOOL bNoWarn)
+void CTrackApp::ImportMidiConfig(const mpt::PathString &filename, bool hideWarning)
 {
-	if(filename.empty()) return FALSE;
+	if(filename.empty()) return;
 
-	if (CDLSBank::IsDLSBank(filename))
+	if(CDLSBank::IsDLSBank(filename))
 	{
 		ConfirmAnswer result = cnfYes;
-		if (!bNoWarn)
+		if(!hideWarning)
 		{
 			result = Reporting::Confirm("You are about to replace the current MIDI library:\n"
 				"Do you want to replace only the missing instruments? (recommended)",
 				"Warning", true);
 		}
-		if (result == cnfCancel) return FALSE;
-		const bool bReplaceAll = (result == cnfNo);
+		if(result == cnfCancel) return;
+		const bool replaceAll = (result == cnfNo);
 		CDLSBank dlsbank;
 		if (dlsbank.Open(filename))
 		{
-			for (uint32 iIns=0; iIns<256; iIns++)
+			for(uint32 ins = 0; ins < 256; ins++)
 			{
-				if((bReplaceAll) || midiLibrary[iIns].empty())
+				if(replaceAll || midiLibrary[ins].empty())
 				{
-					uint32 dwProgram = (iIns < 128) ? iIns : 0xFF;
-					uint32 dwKey = (iIns < 128) ? 0xFF : iIns & 0x7F;
-					uint32 dwBank = (iIns < 128) ? 0 : F_INSTRUMENT_DRUMS;
-					if (dlsbank.FindInstrument((iIns < 128) ? FALSE : TRUE,	dwBank, dwProgram, dwKey))
+					uint32 prog = (ins < 128) ? ins : 0xFF;
+					uint32 key = (ins < 128) ? 0xFF : ins & 0x7F;
+					uint32 bank = (ins < 128) ? 0 : F_INSTRUMENT_DRUMS;
+					if (dlsbank.FindInstrument(ins >= 128, bank, prog, key))
 					{
-						midiLibrary[iIns] = filename;
+						midiLibrary[ins] = filename;
 					}
 				}
 			}
 		}
-		return TRUE;
+		return;
 	}
 
 	IniFileSettingsContainer file(filename);
-	return ImportMidiConfig(file);
+	ImportMidiConfig(file, filename.GetPath());
 }
 
-BOOL CTrackApp::ImportMidiConfig(SettingsContainer &file, bool forgetSettings)
-{
-	mpt::PathString UltraSndPath;
 
-	UltraSndPath = file.Read<mpt::PathString>(U_("Ultrasound"), U_("PatchDir"), mpt::PathString());
-	if(forgetSettings) file.Forget(U_("Ultrasound"), U_("PatchDir"));
-	if(UltraSndPath.empty() || UltraSndPath == P_(".\\"))
+static mpt::PathString GetUltraSoundPatchDir(SettingsContainer &file, const mpt::ustring &iniSection, const mpt::PathString &path, bool forgetSettings)
+{
+	mpt::PathString patchDir = file.Read<mpt::PathString>(iniSection, U_("PatchDir"), {});
+	if(forgetSettings)
+		file.Forget(U_("Ultrasound"), U_("PatchDir"));
+	if(patchDir.empty() || patchDir == P_(".\\"))
+		patchDir = path;
+	if(!patchDir.empty())
+		patchDir.EnsureTrailingSlash();
+	return patchDir;
+}
+
+void CTrackApp::ImportMidiConfig(SettingsContainer &file, const mpt::PathString &path, bool forgetSettings)
+{
+	const mpt::PathString patchDir = GetUltraSoundPatchDir(file, U_("Ultrasound"), path, forgetSettings);
+	for(uint32 prog = 0; prog < 256; prog++)
 	{
-		std::vector<TCHAR> curDir(::GetCurrentDirectory(0, nullptr), '\0');
-		::GetCurrentDirectory(static_cast<DWORD>(curDir.size()), curDir.data());
-		UltraSndPath = mpt::PathString::FromNative(curDir.data());
-	}
-	for(uint32 iMidi = 0; iMidi < 256; iMidi++)
-	{
-		mpt::PathString filename;
-		mpt::ustring key = mpt::format(U_("%1%2"))((iMidi < 128) ? U_("Midi") : U_("Perc"), iMidi & 0x7f);
-		filename = file.Read<mpt::PathString>(U_("Midi Library"), key, mpt::PathString());
+		mpt::ustring key = mpt::format(U_("%1%2"))((prog < 128) ? U_("Midi") : U_("Perc"), prog & 0x7F);
+		mpt::PathString filename = file.Read<mpt::PathString>(U_("Midi Library"), key, mpt::PathString());
 		// Check for ULTRASND.INI
 		if(filename.empty())
 		{
-			mpt::ustring section = (iMidi < 128) ? UL_("Melodic Patches") : UL_("Drum Patches");
-			key = mpt::ufmt::val(iMidi & 0x7f);
+			mpt::ustring section = (prog < 128) ? UL_("Melodic Patches") : UL_("Drum Patches");
+			key = mpt::ufmt::val(prog & 0x7f);
 			filename = file.Read<mpt::PathString>(section, key, mpt::PathString());
 			if(forgetSettings) file.Forget(section, key);
 			if(filename.empty())
 			{
-				section = (iMidi < 128) ? UL_("Melodic Bank 0") : UL_("Drum Bank 0");
+				section = (prog < 128) ? UL_("Melodic Bank 0") : UL_("Drum Bank 0");
 				filename = file.Read<mpt::PathString>(section, key, mpt::PathString());
 				if(forgetSettings) file.Forget(section, key);
 			}
+			const mpt::PathString localPatchDir = GetUltraSoundPatchDir(file, section, patchDir, forgetSettings);
 			if(!filename.empty())
 			{
-				mpt::PathString tmp;
-				if(!UltraSndPath.empty())
-				{
-					tmp = UltraSndPath;
-					tmp.EnsureTrailingSlash();
-				}
-				filename = tmp + filename + P_(".pat");
+				filename = localPatchDir + filename + P_(".pat");
 			}
 		}
 		if(!filename.empty())
 		{
 			filename = theApp.PathInstallRelativeToAbsolute(filename);
-			midiLibrary[iMidi] = filename;
+			midiLibrary[prog] = filename;
 		}
 	}
-	return FALSE;
 }
 
 
-BOOL CTrackApp::ExportMidiConfig(const mpt::PathString &filename)
+void CTrackApp::ExportMidiConfig(const mpt::PathString &filename)
 {
-	if(filename.empty()) return FALSE;
+	if(filename.empty()) return;
 	IniFileSettingsContainer file(filename);
-	return ExportMidiConfig(file);
+	ExportMidiConfig(file);
 }
 
-BOOL CTrackApp::ExportMidiConfig(SettingsContainer &file)
+void CTrackApp::ExportMidiConfig(SettingsContainer &file)
 {
-	for(uint32 iMidi = 0; iMidi < 256; iMidi++) if (!midiLibrary[iMidi].empty())
+	for(uint32 prog = 0; prog < 256; prog++) if (!midiLibrary[prog].empty())
 	{
-		mpt::PathString szFileName = midiLibrary[iMidi];
+		mpt::PathString szFileName = midiLibrary[prog];
 
 		if(!szFileName.empty())
 		{
 			if(theApp.IsPortableMode())
 				szFileName = theApp.PathAbsoluteToInstallRelative(szFileName);
 
-			mpt::ustring key = mpt::format(U_("%1%2"))((iMidi < 128) ? U_("Midi") : U_("Perc"), iMidi & 0x7f);
+			mpt::ustring key = mpt::format(U_("%1%2"))((prog < 128) ? U_("Midi") : U_("Perc"), prog & 0x7F);
 			file.Write<mpt::PathString>(U_("Midi Library"), key, szFileName);
 		}
 	}
-	return TRUE;
 }
 
 
@@ -325,7 +321,7 @@ void CTrackApp::LoadDefaultDLSBanks()
 				::ExpandEnvironmentStrings(filenameT.data(), filenameExpanded.data(), static_cast<DWORD>(filenameExpanded.size()));
 				auto filename = mpt::PathString::FromNative(filenameExpanded.data());
 				AddDLSBank(filename);
-				ImportMidiConfig(filename, TRUE);
+				ImportMidiConfig(filename, true);
 			}
 		}
 		RegCloseKey(key);
@@ -509,31 +505,21 @@ public:
 };
 
 
-// Move a config file called sFileName from the App's directory (or one of its sub directories specified by sSubDir) to
-// %APPDATA%. If specified, it will be renamed to sNewFileName. Existing files are never overwritten.
+// Move a config file called fileName from the App's directory (or one of its sub directories specified by subDir) to
+// %APPDATA%. If specified, it will be renamed to newFileName. Existing files are never overwritten.
 // Returns true on success.
-bool CTrackApp::MoveConfigFile(mpt::PathString sFileName, mpt::PathString sSubDir, mpt::PathString sNewFileName)
+bool CTrackApp::MoveConfigFile(const mpt::PathString &fileName, mpt::PathString subDir, mpt::PathString newFileName)
 {
-	// copy a config file from the exe directory to the new config dirs
-	mpt::PathString sOldPath;
-	mpt::PathString sNewPath;
-	sOldPath = GetInstallPath();
-	sOldPath += sSubDir;
-	sOldPath += sFileName;
+	const mpt::PathString oldPath = GetInstallPath() + subDir + fileName;
+	mpt::PathString newPath = GetConfigPath() + subDir;
+	if(!newFileName.empty())
+		newPath += newFileName;
+	else
+		newPath += fileName;
 
-	sNewPath = GetConfigPath();
-	sNewPath += sSubDir;
-	if(!sNewFileName.empty())
+	if(!newPath.IsFile() && oldPath.IsFile())
 	{
-		sNewPath += sNewFileName;
-	} else
-	{
-		sNewPath += sFileName;
-	}
-
-	if(!sNewPath.IsFile() && sOldPath.IsFile())
-	{
-		return (MoveFile(sOldPath.AsNative().c_str(), sNewPath.AsNative().c_str()) != 0);
+		return MoveFile(oldPath.AsNative().c_str(), newPath.AsNative().c_str()) != 0;
 	}
 	return false;
 }
@@ -664,16 +650,14 @@ void CTrackApp::CreatePaths()
 		MoveConfigFile(P_("plugin.cache"));
 	
 		// Import old tunings
-		mpt::PathString sOldTunings = GetInstallPath() + P_("tunings\\");
+		const mpt::PathString oldTunings = GetInstallPath() + P_("tunings\\");
 
-		if(sOldTunings.IsDirectory())
+		if(oldTunings.IsDirectory())
 		{
-			mpt::PathString sSearchPattern;
-			sSearchPattern = sOldTunings;
-			sSearchPattern += P_("*.*");
+			const mpt::PathString searchPattern = oldTunings + P_("*.*");
 			WIN32_FIND_DATA FindFileData;
 			HANDLE hFind;
-			hFind = FindFirstFile(sSearchPattern.AsNative().c_str(), &FindFileData);
+			hFind = FindFirstFile(searchPattern.AsNative().c_str(), &FindFileData);
 			if(hFind != INVALID_HANDLE_VALUE)
 			{
 				do
@@ -682,7 +666,7 @@ void CTrackApp::CreatePaths()
 				} while(FindNextFile(hFind, &FindFileData) != 0);
 			}
 			FindClose(hFind);
-			RemoveDirectory(sOldTunings.AsNative().c_str());
+			RemoveDirectory(oldTunings.AsNative().c_str());
 		}
 
 	}
@@ -797,7 +781,7 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 			_T("STOP!!!") _T("\n")
 			_T("This is an ANSI (as opposed to a UNICODE) build of OpenMPT.") _T("\n")
 			_T("\n")
-			_T("ANSI builds are NOT SUPPORTED and WILL CAUSE CORRUPTION of the OpenMPT configuration and exibit other unintended behaviour.") _T("\n")
+			_T("ANSI builds are NOT SUPPORTED and WILL CAUSE CORRUPTION of the OpenMPT configuration and exhibit other unintended behaviour.") _T("\n")
 			_T("\n")
 			_T("Please use an official build of OpenMPT or compile 'OpenMPT.sln' instead of 'OpenMPT-ANSI.sln'.") _T("\n")
 			_T("\n")
@@ -1056,7 +1040,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	AddDocTemplate(m_pModTemplate);
 
 	// Load Midi Library
-	ImportMidiConfig(theApp.GetSettings(), true);
+	ImportMidiConfig(theApp.GetSettings(), {}, true);
 
 	// Enable DDE Execute open
 	// requires m_pDocManager
@@ -1140,7 +1124,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	if(TrackerSettings::Instance().FirstRun)
 	{
-		
 		// On high-DPI devices, automatically upscale pattern font
 		FontSetting font = TrackerSettings::Instance().patternFont;
 		font.size = Clamp(Util::GetDPIy(m_pMainWnd->m_hWnd) / 96 - 1, 0, 9);
@@ -1720,17 +1703,11 @@ void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCWSTR lpszText, BOOL bDisabled, BO
 // Misc functions
 
 
-UINT MsgBox(UINT nStringID, CWnd *parent, LPCSTR lpszTitle, UINT n)
+void ErrorBox(UINT nStringID, CWnd *parent)
 {
 	CString str;
 	str.LoadString(nStringID);
-	return Reporting::CustomNotification(str, CString(lpszTitle), n, parent);
-}
-
-
-void ErrorBox(UINT nStringID, CWnd *parent)
-{
-	MsgBox(nStringID, parent, "Error!", MB_OK | MB_ICONERROR);
+	Reporting::CustomNotification(str, _T("Error!"), MB_OK | MB_ICONERROR, parent);
 }
 
 
