@@ -76,41 +76,44 @@ public:
 	{
 		MPT_CONSTANT_IF(targetbits == 0)
 		{
-			return sample;
-		}
-		STATIC_ASSERT(sizeof(MixSampleInt) == 4);
-		constexpr int rshift = (32-targetbits) - MixSampleIntTraits::mix_headroom_bits();
-		MPT_CONSTANT_IF(rshift <= 0)
-		{
 			MPT_UNREFERENCED_PARAMETER(prng);
-			// nothing to dither
 			return sample;
 		} else
 		{
-			constexpr int round_mask = ~((1<<rshift)-1);
-			constexpr int round_offset = 1<<(rshift-1);
-			constexpr int noise_bits = rshift + (ditherdepth - 1);
-			constexpr int noise_bias = (1<<(noise_bits-1));
-			int32 e = error;
-			unsigned int unoise = 0;
-			MPT_CONSTANT_IF(triangular)
+			STATIC_ASSERT(sizeof(MixSampleInt) == 4);
+			constexpr int rshift = (32-targetbits) - MixSampleIntTraits::mix_headroom_bits();
+			MPT_CONSTANT_IF(rshift <= 0)
 			{
-				unoise = (mpt::random<unsigned int>(prng, noise_bits) + mpt::random<unsigned int>(prng, noise_bits)) >> 1;
+				MPT_UNREFERENCED_PARAMETER(prng);
+				// nothing to dither
+				return sample;
 			} else
 			{
-				unoise = mpt::random<unsigned int>(prng, noise_bits);
+				constexpr int round_mask = ~((1<<rshift)-1);
+				constexpr int round_offset = 1<<(rshift-1);
+				constexpr int noise_bits = rshift + (ditherdepth - 1);
+				constexpr int noise_bias = (1<<(noise_bits-1));
+				int32 e = error;
+				unsigned int unoise = 0;
+				MPT_CONSTANT_IF(triangular)
+				{
+					unoise = (mpt::random<unsigned int>(prng, noise_bits) + mpt::random<unsigned int>(prng, noise_bits)) >> 1;
+				} else
+				{
+					unoise = mpt::random<unsigned int>(prng, noise_bits);
+				}
+				int noise = static_cast<int>(unoise) - noise_bias; // un-bias
+				int val = sample;
+				MPT_CONSTANT_IF(shaped)
+				{
+					val += (e >> 1);
+				}
+				int rounded = (val + noise + round_offset) & round_mask;;
+				e = val - rounded;
+				sample = rounded;
+				error = e;
+				return sample;
 			}
-			int noise = static_cast<int>(unoise) - noise_bias; // un-bias
-			int val = sample;
-			MPT_CONSTANT_IF(shaped)
-			{
-				val += (e >> 1);
-			}
-			int rounded = (val + noise + round_offset) & round_mask;;
-			e = val - rounded;
-			sample = rounded;
-			error = e;
-			return sample;
 		}
 	}
 };
