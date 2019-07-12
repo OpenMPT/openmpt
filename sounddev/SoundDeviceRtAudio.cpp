@@ -172,10 +172,10 @@ bool CRtAudioDevice::InternalOpen()
 			m_StreamOptions.flags |= RTAUDIO_MINIMIZE_LATENCY | RTAUDIO_HOG_DEVICE;
 			m_StreamOptions.numberOfBuffers = 2;
 		}
-		if(m_RtAudio->getCurrentApi() == RtAudio::Api::WINDOWS_DS)
+		if(m_RtAudio->getCurrentApi() == RtAudio::Api::WINDOWS_WASAPI)
 		{
 			m_Flags.NeedsClippedFloat = true;
-		} else if (m_RtAudio->getCurrentApi() == RtAudio::Api::WINDOWS_DS)
+		} else if(m_RtAudio->getCurrentApi() == RtAudio::Api::WINDOWS_DS)
 		{
 			m_Flags.NeedsClippedFloat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista));
 		}
