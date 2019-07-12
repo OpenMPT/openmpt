@@ -646,17 +646,17 @@ public:
 	// Formats the stored value as a floating-point value
 	MPT_CONSTEXPR11_FUN double ToDouble() const { return v / double(fractFact); }
 
-	MPT_CONSTEXPR11_FUN FPInt<fractFact, T> operator+ (const FPInt<fractFact, T> &other) const { return FPInt<fractFact, T>(v + other.v); }
-	MPT_CONSTEXPR11_FUN FPInt<fractFact, T> operator- (const FPInt<fractFact, T> &other) const { return FPInt<fractFact, T>(v - other.v); }
-	MPT_CONSTEXPR14_FUN FPInt<fractFact, T> operator+= (const FPInt<fractFact, T> &other) { v += other.v; return *this; }
-	MPT_CONSTEXPR14_FUN FPInt<fractFact, T> operator-= (const FPInt<fractFact, T> &other) { v -= other.v; return *this; }
+	MPT_CONSTEXPR11_FUN friend FPInt<fractFact, T> operator+ (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return FPInt<fractFact, T>(a.v + b.v); }
+	MPT_CONSTEXPR11_FUN friend FPInt<fractFact, T> operator- (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return FPInt<fractFact, T>(a.v - b.v); }
+	MPT_CONSTEXPR14_FUN FPInt<fractFact, T> operator+= (const FPInt<fractFact, T> &other) noexcept { v += other.v; return *this; }
+	MPT_CONSTEXPR14_FUN FPInt<fractFact, T> operator-= (const FPInt<fractFact, T> &other) noexcept { v -= other.v; return *this; }
 
-	MPT_CONSTEXPR11_FUN bool operator== (const FPInt<fractFact, T> &other) const { return v == other.v; }
-	MPT_CONSTEXPR11_FUN bool operator!= (const FPInt<fractFact, T> &other) const { return v != other.v; }
-	MPT_CONSTEXPR11_FUN bool operator<= (const FPInt<fractFact, T> &other) const { return v <= other.v; }
-	MPT_CONSTEXPR11_FUN bool operator>= (const FPInt<fractFact, T> &other) const { return v >= other.v; }
-	MPT_CONSTEXPR11_FUN bool operator< (const FPInt<fractFact, T> &other) const { return v < other.v; }
-	MPT_CONSTEXPR11_FUN bool operator> (const FPInt<fractFact, T> &other) const { return v > other.v; }
+	MPT_CONSTEXPR11_FUN friend bool operator== (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v == b.v; }
+	MPT_CONSTEXPR11_FUN friend bool operator!= (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v != b.v; }
+	MPT_CONSTEXPR11_FUN friend bool operator<= (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v <= b.v; }
+	MPT_CONSTEXPR11_FUN friend bool operator>= (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v >= b.v; }
+	MPT_CONSTEXPR11_FUN friend bool operator< (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v < b.v; }
+	MPT_CONSTEXPR11_FUN friend bool operator> (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v > b.v; }
 };
 
 typedef FPInt<10000, uint32> TEMPO;
