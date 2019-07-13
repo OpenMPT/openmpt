@@ -766,6 +766,9 @@ public:
 	EQPreset m_EqSettings;
 	EQPreset m_EqUserPresets[4];
 #endif
+#ifndef NO_DSP
+	BitCrushSettings m_BitCrushSettings;
+#endif
 
 	// Display (Colors)
 

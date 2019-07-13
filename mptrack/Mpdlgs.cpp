@@ -466,12 +466,15 @@ void COptionsSoundcard::UpdateSampleFormat()
 	}
 	UINT n = 0;
 	m_CbnSampleFormat.ResetContent();
-	m_CbnSampleFormat.EnableWindow(m_CurrentDeviceCaps.CanSampleFormat ? TRUE : FALSE);
 	std::vector<SampleFormat> sampleformats;
 	if(IsDlgButtonChecked(IDC_CHECK4))
 	{
 		sampleformats = m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats;
+	} else
+	{
+		sampleformats = m_CurrentDeviceDynamicCaps.supportedSampleFormats;
 	}
+	m_CbnSampleFormat.EnableWindow(m_CurrentDeviceCaps.CanSampleFormat && (sampleformats.size() != 1) ? TRUE : FALSE);
 	for(UINT bits = 40; bits >= 8; bits -= 8)
 	{
 		if(bits == 40)
@@ -639,6 +642,7 @@ void COptionsSoundcard::OnExclusiveModeChanged()
 {
 	UpdateSampleRates();
 	UpdateSampleFormat();
+	UpdateDither();
 	OnSettingsChanged();
 }
 
@@ -1236,6 +1240,7 @@ BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
 	ON_COMMAND(IDC_CHECK1,			&COptionsPlayer::OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK2,			&COptionsPlayer::OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK4,			&COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK5,			&COptionsPlayer::OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK6,			&COptionsPlayer::OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK7,			&COptionsPlayer::OnSettingsChanged)
 END_MESSAGE_MAP()
@@ -1251,6 +1256,7 @@ void COptionsPlayer::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER3,		m_SbReverbDepth);
 	DDX_Control(pDX, IDC_SLIDER5,		m_SbSurroundDepth);
 	DDX_Control(pDX, IDC_SLIDER6,		m_SbSurroundDelay);
+	DDX_Control(pDX, IDC_SLIDER4,		m_SbBitCrushBits);
 	//}}AFX_DATA_MAP
 }
 
@@ -1291,6 +1297,18 @@ BOOL COptionsPlayer::OnInitDialog()
 	if (dwQuality & SNDDSP_SURROUND) CheckDlgButton(IDC_CHECK4, BST_CHECKED);
 #else
 	GetDlgItem(IDC_CHECK4)->EnableWindow(FALSE);
+#endif
+#ifndef NO_DSP
+	if (dwQuality & SNDDSP_BITCRUSH) CheckDlgButton(IDC_CHECK5, BST_CHECKED);
+#else
+	GetDlgItem(IDC_CHECK5)->EnableWindow(FALSE);
+#endif
+
+#ifndef NO_DSP
+	m_SbBitCrushBits.SetRange(1, 24);
+	m_SbBitCrushBits.SetPos(TrackerSettings::Instance().m_BitCrushSettings.m_Bits);
+#else
+	m_SbBitCurshBits.EnableWindow(FALSE);
 #endif
 
 #ifndef NO_DSP
@@ -1405,6 +1423,16 @@ void COptionsPlayer::OnOK()
 #ifndef NO_REVERB
 	dwQualityMask |= SNDDSP_REVERB;
 	if (IsDlgButtonChecked(IDC_CHECK6)) dwQuality |= SNDDSP_REVERB;
+#endif
+#ifndef NO_DSP
+	dwQualityMask |= SNDDSP_BITCRUSH;
+	if (IsDlgButtonChecked(IDC_CHECK5)) dwQuality |= SNDDSP_BITCRUSH;
+#endif
+
+#ifndef NO_DSP
+	{
+		TrackerSettings::Instance().m_BitCrushSettings.m_Bits = m_SbBitCrushBits.GetPos();
+	}
 #endif
 
 #ifndef NO_DSP

@@ -144,7 +144,7 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 	caps.HasNamedInputSources = false;
 	caps.CanDriverPanel = false;
 	caps.ExclusiveModeDescription = U_("Use primary buffer");
-	caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+	caps.DefaultSettings.sampleFormat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista)) ? SampleFormatFloat32 : SampleFormatInt16;
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
 	if(m_piDS)
@@ -207,21 +207,42 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 	DSCAPS dscaps;
 	MemsetZero(dscaps);
 	dscaps.dwSize = sizeof(dscaps);
-	if(DS_OK != ds->GetCaps(&dscaps))
+	if(DS_OK == ds->GetCaps(&dscaps))
 	{
-		// nothing known about supported sample rates
-	} else if(dscaps.dwMaxSecondarySampleRate == 0)
-	{
-		// nothing known about supported sample rates
-	} else
-	{
-		for(const auto &rate : baseSampleRates)
+		if(dscaps.dwMaxSecondarySampleRate == 0)
 		{
-			if(dscaps.dwMinSecondarySampleRate <= rate && rate <= dscaps.dwMaxSecondarySampleRate)
+			// nothing known about supported sample rates
+		} else
+		{
+			for(const auto &rate : baseSampleRates)
 			{
-				caps.supportedSampleRates.push_back(rate);
-				caps.supportedExclusiveSampleRates.push_back(rate);
+				if(dscaps.dwMinSecondarySampleRate <= rate && rate <= dscaps.dwMaxSecondarySampleRate)
+				{
+					caps.supportedSampleRates.push_back(rate);
+					caps.supportedExclusiveSampleRates.push_back(rate);
+				}
 			}
+		}
+		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
+		{
+			// Vista
+			caps.supportedSampleFormats = { SampleFormatFloat32 };
+			caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32 };
+		} else if(!(dscaps.dwFlags & DSCAPS_EMULDRIVER))
+		{
+			// XP wdm
+			if(dscaps.dwFlags & DSCAPS_PRIMARY8BIT)
+			{
+				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt8);
+			}
+			if(dscaps.dwFlags & DSCAPS_PRIMARY16BIT)
+			{
+				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt16);
+			}
+		} else
+		{
+			// XP vdx
+			// nothing, announce all, fail later
 		}
 	}
 	if(dummy)

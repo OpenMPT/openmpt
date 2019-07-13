@@ -111,6 +111,10 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 {
 	MPT_TRACE_SCOPE();
 	SoundDevice::DynamicCaps caps;
+	if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
+	{
+		caps.supportedSampleFormats = { SampleFormatFloat32 };
+	}
 	WAVEOUTCAPS woc;
 	MemsetZero(woc);
 	if(GetDeviceIndex() > 0)
@@ -136,6 +140,14 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 			if(woc.dwFormats & (WAVE_FORMAT_1M08 | WAVE_FORMAT_1M16	| WAVE_FORMAT_1S08 | WAVE_FORMAT_1S16))
 			{
 				caps.supportedExclusiveSampleRates.push_back(11025);
+			}
+			if(woc.dwFormats & (WAVE_FORMAT_1M08 | WAVE_FORMAT_2M08 | WAVE_FORMAT_4M08 | WAVE_FORMAT_48M08 | WAVE_FORMAT_96M08 | WAVE_FORMAT_1S08 | WAVE_FORMAT_2S08 | WAVE_FORMAT_4S08 | WAVE_FORMAT_48S08 | WAVE_FORMAT_96S08))
+			{
+				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt8);
+			}
+			if(woc.dwFormats & (WAVE_FORMAT_1M16 | WAVE_FORMAT_2M16 | WAVE_FORMAT_4M16 | WAVE_FORMAT_48M16 | WAVE_FORMAT_96M16 | WAVE_FORMAT_1S16 | WAVE_FORMAT_2S16 | WAVE_FORMAT_4S16 | WAVE_FORMAT_48S16 | WAVE_FORMAT_96S16))
+			{
+				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt16);
 			}
 		}
 	}

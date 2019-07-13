@@ -370,7 +370,13 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 		caps.DefaultSettings.sampleFormat = SampleFormatInt32;
 	} else if(m_HostApiType == paDirectSound)
 	{
-		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
+		{
+			caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+		} else
+		{
+			caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+		}
 	} else if(m_HostApiType == paMME)
 	{
 		if(GetSysInfo().IsWine)
@@ -386,6 +392,25 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 	} else if(m_HostApiType == paASIO)
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormatInt32;
+	}
+	if(m_HostApiType == paDirectSound)
+	{
+		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
+		{
+			caps.HasInternalDither = false;
+		}
+	} else if(m_HostApiType == paMME)
+	{
+		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
+		{
+			caps.HasInternalDither = false;
+		}
+	} else if(m_HostApiType == paJACK)
+	{
+		caps.HasInternalDither = false;
+	} else if(m_HostApiType == paWASAPI)
+	{
+		caps.HasInternalDither = false;
 	}
 	return caps;
 }
@@ -406,6 +431,10 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 		StreamParameters.device = device;
 		StreamParameters.channelCount = 2;
 		StreamParameters.sampleFormat = paInt16;
+		if(m_HostApiType == paWASAPI)
+		{
+			StreamParameters.sampleFormat = paFloat32;
+		}
 		StreamParameters.suggestedLatency = 0.0;
 		StreamParameters.hostApiSpecificStreamInfo = NULL;
 		if(Pa_IsFormatSupported(NULL, &StreamParameters, baseSampleRates[n]) == paFormatIsSupported)
@@ -414,13 +443,32 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 			caps.supportedExclusiveSampleRates.push_back(baseSampleRates[n]);
 		}
 	}
+	if(m_HostApiType == paDirectSound)
+	{
+		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
+		{
+			caps.supportedSampleFormats = { SampleFormatFloat32 };
+		}
+	} else if(m_HostApiType == paMME)
+	{
+		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
+		{
+			caps.supportedSampleFormats = { SampleFormatFloat32 };
+		}
+	} else if(m_HostApiType == paJACK)
+	{
+		caps.supportedSampleFormats = { SampleFormatFloat32 };
+	} else if(m_HostApiType == paWASAPI)
+	{
+		caps.supportedSampleFormats = { SampleFormatFloat32 };
+	}
 #if MPT_OS_WINDOWS
 	if(m_HostApiType == paWASAPI)
 	{
 		const std::array<SampleFormat, 5> sampleFormats { SampleFormatInt8, SampleFormatInt16, SampleFormatInt24, SampleFormatInt32, SampleFormatFloat32 };
 		for(const SampleFormat sampleFormat : sampleFormats)
 		{
-			for(std::size_t n = 0; n<baseSampleRates.size(); n++)
+			for(const auto sampleRate : caps.supportedExclusiveSampleRates)
 			{
 				PaStreamParameters StreamParameters;
 				MemsetZero(StreamParameters);
@@ -448,7 +496,41 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 				wasapiStreamInfo.version = 1;
 				wasapiStreamInfo.flags = paWinWasapiExclusive | paWinWasapiExplicitSampleFormat;
 				StreamParameters.hostApiSpecificStreamInfo = &wasapiStreamInfo;
-				if(Pa_IsFormatSupported(NULL, &StreamParameters, baseSampleRates[n]) == paFormatIsSupported)
+				if(Pa_IsFormatSupported(NULL, &StreamParameters, sampleRate) == paFormatIsSupported)
+				{
+					caps.supportedExclusiveModeSampleFormats.push_back(sampleFormat);
+					break;
+				}
+			}
+		}
+	}
+	if(m_HostApiType == paWDMKS)
+	{
+		const std::array<SampleFormat, 5> sampleFormats { SampleFormatInt8, SampleFormatInt16, SampleFormatInt24, SampleFormatInt32, SampleFormatFloat32 };
+		for(const SampleFormat sampleFormat : sampleFormats)
+		{
+			for(const auto sampleRate : caps.supportedSampleRates)
+			{
+				PaStreamParameters StreamParameters;
+				MemsetZero(StreamParameters);
+				StreamParameters.device = device;
+				StreamParameters.channelCount = 2;
+				if(sampleFormat.IsFloat())
+				{
+					StreamParameters.sampleFormat = paFloat32;
+				} else
+				{
+					switch(sampleFormat.GetBitsPerSample())
+					{
+					case 8: StreamParameters.sampleFormat = paInt8; break;
+					case 16: StreamParameters.sampleFormat = paInt16; break;
+					case 24: StreamParameters.sampleFormat = paInt24; break;
+					case 32: StreamParameters.sampleFormat = paInt32; break;
+					}
+				}
+				StreamParameters.suggestedLatency = 0.0;
+				StreamParameters.hostApiSpecificStreamInfo = NULL;
+				if(Pa_IsFormatSupported(NULL, &StreamParameters, sampleRate) == paFormatIsSupported)
 				{
 					caps.supportedExclusiveModeSampleFormats.push_back(sampleFormat);
 					break;

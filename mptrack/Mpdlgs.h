@@ -154,6 +154,7 @@ protected:
 	CSliderCtrl m_SbXBassDepth, m_SbXBassRange;
 	CSliderCtrl m_SbSurroundDepth, m_SbSurroundDelay;
 	CSliderCtrl m_SbReverbDepth;
+	CSliderCtrl m_SbBitCrushBits;
 
 #ifndef NO_EQ
 	CEQSlider m_Sliders[MAX_EQ_BANDS];

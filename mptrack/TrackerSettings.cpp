@@ -366,6 +366,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	m_EqUserPresets[2] = conf.Read<EQPreset>(U_("Effects"), U_("EQ_User3"), userPresets[2]);
 	m_EqUserPresets[3] = conf.Read<EQPreset>(U_("Effects"), U_("EQ_User4"), userPresets[3]);
 #endif
+#ifndef NO_DSP
+	m_BitCrushSettings.m_Bits = conf.Read<int32>(U_("Effects"), U_("BitCrushBits"), m_BitCrushSettings.m_Bits);
+#endif
 	// Display (Colors)
 	GetDefaultColourScheme(rgbCustomColors);
 	for(int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
@@ -579,6 +582,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	if(storedVersion < MAKE_VERSION_NUMERIC(1,29,00,11))
 	{
 		MixerMaxChannels = MixerSettings().m_nMaxMixChannels;  // reset to default on update because we removed the setting in the GUI
+	}
+	if(storedVersion < MAKE_VERSION_NUMERIC(1,29,00,20))
+	{
+		MixerDSPMask = MixerDSPMask & ~SNDDSP_BITCRUSH;
 	}
 
 	// Misc
@@ -1123,6 +1130,9 @@ void TrackerSettings::SaveSettings()
 	conf.Write<EQPreset>(U_("Effects"), U_("EQ_User2"), m_EqUserPresets[1]);
 	conf.Write<EQPreset>(U_("Effects"), U_("EQ_User3"), m_EqUserPresets[2]);
 	conf.Write<EQPreset>(U_("Effects"), U_("EQ_User4"), m_EqUserPresets[3]);
+#endif
+#ifndef NO_DSP
+	conf.Write<int32>(U_("Effects"), U_("BitCrushBits"), m_BitCrushSettings.m_Bits);
 #endif
 
 	// Display (Colors)

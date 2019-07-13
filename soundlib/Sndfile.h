@@ -377,6 +377,9 @@ public:
 #ifndef NO_AGC
 	CAGC m_AGC;
 #endif
+#ifndef NO_DSP
+	BitCrush m_BitCrush;
+#endif
 
 	using samplecount_t = uint32; // Number of rendered samples
 

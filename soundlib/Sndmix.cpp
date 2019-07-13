@@ -107,6 +107,9 @@ void CSoundFile::InitPlayer(bool bReset)
 #ifndef NO_AGC
 	m_AGC.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif
+#ifndef NO_DSP
+	m_BitCrush.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
+#endif
 	if(m_opl)
 	{
 		m_opl->Initialize(m_MixerSettings.gdwMixingFreq);
@@ -399,6 +402,14 @@ void CSoundFile::ProcessDSP(uint32 countChunk)
 			m_AGC.Process(MixSoundBuffer, MixRearBuffer, countChunk, m_MixerSettings.gnChannels);
 		}
 	#endif // NO_AGC
+
+	#ifndef NO_DSP
+		if(m_MixerSettings.DSPMask & SNDDSP_BITCRUSH)
+		{
+			m_BitCrush.Process(MixSoundBuffer, MixRearBuffer, countChunk, m_MixerSettings.gnChannels);
+		}
+	#endif // NO_DSP
+
 	#if defined(NO_DSP) && defined(NO_EQ) && defined(NO_AGC)
 		MPT_UNREFERENCED_PARAMETER(countChunk);
 	#endif

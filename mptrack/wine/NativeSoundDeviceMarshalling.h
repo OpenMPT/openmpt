@@ -117,6 +117,8 @@ namespace SoundDevice
 		MPT_JSON_MAP(currentSampleRate);
 		MPT_JSON_MAP(supportedSampleRates);
 		MPT_JSON_MAP(supportedExclusiveSampleRates);
+		MPT_JSON_MAP(supportedSampleFormats);
+		MPT_JSON_MAP(supportedExclusiveModeSampleFormats);
 		MPT_JSON_MAP(channelNames);
 		MPT_JSON_MAP(inputSourceNames);
 	})

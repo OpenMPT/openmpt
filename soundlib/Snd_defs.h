@@ -277,6 +277,7 @@ DECLARE_FLAGSET(SongFlags)
 #ifndef NO_DSP
 #define SNDDSP_MEGABASS       0x02     // Bass expansion
 #define SNDDSP_SURROUND       0x08     // Surround mix
+#define SNDDSP_BITCRUSH       0x01
 #endif // NO_DSP
 #ifndef NO_REVERB
 #define SNDDSP_REVERB         0x20     // Apply reverb
