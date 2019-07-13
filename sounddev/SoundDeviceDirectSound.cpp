@@ -166,7 +166,7 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 	DSCAPS dscaps;
 	MemsetZero(dscaps);
 	dscaps.dwSize = sizeof(dscaps);
-	if(DS_OK != ds->GetCaps(&dscaps))
+	if(DS_OK == ds->GetCaps(&dscaps))
 	{
 		if(!(dscaps.dwFlags & DSCAPS_EMULDRIVER))
 		{
