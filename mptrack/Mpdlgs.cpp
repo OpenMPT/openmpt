@@ -509,7 +509,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 				}
 				UINT ndx = m_CbnSampleFormat.AddString(mpt::cformat(_T("%1 Bit"))(bits));
 				m_CbnSampleFormat.SetItemData(ndx, bits);
-				if(bits == m_Settings.sampleFormat.GetBitsPerSample())
+				if((SampleFormatFloat32 != m_Settings.sampleFormat) && (bits == m_Settings.sampleFormat.GetBitsPerSample()))
 				{
 					n = ndx;
 				}
