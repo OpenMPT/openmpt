@@ -451,7 +451,7 @@ void BitCrush::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, uin
 	unsigned int mask = ~((1u << (MixSampleIntTraits::mix_precision_bits() - m_Settings.m_Bits)) - 1u);
 	if(nChannels == 4)
 	{
-		for(std::size_t frame = 0; frame < count; ++frame)
+		for(int frame = 0; frame < count; ++frame)
 		{
 			MixSoundBuffer[frame*2 + 0] &= mask;
 			MixSoundBuffer[frame*2 + 1] &= mask;
@@ -460,14 +460,14 @@ void BitCrush::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, uin
 		}
 	} else if(nChannels == 2)
 	{
-		for(std::size_t frame = 0; frame < count; ++frame)
+		for(int frame = 0; frame < count; ++frame)
 		{
 			MixSoundBuffer[frame*2 + 0] &= mask;
 			MixSoundBuffer[frame*2 + 1] &= mask;
 		}
 	} else if(nChannels == 1)
 	{
-		for(std::size_t frame = 0; frame < count; ++frame)
+		for(int frame = 0; frame < count; ++frame)
 		{
 			MixSoundBuffer[frame] &= mask;
 		}
