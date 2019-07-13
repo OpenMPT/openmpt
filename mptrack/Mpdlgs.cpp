@@ -491,7 +491,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 			}
 		} else
 		{
-			if(m_CurrentDeviceCaps.CanSampleFormat || (bits == m_Settings.sampleFormat.GetBitsPerSample()))
+			if(m_CurrentDeviceCaps.CanSampleFormat || ((SampleFormatFloat32 != m_Settings.sampleFormat) && (bits == m_Settings.sampleFormat.GetBitsPerSample())))
 			{
 				if(m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.size() > 0
 					&& std::find(
