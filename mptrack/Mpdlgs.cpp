@@ -467,17 +467,22 @@ void COptionsSoundcard::UpdateSampleFormat()
 	UINT n = 0;
 	m_CbnSampleFormat.ResetContent();
 	m_CbnSampleFormat.EnableWindow(m_CurrentDeviceCaps.CanSampleFormat ? TRUE : FALSE);
+	std::vector<SampleFormat> sampleformats;
+	if(IsDlgButtonChecked(IDC_CHECK4))
+	{
+		sampleformats = m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats;
+	}
 	for(UINT bits = 40; bits >= 8; bits -= 8)
 	{
 		if(bits == 40)
 		{
 			if(m_CurrentDeviceCaps.CanSampleFormat || (SampleFormatFloat32 == m_Settings.sampleFormat))
 			{
-				if(m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.size() > 0
+				if(sampleformats.size() > 0
 					&& std::find(
-						m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.begin(),
-						m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.end(),
-						static_cast<SampleFormat>(SampleFormatFloat32)) == m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.end()
+						sampleformats.begin(),
+						sampleformats.end(),
+						static_cast<SampleFormat>(SampleFormatFloat32)) == sampleformats.end()
 					)
 				{
 					continue;
@@ -493,11 +498,11 @@ void COptionsSoundcard::UpdateSampleFormat()
 		{
 			if(m_CurrentDeviceCaps.CanSampleFormat || ((SampleFormatFloat32 != m_Settings.sampleFormat) && (bits == m_Settings.sampleFormat.GetBitsPerSample())))
 			{
-				if(m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.size() > 0
+				if(sampleformats.size() > 0
 					&& std::find(
-						m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.begin(),
-						m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.end(),
-						static_cast<SampleFormat>(bits)) == m_CurrentDeviceDynamicCaps.supportedExclusiveModeSampleFormats.end()
+						sampleformats.begin(),
+						sampleformats.end(),
+						static_cast<SampleFormat>(bits)) == sampleformats.end()
 					)
 				{
 					continue;

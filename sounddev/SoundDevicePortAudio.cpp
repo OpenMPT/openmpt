@@ -427,7 +427,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 		}
 	}
 #if MPT_OS_WINDOWS
-	if((m_HostApiType == paWASAPI) && m_Settings.ExclusiveMode)
+	if(m_HostApiType == paWASAPI)
 	{
 		const std::array<SampleFormat, 5> sampleFormats { SampleFormatInt8, SampleFormatInt16, SampleFormatInt24, SampleFormatInt32, SampleFormatFloat32 };
 		for(const SampleFormat sampleFormat : sampleFormats)
