@@ -122,18 +122,6 @@ public:
 				throw std::domain_error("");
 		}
 
-#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR14_THROW) || 1
-		static MPT_CONSTEXPR14_FUN bool ParseError(bool really = true)
-		{
-			return !really ? really : throw std::runtime_error("");
-		}
-#else // !MPT_COMPILER_QUIRK_NO_CONSTEXPR14_THROW
-		static MPT_CONSTEXPR14_FUN void ParseError()
-		{
-			throw std::runtime_error("");
-		}
-#endif // MPT_COMPILER_QUIRK_NO_CONSTEXPR14_THROW
-
 	public:
 
 		static MPT_CONSTEXPR14_FUN Version Parse(const char * str, std::size_t len)
@@ -150,11 +138,11 @@ public:
 				{
 					if(field >= 3)
 					{
-						ParseError();
+						mpt::constexpr_throw(std::runtime_error(""));
 					}
 					if(fieldlen == 0)
 					{
-						ParseError();
+						mpt::constexpr_throw(std::runtime_error(""));
 					}
 					field++;
 					fieldlen = 0;
@@ -163,18 +151,18 @@ public:
 					fieldlen++;
 					if(fieldlen > 2)
 					{
-						ParseError();
+						mpt::constexpr_throw(std::runtime_error(""));
 					}
 					v[field] <<= 4;
 					v[field] |= NibbleFromChar(c);
 				} else
 				{
-					ParseError();
+					mpt::constexpr_throw(std::runtime_error(""));
 				}
 			}
 			if(fieldlen == 0)
 			{
-				ParseError();
+				mpt::constexpr_throw(std::runtime_error(""));
 			}
 			return Version(v[0], v[1], v[2], v[3]);
 		}

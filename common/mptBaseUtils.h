@@ -49,6 +49,24 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
+namespace mpt
+{
+// Work-around for GCC5, which does not allow throw statements in constexpr functions, but only throw expressions inside ternary ? operator.
+// And also work-around for a simpler, MPT_COMPILER_QUIRK_NO_CONSTEXPR14_THROW-dependent work-around, which would have thrown in a separate constexpr function,
+// which however is not allowed due to the requirement of at least 1 non-throwing function argument combination in C++ (14,17,2a) (and thus all other compilers).
+template <typename Exception>
+MPT_CONSTEXPR14_FUN bool constexpr_throw_helper(Exception && e, bool really = true)
+{
+	return !really ? really : throw std::forward<Exception>(e);
+}
+template <typename Exception>
+MPT_CONSTEXPR14_FUN bool constexpr_throw(Exception && e)
+{
+	return mpt::constexpr_throw_helper(std::forward<Exception>(e));
+}
+}  // namespace mpt
+
+
 
 namespace mpt {
 
