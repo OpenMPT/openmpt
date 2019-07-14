@@ -110,6 +110,11 @@ public:
 
 	struct LiteralParser
 	{
+	
+	public:
+
+		// Work-around for GCC 5 which complains about instanciating non-literal type inside a constexpr function when using mpt::constexpr_throw(std::runtime_error("")).
+		struct ParseException {};
 
 	private:
 
@@ -138,11 +143,11 @@ public:
 				{
 					if(field >= 3)
 					{
-						mpt::constexpr_throw(std::runtime_error(""));
+						mpt::constexpr_throw(ParseException());
 					}
 					if(fieldlen == 0)
 					{
-						mpt::constexpr_throw(std::runtime_error(""));
+						mpt::constexpr_throw(ParseException());
 					}
 					field++;
 					fieldlen = 0;
@@ -151,18 +156,18 @@ public:
 					fieldlen++;
 					if(fieldlen > 2)
 					{
-						mpt::constexpr_throw(std::runtime_error(""));
+						mpt::constexpr_throw(ParseException());
 					}
 					v[field] <<= 4;
 					v[field] |= NibbleFromChar(c);
 				} else
 				{
-					mpt::constexpr_throw(std::runtime_error(""));
+					mpt::constexpr_throw(ParseException());
 				}
 			}
 			if(fieldlen == 0)
 			{
-				mpt::constexpr_throw(std::runtime_error(""));
+				mpt::constexpr_throw(ParseException());
 			}
 			return Version(v[0], v[1], v[2], v[3]);
 		}
