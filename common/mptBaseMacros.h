@@ -66,6 +66,17 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPT_CONSTEXPR17_VAR const
 #endif
 
+namespace mpt
+{
+#if MPT_CXX_AT_LEAST(17)
+template <auto V> struct constant_value { static constexpr decltype(V) value() { return V; } };
+#define MPT_FORCE_CONSTEXPR(expr) (mpt::constant_value<( expr )>::value())
+#else
+template <typename T, T V> struct constant_value_helper { static constexpr T value() { return V; } };
+#define MPT_FORCE_CONSTEXPR(expr) (mpt::constant_value_helper<decltype( expr ), ( expr )>::value())
+#endif
+}  // namespace mpt
+
 
 
 // C++17 std::size

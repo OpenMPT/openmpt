@@ -384,7 +384,7 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 8;
 
 	// Before OpenMPT 1.20.01.09, the MIDI macros were always read from the file, even if the "embed" flag was not set.
-	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1,20,01,09) && !(songFlags & ITP_EMBEDMIDICFG))
+	if(m_dwLastSavedWithVersion >= MPT_V("1.20.01.09") && !(songFlags & ITP_EMBEDMIDICFG))
 	{
 		m_MidiCfg.Reset();
 	}

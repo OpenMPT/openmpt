@@ -454,13 +454,13 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 
 	// Plugins
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,19,03,01) && vstHostProductString.Get() == "OpenMPT")
+	if(storedVersion < MPT_V("1.19.03.01") && vstHostProductString.Get() == "OpenMPT")
 	{
 		vstHostVendorVersion = Version::Current().GetRawVersion();
 	}
 
 	// Sound Settings
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,30))
+	if(storedVersion < MPT_V("1.22.07.30"))
 	{
 		if(conf.Read<bool>(U_("Sound Settings"), U_("KeepDeviceOpen"), false))
 		{
@@ -470,7 +470,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 			m_SoundSettingsStopMode = SoundDeviceStopModeStopped;
 		}
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,04))
+	if(storedVersion < MPT_V("1.22.07.04"))
 	{
 		std::vector<uint32> sampleRates = m_SoundSampleRates;
 		if(std::count(sampleRates.begin(), sampleRates.end(), MixerSamplerate) == 0)
@@ -481,7 +481,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 			m_SoundSampleRates = sampleRates;
 		}
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,04))
+	if(storedVersion < MPT_V("1.22.07.04"))
 	{
 		m_SoundDeviceID_DEPRECATED = conf.Read<SoundDevice::Legacy::ID>(U_("Sound Settings"), U_("WaveDevice"), SoundDevice::Legacy::ID());
 		Setting<uint32> m_BufferLength_DEPRECATED(conf, U_("Sound Settings"), U_("BufferLength"), 50);
@@ -492,7 +492,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		Setting<bool> m_SoundDeviceBoostThreadPriority(conf, U_("Sound Settings"), U_("BoostThreadPriority"), SoundDevice::Settings().BoostThreadPriority);
 		Setting<bool> m_SoundDeviceUseHardwareTiming(conf, U_("Sound Settings"), U_("UseHardwareTiming"), SoundDevice::Settings().UseHardwareTiming);
 		Setting<SoundDevice::ChannelMapping> m_SoundDeviceChannelMapping(conf, U_("Sound Settings"), U_("ChannelMapping"), SoundDevice::Settings().Channels);
-		if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
+		if(storedVersion < MPT_V("1.21.01.26"))
 		{
 			if(m_BufferLength_DEPRECATED != 0)
 			{
@@ -511,15 +511,15 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 			}
 			conf.Remove(m_BufferLength_DEPRECATED.GetPath());
 		}
-		if(storedVersion < MAKE_VERSION_NUMERIC(1,22,01,03))
+		if(storedVersion < MPT_V("1.22.01.03"))
 		{
 			m_SoundDeviceExclusiveMode = ((MixerFlags & OLD_SOUNDSETUP_SECONDARY) == 0);
 		}
-		if(storedVersion < MAKE_VERSION_NUMERIC(1,22,01,03))
+		if(storedVersion < MPT_V("1.22.01.03"))
 		{
 			m_SoundDeviceBoostThreadPriority = ((MixerFlags & OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY) == 0);
 		}
-		if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,03))
+		if(storedVersion < MPT_V("1.22.07.03"))
 		{
 			m_SoundDeviceChannelMapping = SoundDevice::ChannelMapping::BaseChannel(MixerOutputChannels, conf.Read<int>(U_("Sound Settings"), U_("ASIOBaseChannel"), 0));
 		}
@@ -537,14 +537,14 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		m_SoundDeviceSettingsDefaults.UseHardwareTiming = m_SoundDeviceUseHardwareTiming;
 		m_SoundDeviceSettingsUseOldDefaults = true;
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,28,00,41))
+	if(storedVersion < MPT_V("1.28.00.41"))
 	{
 		// reset this setting to the default when updating,
 		// because we do not provide a GUI any more,
 		// and in general, it should not get changed anyway
 		ResamplerCutoffPercent = mpt::saturate_round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0);
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,25,00,04))
+	if(storedVersion < MPT_V("1.25.00.04"))
 	{
 		m_SoundDeviceDirectSoundOldDefaultIdentifier = true;
 	}
@@ -552,26 +552,26 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		MixerSamplerate = MixerSettings().gdwMixingFreq;
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,21,01,26))
+	if(storedVersion < MPT_V("1.21.01.26"))
 	{
 		MixerFlags &= ~OLD_SOUNDSETUP_REVERSESTEREO;
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,01,03))
+	if(storedVersion < MPT_V("1.22.01.03"))
 	{
 		MixerFlags &= ~OLD_SOUNDSETUP_SECONDARY;
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,01,03))
+	if(storedVersion < MPT_V("1.22.01.03"))
 	{
 		MixerFlags &= ~OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY;
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,22))
+	if(storedVersion < MPT_V("1.20.00.22"))
 	{
 		MixerSettings settings = GetMixerSettings();
 		settings.SetVolumeRampUpSamples(conf.Read<int32>(U_("Sound Settings"), U_("VolumeRampSamples"), 42));
 		settings.SetVolumeRampDownSamples(conf.Read<int32>(U_("Sound Settings"), U_("VolumeRampSamples"), 42));
 		SetMixerSettings(settings);
 		conf.Remove(U_("Sound Settings"), U_("VolumeRampSamples"));
-	} else if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,18))
+	} else if(storedVersion < MPT_V("1.22.07.18"))
 	{
 		MixerSettings settings = GetMixerSettings();
 		settings.SetVolumeRampUpSamples(conf.Read<int32>(U_("Sound Settings"), U_("VolumeRampUpSamples"), MixerSettings().GetVolumeRampUpSamples()));
@@ -579,11 +579,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		SetMixerSettings(settings);
 	}
 	Limit(ResamplerCutoffPercent, 0, 100);
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,29,00,11))
+	if(storedVersion < MPT_V("1.29.00.11"))
 	{
 		MixerMaxChannels = MixerSettings().m_nMaxMixChannels;  // reset to default on update because we removed the setting in the GUI
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,29,00,20))
+	if(storedVersion < MPT_V("1.29.00.20"))
 	{
 		MixerDSPMask = MixerDSPMask & ~SNDDSP_BITCRUSH;
 	}
@@ -595,7 +595,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 
 	// MIDI Settings
-	if((m_dwMidiSetup & 0x40) != 0 && storedVersion < MAKE_VERSION_NUMERIC(1,20,00,86))
+	if((m_dwMidiSetup & 0x40) != 0 && storedVersion < MPT_V("1.20.00.86"))
 	{
 		// This flag used to be "amplify MIDI Note Velocity" - with a fixed amplification factor of 2.
 		midiVelocityAmp = 200;
@@ -603,47 +603,47 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 
 	// Pattern Editor
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,17,02,50))
+	if(storedVersion < MPT_V("1.17.02.50"))
 	{
 		m_dwPatternSetup |= PATTERN_NOTEFADE;
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,17,03,01))
+	if(storedVersion < MPT_V("1.17.03.01"))
 	{
 		m_dwPatternSetup |= PATTERN_RESETCHANNELS;
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,19,00,07))
+	if(storedVersion < MPT_V("1.19.00.07"))
 	{
 		m_dwPatternSetup &= ~0x800;					// this was previously deprecated and is now used for something else
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,04))
+	if(storedVersion < MPT_V("1.20.00.04"))
 	{
 		m_dwPatternSetup &= ~0x200000;				// ditto
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,07))
+	if(storedVersion < MPT_V("1.20.00.07"))
 	{
 		m_dwPatternSetup &= ~0x400000;				// ditto
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,20,00,39))
+	if(storedVersion < MPT_V("1.20.00.39"))
 	{
 		m_dwPatternSetup &= ~0x10000000;			// ditto
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,24,01,04))
+	if(storedVersion < MPT_V("1.24.01.04"))
 	{
 		commentsFont = FontSetting(U_("Courier New"), (m_dwPatternSetup & 0x02) ? 120 : 90);
 		patternFont = FontSetting((m_dwPatternSetup & 0x08) ? PATTERNFONT_SMALL : PATTERNFONT_LARGE, 0);
 		m_dwPatternSetup &= ~(0x08 | 0x02);
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,25,00,08) && glGeneralWindowHeight < 222)
+	if(storedVersion < MPT_V("1.25.00.08") && glGeneralWindowHeight < 222)
 	{
 		glGeneralWindowHeight += 44;
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,25,00,16) && (m_dwPatternSetup & 0x100000))
+	if(storedVersion < MPT_V("1.25.00.16") && (m_dwPatternSetup & 0x100000))
 	{
 		// Move MIDI recording to MIDI setup
 		m_dwPatternSetup &= ~0x100000;
 		m_dwMidiSetup |= MIDISETUP_ENABLE_RECORD_DEFAULT;
 	}
-	if(storedVersion < MAKE_VERSION_NUMERIC(1, 27, 00, 51))
+	if(storedVersion < MPT_V("1.27.00.51"))
 	{
 		// Moving option out of pattern config
 		CreateBackupFiles = (m_dwPatternSetup & 0x200) != 0;
@@ -651,7 +651,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 
 	// Update
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,28,00,39))
+	if(storedVersion < MPT_V("1.28.00.39"))
 	{
 		if(UpdateUpdateCheckPeriod_DEPRECATED <= 0)
 		{
@@ -698,7 +698,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 #endif // !NO_EQ
 
 	// Zxx Macros
-	if((MAKE_VERSION_NUMERIC(1,17,00,00) <= storedVersion) && (storedVersion < MAKE_VERSION_NUMERIC(1,20,00,00)))
+	if((MPT_V("1.17.00.00") <= storedVersion) && (storedVersion < MPT_V("1.20.00.00")))
 	{
 		// Fix old nasty broken (non-standard) MIDI configs in INI file.
 		macros.UpgradeMacros();
@@ -710,13 +710,13 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 
 	// Sample undo buffer size (used to be a hidden, absolute setting in MiB)
 	int64 oldUndoSize = m_SampleUndoBufferSize.Get().GetSizeInPercent();
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,22,07,25) && oldUndoSize != SampleUndoBufferSize::defaultSize && oldUndoSize != 0)
+	if(storedVersion < MPT_V("1.22.07.25") && oldUndoSize != SampleUndoBufferSize::defaultSize && oldUndoSize != 0)
 	{
 		m_SampleUndoBufferSize = SampleUndoBufferSize(static_cast<int32>(100 * (oldUndoSize << 20) / SampleUndoBufferSize(100).GetSizeInBytes()));
 	}
 
 	// More controls in the plugin selection dialog
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,26,00,26))
+	if(storedVersion < MPT_V("1.26.00.26"))
 	{
 		gnPlugWindowHeight += 40;
 	}
@@ -848,7 +848,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 		}
 	}
 	oldLocalTunings = LoadLocalTunings();
-	if(storedVersion < MAKE_VERSION_NUMERIC(1,27,00,56))
+	if(storedVersion < MPT_V("1.27.00.56"))
 	{
 		UnpackTuningCollection(*oldLocalTunings, PathTunings.GetDefaultDir() + P_("Local\\"));
 	}

@@ -255,24 +255,28 @@ static MPT_NOINLINE void TestVersion()
 		VERIFY_EQUAL( Version::Parse(U_("1.fe.02.28")), Version(0x01fe0228) );
 		VERIFY_EQUAL( Version::Parse(U_("01.fe.02.28")), Version(0x01fe0228) );
 		VERIFY_EQUAL( Version::Parse(U_("1.22")), Version(0x01220000) );
-		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,19,02,00).WithoutTestNumber(), MAKE_VERSION_NUMERIC(1,19,02,00));
-		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,03,20).WithoutTestNumber(), MAKE_VERSION_NUMERIC(1,18,03,00));
-		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,01,13).IsTestVersion(), true);
-		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,19,01,00).IsTestVersion(), false);
-		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,17,02,54).IsTestVersion(), false);
-		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,00,00).IsTestVersion(), false);
-		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,02,00).IsTestVersion(), false);
-		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,18,02,01).IsTestVersion(), true);
+		VERIFY_EQUAL( MPT_V("1.17.02.28"), Version(18285096) );
+		VERIFY_EQUAL( MPT_V("1.fe.02.28"), Version(0x01fe0228) );
+		VERIFY_EQUAL( MPT_V("01.fe.02.28"), Version(0x01fe0228) );
+		VERIFY_EQUAL( MPT_V("1.22"), Version(0x01220000) );
+		VERIFY_EQUAL( MPT_V("1.19.02.00").WithoutTestNumber(), MPT_V("1.19.02.00"));
+		VERIFY_EQUAL( MPT_V("1.18.03.20").WithoutTestNumber(), MPT_V("1.18.03.00"));
+		VERIFY_EQUAL( MPT_V("1.18.01.13").IsTestVersion(), true);
+		VERIFY_EQUAL( MPT_V("1.19.01.00").IsTestVersion(), false);
+		VERIFY_EQUAL( MPT_V("1.17.02.54").IsTestVersion(), false);
+		VERIFY_EQUAL( MPT_V("1.18.00.00").IsTestVersion(), false);
+		VERIFY_EQUAL( MPT_V("1.18.02.00").IsTestVersion(), false);
+		VERIFY_EQUAL( MPT_V("1.18.02.01").IsTestVersion(), true);
 
 		// Ensure that versions ending in .00.00 (which are ambiguous to truncated version numbers in certain file formats (e.g. S3M and IT) do not get qualified as test builds.
-		VERIFY_EQUAL( MAKE_VERSION_NUMERIC(1,23,00,00).IsTestVersion(), false);
+		VERIFY_EQUAL( MPT_V("1.23.00.00").IsTestVersion(), false);
 
-		STATIC_ASSERT( MAKE_VERSION_NUMERIC(1,17,2,28).GetRawVersion() == 18285096 );
-		STATIC_ASSERT( MAKE_VERSION_NUMERIC(1,17,02,48).GetRawVersion() == 18285128 );
-		STATIC_ASSERT( MAKE_VERSION_NUMERIC(01,17,02,52).GetRawVersion() == 18285138 );
+		STATIC_ASSERT( MPT_V("1.17.2.28").GetRawVersion() == 18285096 );
+		STATIC_ASSERT( MPT_V("1.17.02.48").GetRawVersion() == 18285128 );
+		STATIC_ASSERT( MPT_V("01.17.02.52").GetRawVersion() == 18285138 );
 		// Ensure that bit-shifting works (used in some mod loaders for example)
-		STATIC_ASSERT( MAKE_VERSION_NUMERIC(01,17,00,00).GetRawVersion() == 0x0117 << 16 );
-		STATIC_ASSERT( MAKE_VERSION_NUMERIC(01,17,03,00).GetRawVersion() >> 8 == 0x011703 );
+		STATIC_ASSERT( MPT_V("01.17.00.00").GetRawVersion() == 0x0117 << 16 );
+		STATIC_ASSERT( MPT_V("01.17.03.00").GetRawVersion() >> 8 == 0x011703 );
 	}
 
 #ifdef MODPLUG_TRACKER
@@ -3048,7 +3052,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempoModeModern);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerBeat, 6);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
-	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
+	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MPT_V("1.19.02.05"));
 	VERIFY_EQUAL_NONCONT(sndFile.Order().GetRestartPos(), 1);
 
 	// Macros
@@ -3248,7 +3252,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempoModeModern);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerBeat, 6);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultRowsPerMeasure, 12);
-	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MAKE_VERSION_NUMERIC(1, 19, 02, 05));
+	VERIFY_EQUAL_NONCONT(sndFile.m_dwCreatedWithVersion, MPT_V("1.19.02.05"));
 	VERIFY_EQUAL_NONCONT(sndFile.m_nResampling, SRCMODE_SINC8LP);
 	VERIFY_EQUAL_NONCONT(sndFile.m_songArtist, U_("Tester"));
 	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing.size(), 6);
@@ -3579,7 +3583,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
 	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), mixLevelsCompatible);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, tempoModeClassic);
-	VERIFY_EQUAL_NONCONT(sndFile.m_dwLastSavedWithVersion, resaved ? Version(Version::Current().GetRawVersion() & 0xFFFF0000u) : MAKE_VERSION_NUMERIC(1, 27, 00, 00));
+	VERIFY_EQUAL_NONCONT(sndFile.m_dwLastSavedWithVersion, resaved ? Version(Version::Current().GetRawVersion() & 0xFFFF0000u) : MPT_V("1.27.00.00"));
 	VERIFY_EQUAL_NONCONT(sndFile.Order().GetRestartPos(), 0);
 
 	// Channels

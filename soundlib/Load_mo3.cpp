@@ -1900,21 +1900,21 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			if(ModInstrument *ins = Instruments[i])
 			{
 				// Fix pitch / filter envelope being shortened by one tick
-				if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 20, 00, 00))
+				if(m_dwLastSavedWithVersion < MPT_V("1.20.00.00"))
 					ins->GetEnvelope(ENV_PITCH).Convert(MOD_TYPE_XM, GetType());
 				// Fix excessive pan swing range
-				if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
+				if(m_dwLastSavedWithVersion < MPT_V("1.26.00.00"))
 					ins->nPanSwing = (ins->nPanSwing + 3) / 4u;
 			}
 		}
-		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 18, 00, 00))
+		if(m_dwLastSavedWithVersion < MPT_V("1.18.00.00"))
 		{
 			m_playBehaviour.reset(kITOffset);
 			m_playBehaviour.reset(kFT2OffsetOutOfRange);
 		}
-		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 23, 00, 00))
+		if(m_dwLastSavedWithVersion < MPT_V("1.23.00.00"))
 			m_playBehaviour.reset(kFT2Periods);
-		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 26, 00, 00))
+		if(m_dwLastSavedWithVersion < MPT_V("1.26.00.00"))
 			m_playBehaviour.reset(kITInstrWithNoteOff);
 	}
 

@@ -486,32 +486,32 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// OpenMPT 1.17.02.26 (r122) to 1.18 (raped IT format)
 				// Exact version number will be determined later.
 				interpretModPlugMade = true;
-				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
+				m_dwLastSavedWithVersion = MPT_V("1.17.00.00");
 			} else if(fileHeader.cwtv == 0x0217 && fileHeader.cmwt == 0x0200 && fileHeader.reserved == 0)
 			{
 				if(memchr(fileHeader.chnpan, 0xFF, sizeof(fileHeader.chnpan)) != nullptr)
 				{
 					// ModPlug Tracker 1.16 (semi-raped IT format) or BeRoTracker (will be determined later)
-					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
+					m_dwLastSavedWithVersion = MPT_V("1.16.00.00");
 					madeWithTracker = U_("ModPlug Tracker 1.09 - 1.16");
 				} else
 				{
 					// OpenMPT 1.17 disguised as this in compatible mode,
 					// but never writes 0xFF in the pan map for unused channels (which is an invalid value).
-					m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
+					m_dwLastSavedWithVersion = MPT_V("1.17.00.00");
 					madeWithTracker = U_("OpenMPT 1.17 (compatibility export)");
 				}
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0202 && fileHeader.reserved == 0)
 			{
 				// ModPlug Tracker b3.3 - 1.09, instruments 557 bytes apart
-				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
+				m_dwLastSavedWithVersion = MPT_V("1.09.00.00");
 				madeWithTracker = U_("ModPlug Tracker b3.3 - 1.09");
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0300 && fileHeader.cmwt == 0x0300 && fileHeader.reserved == 0 && fileHeader.ordnum == 256 && fileHeader.sep == 128 && fileHeader.pwd == 0)
 			{
 				// A rare variant used from OpenMPT 1.17.02.20 (r113) to 1.17.02.25 (r121), found e.g. in xTr1m-SD.it
-				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 02, 20);
+				m_dwLastSavedWithVersion = MPT_V("1.17.02.20");
 				interpretModPlugMade = true;
 			}
 		}
@@ -537,7 +537,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		//   Luckily OpenMPT 1.17.03.02 should not be very wide-spread.
 		// - In normal mode the time signature is always present in the song extensions anyway. So it's okay if we read
 		//   the signature here and maybe overwrite it later when parsing the song extensions.
-		if(!m_dwLastSavedWithVersion || m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 03, 02))
+		if(!m_dwLastSavedWithVersion || m_dwLastSavedWithVersion >= MPT_V("1.17.03.02"))
 		{
 			m_nDefaultRowsPerBeat = fileHeader.highlight_minor;
 			m_nDefaultRowsPerMeasure = fileHeader.highlight_major;
@@ -1106,7 +1106,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					m.volcmd = VOLCMD_VIBRATODEPTH;
 					m.vol = vol - 203;
 					// Old versions of ModPlug saved this as vibrato speed instead, so let's fix that.
-					if(m.vol && m_dwLastSavedWithVersion && m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 17, 02, 54))
+					if(m.vol && m_dwLastSavedWithVersion && m_dwLastSavedWithVersion <= MPT_V("1.17.02.54"))
 						m.volcmd = VOLCMD_VIBRATOSPEED;
 				} else
 				// 213-222: Unused (was velocity)
@@ -1134,7 +1134,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Up to OpenMPT 1.17.02.45 (r165), it was possible that the "last saved with" field was 0
 		// when saving a file in OpenMPT for the first time.
-		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
+		m_dwLastSavedWithVersion = MPT_V("1.17.00.00");
 	}
 
 	if(m_dwLastSavedWithVersion && madeWithTracker.empty())
@@ -1166,7 +1166,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0200 && fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0 && fileHeader.reserved == 0)
 			{
 				// ModPlug Tracker 1.00a5, instruments 560 bytes apart
-				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
+				m_dwLastSavedWithVersion = MPT_V("1.00.00.A5");
 				madeWithTracker = U_("ModPlug Tracker 1.00a5");
 				interpretModPlugMade = true;
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(&fileHeader.reserved, "CHBI", 4))

@@ -80,10 +80,10 @@ bool Version::IsTestVersion() const noexcept
 {
 	return (
 			// Legacy
-			(*this > MAKE_VERSION_NUMERIC(1,17,02,54) && *this < MAKE_VERSION_NUMERIC(1,18,02,00) && *this != MAKE_VERSION_NUMERIC(1,18,00,00))
+			(*this > MPT_V("1.17.02.54") && *this < MPT_V("1.18.02.00") && *this != MPT_V("1.18.00.00"))
 		||
 			// Test builds have non-zero VER_MINORMINOR
-			(*this > MAKE_VERSION_NUMERIC(1,18,02,00) && ((m_Version & 0xFFFFFF00u) != m_Version))
+			(*this > MPT_V("1.18.02.00") && ((m_Version & 0xFFFFFF00u) != m_Version))
 		);
 }
 

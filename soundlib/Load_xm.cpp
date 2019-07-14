@@ -721,12 +721,12 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			if(instrHeader.size == 245)
 			{
 				// ModPlug Tracker Alpha
-				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, A5);
+				m_dwLastSavedWithVersion = MPT_V("1.00.00.A5");
 				madeWithTracker = U_("ModPlug Tracker 1.0 alpha");
 			} else if(instrHeader.size == 263)
 			{
 				// ModPlug Tracker Beta (Beta 1 still behaves like Alpha, but Beta 3.3 does it this way)
-				m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 00, 00, B3);
+				m_dwLastSavedWithVersion = MPT_V("1.00.00.B3");
 				madeWithTracker = U_("ModPlug Tracker 1.0 beta");
 			} else
 			{
@@ -931,11 +931,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		if(madeWith[verModPlug1_09])
 		{
-			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 09, 00, 00);
+			m_dwLastSavedWithVersion = MPT_V("1.09.00.00");
 			madeWithTracker = U_("ModPlug Tracker 1.09");
 		} else if(madeWith[verNewModPlug])
 		{
-			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
+			m_dwLastSavedWithVersion = MPT_V("1.16.00.00");
 			madeWithTracker = U_("ModPlug Tracker 1.10 - 1.16");
 		}
 	}
@@ -947,7 +947,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		m_dwLastSavedWithVersion = Version::Parse(mpt::ToUnicode(mpt::CharsetASCII, mptVersion));
 		madeWith = verOpenMPT | verConfirmed;
 
-		if(m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 07, 19))
+		if(m_dwLastSavedWithVersion < MPT_V("1.22.07.19"))
 			m_nMixLevels = mixLevelsCompatible;
 		else
 			m_nMixLevels = mixLevelsCompatibleFT2;
@@ -1003,20 +1003,20 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	LoadExtendedSongProperties(file, true, &isOpenMPTMade);
 
-	if(isOpenMPTMade && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 17, 00, 00))
+	if(isOpenMPTMade && m_dwLastSavedWithVersion < MPT_V("1.17.00.00"))
 	{
 		// Up to OpenMPT 1.17.02.45 (r165), it was possible that the "last saved with" field was 0
 		// when saving a file in OpenMPT for the first time.
-		m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 17, 00, 00);
+		m_dwLastSavedWithVersion = MPT_V("1.17.00.00");
 	}
 
-	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 17, 00, 00))
+	if(m_dwLastSavedWithVersion >= MPT_V("1.17.00.00"))
 	{
 		madeWithTracker = U_("OpenMPT ") + m_dwLastSavedWithVersion.ToUString();
 	}
 
 	// We no longer allow any --- or +++ items in the order list now.
-	if(m_dwLastSavedWithVersion && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 22, 02, 02))
+	if(m_dwLastSavedWithVersion && m_dwLastSavedWithVersion < MPT_V("1.22.02.02"))
 	{
 		if(!Patterns.IsValidPat(0xFE))
 			Order().RemovePattern(0xFE);

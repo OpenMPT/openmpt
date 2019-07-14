@@ -1924,7 +1924,7 @@ void CTrackApp::InitializeDXPlugins()
 	}
 
 	// Restructured plugin cache
-	if(TrackerSettings::Instance().PreviousSettingsVersion < MAKE_VERSION_NUMERIC(1,27,00,15))
+	if(TrackerSettings::Instance().PreviousSettingsVersion < MPT_V("1.27.00.15"))
 	{
 		DeleteFile(m_szPluginCacheFileName.AsNative().c_str());
 		GetPluginCache().ForgetAll();

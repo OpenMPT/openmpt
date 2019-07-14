@@ -244,7 +244,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && (fileHeader.ordNum & 0x0F) == 0 && fileHeader.ultraClicks == 0 && (fileHeader.flags & ~0x50) == 0)
 		{
 			// MPT 1.16 and older versions of OpenMPT - Simply keep default (filter) MIDI macros
-			m_dwLastSavedWithVersion = MAKE_VERSION_NUMERIC(1, 16, 00, 00);
+			m_dwLastSavedWithVersion = MPT_V("1.16.00.00");
 			madeWithTracker = U_("ModPlug Tracker / OpenMPT");
 			keepMidiMacros = true;
 			nonCompatTracker = true;
