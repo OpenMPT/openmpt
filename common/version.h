@@ -122,7 +122,7 @@ public:
 				throw std::domain_error("");
 		}
 
-#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR14_THROW)
+#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR14_THROW) || 1
 		static MPT_CONSTEXPR14_FUN bool ParseError(bool really = true)
 		{
 			return !really ? really : throw std::runtime_error("");
