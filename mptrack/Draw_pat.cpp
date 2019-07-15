@@ -1580,10 +1580,8 @@ void CViewPattern::UpdateIndicator()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm != nullptr && pSndFile != nullptr && pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
-		CString s;
 		CHANNELINDEX nChn;
-		s.Format(_T("Row %u, Col %u"), GetCurrentRow(), GetCurrentChannel() + 1);
-		pMainFrm->SetUserText(s);
+		pMainFrm->SetUserText(mpt::cformat(_T("Row %1, Col %2"))(GetCurrentRow(), GetCurrentChannel() + 1));
 		if(::GetFocus() == m_hWnd)
 		{
 			nChn = m_Cursor.GetChannel();
