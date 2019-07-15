@@ -22,7 +22,7 @@ copy /y ..\include\opusfile\COPYING                       .\Licenses\License.Opu
 copy /y ..\include\portaudio\LICENSE.txt                  .\Licenses\License.PortAudio.txt || goto error
 rem copy /y ..\include\portaudio\bindings\cpp\COPYING         .\Licenses\License.portaudiocpp.txt || goto error
 rem copy /y ..\include\pugixml\readme.txt                     .\Licenses\License.PugiXML.txt || goto error
-copy /y ..\include\r8brain\LICENSE.txt                    .\Licenses\License.R8Brain.txt || goto error
+copy /y ..\include\r8brain\LICENSE                        .\Licenses\License.R8Brain.txt || goto error
 copy /y ..\include\r8brain\pffft.h                        .\Licenses\License.R8Brain.PFfft.txt || goto error
 copy /y ..\include\rtaudio\README.md                      .\Licenses\License.RtAudio.txt || goto error
 copy /y ..\include\rtkit\rtkit.h                          .\Licenses\License.RealtimeKit.txt || goto error
