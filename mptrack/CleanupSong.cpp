@@ -527,12 +527,13 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 	EndWaitCursor();
 
-	TCHAR s[512];
 	if(unusedInsSamples)
 	{
 		// We don't remove an instrument's unused samples in an ITP.
-		wsprintf(s, _T("OpenMPT detected %u sample%s referenced by an instrument,\n")
-			_T("but not used in the song. Do you want to remove them?"), unusedInsSamples, (unusedInsSamples == 1) ? _T("") : _T("s"));
+		mpt::ustring s = mpt::format(U_("OpenMPT detected %1 sample%2 referenced by an instrument,\nbut not used in the song. Do you want to remove them?"))
+			( unusedInsSamples
+			, (unusedInsSamples == 1) ? U_("") : U_("s")
+			);
 		if(Reporting::Confirm(s, "Sample Cleanup", false, false, this) == cnfYes)
 		{
 			nRemoved += sndFile.RemoveSelectedSamples(samplesUsed);
@@ -541,8 +542,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 	if(nRemoved > 0)
 	{
-		wsprintf(s, _T("%u unused sample%s removed") , nRemoved, (nRemoved == 1) ? _T("") : _T("s"));
-		modDoc.AddToLog(s);
+		modDoc.AddToLog(LogNotification, mpt::format(U_("%1 unused sample%2 removed"))(nRemoved, (nRemoved == 1) ? U_("") : U_("s")));
 	}
 
 	return (nRemoved > 0);
@@ -761,9 +761,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 
 		EndWaitCursor();
 
-		TCHAR s[64];
-		wsprintf(s, _T("%u unused instrument%s removed"), numRemoved, (numRemoved == 1) ? _T("") : _T("s"));
-		modDoc.AddToLog(s);
+		modDoc.AddToLog(LogNotification, mpt::format(U_("%1 unused instrument%2 removed"))(numRemoved, (numRemoved == 1) ? U_("") : U_("s")));
 		return true;
 	}
 	return false;
