@@ -211,6 +211,7 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 			}
 #endif // MPT_COMPILER_MSVC
 			// ignore errorOnFlush here, and re-throw the earlier exception
+			// cppcheck-suppress exceptThrowInDestructor
 			throw;
 		}
 	}
@@ -229,6 +230,7 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 #endif // MPT_COMPILER_MSVC
 	if(errorOnFlush && (stream().exceptions() & (std::ios::badbit | std::ios::failbit)))
 	{
+		// cppcheck-suppress exceptThrowInDestructor
 		throw std::ios_base::failure(std::string("Error flushing file buffers."));
 	}
 }
