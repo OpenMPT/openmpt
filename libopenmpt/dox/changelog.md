@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**Bug**] Compilation fix for OpenBSD.
 
+ *  miniz: Update to v2.1.0 (2019-05-05).
+
 ### libopenmpt 0.4.5 (2019-05-27)
 
  *  [**Sec**] Possible crash during playback due out-of-bounds read in XM and
