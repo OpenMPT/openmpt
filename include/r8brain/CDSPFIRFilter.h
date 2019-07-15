@@ -1,3 +1,4 @@
+//$ nobt
 //$ nocpp
 
 /**
@@ -7,7 +8,7 @@
  *
  * This file includes low-pass FIR filter generator and filter cache.
  *
- * r8brain-free-src Copyright (c) 2013-2014 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2019 Aleksey Vaneev
  * See the "License.txt" file for license.
  */
 
@@ -25,10 +26,11 @@ namespace r8b {
 
 enum EDSPFilterPhaseResponse
 {
-	fprLinearPhase = 0 ///< Linear-phase response. Features a linear-phase
+	fprLinearPhase = 0, ///< Linear-phase response. Features a linear-phase
 		///< high-latency response, with the latency expressed as integer
 		///< value.
-//	fprMinPhase ///< Minimum-phase response. Features a minimal latency
+		///<
+	fprMinPhase ///< Minimum-phase response. Features a minimal latency
 		///< response, but the response's phase is non-linear. The latency is
 		///< usually expressed as non-integer value, and usually is small, but
 		///< is never equal to zero. The minimum-phase filter is transformed
@@ -37,7 +39,10 @@ enum EDSPFilterPhaseResponse
 		///< filter being transformed: as it was measured, the skew happens
 		///< purely at random, and in most cases it is within tolerable range.
 		///< In a small (1%) random subset of cases the skew is bigger and
-		///< cannot be predicted.
+		///< cannot be predicted. Minimum-phase transform requires 64-bit
+		///< floating point FFT precision, results with 32-bit float FFT are
+		///< far from optimal.
+		///<
 };
 
 /**
@@ -204,6 +209,7 @@ private:
 	CFixedBuffer< double > KernelBlock; ///< FIR filter buffer, capacity
 		///< equals to 1 << ( BlockLenBits + 1 ). Second part of the buffer
 		///< contains zero-padding to allow alias-free convolution.
+		///< Memory-aligned.
 		///<
 
 	CDSPFIRFilter()
@@ -459,30 +465,30 @@ private:
 		sinc.initBand( CDSPSincFilterGen :: wftKaiser, WinParams, true );
 
 		KernelLen = sinc.KernelLen;
-		BlockLenBits = getBitOccupancy( KernelLen - 1 );
+		BlockLenBits = getBitOccupancy( KernelLen - 1 ) + R8B_EXTFFT;
 		const int BlockLen = 1 << BlockLenBits;
 
 		KernelBlock.alloc( BlockLen * 2 );
 		sinc.generateBand( &KernelBlock[ 0 ],
 			&CDSPSincFilterGen :: calcWindowKaiser );
 
-/*		if( ReqPhase == fprLinearPhase )
-		{*/
+		if( ReqPhase == fprLinearPhase )
+		{
 			IsZeroPhase = true;
 			Latency = sinc.fl2;
 			LatencyFrac = 0.0;
-/*		}
+		}
 		else
 		{
 			IsZeroPhase = false;
 			double DCGroupDelay;
 
-			calcMinPhaseTransform( &KernelBlock[ 0 ], KernelLen, 3, false,
+			calcMinPhaseTransform( &KernelBlock[ 0 ], KernelLen, 16, false,
 				&DCGroupDelay );
 
 			Latency = (int) DCGroupDelay;
 			LatencyFrac = DCGroupDelay - Latency;
-		}*/
+		}
 
 		CDSPRealFFTKeeper ffto( BlockLenBits + 1 );
 
@@ -527,6 +533,11 @@ private:
 
 		ffto -> forward( KernelBlock );
 
+		if( IsZeroPhase )
+		{
+			ffto -> convertToZ( KernelBlock );
+		}
+
 		R8BCONSOLE( "CDSPFIRFilter: flt_len=%i latency=%i nfreq=%.4f "
 			"tb=%.1f att=%.1f gain=%.3f\n", KernelLen, Latency,
 			ReqNormFreq, ReqTransBand, ReqAtten, ReqGain );
@@ -542,6 +553,8 @@ private:
 
 class CDSPFIRFilterCache : public R8B_BASECLASS
 {
+	R8BNOCTOR( CDSPFIRFilterCache );
+
 	friend class CDSPFIRFilter;
 
 public:

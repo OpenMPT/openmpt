@@ -15,17 +15,21 @@
 		characterset "Unicode"
 	filter {}
   files {
+   "../../include/r8brain/pffft.cpp",
    "../../include/r8brain/r8bbase.cpp",
   }
   files {
    "../../include/r8brain/CDSPBlockConvolver.h",
    "../../include/r8brain/CDSPFIRFilter.h",
    "../../include/r8brain/CDSPFracInterpolator.h",
+   "../../include/r8brain/CDSPHBDownsampler.h",
+   "../../include/r8brain/CDSPHBUpsampler.h",
    "../../include/r8brain/CDSPProcessor.h",
    "../../include/r8brain/CDSPRealFFT.h",
    "../../include/r8brain/CDSPResampler.h",
    "../../include/r8brain/CDSPSincFilterGen.h",
    "../../include/r8brain/fft4g.h",
+   "../../include/r8brain/pffft.h",
    "../../include/r8brain/r8bbase.h",
    "../../include/r8brain/r8bconf.h",
    "../../include/r8brain/r8butil.h",

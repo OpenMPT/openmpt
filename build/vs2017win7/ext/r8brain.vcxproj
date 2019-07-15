@@ -528,16 +528,20 @@
     <ClInclude Include="..\..\..\include\r8brain\CDSPBlockConvolver.h" />
     <ClInclude Include="..\..\..\include\r8brain\CDSPFIRFilter.h" />
     <ClInclude Include="..\..\..\include\r8brain\CDSPFracInterpolator.h" />
+    <ClInclude Include="..\..\..\include\r8brain\CDSPHBDownsampler.h" />
+    <ClInclude Include="..\..\..\include\r8brain\CDSPHBUpsampler.h" />
     <ClInclude Include="..\..\..\include\r8brain\CDSPProcessor.h" />
     <ClInclude Include="..\..\..\include\r8brain\CDSPRealFFT.h" />
     <ClInclude Include="..\..\..\include\r8brain\CDSPResampler.h" />
     <ClInclude Include="..\..\..\include\r8brain\CDSPSincFilterGen.h" />
     <ClInclude Include="..\..\..\include\r8brain\fft4g.h" />
+    <ClInclude Include="..\..\..\include\r8brain\pffft.h" />
     <ClInclude Include="..\..\..\include\r8brain\r8bbase.h" />
     <ClInclude Include="..\..\..\include\r8brain\r8bconf.h" />
     <ClInclude Include="..\..\..\include\r8brain\r8butil.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\include\r8brain\pffft.cpp" />
     <ClCompile Include="..\..\..\include\r8brain\r8bbase.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

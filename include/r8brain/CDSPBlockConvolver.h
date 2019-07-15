@@ -1,3 +1,4 @@
+//$ nobt
 //$ nocpp
 
 /**
@@ -7,7 +8,7 @@
  *
  * This file includes single-block overlap-save convolution processor class.
  *
- * r8brain-free-src Copyright (c) 2013-2014 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2019 Aleksey Vaneev
  * See the "License.txt" file for license.
  */
 
@@ -77,7 +78,9 @@ public:
 		if(( 1 << UpShift ) == UpFactor )
 		{
 			fftinBits = Filter -> getBlockLenBits() + 1 - UpShift;
-			PrevInputLen = ( Filter -> getKernelLen() - 1 ) / UpFactor;
+			PrevInputLen = ( Filter -> getKernelLen() - 1 + UpFactor - 1 ) /
+				UpFactor;
+
 			InputLen = BlockLen2 - PrevInputLen * UpFactor;
 		}
 		else
@@ -88,13 +91,14 @@ public:
 			InputLen = BlockLen2 - PrevInputLen;
 		}
 
-		OutOffset = Filter -> getLatency();
+		OutOffset = ( Filter -> isZeroPhase() ? Filter -> getLatency() : 0 );
 		LatencyFrac = Filter -> getLatencyFrac() + PrevLatency * UpFactor;
 		Latency = (int) LatencyFrac;
+		const int InLatency = Latency + Filter -> getLatency() - OutOffset;
 		LatencyFrac -= Latency;
 		LatencyFrac /= DownFactor;
 
-		Latency += InputLen + OutOffset;
+		Latency += InputLen + Filter -> getLatency();
 
 		int fftoutBits;
 		InputDelay = 0;
@@ -118,22 +122,20 @@ public:
 				}
 				else
 				{
-					int Delay = Latency & ( DownFactor - 1 );
+					// Make sure InputLen is divisible by DownFactor.
 
-					if( Delay > 0 )
+					const int ilc = InputLen & ( DownFactor - 1 );
+					PrevInputLen += ilc;
+					InputLen -= ilc;
+					Latency -= ilc;
+
+					// Correct InputDelay for input and filter's latency.
+
+					const int lc = InLatency & ( DownFactor - 1 );
+
+					if( lc > 0 )
 					{
-						Delay = DownFactor - Delay;
-						Latency += Delay;
-
-						if( Delay < UpFactor )
-						{
-							UpSkipInit = Delay;
-						}
-						else
-						{
-							UpSkipInit = UpFactor - 1;
-							InputDelay = Delay - UpSkipInit;
-						}
+						InputDelay = DownFactor - lc;
 					}
 
 					if( !DoConsumeLatency )
@@ -169,7 +171,8 @@ public:
 
 		WorkBlocks.alloc( BlockLen2 * 2 + PrevInputLen );
 		CurInput = &WorkBlocks[ 0 ];
-		CurOutput = &WorkBlocks[ BlockLen2 ];
+		CurOutput = &WorkBlocks[ BlockLen2 ]; // CurInput and
+			// CurOutput are memory-aligned.
 		PrevInput = &WorkBlocks[ BlockLen2 * 2 ];
 
 		clear();
@@ -195,18 +198,11 @@ public:
 		return( LatencyFrac );
 	}
 
-	virtual int getInLenBeforeOutStart( const int NextInLen ) const
-	{
-		return(( InputLen - InputDelay + NextInLen * DownFactor ) /
-			UpFactor );
-	}
-
 	virtual int getMaxOutLen( const int MaxInLen ) const
 	{
 		R8BASSERT( MaxInLen >= 0 );
 
-		return(( MaxInLen * UpFactor + InputDelay + DownFactor - 1 ) /
-			DownFactor );
+		return(( MaxInLen * UpFactor + DownFactor - 1 ) / DownFactor );
 	}
 
 	virtual void clear()
@@ -302,7 +298,11 @@ public:
 
 			if( UpShift > 0 )
 			{
-				mirrorInputSpectrum();
+				#if R8B_FLOATFFT
+					mirrorInputSpectrum( (float*) CurInput );
+				#else // R8B_FLOATFFT
+					mirrorInputSpectrum( CurInput );
+				#endif // R8B_FLOATFFT
 			}
 
 			if( Filter -> isZeroPhase() )
@@ -319,8 +319,16 @@ public:
 			if( DownShift > 0 )
 			{
 				const int z = BlockLen2 >> DownShift;
-				CurInput[ 1 ] = Filter -> getKernelBlock()[ z ] *
-					CurInput[ z ];
+
+				#if R8B_FLOATFFT
+					float* const kb = (float*) Filter -> getKernelBlock();
+					float* const op = (float*) CurInput;
+				#else // R8B_FLOATFFT
+					const double* const kb = Filter -> getKernelBlock();
+					double* const op = CurInput;
+				#endif // R8B_FLOATFFT
+
+				op[ 1 ] = kb[ z ] * op[ z ] - kb[ z + 1 ] * op[ z + 1 ];
 			}
 
 			(*fftout) -> inverse( CurInput );
@@ -378,7 +386,7 @@ private:
 		///< 1.
 		///<
 	int InputDelay; ///< Additional input delay, in samples. Used to make the
-		///< output latency divisible by DownShift. Used only if UpShift <= 0
+		///< output delay divisible by DownShift. Used only if UpShift <= 0
 		///< and DownShift > 0.
 		///<
 	CFixedBuffer< double > WorkBlocks; ///< Previous input data, input and
@@ -441,8 +449,9 @@ private:
 		double* ip = ip0;
 		int l = l0 / UpFactor;
 		int lz = l0 - l * UpFactor;
+		const int upf = UpFactor;
 
-		if( UpFactor == 3 )
+		if( upf == 3 )
 		{
 			while( l > 0 )
 			{
@@ -450,12 +459,12 @@ private:
 				op[ 1 ] = 0.0;
 				op[ 2 ] = 0.0;
 				ip++;
-				op += UpFactor;
+				op += upf;
 				l--;
 			}
 		}
 		else
-		if( UpFactor == 5 )
+		if( upf == 5 )
 		{
 			while( l > 0 )
 			{
@@ -465,7 +474,7 @@ private:
 				op[ 3 ] = 0.0;
 				op[ 4 ] = 0.0;
 				ip++;
-				op += UpFactor;
+				op += upf;
 				l--;
 			}
 		}
@@ -476,13 +485,13 @@ private:
 				op[ 0 ] = *ip;
 				int j;
 
-				for( j = 1; j < UpFactor; j++ )
+				for( j = 1; j < upf; j++ )
 				{
 					op[ j ] = 0.0;
 				}
 
 				ip++;
-				op += UpFactor;
+				op += upf;
 				l--;
 			}
 		}
@@ -602,30 +611,32 @@ private:
 	 * Function performs input spectrum mirroring which is used to perform a
 	 * fast "power of 2" upsampling. Such mirroring is equivalent to insertion
 	 * of zeros into the input signal.
+	 *
+	 * @param p Spectrum data block to mirror.
 	 */
 
-	void mirrorInputSpectrum()
+	template< class T >
+	void mirrorInputSpectrum( T* const p )
 	{
 		const int bl1 = BlockLen2 >> UpShift;
 		const int bl2 = bl1 + bl1;
-
 		int i;
 
 		for( i = bl1 + 2; i < bl2; i += 2 )
 		{
-			CurInput[ i ] = CurInput[ bl2 - i ];
-			CurInput[ i + 1 ] = -CurInput[ bl2 - i + 1 ];
+			p[ i ] = p[ bl2 - i ];
+			p[ i + 1 ] = -p[ bl2 - i + 1 ];
 		}
 
-		CurInput[ bl1 ] = CurInput[ 1 ];
-		CurInput[ bl1 + 1 ] = 0.0;
-		CurInput[ 1 ] = CurInput[ 0 ];
+		p[ bl1 ] = p[ 1 ];
+		p[ bl1 + 1 ] = 0.0;
+		p[ 1 ] = p[ 0 ];
 
 		for( i = 1; i < UpShift; i++ )
 		{
 			const int z = bl1 << i;
-			memcpy( &CurInput[ z ], CurInput, z * sizeof( double ));
-			CurInput[ z + 1 ] = 0.0;
+			memcpy( &p[ z ], p, z * sizeof( T ));
+			p[ z + 1 ] = 0.0;
 		}
 	}
 };
