@@ -931,7 +931,6 @@ void CDoWaveConvert::Run()
 	static MixSampleFloat floatbuffer[MIXBUFFERSIZE * 4]; // channels
 	static MixSampleInt mixbuffer[MIXBUFFERSIZE * 4]; // channels
 
-	TCHAR s[80];
 	UINT ok = IDOK;
 	uint64 ullSamples = 0;
 
@@ -1057,12 +1056,6 @@ void CDoWaveConvert::Run()
 	patternCuePoints.reserve(m_SndFile.Order().size());
 	m_SndFile.m_PatternCuePoints = &patternCuePoints;
 
-	CString progressStr;
-	if(m_Settings.normalize)
-		progressStr =  _T("Rendering ") + caption + _T("... (%umn%02us, %umn%02us remaining)");
-	else
-		progressStr =  _T("Writing ") + caption + _T("... (%lluKB, %umn%02us, %umn%02us remaining)");
-
 	// Process the conversion
 
 	// For calculating the remaining time
@@ -1168,10 +1161,12 @@ void CDoWaveConvert::Run()
 			}
 
 			if(m_Settings.normalize)
-				_stprintf(s, progressStr, seconds / 60, seconds % 60, timeRemaining / 60, timeRemaining % 60u);
-			else
-				_stprintf(s, progressStr, bytesWritten >> 10, seconds / 60, seconds % 60u, timeRemaining / 60, timeRemaining % 60u);
-			SetText(s);
+			{
+				SetText(mpt::format(CString(_T("Rendering %1... (%2mn%3s, %4mn%5s remaining)")))(caption, seconds / 60, mpt::ufmt::dec0<2>(seconds % 60u), timeRemaining / 60, mpt::ufmt::dec0<2>(timeRemaining % 60u)));
+			} else
+			{
+				SetText(mpt::format(CString(_T("Writing %1... (%2kB, %3mn%4s, %5mn%6s remaining)")))(caption, bytesWritten >> 10, seconds / 60, mpt::ufmt::dec0<2>(seconds % 60u), timeRemaining / 60, mpt::ufmt::dec0<2>(timeRemaining % 60u)));
+			}
 
 			SetProgress(ullSamples);
 		}
@@ -1287,8 +1282,7 @@ void CDoWaveConvert::Run()
 				int percent = static_cast<int>(100 * framesProcessed / framesTotal);
 				if(percent != lastPercent)
 				{
-					_stprintf(s, _T("Normalizing... (%d%%)"), percent);
-					SetText(s);
+					SetText(mpt::format(CString(_T("Normalizing... (%1%%)")))(percent));
 					SetProgress(framesProcessed);
 					lastPercent = percent;
 				}
