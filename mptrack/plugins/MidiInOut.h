@@ -154,64 +154,64 @@ public:
 
 	/////////////////////////////////////////////////
 	// Destroy the plugin
-	virtual void Release() { delete this; }
-	virtual int32 GetUID() const { return 'MMID'; }
-	virtual int32 GetVersion() const { return 2; }
-	virtual void Idle() { }
-	virtual uint32 GetLatency() const;
+	void Release() final { delete this; }
+	int32 GetUID() const final { return 'MMID'; }
+	int32 GetVersion() const final { return 2; }
+	void Idle() final { }
+	uint32 GetLatency() const final;
 
-	virtual int32 GetNumPrograms() const { return kNumPrograms; }
-	virtual int32 GetCurrentProgram() { return 0; }
-	virtual void SetCurrentProgram(int32) { }
+	int32 GetNumPrograms() const final { return kNumPrograms; }
+	int32 GetCurrentProgram() final { return 0; }
+	void SetCurrentProgram(int32) final { }
 
-	virtual PlugParamIndex GetNumParameters() const { return kNumParams; }
-	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue);
-	virtual PlugParamValue GetParameter(PlugParamIndex nIndex);
+	PlugParamIndex GetNumParameters() const final { return kNumParams; }
+	void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) final;
+	PlugParamValue GetParameter(PlugParamIndex nIndex) final;
 
 	// Save parameters for storing them in a module file
-	virtual void SaveAllParameters();
+	void SaveAllParameters() final;
 	// Restore parameters from module file
-	virtual void RestoreAllParameters(int32 program);
-	virtual void Process(float *pOutL, float *pOutR, uint32 numFrames);
+	void RestoreAllParameters(int32 program) final;
+	void Process(float *pOutL, float *pOutR, uint32 numFrames) final;
 	// Render silence and return the highest resulting output level
-	virtual float RenderSilence(uint32) { return 0; }
-	virtual bool MidiSend(uint32 midiCode);
-	virtual bool MidiSysexSend(mpt::const_byte_span sysex);
-	virtual void HardAllNotesOff();
+	float RenderSilence(uint32) final{ return 0; }
+	bool MidiSend(uint32 midiCode) final;
+	bool MidiSysexSend(mpt::const_byte_span sysex) final;
+	void HardAllNotesOff() final;
 	// Modify parameter by given amount. Only needs to be re-implemented if plugin architecture allows this to be performed atomically.
-	virtual void Resume();
-	virtual void Suspend();
+	void Resume() final;
+	void Suspend() final;
 	// Tell the plugin that there is a discontinuity between the previous and next render call (e.g. aftert jumping around in the module)
-	virtual void PositionChanged();
-	virtual void Bypass(bool bypass = true);
-	virtual bool IsInstrument() const { return true; }
-	virtual bool CanRecieveMidiEvents() { return true; }
+	void PositionChanged() final;
+	void Bypass(bool bypass = true) final;
+	bool IsInstrument() const final { return true; }
+	bool CanRecieveMidiEvents() final { return true; }
 	// If false is returned, mixing this plugin can be skipped if its input are currently completely silent.
-	virtual bool ShouldProcessSilence() { return true; }
+	bool ShouldProcessSilence() final { return true; }
 
 #ifdef MODPLUG_TRACKER
-	virtual CString GetDefaultEffectName() { return _T("MIDI Input / Output"); }
+	CString GetDefaultEffectName() final { return _T("MIDI Input / Output"); }
 
-	virtual CString GetParamName(PlugParamIndex param);
-	virtual CString GetParamLabel(PlugParamIndex) { return CString(); }
-	virtual CString GetParamDisplay(PlugParamIndex param);
-	virtual CString GetCurrentProgramName() { return m_programName; }
-	virtual void SetCurrentProgramName(const CString &name) { m_programName = name; }
-	virtual CString GetProgramName(int32) { return m_programName; }
+	CString GetParamName(PlugParamIndex param) final;
+	CString GetParamLabel(PlugParamIndex) final{ return CString(); }
+	CString GetParamDisplay(PlugParamIndex param) final;
+	CString GetCurrentProgramName() final { return m_programName; }
+	void SetCurrentProgramName(const CString &name) final { m_programName = name; }
+	CString GetProgramName(int32) final { return m_programName; }
 	virtual CString GetPluginVendor() { return _T("OpenMPT Project"); }
 
-	virtual bool HasEditor() const { return true; }
+	bool HasEditor() const final { return true; }
 protected:
-	virtual CAbstractVstEditor *OpenEditor();
+	CAbstractVstEditor *OpenEditor() final;
 #endif
 
 public:
-	virtual int GetNumInputChannels() const { return 0; }
-	virtual int GetNumOutputChannels() const { return 0; }
+	int GetNumInputChannels() const final { return 0; }
+	int GetNumOutputChannels() const final { return 0; }
 
-	virtual bool ProgramsAreChunks() const { return true; }
-	virtual ChunkData GetChunk(bool isBank);
-	virtual void SetChunk(const ChunkData &chunk, bool isBank);
+	bool ProgramsAreChunks() const final { return true; }
+	ChunkData GetChunk(bool isBank) final;
+	void SetChunk(const ChunkData &chunk, bool isBank) final;
 
 protected:
 	// Open a device for input or output.
