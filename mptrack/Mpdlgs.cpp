@@ -1513,21 +1513,21 @@ void COptionsPlayer::OnSavePreset()
 }
 
 
-static void f2s(UINT f, TCHAR *s)
+static CString f2s(UINT f)
 {
 	if (f < 1000)
 	{
-		wsprintf(s, _T("%uHz"), f);
+		return mpt::format(CString(_T("%1Hz")))(f);
 	} else
 	{
 		UINT fHi = f / 1000u;
 		UINT fLo = f % 1000u;
-		if (fLo)
+		if(fLo)
 		{
-			wsprintf(s, _T("%u.%ukHz"), fHi, fLo/100);
+			return mpt::format(CString(_T("%1.%2kHz")))(fHi, mpt::cfmt::dec0<1>(fLo/100));
 		} else
 		{
-			wsprintf(s, _T("%ukHz"), fHi);
+			return mpt::format(CString(_T("%1kHz")))(fHi);
 		}
 	}
 }
@@ -1535,15 +1535,13 @@ static void f2s(UINT f, TCHAR *s)
 
 void COptionsPlayer::UpdateDialog()
 {
-	TCHAR s[32];
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
 	{
 		int n = 32 - m_EQPreset.Gains[i];
 		if (n < 0) n = 0;
 		if (n > 32) n = 32;
 		if (n != (m_Sliders[i].GetPos() & 0xFFFF)) m_Sliders[i].SetPos(n);
-		f2s(m_EQPreset.Freqs[i], s);
-		SetDlgItemText(IDC_TEXT1 + i, s);
+		SetDlgItemText(IDC_TEXT1 + i, f2s(m_EQPreset.Freqs[i]));
 	}
 	for(int i = 0; i < CountOf(TrackerSettings::Instance().m_EqUserPresets); i++)
 	{
@@ -1557,7 +1555,6 @@ void COptionsPlayer::OnSliderMenu(UINT nID)
 	UINT n = nID - ID_EQSLIDER_BASE;
 	if (n < MAX_EQ_BANDS)
 	{
-		TCHAR s[32];
 		HMENU hMenu = ::CreatePopupMenu();
 		m_nSliderMenu = n;
 		if (!hMenu) return;
@@ -1566,8 +1563,7 @@ void COptionsPlayer::OnSliderMenu(UINT nID)
 		{
 			DWORD d = MF_STRING;
 			if (m_EQPreset.Freqs[m_nSliderMenu] == pFreqs[i]) d |= MF_CHECKED;
-			f2s(pFreqs[i], s);
-			::AppendMenu(hMenu, d, ID_EQMENU_BASE+i, s);
+			::AppendMenu(hMenu, d, ID_EQMENU_BASE+i, f2s(pFreqs[i]));
 		}
 		CPoint pt(m_Sliders[m_nSliderMenu].m_x, m_Sliders[m_nSliderMenu].m_y);
 		m_Sliders[m_nSliderMenu].ClientToScreen(&pt);
