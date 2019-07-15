@@ -206,7 +206,10 @@ MPT_CONSTEXPR14_FUN Version operator "" _LiteralVersionImpl (const char * str, s
 {
 	return Version::LiteralParser::Parse(str, len);
 }
+
 // Create Version object from version string and check syntax, all at compile time.
+// cppcheck false-positive
+// cppcheck-suppress preprocessorErrorDirective
 #define MPT_V(strver) Version{MPT_FORCE_CONSTEXPR(( strver ## _LiteralVersionImpl ).GetRawVersion())}
 
 
