@@ -1648,12 +1648,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 				if(!m_SndFile.ChnSettings[i].szName.empty())
 				{
 					fileNameAdd += mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.ChnSettings[i].szName);
-					caption.Format(_T("%u:"), i + 1);
-					caption += mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.ChnSettings[i].szName);
+					caption = mpt::cformat(_T("%1:%2"))(i + 1, mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.ChnSettings[i].szName));
 				} else
 				{
 					fileNameAdd += mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
-					caption.Format(_T("channel %u"), i + 1);
+					caption = mpt::cformat(_T("channel %1"))(i + 1);
 				}
 				// Unmute channel to process
 				m_SndFile.ChnSettings[i].dwFlags.reset(CHN_MUTE);
@@ -1673,12 +1672,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 					if(!m_SndFile.m_szNames[i + 1].empty())
 					{
 						fileNameAdd += mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.m_szNames[i + 1]);
-						caption.Format(_T("%u: "), i + 1);
-						caption += mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.m_szNames[i + 1]);
+						caption = mpt::cformat(_T("%1: %2"))(i + 1, mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.m_szNames[i + 1]));
 					} else
 					{
 						fileNameAdd += mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
-						caption.Format(_T("sample %u"), i + 1);
+						caption = mpt::cformat(_T("sample %1"))(i + 1);
 					}
 					// Unmute sample to process
 					MuteSample(static_cast<SAMPLEINDEX>(i + 1), false);
@@ -1693,12 +1691,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 					if(!m_SndFile.Instruments[i + 1]->name.empty())
 					{
 						fileNameAdd += mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.Instruments[i + 1]->name);
-						caption.Format(_T("%u:"), i + 1);
-						caption += mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.Instruments[i + 1]->name);
+						caption = mpt::cformat(_T("%1:%2"))(i + 1, mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.Instruments[i + 1]->name));
 					} else
 					{
 						fileNameAdd += mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
-						caption.Format(_T("instrument %u"), i + 1);
+						caption = mpt::cformat(_T("instrument %1"))(i + 1);
 					}
 					// Unmute instrument to process
 					MuteInstrument(static_cast<SAMPLEINDEX>(i + 1), false);
