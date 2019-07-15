@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.17-pre
 
+ *  miniz: Update to v2.1.0 (2019-05-05).
+
 ### libopenmpt 0.3.16 (2019-04-07)
 
  *  [**Bug**] Channel VU meters were swapped.
