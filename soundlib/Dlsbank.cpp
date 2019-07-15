@@ -1703,21 +1703,19 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 	// Initializes Instrument
 	if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 	{
-		char s[64] = "";
 		uint32 key = pDlsIns->Regions[nDrumRgn].uKeyMin;
-		if ((key >= 24) && (key <= 84)) lstrcpyA(s, szMidiPercussionNames[key-24]);
-		if (pDlsIns->szName[0])
+		if((key >= 24) && (key <= 84))
 		{
-			sprintf(&s[strlen(s)], " (%s", pDlsIns->szName);
-			size_t n = strlen(s);
-			while ((n) && (s[n-1] == ' '))
+			std::string s = szMidiPercussionNames[key-24];
+			if(!mpt::String::ReadAutoBuf(pDlsIns->szName).empty())
 			{
-				n--;
-				s[n] = 0;
+				s += mpt::format(" (%1)")(mpt::String::RTrim<std::string>(mpt::String::ReadAutoBuf(pDlsIns->szName)));
 			}
-			lstrcatA(s, ")");
+			pIns->name = s;
+		} else
+		{
+			pIns->name = mpt::String::ReadAutoBuf(pDlsIns->szName);
 		}
-		pIns->name = mpt::String::ReadAutoBuf(s);
 	} else
 	{
 		pIns->name = mpt::String::ReadAutoBuf(pDlsIns->szName);
