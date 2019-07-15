@@ -378,8 +378,9 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 		otherPtrSize = static_cast<int32>(GetPluginArchPointerSize(arch));
 
 		// Command-line must be a modifiable string...
-		wchar_t cmdLine[128];
-		swprintf(cmdLine, CountOf(cmdLine), L"%s %d", mapName.c_str(), procId);
+		std::wstring cmdLine = mpt::format(L"%1 %2")(mapName, procId);
+		std::vector<WCHAR> cmdLineBuf(cmdLine.length() + 1);
+		std::copy(cmdLine.c_str(), cmdLine.c_str() + cmdLine.length() + 1, cmdLineBuf.begin());
 
 		STARTUPINFOW info;
 		MemsetZero(info);
@@ -387,7 +388,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 		PROCESS_INFORMATION processInfo;
 		MemsetZero(processInfo);
 
-		if(!CreateProcessW(exeName.ToWide().c_str(), cmdLine, NULL, NULL, FALSE, 0, NULL, NULL, &info, &processInfo))
+		if(!CreateProcessW(exeName.ToWide().c_str(), cmdLineBuf.data(), NULL, NULL, FALSE, 0, NULL, NULL, &info, &processInfo))
 		{
 			throw BridgeException("Failed to launch plugin bridge.");
 		}
@@ -1127,7 +1128,7 @@ BridgeWrapper::AuxMem *BridgeWrapper::GetAuxMemory(uint32 size)
 	// Create new memory with appropriate size
 	static_assert(sizeof(DispatchMsg) + sizeof(auxMem.name) <= sizeof(BridgeMessage), "Check message sizes, this will crash!");
 	static unsigned int auxMemCount = 0;
-	swprintf(auxMem.name, CountOf(auxMem.name), L"Local\\openmpt-%u-auxmem-%u", GetCurrentProcessId(), auxMemCount++);
+	mpt::String::WriteAutoBuf(auxMem.name) = mpt::format(L"Local\\openmpt-%1-auxmem-%2")(GetCurrentProcessId(), auxMemCount++);
 	if(auxMem.memory.Create(auxMem.name, size))
 	{
 		auxMem.size = size;
