@@ -64,9 +64,7 @@ public:
 		m_SndFile.m_bIsRendering = true;
 		for(SEQUENCEINDEX seq = 0; seq < m_SndFile.Order.GetNumSequences() && !m_abort; seq++)
 		{
-			TCHAR s[64];
-			wsprintf(s, _T("Automatic Sample Trimmer - Sequence %u / %u"), seq + 1, m_SndFile.Order.GetNumSequences());
-			SetWindowText(s);
+			SetWindowText(mpt::cformat(_T("Automatic Sample Trimmer - Sequence %1 / %2"))(seq + 1, m_SndFile.Order.GetNumSequences()));
 
 			m_SndFile.Order.SetSequence(seq);
 			m_SndFile.ResetPlayPos();
@@ -93,8 +91,7 @@ public:
 					{
 						prevTime = currentTime;
 						auto timeSec = totalSamples / m_SndFile.GetSampleRate();
-						wsprintf(s, _T("Analyzing... %u:%02u:%02u"), timeSec / 3600, (timeSec / 60) % 60, timeSec % 60);
-						SetText(s);
+						SetText(mpt::cformat(_T("Analyzing... %1:%2:%3"))(timeSec / 3600, mpt::cfmt::dec0<2>((timeSec / 60) % 60), mpt::cfmt::dec0<2>(timeSec % 60)));
 						SetProgress(mpt::saturate_cast<uint32>(totalSamples));
 						ProcessMessages();
 					}
