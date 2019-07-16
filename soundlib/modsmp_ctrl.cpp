@@ -280,43 +280,6 @@ bool ConvertToStereo(ModSample &smp, CSoundFile &sndFile)
 }
 
 
-// Convert 16-bit sample to 8-bit
-bool ConvertTo8Bit(ModSample &smp, CSoundFile &sndFile)
-{
-	if(!smp.HasSampleData() || smp.GetElementarySampleSize() != 2)
-		return false;
-
-	CopySample<SC::ConversionChain<SC::Convert<int8, int16>, SC::DecodeIdentity<int16> > >(reinterpret_cast<int8*>(smp.samplev()), smp.nLength * smp.GetNumChannels(), 1, smp.sample16(), smp.GetSampleSizeInBytes(), 1);
-	smp.uFlags.reset(CHN_16BIT);
-	for(auto &chn : sndFile.m_PlayState.Chn)
-	{
-		if(chn.pModSample == &smp)
-			chn.dwFlags.reset(CHN_16BIT);
-	}
-
-	smp.PrecomputeLoops(sndFile, false);
-	return true;
-}
-
-
-// Convert 8-bit sample to 16-bit
-bool ConvertTo16Bit(ModSample &smp, CSoundFile &sndFile)
-{
-	if(!smp.HasSampleData() || smp.GetElementarySampleSize() != 1)
-		return false;
-
-	int16 *newSample = static_cast<int16 *>(ModSample::AllocateSample(smp.nLength, 2 * smp.GetNumChannels()));
-	if(newSample == nullptr)
-		return false;
-
-	CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8> > >(newSample, smp.nLength * smp.GetNumChannels(), 1, smp.sample8(), smp.GetSampleSizeInBytes(), 1);
-	smp.uFlags.set(CHN_16BIT);
-	ctrlSmp::ReplaceSample(smp, newSample, smp.nLength, sndFile);
-	smp.PrecomputeLoops(sndFile, false);
-	return true;
-}
-
-
 } // namespace ctrlSmp
 
 

@@ -2193,7 +2193,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			if(ok && sample.GetElementarySampleSize() > oldSample.GetElementarySampleSize())
 			{
 				// Keep higher bit depth of the two samples
-				ok = ctrlSmp::ConvertTo16Bit(oldSample, sndFile);
+				ok = SampleEdit::ConvertTo16Bit(oldSample, sndFile);
 			}
 			if(ok)
 			{
@@ -2281,7 +2281,7 @@ void CViewSample::On8BitConvert()
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "8-Bit Conversion");
 
 			CriticalSection cs;
-			ctrlSmp::ConvertTo8Bit(sample, sndFile);
+			SampleEdit::ConvertTo8Bit(sample, sndFile);
 			cs.Leave();
 
 			SetModified(SampleHint().Info().Data(), true, true);
@@ -2303,7 +2303,7 @@ void CViewSample::On16BitConvert()
 		{
 			ASSERT(sample.GetElementarySampleSize() == 1);
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "16-Bit Conversion");
-			if(!ctrlSmp::ConvertTo16Bit(sample, sndFile))
+			if(!SampleEdit::ConvertTo16Bit(sample, sndFile))
 			{
 				pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
 			} else

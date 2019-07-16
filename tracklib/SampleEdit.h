@@ -74,6 +74,12 @@ bool SilenceSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &s
 // Modify stereo separation of the sample data. separation is in range [-200, 200]
 bool StereoSepSample(ModSample &smp, SmpLength start, SmpLength end, double separation, CSoundFile &sndFile);
 
+// Convert 16-bit sample to 8-bit
+bool ConvertTo8Bit(ModSample &smp, CSoundFile &sndFile);
+
+// Convert 8-bit sample to 16-bit
+bool ConvertTo16Bit(ModSample &smp, CSoundFile &sndFile);
+
 } // namespace SampleEdit
 
 OPENMPT_NAMESPACE_END
