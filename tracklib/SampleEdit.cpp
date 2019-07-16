@@ -165,7 +165,6 @@ void ResetSamples(CSoundFile &sndFile, ResetFlag resetflag, SAMPLEINDEX minSampl
 			sndFile.m_szNames[i] = "";
 			sample.filename = "";
 			sample.nC5Speed = 8363;
-			// note: break is left out intentionally. keep this order or c&p the stuff from below if you change anything!
 			MPT_FALLTHROUGH;
 		case SmpResetCompo:
 			sample.nPan = 128;
@@ -199,7 +198,7 @@ namespace
 
 	// Returns maximum sample amplitude for given sample type (int8/int16).
 	template <class T>
-	double GetMaxAmplitude() {return 1.0 + (std::numeric_limits<T>::max)();}
+	constexpr double GetMaxAmplitude() {return 1.0 + (std::numeric_limits<T>::max)();}
 
 	// Calculates DC offset and returns struct with DC offset, max and min values.
 	// DC offset value is average of [-1.0, 1.0[-normalized offset values.
@@ -207,17 +206,16 @@ namespace
 	OffsetData CalculateOffset(const T *pStart, const SmpLength length)
 	{
 		OffsetData offsetVals;
-
 		if(length < 1)
 			return offsetVals;
 
-		const double maxAmplitude = GetMaxAmplitude<T>();
+		const double intToFloatScale = 1.0 / GetMaxAmplitude<T>();
 		double max = -1, min = 1, sum = 0;
 
 		const T *p = pStart;
 		for(SmpLength i = 0; i < length; i++, p++)
 		{
-			const double val = double(*p) / maxAmplitude;
+			const double val = static_cast<double>(*p) * intToFloatScale;
 			sum += val;
 			if(val > max) max = val;
 			if(val < min) min = val;
@@ -319,9 +317,10 @@ static void ApplyAmplifyImpl(T * MPT_RESTRICT pSample, const SmpLength length, c
 	{
 		const double fadeOffset = isFadeIn ? amplifyStart : amplifyEnd;
 		const double fadeDiff = isFadeIn ? (amplifyEnd - amplifyStart) : (amplifyStart - amplifyEnd);
+		const double lengthInv = 1.0 / length;
 		for(SmpLength i = 0; i < length; i++)
 		{
-			const double amp = fadeOffset + fadeFunc(static_cast<double>(isFadeIn ? i : (length - i)) / length) * fadeDiff;
+			const double amp = fadeOffset + fadeFunc(static_cast<double>(isFadeIn ? i : (length - i)) * lengthInv) * fadeDiff;
 			pSample[i] = mpt::saturate_round<T>(amp * pSample[i]);
 		}
 	} else
@@ -361,11 +360,11 @@ bool AmplifySample(ModSample &smp, SmpLength start, SmpLength end, double amplif
 
 
 template <class T>
-static void ReverseSampleImpl(T *pStart, const SmpLength nLength)
+static void ReverseSampleImpl(T *pStart, const SmpLength length)
 {
-	for(SmpLength i = 0; i < nLength / 2; i++)
+	for(SmpLength i = 0; i < length / 2; i++)
 	{
-		std::swap(pStart[i], pStart[nLength - 1 - i]);
+		std::swap(pStart[i], pStart[length - 1 - i]);
 	}
 }
 
@@ -381,7 +380,7 @@ bool ReverseSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &s
 
 	if(end - start < 2) return false;
 
-	STATIC_ASSERT(MaxSamplingPointSize <= 4);
+	static_assert(MaxSamplingPointSize <= 4);
 	if(smp.GetBytesPerSample() == 4)	// 16 bit stereo
 		ReverseSampleImpl(static_cast<int32 *>(smp.samplev()) + start, end - start);
 	else if(smp.GetBytesPerSample() == 2)	// 16 bit mono / 8 bit stereo
