@@ -524,7 +524,7 @@ bool ConvertTo8Bit(ModSample &smp, CSoundFile &sndFile)
 	if(!smp.HasSampleData() || smp.GetElementarySampleSize() != 2)
 		return false;
 
-	CopySample<SC::ConversionChain<SC::Convert<int8, int16>, SC::DecodeIdentity<int16>>>(smp.sample8(), smp.nLength * smp.GetNumChannels(), 1, smp.sample16(), smp.GetSampleSizeInBytes(), 1);
+	CopySample<SC::ConversionChain<SC::Convert<int8, int16>, SC::DecodeIdentity<int16>>>(static_cast<int8 *>(smp.samplev()), smp.nLength * smp.GetNumChannels(), 1, smp.sample16(), smp.GetSampleSizeInBytes(), 1);
 	smp.uFlags.reset(CHN_16BIT);
 	for(auto &chn : sndFile.m_PlayState.Chn)
 	{
