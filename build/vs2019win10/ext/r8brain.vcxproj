@@ -1078,13 +1078,11 @@
     <ClInclude Include="..\..\..\include\r8brain\CDSPResampler.h" />
     <ClInclude Include="..\..\..\include\r8brain\CDSPSincFilterGen.h" />
     <ClInclude Include="..\..\..\include\r8brain\fft4g.h" />
-    <ClInclude Include="..\..\..\include\r8brain\pffft.h" />
     <ClInclude Include="..\..\..\include\r8brain\r8bbase.h" />
     <ClInclude Include="..\..\..\include\r8brain\r8bconf.h" />
     <ClInclude Include="..\..\..\include\r8brain\r8butil.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\include\r8brain\pffft.cpp" />
     <ClCompile Include="..\..\..\include\r8brain\r8bbase.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

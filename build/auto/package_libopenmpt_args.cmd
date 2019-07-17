@@ -57,7 +57,6 @@ copy /y ..\..\include\portaudio\LICENSE.txt                  .\Licenses\License.
 copy /y ..\..\include\portaudio\bindings\cpp\COPYING         .\Licenses\License.portaudiocpp.txt || goto error
 copy /y ..\..\include\pugixml\readme.txt                     .\Licenses\License.PugiXML.txt || goto error
 rem copy /y ..\..\include\r8brain\LICENSE                        .\Licenses\License.R8Brain.txt || goto error
-rem copy /y ..\..\include\r8brain\pffft.h                        .\Licenses\License.R8Brain.PFfft.txt || goto error
 rem copy /y ..\..\include\rtaudio\README.md                      .\Licenses\License.RtAudio.txt || goto error
 rem copy /y ..\..\include\rtmidi\License.txt                     .\Licenses\License.RtMidi.txt || goto error
 rem copy /y ..\..\include\smbPitchShift\smbPitchShift.cpp        .\Licenses\License.smbPitchShift.txt || goto error
@@ -139,7 +138,6 @@ rem copy /y ..\..\include\portaudio\LICENSE.txt                  .\Licenses\Lice
 rem copy /y ..\..\include\portaudio\bindings\cpp\COPYING         .\Licenses\License.portaudiocpp.txt || goto error
 rem copy /y ..\..\include\pugixml\readme.txt                     .\Licenses\License.PugiXML.txt || goto error
 rem copy /y ..\..\include\r8brain\LICENSE                        .\Licenses\License.R8Brain.txt || goto error
-rem copy /y ..\..\include\r8brain\pffft.h                        .\Licenses\License.R8Brain.PFfft.txt || goto error
 rem copy /y ..\..\include\rtaudio\README.md                      .\Licenses\License.RtAudio.txt || goto error
 rem copy /y ..\..\include\rtmidi\License.txt                     .\Licenses\License.RtMidi.txt || goto error
 rem copy /y ..\..\include\smbPitchShift\smbPitchShift.cpp        .\Licenses\License.smbPitchShift.txt || goto error

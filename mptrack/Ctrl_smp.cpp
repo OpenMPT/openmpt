@@ -35,14 +35,7 @@
 #include "../soundbase/SampleFormatCopy.h"
 #include "FileDialog.h"
 #include "ProgressDialog.h"
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:4456) // declaration of 'type' hides previous local declaration
-#endif // MPT_COMPILER_MSVC
 #include "../include/r8brain/CDSPResampler.h"
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
 #include "../soundlib/MixFuncTable.h"
 
 #ifdef _DEBUG

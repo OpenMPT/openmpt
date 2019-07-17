@@ -20,6 +20,8 @@ function-based fractional delay filters.  This puts the algorithm into the
 league of the fastest among the most precise SRC algorithms.  The more precise
 alternative being only the whole number-factored SRC, which can be slower.
 
+Please consider supporting the author on [Patreon](https://www.patreon.com/aleksey_vaneev).
+
 ## Requirements ##
 C++ compiler and system with the "double" floating point type (53-bit
 mantissa) support.  No explicit code for the "float" type is present in this
@@ -72,9 +74,7 @@ which is only slightly slower than Intel IPP FFT in performance, however since
 PFFFT works in single-precision resolution, the overall resampler's precision
 will be limited to 24-bit sample rate conversions. To use the PFFFT, define
 the `R8B_PFFFT` macro, and compile and include the supplied `pffft.cpp` file
-to your project build.  Note that, subjectively speaking, the sound produced
-with such lower-resolution FFT is not as good as with the higher-resolution
-Ooura FFT or Intel IPP FFT.
+to your project build.
 
     #define R8B_PFFFT 1
 
@@ -161,12 +161,21 @@ This library is used by:
   * [OpenMPT](https://openmpt.org/)
   * [Zynewave Podium](https://zynewave.com/podium/)
   * [Red Dead Redemption 2](https://www.rockstargames.com/reddeadredemption2/credits)
+  * [Voice Aloud Reader](https://play.google.com/store/apps/details?id=com.hyperionics.avarLic)
 
 Please drop me a note at aleksey.vaneev@gmail.com and I will include a link to
 your software product to the list of users. This list is important at
 maintaining confidence in this library among the interested parties.
 
 ## Change log ##
+Version 4.5:
+
+* Fixed VS2017 compiler warnings.
+
+Version 4.4:
+
+* Fixed the "Declaration hides a member" Intel C++ compiler warnings.
+
 Version 4.3:
 
 * Added //$ markers for internal debugging purposes.

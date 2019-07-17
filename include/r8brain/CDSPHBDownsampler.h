@@ -61,12 +61,12 @@ public:
 
 		if( IsThird )
 		{
-			CDSPHBUpsampler :: getHBFilterThird( ReqAtten, SteepIndex, flt,
+			CDSPHBUpsampler :: getHBFilterThird( ReqAtten, SteepIndex, fltp,
 				fltt, att );
 		}
 		else
 		{
-			CDSPHBUpsampler :: getHBFilter( ReqAtten, SteepIndex, flt, fltt,
+			CDSPHBUpsampler :: getHBFilter( ReqAtten, SteepIndex, fltp, fltt,
 				att );
 		}
 
@@ -145,7 +145,7 @@ public:
 				const int c = ( BufLeft - fl2 + 1 ) >> 1;
 
 				double* const opend = op + c;
-				( *convfn )( op, opend, flt, Buf + fll, ReadPos );
+				( *convfn )( op, opend, fltp, Buf + fll, ReadPos );
 
 				op = opend;
 				BufLeft -= c + c;
@@ -188,7 +188,7 @@ private:
 	double Buf[ BufLen + 54 ]; ///< The ring buffer, including overrun
 		///< protection for the largest filter.
 		///<
-	const double* flt; ///< Half-band filter taps.
+	const double* fltp; ///< Half-band filter taps.
 		///<
 	int fll; ///< Input latency.
 		///<
@@ -212,7 +212,7 @@ private:
 	int LatencyLeft; ///< Latency left to remove.
 		///<
 	typedef void( *CConvolveFn )( double* op, double* const opend,
-		const double* const flt, const double* const rp0, int& ReadPos ); ///<
+		const double* const flt, const double* const rp0, int& ReadPos0 ); ///<
 		///< Convolution funtion type.
 		///<
 	CConvolveFn convfn; ///< Convolution function in use.
@@ -220,9 +220,9 @@ private:
 
 #define R8BHBC1( fn ) \
 	static void fn( double* op, double* const opend, const double* const flt, \
-		const double* const rp0, int& ReadPos ) \
+		const double* const rp0, int& ReadPos0 ) \
 	{ \
-		int rpos = ReadPos; \
+		int rpos = ReadPos0; \
 		while( op < opend ) \
 		{ \
 			const double* const rp = rp0 + rpos; \
@@ -232,7 +232,7 @@ private:
 			rpos = ( rpos + 2 ) & BufLenMask; \
 			op++; \
 		} \
-		ReadPos = rpos; \
+		ReadPos0 = rpos; \
 	}
 
 	R8BHBC1( convolve1 )

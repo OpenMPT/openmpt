@@ -332,7 +332,7 @@ public:
 
 		const int SrcSRDiv = ( 1 << c );
 		int downf;
-		double NormFreq;
+		double NormFreq = 0.5;
 		bool UseInterp = true;
 		bool IsThird = false;
 
@@ -677,14 +677,14 @@ public:
 	 *
 	 * @param SrcSampleRate Source signal sample rate.
 	 * @param DstSampleRate Destination signal sample rate.
-	 * @param MaxInLen The maximal planned length of the input buffer (in
+	 * @param aMaxInLen The maximal planned length of the input buffer (in
 	 * samples) that will be passed to the resampler.
 	 * @param ReqTransBand Required transition band, in percent.
 	 */
 
 	CDSPResampler16( const double SrcSampleRate, const double DstSampleRate,
-		const int MaxInLen, const double ReqTransBand = 2.0 )
-		: CDSPResampler( SrcSampleRate, DstSampleRate, MaxInLen, ReqTransBand,
+		const int aMaxInLen, const double ReqTransBand = 2.0 )
+		: CDSPResampler( SrcSampleRate, DstSampleRate, aMaxInLen, ReqTransBand,
 			136.45, fprLinearPhase )
 	{
 	}
@@ -708,14 +708,14 @@ public:
 	 *
 	 * @param SrcSampleRate Source signal sample rate.
 	 * @param DstSampleRate Destination signal sample rate.
-	 * @param MaxInLen The maximal planned length of the input buffer (in
+	 * @param aMaxInLen The maximal planned length of the input buffer (in
 	 * samples) that will be passed to the resampler.
 	 * @param ReqTransBand Required transition band, in percent.
 	 */
 
 	CDSPResampler16IR( const double SrcSampleRate, const double DstSampleRate,
-		const int MaxInLen, const double ReqTransBand = 2.0 )
-		: CDSPResampler( SrcSampleRate, DstSampleRate, MaxInLen, ReqTransBand,
+		const int aMaxInLen, const double ReqTransBand = 2.0 )
+		: CDSPResampler( SrcSampleRate, DstSampleRate, aMaxInLen, ReqTransBand,
 			109.56, fprLinearPhase )
 	{
 	}
@@ -738,14 +738,14 @@ public:
 	 *
 	 * @param SrcSampleRate Source signal sample rate.
 	 * @param DstSampleRate Destination signal sample rate.
-	 * @param MaxInLen The maximal planned length of the input buffer (in
+	 * @param aMaxInLen The maximal planned length of the input buffer (in
 	 * samples) that will be passed to the resampler.
 	 * @param ReqTransBand Required transition band, in percent.
 	 */
 
 	CDSPResampler24( const double SrcSampleRate, const double DstSampleRate,
-		const int MaxInLen, const double ReqTransBand = 2.0 )
-		: CDSPResampler( SrcSampleRate, DstSampleRate, MaxInLen, ReqTransBand,
+		const int aMaxInLen, const double ReqTransBand = 2.0 )
+		: CDSPResampler( SrcSampleRate, DstSampleRate, aMaxInLen, ReqTransBand,
 			180.15, fprLinearPhase )
 	{
 	}

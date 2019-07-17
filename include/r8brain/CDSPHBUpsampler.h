@@ -526,11 +526,11 @@ public:
 
 		if( IsThird )
 		{
-			getHBFilterThird( ReqAtten, SteepIndex, flt, fltt, att );
+			getHBFilterThird( ReqAtten, SteepIndex, fltp, fltt, att );
 		}
 		else
 		{
-			getHBFilter( ReqAtten, SteepIndex, flt, fltt, att );
+			getHBFilter( ReqAtten, SteepIndex, fltp, fltt, att );
 		}
 
 		convfn = FltConvFn[ fltt - 1 ];
@@ -608,7 +608,7 @@ public:
 				const int c = BufLeft - fl2;
 
 				double* const opend = op + c + c;
-				( *convfn )( op, opend, flt, Buf + fll, ReadPos );
+				( *convfn )( op, opend, fltp, Buf + fll, ReadPos );
 
 				op = opend;
 				BufLeft -= c;
@@ -651,7 +651,7 @@ private:
 	double Buf[ BufLen + 27 ]; ///< The ring buffer, including overrun
 		///< protection for the largest filter.
 		///<
-	const double* flt; ///< Half-band filter taps.
+	const double* fltp; ///< Half-band filter taps.
 		///<
 	int fll; ///< Input latency.
 		///<
@@ -675,7 +675,7 @@ private:
 	int LatencyLeft; ///< Latency left to remove.
 		///<
 	typedef void( *CConvolveFn )( double* op, double* const opend,
-		const double* const flt, const double* const rp0, int& ReadPos ); ///<
+		const double* const flt, const double* const rp0, int& ReadPos0 ); ///<
 		///< Convolution funtion type.
 		///<
 	CConvolveFn convfn; ///< Convolution function in use.
@@ -683,9 +683,9 @@ private:
 
 #define R8BHBC1( fn ) \
 	static void fn( double* op, double* const opend, const double* const flt, \
-		const double* const rp0, int& ReadPos ) \
+		const double* const rp0, int& ReadPos0 ) \
 	{ \
-		int rpos = ReadPos; \
+		int rpos = ReadPos0; \
 		while( op < opend ) \
 		{ \
 			const double* const rp = rp0 + rpos; \
@@ -696,7 +696,7 @@ private:
 			rpos = ( rpos + 1 ) & BufLenMask; \
 			op += 2; \
 		} \
-		ReadPos = rpos; \
+		ReadPos0 = rpos; \
 	}
 
 	R8BHBC1( convolve1 )
