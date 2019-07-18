@@ -9,6 +9,7 @@ is just a high-level summary.
 
  *  [**Bug**] Compilation fix for OpenBSD.
 
+ *  mpg123: Update to v1.25.11 (2019-07-18).
  *  miniz: Update to v2.1.0 (2019-05-05).
 
 ### libopenmpt 0.4.5 (2019-05-27)
