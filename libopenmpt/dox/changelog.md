@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta39
 
+ *  mpg123: Update to v1.25.11 (2019-07-18).
+
 ### libopenmpt 0.2-beta38 (2019-04-07)
 
  *  [**Bug**] Channel VU meters were swapped.
