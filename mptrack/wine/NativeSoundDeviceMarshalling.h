@@ -31,11 +31,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 inline void to_json(JSON::value &j, const SampleFormat &val)
 {
-	j = static_cast<int>(val);
+	j = SampleFormat::ToInt(val);
 }
 inline void from_json(const JSON::value &j, SampleFormat &val)
 {
-	val = static_cast<int>(j);
+	val = SampleFormat::FromInt(j);
 }
 
 namespace SoundDevice
@@ -251,7 +251,7 @@ inline OpenMPT_SoundDevice_BufferFormat encode(SoundDevice::BufferFormat src) {
 	dst.Samplerate = src.Samplerate;
 	dst.Channels = src.Channels;
 	dst.InputChannels = src.InputChannels;
-	dst.sampleFormat = src.sampleFormat;
+	dst.sampleFormat = SampleFormat::ToInt(src.sampleFormat);
 	dst.NeedsClippedFloat = src.NeedsClippedFloat;
 	dst.DitherType = src.DitherType;
 	return dst;
@@ -261,7 +261,7 @@ inline SoundDevice::BufferFormat decode(OpenMPT_SoundDevice_BufferFormat src) {
 	dst.Samplerate = src.Samplerate;
 	dst.Channels = src.Channels;
 	dst.InputChannels = src.InputChannels;
-	dst.sampleFormat = src.sampleFormat;
+	dst.sampleFormat = SampleFormat::FromInt(src.sampleFormat);
 	dst.NeedsClippedFloat = src.NeedsClippedFloat;
 	dst.DitherType = src.DitherType;
 	return dst;

@@ -180,23 +180,22 @@ AUEncoder::AUEncoder()
 		int samplerate = traits.samplerates[i];
 		for(int channels = 1; channels <= traits.maxChannels; channels *= 2)
 		{
-			for(int bytes = 5; bytes >= 1; --bytes)
+			const std::array<SampleFormat, 5> sampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
+			for(const auto sampleFormat : sampleFormats)
 			{
 				Encoder::Format format;
 				format.Samplerate = samplerate;
 				format.Channels = channels;
-				if(bytes == 5)
+				format.Sampleformat = sampleFormat;
+				if(sampleFormat.IsFloat())
 				{
-					format.Sampleformat = SampleFormatFloat32;
 					format.Description = U_("Floating Point");
-				} else if(bytes == 1)
+				} else if(sampleFormat.IsUnsigned())
 				{
-					format.Sampleformat = (SampleFormat)(0 - (bytes * 8));
-					format.Description = mpt::format(U_("%1 Bit (unsigned)"))(bytes * 8);
+					format.Description = mpt::format(U_("%1 Bit (unsigned)"))(sampleFormat.GetBitsPerSample());
 				} else
 				{
-					format.Sampleformat = (SampleFormat)(bytes * 8);
-					format.Description = mpt::format(U_("%1 Bit"))(bytes * 8);
+					format.Description = mpt::format(U_("%1 Bit"))(sampleFormat.GetBitsPerSample());
 				}
 				format.Bitrate = 0;
 				traits.formats.push_back(format);

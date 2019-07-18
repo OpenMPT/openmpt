@@ -505,7 +505,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 					&& std::find(
 						sampleformats.begin(),
 						sampleformats.end(),
-						static_cast<SampleFormat>(bits)) == sampleformats.end()
+						static_cast<SampleFormat>(static_cast<SampleFormatEnum>(bits))) == sampleformats.end()
 					)
 				{
 					continue;
@@ -533,7 +533,7 @@ void COptionsSoundcard::UpdateDither()
 		m_CbnDither.EnableWindow(TRUE);
 	}
 	m_CbnDither.ResetContent();
-	SampleFormat sampleFormat = static_cast<SampleFormatEnum>(m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()));
+	SampleFormat sampleFormat = SampleFormat::FromInt(static_cast<int>(m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel())));
 	if(sampleFormat.IsInt() && sampleFormat.GetBitsPerSample() < 32)
 	{
 		m_CbnDither.EnableWindow(TRUE);
@@ -831,7 +831,7 @@ void COptionsSoundcard::OnOK()
 	// SampleFormat
 	{
 		DWORD_PTR n = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
-		m_Settings.sampleFormat = static_cast<SampleFormat>(static_cast<int>(n & 0xFF));
+		m_Settings.sampleFormat = SampleFormat::FromInt(static_cast<int>(n));
 	}
 	// Dither
 	{

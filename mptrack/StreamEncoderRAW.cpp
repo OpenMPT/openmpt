@@ -84,23 +84,22 @@ RAWEncoder::RAWEncoder()
 		int samplerate = traits.samplerates[i];
 		for(int channels = 1; channels <= traits.maxChannels; channels *= 2)
 		{
-			for(int bytes = 5; bytes >= 0; --bytes)
+			const std::array<SampleFormat, 6> sampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatInt8, SampleFormatUnsigned8 };
+			for(const auto sampleFormat : sampleFormats)
 			{
 				Encoder::Format format;
 				format.Samplerate = samplerate;
 				format.Channels = channels;
-				if(bytes == 5)
+				format.Sampleformat = sampleFormat;
+				if(sampleFormat.IsFloat())
 				{
-					format.Sampleformat = SampleFormatFloat32;
 					format.Description = U_("Floating Point Little-Endian");
-				} else if(bytes == 0)
+				} else if(sampleFormat.IsUnsigned())
 				{
-					format.Sampleformat = SampleFormatUnsigned8;
-					format.Description = mpt::format(U_("%1 Bit Little-Endian (unsigned)"))(8);
+					format.Description = mpt::format(U_("%1 Bit Little-Endian (unsigned)"))(sampleFormat.GetBitsPerSample());
 				} else
 				{
-					format.Sampleformat = (SampleFormat)(bytes * 8);
-					format.Description = mpt::format(U_("%1 Bit Little-Endian"))(bytes * 8);
+					format.Description = mpt::format(U_("%1 Bit Little-Endian"))(sampleFormat.GetBitsPerSample());
 				}
 				format.Bitrate = 0;
 				traits.formats.push_back(format);

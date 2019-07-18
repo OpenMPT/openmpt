@@ -99,7 +99,7 @@ public:
 	}
 	void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
-		switch(sampleFormat.value)
+		switch(sampleFormat)
 		{
 			case SampleFormatUnsigned8:
 				{
@@ -194,7 +194,7 @@ private:
 public:
 	virtual void FillCallback(MixSampleInt * const *MixInputBuffers, std::size_t channels, std::size_t countChunk)
 	{
-		switch(sampleFormat.value)
+		switch(sampleFormat)
 		{
 		case SampleFormatUnsigned8:
 			{

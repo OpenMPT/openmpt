@@ -291,7 +291,7 @@ SoundDevice::Settings SoundDeviceStub::GetSettings() const {
 SampleFormat SoundDeviceStub::GetActualSampleFormat() const {
 	int32_t result = 0;
 	w->OpenMPT_Wine_Wrapper_SoundDevice_GetActualSampleFormat(impl, &result);
-	return result;
+	return SampleFormat::FromInt(result);
 }
 
 SoundDevice::BufferAttributes SoundDeviceStub::GetEffectiveBufferAttributes() const {

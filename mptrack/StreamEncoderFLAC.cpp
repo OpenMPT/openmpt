@@ -212,13 +212,14 @@ FLACEncoder::FLACEncoder()
 		int samplerate = traits.samplerates[i];
 		for(int channels = 1; channels <= traits.maxChannels; channels *= 2)
 		{
-			for(int bytes = 3; bytes >= 1; --bytes)
+			const std::array<SampleFormat, 3> sampleFormats = { SampleFormatInt24, SampleFormatInt16, SampleFormatInt8 };
+			for(const auto sampleFormat : sampleFormats)
 			{
 				Encoder::Format format;
 				format.Samplerate = samplerate;
 				format.Channels = channels;
-				format.Sampleformat = (SampleFormat)(bytes * 8);
-				format.Description = mpt::format(U_("%1 Bit"))(bytes * 8);
+				format.Sampleformat = sampleFormat;
+				format.Description = mpt::format(U_("%1 Bit"))(sampleFormat.GetBitsPerSample());
 				format.Bitrate = 0;
 				traits.formats.push_back(format);
 			}

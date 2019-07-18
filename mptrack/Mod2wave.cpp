@@ -1220,7 +1220,7 @@ void CDoWaveConvert::Run()
 				// Convert float buffer to mixbuffer format so we can apply dither.
 				// This can probably be changed in the future when dither supports floating point input directly.
 				FloatToMonoMix(floatbuffer, mixbuffer, samplesChunk, MIXING_SCALEF);
-				switch(m_Settings.FinalSampleFormat.value)
+				switch(m_Settings.FinalSampleFormat)
 				{
 				case SampleFormatUnsigned8:
 					dither.WithDither(
