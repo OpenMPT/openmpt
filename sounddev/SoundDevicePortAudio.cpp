@@ -465,6 +465,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 #if MPT_OS_WINDOWS
 	if(m_HostApiType == paWASAPI)
 	{
+		caps.supportedExclusiveModeSampleFormats.clear();
 		const std::array<SampleFormat, 5> sampleFormats { SampleFormatInt8, SampleFormatInt16, SampleFormatInt24, SampleFormatInt32, SampleFormatFloat32 };
 		for(const SampleFormat sampleFormat : sampleFormats)
 		{
@@ -506,6 +507,8 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 	}
 	if(m_HostApiType == paWDMKS)
 	{
+		caps.supportedSampleFormats.clear();
+		caps.supportedExclusiveModeSampleFormats.clear();
 		const std::array<SampleFormat, 5> sampleFormats { SampleFormatInt8, SampleFormatInt16, SampleFormatInt24, SampleFormatInt32, SampleFormatFloat32 };
 		for(const SampleFormat sampleFormat : sampleFormats)
 		{
@@ -532,10 +535,19 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 				StreamParameters.hostApiSpecificStreamInfo = NULL;
 				if(Pa_IsFormatSupported(NULL, &StreamParameters, sampleRate) == paFormatIsSupported)
 				{
+					caps.supportedSampleFormats.push_back(sampleFormat);
 					caps.supportedExclusiveModeSampleFormats.push_back(sampleFormat);
 					break;
 				}
 			}
+		}
+		if(caps.supportedSampleFormats.empty())
+		{
+			caps.supportedSampleFormats = DefaultSampleFormats<std::vector<SampleFormat>>();
+		}
+		if(caps.supportedExclusiveModeSampleFormats.empty())
+		{
+			caps.supportedExclusiveModeSampleFormats = DefaultSampleFormats<std::vector<SampleFormat>>();
 		}
 	}
 #endif // MPT_OS_WINDOWS

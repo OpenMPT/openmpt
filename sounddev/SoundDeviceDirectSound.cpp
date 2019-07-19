@@ -231,18 +231,26 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 		} else if(!(dscaps.dwFlags & DSCAPS_EMULDRIVER))
 		{
 			// XP wdm
+			caps.supportedSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
+			caps.supportedExclusiveModeSampleFormats.clear();
 			if(dscaps.dwFlags & DSCAPS_PRIMARY8BIT)
 			{
-				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt8);
+				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatUnsigned8);
 			}
 			if(dscaps.dwFlags & DSCAPS_PRIMARY16BIT)
 			{
 				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt16);
 			}
+			if(caps.supportedExclusiveModeSampleFormats.empty())
+			{
+				caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
+			}
 		} else
 		{
 			// XP vdx
 			// nothing, announce all, fail later
+			caps.supportedSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
+			caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
 		}
 	}
 	if(dummy)

@@ -377,6 +377,7 @@ SoundDevice::DynamicCaps CRtAudioDevice::GetDeviceDynamicCaps(const std::vector<
 	caps.supportedExclusiveSampleRates.insert(caps.supportedExclusiveSampleRates.end(), rtinfo.sampleRates.begin(), rtinfo.sampleRates.end());
 	std::reverse(caps.supportedExclusiveSampleRates.begin(), caps.supportedExclusiveSampleRates.end());
 	caps.supportedSampleFormats = { SampleFormatFloat32 };
+	caps.supportedExclusiveModeSampleFormats.clear();
 	if(rtinfo.nativeFormats & RTAUDIO_SINT8)
 	{
 		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt8);

@@ -29,6 +29,18 @@ enum SampleFormatEnum : uint8
 	SampleFormatInvalid   =  0
 };
 
+template <typename Container>
+Container AllSampleFormats()
+{
+	return { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatInt8, SampleFormatUnsigned8 };
+}
+
+template <typename Container>
+Container DefaultSampleFormats()
+{
+	return { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatInt8 };
+}
+
 template<typename Tsample> struct SampleFormatTraits;
 template<> struct SampleFormatTraits<uint8> { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatUnsigned8; } };
 template<> struct SampleFormatTraits<int8>  { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatInt8;      } };
