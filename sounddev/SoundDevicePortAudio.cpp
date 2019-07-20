@@ -108,6 +108,39 @@ bool CPortaudioDevice::InternalOpen()
 		m_WasapiStreamInfo.hostApiType = paWASAPI;
 		m_WasapiStreamInfo.version = 1;
 #endif // MPT_OS_WINDOWS
+		if(m_Settings.BoostThreadPriority)
+		{
+			m_WasapiStreamInfo.flags |= paWinWasapiThreadPriority;
+			if(GetAppInfo().BoostedThreadMMCSSClassVista == U_(""))
+			{
+				m_WasapiStreamInfo.threadPriority = eThreadPriorityNone;
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Audio"))
+			{
+				m_WasapiStreamInfo.threadPriority = eThreadPriorityAudio;
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Capture"))
+			{
+				m_WasapiStreamInfo.threadPriority = eThreadPriorityCapture;
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Distribution"))
+			{
+				m_WasapiStreamInfo.threadPriority = eThreadPriorityDistribution;
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Games"))
+			{
+				m_WasapiStreamInfo.threadPriority = eThreadPriorityGames;
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Playback"))
+			{
+				m_WasapiStreamInfo.threadPriority = eThreadPriorityPlayback;
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Pro Audio"))
+			{
+				m_WasapiStreamInfo.threadPriority = eThreadPriorityProAudio;
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Window Manager"))
+			{
+				m_WasapiStreamInfo.threadPriority = eThreadPriorityWindowManager;
+			} else
+			{
+				m_WasapiStreamInfo.threadPriority = eThreadPriorityNone;
+			}
+			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
+		}
 		if(m_Settings.ExclusiveMode)
 		{
 			m_Flags.NeedsClippedFloat = false;
@@ -357,6 +390,7 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 	}
 	if(m_HostApiType == paWASAPI)
 	{
+		caps.CanBoostThreadPriority = true;
 		caps.CanExclusiveMode = true;
 		caps.CanDriverPanel = true;
 		if(deviceInfo)
