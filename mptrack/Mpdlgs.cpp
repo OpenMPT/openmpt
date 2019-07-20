@@ -359,7 +359,7 @@ void COptionsSoundcard::UpdateEverything()
 					cbi.iImage = IMAGE_CHIP; // No real image available for now,
 				} else if(it.type.find(TypeWineNative + U_("-")) == 0)
 				{
-					if(theApp.GetWineVersion() && theApp.GetWineVersion()->HostIsLinux())
+					if(theApp.GetWineVersion() && (theApp.GetWineVersion()->HostClass() == mpt::OS::Class::Linux))
 					{
 						cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 						cbi.iImage = IMAGE_TUX;

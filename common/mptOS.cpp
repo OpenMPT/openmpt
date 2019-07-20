@@ -15,8 +15,69 @@
 #include <windows.h>
 #endif
 
+#if defined(MODPLUG_TRACKER)
+#if !MPT_OS_WINDOWS
+#include <sys/utsname.h>
+#endif // !MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
+
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+#if defined(MODPLUG_TRACKER)
+
+namespace mpt
+{
+namespace OS
+{
+
+mpt::OS::Class GetClassFromSysname(mpt::ustring sysname)
+{
+	mpt::OS::Class result = mpt::OS::Class::Unknown;
+	if(sysname == U_(""))
+	{
+		result = mpt::OS::Class::Unknown;
+	} else if(sysname == U_("Windows") || sysname == U_("WindowsNT") || sysname == U_("Windows_NT"))
+	{
+		result = mpt::OS::Class::Windows;
+	} else if(sysname == U_("Linux"))
+	{
+		result = mpt::OS::Class::Linux;
+	} else if(sysname == U_("Darwin"))
+	{
+		result = mpt::OS::Class::Darwin;
+	} else if(sysname == U_("FreeBSD") || sysname == U_("DragonFly") || sysname == U_("NetBSD") || sysname == U_("OpenBSD") || sysname == U_("MidnightBSD"))
+	{
+		result = mpt::OS::Class::BSD;
+	} else if(sysname == U_("Haiku"))
+	{
+		result = mpt::OS::Class::Haiku;
+	} else if(sysname == U_("MS-DOS"))
+	{
+		result = mpt::OS::Class::DOS;
+	}
+	return result;
+}
+
+mpt::OS::Class GetClass()
+{
+	#if MPT_OS_WINDOWS
+		return mpt::OS::Class::Windows;
+	#else // !MPT_OS_WINDOWS
+		utsname uname_result;
+		if(uname(&uname_resukt) != 0)
+		{
+			return mpt::OS::Class::Unknown;
+		}
+		return mpt::OS::GetClassFRomSysname(mpt::ToUnicode(mpt::CharsetASCII, mpt::ReadAutoBuf(uname_result.sysname)));
+	#endif // MPT_OS_WINDOWS
+}
+
+}  // namespace OS
+}  // namespace mpt
+
+#endif // MODPLUG_TRACKER
 
 
 namespace mpt
@@ -853,8 +914,7 @@ mpt::Wine::Version GetMinimumWineVersion()
 
 VersionContext::VersionContext()
 	: m_IsWine(false)
-	, m_HostIsLinux(false)
-	, m_HostIsBSD(false)
+	, m_HostClass(mpt::OS::Class::Unknown)
 {
 	#if MPT_OS_WINDOWS
 		m_IsWine = mpt::Windows::IsWine();
@@ -887,8 +947,7 @@ VersionContext::VersionContext()
 			m_RawHostRelease = wine_host_release ? wine_host_release : "";
 		}
 		m_Version = mpt::Wine::Version(mpt::ToUnicode(mpt::CharsetUTF8, m_RawVersion));
-		m_HostIsLinux = (m_RawHostSysName == "Linux");
-		m_HostIsBSD = (m_RawHostSysName == "FreeBSD" || m_RawHostSysName == "DragonFly" || m_RawHostSysName == "NetBSD" || m_RawHostSysName == "OpenBSD");
+		m_HostClass = mpt::OS::GetClassFromSysname(mpt::ToUnicode(mpt::CharsetUTF8, m_RawHostSysName));
 	#endif // MPT_OS_WINDOWS
 }
 

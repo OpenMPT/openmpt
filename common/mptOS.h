@@ -19,6 +19,34 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+#if defined(MODPLUG_TRACKER)
+
+namespace mpt
+{
+namespace OS
+{
+
+enum class Class
+{
+	Unknown,
+	Windows,
+	Linux,
+	Darwin,
+	BSD,
+	Haiku,
+	DOS,
+};
+
+mpt::OS::Class GetClassFromSysname(mpt::ustring sysname);
+
+mpt::OS::Class GetClass();
+
+}  // namespace OS
+}  // namespace mpt
+
+#endif // MODPLUG_TRACKER
+
+
 namespace mpt
 {
 namespace Windows
@@ -252,8 +280,7 @@ protected:
 	std::string m_RawHostSysName;
 	std::string m_RawHostRelease;
 	mpt::Wine::Version m_Version;
-	bool m_HostIsLinux;
-	bool m_HostIsBSD;
+	mpt::OS::Class m_HostClass;
 public:
 	VersionContext();
 public:
@@ -264,8 +291,7 @@ public:
 	std::string RawHostSysName() const { return m_RawHostSysName; }
 	std::string RawHostRelease() const { return m_RawHostRelease; }
 	mpt::Wine::Version Version() const { return m_Version; }
-	bool HostIsLinux() const { return m_HostIsLinux; }
-	bool HostIsBSD() const { return m_HostIsBSD; }
+	mpt::OS::Class HostClass() const { return m_HostClass; }
 };
 
 } // namespace Wine

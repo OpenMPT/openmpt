@@ -31,7 +31,7 @@ SysInfo::SysInfo()
 	, WineVersion(mpt::Wine::Version())
 {
 	mpt::Wine::VersionContext wineVersionContext;
-	WineHostIsLinux = wineVersionContext.HostIsLinux();
+	WineHostIsLinux = (wineVersionContext.HostClass() == mpt::OS::Class::Linux);
 	WineVersion = wineVersionContext.Version();
 }
 
