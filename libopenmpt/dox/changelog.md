@@ -9,6 +9,9 @@ is just a high-level summary.
 
  *  [**Bug**] Compilation fix for OpenBSD.
 
+ *  in_openmpt: Correct documentation. `openmpt-mpg123.dll` must be placed into
+    the Winamp directory.
+
  *  mpg123: Update to v1.25.11 (2019-07-18).
  *  miniz: Update to v2.1.0 (2019-05-05).
 
