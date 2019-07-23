@@ -97,6 +97,9 @@ public:
 	MPT_CONSTEXPR11_FUN uint16 GetData3() const noexcept { return Data3; }
 	MPT_CONSTEXPR11_FUN uint64 GetData4() const noexcept { return Data4; }
 public:
+	MPT_CONSTEXPR11_FUN uint64 GetData64_1() const noexcept { return (static_cast<uint64>(Data1) << 32) | (static_cast<uint64>(Data2) << 16) | (static_cast<uint64>(Data3) << 0); }
+	MPT_CONSTEXPR11_FUN uint64 GetData64_2() const noexcept { return Data4; }
+public:
 	// xxxxxxxx-xxxx-Mmxx-Nnxx-xxxxxxxxxxxx
 	// <--32-->-<16>-<16>-<-------64------>
 	MPT_CONSTEXPR11_FUN bool IsNil() const noexcept { return (Data1 == 0) && (Data2 == 0) && (Data3 == 0) && (Data4 == 0); }
