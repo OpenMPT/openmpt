@@ -51,6 +51,22 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace mpt
 {
+template <typename T, std::size_t N, typename Tx>
+MPT_CONSTEXPR14_FUN std::array<T, N> init_array(Tx && x)
+{
+	std::array<T, N> result;
+	for(std::size_t i = 0; i < N; ++i)
+	{
+		result[i] = std::forward<Tx>(x);
+	}
+	return result;
+}
+} // namespace mpt
+
+
+
+namespace mpt
+{
 // Work-around for GCC5, which does not allow throw statements in constexpr functions, but only throw expressions inside ternary ? operator.
 // And also work-around for a simpler, MPT_COMPILER_QUIRK_NO_CONSTEXPR14_THROW-dependent work-around, which would have thrown in a separate constexpr function,
 // which however is not allowed due to the requirement of at least 1 non-throwing function argument combination in C++ (14,17,2a) (and thus all other compilers).
