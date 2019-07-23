@@ -1414,7 +1414,7 @@ void CASIODevice::SampleRateDidChange(ASIOSampleRate sRate)
 	m_UsedFeatures.set(AsioFeatureSampleRateChange);
 	if(static_cast<double>(m_Settings.Samplerate) * (1.0 - AsioSampleRateTolerance) <= sRate && sRate <= static_cast<double>(m_Settings.Samplerate) * (1.0 + AsioSampleRateTolerance))
 	{
-		// ignore slight differences which might me due to a unstable external ASIO clock source
+		// ignore slight differences which might be due to a unstable external ASIO clock source
 		return;
 	}
 	// play safe and close the device
