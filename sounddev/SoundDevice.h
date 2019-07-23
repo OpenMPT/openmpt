@@ -256,6 +256,7 @@ struct AppInfo
 	bool BoostedThreadRealtimePosix;
 	int BoostedThreadNicenessPosix;
 	int BoostedThreadRtprioPosix;
+	bool MaskDriverCrashes;
 	AppInfo()
 		: UIHandle(0)
 		, BoostedThreadPriorityXP(mpt::ThreadPriorityHighest)
@@ -263,6 +264,7 @@ struct AppInfo
 		, BoostedThreadRealtimePosix(false)
 		, BoostedThreadNicenessPosix(-5)
 		, BoostedThreadRtprioPosix(10)
+		, MaskDriverCrashes(false)
 	{
 		return;
 	}

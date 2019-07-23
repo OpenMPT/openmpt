@@ -687,6 +687,7 @@ public:
 	Setting<bool> SoundBoostedThreadRealtimePosix;
 	Setting<int> SoundBoostedThreadNicenessPosix;
 	Setting<int> SoundBoostedThreadRtprioPosix;
+	Setting<bool> SoundMaskDriverCrashes;
 
 	// MIDI Settings
 

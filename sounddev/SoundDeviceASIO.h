@@ -79,6 +79,8 @@ protected:
 	}
 
 	template <typename Tfn> auto CallDriverImpl(Tfn fn, const char * funcName) -> decltype(fn());
+	template <typename Tfn> auto CallDriverAndMaskCrashesImpl(Tfn fn, const char * funcName) -> decltype(fn());
+	template <typename Tfn> auto CallDriver(Tfn fn, const char * funcName) -> decltype(fn());
 
 	double m_BufferLatency;
 	long m_nAsioBufferLen;

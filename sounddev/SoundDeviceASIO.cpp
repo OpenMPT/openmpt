@@ -109,7 +109,13 @@ static void AsioCheckResultASIOBool(ASIOBool b, const char * funcName)
 }
 
 
-template <typename Tfn> auto CASIODevice::CallDriverImpl(Tfn fn, const char * funcName) -> decltype(fn())
+template <typename Tfn> auto CASIODevice::CallDriverImpl(Tfn fn, const char * /* funcName */ ) -> decltype(fn())
+{
+	return fn();
+}
+
+
+template <typename Tfn> auto CASIODevice::CallDriverAndMaskCrashesImpl(Tfn fn, const char * funcName) -> decltype(fn())
 {
 	try
 	{
@@ -123,11 +129,23 @@ template <typename Tfn> auto CASIODevice::CallDriverImpl(Tfn fn, const char * fu
 }
 
 
-#define AsioCallUnchecked(asio, call) CallDriverImpl([&]() { return asio . call ; }, #call )
+template <typename Tfn> auto CASIODevice::CallDriver(Tfn fn, const char * funcName) -> decltype(fn())
+{
+	if(GetAppInfo().MaskDriverCrashes)
+	{
+		return CallDriverAndMaskCrashesImpl(fn, funcName);
+	} else
+	{
+		return CallDriverImpl(fn, funcName);
+	}
+}
 
-#define AsioCallBool(asio, call) AsioCheckResultASIOBool(CallDriverImpl([&]() { return asio . call ; }, #call ), #call )
 
-#define AsioCall(asio, call) AsioCheckResultASIOError(CallDriverImpl([&]() { return asio . call ; }, #call ), #call )
+#define AsioCallUnchecked(asio, call) CallDriver([&]() { return asio . call ; }, #call )
+
+#define AsioCallBool(asio, call) AsioCheckResultASIOBool(CallDriver([&]() { return asio . call ; }, #call ), #call )
+
+#define AsioCall(asio, call) AsioCheckResultASIOError(CallDriver([&]() { return asio . call ; }, #call ), #call )
 
 
 #define ASIO_MAXDRVNAMELEN	1024

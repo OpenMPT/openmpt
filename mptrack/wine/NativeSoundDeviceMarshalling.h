@@ -75,6 +75,7 @@ namespace SoundDevice
 		MPT_JSON_MAP(BoostedThreadRealtimePosix);
 		MPT_JSON_MAP(BoostedThreadNicenessPosix);
 		MPT_JSON_MAP(BoostedThreadRtprioPosix);
+		MPT_JSON_MAP(MaskDriverCrashes);
 	})
 
 	MPT_JSON_INLINE(SoundDevice::Settings, {
