@@ -22,8 +22,6 @@
 #include "../common/Endianness.h"
 #include "../common/FlagSet.h"
 
-#include "../common/mptOSException.h"
-
 #ifdef MPT_WITH_ASIO
 #include <iasiodrv.h>
 #endif // MPT_WITH_ASIO
@@ -79,19 +77,8 @@ protected:
 		MPT_ASSERT(m_pAsioDrv);
 		return *m_pAsioDrv;
 	}
-	template <typename Tfn>
-	auto CallDriverImpl(Tfn fn, const char * funcName) -> decltype(fn())
-	{
-		try
-		{
-			return Windows::ThrowOnStructuredException(fn);
-		} catch(const Windows::StructuredException &)
-		{
-			// nothing
-		}
-		ReportASIOException(std::string(funcName) + std::string("() crashed!"));
-		throw ASIOException(std::string("Exception in '") + std::string(funcName) + std::string("'!"));
-	}
+
+	template <typename Tfn> auto CallDriverImpl(Tfn fn, const char * funcName) -> decltype(fn());
 
 	double m_BufferLatency;
 	long m_nAsioBufferLen;

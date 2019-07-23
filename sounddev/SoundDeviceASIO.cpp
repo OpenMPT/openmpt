@@ -18,6 +18,7 @@
 #include "../common/misc_util.h"
 #include "../common/mptUUID.h"
 #include "../common/mptStringBuffer.h"
+#include "../common/mptOSException.h"
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
 
@@ -105,6 +106,20 @@ static void AsioCheckResultASIOBool(ASIOBool b, const char * funcName)
 	{
 		throw ASIOCallBoolResult(funcName, b);
 	}
+}
+
+
+template <typename Tfn> auto CASIODevice::CallDriverImpl(Tfn fn, const char * funcName) -> decltype(fn())
+{
+	try
+	{
+		return Windows::ThrowOnStructuredException(fn);
+	} catch(const Windows::StructuredException &)
+	{
+		// nothing
+	}
+	ReportASIOException(std::string(funcName) + std::string("() crashed!"));
+	throw ASIOException(std::string("Exception in '") + std::string(funcName) + std::string("'!"));
 }
 
 
