@@ -22,6 +22,8 @@
 #include "../common/Endianness.h"
 #include "../common/FlagSet.h"
 
+#include "../common/mptOSException.h"
+
 #ifdef MPT_WITH_ASIO
 #include <iasiodrv.h>
 #endif // MPT_WITH_ASIO
@@ -82,7 +84,7 @@ protected:
 	{
 		try
 		{
-			return fn();
+			return Windows::ThrowOnStructuredException(fn);
 		} catch(const Windows::StructuredException &)
 		{
 			// nothing

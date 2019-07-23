@@ -18,7 +18,6 @@
 #include "../common/misc_util.h"
 #include "../common/mptUUID.h"
 #include "../common/mptStringBuffer.h"
-#include "../common/mptOSException.h"
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
 
