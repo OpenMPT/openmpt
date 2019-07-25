@@ -125,6 +125,7 @@
 #define IDD_TEMPO_SWING                 540
 #define IDD_OPTIONS_WINE                541
 #define ID_ORDERLIST_MERGE              901
+#define ID_ORDERLIST_SPLIT              902
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003
@@ -1261,6 +1262,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        544
 #define _APS_NEXT_COMMAND_VALUE         44646
 #define _APS_NEXT_CONTROL_VALUE         2512
-#define _APS_NEXT_SYMED_VALUE           902
+#define _APS_NEXT_SYMED_VALUE           903
 #endif
 #endif

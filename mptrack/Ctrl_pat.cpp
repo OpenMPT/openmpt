@@ -61,6 +61,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(ID_ORDERLIST_NEW,			&CCtrlPatterns::OnPatternNew)
 	ON_COMMAND(ID_ORDERLIST_COPY,			&CCtrlPatterns::OnPatternDuplicate)
 	ON_COMMAND(ID_ORDERLIST_MERGE,			&CCtrlPatterns::OnPatternMerge)
+	ON_COMMAND(ID_ORDERLIST_SPLIT,			&CCtrlPatterns::OnPatternSplit)
 	ON_COMMAND(ID_PATTERNCOPY,				&CCtrlPatterns::OnPatternCopy)
 	ON_COMMAND(ID_PATTERNPASTE,				&CCtrlPatterns::OnPatternPaste)
 	ON_COMMAND(ID_EDIT_UNDO,				&CCtrlPatterns::OnEditUndo)
@@ -905,6 +906,81 @@ void CCtrlPatterns::OnPatternMerge()
 		// Show error
 		auto& specs = m_sndFile.GetModSpecifications();
 		Reporting::Error(mpt::format("Pattern limit of the %1 format (%2 patterns) has been reached!")(mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Merge Patterns");
+	}
+
+	SwitchToView();
+}
+
+
+// Splits a pattern
+void CCtrlPatterns::OnPatternSplit()
+{
+	OrdSelection selection = m_OrderList.GetCurSel(false);
+	ORDERINDEX pattern = selection.firstOrd;
+
+	// get the pattern index, if it's valid
+	ModSequence& order = m_sndFile.Order();
+	PATTERNINDEX pat = order[pattern];
+
+	if (m_sndFile.Patterns.IsValidPat(pat))
+	{
+		// The split limits
+		ROWINDEX numRows = m_sndFile.Patterns[pat].GetNumRows();
+
+		CInputDlg dlg(this, _T("Enter row in which to split:"), 1, numRows - 2, 1);
+		if (dlg.DoModal() == IDOK)
+		{
+			// The row index
+			ROWINDEX splitRow = dlg.resultAsInt;
+
+			// Create a new pattern
+			PATTERNINDEX newPat = m_sndFile.Patterns.InsertAny(numRows - splitRow, true);
+			if (newPat != PATTERNINDEX_INVALID)
+			{
+				// Now, finally, we're going to split the row
+				auto it = m_sndFile.Patterns[pat].begin() + m_sndFile.Patterns[pat].GetNumChannels() * splitRow;
+				std::copy(it, m_sndFile.Patterns[pat].end(), m_sndFile.Patterns[newPat].begin());
+
+				// Reduce the row number
+				bool success = m_sndFile.Patterns[pat].Resize(splitRow);
+				// If success, we are going to update every occurrence of the split pattern in the order list 
+				if (success)
+				{
+					for (ORDERINDEX i = 0; i < order.size(); i++)
+					{
+						if (order[i] == pat)
+						{
+							order.insert(i + 1, 1, newPat);
+							m_OrderList.InsertUpdatePlaystate(i, i + 1);
+							i++;
+
+							// Slide the current selection accordingly so it doesn't end up in the wrong id
+							if (i < pattern) pattern++;
+						}
+					}
+
+					// Do the remaining busywork
+					m_OrderList.InvalidateRect(nullptr, FALSE);
+					m_OrderList.SetCurSel(pattern, true, false, true);
+					SetCurrentPattern(pat);
+
+					m_modDoc.SetModified();
+					m_modDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
+					m_modDoc.UpdateAllViews(nullptr, PatternHint(PATTERNINDEX_INVALID).Names(), this);
+				}
+				else
+				{
+					m_sndFile.Patterns.Remove(newPat);
+					Reporting::Error("Error resizing the old pattern!");
+				}
+			}
+			else
+			{
+				// Show error
+				auto& specs = m_sndFile.GetModSpecifications();
+				Reporting::Error(mpt::format("Pattern limit of the %1 format (%2 patterns) has been reached!")(mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Split Patterns");
+			}
+		}
 	}
 
 	SwitchToView();

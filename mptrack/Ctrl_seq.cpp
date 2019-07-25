@@ -91,6 +91,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_ORDERLIST_NEW,				&COrderList::OnCreateNewPattern)
 	ON_COMMAND(ID_ORDERLIST_COPY,				&COrderList::OnDuplicatePattern)
     ON_COMMAND(ID_ORDERLIST_MERGE,				&COrderList::OnMergePatterns)
+	ON_COMMAND(ID_ORDERLIST_SPLIT,				&COrderList::OnSplitPattern)
 	ON_COMMAND(ID_PATTERNCOPY,					&COrderList::OnPatternCopy)
 	ON_COMMAND(ID_PATTERNPASTE,					&COrderList::OnPatternPaste)
 	ON_COMMAND(ID_SETRESTARTPOS,				&COrderList::OnSetRestartPos)
@@ -560,6 +561,8 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		OnDuplicatePattern(); return wParam;
 	case kcMergePattern:
 		OnMergePatterns(); return wParam;
+	case kcSplitPattern:
+		OnSplitPattern(); return wParam;
 	case kcNewPattern:
 		OnCreateNewPattern(); return wParam;
 	}
@@ -1061,6 +1064,8 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, ih->GetKeyTextFromCommand(kcDuplicatePattern, _T("&Duplicate Pattern")));
 		AppendMenu(hMenu, MF_STRING | greyed, ID_PATTERNCOPY, _T("&Copy Pattern"));
 		AppendMenu(hMenu, MF_STRING, ID_PATTERNPASTE, ih->GetKeyTextFromCommand(kcEditPaste, _T("P&aste Pattern")));
+		AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_SPLIT, ih->GetKeyTextFromCommand(kcSplitPattern, _T("&Split Pattern")));
 		const bool hasPatternProperties = sndFile.GetModSpecifications().patternRowsMin != sndFile.GetModSpecifications().patternRowsMax;
 		if (hasPatternProperties || sndFile.GetModSpecifications().hasRestartPos)
 		{
@@ -1311,6 +1316,12 @@ void COrderList::OnDuplicatePattern()
 void COrderList::OnMergePatterns()
 {
 	m_pParent.PostMessage(WM_COMMAND, ID_ORDERLIST_MERGE);
+}
+
+
+void COrderList::OnSplitPattern()
+{
+	m_pParent.PostMessage(WM_COMMAND, ID_ORDERLIST_SPLIT);
 }
 
 

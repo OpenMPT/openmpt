@@ -265,6 +265,7 @@ enum CommandID
 	kcNewPattern,
 	kcDuplicatePattern,
 	kcMergePattern,
+	kcSplitPattern,
 	kcPatternEditPCNotePlugin,
 	kcTogglePluginEditor,
 	kcShowNoteProperties,
