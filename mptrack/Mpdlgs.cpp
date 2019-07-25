@@ -478,7 +478,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 	const std::vector<SampleFormat> allSampleFormats = AllSampleFormats<std::vector<SampleFormat>>();
 	for(const auto sampleFormat : allSampleFormats)
 	{
-		if(m_CurrentDeviceCaps.CanSampleFormat || (sampleFormat != m_Settings.sampleFormat))
+		if(!sampleformats.empty())
 		{
 			if(std::find(
 					sampleformats.begin(),
@@ -488,25 +488,25 @@ void COptionsSoundcard::UpdateSampleFormat()
 			{
 				continue;
 			}
-			CString name;
-			if(sampleFormat.IsFloat())
-			{
-				//name = mpt::cformat(_T("Float %1"))(sampleFormat.GetBitsPerSample());
-				name = _T("Float");
-			} else if(sampleFormat.IsUnsigned())
-			{
-				//name = mpt::cformat(_T("%1 Bit uint"))(sampleFormat.GetBitsPerSample());
-				name = mpt::cformat(_T("%1 Bit"))(sampleFormat.GetBitsPerSample());
-			} else
-			{
-				name = mpt::cformat(_T("%1 Bit"))(sampleFormat.GetBitsPerSample());
-			}
-			UINT ndx = m_CbnSampleFormat.AddString(name);
-			m_CbnSampleFormat.SetItemData(ndx, static_cast<int>(sampleFormat));
-			if(sampleFormat == m_Settings.sampleFormat)
-			{
-				n = ndx;
-			}
+		}
+		CString name;
+		if(sampleFormat.IsFloat())
+		{
+			//name = mpt::cformat(_T("Float %1"))(sampleFormat.GetBitsPerSample());
+			name = _T("Float");
+		} else if(sampleFormat.IsUnsigned())
+		{
+			//name = mpt::cformat(_T("%1 Bit uint"))(sampleFormat.GetBitsPerSample());
+			name = mpt::cformat(_T("%1 Bit"))(sampleFormat.GetBitsPerSample());
+		} else
+		{
+			name = mpt::cformat(_T("%1 Bit"))(sampleFormat.GetBitsPerSample());
+		}
+		UINT ndx = m_CbnSampleFormat.AddString(name);
+		m_CbnSampleFormat.SetItemData(ndx, static_cast<int>(sampleFormat));
+		if(sampleFormat == m_Settings.sampleFormat)
+		{
+			n = ndx;
 		}
 	}
 	m_CbnSampleFormat.SetCurSel(n);
