@@ -2870,12 +2870,6 @@ BEGIN
     IDC_SAMPLE_RESAMPLE     "Resample the entire sample or current selection\nResample"
     IDC_SAMPLE_REVERSE      "Reverse selection\nReverse"
     IDC_COMBO_ZOOM          "Changes the current zoom value\nZoom"
-    IDC_SAMPLE_PLAY         "Play a middle C using the current sample\nPlay sample"
-END
-
-STRINGTABLE
-BEGIN
-    IDC_SAMPLE_DOWNSAMPLE   "Shrink selection\nDownsample"
 END
 
 STRINGTABLE
@@ -2885,7 +2879,13 @@ BEGIN
                             "Play the current pattern from the beginning\nReplay Pattern"
     IDC_PATTERN_STOP        "Stop playing\nStop"
     IDC_PATTERN_RECORD      "Enables the recording of notes\nRecord"
+    IDC_SAMPLE_PLAY         "Play a middle C using the current sample\nPlay sample"
     IDC_PATTERN_NEW         "Create a new pattern\nInsert Pattern"
+END
+
+STRINGTABLE
+BEGIN
+    IDC_SAMPLE_DOWNSAMPLE   "Shrink selection\nDownsample"
 END
 
 STRINGTABLE
@@ -3310,6 +3310,38 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Menu
+//
+
+IDR_VSTMENU MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Copy Preset",                ID_EDIT_COPY
+        MENUITEM "&Paste Preset",               ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "&Load Preset / Bank...",      ID_PRESET_LOAD
+        MENUITEM "&Save Preset / Bank...",      ID_PRESET_SAVE
+        MENUITEM SEPARATOR
+        MENUITEM "Create &instrument from plugin", ID_PLUGINTOINSTRUMENT
+        MENUITEM "&Randomize Parameters",       ID_PRESET_RANDOM
+    END
+    POPUP "&Info"
+    BEGIN
+        MENUITEM "I&nputs",                     ID_INFO_INPUTS
+        MENUITEM "Ou&tputs",                    ID_INFO_OUPUTS
+        MENUITEM "&Macros",                     ID_INFO_MACROS
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "&Bypass Plugin",              ID_PLUG_BYPASS
+        MENUITEM "Record &Parameter Changes",   ID_PLUG_RECORDAUTOMATION
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // Dialog Info
 //
 
@@ -3350,38 +3382,6 @@ BEGIN
     IDC_COMBO_CHANNEL, 0x403, 3, 0
 0x3631, "\000" 
     0
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_VSTMENU MENU
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Copy Preset",                ID_EDIT_COPY
-        MENUITEM "&Paste Preset",               ID_EDIT_PASTE
-        MENUITEM SEPARATOR
-        MENUITEM "&Load Preset / Bank...",      ID_PRESET_LOAD
-        MENUITEM "&Save Preset / Bank...",      ID_PRESET_SAVE
-        MENUITEM SEPARATOR
-        MENUITEM "Create &instrument from plugin", ID_PLUGINTOINSTRUMENT
-        MENUITEM "&Randomize Parameters",       ID_PRESET_RANDOM
-    END
-    POPUP "&Info"
-    BEGIN
-        MENUITEM "I&nputs",                     ID_INFO_INPUTS
-        MENUITEM "Ou&tputs",                    ID_INFO_OUPUTS
-        MENUITEM "&Macros",                     ID_INFO_MACROS
-    END
-    POPUP "&Options"
-    BEGIN
-        MENUITEM "&Bypass Plugin",              ID_PLUG_BYPASS
-        MENUITEM "Record &Parameter Changes",   ID_PLUG_RECORDAUTOMATION
-    END
 END
 
 

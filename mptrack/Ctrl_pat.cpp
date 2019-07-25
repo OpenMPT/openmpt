@@ -60,6 +60,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(ID_PATTERN_AMPLIFY,			&CCtrlPatterns::OnPatternAmplify)
 	ON_COMMAND(ID_ORDERLIST_NEW,			&CCtrlPatterns::OnPatternNew)
 	ON_COMMAND(ID_ORDERLIST_COPY,			&CCtrlPatterns::OnPatternDuplicate)
+	ON_COMMAND(ID_ORDERLIST_MERGE,			&CCtrlPatterns::OnPatternMerge)
 	ON_COMMAND(ID_PATTERNCOPY,				&CCtrlPatterns::OnPatternCopy)
 	ON_COMMAND(ID_PATTERNPASTE,				&CCtrlPatterns::OnPatternPaste)
 	ON_COMMAND(ID_EDIT_UNDO,				&CCtrlPatterns::OnEditUndo)
@@ -842,6 +843,70 @@ void CCtrlPatterns::OnPatternDuplicate()
 		auto &specs = m_sndFile.GetModSpecifications();
 		Reporting::Error(mpt::format("Pattern limit of the %1 format (%2 patterns) has been reached!")(mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Duplicate Patterns");
 	}
+	SwitchToView();
+}
+
+
+// Merges one or more patterns into a single pattern
+void CCtrlPatterns::OnPatternMerge()
+{
+	OrdSelection selection = m_OrderList.GetCurSel(false);
+	const ORDERINDEX firstPattern = selection.firstOrd;
+	const ORDERINDEX numPatterns = selection.lastOrd - selection.firstOrd + 1u;
+
+	// Get the total number of lines
+	ROWINDEX rowNumber = 0u;
+
+	ModSequence& order = m_sndFile.Order();
+	for (ORDERINDEX i = 0; i < numPatterns; i++)
+	{
+		PATTERNINDEX pat = order[firstPattern + i];
+		if (m_sndFile.Patterns.IsValidPat(pat))
+		{
+			rowNumber += m_sndFile.Patterns[pat].GetNumRows();
+		}
+	}
+
+	// Try to create a new pattern for the merge
+	PATTERNINDEX newPat = m_sndFile.Patterns.InsertAny(rowNumber, true);
+
+	// If it succeeds, copy the data for each pattern
+	if (newPat != PATTERNINDEX_INVALID)
+	{
+		auto it = m_sndFile.Patterns[newPat].begin();
+		for (ORDERINDEX i = 0; i < numPatterns; i++)
+		{
+			PATTERNINDEX pat = order[firstPattern + i];
+			if (m_sndFile.Patterns.IsValidPat(pat))
+			{
+				it = std::copy(m_sndFile.Patterns[pat].begin(), m_sndFile.Patterns[pat].end(), it);
+			}
+		}
+
+		// Remove the conjoint patterns
+		order.Remove(selection.firstOrd, selection.lastOrd);
+		m_OrderList.DeleteUpdatePlaystate(selection.firstOrd, selection.lastOrd);
+
+		// And insert the new one
+		order.insert(firstPattern, 1, newPat);
+		m_OrderList.InsertUpdatePlaystate(firstPattern, firstPattern);
+
+		// Do the remaining busywork
+		m_OrderList.InvalidateRect(nullptr, FALSE);
+		m_OrderList.SetCurSel(firstPattern, true, false, true);
+		SetCurrentPattern(newPat);
+
+		m_modDoc.SetModified();
+		m_modDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
+		m_modDoc.UpdateAllViews(nullptr, PatternHint(PATTERNINDEX_INVALID).Names(), this);
+	}
+	else
+	{
+		// Show error
+		auto& specs = m_sndFile.GetModSpecifications();
+		Reporting::Error(mpt::format("Pattern limit of the %1 format (%2 patterns) has been reached!")(mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Merge Patterns");
+	}
+
 	SwitchToView();
 }
 

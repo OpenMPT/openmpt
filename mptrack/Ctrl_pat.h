@@ -160,6 +160,7 @@ protected:
 	afx_msg void OnPatternPlayFromStart();
 	afx_msg void OnCreateNewPattern();
 	afx_msg void OnDuplicatePattern();
+	afx_msg void OnMergePatterns();
 	afx_msg void OnPatternCopy();
 	afx_msg void OnPatternPaste();
 	afx_msg void OnSetRestartPos();
@@ -239,6 +240,7 @@ protected:
 	afx_msg void OnPlayerPause();
 	afx_msg void OnPatternNew();
 	afx_msg void OnPatternDuplicate();
+	afx_msg void OnPatternMerge();
 	afx_msg void OnPatternStop();
 	afx_msg void OnPatternPlay();
 	afx_msg void OnPatternPlayNoLoop();		//rewbs.playSongFromCursor
