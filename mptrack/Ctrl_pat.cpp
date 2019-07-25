@@ -62,6 +62,7 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(ID_ORDERLIST_COPY,			&CCtrlPatterns::OnPatternDuplicate)
 	ON_COMMAND(ID_ORDERLIST_MERGE,			&CCtrlPatterns::OnPatternMerge)
 	ON_COMMAND(ID_ORDERLIST_SPLIT,			&CCtrlPatterns::OnPatternSplit)
+	ON_COMMAND(ID_ORDERLIST_SHIFT,			&CCtrlPatterns::OnPatternShiftRows)
 	ON_COMMAND(ID_PATTERNCOPY,				&CCtrlPatterns::OnPatternCopy)
 	ON_COMMAND(ID_PATTERNPASTE,				&CCtrlPatterns::OnPatternPaste)
 	ON_COMMAND(ID_EDIT_UNDO,				&CCtrlPatterns::OnEditUndo)
@@ -869,7 +870,7 @@ void CCtrlPatterns::OnPatternMerge()
 	}
 
 	// Try to create a new pattern for the merge
-	PATTERNINDEX newPat = m_sndFile.Patterns.InsertAny(rowNumber, true);
+	PATTERNINDEX newPat = m_sndFile.Patterns.InsertAny(rowNumber);
 
 	// If it succeeds, copy the data for each pattern
 	if (newPat != PATTERNINDEX_INVALID)
@@ -934,7 +935,7 @@ void CCtrlPatterns::OnPatternSplit()
 			ROWINDEX splitRow = dlg.resultAsInt;
 
 			// Create a new pattern
-			PATTERNINDEX newPat = m_sndFile.Patterns.InsertAny(numRows - splitRow, true);
+			PATTERNINDEX newPat = m_sndFile.Patterns.InsertAny(numRows - splitRow);
 			if (newPat != PATTERNINDEX_INVALID)
 			{
 				// Now, finally, we're going to split the row
@@ -979,6 +980,147 @@ void CCtrlPatterns::OnPatternSplit()
 				// Show error
 				auto& specs = m_sndFile.GetModSpecifications();
 				Reporting::Error(mpt::format("Pattern limit of the %1 format (%2 patterns) has been reached!")(mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Split Patterns");
+			}
+		}
+	}
+
+	SwitchToView();
+}
+
+
+// Shift rows of a pattern selection
+void CCtrlPatterns::OnPatternShiftRows()
+{
+	OrdSelection selection = m_OrderList.GetCurSel(false);
+	ORDERINDEX firstPattern = selection.firstOrd;
+	ORDERINDEX lastPattern = selection.lastOrd;
+	ORDERINDEX numPatterns = selection.lastOrd - selection.firstOrd + 1u;
+
+	// get all pattern indices
+	ModSequence& order = m_sndFile.Order();
+
+	// make a copy of the interval
+	std::vector<PATTERNINDEX> interval(numPatterns);
+	auto it = std::copy_if(order.begin() + firstPattern, order.begin() + firstPattern + numPatterns,
+		interval.begin(), [this](PATTERNINDEX pat) { return m_sndFile.Patterns.IsValidPat(pat); });
+	interval.erase(it, interval.end());
+	numPatterns = interval.size();
+
+	// Compute the maximum rows in each direction
+	ROWINDEX minDir = ROWINDEX_INVALID;
+	ROWINDEX maxDir = ROWINDEX_INVALID;
+	for (ORDERINDEX i = 0; i < numPatterns; i++)
+	{
+		ROWINDEX rows = m_sndFile.Patterns[interval[i]].GetNumRows() - 1;
+		if (i > 0) maxDir = std::min(maxDir, rows);
+		if (i < numPatterns - 1) minDir = std::min(minDir, rows);
+	}
+
+	// If both are equal to zero, report error
+	if (minDir == 0 && maxDir == 0)
+	{
+		Reporting::Error("Not possible to shift rows in this interval!", "Shift Rows");
+	}
+	else
+	{
+		// Present the modal dialog
+		CInputDlg dlg(this, _T("Enter direction and number of rows to shift (+ is forwards, - is backwards):"), -(int)minDir, (int)maxDir, 0);
+		if (dlg.DoModal() == IDOK)
+		{
+			int rowShift = dlg.resultAsInt;
+
+			// Only try to do any operation if we are actually shifting rows
+			if (rowShift != 0)
+			{
+				// Make a copy of all patterns, we want to be conservative here
+				std::vector<PATTERNINDEX> newInterval(numPatterns);
+				bool outOfPatterns = false;
+
+				for (ORDERINDEX i = 0; i < numPatterns; i++)
+				{
+					ROWINDEX newRows = m_sndFile.Patterns[interval[i]].GetNumRows();
+					if (i == 0) newRows += rowShift;
+					else if (i == numPatterns - 1) newRows -= rowShift;
+
+					newInterval[i] = m_sndFile.Patterns.InsertAny(newRows);
+					if (newInterval[i] == PATTERNINDEX_INVALID)
+					{
+						outOfPatterns = true;
+						break;
+					}
+				}
+
+				// If we don't manage to create the new patterns, report
+				if (outOfPatterns)
+				{
+					for (ORDERINDEX i = 0; i < numPatterns; i++)
+					{
+						if (newInterval[i] != PATTERNINDEX_INVALID)
+						{
+							m_sndFile.Patterns.Remove(newInterval[i]);
+						}
+					}
+
+					Reporting::Error("Error trying to create the copy patterns for row shift!", "Shift Rows");
+				}
+				else
+				{
+					if (rowShift > 0)
+					{
+						// Shifting in the positive direction
+						ROWINDEX shiftedCommands = rowShift * m_sndFile.Patterns[newInterval[0]].GetNumChannels();
+
+						auto it = std::copy(m_sndFile.Patterns[interval[0]].begin(), m_sndFile.Patterns[interval[0]].end(),
+							m_sndFile.Patterns[newInterval[0]].begin());
+
+						for (ORDERINDEX i = 1; i < numPatterns; i++)
+						{
+							std::copy_n(m_sndFile.Patterns[interval[i]].begin(), shiftedCommands, it);
+							it = std::copy(m_sndFile.Patterns[interval[i]].begin() + shiftedCommands,
+								m_sndFile.Patterns[interval[i]].end(), m_sndFile.Patterns[newInterval[i]].begin());
+						}
+					}
+					else
+					{
+						// Shifting in the negative direction
+						ROWINDEX shiftedCommands = -rowShift * m_sndFile.Patterns[newInterval[0]].GetNumChannels();
+
+						std::copy(m_sndFile.Patterns[interval[0]].begin(),
+							m_sndFile.Patterns[interval[0]].end() - shiftedCommands,
+							m_sndFile.Patterns[newInterval[0]].begin());
+
+						for (ORDERINDEX i = 1; i < numPatterns; i++)
+						{
+							auto it = std::copy_n(m_sndFile.Patterns[interval[i - 1]].end() - shiftedCommands,
+								shiftedCommands, m_sndFile.Patterns[newInterval[i]].begin());
+
+							if (i < numPatterns - 1)
+							{
+								std::copy(m_sndFile.Patterns[interval[i]].begin(),
+									m_sndFile.Patterns[interval[i]].end() - shiftedCommands, it);
+							}
+							else
+							{
+								std::copy(m_sndFile.Patterns[interval[i]].begin(), m_sndFile.Patterns[interval[i]].end(), it);
+							}
+						}
+					}
+
+					// Now, we update the new selection
+					auto orderIt = std::copy(newInterval.begin(), newInterval.end(), order.begin() + firstPattern);
+					order.erase(orderIt, order.begin() + lastPattern + 1);
+					m_OrderList.DeleteUpdatePlaystate(firstPattern, lastPattern);
+
+					// Do the remaining busywork
+					m_OrderList.InvalidateRect(nullptr, FALSE);
+					m_OrderList.SetCurSel(firstPattern, true, false, true);
+					SetCurrentPattern(newInterval[0]);
+					m_OrderList.m_nScrollPos2nd = firstPattern + numPatterns - 1u;
+
+					m_modDoc.SetModified();
+					m_modDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
+					m_modDoc.UpdateAllViews(nullptr, PatternHint(PATTERNINDEX_INVALID).Names(), this);
+				}
 			}
 		}
 	}

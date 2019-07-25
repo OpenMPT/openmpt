@@ -92,6 +92,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_ORDERLIST_COPY,				&COrderList::OnDuplicatePattern)
     ON_COMMAND(ID_ORDERLIST_MERGE,				&COrderList::OnMergePatterns)
 	ON_COMMAND(ID_ORDERLIST_SPLIT,				&COrderList::OnSplitPattern)
+	ON_COMMAND(ID_ORDERLIST_SHIFT,				&COrderList::OnShiftPatternRows)
 	ON_COMMAND(ID_PATTERNCOPY,					&COrderList::OnPatternCopy)
 	ON_COMMAND(ID_PATTERNPASTE,					&COrderList::OnPatternPaste)
 	ON_COMMAND(ID_SETRESTARTPOS,				&COrderList::OnSetRestartPos)
@@ -563,6 +564,8 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		OnMergePatterns(); return wParam;
 	case kcSplitPattern:
 		OnSplitPattern(); return wParam;
+	case kcShiftPatternRows:
+		OnShiftPatternRows(); return wParam;
 	case kcNewPattern:
 		OnCreateNewPattern(); return wParam;
 	}
@@ -1050,6 +1053,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 		AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
 		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_COPY, ih->GetKeyTextFromCommand(kcDuplicatePattern, _T("&Duplicate Patterns")));
 		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_MERGE, ih->GetKeyTextFromCommand(kcMergePattern, _T("&Merge Patterns")));
+		AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_SHIFT, ih->GetKeyTextFromCommand(kcShiftPatternRows, _T("&Shift Rows")));
 	} else
 	{
 		// Only one pattern is selected
@@ -1322,6 +1326,12 @@ void COrderList::OnMergePatterns()
 void COrderList::OnSplitPattern()
 {
 	m_pParent.PostMessage(WM_COMMAND, ID_ORDERLIST_SPLIT);
+}
+
+
+void COrderList::OnShiftPatternRows()
+{
+	m_pParent.PostMessage(WM_COMMAND, ID_ORDERLIST_SHIFT);
 }
 
 

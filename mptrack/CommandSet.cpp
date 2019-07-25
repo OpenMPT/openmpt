@@ -557,6 +557,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcDuplicatePattern, 1806, _T("Duplicate Pattern"));
 	DefineKeyCommand(kcMergePattern, 2011, _T("Merge Pattern"));
 	DefineKeyCommand(kcSplitPattern, 2012, _T("Split Pattern"));
+	DefineKeyCommand(kcShiftPatternRows, 2013, _T("Shift Pattern Rows"));
 	DefineKeyCommand(kcOrderlistPat0, 1807, _T("Pattern index digit 0"));
 	DefineKeyCommand(kcOrderlistPat1, 1808, _T("Pattern index digit 1"));
 	DefineKeyCommand(kcOrderlistPat2, 1809, _T("Pattern index digit 2"));
