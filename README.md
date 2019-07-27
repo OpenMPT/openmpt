@@ -43,10 +43,14 @@ How to compile
 
  -  OpenMPT requires the compile host system to be 64bit x86-64.
 
- -  The Windows 8.1 SDK and Microsoft Foundation Classes (MFC) are required to
-    build OpenMPT (both are included with Visual Studio, however may need to be
-    selected explicitly during setup). In order to build OpenMPT for Windows XP,
-    the XP targetting toolset also needs to be installed.
+ -  The Windows 8.1 SDK is required to build OpenMPT with Visual Studio 2017
+    (this is included with Visual Studio, however may need to be selected
+    explicitly during setup).
+
+ -  In order to build OpenMPT for Windows XP, the Visual Studio 2017 XP
+    targetting toolset needs to be installed.
+
+ -  Microsoft Foundation Classes (MFC) are required to build OpenMPT.
 
  -  The ASIO SDK is needed for compiling with ASIO support.
 
