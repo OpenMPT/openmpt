@@ -222,6 +222,9 @@ std::unique_ptr<IAudioStreamEncoder> VorbisEncoder::ConstructStreamEncoder(std::
 #if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
 	return std::make_unique<VorbisStreamWriter>(file, settings, tags);
 #else
+	MPT_UNREFERENCED_PARAMETER(file);
+	MPT_UNREFERENCED_PARAMETER(settings);
+	MPT_UNREFERENCED_PARAMETER(tags);
 	return nullptr;
 #endif
 }
@@ -229,11 +232,18 @@ std::unique_ptr<IAudioStreamEncoder> VorbisEncoder::ConstructStreamEncoder(std::
 
 bool VorbisEncoder::IsBitrateSupported(int samplerate, int channels, int bitrate) const
 {
+#if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
 	vorbis_info vi;
 	vorbis_info_init(&vi);
 	bool result = (0 == vorbis_encode_init(&vi, channels, samplerate, -1, bitrate * 1000, -1));
 	vorbis_info_clear(&vi);
 	return result;
+#else
+	MPT_UNREFERENCED_PARAMETER(samplerate);
+	MPT_UNREFERENCED_PARAMETER(channels);
+	MPT_UNREFERENCED_PARAMETER(bitrate);
+	return false;
+#endif
 }
 
 
