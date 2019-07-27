@@ -776,7 +776,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 	if(newTypeIsIT_MPT)
 	{
 		// Convert some commands which behave differently or don't exist
-		if(command == CMD_NONE) switch(volcmd)
+		if(!oldTypeIsIT_MPT && command == CMD_NONE) switch(volcmd)
 		{
 			case VOLCMD_PANSLIDELEFT:
 				command = CMD_PANNINGSLIDE;
