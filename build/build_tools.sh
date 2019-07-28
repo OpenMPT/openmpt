@@ -50,7 +50,7 @@ mkdir -p build/vs2017
 
 cd ../..
 
-echo "d6f834f7f4a0dc2b6e4f133227ce056f08a845b8" > include/genie/OpenMPT-version.txt
+cp include/genie/OpenMPT.txt include/genie/OpenMPT-version.txt
 
 
 
@@ -67,5 +67,5 @@ cd ../..
 
 cd ../..
 
-echo "5.0.0-alpha14" > include/premake/OpenMPT-version.txt
+cp include/premake/OpenMPT.txt include/premake/OpenMPT-version.txt
 

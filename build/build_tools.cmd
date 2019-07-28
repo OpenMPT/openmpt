@@ -55,7 +55,7 @@ if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\B
 
 :geniedone
 
-echo "d6f834f7f4a0dc2b6e4f133227ce056f08a845b8" > include\genie\OpenMPT-version.txt
+copy /y include\genie\OpenMPT.txt include\genie\OpenMPT-version.txt
 
 
 
@@ -116,7 +116,7 @@ goto error
 
 :premakedone
 
-echo "5.0.0-alpha14" > include\premake\OpenMPT-version.txt
+copy /y include\premake\OpenMPT.txt include\premake\OpenMPT-version.txt
 
 goto ok
 
