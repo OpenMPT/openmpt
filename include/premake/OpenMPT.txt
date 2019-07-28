@@ -4,3 +4,4 @@ The following changes have been made:
  *  standardconformance option added
  *  spectremitigations option added
  *  dataexecutionprevention option added
+ *  toolset "ClangCL" option added
