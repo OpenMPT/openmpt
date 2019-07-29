@@ -70,3 +70,6 @@
   filter { "kind:SharedLib" }
    defines { "DLL_EXPORT" }
   filter {}
+		if _OPTIONS["clang"] then
+			defines { "FLOAT_APPROX" }
+		end

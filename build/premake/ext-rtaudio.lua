@@ -28,9 +28,15 @@
    "../../include/rtaudio/RtAudio.cpp",
    "../../include/rtaudio/RtAudio.h",
   }
-	links {
-		"dsound",
-	}
+	if _OPTIONS["clang"] then
+		filter { "not kind:StaticLib" }
+			links { "dsound" }
+		filter {}
+	else
+		filter {}
+			links { "dsound" }
+		filter {}
+	end
   filter { "action:vs*", "architecture:ARM or architecture:ARM64" }
     links { "ole32" }
   filter { }

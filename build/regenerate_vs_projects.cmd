@@ -102,6 +102,16 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=OpenMPT vs2019 --win10 || goto err
 %PREMAKE% --group=all-externals vs2019 --win10 || goto err
 
+%PREMAKE% --group=libopenmpt_test vs2019 --clang --win10 || goto err
+%PREMAKE% --group=in_openmpt vs2019 --clang --win10 || goto err
+%PREMAKE% --group=xmp-openmpt vs2019 --clang --win10 || goto err
+%PREMAKE% --group=libopenmpt-small vs2019 --clang --win10 || goto err
+%PREMAKE% --group=libopenmpt vs2019 --clang --win10 || goto err
+%PREMAKE% --group=openmpt123 vs2019 --clang --win10 || goto err
+%PREMAKE% --group=PluginBridge vs2019 --clang --win10 || goto err
+%PREMAKE% --group=OpenMPT vs2019 --clang --win10 || goto err
+%PREMAKE% --group=all-externals vs2019 --clang --win10 || goto err
+
 del premake5.lua || goto err
 
 

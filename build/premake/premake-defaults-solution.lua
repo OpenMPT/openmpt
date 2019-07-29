@@ -1,7 +1,7 @@
 
 	preferredtoolarchitecture "x86_64"
 
-if _OPTIONS["win10"] then
+if _OPTIONS["win10"] and not _OPTIONS["clang"]  then
 	filter {}
 		systemversion "10.0.16299.0"
 end

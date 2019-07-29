@@ -23,6 +23,12 @@
    "__WINDOWS_MM__",
    "RTMIDI_DO_NOT_ENSURE_UNIQUE_PORTNAMES"
   }
-  links {
-   "winmm"
-  }
+	if _OPTIONS["clang"] then
+		filter { "not kind:StaticLib" }
+			links { "winmm" }
+		filter {}
+	else
+		filter {}
+			links { "winmm" }
+		filter {}
+	end

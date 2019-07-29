@@ -11,27 +11,38 @@
 	filter {}
 
 	filter {}
-		if _OPTIONS["xp"] then
-			if _ACTION == "vs2017" then
-				toolset "v141_xp"
-			elseif _ACTION == "vs2019" then
-				toolset "v142_xp"
+		if _OPTIONS["clang"] then
+			toolset "msc-ClangCL"
+		else
+			if _OPTIONS["xp"] then
+				if _ACTION == "vs2017" then
+					toolset "v141_xp"
+				elseif _ACTION == "vs2019" then
+					toolset "v142_xp"
+				end
+				defines { "MPT_BUILD_TARGET_XP" }
+				filter { "action:vs*" }
+					buildoptions { "/Zc:threadSafeInit-" }
+				filter {}
 			end
-			defines { "MPT_BUILD_TARGET_XP" }
+		end
+	filter {}
+
+	filter {}
+		if _OPTIONS["xp"] then
+			filter { "action:vs*", "not architecture:x86" }
+				if not _OPTIONS["clang"] then
+					spectremitigations "On"
+				end
+			filter {}
+		else
 			filter { "action:vs*" }
-				buildoptions { "/Zc:threadSafeInit-" }
+				if not _OPTIONS["clang"] then
+					spectremitigations "On"
+				end
 			filter {}
 		end
-
-	if _OPTIONS["xp"] then
-		filter { "action:vs*", "not architecture:x86" }
-			spectremitigations "On"
-		filter {}
-	else
-		filter { "action:vs*" }
-			spectremitigations "On"
-		filter {}
-	end
+	filter {}
 
   filter { "kind:StaticLib", "configurations:Debug", "architecture:x86" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/Debug" )
@@ -181,20 +192,34 @@
    defines { "NDEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
    symbols "On"
-   flags { "MultiProcessorCompile", "LinkTimeOptimization" }
+		flags { "MultiProcessorCompile" }
+		if not _OPTIONS["clang"] then
+			flags { "LinkTimeOptimization" }
+		end
    staticruntime "On"
 	 runtime "Release"
    optimize "Speed"
-   floatingpoint "Fast"
+--		if _OPTIONS["clang"] then
+--			floatingpoint "Default"
+--		else
+			floatingpoint "Fast"
+--		end
 
   filter { "configurations:ReleaseShared" }
    defines { "NDEBUG" }
    defines { "MPT_BUILD_MSVC_SHARED" }
    symbols "On"
-   flags { "MultiProcessorCompile", "LinkTimeOptimization" }
+		flags { "MultiProcessorCompile" }
+		if not _OPTIONS["clang"] then
+			flags { "LinkTimeOptimization" }
+		end
 	 runtime "Release"
    optimize "Speed"
-   floatingpoint "Fast"
+--		if _OPTIONS["clang"] then
+--			floatingpoint "Default"
+--		else
+			floatingpoint "Fast"
+--		end
 
 
 	filter {}

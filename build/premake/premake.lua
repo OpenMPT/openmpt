@@ -36,27 +36,44 @@ newoption {
 	description = "Generate Windows 10 Desktop targetting projects",
 }
 
+newoption {
+	trigger = "clang",
+	description = "ClangCL projects",
+}
+
+mpt_projectpathname = _ACTION
+mpt_bindirsuffix = ""
+mpt_bindirsuffix32 = ""
+mpt_bindirsuffix64 = ""
+
 if _OPTIONS["win10"] then
 	allplatforms = { "x86", "x86_64", "arm", "arm64" }
 	trkplatforms = { "x86", "x86_64", "arm", "arm64" }
-	mpt_projectpathname = _ACTION .. "win10"
-	mpt_bindirsuffix = "win10"
-	mpt_bindirsuffix32 = "win10"
-	mpt_bindirsuffix64 = "win10"
+	mpt_projectpathname = mpt_projectpathname .. "win10"
+	mpt_bindirsuffix = mpt_bindirsuffix .. "win10"
+	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "win10"
+	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "win10"
 elseif _OPTIONS["xp"] then
 	allplatforms = { "x86", "x86_64" }
 	trkplatforms = { "x86", "x86_64" }
-	mpt_projectpathname = _ACTION .. "winxp"
-	mpt_bindirsuffix = "winxp"
-	mpt_bindirsuffix32 = "winxp"
-	mpt_bindirsuffix64 = "winxp"
+	mpt_projectpathname = mpt_projectpathname .. "winxp"
+	mpt_bindirsuffix = mpt_bindirsuffix .. "winxp"
+	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "winxp"
+	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "winxp"
 else
 	allplatforms = { "x86", "x86_64" }
 	trkplatforms = { "x86", "x86_64" }
-	mpt_projectpathname = _ACTION .. "win7"
-	mpt_bindirsuffix = "win7"
-	mpt_bindirsuffix32 = "win7"
-	mpt_bindirsuffix64 = "win7"
+	mpt_projectpathname = mpt_projectpathname .. "win7"
+	mpt_bindirsuffix = mpt_bindirsuffix .. "win7"
+	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "win7"
+	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "win7"
+end
+
+if _OPTIONS["clang"] then
+	mpt_projectpathname = mpt_projectpathname .. "clangcl"
+	mpt_bindirsuffix = mpt_bindirsuffix .. "clangcl"
+	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "clangcl"
+	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "clangcl"
 end
 
 if _OPTIONS["group"] == "libopenmpt-all" then
