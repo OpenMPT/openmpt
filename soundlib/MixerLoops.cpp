@@ -12,6 +12,7 @@
 
 #include "stdafx.h"
 #include "MixerLoops.h"
+#include "..//soundbase/SampleBuffer.h"
 #include "Snd_defs.h"
 #include "ModChannel.h"
 #ifdef ENABLE_SSE2
@@ -606,7 +607,7 @@ void DeinterleaveStereo(const mixsample_t * MPT_RESTRICT input, mixsample_t * MP
 
 #ifndef MODPLUG_TRACKER
 
-void ApplyGain(int32 *soundBuffer, std::size_t channels, std::size_t countChunk, int32 gainFactor16_16)
+void ApplyGain(MixSampleInt *soundBuffer, std::size_t channels, std::size_t countChunk, int32 gainFactor16_16)
 {
 	if(gainFactor16_16 == (1<<16))
 	{
@@ -614,7 +615,7 @@ void ApplyGain(int32 *soundBuffer, std::size_t channels, std::size_t countChunk,
 		return; 
 	}
 	// no clipping prevention is done here
-	int32 * buf = soundBuffer;
+	MixSampleInt * buf = soundBuffer;
 	for(std::size_t i=0; i<countChunk*channels; ++i)
 	{
 		*buf = Util::muldiv(*buf, gainFactor16_16, 1<<16);
@@ -622,39 +623,55 @@ void ApplyGain(int32 *soundBuffer, std::size_t channels, std::size_t countChunk,
 	}
 }
 
-static void ApplyGain(float *beg, float *end, float factor)
-{
-	for(float *it = beg; it != end; ++it)
-	{
-		*it *= factor;
-	}
-}
-
-void ApplyGain(float * outputBuffer, float * const *outputBuffers, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor)
+void ApplyGain(MixSampleFloat *soundBuffer, std::size_t channels, std::size_t countChunk, float gainFactor)
 {
 	if(gainFactor == 1.0f)
 	{
 		// nothing to do, gain == +/- 0dB
 		return;
 	}
-	if(outputBuffer)
+	// no clipping prevention is done here
+	MixSampleFloat * buf = soundBuffer;
+	for(std::size_t i=0; i<countChunk*channels; ++i)
 	{
-		ApplyGain(
-			outputBuffer + (channels * offset),
-			outputBuffer + (channels * (offset + countChunk)),
-			gainFactor);
+		*buf *= gainFactor;
+		buf++;
 	}
-	if(outputBuffers)
+}
+
+
+void ApplyGain(audio_buffer_interleaved<float> outputBuffer, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor)
+{
+	if(gainFactor == 1.0f)
+	{
+		// nothing to do, gain == +/- 0dB
+		return;
+	}
+	for(std::size_t i = 0; i < countChunk; ++i)
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
-			ApplyGain(
-				outputBuffers[channel] + offset,
-				outputBuffers[channel] + offset + countChunk,
-				gainFactor);
+			outputBuffer(channel, offset + i) *= gainFactor;
 		}
 	}
 }
+
+void ApplyGain(audio_buffer_planar<float> outputBuffer, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor)
+{
+	if(gainFactor == 1.0f)
+	{
+		// nothing to do, gain == +/- 0dB
+		return;
+	}
+	for(std::size_t i = 0; i < countChunk; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			outputBuffer(channel, offset + i) *= gainFactor;
+		}
+	}
+}
+
 
 #endif // !MODPLUG_TRACKER
 

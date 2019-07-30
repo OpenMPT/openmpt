@@ -17,6 +17,7 @@
 #include "../common/mptOS.h"
 #include "../common/mptThread.h"
 #include "../soundbase/SampleFormat.h"
+#include "../soundbase/SampleTypes.h"
 
 #include <map>
 #include <vector>
@@ -73,6 +74,10 @@ struct Settings;
 struct Flags;
 struct BufferFormat;
 struct BufferAttributes;
+class AudioBufferSink;
+class AudioBufferSource;
+
+
 
 
 class ISource
@@ -442,6 +447,9 @@ struct BufferAttributes
 		return;
 	}
 };
+
+
+
 
 
 enum RequestFlags

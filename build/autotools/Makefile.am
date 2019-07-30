@@ -176,6 +176,7 @@ MPT_FILES_COMMON += common/versionNumber.h
 MPT_FILES_SOUNDBASE = 
 MPT_FILES_SOUNDBASE += soundbase/Dither.cpp
 MPT_FILES_SOUNDBASE += soundbase/Dither.h
+MPT_FILES_SOUNDBASE += soundbase/SampleBuffer.h
 MPT_FILES_SOUNDBASE += soundbase/SampleFormat.h
 MPT_FILES_SOUNDBASE += soundbase/SampleFormatConverters.h
 MPT_FILES_SOUNDBASE += soundbase/SampleFormatCopy.h

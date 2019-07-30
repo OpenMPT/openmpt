@@ -15,6 +15,7 @@
 
 
 #include "SampleTypes.h"
+#include "SampleFormatConverters.h"
 #include "../common/mptRandom.h"
 
 
@@ -36,6 +37,11 @@ struct Dither_None
 public:
 	template <uint32 targetbits, typename Trng>
 	MPT_FORCEINLINE MixSampleInt process(MixSampleInt sample, Trng &)
+	{
+		return sample;
+	}
+	template <uint32 targetbits, typename Trng>
+	MPT_FORCEINLINE MixSampleFloat process(MixSampleFloat sample, Trng &)
 	{
 		return sample;
 	}
@@ -61,6 +67,13 @@ public:
 			sample += mpt::rshift_signed(static_cast<int32>(mpt::random<uint32>(rng)), (targetbits + MixSampleIntTraits::mix_headroom_bits() + 1));
 			return sample;
 		}
+	}
+	template <uint32 targetbits, typename Trng>
+	MPT_FORCEINLINE MixSampleFloat process(MixSampleFloat sample, Trng &prng)
+	{
+		SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::mix_fractional_bits()> conv1;
+		SC::ConvertFixedPoint<MixSampleFloat, MixSampleInt, MixSampleIntTraits::mix_fractional_bits()> conv2;
+		return conv2(process<targetbits>(conv1(sample), prng));
 	}
 };
 
@@ -116,6 +129,13 @@ public:
 			}
 		}
 	}
+	template <uint32 targetbits, typename Trng>
+	MPT_FORCEINLINE MixSampleFloat process(MixSampleFloat sample, Trng &prng)
+	{
+		SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::mix_fractional_bits()> conv1;
+		SC::ConvertFixedPoint<MixSampleFloat, MixSampleInt, MixSampleIntTraits::mix_fractional_bits()> conv2;
+		return conv2(process<targetbits>(conv1(sample), prng));
+	}
 };
 
 using Dither_Simple = Dither_SimpleImpl<>;
@@ -133,6 +153,11 @@ public:
 	}
 	template <uint32 targetbits, typename Trng>
 	MPT_FORCEINLINE MixSampleInt process(std::size_t channel, MixSampleInt sample, Trng &prng)
+	{
+		return DitherChannels[channel].template process<targetbits>(sample, prng);
+	}
+	template <uint32 targetbits, typename Trng>
+	MPT_FORCEINLINE MixSampleFloat process(std::size_t channel, MixSampleFloat sample, Trng &prng)
 	{
 		return DitherChannels[channel].template process<targetbits>(sample, prng);
 	}
@@ -158,6 +183,11 @@ public:
 	{
 		return MultiChannelDither<Dither_None, channels>::template process<targetbits>(channel, sample, prng);
 	}
+	template <uint32 targetbits>
+	MPT_FORCEINLINE MixSampleFloat process(std::size_t channel, MixSampleFloat sample)
+	{
+		return MultiChannelDither<Dither_None, channels>::template process<targetbits>(channel, sample, prng);
+	}
 };
 
 template <std::size_t channels>
@@ -178,6 +208,11 @@ public:
 	{
 		return MultiChannelDither<Dither_ModPlug, channels>::template process<targetbits>(channel, sample, prng);
 	}
+	template <uint32 targetbits>
+	MPT_FORCEINLINE MixSampleFloat process(std::size_t channel, MixSampleFloat sample)
+	{
+		return MultiChannelDither<Dither_ModPlug, channels>::template process<targetbits>(channel, sample, prng);
+	}
 };
 
 template <std::size_t channels>
@@ -195,6 +230,11 @@ public:
 	}
 	template <uint32 targetbits>
 	MPT_FORCEINLINE MixSampleInt process(std::size_t channel, MixSampleInt sample)
+	{
+		return MultiChannelDither<Dither_Simple, channels>::template process<targetbits>(channel, sample, prng);
+	}
+	template <uint32 targetbits>
+	MPT_FORCEINLINE MixSampleFloat process(std::size_t channel, MixSampleFloat sample)
 	{
 		return MultiChannelDither<Dither_Simple, channels>::template process<targetbits>(channel, sample, prng);
 	}

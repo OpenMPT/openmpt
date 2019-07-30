@@ -500,9 +500,9 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 	m_sndFile->ResetMixStat();
 	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
+	std::int16_t * const buffers[4] = { left, right, rear_left, rear_right };
+	AudioReadTargetGainBuffer<audio_buffer_planar<std::int16_t>> target( audio_buffer_planar<std::int16_t>( buffers, planar_audio_buffer_valid_channels( buffers, mpt::size( buffers) ), count ), *m_Dither, m_Gain );
 	while ( count > 0 ) {
-		std::int16_t * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
-		AudioReadTargetGainBuffer<std::int16_t> target(*m_Dither, 0, buffers, m_Gain);
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
 			target
@@ -523,9 +523,9 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 	m_sndFile->ResetMixStat();
 	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
+	float * const buffers[4] = { left, right, rear_left, rear_right };
+	AudioReadTargetGainBuffer<audio_buffer_planar<float>> target( audio_buffer_planar<float>( buffers, planar_audio_buffer_valid_channels( buffers, mpt::size( buffers) ), count ), *m_Dither, m_Gain );
 	while ( count > 0 ) {
-		float * const buffers[4] = { left + count_read, right + count_read, rear_left + count_read, rear_right + count_read };
-		AudioReadTargetGainBuffer<float> target(*m_Dither, 0, buffers, m_Gain);
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
 			target
@@ -546,8 +546,8 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	m_sndFile->ResetMixStat();
 	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
+	AudioReadTargetGainBuffer<audio_buffer_interleaved<std::int16_t>> target( audio_buffer_interleaved<std::int16_t>( interleaved, channels, count ), *m_Dither, m_Gain );
 	while ( count > 0 ) {
-		AudioReadTargetGainBuffer<std::int16_t> target(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
 			target
@@ -568,8 +568,8 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	m_sndFile->ResetMixStat();
 	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
+	AudioReadTargetGainBuffer<audio_buffer_interleaved<float>> target( audio_buffer_interleaved<float>( interleaved, channels, count ), *m_Dither, m_Gain );
 	while ( count > 0 ) {
-		AudioReadTargetGainBuffer<float> target(*m_Dither, interleaved + count_read * channels, 0, m_Gain);
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
 			target
@@ -924,7 +924,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::
 		throw openmpt::exception("null pointer");
 	}
 	apply_mixer_settings( samplerate, 1 );
-	count = read_wrapper( count, mono, 0, 0, 0 );
+	count = read_wrapper( count, mono, nullptr, nullptr, nullptr );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
 }
@@ -933,7 +933,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, std::
 		throw openmpt::exception("null pointer");
 	}
 	apply_mixer_settings( samplerate, 2 );
-	count = read_wrapper( count, left, right, 0, 0 );
+	count = read_wrapper( count, left, right, nullptr, nullptr );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
 }
@@ -951,7 +951,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float
 		throw openmpt::exception("null pointer");
 	}
 	apply_mixer_settings( samplerate, 1 );
-	count = read_wrapper( count, mono, 0, 0, 0 );
+	count = read_wrapper( count, mono, nullptr, nullptr, nullptr );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
 }
@@ -960,7 +960,7 @@ std::size_t module_impl::read( std::int32_t samplerate, std::size_t count, float
 		throw openmpt::exception("null pointer");
 	}
 	apply_mixer_settings( samplerate, 2 );
-	count = read_wrapper( count, left, right, 0, 0 );
+	count = read_wrapper( count, left, right, nullptr, nullptr );
 	m_currentPositionSeconds += static_cast<double>( count ) / static_cast<double>( samplerate );
 	return count;
 }

@@ -19,18 +19,13 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPT_INTMIXER
 
 #ifdef MPT_INTMIXER
-using mixsample_t = MixSampleIntTraits::sample_base_type;
+using mixsample_t = MixSampleIntTraits::sample_type;
 enum { MIXING_FILTER_PRECISION = MixSampleIntTraits::filter_precision_bits() };  // Fixed point resonant filter bits
 #else
 using mixsample_t = AudioSampleFloat;
 #endif
 enum { MIXING_ATTENUATION = MixSampleIntTraits::mix_headroom_bits() };
 enum { MIXING_FRACTIONAL_BITS = MixSampleIntTraits::mix_fractional_bits() };
-enum
-{
-	MIXING_CLIPMAX = MixSampleIntTraits::mix_clip_max(),
-	MIXING_CLIPMIN = MixSampleIntTraits::mix_clip_min(),
-};
 
 constexpr float MIXING_SCALEF = MixSampleIntTraits::mix_scale<float>();
 
@@ -39,9 +34,8 @@ MPT_STATIC_ASSERT(sizeof(mixsample_t) == 4);
 MPT_STATIC_ASSERT(MIXING_FILTER_PRECISION == 24);
 MPT_STATIC_ASSERT(MIXING_ATTENUATION == 4);
 MPT_STATIC_ASSERT(MIXING_FRACTIONAL_BITS == 27);
-MPT_STATIC_ASSERT(MIXING_CLIPMAX == int32(0x7FFFFFF));
-MPT_STATIC_ASSERT(MIXING_CLIPMIN == (0 - int32(0x7FFFFFF)));
-MPT_STATIC_ASSERT(MIXING_CLIPMAX == int32(0x7FFFFFF));
+MPT_STATIC_ASSERT(MixSampleIntTraits::mix_clip_max() == int32(0x7FFFFFF));
+MPT_STATIC_ASSERT(MixSampleIntTraits::mix_clip_min() == (0 - int32(0x7FFFFFF)));
 MPT_STATIC_ASSERT(MIXING_SCALEF == 134217728.0f);
 #else
 MPT_STATIC_ASSERT(sizeof(mixsample_t) == 4);

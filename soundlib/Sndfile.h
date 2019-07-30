@@ -262,7 +262,8 @@ class IAudioReadTarget
 protected:
 	virtual ~IAudioReadTarget() = default;
 public:
-	virtual void DataCallback(int32 *MixSoundBuffer, std::size_t channels, std::size_t countChunk) = 0;
+	virtual void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) = 0;
+	virtual void DataCallback(MixSampleFloat *MixSoundBuffer, std::size_t channels, std::size_t countChunk) = 0;
 };
 
 
@@ -271,7 +272,8 @@ class IAudioSource
 public:
 	virtual ~IAudioSource() = default;
 public:
-	virtual void FillCallback(int32 * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) = 0;
+	virtual void FillCallback(MixSampleInt * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) = 0;
+	virtual void FillCallback(MixSampleFloat * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) = 0;
 };
 
 
@@ -279,13 +281,23 @@ class AudioSourceNone
 	: public IAudioSource
 {
 public:
-	void FillCallback(int32 * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) override
+	void FillCallback(MixSampleInt * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) override
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
 			for(std::size_t frame = 0; frame < countChunk; ++frame)
 			{
 				MixSoundBuffers[channel][frame] = 0;
+			}
+		}
+	}
+	void FillCallback(MixSampleFloat * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) override
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			for(std::size_t frame = 0; frame < countChunk; ++frame)
+			{
+				MixSoundBuffers[channel][frame] = MixSampleFloat(0.0);
 			}
 		}
 	}

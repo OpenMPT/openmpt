@@ -18,8 +18,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 namespace SoundDevice {
-
-
+	
+	
 Base::Base(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: m_Source(nullptr)
 	, m_MessageReceiver(nullptr)

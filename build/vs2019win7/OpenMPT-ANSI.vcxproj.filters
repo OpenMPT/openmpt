@@ -519,6 +519,9 @@
     <ClInclude Include="..\..\soundbase\Dither.h">
       <Filter>soundbase</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundbase\SampleBuffer.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundbase\SampleFormat.h">
       <Filter>soundbase</Filter>
     </ClInclude>
@@ -538,6 +541,9 @@
       <Filter>sounddev</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sounddev\SoundDeviceBase.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDeviceBuffer.h">
       <Filter>sounddev</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sounddev\SoundDeviceDirectSound.h">
@@ -1215,6 +1221,9 @@
       <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDeviceBuffer.cpp">
       <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceDirectSound.cpp">

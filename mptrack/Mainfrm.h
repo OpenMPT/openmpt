@@ -216,14 +216,17 @@ public:
 private:
 	Channel channels[maxChannels];
 	int32 decayParam;
-	void Process(Channel &channel, int sample);
+	void Process(Channel &channel, MixSampleInt sample);
+	void Process(Channel &channel, MixSampleFloat sample);
 public:
 	VUMeter() : decayParam(0) { SetDecaySpeedDecibelPerSecond(88.0f); }
 	void SetDecaySpeedDecibelPerSecond(float decibelPerSecond);
 public:
 	const Channel & operator [] (std::size_t channel) const { return channels[channel]; }
-	void Process(const int *mixbuffer, std::size_t numChannels, std::size_t numFrames); // mixbuffer is interleaved
-	void Process(const int *const *mixbuffers, std::size_t numChannels, std::size_t numFrames);
+	void Process(const MixSampleInt *mixbuffer, std::size_t numChannels, std::size_t numFrames); // mixbuffer is interleaved
+	void Process(const MixSampleInt *const *mixbuffers, std::size_t numChannels, std::size_t numFrames);
+	void Process(const MixSampleFloat *mixbuffer, std::size_t numChannels, std::size_t numFrames); // mixbuffer is interleaved
+	void Process(const MixSampleFloat *const *mixbuffers, std::size_t numChannels, std::size_t numFrames);
 	void Decay(int32 secondsNum, int32 secondsDen);
 	void ResetClipped();
 };

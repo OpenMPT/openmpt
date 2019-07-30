@@ -1261,6 +1261,7 @@
     <ClInclude Include="..\..\mptrack\wine\NativeSoundDeviceMarshalling.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeUtils.h" />
     <ClInclude Include="..\..\soundbase\Dither.h" />
+    <ClInclude Include="..\..\soundbase\SampleBuffer.h" />
     <ClInclude Include="..\..\soundbase\SampleFormat.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatConverters.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />
@@ -1268,6 +1269,7 @@
     <ClInclude Include="..\..\sounddev\SoundDevice.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceASIO.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceBase.h" />
+    <ClInclude Include="..\..\sounddev\SoundDeviceBuffer.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceDirectSound.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceManager.h" />
     <ClInclude Include="..\..\sounddev\SoundDevicePortAudio.h" />
@@ -1308,6 +1310,7 @@
     <ClCompile Include="..\..\sounddev\SoundDevice.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceASIO.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp" />
+    <ClCompile Include="..\..\sounddev\SoundDeviceBuffer.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceDirectSound.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceManager.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDevicePortAudio.cpp" />

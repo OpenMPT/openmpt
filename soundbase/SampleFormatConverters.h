@@ -317,6 +317,108 @@ struct Convert<Tid, Tid>
 };
 
 template <>
+struct Convert<uint8, int8>
+{
+	typedef int8 input_t;
+	typedef uint8 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return static_cast<uint8>(val+0x80);
+	}
+};
+
+template <>
+struct Convert<uint8, int16>
+{
+	typedef int16 input_t;
+	typedef uint8 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return static_cast<uint8>(static_cast<int8>(MPT_SC_RSHIFT_SIGNED(val, 8))+0x80);
+	}
+};
+
+template <>
+struct Convert<uint8, int24>
+{
+	typedef int24 input_t;
+	typedef uint8 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return static_cast<uint8>(static_cast<int8>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val), 16))+0x80);
+	}
+};
+
+template <>
+struct Convert<uint8, int32>
+{
+	typedef int32 input_t;
+	typedef uint8 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return static_cast<uint8>(static_cast<int8>(MPT_SC_RSHIFT_SIGNED(val, 24))+0x80);
+	}
+};
+
+template <>
+struct Convert<uint8, int64>
+{
+	typedef int64 input_t;
+	typedef uint8 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return static_cast<uint8>(static_cast<int8>(MPT_SC_RSHIFT_SIGNED(val, 56))+0x80);
+	}
+};
+
+template <>
+struct Convert<uint8, float32>
+{
+	typedef float32 input_t;
+	typedef uint8 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		Limit(val, -1.0f, 1.0f);
+		val *= 128.0f;
+#if MPT_SC_AVOID_FLOOR
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		return static_cast<uint8>(mpt::saturate_cast<int8>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val * 2.0f + 1.0f), 1))+0x80);
+#else
+		return static_cast<uint8>(mpt::saturate_cast<int8>(static_cast<int>(MPT_SC_FASTROUND(val)))+0x80);
+#endif
+	}
+};
+
+template <>
+struct Convert<uint8, double>
+{
+	typedef double input_t;
+	typedef uint8 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		Limit(val, -1.0, 1.0);
+		val *= 128.0;
+#if MPT_SC_AVOID_FLOOR
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		return static_cast<uint8>(mpt::saturate_cast<int8>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val * 2.0 + 1.0), 1))+0x80);
+#else
+		return static_cast<uint8>(mpt::saturate_cast<int8>(static_cast<int>(MPT_SC_FASTROUND(val)))+0x80);
+#endif
+	}
+};
+
+template <>
+struct Convert<int8, uint8>
+{
+	typedef uint8 input_t;
+	typedef int8 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return static_cast<int8>(static_cast<int>(val)-0x80);
+	}
+};
+
+template <>
 struct Convert<int8, int16>
 {
 	typedef int16 input_t;
@@ -375,6 +477,35 @@ struct Convert<int8, float32>
 #else
 		return mpt::saturate_cast<int8>(static_cast<int>(MPT_SC_FASTROUND(val)));
 #endif
+	}
+};
+
+template <>
+struct Convert<int8, double>
+{
+	typedef double input_t;
+	typedef int8 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		Limit(val, -1.0, 1.0);
+		val *= 128.0;
+#if MPT_SC_AVOID_FLOOR
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		return mpt::saturate_cast<int8>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val * 2.0 + 1.0), 1));
+#else
+		return mpt::saturate_cast<int8>(static_cast<int>(MPT_SC_FASTROUND(val)));
+#endif
+	}
+};
+
+template <>
+struct Convert<int16, uint8>
+{
+	typedef uint8 input_t;
+	typedef int16 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return static_cast<int16>(MPT_SC_LSHIFT_SIGNED(static_cast<int>(val)-0x80, 8));
 	}
 };
 
@@ -441,24 +572,6 @@ struct Convert<int16, float32>
 };
 
 template <>
-struct Convert<int8, double>
-{
-	typedef double input_t;
-	typedef int8 output_t;
-	MPT_FORCEINLINE output_t operator() (input_t val)
-	{
-		Limit(val, -1.0, 1.0);
-		val *= 128.0;
-#if MPT_SC_AVOID_FLOOR
-		// MSVC with x87 floating point math calls floor for the more intuitive version
-		return mpt::saturate_cast<int8>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val * 2.0 + 1.0), 1));
-#else
-		return mpt::saturate_cast<int8>(static_cast<int>(MPT_SC_FASTROUND(val)));
-#endif
-	}
-};
-
-template <>
 struct Convert<int16, double>
 {
 	typedef double input_t;
@@ -473,6 +586,17 @@ struct Convert<int16, double>
 #else
 		return mpt::saturate_cast<int16>(static_cast<int>(MPT_SC_FASTROUND(val)));
 #endif
+	}
+};
+
+template <>
+struct Convert<int24, uint8>
+{
+	typedef uint8 input_t;
+	typedef int24 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return static_cast<int24>(MPT_SC_LSHIFT_SIGNED(static_cast<int>(val)-0x80, 16));
 	}
 };
 
@@ -517,6 +641,53 @@ struct Convert<int24, int64>
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return static_cast<int24>(MPT_SC_RSHIFT_SIGNED(val, 40));
+	}
+};
+
+template <>
+struct Convert<int24, float32>
+{
+	typedef float32 input_t;
+	typedef int24 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		Limit(val, -1.0f, 1.0f);
+		val *= 2147483648.0f;
+#if MPT_SC_AVOID_FLOOR
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		return static_cast<int24>(MPT_SC_RSHIFT_SIGNED(mpt::saturate_cast<int32>(MPT_SC_RSHIFT_SIGNED(static_cast<int64>(val * 2.0f + 1.0f), 1)), 8));
+#else
+		return static_cast<int24>(MPT_SC_RSHIFT_SIGNED(mpt::saturate_cast<int32>(static_cast<int64>(MPT_SC_FASTROUND(val))), 8));
+#endif
+	}
+};
+
+template <>
+struct Convert<int24, double>
+{
+	typedef double input_t;
+	typedef int24 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		Limit(val, -1.0, 1.0);
+		val *= 2147483648.0;
+#if MPT_SC_AVOID_FLOOR
+		// MSVC with x87 floating point math calls floor for the more intuitive version
+		return static_cast<int24>(MPT_SC_RSHIFT_SIGNED(mpt::saturate_cast<int32>(MPT_SC_RSHIFT_SIGNED(static_cast<int64>(val * 2.0 + 1.0), 1)), 8));
+#else
+		return static_cast<int24>(MPT_SC_RSHIFT_SIGNED(mpt::saturate_cast<int32>(static_cast<int64>(MPT_SC_FASTROUND(val))), 8));
+#endif
+	}
+};
+
+template <>
+struct Convert<int32, uint8>
+{
+	typedef uint8 input_t;
+	typedef int32 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return static_cast<int32>(MPT_SC_LSHIFT_SIGNED(static_cast<int>(val)-0x80, 24));
 	}
 };
 
@@ -601,6 +772,17 @@ struct Convert<int32, double>
 };
 
 template <>
+struct Convert<int64, uint8>
+{
+	typedef uint8 input_t;
+	typedef int64 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return MPT_SC_LSHIFT_SIGNED(static_cast<int64>(val)-0x80, 56);
+	}
+};
+
+template <>
 struct Convert<int64, int8>
 {
 	typedef int8 input_t;
@@ -671,6 +853,17 @@ struct Convert<int64, double>
 };
 
 template <>
+struct Convert<float32, uint8>
+{
+	typedef uint8 input_t;
+	typedef float32 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return (static_cast<int>(val)-0x80) * (1.0f / static_cast<float32>(static_cast<unsigned int>(1)<<7));
+	}
+};
+
+template <>
 struct Convert<float32, int8>
 {
 	typedef int8 input_t;
@@ -689,6 +882,17 @@ struct Convert<float32, int16>
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val * (1.0f / static_cast<float>(static_cast<unsigned int>(1)<<15));
+	}
+};
+
+template <>
+struct Convert<float32, int24>
+{
+	typedef int24 input_t;
+	typedef float32 output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return val * (1.0f / static_cast<float>(static_cast<unsigned int>(1)<<23));
 	}
 };
 
@@ -715,6 +919,17 @@ struct Convert<float32, int64>
 };
 
 template <>
+struct Convert<double, uint8>
+{
+	typedef uint8 input_t;
+	typedef double output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return (static_cast<int>(val)-0x80) * (1.0 / static_cast<double>(static_cast<unsigned int>(1)<<7));
+	}
+};
+
+template <>
 struct Convert<double, int8>
 {
 	typedef int8 input_t;
@@ -733,6 +948,17 @@ struct Convert<double, int16>
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		return val * (1.0 / static_cast<double>(static_cast<unsigned int>(1)<<15));
+	}
+};
+
+template <>
+struct Convert<double, int24>
+{
+	typedef int24 input_t;
+	typedef double output_t;
+	MPT_FORCEINLINE output_t operator() (input_t val)
+	{
+		return val * (1.0 / static_cast<double>(static_cast<unsigned int>(1)<<23));
 	}
 };
 
@@ -781,11 +1007,11 @@ struct Convert<float, double>
 };
 
 
-template <typename Tdst, typename Tsrc, int fractionalBits, bool clipOutput>
+template <typename Tdst, typename Tsrc, int fractionalBits>
 struct ConvertFixedPoint;
 
-template <int fractionalBits, bool clipOutput>
-struct ConvertFixedPoint<uint8, int32, fractionalBits, clipOutput>
+template <int fractionalBits>
+struct ConvertFixedPoint<uint8, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef uint8 output_t;
@@ -801,8 +1027,8 @@ struct ConvertFixedPoint<uint8, int32, fractionalBits, clipOutput>
 	}
 };
 
-template <int fractionalBits, bool clipOutput>
-struct ConvertFixedPoint<int8, int32, fractionalBits, clipOutput>
+template <int fractionalBits>
+struct ConvertFixedPoint<int8, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef int8 output_t;
@@ -818,8 +1044,8 @@ struct ConvertFixedPoint<int8, int32, fractionalBits, clipOutput>
 	}
 };
 
-template <int fractionalBits, bool clipOutput>
-struct ConvertFixedPoint<int16, int32, fractionalBits, clipOutput>
+template <int fractionalBits>
+struct ConvertFixedPoint<int16, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef int16 output_t;
@@ -835,8 +1061,8 @@ struct ConvertFixedPoint<int16, int32, fractionalBits, clipOutput>
 	}
 };
 
-template <int fractionalBits, bool clipOutput>
-struct ConvertFixedPoint<int24, int32, fractionalBits, clipOutput>
+template <int fractionalBits>
+struct ConvertFixedPoint<int24, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef int24 output_t;
@@ -852,8 +1078,8 @@ struct ConvertFixedPoint<int24, int32, fractionalBits, clipOutput>
 	}
 };
 
-template <int fractionalBits, bool clipOutput>
-struct ConvertFixedPoint<int32, int32, fractionalBits, clipOutput>
+template <int fractionalBits>
+struct ConvertFixedPoint<int32, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef int32 output_t;
@@ -864,8 +1090,8 @@ struct ConvertFixedPoint<int32, int32, fractionalBits, clipOutput>
 	}
 };
 
-template <int fractionalBits, bool clipOutput>
-struct ConvertFixedPoint<float32, int32, fractionalBits, clipOutput>
+template <int fractionalBits>
+struct ConvertFixedPoint<float32, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef float32 output_t;
@@ -878,21 +1104,12 @@ struct ConvertFixedPoint<float32, int32, fractionalBits, clipOutput>
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
-		MPT_CONSTANT_IF(clipOutput)
-		{
-			float32 out = val * factor;
-			if(out < -1.0f) out = -1.0f;
-			if(out > 1.0f) out = 1.0f;
-			return out;
-		} else
-		{
-			return val * factor;
-		}
+		return val * factor;
 	}
 };
 
-template <int fractionalBits, bool clipOutput>
-struct ConvertFixedPoint<float64, int32, fractionalBits, clipOutput>
+template <int fractionalBits>
+struct ConvertFixedPoint<float64, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef float64 output_t;
@@ -905,16 +1122,7 @@ struct ConvertFixedPoint<float64, int32, fractionalBits, clipOutput>
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
-		MPT_CONSTANT_IF(clipOutput)
-		{
-			float64 out = val * factor;
-			if(out < -1.0) out = -1.0;
-			if(out > 1.0) out = 1.0;
-			return out;
-		} else
-		{
-			return val * factor;
-		}
+		return val * factor;
 	}
 };
 
@@ -1051,6 +1259,69 @@ struct ConversionChain
 };
 
 
+template <typename Tfixed, int fractionalBits, bool clipOutput>
+struct ClipFixed
+{
+	typedef Tfixed input_t;
+	typedef Tfixed output_t;
+	MPT_FORCEINLINE Tfixed operator() (Tfixed val)
+	{
+		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
+		MPT_CONSTANT_IF(clipOutput)
+		{
+			constexpr Tfixed clip_max = (Tfixed(1) << fractionalBits) - Tfixed(1);
+			constexpr Tfixed clip_min = Tfixed(0) - (Tfixed(1) << fractionalBits);
+			if(val < clip_min) val = clip_min;
+			if(val > clip_max) val = clip_max;
+			return val;
+		} else
+		{
+			return val;
+		}
+	}
+};
+
+
+template <typename Tfloat, bool clipOutput>
+struct ClipFloat;
+
+template <bool clipOutput>
+struct ClipFloat<float, clipOutput>
+{
+	typedef float input_t;
+	typedef float output_t;
+	MPT_FORCEINLINE float operator() (float val)
+	{
+		MPT_CONSTANT_IF(clipOutput)
+		{
+			if(val < -1.0f) val = -1.0f;
+			if(val > 1.0f) val = 1.0f;
+			return val;
+		} else
+		{
+			return val;
+		}
+	}
+};
+
+template <bool clipOutput>
+struct ClipFloat<double, clipOutput>
+{
+	typedef double input_t;
+	typedef double output_t;
+	MPT_FORCEINLINE double operator() (double val)
+	{
+		MPT_CONSTANT_IF(clipOutput)
+		{
+			if(val < -1.0) val = -1.0;
+			if(val > 1.0) val = 1.0;
+			return val;
+		} else
+		{
+			return val;
+		}
+	}
+};
 
 
 template <typename Tsample>

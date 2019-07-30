@@ -26,7 +26,8 @@ class CRenderProgressDlg : public CProgressDialog
 	class DummyAudioTarget : public IAudioReadTarget
 	{
 	public:
-		void DataCallback(int *, std::size_t, std::size_t) override { }
+		void DataCallback(MixSampleInt *, std::size_t, std::size_t) override { }
+		void DataCallback(MixSampleFloat *, std::size_t, std::size_t) override { }
 	};
 
 public:

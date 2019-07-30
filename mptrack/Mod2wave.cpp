@@ -21,6 +21,7 @@
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/MixerLoops.h"
 #include "../soundbase/Dither.h"
+#include "../soundbase/SampleBuffer.h"
 #include "../soundlib/AudioReadTarget.h"
 #include "../soundlib/plugins/PlugInterface.h"
 
@@ -32,10 +33,93 @@ OPENMPT_NAMESPACE_BEGIN
 
 extern const TCHAR *gszChnCfgNames[3];
 
+
+class AudioReadTargetBufferInterleavedDynamic
+	: public IAudioReadTarget
+{
+private:
+	const SampleFormat sampleFormat;
+	Dither &dither;
+	void *buffer;
+public:
+	AudioReadTargetBufferInterleavedDynamic(SampleFormat sampleFormat_, Dither &dither_, void *buffer_)
+		: sampleFormat(sampleFormat_)
+		, dither(dither_)
+		, buffer(buffer_)
+	{
+		MPT_ASSERT_ALWAYS(sampleFormat.IsValid());
+	}
+private:
+	template<typename MixSampleType>
+	void DataCallbackTemplate(MixSampleType *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
+	{
+		switch(sampleFormat)
+		{
+			case SampleFormatUnsigned8:
+				{
+					typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
+					AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatInt8:
+				{
+					typedef SampleFormatToType<SampleFormatInt8>::type Tsample;
+					AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatInt16:
+				{
+					typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
+					AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatInt24:
+				{
+					typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
+					AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatInt32:
+				{
+					typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
+					AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatFloat32:
+				{
+					typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
+					AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
+					target.DataCallback(MixSoundBuffer, channels, countChunk);
+				}
+				break;
+			case SampleFormatInvalid:
+				// nothing
+				break;
+		}
+		// increment output buffer for potentially next callback
+		buffer = mpt::void_cast<mpt::byte*>(buffer) + (sampleFormat.GetBitsPerSample()/8) * channels * countChunk;
+	}
+public:
+	void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	{
+		DataCallbackTemplate(MixSoundBuffer, channels, countChunk);
+	}
+	void DataCallback(MixSampleFloat *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	{
+		DataCallbackTemplate(MixSoundBuffer, channels, countChunk);
+	}
+};
+
+
 static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outputBuffer, CSoundFile::samplecount_t count, SampleFormat sampleFormat, Dither &dither)
 {
 	sndFile.ResetMixStat();
-	AudioReadTargetBufferInterleavedDynamic target(sampleFormat, false, dither, outputBuffer);
+	AudioReadTargetBufferInterleavedDynamic target(sampleFormat, dither, outputBuffer);
 	return sndFile.Read(count, target);
 }
 
@@ -927,7 +1011,7 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 
 void CDoWaveConvert::Run()
 {
-	static char buffer[MIXBUFFERSIZE * 4 * 4]; // channels * sizeof(biggestsample)
+	static mpt::byte buffer[MIXBUFFERSIZE * 4 * 4]; // channels * sizeof(biggestsample)
 	static MixSampleFloat floatbuffer[MIXBUFFERSIZE * 4]; // channels
 	static MixSampleInt mixbuffer[MIXBUFFERSIZE * 4]; // channels
 
@@ -1132,7 +1216,7 @@ void CDoWaveConvert::Run()
 				{
 					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetBitsPerSample()/8, buffer, lRead * encSettings.Channels);
 				}
-				fileEnc->WriteInterleavedConverted(lRead, buffer);
+				fileEnc->WriteInterleavedConverted(lRead, mpt::byte_cast<const char*>(buffer));
 			}
 			const std::streampos newPos = fileStream.tellp();
 			bytesWritten += static_cast<uint64>(newPos - oldPos);
@@ -1217,16 +1301,13 @@ void CDoWaveConvert::Run()
 				fileEnc->WriteInterleaved(framesChunk, floatbuffer);
 			} else
 			{
-				// Convert float buffer to mixbuffer format so we can apply dither.
-				// This can probably be changed in the future when dither supports floating point input directly.
-				FloatToMonoMix(floatbuffer, mixbuffer, samplesChunk, MIXING_SCALEF);
 				switch(m_Settings.FinalSampleFormat)
 				{
 				case SampleFormatUnsigned8:
 					dither.WithDither(
 						[&](auto &ditherInstance)
 						{
-							return ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<uint8*>(buffer), mixbuffer, ditherInstance, channels, framesChunk);
+							ConvertBufferMixFloatToBuffer<false>(audio_buffer_interleaved<uint8>(reinterpret_cast<uint8*>(buffer), channels, framesChunk), audio_buffer_interleaved<const MixSampleFloat>(floatbuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
 						}
 					);
 					break;
@@ -1234,7 +1315,7 @@ void CDoWaveConvert::Run()
 					dither.WithDither(
 						[&](auto &ditherInstance)
 						{
-							return ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<int8*>(buffer), mixbuffer, ditherInstance, channels, framesChunk);
+							ConvertBufferMixFloatToBuffer<false>(audio_buffer_interleaved<int8>(reinterpret_cast<int8*>(buffer), channels, framesChunk), audio_buffer_interleaved<const MixSampleFloat>(floatbuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
 						}
 					);
 					break;
@@ -1242,7 +1323,7 @@ void CDoWaveConvert::Run()
 					dither.WithDither(
 						[&](auto &ditherInstance)
 						{
-							return ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<int16*>(buffer), mixbuffer, ditherInstance, channels, framesChunk);
+							ConvertBufferMixFloatToBuffer<false>(audio_buffer_interleaved<int16>(reinterpret_cast<int16*>(buffer), channels, framesChunk), audio_buffer_interleaved<const MixSampleFloat>(floatbuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
 						}
 					);
 					break;
@@ -1250,7 +1331,7 @@ void CDoWaveConvert::Run()
 					dither.WithDither(
 						[&](auto &ditherInstance)
 						{
-							return ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<int24*>(buffer), mixbuffer, ditherInstance, channels, framesChunk);
+							ConvertBufferMixFloatToBuffer<false>(audio_buffer_interleaved<int24>(reinterpret_cast<int24*>(buffer), channels, framesChunk), audio_buffer_interleaved<const MixSampleFloat>(floatbuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
 						}
 					);
 					break;
@@ -1258,7 +1339,7 @@ void CDoWaveConvert::Run()
 					dither.WithDither(
 						[&](auto &ditherInstance)
 						{
-							return ConvertInterleavedFixedPointToInterleaved<MIXING_FRACTIONAL_BITS,false>(reinterpret_cast<int32*>(buffer), mixbuffer, ditherInstance, channels, framesChunk);
+							ConvertBufferMixFloatToBuffer<false>(audio_buffer_interleaved<int32>(reinterpret_cast<int32*>(buffer), channels, framesChunk), audio_buffer_interleaved<const MixSampleFloat>(floatbuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
 						}
 					);
 					break;
@@ -1269,7 +1350,7 @@ void CDoWaveConvert::Run()
 				{
 					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetBitsPerSample()/8, buffer, framesChunk * channels);
 				}
-				fileEnc->WriteInterleavedConverted(framesChunk, buffer);
+				fileEnc->WriteInterleavedConverted(framesChunk, mpt::byte_cast<const char*>(buffer));
 			}
 			const std::streampos newPos = fileStream.tellp();
 			bytesWritten += static_cast<std::size_t>(newPos - oldPos);

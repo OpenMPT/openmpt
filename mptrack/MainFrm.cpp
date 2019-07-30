@@ -15,6 +15,7 @@
 #include "../sounddev/SoundDevice.h"
 #include "../sounddev/SoundDeviceManager.h"
 #include "../soundlib/AudioReadTarget.h"
+#include "../sounddev/SoundDeviceBuffer.h"
 #include "ImageLists.h"
 #include "Moddoc.h"
 #include "Childfrm.h"
@@ -708,41 +709,57 @@ void CMainFrame::SoundSourceUnlock()
 
 
 class StereoVuMeterSourceWrapper
-	: public AudioSourceBuffer
+	: public IAudioSource
 {
 private:
+	SoundDevice::BufferIO &bufferio;
 	VUMeter &vumeter;
 public:
-	StereoVuMeterSourceWrapper(SampleFormat sampleFormat, const void *buffer, VUMeter &vumeter)
-		: AudioSourceBuffer(sampleFormat, buffer)
+	inline StereoVuMeterSourceWrapper(SoundDevice::BufferIO &bufferIO, VUMeter &vumeter)
+		: bufferio(bufferIO)
 		, vumeter(vumeter)
 	{
 		return;
 	}
-	void FillCallback(int * const *MixInputBuffers, std::size_t channels, std::size_t countChunk) override
+	inline void FillCallback(MixSampleInt * const *MixInputBuffers, std::size_t channels, std::size_t countChunk) override
 	{
-		AudioSourceBuffer::FillCallback(MixInputBuffers, channels, countChunk);
+		audio_buffer_planar<MixSampleInt> dst(MixInputBuffers, channels, countChunk);
+		bufferio.Read(dst, countChunk);
+		vumeter.Process(MixInputBuffers, channels, countChunk);
+	}
+	inline void FillCallback(MixSampleFloat * const *MixInputBuffers, std::size_t channels, std::size_t countChunk) override
+	{
+		audio_buffer_planar<MixSampleFloat> dst(MixInputBuffers, channels, countChunk);
+		bufferio.Read(dst, countChunk);
 		vumeter.Process(MixInputBuffers, channels, countChunk);
 	}
 };
 
 
 class StereoVuMeterTargetWrapper
-	: public AudioReadTargetBufferInterleavedDynamic
+	: public IAudioReadTarget
 {
 private:
+	SoundDevice::BufferIO &bufferio;
 	VUMeter &vumeter;
 public:
-	StereoVuMeterTargetWrapper(SampleFormat sampleFormat, bool clipFloat, Dither &dither, void *buffer, VUMeter &vumeter)
-		: AudioReadTargetBufferInterleavedDynamic(sampleFormat, clipFloat, dither, buffer)
+	inline StereoVuMeterTargetWrapper(SoundDevice::BufferIO &bufferIO, VUMeter &vumeter)
+		: bufferio(bufferIO)
 		, vumeter(vumeter)
 	{
 		return;
 	}
-	void DataCallback(int *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	inline void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		vumeter.Process(MixSoundBuffer, channels, countChunk);
-		AudioReadTargetBufferInterleavedDynamic::DataCallback(MixSoundBuffer, channels, countChunk);
+		audio_buffer_interleaved<const MixSampleInt> src(MixSoundBuffer, channels, countChunk);
+		bufferio.Write(src, countChunk);
+	}
+	inline void DataCallback(MixSampleFloat *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	{
+		vumeter.Process(MixSoundBuffer, channels, countChunk);
+		audio_buffer_interleaved<const MixSampleFloat> src(MixSoundBuffer, channels, countChunk);
+		bufferio.Write(src, countChunk);
 	}
 };
 
@@ -768,8 +785,9 @@ void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, s
 	MPT_ASSERT(numFrames <= std::numeric_limits<CSoundFile::samplecount_t>::max());
 	CSoundFile::samplecount_t framesToRender = static_cast<CSoundFile::samplecount_t>(numFrames);
 	m_Dither.SetMode((DitherMode)bufferFormat.DitherType);
-	StereoVuMeterSourceWrapper source(bufferFormat.sampleFormat, inputBuffer, m_VUMeterInput);
-	StereoVuMeterTargetWrapper target(bufferFormat.sampleFormat, bufferFormat.NeedsClippedFloat, m_Dither, buffer, m_VUMeterOutput);
+	SoundDevice::BufferIO bufferIO(buffer, inputBuffer, numFrames, m_Dither, bufferFormat);
+	StereoVuMeterSourceWrapper source(bufferIO, m_VUMeterInput);
+	StereoVuMeterTargetWrapper target(bufferIO, m_VUMeterOutput);
 	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(framesToRender, target, source);
 	MPT_ASSERT(renderedFrames <= framesToRender);
 	CSoundFile::samplecount_t remainingFrames = framesToRender - renderedFrames;
@@ -780,10 +798,10 @@ void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, s
 		std::size_t frameSize = bufferFormat.Channels * (bufferFormat.sampleFormat.GetBitsPerSample()/8);
 		if(bufferFormat.sampleFormat.IsUnsigned())
 		{
-			std::memset((char*)(buffer) + renderedFrames * frameSize, 0x80, remainingFrames * frameSize);
+			std::memset(mpt::void_cast<char*>(buffer) + renderedFrames * frameSize, 0x80, remainingFrames * frameSize);
 		} else
 		{
-			std::memset((char*)(buffer) + renderedFrames * frameSize, 0, remainingFrames * frameSize);
+			std::memset(mpt::void_cast<char*>(buffer) + renderedFrames * frameSize, 0, remainingFrames * frameSize);
 		}
 	}
 }
@@ -881,17 +899,23 @@ void CMainFrame::audioCloseDevice()
 }
 
 
-void VUMeter::Process(Channel &c, int sample)
+void VUMeter::Process(Channel &c, MixSampleInt sample)
 {
 	c.peak = std::max(c.peak, mpt::abs(sample));
-	if(sample < MIXING_CLIPMIN || MIXING_CLIPMAX < sample)
+	if(sample < MixSampleIntTraits::mix_clip_min() || MixSampleIntTraits::mix_clip_max() < sample)
 	{
 		c.clipped = true;
 	}
 }
 
 
-void VUMeter::Process(const int *mixbuffer, std::size_t numChannels, std::size_t numFrames)
+void VUMeter::Process(Channel &c, MixSampleFloat sample)
+{
+	Process(c, SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::filter_fractional_bits()>()(sample));
+}
+
+
+void VUMeter::Process(const MixSampleInt *mixbuffer, std::size_t numChannels, std::size_t numFrames)
 {
 	for(std::size_t frame = 0; frame < numFrames; ++frame)
 	{
@@ -907,7 +931,39 @@ void VUMeter::Process(const int *mixbuffer, std::size_t numChannels, std::size_t
 }
 
 
-void VUMeter::Process(const int *const *mixbuffers, std::size_t numChannels, std::size_t numFrames)
+void VUMeter::Process(const MixSampleFloat *mixbuffer, std::size_t numChannels, std::size_t numFrames)
+{
+	for(std::size_t frame = 0; frame < numFrames; ++frame)
+	{
+		for(std::size_t channel = 0; channel < std::min(numChannels, maxChannels); ++channel)
+		{
+			Process(channels[channel], mixbuffer[frame*numChannels + channel]);
+		}
+	}
+	for(std::size_t channel = std::min(numChannels, maxChannels); channel < maxChannels; ++channel)
+	{
+		channels[channel] = Channel();
+	}
+}
+
+
+void VUMeter::Process(const MixSampleInt *const *mixbuffers, std::size_t numChannels, std::size_t numFrames)
+{
+	for(std::size_t channel = 0; channel < std::min(numChannels, maxChannels); ++channel)
+	{
+		for(std::size_t frame = 0; frame < numFrames; ++frame)
+		{
+			Process(channels[channel], mixbuffers[channel][frame]);
+		}
+	}
+	for(std::size_t channel = std::min(numChannels, maxChannels); channel < maxChannels; ++channel)
+	{
+		channels[channel] = Channel();
+	}
+}
+
+
+void VUMeter::Process(const MixSampleFloat *const *mixbuffers, std::size_t numChannels, std::size_t numFrames)
 {
 	for(std::size_t channel = 0; channel < std::min(numChannels, maxChannels); ++channel)
 	{
@@ -929,7 +985,7 @@ const float VUMeter::dynamicRange = 48.0f; // corresponds to the current impleme
 void VUMeter::SetDecaySpeedDecibelPerSecond(float decibelPerSecond)
 {
 	float linearDecayRate = decibelPerSecond / dynamicRange;
-	decayParam = mpt::saturate_round<int32>(linearDecayRate * MIXING_CLIPMAX);
+	decayParam = mpt::saturate_round<int32>(linearDecayRate * MixSampleIntTraits::mix_clip_max());
 }
 
 

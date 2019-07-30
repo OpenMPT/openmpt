@@ -1983,10 +1983,10 @@ void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
 					switch(sample.GetElementarySampleSize())
 					{
 					case 1:
-						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int8, mixsample_t, 23, false>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int8 *>(newSample) + writeOffset + c, procCount, sample.GetNumChannels(), buffer + c, sizeof(buffer), 2);
+						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int8, mixsample_t, 23>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int8 *>(newSample) + writeOffset + c, procCount, sample.GetNumChannels(), buffer + c, sizeof(buffer), 2);
 						break;
 					case 2:
-						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int16, mixsample_t, 23, false>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int16 *>(newSample) + writeOffset + c, procCount, sample.GetNumChannels(), buffer + c, sizeof(buffer), 2);
+						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int16, mixsample_t, 23>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int16 *>(newSample) + writeOffset + c, procCount, sample.GetNumChannels(), buffer + c, sizeof(buffer), 2);
 						break;
 					}
 				}

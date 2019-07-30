@@ -78,38 +78,109 @@ void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_REST
 }
 
 
-
-template<int fractionalBits, bool clipOutput, typename Tsample, typename Tfixed, typename Tdither>
-void ConvertInterleavedFixedPointToInterleaved(Tsample * MPT_RESTRICT p, const Tfixed * MPT_RESTRICT mixbuffer, Tdither & dither, std::size_t channels, std::size_t count)
+template<int fractionalBits, bool clipOutput, typename TOutBuf, typename TInBuf, typename Tdither>
+void ConvertBufferMixFixedToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither & dither, std::size_t channels, std::size_t count)
 {
-	constexpr int ditherBits = SampleFormat(SampleFormatTraits<Tsample>::sampleFormat()).IsInt()
-		? SampleFormat(SampleFormatTraits<Tsample>::sampleFormat()).GetBitsPerSample()
+	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
+	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
+	MPT_ASSERT(inBuf.size_channels() >= channels);
+	MPT_ASSERT(outBuf.size_channels() >= channels);
+	MPT_ASSERT(inBuf.size_frames() >= count);
+	MPT_ASSERT(outBuf.size_frames() >= count);
+	constexpr int ditherBits = SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).IsInt()
+		? SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).GetBitsPerSample()
 		: 0;
-	SC::ConvertFixedPoint<Tsample, int32, fractionalBits, clipOutput> conv;
+	SC::ClipFixed<int32, fractionalBits, clipOutput> clip;
+	SC::ConvertFixedPoint<TOutSample, TInSample, fractionalBits> conv;
 	for(std::size_t i = 0; i < count; ++i)
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
-			*p = conv(dither.template process<ditherBits>(channel, *mixbuffer));
-			mixbuffer++;
-			p++;
+			outBuf(channel, i) = conv(clip(dither.template process<ditherBits>(channel, inBuf(channel, i))));
 		}
 	}
 }
 
-template<int fractionalBits, bool clipOutput, typename Tsample, typename Tfixed, typename Tdither>
-void ConvertInterleavedFixedPointToNonInterleaved(Tsample * const * const MPT_RESTRICT buffers, const Tfixed * MPT_RESTRICT mixbuffer, Tdither & dither, std::size_t channels, std::size_t count)
+
+template<int fractionalBits, typename TOutBuf, typename TInBuf>
+void ConvertBufferToBufferMixFixed(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
 {
-	constexpr int ditherBits = SampleFormat(SampleFormatTraits<Tsample>::sampleFormat()).IsInt()
-		? SampleFormat(SampleFormatTraits<Tsample>::sampleFormat()).GetBitsPerSample()
-		: 0;
-	SC::ConvertFixedPoint<Tsample, int32, fractionalBits, clipOutput> conv;
+	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
+	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
+	MPT_ASSERT(inBuf.size_channels() >= channels);
+	MPT_ASSERT(outBuf.size_channels() >= channels);
+	MPT_ASSERT(inBuf.size_frames() >= count);
+	MPT_ASSERT(outBuf.size_frames() >= count);
+	SC::ConvertToFixedPoint<TOutSample, TInSample, fractionalBits> conv;
 	for(std::size_t i = 0; i < count; ++i)
 	{
 		for(std::size_t channel = 0; channel < channels; ++channel)
 		{
-			buffers[channel][i] = conv(dither.template process<ditherBits>(channel, *mixbuffer));
-			mixbuffer++;
+			outBuf(channel, i) = conv(inBuf(channel, i));
+		}
+	}
+}
+
+
+template<bool clipOutput, typename TOutBuf, typename TInBuf, typename Tdither>
+void ConvertBufferMixFloatToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither & dither, std::size_t channels, std::size_t count)
+{
+	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
+	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
+	MPT_ASSERT(inBuf.size_channels() >= channels);
+	MPT_ASSERT(outBuf.size_channels() >= channels);
+	MPT_ASSERT(inBuf.size_frames() >= count);
+	MPT_ASSERT(outBuf.size_frames() >= count);
+	constexpr int ditherBits = SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).IsInt()
+		? SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).GetBitsPerSample()
+		: 0;
+	SC::ClipFloat<TInSample, clipOutput> clip;
+	SC::Convert<TOutSample, TInSample> conv;
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			outBuf(channel, i) = conv(clip(dither.template process<ditherBits>(channel, inBuf(channel, i))));
+		}
+	}
+}
+
+
+template<typename TOutBuf, typename TInBuf>
+void ConvertBufferToBufferMixFloat(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
+{
+	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
+	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
+	MPT_ASSERT(inBuf.size_channels() >= channels);
+	MPT_ASSERT(outBuf.size_channels() >= channels);
+	MPT_ASSERT(inBuf.size_frames() >= count);
+	MPT_ASSERT(outBuf.size_frames() >= count);
+	SC::Convert<TOutSample, TInSample> conv;
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			outBuf(channel, i) = conv(inBuf(channel, i));
+		}
+	}
+}
+
+
+template<typename TOutBuf, typename TInBuf>
+void ConvertBufferToBuffer(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
+{
+	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
+	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
+	MPT_ASSERT(inBuf.size_channels() >= channels);
+	MPT_ASSERT(outBuf.size_channels() >= channels);
+	MPT_ASSERT(inBuf.size_frames() >= count);
+	MPT_ASSERT(outBuf.size_frames() >= count);
+	SC::Convert<TOutSample, TInSample> conv;
+	for(std::size_t i = 0; i < count; ++i)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			outBuf(channel, i) = conv(inBuf(channel, i));
 		}
 	}
 }
