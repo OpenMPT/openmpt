@@ -434,12 +434,12 @@ void CSoundFile::CreateStereoMix(int count)
 			if((pastLoopEnd || pastSampleEnd) && doSampleSwap)
 			{
 				// ProTracker compatibility: Instrument changes without a note do not happen instantly, but rather when the sample loop has finished playing.
-				// Test case: PTInstrSwap.mod
+				// Test case: PTInstrSwap.mod, PTSwapNoLoop.mod
 				const ModSample &smp = Samples[chn.nNewIns];
 				chn.pModSample = &smp;
 				chn.pCurrentSample = smp.samplev();
 				chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | smp.uFlags;
-				chn.nLength = smp.uFlags[CHN_LOOP] ? smp.nLoopEnd : smp.nLength;
+				chn.nLength = smp.uFlags[CHN_LOOP] ? smp.nLoopEnd : 0; // non-looping sample continue in oneshot mode (i.e. they will most probably just play silence)
 				chn.nLoopStart = smp.nLoopStart;
 				chn.nLoopEnd = smp.nLoopEnd;
 				chn.position.SetInt(chn.nLoopStart);
