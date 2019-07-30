@@ -428,31 +428,31 @@ void CSoundFile::CreateStereoMix(int count)
 				}
 			}
 
-			if(chn.position.GetUInt() >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP])
+			const bool pastLoopEnd = chn.position.GetUInt() >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP];
+			const bool pastSampleEnd = chn.position.GetUInt() >= chn.nLength && !chn.dwFlags[CHN_LOOP] && chn.nLength && !chn.nMasterChn;
+			const bool doSampleSwap = m_playBehaviour[kMODSampleSwap] && chn.nNewIns && chn.nNewIns <= GetNumSamples() && chn.pModSample != &Samples[chn.nNewIns];
+			if((pastLoopEnd || pastSampleEnd) && doSampleSwap)
 			{
-				if(m_playBehaviour[kMODSampleSwap] && chn.nNewIns && chn.nNewIns <= GetNumSamples() && chn.pModSample != &Samples[chn.nNewIns])
+				// ProTracker compatibility: Instrument changes without a note do not happen instantly, but rather when the sample loop has finished playing.
+				// Test case: PTInstrSwap.mod
+				const ModSample &smp = Samples[chn.nNewIns];
+				chn.pModSample = &smp;
+				chn.pCurrentSample = smp.samplev();
+				chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | smp.uFlags;
+				chn.nLength = smp.uFlags[CHN_LOOP] ? smp.nLoopEnd : smp.nLength;
+				chn.nLoopStart = smp.nLoopStart;
+				chn.nLoopEnd = smp.nLoopEnd;
+				chn.position.SetInt(chn.nLoopStart);
+				mixLoopState.UpdateLookaheadPointers(chn);
+				if(!chn.pCurrentSample)
 				{
-					// ProTracker compatibility: Instrument changes without a note do not happen instantly, but rather when the sample loop has finished playing.
-					// Test case: PTInstrSwap.mod
-					const ModSample &smp = Samples[chn.nNewIns];
-					chn.pModSample = &smp;
-					chn.pCurrentSample = smp.samplev();
-					chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | smp.uFlags;
-					chn.nLength = smp.uFlags[CHN_LOOP] ? smp.nLoopEnd : smp.nLength;
-					chn.nLoopStart = smp.nLoopStart;
-					chn.nLoopEnd = smp.nLoopEnd;
-					chn.position.SetInt(chn.nLoopStart);
-					mixLoopState.UpdateLookaheadPointers(chn);
-					if(!chn.pCurrentSample)
-					{
-						break;
-					}
-				} else if(m_playBehaviour[kMODOneShotLoops] && chn.nLoopStart == 0)
-				{
-					// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
-					chn.position.SetInt(0);
-					chn.nLoopEnd = chn.nLength = chn.pModSample->nLoopEnd;
+					break;
 				}
+			} else if(pastLoopEnd && !doSampleSwap && m_playBehaviour[kMODOneShotLoops] && chn.nLoopStart == 0)
+			{
+				// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
+				chn.position.SetInt(0);
+				chn.nLoopEnd = chn.nLength = chn.pModSample->nLoopEnd;
 			}
 		} while(nsamples > 0);
 
