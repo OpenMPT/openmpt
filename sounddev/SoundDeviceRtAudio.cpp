@@ -398,6 +398,10 @@ SoundDevice::DynamicCaps CRtAudioDevice::GetDeviceDynamicCaps(const std::vector<
 	{
 		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatFloat32);
 	}
+	if(rtinfo.nativeFormats & RTAUDIO_FLOAT64)
+	{
+		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatFloat64);
+	}
 	for(unsigned int channel = 0; channel < rtinfo.outputChannels; ++channel)
 	{
 		caps.channelNames.push_back(mpt::format(U_("Output Channel %1"))(channel));

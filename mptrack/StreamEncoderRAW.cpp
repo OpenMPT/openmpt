@@ -84,7 +84,7 @@ RAWEncoder::RAWEncoder()
 		int samplerate = traits.samplerates[i];
 		for(int channels = 1; channels <= traits.maxChannels; channels *= 2)
 		{
-			const std::array<SampleFormat, 6> sampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatInt8, SampleFormatUnsigned8 };
+			const std::array<SampleFormat, 7> sampleFormats = { SampleFormatFloat64, SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatInt8, SampleFormatUnsigned8 };
 			for(const auto sampleFormat : sampleFormats)
 			{
 				Encoder::Format format;
@@ -93,7 +93,7 @@ RAWEncoder::RAWEncoder()
 				format.Sampleformat = sampleFormat;
 				if(sampleFormat.IsFloat())
 				{
-					format.Description = U_("Floating Point Little-Endian");
+					format.Description = mpt::format(U_("%1 Bit Floating Point Little-Endian"))(sampleFormat.GetBitsPerSample());
 				} else if(sampleFormat.IsUnsigned())
 				{
 					format.Description = mpt::format(U_("%1 Bit Little-Endian (unsigned)"))(sampleFormat.GetBitsPerSample());

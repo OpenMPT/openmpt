@@ -97,6 +97,13 @@ private:
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
+			case SampleFormatFloat64:
+			{
+				typedef SampleFormatToType<SampleFormatFloat64>::type Tsample;
+				AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
+				target.DataCallback(MixSoundBuffer, channels, countChunk);
+			}
+			break;
 			case SampleFormatInvalid:
 				// nothing
 				break;

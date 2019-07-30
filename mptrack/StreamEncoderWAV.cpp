@@ -134,7 +134,7 @@ WAVEncoder::WAVEncoder()
 		int samplerate = traits.samplerates[i];
 		for(int channels = 1; channels <= traits.maxChannels; channels *= 2)
 		{
-			const std::array<SampleFormat, 5> sampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
+			const std::array<SampleFormat, 6> sampleFormats = { SampleFormatFloat64, SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
 			for(const auto sampleFormat : sampleFormats)
 			{
 				Encoder::Format format;
@@ -143,7 +143,7 @@ WAVEncoder::WAVEncoder()
 				format.Sampleformat = sampleFormat;
 				if(sampleFormat.IsFloat())
 				{
-					format.Description = U_("Floating Point");
+					format.Description = mpt::format(U_("Floating Point (%1 Bit)"))(sampleFormat.GetBitsPerSample());
 				} else if(sampleFormat.IsUnsigned())
 				{
 					format.Description = mpt::format(U_("%1 Bit (unsigned)"))(sampleFormat.GetBitsPerSample());
