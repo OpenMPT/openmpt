@@ -76,9 +76,9 @@ HTREEITEM CTuningDialog::AddTreeItem(CTuningCollection* pTC, HTREEITEM parent, H
 	const HTREEITEM temp = m_TreeCtrlTuning.InsertItem((IsDeletable(pTC) ? CString(_T("loaded: ")) : CString()) +  m_TuningCollectionsNames[pTC], parent, insertAfter);
 	HTREEITEM temp2 = NULL;
 	m_TreeItemTuningItemMap.AddPair(temp, TUNINGTREEITEM(pTC));
-	for(size_t i = 0; i<pTC->GetNumTunings(); i++)
+	for(const auto &tuning : *pTC)
 	{
-		temp2 = AddTreeItem(&pTC->GetTuning(i), temp, temp2);
+		temp2 = AddTreeItem(tuning.get(), temp, temp2);
 	}
 	m_TreeCtrlTuning.EnsureVisible(temp);
 	return temp;
@@ -1012,9 +1012,9 @@ CTuningCollection* CTuningDialog::GetpTuningCollection(const CTuning* const pT) 
 {
 	for(auto &tuningCol : m_TuningCollections)
 	{
-		for(size_t j = 0; j < tuningCol->GetNumTunings(); j++)
+		for(const auto &tuning : *tuningCol)
 		{
-			if(pT == &tuningCol->GetTuning(j))
+			if(pT == tuning.get())
 			{
 				return tuningCol;
 			}

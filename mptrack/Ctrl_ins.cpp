@@ -3122,9 +3122,9 @@ void CCtrlInstruments::BuildTuningComboBox()
 	m_ComboTuning.ResetContent();
 
 	m_ComboTuning.AddString(_T("OpenMPT IT behaviour")); //<-> Instrument pTuning pointer == NULL
-	for(size_t i = 0; i<m_sndFile.GetTuneSpecificTunings().GetNumTunings(); i++)
+	for(const auto &tuning : m_sndFile.GetTuneSpecificTunings())
 	{
-		m_ComboTuning.AddString(mpt::ToCString(TuningCharset, m_sndFile.GetTuneSpecificTunings().GetTuning(i).GetName()));
+		m_ComboTuning.AddString(mpt::ToCString(TuningCharset, tuning->GetName()));
 	}
 	m_ComboTuning.AddString(_T("Control Tunings..."));
 	UpdateTuningComboBox();
