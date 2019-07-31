@@ -492,12 +492,10 @@ void COptionsSoundcard::UpdateSampleFormat()
 		CString name;
 		if(sampleFormat.IsFloat())
 		{
-			//name = mpt::cformat(_T("Float %1"))(sampleFormat.GetBitsPerSample());
-			name = _T("Float");
+			name = mpt::cformat(_T("Float %1 bit"))(sampleFormat.GetBitsPerSample());
 		} else if(sampleFormat.IsUnsigned())
 		{
-			//name = mpt::cformat(_T("%1 Bit uint"))(sampleFormat.GetBitsPerSample());
-			name = mpt::cformat(_T("%1 Bit"))(sampleFormat.GetBitsPerSample());
+			name = mpt::cformat(_T("%1 Bit uint"))(sampleFormat.GetBitsPerSample());
 		} else
 		{
 			name = mpt::cformat(_T("%1 Bit"))(sampleFormat.GetBitsPerSample());
