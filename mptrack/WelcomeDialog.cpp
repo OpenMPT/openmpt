@@ -79,7 +79,7 @@ BOOL WelcomeDlg::OnInitDialog()
 
 	const char *keyFile = nullptr;
 	const TCHAR *keyFileName = nullptr;
-	const uint16_t language = LOWORD(GetKeyboardLayout(0)), primaryLang = language & 0x3FF;
+	const uint16 language = LOWORD(GetKeyboardLayout(0)), primaryLang = language & 0x3FF;
 	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
 	combo->AddString(_T("OpenMPT / Chromatic (Default)"));
 	combo->SetCurSel(0);

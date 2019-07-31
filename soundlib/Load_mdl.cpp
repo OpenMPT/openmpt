@@ -187,7 +187,7 @@ static const ModCommand::COMMAND MDLEffTrans[] =
 
 
 // receive an MDL effect, give back a 'normal' one.
-static void ConvertMDLCommand(uint8_t &cmd, uint8_t &param)
+static void ConvertMDLCommand(uint8 &cmd, uint8 &param)
 {
 	if(cmd >= CountOf(MDLEffTrans))
 		return;

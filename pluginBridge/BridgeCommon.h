@@ -328,7 +328,7 @@ union BridgeMessage
 	DispatchMsg dispatch;
 	ParameterMsg parameter;
 	ErrorMsg error;
-	uint8_t dummy[2048];	// Enough space for most default structs, e.g. 2x speaker negotiation struct
+	uint8 dummy[2048];	// Enough space for most default structs, e.g. 2x speaker negotiation struct
 
 	void SetType(MsgHeader::BridgeMessageType msgType, uint32 size)
 	{

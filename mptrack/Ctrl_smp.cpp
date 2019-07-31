@@ -1820,7 +1820,7 @@ void CCtrlSamples::OnResample()
 }
 
 
-void CCtrlSamples::ApplyResample(uint32_t newRate, ResamplingMode mode)
+void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
 {
 	BeginWaitCursor();
 
@@ -3367,7 +3367,7 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	case kcSampleUpsample:
 	case kcSampleDownsample:
 		{
-			uint32_t oldRate = m_sndFile.GetSample(m_nSample).GetSampleRate(m_sndFile.GetType());
+			uint32 oldRate = m_sndFile.GetSample(m_nSample).GetSampleRate(m_sndFile.GetType());
 			ApplyResample(wParam == kcSampleUpsample ? oldRate * 2 : oldRate / 2, TrackerSettings::Instance().sampleEditorDefaultResampler);
 		}
 		break;

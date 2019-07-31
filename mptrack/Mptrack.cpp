@@ -1814,7 +1814,7 @@ void CFastBitmap::SetBlendColor(COLORREF cr)
 // Monochrome 4-bit bitmap (0=text, !0 = back)
 void CFastBitmap::TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, MODPLUGDIB *lpdib)
 {
-	const uint8_t *psrc;
+	const uint8 *psrc;
 	BYTE *pdest;
 	UINT x1, x2;
 	int srcwidth, srcinc;
@@ -1849,7 +1849,7 @@ void CFastBitmap::TextBlt(int x, int y, int cx, int cy, int srcx, int srcy, MODP
 	psrc = lpdib->lpDibBits + (srcx >> 1) + (srcy * srcwidth);
 	for (int iy=0; iy<cy; iy++)
 	{
-		uint8_t *p = pdest;
+		uint8 *p = pdest;
 		UINT ix = x1;
 		if (ix&1)
 		{

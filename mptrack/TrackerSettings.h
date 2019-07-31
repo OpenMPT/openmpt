@@ -469,7 +469,7 @@ struct FontSetting
 	int32 size;
 	FlagSet<FontFlags> flags;
 
-	FontSetting(const mpt::ustring &name = U_(""), int32_t size = 120, FontFlags flags = None) : name(name), size(size), flags(flags) { }
+	FontSetting(const mpt::ustring &name = U_(""), int32 size = 120, FontFlags flags = None) : name(name), size(size), flags(flags) { }
 
 	bool operator== (const FontSetting &other) const
 	{

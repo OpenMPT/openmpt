@@ -3003,15 +3003,15 @@ void CModDoc::SerializeViews() const
 			const CRect rect = wnd.rcNormalPosition;
 
 			// Write size information
-			uint8_t windowState = 0;
+			uint8 windowState = 0;
 			if(wnd.showCmd == SW_SHOWMAXIMIZED) windowState = 1;
 			else if(wnd.showCmd == SW_SHOWMINIMIZED) windowState = 2;
-			mpt::IO::WriteIntLE<uint8_t>(f, 0);	// Window type
-			mpt::IO::WriteIntLE<uint8_t>(f, windowState);
-			mpt::IO::WriteIntLE<int32_t>(f, Util::muldivr(rect.left, 1 << 30, width));
-			mpt::IO::WriteIntLE<int32_t>(f, Util::muldivr(rect.top, 1 << 30, height));
-			mpt::IO::WriteIntLE<int32_t>(f, Util::muldivr(rect.Width(), 1 << 30, width));
-			mpt::IO::WriteIntLE<int32_t>(f, Util::muldivr(rect.Height(), 1 << 30, height));
+			mpt::IO::WriteIntLE<uint8>(f, 0);	// Window type
+			mpt::IO::WriteIntLE<uint8>(f, windowState);
+			mpt::IO::WriteIntLE<int32>(f, Util::muldivr(rect.left, 1 << 30, width));
+			mpt::IO::WriteIntLE<int32>(f, Util::muldivr(rect.top, 1 << 30, height));
+			mpt::IO::WriteIntLE<int32>(f, Util::muldivr(rect.Width(), 1 << 30, width));
+			mpt::IO::WriteIntLE<int32>(f, Util::muldivr(rect.Height(), 1 << 30, height));
 
 			std::string s = pChildFrm->SerializeView();
 			mpt::IO::WriteVarInt(f, s.size());
@@ -3027,11 +3027,11 @@ void CModDoc::SerializeViews() const
 			int32 editorX = Util::muldivr(m_SndFile.m_MixPlugins[i].editorX, 1 << 30, cxScreen);
 			int32 editorY = Util::muldivr(m_SndFile.m_MixPlugins[i].editorY, 1 << 30, cyScreen);
 
-			mpt::IO::WriteIntLE<uint8_t>(f, 1);	// Window type
-			mpt::IO::WriteIntLE<uint8_t>(f, 0);	// Version
+			mpt::IO::WriteIntLE<uint8>(f, 1);	// Window type
+			mpt::IO::WriteIntLE<uint8>(f, 0);	// Version
 			mpt::IO::WriteVarInt(f, i);
-			mpt::IO::WriteIntLE<int32_t>(f, editorX);
-			mpt::IO::WriteIntLE<int32_t>(f, editorY);
+			mpt::IO::WriteIntLE<int32>(f, editorX);
+			mpt::IO::WriteIntLE<int32>(f, editorY);
 		}
 	}
 

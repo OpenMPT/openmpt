@@ -150,18 +150,18 @@ void PatternFont::UpdateFont(HWND hwnd)
 		customFontBitmap.bmiHeader.biWidth *= font.size;
 		customFontBitmap.bmiHeader.biHeight *= font.size;
 		customFontBitmap.bmiHeader.biSizeImage = customFontBitmap.bmiHeader.biWidth * customFontBitmap.bmiHeader.biHeight / 2;
-		customFontBitmap.lpDibBits = new uint8_t[customFontBitmap.bmiHeader.biSizeImage];
+		customFontBitmap.lpDibBits = new uint8[customFontBitmap.bmiHeader.biSizeImage];
 
 		// Upscale the image (ugly code ahead)
-		const uint8_t *origPixels = CMainFrame::bmpNotes->lpDibBits;
-		uint8_t *scaledPixels = customFontBitmap.lpDibBits;
+		const uint8 *origPixels = CMainFrame::bmpNotes->lpDibBits;
+		uint8 *scaledPixels = customFontBitmap.lpDibBits;
 		const int bytesPerLine = customFontBitmap.bmiHeader.biWidth / 2, scaleBytes = bytesPerLine * font.size;
 		bool outPos = false;
 		for(int y = 0; y < CMainFrame::bmpNotes->bmiHeader.biHeight; y++, scaledPixels += scaleBytes - bytesPerLine)
 		{
 			for(int x = 0; x < CMainFrame::bmpNotes->bmiHeader.biWidth; x++)
 			{
-				uint8_t pixel = *origPixels;
+				uint8 pixel = *origPixels;
 				if(x % 2u == 0)
 				{
 					pixel >>= 4;
@@ -301,16 +301,16 @@ void PatternFont::UpdateFont(HWND hwnd)
 
 	pf.dib->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	pf.dib->bmiHeader.biWidth = ((width + 7) & ~7);	// 4-byte alignment
-	pf.dib->bmiHeader.biHeight = -(int32_t)height;
+	pf.dib->bmiHeader.biHeight = -(int32)height;
 	pf.dib->bmiHeader.biSizeImage = pf.dib->bmiHeader.biWidth * height / 2;
 	pf.dib->bmiHeader.biPlanes = 1;
 	pf.dib->bmiHeader.biBitCount = 4;
 	pf.dib->bmiHeader.biCompression = BI_RGB;
-	pf.dib->lpDibBits = new uint8_t[pf.dib->bmiHeader.biSizeImage];
+	pf.dib->lpDibBits = new uint8[pf.dib->bmiHeader.biSizeImage];
 	pf.dib->bmiColors[0] = rgb2quad(RGB(0x00, 0x00, 0x00));
 	pf.dib->bmiColors[15] = rgb2quad(RGB(0xFF, 0xFF, 0xFF));
 
-	uint8_t *data = nullptr;
+	uint8 *data = nullptr;
 	HBITMAP bitmap = ::CreateDIBSection(hDC, (BITMAPINFO *)&pf.dib->bmiHeader, DIB_RGB_COLORS, (void **)&data, nullptr, 0);
 	if(!bitmap)
 	{
@@ -413,16 +413,16 @@ void PatternFont::UpdateFont(HWND hwnd)
 
 		pf.dibASCII->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 		pf.dibASCII->bmiHeader.biWidth = ((charWidth * 128 + 7) & ~7);	// 4-byte alignment
-		pf.dibASCII->bmiHeader.biHeight = -(int32_t)charHeight;
+		pf.dibASCII->bmiHeader.biHeight = -(int32)charHeight;
 		pf.dibASCII->bmiHeader.biSizeImage = pf.dibASCII->bmiHeader.biWidth * charHeight / 2;
 		pf.dibASCII->bmiHeader.biPlanes = 1;
 		pf.dibASCII->bmiHeader.biBitCount = 4;
 		pf.dibASCII->bmiHeader.biCompression = BI_RGB;
-		pf.dibASCII->lpDibBits = new uint8_t[pf.dibASCII->bmiHeader.biSizeImage];
+		pf.dibASCII->lpDibBits = new uint8[pf.dibASCII->bmiHeader.biSizeImage];
 		pf.dibASCII->bmiColors[0] = rgb2quad(RGB(0x00, 0x00, 0x00));
 		pf.dibASCII->bmiColors[15] = rgb2quad(RGB(0xFF, 0xFF, 0xFF));
 
-		uint8_t *data = nullptr;
+		uint8 *data = nullptr;
 		HBITMAP bitmap = ::CreateDIBSection(hDC, (BITMAPINFO *)&pf.dibASCII->bmiHeader, DIB_RGB_COLORS, (void **)&data, nullptr, 0);
 		if(!bitmap)
 		{

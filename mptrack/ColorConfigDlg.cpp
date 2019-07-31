@@ -232,7 +232,7 @@ void COptionsColors::OnChoosePatternFont()
 {
 	LOGFONT lf;
 	MemsetZero(lf);
-	const int32_t size = patternFont.size < 10 ? 120 : patternFont.size;
+	const int32 size = patternFont.size < 10 ? 120 : patternFont.size;
 	// Point size to pixels
 	lf.lfHeight = -MulDiv(size, Util::GetDPIy(m_hWnd), 720);
 	lf.lfWeight = patternFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;

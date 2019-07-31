@@ -62,7 +62,7 @@ protected:
 	void ReadTimeStretchParameters();
 
 	void ApplyAmplify(const double amp, const double fadeInStart, const double fadeOutEnd, const bool fadeIn, const bool fadeOut, const Fade::Law fadeLaw);
-	void ApplyResample(uint32_t newRate, ResamplingMode mode);
+	void ApplyResample(uint32 newRate, ResamplingMode mode);
 
 	SampleSelectionPoints GetSelectionPoints();
 	void SetSelectionPoints(SmpLength nStart, SmpLength nEnd);

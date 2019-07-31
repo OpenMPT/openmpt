@@ -1992,7 +1992,7 @@ void CViewSample::OnEditCopy()
 		// We want to store some loop metadata as well.
 		memSize += sizeof(RIFFChunk) + sizeof(WAVSampleInfoChunk) + 2 * sizeof(WAVSampleLoop);
 		// ...and cue points, too.
-		memSize += sizeof(RIFFChunk) + sizeof(uint32_t) + CountOf(sample.cues) * sizeof(WAVCuePoint);
+		memSize += sizeof(RIFFChunk) + sizeof(uint32) + CountOf(sample.cues) * sizeof(WAVCuePoint);
 	}
 
 	ASSERT((memSize % 2u) == 0);
