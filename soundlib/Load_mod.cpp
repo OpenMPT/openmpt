@@ -963,7 +963,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 						extendedPanning = true;
 				} else if(m.command == 0x0E && (m.param & 0xF0) == 0x80)
 				{
-					maxPanning = std::max<uint8>(maxPanning, m.param << 4);
+					maxPanning = std::max<uint8>(maxPanning, (m.param & 0x0F) << 4);
 				}
 			}
 		}
