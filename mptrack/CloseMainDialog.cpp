@@ -1,7 +1,7 @@
 /*
  * CloseMainDialog.cpp
  * -------------------
- * Purpose: Class for displaying a dialog with a list of unsaved documents, and the ability to choose which documents should be saved or not.
+ * Purpose: Dialog showing a list of unsaved documents, with the ability to choose which documents should be saved or not.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -11,7 +11,6 @@
 #include "stdafx.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
-#include "InputHandler.h"
 #include "Moddoc.h"
 #include "CloseMainDialog.h"
 
@@ -37,20 +36,14 @@ void CloseMainDialog::DoDataExchange(CDataExchange* pDX)
 
 CloseMainDialog::CloseMainDialog() : ResizableDialog(IDD_CLOSEDOCUMENTS)
 {
-	CMainFrame::GetInputHandler()->Bypass(true);
-};
-
-
-CloseMainDialog::~CloseMainDialog()
-{
-	CMainFrame::GetInputHandler()->Bypass(false);
 };
 
 
 CString CloseMainDialog::FormatTitle(const CModDoc *modDoc, bool fullPath)
 {
-	const CString &path = (!fullPath || modDoc->GetPathNameMpt().empty()) ? modDoc->GetTitle() : modDoc->GetPathNameMpt().ToCString();
-	return mpt::ToCString(modDoc->GetSoundFile().GetCharsetInternal(), modDoc->GetSoundFile().GetTitle()) + _T(" (") + path + _T(")");
+	return mpt::cformat(_T("%1 (%2)"))
+		(mpt::ToCString(modDoc->GetSoundFile().GetCharsetInternal(), modDoc->GetSoundFile().GetTitle()),
+		(!fullPath || modDoc->GetPathNameMpt().empty()) ? modDoc->GetTitle() : modDoc->GetPathNameMpt().ToCString());
 }
 
 
@@ -63,8 +56,8 @@ BOOL CloseMainDialog::OnInitDialog()
 
 	CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 
-	auto documents = theApp.GetOpenDocuments();
-	for(const auto &modDoc : documents)
+	m_List.SetRedraw(FALSE);
+	for(const auto &modDoc : theApp.GetOpenDocuments())
 	{
 		if(modDoc->IsModified())
 		{
@@ -73,6 +66,7 @@ BOOL CloseMainDialog::OnInitDialog()
 			m_List.SetSel(item, TRUE);
 		}
 	}
+	m_List.SetRedraw(TRUE);
 
 	if(m_List.GetCount() == 0)
 	{
@@ -113,7 +107,7 @@ void CloseMainDialog::OnOK()
 void CloseMainDialog::OnSaveAll()
 {
 	if(m_List.GetCount() == 1)
-		m_List.SetSel(0, TRUE);	// SelItemRange can't select one item: http://support.microsoft.com/kb/129428/en-us
+		m_List.SetSel(0, TRUE);	// SelItemRange can't select one item: https://jeffpar.github.io/kbarchive/kb/129/Q129428/
 	else
 		m_List.SelItemRange(TRUE, 0, m_List.GetCount() - 1);
 	OnOK();
@@ -123,7 +117,7 @@ void CloseMainDialog::OnSaveAll()
 void CloseMainDialog::OnSaveNone()
 {
 	if(m_List.GetCount() == 1)
-		m_List.SetSel(0, FALSE);	// SelItemRange can't select one item: http://support.microsoft.com/kb/129428/en-us
+		m_List.SetSel(0, FALSE);	// SelItemRange can't select one item: https://jeffpar.github.io/kbarchive/kb/129/Q129428/
 	else
 		m_List.SelItemRange(FALSE, 0, m_List.GetCount() - 1);
 	OnOK();
@@ -135,6 +129,7 @@ void CloseMainDialog::OnSwitchFullPaths()
 {
 	const int count = m_List.GetCount();
 	const bool fullPath = (IsDlgButtonChecked(IDC_CHECK1) == BST_CHECKED);
+	m_List.SetRedraw(FALSE);
 	for(int i = 0; i < count; i++)
 	{
 		CModDoc *modDoc = static_cast<CModDoc *>(m_List.GetItemDataPtr(i));
@@ -143,6 +138,7 @@ void CloseMainDialog::OnSwitchFullPaths()
 		m_List.SetSel(item, m_List.GetSel(i));
 		m_List.DeleteString(i);
 	}
+	m_List.SetRedraw(TRUE);
 }
 
 OPENMPT_NAMESPACE_END
