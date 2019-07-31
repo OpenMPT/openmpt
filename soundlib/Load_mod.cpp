@@ -809,6 +809,9 @@ bool CSoundFile::ReadMod(FileReader &file, ModLoadingFlags loadFlags)
 						leftPanning = true;
 					else if(m.param > 0x8F && m.param != 0xA4)
 						extendedPanning = true;
+				} else if(m.command == 0x0E && (m.param & 0xF0) == 0x80)
+				{
+					maxPanning = std::max<uint8>(maxPanning, (m.param & 0x0F) << 4);
 				}
 			}
 		}
