@@ -377,10 +377,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 	
 		otherPtrSize = static_cast<int32>(GetPluginArchPointerSize(arch));
 
-		// Command-line must be a modifiable string...
 		std::wstring cmdLine = mpt::format(L"%1 %2")(mapName, procId);
-		std::vector<WCHAR> cmdLineBuf(cmdLine.length() + 1);
-		std::copy(cmdLine.c_str(), cmdLine.c_str() + cmdLine.length() + 1, cmdLineBuf.begin());
 
 		STARTUPINFOW info;
 		MemsetZero(info);
@@ -388,7 +385,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 		PROCESS_INFORMATION processInfo;
 		MemsetZero(processInfo);
 
-		if(!CreateProcessW(exeName.ToWide().c_str(), cmdLineBuf.data(), NULL, NULL, FALSE, 0, NULL, NULL, &info, &processInfo))
+		if(!CreateProcessW(exeName.ToWide().c_str(), cmdLine.data(), NULL, NULL, FALSE, 0, NULL, NULL, &info, &processInfo))
 		{
 			throw BridgeException("Failed to launch plugin bridge.");
 		}
