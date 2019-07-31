@@ -25,30 +25,30 @@ namespace SoundDevice {
 
 
 template <typename Tbuffer>
-static void BufferReadTemplateFixed(Tbuffer & dst, const void * src, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
+static void BufferReadTemplateFixed(Tbuffer & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
 {
 	switch(sampleFormat)
 	{
 	case SampleFormatUnsigned8:
-		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const uint8>(static_cast<const uint8*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const uint8>(static_cast<const uint8*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatInt8:
-		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const int8>(static_cast<const int8*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const int8>(static_cast<const int8*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatInt16:
-		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const int16>(static_cast<const int16*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const int16>(static_cast<const int16*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatInt24:
-		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const int24>(static_cast<const int24*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const int24>(static_cast<const int24*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatInt32:
-		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const int32>(static_cast<const int32*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const int32>(static_cast<const int32*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatFloat32:
-		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const float>(static_cast<const float*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const float>(static_cast<const float*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatFloat64:
-		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const double>(static_cast<const double*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFixed<MixSampleIntTraits::mix_fractional_bits()>(dst, advance_audio_buffer(audio_buffer_interleaved<const double>(static_cast<const double*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatInvalid:
 		// nothing
@@ -58,30 +58,30 @@ static void BufferReadTemplateFixed(Tbuffer & dst, const void * src, std::size_t
 
 
 template <typename Tbuffer>
-static void BufferReadTemplateFloat(Tbuffer & dst, const void * src, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
+static void BufferReadTemplateFloat(Tbuffer & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
 {
 	switch(sampleFormat)
 	{
 	case SampleFormatUnsigned8:
-		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const uint8>(static_cast<const uint8*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const uint8>(static_cast<const uint8*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatInt8:
-		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const int8>(static_cast<const int8*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const int8>(static_cast<const int8*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatInt16:
-		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const int16>(static_cast<const int16*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const int16>(static_cast<const int16*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatInt24:
-		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const int24>(static_cast<const int24*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const int24>(static_cast<const int24*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatInt32:
-		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const int32>(static_cast<const int32*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const int32>(static_cast<const int32*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatFloat32:
-		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const float>(static_cast<const float*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const float>(static_cast<const float*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatFloat64:
-		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const double>(static_cast<const double*>(src), numChannels, numFrames), srcPos), numChannels, numFrames);
+		ConvertBufferToBufferMixFloat(dst, advance_audio_buffer(audio_buffer_interleaved<const double>(static_cast<const double*>(src), numChannels, srcTotal), srcPos), numChannels, numFrames);
 		break;
 	case SampleFormatInvalid:
 		// nothing
@@ -91,7 +91,7 @@ static void BufferReadTemplateFloat(Tbuffer & dst, const void * src, std::size_t
 
 
 template <typename Tbuffer>
-static void BufferWriteTemplateFixed(void * dst, std::size_t dstPos, Tbuffer & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
+static void BufferWriteTemplateFixed(void * dst, std::size_t dstTotal, std::size_t dstPos, Tbuffer & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
 {
 	switch(sampleFormat)
 	{
@@ -99,7 +99,7 @@ static void BufferWriteTemplateFixed(void * dst, std::size_t dstPos, Tbuffer & s
 			dither.WithDither(
 				[&](auto &ditherInstance)
 				{
-					ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<uint8>(static_cast<uint8*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+					ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<uint8>(static_cast<uint8*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 				}
 			);
 			break;
@@ -107,7 +107,7 @@ static void BufferWriteTemplateFixed(void * dst, std::size_t dstPos, Tbuffer & s
 			dither.WithDither(
 				[&](auto &ditherInstance)
 				{
-					ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<int8>(static_cast<int8*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+					ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<int8>(static_cast<int8*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 				}
 			);
 			break;
@@ -115,7 +115,7 @@ static void BufferWriteTemplateFixed(void * dst, std::size_t dstPos, Tbuffer & s
 			dither.WithDither(
 				[&](auto &ditherInstance)
 				{
-					ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<int16>(static_cast<int16*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+					ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<int16>(static_cast<int16*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 				}
 			);
 			break;
@@ -123,7 +123,7 @@ static void BufferWriteTemplateFixed(void * dst, std::size_t dstPos, Tbuffer & s
 			dither.WithDither(
 				[&](auto &ditherInstance)
 				{
-					ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<int24>(static_cast<int24*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+					ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<int24>(static_cast<int24*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 				}
 			);
 			break;
@@ -131,7 +131,7 @@ static void BufferWriteTemplateFixed(void * dst, std::size_t dstPos, Tbuffer & s
 			dither.WithDither(
 				[&](auto &ditherInstance)
 				{
-					ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<int32>(static_cast<int32*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+					ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<int32>(static_cast<int32*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 				}
 			);
 			break;
@@ -141,7 +141,7 @@ static void BufferWriteTemplateFixed(void * dst, std::size_t dstPos, Tbuffer & s
 				dither.WithDither(
 					[&](auto &ditherInstance)
 					{
-						ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), true>(advance_audio_buffer(audio_buffer_interleaved<float>(static_cast<float*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+						ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), true>(advance_audio_buffer(audio_buffer_interleaved<float>(static_cast<float*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 					}
 				);
 			} else
@@ -149,7 +149,7 @@ static void BufferWriteTemplateFixed(void * dst, std::size_t dstPos, Tbuffer & s
 				dither.WithDither(
 					[&](auto &ditherInstance)
 					{
-						ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<float>(static_cast<float*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+						ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<float>(static_cast<float*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 					}
 				);
 			}
@@ -160,7 +160,7 @@ static void BufferWriteTemplateFixed(void * dst, std::size_t dstPos, Tbuffer & s
 				dither.WithDither(
 					[&](auto &ditherInstance)
 					{
-						ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), true>(advance_audio_buffer(audio_buffer_interleaved<double>(static_cast<double*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+						ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), true>(advance_audio_buffer(audio_buffer_interleaved<double>(static_cast<double*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 					}
 				);
 			} else
@@ -168,7 +168,7 @@ static void BufferWriteTemplateFixed(void * dst, std::size_t dstPos, Tbuffer & s
 				dither.WithDither(
 					[&](auto &ditherInstance)
 					{
-						ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<double>(static_cast<double*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+						ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(audio_buffer_interleaved<double>(static_cast<double*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 					}
 				);
 			}
@@ -181,7 +181,7 @@ static void BufferWriteTemplateFixed(void * dst, std::size_t dstPos, Tbuffer & s
 
 
 template <typename Tbuffer>
-static void BufferWriteTemplateFloat(void * dst, std::size_t dstPos, Tbuffer & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
+static void BufferWriteTemplateFloat(void * dst, std::size_t dstTotal, std::size_t dstPos, Tbuffer & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
 {
 	switch(sampleFormat)
 	{
@@ -189,7 +189,7 @@ static void BufferWriteTemplateFloat(void * dst, std::size_t dstPos, Tbuffer & s
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<uint8>(static_cast<uint8*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+				ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<uint8>(static_cast<uint8*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 			}
 		);
 		break;
@@ -197,7 +197,7 @@ static void BufferWriteTemplateFloat(void * dst, std::size_t dstPos, Tbuffer & s
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<int8>(static_cast<int8*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+				ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<int8>(static_cast<int8*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 			}
 		);
 		break;
@@ -205,7 +205,7 @@ static void BufferWriteTemplateFloat(void * dst, std::size_t dstPos, Tbuffer & s
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<int16>(static_cast<int16*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+				ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<int16>(static_cast<int16*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 			}
 		);
 		break;
@@ -213,7 +213,7 @@ static void BufferWriteTemplateFloat(void * dst, std::size_t dstPos, Tbuffer & s
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<int24>(static_cast<int24*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+				ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<int24>(static_cast<int24*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 			}
 		);
 		break;
@@ -221,7 +221,7 @@ static void BufferWriteTemplateFloat(void * dst, std::size_t dstPos, Tbuffer & s
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<int32>(static_cast<int32*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+				ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<int32>(static_cast<int32*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 			}
 		);
 		break;
@@ -231,7 +231,7 @@ static void BufferWriteTemplateFloat(void * dst, std::size_t dstPos, Tbuffer & s
 			dither.WithDither(
 				[&](auto &ditherInstance)
 				{
-					ConvertBufferMixFloatToBuffer<true>(advance_audio_buffer(audio_buffer_interleaved<float>(static_cast<float*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+					ConvertBufferMixFloatToBuffer<true>(advance_audio_buffer(audio_buffer_interleaved<float>(static_cast<float*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 				}
 			);
 		} else
@@ -239,7 +239,7 @@ static void BufferWriteTemplateFloat(void * dst, std::size_t dstPos, Tbuffer & s
 			dither.WithDither(
 				[&](auto &ditherInstance)
 				{
-					ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<float>(static_cast<float*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+					ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<float>(static_cast<float*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 				}
 			);
 		}
@@ -250,7 +250,7 @@ static void BufferWriteTemplateFloat(void * dst, std::size_t dstPos, Tbuffer & s
 			dither.WithDither(
 				[&](auto &ditherInstance)
 				{
-					ConvertBufferMixFloatToBuffer<true>(advance_audio_buffer(audio_buffer_interleaved<double>(static_cast<double*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+					ConvertBufferMixFloatToBuffer<true>(advance_audio_buffer(audio_buffer_interleaved<double>(static_cast<double*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 				}
 			);
 		} else
@@ -258,7 +258,7 @@ static void BufferWriteTemplateFloat(void * dst, std::size_t dstPos, Tbuffer & s
 			dither.WithDither(
 				[&](auto &ditherInstance)
 				{
-					ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<double>(static_cast<double*>(dst), numChannels, numFrames), dstPos), src, ditherInstance, numChannels, numFrames);
+					ConvertBufferMixFloatToBuffer<false>(advance_audio_buffer(audio_buffer_interleaved<double>(static_cast<double*>(dst), numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 				}
 			);
 		}
@@ -271,44 +271,44 @@ static void BufferWriteTemplateFloat(void * dst, std::size_t dstPos, Tbuffer & s
 
 
 
-void BufferRead(audio_buffer_interleaved<MixSampleInt> & dst, const void * src, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
+void BufferRead(audio_buffer_interleaved<MixSampleInt> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
 {
-	BufferReadTemplateFixed(dst, src, srcPos, numFrames, numChannels, sampleFormat);
+	BufferReadTemplateFixed(dst, src, srcTotal, srcPos, numFrames, numChannels, sampleFormat);
 }
 
-void BufferRead(audio_buffer_planar<MixSampleInt> & dst, const void * src, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
+void BufferRead(audio_buffer_planar<MixSampleInt> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
 {
-	BufferReadTemplateFixed(dst, src, srcPos, numFrames, numChannels, sampleFormat);
+	BufferReadTemplateFixed(dst, src, srcTotal, srcPos, numFrames, numChannels, sampleFormat);
 }
 
-void BufferRead(audio_buffer_interleaved<MixSampleFloat> & dst, const void * src, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
+void BufferRead(audio_buffer_interleaved<MixSampleFloat> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
 {
-	BufferReadTemplateFloat(dst, src, srcPos, numFrames, numChannels, sampleFormat);
+	BufferReadTemplateFloat(dst, src, srcTotal, srcPos, numFrames, numChannels, sampleFormat);
 }
 
-void BufferRead(audio_buffer_planar<MixSampleFloat> & dst, const void * src, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
+void BufferRead(audio_buffer_planar<MixSampleFloat> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
 {
-	BufferReadTemplateFloat(dst, src, srcPos, numFrames, numChannels, sampleFormat);
+	BufferReadTemplateFloat(dst, src, srcTotal, srcPos, numFrames, numChannels, sampleFormat);
 }
 
-void BufferWrite(void * dst, std::size_t dstPos, audio_buffer_interleaved<const MixSampleInt> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
+void BufferWrite(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_interleaved<const MixSampleInt> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
 {
-	BufferWriteTemplateFixed(dst, dstPos, src, numFrames, numChannels, dither, sampleFormat, clipFloat);
+	BufferWriteTemplateFixed(dst, dstTotal, dstPos, src, numFrames, numChannels, dither, sampleFormat, clipFloat);
 }
 
-void BufferWrite(void * dst, std::size_t dstPos, audio_buffer_planar<const MixSampleInt> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
+void BufferWrite(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_planar<const MixSampleInt> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
 {
-	BufferWriteTemplateFixed(dst, dstPos, src, numFrames, numChannels, dither, sampleFormat, clipFloat);
+	BufferWriteTemplateFixed(dst, dstTotal, dstPos, src, numFrames, numChannels, dither, sampleFormat, clipFloat);
 }
 
-void BufferWrite(void * dst, std::size_t dstPos, audio_buffer_interleaved<const MixSampleFloat> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
+void BufferWrite(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_interleaved<const MixSampleFloat> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
 {
-	BufferWriteTemplateFloat(dst, dstPos, src, numFrames, numChannels, dither, sampleFormat, clipFloat);
+	BufferWriteTemplateFloat(dst, dstTotal, dstPos, src, numFrames, numChannels, dither, sampleFormat, clipFloat);
 }
 
-void BufferWrite(void * dst, std::size_t dstPos, audio_buffer_planar<const MixSampleFloat> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
+void BufferWrite(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_planar<const MixSampleFloat> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
 {
-	BufferWriteTemplateFloat(dst, dstPos, src, numFrames, numChannels, dither, sampleFormat, clipFloat);
+	BufferWriteTemplateFloat(dst, dstTotal, dstPos, src, numFrames, numChannels, dither, sampleFormat, clipFloat);
 }
 
 
