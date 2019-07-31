@@ -618,6 +618,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kOPLFlexibleNoteOff: desc = _T("Full control over OPL notes after note-off"); break;
 		case kITInstrWithNoteOffOldEffects: desc = _T("Instrument number with note-off retriggers envelopes with Old Effects enabled"); break;
 		case kMIDIVolumeOnNoteOffBug: desc = _T("Reset VST volume on note-off"); break;
+		case kITDoNotOverrideChannelPan: desc = _T("Instruments / samples with forced panning do not override channel panning for following instruments / samples"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

@@ -371,7 +371,7 @@ mpt::ustring CSoundFile::GetSchismTrackerVersion(uint16 cwtv)
 			mpt::ufmt::dec0<2>(ddd - (mi * 306 + 5) / 10 + 1));
 	} else
 	{
-		version = mpt::format(U_("Schism Tracker 0.%1"))(mpt::ufmt::hex(cwtv));
+		version = mpt::format(U_("Schism Tracker 0.%1"))(mpt::ufmt::hex0<2>(cwtv));
 	}
 	return version;
 }

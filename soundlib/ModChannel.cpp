@@ -132,4 +132,18 @@ ModCommand::NOTE ModChannel::GetPluginNote(bool realNoteMapping) const
 }
 
 
+void ModChannel::SetInstrumentPan(int32 pan, const CSoundFile &sndFile)
+{
+	// IT compatibility: Instrument and sample panning does not override channel panning
+	// Test case: PanResetInstr.it
+	if(sndFile.m_playBehaviour[kITDoNotOverrideChannelPan])
+	{
+		nRestorePanOnNewNote = static_cast<uint16>(nPan + 1);
+		if(dwFlags[CHN_SURROUND])
+			nRestorePanOnNewNote |= 0x8000;
+	}
+	nPan = pan;
+}
+
+
 OPENMPT_NAMESPACE_END

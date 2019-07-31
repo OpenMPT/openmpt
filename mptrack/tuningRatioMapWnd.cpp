@@ -77,7 +77,7 @@ void CTuningRatioMapWnd::OnPaint()
 			DrawButtonRect(dc, &rect, noteStr.c_str(), FALSE, FALSE);
 
 			// Mapped Note
-			const bool highLight = (focus && (nPos == (int)m_nNote) ) ? TRUE : FALSE;
+			const bool highLight = focus && (nPos == (int)m_nNote);
 			rect.left = rect.right;
 			rect.right = m_cxFont*4-1;
 			FillRect(dc, &rect, highLight ? CMainFrame::brushHighLight : CMainFrame::brushWindow);

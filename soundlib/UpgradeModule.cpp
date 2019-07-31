@@ -542,6 +542,7 @@ void CSoundFile::UpgradeModule()
 			{ kITInstrWithNoteOff,            MPT_V("1.26.00.01") },
 			{ kITMultiSampleInstrumentNumber, MPT_V("1.27.00.27") },
 			{ kITInstrWithNoteOffOldEffects,  MPT_V("1.28.02.06") },
+			{ kITDoNotOverrideChannelPan,     MPT_V("1.29.00.22") },
 		};
 
 		for(const auto &b : behaviours)

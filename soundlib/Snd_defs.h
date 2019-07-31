@@ -519,6 +519,7 @@ enum PlayBehaviour
 	kOPLFlexibleNoteOff,            // Full control after note-off over OPL voices, ^^^ sends note cut instead of just note-off
 	kITInstrWithNoteOffOldEffects,  // Instrument number with note-off recalls default volume - special cases with Old Effects enabled
 	kMIDIVolumeOnNoteOffBug,        // Update MIDI channel volume on note-off (legacy bug emulation)
+	kITDoNotOverrideChannelPan,     // Sample / instrument pan does not override channel pan for following samples / instruments that are not panned
 
 	// Add new play behaviours here.
 
@@ -543,8 +544,8 @@ public:
 // Sample position and sample position increment value
 struct SamplePosition
 {
-	typedef int64 value_t;
-	typedef uint64 unsigned_value_t;
+	using value_t = int64;
+	using unsigned_value_t = uint64;
 
 protected:
 	value_t v = 0;
@@ -552,40 +553,40 @@ protected:
 public:
 	enum : uint32 { fractMax = 0xFFFFFFFFu };
 
-	SamplePosition() { }
-	explicit SamplePosition(value_t pos) : v(pos) { }
-	SamplePosition(int32 intPart, uint32 fractPart) : v((static_cast<value_t>(intPart) * (1ll<<32)) | fractPart) { }
+	MPT_CONSTEXPR11_FUN SamplePosition() { }
+	MPT_CONSTEXPR11_FUN explicit SamplePosition(value_t pos) : v(pos) { }
+	MPT_CONSTEXPR11_FUN SamplePosition(int32 intPart, uint32 fractPart) : v((static_cast<value_t>(intPart) * (1ll << 32)) | fractPart) { }
 	static SamplePosition Ratio(uint32 dividend, uint32 divisor) { return SamplePosition((static_cast<int64>(dividend) << 32) / divisor); }
 	static SamplePosition FromDouble(double pos) { return SamplePosition(static_cast<value_t>(pos * 4294967296.0)); }
 
 	// Set integer and fractional part
-	MPT_FORCEINLINE SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { v = (static_cast<int64>(intPart) << 32) | fractPart; return *this; }
+	MPT_CONSTEXPR14_FUN SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { v = (static_cast<int64>(intPart) << 32) | fractPart; return *this; }
 	// Set integer part, keep fractional part
-	MPT_FORCEINLINE SamplePosition &SetInt(int32 intPart) { v = (static_cast<value_t>(intPart) << 32) | GetFract(); return *this; }
+	MPT_CONSTEXPR14_FUN SamplePosition &SetInt(int32 intPart) { v = (static_cast<value_t>(intPart) << 32) | GetFract(); return *this; }
 	// Get integer part (as sample length / position)
-	MPT_FORCEINLINE SmpLength GetUInt() const { return static_cast<SmpLength>(static_cast<unsigned_value_t>(v) >> 32); }
+	MPT_CONSTEXPR11_FUN SmpLength GetUInt() const { return static_cast<SmpLength>(static_cast<unsigned_value_t>(v) >> 32); }
 	// Get integer part
-	MPT_FORCEINLINE int32 GetInt() const { return static_cast<int32>(static_cast<unsigned_value_t>(v) >> 32); }
+	MPT_CONSTEXPR11_FUN int32 GetInt() const { return static_cast<int32>(static_cast<unsigned_value_t>(v) >> 32); }
 	// Get fractional part
-	MPT_FORCEINLINE uint32 GetFract() const { return static_cast<uint32>(v); }
+	MPT_CONSTEXPR11_FUN uint32 GetFract() const { return static_cast<uint32>(v); }
 	// Get the inverted fractional part
-	MPT_FORCEINLINE SamplePosition GetInvertedFract() const { return SamplePosition(0x100000000ll - GetFract()); }
+	MPT_CONSTEXPR11_FUN SamplePosition GetInvertedFract() const { return SamplePosition(0x100000000ll - GetFract()); }
 	// Get the raw fixed-point value
-	MPT_FORCEINLINE int64 GetRaw() const { return v; }
+	MPT_CONSTEXPR11_FUN int64 GetRaw() const { return v; }
 	// Negate the current value
-	MPT_FORCEINLINE SamplePosition &Negate() { v = -v; return *this; }
+	MPT_CONSTEXPR14_FUN SamplePosition &Negate() { v = -v; return *this; }
 	// Multiply and divide by given integer scalars
-	MPT_FORCEINLINE SamplePosition &MulDiv(uint32 mul, uint32 div) { v = (v * mul) / div; return *this; }
+	MPT_CONSTEXPR14_FUN SamplePosition &MulDiv(uint32 mul, uint32 div) { v = (v * mul) / div; return *this; }
 	// Removes the integer part, only keeping fractions
-	MPT_FORCEINLINE SamplePosition &RemoveInt() { v &= fractMax; return *this; }
+	MPT_CONSTEXPR14_FUN SamplePosition &RemoveInt() { v &= fractMax; return *this; }
 	// Check if value is 1.0
-	MPT_FORCEINLINE bool IsUnity() const { return v == 0x100000000ll; }
+	MPT_CONSTEXPR11_FUN bool IsUnity() const { return v == 0x100000000ll; }
 	// Check if value is 0
-	MPT_FORCEINLINE bool IsZero() const { return v == 0; }
+	MPT_CONSTEXPR11_FUN bool IsZero() const { return v == 0; }
 	// Check if value is > 0
-	MPT_FORCEINLINE bool IsPositive() const { return v > 0; }
+	MPT_CONSTEXPR11_FUN bool IsPositive() const { return v > 0; }
 	// Check if value is < 0
-	MPT_FORCEINLINE bool IsNegative() const { return v < 0; }
+	MPT_CONSTEXPR11_FUN bool IsNegative() const { return v < 0; }
 
 	// Addition / subtraction of another fixed-point number
 	SamplePosition operator+ (const SamplePosition &other) const { return SamplePosition(v + other.v); }
@@ -604,12 +605,12 @@ public:
 	// Division by scalar; returns fractional point number
 	SamplePosition operator/ (int div) const { return SamplePosition(v / div); }
 
-	bool operator== (const SamplePosition &other) const { return v == other.v; }
-	bool operator!= (const SamplePosition &other) const { return v != other.v; }
-	bool operator<= (const SamplePosition &other) const { return v <= other.v; }
-	bool operator>= (const SamplePosition &other) const { return v >= other.v; }
-	bool operator< (const SamplePosition &other) const { return v < other.v; }
-	bool operator> (const SamplePosition &other) const { return v > other.v; }
+	MPT_CONSTEXPR11_FUN bool operator==(const SamplePosition &other) const { return v == other.v; }
+	MPT_CONSTEXPR11_FUN bool operator!=(const SamplePosition &other) const { return v != other.v; }
+	MPT_CONSTEXPR11_FUN bool operator<=(const SamplePosition &other) const { return v <= other.v; }
+	MPT_CONSTEXPR11_FUN bool operator>=(const SamplePosition &other) const { return v >= other.v; }
+	MPT_CONSTEXPR11_FUN bool operator<(const SamplePosition &other) const { return v < other.v; }
+	MPT_CONSTEXPR11_FUN bool operator>(const SamplePosition &other) const { return v > other.v; }
 };
 
 
@@ -627,7 +628,7 @@ protected:
 
 public:
 	enum : size_t { fractFact = FFact };
-	typedef T store_t;
+	using store_t = T;
 
 	MPT_CONSTEXPR11_FUN FPInt() : v(0) { }
 	MPT_CONSTEXPR11_FUN FPInt(T intPart, T fractPart) : v((intPart * fractFact) + (fractPart % fractFact)) { }
@@ -660,8 +661,8 @@ public:
 	MPT_CONSTEXPR11_FUN friend bool operator> (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v > b.v; }
 };
 
-typedef FPInt<10000, uint32> TEMPO;
+using TEMPO = FPInt<10000, uint32>;
 
-typedef std::array<uint8, 12> OPLPatch;
+using OPLPatch = std::array<uint8, 12>;
 
 OPENMPT_NAMESPACE_END

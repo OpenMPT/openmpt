@@ -541,7 +541,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if(chn.nNewIns <= GetNumInstruments() && (pIns = Instruments[chn.nNewIns]) != nullptr)
 					{
 						if(pIns->dwFlags[INS_SETPANNING])
-							chn.nPan = pIns->nPan;
+							chn.SetInstrumentPan(pIns->nPan, *this);
 						if(ModCommand::IsNote(note))
 							smp = pIns->Keyboard[note - NOTE_MIN];
 					}
@@ -552,7 +552,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if(smp > 0 && smp <= GetNumSamples())
 				{
 					if(Samples[smp].uFlags[CHN_PANNING])
-						chn.nPan = Samples[smp].nPan;
+						chn.SetInstrumentPan(Samples[smp].nPan, *this);
 					if(Samples[smp].uFlags[CHN_ADLIB])
 					{
 						memory.state->Chn[nChn].Stop();
@@ -1624,7 +1624,7 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 		}
 		chn.nInsVol = oldInsVol;
 		chn.nVolume = pSmp->nVolume;
-		if(pSmp->uFlags[CHN_PANNING]) chn.nPan = pSmp->nPan;
+		if(pSmp->uFlags[CHN_PANNING]) chn.SetInstrumentPan(pSmp->nPan, *this);
 		return;
 	}
 
@@ -1852,9 +1852,9 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 			if(pIns->nPanSwing)
 			{
 				chn.nPanSwing = static_cast<int16>(((mpt::random<int8>(AccessPRNG()) * pIns->nPanSwing * 4) / 128));
-				if(!m_playBehaviour[kITSwingBehaviour])
+				if(!m_playBehaviour[kITSwingBehaviour] && chn.nRestorePanOnNewNote == 0)
 				{
-					chn.nRestorePanOnNewNote = static_cast<int16>(chn.nPan + 1);
+					chn.nRestorePanOnNewNote = static_cast<uint16>(chn.nPan + 1);
 				}
 			}
 			// Cutoff Swing
@@ -2071,7 +2071,7 @@ void CSoundFile::ApplyInstrumentPanning(ModChannel &chn, const ModInstrument *in
 
 	if(newPan != int32_min)
 	{
-		chn.nPan = newPan;
+		chn.SetInstrumentPan(newPan, *this);
 		// IT compatibility: Sample and instrument panning overrides channel surround status.
 		// Test case: SmpInsPanSurround.it
 		if(m_playBehaviour[kPanOverride] && !m_SongFlags[SONG_SURROUNDPAN])
@@ -2748,7 +2748,7 @@ bool CSoundFile::ProcessEffects()
 					if(reloadSampleSettings)
 					{
 						// Also reload panning
-						chn.nPan = oldSample->nPan;
+						chn.SetInstrumentPan(oldSample->nPan, *this);
 					}
 				}
 			}
@@ -2857,7 +2857,9 @@ bool CSoundFile::ProcessEffects()
 			{
 				if(chn.nRestorePanOnNewNote > 0)
 				{
-					chn.nPan = chn.nRestorePanOnNewNote - 1;
+					chn.nPan = (chn.nRestorePanOnNewNote & 0x7FFF) - 1;
+					if(chn.nRestorePanOnNewNote & 0x8000)
+						chn.dwFlags.set(CHN_SURROUND);
 					chn.nRestorePanOnNewNote = 0;
 				}
 				if(chn.nRestoreResonanceOnNewNote > 0)
