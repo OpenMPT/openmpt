@@ -47,9 +47,9 @@ template <typename Tstring>
 struct string_traits
 {
 
-	typedef Tstring string_type;
-	typedef typename string_type::size_type size_type;
-	typedef typename string_type::value_type char_type;
+	using string_type = Tstring;
+	using size_type = typename string_type::size_type;
+	using char_type = typename string_type::value_type;
 
 	static inline std::size_t length(const string_type &str) { return str.length(); }
 
@@ -73,9 +73,9 @@ template <>
 struct string_traits<CString>
 {
 
-	typedef CString string_type;
-	typedef int size_type;
-	typedef typename CString::XCHAR char_type;
+	using string_type = CString;
+	using size_type = int;
+	using char_type = typename CString::XCHAR;
 
 	static inline size_type length(const string_type &str) { return str.GetLength(); }
 
@@ -256,30 +256,30 @@ struct charset_char_traits : std::char_traits<char> {
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 
-typedef MPT_ENCODED_STRING_TYPE(mpt::CharsetLocale) lstring;
+using lstring = MPT_ENCODED_STRING_TYPE(mpt::CharsetLocale);
 
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 #if MPT_OS_WINDOWS
 
 template <typename Tchar> struct windows_char_traits { };
-template <> struct windows_char_traits<char>  { typedef mpt::lstring string_type; };
-template <> struct windows_char_traits<wchar_t> { typedef std::wstring string_type; };
+template <> struct windows_char_traits<char>  { using string_type = mpt::lstring; };
+template <> struct windows_char_traits<wchar_t> { using string_type = std::wstring; };
 
 #ifdef UNICODE
-typedef windows_char_traits<wchar_t>::string_type tstring;
+using tstring = windows_char_traits<wchar_t>::string_type;
 #else
-typedef windows_char_traits<char>::string_type tstring;
+using tstring = windows_char_traits<char>::string_type;
 #endif
 
-typedef mpt::tstring winstring;
+using winstring = mpt::tstring;
 
 #endif // MPT_OS_WINDOWS
 
 
 #if MPT_ENABLE_U8STRING
 
-typedef MPT_ENCODED_STRING_TYPE(mpt::CharsetUTF8) u8string;
+using u8string = MPT_ENCODED_STRING_TYPE(mpt::CharsetUTF8);
 
 #define MPT_U8CHAR_TYPE  char
 #define MPT_U8CHAR(x)    x
@@ -412,7 +412,7 @@ std::string ToCharset(Charset to, const CString &str);
 #error "MPT_USTRING_MODE_WIDE and MPT_USTRING_MODE_UTF8 are mutually exclusive."
 #endif
 
-typedef std::wstring     ustring;
+using ustring = std::wstring;
 #define MPT_UCHAR_TYPE   wchar_t
 #define MPT_UCHAR(x)     L ## x
 #define MPT_ULITERAL(x)  L ## x
@@ -425,7 +425,7 @@ typedef std::wstring     ustring;
 #error "MPT_USTRING_MODE_WIDE and MPT_USTRING_MODE_UTF8 are mutually exclusive."
 #endif
 
-typedef mpt::u8string    ustring;
+using ustring = mpt::u8string;
 #define MPT_UCHAR_TYPE   char
 #define MPT_UCHAR(x)     x
 #define MPT_ULITERAL(x)  x
@@ -634,32 +634,32 @@ public:
 // AnyString
 // Try to do the smartest auto-magic we can do.
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-typedef BasicAnyString<mpt::CharsetLocale, true> AnyString;
+using AnyString = BasicAnyString<mpt::CharsetLocale, true>;
 #elif MPT_OS_WINDOWS
-typedef BasicAnyString<mpt::CharsetWindows1252, true> AnyString;
+using AnyString = BasicAnyString<mpt::CharsetWindows1252, true>;
 #else
-typedef BasicAnyString<mpt::CharsetISO8859_1, true> AnyString;
+using AnyString = BasicAnyString<mpt::CharsetISO8859_1, true>;
 #endif
 
 // AnyStringLocale
 // char-based strings are assumed to be in locale encoding.
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-typedef BasicAnyString<mpt::CharsetLocale, false> AnyStringLocale;
+using AnyStringLocale = BasicAnyString<mpt::CharsetLocale, false>;
 #else
-typedef BasicAnyString<mpt::CharsetUTF8, false> AnyStringLocale;
+using AnyStringLocale = BasicAnyString<mpt::CharsetUTF8, false>;
 #endif
 
 // AnyStringUTF8orLocale
 // char-based strings are tried in UTF8 first, if this fails, locale is used.
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-typedef BasicAnyString<mpt::CharsetLocale, true> AnyStringUTF8orLocale;
+using AnyStringUTF8orLocale = BasicAnyString<mpt::CharsetLocale, true>;
 #else
-typedef BasicAnyString<mpt::CharsetUTF8, false> AnyStringUTF8orLocale;
+using AnyStringUTF8orLocale = BasicAnyString<mpt::CharsetUTF8, false>;
 #endif
 
 // AnyStringUTF8
 // char-based strings are assumed to be in UTF8.
-typedef BasicAnyString<mpt::CharsetUTF8, false> AnyStringUTF8;
+using AnyStringUTF8 = BasicAnyString<mpt::CharsetUTF8, false>;
 
 
 

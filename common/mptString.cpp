@@ -441,12 +441,12 @@ static const uint32 CharsetTableCP437AMS2[256] = {
 
 
 #if defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-typedef char32_t widechar;
-typedef std::u32string widestring;
+using widechar = char32_t;
+using widestring = std::u32string;
 static constexpr widechar wide_default_replacement = 0xFFFD;
 #else // !MPT_COMPILER_QUIRK_NO_WCHAR
-typedef wchar_t widechar;
-typedef std::wstring widestring;
+using widechar = wchar_t;
+using widestring = std::wstring;
 static constexpr widechar wide_default_replacement = L'\uFFFD';
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 
@@ -603,7 +603,7 @@ static std::wstring LocaleDecode(const std::string &str, const std::locale & loc
 		return std::wstring();
 	}
 	std::vector<wchar_t> out;
-	typedef std::codecvt<wchar_t, char, std::mbstate_t> codecvt_type;
+	using codecvt_type = std::codecvt<wchar_t, char, std::mbstate_t>;
 	std::mbstate_t state = std::mbstate_t();
 	const codecvt_type & facet = std::use_facet<codecvt_type>(locale);
 	codecvt_type::result result = codecvt_type::partial;
@@ -688,7 +688,7 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 		return std::string();
 	}
 	std::vector<char> out;
-	typedef std::codecvt<wchar_t, char, std::mbstate_t> codecvt_type;
+	using codecvt_type = std::codecvt<wchar_t, char, std::mbstate_t>;
 	std::mbstate_t state = std::mbstate_t();
 	const codecvt_type & facet = std::use_facet<codecvt_type>(locale);
 	codecvt_type::result result = codecvt_type::partial;
