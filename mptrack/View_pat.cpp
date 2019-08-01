@@ -4544,7 +4544,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 		{
 			pTarget->command = CMD_S3MCMDEX;
 			if(!specs.HasCommand(CMD_S3MCMDEX)) pTarget->command = CMD_MODCMDEX;
-			pTarget->param = static_cast<ModCommand::PARAM>(0xD0 | MIN(0xF, m_nPlayTick));
+			pTarget->param = static_cast<ModCommand::PARAM>(0xD0 | std::min(uint8(0xF), mpt::saturate_cast<uint8>(m_nPlayTick)));
 		}
 
 		//Enter note off
@@ -4564,7 +4564,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 			{
 				pTarget->command = CMD_S3MCMDEX;
 				if(!specs.HasCommand(CMD_S3MCMDEX)) pTarget->command = CMD_MODCMDEX;
-				pTarget->param = static_cast<ModCommand::PARAM>(0xC0 | MIN(0xF, m_nPlayTick));
+				pTarget->param = static_cast<ModCommand::PARAM>(0xC0 | std::min(uint8(0xF), mpt::saturate_cast<uint8>(m_nPlayTick)));
 			} else // C00
 			{
 				pTarget->note = NOTE_NONE;
@@ -4855,9 +4855,9 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 			{
 				newcmd.command = CMD_S3MCMDEX;
 				if(!sndFile.GetModSpecifications().HasCommand(CMD_S3MCMDEX)) newcmd.command = CMD_MODCMDEX;
-				UINT maxSpeed = 0x0F;
-				if(m_nTicksOnRow > 0) maxSpeed = MIN(0x0F, m_nTicksOnRow - 1);
-				newcmd.param = static_cast<ModCommand::PARAM>(0xD0 | MIN(maxSpeed, m_nPlayTick));
+				uint8 maxSpeed = 0x0F;
+				if(m_nTicksOnRow > 0) maxSpeed = std::min(uint8(0x0F), mpt::saturate_cast<uint8>(m_nTicksOnRow - 1));
+				newcmd.param = static_cast<ModCommand::PARAM>(0xD0 | std::min(maxSpeed, mpt::saturate_cast<uint8>(m_nPlayTick)));
 			}
 		}
 

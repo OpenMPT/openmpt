@@ -325,41 +325,17 @@ MPT_CONSTEXPR14_FUN T log2p1(T x) noexcept
 
 
 #if defined(MODPLUG_TRACKER)
-// Tracker code requires MIN/MAX to work in constexpr contexts.
-// We could make MIN/MAX constexpr for supporting compilers,
-// but that would just needlessly complicate the support matrix
-// for now.
-#ifndef MPT_MINMAX_MACROS
-#define MPT_MINMAX_MACROS
-#endif
-#endif
-
-#if MPT_COMPILER_MSVC
-// MSVC disables a bunch of type conversion warnings once a macro is involved.
-// Replacing the macro with a template thus spews a TON OF WARNINGS for now.
-#ifndef MPT_MINMAX_MACROS
-#define MPT_MINMAX_MACROS
-#endif
-#endif
-
-#if defined(MPT_MINMAX_MACROS)
-
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
-
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-
-#else
 
 namespace mpt { namespace Legacy {
 
 template <typename Ta, typename Tb>
-MPT_FORCEINLINE auto MAX(const Ta &a, const Tb &b) -> decltype((a>b)?a:b)
+MPT_CONSTEXPR11_FUN auto MAX(const Ta &a, const Tb &b) -> decltype((a>b)?a:b)
 {
 	return (a > b) ? a : b;
 }
 
 template <typename Ta, typename Tb>
-MPT_FORCEINLINE auto MIN(const Ta &a, const Tb &b) -> decltype((a<b)?a:b)
+MPT_CONSTEXPR11_FUN auto MIN(const Ta &a, const Tb &b) -> decltype((a<b)?a:b)
 {
 	return (a < b) ? a : b;
 }
