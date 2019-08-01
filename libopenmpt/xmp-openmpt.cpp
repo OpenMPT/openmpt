@@ -374,8 +374,8 @@ static void WINAPI ShortcutHandler( DWORD id ) {
 		break;
 	}
 	
-	self->tempo_factor = std::min ( 48, std::max( -48, self->tempo_factor ) );
-	self->pitch_factor = std::min ( 48, std::max( -48, self->pitch_factor ) );
+	self->tempo_factor = std::min( 48, std::max( -48, self->tempo_factor ) );
+	self->pitch_factor = std::min( 48, std::max( -48, self->pitch_factor ) );
 	const double tempo_factor = std::pow( 2.0, self->tempo_factor / 24.0 );
 	const double pitch_factor = std::pow( 2.0, self->pitch_factor / 24.0 );
 
@@ -502,7 +502,7 @@ std::streambuf::int_type xmplay_streambuf::underflow() {
 	char * base = &buffer.front();
 	char * start = base;
 	if ( eback() == base ) {
-		std::size_t put_back_count = std::min<std::size_t>( put_back, egptr() - base );
+		std::size_t put_back_count = std::min( put_back, static_cast<std::size_t>( egptr() - base ) );
 		std::memmove( base, egptr() - put_back_count, put_back_count );
 		start += put_back_count;
 	}
@@ -1134,7 +1134,7 @@ static DWORD WINAPI openmpt_Process( float * dstbuf, DWORD count ) {
 	std::size_t frames_to_render = frames;
 	std::size_t frames_rendered = 0;
 	while ( frames_to_render > 0 ) {
-		std::size_t frames_chunk = std::min<std::size_t>( frames_to_render, ( self->samplerate + 99 ) / 100 ); // 100 Hz timing info update interval
+		std::size_t frames_chunk = std::min( frames_to_render, static_cast<std::size_t>( ( self->samplerate + 99 ) / 100 ) ); // 100 Hz timing info update interval
 		switch ( self->num_channels ) {
 		case 1:
 			{
@@ -1304,8 +1304,8 @@ static BOOL WINAPI VisOpen(DWORD colors[3]) {
 	int mix = viscolors[col].c1 + 0xA0; \
 	viscolors[col].c1 = mix; \
 	if ( mix > 0xFF ) { \
-		viscolors[col].c2 = std::max<uint8_t>( c2 - viscolors[col].c1 / 2, 0 ); \
-		viscolors[col].c3 = std::max<uint8_t>( c3 - viscolors[col].c1 / 2, 0 ); \
+		viscolors[col].c2 = std::max( static_cast<std::uint8_t>( c2 - viscolors[col].c1 / 2 ), std::uint8_t(0) ); \
+		viscolors[col].c3 = std::max( static_cast<std::uint8_t>( c3 - viscolors[col].c1 / 2 ), std::uint8_t(0) ); \
 		viscolors[col].c1 = 0xFF; \
 	} }
 
@@ -1392,7 +1392,7 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 	const std::size_t channels = self->mod->get_num_channels();
 	const std::size_t rows = self->mod->get_pattern_num_rows( pattern );
 
-	const std::size_t num_half_chars = std::max<std::size_t>( 2 * size.cx / text_size.cx, 8 ) - 8;
+	const std::size_t num_half_chars = std::max( static_cast<std::size_t>( 2 * size.cx / text_size.cx ), std::size_t(8) ) - 8;
 	const std::size_t num_rows = size.cy / text_size.cy;
 
 	// Spaces between pattern components are half width, full space at channel end
@@ -1565,13 +1565,13 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 
 	if ( offset_x < 0 ) {
 		src_offset_x -= offset_x;
-		pattern_width = std::min<int>( pattern_width + offset_x, size.cx );
+		pattern_width = std::min( static_cast<int>( pattern_width + offset_x ), static_cast<int>( size.cx ) );
 		offset_x = 0;
 	}
 
 	if ( offset_y < 0 ) {
 		src_offset_y -= offset_y;
-		pattern_height = std::min<int>( pattern_height + offset_y, size.cy );
+		pattern_height = std::min( static_cast<int>( pattern_height + offset_y ), static_cast<int>( size.cy ) );
 		offset_y = 0;
 	}
 

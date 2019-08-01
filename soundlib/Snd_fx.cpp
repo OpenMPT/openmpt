@@ -1901,7 +1901,7 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 			chn.position.Set(0);
 			if((m_SongFlags[SONG_PT_MODE] || m_playBehaviour[kST3OffsetWithoutInstrument]) && !chn.rowCommand.instr)
 			{
-				chn.position.SetInt(std::min<SmpLength>(chn.prevNoteOffset, chn.nLength - 1));
+				chn.position.SetInt(std::min(chn.prevNoteOffset, chn.nLength - SmpLength(1)));
 			} else
 			{
 				chn.prevNoteOffset = 0;
@@ -4896,11 +4896,11 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		} else if(macro[pos] == 'x')
 		{
 			// Pan set
-			data = static_cast<uint8>(std::min<int>(chn.nPan / 2, 127));
+			data = static_cast<uint8>(std::min(static_cast<int>(chn.nPan / 2), 127));
 		} else if(macro[pos] == 'y')
 		{
 			// Calculated pan
-			data = static_cast<uint8>(std::min<int>(chn.nRealPan / 2, 127));
+			data = static_cast<uint8>(std::min(static_cast<int>(chn.nRealPan / 2), 127));
 		} else if(macro[pos] == 'a')
 		{
 			// High byte of bank select
@@ -5042,7 +5042,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		} else
 		{
 			// Other MIDI messages
-			sendLen = std::min<uint32>(MIDIEvents::GetEventLength(out[sendPos]), outPos - sendPos);
+			sendLen = std::min(static_cast<uint32>(MIDIEvents::GetEventLength(out[sendPos])), outPos - sendPos);
 		}
 
 		if(sendLen == 0)
@@ -5227,7 +5227,7 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 						pPlugin->MidiSysexSend(mpt::as_span(mpt::byte_cast<const mpt::byte*>(macro), macroLen));
 					} else
 					{
-						uint32 len = std::min<uint32>(MIDIEvents::GetEventLength(macro[0]), macroLen);
+						uint32 len = std::min(static_cast<uint32>(MIDIEvents::GetEventLength(macro[0])), macroLen);
 						uint32 curData = 0;
 						memcpy(&curData, macro, len);
 						pPlugin->MidiSend(curData);
@@ -5362,7 +5362,7 @@ void CSoundFile::ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) c
 		chn.dwFlags.set(CHN_PINGPONGFLAG);
 		chn.dwFlags.reset(CHN_LOOP);
 		chn.nLength = chn.pModSample->nLength;	// If there was a loop, extend sample to whole length.
-		chn.position.Set((chn.nLength - 1) - std::min<SmpLength>(SmpLength(param) << 8, chn.nLength - 1), 0);
+		chn.position.Set((chn.nLength - 1) - std::min(SmpLength(param) << 8, chn.nLength - SmpLength(1)), 0);
 	}
 }
 
@@ -5664,7 +5664,7 @@ void CSoundFile::SetSpeed(PlayState &playState, uint32 param) const
 	if(param > 0) playState.m_nMusicSpeed = param;
 	if(GetType() == MOD_TYPE_STM && param > 0)
 	{
-		playState.m_nMusicSpeed = std::max<uint32>(param >> 4u, 1);
+		playState.m_nMusicSpeed = std::max(param >> 4, uint32(1));
 		playState.m_nMusicTempo = ConvertST2Tempo(static_cast<uint8>(param));
 	}
 }

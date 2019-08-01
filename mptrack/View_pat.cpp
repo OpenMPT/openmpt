@@ -2515,7 +2515,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 	// Don't allow notes outside our supported note range.
 	const ModCommand::NOTE noteMin = pSndFile->GetModSpecifications().noteMin;
 	const ModCommand::NOTE noteMax = pSndFile->GetModSpecifications().noteMax;
-	const int instrMax = std::min<int>(Util::MaxValueOfType(ModCommand::INSTR()), pSndFile->GetNumInstruments() ? pSndFile->GetNumInstruments() : pSndFile->GetNumSamples());
+	const int instrMax = std::min(static_cast<int>(Util::MaxValueOfType(ModCommand::INSTR())), static_cast<int>(pSndFile->GetNumInstruments() ? pSndFile->GetNumInstruments() : pSndFile->GetNumSamples()));
 	const EffectInfo effectInfo(*pSndFile);
 	const int offset = up ? 1 : -1;
 

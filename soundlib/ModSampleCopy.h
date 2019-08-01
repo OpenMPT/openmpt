@@ -29,7 +29,7 @@ size_t CopyMonoSample(ModSample &sample, const Tbyte *sourceBuffer, size_t sourc
 	MPT_ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
 	const size_t frameSize =  SampleConversion::input_inc;
-	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
+	const size_t countFrames = std::min(sourceSize / frameSize, static_cast<std::size_t>(sample.nLength));
 	size_t numFrames = countFrames;
 	SampleConversion sampleConv(conv);
 	const mpt::byte * MPT_RESTRICT inBuf = mpt::byte_cast<const mpt::byte*>(sourceBuffer);
@@ -52,7 +52,7 @@ size_t CopyStereoInterleavedSample(ModSample &sample, const Tbyte *sourceBuffer,
 	MPT_ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
 	const size_t frameSize = 2 * SampleConversion::input_inc;
-	const size_t countFrames = std::min<size_t>(sourceSize / frameSize, sample.nLength);
+	const size_t countFrames = std::min(sourceSize / frameSize, static_cast<std::size_t>(sample.nLength));
 	size_t numFrames = countFrames;
 	SampleConversion sampleConvLeft(conv);
 	SampleConversion sampleConvRight(conv);
@@ -79,8 +79,8 @@ size_t CopyStereoSplitSample(ModSample &sample, const Tbyte *sourceBuffer, size_
 	MPT_ASSERT(sample.GetElementarySampleSize() == sizeof(typename SampleConversion::output_t));
 
 	const size_t sampleSize = SampleConversion::input_inc;
-	const size_t sourceSizeLeft = std::min<size_t>(sample.nLength * SampleConversion::input_inc, sourceSize);
-	const size_t sourceSizeRight = std::min<size_t>(sample.nLength * SampleConversion::input_inc, sourceSize - sourceSizeLeft);
+	const size_t sourceSizeLeft = std::min(static_cast<std::size_t>(sample.nLength) * SampleConversion::input_inc, sourceSize);
+	const size_t sourceSizeRight = std::min(static_cast<std::size_t>(sample.nLength) * SampleConversion::input_inc, sourceSize - sourceSizeLeft);
 	const size_t countSamplesLeft = sourceSizeLeft / sampleSize;
 	const size_t countSamplesRight = sourceSizeRight / sampleSize;
 

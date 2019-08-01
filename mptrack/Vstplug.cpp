@@ -949,7 +949,7 @@ bool CVstPlugin::InitializeIOBuffers()
 {
 	// Input pointer array size must be >= 2 for now - the input buffer assignment might write to non allocated mem. otherwise
 	// In case of a bridged plugin, the AEffect struct has been updated before calling this opcode, so we don't have to worry about it being up-to-date.
-	return m_mixBuffer.Initialize(std::max<uint32>(m_Effect.numInputs, 2), m_Effect.numOutputs);
+	return m_mixBuffer.Initialize(std::max(m_Effect.numInputs, int32(2)), m_Effect.numOutputs);
 }
 
 

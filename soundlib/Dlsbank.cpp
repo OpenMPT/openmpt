@@ -1651,7 +1651,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 
 static uint16 ScaleEnvelope(uint32 time, float tempoScale)
 {
-	return std::max<uint16>(mpt::saturate_round<uint16>(time * tempoScale), 1);
+	return std::max(mpt::saturate_round<uint16>(time * tempoScale), uint16(1));
 }
 
 

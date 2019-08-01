@@ -548,8 +548,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultGlobalVolume = fileHeader.globalvol << 1;
 	if(m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(fileHeader.speed) m_nDefaultSpeed = fileHeader.speed;
-	m_nDefaultTempo.Set(std::max<uint8>(31, fileHeader.tempo));
-	m_nSamplePreAmp = std::min<uint8>(fileHeader.mv, 128);
+	m_nDefaultTempo.Set(std::max(uint8(31), static_cast<uint8>(fileHeader.tempo)));
+	m_nSamplePreAmp = std::min(static_cast<uint8>(fileHeader.mv), uint8(128));
 
 	// Reading Channels Pan Positions
 	for(CHANNELINDEX i = 0; i < 64; i++) if(fileHeader.chnpan[i] != 0xFF)
@@ -606,7 +606,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	if(fileHeader.special & ITFileHeader::embedSongMessage)
 	{
-		minPtr = std::min<uint32>(minPtr, fileHeader.msgoffset);
+		minPtr = std::min(minPtr, static_cast<uint32>(fileHeader.msgoffset));
 	}
 
 	const bool possiblyUNMO3 = fileHeader.cmwt == 0x0214 && (fileHeader.cwtv == 0x0214 || fileHeader.cwtv == 0)
@@ -742,7 +742,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nInstruments = 0;
 	if(fileHeader.flags & ITFileHeader::instrumentMode)
 	{
-		m_nInstruments = std::min<INSTRUMENTINDEX>(fileHeader.insnum, MAX_INSTRUMENTS - 1);
+		m_nInstruments = std::min(static_cast<INSTRUMENTINDEX>(fileHeader.insnum), static_cast<INSTRUMENTINDEX>(MAX_INSTRUMENTS - 1));
 	}
 	for(INSTRUMENTINDEX i = 0; i < GetNumInstruments(); i++)
 	{
@@ -770,7 +770,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	bool possibleXMconversion = false;
 
 	// Reading Samples
-	m_nSamples = std::min<SAMPLEINDEX>(fileHeader.smpnum, MAX_SAMPLES - 1);
+	m_nSamples = std::min(static_cast<SAMPLEINDEX>(fileHeader.smpnum), static_cast<SAMPLEINDEX>(MAX_SAMPLES - 1));
 	bool lastSampleCompressed = false;
 	for(SAMPLEINDEX i = 0; i < GetNumSamples(); i++)
 	{

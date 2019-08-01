@@ -51,7 +51,7 @@ MPT_BINARY_STRUCT(OktSample, 32)
 // Parse the sample header block
 static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSoundFile &sndFile)
 {
-	sndFile.m_nSamples = std::min<SAMPLEINDEX>(static_cast<SAMPLEINDEX>(chunk.BytesLeft() / sizeof(OktSample)), MAX_SAMPLES - 1u);
+	sndFile.m_nSamples = std::min(static_cast<SAMPLEINDEX>(chunk.BytesLeft() / sizeof(OktSample)), static_cast<SAMPLEINDEX>(MAX_SAMPLES - 1));
 	sample7bit.resize(sndFile.GetNumSamples());
 
 	for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
@@ -65,7 +65,7 @@ static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSo
 
 		mptSmp.nC5Speed = 8287;
 		mptSmp.nGlobalVol = 64;
-		mptSmp.nVolume = std::min<uint16>(oktSmp.volume, 64u) * 4u;
+		mptSmp.nVolume = std::min(static_cast<uint16>(oktSmp.volume), uint16(64)) * 4u;
 		mptSmp.nLength = oktSmp.length & ~1;	// round down
 		// Parse loops
 		const SmpLength loopStart = oktSmp.loopStart * 2;

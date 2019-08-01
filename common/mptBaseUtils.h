@@ -161,7 +161,7 @@ inline Tdst saturate_cast(Tsrc src)
 			return static_cast<Tdst>(src);
 		} else
 		{
-			return static_cast<Tdst>(std::max<Tsrc>(static_cast<Tsrc>(std::numeric_limits<Tdst>::min()), std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
+			return static_cast<Tdst>(std::max(static_cast<Tsrc>(std::numeric_limits<Tdst>::min()), std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
 		}
 	} else MPT_CONSTANT_IF(!std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
 	{
@@ -170,7 +170,7 @@ inline Tdst saturate_cast(Tsrc src)
 			return static_cast<Tdst>(src);
 		} else
 		{
-			return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
+			return static_cast<Tdst>(std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
 		}
 	} else MPT_CONSTANT_IF(std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
 	{
@@ -179,19 +179,19 @@ inline Tdst saturate_cast(Tsrc src)
 			return static_cast<Tdst>(src);
 		} else MPT_CONSTANT_IF(sizeof(Tdst) == sizeof(Tsrc))
 		{
-			return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
+			return static_cast<Tdst>(std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
 		} else
 		{
-			return static_cast<Tdst>(std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
+			return static_cast<Tdst>(std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
 		}
 	} else // Tdst unsigned, Tsrc signed
 	{
 		MPT_CONSTANT_IF(sizeof(Tdst) >= sizeof(Tsrc))
 		{
-			return static_cast<Tdst>(std::max<Tsrc>(0, src));
+			return static_cast<Tdst>(std::max(static_cast<Tsrc>(0), src));
 		} else
 		{
-			return static_cast<Tdst>(std::max<Tsrc>(0, std::min<Tsrc>(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
+			return static_cast<Tdst>(std::max(static_cast<Tsrc>(0), std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
 		}
 	}
 }
@@ -423,8 +423,8 @@ inline T ExponentialGrow(const T &x, const Tlimit &limit)
 	{
 		return 2;
 	}
-	T add = std::min<T>(x >> 1, std::numeric_limits<T>::max() - x);
-	return std::min<T>(x + add, mpt::saturate_cast<T>(limit));
+	T add = std::min(x >> 1, std::numeric_limits<T>::max() - x);
+	return std::min(x + add, mpt::saturate_cast<T>(limit));
 }
 									
 template <typename T>

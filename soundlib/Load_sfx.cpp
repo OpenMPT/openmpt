@@ -40,7 +40,7 @@ struct SFXSampleHeader
 		mptSmp.Initialize(MOD_TYPE_MOD);
 		mptSmp.nLength = length;
 		mptSmp.nFineTune = MOD2XMFineTune(finetune);
-		mptSmp.nVolume = 4u * std::min<uint8>(volume, 64);
+		mptSmp.nVolume = 4u * std::min(static_cast<uint8>(volume), uint8(64));
 
 		SmpLength lStart = loopStart;
 		SmpLength lLength = loopLength * 2u;
@@ -89,7 +89,7 @@ static uint8 ClampSlideParam(uint8 value, uint8 lowNote, uint8 highNote)
 
 		// with a fixed speed of 6 ticks/row, and excluding the first row,
 		// 1xx/2xx param has a max value of (low-high)/5 to avoid sliding too far
-		return std::min<uint8>(value, static_cast<uint8>((lowPeriod - highPeriod) / 5));
+		return std::min(value, static_cast<uint8>((lowPeriod - highPeriod) / 5));
 	}
 
 	return 0;
@@ -261,7 +261,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 	PATTERNINDEX numPatterns = 0;
 	for(ORDERINDEX ord = 0; ord < fileHeader.numOrders; ord++)
 	{
-		numPatterns = std::max<PATTERNINDEX>(numPatterns, fileHeader.orderList[ord] + 1u);
+		numPatterns = std::max(numPatterns, static_cast<PATTERNINDEX>(fileHeader.orderList[ord] + 1));
 	}
 
 	if(fileHeader.restartPos < fileHeader.numOrders)

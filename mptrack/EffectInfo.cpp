@@ -599,7 +599,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNEL
 			if((sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M)) && param > maxVal)
 				s = _T("undefined");
 			else
-				s.Format(_T("%u"), std::min<uint32>(param, maxVal));
+				s.Format(_T("%u"), std::min(static_cast<uint32>(param), static_cast<uint32>(maxVal)));
 		}
 		break;
 

@@ -273,7 +273,7 @@ IFileDataContainer::off_t FileDataContainerSeekable::Read(mpt::byte *dst, IFileD
 {
 	if(cached)
 	{
-		IFileDataContainer::off_t cache_avail = std::min<IFileDataContainer::off_t>(IFileDataContainer::off_t(cache.size()) - pos, count);
+		IFileDataContainer::off_t cache_avail = std::min(IFileDataContainer::off_t(cache.size()) - pos, count);
 		std::copy(cache.begin() + pos, cache.begin() + pos + cache_avail, dst);
 		return cache_avail;
 	} else
@@ -452,7 +452,7 @@ IFileDataContainer::off_t FileDataContainerUnseekable::Read(mpt::byte *dst, IFil
 	{
 		return 0;
 	}
-	IFileDataContainer::off_t cache_avail = std::min<IFileDataContainer::off_t>(IFileDataContainer::off_t(cachesize) - pos, count);
+	IFileDataContainer::off_t cache_avail = std::min(IFileDataContainer::off_t(cachesize) - pos, count);
 	ReadCached(dst, pos, cache_avail);
 	return cache_avail;
 }
@@ -478,7 +478,7 @@ IFileDataContainer::off_t FileDataContainerUnseekable::GetReadableLength(IFileDa
 	{
 		return 0;
 	}
-	return std::min<IFileDataContainer::off_t>(cachesize - pos, length);
+	return std::min(static_cast<IFileDataContainer::off_t>(cachesize) - pos, length);
 }
 
 

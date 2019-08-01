@@ -136,7 +136,7 @@ inline T random(Trng & rng)
 	typedef typename std::make_unsigned<T>::type unsigned_T;
 	const unsigned int rng_bits = mpt::engine_traits<Trng>::result_bits();
 	unsigned_T result = 0;
-	for(std::size_t entropy = 0; entropy < std::min<std::size_t>(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
+	for(std::size_t entropy = 0; entropy < std::min(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
 	{
 		MPT_CONSTANT_IF(rng_bits < (sizeof(T) * 8))
 		{
@@ -163,7 +163,7 @@ inline T random(Trng & rng, std::size_t required_entropy_bits)
 	typedef typename std::make_unsigned<T>::type unsigned_T;
 	const unsigned int rng_bits = mpt::engine_traits<Trng>::result_bits();
 	unsigned_T result = 0;
-	for(std::size_t entropy = 0; entropy < std::min<std::size_t>(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
+	for(std::size_t entropy = 0; entropy < std::min(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
 	{
 		MPT_CONSTANT_IF(rng_bits < (sizeof(T) * 8))
 		{

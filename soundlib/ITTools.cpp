@@ -73,7 +73,7 @@ void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, uint8
 
 	// Envelope Data
 	// Attention: Full MPTM envelope is stored in extended instrument properties
-	for(uint32 ev = 0; ev < std::min<uint32>(25, num); ev++)
+	for(uint32 ev = 0; ev < std::min(uint8(25), num); ev++)
 	{
 		mptEnv[ev].value = Clamp<int8, int8>(data[ev].value + envOffset, 0, 64);
 		mptEnv[ev].tick = data[ev].tick;
@@ -174,9 +174,9 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	mpt::String::WriteBuf(mpt::String::nullTerminated, name) = mptIns.name;
 
 	// Volume / Panning
-	fadeout = static_cast<uint16>(std::min<uint32>(mptIns.nFadeOut >> 5, 256u));
-	gbv = static_cast<uint8>(std::min<uint32>(mptIns.nGlobalVol * 2u, 128u));
-	dfp = static_cast<uint8>(std::min<uint32>(mptIns.nPan / 4u, 64u));
+	fadeout = static_cast<uint16>(std::min(mptIns.nFadeOut >> 5, uint32(256)));
+	gbv = static_cast<uint8>(std::min(mptIns.nGlobalVol * 2u, uint32(128)));
+	dfp = static_cast<uint8>(std::min(mptIns.nPan / 4u, uint32(64)));
 	if(!mptIns.dwFlags[INS_SETPANNING]) dfp |= ITInstrument::ignorePanning;
 
 	// Random Variation
@@ -273,8 +273,8 @@ uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	mptIns.dwFlags.set(INS_SETPANNING, !(dfp & ITInstrument::ignorePanning));
 
 	// Random Variation
-	mptIns.nVolSwing = std::min<uint8>(rv, 100);
-	mptIns.nPanSwing = std::min<uint8>(rp, 64);
+	mptIns.nVolSwing = std::min(static_cast<uint8>(rv), uint8(100));
+	mptIns.nPanSwing = std::min(static_cast<uint8>(rp), uint8(64));
 
 	// NNA Stuff
 	mptIns.nNNA = static_cast<NewNoteAction>(nna.get());

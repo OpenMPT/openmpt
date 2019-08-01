@@ -36,7 +36,7 @@ struct STMSampleHeader
 		mptSmp.filename = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, filename);
 
 		mptSmp.nC5Speed = sampleRate;
-		mptSmp.nVolume = std::min<uint8>(volume, 64) * 4;
+		mptSmp.nVolume = std::min(static_cast<uint8>(volume), uint8(64)) * 4;
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopEnd;
@@ -165,7 +165,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo = ConvertST2Tempo(initTempo);
 	m_nDefaultSpeed = initTempo >> 4;
 	if(fileHeader.verMinor > 10)
-		m_nDefaultGlobalVolume = std::min<uint8>(fileHeader.globalVolume, 64) * 4u;
+		m_nDefaultGlobalVolume = std::min(static_cast<uint8>(fileHeader.globalVolume), uint8(64)) * 4u;
 
 	// Setting up channels
 	for(CHANNELINDEX chn = 0; chn < 4; chn++)

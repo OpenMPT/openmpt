@@ -690,7 +690,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				const MMD2PLAYSEQ *pmps = (const MMD2PLAYSEQ *)(lpStream + pseq);
 				if(m_songName.empty()) m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, pmps->name);
-				ORDERINDEX n = std::min<ORDERINDEX>(pmps->length, MAX_ORDERS - nOrders);
+				ORDERINDEX n = std::min(static_cast<ORDERINDEX>(pmps->length), static_cast<ORDERINDEX>(MAX_ORDERS - nOrders));
 				if (n <= (dwMemLength - pseq + 42) / 2u && n < MPT_ARRAY_COUNT(pmps->seq))
 				{
 					Order().resize(nOrders + n);
@@ -721,7 +721,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		// Song Comments (null-terminated)
 		uint32 annotxt = pmex->annotxt;
 		uint32 annolen = pmex->annolen;
-		annolen = std::min<uint32>(annolen, MED_MAX_COMMENT_LENGTH); //Thanks to Luigi Auriemma for pointing out an overflow risk
+		annolen = std::min(annolen, static_cast<uint32>(MED_MAX_COMMENT_LENGTH)); //Thanks to Luigi Auriemma for pointing out an overflow risk
 		if ((annotxt) && (annolen) && (annolen <= dwMemLength) && (annotxt <= dwMemLength - annolen) )
 		{
 			m_songMessage.Read(mpt::byte_cast<const mpt::byte*>(lpStream) + annotxt, annolen - 1, SongMessage::leAutodetect);

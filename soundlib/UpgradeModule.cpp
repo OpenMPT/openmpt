@@ -243,7 +243,7 @@ void CSoundFile::UpgradeModule()
 		{
 			ModInstrument *ins = Instruments[i];
 			// Previously, volume swing values ranged from 0 to 64. They should reach from 0 to 100 instead.
-			ins->nVolSwing = static_cast<uint8>(std::min<uint32>(ins->nVolSwing * 100 / 64, 100));
+			ins->nVolSwing = static_cast<uint8>(std::min(static_cast<uint32>(ins->nVolSwing * 100 / 64), uint32(100)));
 
 			if(!compatModeIT || m_dwLastSavedWithVersion < MPT_V("1.18.00.00"))
 			{

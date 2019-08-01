@@ -316,7 +316,7 @@ public:
 
 	void SetDecimalValue(double d)
 	{
-		SetDecimalValue(d, std::min<int>(limit, static_cast<const T*>(this)->GetLimitText()) - 2);
+		SetDecimalValue(d, std::min(limit, static_cast<int>(static_cast<const T*>(this)->GetLimitText())) - 2);
 	}
 
 	/// sets the controls text

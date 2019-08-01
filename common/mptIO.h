@@ -139,7 +139,7 @@ template <typename Tbyte> IO::Offset ReadRawImpl(std::pair<mpt::span<Tbyte>, IO:
 	{
 		return 0;
 	}
-	std::size_t num = mpt::saturate_cast<std::size_t>(std::min<IO::Offset>(f.first.size() - f.second, size));
+	std::size_t num = mpt::saturate_cast<std::size_t>(std::min(static_cast<IO::Offset>(f.first.size()) - f.second, static_cast<IO::Offset>(size)));
 	std::copy(mpt::byte_cast<const mpt::byte*>(f.first.data() + f.second), mpt::byte_cast<const mpt::byte*>(f.first.data() + f.second + num), data);
 	f.second += num;
 	return num;
@@ -154,7 +154,7 @@ template <typename Tbyte> bool WriteRawImpl(std::pair<mpt::span<Tbyte>, IO::Offs
 	{
 		return false;
 	}
-	std::size_t num = mpt::saturate_cast<std::size_t>(std::min<IO::Offset>(f.first.size() - f.second, size));
+	std::size_t num = mpt::saturate_cast<std::size_t>(std::min(static_cast<IO::Offset>(f.first.size()) - f.second, static_cast<IO::Offset>(size)));
 	if(num != size)
 	{
 		return false;
@@ -722,7 +722,7 @@ public:
 		{
 			return 0;
 		}
-		return std::min<off_t>(length, dataLength - pos);
+		return std::min(length, dataLength - pos);
 	}
 };
 
@@ -1058,7 +1058,7 @@ public:
 		{
 			return 0;
 		}
-		off_t avail = std::min<off_t>(streamLength - pos, count);
+		off_t avail = std::min(streamLength - pos, count);
 		std::copy(streamData + pos, streamData + pos + avail, dst);
 		return avail;
 	}
@@ -1087,7 +1087,7 @@ public:
 		{
 			return 0;
 		}
-		return std::min<off_t>(length, streamLength - pos);
+		return std::min(length, streamLength - pos);
 	}
 
 };

@@ -116,7 +116,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 	CMainFrame::GetMainFrame()->GetClientRect(mainWindowRect);
 
 	const int realHeight = static_cast<int>(m_tempoSwing.size()) * m.rowHeight;
-	const int displayHeight = std::min<int>(realHeight, mainWindowRect.bottom - windowRect.Height() - m.paddingTop - m.footerHeight);
+	const int displayHeight = std::min(realHeight, static_cast<int>(mainWindowRect.bottom - windowRect.Height() - m.paddingTop - m.footerHeight));
 
 	CRect containerRect;
 	m_container.GetClientRect(containerRect);

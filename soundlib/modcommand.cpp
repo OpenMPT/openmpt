@@ -206,7 +206,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 				}
 			}
 
-			param = (PARAM)(std::min<uint16>(maxColumnValue, GetValueEffectCol()) * 0x7F / maxColumnValue);
+			param = static_cast<PARAM>(std::min(static_cast<uint16>(maxColumnValue), GetValueEffectCol()) * 0x7F / maxColumnValue);
 			command = newCmd; // might be removed later
 			volcmd = VOLCMD_NONE;
 			note = NOTE_NONE;
@@ -303,10 +303,10 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			// swap L/R, convert to fine slide
 			if(param & 0xF0)
 			{
-				param = 0xF0 | std::min<PARAM>(0x0E, (param >> 4));
+				param = 0xF0 | std::min(PARAM(0x0E), static_cast<PARAM>(param >> 4));
 			} else
 			{
-				param = 0x0F | (std::min<PARAM>(0x0E, param & 0x0F) << 4);
+				param = 0x0F | (std::min(PARAM(0x0E), static_cast<PARAM>(param & 0x0F)) << 4);
 			}
 
 		default:
@@ -480,7 +480,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			break;
 
 		case CMD_GLOBALVOLUME:
-			param = (std::min<PARAM>(0x80, param) + 1) / 2u;
+			param = (std::min(PARAM(0x80), param) + 1) / 2u;
 			break;
 
 		default:
@@ -499,7 +499,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			param = (param & 0xF0) | (((param & 0x0F) + 1) / 2u);
 			break;
 		case CMD_GLOBALVOLUME:
-			param = (std::min<PARAM>(0x80, param) + 1) / 2u;
+			param = (std::min(PARAM(0x80), param) + 1) / 2u;
 			break;
 		}
 	} // End if(oldTypeIsIT_MPT && newTypeIsXM)
@@ -512,10 +512,10 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		{
 		case CMD_VIBRATO:
 			// With linear slides, strength is roughly halved.
-			param = (param & 0xF0) | std::min<PARAM>((param & 0x0F) * 2u, 15);
+			param = (param & 0xF0) | std::min(static_cast<PARAM>((param & 0x0F) * 2u), PARAM(15));
 			break;
 		case CMD_GLOBALVOLUME:
-			param = std::min<PARAM>(0x40, param) * 2u;
+			param = std::min(PARAM(0x40), param) * 2u;
 			break;
 		}
 	} // End if(oldTypeIsIT_MPT && newTypeIsXM)
@@ -527,11 +527,11 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		switch(command)
 		{
 		case CMD_SPEED:
-			param = std::min<PARAM>(param, 0x1F);
+			param = std::min(param, PARAM(0x1F));
 			break;
 			break;
 		case CMD_TEMPO:
-			param = std::max<PARAM>(param, 0x20);
+			param = std::max(param, PARAM(0x20));
 			break;
 		}
 	}
@@ -815,7 +815,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		case VOLCMD_VIBRATODEPTH:
 			// OpenMPT-specific commands
 		case VOLCMD_OFFSET:
-			vol = std::min<PARAM>(vol, 9);
+			vol = std::min(vol, PARAM(9));
 			break;
 		}
 	} // End if(newTypeIsIT_MPT)
@@ -972,7 +972,7 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		return true;
 	case CMD_VOLUME:
 		effect = VOLCMD_VOLUME;
-		param = std::min<PARAM>(param, 64);
+		param = std::min(param, PARAM(64));
 		break;
 	case CMD_PORTAMENTOUP:
 		// if not force, reject when dividing causes loss of data in LSB, or if the final value is too
@@ -1010,7 +1010,7 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 		return false;
 	case CMD_VIBRATO:
 		if(force)
-			param = std::min<PARAM>(param & 0x0F, 9);
+			param = std::min(static_cast<PARAM>(param & 0x0F), PARAM(9));
 		else if((param & 0x0F) > 9 || (param & 0xF0) != 0)
 			return false;
 		param &= 0x0F;

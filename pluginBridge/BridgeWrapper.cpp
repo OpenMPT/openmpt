@@ -871,7 +871,7 @@ intptr_t BridgeWrapper::DispatchToPlugin(VstOpcodeToPlugin opcode, int32 index, 
 				{
 					int32 *prog = static_cast<int32 *>(ptr);
 					cachedProgNameStart = prog[0];
-					ptrOut = std::max<int64>(sizeof(int32) * 2, (prog[1] - prog[0]) * kCachedProgramNameLength);
+					ptrOut = std::max(static_cast<int64>(sizeof(int32) * 2), static_cast<int64>((prog[1] - prog[0]) * kCachedProgramNameLength));
 					dispatchData.insert(dispatchData.end(), ptrC, ptrC + 2 * sizeof(int32));
 				}
 				break;
@@ -880,7 +880,7 @@ intptr_t BridgeWrapper::DispatchToPlugin(VstOpcodeToPlugin opcode, int32 index, 
 				{
 					int32 *param = static_cast<int32 *>(ptr);
 					cachedParamInfoStart = param[0];
-					ptrOut = std::max<int64>(sizeof(int32) * 2, (param[1] - param[0]) * sizeof(ParameterInfo));
+					ptrOut = std::max(static_cast<int64>(sizeof(int32) * 2), static_cast<int64>((param[1] - param[0]) * sizeof(ParameterInfo)));
 					dispatchData.insert(dispatchData.end(), ptrC, ptrC + 2 * sizeof(int32));
 				}
 			}

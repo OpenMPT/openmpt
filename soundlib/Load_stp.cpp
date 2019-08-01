@@ -59,7 +59,7 @@ struct STPSampleHeader
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.nLength = length;
-		mptSmp.nVolume = 4u * std::min<uint16>(volume, 64);
+		mptSmp.nVolume = 4u * std::min(static_cast<uint8>(volume), uint8(64));
 
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopStart + loopLength;

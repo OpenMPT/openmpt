@@ -22,7 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 // Convert OpenMPT's internal envelope representation to XM envelope data.
 void XMInstrument::ConvertEnvelopeToXM(const InstrumentEnvelope &mptEnv, uint8le &numPoints, uint8le &flags, uint8le &sustain, uint8le &loopStart, uint8le &loopEnd, EnvType env)
 {
-	numPoints = static_cast<uint8>(std::min<std::size_t>(12u, mptEnv.size()));
+	numPoints = static_cast<uint8>(std::min(std::size_t(12), static_cast<std::size_t>(mptEnv.size())));
 
 	// Envelope Data
 	for(uint8 i = 0; i < numPoints; i++)
@@ -125,7 +125,7 @@ std::vector<SAMPLEINDEX> XMInstrument::GetSampleList(const ModInstrument &mptIns
 // Convert XM envelope data to an OpenMPT's internal envelope representation.
 void XMInstrument::ConvertEnvelopeToMPT(InstrumentEnvelope &mptEnv, uint8 numPoints, uint8 flags, uint8 sustain, uint8 loopStart, uint8 loopEnd, EnvType env) const
 {
-	mptEnv.resize(std::min<uint8>(numPoints, 12));
+	mptEnv.resize(std::min(numPoints, uint8(12)));
 
 	// Envelope Data
 	for(uint32 i = 0; i < mptEnv.size(); i++)
@@ -194,7 +194,7 @@ void XMInstrument::ConvertToMPT(ModInstrument &mptIns) const
 	{
 		mptIns.nMidiChannel = midiChannel + MidiFirstChannel;
 		Limit(mptIns.nMidiChannel, uint8(MidiFirstChannel), uint8(MidiLastChannel));
-		mptIns.nMidiProgram = static_cast<uint8>(std::min<uint16>(midiProgram, 127) + 1);
+		mptIns.nMidiProgram = static_cast<uint8>(std::min(static_cast<uint16>(midiProgram), uint16(127)) + 1);
 	}
 	mptIns.midiPWD = static_cast<int8>(pitchWheelRange);
 }

@@ -169,7 +169,7 @@ void OPL::Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff, bool beating
 	// We allocate our OPL channels dynamically, which would result in slightly different beating characteristics,
 	// but we can just take the pattern channel number instead, as the pattern channel layout is always identical.
 	if(beatingOscillators)
-		fnum = std::min<uint16>(fnum + (c & 3), 1023);
+		fnum = std::min(static_cast<uint16>(fnum + (c & 3)), uint16(1023));
 
 	fnum |= (block << 10);
 

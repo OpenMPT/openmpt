@@ -1290,7 +1290,7 @@ void CDoWaveConvert::Run()
 
 		while(framesToProcess)
 		{
-			const std::size_t framesChunk = std::min<std::size_t>(mpt::saturate_cast<std::size_t>(framesToProcess), MIXBUFFERSIZE);
+			const std::size_t framesChunk = std::min(mpt::saturate_cast<std::size_t>(framesToProcess), std::size_t(MIXBUFFERSIZE));
 			const uint32 samplesChunk = static_cast<uint32>(framesChunk * channels);
 			
 			normalizeFile.read(reinterpret_cast<char*>(floatbuffer), samplesChunk * sizeof(float));

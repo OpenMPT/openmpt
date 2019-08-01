@@ -299,7 +299,7 @@ struct AMSSampleHeader
 		mptSmp.nLoopStart = std::min(loopStart, length);
 		mptSmp.nLoopEnd = std::min(loopEnd, length);
 
-		mptSmp.nVolume = (std::min<uint8>(127, volume) * 256 + 64) / 127;
+		mptSmp.nVolume = (std::min(uint8(127), static_cast<uint8>(volume)) * 256 + 64) / 127;
 		if(panFinetune & 0xF0)
 		{
 			mptSmp.nPan = (panFinetune & 0xF0);
@@ -661,7 +661,7 @@ struct AMS2SampleHeader
 		uint32 newC4speed = ModSample::TransposeToFrequency(relativeTone, MOD2XMFineTune(panFinetune & 0x0F));
 		mptSmp.nC5Speed = (mptSmp.nC5Speed * newC4speed) / 8363;
 
-		mptSmp.nVolume = (std::min<uint8>(volume, 127) * 256 + 64) / 127;
+		mptSmp.nVolume = (std::min(static_cast<uint8>(volume), uint8(127)) * 256 + 64) / 127;
 		if(panFinetune & 0xF0)
 		{
 			mptSmp.nPan = (panFinetune & 0xF0);

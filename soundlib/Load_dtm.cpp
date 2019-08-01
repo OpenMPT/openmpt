@@ -107,7 +107,7 @@ struct DTMSample
 			transposeAmount += (48 - transpose) * 128;
 		}
 		mptSmp.Transpose(transposeAmount * (1.0 / (12.0 * 128.0)));
-		mptSmp.nVolume = std::min<uint8>(volume, 64u) * 4u;
+		mptSmp.nVolume = std::min(static_cast<uint8>(volume), uint8(64)) * 4u;
 		if(stereo & 1)
 		{
 			mptSmp.uFlags.set(CHN_STEREO);
@@ -290,14 +290,14 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		for(CHANNELINDEX chn = 0; chn < 32 && chn < GetNumChannels(); chn++)
 		{
 			// Panning is in range 0...180, 90 = center
-			ChnSettings[chn].nPan = static_cast<uint16>(128 + Util::muldivr(std::min<int>(panning[chn], 180) - 90, 128, 90));
+			ChnSettings[chn].nPan = static_cast<uint16>(128 + Util::muldivr(std::min(static_cast<int>(panning[chn]), int(180)) - 90, 128, 90));
 		}
 
 		chunk.Skip(16);
 		// Chunk ends here for old DTM modules
 		if(chunk.CanRead(2))
 		{
-			m_nDefaultGlobalVolume = std::min<uint32>(chunk.ReadUint16BE(), MAX_GLOBAL_VOLUME);
+			m_nDefaultGlobalVolume = std::min(chunk.ReadUint16BE(), static_cast<uint16>(MAX_GLOBAL_VOLUME));
 		}
 		chunk.Skip(128);
 		uint16be volume[32];
@@ -306,7 +306,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 			for(CHANNELINDEX chn = 0; chn < 32 && chn < GetNumChannels(); chn++)
 			{
 				// Volume is in range 0...128, 64 = normal
-				ChnSettings[chn].nVolume = static_cast<uint8>(std::min<int>(volume[chn], 128) / 2);
+				ChnSettings[chn].nVolume = static_cast<uint8>(std::min(static_cast<int>(volume[chn]), int(128)) / 2);
 			}
 			m_nSamplePreAmp *= 2;	// Compensate for channel volume range
 		}
@@ -354,7 +354,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		if(chunk.ReadUint16BE() == 0x0004)
 		{
 			// Digital Home Studio instruments
-			m_nInstruments = std::min<INSTRUMENTINDEX>(m_nSamples, MAX_INSTRUMENTS - 1);
+			m_nInstruments = std::min(static_cast<INSTRUMENTINDEX>(m_nSamples), static_cast<INSTRUMENTINDEX>(MAX_INSTRUMENTS - 1));
 
 			FileReader envChunk = chunks.GetChunk(DTMChunk::idIENV);
 			while(chunk.CanRead(sizeof(DTMInstrument)))
@@ -372,16 +372,16 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 					if(mptIns != nullptr)
 					{
 						InstrumentEnvelope &mptEnv = mptIns->VolEnv;
-						mptIns->nFadeOut = std::min<uint16>(instr.fadeout, 0xFFF);
+						mptIns->nFadeOut = std::min(static_cast<uint16>(instr.fadeout), uint16(0xFFF));
 						if(instr.envelope != 0xFF && envChunk.Seek(2 + sizeof(DTMEnvelope) * instr.envelope))
 						{
 							DTMEnvelope env;
 							envChunk.ReadStruct(env);
 							mptEnv.dwFlags.set(ENV_ENABLED);
-							mptEnv.resize(std::min<size_t>({ env.numPoints, mpt::size(env.points), MAX_ENVPOINTS }));
+							mptEnv.resize(std::min({ static_cast<std::size_t>(env.numPoints), mpt::size(env.points), static_cast<std::size_t>(MAX_ENVPOINTS) }));
 							for(size_t i = 0; i < mptEnv.size(); i++)
 							{
-								mptEnv[i].value = std::min<uint8>(64, env.points[i].value);
+								mptEnv[i].value = std::min(uint8(64), static_cast<uint8>(env.points[i].value));
 								mptEnv[i].tick = env.points[i].tick;
 							}
 

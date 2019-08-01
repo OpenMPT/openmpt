@@ -128,8 +128,8 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 	case CMD_VOLUME:			command = 0x0C; break;
 	case CMD_PATTERNBREAK:		command = 0x0D; param = ((param / 10) << 4) | (param % 10); break;
 	case CMD_MODCMDEX:			command = 0x0E; break;
-	case CMD_SPEED:				command = 0x0F; param = std::min<uint8>(param, 0x1F); break;
-	case CMD_TEMPO:				command = 0x0F; param = std::max<uint8>(param, 0x20); break;
+	case CMD_SPEED:				command = 0x0F; param = std::min(param, uint8(0x1F)); break;
+	case CMD_TEMPO:				command = 0x0F; param = std::max(param, uint8(0x20)); break;
 	case CMD_GLOBALVOLUME:		command = 'G' - 55; break;
 	case CMD_GLOBALVOLSLIDE:	command = 'H' - 55; break;
 	case CMD_KEYOFF:			command = 'K' - 55; break;
@@ -227,7 +227,7 @@ struct MODSampleHeader
 		mptSmp.Initialize(MOD_TYPE_MOD);
 		mptSmp.nLength = length * 2;
 		mptSmp.nFineTune = MOD2XMFineTune(finetune & 0x0F);
-		mptSmp.nVolume = 4u * std::min<uint8>(volume, 64);
+		mptSmp.nVolume = 4u * std::min(static_cast<uint8>(volume), uint8(64));
 
 		SmpLength lStart = loopStart * 2;
 		SmpLength lLength = loopLength * 2;
@@ -963,7 +963,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 						extendedPanning = true;
 				} else if(m.command == 0x0E && (m.param & 0xF0) == 0x80)
 				{
-					maxPanning = std::max<uint8>(maxPanning, (m.param & 0x0F) << 4);
+					maxPanning = std::max(maxPanning, static_cast<uint8>((m.param & 0x0F) << 4));
 				}
 			}
 		}
@@ -2145,7 +2145,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 		bool vblank = (info.flags & 0x100) == 0;
 		m_playBehaviour.set(kMODVBlankTiming, vblank);
 		if(info.volume != 0)
-			m_nSamplePreAmp = std::min<uint16>(64, info.volume);
+			m_nSamplePreAmp = std::min(uint16(64), static_cast<uint16>(info.volume));
 		if(info.tempo != 0 && !vblank)
 			m_nDefaultTempo.Set(info.tempo);
 

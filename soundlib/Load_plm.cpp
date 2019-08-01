@@ -190,7 +190,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 			sample.uFlags.set(CHN_PANNING);
 			sample.nPan = sampleHeader.panning * 0x11;
 		}
-		sample.nGlobalVol = std::min<uint8>(sampleHeader.volume, 64);
+		sample.nGlobalVol = std::min(static_cast<uint8>(sampleHeader.volume), uint8(64));
 		sample.nC5Speed = sampleHeader.sampleRate;
 		sample.nLoopStart = sampleHeader.loopStart;
 		sample.nLoopEnd = sampleHeader.loopEnd;
@@ -270,7 +270,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		STATIC_ASSERT(ORDERINDEX_MAX >= ((mpt::limits<decltype(ord.x)>::max)() + 255) / rowsPerPat);
 		ORDERINDEX curOrd = static_cast<ORDERINDEX>(ord.x / rowsPerPat);
 		ROWINDEX curRow = static_cast<ROWINDEX>(ord.x % rowsPerPat);
-		const CHANNELINDEX numChannels = std::min<uint8>(patHeader.numChannels, fileHeader.numChannels - ord.y);
+		const CHANNELINDEX numChannels = std::min(static_cast<uint8>(patHeader.numChannels), static_cast<uint8>(fileHeader.numChannels - ord.y));
 		const uint32 patternEnd = ord.x + patHeader.numRows;
 		maxPos = std::max(maxPos, patternEnd);
 
@@ -341,13 +341,13 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 						m->param = 0x80 | (m->param & 0x0F);
 						break;
 					case 0x10:	// Delay Note
-						m->param = 0xD0 | std::min<ModCommand::PARAM>(m->param, 0x0F);
+						m->param = 0xD0 | std::min(m->param, ModCommand::PARAM(0x0F));
 						break;
 					case 0x11:	// Cut Note
-						m->param = 0xC0 | std::min<ModCommand::PARAM>(m->param, 0x0F);
+						m->param = 0xC0 | std::min(m->param, ModCommand::PARAM(0x0F));
 						break;
 					case 0x12:	// Pattern Delay
-						m->param = 0xE0 | std::min<ModCommand::PARAM>(m->param, 0x0F);
+						m->param = 0xE0 | std::min(m->param, ModCommand::PARAM(0x0F));
 						break;
 					case 0x04:	// Volume Slide
 					case 0x14:	// Vibrato + Volume Slide

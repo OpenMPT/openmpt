@@ -1904,7 +1904,7 @@ void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
 					for(SmpLength i = 0; i < bufferSize; i++) convBuffer[i] = firstVal;
 					while(remain > 0)
 					{
-						uint32 procIn = std::min<uint32>(remain, bufferSize);
+						uint32 procIn = std::min(remain, mpt::saturate_cast<uint32>(bufferSize));
 						SmpLength procCount = resampler.process(convBuffer.data(), procIn, outBuffer);
 						MPT_ASSERT(procCount <= outLatency);
 						LimitMax(procCount, outLatency);
@@ -1973,7 +1973,7 @@ void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
 			SmpLength writeOffset = selection.nStart * sample.GetNumChannels();
 			while(writeCount > 0)
 			{
-				SmpLength procCount = std::min<SmpLength>(MIXBUFFERSIZE, writeCount);
+				SmpLength procCount = std::min(static_cast<SmpLength>(MIXBUFFERSIZE), writeCount);
 				mixsample_t buffer[MIXBUFFERSIZE * 2];
 				MemsetZero(buffer);
 				MixFuncTable::Functions[functionNdx](chn, m_sndFile.m_Resampler, buffer, procCount);
@@ -2284,7 +2284,7 @@ public:
 
 			// Receive some processed samples (it's not guaranteed that there is any available).
 			{
-				SmpLength outChunkSize = std::min<SmpLength>(soundtouch_numSamples(handleSt), stretchLength - outPos);
+				SmpLength outChunkSize = std::min(static_cast<SmpLength>(soundtouch_numSamples(handleSt)), stretchLength - outPos);
 				if(outChunkSize > 0)
 				{
 					buffer.resize(outChunkSize * numChannels);
@@ -2310,7 +2310,7 @@ public:
 		{
 			// The input sample should now be processed. Receive remaining samples.
 			soundtouch_flush(handleSt);
-			SmpLength outChunkSize = std::min<SmpLength>(soundtouch_numSamples(handleSt), stretchLength - (outPos - selection.nStart));
+			SmpLength outChunkSize = std::min(static_cast<SmpLength>(soundtouch_numSamples(handleSt)), stretchLength - (outPos - selection.nStart));
 			if(outChunkSize > 0)
 			{
 				buffer.resize(outChunkSize * numChannels);

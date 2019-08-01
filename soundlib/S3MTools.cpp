@@ -48,7 +48,7 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 	}
 
 	// Volume / Panning
-	mptSmp.nVolume = std::min<uint8>(defaultVolume, 64) * 4;
+	mptSmp.nVolume = std::min(static_cast<uint8>(defaultVolume), uint8(64)) * 4;
 
 	// C-5 frequency
 	mptSmp.nC5Speed = c5speed;

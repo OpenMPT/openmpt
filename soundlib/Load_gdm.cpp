@@ -272,7 +272,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		if(gdmSample.flags & GDMSampleHeader::smpVolume)
 		{
 			// Default volume is used... 0...64, 255 = no default volume
-			sample.nVolume = std::min<uint8>(gdmSample.volume, 64) * 4;
+			sample.nVolume = std::min(static_cast<uint8>(gdmSample.volume), uint8(64)) * 4;
 		} else
 		{
 			sample.uFlags.set(SMP_NODEFAULTVOLUME);

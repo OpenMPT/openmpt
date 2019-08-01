@@ -195,17 +195,17 @@ static uint8 DMFporta2MPT(uint8 val, const uint8 internalTicks, const bool hasFi
 	else if((val <= 0x0F && hasFine) || internalTicks < 2)
 		return (val | 0xF0);
 	else
-		return std::max<uint8>(1, (val / (internalTicks - 1)));	// no porta on first tick!
+		return std::max(uint8(1), static_cast<uint8>((val / (internalTicks - 1))));	// no porta on first tick!
 }
 
 
 // Convert portamento / volume slide value (not very accurate due to X-Tracker's higher granularity, to say the least)
 static uint8 DMFslide2MPT(uint8 val, const uint8 internalTicks, const bool up)
 {
-	val = std::max<uint8>(1, val / 4);
+	val = std::max(uint8(1), static_cast<uint8>(val / 4));
 	const bool isFine = (val < 0x0F) || (internalTicks < 2);
 	if(!isFine)
-		val = std::max<uint8>(1, (val + internalTicks - 2) / (internalTicks - 1));	// no slides on first tick! "+ internalTicks - 2" for rounding precision
+		val = std::max(uint8(1), static_cast<uint8>((val + internalTicks - 2) / (internalTicks - 1)));	// no slides on first tick! "+ internalTicks - 2" for rounding precision
 
 	if(up)
 		return (isFine ? 0x0F : 0x00) | (val << 4);
@@ -242,7 +242,7 @@ static uint8 DMFvibrato2MPT(uint8 val, const uint8 internalTicks)
 	// X-Tracker: Period length specified in rows!
 	const int periodInTicks = std::max(1, (val >> 4)) * internalTicks;
 	const uint8 matchingPeriod = static_cast<uint8>(Clamp((128 / periodInTicks), 1, 15));
-	return (matchingPeriod << 4) | std::max<uint8>(1, (val & 0x0F));
+	return (matchingPeriod << 4) | std::max(uint8(1), static_cast<uint8>(val & 0x0F));
 }
 
 
@@ -340,7 +340,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 	}
 
 	PatternRow m = sndFile.Patterns[pat].GetRow(0);
-	const CHANNELINDEX numChannels = std::min<CHANNELINDEX>(sndFile.GetNumChannels() - 1, patHead.numTracks);
+	const CHANNELINDEX numChannels = std::min(static_cast<CHANNELINDEX>(sndFile.GetNumChannels() - 1), static_cast<CHANNELINDEX>(patHead.numTracks));
 
 	// When breaking to a pattern with less channels that the previous pattern,
 	// all voices in the now unused channels are killed:

@@ -382,7 +382,7 @@ static void ramping_to_mixersettings( MixerSettings & settings, int ramping ) {
 	}
 }
 static void mixersettings_to_ramping( int & ramping, const MixerSettings & settings ) {
-	std::int32_t ramp_us = std::max<std::int32_t>( settings.GetVolumeRampUpMicroseconds(), settings.GetVolumeRampDownMicroseconds() );
+	std::int32_t ramp_us = std::max( settings.GetVolumeRampUpMicroseconds(), settings.GetVolumeRampDownMicroseconds() );
 	if ( ( settings.GetVolumeRampUpMicroseconds() == MixerSettings().GetVolumeRampUpMicroseconds() ) && ( settings.GetVolumeRampDownMicroseconds() == MixerSettings().GetVolumeRampDownMicroseconds() ) ) {
 		ramping = -1;
 	} else if ( ramp_us <= 0 ) {
@@ -504,7 +504,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 	AudioReadTargetGainBuffer<audio_buffer_planar<std::int16_t>> target( audio_buffer_planar<std::int16_t>( buffers, planar_audio_buffer_valid_channels( buffers, mpt::size( buffers) ), count ), *m_Dither, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
-			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
+			static_cast<CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
 			target
 			);
 		if ( count_chunk == 0 ) {
@@ -527,7 +527,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 	AudioReadTargetGainBuffer<audio_buffer_planar<float>> target( audio_buffer_planar<float>( buffers, planar_audio_buffer_valid_channels( buffers, mpt::size( buffers) ), count ), *m_Dither, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
-			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
+			static_cast<CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
 			target
 			);
 		if ( count_chunk == 0 ) {
@@ -549,7 +549,7 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	AudioReadTargetGainBuffer<audio_buffer_interleaved<std::int16_t>> target( audio_buffer_interleaved<std::int16_t>( interleaved, channels, count ), *m_Dither, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
-			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
+			static_cast<CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
 			target
 			);
 		if ( count_chunk == 0 ) {
@@ -571,7 +571,7 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	AudioReadTargetGainBuffer<audio_buffer_interleaved<float>> target( audio_buffer_interleaved<float>( interleaved, channels, count ), *m_Dither, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
-			static_cast<CSoundFile::samplecount_t>( std::min<std::uint64_t>( count, std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ), // safety margin / samplesize / channels
+			static_cast<CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
 			target
 			);
 		if ( count_chunk == 0 ) {

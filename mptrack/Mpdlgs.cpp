@@ -436,7 +436,7 @@ void COptionsSoundcard::UpdateChannels()
 	int maxChannels = 0;
 	if(m_CurrentDeviceDynamicCaps.channelNames.size() > 0)
 	{
-		maxChannels = static_cast<int>(std::min<std::size_t>(4, m_CurrentDeviceDynamicCaps.channelNames.size()));
+		maxChannels = static_cast<int>(std::min(std::size_t(4), m_CurrentDeviceDynamicCaps.channelNames.size()));
 	} else
 	{
 		maxChannels = 4;
@@ -850,7 +850,7 @@ void COptionsSoundcard::OnOK()
 	{
 		if(m_CurrentDeviceCaps.CanChannelMapping)
 		{
-			int numChannels = std::min<int>(m_Settings.Channels, NUM_CHANNELCOMBOBOXES);
+			int numChannels = std::min(static_cast<int>(m_Settings.Channels), static_cast<int>(NUM_CHANNELCOMBOBOXES));
 			std::vector<int32> channels(numChannels);
 			for(int mch = 0; mch < numChannels; mch++)	// Host channels
 			{

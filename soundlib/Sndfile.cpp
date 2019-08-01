@@ -270,12 +270,12 @@ CSoundFile::ProbeResult CSoundFile::ProbeAdditionalSize(MemoryFileReader &file, 
 {
 	const uint64 availableFileSize = file.GetLength();
 	const uint64 fileSize = (pfilesize ? *pfilesize : file.GetLength());
-	//const uint64 validFileSize = std::min<uint64>(fileSize, ProbeRecommendedSize);
+	//const uint64 validFileSize = std::min(fileSize, static_cast<uint64>(ProbeRecommendedSize));
 	const uint64 goalSize = file.GetPosition() + minimumAdditionalSize;
-	//const uint64 goalMinimumSize = std::min<uint64>(goalSize, ProbeRecommendedSize);
+	//const uint64 goalMinimumSize = std::min(goalSize, static_cast<uint64>(ProbeRecommendedSize));
 	if(pfilesize)
 	{
-		if(availableFileSize < std::min<uint64>(fileSize, ProbeRecommendedSize))
+		if(availableFileSize < std::min(fileSize, static_cast<uint64>(ProbeRecommendedSize)))
 		{
 			if(availableFileSize < goalSize)
 			{

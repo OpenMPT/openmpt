@@ -293,7 +293,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 
 		MPT_ASSERT(m_PlayState.m_nBufferCount > 0); // assert that we have actually something to do
 
-		const samplecount_t countChunk = std::min<samplecount_t>({ MIXBUFFERSIZE, m_PlayState.m_nBufferCount, countToRender });
+		const samplecount_t countChunk = std::min({ static_cast<samplecount_t>(MIXBUFFERSIZE), static_cast<samplecount_t>(m_PlayState.m_nBufferCount), static_cast<samplecount_t>(countToRender) });
 
 		if(m_MixerSettings.NumInputChannels > 0)
 		{
@@ -1509,7 +1509,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEIND
 					// Test case: ArpeggioClamp.xm
 					if(note >= 108 + NOTE_MIN && arpPos != 0)
 					{
-						period = std::max<uint32>(period, GetPeriodFromNote(108 + NOTE_MIN, 0, chn.nC5Speed));
+						period = std::max(static_cast<uint32>(period), GetPeriodFromNote(108 + NOTE_MIN, 0, chn.nC5Speed));
 					}
 
 				}
@@ -2586,8 +2586,8 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 				else pPlugin->SetDryRatio(2 * defaultVolume);
 				break;
 			case PLUGIN_VOLUMEHANDLING_MIDI:
-				if(hasVolCommand) pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Coarse, std::min<uint8>(127u, 2u * vol), nChn);
-				else pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Coarse, static_cast<uint8>(std::min<uint32>(127u, 2u * defaultVolume)), nChn);
+				if(hasVolCommand) pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Coarse, std::min(uint8(127), static_cast<uint8>(2 * vol)), nChn);
+				else pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Coarse, static_cast<uint8>(std::min(uint32(127), static_cast<uint32>(2 * defaultVolume))), nChn);
 				break;
 			default:
 				break;
@@ -2667,7 +2667,7 @@ void CSoundFile::ProcessGlobalVolume(long lCount)
 			// If step is too big (might cause click), extend ramp length.
 			// Warning: This increases the volume ramp length by EXTREME amounts (factors of 100 are easily reachable)
 			// compared to the user-defined setting, so this really should not be used!
-			int32 maxStep = std::max<int>(50, (10000 / (m_PlayState.m_nGlobalVolumeRampAmount + 1)));
+			int32 maxStep = std::max(int32(50), static_cast<int32>((10000 / (m_PlayState.m_nGlobalVolumeRampAmount + 1))));
 			while(mpt::abs(step) > maxStep)
 			{
 				m_PlayState.m_nSamplesToGlobalVolRampDest += m_PlayState.m_nGlobalVolumeRampAmount;

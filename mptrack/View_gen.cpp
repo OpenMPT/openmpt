@@ -694,7 +694,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		short int pos;
 
 		LockControls();
-		const CHANNELINDEX nLoopLimit = std::min<CHANNELINDEX>(CHANNELS_IN_TAB, pModDoc->GetSoundFile().GetNumChannels() - nChn);
+		const CHANNELINDEX nLoopLimit = std::min(static_cast<CHANNELINDEX>(CHANNELS_IN_TAB), static_cast<CHANNELINDEX>(pModDoc->GetSoundFile().GetNumChannels() - nChn));
 		for (CHANNELINDEX iCh = 0; iCh < nLoopLimit; iCh++)
 		{
 			if(pScrollBar == (CScrollBar *) &m_sbVolume[iCh])

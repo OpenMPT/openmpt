@@ -458,7 +458,7 @@ namespace FileReader
 		packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(f, srcSize))
 			return false;
-		return ReadString<mode>(f, destBuffer, std::min<typename TFileCursor::off_t>(srcSize, maxLength));
+		return ReadString<mode>(f, destBuffer, std::min(static_cast<typename TFileCursor::off_t>(srcSize), maxLength));
 	}
 
 	// Read a string with a preprended length field of type Tsize (must be a packed<*,*> type) into a std::string dest using a given read mode.
@@ -470,7 +470,7 @@ namespace FileReader
 		packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(f, srcSize))
 			return false;
-		return ReadString<mode>(f, dest, std::min<typename TFileCursor::off_t>(srcSize, maxLength));
+		return ReadString<mode>(f, dest, std::min(static_cast<typename TFileCursor::off_t>(srcSize), maxLength));
 	}
 
 	// Read a string with a preprended length field of type Tsize (must be a packed<*,*> type) into a mpt::charbuf dest using a given read mode.
@@ -482,7 +482,7 @@ namespace FileReader
 		packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(f, srcSize))
 			return false;
-		return ReadString<mode>(f, dest, std::min<typename TFileCursor::off_t>(srcSize, maxLength));
+		return ReadString<mode>(f, dest, std::min(static_cast<typename TFileCursor::off_t>(srcSize), maxLength));
 	}
 
 	// Read a null-terminated string into a std::string

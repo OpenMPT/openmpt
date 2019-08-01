@@ -369,7 +369,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Global Volume
-	m_nDefaultGlobalVolume = std::min<uint32>(fileHeader.globalVol, 64) * 4u;
+	m_nDefaultGlobalVolume = std::min(static_cast<uint8>(fileHeader.globalVol), uint8(64)) * 4u;
 	// The following check is probably not very reliable, but it fixes a few tunes, e.g.
 	// DARKNESS.S3M by Purple Motion (ST 3.00) and "Image of Variance" by C.C.Catch (ST 3.01):
 	if(m_nDefaultGlobalVolume == 0 && fileHeader.cwtv < S3MFileHeader::trkST3_20)
@@ -438,7 +438,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading sample headers
-	m_nSamples = std::min<SAMPLEINDEX>(fileHeader.smpNum, MAX_SAMPLES - 1);
+	m_nSamples = std::min(static_cast<SAMPLEINDEX>(fileHeader.smpNum), static_cast<SAMPLEINDEX>(MAX_SAMPLES - 1));
 	for(SAMPLEINDEX smp = 0; smp < m_nSamples; smp++)
 	{
 		S3MSampleHeader sampleHeader;
@@ -476,7 +476,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 	// Order list cannot contain pattern indices > 255, so do not even try to load higher patterns
-	const PATTERNINDEX readPatterns = std::min<PATTERNINDEX>(fileHeader.patNum, uint8_max);
+	const PATTERNINDEX readPatterns = std::min(static_cast<PATTERNINDEX>(fileHeader.patNum), static_cast<PATTERNINDEX>(uint8_max));
 	Patterns.ResizeArray(readPatterns);
 	for(PATTERNINDEX pat = 0; pat < readPatterns; pat++)
 	{
@@ -675,7 +675,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 	memcpy(fileHeader.magic, "SCRM", 4);
 
 	// Song Variables
-	fileHeader.globalVol = static_cast<uint8>(std::min<unsigned int>(m_nDefaultGlobalVolume / 4u, 64u));
+	fileHeader.globalVol = static_cast<uint8>(std::min(m_nDefaultGlobalVolume / 4u, uint32(64)));
 	fileHeader.speed = static_cast<uint8>(Clamp(m_nDefaultSpeed, 1u, 254u));
 	fileHeader.tempo = static_cast<uint8>(Clamp(m_nDefaultTempo.GetInt(), 33u, 255u));
 	fileHeader.masterVolume = static_cast<uint8>(Clamp(m_nSamplePreAmp, 16u, 127u) | 0x80);

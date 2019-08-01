@@ -147,7 +147,7 @@ struct MixLoopState
 				if ((chn.position.GetUInt() <= chn.nLoopStart) || (chn.position.GetUInt() >= chn.nLength))
 				{
 					// Impulse Tracker's software mixer would put a -2 (instead of -1) in the following line (doesn't happen on a GUS)
-					chn.position.SetInt(chn.nLength - std::min<SmpLength>(chn.nLength, ITPingPongMode ? 2 : 1));
+					chn.position.SetInt(chn.nLength - std::min(chn.nLength, ITPingPongMode ? SmpLength(2) : SmpLength(1)));
 				}
 			} else
 			{
@@ -379,7 +379,7 @@ void CSoundFile::CreateStereoMix(int count)
 			{
 				// Detecting the longest play time for each sample for optimization
 				chn.position += chn.increment * nSmpCount;
-				size_t smp = std::distance<const ModSample *>(Samples, chn.pModSample);
+				size_t smp = std::distance(static_cast<const ModSample*>(static_cast<std::decay<decltype(Samples)>::type>(Samples)), chn.pModSample);
 				if(smp < m_SamplePlayLengths->size())
 				{
 					m_SamplePlayLengths->at(smp) = std::max(m_SamplePlayLengths->at(smp), chn.position.GetUInt());
@@ -467,7 +467,7 @@ void CSoundFile::CreateStereoMix(int count)
 		}
 #endif // NO_PLUGINS
 	}
-	m_nMixStat = std::max<CHANNELINDEX>(m_nMixStat, nchmixed);
+	m_nMixStat = std::max(m_nMixStat, nchmixed);
 }
 
 

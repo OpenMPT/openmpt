@@ -133,7 +133,7 @@ struct MO3Envelope
 		if(flags & envLoop) mptEnv.dwFlags.set(ENV_LOOP);
 		if(flags & envFilter) mptEnv.dwFlags.set(ENV_FILTER);
 		if(flags & envCarry) mptEnv.dwFlags.set(ENV_CARRY);
-		mptEnv.resize(std::min<uint8>(numNodes, 25));
+		mptEnv.resize(std::min(static_cast<uint8>(numNodes), uint8(25)));
 		mptEnv.nSustainStart = sustainStart;
 		mptEnv.nSustainEnd = sustainEnd;
 		mptEnv.nLoopStart = loopStart;
@@ -233,7 +233,7 @@ struct MO3Instrument
 		}
 
 		if(type == MOD_TYPE_IT)
-			mptIns.nGlobalVol = std::min<uint8>(globalVol, 128) / 2u;
+			mptIns.nGlobalVol = std::min(static_cast<uint8>(globalVol), uint8(128)) / 2u;
 		if(panning <= 256)
 		{
 			mptIns.nPan = panning;
@@ -244,8 +244,8 @@ struct MO3Instrument
 		mptIns.nPPC = ppc;
 		mptIns.nDCT = static_cast<DuplicateCheckType>(dct.get());
 		mptIns.nDNA = static_cast<DuplicateNoteAction>(dca.get());
-		mptIns.nVolSwing = static_cast<uint8>(std::min<uint16>(volSwing, 100));
-		mptIns.nPanSwing = static_cast<uint8>(std::min<uint16>(panSwing, 256) / 4u);
+		mptIns.nVolSwing = static_cast<uint8>(std::min(static_cast<uint16>(volSwing), uint16(100)));
+		mptIns.nPanSwing = static_cast<uint8>(std::min(static_cast<uint16>(panSwing), uint16(256)) / 4u);
 		mptIns.SetCutoff(cutoff & 0x7F, (cutoff & 0x80) != 0);
 		mptIns.SetResonance(resonance & 0x7F, (resonance & 0x80) != 0);
 	}
@@ -306,7 +306,7 @@ struct MO3Sample
 			if(type != MOD_TYPE_MTM) mptSmp.nFineTune -= 128;
 			mptSmp.RelativeTone = transpose;
 		}
-		mptSmp.nVolume = std::min<uint8>(defaultVolume, 64) * 4u;
+		mptSmp.nVolume = std::min(static_cast<uint8>(defaultVolume), uint8(64)) * 4u;
 		if(panning <= 256)
 		{
 			mptSmp.nPan = panning;
@@ -326,7 +326,7 @@ struct MO3Sample
 		mptSmp.nVibRate = vibRate;
 
 		if(type == MOD_TYPE_IT)
-			mptSmp.nGlobalVol = std::min<uint8>(globalVol, 64);
+			mptSmp.nGlobalVol = std::min(static_cast<uint8>(globalVol), uint8(64));
 		mptSmp.nSustainStart = sustainStart;
 		mptSmp.nSustainEnd = sustainEnd;
 	}
@@ -867,9 +867,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		m_playBehaviour.set(kMODVBlankTiming);
 
 	if(m_nType == MOD_TYPE_IT)
-		m_nDefaultGlobalVolume = std::min<uint16>(fileHeader.globalVol, 128) * 2;
+		m_nDefaultGlobalVolume = std::min(static_cast<uint8>(fileHeader.globalVol), uint8(128)) * 2;
 	else if(m_nType == MOD_TYPE_S3M)
-		m_nDefaultGlobalVolume = std::min<uint16>(fileHeader.globalVol, 64) * 4;
+		m_nDefaultGlobalVolume = std::min(static_cast<uint8>(fileHeader.globalVol), uint8(64)) * 4;
 
 	if(fileHeader.sampleVolume < 0)
 		m_nSamplePreAmp = fileHeader.sampleVolume + 52;
@@ -881,7 +881,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	for(CHANNELINDEX i = 0; i < headerChannels; i++)
 	{
 		if(m_nType == MOD_TYPE_IT)
-			ChnSettings[i].nVolume = std::min<uint8>(fileHeader.chnVolume[i], 64);
+			ChnSettings[i].nVolume = std::min(static_cast<uint8>(fileHeader.chnVolume[i]), uint8(64));
 		if(m_nType != MOD_TYPE_XM)
 		{
 			if(fileHeader.chnPan[i] == 127)

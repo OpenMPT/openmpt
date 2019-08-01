@@ -224,11 +224,11 @@ static void ConvertMDLCommand(uint8 &cmd, uint8 &param)
 			break;
 		case 0x1: // Pan Slide Left
 			cmd = CMD_PANNINGSLIDE;
-			param = (std::min<uint8>(param & 0x0F, 0x0E) << 4) | 0x0F;
+			param = (std::min(static_cast<uint8>(param & 0x0F), uint8(0x0E)) << 4) | 0x0F;
 			break;
 		case 0x2: // Pan Slide Right
 			cmd = CMD_PANNINGSLIDE;
-			param = 0xF0 | std::min<uint8>(param & 0x0F, 0x0E);
+			param = 0xF0 | std::min(static_cast<uint8>(param & 0x0F), uint8(0x0E));
 			break;
 		case 0x4: // Vibrato Waveform
 			param = 0x30 | (param & 0x0F);
@@ -646,7 +646,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 					mptSmp.nVolume = sampleHeader.volume;
 				else
 					mptSmp.uFlags.set(SMP_NODEFAULTVOLUME);
-				mptSmp.nPan = std::min<uint16>(sampleHeader.panning * 2, 254);
+				mptSmp.nPan = std::min(static_cast<uint16>(sampleHeader.panning * 2), uint16(254));
 				mptSmp.nVibType = MDLVibratoType[sampleHeader.vibType & 3];
 				mptSmp.nVibSweep = sampleHeader.vibSweep;
 				mptSmp.nVibDepth = sampleHeader.vibDepth;

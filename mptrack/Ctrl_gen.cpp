@@ -288,7 +288,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 	if (updateAll || (hint.GetCategory() == HINTCAT_SEQUENCE && hintType[HINT_MODSEQUENCE | HINT_RESTARTPOS]))
 	{
 		// Set max valid restart position
-		m_SpinRestartPos.SetRange32(0, std::max<int>(m_sndFile.Order().GetRestartPos(), m_sndFile.Order().GetLengthTailTrimmed() - 1));
+		m_SpinRestartPos.SetRange32(0, std::max(static_cast<int>(m_sndFile.Order().GetRestartPos()), static_cast<int>(m_sndFile.Order().GetLengthTailTrimmed() - 1)));
 		SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.Order().GetRestartPos(), FALSE);
 	}
 	if (updateAll || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))

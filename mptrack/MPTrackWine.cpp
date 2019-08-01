@@ -581,7 +581,7 @@ void Initialize()
 			
 			script += std::string() + "{" + "\n";
 			script += std::string() + " echo 0" + "\n";
-			script += std::string() + " " + make + " -j " + mpt::fmt::dec(std::max<unsigned int>(std::thread::hardware_concurrency(), 1)) + " -f build/wine/native_support.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " " + features + " all MPT_PROGRESS_FILE=\"&4\" 4>&1 1>stdout.txt 2>stderr.txt" + "\n";
+			script += std::string() + " " + make + " -j " + mpt::fmt::dec(std::max(std::thread::hardware_concurrency(), unsigned int(1))) + " -f build/wine/native_support.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " " + features + " all MPT_PROGRESS_FILE=\"&4\" 4>&1 1>stdout.txt 2>stderr.txt" + "\n";
 			script += std::string() + " echo -n $? > stdexit.txt" + "\n";
 			script += std::string() + " echo 100" + "\n";
 			script += std::string() + "} | " + dialog.Progress("[OK] Prepare OpenMPT Wine Integration\\n[>>] Compile native support\\n[  ] Compile Wine wrapper\\n\\n[2/3] Compiling native support ...") + "\n";
@@ -600,7 +600,7 @@ void Initialize()
 
 			script += std::string() + "{" + "\n";
 			script += std::string() + " echo 0" + "\n";
-			script += std::string() + " " + make + " -j " + mpt::fmt::dec(std::max<unsigned int>(std::thread::hardware_concurrency(), 1)) + " -f build/wine/wine_wrapper.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " WINEGXX=$MPT_WINEGXX " + "MPT_WINEGCC_LANG=" + ((wineVersion.HostClass() == mpt::OS::Class::BSD) ? "C" : "CPLUSPLUS") + " MPT_WINE_SEARCHPATH=" + wine.EscapePosixShell(nativeSearchPath) + " all MPT_PROGRESS_FILE=\"&4\" 4>&1 1>stdout.txt 2>stderr.txt" + "\n";
+			script += std::string() + " " + make + " -j " + mpt::fmt::dec(std::max(std::thread::hardware_concurrency(), unsigned int(1))) + " -f build/wine/wine_wrapper.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " WINEGXX=$MPT_WINEGXX " + "MPT_WINEGCC_LANG=" + ((wineVersion.HostClass() == mpt::OS::Class::BSD) ? "C" : "CPLUSPLUS") + " MPT_WINE_SEARCHPATH=" + wine.EscapePosixShell(nativeSearchPath) + " all MPT_PROGRESS_FILE=\"&4\" 4>&1 1>stdout.txt 2>stderr.txt" + "\n";
 			script += std::string() + " echo -n $? > stdexit.txt" + "\n";
 			script += std::string() + " echo 100" + "\n";
 			script += std::string() + "} | " + dialog.Progress("[OK] Prepare OpenMPT Wine Integration\\n[OK] Compile native support\\n[>>] Compile Wine wrapper\\n\\n[3/3] Compiling Wine wrapper ...") + "\n";
@@ -620,7 +620,7 @@ void Initialize()
 		} else
 		{
 
-			script += std::string() + "" + make + " -j " + mpt::fmt::dec(std::max<unsigned int>(std::thread::hardware_concurrency(), 1)) + " -f build/wine/native_support.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " " + features + " all" + "\n";
+			script += std::string() + "" + make + " -j " + mpt::fmt::dec(std::max(std::thread::hardware_concurrency(), unsigned int(1))) + " -f build/wine/native_support.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " " + features + " all" + "\n";
 			script += std::string() + "if [ \"$?\" -ne \"0\" ] ; then" + "\n";
 			if(TrackerSettings::Instance().WineSupportCompileVerbosity >= 1)
 			{
@@ -633,7 +633,7 @@ void Initialize()
 			script += std::string() + " " + dialog.TextBox("stderr.txt") + "\n";
 			script += std::string() + "fi" + "\n";
 		
-			script += std::string() + "" + make + " -j " + mpt::fmt::dec(std::max<unsigned int>(std::thread::hardware_concurrency(), 1)) + " -f build/wine/wine_wrapper.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " WINEGXX=$MPT_WINEGXX " + "MPT_WINEGCC_LANG=" + ((wineVersion.HostClass() == mpt::OS::Class::BSD) ? "C" : "CPLUSPLUS") + " MPT_WINE_SEARCHPATH=" + wine.EscapePosixShell(nativeSearchPath) + " all" + "\n";
+			script += std::string() + "" + make + " -j " + mpt::fmt::dec(std::max(std::thread::hardware_concurrency(), unsigned int(1))) + " -f build/wine/wine_wrapper.mk" + " V=" + mpt::fmt::dec(makeverbosity) + " WINEGXX=$MPT_WINEGXX " + "MPT_WINEGCC_LANG=" + ((wineVersion.HostClass() == mpt::OS::Class::BSD) ? "C" : "CPLUSPLUS") + " MPT_WINE_SEARCHPATH=" + wine.EscapePosixShell(nativeSearchPath) + " all" + "\n";
 			script += std::string() + "if [ \"$?\" -ne \"0\" ] ; then" + "\n";
 			if(TrackerSettings::Instance().WineSupportCompileVerbosity >= 1)
 			{

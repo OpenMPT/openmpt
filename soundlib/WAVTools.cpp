@@ -264,9 +264,9 @@ void WAVReader::ApplySampleSettings(ModSample &sample, mpt::Charset sampleCharse
 	{
 		if(mptInfo.flags & WAVExtraChunk::setPanning) sample.uFlags.set(CHN_PANNING);
 
-		sample.nPan = std::min<uint16>(mptInfo.defaultPan, 256);
-		sample.nVolume = std::min<uint16>(mptInfo.defaultVolume, 256);
-		sample.nGlobalVol = std::min<uint16>(mptInfo.globalVolume, 64);
+		sample.nPan = std::min(static_cast<uint16>(mptInfo.defaultPan), uint16(256));
+		sample.nVolume = std::min(static_cast<uint16>(mptInfo.defaultVolume), uint16(256));
+		sample.nGlobalVol = std::min(static_cast<uint16>(mptInfo.globalVolume), uint16(64));
 		sample.nVibType = static_cast<VibratoType>(mptInfo.vibratoType.get());
 		sample.nVibSweep = mptInfo.vibratoSweep;
 		sample.nVibDepth = mptInfo.vibratoDepth;

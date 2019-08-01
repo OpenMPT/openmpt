@@ -882,8 +882,8 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos,
 				// Sanitize PC events
 				if(m.IsPcNote())
 				{
-					m.SetValueEffectCol(std::min<decltype(m.GetValueEffectCol())>(m.GetValueEffectCol(), ModCommand::maxColumnValue));
-					m.SetValueVolCol(std::min<decltype(m.GetValueEffectCol())>(m.GetValueVolCol(), ModCommand::maxColumnValue));
+					m.SetValueEffectCol(std::min(m.GetValueEffectCol(), static_cast<decltype(m.GetValueEffectCol())>(ModCommand::maxColumnValue)));
+					m.SetValueVolCol(std::min(m.GetValueVolCol(), static_cast<decltype(m.GetValueEffectCol())>(ModCommand::maxColumnValue)));
 				}
 
 				// Adjust pattern selection

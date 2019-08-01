@@ -688,7 +688,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				uint8 flags = rowChunk.ReadUint8();
 				uint8 channel = rowChunk.ReadUint8();
 				// Point to the correct channel
-				ModCommand &m = rowBase[std::min<CHANNELINDEX>(m_nChannels - 1, channel)];
+				ModCommand &m = rowBase[std::min(static_cast<CHANNELINDEX>(m_nChannels - 1), static_cast<CHANNELINDEX>(channel))];
 
 				if(flags & noteFlag)
 				{
@@ -1022,7 +1022,7 @@ struct PSM16SampleHeader
 		mptSmp.nC5Speed = c2freq;
 		mptSmp.Transpose(((finetune ^ 0x08) - 0x78) / (12.0 * 16.0));
 
-		mptSmp.nVolume = std::min<uint8>(volume, 64u) * 4u;
+		mptSmp.nVolume = std::min(static_cast<uint8>(volume), uint8(64)) * 4u;
 
 		mptSmp.uFlags.reset();
 		if(flags & PSM16SampleHeader::smp16Bit)
@@ -1239,7 +1239,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 					continue;
 				}
 
-				ModCommand &m = *Patterns[pat].GetpModCommand(curRow, std::min<CHANNELINDEX>(chnFlag & channelMask, m_nChannels - 1));
+				ModCommand &m = *Patterns[pat].GetpModCommand(curRow, std::min(static_cast<CHANNELINDEX>(chnFlag & channelMask), static_cast<CHANNELINDEX>(m_nChannels - 1)));
 
 				if(chnFlag & noteFlag)
 				{

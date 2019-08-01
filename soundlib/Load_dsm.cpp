@@ -80,7 +80,7 @@ struct DSMSampleHeader
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopEnd;
-		mptSmp.nVolume = std::min<uint8>(volume, 64) * 4;
+		mptSmp.nVolume = std::min(static_cast<uint8>(volume), uint8(64)) * 4;
 	}
 
 	// Retrieve the internal sample format flags for this sample.
@@ -213,10 +213,10 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.charset = mpt::CharsetCP437;
 
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, songHeader.songName);
-	m_nChannels = std::max<uint16>(songHeader.numChannels, 1);
+	m_nChannels = std::max(static_cast<uint16>(songHeader.numChannels), uint16(1));
 	m_nDefaultSpeed = songHeader.speed;
 	m_nDefaultTempo.Set(songHeader.bpm);
-	m_nDefaultGlobalVolume = std::min<uint8>(songHeader.globalVol, 64) * 4u;
+	m_nDefaultGlobalVolume = std::min(static_cast<uint8>(songHeader.globalVol), uint8(64)) * 4u;
 	if(!m_nDefaultGlobalVolume) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(songHeader.mastervol == 0x80)
 	{

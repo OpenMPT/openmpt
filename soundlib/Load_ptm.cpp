@@ -65,7 +65,7 @@ struct PTMSampleHeader
 	SampleIO ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize(MOD_TYPE_S3M);
-		mptSmp.nVolume = std::min<uint8>(volume, 64) * 4;
+		mptSmp.nVolume = std::min(static_cast<uint8>(volume), uint8(64)) * 4;
 		mptSmp.nC5Speed = c4speed * 2;
 
 		mptSmp.filename = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, filename);
@@ -177,7 +177,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_nChannels = fileHeader.numChannels;
-	m_nSamples = std::min<SAMPLEINDEX>(fileHeader.numSamples, MAX_SAMPLES - 1);
+	m_nSamples = std::min(static_cast<SAMPLEINDEX>(fileHeader.numSamples), static_cast<SAMPLEINDEX>(MAX_SAMPLES - 1));
 	ReadOrderFromArray(Order(), fileHeader.orders, fileHeader.numOrders, 0xFF, 0xFE);
 
 	// Reading channel panning

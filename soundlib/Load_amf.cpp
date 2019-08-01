@@ -49,7 +49,7 @@ struct AsylumSampleHeader
 	{
 		mptSmp.Initialize();
 		mptSmp.nFineTune = MOD2XMFineTune(finetune);
-		mptSmp.nVolume = std::min<uint8>(defaultVolume, 64) * 4u;
+		mptSmp.nVolume = std::min(static_cast<uint8>(defaultVolume), uint8(64)) * 4u;
 		mptSmp.RelativeTone = transpose;
 		mptSmp.nLength = length;
 

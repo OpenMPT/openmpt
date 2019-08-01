@@ -424,8 +424,8 @@ struct AMSampleHeader
 	void ConvertToMPT(AMInstrumentHeader &instrHeader, ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mptSmp.nPan = std::min<uint16>(pan, 32767) * 256 / 32767;
-		mptSmp.nVolume = std::min<uint16>(volume, 32767) * 256 / 32767;
+		mptSmp.nPan = std::min(static_cast<uint16>(pan), uint16(32767)) * 256 / 32767;
+		mptSmp.nVolume = std::min(static_cast<uint16>(volume), uint16(32767)) * 256 / 32767;
 		mptSmp.nGlobalVol = 64;
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
@@ -518,7 +518,7 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 			continue;
 		}
 
-		ModCommand &m = *sndFile.Patterns[pat].GetpModCommand(row, std::min<CHANNELINDEX>((flags & channelMask), channels - 1));
+		ModCommand &m = *sndFile.Patterns[pat].GetpModCommand(row, std::min(static_cast<CHANNELINDEX>(flags & channelMask), static_cast<CHANNELINDEX>(channels - 1)));
 
 		if(flags & dataFlag)
 		{

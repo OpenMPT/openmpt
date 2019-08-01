@@ -266,7 +266,7 @@ bool IsNegative(const T &val)
 		} \
 		if(only_this_code == fcode || only_this_code == Util::MaxValueOfType(only_this_code)) \
 		{ \
-			uint32 maxNodes = std::min<uint32>(fsize/sizeof(type), env.size()); \
+			uint32 maxNodes = std::min(static_cast<uint32>(fsize/sizeof(type)), static_cast<uint32>(env.size())); \
 			for(uint32 i = 0; i < maxNodes; ++i) \
 			{ \
 				type tmp; \
@@ -616,15 +616,15 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 		result = true;
 	} break;
 	case MagicBE("VE.."):
-		input->VolEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
+		input->VolEnv.resize(std::min(uint32(MAX_ENVPOINTS), file.ReadTruncatedIntLE<uint32>(fsize)));
 		result = true;
 		break;
 	case MagicBE("PE.."):
-		input->PanEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
+		input->PanEnv.resize(std::min(uint32(MAX_ENVPOINTS), file.ReadTruncatedIntLE<uint32>(fsize)));
 		result = true;
 		break;
 	case MagicBE("PiE."):
-		input->PitchEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
+		input->PitchEnv.resize(std::min(uint32(MAX_ENVPOINTS), file.ReadTruncatedIntLE<uint32>(fsize)));
 		result = true;
 		break;
 	}
