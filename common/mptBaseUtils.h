@@ -249,6 +249,8 @@ using std::ispow2;
 using std::ceil2;
 using std::floor2;
 using std::log2p1;
+using std::rotl;
+using std::rotr;
 
 #else
 
@@ -317,6 +319,26 @@ MPT_CONSTEXPR14_FUN T log2p1(T x) noexcept
 		result += 1;
 	}
 	return result;
+}
+
+template <typename T>
+MPT_CONSTEXPR14_FUN T rotl(T x, int s) noexcept
+{
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
+	auto N = std::numeric_limits<T>::digits;
+	auto r = s % N;
+	return (s < 0) ? mpt::rotr(x, -s) : (x >> (N - r)) | (x << r);
+}
+
+template <typename T>
+MPT_CONSTEXPR14_FUN T rotr(T x, int s) noexcept
+{
+	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
+	auto N = std::numeric_limits<T>::digits;
+	auto r = s % N;
+	return (s < 0) ? mpt::rotl(x, -s) : (x << (N - r)) | (x >> r);
 }
 
 #endif
@@ -552,33 +574,6 @@ MPT_FORCEINLINE auto lshift_signed(T x, int y) -> decltype(x << y)
 #endif
 
 } // namespace mpt
-
-
-
-namespace mpt
-{
-
-template <typename T>
-MPT_CONSTEXPR14_FUN auto ror(T x, int y) -> decltype(x >> y)
-{
-	using result_type = decltype(x >> y);
-	using unsigned_result_type = typename std::make_unsigned<result_type>::type;
-	unsigned_result_type urx = static_cast<unsigned_result_type>(x);
-	urx = (urx << (std::numeric_limits<unsigned_result_type>::digits - y)) | (urx >> y);
-	return static_cast<result_type>(urx);
-}
-
-template <typename T>
-MPT_CONSTEXPR14_FUN auto rol(T x, int y) -> decltype(x << y)
-{
-	using result_type = decltype(x << y);
-	using unsigned_result_type = typename std::make_unsigned<result_type>::type;
-	unsigned_result_type urx = static_cast<unsigned_result_type>(x);
-	urx = (urx >> (std::numeric_limits<unsigned_result_type>::digits - y)) | (urx << y);
-	return static_cast<result_type>(urx);
-}
-
-}  // namespace mpt
 
 
 

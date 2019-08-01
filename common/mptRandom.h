@@ -317,10 +317,10 @@ public:
 	{
 		state_type a = state1;
 		state_type b = state2;
-		a = mpt::rol(a, rol1);
+		a = mpt::rotl(a, rol1);
 		a ^= x1;
 		a += x2 + (b * x3);
-		b += mpt::rol(a, rol2) * x4;
+		b += mpt::rotl(a, rol2) * x4;
 		state1 = a;
 		state2 = b;
 		result_type result = static_cast<result_type>(b);
