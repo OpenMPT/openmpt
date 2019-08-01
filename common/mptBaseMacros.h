@@ -79,10 +79,11 @@ template <typename T, T V> struct constant_value_helper { static constexpr T val
 
 
 
-// C++17 std::size
+// C++17 std::size and std::data
 #if MPT_CXX_AT_LEAST(17)
 namespace mpt {
 using std::size;
+using std::data;
 } // namespace mpt
 #else
 namespace mpt {
@@ -95,6 +96,16 @@ template <typename T, std::size_t N>
 MPT_CONSTEXPR11_FUN std::size_t size(const T(&)[N]) noexcept
 {
 	return N;
+}
+template <typename T>
+MPT_CONSTEXPR11_FUN auto data(const T & v) -> decltype(v.data())
+{
+	return v.data();
+}
+template <typename T, std::size_t N>
+MPT_CONSTEXPR11_FUN T* data(T(&a)[N]) noexcept
+{
+	return a;
 }
 } // namespace mpt
 #endif
