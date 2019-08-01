@@ -321,6 +321,25 @@ MPT_CONSTEXPR14_FUN T log2p1(T x) noexcept
 	return result;
 }
 
+namespace detail
+{
+
+template <typename T>
+MPT_CONSTEXPR14_FUN T rotl(T x, int r) noexcept
+{
+	auto N = std::numeric_limits<T>::digits;
+	return (x >> (N - r)) | (x << r);
+}
+
+template <typename T>
+MPT_CONSTEXPR14_FUN T rotr(T x, int r) noexcept
+{
+	auto N = std::numeric_limits<T>::digits;
+	return (x << (N - r)) | (x >> r);
+}
+
+} // namespace detail
+
 template <typename T>
 MPT_CONSTEXPR14_FUN T rotl(T x, int s) noexcept
 {
@@ -328,7 +347,7 @@ MPT_CONSTEXPR14_FUN T rotl(T x, int s) noexcept
 	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
 	auto N = std::numeric_limits<T>::digits;
 	auto r = s % N;
-	return (s < 0) ? mpt::rotr(x, -s) : (x >> (N - r)) | (x << r);
+	return (s < 0) ? detail::rotr(x, -s) : ((x >> (N - r)) | (x << r));
 }
 
 template <typename T>
@@ -338,7 +357,7 @@ MPT_CONSTEXPR14_FUN T rotr(T x, int s) noexcept
 	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
 	auto N = std::numeric_limits<T>::digits;
 	auto r = s % N;
-	return (s < 0) ? mpt::rotl(x, -s) : (x << (N - r)) | (x >> r);
+	return (s < 0) ? detail::rotl(x, -s) : ((x << (N - r)) | (x >> r));
 }
 
 #endif
