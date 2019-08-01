@@ -282,7 +282,7 @@ public:
 	}
 };
 
-#define MPT_SOURCE_LOCATION_CURRENT() mpt::source_location::current( __FILE__ , __FUNCTION__ , __LINE__ , 0 )
+#define MPT_SOURCE_LOCATION_CURRENT() mpt::source_location::current( __FILE__ , __func__ , __LINE__ , 0 )
 
 } // namespace mpt
 
