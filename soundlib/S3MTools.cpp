@@ -28,8 +28,8 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 		if(sampleType == typePCM)
 		{
 			mptSmp.nLength = length;
-			mptSmp.nLoopStart = MIN(loopStart, mptSmp.nLength - 1);
-			mptSmp.nLoopEnd = MIN(loopEnd, mptSmp.nLength);
+			mptSmp.nLoopStart = std::min(static_cast<SmpLength>(loopStart), mptSmp.nLength - 1);
+			mptSmp.nLoopEnd = std::min(static_cast<SmpLength>(loopEnd), mptSmp.nLength);
 			mptSmp.uFlags.set(CHN_LOOP, (flags & smpLoop) != 0);
 		}
 
@@ -100,7 +100,7 @@ SmpLength S3MSampleHeader::ConvertToS3M(const ModSample &mptSmp)
 		sampleType = typeNone;
 	}
 
-	defaultVolume = static_cast<uint8>(MIN(mptSmp.nVolume / 4, 64));
+	defaultVolume = static_cast<uint8>(std::min(static_cast<uint16>(mptSmp.nVolume / 4), uint16(64)));
 	if(mptSmp.nC5Speed != 0)
 	{
 		c5speed = mptSmp.nC5Speed;

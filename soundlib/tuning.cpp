@@ -810,7 +810,7 @@ namespace CTuningS11n
 
 void RatioWriter::operator()(std::ostream& oStrm, const std::vector<float>& v)
 {
-	const size_t nWriteCount = MIN(v.size(), m_nWriteCount);
+	const std::size_t nWriteCount = std::min(v.size(), static_cast<std::size_t>(m_nWriteCount));
 	mpt::IO::WriteAdaptiveInt64LE(oStrm, nWriteCount);
 	for(size_t i = 0; i < nWriteCount; i++)
 		mpt::IO::Write(oStrm, IEEE754binary32LE(v[i]));
@@ -837,7 +837,7 @@ void ReadRatioTable(std::istream& iStrm, std::vector<RATIOTYPE>& v, const size_t
 {
 	uint64 val;
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
-	v.resize( static_cast<size_t>(MIN(val, 256u))); // Read 256 vals at max.
+	v.resize(std::min(mpt::saturate_cast<std::size_t>(val), std::size_t(256))); // Read 256 vals at max.
 	for(size_t i = 0; i < v.size(); i++)
 	{
 		IEEE754binary32LE tmp(0.0f);

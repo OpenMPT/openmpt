@@ -463,7 +463,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 				// => Tempo = 60 * Rows per Second * Speed / 24
 				// For some reason, using settings.tempoTicks + 1 gives more accurate results than just settings.tempoTicks... (same problem in the old libmodplug DMF loader)
 				// Original unoptimized formula:
-				//const int tickspeed = (tempoRealBPMmode) ? MAX(1, (tempoData * beat * 4) / 60) : tempoData;
+				//const int tickspeed = (tempoRealBPMmode) ? std::max(1, (tempoData * beat * 4) / 60) : tempoData;
 				const int tickspeed = (settings.realBPMmode) ? std::max(1, settings.tempoBPM * settings.beat * 2) : ((settings.tempoTicks + 1) * 30);
 				// Try to find matching speed - try higher speeds first, so that effects like arpeggio and tremor work better.
 				for(speed = 255; speed > 2; speed--)

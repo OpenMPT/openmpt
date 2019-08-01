@@ -154,14 +154,14 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 				if (m.param)
 				{
 					m.command = CMD_NOTESLIDEDOWN;
-					m.param = 0x10 | MIN(0x0F, m.param);
+					m.param = 0x10 | std::min(uint8(0x0F), m.param);
 				}
 				break;
 			case 30: // U Slide Up (Notes)
 				if (m.param)
 				{
 					m.command = CMD_NOTESLIDEUP;
-					m.param = 0x10 | MIN(0x0F, m.param);
+					m.param = 0x10 | std::min(uint8(0x0F), m.param);
 				}
 				break;
 			// We don't have fine note slide, but this is supposed to happen once
@@ -171,14 +171,14 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 				if (m.param)
 				{
 					m.command = CMD_NOTESLIDEDOWN;
-					m.param = 0x50 | MIN(0x0F, m.param);
+					m.param = 0x50 | std::min(uint8(0x0F), m.param);
 				}
 				break;
 			case 17: // H Slide Up Once (Notes)
 				if (m.param)
 				{
 					m.command = CMD_NOTESLIDEUP;
-					m.param = 0x50 | MIN(0x0F, m.param);
+					m.param = 0x50 | std::min(uint8(0x0F), m.param);
 				}
 				break;
 
@@ -222,10 +222,10 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 					m.param = (m.param & 0x0F) << 4; // Dx0
 					break;
 				case 6:
-					m.param = 0xF0 | MIN(m.param & 0x0F, 0x0E); // DFx
+					m.param = 0xF0 | std::min(static_cast<uint8>(m.param & 0x0F), uint8(0x0E)); // DFx
 					break;
 				case 7:
-					m.param = (MIN(m.param & 0x0F, 0x0E) << 4) | 0x0F; // DxF
+					m.param = (std::min(static_cast<uint8>(m.param & uint8(0x0F)), uint8(0x0E)) << 4) | 0x0F; // DxF
 					break;
 				default:
 					// Junk.

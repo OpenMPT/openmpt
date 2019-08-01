@@ -545,7 +545,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 				} else
 				{
 					m.volcmd = VOLCMD_VOLUME;
-					m.vol = MIN(volume, 64);
+					m.vol = std::min(volume, uint8(64));
 				}
 			}
 
@@ -650,7 +650,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 	fileHeader.smpNum = static_cast<uint16>(writeSamples);
 
 	// Patterns
-	PATTERNINDEX writePatterns = MIN(Patterns.GetNumPatterns(), 100u);
+	PATTERNINDEX writePatterns = std::min(Patterns.GetNumPatterns(), PATTERNINDEX(100));
 	fileHeader.patNum = static_cast<uint16>(writePatterns);
 
 	// Flags
@@ -822,7 +822,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 					{
 						command = CMD_NONE;
 						volcmd = VOLCMD_VOLUME;
-						vol = MIN(param, 64);
+						vol = std::min(param, uint8(64));
 					}
 
 					if(volcmd == VOLCMD_VOLUME)

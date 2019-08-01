@@ -430,7 +430,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 							break;
 
 						case CMD_VOLUME:
-							m.param = MIN(m.param, 64);
+							m.param = std::min(m.param, uint8(64));
 							if(modSpecs.HasVolCommand(VOLCMD_VOLUME))
 							{
 								m.volcmd = VOLCMD_VOLUME;

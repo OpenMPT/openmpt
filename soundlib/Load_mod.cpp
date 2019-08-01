@@ -106,7 +106,7 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 		{
 			if(param <= 0x80)
 			{
-				param = MIN(param << 1, 0xFF);
+				param = mpt::saturate_cast<uint8>(param * 2);
 			}
 			else if(param == 0xA4)	// surround
 			{
@@ -2324,7 +2324,7 @@ bool CSoundFile::SaveMod(std::ostream &f) const
 				{
 					// Maybe we can save some volume commands...
 					command = 0x0C;
-					param = MIN(m.vol, 64);
+					param = std::min(m.vol, uint8(64));
 				}
 
 				uint16 period = 0;
