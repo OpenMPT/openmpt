@@ -1012,7 +1012,7 @@ static bool StringToEnvelope(const std::string_view &s, InstrumentEnvelope &env,
 	sscanf(&s[pos], pszEnvFmt, &nPoints, &susBegin, &susEnd, &loopBegin, &loopEnd, &bSus, &bLoop, &bCarry);
 	while (pos < length && s[pos] != '\r' && s[pos] != '\n') pos++;
 
-	nPoints = MIN(nPoints, specs.envelopePointsMax);
+	nPoints = std::min(nPoints, static_cast<uint32>(specs.envelopePointsMax));
 	if (susEnd >= nPoints) susEnd = 0;
 	if (susBegin > susEnd) susBegin = susEnd;
 	if (loopEnd >= nPoints) loopEnd = 0;

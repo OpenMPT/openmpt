@@ -314,7 +314,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		m_TabCtrl.DeleteAllItems();
 		for (int iItem=0; iItem<nTabCount; iItem++)
 		{
-			const int lastItem = MIN(iItem * CHANNELS_IN_TAB + CHANNELS_IN_TAB, MAX_BASECHANNELS);
+			const int lastItem = std::min(iItem * CHANNELS_IN_TAB + CHANNELS_IN_TAB, static_cast<int>(MAX_BASECHANNELS));
 			s.Format(_T("%u - %u"), iItem * CHANNELS_IN_TAB + 1, lastItem);
 			TC_ITEM tci;
 			tci.mask = TCIF_TEXT | TCIF_PARAM;

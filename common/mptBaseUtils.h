@@ -324,29 +324,6 @@ MPT_CONSTEXPR14_FUN T log2p1(T x) noexcept
 } // namespace mpt
 
 
-#if defined(MODPLUG_TRACKER)
-
-namespace mpt { namespace Legacy {
-
-template <typename Ta, typename Tb>
-MPT_CONSTEXPR11_FUN auto MAX(const Ta &a, const Tb &b) -> decltype((a>b)?a:b)
-{
-	return (a > b) ? a : b;
-}
-
-template <typename Ta, typename Tb>
-MPT_CONSTEXPR11_FUN auto MIN(const Ta &a, const Tb &b) -> decltype((a<b)?a:b)
-{
-	return (a < b) ? a : b;
-}
-
-} } // namespace mpt::Legacy
-
-using namespace mpt::Legacy;
-
-#endif
-
-
 namespace Util
 {
 

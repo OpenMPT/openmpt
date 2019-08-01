@@ -850,7 +850,7 @@ void CViewPattern::OnGrowSelection()
 	}
 
 	// Adjust selection
-	m_Selection = PatternRect(startSel, PatternCursor(MIN(finalDest, pSndFile->Patterns[m_nPattern].GetNumRows() - 1), endSel));
+	m_Selection = PatternRect(startSel, PatternCursor(std::min(finalDest, static_cast<ROWINDEX>(pSndFile->Patterns[m_nPattern].GetNumRows() - 1)), endSel));
 
 	InvalidatePattern();
 	SetModified();
@@ -950,7 +950,7 @@ void CViewPattern::OnShrinkSelection()
 	}
 
 	// Adjust selection
-	m_Selection = PatternRect(startSel, PatternCursor(MIN(finalDest, pSndFile->Patterns[m_nPattern].GetNumRows() - 1), endSel));
+	m_Selection = PatternRect(startSel, PatternCursor(std::min(finalDest, static_cast<ROWINDEX>(pSndFile->Patterns[m_nPattern].GetNumRows() - 1)), endSel));
 
 	InvalidatePattern();
 	SetModified();

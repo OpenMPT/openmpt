@@ -252,7 +252,7 @@ void CDefaultVstEditor::CreateControls()
 void CDefaultVstEditor::UpdateControls(bool updateParamNames)
 {
 	const PlugParamIndex numParams = m_VstPlugin.GetNumParameters();
-	const PlugParamIndex scrollMax = numParams - MIN(numParams, NUM_PLUGINEDITOR_PARAMETERS);
+	const PlugParamIndex scrollMax = numParams - std::min(numParams, static_cast<PlugParamIndex>(NUM_PLUGINEDITOR_PARAMETERS));
 	LimitMax(paramOffset, scrollMax);
 
 	int curScrollMin, curScrollMax;
@@ -352,14 +352,14 @@ void CDefaultVstEditor::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 		case SB_PAGELEFT:		// Scroll one page left.
 			if(curpos > minpos)
 			{
-				curpos = MAX(minpos, curpos - (int)sbInfo.nPage);
+				curpos = std::max(minpos, curpos - static_cast<int>(sbInfo.nPage));
 			}
 			break;
 
 		case SB_PAGERIGHT:		// Scroll one page right.
 			if(curpos < maxpos)
 			{
-				curpos = MIN(maxpos, curpos + (int)sbInfo.nPage);
+				curpos = std::min(maxpos, curpos + static_cast<int>(sbInfo.nPage));
 			}
 			break;
 

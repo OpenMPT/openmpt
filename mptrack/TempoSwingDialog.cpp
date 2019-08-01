@@ -323,14 +323,14 @@ void CTempoSwingDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
 		case SB_PAGELEFT:		// Scroll one page left.
 			if(curpos > minpos)
 			{
-				curpos = MAX(minpos, curpos - (int)sbInfo.nPage);
+				curpos = std::max(minpos, curpos - static_cast<int>(sbInfo.nPage));
 			}
 			break;
 
 		case SB_PAGERIGHT:		// Scroll one page right.
 			if(curpos < maxpos)
 			{
-				curpos = MIN(maxpos, curpos + (int)sbInfo.nPage);
+				curpos = std::min(maxpos, curpos + static_cast<int>(sbInfo.nPage));
 			}
 			break;
 
