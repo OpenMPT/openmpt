@@ -102,6 +102,11 @@ MPT_CONSTEXPR11_FUN auto data(const T & v) -> decltype(v.data())
 {
 	return v.data();
 }
+template <typename T>
+MPT_CONSTEXPR11_FUN auto data(T & v) -> decltype(v.data())
+{
+	return v.data();
+}
 template <typename T, std::size_t N>
 MPT_CONSTEXPR11_FUN T* data(T(&a)[N]) noexcept
 {
