@@ -258,8 +258,6 @@ SoundDevice::Caps PulseaudioSimple::InternalGetDeviceCaps()
 	caps.Available = true; // TODO: poll PulseAudio
 	caps.CanUpdateInterval = true;
 	caps.CanSampleFormat = false;
-	caps.supportedSampleFormats = { SampleFormatFloat32 };
-	caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32 };
 	caps.CanExclusiveMode = true;
 	caps.CanBoostThreadPriority = true;
 	caps.CanKeepDeviceRunning = false;
@@ -283,6 +281,8 @@ SoundDevice::DynamicCaps PulseaudioSimple::GetDeviceDynamicCaps(const std::vecto
 	SoundDevice::DynamicCaps caps;
 	caps.supportedSampleRates = baseSampleRates;
 	caps.supportedExclusiveSampleRates = baseSampleRates;
+	caps.supportedSampleFormats = { SampleFormatFloat32 };
+	caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32 };
 	return caps;
 }
 
