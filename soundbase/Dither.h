@@ -102,7 +102,7 @@ public:
 				return sample;
 			} else
 			{
-				constexpr int rshiftpositive = (rshift > 1) ? rshift : 0; // work-around warnings about negative shift with C++14 compilers
+				constexpr int rshiftpositive = (rshift > 1) ? rshift : 1; // work-around warnings about negative shift with C++14 compilers
 				constexpr int round_mask = ~((1<<rshiftpositive)-1);
 				constexpr int round_offset = 1<<(rshiftpositive-1);
 				constexpr int noise_bits = rshiftpositive + (ditherdepth - 1);
