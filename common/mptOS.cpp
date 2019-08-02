@@ -70,7 +70,7 @@ mpt::OS::Class GetClass()
 		{
 			return mpt::OS::Class::Unknown;
 		}
-		return mpt::OS::GetClassFromSysname(mpt::ToUnicode(mpt::CharsetASCII, mpt::ReadAutoBuf(uname_result.sysname)));
+		return mpt::OS::GetClassFromSysname(mpt::ToUnicode(mpt::CharsetASCII, mpt::String::ReadAutoBuf(uname_result.sysname)));
 	#endif // MPT_OS_WINDOWS
 }
 
