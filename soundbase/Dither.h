@@ -95,16 +95,17 @@ public:
 		{
 			STATIC_ASSERT(sizeof(MixSampleInt) == 4);
 			constexpr int rshift = (32-targetbits) - MixSampleIntTraits::mix_headroom_bits();
-			MPT_CONSTANT_IF(rshift <= 0)
+			MPT_CONSTANT_IF(rshift <= 1)
 			{
 				MPT_UNREFERENCED_PARAMETER(prng);
 				// nothing to dither
 				return sample;
 			} else
 			{
-				constexpr int round_mask = ~((1<<rshift)-1);
-				constexpr int round_offset = 1<<(rshift-1);
-				constexpr int noise_bits = rshift + (ditherdepth - 1);
+				constexpr int rshiftpositive = (rshift > 1) ? rshift : 0; // work-around warnings about negative shift with C++14 compilers
+				constexpr int round_mask = ~((1<<rshiftpositive)-1);
+				constexpr int round_offset = 1<<(rshiftpositive-1);
+				constexpr int noise_bits = rshiftpositive + (ditherdepth - 1);
 				constexpr int noise_bias = (1<<(noise_bits-1));
 				int32 e = error;
 				unsigned int unoise = 0;
