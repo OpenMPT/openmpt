@@ -107,7 +107,6 @@ bool CPortaudioDevice::InternalOpen()
 		m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
 		m_WasapiStreamInfo.hostApiType = paWASAPI;
 		m_WasapiStreamInfo.version = 1;
-#endif // MPT_OS_WINDOWS
 		if(m_Settings.BoostThreadPriority)
 		{
 			m_WasapiStreamInfo.flags |= paWinWasapiThreadPriority;
@@ -141,6 +140,7 @@ bool CPortaudioDevice::InternalOpen()
 			}
 			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
 		}
+#endif // MPT_OS_WINDOWS
 		if(m_Settings.ExclusiveMode)
 		{
 			m_Flags.NeedsClippedFloat = false;
