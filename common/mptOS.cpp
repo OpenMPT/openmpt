@@ -66,11 +66,11 @@ mpt::OS::Class GetClass()
 		return mpt::OS::Class::Windows;
 	#else // !MPT_OS_WINDOWS
 		utsname uname_result;
-		if(uname(&uname_resukt) != 0)
+		if(uname(&uname_result) != 0)
 		{
 			return mpt::OS::Class::Unknown;
 		}
-		return mpt::OS::GetClassFRomSysname(mpt::ToUnicode(mpt::CharsetASCII, mpt::ReadAutoBuf(uname_result.sysname)));
+		return mpt::OS::GetClassFromSysname(mpt::ToUnicode(mpt::CharsetASCII, mpt::ReadAutoBuf(uname_result.sysname)));
 	#endif // MPT_OS_WINDOWS
 }
 
