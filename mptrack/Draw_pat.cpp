@@ -31,29 +31,32 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Headers
-#define ROWHDR_WIDTH		32	// Row header
-#define COLHDR_HEIGHT		16	// Column header
-#define	VUMETERS_HEIGHT		13	// Height of vu-meters
-#define	PLUGNAME_HEIGHT		16	// Height of plugin names
-#define VUMETERS_BMPWIDTH		32
-#define VUMETERS_BMPHEIGHT		10
-#define VUMETERS_MEDWIDTH		24
-#define VUMETERS_LOWIDTH		16
+enum
+{
+	ROWHDR_WIDTH       = 32,  // Row header
+	COLHDR_HEIGHT      = 16,  // Column header
+	VUMETERS_HEIGHT    = 13,  // Height of vu-meters
+	PLUGNAME_HEIGHT    = 16,  // Height of plugin names
+	VUMETERS_BMPWIDTH  = 32,
+	VUMETERS_BMPHEIGHT = 10,
+	VUMETERS_MEDWIDTH  = 24,
+	VUMETERS_LOWIDTH   = 16,
+};
 
 enum
 {
-	COLUMN_BITS_NONE			= 0x00,
-	COLUMN_BITS_NOTE			= 0x01,
-	COLUMN_BITS_INSTRUMENT		= 0x02,
-	COLUMN_BITS_VOLUME			= 0x04,
-	COLUMN_BITS_FXCMD			= 0x08,
-	COLUMN_BITS_FXPARAM			= 0x10,
-	COLUMN_BITS_FXCMDANDPARAM	= 0x18,
-	COLUMN_BITS_ALLCOLUMNS		= 0x1F,
-	COLUMN_BITS_UNKNOWN			= 0x20,	// Appears to be unused
-	COLUMN_BITS_ALL				= 0x3F,
-	COLUMN_BITS_SKIP			= 0x40,
-	COLUMN_BITS_INVISIBLE		= 0x80,
+	COLUMN_BITS_NONE          = 0x00,
+	COLUMN_BITS_NOTE          = 0x01,
+	COLUMN_BITS_INSTRUMENT    = 0x02,
+	COLUMN_BITS_VOLUME        = 0x04,
+	COLUMN_BITS_FXCMD         = 0x08,
+	COLUMN_BITS_FXPARAM       = 0x10,
+	COLUMN_BITS_FXCMDANDPARAM = 0x18,
+	COLUMN_BITS_ALLCOLUMNS    = 0x1F,
+	COLUMN_BITS_UNKNOWN       = 0x20,  // Appears to be unused
+	COLUMN_BITS_ALL           = 0x3F,
+	COLUMN_BITS_SKIP          = 0x40,
+	COLUMN_BITS_INVISIBLE     = 0x80,
 };
 
 
@@ -64,7 +67,7 @@ enum
 // Effect colour codes
 
 // CommandTypes => Effect colour assignment
-const int effectColors[] =
+static constexpr int effectColors[] =
 {
 	0,
 	MODCOLOR_GLOBALS,
@@ -73,7 +76,7 @@ const int effectColors[] =
 	MODCOLOR_PITCH,
 };
 
-STATIC_ASSERT(CountOf(effectColors) == MAX_EFFECT_TYPE);
+static_assert(mpt::size(effectColors) == MAX_EFFECT_TYPE);
 
 /////////////////////////////////////////////////////////////////////////////
 // CViewPattern Drawing Implementation
@@ -646,7 +649,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		sprintf(s, "#%u", m_nPattern);
 		rect.right = m_szHeader.cx;
 		DrawButtonRect(hdc, &rect, s, FALSE,
-			((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PATTERNHEADER)) ? TRUE : FALSE);
+			(m_bInItemRect && m_nDragItem.Type() == DragItem::PatternHeader) ? TRUE : FALSE);
 
 		const int dropWidth = Util::ScalePixels(2, m_hWnd);
 
@@ -664,20 +667,20 @@ void CViewPattern::OnDraw(CDC *pDC)
 				sprintf(s, pszfmt, ncolhdr + 1, sndFile.ChnSettings[ncolhdr].szName.buf);
 				DrawButtonRect(hdc, &rect, s,
 					sndFile.ChnSettings[ncolhdr].dwFlags[CHN_MUTE] ? TRUE : FALSE,
-					((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE,
+					(m_bInItemRect && m_nDragItem.Type() == DragItem::ChannelHeader && m_nDragItem.Value() == ncolhdr) ? TRUE : FALSE,
 					pModDoc->IsChannelRecord(static_cast<CHANNELINDEX>(ncolhdr)) ? DT_RIGHT : DT_CENTER);
 
 				// When dragging around channel headers, mark insertion position
 				if(m_Status[psDragging] && !m_bInItemRect
-					&& (m_nDragItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER
-					&& (m_nDropItem & DRAGITEM_MASK) == DRAGITEM_CHNHEADER
-					&& (m_nDropItem & DRAGITEM_VALUEMASK) == ncolhdr)
+				   && m_nDragItem.Type() == DragItem::ChannelHeader
+				   && m_nDropItem.Type() == DragItem::ChannelHeader
+				   && m_nDropItem.Value() == ncolhdr)
 				{
 					CRect r;
 					r.top = rect.top;
 					r.bottom = rect.bottom;
 					// Drop position depends on whether hovered channel is left or right of dragged item.
-					r.left = ((m_nDropItem & DRAGITEM_VALUEMASK) < (m_nDragItem & DRAGITEM_VALUEMASK) || m_Status[psShiftDragging]) ? rect.left : rect.right - dropWidth;
+					r.left = (m_nDropItem.Value() < m_nDragItem.Value() || m_Status[psShiftDragging]) ? rect.left : rect.right - dropWidth;
 					r.right = r.left + dropWidth;
 					::FillRect(hdc, r, CMainFrame::brushText);
 				}
@@ -721,7 +724,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 					else
 						sprintf(s, "---");
 					DrawButtonRect(hdc, &rect, s, FALSE,
-						((m_bInItemRect) && ((m_nDragItem & DRAGITEM_MASK) == DRAGITEM_PLUGNAME) && ((m_nDragItem & DRAGITEM_VALUEMASK) == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
+						((m_bInItemRect) && (m_nDragItem.Type() == DragItem::PluginName) && (m_nDragItem.Value() == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
 				}
 
 			} else break;

@@ -80,16 +80,16 @@ protected:
 	afx_msg void OnEditFindNext() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FINDNEXT, 0); }	  //rewbs.customKeys
 	afx_msg void OnSwitchToView() { if (m_hWndView) ::PostMessage(m_hWndView, WM_MOD_VIEWMSG, VIEWMSG_SETFOCUS, 0); } //rewbs.customKeys
 
-	virtual void OnOK() {}
-	virtual void OnCancel() {}
+	void OnOK() override {}
+	void OnCancel() override {}
 	virtual void RecalcLayout() {}
 	virtual void UpdateView(UpdateHint, CObject *) {}
 	virtual CRuntimeClass *GetAssociatedViewClass() { return NULL; }
 	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
 	virtual void OnActivatePage(LPARAM) {}
 	virtual void OnDeactivatePage() {}
-	virtual BOOL OnInitDialog();
-	virtual INT_PTR OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
+	BOOL OnInitDialog() override;
+	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
 	virtual BOOL GetToolTipText(UINT, LPTSTR) { return FALSE; }
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CModControlDlg)

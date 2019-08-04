@@ -25,12 +25,36 @@ class CEffectVis;
 class CInputHandler;
 
 // Drag & Drop info
-#define DRAGITEM_VALUEMASK		0x00FFFFFF
-#define DRAGITEM_MASK			0xFF000000
-#define DRAGITEM_CHNHEADER		0x01000000
-#define DRAGITEM_PATTERNHEADER	0x02000000
-#define DRAGITEM_PLUGNAME		0x04000000
-using DragItem = uint32;
+class DragItem
+{
+	uint32 v = 0;
+
+	enum : uint32
+	{
+		ValueMask = 0x00FFFFFF,
+		TypeMask = 0xFF000000,
+	};
+
+public:
+	enum DragType : uint32
+	{
+		ChannelHeader = 0x01000000,
+		PatternHeader = 0x02000000,
+		PluginName = 0x04000000,
+	};
+
+	DragItem() = default;
+	DragItem(DragType type, uint32 value)
+	    : v(type | value) {}
+
+	DragType Type() const { return static_cast<DragType>(v & TypeMask); }
+	uint32 Value() const { return v & ValueMask; }
+	INT_PTR ToIntPtr() const { return v; }
+	bool IsValid() const { return v != 0; }
+
+	bool operator==(const DragItem other) const { return v == other.v; }
+	bool operator!=(const DragItem other) const { return v != other.v; }
+};
 
 
 // Edit Step aka Row Spacing
@@ -99,37 +123,35 @@ OPENMPT_NAMESPACE_BEGIN
 // Pattern editing class
 
 
-class CViewPattern: public CModScrollView
+class CViewPattern : public CModScrollView
 {
 public:
-
 	// Pattern status flags
 	enum PatternStatus
 	{
-		psMouseDragSelect		= 0x01,		// Creating a selection using the mouse
-		psKeyboardDragSelect	= 0x02,		// Creating a selection using shortcuts
-		psFocussed				= 0x04,		// Is the pattern editor focussed
-		psFollowSong			= 0x08,		// Does the cursor follow playback
-		psRecordingEnabled		= 0x10,		// Recording enabled
-		psDragVScroll			= 0x40,		// Indicates that the vertical scrollbar is being dragged
-		psShowVUMeters			= 0x80,		// Display channel VU meters
-		psChordPlaying			= 0x100,	// Is a chord playing? (pretty much unused)
-		psDragnDropEdit			= 0x200,	// Drag & Drop editing (?)
-		psDragnDropping			= 0x400,	// Dragging a selection around
-		psShiftSelect			= 0x800,	// User has made at least one selection using Shift-Click since the Shift key has been pressed.
-		psCtrlDragSelect		= 0x1000,	// Creating a selection using Ctrl
-		psShowPluginNames		= 0x2000,	// Show plugin names in channel headers
-		psRowSelection			= 0x4000,	// Selecting a whole pattern row by clicking the row numbers
-		psChannelSelection		= 0x8000,	// Double-clicked pattern to select a whole channel
-		psDragging				= 0x10000,	// Drag&Drop: Dragging an item around
-		psShiftDragging			= 0x20000,	// Drag&Drop: Dragging an item around and holding shift
+		psMouseDragSelect    = 0x01,     // Creating a selection using the mouse
+		psKeyboardDragSelect = 0x02,     // Creating a selection using shortcuts
+		psFocussed           = 0x04,     // Is the pattern editor focussed
+		psFollowSong         = 0x08,     // Does the cursor follow playback
+		psRecordingEnabled   = 0x10,     // Recording enabled
+		psDragVScroll        = 0x40,     // Indicates that the vertical scrollbar is being dragged
+		psShowVUMeters       = 0x80,     // Display channel VU meters
+		psChordPlaying       = 0x100,    // Is a chord playing? (pretty much unused)
+		psDragnDropEdit      = 0x200,    // Drag & Drop editing (?)
+		psDragnDropping      = 0x400,    // Dragging a selection around
+		psShiftSelect        = 0x800,    // User has made at least one selection using Shift-Click since the Shift key has been pressed.
+		psCtrlDragSelect     = 0x1000,   // Creating a selection using Ctrl
+		psShowPluginNames    = 0x2000,   // Show plugin names in channel headers
+		psRowSelection       = 0x4000,   // Selecting a whole pattern row by clicking the row numbers
+		psChannelSelection   = 0x8000,   // Double-clicked pattern to select a whole channel
+		psDragging           = 0x10000,  // Drag&Drop: Dragging an item around
+		psShiftDragging      = 0x20000,  // Drag&Drop: Dragging an item around and holding shift
 
 		// All possible drag flags, to test if user is dragging a selection or a scrollbar
-		psDragActive			= psDragVScroll | psMouseDragSelect | psRowSelection | psChannelSelection,
+		psDragActive = psDragVScroll | psMouseDragSelect | psRowSelection | psChannelSelection,
 	};
 
 protected:
-
 	CFastBitmap m_Dib;
 	CDC m_offScreenDC;
 	CBitmap m_offScreenBitmap;
@@ -145,27 +167,27 @@ protected:
 	static int32 m_nTransposeAmount;
 
 	int m_nXScroll, m_nYScroll;
-	PatternCursor::Columns m_nDetailLevel;	// Visible Columns
+	PatternCursor::Columns m_nDetailLevel;  // Visible Columns
 
 	// Cursor and selection positions
-	PatternCursor m_Cursor;					// Current cursor position in pattern.
-	PatternCursor m_StartSel, m_DragPos;	// Point where selection was started.
-	PatternCursor m_MenuCursor;				// Position at which context menu was opened.
-	PatternRect m_Selection;				// Upper-left / Lower-right corners of selection.
+	PatternCursor m_Cursor;               // Current cursor position in pattern.
+	PatternCursor m_StartSel, m_DragPos;  // Point where selection was started.
+	PatternCursor m_MenuCursor;           // Position at which context menu was opened.
+	PatternRect m_Selection;              // Upper-left / Lower-right corners of selection.
 
 	// Drag&Drop
-	DragItem m_nDragItem;	// Currently dragged item
-	DragItem m_nDropItem;	// Currently hovered item during dragondrop
+	DragItem m_nDragItem;  // Currently dragged item
+	DragItem m_nDropItem;  // Currently hovered item during dragondrop
 	RECT m_rcDragItem, m_rcDropItem;
 	bool m_bInItemRect : 1;
 
 	UINT m_nFoundInstrument;
-	DWORD m_dwLastNoteEntryTime; //rewbs.customkeys
+	DWORD m_dwLastNoteEntryTime;  //rewbs.customkeys
 	bool m_bLastNoteEntryBlocked : 1;
 	bool m_bContinueSearch : 1, m_bWholePatternFitsOnScreen : 1;
 
-	ModCommand m_PCNoteEditMemory;		// PC Note edit memory
-	static ModCommand m_cmdOld;			// Quick cursor copy/paste data
+	ModCommand m_PCNoteEditMemory;  // PC Note edit memory
+	static ModCommand m_cmdOld;     // Quick cursor copy/paste data
 
 	QuickChannelProperties quickChannelProperties;
 
@@ -177,12 +199,12 @@ protected:
 	std::array<uint16, MAX_BASECHANNELS> OldVUMeters;
 
 	std::bitset<128> m_baPlayingNote;
-	CModDoc::NoteToChannelMap m_noteChannel;	// Note -> Preview channel assignment
+	CModDoc::NoteToChannelMap m_noteChannel;  // Note -> Preview channel assignment
 	std::array<ModCommand::NOTE, 10> m_octaveKeyMemory;
 	std::array<ModCommand::NOTE, MAX_BASECHANNELS> previousNote;
 	std::array<uint8, NOTE_MAX + NOTE_MIN> activeNoteChannel;
 	std::array<uint8, NOTE_MAX + NOTE_MIN> splitActiveNoteChannel;
-	enum { NOTE_CHANNEL_MAP_INVALID = 0xFF };
+	static inline const uint8 NOTE_CHANNEL_MAP_INVALID = 0xFF;
 
 public:
 	std::unique_ptr<CEffectVis> m_pEffectVis;
@@ -192,7 +214,6 @@ public:
 	DECLARE_SERIAL(CViewPattern)
 
 public:
-
 	const CSoundFile *GetSoundFile() const;
 	CSoundFile *GetSoundFile();
 
@@ -202,7 +223,7 @@ public:
 	void UpdateScrollSize();
 	void UpdateScrollPos();
 	void UpdateIndicator();
-	void UpdateXInfoText(); //rewbs.xinfo
+	void UpdateXInfoText();  //rewbs.xinfo
 	void UpdateColors();
 
 	CString GetCursorDescription() const;
@@ -217,7 +238,11 @@ public:
 	ROWINDEX GetCurrentRow() const { return m_Cursor.GetRow(); }
 	CHANNELINDEX GetCurrentChannel() const { return m_Cursor.GetChannel(); }
 	ORDERINDEX GetCurrentOrder() const { return m_nOrder; }
-	void SetCurrentOrder(ORDERINDEX ord) { m_nOrder = ord; SendCtrlMessage(CTRLMSG_SETCURRENTORDER, ord); }
+	void SetCurrentOrder(ORDERINDEX ord)
+	{
+		m_nOrder = ord;
+		SendCtrlMessage(CTRLMSG_SETCURRENTORDER, ord);
+	}
 	// Get ModCommand at the pattern cursor position.
 	ModCommand &GetCursorCommand() { return GetModCommand(m_Cursor); };
 	void SanitizeCursor();
@@ -255,7 +280,6 @@ public:
 	bool DragToSel(const PatternCursor &cursor, bool scrollHorizontal, bool scrollVertical, bool noMove = false);
 	bool SetPlayCursor(PATTERNINDEX pat, ROWINDEX row, uint32 tick);
 	bool UpdateScrollbarPositions(bool updateHorizontalScrollbar = true);
-	BYTE EnterNote(UINT nNote, UINT nIns=0, BOOL bCheck=FALSE, int vol=-1, BOOL bMultiCh=FALSE);
 	bool ShowEditWindow();
 	UINT GetCurrentInstrument() const;
 	void SelectBeatOrMeasure(bool selectBeat);
@@ -275,9 +299,9 @@ public:
 
 public:
 	void DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnable, bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint);
-	void DrawLetter(int x, int y, char letter, int sizex=10, int ofsx=0);
-	void DrawLetter(int x, int y, wchar_t letter, int sizex=10, int ofsx=0);
-	void DrawNote(int x, int y, UINT note, CTuning* pTuning = NULL);
+	void DrawLetter(int x, int y, char letter, int sizex = 10, int ofsx = 0);
+	void DrawLetter(int x, int y, wchar_t letter, int sizex = 10, int ofsx = 0);
+	void DrawNote(int x, int y, UINT note, CTuning *pTuning = nullptr);
 	void DrawInstrument(int x, int y, UINT instr);
 	void DrawVolumeCommand(int x, int y, const ModCommand &mc, bool drawDefaultVolume);
 	void DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn);
@@ -292,7 +316,7 @@ public:
 	void TempEnterNote(ModCommand::NOTE n, int vol = -1, bool fromMidi = false);
 	void TempStopNote(ModCommand::NOTE note, const bool fromMidi = false, bool chordMode = false);
 	void TempEnterChord(ModCommand::NOTE n);
-	void TempStopChord(ModCommand::NOTE note) {TempStopNote(note, false, true);}
+	void TempStopChord(ModCommand::NOTE note) { TempStopNote(note, false, true); }
 	void TempEnterIns(int val);
 	void TempEnterOctave(int val);
 	void TempStopOctave(int val);
@@ -318,7 +342,7 @@ public:
 	void FindInstrument();
 	void JumpToPrevOrNextEntry(bool nextEntry);
 
-	void TogglePluginEditor(int chan); //rewbs.patPlugName
+	void TogglePluginEditor(int chan);
 
 	void ExecutePaste(PatternClipboard::PasteModes mode);
 
@@ -334,6 +358,7 @@ public:
 	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
 	LRESULT OnModViewMsg(WPARAM, LPARAM) override;
 	LRESULT OnPlayerNotify(Notification *) override;
+	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
 	//}}AFX_VIRTUAL
 
 protected:
@@ -348,7 +373,7 @@ protected:
 	afx_msg void OnLButtonDown(UINT, CPoint);
 	afx_msg void OnLButtonDblClk(UINT, CPoint);
 	afx_msg void OnRButtonDown(UINT, CPoint);
-	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar);
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnKillFocus(CWnd *pNewWnd);
 	afx_msg void OnEditCut();
@@ -392,12 +417,12 @@ protected:
 	afx_msg void OnNextOrder();
 	afx_msg void OnPrevInstrument() { PostCtrlMessage(CTRLMSG_PAT_PREVINSTRUMENT); }
 	afx_msg void OnNextInstrument() { PostCtrlMessage(CTRLMSG_PAT_NEXTINSTRUMENT); }
-	afx_msg void OnPatternRecord()	{ PostCtrlMessage(CTRLMSG_SETRECORD, -1); }
+	afx_msg void OnPatternRecord() { PostCtrlMessage(CTRLMSG_SETRECORD, -1); }
 	afx_msg void OnInterpolateVolume() { Interpolate(PatternCursor::volumeColumn); }
 	afx_msg void OnInterpolateEffect() { Interpolate(PatternCursor::effectColumn); }
 	afx_msg void OnInterpolateNote() { Interpolate(PatternCursor::noteColumn); }
 	afx_msg void OnInterpolateInstr() { Interpolate(PatternCursor::instrColumn); }
-	afx_msg void OnVisualizeEffect();		//rewbs.fxvis
+	afx_msg void OnVisualizeEffect();
 	afx_msg void OnTransposeUp() { TransposeSelection(1); }
 	afx_msg void OnTransposeDown() { TransposeSelection(-1); }
 	afx_msg void OnTransposeOctUp() { TransposeSelection(12000); }
@@ -421,7 +446,7 @@ protected:
 	afx_msg LRESULT OnUpdatePosition(WPARAM nOrd, LPARAM nRow);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnRecordPlugParamChange(WPARAM, LPARAM);
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnClearSelectionFromMenu();
 	afx_msg void OnSelectInstrument(UINT nid);
 	afx_msg void OnSelectPCNoteParam(UINT nid);
@@ -435,10 +460,9 @@ protected:
 
 
 public:
-	afx_msg void OnInitMenu(CMenu* pMenu);
+	afx_msg void OnInitMenu(CMenu *pMenu);
 
 private:
-
 	// Copy&Paste
 	bool CopyPattern(PATTERNINDEX nPattern, const PatternRect &selection);
 	bool PastePattern(PATTERNINDEX nPattern, const PatternCursor &pastePos, PatternClipboard::PasteModes mode);
@@ -459,7 +483,7 @@ private:
 	bool BuildGrowShrinkCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildInterpolationCtxMenu(HMENU hMenu, PatternCursor::Columns colType, CString label, UINT command) const;
-	bool BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih,  CModDoc* pModDoc) const;
+	bool BuildEditCtxMenu(HMENU hMenu, CInputHandler *ih, CModDoc *pModDoc) const;
 	bool BuildVisFXCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildTransposeCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const;
@@ -491,12 +515,10 @@ private:
 
 	// If given edit positions are valid, sets them to iRow and iPat.
 	// If not valid, set edit cursor position.
-	void SetEditPos(const CSoundFile &rSndFile, 
-					ROWINDEX &iRow, PATTERNINDEX &iPat,
-					const ROWINDEX iRowCandidate, const PATTERNINDEX iPatCandidate) const;
+	void SetEditPos(const CSoundFile &sndFile, ROWINDEX &row, PATTERNINDEX &pat, const ROWINDEX rowCandidate, const PATTERNINDEX patCandidate) const;
 
 	// Returns edit position.
-	ModCommandPos GetEditPos(CSoundFile &rSf, const bool bLiveRecord) const;
+	ModCommandPos GetEditPos(CSoundFile &sndFile, const bool liveRecord) const;
 
 	// Returns pointer to modcommand at given position.
 	// If the position is not valid, a pointer to a dummy command is returned.
@@ -517,13 +539,13 @@ private:
 
 public:
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
-private:
 
+private:
 	void TogglePendingMute(CHANNELINDEX nChn);
 	void PendingSoloChn(CHANNELINDEX nChn);
 	void PendingUnmuteAllChn();
 
-	template<typename Func>
+	template <typename Func>
 	void ApplyToSelection(Func func);
 
 	void PlayNote(ModCommand::NOTE note, ModCommand::INSTR instr, int volume, CHANNELINDEX channel);
