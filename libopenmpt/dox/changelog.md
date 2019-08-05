@@ -13,6 +13,8 @@ is just a high-level summary.
     the Winamp directory.
 
  *  mpg123: Update to v1.25.11 (2019-07-18).
+ *  minimp3: Update to commit 977514a6dfc4960d819a103f43b358e58ac6c28f
+    (2019-07-24).
  *  miniz: Update to v2.1.0 (2019-05-05).
 
 ### libopenmpt 0.4.5 (2019-05-27)
