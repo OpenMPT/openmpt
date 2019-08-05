@@ -6780,7 +6780,7 @@ INT_PTR CViewPattern::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 	if(text.empty())
 		return CScrollView::OnToolHitTest(point, pTI);
 
-	MPT_LOG(LogDebug, "pat", text);
+	MPT_LOG(LogDebug, "pat", mpt::ToUnicode(text));
 	//pTI->uFlags = TTF_ALWAYSTIP;
 	pTI->hwnd = m_hWnd;
 	pTI->uId = item.ToIntPtr();
