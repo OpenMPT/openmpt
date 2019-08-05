@@ -395,7 +395,9 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 		caps.CanDriverPanel = true;
 		if(deviceInfo)
 		{
-			caps.DefaultSettings.Latency = deviceInfo->defaultHighOutputLatency;
+			// PortAudio WASAPI returns the device period as latency
+			caps.DefaultSettings.Latency = deviceInfo->defaultHighOutputLatency * 2.0;
+			caps.DefaultSettings.UpdateInterval = deviceInfo->defaultHighOutputLatency;
 		}
 		caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
 	} else if(m_HostApiType == paWDMKS)
