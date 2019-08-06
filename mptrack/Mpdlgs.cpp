@@ -301,6 +301,10 @@ void COptionsSoundcard::UpdateEverything()
 {
 	// Sound Device
 	{
+		if(ConvertStrTo<int>(m_CurrentDeviceInfo.extraData[U_("priority")]) < 0)
+		{
+			TrackerSettings::Instance().m_SoundShowDeprecatedDevices = true;
+		}
 		CheckDlgButton(IDC_CHECK_SOUNDCARD_SHOWALL, TrackerSettings::Instance().m_SoundShowDeprecatedDevices ? BST_CHECKED : BST_UNCHECKED);
 
 		m_CbnDevice.ResetContent();
