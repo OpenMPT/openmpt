@@ -279,6 +279,17 @@ using winstring = mpt::tstring;
 
 #if MPT_ENABLE_U8STRING
 
+#if MPT_CXX_AT_LEAST(20)
+
+using u8string = std::u8string;
+
+#define MPT_U8CHAR_TYPE  char8_t
+#define MPT_U8CHAR(x)    u8 x
+#define MPT_U8LITERAL(x) u8 x
+#define MPT_U8STRING(x)  mpt::u8string( x )
+
+#else // !C++20
+
 using u8string = MPT_ENCODED_STRING_TYPE(mpt::CharsetUTF8);
 
 #define MPT_U8CHAR_TYPE  char
@@ -299,6 +310,8 @@ using u8string = MPT_ENCODED_STRING_TYPE(mpt::CharsetUTF8);
 // mpt::u8string is not meant to be used directly though.
 // mpt::u8string is meant as an alternative implementaion to std::wstring
 // for implementing the unicode string type mpt::ustring.
+
+#endif // C++20
 
 #endif // MPT_ENABLE_U8STRING
 
