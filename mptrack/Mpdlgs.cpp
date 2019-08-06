@@ -65,6 +65,7 @@ BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_COMMAND(IDC_CHECK5,	&COptionsSoundcard::OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK7,	&COptionsSoundcard::OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK9,	&COptionsSoundcard::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK_SOUNDCARD_SHOWALL, &COptionsSoundcard::OnSoundCardShowAll)
 	ON_CBN_SELCHANGE(IDC_COMBO1, &COptionsSoundcard::OnDeviceChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO2, &COptionsSoundcard::OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO_UPDATEINTERVAL, &COptionsSoundcard::OnSettingsChanged)
@@ -155,6 +156,14 @@ void COptionsSoundcard::SetDevice(SoundDevice::Identifier dev, bool forceReload)
 	m_CurrentDeviceCaps = newCaps;
 	m_CurrentDeviceDynamicCaps = newDynamicCaps;
 	m_Settings = newSettings;
+}
+
+
+void COptionsSoundcard::OnSoundCardShowAll()
+{
+	TrackerSettings::Instance().m_SoundShowDeprecatedDevices = (IsDlgButtonChecked(IDC_CHECK_SOUNDCARD_SHOWALL) == BST_CHECKED);
+	SetDevice(m_CurrentDeviceInfo.GetIdentifier(), true);
+	UpdateEverything();
 }
 
 
@@ -292,6 +301,8 @@ void COptionsSoundcard::UpdateEverything()
 {
 	// Sound Device
 	{
+		CheckDlgButton(IDC_CHECK_SOUNDCARD_SHOWALL, TrackerSettings::Instance().m_SoundShowDeprecatedDevices ? BST_CHECKED : BST_UNCHECKED);
+
 		m_CbnDevice.ResetContent();
 		m_CbnDevice.SetImageList(&CMainFrame::GetMainFrame()->m_MiscIcons);
 
@@ -374,7 +385,7 @@ void COptionsSoundcard::UpdateEverything()
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
 				mpt::ustring name = it.name + (it.isDefault ? U_(" [default]") : U_(""));
-				if(TrackerSettings::Instance().m_SoundShowNotRecommendedDeviceWarning && (priority < 0))
+				if(priority < 0)
 				{
 					name += U_(" [not recommended]");
 				}
@@ -415,6 +426,7 @@ void COptionsSoundcard::UpdateEverything()
 
 void COptionsSoundcard::UpdateDevice()
 {
+	GetDlgItem(IDC_CHECK_SOUNDCARD_SHOWALL)->EnableWindow((ConvertStrTo<int>(m_CurrentDeviceInfo.extraData[U_("priority")]) < 0) ? FALSE : TRUE);
 	UpdateGeneral();
 	UpdateControls();
 	UpdateLatency();

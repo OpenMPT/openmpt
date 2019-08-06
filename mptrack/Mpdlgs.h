@@ -72,6 +72,7 @@ protected:
 	afx_msg void OnExclusiveModeChanged();
 	afx_msg void OnChannelsChanged();
 	afx_msg void OnSampleFormatChanged();
+	afx_msg void OnSoundCardShowAll();
 	afx_msg void OnSoundCardRescan();
 	afx_msg void OnSoundCardDriverPanel();
 
