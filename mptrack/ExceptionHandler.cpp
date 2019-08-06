@@ -285,7 +285,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		f << mpt::format("WatchDir: %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindWatchdir))) << "\r\n";
 	}
 
-	static constexpr struct { const MPT_UCHAR_TYPE * section; const MPT_UCHAR_TYPE * key; } configAnonymize[] =
+	static constexpr struct { const mpt::uchar * section; const mpt::uchar * key; } configAnonymize[] =
 	{
 		{ UL_("Version"), UL_("InstallGUID") },
 		{ UL_("Recent File List"), nullptr },

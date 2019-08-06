@@ -1484,7 +1484,7 @@ mpt::ustring CSoundFile::GetNoteName(const ModCommand::NOTE note, const NoteName
 	{
 		// cppcheck false-positive
 		// cppcheck-suppress constStatement
-		const MPT_UCHAR_TYPE specialNoteNames[][4] = { UL_("PCs"), UL_("PC "), UL_("~~~"), UL_("^^^"), UL_("===") };
+		const mpt::uchar specialNoteNames[][4] = { UL_("PCs"), UL_("PC "), UL_("~~~"), UL_("^^^"), UL_("===") };
 		STATIC_ASSERT(CountOf(specialNoteNames) == NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1);
 		return specialNoteNames[note - NOTE_MIN_SPECIAL];
 	} else if(ModCommand::IsNote(note))

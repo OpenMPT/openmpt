@@ -1621,7 +1621,7 @@ BOOL CModTree::SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName)
 	return FALSE;
 }
 
-static mpt::ustring TreeDeletionString(const CSoundFile &sndFile, const MPT_UCHAR_TYPE *type, uint32 id, const std::string &name)
+static mpt::ustring TreeDeletionString(const CSoundFile &sndFile, const mpt::uchar *type, uint32 id, const std::string &name)
 {
 	mpt::ustring s = mpt::format(U_("Remove %1 %2"))(mpt::ustring(type), id);
 	if(!name.empty())

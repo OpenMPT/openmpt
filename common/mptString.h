@@ -413,7 +413,7 @@ std::string ToCharset(Charset to, const CString &str);
 #endif
 
 using ustring = std::wstring;
-#define MPT_UCHAR_TYPE   wchar_t
+using uchar = wchar_t;
 #define MPT_UCHAR(x)     L ## x
 #define MPT_ULITERAL(x)  L ## x
 #define MPT_USTRING(x)   std::wstring( L ## x )
@@ -426,7 +426,7 @@ using ustring = std::wstring;
 #endif
 
 using ustring = mpt::u8string;
-#define MPT_UCHAR_TYPE   char
+using uchar = char;
 #define MPT_UCHAR(x)     x
 #define MPT_ULITERAL(x)  x
 #define MPT_USTRING(x)   mpt::ustring( x )

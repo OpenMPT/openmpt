@@ -572,7 +572,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	// Setup channel pan positions and volume
 	SetupMODPanning(true);
 
-	const MPT_UCHAR_TYPE *madeWithTracker = UL_("");
+	const mpt::uchar *madeWithTracker = UL_("");
 	switch(version)
 	{
 	case '0': madeWithTracker = m_nChannels > 4 ? UL_("OctaMED v2.10") : UL_("MED v2"); break;

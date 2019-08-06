@@ -304,7 +304,7 @@ public:
 };
 
 
-using NoteName = MPT_UCHAR_TYPE[4];
+using NoteName = mpt::uchar[4];
 
 
 class CSoundFile

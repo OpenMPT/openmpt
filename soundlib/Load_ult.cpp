@@ -402,7 +402,7 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_ULT);
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);
 
-	const MPT_UCHAR_TYPE *versions[] = {UL_("<1.4"), UL_("1.4"), UL_("1.5"), UL_("1.6")};
+	const mpt::uchar *versions[] = {UL_("<1.4"), UL_("1.4"), UL_("1.5"), UL_("1.6")};
 	m_modFormat.formatName = U_("UltraTracker");
 	m_modFormat.type = U_("ult");
 	m_modFormat.madeWithTracker = U_("UltraTracker ") + versions[fileHeader.version - '1'];

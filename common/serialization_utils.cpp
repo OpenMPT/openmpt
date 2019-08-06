@@ -135,22 +135,22 @@ const char Ssb::s_EntryID[3] = {'2','2','8'};
 
 
 #ifdef SSB_LOGGING
-static const MPT_UCHAR_TYPE tstrWriteHeader[] = UL_("Write header with ID = %1\n");
-static const MPT_UCHAR_TYPE tstrWriteProgress[] = UL_("Wrote entry: {num, id, rpos, size} = {%1, %2, %3, %4}\n");
-static const MPT_UCHAR_TYPE tstrWritingMap[] = UL_("Writing map to rpos: %1\n");
-static const MPT_UCHAR_TYPE tstrMapEntryWrite[] = UL_("Writing map entry: id=%1, rpos=%2, size=%3\n");
-static const MPT_UCHAR_TYPE strWriteNote[] = UL_("Write note: ");
-static const MPT_UCHAR_TYPE tstrEndOfStream[] = UL_("End of stream(rpos): %1\n");
+static const mpt::uchar tstrWriteHeader[] = UL_("Write header with ID = %1\n");
+static const mpt::uchar tstrWriteProgress[] = UL_("Wrote entry: {num, id, rpos, size} = {%1, %2, %3, %4}\n");
+static const mpt::uchar tstrWritingMap[] = UL_("Writing map to rpos: %1\n");
+static const mpt::uchar tstrMapEntryWrite[] = UL_("Writing map entry: id=%1, rpos=%2, size=%3\n");
+static const mpt::uchar strWriteNote[] = UL_("Write note: ");
+static const mpt::uchar tstrEndOfStream[] = UL_("End of stream(rpos): %1\n");
 
-static const MPT_UCHAR_TYPE tstrReadingHeader[] = UL_("Read header with expected ID = %1\n");
-static const MPT_UCHAR_TYPE strNoMapInFile[] = UL_("No map in the file.\n");
-static const MPT_UCHAR_TYPE strIdMismatch[] = UL_("ID mismatch, terminating read.\n");
-static const MPT_UCHAR_TYPE strIdMatch[] = UL_("ID match, continuing reading.\n");
-static const MPT_UCHAR_TYPE tstrReadingMap[] = UL_("Reading map from rpos: %1\n");
-static const MPT_UCHAR_TYPE tstrEndOfMap[] = UL_("End of map(rpos): %1\n");
-static const MPT_UCHAR_TYPE tstrReadProgress[] = UL_("Read entry: {num, id, rpos, size, desc} = {%1, %2, %3, %4, %5}\n");
-static const MPT_UCHAR_TYPE tstrNoEntryFound[] = UL_("No entry with id %1 found.\n");
-static const MPT_UCHAR_TYPE strReadNote[] = UL_("Read note: ");
+static const mpt::uchar tstrReadingHeader[] = UL_("Read header with expected ID = %1\n");
+static const mpt::uchar strNoMapInFile[] = UL_("No map in the file.\n");
+static const mpt::uchar strIdMismatch[] = UL_("ID mismatch, terminating read.\n");
+static const mpt::uchar strIdMatch[] = UL_("ID match, continuing reading.\n");
+static const mpt::uchar tstrReadingMap[] = UL_("Reading map from rpos: %1\n");
+static const mpt::uchar tstrEndOfMap[] = UL_("End of map(rpos): %1\n");
+static const mpt::uchar tstrReadProgress[] = UL_("Read entry: {num, id, rpos, size, desc} = {%1, %2, %3, %4, %5}\n");
+static const mpt::uchar tstrNoEntryFound[] = UL_("No entry with id %1 found.\n");
+static const mpt::uchar strReadNote[] = UL_("Read note: ");
 #endif
 
 

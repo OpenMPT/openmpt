@@ -110,7 +110,7 @@ struct SNDMIX_REVERB_PROPERTIES
 struct SNDMIX_RVBPRESET
 {
 	SNDMIX_REVERB_PROPERTIES Preset;
-	const MPT_UCHAR_TYPE *name;
+	const mpt::uchar *name;
 };
 
 

@@ -119,7 +119,7 @@ List of string types
     runtime conversion. Only use for string literals containing non-ascii
     characters (use MPT_USTRING otherwise).
 
- *  MPT_ULITERAL / MPT_UCHAR / MPT_UCHAR_TYPE (OpenMPT, libopenmpt)
+ *  MPT_ULITERAL / MPT_UCHAR / mpt::uchar (OpenMPT, libopenmpt)
     Macros which generate string literals, char literals and the char literal
     type respectively. These are especially useful in constexpr contexts or
     global data where MPT_USTRING is either unusable or requires a global
@@ -207,7 +207,7 @@ if in libopenmpt
 else
  if performance critical inner loop
   if needs unicode support
-   T = MPT_UCHAR_TYPE* / MPT_ULITERAL
+   T = mpt::uchar* / MPT_ULITERAL
   else
    T = char*, document the encoding if not clear from context 
   fi
@@ -227,7 +227,7 @@ else
   T = CString
  else
   if constexpr context or global data
-   T = MPT_UCHAR_TYPE* / MPT_ULITERAL
+   T = mpt::uchar* / MPT_ULITERAL
   else
    T = mpt::ustring
   fi

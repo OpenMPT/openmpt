@@ -98,13 +98,13 @@ public:
 };
 
 
-static const MPT_UCHAR_TYPE TypeWAVEOUT          [] = UL_("WaveOut");
-static const MPT_UCHAR_TYPE TypeDSOUND           [] = UL_("DirectSound");
-static const MPT_UCHAR_TYPE TypeASIO             [] = UL_("ASIO");
-static const MPT_UCHAR_TYPE TypePORTAUDIO_WASAPI [] = UL_("WASAPI");
-static const MPT_UCHAR_TYPE TypePORTAUDIO_WDMKS  [] = UL_("WDM-KS");
-static const MPT_UCHAR_TYPE TypePORTAUDIO_WMME   [] = UL_("MME");
-static const MPT_UCHAR_TYPE TypePORTAUDIO_DS     [] = UL_("DS");
+static const mpt::uchar TypeWAVEOUT          [] = UL_("WaveOut");
+static const mpt::uchar TypeDSOUND           [] = UL_("DirectSound");
+static const mpt::uchar TypeASIO             [] = UL_("ASIO");
+static const mpt::uchar TypePORTAUDIO_WASAPI [] = UL_("WASAPI");
+static const mpt::uchar TypePORTAUDIO_WDMKS  [] = UL_("WDM-KS");
+static const mpt::uchar TypePORTAUDIO_WMME   [] = UL_("MME");
+static const mpt::uchar TypePORTAUDIO_DS     [] = UL_("DS");
 
 typedef mpt::ustring Type;
 

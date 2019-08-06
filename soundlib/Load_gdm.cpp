@@ -94,11 +94,11 @@ static const MODTYPE gdmFormatOrigin[] =
 {
 	MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_MTM, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED, MOD_TYPE_PSM
 };
-static const MPT_UCHAR_TYPE gdmFormatOriginType[][4] =
+static const mpt::uchar gdmFormatOriginType[][4] =
 {
 	UL_(""), UL_("mod"), UL_("mtm"), UL_("s3m"), UL_("669"), UL_("far"), UL_("ult"), UL_("stm"), UL_("med"), UL_("psm")
 };
-static const MPT_UCHAR_TYPE * const gdmFormatOriginFormat[] =
+static const mpt::uchar * const gdmFormatOriginFormat[] =
 {
 	UL_(""),
 	UL_("Generic MOD"),

@@ -362,7 +362,7 @@ mpt::Windows::Version::TypeId Version::GetTypeId() const noexcept
 }
 
 
-static MPT_CONSTEXPR11_VAR struct { Version::System version; const MPT_UCHAR_TYPE * name; bool showDetails; } versionMap[] =
+static MPT_CONSTEXPR11_VAR struct { Version::System version; const mpt::uchar * name; bool showDetails; } versionMap[] =
 {
 	{ mpt::Windows::Version::WinNewer, UL_("Windows 10 (or newer)"), false },
 	{ mpt::Windows::Version::Win10, UL_("Windows 10"), true },
@@ -580,7 +580,7 @@ struct ArchitectureInfo
 {
 	Architecture Arch;
 	int Bitness;
-	const MPT_UCHAR_TYPE * Name;
+	const mpt::uchar * Name;
 };
 static constexpr ArchitectureInfo architectureInfo [] = {
 	{ Architecture::x86    , 32, UL_("x86")     },

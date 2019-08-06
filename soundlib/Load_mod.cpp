@@ -664,7 +664,7 @@ void CSoundFile::ReadMODPatternEntry(const uint8 (&data)[4], ModCommand &m)
 
 struct MODMagicResult
 {
-	const MPT_UCHAR_TYPE *madeWithTracker = nullptr;
+	const mpt::uchar *madeWithTracker = nullptr;
 	uint32 invalidByteThreshold = MODSampleHeader::INVALID_BYTE_THRESHOLD;
 	CHANNELINDEX numChannels    = 0;
 	bool isNoiseTracker         = false;
@@ -1757,7 +1757,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	const MPT_UCHAR_TYPE *madeWithTracker = UL_("");
+	const mpt::uchar *madeWithTracker = UL_("");
 	switch(minVersion)
 	{
 	case UST1_00:

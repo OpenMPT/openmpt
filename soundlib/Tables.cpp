@@ -24,13 +24,13 @@ OPENMPT_NAMESPACE_BEGIN
 /////////////////////////////////////////////////////////////////////////////
 // Note Name Tables
 
-const MPT_UCHAR_TYPE NoteNamesSharp[12][4] =
+const mpt::uchar NoteNamesSharp[12][4] =
 {
 	UL_("C-"), UL_("C#"), UL_("D-"), UL_("D#"), UL_("E-"), UL_("F-"),
 	UL_("F#"), UL_("G-"), UL_("G#"), UL_("A-"), UL_("A#"), UL_("B-")
 };
 
-const MPT_UCHAR_TYPE NoteNamesFlat[12][4] =
+const mpt::uchar NoteNamesFlat[12][4] =
 {
 	UL_("C-"), UL_("Db"), UL_("D-"), UL_("Eb"), UL_("E-"), UL_("F-"),
 	UL_("Gb"), UL_("G-"), UL_("Ab"), UL_("A-"), UL_("Bb"), UL_("B-")
@@ -43,7 +43,7 @@ const MPT_UCHAR_TYPE NoteNamesFlat[12][4] =
 struct ModFormatInfo
 {
 	MODTYPE format;              // MOD_TYPE_XXXX
-	const MPT_UCHAR_TYPE *name;  // "ProTracker"
+	const mpt::uchar *name;  // "ProTracker"
 	const char *extension;       // "mod"
 };
 
@@ -113,7 +113,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 struct ModContainerInfo
 {
 	MODCONTAINERTYPE format;     // MOD_CONTAINERTYPE_XXXX
-	const MPT_UCHAR_TYPE *name;  // "Unreal Music"
+	const mpt::uchar *name;  // "Unreal Music"
 	const char *extension;       // "umx"
 };
 

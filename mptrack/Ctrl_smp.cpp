@@ -1228,8 +1228,8 @@ bool CCtrlSamples::InsertSample(bool duplicate, int8 *confirm)
 
 static constexpr struct
 {
-	const MPT_UCHAR_TYPE *name;
-	const MPT_UCHAR_TYPE *exts;
+	const mpt::uchar *name;
+	const mpt::uchar *exts;
 } SampleFormats[]
 {
 	{ UL_("Wave Files (*.wav)"), UL_("*.wav") },
