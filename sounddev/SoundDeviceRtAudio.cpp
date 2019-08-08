@@ -26,67 +26,6 @@ namespace SoundDevice {
 #ifdef MPT_WITH_RTAUDIO
 
 
-static mpt::ustring RtAudioApiToString(RtAudio::Api api)
-{
-	mpt::ustring result;
-	switch(api)
-	{
-	case RtAudio::UNSPECIFIED: result = U_("UNSPECIFIED"); break;
-	case RtAudio::LINUX_ALSA: result = U_("LINUX_ALSA"); break;
-	case RtAudio::LINUX_PULSE: result = U_("LINUX_PULSE"); break;
-	case RtAudio::LINUX_OSS: result = U_("LINUX_OSS"); break;
-	case RtAudio::UNIX_JACK: result = U_("UNIX_JACK"); break;
-	case RtAudio::MACOSX_CORE: result = U_("MACOSX_CORE"); break;
-	case RtAudio::WINDOWS_WASAPI: result = U_("WINDOWS_WASAPI"); break;
-	case RtAudio::WINDOWS_ASIO: result = U_("WINDOWS_ASIO"); break;
-	case RtAudio::WINDOWS_DS: result = U_("WINDOWS_DS"); break;
-	case RtAudio::RTAUDIO_DUMMY: result = U_("RTAUDIO_DUMMY"); break;
-	default: result = mpt::ToUnicode(mpt::CharsetASCII, RtAudio::getApiName(api)); break;
-	}
-	return result;
-}
-
-
-static mpt::ustring RtAudioApiToDescription(RtAudio::Api api)
-{
-	mpt::ustring result;
-	switch(api)
-	{
-	case RtAudio::UNSPECIFIED: result = U_("default"); break;
-	case RtAudio::LINUX_ALSA: result = U_("ALSA"); break;
-	case RtAudio::LINUX_PULSE: result = U_("PulseAudio"); break;
-	case RtAudio::LINUX_OSS: result = U_("OSS"); break;
-	case RtAudio::UNIX_JACK: result = U_("Jack"); break;
-	case RtAudio::MACOSX_CORE: result = U_("CoreAudio"); break;
-	case RtAudio::WINDOWS_WASAPI: result = U_("WASAPI"); break;
-	case RtAudio::WINDOWS_ASIO: result = U_("ASIO"); break;
-	case RtAudio::WINDOWS_DS: result = U_("DirectSound"); break;
-	case RtAudio::RTAUDIO_DUMMY: result = U_("Dummy"); break;
-	default: result = mpt::ToUnicode(mpt::CharsetASCII, RtAudio::getApiDisplayName(api)); break;
-	}
-	return result;
-}
-
-
-static RtAudio::Api StringToRtAudioApi(const mpt::ustring &str)
-{
-	RtAudio::Api result = RtAudio::RTAUDIO_DUMMY;
-	if(str == U_("")) result = RtAudio::RTAUDIO_DUMMY;
-	else if(str == U_("UNSPECIFIED")) result = RtAudio::UNSPECIFIED;
-	else if(str == U_("LINUX_ALSA")) result = RtAudio::LINUX_ALSA;
-	else if(str == U_("LINUX_PULSE")) result = RtAudio::LINUX_PULSE;
-	else if(str == U_("LINUX_OSS")) result = RtAudio::LINUX_OSS;
-	else if(str == U_("UNIX_JACK")) result = RtAudio::UNIX_JACK;
-	else if(str == U_("MACOSX_CORE")) result = RtAudio::MACOSX_CORE;
-	else if(str == U_("WINDOWS_WASAPI")) result = RtAudio::WINDOWS_WASAPI;
-	else if(str == U_("WINDOWS_ASIO")) result = RtAudio::WINDOWS_ASIO;
-	else if(str == U_("WINDOWS_DS")) result = RtAudio::WINDOWS_DS;
-	else if(str == U_("RTAUDIO_DUMMY")) result = RtAudio::RTAUDIO_DUMMY;
-	else result = RtAudio::getCompiledApiByName(mpt::ToCharset(mpt::CharsetASCII, str));
-	return result;
-}
-
-
 static RtAudioFormat SampleFormatToRtAudioFormat(SampleFormat sampleFormat)
 {
 	RtAudioFormat result = RtAudioFormat();
@@ -467,7 +406,7 @@ RtAudio::Api CRtAudioDevice::GetApi(SoundDevice::Info info)
 	{
 		return RtAudio::UNSPECIFIED;
 	}
-	return StringToRtAudioApi(apidev[0]);
+	return RtAudio::getCompiledApiByName(mpt::ToCharset(mpt::CharsetUTF8, apidev[0]));
 }
 
 
@@ -511,13 +450,13 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 					continue;
 				}
 				SoundDevice::Info info = SoundDevice::Info();
-				info.type = U_("RtAudio") + U_("-") + RtAudioApiToString(rtaudio.getCurrentApi());
+				info.type = U_("RtAudio") + U_("-") + mpt::ToUnicode(mpt::CharsetUTF8, RtAudio::getApiName(rtaudio.getCurrentApi()));
 				std::vector<mpt::ustring> apidev;
-				apidev.push_back(RtAudioApiToString(rtaudio.getCurrentApi()));
+				apidev.push_back(mpt::ToUnicode(mpt::CharsetUTF8, RtAudio::getApiName(rtaudio.getCurrentApi())));
 				apidev.push_back(mpt::ufmt::val(device));
 				info.internalID = mpt::String::Combine(apidev, U_(","));
 				info.name = mpt::ToUnicode(mpt::CharsetUTF8, rtinfo.name);
-				info.apiName = RtAudioApiToDescription(rtaudio.getCurrentApi());
+				info.apiName = mpt::ToUnicode(mpt::CharsetUTF8, RtAudio::getApiDisplayName(rtaudio.getCurrentApi()));
 				info.apiPath.push_back(U_("RtAudio"));
 				info.isDefault = rtinfo.isDefaultOutput;
 				info.useNameAsIdentifier = true;

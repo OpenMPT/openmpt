@@ -356,15 +356,15 @@ void COptionsSoundcard::UpdateEverything()
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_WAVEOUT;
-				} else if(it.type == SoundDevice::TypeDSOUND || it.type == SoundDevice::TypePORTAUDIO_DS || it.type == U_("RtAudio-WINDOWS_DS"))
+				} else if(it.type == SoundDevice::TypeDSOUND || it.type == SoundDevice::TypePORTAUDIO_DS || it.type == U_("RtAudio-ds"))
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_DIRECTX;
-				} else if(it.type == SoundDevice::TypeASIO || it.type == U_("RtAudio-WINDOWS_ASIO"))
+				} else if(it.type == SoundDevice::TypeASIO || it.type == U_("RtAudio-asio"))
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_ASIO;
-				} else if(it.type == SoundDevice::TypePORTAUDIO_WASAPI || it.type == U_("RtAudio-WINDOWS_WASAPI"))
+				} else if(it.type == SoundDevice::TypePORTAUDIO_WASAPI || it.type == U_("RtAudio-wasapi"))
 				{
 					cbi.mask |= CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_OVERLAY;
 					cbi.iImage = IMAGE_SAMPLEMUTE; // // No real image available for now,
