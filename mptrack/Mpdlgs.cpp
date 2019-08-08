@@ -388,27 +388,18 @@ void COptionsSoundcard::UpdateEverything()
 				}
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
-				mpt::ustring name = it.name + (it.isDefault ? U_(" [default]") : U_(""));
+				mpt::ustring name = it.apiName + U_(" - ") + mpt::String::Trim(it.name);
 				if(priority < 0)
 				{
 					name += U_(" [not recommended]");
 				}
-				if(it.type == SoundDevice::TypeWAVEOUT || it.type == SoundDevice::TypeDSOUND || it.type == SoundDevice::TypeASIO)
+				if(it.isDefault)
 				{
-					// leave name alone
-				} else if(it.type == SoundDevice::TypePORTAUDIO_WASAPI || it.type == SoundDevice::TypePORTAUDIO_WDMKS)
+					name += U_(" [default]");
+				}
+				if(it.apiPath.size() > 0)
 				{
-					name = it.apiName + U_(" - ") + name;
-				/*
-				} else if(it->type.find(TypeWineNative + U_("-")) == 0 && it->apiPath.size() > 0)
-				{
-					std::vector<mpt::ustring> apiPath = it->apiPath;
-					apiPath.erase(apiPath.begin());
-					name = ((apiPath.size() > 0) ? mpt::String::Combine(apiPath, U_(" - ")) + U_(" - ") : U_("")) + it->apiName + U_(" - ") + name;
-				*/
-				} else
-				{
-					name = ((it.apiPath.size() > 0) ? mpt::String::Combine(it.apiPath, U_(" - ")) + U_(" - ") : U_("")) + it.apiName + U_(" - ") + name;
+					name += U_(" (") + mpt::String::Combine(it.apiPath, U_("/")) + U_(")");
 				}
 				CString tmp = mpt::ToCString(name);
 				cbi.pszText = const_cast<TCHAR *>(tmp.GetString());
