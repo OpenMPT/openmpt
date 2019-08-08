@@ -113,6 +113,7 @@ typedef mpt::ustring Identifier;
 
 SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier);
 
+
 struct Info
 {
 	SoundDevice::Type type;
@@ -122,12 +123,86 @@ struct Info
 	std::vector<mpt::ustring> apiPath; // i.e. Wine-support, PortAudio
 	bool isDefault;
 	bool useNameAsIdentifier;
+
+	enum class DefaultFor : int8 {
+		System   = 3,
+		ProAudio = 2,
+		LowLevel = 1,
+		None     = 0,
+	};
+	struct ManagerFlags {
+		DefaultFor  defaultFor  = DefaultFor::None;
+	};
+	ManagerFlags managerFlags;
+
+	enum class Usability : int8 {
+		Usable                    =  2,
+		Experimental              =  1,
+		Unknown                   =  0,
+		Deprecated                = -3,
+		Broken                    = -4,
+		NotAvailable              = -5,
+	};
+	enum class Level : int8 {
+		Primary   =  1,
+		Unknown   =  0,
+		Secondary = -1,
+	};
+	enum class Compatible : int8 {
+		Yes     =  1,
+		Unknown =  0,
+		No      = -1,
+	};
+	enum class Api : int8 {
+		Native   =  1,
+		Unknown  =  0,
+		Emulated = -1,
+	};
+	enum class Io : int8 {
+		FullDuplex =  1,
+		Unknown    =  0,
+		OutputOnly = -1,
+	};
+	enum class Mixing : int8 {
+		Server   =  2,
+		Software =  1,
+		Unknown  =  0,
+		Hardware = -1,
+	};
+	enum class Implementor : int8 {
+		OpenMPT  =  1,
+		Unknown  =  0,
+		External = -1,
+	};
+	struct Flags {
+		Usability   usability   = Usability::Unknown;
+		Level       level       = Level::Unknown;
+		Compatible  compatible  = Compatible::Unknown;
+		Api         api         = Api::Unknown;
+		Io          io          = Io::Unknown;
+		Mixing      mixing      = Mixing::Unknown;
+		Implementor implementor = Implementor::Unknown;
+	};
+	Flags flags;
+
 	std::map<mpt::ustring, mpt::ustring> extraData; // user visible (hidden by default)
-	Info() : isDefault(false), useNameAsIdentifier(false) { }
+
+	Info()
+		: isDefault(false)
+		, useNameAsIdentifier(false)
+	{
+	}
+
 	bool IsValid() const
 	{
 		return !type.empty() && !internalID.empty();
 	}
+
+	bool IsDeprecated() const
+	{
+		return (static_cast<int8>(flags.usability) <= 0) || (static_cast<int8>(flags.level) <= 0);
+	}
+
 	SoundDevice::Identifier GetIdentifier() const
 	{
 		if(!IsValid())
@@ -240,11 +315,16 @@ public:
 
 struct SysInfo
 {
+public:
+	mpt::OS::Class SystemClass;
 	mpt::Windows::Version WindowsVersion;
 	bool IsWine;
-	bool WineHostIsLinux;
+	mpt::OS::Class WineHostClass;
 	mpt::Wine::Version WineVersion;
+public:
 	bool IsOriginal() const { return !IsWine; }
+	bool IsWindowsOriginal() const { return !IsWine; }
+	bool IsWindowsWine() const { return IsWine; }
 public:
 	static SysInfo Current();
 private:

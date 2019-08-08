@@ -421,7 +421,7 @@ unsigned int CRtAudioDevice::GetDevice(SoundDevice::Info info)
 }
 
 
-std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::SysInfo /* sysInfo */ )
+std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::SysInfo sysInfo)
 {
 	std::vector<SoundDevice::Info> devices;
 	std::vector<RtAudio::Api> apis;
@@ -457,9 +457,125 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 				info.internalID = mpt::String::Combine(apidev, U_(","));
 				info.name = mpt::ToUnicode(mpt::CharsetUTF8, rtinfo.name);
 				info.apiName = mpt::ToUnicode(mpt::CharsetUTF8, RtAudio::getApiDisplayName(rtaudio.getCurrentApi()));
+				info.extraData[U_("RtAudio-ApiDisplayName")] = mpt::ToUnicode(mpt::CharsetUTF8, RtAudio::getApiDisplayName(rtaudio.getCurrentApi())); 
 				info.apiPath.push_back(U_("RtAudio"));
 				info.isDefault = rtinfo.isDefaultOutput;
 				info.useNameAsIdentifier = true;
+				switch(rtaudio.getCurrentApi())
+				{
+				case RtAudio::LINUX_ALSA:
+					info.apiName = U_("ALSA");
+					info.flags = {
+						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
+						Info::Level::Secondary,
+						Info::Compatible::No,
+						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+						Info::Io::FullDuplex,
+						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Mixing::Hardware : Info::Mixing::Software,
+						Info::Implementor::External
+					};
+					break;
+				case RtAudio::LINUX_PULSE:
+					info.apiName = U_("PulseAudio");
+					info.flags = {
+						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
+						Info::Level::Secondary,
+						Info::Compatible::No,
+						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+						Info::Io::FullDuplex,
+						Info::Mixing::Server,
+						Info::Implementor::External
+					};
+					break;
+				case RtAudio::LINUX_OSS:
+					info.apiName = U_("OSS");
+					info.flags = {
+						sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Usability::Usable : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
+						Info::Level::Secondary,
+						Info::Compatible::No,
+						sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Api::Native : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Emulated : Info::Api::Emulated,
+						Info::Io::FullDuplex,
+						sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Mixing::Hardware : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Mixing::Software : Info::Mixing::Software,
+						Info::Implementor::External
+					};
+					break;
+				case RtAudio::UNIX_JACK:
+					info.apiName = U_("JACK");
+					info.flags = {
+						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Usability::Usable : Info::Usability::Experimental,
+						Info::Level::Primary,
+						Info::Compatible::Yes,
+						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+						Info::Io::FullDuplex,
+						Info::Mixing::Server,
+						Info::Implementor::External
+					};
+					break;
+				case RtAudio::MACOSX_CORE:
+					info.apiName = U_("CoreAudio");
+					info.flags = {
+						sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Usability::Usable : Info::Usability::NotAvailable,
+						Info::Level::Primary,
+						Info::Compatible::Yes,
+						sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Api::Native : Info::Api::Emulated,
+						Info::Io::FullDuplex,
+						Info::Mixing::Server,
+						Info::Implementor::External
+					};
+					break;
+				case RtAudio::WINDOWS_WASAPI:
+					info.apiName = U_("WASAPI");
+					info.flags = {
+						sysInfo.SystemClass == mpt::OS::Class::Windows ?
+							sysInfo.IsWindowsOriginal() ?
+								sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::Win7) ?
+									Info::Usability::Usable
+								:
+									sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) ?
+										Info::Usability::Experimental
+									:
+										Info::Usability::NotAvailable
+							:
+								Info::Usability::Usable
+						:
+							Info::Usability::NotAvailable,
+						Info::Level::Secondary,
+						Info::Compatible::No,
+						sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Api::Native : Info::Api::Emulated,
+						Info::Io::FullDuplex,
+						Info::Mixing::Server,
+						Info::Implementor::External
+					};
+					break;
+				case RtAudio::WINDOWS_ASIO:
+					info.apiName = U_("ASIO");
+					info.flags = {
+						sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
+						Info::Level::Secondary,
+						Info::Compatible::No,
+						sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() ? Info::Api::Native : Info::Api::Emulated,
+						Info::Io::FullDuplex,
+						Info::Mixing::Hardware,
+						Info::Implementor::External
+					};
+					break;
+				case RtAudio::WINDOWS_DS:
+					info.apiName = U_("DirectSound");
+					info.flags = {
+						Info::Usability::Broken, // sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::Win7) ? Info::Usability:Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
+						Info::Level::Secondary,
+						Info::Compatible::No,
+						sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
+						Info::Io::FullDuplex,
+						Info::Mixing::Software,
+						Info::Implementor::External
+					};
+					break;
+				default:
+					// nothing
+					break;
+				}
+
 				devices.push_back(info);
 			}
 		} catch(const RtAudioError &)

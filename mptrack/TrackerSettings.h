@@ -643,10 +643,7 @@ public:
 	// Sound Settings
 
 	Setting<bool> m_SoundShowDeprecatedDevices;
-	Setting<bool> m_SoundShowNotRecommendedDeviceWarning;
 	Setting<std::vector<uint32> > m_SoundSampleRates;
-	Setting<bool> m_MorePortaudio;
-	Setting<bool> m_MoreRtaudio;
 	Setting<bool> m_SoundSettingsOpenDeviceAtStartup;
 	Setting<SoundDeviceStopMode> m_SoundSettingsStopMode;
 

@@ -593,7 +593,7 @@ SoundDevice::Statistics CWaveDevice::GetStatistics() const
 }
 
 
-std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInfo /* sysInfo */ )
+std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInfo sysInfo)
 {
 	MPT_TRACE_SCOPE();
 	std::vector<SoundDevice::Info> devices;
@@ -603,7 +603,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInf
 		SoundDevice::Info info;
 		info.type = TypeWAVEOUT;
 		info.internalID = mpt::ufmt::dec(index);
-		info.apiName = U_("WaveOut");
+		info.apiName = U_("MME");
 		info.useNameAsIdentifier = true;
 		WAVEOUTCAPS woc;
 		MemsetZero(woc);
@@ -620,6 +620,15 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInf
 			info.name = mpt::format(U_("Device %1"))(index - 1);
 		}
 		info.isDefault = (index == 0);
+		info.flags = {
+			sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
+			Info::Level::Primary,
+			sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() ? Info::Compatible::Yes : Info::Compatible::No,
+			sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
+			Info::Io::OutputOnly,
+			Info::Mixing::Software,
+			Info::Implementor::OpenMPT
+		};
 		devices.push_back(info);
 	}
 	return devices;

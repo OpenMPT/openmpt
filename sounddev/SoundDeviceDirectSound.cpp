@@ -73,9 +73,21 @@ mpt::ustring GetDirectSoundDefaultDeviceIdentifier_1_25_00_04()
 }
 
 
+namespace
+{
+struct DevicesAndSysInfo
+{
+	std::vector<SoundDevice::Info> devices;
+	SoundDevice::SysInfo sysInfo;
+};
+}
+
+
 static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTSTR lpstrDriver, LPVOID lpContext)
 {
-	std::vector<SoundDevice::Info> &devices = *(std::vector<SoundDevice::Info>*)lpContext;
+	DevicesAndSysInfo &devicesAndSysInfo = *(DevicesAndSysInfo*)lpContext;
+	std::vector<SoundDevice::Info> &devices = devicesAndSysInfo.devices;
+	SoundDevice::SysInfo &sysInfo = devicesAndSysInfo.sysInfo;
 	if(!lpstrDescription)
 	{
 		return TRUE;
@@ -96,16 +108,25 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 	}
 	info.apiName = U_("DirectSound");
 	info.useNameAsIdentifier = false;
+	info.flags = {
+		sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
+		Info::Level::Primary,
+		sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsWine() ? Info::Compatible::Yes : Info::Compatible::No,
+		sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
+		Info::Io::OutputOnly,
+		Info::Mixing::Software,
+		Info::Implementor::OpenMPT
+	};
 	devices.push_back(info);
 	return TRUE;
 }
 
 
-std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices(SoundDevice::SysInfo /* sysInfo */ )
+std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices(SoundDevice::SysInfo sysInfo)
 {
-	std::vector<SoundDevice::Info> devices;
-	DirectSoundEnumerate(DSEnumCallback, &devices);
-	return devices;
+	DevicesAndSysInfo devicesAndSysInfo = { std::vector<SoundDevice::Info>(), sysInfo };
+	DirectSoundEnumerate(DSEnumCallback, &devicesAndSysInfo);
+	return devicesAndSysInfo.devices;
 }
 
 

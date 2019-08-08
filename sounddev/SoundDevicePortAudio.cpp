@@ -749,24 +749,164 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 		switch(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type)
 		{
 			case paWASAPI:
-				result.apiName = U_("WASAPI");
 				break;
 			case paWDMKS:
-				if(sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
-				{
-					result.apiName = U_("WaveRT");
-				} else
-				{
-					result.apiName = U_("WDM-KS");
-				}
 				break;
 			default:
-				result.apiName = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
 				break;
 		}
+		result.apiName = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
+		result.extraData[U_("PortAudio-HostAPI-name")] = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
 		result.apiPath.push_back(U_("PortAudio"));
 		result.isDefault = (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev));
 		result.useNameAsIdentifier = true;
+		result.flags = {
+			Info::Usability::Unknown,
+			Info::Level::Unknown,
+			Info::Compatible::Unknown,
+			Info::Api::Unknown,
+			Info::Io::Unknown,
+			Info::Mixing::Unknown,
+			Info::Implementor::External
+		};
+		switch(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type)
+		{
+		case paDirectSound:
+			result.apiName = U_("DirectSound");
+			result.flags = {
+				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
+				Info::Level::Secondary,
+				Info::Compatible::No,
+				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
+				Info::Io::FullDuplex,
+				Info::Mixing::Software,
+				Info::Implementor::External
+			};
+			break;
+		case paMME:
+			result.apiName = U_("MME");
+			result.flags = {
+				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
+				Info::Level::Secondary,
+				Info::Compatible::No,
+				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
+				Info::Io::FullDuplex,
+				Info::Mixing::Software,
+				Info::Implementor::External
+			};
+			break;
+		case paASIO:
+			result.apiName = U_("ASIO");
+			result.flags = {
+				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
+				Info::Level::Secondary,
+				Info::Compatible::No,
+				sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() ? Info::Api::Native : Info::Api::Emulated,
+				Info::Io::FullDuplex,
+				Info::Mixing::Hardware,
+				Info::Implementor::External
+			};
+			break;
+		case paCoreAudio:
+			result.apiName = U_("CoreAudio");
+			result.flags = {
+				sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Usability::Usable : Info::Usability::NotAvailable,
+				Info::Level::Secondary,
+				Info::Compatible::Yes,
+				sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Api::Native : Info::Api::Emulated,
+				Info::Io::FullDuplex,
+				Info::Mixing::Server,
+				Info::Implementor::External
+			};
+			break;
+		case paOSS:
+			result.apiName = U_("OSS");
+			result.flags = {
+				sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Usability::Usable : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
+				Info::Level::Primary,
+				Info::Compatible::No,
+				sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Api::Native : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Emulated : Info::Api::Emulated,
+				Info::Io::FullDuplex,
+				sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Mixing::Hardware : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Mixing::Software : Info::Mixing::Software,
+				Info::Implementor::External
+			};
+			break;
+		case paALSA:
+			result.apiName = U_("ALSA");
+			result.flags = {
+				sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
+				Info::Level::Primary,
+				Info::Compatible::No,
+				sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+				Info::Io::FullDuplex,
+				sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Mixing::Hardware : Info::Mixing::Software,
+				Info::Implementor::External
+			};
+			break;
+		case paAL:
+			result.apiName = U_("OpenAL");
+			result.flags = {
+				Info::Usability::Usable,
+				Info::Level::Primary,
+				Info::Compatible::No,
+				sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::WinVista) ? Info::Api::Native : Info::Api::Emulated,
+				Info::Io::FullDuplex,
+				sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::WinVista) ? Info::Mixing::Hardware : Info::Mixing::Software,
+				Info::Implementor::External
+			};
+			break;
+		case paWDMKS:
+			result.apiName = sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) ? U_("WaveRT") : U_("WDM-KS");
+			result.flags = {
+				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::WinVista) ? Info::Usability::Usable : Info::Usability::Usable : Info::Usability::Broken : Info::Usability::NotAvailable,
+				Info::Level::Primary,
+				Info::Compatible::No,
+				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::WinVista) ? Info::Api::Native : Info::Api::Native : Info::Api::Emulated : Info::Api::Emulated,
+				Info::Io::FullDuplex,
+				Info::Mixing::Hardware,
+				Info::Implementor::External
+			};
+			break;
+		case paJACK:
+			result.apiName = U_("JACK");
+			result.flags = {
+				sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Usability::Usable : Info::Usability::Experimental,
+				Info::Level::Secondary,
+				Info::Compatible::Yes,
+				sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+				Info::Io::FullDuplex,
+				Info::Mixing::Server,
+				Info::Implementor::External
+			};
+			break;
+		case paWASAPI:
+			result.apiName = U_("WASAPI");
+			result.flags = {
+				sysInfo.SystemClass == mpt::OS::Class::Windows ?
+					sysInfo.IsWindowsOriginal() ?
+						sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::Win7) ?
+							Info::Usability::Usable
+						:
+							sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) ?
+								Info::Usability::Experimental
+							:
+								Info::Usability::NotAvailable
+					:
+						Info::Usability::Usable
+				:
+					Info::Usability::NotAvailable,
+				Info::Level::Primary,
+				Info::Compatible::No,
+				sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Api::Native : Info::Api::Emulated,
+				Info::Io::FullDuplex,
+				Info::Mixing::Server,
+				Info::Implementor::External
+			};
+			break;
+		default:
+			// nothing
+			break;
+		}
 		PALOG(mpt::format(U_("PortAudio: %1, %2, %3, %4"))(result.internalID, result.name, result.apiName, result.isDefault));
 		PALOG(mpt::format(U_(" low  : %1"))(Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
 		PALOG(mpt::format(U_(" high : %1"))(Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));

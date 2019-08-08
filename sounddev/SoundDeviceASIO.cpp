@@ -153,7 +153,7 @@ template <typename Tfn> auto CASIODevice::CallDriver(Tfn fn, const char * funcNa
 CASIODevice *CASIODevice::g_CallbacksInstance = nullptr;
 
 
-std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInfo /* sysInfo */ )
+std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInfo sysInfo)
 {
 	MPT_TRACE_SCOPE();
 	std::vector<SoundDevice::Info> devices;
@@ -209,6 +209,15 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 				info.name = description;
 				info.useNameAsIdentifier = false;
 				info.isDefault = false;
+				info.flags = {
+					sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
+					Info::Level::Primary,
+					Info::Compatible::No,
+					sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() ? Info::Api::Native : Info::Api::Emulated,
+					Info::Io::FullDuplex,
+					Info::Mixing::Hardware,
+					Info::Implementor::OpenMPT
+				};
 				info.extraData[U_("Key")] = mpt::ToUnicode(keyname);
 				info.extraData[U_("Description")] = description;
 				info.extraData[U_("CLSID")] = mpt::ToUnicode(internalID);

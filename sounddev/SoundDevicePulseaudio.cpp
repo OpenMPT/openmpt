@@ -96,25 +96,43 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_
 		info.type = U_("PulseAudio");
 		info.internalID = mpt::ToUnicode(mpt::CharsetUTF8, i->name);
 		info.name = mpt::ToUnicode(mpt::CharsetUTF8, i->description);
-		info.apiName = U_("Pulseaudio");
+		info.apiName = U_("PulseAudio");
 		info.isDefault = false;
 		info.useNameAsIdentifier = false;
+		info.flags = {
+			sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
+			Info::Level::Primary,
+			Info::Compatible::No,
+			sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+			Info::Io::FullDuplex,
+			Info::Mixing::Server,
+			Info::Implementor::External
+		};
 		devices.push_back(info);
 		break;
 	}
 }
 
 
-std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(SoundDevice::SysInfo /* sysInfo */ )
+std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(SoundDevice::SysInfo sysInfo)
 {
 	std::vector<SoundDevice::Info> devices;
 	SoundDevice::Info info;
 	info.type = U_("PulseAudio");
 	info.internalID = U_("0");
 	info.name = U_("Default Device");
-	info.apiName = U_("Pulseaudio");
+	info.apiName = U_("PulseAudio");
 	info.isDefault = true;
 	info.useNameAsIdentifier = false;
+	info.flags = {
+		sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
+		Info::Level::Primary,
+		Info::Compatible::No,
+		sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+		Info::Io::FullDuplex,
+		Info::Mixing::Server,
+		Info::Implementor::External
+	};
 	devices.push_back(info);
 
 	int result = 0;

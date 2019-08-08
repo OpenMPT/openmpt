@@ -110,6 +110,15 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_
 		#endif
 		info.isDefault = false;
 		info.useNameAsIdentifier = false;
+		info.flags = {
+			sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
+			Info::Level::Primary,
+			Info::Compatible::No,
+			sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+			Info::Io::FullDuplex,
+			Info::Mixing::Server,
+			Info::Implementor::External
+		};
 		devices.push_back(info);
 		break;
 	}
@@ -118,7 +127,7 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_
 #endif // MPT_PULSEAUDIO_SIMPLE_ENUMERATE_DEVICES
 
 
-std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(SoundDevice::SysInfo /* sysInfo */ )
+std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(SoundDevice::SysInfo sysInfo)
 {
 	std::vector<SoundDevice::Info> devices;
 	SoundDevice::Info info;
@@ -136,6 +145,15 @@ std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(SoundDevice::S
 	#endif
 	info.isDefault = true;
 	info.useNameAsIdentifier = false;
+	info.flags = {
+		sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
+		Info::Level::Primary,
+		Info::Compatible::No,
+		sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+		Info::Io::FullDuplex,
+		Info::Mixing::Server,
+		Info::Implementor::External
+	};
 	devices.push_back(info);
 
 	#ifdef MPT_PULSEAUDIO_SIMPLE_ENUMERATE_DEVICES

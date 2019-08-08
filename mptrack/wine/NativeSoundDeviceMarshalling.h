@@ -57,6 +57,20 @@ namespace SoundDevice
 namespace SoundDevice
 {
 
+	MPT_JSON_INLINE(SoundDevice::Info::ManagerFlags, {
+		MPT_JSON_MAP(defaultFor);
+	})
+
+	MPT_JSON_INLINE(SoundDevice::Info::Flags, {
+		MPT_JSON_MAP(usability);
+		MPT_JSON_MAP(level);
+		MPT_JSON_MAP(compatible);
+		MPT_JSON_MAP(api);
+		MPT_JSON_MAP(io);
+		MPT_JSON_MAP(mixing);
+		MPT_JSON_MAP(implementor);
+	})
+
 	MPT_JSON_INLINE(SoundDevice::Info, {
 		MPT_JSON_MAP(type);
 		MPT_JSON_MAP(internalID);
@@ -65,6 +79,8 @@ namespace SoundDevice
 		MPT_JSON_MAP(apiPath);
 		MPT_JSON_MAP(isDefault);
 		MPT_JSON_MAP(useNameAsIdentifier);
+		MPT_JSON_MAP(managerFlags);
+		MPT_JSON_MAP(flags);
 		MPT_JSON_MAP(extraData);
 	})
 
