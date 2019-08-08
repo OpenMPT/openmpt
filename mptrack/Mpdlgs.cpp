@@ -301,7 +301,7 @@ void COptionsSoundcard::UpdateEverything()
 {
 	// Sound Device
 	{
-		if(ConvertStrTo<int>(m_CurrentDeviceInfo.extraData[U_("priority")]) < 0)
+		if(m_CurrentDeviceInfo.IsDeprecated())
 		{
 			TrackerSettings::Instance().m_SoundShowDeprecatedDevices = true;
 		}
@@ -314,31 +314,10 @@ void COptionsSoundcard::UpdateEverything()
 
 		for(const auto &it : *theApp.GetSoundDevicesManager())
 		{
-			auto extraData = it.extraData;
-			int priority = ConvertStrTo<int>(extraData[U_("priority")]);
-
-			if(!TrackerSettings::Instance().m_MorePortaudio)
-			{
-				if(it.type == SoundDevice::TypePORTAUDIO_DS || it.type == SoundDevice::TypePORTAUDIO_WMME)
-				{
-					// skip those portaudio apis that are already implemented via our own SoundDevice class
-					// can be overwritten via [Sound Settings]MorePortaudio=1
-					continue;
-				}
-			}
-			if(!TrackerSettings::Instance().m_MoreRtaudio)
-			{
-				if(it.type == U_("RtAudio-WINDOWS_DS") || it.type == U_("RtAudio-WINDOWS_WASAPI") || it.type == U_("RtAudio-WINDOWS_ASIO"))
-				{
-					// skip rtaudio apis that are already implemented via our own SoundDevice class
-					// can be overwritten via [Sound Settings]MoreRtaudio=1
-					continue;
-				}
-			}
 
 			if(!TrackerSettings::Instance().m_SoundShowDeprecatedDevices)
 			{
-				if(priority < 0)
+				if(it.IsDeprecated())
 				{
 					continue;
 				}
@@ -389,9 +368,23 @@ void COptionsSoundcard::UpdateEverything()
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
 				mpt::ustring name = it.apiName + U_(" - ") + mpt::String::Trim(it.name);
-				if(priority < 0)
+				switch(it.flags.usability)
 				{
-					name += U_(" [not recommended]");
+				case SoundDevice::Info::Usability::Experimental:
+					name += U_(" [experimental]");
+					break;
+				case SoundDevice::Info::Usability::Deprecated:
+					name += U_(" [deprecated]");
+					break;
+				case SoundDevice::Info::Usability::Broken:
+					name += U_(" [broken]");
+					break;
+				case SoundDevice::Info::Usability::NotAvailable:
+					name += U_(" [alien]");
+					break;
+				default:
+					// nothing
+					break;
 				}
 				if(it.isDefault)
 				{
@@ -421,7 +414,7 @@ void COptionsSoundcard::UpdateEverything()
 
 void COptionsSoundcard::UpdateDevice()
 {
-	GetDlgItem(IDC_CHECK_SOUNDCARD_SHOWALL)->EnableWindow((ConvertStrTo<int>(m_CurrentDeviceInfo.extraData[U_("priority")]) < 0) ? FALSE : TRUE);
+	GetDlgItem(IDC_CHECK_SOUNDCARD_SHOWALL)->EnableWindow(m_CurrentDeviceInfo.IsDeprecated() ? FALSE : TRUE);
 	UpdateGeneral();
 	UpdateControls();
 	UpdateLatency();
