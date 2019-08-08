@@ -746,15 +746,6 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 		}
 		result.internalID = mpt::ufmt::dec(dev);
 		result.name = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->name);
-		switch(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type)
-		{
-			case paWASAPI:
-				break;
-			case paWDMKS:
-				break;
-			default:
-				break;
-		}
 		result.apiName = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
 		result.extraData[U_("PortAudio-HostAPI-name")] = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
 		result.apiPath.push_back(U_("PortAudio"));
