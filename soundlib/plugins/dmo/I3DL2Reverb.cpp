@@ -326,6 +326,8 @@ void I3DL2Reverb::SetCurrentProgram(int32 program)
 		m_param[kI3DL2ReverbHFReference] = (5000.0f - 20.0f) / 19980.0f;
 		RecalculateI3DL2ReverbParams();
 	}
+#else
+	MPT_UNUSED_VARIABLE(program);
 #endif
 }
 
