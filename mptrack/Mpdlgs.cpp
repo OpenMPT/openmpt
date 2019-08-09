@@ -1645,11 +1645,11 @@ BOOL CMidiSetupDlg::OnInitDialog()
 		{ _T("Record as MIDI Macros"), atRecordAsMacro },
 	};
 
-	for(const auto &atOpt : aftertouchOptions)
+	for(const auto [str, value] : aftertouchOptions)
 	{
-		int item = m_ATBehaviour.AddString(atOpt.first);
-		m_ATBehaviour.SetItemData(item, atOpt.second);
-		if(atOpt.second == TrackerSettings::Instance().aftertouchBehaviour)
+		int item = m_ATBehaviour.AddString(str);
+		m_ATBehaviour.SetItemData(item, value);
+		if(value == TrackerSettings::Instance().aftertouchBehaviour)
 		{
 			m_ATBehaviour.SetCurSel(item);
 		}
@@ -1676,11 +1676,11 @@ BOOL CMidiSetupDlg::OnInitDialog()
 		{ _T("1/64th Notes"), 64 }, { _T("1/96th Notes"), 96 },
 	};
 
-	for(const auto &quantOpt : quantizeOptions)
+	for(const auto [str, value]: quantizeOptions)
 	{
-		int item = m_Quantize.AddString(quantOpt.first);
-		m_Quantize.SetItemData(item, quantOpt.second);
-		if(quantOpt.second == TrackerSettings::Instance().midiImportQuantize)
+		int item = m_Quantize.AddString(str);
+		m_Quantize.SetItemData(item, value);
+		if(value == TrackerSettings::Instance().midiImportQuantize)
 		{
 			m_Quantize.SetCurSel(item);
 		}

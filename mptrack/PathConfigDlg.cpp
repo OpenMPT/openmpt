@@ -69,9 +69,9 @@ BOOL PathConfigDlg::OnInitDialog()
 
 	const auto &settings = TrackerSettings::Instance();
 	// Default paths
-	for(const auto &path : PathSettings)
+	for(const auto [path, id] : PathSettings)
 	{
-		SetDlgItemText(path.second, (settings.*path.first).GetDefaultDir().AsNative().c_str());
+		SetDlgItemText(id, (settings.*path).GetDefaultDir().AsNative().c_str());
 	}
 
 	// Autosave

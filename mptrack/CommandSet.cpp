@@ -754,8 +754,7 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 
 	// Check that this keycombination isn't already assigned (in this context), except for dummy keys
 	CString report;
-	std::pair<CommandID, KeyCombination> conflictCmd;
-	if((conflictCmd = IsConflicting(kc, cmd, checkEventConflict)).first != kcNull)
+	if(auto conflictCmd = IsConflicting(kc, cmd, checkEventConflict); conflictCmd.first != kcNull)
 	{
 		if (!overwrite)
 		{

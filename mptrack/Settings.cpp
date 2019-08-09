@@ -299,12 +299,12 @@ void SettingsContainer::WriteSettings()
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
-	for(auto &i : map)
+	for(auto &[path, value] : map)
 	{
-		if(i.second.IsDirty())
+		if(value.IsDirty())
 		{
-			BackendsWriteSetting(i.first, i.second);
-			i.second.Clean();
+			BackendsWriteSetting(path, value);
+			value.Clean();
 		}
 	}
 }
