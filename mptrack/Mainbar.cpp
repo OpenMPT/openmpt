@@ -668,7 +668,7 @@ BOOL CMainToolBar::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 		id = (UINT_PTR)::GetDlgCtrlID((HWND)id);
 	}
 
-	mpt::tstring s;
+	const TCHAR *s = nullptr;
 	CommandID cmd = kcNull;
 	switch(id)
 	{
@@ -687,16 +687,17 @@ BOOL CMainToolBar::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 	case ID_PANIC: s = _T("Stop all hanging VSTi and sample voices"); cmd = kcPanic; break;
 	}
 
-	if(s.empty())
+	if(s == nullptr)
 		return FALSE;
 	
+	mpt::tstring fmt = s;
 	if(cmd != kcNull)
 	{
 		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
 		if(!keyText.IsEmpty())
-			s += mpt::tformat(_T(" (%1)"))(keyText);
+			fmt += mpt::tformat(_T(" (%1)"))(keyText);
 	}
-	lstrcpyn(pTTT->szText, s.c_str(), mpt::saturate_cast<int>(mpt::size(pTTT->szText)));
+	lstrcpyn(pTTT->szText, fmt.c_str(), mpt::saturate_cast<int>(mpt::size(pTTT->szText)));
 	*pResult = 0;
 
 	// bring the tooltip window above other popup windows

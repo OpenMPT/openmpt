@@ -65,26 +65,23 @@ public:
 	bool IsLocked() const { return (m_nLockCount > 0); }
 	virtual Setting<LONG> &GetSplitPosRef() = 0; 	//rewbs.varWindowSize
 
-protected:
-	//{{AFX_VIRTUAL(CModControlDlg)
-	public:
-	
-	afx_msg void OnEditCut() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_CUT, 0); }			//rewbs.customKeys
-	afx_msg void OnEditCopy() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_COPY, 0); }		//rewbs.customKeys
-	afx_msg void OnEditPaste() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_PASTE, 0); }		//rewbs.customKeys
-	afx_msg void OnEditMixPaste() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_MIXPASTE, 0); }		//rewbs.mixPaste
+	afx_msg void OnEditCut() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_CUT, 0); }
+	afx_msg void OnEditCopy() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_COPY, 0); }
+	afx_msg void OnEditPaste() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_PASTE, 0); }
+	afx_msg void OnEditMixPaste() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_MIXPASTE, 0); }
 	afx_msg void OnEditMixPasteITStyle() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_MIXPASTE_ITSTYLE, 0); }
 	afx_msg void OnEditPasteFlood() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_PASTEFLOOD, 0); }
 	afx_msg void OnEditPushForwardPaste() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_PUSHFORWARDPASTE, 0); }
-	afx_msg void OnEditFind() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FIND, 0); }		//rewbs.customKeys
-	afx_msg void OnEditFindNext() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FINDNEXT, 0); }	  //rewbs.customKeys
-	afx_msg void OnSwitchToView() { if (m_hWndView) ::PostMessage(m_hWndView, WM_MOD_VIEWMSG, VIEWMSG_SETFOCUS, 0); } //rewbs.customKeys
+	afx_msg void OnEditFind() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FIND, 0); }
+	afx_msg void OnEditFindNext() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FINDNEXT, 0); }
+	afx_msg void OnSwitchToView() { if (m_hWndView) ::PostMessage(m_hWndView, WM_MOD_VIEWMSG, VIEWMSG_SETFOCUS, 0); }
 
+	//{{AFX_VIRTUAL(CModControlDlg)
 	void OnOK() override {}
 	void OnCancel() override {}
-	virtual void RecalcLayout() {}
-	virtual void UpdateView(UpdateHint, CObject *) {}
-	virtual CRuntimeClass *GetAssociatedViewClass() { return NULL; }
+	virtual void RecalcLayout() = 0;
+	virtual void UpdateView(UpdateHint, CObject *) = 0;
+	virtual CRuntimeClass *GetAssociatedViewClass() { return nullptr; }
 	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
 	virtual void OnActivatePage(LPARAM) {}
 	virtual void OnDeactivatePage() {}

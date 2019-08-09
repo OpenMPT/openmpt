@@ -239,6 +239,21 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		sample.filename = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, gdmSample.fileName);
 
 		sample.nC5Speed = gdmSample.c4Hertz;
+		if(UseFinetuneAndTranspose())
+		{
+			// Use the same inaccurate table as 2GDM for translating back to finetune, as our own routines
+			// give slightly different results for the provided sample rates that may result in transpose != 0.
+			static const uint16 rate2finetune[] = { 8363, 8424, 8485, 8547, 8608, 8671, 8734, 8797, 7894, 7951, 8009, 8067, 8125, 8184, 8244, 8303 };
+			for(uint8 i = 0; i < 16; i++)
+			{
+				if(sample.nC5Speed == rate2finetune[i])
+				{
+					sample.nFineTune = MOD2XMFineTune(i);
+					break;
+				}
+			}
+		}
+
 		sample.nGlobalVol = 64;	// Not supported in this format
 
 		sample.nLength = gdmSample.length; // in bytes
@@ -252,20 +267,6 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 		sample.nLoopStart = gdmSample.loopBegin;
 		sample.nLoopEnd = gdmSample.loopEnd - 1;
-
-		if(UseFinetuneAndTranspose())
-		{
-			// Use the same inaccurate table as 2GDM for translating back to finetune, as our own routines
-			// give slightly different results for the provided sample rates that may result in transpose != 0.
-			static const uint16 rate2finetune[] = { 8363, 8424, 8485, 8547, 8608, 8671, 8734, 8797, 7894, 7951, 8009, 8067, 8125, 8184, 8244, 8303 };
-			for(uint8 i = 0; i < 16; i++)
-			{
-				if(sample.nC5Speed == rate2finetune[i])
-				{
-					sample.nFineTune = MOD2XMFineTune(i);
-				}
-			}
-		}
 
 		if(gdmSample.flags & GDMSampleHeader::smpLoop) sample.uFlags.set(CHN_LOOP); // Loop sample
 

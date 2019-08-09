@@ -27,21 +27,11 @@ enum ArchiveFileType
 struct ArchiveFileInfo
 {
 	mpt::PathString name;
-	ArchiveFileType type;
-	uint64 size;
+	ArchiveFileType type = ArchiveFileInvalid;
+	uint64 size = 0;
 	mpt::ustring comment;
-	uint64 cookie1;
-	uint64 cookie2;
-	ArchiveFileInfo()
-		: name(mpt::PathString())
-		, type(ArchiveFileInvalid)
-		, size(0)
-		, comment(mpt::ustring())
-		, cookie1(0)
-		, cookie2(0)
-	{
-		return;
-	}
+	uint64 cookie1 = 0;
+	uint64 cookie2 = 0;
 };
 
 class IArchive
@@ -51,7 +41,8 @@ public:
 protected:
 	IArchive() {}
 public:
-	virtual ~IArchive() {};
+	virtual ~IArchive() {}
+
 public:
 	virtual bool IsArchive() const = 0;
 	virtual mpt::ustring GetComment() const = 0;

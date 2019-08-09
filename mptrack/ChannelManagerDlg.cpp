@@ -695,7 +695,7 @@ void CChannelManagerDlg::OnPaint()
 	{
 		CHANNELINDEX nThisChn = pattern[nChn];
 
-		CString fmt = (sndFile.ChnSettings[nThisChn].szName[0] != '\0') ? _T("%1: %2") : _T("Channel %1");
+		CString fmt = !sndFile.ChnSettings[nThisChn].szName.empty() ? _T("%1: %2") : _T("Channel %1");
 		s = mpt::cformat(fmt)(nThisChn + 1, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[nThisChn].szName));
 
 		const int borderX = MulDiv(3, dpiX, 96), borderY = MulDiv(3, dpiY, 96);
@@ -723,7 +723,7 @@ void CChannelManagerDlg::OnPaint()
 			{
 				const HBRUSH brushes[] = { CMainFrame::brushHighLight, green, red };
 				auto r = m_ModDoc->IsChannelRecord(nThisChn);
-				FillRect(dc, btn, brushes[r % MPT_ARRAY_COUNT(brushes)]);
+				FillRect(dc, btn, brushes[r % mpt::size(brushes)]);
 				break;
 			}
 			case 2:

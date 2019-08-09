@@ -472,9 +472,7 @@ DragItem CViewPattern::GetDragItem(CPoint point, RECT &outRect) const
 {
 	const CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile == nullptr)
-	{
 		return {};
-	}
 
 	CRect rcClient, rect, plugRect;
 
@@ -529,9 +527,7 @@ bool CViewPattern::DragToSel(const PatternCursor &cursor, bool scrollHorizontal,
 {
 	const CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
-	{
 		return false;
-	}
 
 	CRect rect;
 	int yofs = GetYScrollPos(), xofs = GetXScrollPos();
@@ -679,22 +675,16 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 				if(ctx == kCtxViewPatternsFX)
 				{
 					if(ih->KeyEvent(kCtxViewPatternsFXparam, nChar, nRepCnt, nFlags, kT) != kcNull)
-					{
 						return true;  // Mapped to a command, no need to pass message on.
-					}
 				} else if(ctx == kCtxViewPatternsFXparam)
 				{
 					if(ih->KeyEvent(kCtxViewPatternsFX, nChar, nRepCnt, nFlags, kT) != kcNull)
-					{
 						return true;  // Mapped to a command, no need to pass message on.
-					}
 				} else if(ctx == kCtxViewPatternsIns)
 				{
 					// Do the same with instrument->note column
 					if(ih->KeyEvent(kCtxViewPatternsNote, nChar, nRepCnt, nFlags, kT) != kcNull)
-					{
 						return true;  // Mapped to a command, no need to pass message on.
-					}
 				}
 			}
 			//end HACK.
@@ -6796,8 +6786,8 @@ INT_PTR CViewPattern::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 HRESULT CViewPattern::get_accName(VARIANT varChild, BSTR *pszName)
 {
 	const ModCommand &m = GetCursorCommand();
-	size_t columnIndex = m_Cursor.GetColumnType();
-	static const TCHAR *column = _T("");
+	const size_t columnIndex = m_Cursor.GetColumnType();
+	const TCHAR *column = _T("");
 	static const TCHAR *regularColumns[] = {_T("Note"), _T("Instrument"), _T("Volume"), _T("Effect"), _T("Parameter")};
 	static const TCHAR *pcColumns[] = {_T("Note"), _T("Plugin"), _T("Plugin Parameter"), _T("Parameter Value"), _T("Parameter Value")};
 	static_assert(PatternCursor::lastColumn + 1 == mpt::size(regularColumns));
