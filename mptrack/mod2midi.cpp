@@ -215,26 +215,14 @@ namespace MidiExport
 			WriteString(strType, mpt::ToCharset(mpt::CharsetLocaleOrUTF8, str));
 		}
 
-		void WriteString(StringType strType, const std::string &str)
+		void WriteString(StringType strType, const std::string_view &str)
 		{
-			if(str.length() > 0)
+			if(!str.empty())
 			{
 				uint8 msg[3] = { 0x00, 0xFF, strType };
 				mpt::IO::WriteRaw(f, msg, 3);
 				mpt::IO::WriteVarInt(f, str.length());
-				mpt::IO::WriteRaw(f, str.c_str(), str.length());
-			}
-		}
-
-		void WriteString(StringType strType, const char *str)
-		{
-			const size_t len = strlen(str);
-			if(len > 0)
-			{
-				uint8 msg[3] = { 0x00, 0xFF, strType };
-				mpt::IO::WriteRaw(f, msg, 3);
-				mpt::IO::WriteVarInt(f, len);
-				mpt::IO::WriteRaw(f, str, len);
+				mpt::IO::WriteRaw(f, str.data(), str.length());
 			}
 		}
 
@@ -351,13 +339,13 @@ namespace MidiExport
 		bool CanRecieveMidiEvents() override { return true; }
 		bool ShouldProcessSilence() override { return true; }
 #ifdef MODPLUG_TRACKER
-		CString GetDefaultEffectName() override { return CString(); }
-		CString GetParamName(PlugParamIndex) override { return CString(); }
-		CString GetParamLabel(PlugParamIndex) override { return CString(); }
-		CString GetParamDisplay(PlugParamIndex) override { return CString(); }
-		CString GetCurrentProgramName() override { return CString(); }
+		CString GetDefaultEffectName() override { return {}; }
+		CString GetParamName(PlugParamIndex) override { return {}; }
+		CString GetParamLabel(PlugParamIndex) override { return {}; }
+		CString GetParamDisplay(PlugParamIndex) override { return {}; }
+		CString GetCurrentProgramName() override { return {}; }
 		void SetCurrentProgramName(const CString &) override { }
-		CString GetProgramName(int32) override { return CString(); }
+		CString GetProgramName(int32) override { return {}; }
 		bool HasEditor() const override { return false; }
 #endif // MODPLUG_TRACKER
 		int GetNumInputChannels() const override { return 0; }
@@ -467,9 +455,10 @@ namespace MidiExport
 				std::string data = track->Finalise().str();
 				if(!data.empty())
 				{
+					const uint32 len = mpt::saturate_cast<uint32>(data.size());
 					mpt::IO::WriteRaw(m_file, "MTrk", 4);
-					mpt::IO::WriteIntBE<uint32>(m_file, mpt::saturate_cast<uint32>(data.size()));
-					mpt::IO::WriteRaw(m_file, data.data(), mpt::saturate_cast<uint32>(data.size()));
+					mpt::IO::WriteIntBE<uint32>(m_file, len);
+					mpt::IO::WriteRaw(m_file, data.data(), len);
 				}
 			}
 		}
@@ -604,13 +593,13 @@ BOOL CModToMidi::OnInitDialog()
 	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Don't Export")), MidiNoChannel);
 	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Melodic (any)")), MidiMappedChannel);
 	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Percussions")), MidiFirstChannel + 9);
-	for (UINT iCh=1; iCh<=16; iCh++) if (iCh != 10)
+	for(uint32 chn = 1; chn <= 16; chn++) if (chn != 10)
 	{
-		s.Format(_T("Melodic %u"), iCh);
-		m_CbnChannel.SetItemData(m_CbnChannel.AddString(s), MidiFirstChannel - 1 + iCh);
+		s.Format(_T("Melodic %u"), chn);
+		m_CbnChannel.SetItemData(m_CbnChannel.AddString(s), MidiFirstChannel - 1 + chn);
 	}
 	m_nCurrInstr = 1;
-	m_bPerc = TRUE;
+	m_bPerc = true;
 	m_CbnChannel.SetCurSel(1);
 	m_CbnInstrument.SetCurSel(0);
 	FillProgramBox(false);
