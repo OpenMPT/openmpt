@@ -35,7 +35,7 @@ OPENMPT_NAMESPACE_BEGIN
 // Load two 32-bit values
 static MPT_FORCEINLINE __m64 Load64MMX(const int32 *x) { return _mm_set_pi32(x[1], x[0]); }
 // Load four 16-bit values
-static MPT_FORCEINLINE __m64 Load64MMX(const LR16 (&x)[2]) { return Load64MMX(&x->lr); }
+static MPT_FORCEINLINE __m64 Load64MMX(const LR16 (&x)[2]) { return _mm_set_pi32(x[1].lr, x[0].lr); }
 // Store 64-bit value from register (MSVC does not have_mm_cvtsi64_si64x) - macro to avoid emms warnings
 #define Store64MMX(dst, src) \
 	MPT_DO \
@@ -49,10 +49,10 @@ static MPT_FORCEINLINE __m64 Load64MMX(const LR16 (&x)[2]) { return Load64MMX(&x
 // Load two 32-bit values
 static MPT_FORCEINLINE __m128i Load64SSE(const int32 *x) { return _mm_loadl_epi64(reinterpret_cast<const __m128i *>(x)); }
 // Load four 16-bit values
-static MPT_FORCEINLINE __m128i Load64SSE(const LR16 (&x)[2]) { return _mm_loadl_epi64(reinterpret_cast<const __m128i *>(&x)); }
+static MPT_FORCEINLINE __m128i Load64SSE(const LR16 (&x)[2]) { return _mm_loadl_epi64(&reinterpret_cast<const __m128i &>(x)); }
 // Store two 32-bit or four 16-bit values from register
 static MPT_FORCEINLINE void Store64SSE(int32 *dst, __m128i src) { return _mm_storel_epi64(reinterpret_cast<__m128i *>(dst), src); }
-static MPT_FORCEINLINE void Store64SSE(LR16 *dst, __m128i src) { return _mm_storel_epi64(reinterpret_cast<__m128i *>(dst), src); }
+static MPT_FORCEINLINE void Store64SSE(LR16 (&dst)[2], __m128i src) { return _mm_storel_epi64(&reinterpret_cast<__m128i &>(dst), src); }
 #endif
 
 
@@ -92,64 +92,56 @@ static int32 mBToLinear(int32 scale, int32 value_mB)
 	return mpt::saturate_round<int32>(mBToLinear(value_mB) * scale);
 }
 
-
-struct SNDMIX_REVERB_PROPERTIES
+static constexpr std::pair<SNDMIX_REVERB_PROPERTIES, const char *> ReverbPresets[NUM_REVERBTYPES] =
 {
-	int32 lRoom;                   // [-10000, 0]      default: -10000 mB
-	int32 lRoomHF;                 // [-10000, 0]      default: 0 mB
-	float flDecayTime;             // [0.1, 20.0]      default: 1.0 s
-	float flDecayHFRatio;          // [0.1, 2.0]       default: 0.5
-	int32 lReflections;            // [-10000, 1000]   default: -10000 mB
-	float flReflectionsDelay;      // [0.0, 0.3]       default: 0.02 s
-	int32 lReverb;                 // [-10000, 2000]   default: -10000 mB
-	float flReverbDelay;           // [0.0, 0.1]       default: 0.04 s
-	float flDiffusion;             // [0.0, 100.0]     default: 100.0 %
-	float flDensity;               // [0.0, 100.0]     default: 100.0 %
+	// Examples simulating General MIDI 2'musical' reverb presets
+	// Name  (Decay time)  Description
+	// Plate       (1.3s)  A plate reverb simulation.
+	{{ -1000, -200, 1.30f,0.90f,     0,0.002f,     0,0.010f,100.0f, 75.0f }, "GM Plate"},
+	// Small Room  (1.1s)  A small size room with a length of 5m or so.
+	{{ -1000, -600, 1.10f,0.83f,  -400,0.005f,   500,0.010f,100.0f,100.0f }, "GM Small Room"},
+	// Medium Room (1.3s)  A medium size room with a length of 10m or so.
+	{{ -1000, -600, 1.30f,0.83f, -1000,0.010f,  -200,0.020f,100.0f,100.0f }, "GM Medium Room"},
+	// Large Room  (1.5s)  A large size room suitable for live performances.
+	{{ -1000, -600, 1.50f,0.83f, -1600,0.020f, -1000,0.040f,100.0f,100.0f }, "GM Large Room"},
+	// Medium Hall (1.8s)  A medium size concert hall.
+	{{ -1000, -600, 1.80f,0.70f, -1300,0.015f,  -800,0.030f,100.0f,100.0f }, "GM Medium Hall"},
+	// Large Hall  (1.8s)  A large size concert hall suitable for a full orchestra.
+	{{ -1000, -600, 1.80f,0.70f, -2000,0.030f, -1400,0.060f,100.0f,100.0f }, "GM Large Hall"},
+
+	{{ -1000, -100, 1.49f,0.83f, -2602,0.007f,   200,0.011f,100.0f,100.0f }, "Generic"},
+	{{ -1000,-6000, 0.17f,0.10f, -1204,0.001f,   207,0.002f,100.0f,100.0f }, "Padded Cell"},
+	{{ -1000, -454, 0.40f,0.83f, -1646,0.002f,    53,0.003f,100.0f,100.0f }, "Room"},
+	{{ -1000,-1200, 1.49f,0.54f,  -370,0.007f,  1030,0.011f,100.0f, 60.0f }, "Bathroom"},
+	{{ -1000,-6000, 0.50f,0.10f, -1376,0.003f, -1104,0.004f,100.0f,100.0f }, "Living Room"},
+	{{ -1000, -300, 2.31f,0.64f,  -711,0.012f,    83,0.017f,100.0f,100.0f }, "Stone Room"},
+	{{ -1000, -476, 4.32f,0.59f,  -789,0.020f,  -289,0.030f,100.0f,100.0f }, "Auditorium"},
+	{{ -1000, -500, 3.92f,0.70f, -1230,0.020f,    -2,0.029f,100.0f,100.0f }, "Concert Hall"},
+	{{ -1000,    0, 2.91f,1.30f,  -602,0.015f,  -302,0.022f,100.0f,100.0f }, "Cave"},
+	{{ -1000, -698, 7.24f,0.33f, -1166,0.020f,    16,0.030f,100.0f,100.0f }, "Arena"},
+	{{ -1000,-1000,10.05f,0.23f,  -602,0.020f,   198,0.030f,100.0f,100.0f }, "Hangar"},
+	{{ -1000,-4000, 0.30f,0.10f, -1831,0.002f, -1630,0.030f,100.0f,100.0f }, "Carpeted Hallway"},
+	{{ -1000, -300, 1.49f,0.59f, -1219,0.007f,   441,0.011f,100.0f,100.0f }, "Hallway"},
+	{{ -1000, -237, 2.70f,0.79f, -1214,0.013f,   395,0.020f,100.0f,100.0f }, "Stone Corridor"},
+	{{ -1000, -270, 1.49f,0.86f, -1204,0.007f,    -4,0.011f,100.0f,100.0f }, "Alley"},
+	{{ -1000,-3300, 1.49f,0.54f, -2560,0.162f,  -613,0.088f, 79.0f,100.0f }, "Forest"},
+	{{ -1000, -800, 1.49f,0.67f, -2273,0.007f, -2217,0.011f, 50.0f,100.0f }, "City"},
+	{{ -1000,-2500, 1.49f,0.21f, -2780,0.300f, -2014,0.100f, 27.0f,100.0f }, "Mountains"},
+	{{ -1000,-1000, 1.49f,0.83f,-10000,0.061f,   500,0.025f,100.0f,100.0f }, "Quarry"},
+	{{ -1000,-2000, 1.49f,0.50f, -2466,0.179f, -2514,0.100f, 21.0f,100.0f }, "Plain"},
+	{{ -1000,    0, 1.65f,1.50f, -1363,0.008f, -1153,0.012f,100.0f,100.0f }, "Parking Lot"},
+	{{ -1000,-1000, 2.81f,0.14f,   429,0.014f,   648,0.021f, 80.0f, 60.0f }, "Sewer Pipe"},
+	{{ -1000,-4000, 1.49f,0.10f,  -449,0.007f,  1700,0.011f,100.0f,100.0f }, "Underwater"},
 };
 
-struct SNDMIX_RVBPRESET
+mpt::ustring GetReverbPresetName(uint32 preset)
 {
-	SNDMIX_REVERB_PROPERTIES Preset;
-	const mpt::uchar *name;
-};
+	return (preset < NUM_REVERBTYPES) ? mpt::ToUnicode(mpt::CharsetASCII, ReverbPresets[preset].second) : mpt::ustring{};
+}
 
-
-static const SNDMIX_RVBPRESET gRvbPresets[NUM_REVERBTYPES] =
+const SNDMIX_REVERB_PROPERTIES *GetReverbPreset(uint32 preset)
 {
-	{{ SNDMIX_REVERB_PRESET_PLATE },           UL_("GM Plate")},
-	{{ SNDMIX_REVERB_PRESET_SMALLROOM },       UL_("GM Small Room")},
-	{{ SNDMIX_REVERB_PRESET_MEDIUMROOM },      UL_("GM Medium Room")},
-	{{ SNDMIX_REVERB_PRESET_LARGEROOM },       UL_("GM Large Room")},
-	{{ SNDMIX_REVERB_PRESET_MEDIUMHALL },      UL_("GM Medium Hall")},
-	{{ SNDMIX_REVERB_PRESET_LARGEHALL },       UL_("GM Large Hall")},
-	{{ SNDMIX_REVERB_PRESET_GENERIC },         UL_("Generic")},
-	{{ SNDMIX_REVERB_PRESET_PADDEDCELL },      UL_("Padded Cell")},
-	{{ SNDMIX_REVERB_PRESET_ROOM },            UL_("Room")},
-	{{ SNDMIX_REVERB_PRESET_BATHROOM },        UL_("Bathroom")},
-	{{ SNDMIX_REVERB_PRESET_LIVINGROOM },      UL_("Living Room")},
-	{{ SNDMIX_REVERB_PRESET_STONEROOM },       UL_("Stone Room")},
-	{{ SNDMIX_REVERB_PRESET_AUDITORIUM },      UL_("Auditorium")},
-	{{ SNDMIX_REVERB_PRESET_CONCERTHALL },     UL_("Concert Hall")},
-	{{ SNDMIX_REVERB_PRESET_CAVE },            UL_("Cave")},
-	{{ SNDMIX_REVERB_PRESET_ARENA },           UL_("Arena")},
-	{{ SNDMIX_REVERB_PRESET_HANGAR },          UL_("Hangar")},
-	{{ SNDMIX_REVERB_PRESET_CARPETEDHALLWAY }, UL_("Carpeted Hallway")},
-	{{ SNDMIX_REVERB_PRESET_HALLWAY },         UL_("Hallway")},
-	{{ SNDMIX_REVERB_PRESET_STONECORRIDOR },   UL_("Stone Corridor")},
-	{{ SNDMIX_REVERB_PRESET_ALLEY },           UL_("Alley")},
-	{{ SNDMIX_REVERB_PRESET_FOREST },          UL_("Forest")},
-	{{ SNDMIX_REVERB_PRESET_CITY },            UL_("City")},
-	{{ SNDMIX_REVERB_PRESET_MOUNTAINS },       UL_("Mountains")},
-	{{ SNDMIX_REVERB_PRESET_QUARRY },          UL_("Quarry")},
-	{{ SNDMIX_REVERB_PRESET_PLAIN },           UL_("Plain")},
-	{{ SNDMIX_REVERB_PRESET_PARKINGLOT },      UL_("Parking Lot")},
-	{{ SNDMIX_REVERB_PRESET_SEWERPIPE },       UL_("Sewer Pipe")},
-	{{ SNDMIX_REVERB_PRESET_UNDERWATER },      UL_("Underwater")},
-};
-
-mpt::ustring GetReverbPresetName(uint32 nPreset)
-{
-	return (nPreset < NUM_REVERBTYPES) ? mpt::ustring(gRvbPresets[nPreset].name) : mpt::ustring();
+	return (preset < NUM_REVERBTYPES) ? &ReverbPresets[preset].first : nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -301,7 +293,7 @@ void CReverb::Shutdown()
 void CReverb::Initialize(bool bReset, uint32 MixingFreq)
 {
 	if (m_Settings.m_nReverbType >= NUM_REVERBTYPES) m_Settings.m_nReverbType = 0;
-	const SNDMIX_REVERB_PROPERTIES *rvbPreset = &gRvbPresets[m_Settings.m_nReverbType].Preset;
+	const SNDMIX_REVERB_PROPERTIES *rvbPreset = &ReverbPresets[m_Settings.m_nReverbType].first;
 
 	if ((rvbPreset != m_currentPreset) || (bReset))
 	{
