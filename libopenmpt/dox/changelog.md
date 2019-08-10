@@ -7,6 +7,12 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta39
 
+ *  [**Bug**] Compilation fix for NO_PLUGINS being defined.
+
+ *  Breaking out of a sustain loop through Note-Off sometimes didn't continue in
+    the regular sample loop.
+ *  Seeking did not stop notes playing with XM Key Off (Kxx) effect.
+
  *  mpg123: Update to v1.25.11 (2019-07-18).
  *  stb_vorbis: Update to v1.17 (2019-08-09).
 
