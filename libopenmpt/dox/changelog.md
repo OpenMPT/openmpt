@@ -16,6 +16,7 @@ is just a high-level summary.
  *  minimp3: Update to commit 977514a6dfc4960d819a103f43b358e58ac6c28f
     (2019-07-24).
  *  miniz: Update to v2.1.0 (2019-05-05).
+ *  stb_vorbis: Update to v1.17 (2019-08-09).
 
 ### libopenmpt 0.4.5 (2019-05-27)
 
