@@ -9,6 +9,7 @@ is just a high-level summary.
 
  *  mpg123: Update to v1.25.11 (2019-07-18).
  *  miniz: Update to v2.1.0 (2019-05-05).
+ *  stb_vorbis: Update to v1.17 (2019-08-09).
 
 ### libopenmpt 0.3.16 (2019-04-07)
 
