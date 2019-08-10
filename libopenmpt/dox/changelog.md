@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.4.7-pre
+
 ### libopenmpt 0.4.6 (2019-08-10)
 
  *  [**Bug**] Compilation fix for OpenBSD.
