@@ -30,10 +30,10 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.06.00 (* August 2019, revision 11901)
+v1.28.06.00 (10 August 2019, revision 11908)
 -------------------------------------------
 Tree view
-- [Imp] <js> Previous folder is now also remembed when showing folders in the lower panel (http://bugs.openmpt.org/view.php?id=1225).
+- [Imp] <js> When showing folders in the lower panel, going back to the parent folder selects the previously visited folder (http://bugs.openmpt.org/view.php?id=1225).
 - [Imp] <js> Scroll to last selected item when refreshing.
 
 Pattern tab
