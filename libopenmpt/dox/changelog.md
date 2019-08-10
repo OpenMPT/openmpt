@@ -8,6 +8,7 @@ is just a high-level summary.
 ### libopenmpt 0.2-beta39
 
  *  mpg123: Update to v1.25.11 (2019-07-18).
+ *  stb_vorbis: Update to v1.17 (2019-08-09).
 
 ### libopenmpt 0.2-beta38 (2019-04-07)
 
