@@ -30,6 +30,34 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.28.06.00 (* August 2019, revision 11901)
+-------------------------------------------
+Tree view
+- [Imp] <js> Previous folder is now also remembed when showing folders in the lower panel (http://bugs.openmpt.org/view.php?id=1225).
+- [Imp] <js> Scroll to last selected item when refreshing.
+
+Pattern tab
+- [Fix] <js> When pasting from IT to MPTM or vice versa, don't convert volume column commands as if they were coming from XM.
+
+Sample tab
+- [Fix] <js> Time-stretching a samples with a sample rate higher than 192 kHz crashed OpenMPT (http://bugs.openmpt.org/view.php?id=1234).
+
+Mod Conversion
+- [Fix] <js> When converting from IT to MPTM or vice versa, don't convert volume column commands as if they were coming from XM.
+
+IT
+- [Imp] <js> Detect IT files unpacked with early UNMO3 versions (http://forum.openmpt.org/index.php?topic=6189.0).
+
+XM
+- [Fix] <js> Fix VSTi playback or MIDI export with sample slots whose transpose is not set to C-5.
+
+MOD
+- [Imp] <js> Warn when samples beyond sample slot 31 are used.
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.25.11)
+
+
 v1.28.05.00 (26 May 2019, revision 11622)
 -----------------------------------------
 Pattern tab

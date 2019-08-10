@@ -8,9 +8,12 @@ is just a high-level summary.
 ### libopenmpt 0.4.6-pre
 
  *  [**Bug**] Compilation fix for OpenBSD.
+ *  [**Bug**] Compilation fix for NO_PLUGINS being defined.
 
  *  in_openmpt: Correct documentation. `openmpt-mpg123.dll` must be placed into
     the Winamp directory.
+
+ *  Detect IT files unpacked with early UNMO3 versions.
 
  *  mpg123: Update to v1.25.11 (2019-07-18).
  *  minimp3: Update to commit 977514a6dfc4960d819a103f43b358e58ac6c28f
