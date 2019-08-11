@@ -144,8 +144,6 @@ bool CPortaudioDevice::InternalOpen()
 		if(m_Settings.ExclusiveMode)
 		{
 			m_Flags.NeedsClippedFloat = false;
-			m_StreamParameters.suggestedLatency = 0.0; // let portaudio choose
-			framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 #if MPT_OS_WINDOWS
 			m_WasapiStreamInfo.flags |= paWinWasapiExclusive | paWinWasapiExplicitSampleFormat;
 			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
