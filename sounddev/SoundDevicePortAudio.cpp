@@ -48,7 +48,16 @@ CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info, SoundDevice::SysInfo 
 	: SoundDevice::Base(info, sysInfo)
 	, m_StatisticPeriodFrames(0)
 {
-	m_DeviceIndex = ConvertStrTo<PaDeviceIndex>(GetDeviceInternalID());
+	mpt::ustring internalID = GetDeviceInternalID();
+	if(internalID == U_("WASAPI-Default"))
+	{
+		m_DeviceIsDefault = true;
+		m_DeviceIndex = Pa_GetHostApiInfo(Pa_HostApiTypeIdToHostApiIndex(paWASAPI))->defaultOutputDevice;
+	} else
+	{
+		m_DeviceIsDefault = false;
+		m_DeviceIndex = ConvertStrTo<PaDeviceIndex>(internalID);
+	}
 	m_HostApiType = Pa_GetHostApiInfo(Pa_GetDeviceInfo(m_DeviceIndex)->hostApi)->type;
 	MemsetZero(m_StreamParameters);
 	MemsetZero(m_InputStreamParameters);
@@ -389,15 +398,23 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 	if(m_HostApiType == paWASAPI)
 	{
 		caps.CanBoostThreadPriority = true;
-		caps.CanExclusiveMode = true;
 		caps.CanDriverPanel = true;
-		if(deviceInfo)
-		{
-			// PortAudio WASAPI returns the device period as latency
-			caps.DefaultSettings.Latency = deviceInfo->defaultHighOutputLatency * 2.0;
-			caps.DefaultSettings.UpdateInterval = deviceInfo->defaultHighOutputLatency;
-		}
 		caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+		if(m_DeviceIsDefault)
+		{
+			caps.CanExclusiveMode = false;
+			caps.DefaultSettings.Latency = 0.030;
+			caps.DefaultSettings.UpdateInterval = 0.010;
+		} else
+		{
+			caps.CanExclusiveMode = true;
+			if(deviceInfo)
+			{
+				// PortAudio WASAPI returns the device period as latency
+				caps.DefaultSettings.Latency = deviceInfo->defaultHighOutputLatency * 2.0;
+				caps.DefaultSettings.UpdateInterval = deviceInfo->defaultHighOutputLatency;
+			}
+		}
 	} else if(m_HostApiType == paWDMKS)
 	{
 		caps.CanUpdateInterval = false;
@@ -474,7 +491,10 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 		if(Pa_IsFormatSupported(NULL, &StreamParameters, baseSampleRates[n]) == paFormatIsSupported)
 		{
 			caps.supportedSampleRates.push_back(baseSampleRates[n]);
-			caps.supportedExclusiveSampleRates.push_back(baseSampleRates[n]);
+			if(!((m_HostApiType == paWASAPI) && m_DeviceIsDefault))
+			{
+				caps.supportedExclusiveSampleRates.push_back(baseSampleRates[n]);
+			}
 		}
 	}
 	if(m_HostApiType == paDirectSound)
@@ -497,7 +517,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 		caps.supportedSampleFormats = { SampleFormatFloat32 };
 	}
 #if MPT_OS_WINDOWS
-	if(m_HostApiType == paWASAPI)
+	if(m_HostApiType == paWASAPI && !m_DeviceIsDefault)
 	{
 		caps.supportedExclusiveModeSampleFormats.clear();
 		const std::array<SampleFormat, 5> sampleFormats { SampleFormatInt8, SampleFormatInt16, SampleFormatInt24, SampleFormatInt32, SampleFormatFloat32 };
@@ -899,6 +919,15 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 		PALOG(mpt::format(U_("PortAudio: %1, %2, %3, %4"))(result.internalID, result.name, result.apiName, result.isDefault));
 		PALOG(mpt::format(U_(" low  : %1"))(Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
 		PALOG(mpt::format(U_(" high : %1"))(Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
+		if(result.isDefault && Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type == paWASAPI)
+		{
+			auto defaultResult = result;
+			defaultResult.name = U_("Default Device");
+			defaultResult.internalID = U_("WASAPI-Default");
+			defaultResult.useNameAsIdentifier = false;
+			devices.push_back(defaultResult);
+			result.isDefault = false;
+		}
 		devices.push_back(result);
 	}
 	return devices;

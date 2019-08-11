@@ -34,6 +34,7 @@ class CPortaudioDevice: public SoundDevice::Base
 
 protected:
 
+	PaDeviceIndex m_DeviceIsDefault;
 	PaDeviceIndex m_DeviceIndex;
 	PaHostApiTypeId m_HostApiType;
 	PaStreamParameters m_StreamParameters;
