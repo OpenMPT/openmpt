@@ -642,6 +642,7 @@ public:
 
 	// Sound Settings
 
+	bool m_SoundShowRecordingSettings;
 	Setting<bool> m_SoundShowDeprecatedDevices;
 	Setting<std::vector<uint32> > m_SoundSampleRates;
 	Setting<bool> m_SoundSettingsOpenDeviceAtStartup;
@@ -668,6 +669,7 @@ public:
 	Setting<uint32> MixerStereoSeparation;
 	Setting<uint32> MixerVolumeRampUpMicroseconds;
 	Setting<uint32> MixerVolumeRampDownMicroseconds;
+	Setting<uint32> MixerNumInputChannels;
 	MixerSettings GetMixerSettings() const;
 	void SetMixerSettings(const MixerSettings &settings);
 

@@ -23,13 +23,12 @@ class COptionsSoundcard: public CPropertyPage
 {
 protected:
 	CComboBoxEx m_CbnDevice;
-	CComboBox m_CbnLatencyMS, m_CbnUpdateIntervalMS, m_CbnMixingFreq, m_CbnChannels, m_CbnSampleFormat, m_CbnDither;
+	CComboBox m_CbnLatencyMS, m_CbnUpdateIntervalMS, m_CbnMixingFreq, m_CbnChannels, m_CbnSampleFormat, m_CbnDither, m_CbnRecordingChannels, m_CbnRecordingSource;
 	CEdit m_EditStatistics;
 	CButton m_BtnDriverPanel;
 
 	CComboBox m_CbnStoppedMode;
 
-	CStatic m_StaticChannelMapping[NUM_CHANNELCOMBOBOXES];
 	CComboBox m_CbnChannelMapping[NUM_CHANNELCOMBOBOXES];
 
 	SoundDevice::Identifier m_InitialDeviceIdentifier;
@@ -58,6 +57,7 @@ private:
 	void UpdateSampleFormat();
 	void UpdateDither();
 	void UpdateChannelMapping();
+	void UpdateRecording();
 	void UpdateControls();
 
 protected:
@@ -72,6 +72,7 @@ protected:
 	afx_msg void OnExclusiveModeChanged();
 	afx_msg void OnChannelsChanged();
 	afx_msg void OnSampleFormatChanged();
+	afx_msg void OnRecordingChanged();
 	afx_msg void OnSoundCardShowAll();
 	afx_msg void OnSoundCardRescan();
 	afx_msg void OnSoundCardDriverPanel();

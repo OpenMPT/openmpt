@@ -1822,6 +1822,7 @@ BOOL CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevic
 		TrackerSettings::Instance().SetSoundDeviceIdentifier(deviceIdentifier);
 		TrackerSettings::Instance().SetSoundDeviceSettings(deviceIdentifier, deviceSettings);
 		TrackerSettings::Instance().MixerOutputChannels = deviceSettings.Channels;
+		TrackerSettings::Instance().MixerNumInputChannels = deviceSettings.InputChannels;
 		TrackerSettings::Instance().MixerSamplerate = deviceSettings.Samplerate;
 		if(pActiveMod)
 		{

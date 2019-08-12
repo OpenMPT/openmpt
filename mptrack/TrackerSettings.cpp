@@ -202,6 +202,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, MiscFlushFileBuffersOnSave(conf, U_("Misc"), U_("FlushFileBuffersOnSave"), true)
 	, MiscCacheCompleteFileBeforeLoading(conf, U_("Misc"), U_("CacheCompleteFileBeforeLoading"), false)
 	// Sound Settings
+	, m_SoundShowRecordingSettings(false)
 	, m_SoundShowDeprecatedDevices(conf, U_("Sound Settings"), U_("ShowDeprecatedDevices"), true)
 	, m_SoundSampleRates(conf, U_("Sound Settings"), U_("SampleRates"), GetDefaultSampleRates())
 	, m_SoundSettingsOpenDeviceAtStartup(conf, U_("Sound Settings"), U_("OpenDeviceAtStartup"), false)
@@ -219,6 +220,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, MixerStereoSeparation(conf, U_("Sound Settings"), U_("StereoSeparation"), MixerSettings().m_nStereoSeparation)
 	, MixerVolumeRampUpMicroseconds(conf, U_("Sound Settings"), U_("VolumeRampUpMicroseconds"), MixerSettings().GetVolumeRampUpMicroseconds())
 	, MixerVolumeRampDownMicroseconds(conf, U_("Sound Settings"), U_("VolumeRampDownMicroseconds"), MixerSettings().GetVolumeRampDownMicroseconds())
+	, MixerNumInputChannels(conf, U_("Sound Settings"), U_("NumInputChannels"), static_cast<uint32>(MixerSettings().NumInputChannels))
 	, ResamplerMode(conf, U_("Sound Settings"), U_("SrcMode"), CResamplerSettings().SrcMode)
 	, ResamplerSubMode(conf, U_("Sound Settings"), U_("XMMSModplugResamplerWFIRType"), CResamplerSettings().gbWFIRType)
 	, ResamplerCutoffPercent(conf, U_("Sound Settings"), U_("ResamplerWFIRCutoff"), mpt::saturate_round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0))
@@ -528,10 +530,12 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 			// reset invalid channel mapping to default
 			m_SoundDeviceSettingsDefaults.Channels = SoundDevice::ChannelMapping(MixerOutputChannels);
 		}
+		m_SoundDeviceSettingsDefaults.InputChannels = 0;
 		m_SoundDeviceSettingsDefaults.sampleFormat = m_SampleFormat;
 		m_SoundDeviceSettingsDefaults.ExclusiveMode = m_SoundDeviceExclusiveMode;
 		m_SoundDeviceSettingsDefaults.BoostThreadPriority = m_SoundDeviceBoostThreadPriority;
 		m_SoundDeviceSettingsDefaults.UseHardwareTiming = m_SoundDeviceUseHardwareTiming;
+		m_SoundDeviceSettingsDefaults.InputSourceID = 0;
 		m_SoundDeviceSettingsUseOldDefaults = true;
 	}
 	if(storedVersion < MPT_V("1.28.00.41"))
@@ -884,12 +888,14 @@ private:
 	Setting<uint32> Samplerate;
 	Setting<uint8> ChannelsOld; // compatibility with older versions
 	Setting<SoundDevice::ChannelMapping> ChannelMapping;
+	Setting<uint8> InputChannels;
 	Setting<SampleFormat> sampleFormat;
 	Setting<bool> ExclusiveMode;
 	Setting<bool> BoostThreadPriority;
 	Setting<bool> KeepDeviceRunning;
 	Setting<bool> UseHardwareTiming;
 	Setting<int> DitherType;
+	Setting<uint32> InputSourceID;
 
 public:
 
@@ -901,12 +907,14 @@ public:
 		, Samplerate(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("SampleRate"), defaults.Samplerate)
 		, ChannelsOld(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("Channels"), mpt::saturate_cast<uint8>((int)defaults.Channels))
 		, ChannelMapping(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("ChannelMapping"), defaults.Channels)
+		, InputChannels(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("InputChannels"), defaults.InputChannels)
 		, sampleFormat(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("SampleFormat"), defaults.sampleFormat)
 		, ExclusiveMode(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("ExclusiveMode"), defaults.ExclusiveMode)
 		, BoostThreadPriority(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("BoostThreadPriority"), defaults.BoostThreadPriority)
 		, KeepDeviceRunning(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("KeepDeviceRunning"), defaults.KeepDeviceRunning)
 		, UseHardwareTiming(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("UseHardwareTiming"), defaults.UseHardwareTiming)
 		, DitherType(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("DitherType"), defaults.DitherType)
+		, InputSourceID(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("InputSourceID"), defaults.InputSourceID)
 	{
 		if(ChannelMapping.Get().GetNumHostChannels() != ChannelsOld)
 		{
@@ -928,12 +936,14 @@ public:
 		Samplerate = settings.Samplerate;
 		ChannelsOld = mpt::saturate_cast<uint8>((int)settings.Channels);
 		ChannelMapping = settings.Channels;
+		InputChannels = settings.InputChannels;
 		sampleFormat = settings.sampleFormat;
 		ExclusiveMode = settings.ExclusiveMode;
 		BoostThreadPriority = settings.BoostThreadPriority;
 		KeepDeviceRunning = settings.KeepDeviceRunning;
 		UseHardwareTiming = settings.UseHardwareTiming;
 		DitherType = settings.DitherType;
+		InputSourceID = settings.InputSourceID;
 		return *this;
 	}
 
@@ -944,12 +954,14 @@ public:
 		settings.UpdateInterval = UpdateIntervalUS / 1000000.0;
 		settings.Samplerate = Samplerate;
 		settings.Channels = ChannelMapping;
+		settings.InputChannels = InputChannels;
 		settings.sampleFormat = sampleFormat;
 		settings.ExclusiveMode = ExclusiveMode;
 		settings.BoostThreadPriority = BoostThreadPriority;
 		settings.KeepDeviceRunning = KeepDeviceRunning;
 		settings.UseHardwareTiming = UseHardwareTiming;
 		settings.DitherType = DitherType;
+		settings.InputSourceID = InputSourceID;
 		return settings;
 	}
 
@@ -1006,6 +1018,7 @@ MixerSettings TrackerSettings::GetMixerSettings() const
 	settings.m_nStereoSeparation = MixerStereoSeparation;
 	settings.VolumeRampUpMicroseconds = MixerVolumeRampUpMicroseconds;
 	settings.VolumeRampDownMicroseconds = MixerVolumeRampDownMicroseconds;
+	settings.NumInputChannels = MixerNumInputChannels;
 	return settings;
 }
 
@@ -1020,6 +1033,7 @@ void TrackerSettings::SetMixerSettings(const MixerSettings &settings)
 	MixerStereoSeparation = settings.m_nStereoSeparation;
 	MixerVolumeRampUpMicroseconds = settings.VolumeRampUpMicroseconds;
 	MixerVolumeRampDownMicroseconds = settings.VolumeRampDownMicroseconds;
+	MixerNumInputChannels = static_cast<uint32>(settings.NumInputChannels);
 }
 
 

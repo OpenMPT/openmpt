@@ -83,6 +83,8 @@ BEGIN_MESSAGE_MAP(COptionsSoundcard, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO_CHANNEL_FRONTRIGHT, &COptionsSoundcard::OnChannel2Changed)
 	ON_CBN_SELCHANGE(IDC_COMBO_CHANNEL_REARLEFT, &COptionsSoundcard::OnChannel3Changed)
 	ON_CBN_SELCHANGE(IDC_COMBO_CHANNEL_REARRIGHT, &COptionsSoundcard::OnChannel4Changed)
+	ON_CBN_SELCHANGE(IDC_COMBO_RECORDING_CHANNELS, OnRecordingChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_RECORDING_SOURCE, OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -90,6 +92,14 @@ void COptionsSoundcard::OnSampleFormatChanged()
 {
 	OnSettingsChanged();
 	UpdateDither();
+}
+
+
+void COptionsSoundcard::OnRecordingChanged()
+{
+	DWORD_PTR inputChannels = m_CbnRecordingChannels.GetItemData(m_CbnRecordingChannels.GetCurSel());
+	m_CbnRecordingSource.EnableWindow((m_CurrentDeviceCaps.HasNamedInputSources && inputChannels > 0) ? TRUE : FALSE);
+	OnSettingsChanged();
 }
 
 
@@ -107,14 +117,12 @@ void COptionsSoundcard::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON2,		m_BtnDriverPanel);
 	DDX_Control(pDX, IDC_COMBO6,		m_CbnSampleFormat);
 	DDX_Control(pDX, IDC_COMBO11,		m_CbnStoppedMode);
-	DDX_Control(pDX, IDC_STATIC_CHANNEL_FRONTLEFT , m_StaticChannelMapping[0]);
-	DDX_Control(pDX, IDC_STATIC_CHANNEL_FRONTRIGHT, m_StaticChannelMapping[1]);
-	DDX_Control(pDX, IDC_STATIC_CHANNEL_REARLEFT  , m_StaticChannelMapping[2]);
-	DDX_Control(pDX, IDC_STATIC_CHANNEL_REARRIGHT , m_StaticChannelMapping[3]);
 	DDX_Control(pDX, IDC_COMBO_CHANNEL_FRONTLEFT , m_CbnChannelMapping[0]);
 	DDX_Control(pDX, IDC_COMBO_CHANNEL_FRONTRIGHT, m_CbnChannelMapping[1]);
 	DDX_Control(pDX, IDC_COMBO_CHANNEL_REARLEFT  , m_CbnChannelMapping[2]);
 	DDX_Control(pDX, IDC_COMBO_CHANNEL_REARRIGHT , m_CbnChannelMapping[3]);
+	DDX_Control(pDX, IDC_COMBO_RECORDING_CHANNELS,		m_CbnRecordingChannels);
+	DDX_Control(pDX, IDC_COMBO_RECORDING_SOURCE,		m_CbnRecordingSource);
 	DDX_Control(pDX, IDC_EDIT_STATISTICS,	m_EditStatistics);
 	//}}AFX_DATA_MAP
 }
@@ -424,6 +432,7 @@ void COptionsSoundcard::UpdateDevice()
 	UpdateSampleFormat();
 	UpdateDither();
 	UpdateChannelMapping();
+	UpdateRecording();
 }
 
 
@@ -455,6 +464,67 @@ void COptionsSoundcard::UpdateChannels()
 	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
 	{
 		m_CbnChannels.EnableWindow(FALSE);
+	}
+}
+
+
+void COptionsSoundcard::UpdateRecording()
+{
+	GetDlgItem(IDC_STATIC_RECORDING)->ShowWindow(TrackerSettings::Instance().m_SoundShowRecordingSettings ? SW_SHOW : SW_HIDE);
+	m_CbnRecordingChannels.ShowWindow(TrackerSettings::Instance().m_SoundShowRecordingSettings ? SW_SHOW : SW_HIDE);
+	m_CbnRecordingSource.ShowWindow(TrackerSettings::Instance().m_SoundShowRecordingSettings ? SW_SHOW : SW_HIDE);
+	m_CbnRecordingChannels.ResetContent();
+	m_CbnRecordingSource.ResetContent();
+	if(m_CurrentDeviceCaps.CanInput && ((m_CurrentDeviceCaps.HasNamedInputSources && m_CurrentDeviceDynamicCaps.inputSourceNames.size() > 0) || !m_CurrentDeviceCaps.HasNamedInputSources))
+	{
+		GetDlgItem(IDC_STATIC_RECORDING)->EnableWindow(TRUE);
+		m_CbnRecordingChannels.EnableWindow(TRUE);
+		int sel = 0;
+		{
+			int ndx = m_CbnRecordingChannels.AddString(_T("off"));
+			m_CbnRecordingChannels.SetItemData(ndx, 0);
+			if(0 == m_Settings.InputChannels)
+			{
+				sel = ndx;
+			}
+		}
+		for(int channels = 4; channels >= 1; channels /= 2)
+		{
+			int ndx = m_CbnRecordingChannels.AddString(gszChnCfgNames[(channels+2)/2-1]);
+			m_CbnRecordingChannels.SetItemData(ndx, channels);
+			if(channels == m_Settings.InputChannels)
+			{
+				sel = ndx;
+			}
+		}
+		m_CbnRecordingChannels.SetCurSel(sel);
+		if(m_CurrentDeviceCaps.HasNamedInputSources)
+		{
+			m_CbnRecordingSource.EnableWindow((m_Settings.InputChannels > 0) ? TRUE : FALSE);
+			sel = -1;
+			for(size_t ch = 0; ch < m_CurrentDeviceDynamicCaps.inputSourceNames.size(); ch++)
+			{
+				const int pos = (int)::SendMessageW(m_CbnRecordingSource.m_hWnd, CB_ADDSTRING, 0, (LPARAM)m_CurrentDeviceDynamicCaps.inputSourceNames[ch].second.c_str());
+				m_CbnRecordingSource.SetItemData(pos, (DWORD_PTR)m_CurrentDeviceDynamicCaps.inputSourceNames[ch].first);
+				if(m_CurrentDeviceDynamicCaps.inputSourceNames[ch].first == m_Settings.InputSourceID)
+				{
+					sel = pos;
+				}
+			}
+			if(sel == -1 ) sel = 0;
+			m_CbnRecordingSource.SetCurSel(sel);
+		} else
+		{
+			m_CbnRecordingSource.EnableWindow(FALSE);
+		}
+	} else
+	{
+		GetDlgItem(IDC_STATIC_RECORDING)->EnableWindow(FALSE);
+		m_CbnRecordingChannels.EnableWindow(FALSE);
+		int ndx = m_CbnRecordingChannels.AddString(_T("off"));
+		m_CbnRecordingChannels.SetItemData(ndx, 0);
+		m_CbnRecordingChannels.SetCurSel(ndx);
+		m_CbnRecordingSource.EnableWindow(FALSE);
 	}
 }
 
@@ -560,11 +630,11 @@ void COptionsSoundcard::UpdateChannelMapping()
 {
 	{
 		GetDlgItem(IDC_STATIC_CHANNELMAPPING)->EnableWindow(TRUE);
+		GetDlgItem(IDC_STATIC_CHANNEL_FRONT)->EnableWindow(TRUE);
+		GetDlgItem(IDC_STATIC_CHANNEL_REAR)->EnableWindow(TRUE);
 		for(int mch = 0; mch < NUM_CHANNELCOMBOBOXES; mch++)
 		{
-			CStatic *statictext = &m_StaticChannelMapping[mch];
 			CComboBox *combo = &m_CbnChannelMapping[mch];
-			statictext->EnableWindow(TRUE);
 			combo->EnableWindow(TRUE);
 		}
 	}
@@ -575,11 +645,18 @@ void COptionsSoundcard::UpdateChannelMapping()
 		m_Settings.Channels = SoundDevice::ChannelMapping(usedChannels);
 	}
 	GetDlgItem(IDC_STATIC_CHANNELMAPPING)->EnableWindow(m_CurrentDeviceCaps.CanChannelMapping ? TRUE : FALSE);
+	if(m_CurrentDeviceCaps.CanChannelMapping && usedChannels > 2)
+	{
+		GetDlgItem(IDC_STATIC_CHANNEL_FRONT)->EnableWindow(TRUE);
+		GetDlgItem(IDC_STATIC_CHANNEL_REAR)->EnableWindow(TRUE);
+	} else
+	{
+		GetDlgItem(IDC_STATIC_CHANNEL_FRONT)->EnableWindow(FALSE);
+		GetDlgItem(IDC_STATIC_CHANNEL_REAR)->EnableWindow(FALSE);
+	}
 	for(int mch = 0; mch < NUM_CHANNELCOMBOBOXES; mch++)	// Host channels
 	{
-		CStatic *statictext = &m_StaticChannelMapping[mch];
 		CComboBox *combo = &m_CbnChannelMapping[mch];
-		statictext->EnableWindow((m_CurrentDeviceCaps.CanChannelMapping && mch < usedChannels) ? TRUE : FALSE);
 		combo->EnableWindow((m_CurrentDeviceCaps.CanChannelMapping && mch < usedChannels) ? TRUE : FALSE);
 		combo->ResetContent();
 		if(m_CurrentDeviceCaps.CanChannelMapping)
@@ -603,11 +680,11 @@ void COptionsSoundcard::UpdateChannelMapping()
 	if(theApp.GetSoundDevicesManager()->IsDeviceUnavailable(m_CurrentDeviceInfo.GetIdentifier()))
 	{
 		GetDlgItem(IDC_STATIC_CHANNELMAPPING)->EnableWindow(FALSE);
+		GetDlgItem(IDC_STATIC_CHANNEL_FRONT)->EnableWindow(FALSE);
+		GetDlgItem(IDC_STATIC_CHANNEL_REAR)->EnableWindow(FALSE);
 		for(int mch = 0; mch < NUM_CHANNELCOMBOBOXES; mch++)
 		{
-			CStatic *statictext = &m_StaticChannelMapping[mch];
 			CComboBox *combo = &m_CbnChannelMapping[mch];
-			statictext->EnableWindow(FALSE);
 			combo->EnableWindow(FALSE);
 		}
 	}
@@ -858,6 +935,30 @@ void COptionsSoundcard::OnOK()
 				channels[mch] = static_cast<int32>(combo->GetItemData(combo->GetCurSel()));
 			}
 			m_Settings.Channels = channels;
+		}
+	}
+	// Recording
+	{
+		if(TrackerSettings::Instance().m_SoundShowRecordingSettings && m_CurrentDeviceCaps.CanInput && ((m_CurrentDeviceCaps.HasNamedInputSources && m_CurrentDeviceDynamicCaps.inputSourceNames.size() > 0) || !m_CurrentDeviceCaps.HasNamedInputSources))
+		{
+			DWORD_PTR n = m_CbnRecordingChannels.GetItemData(m_CbnRecordingChannels.GetCurSel());
+			m_Settings.InputChannels = static_cast<uint8>(n);
+			if((m_Settings.InputChannels != 1) && (m_Settings.InputChannels != 2) && (m_Settings.InputChannels != 4))
+			{
+				m_Settings.InputChannels = 0;
+			}
+			if(m_CurrentDeviceCaps.HasNamedInputSources)
+			{
+				DWORD_PTR sourceID = m_CbnRecordingSource.GetItemData(m_CbnRecordingSource.GetCurSel());
+				m_Settings.InputSourceID = static_cast<uint32>(sourceID);
+			} else
+			{
+				m_Settings.InputSourceID = 0;
+			}
+		} else
+		{
+			m_Settings.InputChannels = 0;
+			m_Settings.InputSourceID = 0;
 		}
 	}
 	CMainFrame::GetMainFrame()->SetupSoundCard(m_Settings, m_CurrentDeviceInfo.GetIdentifier(), (SoundDeviceStopMode)m_CbnStoppedMode.GetCurSel());
