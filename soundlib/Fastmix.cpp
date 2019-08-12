@@ -511,7 +511,7 @@ void CSoundFile::ProcessPlugins(uint32 nCount)
 #ifdef MPT_INTMIXER
 				StereoMixToFloat(state.pMixBuffer, plugInputL, plugInputR, nCount, IntToFloat);
 #else
-				DeinterleaveStereo(pState->pMixBuffer, plugInputL, plugInputR, nCount);
+				DeinterleaveStereo(state.pMixBuffer, plugInputL, plugInputR, nCount);
 #endif // MPT_INTMIXER
 			} else if (state.nVolDecayR || state.nVolDecayL)
 			{
@@ -519,7 +519,7 @@ void CSoundFile::ProcessPlugins(uint32 nCount)
 #ifdef MPT_INTMIXER
 				StereoMixToFloat(state.pMixBuffer, plugInputL, plugInputR, nCount, IntToFloat);
 #else
-				DeinterleaveStereo(pState->pMixBuffer, plugInputL, plugInputR, nCount);
+				DeinterleaveStereo(state.pMixBuffer, plugInputL, plugInputR, nCount);
 #endif // MPT_INTMIXER
 			} else
 			{
