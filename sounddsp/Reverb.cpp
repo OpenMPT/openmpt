@@ -393,7 +393,7 @@ mixsample_t *CReverb::GetReverbSendBuffer(uint32 nSamples)
 
 
 // Reverb
-void CReverb::Process(mixsample_t *MixSoundBuffer, uint32 nSamples)
+void CReverb::Process(MixSampleInt *MixSoundBuffer, uint32 nSamples)
 {
 	if((!gnReverbSend) && (!gnReverbSamples))
 	{ // no data is sent to reverb and reverb decayed completely

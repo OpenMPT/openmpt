@@ -138,9 +138,9 @@ public:
 
 	// Shared reverb state
 private:
-	mixsample_t MixReverbBuffer[MIXBUFFERSIZE * 2];
+	MixSampleInt MixReverbBuffer[MIXBUFFERSIZE * 2];
 public:
-	mixsample_t gnRvbROfsVol = 0, gnRvbLOfsVol = 0;
+	MixSampleInt gnRvbROfsVol = 0, gnRvbLOfsVol = 0;
 
 private:
 	const SNDMIX_REVERB_PROPERTIES *m_currentPreset = nullptr;
@@ -172,10 +172,10 @@ public:
 	void Initialize(bool bReset, uint32 MixingFreq);
 
 	// can be called multiple times or never (if no data is sent to reverb)
-	mixsample_t *GetReverbSendBuffer(uint32 nSamples);
+	MixSampleInt *GetReverbSendBuffer(uint32 nSamples);
 
 	// call once after all data has been sent.
-	void Process(mixsample_t *MixSoundBuffer, uint32 nSamples);
+	void Process(MixSampleInt *MixSoundBuffer, uint32 nSamples);
 
 private:
 	void Shutdown();
