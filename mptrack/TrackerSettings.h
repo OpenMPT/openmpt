@@ -654,7 +654,6 @@ public:
 	bool m_SoundDeviceDirectSoundOldDefaultIdentifier;
 
 	Setting<SoundDevice::Identifier> m_SoundDeviceIdentifier;
-	Setting<bool> m_SoundDevicePreferSameTypeIfDeviceUnavailable;
 	SoundDevice::Identifier GetSoundDeviceIdentifier() const;
 	void SetSoundDeviceIdentifier(const SoundDevice::Identifier &identifier);
 	SoundDevice::Settings GetSoundDeviceSettings(const SoundDevice::Identifier &device) const;

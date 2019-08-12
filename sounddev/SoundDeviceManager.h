@@ -109,7 +109,7 @@ public:
 
 	SoundDevice::Info FindDeviceInfo(SoundDevice::Manager::GlobalID id) const;
 	SoundDevice::Info FindDeviceInfo(SoundDevice::Identifier identifier) const;
-	SoundDevice::Info FindDeviceInfoBestMatch(SoundDevice::Identifier identifier, bool preferSameType);
+	SoundDevice::Info FindDeviceInfoBestMatch(SoundDevice::Identifier identifier);
 
 	bool OpenDriverSettings(SoundDevice::Identifier identifier, SoundDevice::IMessageReceiver *messageReceiver = nullptr, SoundDevice::IBase *currentSoundDevice = nullptr);
 

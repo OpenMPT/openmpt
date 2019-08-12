@@ -239,7 +239,7 @@ void CMainFrame::Initialize()
 	SoundDevice::Identifier dev = TrackerSettings::Instance().GetSoundDeviceIdentifier();
 	if(!theApp.GetSoundDevicesManager()->FindDeviceInfo(dev).IsValid())
 	{
-		dev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(dev, TrackerSettings::Instance().m_SoundDevicePreferSameTypeIfDeviceUnavailable).GetIdentifier();
+		dev = theApp.GetSoundDevicesManager()->FindDeviceInfoBestMatch(dev).GetIdentifier();
 		TrackerSettings::Instance().SetSoundDeviceIdentifier(dev);
 	}
 

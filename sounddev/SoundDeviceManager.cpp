@@ -319,7 +319,7 @@ SoundDevice::Info Manager::FindDeviceInfo(SoundDevice::Identifier identifier) co
 }
 
 
-SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier identifier, bool preferSameType)
+SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier identifier)
 {
 	MPT_TRACE_SCOPE();
 	if(m_SoundDevices.empty())
@@ -333,24 +333,6 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier ident
 			if((info.GetIdentifier() == identifier) && !IsDeviceUnavailable(info.GetIdentifier()))
 			{ // exact match
 				return info;
-			}
-		}
-		const SoundDevice::Type type = ParseType(identifier);
-		if(type == TypePORTAUDIO_WASAPI)
-		{
-			// WASAPI devices might change names if a different connector jack is used.
-			// In order to avoid defaulting to wave mapper in that case,
-			// just find the first WASAPI device.
-			preferSameType = true;
-		}
-		if(preferSameType)
-		{ // find first avilable device of given type
-			for(const auto &info : *this)
-			{
-				if((info.type == type) && !IsDeviceUnavailable(info.GetIdentifier()))
-				{
-					return info;
-				}
 			}
 		}
 	}
