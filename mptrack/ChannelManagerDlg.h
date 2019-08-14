@@ -18,6 +18,14 @@ class CModDoc;
 
 class CChannelManagerDlg: public CDialog
 {
+	enum Tab
+	{
+		kSoloMute      = 0,
+		kRecordSelect  = 1,
+		kPluginState   = 2,
+		kReorderRemove = 3,
+	};
+
 public:
 
 	static CChannelManagerDlg * sharedInstance() { return sharedInstance_; }
@@ -61,7 +69,7 @@ protected:
 	CRect m_drawableArea;
 	CModDoc *m_ModDoc = nullptr;
 	HBITMAP m_bkgnd = nullptr;
-	int m_currentTab = 0;
+	Tab m_currentTab = kSoloMute;
 	int m_downX, m_downY;
 	int m_moveX, m_moveY;
 	int m_buttonHeight;
