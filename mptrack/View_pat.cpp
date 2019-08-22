@@ -6294,7 +6294,8 @@ bool CViewPattern::IsEditingEnabled_bmsg()
 	
 	CPoint pt = GetPointFromPosition(m_Cursor);
 
-	AppendMenu(hMenu, MF_STRING, IDC_PATTERN_RECORD, _T("Editing (recording) is disabled; click here to enable it."));
+	// We add an mnemonic for an unbreakable space to avoid activating edit mode accidentally.
+	AppendMenuW(hMenu, MF_STRING, IDC_PATTERN_RECORD, L"Editing (recording) is disabled;&\u00A0 click here to enable it.");
 
 	ClientToScreen(&pt);
 	::TrackPopupMenu(hMenu, TPM_LEFTALIGN, pt.x, pt.y, 0, m_hWnd, NULL);
