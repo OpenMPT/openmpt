@@ -144,7 +144,6 @@ HPEN CMainFrame::penBlack = NULL;
 HPEN CMainFrame::penWhite = NULL;
 HPEN CMainFrame::penHalfDarkGray = NULL;
 HPEN CMainFrame::penSample = NULL;
-HPEN CMainFrame::penSeparator = NULL;
 HBRUSH CMainFrame::brushGray = NULL;
 HBRUSH CMainFrame::brushBlack = NULL;
 HBRUSH CMainFrame::brushWhite = NULL;
@@ -1279,8 +1278,6 @@ void CMainFrame::UpdateColors()
 
 		if (brushWindow) DeleteObject(brushWindow);
 		brushWindow = CreateSolidBrush(crBkgnd);
-		if (penSeparator) DeleteObject(penSeparator);
-		penSeparator = CreatePen(PS_SOLID, 0, RGB(GetRValue(crBkgnd)/2, GetGValue(crBkgnd)/2, GetBValue(crBkgnd)/2));
 	}
 }
 
