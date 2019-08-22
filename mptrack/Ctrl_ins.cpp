@@ -566,8 +566,9 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	if (wParam >= kcInsNoteMapStartNotes && wParam <= kcInsNoteMapEndNotes)
 	{
 		// Special case: number keys override notes if we're in the sample # column.
-		if ((m_bIns) && (((lParam >= '0') && (lParam <= '9')) || (lParam == ' ')))
-			HandleChar(lParam);
+		const auto key = KeyCombination::FromLPARAM(lParam).KeyCode();
+		if(m_bIns && ((key >= '0' && key <= '9') || (key == ' ')))
+			HandleChar(key);
 		else
 			EnterNote(wParam-kcInsNoteMapStartNotes+1+pMainFrm->GetBaseOctave()*12);
 
