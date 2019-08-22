@@ -3815,7 +3815,7 @@ void CViewPattern::CursorJump(int distance, bool snap)
 }
 
 
-LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
+LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 {
 	if(wParam == kcNull)
 		return NULL;
@@ -4103,15 +4103,21 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 			return wParam;
 
 	}
-	//Ranges:
+
+	// Ignore note entry if it is on key hold and user is in key-jazz mode or edit step is 0 (so repeated entry would be useless)
+	const auto keyCombination = KeyCombination::FromLPARAM(lParam);
+	const bool enterNote = keyCombination.EventType() != kKeyEventRepeat || (IsEditingEnabled() && m_nSpacing != 0);
+
+	// Ranges:
 	if(wParam >= kcVPStartNotes && wParam <= kcVPEndNotes)
 	{
-		TempEnterNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNotes + 1 + pMainFrm->GetBaseOctave() * 12));
+		if(enterNote)
+			TempEnterNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNotes + 1 + pMainFrm->GetBaseOctave() * 12));
 		return wParam;
-	}
-	if(wParam >= kcVPStartChords && wParam <= kcVPEndChords)
+	} else if(wParam >= kcVPStartChords && wParam <= kcVPEndChords)
 	{
-		TempEnterChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChords + 1 + pMainFrm->GetBaseOctave() * 12));
+		if(enterNote)
+			TempEnterChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChords + 1 + pMainFrm->GetBaseOctave() * 12));
 		return wParam;
 	}
 
@@ -4119,8 +4125,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	{
 		TempStopNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12));
 		return wParam;
-	}
-	if(wParam >= kcVPStartChordStops && wParam <= kcVPEndChordStops)
+	} else if(wParam >= kcVPStartChordStops && wParam <= kcVPEndChordStops)
 	{
 		TempStopChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChordStops + 1 + pMainFrm->GetBaseOctave() * 12));
 		return wParam;
@@ -4265,20 +4270,20 @@ void CViewPattern::TempEnterVol(int v)
 		{
 			switch(v + kcSetVolumeStart)
 			{
-			case kcSetVolumeVol:          volcmd = VOLCMD_VOLUME; break;
-			case kcSetVolumePan:          volcmd = VOLCMD_PANNING; break;
-			case kcSetVolumeVolSlideUp:   volcmd = VOLCMD_VOLSLIDEUP; break;
+			case kcSetVolumeVol: volcmd = VOLCMD_VOLUME; break;
+			case kcSetVolumePan: volcmd = VOLCMD_PANNING; break;
+			case kcSetVolumeVolSlideUp: volcmd = VOLCMD_VOLSLIDEUP; break;
 			case kcSetVolumeVolSlideDown: volcmd = VOLCMD_VOLSLIDEDOWN; break;
-			case kcSetVolumeFineVolUp:    volcmd = VOLCMD_FINEVOLUP; break;
-			case kcSetVolumeFineVolDown:  volcmd = VOLCMD_FINEVOLDOWN; break;
-			case kcSetVolumeVibratoSpd:   volcmd = VOLCMD_VIBRATOSPEED; break;
-			case kcSetVolumeVibrato:      volcmd = VOLCMD_VIBRATODEPTH; break;
-			case kcSetVolumeXMPanLeft:    volcmd = VOLCMD_PANSLIDELEFT; break;
-			case kcSetVolumeXMPanRight:   volcmd = VOLCMD_PANSLIDERIGHT; break;
-			case kcSetVolumePortamento:   volcmd = VOLCMD_TONEPORTAMENTO; break;
-			case kcSetVolumeITPortaUp:    volcmd = VOLCMD_PORTAUP; break;
-			case kcSetVolumeITPortaDown:  volcmd = VOLCMD_PORTADOWN; break;
-			case kcSetVolumeITOffset:     volcmd = VOLCMD_OFFSET; break;
+			case kcSetVolumeFineVolUp: volcmd = VOLCMD_FINEVOLUP; break;
+			case kcSetVolumeFineVolDown: volcmd = VOLCMD_FINEVOLDOWN; break;
+			case kcSetVolumeVibratoSpd: volcmd = VOLCMD_VIBRATOSPEED; break;
+			case kcSetVolumeVibrato: volcmd = VOLCMD_VIBRATODEPTH; break;
+			case kcSetVolumeXMPanLeft: volcmd = VOLCMD_PANSLIDELEFT; break;
+			case kcSetVolumeXMPanRight: volcmd = VOLCMD_PANSLIDERIGHT; break;
+			case kcSetVolumePortamento: volcmd = VOLCMD_TONEPORTAMENTO; break;
+			case kcSetVolumeITPortaUp: volcmd = VOLCMD_PORTAUP; break;
+			case kcSetVolumeITPortaDown: volcmd = VOLCMD_PORTADOWN; break;
+			case kcSetVolumeITOffset: volcmd = VOLCMD_OFFSET; break;
 			}
 			if(target.volcmd == VOLCMD_NONE && volcmd == m_cmdOld.volcmd)
 			{

@@ -68,25 +68,25 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 }
 
 
-static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd, WPARAM wParam)
+static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd)
 {
 	CommandID executeCommand = kcNull;
 	if(wnd != nullptr)
 	{
 		// Some commands (e.g. open/close/document switching) may invalidate the key map and thus its iterators.
 		// To avoid this problem, copy over the elements we are interested in before sending commands.
-		std::vector<CommandID> commands;
+		std::vector<KeyMap::value_type> commands;
 		commands.reserve(std::distance(cmd.first, cmd.second));
 		for(auto i = cmd.first; i != cmd.second; i++)
 		{
-			commands.push_back(i->second);
+			commands.push_back(*i);
 		}
-		for(auto i : commands)
+		for(const auto &i : commands)
 		{
-			if(wnd->SendMessage(WM_MOD_KEYCOMMAND, i, wParam))
+			if(wnd->SendMessage(WM_MOD_KEYCOMMAND, i.second, i.first.AsLPARAM()))
 			{
 				// Command was handled, no need to let the OS handle the key
-				executeCommand = i;
+				executeCommand = i.second;
 			}
 		}
 	}
@@ -96,7 +96,7 @@ static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd, WPARAM wParam)
 
 CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam, LPARAM lParam)
 {
-	KeyMapRange cmd = std::make_pair(m_keyMap.end(), m_keyMap.end());
+	KeyMapRange cmd = { m_keyMap.end(), m_keyMap.end() };
 	KeyEventType keyEventType;
 
 	if(code == HC_ACTION)
@@ -134,7 +134,7 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 		cmd = m_keyMap.equal_range(KeyCombination(context, ModMidi, static_cast<UINT>(wParam), kKeyEventDown));
 	}
 
-	return SendCommands(m_pMainFrm, cmd, wParam);
+	return SendCommands(m_pMainFrm, cmd);
 }
 
 
@@ -146,7 +146,7 @@ CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT 
 
 	if(pSourceWnd == nullptr)
 		pSourceWnd = m_pMainFrm;	// By default, send command message to main frame.
-	return SendCommands(pSourceWnd, cmd, nChar);
+	return SendCommands(pSourceWnd, cmd);
 }
 
 
