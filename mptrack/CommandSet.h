@@ -1213,7 +1213,7 @@ protected:
 
 	MPT_CONSTEXPR11_FUN uint32 AsUint32() const
 	{
-		static_assert(sizeof(KeyCombination) == sizeof(uint32));
+		STATIC_ASSERT(sizeof(KeyCombination) == sizeof(uint32));
 		return (static_cast<uint32>(ctx) << 0) |
 		       (static_cast<uint32>(mod.GetRaw()) << 8) |
 		       (static_cast<uint32>(code) << 16) |
