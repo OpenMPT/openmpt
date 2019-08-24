@@ -242,6 +242,8 @@
 	#define MPT_OS_NETBSD 1
 #elif defined(__unix__)
 	#define MPT_OS_GENERIC_UNIX 1
+#elif defined(__HAIKU__)
+	#define MPT_OS_HAIKU 1
 #else
 	#define MPT_OS_UNKNOWN 1
 #endif
@@ -281,6 +283,9 @@
 #endif
 #ifndef MPT_OS_GENERIC_UNIX
 #define MPT_OS_GENERIC_UNIX 0
+#endif
+#ifndef MPT_OS_HAIKU
+#define MPT_OS_HAIKU 0
 #endif
 #ifndef MPT_OS_UNKNOWN
 #define MPT_OS_UNKNOWN 0
