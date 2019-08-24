@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.7-pre
 
+ *  [**Bug**] Compilation fix for Haiku.
+
 ### libopenmpt 0.4.6 (2019-08-10)
 
  *  [**Bug**] Compilation fix for OpenBSD.
