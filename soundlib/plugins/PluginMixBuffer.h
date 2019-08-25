@@ -12,7 +12,7 @@
 
 #include "BuildSettings.h"
 
-#include "..//common/mptAlloc.h"
+#include "../../common/mptAlloc.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
