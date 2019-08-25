@@ -884,7 +884,8 @@ int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 								int rva_mode = -1; /* mix / album */
 								unsigned long realsize = framesize;
 								unsigned char* realdata = tagdata+pos;
-								if((flags & UNSYNC_FLAG) || (fflags & UNSYNC_FFLAG))
+								unsigned char* unsyncbuffer = NULL;
+								if(((flags & UNSYNC_FLAG) || (fflags & UNSYNC_FFLAG)) && framesize > 0)
 								{
 									unsigned long ipos = 0;
 									unsigned long opos = 0;
@@ -892,7 +893,7 @@ int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 									/* de-unsync: FF00 -> FF; real FF00 is simply represented as FF0000 ... */
 									/* damn, that means I have to delete bytes from withing the data block... thus need temporal storage */
 									/* standard mandates that de-unsync should always be safe if flag is set */
-									realdata = (unsigned char*) malloc(framesize+1); /* will need <= bytes, plus a safety zero */
+									realdata = unsyncbuffer = malloc(framesize+1); /* will need <= bytes, plus a safety zero */
 									if(realdata == NULL)
 									{
 										if(NOQUIET) error("ID3v2: unable to allocate working buffer for de-unsync");
@@ -938,10 +939,12 @@ int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 										if(fr->rva.level[rva_mode] <= rva2+1)
 										{
 											pos += strlen((char*) realdata) + 1;
-											if(pos >= realsize)
+											// channel and two bytes for RVA value
+											// pos possibly just past the safety zero, so one more than realsize
+											if(pos > realsize || realsize-pos < 3)
 											{
 												if(NOQUIET)
-												error("bad RVA2 tag (non-terminated identification)");
+													error("bad RVA2 tag (truncated?)");
 											}
 											else if(realdata[pos] == 1)
 											{
@@ -974,7 +977,8 @@ int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 										break;
 									default: if(NOQUIET) error1("ID3v2: unknown frame type %i", tt);
 								}
-								if((flags & UNSYNC_FLAG) || (fflags & UNSYNC_FFLAG)) free(realdata);
+								if(unsyncbuffer)
+									free(unsyncbuffer);
 							}
 							#undef BAD_FFLAGS
 							#undef PRES_TAG_FFLAG
