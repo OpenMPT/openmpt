@@ -578,6 +578,10 @@
 #define NO_DMO
 #endif
 
+#if defined(ENABLE_ASM) || !defined(NO_VST)
+#define MPT_ENABLE_ALIGNED_ALLOC
+#endif
+
 
 
 #if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT) && !defined(MPT_BUILD_WINESUPPORT_WRAPPER)
