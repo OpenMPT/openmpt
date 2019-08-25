@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-# preferrably run on Ubuntu 14.04 / GCC 4.8
+# preferrably run on Ubuntu 18.04 / GCC 7
 # (other systems will also work though)
 
 
