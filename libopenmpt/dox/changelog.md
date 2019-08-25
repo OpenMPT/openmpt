@@ -7,8 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.7-pre
 
- *  [**Bug**] Compilation fix for MinGW.
- *  [**Bug**] Compilation fix for Haiku.
+ *  [**Bug**] Compilation fix for various platforms that do not provide
+    `std::aligned_alloc` in C++17 mode. The problematic dependency has been
+    removed. This should fix build problems on MinGW, OpenBSD, Haiku, and others
+    for good.
 
  *  mpg123: Update to v1.25.13 (2019-08-24).
  *  flac: Update to v1.3.3. (2019-08-04).
