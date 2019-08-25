@@ -118,7 +118,7 @@
   filter {}
   defines { "FLAC__HAS_OGG=1" }
   links { "ogg" }
-  defines { "PACKAGE_VERSION=\"1.3.2\"" }
+  defines { "PACKAGE_VERSION=\"1.3.3\"" }
   filter {}
   filter { "kind:StaticLib" }
    defines { "FLAC__NO_DLL" }
