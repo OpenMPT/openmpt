@@ -102,9 +102,9 @@
   defines { "FLAC__HAS_OGG=1" }
   links { "ogg" }
   filter { "action:vs2008" }
-   defines { "PACKAGE_VERSION=\\\"1.3.2\\\"" }
+   defines { "PACKAGE_VERSION=\\\"1.3.3\\\"" }
   filter { "action:not vs2008" }
-   defines { "PACKAGE_VERSION=\"1.3.2\"" }
+   defines { "PACKAGE_VERSION=\"1.3.3\"" }
   filter {}
   filter { "kind:StaticLib" }
    defines { "FLAC__NO_DLL" }

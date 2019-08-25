@@ -110,7 +110,7 @@ int get_utf8_argv(int *argc, char ***argv)
 	char **utf8argv;
 	int ret, i;
 
-	if ((handle = LoadLibrary("msvcrt.dll")) == NULL) return 1;
+	if ((handle = LoadLibraryW(L"msvcrt.dll")) == NULL) return 1;
 	if ((wgetmainargs = (wgetmainargs_t)GetProcAddress(handle, "__wgetmainargs")) == NULL) {
 		FreeLibrary(handle);
 		return 1;
@@ -147,6 +147,24 @@ int get_utf8_argv(int *argc, char ***argv)
 	}
 
 	return ret;
+}
+
+/* similar to CreateFileW but accepts UTF-8 encoded lpFileName */
+HANDLE WINAPI CreateFile_utf8(const char *lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile)
+{
+	if (!flac_internal_get_utf8_filenames()) {
+		return CreateFileA(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+	} else {
+		wchar_t *wname;
+		HANDLE handle = INVALID_HANDLE_VALUE;
+
+		if ((wname = wchar_from_utf8(lpFileName)) != NULL) {
+			handle = CreateFileW(wname, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+			free(wname);
+		}
+
+		return handle;
+	}
 }
 
 /* return number of characters in the UTF-8 string */
