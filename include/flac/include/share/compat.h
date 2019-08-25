@@ -29,7 +29,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* This is the prefered location of all CPP hackery to make $random_compiler
+/* This is the preferred location of all CPP hackery to make $random_compiler
  * work like something approaching a C99 (or maybe more accurately GNU99)
  * compiler.
  *
@@ -72,7 +72,7 @@
 #define strtoull _strtoui64
 #endif
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(__cplusplus)
 #define inline __inline
 #endif
 
@@ -98,7 +98,7 @@
 #define FLAC__STRNCASECMP strncasecmp
 #endif
 
-#if defined _MSC_VER || defined __MINGW32__ || defined __CYGWIN__ || defined __EMX__
+#if defined _MSC_VER || defined __MINGW32__ || defined __EMX__
 #include <io.h> /* for _setmode(), chmod() */
 #include <fcntl.h> /* for _O_BINARY */
 #else
@@ -130,14 +130,6 @@
 #    ifndef UINT32_MAX
 #      define UINT32_MAX _UI32_MAX
 #    endif
-     typedef unsigned __int64 uint64_t;
-     typedef unsigned __int32 uint32_t;
-     typedef unsigned __int16 uint16_t;
-     typedef unsigned __int8 uint8_t;
-     typedef __int64 int64_t;
-     typedef __int32 int32_t;
-     typedef __int16 int16_t;
-     typedef __int8  int8_t;
 #    define PRIu64 "I64u"
 #    define PRId64 "I64d"
 #    define PRIx64 "I64x"
@@ -181,6 +173,10 @@
 #else
 #define flac_stat_s stat /* stat struct */
 #define flac_fstat fstat
+#endif
+
+#ifdef ANDROID
+#include <limits.h>
 #endif
 
 #ifndef M_LN2

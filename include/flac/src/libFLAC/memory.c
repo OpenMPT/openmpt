@@ -40,6 +40,7 @@
 
 #include "private/memory.h"
 #include "FLAC/assert.h"
+#include "share/compat.h"
 #include "share/alloc.h"
 
 void *FLAC__memory_alloc_aligned(size_t bytes, void **aligned_address)
@@ -146,11 +147,11 @@ FLAC__bool FLAC__memory_alloc_aligned_uint64_array(size_t elements, FLAC__uint64
 	}
 }
 
-FLAC__bool FLAC__memory_alloc_aligned_unsigned_array(size_t elements, unsigned **unaligned_pointer, unsigned **aligned_pointer)
+FLAC__bool FLAC__memory_alloc_aligned_unsigned_array(size_t elements, uint32_t **unaligned_pointer, uint32_t **aligned_pointer)
 {
-	unsigned *pu; /* unaligned pointer */
+	uint32_t *pu; /* unaligned pointer */
 	union { /* union needed to comply with C99 pointer aliasing rules */
-		unsigned *pa; /* aligned pointer */
+		uint32_t *pa; /* aligned pointer */
 		void     *pv; /* aligned pointer alias */
 	} u;
 
