@@ -30,6 +30,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
+#if defined(MPT_ENABLE_ALIGNED_ALLOC)
+
+
+
 namespace mpt
 {
 
@@ -115,6 +119,10 @@ void aligned_free(aligned_raw_memory raw)
 
 
 } // namespace mpt
+
+
+
+#endif // MPT_ENABLE_ALIGNED_ALLOC
 
 
 

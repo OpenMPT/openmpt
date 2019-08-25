@@ -79,6 +79,10 @@ struct GetRawBytesFunctor<const std::vector<T>>
 
 
 
+#if defined(MPT_ENABLE_ALIGNED_ALLOC)
+
+
+
 namespace mpt
 {
 
@@ -240,6 +244,10 @@ public:
 
 
 } // namespace mpt
+
+
+
+#endif // MPT_ENABLE_ALIGNED_ALLOC
 
 
 
