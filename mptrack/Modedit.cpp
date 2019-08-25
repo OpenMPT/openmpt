@@ -46,7 +46,7 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 {
 	const CHANNELINDEX maxChans = m_SndFile.GetModSpecifications().channelsMax;
 
-	if (nNewChannels > maxChans)
+	if(nNewChannels > maxChans)
 	{
 		CString error;
 		error.Format(_T("Error: Max number of channels for this file type is %u"), maxChans);
@@ -54,9 +54,10 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 		return false;
 	}
 
-	if (nNewChannels == GetNumChannels()) return false;
+	if(nNewChannels == GetNumChannels())
+		return false;
 
-	if (nNewChannels < GetNumChannels())
+	if(nNewChannels < GetNumChannels())
 	{
 		// Remove channels
 		CHANNELINDEX chnsToRemove = 0, maxRemoveCount = 0;
@@ -71,10 +72,11 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 			chnsToRemove = 0;
 			maxRemoveCount = GetNumChannels();
 		}
-		
+
 		CRemoveChannelsDlg rem(m_SndFile, chnsToRemove, showCancelInRemoveDlg);
 		CheckUsedChannels(rem.m_bKeepMask, maxRemoveCount);
-		if (rem.DoModal() != IDOK) return false;
+		if(rem.DoModal() != IDOK)
+			return false;
 
 		// Removing selected channels
 		return RemoveChannels(rem.m_bKeepMask, true);
@@ -108,7 +110,8 @@ bool CModDoc::RemoveChannels(const std::vector<bool> &keepMask, bool verbose)
 	//First calculating how many channels are to be left
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
-		if(keepMask[chn]) nRemainingChannels++;
+		if(keepMask[chn])
+			nRemainingChannels++;
 	}
 	if(nRemainingChannels == GetNumChannels() || nRemainingChannels < m_SndFile.GetModSpecifications().channelsMin)
 	{
@@ -143,7 +146,6 @@ bool CModDoc::RemoveChannels(const std::vector<bool> &keepMask, bool verbose)
 	}
 	EndWaitCursor();
 	return success;
-
 }
 
 
@@ -185,7 +187,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 				oldRow.assign(m, m + oldNumChannels);
 				for(CHANNELINDEX chn = 0; chn < newNumChannels; chn++, m++)
 				{
-					if(newOrder[chn] < oldNumChannels)	// Case: getting old channel to the new channel order.
+					if(newOrder[chn] < oldNumChannels)  // Case: getting old channel to the new channel order.
 						*m = oldRow[newOrder[chn]];
 					else
 						*m = ModCommand::Empty();
@@ -221,7 +223,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 				{
 					for(CHANNELINDEX chn = 0; chn < newNumChannels; chn++, mNew++)
 					{
-						if(newOrder[chn] < oldNumChannels)	// Case: getting old channel to the new channel order.
+						if(newOrder[chn] < oldNumChannels)  // Case: getting old channel to the new channel order.
 							*mNew = mOld[newOrder[chn]];
 					}
 				}
@@ -268,10 +270,12 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 		{
 			m_SndFile.ChnSettings[chn] = settings[srcChn];
 			m_SndFile.m_PlayState.Chn[chn] = chns[srcChn];
-			if(recordStates[srcChn] == 1) Record1Channel(chn, true);
-			if(recordStates[srcChn] == 2) Record2Channel(chn, true);
+			if(recordStates[srcChn] == 1)
+				Record1Channel(chn, true);
+			if(recordStates[srcChn] == 2)
+				Record2Channel(chn, true);
 			m_SndFile.m_bChannelMuteTogglePending[chn] = chnMutePendings[srcChn];
-			if (m_SndFile.m_opl)
+			if(m_SndFile.m_opl)
 				m_SndFile.m_opl->MoveChannel(srcChn, chn);
 		} else
 		{
@@ -301,7 +305,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 
 	std::vector<int> sampleCount(oldNumSamples + 1, 0);
 	std::vector<ModSample> sampleHeaders(oldNumSamples + 1);
-	std::vector<SAMPLEINDEX> newIndex(oldNumSamples + 1, 0);	// One of the new indexes for the old sample
+	std::vector<SAMPLEINDEX> newIndex(oldNumSamples + 1, 0);  // One of the new indexes for the old sample
 	std::vector<std::string> sampleNames(oldNumSamples + 1);
 	std::vector<mpt::PathString> samplePaths(oldNumSamples + 1);
 
@@ -312,7 +316,8 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 		{
 			sampleCount[origSlot]++;
 			sampleHeaders[origSlot] = m_SndFile.GetSample(origSlot);
-			if(!newIndex[origSlot]) newIndex[origSlot] = i + 1;
+			if(!newIndex[origSlot])
+				newIndex[origSlot] = i + 1;
 		}
 	}
 
@@ -337,7 +342,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 	}
 
 	// Now, create new sample list.
-	m_SndFile.m_nSamples = std::max(m_SndFile.m_nSamples, newNumSamples);	// Avoid assertions when using GetSample()...
+	m_SndFile.m_nSamples = std::max(m_SndFile.m_nSamples, newNumSamples);  // Avoid assertions when using GetSample()...
 	for(SAMPLEINDEX i = 0; i < newNumSamples; i++)
 	{
 		const SAMPLEINDEX origSlot = newOrder[i];
@@ -442,7 +447,7 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const std::vector<INSTRUMENTINDEX>
 	const INSTRUMENTINDEX oldNumInstruments = m_SndFile.GetNumInstruments(), newNumInstruments = static_cast<INSTRUMENTINDEX>(newOrder.size());
 
 	std::vector<ModInstrument> instrumentHeaders(oldNumInstruments + 1);
-	std::vector<INSTRUMENTINDEX> newIndex(oldNumInstruments + 1, 0);	// One of the new indexes for the old instrument
+	std::vector<INSTRUMENTINDEX> newIndex(oldNumInstruments + 1, 0);  // One of the new indexes for the old instrument
 	for(INSTRUMENTINDEX i = 0; i < newNumInstruments; i++)
 	{
 		const INSTRUMENTINDEX origSlot = newOrder[i];
@@ -504,7 +509,8 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const std::vector<INSTRUMENTINDEX>
 
 bool CModDoc::ConvertInstrumentsToSamples()
 {
-	if (!m_SndFile.GetNumInstruments()) return false;
+	if(!m_SndFile.GetNumInstruments())
+		return false;
 	GetInstrumentUndo().ClearUndo();
 	m_SndFile.Patterns.ForEachModCommand([&] (ModCommand &m)
 	{
@@ -522,7 +528,8 @@ bool CModDoc::ConvertInstrumentsToSamples()
 				const ModInstrument *pIns = m_SndFile.Instruments[instr];
 				newinstr = static_cast<ModCommand::INSTR>(pIns->Keyboard[note]);
 				newnote = pIns->NoteMap[note];
-				if(pIns->Keyboard[note] > Util::MaxValueOfType(m.instr)) newinstr = 0;
+				if(pIns->Keyboard[note] > Util::MaxValueOfType(m.instr))
+					newinstr = 0;
 			}
 			m.instr = newinstr;
 			if(m.IsNote())
@@ -538,7 +545,8 @@ bool CModDoc::ConvertInstrumentsToSamples()
 bool CModDoc::ConvertSamplesToInstruments()
 {
 	const INSTRUMENTINDEX instrumentMax = m_SndFile.GetModSpecifications().instrumentsMax;
-	if(GetNumInstruments() > 0 || instrumentMax == 0) return false;
+	if(GetNumInstruments() > 0 || instrumentMax == 0)
+		return false;
 
 	// If there is no actual sample data, don't bother creating any instruments
 	bool anySamples = false;
@@ -550,7 +558,8 @@ bool CModDoc::ConvertSamplesToInstruments()
 			break;
 		}
 	}
-	if(!anySamples) return true;
+	if(!anySamples)
+		return true;
 
 	m_SndFile.m_nInstruments = std::min(m_SndFile.GetNumSamples(), instrumentMax);
 	for(SAMPLEINDEX smp = 1; smp <= m_SndFile.m_nInstruments; smp++)
@@ -571,7 +580,6 @@ bool CModDoc::ConvertSamplesToInstruments()
 	}
 
 	return true;
-
 }
 
 
@@ -661,10 +669,12 @@ SAMPLEINDEX CModDoc::InsertSample()
 		return SAMPLEINDEX_INVALID;
 	}
 	const bool newSlot = (i > m_SndFile.GetNumSamples());
-	if(newSlot || !m_SndFile.m_szNames[i][0]) m_SndFile.m_szNames[i] = "untitled";
-	if(newSlot) m_SndFile.m_nSamples = i;
+	if(newSlot || !m_SndFile.m_szNames[i][0])
+		m_SndFile.m_szNames[i] = "untitled";
+	if(newSlot)
+		m_SndFile.m_nSamples = i;
 	m_SndFile.GetSample(i).Initialize(m_SndFile.GetType());
-	
+
 	m_SndFile.ResetSamplePath(i);
 
 	SetModified();
@@ -676,7 +686,8 @@ SAMPLEINDEX CModDoc::InsertSample()
 // If "sample" is invalid, an appropriate sample slot is selected. 0 means "no sample".
 INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX duplicateSource, bool silent)
 {
-	if (m_SndFile.GetModSpecifications().instrumentsMax == 0) return INSTRUMENTINDEX_INVALID;
+	if(m_SndFile.GetModSpecifications().instrumentsMax == 0)
+		return INSTRUMENTINDEX_INVALID;
 
 	ModInstrument *pDup = nullptr;
 	if(duplicateSource > 0 && duplicateSource <= m_SndFile.m_nInstruments)
@@ -704,7 +715,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX du
 			}
 		}
 	}
-	
+
 	const INSTRUMENTINDEX newins = m_SndFile.GetNextFreeInstrument();
 	if(newins == INSTRUMENTINDEX_INVALID)
 	{
@@ -727,11 +738,12 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX du
 	} else if(!pDup)
 	{
 		newsmp = m_SndFile.GetNextFreeSample(newins);
-		if (newsmp > m_SndFile.GetNumSamples())
+		if(newsmp > m_SndFile.GetNumSamples())
 		{
 			// Add a new sample
 			const SAMPLEINDEX inssmp = InsertSample();
-			if (inssmp != SAMPLEINDEX_INVALID) newsmp = inssmp;
+			if(inssmp != SAMPLEINDEX_INVALID)
+				newsmp = inssmp;
 		}
 	}
 
@@ -749,7 +761,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX du
 	}
 	InitializeInstrument(pIns);
 
-	if (pDup)
+	if(pDup)
 	{
 		*pIns = *pDup;
 	}
@@ -773,7 +785,8 @@ INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 #ifndef NO_PLUGINS
 	const bool first = (GetNumInstruments() == 0);
 	INSTRUMENTINDEX instr = InsertInstrument(0, INSTRUMENTINDEX_INVALID, true);
-	if(instr == INSTRUMENTINDEX_INVALID) return INSTRUMENTINDEX_INVALID;
+	if(instr == INSTRUMENTINDEX_INVALID)
+		return INSTRUMENTINDEX_INVALID;
 
 	ModInstrument &ins = *m_SndFile.Instruments[instr];
 	ins.name = mpt::format("%1: %2")(plug + 1, m_SndFile.m_MixPlugins[plug].GetName());
@@ -782,7 +795,8 @@ INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 	ins.nMidiChannel = 1;
 
 	InstrumentHint hint = InstrumentHint(instr).Info().Envelope().Names();
-	if(first) hint.ModType();
+	if(first)
+		hint.ModType();
 	UpdateAllViews(nullptr, hint);
 	if(m_SndFile.GetModSpecifications().supportsPlugins)
 	{
@@ -811,7 +825,7 @@ INSTRUMENTINDEX CModDoc::HasInstrumentForPlugin(PLUGINDEX plug) const
 
 bool CModDoc::RemoveOrder(SEQUENCEINDEX nSeq, ORDERINDEX nOrd)
 {
-	if (nSeq >= m_SndFile.Order.GetNumSequences() || nOrd >= m_SndFile.Order(nSeq).size())
+	if(nSeq >= m_SndFile.Order.GetNumSequences() || nOrd >= m_SndFile.Order(nSeq).size())
 		return false;
 
 	CriticalSection cs;
@@ -840,15 +854,15 @@ bool CModDoc::RemovePattern(PATTERNINDEX nPat)
 
 bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
 {
-	if ((nSmp) && (nSmp <= m_SndFile.GetNumSamples()))
+	if((nSmp) && (nSmp <= m_SndFile.GetNumSamples()))
 	{
 		CriticalSection cs;
 
 		m_SndFile.DestroySample(nSmp);
 		m_SndFile.m_szNames[nSmp] = "";
-		while ((m_SndFile.GetNumSamples() > 1)
-			&& (!m_SndFile.m_szNames[m_SndFile.GetNumSamples()][0])
-			&& (!m_SndFile.GetSample(m_SndFile.GetNumSamples()).HasSampleData()))
+		while((m_SndFile.GetNumSamples() > 1)
+		      && (!m_SndFile.m_szNames[m_SndFile.GetNumSamples()][0])
+		      && (!m_SndFile.GetSample(m_SndFile.GetNumSamples()).HasSampleData()))
 		{
 			m_SndFile.m_nSamples--;
 		}
@@ -862,10 +876,11 @@ bool CModDoc::RemoveSample(SAMPLEINDEX nSmp)
 
 bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 {
-	if ((nIns) && (nIns <= m_SndFile.GetNumInstruments()) && (m_SndFile.Instruments[nIns]))
+	if((nIns) && (nIns <= m_SndFile.GetNumInstruments()) && (m_SndFile.Instruments[nIns]))
 	{
 		ConfirmAnswer result = cnfNo;
-		if(!m_SndFile.Instruments[nIns]->GetSamples().empty()) result = Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing instrument", true);
+		if(!m_SndFile.Instruments[nIns]->GetSamples().empty())
+			result = Reporting::Confirm("Remove samples associated with an instrument if they are unused?", "Removing instrument", true);
 		if(result == cnfCancel)
 		{
 			return false;
@@ -873,9 +888,11 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 		if(m_SndFile.DestroyInstrument(nIns, (result == cnfYes) ? deleteAssociatedSamples : doNoDeleteAssociatedSamples))
 		{
 			CriticalSection cs;
-			if (nIns == m_SndFile.m_nInstruments) m_SndFile.m_nInstruments--;
+			if(nIns == m_SndFile.m_nInstruments)
+				m_SndFile.m_nInstruments--;
 			bool instrumentsLeft = std::find_if(std::begin(m_SndFile.Instruments), std::end(m_SndFile.Instruments), [](ModInstrument *ins) { return ins != nullptr; }) != std::end(m_SndFile.Instruments);
-			if (!instrumentsLeft) m_SndFile.m_nInstruments = 0;
+			if(!instrumentsLeft)
+				m_SndFile.m_nInstruments = 0;
 			SetModified();
 
 			return true;
@@ -885,28 +902,35 @@ bool CModDoc::RemoveInstrument(INSTRUMENTINDEX nIns)
 }
 
 
-bool CModDoc::MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate, bool bCopy, SEQUENCEINDEX nSourceSeq, SEQUENCEINDEX nDestSeq)
+bool CModDoc::MoveOrder(ORDERINDEX sourceOrd, ORDERINDEX destOrd, bool update, bool copy, SEQUENCEINDEX sourceSeq, SEQUENCEINDEX destSeq)
 {
-	if (nDestNdx >= m_SndFile.GetModSpecifications().ordersMax) return false;
+	if(sourceSeq == SEQUENCEINDEX_INVALID)
+		sourceSeq = m_SndFile.Order.GetCurrentSequenceIndex();
+	if(destSeq == SEQUENCEINDEX_INVALID)
+		destSeq = m_SndFile.Order.GetCurrentSequenceIndex();
+	if(std::max(sourceSeq, destSeq) >= m_SndFile.Order.GetNumSequences())
+		return false;
 
-	if(nSourceSeq == SEQUENCEINDEX_INVALID) nSourceSeq = m_SndFile.Order.GetCurrentSequenceIndex();
-	if(nDestSeq == SEQUENCEINDEX_INVALID) nDestSeq = m_SndFile.Order.GetCurrentSequenceIndex();
-	if (std::max(nSourceSeq, nDestSeq) >= m_SndFile.Order.GetNumSequences()) return false;
-	auto &sourceSeq = m_SndFile.Order(nSourceSeq);
-	PATTERNINDEX nSourcePat = sourceSeq.GetInvalidPatIndex();
-	if(nSourceNdx < sourceSeq.size())
-		nSourcePat = sourceSeq[nSourceNdx];
+	const ORDERINDEX maxOrders = m_SndFile.GetModSpecifications().ordersMax;
+	if(destOrd > maxOrders)
+		return false;
+	if(destOrd == maxOrders && (sourceSeq != destSeq || copy))
+		return false;
+
+	auto &sourceSequence = m_SndFile.Order(sourceSeq);
+	const PATTERNINDEX sourcePat = sourceOrd < sourceSequence.size() ? sourceSequence[sourceOrd] : sourceSequence.GetInvalidPatIndex();
 
 	// Delete source
-	if (!bCopy)
+	if(!copy)
 	{
-		sourceSeq.Remove(nSourceNdx, nSourceNdx);
-		if (nSourceNdx < nDestNdx && nSourceSeq == nDestSeq) nDestNdx--;
+		sourceSequence.Remove(sourceOrd, sourceOrd);
+		if(sourceOrd < destOrd && sourceSeq == destSeq)
+			destOrd--;
 	}
 	// Insert at dest
-	m_SndFile.Order(nDestSeq).insert(nDestNdx, 1, nSourcePat);
+	m_SndFile.Order(destSeq).insert(destOrd, 1, sourcePat);
 
-	if (bUpdate)
+	if(update)
 	{
 		UpdateAllViews(nullptr, SequenceHint().Data());
 	}
@@ -919,7 +943,7 @@ BOOL CModDoc::ExpandPattern(PATTERNINDEX nPattern)
 	ROWINDEX numRows;
 
 	if(!m_SndFile.Patterns.IsValidPat(nPattern)
-		|| (numRows = m_SndFile.Patterns[nPattern].GetNumRows()) > m_SndFile.GetModSpecifications().patternRowsMax / 2)
+	   || (numRows = m_SndFile.Patterns[nPattern].GetNumRows()) > m_SndFile.GetModSpecifications().patternRowsMax / 2)
 	{
 		return false;
 	}
@@ -948,7 +972,7 @@ BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
 	ROWINDEX numRows;
 
 	if(!m_SndFile.Patterns.IsValidPat(nPattern)
-		|| (numRows = m_SndFile.Patterns[nPattern].GetNumRows()) < m_SndFile.GetModSpecifications().patternRowsMin * 2)
+	   || (numRows = m_SndFile.Patterns[nPattern].GetNumRows()) < m_SndFile.GetModSpecifications().patternRowsMin * 2)
 	{
 		return false;
 	}
@@ -988,8 +1012,7 @@ static bool EnvelopeToString(CStringA &s, const InstrumentEnvelope &env)
 
 	s.Preallocate(2048);
 	s = pszEnvHdr;
-	s.AppendFormat(pszEnvFmt, env.size(), env.nSustainStart, env.nSustainEnd, env.nLoopStart, env.nLoopEnd,
-		env.dwFlags[ENV_SUSTAIN] ? 1 : 0, env.dwFlags[ENV_LOOP] ? 1 : 0, env.dwFlags[ENV_CARRY] ? 1 : 0);
+	s.AppendFormat(pszEnvFmt, env.size(), env.nSustainStart, env.nSustainEnd, env.nLoopStart, env.nLoopEnd, env.dwFlags[ENV_SUSTAIN] ? 1 : 0, env.dwFlags[ENV_LOOP] ? 1 : 0, env.dwFlags[ENV_CARRY] ? 1 : 0);
 	for(auto &p : env)
 	{
 		s.AppendFormat("%d,%d\r\n", p.tick, p.value);
@@ -1010,13 +1033,18 @@ static bool StringToEnvelope(const std::string_view &s, InstrumentEnvelope &env,
 		return false;
 	}
 	sscanf(&s[pos], pszEnvFmt, &nPoints, &susBegin, &susEnd, &loopBegin, &loopEnd, &bSus, &bLoop, &bCarry);
-	while (pos < length && s[pos] != '\r' && s[pos] != '\n') pos++;
+	while(pos < length && s[pos] != '\r' && s[pos] != '\n')
+		pos++;
 
 	nPoints = std::min(nPoints, static_cast<uint32>(specs.envelopePointsMax));
-	if (susEnd >= nPoints) susEnd = 0;
-	if (susBegin > susEnd) susBegin = susEnd;
-	if (loopEnd >= nPoints) loopEnd = 0;
-	if (loopBegin > loopEnd) loopBegin = loopEnd;
+	if(susEnd >= nPoints)
+		susEnd = 0;
+	if(susBegin > susEnd)
+		susBegin = susEnd;
+	if(loopEnd >= nPoints)
+		loopEnd = 0;
+	if(loopBegin > loopEnd)
+		loopBegin = loopEnd;
 
 	try
 	{
@@ -1039,20 +1067,28 @@ static bool StringToEnvelope(const std::string_view &s, InstrumentEnvelope &env,
 	int oldn = 0;
 	for(auto &p : env)
 	{
-		while (pos < length && (s[pos] < '0' || s[pos] > '9')) pos++;
-		if (pos >= length) break;
+		while(pos < length && (s[pos] < '0' || s[pos] > '9'))
+			pos++;
+		if(pos >= length)
+			break;
 		int n1 = atoi(&s[pos]);
-		while (pos < length && s[pos] != ',') pos++;
-		while (pos < length && (s[pos] < '0' || s[pos] > '9')) pos++;
-		if (pos >= length) break;
+		while(pos < length && s[pos] != ',')
+			pos++;
+		while(pos < length && (s[pos] < '0' || s[pos] > '9'))
+			pos++;
+		if(pos >= length)
+			break;
 		int n2 = atoi(&s[pos]);
-		if (n1 < oldn) n1 = oldn + 1;
+		if(n1 < oldn)
+			n1 = oldn + 1;
 		Limit(n2, ENVELOPE_MIN, ENVELOPE_MAX);
 		p.tick = (uint16)n1;
 		p.value = (uint8)n2;
 		oldn = n1;
-		while (pos < length && s[pos] != '\r' && s[pos] != '\n') pos++;
-		if (pos >= length) break;
+		while(pos < length && s[pos] != '\r' && s[pos] != '\n')
+			pos++;
+		if(pos >= length)
+			break;
 	}
 	env.Sanitize();
 
@@ -1073,11 +1109,13 @@ bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
-	if ((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm)) return false;
+	if((nIns < 1) || (nIns > m_SndFile.m_nInstruments) || (!m_SndFile.Instruments[nIns]) || (!pMainFrm))
+		return false;
 	BeginWaitCursor();
 	const ModInstrument *pIns = m_SndFile.Instruments[nIns];
-	if(pIns == nullptr) return false;
-	
+	if(pIns == nullptr)
+		return false;
+
 	CStringA s;
 	EnvelopeToString(s, pIns->GetEnvelope(nEnv));
 
@@ -1094,16 +1132,18 @@ bool CModDoc::CopyEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv)
 
 bool CModDoc::SaveEnvelope(INSTRUMENTINDEX ins, EnvelopeType env, const mpt::PathString &fileName)
 {
-	if (ins < 1 || ins > m_SndFile.m_nInstruments || !m_SndFile.Instruments[ins]) return false;
+	if(ins < 1 || ins > m_SndFile.m_nInstruments || !m_SndFile.Instruments[ins])
+		return false;
 	BeginWaitCursor();
 	const ModInstrument *pIns = m_SndFile.Instruments[ins];
-	if(pIns == nullptr) return false;
-	
+	if(pIns == nullptr)
+		return false;
+
 	CStringA s;
 	EnvelopeToString(s, pIns->GetEnvelope(env));
 
 	mpt::SafeOutputFile sf(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-	mpt::ofstream& f = sf;
+	mpt::ofstream &f = sf;
 	if(!f)
 	{
 		EndWaitCursor();
@@ -1118,7 +1158,8 @@ bool CModDoc::SaveEnvelope(INSTRUMENTINDEX ins, EnvelopeType env, const mpt::Pat
 bool CModDoc::PasteEnvelope(INSTRUMENTINDEX ins, EnvelopeType env)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (ins < 1 || ins > m_SndFile.m_nInstruments || !m_SndFile.Instruments[ins] || !pMainFrm) return false;
+	if(ins < 1 || ins > m_SndFile.m_nInstruments || !m_SndFile.Instruments[ins] || !pMainFrm)
+		return false;
 	BeginWaitCursor();
 	Clipboard clipboard(CF_TEXT);
 	auto data = clipboard.GetString();
@@ -1136,7 +1177,8 @@ bool CModDoc::PasteEnvelope(INSTRUMENTINDEX ins, EnvelopeType env)
 bool CModDoc::LoadEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName)
 {
 	InputFile f(fileName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
-	if (nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns] || !f.IsValid()) return false;
+	if(nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns] || !f.IsValid())
+		return false;
 	BeginWaitCursor();
 	FileReader file = GetFileReader(f);
 	std::string data;
@@ -1159,7 +1201,8 @@ void CModDoc::CheckUsedChannels(std::vector<bool> &usedMask, CHANNELINDEX maxRem
 		{
 			usedMask[chn] = false;
 			// Found enough empty channels yet?
-			if((--maxRemoveCount) == 0) break;
+			if((--maxRemoveCount) == 0)
+				break;
 		}
 	}
 }
@@ -1191,7 +1234,8 @@ bool CModDoc::IsChannelUnused(CHANNELINDEX nChn) const
 
 bool CModDoc::IsSampleUsed(SAMPLEINDEX sample, bool searchInMutedChannels) const
 {
-	if(!sample || sample > GetNumSamples()) return false;
+	if(!sample || sample > GetNumSamples())
+		return false;
 	if(GetNumInstruments())
 	{
 		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
@@ -1290,8 +1334,8 @@ int CModDoc::GetInstrumentGroupSize(INSTRUMENTINDEX instr) const
 {
 	const ModInstrument *ins;
 	if(instr > 0 && instr <= GetNumInstruments()
-		&& (ins = m_SndFile.Instruments[instr]) != nullptr && ins->pTuning != nullptr
-		&& ins->pTuning->GetGroupSize() != 0)
+	   && (ins = m_SndFile.Instruments[instr]) != nullptr && ins->pTuning != nullptr
+	   && ins->pTuning->GetGroupSize() != 0)
 	{
 		return ins->pTuning->GetGroupSize();
 	}

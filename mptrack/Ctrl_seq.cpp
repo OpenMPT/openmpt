@@ -136,8 +136,8 @@ bool COrderList::EnsureEditable(ORDERINDEX ord)
 }
 
 
-ModSequence& COrderList::Order() { return m_pModDoc.GetSoundFile().Order(); }
-const ModSequence& COrderList::Order() const { return m_pModDoc.GetSoundFile().Order(); }
+ModSequence &COrderList::Order() { return m_pModDoc.GetSoundFile().Order(); }
+const ModSequence &COrderList::Order() const { return m_pModDoc.GetSoundFile().Order(); }
 
 
 void COrderList::SetScrollPos(int pos)
@@ -724,47 +724,48 @@ void COrderList::OnPaint()
 {
 	TCHAR s[64];
 	CPaintDC dc(this);
-	HGDIOBJ oldfont = ::SelectObject(dc.m_hDC, m_hFont);
-	HGDIOBJ oldpen = ::SelectObject(dc.m_hDC, GetStockObject(DC_PEN));
+	HGDIOBJ oldfont = dc.SelectObject(m_hFont);
+	HGDIOBJ oldpen = dc.SelectObject(GetStockObject(DC_PEN));
 	const auto separatorColor = GetSysColor(COLOR_WINDOW) ^ 0x808080;
 	SetDCPenColor(dc, separatorColor);
-	const int lineWidth1 = Util::ScalePixels(1, m_hWnd);
-	const int lineWidth2 = Util::ScalePixels(2, m_hWnd);
-	const bool isFocussed = (::GetFocus() == m_hWnd);
 
 	// First time ?
-	if((m_cxFont <= 0) || (m_cyFont <= 0))
+	if(m_cxFont <= 0 || m_cyFont <= 0)
 	{
 		CSize sz = dc.GetTextExtent(_T("000+"), 4);
 		m_cxFont = sz.cx;
 		m_cyFont = sz.cy;
 	}
 
-	if((m_cxFont > 0) && (m_cyFont > 0))
+	if(m_cxFont > 0 && m_cyFont > 0)
 	{
-		CRect rcClient, rect;
+		CRect rcClient;
+		GetClientRect(&rcClient);
+		CRect rect = rcClient;
 
 		UpdateScrollInfo();
 		dc.SetBkMode(TRANSPARENT);
-		GetClientRect(&rcClient);
-		rect = rcClient;
-		ORDERINDEX ord = m_nXScroll;
-		OrdSelection selection = GetCurSel(false);
+		const OrdSelection selection = GetCurSel(false);
 
+		const int lineWidth1 = Util::ScalePixels(1, m_hWnd);
+		const int lineWidth2 = Util::ScalePixels(2, m_hWnd);
+		const bool isFocussed = (::GetFocus() == m_hWnd);
+
+		const auto &order = Order();
 		CSoundFile &sndFile = m_pModDoc.GetSoundFile();
 		ORDERINDEX maxEntries = sndFile.GetModSpecifications().ordersMax;
-		if(Order().size() > maxEntries)
+		if(order.size() > maxEntries)
 		{
 			// Only computed if potentially needed.
-			maxEntries = std::max(maxEntries, Order().GetLengthTailTrimmed());
+			maxEntries = std::max(maxEntries, order.GetLengthTailTrimmed());
 		}
 
 		// Scrolling the shown orders(the showns rectangles)?
-		while(rect.left < rcClient.right)
+		for(ORDERINDEX ord = m_nXScroll; rect.left < rcClient.right; ord++, rect.left += m_cxFont)
 		{
 			dc.SetTextColor(colorText);
 			const bool inSelection = (ord >= selection.firstOrd && ord <= selection.lastOrd);
-			bool highLight = ((isFocussed) && inSelection);
+			const bool highLight = (isFocussed && inSelection);
 			if((rect.right = rect.left + m_cxFont) > rcClient.right)
 				rect.right = rcClient.right;
 			rect.right--;
@@ -772,19 +773,19 @@ void COrderList::OnPaint()
 			if(highLight)
 			{
 				// Currently selected order item
-				FillRect(dc, &rect, CMainFrame::brushHighLight);
-			} else if(Order().IsPositionLocked(ord))
+				::FillRect(dc, &rect, CMainFrame::brushHighLight);
+			} else if(order.IsPositionLocked(ord))
 			{
 				// "Playback lock" indicator - grey out all order items which aren't played.
-				FillRect(dc, &rect, CMainFrame::brushGray);
+				::FillRect(dc, &rect, CMainFrame::brushGray);
 			} else
 			{
 				// Normal, unselected item.
-				FillRect(dc, &rect, CMainFrame::brushWindow);
+				::FillRect(dc, &rect, CMainFrame::brushWindow);
 			}
 
 			// Drawing the shown pattern-indicator or drag position.
-			if(ord == ((m_bDragging) ? m_nDropPos : m_nScrollPos))
+			if(ord == (m_bDragging ? m_nDropPos : m_nScrollPos))
 			{
 				rect.InflateRect(-1, -1);
 				dc.DrawFocusRect(&rect);
@@ -810,17 +811,16 @@ void COrderList::OnPaint()
 			if(m_bDragging && ord == m_nDropPos && !inSelection)
 			{
 				const bool dropLeft = (m_nDropPos < selection.firstOrd);
-				const auto x = (m_nDropPos < m_nDragOrder) ? rect.left + 2 : rect.right - 2;
 				dc.FillSolidRect(CRect{dropLeft ? (rect.left + 2) : (rect.right - 2 - lineWidth2), rect.top + 2, dropLeft ? (rect.left + 2 + lineWidth2) : (rect.right - 2), rect.bottom - 2}, separatorColor);
 			}
 
 			s[0] = _T('\0');
-			const PATTERNINDEX pat = (ord < Order().size()) ? Order()[ord] : PATTERNINDEX_INVALID;
+			const PATTERNINDEX pat = (ord < order.size()) ? order[ord] : PATTERNINDEX_INVALID;
 			if(ord < maxEntries && (rect.left + m_cxFont - 4) <= rcClient.right)
 			{
-				if(pat == sndFile.Order.GetInvalidPatIndex())
+				if(pat == order.GetInvalidPatIndex())
 					_tcscpy(s, _T("---"));
-				else if(pat == sndFile.Order.GetIgnoreIndex())
+				else if(pat == order.GetIgnoreIndex())
 					_tcscpy(s, _T("+++"));
 				else
 					wsprintf(s, _T("%u"), pat);
@@ -834,14 +834,12 @@ void COrderList::OnPaint()
 			                : colorInvalid));  // Non-existent pattern
 			dc.SetTextColor(textCol);
 			dc.DrawText(s, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
-			rect.left += m_cxFont;
-			ord++;
 		}
 	}
 	if(oldpen)
-		::SelectObject(dc.m_hDC, oldpen);
+		dc.SelectObject(oldpen);
 	if(oldfont)
-		::SelectObject(dc.m_hDC, oldfont);
+		dc.SelectObject(oldfont);
 }
 
 
@@ -919,23 +917,22 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 		if(rect.PtInRect(pt))
 		{
 			ORDERINDEX n = GetOrderFromPoint(rect, pt);
-			if(n != ORDERINDEX_INVALID && n == m_nDropPos && n != m_nMouseDownPos)
+			const OrdSelection selection = GetCurSel(false);
+			if(n != ORDERINDEX_INVALID && n == m_nDropPos && (n < selection.firstOrd || n > selection.lastOrd))
 			{
-				const OrdSelection selection = GetCurSel(false);
 				const bool multiSelection = (selection.firstOrd != selection.lastOrd);
 				const bool moveBack = m_nDropPos < m_nDragOrder;
 				ORDERINDEX moveCount = (selection.lastOrd - selection.firstOrd), movePos = selection.firstOrd;
-				// Don't do anything if drop position is inside the selection
-				if((m_nDropPos >= selection.firstOrd && m_nDropPos <= selection.lastOrd) || m_nDragOrder == m_nDropPos)
-					return;
 
 				if(!moveBack)
 					m_nDropPos++;
 
+				bool modified = false;
 				for(int i = 0; i <= moveCount; i++)
 				{
 					if(!m_pModDoc.MoveOrder(movePos, m_nDropPos, true, copyOrders))
-						return;
+						break;
+					modified = true;
 					if(moveBack != copyOrders && multiSelection)
 					{
 						movePos++;
@@ -959,10 +956,8 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 					SetCurSel((m_nDragOrder < m_nDropPos && !copyOrders) ? m_nDropPos - 1 : m_nDropPos);
 				}
 				// Did we actually change anything?
-				if(n != selection.lastOrd + 1 || copyOrders)
-				{
+				if(modified)
 					m_pModDoc.SetModified();
-				}
 			} else
 			{
 				if(pt.y < rect.bottom && n == m_nMouseDownPos && !copyOrders)
@@ -974,7 +969,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 				}
 			}
 		}
-		InvalidateRect(NULL, FALSE);
+		InvalidateRect(nullptr, FALSE);
 	} else
 	{
 		CWnd::OnLButtonUp(nFlags, pt);
