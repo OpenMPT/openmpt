@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.18-pre
 
+ *  flac: Update to v1.3.3. (2019-08-04).
+
 ### libopenmpt 0.3.17 (2019-08-10)
 
  *  [**Bug**] Compilation fix for NO_PLUGINS being defined.
