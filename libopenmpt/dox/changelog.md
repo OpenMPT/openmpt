@@ -10,6 +10,8 @@ is just a high-level summary.
  *  [**Bug**] Compilation fix for MinGW.
  *  [**Bug**] Compilation fix for Haiku.
 
+ *  flac: Update to v1.3.3. (2019-08-04).
+
 ### libopenmpt 0.4.6 (2019-08-10)
 
  *  [**Bug**] Compilation fix for OpenBSD.
