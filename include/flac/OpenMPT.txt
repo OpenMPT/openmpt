@@ -2,5 +2,6 @@ flac 1.3.3.
 The FLAC package has been left pretty much untouched, except for a few changes:
  *  Obviously, unnecessary folders and files (documentation, makefiles, etc.) have
     been removed.
+ *  In include/FLAC/ordinals.h <stdint.h> gets included also for VS2008.
  *  For building, premake is used to generate Visual Studio project files.
     See ../build/premake/ for details.

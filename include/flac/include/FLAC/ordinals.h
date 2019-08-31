@@ -38,6 +38,7 @@
 /* Microsoft Visual Studio earlier than the 2010 version did not provide
  * the 1999 ISO C Standard header file <stdint.h>.
  */
+#include <stdint.h> /* OpenMPT */
 
 typedef signed __int8 FLAC__int8;
 typedef signed __int16 FLAC__int16;
