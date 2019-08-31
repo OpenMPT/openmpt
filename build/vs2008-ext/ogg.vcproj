@@ -917,6 +917,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\ogg\src\crctable.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\ogg\src\framing.c"
 				>
 			</File>
