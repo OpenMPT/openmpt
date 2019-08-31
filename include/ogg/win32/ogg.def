@@ -1,7 +1,9 @@
-; $Id$
 ;
 ; ogg.def
+; List of exported functions for Windows builds.
 ;
+; OpenMPT
+;LIBRARY ogg
 LIBRARY
 EXPORTS
 ;
