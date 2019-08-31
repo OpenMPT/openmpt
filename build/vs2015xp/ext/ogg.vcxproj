@@ -533,6 +533,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\ogg\include\ogg\ogg.h" />
     <ClInclude Include="..\..\..\include\ogg\include\ogg\os_types.h" />
+    <ClInclude Include="..\..\..\include\ogg\src\crctable.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\include\ogg\src\bitwise.c" />
