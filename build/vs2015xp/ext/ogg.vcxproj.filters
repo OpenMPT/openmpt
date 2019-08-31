@@ -21,6 +21,9 @@
     <ClInclude Include="..\..\..\include\ogg\include\ogg\os_types.h">
       <Filter>include\ogg</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\ogg\src\crctable.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\include\ogg\src\bitwise.c">
