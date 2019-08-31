@@ -18,6 +18,7 @@
    "../../include/ogg/include/ogg/os_types.h",
    "../../include/ogg/src/bitwise.c",
    "../../include/ogg/src/framing.c",
+   "../../include/ogg/src/crctable.h",
   }
   filter { "kind:SharedLib" }
    files { "../../include/ogg/win32/ogg.def" }
