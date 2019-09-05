@@ -116,7 +116,7 @@ bool CRtAudioDevice::InternalOpen()
 			m_Flags.NeedsClippedFloat = true;
 		} else if(m_RtAudio->getCurrentApi() == RtAudio::Api::WINDOWS_DS)
 		{
-			m_Flags.NeedsClippedFloat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista));
+			m_Flags.NeedsClippedFloat = GetSysInfo().IsOriginal();
 		}
 		m_RtAudio->openStream((m_OutputStreamParameters.nChannels > 0) ? &m_OutputStreamParameters : nullptr, (m_InputStreamParameters.nChannels > 0) ? &m_InputStreamParameters : nullptr, SampleFormatToRtAudioFormat(m_Settings.sampleFormat), m_Settings.Samplerate, &m_FramesPerChunk, &RtAudioCallback, this, &m_StreamOptions, nullptr);
 	} catch (const RtAudioError &e)
@@ -526,19 +526,7 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 				case RtAudio::WINDOWS_WASAPI:
 					info.apiName = U_("WASAPI");
 					info.flags = {
-						sysInfo.SystemClass == mpt::OS::Class::Windows ?
-							sysInfo.IsWindowsOriginal() ?
-								sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::Win7) ?
-									Info::Usability::Usable
-								:
-									sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) ?
-										Info::Usability::Experimental
-									:
-										Info::Usability::NotAvailable
-							:
-								Info::Usability::Usable
-						:
-							Info::Usability::NotAvailable,
+						sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Usable : Info::Usability::NotAvailable,
 						Info::Level::Secondary,
 						Info::Compatible::No,
 						sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Api::Native : Info::Api::Emulated,
@@ -562,10 +550,10 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 				case RtAudio::WINDOWS_DS:
 					info.apiName = U_("DirectSound");
 					info.flags = {
-						Info::Usability::Broken, // sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::Win7) ? Info::Usability:Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
+						Info::Usability::Broken, // sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
 						Info::Level::Secondary,
 						Info::Compatible::No,
-						sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
+						Info::Api::Emulated,
 						Info::Io::FullDuplex,
 						Info::Mixing::Software,
 						Info::Implementor::External

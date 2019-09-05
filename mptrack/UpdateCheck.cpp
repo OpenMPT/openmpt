@@ -358,7 +358,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	request.method = HTTP::Method::Get;
 	request.flags = HTTP::NoCache;
 
-	HTTP::Result resultHTTP = internet(request.InsecureTLSDowngradeWindowsXP());
+	HTTP::Result resultHTTP = internet(request);
 
 	if(settings.sendStatistics)
 	{
@@ -377,7 +377,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 		std::string jsondata = GetStatisticsDataV3(settings);
 		MPT_LOG(LogInformation, "Update", mpt::ToUnicode(mpt::CharsetUTF8, jsondata));
 		requestStatistics.data = mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(jsondata));
-		internet(requestStatistics.InsecureTLSDowngradeWindowsXP());
+		internet(requestStatistics);
 	}
 
 	// Retrieve HTTP status code.

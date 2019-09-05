@@ -100,7 +100,7 @@ public:
 		if(WindowsVersion.IsAtLeast(mpt::Windows::Version::Win8))
 		{
 			hasKB2533623 = true;
-		} else if(WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
+		} else
 		{
 			HMODULE hKernel32DLL = LoadLibraryW(L"kernel32.dll");
 			if(hKernel32DLL)

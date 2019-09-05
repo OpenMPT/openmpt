@@ -177,7 +177,6 @@ struct Request
 	mpt::const_byte_span data;
 
 	Request &SetURI(const URI &uri);
-	Request &InsecureTLSDowngradeWindowsXP();
 
 	Result operator()(InternetSession &internet) const;
 };

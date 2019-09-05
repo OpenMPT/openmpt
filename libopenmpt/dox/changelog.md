@@ -19,6 +19,7 @@ is just a high-level summary.
  *  [**Regression**] Support for Visual Studio 2015 has been removed.
  *  [**Regression**] Support for GCC 4.8, 4.9 has been removed.
  *  [**Regression**] Support for Clang 3.6, 3.7 has been removed.
+ *  [**Regression**] Windows XP and Windows Vista are no longer supported.
 
 ### libopenmpt 0.4.0
 

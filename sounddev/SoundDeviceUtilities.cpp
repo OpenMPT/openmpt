@@ -19,6 +19,7 @@
 #include <algorithm>
 
 #if MPT_OS_WINDOWS
+#include <avrt.h>
 #include <mmsystem.h>
 #endif // MPT_OS_WINDOWS
 
@@ -131,41 +132,8 @@ CAudioThread::~CAudioThread()
 }
 
 
-MPT_REGISTERED_COMPONENT(ComponentAvRt, "AvRt")
-
-ComponentAvRt::ComponentAvRt()
-	: ComponentLibrary(ComponentTypeSystem)
-	, AvSetMmThreadCharacteristics(nullptr)
-	, AvRevertMmThreadCharacteristics(nullptr)
-{
-	return;
-}
-
-bool ComponentAvRt::DoInitialize()
-{
-	if(!mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinVista))
-	{
-		return false;
-	}
-	AddLibrary("avrt", mpt::LibraryPath::System(P_("avrt")));
-	MPT_COMPONENT_BINDWIN("avrt", AvSetMmThreadCharacteristics);
-	MPT_COMPONENT_BIND("avrt", AvRevertMmThreadCharacteristics);
-	if(HasBindFailed())
-	{
-		return false;
-	}
-	return true;
-}
-
-ComponentAvRt::~ComponentAvRt()
-{
-	return;
-}
-
-
-CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority, const mpt::winstring & priorityClass, int priority)
+CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring & priorityClass, int priority)
 	: m_SysInfo(sysInfo)
-	, m_AvRt(avrt)
 	, m_BoostPriority(boostPriority)
 	, m_Priority(priority)
 	, task_idx(0)
@@ -178,16 +146,9 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle
 	#endif
 	if(m_BoostPriority)
 	{
-		if(m_SysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) && IsComponentAvailable(m_AvRt))
+		if(!priorityClass.empty())
 		{
-			if(!priorityClass.empty())
-			{
-				hTask = m_AvRt->AvSetMmThreadCharacteristics(priorityClass.c_str(), &task_idx);
-			}
-		} else
-		{
-			oldPriority = GetThreadPriority(GetCurrentThread());
-			SetThreadPriority(GetCurrentThread(), m_Priority);
+			hTask = AvSetMmThreadCharacteristics(priorityClass.c_str(), &task_idx);
 		}
 	}
 }
@@ -198,18 +159,12 @@ CPriorityBooster::~CPriorityBooster()
 	MPT_TRACE_SCOPE();
 	if(m_BoostPriority)
 	{
-		if(m_SysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) && IsComponentAvailable(m_AvRt))
+		if(hTask)
 		{
-			if(hTask)
-			{
-				m_AvRt->AvRevertMmThreadCharacteristics(hTask);
-			}
-			hTask = NULL;
-			task_idx = 0;
-		} else
-		{
-			SetThreadPriority(GetCurrentThread(), oldPriority);
+			AvRevertMmThreadCharacteristics(hTask);
 		}
+		hTask = NULL;
+		task_idx = 0;
 	}
 }
 
@@ -322,7 +277,7 @@ DWORD CAudioThread::AudioThread()
 		if(!terminate)
 		{
 
-			CPriorityBooster priorityBooster(m_SoundDevice.GetSysInfo(), m_AvRt, m_SoundDevice.m_Settings.BoostThreadPriority, m_MMCSSClass, m_SoundDevice.m_AppInfo.BoostedThreadPriorityXP);
+			CPriorityBooster priorityBooster(m_SoundDevice.GetSysInfo(), m_SoundDevice.m_Settings.BoostThreadPriority, m_MMCSSClass, m_SoundDevice.m_AppInfo.BoostedThreadPriorityXP);
 			CPeriodicWaker periodicWaker(m_WakeupInterval);
 
 			m_SoundDevice.StartFromSoundThread();

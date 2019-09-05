@@ -109,10 +109,10 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 	info.apiName = U_("DirectSound");
 	info.useNameAsIdentifier = false;
 	info.flags = {
-		sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
+		sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
 		Info::Level::Primary,
 		sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsWine() ? Info::Compatible::Yes : Info::Compatible::No,
-		sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
+		Info::Api::Emulated,
 		Info::Io::OutputOnly,
 		Info::Mixing::Software,
 		Info::Implementor::OpenMPT
@@ -165,7 +165,7 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 	caps.HasNamedInputSources = false;
 	caps.CanDriverPanel = false;
 	caps.ExclusiveModeDescription = U_("Use primary buffer");
-	caps.DefaultSettings.sampleFormat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista)) ? SampleFormatFloat32 : SampleFormatInt16;
+	caps.DefaultSettings.sampleFormat = GetSysInfo().IsOriginal() ? SampleFormatFloat32 : SampleFormatInt16;
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
 	if(m_piDS)
@@ -244,14 +244,13 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 				}
 			}
 		}
-		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista))
+		if(GetSysInfo().IsOriginal())
 		{
-			// Vista
 			caps.supportedSampleFormats = { SampleFormatFloat32 };
 			caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32 };
 		} else if(!(dscaps.dwFlags & DSCAPS_EMULDRIVER))
 		{
-			// XP wdm
+			// Wine wdm-style
 			caps.supportedSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
 			caps.supportedExclusiveModeSampleFormats.clear();
 			if(dscaps.dwFlags & DSCAPS_PRIMARY8BIT)
@@ -268,7 +267,7 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 			}
 		} else
 		{
-			// XP vdx
+			// Wine vdx-style
 			// nothing, announce all, fail later
 			caps.supportedSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
 			caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
@@ -386,7 +385,7 @@ bool CDSoundDevice::InternalOpen()
 	}
 	m_dwWritePos = 0xFFFFFFFF;
 	SetWakeupInterval(std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
-	m_Flags.NeedsClippedFloat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::Windows::Version::WinVista));
+	m_Flags.NeedsClippedFloat = GetSysInfo().IsOriginal();
 	return true;
 }
 

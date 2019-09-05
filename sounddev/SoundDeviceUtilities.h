@@ -16,7 +16,6 @@
 #include "SoundDeviceBase.h"
 
 #include "../common/misc_util.h"
-#include "../common/ComponentManager.h"
 
 #if MPT_OS_WINDOWS
 #include <mmreg.h>
@@ -48,34 +47,17 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 class CSoundDeviceWithThread;
 
 
-class ComponentAvRt
-	: public ComponentLibrary
-{
-	MPT_DECLARE_COMPONENT_MEMBERS
-public:
-	typedef HANDLE (WINAPI *pAvSetMmThreadCharacteristics)(LPCTSTR, LPDWORD);
-	typedef BOOL (WINAPI *pAvRevertMmThreadCharacteristics)(HANDLE);
-	pAvSetMmThreadCharacteristics AvSetMmThreadCharacteristics;
-	pAvRevertMmThreadCharacteristics AvRevertMmThreadCharacteristics;
-public:
-	ComponentAvRt();
-	virtual ~ComponentAvRt();
-	bool DoInitialize() override;
-};
-
-
 class CPriorityBooster
 {
 private:
 	SoundDevice::SysInfo m_SysInfo;
-	ComponentHandle<ComponentAvRt> & m_AvRt;
 	bool m_BoostPriority;
 	int m_Priority;
 	DWORD task_idx;
 	HANDLE hTask;
 	int oldPriority;
 public:
-	CPriorityBooster(SoundDevice::SysInfo sysInfo, ComponentHandle<ComponentAvRt> & avrt, bool boostPriority, const mpt::winstring & priorityClass, int priority);
+	CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring & priorityClass, int priority);
 	~CPriorityBooster();
 };
 
@@ -85,7 +67,6 @@ class CAudioThread
 	friend class CPeriodicWaker;
 private:
 	CSoundDeviceWithThread & m_SoundDevice;
-	ComponentHandle<ComponentAvRt> m_AvRt;
 	mpt::winstring m_MMCSSClass;
 	double m_WakeupInterval;
 	HANDLE m_hAudioWakeUp;

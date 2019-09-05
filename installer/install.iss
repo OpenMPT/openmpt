@@ -58,19 +58,12 @@ Name: english; MessagesFile: compiler:Default.isl
 
 ; preserve file type order for best solid compression results (first binary, then text)
 ; base folder
-Source: ..\bin\{#PlatformFolder}\OpenMPT.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
-Source: ..\bin\{#PlatformFolder}\..\x86\PluginBridge-x86.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
-Source: ..\bin\{#PlatformFolder}\..\amd64\PluginBridge-amd64.exe; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
-Source: ..\bin\{#PlatformFolder}\openmpt-lame.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
-Source: ..\bin\{#PlatformFolder}\openmpt-mpg123.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
-Source: ..\bin\{#PlatformFolder}\openmpt-soundtouch.dll; DestDir: {app}; Flags: ignoreversion; Check: not InstallWinOld
-; Additional binaries for XP-/Vista-compatible version
-Source: ..\bin\{#PlatformFolderOld}\OpenMPT.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
-Source: ..\bin\{#PlatformFolderOld}\..\x86\PluginBridge-x86.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
-Source: ..\bin\{#PlatformFolderOld}\..\amd64\PluginBridge-amd64.exe; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
-Source: ..\bin\{#PlatformFolderOld}\openmpt-lame.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
-Source: ..\bin\{#PlatformFolderOld}\openmpt-mpg123.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
-Source: ..\bin\{#PlatformFolderOld}\openmpt-soundtouch.dll; DestDir: {app}; Flags: ignoreversion; Check: InstallWinOld
+Source: ..\bin\{#PlatformFolder}\OpenMPT.exe; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\{#PlatformFolder}\..\x86\PluginBridge-x86.exe; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\{#PlatformFolder}\..\amd64\PluginBridge-amd64.exe; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\{#PlatformFolder}\openmpt-lame.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\{#PlatformFolder}\openmpt-mpg123.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\{#PlatformFolder}\openmpt-soundtouch.dll; DestDir: {app}; Flags: ignoreversion
 ; Wine support
 Source: ..\bin\{#PlatformFolder}\openmpt-wine-support.zip; DestDir: {app}; Flags: ignoreversion
 ; portable mode
@@ -172,7 +165,6 @@ Type: dirifempty; Name: {userappdata}\OpenMPT\Components; Tasks: portable
 var
     BitnessPage: TInputOptionWizardPage;
     ShouldSkipBitnessPage: Boolean;
-    BuildType: Integer;
 
 // Copy old config files to the AppData directory, if there are any (and if the files don't exist already)
 procedure CopyConfigsToAppDataDir();
@@ -228,11 +220,6 @@ begin
     end;
 end;
 
-Function InstallWinOld(): Boolean;
-begin
-    Result := (BuildType = 1);
-end;
-
 function IsProcessorFeaturePresent(Feature: Integer): Integer;
 external 'IsProcessorFeaturePresent@Kernel32.dll stdcall delayload';
 
@@ -241,7 +228,6 @@ external 'wine_get_version@ntdll.dll stdcall delayload';
 
 procedure InitializeWizard();
 var
-    IsModernSystem: Boolean;
     WineVersion: PAnsiChar;
 begin
     BitnessPage := CreateInputOptionPage(wpWelcome, 'OpenMPT Version', 'Select the version of OpenMPT you want to install.',
@@ -252,39 +238,21 @@ begin
     try
         // Check if installing on Wine 1.8 or later
         WineVersion := IsWine();
-        IsModernSystem := True; //((WineVersion <> nil) and (CompareStr(AnsiString(WineVersion), '1.8') >= 0));
 #if PlatformName == "32-Bit"
         BitnessPage.Add('32-Bit, for CPU with SSE2 instruction set');
-        BitnessPage.Add('32-Bit, for CPU without SSE2 instruction set');
 #else
-        BitnessPage.Add('64-Bit, for Wine 1.8 or newer');
         BitnessPage.Add('64-Bit, for Wine 1.8 or newer');
         ShouldSkipBitnessPage := True;
 #endif
     except
         // Installing on Windows 7 or later
-        IsModernSystem := (GetWindowsVersion >= $06010000);
 #if PlatformName == "32-Bit"
         BitnessPage.Add('32-Bit, for Windows 7 or newer and CPU with SSE2 instruction set');
-        BitnessPage.Add('32-Bit, for Windows XP / Vista or CPU without SSE2 instruction set');
 #else
         BitnessPage.Add('64-Bit, for Windows 7 or newer');
-        BitnessPage.Add('64-Bit, for Windows XP / Vista');
 #endif
     end;
-    BitnessPage.Values[1] := True;
-
-    if(IsModernSystem) then
-    begin
-        try
-            if(IsWin64 or (IsProcessorFeaturePresent(10) <> 0)) then
-            begin
-                // Windows 7 or Wine with SSE2
-                BitnessPage.Values[0] := True;
-            end;
-        except
-        end;
-    end else
+    BitnessPage.Values[0] := True;
 end;
 
 function ShouldSkipPage(PageID: Integer): Boolean;
@@ -310,7 +278,6 @@ begin
 
     BitnessPage.ID:
         begin;
-            BuildType := BitnessPage.SelectedValueIndex;
         end;
     end;
     Result := true;

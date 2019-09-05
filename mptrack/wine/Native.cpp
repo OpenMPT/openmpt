@@ -16,6 +16,7 @@
 
 #pragma comment(lib, "strmiids.lib")
 
+#pragma comment(lib, "avrt.lib")
 #pragma comment(lib, "dsound.lib")
 #pragma comment(lib, "winmm.lib")
 
