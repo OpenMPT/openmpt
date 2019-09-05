@@ -13,34 +13,13 @@
 	filter {}
 		if _OPTIONS["clang"] then
 			toolset "msc-ClangCL"
-		else
-			if _OPTIONS["xp"] then
-				if _ACTION == "vs2017" then
-					toolset "v141_xp"
-				elseif _ACTION == "vs2019" then
-					toolset "v142_xp"
-				end
-				defines { "MPT_BUILD_TARGET_XP" }
-				filter { "action:vs*" }
-					buildoptions { "/Zc:threadSafeInit-" }
-				filter {}
-			end
 		end
 	filter {}
 
 	filter {}
-		if _OPTIONS["xp"] then
-			filter { "action:vs*", "not architecture:x86" }
-				if not _OPTIONS["clang"] then
-					spectremitigations "On"
-				end
-			filter {}
-		else
-			filter { "action:vs*" }
-				if not _OPTIONS["clang"] then
-					spectremitigations "On"
-				end
-			filter {}
+	filter { "action:vs*" }
+		if not _OPTIONS["clang"] then
+			spectremitigations "On"
 		end
 	filter {}
 
@@ -224,31 +203,19 @@
 
 	filter {}
 
-	if _OPTIONS["xp"] then
+	filter { "architecture:x86", "configurations:Checked" }
+		vectorextensions "SSE2"
 
-		filter { "architecture:x86" }
-			vectorextensions "IA32"
-		filter {}
+	filter { "architecture:x86", "configurations:CheckedShared" }
+		vectorextensions "SSE2"
 
-	else
+	filter { "architecture:x86", "configurations:Release" }
+		vectorextensions "SSE2"
 
-		filter {}
+	filter { "architecture:x86", "configurations:ReleaseShared" }
+		vectorextensions "SSE2"
 
-		filter { "architecture:x86", "configurations:Checked" }
-			vectorextensions "SSE2"
-
-		filter { "architecture:x86", "configurations:CheckedShared" }
-			vectorextensions "SSE2"
-
-		filter { "architecture:x86", "configurations:Release" }
-			vectorextensions "SSE2"
-
-		filter { "architecture:x86", "configurations:ReleaseShared" }
-			vectorextensions "SSE2"
-
-		filter {}
-	
-	end
+	filter {}
 
   filter {}
 	defines { "MPT_BUILD_MSVC" }

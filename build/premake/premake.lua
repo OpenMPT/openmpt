@@ -27,11 +27,6 @@ newoption {
 }
 
 newoption {
-	trigger = "xp",
-	description = "Generate XP targetting projects",
-}
-
-newoption {
 	trigger = "win10",
 	description = "Generate Windows 10 Desktop targetting projects",
 }
@@ -53,13 +48,6 @@ if _OPTIONS["win10"] then
 	mpt_bindirsuffix = mpt_bindirsuffix .. "win10"
 	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "win10"
 	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "win10"
-elseif _OPTIONS["xp"] then
-	allplatforms = { "x86", "x86_64" }
-	trkplatforms = { "x86", "x86_64" }
-	mpt_projectpathname = mpt_projectpathname .. "winxp"
-	mpt_bindirsuffix = mpt_bindirsuffix .. "winxp"
-	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "winxp"
-	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "winxp"
 else
 	allplatforms = { "x86", "x86_64" }
 	trkplatforms = { "x86", "x86_64" }
