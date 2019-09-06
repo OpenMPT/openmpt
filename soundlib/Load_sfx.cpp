@@ -438,7 +438,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 
 					case 0x9: // 9xy: Auto slide
 						version = std::max(version, uint8(8));
-						MPT_FALLTHROUGH;
+						[[fallthrough]];
 					default:
 						m.command = CMD_NONE;
 						break;

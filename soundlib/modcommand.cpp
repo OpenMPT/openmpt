@@ -356,7 +356,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 				vol = 0;
 			}
 
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 		case CMD_VOLUMESLIDE:
 			if((param & 0xF0) && ((param & 0x0F) == 0x0F))
 			{

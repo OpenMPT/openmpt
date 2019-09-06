@@ -1186,7 +1186,7 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_INS_OPENFILE_NEW:
 		if(!InsertInstrument(false))
 			break;
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case CTRLMSG_INS_OPENFILE:
 		if (lParam) return OpenInstrument(*reinterpret_cast<const mpt::PathString *>(lParam));
 		break;

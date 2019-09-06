@@ -624,7 +624,7 @@ void BridgeWrapper::DispatchToHost(DispatchMsg *msg)
 		{
 			break;
 		}
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case audioMasterIOChanged:
 		{
 			// If the song is playing, the rendering thread might be active at the moment,
@@ -717,7 +717,7 @@ intptr_t BridgeWrapper::DispatchToPlugin(VstOpcodeToPlugin opcode, int32 index, 
 				strcpy(ptrC, cachedParamInfo[index - cachedParamInfoStart].name);
 			return 1;
 		}
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case effGetProgramName:
 	case effString2Parameter:
 	case effGetProgramNameIndexed:
@@ -742,7 +742,7 @@ intptr_t BridgeWrapper::DispatchToPlugin(VstOpcodeToPlugin opcode, int32 index, 
 
 	case effSetProgramName:
 		cachedProgNames.clear();
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case effCanDo:
 		// char* in [ptr]
 		ptrOut = strlen(ptrC) + 1;

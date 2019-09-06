@@ -99,12 +99,12 @@ mpt::tstring SafeOutputFile::convert_mode(std::ios_base::openmode mode, FlushMod
 		fopen_mode = _T("r");
 		break;
 	case std::ios_base::out:
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case std::ios_base::out | std::ios_base::trunc:
 		fopen_mode = _T("w");
 		break;
 	case std::ios_base::app:
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case std::ios_base::out | std::ios_base::app:
 		fopen_mode = _T("a");
 		break;
@@ -115,7 +115,7 @@ mpt::tstring SafeOutputFile::convert_mode(std::ios_base::openmode mode, FlushMod
 		fopen_mode = _T("w+");
 		break;
 	case std::ios_base::out | std::ios_base::in | std::ios_base::app:
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case std::ios_base::in | std::ios_base::app:
 		fopen_mode = _T("a+");
 		break;

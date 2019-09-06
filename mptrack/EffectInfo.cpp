@@ -536,7 +536,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNEL
 			s = continueOrIgnore;
 			break;
 		}
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case CMD_TONEPORTAVOL:
 	case CMD_VIBRATOVOL:
 	case CMD_GLOBALVOLSLIDE:
@@ -692,9 +692,9 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNEL
 					case 0x0B:	s = _T("7B: Pitch Env Off"); break;
 					case 0x0C:	s = _T("7C: Pitch Env On"); break;
 					case 0x0D:	if(sndFile.GetType() == MOD_TYPE_MPT) { s = _T("7D: Force Pitch Env"); break; }
-								MPT_FALLTHROUGH;
+								[[fallthrough]];
 					case 0x0E:	if(sndFile.GetType() == MOD_TYPE_MPT) { s = _T("7E: Force Filter Env"); break; }
-								MPT_FALLTHROUGH;
+								[[fallthrough]];
 					default:	s.Format(_T("%02X: undefined"), param); break;
 					}
 				} else

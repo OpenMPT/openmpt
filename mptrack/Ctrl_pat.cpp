@@ -393,7 +393,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		// Otherwise, just act the same as a normal selection change
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case CTRLMSG_SETCURRENTORDER:
 		// Set order list selection and refresh GUI if change successful
 		m_OrderList.SetCurSel(static_cast<ORDERINDEX>(lParam), false, false, true);

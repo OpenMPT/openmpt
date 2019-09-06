@@ -2599,7 +2599,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 				break;
 			}
 		}
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case DRAGONDROP_SOUNDFILE:
 		SendCtrlMessage(CTRLMSG_SMP_OPENFILE, lpDropInfo->lDropParam);
 		break;

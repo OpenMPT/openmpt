@@ -500,7 +500,7 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		SetCurSelTo2ndSel(wParam == kcOrderlistNavigateFirstSelect); SetCurSel(0, wParam == kcOrderlistNavigateFirst || !isPlaying); return wParam;
 	case kcEditSelectAll:
 		SetCurSel(0, !isPlaying);
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case kcOrderlistNavigateLastSelect:
 	case kcOrderlistNavigateLast:
 		{

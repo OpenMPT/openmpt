@@ -2059,7 +2059,7 @@ void CViewPattern::OnCursorPaste()
 	{
 	case PatternCursor::noteColumn:
 		m.note = m_cmdOld.note;
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case PatternCursor::instrColumn:
 		m.instr = m_cmdOld.instr;
 		break;

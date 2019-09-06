@@ -103,7 +103,7 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, 
 			case MIDIEvents::evNoteOff:	// Note Off
 			case MIDIEvents::evNoteOn:	// Note On
 				ApplyTransposeKeyboardSetting(*pMainFrm, data);
-				MPT_FALLTHROUGH;
+				[[fallthrough]];
 			default:
 				if(::PostMessage(hWndMidi, WM_MOD_MIDIMSG, data, dwParam2))
 					return;	// Message has been handled

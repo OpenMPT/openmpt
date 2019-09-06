@@ -2075,7 +2075,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 			}
 		}
 		// Instrument file -> fall through
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case DRAGONDROP_SOUNDFILE:
 		SendCtrlMessage(CTRLMSG_INS_OPENFILE, lpDropInfo->lDropParam);
 		break;

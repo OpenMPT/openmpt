@@ -131,7 +131,7 @@ CRarArchive::CRarArchive(FileReader &file)
 			comment = mpt::ToUnicode(std::wstring(ArchiveData.CmtBufW, ArchiveData.CmtBufW + ArchiveData.CmtSize - 1));
 			break;
 		}
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case 0:
 		comment = mpt::ustring();
 		break;

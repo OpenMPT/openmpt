@@ -935,7 +935,7 @@ int16_t Opal::Operator::Output(uint16_t /*keyscalenum*/, uint32_t phase_step, in
                 break;
 
             // Note: fall-through!
-            MPT_FALLTHROUGH;
+            [[fallthrough]];
         }
 
         // Release stage

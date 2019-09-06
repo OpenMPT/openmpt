@@ -2095,7 +2095,7 @@ void CModTree::InsertInsLibItem(const TCHAR *name, int image, const TCHAR *selec
 	case IMAGE_OPLINSTR:
 		// Only group instruments and samples separately if we're browsing inside a module file
 		if(!m_SongFileName.empty()) { sortOrder = 5; break; }
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case IMAGE_INSTRUMENTS:
 		sortOrder = 4;
 		break;
@@ -2886,7 +2886,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			case MODITEM_HDR_INSTRUMENTLIB:
 				if(!IsSampleBrowser())
 					break;
-				MPT_FALLTHROUGH;
+				[[fallthrough]];
 			case MODITEM_INSLIB_FOLDER:
 				nDefault = ID_MODTREE_EXECUTE;
 				AppendMenu(hMenu, MF_STRING, nDefault, _T("&Browse..."));
@@ -3725,7 +3725,7 @@ LRESULT CModTree::OnMidiMsg(WPARAM midiData_, LPARAM)
 			PlayItem(GetSelectedItem(), midiByte1 + NOTE_MIN, Util::muldivr(volume, 256, 127));
 			return 1;
 		}
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case MIDIEvents::evNoteOff:
 		PlayItem(GetSelectedItem(), NOTE_NOTECUT);
 		return 1;
@@ -3857,7 +3857,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				break;
 			}
-			MPT_FALLTHROUGH;
+			[[fallthrough]];
 		case MODITEM_SEQUENCE:
 			if(modItem.val1 < sndFile.Order.GetNumSequences())
 			{

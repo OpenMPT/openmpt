@@ -856,7 +856,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						playState.Chn[channel].dwFlags.set(CHN_AMIGAFILTER, !(param & 1));
 					}
 				}
-				MPT_FALLTHROUGH;
+				[[fallthrough]];
 			case CMD_S3MCMDEX:
 				if((param & 0xF0) == 0x80)
 				{
@@ -867,7 +867,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_VIBRATOVOL:
 				if (param) chn.nOldVolumeSlide = param;
 				param = 0;
-				MPT_FALLTHROUGH;
+				[[fallthrough]];
 			case CMD_VIBRATO:
 				Vibrato(chn, param);
 				break;
@@ -3031,7 +3031,7 @@ bool CSoundFile::ProcessEffects()
 						{
 							chn.nPan = 0;
 						}
-						MPT_FALLTHROUGH;
+						[[fallthrough]];
 					default:
 						// no memory here.
 						volcmd = VOLCMD_NONE;

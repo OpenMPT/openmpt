@@ -1888,10 +1888,10 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				{
 				case kGlobal:
 					globals.Parse(key, value, control);
-					MPT_FALLTHROUGH;
+					[[fallthrough]];
 				case kMaster:
 					master.Parse(key, value, control);
-					MPT_FALLTHROUGH;
+					[[fallthrough]];
 				case kGroup:
 					group.Parse(key, value, control);
 					break;

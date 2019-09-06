@@ -457,7 +457,7 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_SMP_OPENFILE_NEW:
 		if(!InsertSample(false))
 			break;
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case CTRLMSG_SMP_OPENFILE:
 		if (lParam) return OpenSample(*reinterpret_cast<const mpt::PathString *>(lParam));
 		break;

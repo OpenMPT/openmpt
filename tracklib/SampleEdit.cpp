@@ -165,7 +165,7 @@ void ResetSamples(CSoundFile &sndFile, ResetFlag resetflag, SAMPLEINDEX minSampl
 			sndFile.m_szNames[i] = "";
 			sample.filename = "";
 			sample.nC5Speed = 8363;
-			MPT_FALLTHROUGH;
+			[[fallthrough]];
 		case SmpResetCompo:
 			sample.nPan = 128;
 			sample.nGlobalVol = 64;

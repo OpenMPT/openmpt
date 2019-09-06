@@ -324,7 +324,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 				m->param >>= 4;
 #endif // MODPLUG_TRACKER
 
-				MPT_FALLTHROUGH;
+				[[fallthrough]];
 
 			default:
 				// Anything not listed above is a no-op if there's no value.

@@ -1009,7 +1009,7 @@ intptr_t PluginBridge::DispatchToHost(VstOpcodeToHost opcode, int32 index, intpt
 			}
 			break;
 		}
-		MPT_FALLTHROUGH;
+		[[fallthrough]];
 	case audioMasterIOChanged:
 		// We need to be sure that the new values are known to the master.
 		if(nativeEffect != nullptr)

@@ -156,11 +156,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-// Macro for marking intentional fall-throughs in switch statements - can be used for static analysis if supported.
-#define MPT_FALLTHROUGH [[fallthrough]]
-
-
-
 #if MPT_COMPILER_MSVC
 // warning LNK4221: no public symbols found; archive member will be inaccessible
 // There is no way to selectively disable linker warnings.
