@@ -411,6 +411,7 @@ protected:
 	afx_msg void OnDeleteRows();
 	afx_msg void OnDeleteRowsEx();
 	afx_msg void OnInsertRows();
+	afx_msg void OnSplitPattern();
 	afx_msg void OnPatternStep();
 	afx_msg void OnSwitchToOrderList();
 	afx_msg void OnPrevOrder();

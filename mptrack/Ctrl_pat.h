@@ -43,7 +43,7 @@ protected:
 	//To tell how many orders('orderboxes') to show at least
 	//on both sides of current order(when updating orderslist position).
 	int m_nOrderlistMargins;
-	CModDoc &m_pModDoc;
+	CModDoc &m_modDoc;
 	CCtrlPatterns &m_pParent;
 	bool m_bScrolling = false, m_bDragging = false;
 
@@ -75,8 +75,8 @@ public:
 	ORDERINDEX GetOrderFromPoint(const CRect& rect, const CPoint& pt) const;
 
 	// Get the currently selected pattern(s).
-	// Set bIgnoreSelection to true if only the first selected point is important.
-	OrdSelection GetCurSel(bool bIgnoreSelection) const;
+	// Set ignoreSelection to true if only the first selected point is important.
+	OrdSelection GetCurSel(bool ignoreSelection = false) const;
 
 	// Sets target margin value and returns the effective margin value.
 	ORDERINDEX SetMargins(int);
@@ -159,6 +159,7 @@ protected:
 	afx_msg void OnPatternPlayFromStart();
 	afx_msg void OnCreateNewPattern();
 	afx_msg void OnDuplicatePattern();
+	afx_msg void OnMergePatterns();
 	afx_msg void OnPatternCopy();
 	afx_msg void OnPatternPaste();
 	afx_msg void OnSetRestartPos();
@@ -214,6 +215,7 @@ public:
 	BOOL SetCurrentInstrument(UINT nIns);
 	BOOL GetFollowSong() { return IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG); }
 	BOOL GetLoopPattern() {return IsDlgButtonChecked(IDC_PATTERN_LOOP);}
+	COrderList &GetOrderList() { return m_OrderList; }
 	//{{AFX_VIRTUAL(CCtrlPatterns)
 	BOOL OnInitDialog() override;
 	void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV support
@@ -235,6 +237,7 @@ protected:
 	afx_msg void OnPlayerPause();
 	afx_msg void OnPatternNew();
 	afx_msg void OnPatternDuplicate();
+	afx_msg void OnPatternMerge();
 	afx_msg void OnPatternStop();
 	afx_msg void OnPatternPlay();
 	afx_msg void OnPatternPlayNoLoop();

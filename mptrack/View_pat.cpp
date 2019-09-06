@@ -89,6 +89,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PATTERN_DELETEROW,&CViewPattern::OnDeleteRows)
 	ON_COMMAND(ID_PATTERN_DELETEALLROW,&CViewPattern::OnDeleteRowsEx)
 	ON_COMMAND(ID_PATTERN_INSERTROW,&CViewPattern::OnInsertRows)
+	ON_COMMAND(ID_PATTERN_SPLIT,	&CViewPattern::OnSplitPattern)
 	ON_COMMAND(ID_NEXTINSTRUMENT,	&CViewPattern::OnNextInstrument)
 	ON_COMMAND(ID_PREVINSTRUMENT,	&CViewPattern::OnPrevInstrument)
 	ON_COMMAND(ID_PATTERN_PLAYROW,	&CViewPattern::OnPatternStep)
@@ -1927,6 +1928,86 @@ void CViewPattern::InsertRows(CHANNELINDEX colmin, CHANNELINDEX colmax)
 void CViewPattern::OnInsertRows()
 {
 	InsertRows(m_Selection.GetStartChannel(), m_Selection.GetEndChannel());
+}
+
+
+void CViewPattern::OnSplitPattern()
+{
+	COrderList &orderList = static_cast<CCtrlPatterns *>(GetControlDlg())->GetOrderList();
+	CSoundFile &sndFile = *GetSoundFile();
+	const auto &specs = sndFile.GetModSpecifications();
+	const PATTERNINDEX sourcePat = m_nPattern;
+	const ROWINDEX splitRow = m_MenuCursor.GetRow();
+	if(splitRow < 1 || !sndFile.Patterns.IsValidPat(sourcePat) || !sndFile.Patterns[sourcePat].IsValidRow(splitRow))
+	{
+		MessageBeep(MB_ICONWARNING);
+		return;
+	}
+
+	// Create a new pattern (ignore if it's too big for this format - if it is, then the source pattern already was too big, too)
+	CriticalSection cs;
+	const ROWINDEX numSplitRows = sndFile.Patterns[sourcePat].GetNumRows() - splitRow;
+	const PATTERNINDEX newPat = sndFile.Patterns.InsertAny(std::max(specs.patternRowsMin, numSplitRows), false);
+	if(newPat == PATTERNINDEX_INVALID)
+	{
+		cs.Leave();
+		Reporting::Error(mpt::format("Pattern limit of the %1 format (%2 patterns) has been reached.")(mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Split Pattern");
+		return;
+	}
+	auto &sourcePattern = sndFile.Patterns[sourcePat];
+	auto &newPattern = sndFile.Patterns[newPat];
+
+	auto &undo = GetDocument()->GetPatternUndo();
+	undo.PrepareUndo(sourcePat, 0, splitRow, sourcePattern.GetNumChannels(), numSplitRows, "Split Pattern");
+	undo.PrepareUndo(newPat, 0, 0, newPattern.GetNumChannels(), newPattern.GetNumRows(), "Split Pattern", true);
+
+	auto copyStart = sourcePattern.begin() + sourcePattern.GetNumChannels() * splitRow;
+	std::copy(copyStart, sourcePattern.end(), newPattern.begin());
+
+	// Reduce the row number or insert pattern breaks, if the patterns are too small for the format
+	sourcePattern.Resize(std::max(specs.patternRowsMin, splitRow));
+	if(splitRow != sourcePattern.GetNumRows())
+	{
+		std::fill(copyStart, sourcePattern.end(), ModCommand::Empty());
+		sourcePattern.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(splitRow - 1).RetryNextRow());
+	}
+	if(numSplitRows != newPattern.GetNumRows())
+	{
+		newPattern.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(numSplitRows - 1).RetryNextRow());
+	}
+
+	// Update every occurrence of the split pattern in all order lists
+	auto editOrd = GetCurrentOrder();
+	for(SEQUENCEINDEX seq = 0; seq < sndFile.Order.GetNumSequences(); seq++)
+	{
+		const bool isCurrentSeq = (seq == sndFile.Order.GetCurrentSequenceIndex());
+		bool editedSeq = false;
+		auto &order = sndFile.Order(seq);
+		for(ORDERINDEX i = 0; i < order.GetLength(); i++)
+		{
+			if(order[i] == sourcePat)
+			{
+				if(!order.insert(i + 1, 1, newPat))
+					continue;
+				editedSeq = true;
+				if(isCurrentSeq)
+					orderList.InsertUpdatePlaystate(i, i + 1);
+				i++;
+
+				// Slide the current selection accordingly so it doesn't end up in the wrong id
+				if(i < editOrd && isCurrentSeq)
+					editOrd++;
+			}
+		}
+		if(editedSeq)
+			GetDocument()->UpdateAllViews(nullptr, SequenceHint(seq).Data(), this);
+	}
+
+	orderList.SetSelection(editOrd + 1);
+	SetCurrentRow(0);
+
+	SetModified(true);
+	GetDocument()->UpdateAllViews(nullptr, PatternHint(newPat).Names().Data(), this);
 }
 
 
@@ -4074,6 +4155,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			}
 		case kcChannelTranspose: m_MenuCursor = m_Cursor; OnTransposeChannel(); return wParam;
 		case kcChannelDuplicate: m_MenuCursor = m_Cursor; OnDuplicateChannel(); return wParam;
+		case kcSplitPattern: m_MenuCursor = m_Cursor; OnSplitPattern(); return wParam;
 
 		case kcDecreaseSpacing:
 			if(m_nSpacing > 0) SetSpacing(m_nSpacing - 1);
@@ -5850,6 +5932,13 @@ bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const
 bool CViewPattern::BuildMiscCtxMenu(HMENU hMenu, CInputHandler *ih) const
 {
 	AppendMenu(hMenu, MF_STRING, ID_SHOWTIMEATROW, ih->GetKeyTextFromCommand(kcTimeAtRow, _T("Show Row Play Time")));
+
+	if(m_Selection.GetStartRow() == m_Selection.GetEndRow())
+	{
+		CString s;
+		s.Format(_T("Split Pattern at Ro&w %u"), m_Selection.GetStartRow());
+		AppendMenu(hMenu, MF_STRING | (m_Selection.GetStartRow() < 1 ? MF_GRAYED : 0), ID_PATTERN_SPLIT, ih->GetKeyTextFromCommand(kcSplitPattern, s));
+	}
 
 	const CSoundFile &sndFile = *GetSoundFile();
 	CString lockStr;

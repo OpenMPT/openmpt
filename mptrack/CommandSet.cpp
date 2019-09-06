@@ -716,6 +716,8 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcInstrumentEnvelopeToggleCarry, 1985, _T("Toggle Envelope Carry"));
 	DefineKeyCommand(kcSampleInitializeOPL, 1986, _T("Initialize OPL Instrument"));
 	DefineKeyCommand(kcFileSaveCopy, 1987, _T("File/Save Copy"));
+	DefineKeyCommand(kcMergePatterns, 1988, _T("Merge Patterns"));
+	DefineKeyCommand(kcSplitPattern, 1989, _T("Split Pattern"));
 
 	// Add new key commands here.
 
