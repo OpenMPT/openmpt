@@ -42,7 +42,7 @@ static MPT_FORCEINLINE void Store64SSE(LR16 (&dst)[2], __m128i src) { return _mm
 CReverb::CReverb()
 {
 	// Shared reverb state
-	InitMixBuffer(MixReverbBuffer, static_cast<uint32>(mpt::size(MixReverbBuffer)));
+	InitMixBuffer(MixReverbBuffer, static_cast<uint32>(std::size(MixReverbBuffer)));
 
 	// Reverb mix buffers
 	MemsetZero(g_RefDelay);

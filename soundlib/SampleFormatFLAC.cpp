@@ -691,7 +691,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 	FLAC__int32 buffer[mpt::IO::BUFFERSIZE_TINY];
 	while(framesRemain && success)
 	{
-		const SmpLength copyFrames = std::min(framesRemain, mpt::saturate_cast<SmpLength>(mpt::size(buffer) / numChannels));
+		const SmpLength copyFrames = std::min(framesRemain, mpt::saturate_cast<SmpLength>(std::size(buffer) / numChannels));
 
 		// First, convert to a 32-bit integer buffer
 		switch(sample.GetElementarySampleSize())

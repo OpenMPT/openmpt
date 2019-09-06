@@ -852,7 +852,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(vol != 0x40)
 				possibleXMconversion = false;
 		}
-		for(size_t i = 20; i < mpt::size(fileHeader.songname); i++)
+		for(size_t i = 20; i < std::size(fileHeader.songname); i++)
 		{
 			if(fileHeader.songname[i] != 0)
 				possibleXMconversion = false;

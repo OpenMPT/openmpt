@@ -633,8 +633,8 @@ void CSoundFile::ReadMODPatternEntry(const uint8 (&data)[4], ModCommand &m)
 	size_t note = NOTE_NONE;
 	if(period > 0 && period != 0xFFF)
 	{
-		note = mpt::size(ProTrackerPeriodTable) + 23 + NOTE_MIN;
-		for(size_t i = 0; i < mpt::size(ProTrackerPeriodTable); i++)
+		note = std::size(ProTrackerPeriodTable) + 23 + NOTE_MIN;
+		for(size_t i = 0; i < std::size(ProTrackerPeriodTable); i++)
 		{
 			if(period >= ProTrackerPeriodTable[i])
 			{
@@ -2329,7 +2329,7 @@ bool CSoundFile::SaveMod(std::ostream &f) const
 
 				uint16 period = 0;
 				// Convert note to period
-				if(m.note >= 24 + NOTE_MIN && m.note < mpt::size(ProTrackerPeriodTable) + 24 + NOTE_MIN)
+				if(m.note >= 24 + NOTE_MIN && m.note < std::size(ProTrackerPeriodTable) + 24 + NOTE_MIN)
 				{
 					period = ProTrackerPeriodTable[m.note - 24 - NOTE_MIN];
 				}

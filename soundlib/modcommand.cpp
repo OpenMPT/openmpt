@@ -32,7 +32,7 @@ const EffectType effectTypes[] =
 	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_NORMAL,
 };
 
-STATIC_ASSERT(mpt::size(effectTypes) == MAX_EFFECTS);
+STATIC_ASSERT(std::size(effectTypes) == MAX_EFFECTS);
 
 
 const EffectType volumeEffectTypes[] =
@@ -43,12 +43,12 @@ const EffectType volumeEffectTypes[] =
 	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_NORMAL,  EFFECT_TYPE_NORMAL,
 };
 
-STATIC_ASSERT(mpt::size(volumeEffectTypes) == MAX_VOLCMDS);
+STATIC_ASSERT(std::size(volumeEffectTypes) == MAX_VOLCMDS);
 
 
 EffectType ModCommand::GetEffectType(COMMAND cmd)
 {
-	if(cmd < mpt::size(effectTypes))
+	if(cmd < std::size(effectTypes))
 	{
 		return effectTypes[cmd];
 	} else
@@ -60,7 +60,7 @@ EffectType ModCommand::GetEffectType(COMMAND cmd)
 
 EffectType ModCommand::GetVolumeEffectType(VOLCMD volcmd)
 {
-	if(volcmd < mpt::size(volumeEffectTypes))
+	if(volcmd < std::size(volumeEffectTypes))
 	{
 		return volumeEffectTypes[volcmd];
 	} else
@@ -945,9 +945,9 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		CMD_POSITIONJUMP,
 		CMD_PATTERNBREAK,
 	};
-	STATIC_ASSERT(mpt::size(weights) == MAX_EFFECTS);
+	STATIC_ASSERT(std::size(weights) == MAX_EFFECTS);
 
-	for(size_t i = 0; i < mpt::size(weights); i++)
+	for(size_t i = 0; i < std::size(weights); i++)
 	{
 		if(weights[i] == cmd)
 		{

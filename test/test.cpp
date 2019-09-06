@@ -288,7 +288,7 @@ static MPT_NOINLINE void TestVersion()
 		DWORD dwVerInfoSize;
 
 		// Get version information from the application
-		::GetModuleFileNameW(NULL, szFullPath, mpt::saturate_cast<DWORD>(mpt::size(szFullPath)));
+		::GetModuleFileNameW(NULL, szFullPath, mpt::saturate_cast<DWORD>(std::size(szFullPath)));
 		dwVerInfoSize = ::GetFileVersionInfoSizeW(szFullPath, &dwVerHnd);
 		if (!dwVerInfoSize)
 			throw std::runtime_error("!dwVerInfoSize is true");
@@ -4309,16 +4309,16 @@ static MPT_NOINLINE void TestStringIO()
 #define ReadTest(mode, dst, src, expectedResult) \
 	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::WriteAutoBuf(dst) = mpt::String::ReadBuf(mpt::String:: mode , src); \
-	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
-	for(size_t i = strlen(dst); i < mpt::size(dst); i++) \
+	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, std::size(dst)), 0); /* Ensure that the strings are identical */ \
+	for(size_t i = strlen(dst); i < std::size(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 	/**/
 
 #define WriteTest(mode, dst, src, expectedResult) \
 	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::WriteBuf(mpt::String:: mode , dst) = mpt::String::ReadAutoBuf(src); \
-	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0);  /* Ensure that the strings are identical */ \
-	for(size_t i = Test::strnlen(dst, mpt::size(dst)); i < mpt::size(dst); i++) \
+	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, std::size(dst)), 0);  /* Ensure that the strings are identical */ \
+	for(size_t i = Test::strnlen(dst, std::size(dst)); i < std::size(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 	/**/
 
@@ -4438,10 +4438,10 @@ static MPT_NOINLINE void TestStringIO()
 	{
 
 		std::string dststring;
-		std::string src0string = std::string(src0, mpt::size(src0));
-		std::string src1string = std::string(src1, mpt::size(src1));
-		std::string src2string = std::string(src2, mpt::size(src2));
-		std::string src3string = std::string(src3, mpt::size(src3));
+		std::string src0string = std::string(src0, std::size(src0));
+		std::string src1string = std::string(src1, std::size(src1));
+		std::string src2string = std::string(src2, std::size(src2));
+		std::string src3string = std::string(src3, std::size(src3));
 
 #define ReadTest(mode, dst, src, expectedResult) \
 	dst = mpt::String::ReadBuf(mpt::String:: mode , src); \
@@ -4451,8 +4451,8 @@ static MPT_NOINLINE void TestStringIO()
 #define WriteTest(mode, dst, src, expectedResult) \
 	std::memset(dst, 0x7f, sizeof(dst)); \
 	mpt::String::WriteBuf(mpt::String:: mode , dst) = src; \
-	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0);  /* Ensure that the strings are identical */ \
-	for(size_t i = Test::strnlen(dst, mpt::size(dst)); i < mpt::size(dst); i++) \
+	VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, std::size(dst)), 0);  /* Ensure that the strings are identical */ \
+	for(size_t i = Test::strnlen(dst, std::size(dst)); i < std::size(dst); i++) \
 		VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 	/**/
 
@@ -4547,9 +4547,9 @@ static MPT_NOINLINE void TestStringIO()
 	mpt::String::FixNullString(src1);
 	mpt::String::FixNullString(src2);
 	mpt::String::FixNullString(src3);
-	VERIFY_EQUAL_NONCONT(strncmp(src1, "X ", mpt::size(src1)), 0);
-	VERIFY_EQUAL_NONCONT(strncmp(src2, "XYZ", mpt::size(src2)), 0);
-	VERIFY_EQUAL_NONCONT(strncmp(src3, "XYZ", mpt::size(src3)), 0);
+	VERIFY_EQUAL_NONCONT(strncmp(src1, "X ", std::size(src1)), 0);
+	VERIFY_EQUAL_NONCONT(strncmp(src2, "XYZ", std::size(src2)), 0);
+	VERIFY_EQUAL_NONCONT(strncmp(src3, "XYZ", std::size(src3)), 0);
 
 	{
 	
@@ -4565,8 +4565,8 @@ static MPT_NOINLINE void TestStringIO()
 		#define CopyTest(dst, src, expectedResult) \
 			std::memset(dst, 0x7f, sizeof(dst)); \
 			mpt::String::WriteAutoBuf(dst) = mpt::String::ReadAutoBuf(src); \
-			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
-			for(size_t i = strlen(dst); i < mpt::size(dst); i++) \
+			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, std::size(dst)), 0); /* Ensure that the strings are identical */ \
+			for(size_t i = strlen(dst); i < std::size(dst); i++) \
 				VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 			/**/
 
@@ -4587,9 +4587,9 @@ static MPT_NOINLINE void TestStringIO()
 
 		#define CopyTestN(dst, src, len, expectedResult) \
 			std::memset(dst, 0x7f, sizeof(dst)); \
-			mpt::String::WriteAutoBuf(dst) = mpt::String::ReadAutoBuf(src, std::min(mpt::size(src), static_cast<std::size_t>(len))); \
-			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, mpt::size(dst)), 0); /* Ensure that the strings are identical */ \
-			for(size_t i = strlen(dst); i < mpt::size(dst); i++) \
+			mpt::String::WriteAutoBuf(dst) = mpt::String::ReadAutoBuf(src, std::min(std::size(src), static_cast<std::size_t>(len))); \
+			VERIFY_EQUAL_NONCONT(strncmp(dst, expectedResult, std::size(dst)), 0); /* Ensure that the strings are identical */ \
+			for(size_t i = strlen(dst); i < std::size(dst); i++) \
 				VERIFY_EQUAL_NONCONT(dst[i], '\0'); /* Ensure that rest of the buffer is completely nulled */ \
 			/**/
 

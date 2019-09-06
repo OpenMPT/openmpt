@@ -5926,7 +5926,7 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 	} else
 	{
 		nFineTune = XM2MODFineTune(nFineTune);
-		if ((nFineTune) || (note < 24) || (note >= 24 + mpt::size(ProTrackerPeriodTable)))
+		if ((nFineTune) || (note < 24) || (note >= 24 + std::size(ProTrackerPeriodTable)))
 			return (ProTrackerTunedPeriods[nFineTune * 12u + note % 12u] << 5) >> (note / 12u);
 		else
 			return (ProTrackerPeriodTable[note - 24] << 2);
@@ -6124,7 +6124,7 @@ IMixPlugin *CSoundFile::GetChannelInstrumentPlugin(CHANNELINDEX chn) const
 // Get the MIDI channel currently associated with a given tracker channel
 uint8 CSoundFile::GetBestMidiChannel(CHANNELINDEX trackerChn) const
 {
-	if(trackerChn >= mpt::size(m_PlayState.Chn))
+	if(trackerChn >= std::size(m_PlayState.Chn))
 	{
 		return 0;
 	}

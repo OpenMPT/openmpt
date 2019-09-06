@@ -84,7 +84,7 @@ public:
 
 	template <std::size_t N> span(const std::array<value_type, N> &arr) : m_beg(arr.data()), m_end(arr.data() + arr.size()) { }
 
-	template <typename Cont> span(Cont &cont) : m_beg(mpt::data(cont)), m_end(mpt::data(cont) + mpt::size(cont)) { }
+	template <typename Cont> span(Cont &cont) : m_beg(std::data(cont)), m_end(std::data(cont) + std::size(cont)) { }
 
 	span(const span &other) : m_beg(other.begin()), m_end(other.end()) { }
 

@@ -6796,12 +6796,12 @@ HRESULT CViewPattern::get_accName(VARIANT varChild, BSTR *pszName)
 	const TCHAR *column = _T("");
 	static const TCHAR *regularColumns[] = {_T("Note"), _T("Instrument"), _T("Volume"), _T("Effect"), _T("Parameter")};
 	static const TCHAR *pcColumns[] = {_T("Note"), _T("Plugin"), _T("Plugin Parameter"), _T("Parameter Value"), _T("Parameter Value")};
-	static_assert(PatternCursor::lastColumn + 1 == mpt::size(regularColumns));
-	static_assert(PatternCursor::lastColumn + 1 == mpt::size(pcColumns));
+	static_assert(PatternCursor::lastColumn + 1 == std::size(regularColumns));
+	static_assert(PatternCursor::lastColumn + 1 == std::size(pcColumns));
 
-	if(m.IsPcNote() && columnIndex < mpt::size(pcColumns))
+	if(m.IsPcNote() && columnIndex < std::size(pcColumns))
 		column = pcColumns[columnIndex];
-	else if(!m.IsPcNote() && columnIndex < mpt::size(regularColumns))
+	else if(!m.IsPcNote() && columnIndex < std::size(regularColumns))
 		column = regularColumns[columnIndex];
 
 	const CSoundFile *sndFile = GetSoundFile();

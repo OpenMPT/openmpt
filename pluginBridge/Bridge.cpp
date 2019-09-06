@@ -1184,8 +1184,8 @@ intptr_t PluginBridge::DispatchToHost(VstOpcodeToHost opcode, int32 index, intpt
 	
 	case audioMasterGetDirectory:
 		// Name in [return value]
-		strncpy(host2PlugMem.name, extraData, mpt::size(host2PlugMem.name) - 1);
-		host2PlugMem.name[mpt::size(host2PlugMem.name) - 1] = 0;
+		strncpy(host2PlugMem.name, extraData, std::size(host2PlugMem.name) - 1);
+		host2PlugMem.name[std::size(host2PlugMem.name) - 1] = 0;
 		return ToIntPtr<char>(host2PlugMem.name);
 
 	case audioMasterGetChunkFile:

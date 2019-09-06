@@ -267,7 +267,7 @@ BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 		break;
 	}
 
-	lstrcpyn(pTTT->szText, text.c_str(), mpt::saturate_cast<int>(mpt::size(pTTT->szText)));
+	lstrcpyn(pTTT->szText, text.c_str(), mpt::saturate_cast<int>(std::size(pTTT->szText)));
 	return TRUE;
 }
 

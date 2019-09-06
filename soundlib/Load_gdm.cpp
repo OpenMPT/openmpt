@@ -119,7 +119,7 @@ static bool ValidateHeader(const GDMFileHeader &fileHeader)
 		|| fileHeader.dosEOF[0] != 13 || fileHeader.dosEOF[1] != 10 || fileHeader.dosEOF[2] != 26
 		|| std::memcmp(fileHeader.magic2, "GMFS", 4)
 		|| fileHeader.formatMajorVer != 1 || fileHeader.formatMinorVer != 0
-		|| fileHeader.originalFormat >= mpt::size(gdmFormatOrigin)
+		|| fileHeader.originalFormat >= std::size(gdmFormatOrigin)
 		|| fileHeader.originalFormat == 0)
 	{
 		return false;

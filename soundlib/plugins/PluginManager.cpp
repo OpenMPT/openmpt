@@ -298,7 +298,7 @@ CVstPluginManager::CVstPluginManager()
 #endif // MODPLUG_TRACKER
 	};
 
-	pluginList.reserve(mpt::size(BuiltInPlugins));
+	pluginList.reserve(std::size(BuiltInPlugins));
 	for(const auto &plugin : BuiltInPlugins)
 	{
 		VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(plugin.createProc, true, mpt::PathString::FromUTF8(plugin.filename), mpt::PathString::FromUTF8(plugin.name));

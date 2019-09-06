@@ -394,7 +394,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		// Convert IT/MPT to XM (fix instruments)
 		if(newTypeIsXM)
 		{
-			for(size_t i = 0; i < mpt::size(pIns->NoteMap); i++)
+			for(size_t i = 0; i < std::size(pIns->NoteMap); i++)
 			{
 				if (pIns->NoteMap[i] && pIns->NoteMap[i] != (i + 1))
 				{

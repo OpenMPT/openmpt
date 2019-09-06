@@ -271,7 +271,7 @@ namespace MidiExport
 
 		uint8 GetMidiChannel(CHANNELINDEX trackChannel) const override
 		{
-			if(m_instr.nMidiChannel == MidiMappedChannel && trackChannel < mpt::size(m_sndFile.m_PlayState.Chn))
+			if(m_instr.nMidiChannel == MidiMappedChannel && trackChannel < std::size(m_sndFile.m_PlayState.Chn))
 			{
 				// For mapped channels, distribute tracker channels evenly over MIDI channels, but avoid channel 10 (drums)
 				uint8 midiCh = trackChannel % 15u;
@@ -317,7 +317,7 @@ namespace MidiExport
 			for(uint8 mc = 0; mc < m_MidiCh.size(); mc++)
 			{
 				PlugInstrChannel &channel = m_MidiCh[mc];
-				for(size_t i = 0; i < mpt::size(channel.noteOnMap); i++)
+				for(size_t i = 0; i < std::size(channel.noteOnMap); i++)
 				{
 					for(auto &c : channel.noteOnMap[i])
 					{

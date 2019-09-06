@@ -102,7 +102,7 @@ BOOL COptionsColors::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	m_pPreviewDib = LoadDib(MAKEINTRESOURCE(IDB_COLORSETUP));
 	CustomColors = TrackerSettings::Instance().rgbCustomColors;
-	for (size_t i = 0; i < mpt::size(colorDefs); i++)
+	for (size_t i = 0; i < std::size(colorDefs); i++)
 	{
 		m_ComboItem.SetItemData(m_ComboItem.AddString(colorDefs[i].name), i);
 	}
@@ -144,7 +144,7 @@ BOOL COptionsColors::OnInitDialog()
 	SetDlgItemText(IDC_BUTTON10, FormatFontName(commentFont));
 
 	m_ComboPreset.SetRedraw(FALSE);
-	m_ComboPreset.InitStorage(static_cast<int>(2 + mpt::size(ColorSchemes)), 20 * sizeof(TCHAR));
+	m_ComboPreset.InitStorage(static_cast<int>(2 + std::size(ColorSchemes)), 20 * sizeof(TCHAR));
 	m_ComboPreset.AddString(_T("Choose a Colour Scheme..."));
 	m_ComboPreset.AddString(_T("OpenMPT (Default)"));
 	for(const auto &preset : ColorSchemes)

@@ -204,7 +204,7 @@ void CMidiMacroSetup::UpdateDialog()
 {
 	UINT sfx = m_CbnSFx.GetCurSel();
 	UINT sfx_preset = static_cast<UINT>(m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel()));
-	if(sfx < mpt::size(m_MidiCfg.szMidiSFXExt))
+	if(sfx < std::size(m_MidiCfg.szMidiSFXExt))
 	{
 		ToggleBoxes(sfx_preset, sfx);
 		m_EditSFx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, m_MidiCfg.szMidiSFXExt[sfx]));
@@ -269,7 +269,7 @@ void CMidiMacroSetup::OnSFxPresetChanged()
 	UINT sfx = m_CbnSFx.GetCurSel();
 	ParameteredMacro sfx_preset = static_cast<ParameteredMacro>(m_CbnSFxPreset.GetItemData(m_CbnSFxPreset.GetCurSel()));
 
-	if (sfx < mpt::size(m_MidiCfg.szMidiSFXExt))
+	if (sfx < std::size(m_MidiCfg.szMidiSFXExt))
 	{
 		if(sfx_preset != kSFxCustom)
 		{
@@ -295,7 +295,7 @@ void CMidiMacroSetup::OnZxxPresetChanged()
 void CMidiMacroSetup::UpdateZxxSelection()
 {
 	UINT zxx = m_CbnZxx.GetCurSel();
-	if(zxx < mpt::size(m_MidiCfg.szMidiZXXExt))
+	if(zxx < std::size(m_MidiCfg.szMidiZXXExt))
 	{
 		m_EditZxx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, m_MidiCfg.szMidiZXXExt[zxx]));
 	}
@@ -305,7 +305,7 @@ void CMidiMacroSetup::UpdateZxxSelection()
 void CMidiMacroSetup::OnSFxEditChanged()
 {
 	UINT sfx = m_CbnSFx.GetCurSel();
-	if (sfx < mpt::size(m_MidiCfg.szMidiSFXExt))
+	if (sfx < std::size(m_MidiCfg.szMidiSFXExt))
 	{
 		if(ValidateMacroString(m_EditSFx, m_MidiCfg.szMidiSFXExt[sfx], true))
 		{
@@ -325,7 +325,7 @@ void CMidiMacroSetup::OnSFxEditChanged()
 void CMidiMacroSetup::OnZxxEditChanged()
 {
 	UINT zxx = m_CbnZxx.GetCurSel();
-	if (zxx < mpt::size(m_MidiCfg.szMidiZXXExt))
+	if (zxx < std::size(m_MidiCfg.szMidiZXXExt))
 	{
 		if(ValidateMacroString(m_EditZxx, m_MidiCfg.szMidiZXXExt[zxx], false))
 		{

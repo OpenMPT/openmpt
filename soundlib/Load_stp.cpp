@@ -188,7 +188,7 @@ static void ConvertLoopSequence(ModSample &smp, STPLoopList &loopList)
 
 		// update loop info based on position in edited sample
 		info.loopStart = start;
-		if(i > 0 && i <= mpt::size(newSmp.cues))
+		if(i > 0 && i <= std::size(newSmp.cues))
 		{
 			newSmp.cues[i - 1] = start;
 		}
@@ -609,7 +609,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 						STPLoopList &loopList = loopInfo[m.instr - 1];
 
 						m.param--;
-						if(m.param < std::min(mpt::size(ModSample().cues), loopList.size()))
+						if(m.param < std::min(std::size(ModSample().cues), loopList.size()))
 						{
 							m.volcmd = VOLCMD_OFFSET;
 							m.vol = m.param;
@@ -642,7 +642,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 						STPLoopList &loopList = loopInfo[m.instr - 1];
 
 						m.param--;
-						if(m.param < std::min(mpt::size(ModSample().cues), loopList.size()))
+						if(m.param < std::min(std::size(ModSample().cues), loopList.size()))
 						{
 							m.volcmd = VOLCMD_OFFSET;
 							m.vol = m.param;

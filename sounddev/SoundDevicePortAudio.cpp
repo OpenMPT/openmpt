@@ -633,7 +633,7 @@ bool CPortaudioDevice::OpenDriverSettings()
 	mpt::PathString controlEXE;
 	TCHAR systemDir[MAX_PATH];
 	MemsetZero(systemDir);
-	if(GetSystemDirectory(systemDir, mpt::saturate_cast<UINT>(mpt::size(systemDir))) > 0)
+	if(GetSystemDirectory(systemDir, mpt::saturate_cast<UINT>(std::size(systemDir))) > 0)
 	{
 		controlEXE += mpt::PathString::FromNative(systemDir);
 		controlEXE += P_("\\");

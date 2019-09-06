@@ -76,7 +76,7 @@ static constexpr int effectColors[] =
 	MODCOLOR_PITCH,
 };
 
-static_assert(mpt::size(effectColors) == MAX_EFFECT_TYPE);
+static_assert(std::size(effectColors) == MAX_EFFECT_TYPE);
 
 /////////////////////////////////////////////////////////////////////////////
 // CViewPattern Drawing Implementation

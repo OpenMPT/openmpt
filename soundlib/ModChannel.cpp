@@ -124,7 +124,7 @@ ModCommand::NOTE ModChannel::GetPluginNote(bool realNoteMapping) const
 	}
 	ModCommand::NOTE plugNote = mpt::saturate_cast<ModCommand::NOTE>(nNote - nTranspose);
 	// Caution: When in compatible mode, ModChannel::nNote stores the "real" note, not the mapped note!
-	if(realNoteMapping && pModInstrument != nullptr && plugNote >= NOTE_MIN && plugNote < (mpt::size(pModInstrument->NoteMap) + NOTE_MIN))
+	if(realNoteMapping && pModInstrument != nullptr && plugNote >= NOTE_MIN && plugNote < (std::size(pModInstrument->NoteMap) + NOTE_MIN))
 	{
 		plugNote = pModInstrument->NoteMap[plugNote - NOTE_MIN];
 	}

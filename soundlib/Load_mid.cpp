@@ -1324,7 +1324,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 							} else
 							{
 								uint32 key = midiCode & 0x7F;
-								if((key >= 24) && (key < 24 + mpt::size(szMidiPercussionNames)))
+								if((key >= 24) && (key < 24 + std::size(szMidiPercussionNames)))
 									pIns->name = szMidiPercussionNames[key - 24];
 							}
 						}

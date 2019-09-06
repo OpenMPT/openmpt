@@ -378,7 +378,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 							DTMEnvelope env;
 							envChunk.ReadStruct(env);
 							mptEnv.dwFlags.set(ENV_ENABLED);
-							mptEnv.resize(std::min({ static_cast<std::size_t>(env.numPoints), mpt::size(env.points), static_cast<std::size_t>(MAX_ENVPOINTS) }));
+							mptEnv.resize(std::min({ static_cast<std::size_t>(env.numPoints), std::size(env.points), static_cast<std::size_t>(MAX_ENVPOINTS) }));
 							for(size_t i = 0; i < mptEnv.size(); i++)
 							{
 								mptEnv[i].value = std::min(uint8(64), static_cast<uint8>(env.points[i].value));

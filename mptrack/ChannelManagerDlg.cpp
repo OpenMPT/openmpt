@@ -722,7 +722,7 @@ void CChannelManagerDlg::OnPaint()
 			{
 				const HBRUSH brushes[] = { CMainFrame::brushHighLight, green, red };
 				auto r = m_ModDoc->IsChannelRecord(nThisChn);
-				FillRect(dc, btn, brushes[r % mpt::size(brushes)]);
+				FillRect(dc, btn, brushes[r % std::size(brushes)]);
 				break;
 			}
 			case kPluginState:

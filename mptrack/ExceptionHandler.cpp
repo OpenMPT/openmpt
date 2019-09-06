@@ -556,7 +556,7 @@ void ExceptionHandler::UnhandledMFCException(CException * e, const MSG * pMsg)
 	{
 		TCHAR tmp[1024 + 1];
 		MemsetZero(tmp);
-		if(dynamic_cast<CSimpleException*>(e)->GetErrorMessage(tmp, static_cast<UINT>(mpt::size(tmp) - 1)) != 0)
+		if(dynamic_cast<CSimpleException*>(e)->GetErrorMessage(tmp, static_cast<UINT>(std::size(tmp) - 1)) != 0)
 		{
 			tmp[1024] = 0;
 			errorMessage = mpt::format(U_("Unhandled MFC exception occurred while processming window message '%1': %2."))

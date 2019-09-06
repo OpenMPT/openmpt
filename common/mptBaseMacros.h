@@ -65,11 +65,6 @@ template <auto V> struct constant_value { static constexpr decltype(V) value() {
 
 
 
-// C++17 std::size and std::data
-namespace mpt {
-using std::size;
-using std::data;
-} // namespace mpt
 // legacy
 #if MPT_COMPILER_MSVC
 OPENMPT_NAMESPACE_END

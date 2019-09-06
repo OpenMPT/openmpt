@@ -87,7 +87,7 @@ BOOL CAmpDlg::OnInitDialog()
 	m_list.Create(cx, cy, ILC_COLOR32 | ILC_MASK, 0, 1);
 	std::vector<COLORREF> bits(imgWidth * cy, RGB(255, 0, 255));
 	const COLORREF col = GetSysColor(COLOR_WINDOWTEXT);
-	for(int i = 0, baseX = 0; i < static_cast<int>(mpt::size(fadeLaws)); i++, baseX += cx)
+	for(int i = 0, baseX = 0; i < static_cast<int>(std::size(fadeLaws)); i++, baseX += cx)
 	{
 		Fade::Func fadeFunc = Fade::GetFadeFunc(fadeLaws[i].id);
 		int oldVal = cy - 1;
@@ -121,7 +121,7 @@ BOOL CAmpDlg::OnInitDialog()
 	COMBOBOXEXITEM cbi;
 	MemsetZero(cbi);
 	cbi.mask = CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_TEXT | CBEIF_LPARAM;
-	for(int i = 0; i < static_cast<int>(mpt::size(fadeLaws)); i++)
+	for(int i = 0; i < static_cast<int>(std::size(fadeLaws)); i++)
 	{
 		cbi.iItem = i;
 		cbi.pszText = const_cast<LPTSTR>(fadeLaws[i].name);

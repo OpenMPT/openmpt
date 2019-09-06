@@ -551,7 +551,7 @@ void I3DL2Reverb::SetDelayTaps()
 	m_delayTaps[13] = static_cast<int32>(3.25f / 1000.0f * sampleRate);
 	m_delayTaps[14] = static_cast<int32>(3.53f / 1000.0f * sampleRate);
 
-	for(std::size_t d = 0; d < mpt::size(m_delayTaps); d++)
+	for(std::size_t d = 0; d < std::size(m_delayTaps); d++)
 		m_delayLines[d].SetDelayTap(m_delayTaps[d]);
 }
 

@@ -478,12 +478,12 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 					s.AppendFormat(_T("%u%%"), Util::muldivr(m_tempoSwing[i], 100, TempoSwing::Unity));
 				}
 			}
-			lstrcpyn(pTTT->szText, s, mpt::saturate_cast<int>(mpt::size(pTTT->szText)));
+			lstrcpyn(pTTT->szText, s, mpt::saturate_cast<int>(std::size(pTTT->szText)));
 			return TRUE;
 		}
 	}
 
-	lstrcpyn(pTTT->szText, text, mpt::saturate_cast<int>(mpt::size(pTTT->szText)));
+	lstrcpyn(pTTT->szText, text, mpt::saturate_cast<int>(std::size(pTTT->szText)));
 	return TRUE;
 }
 

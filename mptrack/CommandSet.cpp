@@ -1598,7 +1598,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const mpt::ustring &filenameDesc
 	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
 
 	const std::string whitespace(" \n\r\t");
-	while(iStrm.getline(s, mpt::size(s)))
+	while(iStrm.getline(s, std::size(s)))
 	{
 		curLine = s;
 		l++;

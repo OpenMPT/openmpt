@@ -2180,14 +2180,14 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	}
 
 	size_t numSamples = 0;
-	for(size_t i = 0; i < mpt::size(ins->Keyboard); i++)
+	for(size_t i = 0; i < std::size(ins->Keyboard); i++)
 	{
 		if(ins->Keyboard[i] < 1 || ins->Keyboard[i] > GetNumSamples())
 			continue;
 
 		numSamples++;
 		size_t endOfRegion = i + 1;
-		while(endOfRegion < mpt::size(ins->Keyboard))
+		while(endOfRegion < std::size(ins->Keyboard))
 		{
 			if(ins->Keyboard[endOfRegion] != ins->Keyboard[i] || ins->NoteMap[endOfRegion] != (ins->NoteMap[i] + endOfRegion - i))
 				break;

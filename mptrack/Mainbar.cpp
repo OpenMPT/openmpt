@@ -697,7 +697,7 @@ BOOL CMainToolBar::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 		if(!keyText.IsEmpty())
 			fmt += mpt::tformat(_T(" (%1)"))(keyText);
 	}
-	lstrcpyn(pTTT->szText, fmt.c_str(), mpt::saturate_cast<int>(mpt::size(pTTT->szText)));
+	lstrcpyn(pTTT->szText, fmt.c_str(), mpt::saturate_cast<int>(std::size(pTTT->szText)));
 	*pResult = 0;
 
 	// bring the tooltip window above other popup windows

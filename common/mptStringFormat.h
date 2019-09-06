@@ -620,7 +620,7 @@ private:
 				if(typename traits::char_type('1') <= c && c <= typename traits::char_type('9'))
 				{
 					const std::size_t n = c - typename traits::char_type('0') - 1;
-					if(n < mpt::size(vals))
+					if(n < std::size(vals))
 					{
 						traits::append(result, vals[n]);
 					}

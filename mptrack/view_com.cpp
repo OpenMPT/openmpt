@@ -299,7 +299,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 							TCHAR stmp[512];
 							lvi2 = lvi;
 							lvi2.pszText = stmp;
-							lvi2.cchTextMax = mpt::saturate_cast<int>(mpt::size(stmp));
+							lvi2.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
 							stmp[0] = 0;
 							m_ItemList.GetItem(&lvi2);
 							if (s == stmp) bOk = false;
@@ -387,7 +387,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 							TCHAR stmp[512];
 							lvi2 = lvi;
 							lvi2.pszText = stmp;
-							lvi2.cchTextMax = mpt::saturate_cast<int>(mpt::size(stmp));
+							lvi2.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
 							stmp[0] = 0;
 							m_ItemList.GetItem(&lvi2);
 							if (s == stmp) bOk = FALSE;

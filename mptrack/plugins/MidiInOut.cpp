@@ -441,7 +441,7 @@ void MidiInOut::HardAllNotesOff()
 		Resume();
 	}
 
-	for(uint8 mc = 0; mc < mpt::size(m_MidiCh); mc++)		//all midi chans
+	for(uint8 mc = 0; mc < std::size(m_MidiCh); mc++)		//all midi chans
 	{
 		PlugInstrChannel &channel = m_MidiCh[mc];
 		channel.ResetProgram();
@@ -449,7 +449,7 @@ void MidiInOut::HardAllNotesOff()
 		MidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));		// centre pitch bend
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
 
-		for(size_t i = 0; i < mpt::size(channel.noteOnMap); i++)	//all notes
+		for(size_t i = 0; i < std::size(channel.noteOnMap); i++)	//all notes
 		{
 			for(auto &c : channel.noteOnMap[i])
 			{

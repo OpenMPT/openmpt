@@ -496,7 +496,7 @@ namespace FileReader
 		{
 			char buffer[64];
 			typename TFileCursor::off_t avail = 0;
-			while((avail = std::min(f.GetRaw(buffer, mpt::size(buffer)), maxLength - dest.length())) != 0)
+			while((avail = std::min(f.GetRaw(buffer, std::size(buffer)), maxLength - dest.length())) != 0)
 			{
 				auto end = std::find(buffer, buffer + avail, '\0');
 				dest.insert(dest.end(), buffer, end);
@@ -527,7 +527,7 @@ namespace FileReader
 			char buffer[64];
 			char c = '\0';
 			typename TFileCursor::off_t avail = 0;
-			while((avail = std::min(f.GetRaw(buffer, mpt::size(buffer)), maxLength - dest.length())) != 0)
+			while((avail = std::min(f.GetRaw(buffer, std::size(buffer)), maxLength - dest.length())) != 0)
 			{
 				auto end = std::find_if(buffer, buffer + avail, mpt::String::Traits<std::string>::IsLineEnding);
 				dest.insert(dest.end(), buffer, end);

@@ -295,7 +295,7 @@ void State::InputSample(int16 sample)
 {
 	if(sample != globalOutputLevel)
 	{
-		LimitMax(activeBleps, static_cast<uint16>(mpt::size(blepState) - 1));
+		LimitMax(activeBleps, static_cast<uint16>(std::size(blepState) - 1));
 
 		// Make room for new blep in the sorted list
 		std::move_backward(blepState, blepState + activeBleps, blepState + activeBleps + 1);
@@ -330,7 +330,7 @@ void State::Clock(int cycles)
 	for(uint16 i = 0; i < activeBleps; i++)
 	{
 		blepState[i].age += static_cast<uint16>(cycles);
-		if(blepState[i].age >= mpt::size(WinSincIntegral[0]))
+		if(blepState[i].age >= std::size(WinSincIntegral[0]))
 		{
 			activeBleps = i;
 			return;

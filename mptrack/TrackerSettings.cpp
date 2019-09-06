@@ -1229,7 +1229,7 @@ std::vector<uint32> TrackerSettings::GetDefaultSampleRates()
 
 void TrackerSettings::LoadChords(MPTChords &chords)
 {	
-	for(std::size_t i = 0; i < mpt::size(chords); i++)
+	for(std::size_t i = 0; i < std::size(chords); i++)
 	{
 		uint32 chord;
 		mpt::ustring note = mpt::format(U_("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
@@ -1249,7 +1249,7 @@ void TrackerSettings::LoadChords(MPTChords &chords)
 
 void TrackerSettings::SaveChords(MPTChords &chords)
 {
-	for(std::size_t i = 0; i < mpt::size(chords); i++)
+	for(std::size_t i = 0; i < std::size(chords); i++)
 	{
 		int32 s = (chords[i].key) | (chords[i].notes[0] << 6) | (chords[i].notes[1] << 12) | (chords[i].notes[2] << 18);
 		mpt::ustring note = mpt::format(U_("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
