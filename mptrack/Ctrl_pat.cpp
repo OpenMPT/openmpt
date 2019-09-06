@@ -1090,7 +1090,7 @@ void CCtrlPatterns::TogglePluginEditor()
 }
 
 
-bool CCtrlPatterns::HasValidPlug(INSTRUMENTINDEX instr)
+bool CCtrlPatterns::HasValidPlug(INSTRUMENTINDEX instr) const
 {
 	return m_sndFile.GetInstrumentPlugin(instr) != nullptr;
 }

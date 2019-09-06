@@ -23,9 +23,8 @@ class CCtrlPatterns;
 
 struct OrdSelection
 {
-	ORDERINDEX firstOrd;
-	ORDERINDEX lastOrd;
-	ORDERINDEX GetSelCount() const {return lastOrd - firstOrd + 1;}
+	ORDERINDEX firstOrd = 0, lastOrd = 0;
+	ORDERINDEX GetSelCount() const { return lastOrd - firstOrd + 1; }
 };
 
 class COrderList: public CWnd
@@ -38,7 +37,7 @@ protected:
 	//m_nXScroll  : The order at the beginning of shown orderlist
 	//m_nScrollPos: The same as order
 	//m_nScrollPos2nd: 2nd selection point if multiple orders are selected
-	//	               (not neccessarily the higher order - GetCurSel() is taking care of that.)
+	//                 (not neccessarily the higher order - GetCurSel() is taking care of that.)
 	ORDERINDEX m_nXScroll = 0, m_nScrollPos = 0, m_nScrollPos2nd = ORDERINDEX_INVALID, m_nDropPos, m_nMouseDownPos, m_playPos = ORDERINDEX_INVALID;
 	ORDERINDEX m_nDragOrder;
 	//To tell how many orders('orderboxes') to show at least
@@ -50,7 +49,6 @@ protected:
 
 public:
 	COrderList(CCtrlPatterns &parent, CModDoc &document);
-	virtual ~COrderList() {}
 
 public:
 	BOOL Init(const CRect&, HFONT hFont);
@@ -63,8 +61,9 @@ public:
 		if(isSelectionKeyPressed && m_nScrollPos2nd == ORDERINDEX_INVALID) m_nScrollPos2nd = m_nScrollPos;
 		else if(!isSelectionKeyPressed && m_nScrollPos2nd != ORDERINDEX_INVALID) m_nScrollPos2nd = ORDERINDEX_INVALID;
 	};
+	void SetSelection(ORDERINDEX firstOrd, ORDERINDEX lastOrd = ORDERINDEX_INVALID);
 	// Why VC wants to inline this huge function is beyond my understanding...
-	MPT_NOINLINE bool SetCurSel(ORDERINDEX sel, bool bEdit = true, bool bShiftClick = false, bool bIgnoreCurSel = false, bool setPlayPos = true);
+	MPT_NOINLINE bool SetCurSel(ORDERINDEX sel, bool setPlayPos = true, bool shiftClick = false, bool ignoreCurSel = false);
 	void UpdateScrollInfo();
 	void UpdateInfoText();
 	int GetFontWidth();
@@ -188,7 +187,7 @@ protected:
 public:
 	CPatEdit() { m_pParent = nullptr; }
 	void SetParent(CCtrlPatterns *parent) { m_pParent = parent; }
-	virtual BOOL PreTranslateMessage(MSG *pMsg);
+	BOOL PreTranslateMessage(MSG *pMsg) override;
 };
 
 
@@ -208,7 +207,7 @@ protected:
 
 public:
 	CCtrlPatterns(CModControlView &parent, CModDoc &document);
-	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glPatternWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG> &GetSplitPosRef() override { return TrackerSettings::Instance().glPatternWindowHeight; }
 
 public:
 	void SetCurrentPattern(PATTERNINDEX nPat);
@@ -231,22 +230,19 @@ protected:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSequenceNext();
 	afx_msg void OnSequencePrev();
-// -> CODE#0015
-// -> DESC="channels management dlg"
 	afx_msg void OnChannelManager();
-// -! NEW_FEATURE#0015
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnPlayerPause();
 	afx_msg void OnPatternNew();
 	afx_msg void OnPatternDuplicate();
 	afx_msg void OnPatternStop();
 	afx_msg void OnPatternPlay();
-	afx_msg void OnPatternPlayNoLoop();		//rewbs.playSongFromCursor
+	afx_msg void OnPatternPlayNoLoop();
 	afx_msg void OnPatternPlayRow();
 	afx_msg void OnPatternPlayFromStart();
 	afx_msg void OnPatternRecord();
 	afx_msg void OnPatternVUMeters();
-	afx_msg void OnPatternViewPlugNames();	//rewbs.patPlugNames
+	afx_msg void OnPatternViewPlugNames();
 	afx_msg void OnPatternProperties();
 	afx_msg void OnPatternExpand();
 	afx_msg void OnPatternShrink();
@@ -268,7 +264,7 @@ protected:
 	afx_msg void OnDetailHi();
 	afx_msg void OnEditUndo();
 	afx_msg void OnUpdateRecord(CCmdUI *pCmdUI);
-	afx_msg void TogglePluginEditor(); //rewbs.instroVST
+	afx_msg void TogglePluginEditor();
 	afx_msg void OnToggleOverflowPaste();
 	afx_msg void OnSequenceNumChanged();
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
@@ -276,7 +272,7 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
-	bool HasValidPlug(INSTRUMENTINDEX instr);
+	bool HasValidPlug(INSTRUMENTINDEX instr) const;
 public:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
