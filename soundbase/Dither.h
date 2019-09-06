@@ -93,7 +93,7 @@ public:
 			return sample;
 		} else
 		{
-			STATIC_ASSERT(sizeof(MixSampleInt) == 4);
+			static_assert(sizeof(MixSampleInt) == 4);
 			constexpr int rshift = (32-targetbits) - MixSampleIntTraits::mix_headroom_bits();
 			if constexpr(rshift <= 1)
 			{

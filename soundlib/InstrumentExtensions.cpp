@@ -221,7 +221,7 @@ bool IsNegative(const T &val)
 // Convenient macro to help WRITE_HEADER declaration for array members ONLY
 // ------------------------------------------------------------------------
 #define WRITE_MPTHEADER_array_member(name,type,code,arraysize) \
-	STATIC_ASSERT(sizeof(type) == sizeof(input-> name [0])); \
+	static_assert(sizeof(type) == sizeof(input-> name [0])); \
 	MPT_ASSERT(sizeof(input->name) >= sizeof(type) * arraysize);\
 	fcode = code;\
 	fsize = sizeof( type ) * arraysize;\
@@ -251,7 +251,7 @@ bool IsNegative(const T &val)
 #define WRITE_MPTHEADER_envelope_member(envType,envField,type,code) \
 	{\
 		const InstrumentEnvelope &env = input->GetEnvelope(envType); \
-		STATIC_ASSERT(sizeof(type) == sizeof(env[0]. envField)); \
+		static_assert(sizeof(type) == sizeof(env[0]. envField)); \
 		fcode = code;\
 		fsize = mpt::saturate_cast<int16>(sizeof( type ) * env.size());\
 		MPT_ASSERT(size_t(fsize) == sizeof( type ) * env.size()); \
@@ -472,7 +472,7 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, uint16 si
 			{ \
 				type tmp; \
 				tmp = file.ReadTruncatedIntLE<type>(fsize); \
-				STATIC_ASSERT(sizeof(tmp) == sizeof(input-> name )); \
+				static_assert(sizeof(tmp) == sizeof(input-> name )); \
 				input-> name = decltype(input-> name )(tmp); \
 				result = true; \
 			} \

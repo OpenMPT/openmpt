@@ -891,7 +891,7 @@ static const MPTVOLCMDINFO gVolCmdInfo[] =
 	{VOLCMD_OFFSET,			MOD_TYPE_MPT,		_T("Sample Cue")},
 };
 
-STATIC_ASSERT(CountOf(gVolCmdInfo) == (MAX_VOLCMDS - 1));
+static_assert(CountOf(gVolCmdInfo) == (MAX_VOLCMDS - 1));
 
 
 UINT EffectInfo::GetNumVolCmds() const

@@ -418,14 +418,14 @@ void SanitizeFilename(mpt::u8string &str);
 template <std::size_t size>
 void SanitizeFilename(char (&buffer)[size])
 {
-	STATIC_ASSERT(size > 0);
+	static_assert(size > 0);
 	SanitizeFilename(buffer, buffer + size);
 }
 
 template <std::size_t size>
 void SanitizeFilename(wchar_t (&buffer)[size])
 {
-	STATIC_ASSERT(size > 0);
+	static_assert(size > 0);
 	SanitizeFilename(buffer, buffer + size);
 }
 

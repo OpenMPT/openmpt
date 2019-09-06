@@ -32,7 +32,7 @@ const EffectType effectTypes[] =
 	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_NORMAL,
 };
 
-STATIC_ASSERT(std::size(effectTypes) == MAX_EFFECTS);
+static_assert(std::size(effectTypes) == MAX_EFFECTS);
 
 
 const EffectType volumeEffectTypes[] =
@@ -43,7 +43,7 @@ const EffectType volumeEffectTypes[] =
 	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_NORMAL,  EFFECT_TYPE_NORMAL,
 };
 
-STATIC_ASSERT(std::size(volumeEffectTypes) == MAX_VOLCMDS);
+static_assert(std::size(volumeEffectTypes) == MAX_VOLCMDS);
 
 
 EffectType ModCommand::GetEffectType(COMMAND cmd)
@@ -945,7 +945,7 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		CMD_POSITIONJUMP,
 		CMD_PATTERNBREAK,
 	};
-	STATIC_ASSERT(std::size(weights) == MAX_EFFECTS);
+	static_assert(std::size(weights) == MAX_EFFECTS);
 
 	for(size_t i = 0; i < std::size(weights); i++)
 	{

@@ -413,7 +413,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 
 	std::vector<bool> packSample(fileHeader.numSamps);
 
-	STATIC_ASSERT(MAX_SAMPLES > 255);
+	static_assert(MAX_SAMPLES > 255);
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
 		AMSSampleHeader sampleHeader;
@@ -556,7 +556,7 @@ struct AMS2Envelope
 			return;
 		}
 
-		STATIC_ASSERT(MAX_ENVPOINTS >= CountOf(data));
+		static_assert(MAX_ENVPOINTS >= CountOf(data));
 		mptEnv.resize(std::min(numPoints, uint8(CountOf(data))));
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
@@ -814,7 +814,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		packStatusMask		= 0x8000,	// If bit is set, sample is packed
 	};
 
-	STATIC_ASSERT(MAX_INSTRUMENTS > 255);
+	static_assert(MAX_INSTRUMENTS > 255);
 	for(INSTRUMENTINDEX ins = 1; ins <= m_nInstruments; ins++)
 	{
 		ModInstrument *instrument = AllocateInstrument(ins);
@@ -835,7 +835,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		STATIC_ASSERT(CountOf(instrument->Keyboard) >= CountOf(sampleAssignment));
+		static_assert(CountOf(instrument->Keyboard) >= CountOf(sampleAssignment));
 		for(size_t i = 0; i < 120; i++)
 		{
 			instrument->Keyboard[i] = sampleAssignment[i] + GetNumSamples() + 1;

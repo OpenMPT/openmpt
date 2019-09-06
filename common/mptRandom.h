@@ -111,7 +111,7 @@ template <typename Trng> struct engine_traits
 template <typename T, typename Trng>
 inline T random(Trng & rng)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	typedef typename std::make_unsigned<T>::type unsigned_T;
 	const unsigned int rng_bits = mpt::engine_traits<Trng>::result_bits();
 	unsigned_T result = 0;
@@ -132,7 +132,7 @@ inline T random(Trng & rng)
 template <typename T, std::size_t required_entropy_bits, typename Trng>
 inline T random(Trng & rng)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	typedef typename std::make_unsigned<T>::type unsigned_T;
 	const unsigned int rng_bits = mpt::engine_traits<Trng>::result_bits();
 	unsigned_T result = 0;
@@ -159,7 +159,7 @@ inline T random(Trng & rng)
 template <typename T, typename Trng>
 inline T random(Trng & rng, std::size_t required_entropy_bits)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	typedef typename std::make_unsigned<T>::type unsigned_T;
 	const unsigned int rng_bits = mpt::engine_traits<Trng>::result_bits();
 	unsigned_T result = 0;
@@ -208,7 +208,7 @@ public:
 template <typename T, typename Trng>
 inline T random(Trng & rng, T min, T max)
 {
-	STATIC_ASSERT(!std::numeric_limits<T>::is_integer);
+	static_assert(!std::numeric_limits<T>::is_integer);
 	typedef mpt::uniform_real_distribution<T> dis_type;
 	dis_type dis(min, max);
 	return static_cast<T>(dis(rng));
@@ -250,12 +250,12 @@ public:
 	}
 	static MPT_CONSTEXPR11_FUN result_type max()
 	{
-		STATIC_ASSERT(((result_mask >> result_shift) << result_shift) == result_mask);
+		static_assert(((result_mask >> result_shift) << result_shift) == result_mask);
 		return static_cast<result_type>(result_mask >> result_shift);
 	}
 	static MPT_CONSTEXPR11_FUN int result_bits()
 	{
-		STATIC_ASSERT(((static_cast<Tstate>(1) << result_bits_) - 1) == (result_mask >> result_shift));
+		static_assert(((static_cast<Tstate>(1) << result_bits_) - 1) == (result_mask >> result_shift));
 		return result_bits_;
 	}
 	inline result_type operator()()
@@ -309,8 +309,8 @@ public:
 	}
 	static MPT_CONSTEXPR11_FUN int result_bits()
 	{
-		MPT_STATIC_ASSERT(std::is_integral<result_type>::value);
-		MPT_STATIC_ASSERT(std::is_unsigned<result_type>::value);
+		static_assert(std::is_integral<result_type>::value);
+		static_assert(std::is_unsigned<result_type>::value);
 		return std::numeric_limits<result_type>::digits;
 	}
 	inline result_type operator()()

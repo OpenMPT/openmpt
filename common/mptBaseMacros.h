@@ -28,13 +28,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-// Compile time assert.
-#define MPT_STATIC_ASSERT static_assert
-// legacy
-#define STATIC_ASSERT(x) MPT_STATIC_ASSERT(x)
-
-
-
 // Advanced inline attributes
 #if MPT_COMPILER_MSVC
 #define MPT_FORCEINLINE __forceinline

@@ -1622,7 +1622,7 @@ struct SFZRegion
 		{
 			// Scientific pitch
 			static const int8 keys[] = { 9, 11, 0, 2, 4, 5, 7 };
-			STATIC_ASSERT(CountOf(keys) == 'g' - 'a' + 1);
+			static_assert(CountOf(keys) == 'g' - 'a' + 1);
 			auto keyC = value[0];
 			if(keyC >= 'A' && keyC <= 'G')
 				key = keys[keyC - 'A'];

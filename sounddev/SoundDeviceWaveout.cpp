@@ -39,7 +39,7 @@ static const std::size_t WAVEOUT_MAXBUFFERSIZE = 16384; // fits in int16
 
 static inline LONG* interlocked_access(DWORD* p)
 {
-	MPT_STATIC_ASSERT(sizeof(LONG) == sizeof(DWORD));
+	static_assert(sizeof(LONG) == sizeof(DWORD));
 	return reinterpret_cast<LONG*>(p);
 }
 

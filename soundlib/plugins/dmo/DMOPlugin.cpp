@@ -136,7 +136,7 @@ static void InterleaveStereo(const float * MPT_RESTRICT inputL, const float * MP
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
-		STATIC_ASSERT((MIXBUFFERSIZE & 7) == 0);
+		static_assert((MIXBUFFERSIZE & 7) == 0);
 		__m128 factor = _mm_set_ps1(_f2si);
 		numFrames = (numFrames + 3) / 4;
 		do
@@ -170,7 +170,7 @@ static void DeinterleaveStereo(const float * MPT_RESTRICT input, float * MPT_RES
 	if(GetProcSupport() & PROCSUPPORT_SSE)
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
-		STATIC_ASSERT((MIXBUFFERSIZE & 7) == 0);
+		static_assert((MIXBUFFERSIZE & 7) == 0);
 		__m128 factor = _mm_set_ps1(_si2f);
 		numFrames = (numFrames + 3) / 4;
 		do
@@ -207,7 +207,7 @@ static void InterleaveFloatToInt16(const float * MPT_RESTRICT inputL, const floa
 	if((GetProcSupport() & (PROCSUPPORT_MMX | PROCSUPPORT_SSE)) == (PROCSUPPORT_MMX | PROCSUPPORT_SSE))
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
-		STATIC_ASSERT((MIXBUFFERSIZE & 7) == 0);
+		static_assert((MIXBUFFERSIZE & 7) == 0);
 		__m64 *out = reinterpret_cast<__m64 *>(output);
 		__m128 factor = _mm_set_ps1(_f2si);
 		numFrames = (numFrames + 3) / 4;
@@ -259,7 +259,7 @@ static void DeinterleaveInt16ToFloat(const int16 * MPT_RESTRICT input, float * M
 	if((GetProcSupport() & (PROCSUPPORT_MMX | PROCSUPPORT_SSE)) == (PROCSUPPORT_MMX | PROCSUPPORT_SSE))
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
-		STATIC_ASSERT((MIXBUFFERSIZE & 7) == 0);
+		static_assert((MIXBUFFERSIZE & 7) == 0);
 		const __m128i *in = reinterpret_cast<const __m128i *>(input);
 		__m128 factor = _mm_set_ps1(_si2f);
 		numFrames = (numFrames + 3) / 4;

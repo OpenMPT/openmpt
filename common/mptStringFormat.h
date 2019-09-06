@@ -215,7 +215,7 @@ enum FormatFlagsEnum
 
 typedef unsigned int FormatFlags;
 
-STATIC_ASSERT(sizeof(FormatFlags) >= sizeof(fmt_base::FormatFlagsEnum));
+static_assert(sizeof(FormatFlags) >= sizeof(fmt_base::FormatFlagsEnum));
 
 class FormatSpec;
 
@@ -395,95 +395,95 @@ static inline Tstring fmt(const T& x, const FormatSpec& f)
 template<typename T>
 static inline Tstring dec(const T& x)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillOff());
 }
 template<int width, typename T>
 static inline Tstring dec0(const T& x)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillNul().Width(width));
 }
 
 template<typename T>
 static inline Tstring dec(unsigned int g, char s, const T& x)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillOff().Group(g).GroupSep(s));
 }
 template<int width, typename T>
 static inline Tstring dec0(unsigned int g, char s, const T& x)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillNul().Width(width).Group(g).GroupSep(s));
 }
 
 template<typename T>
 static inline Tstring hex(const T& x)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillOff());
 }
 template<typename T>
 static inline Tstring HEX(const T& x)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillOff());
 }
 template<int width, typename T>
 static inline Tstring hex0(const T& x)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillNul().Width(width));
 }
 template<int width, typename T>
 static inline Tstring HEX0(const T& x)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillNul().Width(width));
 }
 
 template<typename T>
 static inline Tstring hex(unsigned int g, char s, const T& x)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillOff().Group(g).GroupSep(s));
 }
 template<typename T>
 static inline Tstring HEX(unsigned int g, char s, const T& x)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillOff().Group(g).GroupSep(s));
 }
 template<int width, typename T>
 static inline Tstring hex0(unsigned int g, char s, const T& x)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillNul().Width(width).Group(g).GroupSep(s));
 }
 template<int width, typename T>
 static inline Tstring HEX0(unsigned int g, char s, const T& x)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillNul().Width(width).Group(g).GroupSep(s));
 }
 
 template<typename T>
 static inline Tstring flt(const T& x, int precision = -1)
 {
-	STATIC_ASSERT(std::is_floating_point<T>::value);
+	static_assert(std::is_floating_point<T>::value);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaNrm().FillOff().Precision(precision));
 }
 template<typename T>
 static inline Tstring fix(const T& x, int precision = -1)
 {
-	STATIC_ASSERT(std::is_floating_point<T>::value);
+	static_assert(std::is_floating_point<T>::value);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaFix().FillOff().Precision(precision));
 }
 template<typename T>
 static inline Tstring sci(const T& x, int precision = -1)
 {
-	STATIC_ASSERT(std::is_floating_point<T>::value);
+	static_assert(std::is_floating_point<T>::value);
 	return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaSci().FillOff().Precision(precision));
 }
 

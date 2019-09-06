@@ -589,7 +589,7 @@ void COrderList::EnterPatternNum(int enterNum)
 			curIndex = 0;
 
 		curIndex = curIndex * 10 + static_cast<PATTERNINDEX>(enterNum);
-		STATIC_ASSERT(MAX_PATTERNS < 10000);
+		static_assert(MAX_PATTERNS < 10000);
 		if((curIndex >= 1000) && (curIndex > maxIndex)) curIndex %= 1000;
 		if((curIndex >= 100) && (curIndex > maxIndex)) curIndex %= 100;
 		if((curIndex >= 10) && (curIndex > maxIndex)) curIndex %= 10;

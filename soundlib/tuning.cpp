@@ -54,7 +54,7 @@ Version changes:
 */
 
 
-MPT_STATIC_ASSERT(CTuningRTI::s_RatioTableFineSizeMaxDefault < static_cast<USTEPINDEXTYPE>(FINESTEPCOUNT_MAX));
+static_assert(CTuningRTI::s_RatioTableFineSizeMaxDefault < static_cast<USTEPINDEXTYPE>(FINESTEPCOUNT_MAX));
 
 
 CTuningRTI::CTuningRTI()

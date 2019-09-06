@@ -76,7 +76,7 @@ public:
 		: buf(buf)
 		, size(size)
 	{
-		MPT_STATIC_ASSERT(sizeof(Tchar) == sizeof(typename Tstring::value_type));
+		static_assert(sizeof(Tchar) == sizeof(typename Tstring::value_type));
 		MPT_ASSERT(size > 0);
 	}
 	StringBufRefImpl(const StringBufRefImpl &) = delete;
@@ -114,7 +114,7 @@ public:
 		: buf(buf)
 		, size(size)
 	{
-		MPT_STATIC_ASSERT(sizeof(Tchar) == sizeof(typename Tstring::value_type));
+		static_assert(sizeof(Tchar) == sizeof(typename Tstring::value_type));
 		MPT_ASSERT(size > 0);
 	}
 	StringBufRefImpl(const StringBufRefImpl &) = delete;
@@ -236,7 +236,7 @@ public:
 		, size(size)
 		, mode(mode)
 	{
-		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
+		static_assert(sizeof(Tchar) == 1);
 	}
 	StringModeBufRefImpl(const StringModeBufRefImpl &) = delete;
 	StringModeBufRefImpl(StringModeBufRefImpl &&) = default;
@@ -272,7 +272,7 @@ public:
 		, size(size)
 		, mode(mode)
 	{
-		MPT_STATIC_ASSERT(sizeof(Tchar) == 1);
+		static_assert(sizeof(Tchar) == 1);
 	}
 	StringModeBufRefImpl(const StringModeBufRefImpl &) = delete;
 	StringModeBufRefImpl(StringModeBufRefImpl &&) = default;
@@ -347,9 +347,9 @@ template <std::size_t len, mpt::String::ReadWriteMode mode>
 struct is_binary_safe<typename mpt::charbuf<len, mode>> : public std::true_type { };
 template <std::size_t len>
 struct is_binary_safe<typename mpt::charbuf<len, static_cast<mpt::String::ReadWriteMode>(0)>> : public std::false_type { };
-MPT_STATIC_ASSERT(sizeof(mpt::charbuf<7>) == 7);
-MPT_STATIC_ASSERT(alignof(mpt::charbuf<7>) == 1);
-MPT_STATIC_ASSERT(std::is_standard_layout<mpt::charbuf<7>>::value);
+static_assert(sizeof(mpt::charbuf<7>) == 7);
+static_assert(alignof(mpt::charbuf<7>) == 1);
+static_assert(std::is_standard_layout<mpt::charbuf<7>>::value);
 
 
 #ifdef MODPLUG_TRACKER
@@ -488,7 +488,7 @@ namespace String
 	template <size_t size>
 	void SetNullTerminator(char (&buffer)[size])
 	{
-		STATIC_ASSERT(size > 0);
+		static_assert(size > 0);
 		buffer[size - 1] = 0;
 	}
 
@@ -503,7 +503,7 @@ namespace String
 	template <size_t size>
 	void SetNullTerminator(wchar_t (&buffer)[size])
 	{
-		STATIC_ASSERT(size > 0);
+		static_assert(size > 0);
 		buffer[size - 1] = 0;
 	}
 
@@ -520,7 +520,7 @@ namespace String
 	template <size_t size>
 	void FixNullString(char (&buffer)[size])
 	{
-		STATIC_ASSERT(size > 0);
+		static_assert(size > 0);
 		SetNullTerminator(buffer);
 		size_t pos = 0;
 		// Find the first null char.

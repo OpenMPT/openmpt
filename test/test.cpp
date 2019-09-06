@@ -271,12 +271,12 @@ static MPT_NOINLINE void TestVersion()
 		// Ensure that versions ending in .00.00 (which are ambiguous to truncated version numbers in certain file formats (e.g. S3M and IT) do not get qualified as test builds.
 		VERIFY_EQUAL( MPT_V("1.23.00.00").IsTestVersion(), false);
 
-		STATIC_ASSERT( MPT_V("1.17.2.28").GetRawVersion() == 18285096 );
-		STATIC_ASSERT( MPT_V("1.17.02.48").GetRawVersion() == 18285128 );
-		STATIC_ASSERT( MPT_V("01.17.02.52").GetRawVersion() == 18285138 );
+		static_assert( MPT_V("1.17.2.28").GetRawVersion() == 18285096 );
+		static_assert( MPT_V("1.17.02.48").GetRawVersion() == 18285128 );
+		static_assert( MPT_V("01.17.02.52").GetRawVersion() == 18285138 );
 		// Ensure that bit-shifting works (used in some mod loaders for example)
-		STATIC_ASSERT( MPT_V("01.17.00.00").GetRawVersion() == 0x0117 << 16 );
-		STATIC_ASSERT( MPT_V("01.17.03.00").GetRawVersion() >> 8 == 0x011703 );
+		static_assert( MPT_V("01.17.00.00").GetRawVersion() == 0x0117 << 16 );
+		static_assert( MPT_V("01.17.03.00").GetRawVersion() >> 8 == 0x011703 );
 	}
 
 #ifdef MODPLUG_TRACKER
@@ -360,10 +360,10 @@ static MPT_NOINLINE void TestVersion()
 static MPT_NOINLINE void TestTypes()
 {
 
-	MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
+	static_assert(sizeof(std::uintptr_t) == sizeof(void*));
 	#if defined(__SIZEOF_POINTER__)
-		MPT_STATIC_ASSERT(__SIZEOF_POINTER__ == mpt::pointer_size);
-		MPT_STATIC_ASSERT(__SIZEOF_POINTER__ == sizeof(void*));
+		static_assert(__SIZEOF_POINTER__ == mpt::pointer_size);
+		static_assert(__SIZEOF_POINTER__ == sizeof(void*));
 	#endif
 
 	VERIFY_EQUAL(int8_min, (std::numeric_limits<int8>::min)());
@@ -383,54 +383,54 @@ static MPT_NOINLINE void TestTypes()
 	VERIFY_EQUAL(uint64_max, (std::numeric_limits<uint64>::max)());
 
 
-	STATIC_ASSERT(int8_max == (std::numeric_limits<int8>::max)());
-	STATIC_ASSERT(uint8_max == (std::numeric_limits<uint8>::max)());
+	static_assert(int8_max == (std::numeric_limits<int8>::max)());
+	static_assert(uint8_max == (std::numeric_limits<uint8>::max)());
 
-	STATIC_ASSERT(int16_max == (std::numeric_limits<int16>::max)());
-	STATIC_ASSERT(uint16_max == (std::numeric_limits<uint16>::max)());
+	static_assert(int16_max == (std::numeric_limits<int16>::max)());
+	static_assert(uint16_max == (std::numeric_limits<uint16>::max)());
 
-	STATIC_ASSERT(int32_max == (std::numeric_limits<int32>::max)());
-	STATIC_ASSERT(uint32_max == (std::numeric_limits<uint32>::max)());
+	static_assert(int32_max == (std::numeric_limits<int32>::max)());
+	static_assert(uint32_max == (std::numeric_limits<uint32>::max)());
 
-	STATIC_ASSERT(int64_max == (std::numeric_limits<int64>::max)());
-	STATIC_ASSERT(uint64_max == (std::numeric_limits<uint64>::max)());
+	static_assert(int64_max == (std::numeric_limits<int64>::max)());
+	static_assert(uint64_max == (std::numeric_limits<uint64>::max)());
 
 
-	STATIC_ASSERT((mpt::limits<int8>::max)() == (std::numeric_limits<int8>::max)());
-	STATIC_ASSERT((mpt::limits<uint8>::max)() == (std::numeric_limits<uint8>::max)());
+	static_assert((mpt::limits<int8>::max)() == (std::numeric_limits<int8>::max)());
+	static_assert((mpt::limits<uint8>::max)() == (std::numeric_limits<uint8>::max)());
 
-	STATIC_ASSERT((mpt::limits<int16>::max)() == (std::numeric_limits<int16>::max)());
-	STATIC_ASSERT((mpt::limits<uint16>::max)() == (std::numeric_limits<uint16>::max)());
+	static_assert((mpt::limits<int16>::max)() == (std::numeric_limits<int16>::max)());
+	static_assert((mpt::limits<uint16>::max)() == (std::numeric_limits<uint16>::max)());
 
-	STATIC_ASSERT((mpt::limits<int32>::max)() == (std::numeric_limits<int32>::max)());
-	STATIC_ASSERT((mpt::limits<uint32>::max)() == (std::numeric_limits<uint32>::max)());
+	static_assert((mpt::limits<int32>::max)() == (std::numeric_limits<int32>::max)());
+	static_assert((mpt::limits<uint32>::max)() == (std::numeric_limits<uint32>::max)());
 
-	STATIC_ASSERT((mpt::limits<int64>::max)() == (std::numeric_limits<int64>::max)());
-	STATIC_ASSERT((mpt::limits<uint64>::max)() == (std::numeric_limits<uint64>::max)());
+	static_assert((mpt::limits<int64>::max)() == (std::numeric_limits<int64>::max)());
+	static_assert((mpt::limits<uint64>::max)() == (std::numeric_limits<uint64>::max)());
 
-	STATIC_ASSERT((mpt::limits<int8le>::min)() == (std::numeric_limits<int8>::min)());
-	STATIC_ASSERT((mpt::limits<uint8le>::min)() == (std::numeric_limits<uint8>::min)());
+	static_assert((mpt::limits<int8le>::min)() == (std::numeric_limits<int8>::min)());
+	static_assert((mpt::limits<uint8le>::min)() == (std::numeric_limits<uint8>::min)());
 
-	STATIC_ASSERT((mpt::limits<int16le>::min)() == (std::numeric_limits<int16>::min)());
-	STATIC_ASSERT((mpt::limits<uint16le>::min)() == (std::numeric_limits<uint16>::min)());
+	static_assert((mpt::limits<int16le>::min)() == (std::numeric_limits<int16>::min)());
+	static_assert((mpt::limits<uint16le>::min)() == (std::numeric_limits<uint16>::min)());
 
-	STATIC_ASSERT((mpt::limits<int32le>::min)() == (std::numeric_limits<int32>::min)());
-	STATIC_ASSERT((mpt::limits<uint32le>::min)() == (std::numeric_limits<uint32>::min)());
+	static_assert((mpt::limits<int32le>::min)() == (std::numeric_limits<int32>::min)());
+	static_assert((mpt::limits<uint32le>::min)() == (std::numeric_limits<uint32>::min)());
 
-	STATIC_ASSERT((mpt::limits<int64le>::min)() == (std::numeric_limits<int64>::min)());
-	STATIC_ASSERT((mpt::limits<uint64le>::min)() == (std::numeric_limits<uint64>::min)());
+	static_assert((mpt::limits<int64le>::min)() == (std::numeric_limits<int64>::min)());
+	static_assert((mpt::limits<uint64le>::min)() == (std::numeric_limits<uint64>::min)());
 
-	STATIC_ASSERT((mpt::limits<int8le>::max)() == (std::numeric_limits<int8>::max)());
-	STATIC_ASSERT((mpt::limits<uint8le>::max)() == (std::numeric_limits<uint8>::max)());
+	static_assert((mpt::limits<int8le>::max)() == (std::numeric_limits<int8>::max)());
+	static_assert((mpt::limits<uint8le>::max)() == (std::numeric_limits<uint8>::max)());
 
-	STATIC_ASSERT((mpt::limits<int16le>::max)() == (std::numeric_limits<int16>::max)());
-	STATIC_ASSERT((mpt::limits<uint16le>::max)() == (std::numeric_limits<uint16>::max)());
+	static_assert((mpt::limits<int16le>::max)() == (std::numeric_limits<int16>::max)());
+	static_assert((mpt::limits<uint16le>::max)() == (std::numeric_limits<uint16>::max)());
 
-	STATIC_ASSERT((mpt::limits<int32le>::max)() == (std::numeric_limits<int32>::max)());
-	STATIC_ASSERT((mpt::limits<uint32le>::max)() == (std::numeric_limits<uint32>::max)());
+	static_assert((mpt::limits<int32le>::max)() == (std::numeric_limits<int32>::max)());
+	static_assert((mpt::limits<uint32le>::max)() == (std::numeric_limits<uint32>::max)());
 
-	STATIC_ASSERT((mpt::limits<int64le>::max)() == (std::numeric_limits<int64>::max)());
-	STATIC_ASSERT((mpt::limits<uint64le>::max)() == (std::numeric_limits<uint64>::max)());
+	static_assert((mpt::limits<int64le>::max)() == (std::numeric_limits<int64>::max)());
+	static_assert((mpt::limits<uint64le>::max)() == (std::numeric_limits<uint64>::max)());
 
 }
 
@@ -1536,7 +1536,7 @@ static MPT_NOINLINE void TestMisc2()
 	{
 		uuiddata[i] = mpt::byte_cast<std::byte>(static_cast<uint8>(i));
 	}
-	STATIC_ASSERT(sizeof(mpt::UUID) == 16);
+	static_assert(sizeof(mpt::UUID) == 16);
 	UUIDbin uuid2;
 	std::memcpy(&uuid2, uuiddata, 16);
 	VERIFY_EQUAL(mpt::UUID(uuid2).ToUString(), U_("00010203-0405-0607-0809-0a0b0c0d0e0f"));

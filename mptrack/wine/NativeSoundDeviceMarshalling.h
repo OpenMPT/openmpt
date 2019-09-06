@@ -210,7 +210,7 @@ struct json_cast_impl<Tdst, std::string>
 
 namespace C {
 
-STATIC_ASSERT(sizeof(OpenMPT_SoundDevice_StreamPosition) % 8 == 0);
+static_assert(sizeof(OpenMPT_SoundDevice_StreamPosition) % 8 == 0);
 inline OpenMPT_SoundDevice_StreamPosition encode(SoundDevice::StreamPosition src) {
 	OpenMPT_SoundDevice_StreamPosition dst;
 	MemsetZero(dst);
@@ -225,7 +225,7 @@ inline SoundDevice::StreamPosition decode(OpenMPT_SoundDevice_StreamPosition src
 	return dst;
 }
 
-STATIC_ASSERT(sizeof(OpenMPT_SoundDevice_TimeInfo) % 8 == 0);
+static_assert(sizeof(OpenMPT_SoundDevice_TimeInfo) % 8 == 0);
 inline OpenMPT_SoundDevice_TimeInfo encode(SoundDevice::TimeInfo src) {
 	OpenMPT_SoundDevice_TimeInfo dst;
 	MemsetZero(dst);
@@ -248,7 +248,7 @@ inline SoundDevice::TimeInfo decode(OpenMPT_SoundDevice_TimeInfo src) {
 	return dst;
 }
 
-STATIC_ASSERT(sizeof(OpenMPT_SoundDevice_Flags) % 8 == 0);
+static_assert(sizeof(OpenMPT_SoundDevice_Flags) % 8 == 0);
 inline OpenMPT_SoundDevice_Flags encode(SoundDevice::Flags src) {
 	OpenMPT_SoundDevice_Flags dst;
 	MemsetZero(dst);
@@ -261,7 +261,7 @@ inline SoundDevice::Flags decode(OpenMPT_SoundDevice_Flags src) {
 	return dst;
 }
 
-STATIC_ASSERT(sizeof(OpenMPT_SoundDevice_BufferFormat) % 8 == 0);
+static_assert(sizeof(OpenMPT_SoundDevice_BufferFormat) % 8 == 0);
 inline OpenMPT_SoundDevice_BufferFormat encode(SoundDevice::BufferFormat src) {
 	OpenMPT_SoundDevice_BufferFormat dst;
 	MemsetZero(dst);
@@ -284,7 +284,7 @@ inline SoundDevice::BufferFormat decode(OpenMPT_SoundDevice_BufferFormat src) {
 	return dst;
 }
 
-STATIC_ASSERT(sizeof(OpenMPT_SoundDevice_BufferAttributes) % 8 == 0);
+static_assert(sizeof(OpenMPT_SoundDevice_BufferAttributes) % 8 == 0);
 inline OpenMPT_SoundDevice_BufferAttributes encode(SoundDevice::BufferAttributes src) {
 	OpenMPT_SoundDevice_BufferAttributes dst;
 	MemsetZero(dst);
@@ -301,7 +301,7 @@ inline SoundDevice::BufferAttributes decode(OpenMPT_SoundDevice_BufferAttributes
 	return dst;
 }
 
-STATIC_ASSERT(sizeof(OpenMPT_SoundDevice_RequestFlags) % 8 == 0);
+static_assert(sizeof(OpenMPT_SoundDevice_RequestFlags) % 8 == 0);
 inline OpenMPT_SoundDevice_RequestFlags encode(FlagSet<SoundDevice::RequestFlags> src) {
 	OpenMPT_SoundDevice_RequestFlags dst;
 	MemsetZero(dst);

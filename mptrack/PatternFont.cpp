@@ -370,7 +370,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 
 	// Volume commands
 	const char volEffects[]= " vpcdabuhlrgfe:o";
-	STATIC_ASSERT(CountOf(volEffects) - 1 == MAX_VOLCMDS);
+	static_assert(CountOf(volEffects) - 1 == MAX_VOLCMDS);
 	for(int i = 0; i < MAX_VOLCMDS; i++)
 	{
 		DrawChar(hDC, volEffects[i], pf.nVolX, pf.nVolY + i * charHeight, charWidth, charHeight);

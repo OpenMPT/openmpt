@@ -482,7 +482,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	const CHANNELINDEX channelsWithoutDrums = m_nChannels;
 	const bool hasDrumChannels = drumData.CanRead(sizeof(MT2DrumsData));
-	STATIC_ASSERT(MAX_BASECHANNELS >= 64 + 8);
+	static_assert(MAX_BASECHANNELS >= 64 + 8);
 	if(hasDrumChannels)
 	{
 		m_nChannels += 8;

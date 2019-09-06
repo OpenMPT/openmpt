@@ -176,7 +176,7 @@ protected:
 
 };
 
-STATIC_ASSERT(sizeof(MIDIMacroConfig) == sizeof(MIDIMacroConfigData)); // this is directly written to files, so the size must be correct!
+static_assert(sizeof(MIDIMacroConfig) == sizeof(MIDIMacroConfigData)); // this is directly written to files, so the size must be correct!
 
 
 OPENMPT_NAMESPACE_END

@@ -1465,7 +1465,7 @@ static constexpr MsgBoxHidableMessage HidableMessages[] =
 	{ _T("Warning: The exported file will not contain any of MPT's file format hacks."), 1 << 4, true },
 };
 
-STATIC_ASSERT(CountOf(HidableMessages) == enMsgBoxHidableMessage_count);
+static_assert(CountOf(HidableMessages) == enMsgBoxHidableMessage_count);
 
 // Messagebox with 'don't show this again'-checkbox. Uses parameter 'enMsg'
 // to get the needed information from message array, and updates the variable that

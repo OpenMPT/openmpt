@@ -352,7 +352,7 @@ static constexpr ResamplingMode RemoveAA(ResamplingMode mode) noexcept { return 
 // Release node defines
 #define ENV_RELEASE_NODE_UNSET	0xFF
 #define NOT_YET_RELEASED		(-1)
-STATIC_ASSERT(ENV_RELEASE_NODE_UNSET > MAX_ENVPOINTS);
+static_assert(ENV_RELEASE_NODE_UNSET > MAX_ENVPOINTS);
 
 
 enum PluginPriority

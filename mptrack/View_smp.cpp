@@ -1400,7 +1400,7 @@ void CViewSample::ScrollToPosition(int x)    // logical coordinates
 template<class T, class uT>
 T CViewSample::GetSampleValueFromPoint(const ModSample &smp, const CPoint &point) const
 {
-	STATIC_ASSERT(sizeof(T) == sizeof(uT) && sizeof(T) <= 2);
+	static_assert(sizeof(T) == sizeof(uT) && sizeof(T) <= 2);
 	const int channelHeight = m_rcClient.Height() / smp.GetNumChannels();
 	int yPos = point.y - m_drawChannel * channelHeight - m_rcClient.top;
 
@@ -1983,9 +1983,9 @@ void CViewSample::OnEditCopy()
 		+ sizeof(RIFFChunk) + ((smpSize + 1) & ~1)						// Sample data
 		+ sizeof(RIFFChunk) + sizeof(WAVExtraChunk)						// Sample metadata
 		+ MAX_SAMPLENAME + MAX_SAMPLEFILENAME;							// Sample name
-	STATIC_ASSERT((sizeof(WAVExtraChunk) % 2u) == 0);
-	STATIC_ASSERT((MAX_SAMPLENAME % 2u) == 0);
-	STATIC_ASSERT((MAX_SAMPLEFILENAME % 2u) == 0);
+	static_assert((sizeof(WAVExtraChunk) % 2u) == 0);
+	static_assert((MAX_SAMPLENAME % 2u) == 0);
+	static_assert((MAX_SAMPLEFILENAME % 2u) == 0);
 
 	if(addLoopInfo)
 	{

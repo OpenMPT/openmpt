@@ -371,7 +371,7 @@ namespace FileReader
 	template <typename T, typename TFileCursor>
 	bool ReadStruct(TFileCursor &f, T &target)
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		static_assert(mpt::is_binary_safe<T>::value);
 		if(Read(f, target))
 		{
 			return true;
@@ -387,7 +387,7 @@ namespace FileReader
 	template <typename T, typename TFileCursor>
 	bool ReadStructPartial(TFileCursor &f, T &target, typename TFileCursor::off_t partialSize = sizeof(T))
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		static_assert(mpt::is_binary_safe<T>::value);
 		typename TFileCursor::off_t copyBytes = std::min(partialSize, sizeof(T));
 		if(!f.CanRead(copyBytes))
 		{
@@ -558,7 +558,7 @@ namespace FileReader
 	template<typename T, std::size_t destSize, typename TFileCursor>
 	bool ReadArray(TFileCursor &f, T (&destArray)[destSize])
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		static_assert(mpt::is_binary_safe<T>::value);
 		if(f.CanRead(sizeof(destArray)))
 		{
 			for(auto &element : destArray)
@@ -579,7 +579,7 @@ namespace FileReader
 	template<typename T, std::size_t destSize, typename TFileCursor>
 	bool ReadArray(TFileCursor &f, std::array<T, destSize> &destArray)
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		static_assert(mpt::is_binary_safe<T>::value);
 		if(f.CanRead(sizeof(destArray)))
 		{
 			for(auto &element : destArray)
@@ -600,7 +600,7 @@ namespace FileReader
 	template<typename T, typename TFileCursor>
 	bool ReadVector(TFileCursor &f, std::vector<T> &destVector, size_t destSize)
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<T>::value);
+		static_assert(mpt::is_binary_safe<T>::value);
 		destVector.resize(destSize);
 		if(f.CanRead(sizeof(T) * destSize))
 		{

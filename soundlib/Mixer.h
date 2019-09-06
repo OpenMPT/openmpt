@@ -30,15 +30,15 @@ enum { MIXING_FRACTIONAL_BITS = MixSampleIntTraits::mix_fractional_bits() };
 constexpr float MIXING_SCALEF = MixSampleIntTraits::mix_scale<float>();
 
 #ifdef MPT_INTMIXER
-MPT_STATIC_ASSERT(sizeof(mixsample_t) == 4);
-MPT_STATIC_ASSERT(MIXING_FILTER_PRECISION == 24);
-MPT_STATIC_ASSERT(MIXING_ATTENUATION == 4);
-MPT_STATIC_ASSERT(MIXING_FRACTIONAL_BITS == 27);
-MPT_STATIC_ASSERT(MixSampleIntTraits::mix_clip_max() == int32(0x7FFFFFF));
-MPT_STATIC_ASSERT(MixSampleIntTraits::mix_clip_min() == (0 - int32(0x7FFFFFF)));
-MPT_STATIC_ASSERT(MIXING_SCALEF == 134217728.0f);
+static_assert(sizeof(mixsample_t) == 4);
+static_assert(MIXING_FILTER_PRECISION == 24);
+static_assert(MIXING_ATTENUATION == 4);
+static_assert(MIXING_FRACTIONAL_BITS == 27);
+static_assert(MixSampleIntTraits::mix_clip_max() == int32(0x7FFFFFF));
+static_assert(MixSampleIntTraits::mix_clip_min() == (0 - int32(0x7FFFFFF)));
+static_assert(MIXING_SCALEF == 134217728.0f);
 #else
-MPT_STATIC_ASSERT(sizeof(mixsample_t) == 4);
+static_assert(sizeof(mixsample_t) == 4);
 #endif
 
 #define MIXBUFFERSIZE 512

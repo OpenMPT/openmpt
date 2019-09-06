@@ -1085,7 +1085,7 @@ static const char * Charset_wchar_t()
 		return "wchar_t";
 	#else // MPT_ICONV_NO_WCHAR
 		// iconv on OSX does not handle wchar_t if no locale is set
-		STATIC_ASSERT(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
+		static_assert(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
 		if(sizeof(wchar_t) == 2)
 		{
 			// "UTF-16" generates BOM
@@ -1126,8 +1126,8 @@ static Tdststring EncodeImplFallback(Charset charset, const widestring &src);
 template<typename Tdststring>
 static Tdststring EncodeImpl(Charset charset, const widestring &src)
 {
-	MPT_STATIC_ASSERT(sizeof(typename Tdststring::value_type) == sizeof(char));
-	MPT_STATIC_ASSERT((std::is_same<typename Tdststring::value_type, char>::value));
+	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
+	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
 	if(charset == CharsetCP437AMS || charset == CharsetCP437AMS2)
 	{
 		std::string out;
@@ -1246,8 +1246,8 @@ static widestring DecodeImplFallback(Charset charset, const Tsrcstring &src);
 template<typename Tsrcstring>
 static widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 {
-	MPT_STATIC_ASSERT(sizeof(typename Tsrcstring::value_type) == sizeof(char));
-	MPT_STATIC_ASSERT((std::is_same<typename Tsrcstring::value_type, char>::value));
+	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
+	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
 	if(charset == CharsetCP437AMS || charset == CharsetCP437AMS2)
 	{
 		std::string in(src.begin(), src.end());
@@ -1363,8 +1363,8 @@ static widestring DecodeImplFallback(Charset charset, const Tsrcstring &src)
 template<typename Tdststring, typename Tsrcstring>
 static Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 {
-	STATIC_ASSERT(sizeof(typename Tdststring::value_type) == sizeof(char));
-	STATIC_ASSERT(sizeof(typename Tsrcstring::value_type) == sizeof(char));
+	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
+	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
 	if(to == from)
 	{
 		const typename Tsrcstring::value_type * src_beg = src.data();

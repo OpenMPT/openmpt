@@ -27,7 +27,7 @@ namespace mpt {
 namespace IO {
 
 
-//STATIC_ASSERT(sizeof(std::streamoff) == 8); // Assert 64bit file support.
+//static_assert(sizeof(std::streamoff) == 8); // Assert 64bit file support.
 bool IsValid(std::ostream & f) { return !f.fail(); }
 bool IsValid(std::istream & f) { return !f.fail(); }
 bool IsValid(std::iostream & f) { return !f.fail(); }

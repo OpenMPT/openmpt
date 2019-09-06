@@ -214,7 +214,7 @@ inline bool Write(Tfile & f, const Tbinary & v)
 template <typename Tbinary, typename Tfile>
 inline bool Write(Tfile & f, const std::vector<Tbinary> & v)
 {
-	STATIC_ASSERT(mpt::is_binary_safe<Tbinary>::value);
+	static_assert(mpt::is_binary_safe<Tbinary>::value);
 	return IO::WriteRaw(f, mpt::as_raw_memory(v));
 }
 
@@ -246,7 +246,7 @@ template <typename T, typename Tfile>
 inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 {
 	bool result = false;
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	uint8 bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
 	const IO::Offset readResult = IO::ReadRaw(f, bytes, std::min(size, sizeof(T)));
@@ -267,7 +267,7 @@ template <typename T, typename Tfile>
 inline bool ReadIntLE(Tfile & f, T & v)
 {
 	bool result = false;
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	uint8 bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
 	const IO::Offset readResult = IO::ReadRaw(f, bytes, sizeof(T));
@@ -288,7 +288,7 @@ template <typename T, typename Tfile>
 inline bool ReadIntBE(Tfile & f, T & v)
 {
 	bool result = false;
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	uint8 bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
 	const IO::Offset readResult = IO::ReadRaw(f, bytes, sizeof(T));
@@ -368,7 +368,7 @@ inline bool ReadAdaptiveInt64LE(Tfile & f, uint64 & v)
 template <typename Tsize, typename Tfile>
 inline bool ReadSizedStringLE(Tfile & f, std::string & str, Tsize maxSize = std::numeric_limits<Tsize>::max())
 {
-	STATIC_ASSERT(std::numeric_limits<Tsize>::is_integer);
+	static_assert(std::numeric_limits<Tsize>::is_integer);
 	str.clear();
 	Tsize size = 0;
 	if(!mpt::IO::ReadIntLE(f, size))
@@ -395,14 +395,14 @@ inline bool ReadSizedStringLE(Tfile & f, std::string & str, Tsize maxSize = std:
 template <typename T, typename Tfile>
 inline bool WriteIntLE(Tfile & f, const T v)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return IO::Write(f, mpt::as_le(v));
 }
 
 template <typename T, typename Tfile>
 inline bool WriteIntBE(Tfile & f, const T v)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	return IO::Write(f, mpt::as_be(v));
 }
 
@@ -502,8 +502,8 @@ inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 v, std::size_t fixedSiz
 template <typename Tfile, typename T>
 bool WriteVarInt(Tfile & f, const T v, size_t *bytesWritten = nullptr)
 {
-	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	STATIC_ASSERT(!std::numeric_limits<T>::is_signed);
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(!std::numeric_limits<T>::is_signed);
 	std::byte out[(sizeof(T) * 8 + 6) / 7];
 	size_t numBytes = 0;
 	for(uint32 n = (sizeof(T) * 8) / 7; n > 0; n--)
@@ -522,7 +522,7 @@ bool WriteVarInt(Tfile & f, const T v, size_t *bytesWritten = nullptr)
 template <typename Tsize, typename Tfile>
 inline bool WriteSizedStringLE(Tfile & f, const std::string & str)
 {
-	STATIC_ASSERT(std::numeric_limits<Tsize>::is_integer);
+	static_assert(std::numeric_limits<Tsize>::is_integer);
 	if(str.size() > std::numeric_limits<Tsize>::max())
 	{
 		return false;

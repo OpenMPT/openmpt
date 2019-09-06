@@ -598,7 +598,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				if(sampleHeader.smpNum == 0)
 					continue;
 				#if 1
-					STATIC_ASSERT((mpt::limits<decltype(sampleHeader.smpNum)>::max)() < MAX_SAMPLES);
+					static_assert((mpt::limits<decltype(sampleHeader.smpNum)>::max)() < MAX_SAMPLES);
 				#else
 					MPT_MAYBE_CONSTANT_IF(sampleHeader.smpNum >= MAX_SAMPLES)
 						continue;

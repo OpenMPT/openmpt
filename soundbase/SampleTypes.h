@@ -30,10 +30,10 @@ using AudioSample = mpt::select_type<mpt::float_traits<nativefloat>::is_hard, Au
 template <typename Tsample, std::size_t MIX_HEADROOM_BITS, std::size_t FILTER_HEADROOM_BITS>
 struct FixedPointSampleTraits
 {
-	MPT_STATIC_ASSERT(std::is_integral<Tsample>::value);
-	MPT_STATIC_ASSERT(std::is_signed<Tsample>::value);
-	MPT_STATIC_ASSERT((sizeof(Tsample) * 8u) - 1 > MIX_HEADROOM_BITS);
-	MPT_STATIC_ASSERT((sizeof(Tsample) * 8u) - 1 > FILTER_HEADROOM_BITS);
+	static_assert(std::is_integral<Tsample>::value);
+	static_assert(std::is_signed<Tsample>::value);
+	static_assert((sizeof(Tsample) * 8u) - 1 > MIX_HEADROOM_BITS);
+	static_assert((sizeof(Tsample) * 8u) - 1 > FILTER_HEADROOM_BITS);
 	using sample_type = Tsample;
 	enum class sample_type_strong : sample_type {};
 	static constexpr int mix_headroom_bits() noexcept { return static_cast<int>(MIX_HEADROOM_BITS); }

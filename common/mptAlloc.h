@@ -53,12 +53,12 @@ struct GetRawBytesFunctor<std::vector<T>>
 {
 	inline mpt::const_byte_span operator () (const std::vector<T> & v) const
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		static_assert(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
 		return mpt::as_span(reinterpret_cast<const std::byte *>(v.data()), v.size() * sizeof(T));
 	}
 	inline mpt::byte_span operator () (std::vector<T> & v) const
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		static_assert(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
 		return mpt::as_span(reinterpret_cast<std::byte *>(v.data()), v.size() * sizeof(T));
 	}
 };
@@ -68,7 +68,7 @@ struct GetRawBytesFunctor<const std::vector<T>>
 {
 	inline mpt::const_byte_span operator () (const std::vector<T> & v) const
 	{
-		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		static_assert(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
 		return mpt::as_span(reinterpret_cast<const std::byte *>(v.data()), v.size() * sizeof(T));
 	}
 };
@@ -111,7 +111,7 @@ aligned_raw_memory aligned_alloc_impl(std::size_t size, std::size_t count, std::
 template <std::size_t alignment>
 inline aligned_raw_memory aligned_alloc(std::size_t size, std::size_t count)
 {
-	MPT_STATIC_ASSERT(alignment > 0);
+	static_assert(alignment > 0);
 	MPT_CONSTEXPR14_ASSERT(mpt::weight(alignment) == 1);
 	return aligned_alloc_impl(size, count, alignment);
 }
@@ -128,7 +128,7 @@ struct aligned_raw_buffer
 template <typename T, std::size_t alignment>
 inline aligned_raw_buffer<T> aligned_alloc(std::size_t count)
 {
-	MPT_STATIC_ASSERT(alignment >= alignof(T));
+	static_assert(alignment >= alignof(T));
 	aligned_raw_memory raw = aligned_alloc<alignment>(sizeof(T), count);
 	return aligned_raw_buffer<T>{mpt::launder(reinterpret_cast<T*>(raw.aligned)), raw.mem};
 }

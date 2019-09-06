@@ -1018,8 +1018,8 @@ struct ConvertFixedPoint<uint8, int32, fractionalBits>
 	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
-		STATIC_ASSERT(shiftBits >= 1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		static_assert(shiftBits >= 1);
 		val = MPT_SC_RSHIFT_SIGNED((val + (1<<(shiftBits-1))), shiftBits); // round
 		if(val < int8_min) val = int8_min;
 		if(val > int8_max) val = int8_max;
@@ -1035,8 +1035,8 @@ struct ConvertFixedPoint<int8, int32, fractionalBits>
 	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
-		STATIC_ASSERT(shiftBits >= 1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		static_assert(shiftBits >= 1);
 		val = MPT_SC_RSHIFT_SIGNED((val + (1<<(shiftBits-1))), shiftBits); // round
 		if(val < int8_min) val = int8_min;
 		if(val > int8_max) val = int8_max;
@@ -1052,8 +1052,8 @@ struct ConvertFixedPoint<int16, int32, fractionalBits>
 	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
-		STATIC_ASSERT(shiftBits >= 1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		static_assert(shiftBits >= 1);
 		val = MPT_SC_RSHIFT_SIGNED((val + (1<<(shiftBits-1))), shiftBits); // round
 		if(val < int16_min) val = int16_min;
 		if(val > int16_max) val = int16_max;
@@ -1069,8 +1069,8 @@ struct ConvertFixedPoint<int24, int32, fractionalBits>
 	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
-		STATIC_ASSERT(shiftBits >= 1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		static_assert(shiftBits >= 1);
 		val = MPT_SC_RSHIFT_SIGNED((val + (1<<(shiftBits-1))), shiftBits); // round
 		if(val < int24_min) val = int24_min;
 		if(val > int24_max) val = int24_max;
@@ -1085,7 +1085,7 @@ struct ConvertFixedPoint<int32, int32, fractionalBits>
 	typedef int32 output_t;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		return static_cast<int32>(Clamp(val, static_cast<int>(-((1<<fractionalBits)-1)), static_cast<int>(1<<fractionalBits)-1)) << (sizeof(input_t)*8-1-fractionalBits);
 	}
 };
@@ -1103,7 +1103,7 @@ struct ConvertFixedPoint<float32, int32, fractionalBits>
 	}
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		return val * factor;
 	}
 };
@@ -1121,7 +1121,7 @@ struct ConvertFixedPoint<float64, int32, fractionalBits>
 	}
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		return val * factor;
 	}
 };
@@ -1138,8 +1138,8 @@ struct ConvertToFixedPoint<int32, uint8, fractionalBits>
 	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
-		STATIC_ASSERT(shiftBits >= 1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
+		static_assert(shiftBits >= 1);
 		return MPT_SC_LSHIFT_SIGNED(static_cast<output_t>(static_cast<int>(val)-0x80), shiftBits);
 	}
 };
@@ -1152,8 +1152,8 @@ struct ConvertToFixedPoint<int32, int8, fractionalBits>
 	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
-		STATIC_ASSERT(shiftBits >= 1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
+		static_assert(shiftBits >= 1);
 		return MPT_SC_LSHIFT_SIGNED(static_cast<output_t>(val), shiftBits);
 	}
 };
@@ -1166,8 +1166,8 @@ struct ConvertToFixedPoint<int32, int16, fractionalBits>
 	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
-		STATIC_ASSERT(shiftBits >= 1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
+		static_assert(shiftBits >= 1);
 		return MPT_SC_LSHIFT_SIGNED(static_cast<output_t>(val), shiftBits);
 	}
 };
@@ -1180,8 +1180,8 @@ struct ConvertToFixedPoint<int32, int24, fractionalBits>
 	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
-		STATIC_ASSERT(shiftBits >= 1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
+		static_assert(shiftBits >= 1);
 		return MPT_SC_LSHIFT_SIGNED(static_cast<output_t>(val), shiftBits);
 	}
 };
@@ -1193,7 +1193,7 @@ struct ConvertToFixedPoint<int32, int32, fractionalBits>
 	typedef int32 output_t;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
 		return MPT_SC_RSHIFT_SIGNED(static_cast<output_t>(val), (sizeof(input_t)*8-1-fractionalBits));
 	}
 };
@@ -1211,7 +1211,7 @@ struct ConvertToFixedPoint<int32, float32, fractionalBits>
 	}
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		return mpt::saturate_cast<output_t>(MPT_SC_FASTROUND(val * factor));
 	}
 };
@@ -1229,7 +1229,7 @@ struct ConvertToFixedPoint<int32, float64, fractionalBits>
 	}
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
 		return mpt::saturate_cast<output_t>(MPT_SC_FASTROUND(val * factor));
 	}
 };
@@ -1266,7 +1266,7 @@ struct ClipFixed
 	typedef Tfixed output_t;
 	MPT_FORCEINLINE Tfixed operator() (Tfixed val)
 	{
-		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
+		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
 		if constexpr(clipOutput)
 		{
 			constexpr Tfixed clip_max = (Tfixed(1) << fractionalBits) - Tfixed(1);

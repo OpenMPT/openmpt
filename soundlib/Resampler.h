@@ -50,7 +50,7 @@ typedef mixsample_t SINC_TYPE;
 #endif // MPT_INTMIXER
 
 #define SINC_MASK (SINC_PHASES-1)
-STATIC_ASSERT((SINC_MASK & 0xffff) == SINC_MASK); // exceeding fractional freq
+static_assert((SINC_MASK & 0xffff) == SINC_MASK); // exceeding fractional freq
 
 
 class CResamplerSettings

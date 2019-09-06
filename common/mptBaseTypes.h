@@ -183,16 +183,16 @@ constexpr nativefloat operator"" _nf(long double lit)
 
 
 
-MPT_STATIC_ASSERT(sizeof(std::uintptr_t) == sizeof(void*));
+static_assert(sizeof(std::uintptr_t) == sizeof(void*));
 
 
 
-MPT_STATIC_ASSERT(std::numeric_limits<unsigned char>::digits == 8);
+static_assert(std::numeric_limits<unsigned char>::digits == 8);
 
-MPT_STATIC_ASSERT(sizeof(char) == 1);
+static_assert(sizeof(char) == 1);
 
-MPT_STATIC_ASSERT(sizeof(std::byte) == 1);
-MPT_STATIC_ASSERT(alignof(std::byte) == 1);
+static_assert(sizeof(std::byte) == 1);
+static_assert(alignof(std::byte) == 1);
 
 
 namespace mpt {
@@ -200,7 +200,7 @@ constexpr int arch_bits = sizeof(void*) * 8;
 constexpr std::size_t pointer_size = sizeof(void*);
 } // namespace mpt
 
-MPT_STATIC_ASSERT(mpt::arch_bits == static_cast<int>(mpt::pointer_size) * 8);
+static_assert(mpt::arch_bits == static_cast<int>(mpt::pointer_size) * 8);
 
 
 

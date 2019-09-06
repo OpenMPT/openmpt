@@ -426,7 +426,7 @@ static std::vector<char> ReadFile(const mpt::PathString &filename)
 
 static void WriteFileUTF16LE(const mpt::PathString &filename, const std::wstring &str)
 {
-	STATIC_ASSERT(sizeof(wchar_t) == 2);
+	static_assert(sizeof(wchar_t) == 2);
 	mpt::SafeOutputFile sinifile(filename, std::ios::binary, mpt::FlushMode::Full);
 	mpt::ofstream& inifile = sinifile;
 	const uint8 UTF16LE_BOM[] = { 0xff, 0xfe };

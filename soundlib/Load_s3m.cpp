@@ -701,7 +701,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 	std::vector<uint16le> sampleOffsets(writeSamples);
 	for(SAMPLEINDEX smp = 0; smp < writeSamples; smp++)
 	{
-		STATIC_ASSERT((sizeof(S3MSampleHeader) % 16) == 0);
+		static_assert((sizeof(S3MSampleHeader) % 16) == 0);
 		sampleOffsets[smp] = static_cast<uint16>((sampleHeaderOffset + smp * sizeof(S3MSampleHeader)) / 16);
 	}
 	mpt::IO::Write(f, sampleOffsets);

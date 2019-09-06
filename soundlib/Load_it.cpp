@@ -1968,13 +1968,13 @@ uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool updatePlugData)
 				// Dry/Wet ratio
 				mpt::IO::WriteRaw(f, "DWRT", 4);
 				// DWRT chunk does not include a size, so better make sure we always write 4 bytes here.
-				STATIC_ASSERT(sizeof(IEEE754binary32LE) == 4);
+				static_assert(sizeof(IEEE754binary32LE) == 4);
 				mpt::IO::Write(f, IEEE754binary32LE(m_MixPlugins[i].fDryRatio));
 
 				// Default program
 				mpt::IO::WriteRaw(f, "PROG", 4);
 				// PROG chunk does not include a size, so better make sure we always write 4 bytes here.
-				STATIC_ASSERT(sizeof(m_MixPlugins[i].defaultProgram) == sizeof(int32));
+				static_assert(sizeof(m_MixPlugins[i].defaultProgram) == sizeof(int32));
 				mpt::IO::WriteIntLE<int32>(f, m_MixPlugins[i].defaultProgram);
 
 				// Please, if you add any more chunks here, don't repeat history (see above) and *do* add a size field for your chunk, mmmkay?
@@ -2305,7 +2305,7 @@ void ReadField(FileReader &chunk, std::size_t size, T &field)
 template<typename T>
 void ReadFieldCast(FileReader &chunk, std::size_t size, T &field)
 {
-	STATIC_ASSERT(sizeof(T) <= sizeof(int32));
+	static_assert(sizeof(T) <= sizeof(int32));
 	field = static_cast<T>(chunk.ReadSizedIntLE<int32>(size));
 }
 
@@ -2375,7 +2375,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 				// Channel settings for channels 65+
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
-					STATIC_ASSERT(CountOf(ChnSettings) >= 64);
+					static_assert(CountOf(ChnSettings) >= 64);
 					const CHANNELINDEX loopLimit = std::min(uint16(64 + size / 2), uint16(CountOf(ChnSettings)));
 
 					for(CHANNELINDEX chn = 64; chn < loopLimit; chn++)

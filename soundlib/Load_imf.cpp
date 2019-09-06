@@ -123,7 +123,7 @@ struct IMFInstrument
 
 		if(smpNum)
 		{
-			STATIC_ASSERT(CountOf(mptIns.Keyboard) >= CountOf(map));
+			static_assert(CountOf(mptIns.Keyboard) >= CountOf(map));
 			for(size_t note = 0; note < CountOf(map); note++)
 			{
 				mptIns.Keyboard[note] = firstSample + map[note];

@@ -150,7 +150,7 @@ CModDoc::~CModDoc()
 
 void CModDoc::SetModified(bool modified)
 {
-	STATIC_ASSERT(sizeof(long) == sizeof(m_bModified));
+	static_assert(sizeof(long) == sizeof(m_bModified));
 	m_modifiedAutosave = modified;
 	if(!!InterlockedExchange(reinterpret_cast<long *>(&m_bModified), modified ? TRUE : FALSE) != modified)
 	{

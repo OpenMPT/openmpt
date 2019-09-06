@@ -113,8 +113,8 @@ template <typename Tdst, typename Tsrc>
 inline Tdst saturate_cast(Tsrc src)
 {
 	// This code tries not only to obviously avoid overflows but also to avoid signed/unsigned comparison warnings and type truncation warnings (which in fact would be safe here) by explicit casting.
-	STATIC_ASSERT(std::numeric_limits<Tdst>::is_integer);
-	STATIC_ASSERT(std::numeric_limits<Tsrc>::is_integer);
+	static_assert(std::numeric_limits<Tdst>::is_integer);
+	static_assert(std::numeric_limits<Tsrc>::is_integer);
 	if constexpr(std::numeric_limits<Tdst>::is_signed && std::numeric_limits<Tsrc>::is_signed)
 	{
 		if constexpr(sizeof(Tdst) >= sizeof(Tsrc))
@@ -189,7 +189,7 @@ inline Tdst saturate_cast(float src)
 template <typename T>
 MPT_CONSTEXPR14_FUN std::size_t weight(T val) noexcept
 {
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_integer);
 	typedef typename std::make_unsigned<T>::type Tunsigned;
 	Tunsigned uval = static_cast<Tunsigned>(val);
 	std::size_t result = 0;
@@ -223,16 +223,16 @@ using std::rotr;
 template <typename T>
 MPT_CONSTEXPR14_FUN bool ispow2(T x) noexcept
 {
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::is_unsigned<T>::value);
 	return mpt::weight(x) == 1;
 }
 
 template <typename T>
 MPT_CONSTEXPR14_FUN T ceil2(T x) noexcept
 {
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::is_unsigned<T>::value);
 	T result = 1;
 	while(result < x)
 	{
@@ -249,8 +249,8 @@ MPT_CONSTEXPR14_FUN T ceil2(T x) noexcept
 template <typename T>
 MPT_CONSTEXPR14_FUN T floor2(T x) noexcept
 {
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::is_unsigned<T>::value);
 	if(x == 0)
 	{
 		return 0;
@@ -271,8 +271,8 @@ MPT_CONSTEXPR14_FUN T floor2(T x) noexcept
 template <typename T>
 MPT_CONSTEXPR14_FUN T log2p1(T x) noexcept
 {
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::is_unsigned<T>::value);
 	T result = 0;
 	while(x > 0)
 	{
@@ -304,8 +304,8 @@ MPT_CONSTEXPR14_FUN T rotr(T x, int r) noexcept
 template <typename T>
 MPT_CONSTEXPR14_FUN T rotl(T x, int s) noexcept
 {
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::is_unsigned<T>::value);
 	auto N = std::numeric_limits<T>::digits;
 	auto r = s % N;
 	return (s < 0) ? detail::rotr(x, -s) : ((x >> (N - r)) | (x << r));
@@ -314,8 +314,8 @@ MPT_CONSTEXPR14_FUN T rotl(T x, int s) noexcept
 template <typename T>
 MPT_CONSTEXPR14_FUN T rotr(T x, int s) noexcept
 {
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	MPT_STATIC_ASSERT(std::is_unsigned<T>::value);
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::is_unsigned<T>::value);
 	auto N = std::numeric_limits<T>::digits;
 	auto r = s % N;
 	return (s < 0) ? detail::rotl(x, -s) : ((x << (N - r)) | (x >> r));
@@ -337,10 +337,10 @@ struct ModIfNotZeroImpl
 	template <typename Tval>
 	inline Tval mod(Tval x)
 	{
-		STATIC_ASSERT(std::numeric_limits<Tmod>::is_integer);
-		STATIC_ASSERT(!std::numeric_limits<Tmod>::is_signed);
-		STATIC_ASSERT(std::numeric_limits<Tval>::is_integer);
-		STATIC_ASSERT(!std::numeric_limits<Tval>::is_signed);
+		static_assert(std::numeric_limits<Tmod>::is_integer);
+		static_assert(!std::numeric_limits<Tmod>::is_signed);
+		static_assert(std::numeric_limits<Tval>::is_integer);
+		static_assert(!std::numeric_limits<Tval>::is_signed);
 		return static_cast<Tval>(x % m);
 	}
 };
@@ -450,8 +450,8 @@ namespace mpt
 template <typename T>
 MPT_FORCEINLINE auto rshift_signed_standard(T x, int y) -> decltype(x >> y)
 {
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_signed);
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_signed);
 	typedef decltype(x >> y) result_type;
 	typedef typename std::make_unsigned<result_type>::type unsigned_result_type;
 	const unsigned_result_type roffset = static_cast<unsigned_result_type>(1) << ((sizeof(result_type) * 8) - 1);
@@ -466,8 +466,8 @@ MPT_FORCEINLINE auto rshift_signed_standard(T x, int y) -> decltype(x >> y)
 template <typename T>
 MPT_FORCEINLINE auto lshift_signed_standard(T x, int y) -> decltype(x << y)
 {
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_signed);
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_signed);
 	typedef decltype(x << y) result_type;
 	typedef typename std::make_unsigned<result_type>::type unsigned_result_type;
 	const unsigned_result_type roffset = static_cast<unsigned_result_type>(1) << ((sizeof(result_type) * 8) - 1);
@@ -484,16 +484,16 @@ MPT_FORCEINLINE auto lshift_signed_standard(T x, int y) -> decltype(x << y)
 template <typename T>
 MPT_FORCEINLINE auto rshift_signed_undefined(T x, int y) -> decltype(x >> y)
 {
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_signed);
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_signed);
 	return x >> y;
 }
 
 template <typename T>
 MPT_FORCEINLINE auto lshift_signed_undefined(T x, int y) -> decltype(x << y)
 {
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_integer);
-	MPT_STATIC_ASSERT(std::numeric_limits<T>::is_signed);
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::numeric_limits<T>::is_signed);
 	return x << y;
 }
 

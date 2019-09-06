@@ -346,7 +346,7 @@ static bool ValidateHeader(const XPKFILEHEADER &header)
 	{
 		return false;
 	}
-	MPT_STATIC_ASSERT(sizeof(XPKFILEHEADER) >= 8);
+	static_assert(sizeof(XPKFILEHEADER) >= 8);
 	if(header.SrcLen < (sizeof(XPKFILEHEADER) - 8))
 	{
 		return false;
