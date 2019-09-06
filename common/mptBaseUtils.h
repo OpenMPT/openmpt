@@ -681,12 +681,4 @@ namespace Util {
 
 
 
-namespace mpt
-{
-using std::gcd;
-using std::lcm;
-} // namespace mpt
-
-
-
 OPENMPT_NAMESPACE_END
