@@ -574,7 +574,7 @@ public:
 		const int count_max = 0xffff;
 		while(count > 0)
 		{
-			int count_chunk = mpt::clamp(mpt::saturate_cast<int>(count), int(0), count_max);
+			int count_chunk = std::clamp(mpt::saturate_cast<int>(count), int(0), count_max);
 			buf.resize(count_chunk + (count_chunk+3)/4 + 7200);
 			int result = 0;
 			if(lame_get_num_channels(gfp) == 1)

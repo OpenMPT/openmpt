@@ -428,13 +428,6 @@ inline T ExponentialGrow(const T &x)
 } //namespace Util
 
 
-namespace mpt
-{
-// C++17 clamp
-using std::clamp;
-} // namespace mpt
-
-
 // Limits 'val' to given range. If 'val' is less than 'lowerLimit', 'val' is set to value 'lowerLimit'.
 // Similarly if 'val' is greater than 'upperLimit', 'val' is set to value 'upperLimit'.
 // If 'lowerLimit' > 'upperLimit', 'val' won't be modified.

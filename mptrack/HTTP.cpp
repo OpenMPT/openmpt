@@ -384,7 +384,7 @@ Result Request::operator()(InternetSession &internet) const
 			{
 				throw HTTP::LastErrorException();
 			}
-			availableSize = mpt::clamp(availableSize, DWORD(0), mpt::saturate_cast<DWORD>(mpt::IO::BUFFERSIZE_TINY));
+			availableSize = std::clamp(availableSize, DWORD(0), mpt::saturate_cast<DWORD>(mpt::IO::BUFFERSIZE_TINY));
 			if(InternetReadFile(NativeHandle(request), downloadBuffer, availableSize, &bytesRead) == FALSE)
 			{
 				throw HTTP::LastErrorException();

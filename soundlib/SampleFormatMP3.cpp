@@ -609,8 +609,8 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 			channels = info.channels;
 			if(rate <= 0) break; // broken stream
 			if(channels != 1 && channels != 2) break; // broken stream
-			stream_pos += mpt::clamp(info.frame_bytes, 0, mpt::saturate_cast<int>(bytes_left));
-			bytes_left -= mpt::clamp(info.frame_bytes, 0, mpt::saturate_cast<int>(bytes_left));
+			stream_pos += std::clamp(info.frame_bytes, 0, mpt::saturate_cast<int>(bytes_left));
+			bytes_left -= std::clamp(info.frame_bytes, 0, mpt::saturate_cast<int>(bytes_left));
 			if(frame_samples > 0)
 			{
 				try

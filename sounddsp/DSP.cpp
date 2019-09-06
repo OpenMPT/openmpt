@@ -172,8 +172,8 @@ void CMegaBass::Initialize(bool bReset, DWORD MixingFreq)
 		int32 a1 = 0, b0 = 1024, b1 = 0;
 		int nXBassCutOff = 50 + (m_Settings.m_nXBassRange+2) * 20;
 		int nXBassGain = m_Settings.m_nXBassDepth;
-		nXBassGain = mpt::clamp(nXBassGain, 2, 8);
-		nXBassCutOff = mpt::clamp(nXBassCutOff, 60, 600);
+		nXBassGain = std::clamp(nXBassGain, 2, 8);
+		nXBassCutOff = std::clamp(nXBassCutOff, 60, 600);
 		ShelfEQ(1024, a1, b0, b1, nXBassCutOff, MixingFreq,
 				1.0f + (1.0f/16.0f) * (0x300 >> nXBassGain),
 				1.0f,

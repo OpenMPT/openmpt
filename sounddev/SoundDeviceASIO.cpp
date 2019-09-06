@@ -386,10 +386,10 @@ bool CASIODevice::InternalOpen()
 			}
 		} else if(granularity < -1)
 		{ // granularity value not allowed, just clamp value
-			m_nAsioBufferLen = mpt::clamp(m_nAsioBufferLen, minSize, maxSize);
+			m_nAsioBufferLen = std::clamp(m_nAsioBufferLen, minSize, maxSize);
 		} else if(granularity == -1 && (mpt::weight(minSize) != 1 || mpt::weight(maxSize) != 1))
 		{ // granularity tells us we need power-of-2 sizes, but min or max sizes are no power-of-2
-			m_nAsioBufferLen = mpt::clamp(m_nAsioBufferLen, minSize, maxSize);
+			m_nAsioBufferLen = std::clamp(m_nAsioBufferLen, minSize, maxSize);
 			// just start at 1 and find a matching power-of-2 in range
 			const long bufTarget = m_nAsioBufferLen;
 			for(long bufSize = 1; bufSize <= maxSize && bufSize <= bufTarget; bufSize *= 2)
@@ -402,7 +402,7 @@ bool CASIODevice::InternalOpen()
 			// if no power-of-2 in range is found, just leave the clamped value alone, perhaps it works
 		} else if(granularity == -1)
 		{ // sane values, power-of-2 size required between min and max
-			m_nAsioBufferLen = mpt::clamp(m_nAsioBufferLen, minSize, maxSize);
+			m_nAsioBufferLen = std::clamp(m_nAsioBufferLen, minSize, maxSize);
 			// get the largest allowed buffer size that is smaller or equal to the target size
 			const long bufTarget = m_nAsioBufferLen;
 			for(long bufSize = minSize; bufSize <= maxSize && bufSize <= bufTarget; bufSize *= 2)
@@ -411,7 +411,7 @@ bool CASIODevice::InternalOpen()
 			}
 		} else if(granularity > 0)
 		{ // buffer size in granularity steps from min to max allowed
-			m_nAsioBufferLen = mpt::clamp(m_nAsioBufferLen, minSize, maxSize);
+			m_nAsioBufferLen = std::clamp(m_nAsioBufferLen, minSize, maxSize);
 			// get the largest allowed buffer size that is smaller or equal to the target size
 			const long bufTarget = m_nAsioBufferLen;
 			for(long bufSize = minSize; bufSize <= maxSize && bufSize <= bufTarget; bufSize += granularity)
