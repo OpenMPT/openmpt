@@ -84,43 +84,6 @@ MPT_CONSTEXPR14_FUN bool constexpr_throw(Exception && e)
 
 namespace mpt {
 
-//  GCC 4.5 and up provides templated overloads of std::abs that convert
-// integer type narrower than int to double.
-//  This is fixed as of GCC 7.1.
-//  As this is apparently valid by the current standard, Library Working Group
-// Issue #2735 has been filed (see
-// <https://cplusplus.github.io/LWG/lwg-defects.html#2735>).
-//  In any case, avoid this insanity and provide our own mpt::abs implementation
-// for signed integer and floating point types.
-//  Note: We stick to a C++98-style implementation only overloading int and
-// greater types in order to keep promotion rules consistent for narrower types,
-// which a templated version returning the argument type would not do. OpenMPT
-// probably assumes this semantic when calling abs(int8) in various places.
-inline int abs(int x)
-{
-	return std::abs(x);
-}
-inline long abs(long x)
-{
-	return std::abs(x);
-}
-inline long long abs(long long x)
-{
-	return std::abs(x);
-}
-inline float abs(float x)
-{
-	return std::fabs(x);
-}
-inline double abs(double x)
-{
-	return std::fabs(x);
-}
-inline long double abs(long double x)
-{
-	return std::fabs(x);
-}
-
 // Modulo with more intuitive behaviour for some contexts:
 // Instead of being symmetrical around 0, the pattern for positive numbers is repeated in the negative range.
 // For example, wrapping_modulo(-1, m) == (m - 1).

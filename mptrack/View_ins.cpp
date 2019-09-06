@@ -1551,13 +1551,13 @@ CString CViewInstrument::EnvValueToString(int tick, int val) const
 		if(m_nEnv != ENV_PANNING)
 			s.Format(_T("%d"), displayVal);
 		else	// panning envelope: display right/center/left chars
-			s.Format(_T("%d %c"), mpt::abs(displayVal), displayVal > 0 ? _T('R') : (displayVal < 0 ? _T('L') : _T('C')));
+			s.Format(_T("%d %c"), std::abs(displayVal), displayVal > 0 ? _T('R') : (displayVal < 0 ? _T('L') : _T('C')));
 	} else
 	{
 		// ticks after release node
 		int displayVal = (val - releaseNode.value) * 2;
 		displayVal = (m_nEnv != ENV_VOLUME) ? displayVal - 32 : displayVal;
-		s.Format(_T("Rel%c%d"), displayVal > 0 ? _T('+') : _T('-'), mpt::abs(displayVal));
+		s.Format(_T("Rel%c%d"), displayVal > 0 ? _T('+') : _T('-'), std::abs(displayVal));
 	}
 	return s;
 }

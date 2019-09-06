@@ -1445,7 +1445,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 	{
 		if(Instruments[ins] != nullptr && Instruments[ins]->midiPWD != 0)
 		{
-			itHeader.pwd = static_cast<uint8>(mpt::abs(Instruments[ins]->midiPWD));
+			itHeader.pwd = static_cast<uint8>(std::abs(Instruments[ins]->midiPWD));
 			break;
 		}
 	}

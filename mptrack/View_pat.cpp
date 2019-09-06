@@ -3782,7 +3782,7 @@ void CViewPattern::CursorJump(int distance, bool snap)
 {
 	ROWINDEX row = GetCurrentRow();
 	const bool upwards = distance < 0;
-	const int distanceAbs = mpt::abs(distance);
+	const int distanceAbs = std::abs(distance);
 
 	if(snap)
 		row = (((row + (upwards ? -1 : 0)) / distanceAbs) + (upwards ? 0 : 1)) * distanceAbs;

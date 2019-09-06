@@ -621,7 +621,7 @@ float I3DL2Reverb::CalcDecayCoeffs(int32 index)
 		float c22 = -2.0f * c21 - 2.0f;
 		float c23 = std::sqrt(c22 * c22 - c21 * c21 * 4.0f);
 		c2 = (c23 - c22) / (c21 + c21);
-		if(mpt::abs(c2) > 1.0f)
+		if(std::abs(c2) > 1.0f)
 			c2 = (-c22 - c23) / (c21 + c21);
 	}
 	m_delayCoeffs[index][0] = c1;

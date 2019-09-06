@@ -87,7 +87,7 @@ void LFOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			value = std::sin(m_phase * 2.0 * M_PI);
 			break;
 		case kTriangle:
-			value = 1.0 - 4.0 * mpt::abs(m_phase - 0.5);
+			value = 1.0 - 4.0 * std::abs(m_phase - 0.5);
 			break;
 		case kSaw:
 			value = 2.0 * m_phase - 1.0;

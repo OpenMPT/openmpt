@@ -284,7 +284,7 @@ bool CTuningRTI::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 			if(n == s)
 			{
 				// nothing
-			} else if(mpt::abs(n - s) % m_GroupSize == 0)
+			} else if(std::abs(n - s) % m_GroupSize == 0)
 			{
 				m_RatioTable[n - m_StepMin] = std::pow(m_GroupRatio, static_cast<RATIOTYPE>(n - s) / static_cast<RATIOTYPE>(m_GroupSize)) * m_RatioTable[s - m_StepMin];
 			}

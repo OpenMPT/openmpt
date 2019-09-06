@@ -3828,7 +3828,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, cons
 // Send portamento commands to plugins
 void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 {
-	int actualParam = mpt::abs(param);
+	int actualParam = std::abs(param);
 	int pitchBend = 0;
 
 	// Old MIDI Pitch Bends:
@@ -4094,7 +4094,7 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 
 		const int32 slide = chn.m_PortamentoTickSlide - old_PortamentoTickSlide;
 
-		if(mpt::abs(chn.nPortamentoDest) <= mpt::abs(slide))
+		if(std::abs(chn.nPortamentoDest) <= std::abs(slide))
 		{
 			if(chn.nPortamentoDest != 0)
 			{
@@ -5538,7 +5538,7 @@ void CSoundFile::DoFreqSlide(ModChannel &chn, int32 nFreqSlide) const
 	{
 		// IT Linear slides
 		const auto nOldPeriod = chn.nPeriod;
-		uint32 n = mpt::abs(nFreqSlide) / 4u;
+		uint32 n = std::abs(nFreqSlide) / 4u;
 		LimitMax(n, 255u);
 		if(n != 0)
 		{
@@ -6213,9 +6213,9 @@ void CSoundFile::PortamentoFineMPT(ModChannel &chn, int param)
 	const int tickParam = static_cast<int>((m_PlayState.m_nTickCount + 1.0) * param / m_PlayState.m_nMusicSpeed);
 	chn.m_PortamentoFineSteps += (param >= 0) ? tickParam - chn.nOldFinePortaUpDown : tickParam + chn.nOldFinePortaUpDown;
 	if(m_PlayState.m_nTickCount + 1 == m_PlayState.m_nMusicSpeed)
-		chn.nOldFinePortaUpDown = static_cast<int8>(mpt::abs(param));
+		chn.nOldFinePortaUpDown = static_cast<int8>(std::abs(param));
 	else
-		chn.nOldFinePortaUpDown = static_cast<int8>(mpt::abs(tickParam));
+		chn.nOldFinePortaUpDown = static_cast<int8>(std::abs(tickParam));
 
 	chn.m_CalculateFreq = true;
 }

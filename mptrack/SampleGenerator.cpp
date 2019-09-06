@@ -150,7 +150,7 @@ bool CSampleGenerator::RenderSample(CSoundFile *pSndFile, SAMPLEINDEX nSample)
 			sample_buffer[i] = 0;
 		}
 		// new maximum value?
-		if(mpt::abs(sample_buffer[i]) > minmax) minmax = mpt::abs(sample_buffer[i]);
+		if(std::abs(sample_buffer[i]) > minmax) minmax = std::abs(sample_buffer[i]);
 
 	}
 

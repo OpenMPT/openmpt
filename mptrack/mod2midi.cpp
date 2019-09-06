@@ -124,7 +124,7 @@ namespace MidiExport
 			for(uint8 i = firstCh; i <= lastCh; i++)
 			{
 				const uint8 ch = 0xB0 | i;
-				const uint8 msg[] = { ch, 0x64, 0x00, 0x00, ch, 0x65, 0x00, 0x00, ch, 0x06, static_cast<uint8>(mpt::abs(m_instr.midiPWD)) };
+				const uint8 msg[] = { ch, 0x64, 0x00, 0x00, ch, 0x65, 0x00, 0x00, ch, 0x06, static_cast<uint8>(std::abs(m_instr.midiPWD)) };
 				WriteTicks();
 				mpt::IO::WriteRaw(f, msg, sizeof(msg));
 				if(m_tempoTrack)

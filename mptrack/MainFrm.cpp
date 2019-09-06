@@ -900,7 +900,7 @@ void CMainFrame::audioCloseDevice()
 
 void VUMeter::Process(Channel &c, MixSampleInt sample)
 {
-	c.peak = std::max(c.peak, mpt::abs(sample));
+	c.peak = std::max(c.peak, std::abs(sample));
 	if(sample < MixSampleIntTraits::mix_clip_min() || MixSampleIntTraits::mix_clip_max() < sample)
 	{
 		c.clipped = true;
