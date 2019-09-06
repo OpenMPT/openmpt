@@ -595,16 +595,10 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				MDLSampleHeader sampleHeader;
 				chunk.ReadStruct(sampleHeader);
-				if(sampleHeader.smpNum == 0)
+				if(sampleHeader.smpNum == 0 || sampleHeader.smpNum > GetNumSamples())
 					continue;
-				#if 1
-					static_assert((mpt::limits<decltype(sampleHeader.smpNum)>::max)() < MAX_SAMPLES);
-				#else
-					MPT_MAYBE_CONSTANT_IF(sampleHeader.smpNum >= MAX_SAMPLES)
-						continue;
-				#endif
 
-				LimitMax(sampleHeader.lastNote, static_cast<uint8>(CountOf(mptIns->Keyboard)));
+				LimitMax(sampleHeader.lastNote, static_cast<uint8>(std::size(mptIns->Keyboard)));
 				for(uint8 n = firstNote; n <= sampleHeader.lastNote; n++)
 				{
 					mptIns->Keyboard[n] = sampleHeader.smpNum;
