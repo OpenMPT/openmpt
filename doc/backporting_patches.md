@@ -20,7 +20,7 @@ OpenMPT 1.28 / libopenmpt 0.4
  *  Replace `std::size` by `mpt::size`.
  *  Replace `if constexpr` by `MPT_CONSTANT_IF`.
  *  Replace `static_assert` by `MPT_STATIC_ASSERT`.
- *  Replace `[[discard]]` by `MPT_DISCARD`.
+ *  Replace `[[nodiscard]]` by `MPT_NODISCARD`.
  *  Replace `[[fallthrough]]` by `MPT_FALLTHROUGH`.
 
 OpenMPT 1.27 / libopenmpt 0.3 
