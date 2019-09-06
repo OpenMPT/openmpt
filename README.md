@@ -172,9 +172,9 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
         The minimum required compiler versions are:
 
-         -  gcc 5
+         -  gcc 7
 
-         -  clang 3.8
+         -  clang 5
 
         The Makefile requires pkg-config for native builds.
         For sound output in openmpt123, PortAudio or SDL is required.

@@ -62,9 +62,6 @@ mpt::ustring SettingValue::FormatTypeAsString() const
 }
 
 
-#if MPT_CXX_AT_LEAST(17)
-
-
 mpt::ustring SettingValue::FormatValueAsString() const
 {
 	switch(GetType())
@@ -116,65 +113,6 @@ void SettingValue::SetFromString(const AnyStringLocale &newVal)
 			break;
 	}
 }
-
-
-#else
-
-
-mpt::ustring SettingValue::FormatValueAsString() const
-{
-	switch(GetType())
-	{
-		case SettingTypeBool:
-			return mpt::ufmt::val(valueBool);
-			break;
-		case SettingTypeInt:
-			return mpt::ufmt::val(valueInt);
-			break;
-		case SettingTypeFloat:
-			return mpt::ufmt::val(valueFloat);
-			break;
-		case SettingTypeString:
-			return valueString;
-			break;
-		case SettingTypeBinary:
-			return Util::BinToHex(mpt::as_span(valueBinary));
-			break;
-		case SettingTypeNone:
-		default:
-			return mpt::ustring();
-			break;
-	}
-}
-
-
-void SettingValue::SetFromString(const AnyStringLocale &newVal)
-{
-	switch(GetType())
-	{
-		case SettingTypeBool:
-			valueBool = ConvertStrTo<bool>(newVal);
-			break;
-		case SettingTypeInt:
-			valueInt = ConvertStrTo<int32>(newVal);
-			break;
-		case SettingTypeFloat:
-			valueFloat = ConvertStrTo<double>(newVal);
-			break;
-		case SettingTypeString:
-			valueString = newVal;
-			break;
-		case SettingTypeBinary:
-			valueBinary = Util::HexToBin(newVal);
-			break;
-		case SettingTypeNone:
-		default:
-			break;
-	}
-}
-
-
-#endif
 
 
 SettingValue SettingsContainer::BackendsReadSetting(const SettingPath &path, const SettingValue &def) const

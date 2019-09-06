@@ -88,7 +88,7 @@ namespace mpt
 
 
 
-#if MPT_CXX_AT_LEAST(17) && !(MPT_COMPILER_CLANG && defined(__GLIBCXX__)) && !(MPT_COMPILER_CLANG && MPT_OS_MACOSX_OR_IOS)
+#if !(MPT_COMPILER_CLANG && defined(__GLIBCXX__)) && !(MPT_COMPILER_CLANG && MPT_OS_MACOSX_OR_IOS)
 using std::launder;
 #else
 template <class T>
@@ -96,14 +96,6 @@ MPT_NOINLINE T* launder(T* p) noexcept
 {
 	return p;
 }
-#endif
-
-
-#if MPT_CXX_AT_LEAST(17)
-using std::align;
-#else
-// pre-C++17, std::align does not support over-alignement
-void* align(std::size_t alignment, std::size_t size, void* &ptr, std::size_t &space) noexcept;
 #endif
 
 

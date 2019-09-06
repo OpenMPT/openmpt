@@ -138,11 +138,7 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 
 #define MPT_CONSTEXPR11_ASSERT MPT_STATIC_ASSERT
 #define MPT_CONSTEXPR14_ASSERT MPT_STATIC_ASSERT
-#if MPT_CXX_AT_LEAST(17)
 #define MPT_CONSTEXPR17_ASSERT MPT_STATIC_ASSERT
-#else
-#define MPT_CONSTEXPR17_ASSERT MPT_ASSERT
-#endif
 
 
 

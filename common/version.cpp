@@ -323,9 +323,6 @@ mpt::ustring GetBuildFeaturesString()
 		#if defined(MPT_CHARSET_ICONV)
 			UL_(" +ICONV")
 		#endif
-		#if defined(MPT_CHARSET_CODECVTUTF8)
-			UL_(" +CODECVTUTF8")
-		#endif
 		#if defined(MPT_CHARSET_INTERNAL)
 			UL_(" +INTERNALCHARSETS")
 		#endif

@@ -11,14 +11,14 @@ Dependencies
  *  Supported compilers for building libopenmpt:
      *  **Microsoft Visual Studio 2017** or higher, running on a x86-64 build
         system (other target systems are supported)
-     *  **GCC 5.1** or higher
-     *  **Clang 3.8** or higher
-     *  **MinGW-W64 5.1** or higher (it is recommended to preferably use
+     *  **GCC 7.1** or higher
+     *  **Clang 5** or higher
+     *  **MinGW-W64 7.1** or higher (it is recommended to preferably use
         posix threading model as opposed to win32 threading model, or at least
         have mingw-std-threads available otherwise)
      *  **emscripten 1.38.5** or higher
      *  **DJGPP GCC 7.2** or higher
-     *  any other **C++14 compliant** compiler (full standard compliant mode is
+     *  any other **C++17 compliant** compiler (full standard compliant mode is
         known to work with GCC >= 5.1 and Clang >= 3.8)
         
         libopenmpt makes the following assumptions about the C++ implementation
@@ -73,11 +73,11 @@ Dependencies
  *  Supported compilers for building openmpt123:
      *  **Microsoft Visual Studio 2017** or higher, running on a x86-64 build
         system (other target systems are supported)
-     *  **GCC 5.1** or higher
-     *  **Clang 3.8** or higher
-     *  **MinGW-W64 5.1** or higher
+     *  **GCC 7.1** or higher
+     *  **Clang 5** or higher
+     *  **MinGW-W64 7.1** or higher
      *  **DJGPP GCC 7.2** or higher
-     *  any **C++14 compliant** compiler
+     *  any **C++17 compliant** compiler
  *  Live sound output requires one of:
      *  **PulseAudio**
      *  **SDL 2**

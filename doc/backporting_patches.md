@@ -10,7 +10,18 @@ This list is incomplete.
 OpenMPT 1.28 / libopenmpt 0.4
 -----------------------------
 
+ *  Replace `std::abs` by `mpt::abs`.
+ *  Replace `std::byte` by `mpt::byte`.
+ *  Replace `std::clamp` by `mpt::clamp`.
+ *  Replace `std::data` by `mpt::data`.
+ *  Replace `std::gcd` by `mpt::gcd`.
+ *  Replace `std::lcm` by `mpt::lcm`.
  *  Replace `std::make_unique` by `mpt::make_unique`.
+ *  Replace `std::size` by `mpt::size`.
+ *  Replace `if constexpr` by `MPT_CONSTANT_IF`.
+ *  Replace `static_assert` by `MPT_STATIC_ASSERT`.
+ *  Replace `[[discard]]` by `MPT_DISCARD`.
+ *  Replace `[[fallthrough]]` by `MPT_FALLTHROUGH`.
 
 OpenMPT 1.27 / libopenmpt 0.3 
 -----------------------------

@@ -6,7 +6,7 @@ AR  = i586-pc-msdosdjgpp-ar
 
 # Note that we are using GNU extensions instead of 100% standards-compliant
 # mode, because otherwise DJGPP-specific headers/functions are unavailable.
-CXXFLAGS_STDCXX = -std=gnu++14
+CXXFLAGS_STDCXX = -std=gnu++17
 CFLAGS_STDC = -std=gnu99
 CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)

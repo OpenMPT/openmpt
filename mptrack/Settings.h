@@ -19,9 +19,7 @@
 
 #include <map>
 #include <set>
-#if MPT_CXX_AT_LEAST(17)
 #include <variant>
-#endif
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -40,7 +38,6 @@ enum SettingType
 // SettingValue is a variant type that stores any type that can natively be represented in a config backend.
 // Any other type that should be stored must provide a matching ToSettingValue and FromSettingValue.
 // Other types can optionally also set a type tag which would get checked in debug builds.
-#if MPT_CXX_AT_LEAST(17)
 class SettingValue
 {
 private:
@@ -190,185 +187,6 @@ public:
 	mpt::ustring FormatValueAsString() const;
 	void SetFromString(const AnyStringLocale &newVal);
 };
-#else
-class SettingValue
-{
-private:
-	bool valueBool;
-	int32 valueInt;
-	double valueFloat;
-	mpt::ustring valueString;
-	std::vector<mpt::byte> valueBinary;
-	SettingType type;
-	std::string typeTag;
-	void Init()
-	{
-		valueBool = false;
-		valueInt = 0;
-		valueFloat = 0.0;
-		valueString = mpt::ustring();
-		valueBinary.clear();
-		type = SettingTypeNone;
-		typeTag = std::string();
-	}
-public:
-	bool operator == (const SettingValue &other) const
-	{
-		return type == other.type
-			&& typeTag == other.typeTag
-			&& valueBool == other.valueBool
-			&& valueInt == other.valueInt
-			&& valueFloat == other.valueFloat
-			&& valueString == other.valueString
-			&& valueBinary == other.valueBinary
-			;
-	}
-	bool operator != (const SettingValue &other) const
-	{
-		return !(*this == other);
-	}
-	SettingValue()
-	{
-		Init();
-	}
-	SettingValue(const SettingValue &other)
-	{
-		Init();
-		*this = other;
-	}
-	SettingValue & operator = (const SettingValue &other)
-	{
-		if(this == &other)
-		{
-			return *this;
-		}
-		MPT_ASSERT(type == SettingTypeNone || (type == other.type && typeTag == other.typeTag));
-		type = other.type;
-		valueBool = other.valueBool;
-		valueInt = other.valueInt;
-		valueFloat = other.valueFloat;
-		valueString = other.valueString;
-		valueBinary = other.valueBinary;
-		typeTag = other.typeTag;
-		return *this;
-	}
-	SettingValue(bool val)
-	{
-		Init();
-		type = SettingTypeBool;
-		valueBool = val;
-	}
-	SettingValue(int32 val)
-	{
-		Init();
-		type = SettingTypeInt;
-		valueInt = val;
-	}
-	SettingValue(double val)
-	{
-		Init();
-		type = SettingTypeFloat;
-		valueFloat = val;
-	}
-	SettingValue(const mpt::ustring &val)
-	{
-		Init();
-		type = SettingTypeString;
-		valueString = val;
-	}
-	SettingValue(const std::vector<mpt::byte> &val)
-	{
-		Init();
-		type = SettingTypeBinary;
-		valueBinary =  val;
-	}
-	SettingValue(bool val, const std::string &typeTag_)
-	{
-		Init();
-		type = SettingTypeBool;
-		typeTag = typeTag_;
-		valueBool = val;
-	}
-	SettingValue(int32 val, const std::string &typeTag_)
-	{
-		Init();
-		type = SettingTypeInt;
-		typeTag = typeTag_;
-		valueInt = val;
-	}
-	SettingValue(double val, const std::string &typeTag_)
-	{
-		Init();
-		type = SettingTypeFloat;
-		typeTag = typeTag_;
-		valueFloat = val;
-	}
-	SettingValue(const mpt::ustring &val, const std::string &typeTag_)
-	{
-		Init();
-		type = SettingTypeString;
-		typeTag = typeTag_;
-		valueString = val;
-	}
-	SettingValue(const std::vector<mpt::byte> &val, const std::string &typeTag_)
-	{
-		Init();
-		type = SettingTypeBinary;
-		typeTag = typeTag_;
-		valueBinary =  val;
-	}
-	// these need to be explicitly deleted because otherwise the bool overload will catch the pointers
-	SettingValue(const char *val) = delete;
-	SettingValue(const wchar_t *val) = delete;
-	SettingValue(const char *val, const std::string &typeTag_) = delete;
-	SettingValue(const wchar_t *val, const std::string &typeTag_) = delete;
-	SettingType GetType() const
-	{
-		return type;
-	}
-	bool HasTypeTag() const
-	{
-		return !typeTag.empty();
-	}
-	std::string GetTypeTag() const
-	{
-		return typeTag;
-	}
-	template <typename T>
-	T as() const
-	{
-		return *this;
-	}
-	operator bool () const
-	{
-		MPT_ASSERT(type == SettingTypeBool);
-		return valueBool;
-	}
-	operator int32 () const
-	{
-		MPT_ASSERT(type == SettingTypeInt);
-		return valueInt;
-	}
-	operator double () const
-	{
-		MPT_ASSERT(type == SettingTypeFloat);
-		return valueFloat;
-	}
-	operator mpt::ustring () const
-	{
-		MPT_ASSERT(type == SettingTypeString);
-		return valueString;
-	}
-	operator std::vector<mpt::byte> () const
-	{
-		MPT_ASSERT(type == SettingTypeBinary);
-		return valueBinary;
-	}
-	mpt::ustring FormatTypeAsString() const;
-	mpt::ustring FormatValueAsString() const;
-	void SetFromString(const AnyStringLocale &newVal);
-};
-#endif
 
 
 template<typename T>

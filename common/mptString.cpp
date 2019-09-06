@@ -12,9 +12,6 @@
 
 #include "Endianness.h"
 
-#if defined(MPT_CHARSET_CODECVTUTF8)
-#include <codecvt>
-#endif
 #if defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
 #include <cstdlib>
 #endif
@@ -332,7 +329,7 @@ static const uint32 CharsetTableISO8859_1[256] = {
 };
 */
 
-#if defined(MPT_CHARSET_CODECVTUTF8) || defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
+#if defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
 
 static const uint32 CharsetTableISO8859_15[256] = {
 	0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,0x0008,0x0009,0x000a,0x000b,0x000c,0x000d,0x000e,0x000f,
@@ -391,7 +388,7 @@ static const uint32 CharsetTableCP437[256] = {
 	0x2261,0x00b1,0x2265,0x2264,0x2320,0x2321,0x00f7,0x2248,0x00b0,0x2219,0x00b7,0x221a,0x207f,0x00b2,0x25a0,0x00a0
 };
 
-#endif // MPT_CHARSET_CODECVTUTF8 || MPT_CHARSET_INTERNAL || MPT_CHARSET_WIN32
+#endif // MPT_CHARSET_INTERNAL || MPT_CHARSET_WIN32
 
 
 #define C(x) (static_cast<uint8>((x)))
@@ -510,7 +507,7 @@ static std::string To8bit(const widestring &str, const uint32 (&table)[256], cha
 	return res;
 }
 
-#if defined(MPT_CHARSET_CODECVTUTF8) || defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
+#if defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
 
 static widestring FromAscii(const std::string &str, widechar replacement = wide_default_replacement)
 {
@@ -828,25 +825,7 @@ static std::string ToLocale(const std::wstring &str, char replacement = '?')
 
 #endif // MPT_ENABLE_CHARSET_LOCALE && !MPT_LOCALE_ASSUME_CHARSET
 
-#endif // MPT_CHARSET_CODECVTUTF8 || MPT_CHARSET_INTERNAL || MPT_CHARSET_WIN32
-
-#if defined(MPT_CHARSET_CODECVTUTF8)
-
-static std::wstring FromUTF8(const std::string &str, wchar_t replacement = L'\uFFFD')
-{
-	MPT_UNREFERENCED_PARAMETER(replacement);
-	std::wstring_convert<std::codecvt_utf8<wchar_t> > conv;
-	return conv.from_bytes(str);
-}
-
-static std::string ToUTF8(const std::wstring &str, char replacement = '?')
-{
-	MPT_UNREFERENCED_PARAMETER(replacement);
-	std::wstring_convert<std::codecvt_utf8<wchar_t> > conv;
-	return conv.to_bytes(str);
-}
-
-#endif // MPT_CHARSET_CODECVTUTF8
+#endif // MPT_CHARSET_INTERNAL || MPT_CHARSET_WIN32
 
 #if defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
 
@@ -1175,16 +1154,10 @@ static Tdststring EncodeImpl(Charset charset, const widestring &src)
 		{
 			return Tdststring();
 		}
-		#if MPT_CXX_AT_LEAST(17)
-			Tdststring encoded_string(required_size, char());
-			WideCharToMultiByte(codepage, 0, src.c_str(), -1, encoded_string.data(), required_size, nullptr, nullptr);
-			encoded_string.resize(encoded_string.size() - 1); // remove \0
-			return encoded_string;
-		#else
-			std::vector<CHAR> encoded_string(required_size);
-			WideCharToMultiByte(codepage, 0, src.c_str(), -1, encoded_string.data(), required_size, nullptr, nullptr);
-			return reinterpret_cast<const typename Tdststring::value_type*>(encoded_string.data());
-		#endif
+		Tdststring encoded_string(required_size, char());
+		WideCharToMultiByte(codepage, 0, src.c_str(), -1, encoded_string.data(), required_size, nullptr, nullptr);
+		encoded_string.resize(encoded_string.size() - 1); // remove \0
+		return encoded_string;
 	#elif defined(MPT_CHARSET_ICONV)
 		iconv_t conv = iconv_t();
 		conv = iconv_open(CharsetToStringTranslit(charset), Charset_wchar_t());
@@ -1302,16 +1275,10 @@ static widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 		{
 			return widestring();
 		}
-		#if MPT_CXX_AT_LEAST(17)
-			widestring decoded_string(required_size, widechar());
-			MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, decoded_string.data(), required_size);
-			decoded_string.resize(decoded_string.size() - 1); // remove \0
-			return decoded_string;
-		#else
-			std::vector<WCHAR> decoded_string(required_size);
-			MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, decoded_string.data(), required_size);
-			return decoded_string.data();
-		#endif
+		widestring decoded_string(required_size, widechar());
+		MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, decoded_string.data(), required_size);
+		decoded_string.resize(decoded_string.size() - 1); // remove \0
+		return decoded_string;
 	#elif defined(MPT_CHARSET_ICONV)
 		iconv_t conv = iconv_t();
 		conv = iconv_open(Charset_wchar_t(), CharsetToString(charset));
@@ -1725,16 +1692,10 @@ static mpt::ustring FromCodePageDirect(uint16 codepage, const std::string & src)
 	{
 		return mpt::ustring();
 	}
-	#if MPT_CXX_AT_LEAST(17)
-		std::wstring decoded_string(required_size, wchar_t());
-		MultiByteToWideChar(codepage, 0, src.c_str(), -1, decoded_string.data(), required_size);
-		decoded_string.resize(decoded_string.size() - 1); // remove \0
-		return mpt::ToUnicode(decoded_string);
-	#else
-		std::vector<WCHAR> decoded_string(required_size);
-		MultiByteToWideChar(codepage, 0, src.c_str(), -1, decoded_string.data(), required_size);
-		return mpt::ToUnicode(std::wstring(decoded_string.data()));
-	#endif
+	std::wstring decoded_string(required_size, wchar_t());
+	MultiByteToWideChar(codepage, 0, src.c_str(), -1, decoded_string.data(), required_size);
+	decoded_string.resize(decoded_string.size() - 1); // remove \0
+	return mpt::ToUnicode(decoded_string);
 }
 
 #endif // MPT_OS_WINDOWS

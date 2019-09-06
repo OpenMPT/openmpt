@@ -67,9 +67,7 @@ MPT_CONSTEXPR14_FUN std::array<T, N> init_array(Tx && x)
 
 namespace mpt
 {
-// Work-around for GCC5, which does not allow throw statements in constexpr functions, but only throw expressions inside ternary ? operator.
-// And also work-around for a simpler, MPT_COMPILER_QUIRK_NO_CONSTEXPR14_THROW-dependent work-around, which would have thrown in a separate constexpr function,
-// which however is not allowed due to the requirement of at least 1 non-throwing function argument combination in C++ (14,17,2a) (and thus all other compilers).
+// Work-around for the requirement of at least 1 non-throwing function argument combination in C++ (17,2a).
 template <typename Exception>
 MPT_CONSTEXPR14_FUN bool constexpr_throw_helper(Exception && e, bool really = true)
 {
@@ -432,29 +430,8 @@ inline T ExponentialGrow(const T &x)
 
 namespace mpt
 {
-
 // C++17 clamp
-
-#if MPT_CXX_AT_LEAST(17)
-
 using std::clamp;
-
-#else
-
-template<typename T, typename Compare>
-MPT_CONSTEXPR11_FUN const T & clamp(const T & v, const T & lo, const T & hi, Compare comp)
-{
-	return comp(v, lo) ? lo : comp(hi, v) ? hi : v;
-}
-
-template<typename T>
-MPT_CONSTEXPR11_FUN const T & clamp(const T & v, const T & lo, const T & hi)
-{
-	return mpt::clamp(v, lo, hi, std::less<T>());
-}
-
-#endif
-
 } // namespace mpt
 
 
@@ -706,54 +683,8 @@ namespace Util {
 
 namespace mpt
 {
-
-#if MPT_CXX_AT_LEAST(17)
-
 using std::gcd;
 using std::lcm;
-
-#else
-
-	// Greatest Common Divisor. Always returns non-negative number.
-	// compatible with C++17 std::gcd
-	template <typename A, typename B>
-	inline typename std::common_type<A, B>::type gcd(A a_, B b_)
-	{
-		typename std::common_type<A, B>::type a = a_;
-		typename std::common_type<A, B>::type b = b_;
-		if(a < 0)
-			a = -a;
-		if(b < 0)
-			b = -b;
-		for(;;)
-		{
-			if(a == 0)
-				return b;
-			b %= a;
-			if(b == 0)
-				return a;
-			a %= b;
-		}
-	}
-
-	// Least Common Multiple. Always returns non-negative number.
-	// compatible with C++17 std::lcm
-	template <typename A, typename B>
-	inline typename std::common_type<A, B>::type lcm(A a_, B b_)
-	{
-		typename std::common_type<A, B>::type a = a_;
-		typename std::common_type<A, B>::type b = b_;
-		if(a < 0)
-			a = -a;
-		if(b < 0)
-			b = -b;
-		if((a | b) == 0)
-			return 0;
-		return a / mpt::gcd(a, b) * b;
-	}
-
-#endif
-
 } // namespace mpt
 
 

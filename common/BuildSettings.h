@@ -502,11 +502,7 @@
 #define MPT_ENABLE_TEMPFILE
 #endif
 
-#if MPT_CXX_AT_LEAST(17) && defined(MPT_CHARSET_CODECVTUTF8)
-#undef MPT_CHARSET_CODECVTUTF8 // std::codecvt_utf8 is deprecated in c++17
-#endif
-
-#if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_ICONV) && !defined(MPT_CHARSET_CODECVTUTF8) && !defined(MPT_CHARSET_INTERNAL)
+#if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_ICONV) && !defined(MPT_CHARSET_INTERNAL)
 #define MPT_CHARSET_INTERNAL
 #endif
 
@@ -713,14 +709,12 @@
 
 // standard library quirks
 
-#if MPT_CXX_AT_LEAST(17)
 #if (MPT_COMPILER_GCC || MPT_COMPILER_CLANG)
 // we need to detect the standard library via macro __GLIBCXX__
 #include <vector>
 #endif
-#if MPT_COMPILER_MSVC || MPT_GCC_BEFORE(8,1,0) || MPT_CLANG_BEFORE(5,0,0) || (MPT_COMPILER_GCC && defined(__GLIBCXX__) && (defined(__MINGW32__) || defined(__MINGW64__))) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__)) || (MPT_COMPILER_CLANG && MPT_OS_MACOSX_OR_IOS) || MPT_OS_OPENBSD || MPT_OS_EMSCRIPTEN || MPT_OS_HAIKU || (defined(__clang__) && defined(_MSC_VER))
+#if MPT_COMPILER_MSVC || MPT_GCC_BEFORE(8,1,0) || (MPT_COMPILER_GCC && defined(__GLIBCXX__) && (defined(__MINGW32__) || defined(__MINGW64__))) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__)) || (MPT_COMPILER_CLANG && MPT_OS_MACOSX_OR_IOS) || MPT_OS_OPENBSD || MPT_OS_EMSCRIPTEN || MPT_OS_HAIKU || (defined(__clang__) && defined(_MSC_VER))
 #define MPT_COMPILER_QUIRK_NO_ALIGNEDALLOC
-#endif
 #endif
 
 

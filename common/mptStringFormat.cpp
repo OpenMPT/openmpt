@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "mptStringFormat.h"
 
-#if MPT_CXX_AT_LEAST(17) && MPT_COMPILER_MSVC
+#if MPT_COMPILER_MSVC
 #define MPT_FORMAT_CXX17_INT 1
 #else
 #define MPT_FORMAT_CXX17_INT 0

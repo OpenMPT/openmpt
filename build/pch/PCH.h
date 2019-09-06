@@ -111,9 +111,7 @@
 #include <thread>
 #include <type_traits>
 #include <utility>
-#if MPT_CXX_AT_LEAST(17)
 #include <variant>
-#endif // C++17
 #include <vector>
 
 

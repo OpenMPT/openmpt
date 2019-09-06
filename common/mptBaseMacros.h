@@ -29,11 +29,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Compile time assert.
-#if MPT_CXX_AT_LEAST(17)
 #define MPT_STATIC_ASSERT static_assert
-#else
-#define MPT_STATIC_ASSERT(expr) static_assert((expr), "compile time assertion failed: " #expr)
-#endif
 // legacy
 #define STATIC_ASSERT(x) MPT_STATIC_ASSERT(x)
 
@@ -58,62 +54,22 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPT_CONSTEXPR11_VAR constexpr
 #define MPT_CONSTEXPR14_FUN constexpr MPT_FORCEINLINE
 #define MPT_CONSTEXPR14_VAR constexpr
-#if MPT_CXX_AT_LEAST(17)
 #define MPT_CONSTEXPR17_FUN constexpr MPT_FORCEINLINE
 #define MPT_CONSTEXPR17_VAR constexpr
-#else
-#define MPT_CONSTEXPR17_FUN MPT_FORCEINLINE
-#define MPT_CONSTEXPR17_VAR const
-#endif
 
 namespace mpt
 {
-#if MPT_CXX_AT_LEAST(17)
 template <auto V> struct constant_value { static constexpr decltype(V) value() { return V; } };
 #define MPT_FORCE_CONSTEXPR(expr) (mpt::constant_value<( expr )>::value())
-#else
-template <typename T, T V> struct constant_value_helper { static constexpr T value() { return V; } };
-#define MPT_FORCE_CONSTEXPR(expr) (mpt::constant_value_helper<decltype( expr ), ( expr )>::value())
-#endif
 }  // namespace mpt
 
 
 
 // C++17 std::size and std::data
-#if MPT_CXX_AT_LEAST(17)
 namespace mpt {
 using std::size;
 using std::data;
 } // namespace mpt
-#else
-namespace mpt {
-template <typename T>
-MPT_CONSTEXPR11_FUN auto size(const T & v) -> decltype(v.size())
-{
-	return v.size();
-}
-template <typename T, std::size_t N>
-MPT_CONSTEXPR11_FUN std::size_t size(const T(&)[N]) noexcept
-{
-	return N;
-}
-template <typename T>
-MPT_CONSTEXPR11_FUN auto data(const T & v) -> decltype(v.data())
-{
-	return v.data();
-}
-template <typename T>
-MPT_CONSTEXPR11_FUN auto data(T & v) -> decltype(v.data())
-{
-	return v.data();
-}
-template <typename T, std::size_t N>
-MPT_CONSTEXPR11_FUN T* data(T(&a)[N]) noexcept
-{
-	return a;
-}
-} // namespace mpt
-#endif
 // legacy
 #if MPT_COMPILER_MSVC
 OPENMPT_NAMESPACE_END
@@ -137,29 +93,14 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#if MPT_CXX_AT_LEAST(17)
-#define MPT_NODISCARD [[nodiscard]]
+#define MPT_ATTR_NODISCARD [[nodiscard]]
 #define MPT_DISCARD(expr) static_cast<void>(expr)
-#else
-#define MPT_NODISCARD
-#define MPT_DISCARD(expr) expr
-#endif
 
 
 
-#if MPT_CXX_AT_LEAST(17)
 #define MPT_CONSTANT_IF if constexpr
-#endif
 
 #if MPT_COMPILER_MSVC
-#if !defined(MPT_CONSTANT_IF)
-#define MPT_CONSTANT_IF(x) \
-  __pragma(warning(push)) \
-  __pragma(warning(disable:4127)) \
-  if(x) \
-  __pragma(warning(pop)) \
-/**/
-#endif
 #define MPT_MAYBE_CONSTANT_IF(x) \
   __pragma(warning(push)) \
   __pragma(warning(disable:4127)) \
@@ -186,11 +127,6 @@ OPENMPT_NAMESPACE_BEGIN
   if(x) \
   _Pragma("clang diagnostic pop") \
 /**/
-#endif
-
-#if !defined(MPT_CONSTANT_IF)
-// MPT_CONSTANT_IF disables compiler warnings for conditions that are either always true or always false for some reason (dependent on template arguments for example)
-#define MPT_CONSTANT_IF(x) if(x)
 #endif
 
 #if !defined(MPT_MAYBE_CONSTANT_IF)
@@ -228,23 +164,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Macro for marking intentional fall-throughs in switch statements - can be used for static analysis if supported.
-#if MPT_CXX_AT_LEAST(17)
-	#define MPT_FALLTHROUGH [[fallthrough]]
-#elif MPT_COMPILER_MSVC
-	#define MPT_FALLTHROUGH __fallthrough
-#elif MPT_COMPILER_CLANG
-	#define MPT_FALLTHROUGH [[clang::fallthrough]]
-#elif MPT_COMPILER_GCC && MPT_GCC_AT_LEAST(7,1,0)
-	#define MPT_FALLTHROUGH __attribute__((fallthrough))
-#elif defined(__has_cpp_attribute)
-	#if __has_cpp_attribute(fallthrough)
-		#define MPT_FALLTHROUGH [[fallthrough]]
-	#else
-		#define MPT_FALLTHROUGH MPT_DO { } MPT_WHILE_0
-	#endif
-#else
-	#define MPT_FALLTHROUGH MPT_DO { } MPT_WHILE_0
-#endif
+#define MPT_FALLTHROUGH [[fallthrough]]
 
 
 

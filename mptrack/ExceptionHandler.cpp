@@ -50,17 +50,11 @@ bool ExceptionHandler::useAnyCrashHandler = false;
 bool ExceptionHandler::useImplicitFallbackSEH = false;
 bool ExceptionHandler::useExplicitSEH = false;
 bool ExceptionHandler::handleStdTerminate = false;
-#if MPT_CXX_BEFORE(17)
-bool ExceptionHandler::handleStdUnexpected = false;
-#endif
 bool ExceptionHandler::handleMfcExceptions = false;
 
 
 static LPTOP_LEVEL_EXCEPTION_FILTER g_OriginalUnhandledExceptionFilter = nullptr;
 static std::terminate_handler g_OriginalTerminateHandler = nullptr;
-#if MPT_CXX_BEFORE(17)
-static std::unexpected_handler g_OriginalUnexpectedHandler = nullptr;
-#endif
 
 static UINT g_OriginalErrorMode = 0;
 
@@ -658,12 +652,6 @@ void ExceptionHandler::Register()
 	{
 		g_OriginalTerminateHandler = std::set_terminate(&mpt_terminate_handler);
 	}
-#if MPT_CXX_BEFORE(17)
-	if(handleStdUnexpected)
-	{
-		g_OriginalUnexpectedHandler = std::set_unexpected(&mpt_unexpected_handler);
-	}
-#endif
 }
 
 
@@ -689,13 +677,6 @@ void ExceptionHandler::UnconfigureSystemHandler()
 
 void ExceptionHandler::Unregister()
 {
-#if MPT_CXX_BEFORE(17)
-	if(handleStdUnexpected)
-	{
-		std::set_unexpected(g_OriginalUnexpectedHandler);
-		g_OriginalUnexpectedHandler = nullptr;
-	}
-#endif
 	if(handleStdTerminate)
 	{
 		std::set_terminate(g_OriginalTerminateHandler);
@@ -707,27 +688,6 @@ void ExceptionHandler::Unregister()
 		g_OriginalUnhandledExceptionFilter = nullptr;
 	}
 }
-
-
-#if MPT_CXX_BEFORE(17)
-static void mpt_unexpected_handler()
-{
-	DebugReporter(DumpModeCrash, nullptr).ReportError(U_("An unexpected C++ exception occured: std::unexpected() called."));
-	// We disable the call to std::terminate() as that would re-renter the crash
-	// handler another time, but with less information available.
-#if 1
-	std::abort();
-#else
-	if(g_OriginalUnexpectedHandler)
-	{
-		g_OriginalUnexpectedHandler();
-	} else
-	{
-		std::terminate();
-	}
-#endif
-}
-#endif
 
 
 static void mpt_terminate_handler()

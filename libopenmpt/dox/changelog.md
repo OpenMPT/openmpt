@@ -15,10 +15,11 @@ is just a high-level summary.
  *  [**Regression**] foo_openmpt: foo_openmpt is discontinued. Please use
     Kode54's fork foo_openmpt54:
     <https://www.foobar2000.org/components/view/foo_openmpt54>.
- *  [**Regression**] Support for C++11 has been removed. C++14 is now required.
+ *  [**Regression**] Support for C++11 and C++14 has been removed. C++17 is now
+    required.
  *  [**Regression**] Support for Visual Studio 2015 has been removed.
- *  [**Regression**] Support for GCC 4.8, 4.9 has been removed.
- *  [**Regression**] Support for Clang 3.6, 3.7 has been removed.
+ *  [**Regression**] Support for GCC 4.8, 4.9, 5, 6 has been removed.
+ *  [**Regression**] Support for Clang 3.6, 3.7, 3.8, 3.9, 4 has been removed.
  *  [**Regression**] Windows XP and Windows Vista are no longer supported.
 
 ### libopenmpt 0.4.0
