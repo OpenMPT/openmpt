@@ -735,19 +735,37 @@ bool CTrackApp::CheckSystemSupport()
 			{
 				text += U_("The following OpenMPT variants are supported on your system:") + lf;
 				text += mpt::String::Combine(BuildVariants::GetBuildNames(BuildVariants::GetRecommendedBuilds()), lf) + lf;
-				text += U_("OpenMPT will exit now.") + lf;
+				if(BuildVariants::IsKnownSystem() && mpt::Windows::IsOriginal())
+				{
+					text += U_("OpenMPT will exit now.") + lf;
+				}
 				text += U_("Do you want to visit ") + url + U_(" to download a suitable OpenMPT variant now?") + lf;
 				if(Reporting::CustomNotification(text, "OpenMPT", MB_YESNO | MB_ICONERROR, CMainFrame::GetMainFrame()) == IDYES)
 				{
 					OpenURL(url);
 				}
-				return true; // may work though
+				if(BuildVariants::IsKnownSystem() && mpt::Windows::IsOriginal())
+				{
+					return false;
+				} else
+				{
+					return true; // may work though
+				}
 			} else
 			{
 				text += U_("There is no OpenMPT variant available for your system.") + lf;
-				text += U_("OpenMPT will exit now.") + lf;
+				if(BuildVariants::IsKnownSystem() && mpt::Windows::IsOriginal())
+				{
+					text += U_("OpenMPT will exit now.") + lf;
+				}
 				Reporting::Error(text, "OpenMPT");
-				return true; // may work though
+				if(BuildVariants::IsKnownSystem() && mpt::Windows::IsOriginal())
+				{
+					return false;
+				} else
+				{
+					return true; // may work though
+				}
 			}
 		} else if(!BuildVariants::CurrentBuildIsModern())
 		{
