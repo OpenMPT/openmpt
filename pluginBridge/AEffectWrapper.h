@@ -99,15 +99,7 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const Vst::VstEv
 {
 	data.reserve(data.size() + sizeof(int32) + sizeof(Vst::VstEvent) * events->numEvents);
 	// Write number of events
-	if(data.size() >= sizeof(int32))
-	{
-		int32 &numEvents = reinterpret_cast<int32 &>(data[0]);
-		numEvents += events->numEvents;
-	} else
-	{
-		PushToVector(data, events->numEvents);
-	}
-
+	PushToVector(data, events->numEvents);
 	// Write events
 	for(decltype(events->numEvents) i = 0; i < events->numEvents; i++)
 	{

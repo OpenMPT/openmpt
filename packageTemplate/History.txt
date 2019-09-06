@@ -30,6 +30,22 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.28.07.00 (* September 2019, revision 12019)
+----------------------------------------------
+Pattern tab
+- [Imp] <js> If repeating notes on key hold is enabled, the repetitions are now ignored if recording is disabled (key-jazz) or the edit step is set to 0, to avoid ugly and unnecessary repetitions (http://forum.openmpt.org/index.php?topic=6207.0).
+- [Imp] <js> The "editing is disabled" prompt can no longer be dismissed by pressing the "E" key and thus re-enabling editing accidentally (http://bugs.openmpt.org/view.php?id=1250).
+
+VST::Plugin Bridge
+- [Fix] <js> Receiving MIDI messages from the bridge was broken since v1.27.08.00.
+
+Other formats
+- [Fix] <js> MID: Possible crash when importing more than one sustain pedal release message following a note-off. 
+
+Third-Party Libraries
+- [Imp] Update flac (v1.3.3), mpg123 (v1.25.12), ogg (v1.3.4), UnRAR (v5.8.1)
+
+
 v1.28.06.00 (10 August 2019, revision 11908)
 -------------------------------------------
 Tree view
