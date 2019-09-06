@@ -2231,7 +2231,7 @@ public:
 		BeginWaitCursor();
 
 		memcpy(pNewSample, sample.sampleb(), selection.nStart * sample.GetBytesPerSample());
-		memcpy(static_cast<mpt::byte *>(pNewSample) + stretchEnd * sample.GetBytesPerSample(), sample.sampleb() + selection.nEnd * sample.GetBytesPerSample(), (sample.nLength - selection.nEnd) * sample.GetBytesPerSample());
+		memcpy(static_cast<std::byte *>(pNewSample) + stretchEnd * sample.GetBytesPerSample(), sample.sampleb() + selection.nEnd * sample.GetBytesPerSample(), (sample.nLength - selection.nEnd) * sample.GetBytesPerSample());
 
 		static const SmpLength MaxInputChunkSize = 1024;
 

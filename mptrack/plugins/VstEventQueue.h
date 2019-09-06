@@ -75,7 +75,7 @@ public:
 		{
 			// SysEx messages need to be copied, as the space used for the dump might be freed in the meantime.
 			auto &e = copyEvent.sysex;
-			auto sysexDump = new (std::nothrow) mpt::byte[e.dumpBytes];
+			auto sysexDump = new (std::nothrow) std::byte[e.dumpBytes];
 			if(sysexDump == nullptr)
 				return false;
 			memcpy(sysexDump, e.sysexDump, e.dumpBytes);

@@ -486,7 +486,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 		}
 	}
 
-	std::vector<mpt::byte> buf_bytes;
+	std::vector<std::byte> buf_bytes;
 	std::vector<int16> buf_samples;
 	bool decode_error = false;
 	bool decode_done = false;

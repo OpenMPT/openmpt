@@ -631,7 +631,7 @@ public:
 
 	static ProbeResult ProbeAdditionalSize(MemoryFileReader &file, const uint64 *pfilesize, uint64 minimumAdditionalSize);
 
-	static ProbeResult Probe(ProbeFlags flags, mpt::span<const mpt::byte> data, const uint64 *pfilesize);
+	static ProbeResult Probe(ProbeFlags flags, mpt::span<const std::byte> data, const uint64 *pfilesize);
 
 public:
 

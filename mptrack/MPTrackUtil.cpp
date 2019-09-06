@@ -27,7 +27,7 @@ mpt::const_byte_span GetResource(LPCTSTR lpName, LPCTSTR lpType)
 	{
 		return mpt::const_byte_span();
 	}
-	return mpt::const_byte_span(mpt::void_cast<const mpt::byte *>(LockResource(hGlob)), SizeofResource(hInstance, hRsrc));
+	return mpt::const_byte_span(mpt::void_cast<const std::byte *>(LockResource(hGlob)), SizeofResource(hInstance, hRsrc));
 	// no need to call FreeResource(hGlob) or free hRsrc, according to MSDN
 }
 

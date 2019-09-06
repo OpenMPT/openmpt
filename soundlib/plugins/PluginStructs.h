@@ -65,7 +65,7 @@ MPT_BINARY_STRUCT(SNDMIXPLUGININFO, 128)	// this is directly written to files, s
 struct SNDMIXPLUGIN
 {
 	IMixPlugin *pMixPlugin;
-	std::vector<mpt::byte> pluginData;
+	std::vector<std::byte> pluginData;
 	SNDMIXPLUGININFO Info;
 	float fDryRatio;
 	int32 defaultProgram;

@@ -191,12 +191,8 @@ MPT_STATIC_ASSERT(std::numeric_limits<unsigned char>::digits == 8);
 
 MPT_STATIC_ASSERT(sizeof(char) == 1);
 
-namespace mpt {
-using byte = std::byte;
-} // namespace mpt
-#define MPT_BYTE_IS_STD_BYTE 1
-MPT_STATIC_ASSERT(sizeof(mpt::byte) == 1);
-MPT_STATIC_ASSERT(alignof(mpt::byte) == 1);
+MPT_STATIC_ASSERT(sizeof(std::byte) == 1);
+MPT_STATIC_ASSERT(alignof(std::byte) == 1);
 
 
 namespace mpt {

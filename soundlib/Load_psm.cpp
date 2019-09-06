@@ -263,7 +263,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifdef MPT_PSM_DECRYPT
 	// CONVERT.EXE /K - I don't think any game ever used this.
-	std::vector<mpt::byte> decrypted;
+	std::vector<std::byte> decrypted;
 	if(!memcmp(fileHeader.formatID, "QUP$", 4)
 		&& !memcmp(fileHeader.fileInfoID, "OSWQ", 4))
 	{

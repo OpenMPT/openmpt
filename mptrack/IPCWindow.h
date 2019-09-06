@@ -32,7 +32,7 @@ namespace IPCWindow
 
 	LRESULT SendIPC(HWND ipcWnd, Function function, mpt::const_byte_span data = mpt::const_byte_span());
 
-	template <typename Tdata> LRESULT SendIPC(HWND ipcWnd, Function function, mpt::span<const Tdata> data) { return SendIPC(ipcWnd, function, mpt::const_byte_span(reinterpret_cast<const mpt::byte*>(data.data()), data.size() * sizeof(Tdata))); }
+	template <typename Tdata> LRESULT SendIPC(HWND ipcWnd, Function function, mpt::span<const Tdata> data) { return SendIPC(ipcWnd, function, mpt::const_byte_span(reinterpret_cast<const std::byte*>(data.data()), data.size() * sizeof(Tdata))); }
 
 	enum InstanceRequirements
 	{

@@ -1531,10 +1531,10 @@ static MPT_NOINLINE void TestMisc2()
 	VERIFY_EQUAL(mpt::UUID::Generate() != mpt::UUID::Generate(), true);
 	mpt::UUID a = mpt::UUID::Generate();
 	VERIFY_EQUAL(a, mpt::UUID::FromString(a.ToUString()));
-	mpt::byte uuiddata[16]{};
+	std::byte uuiddata[16]{};
 	for(std::size_t i = 0; i < 16; ++i)
 	{
-		uuiddata[i] = mpt::byte_cast<mpt::byte>(static_cast<uint8>(i));
+		uuiddata[i] = mpt::byte_cast<std::byte>(static_cast<uint8>(i));
 	}
 	STATIC_ASSERT(sizeof(mpt::UUID) == 16);
 	UUIDbin uuid2;
@@ -1963,7 +1963,7 @@ static MPT_NOINLINE void TestMisc2()
 #ifdef MPT_ENABLE_FILEIO
 
 	{
-		std::vector<mpt::byte> data;
+		std::vector<std::byte> data;
 		data.push_back(mpt::as_byte(0));
 		data.push_back(mpt::as_byte(255));
 		data.push_back(mpt::as_byte(1));
@@ -1972,7 +1972,7 @@ static MPT_NOINLINE void TestMisc2()
 		RemoveFile(fn);
 		mpt::LazyFileRef f(fn);
 		f = data;
-		std::vector<mpt::byte> data2;
+		std::vector<std::byte> data2;
 		data2 = f;
 		VERIFY_EQUAL(data.size(), data2.size());
 		for(std::size_t i = 0; i < data.size() && i < data2.size(); ++i)
@@ -4687,9 +4687,9 @@ static MPT_NOINLINE void TestSampleConversion()
 		uint8 *unsigned8 = static_cast<uint8 *>(targetBuf) + 256;
 		int8 *delta8 = static_cast<int8 *>(targetBuf) + 512;
 		int8 delta = 0;
-		CopySample<SC::DecodeInt8>(signed8, 256, 1, mpt::byte_cast<const mpt::byte *>(source8), 256, 1);
-		CopySample<SC::DecodeUint8>(reinterpret_cast<int8 *>(unsigned8), 256, 1, mpt::byte_cast<const mpt::byte *>(source8), 256, 1);
-		CopySample<SC::DecodeInt8Delta>(delta8, 256, 1, mpt::byte_cast<const mpt::byte *>(source8), 256, 1);
+		CopySample<SC::DecodeInt8>(signed8, 256, 1, mpt::byte_cast<const std::byte *>(source8), 256, 1);
+		CopySample<SC::DecodeUint8>(reinterpret_cast<int8 *>(unsigned8), 256, 1, mpt::byte_cast<const std::byte *>(source8), 256, 1);
+		CopySample<SC::DecodeInt8Delta>(delta8, 256, 1, mpt::byte_cast<const std::byte *>(source8), 256, 1);
 
 		for(size_t i = 0; i < 256; i++)
 		{
@@ -4717,9 +4717,9 @@ static MPT_NOINLINE void TestSampleConversion()
 		uint16 *unsigned16 = static_cast<uint16 *>(targetBuf) + 65536;
 		int16 *delta16 = static_cast<int16 *>(targetBuf) + 65536 * 2;
 		int16 delta = 0;
-		CopySample<SC::DecodeInt16<0, littleEndian16> >(signed16, 65536, 1, mpt::byte_cast<const mpt::byte *>(source16), 65536 * 2, 1);
-		CopySample<SC::DecodeInt16<0x8000u, littleEndian16> >(reinterpret_cast<int16*>(unsigned16), 65536, 1, mpt::byte_cast<const mpt::byte *>(source16), 65536 * 2, 1);
-		CopySample<SC::DecodeInt16Delta<littleEndian16> >(delta16, 65536, 1, mpt::byte_cast<const mpt::byte *>(source16), 65536 * 2, 1);
+		CopySample<SC::DecodeInt16<0, littleEndian16> >(signed16, 65536, 1, mpt::byte_cast<const std::byte *>(source16), 65536 * 2, 1);
+		CopySample<SC::DecodeInt16<0x8000u, littleEndian16> >(reinterpret_cast<int16*>(unsigned16), 65536, 1, mpt::byte_cast<const std::byte *>(source16), 65536 * 2, 1);
+		CopySample<SC::DecodeInt16Delta<littleEndian16> >(delta16, 65536, 1, mpt::byte_cast<const std::byte *>(source16), 65536 * 2, 1);
 
 		for(size_t i = 0; i < 65536; i++)
 		{
@@ -4737,9 +4737,9 @@ static MPT_NOINLINE void TestSampleConversion()
 			source16[i * 2 + 1] = static_cast<uint8>(i & 0xFF);
 		}
 
-		CopySample<SC::DecodeInt16<0, bigEndian16> >(signed16, 65536, 1, mpt::byte_cast<const mpt::byte *>(source16), 65536 * 2, 1);
-		CopySample<SC::DecodeInt16<0x8000u, bigEndian16> >(reinterpret_cast<int16*>(unsigned16), 65536, 1, mpt::byte_cast<const mpt::byte *>(source16), 65536 * 2, 1);
-		CopySample<SC::DecodeInt16Delta<bigEndian16> >(delta16, 65536, 1, mpt::byte_cast<const mpt::byte *>(source16), 65536 * 2, 1);
+		CopySample<SC::DecodeInt16<0, bigEndian16> >(signed16, 65536, 1, mpt::byte_cast<const std::byte *>(source16), 65536 * 2, 1);
+		CopySample<SC::DecodeInt16<0x8000u, bigEndian16> >(reinterpret_cast<int16*>(unsigned16), 65536, 1, mpt::byte_cast<const std::byte *>(source16), 65536 * 2, 1);
+		CopySample<SC::DecodeInt16Delta<bigEndian16> >(delta16, 65536, 1, mpt::byte_cast<const std::byte *>(source16), 65536 * 2, 1);
 
 		delta = 0;
 		for(size_t i = 0; i < 65536; i++)
@@ -4768,8 +4768,8 @@ static MPT_NOINLINE void TestSampleConversion()
 		sample.nLength = 65536;
 		sample.uFlags.set(CHN_16BIT);
 		sample.pData.pSample = (static_cast<int16 *>(targetBuf) + 65536);
-		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, mpt::byte_cast<const mpt::byte *>(source24), 3*65536);
-		CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32, 16>, SC::DecodeInt24<0, littleEndian24> > >(truncated16, 65536, 1, mpt::byte_cast<const mpt::byte *>(source24), 65536 * 3, 1);
+		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, mpt::byte_cast<const std::byte *>(source24), 3*65536);
+		CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32, 16>, SC::DecodeInt24<0, littleEndian24> > >(truncated16, 65536, 1, mpt::byte_cast<const std::byte *>(source24), 65536 * 3, 1);
 
 		for(size_t i = 0; i < 65536; i++)
 		{
@@ -4796,8 +4796,8 @@ static MPT_NOINLINE void TestSampleConversion()
 		sample.nLength = 65536;
 		sample.uFlags.set(CHN_16BIT);
 		sample.pData.pSample = static_cast<int16 *>(targetBuf) + 65536;
-		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, mpt::byte_cast<const mpt::byte *>(source32), 4*65536);
-		CopySample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(truncated16, 65536, 1, mpt::byte_cast<const mpt::byte *>(source32), 65536 * 4, 1);
+		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, mpt::byte_cast<const std::byte *>(source32), 4*65536);
+		CopySample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(truncated16, 65536, 1, mpt::byte_cast<const std::byte *>(source32), 65536 * 4, 1);
 
 		for(size_t i = 0; i < 65536; i++)
 		{
@@ -4814,7 +4814,7 @@ static MPT_NOINLINE void TestSampleConversion()
 		int8 oneSample = 1;
 		char *signed8 = reinterpret_cast<char *>(targetBuf);
 		memset(signed8, 0, 4);
-		CopySample<SC::DecodeInt8>(reinterpret_cast<int8*>(targetBuf), 4, 1, reinterpret_cast<const mpt::byte*>(&oneSample), sizeof(oneSample), 1);
+		CopySample<SC::DecodeInt8>(reinterpret_cast<int8*>(targetBuf), 4, 1, reinterpret_cast<const std::byte*>(&oneSample), sizeof(oneSample), 1);
 		VERIFY_EQUAL_NONCONT(signed8[0], 1);
 		VERIFY_EQUAL_NONCONT(signed8[1], 0);
 		VERIFY_EQUAL_NONCONT(signed8[2], 0);

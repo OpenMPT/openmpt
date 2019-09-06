@@ -309,7 +309,7 @@ const std::size_t CSoundFile::ProbeRecommendedSize = PROBE_RECOMMENDED_SIZE;
 /**/
 
 
-CSoundFile::ProbeResult CSoundFile::Probe(ProbeFlags flags, mpt::span<const mpt::byte> data, const uint64 *pfilesize)
+CSoundFile::ProbeResult CSoundFile::Probe(ProbeFlags flags, mpt::span<const std::byte> data, const uint64 *pfilesize)
 {
 	ProbeResult result = ProbeFailure;
 	if(pfilesize && (*pfilesize < data.size()))

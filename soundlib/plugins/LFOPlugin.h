@@ -49,7 +49,7 @@ protected:
 		kNumWaveforms
 	};
 
-	std::vector<mpt::byte> m_chunkData;
+	std::vector<std::byte> m_chunkData;
 
 	// LFO parameters
 	float m_amplitude, m_offset, m_frequency;

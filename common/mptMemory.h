@@ -36,8 +36,8 @@ namespace mpt {
 
 
 
-typedef mpt::span<mpt::byte> byte_span;
-typedef mpt::span<const mpt::byte> const_byte_span;
+typedef mpt::span<std::byte> byte_span;
+typedef mpt::span<const std::byte> const_byte_span;
 
 
 
@@ -49,19 +49,15 @@ typedef mpt::span<const mpt::byte> const_byte_span;
 template <typename T> struct is_byte_castable : public std::false_type { };
 template <> struct is_byte_castable<char>                : public std::true_type { };
 template <> struct is_byte_castable<unsigned char>       : public std::true_type { };
-#if MPT_BYTE_IS_STD_BYTE
-template <> struct is_byte_castable<mpt::byte>           : public std::true_type { };
-#endif
+template <> struct is_byte_castable<std::byte>           : public std::true_type { };
 template <> struct is_byte_castable<const char>          : public std::true_type { };
 template <> struct is_byte_castable<const unsigned char> : public std::true_type { };
-#if MPT_BYTE_IS_STD_BYTE
-template <> struct is_byte_castable<const mpt::byte>     : public std::true_type { };
-#endif
+template <> struct is_byte_castable<const std::byte>     : public std::true_type { };
 
 
 template <typename T> struct is_byte        : public std::false_type { };
-template <> struct is_byte<mpt::byte>       : public std::true_type  { };
-template <> struct is_byte<const mpt::byte> : public std::true_type  { };
+template <> struct is_byte<std::byte>       : public std::true_type  { };
+template <> struct is_byte<const std::byte> : public std::true_type  { };
 
 
 // Tell which types are safe to binary write into files.
@@ -74,9 +70,7 @@ template <typename T> struct is_binary_safe : public std::false_type { };
 template <> struct is_binary_safe<char>      : public std::true_type { };
 template <> struct is_binary_safe<uint8>     : public std::true_type { };
 template <> struct is_binary_safe<int8>      : public std::true_type { };
-#if MPT_BYTE_IS_STD_BYTE
-template <> struct is_binary_safe<mpt::byte> : public std::true_type { };
-#endif
+template <> struct is_binary_safe<std::byte> : public std::true_type { };
 
 // Generic Specialization for arrays.
 template <typename T, std::size_t N> struct is_binary_safe<T[N]> : public is_binary_safe<T> { };
@@ -185,8 +179,8 @@ struct byte_cast_impl
 {
 	inline Tdst operator () (Tsrc src) const
 	{
-		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
-		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+		STATIC_ASSERT(sizeof(Tsrc) == sizeof(std::byte));
+		STATIC_ASSERT(sizeof(Tdst) == sizeof(std::byte));
 		// not checking is_byte_castable here because we are actually
 		// doing a static_cast and converting the value
 		STATIC_ASSERT(std::is_integral<Tsrc>::value || mpt::is_byte<Tsrc>::value);
@@ -199,8 +193,8 @@ struct byte_cast_impl<mpt::span<Tdst>, mpt::span<Tsrc> >
 {
 	inline mpt::span<Tdst> operator () (mpt::span<Tsrc> src) const
 	{
-		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
-		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+		STATIC_ASSERT(sizeof(Tsrc) == sizeof(std::byte));
+		STATIC_ASSERT(sizeof(Tdst) == sizeof(std::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
 		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
 		STATIC_ASSERT(std::is_integral<Tsrc>::value || mpt::is_byte<Tsrc>::value);
@@ -213,8 +207,8 @@ struct byte_cast_impl<Tdst*, Tsrc*>
 {
 	inline Tdst* operator () (Tsrc* src) const
 	{
-		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
-		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+		STATIC_ASSERT(sizeof(Tsrc) == sizeof(std::byte));
+		STATIC_ASSERT(sizeof(Tdst) == sizeof(std::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
 		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
 		STATIC_ASSERT(std::is_integral<Tsrc>::value || mpt::is_byte<Tsrc>::value);
@@ -231,7 +225,7 @@ struct void_cast_impl<Tdst*, void*>
 {
 	inline Tdst* operator () (void* src) const
 	{
-		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+		STATIC_ASSERT(sizeof(Tdst) == sizeof(std::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
 		STATIC_ASSERT(std::is_integral<Tdst>::value || mpt::is_byte<Tdst>::value);
 		return reinterpret_cast<Tdst*>(src);
@@ -242,7 +236,7 @@ struct void_cast_impl<Tdst*, const void*>
 {
 	inline Tdst* operator () (const void* src) const
 	{
-		STATIC_ASSERT(sizeof(Tdst) == sizeof(mpt::byte));
+		STATIC_ASSERT(sizeof(Tdst) == sizeof(std::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tdst>::value);
 		STATIC_ASSERT(std::is_integral<Tdst>::value || mpt::is_byte<Tdst>::value);
 		return reinterpret_cast<Tdst*>(src);
@@ -253,7 +247,7 @@ struct void_cast_impl<void*, Tsrc*>
 {
 	inline void* operator () (Tsrc* src) const
 	{
-		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
+		STATIC_ASSERT(sizeof(Tsrc) == sizeof(std::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
 		STATIC_ASSERT(std::is_integral<Tsrc>::value || mpt::is_byte<Tsrc>::value);
 		return reinterpret_cast<void*>(src);
@@ -264,7 +258,7 @@ struct void_cast_impl<const void*, Tsrc*>
 {
 	inline const void* operator () (Tsrc* src) const
 	{
-		STATIC_ASSERT(sizeof(Tsrc) == sizeof(mpt::byte));
+		STATIC_ASSERT(sizeof(Tsrc) == sizeof(std::byte));
 		STATIC_ASSERT(mpt::is_byte_castable<Tsrc>::value);
 		STATIC_ASSERT(std::is_integral<Tsrc>::value || mpt::is_byte<Tsrc>::value);
 		return reinterpret_cast<const void*>(src);
@@ -288,10 +282,10 @@ inline Tdst void_cast(Tsrc src)
 
 
 template <typename T>
-MPT_CONSTEXPR14_FUN mpt::byte as_byte(T src) noexcept
+MPT_CONSTEXPR14_FUN std::byte as_byte(T src) noexcept
 {
 	MPT_STATIC_ASSERT(std::is_integral<T>::value);
-	return static_cast<mpt::byte>(static_cast<uint8>(src));
+	return static_cast<std::byte>(static_cast<uint8>(src));
 }
 
 
@@ -302,12 +296,12 @@ struct GetRawBytesFunctor
 	inline mpt::const_byte_span operator () (const T & v) const
 	{
 		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return mpt::as_span(reinterpret_cast<const mpt::byte *>(&v), sizeof(T));
+		return mpt::as_span(reinterpret_cast<const std::byte *>(&v), sizeof(T));
 	}
 	inline mpt::byte_span operator () (T & v) const
 	{
 		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return mpt::as_span(reinterpret_cast<mpt::byte *>(&v), sizeof(T));
+		return mpt::as_span(reinterpret_cast<std::byte *>(&v), sizeof(T));
 	}
 };
 
@@ -317,12 +311,12 @@ struct GetRawBytesFunctor<T[N]>
 	inline mpt::const_byte_span operator () (const T (&v)[N]) const
 	{
 		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return mpt::as_span(reinterpret_cast<const mpt::byte *>(v), N * sizeof(T));
+		return mpt::as_span(reinterpret_cast<const std::byte *>(v), N * sizeof(T));
 	}
 	inline mpt::byte_span operator () (T (&v)[N]) const
 	{
 		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return mpt::as_span(reinterpret_cast<mpt::byte *>(v), N * sizeof(T));
+		return mpt::as_span(reinterpret_cast<std::byte *>(v), N * sizeof(T));
 	}
 };
 
@@ -332,14 +326,14 @@ struct GetRawBytesFunctor<const T[N]>
 	inline mpt::const_byte_span operator () (const T (&v)[N]) const
 	{
 		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return mpt::as_span(reinterpret_cast<const mpt::byte *>(v), N * sizeof(T));
+		return mpt::as_span(reinterpret_cast<const std::byte *>(v), N * sizeof(T));
 	}
 };
 
 // In order to be able to partially specialize it,
 // as_raw_memory is implemented via a class template.
 // Do not overload or specialize as_raw_memory directly.
-// Using a wrapper (by default just around a cast to const mpt::byte *),
+// Using a wrapper (by default just around a cast to const std::byte *),
 // allows for implementing raw memory access
 // via on-demand generating a cached serialized representation.
 template <typename T> inline mpt::const_byte_span as_raw_memory(const T & v)

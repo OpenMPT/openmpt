@@ -62,7 +62,7 @@ mpt::ustring BinToHex(mpt::const_byte_span src)
 {
 	mpt::ustring result;
 	result.reserve(src.size() * 2);
-	for(mpt::byte byte : src)
+	for(std::byte byte : src)
 	{
 		result.push_back(EncodeNibble[(mpt::byte_cast<uint8>(byte) & 0xf0) >> 4]);
 		result.push_back(EncodeNibble[mpt::byte_cast<uint8>(byte) & 0x0f]);
@@ -70,9 +70,9 @@ mpt::ustring BinToHex(mpt::const_byte_span src)
 	return result;
 }
 
-std::vector<mpt::byte> HexToBin(const mpt::ustring &src)
+std::vector<std::byte> HexToBin(const mpt::ustring &src)
 {
-	std::vector<mpt::byte> result;
+	std::vector<std::byte> result;
 	result.reserve(src.size() / 2);
 	for(std::size_t i = 0; (i + 1) < src.size(); i += 2)
 	{
@@ -81,7 +81,7 @@ std::vector<mpt::byte> HexToBin(const mpt::ustring &src)
 		{
 			return result;
 		}
-		result.push_back(mpt::byte_cast<mpt::byte>(byte));
+		result.push_back(mpt::byte_cast<std::byte>(byte));
 	}
 	return result;
 }

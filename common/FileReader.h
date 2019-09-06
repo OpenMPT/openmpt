@@ -621,7 +621,7 @@ namespace FileReader
 	template <typename TFileCursor>
 	bool ReadMagic(TFileCursor &f, const char *const magic, typename TFileCursor::off_t magicLength)
 	{
-		mpt::byte buffer[16] = { mpt::byte(0) };
+		std::byte buffer[16] = { std::byte(0) };
 		typename TFileCursor::off_t bytesRead = 0;
 		typename TFileCursor::off_t bytesRemain = magicLength;
 		while(bytesRemain)
@@ -665,7 +665,7 @@ namespace FileReader
 			return false;
 		}
 
-		mpt::byte bytes[16];	// More than enough for any valid VarInt
+		std::byte bytes[16];	// More than enough for any valid VarInt
 		typename TFileCursor::off_t avail = f.GetRaw(bytes, sizeof(bytes));
 		typename TFileCursor::off_t readPos = 1;
 		
@@ -937,8 +937,8 @@ public:
 	{
 	private:
 		std::size_t size_;
-		const mpt::byte *pinnedData;
-		std::vector<mpt::byte> cache;
+		const std::byte *pinnedData;
+		std::vector<std::byte> cache;
 	private:
 		void Init(const FileReader &file, std::size_t size)
 		{
@@ -1008,8 +1008,8 @@ public:
 			}
 		}
 		mpt::const_byte_span span() const { return GetSpan(); }
-		void invalidate() { size_ = 0; pinnedData = nullptr; cache = std::vector<mpt::byte>(); }
-		const mpt::byte *data() const { return span().data(); }
+		void invalidate() { size_ = 0; pinnedData = nullptr; cache = std::vector<std::byte>(); }
+		const std::byte *data() const { return span().data(); }
 		std::size_t size() const { return size_; }
 		mpt::const_byte_span::iterator begin() const { return span().begin(); }
 		mpt::const_byte_span::iterator end() const { return span().end(); }
@@ -1044,7 +1044,7 @@ public:
 	// Returns raw stream data at cursor position.
 	// Should only be used if absolutely necessary, for example for sample reading, or when used with a small chunk of the file retrieved by ReadChunk().
 	// Use GetPinnedRawDataView(size) whenever possible.
-	FILEREADER_DEPRECATED const mpt::byte *GetRawData() const
+	FILEREADER_DEPRECATED const std::byte *GetRawData() const
 	{
 		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
 		return DataContainer().GetRawData() + streamPos;
@@ -1059,7 +1059,7 @@ public:
 	template <typename T>
 	std::size_t GetRawWithOffset(std::size_t offset, T *dst, std::size_t count) const
 	{
-		return static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<mpt::byte*>(dst), streamPos + offset, count));
+		return static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<std::byte*>(dst), streamPos + offset, count));
 	}
 	std::size_t GetRawWithOffset(std::size_t offset, mpt::byte_span dst) const
 	{
@@ -1069,7 +1069,7 @@ public:
 	template <typename T>
 	std::size_t GetRaw(T *dst, std::size_t count) const
 	{
-		return static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<mpt::byte*>(dst), streamPos, count));
+		return static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<std::byte*>(dst), streamPos, count));
 	}
 	std::size_t GetRaw(mpt::byte_span dst) const
 	{
@@ -1079,7 +1079,7 @@ public:
 	template <typename T>
 	std::size_t ReadRaw(T *dst, std::size_t count)
 	{
-		std::size_t result = static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<mpt::byte*>(dst), streamPos, count));
+		std::size_t result = static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<std::byte*>(dst), streamPos, count));
 		streamPos += result;
 		return result;
 	}
@@ -1090,25 +1090,25 @@ public:
 		return result;
 	}
 	
-	std::vector<mpt::byte> GetRawDataAsByteVector() const
+	std::vector<std::byte> GetRawDataAsByteVector() const
 	{
 		PinnedRawDataView view = GetPinnedRawDataView();
-		return std::vector<mpt::byte>(view.span().begin(), view.span().end());
+		return std::vector<std::byte>(view.span().begin(), view.span().end());
 	}
-	std::vector<mpt::byte> ReadRawDataAsByteVector()
+	std::vector<std::byte> ReadRawDataAsByteVector()
 	{
 		PinnedRawDataView view = ReadPinnedRawDataView();
-		return std::vector<mpt::byte>(view.span().begin(), view.span().end());
+		return std::vector<std::byte>(view.span().begin(), view.span().end());
 	}
-	std::vector<mpt::byte> GetRawDataAsByteVector(std::size_t size) const
+	std::vector<std::byte> GetRawDataAsByteVector(std::size_t size) const
 	{
 		PinnedRawDataView view = GetPinnedRawDataView(size);
-		return std::vector<mpt::byte>(view.span().begin(), view.span().end());
+		return std::vector<std::byte>(view.span().begin(), view.span().end());
 	}
-	std::vector<mpt::byte> ReadRawDataAsByteVector(std::size_t size)
+	std::vector<std::byte> ReadRawDataAsByteVector(std::size_t size)
 	{
 		PinnedRawDataView view = ReadPinnedRawDataView(size);
-		return std::vector<mpt::byte>(view.span().begin(), view.span().end());
+		return std::vector<std::byte>(view.span().begin(), view.span().end());
 	}
 
 	std::string GetRawDataAsString() const

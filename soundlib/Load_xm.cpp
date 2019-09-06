@@ -66,7 +66,7 @@ OPENMPT_NAMESPACE_BEGIN
 static size_t VorbisfileFilereaderRead(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
 	FileReader &file = *reinterpret_cast<FileReader*>(datasource);
-	return file.ReadRaw(mpt::void_cast<mpt::byte*>(ptr), size * nmemb) / size;
+	return file.ReadRaw(mpt::void_cast<std::byte*>(ptr), size * nmemb) / size;
 }
 
 static int VorbisfileFilereaderSeek(void *datasource, ogg_int64_t offset, int whence)
@@ -520,7 +520,7 @@ static bool ReadSampleData(ModSample &sample, SampleIO sampleFlags, FileReader &
 		int consumed = 0, error = 0;
 		stb_vorbis *vorb = nullptr;
 		FileReader::PinnedRawDataView sampleDataView = sampleData.GetPinnedRawDataView();
-		const mpt::byte* data = sampleDataView.data();
+		const std::byte* data = sampleDataView.data();
 		std::size_t dataLeft = sampleDataView.size();
 		vorb = stb_vorbis_open_pushdata(mpt::byte_cast<const unsigned char*>(data), mpt::saturate_cast<int>(dataLeft), &consumed, &error, nullptr);
 		sampleData.Skip(consumed);

@@ -245,10 +245,10 @@ public:
 		return;
 	}
 public:
-	LazyFileRef & operator = (const std::vector<mpt::byte> &data);
+	LazyFileRef & operator = (const std::vector<std::byte> &data);
 	LazyFileRef & operator = (const std::vector<char> &data);
 	LazyFileRef & operator = (const std::string &data);
-	operator std::vector<mpt::byte> () const;
+	operator std::vector<std::byte> () const;
 	operator std::vector<char> () const;
 	operator std::string () const;
 };
@@ -265,7 +265,7 @@ private:
 	mpt::PathString m_Filename;
 	mpt::ifstream m_File;
 	bool m_IsCached;
-	std::vector<mpt::byte> m_Cache;
+	std::vector<std::byte> m_Cache;
 public:
 	static bool DefaultToLargeAddressSpaceUsage();
 public:

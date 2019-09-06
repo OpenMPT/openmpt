@@ -365,7 +365,7 @@ static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file
 	{
 		FileReader block = file.ReadChunk(blockAlign);
 		FileReader::PinnedRawDataView blockView = block.GetPinnedRawDataView();
-		const mpt::byte *data = blockView.data();
+		const std::byte *data = blockView.data();
 		const uint32 blockSize = static_cast<uint32>(blockView.size());
 
 		for(uint32 chn = 0; chn < numChannels; chn++)

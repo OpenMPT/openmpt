@@ -72,13 +72,13 @@ namespace SC { // SC = _S_ample_C_onversion
 // and has to provide a static const input_inc member
 // which describes by how many input_t elements inBuf has to be incremented between invocations.
 // input_inc is normally 1 except when decoding e.g. bigger sample values
-// from multiple mpt::byte values.
+// from multiple std::byte values.
 
 
 // decodes signed 7bit values stored as signed int8
 struct DecodeInt7
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef int8 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 1;
 	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
@@ -89,7 +89,7 @@ struct DecodeInt7
 
 struct DecodeInt8
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef int8 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 1;
 	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
@@ -100,7 +100,7 @@ struct DecodeInt8
 
 struct DecodeUint8
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef int8 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 1;
 	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
@@ -111,7 +111,7 @@ struct DecodeUint8
 
 struct DecodeInt8Delta
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef int8 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 1;
 	uint8 delta;
@@ -126,7 +126,7 @@ struct DecodeInt8Delta
 template <uint16 offset, size_t loByteIndex, size_t hiByteIndex>
 struct DecodeInt16
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef int16 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 2;
 	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
@@ -138,7 +138,7 @@ struct DecodeInt16
 template <size_t loByteIndex, size_t hiByteIndex>
 struct DecodeInt16Delta
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef int16 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 2;
 	uint16 delta;
@@ -152,7 +152,7 @@ struct DecodeInt16Delta
 
 struct DecodeInt16Delta8
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef int16 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 2;
 	uint16 delta;
@@ -170,7 +170,7 @@ struct DecodeInt16Delta8
 template <uint32 offset, size_t loByteIndex, size_t midByteIndex, size_t hiByteIndex>
 struct DecodeInt24
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef int32 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 3;
 	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
@@ -182,7 +182,7 @@ struct DecodeInt24
 template <uint32 offset, size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct DecodeInt32
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef int32 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 4;
 	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
@@ -194,7 +194,7 @@ struct DecodeInt32
 template <uint64 offset, size_t b0, size_t b1, size_t b2, size_t b3, size_t b4, size_t b5, size_t b6, size_t b7>
 struct DecodeInt64
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef int64 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 8;
 	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
@@ -215,7 +215,7 @@ struct DecodeInt64
 template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct DecodeFloat32
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef float32 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 4;
 	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
@@ -227,7 +227,7 @@ struct DecodeFloat32
 template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
 struct DecodeScaledFloat32
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef float32 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 4;
 	float factor;
@@ -245,7 +245,7 @@ struct DecodeScaledFloat32
 template <size_t b0, size_t b1, size_t b2, size_t b3, size_t b4, size_t b5, size_t b6, size_t b7>
 struct DecodeFloat64
 {
-	typedef mpt::byte input_t;
+	typedef std::byte input_t;
 	typedef float64 output_t;
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 8;
 	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)

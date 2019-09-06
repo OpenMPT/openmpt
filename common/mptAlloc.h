@@ -54,12 +54,12 @@ struct GetRawBytesFunctor<std::vector<T>>
 	inline mpt::const_byte_span operator () (const std::vector<T> & v) const
 	{
 		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return mpt::as_span(reinterpret_cast<const mpt::byte *>(v.data()), v.size() * sizeof(T));
+		return mpt::as_span(reinterpret_cast<const std::byte *>(v.data()), v.size() * sizeof(T));
 	}
 	inline mpt::byte_span operator () (std::vector<T> & v) const
 	{
 		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return mpt::as_span(reinterpret_cast<mpt::byte *>(v.data()), v.size() * sizeof(T));
+		return mpt::as_span(reinterpret_cast<std::byte *>(v.data()), v.size() * sizeof(T));
 	}
 };
 
@@ -69,7 +69,7 @@ struct GetRawBytesFunctor<const std::vector<T>>
 	inline mpt::const_byte_span operator () (const std::vector<T> & v) const
 	{
 		STATIC_ASSERT(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
-		return mpt::as_span(reinterpret_cast<const mpt::byte *>(v.data()), v.size() * sizeof(T));
+		return mpt::as_span(reinterpret_cast<const std::byte *>(v.data()), v.size() * sizeof(T));
 	}
 };
 

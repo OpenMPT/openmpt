@@ -24,7 +24,7 @@ public:
 			if(m_opened && (m_hCpy = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, size)) != nullptr)
 			{
 				::EmptyClipboard();
-				m_data = mpt::as_span(static_cast<mpt::byte *>(::GlobalLock(m_hCpy)), size);
+				m_data = mpt::as_span(static_cast<std::byte *>(::GlobalLock(m_hCpy)), size);
 			}
 		} else
 		{
@@ -32,7 +32,7 @@ public:
 			void *p;
 			if(hCpy != nullptr && (p = ::GlobalLock(hCpy)) != nullptr)
 			{
-				m_data = mpt::as_span(static_cast<mpt::byte *>(p), ::GlobalSize(hCpy));
+				m_data = mpt::as_span(static_cast<std::byte *>(p), ::GlobalSize(hCpy));
 			}
 		}
 	}

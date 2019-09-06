@@ -5224,7 +5224,7 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 				{
 					if(macro[0] == 0xF0)
 					{
-						pPlugin->MidiSysexSend(mpt::as_span(mpt::byte_cast<const mpt::byte*>(macro), macroLen));
+						pPlugin->MidiSysexSend(mpt::as_span(mpt::byte_cast<const std::byte*>(macro), macroLen));
 					} else
 					{
 						uint32 len = std::min(static_cast<uint32>(MIDIEvents::GetEventLength(macro[0])), macroLen);

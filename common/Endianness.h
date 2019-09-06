@@ -177,7 +177,7 @@ namespace detail {
 		MPT_STATIC_ASSERT(sizeof(endian_probe_type) == 4);
 		constexpr endian_probe_type endian_probe_big    = 0x12345678u;
 		constexpr endian_probe_type endian_probe_little = 0x78563412u;
-		const mpt::byte probe[sizeof(endian_probe_type)] = { mpt::as_byte(0x12), mpt::as_byte(0x34), mpt::as_byte(0x56), mpt::as_byte(0x78) };
+		const std::byte probe[sizeof(endian_probe_type)] = { mpt::as_byte(0x12), mpt::as_byte(0x34), mpt::as_byte(0x56), mpt::as_byte(0x78) };
 		endian_probe_type test;
 		std::memcpy(&test, probe, sizeof(endian_probe_type));
 		mpt::endian result = mpt::endian::native;
@@ -334,7 +334,7 @@ static MPT_FORCEINLINE uint64 mpt_bswap64(uint64 x) { return bswap64(x); }
 
 
 template <typename T, typename Tendian, std::size_t size>
-static MPT_CONSTEXPR17_FUN std::array<mpt::byte, size> EndianEncode(T val) noexcept
+static MPT_CONSTEXPR17_FUN std::array<std::byte, size> EndianEncode(T val) noexcept
 {
 	MPT_STATIC_ASSERT(Tendian::endian == mpt::endian::little || Tendian::endian == mpt::endian::big);
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
@@ -344,25 +344,25 @@ static MPT_CONSTEXPR17_FUN std::array<mpt::byte, size> EndianEncode(T val) noexc
 	using unsigned_base_type = typename std::make_unsigned<base_type>::type;
 	using endian_type = Tendian;
 	unsigned_base_type uval = static_cast<unsigned_base_type>(val);
-	std::array<mpt::byte, size> data;
+	std::array<std::byte, size> data;
 	MPT_CONSTANT_IF(endian_type::endian == mpt::endian::little)
 	{
 		for(std::size_t i = 0; i < sizeof(base_type); ++i)
 		{
-			data[i] = static_cast<mpt::byte>(static_cast<uint8>((uval >> (i*8)) & 0xffu));
+			data[i] = static_cast<std::byte>(static_cast<uint8>((uval >> (i*8)) & 0xffu));
 		}
 	} else
 	{
 		for(std::size_t i = 0; i < sizeof(base_type); ++i)
 		{
-			data[(sizeof(base_type)-1) - i] = static_cast<mpt::byte>(static_cast<uint8>((uval >> (i*8)) & 0xffu));
+			data[(sizeof(base_type)-1) - i] = static_cast<std::byte>(static_cast<uint8>((uval >> (i*8)) & 0xffu));
 		}
 	}
 	return data;
 }
 
 template <typename T, typename Tendian, std::size_t size>
-static MPT_CONSTEXPR17_FUN T EndianDecode(std::array<mpt::byte, size> data) noexcept
+static MPT_CONSTEXPR17_FUN T EndianDecode(std::array<std::byte, size> data) noexcept
 {
 	MPT_STATIC_ASSERT(Tendian::endian == mpt::endian::little || Tendian::endian == mpt::endian::big);
 	STATIC_ASSERT(std::numeric_limits<T>::is_integer);
@@ -546,9 +546,9 @@ struct IEEE754binary32Emulated
 {
 public:
 	using self_t = IEEE754binary32Emulated<hihi,hilo,lohi,lolo>;
-	mpt::byte bytes[4];
+	std::byte bytes[4];
 public:
-	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
+	MPT_FORCEINLINE std::byte GetByte(std::size_t i) const
 	{
 		return bytes[i];
 	}
@@ -560,7 +560,7 @@ public:
 	// b0...b3 are in memory order, i.e. depend on the endianness of this type
 	// little endian: (0x00,0x00,0x80,0x3f)
 	// big endian:    (0x3f,0x80,0x00,0x00)
-	MPT_FORCEINLINE explicit IEEE754binary32Emulated(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3)
+	MPT_FORCEINLINE explicit IEEE754binary32Emulated(std::byte b0, std::byte b1, std::byte b2, std::byte b3)
 	{
 		bytes[0] = b0;
 		bytes[1] = b1;
@@ -573,10 +573,10 @@ public:
 	}
 	MPT_FORCEINLINE self_t & SetInt32(uint32 i)
 	{
-		bytes[hihi] = static_cast<mpt::byte>(i >> 24);
-		bytes[hilo] = static_cast<mpt::byte>(i >> 16);
-		bytes[lohi] = static_cast<mpt::byte>(i >>  8);
-		bytes[lolo] = static_cast<mpt::byte>(i >>  0);
+		bytes[hihi] = static_cast<std::byte>(i >> 24);
+		bytes[hilo] = static_cast<std::byte>(i >> 16);
+		bytes[lohi] = static_cast<std::byte>(i >>  8);
+		bytes[lolo] = static_cast<std::byte>(i >>  0);
 		return *this;
 	}
 	MPT_FORCEINLINE uint32 GetInt32() const
@@ -607,9 +607,9 @@ struct IEEE754binary64Emulated
 {
 public:
 	using self_t = IEEE754binary64Emulated<hihihi,hihilo,hilohi,hilolo,lohihi,lohilo,lolohi,lololo>;
-	mpt::byte bytes[8];
+	std::byte bytes[8];
 public:
-	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
+	MPT_FORCEINLINE std::byte GetByte(std::size_t i) const
 	{
 		return bytes[i];
 	}
@@ -618,7 +618,7 @@ public:
 	{
 		SetInt64(EncodeIEEE754binary64(f));
 	}
-	MPT_FORCEINLINE explicit IEEE754binary64Emulated(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3, mpt::byte b4, mpt::byte b5, mpt::byte b6, mpt::byte b7)
+	MPT_FORCEINLINE explicit IEEE754binary64Emulated(std::byte b0, std::byte b1, std::byte b2, std::byte b3, std::byte b4, std::byte b5, std::byte b6, std::byte b7)
 	{
 		bytes[0] = b0;
 		bytes[1] = b1;
@@ -635,14 +635,14 @@ public:
 	}
 	MPT_FORCEINLINE self_t & SetInt64(uint64 i)
 	{
-		bytes[hihihi] = static_cast<mpt::byte>(i >> 56);
-		bytes[hihilo] = static_cast<mpt::byte>(i >> 48);
-		bytes[hilohi] = static_cast<mpt::byte>(i >> 40);
-		bytes[hilolo] = static_cast<mpt::byte>(i >> 32);
-		bytes[lohihi] = static_cast<mpt::byte>(i >> 24);
-		bytes[lohilo] = static_cast<mpt::byte>(i >> 16);
-		bytes[lolohi] = static_cast<mpt::byte>(i >>  8);
-		bytes[lololo] = static_cast<mpt::byte>(i >>  0);
+		bytes[hihihi] = static_cast<std::byte>(i >> 56);
+		bytes[hihilo] = static_cast<std::byte>(i >> 48);
+		bytes[hilohi] = static_cast<std::byte>(i >> 40);
+		bytes[hilolo] = static_cast<std::byte>(i >> 32);
+		bytes[lohihi] = static_cast<std::byte>(i >> 24);
+		bytes[lohilo] = static_cast<std::byte>(i >> 16);
+		bytes[lolohi] = static_cast<std::byte>(i >>  8);
+		bytes[lololo] = static_cast<std::byte>(i >>  0);
 		return *this;
 	}
 	MPT_FORCEINLINE uint64 GetInt64() const
@@ -693,16 +693,16 @@ struct IEEE754binary32Native
 public:
 	float32 value;
 public:
-	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
+	MPT_FORCEINLINE std::byte GetByte(std::size_t i) const
 	{
 		MPT_STATIC_ASSERT(endian == mpt::endian::little || endian == mpt::endian::big);
 		MPT_CONSTANT_IF(endian == mpt::endian::little)
 		{
-			return static_cast<mpt::byte>(EncodeIEEE754binary32(value) >> (i*8));
+			return static_cast<std::byte>(EncodeIEEE754binary32(value) >> (i*8));
 		}
 		MPT_CONSTANT_IF(endian == mpt::endian::big)
 		{
-			return static_cast<mpt::byte>(EncodeIEEE754binary32(value) >> ((4-1-i)*8));
+			return static_cast<std::byte>(EncodeIEEE754binary32(value) >> ((4-1-i)*8));
 		}
 	}
 	MPT_FORCEINLINE IEEE754binary32Native() { }
@@ -713,7 +713,7 @@ public:
 	// b0...b3 are in memory order, i.e. depend on the endianness of this type
 	// little endian: (0x00,0x00,0x80,0x3f)
 	// big endian:    (0x3f,0x80,0x00,0x00)
-	MPT_FORCEINLINE explicit IEEE754binary32Native(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3)
+	MPT_FORCEINLINE explicit IEEE754binary32Native(std::byte b0, std::byte b1, std::byte b2, std::byte b3)
 	{
 		MPT_STATIC_ASSERT(endian == mpt::endian::little || endian == mpt::endian::big);
 		MPT_CONSTANT_IF(endian == mpt::endian::little)
@@ -764,16 +764,16 @@ struct IEEE754binary64Native
 public:
 	float64 value;
 public:
-	MPT_FORCEINLINE mpt::byte GetByte(std::size_t i) const
+	MPT_FORCEINLINE std::byte GetByte(std::size_t i) const
 	{
 		MPT_STATIC_ASSERT(endian == mpt::endian::little || endian == mpt::endian::big);
 		MPT_CONSTANT_IF(endian == mpt::endian::little)
 		{
-			return mpt::byte_cast<mpt::byte>(static_cast<uint8>(EncodeIEEE754binary64(value) >> (i*8)));
+			return mpt::byte_cast<std::byte>(static_cast<uint8>(EncodeIEEE754binary64(value) >> (i*8)));
 		}
 		MPT_CONSTANT_IF(endian == mpt::endian::big)
 		{
-			return mpt::byte_cast<mpt::byte>(static_cast<uint8>(EncodeIEEE754binary64(value) >> ((8-1-i)*8)));
+			return mpt::byte_cast<std::byte>(static_cast<uint8>(EncodeIEEE754binary64(value) >> ((8-1-i)*8)));
 		}
 	}
 	MPT_FORCEINLINE IEEE754binary64Native() { }
@@ -781,7 +781,7 @@ public:
 	{
 		value = f;
 	}
-	MPT_FORCEINLINE explicit IEEE754binary64Native(mpt::byte b0, mpt::byte b1, mpt::byte b2, mpt::byte b3, mpt::byte b4, mpt::byte b5, mpt::byte b6, mpt::byte b7)
+	MPT_FORCEINLINE explicit IEEE754binary64Native(std::byte b0, std::byte b1, std::byte b2, std::byte b3, std::byte b4, std::byte b5, std::byte b6, std::byte b7)
 	{
 		MPT_STATIC_ASSERT(endian == mpt::endian::little || endian == mpt::endian::big);
 		MPT_CONSTANT_IF(endian == mpt::endian::little)
@@ -912,9 +912,9 @@ public:
 	using endian_type = Tendian;
 public:
 #if MPT_ENDIAN_IS_CONSTEXPR
-	mpt::byte data[sizeof(base_type)]{};
+	std::byte data[sizeof(base_type)]{};
 #else // !MPT_ENDIAN_IS_CONSTEXPR
-	std::array<mpt::byte, sizeof(base_type)> data;
+	std::array<std::byte, sizeof(base_type)> data;
 #endif // MPT_ENDIAN_IS_CONSTEXPR
 public:
 	MPT_ENDIAN_CONSTEXPR_FUN void set(base_type val) noexcept
@@ -926,14 +926,14 @@ public:
 				typename std::make_unsigned<base_type>::type uval = val;
 				for(std::size_t i = 0; i < sizeof(base_type); ++i)
 				{
-					data[i] = static_cast<mpt::byte>((uval >> (8*(sizeof(base_type)-1-i))) & 0xffu);
+					data[i] = static_cast<std::byte>((uval >> (8*(sizeof(base_type)-1-i))) & 0xffu);
 				}
 			} else
 			{
 				typename std::make_unsigned<base_type>::type uval = val;
 				for(std::size_t i = 0; i < sizeof(base_type); ++i)
 				{
-					data[i] = static_cast<mpt::byte>((uval >> (8*i)) & 0xffu);
+					data[i] = static_cast<std::byte>((uval >> (8*i)) & 0xffu);
 				}
 			}
 		#else // !MPT_ENDIAN_IS_CONSTEXPR
@@ -1126,7 +1126,7 @@ class const_unaligned_ptr_le
 public:
 	using value_type = T;
 private:
-	const mpt::byte *mem;
+	const std::byte *mem;
 	value_type Read() const
 	{
 		typename mpt::make_le<T>::type val;
@@ -1137,7 +1137,7 @@ public:
 	const_unaligned_ptr_le() : mem(nullptr) {}
 	const_unaligned_ptr_le(const const_unaligned_ptr_le<value_type> & other) : mem(other.mem) {}
 	const_unaligned_ptr_le & operator = (const const_unaligned_ptr_le<value_type> & other) { mem = other.mem; return *this; }
-	template <typename Tbyte> explicit const_unaligned_ptr_le(const Tbyte *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
+	template <typename Tbyte> explicit const_unaligned_ptr_le(const Tbyte *mem) : mem(mpt::byte_cast<const std::byte*>(mem)) {}
 	const_unaligned_ptr_le & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
 	const_unaligned_ptr_le & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
 	const_unaligned_ptr_le & operator ++ () { mem += sizeof(value_type); return *this; }
@@ -1157,7 +1157,7 @@ class const_unaligned_ptr_be
 public:
 	using value_type = T;
 private:
-	const mpt::byte *mem;
+	const std::byte *mem;
 	value_type Read() const
 	{
 		typename mpt::make_be<T>::type val;
@@ -1168,7 +1168,7 @@ public:
 	const_unaligned_ptr_be() : mem(nullptr) {}
 	const_unaligned_ptr_be(const const_unaligned_ptr_be<value_type> & other) : mem(other.mem) {}
 	const_unaligned_ptr_be & operator = (const const_unaligned_ptr_be<value_type> & other) { mem = other.mem; return *this; }
-	template <typename Tbyte> explicit const_unaligned_ptr_be(const Tbyte *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
+	template <typename Tbyte> explicit const_unaligned_ptr_be(const Tbyte *mem) : mem(mpt::byte_cast<const std::byte*>(mem)) {}
 	const_unaligned_ptr_be & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
 	const_unaligned_ptr_be & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
 	const_unaligned_ptr_be & operator ++ () { mem += sizeof(value_type); return *this; }
@@ -1188,7 +1188,7 @@ class const_unaligned_ptr
 public:
 	using value_type = T;
 private:
-	const mpt::byte *mem;
+	const std::byte *mem;
 	value_type Read() const
 	{
 		value_type val = value_type();
@@ -1199,7 +1199,7 @@ public:
 	const_unaligned_ptr() : mem(nullptr) {}
 	const_unaligned_ptr(const const_unaligned_ptr<value_type> & other) : mem(other.mem) {}
 	const_unaligned_ptr & operator = (const const_unaligned_ptr<value_type> & other) { mem = other.mem; return *this; }
-	template <typename Tbyte> explicit const_unaligned_ptr(const Tbyte *mem) : mem(mpt::byte_cast<const mpt::byte*>(mem)) {}
+	template <typename Tbyte> explicit const_unaligned_ptr(const Tbyte *mem) : mem(mpt::byte_cast<const std::byte*>(mem)) {}
 	const_unaligned_ptr & operator += (std::size_t count) { mem += count * sizeof(value_type); return *this; }
 	const_unaligned_ptr & operator -= (std::size_t count) { mem -= count * sizeof(value_type); return *this; }
 	const_unaligned_ptr & operator ++ () { mem += sizeof(value_type); return *this; }

@@ -668,7 +668,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		if(ReadMP3Sample(0, chunk, true))
 		{
 			ModSample &srcSample = Samples[0];
-			const mpt::byte *smpData = srcSample.sampleb();
+			const std::byte *smpData = srcSample.sampleb();
 			SmpLength predelay = Util::muldiv_unsigned(20116, srcSample.nC5Speed, 100000);
 			LimitMax(predelay, srcSample.nLength);
 			smpData += predelay * srcSample.GetBytesPerSample();

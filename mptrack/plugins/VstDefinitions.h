@@ -650,7 +650,7 @@ struct VstMidiSysexEvent : public VstEvent
 {
 	int32 dumpBytes;
 	intptr_t reserved1;
-	const mpt::byte *sysexDump;
+	const std::byte *sysexDump;
 	intptr_t reserved2;
 };
 

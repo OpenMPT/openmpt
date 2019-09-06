@@ -134,7 +134,7 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 	}
 #endif
 	m_chunkData = s.str();
-	return mpt::as_span(mpt::byte_cast<const mpt::byte *>(m_chunkData.data()), m_chunkData.size());
+	return mpt::as_span(mpt::byte_cast<const std::byte *>(m_chunkData.data()), m_chunkData.size());
 }
 
 

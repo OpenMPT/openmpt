@@ -179,7 +179,7 @@ static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 		if(events->events[i]->type == Vst::kVstSysExType)
 		{
 			auto sysExEvent = static_cast<Vst::VstMidiSysexEvent *>(events->events[i]);
-			sysExEvent->sysexDump = reinterpret_cast<const mpt::byte *>(offset);
+			sysExEvent->sysexDump = reinterpret_cast<const std::byte *>(offset);
 			offset += sysExEvent->dumpBytes;
 		}
 	}

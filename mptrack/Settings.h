@@ -41,7 +41,7 @@ enum SettingType
 class SettingValue
 {
 private:
-	std::variant<std::monostate, bool, int32, double, mpt::ustring, std::vector<mpt::byte>> value;
+	std::variant<std::monostate, bool, int32, double, mpt::ustring, std::vector<std::byte>> value;
 	std::string typeTag;
 public:
 	bool operator == (const SettingValue &other) const
@@ -86,7 +86,7 @@ public:
 		: value(val)
 	{
 	}
-	SettingValue(const std::vector<mpt::byte> &val)
+	SettingValue(const std::vector<std::byte> &val)
 		: value(val)
 	{
 	}
@@ -110,7 +110,7 @@ public:
 		, typeTag(typeTag_)
 	{
 	}
-	SettingValue(const std::vector<mpt::byte> &val, const std::string &typeTag_)
+	SettingValue(const std::vector<std::byte> &val, const std::string &typeTag_)
 		: value(val)
 		, typeTag(typeTag_)
 	{
@@ -139,7 +139,7 @@ public:
 		{
 			result = SettingTypeString;
 		}
-		if(std::holds_alternative<std::vector<mpt::byte>>(value))
+		if(std::holds_alternative<std::vector<std::byte>>(value))
 		{
 			result = SettingTypeBinary;
 		}
@@ -178,9 +178,9 @@ public:
 		MPT_ASSERT(std::holds_alternative<mpt::ustring>(value));
 		return std::get<mpt::ustring>(value);			
 	}
-	operator std::vector<mpt::byte> () const
+	operator std::vector<std::byte> () const
 	{
-		MPT_ASSERT(std::holds_alternative<std::vector<mpt::byte>>(value));
+		MPT_ASSERT(std::holds_alternative<std::vector<std::byte>>(value));
 		return std::get<std::vector<std::byte>>(value);			
 	}
 	mpt::ustring FormatTypeAsString() const;
@@ -190,14 +190,14 @@ public:
 
 
 template<typename T>
-std::vector<mpt::byte> EncodeBinarySetting(const T &val)
+std::vector<std::byte> EncodeBinarySetting(const T &val)
 {
-	std::vector<mpt::byte> result(sizeof(T));
+	std::vector<std::byte> result(sizeof(T));
 	std::memcpy(result.data(), &val, sizeof(T));
 	return result;
 }
 template<typename T>
-T DecodeBinarySetting(const std::vector<mpt::byte> &val)
+T DecodeBinarySetting(const std::vector<std::byte> &val)
 {
 	T result = T();
 	if(val.size() >= sizeof(T))
@@ -688,12 +688,12 @@ class IniFileSettingsBackend : public ISettingsBackend
 private:
 	const mpt::PathString filename;
 private:
-	std::vector<mpt::byte> ReadSettingRaw(const SettingPath &path, const std::vector<mpt::byte> &def) const;
+	std::vector<std::byte> ReadSettingRaw(const SettingPath &path, const std::vector<std::byte> &def) const;
 	mpt::ustring ReadSettingRaw(const SettingPath &path, const mpt::ustring &def) const;
 	double ReadSettingRaw(const SettingPath &path, double def) const;
 	int32 ReadSettingRaw(const SettingPath &path, int32 def) const;
 	bool ReadSettingRaw(const SettingPath &path, bool def) const;
-	void WriteSettingRaw(const SettingPath &path, const std::vector<mpt::byte> &val);
+	void WriteSettingRaw(const SettingPath &path, const std::vector<std::byte> &val);
 	void WriteSettingRaw(const SettingPath &path, const mpt::ustring &val);
 	void WriteSettingRaw(const SettingPath &path, double val);
 	void WriteSettingRaw(const SettingPath &path, int32 val);

@@ -47,7 +47,7 @@ struct ZipFileAbstraction
 	static uLong ZCALLBACK fread_mem(voidpf opaque, voidpf, void *buf, uLong size)
 	{
 		FileReader &file = *static_cast<FileReader *>(opaque);
-		return mpt::saturate_cast<uLong>(file.ReadRaw(mpt::void_cast<mpt::byte*>(buf), size));
+		return mpt::saturate_cast<uLong>(file.ReadRaw(mpt::void_cast<std::byte*>(buf), size));
 	}
 
 	static uLong ZCALLBACK fwrite_mem(voidpf, voidpf, const void *, uLong)

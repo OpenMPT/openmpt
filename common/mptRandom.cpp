@@ -86,7 +86,7 @@ static T generate_timeseed()
 	{
 		uint64be time;
 		time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock().now().time_since_epoch()).count();
-		mpt::byte bytes[sizeof(time)];
+		std::byte bytes[sizeof(time)];
 		std::memcpy(bytes, &time, sizeof(time));
 		hash(std::begin(bytes), std::end(bytes));
 	}
@@ -94,7 +94,7 @@ static T generate_timeseed()
 	{
 		uint64be time;
 		time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock().now().time_since_epoch()).count();
-		mpt::byte bytes[sizeof(time)];
+		std::byte bytes[sizeof(time)];
 		std::memcpy(bytes, &time, sizeof(time));
 		hash(std::begin(bytes), std::end(bytes));
 	}

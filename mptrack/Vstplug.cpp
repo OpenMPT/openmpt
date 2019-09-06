@@ -1313,7 +1313,7 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 				} else if(ev->type == kVstSysExType)
 				{
 					auto event = static_cast<const VstMidiSysexEvent *>(ev);
-					plugin->MidiSysexSend(mpt::as_span(mpt::byte_cast<const mpt::byte *>(event->sysexDump), event->dumpBytes));
+					plugin->MidiSysexSend(mpt::as_span(mpt::byte_cast<const std::byte *>(event->sysexDump), event->dumpBytes));
 				}
 			}
 		}
@@ -1672,7 +1672,7 @@ void CVstPlugin::CacheParameterNames(int32 firstParam, int32 lastParam)
 
 IMixPlugin::ChunkData CVstPlugin::GetChunk(bool isBank)
 {
-	mpt::byte *chunk = nullptr;
+	std::byte *chunk = nullptr;
 	auto size = Dispatch(effGetChunk, isBank ? 0 : 1, 0, &chunk, 0);
 	if(chunk == nullptr)
 	{
@@ -1684,7 +1684,7 @@ IMixPlugin::ChunkData CVstPlugin::GetChunk(bool isBank)
 
 void CVstPlugin::SetChunk(const ChunkData &chunk, bool isBank)
 {
-	Dispatch(effSetChunk, isBank ? 0 : 1, chunk.size(), const_cast<mpt::byte *>(chunk.data()), 0);
+	Dispatch(effSetChunk, isBank ? 0 : 1, chunk.size(), const_cast<std::byte *>(chunk.data()), 0);
 }
 
 

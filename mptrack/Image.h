@@ -87,10 +87,10 @@ namespace GDIP
 	{
 		if(bitmapData.Stride >= 0)
 		{
-			return reinterpret_cast<Pixel*>(mpt::void_cast<void*>(mpt::void_cast<mpt::byte*>(bitmapData.Scan0) + y * bitmapData.Stride));
+			return reinterpret_cast<Pixel*>(mpt::void_cast<void*>(mpt::void_cast<std::byte*>(bitmapData.Scan0) + y * bitmapData.Stride));
 		} else
 		{
-			return reinterpret_cast<Pixel*>(mpt::void_cast<void*>(mpt::void_cast<mpt::byte*>(bitmapData.Scan0) + (bitmapData.Height - 1 - y) * (-bitmapData.Stride)));
+			return reinterpret_cast<Pixel*>(mpt::void_cast<void*>(mpt::void_cast<std::byte*>(bitmapData.Scan0) + (bitmapData.Height - 1 - y) * (-bitmapData.Stride)));
 		}
 	}
 

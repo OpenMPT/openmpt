@@ -44,7 +44,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 	FileReader::off_t bytesRead = 0;	// Amount of memory that has been read from file
 
 	FileReader::off_t filePosition = file.GetPosition();
-	const mpt::byte * sourceBuf = nullptr;
+	const std::byte * sourceBuf = nullptr;
 	FileReader::PinnedRawDataView restrictedSampleDataView;
 	FileReader::off_t fileSize = 0;
 	if(UsesFileReaderForDecoding())
@@ -861,7 +861,7 @@ size_t SampleIO::WriteSample(std::ostream &f, const ModSample &sample, SmpLength
 		return 0;
 	}
 
-	std::array<mpt::byte, mpt::IO::BUFFERSIZE_TINY> writeBuffer;
+	std::array<std::byte, mpt::IO::BUFFERSIZE_TINY> writeBuffer;
 	mpt::IO::WriteBuffer<std::ostream> fb{f, mpt::as_span(writeBuffer)};
 
 	SmpLength numSamples = sample.nLength;
@@ -962,7 +962,7 @@ size_t SampleIO::WriteSample(std::ostream &f, const ModSample &sample, SmpLength
 		// Stereo signed interleaved
 		MPT_ASSERT(len == numSamples * 2);
 		const int8 *const pSample8 = sample.sample8();
-		mpt::IO::WriteRaw(f, reinterpret_cast<const mpt::byte*>(pSample8), len);
+		mpt::IO::WriteRaw(f, reinterpret_cast<const std::byte*>(pSample8), len);
 	}
 
 	else if(GetBitDepth() == 16 && GetChannelFormat() == stereoInterleaved && GetEncoding() == signedPCM && GetEndianness() == littleEndian)

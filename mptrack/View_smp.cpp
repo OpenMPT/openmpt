@@ -1073,7 +1073,7 @@ void CViewSample::OnDraw(CDC *pDC)
 			{
 				// Draw sample data in 1:1 ratio or higher (zoom in)
 				SmpLength len = sample.nLength - nSmpScrollPos;
-				const mpt::byte *psample = sample.sampleb() + nSmpScrollPos * smplsize;
+				const std::byte *psample = sample.sampleb() + nSmpScrollPos * smplsize;
 				if (sample.uFlags[CHN_STEREO])
 				{
 					DrawSampleData1(offScreenDC, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
@@ -1092,7 +1092,7 @@ void CViewSample::OnDraw(CDC *pDC)
 					xscroll = nSmpScrollPos;
 					len -= nSmpScrollPos;
 				}
-				const mpt::byte *psample = sample.sampleb() + xscroll * smplsize;
+				const std::byte *psample = sample.sampleb() + xscroll * smplsize;
 				if (sample.uFlags[CHN_STEREO])
 				{
 					DrawSampleData2(offScreenDC, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);

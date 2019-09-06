@@ -3063,7 +3063,7 @@ void CModDoc::DeserializeViews()
 			if(s.size() < 2) return;
 		}
 	}
-	std::vector<mpt::byte> bytes = Util::HexToBin(s);
+	std::vector<std::byte> bytes = Util::HexToBin(s);
 
 	FileReader file(mpt::as_span(bytes));
 

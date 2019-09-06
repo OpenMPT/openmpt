@@ -245,7 +245,7 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 
 namespace mpt {
 
-LazyFileRef & LazyFileRef::operator = (const std::vector<mpt::byte> &data)
+LazyFileRef & LazyFileRef::operator = (const std::vector<std::byte> &data)
 {
 	mpt::ofstream file(m_Filename, std::ios::binary);
 	file.exceptions(std::ios_base::failbit | std::ios_base::badbit);
@@ -272,16 +272,16 @@ LazyFileRef & LazyFileRef::operator = (const std::string &data)
 	return *this;
 }
 
-LazyFileRef::operator std::vector<mpt::byte> () const
+LazyFileRef::operator std::vector<std::byte> () const
 {
 	mpt::ifstream file(m_Filename, std::ios::binary);
 	if(!mpt::IO::IsValid(file))
 	{
-		return std::vector<mpt::byte>();
+		return std::vector<std::byte>();
 	}
 	file.exceptions(std::ios_base::failbit | std::ios_base::badbit);
 	mpt::IO::SeekEnd(file);
-	std::vector<mpt::byte> buf(mpt::saturate_cast<std::size_t>(mpt::IO::TellRead(file)));
+	std::vector<std::byte> buf(mpt::saturate_cast<std::size_t>(mpt::IO::TellRead(file)));
 	mpt::IO::SeekBegin(file);
 	mpt::IO::ReadRaw(file, buf.data(), buf.size());
 	return buf;

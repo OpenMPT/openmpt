@@ -71,13 +71,13 @@ struct ModSample
 	{
 		return pData.pSample;
 	}
-	MPT_FORCEINLINE const mpt::byte *sampleb() const noexcept
+	MPT_FORCEINLINE const std::byte *sampleb() const noexcept
 	{
-		return mpt::void_cast<const mpt::byte*>(pData.pSample);
+		return mpt::void_cast<const std::byte*>(pData.pSample);
 	}
-	MPT_FORCEINLINE mpt::byte *sampleb() noexcept
+	MPT_FORCEINLINE std::byte *sampleb() noexcept
 	{
-		return mpt::void_cast<mpt::byte*>(pData.pSample);
+		return mpt::void_cast<std::byte*>(pData.pSample);
 	}
 	MPT_FORCEINLINE const int8 *sample8() const noexcept
 	{
