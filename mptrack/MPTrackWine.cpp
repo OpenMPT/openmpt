@@ -480,7 +480,7 @@ void Initialize()
 		script += std::string() + "\n";
 
 		std::vector<std::string> winegcc;
-		MPT_CONSTANT_IF(mpt::arch_bits == 32)
+		if constexpr(mpt::arch_bits == 32)
 		{ // 32bit winegcc probably cannot compile to 64bit
 			winegcc.push_back("winegcc32-development");
 		}
@@ -491,7 +491,7 @@ void Initialize()
 		winegcc.push_back("winegcc-development");
 		if(wineVersion.HostClass() != mpt::OS::Class::BSD)
 		{ // avoid C++ compiler on *BSD because libc++ Win32 support tends to be missing there.
-			MPT_CONSTANT_IF(mpt::arch_bits == 32)
+			if constexpr(mpt::arch_bits == 32)
 			{ // 32bit winegcc probably cannot compile to 64bit
 				winegcc.push_back("wineg++32-development");
 			}
@@ -501,7 +501,7 @@ void Initialize()
 			}
 			winegcc.push_back("wineg++-development");
 		}
-		MPT_CONSTANT_IF(mpt::arch_bits == 32)
+		if constexpr(mpt::arch_bits == 32)
 		{ // 32bit winegcc probably cannot compile to 64bit
 			winegcc.push_back("winegcc32");
 		}
@@ -512,7 +512,7 @@ void Initialize()
 		winegcc.push_back("winegcc");
 		if(wineVersion.HostClass() != mpt::OS::Class::BSD)
 		{ // avoid C++ compiler on *BSD because libc++ Win32 support tends to be missing there.
-			MPT_CONSTANT_IF(mpt::arch_bits == 32)
+			if constexpr(mpt::arch_bits == 32)
 			{ // 32bit winegcc probably cannot compile to 64bit
 				winegcc.push_back("wineg++32");
 			}
@@ -547,7 +547,7 @@ void Initialize()
 			script += std::string() + " fi" + "\n";
 			script += std::string() + "fi" + "\n";
 		}
-		MPT_CONSTANT_IF(mpt::arch_bits == 32)
+		if constexpr(mpt::arch_bits == 32)
 		{
 			script += std::string() + "if [ `$MPT_WINEGXX > /dev/null 2>&1 ; echo $?` -eq 127 ] ; then" + "\n";
 			script += std::string() + " if command -v /usr/lib/i386-linux-gnu/wine/bin/winegcc 2>/dev/null 1>/dev/null ; then" + "\n";
@@ -562,7 +562,7 @@ void Initialize()
 		if(TrackerSettings::Instance().WineSupportForeignOpenMPT)
 		{
 			features += std::string() + " " + "MPT_ARCH_BITS=" + mpt::fmt::dec(mpt::arch_bits);
-			MPT_CONSTANT_IF(mpt::arch_bits == 64)
+			if constexpr(mpt::arch_bits == 64)
 			{
 				features += std::string() + " " + "MPT_TARGET=" + "x86_64-linux-gnu-";
 			} else

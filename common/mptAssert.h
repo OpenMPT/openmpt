@@ -117,7 +117,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #else // !NO_ASSERTS
 
-#define MPT_ASSERT_NOTREACHED()          MPT_DO { MPT_CONSTANT_IF(!(0)) { AssertHandler(MPT_SOURCE_LOCATION_CURRENT(), "0"); } MPT_CHECKER_ASSUME(0); } MPT_WHILE_0
+#define MPT_ASSERT_NOTREACHED()          MPT_DO { if constexpr(!(0)) { AssertHandler(MPT_SOURCE_LOCATION_CURRENT(), "0"); } MPT_CHECKER_ASSUME(0); } MPT_WHILE_0
 #define MPT_ASSERT(expr)                 MPT_DO { if(!(expr)) { AssertHandler(MPT_SOURCE_LOCATION_CURRENT(), #expr); } MPT_CHECKER_ASSUME(expr); } MPT_WHILE_0
 #define MPT_ASSERT_MSG(expr, msg)        MPT_DO { if(!(expr)) { AssertHandler(MPT_SOURCE_LOCATION_CURRENT(), #expr, msg); } MPT_CHECKER_ASSUME(expr); } MPT_WHILE_0
 #define MPT_ASSERT_ALWAYS(expr)          MPT_DO { if(!(expr)) { AssertHandler(MPT_SOURCE_LOCATION_CURRENT(), #expr); } MPT_CHECKER_ASSUME(expr); } MPT_WHILE_0

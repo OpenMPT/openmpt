@@ -54,11 +54,11 @@ public:
 	template <uint32 targetbits, typename Trng>
 	MPT_FORCEINLINE MixSampleInt process(MixSampleInt sample, Trng &rng)
 	{
-		MPT_CONSTANT_IF(targetbits == 0)
+		if constexpr(targetbits == 0)
 		{
 			MPT_UNREFERENCED_PARAMETER(rng);
 			return sample;
-		} else MPT_CONSTANT_IF(targetbits + MixSampleIntTraits::mix_headroom_bits() + 1 >= 32)
+		} else if constexpr(targetbits + MixSampleIntTraits::mix_headroom_bits() + 1 >= 32)
 		{
 			MPT_UNREFERENCED_PARAMETER(rng);
 			return sample;
@@ -87,7 +87,7 @@ public:
 	template <uint32 targetbits, typename Trng>
 	MPT_FORCEINLINE MixSampleInt process(MixSampleInt sample, Trng &prng)
 	{
-		MPT_CONSTANT_IF(targetbits == 0)
+		if constexpr(targetbits == 0)
 		{
 			MPT_UNREFERENCED_PARAMETER(prng);
 			return sample;
@@ -95,7 +95,7 @@ public:
 		{
 			STATIC_ASSERT(sizeof(MixSampleInt) == 4);
 			constexpr int rshift = (32-targetbits) - MixSampleIntTraits::mix_headroom_bits();
-			MPT_CONSTANT_IF(rshift <= 1)
+			if constexpr(rshift <= 1)
 			{
 				MPT_UNREFERENCED_PARAMETER(prng);
 				// nothing to dither
@@ -109,7 +109,7 @@ public:
 				constexpr int noise_bias = (1<<(noise_bits-1));
 				int32 e = error;
 				unsigned int unoise = 0;
-				MPT_CONSTANT_IF(triangular)
+				if constexpr(triangular)
 				{
 					unoise = (mpt::random<unsigned int>(prng, noise_bits) + mpt::random<unsigned int>(prng, noise_bits)) >> 1;
 				} else
@@ -118,7 +118,7 @@ public:
 				}
 				int noise = static_cast<int>(unoise) - noise_bias; // un-bias
 				int val = sample;
-				MPT_CONSTANT_IF(shaped)
+				if constexpr(shaped)
 				{
 					val += (e >> 1);
 				}

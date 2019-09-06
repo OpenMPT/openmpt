@@ -93,8 +93,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#define MPT_CONSTANT_IF if constexpr
-
 #if MPT_COMPILER_MSVC
 #define MPT_MAYBE_CONSTANT_IF(x) \
   __pragma(warning(push)) \

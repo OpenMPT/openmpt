@@ -872,7 +872,7 @@ static widestring FromUTF8(const std::string &str, widechar replacement = wide_d
 			charsleft--;
 
 			if ( charsleft == 0 ) {
-				MPT_CONSTANT_IF ( sizeof( widechar ) == 2 ) {
+				if constexpr ( sizeof( widechar ) == 2 ) {
 					if ( ucs4 > 0x1fffff ) {
 						out.push_back( replacement );
 						ucs4 = 0;
@@ -918,7 +918,7 @@ static std::string ToUTF8(const widestring &str, char replacement = '?')
 		wchar_t wc = in[i];
 
 		uint32 ucs4 = 0;
-		MPT_CONSTANT_IF ( sizeof( widechar ) == 2 ) {
+		if constexpr ( sizeof( widechar ) == 2 ) {
 			uint16 c = static_cast<uint16>( wc );
 			if ( i + 1 < in.length() ) {
 				// check for surrogate pair

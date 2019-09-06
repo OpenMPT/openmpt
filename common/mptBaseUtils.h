@@ -115,30 +115,30 @@ inline Tdst saturate_cast(Tsrc src)
 	// This code tries not only to obviously avoid overflows but also to avoid signed/unsigned comparison warnings and type truncation warnings (which in fact would be safe here) by explicit casting.
 	STATIC_ASSERT(std::numeric_limits<Tdst>::is_integer);
 	STATIC_ASSERT(std::numeric_limits<Tsrc>::is_integer);
-	MPT_CONSTANT_IF(std::numeric_limits<Tdst>::is_signed && std::numeric_limits<Tsrc>::is_signed)
+	if constexpr(std::numeric_limits<Tdst>::is_signed && std::numeric_limits<Tsrc>::is_signed)
 	{
-		MPT_CONSTANT_IF(sizeof(Tdst) >= sizeof(Tsrc))
+		if constexpr(sizeof(Tdst) >= sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(src);
 		} else
 		{
 			return static_cast<Tdst>(std::max(static_cast<Tsrc>(std::numeric_limits<Tdst>::min()), std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
 		}
-	} else MPT_CONSTANT_IF(!std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
+	} else if constexpr(!std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
 	{
-		MPT_CONSTANT_IF(sizeof(Tdst) >= sizeof(Tsrc))
+		if constexpr(sizeof(Tdst) >= sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(src);
 		} else
 		{
 			return static_cast<Tdst>(std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
 		}
-	} else MPT_CONSTANT_IF(std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
+	} else if constexpr(std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed)
 	{
-		MPT_CONSTANT_IF(sizeof(Tdst) > sizeof(Tsrc))
+		if constexpr(sizeof(Tdst) > sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(src);
-		} else MPT_CONSTANT_IF(sizeof(Tdst) == sizeof(Tsrc))
+		} else if constexpr(sizeof(Tdst) == sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
 		} else
@@ -147,7 +147,7 @@ inline Tdst saturate_cast(Tsrc src)
 		}
 	} else // Tdst unsigned, Tsrc signed
 	{
-		MPT_CONSTANT_IF(sizeof(Tdst) >= sizeof(Tsrc))
+		if constexpr(sizeof(Tdst) >= sizeof(Tsrc))
 		{
 			return static_cast<Tdst>(std::max(static_cast<Tsrc>(0), src));
 		} else

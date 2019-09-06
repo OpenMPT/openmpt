@@ -179,7 +179,7 @@ sane_random_device::result_type sane_random_device::operator()()
 	result_type result = 0;
 	try
 	{
-		MPT_CONSTANT_IF(decltype(rd)::min() != 0 || !mpt::is_mask(decltype(rd)::max()))
+		if constexpr(decltype(rd)::min() != 0 || !mpt::is_mask(decltype(rd)::max()))
 		{ // insane std::random_device
 			//  This implementation is not exactly uniformly distributed but good enough
 			// for OpenMPT.

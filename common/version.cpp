@@ -367,7 +367,7 @@ mpt::ustring GetBuildFeaturesString()
 		;
 	#endif
 	#ifdef MODPLUG_TRACKER
-		MPT_CONSTANT_IF(mpt::arch_bits == 64)
+		if constexpr(mpt::arch_bits == 64)
 		{
 			if (true
 				&& (mpt::Windows::Version::GetMinimumKernelLevel() <= mpt::Windows::Version::WinXP64)
@@ -375,7 +375,7 @@ mpt::ustring GetBuildFeaturesString()
 			) {
 				retval += UL_(" WIN64OLD");
 			}
-		} else MPT_CONSTANT_IF(mpt::arch_bits == 32)
+		} else if constexpr(mpt::arch_bits == 32)
 		{
 			if (true
 				&& (mpt::Windows::Version::GetMinimumKernelLevel() <= mpt::Windows::Version::WinXP)

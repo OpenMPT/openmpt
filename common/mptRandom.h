@@ -117,7 +117,7 @@ inline T random(Trng & rng)
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < (sizeof(T) * 8); entropy += rng_bits)
 	{
-		MPT_CONSTANT_IF(rng_bits < (sizeof(T) * 8))
+		if constexpr(rng_bits < (sizeof(T) * 8))
 		{
 			MPT_CONSTEXPR11_VAR unsigned int shift_bits = rng_bits % (sizeof(T) * 8); // silence utterly stupid MSVC and GCC warnings about shifting by too big amount (in which case this branch is not even taken however)
 			result = (result << shift_bits) ^ static_cast<unsigned_T>(rng());
@@ -138,7 +138,7 @@ inline T random(Trng & rng)
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < std::min(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
 	{
-		MPT_CONSTANT_IF(rng_bits < (sizeof(T) * 8))
+		if constexpr(rng_bits < (sizeof(T) * 8))
 		{
 			MPT_CONSTEXPR11_VAR unsigned int shift_bits = rng_bits % (sizeof(T) * 8); // silence utterly stupid MSVC and GCC warnings about shifting by too big amount (in which case this branch is not even taken however)
 			result = (result << shift_bits) ^ static_cast<unsigned_T>(rng());
@@ -147,7 +147,7 @@ inline T random(Trng & rng)
 			result = static_cast<unsigned_T>(rng());
 		}
 	}
-	MPT_CONSTANT_IF(required_entropy_bits >= (sizeof(T) * 8))
+	if constexpr(required_entropy_bits >= (sizeof(T) * 8))
 	{
 		return static_cast<T>(result);
 	} else
@@ -165,7 +165,7 @@ inline T random(Trng & rng, std::size_t required_entropy_bits)
 	unsigned_T result = 0;
 	for(std::size_t entropy = 0; entropy < std::min(required_entropy_bits, sizeof(T) * 8); entropy += rng_bits)
 	{
-		MPT_CONSTANT_IF(rng_bits < (sizeof(T) * 8))
+		if constexpr(rng_bits < (sizeof(T) * 8))
 		{
 			MPT_CONSTEXPR11_VAR unsigned int shift_bits = rng_bits % (sizeof(T) * 8); // silence utterly stupid MSVC and GCC warnings about shifting by too big amount (in which case this branch is not even taken however)
 			result = (result << shift_bits) ^ static_cast<unsigned_T>(rng());

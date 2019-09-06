@@ -1267,7 +1267,7 @@ struct ClipFixed
 	MPT_FORCEINLINE Tfixed operator() (Tfixed val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
-		MPT_CONSTANT_IF(clipOutput)
+		if constexpr(clipOutput)
 		{
 			constexpr Tfixed clip_max = (Tfixed(1) << fractionalBits) - Tfixed(1);
 			constexpr Tfixed clip_min = Tfixed(0) - (Tfixed(1) << fractionalBits);
@@ -1292,7 +1292,7 @@ struct ClipFloat<float, clipOutput>
 	typedef float output_t;
 	MPT_FORCEINLINE float operator() (float val)
 	{
-		MPT_CONSTANT_IF(clipOutput)
+		if constexpr(clipOutput)
 		{
 			if(val < -1.0f) val = -1.0f;
 			if(val > 1.0f) val = 1.0f;
@@ -1311,7 +1311,7 @@ struct ClipFloat<double, clipOutput>
 	typedef double output_t;
 	MPT_FORCEINLINE double operator() (double val)
 	{
-		MPT_CONSTANT_IF(clipOutput)
+		if constexpr(clipOutput)
 		{
 			if(val < -1.0) val = -1.0;
 			if(val > 1.0) val = 1.0;

@@ -113,7 +113,7 @@ public:
 
 	inline void processByte(byte_type byte)
 	{
-		MPT_CONSTANT_IF(reverseData)
+		if constexpr(reverseData)
 		{
 			value = (value >> 8) ^ read_table(static_cast<byte_type>((value & 0xff) ^ byte));
 		} else

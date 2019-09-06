@@ -1597,7 +1597,7 @@ struct SFZRegion
 	static void Read(const std::string &valueStr, T &value, Tc valueMin = std::numeric_limits<T>::min(), Tc valueMax = std::numeric_limits<T>::max())
 	{
 		double valueF = ConvertStrTo<double>(valueStr);
-		MPT_CONSTANT_IF(std::numeric_limits<T>::is_integer)
+		if constexpr(std::numeric_limits<T>::is_integer)
 		{
 			valueF = mpt::round(valueF);
 		}

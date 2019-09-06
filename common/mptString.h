@@ -558,13 +558,13 @@ private:
 	
 	static mpt::ustring From8bit(const std::string &str)
 	{
-		MPT_CONSTANT_IF(charset == mpt::CharsetUTF8)
+		if constexpr(charset == mpt::CharsetUTF8)
 		{
 			return mpt::ToUnicode(mpt::CharsetUTF8, str);
 		} else
 		{
 			// auto utf8 detection
-			MPT_CONSTANT_IF(tryUTF8)
+			if constexpr(tryUTF8)
 			{
 				if(mpt::IsUTF8(str))
 				{
