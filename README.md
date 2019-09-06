@@ -47,9 +47,6 @@ How to compile
     (this is included with Visual Studio, however may need to be selected
     explicitly during setup).
 
- -  In order to build OpenMPT for Windows XP, the Visual Studio 2017 XP
-    targetting toolset needs to be installed.
-
  -  Microsoft Foundation Classes (MFC) are required to build OpenMPT.
 
  -  The ASIO SDK is needed for compiling with ASIO support.
