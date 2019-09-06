@@ -382,10 +382,7 @@ class Unpack:PackDef
     void SetSuspended(bool Suspended) {Unpack::Suspended=Suspended;}
 
 #ifdef RAR_SMP
-    // More than 8 threads are unlikely to provide a noticeable gain
-    // for unpacking, but would use the additional memory.
-    void SetThreads(uint Threads) {MaxUserThreads=Min(Threads,8);}
-
+    void SetThreads(uint Threads);
     void UnpackDecode(UnpackThreadData &D);
 #endif
 

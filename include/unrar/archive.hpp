@@ -83,7 +83,7 @@ class Archive:public File
     int64 GetStartPos();
     void AddSubData(byte *SrcData,uint64 DataSize,File *SrcFile,
          const wchar *Name,uint Flags);
-    bool ReadSubData(Array<byte> *UnpData,File *DestFile);
+    bool ReadSubData(Array<byte> *UnpData,File *DestFile,bool TestMode);
     HEADER_TYPE GetHeaderType() {return CurHeaderType;}
     RAROptions* GetRAROptions() {return Cmd;}
     void SetSilentOpen(bool Mode) {SilentOpen=Mode;}
