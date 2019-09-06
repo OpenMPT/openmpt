@@ -1,4 +1,4 @@
-#define PlatformFolder    "release\vs2017-win7-static\amd64"
+#define PlatformFolder    "release\vs2019-win7-static\amd64"
 #define PlatformName "64-Bit"
 #define BaseNameAddition "-x64"
 #define PlatformArchitecture "x64"

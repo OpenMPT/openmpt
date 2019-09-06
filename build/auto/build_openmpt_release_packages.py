@@ -123,14 +123,14 @@ if singleThreaded:
 
 print("Copying 32-bit binaries...")
 shutil.rmtree(openmpt_zip_32bit_basepath, ignore_errors=True)
-copy_binaries("bin/release/vs2017-win7-static/x86/", openmpt_zip_32bit_path)
-copy_pluginbridge("bin/release/vs2017-win7-static/", "x86", openmpt_zip_32bit_path)
-copy_pluginbridge("bin/release/vs2017-win7-static/", "amd64", openmpt_zip_32bit_path)
+copy_binaries("bin/release/vs2019-win7-static/x86/", openmpt_zip_32bit_path)
+copy_pluginbridge("bin/release/vs2019-win7-static/", "x86", openmpt_zip_32bit_path)
+copy_pluginbridge("bin/release/vs2019-win7-static/", "amd64", openmpt_zip_32bit_path)
 print("Copying 64-bit binaries...")
 shutil.rmtree(openmpt_zip_64bit_basepath, ignore_errors=True)
-copy_binaries("bin/release/vs2017-win7-static/amd64/", openmpt_zip_64bit_path)
-copy_pluginbridge("bin/release//vs2017-win7-static/", "x86", openmpt_zip_64bit_path)
-copy_pluginbridge("bin/release//vs2017-win7-static/", "amd64", openmpt_zip_64bit_path)
+copy_binaries("bin/release/vs2019-win7-static/amd64/", openmpt_zip_64bit_path)
+copy_pluginbridge("bin/release//vs2019-win7-static/", "x86", openmpt_zip_64bit_path)
+copy_pluginbridge("bin/release//vs2019-win7-static/", "amd64", openmpt_zip_64bit_path)
 
 if not singleThreaded:
 	pManual.communicate()

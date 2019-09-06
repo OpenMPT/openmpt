@@ -1,4 +1,4 @@
-#define PlatformFolder    "release\vs2017-win7-static\x86"
+#define PlatformFolder    "release\vs2019-win7-static\x86"
 #define PlatformName "32-Bit"
 #define PlatformArchitecture "x86"
 
