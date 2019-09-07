@@ -718,6 +718,9 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcFileSaveCopy, 1987, _T("File/Save Copy"));
 	DefineKeyCommand(kcMergePatterns, 1988, _T("Merge Patterns"));
 	DefineKeyCommand(kcSplitPattern, 1989, _T("Split Pattern"));
+	DefineKeyCommand(kcSampleToggleDrawing, 1990, _T("Toggle Sample Drawing"));
+	DefineKeyCommand(kcSampleResize, 1991, _T("Add Silence / Create Sample"));
+	DefineKeyCommand(kcSampleGrid, 1992, _T("Configure Sample Grid"));
 
 	// Add new key commands here.
 

@@ -123,10 +123,10 @@ protected:
 
 	// Set envelope status
 	bool EnvToggleEnv(EnvelopeType envelope, CSoundFile &sndFile, ModInstrument &ins, bool enable, EnvelopeNode::value_t defaultValue, EnvelopeFlags extraFlags = EnvelopeFlags(0));
-	bool EnvSetVolEnv(bool bEnable);
-	bool EnvSetPanEnv(bool bEnable);
-	bool EnvSetPitchEnv(bool bEnable);
-	bool EnvSetFilterEnv(bool bEnable);
+	bool EnvSetVolEnv(bool enable);
+	bool EnvSetPanEnv(bool enable);
+	bool EnvSetPitchEnv(bool enable);
+	bool EnvSetFilterEnv(bool enable);
 
 	// Keyboard envelope control
 	void EnvKbdSelectPoint(DragPoints point);
@@ -163,7 +163,8 @@ protected:
 	void InvalidateEnvelope() { InvalidateRect(NULL, FALSE); }
 	void DrawPositionMarks();
 	void DrawNcButton(CDC *pDC, UINT nBtn);
-	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
+	bool GetNcButtonRect(UINT button, CRect &rect) const;
+	UINT GetNcButtonAtPoint(CPoint point, CRect *outRect = nullptr) const;
 	void UpdateNcButtonState();
 	void PlayNote(ModCommand::NOTE note);
 	void DrawGrid(CDC *memDC, uint32 speed);
@@ -185,6 +186,7 @@ public:
 	LRESULT OnModViewMsg(WPARAM, LPARAM) override;
 	LRESULT OnPlayerNotify(Notification *) override;
 	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override;
+	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
 	//}}AFX_VIRTUAL
 
 protected:

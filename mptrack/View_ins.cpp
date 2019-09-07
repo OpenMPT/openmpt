@@ -162,6 +162,7 @@ void CViewInstrument::OnInitialUpdate()
 	m_envPointSize = Util::ScalePixels(ENV_POINT_SIZE, m_hWnd);
 	UpdateScrollSize();
 	UpdateNcButtonState();
+	EnableToolTips();
 }
 
 
@@ -169,8 +170,9 @@ void CViewInstrument::UpdateScrollSize()
 {
 	CModDoc *pModDoc = GetDocument();
 	GetClientRect(&m_rcClient);
-	if (m_rcClient.bottom < 2) m_rcClient.bottom = 2;
-	if (pModDoc)
+	if(m_rcClient.bottom < 2)
+		m_rcClient.bottom = 2;
+	if(pModDoc)
 	{
 		SIZE sizeTotal, sizePage, sizeLine;
 		uint32 maxTick = EnvGetTick(EnvGetLastPoint());
@@ -215,7 +217,8 @@ BOOL CViewInstrument::SetCurrentInstrument(INSTRUMENTINDEX nIns, EnvelopeType nE
 	CModDoc *pModDoc = GetDocument();
 	Notification::Type type;
 
-	if ((!pModDoc) || (nIns < 1) || (nIns >= MAX_INSTRUMENTS)) return FALSE;
+	if((!pModDoc) || (nIns < 1) || (nIns >= MAX_INSTRUMENTS))
+		return FALSE;
 	m_nEnv = nEnv;
 	m_nInstrument = nIns;
 	switch(m_nEnv)
@@ -249,10 +252,10 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case VIEWMSG_LOADSTATE:
-		if (lParam)
+		if(lParam)
 		{
 			INSTRUMENTVIEWSTATE *pState = (INSTRUMENTVIEWSTATE *)lParam;
-			if (pState->initialized)
+			if(pState->initialized)
 			{
 				SetCurrentInstrument(m_nInstrument, pState->nEnv);
 				m_bGrid = pState->bGrid;
@@ -261,7 +264,7 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case VIEWMSG_SAVESTATE:
-		if (lParam)
+		if(lParam)
 		{
 			INSTRUMENTVIEWSTATE *pState = (INSTRUMENTVIEWSTATE *)lParam;
 			pState->initialized = true;
@@ -280,7 +283,8 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 uint32 CViewInstrument::EnvGetTick(int nPoint) const
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return 0;
+	if(envelope == nullptr)
+		return 0;
 	if((nPoint >= 0) && (nPoint < (int)envelope->size()))
 		return envelope->at(nPoint).tick;
 	else
@@ -291,7 +295,8 @@ uint32 CViewInstrument::EnvGetTick(int nPoint) const
 uint32 CViewInstrument::EnvGetValue(int nPoint) const
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return 0;
+	if(envelope == nullptr)
+		return 0;
 	if(nPoint >= 0 && nPoint < (int)envelope->size())
 		return envelope->at(nPoint).value;
 	else
@@ -302,7 +307,8 @@ uint32 CViewInstrument::EnvGetValue(int nPoint) const
 bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool moveTail)
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr || nPoint < 0) return false;
+	if(envelope == nullptr || nPoint < 0)
+		return false;
 
 	if(nPoint == 0)
 	{
@@ -329,10 +335,13 @@ bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool mo
 			if(nPoint > 0 && mintick < maxtick - 1)
 			{
 				mintick++;
-				if(nPoint + 1 < (int)envelope->size()) maxtick--;
+				if(nPoint + 1 < (int)envelope->size())
+					maxtick--;
 			}
-			if(nTick < mintick) nTick = mintick;
-			if(nTick > maxtick) nTick = maxtick;
+			if(nTick < mintick)
+				nTick = mintick;
+			if(nTick > maxtick)
+				nTick = maxtick;
 			if(nTick != envelope->at(nPoint).tick)
 			{
 				envelope->at(nPoint).tick = static_cast<EnvelopeNode::tick_t>(nTick);
@@ -368,7 +377,8 @@ bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool mo
 uint32 CViewInstrument::EnvGetNumPoints() const
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return 0;
+	if(envelope == nullptr)
+		return 0;
 	return envelope->size();
 }
 
@@ -376,7 +386,8 @@ uint32 CViewInstrument::EnvGetNumPoints() const
 uint32 CViewInstrument::EnvGetLastPoint() const
 {
 	uint32 nPoints = EnvGetNumPoints();
-	if (nPoints > 0) return nPoints - 1;
+	if(nPoints > 0)
+		return nPoints - 1;
 	return 0;
 }
 
@@ -385,7 +396,8 @@ uint32 CViewInstrument::EnvGetLastPoint() const
 bool CViewInstrument::EnvGetFlag(const EnvelopeFlags dwFlag) const
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv != nullptr) return pEnv->dwFlags[dwFlag];
+	if(pEnv != nullptr)
+		return pEnv->dwFlags[dwFlag];
 	return false;
 }
 
@@ -393,7 +405,8 @@ bool CViewInstrument::EnvGetFlag(const EnvelopeFlags dwFlag) const
 uint32 CViewInstrument::EnvGetLoopStart() const
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return 0;
+	if(envelope == nullptr)
+		return 0;
 	return envelope->nLoopStart;
 }
 
@@ -401,7 +414,8 @@ uint32 CViewInstrument::EnvGetLoopStart() const
 uint32 CViewInstrument::EnvGetLoopEnd() const
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return 0;
+	if(envelope == nullptr)
+		return 0;
 	return envelope->nLoopEnd;
 }
 
@@ -409,7 +423,8 @@ uint32 CViewInstrument::EnvGetLoopEnd() const
 uint32 CViewInstrument::EnvGetSustainStart() const
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return 0;
+	if(envelope == nullptr)
+		return 0;
 	return envelope->nSustainStart;
 }
 
@@ -417,7 +432,8 @@ uint32 CViewInstrument::EnvGetSustainStart() const
 uint32 CViewInstrument::EnvGetSustainEnd() const
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return 0;
+	if(envelope == nullptr)
+		return 0;
 	return envelope->nSustainEnd;
 }
 
@@ -425,7 +441,8 @@ uint32 CViewInstrument::EnvGetSustainEnd() const
 bool CViewInstrument::EnvGetVolEnv() const
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if (pIns) return pIns->VolEnv.dwFlags[ENV_ENABLED] != 0;
+	if(pIns)
+		return pIns->VolEnv.dwFlags[ENV_ENABLED] != 0;
 	return false;
 }
 
@@ -433,7 +450,8 @@ bool CViewInstrument::EnvGetVolEnv() const
 bool CViewInstrument::EnvGetPanEnv() const
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if (pIns) return pIns->PanEnv.dwFlags[ENV_ENABLED] != 0;
+	if(pIns)
+		return pIns->PanEnv.dwFlags[ENV_ENABLED] != 0;
 	return false;
 }
 
@@ -441,7 +459,8 @@ bool CViewInstrument::EnvGetPanEnv() const
 bool CViewInstrument::EnvGetPitchEnv() const
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if (pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED | ENV_FILTER)) == ENV_ENABLED);
+	if(pIns)
+		return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED | ENV_FILTER)) == ENV_ENABLED);
 	return false;
 }
 
@@ -449,7 +468,8 @@ bool CViewInstrument::EnvGetPitchEnv() const
 bool CViewInstrument::EnvGetFilterEnv() const
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if(pIns) return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED | ENV_FILTER)) == (ENV_ENABLED | ENV_FILTER));
+	if(pIns)
+		return ((pIns->PitchEnv.dwFlags & (ENV_ENABLED | ENV_FILTER)) == (ENV_ENABLED | ENV_FILTER));
 	return false;
 }
 
@@ -457,13 +477,16 @@ bool CViewInstrument::EnvGetFilterEnv() const
 bool CViewInstrument::EnvSetLoopStart(int nPoint)
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return false;
-	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
+	if(envelope == nullptr)
+		return false;
+	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint())
+		return false;
 
-	if (nPoint != envelope->nLoopStart)
+	if(nPoint != envelope->nLoopStart)
 	{
 		envelope->nLoopStart = static_cast<decltype(envelope->nLoopStart)>(nPoint);
-		if (envelope->nLoopEnd < nPoint) envelope->nLoopEnd = static_cast<decltype(envelope->nLoopEnd)>(nPoint);
+		if(envelope->nLoopEnd < nPoint)
+			envelope->nLoopEnd = static_cast<decltype(envelope->nLoopEnd)>(nPoint);
 		return true;
 	} else
 	{
@@ -475,13 +498,16 @@ bool CViewInstrument::EnvSetLoopStart(int nPoint)
 bool CViewInstrument::EnvSetLoopEnd(int nPoint)
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return false;
-	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
+	if(envelope == nullptr)
+		return false;
+	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint())
+		return false;
 
-	if (nPoint != envelope->nLoopEnd)
+	if(nPoint != envelope->nLoopEnd)
 	{
 		envelope->nLoopEnd = static_cast<decltype(envelope->nLoopEnd)>(nPoint);
-		if (envelope->nLoopStart > nPoint) envelope->nLoopStart = static_cast<decltype(envelope->nLoopStart)>(nPoint);
+		if(envelope->nLoopStart > nPoint)
+			envelope->nLoopStart = static_cast<decltype(envelope->nLoopStart)>(nPoint);
 		return true;
 	} else
 	{
@@ -493,16 +519,19 @@ bool CViewInstrument::EnvSetLoopEnd(int nPoint)
 bool CViewInstrument::EnvSetSustainStart(int nPoint)
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return false;
-	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
+	if(envelope == nullptr)
+		return false;
+	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint())
+		return false;
 
 	// We won't do any security checks here as GetEnvelopePtr() does that for us.
 	CSoundFile &sndFile = GetDocument()->GetSoundFile();
 
-	if (nPoint != envelope->nSustainStart)
+	if(nPoint != envelope->nSustainStart)
 	{
 		envelope->nSustainStart = static_cast<decltype(envelope->nSustainStart)>(nPoint);
-		if ((envelope->nSustainEnd < nPoint) || (sndFile.GetType() & MOD_TYPE_XM)) envelope->nSustainEnd = static_cast<decltype(envelope->nSustainEnd)>(nPoint);
+		if((envelope->nSustainEnd < nPoint) || (sndFile.GetType() & MOD_TYPE_XM))
+			envelope->nSustainEnd = static_cast<decltype(envelope->nSustainEnd)>(nPoint);
 		return true;
 	} else
 	{
@@ -514,16 +543,19 @@ bool CViewInstrument::EnvSetSustainStart(int nPoint)
 bool CViewInstrument::EnvSetSustainEnd(int nPoint)
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return false;
-	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint()) return false;
+	if(envelope == nullptr)
+		return false;
+	if(nPoint < 0 || nPoint > (int)EnvGetLastPoint())
+		return false;
 
 	// We won't do any security checks here as GetEnvelopePtr() does that for us.
 	CSoundFile &sndFile = GetDocument()->GetSoundFile();
 
-	if (nPoint != envelope->nSustainEnd)
+	if(nPoint != envelope->nSustainEnd)
 	{
 		envelope->nSustainEnd = static_cast<decltype(envelope->nSustainEnd)>(nPoint);
-		if ((envelope->nSustainStart > nPoint) || (sndFile.GetType() & MOD_TYPE_XM)) envelope->nSustainStart = static_cast<decltype(envelope->nSustainStart)>(nPoint);
+		if((envelope->nSustainStart > nPoint) || (sndFile.GetType() & MOD_TYPE_XM))
+			envelope->nSustainStart = static_cast<decltype(envelope->nSustainStart)>(nPoint);
 		return true;
 	} else
 	{
@@ -535,8 +567,10 @@ bool CViewInstrument::EnvSetSustainEnd(int nPoint)
 bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return false;
-	if(nPoint < 0 || nPoint >= (int)EnvGetNumPoints()) return false;
+	if(envelope == nullptr)
+		return false;
+	if(nPoint < 0 || nPoint >= (int)EnvGetNumPoints())
+		return false;
 
 	// Don't allow release nodes in IT/XM. GetDocument()/... nullptr check is done in GetEnvelopePtr, so no need to check twice.
 	if(!GetDocument()->GetSoundFile().GetModSpecifications().hasReleaseNode)
@@ -549,7 +583,7 @@ bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
 		return false;
 	}
 
-	if (envelope->nReleaseNode == nPoint)
+	if(envelope->nReleaseNode == nPoint)
 	{
 		envelope->nReleaseNode = ENV_RELEASE_NODE_UNSET;
 	} else
@@ -563,7 +597,8 @@ bool CViewInstrument::EnvToggleReleaseNode(int nPoint)
 bool CViewInstrument::EnvSetFlag(EnvelopeFlags flag, bool enable)
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr || envelope->empty()) return false;
+	if(envelope == nullptr || envelope->empty())
+		return false;
 
 	bool modified = envelope->dwFlags[flag] != enable;
 	PrepareUndo("Toggle Envelope Flag");
@@ -602,45 +637,50 @@ bool CViewInstrument::EnvToggleEnv(EnvelopeType envelope, CSoundFile &sndFile, M
 }
 
 
-bool CViewInstrument::EnvSetVolEnv(bool bEnable)
+bool CViewInstrument::EnvSetVolEnv(bool enable)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if(pIns == nullptr) return false;
-	return EnvToggleEnv(ENV_VOLUME, GetDocument()->GetSoundFile(), *pIns, bEnable, 64);
+	if(pIns == nullptr)
+		return false;
+	return EnvToggleEnv(ENV_VOLUME, GetDocument()->GetSoundFile(), *pIns, enable, 64);
 }
 
 
-bool CViewInstrument::EnvSetPanEnv(bool bEnable)
+bool CViewInstrument::EnvSetPanEnv(bool enable)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if(pIns == nullptr) return false;
-	return EnvToggleEnv(ENV_PANNING, GetDocument()->GetSoundFile(), *pIns, bEnable, 32);
+	if(pIns == nullptr)
+		return false;
+	return EnvToggleEnv(ENV_PANNING, GetDocument()->GetSoundFile(), *pIns, enable, 32);
 }
 
 
-bool CViewInstrument::EnvSetPitchEnv(bool bEnable)
+bool CViewInstrument::EnvSetPitchEnv(bool enable)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if(pIns == nullptr) return false;
+	if(pIns == nullptr)
+		return false;
 
 	pIns->PitchEnv.dwFlags.reset(ENV_FILTER);
-	return EnvToggleEnv(ENV_PITCH, GetDocument()->GetSoundFile(), *pIns, bEnable, 32);
+	return EnvToggleEnv(ENV_PITCH, GetDocument()->GetSoundFile(), *pIns, enable, 32);
 }
 
 
-bool CViewInstrument::EnvSetFilterEnv(bool bEnable)
+bool CViewInstrument::EnvSetFilterEnv(bool enable)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if(pIns == nullptr) return false;
+	if(pIns == nullptr)
+		return false;
 
-	return EnvToggleEnv(ENV_PITCH, GetDocument()->GetSoundFile(), *pIns, bEnable, 64, ENV_FILTER);
+	return EnvToggleEnv(ENV_PITCH, GetDocument()->GetSoundFile(), *pIns, enable, 64, ENV_FILTER);
 }
 
 
 uint32 CViewInstrument::DragItemToEnvPoint() const
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !m_nDragItem) return 0;
+	if(pEnv == nullptr || !m_nDragItem)
+		return 0;
 
 	switch(m_nDragItem)
 	{
@@ -650,7 +690,6 @@ uint32 CViewInstrument::DragItemToEnvPoint() const
 	case ENV_DRAGSUSTAINEND: return pEnv->nSustainEnd;
 	default: return m_nDragItem - 1;
 	}
-
 }
 
 
@@ -668,17 +707,21 @@ int CViewInstrument::PointToScreen(int nPoint) const
 int CViewInstrument::ScreenToTick(int x) const
 {
 	int offset = m_nScrollPosX + x;
-	if(offset < m_envPointSize) return 0;
+	if(offset < m_envPointSize)
+		return 0;
 	return mpt::saturate_round<int>((offset - m_envPointSize) / m_zoom);
 }
 
 
 int CViewInstrument::ScreenToValue(int y) const
 {
-	if (m_rcClient.bottom < 2) return ENVELOPE_MIN;
+	if(m_rcClient.bottom < 2)
+		return ENVELOPE_MIN;
 	int n = ENVELOPE_MAX - Util::muldivr(y, ENVELOPE_MAX, m_rcClient.bottom - 1);
-	if (n < ENVELOPE_MIN) return ENVELOPE_MIN;
-	if (n > ENVELOPE_MAX) return ENVELOPE_MAX;
+	if(n < ENVELOPE_MIN)
+		return ENVELOPE_MIN;
+	if(n > ENVELOPE_MAX)
+		return ENVELOPE_MAX;
 	return n;
 }
 
@@ -708,39 +751,61 @@ int CViewInstrument::ScreenToPoint(int x0, int y0) const
 }
 
 
-BOOL CViewInstrument::GetNcButtonRect(UINT nBtn, LPRECT lpRect)
+bool CViewInstrument::GetNcButtonRect(UINT button, CRect &rect) const
 {
-	lpRect->left = 4;
-	lpRect->top = 3;
-	lpRect->bottom = lpRect->top + ENV_LEFTBAR_CYBTN;
-	if (nBtn >= ENV_LEFTBAR_BUTTONS) return FALSE;
-	for (UINT i=0; i<nBtn; i++)
+	rect.left = 4;
+	rect.top = 3;
+	rect.bottom = rect.top + ENV_LEFTBAR_CYBTN;
+	if(button >= ENV_LEFTBAR_BUTTONS)
+		return false;
+	for(UINT i = 0; i < button; i++)
 	{
-		if (cLeftBarButtons[i] == ID_SEPARATOR)
-		{
-			lpRect->left += ENV_LEFTBAR_CXSEP;
-		} else
-		{
-			lpRect->left += ENV_LEFTBAR_CXBTN + ENV_LEFTBAR_CXSPC;
-		}
+		if(cLeftBarButtons[i] == ID_SEPARATOR)
+			rect.left += ENV_LEFTBAR_CXSEP;
+		else
+			rect.left += ENV_LEFTBAR_CXBTN + ENV_LEFTBAR_CXSPC;
 	}
-	if (cLeftBarButtons[nBtn] == ID_SEPARATOR)
+	if(cLeftBarButtons[button] == ID_SEPARATOR)
 	{
-		lpRect->left += ENV_LEFTBAR_CXSEP/2 - 2;
-		lpRect->right = lpRect->left + 2;
-		return FALSE;
+		rect.left += ENV_LEFTBAR_CXSEP / 2 - 2;
+		rect.right = rect.left + 2;
+		return false;
 	} else
 	{
-		lpRect->right = lpRect->left + ENV_LEFTBAR_CXBTN;
+		rect.right = rect.left + ENV_LEFTBAR_CXBTN;
 	}
-	return TRUE;
+	return true;
+}
+
+
+UINT CViewInstrument::GetNcButtonAtPoint(CPoint point, CRect *outRect) const
+{
+	CRect rect, rcWnd;
+	UINT button = uint32_max;
+	GetWindowRect(&rcWnd);
+	for(UINT i = 0; i < ENV_LEFTBAR_BUTTONS; i++)
+	{
+		if(!(m_NcButtonState[i] & NCBTNS_DISABLED) && GetNcButtonRect(i, rect))
+		{
+			rect.OffsetRect(rcWnd.left, rcWnd.top);
+			if(rect.PtInRect(point))
+			{
+				button = i;
+				break;
+			}
+		}
+	}
+	if(outRect)
+		*outRect = rect;
+	return button;
 }
 
 
 void CViewInstrument::UpdateNcButtonState()
 {
 	CModDoc *pModDoc = GetDocument();
-	if(!pModDoc) return;
+	if(!pModDoc)
+		return;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	CDC *pDC = NULL;
@@ -812,7 +877,7 @@ void CViewInstrument::DrawGrid(CDC *pDC, uint32 speed)
 {
 	bool windowResized = false;
 
-	if (m_dcGrid.m_hDC)
+	if(m_dcGrid.m_hDC)
 	{
 		m_dcGrid.SelectObject(m_pbmpOldGrid);
 		m_dcGrid.DeleteDC();
@@ -820,7 +885,7 @@ void CViewInstrument::DrawGrid(CDC *pDC, uint32 speed)
 		windowResized = true;
 	}
 
-	if (windowResized || m_bGridForceRedraw || (m_nScrollPosX != m_GridScrollPos) || (speed != (UINT)m_GridSpeed) && speed > 0)
+	if(windowResized || m_bGridForceRedraw || (m_nScrollPosX != m_GridScrollPos) || (speed != (UINT)m_GridSpeed) && speed > 0)
 	{
 		m_GridSpeed = speed;
 		m_GridScrollPos = m_nScrollPosX;
@@ -828,7 +893,7 @@ void CViewInstrument::DrawGrid(CDC *pDC, uint32 speed)
 
 		// create a memory based dc for drawing the grid
 		m_dcGrid.CreateCompatibleDC(pDC);
-		m_bmpGrid.CreateCompatibleBitmap(pDC,  m_rcClient.Width(), m_rcClient.Height());
+		m_bmpGrid.CreateCompatibleBitmap(pDC, m_rcClient.Width(), m_rcClient.Height());
 		m_pbmpOldGrid = *m_dcGrid.SelectObject(&m_bmpGrid);
 
 		// Do draw
@@ -847,11 +912,11 @@ void CViewInstrument::DrawGrid(CDC *pDC, uint32 speed)
 		const uint32 startTick = (ScreenToTick(0) / speed) * speed;
 		const uint32 endTick = (ScreenToTick(width) / speed) * speed;
 
-		for (uint32 tick = startTick, row = startTick / speed; tick <= endTick; tick += speed, row++)
+		for(uint32 tick = startTick, row = startTick / speed; tick <= endTick; tick += speed, row++)
 		{
-			if (rowsPerMeasure > 0 && row % rowsPerMeasure == 0)
+			if(rowsPerMeasure > 0 && row % rowsPerMeasure == 0)
 				m_dcGrid.SelectObject(CMainFrame::penGray80);
-			else if (rowsPerBeat > 0 && row % rowsPerBeat == 0)
+			else if(rowsPerBeat > 0 && row % rowsPerBeat == 0)
 				m_dcGrid.SelectObject(CMainFrame::penGray55);
 			else
 				m_dcGrid.SelectObject(CMainFrame::penGray33);
@@ -869,27 +934,28 @@ void CViewInstrument::DrawGrid(CDC *pDC, uint32 speed)
 void CViewInstrument::OnDraw(CDC *pDC)
 {
 	CModDoc *pModDoc = GetDocument();
-	if ((!pModDoc) || (!pDC)) return;
+	if((!pModDoc) || (!pDC))
+		return;
 	HGDIOBJ oldpen;
 
 	// to avoid flicker, establish a memory dc, draw to it
 	// and then BitBlt it to the destination "pDC"
 
 	//check for window resize
-	if (m_dcMemMain.GetSafeHdc() && m_rcOldClient != m_rcClient)
+	if(m_dcMemMain.GetSafeHdc() && m_rcOldClient != m_rcClient)
 	{
 		m_dcMemMain.SelectObject(oldBitmap);
 		m_dcMemMain.DeleteDC();
 		m_bmpMemMain.DeleteObject();
 	}
 
-	if (!m_dcMemMain.m_hDC)
+	if(!m_dcMemMain.m_hDC)
 	{
 		m_dcMemMain.CreateCompatibleDC(pDC);
-		if (!m_dcMemMain.m_hDC)
+		if(!m_dcMemMain.m_hDC)
 			return;
 	}
-	if (!m_bmpMemMain.m_hObject)
+	if(!m_bmpMemMain.m_hObject)
 	{
 		m_bmpMemMain.CreateCompatibleBitmap(pDC, m_rcClient.Width(), m_rcClient.Height());
 	}
@@ -897,7 +963,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	oldBitmap = *m_dcMemMain.SelectObject(&m_bmpMemMain);
 
 	oldpen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
-	if (m_bGrid)
+	if(m_bGrid)
 	{
 		DrawGrid(&m_dcMemMain, pModDoc->GetSoundFile().m_PlayState.m_nMusicSpeed);
 	} else
@@ -912,7 +978,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	m_dcMemMain.LineTo(m_rcClient.right, ymed);
 
 	// Drawing Loop Start/End
-	if (EnvGetLoop())
+	if(EnvGetLoop())
 	{
 		m_dcMemMain.SelectObject(m_nDragItem == ENV_DRAGLOOPSTART ? CMainFrame::penGray99 : CMainFrame::penDarkGray);
 		int x1 = PointToScreen(EnvGetLoopStart()) - m_envPointSize / 2;
@@ -924,7 +990,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		m_dcMemMain.LineTo(x2, m_rcClient.bottom);
 	}
 	// Drawing Sustain Start/End
-	if (EnvGetSustain())
+	if(EnvGetSustain())
 	{
 		m_dcMemMain.SelectObject(CMainFrame::penHalfDarkGray);
 		int nspace = m_rcClient.bottom / 4;
@@ -932,23 +998,23 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		int x1 = PointToScreen(n1) - m_envPointSize / 2;
 		int y1 = ValueToScreen(EnvGetValue(n1));
 		m_dcMemMain.MoveTo(x1, y1 - nspace);
-		m_dcMemMain.LineTo(x1, y1+nspace);
+		m_dcMemMain.LineTo(x1, y1 + nspace);
 		int n2 = EnvGetSustainEnd();
 		int x2 = PointToScreen(n2) + m_envPointSize / 2;
 		int y2 = ValueToScreen(EnvGetValue(n2));
-		m_dcMemMain.MoveTo(x2, y2-nspace);
-		m_dcMemMain.LineTo(x2, y2+nspace);
+		m_dcMemMain.MoveTo(x2, y2 - nspace);
+		m_dcMemMain.LineTo(x2, y2 + nspace);
 	}
 	uint32 maxpoint = EnvGetNumPoints();
 	// Drawing Envelope
-	if (maxpoint)
+	if(maxpoint)
 	{
 		maxpoint--;
 		m_dcMemMain.SelectObject(GetStockObject(DC_PEN));
 		m_dcMemMain.SetDCPenColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_ENVELOPES]);
 		uint32 releaseNode = EnvGetReleaseNode();
 		RECT rect;
-		for (uint32 i = 0; i <= maxpoint; i++)
+		for(uint32 i = 0; i <= maxpoint; i++)
 		{
 			int x = PointToScreen(i);
 			int y = ValueToScreen(EnvGetValue(i));
@@ -956,15 +1022,15 @@ void CViewInstrument::OnDraw(CDC *pDC)
 			rect.top = y - m_envPointSize + 1;
 			rect.right = x + m_envPointSize;
 			rect.bottom = y + m_envPointSize;
-			if (i)
+			if(i)
 				m_dcMemMain.LineTo(x, y);
 			else
 				m_dcMemMain.MoveTo(x, y);
-			if (i == releaseNode)
+			if(i == releaseNode)
 			{
 				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushHighLightRed));
 				m_dcMemMain.SetDCPenColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_ENVELOPE_RELEASE]);
-			} else if (i == m_nDragItem - 1)
+			} else if(i == m_nDragItem - 1)
 			{
 				// currently selected env point
 				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushYellow));
@@ -972,11 +1038,11 @@ void CViewInstrument::OnDraw(CDC *pDC)
 			{
 				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushWhite));
 			}
-
 		}
 	}
 	DrawPositionMarks();
-	if (oldpen) m_dcMemMain.SelectObject(oldpen);
+	if(oldpen)
+		m_dcMemMain.SelectObject(oldpen);
 
 	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), &m_dcMemMain, 0, 0, SRCCOPY);
 }
@@ -985,7 +1051,8 @@ void CViewInstrument::OnDraw(CDC *pDC)
 uint8 CViewInstrument::EnvGetReleaseNode()
 {
 	InstrumentEnvelope *envelope = GetEnvelopePtr();
-	if(envelope == nullptr) return ENV_RELEASE_NODE_UNSET;
+	if(envelope == nullptr)
+		return ENV_RELEASE_NODE_UNSET;
 	return envelope->nReleaseNode;
 }
 
@@ -993,13 +1060,14 @@ uint8 CViewInstrument::EnvGetReleaseNode()
 bool CViewInstrument::EnvRemovePoint(uint32 nPoint)
 {
 	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (nPoint <= EnvGetLastPoint()))
+	if((pModDoc) && (nPoint <= EnvGetLastPoint()))
 	{
 		ModInstrument *pIns = pModDoc->GetSoundFile().Instruments[m_nInstrument];
-		if (pIns)
+		if(pIns)
 		{
 			InstrumentEnvelope *envelope = GetEnvelopePtr();
-			if(envelope == nullptr || envelope->empty()) return false;
+			if(envelope == nullptr || envelope->empty())
+				return false;
 
 			PrepareUndo("Remove Envelope Point");
 			envelope->erase(envelope->begin() + nPoint);
@@ -1029,7 +1097,7 @@ bool CViewInstrument::EnvRemovePoint(uint32 nPoint)
 uint32 CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 {
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc && nTick >= 0)
+	if(pModDoc && nTick >= 0)
 	{
 		InstrumentEnvelope *envelope = GetEnvelopePtr();
 		if(envelope != nullptr && envelope->size() < pModDoc->GetSoundFile().GetModSpecifications().envelopePointsMax)
@@ -1107,14 +1175,15 @@ LRESULT CViewInstrument::OnPlayerNotify(Notification *pnotify)
 {
 	Notification::Type type;
 	CModDoc *pModDoc = GetDocument();
-	if ((!pnotify) || (!pModDoc)) return 0;
+	if((!pnotify) || (!pModDoc))
+		return 0;
 	switch(m_nEnv)
 	{
 	case ENV_PANNING:	type = Notification::PanEnv; break;
 	case ENV_PITCH:		type = Notification::PitchEnv; break;
 	default:			type = Notification::VolEnv; break;
 	}
-	if (pnotify->type[Notification::Stop])
+	if(pnotify->type[Notification::Stop])
 	{
 		bool invalidate = false;
 		for(auto &pos : m_dwNotifyPos)
@@ -1132,21 +1201,21 @@ LRESULT CViewInstrument::OnPlayerNotify(Notification *pnotify)
 		m_baPlayingNote.reset();
 	} else if(pnotify->type[type] && pnotify->item == m_nInstrument)
 	{
-		BOOL bUpdate = FALSE;
-		for (CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+		bool update = false;
+		for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		{
 			uint32 newpos = (uint32)pnotify->pos[i];
-			if (m_dwNotifyPos[i] != newpos)
+			if(m_dwNotifyPos[i] != newpos)
 			{
-				bUpdate = TRUE;
+				update = true;
 				break;
 			}
 		}
-		if (bUpdate)
+		if(update)
 		{
 			HDC hdc = ::GetDC(m_hWnd);
 			DrawPositionMarks();
-			for (CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
+			for(CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
 			{
 				uint32 newpos = (uint32)pnotify->pos[j];
 				m_dwNotifyPos[j] = newpos;
@@ -1168,31 +1237,30 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 	COLORREF crFc = GetSysColor(COLOR_3DFACE);
 	COLORREF c1, c2;
 
-	if (GetNcButtonRect(nBtn, &rect))
+	if(GetNcButtonRect(nBtn, rect))
 	{
 		DWORD dwStyle = m_NcButtonState[nBtn];
 		COLORREF c3, c4;
 		int xofs = 0, yofs = 0, nImage = 0;
 
 		c1 = c2 = c3 = c4 = crFc;
-		if (!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS))
+		if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS))
 		{
 			c1 = c3 = crHi;
 			c2 = crDk;
-			c4 = RGB(0,0,0);
+			c4 = RGB(0, 0, 0);
 		}
-		if (dwStyle & (NCBTNS_PUSHED|NCBTNS_CHECKED))
+		if(dwStyle & (NCBTNS_PUSHED | NCBTNS_CHECKED))
 		{
 			c1 = crDk;
 			c2 = crHi;
-			if (!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS))
+			if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS))
 			{
 				c4 = crHi;
-				c3 = (dwStyle & NCBTNS_PUSHED) ? RGB(0,0,0) : crDk;
+				c3 = (dwStyle & NCBTNS_PUSHED) ? RGB(0, 0, 0) : crDk;
 			}
 			xofs = yofs = 1;
-		} else
-		if ((dwStyle & NCBTNS_MOUSEOVER) && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS))
+		} else if((dwStyle & NCBTNS_MOUSEOVER) && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS))
 		{
 			c1 = crHi;
 			c2 = crDk;
@@ -1216,18 +1284,19 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 		case ID_ENVELOPE_LOAD:		nImage = IIMAGE_LOAD; break;
 		case ID_ENVELOPE_SAVE:		nImage = IIMAGE_SAVE; break;
 		}
-		pDC->Draw3dRect(rect.left-1, rect.top-1, ENV_LEFTBAR_CXBTN+2, ENV_LEFTBAR_CYBTN+2, c3, c4);
+		pDC->Draw3dRect(rect.left - 1, rect.top - 1, ENV_LEFTBAR_CXBTN + 2, ENV_LEFTBAR_CYBTN + 2, c3, c4);
 		pDC->Draw3dRect(rect.left, rect.top, ENV_LEFTBAR_CXBTN, ENV_LEFTBAR_CYBTN, c1, c2);
 		rect.DeflateRect(1, 1);
 		pDC->FillSolidRect(&rect, crFc);
 		rect.left += xofs;
 		rect.top += yofs;
-		if (dwStyle & NCBTNS_CHECKED) m_bmpEnvBar.Draw(pDC, IIMAGE_CHECKED, rect.TopLeft(), ILD_NORMAL);
+		if(dwStyle & NCBTNS_CHECKED)
+			m_bmpEnvBar.Draw(pDC, IIMAGE_CHECKED, rect.TopLeft(), ILD_NORMAL);
 		m_bmpEnvBar.Draw(pDC, nImage, rect.TopLeft(), ILD_NORMAL);
 	} else
 	{
 		c1 = c2 = crFc;
-		if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS)
+		if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS)
 		{
 			c1 = crDk;
 			c2 = crHi;
@@ -1248,7 +1317,7 @@ void CViewInstrument::OnNcPaint()
 	rect.right -= rect.left;
 	rect.left = 0;
 	rect.top = 0;
-	if ((rect.left < rect.right) && (rect.top < rect.bottom))
+	if((rect.left < rect.right) && (rect.top < rect.bottom))
 	{
 		CDC *pDC = GetWindowDC();
 		HDC hdc = pDC->m_hDC;
@@ -1256,15 +1325,17 @@ void CViewInstrument::OnNcPaint()
 		rect.bottom--;
 		MoveToEx(hdc, rect.left, rect.bottom, NULL);
 		LineTo(hdc, rect.right, rect.bottom);
-		if (rect.top < rect.bottom) FillRect(hdc, &rect, CMainFrame::brushGray);
-		if (rect.top + 2 < rect.bottom)
+		if(rect.top < rect.bottom)
+			FillRect(hdc, &rect, CMainFrame::brushGray);
+		if(rect.top + 2 < rect.bottom)
 		{
-			for (UINT i=0; i<ENV_LEFTBAR_BUTTONS; i++)
+			for(UINT i = 0; i < ENV_LEFTBAR_BUTTONS; i++)
 			{
 				DrawNcButton(pDC, i);
 			}
 		}
-		if (oldpen) SelectObject(hdc, oldpen);
+		if(oldpen)
+			SelectObject(hdc, oldpen);
 		ReleaseDC(pDC);
 	}
 }
@@ -1277,55 +1348,41 @@ void CViewInstrument::OnNcPaint()
 void CViewInstrument::OnSize(UINT nType, int cx, int cy)
 {
 	CModScrollView::OnSize(nType, cx, cy);
-	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0))
+	if(((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0))
 	{
 		UpdateScrollSize();
 	}
 }
 
 
-void CViewInstrument::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
+void CViewInstrument::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS *lpncsp)
 {
 	CModScrollView::OnNcCalcSize(bCalcValidRects, lpncsp);
-	if (lpncsp)
+	if(lpncsp)
 	{
 		lpncsp->rgrc[0].top += ENV_LEFTBAR_CY;
-		if (lpncsp->rgrc[0].bottom < lpncsp->rgrc[0].top) lpncsp->rgrc[0].top = lpncsp->rgrc[0].bottom;
+		if(lpncsp->rgrc[0].bottom < lpncsp->rgrc[0].top)
+			lpncsp->rgrc[0].top = lpncsp->rgrc[0].bottom;
 	}
 }
 
 
 void CViewInstrument::OnNcMouseMove(UINT nHitTest, CPoint point)
 {
-	CRect rect, rcWnd;
-	UINT nBtnSel = 0xFFFF;
-
-	GetWindowRect(&rcWnd);
-	for (UINT i=0; i<ENV_LEFTBAR_BUTTONS; i++)
-	{
-		if ((!(m_NcButtonState[i] & NCBTNS_DISABLED)) && (GetNcButtonRect(i, &rect)))
-		{
-			rect.OffsetRect(rcWnd.left, rcWnd.top);
-			if (rect.PtInRect(point))
-			{
-				nBtnSel = i;
-				break;
-			}
-		}
-	}
-	if (nBtnSel != m_nBtnMouseOver)
+	const auto button = GetNcButtonAtPoint(point);
+	if(button != m_nBtnMouseOver)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm)
+		if(pMainFrm)
 		{
-			CString strText = "";
-			if ((nBtnSel < ENV_LEFTBAR_BUTTONS) && (cLeftBarButtons[nBtnSel] != ID_SEPARATOR))
+			CString strText;
+			if(button < ENV_LEFTBAR_BUTTONS && cLeftBarButtons[button] != ID_SEPARATOR)
 			{
-				strText.LoadString(cLeftBarButtons[nBtnSel]);
+				strText.LoadString(cLeftBarButtons[button]);
 			}
 			pMainFrm->SetHelpText(strText);
 		}
-		m_nBtnMouseOver = nBtnSel;
+		m_nBtnMouseOver = button;
 		UpdateNcButtonState();
 	}
 	CModScrollView::OnNcMouseMove(nHitTest, point);
@@ -1334,10 +1391,10 @@ void CViewInstrument::OnNcMouseMove(UINT nHitTest, CPoint point)
 
 void CViewInstrument::OnNcLButtonDown(UINT uFlags, CPoint point)
 {
-	if (m_nBtnMouseOver < ENV_LEFTBAR_BUTTONS)
+	if(m_nBtnMouseOver < ENV_LEFTBAR_BUTTONS)
 	{
 		m_dwStatus |= INSSTATUS_NCLBTNDOWN;
-		if (cLeftBarButtons[m_nBtnMouseOver] != ID_SEPARATOR)
+		if(cLeftBarButtons[m_nBtnMouseOver] != ID_SEPARATOR)
 		{
 			PostMessage(WM_COMMAND, cLeftBarButtons[m_nBtnMouseOver]);
 			UpdateNcButtonState();
@@ -1349,7 +1406,7 @@ void CViewInstrument::OnNcLButtonDown(UINT uFlags, CPoint point)
 
 void CViewInstrument::OnNcLButtonUp(UINT uFlags, CPoint point)
 {
-	if (m_dwStatus & INSSTATUS_NCLBTNDOWN)
+	if(m_dwStatus & INSSTATUS_NCLBTNDOWN)
 	{
 		m_dwStatus &= ~INSSTATUS_NCLBTNDOWN;
 		UpdateNcButtonState();
@@ -1369,7 +1426,7 @@ LRESULT CViewInstrument::OnNcHitTest(CPoint point)
 	CRect rect;
 	GetWindowRect(&rect);
 	rect.bottom = rect.top + ENV_LEFTBAR_CY;
-	if (rect.PtInRect(point))
+	if(rect.PtInRect(point))
 	{
 		return HTBORDER;
 	}
@@ -1380,129 +1437,137 @@ LRESULT CViewInstrument::OnNcHitTest(CPoint point)
 void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if (pIns == nullptr) return;
+	if(pIns == nullptr)
+		return;
 
-	bool bSplitCursor = false;
+	bool splitCursor = false;
 
-	if ((m_nBtnMouseOver < ENV_LEFTBAR_BUTTONS) || (m_dwStatus & INSSTATUS_NCLBTNDOWN))
+	if((m_nBtnMouseOver < ENV_LEFTBAR_BUTTONS) || (m_dwStatus & INSSTATUS_NCLBTNDOWN))
 	{
 		m_dwStatus &= ~INSSTATUS_NCLBTNDOWN;
 		m_nBtnMouseOver = 0xFFFF;
 		UpdateNcButtonState();
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm) pMainFrm->SetHelpText(_T(""));
+		if(pMainFrm)
+			pMainFrm->SetHelpText(_T(""));
 	}
 	int nTick = ScreenToTick(pt.x);
 	int nVal = Clamp(ScreenToValue(pt.y), ENVELOPE_MIN, ENVELOPE_MAX);
-	if (nTick < 0) nTick = 0;
+	if(nTick < 0)
+		nTick = 0;
 	UpdateIndicator(nTick, nVal);
 
-	if ((m_dwStatus & INSSTATUS_DRAGGING) && (m_nDragItem))
+	if((m_dwStatus & INSSTATUS_DRAGGING) && (m_nDragItem))
 	{
 		if(!m_mouseMoveModified)
 		{
 			PrepareUndo("Move Envelope Point");
 			m_mouseMoveModified = true;
 		}
-		bool bChanged = false;
-		if (pt.x >= m_rcClient.right - 2) nTick++;
-		if (IsDragItemEnvPoint())
+		bool changed = false;
+		if(pt.x >= m_rcClient.right - 2)
+			nTick++;
+		if(IsDragItemEnvPoint())
 		{
 			// Ctrl pressed -> move tail of envelope
-			bChanged = EnvSetValue(m_nDragItem - 1, nTick, nVal, CMainFrame::GetInputHandler()->CtrlPressed());
+			changed = EnvSetValue(m_nDragItem - 1, nTick, nVal, CMainFrame::GetInputHandler()->CtrlPressed());
 		} else
 		{
 			int nPoint = ScreenToPoint(pt.x, pt.y);
 			if (nPoint >= 0) switch(m_nDragItem)
 			{
 			case ENV_DRAGLOOPSTART:
-				bChanged = EnvSetLoopStart(nPoint);
-				bSplitCursor = true;
+				changed = EnvSetLoopStart(nPoint);
+				splitCursor = true;
 				break;
 			case ENV_DRAGLOOPEND:
-				bChanged = EnvSetLoopEnd(nPoint);
-				bSplitCursor = true;
+				changed = EnvSetLoopEnd(nPoint);
+				splitCursor = true;
 				break;
 			case ENV_DRAGSUSTAINSTART:
-				bChanged = EnvSetSustainStart(nPoint);
-				bSplitCursor = true;
+				changed = EnvSetSustainStart(nPoint);
+				splitCursor = true;
 				break;
 			case ENV_DRAGSUSTAINEND:
-				bChanged = EnvSetSustainEnd(nPoint);
-				bSplitCursor = true;
+				changed = EnvSetSustainEnd(nPoint);
+				splitCursor = true;
 				break;
 			}
 		}
-		if (bChanged)
+		if(changed)
 		{
-			if (pt.x <= 0)
+			if(pt.x <= 0)
 			{
 				UpdateScrollSize();
 				OnScrollBy(CSize(pt.x - (int)m_zoom, 0), TRUE);
 			}
-			if (pt.x >= m_rcClient.right-1)
+			if(pt.x >= m_rcClient.right - 1)
 			{
 				UpdateScrollSize();
 				OnScrollBy(CSize((int)m_zoom + pt.x - m_rcClient.right, 0), TRUE);
 			}
 			SetModified(InstrumentHint().Envelope(), true);
-			UpdateWindow(); //rewbs: TODO - optimisation here so we don't redraw whole view.
+			UpdateWindow();  //rewbs: TODO - optimisation here so we don't redraw whole view.
 		}
 	} else
 	{
 		CRect rect;
-		if (EnvGetSustain())
+		if(EnvGetSustain())
 		{
-			int nspace = m_rcClient.bottom/4;
+			int nspace = m_rcClient.bottom / 4;
 			rect.top = ValueToScreen(EnvGetValue(EnvGetSustainStart())) - nspace;
 			rect.bottom = rect.top + nspace * 2;
 			rect.right = PointToScreen(EnvGetSustainStart()) + 1;
 			rect.left = rect.right - m_envPointSize * 2;
-			if (rect.PtInRect(pt))
+			if(rect.PtInRect(pt))
 			{
-				bSplitCursor = true; // ENV_DRAGSUSTAINSTART;
+				splitCursor = true;  // ENV_DRAGSUSTAINSTART;
 			} else
 			{
 				rect.top = ValueToScreen(EnvGetValue(EnvGetSustainEnd())) - nspace;
 				rect.bottom = rect.top + nspace * 2;
 				rect.left = PointToScreen(EnvGetSustainEnd()) - 1;
 				rect.right = rect.left + m_envPointSize * 2;
-				if (rect.PtInRect(pt)) bSplitCursor = true; // ENV_DRAGSUSTAINEND;
+				if(rect.PtInRect(pt))
+					splitCursor = true;  // ENV_DRAGSUSTAINEND;
 			}
 		}
-		if (EnvGetLoop())
+		if(EnvGetLoop())
 		{
 			rect.top = m_rcClient.top;
 			rect.bottom = m_rcClient.bottom;
 			rect.right = PointToScreen(EnvGetLoopStart()) + 1;
 			rect.left = rect.right - m_envPointSize * 2;
-			if (rect.PtInRect(pt))
+			if(rect.PtInRect(pt))
 			{
-				bSplitCursor = true; // ENV_DRAGLOOPSTART;
+				splitCursor = true;  // ENV_DRAGLOOPSTART;
 			} else
 			{
 				rect.left = PointToScreen(EnvGetLoopEnd()) - 1;
 				rect.right = rect.left + m_envPointSize * 2;
-				if (rect.PtInRect(pt)) bSplitCursor = true; // ENV_DRAGLOOPEND;
+				if(rect.PtInRect(pt))
+					splitCursor = true;  // ENV_DRAGLOOPEND;
 			}
 		}
 	}
 	// Update the mouse cursor
-	if (bSplitCursor)
+	if(splitCursor)
 	{
-		if (!(m_dwStatus & INSSTATUS_SPLITCURSOR))
+		if(!(m_dwStatus & INSSTATUS_SPLITCURSOR))
 		{
 			m_dwStatus |= INSSTATUS_SPLITCURSOR;
-			if (!(m_dwStatus & INSSTATUS_DRAGGING)) SetCapture();
+			if(!(m_dwStatus & INSSTATUS_DRAGGING))
+				SetCapture();
 			SetCursor(CMainFrame::curVSplit);
 		}
 	} else
 	{
-		if (m_dwStatus & INSSTATUS_SPLITCURSOR)
+		if(m_dwStatus & INSSTATUS_SPLITCURSOR)
 		{
 			m_dwStatus &= ~INSSTATUS_SPLITCURSOR;
 			SetCursor(CMainFrame::curArrow);
-			if (!(m_dwStatus & INSSTATUS_DRAGGING))	ReleaseCapture();
+			if(!(m_dwStatus & INSSTATUS_DRAGGING))
+				ReleaseCapture();
 		}
 	}
 }
@@ -1512,7 +1577,8 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 void CViewInstrument::UpdateIndicator()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !m_nDragItem) return;
+	if(pEnv == nullptr || !m_nDragItem)
+		return;
 
 	uint32 point = DragItemToEnvPoint();
 	if(point < pEnv->size())
@@ -1525,7 +1591,8 @@ void CViewInstrument::UpdateIndicator()
 void CViewInstrument::UpdateIndicator(int tick, int val)
 {
 	ModInstrument *pIns = GetInstrumentPtr();
-	if (pIns == nullptr) return;
+	if(pIns == nullptr)
+		return;
 
 	CString s;
 	s.Format(TrackerSettings::Instance().cursorPositionInHex ? _T("Tick %X, [%s]") : _T("Tick %d, [%s]"), tick, EnvValueToString(tick, val).GetString());
@@ -1550,7 +1617,7 @@ CString CViewInstrument::EnvValueToString(int tick, int val) const
 		const int displayVal = (m_nEnv != ENV_VOLUME && !(m_nEnv == ENV_PITCH && env->dwFlags[ENV_FILTER])) ? val - 32 : val;
 		if(m_nEnv != ENV_PANNING)
 			s.Format(_T("%d"), displayVal);
-		else	// panning envelope: display right/center/left chars
+		else  // panning envelope: display right/center/left chars
 			s.Format(_T("%d %c"), std::abs(displayVal), displayVal > 0 ? _T('R') : (displayVal < 0 ? _T('L') : _T('C')));
 	} else
 	{
@@ -1566,7 +1633,7 @@ CString CViewInstrument::EnvValueToString(int tick, int val) const
 void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 {
 	m_mouseMoveModified = false;
-	if (!(m_dwStatus & INSSTATUS_DRAGGING))
+	if(!(m_dwStatus & INSSTATUS_DRAGGING))
 	{
 		CRect rect;
 		// Look if dragging a point
@@ -1574,25 +1641,25 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 		uint32 oldDragItem = m_nDragItem;
 		m_nDragItem = 0;
 		const int hitboxSize = static_cast<int>((6 * m_nDPIx) / 96.0f);
-		for (uint32 i = 0; i <= maxpoint; i++)
+		for(uint32 i = 0; i <= maxpoint; i++)
 		{
 			int x = PointToScreen(i);
 			int y = ValueToScreen(EnvGetValue(i));
 			rect.SetRect(x - hitboxSize, y - hitboxSize, x + hitboxSize + 1, y + hitboxSize + 1);
-			if (rect.PtInRect(pt))
+			if(rect.PtInRect(pt))
 			{
 				m_nDragItem = i + 1;
 				break;
 			}
 		}
-		if ((!m_nDragItem) && (EnvGetSustain()))
+		if((!m_nDragItem) && (EnvGetSustain()))
 		{
-			int nspace = m_rcClient.bottom/4;
+			int nspace = m_rcClient.bottom / 4;
 			rect.top = ValueToScreen(EnvGetValue(EnvGetSustainStart())) - nspace;
 			rect.bottom = rect.top + nspace * 2;
 			rect.right = PointToScreen(EnvGetSustainStart()) + 1;
 			rect.left = rect.right - m_envPointSize * 2;
-			if (rect.PtInRect(pt))
+			if(rect.PtInRect(pt))
 			{
 				m_nDragItem = ENV_DRAGSUSTAINSTART;
 			} else
@@ -1601,27 +1668,29 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 				rect.bottom = rect.top + nspace * 2;
 				rect.left = PointToScreen(EnvGetSustainEnd()) - 1;
 				rect.right = rect.left + m_envPointSize * 2;
-				if (rect.PtInRect(pt)) m_nDragItem = ENV_DRAGSUSTAINEND;
+				if(rect.PtInRect(pt))
+					m_nDragItem = ENV_DRAGSUSTAINEND;
 			}
 		}
-		if ((!m_nDragItem) && (EnvGetLoop()))
+		if((!m_nDragItem) && (EnvGetLoop()))
 		{
 			rect.top = m_rcClient.top;
 			rect.bottom = m_rcClient.bottom;
 			rect.right = PointToScreen(EnvGetLoopStart()) + 1;
 			rect.left = rect.right - m_envPointSize * 2;
-			if (rect.PtInRect(pt))
+			if(rect.PtInRect(pt))
 			{
 				m_nDragItem = ENV_DRAGLOOPSTART;
 			} else
 			{
 				rect.left = PointToScreen(EnvGetLoopEnd()) - 1;
 				rect.right = rect.left + m_envPointSize * 2;
-				if (rect.PtInRect(pt)) m_nDragItem = ENV_DRAGLOOPEND;
+				if(rect.PtInRect(pt))
+					m_nDragItem = ENV_DRAGLOOPEND;
 			}
 		}
 
-		if (m_nDragItem)
+		if(m_nDragItem)
 		{
 			SetCapture();
 			m_dwStatus |= INSSTATUS_DRAGGING;
@@ -1648,12 +1717,12 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 void CViewInstrument::OnLButtonUp(UINT, CPoint)
 {
 	m_mouseMoveModified = false;
-	if (m_dwStatus & INSSTATUS_SPLITCURSOR)
+	if(m_dwStatus & INSSTATUS_SPLITCURSOR)
 	{
 		m_dwStatus &= ~INSSTATUS_SPLITCURSOR;
 		SetCursor(CMainFrame::curArrow);
 	}
-	if (m_dwStatus & INSSTATUS_DRAGGING)
+	if(m_dwStatus & INSSTATUS_DRAGGING)
 	{
 		m_dwStatus &= ~INSSTATUS_DRAGGING;
 		ReleaseCapture();
@@ -1664,10 +1733,12 @@ void CViewInstrument::OnLButtonUp(UINT, CPoint)
 void CViewInstrument::OnRButtonDown(UINT flags, CPoint pt)
 {
 	const CModDoc *pModDoc = GetDocument();
-	if(!pModDoc) return;
+	if(!pModDoc)
+		return;
 	const CSoundFile &sndFile = GetDocument()->GetSoundFile();
 
-	if (m_dwStatus & INSSTATUS_DRAGGING) return;
+	if(m_dwStatus & INSSTATUS_DRAGGING)
+		return;
 
 	// Ctrl + Right-Click = Delete point
 	if(flags & MK_CONTROL)
@@ -1677,10 +1748,10 @@ void CViewInstrument::OnRButtonDown(UINT flags, CPoint pt)
 	}
 
 	CMenu Menu;
-	if ((pModDoc) && (Menu.LoadMenu(IDR_ENVELOPES)))
+	if((pModDoc) && (Menu.LoadMenu(IDR_ENVELOPES)))
 	{
-		CMenu* pSubMenu = Menu.GetSubMenu(0);
-		if (pSubMenu != NULL)
+		CMenu *pSubMenu = Menu.GetSubMenu(0);
+		if(pSubMenu != nullptr)
 		{
 			m_nDragItem = ScreenToPoint(pt.x, pt.y) + 1;
 			const uint32 maxPoint = (sndFile.GetType() == MOD_TYPE_XM) ? 11 : 24;
@@ -1688,7 +1759,7 @@ void CViewInstrument::OnRButtonDown(UINT flags, CPoint pt)
 			const bool forceRelease = !sndFile.GetModSpecifications().hasReleaseNode && (EnvGetReleaseNode() != ENV_RELEASE_NODE_UNSET);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_INSERTPOINT, (lastpoint < maxPoint) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_REMOVEPOINT, ((m_nDragItem) && (lastpoint > 0)) ? MF_ENABLED : MF_GRAYED);
-			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) ? MF_ENABLED : MF_GRAYED);
+			pSubMenu->EnableMenuItem(ID_ENVELOPE_CARRY, (sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->EnableMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, ((sndFile.GetModSpecifications().hasReleaseNode && m_nEnv == ENV_VOLUME) || forceRelease) ? MF_ENABLED : MF_GRAYED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SETLOOP, (EnvGetLoop()) ? MF_CHECKED : MF_UNCHECKED);
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_SUSTAIN, (EnvGetSustain()) ? MF_CHECKED : MF_UNCHECKED);
@@ -1696,7 +1767,7 @@ void CViewInstrument::OnRButtonDown(UINT flags, CPoint pt)
 			pSubMenu->CheckMenuItem(ID_ENVELOPE_TOGGLERELEASENODE, (EnvGetReleaseNode() == m_nDragItem - 1) ? MF_CHECKED : MF_UNCHECKED);
 			m_ptMenu = pt;
 			ClientToScreen(&pt);
-			pSubMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON,pt.x,pt.y,this);
+			pSubMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, this);
 		}
 	}
 }
@@ -1733,19 +1804,22 @@ void CViewInstrument::OnEditSampleMap()
 
 void CViewInstrument::OnSelectVolumeEnv()
 {
-	if (m_nEnv != ENV_VOLUME) SetCurrentInstrument(m_nInstrument, ENV_VOLUME);
+	if(m_nEnv != ENV_VOLUME)
+		SetCurrentInstrument(m_nInstrument, ENV_VOLUME);
 }
 
 
 void CViewInstrument::OnSelectPanningEnv()
 {
-	if (m_nEnv != ENV_PANNING) SetCurrentInstrument(m_nInstrument, ENV_PANNING);
+	if(m_nEnv != ENV_PANNING)
+		SetCurrentInstrument(m_nInstrument, ENV_PANNING);
 }
 
 
 void CViewInstrument::OnSelectPitchEnv()
 {
-	if (m_nEnv != ENV_PITCH) SetCurrentInstrument(m_nInstrument, ENV_PITCH);
+	if(m_nEnv != ENV_PITCH)
+		SetCurrentInstrument(m_nInstrument, ENV_PITCH);
 }
 
 
@@ -1753,7 +1827,7 @@ void CViewInstrument::OnEnvLoopChanged()
 {
 	CModDoc *pModDoc = GetDocument();
 	PrepareUndo("Toggle Envelope Loop");
-	if ((pModDoc) && (EnvSetLoop(!EnvGetLoop())))
+	if((pModDoc) && (EnvSetLoop(!EnvGetLoop())))
 	{
 		InstrumentEnvelope *pEnv = GetEnvelopePtr();
 		if(EnvGetLoop() && pEnv != nullptr && pEnv->nLoopEnd == 0)
@@ -1771,7 +1845,7 @@ void CViewInstrument::OnEnvSustainChanged()
 {
 	CModDoc *pModDoc = GetDocument();
 	PrepareUndo("Toggle Envelope Sustain");
-	if ((pModDoc) && (EnvSetSustain(!EnvGetSustain())))
+	if((pModDoc) && (EnvSetSustain(!EnvGetSustain())))
 	{
 		InstrumentEnvelope *pEnv = GetEnvelopePtr();
 		if(EnvGetSustain() && pEnv != nullptr && pEnv->nSustainStart == pEnv->nSustainEnd && IsDragItemEnvPoint())
@@ -1788,9 +1862,10 @@ void CViewInstrument::OnEnvCarryChanged()
 {
 	CModDoc *pModDoc = GetDocument();
 	PrepareUndo("Toggle Envelope Carry");
-	if ((pModDoc) && (EnvSetCarry(!EnvGetCarry())))
+	if((pModDoc) && (EnvSetCarry(!EnvGetCarry())))
 	{
 		SetModified(InstrumentHint().Envelope(), false);
+		UpdateNcButtonState();
 	}
 }
 
@@ -1810,9 +1885,10 @@ void CViewInstrument::OnEnvToggleReleasNode()
 void CViewInstrument::OnEnvVolChanged()
 {
 	GetDocument()->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Toggle Volume Envelope", ENV_VOLUME);
-	if (EnvSetVolEnv(!EnvGetVolEnv()))
+	if(EnvSetVolEnv(!EnvGetVolEnv()))
 	{
 		SetModified(InstrumentHint().Envelope(), false);
+		UpdateNcButtonState();
 	}
 }
 
@@ -1820,9 +1896,10 @@ void CViewInstrument::OnEnvVolChanged()
 void CViewInstrument::OnEnvPanChanged()
 {
 	GetDocument()->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Toggle Panning Envelope", ENV_PANNING);
-	if (EnvSetPanEnv(!EnvGetPanEnv()))
+	if(EnvSetPanEnv(!EnvGetPanEnv()))
 	{
 		SetModified(InstrumentHint().Envelope(), false);
+		UpdateNcButtonState();
 	}
 }
 
@@ -1830,9 +1907,10 @@ void CViewInstrument::OnEnvPanChanged()
 void CViewInstrument::OnEnvPitchChanged()
 {
 	GetDocument()->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Toggle Pitch Envelope", ENV_PITCH);
-	if (EnvSetPitchEnv(!EnvGetPitchEnv()))
+	if(EnvSetPitchEnv(!EnvGetPitchEnv()))
 	{
 		SetModified(InstrumentHint().Envelope(), false);
+		UpdateNcButtonState();
 	}
 }
 
@@ -1840,9 +1918,10 @@ void CViewInstrument::OnEnvPitchChanged()
 void CViewInstrument::OnEnvFilterChanged()
 {
 	GetDocument()->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Toggle Filter Envelope", ENV_PITCH);
-	if (EnvSetFilterEnv(!EnvGetFilterEnv()))
+	if(EnvSetFilterEnv(!EnvGetFilterEnv()))
 	{
 		SetModified(InstrumentHint().Envelope(), false);
+		UpdateNcButtonState();
 	}
 }
 
@@ -1850,12 +1929,11 @@ void CViewInstrument::OnEnvFilterChanged()
 void CViewInstrument::OnEnvToggleGrid()
 {
 	m_bGrid = !m_bGrid;
-	if (m_bGrid)
+	if(m_bGrid)
 		m_bGridForceRedraw = true;
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
+	if(pModDoc)
 		pModDoc->UpdateAllViews(nullptr, InstrumentHint(m_nInstrument).Envelope());
-
 }
 
 
@@ -1882,7 +1960,7 @@ void CViewInstrument::OnEnvInsertPoint()
 
 bool CViewInstrument::InsertAtPoint(CPoint pt)
 {
-	auto item = EnvInsertPoint(ScreenToTick(pt.x), ScreenToValue(pt.y)); // returns point ID + 1 if successful, else 0.
+	auto item = EnvInsertPoint(ScreenToTick(pt.x), ScreenToValue(pt.y));  // returns point ID + 1 if successful, else 0.
 	if(item > 0)
 	{
 		// Drag point if successful
@@ -1897,7 +1975,8 @@ bool CViewInstrument::InsertAtPoint(CPoint pt)
 void CViewInstrument::OnEditCopy()
 {
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc) pModDoc->CopyEnvelope(m_nInstrument, m_nEnv);
+	if(pModDoc)
+		pModDoc->CopyEnvelope(m_nInstrument, m_nEnv);
 }
 
 
@@ -1905,7 +1984,7 @@ void CViewInstrument::OnEditPaste()
 {
 	CModDoc *pModDoc = GetDocument();
 	PrepareUndo("Paste Envelope");
-	if (pModDoc && pModDoc->PasteEnvelope(m_nInstrument, m_nEnv))
+	if(pModDoc && pModDoc->PasteEnvelope(m_nInstrument, m_nEnv))
 	{
 		SetModified(InstrumentHint().Envelope(), true);
 	} else
@@ -1922,19 +2001,20 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc == nullptr || pMainFrm == nullptr)
+	if(pModDoc == nullptr || pMainFrm == nullptr)
 	{
 		return;
 	}
-	if (note > 0 && note<128)
+	if(note > 0 && note < 128)
 	{
-		if (m_nInstrument && !m_baPlayingNote[note])
+		if(m_nInstrument && !m_baPlayingNote[note])
 		{
 			CSoundFile &sndFile = pModDoc->GetSoundFile();
 			ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
-			if ((!pIns) || (!pIns->Keyboard[note - NOTE_MIN] && !pIns->nMixPlug)) return;
+			if((!pIns) || (!pIns->Keyboard[note - NOTE_MIN] && !pIns->nMixPlug))
+				return;
 			{
-				if (pMainFrm->GetModPlaying() != pModDoc)
+				if(pMainFrm->GetModPlaying() != pModDoc)
 				{
 					sndFile.m_SongFlags.set(SONG_PAUSED);
 					sndFile.ResetChannels();
@@ -1990,51 +2070,54 @@ void CViewInstrument::OnDropFiles(HDROP hDropInfo)
 }
 
 
-BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
+BOOL CViewInstrument::OnDragonDrop(BOOL doDrop, const DRAGONDROP *lpDropInfo)
 {
 	CModDoc *pModDoc = GetDocument();
-	bool bCanDrop = false;
+	bool canDrop = false;
 
-	if ((!lpDropInfo) || (!pModDoc)) return FALSE;
+	if((!lpDropInfo) || (!pModDoc))
+		return FALSE;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	switch(lpDropInfo->dwDropType)
 	{
 	case DRAGONDROP_INSTRUMENT:
-		if (lpDropInfo->pModDoc == pModDoc)
+		if(lpDropInfo->pModDoc == pModDoc)
 		{
-			bCanDrop = ((lpDropInfo->dwDropItem)
-					 && (lpDropInfo->dwDropItem <= sndFile.m_nInstruments)
-					 && (lpDropInfo->pModDoc == pModDoc));
+			canDrop = ((lpDropInfo->dwDropItem)
+			           && (lpDropInfo->dwDropItem <= sndFile.m_nInstruments)
+			           && (lpDropInfo->pModDoc == pModDoc));
 		} else
 		{
-			bCanDrop = ((lpDropInfo->dwDropItem)
-					 && ((lpDropInfo->lDropParam) || (lpDropInfo->pModDoc)));
+			canDrop = ((lpDropInfo->dwDropItem)
+			           && ((lpDropInfo->lDropParam) || (lpDropInfo->pModDoc)));
 		}
 		break;
 
 	case DRAGONDROP_DLS:
-		bCanDrop = ((lpDropInfo->dwDropItem < CTrackApp::gpDLSBanks.size())
-				 && (CTrackApp::gpDLSBanks[lpDropInfo->dwDropItem]));
+		canDrop = ((lpDropInfo->dwDropItem < CTrackApp::gpDLSBanks.size())
+		            && (CTrackApp::gpDLSBanks[lpDropInfo->dwDropItem]));
 		break;
 
 	case DRAGONDROP_SOUNDFILE:
 	case DRAGONDROP_MIDIINSTR:
-		bCanDrop = !lpDropInfo->GetPath().empty();
+		canDrop = !lpDropInfo->GetPath().empty();
 		break;
 	}
-	if ((!bCanDrop) || (!bDoDrop)) return bCanDrop;
-	if ((!sndFile.GetNumInstruments()) && sndFile.GetModSpecifications().instrumentsMax > 0)
+	if((!canDrop) || (!doDrop))
+		return canDrop;
+	if((!sndFile.GetNumInstruments()) && sndFile.GetModSpecifications().instrumentsMax > 0)
 	{
 		SendCtrlMessage(CTRLMSG_INS_NEWINSTRUMENT);
 	}
-	if ((!m_nInstrument) || (m_nInstrument > sndFile.GetNumInstruments())) return FALSE;
+	if((!m_nInstrument) || (m_nInstrument > sndFile.GetNumInstruments()))
+		return FALSE;
 	// Do the drop
-	bool bUpdate = false;
+	bool update = false;
 	BeginWaitCursor();
 	switch(lpDropInfo->dwDropType)
 	{
 	case DRAGONDROP_INSTRUMENT:
-		if (lpDropInfo->pModDoc == pModDoc)
+		if(lpDropInfo->pModDoc == pModDoc)
 		{
 			SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, lpDropInfo->dwDropItem);
 		} else
@@ -2044,33 +2127,35 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 		break;
 
 	case DRAGONDROP_MIDIINSTR:
-		if (CDLSBank::IsDLSBank(lpDropInfo->GetPath()))
+		if(CDLSBank::IsDLSBank(lpDropInfo->GetPath()))
 		{
 			CDLSBank dlsbank;
-			if (dlsbank.Open(lpDropInfo->GetPath()))
+			if(dlsbank.Open(lpDropInfo->GetPath()))
 			{
 				const DLSINSTRUMENT *pDlsIns;
 				UINT nIns = 0, nRgn = 0xFF;
 				// Drums
-				if (lpDropInfo->dwDropItem & 0x80)
+				if(lpDropInfo->dwDropItem & 0x80)
 				{
 					UINT key = lpDropInfo->dwDropItem & 0x7F;
 					pDlsIns = dlsbank.FindInstrument(TRUE, 0xFFFF, 0xFF, key, &nIns);
-					if (pDlsIns) nRgn = dlsbank.GetRegionFromKey(nIns, key);
+					if(pDlsIns)
+						nRgn = dlsbank.GetRegionFromKey(nIns, key);
 				} else
 				// Melodic
 				{
 					pDlsIns = dlsbank.FindInstrument(FALSE, 0xFFFF, lpDropInfo->dwDropItem, 60, &nIns);
-					if (pDlsIns) nRgn = dlsbank.GetRegionFromKey(nIns, 60);
+					if(pDlsIns)
+						nRgn = dlsbank.GetRegionFromKey(nIns, 60);
 				}
-				bCanDrop = false;
-				if (pDlsIns)
+				canDrop = false;
+				if(pDlsIns)
 				{
 					CriticalSection cs;
 					pModDoc->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Replace Instrument");
-					bCanDrop = dlsbank.ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
+					canDrop = dlsbank.ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
 				}
-				bUpdate = true;
+				update = true;
 				break;
 			}
 		}
@@ -2098,25 +2183,25 @@ BOOL CViewInstrument::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 			CriticalSection cs;
 
 			pModDoc->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Replace Instrument");
-			bCanDrop = pDLSBank->ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
-			bUpdate = true;
+			canDrop = pDLSBank->ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
+			update = true;
 		}
 		break;
 	}
-	if (bUpdate)
+	if(update)
 	{
 		SetModified(InstrumentHint().Info().Envelope().Names(), true);
 		GetDocument()->UpdateAllViews(nullptr, SampleHint().Info().Names().Data(), this);
 	}
 	CMDIChildWnd *pMDIFrame = (CMDIChildWnd *)GetParentFrame();
-	if (pMDIFrame)
+	if(pMDIFrame)
 	{
 		pMDIFrame->MDIActivate();
 		pMDIFrame->SetActiveView(this);
 		SetFocus();
 	}
 	EndWaitCursor();
-	return bCanDrop;
+	return canDrop;
 }
 
 
@@ -2128,7 +2213,7 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM midiDataParam, LPARAM)
 	{
 		modDoc->ProcessMIDI(midiData, m_nInstrument, modDoc->GetSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
 
-		MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(midiData);
+		MIDIEvents::EventType event = MIDIEvents::GetTypeFromEvent(midiData);
 		uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
 		if(event == MIDIEvents::evNoteOn)
 		{
@@ -2143,13 +2228,13 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM midiDataParam, LPARAM)
 
 BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 {
-	if (pMsg)
+	if(pMsg)
 	{
 		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
 		if((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
-			CInputHandler* ih = CMainFrame::GetInputHandler();
+			CInputHandler *ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
 			UINT nChar = static_cast<UINT>(pMsg->wParam);
@@ -2159,7 +2244,7 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 			InputTargetContext ctx = (InputTargetContext)(kCtxViewInstruments);
 
 			if(ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
-				return true; // Mapped to a command, no need to pass message on.
+				return true;  // Mapped to a command, no need to pass message on.
 
 			// Handle Application (menu) key
 			if(pMsg->message == WM_KEYDOWN && nChar == VK_APPS)
@@ -2173,7 +2258,6 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 				OnRButtonDown(0, pt);
 			}
 		}
-
 	}
 
 	return CModScrollView::PreTranslateMessage(pMsg);
@@ -2182,11 +2266,12 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 
 LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 {
-	if (wParam == kcNull)
+	if(wParam == kcNull)
 		return NULL;
 
 	CModDoc *pModDoc = GetDocument();
-	if(!pModDoc) return NULL;
+	if(!pModDoc)
+		return NULL;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -2251,7 +2336,8 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	if(wParam >= kcInstrumentStartNoteStops && wParam <= kcInstrumentEndNoteStops)
 	{
 		ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcInstrumentStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12);
-		if(ModCommand::IsNote(note)) m_baPlayingNote[note] = false;
+		if(ModCommand::IsNote(note))
+			m_baPlayingNote[note] = false;
 		pModDoc->NoteOff(note, false, m_nInstrument, m_noteChannel[note - NOTE_MIN]);
 		return wParam;
 	}
@@ -2268,8 +2354,8 @@ void CViewInstrument::OnEnvelopeScalePoints()
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	if(m_nInstrument >= 1
-		&& m_nInstrument <= sndFile.GetNumInstruments()
-		&& sndFile.Instruments[m_nInstrument])
+	   && m_nInstrument <= sndFile.GetNumInstruments()
+	   && sndFile.Instruments[m_nInstrument])
 	{
 		// "Center" y value of the envelope. For panning and pitch, this is 32, for volume and filter it is 0 (minimum).
 		int nOffset = ((m_nEnv != ENV_VOLUME) && !GetEnvelopePtr()->dwFlags[ENV_FILTER]) ? 32 : 0;
@@ -2300,18 +2386,21 @@ void CViewInstrument::EnvSetZoom(float newZoom)
 void CViewInstrument::EnvKbdSelectPoint(DragPoints point)
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr) return;
+	if(pEnv == nullptr)
+		return;
 
 	switch(point)
 	{
 	case ENV_DRAGLOOPSTART:
 	case ENV_DRAGLOOPEND:
-		if(!pEnv->dwFlags[ENV_LOOP]) return;
+		if(!pEnv->dwFlags[ENV_LOOP])
+			return;
 		m_nDragItem = point;
 		break;
 	case ENV_DRAGSUSTAINSTART:
 	case ENV_DRAGSUSTAINEND:
-		if(!pEnv->dwFlags[ENV_SUSTAIN]) return;
+		if(!pEnv->dwFlags[ENV_SUSTAIN])
+			return;
 		m_nDragItem = point;
 		break;
 	case ENV_DRAGPREVIOUS:
@@ -2335,29 +2424,37 @@ void CViewInstrument::EnvKbdSelectPoint(DragPoints point)
 void CViewInstrument::EnvKbdMovePointLeft(int stepsize)
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr) return;
+	if(pEnv == nullptr)
+		return;
 	const MODTYPE modType = GetDocument()->GetModType();
 
 	// Move loop points?
 	PrepareUndo("Move Envelope Point");
 	if(m_nDragItem == ENV_DRAGSUSTAINSTART)
 	{
-		if(pEnv->nSustainStart <= 0) return;
+		if(pEnv->nSustainStart <= 0)
+			return;
 		pEnv->nSustainStart--;
-		if(modType == MOD_TYPE_XM) pEnv->nSustainEnd = pEnv->nSustainStart;
+		if(modType == MOD_TYPE_XM)
+			pEnv->nSustainEnd = pEnv->nSustainStart;
 	} else if(m_nDragItem == ENV_DRAGSUSTAINEND)
 	{
-		if(pEnv->nSustainEnd <= 0) return;
-		if(pEnv->nSustainEnd <= pEnv->nSustainStart) pEnv->nSustainStart--;
+		if(pEnv->nSustainEnd <= 0)
+			return;
+		if(pEnv->nSustainEnd <= pEnv->nSustainStart)
+			pEnv->nSustainStart--;
 		pEnv->nSustainEnd--;
 	} else if(m_nDragItem == ENV_DRAGLOOPSTART)
 	{
-		if(pEnv->nLoopStart <= 0) return;
+		if(pEnv->nLoopStart <= 0)
+			return;
 		pEnv->nLoopStart--;
 	} else if(m_nDragItem == ENV_DRAGLOOPEND)
 	{
-		if(pEnv->nLoopEnd <= 0) return;
-		if(pEnv->nLoopEnd <= pEnv->nLoopStart) pEnv->nLoopStart--;
+		if(pEnv->nLoopEnd <= 0)
+			return;
+		if(pEnv->nLoopEnd <= pEnv->nLoopStart)
+			pEnv->nLoopStart--;
 		pEnv->nLoopEnd--;
 	} else
 	{
@@ -2381,29 +2478,37 @@ void CViewInstrument::EnvKbdMovePointLeft(int stepsize)
 void CViewInstrument::EnvKbdMovePointRight(int stepsize)
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr) return;
+	if(pEnv == nullptr)
+		return;
 	const MODTYPE modType = GetDocument()->GetModType();
 
 	// Move loop points?
 	PrepareUndo("Move Envelope Point");
 	if(m_nDragItem == ENV_DRAGSUSTAINSTART)
 	{
-		if(pEnv->nSustainStart >= pEnv->size() - 1) return;
-		if(pEnv->nSustainStart >= pEnv->nSustainEnd) pEnv->nSustainEnd++;
+		if(pEnv->nSustainStart >= pEnv->size() - 1)
+			return;
+		if(pEnv->nSustainStart >= pEnv->nSustainEnd)
+			pEnv->nSustainEnd++;
 		pEnv->nSustainStart++;
 	} else if(m_nDragItem == ENV_DRAGSUSTAINEND)
 	{
-		if(pEnv->nSustainEnd >= pEnv->size() - 1) return;
+		if(pEnv->nSustainEnd >= pEnv->size() - 1)
+			return;
 		pEnv->nSustainEnd++;
-		if(modType == MOD_TYPE_XM) pEnv->nSustainStart = pEnv->nSustainEnd;
+		if(modType == MOD_TYPE_XM)
+			pEnv->nSustainStart = pEnv->nSustainEnd;
 	} else if(m_nDragItem == ENV_DRAGLOOPSTART)
 	{
-		if(pEnv->nLoopStart >= pEnv->size() - 1) return;
-		if(pEnv->nLoopStart >= pEnv->nLoopEnd) pEnv->nLoopEnd++;
+		if(pEnv->nLoopStart >= pEnv->size() - 1)
+			return;
+		if(pEnv->nLoopStart >= pEnv->nLoopEnd)
+			pEnv->nLoopEnd++;
 		pEnv->nLoopStart++;
 	} else if(m_nDragItem == ENV_DRAGLOOPEND)
 	{
-		if(pEnv->nLoopEnd >= pEnv->size() - 1) return;
+		if(pEnv->nLoopEnd >= pEnv->size() - 1)
+			return;
 		pEnv->nLoopEnd++;
 	} else
 	{
@@ -2427,7 +2532,8 @@ void CViewInstrument::EnvKbdMovePointRight(int stepsize)
 void CViewInstrument::EnvKbdMovePointVertical(int stepsize)
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint())
+		return;
 	int val = pEnv->at(m_nDragItem - 1).value + stepsize;
 	PrepareUndo("Move Envelope Point");
 	if(EnvSetValue(m_nDragItem - 1, int32_min, val, false))
@@ -2444,8 +2550,10 @@ void CViewInstrument::EnvKbdMovePointVertical(int stepsize)
 void CViewInstrument::EnvKbdInsertPoint()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr) return;
-	if(!IsDragItemEnvPoint()) m_nDragItem = pEnv->size();
+	if(pEnv == nullptr)
+		return;
+	if(!IsDragItemEnvPoint())
+		m_nDragItem = pEnv->size();
 	EnvelopeNode::tick_t newTick = 10;
 	EnvelopeNode::value_t newVal = m_nEnv == ENV_VOLUME ? ENVELOPE_MAX : ENVELOPE_MID;
 	if(m_nDragItem < pEnv->size() && (pEnv->at(m_nDragItem).tick - pEnv->at(m_nDragItem - 1).tick > 1))
@@ -2461,7 +2569,8 @@ void CViewInstrument::EnvKbdInsertPoint()
 	}
 
 	auto newPoint = EnvInsertPoint(newTick, newVal);
-	if(newPoint > 0) m_nDragItem = newPoint;
+	if(newPoint > 0)
+		m_nDragItem = newPoint;
 	UpdateIndicator();
 }
 
@@ -2469,8 +2578,10 @@ void CViewInstrument::EnvKbdInsertPoint()
 void CViewInstrument::EnvKbdRemovePoint()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !IsDragItemEnvPoint() || pEnv->empty()) return;
-	if(m_nDragItem > pEnv->size()) m_nDragItem = pEnv->size();
+	if(pEnv == nullptr || !IsDragItemEnvPoint() || pEnv->empty())
+		return;
+	if(m_nDragItem > pEnv->size())
+		m_nDragItem = pEnv->size();
 	EnvRemovePoint(m_nDragItem - 1);
 	UpdateIndicator();
 }
@@ -2479,7 +2590,8 @@ void CViewInstrument::EnvKbdRemovePoint()
 void CViewInstrument::EnvKbdSetLoopStart()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint())
+		return;
 	PrepareUndo("Set Envelope Loop Start");
 	if(!EnvGetLoop())
 		EnvSetLoopStart(0);
@@ -2491,7 +2603,8 @@ void CViewInstrument::EnvKbdSetLoopStart()
 void CViewInstrument::EnvKbdSetLoopEnd()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint())
+		return;
 	PrepareUndo("Set Envelope Loop End");
 	if(!EnvGetLoop())
 	{
@@ -2506,7 +2619,8 @@ void CViewInstrument::EnvKbdSetLoopEnd()
 void CViewInstrument::EnvKbdSetSustainStart()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint())
+		return;
 	PrepareUndo("Set Envelope Sustain Start");
 	if(!EnvGetSustain())
 		EnvSetSustain(true);
@@ -2518,7 +2632,8 @@ void CViewInstrument::EnvKbdSetSustainStart()
 void CViewInstrument::EnvKbdSetSustainEnd()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint())
+		return;
 	PrepareUndo("Set Envelope Sustain End");
 	if(!EnvGetSustain())
 	{
@@ -2533,7 +2648,8 @@ void CViewInstrument::EnvKbdSetSustainEnd()
 void CViewInstrument::EnvKbdToggleReleaseNode()
 {
 	InstrumentEnvelope *pEnv = GetEnvelopePtr();
-	if(pEnv == nullptr || !IsDragItemEnvPoint()) return;
+	if(pEnv == nullptr || !IsDragItemEnvPoint())
+		return;
 	PrepareUndo("Toggle Release Node");
 	if(EnvToggleReleaseNode(m_nDragItem - 1))
 	{
@@ -2550,7 +2666,8 @@ void CViewInstrument::EnvKbdToggleReleaseNode()
 ModInstrument *CViewInstrument::GetInstrumentPtr() const
 {
 	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr) return nullptr;
+	if(pModDoc == nullptr)
+		return nullptr;
 	return pModDoc->GetSoundFile().Instruments[m_nInstrument];
 }
 
@@ -2561,7 +2678,8 @@ InstrumentEnvelope *CViewInstrument::GetEnvelopePtr() const
 {
 	// First do some standard checks...
 	ModInstrument *pIns = GetInstrumentPtr();
-	if(pIns == nullptr) return nullptr;
+	if(pIns == nullptr)
+		return nullptr;
 
 	return &pIns->GetEnvelope(m_nEnv);
 }
@@ -2570,7 +2688,8 @@ InstrumentEnvelope *CViewInstrument::GetEnvelopePtr() const
 bool CViewInstrument::CanMovePoint(uint32 envPoint, int step)
 {
 	const InstrumentEnvelope *env = GetEnvelopePtr();
-	if(env == nullptr) return false;
+	if(env == nullptr)
+		return false;
 
 	// Can't move first point
 	if(envPoint == 0)
@@ -2594,7 +2713,7 @@ bool CViewInstrument::CanMovePoint(uint32 envPoint, int step)
 BOOL CViewInstrument::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	// Ctrl + mouse wheel: envelope zoom.
-	if (nFlags == MK_CONTROL)
+	if(nFlags == MK_CONTROL)
 	{
 		// Speed up zoom scrolling by some factor (might need some tuning).
 		const float speedUpFactor = std::max(1.0f, m_zoom * 7.0f / ENV_MAX_ZOOM);
@@ -2607,15 +2726,18 @@ BOOL CViewInstrument::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 void CViewInstrument::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
 {
-	if(nButton == XBUTTON1) OnPrevInstrument();
-	else if(nButton == XBUTTON2) OnNextInstrument();
+	if(nButton == XBUTTON1)
+		OnPrevInstrument();
+	else if(nButton == XBUTTON2)
+		OnNextInstrument();
 	CModScrollView::OnXButtonUp(nFlags, nButton, point);
 }
 
 
 void CViewInstrument::OnEnvLoad()
 {
-	if(GetInstrumentPtr() == nullptr) return;
+	if(GetInstrumentPtr() == nullptr)
+		return;
 
 	FileDialog dlg = OpenFileDialog()
 		.DefaultExtension("envelope")
@@ -2661,7 +2783,7 @@ void CViewInstrument::OnEnvSave()
 void CViewInstrument::OnUpdateUndo(CCmdUI *pCmdUI)
 {
 	CModDoc *pModDoc = GetDocument();
-	if ((pCmdUI) && (pModDoc))
+	if((pCmdUI) && (pModDoc))
 	{
 		pCmdUI->Enable(pModDoc->GetInstrumentUndo().CanUndo(m_nInstrument));
 		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo, _T("Undo ") + CString(pModDoc->GetInstrumentUndo().GetUndoName(m_nInstrument))));
@@ -2672,7 +2794,7 @@ void CViewInstrument::OnUpdateUndo(CCmdUI *pCmdUI)
 void CViewInstrument::OnUpdateRedo(CCmdUI *pCmdUI)
 {
 	CModDoc *pModDoc = GetDocument();
-	if ((pCmdUI) && (pModDoc))
+	if((pCmdUI) && (pModDoc))
 	{
 		pCmdUI->Enable(pModDoc->GetInstrumentUndo().CanRedo(m_nInstrument));
 		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo, _T("Redo ") + CString(pModDoc->GetInstrumentUndo().GetRedoName(m_nInstrument))));
@@ -2683,7 +2805,8 @@ void CViewInstrument::OnUpdateRedo(CCmdUI *pCmdUI)
 void CViewInstrument::OnEditUndo()
 {
 	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr) return;
+	if(pModDoc == nullptr)
+		return;
 	if(pModDoc->GetInstrumentUndo().Undo(m_nInstrument))
 	{
 		SetModified(InstrumentHint().Info().Envelope().Names(), true);
@@ -2694,11 +2817,65 @@ void CViewInstrument::OnEditUndo()
 void CViewInstrument::OnEditRedo()
 {
 	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr) return;
+	if(pModDoc == nullptr)
+		return;
 	if(pModDoc->GetInstrumentUndo().Redo(m_nInstrument))
 	{
 		SetModified(InstrumentHint().Info().Envelope().Names(), true);
 	}
+}
+
+
+INT_PTR CViewInstrument::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
+{
+	CRect ncRect;
+	ClientToScreen(&point);
+	const auto ncButton = GetNcButtonAtPoint(point, &ncRect);
+	if(ncButton == uint32_max)
+		return CModScrollView::OnToolHitTest(point, pTI);
+	
+	auto buttonID = cLeftBarButtons[ncButton];
+	ScreenToClient(&ncRect);
+
+	pTI->hwnd = m_hWnd;
+	pTI->uId = buttonID;
+	pTI->rect = ncRect;
+	CString text;
+	text.LoadString(buttonID);
+
+	CommandID cmd = kcNull;
+	switch(buttonID)
+	{
+	case ID_ENVSEL_VOLUME: cmd = kcInstrumentEnvelopeSwitchToVolume; break;
+	case ID_ENVSEL_PANNING: cmd = kcInstrumentEnvelopeSwitchToPanning; break;
+	case ID_ENVSEL_PITCH: cmd = kcInstrumentEnvelopeSwitchToPitch; break;
+	case ID_ENVELOPE_VOLUME: cmd = kcInstrumentEnvelopeToggleVolume; break;
+	case ID_ENVELOPE_PANNING: cmd = kcInstrumentEnvelopeTogglePanning; break;
+	case ID_ENVELOPE_PITCH: cmd = kcInstrumentEnvelopeTogglePitch; break;
+	case ID_ENVELOPE_FILTER: cmd = kcInstrumentEnvelopeToggleFilter; break;
+	case ID_ENVELOPE_SETLOOP: cmd = kcInstrumentEnvelopeToggleLoop; break;
+	case ID_ENVELOPE_SUSTAIN: cmd = kcInstrumentEnvelopeToggleSustain; break;
+	case ID_ENVELOPE_CARRY: cmd = kcInstrumentEnvelopeToggleCarry; break;
+	case ID_INSTRUMENT_SAMPLEMAP: cmd = kcInsNoteMapEditSampleMap; break;
+	case ID_ENVELOPE_ZOOM_IN: cmd = kcInstrumentEnvelopeZoomIn; break;
+	case ID_ENVELOPE_ZOOM_OUT: cmd = kcInstrumentEnvelopeZoomOut; break;
+	case ID_ENVELOPE_LOAD: cmd = kcInstrumentEnvelopeLoad; break;
+	case ID_ENVELOPE_SAVE: cmd = kcInstrumentEnvelopeSave; break;
+	}
+	if(cmd != kcNull)
+	{
+		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
+		if(!keyText.IsEmpty())
+			text += mpt::cformat(_T(" (%1)"))(keyText);
+	}
+
+	// MFC will free() the text
+	auto size = text.GetLength() + 1;
+	TCHAR *textP = static_cast<TCHAR *>(calloc(size, sizeof(TCHAR)));
+	std::copy(text.GetString(), text.GetString() + size, textP);
+	pTI->lpszText = textP;
+
+	return buttonID;
 }
 
 
