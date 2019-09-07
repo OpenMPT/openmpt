@@ -57,6 +57,7 @@ BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+CChildFrame *CChildFrame::m_lastActiveFrame = nullptr;
 int CChildFrame::glMdiOpenCount = 0;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -139,6 +140,7 @@ void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeact
 		MPT_ASSERT(pActivateWnd == this);
 		CMainFrame::GetMainFrame()->UpdateEffectKeys(static_cast<CModDoc *>(GetActiveDocument()));
 		CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_hWndView);
+		m_lastActiveFrame = this;
 	}
 
 	// Update channel manager according to active document
@@ -336,6 +338,8 @@ LRESULT CChildFrame::OnInstrumentSelected(WPARAM wParam, LPARAM lParam)
 void CChildFrame::OnDestroy()
 {
 	SavePosition();
+	if(m_lastActiveFrame == this)
+		m_lastActiveFrame = nullptr;
 	CMDIChildWnd::OnDestroy();
 }
 
