@@ -159,7 +159,7 @@ public:
 	bool ModifiedSinceLastAutosave();
 	void SetShowSaveDialog(bool b) {m_ShowSavedialog = b;}
 	void PostMessageToAllViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
-	void SendMessageToActiveViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
+	void SendMessageToActiveView(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
 	MODTYPE GetModType() const { return m_SndFile.m_nType; }
 	INSTRUMENTINDEX GetNumInstruments() const { return m_SndFile.m_nInstruments; }
 	SAMPLEINDEX GetNumSamples() const { return m_SndFile.m_nSamples; }

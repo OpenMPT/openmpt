@@ -633,40 +633,38 @@ BOOL CModDoc::InitializeMod()
 void CModDoc::PostMessageToAllViews(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	POSITION pos = GetFirstViewPosition();
-	while (pos != NULL)
+	while(pos != nullptr)
 	{
-		CView* pView = GetNextView(pos);
-		if (pView) pView->PostMessage(uMsg, wParam, lParam);
+		if(CView *pView = GetNextView(pos); pView != nullptr)
+			pView->PostMessage(uMsg, wParam, lParam);
 	}
 }
 
 
-void CModDoc::SendMessageToActiveViews(UINT uMsg, WPARAM wParam, LPARAM lParam)
+void CModDoc::SendMessageToActiveView(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm)
+	if(auto *lastActiveFrame = CChildFrame::LastActiveFrame(); lastActiveFrame != nullptr)
 	{
-		CMDIChildWnd *pMDI = pMainFrm->MDIGetActive();
-		if (pMDI) pMDI->SendMessageToDescendants(uMsg, wParam, lParam);
+		lastActiveFrame->SendMessageToDescendants(uMsg, wParam, lParam);
 	}
 }
 
 
 void CModDoc::ViewPattern(UINT nPat, UINT nOrd)
 {
-	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_PATTERNS, ((nPat+1) << 16) | nOrd);
+	SendMessageToActiveView(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_PATTERNS, ((nPat+1) << 16) | nOrd);
 }
 
 
 void CModDoc::ViewSample(UINT nSmp)
 {
-	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_SAMPLES, nSmp);
+	SendMessageToActiveView(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_SAMPLES, nSmp);
 }
 
 
 void CModDoc::ViewInstrument(UINT nIns)
 {
-	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_INSTRUMENTS, nIns);
+	SendMessageToActiveView(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_INSTRUMENTS, nIns);
 }
 
 
@@ -2085,32 +2083,32 @@ void CModDoc::OnPlayerPlayFromStart()
 
 void CModDoc::OnEditGlobals()
 {
-	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW,	IDD_CONTROL_GLOBALS);
+	SendMessageToActiveView(WM_MOD_ACTIVATEVIEW,	IDD_CONTROL_GLOBALS);
 }
 
 
 void CModDoc::OnEditPatterns()
 {
-	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_PATTERNS, -1);
+	SendMessageToActiveView(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_PATTERNS, -1);
 }
 
 
 void CModDoc::OnEditSamples()
 {
-	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_SAMPLES);
+	SendMessageToActiveView(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_SAMPLES);
 }
 
 
 void CModDoc::OnEditInstruments()
 {
 	//if (m_SndFile.m_nInstruments) rewbs.cosmetic: allow keyboard access to instruments even with no instruments
-	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_INSTRUMENTS);
+	SendMessageToActiveView(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_INSTRUMENTS);
 }
 
 
 void CModDoc::OnEditComments()
 {
-	SendMessageToActiveViews(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_COMMENTS);
+	SendMessageToActiveView(WM_MOD_ACTIVATEVIEW, IDD_CONTROL_COMMENTS);
 }
 
 
@@ -2666,7 +2664,7 @@ CHANNELINDEX CModDoc::FindAvailableChannel() const
 
 void CModDoc::RecordParamChange(PLUGINDEX plugSlot, PlugParamIndex paramIndex)
 {
-	SendMessageToActiveViews(WM_MOD_RECORDPARAM, plugSlot, paramIndex);
+	SendMessageToActiveView(WM_MOD_RECORDPARAM, plugSlot, paramIndex);
 }
 
 

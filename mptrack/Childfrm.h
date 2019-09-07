@@ -76,6 +76,7 @@ public:
 	CChildFrame();
 
 protected:
+	static CChildFrame *m_lastActiveFrame;
 	static int glMdiOpenCount;
 
 // Attributes
@@ -113,6 +114,8 @@ public:
 
 	std::string SerializeView() const;
 	void DeserializeView(FileReader &file);
+
+	static CChildFrame *LastActiveFrame() { return m_lastActiveFrame; }
 
 // Overrides
 	// ClassWizard generated virtual function overrides
