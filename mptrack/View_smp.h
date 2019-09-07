@@ -90,7 +90,8 @@ protected:
 	void DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const void *pSampleData);
 	void DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const void *pSampleData);
 	void DrawNcButton(CDC *pDC, UINT nBtn);
-	BOOL GetNcButtonRect(UINT nBtn, LPRECT lpRect);
+	bool GetNcButtonRect(UINT button, CRect &rect) const;
+	UINT GetNcButtonAtPoint(CPoint point, CRect *outRect = nullptr) const;
 	void UpdateNcButtonState();
 	void DoPaste(PasteMode pasteMode);
 
@@ -129,6 +130,7 @@ public:
 	LRESULT OnPlayerNotify(Notification *) override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE) override;
+	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
 	//}}AFX_VIRTUAL
 
 protected:

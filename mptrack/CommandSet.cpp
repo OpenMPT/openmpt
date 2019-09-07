@@ -717,6 +717,9 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcInstrumentEnvelopeToggleCarry, 1985, _T("Toggle Envelope Carry"));
 	DefineKeyCommand(kcSampleInitializeOPL, 1986, _T("Initialize OPL Instrument"));
 	DefineKeyCommand(kcFileSaveCopy, 1987, _T("File/Save Copy"));
+	DefineKeyCommand(kcSampleToggleDrawing, 1990, _T("Toggle Sample Drawing"));
+	DefineKeyCommand(kcSampleResize, 1991, _T("Add Silence / Create Sample"));
+	DefineKeyCommand(kcSampleGrid, 1992, _T("Configure Sample Grid"));
 
 	// Add new key commands here.
 

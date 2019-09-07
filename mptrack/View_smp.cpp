@@ -162,6 +162,7 @@ void CViewSample::OnInitialUpdate()
 	UpdateOPLEditor();
 	UpdateScrollSize();
 	UpdateNcButtonState();
+	EnableToolTips();
 }
 
 
@@ -1332,32 +1333,52 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 }
 
 
-BOOL CViewSample::GetNcButtonRect(UINT nBtn, LPRECT lpRect)
+bool CViewSample::GetNcButtonRect(UINT button, CRect &rect) const
 {
-	lpRect->left = 4;
-	lpRect->top = 3;
-	lpRect->bottom = lpRect->top + SMP_LEFTBAR_CYBTN;
-	if (nBtn >= SMP_LEFTBAR_BUTTONS) return FALSE;
-	for (UINT i=0; i<nBtn; i++)
+	rect.left = 4;
+	rect.top = 3;
+	rect.bottom = rect.top + SMP_LEFTBAR_CYBTN;
+	if(button >= SMP_LEFTBAR_BUTTONS) return false;
+	for(UINT i = 0; i < button; i++)
 	{
-		if (cLeftBarButtons[i] == ID_SEPARATOR)
-		{
-			lpRect->left += SMP_LEFTBAR_CXSEP;
-		} else
-		{
-			lpRect->left += SMP_LEFTBAR_CXBTN + SMP_LEFTBAR_CXSPC;
-		}
+		if(cLeftBarButtons[i] == ID_SEPARATOR)
+			rect.left += SMP_LEFTBAR_CXSEP;
+		else
+			rect.left += SMP_LEFTBAR_CXBTN + SMP_LEFTBAR_CXSPC;
 	}
-	if (cLeftBarButtons[nBtn] == ID_SEPARATOR)
+	if(cLeftBarButtons[button] == ID_SEPARATOR)
 	{
-		lpRect->left += SMP_LEFTBAR_CXSEP/2 - 2;
-		lpRect->right = lpRect->left + 2;
-		return FALSE;
+		rect.left += SMP_LEFTBAR_CXSEP/2 - 2;
+		rect.right = rect.left + 2;
+		return false;
 	} else
 	{
-		lpRect->right = lpRect->left + SMP_LEFTBAR_CXBTN;
+		rect.right = rect.left + SMP_LEFTBAR_CXBTN;
 	}
-	return TRUE;
+	return true;
+}
+
+
+UINT CViewSample::GetNcButtonAtPoint(CPoint point, CRect *outRect) const
+{
+	CRect rect, rcWnd;
+	UINT button = uint32_max;
+	GetWindowRect(&rcWnd);
+	for(UINT i = 0; i < SMP_LEFTBAR_BUTTONS; i++)
+	{
+		if(!(m_NcButtonState[i] & NCBTNS_DISABLED) && GetNcButtonRect(i, rect))
+		{
+			rect.OffsetRect(rcWnd.left, rcWnd.top);
+			if(rect.PtInRect(point))
+			{
+				button = i;
+				break;
+			}
+		}
+	}
+	if(outRect)
+		*outRect = rect;
+	return button;
 }
 
 
@@ -1369,7 +1390,7 @@ void CViewSample::DrawNcButton(CDC *pDC, UINT nBtn)
 	COLORREF crFc = GetSysColor(COLOR_3DFACE);
 	COLORREF c1, c2;
 
-	if (GetNcButtonRect(nBtn, &rect))
+	if(GetNcButtonRect(nBtn, rect))
 	{
 		DWORD dwStyle = m_NcButtonState[nBtn];
 		COLORREF c3, c4;
@@ -1620,15 +1641,15 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				const SmpLength xLow = (x / 0x100) % 0x100;
 				const SmpLength xHigh = x / 0x10000;
 
-				const char cOffsetChar = sndFile.GetModSpecifications().GetEffectLetter(CMD_OFFSET);
-				const bool bHasHighOffset = (sndFile.GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM));
-				const char cHighOffsetChar = sndFile.GetModSpecifications().GetEffectLetter(static_cast<ModCommand::COMMAND>(sndFile.GetModSpecifications().HasCommand(CMD_S3MCMDEX) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN));
+				const char offsetChar = sndFile.GetModSpecifications().GetEffectLetter(CMD_OFFSET);
+				const bool hasHighOffset = (sndFile.GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM));
+				const char highOffsetChar = sndFile.GetModSpecifications().GetEffectLetter(static_cast<ModCommand::COMMAND>(sndFile.GetModSpecifications().HasCommand(CMD_S3MCMDEX) ? CMD_S3MCMDEX : CMD_XFINEPORTAUPDOWN));
 
 				CString s;
 				if(xHigh == 0)
-					s.Format(_T("Offset: %c%02X"), cOffsetChar, xLow);
-				else if(bHasHighOffset && xHigh < 0x10)
-					s.Format(_T("Offset: %c%02X, %cA%X"), cOffsetChar, xLow, cHighOffsetChar, xHigh);
+					s.Format(_T("Offset: %c%02X"), offsetChar, xLow);
+				else if(hasHighOffset && xHigh < 0x10)
+					s.Format(_T("Offset: %c%02X, %cA%X"), offsetChar, xLow, highOffsetChar, xHigh);
 				else
 					s = _T("Beyond offset range");
 				pMainFrm->SetInfoText(s);
@@ -1868,7 +1889,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			// "Trim" menu item is responding differently if there's no selection,
 			// but a loop present: "trim around loop point"! (jojo in topic 2258)
 			CString trimMenuText = _T("Tr&im");
-			bool bIsGrayed = ( (m_dwEndSel<=m_dwBeginSel) || (m_dwEndSel - m_dwBeginSel < MIN_TRIM_LENGTH)
+			bool isGrayed = ((m_dwEndSel <= m_dwBeginSel) || (m_dwEndSel - m_dwBeginSel < MIN_TRIM_LENGTH)
 								|| (m_dwEndSel - m_dwBeginSel == sample.nLength));
 
 			if ((m_dwBeginSel == m_dwEndSel) && (sample.nLoopStart < sample.nLoopEnd))
@@ -1879,10 +1900,10 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				if( (sample.nLoopEnd <= sample.nLength) &&
 					(sample.nLoopEnd - sample.nLoopStart >= MIN_TRIM_LENGTH) &&
 					(sample.nLoopEnd - sample.nLoopStart < sample.nLength) )
-					bIsGrayed = false;
+					isGrayed = false;
 			}
 
-			::AppendMenu(hMenu, MF_STRING | (bIsGrayed ? MF_GRAYED : 0), ID_SAMPLE_TRIM, ih->GetKeyTextFromCommand(kcSampleTrim, trimMenuText));
+			::AppendMenu(hMenu, MF_STRING | (isGrayed ? MF_GRAYED : 0), ID_SAMPLE_TRIM, ih->GetKeyTextFromCommand(kcSampleTrim, trimMenuText));
 			if((m_dwBeginSel == 0 && m_dwEndSel != 0) || (m_dwBeginSel < sample.nLength && m_dwEndSel == sample.nLength))
 			{
 				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_QUICKFADE, ih->GetKeyTextFromCommand(kcSampleQuickFade, _T("Quick &Fade")));
@@ -1905,35 +1926,20 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 
 void CViewSample::OnNcMouseMove(UINT nHitTest, CPoint point)
 {
-	CRect rect, rcWnd;
-	UINT nBtnSel = 0xFFFF;
-
-	GetWindowRect(&rcWnd);
-	for (UINT i=0; i<SMP_LEFTBAR_BUTTONS; i++)
-	{
-		if ((!(m_NcButtonState[i] & NCBTNS_DISABLED)) && (GetNcButtonRect(i, &rect)))
-		{
-			rect.OffsetRect(rcWnd.left, rcWnd.top);
-			if (rect.PtInRect(point))
-			{
-				nBtnSel = i;
-				break;
-			}
-		}
-	}
-	if (nBtnSel != m_nBtnMouseOver)
+	const auto button = GetNcButtonAtPoint(point);
+	if(button != m_nBtnMouseOver)
 	{
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm)
+		if(pMainFrm)
 		{
 			CString strText;
-			if ((nBtnSel < SMP_LEFTBAR_BUTTONS) && (cLeftBarButtons[nBtnSel] != ID_SEPARATOR))
+			if(button < SMP_LEFTBAR_BUTTONS && cLeftBarButtons[button] != ID_SEPARATOR)
 			{
-				strText.LoadString(cLeftBarButtons[nBtnSel]);
+				strText.LoadString(cLeftBarButtons[button]);
 			}
 			pMainFrm->SetHelpText(strText);
 		}
-		m_nBtnMouseOver = nBtnSel;
+		m_nBtnMouseOver = button;
 		UpdateNcButtonState();
 	}
 	CModScrollView::OnNcMouseMove(nHitTest, point);
@@ -2669,10 +2675,10 @@ void CViewSample::OnDropFiles(HDROP hDropInfo)
 }
 
 
-BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
+BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *lpDropInfo)
 {
 	CModDoc *pModDoc = GetDocument();
-	BOOL bCanDrop = FALSE, bUpdate;
+	bool canDrop = false;
 
 	if ((!lpDropInfo) || (!pModDoc)) return FALSE;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
@@ -2681,29 +2687,29 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 	case DRAGONDROP_SAMPLE:
 		if (lpDropInfo->pModDoc == pModDoc)
 		{
-			bCanDrop = ((lpDropInfo->dwDropItem)
-					 && (lpDropInfo->dwDropItem <= sndFile.GetNumSamples()));
+			canDrop = ((lpDropInfo->dwDropItem)
+			           && (lpDropInfo->dwDropItem <= sndFile.GetNumSamples()));
 		} else
 		{
-			bCanDrop = ((lpDropInfo->dwDropItem)
-					&& ((lpDropInfo->lDropParam) || (lpDropInfo->pModDoc)));
+			canDrop = ((lpDropInfo->dwDropItem)
+			           && ((lpDropInfo->lDropParam) || (lpDropInfo->pModDoc)));
 		}
 		break;
 
 	case DRAGONDROP_DLS:
-		bCanDrop = ((lpDropInfo->dwDropItem < CTrackApp::gpDLSBanks.size())
-				 && (CTrackApp::gpDLSBanks[lpDropInfo->dwDropItem]));
+		canDrop = ((lpDropInfo->dwDropItem < CTrackApp::gpDLSBanks.size())
+		           && (CTrackApp::gpDLSBanks[lpDropInfo->dwDropItem]));
 		break;
 
 	case DRAGONDROP_SOUNDFILE:
 	case DRAGONDROP_MIDIINSTR:
-		bCanDrop = !lpDropInfo->GetPath().empty();
+		canDrop = !lpDropInfo->GetPath().empty();
 		break;
 	}
-	if ((!bCanDrop) || (!bDoDrop)) return bCanDrop;
+	if (!canDrop || !doDrop) return canDrop;
 	// Do the drop
 	BeginWaitCursor();
-	bUpdate = FALSE;
+	bool update = false;
 	switch(lpDropInfo->dwDropType)
 	{
 	case DRAGONDROP_SAMPLE:
@@ -2736,15 +2742,15 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 					pDlsIns = dlsbank.FindInstrument(FALSE, 0xFFFF, lpDropInfo->dwDropItem, 60, &nIns);
 					if (pDlsIns) nRgn = dlsbank.GetRegionFromKey(nIns, 60);
 				}
-				bCanDrop = FALSE;
+				canDrop = FALSE;
 				if (pDlsIns)
 				{
 					CriticalSection cs;
 
 					pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
-					bCanDrop = dlsbank.ExtractSample(sndFile, m_nSample, nIns, nRgn);
+					canDrop = dlsbank.ExtractSample(sndFile, m_nSample, nIns, nRgn);
 				}
-				bUpdate = TRUE;
+				update = true;
 				break;
 			}
 		}
@@ -2770,13 +2776,13 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 			CriticalSection cs;
 
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
-			bCanDrop = pDLSBank->ExtractSample(sndFile, m_nSample, nIns, nRgn);
+			canDrop = pDLSBank->ExtractSample(sndFile, m_nSample, nIns, nRgn);
 
-			bUpdate = TRUE;
+			update = true;
 		}
 		break;
 	}
-	if (bUpdate)
+	if(update)
 	{
 		SetModified(SampleHint().Info().Data().Names(), true, false);
 	}
@@ -2788,7 +2794,7 @@ BOOL CViewSample::OnDragonDrop(BOOL bDoDrop, const DRAGONDROP *lpDropInfo)
 		SetFocus();
 	}
 	EndWaitCursor();
-	return bCanDrop;
+	return canDrop;
 }
 
 
@@ -3191,6 +3197,9 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSampleQuickFade:			PostCtrlMessage(IDC_SAMPLE_QUICKFADE); return wParam;
 		case kcSampleStereoSep:			PostCtrlMessage(IDC_SAMPLE_STEREOSEPARATION); return wParam;
 		case kcSampleSlice:				OnSampleSlice(); return wParam;
+		case kcSampleToggleDrawing:		OnDrawingToggle(); return wParam;
+		case kcSampleResize:			OnAddSilence(); return wParam;
+		case kcSampleGrid:				OnChangeGridSize(); return wParam;
 
 		// Those don't seem to work.
 		case kcNoteOff:			PlayNote(NOTE_KEYOFF); return wParam;
@@ -3449,6 +3458,49 @@ void CViewSample::OnUpdateRedo(CCmdUI *pCmdUI)
 		pCmdUI->Enable(pModDoc->GetSampleUndo().CanRedo(m_nSample));
 		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo, _T("Redo ") + CString(pModDoc->GetSampleUndo().GetRedoName(m_nSample))));
 	}
+}
+
+
+INT_PTR CViewSample::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
+{
+	CRect ncRect;
+	ClientToScreen(&point);
+	const auto ncButton = GetNcButtonAtPoint(point, &ncRect);
+	if(ncButton == uint32_max)
+		return CModScrollView::OnToolHitTest(point, pTI);
+
+	auto buttonID = cLeftBarButtons[ncButton];
+	ScreenToClient(&ncRect);
+
+	pTI->hwnd = m_hWnd;
+	pTI->uId = buttonID;
+	pTI->rect = ncRect;
+	CString text;
+	text.LoadString(buttonID);
+
+	CommandID cmd = kcNull;
+	switch(buttonID)
+	{
+	case ID_SAMPLE_ZOOMUP: cmd = kcSampleZoomUp; break;
+	case ID_SAMPLE_ZOOMDOWN: cmd = kcSampleZoomDown; break;
+	case ID_SAMPLE_DRAW: cmd = kcSampleToggleDrawing; break;
+	case ID_SAMPLE_ADDSILENCE: cmd = kcSampleResize; break;
+	case ID_SAMPLE_GRID: cmd = kcSampleGrid; break;
+	}
+	if(cmd != kcNull)
+	{
+		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
+		if(!keyText.IsEmpty())
+			text += mpt::cformat(_T(" (%1)"))(keyText);
+	}
+
+	// MFC will free() the text
+	auto size = text.GetLength() + 1;
+	TCHAR *textP = static_cast<TCHAR *>(calloc(size, sizeof(TCHAR)));
+	std::copy(text.GetString(), text.GetString() + size, textP);
+	pTI->lpszText = textP;
+
+	return buttonID;
 }
 
 
