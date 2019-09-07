@@ -61,6 +61,7 @@
 // this will be available everywhere
 
 #include "../common/mptBaseMacros.h"
+// <array>
 // <iterator>
 // <type_traits>
 // <cstddef>

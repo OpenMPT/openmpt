@@ -14,6 +14,7 @@
 
 
 
+#include <array>
 #include <iterator>
 #include <type_traits>
 
@@ -85,7 +86,7 @@ struct is_stdarray<std::array<T, N>> : std::true_type {};
 template <typename T>
 constexpr std::size_t extent() noexcept
 {
-	using Tarray = typename std::remove_cv<std::remove_reference<T>::type>::type;
+	using Tarray = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
 	static_assert(std::is_array<Tarray>::value || mpt::is_stdarray<Tarray>::value);
 	if constexpr(mpt::is_stdarray<Tarray>::value)
 	{
