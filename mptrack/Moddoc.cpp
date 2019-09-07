@@ -626,7 +626,8 @@ void CModDoc::PostMessageToAllViews(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	POSITION pos = GetFirstViewPosition();
 	while(pos != nullptr)
 	{
-		if(CView *pView = GetNextView(pos); pView != nullptr)
+		CView *pView = GetNextView(pos); 
+		if(pView != nullptr)
 			pView->PostMessage(uMsg, wParam, lParam);
 	}
 }
@@ -634,7 +635,8 @@ void CModDoc::PostMessageToAllViews(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void CModDoc::SendMessageToActiveView(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if(auto *lastActiveFrame = CChildFrame::LastActiveFrame(); lastActiveFrame != nullptr)
+	auto *lastActiveFrame = CChildFrame::LastActiveFrame();
+	if(lastActiveFrame != nullptr)
 	{
 		lastActiveFrame->SendMessageToDescendants(uMsg, wParam, lParam);
 	}
