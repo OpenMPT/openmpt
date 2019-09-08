@@ -382,8 +382,8 @@ public:
 	void SetXInfoText(LPCTSTR lpszText);
 	void SetHelpText(LPCTSTR lpszText);
 	UINT GetBaseOctave() const;
-	CModDoc *GetActiveDoc();
-	CView *GetActiveView();
+	CModDoc *GetActiveDoc() const;
+	CView *GetActiveView() const;
 	void OnDocumentCreated(CModDoc *pModDoc);
 	void OnDocumentClosed(CModDoc *pModDoc);
 	void UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint=NULL);

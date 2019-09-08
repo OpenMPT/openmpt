@@ -2165,7 +2165,7 @@ void CMainFrame::OnTimerGUI()
 }
 
 
-CModDoc *CMainFrame::GetActiveDoc()
+CModDoc *CMainFrame::GetActiveDoc() const
 {
 	CMDIChildWnd *pMDIActive = MDIGetActive();
 	if (pMDIActive)
@@ -2176,7 +2176,7 @@ CModDoc *CMainFrame::GetActiveDoc()
 }
 
 
-CView *CMainFrame::GetActiveView()
+CView *CMainFrame::GetActiveView() const
 {
 	CMDIChildWnd *pMDIActive = MDIGetActive();
 	if (pMDIActive)

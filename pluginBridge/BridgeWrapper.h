@@ -3,7 +3,7 @@
  * ---------------
  * Purpose: VST plugin bridge wrapper (host side)
  * Notes  : (currently none)
- * Authors: Johannes Schultz (OpenMPT Devs)
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -92,29 +92,27 @@ public:
 
 #endif // MPT_WITH_WINDOWS10
 
-class BridgeWrapper : protected BridgeCommon
+class BridgeWrapper : private BridgeCommon
 {
 protected:
-	Event sigAutomation;
-	MappedMemory oldProcessMem;
+	Event m_sigAutomation;
+	MappedMemory m_oldProcessMem;
 
 	// Helper struct for keeping track of auxiliary shared memory
 	struct AuxMem
 	{
-		LONG used;
-		uint32 size;
+		std::atomic<bool> used = false;
+		std::atomic<uint32> size = 0;
 		MappedMemory memory;
 		wchar_t name[64];
-
-		AuxMem() : used(0), size(0) { }
 	};
-	AuxMem auxMems[SharedMemLayout::queueSize];
+	AuxMem m_auxMems[MsgStack::kStackSize];
 	
-	std::vector<char> cachedProgNames;
-	std::vector<ParameterInfo> cachedParamInfo;
-	int32 cachedProgNameStart, cachedParamInfoStart;
+	std::vector<char> m_cachedProgNames;
+	std::vector<ParameterInfo> m_cachedParamInfo;
+	int32 m_cachedProgNameStart = 0, m_cachedParamInfoStart = 0;
 	
-	bool isSettingProgram;
+	bool m_isSettingProgram = false;
 
 	Vst::ERect editRect;
 	Vst::VstSpeakerArrangement speakers[2];
@@ -157,7 +155,7 @@ public:
 	static Vst::AEffect *Create(const VSTPluginLib &plugin);
 
 protected:
-	BridgeWrapper() : isSettingProgram(false) { }
+	BridgeWrapper() = default;
 	~BridgeWrapper();
 
 	bool Init(const mpt::PathString &pluginPath, BridgeWrapper *sharedInstace);

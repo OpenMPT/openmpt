@@ -3,7 +3,7 @@
  * --------
  * Purpose: VST plugin bridge (plugin side)
  * Notes  : (currently none)
- * Authors: Johannes Schultz (OpenMPT Devs)
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -11,48 +11,66 @@
 #pragma once
 
 #include "BuildSettings.h"
+#include <atomic>
 
-#include <vector>
 #include "BridgeCommon.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
-class PluginBridge : protected BridgeCommon
+// This counter is not part of class PluginBridge to avoid triggering the quit signal before all heap memory allocated by members of class PluginBridge has been freed.
+class BridgeInstanceCounter
 {
 public:
-	static Event sigQuit;
-	static bool fullMemDump;
+	BridgeInstanceCounter();
+	~BridgeInstanceCounter();
+
+	static Event m_sigQuit;
+
+private:
+	static std::atomic<uint32> m_instanceCount;
+};
+
+
+class PluginBridge : private BridgeInstanceCounter, private BridgeCommon
+{
+public:
+	static bool m_fullMemDump;
 
 protected:
-	static LONG instanceCount;
-	static PluginBridge *latestInstance;
-	static WNDCLASSEX windowClass;
+	static PluginBridge *m_latestInstance;
+	static WNDCLASSEX m_windowClass;
+	thread_local static int m_inMessageStack;  // To determine if a message is a reply to another message, or if we need to send to the host's dedicated message thread
 
 	// Plugin
-	Vst::AEffect *nativeEffect = nullptr;
-	HMODULE library = nullptr;
-	HWND window = nullptr, windowParent = nullptr;
-	int windowWidth = 0, windowHeight = 0;
-	LONG isProcessing = 0;
+	Vst::AEffect *m_nativeEffect = nullptr;
+	HMODULE m_library = nullptr;
+	HWND m_window = nullptr, m_windowParent = nullptr;
+	int m_windowWidth = 0, m_windowHeight = 0;
+	enum ProcessMode
+	{
+		kNotProcessing,
+		kAboutToProcess,
+		kProcessing,
+	};
+	std::atomic<ProcessMode> m_isProcessing = kNotProcessing;
 
 	// Static memory for host-to-plugin pointers
 	union
 	{
 		Vst::VstSpeakerArrangement speakerArrangement;
 		char name[256];
-	} host2PlugMem;
-	std::vector<char> eventCache;	// Cached VST (MIDI) events
+	} m_host2PlugMem;
+	std::vector<char> m_eventCache;  // Cached VST (MIDI) events
 
 	// Pointers to sample data
-	std::vector<void *> samplePointers;
-	uint32 mixBufSize = 0;
+	std::vector<void *> m_sampleBuffers;
+	uint32 m_mixBufSize = 0;
 
-	bool needIdle = false;	// Plugin needs idle time
-	bool closeInstance = false;
+	bool m_needIdle = false;  // Plugin needs idle time
+	bool m_closeInstance = false;
 
 public:
 	PluginBridge(const wchar_t *memName, HANDLE otherProcess);
-	~PluginBridge();
 	static void InitializeStaticVariables();
 
 protected:
@@ -81,7 +99,7 @@ protected:
 	template<typename buf_t>
 	int32 BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPointers));
 
-	void RenderThread();
+	void AudioThread();
 
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 

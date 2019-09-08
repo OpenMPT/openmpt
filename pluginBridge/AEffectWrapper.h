@@ -22,33 +22,33 @@ OPENMPT_NAMESPACE_BEGIN
 template<typename ptr_t>
 struct AEffectProto
 {
-	int32_t magic;
+	int32 magic;
 	ptr_t dispatcher;
 	ptr_t process;
 	ptr_t setParameter;
 	ptr_t getParameter;
 
-	int32_t numPrograms;
-	int32_t numParams;
-	int32_t numInputs;
-	int32_t numOutputs;
+	int32 numPrograms;
+	int32 numParams;
+	int32 numInputs;
+	int32 numOutputs;
 
-	int32_t flags;
+	int32 flags;
 	
 	ptr_t resvd1;
 	ptr_t resvd2;
 	
-	int32_t initialDelay;
+	int32 initialDelay;
 	
-	int32_t realQualities;
-	int32_t offQualities;
+	int32 realQualities;
+	int32 offQualities;
 	float ioRatio;
 
 	ptr_t object;
 	ptr_t user;
 
-	int32_t uniqueID;
-	int32_t version;
+	int32 uniqueID;
+	int32 version;
 
 	ptr_t processReplacing;
 	ptr_t processDoubleReplacing;
@@ -77,25 +77,21 @@ struct AEffectProto
 		version = in.version;
 
 		if(in.processReplacing == nullptr)
-		{
 			flags &= ~Vst::effFlagsCanReplacing;
-		}
 		if(in.processDoubleReplacing == nullptr)
-		{
 			flags &= ~Vst::effFlagsCanDoubleReplacing;
-		}
 	}
 
 };
 
-using AEffect32 = AEffectProto<int32_t>;
-using AEffect64 = AEffectProto<int64_t>;
+using AEffect32 = AEffectProto<int32>;
+using AEffect64 = AEffectProto<int64>;
 
 #pragma pack(pop)
 
 
 // Translate a VSTEvents struct to bridge format (placed in data vector)
-static void TranslateVSTEventsToBridge(std::vector<char> &data, const Vst::VstEvents *events, int32_t targetPtrSize)
+static void TranslateVSTEventsToBridge(std::vector<char> &data, const Vst::VstEvents *events, int32 targetPtrSize)
 {
 	data.reserve(data.size() + sizeof(int32) + sizeof(Vst::VstEvent) * events->numEvents);
 	// Write number of events
@@ -132,20 +128,18 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const Vst::VstEv
 // Translate bridge format (void *ptr) back to VSTEvents struct (placed in data vector)
 static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 {
-	const int32_t numEvents = *static_cast<const int32_t *>(ptr);
+	const int32 numEvents = *static_cast<const int32 *>(ptr);
 	
 	// First element is really a int32, but in case of 64-bit builds, the next field gets aligned anyway.
 	const size_t headerSize = sizeof(intptr_t) + sizeof(intptr_t) + sizeof(Vst::VstEvent *) * numEvents;
 	data.reserve(headerSize + sizeof(Vst::VstEvent) * numEvents);
 	data.resize(headerSize, 0);
 	if(numEvents == 0)
-	{
 		return;
-	}
 
 	// Copy over event data (this is required for dumb SynthEdit plugins that don't copy over the event data during effProcessEvents)
-	char *offset = static_cast<char *>(ptr) + sizeof(int32_t);
-	for(int32_t i = 0; i < numEvents; i++)
+	char *offset = static_cast<char *>(ptr) + sizeof(int32);
+	for(int32 i = 0; i < numEvents; i++)
 	{
 		Vst::VstEvent *event = reinterpret_cast<Vst::VstEvent *>(offset);
 		data.insert(data.end(), offset, offset + event->byteSize);
@@ -164,7 +158,7 @@ static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 	auto events = reinterpret_cast<Vst::VstEvents *>(data.data());
 	events->numEvents = numEvents;
 	offset = data.data() + headerSize;
-	for(int32_t i = 0; i < numEvents; i++)
+	for(int32 i = 0; i < numEvents; i++)
 	{
 		events->events[i] = reinterpret_cast<Vst::VstEvent *>(offset);
 		offset += events->events[i]->byteSize;
