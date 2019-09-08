@@ -1407,6 +1407,11 @@ LRESULT CALLBACK PluginBridge::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, L
 		}
 		break;
 	}
+
+	case WM_ENABLE:
+		// If the plugin tries to disable us (e.g. by showing a modal dialog), pass it on to the main window
+		EnableWindow(GetAncestor(that->m_windowParent, GA_ROOTOWNER), wParam ? TRUE : FALSE);
+		break;
 	}
 
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
