@@ -183,7 +183,16 @@ void PluginBridge::MessageThread()
 		{
 			SetContext(m_sharedMem->guiThreadMessages, m_sigToHostGui, m_sigToBridgeGui);
 			ParseNextMessage();
-		} else if(result == WAIT_TIMEOUT && m_nativeEffect)
+		}
+		// Normally we would only need this block if there's an editor window, but the 4klang VSTi creates
+		// its custom window in the message thread, and it will freeze if we don't dispatch messages here...
+		MSG msg;
+		while(::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		{
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+		}
+		if(result == WAIT_TIMEOUT && m_nativeEffect)
 		{
 			if(m_needIdle)
 			{
@@ -194,14 +203,6 @@ void PluginBridge::MessageThread()
 			{
 				Dispatch(effEditIdle, 0, 0, nullptr, 0.0f);
 			}
-		}
-		// Normally we would only need this block if there's an editor window, but the 4klang VSTi creates
-		// its custom window in the message thread, and it will freeze if we don't dispatch messages here...
-		MSG msg;
-		while(::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-		{
-			::TranslateMessage(&msg);
-			::DispatchMessage(&msg);
 		}
 	} while(result != WAIT_OBJECT_0 + 1 && result != WAIT_FAILED && !m_closeInstance);
 
