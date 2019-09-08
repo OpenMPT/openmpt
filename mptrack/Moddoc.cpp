@@ -2676,7 +2676,7 @@ CHANNELINDEX CModDoc::FindAvailableChannel() const
 
 void CModDoc::RecordParamChange(PLUGINDEX plugSlot, PlugParamIndex paramIndex)
 {
-	SendMessageToActiveView(WM_MOD_RECORDPARAM, plugSlot, paramIndex);
+	::PostMessage(m_hWndFollow, WM_MOD_RECORDPARAM, plugSlot, paramIndex);
 }
 
 
