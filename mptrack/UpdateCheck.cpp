@@ -22,6 +22,7 @@
 #include "HTTP.h"
 #include "../misc/JSON.h"
 #include "dlg_misc.h"
+#include "..//sounddev/SoundDeviceManager.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -96,7 +97,7 @@ mpt::ustring CUpdateCheck::GetStatisticsUserInformation(bool shortText)
 			"When checking for updates, OpenMPT can additionally collect basic statistical information."
 			" A randomized user ID is sent alongside the update check. This ID and the transmitted statistics cannot be linked to you personally in any way."
 			" OpenMPT will use this information to gather usage statistics and to plan system support for future OpenMPT versions."
-			"\nOpenMPT would collect the following statistical data points: OpenMPT version, Windows version, type of CPU, amount of RAM, configured update check frequency of OpenMPT.");
+			"\nOpenMPT would collect the following statistical data points: OpenMPT version, Windows version, type of CPU, amount of RAM, sound device settings, configured update check frequency of OpenMPT.");
 	}
 }
 
@@ -277,6 +278,19 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 		}
 		j["System"]["Windows"]["Wine"]["HostSysName"] = v.RawHostSysName();
 	}
+	const SoundDevice::Identifier deviceIdentifier = TrackerSettings::Instance().GetSoundDeviceIdentifier();
+	const SoundDevice::Info deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(deviceIdentifier);
+	const SoundDevice::Settings deviceSettings = TrackerSettings::Instance().GetSoundDeviceSettings(deviceIdentifier);
+	j["OpenMPT"]["SoundDevice"]["Type"] = deviceInfo.type;
+	j["OpenMPT"]["SoundDevice"]["Name"] = deviceInfo.name;
+	j["OpenMPT"]["SoundDevice"]["Settings"]["Samplerate"] = deviceSettings.Samplerate;
+	j["OpenMPT"]["SoundDevice"]["Settings"]["Latency"] = deviceSettings.Latency;
+	j["OpenMPT"]["SoundDevice"]["Settings"]["UpdateInterval"] = deviceSettings.UpdateInterval;
+	j["OpenMPT"]["SoundDevice"]["Settings"]["Channels"] = deviceSettings.Channels.GetNumHostChannels();
+	j["OpenMPT"]["SoundDevice"]["Settings"]["BoostThreadPriority"] = deviceSettings.BoostThreadPriority;
+	j["OpenMPT"]["SoundDevice"]["Settings"]["ExclusiveMode"] = deviceSettings.ExclusiveMode;
+	j["OpenMPT"]["SoundDevice"]["Settings"]["UseHardwareTiming"] = deviceSettings.UseHardwareTiming;
+	j["OpenMPT"]["SoundDevice"]["Settings"]["KeepDeviceRunning"] = deviceSettings.KeepDeviceRunning;
 	#ifdef ENABLE_ASM
 		j["OpenMPT"]["cpuid"] = ((GetRealProcSupport() & PROCSUPPORT_CPUID) != 0);
 		j["System"]["Processor"]["Vendor"] = std::string(mpt::String::ReadAutoBuf(ProcVendorID));
