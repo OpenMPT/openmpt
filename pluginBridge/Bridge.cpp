@@ -933,10 +933,24 @@ intptr_t PluginBridge::DispatchToHost(VstOpcodeToHost opcode, int32 index, intpt
 		TranslateVSTEventsToBridge(dispatchData, static_cast<VstEvents *>(ptr), m_otherPtrSize);
 		ptrOut = dispatchData.size() - sizeof(DispatchMsg);
 		// If we are currently processing, try to return the events as part of the process call
-		if(processing == kProcessing && m_eventMem.Size() >= static_cast<size_t>(ptrOut))
+		if(processing == kProcessing && m_eventMem.Good())
 		{
-			std::memcpy(m_eventMem.Data(), dispatchData.data() + sizeof(DispatchMsg), static_cast<size_t>(ptrOut));
-			return 1;
+			auto *memBytes = m_eventMem.Data<char>();
+			auto *eventBytes = m_eventMem.Data<char>() + sizeof(int32);
+			int32 &memNumEvents = *m_eventMem.Data<int32>();
+			const auto memEventsSize = BridgeVSTEventsSize(memBytes);
+			if(m_eventMem.Size() >= static_cast<size_t>(ptrOut) + memEventsSize)
+			{
+				// Enough shared memory for possibly pre-existing and new events; add new events at the end
+				memNumEvents += static_cast<VstEvents *>(ptr)->numEvents;
+				std::memcpy(eventBytes + memEventsSize, dispatchData.data() + sizeof(DispatchMsg) + sizeof(int32), static_cast<size_t>(ptrOut) - sizeof(int32));
+				return 1;
+			} else if(memNumEvents)
+			{
+				// Not enough memory; merge what we have and what we want to add so that it arrives in the correct order
+				dispatchData.insert(dispatchData.begin() + sizeof(DispatchMsg) + sizeof(int32), eventBytes, eventBytes + memEventsSize);
+				ptrOut += memEventsSize;
+			}
 		}
 		break;
 

@@ -108,7 +108,7 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const Vst::VstEv
 			PushToVector(data, sysExEvent, 5 * sizeof(int32));            // Exclude the three pointers at the end for now
 			if(targetPtrSize > sizeof(int32))                             // Padding for 64-bit required?
 				data.insert(data.end(), targetPtrSize - sizeof(int32), 0);
-			data.resize(data.size() + 3 * targetPtrSize);  // Make space for pointer + two reserved intptr_ts
+			data.insert(data.end(), 3 * targetPtrSize, 0);  // Make space for pointer + two reserved intptr_ts
 			// Embed SysEx dump as well...
 			auto sysex = reinterpret_cast<const char *>(sysExEvent.sysexDump);
 			data.insert(data.end(), sysex, sysex + sysExEvent.dumpBytes);
@@ -171,6 +171,24 @@ static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 			offset += sysExEvent->dumpBytes;
 		}
 	}
+}
+
+
+// Calculate the size total of the VSTEvents (without header) in bridge format
+static size_t BridgeVSTEventsSize(const void *ptr)
+{
+	const int32 numEvents = *static_cast<const int32 *>(ptr);
+	size_t size = 0;
+	for(int32 i = 0; i < numEvents; i++)
+	{
+		const auto event = reinterpret_cast<const Vst::VstEvent *>(static_cast<const char *>(ptr) + sizeof(int32) + size);
+		size += event->byteSize;
+		if(event->type == Vst::kVstSysExType)
+		{
+			size += static_cast<const Vst::VstMidiSysexEvent *>(event)->dumpBytes;
+		}
+	}
+	return size;
 }
 
 
