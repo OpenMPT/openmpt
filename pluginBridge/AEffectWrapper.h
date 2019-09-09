@@ -97,7 +97,7 @@ typedef AEffectProto<int64_t> AEffect64;
 // Translate a VSTEvents struct to bridge format (placed in data vector)
 static void TranslateVSTEventsToBridge(std::vector<char> &data, const Vst::VstEvents *events, int32_t targetPtrSize)
 {
-	data.reserve(data.size() + sizeof(int32) + sizeof(Vst::VstEvent) * events->numEvents);
+	data.reserve(data.size() + sizeof(int32) + sizeof(Vst::VstMidiEvent) * events->numEvents);
 	// Write number of events
 	PushToVector(data, events->numEvents);
 	// Write events
@@ -108,9 +108,11 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const Vst::VstEv
 			// This is going to be messy since the VstMidiSysexEvent event has a different size than other events on 64-bit platforms.
 			// We are going to write the event using the target process pointer size.
 			auto sysExEvent = *static_cast<const Vst::VstMidiSysexEvent *>(events->events[i]);
-			sysExEvent.byteSize = 5 * sizeof(int32) + 3 * targetPtrSize;
-			PushToVector(data, sysExEvent, 5 * sizeof(int32));	// Exclude the three pointers at the end for now
-			data.resize(data.size() + 3 * targetPtrSize);		// Make space for pointer + two reserved intptr_ts
+			sysExEvent.byteSize = 4 * sizeof(int32) + 4 * targetPtrSize;  // It's 5 int32s and 3 pointers but that means that on 64-bit platforms, the fifth int32 is padded for alignment.
+			PushToVector(data, sysExEvent, 5 * sizeof(int32));            // Exclude the three pointers at the end for now
+			if(targetPtrSize > sizeof(int32))                             // Padding for 64-bit required?
+				data.insert(data.end(), targetPtrSize - sizeof(int32), 0);
+			data.resize(data.size() + 3 * targetPtrSize);  // Make space for pointer + two reserved intptr_ts
 			// Embed SysEx dump as well...
 			auto sysex = reinterpret_cast<const char *>(sysExEvent.sysexDump);
 			data.insert(data.end(), sysex, sysex + sysExEvent.dumpBytes);
