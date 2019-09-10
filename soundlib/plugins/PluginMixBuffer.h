@@ -29,12 +29,19 @@ class PluginMixBuffer
 
 private:
 
+#if defined(MPT_ENABLE_ALIGNED_ALLOC)
 	static constexpr std::align_val_t alignment = std::align_val_t{16};
+#endif
 
 protected:
 
+#if defined(MPT_ENABLE_ALIGNED_ALLOC)
 	std::vector<mpt::aligned_array<buffer_t, bufferSize, alignment>> inputs;
 	std::vector<mpt::aligned_array<buffer_t, bufferSize, alignment>> outputs;
+#else
+	std::vector<std::array<buffer_t, bufferSize>> inputs;
+	std::vector<std::array<buffer_t, bufferSize>> outputs;
+#endif
 	std::vector<buffer_t*> inputsarray;
 	std::vector<buffer_t*> outputsarray;
 
@@ -71,12 +78,12 @@ public:
 
 		for(uint32 i = 0; i < numInputs; i++)
 		{
-			inputsarray[i] = inputs[i].data;
+			inputsarray[i] = inputs[i].data();
 		}
 
 		for(uint32 i = 0; i < numOutputs; i++)
 		{
-			outputsarray[i] = outputs[i].data;
+			outputsarray[i] = outputs[i].data();
 		}
 
 		return true;
@@ -88,7 +95,7 @@ public:
 		MPT_ASSERT(numSamples <= bufferSize);
 		for(size_t i = 0; i < inputs.size(); i++)
 		{
-			std::fill(inputs[i].data, inputs[i].data + numSamples, buffer_t{0});
+			std::fill(inputs[i].data(), inputs[i].data() + numSamples, buffer_t{0});
 		}
 	}
 
@@ -98,7 +105,7 @@ public:
 		MPT_ASSERT(numSamples <= bufferSize);
 		for(size_t i = 0; i < outputs.size(); i++)
 		{
-			std::fill(outputs[i].data, outputs[i].data + numSamples, buffer_t{0});
+			std::fill(outputs[i].data(), outputs[i].data() + numSamples, buffer_t{0});
 		}
 	}
 
@@ -108,10 +115,10 @@ public:
 	}
 
 	// Return pointer to a given input or output buffer
-	const buffer_t *GetInputBuffer(uint32 index) const { return inputs[index].data; }
-	const buffer_t *GetOutputBuffer(uint32 index) const { return outputs[index].data; }
-	buffer_t *GetInputBuffer(uint32 index) { return inputs[index].data; }
-	buffer_t *GetOutputBuffer(uint32 index) { return outputs[index].data; }
+	const buffer_t *GetInputBuffer(uint32 index) const { return inputs[index].data(); }
+	const buffer_t *GetOutputBuffer(uint32 index) const { return outputs[index].data(); }
+	buffer_t *GetInputBuffer(uint32 index) { return inputs[index].data(); }
+	buffer_t *GetOutputBuffer(uint32 index) { return outputs[index].data(); }
 
 	// Return pointer array to all input or output buffers
 	buffer_t **GetInputBufferArray() { return inputs.empty() ? nullptr : inputsarray.data(); }

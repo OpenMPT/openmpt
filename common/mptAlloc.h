@@ -105,7 +105,15 @@ struct alignas(static_cast<std::size_t>(alignment)) aligned_array
 {
 	static_assert(static_cast<std::size_t>(alignment) >= alignof(T));
 	static_assert(((count * sizeof(T)) % static_cast<std::size_t>(alignment)) == 0);
-	T data[count];
+	T m_data[count];
+	constexpr const T* data() const noexcept
+	{
+		return m_data;
+	}
+	constexpr T* data() noexcept
+	{
+		return m_data;
+	}
 };
 
 
