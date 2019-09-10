@@ -18,6 +18,7 @@
 #include "mptMemory.h"
 #include "mptSpan.h"
 
+#include <array>
 #include <memory>
 #include <new>
 #include <vector>
@@ -102,19 +103,15 @@ MPT_NOINLINE T* launder(T* p) noexcept
 
 template <typename T, std::size_t count, std::align_val_t alignment>
 struct alignas(static_cast<std::size_t>(alignment)) aligned_array
+	: std::array<T, count>
 {
 	static_assert(static_cast<std::size_t>(alignment) >= alignof(T));
 	static_assert(((count * sizeof(T)) % static_cast<std::size_t>(alignment)) == 0);
-	T m_data[count];
-	constexpr const T* data() const noexcept
-	{
-		return m_data;
-	}
-	constexpr T* data() noexcept
-	{
-		return m_data;
-	}
+	static_assert(sizeof(std::array<T, count>) == (sizeof(T) * count));
 };
+
+static_assert(sizeof(mpt::aligned_array<float, 4, std::align_val_t{sizeof(float) * 4}>) == sizeof(std::array<float, 4>));
+
 
 
 

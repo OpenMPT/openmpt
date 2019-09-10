@@ -105,6 +105,7 @@
 // "mptBaseMacros.h"
 // "mptMemory.h"
 // "mptSpan.h"
+// <array>
 // <memory>
 // <new>
 // <vector>

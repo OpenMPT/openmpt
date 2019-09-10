@@ -13,6 +13,7 @@
 #include "BuildSettings.h"
 
 #include <algorithm>
+#include <array>
 
 #include "../../common/mptAlloc.h"
 
@@ -31,6 +32,7 @@ private:
 
 #if defined(MPT_ENABLE_ALIGNED_ALLOC)
 	static constexpr std::align_val_t alignment = std::align_val_t{16};
+	static_assert(sizeof(mpt::aligned_array<buffer_t, bufferSize, alignment>) == sizeof(std::array<buffer_t, bufferSize>));
 #endif
 
 protected:
