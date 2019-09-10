@@ -12,6 +12,8 @@
 
 #include "BuildSettings.h"
 
+#include <algorithm>
+
 #include "../../common/mptAlloc.h"
 
 
@@ -24,27 +26,17 @@ OPENMPT_NAMESPACE_BEGIN
 template<typename buffer_t, uint32 bufferSize>
 class PluginMixBuffer
 {
+
+private:
+
+	static constexpr std::align_val_t alignment = std::align_val_t{16};
+
 protected:
 
-	std::vector<buffer_t *> inputs;                   // Pointers to input buffers
-	std::vector<buffer_t *> outputs;                  // Pointers to output buffers
-#if defined(MPT_ENABLE_ALIGNED_ALLOC)
-	mpt::aligned_buffer<buffer_t, 16> alignedBuffer;  // Aligned buffer pointed into
-#else
-	std::vector<buffer_t> alignedBuffer;
-#endif
-
-	// Return pointer to an aligned buffer
-	const buffer_t *GetBuffer(size_t index) const
-	{
-		MPT_ASSERT(index < inputs.size() + outputs.size());
-		return &alignedBuffer[bufferSize * index];
-	}
-	buffer_t *GetBuffer(size_t index)
-	{
-		MPT_ASSERT(index < inputs.size() + outputs.size());
-		return &alignedBuffer[bufferSize * index];
-	}
+	std::vector<mpt::aligned_array<buffer_t, bufferSize, alignment>> inputs;
+	std::vector<mpt::aligned_array<buffer_t, bufferSize, alignment>> outputs;
+	std::vector<buffer_t*> inputsarray;
+	std::vector<buffer_t*> outputsarray;
 
 public:
 
@@ -61,14 +53,8 @@ public:
 		{
 			inputs.resize(numInputs);
 			outputs.resize(numOutputs);
-
-			// Create inputs + outputs buffers
-			#if defined(MPT_ENABLE_ALIGNED_ALLOC)
-				alignedBuffer.destructive_resize(bufferSize * (numInputs + numOutputs));
-			#else
-				alignedBuffer.resize(bufferSize * (numInputs + numOutputs));
-			#endif
-
+			inputsarray.resize(numInputs);
+			outputsarray.resize(numOutputs);
 		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
 			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
@@ -76,22 +62,21 @@ public:
 			inputs.shrink_to_fit();
 			outputs.clear();
 			outputs.shrink_to_fit();
-			#if defined(MPT_ENABLE_ALIGNED_ALLOC)
-				alignedBuffer.destructive_resize(0);
-			#else
-				alignedBuffer.resize(0);
-			#endif
+			inputsarray.clear();
+			inputsarray.shrink_to_fit();
+			outputsarray.clear();
+			outputsarray.shrink_to_fit();
 			return false;
 		}
 
 		for(uint32 i = 0; i < numInputs; i++)
 		{
-			inputs[i] = GetInputBuffer(i);
+			inputsarray[i] = inputs[i].data;
 		}
 
 		for(uint32 i = 0; i < numOutputs; i++)
 		{
-			outputs[i] = GetOutputBuffer(i);
+			outputsarray[i] = outputs[i].data;
 		}
 
 		return true;
@@ -103,7 +88,7 @@ public:
 		MPT_ASSERT(numSamples <= bufferSize);
 		for(size_t i = 0; i < inputs.size(); i++)
 		{
-			std::memset(inputs[i], 0, numSamples * sizeof(buffer_t));
+			std::fill(inputs[i].data, inputs[i].data + numSamples, buffer_t{0});
 		}
 	}
 
@@ -113,7 +98,7 @@ public:
 		MPT_ASSERT(numSamples <= bufferSize);
 		for(size_t i = 0; i < outputs.size(); i++)
 		{
-			std::memset(outputs[i], 0, numSamples * sizeof(buffer_t));
+			std::fill(outputs[i].data, outputs[i].data + numSamples, buffer_t{0});
 		}
 	}
 
@@ -123,16 +108,17 @@ public:
 	}
 
 	// Return pointer to a given input or output buffer
-	const buffer_t *GetInputBuffer(uint32 index) const { return GetBuffer(index); }
-	const buffer_t *GetOutputBuffer(uint32 index) const { return GetBuffer(inputs.size() + index); }
-	buffer_t *GetInputBuffer(uint32 index) { return GetBuffer(index); }
-	buffer_t *GetOutputBuffer(uint32 index) { return GetBuffer(inputs.size() + index); }
+	const buffer_t *GetInputBuffer(uint32 index) const { return inputs[index].data; }
+	const buffer_t *GetOutputBuffer(uint32 index) const { return outputs[index].data; }
+	buffer_t *GetInputBuffer(uint32 index) { return inputs[index].data; }
+	buffer_t *GetOutputBuffer(uint32 index) { return outputs[index].data; }
 
 	// Return pointer array to all input or output buffers
-	buffer_t **GetInputBufferArray() { return inputs.empty() ? nullptr : inputs.data(); }
-	buffer_t **GetOutputBufferArray() { return outputs.empty() ? nullptr : outputs.data(); }
+	buffer_t **GetInputBufferArray() { return inputs.empty() ? nullptr : inputsarray.data(); }
+	buffer_t **GetOutputBufferArray() { return outputs.empty() ? nullptr : outputsarray.data(); }
 
-	bool Ok() const { return alignedBuffer.size() > 0; }
+	bool Ok() const { return (inputs.size() + outputs.size()) > 0; }
+
 };
 
 

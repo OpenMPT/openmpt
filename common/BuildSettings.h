@@ -709,14 +709,6 @@
 
 // standard library quirks
 
-#if (MPT_COMPILER_GCC || MPT_COMPILER_CLANG)
-// we need to detect the standard library via macro __GLIBCXX__
-#include <vector>
-#endif
-#if MPT_COMPILER_MSVC || MPT_GCC_BEFORE(8,1,0) || (MPT_COMPILER_GCC && defined(__GLIBCXX__) && (defined(__MINGW32__) || defined(__MINGW64__))) || (MPT_COMPILER_CLANG && defined(__GLIBCXX__)) || (MPT_COMPILER_CLANG && MPT_OS_MACOSX_OR_IOS) || MPT_OS_OPENBSD || MPT_OS_EMSCRIPTEN || MPT_OS_HAIKU || (defined(__clang__) && defined(_MSC_VER))
-#define MPT_COMPILER_QUIRK_NO_ALIGNEDALLOC
-#endif
-
 
 
 
