@@ -135,15 +135,13 @@ void COptionsAdvanced::ReInit()
 	lvi.iGroupId = 0;
 
 	int i = 0;
-	for(const auto &it : theApp.GetSettings())
+	for(const auto &[path, state] : theApp.GetSettings())
 	{
 		// In MPT_USTRING_MODE_WIDE mode,
 		// this loop is heavily optimized to avoid as much string copies as possible
 		// in order to perform ok-ish in debug builds.
 		// MPT_USTRING_MODE_UTF8 is not optimized as we (currently) do not build in
 		// this mode by default.
-		const SettingPath &path = it.first;
-		const SettingState &state = it.second;
 		const mpt::ustring &section = path.GetRefSection();
 		const mpt::ustring &key = path.GetRefKey();
 		const SettingValue &value = state.GetRefValue();

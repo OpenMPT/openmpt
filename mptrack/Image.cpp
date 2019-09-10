@@ -1,8 +1,8 @@
 /*
  * Image.cpp
  * ---------
- * Purpose: Bitmap and Vector image file handling.
- * Notes  : Either uses GDI+ or a simple custom PNG loader.
+ * Purpose: Bitmap and Vector image file handling using GDI+.
+ * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */

@@ -310,14 +310,14 @@ Result Request::operator()(InternetSession &internet) const
 	if(!query.empty())
 	{
 		std::vector<mpt::ustring> arguments;
-		for(const auto &argument : query)
+		for(const auto &[key, value] : query)
 		{
-			if(!argument.second.empty())
+			if(!value.empty())
 			{
-				arguments.push_back(mpt::format(U_("%1=%2"))(argument.first, argument.second));
+				arguments.push_back(mpt::format(U_("%1=%2"))(key, value));
 			} else
 			{
-				arguments.push_back(mpt::format(U_("%1"))(argument.first));
+				arguments.push_back(mpt::format(U_("%1"))(key));
 			}
 		}
 		queryPath += U_("?") + mpt::String::Combine(arguments, U_("&"));
@@ -347,9 +347,9 @@ Result Request::operator()(InternetSession &internet) const
 		}
 		if(!headers.empty())
 		{
-			for(const auto &header : headers)
+			for(const auto &[key, value] : headers)
 			{
-				headersString += mpt::format("%1: %2\r\n")(header.first, header.second);
+				headersString += mpt::format("%1: %2\r\n")(key, value);
 			}
 		}
 		if(HttpSendRequest(
@@ -393,7 +393,7 @@ Result Request::operator()(InternetSession &internet) const
 		} while(bytesRead != 0);
 		result.Data = std::move(resultBuffer);
 	}
-	return result;		
+	return result;
 }
 
 
@@ -410,7 +410,7 @@ Request &Request::SetURI(const URI &uri)
 		protocol = HTTP::Protocol::HTTPS;
 	} else
 	{
-		throw bad_uri("wrong scheme");		
+		throw bad_uri("wrong scheme");
 	}
 	host = uri.host;
 	if(!uri.port.empty())
