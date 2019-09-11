@@ -2,6 +2,8 @@
   configuration {}
 
 	objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. mpt_projectname )
+	
+	buildoptions { "/std:c++17" }
 
 	configuration { "Debug", "x32" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/x86" )
