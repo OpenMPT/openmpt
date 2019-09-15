@@ -958,7 +958,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &heade
 				dlsSmp.dwSampleRate = p.dwSampleRate;
 				dlsSmp.byOriginalPitch = p.byOriginalPitch;
 				dlsSmp.chPitchCorrection = static_cast<int8>(Util::muldivr(p.chPitchCorrection, 128, 100));
-				if (((p.sfSampleType & 0x7FFF) <= 4) && (p.dwStart < 0x08000000) && (p.dwEnd >= p.dwStart+8))
+				if (((p.sfSampleType & 0x7FFF) <= 4) && (p.dwEnd >= p.dwStart + 4))
 				{
 					dlsSmp.dwLen = (p.dwEnd - p.dwStart) * 2;
 					if ((p.dwEndloop > p.dwStartloop + 7) && (p.dwStartloop >= p.dwStart))
@@ -1469,13 +1469,13 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 		return false;
 	}
 
-	long dwOffset = mpt::saturate_cast<long>(m_WaveForms[nWaveLink] + m_dwWavePoolOffset);
 	mpt::ifstream f(m_szFileName, std::ios::binary);
 	if(!f)
 	{
 		return false;
 	}
-	if (mpt::IO::SeekAbsolute(f, dwOffset))
+	mpt::IO::Offset sampleOffset = mpt::saturate_cast<mpt::IO::Offset>(m_WaveForms[nWaveLink] + m_dwWavePoolOffset);
+	if(mpt::IO::SeekAbsolute(f, sampleOffset))
 	{
 		if (m_nType & SOUNDBANK_TYPE_SF2)
 		{
