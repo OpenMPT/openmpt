@@ -369,19 +369,22 @@ bool CTrackApp::AddDLSBank(const mpt::PathString &filename)
 	{
 		if(bank && !mpt::PathString::CompareNoCase(filename, bank->GetFileName())) return true;
 	}
+	CDLSBank *bank = nullptr;
 	try
 	{
-		CDLSBank *bank = new CDLSBank;
+		bank = new CDLSBank;
 		if(bank->Open(filename))
 		{
 			gpDLSBanks.push_back(bank);
 			return true;
 		}
-		delete bank;
 	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
 		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+	} catch(const std::exception &)
+	{
 	}
+	delete bank;
 	return false;
 }
 
