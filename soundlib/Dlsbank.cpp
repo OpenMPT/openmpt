@@ -563,7 +563,7 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 
 const DLSINSTRUMENT *CDLSBank::FindInstrument(bool isDrum, uint32 bank, uint32 program, uint32 key, uint32 *pInsNo) const
 {
-	if (m_Instruments.empty()) return NULL;
+	if (m_Instruments.empty()) return nullptr;
 	for (uint32 iIns=0; iIns<m_Instruments.size(); iIns++)
 	{
 		const DLSINSTRUMENT &dlsIns = m_Instruments[iIns];
@@ -1192,7 +1192,6 @@ bool CDLSBank::Open(FileReader file)
 		m_szFileName = file.GetFileName();
 
 	file.Rewind();
-	const uint8 *lpMemFile = file.GetRawData<uint8>();
 	size_t dwMemLength = file.GetLength();
 	size_t dwMemPos = 0;
 	if(!file.CanRead(256))
@@ -1397,13 +1396,14 @@ bool CDLSBank::Open(FileReader file)
 		Log("ptbl not present: building table (%d wavelinks)...\n", m_nMaxWaveLink);
 	#endif
 		m_WaveForms.reserve(m_nMaxWaveLink);
-		dwMemPos = m_dwWavePoolOffset;
-		while (dwMemPos + sizeof(IFFCHUNK) < dwMemLength)
+		file.Seek(m_dwWavePoolOffset);
+		while(m_WaveForms.size() < m_nMaxWaveLink && file.CanRead(sizeof(IFFCHUNK)))
 		{
-			IFFCHUNK *pchunk = (IFFCHUNK *)(lpMemFile + dwMemPos);
-			if (pchunk->id == IFFID_LIST) m_WaveForms.push_back(dwMemPos - m_dwWavePoolOffset);
-			dwMemPos += 8 + pchunk->len;
-			if (m_WaveForms.size() >= m_nMaxWaveLink) break;
+			IFFCHUNK chunk;
+			file.ReadStruct(chunk);
+			if (chunk.id == IFFID_LIST)
+				m_WaveForms.push_back(file.GetPosition() - m_dwWavePoolOffset - sizeof(IFFCHUNK));
+			file.Skip(chunk.len);
 		}
 #ifdef DLSBANK_LOG
 		Log("Found %d waveforms\n", m_WaveForms.size());

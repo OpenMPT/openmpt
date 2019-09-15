@@ -1975,10 +1975,14 @@ void CMainFrame::OnAddDlsBank()
 	if(!dlg.Show()) return;
 
 	BeginWaitCursor();
-	const FileDialog::PathList &files = dlg.GetFilenames();
-	for(size_t counter = 0; counter < files.size(); counter++)
+	bool ok = true;
+	for(const auto &file : dlg.GetFilenames())
 	{
-		CTrackApp::AddDLSBank(files[counter]);
+		ok &= CTrackApp::AddDLSBank(file);
+	}
+	if(!ok)
+	{
+		Reporting::Error("At least one selected file was not a valid sound bank.");
 	}
 	m_wndTree.RefreshDlsBanks();
 	EndWaitCursor();
