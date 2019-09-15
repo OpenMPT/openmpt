@@ -30,7 +30,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.07.00 (* September 2019, revision 12025)
+v1.28.07.00 (* September 2019, revision 12053)
 ----------------------------------------------
 Pattern tab
 - [Imp] <js> If repeating notes on key hold is enabled, the repetitions are now ignored if recording is disabled (key-jazz) or the edit step is set to 0, to avoid ugly and unnecessary repetitions (http://forum.openmpt.org/index.php?topic=6207.0).
@@ -47,9 +47,15 @@ Instrument tab
 VST::Plugin Bridge
 - [Fix] <js> It was not possible to record parameter changes to the pattern editor (http://bugs.openmpt.org/view.php?id=991).
 - [Fix] <js> Receiving MIDI messages from the bridge was broken since v1.27.08.00.
+- [Fix] <js> Sending SysEx messages to a 64-bit host or bridge never worked.
 
 Other formats
 - [Fix] <js> MID: Possible crash when importing more than one sustain pedal release message following a note-off. 
+
+Misc
+- [Imp] <js> When adding a sound font fails, an error message is shown.
+- [Fix] <js> Possible crash when trying to load huge sound fonts (http://forum.openmpt.org/index.php?topic=6217.0).
+- [Fix] <js> SF2: Samples stored past 2 GB into the file couldn't be extracted (http://forum.openmpt.org/index.php?topic=6217.0).
 
 Third-Party Libraries
 - [Imp] Update flac (v1.3.3), mpg123 (v1.25.12), ogg (v1.3.4), UnRAR (v5.8.1)
