@@ -25,14 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 #define DLSMAXREGIONS		128
 
-// Region Flags
-#define DLSREGION_KEYGROUPMASK		0x0F
-#define DLSREGION_OVERRIDEWSMP		0x10
-#define DLSREGION_PINGPONGLOOP		0x20
-#define DLSREGION_SAMPLELOOP		0x40
-#define DLSREGION_SELFNONEXCLUSIVE	0x80
-#define DLSREGION_SUSTAINLOOP		0x100
-
 struct DLSREGION
 {
 	uint32 ulLoopStart;
@@ -97,7 +89,7 @@ struct SOUNDBANKINFO
 };
 
 struct IFFCHUNK;
-struct SF2LOADERINFO;
+struct SF2LoaderInfo;
 
 class CDLSBank
 {
@@ -141,9 +133,9 @@ public:
 
 // Internal Loader Functions
 protected:
-	bool UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, const IFFCHUNK *pchunk, uint32 dwMaxLen);
-	bool UpdateSF2PresetData(SF2LOADERINFO &sf2info, const IFFCHUNK &header, FileReader &chunk);
-	bool ConvertSF2ToDLS(SF2LOADERINFO &sf2info);
+	bool UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, FileReader chunk);
+	bool UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &header, FileReader &chunk);
+	bool ConvertSF2ToDLS(SF2LoaderInfo &sf2info);
 
 public:
 	// DLS Unit conversion
