@@ -589,27 +589,25 @@ void IMixPlugin::AutomateParameter(PlugParamIndex param)
 	}
 
 	modDoc->PostMessageToAllViews(WM_MOD_PLUGPARAMAUTOMATE, m_nSlot, param);
-	// TODO: This should rather be posted to the GUI thread!
-	CAbstractVstEditor *pVstEditor = GetEditor();
 
-	if(pVstEditor && pVstEditor->m_hWnd)
+	if(auto *vstEditor = GetEditor() ; vstEditor && vstEditor->m_hWnd)
 	{
 		// Mark track modified if GUI is open and format supports plugins
 		SetModified();
 
-		if (CMainFrame::GetInputHandler()->ShiftPressed() && TrackerSettings::Instance().midiMappingInPluginEditor)
+		// Do not use InputHandler in case we are coming from a bridged plugin editor
+		if((GetAsyncKeyState(VK_SHIFT) & 0x8000) && TrackerSettings::Instance().midiMappingInPluginEditor)
 		{
 			// Shift pressed -> Open MIDI mapping dialog
-			CMainFrame::GetInputHandler()->SetModifierMask(ModNone); // Make sure that the dialog will open only once.
 			CMainFrame::GetMainFrame()->PostMessage(WM_MOD_MIDIMAPPING, m_nSlot, param);
 		}
 
 		// Learn macro
-		int macroToLearn = pVstEditor->GetLearnMacro();
+		int macroToLearn = vstEditor->GetLearnMacro();
 		if (macroToLearn > -1)
 		{
 			modDoc->LearnMacro(macroToLearn, param);
-			pVstEditor->SetLearnMacro(-1);
+			vstEditor->SetLearnMacro(-1);
 		}
 	}
 }
