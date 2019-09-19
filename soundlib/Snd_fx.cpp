@@ -2530,7 +2530,7 @@ bool CSoundFile::ProcessEffects()
 				{
 					note = NOTE_NONE;
 				}
-			} else if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetNumInstruments() != 0 && ModCommand::IsNoteOrEmpty(static_cast<ModCommand::NOTE>(note)))
+			} else if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_J2B)) && GetNumInstruments() != 0 && ModCommand::IsNoteOrEmpty(static_cast<ModCommand::NOTE>(note)))
 			{
 				// IT compatibility: Invalid instrument numbers do nothing, but they are remembered for upcoming notes and do not trigger a note in that case.
 				// Test case: InstrumentNumberChange.it
