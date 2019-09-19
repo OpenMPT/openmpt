@@ -142,7 +142,6 @@ CSoundFile *CViewPattern::GetSoundFile() { return (GetDocument() != nullptr) ? &
 CViewPattern::CViewPattern()
 {
 	EnableActiveAccessibility();
-	m_bLastNoteEntryBlocked = false;
 
 	m_nPattern = 0;
 	m_nOrder = 0;
@@ -4756,14 +4755,32 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 	{
 		if (m_nSpacing > 0)
 		{
-			if ((timeGetTime() - m_dwLastNoteEntryTime < TrackerSettings::Instance().gnAutoChordWaitTime)
-				&& (editPos.row >= m_nSpacing) && (!m_bLastNoteEntryBlocked))
+			const auto &order = sndFile.Order();
+			if((timeGetTime() - m_autoChordStartTime) < TrackerSettings::Instance().gnAutoChordWaitTime
+			   && order.IsValidPat(m_autoChordStartOrder)
+			   && sndFile.Patterns[order[m_autoChordStartOrder]].IsValidRow(m_autoChordStartRow))
 			{
-				editPos.row -= m_nSpacing;
+				const auto pattern = order[m_autoChordStartOrder];
+				if(pattern != editPos.pattern)
+				{
+					SetCurrentOrder(m_autoChordStartOrder);
+					SetCurrentPattern(pattern, m_autoChordStartRow);
+				}
+				editPos.pattern = pattern;
+				editPos.row = m_autoChordStartRow;
+			} else
+			{
+				m_autoChordStartRow = ROWINDEX_INVALID;
+				m_autoChordStartOrder = ORDERINDEX_INVALID;
 			}
 		}
 	}
-	m_dwLastNoteEntryTime = timeGetTime();
+	m_autoChordStartTime = timeGetTime();
+	if(m_autoChordStartOrder == ORDERINDEX_INVALID || m_autoChordStartRow == ROWINDEX_INVALID)
+	{
+		m_autoChordStartOrder = sndFile.Order()[editPos.pattern];
+		m_autoChordStartRow = editPos.row;
+	}
 
 	// Quantize
 	const bool doQuantize = (liveRecord || (fromMidi && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && TrackerSettings::Instance().recordQuantizeRows != 0;
@@ -4956,12 +4973,6 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 				if(editPos.row + m_nSpacing < sndFile.Patterns[editPos.pattern].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 				{
 					SetCurrentRow(editPos.row + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) != 0);
-					m_bLastNoteEntryBlocked = false;
-				} else
-				{
-					// if the cursor is block by the end of the pattern here,
-					// we must remember to not step back should the next note form a chord.
-					m_bLastNoteEntryBlocked = true;
 				}
 
 			}
