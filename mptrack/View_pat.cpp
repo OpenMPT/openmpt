@@ -144,10 +144,6 @@ CViewPattern::CViewPattern()
 {
 	EnableActiveAccessibility();
 
-	m_nPattern = 0;
-	m_nOrder = 0;
-	m_nDetailLevel = PatternCursor::lastColumn;
-	m_pEditWnd = nullptr;
 	m_Dib.Init(CMainFrame::bmpNotes);
 	UpdateColors();
 	m_PCNoteEditMemory = ModCommand::Empty();

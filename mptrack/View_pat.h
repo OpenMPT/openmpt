@@ -155,19 +155,19 @@ protected:
 	CFastBitmap m_Dib;
 	CDC m_offScreenDC;
 	CBitmap m_offScreenBitmap;
-	CEditCommand *m_pEditWnd;
+	CEditCommand *m_pEditWnd = nullptr;
 	CSize m_szHeader, m_szPluginHeader, m_szCell;
 	CRect m_oldClient;
 	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
 	FlagSet<PatternStatus> m_Status;
 	ROWINDEX m_nPlayRow, m_nNextPlayRow;
 	uint32 m_nPlayTick, m_nTicksOnRow;
-	PATTERNINDEX m_nPattern, m_nPlayPat;
-	ORDERINDEX m_nOrder;
+	PATTERNINDEX m_nPattern = 0, m_nPlayPat = 0;
+	ORDERINDEX m_nOrder = 0;
 	static int32 m_nTransposeAmount;
 
 	int m_nXScroll, m_nYScroll;
-	PatternCursor::Columns m_nDetailLevel;  // Visible Columns
+	PatternCursor::Columns m_nDetailLevel = PatternCursor::lastColumn;  // Visible Columns
 
 	// Cursor and selection positions
 	PatternCursor m_Cursor;               // Current cursor position in pattern.
@@ -182,11 +182,11 @@ protected:
 	bool m_bInItemRect : 1;
 
 	UINT m_nFoundInstrument;
-	
+
 	// Chord auto-detect interval
 	DWORD m_autoChordStartTime = 0;
 	ROWINDEX m_autoChordStartRow = ROWINDEX_INVALID;
-	PATTERNINDEX m_autoChordStartOrder = ORDERINDEX_INVALID;
+	ORDERINDEX m_autoChordStartOrder = ORDERINDEX_INVALID;
 
 	bool m_bContinueSearch : 1, m_bWholePatternFitsOnScreen : 1;
 
