@@ -182,8 +182,12 @@ protected:
 	bool m_bInItemRect : 1;
 
 	UINT m_nFoundInstrument;
-	DWORD m_dwLastNoteEntryTime;  //rewbs.customkeys
-	bool m_bLastNoteEntryBlocked : 1;
+	
+	// Chord auto-detect interval
+	DWORD m_autoChordStartTime = 0;
+	ROWINDEX m_autoChordStartRow = ROWINDEX_INVALID;
+	PATTERNINDEX m_autoChordStartOrder = ORDERINDEX_INVALID;
+
 	bool m_bContinueSearch : 1, m_bWholePatternFitsOnScreen : 1;
 
 	ModCommand m_PCNoteEditMemory;  // PC Note edit memory
