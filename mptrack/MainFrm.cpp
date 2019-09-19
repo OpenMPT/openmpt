@@ -2632,9 +2632,15 @@ void CMainFrame::OnHelp()
 
 LRESULT CMainFrame::OnViewMIDIMapping(WPARAM wParam, LPARAM lParam)
 {
-	CModDoc *doc = GetActiveDoc();
-	if(doc != nullptr)
-		doc->ViewMIDIMapping(static_cast<PLUGINDEX>(wParam), static_cast<PlugParamIndex>(lParam));
+	static bool inMapper = false;
+	if(!inMapper)
+	{
+		inMapper = true;
+		CModDoc *doc = GetActiveDoc();
+		if(doc != nullptr)
+			doc->ViewMIDIMapping(static_cast<PLUGINDEX>(wParam), static_cast<PlugParamIndex>(lParam));
+		inMapper = false;
+	}
 	return 0;
 }
 
