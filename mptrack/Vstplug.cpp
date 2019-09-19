@@ -647,7 +647,6 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 
 
 // Helper function for file selection dialog stuff.
-// Note: This function has been copied over to the Plugin Bridge. Ugly, but serializing this over the bridge would be even uglier.
 intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 {
 	if(!destructor)
@@ -656,6 +655,7 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 		fileSel.numReturnPaths = 0;
 		fileSel.reserved = 0;
 
+		std::string returnPath;
 		if(fileSel.command != kVstDirectorySelect)
 		{
 			// Plugin wants to load or save a file.
@@ -701,9 +701,7 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 			dlg.ExtensionFilter(extensions)
 				.WorkingDirectory(mpt::PathString::FromLocale(workingDir));
 			if(!dlg.Show(GetEditor()))
-			{
 				return 0;
-			}
 
 			if(fileSel.command == kVstMultipleFilesLoad)
 			{
@@ -718,6 +716,7 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 					strcpy(fname, fname_.c_str());
 					fileSel.returnMultiplePaths[i] = fname;
 				}
+				return 1;
 			} else
 			{
 				// Single path
@@ -728,66 +727,46 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 					fileSel.sizeReturnPath = _MAX_PATH;
 				}
 
-				const auto localePath = dlg.GetFirstFile().ToLocale();
-				if(fileSel.returnPath == nullptr || fileSel.sizeReturnPath == 0)
-				{
-					// Provide some memory for the return path.
-					fileSel.sizeReturnPath = mpt::saturate_cast<int32>(localePath.length() + 1);
-					fileSel.returnPath = new (std::nothrow) char[fileSel.sizeReturnPath];
-					if(fileSel.returnPath == nullptr)
-					{
-						return 0;
-					}
-					fileSel.returnPath[fileSel.sizeReturnPath - 1] = '\0';
-					fileSel.reserved = 1;
-				} else
-				{
-					fileSel.reserved = 0;
-				}
-				strncpy(fileSel.returnPath, localePath.c_str(), fileSel.sizeReturnPath - 1);
-				fileSel.numReturnPaths = 1;
-				fileSel.returnMultiplePaths = nullptr;
+				returnPath = dlg.GetFirstFile().ToLocale();
 			}
-			return 1;
-
 		} else
 		{
 			// Plugin wants a directory
 			BrowseForFolder dlg(mpt::PathString::FromLocale(fileSel.initialPath != nullptr ? fileSel.initialPath : ""), fileSel.title != nullptr ? fileSel.title : "");
-			if(dlg.Show(GetEditor()))
+			if(!dlg.Show(GetEditor()))
+				return 0;
+
+			returnPath = dlg.GetDirectory().ToLocale();
+			if(FourCC("VSTr") == GetUID() && fileSel.returnPath != nullptr && fileSel.sizeReturnPath == 0)
 			{
-				const std::string dir = dlg.GetDirectory().ToLocale();
-				if(FourCC("VSTr") == GetUID() && fileSel.returnPath != nullptr && fileSel.sizeReturnPath == 0)
-				{
-					// Old versions of reViSiT (which still relied on the host's file selector) seem to be dodgy.
-					// They report a path size of 0, but when using an own buffer, they will crash.
-					// So we'll just assume that reViSiT can handle long enough (_MAX_PATH) paths here.
-					fileSel.sizeReturnPath = mpt::saturate_cast<int32>(dir.length() + 1);
-					fileSel.returnPath[fileSel.sizeReturnPath - 1] = '\0';
-				}
-				if(fileSel.returnPath == nullptr || fileSel.sizeReturnPath == 0)
-				{
-					// Provide some memory for the return path.
-					fileSel.sizeReturnPath = mpt::saturate_cast<int32>(dir.length() + 1);
-					fileSel.returnPath = new char[fileSel.sizeReturnPath];
-					if(fileSel.returnPath == nullptr)
-					{
-						return 0;
-					}
-					fileSel.returnPath[fileSel.sizeReturnPath - 1] = '\0';
-					fileSel.reserved = 1;
-				} else
-				{
-					fileSel.reserved = 0;
-				}
-				strncpy(fileSel.returnPath, dir.c_str(), fileSel.sizeReturnPath - 1);
-				fileSel.numReturnPaths = 1;
-				return 1;
-			} else
+				// Old versions of reViSiT (which still relied on the host's file selector) seem to be dodgy.
+				// They report a path size of 0, but when using an own buffer, they will crash.
+				// So we'll just assume that reViSiT can handle long enough (_MAX_PATH) paths here.
+				fileSel.sizeReturnPath = mpt::saturate_cast<int32>(returnPath.length() + 1);
+			}
+		}
+
+		// Return single path (file or directory)
+		if(fileSel.returnPath == nullptr || fileSel.sizeReturnPath == 0)
+		{
+			// Provide some memory for the return path.
+			fileSel.sizeReturnPath = mpt::saturate_cast<int32>(returnPath.length() + 1);
+			fileSel.returnPath = new(std::nothrow) char[fileSel.sizeReturnPath];
+			if(fileSel.returnPath == nullptr)
 			{
 				return 0;
 			}
+			fileSel.reserved = 1;
+		} else
+		{
+			fileSel.reserved = 0;
 		}
+		const auto len = std::min(returnPath.size(), static_cast<size_t>(fileSel.sizeReturnPath - 1));
+		strncpy(fileSel.returnPath, returnPath.data(), len);
+		fileSel.returnPath[len] = '\0';
+		fileSel.numReturnPaths = 1;
+		fileSel.returnMultiplePaths = nullptr;
+		return 1;
 	} else
 	{
 		// Close file selector - delete allocated strings.

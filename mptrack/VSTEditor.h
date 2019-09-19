@@ -18,7 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifndef NO_VST
 
-class COwnerVstEditor: public CAbstractVstEditor
+class COwnerVstEditor : public CAbstractVstEditor
 {
 protected:
 	CStatic m_plugWindow;
@@ -28,10 +28,6 @@ public:
 	COwnerVstEditor(CVstPlugin &plugin) : CAbstractVstEditor(plugin) { }
 	~COwnerVstEditor() override { }
 
-	DECLARE_MESSAGE_MAP()
-	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
-	afx_msg void OnPaint();
-
 	// Plugins may request to change the GUI size.
 	bool IsResizable() const override { return true; }
 	bool SetSize(int contentWidth, int contentHeight) override;
@@ -40,6 +36,22 @@ public:
 
 	bool OpenEditor(CWnd *parent) override;
 	void DoClose() override;
+
+protected:
+	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
+	afx_msg void OnPaint();
+
+	LRESULT OnPreTranslateKeyDown(WPARAM wParam, LPARAM lParam) { return HandlePreTranslateMessage(WM_KEYDOWN, wParam, lParam); }
+	LRESULT OnPreTranslateKeyUp(WPARAM wParam, LPARAM lParam) { return HandlePreTranslateMessage(WM_KEYUP, wParam, lParam); }
+	LRESULT OnPreTranslateSysKeyDown(WPARAM wParam, LPARAM lParam) { return HandlePreTranslateMessage(WM_SYSKEYDOWN, wParam, lParam); }
+	LRESULT OnPreTranslateSysKeyUp(WPARAM wParam, LPARAM lParam) { return HandlePreTranslateMessage(WM_SYSKEYUP, wParam, lParam); }
+	LRESULT HandlePreTranslateMessage(UINT message, WPARAM wParam, LPARAM lParam)
+	{
+		MSG msg = {m_hWnd, message, wParam, lParam, 0, {}};
+		return PreTranslateMessage(&msg);
+	}
+
+	DECLARE_MESSAGE_MAP()
 };
 
 #endif // NO_VST

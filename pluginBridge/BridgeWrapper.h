@@ -46,7 +46,7 @@ public:
 private:
 	const PluginArch arch;
 	mpt::PathString exeName;
-	Availability availability;
+	Availability availability = AvailabilityUnknown;
 protected:
 	ComponentPluginBridge(PluginArch arch);
 protected:
@@ -106,7 +106,7 @@ protected:
 		MappedMemory memory;
 		wchar_t name[64];
 	};
-	AuxMem m_auxMems[MsgStack::kStackSize];
+	AuxMem m_auxMems[MSG_STACK_SIZE];
 	
 	std::vector<char> m_cachedProgNames;
 	std::vector<ParameterInfo> m_cachedParamInfo;
@@ -114,8 +114,8 @@ protected:
 	
 	bool m_isSettingProgram = false;
 
-	Vst::ERect editRect;
-	Vst::VstSpeakerArrangement speakers[2];
+	Vst::ERect m_editRect;
+	Vst::VstSpeakerArrangement m_speakers[2];
 
 	ComponentHandle<ComponentPluginBridge_x86> pluginBridge_x86;
 	ComponentHandle<ComponentPluginBridge_amd64> pluginBridge_amd64;
@@ -155,15 +155,13 @@ public:
 	static Vst::AEffect *Create(const VSTPluginLib &plugin);
 
 protected:
-	BridgeWrapper() = default;
+	BridgeWrapper();
 	~BridgeWrapper();
 
 	bool Init(const mpt::PathString &pluginPath, BridgeWrapper *sharedInstace);
 
-	void MessageThread();
-
-	void ParseNextMessage();
-	void DispatchToHost(DispatchMsg *msg);
+	void ParseNextMessage(int msgID);
+	void DispatchToHost(DispatchMsg &msg);
 	bool SendToBridge(BridgeMessage &sendMsg);
 	void SendAutomationQueue();
 	AuxMem *GetAuxMemory(uint32 size);
@@ -180,6 +178,8 @@ protected:
 
 	template<typename buf_t>
 	void BuildProcessBuffer(ProcessMsg::ProcessType type, int32 numInputs, int32 numOutputs, buf_t **inputs, buf_t **outputs, int32 sampleFrames);
+
+	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 
 OPENMPT_NAMESPACE_END

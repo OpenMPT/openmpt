@@ -19,7 +19,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #pragma pack(push, 8)
 
-template<typename ptr_t>
+template <typename ptr_t>
 struct AEffectProto
 {
 	int32 magic;
@@ -34,12 +34,12 @@ struct AEffectProto
 	int32 numOutputs;
 
 	int32 flags;
-	
+
 	ptr_t resvd1;
 	ptr_t resvd2;
-	
+
 	int32 initialDelay;
-	
+
 	int32 realQualities;
 	int32 offQualities;
 	float ioRatio;
@@ -81,7 +81,6 @@ struct AEffectProto
 		if(in.processDoubleReplacing == nullptr)
 			flags &= ~Vst::effFlagsCanDoubleReplacing;
 	}
-
 };
 
 using AEffect32 = AEffectProto<int32>;
@@ -91,13 +90,13 @@ using AEffect64 = AEffectProto<int64>;
 
 
 // Translate a VSTEvents struct to bridge format (placed in data vector)
-static void TranslateVSTEventsToBridge(std::vector<char> &data, const Vst::VstEvents *events, int32 targetPtrSize)
+static void TranslateVstEventsToBridge(std::vector<char> &outData, const Vst::VstEvents &events, int32 targetPtrSize)
 {
-	data.reserve(data.size() + sizeof(int32) + sizeof(Vst::VstMidiEvent) * events->numEvents);
+	outData.reserve(outData.size() + sizeof(int32) + sizeof(Vst::VstMidiEvent) * events.numEvents);
 	// Write number of events
-	PushToVector(data, events->numEvents);
+	PushToVector(outData, events.numEvents);
 	// Write events
-	for(const auto event : *events)
+	for(const auto event : events)
 	{
 		if(event->type == Vst::kVstSysExType)
 		{
@@ -105,61 +104,61 @@ static void TranslateVSTEventsToBridge(std::vector<char> &data, const Vst::VstEv
 			// We are going to write the event using the target process pointer size.
 			auto sysExEvent = *static_cast<const Vst::VstMidiSysexEvent *>(event);
 			sysExEvent.byteSize = 4 * sizeof(int32) + 4 * targetPtrSize;  // It's 5 int32s and 3 pointers but that means that on 64-bit platforms, the fifth int32 is padded for alignment.
-			PushToVector(data, sysExEvent, 5 * sizeof(int32));            // Exclude the three pointers at the end for now
+			PushToVector(outData, sysExEvent, 5 * sizeof(int32));         // Exclude the three pointers at the end for now
 			if(targetPtrSize > sizeof(int32))                             // Padding for 64-bit required?
-				data.insert(data.end(), targetPtrSize - sizeof(int32), 0);
-			data.insert(data.end(), 3 * targetPtrSize, 0);  // Make space for pointer + two reserved intptr_ts
+				outData.insert(outData.end(), targetPtrSize - sizeof(int32), 0);
+			outData.insert(outData.end(), 3 * targetPtrSize, 0);  // Make space for pointer + two reserved intptr_ts
 			// Embed SysEx dump as well...
 			auto sysex = reinterpret_cast<const char *>(sysExEvent.sysexDump);
-			data.insert(data.end(), sysex, sysex + sysExEvent.dumpBytes);
+			outData.insert(outData.end(), sysex, sysex + sysExEvent.dumpBytes);
 		} else if(event->type == Vst::kVstMidiType)
 		{
 			// randomid by Insert Piz Here sends events of type kVstMidiType, but with a claimed size of 24 bytes instead of 32.
 			Vst::VstMidiEvent midiEvent;
 			std::memcpy(&midiEvent, event, sizeof(midiEvent));
 			midiEvent.byteSize = sizeof(midiEvent);
-			PushToVector(data, midiEvent, sizeof(midiEvent));
+			PushToVector(outData, midiEvent, sizeof(midiEvent));
 		} else
 		{
-			PushToVector(data, *event, event->byteSize);
+			PushToVector(outData, *event, event->byteSize);
 		}
 	}
 }
 
 
 // Translate bridge format (void *ptr) back to VSTEvents struct (placed in data vector)
-static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
+static void TranslateBridgeToVstEvents(std::vector<char> &outData, const void *inData)
 {
-	const int32 numEvents = *static_cast<const int32 *>(ptr);
-	
+	const int32 numEvents = *static_cast<const int32 *>(inData);
+
 	// First element is really a int32, but in case of 64-bit builds, the next field gets aligned anyway.
 	const size_t headerSize = sizeof(intptr_t) + sizeof(intptr_t) + sizeof(Vst::VstEvent *) * numEvents;
-	data.reserve(headerSize + sizeof(Vst::VstEvent) * numEvents);
-	data.resize(headerSize, 0);
+	outData.reserve(headerSize + sizeof(Vst::VstMidiEvent) * numEvents);
+	outData.resize(headerSize, 0);
 	if(numEvents == 0)
 		return;
 
 	// Copy over event data (this is required for dumb SynthEdit plugins that don't copy over the event data during effProcessEvents)
-	char *offset = static_cast<char *>(ptr) + sizeof(int32);
+	const char *readOffset = static_cast<const char *>(inData) + sizeof(int32);
 	for(int32 i = 0; i < numEvents; i++)
 	{
-		Vst::VstEvent *event = reinterpret_cast<Vst::VstEvent *>(offset);
-		data.insert(data.end(), offset, offset + event->byteSize);
-		offset += event->byteSize;
+		auto *event = reinterpret_cast<const Vst::VstEvent *>(readOffset);
+		outData.insert(outData.end(), readOffset, readOffset + event->byteSize);
+		readOffset += event->byteSize;
 
 		if(event->type == Vst::kVstSysExType)
 		{
 			// Copy over sysex dump
-			auto sysExEvent = static_cast<Vst::VstMidiSysexEvent *>(event);
-			data.insert(data.end(), offset, offset + sysExEvent->dumpBytes);
-			offset += sysExEvent->dumpBytes;
+			auto *sysExEvent = static_cast<const Vst::VstMidiSysexEvent *>(event);
+			outData.insert(outData.end(), readOffset, readOffset + sysExEvent->dumpBytes);
+			readOffset += sysExEvent->dumpBytes;
 		}
 	}
 
 	// Write pointers
-	auto events = reinterpret_cast<Vst::VstEvents *>(data.data());
+	auto events = reinterpret_cast<Vst::VstEvents *>(outData.data());
 	events->numEvents = numEvents;
-	offset = data.data() + headerSize;
+	char *offset = outData.data() + headerSize;
 	for(int32 i = 0; i < numEvents; i++)
 	{
 		events->events[i] = reinterpret_cast<Vst::VstEvent *>(offset);
@@ -175,7 +174,7 @@ static void TranslateBridgeToVSTEvents(std::vector<char> &data, void *ptr)
 
 
 // Calculate the size total of the VSTEvents (without header) in bridge format
-static size_t BridgeVSTEventsSize(const void *ptr)
+static size_t BridgeVstEventsSize(const void *ptr)
 {
 	const int32 numEvents = *static_cast<const int32 *>(ptr);
 	size_t size = 0;
@@ -189,6 +188,86 @@ static size_t BridgeVSTEventsSize(const void *ptr)
 		}
 	}
 	return size;
+}
+
+
+static void TranslateVstFileSelectToBridge(std::vector<char> &outData, const Vst::VstFileSelect &fileSelect, int32 targetPtrSize)
+{
+	outData.reserve(outData.size() + sizeof(Vst::VstFileSelect) + fileSelect.numFileTypes * sizeof(Vst::VstFileType));
+	PushToVector(outData, fileSelect.command);
+	PushToVector(outData, fileSelect.type);
+	PushToVector(outData, fileSelect.macCreator);
+	PushToVector(outData, fileSelect.numFileTypes);
+	outData.insert(outData.end(), targetPtrSize, 0);  // fileTypes
+	PushToVector(outData, fileSelect.title);
+	outData.insert(outData.end(), 2 * targetPtrSize, 0);  // initialPath, returnPath
+	PushToVector(outData, fileSelect.sizeReturnPath);
+	if(targetPtrSize > sizeof(int32))
+		outData.insert(outData.end(), targetPtrSize - sizeof(int32), 0);  // padding
+	outData.insert(outData.end(), targetPtrSize, 0);                      // returnMultiplePaths
+	PushToVector(outData, fileSelect.numReturnPaths);
+	outData.insert(outData.end(), targetPtrSize, 0);  // reserved
+	PushToVector(outData, fileSelect.reserved2);
+
+	if(fileSelect.command != Vst::kVstDirectorySelect)
+	{
+		for(int32 i = 0; i < fileSelect.numFileTypes; i++)
+		{
+			PushToVector(outData, fileSelect.fileTypes[i]);
+		}
+	}
+
+	if(fileSelect.command == Vst::kVstMultipleFilesLoad)
+	{
+		outData.insert(outData.end(), fileSelect.numReturnPaths * targetPtrSize, 0);
+		for(int32 i = 0; i < fileSelect.numReturnPaths; i++)
+		{
+			PushZStringToVector(outData, fileSelect.returnMultiplePaths[i]);
+		}
+	}
+
+	PushZStringToVector(outData, fileSelect.initialPath);
+	PushZStringToVector(outData, fileSelect.returnPath);
+}
+
+
+static void TranslateBridgeToVstFileSelect(std::vector<char> &outData, const void *inData, size_t srcSize)
+{
+	outData.assign(static_cast<const char *>(inData), static_cast<const char *>(inData) + srcSize);
+
+	// Fixup pointers
+	Vst::VstFileSelect &fileSelect = *reinterpret_cast<Vst::VstFileSelect *>(outData.data());
+	auto ptrOffset = outData.data() + sizeof(Vst::VstFileSelect);
+
+	if(fileSelect.command != Vst::kVstDirectorySelect)
+	{
+		fileSelect.fileTypes = reinterpret_cast<Vst::VstFileType *>(ptrOffset);
+		ptrOffset += fileSelect.numFileTypes * sizeof(Vst::VstFileType);
+	} else
+	{
+		fileSelect.fileTypes = nullptr;
+	}
+
+	if(fileSelect.command == Vst::kVstMultipleFilesLoad)
+	{
+		fileSelect.returnMultiplePaths = reinterpret_cast<char **>(ptrOffset);
+		ptrOffset += fileSelect.numReturnPaths * sizeof(char *);
+
+		for(int32 i = 0; i < fileSelect.numReturnPaths; i++)
+		{
+			fileSelect.returnMultiplePaths[i] = ptrOffset;
+			ptrOffset += strlen(fileSelect.returnMultiplePaths[i]) + 1;
+		}
+	} else
+	{
+		fileSelect.returnMultiplePaths = nullptr;
+	}
+
+	fileSelect.initialPath = ptrOffset;
+	ptrOffset += strlen(fileSelect.initialPath) + 1;
+	fileSelect.returnPath = ptrOffset;
+	fileSelect.sizeReturnPath = static_cast<int32>(srcSize - std::distance(outData.data(), ptrOffset));
+	ptrOffset += strlen(fileSelect.returnPath) + 1;
 }
 
 

@@ -12,9 +12,6 @@
 
 #include "BuildSettings.h"
 
-#include <map>
-#include <shared_mutex>
-#include <thread>
 #include <vector>
 
 
@@ -29,12 +26,17 @@ static void PushToVector(std::vector<char> &data, const T &obj, size_t writeSize
 	data.insert(data.end(), objC, objC + writeSize);
 }
 
+static void PushZStringToVector(std::vector<char> &data, const char *str)
+{
+	if(str != nullptr)
+		data.insert(data.end(), str, str + strlen(str));
+	PushToVector(data, char(0));
+}
+
 OPENMPT_NAMESPACE_END
 
 #include "AEffectWrapper.h"
 #include "BridgeOpCodes.h"
-#include "../common/mptThread.h"
-
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -45,12 +47,11 @@ OPENMPT_NAMESPACE_BEGIN
 // Event to notify other threads
 class Event
 {
-protected:
-	HANDLE handle;
+private:
+	HANDLE handle = nullptr;
 
 public:
-	Event()
-	    : handle(nullptr) {}
+	Event() = default;
 	~Event() { Close(); }
 
 	// Create a new event
@@ -92,12 +93,12 @@ public:
 class Signal
 {
 public:
-	Event send, ack;
+	Event send, confirm;
 
 	// Create new (local) signal
 	bool Create()
 	{
-		return send.Create() && ack.Create();
+		return send.Create() && confirm.Create();
 	}
 
 	// Create signal from name (for inter-process communication)
@@ -111,14 +112,14 @@ public:
 
 		bool success = send.Create(false, fullName);
 		wcscpy(fullName + nameLen, L"-a");
-		return success && ack.Create(false, fullName);
+		return success && confirm.Create(false, fullName);
 	}
 
 	// Create signal from other signal
 	bool DuplicateFrom(const Signal &other)
 	{
 		return send.DuplicateFrom(other.send)
-		       && ack.DuplicateFrom(other.ack);
+		       && confirm.DuplicateFrom(other.confirm);
 	}
 
 	void Send()
@@ -128,7 +129,7 @@ public:
 
 	void Confirm()
 	{
-		ack.Trigger();
+		confirm.Trigger();
 	}
 };
 
@@ -220,6 +221,44 @@ public:
 
 #pragma pack(push, 8)
 
+// Simple atomic value that has a guaranteed size and layout for the shared memory
+template <typename T>
+struct BridgeAtomic
+{
+public:
+	BridgeAtomic() = default;
+	BridgeAtomic<T> &operator=(const T value)
+	{
+		static_assert(sizeof(m_value) >= sizeof(T));
+		MPT_ASSERT((intptr_t(&m_value) & 3) == 0);
+		InterlockedExchange(&m_value, static_cast<LONG>(value));
+		return *this;
+	}
+	operator T() const
+	{
+		return static_cast<T>(InterlockedAdd(&m_value, 0));
+	}
+
+	T exchange(T desired)
+	{
+		return static_cast<T>(InterlockedExchange(&m_value, static_cast<LONG>(desired)));
+	}
+
+	T fetch_add(T arg)
+	{
+		return static_cast<T>(InterlockedExchangeAdd(&m_value, static_cast<LONG>(arg)));
+	}
+
+	bool compare_exchange_strong(T &expected, T desired)
+	{
+		return InterlockedCompareExchange(&m_value, static_cast<LONG>(desired), static_cast<LONG>(expected)) == static_cast<LONG>(expected);
+	}
+
+private:
+	mutable LONG m_value;
+};
+
+
 // Host-to-bridge parameter automation message
 struct AutomationQueue
 {
@@ -229,8 +268,8 @@ struct AutomationQueue
 		float value;
 	};
 
-	LONG pendingEvents;    // Number of pending automation events
-	Parameter params[64];  // Automation events
+	BridgeAtomic<int32> pendingEvents;  // Number of pending automation events
+	Parameter params[64];               // Automation events
 };
 
 
@@ -272,17 +311,7 @@ struct MsgHeader
 		automate,
 	};
 
-	// Message life-cycle
-	enum BridgeMessageStatus : LONG
-	{
-		empty = 0,  // Slot is usable
-		sent,       // Slot is ready to be sent
-		received,   // Slot is being handled
-		done,       // Slot got handled
-		delivered,  // Slot got handed back to sender
-	};
-
-	LONG status;  // See BridgeMessageStatus
+	BridgeAtomic<bool> isUsed;
 	uint32 size;  // Size of complete message, including this header
 	uint32 type;  // See BridgeMessageType
 };
@@ -299,9 +328,9 @@ struct NewInstanceMsg : public MsgHeader
 struct InitMsg : public MsgHeader
 {
 	int32 result;
-	int32 version;           // Protocol version used by host
 	int32 hostPtrSize;       // Size of VstIntPtr in host
 	uint32 mixBufSize;       // Interal mix buffer size (for shared memory audio buffers)
+	int32 pluginID;          // ID to use when sending messages to host
 	uint32 fullMemDump;      // When crashing, create full memory dumps instead of stack dumps
 	wchar_t str[_MAX_PATH];  // Plugin file to load. Out: Error message if result != 0.
 };
@@ -347,7 +376,7 @@ union BridgeMessage
 
 	void SetType(MsgHeader::BridgeMessageType msgType, uint32 size)
 	{
-		header.status = MsgHeader::empty;
+		header.isUsed = true;
 		header.size = size;
 		header.type = msgType;
 	}
@@ -359,13 +388,14 @@ union BridgeMessage
 		wcsncpy(newInstance.memName, memName, CountOf(newInstance.memName) - 1);
 	}
 
-	void Init(const wchar_t *pluginPath, uint32 mixBufSize, bool fullMemDump)
+	void Init(const wchar_t *pluginPath, uint32 mixBufSize, int32 pluginID, bool fullMemDump)
 	{
 		SetType(MsgHeader::init, sizeof(InitMsg));
 
 		init.result = 0;
 		init.hostPtrSize = sizeof(intptr_t);
 		init.mixBufSize = mixBufSize;
+		init.pluginID = pluginID;
 		init.fullMemDump = fullMemDump;
 		wcsncpy(init.str, pluginPath, CountOf(init.str) - 1);
 	}
@@ -423,10 +453,10 @@ union BridgeMessage
 	}
 
 	// Copy message to target and clear delivery status
-	void CopyFromSharedMemory(BridgeMessage &target)
+	void CopyTo(BridgeMessage &target)
 	{
 		std::memcpy(&target, this, std::min(static_cast<size_t>(header.size), sizeof(BridgeMessage)));
-		InterlockedExchange(&header.status, MsgHeader::empty);
+		header.isUsed = false;
 	}
 };
 
@@ -434,22 +464,22 @@ union BridgeMessage
 inline constexpr size_t DISPATCH_DATA_SIZE = (sizeof(BridgeMessage) - sizeof(DispatchMsg));
 static_assert(DISPATCH_DATA_SIZE >= 256, "There should be room for at least 256 bytes of dispatch data!");
 
-struct MsgStack
-{
-	enum
-	{
-		kStackSize = 16u,  // Should be more than enough for any realistic scenario with nested dispatch calls
-	};
-	LONG readPos = 0, writePos = 0;
-	std::array<BridgeMessage, kStackSize> msg;
 
-	BridgeMessage &ReadNext()
-	{
-		auto pos = InterlockedIncrement(&readPos);
-		MPT_ASSERT(pos > 0 && pos <= kStackSize);
-		return msg[pos - 1];
-	}
+// The array size should be more than enough for any realistic scenario with nested and simultaneous dispatch calls
+inline constexpr int MSG_STACK_SIZE = 16;
+using MsgStack = std::array<BridgeMessage, MSG_STACK_SIZE>;
+
+
+// Ensuring that our HWND looks the same to both 32-bit and 64-bit processes
+struct BridgeHWND
+{
+public:
+	void operator=(HWND handle) { m_handle = static_cast<int32>(reinterpret_cast<intptr_t>(handle)); }
+	operator HWND() const { return reinterpret_cast<HWND>(static_cast<intptr_t>(m_handle)); }
+protected:
+	BridgeAtomic<int32> m_handle;
 };
+
 
 // Layout of the shared memory chunk
 struct SharedMemLayout
@@ -460,12 +490,15 @@ struct SharedMemLayout
 		AEffect32 effect32;
 		AEffect64 effect64;
 	};
-	MsgStack guiThreadMessages;
-	MsgStack audioThreadMessages;
-	MsgStack msgThreadMessages;
+	MsgStack ipcMessages;
 	AutomationQueue automationQueue;
 	Vst::VstTimeInfo timeInfo;
-	int32 tailSize;
+	BridgeHWND hostCommWindow;
+	BridgeHWND bridgeCommWindow;
+	int32 bridgePluginID;
+	BridgeAtomic<int32> tailSize;
+	BridgeAtomic<int32> audioThreadToHostMsgID;
+	BridgeAtomic<int32> audioThreadToBridgeMsgID;
 };
 static_assert(sizeof(Vst::AEffect) <= sizeof(AEffect64), "Something's going very wrong here.");
 
@@ -486,28 +519,39 @@ struct ParameterInfo
 class BridgeCommon
 {
 public:
-	BridgeCommon() = default;
+	BridgeCommon()
+	{
+		m_instanceCount++;
+	}
+
+	~BridgeCommon()
+	{
+		m_instanceCount--;
+	}
 
 protected:
-	// Signals for host <-> bridge communication
-	Signal m_sigToHostGui, m_sigToBridgeGui;
-	Signal m_sigToHostAudio, m_sigToBridgeAudio;
-	Signal m_sigToHostMsgThread, m_sigToBridgeMsgThread;
-	Signal m_sigProcessAudio;
-
-	// The thread context indicates which message stack to use and which signals to send / listen to
-	struct ThreadContext
+	enum WindowMessage : UINT
 	{
-		MsgStack *msgStack;
-		Signal *signalToHost;
-		Signal *signalToBridge;
+		WM_BRIDGE_KEYFIRST = WM_USER + 4000,  // Must be consistent with VSTEditor.cpp!
+		WM_BRIDGE_KEYLAST = WM_BRIDGE_KEYFIRST + WM_KEYLAST - WM_KEYFIRST,
+		WM_BRIDGE_MESSAGE_TO_BRIDGE,
+		WM_BRIDGE_MESSAGE_TO_HOST,
+		WM_BRIDGE_DELETE_PLUGIN,
 
-		bool Valid() const { return msgStack && signalToHost && signalToBridge; }
+		WM_BRIDGE_SUCCESS = 1337,
 	};
 
-	mpt::UnmanagedThread m_otherThread;  // Handle of the "other" thread (host side: message thread, bridge side: process thread)
-	Event m_otherProcess;                // Handle of "other" process (host handle in the bridge and vice versa)
-	Event m_sigThreadExit;               // Signal to kill helper thread
+	static std::vector<BridgeCommon *> m_plugins;
+	static HWND m_communicationWindow;
+	static int m_instanceCount;
+	static thread_local bool m_isAudioThread;
+
+	// Signals for host <-> bridge communication
+	Signal m_sigToHostAudio, m_sigToBridgeAudio;
+	Signal m_sigProcessAudio;
+	Event m_sigBridgeReady;
+
+	Event m_otherProcess;  // Handle of "other" process (host handle in the bridge and vice versa)
 
 	// Shared memory segments
 	MappedMemory m_queueMem;     // AEffect, message, some fixed size VST structures
@@ -516,75 +560,77 @@ protected:
 	MappedMemory m_eventMem;     // VstEvents memory
 
 	// Pointer into shared memory
-	SharedMemLayout *volatile m_sharedMem = nullptr;
+	SharedMemLayout /*volatile*/ *m_sharedMem = nullptr;
 
 	// Pointer size of the "other" side of the bridge, in bytes
 	int32 m_otherPtrSize = 0;
 
-private:
-	std::map<std::thread::id, ThreadContext> m_threadContext;
-	mutable std::shared_mutex m_contextMutex;
+	int32 m_thisPluginID = 0;
+	int32 m_otherPluginID = 0;
 
-protected:
+	static void CreateCommunicationWindow(WNDPROC windowProc)
+	{
+		static const TCHAR windowClassName[] = _T("OpenMPTPluginBridgeCommunication");
+		static bool registered = false;
+		if(!registered)
+		{
+			registered = true;
+			WNDCLASSEX wndClass;
+			wndClass.cbSize = sizeof(WNDCLASSEX);
+			wndClass.style = CS_HREDRAW | CS_VREDRAW;
+			wndClass.lpfnWndProc = windowProc;
+			wndClass.cbClsExtra = 0;
+			wndClass.cbWndExtra = 0;
+			wndClass.hInstance = GetModuleHandle(nullptr);
+			wndClass.hIcon = nullptr;
+			wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+			wndClass.hbrBackground = nullptr;
+			wndClass.lpszMenuName = nullptr;
+			wndClass.lpszClassName = windowClassName;
+			wndClass.hIconSm = nullptr;
+			RegisterClassEx(&wndClass);
+		}
+
+		m_communicationWindow = CreateWindow(
+		    windowClassName,
+		    _T("OpenMPT Plugin Bridge Communication"),
+		    WS_POPUP,
+		    CW_USEDEFAULT,
+		    CW_USEDEFAULT,
+		    1,
+		    1,
+		    HWND_MESSAGE,
+		    nullptr,
+		    GetModuleHandle(nullptr),
+		    nullptr);
+	}
+
 	bool CreateSignals(const wchar_t *mapName)
 	{
-		return m_sigToHostGui.Create(mapName, L"hg")
-		       && m_sigToBridgeGui.Create(mapName, L"bg")
-		       && m_sigToHostAudio.Create(mapName, L"hp")
-		       && m_sigToBridgeAudio.Create(mapName, L"bp")
-		       && m_sigToHostMsgThread.Create(mapName, L"hm")
-		       && m_sigToBridgeMsgThread.Create(mapName, L"bm")
-		       && m_sigProcessAudio.Create(mapName, L"p");
-	}
-
-	// Set current thread context and returns the old context
-	ThreadContext SetContext(MsgStack &msgStack, Signal &signalToHost, Signal &signalToBridge)
-	{
-		std::unique_lock lock(m_contextMutex);
-		auto &context = m_threadContext[std::this_thread::get_id()];
-		const auto oldContext = context;
-		context = {&msgStack, &signalToHost, &signalToBridge};
-		return oldContext;
-	}
-
-	// Clears current thread context
-	void ClearContext()
-	{
-		std::unique_lock lock(m_contextMutex);
-		m_threadContext.erase(std::this_thread::get_id());
-	}
-
-	// Returns current thread context, or falls back to GUI context if none exists
-	std::tuple<MsgStack &, Signal &, Signal &> Context()
-	{
-		std::shared_lock lock(m_contextMutex);
-		const auto ctx = m_threadContext.find(std::this_thread::get_id());
-		if(ctx != m_threadContext.end())
-			return {*ctx->second.msgStack, *ctx->second.signalToHost, *ctx->second.signalToBridge};
-		else
-			return {m_sharedMem->guiThreadMessages, m_sigToHostGui, m_sigToBridgeGui};
+		wchar_t readyName[64];
+		wcscpy(readyName, mapName);
+		wcscat(readyName, L"rdy");
+		return m_sigToHostAudio.Create(mapName, L"sha")
+		       && m_sigToBridgeAudio.Create(mapName, L"sba")
+		       && m_sigProcessAudio.Create(mapName, L"prc")
+		       && m_sigBridgeReady.Create(false, readyName);
 	}
 
 	// Copy a message to shared memory and return relative position.
-	BridgeMessage *CopyToSharedMemory(const BridgeMessage &msg, MsgStack &stack)
+	int CopyToSharedMemory(const BridgeMessage &msg, MsgStack &stack)
 	{
-		MPT_ASSERT(msg.header.status == MsgHeader::empty);
-		MPT_ASSERT((intptr_t(&stack.writePos) & 3) == 0);
-
-		const LONG writePos = InterlockedIncrement(&stack.writePos) - 1;
-		if(writePos >= MsgStack::kStackSize)
+		MPT_ASSERT(msg.header.isUsed);
+		for(int i = 0; i < MSG_STACK_SIZE; i++)
 		{
-			// Stack full! Should never happen, unless there is a crazy amount of threads talking over the bridge or too many nested messages, which by itself shouldn't happen.
-			InterlockedDecrement(&stack.writePos);
-			return nullptr;
+			BridgeMessage &targetMsg = stack[i];
+			bool expected = false;
+			if(targetMsg.header.isUsed.compare_exchange_strong(expected, true))
+			{
+				std::memcpy(&targetMsg, &msg, std::min(sizeof(BridgeMessage), size_t(msg.header.size)));
+				return i;
+			}
 		}
-
-		BridgeMessage &targetMsg = stack.msg[writePos];
-		MPT_ASSERT((intptr_t(&targetMsg.header.status) & 3) == 0);  // InterlockedExchangeAdd operand should be aligned to 32 bits
-		InterlockedExchange(&targetMsg.header.status, MsgHeader::empty);
-		std::memcpy(&targetMsg, &msg, std::min(sizeof(BridgeMessage), size_t(msg.header.size)));
-		InterlockedExchange(&targetMsg.header.status, MsgHeader::sent);
-		return &targetMsg;
+		return -1;
 	}
 };
 

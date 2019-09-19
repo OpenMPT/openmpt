@@ -22,22 +22,30 @@ OPENMPT_NAMESPACE_BEGIN
 BEGIN_MESSAGE_MAP(COwnerVstEditor, CAbstractVstEditor)
 	ON_WM_ERASEBKGND()
 	ON_WM_PAINT()
+	// Messages from plugin bridge to check whether a key would be handled by OpenMPT
+	// We need an offset to WM_USER because the editor window receives some spurious WM_USER messages (from MFC?) when it gets activated
+	ON_MESSAGE(WM_USER + 4000 + WM_KEYDOWN - WM_KEYFIRST, &COwnerVstEditor::OnPreTranslateKeyDown)
+	ON_MESSAGE(WM_USER + 4000 + WM_KEYUP - WM_KEYFIRST, &COwnerVstEditor::OnPreTranslateKeyUp)
+	ON_MESSAGE(WM_USER + 4000 + WM_SYSKEYDOWN - WM_KEYFIRST, &COwnerVstEditor::OnPreTranslateSysKeyDown)
+	ON_MESSAGE(WM_USER + 4000 + WM_SYSKEYUP - WM_KEYFIRST, &COwnerVstEditor::OnPreTranslateSysKeyUp)
 END_MESSAGE_MAP()
 
 
 void COwnerVstEditor::OnPaint()
 {
 	CAbstractVstEditor::OnPaint();
-	CVstPlugin &plugin = static_cast<CVstPlugin &>(m_VstPlugin);
+	auto &plugin = static_cast<const CVstPlugin &>(m_VstPlugin);
 	if(plugin.isBridged)
 	{
 		// Force redrawing for the plugin window in the bridged process.
-		// Otherwise, bridged plugin GUIs will not always be refreshed properly.
+		// Otherwise, bridged plugin GUIs will not always be refreshed properly (e.g. when restoring OpenMPT from minimized state).
+		// Synth1 is a good candidate for testing this behaviour.
 		CRect rect;
 		if(m_plugWindow.GetUpdateRect(&rect, FALSE))
 		{
 			CWnd *child = m_plugWindow.GetWindow(GW_CHILD | GW_HWNDFIRST);
-			if(child) child->RedrawWindow(&rect, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN);
+			if(child)
+				child->RedrawWindow(&rect, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW);
 		}
 	} else
 	{
