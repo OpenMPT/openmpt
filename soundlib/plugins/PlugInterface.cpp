@@ -486,10 +486,12 @@ void IMixPlugin::SaveAllParameters()
 		m_pMixStruct->pluginData.resize(nLen);
 		auto memFile = std::make_pair(mpt::as_span(m_pMixStruct->pluginData), mpt::IO::Offset(0));
 		mpt::IO::WriteIntLE<uint32>(memFile, 0);	// Plugin data type
+		BeginGetProgram();
 		for(PlugParamIndex i = 0; i < numParams; i++)
 		{
 			mpt::IO::Write(memFile, IEEE754binary32LE(GetParameter(i)));
 		}
+		EndGetProgram();
 	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 	{
 		m_pMixStruct->pluginData.clear();
@@ -509,7 +511,7 @@ void IMixPlugin::RestoreAllParameters(int32 /*program*/)
 			const uint32 numParams = GetNumParameters();
 			if((m_pMixStruct->pluginData.size() - sizeof(uint32)) >= (numParams * sizeof(IEEE754binary32LE)))
 			{
-				BeginSetProgram(-1);
+				BeginSetProgram();
 				for(uint32 i = 0; i < numParams; i++)
 				{
 					SetParameter(i, memFile.ReadFloatLE());
@@ -590,7 +592,7 @@ void IMixPlugin::AutomateParameter(PlugParamIndex param)
 
 	modDoc->PostMessageToAllViews(WM_MOD_PLUGPARAMAUTOMATE, m_nSlot, param);
 
-	if(auto *vstEditor = GetEditor() ; vstEditor && vstEditor->m_hWnd)
+	if(auto *vstEditor = GetEditor(); vstEditor && vstEditor->m_hWnd)
 	{
 		// Mark track modified if GUI is open and format supports plugins
 		SetModified();

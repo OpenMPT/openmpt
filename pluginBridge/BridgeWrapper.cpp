@@ -816,6 +816,14 @@ intptr_t BridgeWrapper::DispatchToPlugin(VstOpcodeToPlugin opcode, int32 index, 
 				ptrOut = std::max(static_cast<int64>(sizeof(int32) * 2), static_cast<int64>((param[1] - param[0]) * sizeof(ParameterInfo)));
 				dispatchData.insert(dispatchData.end(), ptrC, ptrC + 2 * sizeof(int32));
 			}
+
+			case kBeginGetProgram:
+				ptrOut = m_sharedMem->effect.numParams * sizeof(float);
+				break;
+
+			case kEndGetProgram:
+				m_cachedParamValues.clear();
+				return 1;
 			}
 		}
 		break;
@@ -933,7 +941,7 @@ intptr_t BridgeWrapper::DispatchToPlugin(VstOpcodeToPlugin opcode, int32 index, 
 
 	const DispatchMsg &resultMsg = msg.dispatch;
 
-	const char *extraData = useAuxMem ? auxMem->memory.Data<const char>() : reinterpret_cast<const char *>(&resultMsg + 1);
+	const void *extraData = useAuxMem ? auxMem->memory.Data<const char>() : reinterpret_cast<const char *>(&resultMsg + 1);
 	// Post-fix some opcodes
 	switch(opcode)
 	{
@@ -954,40 +962,39 @@ intptr_t BridgeWrapper::DispatchToPlugin(VstOpcodeToPlugin opcode, int32 index, 
 	case effGetProductString:
 	case effShellGetNextPlugin:
 		// Name in [ptr]
-		strcpy(ptrC, extraData);
+		strcpy(ptrC, static_cast<const char *>(extraData));
 		break;
 
 	case effEditGetRect:
 		// ERect** in [ptr]
-		m_editRect = *reinterpret_cast<const ERect *>(extraData);
+		m_editRect = *static_cast<const ERect *>(extraData);
 		*static_cast<const ERect **>(ptr) = &m_editRect;
 		break;
 
 	case effGetChunk:
 		// void** in [ptr] for chunk data address
-		if(const wchar_t *str = reinterpret_cast<const wchar_t *>(extraData); m_getChunkMem.Open(str))
+		if(const wchar_t *str = static_cast<const wchar_t *>(extraData); m_getChunkMem.Open(str))
 			*static_cast<void **>(ptr) = m_getChunkMem.Data();
 		else
 			return 0;
 		break;
 
 	case effVendorSpecific:
-		if(index == kVendorOpenMPT)
+		if(index == kVendorOpenMPT && resultMsg.result == 1)
 		{
 			switch(value)
 			{
 			case kCacheProgramNames:
-				if(resultMsg.result == 1)
-				{
-					m_cachedProgNames.assign(extraData, extraData + ptrOut);
-				}
+				m_cachedProgNames.assign(static_cast<const char *>(extraData), static_cast<const char *>(extraData) + ptrOut);
 				break;
 			case kCacheParameterInfo:
-				if(resultMsg.result == 1)
-				{
-					const ParameterInfo *params = reinterpret_cast<const ParameterInfo *>(extraData);
-					m_cachedParamInfo.assign(params, params + ptrOut / sizeof(ParameterInfo));
-				}
+			{
+				const ParameterInfo *params = static_cast<const ParameterInfo *>(extraData);
+				m_cachedParamInfo.assign(params, params + ptrOut / sizeof(ParameterInfo));
+				break;
+			}
+			case kBeginGetProgram:
+				m_cachedParamValues.assign(static_cast<const float *>(extraData), static_cast<const float *>(extraData) + ptrOut / sizeof(float));
 				break;
 			}
 		}
@@ -995,8 +1002,8 @@ intptr_t BridgeWrapper::DispatchToPlugin(VstOpcodeToPlugin opcode, int32 index, 
 
 	case effGetSpeakerArrangement:
 		// VstSpeakerArrangement* in [value] and [ptr]
-		m_speakers[0] = *reinterpret_cast<const VstSpeakerArrangement *>(extraData);
-		m_speakers[1] = *(reinterpret_cast<const VstSpeakerArrangement *>(extraData) + 1);
+		m_speakers[0] = *static_cast<const VstSpeakerArrangement *>(extraData);
+		m_speakers[1] = *(static_cast<const VstSpeakerArrangement *>(extraData) + 1);
 		*static_cast<VstSpeakerArrangement *>(ptr) = m_speakers[0];
 		*FromIntPtr<VstSpeakerArrangement>(value) = m_speakers[1];
 		break;
@@ -1137,6 +1144,9 @@ float VSTCALLBACK BridgeWrapper::GetParameter(AEffect *effect, int32 index)
 	BridgeWrapper *that = static_cast<BridgeWrapper *>(effect->object);
 	if(that)
 	{
+		if(static_cast<size_t>(index) < that->m_cachedParamValues.size())
+			return that->m_cachedParamValues[index];
+
 		try
 		{
 			return that->GetParameter(index);

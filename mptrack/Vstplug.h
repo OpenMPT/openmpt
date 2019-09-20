@@ -128,6 +128,8 @@ public:
 
 	void BeginSetProgram(int32 program) override;
 	void EndSetProgram() override;
+	void BeginGetProgram(int32 program) override;
+	void EndGetProgram() override;
 
 protected:
 	// Helper function for retreiving parameter name / label / display

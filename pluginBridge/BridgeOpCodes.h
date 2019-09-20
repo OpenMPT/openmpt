@@ -31,6 +31,10 @@ enum VendorSpecificOpCodes : int32
 	kCacheProgramNames,
 	// Cache parameter information - ptr points to 2x int32 containing the start and end parameter index - caches info in range [start, end[
 	kCacheParameterInfo,
+	// Cache parameter values
+	kBeginGetProgram,
+	// Stop using parameter value cache
+	kEndGetProgram,
 
 	// Constant for identifying our vendor-specific opcodes
 	kVendorOpenMPT = Vst::FourCC("OMPT"),

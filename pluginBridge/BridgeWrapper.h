@@ -110,6 +110,7 @@ protected:
 	
 	std::vector<char> m_cachedProgNames;
 	std::vector<ParameterInfo> m_cachedParamInfo;
+	std::vector<float> m_cachedParamValues;
 	int32 m_cachedProgNameStart = 0, m_cachedParamInfoStart = 0;
 	
 	bool m_isSettingProgram = false;

@@ -603,6 +603,16 @@ void PluginBridge::DispatchToPlugin(DispatchMsg &msg)
 				}
 				break;
 			}
+			case kBeginGetProgram:
+			{
+				int32 numParams = static_cast<int32>((msg.size - sizeof(DispatchMsg)) / sizeof(float));
+				float *params = static_cast<float *>(ptr);
+				for(int32 i = 0; i < numParams; i++)
+				{
+					params[i] = m_nativeEffect->getParameter(m_nativeEffect, i);
+				}
+				break;
+			}
 			default:
 				msg.result = 0;
 			}

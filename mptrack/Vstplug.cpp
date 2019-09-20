@@ -1131,6 +1131,22 @@ void CVstPlugin::EndSetProgram()
 }
 
 
+void CVstPlugin::BeginGetProgram(int32 program)
+{
+	if(isBridged)
+		Dispatch(effVendorSpecific, kVendorOpenMPT, kBeginGetProgram, nullptr, 0);
+	if(program != -1)
+		Dispatch(effSetProgram, 0, program, nullptr, 0);
+}
+
+
+void CVstPlugin::EndGetProgram()
+{
+	if(isBridged)
+		Dispatch(effVendorSpecific, kVendorOpenMPT, kEndGetProgram, nullptr, 0);
+}
+
+
 PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 {
 	float fResult = 0;
@@ -1520,12 +1536,12 @@ void CVstPlugin::SaveAllParameters()
 		void *p = nullptr;
 
 		// Try to get whole bank
-		intptr_t nByteSize = Dispatch(effGetChunk, 0, 0, &p, 0);
+		intptr_t byteSize = Dispatch(effGetChunk, 0, 0, &p, 0);
 
 		if (!p)
 		{
 			// Getting bank failed, try to get just preset
-			nByteSize = Dispatch(effGetChunk, 1, 0, &p, 0);
+			byteSize = Dispatch(effGetChunk, 1, 0, &p, 0);
 		} else
 		{
 			// We managed to get the bank, now we need to remember which program we're on.
@@ -1533,13 +1549,13 @@ void CVstPlugin::SaveAllParameters()
 		}
 		if (p != nullptr)
 		{
-			LimitMax(nByteSize, Util::MaxValueOfType(nByteSize) - 4);
+			LimitMax(byteSize, Util::MaxValueOfType(byteSize) - 4);
 			try
 			{
-				m_pMixStruct->pluginData.resize(nByteSize + 4);
+				m_pMixStruct->pluginData.resize(byteSize + 4);
 				auto data = m_pMixStruct->pluginData.data();
 				memcpy(data, "fEvN", 4);	// 'NvEf', return value of deprecated effIdentify call
-				memcpy(data + 4, p, nByteSize);
+				memcpy(data + 4, p, byteSize);
 				return;
 			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 			{

@@ -262,10 +262,12 @@ void VSTPresets::SaveProgram(std::ostream &f, IMixPlugin &plugin)
 	}
 	if(!writeChunk)
 	{
+		plugin.BeginGetProgram();
 		for(uint32 p = 0; p < numParams; p++)
 		{
 			mpt::IO::Write(f, IEEE754binary32BE(plugin.GetParameter(p)));
 		}
+		plugin.EndGetProgram();
 	}
 
 	// Now we know the correct chunk size.
