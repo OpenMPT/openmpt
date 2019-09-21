@@ -1129,7 +1129,7 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 	mpt::IO::Write(f, fileHeader);
 
 	// Write processed order list
-	mpt::IO::WriteRaw(f, orderList.data(), orderList.size());
+	mpt::IO::Write(f, orderList);
 
 	// Writing patterns
 

@@ -40,7 +40,7 @@ struct SFXSampleHeader
 		mptSmp.Initialize(MOD_TYPE_MOD);
 		mptSmp.nLength = length;
 		mptSmp.nFineTune = MOD2XMFineTune(finetune);
-		mptSmp.nVolume = 4u * std::min(static_cast<uint8>(volume), uint8(64));
+		mptSmp.nVolume = 4u * std::min(volume.get(), uint8(64));
 
 		SmpLength lStart = loopStart;
 		SmpLength lLength = loopLength * 2u;
@@ -297,8 +297,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
 				ModCommand &m = rowBase[chn];
-				uint8 data[4];
-				file.ReadArray(data);
+				auto data = file.ReadArray<uint8, 4>();
 
 				if(data[0] == 0xFF)
 				{

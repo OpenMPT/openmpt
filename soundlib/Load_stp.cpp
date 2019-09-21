@@ -59,7 +59,7 @@ struct STPSampleHeader
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.nLength = length;
-		mptSmp.nVolume = 4u * std::min(static_cast<uint8>(volume), uint8(64));
+		mptSmp.nVolume = 4u * std::min(volume.get(), uint8(64));
 
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopStart + loopLength;
@@ -433,13 +433,11 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				ChannelMemory &chnMem = channelMemory[chn];
 				ModCommand &m = rowBase[chn];
-				uint8 data[4];
-				file.ReadArray(data);
+				const auto [instr, note, command, param] = file.ReadArray<uint8, 4>();
 
-				m.instr   = data[0];
-				m.note    = data[1];
-				m.command = data[2];
-				m.param   = data[3];
+				m.instr   = instr;
+				m.note    = note;
+				m.param   = param;
 
 				if(m.note)
 				{
@@ -451,10 +449,10 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 				// and auto global fine volside
 				uint8 swapped = (m.param >> 4) | (m.param << 4);
 
-				if((m.command & 0xF0) == 0xF0)
+				if((command & 0xF0) == 0xF0)
 				{
 					// 12-bit CIA tempo
-					uint16 ciaTempo = (static_cast<uint16>(m.command & 0x0F) << 8) | m.param;
+					uint16 ciaTempo = (static_cast<uint16>(command & 0x0F) << 8) | m.param;
 					if(ciaTempo)
 					{
 						m.param = mpt::saturate_round<ModCommand::PARAM>(ConvertTempo(ciaTempo).ToDouble());
@@ -463,11 +461,13 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 					{
 						m.command = CMD_NONE;
 					}
-				} else switch(m.command)
+				} else switch(command)
 				{
 				case 0x00: // arpeggio
 					if(m.param)
 						m.command = CMD_ARPEGGIO;
+					else
+						m.command = CMD_NONE;
 					break;
 
 				case 0x01: // portamento up

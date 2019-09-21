@@ -546,8 +546,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Global Volume
 	m_nDefaultGlobalVolume = fileHeader.globalvol << 1;
-	if(m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-	if(fileHeader.speed) m_nDefaultSpeed = fileHeader.speed;
+	if(m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME)
+		m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
+	if(fileHeader.speed)
+		m_nDefaultSpeed = fileHeader.speed;
 	m_nDefaultTempo.Set(std::max(uint8(31), static_cast<uint8>(fileHeader.tempo)));
 	m_nSamplePreAmp = std::min(static_cast<uint8>(fileHeader.mv), uint8(128));
 
@@ -594,19 +596,22 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	uint32 minPtr = Util::MaxValueOfType(minPtr);
 	for(uint32 pos : insPos)
 	{
-		if(pos > 0 && pos < minPtr) minPtr = pos;
+		if(pos > 0 && pos < minPtr)
+			minPtr = pos;
 	}
 	for(uint32 pos : smpPos)
 	{
-		if(pos > 0 && pos < minPtr) minPtr = pos;
+		if(pos > 0 && pos < minPtr)
+			minPtr = pos;
 	}
 	for(uint32 pos : patPos)
 	{
-		if(pos > 0 && pos < minPtr) minPtr = pos;
+		if(pos > 0 && pos < minPtr)
+			minPtr = pos;
 	}
 	if(fileHeader.special & ITFileHeader::embedSongMessage)
 	{
-		minPtr = std::min(minPtr, static_cast<uint32>(fileHeader.msgoffset));
+		minPtr = std::min(minPtr, fileHeader.msgoffset.get());
 	}
 
 	const bool possiblyUNMO3 = fileHeader.cmwt == 0x0214 && (fileHeader.cwtv == 0x0214 || fileHeader.cwtv == 0)
@@ -664,9 +669,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(possiblyUNMO3 && nflt == 0)
 			{
 				if(fileHeader.special & ITFileHeader::embedPatternHighlights)
-					madeWithTracker = U_("UNMO3 <= 2.4.0.1");	// Set together with MIDI macro embed flag
+					madeWithTracker = U_("UNMO3 <= 2.4.0.1");  // Set together with MIDI macro embed flag
 				else
-					madeWithTracker = U_("UNMO3");	// Either 2.4.0.2+ or no MIDI macros embedded
+					madeWithTracker = U_("UNMO3");  // Either 2.4.0.2+ or no MIDI macros embedded
 			}
 		} else
 		{
@@ -827,7 +832,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
 #elif !defined(LIBOPENMPT_BUILD_TEST)
 					AddToLog(LogWarning, mpt::format(U_("Loading external sample %1 ('%2') failed: External samples are not supported."))(i + 1, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
-#endif // MPT_EXTERNAL_SAMPLES
+#endif  // MPT_EXTERNAL_SAMPLES
 				} else
 				{
 					file.Skip(strLen);
@@ -929,13 +934,17 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			// Now we actually update the pattern-row entry the note,instrument etc.
 			// Note
-			if(chnMask[ch] & 1) patternData.Skip(1);
+			if(chnMask[ch] & 1)
+				patternData.Skip(1);
 			// Instrument
-			if(chnMask[ch] & 2) patternData.Skip(1);
+			if(chnMask[ch] & 2)
+				patternData.Skip(1);
 			// Volume
-			if(chnMask[ch] & 4) patternData.Skip(1);
+			if(chnMask[ch] & 4)
+				patternData.Skip(1);
 			// Effect
-			if(chnMask[ch] & 8) patternData.Skip(2);
+			if(chnMask[ch] & 8)
+				patternData.Skip(2);
 		}
 		lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
 	}
@@ -999,7 +1008,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		if(!file.Skip(4)
 			|| !Patterns.Insert(pat, numRows))
 			continue;
-			
+
 		FileReader patternData = file.ReadChunk(len);
 
 		// Now (after the Insert() call), we can read the pattern name.
@@ -1064,7 +1073,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(chnMask[ch] & 1)	// Note
 			{
 				uint8 note = patternData.ReadUint8();
-				if(note < 0x80) note += NOTE_MIN;
+				if(note < 0x80)
+					note += NOTE_MIN;
 				if(!(GetType() & MOD_TYPE_MPT))
 				{
 					if(note > NOTE_MAX && note < 0xFD) note = NOTE_FADE;
@@ -1118,8 +1128,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Reading command/param
 			if(chnMask[ch] & 8)
 			{
-				m.command = patternData.ReadUint8();
-				m.param = patternData.ReadUint8();
+				const auto [command, param] = patternData.ReadArray<uint8, 2>();
+				m.command = command;
+				m.param = param;
 				S3MConvert(m, true);
 				// In some IT-compatible trackers, it is possible to input a parameter without a command.
 				// In this case, we still need to update the last value memory. OpenMPT didn't do this until v1.25.01.07.
@@ -1386,7 +1397,8 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 		// An additional "---" pattern is appended so Impulse Tracker won't ignore the last order item.
 		// Interestingly, this can exceed IT's 256 order limit. Also, IT will always save at least two orders.
 		itHeader.ordnum = std::min(Order().GetLengthTailTrimmed(), specs.ordersMax) + 1;
-		if(itHeader.ordnum < 2) itHeader.ordnum = 2;
+		if(itHeader.ordnum < 2)
+			itHeader.ordnum = 2;
 	}
 
 	itHeader.insnum = std::min(m_nInstruments, specs.instrumentsMax);
@@ -1874,7 +1886,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 	mpt::IO::SeekEnd(f);
 
 	const mpt::IO::Offset MPTStartPos = mpt::IO::TellWrite(f);
-	
+
 	srlztn::SsbWrite ssb(f);
 	ssb.BeginWrite("mptm", Version::Current().GetRawVersion());
 
@@ -2022,11 +2034,11 @@ bool CSoundFile::LoadMixPlugins(FileReader &file)
 		char code[4];
 		file.ReadArray(code);
 		const uint32 chunkSize = file.ReadUint32LE();
-		if(!memcmp(code, "IMPI", 4)	// IT instrument, we definitely read too far
-			|| !memcmp(code, "IMPS", 4)	// IT sample, ditto
-			|| !memcmp(code, "XTPM", 4)	// Instrument extensions, ditto
-			|| !memcmp(code, "STPM", 4)	// Song extensions, ditto
-			|| !file.CanRead(chunkSize))
+		if(!memcmp(code, "IMPI", 4)     // IT instrument, we definitely read too far
+		   || !memcmp(code, "IMPS", 4)  // IT sample, ditto
+		   || !memcmp(code, "XTPM", 4)  // Instrument extensions, ditto
+		   || !memcmp(code, "STPM", 4)  // Song extensions, ditto
+		   || !file.CanRead(chunkSize))
 		{
 			file.SkipBack(8);
 			return isBeRoTracker;
@@ -2036,9 +2048,9 @@ bool CSoundFile::LoadMixPlugins(FileReader &file)
 		// Channel FX
 		if(!memcmp(code, "CHFX", 4))
 		{
-			for (size_t ch = 0; ch < MAX_BASECHANNELS; ch++)
+			for(auto &chn : ChnSettings)
 			{
-				ChnSettings[ch].nMixPlugin = static_cast<PLUGINDEX>(chunk.ReadUint32LE());
+				chn.nMixPlugin = static_cast<PLUGINDEX>(chunk.ReadUint32LE());
 			}
 #ifndef NO_PLUGINS
 		}
@@ -2224,7 +2236,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 				// Write one chunk for every sample.
 				// Rationale: chunks are limited to 65536 bytes, which can easily be reached
 				// with the amount of samples that OpenMPT supports.
-				WRITEMODULARHEADER(MagicLE("CUES"), 2 + CountOf(sample.cues) * 4);
+				WRITEMODULARHEADER(MagicLE("CUES"), static_cast<uint16>(2 + std::size(sample.cues) * 4));
 				mpt::IO::WriteIntLE<uint16>(f, smp);
 				for(auto cue : sample.cues)
 				{
@@ -2376,11 +2388,11 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
 					static_assert(CountOf(ChnSettings) >= 64);
-					const CHANNELINDEX loopLimit = std::min(uint16(64 + size / 2), uint16(CountOf(ChnSettings)));
+					const CHANNELINDEX loopLimit = std::min(uint16(64 + size / 2), uint16(std::size(ChnSettings)));
 
 					for(CHANNELINDEX chn = 64; chn < loopLimit; chn++)
 					{
-						uint8 pan = chunk.ReadUint8(), vol = chunk.ReadUint8();
+						auto [pan, vol] = chunk.ReadArray<uint8, 2>();
 						if(pan != 0xFF)
 						{
 							ChnSettings[chn].nVolume = vol;
@@ -2439,7 +2451,6 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 				}
 				break;
 		}
-
 	}
 
 	// Validate read values.

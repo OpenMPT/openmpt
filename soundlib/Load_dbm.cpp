@@ -262,7 +262,7 @@ static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundF
 				if(dbmEnv.flags & DBMEnvelope::envLoop) mptEnv.dwFlags.set(ENV_LOOP);
 			}
 
-			uint8 numPoints = std::min(static_cast<uint8>(dbmEnv.numSegments), uint8(31)) + 1;
+			uint8 numPoints = std::min(dbmEnv.numSegments.get(), uint8(31)) + 1;
 			mptEnv.resize(numPoints);
 
 			mptEnv.nLoopStart = dbmEnv.loopBegin;

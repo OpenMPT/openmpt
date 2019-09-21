@@ -549,12 +549,12 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			for(ROWINDEX row = 0; row < numRows; row++)
 			{
-				ModCommand *m = Patterns[pat].GetRow(row);
-				for(CHANNELINDEX chn = 0; chn < channelsWithoutDrums; chn++, m++)
+				auto rowData = Patterns[pat].GetRow(row);
+				for(CHANNELINDEX chn = 0; chn < channelsWithoutDrums; chn++)
 				{
 					MT2Command cmd;
 					chunk.ReadStruct(cmd);
-					hasLegacyTempo |= ConvertMT2Command(this, *m, cmd);
+					hasLegacyTempo |= ConvertMT2Command(this, rowData[chn], cmd);
 				}
 			}
 		}
@@ -609,9 +609,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				MT2TrackSettings trackSettings;
 				if(chunk.ReadStruct(trackSettings))
 				{
-					ChnSettings[c].nVolume = trackSettings.volume >> 10;	// 32768 is 0dB
+					ChnSettings[c].nVolume = static_cast<uint8>(trackSettings.volume >> 10);	// 32768 is 0dB
 					trackRouting[c] = trackSettings.output;
-					LimitMax(ChnSettings[c].nVolume, uint16(64));
 				}
 			}
 			break;
@@ -944,7 +943,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				mptEnv.dwFlags.set(ENV_ENABLED, (mt2Env.flags & 1) != 0);
 				mptEnv.dwFlags.set(ENV_SUSTAIN, (mt2Env.flags & 2) != 0);
 				mptEnv.dwFlags.set(ENV_LOOP, (mt2Env.flags & 4) != 0);
-				mptEnv.resize(std::min(static_cast<uint8>(mt2Env.numPoints), uint8(16)));
+				mptEnv.resize(std::min(mt2Env.numPoints.get(), uint8(16)));
 				mptEnv.nSustainStart = mptEnv.nSustainEnd = mt2Env.sustainPos;
 				mptEnv.nLoopStart = mt2Env.loopStart;
 				mptEnv.nLoopEnd = mt2Env.loopEnd;

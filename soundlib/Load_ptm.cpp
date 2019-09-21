@@ -65,7 +65,7 @@ struct PTMSampleHeader
 	SampleIO ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize(MOD_TYPE_S3M);
-		mptSmp.nVolume = std::min(static_cast<uint8>(volume), uint8(64)) * 4;
+		mptSmp.nVolume = std::min(volume.get(), uint8(64)) * 4;
 		mptSmp.nC5Speed = c4speed * 2;
 
 		mptSmp.filename = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, filename);
@@ -238,8 +238,9 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 
 			if(b & 0x20)
 			{
-				m.note = file.ReadUint8();
-				m.instr = file.ReadUint8();
+				const auto [note, instr] = file.ReadArray<uint8, 2>();
+				m.note = note;
+				m.instr = instr;
 				if(m.note == 254)
 					m.note = NOTE_NOTECUT;
 				else if(!m.note || m.note > 120)
@@ -247,8 +248,9 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			if(b & 0x40)
 			{
-				m.command = file.ReadUint8();
-				m.param = file.ReadUint8();
+				const auto [command, param] = file.ReadArray<uint8, 2>();
+				m.command = command;
+				m.param = param;
 
 				static const EffectCommand effTrans[] = { CMD_GLOBALVOLUME, CMD_RETRIG, CMD_FINEVIBRATO, CMD_NOTESLIDEUP, CMD_NOTESLIDEDOWN, CMD_NOTESLIDEUPRETRIG, CMD_NOTESLIDEDOWNRETRIG, CMD_REVERSEOFFSET };
 				if(m.command < 0x10)

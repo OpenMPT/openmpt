@@ -853,7 +853,7 @@ public:
 	void S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool compatibilityExport = false) const;
 	void ModSaveCommand(uint8 &command, uint8 &param, const bool toXM, const bool compatibilityExport = false) const;
 	static void ReadMODPatternEntry(FileReader &file, ModCommand &m);
-	static void ReadMODPatternEntry(const uint8 (&data)[4], ModCommand &m);
+	static void ReadMODPatternEntry(const std::array<uint8, 4> data, ModCommand &m);
 
 	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
 

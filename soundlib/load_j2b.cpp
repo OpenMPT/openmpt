@@ -424,8 +424,8 @@ struct AMSampleHeader
 	void ConvertToMPT(AMInstrumentHeader &instrHeader, ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mptSmp.nPan = std::min(static_cast<uint16>(pan), uint16(32767)) * 256 / 32767;
-		mptSmp.nVolume = std::min(static_cast<uint16>(volume), uint16(32767)) * 256 / 32767;
+		mptSmp.nPan = std::min(pan.get(), uint16(32767)) * 256 / 32767;
+		mptSmp.nVolume = std::min(volume.get(), uint16(32767)) * 256 / 32767;
 		mptSmp.nGlobalVol = 64;
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
@@ -591,8 +591,9 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 
 			if (flags & noteFlag) // note + ins
 			{
-				m.instr = chunk.ReadUint8();
-				m.note = chunk.ReadUint8();
+				const auto [instr, note] = chunk.ReadArray<uint8, 2>();
+				m.instr = instr;
+				m.note = note;
 				if(m.note == 0x80) m.note = NOTE_KEYOFF;
 				else if(m.note > 0x80) m.note = NOTE_FADE;	// I guess the support for IT "note fade" notes was not intended in mod2j2b, but hey, it works! :-D
 			}

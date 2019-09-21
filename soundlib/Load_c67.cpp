@@ -227,9 +227,7 @@ bool CSoundFile::ReadC67(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// Note, instrument, volume
 				ModCommand &m = *pattern.GetpModCommand(row, cmd);
-				uint8 data[2];
-				patChunk.ReadArray(data);
-				uint8 note = data[0], instrVol = data[1];
+				const auto [note, instrVol] = patChunk.ReadArray<uint8, 2>();
 				bool fmChn = (cmd >= 4);
 				m.note = NOTE_MIN + (fmChn ? 12 : 36) + (note & 0x0F) + ((note >> 4) & 0x07) * 12;
 				m.instr = (fmChn ? 33 : 1) + (instrVol >> 4) + ((note & 0x80) >> 3);

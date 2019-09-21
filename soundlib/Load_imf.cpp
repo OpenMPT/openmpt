@@ -110,7 +110,7 @@ struct IMFInstrument
 		uint16 minTick = 0; // minimum tick value for next node
 		for(uint32 n = 0; n < mptEnv.size(); n++)
 		{
-			minTick = mptEnv[n].tick = std::max(minTick, static_cast<uint16>(nodes[e][n].tick));
+			mptEnv[n].tick = minTick = std::max(minTick, nodes[e][n].tick.get());
 			minTick++;
 			mptEnv[n].value = static_cast<uint8>(std::min(nodes[e][n].value >> shift, ENVELOPE_MAX));
 		}
@@ -521,8 +521,9 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 			if(mask & 0x20)
 			{
 				// Read note/instrument
-				m.note = patternChunk.ReadUint8();
-				m.instr = patternChunk.ReadUint8();
+				const auto [note, instr] = patternChunk.ReadArray<uint8, 2>();
+				m.note = note;
+				m.instr = instr;
 
 				if(m.note == 160)
 				{
@@ -542,10 +543,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 			if((mask & 0xC0) == 0xC0)
 			{
 				// Read both effects and figure out what to do with them
-				uint8 e1c = patternChunk.ReadUint8();	// Command 1
-				uint8 e1d = patternChunk.ReadUint8();	// Data 1
-				uint8 e2c = patternChunk.ReadUint8();	// Command 2
-				uint8 e2d = patternChunk.ReadUint8();	// Data 2
+				const auto [e1c, e1d, e2c, e2d] = patternChunk.ReadArray<uint8, 4>();  // Command 1, Data 1, Command 2, Data 2
 
 				if(e1c == 0x0C)
 				{
@@ -582,8 +580,9 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(mask & 0xC0)
 			{
 				// There's one effect, just stick it in the effect column
-				m.command = patternChunk.ReadUint8();
-				m.param = patternChunk.ReadUint8();
+				const auto [command, param] = patternChunk.ReadArray<uint8, 2>();
+				m.command = command;
+				m.param = param;
 			}
 			if(m.command)
 				ImportIMFEffect(m);

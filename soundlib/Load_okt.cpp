@@ -65,7 +65,7 @@ static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSo
 
 		mptSmp.nC5Speed = 8287;
 		mptSmp.nGlobalVol = 64;
-		mptSmp.nVolume = std::min(static_cast<uint16>(oktSmp.volume), uint16(64)) * 4u;
+		mptSmp.nVolume = std::min(oktSmp.volume.get(), uint16(64)) * 4u;
 		mptSmp.nLength = oktSmp.length & ~1;	// round down
 		// Parse loops
 		const SmpLength loopStart = oktSmp.loopStart * 2;
@@ -106,10 +106,8 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 		for(CHANNELINDEX chn = 0; chn < chns; chn++)
 		{
 			ModCommand &m = rowCmd[chn];
-			uint8 note = chunk.ReadUint8();
-			uint8 instr = chunk.ReadUint8();
-			uint8 effect = chunk.ReadUint8();
-			m.param = chunk.ReadUint8();
+			const auto [note, instr, effect, param] = chunk.ReadArray<uint8, 4>();
+			m.param = param;
 
 			if(note > 0 && note <= 36)
 			{
@@ -243,7 +241,8 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 #endif
 
 			default:
-				m.command = m.param = 0;
+				m.command = CMD_NONE;
+				m.param = 0;
 				break;
 			}
 		}

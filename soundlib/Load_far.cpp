@@ -257,24 +257,23 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				ModCommand &m = rowBase[chn];
 
-				uint8 data[4];
-				patternChunk.ReadArray(data);
+				const auto [note, instr, volume, effect] = patternChunk.ReadArray<uint8, 4>();
 
-				if(data[0] > 0 && data[0] < 85)
+				if(note > 0 && note <= 72)
 				{
-					m.note = data[0] + 35 + NOTE_MIN;
-					m.instr = data[1] + 1;
+					m.note = note + 35 + NOTE_MIN;
+					m.instr = instr + 1;
 				}
 
-				if(m.note != NOTE_NONE || data[2] > 0)
+				if(m.note != NOTE_NONE || volume > 0)
 				{
 					m.volcmd = VOLCMD_VOLUME;
-					m.vol = (Clamp(data[2], uint8(1), uint8(16)) - 1u) * 4u;
+					m.vol = (Clamp(volume, uint8(1), uint8(16)) - 1u) * 4u;
 				}
 				
-				m.param = data[3] & 0x0F;
+				m.param = effect & 0x0F;
 
-				switch(data[3] >> 4)
+				switch(effect >> 4)
 				{
 				case 0x03:	// Porta to note
 					m.param <<= 2;
@@ -297,7 +296,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 					m.param = 6 / (1 + m.param) + 1;
 					m.param |= 0x0D;
 				}
-				m.command = farEffects[data[3] >> 4];
+				m.command = farEffects[effect >> 4];
 			}
 		}
 

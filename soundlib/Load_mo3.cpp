@@ -133,7 +133,7 @@ struct MO3Envelope
 		if(flags & envLoop) mptEnv.dwFlags.set(ENV_LOOP);
 		if(flags & envFilter) mptEnv.dwFlags.set(ENV_FILTER);
 		if(flags & envCarry) mptEnv.dwFlags.set(ENV_CARRY);
-		mptEnv.resize(std::min(static_cast<uint8>(numNodes), uint8(25)));
+		mptEnv.resize(std::min(numNodes.get(), uint8(25)));
 		mptEnv.nSustainStart = sustainStart;
 		mptEnv.nSustainEnd = sustainEnd;
 		mptEnv.nLoopStart = loopStart;
@@ -306,7 +306,7 @@ struct MO3Sample
 			if(type != MOD_TYPE_MTM) mptSmp.nFineTune -= 128;
 			mptSmp.RelativeTone = transpose;
 		}
-		mptSmp.nVolume = std::min(static_cast<uint8>(defaultVolume), uint8(64)) * 4u;
+		mptSmp.nVolume = std::min(defaultVolume.get(), uint8(64)) * 4u;
 		if(panning <= 256)
 		{
 			mptSmp.nPan = panning;
@@ -455,12 +455,9 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 					break;
 				}
 				size -= strLen;
-				const uint8 *string = dst + strOffset;
-				while(strLen > 0)
-				{
-					*dst++ = *string++;
-					strLen--;
-				}
+				memcpy(dst, dst + strOffset, strLen);
+				dst += strLen;
+				strLen = 0;
 			} else
 			{
 				break;
@@ -867,9 +864,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		m_playBehaviour.set(kMODVBlankTiming);
 
 	if(m_nType == MOD_TYPE_IT)
-		m_nDefaultGlobalVolume = std::min(static_cast<uint8>(fileHeader.globalVol), uint8(128)) * 2;
+		m_nDefaultGlobalVolume = std::min(fileHeader.globalVol.get(), uint8(128)) * 2;
 	else if(m_nType == MOD_TYPE_S3M)
-		m_nDefaultGlobalVolume = std::min(static_cast<uint8>(fileHeader.globalVol), uint8(64)) * 4;
+		m_nDefaultGlobalVolume = std::min(fileHeader.globalVol.get(), uint8(64)) * 4;
 
 	if(fileHeader.sampleVolume < 0)
 		m_nSamplePreAmp = fileHeader.sampleVolume + 52;
@@ -881,7 +878,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	for(CHANNELINDEX i = 0; i < headerChannels; i++)
 	{
 		if(m_nType == MOD_TYPE_IT)
-			ChnSettings[i].nVolume = std::min(static_cast<uint8>(fileHeader.chnVolume[i]), uint8(64));
+			ChnSettings[i].nVolume = std::min(fileHeader.chnVolume[i].get(), uint8(64));
 		if(m_nType != MOD_TYPE_XM)
 		{
 			if(fileHeader.chnPan[i] == 127)

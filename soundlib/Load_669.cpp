@@ -209,29 +209,28 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 
 			for(CHANNELINDEX chn = 0; chn < 8; chn++, m++)
 			{
-				uint8 data[3];
-				file.ReadArray(data);
+				const auto [noteInstr, instrVol, effParam] = file.ReadArray<uint8, 3>();
 
-				uint8 note = data[0] >> 2;
-				uint8 instr = ((data[0] & 0x03) << 4) | (data[1] >> 4);
-				uint8 vol = data[1] & 0x0F;
-				if(data[0] < 0xFE)
+				uint8 note = noteInstr >> 2;
+				uint8 instr = ((noteInstr & 0x03) << 4) | (instrVol >> 4);
+				uint8 vol = instrVol & 0x0F;
+				if(noteInstr < 0xFE)
 				{
 					m->note = note + 36 + NOTE_MIN;
 					m->instr = instr + 1;
 					effect[chn] = 0xFF;
 				}
-				if(data[0] <= 0xFE)
+				if(noteInstr <= 0xFE)
 				{
 					m->volcmd = VOLCMD_VOLUME;
 					m->vol = ((vol * 64 + 8) / 15);
 				}
 
-				if(data[2] != 0xFF)
+				if(effParam != 0xFF)
 				{
-					effect[chn] = data[2];
+					effect[chn] = effParam;
 				}
-				if((data[2] & 0x0F) == 0 && data[2] != 0x30)
+				if((effParam & 0x0F) == 0 && effParam != 0x30)
 				{
 					// A param value of 0 resets the effect.
 					effect[chn] = 0xFF;

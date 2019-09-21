@@ -357,20 +357,18 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 				if(channelByte & noteFlag)
 				{
 					// Note and sample follows
-					uint8 noteByte = chunk.ReadUint8();
-					uint8 noteSample = chunk.ReadUint8();
+					auto [note, instr] = chunk.ReadArray<uint8, 2>();
 
-					if(noteByte)
+					if(note)
 					{
-						noteByte = (noteByte & 0x7F) - 1; // This format doesn't have note cuts
-						if(noteByte < 0xF0) noteByte = (noteByte & 0x0F) + 12 * (noteByte >> 4) + 12 + NOTE_MIN;
-						m.note = noteByte;
+						note = (note & 0x7F) - 1;  // High bit = no-retrig flag (notes with portamento have this set)
+						m.note = (note & 0x0F) + 12 * (note >> 4) + 12 + NOTE_MIN;
 						if(!m.IsAmigaNote())
 						{
 							onlyAmigaNotes = false;
 						}
 					}
-					m.instr = noteSample;
+					m.instr = instr;
 				}
 
 				if(channelByte & effectFlag)
@@ -384,8 +382,8 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 						// We may want to restore the old command in some cases.
 						const ModCommand oldCmd = m;
 
-						uint8 effByte = chunk.ReadUint8();
-						m.param = chunk.ReadUint8();
+						const auto [effByte, param] = chunk.ReadArray<uint8, 2>();
+						m.param = param;
 
 						// Effect translation LUT
 						static const EffectCommand gdmEffTrans[] =

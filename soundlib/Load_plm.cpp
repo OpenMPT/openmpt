@@ -190,7 +190,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 			sample.uFlags.set(CHN_PANNING);
 			sample.nPan = sampleHeader.panning * 0x11;
 		}
-		sample.nGlobalVol = std::min(static_cast<uint8>(sampleHeader.volume), uint8(64));
+		sample.nGlobalVol = std::min(sampleHeader.volume.get(), uint8(64));
 		sample.nC5Speed = sampleHeader.sampleRate;
 		sample.nLoopStart = sampleHeader.loopStart;
 		sample.nLoopEnd = sampleHeader.loopEnd;
@@ -270,7 +270,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		static_assert(ORDERINDEX_MAX >= ((mpt::limits<decltype(ord.x)>::max)() + 255) / rowsPerPat);
 		ORDERINDEX curOrd = static_cast<ORDERINDEX>(ord.x / rowsPerPat);
 		ROWINDEX curRow = static_cast<ROWINDEX>(ord.x % rowsPerPat);
-		const CHANNELINDEX numChannels = std::min(static_cast<uint8>(patHeader.numChannels), static_cast<uint8>(fileHeader.numChannels - ord.y));
+		const CHANNELINDEX numChannels = std::min(patHeader.numChannels.get(), static_cast<uint8>(fileHeader.numChannels - ord.y));
 		const uint32 patternEnd = ord.x + patHeader.numRows;
 		maxPos = std::max(maxPos, patternEnd);
 
@@ -293,25 +293,24 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 			ModCommand *m = Patterns[pat].GetpModCommand(curRow, ord.y);
 			for(CHANNELINDEX c = 0; c < numChannels; c++, m++)
 			{
-				uint8 data[5];
-				file.ReadArray(data);
-				if(data[0])
-					lastNote[c] = m->note = (data[0] >> 4) * 12 + (data[0] & 0x0F) + 12 + NOTE_MIN;
+				const auto [note, instr, volume, command, param] = file.ReadArray<uint8, 5>();
+				if(note > 0 && note < 0x90)
+					lastNote[c] = m->note = (note >> 4) * 12 + (note & 0x0F) + 12 + NOTE_MIN;
 				else
 					m->note = NOTE_NONE;
-				m->instr = data[1];
+				m->instr = instr;
 				m->volcmd = VOLCMD_VOLUME;
-				if(data[2] != 0xFF)
-					m->vol = data[2];
+				if(volume != 0xFF)
+					m->vol = volume;
 				else
 					m->volcmd = VOLCMD_NONE;
 
-				if(data[3] < CountOf(effTrans))
+				if(command < CountOf(effTrans))
 				{
-					m->command = effTrans[data[3]];
-					m->param = data[4];
+					m->command = effTrans[command];
+					m->param = param;
 					// Fix some commands
-					switch(data[3])
+					switch(command)
 					{
 					case 0x07:	// Tremolo waveform
 						m->param = 0x40 | (m->param & 0x03);

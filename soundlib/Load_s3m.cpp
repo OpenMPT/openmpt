@@ -369,7 +369,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Global Volume
-	m_nDefaultGlobalVolume = std::min(static_cast<uint8>(fileHeader.globalVol), uint8(64)) * 4u;
+	m_nDefaultGlobalVolume = std::min(fileHeader.globalVol.get(), uint8(64)) * 4u;
 	// The following check is probably not very reliable, but it fixes a few tunes, e.g.
 	// DARKNESS.S3M by Purple Motion (ST 3.00) and "Image of Variance" by C.C.Catch (ST 3.01):
 	if(m_nDefaultGlobalVolume == 0 && fileHeader.cwtv < S3MFileHeader::trkST3_20)
@@ -515,23 +515,13 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 			if(info & s3mNotePresent)
 			{
-				uint8 note = file.ReadUint8(), instr = file.ReadUint8();
-
+				const auto [note, instr] = file.ReadArray<uint8, 2>();
 				if(note < 0xF0)
-				{
-					// Note
-					note = (note & 0x0F) + 12 * (note >> 4) + 12 + NOTE_MIN;
-				} else if(note == s3mNoteOff)
-				{
-					// ^^
-					note = NOTE_NOTECUT;
-				} else if(note == s3mNoteNone)
-				{
-					// ..
-					note = NOTE_NONE;
-				}
-
-				m.note = note;
+					m.note = (note & 0x0F) + 12 * (note >> 4) + 12 + NOTE_MIN;
+				else if(note == s3mNoteOff)
+					m.note = NOTE_NOTECUT;
+				else if(note == s3mNoteNone)
+					m.note = NOTE_NONE;
 				m.instr = instr;
 			}
 
@@ -551,8 +541,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 			if(info & s3mEffectPresent)
 			{
-				m.command = file.ReadUint8();
-				m.param = file.ReadUint8();
+				const auto [command, param] = file.ReadArray<uint8, 2>();
+				m.command = command;
+				m.param = param;
 				S3MConvert(m, false);
 
 				if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xA0 && fileHeader.cwtv < S3MFileHeader::trkST3_20)

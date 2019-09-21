@@ -190,13 +190,13 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 			ModCommand *m = Patterns[pat].GetpModCommand(0, chn);
 			for(ROWINDEX row = 0; row < rowsPerPat; row++, m += GetNumChannels())
 			{
-				uint8 data[3];
-				tracks.ReadArray(data);
+				const auto [noteInstr, instrCmd, par] = tracks.ReadArray<uint8, 3>();
 
-				if(data[0] & 0xFC) m->note = (data[0] >> 2) + 36 + NOTE_MIN;
-				m->instr = ((data[0] & 0x03) << 4) | (data[1] >> 4);
-				uint8 cmd = data[1] & 0x0F;
-				uint8 param = data[2];
+				if(noteInstr & 0xFC)
+					m->note = (noteInstr >> 2) + 36 + NOTE_MIN;
+				m->instr = ((noteInstr & 0x03) << 4) | (instrCmd >> 4);
+				uint8 cmd = instrCmd & 0x0F;
+				uint8 param = par;
 				if(cmd == 0x0A)
 				{
 					if(param & 0xF0) param &= 0xF0; else param &= 0x0F;

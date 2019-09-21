@@ -452,9 +452,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 						case 0x0D: // Channel panning table - can be set using CONVERT.EXE /E
 							{
-								uint8 chn = subChunk.ReadUint8();
-								uint8 pan = subChunk.ReadUint8();
-								uint8 type = subChunk.ReadUint8();
+								const auto [chn, pan, type] = subChunk.ReadArray<uint8, 3>();
 								if(chn < subsong.channelPanning.size())
 								{
 									switch(type)
@@ -487,8 +485,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 						case 0x0E: // Channel volume table (0...255) - can be set using CONVERT.EXE /E, is 255 in all "official" PSMs except for some OMF 2097 tracks
 							{
-								uint8 chn = subChunk.ReadUint8();
-								uint8 vol = subChunk.ReadUint8();
+								const auto [chn, vol] = subChunk.ReadArray<uint8, 2>();
 								if(chn < subsong.channelVolume.size())
 								{
 									subsong.channelVolume[chn] = (vol / 4u) + 1;
@@ -514,8 +511,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 					if(!subChunk.CanRead(2))
 						break;
 
-					uint8 type = subChunk.ReadUint8();
-					uint8 pan = subChunk.ReadUint8();
+					const auto [type, pan] = subChunk.ReadArray<uint8, 2>();
 					switch(type)
 					{
 					case 0: // use panning
@@ -685,8 +681,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 			while(rowChunk.CanRead(3))
 			{
-				uint8 flags = rowChunk.ReadUint8();
-				uint8 channel = rowChunk.ReadUint8();
+				const auto [flags, channel] = rowChunk.ReadArray<uint8, 2>();
 				// Point to the correct channel
 				ModCommand &m = rowBase[std::min(static_cast<CHANNELINDEX>(m_nChannels - 1), static_cast<CHANNELINDEX>(channel))];
 
@@ -724,11 +719,11 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				if(flags & effectFlag)
 				{
 					// Effect present - convert
-					m.command = rowChunk.ReadUint8();
-					m.param = rowChunk.ReadUint8();
+					const auto [command, param] = rowChunk.ReadArray<uint8, 2>();
+					m.param = param;
 
 					// This list is annoyingly similar to PSM16, but not quite identical.
-					switch(m.command)
+					switch(command)
 					{
 					// Volslides
 					case 0x01: // fine volslide up
@@ -1022,7 +1017,7 @@ struct PSM16SampleHeader
 		mptSmp.nC5Speed = c2freq;
 		mptSmp.Transpose(((finetune ^ 0x08) - 0x78) / (12.0 * 16.0));
 
-		mptSmp.nVolume = std::min(static_cast<uint8>(volume), uint8(64)) * 4u;
+		mptSmp.nVolume = std::min(volume.get(), uint8(64)) * 4u;
 
 		mptSmp.uFlags.reset();
 		if(flags & PSM16SampleHeader::smp16Bit)
@@ -1244,8 +1239,9 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 				if(chnFlag & noteFlag)
 				{
 					// note + instr present
-					m.note = patternChunk.ReadUint8() + 36;
-					m.instr = patternChunk.ReadUint8();
+					const auto [note, instr] = patternChunk.ReadArray<uint8, 2>();
+					m.note = note + 36;
+					m.instr = instr;
 				}
 				if(chnFlag & volFlag)
 				{
@@ -1256,10 +1252,10 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 				if(chnFlag & effectFlag)
 				{
 					// effect present - convert
-					m.command = patternChunk.ReadUint8();
-					m.param = patternChunk.ReadUint8();
+					const auto [command, param] = patternChunk.ReadArray<uint8, 2>();
+					m.param = param;
 
-					switch(m.command)
+					switch(command)
 					{
 					// Volslides
 					case 0x01: // fine volslide up

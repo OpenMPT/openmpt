@@ -578,8 +578,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		uint8 numInstruments = chunk.ReadUint8();
 		for(uint8 i = 0; i < numInstruments; i++)
 		{
-			uint8 ins = chunk.ReadUint8();
-			uint8 numSamples = chunk.ReadUint8();
+			const auto [ins, numSamples] = chunk.ReadArray<uint8, 2>();
 			uint8 firstNote = 0;
 			ModInstrument *mptIns = nullptr;
 			if(ins == 0
@@ -591,7 +590,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			chunk.ReadString<mpt::String::spacePadded>(mptIns->name, 32);
-			while(numSamples--)
+			for(uint8 smp = 0; smp < numSamples; smp++)
 			{
 				MDLSampleHeader sampleHeader;
 				chunk.ReadStruct(sampleHeader);

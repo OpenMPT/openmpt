@@ -148,7 +148,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		sample.SanitizeLoops();
 	
-		sample.nVolume = std::min(static_cast<uint8>(fileHeader.smpVolume[smp]), uint8(64)) * 4;
+		sample.nVolume = std::min(fileHeader.smpVolume[smp].get(), uint8(64)) * 4;
 		sample.nFineTune = MOD2XMFineTune(fileHeader.smpFinetune[smp]);
 	}
 

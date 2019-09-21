@@ -49,7 +49,7 @@ struct AsylumSampleHeader
 	{
 		mptSmp.Initialize();
 		mptSmp.nFineTune = MOD2XMFineTune(finetune);
-		mptSmp.nVolume = std::min(static_cast<uint8>(defaultVolume), uint8(64)) * 4u;
+		mptSmp.nVolume = std::min(defaultVolume.get(), uint8(64)) * 4u;
 		mptSmp.RelativeTone = transpose;
 		mptSmp.nLength = length;
 
@@ -178,16 +178,14 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 
 		for(auto &m : Patterns[pat])
 		{
-			uint8 data[4];
-			file.ReadArray(data);
-
-			if(data[0] && data[0] + 12 + NOTE_MIN <= NOTE_MAX)
+			const auto [note, instr, command, param] = file.ReadArray<uint8, 4>();
+			if(note && note + 12 + NOTE_MIN <= NOTE_MAX)
 			{
-				m.note = data[0] + 12 + NOTE_MIN;
+				m.note = note + 12 + NOTE_MIN;
 			}
-			m.instr = data[1];
-			m.command = data[2];
-			m.param = data[3];
+			m.instr = instr;
+			m.command = command;
+			m.param = param;
 			ConvertModCommand(m);
 #ifdef MODPLUG_TRACKER
 			if(m.command == CMD_PANNING8)
@@ -225,9 +223,7 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 	ModCommand::INSTR lastInstr = 0;
 	while(fileChunk.CanRead(3))
 	{
-		const uint8 row = fileChunk.ReadUint8();
-		const uint8 command = fileChunk.ReadUint8();
-		const uint8 value = fileChunk.ReadUint8();
+		const auto [row, command, value] = fileChunk.ReadArray<uint8, 3>();
 		if(row >= pattern.GetNumRows())
 		{
 			break;
@@ -486,10 +482,10 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	// Get Tempo/Speed
 	if(fileHeader.version >= 13)
 	{
-		uint8 tempo = file.ReadUint8();
+		auto [tempo, speed] = file.ReadArray<uint8, 2>();
 		if(tempo < 32) tempo = 125;
 		m_nDefaultTempo.Set(tempo);
-		m_nDefaultSpeed = file.ReadUint8();
+		m_nDefaultSpeed = speed;
 	} else
 	{
 		m_nDefaultTempo.Set(125);
