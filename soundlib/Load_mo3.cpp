@@ -455,9 +455,12 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 					break;
 				}
 				size -= strLen;
-				memcpy(dst, dst + strOffset, strLen);
-				dst += strLen;
-				strLen = 0;
+				const uint8 *string = dst + strOffset;
+				while(strLen > 0)
+				{
+					*dst++ = *string++;
+					strLen--;
+				}
 			} else
 			{
 				break;
