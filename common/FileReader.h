@@ -385,7 +385,7 @@ namespace FileReader
 	// Allow to read a struct partially (if there's less memory available than the struct's size, fill it up with zeros).
 	// The file cursor is advanced by "partialSize" bytes.
 	template <typename T, typename TFileCursor>
-	bool ReadStructPartial(TFileCursor &f, T &target, typename TFileCursor::off_t partialSize = sizeof(T))
+	typename TFileCursor::off_t ReadStructPartial(TFileCursor &f, T &target, typename TFileCursor::off_t partialSize = sizeof(T))
 	{
 		static_assert(mpt::is_binary_safe<T>::value);
 		typename TFileCursor::off_t copyBytes = std::min(partialSize, sizeof(T));
@@ -396,7 +396,7 @@ namespace FileReader
 		f.GetRaw(mpt::as_raw_memory(target).data(), copyBytes);
 		std::memset(mpt::as_raw_memory(target).data() + copyBytes, 0, sizeof(target) - copyBytes);
 		f.Skip(partialSize);
-		return true;
+		return copyBytes;
 	}
 
 	// Read a string of length srcSize into fixed-length char array destBuffer using a given read mode.
@@ -1244,7 +1244,7 @@ public:
 	}
 
 	template <typename T>
-	bool ReadStructPartial(T &target, off_t partialSize = sizeof(T))
+	size_t ReadStructPartial(T &target, size_t partialSize = sizeof(T))
 	{
 		return mpt::FileReader::ReadStructPartial(*this, target, partialSize);
 	}
@@ -1305,6 +1305,14 @@ public:
 	bool ReadArray(T (&destArray)[destSize])
 	{
 		return mpt::FileReader::ReadArray(*this, destArray);
+	}
+
+	template <typename T, std::size_t destSize>
+	std::array<T, destSize> ReadArray()
+	{
+		std::array<T, destSize> destArray;
+		mpt::FileReader::ReadArray(*this, destArray);
+		return destArray;
 	}
 
 	template<typename T, std::size_t destSize>
