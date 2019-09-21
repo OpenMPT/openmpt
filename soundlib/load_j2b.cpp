@@ -1018,23 +1018,41 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	FileReader::PinnedRawDataView filePackedView = file.GetPinnedRawDataView(fileHeader.packedLength);
-
-#ifndef MPT_BUILD_FUZZER
-	if(fileHeader.crc32 != crc32(0, mpt::byte_cast<const Bytef*>(filePackedView.data()), static_cast<uint32>(filePackedView.size())))
-	{
-		return false;
-	}
-#endif
-
 	// Header is valid, now unpack the RIFF AM file using inflate
-	uLongf destSize = fileHeader.unpackedLength;
-	std::vector<Bytef> amFileData(destSize);
-	int retVal = uncompress(amFileData.data(), &destSize, mpt::byte_cast<const Bytef*>(filePackedView.data()), static_cast<uint32>(filePackedView.size()));
+	z_stream strm{};
+	if(inflateInit(&strm) != Z_OK)
+		return false;
+
+	uint32 remainRead = fileHeader.packedLength, remainWrite = fileHeader.unpackedLength, totalWritten = 0;
+	uint32 crc = 0;
+	std::vector<Bytef> amFileData(remainWrite);
+	int retVal = Z_OK;
+	while(remainRead && remainWrite && retVal != Z_STREAM_END)
+	{
+		Bytef buffer[mpt::IO::BUFFERSIZE_TINY];
+		uint32 readSize = std::min(static_cast<uint32>(sizeof(buffer)), remainRead);
+		file.ReadRaw(buffer, readSize);
+		crc = crc32(crc, buffer, readSize);
+
+		strm.avail_in = readSize;
+		strm.next_in = buffer;
+		do
+		{
+			strm.avail_out = remainWrite;
+			strm.next_out = amFileData.data() + totalWritten;
+			retVal = inflate(&strm, Z_NO_FLUSH);
+			uint32 written = remainWrite - strm.avail_out;
+			totalWritten += written;
+			remainWrite -= written;
+		} while(remainWrite && strm.avail_out == 0);
+
+		remainRead -= readSize;
+	}
+	inflateEnd(&strm);
 
 	bool result = false;
 #ifndef MPT_BUILD_FUZZER
-	if(destSize == fileHeader.unpackedLength && retVal == Z_OK)
+	if(fileHeader.crc32 == crc && !remainWrite && retVal == Z_STREAM_END)
 #endif
 	{
 		// Success, now load the RIFF AM(FF) module.
