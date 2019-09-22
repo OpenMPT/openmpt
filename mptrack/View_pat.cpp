@@ -6504,7 +6504,7 @@ void CViewPattern::SetSplitKeyboardSettings()
 	if(pModDoc == nullptr)
 		return;
 
-	CSplitKeyboadSettings dlg(CMainFrame::GetMainFrame(), pModDoc->GetSoundFile(), pModDoc->GetSplitKeyboardSettings());
+	CSplitKeyboardSettings dlg(CMainFrame::GetMainFrame(), pModDoc->GetSoundFile(), pModDoc->GetSplitKeyboardSettings());
 	if(dlg.DoModal() == IDOK)
 	{
 		// Update split keyboard settings in other pattern views

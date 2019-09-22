@@ -115,7 +115,7 @@ protected:
 	MPTChord::NoteType m_mouseDownKey = MPTChord::noNote, m_dragKey = MPTChord::noNote;
 	enum : MPTChord::NoteType
 	{
-		CHORD_MIN = -12,
+		CHORD_MIN = -24,
 		CHORD_MAX = 24
 	};
 
@@ -144,7 +144,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Keyboard Split Settings (pattern editor)
 
-class CSplitKeyboadSettings : public CDialog
+class CSplitKeyboardSettings : public CDialog
 {
 protected:
 	CComboBox m_CbnSplitInstrument, m_CbnSplitNote, m_CbnOctaveModifier, m_CbnSplitVolume;
@@ -153,7 +153,7 @@ protected:
 public:
 	SplitKeyboardSettings &m_Settings;
 
-	CSplitKeyboadSettings(CWnd *parent, CSoundFile &sf, SplitKeyboardSettings &settings) : CDialog(IDD_KEYBOARD_SPLIT, parent), sndFile(sf), m_Settings(settings) { }
+	CSplitKeyboardSettings(CWnd *parent, CSoundFile &sf, SplitKeyboardSettings &settings) : CDialog(IDD_KEYBOARD_SPLIT, parent), sndFile(sf), m_Settings(settings) { }
 
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;

@@ -832,11 +832,11 @@ BEGIN_MESSAGE_MAP(CKeyboardControl, CWnd)
 END_MESSAGE_MAP()
 
 
-void CKeyboardControl::Init(HWND parent, UINT nOctaves, bool cursNotify)
+void CKeyboardControl::Init(CWnd *parent, int octaves, bool cursorNotify)
 {
-	m_hParent = parent;
-	m_nOctaves = nOctaves;
-	m_bCursorNotify = cursNotify;
+	m_parent = parent;
+	m_nOctaves = std::max(1, octaves);
+	m_cursorNotify = cursorNotify;
 	MemsetZero(KeyFlags);
 	MemsetZero(m_sampleNum);
 	
@@ -852,111 +852,104 @@ void CKeyboardControl::OnDestroy()
 }
 
 
+void CKeyboardControl::DrawKey(CPaintDC &dc, const CRect rect, int key, bool black) const
+{
+	const bool selected = (key == m_nSelection);
+	COLORREF color = black ? RGB(20, 20, 20) : RGB(255, 255, 255);
+	if(m_mouseDown && selected)
+		color = black ? RGB(104, 104, 104) : RGB(212, 212, 212);
+	else if(selected)
+		color = black ? RGB(130, 130, 130) : RGB(228, 228, 228);
+	dc.SetDCBrushColor(color);
+	dc.Rectangle(&rect);
+
+	if(static_cast<size_t>(key) < std::size(KeyFlags) && KeyFlags[key] != KEYFLAG_NORMAL)
+	{
+		const int margin = black ? 0 : 2;
+		CRect ellipseRect(rect.left + margin, rect.bottom - rect.Width() + margin, rect.right - margin, rect.bottom - margin);
+		dc.SetDCBrushColor((KeyFlags[key] & KEYFLAG_REDDOT) ? RGB(255, 0, 0) : RGB(255, 192, 192));
+		dc.Ellipse(ellipseRect);
+		if(m_sampleNum[key] != 0)
+		{
+			dc.SetTextColor((KeyFlags[key] & KEYFLAG_REDDOT) ? RGB(255, 255, 255) : RGB(0, 0, 0));
+			TCHAR s[16];
+			wsprintf(s, _T("%u"), m_sampleNum[key]);
+			dc.DrawText(s, -1, ellipseRect, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		}
+	}
+}
+
+
 void CKeyboardControl::OnPaint()
 {
-	HGDIOBJ oldpen, oldbrush;
 	CRect rcClient, rect;
 	CPaintDC dc(this);
-	HDC hdc = dc.m_hDC;
-	HBRUSH brushDot[2];
 
-	if (!m_nOctaves) m_nOctaves = 1;
 	dc.SetBkMode(TRANSPARENT);
 	GetClientRect(&rcClient);
 	rect = rcClient;
-	oldpen = ::SelectObject(hdc, CMainFrame::penBlack);
-	oldbrush = ::SelectObject(hdc, CMainFrame::brushWhite);
-	brushDot[0] = ::CreateSolidBrush(RGB(0xFF, 0, 0));
-	brushDot[1] = ::CreateSolidBrush(RGB(0xFF, 0xC0, 0xC0));
-	CFont *oldFont = dc.SelectObject(&m_font);
+	auto oldBrush = dc.SelectObject(GetStockObject(DC_BRUSH));
+	auto oldPen = dc.SelectObject(GetStockObject(DC_PEN));
+	auto oldFont = dc.SelectObject(&m_font);
+
+	// Rectangle outline
+	dc.SetDCPenColor(RGB(50, 50, 50));
+
 	// White notes
-	for (UINT note=0; note<m_nOctaves*7; note++)
+	for(int note = 0; note < m_nOctaves * 7; note++)
 	{
 		rect.right = ((note + 1) * rcClient.Width()) / (m_nOctaves * 7);
-		int val = (note/7) * 12 + whitetab[note % 7];
-		if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushGray);
-		dc.Rectangle(&rect);
-		if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushWhite);
-		if (val < NOTE_MAX && KeyFlags[val] != KEYFLAG_NORMAL && KeyFlags[val] < KEYFLAG_MAX)
-		{
-			CRect ellipseRect(rect.left + 2, rect.bottom - (rect.right - rect.left) + 2, rect.right - 2, rect.bottom - 2);
-			::SelectObject(hdc, brushDot[KeyFlags[val] - 1]);
-			dc.Ellipse(ellipseRect);
-			::SelectObject(hdc, CMainFrame::brushWhite);
-			if(m_sampleNum[val] != 0)
-			{
-				dc.SetTextColor(KeyFlags[val] == KEYFLAG_REDDOT ? RGB(255, 255, 255) : RGB(0, 0, 0));
-				TCHAR s[16];
-				wsprintf(s, _T("%u"), m_sampleNum[val]);
-				dc.DrawText(s, -1, ellipseRect, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
-			}
-		}
+		int val = (note / 7) * 12 + whitetab[note % 7];
+
+		DrawKey(dc, rect, val, false);
+		
 		rect.left = rect.right - 1;
 	}
+
 	// Black notes
-	::SelectObject(hdc, CMainFrame::brushBlack);
 	rect = rcClient;
 	rect.bottom -= rcClient.Height() / 3;
-	for (UINT nblack=0; nblack<m_nOctaves*7; nblack++)
+	for(int note = 0; note < m_nOctaves * 7; note++)
 	{
-		switch(nblack % 7)
+		switch(note % 7)
 		{
 		case 1:
 		case 2:
 		case 4:
 		case 5:
 		case 6:
-			{
-				rect.left = (nblack * rcClient.Width()) / (m_nOctaves * 7);
-				rect.right = rect.left;
-				int delta = rcClient.Width() / (m_nOctaves * 7 * 3);
-				rect.left -= delta;
-				rect.right += delta;
-				int val = (nblack/7)*12 + blacktab[nblack%7];
-				if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushGray);
-				dc.Rectangle(&rect);
-				if (val == m_nSelection) ::SelectObject(hdc, CMainFrame::brushBlack);
-				if (val < NOTE_MAX && KeyFlags[val] != KEYFLAG_NORMAL && KeyFlags[val] < KEYFLAG_MAX)
-				{
-					CRect ellipseRect(rect.left, rect.bottom - (rect.right - rect.left), rect.right, rect.bottom);
-					::SelectObject(hdc, brushDot[KeyFlags[val] - 1]);
-					dc.Ellipse(ellipseRect);
-					::SelectObject(hdc, CMainFrame::brushBlack);
-					if(m_sampleNum[val] != 0)
-					{
-						dc.SetTextColor(KeyFlags[val] == KEYFLAG_REDDOT ? RGB(255, 255, 255) : RGB(0, 0, 0));
-						TCHAR s[16];
-						wsprintf(s, _T("%u"), m_sampleNum[val]);
-						dc.DrawText(s, -1, ellipseRect, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
-					}
-				}
-			}
+		{
+			rect.left = (note * rcClient.Width()) / (m_nOctaves * 7);
+			rect.right = rect.left;
+			int delta = rcClient.Width() / (m_nOctaves * 7 * 3);
+			rect.left -= delta;
+			rect.right += delta;
+			int val = (note / 7) * 12 + blacktab[note % 7];
+
+			DrawKey(dc, rect, val, true);
 			break;
 		}
+		}
 	}
-	if (oldpen) ::SelectObject(hdc, oldpen);
-	if (oldbrush) ::SelectObject(hdc, oldbrush);
-	for(auto &brush : brushDot)
-	{
-		DeleteBrush(brush);
-	}
+
+	dc.SelectObject(oldBrush);
+	dc.SelectObject(oldPen);
 	dc.SelectObject(oldFont);
 }
 
 
 void CKeyboardControl::OnMouseMove(UINT flags, CPoint point)
 {
-	int sel = -1, xmin, xmax;
 	CRect rcClient, rect;
-	if (!m_nOctaves) m_nOctaves = 1;
 	GetClientRect(&rcClient);
 	rect = rcClient;
-	xmin = rcClient.right;
-	xmax = rcClient.left;
+	int xmin = rcClient.right;
+	int xmax = rcClient.left;
+	int sel = -1;
 	// White notes
-	for (UINT note=0; note<m_nOctaves*7; note++)
+	for(int note = 0; note < m_nOctaves * 7; note++)
 	{
-		int val = (note/7)*12 + whitetab[note % 7];
+		int val = (note / 7) * 12 + whitetab[note % 7];
 		rect.right = ((note + 1) * rcClient.Width()) / (m_nOctaves * 7);
 		if (val == m_nSelection)
 		{
@@ -974,65 +967,67 @@ void CKeyboardControl::OnMouseMove(UINT flags, CPoint point)
 	// Black notes
 	rect = rcClient;
 	rect.bottom -= rcClient.Height() / 3;
-	for (UINT nblack=0; nblack<m_nOctaves*7; nblack++)
+	for(int note = 0; note < m_nOctaves * 7; note++)
 	{
-		switch(nblack % 7)
+		switch(note % 7)
 		{
 		case 1:
 		case 2:
 		case 4:
 		case 5:
 		case 6:
+		{
+			int val = (note / 7) * 12 + blacktab[note % 7];
+			rect.left = (note * rcClient.Width()) / (m_nOctaves * 7);
+			rect.right = rect.left;
+			int delta = rcClient.Width() / (m_nOctaves * 7 * 3);
+			rect.left -= delta;
+			rect.right += delta;
+			if(val == m_nSelection)
 			{
-				int val = (nblack/7)*12 + blacktab[nblack % 7];
-				rect.left = (nblack * rcClient.Width()) / (m_nOctaves * 7);
-				rect.right = rect.left;
-				int delta = rcClient.Width() / (m_nOctaves * 7 * 3);
-				rect.left -= delta;
-				rect.right += delta;
-				if (val == m_nSelection)
-				{
-					if (rect.left < xmin) xmin = rect.left;
-					if (rect.right > xmax) xmax = rect.right;
-				}
-				if (rect.PtInRect(point))
-				{
-					sel = val;
-					if (rect.left < xmin) xmin = rect.left;
-					if (rect.right > xmax) xmax = rect.right;
-				}
+				if(rect.left < xmin)
+					xmin = rect.left;
+				if(rect.right > xmax)
+					xmax = rect.right;
+			}
+			if(rect.PtInRect(point))
+			{
+				sel = val;
+				if(rect.left < xmin)
+					xmin = rect.left;
+				if(rect.right > xmax)
+					xmax = rect.right;
 			}
 			break;
 		}
+		}
 	}
 	// Check for selection change
-	if (sel != m_nSelection)
+	if(sel != m_nSelection)
 	{
 		m_nSelection = sel;
 		rcClient.left = xmin;
 		rcClient.right = xmax;
 		InvalidateRect(&rcClient, FALSE);
-		if ((m_bCursorNotify) && (m_hParent))
+		if(m_cursorNotify && m_parent)
 		{
-			::PostMessage(m_hParent, WM_MOD_KBDNOTIFY, KBDNOTIFY_MOUSEMOVE, m_nSelection);
-			if((flags & MK_LBUTTON))
-			{
-				::SendMessage(m_hParent, WM_MOD_KBDNOTIFY, KBDNOTIFY_LBUTTONDOWN, m_nSelection);
-			}
+			m_parent->PostMessage(WM_MOD_KBDNOTIFY, KBDNOTIFY_MOUSEMOVE, m_nSelection);
+			if(flags & MK_LBUTTON)
+				m_parent->SendMessage(WM_MOD_KBDNOTIFY, KBDNOTIFY_LBUTTONDOWN, m_nSelection);
 		}
 	}
-	if (sel >= 0)
+	if(sel >= 0)
 	{
-		if (!m_bCapture)
+		if(!m_mouseCapture)
 		{
-			m_bCapture = TRUE;
+			m_mouseCapture = true;
 			SetCapture();
 		}
 	} else
 	{
-		if (m_bCapture)
+		if(m_mouseCapture)
 		{
-			m_bCapture = FALSE;
+			m_mouseCapture = false;
 			ReleaseCapture();
 		}
 	}
@@ -1041,19 +1036,19 @@ void CKeyboardControl::OnMouseMove(UINT flags, CPoint point)
 
 void CKeyboardControl::OnLButtonDown(UINT, CPoint)
 {
-	if(m_hParent)
-	{
-		::SendMessage(m_hParent, WM_MOD_KBDNOTIFY, KBDNOTIFY_LBUTTONDOWN, m_nSelection);
-	}
+	m_mouseDown = true;
+	InvalidateRect(nullptr, FALSE);
+	if(m_parent)
+		m_parent->SendMessage(WM_MOD_KBDNOTIFY, KBDNOTIFY_LBUTTONDOWN, m_nSelection);
 }
 
 
 void CKeyboardControl::OnLButtonUp(UINT, CPoint)
 {
-	if(m_hParent)
-	{
-		::SendMessage(m_hParent, WM_MOD_KBDNOTIFY, KBDNOTIFY_LBUTTONUP, m_nSelection);
-	}
+	m_mouseDown = false;
+	InvalidateRect(nullptr, FALSE);
+	if(m_parent)
+		m_parent->SendMessage(WM_MOD_KBDNOTIFY, KBDNOTIFY_LBUTTONUP, m_nSelection);
 }
 
 
@@ -1091,7 +1086,7 @@ BOOL CSampleMapDlg::OnInitDialog()
 			KeyboardMap[i] = pIns->Keyboard[i];
 		}
 	}
-	m_Keyboard.Init(m_hWnd, 3, TRUE);
+	m_Keyboard.Init(this, 3, TRUE);
 	m_SbOctave.SetRange(0, 7);
 	m_SbOctave.SetPos(4);
 	OnUpdateSamples();

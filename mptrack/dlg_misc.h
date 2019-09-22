@@ -175,29 +175,34 @@ class CKeyboardControl: public CWnd
 public:
 	enum
 	{
-		KEYFLAG_NORMAL=0,
-		KEYFLAG_REDDOT,
-		KEYFLAG_BRIGHTDOT,
-		KEYFLAG_MAX
+		KEYFLAG_NORMAL    = 0x00,
+		KEYFLAG_REDDOT    = 0x01,
+		KEYFLAG_BRIGHTDOT = 0x02,
 	};
 protected:
-	HWND m_hParent;
+	CWnd *m_parent = nullptr;
 	CFont m_font;
-	UINT m_nOctaves;
-	int m_nSelection;
-	bool m_bCapture, m_bCursorNotify;
+	int m_nOctaves = 1;
+	int m_nSelection = -1;
+	bool m_mouseCapture = false, m_cursorNotify = false;
+	bool m_mouseDown = false;
+
 	uint8 KeyFlags[NOTE_MAX]; // 10 octaves max
 	SAMPLEINDEX m_sampleNum[NOTE_MAX];
 
 public:
-	CKeyboardControl() { m_hParent = NULL; m_nOctaves = 1; m_nSelection = -1; m_bCapture = FALSE; }
+	CKeyboardControl() = default;
 
 public:
-	void Init(HWND parent, UINT nOctaves=1, bool cursNotify = false);
+	void Init(CWnd *parent, int octaves = 1, bool cursorNotify = false);
 	void SetFlags(UINT key, uint8 flags) { if (key < NOTE_MAX) KeyFlags[key] = flags; }
 	uint8 GetFlags(UINT key) const { return (key < NOTE_MAX) ? KeyFlags[key] : 0; }
 	void SetSample(UINT key, SAMPLEINDEX sample) { if (key < NOTE_MAX) m_sampleNum[key] = sample; }
 	SAMPLEINDEX GetSample(UINT key) const { return (key < NOTE_MAX) ? m_sampleNum[key] : 0; }
+
+protected:
+	void DrawKey(CPaintDC &dc, const CRect rect, int key, bool black) const;
+
 	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);

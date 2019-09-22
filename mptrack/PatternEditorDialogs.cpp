@@ -896,7 +896,7 @@ CChordEditor::CChordEditor(CWnd *parent)
 BOOL CChordEditor::OnInitDialog()
 {
 	ResizableDialog::OnInitDialog();
-	m_Keyboard.Init(m_hWnd, (CHORD_MAX - CHORD_MIN) / 12, true);
+	m_Keyboard.Init(this, (CHORD_MAX - CHORD_MIN) / 12, true);
 	// Shortcut key combo box
 	AppendNotesToControl(m_CbnShortcut, NOTE_MIN, NOTE_MIN + kcVPEndChords - kcVPStartChords);
 
@@ -1089,12 +1089,12 @@ void CChordEditor::OnNoteChanged(int noteIndex)
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Keyboard Split Settings (pattern editor)
 
-BEGIN_MESSAGE_MAP(CSplitKeyboadSettings, CDialog)
-	ON_CBN_SELCHANGE(IDC_COMBO_OCTAVEMODIFIER, &CSplitKeyboadSettings::OnOctaveModifierChanged)
+BEGIN_MESSAGE_MAP(CSplitKeyboardSettings, CDialog)
+	ON_CBN_SELCHANGE(IDC_COMBO_OCTAVEMODIFIER, &CSplitKeyboardSettings::OnOctaveModifierChanged)
 END_MESSAGE_MAP()
 
 
-void CSplitKeyboadSettings::DoDataExchange(CDataExchange *pDX)
+void CSplitKeyboardSettings::DoDataExchange(CDataExchange *pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSplitKeyboadSettings)
@@ -1106,7 +1106,7 @@ void CSplitKeyboadSettings::DoDataExchange(CDataExchange *pDX)
 }
 
 
-BOOL CSplitKeyboadSettings::OnInitDialog()
+BOOL CSplitKeyboardSettings::OnInitDialog()
 {
 	if(sndFile.GetpModDoc() == nullptr)
 		return FALSE;
@@ -1175,7 +1175,7 @@ BOOL CSplitKeyboadSettings::OnInitDialog()
 }
 
 
-void CSplitKeyboadSettings::OnOK()
+void CSplitKeyboardSettings::OnOK()
 {
 	CDialog::OnOK();
 
@@ -1187,13 +1187,13 @@ void CSplitKeyboadSettings::OnOK()
 }
 
 
-void CSplitKeyboadSettings::OnCancel()
+void CSplitKeyboardSettings::OnCancel()
 {
 	CDialog::OnCancel();
 }
 
 
-void CSplitKeyboadSettings::OnOctaveModifierChanged()
+void CSplitKeyboardSettings::OnOctaveModifierChanged()
 {
 	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_CbnOctaveModifier.GetCurSel() != 9) ? BST_CHECKED : BST_UNCHECKED);
 }
