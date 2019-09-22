@@ -867,14 +867,22 @@ void CKeyboardControl::DrawKey(CPaintDC &dc, const CRect rect, int key, bool bla
 	{
 		const int margin = black ? 0 : 2;
 		CRect ellipseRect(rect.left + margin, rect.bottom - rect.Width() + margin, rect.right - margin, rect.bottom - margin);
-		dc.SetDCBrushColor((KeyFlags[key] & KEYFLAG_REDDOT) ? RGB(255, 0, 0) : RGB(255, 192, 192));
+		dc.SetDCBrushColor((KeyFlags[key] & KEYFLAG_BRIGHTDOT) ? RGB(255, 192, 192) : RGB(255, 0, 0));
 		dc.Ellipse(ellipseRect);
 		if(m_sampleNum[key] != 0)
 		{
-			dc.SetTextColor((KeyFlags[key] & KEYFLAG_REDDOT) ? RGB(255, 255, 255) : RGB(0, 0, 0));
+			dc.SetTextColor((KeyFlags[key] & KEYFLAG_BRIGHTDOT) ? RGB(0, 0, 0) : RGB(255, 255, 255));
 			TCHAR s[16];
 			wsprintf(s, _T("%u"), m_sampleNum[key]);
 			dc.DrawText(s, -1, ellipseRect, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+		}
+
+		if(KeyFlags[key] == (KEYFLAG_REDDOT | KEYFLAG_BRIGHTDOT))
+		{
+			// Both flags set: Draw second dot
+			ellipseRect.MoveToY(ellipseRect.top - ellipseRect.Height() - 2);
+			dc.SetDCBrushColor(RGB(255, 0, 0));
+			dc.Ellipse(ellipseRect);
 		}
 	}
 }

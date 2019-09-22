@@ -1054,10 +1054,10 @@ void CChordEditor::UpdateKeyboard()
 		for(const auto note : chord.notes)
 		{
 			if(i == note)
-				b = CKeyboardControl::KEYFLAG_REDDOT;
+				b |= CKeyboardControl::KEYFLAG_REDDOT;
 		}
 		if(i == baseNote)
-			b = CKeyboardControl::KEYFLAG_BRIGHTDOT;
+			b |= CKeyboardControl::KEYFLAG_BRIGHTDOT;
 		m_Keyboard.SetFlags(i - CHORD_MIN, b);
 	}
 	m_Keyboard.InvalidateRect(nullptr, FALSE);
