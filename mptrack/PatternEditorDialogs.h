@@ -15,6 +15,8 @@
 #include "dlg_misc.h"	// for keyboard control
 #include "EffectInfo.h"
 #include "PatternCursor.h"
+#include "TrackerSettings.h"
+#include "ResizableDialog.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -36,8 +38,8 @@ public:
 	{ }
 
 protected:
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 	afx_msg void OnHalfRowNumber();
 	afx_msg void OnDoubleRowNumber();
 	afx_msg void OnOverrideSignature();
@@ -56,12 +58,12 @@ protected:
 	CComboBox cbnNote, cbnInstr, cbnVolCmd, cbnCommand, cbnPlugParam;
 	CSliderCtrl sldVolParam, sldParam;
 	CSoundFile &sndFile;
-	const CModSpecifications *oldSpecs;
+	const CModSpecifications *oldSpecs = nullptr;
+	ModCommand *m = nullptr;
 	EffectInfo effectInfo;
-	ModCommand *m;
 	ModCommandPos editPos;
 	UINT xParam, xMultiplier;
-	bool modified;
+	bool modified = false;
 
 public:
 	CEditCommand(CSoundFile &sndFile);
@@ -84,10 +86,10 @@ protected:
 	void PrepareUndo(const char *description);
 
 	//{{AFX_VIRTUAL(CEditCommand)
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual void OnOK()		{ ShowWindow(SW_HIDE); }
-	virtual void OnCancel()	{ ShowWindow(SW_HIDE); }
-	virtual BOOL PreTranslateMessage(MSG *pMsg);
+	void DoDataExchange(CDataExchange *pDX) override;
+	void OnOK() override { ShowWindow(SW_HIDE); }
+	void OnCancel() override { ShowWindow(SW_HIDE); }
+	BOOL PreTranslateMessage(MSG *pMsg) override;
 	afx_msg void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
 	afx_msg void OnClose()	{ ShowWindow(SW_HIDE); }
 
@@ -104,29 +106,37 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Chord Editor
 
-struct MPTChord;
-
-class CChordEditor: public CDialog
+class CChordEditor : public ResizableDialog
 {
 protected:
 	CKeyboardControl m_Keyboard;
-	CComboBox m_CbnShortcut, m_CbnBaseNote, m_CbnNote1, m_CbnNote2, m_CbnNote3;
+	CComboBox m_CbnShortcut, m_CbnBaseNote, m_CbnNote[MPTChord::notesPerChord - 1];
+	MPTChords m_chords;
+	MPTChord::NoteType m_mouseDownKey = MPTChord::noNote, m_dragKey = MPTChord::noNote;
+	enum : MPTChord::NoteType
+	{
+		CHORD_MIN = -12,
+		CHORD_MAX = 24
+	};
 
 public:
-	CChordEditor(CWnd *parent=NULL):CDialog(IDD_CHORDEDIT, parent) {}
+	CChordEditor(CWnd *parent = nullptr);
 
 protected:
 	MPTChord &GetChord();
 
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+
 	void UpdateKeyboard();
 	afx_msg LRESULT OnKeyboardNotify(WPARAM, LPARAM);
 	afx_msg void OnChordChanged();
 	afx_msg void OnBaseNoteChanged();
-	afx_msg void OnNote1Changed();
-	afx_msg void OnNote2Changed();
-	afx_msg void OnNote3Changed();
+	afx_msg void OnNote1Changed() { OnNoteChanged(0); }
+	afx_msg void OnNote2Changed() { OnNoteChanged(1); }
+	afx_msg void OnNote3Changed() { OnNoteChanged(2); }
+	void OnNoteChanged(int noteIndex);
 	DECLARE_MESSAGE_MAP()
 };
 
@@ -134,7 +144,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Keyboard Split Settings (pattern editor)
 
-class CSplitKeyboadSettings: public CDialog
+class CSplitKeyboadSettings : public CDialog
 {
 protected:
 	CComboBox m_CbnSplitInstrument, m_CbnSplitNote, m_CbnOctaveModifier, m_CbnSplitVolume;
@@ -146,10 +156,10 @@ public:
 	CSplitKeyboadSettings(CWnd *parent, CSoundFile &sf, SplitKeyboardSettings &settings) : CDialog(IDD_KEYBOARD_SPLIT, parent), sndFile(sf), m_Settings(settings) { }
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual void OnCancel();
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	void OnCancel() override;
 
 	afx_msg void OnOctaveModifierChanged();
 
@@ -163,24 +173,24 @@ protected:
 class QuickChannelProperties : public CDialog
 {
 protected:
-	CModDoc *document;
-	CHANNELINDEX channel;
-	PATTERNINDEX pattern;
-	bool visible;
-	bool settingsChanged;
+	CModDoc *document = nullptr;
+	CHANNELINDEX channel = 0;
+	PATTERNINDEX pattern = 0;
+	bool visible = false;
+	bool settingsChanged = false;
 
 	CSliderCtrl volSlider, panSlider;
 	CSpinButtonCtrl volSpin, panSpin;
 	CEdit nameEdit;
 
 public:
-	QuickChannelProperties();
+	QuickChannelProperties() = default;
 	~QuickChannelProperties();
 
 	void Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDEX ptn, CPoint position);
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
+	void DoDataExchange(CDataExchange *pDX) override;
 
 	void UpdateDisplay();
 	void PrepareUndo();

@@ -5198,20 +5198,21 @@ int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord
 		outNotes[numNotes++] = key;
 	}
 
+	int32 baseKey = key - NOTE_MIN;
+	if(!relativeMode)
+	{
+		// Only use octave information from the base key
+		baseKey = (baseKey / 12) * 12;
+	}
+
 	for(auto cnote : chord.notes)
 	{
-		if(cnote)
+		if(cnote != MPTChord::noNote)
 		{
-			ModCommand::NOTE chordNote = key - NOTE_MIN;
-			if(!relativeMode)
+			int32 chordNote = baseKey + cnote + NOTE_MIN;
+			if(chordNote >= NOTE_MIN && chordNote <= NOTE_MAX && specs.HasNote(static_cast<ModCommand::NOTE>(chordNote)))
 			{
-				// Only use octave information from the base key
-				chordNote = (chordNote / 12) * 12;
-			}
-			chordNote += cnote;
-			if(specs.HasNote(chordNote))
-			{
-				outNotes[numNotes++] = chordNote;
+				outNotes[numNotes++] = static_cast<ModCommand::NOTE>(chordNote);
 			}
 		}
 	}

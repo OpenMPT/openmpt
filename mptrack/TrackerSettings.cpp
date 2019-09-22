@@ -141,7 +141,6 @@ DebugSettings::DebugSettings(SettingsContainer &conf)
 	{
 		mpt::log::Trace::Enable(DebugTraceSize);
 	}
-
 }
 
 
@@ -386,22 +385,22 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	for(UINT ichord = 0; ichord < 3 * 12; ichord++)
 	{
 		Chords[ichord].key = (uint8)ichord;
-		Chords[ichord].notes[0] = 0;
-		Chords[ichord].notes[1] = 0;
-		Chords[ichord].notes[2] = 0;
+		Chords[ichord].notes[0] = MPTChord::noNote;
+		Chords[ichord].notes[1] = MPTChord::noNote;
+		Chords[ichord].notes[2] = MPTChord::noNote;
 
 		if(ichord < 12)
 		{
 			// Major Chords
-			Chords[ichord].notes[0] = (uint8)(ichord+5);
-			Chords[ichord].notes[1] = (uint8)(ichord+8);
-			Chords[ichord].notes[2] = (uint8)(ichord+11);
+			Chords[ichord].notes[0] = (int8)(ichord + 4);
+			Chords[ichord].notes[1] = (int8)(ichord + 7);
+			Chords[ichord].notes[2] = (int8)(ichord + 10);
 		} else if(ichord < 24)
 		{
 			// Minor Chords
-			Chords[ichord].notes[0] = (uint8)(ichord-8);
-			Chords[ichord].notes[1] = (uint8)(ichord-4);
-			Chords[ichord].notes[2] = (uint8)(ichord-1);
+			Chords[ichord].notes[0] = (int8)(ichord - 9);
+			Chords[ichord].notes[1] = (int8)(ichord - 5);
+			Chords[ichord].notes[2] = (int8)(ichord - 2);
 		}
 	}
 
@@ -744,7 +743,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 
 	// Write updated settings
 	conf.Flush();
-
 }
 
 
@@ -813,7 +811,6 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 
 void TrackerSettings::MigrateTunings(const Version storedVersion)
 {
-	
 	if(!PathTunings.GetDefaultDir().IsDirectory())
 	{
 		CreateDirectory(PathTunings.GetDefaultDir().AsNative().c_str(), 0);
@@ -830,7 +827,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 		mpt::PathString fn = PathTunings.GetDefaultDir() + P_("Built-in\\12TET.tun");
 		if(!fn.FileOrDirectoryExists())
 		{
-			CTuning * pT = CSoundFile::CreateTuning12TET("12TET");
+			CTuning *pT = CSoundFile::CreateTuning12TET("12TET");
 			mpt::SafeOutputFile sf(fn, std::ios::binary, mpt::FlushMode::Full);
 			pT->Serialize(sf);
 			delete pT;
@@ -841,7 +838,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 		mpt::PathString fn = PathTunings.GetDefaultDir() + P_("Built-in\\12TET [[fs15 1.17.02.49]].tun");
 		if(!fn.FileOrDirectoryExists())
 		{
-			CTuning * pT = CSoundFile::CreateTuning12TET("12TET [[fs15 1.17.02.49]]");
+			CTuning *pT = CSoundFile::CreateTuning12TET("12TET [[fs15 1.17.02.49]]");
 			mpt::SafeOutputFile sf(fn, std::ios::binary, mpt::FlushMode::Full);
 			pT->Serialize(sf);
 			delete pT;
@@ -877,12 +874,10 @@ struct StoredSoundDeviceSettings
 {
 
 private:
-
 	SettingsContainer &conf;
 	const SoundDevice::Info deviceInfo;
-	
-private:
 
+private:
 	Setting<uint32> LatencyUS;
 	Setting<uint32> UpdateIntervalUS;
 	Setting<uint32> Samplerate;
@@ -964,7 +959,6 @@ public:
 		settings.InputSourceID = InputSourceID;
 		return settings;
 	}
-
 };
 
 SoundDevice::Settings TrackerSettings::GetSoundDeviceSettingsDefaults() const
@@ -1101,7 +1095,7 @@ void TrackerSettings::GetDefaultColourScheme(std::array<COLORREF, MAX_MODCOLORS>
 
 void TrackerSettings::FixupEQ(EQPreset &eqSettings)
 {
-	for(UINT i=0; i<MAX_EQ_BANDS; i++)
+	for(UINT i = 0; i < MAX_EQ_BANDS; i++)
 	{
 		if(eqSettings.Gains[i] > 32)
 			eqSettings.Gains[i] = 16;
@@ -1228,19 +1222,28 @@ std::vector<uint32> TrackerSettings::GetDefaultSampleRates()
 // Chords
 
 void TrackerSettings::LoadChords(MPTChords &chords)
-{	
+{
 	for(std::size_t i = 0; i < std::size(chords); i++)
 	{
 		uint32 chord;
-		mpt::ustring note = mpt::format(U_("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
-		if((chord = conf.Read<int32>(U_("Chords"), note, -1)) != uint32(-1))
+		mpt::ustring noteName = mpt::format(U_("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
+		if((chord = conf.Read<int32>(U_("Chords"), noteName, -1)) != uint32(-1))
 		{
-			if((chord & 0xFFFFFFC0) || (!chords[i].notes[0]))
+			if((chord & 0xFFFFFFC0) || chords[i].notes[0] == MPTChord::noNote)
 			{
 				chords[i].key = (uint8)(chord & 0x3F);
-				chords[i].notes[0] = (uint8)((chord >> 6) & 0x3F);
-				chords[i].notes[1] = (uint8)((chord >> 12) & 0x3F);
-				chords[i].notes[2] = (uint8)((chord >> 18) & 0x3F);
+				int shift = 6;
+				for(auto &note : chords[i].notes)
+				{
+					// Extract 6 bits and sign-extend to 8 bits
+					const int signBit = ((chord >> (shift + 5)) & 1);
+					note = static_cast<MPTChord::NoteType>(((chord >> shift) & 0x3F) | (0xC0 * signBit));
+					shift += 6;
+					if(note == 0)
+						note = MPTChord::noNote;
+					else if(note > 0)
+						note--;
+				}
 			}
 		}
 	}
@@ -1251,9 +1254,18 @@ void TrackerSettings::SaveChords(MPTChords &chords)
 {
 	for(std::size_t i = 0; i < std::size(chords); i++)
 	{
-		int32 s = (chords[i].key) | (chords[i].notes[0] << 6) | (chords[i].notes[1] << 12) | (chords[i].notes[2] << 18);
-		mpt::ustring note = mpt::format(U_("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
-		conf.Write<int32>(U_("Chords"), note, s);
+		auto notes = chords[i].notes;
+		for(auto &note : notes)
+		{
+			if(note == MPTChord::noNote)
+				note = 0;
+			else if(note >= 0)
+				note++;
+			note &= 0x3F;
+		}
+		int32 s = (chords[i].key) | (notes[0] << 6) | (notes[1] << 12) | (notes[2] << 18);
+		mpt::ustring noteName = mpt::format(U_("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
+		conf.Write<int32>(U_("Chords"), noteName, s);
 	}
 }
 
@@ -1274,7 +1286,7 @@ UINT TrackerSettings::GetCurrentMIDIDevice()
 {
 	if(midiDeviceName.Get().IsEmpty())
 		return m_nMidiDevice;
-	
+
 	CString deviceName = midiDeviceName;
 	deviceName.TrimRight();
 

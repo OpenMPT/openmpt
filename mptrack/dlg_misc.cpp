@@ -1041,7 +1041,7 @@ void CKeyboardControl::OnMouseMove(UINT flags, CPoint point)
 
 void CKeyboardControl::OnLButtonDown(UINT, CPoint)
 {
-	if ((m_nSelection != -1) && (m_hParent))
+	if(m_hParent)
 	{
 		::SendMessage(m_hParent, WM_MOD_KBDNOTIFY, KBDNOTIFY_LBUTTONDOWN, m_nSelection);
 	}
@@ -1050,7 +1050,7 @@ void CKeyboardControl::OnLButtonDown(UINT, CPoint)
 
 void CKeyboardControl::OnLButtonUp(UINT, CPoint)
 {
-	if ((m_nSelection != -1) && (m_hParent))
+	if(m_hParent)
 	{
 		::SendMessage(m_hParent, WM_MOD_KBDNOTIFY, KBDNOTIFY_LBUTTONUP, m_nSelection);
 	}

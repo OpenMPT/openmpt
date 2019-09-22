@@ -1874,25 +1874,25 @@ BEGIN
     PUSHBUTTON      "Macro Help",IDC_BUTTON3,300,84,50,14
 END
 
-IDD_CHORDEDIT DIALOGEX 0, 0, 245, 156
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_CHORDEDIT DIALOGEX 0, 0, 321, 122
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Chord Editor"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "Close",IDOK,191,10,50,14
-    CONTROL         "",IDC_KEYBOARD1,"Static",SS_WHITERECT | SS_NOTIFY,4,76,237,56,WS_EX_CLIENTEDGE
-    GROUPBOX        "",IDC_STATIC,4,4,185,67
-    COMBOBOX        IDC_COMBO1,12,24,52,114,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Shortcut Key:",IDC_STATIC,12,12,57,8
-    LTEXT           "Base Key:",IDC_STATIC,72,12,40,8
-    COMBOBOX        IDC_COMBO2,72,24,52,89,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO3,12,54,52,80,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Note #1",IDC_STATIC,12,42,39,8
-    COMBOBOX        IDC_COMBO4,72,54,52,80,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Note #2",IDC_STATIC,72,42,39,8
-    COMBOBOX        IDC_COMBO5,132,54,52,80,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Note #3",IDC_STATIC,132,42,39,8
-    LTEXT           "In ""Relative"" base note mode, all notes are relative to a previously entered note in the pattern cell where the chord is entered.",IDC_STATIC,6,136,234,20
+    DEFPUSHBUTTON   "Close",IDOK,264,102,50,14
+    CONTROL         "",IDC_KEYBOARD1,"Static",SS_WHITERECT | SS_NOTIFY,6,36,306,56,WS_EX_CLIENTEDGE
+    COMBOBOX        IDC_COMBO1,6,18,52,114,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Shortcut Key:",IDC_STATIC,6,6,57,8
+    LTEXT           "Base Key:",IDC_STATIC,78,6,40,8
+    COMBOBOX        IDC_COMBO2,78,18,52,89,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO3,138,19,52,80,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Note #1",IDC_STATIC,138,6,39,8
+    COMBOBOX        IDC_COMBO4,198,19,52,80,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Note #2",IDC_STATIC,198,6,39,8
+    COMBOBOX        IDC_COMBO5,258,19,52,80,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Note #3",IDC_STATIC,258,6,39,8
+    LTEXT           "In ""Relative"" Base Key mode, all notes are relative to a previously entered note in the pattern cell where the chord is entered.",IDC_STATIC,6,102,252,18
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT,66,6,1,25
 END
 
 IDD_SPLASHSCREEN DIALOGEX 0, 0, 266, 188
@@ -2323,9 +2323,9 @@ BEGIN
     IDD_CHORDEDIT, DIALOG
     BEGIN
         LEFTMARGIN, 4
-        RIGHTMARGIN, 241
+        RIGHTMARGIN, 317
         TOPMARGIN, 4
-        BOTTOMMARGIN, 154
+        BOTTOMMARGIN, 120
     END
 
     IDD_SPLASHSCREEN, DIALOG
@@ -2480,6 +2480,25 @@ END
 IDD_CONTROL_GLOBALS AFX_DIALOG_LAYOUT
 BEGIN
     0
+END
+
+IDD_CHORDEDIT AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    100, 100, 0, 0,
+    0, 0, 100, 100,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 100, 0, 0,
+    0, 0, 0, 0
 END
 
 
@@ -2878,12 +2897,6 @@ BEGIN
     IDC_SAMPLE_RESAMPLE     "Resample the entire sample or current selection\nResample"
     IDC_SAMPLE_REVERSE      "Reverse selection\nReverse"
     IDC_COMBO_ZOOM          "Changes the current zoom value\nZoom"
-    IDC_SAMPLE_PLAY         "Play a middle C using the current sample\nPlay sample"
-END
-
-STRINGTABLE
-BEGIN
-    IDC_SAMPLE_DOWNSAMPLE   "Shrink selection\nDownsample"
 END
 
 STRINGTABLE
@@ -2893,7 +2906,13 @@ BEGIN
                             "Play the current pattern from the beginning\nReplay Pattern"
     IDC_PATTERN_STOP        "Stop playing\nStop"
     IDC_PATTERN_RECORD      "Enables the recording of notes\nRecord"
+    IDC_SAMPLE_PLAY         "Play a middle C using the current sample\nPlay sample"
     IDC_PATTERN_NEW         "Create a new pattern\nInsert Pattern"
+END
+
+STRINGTABLE
+BEGIN
+    IDC_SAMPLE_DOWNSAMPLE   "Shrink selection\nDownsample"
 END
 
 STRINGTABLE
@@ -3318,6 +3337,38 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Menu
+//
+
+IDR_VSTMENU MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Copy Preset",                ID_EDIT_COPY
+        MENUITEM "&Paste Preset",               ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "&Load Preset / Bank...",      ID_PRESET_LOAD
+        MENUITEM "&Save Preset / Bank...",      ID_PRESET_SAVE
+        MENUITEM SEPARATOR
+        MENUITEM "Create &instrument from plugin", ID_PLUGINTOINSTRUMENT
+        MENUITEM "&Randomize Parameters",       ID_PRESET_RANDOM
+    END
+    POPUP "&Info"
+    BEGIN
+        MENUITEM "I&nputs",                     ID_INFO_INPUTS
+        MENUITEM "Ou&tputs",                    ID_INFO_OUPUTS
+        MENUITEM "&Macros",                     ID_INFO_MACROS
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "&Bypass Plugin",              ID_PLUG_BYPASS
+        MENUITEM "Record &Parameter Changes",   ID_PLUG_RECORDAUTOMATION
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // Dialog Info
 //
 
@@ -3358,38 +3409,6 @@ BEGIN
     IDC_COMBO_CHANNEL, 0x403, 3, 0
 0x3631, "\000" 
     0
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_VSTMENU MENU
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Copy Preset",                ID_EDIT_COPY
-        MENUITEM "&Paste Preset",               ID_EDIT_PASTE
-        MENUITEM SEPARATOR
-        MENUITEM "&Load Preset / Bank...",      ID_PRESET_LOAD
-        MENUITEM "&Save Preset / Bank...",      ID_PRESET_SAVE
-        MENUITEM SEPARATOR
-        MENUITEM "Create &instrument from plugin", ID_PLUGINTOINSTRUMENT
-        MENUITEM "&Randomize Parameters",       ID_PRESET_RANDOM
-    END
-    POPUP "&Info"
-    BEGIN
-        MENUITEM "I&nputs",                     ID_INFO_INPUTS
-        MENUITEM "Ou&tputs",                    ID_INFO_OUPUTS
-        MENUITEM "&Macros",                     ID_INFO_MACROS
-    END
-    POPUP "&Options"
-    BEGIN
-        MENUITEM "&Bypass Plugin",              ID_PLUG_BYPASS
-        MENUITEM "Record &Parameter Changes",   ID_PLUG_RECORDAUTOMATION
-    END
 END
 
 

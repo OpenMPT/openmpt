@@ -190,10 +190,12 @@ struct MPTChord
 	{
 		notesPerChord = 4,
 		relativeMode = 0x3F,
+		noNote = int8_min,
 	};
+	using NoteType = int8;
 
-	uint8 key;			// Base note
-	uint8 notes[3];		// Additional chord notes
+	uint8 key;  // Base note
+	std::array<NoteType, notesPerChord - 1> notes;  // Additional chord notes
 };
 
 using MPTChords = std::array<MPTChord, 3 * 12>;	// 3 octaves
