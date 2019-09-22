@@ -615,6 +615,14 @@ namespace FileReader
 		}
 	}
 
+	template <typename T, std::size_t destSize, typename TFileCursor>
+	std::array<T, destSize> ReadArray(TFileCursor &f)
+	{
+		std::array<T, destSize> destArray;
+		ReadArray(f, destArray);
+		return destArray;
+	}
+
 	// Compare a magic string with the current stream position.
 	// Returns true if they are identical and advances the file cursor by the the length of the "magic" string.
 	// Returns false if the string could not be found. The file cursor is not advanced in this case.
@@ -1307,18 +1315,16 @@ public:
 		return mpt::FileReader::ReadArray(*this, destArray);
 	}
 
-	template <typename T, std::size_t destSize>
-	std::array<T, destSize> ReadArray()
-	{
-		std::array<T, destSize> destArray;
-		mpt::FileReader::ReadArray(*this, destArray);
-		return destArray;
-	}
-
 	template<typename T, std::size_t destSize>
 	bool ReadArray(std::array<T, destSize> &destArray)
 	{
 		return mpt::FileReader::ReadArray(*this, destArray);
+	}
+
+	template <typename T, std::size_t destSize>
+	std::array<T, destSize> ReadArray()
+	{
+		return mpt::FileReader::ReadArray<T, destSize>(*this);
 	}
 
 	template<typename T>
