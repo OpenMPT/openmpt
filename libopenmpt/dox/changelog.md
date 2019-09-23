@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.18-pre
 
+ *  J2B: Ignore notes with non-existing instrument (fixes Ending.j2b).
+
  *  mpg123: Update to v1.25.13 (2019-08-24).
  *  ogg: Update to v1.3.4. (2019-08-31).
  *  flac: Update to v1.3.3. (2019-08-04).
