@@ -210,8 +210,8 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 	context.msgSuccess = MPT_WM_APP_UPDATECHECK_SUCCESS;
 	context.msgFailure = MPT_WM_APP_UPDATECHECK_FAILURE;
 	context.autoUpdate = isAutoUpdate;
-	std::thread(CUpdateCheck::ThreadFunc(CUpdateCheck::Settings(), context)).detach();
-}
+	context.statistics = GetStatisticsDataV3(CUpdateCheck::Settings());
+	std::thread(CUpdateCheck::ThreadFunc(CUpdateCheck::Settings(), context)).detach();}
 
 
 CUpdateCheck::Settings::Settings()
@@ -361,7 +361,7 @@ mpt::ustring CUpdateCheck::GetUpdateURLV2(const CUpdateCheck::Settings &settings
 
 
 // Run update check (independent thread)
-CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &settings)
+CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &settings, const std::string &statistics)
 {
 	
 	HTTP::InternetSession internet(Version::Current().GetOpenMPTVersionString());
@@ -388,7 +388,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 		}
 		requestStatistics.dataMimeType = HTTP::MimeType::JSON();
 		requestStatistics.acceptMimeTypes = HTTP::MimeTypes::JSON();
-		std::string jsondata = GetStatisticsDataV3(settings);
+		std::string jsondata = statistics;
 		MPT_LOG(LogInformation, "Update", mpt::ToUnicode(mpt::CharsetUTF8, jsondata));
 		requestStatistics.data = mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(jsondata));
 		internet(requestStatistics);
@@ -451,7 +451,7 @@ void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings, const 
 	{
 		try
 		{
-			result = SearchUpdate(settings);
+			result = SearchUpdate(settings, context.statistics);
 		} catch(const bad_uri &e)
 		{
 			throw CUpdateCheck::Error(mpt::cformat(_T("Error parsing update URL: %1"))(mpt::get_exception_text<CString>(e)));

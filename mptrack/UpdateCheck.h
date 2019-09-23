@@ -62,6 +62,7 @@ public:
 		UINT msgSuccess;
 		UINT msgFailure;
 		bool autoUpdate;
+		std::string statistics;
 	};
 
 	struct Settings
@@ -131,7 +132,7 @@ protected:
 
 	static void CheckForUpdate(const CUpdateCheck::Settings &settings, const CUpdateCheck::Context &context);
 
-	static CUpdateCheck::Result SearchUpdate(const CUpdateCheck::Settings &settings); // may throw
+	static CUpdateCheck::Result SearchUpdate(const CUpdateCheck::Settings &settings, const std::string &statistics); // may throw
 	
 };
 
