@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.7-pre
+### libopenmpt 0.4.7 (2019-09-23)
 
  *  [**Bug**] Compilation fix for various platforms that do not provide
     `std::aligned_alloc` in C++17 mode. The problematic dependency has been
