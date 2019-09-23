@@ -211,7 +211,8 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 	context.msgFailure = MPT_WM_APP_UPDATECHECK_FAILURE;
 	context.autoUpdate = isAutoUpdate;
 	context.statistics = GetStatisticsDataV3(CUpdateCheck::Settings());
-	std::thread(CUpdateCheck::ThreadFunc(CUpdateCheck::Settings(), context)).detach();}
+	std::thread(CUpdateCheck::ThreadFunc(CUpdateCheck::Settings(), context)).detach();
+}
 
 
 CUpdateCheck::Settings::Settings()
