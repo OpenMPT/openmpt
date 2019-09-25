@@ -40,12 +40,6 @@
 #define MPT_WITH_MMIO
 #endif // WIN32
 
-#if defined(_MSC_VER)
-
-#pragma warning( disable : 4996 ) // 'foo': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _foo. See online help for details.
-
-#endif // _MSC_VER
-
 #if defined(MPT_BUILD_MSVC)
 
 #define MPT_WITH_FLAC
