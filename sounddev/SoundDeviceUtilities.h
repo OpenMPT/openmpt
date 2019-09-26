@@ -55,7 +55,7 @@ private:
 	DWORD task_idx;
 	HANDLE hTask;
 public:
-	CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring & priorityClass, int priority);
+	CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring & priorityClass);
 	~CPriorityBooster();
 };
 

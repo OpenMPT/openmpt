@@ -132,7 +132,7 @@ CAudioThread::~CAudioThread()
 }
 
 
-CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring & priorityClass, int priority)
+CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring & priorityClass)
 	: m_SysInfo(sysInfo)
 	, m_BoostPriority(boostPriority)
 	, task_idx(0)
@@ -275,7 +275,7 @@ DWORD CAudioThread::AudioThread()
 		if(!terminate)
 		{
 
-			CPriorityBooster priorityBooster(m_SoundDevice.GetSysInfo(), m_SoundDevice.m_Settings.BoostThreadPriority, m_MMCSSClass, m_SoundDevice.m_AppInfo.BoostedThreadPriorityXP);
+			CPriorityBooster priorityBooster(m_SoundDevice.GetSysInfo(), m_SoundDevice.m_Settings.BoostThreadPriority, m_MMCSSClass);
 			CPeriodicWaker periodicWaker(m_WakeupInterval);
 
 			m_SoundDevice.StartFromSoundThread();
