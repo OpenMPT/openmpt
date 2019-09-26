@@ -2633,27 +2633,27 @@ error:
 
 	if(errorcode != kAbort)
 	{
-		TCHAR str[64];
+		CString str;
 		switch(errorcode)
 		{
 		case kInvalidRatio:
-			wsprintf(str, _T("Invalid stretch ratio!"));
+			str = _T("Invalid stretch ratio!");
 			break;
 		case kStretchTooShort:
 		case kStretchTooLong:
-			wsprintf(str, _T("Stretch ratio is too %s. Must be between 50%% and 200%%."), (errorcode == kStretchTooShort) ? _T("low") : _T("high"));
+			str = mpt::cformat(_T("Stretch ratio is too %1. Must be between 50%% and 200%%."))((errorcode == kStretchTooShort) ? CString(_T("low")) : CString(_T("high")));
 			break;
 		case kOutOfMemory:
-			_tcscpy(str, _T("Out of memory."));
+			str = _T("Out of memory.");
 			break;
 		case kSampleTooShort:
-			_tcscpy(str, _T("Sample too short."));
+			str = _T("Sample too short.");
 			break;
 		case kStretchInvalidSampleRate:
-			_tcscpy(str, _T("Sample rate must be 192,000 Hz or lower."));
+			str = _T("Sample rate must be 192,000 Hz or lower.");
 			break;
 		default:
-			_tcscpy(str, _T("Unknown Error."));
+			str = _T("Unknown Error.");
 			break;
 		}
 		Reporting::Error(str);
