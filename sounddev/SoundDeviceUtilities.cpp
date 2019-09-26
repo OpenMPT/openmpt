@@ -135,10 +135,8 @@ CAudioThread::~CAudioThread()
 CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring & priorityClass, int priority)
 	: m_SysInfo(sysInfo)
 	, m_BoostPriority(boostPriority)
-	, m_Priority(priority)
 	, task_idx(0)
 	, hTask(NULL)
-	, oldPriority(THREAD_PRIORITY_NORMAL)
 {
 	MPT_TRACE_SCOPE();
 	#ifdef MPT_BUILD_DEBUG
