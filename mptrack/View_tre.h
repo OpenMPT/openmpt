@@ -49,7 +49,7 @@ protected:
 	CModTree *m_pModTree;
 
 public:
-	CModTreeDropTarget() { m_pModTree = NULL; }
+	CModTreeDropTarget() { m_pModTree = nullptr; }
 	BOOL Register(CModTree *pWnd);
 
 public:
@@ -211,15 +211,15 @@ public:
 	bool GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath);
 	void OnOptionsChanged();
 	void AddDocument(CModDoc &modDoc);
-	void RemoveDocument(CModDoc &modDoc);
+	void RemoveDocument(const CModDoc &modDoc);
 	void UpdateView(ModTreeDocInfo &info, UpdateHint hint);
 	void OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint);
 	bool CanDrop(HTREEITEM hItem, bool bDoDrop);
 	void UpdatePlayPos(CModDoc &modDoc, Notification *pNotify);
 	bool IsItemExpanded(HTREEITEM hItem);
 	void DeleteChildren(HTREEITEM hItem);
-	HTREEITEM GetNthChildItem(HTREEITEM hItem, int index);
-	HTREEITEM GetParentRootItem(HTREEITEM hItem);
+	HTREEITEM GetNthChildItem(HTREEITEM hItem, int index) const;
+	HTREEITEM GetParentRootItem(HTREEITEM hItem) const;
 
 	bool IsSampleBrowser() const { return m_pDataTree == nullptr; }
 	CModTree *GetSampleBrowser() { return IsSampleBrowser() ? this : m_pDataTree; }
