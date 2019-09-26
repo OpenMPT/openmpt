@@ -46,29 +46,32 @@ BOOL CModTreeDropTarget::Register(CModTree *pWnd)
 }
 
 
-DROPEFFECT CModTreeDropTarget::OnDragEnter(CWnd *pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point)
+DROPEFFECT CModTreeDropTarget::OnDragEnter(CWnd *pWnd, COleDataObject *pDataObject, DWORD dwKeyState, CPoint point)
 {
-	if ((m_pModTree) && (m_pModTree == pWnd)) return m_pModTree->OnDragEnter(pDataObject, dwKeyState, point);
+	if((m_pModTree) && (m_pModTree == pWnd))
+		return m_pModTree->OnDragEnter(pDataObject, dwKeyState, point);
 	return DROPEFFECT_NONE;
 }
 
 
-DROPEFFECT CModTreeDropTarget::OnDragOver(CWnd *pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point)
+DROPEFFECT CModTreeDropTarget::OnDragOver(CWnd *pWnd, COleDataObject *pDataObject, DWORD dwKeyState, CPoint point)
 {
-	if ((m_pModTree) && (m_pModTree == pWnd)) return m_pModTree->OnDragOver(pDataObject, dwKeyState, point);
+	if((m_pModTree) && (m_pModTree == pWnd))
+		return m_pModTree->OnDragOver(pDataObject, dwKeyState, point);
 	return DROPEFFECT_NONE;
 }
 
 
-BOOL CModTreeDropTarget::OnDrop(CWnd *pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point)
+BOOL CModTreeDropTarget::OnDrop(CWnd *pWnd, COleDataObject *pDataObject, DROPEFFECT dropEffect, CPoint point)
 {
-	if ((m_pModTree) && (m_pModTree == pWnd)) return m_pModTree->OnDrop(pDataObject, dropEffect, point);
+	if((m_pModTree) && (m_pModTree == pWnd))
+		return m_pModTree->OnDrop(pDataObject, dropEffect, point);
 	return FALSE;
 }
 
 
 ModTreeDocInfo::ModTreeDocInfo(CModDoc &modDoc)
-	: modDoc(modDoc)
+    : modDoc(modDoc)
 {
 	const CSoundFile &sndFile = modDoc.GetSoundFile();
 	tiPatterns.resize(sndFile.Patterns.Size(), nullptr);
@@ -143,9 +146,9 @@ CModTree::CModTree(CModTree *pDataTree)
 	if(m_pDataTree != nullptr)
 	{
 		// Set up instrument library monitoring thread
-		m_hWatchDirKillThread = CreateEvent(NULL, FALSE, FALSE, NULL);
-		m_hSwitchWatchDir = CreateEvent(NULL,  FALSE, FALSE, NULL);
-		m_WatchDirThread = std::thread([&](){MonitorInstrumentLibrary();});
+		m_hWatchDirKillThread = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		m_hSwitchWatchDir = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		m_WatchDirThread = std::thread([this]() { MonitorInstrumentLibrary(); });
 	}
 	MemsetZero(m_tiMidi);
 	MemsetZero(m_tiPerc);
@@ -154,8 +157,6 @@ CModTree::CModTree(CModTree *pDataTree)
 
 CModTree::~CModTree()
 {
-	DocInfo.clear();
-
 	delete m_SongFile;
 	m_SongFile = nullptr;
 
@@ -176,12 +177,12 @@ void CModTree::Init()
 	DWORD dwRemove = TVS_SINGLEEXPAND;
 	DWORD dwAdd = TVS_EDITLABELS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS;
 
-	if (IsSampleBrowser())
+	if(IsSampleBrowser())
 	{
-		dwRemove |= (TVS_HASLINES|TVS_LINESATROOT|TVS_HASBUTTONS|TVS_SHOWSELALWAYS);
-		dwAdd &= ~(TVS_HASLINES|TVS_LINESATROOT|TVS_HASBUTTONS|TVS_SHOWSELALWAYS);
+		dwRemove |= (TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS);
+		dwAdd &= ~(TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS);
 	}
-	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SINGLEEXPAND)
+	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SINGLEEXPAND)
 	{
 		dwRemove &= ~TVS_SINGLEEXPAND;
 		dwAdd |= TVS_SINGLEEXPAND;
@@ -204,18 +205,19 @@ void CModTree::Init()
 		for(auto &path : dirs)
 		{
 			m_InstrLibPath = path;
-			if(!m_InstrLibPath.empty()) break;
+			if(!m_InstrLibPath.empty())
+				break;
 		}
 		m_InstrLibPath.EnsureTrailingSlash();
 		m_pDataTree->InsLibSetFullPath(m_InstrLibPath, mpt::PathString());
 	}
 
 	SetImageList(&CMainFrame::GetMainFrame()->m_MiscIcons, TVSIL_NORMAL);
-	if (!IsSampleBrowser())
+	if(!IsSampleBrowser())
 	{
 		// Create Midi Library
 		m_hMidiLib = InsertItem(_T("MIDI Library"), IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
-		for (UINT iMidGrp=0; iMidGrp<17; iMidGrp++)
+		for(UINT iMidGrp = 0; iMidGrp < 17; iMidGrp++)
 		{
 			InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, mpt::ToCString(mpt::CharsetASCII, szMidiGroupNames[iMidGrp]), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, (MODITEM_HDR_MIDIGROUP << MIDILIB_SHIFT) | iMidGrp, m_hMidiLib, TVI_LAST);
 		}
@@ -230,7 +232,8 @@ void CModTree::Init()
 
 BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 {
-	if (!pMsg) return TRUE;
+	if(!pMsg)
+		return TRUE;
 
 	if(m_doLabelEdit)
 	{
@@ -243,12 +246,13 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 		return CTreeCtrl::PreTranslateMessage(pMsg);
 	}
 
-	if (pMsg->message == WM_KEYDOWN)
+	if(pMsg->message == WM_KEYDOWN)
 	{
 		switch(pMsg->wParam)
 		{
 		case VK_SPACE:
-			if(!(pMsg->lParam & 0x40000000)) OnPlayTreeItem();
+			if(!(pMsg->lParam & 0x40000000))
+				OnPlayTreeItem();
 			return TRUE;
 
 		case VK_RETURN:
@@ -266,17 +270,41 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 							const ModItem modItem = GetModItem(hItem);
 							if(view && (modItem.type == MODITEM_INSLIB_SAMPLE || modItem.type == MODITEM_INSLIB_INSTRUMENT))
 							{
-								const mpt::PathString file = InsLibGetFullPath(hItem);
 								const char *className = view->GetRuntimeClass()->m_lpszClassName;
-								if(!strcmp("CViewSample", className))
+								const bool isSampleView = !strcmp("CViewSample", className);
+								const bool isInstrumentView = !strcmp("CViewInstrument", className);
+								const bool createNew = CMainFrame::GetInputHandler()->ShiftPressed();
+								auto msg = CTRLMSG_BASE;
+								const void *lparam = nullptr;
+								mpt::PathString fullPath = InsLibGetFullPath(hItem);
+								DRAGONDROP dropInfo;
+
+								if(!m_SongFileName.empty())
 								{
-									view->SendCtrlMessage(CMainFrame::GetInputHandler()->ShiftPressed() ? CTRLMSG_SMP_OPENFILE_NEW : CTRLMSG_SMP_OPENFILE, (LPARAM)&file);
-								} else if(!strcmp("CViewInstrument", className))
+									m_hItemDrag = hItem;
+									m_itemDrag = modItem;
+									if(GetDropInfo(dropInfo, fullPath))
+									{
+										lparam = &dropInfo;
+										if(isSampleView)
+											msg = createNew ? CTRLMSG_SMP_SONGDROP_NEW : CTRLMSG_SMP_SONGDROP;
+										else if(isInstrumentView)
+											msg = createNew ? CTRLMSG_INS_SONGDROP_NEW : CTRLMSG_INS_SONGDROP;
+									}
+								} else
 								{
-									view->SendCtrlMessage(CMainFrame::GetInputHandler()->ShiftPressed() ? CTRLMSG_INS_OPENFILE_NEW : CTRLMSG_INS_OPENFILE, (LPARAM)&file);
+									lparam = &fullPath;
+									if(isSampleView)
+										msg = createNew ? CTRLMSG_SMP_OPENFILE_NEW : CTRLMSG_SMP_OPENFILE;
+									else if(isInstrumentView)
+										msg = createNew ? CTRLMSG_INS_OPENFILE_NEW : CTRLMSG_INS_OPENFILE;
 								}
-								// In case a message box like "create instrument for sample?" showed up
-								SetFocus();
+								if(msg != CTRLMSG_BASE)
+								{
+									view->SendCtrlMessage(msg, reinterpret_cast<LPARAM>(lparam));
+									// In case a message box like "create instrument for sample?" showed up
+									SetFocus();
+								}
 							}
 						} else
 						{
@@ -304,7 +332,7 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 			else
 				CMainFrame::GetMainFrame()->GetUpperTreeview()->SetFocus();
 			return TRUE;
-		
+
 		case VK_BACK:
 			// Backspace: Go up one directory
 			if(GetParentRootItem(GetSelectedItem()) == m_hInsLib || IsSampleBrowser())
@@ -348,7 +376,7 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 	if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 		(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 	{
-		CInputHandler* ih = CMainFrame::GetInputHandler();
+		CInputHandler *ih = CMainFrame::GetInputHandler();
 
 		//Translate message manually
 		UINT nChar = (UINT)pMsg->wParam;
@@ -357,8 +385,8 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 		KeyEventType kT = ih->GetKeyEventType(nFlags);
 		InputTargetContext ctx = (InputTargetContext)(kCtxViewTree);
 
-		if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
-			return true; // Mapped to a command, no need to pass message on.
+		if(ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+			return true;  // Mapped to a command, no need to pass message on.
 	}
 	return CTreeCtrl::PreTranslateMessage(pMsg);
 }
@@ -388,7 +416,7 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 					m_SongFile->Destroy();
 				} else
 				{
-					m_SongFile = new (std::nothrow) CSoundFile;
+					m_SongFile = new(std::nothrow) CSoundFile;
 				}
 				if(m_SongFile != nullptr)
 				{
@@ -414,7 +442,7 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 
 bool CModTree::SetSoundFile(FileReader &file)
 {
-	CSoundFile *sndFile = new (std::nothrow) CSoundFile;
+	CSoundFile *sndFile = new(std::nothrow) CSoundFile;
 	if(sndFile == nullptr || !sndFile->Create(file, CSoundFile::loadNoPatternOrPluginData))
 	{
 		delete sndFile;
@@ -441,7 +469,7 @@ void CModTree::OnOptionsChanged()
 {
 	DWORD dwRemove = TVS_SINGLEEXPAND, dwAdd = 0;
 	m_dwStatus &= ~TREESTATUS_SINGLEEXPAND;
-	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SINGLEEXPAND)
+	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SINGLEEXPAND)
 	{
 		dwRemove = 0;
 		dwAdd = TVS_SINGLEEXPAND;
@@ -476,16 +504,17 @@ void CModTree::AddDocument(CModDoc &modDoc)
 }
 
 
-void CModTree::RemoveDocument(CModDoc &modDoc)
+void CModTree::RemoveDocument(const CModDoc &modDoc)
 {
 	auto doc = std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](const std::unique_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; });
-	if(doc != DocInfo.end())
-	{
-		DeleteItem((**doc).hSong);
-		DocInfo.erase(doc);
-	}
+	if(doc == DocInfo.end())
+		return;
+
+	size_t startID = std::distance(DocInfo.begin(), doc);
+	DeleteItem((**doc).hSong);
+	DocInfo.erase(doc);
 	// Refresh all item IDs
-	for(size_t i = 0; i < DocInfo.size(); i++)
+	for(size_t i = startID; i < DocInfo.size(); i++)
 	{
 		SetItemData(DocInfo[i]->hSong, i);
 	}
@@ -530,7 +559,8 @@ void CModTree::RefreshMidiLibrary()
 	TVITEM tvi;
 	const MidiLibrary &midiLib = CTrackApp::GetMidiLibrary();
 
-	if (IsSampleBrowser()) return;
+	if(IsSampleBrowser())
+		return;
 	// Midi Programs
 	HTREEITEM parent = GetChildItem(m_hMidiLib);
 	for(UINT iMidi = 0; iMidi < 128; iMidi++)
@@ -543,7 +573,7 @@ void CModTree::RefreshMidiLibrary()
 			s += _T(": ") + midiLib[iMidi].GetFullFileName().ToCString();
 			dwImage = IMAGE_INSTRUMENTS;
 		}
-		if (!m_tiMidi[iMidi])
+		if(!m_tiMidi[iMidi])
 		{
 			m_tiMidi[iMidi] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 							s, dwImage, dwImage, 0, 0, param, parent, TVI_LAST);
@@ -568,18 +598,18 @@ void CModTree::RefreshMidiLibrary()
 		}
 	}
 	// Midi Percussions
-	for (UINT iPerc=24; iPerc<=84; iPerc++)
+	for(UINT iPerc = 24; iPerc <= 84; iPerc++)
 	{
 		DWORD dwImage = IMAGE_NOSAMPLE;
 		s = mpt::ToCString(CSoundFile::GetNoteName((ModCommand::NOTE)(iPerc + NOTE_MIN), CSoundFile::GetDefaultNoteNames()))
-			+ _T(": ") + mpt::ToCString(mpt::CharsetASCII, szMidiPercussionNames[iPerc - 24]);
+		    + _T(": ") + mpt::ToCString(mpt::CharsetASCII, szMidiPercussionNames[iPerc - 24]);
 		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
 		if(!midiLib[iPerc | 0x80].empty())
 		{
 			s += _T(": ") + midiLib[iPerc | 0x80].GetFullFileName().ToCString();
 			dwImage = IMAGE_SAMPLES;
 		}
-		if (!m_tiPerc[iPerc])
+		if(!m_tiPerc[iPerc])
 		{
 			m_tiPerc[iPerc] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 							s, dwImage, dwImage, 0, 0, param, parent, TVI_LAST);
@@ -608,14 +638,15 @@ void CModTree::RefreshDlsBanks()
 	TCHAR s[256];
 	HTREEITEM hDlsRoot = m_hMidiLib;
 
-	if (IsSampleBrowser()) return;
+	if(IsSampleBrowser())
+		return;
 
 	if(m_tiDLS.size() < CTrackApp::gpDLSBanks.size())
 	{
 		m_tiDLS.resize(CTrackApp::gpDLSBanks.size(), nullptr);
 	}
 
-	for(size_t iDls=0; iDls < CTrackApp::gpDLSBanks.size(); iDls++)
+	for(size_t iDls = 0; iDls < CTrackApp::gpDLSBanks.size(); iDls++)
 	{
 		if(CTrackApp::gpDLSBanks[iDls])
 		{
@@ -633,15 +664,15 @@ void CModTree::RefreshDlsBanks()
 						_T("Drum Kits"), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0, m_tiDLS[iDls], TVI_LAST);
 				// Add Instruments
 				UINT nInstr = pDlsBank->GetNumInstruments();
-				for (UINT iIns=0; iIns<nInstr; iIns++)
+				for(UINT iIns = 0; iIns < nInstr; iIns++)
 				{
 					const DLSINSTRUMENT *pDlsIns = pDlsBank->GetInstrument(iIns);
-					if (pDlsIns)
+					if(pDlsIns)
 					{
 						TCHAR szName[256];
 						wsprintf(szName, _T("%u: %s"), pDlsIns->ulInstrument & 0x7F, mpt::ToCString(charset, pDlsIns->szName).GetString());
 						// Drum Kit
-						if (pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
+						if(pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 						{
 							HTREEITEM hKit = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
 								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, pDlsIns->ulInstrument & 0x7F, hDrums, TVI_LAST);
@@ -659,7 +690,7 @@ void CModTree::RefreshDlsBanks()
 									regionName = "";
 								}
 
-								if (keymin >= keymax)
+								if(keymin >= keymax)
 								{
 									wsprintf(szName, _T("%s%u: %s"),
 										mpt::ToCString(CSoundFile::GetDefaultNoteName(keymin % 12)).GetString(),
@@ -711,7 +742,7 @@ void CModTree::RefreshDlsBanks()
 					tvs.lParam = (LPARAM)this;
 					SortChildrenCB(&tvs);
 				}
-				if (hDrums != NULL)
+				if(hDrums != NULL)
 				{
 					tvs.hParent = hDrums;
 					tvs.lpfnCompare = ModTreeInsLibCompareProc;
@@ -722,7 +753,7 @@ void CModTree::RefreshDlsBanks()
 			hDlsRoot = m_tiDLS[iDls];
 		} else
 		{
-			if (m_tiDLS[iDls])
+			if(m_tiDLS[iDls])
 			{
 				DeleteItem(m_tiDLS[iDls]);
 				m_tiDLS[iDls] = nullptr;
@@ -738,7 +769,7 @@ void CModTree::RefreshInstrumentLibrary()
 	// Check if the currently selected item should be selected after refreshing
 	CString selectedName;
 	if((IsSampleBrowser() || GetParentRootItem(GetSelectedItem()) == m_hInsLib)
-		&& GetItemText(GetSampleBrowser()->m_hInsLib) == (m_SongFileName.empty() ? m_InstrLibPath : m_SongFileName).ToCString())
+	   && GetItemText(GetSampleBrowser()->m_hInsLib) == (m_SongFileName.empty() ? m_InstrLibPath : m_SongFileName).ToCString())
 	{
 		selectedName = GetItemText(GetSelectedItem());
 	}
@@ -767,7 +798,8 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	TVITEM tvi;
 	MemsetZero(tvi);
 	const FlagSet<HintType> hintType = hint.GetType();
-	if (IsSampleBrowser() || hintType == HINT_NONE) return;
+	if(IsSampleBrowser() || hintType == HINT_NONE)
+		return;
 
 	const CModDoc &modDoc = info.modDoc;
 	const CSoundFile &sndFile = modDoc.GetSoundFile();
@@ -779,7 +811,8 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	{
 		// Module folder + sub folders
 		CString name = modDoc.GetPathNameMpt().GetFullFileName().ToCString();
-		if(name.IsEmpty()) name = mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent().ToCString();
+		if(name.IsEmpty())
+			name = mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent().ToCString();
 
 		if(!info.hSong)
 		{
@@ -796,9 +829,10 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		}
 	}
 
-	if (sndFile.GetModSpecifications().instrumentsMax > 0)
+	if(sndFile.GetModSpecifications().instrumentsMax > 0)
 	{
-		if(!info.hInstruments) info.hInstruments = InsertItem(_T("Instruments"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, info.hSamples);
+		if(!info.hInstruments)
+			info.hInstruments = InsertItem(_T("Instruments"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, info.hSamples);
 	} else
 	{
 		if(info.hInstruments)
@@ -807,10 +841,11 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			info.hInstruments = NULL;
 		}
 	}
-	if (!info.hComments) info.hComments = InsertItem(_T("Comments"), IMAGE_COMMENTS, IMAGE_COMMENTS, info.hSong, TVI_LAST);
+	if(!info.hComments)
+		info.hComments = InsertItem(_T("Comments"), IMAGE_COMMENTS, IMAGE_COMMENTS, info.hSong, TVI_LAST);
 	// Add effects
 	const PluginHint pluginHint = hint.ToType<PluginHint>();
-	if (pluginHint.GetType()[HINT_MODTYPE | HINT_PLUGINNAMES])
+	if(pluginHint.GetType()[HINT_MODTYPE | HINT_PLUGINNAMES])
 	{
 		HTREEITEM hItem = info.hEffects ? GetChildItem(info.hEffects) : nullptr;
 		PLUGINDEX firstPlug = 0, lastPlug = MAX_MIXPLUGINS - 1;
@@ -837,8 +872,9 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 
 				wsprintf(s, _T("FX%u: %s"), i + 1, mpt::ToCString(m_SongFile->GetCharsetInternal(), plugin.GetName()).GetString());
 				int nImage = IMAGE_NOPLUGIN;
-				if(plugin.pMixPlugin != nullptr) nImage = (plugin.pMixPlugin->IsInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
-				
+				if(plugin.pMixPlugin != nullptr)
+					nImage = (plugin.pMixPlugin->IsInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
+
 				if(hItem)
 				{
 					// Replace existing item
@@ -889,10 +925,10 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	// Add Orders
 	const PatternHint patternHint = hint.ToType<PatternHint>();
 	const SequenceHint seqHint = hint.ToType<SequenceHint>();
-	if (info.hOrders && (seqHint.GetType()[HINT_MODTYPE | HINT_MODSEQUENCE | HINT_SEQNAMES] || patternHint.GetType()[HINT_PATNAMES]))
+	if(info.hOrders && (seqHint.GetType()[HINT_MODTYPE | HINT_MODSEQUENCE | HINT_SEQNAMES] || patternHint.GetType()[HINT_PATNAMES]))
 	{
 		const PATTERNINDEX nPat = patternHint.GetPattern();
-		bool adjustParentNode = false;	// adjust sequence name of "Sequence" node?
+		bool adjustParentNode = false;  // adjust sequence name of "Sequence" node?
 
 		// (only one seq remaining || previously only one sequence): update parent item
 		if((info.tiSequences.size() > 1 && sndFile.Order.GetNumSequences() == 1) || (info.tiSequences.size() == 1 && sndFile.Order.GetNumSequences() > 1))
@@ -901,13 +937,15 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			{
 				for(auto &ord : seq)
 				{
-					if(ord) DeleteItem(ord);
+					if(ord)
+						DeleteItem(ord);
 					ord = nullptr;
 				}
 			}
 			for(auto &seq : info.tiSequences)
 			{
-				if(seq) DeleteItem(seq);
+				if(seq)
+					DeleteItem(seq);
 				seq = nullptr;
 			}
 			info.tiOrders.resize(sndFile.Order.GetNumSequences());
@@ -934,7 +972,8 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 
 		SEQUENCEINDEX nSeqMin = 0, nSeqMax = sndFile.Order.GetNumSequences() - 1;
 		SEQUENCEINDEX nHintParam = seqHint.GetSequence();
-		if (seqHint.GetType()[HINT_SEQNAMES] && (nHintParam <= nSeqMax)) nSeqMin = nSeqMax = nHintParam;
+		if(seqHint.GetType()[HINT_SEQNAMES] && (nHintParam <= nSeqMax))
+			nSeqMin = nSeqMax = nHintParam;
 
 		// Adjust caption of the "Sequence" node (if only one sequence exists, it should be labeled with the sequence name)
 		if((seqHint.GetType()[HINT_SEQNAMES] && sndFile.Order.GetNumSequences() == 1) || adjustParentNode)
@@ -997,12 +1036,12 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 
 			//if (hintFlagPart == HINT_PATNAMES) && (dwHintParam < sndFile.Order().GetLength())) imin = imax = dwHintParam;
 			CString patName;
-			for (ORDERINDEX iOrd = 0; iOrd < ordLength; iOrd++)
+			for(ORDERINDEX iOrd = 0; iOrd < ordLength; iOrd++)
 			{
 				if(patNamesOnly && sndFile.Order(seq)[iOrd] != nPat)
 					continue;
 				UINT state = (iOrd == info.nOrdSel && seq == info.nSeqSel) ? TVIS_BOLD : 0;
-				if (sndFile.Order(seq)[iOrd] < sndFile.Patterns.Size())
+				if(sndFile.Order(seq)[iOrd] < sndFile.Patterns.Size())
 				{
 					patName = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Patterns[sndFile.Order(seq)[iOrd]].GetName());
 					if(!patName.IsEmpty())
@@ -1029,7 +1068,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				}
 
 				LPARAM param = (seq << SEQU_SHIFT) | iOrd;
-				if (info.tiOrders[seq][iOrd])
+				if(info.tiOrders[seq][iOrd])
 				{
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_STATE;
 					tvi.state = 0;
@@ -1048,7 +1087,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		}
 	}
 	// Add Patterns
-	if (info.hPatterns && patternHint.GetType()[HINT_MODTYPE | HINT_PATNAMES])
+	if(info.hPatterns && patternHint.GetType()[HINT_MODTYPE | HINT_PATNAMES])
 	{
 		const PATTERNINDEX nPat = patternHint.GetPattern();
 		PATTERNINDEX minPat = 0, maxPat = sndFile.Patterns.Size();
@@ -1076,14 +1115,15 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					_tcscat(s, _T(": "));
 					_tcscat(s, patName.c_str());
 				}
-				if (info.tiPatterns[pat])
+				if(info.tiPatterns[pat])
 				{
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE;
 					tvi.hItem = info.tiPatterns[pat];
 					tvi.pszText = stmp;
 					tvi.cchTextMax = CountOf(stmp);
 					GetItem(&tvi);
-					if (_tcscmp(s, stmp)) SetItem(info.tiPatterns[pat], TVIF_TEXT, s, 0, 0, 0, 0, 0);
+					if(_tcscmp(s, stmp))
+						SetItem(info.tiPatterns[pat], TVIF_TEXT, s, 0, 0, 0, 0, 0);
 				} else
 				{
 					info.tiPatterns[pat] = InsertItem(s, IMAGE_PATTERNS, IMAGE_PATTERNS, info.hPatterns, TVI_LAST);
@@ -1098,11 +1138,11 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	}
 	// Add Samples
 	const SampleHint sampleHint = hint.ToType<SampleHint>();
-	if (info.hSamples && sampleHint.GetType()[HINT_MODTYPE | HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA])
+	if(info.hSamples && sampleHint.GetType()[HINT_MODTYPE | HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA])
 	{
 		const SAMPLEINDEX hintSmp = sampleHint.GetSample();
 		SAMPLEINDEX smin = 1, smax = MAX_SAMPLES - 1;
-		if (sampleHint.GetType()[HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA] && hintSmp > 0 && hintSmp < MAX_SAMPLES)
+		if(sampleHint.GetType()[HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_SAMPLEDATA] && hintSmp > 0 && hintSmp < MAX_SAMPLES)
 		{
 			smin = smax = hintSmp;
 		}
@@ -1110,7 +1150,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		for(SAMPLEINDEX nSmp = smin; nSmp <= smax; nSmp++)
 		{
 			HTREEITEM hNextChild = GetNextSiblingItem(hChild);
-			if (nSmp <= sndFile.GetNumSamples())
+			if(nSmp <= sndFile.GetNumSamples())
 			{
 				const ModSample &sample = sndFile.GetSample(nSmp);
 				const bool sampleExists = (sample.HasSampleData());
@@ -1136,7 +1176,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				else if(info.samplesPlaying[nSmp])
 					image++;
 
-				if(sample.uFlags[SMP_KEEPONDISK] && !sampleExists) 
+				if(sample.uFlags[SMP_KEEPONDISK] && !sampleExists)
 					image = IMAGE_EXTSAMPLEMISSING;
 				else
 					image = Images[image];
@@ -1154,7 +1194,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					wsprintf(s, _T("%3d: %s"), nSmp, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[nSmp]).GetString());
 				}
 
-				if (!hChild)
+				if(!hChild)
 				{
 					hChild = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, image, image, 0, 0, nSmp, info.hSamples, TVI_LAST);
 				} else
@@ -1182,27 +1222,29 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	}
 	// Add Instruments
 	const InstrumentHint instrHint = hint.ToType<InstrumentHint>();
-	if (info.hInstruments && instrHint.GetType()[HINT_MODTYPE | HINT_INSNAMES | HINT_INSTRUMENT])
+	if(info.hInstruments && instrHint.GetType()[HINT_MODTYPE | HINT_INSNAMES | HINT_INSTRUMENT])
 	{
 		INSTRUMENTINDEX smin = 1, smax = MAX_INSTRUMENTS - 1;
 		const INSTRUMENTINDEX hintIns = instrHint.GetInstrument();
-		if (instrHint.GetType()[HINT_INSNAMES | HINT_INSTRUMENT] && hintIns > 0 && hintIns < MAX_INSTRUMENTS)
+		if(instrHint.GetType()[HINT_INSNAMES | HINT_INSTRUMENT] && hintIns > 0 && hintIns < MAX_INSTRUMENTS)
 		{
 			smin = smax = hintIns;
 		}
 		HTREEITEM hChild = GetNthChildItem(info.hInstruments, smin - 1);
-		for (INSTRUMENTINDEX nIns = smin; nIns <= smax; nIns++)
+		for(INSTRUMENTINDEX nIns = smin; nIns <= smax; nIns++)
 		{
 			HTREEITEM hNextChild = GetNextSiblingItem(hChild);
-			if (nIns <= sndFile.GetNumInstruments())
+			if(nIns <= sndFile.GetNumInstruments())
 			{
 				wsprintf(s, _T("%3u: %s"), nIns, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetInstrumentName(nIns)).GetString());
 
 				int nImage = IMAGE_INSTRUMENTS;
-				if(info.instrumentsPlaying[nIns]) nImage = IMAGE_INSTRACTIVE;
-				if(!sndFile.Instruments[nIns] || info.modDoc.IsInstrumentMuted(nIns)) nImage = IMAGE_INSTRMUTE;
+				if(info.instrumentsPlaying[nIns])
+					nImage = IMAGE_INSTRACTIVE;
+				if(!sndFile.Instruments[nIns] || info.modDoc.IsInstrumentMuted(nIns))
+					nImage = IMAGE_INSTRMUTE;
 
-				if (!hChild)
+				if(!hChild)
 				{
 					hChild = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, nIns, info.hInstruments, TVI_LAST);
 				} else
@@ -1233,10 +1275,13 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 
 CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 {
-	if (!hItem) return ModItem(MODITEM_NULL);
+	if(!hItem)
+		return ModItem(MODITEM_NULL);
 	// First, test root items
-	if (hItem == m_hInsLib) return ModItem(MODITEM_HDR_INSTRUMENTLIB);
-	if (hItem == m_hMidiLib) return ModItem(MODITEM_HDR_MIDILIB);
+	if(hItem == m_hInsLib)
+		return ModItem(MODITEM_HDR_INSTRUMENTLIB);
+	if(hItem == m_hMidiLib)
+		return ModItem(MODITEM_HDR_MIDILIB);
 
 	// The immediate parent of the item (NULL if this item is on the root level of the tree)
 	HTREEITEM hItemParent = GetParentItem(hItem);
@@ -1261,10 +1306,10 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 	if(hRootParent == m_hInsLib || (IsSampleBrowser() && hItem != m_hInsLib))
 	{
 		TVITEM tvi;
-		tvi.mask = TVIF_IMAGE|TVIF_HANDLE;
+		tvi.mask = TVIF_IMAGE | TVIF_HANDLE;
 		tvi.hItem = hItem;
 		tvi.iImage = 0;
-		if (GetItem(&tvi))
+		if(GetItem(&tvi))
 		{
 			switch(tvi.iImage)
 			{
@@ -1284,23 +1329,30 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 		}
 		return ModItem(MODITEM_NULL);
 	}
-	if (IsSampleBrowser()) return ModItem(MODITEM_NULL);
+	if(IsSampleBrowser())
+		return ModItem(MODITEM_NULL);
 	// Songs
 	if(rootItemData < DocInfo.size())
 	{
 		m_nDocNdx = rootItemData;
 		auto &pInfo = DocInfo[rootItemData];
 
-		if(hItem == pInfo->hSong) return ModItem(MODITEM_HDR_SONG);
+		if(hItem == pInfo->hSong)
+			return ModItem(MODITEM_HDR_SONG);
 		if(hRootParent == pInfo->hSong)
 		{
-			if (hItem == pInfo->hPatterns) return ModItem(MODITEM_HDR_PATTERNS);
-			if (hItem == pInfo->hOrders) return ModItem(MODITEM_HDR_ORDERS);
-			if (hItem == pInfo->hSamples) return ModItem(MODITEM_HDR_SAMPLES);
-			if (hItem == pInfo->hInstruments) return ModItem(MODITEM_HDR_INSTRUMENTS);
-			if (hItem == pInfo->hComments) return ModItem(MODITEM_COMMENTS);
+			if(hItem == pInfo->hPatterns)
+				return ModItem(MODITEM_HDR_PATTERNS);
+			if(hItem == pInfo->hOrders)
+				return ModItem(MODITEM_HDR_ORDERS);
+			if(hItem == pInfo->hSamples)
+				return ModItem(MODITEM_HDR_SAMPLES);
+			if(hItem == pInfo->hInstruments)
+				return ModItem(MODITEM_HDR_INSTRUMENTS);
+			if(hItem == pInfo->hComments)
+				return ModItem(MODITEM_COMMENTS);
 			// Order List or Sequence item?
-			if ((hItemParent == pInfo->hOrders) || (hItemParentParent == pInfo->hOrders))
+			if((hItemParent == pInfo->hOrders) || (hItemParentParent == pInfo->hOrders))
 			{
 				const ORDERINDEX ord = (ORDERINDEX)(itemData & SEQU_MASK);
 				const SEQUENCEINDEX seq = (SEQUENCEINDEX)(itemData >> SEQU_SHIFT);
@@ -1314,19 +1366,19 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 			}
 
 			ModItem modItem(MODITEM_NULL, itemData);
-			if (hItemParent == pInfo->hPatterns)
+			if(hItemParent == pInfo->hPatterns)
 			{
 				// Pattern
 				modItem.type = MODITEM_PATTERN;
-			} else if (hItemParent == pInfo->hSamples)
+			} else if(hItemParent == pInfo->hSamples)
 			{
 				// Sample
 				modItem.type = MODITEM_SAMPLE;
-			} else if (hItemParent == pInfo->hInstruments)
+			} else if(hItemParent == pInfo->hInstruments)
 			{
 				// Instrument
 				modItem.type = MODITEM_INSTRUMENT;
-			} else if (hItemParent == pInfo->hEffects)
+			} else if(hItemParent == pInfo->hEffects)
 			{
 				// Effect
 				modItem.type = MODITEM_EFFECT;
@@ -1344,11 +1396,11 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 	{
 		if(rootItemData < m_tiDLS.size() && m_tiDLS[rootItemData] == hRootParent)
 		{
-			if (hItem == m_tiDLS[rootItemData])
+			if(hItem == m_tiDLS[rootItemData])
 				return ModItem(MODITEM_DLSBANK_FOLDER, (uint32)rootItemData);
 
-			if ((itemData & DLS_TYPEMASK) == DLS_TYPEPERC
-				|| (itemData & DLS_TYPEMASK) == DLS_TYPEINST)
+			if((itemData & DLS_TYPEMASK) == DLS_TYPEPERC
+			   || (itemData & DLS_TYPEMASK) == DLS_TYPEINST)
 			{
 				return DlsItem(rootItemData, itemData);
 			}
@@ -1360,7 +1412,7 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 
 BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 {
-	if (hItem)
+	if(hItem)
 	{
 		const ModItem modItem = GetModItem(hItem);
 		uint32 modItemID = modItem.val1;
@@ -1369,7 +1421,8 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 		switch(modItem.type)
 		{
 		case MODITEM_COMMENTS:
-			if (modDoc) modDoc->ActivateView(IDD_CONTROL_COMMENTS, 0);
+			if(modDoc)
+				modDoc->ActivateView(IDD_CONTROL_COMMENTS, 0);
 			return TRUE;
 
 		/*case MODITEM_SEQUENCE:
@@ -1377,19 +1430,23 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 			return TRUE;*/
 
 		case MODITEM_ORDER:
-			if (modDoc) modDoc->ActivateView(IDD_CONTROL_PATTERNS, modItemID | (uint32(modItem.val2) << SEQU_SHIFT) | SEQU_INDICATOR);
+			if(modDoc)
+				modDoc->ActivateView(IDD_CONTROL_PATTERNS, modItemID | (uint32(modItem.val2) << SEQU_SHIFT) | SEQU_INDICATOR);
 			return TRUE;
 
 		case MODITEM_PATTERN:
-			if (modDoc) modDoc->ActivateView(IDD_CONTROL_PATTERNS, modItemID);
+			if(modDoc)
+				modDoc->ActivateView(IDD_CONTROL_PATTERNS, modItemID);
 			return TRUE;
 
 		case MODITEM_SAMPLE:
-			if (modDoc) modDoc->ActivateView(IDD_CONTROL_SAMPLES, modItemID);
+			if(modDoc)
+				modDoc->ActivateView(IDD_CONTROL_SAMPLES, modItemID);
 			return TRUE;
 
 		case MODITEM_INSTRUMENT:
-			if (modDoc) modDoc->ActivateView(IDD_CONTROL_INSTRUMENTS, modItemID);
+			if(modDoc)
+				modDoc->ActivateView(IDD_CONTROL_INSTRUMENTS, modItemID);
 			return TRUE;
 
 		case MODITEM_MIDIPERCUSSION:
@@ -1410,7 +1467,8 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 			return TRUE;
 
 		case MODITEM_HDR_SONG:
-			if (modDoc) modDoc->ActivateWindow();
+			if(modDoc)
+				modDoc->ActivateWindow();
 			return TRUE;
 
 		case MODITEM_DLSBANK_INSTRUMENT:
@@ -1453,7 +1511,7 @@ void CModTree::PlayDLSItem(CDLSBank &dlsBank, const DlsItem &item, ModCommand::N
 
 BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 {
-	if (hItem)
+	if(hItem)
 	{
 		const ModItem modItem = GetModItem(hItem);
 		uint32 modItemID = modItem.val1;
@@ -1462,29 +1520,29 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 		switch(modItem.type)
 		{
 		case MODITEM_SAMPLE:
-			if (modDoc)
+			if(modDoc)
 			{
-				if (note == NOTE_NOTECUT)
+				if(note == NOTE_NOTECUT)
 				{
-					modDoc->NoteOff(0, true); // cut previous playing samples
-				} else if (note & 0x80)
+					modDoc->NoteOff(0, true);  // cut previous playing samples
+				} else if(note & 0x80)
 				{
 					modDoc->NoteOff(note & 0x7F, true);
 				} else
 				{
-					modDoc->NoteOff(0, true); // cut previous playing samples
+					modDoc->NoteOff(0, true);  // cut previous playing samples
 					modDoc->PlayNote(PlayNoteParam(note & 0x7F).Sample(static_cast<SAMPLEINDEX>(modItemID)).Volume(volume));
 				}
 			}
 			return TRUE;
 
 		case MODITEM_INSTRUMENT:
-			if (modDoc)
+			if(modDoc)
 			{
-				if (note == NOTE_NOTECUT)
+				if(note == NOTE_NOTECUT)
 				{
 					modDoc->NoteOff(0, true);
-				} else if (note & 0x80)
+				} else if(note & 0x80)
 				{
 					modDoc->NoteOff(note & 0x7F, true);
 				} else
@@ -1496,7 +1554,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 			return TRUE;
 
 		case MODITEM_EFFECT:
-			if ((modDoc) && (modItemID < MAX_MIXPLUGINS))
+			if((modDoc) && (modItemID < MAX_MIXPLUGINS))
 			{
 				modDoc->TogglePluginEditor(modItemID);
 			}
@@ -1511,9 +1569,9 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 				{
 					// Preview sample / instrument in module
 					const size_t n = ConvertStrTo<size_t>(GetItemText(hItem));
-					if (pMainFrm && m_SongFile)
+					if(pMainFrm && m_SongFile)
 					{
-						if (modItem.type == MODITEM_INSLIB_INSTRUMENT)
+						if(modItem.type == MODITEM_INSLIB_INSTRUMENT)
 						{
 							pMainFrm->PlaySoundFile(*m_SongFile, static_cast<INSTRUMENTINDEX>(n), SAMPLEINDEX_INVALID, note, volume);
 						} else
@@ -1524,12 +1582,14 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 				} else
 				{
 					// Preview sample / instrument file
-					if (pMainFrm) pMainFrm->PlaySoundFile(InsLibGetFullPath(hItem), note, volume);
+					if(pMainFrm)
+						pMainFrm->PlaySoundFile(InsLibGetFullPath(hItem), note, volume);
 				}
 			} else
 			{
 				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if (pMainFrm) pMainFrm->StopPreview();
+				if(pMainFrm)
+					pMainFrm->StopPreview();
 			}
 
 			return TRUE;
@@ -1685,7 +1745,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_SAMPLE:
 		if(!sndFile->GetSample(static_cast<SAMPLEINDEX>(modItemID)).HasSampleData()
-			|| Reporting::Confirm(TreeDeletionString(*sndFile, UL_("sample"), modItemID, sndFile->m_szNames[modItemID]), false, true) == cnfYes)
+		   || Reporting::Confirm(TreeDeletionString(*sndFile, UL_("sample"), modItemID, sndFile->m_szNames[modItemID]), false, true) == cnfYes)
 		{
 			const SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(modItemID);
 			modDoc->GetSampleUndo().PrepareUndo(smp, sundo_replace, "Delete");
@@ -1699,7 +1759,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_INSTRUMENT:
 		if(sndFile->Instruments[modItemID] == nullptr
-			|| Reporting::Confirm(TreeDeletionString(*sndFile, UL_("instrument"), modItemID, sndFile->Instruments[modItemID]->name), false, true) == cnfYes)
+		   || Reporting::Confirm(TreeDeletionString(*sndFile, UL_("instrument"), modItemID, sndFile->Instruments[modItemID]->name), false, true) == cnfYes)
 		{
 			const INSTRUMENTINDEX ins = static_cast<INSTRUMENTINDEX>(modItemID);
 			modDoc->GetInstrumentUndo().PrepareUndo(ins, "Delete");
@@ -1806,7 +1866,7 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 			"All Files (*.*)|*.*||");
 	if(!dlg.Show()) return FALSE;
 
-	if (dwItem & 0x80)
+	if(dwItem & 0x80)
 		return SetMidiPercussion(dwItem & 0x7F, dlg.GetFirstFile());
 	else
 		return SetMidiInstrument(dwItem, dlg.GetFirstFile());
@@ -1817,13 +1877,14 @@ BOOL CModTree::OpenMidiInstrument(DWORD dwItem)
 void CModTree::EmptyInstrumentLibrary()
 {
 	HTREEITEM h;
-	if (!m_hInsLib) return;
-	if (!IsSampleBrowser())
+	if(!m_hInsLib)
+		return;
+	if(!IsSampleBrowser())
 	{
 		DeleteChildren(m_hInsLib);
 	} else
 	{
-		while ((h = GetNextItem(m_hInsLib, TVGN_NEXT)) != NULL)
+		while((h = GetNextItem(m_hInsLib, TVGN_NEXT)) != NULL)
 		{
 			DeleteItem(h);
 		}
@@ -1834,7 +1895,8 @@ void CModTree::EmptyInstrumentLibrary()
 // Refresh Instrument Library
 void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 {
-	if (!m_hInsLib) return;
+	if(!m_hInsLib)
+		return;
 
 	SetRedraw(FALSE);
 	if(!m_SongFileName.empty() && IsSampleBrowser() && m_SongFile)
@@ -1918,11 +1980,11 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 					{
 						InsertInsLibItem(wfd.cFileName, IMAGE_FOLDERPARENT, selectedItem);
 					}
-				} else if (wfd.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_OFFLINE | FILE_ATTRIBUTE_SYSTEM))
+				} else if(wfd.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_OFFLINE | FILE_ATTRIBUTE_SYSTEM))
 				{
 					// Ignore these files
 					continue;
-				} else if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				} else if(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
 					// Directory
 					if(_tcscmp(wfd.cFileName, _T(".")) && showDirs)
@@ -1979,11 +2041,11 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 						}
 					}
 				}
-			} while (FindNextFile(hFind, &wfd));
+			} while(FindNextFile(hFind, &wfd));
 			FindClose(hFind);
 		}
 	}
-	
+
 	// Sort items
 	TVSORTCB tvs;
 	tvs.hParent = (!IsSampleBrowser()) ? m_hInsLib : TVI_ROOT;
@@ -2034,7 +2096,7 @@ void CModTree::MonitorInstrumentLibrary()
 				}
 			}
 		}
-		const HANDLE waitHandles[3] = { m_hWatchDirKillThread, m_hSwitchWatchDir, hWatchDir };
+		const HANDLE waitHandles[3] = {m_hWatchDirKillThread, m_hSwitchWatchDir, hWatchDir};
 		result = WaitForMultipleObjects(hWatchDir != INVALID_HANDLE_VALUE ? 3 : 2, waitHandles, FALSE, timeout);
 		DWORD now = GetTickCount();
 		if(result == WAIT_TIMEOUT)
@@ -2049,7 +2111,7 @@ void CModTree::MonitorInstrumentLibrary()
 		} else if(result == WAIT_OBJECT_0 + 2)
 		{
 			FindNextChangeNotification(hWatchDir);
-			timeout = 0; // update timeout later	
+			timeout = 0;  // update timeout later
 		}
 		if(timeout != INFINITE)
 		{
@@ -2079,7 +2141,7 @@ void CModTree::MonitorInstrumentLibrary()
 // Insert sample browser item.
 void CModTree::InsertInsLibItem(const TCHAR *name, int image, const TCHAR *selectIfMatch)
 {
-	LPARAM sortOrder = 0; // The order in which item groups appear in the instrument library
+	LPARAM sortOrder = 0;  // The order in which item groups appear in the instrument library
 	switch(image)
 	{
 	case IMAGE_FOLDERPARENT:
@@ -2127,14 +2189,14 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 {
 	lParam1 &= 0x7FFFFFFF;
 	lParam2 &= 0x7FFFFFFF;
-	if ((lParam1 & 0xFF00FFFF) == (lParam2 & 0xFF00FFFF))
+	if((lParam1 & 0xFF00FFFF) == (lParam2 & 0xFF00FFFF))
 	{
 		if(pDLSBank)
 		{
 			const DLSINSTRUMENT *pDlsIns = reinterpret_cast<CDLSBank *>(pDLSBank)->GetInstrument(lParam1 & 0xFFFF);
 			lParam1 = (lParam1 >> 16) & 0xFF;
 			lParam2 = (lParam2 >> 16) & 0xFF;
-			if ((pDlsIns) && (lParam1 < (LONG)pDlsIns->nRegions) && (lParam2 < (LONG)pDlsIns->nRegions))
+			if((pDlsIns) && (lParam1 < (LONG)pDlsIns->nRegions) && (lParam2 < (LONG)pDlsIns->nRegions))
 			{
 				lParam1 = pDlsIns->Regions[lParam1].uKeyMin;
 				lParam2 = pDlsIns->Regions[lParam2].uKeyMin;
@@ -2147,7 +2209,8 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 
 void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 {
-	if(dir.empty()) return;
+	if(dir.empty())
+		return;
 	if(IsSampleBrowser())
 	{
 		CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(dir, isSong);
@@ -2174,7 +2237,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 			mpt::winstring::size_type pos = prevDir.find_last_of(_T("\\/"), prevDir.length() - 2);
 			if(pos != mpt::winstring::npos)
 			{
-				m_InstrLibHighlightPath = mpt::PathString::FromNative(prevDir.substr(pos + 1, prevDir.length() - pos - 2));	// Highlight previously accessed directory
+				m_InstrLibHighlightPath = mpt::PathString::FromNative(prevDir.substr(pos + 1, prevDir.length() - pos - 2));  // Highlight previously accessed directory
 				prevDir = prevDir.substr(0, pos + 1);
 			}
 			dir = mpt::PathString::FromNative(prevDir);
@@ -2188,7 +2251,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 					dir = m_InstrLibPath + dir;
 					dir.EnsureTrailingSlash();
 				}
-				m_InstrLibHighlightPath = P_("..");	// Highlight first entry
+				m_InstrLibHighlightPath = P_("..");  // Highlight first entry
 
 				FolderScanner scan(dir, FolderScanner::kFilesAndDirectories);
 				mpt::PathString name;
@@ -2229,31 +2292,31 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 
 bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 {
-	dropInfo.pModDoc = (m_nDragDocNdx < DocInfo.size() ? &(DocInfo[m_nDragDocNdx]->modDoc) : nullptr);
-	dropInfo.dwDropType = DRAGONDROP_NOTHING;
-	dropInfo.dwDropItem = m_itemDrag.val1;
-	dropInfo.lDropParam = 0;
+	dropInfo.sndFile = (m_nDragDocNdx < DocInfo.size() ? &(DocInfo[m_nDragDocNdx]->modDoc.GetSoundFile()) : nullptr);
+	dropInfo.dropType = DRAGONDROP_NOTHING;
+	dropInfo.dropItem = m_itemDrag.val1;
+	dropInfo.dropParam = 0;
 	switch(m_itemDrag.type)
 	{
 	case MODITEM_ORDER:
-		dropInfo.dwDropType = DRAGONDROP_ORDER;
+		dropInfo.dropType = DRAGONDROP_ORDER;
 		break;
 
 	case MODITEM_PATTERN:
-		dropInfo.dwDropType = DRAGONDROP_PATTERN;
+		dropInfo.dropType = DRAGONDROP_PATTERN;
 		break;
 
 	case MODITEM_SAMPLE:
-		dropInfo.dwDropType = DRAGONDROP_SAMPLE;
+		dropInfo.dropType = DRAGONDROP_SAMPLE;
 		break;
 
 	case MODITEM_INSTRUMENT:
-		dropInfo.dwDropType = DRAGONDROP_INSTRUMENT;
+		dropInfo.dropType = DRAGONDROP_INSTRUMENT;
 		break;
 
 	case MODITEM_SEQUENCE:
 	case MODITEM_HDR_ORDERS:
-		dropInfo.dwDropType = DRAGONDROP_SEQUENCE;
+		dropInfo.dropType = DRAGONDROP_SEQUENCE;
 		break;
 
 	case MODITEM_INSLIB_SAMPLE:
@@ -2261,54 +2324,54 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 		if(!m_SongFileName.empty())
 		{
 			const uint32 n = ConvertStrTo<uint32>(GetItemText(m_hItemDrag));
-			dropInfo.dwDropType = (m_itemDrag.type == MODITEM_INSLIB_SAMPLE) ? DRAGONDROP_SAMPLE : DRAGONDROP_INSTRUMENT;
-			dropInfo.dwDropItem = n;
-			dropInfo.pModDoc = nullptr;
-			dropInfo.lDropParam = (LPARAM)m_SongFile;
+			dropInfo.dropType = (m_itemDrag.type == MODITEM_INSLIB_SAMPLE) ? DRAGONDROP_SAMPLE : DRAGONDROP_INSTRUMENT;
+			dropInfo.dropItem = n;
+			dropInfo.sndFile = m_SongFile;
+			dropInfo.dropParam = 0;
 		} else
 		{
 			fullPath = InsLibGetFullPath(m_hItemDrag);
-			dropInfo.dwDropType = DRAGONDROP_SOUNDFILE;
-			dropInfo.lDropParam = (LPARAM)&fullPath;
+			dropInfo.dropType = DRAGONDROP_SOUNDFILE;
+			dropInfo.dropParam = (LPARAM)&fullPath;
 		}
 		break;
 
 	case MODITEM_MIDIPERCUSSION:
-		dropInfo.dwDropItem |= 0x80;
+		dropInfo.dropItem |= 0x80;
 	case MODITEM_MIDIINSTRUMENT:
 		{
 			MidiLibrary &midiLib = CTrackApp::GetMidiLibrary();
-			if(!midiLib[dropInfo.dwDropItem & 0xFF].empty())
+			if(!midiLib[dropInfo.dropItem & 0xFF].empty())
 			{
-				fullPath = midiLib[dropInfo.dwDropItem & 0xFF];
-				dropInfo.dwDropType = DRAGONDROP_MIDIINSTR;
-				dropInfo.lDropParam = (LPARAM)&fullPath;
+				fullPath = midiLib[dropInfo.dropItem & 0xFF];
+				dropInfo.dropType = DRAGONDROP_MIDIINSTR;
+				dropInfo.dropParam = (LPARAM)&fullPath;
 			}
 		}
 		break;
 
 	case MODITEM_INSLIB_SONG:
 		fullPath = InsLibGetFullPath(m_hItemDrag);
-		dropInfo.pModDoc = NULL;
-		dropInfo.dwDropType = DRAGONDROP_SONG;
-		dropInfo.dwDropItem = 0;
-		dropInfo.lDropParam = (LPARAM)&fullPath;
+		dropInfo.sndFile = nullptr;
+		dropInfo.dropType = DRAGONDROP_SONG;
+		dropInfo.dropItem = 0;
+		dropInfo.dropParam = (LPARAM)&fullPath;
 		break;
 
 	case MODITEM_DLSBANK_INSTRUMENT:
 		{
 			const DlsItem &item = *static_cast<const DlsItem *>(&m_itemDrag);
 			ASSERT(item.IsInstr() || item.IsPercussion());
-			dropInfo.dwDropType = DRAGONDROP_DLS;
+			dropInfo.dropType = DRAGONDROP_DLS;
 			// dwDropItem = DLS Bank #
-			dropInfo.dwDropItem = item.GetBankIndex();	// bank #
+			dropInfo.dropItem = item.GetBankIndex();	// bank #
 			// Melodic: (Instrument)
 			// Drums:	(0x80000000) | (Region << 16) | (Instrument)
-			dropInfo.lDropParam = (LPARAM)((m_itemDrag.val1 & (DLS_TYPEPERC | DLS_REGIONMASK | DLS_INSTRMASK)));
+			dropInfo.dropParam = (LPARAM)((m_itemDrag.val1 & (DLS_TYPEPERC | DLS_REGIONMASK | DLS_INSTRMASK)));
 		}
 		break;
 	}
-	return (dropInfo.dwDropType != DRAGONDROP_NOTHING);
+	return (dropInfo.dropType != DRAGONDROP_NOTHING);
 }
 
 
@@ -2328,10 +2391,10 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 	{
 	case MODITEM_ORDER:
 	case MODITEM_SEQUENCE:
-		if ((m_itemDrag.type == MODITEM_ORDER) && (pModDoc) && sameModDoc)
+		if((m_itemDrag.type == MODITEM_ORDER) && (pModDoc) && sameModDoc)
 		{
 			// drop an order somewhere
-			if (bDoDrop)
+			if(bDoDrop)
 			{
 				SEQUENCEINDEX nSeqFrom = (SEQUENCEINDEX)m_itemDrag.val2, nSeqTo = (SEQUENCEINDEX)modItemDrop.val2;
 				ORDERINDEX nOrdFrom = (ORDERINDEX)m_itemDrag.val1, nOrdTo = (ORDERINDEX)modItemDrop.val1;
@@ -2342,7 +2405,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 					nOrdTo = pSndFile->Order(nSeqTo).GetLengthTailTrimmed();
 				}
 
-				if (nSeqFrom != nSeqTo || nOrdFrom != nOrdTo)
+				if(nSeqFrom != nSeqTo || nOrdFrom != nOrdTo)
 				{
 					if(pModDoc->MoveOrder(nOrdFrom, nOrdTo, true, false, nSeqFrom, nSeqTo) == true)
 					{
@@ -2369,8 +2432,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 				if(pSndFile->GetModSpecifications().sequencesMax > 1)
 				{
 					pSndFile->Order.AddSequence(false);
-				}
-				else
+				} else
 				{
 					if(Reporting::Confirm(_T("Replace the current orderlist?"), _T("Sequence import")) == cnfNo)
 						return false;
@@ -2469,12 +2531,12 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 
 	case MODITEM_MIDIINSTRUMENT:
 	case MODITEM_MIDIPERCUSSION:
-		if ((m_itemDrag.type == MODITEM_INSLIB_SAMPLE) || (m_itemDrag.type == MODITEM_INSLIB_INSTRUMENT))
+		if((m_itemDrag.type == MODITEM_INSLIB_SAMPLE) || (m_itemDrag.type == MODITEM_INSLIB_INSTRUMENT))
 		{
-			if (bDoDrop)
+			if(bDoDrop)
 			{
 				mpt::PathString fullPath = InsLibGetFullPath(m_hItemDrag);
-				if (modItemDrop.type == MODITEM_MIDIINSTRUMENT)
+				if(modItemDrop.type == MODITEM_MIDIINSTRUMENT)
 					SetMidiInstrument(modItemDropID, fullPath);
 				else
 					SetMidiPercussion(modItemDropID, fullPath);
@@ -2490,12 +2552,13 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 {
 	ModTreeDocInfo *pInfo = GetDocumentInfoFromModDoc(modDoc);
-	if(pInfo == nullptr) return;
+	if(pInfo == nullptr)
+		return;
 
 	const CSoundFile &sndFile = modDoc.GetSoundFile();
 	ORDERINDEX nNewOrd = (pNotify) ? pNotify->order : ORDERINDEX_INVALID;
 	SEQUENCEINDEX nNewSeq = sndFile.Order.GetCurrentSequenceIndex();
-	if (nNewOrd != pInfo->nOrdSel || nNewSeq != pInfo->nSeqSel)
+	if(nNewOrd != pInfo->nOrdSel || nNewSeq != pInfo->nSeqSel)
 	{
 		// Remove bold state from old item
 		if(pInfo->nSeqSel < pInfo->tiOrders.size() && pInfo->nOrdSel < pInfo->tiOrders[pInfo->nSeqSel].size())
@@ -2511,7 +2574,8 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 
 	// Update sample / instrument playing status icons (will only detect instruments with samples, though)
 
-	if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_LIVEUPDATETREE) == 0) return;
+	if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_LIVEUPDATETREE) == 0)
+		return;
 	// TODO: Is there a way to find out if the treeview is actually visible?
 	/*static int nUpdateCount = 0;
 	nUpdateCount++;
@@ -2524,7 +2588,8 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 	pInfo->samplesPlaying.reset();
 	pInfo->instrumentsPlaying.reset();
 
-	if(!updateSamples && !updateInstruments) return;
+	if(!updateSamples && !updateInstruments)
+		return;
 
 	for(const auto &chn : sndFile.m_PlayState.Chn)
 	{
@@ -2555,8 +2620,10 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 		}
 	}
 	// what should be updated?
-	if(updateSamples) UpdateView(*pInfo, SampleHint().Info());
-	if(updateInstruments) UpdateView(*pInfo, InstrumentHint().Info());
+	if(updateSamples)
+		UpdateView(*pInfo, SampleHint().Info());
+	if(updateInstruments)
+		UpdateView(*pInfo, InstrumentHint().Info());
 }
 
 
@@ -2567,15 +2634,16 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 
 void CModTree::OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
 {
-	if (pHint != this)
+	if(pHint == this)
+		return;
+
+	for(auto &doc : DocInfo)
 	{
-		for (auto &doc : DocInfo)
+		if(&doc->modDoc == pModDoc || !pModDoc)
 		{
-			if (&doc->modDoc == pModDoc || !pModDoc)
-			{
-				UpdateView(*doc, hint);
+			UpdateView(*doc, hint);
+			if(pModDoc)
 				break;
-			}
 		}
 	}
 }
@@ -2583,26 +2651,28 @@ void CModTree::OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
 void CModTree::OnItemExpanded(LPNMHDR pnmhdr, LRESULT *pResult)
 {
 	LPNMTREEVIEW pnm = (LPNMTREEVIEW)pnmhdr;
-	if ((pnm->itemNew.iImage == IMAGE_FOLDER) || (pnm->itemNew.iImage == IMAGE_OPENFOLDER))
+	if((pnm->itemNew.iImage == IMAGE_FOLDER) || (pnm->itemNew.iImage == IMAGE_OPENFOLDER))
 	{
 		int iNewImage = (pnm->itemNew.state & TVIS_EXPANDED) ? IMAGE_OPENFOLDER : IMAGE_FOLDER;
 		SetItemImage(pnm->itemNew.hItem, iNewImage, iNewImage);
 	}
-	if (pResult) *pResult = TRUE;
+	if(pResult)
+		*pResult = TRUE;
 }
 
 
 void CModTree::OnBeginDrag(HTREEITEM hItem, bool bLeft, LRESULT *pResult)
 {
-	if (!(m_dwStatus & TREESTATUS_DRAGGING))
+	if(!(m_dwStatus & TREESTATUS_DRAGGING))
 	{
 		bool bDrag = false;
 
 		m_hDropWnd = NULL;
 		m_hItemDrag = hItem;
-		if (m_hItemDrag != NULL)
+		if(m_hItemDrag != NULL)
 		{
-			if (!ItemHasChildren(m_hItemDrag)) SelectItem(m_hItemDrag);
+			if(!ItemHasChildren(m_hItemDrag))
+				SelectItem(m_hItemDrag);
 		}
 		m_itemDrag = GetModItem(m_hItemDrag);
 		m_nDragDocNdx = m_nDocNdx;
@@ -2629,22 +2699,24 @@ void CModTree::OnBeginDrag(HTREEITEM hItem, bool bLeft, LRESULT *pResult)
 			}
 			break;
 		default:
-			if (m_itemDrag.type == MODITEM_DLSBANK_INSTRUMENT) bDrag = true;
+			if(m_itemDrag.type == MODITEM_DLSBANK_INSTRUMENT)
+				bDrag = true;
 		}
-		if (bDrag)
+		if(bDrag)
 		{
 			m_dwStatus |= (bLeft) ? TREESTATUS_LDRAG : TREESTATUS_RDRAG;
 			m_hItemDrop = NULL;
 			SetCapture();
 		}
 	}
-	if (pResult) *pResult = TRUE;
+	if(pResult)
+		*pResult = TRUE;
 }
 
 
 void CModTree::OnBeginRDrag(LPNMHDR pnmhdr, LRESULT *pResult)
 {
-	if (pnmhdr)
+	if(pnmhdr)
 	{
 		LPNMTREEVIEW pnmtv = (LPNMTREEVIEW)pnmhdr;
 		OnBeginDrag(pnmtv->itemNew.hItem, false, pResult);
@@ -2654,7 +2726,7 @@ void CModTree::OnBeginRDrag(LPNMHDR pnmhdr, LRESULT *pResult)
 
 void CModTree::OnBeginLDrag(LPNMHDR pnmhdr, LRESULT *pResult)
 {
-	if (pnmhdr)
+	if(pnmhdr)
 	{
 		LPNMTREEVIEW pnmtv = (LPNMTREEVIEW)pnmhdr;
 		OnBeginDrag(pnmtv->itemNew.hItem, true, pResult);
@@ -2668,19 +2740,22 @@ void CModTree::OnItemDblClk(LPNMHDR, LRESULT *pResult)
 	GetCursorPos(&pt);
 	ScreenToClient(&pt);
 	HTREEITEM hItem = GetSelectedItem();
-	if ((hItem) && (hItem == HitTest(pt)))
+	if((hItem) && (hItem == HitTest(pt)))
 	{
 		ExecuteItem(hItem);
 	}
-	if (pResult) *pResult = 0;
+	if(pResult)
+		*pResult = 0;
 }
 
 
 void CModTree::OnItemReturn(LPNMHDR, LRESULT *pResult)
 {
 	HTREEITEM hItem = GetSelectedItem();
-	if (hItem) ExecuteItem(hItem);
-	if (pResult) *pResult = 0;
+	if(hItem)
+		ExecuteItem(hItem);
+	if(pResult)
+		*pResult = 0;
 }
 
 
@@ -2693,16 +2768,17 @@ void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 	ptClient = pt;
 	ScreenToClient(&ptClient);
 	OnItemRightClick(HitTest(ptClient, &flags), pt);
-	if(pResult) *pResult = 0;
+	if(pResult)
+		*pResult = 0;
 }
 
 
 void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 {
 	HMENU hMenu;
-	if (m_dwStatus & TREESTATUS_LDRAG)
+	if(m_dwStatus & TREESTATUS_LDRAG)
 	{
-		if (ItemHasChildren(hItem))
+		if(ItemHasChildren(hItem))
 		{
 			Expand(hItem, TVE_TOGGLE);
 		} else
@@ -2713,14 +2789,14 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 		}
 	} else
 	{
-		if (m_dwStatus & TREESTATUS_DRAGGING)
+		if(m_dwStatus & TREESTATUS_DRAGGING)
 		{
 			m_hItemDrop = NULL;
 			m_hDropWnd = NULL;
 			OnEndDrag(TREESTATUS_DRAGGING);
 		}
 		hMenu = ::CreatePopupMenu();
-		if (hMenu)
+		if(hMenu)
 		{
 			const CModDoc *modDoc = GetDocumentFromItem(hItem);
 			const CSoundFile *sndFile = modDoc != nullptr ? &modDoc->GetSoundFile() : nullptr;
@@ -2958,14 +3034,14 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 
 void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
 {
-	if (!(m_dwStatus & TREESTATUS_RDRAG))
+	if(!(m_dwStatus & TREESTATUS_RDRAG))
 	{
 		POINT pt;
 		UINT flags;
 		GetCursorPos(&pt);
 		ScreenToClient(&pt);
 		HTREEITEM hItem = HitTest(pt, &flags);
-		if (hItem != NULL)
+		if(hItem != NULL)
 		{
 			const ModItem modItem = GetModItem(hItem);
 			const uint32 modItemID = modItem.val1;
@@ -2974,7 +3050,8 @@ void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
 			{
 			case MODITEM_INSLIB_FOLDER:
 			case MODITEM_INSLIB_SONG:
-				if (m_dwStatus & TREESTATUS_SINGLEEXPAND) ExecuteItem(hItem);
+				if(m_dwStatus & TREESTATUS_SINGLEEXPAND)
+					ExecuteItem(hItem);
 				break;
 
 			case MODITEM_SAMPLE:
@@ -2997,31 +3074,31 @@ void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
 			}
 		}
 	}
-	if (pResult) *pResult = 0;
+	if(pResult)
+		*pResult = 0;
 }
 
 
 void CModTree::OnEndDrag(DWORD dwMask)
 {
-	if (m_dwStatus & dwMask)
+	if(m_dwStatus & dwMask)
 	{
 		m_dwStatus &= ~dwMask;
-		if (!(m_dwStatus & TREESTATUS_DRAGGING))
+		if(!(m_dwStatus & TREESTATUS_DRAGGING))
 		{
 			ReleaseCapture();
 			SetCursor(CMainFrame::curArrow);
 			SelectDropTarget(NULL);
-			if (m_hItemDrop != NULL)
+			if(m_hItemDrop != NULL)
 			{
 				CanDrop(m_hItemDrop, TRUE);
-			} else
-			if (m_hDropWnd)
+			} else if(m_hDropWnd)
 			{
 				DRAGONDROP dropinfo;
 				mpt::PathString fullPath;
 				if(GetDropInfo(dropinfo, fullPath))
 				{
-					if (dropinfo.dwDropType == DRAGONDROP_SONG)
+					if(dropinfo.dropType == DRAGONDROP_SONG)
 					{
 						theApp.OpenDocumentFile(fullPath.ToCString());
 					} else
@@ -3051,13 +3128,13 @@ void CModTree::OnRButtonUp(UINT nFlags, CPoint point)
 
 void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 {
-	if (m_dwStatus & TREESTATUS_DRAGGING)
+	if(m_dwStatus & TREESTATUS_DRAGGING)
 	{
 		HTREEITEM hItem;
 		UINT flags;
 
 		// Bug?
-		if (!(nFlags & (MK_LBUTTON|MK_RBUTTON)))
+		if(!(nFlags & (MK_LBUTTON | MK_RBUTTON)))
 		{
 			m_itemDrag = ModItem(MODITEM_NULL);
 			m_hItemDrag = NULL;
@@ -3065,34 +3142,34 @@ void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 			return;
 		}
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if (pMainFrm)
+		if(pMainFrm)
 		{
 			CRect rect;
 			GetClientRect(&rect);
-			if (rect.PtInRect(point))
+			if(rect.PtInRect(point))
 			{
 				m_hDropWnd = m_hWnd;
-				bool bCanDrop = CanDrop( HitTest(point, &flags), false);
+				bool bCanDrop = CanDrop(HitTest(point, &flags), false);
 				SetCursor((bCanDrop) ? CMainFrame::curDragging : CMainFrame::curNoDrop2);
 			} else
 			{
 				CPoint screenPt = point;
 				ClientToScreen(&screenPt);
 				HWND hwnd = ::WindowFromPoint(screenPt);
-				if (hwnd != m_hDropWnd)
+				if(hwnd != m_hDropWnd)
 				{
 					bool canDrop = false;
 					m_hDropWnd = hwnd;
-					if (hwnd == m_hWnd)
+					if(hwnd == m_hWnd)
 					{
 						canDrop = true;
-					} else if (hwnd != NULL)
+					} else if(hwnd != NULL)
 					{
 						DRAGONDROP dropinfo;
 						mpt::PathString fullPath;
 						if(GetDropInfo(dropinfo, fullPath))
 						{
-							if (dropinfo.dwDropType == DRAGONDROP_SONG)
+							if(dropinfo.dropType == DRAGONDROP_SONG)
 							{
 								canDrop = true;
 							} else if(::SendMessage(hwnd, WM_MOD_DRAGONDROPPING, FALSE, (LPARAM)&dropinfo))
@@ -3102,9 +3179,9 @@ void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 						}
 					}
 					SetCursor(canDrop ? CMainFrame::curDragging : CMainFrame::curNoDrop);
-					if (canDrop)
+					if(canDrop)
 					{
-						if (GetDropHilightItem() != m_hItemDrag)
+						if(GetDropHilightItem() != m_hItemDrag)
 						{
 							SelectDropTarget(m_hItemDrag);
 						}
@@ -3113,27 +3190,28 @@ void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 					}
 				}
 			}
-			if ((point.x >= -1) && (point.x <= rect.right + GetSystemMetrics(SM_CXVSCROLL)))
+			if((point.x >= -1) && (point.x <= rect.right + GetSystemMetrics(SM_CXVSCROLL)))
 			{
-				if (point.y <= 0)
+				if(point.y <= 0)
 				{
 					HTREEITEM hfirst = GetFirstVisibleItem();
-					if (hfirst != NULL)
+					if(hfirst != NULL)
 					{
 						HTREEITEM hprev = GetPrevVisibleItem(hfirst);
-						if (hprev != NULL) SelectSetFirstVisible(hprev);
+						if(hprev != NULL)
+							SelectSetFirstVisible(hprev);
 					}
-				} else if (point.y >= rect.bottom-1)
+				} else if(point.y >= rect.bottom - 1)
 				{
 					hItem = HitTest(point, &flags);
 					HTREEITEM hNext = GetNextItem(hItem, TVGN_NEXTVISIBLE);
-					if (hNext != NULL)
+					if(hNext != NULL)
 					{
 						EnsureVisible(hNext);
 					}
 				}
 			}
-			if ((hItem = HitTest(point, &flags)) != NULL)
+			if((hItem = HitTest(point, &flags)) != NULL)
 			{
 				SelectDropTarget(hItem);
 				m_hItemDrop = hItem;
@@ -3159,7 +3237,7 @@ void CModTree::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CModTree::OnRefreshTree()
 {
 	BeginWaitCursor();
-	for (auto &doc : DocInfo)
+	for(auto &doc : DocInfo)
 	{
 		UpdateView(*doc, UpdateHint().ModType());
 	}
@@ -3202,19 +3280,18 @@ void CModTree::OnMuteTreeItem()
 	const uint32 modItemID = modItem.val1;
 
 	ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem);
-	if (info)
+	if(info)
 	{
 		CModDoc &modDoc = info->modDoc;
-		if ((modItem.type == MODITEM_SAMPLE) && !modDoc.GetNumInstruments())
+		if((modItem.type == MODITEM_SAMPLE) && !modDoc.GetNumInstruments())
 		{
 			modDoc.MuteSample((SAMPLEINDEX)modItemID, !modDoc.IsSampleMuted((SAMPLEINDEX)modItemID));
 			UpdateView(*info, SampleHint((SAMPLEINDEX)modItemID).Info().Names());
-		} else
-		if ((modItem.type == MODITEM_INSTRUMENT) && modDoc.GetNumInstruments())
+		} else if((modItem.type == MODITEM_INSTRUMENT) && modDoc.GetNumInstruments())
 		{
 			modDoc.MuteInstrument((INSTRUMENTINDEX)modItemID, !modDoc.IsInstrumentMuted((INSTRUMENTINDEX)modItemID));
 			UpdateView(*info, InstrumentHint((INSTRUMENTINDEX)modItemID).Info().Names());
-		} else if ((modItem.type == MODITEM_EFFECT))
+		} else if((modItem.type == MODITEM_EFFECT))
 		{
 			IMixPlugin *pPlugin = modDoc.GetSoundFile().m_MixPlugins[modItemID].pMixPlugin;
 			if(pPlugin == nullptr)
@@ -3235,20 +3312,20 @@ void CModTree::OnSoloTreeItem()
 	const uint32 modItemID = modItem.val1;
 
 	ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem);
-	if (info)
+	if(info)
 	{
 		CModDoc &modDoc = info->modDoc;
 		INSTRUMENTINDEX nInstruments = modDoc.GetNumInstruments();
-		if ((modItem.type == MODITEM_SAMPLE) && (!nInstruments))
+		if((modItem.type == MODITEM_SAMPLE) && (!nInstruments))
 		{
-			for (SAMPLEINDEX nSmp = 1; nSmp <= modDoc.GetNumSamples(); nSmp++)
+			for(SAMPLEINDEX nSmp = 1; nSmp <= modDoc.GetNumSamples(); nSmp++)
 			{
 				modDoc.MuteSample(nSmp, nSmp != modItemID);
 			}
 			UpdateView(*info, SampleHint().Info().Names());
-		} else if ((modItem.type == MODITEM_INSTRUMENT) && (nInstruments))
+		} else if((modItem.type == MODITEM_INSTRUMENT) && (nInstruments))
 		{
-			for (INSTRUMENTINDEX nIns = 1; nIns <= nInstruments; nIns++)
+			for(INSTRUMENTINDEX nIns = 1; nIns <= nInstruments; nIns++)
 			{
 				modDoc.MuteInstrument(nIns, nIns != modItemID);
 			}
@@ -3265,17 +3342,17 @@ void CModTree::OnUnmuteAllTreeItem()
 	const ModItem modItem = GetModItem(hItem);
 
 	ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem);
-	if (info)
+	if(info)
 	{
 		CModDoc &modDoc = info->modDoc;
-		if ((modItem.type == MODITEM_SAMPLE) || (modItem.type == MODITEM_INSTRUMENT))
+		if((modItem.type == MODITEM_SAMPLE) || (modItem.type == MODITEM_INSTRUMENT))
 		{
-			for (SAMPLEINDEX nSmp = 1; nSmp <= modDoc.GetNumSamples(); nSmp++)
+			for(SAMPLEINDEX nSmp = 1; nSmp <= modDoc.GetNumSamples(); nSmp++)
 			{
 				modDoc.MuteSample(nSmp, false);
 			}
 			UpdateView(*info, SampleHint().Info().Names());
-			for (INSTRUMENTINDEX nIns = 1; nIns <= modDoc.GetNumInstruments(); nIns++)
+			for(INSTRUMENTINDEX nIns = 1; nIns <= modDoc.GetNumInstruments(); nIns++)
 			{
 				modDoc.MuteInstrument(nIns, false);
 			}
@@ -3286,7 +3363,7 @@ void CModTree::OnUnmuteAllTreeItem()
 
 
 // Helper function for generating an insert vector for samples/instruments
-template<typename T>
+template <typename T>
 std::vector<T> GenerateInsertVector(size_t howMany, size_t insertPos, T insertId)
 {
 	std::vector<T> newOrder(howMany);
@@ -3307,7 +3384,7 @@ void CModTree::InsertOrDupItem(bool insert)
 	const uint32 modItemID = modItem.val1;
 
 	ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem);
-	if (info)
+	if(info)
 	{
 		CModDoc &modDoc = info->modDoc;
 		CSoundFile &sndFile = modDoc.GetSoundFile();
@@ -3363,7 +3440,7 @@ void CModTree::OnSwitchToTreeItem()
 	const ModItem modItem = GetModItem(hItem);
 
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
-	if (pModDoc && (modItem.type == MODITEM_SEQUENCE))
+	if(pModDoc && (modItem.type == MODITEM_SEQUENCE))
 	{
 		pModDoc->ActivateView(IDD_CONTROL_PATTERNS, uint32(modItem.val1 << SEQU_SHIFT) | SEQU_INDICATOR);
 	}
@@ -3387,7 +3464,8 @@ void CModTree::OnSetItemPath()
 			dlg.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir());
 		else
 			dlg.DefaultFilename(path);
-		if(!dlg.Show()) return;
+		if(!dlg.Show())
+			return;
 		TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 
 		if(dlg.GetFirstFile() != pModDoc->GetSoundFile().GetSamplePath(smpID))
@@ -3411,7 +3489,8 @@ void CModTree::OnSaveItem()
 	{
 		SAMPLEINDEX smpID = static_cast<SAMPLEINDEX>(modItem.val1);
 		pModDoc->SaveSample(smpID);
-		if(pModDoc) pModDoc->UpdateAllViews(NULL, SampleHint(smpID).Info());
+		if(pModDoc)
+			pModDoc->UpdateAllViews(NULL, SampleHint(smpID).Info());
 		OnRefreshTree();
 	}
 }
@@ -3423,7 +3502,8 @@ void CModTree::OnSaveAll()
 	if(pModDoc != nullptr)
 	{
 		pModDoc->SaveAllSamples();
-		if(pModDoc) pModDoc->UpdateAllViews(nullptr, SampleHint().Info());
+		if(pModDoc)
+			pModDoc->UpdateAllViews(nullptr, SampleHint().Info());
 		OnRefreshTree();
 	}
 }
@@ -3469,7 +3549,8 @@ void CModTree::OnReloadAll()
 		for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
 		{
 			const mpt::PathString &path = sndFile.GetSamplePath(smp);
-			if(path.empty()) continue;
+			if(path.empty())
+				continue;
 
 			pModDoc->GetSampleUndo().PrepareUndo(smp, sundo_replace, "Replace");
 			if(!sndFile.LoadExternalSample(smp, path))
@@ -3510,14 +3591,16 @@ void CModTree::OnFindMissing()
 void CModTree::OnAddDlsBank()
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm) pMainFrm->OnAddDlsBank();
+	if(pMainFrm)
+		pMainFrm->OnAddDlsBank();
 }
 
 
 void CModTree::OnImportMidiLib()
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm) pMainFrm->OnImportMidiLib();
+	if(pMainFrm)
+		pMainFrm->OnImportMidiLib();
 }
 
 
@@ -3537,13 +3620,13 @@ void CModTree::OnExportMidiLib()
 ///////////////////////////////////////////////////////////////////////
 // Drop support
 
-DROPEFFECT CModTree::OnDragEnter(COleDataObject*, DWORD, CPoint)
+DROPEFFECT CModTree::OnDragEnter(COleDataObject *, DWORD, CPoint)
 {
 	return DROPEFFECT_LINK;
 }
 
 
-DROPEFFECT CModTree::OnDragOver(COleDataObject*, DWORD, CPoint point)
+DROPEFFECT CModTree::OnDragOver(COleDataObject *, DWORD, CPoint point)
 {
 	UINT flags;
 	HTREEITEM hItem = HitTest(point, &flags);
@@ -3554,7 +3637,7 @@ DROPEFFECT CModTree::OnDragOver(COleDataObject*, DWORD, CPoint point)
 	{
 	case MODITEM_MIDIINSTRUMENT:
 	case MODITEM_MIDIPERCUSSION:
-		if (hItem != GetDropHilightItem())
+		if(hItem != GetDropHilightItem())
 		{
 			SelectDropTarget(hItem);
 			EnsureVisible(hItem);
@@ -3572,20 +3655,24 @@ DROPEFFECT CModTree::OnDragOver(COleDataObject*, DWORD, CPoint point)
 }
 
 
-BOOL CModTree::OnDrop(COleDataObject* pDataObject, DROPEFFECT, CPoint)
+BOOL CModTree::OnDrop(COleDataObject *pDataObject, DROPEFFECT, CPoint)
 {
 	STGMEDIUM stgm;
 	HDROP hDropInfo;
 	UINT nFiles;
 	BOOL bOk = FALSE;
 
-	if (!pDataObject) return FALSE;
-	if (!pDataObject->GetData(CF_HDROP, &stgm)) return FALSE;
-	if (stgm.tymed != TYMED_HGLOBAL) return FALSE;
-	if (stgm.hGlobal == NULL) return FALSE;
+	if(!pDataObject)
+		return FALSE;
+	if(!pDataObject->GetData(CF_HDROP, &stgm))
+		return FALSE;
+	if(stgm.tymed != TYMED_HGLOBAL)
+		return FALSE;
+	if(stgm.hGlobal == NULL)
+		return FALSE;
 	hDropInfo = (HDROP)stgm.hGlobal;
 	nFiles = DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
-	if (nFiles)
+	if(nFiles)
 	{
 		UINT size = ::DragQueryFile(hDropInfo, 0, nullptr, 0) + 1;
 		std::vector<TCHAR> fileName(size, _T('\0'));
@@ -3633,7 +3720,7 @@ void CModTree::OnShowDirectories()
 
 void CModTree::OnShowAllFiles()
 {
-	if (!m_showAllFiles)
+	if(!m_showAllFiles)
 	{
 		m_showAllFiles = true;
 		OnRefreshInstrLib();
@@ -3643,7 +3730,7 @@ void CModTree::OnShowAllFiles()
 
 void CModTree::OnShowSoundFiles()
 {
-	if (m_showAllFiles)
+	if(m_showAllFiles)
 	{
 		m_showAllFiles = false;
 		OnRefreshInstrLib();
@@ -3667,7 +3754,7 @@ void CModTree::OnSoundBankProperties()
 {
 	const ModItem modItem = GetModItem(GetSelectedItem());
 	if(modItem.type == MODITEM_DLSBANK_FOLDER
-		&& modItem.val1 < CTrackApp::gpDLSBanks.size() && CTrackApp::gpDLSBanks[modItem.val1])
+	   && modItem.val1 < CTrackApp::gpDLSBanks.size() && CTrackApp::gpDLSBanks[modItem.val1])
 	{
 		CSoundBankProperties dlg(*CTrackApp::gpDLSBanks[modItem.val1], this);
 		dlg.DoModal();
@@ -3694,7 +3781,8 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	}
 	if(note != NOTE_NONE)
 	{
-		if(stop) note |= 0x80;
+		if(stop)
+			note |= 0x80;
 
 		if(PlayItem(GetSelectedItem(), note))
 			return wParam;
@@ -3712,7 +3800,7 @@ LRESULT CModTree::OnMidiMsg(WPARAM midiData_, LPARAM)
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetInputHandler();
 	ih->HandleMIDIMessage(kCtxViewTree, midiData) != kcNull
-		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull;
+	    || ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull;
 
 	uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
 	int volume;
@@ -3734,7 +3822,7 @@ LRESULT CModTree::OnMidiMsg(WPARAM midiData_, LPARAM)
 }
 
 
-void CModTree::OnKillFocus(CWnd* pNewWnd)
+void CModTree::OnKillFocus(CWnd *pNewWnd)
 {
 	CTreeCtrl::OnKillFocus(pNewWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = false;
@@ -3743,7 +3831,7 @@ void CModTree::OnKillFocus(CWnd* pNewWnd)
 }
 
 
-void CModTree::OnSetFocus(CWnd* pOldWnd)
+void CModTree::OnSetFocus(CWnd *pOldWnd)
 {
 	CTreeCtrl::OnSetFocus(pOldWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = true;
@@ -3754,7 +3842,8 @@ void CModTree::OnSetFocus(CWnd* pOldWnd)
 bool CModTree::IsItemExpanded(HTREEITEM hItem)
 {
 	// checks if a treeview item is expanded.
-	if(hItem == NULL) return false;
+	if(hItem == NULL)
+		return false;
 	TVITEM tvi;
 	tvi.mask = TVIF_HANDLE | TVIF_STATE;
 	tvi.state = 0;
@@ -3769,12 +3858,15 @@ void CModTree::OnCloseItem()
 {
 	HTREEITEM hItem = GetSelectedItem();
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
-	if(pModDoc == nullptr) return;
+	if(pModDoc == nullptr)
+		return;
 	// Spam our message to the first available view
 	POSITION pos = pModDoc->GetFirstViewPosition();
-	if(pos == nullptr) return;
-	CView* pView = pModDoc->GetNextView(pos);
-	if (pView) pView->PostMessage(WM_COMMAND, ID_FILE_CLOSE);
+	if(pos == nullptr)
+		return;
+	CView *pView = pModDoc->GetNextView(pos);
+	if(pView)
+		pView->PostMessage(WM_COMMAND, ID_FILE_CLOSE);
 }
 
 
@@ -3793,7 +3885,7 @@ void CModTree::DeleteChildren(HTREEITEM hItem)
 
 
 // Get the n-th child of a tree node
-HTREEITEM CModTree::GetNthChildItem(HTREEITEM hItem, int index)
+HTREEITEM CModTree::GetNthChildItem(HTREEITEM hItem, int index) const
 {
 	HTREEITEM hChildItem = nullptr;
 	if(hItem != nullptr && ItemHasChildren(hItem))
@@ -3810,12 +3902,13 @@ HTREEITEM CModTree::GetNthChildItem(HTREEITEM hItem, int index)
 
 // Gets the root parent of an item, i.e. if C is a child of B and B is a child of A, GetParentRootItem(C) returns A.
 // A root item is considered to be its own parent, i.e. the returned value is only ever NULL if the input value was NULL.
-HTREEITEM CModTree::GetParentRootItem(HTREEITEM hItem)
+HTREEITEM CModTree::GetParentRootItem(HTREEITEM hItem) const
 {
 	while(hItem != nullptr)
 	{
 		const HTREEITEM h = GetParentItem(hItem);
-		if(h == nullptr || h == hItem) break;
+		if(h == nullptr || h == hItem)
+			break;
 		hItem = h;
 	}
 	return hItem;
@@ -4016,7 +4109,8 @@ void CModTree::OnDropFiles(HDROP hDropInfo)
 				const bool isSong = !file.IsDirectory();
 				CModTree *dirBrowser = CMainFrame::GetMainFrame()->GetUpperTreeview();
 				dirBrowser->m_InstrLibPath = file.GetPath();
-				if(isSong) dirBrowser->RefreshInstrumentLibrary();
+				if(isSong)
+					dirBrowser->RefreshInstrumentLibrary();
 				dirBrowser->InstrumentLibraryChDir(file.GetFullFileName(), isSong);
 				break;
 			} else

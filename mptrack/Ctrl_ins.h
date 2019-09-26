@@ -126,7 +126,7 @@ public:
 	BOOL SetCurrentInstrument(UINT nIns, BOOL bUpdNum=TRUE);
 	bool InsertInstrument(bool duplicate);
 	bool OpenInstrument(const mpt::PathString &fileName);
-	bool OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
+	bool OpenInstrument(const CSoundFile &sndFile, INSTRUMENTINDEX nInstr);
 	void SaveInstrument(bool doBatchSave);
 	BOOL EditSample(UINT nSample);
 	void UpdateFilterText();

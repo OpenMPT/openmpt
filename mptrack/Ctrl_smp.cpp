@@ -459,16 +459,20 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 			break;
 		[[fallthrough]];
 	case CTRLMSG_SMP_OPENFILE:
-		if (lParam) return OpenSample(*reinterpret_cast<const mpt::PathString *>(lParam));
+		if(lParam)
+			return OpenSample(*reinterpret_cast<const mpt::PathString *>(lParam));
 		break;
 
+	case CTRLMSG_SMP_SONGDROP_NEW:
+		if(!InsertSample(false))
+			break;
+		[[fallthrough]];
 	case CTRLMSG_SMP_SONGDROP:
-		if (lParam)
+		if(lParam)
 		{
-			const DRAGONDROP *pDropInfo = (const DRAGONDROP *)lParam;
-			CSoundFile *pSndFile = (CSoundFile *)(pDropInfo->lDropParam);
-			if (pDropInfo->pModDoc) pSndFile = &pDropInfo->pModDoc->GetSoundFile();
-			if (pSndFile) return OpenSample(*pSndFile, (SAMPLEINDEX)pDropInfo->dwDropItem) ? TRUE : FALSE;
+			const auto &dropInfo = *reinterpret_cast<const DRAGONDROP *>(lParam);
+			if(dropInfo.sndFile)
+				return OpenSample(*dropInfo.sndFile, static_cast<SAMPLEINDEX>(dropInfo.dropItem)) ? TRUE : FALSE;
 		}
 		break;
 
@@ -1559,8 +1563,8 @@ void CCtrlSamples::OnSamplePlay()
 template<typename T>
 static bool DoNormalize(T *p, SmpLength selStart, SmpLength selEnd)
 {
-	auto minMax = CViewSample::FindMinMax(p + selStart, selEnd - selStart, 1);
-	int max = std::max(-minMax.first, minMax.second);
+	auto [min, max] = CViewSample::FindMinMax(p + selStart, selEnd - selStart, 1);
+	max = std::max(-min, max);
 	if(max < std::numeric_limits<T>::max())
 	{
 		max++;

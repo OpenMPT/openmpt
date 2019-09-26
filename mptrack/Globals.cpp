@@ -38,11 +38,7 @@ OPENMPT_NAMESPACE_BEGIN
 BEGIN_MESSAGE_MAP(CModControlDlg, CDialog)
 	//{{AFX_MSG_MAP(CModControlDlg)
 	ON_WM_SIZE()
-#ifdef WM_DPICHANGED
 	ON_MESSAGE(WM_DPICHANGED, &CModControlDlg::OnDPIChanged)
-#else
-	ON_MESSAGE(0x02E0, &CModControlDlg::OnDPIChanged)
-#endif
 	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,		&CModControlDlg::OnUnlockControls)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CModControlDlg::OnToolTipText)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CModControlDlg::OnToolTipText)
@@ -546,11 +542,7 @@ BEGIN_MESSAGE_MAP(CModScrollView, CScrollView)
 	ON_WM_DESTROY()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_MOUSEHWHEEL()
-#ifdef WM_DPICHANGED
 	ON_MESSAGE(WM_DPICHANGED, &CModScrollView::OnDPIChanged)
-#else
-	ON_MESSAGE(0x02E0, &CModScrollView::OnDPIChanged)
-#endif
 	ON_MESSAGE(WM_MOD_VIEWMSG,			&CModScrollView::OnReceiveModViewMsg)
 	ON_MESSAGE(WM_MOD_DRAGONDROPPING,	&CModScrollView::OnDragonDropping)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,	&CModScrollView::OnUpdatePosition)

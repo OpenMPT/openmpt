@@ -67,7 +67,7 @@ using MidiLibrary = std::array<mpt::PathString, 128 * 2>;  // 128 instruments + 
 
 enum DragonDropType
 {
-	DRAGONDROP_NOTHING = 0,  // |------< Drop Type >-------------|--< dwDropItem >---|--< lDropParam >---|
+	DRAGONDROP_NOTHING = 0,  // |------< Drop Type >-------------|---< dropItem >----|---< dropParam >---|
 	DRAGONDROP_DLS,          // | Instrument from a DLS bank     |     DLS Bank #    |   DLS Instrument  |
 	DRAGONDROP_SAMPLE,       // | Sample from a song             |     Sample #      |       NULL        |
 	DRAGONDROP_INSTRUMENT,   // | Instrument from a song         |     Instrument #  |       NULL        |
@@ -81,20 +81,16 @@ enum DragonDropType
 
 struct DRAGONDROP
 {
-	CModDoc *pModDoc;
-	DragonDropType dwDropType;
-	DWORD dwDropItem;
-	LPARAM lDropParam;
+	CSoundFile *sndFile = nullptr;
+	DragonDropType dropType = DRAGONDROP_NOTHING;
+	uint32 dropItem = 0;
+	LPARAM dropParam = 0;
 
 	mpt::PathString GetPath() const
 	{
-		const mpt::PathString *const pPath = reinterpret_cast<const mpt::PathString *>(lDropParam);
-		ASSERT(pPath);
-		if(!pPath)
-		{
-			return mpt::PathString();
-		}
-		return *pPath;
+		const mpt::PathString *const path = reinterpret_cast<const mpt::PathString *>(dropParam);
+		MPT_ASSERT(path);
+		return path ? *path : mpt::PathString();
 	}
 };
 

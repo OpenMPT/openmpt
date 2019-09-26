@@ -2526,71 +2526,68 @@ void CViewSample::OnDropFiles(HDROP hDropInfo)
 }
 
 
-BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *lpDropInfo)
+BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 {
-	CModDoc *pModDoc = GetDocument();
+	CModDoc *modDoc = GetDocument();
 	bool canDrop = false;
 
-	if ((!lpDropInfo) || (!pModDoc)) return FALSE;
-	CSoundFile &sndFile = pModDoc->GetSoundFile();
-	switch(lpDropInfo->dwDropType)
+	if ((!dropInfo) || (!modDoc)) return FALSE;
+	CSoundFile &sndFile = modDoc->GetSoundFile();
+	switch(dropInfo->dropType)
 	{
 	case DRAGONDROP_SAMPLE:
-		if (lpDropInfo->pModDoc == pModDoc)
+		if (dropInfo->sndFile == &sndFile)
 		{
-			canDrop = ((lpDropInfo->dwDropItem)
-			           && (lpDropInfo->dwDropItem <= sndFile.GetNumSamples()));
+			canDrop = ((dropInfo->dropItem)
+			           && (dropInfo->dropItem <= sndFile.GetNumSamples()));
 		} else
 		{
-			canDrop = ((lpDropInfo->dwDropItem)
-			           && ((lpDropInfo->lDropParam) || (lpDropInfo->pModDoc)));
+			canDrop = ((dropInfo->dropItem)
+			           && ((dropInfo->dropParam) || (dropInfo->sndFile)));
 		}
 		break;
 
 	case DRAGONDROP_DLS:
-		canDrop = ((lpDropInfo->dwDropItem < CTrackApp::gpDLSBanks.size())
-		           && (CTrackApp::gpDLSBanks[lpDropInfo->dwDropItem]));
+		canDrop = ((dropInfo->dropItem < CTrackApp::gpDLSBanks.size())
+		           && (CTrackApp::gpDLSBanks[dropInfo->dropItem]));
 		break;
 
 	case DRAGONDROP_SOUNDFILE:
 	case DRAGONDROP_MIDIINSTR:
-		canDrop = !lpDropInfo->GetPath().empty();
+		canDrop = !dropInfo->GetPath().empty();
 		break;
 	}
 	if (!canDrop || !doDrop) return canDrop;
 	// Do the drop
 	BeginWaitCursor();
 	bool update = false;
-	switch(lpDropInfo->dwDropType)
+	switch(dropInfo->dropType)
 	{
 	case DRAGONDROP_SAMPLE:
-		if (lpDropInfo->pModDoc == pModDoc)
-		{
-			SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, lpDropInfo->dwDropItem);
-		} else
-		{
-			SendCtrlMessage(CTRLMSG_SMP_SONGDROP, (LPARAM)lpDropInfo);
-		}
+		if (dropInfo->sndFile == &sndFile)
+			SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, dropInfo->dropItem);
+		else
+			SendCtrlMessage(CTRLMSG_SMP_SONGDROP, (LPARAM)dropInfo);
 		break;
 
 	case DRAGONDROP_MIDIINSTR:
-		if (CDLSBank::IsDLSBank(lpDropInfo->GetPath()))
+		if (CDLSBank::IsDLSBank(dropInfo->GetPath()))
 		{
 			CDLSBank dlsbank;
-			if (dlsbank.Open(lpDropInfo->GetPath()))
+			if (dlsbank.Open(dropInfo->GetPath()))
 			{
 				const DLSINSTRUMENT *pDlsIns;
 				UINT nIns = 0, nRgn = 0xFF;
 				// Drums
-				if (lpDropInfo->dwDropItem & 0x80)
+				if (dropInfo->dropItem & 0x80)
 				{
-					UINT key = lpDropInfo->dwDropItem & 0x7F;
+					UINT key = dropInfo->dropItem & 0x7F;
 					pDlsIns = dlsbank.FindInstrument(TRUE, 0xFFFF, 0xFF, key, &nIns);
 					if (pDlsIns) nRgn = dlsbank.GetRegionFromKey(nIns, key);
 				} else
 				// Melodic
 				{
-					pDlsIns = dlsbank.FindInstrument(FALSE, 0xFFFF, lpDropInfo->dwDropItem, 60, &nIns);
+					pDlsIns = dlsbank.FindInstrument(FALSE, 0xFFFF, dropInfo->dropItem, 60, &nIns);
 					if (pDlsIns) nRgn = dlsbank.GetRegionFromKey(nIns, 60);
 				}
 				canDrop = FALSE;
@@ -2598,7 +2595,7 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *lpDropInfo)
 				{
 					CriticalSection cs;
 
-					pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
+					modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
 					canDrop = dlsbank.ExtractSample(sndFile, m_nSample, nIns, nRgn);
 				}
 				update = true;
@@ -2607,18 +2604,18 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *lpDropInfo)
 		}
 		[[fallthrough]];
 	case DRAGONDROP_SOUNDFILE:
-		SendCtrlMessage(CTRLMSG_SMP_OPENFILE, lpDropInfo->lDropParam);
+		SendCtrlMessage(CTRLMSG_SMP_OPENFILE, dropInfo->dropParam);
 		break;
 
 	case DRAGONDROP_DLS:
 		{
-			CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[lpDropInfo->dwDropItem];
-			UINT nIns = lpDropInfo->lDropParam & 0x7FFF;
+			const CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[dropInfo->dropItem];
+			UINT nIns = dropInfo->dropParam & 0x7FFF;
 			UINT nRgn;
-			// Drums:	(0x80000000) | (Region << 16) | (Instrument)
-			if (lpDropInfo->lDropParam & 0x80000000)
+			// Drums: (0x80000000) | (Region << 16) | (Instrument)
+			if (dropInfo->dropParam & 0x80000000)
 			{
-				nRgn = (lpDropInfo->lDropParam & 0xFF0000) >> 16;
+				nRgn = (dropInfo->dropParam & 0xFF0000) >> 16;
 			} else
 			// Melodic: (MidiBank << 16) | (Instrument)
 			{
@@ -2626,7 +2623,7 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *lpDropInfo)
 			}
 			CriticalSection cs;
 
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
+			modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
 			canDrop = pDLSBank->ExtractSample(sndFile, m_nSample, nIns, nRgn);
 
 			update = true;

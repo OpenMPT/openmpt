@@ -1381,13 +1381,13 @@ LRESULT COrderList::OnDragonDropping(WPARAM doDrop, LPARAM lParam)
 	const DRAGONDROP *pDropInfo = (const DRAGONDROP *)lParam;
 	CPoint pt;
 
-	if((!pDropInfo) || (&m_modDoc != pDropInfo->pModDoc) || (!m_cxFont))
+	if((!pDropInfo) || (&m_modDoc.GetSoundFile() != pDropInfo->sndFile) || (!m_cxFont))
 		return FALSE;
 	BOOL canDrop = FALSE;
-	switch(pDropInfo->dwDropType)
+	switch(pDropInfo->dropType)
 	{
 	case DRAGONDROP_ORDER:
-		if(pDropInfo->dwDropItem >= Order().size())
+		if(pDropInfo->dropItem >= Order().size())
 			break;
 	case DRAGONDROP_PATTERN:
 		canDrop = TRUE;
@@ -1402,14 +1402,14 @@ LRESULT COrderList::OnDragonDropping(WPARAM doDrop, LPARAM lParam)
 	ORDERINDEX posDest = static_cast<ORDERINDEX>(m_nXScroll + (pt.x / m_cxFont));
 	if(posDest >= Order().size())
 		return FALSE;
-	switch(pDropInfo->dwDropType)
+	switch(pDropInfo->dropType)
 	{
 	case DRAGONDROP_PATTERN:
-		Order()[posDest] = static_cast<PATTERNINDEX>(pDropInfo->dwDropItem);
+		Order()[posDest] = static_cast<PATTERNINDEX>(pDropInfo->dropItem);
 		break;
 
 	case DRAGONDROP_ORDER:
-		Order()[posDest] = Order()[pDropInfo->dwDropItem];
+		Order()[posDest] = Order()[pDropInfo->dropItem];
 		break;
 	}
 	if(canDrop)

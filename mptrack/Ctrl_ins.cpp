@@ -1188,16 +1188,20 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 			break;
 		[[fallthrough]];
 	case CTRLMSG_INS_OPENFILE:
-		if (lParam) return OpenInstrument(*reinterpret_cast<const mpt::PathString *>(lParam));
+		if(lParam)
+			return OpenInstrument(*reinterpret_cast<const mpt::PathString *>(lParam));
 		break;
 
+	case CTRLMSG_INS_SONGDROP_NEW:
+		if(!InsertInstrument(false))
+			break;
+		[[fallthrough]];
 	case CTRLMSG_INS_SONGDROP:
-		if (lParam)
+		if(lParam)
 		{
-			const DRAGONDROP *pDropInfo = (const DRAGONDROP *)lParam;
-			CSoundFile *pSndFile = (CSoundFile *)(pDropInfo->lDropParam);
-			if (pDropInfo->pModDoc) pSndFile = &pDropInfo->pModDoc->GetSoundFile();
-			if (pSndFile) return OpenInstrument(*pSndFile, static_cast<INSTRUMENTINDEX>(pDropInfo->dwDropItem));
+			const auto &dropInfo = *reinterpret_cast<const DRAGONDROP *>(lParam);
+			if(dropInfo.sndFile)
+				return OpenInstrument(*dropInfo.sndFile, static_cast<INSTRUMENTINDEX>(dropInfo.dropItem));
 		}
 		break;
 
@@ -1615,7 +1619,7 @@ bool CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 }
 
 
-bool CCtrlInstruments::OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr)
+bool CCtrlInstruments::OpenInstrument(const CSoundFile &sndFile, INSTRUMENTINDEX nInstr)
 {
 	if((!nInstr) || (nInstr > sndFile.GetNumInstruments())) return false;
 	BeginWaitCursor();
@@ -1627,12 +1631,7 @@ bool CCtrlInstruments::OpenInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInst
 	{
 		first = true;
 		m_sndFile.m_nInstruments = 1;
-		m_NoteMap.SetCurrentInstrument(1);
-		first = true;
-	}
-	if (!m_nInstrument)
-	{
-		m_nInstrument = 1;
+		SetCurrentInstrument(1);
 		first = true;
 	}
 	PrepareUndo("Replace Instrument");
