@@ -423,6 +423,7 @@ void PluginBridge::InitBridge(InitMsg *msg)
 			msg->str,
 			CountOf(msg->str),
 			NULL);
+		closeInstance = true;
 		return;
 	}
 
@@ -689,7 +690,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg *msg)
 	//std::flush(std::cout);
 	bool exception = false;
 	msg->result = static_cast<int32>(DispatchSEH(nativeEffect, static_cast<VstOpcodeToPlugin>(msg->opcode), msg->index, static_cast<intptr_t>(msg->value), ptr, msg->opt, exception));
-	if(exception)
+	if(exception && msg->opcode != effClose)
 	{
 		msg->type = MsgHeader::exceptionMsg;
 		return;
