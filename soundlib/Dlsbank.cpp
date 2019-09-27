@@ -216,11 +216,7 @@ MPT_BINARY_STRUCT(IFFCHUNK, 8)
 struct RIFFCHUNKID
 {
 	uint32le id_RIFF;
-	union
-	{
-		uint32le riff_len;
-		uint32be riff_len_be;
-	};
+	uint32le riff_len;
 	uint32le id_DLS;
 };
 
@@ -545,7 +541,7 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 		// Miles Sound System
 		do
 		{
-			uint32 len = riff.riff_len_be;
+			uint32 len = mpt::bit_cast<uint32be>(riff.riff_len);
 			if (len <= 4) break;
 			if (riff.id_DLS == IFFID_XDLS)
 			{
@@ -1267,7 +1263,7 @@ bool CDLSBank::Open(FileReader file)
 				file.ReadStruct(riff);
 				break;
 			}
-			uint32 len = riff.riff_len_be;
+			uint32 len = mpt::bit_cast<uint32be>(riff.riff_len);
 			if((len % 2u) != 0)
 				len++;
 			file.SkipBack(4);
