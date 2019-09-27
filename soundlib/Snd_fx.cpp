@@ -2037,7 +2037,7 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 		if((chn.nCutOff < 0x7F || m_playBehaviour[kITFilterBehaviour]) && useFilter)
 		{
 			int cutoff = SetupChannelFilter(chn, true);
-			if(cutoff >= 0 && chn.dwFlags[CHN_ADLIB] && m_opl)
+			if(cutoff >= 0 && chn.dwFlags[CHN_ADLIB] && m_opl && channelHint != CHANNELINDEX_INVALID)
 				m_opl->Volume(channelHint, chn.nCutOff / 2u, true);
 		}
 	}
@@ -5488,7 +5488,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		bool fading = chn.dwFlags[CHN_NOTEFADE];
 		// IT compatibility: Really weird combination of envelopes and retrigger (see Storlek's q.it testcase)
 		// Test case: retrig.it
-		NoteChange(chn, note, m_playBehaviour[kITRetrigger], resetEnv);
+		NoteChange(chn, note, m_playBehaviour[kITRetrigger], resetEnv, false, nChn);
 		// XM compatibility: Prevent NoteChange from resetting the fade flag in case an instrument number + note-off is present.
 		// Test case: RetrigFade.xm
 		if(fading && GetType() == MOD_TYPE_XM)
