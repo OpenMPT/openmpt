@@ -99,6 +99,7 @@
 // "mptBaseTypes.h"
 // "mptSpan.h"
 // <utility>
+// <type_traits>
 // <cstring>
 
 #include "../common/mptAlloc.h"
