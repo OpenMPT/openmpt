@@ -358,6 +358,7 @@ void PluginBridge::InitBridge(InitMsg &msg)
 	if(m_library == nullptr)
 	{
 		FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), msg.str, CountOf(msg.str), nullptr);
+		RequestDelete();
 		return;
 	}
 
@@ -631,7 +632,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg &msg)
 	//std::flush(std::cout);
 	bool exception = false;
 	msg.result = static_cast<int32>(DispatchSEH(m_nativeEffect, static_cast<VstOpcodeToPlugin>(msg.opcode), msg.index, static_cast<intptr_t>(msg.value), ptr, msg.opt, exception));
-	if(exception)
+	if(exception && msg.opcode != effClose)
 	{
 		msg.type = MsgHeader::exceptionMsg;
 		return;
