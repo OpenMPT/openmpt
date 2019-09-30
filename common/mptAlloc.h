@@ -114,7 +114,6 @@ static_assert(sizeof(mpt::aligned_array<float, 4, std::align_val_t{sizeof(float)
 
 
 
-
 } // namespace mpt
 
 
