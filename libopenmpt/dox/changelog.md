@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.8-pre
+### libopenmpt 0.4.8 (2019-09-30)
 
  *  [**Sec**] Possible crash due to out-of-bounds read when playing an OPL note
     with active filter in S3M or MPTM files (r12118).
