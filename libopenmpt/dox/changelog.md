@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.8-pre
 
+ *  [**Sec**] Possible crash due to out-of-bounds read when playing an OPL note
+    with active filter in S3M or MPTM files (r12118).
+
 ### libopenmpt 0.4.7 (2019-09-23)
 
  *  [**Bug**] Compilation fix for various platforms that do not provide
