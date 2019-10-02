@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.20-pre
+
 ### libopenmpt 0.3.19 (2019-10-02)
 
  *  [**Sec**] libmodplug: C API: Limit the length of strings copied to the
