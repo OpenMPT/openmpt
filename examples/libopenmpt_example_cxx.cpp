@@ -20,20 +20,16 @@
 
 #include <libopenmpt/libopenmpt.hpp>
 
-#if (__cplusplus >= 201103L)
 #if defined(__clang__)
 #if ((__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__) >= 40000)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-dynamic-exception-spec"
 #endif
 #endif
-#endif
 #include <portaudiocpp/PortAudioCpp.hxx>
-#if (__cplusplus >= 201103L)
 #if defined(__clang__)
 #if ((__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__) >= 40000)
 #pragma clang diagnostic pop
-#endif
 #endif
 #endif
 
