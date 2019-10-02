@@ -7,6 +7,16 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta41
 
+ *  [**Sec**] libmodplug: C API: Limit the length of strings copied to the
+    output buffer of `ModPlug_InstrumentName()` and `ModPlug_SampleName()` to 32
+    bytes (including terminating null) as is done by original libmodplug. This
+    avoids potential buffer overflows in software relying on this limit instead
+    of querying the required buffer size beforehand. libopenmpt can return
+    strings longer than 32 bytes here beacuse the internal limit of 32 bytes
+    applies to strings encoded in arbitrary character encodings but the API
+    returns them converted to UTF-8, which can be longer. (reported by Antonio
+    Morales Maldonado of Semmle Security Research Team) (r12133)
+
 ### libopenmpt 0.2-beta40 (2019-09-23)
 
  *  J2B: Ignore notes with non-existing instrument (fixes Ending.j2b).
