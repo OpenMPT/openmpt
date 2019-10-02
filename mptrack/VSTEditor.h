@@ -47,7 +47,7 @@ protected:
 	LRESULT OnPreTranslateSysKeyUp(WPARAM wParam, LPARAM lParam) { return HandlePreTranslateMessage(WM_SYSKEYUP, wParam, lParam); }
 	LRESULT HandlePreTranslateMessage(UINT message, WPARAM wParam, LPARAM lParam)
 	{
-		MSG msg = {m_hWnd, message, wParam, lParam, 0, {}};
+		MSG msg = {m_plugWindow, message, wParam, lParam, 0, {}};
 		return PreTranslateMessage(&msg);
 	}
 
