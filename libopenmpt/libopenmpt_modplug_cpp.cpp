@@ -305,9 +305,6 @@ void CSoundFile::SetCurrentOrder( UINT nOrder ) {
 
 UINT CSoundFile::GetSampleName( UINT nSample, LPSTR s ) const {
 	mpcpplog();
-	if ( !s ) {
-		return 0;
-	}
 	char buf[32];
 	std::memset( buf, 0, 32 );
 	if ( mod ) {
@@ -316,15 +313,14 @@ UINT CSoundFile::GetSampleName( UINT nSample, LPSTR s ) const {
 			std::strncpy( buf, names[ nSample - 1 ].c_str(), 31 );
 		}
 	}
-	std::memcpy( s, buf, 32 );
+	if ( s ) {
+		std::strncpy( s, buf, 32 );
+	}
 	return static_cast<UINT>( std::strlen( buf ) );
 }
 
 UINT CSoundFile::GetInstrumentName( UINT nInstr, LPSTR s ) const {
 	mpcpplog();
-	if ( !s ) {
-		return 0;
-	}
 	char buf[32];
 	std::memset( buf, 0, 32 );
 	if ( mod ) {
@@ -333,7 +329,9 @@ UINT CSoundFile::GetInstrumentName( UINT nInstr, LPSTR s ) const {
 			std::strncpy( buf, names[ nInstr - 1 ].c_str(), 31 );
 		}
 	}
-	std::memcpy( s, buf, 32 );
+	if ( s ) {
+		std::strncpy( s, buf, 32 );
+	}
 	return static_cast<UINT>( std::strlen( buf ) );
 }
 
