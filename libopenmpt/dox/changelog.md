@@ -7,6 +7,20 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.9-pre
 
+ *  [**Sec**] libmodplug: C API: Limit the length of strings copied to the
+    output buffer of `ModPlug_InstrumentName()` and `ModPlug_SampleName()` to 32
+    bytes (including terminating null) as is done by original libmodplug. This
+    avoids potential buffer overflows in software relying on this limit instead
+    of querying the required buffer size beforehand. libopenmpt can return
+    strings longer than 32 bytes here beacuse the internal limit of 32 bytes
+    applies to strings encoded in arbitrary character encodings but the API
+    returns them converted to UTF-8, which can be longer. (reported by Antonio
+    Morales Maldonado of Semmle Security Research Team) (r12129)
+ *  [**Sec**] libmodplug: C++ API: Do not return 0 in
+    `CSoundFile::GetSampleName()` and `CSoundFile::GetInstrumentName()` when a
+    null output pointer is provided. This behaviour differed from libmodplug and
+    made it impossible to determine the required buffer size. (r12130)
+
 ### libopenmpt 0.4.8 (2019-09-30)
 
  *  [**Sec**] Possible crash due to out-of-bounds read when playing an OPL note
