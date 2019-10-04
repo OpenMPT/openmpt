@@ -912,7 +912,7 @@ public:
 	using endian_type = Tendian;
 public:
 #if MPT_ENDIAN_IS_CONSTEXPR
-	std::byte data[sizeof(base_type)]{};
+	std::array<std::byte, sizeof(base_type)> data{};
 #else // !MPT_ENDIAN_IS_CONSTEXPR
 	std::array<std::byte, sizeof(base_type)> data;
 #endif // MPT_ENDIAN_IS_CONSTEXPR
