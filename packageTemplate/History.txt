@@ -30,6 +30,20 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.28.08.00 (* October 2019, revision 12158)
+--------------------------------------------
+Playback
+- [Fix] <js> Possible crash when trying to retrigger an OPL note with active filter.
+
+VST::Plugin Bridge
+- [Fix] <js> Bridge process kept hanging around in background if loading or closing plugin failed.
+
+Other formats
+- [Fix] <js> MTM: Sample loop length was off by one.
+- [Fix] <js> PSM: Sample loop length was off by one in most files.
+- [Fix] <js> ITP: Possible crash with malformed files.
+
+
 v1.28.07.00 (22 September 2019, revision 12079)
 -----------------------------------------------
 Pattern tab
@@ -46,7 +60,7 @@ Instrument tab
 - [Fix] <js> Toggling some envelope features through keyboard shortcuts did not update the corresponding button status.
 
 VST / DMO Plugins
-- [Fix] <js> MIDI Mapping dialog did not appear when holding shift in some plugin editors (e.g. in Synth1 editor when enabling popout sliders).
+- [Fix] <js> MIDI Mapping dialog did not appear when holding Shift key in some plugin editors (e.g. in Synth1 editor when enabling popout sliders).
 
 VST::Plugin Bridge
 - [Fix] <js> It was not possible to record parameter changes to the pattern editor (http://bugs.openmpt.org/view.php?id=991).
