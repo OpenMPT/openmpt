@@ -320,7 +320,7 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 
 		if((loadFlags & loadSampleData)
 		   && realSample >= 1 && realSample <= GetNumSamples()
-		   && Samples[realSample].pData.pSample == nullptr
+		   && Samples[realSample].pSample == nullptr
 		   && !memcmp(sampleHeader.id, "IMPS", 4))
 		{
 			sampleHeader.ConvertToMPT(Samples[realSample]);
