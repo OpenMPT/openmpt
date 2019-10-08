@@ -318,7 +318,10 @@ bool CSoundFile::ReadITProject(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadStruct(sampleHeader);
 		FileReader sampleData = file.ReadChunk(file.ReadUint32LE());
 
-		if(realSample >= 1 && realSample <= GetNumSamples() && !memcmp(sampleHeader.id, "IMPS", 4) && (loadFlags & loadSampleData))
+		if((loadFlags & loadSampleData)
+		   && realSample >= 1 && realSample <= GetNumSamples()
+		   && Samples[realSample].pData.pSample == nullptr
+		   && !memcmp(sampleHeader.id, "IMPS", 4))
 		{
 			sampleHeader.ConvertToMPT(Samples[realSample]);
 			mpt::String::Read<mpt::String::nullTerminated>(m_szNames[realSample], sampleHeader.name);
