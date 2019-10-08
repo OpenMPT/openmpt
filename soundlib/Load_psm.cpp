@@ -191,7 +191,7 @@ static uint8 ConvertPSMPorta(uint8 param, bool sinariaFormat)
 }
 
 
-// Read a Pattern ID (something like "P0  " or "P13 " in the old format, or "PATT0   " in Sinaria)
+// Read a Pattern ID (something like "P0  " or "P13 ", or "PATT0   " in Sinaria)
 static PATTERNINDEX ReadPSMPatternIndex(FileReader &file, bool &sinariaFormat)
 {
 	char patternID[5];
