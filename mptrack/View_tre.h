@@ -33,8 +33,8 @@ struct ModTreeDocInfo
 	HTREEITEM hSong = nullptr, hPatterns = nullptr, hSamples = nullptr, hInstruments = nullptr, hComments = nullptr, hOrders = nullptr, hEffects = nullptr;
 
 	// Module information
-	ORDERINDEX nOrdSel = ORDERINDEX_INVALID;
-	SEQUENCEINDEX nSeqSel = SEQUENCEINDEX_INVALID;
+	ORDERINDEX ordSel = ORDERINDEX_INVALID;
+	SEQUENCEINDEX seqSel = SEQUENCEINDEX_INVALID;
 
 	std::bitset<MAX_SAMPLES> samplesPlaying;
 	std::bitset<MAX_INSTRUMENTS> instrumentsPlaying;
@@ -64,10 +64,10 @@ class CModTree: public CTreeCtrl
 protected:
 	enum TreeStatus
 	{
-		TREESTATUS_RDRAG			= 0x01,
-		TREESTATUS_LDRAG			= 0x02,
-		TREESTATUS_SINGLEEXPAND		= 0x04,
-		TREESTATUS_DRAGGING			= (TREESTATUS_RDRAG|TREESTATUS_LDRAG)
+		TREESTATUS_RDRAG        = 0x01,
+		TREESTATUS_LDRAG        = 0x02,
+		TREESTATUS_SINGLEEXPAND = 0x04,
+		TREESTATUS_DRAGGING     = (TREESTATUS_RDRAG | TREESTATUS_LDRAG)
 	};
 
 	enum ModItemType : uint16
@@ -105,23 +105,23 @@ protected:
 	// Bit mask magic
 	enum
 	{
-		MIDILIB_SHIFT	= 16,
-		MIDILIB_MASK	= (1 << MIDILIB_SHIFT) - 1,
+		MIDILIB_SHIFT = 16,
+		MIDILIB_MASK  = (1 << MIDILIB_SHIFT) - 1,
 
 		// Must be consistent with CCtrlPatterns::OnActivatePage
-		SEQU_SHIFT		= 16,
-		SEQU_MASK		= (1 << SEQU_SHIFT) - 1,
-		SEQU_INDICATOR	= 0x80000000,
+		SEQU_SHIFT     = 16,
+		SEQU_MASK      = (1 << SEQU_SHIFT) - 1,
+		SEQU_INDICATOR = 0x80000000,
 
 		// Soundbank instrument identification
-		DLS_TYPEINST	= 0x40000000,
-		DLS_TYPEPERC	= 0x80000000,
-		DLS_TYPEMASK	= DLS_TYPEINST | DLS_TYPEPERC,
-		DLS_INSTRMASK	= 0x00007FFF,
-		DLS_REGIONMASK	= 0x007F0000,	// DLS region
-		DLS_REGIONSHIFT	= 16,
-		DLS_HIBANKMASK	= 0x3F000000,	// High bits of bank index
-		DLS_HIBANKSHIFT	= 24,
+		DLS_TYPEINST    = 0x40000000,
+		DLS_TYPEPERC    = 0x80000000,
+		DLS_TYPEMASK    = DLS_TYPEINST | DLS_TYPEPERC,
+		DLS_INSTRMASK   = 0x00007FFF,
+		DLS_REGIONMASK  = 0x007F0000,  // DLS region
+		DLS_REGIONSHIFT = 16,
+		DLS_HIBANKMASK  = 0x3F000000,  // High bits of bank index
+		DLS_HIBANKSHIFT = 24,
 	};
 	static_assert((ORDERINDEX_INVALID & SEQU_MASK) == ORDERINDEX_INVALID, "ORDERINDEX doesn't fit in GetItemData() parameter");
 	static_assert((ORDERINDEX_MAX & SEQU_MASK) == ORDERINDEX_MAX, "ORDERINDEX doesn't fit in GetItemData() parameter");
@@ -151,9 +151,9 @@ protected:
 		static uint32 EncodeValueInstr(uint8 region, uint16 instr) { return DLS_TYPEINST | (region << DLS_REGIONSHIFT) | instr; }
 	};
 
-	static CSoundFile *m_SongFile; // For browsing samples and instruments inside modules on disk
+	static CSoundFile *m_SongFile;  // For browsing samples and instruments inside modules on disk
 	CModTreeDropTarget m_DropTarget;
-	CModTree *m_pDataTree = nullptr; // Pointer to instrument browser (lower part of tree view) - if it's a nullptr, this object is the instrument browser itself.
+	CModTree *m_pDataTree = nullptr;  // Pointer to instrument browser (lower part of tree view) - if it's a nullptr, this object is the instrument browser itself.
 	HWND m_hDropWnd = nullptr;
 	mpt::mutex m_WatchDirMutex;
 	HANDLE m_hSwitchWatchDir = nullptr;
@@ -162,22 +162,22 @@ protected:
 	std::thread m_WatchDirThread;
 	ModItem m_itemDrag;
 	DWORD m_dwStatus = 0;
-	UINT m_nDocNdx = 0, m_nDragDocNdx = 0;
+	CModDoc *m_selectedDoc = nullptr, *m_dragDoc = nullptr;
 	HTREEITEM m_hItemDrag = nullptr, m_hItemDrop = nullptr;
 	HTREEITEM m_hInsLib = nullptr, m_hMidiLib = nullptr;
 	HTREEITEM m_tiMidi[128];
 	HTREEITEM m_tiPerc[128];
 	std::vector<HTREEITEM> m_tiDLS;
-	std::vector<std::unique_ptr<ModTreeDocInfo>> DocInfo;
+	std::map<const CModDoc *, ModTreeDocInfo> m_docInfo;
 
 	std::unique_ptr<CDLSBank> m_cachedBank;
 	mpt::PathString m_cachedBankName;
 
 	// Instrument library
-	mpt::PathString m_InstrLibPath;				// Current path to be explored
-	mpt::PathString m_InstrLibHighlightPath;	// Folder to highlight in browser after a refresh
-	mpt::PathString m_SongFileName;				// Name of open module, without path (== m_szInstrLibPath).
-	std::vector<mpt::PathString> m_MediaFoundationExtensions;	// cached in order to avoid querying too often when changing browsed folder
+	mpt::PathString m_InstrLibPath;           // Current path to be explored
+	mpt::PathString m_InstrLibHighlightPath;  // Folder to highlight in browser after a refresh
+	mpt::PathString m_SongFileName;           // Name of open module, without path (== m_szInstrLibPath).
+	std::vector<mpt::PathString> m_MediaFoundationExtensions;  // cached in order to avoid querying too often when changing browsed folder
 	bool m_showAllFiles = false;
 
 	bool m_doLabelEdit = false;

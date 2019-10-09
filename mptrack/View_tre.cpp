@@ -77,8 +77,6 @@ ModTreeDocInfo::ModTreeDocInfo(CModDoc &modDoc)
 	tiPatterns.resize(sndFile.Patterns.Size(), nullptr);
 	tiOrders.resize(sndFile.Order.GetNumSequences());
 	tiSequences.resize(sndFile.Order.GetNumSequences(), nullptr);
-	samplesPlaying.reset();
-	instrumentsPlaying.reset();
 }
 
 
@@ -482,42 +480,27 @@ void CModTree::OnOptionsChanged()
 void CModTree::AddDocument(CModDoc &modDoc)
 {
 	// Check if document is already in the list
-	if(std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](const std::unique_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; }) != DocInfo.end())
-		return;
+	const auto [it, inserted] = m_docInfo.try_emplace(&modDoc, modDoc);
 
-	try
+	auto &info = it->second;
+	UpdateView(info, UpdateHint().ModType());
+	if(info.hSong)
 	{
-		DocInfo.push_back(std::make_unique<ModTreeDocInfo>(modDoc));
-		auto &pInfo = DocInfo.back();
-
-		UpdateView(*pInfo, UpdateHint().ModType());
-		if(pInfo->hSong)
-		{
-			Expand(pInfo->hSong, TVE_EXPAND);
-			EnsureVisible(pInfo->hSong);
-			SelectItem(pInfo->hSong);
-		}
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-	{
-		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		Expand(info.hSong, TVE_EXPAND);
+		EnsureVisible(info.hSong);
+		SelectItem(info.hSong);
 	}
 }
 
 
 void CModTree::RemoveDocument(const CModDoc &modDoc)
 {
-	auto doc = std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](const std::unique_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; });
-	if(doc == DocInfo.end())
+	auto doc = m_docInfo.find(&modDoc);
+	if(doc == m_docInfo.end())
 		return;
 
-	size_t startID = std::distance(DocInfo.begin(), doc);
-	DeleteItem((**doc).hSong);
-	DocInfo.erase(doc);
-	// Refresh all item IDs
-	for(size_t i = startID; i < DocInfo.size(); i++)
-	{
-		SetItemData(DocInfo[i]->hSong, i);
-	}
+	DeleteItem(doc->second.hSong);
+	m_docInfo.erase(doc);
 }
 
 
@@ -528,10 +511,10 @@ ModTreeDocInfo *CModTree::GetDocumentInfoFromItem(HTREEITEM hItem)
 	if(hItem != nullptr)
 	{
 		// Root item has moddoc pointer
-		const size_t doc = GetItemData(hItem);
-		if(doc < DocInfo.size() && hItem == DocInfo[doc]->hSong)
+		const auto doc = m_docInfo.find(reinterpret_cast<const CModDoc *>(GetItemData(hItem)));
+		if(doc != m_docInfo.end() && hItem == doc->second.hSong)
 		{
-			return DocInfo[doc].get();
+			return &doc->second;
 		}
 	}
 	return nullptr;
@@ -541,9 +524,9 @@ ModTreeDocInfo *CModTree::GetDocumentInfoFromItem(HTREEITEM hItem)
 // Get modtree doc information for a given CModDoc
 ModTreeDocInfo *CModTree::GetDocumentInfoFromModDoc(CModDoc &modDoc)
 {
-	auto doc = std::find_if(DocInfo.begin(), DocInfo.end(), [&modDoc](const std::unique_ptr<ModTreeDocInfo> &doc) { return &(doc->modDoc) == &modDoc; });
-	if(doc != DocInfo.end())
-		return doc->get();
+	auto doc = m_docInfo.find(&modDoc);
+	if(doc != m_docInfo.end())
+		return &doc->second;
 	else
 		return nullptr;
 }
@@ -816,7 +799,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 
 		if(!info.hSong)
 		{
-			info.hSong = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, name, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, (LPARAM)(DocInfo.size() - 1), TVI_ROOT, TVI_FIRST);
+			info.hSong = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, name, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, reinterpret_cast<LPARAM>(&info.modDoc), TVI_ROOT, TVI_FIRST);
 			info.hOrders = InsertItem(_T("Sequence"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, TVI_LAST);
 			info.hPatterns = InsertItem(_T("Patterns"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, TVI_LAST);
 			info.hSamples = InsertItem(_T("Samples"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, TVI_LAST);
@@ -1040,7 +1023,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			{
 				if(patNamesOnly && sndFile.Order(seq)[iOrd] != nPat)
 					continue;
-				UINT state = (iOrd == info.nOrdSel && seq == info.nSeqSel) ? TVIS_BOLD : 0;
+				UINT state = (iOrd == info.ordSel && seq == info.seqSel) ? TVIS_BOLD : 0;
 				if(sndFile.Order(seq)[iOrd] < sndFile.Patterns.Size())
 				{
 					patName = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Patterns[sndFile.Order(seq)[iOrd]].GetName());
@@ -1332,53 +1315,49 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 	if(IsSampleBrowser())
 		return ModItem(MODITEM_NULL);
 	// Songs
-	if(rootItemData < DocInfo.size())
+	if(auto info = GetDocumentInfoFromItem(hRootParent); info != nullptr)
 	{
-		m_nDocNdx = rootItemData;
-		auto &pInfo = DocInfo[rootItemData];
+		m_selectedDoc = &info->modDoc;
 
-		if(hItem == pInfo->hSong)
+		if(hItem == info->hSong)
 			return ModItem(MODITEM_HDR_SONG);
-		if(hRootParent == pInfo->hSong)
+		if(hRootParent == info->hSong)
 		{
-			if(hItem == pInfo->hPatterns)
+			if(hItem == info->hPatterns)
 				return ModItem(MODITEM_HDR_PATTERNS);
-			if(hItem == pInfo->hOrders)
+			if(hItem == info->hOrders)
 				return ModItem(MODITEM_HDR_ORDERS);
-			if(hItem == pInfo->hSamples)
+			if(hItem == info->hSamples)
 				return ModItem(MODITEM_HDR_SAMPLES);
-			if(hItem == pInfo->hInstruments)
+			if(hItem == info->hInstruments)
 				return ModItem(MODITEM_HDR_INSTRUMENTS);
-			if(hItem == pInfo->hComments)
+			if(hItem == info->hComments)
 				return ModItem(MODITEM_COMMENTS);
 			// Order List or Sequence item?
-			if((hItemParent == pInfo->hOrders) || (hItemParentParent == pInfo->hOrders))
+			if((hItemParent == info->hOrders) || (hItemParentParent == info->hOrders))
 			{
-				const ORDERINDEX ord = (ORDERINDEX)(itemData & SEQU_MASK);
-				const SEQUENCEINDEX seq = (SEQUENCEINDEX)(itemData >> SEQU_SHIFT);
+				const auto ord = static_cast<ORDERINDEX>(itemData & SEQU_MASK);
+				const auto seq = static_cast<SEQUENCEINDEX>(itemData >> SEQU_SHIFT);
 				if(ord == ORDERINDEX_INVALID)
-				{
 					return ModItem(MODITEM_SEQUENCE, seq);
-				} else
-				{
+				else
 					return ModItem(MODITEM_ORDER, ord, seq);
-				}
 			}
 
 			ModItem modItem(MODITEM_NULL, itemData);
-			if(hItemParent == pInfo->hPatterns)
+			if(hItemParent == info->hPatterns)
 			{
 				// Pattern
 				modItem.type = MODITEM_PATTERN;
-			} else if(hItemParent == pInfo->hSamples)
+			} else if(hItemParent == info->hSamples)
 			{
 				// Sample
 				modItem.type = MODITEM_SAMPLE;
-			} else if(hItemParent == pInfo->hInstruments)
+			} else if(hItemParent == info->hInstruments)
 			{
 				// Instrument
 				modItem.type = MODITEM_INSTRUMENT;
-			} else if(hItemParent == pInfo->hEffects)
+			} else if(hItemParent == info->hEffects)
 			{
 				// Effect
 				modItem.type = MODITEM_EFFECT;
@@ -1416,7 +1395,7 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 	{
 		const ModItem modItem = GetModItem(hItem);
 		uint32 modItemID = modItem.val1;
-		CModDoc *modDoc = m_nDocNdx < DocInfo.size() ? &(DocInfo[m_nDocNdx]->modDoc) : nullptr;
+		CModDoc *modDoc = m_docInfo.count(m_selectedDoc) ? m_selectedDoc : nullptr;
 
 		switch(modItem.type)
 		{
@@ -1515,7 +1494,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 	{
 		const ModItem modItem = GetModItem(hItem);
 		uint32 modItemID = modItem.val1;
-		CModDoc *modDoc = m_nDocNdx < DocInfo.size() ? &(DocInfo[m_nDocNdx]->modDoc) : nullptr;
+		CModDoc *modDoc = m_docInfo.count(m_selectedDoc) ? m_selectedDoc : nullptr;
 
 		switch(modItem.type)
 		{
@@ -1695,7 +1674,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 	const ModItem modItem = GetModItem(hItem);
 	uint32 modItemID = modItem.val1;
 
-	CModDoc *modDoc = m_nDocNdx < DocInfo.size() ? &(DocInfo[m_nDocNdx]->modDoc) : nullptr;
+	CModDoc *modDoc = m_docInfo.count(m_selectedDoc) ? m_selectedDoc : nullptr;
 	CSoundFile *sndFile = modDoc ? &modDoc->GetSoundFile() : nullptr;
 	if(modItem.IsSongItem() && modDoc == nullptr)
 	{
@@ -2292,7 +2271,8 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 
 bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 {
-	dropInfo.sndFile = (m_nDragDocNdx < DocInfo.size() ? &(DocInfo[m_nDragDocNdx]->modDoc.GetSoundFile()) : nullptr);
+	const auto dragDoc = m_docInfo.find(m_dragDoc);
+	dropInfo.sndFile = dragDoc != m_docInfo.end() ? &dragDoc->second.modDoc.GetSoundFile() : nullptr;
 	dropInfo.dropType = DRAGONDROP_NOTHING;
 	dropInfo.dropItem = m_itemDrag.val1;
 	dropInfo.dropParam = 0;
@@ -2381,11 +2361,13 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 	const uint32 modItemDropID = modItemDrop.val1;
 	const uint32 modItemDragID = m_itemDrag.val1;
 
-	const ModTreeDocInfo *pInfoDrag = (m_nDragDocNdx < DocInfo.size() ? DocInfo[m_nDragDocNdx].get() : nullptr);
-	const ModTreeDocInfo *pInfoDrop = (m_nDocNdx < DocInfo.size() ? DocInfo[m_nDocNdx].get() : nullptr);
-	CModDoc *pModDoc = (pInfoDrop) ? &pInfoDrop->modDoc : nullptr;
+	const auto dragIter = m_docInfo.find(m_dragDoc);
+	const auto selIter = m_docInfo.find(m_selectedDoc);
+	const ModTreeDocInfo *infoDrag = dragIter != m_docInfo.end() ? &dragIter->second : nullptr;
+	const ModTreeDocInfo *infoDrop = selIter != m_docInfo.end() ? &selIter->second : nullptr;
+	CModDoc *pModDoc = (infoDrop) ? &infoDrop->modDoc : nullptr;
 	CSoundFile *pSndFile = (pModDoc) ? &pModDoc->GetSoundFile() : nullptr;
-	const bool sameModDoc = pInfoDrag && (pModDoc == &pInfoDrag->modDoc);
+	const bool sameModDoc = infoDrag && (pModDoc == &infoDrag->modDoc);
 
 	switch(modItemDrop.type)
 	{
@@ -2396,8 +2378,8 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 			// drop an order somewhere
 			if(bDoDrop)
 			{
-				SEQUENCEINDEX nSeqFrom = (SEQUENCEINDEX)m_itemDrag.val2, nSeqTo = (SEQUENCEINDEX)modItemDrop.val2;
-				ORDERINDEX nOrdFrom = (ORDERINDEX)m_itemDrag.val1, nOrdTo = (ORDERINDEX)modItemDrop.val1;
+				SEQUENCEINDEX seqFrom = (SEQUENCEINDEX)m_itemDrag.val2, nSeqTo = (SEQUENCEINDEX)modItemDrop.val2;
+				ORDERINDEX ordFrom = (ORDERINDEX)m_itemDrag.val1, nOrdTo = (ORDERINDEX)modItemDrop.val1;
 				if(modItemDrop.type == MODITEM_SEQUENCE)
 				{
 					// drop on sequence -> attach
@@ -2405,9 +2387,9 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 					nOrdTo = pSndFile->Order(nSeqTo).GetLengthTailTrimmed();
 				}
 
-				if(nSeqFrom != nSeqTo || nOrdFrom != nOrdTo)
+				if(seqFrom != nSeqTo || ordFrom != nOrdTo)
 				{
-					if(pModDoc->MoveOrder(nOrdFrom, nOrdTo, true, false, nSeqFrom, nSeqTo) == true)
+					if(pModDoc->MoveOrder(ordFrom, nOrdTo, true, false, seqFrom, nSeqTo) == true)
 					{
 						pModDoc->SetModified();
 					}
@@ -2420,12 +2402,12 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 	case MODITEM_HDR_ORDERS:
 		// Drop your sequences here.
 		// At the moment, only dropping sequences into another module is possible.
-		if((m_itemDrag.type == MODITEM_SEQUENCE || m_itemDrag.type == MODITEM_HDR_ORDERS) && pSndFile && pInfoDrag && !sameModDoc)
+		if((m_itemDrag.type == MODITEM_SEQUENCE || m_itemDrag.type == MODITEM_HDR_ORDERS) && pSndFile && infoDrag && !sameModDoc)
 		{
-			if(bDoDrop && pInfoDrag != nullptr)
+			if(bDoDrop && infoDrag != nullptr)
 			{
 				// copy mod sequence over.
-				CSoundFile &dragSndFile = pInfoDrag->modDoc.GetSoundFile();
+				CSoundFile &dragSndFile = infoDrag->modDoc.GetSoundFile();
 				const SEQUENCEINDEX nOrigSeq = (SEQUENCEINDEX)modItemDragID;
 				const ModSequence &origSeq = dragSndFile.Order(nOrigSeq);
 
@@ -2461,7 +2443,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 		break;
 
 	case MODITEM_SAMPLE:
-		if(m_itemDrag.type == MODITEM_SAMPLE && pInfoDrag != nullptr)
+		if(m_itemDrag.type == MODITEM_SAMPLE && infoDrag != nullptr)
 		{
 			if(bDoDrop)
 			{
@@ -2483,7 +2465,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 				} else
 				{
 					// Load sample into other module
-					pSndFile->ReadSampleFromSong(static_cast<SAMPLEINDEX>(modItemDropID), pInfoDrag->modDoc.GetSoundFile(), static_cast<SAMPLEINDEX>(modItemDragID));
+					pSndFile->ReadSampleFromSong(static_cast<SAMPLEINDEX>(modItemDropID), infoDrag->modDoc.GetSoundFile(), static_cast<SAMPLEINDEX>(modItemDragID));
 				}
 				pModDoc->UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
 				pModDoc->UpdateAllViews(nullptr, PatternHint().Data());
@@ -2496,7 +2478,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 		break;
 
 	case MODITEM_INSTRUMENT:
-		if(m_itemDrag.type == MODITEM_INSTRUMENT && pInfoDrag != nullptr)
+		if(m_itemDrag.type == MODITEM_INSTRUMENT && infoDrag != nullptr)
 		{
 			if(bDoDrop)
 			{
@@ -2518,7 +2500,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 				} else
 				{
 					// Load instrument into other module
-					pSndFile->ReadInstrumentFromSong(static_cast<INSTRUMENTINDEX>(modItemDropID), pInfoDrag->modDoc.GetSoundFile(), static_cast<INSTRUMENTINDEX>(modItemDragID));
+					pSndFile->ReadInstrumentFromSong(static_cast<INSTRUMENTINDEX>(modItemDropID), infoDrag->modDoc.GetSoundFile(), static_cast<INSTRUMENTINDEX>(modItemDragID));
 				}
 				pModDoc->UpdateAllViews(nullptr, InstrumentHint().Info().Envelope().Names());
 				pModDoc->UpdateAllViews(nullptr, PatternHint().Data());
@@ -2551,25 +2533,25 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool bDoDrop)
 
 void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 {
-	ModTreeDocInfo *pInfo = GetDocumentInfoFromModDoc(modDoc);
-	if(pInfo == nullptr)
+	ModTreeDocInfo *info = GetDocumentInfoFromModDoc(modDoc);
+	if(info == nullptr)
 		return;
 
 	const CSoundFile &sndFile = modDoc.GetSoundFile();
 	ORDERINDEX nNewOrd = (pNotify) ? pNotify->order : ORDERINDEX_INVALID;
 	SEQUENCEINDEX nNewSeq = sndFile.Order.GetCurrentSequenceIndex();
-	if(nNewOrd != pInfo->nOrdSel || nNewSeq != pInfo->nSeqSel)
+	if(nNewOrd != info->ordSel || nNewSeq != info->seqSel)
 	{
 		// Remove bold state from old item
-		if(pInfo->nSeqSel < pInfo->tiOrders.size() && pInfo->nOrdSel < pInfo->tiOrders[pInfo->nSeqSel].size())
-			SetItemState(pInfo->tiOrders[pInfo->nSeqSel][pInfo->nOrdSel], 0, TVIS_BOLD);
+		if(info->seqSel < info->tiOrders.size() && info->ordSel < info->tiOrders[info->seqSel].size())
+			SetItemState(info->tiOrders[info->seqSel][info->ordSel], 0, TVIS_BOLD);
 
-		pInfo->nOrdSel = nNewOrd;
-		pInfo->nSeqSel = nNewSeq;
-		if(pInfo->nSeqSel < pInfo->tiOrders.size() && pInfo->nOrdSel < pInfo->tiOrders[pInfo->nSeqSel].size())
-			SetItemState(pInfo->tiOrders[pInfo->nSeqSel][pInfo->nOrdSel], TVIS_BOLD, TVIS_BOLD);
+		info->ordSel = nNewOrd;
+		info->seqSel = nNewSeq;
+		if(info->seqSel < info->tiOrders.size() && info->ordSel < info->tiOrders[info->seqSel].size())
+			SetItemState(info->tiOrders[info->seqSel][info->ordSel], TVIS_BOLD, TVIS_BOLD);
 		else
-			UpdateView(*pInfo, SequenceHint().Data());
+			UpdateView(*info, SequenceHint().Data());
 	}
 
 	// Update sample / instrument playing status icons (will only detect instruments with samples, though)
@@ -2583,10 +2565,10 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 	nUpdateCount = 0;*/
 
 	// check whether the lists are actually visible (don't waste resources)
-	const bool updateSamples = IsItemExpanded(pInfo->hSamples), updateInstruments = IsItemExpanded(pInfo->hInstruments);
+	const bool updateSamples = IsItemExpanded(info->hSamples), updateInstruments = IsItemExpanded(info->hInstruments);
 
-	pInfo->samplesPlaying.reset();
-	pInfo->instrumentsPlaying.reset();
+	info->samplesPlaying.reset();
+	info->instrumentsPlaying.reset();
 
 	if(!updateSamples && !updateInstruments)
 		return;
@@ -2601,7 +2583,7 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 				{
 					if(chn.pModSample == &sndFile.GetSample(nSmp))
 					{
-						pInfo->samplesPlaying.set(nSmp);
+						info->samplesPlaying.set(nSmp);
 						break;
 					}
 				}
@@ -2612,7 +2594,7 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 				{
 					if(chn.pModInstrument == sndFile.Instruments[nIns])
 					{
-						pInfo->instrumentsPlaying.set(nIns);
+						info->instrumentsPlaying.set(nIns);
 						break;
 					}
 				}
@@ -2621,9 +2603,9 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 	}
 	// what should be updated?
 	if(updateSamples)
-		UpdateView(*pInfo, SampleHint().Info());
+		UpdateView(*info, SampleHint().Info());
 	if(updateInstruments)
-		UpdateView(*pInfo, InstrumentHint().Info());
+		UpdateView(*info, InstrumentHint().Info());
 }
 
 
@@ -2637,11 +2619,11 @@ void CModTree::OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
 	if(pHint == this)
 		return;
 
-	for(auto &doc : DocInfo)
+	for(auto &[doc, docInfo] : m_docInfo)
 	{
-		if(&doc->modDoc == pModDoc || !pModDoc)
+		if(doc == pModDoc || !pModDoc)
 		{
-			UpdateView(*doc, hint);
+			UpdateView(docInfo, hint);
 			if(pModDoc)
 				break;
 		}
@@ -2675,7 +2657,7 @@ void CModTree::OnBeginDrag(HTREEITEM hItem, bool bLeft, LRESULT *pResult)
 				SelectItem(m_hItemDrag);
 		}
 		m_itemDrag = GetModItem(m_hItemDrag);
-		m_nDragDocNdx = m_nDocNdx;
+		m_dragDoc = m_selectedDoc;
 		switch(m_itemDrag.type)
 		{
 		case MODITEM_ORDER:
@@ -2693,7 +2675,7 @@ void CModTree::OnBeginDrag(HTREEITEM hItem, bool bLeft, LRESULT *pResult)
 		case MODITEM_HDR_ORDERS:
 			// can we drag an order header? (only in MPTM format and if there's only one sequence)
 			{
-				const CModDoc *pModDoc = (m_nDragDocNdx < DocInfo.size() ? &(DocInfo[m_nDragDocNdx]->modDoc) : nullptr);
+				const CModDoc *pModDoc = m_docInfo.count(m_dragDoc) ? m_dragDoc : nullptr;
 				if(pModDoc && pModDoc->GetSoundFile().Order.GetNumSequences() == 1)
 					bDrag = true;
 			}
@@ -3230,16 +3212,16 @@ void CModTree::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		DeleteTreeItem(GetSelectedItem());
 		break;
 	}
-	CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
+	CTreeCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 
 void CModTree::OnRefreshTree()
 {
 	BeginWaitCursor();
-	for(auto &doc : DocInfo)
+	for(auto &doc : m_docInfo)
 	{
-		UpdateView(*doc, UpdateHint().ModType());
+		UpdateView(doc.second, UpdateHint().ModType());
 	}
 	RefreshMidiLibrary();
 	RefreshDlsBanks();
