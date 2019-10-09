@@ -627,7 +627,7 @@ void CSelectPluginDlg::OnAddPlugin()
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.DefaultExtension("dll")
-		.ExtensionFilter("VST Plugins (*.dll)|*.dll||")
+		.ExtensionFilter("VST Plugins|*.dll;*.vst3||")
 		.WorkingDirectory(TrackerSettings::Instance().PathPlugins.GetWorkingDir());
 	if(!dlg.Show(this)) return;
 
