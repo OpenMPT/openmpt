@@ -319,7 +319,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 		// Check if pattern is valid
 		playState.m_nPattern = playState.m_nCurrentOrder < orderList.size() ? orderList[playState.m_nCurrentOrder] : orderList.GetInvalidPatIndex();
-		bool positionJumpOnThisRow = false;
+		bool positionJumpOnThisRow = false, positionJumpRightOfPatternLoop = false;
 		bool patternBreakOnThisRow = false;
 		bool patternLoopEndedOnThisRow = false, patternLoopStartedOnThisRow = false;
 
@@ -577,7 +577,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			{
 			// Position Jump
 			case CMD_POSITIONJUMP:
-				positionJumpOnThisRow = true;
+				positionJumpOnThisRow = positionJumpRightOfPatternLoop = true;
 				playState.m_nNextOrder = static_cast<ORDERINDEX>(CalculateXParam(playState.m_nPattern, playState.m_nRow, nChn));
 				playState.m_nNextPatStartRow = 0;  // FT2 E60 bug
 				// see https://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
@@ -666,6 +666,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				case 0xB0:
 					// Pattern Loop
 					{
+						positionJumpRightOfPatternLoop = false;
 						CHANNELINDEX firstChn = nChn, lastChn = nChn;
 						if(GetType() == MOD_TYPE_S3M)
 						{
@@ -1184,12 +1185,13 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		oldTickDuration = tickDuration;
 
 		// Pattern loop is not executed in FT2 if there are any position jump or pattern break commands on the same row.
-		// Pattern loop is not executed in IT if there are any position jump commands on the same row.
+		// Pattern loop is not executed in IT if there are any position jump commands to the right (and to the left in older OpenMPT versions).
 		// Test case for FT2 exception: PatLoop-Jumps.xm, PatLoop-Various.xm
-		// Test case for IT: exception: LoopBreak.it
+		// Test case for IT: exception: LoopBreak.it, sbx-priority.it
 		if(patternLoopEndedOnThisRow
-			&& (!m_playBehaviour[kFT2PatternLoopWithJumps] || !(positionJumpOnThisRow || patternBreakOnThisRow))
-			&& (!m_playBehaviour[kITPatternLoopWithJumps] || !positionJumpOnThisRow))
+		   && (!m_playBehaviour[kFT2PatternLoopWithJumps] || !(positionJumpOnThisRow || patternBreakOnThisRow))
+		   && (!m_playBehaviour[kITPatternLoopWithJumpsOld] || !positionJumpOnThisRow)
+		   && (!m_playBehaviour[kITPatternLoopWithJumps] || !positionJumpRightOfPatternLoop))
 		{
 			std::map<double, int> startTimes;
 			// This is really just a simple estimation for nested pattern loops. It should handle cases correctly where all parallel loops start and end on the same row.
@@ -2516,6 +2518,10 @@ bool CSoundFile::ProcessEffects()
 						}
 
 						nPatLoopRow = nloop;
+						// IT compatibility: SBx is prioritized over Position Jump (Bxx) effects that are located left of the SBx effect.
+						// Test case: sbx-priority.it, LoopBreak.it
+						if(m_playBehaviour[kITPatternLoopWithJumps])
+							nPosJump = ORDERINDEX_INVALID;
 					}
 
 					if(GetType() == MOD_TYPE_S3M)
@@ -3560,9 +3566,12 @@ bool CSoundFile::ProcessEffects()
 		// Pattern Break / Position Jump only if no loop running
 		// Exception: FastTracker 2 in all cases, Impulse Tracker in case of position jump
 		// Test case for FT2 exception: PatLoop-Jumps.xm, PatLoop-Various.xm
-		// Test case for IT: exception: LoopBreak.it
+		// Test case for IT: exception: LoopBreak.it, sbx-priority.it
 		if((doBreakRow || doPosJump)
-			&& (!doPatternLoop || m_playBehaviour[kFT2PatternLoopWithJumps] || (m_playBehaviour[kITPatternLoopWithJumps] && doPosJump)))
+		   && (!doPatternLoop
+		       || m_playBehaviour[kFT2PatternLoopWithJumps]
+		       || (m_playBehaviour[kITPatternLoopWithJumps] && doPosJump)
+		       || (m_playBehaviour[kITPatternLoopWithJumpsOld] && doPosJump)))
 		{
 			if(!doPosJump) nPosJump = m_PlayState.m_nCurrentOrder + 1;
 			if(!doBreakRow) nBreakRow = 0;

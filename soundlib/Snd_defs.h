@@ -460,7 +460,7 @@ enum PlayBehaviour
 	kITClearPortaTarget,            // New notes reset portamento target in IT
 	kITPanbrelloHold,               // Don't reset panbrello effect until next note or panning effect
 	kITPanningReset,                // Sample and instrument panning is only applied on note change, not instrument change
-	kITPatternLoopWithJumps,        // Bxx on the same row as SBx terminates the loop in IT
+	kITPatternLoopWithJumpsOld,     // Bxx on the same row as SBx terminates the loop in IT (old implementation of kITPatternLoopWithJumps)
 	kITInstrWithNoteOff,            // Instrument number with note-off recalls default volume
 
 	kFT2Arpeggio,                   // FT2 arpeggio algorithm
@@ -520,6 +520,7 @@ enum PlayBehaviour
 	kITInstrWithNoteOffOldEffects,  // Instrument number with note-off recalls default volume - special cases with Old Effects enabled
 	kMIDIVolumeOnNoteOffBug,        // Update MIDI channel volume on note-off (legacy bug emulation)
 	kITDoNotOverrideChannelPan,     // Sample / instrument pan does not override channel pan for following samples / instruments that are not panned
+	kITPatternLoopWithJumps,        // Bxx right of SBx terminates the loop in IT
 
 	// Add new play behaviours here.
 

@@ -565,7 +565,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kITClearPortaTarget: desc = _T("New notes reset portamento target in IT"); break;
 		case kITPanbrelloHold: desc = _T("Do not reset panbrello effect until next note or panning effect"); break;
 		case kITPanningReset: desc = _T("Sample and instrument panning is only applied on note change, not instrument change"); break;
-		case kITPatternLoopWithJumps: desc = _T("Bxx on the same row as SBx terminates the loop in IT"); break;
+		case kITPatternLoopWithJumpsOld: desc = _T("Bxx on the same row as SBx terminates the loop in IT"); break;
 		case kITInstrWithNoteOff: desc = _T("Instrument number with note-off recalls default volume"); break;
 		case kFT2Arpeggio: desc = _T("FT2 arpeggio algorithm"); break;
 		case kFT2Retrigger: desc = _T("Rxx behaves like in FT2"); break;
@@ -619,6 +619,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kITInstrWithNoteOffOldEffects: desc = _T("Instrument number with note-off retriggers envelopes with Old Effects enabled"); break;
 		case kMIDIVolumeOnNoteOffBug: desc = _T("Reset VST volume on note-off"); break;
 		case kITDoNotOverrideChannelPan: desc = _T("Instruments / samples with forced panning do not override channel panning for following instruments / samples"); break;
+		case kITPatternLoopWithJumps: desc = _T("Bxx right of SBx terminates the loop in IT"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

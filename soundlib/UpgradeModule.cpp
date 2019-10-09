@@ -484,7 +484,7 @@ void CSoundFile::UpgradeModule()
 			{ kITClearPortaTarget,         MPT_V("1.23.04.03") },
 			{ kITPanbrelloHold,            MPT_V("1.24.01.06") },
 			{ kITPanningReset,             MPT_V("1.24.01.06") },
-			{ kITPatternLoopWithJumps,     MPT_V("1.25.00.19") },
+			{ kITPatternLoopWithJumpsOld,  MPT_V("1.25.00.19") },
 		};
 
 		for(const auto &b : behaviours)
@@ -543,6 +543,7 @@ void CSoundFile::UpgradeModule()
 			{ kITMultiSampleInstrumentNumber, MPT_V("1.27.00.27") },
 			{ kITInstrWithNoteOffOldEffects,  MPT_V("1.28.02.06") },
 			{ kITDoNotOverrideChannelPan,     MPT_V("1.29.00.22") },
+			{ kITPatternLoopWithJumps,        MPT_V("1.29.00.32") },
 		};
 
 		for(const auto &b : behaviours)
