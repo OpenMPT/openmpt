@@ -479,8 +479,9 @@ void CModTree::OnOptionsChanged()
 
 void CModTree::AddDocument(CModDoc &modDoc)
 {
-	// Check if document is already in the list
 	const auto [it, inserted] = m_docInfo.try_emplace(&modDoc, modDoc);
+	if(!inserted)
+		return;
 
 	auto &info = it->second;
 	UpdateView(info, UpdateHint().ModType());
