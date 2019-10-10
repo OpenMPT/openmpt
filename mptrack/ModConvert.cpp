@@ -532,8 +532,12 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		warnings.set(wVolRamp);
 	}
 
+	{
+		CriticalSection cs;
+		m_SndFile.ChangeModTypeTo(nNewType);
+	}
+
 	CriticalSection cs;
-	m_SndFile.ChangeModTypeTo(nNewType);
 
 	// In case we need to update IT bidi loop handling pre-computation or loops got changed...
 	m_SndFile.PrecomputeSampleLoops(false);
