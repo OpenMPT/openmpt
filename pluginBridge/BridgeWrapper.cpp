@@ -816,6 +816,7 @@ intptr_t BridgeWrapper::DispatchToPlugin(VstOpcodeToPlugin opcode, int32 index, 
 				ptrOut = std::max(static_cast<int64>(sizeof(int32) * 2), static_cast<int64>((param[1] - param[0]) * sizeof(ParameterInfo)));
 				dispatchData.insert(dispatchData.end(), ptrC, ptrC + 2 * sizeof(int32));
 			}
+			break;
 
 			case kBeginGetProgram:
 				ptrOut = m_sharedMem->effect.numParams * sizeof(float);
