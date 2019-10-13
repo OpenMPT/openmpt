@@ -1366,7 +1366,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// In the best case, MO3 compression represents each sample point as two bits.
 				// As a result, if we have a file length of n, we know that the sample can be at most n*4 sample points long.
-				size_t maxLength = smpHeader.compressedSize;
+				auto maxLength = sampleData.GetLength();
 				uint8 maxSamplesPerByte = 4 / numChannels;
 				if(Util::MaxValueOfType(maxLength) / maxSamplesPerByte >= maxLength)
 					maxLength *= maxSamplesPerByte;
