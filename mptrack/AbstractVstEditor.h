@@ -110,7 +110,8 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	BOOL PreTranslateMessage(MSG* pMsg) override;
+	BOOL PreTranslateMessage(MSG *msg) override;
+	bool HandleKeyMessage(MSG &msg);
 	void UpdatePresetMenu(bool force = false);
 	void GeneratePresetMenu(int32 offset, CMenu &parent);
 	void UpdateInputMenu();

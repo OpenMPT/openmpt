@@ -412,43 +412,42 @@ void CAbstractVstEditor::OnPassKeypressesToPlug()
 }
 
 
-BOOL CAbstractVstEditor::PreTranslateMessage(MSG* pMsg)
+BOOL CAbstractVstEditor::PreTranslateMessage(MSG *msg)
 {
-	if (pMsg)
-	{
-		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
-		if(!m_VstPlugin.m_passKeypressesToPlug &&
-			(pMsg->message == WM_SYSKEYUP   || pMsg->message == WM_KEYUP ||
-			 pMsg->message == WM_SYSKEYDOWN || pMsg->message == WM_KEYDOWN) )
-		{
+	if(msg && HandleKeyMessage(*msg))
+		return TRUE;
 
-			CInputHandler *ih = CMainFrame::GetInputHandler();
-			if(ih->IsKeyPressHandledByTextBox(static_cast<DWORD>(pMsg->wParam), ::GetFocus()))
-				return CDialog::PreTranslateMessage(pMsg);
+	return CDialog::PreTranslateMessage(msg);
+}
 
-			// Translate message manually
-			UINT nChar = (UINT)pMsg->wParam;
-			UINT nRepCnt = LOWORD(pMsg->lParam);
-			UINT nFlags = HIWORD(pMsg->lParam);
-			KeyEventType kT = ih->GetKeyEventType(nFlags);
 
-			// If we successfully mapped to a command and plug does not listen for keypresses, no need to pass message on.
-			if(ih->KeyEvent(kCtxVSTGUI, nChar, nRepCnt, nFlags, kT, this) != kcNull)
-			{
-				return true;
-			}
+bool CAbstractVstEditor::HandleKeyMessage(MSG &msg)
+{
+	if(m_VstPlugin.m_passKeypressesToPlug)
+		return false;
+	if(msg.message != WM_SYSKEYUP && msg.message != WM_KEYUP && msg.message != WM_SYSKEYDOWN && msg.message != WM_KEYDOWN)
+		return false;
 
-			// Don't forward key repeats if plug does not listen for keypresses
-			// (avoids system beeps on note hold)
-			if(kT == kKeyEventRepeat)
-			{
-				return true;
-			}
-		}
-	}
+	CInputHandler *ih = CMainFrame::GetInputHandler();
+	if(ih->IsKeyPressHandledByTextBox(static_cast<DWORD>(msg.wParam), ::GetFocus()))
+		return false;
 
-	return CDialog::PreTranslateMessage(pMsg);
+	// Translate message manually
+	UINT nChar = (UINT)msg.wParam;
+	UINT nRepCnt = LOWORD(msg.lParam);
+	UINT nFlags = HIWORD(msg.lParam);
+	KeyEventType kT = ih->GetKeyEventType(nFlags);
 
+	// If we successfully mapped to a command and plug does not listen for keypresses, no need to pass message on.
+	if(ih->KeyEvent(kCtxVSTGUI, nChar, nRepCnt, nFlags, kT, this) != kcNull)
+		return true;
+
+	// Don't forward key repeats if plug does not listen for keypresses
+	// (avoids system beeps on note hold)
+	if(kT == kKeyEventRepeat)
+		return true;
+	
+	return false;
 }
 
 
