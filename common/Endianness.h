@@ -117,6 +117,7 @@ namespace mpt {
 // C++20 std::endian
 #if MPT_CXX_AT_LEAST(20)
 using std::endian;
+static_assert(mpt::endian::big != mpt::endian::little, "platform with all scalar types having size 1 is not supported");
 #else // !C++20
 enum class endian
 {
