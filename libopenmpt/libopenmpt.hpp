@@ -174,19 +174,19 @@ LIBOPENMPT_CXX_API std::uint32_t get_core_version();
 namespace string {
 
 //! Return a verbose library version string from openmpt::string::get(). \deprecated Please use `"library_version"` directly.
-LIBOPENMPT_DEPRECATED static const char library_version  LIBOPENMPT_ATTR_DEPRECATED [] = "library_version";
+static const char library_version  LIBOPENMPT_ATTR_DEPRECATED [] = "library_version";
 //! Return a verbose library features string from openmpt::string::get(). \deprecated Please use `"library_features"` directly.
-LIBOPENMPT_DEPRECATED static const char library_features LIBOPENMPT_ATTR_DEPRECATED [] = "library_features";
+static const char library_features LIBOPENMPT_ATTR_DEPRECATED [] = "library_features";
 //! Return a verbose OpenMPT core version string from openmpt::string::get(). \deprecated Please use `"core_version"` directly.
-LIBOPENMPT_DEPRECATED static const char core_version     LIBOPENMPT_ATTR_DEPRECATED [] = "core_version";
+static const char core_version     LIBOPENMPT_ATTR_DEPRECATED [] = "core_version";
 //! Return information about the current build (e.g. the build date or compiler used) from openmpt::string::get(). \deprecated Please use `"build"` directly.
-LIBOPENMPT_DEPRECATED static const char build            LIBOPENMPT_ATTR_DEPRECATED [] = "build";
+static const char build            LIBOPENMPT_ATTR_DEPRECATED [] = "build";
 //! Return all contributors from openmpt::string::get(). \deprecated Please use `"credits"` directly.
-LIBOPENMPT_DEPRECATED static const char credits          LIBOPENMPT_ATTR_DEPRECATED [] = "credits";
+static const char credits          LIBOPENMPT_ATTR_DEPRECATED [] = "credits";
 //! Return contact information about libopenmpt from openmpt::string::get(). \deprecated Please use `"contact"` directly.
-LIBOPENMPT_DEPRECATED static const char contact          LIBOPENMPT_ATTR_DEPRECATED [] = "contact";
+static const char contact          LIBOPENMPT_ATTR_DEPRECATED [] = "contact";
 //! Return the libopenmpt license from openmpt::string::get(). \deprecated Please use `"license"` directly.
-LIBOPENMPT_DEPRECATED static const char license          LIBOPENMPT_ATTR_DEPRECATED [] = "license";
+static const char license          LIBOPENMPT_ATTR_DEPRECATED [] = "license";
 
 //! Get library related metadata.
 /*!
@@ -253,7 +253,7 @@ LIBOPENMPT_CXX_API double could_open_probability( std::istream & stream, double 
 /*!
   \deprecated Please use openmpt::module::could_open_probability().
 */
-LIBOPENMPT_ATTR_DEPRECATED LIBOPENMPT_CXX_API LIBOPENMPT_DEPRECATED double could_open_propability( std::istream & stream, double effort = 1.0, std::ostream & log = std::clog );
+LIBOPENMPT_ATTR_DEPRECATED LIBOPENMPT_CXX_API double could_open_propability( std::istream & stream, double effort = 1.0, std::ostream & log = std::clog );
 
 //! Get recommended header size for successfull format probing
 /*!
