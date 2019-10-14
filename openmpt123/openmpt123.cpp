@@ -2404,7 +2404,7 @@ static int main( int argc, char * argv [] ) {
 			}
 		#endif
 		
-		textout & log = flags.quiet ? *static_cast<textout*>( &dummy_log ) : *static_cast<textout*>( stdout_can_ui ? &std_out : &std_err );
+		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : static_cast<textout&>( stdout_can_ui ? std_out : std_err );
 
 		show_info( log, flags.verbose );
 		
