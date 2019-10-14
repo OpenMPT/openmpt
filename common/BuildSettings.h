@@ -693,6 +693,10 @@
 
 #if MPT_COMPILER_CLANG
 
+#if defined(MPT_BUILD_MSVC)
+#pragma clang diagnostic warning "-Wimplicit-fallthrough"
+#endif // MPT_BUILD_MSVC
+
 #if defined(MODPLUG_TRACKER)
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif // MODPLUG_TRACKER
