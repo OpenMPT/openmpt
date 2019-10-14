@@ -61,12 +61,8 @@ if c++ -std=c++17 -c bin/empty.cpp -o bin/empty.cpp17.out > /dev/null 2>&1 ; the
 echo " c++ 17"
 c++     -std=c++17 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
 fi
-echo " g++ 11"
-g++     -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp11.out
-if g++ -std=c++14 -c bin/empty.cpp -o bin/empty.gpp14.out > /dev/null 2>&1 ; then
 echo " g++ 14"
 g++     -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp14.out
-fi
 if g++ -std=c++17 -c bin/empty.cpp -o bin/empty.gpp17.out > /dev/null 2>&1 ; then
 echo " g++ 17"
 g++     -std=c++17 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
