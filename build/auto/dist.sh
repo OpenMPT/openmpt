@@ -55,12 +55,8 @@ echo '#include "libopenmpt/libopenmpt.hpp"' >> bin/headercheck.cpp
 echo 'int main() { return 0; }' >> bin/headercheck.cpp
 #echo " c++"
 #c++                -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp.out
-echo " c++ 11"
-c++     -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp11.out
-if c++ -std=c++14 -c bin/empty.cpp -o bin/empty.cpp14.out > /dev/null 2>&1 ; then
 echo " c++ 14"
 c++     -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp14.out
-fi
 if c++ -std=c++17 -c bin/empty.cpp -o bin/empty.cpp17.out > /dev/null 2>&1 ; then
 echo " c++ 17"
 c++     -std=c++17 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
@@ -75,12 +71,8 @@ if g++ -std=c++17 -c bin/empty.cpp -o bin/empty.gpp17.out > /dev/null 2>&1 ; the
 echo " g++ 17"
 g++     -std=c++17 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
 fi
-echo " clang++ 11"
-clang++ -std=c++11 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp11.out
-if clang++ -std=c++14 -c bin/empty.cpp -o bin/empty.clangpp14.out > /dev/null 2>&1  ; then
 echo " clang++ 14"
 clang++ -std=c++14 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp14.out
-fi
 if clang++ -std=c++17 -c bin/empty.cpp -o bin/empty.clangpp17.out > /dev/null 2>&1  ; then
 echo " clang++ 17"
 clang++ -std=c++17 -pedantic -Wall -Wextra -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
