@@ -33,6 +33,7 @@ private:
 #if defined(MPT_ENABLE_ALIGNED_ALLOC)
 	static constexpr std::align_val_t alignment = std::align_val_t{16};
 	static_assert(sizeof(mpt::aligned_array<buffer_t, bufferSize, alignment>) == sizeof(std::array<buffer_t, bufferSize>));
+	static_assert(alignof(mpt::aligned_array<buffer_t, bufferSize, alignment>) == static_cast<std::size_t>(alignment));
 #endif
 
 protected:
