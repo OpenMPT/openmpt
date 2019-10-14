@@ -39,7 +39,7 @@ endif
 CXXFLAGS_WARNINGS += -Wmissing-declarations -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
 CFLAGS_WARNINGS   += -Wmissing-prototypes   -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
 
-CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wnon-virtual-dtor -Wreserved-id-macro -Wglobal-constructors
+CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wnon-virtual-dtor -Wreserved-id-macro -Wglobal-constructors -Wimplicit-fallthrough
 
 #CXXFLAGS_WARNINGS += -Wdocumentation
 #CXXFLAGS_WARNINGS += -Wconversion
