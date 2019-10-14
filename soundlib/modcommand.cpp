@@ -310,6 +310,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			{
 				param = 0x0F | (std::min<PARAM>(0x0E, param & 0x0F) << 4);
 			}
+			break;
 
 		default:
 			break;
