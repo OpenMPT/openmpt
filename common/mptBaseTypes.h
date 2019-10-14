@@ -18,6 +18,9 @@
 
 #include <array>
 #include <limits>
+#if MPT_CXX_AT_LEAST(20)
+#include <source_location>
+#endif // C++20
 
 #include <cstddef>
 #include <cstdint>
@@ -220,6 +223,14 @@ struct limits
 namespace mpt
 {
 
+#if MPT_CXX_AT_LEAST(20)
+
+using std::source_location;
+
+#define MPT_SOURCE_LOCATION_CURRENT() std::source_location::current()
+
+#else // !C++20
+
 // compatible with std::experimental::source_location from Library Fundamentals TS v2.
 struct source_location
 {
@@ -269,6 +280,8 @@ public:
 };
 
 #define MPT_SOURCE_LOCATION_CURRENT() mpt::source_location::current( __FILE__ , __func__ , __LINE__ , 0 )
+
+#endif // C++20
 
 } // namespace mpt
 
