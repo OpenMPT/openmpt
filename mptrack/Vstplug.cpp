@@ -147,6 +147,13 @@ AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool for
 		if(error == ERROR_MOD_NOT_FOUND)
 		{
 			return nullptr;
+		} else if(error == ERROR_DLL_INIT_FAILED)
+		{
+			// A likely reason for this error is that Fiber Local Storage slots are exhausted, e.g. because too many plugins ship with a statically linked runtime.
+			// Before Windows 10 1903, there was a limit of 128 FLS slots per process, and the VS2017 runtime uses two FLS slots, so this could cause a worst-case limit
+			// of 62 different plugins per process (assuming they all use a statically-linked runtime).
+			// In Windows 10 1903, the FLS limit was finally raised, so this message is mostly relevant for older systems.
+			CVstPluginManager::ReportPlugException(U_("Plugin initialization failed. This may be caused by loading too many plugins.\nTry activating the Plugin Bridge for this plugin."));
 		}
 
 #ifdef _DEBUG
@@ -516,25 +523,17 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 	// string in ptr, see below
 	case audioMasterCanDo:
 		//Other possible Can Do strings are:
-		//"receiveVstTimeInfo",
-		//"asyncProcessing",
-		//"offline",
-		//"supportShell"
-		//"shellCategory"
-		//"editFile"
-		//"startStopProcess"
-		//"sendVstMidiEventFlagIsRealtime"
-		if(!strcmp((char*)ptr, canDoSendVstEvents)
-			|| !strcmp((char*)ptr, canDoSendVstMidiEvent)
-			|| !strcmp((char*)ptr, canDoSendVstTimeInfo)
-			|| !strcmp((char*)ptr, canDoReceiveVstEvents)
-			|| !strcmp((char*)ptr, canDoReceiveVstMidiEvent)
-			|| !strcmp((char*)ptr, "supplyIdle")
-			|| !strcmp((char*)ptr, canDoSizeWindow)
-			|| !strcmp((char*)ptr, canDoOpenFileSelector)
-			|| !strcmp((char*)ptr, canDoCloseFileSelector)
-			|| !strcmp((char*)ptr, canDoAcceptIOChanges)
-			|| !strcmp((char*)ptr, canDoReportConnectionChanges))
+		if(!strcmp((char*)ptr, HostCanDo::sendVstEvents)
+		   || !strcmp((char *)ptr, HostCanDo::sendVstMidiEvent)
+		   || !strcmp((char *)ptr, HostCanDo::sendVstTimeInfo)
+		   || !strcmp((char *)ptr, HostCanDo::receiveVstEvents)
+		   || !strcmp((char *)ptr, HostCanDo::receiveVstMidiEvent)
+		   || !strcmp((char *)ptr, HostCanDo::supplyIdle)
+		   || !strcmp((char *)ptr, HostCanDo::sizeWindow)
+		   || !strcmp((char *)ptr, HostCanDo::openFileSelector)
+		   || !strcmp((char *)ptr, HostCanDo::closeFileSelector)
+		   || !strcmp((char *)ptr, HostCanDo::acceptIOChanges)
+		   || !strcmp((char *)ptr, HostCanDo::reportConnectionChanges))
 		{
 			return HostCanDo;
 		} else
@@ -1133,10 +1132,10 @@ void CVstPlugin::EndSetProgram()
 
 void CVstPlugin::BeginGetProgram(int32 program)
 {
-	if(isBridged)
-		Dispatch(effVendorSpecific, kVendorOpenMPT, kBeginGetProgram, nullptr, 0);
 	if(program != -1)
 		Dispatch(effSetProgram, 0, program, nullptr, 0);
+	if(isBridged)
+		Dispatch(effVendorSpecific, kVendorOpenMPT, kBeginGetProgram, nullptr, 0);
 }
 
 
@@ -1633,7 +1632,7 @@ bool CVstPlugin::IsInstrument() const
 
 bool CVstPlugin::CanRecieveMidiEvents()
 {
-	return Dispatch(effCanDo, 0, 0, (void *)"receiveVstMidiEvent", 0.0f) != 0;
+	return Dispatch(effCanDo, 0, 0, const_cast<char *>(PluginCanDo::receiveVstMidiEvent), 0.0f) != 0;
 }
 
 
