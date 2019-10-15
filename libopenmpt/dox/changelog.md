@@ -15,9 +15,9 @@ is just a high-level summary.
  *  [**Regression**] foo_openmpt: foo_openmpt is discontinued. Please use
     Kode54's fork foo_openmpt54:
     <https://www.foobar2000.org/components/view/foo_openmpt54>.
- *  [**Regression**] Support for client code using C++11 has been removed. C++14
-    is now required to build libopenmpt client applications.
- *  [**Regression**] Support for building with C++11 and C++14 has been removed.
+ *  [**Regression**] Support for client code using C++11 or C++ 14 has been
+    removed. C++17 is now required to build libopenmpt client applications.
+ *  [**Regression**] Support for building with C++11 or C++14 has been removed.
     C++17 is now required to build libopenmpt.
  *  [**Regression**] Support for Visual Studio 2015 has been removed.
  *  [**Regression**] Support for GCC 4.8, 4.9, 5, 6 has been removed.
