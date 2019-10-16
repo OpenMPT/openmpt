@@ -439,10 +439,10 @@ using uchar = wchar_t;
 #endif
 
 using ustring = mpt::u8string;
-using uchar = char;
-#define MPT_UCHAR(x)     x
-#define MPT_ULITERAL(x)  x
-#define MPT_USTRING(x)   mpt::ustring( x )
+using uchar = MPT_U8CHAR_TYPE;
+#define MPT_UCHAR(x)     MPT_U8CHAR( x )
+#define MPT_ULITERAL(x)  MPT_U8LITERAL( x )
+#define MPT_USTRING(x)   MPT_U8STRING( x )
 
 #endif // MPT_USTRING_MODE_UTF8
 
