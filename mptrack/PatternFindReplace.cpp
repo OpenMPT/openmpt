@@ -432,7 +432,7 @@ void CViewPattern::OnEditFindNext()
 						else if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceValue)
 							param = paramReplace;
 
-						m->SetValueVolCol(static_cast<uint16>(Clamp(param, 0, static_cast<int>(ModCommand::maxColumnValue))));
+						m->SetValueVolCol(static_cast<uint16>(Clamp(param, 0, ModCommand::maxColumnValue)));
 					}
 
 					if(FindReplace::instance.replaceFlags[FindReplace::PCValue])
@@ -446,7 +446,7 @@ void CViewPattern::OnEditFindNext()
 						else if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceValue)
 							value = valueReplace;
 
-						m->SetValueEffectCol(static_cast<uint16>(Clamp(value, 0, static_cast<int>(ModCommand::maxColumnValue))));
+						m->SetValueEffectCol(static_cast<uint16>(Clamp(value, 0, ModCommand::maxColumnValue)));
 					}
 
 					SetModified(false);

@@ -2664,7 +2664,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 			if(m.IsPcNote())
 			{
 				int val = m.GetValueVolCol() + offset * (coarse ? 10 : 1);
-				Limit(val, 0, int(ModCommand::maxColumnValue));
+				Limit(val, 0, ModCommand::maxColumnValue);
 				m.SetValueVolCol(static_cast<uint16>(val));
 			} else
 			{
@@ -2686,7 +2686,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 			if(m.IsPcNote())
 			{
 				int val = m.GetValueEffectCol() + offset * (coarse ? 10 : 1);
-				Limit(val, 0, int(ModCommand::maxColumnValue));
+				Limit(val, 0, ModCommand::maxColumnValue);
 				m.SetValueEffectCol(static_cast<uint16>(val));
 			} else
 			{
@@ -3325,7 +3325,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		{
 			pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
 
-			pRow->Set(NOTE_PCS, static_cast<ModCommand::INSTR>(plugSlot + 1), static_cast<uint16>(paramIndex), static_cast<uint16>(pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex)) * static_cast<int>(ModCommand::maxColumnValue)));
+			pRow->Set(NOTE_PCS, static_cast<ModCommand::INSTR>(plugSlot + 1), static_cast<uint16>(paramIndex), static_cast<uint16>(pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex)) * ModCommand::maxColumnValue));
 			InvalidateRow(nRow);
 		}
 	} else if(sndFile.GetModSpecifications().HasCommand(CMD_SMOOTHMIDI))

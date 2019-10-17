@@ -451,7 +451,7 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 
 	if(mc.IsPcNote())
 	{	//If note is parameter control note, drawing volume command differently.
-		const int val = std::min(static_cast<int>(ModCommand::maxColumnValue), static_cast<int>(mc.GetValueVolCol()));
+		const int val = std::min(ModCommand::maxColumnValue, static_cast<int>(mc.GetValueVolCol()));
 
 		if(pfnt->pcParamMargin) m_Dib.TextBlt(x, y, pfnt->pcParamMargin, pfnt->spacingY, pfnt->nClrX, pfnt->nClrY, pfnt->dib);
 		m_Dib.TextBlt(x + pfnt->pcParamMargin, y, pfnt->nVolCmdWidth, pfnt->spacingY,
