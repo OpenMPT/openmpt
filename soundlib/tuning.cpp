@@ -183,9 +183,6 @@ std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) cons
 }
 
 
-const RATIOTYPE CTuningRTI::s_DefaultFallbackRatio = 1.0f;
-
-
 //Without finetune
 RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const
 {

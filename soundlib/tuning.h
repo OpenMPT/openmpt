@@ -37,10 +37,10 @@ public:
 		TT_GEOMETRIC      = 3,
 	};
 
-	static const RATIOTYPE s_DefaultFallbackRatio;
-	enum : NOTEINDEXTYPE { s_StepMinDefault = -64 };
-	enum : UNOTEINDEXTYPE { s_RatioTableSizeDefault = 128 };
-	enum : USTEPINDEXTYPE { s_RatioTableFineSizeMaxDefault = 1000 };
+	static constexpr RATIOTYPE s_DefaultFallbackRatio = 1.0f;
+	static constexpr NOTEINDEXTYPE s_StepMinDefault = -64;
+	static constexpr UNOTEINDEXTYPE s_RatioTableSizeDefault = 128;
+	static constexpr USTEPINDEXTYPE s_RatioTableFineSizeMaxDefault = 1000;
 
 public:
 
@@ -140,7 +140,7 @@ public:
 	{
 		CTuningRTI *pT = new CTuningRTI();
 		pT->SetName(name);
-		VRPAIR range = std::make_pair(s_StepMinDefault, static_cast<NOTEINDEXTYPE>(static_cast<NOTEINDEXTYPE>(s_StepMinDefault) + static_cast<NOTEINDEXTYPE>(s_RatioTableSizeDefault) - 1));
+		VRPAIR range = std::make_pair(s_StepMinDefault, static_cast<NOTEINDEXTYPE>(s_StepMinDefault + s_RatioTableSizeDefault - 1));
 		range.second = std::max(range.second, mpt::saturate_cast<NOTEINDEXTYPE>(ratios.size() - 1));
 		range.first = 0 - range.second - 1;
 		if(pT->CreateGroupGeometric(ratios, groupratio, range, 0) != false)
