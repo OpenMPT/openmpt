@@ -1,19 +1,29 @@
 
-  filter {}
-	
-	objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. mpt_projectname )
-
-  filter {}
-	filter { "not action:vs*", "language:C++" }
-		buildoptions { "-std=c++14" }
-	filter { "not action:vs*", "language:C" }
-		buildoptions { "-std=c99" }
+	filter {}
+		objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. mpt_projectname )
 	filter {}
 
 	filter {}
 		if _OPTIONS["clang"] then
 			toolset "msc-ClangCL"
 		end
+	filter {}
+
+	filter {}
+
+	filter {}
+	filter { "action:vs*", "language:C++" }
+		cppdialect "C++17"
+	filter { "action:vs*", "action:vs2017" }
+		if _OPTIONS["win10"] then
+			standardconformance "On"
+		end
+	filter { "action:vs*", "not action:vs2017" }
+		standardconformance "On"
+	filter { "not action:vs*", "language:C++" }
+		buildoptions { "-std=c++14" }
+	filter { "not action:vs*", "language:C" }
+		buildoptions { "-std=c99" }
 	filter {}
 
 	filter {}

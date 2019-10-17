@@ -7,7 +7,6 @@
   mpt_projectname = "libopenmpt"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-	dofile "../../build/premake/premake-defaults-strict.lua"
   local extincludedirs = {
    "../../include",
    "../../include/mpg123/ports/MSVC++",

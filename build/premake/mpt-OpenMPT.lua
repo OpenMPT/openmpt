@@ -19,7 +19,6 @@ end
   vpaths { ["*"] = "../../" }
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
   dofile "../../build/premake/premake-defaults.lua"
-	dofile "../../build/premake/premake-defaults-strict.lua"
 if stringmode == "UTF8" then
    targetname "OpenMPT-UTF8"
 elseif charset == "MBCS" then
@@ -170,7 +169,6 @@ end
   mpt_projectname = "OpenMPT-NativeSupport"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-	dofile "../../build/premake/premake-defaults-strict.lua"
   includedirs {
    "../../common",
    "../../include",
@@ -216,7 +214,6 @@ end
   mpt_projectname = "OpenMPT-WineWrapper"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-	dofile "../../build/premake/premake-defaults-strict.lua"
   includedirs {
    "../../common",
    "../../include",

@@ -7,7 +7,6 @@
   mpt_projectname = "libopenmpt_example_cxx"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
-	dofile "../../build/premake/premake-defaults-strict.lua"
   local extincludedirs = {
    "../..",
    "../../include/portaudio/bindings/cpp/include",
@@ -39,7 +38,6 @@
   mpt_projectname = "libopenmpt_example_c"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
-	dofile "../../build/premake/premake-defaults-strict.lua"
   local extincludedirs = {
    "../..",
    "../../include/portaudio/include",
@@ -70,7 +68,6 @@
   mpt_projectname = "libopenmpt_example_c_mem"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
-	dofile "../../build/premake/premake-defaults-strict.lua"
   local extincludedirs = {
    "../..",
    "../../include/portaudio/include",
@@ -101,7 +98,6 @@
   mpt_projectname = "libopenmpt_example_c_unsafe"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
-	dofile "../../build/premake/premake-defaults-strict.lua"
   local extincludedirs = {
    "../..",
    "../../include/portaudio/include",
@@ -132,7 +128,6 @@
   mpt_projectname = "libopenmpt_example_c_probe"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
-	dofile "../../build/premake/premake-defaults-strict.lua"
   local extincludedirs = {
    "../..",
    "../../include/portaudio/include",

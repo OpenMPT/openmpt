@@ -6,8 +6,6 @@
   mpt_projectname = "portaudio"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-	dofile "../../build/premake/premake-defaults-strict.lua"
-
 --  dofile "../../build/premake/premake-defaults-winver.lua"
   filter {}
   filter { "action:vs*" }

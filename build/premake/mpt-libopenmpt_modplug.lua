@@ -7,7 +7,6 @@
   mpt_projectname = "libopenmpt_modplug"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-	dofile "../../build/premake/premake-defaults-strict.lua"
   targetname "libmodplug"
   local extincludedirs = {
    "../..",

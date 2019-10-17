@@ -6,7 +6,6 @@
   mpt_projectname = "soundtouch"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-	dofile "../../build/premake/premake-defaults-strict.lua"
   dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-soundtouch"
   includedirs { "../../include/soundtouch/include" }
