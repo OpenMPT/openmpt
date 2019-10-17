@@ -253,7 +253,7 @@ BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 		nID = ::GetDlgCtrlID((HWND)nID);
 	}
 
-	static const TCHAR *ksl[] = { _T("disabled"), _T("1.5 dB / octave"), _T("3 dB / octave") , _T("6 dB / octave") };
+	static constexpr const TCHAR *ksl[] = { _T("disabled"), _T("1.5 dB / octave"), _T("3 dB / octave") , _T("6 dB / octave") };
 
 	mpt::tstring text;
 	const CWnd *wnd = GetDlgItem(static_cast<int>(nID));
