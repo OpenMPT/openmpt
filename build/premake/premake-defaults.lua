@@ -21,7 +21,7 @@
 	filter { "action:vs*", "not action:vs2017" }
 		standardconformance "On"
 	filter { "not action:vs*", "language:C++" }
-		buildoptions { "-std=c++14" }
+		buildoptions { "-std=c++17" }
 	filter { "not action:vs*", "language:C" }
 		buildoptions { "-std=c99" }
 	filter {}
