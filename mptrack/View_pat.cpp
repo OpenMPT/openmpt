@@ -3325,7 +3325,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		{
 			pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
 
-			pRow->Set(NOTE_PCS, static_cast<ModCommand::INSTR>(plugSlot + 1), static_cast<uint16>(paramIndex), static_cast<uint16>(pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex)) * ModCommand::maxColumnValue));
+			pRow->Set(NOTE_PCS, static_cast<ModCommand::INSTR>(plugSlot + 1), static_cast<uint16>(paramIndex), static_cast<uint16>(pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex)) * static_cast<int>(ModCommand::maxColumnValue)));
 			InvalidateRow(nRow);
 		}
 	} else if(sndFile.GetModSpecifications().HasCommand(CMD_SMOOTHMIDI))

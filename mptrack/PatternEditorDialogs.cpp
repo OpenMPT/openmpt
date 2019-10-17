@@ -898,7 +898,7 @@ BOOL CChordEditor::OnInitDialog()
 	ResizableDialog::OnInitDialog();
 	m_Keyboard.Init(this, (CHORD_MAX - CHORD_MIN) / 12, true);
 	// Shortcut key combo box
-	AppendNotesToControl(m_CbnShortcut, NOTE_MIN, NOTE_MIN + kcVPEndChords - kcVPStartChords);
+	AppendNotesToControl(m_CbnShortcut, NOTE_MIN, NOTE_MIN + static_cast<int>(kcVPEndChords) - static_cast<int>(kcVPStartChords));
 
 	m_CbnShortcut.SetCurSel(0);
 	// Base Note combo box
