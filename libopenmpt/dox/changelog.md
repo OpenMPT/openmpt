@@ -18,6 +18,7 @@ is just a high-level summary.
     applies to strings encoded in arbitrary character encodings but the API
     returns them converted to UTF-8, which can be longer. (reported by Antonio
     Morales Maldonado of Semmle Security Research Team) (r12133)
+    ([CVE-2019-17113](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-17113))
 
 ### libopenmpt 0.2-beta40 (2019-09-23)
 
@@ -46,8 +47,10 @@ is just a high-level summary.
 
  *  [**Sec**] DSM: Assertion failure during file parsing with debug STLs
     (r11211).
+    ([CVE-2019-14382](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-14382))
  *  [**Sec**] J2B: Assertion failure during file parsing with debug STLs
     (r11218).
+    ([CVE-2019-14383](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-14383))
 
  *  Do not apply Amiga playback heuristics to MOD files that have clearly been
     written with a PC tracker.
@@ -58,6 +61,7 @@ is just a high-level summary.
 ### libopenmpt 0.2-beta36 (2018-10-21)
 
  *  [**Sec**] Crash with malformed MED files (r10905).
+    ([CVE-2018-20860](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-20860))
 
  *  Transposed samples in AMF ASYLUM modules were not played correctly.
  *  Notes triggered by libopenmpt_ext play_note could be played with a panbrello
@@ -78,8 +82,10 @@ is just a high-level summary.
  *  Reject overly long MP3 and Vorbis samples in MO3.
 
 ### libopenmpt 0.2-beta34 (2018-07-28)
+
  *  [**Sec**] Crash with some malformed custom tunings in MPTM files (r10616,
     r10617).
+    ([CVE-2018-20861](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-20861))
 
  *  Channels whose volume envelope was playing at volume 0 while being moved to
     a NNA background channel were cut off completely since libopenmpt 0.2-beta31
@@ -95,7 +101,8 @@ is just a high-level summary.
 ### libopenmpt 0.2-beta32 (2018-04-29)
 
  *  [**Sec**] Possible write near address 0 in out-of-memory situations when
-    reading AMS files (r10151, r10154). (CVE-2018-11710)
+    reading AMS files (r10151, r10154).
+    ([CVE-2018-11710](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-11710))
 
  *  STM: Having both Bxx and Cxx commands in a pattern imported the Bxx command
     incorrectly.
@@ -106,7 +113,8 @@ is just a high-level summary.
 ### libopenmpt 0.2-beta31 (2018-04-08)
 
  *  [**Sec**] Possible out-of-bounds memory read with IT / MO3 files containing
-    pattern loops (r10029, r10030). (CVE-2018-10017)
+    pattern loops (r10029, r10030).
+    ([CVE-2018-10017](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-10017))
 
  *  Keep track of active SFx macro during seeking.
  *  The "note cut" duplicate note action did not volume-ramp the previously
@@ -166,7 +174,7 @@ is just a high-level summary.
 ### libopenmpt 0.2-beta26 (2017-07-07)
 
  *  [**Bug**] Possible crashes with malformed PLM and PSM files.
-    (CVE-2017-11311)
+    ([CVE-2017-11311](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-11311))
  *  [**Bug**] mktime() and localtime() were used for song date parsing.
     These functions are not guaranteed to be thread-safe by the standard.
     Furthermore, some standard library implementations are buggy and may cause
