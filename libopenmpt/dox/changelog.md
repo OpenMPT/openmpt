@@ -18,6 +18,7 @@ is just a high-level summary.
     applies to strings encoded in arbitrary character encodings but the API
     returns them converted to UTF-8, which can be longer. (reported by Antonio
     Morales Maldonado of Semmle Security Research Team) (r12131)
+    ([CVE-2019-17113](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-17113))
  *  [**Sec**] libmodplug: C++ API: Do not return 0 in
     `CSoundFile::GetSampleName()` and `CSoundFile::GetInstrumentName()` when a
     null output pointer is provided. This behaviour differed from libmodplug and
@@ -56,8 +57,10 @@ is just a high-level summary.
 
  *  [**Sec**] DSM: Assertion failure during file parsing with debug STLs
     (r11210).
+    ([CVE-2019-14382](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-14382))
  *  [**Sec**] J2B: Assertion failure during file parsing with debug STLs
     (r11217).
+    ([CVE-2019-14383](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-14383))
 
 ### libopenmpt 0.3.14 (2019-01-06)
 
@@ -73,6 +76,7 @@ is just a high-level summary.
 ### libopenmpt 0.3.13 (2018-10-21)
 
  *  [**Sec**] Crash with malformed MED files (r10904).
+    ([CVE-2018-20860](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-20860))
 
  *  Transposed samples in AMF ASYLUM modules were not played correctly.
  *  Notes triggered by libopenmpt_ext play_note could be played with a panbrello
@@ -106,6 +110,7 @@ is just a high-level summary.
 ### libopenmpt 0.3.11 (2018-07-28)
 
  *  [**Sec**] Crash with some malformed custom tunings in MPTM files (r10615).
+    ([CVE-2018-20861](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-20861))
 
  *  Channels whose volume envelope was playing at volume 0 while being moved to
     a NNA background channel were cut off completely since libopenmpt 0.3.8.
@@ -125,7 +130,8 @@ is just a high-level summary.
 ### libopenmpt 0.3.9 (2018-04-29)
 
  *  [**Sec**] Possible write near address 0 in out-of-memory situations when
-    reading AMS files (r10149). (CVE-2018-11710)
+    reading AMS files (r10149).
+    ([CVE-2018-11710](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-11710))
 
  *  [**Bug**] openmpt123: Fixed build failure in C++17 due to use of removed
     feature `std::random_shuffle`.
@@ -141,7 +147,8 @@ is just a high-level summary.
 ### libopenmpt 0.3.8 (2018-04-08)
 
  *  [**Sec**] Possible out-of-bounds memory read with IT and MO3 files
-    containing many nested pattern loops (r10028). (CVE-2018-10017)
+    containing many nested pattern loops (r10028).
+    ([CVE-2018-10017](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-10017))
 
  *  Keep track of active SFx macro during seeking.
  *  The "note cut" duplicate note action did not volume-ramp the previously
@@ -174,7 +181,8 @@ is just a high-level summary.
 ### libopenmpt 0.3.6 (2018-02-03)
 
  *  [**Sec**] Possible out-of-bounds memory read with malformed STP files.
-    (r9576) (CVE-2018-6611)
+    (r9576)
+    ([CVE-2018-6611](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-6611))
 
  *  [**Bug**] Small memory leak with malformed STP files.
 
