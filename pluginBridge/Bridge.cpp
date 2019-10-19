@@ -146,18 +146,20 @@ void PluginBridge::MainLoop(TCHAR *argv[])
 		// Let host pre-process key messages like it does for non-bridged plugins
 		if(msg.message >= WM_KEYFIRST && msg.message <= WM_KEYLAST)
 		{
-			// Does the message come from a top-level window? This is required e.g. for the slider pop-up windows in Synth1...
-			HWND owner = GetWindow(msg.hwnd, GW_OWNER);
-			if(owner == nullptr)
+			HWND owner = nullptr;
+			for(HWND hwnd = msg.hwnd; hwnd != nullptr; hwnd = GetParent(hwnd))
 			{
-				// ...or does it come from a child window? (e.g. Kirnu editor)
-				for(HWND hwnd = msg.hwnd; hwnd != nullptr; hwnd = GetParent(hwnd))
+				// Does it come from a child window? (e.g. Kirnu editor)
+				if(GetClassWord(hwnd, GCW_ATOM) == m_editorClassAtom)
 				{
-					if(GetClassWord(hwnd, GCW_ATOM) == m_editorClassAtom)
-					{
-						owner = GetParent(GetParent(hwnd));
-						break;
-					}
+					owner = GetParent(GetParent(hwnd));
+					break;
+				}
+				// Does the message come from a top-level window? This is required e.g. for the slider pop-up windows and patch browser in Synth1.
+				if(!(GetWindowLong(hwnd, GWL_STYLE) & WS_CHILD))
+				{
+					owner = GetWindow(hwnd, GW_OWNER);
+					break;
 				}
 			}
 			// Send to top-level VST editor window in host
