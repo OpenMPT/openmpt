@@ -30,9 +30,10 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.08.00 (* October 2019, revision 12158)
+v1.28.08.00 (* October 2019, revision 12220)
 --------------------------------------------
 Playback
+- [Mod] <js> Do not apply ramp from initial global volume to current global volume when jumping around in playback.
 - [Fix] <js> Possible crash when trying to retrigger an OPL note with active filter.
 
 VST::Plugin Bridge
