@@ -207,42 +207,6 @@ void OPLInstrDlg::ParamsChanged()
 }
 
 
-static mpt::tstring GetFeedbackText(int index)
-{
-	mpt::tstring result;
-	switch(index)
-	{
-	case 0:
-		result = mpt::ToWin(MPT_UTF8("disabled"));
-		break;
-	case 1:
-		result = mpt::ToWin(MPT_UTF8("\xCF\x80/16"));
-		break;
-	case 2:
-		result = mpt::ToWin(MPT_UTF8("\xCF\x80/8"));
-		break;
-	case 3:
-		result = mpt::ToWin(MPT_UTF8("\xCF\x80/4"));
-		break;
-	case 4:
-		result = mpt::ToWin(MPT_UTF8("\xCF\x80/2"));
-		break;
-	case 5:
-		result = mpt::ToWin(MPT_UTF8("\xCF\x80"));
-		break;
-	case 6:
-		result = mpt::ToWin(MPT_UTF8("2\xCF\x80"));
-		break;
-	case 7:
-		result = mpt::ToWin(MPT_UTF8("4\xCF\x80"));
-		break;
-	default:
-		break;
-	}
-	return result;
-}
-
-
 BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 {
 	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
@@ -253,7 +217,8 @@ BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 		nID = ::GetDlgCtrlID((HWND)nID);
 	}
 
-	static constexpr const TCHAR *ksl[] = { _T("disabled"), _T("1.5 dB / octave"), _T("3 dB / octave") , _T("6 dB / octave") };
+	static constexpr char *feedback[] = {"disabled", "\xCF\x80/16", "\xCF\x80/8", "\xCF\x80/4", "\xCF\x80/2", "\xCF\x80", "2\xCF\x80", "44\xCF\x80"};
+	static constexpr const TCHAR *ksl[] = {_T("disabled"), _T("1.5 dB / octave"), _T("3 dB / octave"), _T("6 dB / octave")};
 
 	mpt::tstring text;
 	const CWnd *wnd = GetDlgItem(static_cast<int>(nID));
@@ -262,7 +227,7 @@ BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 	{
 	case IDC_SLIDER1:
 		// Feedback
-		text = GetFeedbackText(slider->GetPos() & 7);
+		text = mpt::ToWin(mpt::CharsetUTF8, feedback[slider->GetPos() & 7]);
 		break;
 
 	case IDC_SLIDER2:

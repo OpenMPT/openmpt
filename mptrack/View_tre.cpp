@@ -35,6 +35,58 @@ OPENMPT_NAMESPACE_BEGIN
 
 CSoundFile *CModTree::m_SongFile = nullptr;
 
+// Resolve shell link targets
+class LinkResolver
+{
+	IShellLink *psl = nullptr;
+	IPersistFile *ppf = nullptr;
+
+public:
+	LinkResolver()
+	{
+		// Create instance
+		HRESULT result = CoCreateInstance(CLSID_ShellLink,
+		                                  0,
+		                                  CLSCTX_INPROC_SERVER,
+		                                  IID_IShellLink,
+		                                  reinterpret_cast<LPVOID *>(&psl));
+		if(SUCCEEDED(result) && psl != nullptr)
+		{
+			psl->QueryInterface(IID_IPersistFile, reinterpret_cast<LPVOID *>(&ppf));
+		}
+	}
+
+	~LinkResolver()
+	{
+		if(ppf != nullptr)
+			ppf->Release();
+		if(psl != nullptr)
+			psl->Release();
+	}
+
+	mpt::PathString Resolve(const TCHAR *inPath)
+	{
+		if(ppf == nullptr)
+			return {};
+
+		SHFILEINFO info;
+		if((SHGetFileInfo(inPath, 0, &info, sizeof(info), SHGFI_ATTRIBUTES) == 0) || !(info.dwAttributes & SFGAO_LINK))
+			return {};
+
+		USES_CONVERSION;  // T2COLE needs this
+		if(ppf != nullptr && SUCCEEDED(ppf->Load(T2COLE(inPath), STGM_READ)))
+		{
+			if(SUCCEEDED(psl->Resolve(AfxGetMainWnd()->m_hWnd, SLR_ANY_MATCH)))
+			{
+				TCHAR outPath[MAX_PATH];
+				psl->GetPath(outPath, std::size(outPath), nullptr, 0);
+				return mpt::PathString::FromNative(outPath);
+			}
+		}
+		return {};
+	}
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // CModTreeDropTarget
 
@@ -1443,7 +1495,25 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 
 		case MODITEM_INSLIB_SONG:
 		case MODITEM_INSLIB_FOLDER:
-			InstrumentLibraryChDir(mpt::PathString::FromCString(GetItemText(hItem)), modItem.type == MODITEM_INSLIB_SONG);
+			// If it's a shell link, resolve the link target
+			if(auto file = LinkResolver().Resolve(m_InstrLibPath.ToCString() + GetItemText(hItem)); !file.empty())
+			{
+				if(file.IsDirectory())
+				{
+					file.EnsureTrailingSlash();
+					InstrumentLibraryChDir(file, false);
+				} else if(file.IsFile())
+				{
+					// Browse module contents
+					CModTree *dirBrowser = CMainFrame::GetMainFrame()->GetUpperTreeview();
+					dirBrowser->m_InstrLibPath = file.GetPath();
+					dirBrowser->RefreshInstrumentLibrary();
+					dirBrowser->InstrumentLibraryChDir(file.GetFullFileName(), true);
+				}
+			} else
+			{
+				InstrumentLibraryChDir(mpt::PathString::FromCString(GetItemText(hItem)), modItem.type == MODITEM_INSLIB_SONG);
+			}
 			return TRUE;
 
 		case MODITEM_HDR_SONG:
@@ -1562,8 +1632,13 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 				} else
 				{
 					// Preview sample / instrument file
+					auto file = InsLibGetFullPath(hItem);
+					// If it's a shell link, resolve the link target
+					if(auto resolvedName = LinkResolver().Resolve(file.AsNative().c_str()); !resolvedName.empty())
+						file = std::move(resolvedName);
+
 					if(pMainFrm)
-						pMainFrm->PlaySoundFile(InsLibGetFullPath(hItem), note, volume);
+						pMainFrm->PlaySoundFile(file, note, volume);
 				}
 			} else
 			{
@@ -1941,15 +2016,70 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 		const mpt::PathString path = m_InstrLibPath + P_("*.*");
 		const bool showDirs = !IsSampleBrowser() || TrackerSettings::Instance().showDirsInSampleBrowser, showInstrs = IsSampleBrowser();
 
+		LinkResolver linkResolver;
 		HANDLE hFind;
 		WIN32_FIND_DATA wfd;
 		MemsetZero(wfd);
 		if((hFind = FindFirstFile(path.AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
 		{
-			auto modExts = CSoundFile::GetSupportedExtensions(false);
-			auto instrExts = { "xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat" };
-			auto sampleExts = { "wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf", "sb0", "sb2", "sbi" };
-			auto allExtsBlacklist = { "txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "mol" };
+			const auto modExts = CSoundFile::GetSupportedExtensions(false);
+			const auto instrExts = {"xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat"};
+			const auto sampleExts = {"wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf", "sb0", "sb2", "sbi"};
+			const auto allExtsBlacklist = {"txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "mol", "lnk", "url"};
+
+			const auto FilterFile = [this, &modExts, &instrExts, &sampleExts, &allExtsBlacklist, selectedItem, showInstrs, showDirs](const mpt::PathString &fileName, const TCHAR *displayName) {
+				// Get lower-case file extension without dot.
+				mpt::PathString extPS = fileName.GetFileExt();
+				std::string ext = extPS.ToUTF8();
+				if(!ext.empty())
+				{
+					ext.erase(0, 1);
+					ext = mpt::ToLowerCaseAscii(ext);
+					extPS = mpt::PathString::FromUTF8(ext);
+				}
+				// Amiga-style extensions (i.e. mod.songname)
+				std::string prefixExt = fileName.ToUTF8();
+				auto dotPos = prefixExt.find('.');
+				if(dotPos != std::string::npos)
+					prefixExt.erase(dotPos);
+				else
+					prefixExt.clear();
+
+				if(std::find(instrExts.begin(), instrExts.end(), ext) != instrExts.end())
+				{
+					// Instruments
+					if(showInstrs)
+					{
+						InsertInsLibItem(displayName, IMAGE_INSTRUMENTS, selectedItem);
+					}
+				} else if(std::find(sampleExts.begin(), sampleExts.end(), ext) != sampleExts.end())
+				{
+					// Samples
+					if(showInstrs)
+					{
+						InsertInsLibItem(displayName, IMAGE_SAMPLES, selectedItem);
+					}
+				} else if(std::find(modExts.begin(), modExts.end(), ext) != modExts.end() || std::find(modExts.begin(), modExts.end(), prefixExt) != modExts.end())
+				{
+					// Songs
+					if(showDirs)
+					{
+						InsertInsLibItem(displayName, IMAGE_FOLDERSONG, selectedItem);
+					}
+				} else if((!extPS.empty() && std::find(m_MediaFoundationExtensions.begin(), m_MediaFoundationExtensions.end(), extPS) != m_MediaFoundationExtensions.end())
+				          || (m_showAllFiles && std::find(allExtsBlacklist.begin(), allExtsBlacklist.end(), ext) == allExtsBlacklist.end()))
+				{
+					// MediaFoundation samples / other files
+					if(showInstrs)
+					{
+						InsertInsLibItem(displayName, IMAGE_SAMPLES, selectedItem);
+					}
+				} else
+				{
+					return false;
+				}
+				return true;
+			};
 
 			do
 			{
@@ -1973,51 +2103,16 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 					}
 				} else if(wfd.nFileSizeHigh > 0 || wfd.nFileSizeLow >= 16)
 				{
-					// Get lower-case file extension without dot.
-					mpt::PathString extPS = mpt::PathString::FromNative(wfd.cFileName).GetFileExt();
-					std::string ext = extPS.ToUTF8();
-					if(!ext.empty())
+					if(!FilterFile(mpt::PathString::FromNative(wfd.cFileName), wfd.cFileName))
 					{
-						ext.erase(0, 1);
-						ext = mpt::ToLowerCaseAscii(ext);
-						extPS = mpt::PathString::FromUTF8(ext);
-					}
-					// Amiga-style extensions (i.e. mod.songname)
-					std::string prefixExt = mpt::ToCharset(mpt::CharsetUTF8, mpt::winstring(wfd.cFileName));
-					auto dotPos = prefixExt.find('.');
-					if(dotPos != std::string::npos)
-						prefixExt.erase(dotPos);
-					else
-						prefixExt.clear();
-
-					if(std::find(instrExts.begin(), instrExts.end(), ext) != instrExts.end())
-					{
-						// Instruments
-						if(showInstrs)
+						// Try resolving file as link if it wasn't a module or instrument
+						const auto nativePath = (m_InstrLibPath.AsNative() + wfd.cFileName);
+						if(const auto resolvedName = linkResolver.Resolve(nativePath.c_str()); !resolvedName.empty())
 						{
-							InsertInsLibItem(wfd.cFileName, IMAGE_INSTRUMENTS, selectedItem);
-						}
-					} else if(std::find(sampleExts.begin(), sampleExts.end(), ext) != sampleExts.end())
-					{
-						// Samples
-						if(showInstrs)
-						{
-							InsertInsLibItem(wfd.cFileName, IMAGE_SAMPLES, selectedItem);
-						}
-					} else if(std::find(modExts.begin(), modExts.end(), ext) != modExts.end() || std::find(modExts.begin(), modExts.end(), prefixExt) != modExts.end())
-					{
-						// Songs
-						if(showDirs)
-						{
-							InsertInsLibItem(wfd.cFileName, IMAGE_FOLDERSONG, selectedItem);
-						}
-					} else if((!extPS.empty() && std::find(m_MediaFoundationExtensions.begin(), m_MediaFoundationExtensions.end(), extPS) != m_MediaFoundationExtensions.end())
-						|| (m_showAllFiles && std::find(allExtsBlacklist.begin(), allExtsBlacklist.end(), ext) == allExtsBlacklist.end()))
-					{
-						// MediaFoundation samples / other files
-						if(showInstrs)
-						{
-							InsertInsLibItem(wfd.cFileName, IMAGE_SAMPLES, selectedItem);
+							if(resolvedName.IsDirectory() && showDirs)
+								InsertInsLibItem(wfd.cFileName, IMAGE_FOLDER, selectedItem);
+							else if(resolvedName.IsFile())
+								FilterFile(resolvedName, wfd.cFileName);
 						}
 					}
 				}
@@ -2136,9 +2231,14 @@ void CModTree::InsertInsLibItem(const TCHAR *name, int image, const TCHAR *selec
 	case IMAGE_SAMPLES:
 	case IMAGE_OPLINSTR:
 		// Only group instruments and samples separately if we're browsing inside a module file
-		if(!m_SongFileName.empty()) { sortOrder = 5; break; }
+		if(!m_SongFileName.empty())
+		{
+			sortOrder = 5;
+			break;
+		}
 		[[fallthrough]];
 	case IMAGE_INSTRUMENTS:
+	default:
 		sortOrder = 4;
 		break;
 	}
