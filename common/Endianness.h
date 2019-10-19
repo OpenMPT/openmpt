@@ -345,7 +345,7 @@ static MPT_CONSTEXPR17_FUN std::array<std::byte, size> EndianEncode(T val) noexc
 	using unsigned_base_type = typename std::make_unsigned<base_type>::type;
 	using endian_type = Tendian;
 	unsigned_base_type uval = static_cast<unsigned_base_type>(val);
-	std::array<std::byte, size> data;
+	std::array<std::byte, size> data{};
 	if constexpr(endian_type::endian == mpt::endian::little)
 	{
 		for(std::size_t i = 0; i < sizeof(base_type); ++i)
