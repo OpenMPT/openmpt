@@ -63,9 +63,9 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	m_EditZxx.SetLimitText(MACRO_LENGTH - 1);
 
 	// Parametered macro selection
-	for(int isfx = 0; isfx < 16; isfx++)
+	for(int i = 0; i < 16; i++)
 	{
-		s.Format(_T("%d (SF%X)"), isfx, isfx);
+		s.Format(_T("%d (SF%X)"), i, i);
 		m_CbnSFx.AddString(s);
 	}
 
@@ -109,7 +109,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 
 	for(UINT m = 0; m < NUM_MACROS; m++)
 	{
-		m_EditMacro[m].Create(_T(""), /*BS_FLAT |*/ WS_CHILD | WS_VISIBLE | WS_TABSTOP /*| WS_BORDER*/,
+		m_EditMacro[m].Create(_T(""), WS_CHILD | WS_VISIBLE | WS_TABSTOP,
 			CRect(offsetx, offsety + m * (separatory + height), offsetx + widthMacro, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + NUM_MACROS + m);
 		m_EditMacro[m].SetFont(GetFont());
 
@@ -139,9 +139,9 @@ BOOL CMidiMacroSetup::OnInitDialog()
 			m_CbnMacroPlug.SetItemData(m_CbnMacroPlug.AddString(s), i);
 		}
 	}
-#endif // NO_PLUGINS
 	m_CbnMacroPlug.SetCurSel(0);
 	OnPlugChanged();
+#endif  // NO_PLUGINS
 	return FALSE;
 }
 
@@ -410,10 +410,10 @@ void CMidiMacroSetup::OnCCChanged()
 	m_EditSFx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, macroText));
 }
 
-void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
+void CMidiMacroSetup::ToggleBoxes(UINT sfxPreset, UINT sfx)
 {
 
-	if (sfx_preset == kSFxPlugParam)
+	if (sfxPreset == kSFxPlugParam)
 	{
 		m_CbnMacroCC.ShowWindow(FALSE);
 		m_CbnMacroPlug.ShowWindow(TRUE);
@@ -428,7 +428,7 @@ void CMidiMacroSetup::ToggleBoxes(UINT sfx_preset, UINT sfx)
 		m_CbnMacroParam.EnableWindow(FALSE);
 	}
 
-	if (sfx_preset == kSFxCC)
+	if (sfxPreset == kSFxCC)
 	{
 		m_CbnMacroCC.EnableWindow(TRUE);
 		m_CbnMacroCC.ShowWindow(TRUE);

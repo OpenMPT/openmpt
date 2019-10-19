@@ -217,7 +217,7 @@ BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 		nID = ::GetDlgCtrlID((HWND)nID);
 	}
 
-	static constexpr const char *feedback[] = {"disabled", "\xCF\x80/16", "\xCF\x80/8", "\xCF\x80/4", "\xCF\x80/2", "\xCF\x80", "2\xCF\x80", "44\xCF\x80"};
+	static constexpr const char *feedback[] = {"disabled", "\xCF\x80/16", "\xCF\x80/8", "\xCF\x80/4", "\xCF\x80/2", "\xCF\x80", "2\xCF\x80", "4\xCF\x80"};
 	static constexpr const TCHAR *ksl[] = {_T("disabled"), _T("1.5 dB / octave"), _T("3 dB / octave"), _T("6 dB / octave")};
 
 	mpt::tstring text;
