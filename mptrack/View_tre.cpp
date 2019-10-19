@@ -79,7 +79,7 @@ public:
 			if(SUCCEEDED(psl->Resolve(AfxGetMainWnd()->m_hWnd, SLR_ANY_MATCH)))
 			{
 				TCHAR outPath[MAX_PATH];
-				psl->GetPath(outPath, std::size(outPath), nullptr, 0);
+				psl->GetPath(outPath, mpt::saturate_cast<int>(std::size(outPath)), nullptr, 0);
 				return mpt::PathString::FromNative(outPath);
 			}
 		}
