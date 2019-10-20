@@ -278,8 +278,6 @@ State::State(uint32 sampleRate)
 	numSteps = static_cast<int>(amigaClocksPerSample / MINIMUM_INTERVAL);
 	stepRemainder = SamplePosition::FromDouble(amigaClocksPerSample - numSteps * MINIMUM_INTERVAL);
 	remainder = SamplePosition(0);
-	activeBleps = 0;
-	globalOutputLevel = 0;
 }
 
 
@@ -287,6 +285,7 @@ void State::Reset()
 {
 	remainder = SamplePosition(0);
 	activeBleps = 0;
+	firstBlep = MAX_BLEPS / 2u;
 	globalOutputLevel = 0;
 }
 
@@ -295,15 +294,12 @@ void State::InputSample(int16 sample)
 {
 	if(sample != globalOutputLevel)
 	{
-		LimitMax(activeBleps, static_cast<uint16>(std::size(blepState) - 1));
-
-		// Make room for new blep in the sorted list
-		std::move_backward(blepState, blepState + activeBleps, blepState + activeBleps + 1);
-
 		// Start a new blep: level is the difference, age (or phase) is 0 clocks.
-		activeBleps++;
-		blepState[0].age = 0;
-		blepState[0].level = sample - globalOutputLevel;
+		firstBlep = (firstBlep - 1u) % MAX_BLEPS;
+		if(activeBleps < std::size(blepState))
+			activeBleps++;
+		blepState[firstBlep].age = 0;
+		blepState[firstBlep].level = sample - globalOutputLevel;
 		globalOutputLevel = sample;
 	}
 }
@@ -313,9 +309,10 @@ void State::InputSample(int16 sample)
 int State::OutputSample(bool filter)
 {
 	int output = globalOutputLevel * (1 << Paula::BLEP_SCALE);
-	for(uint16 i = 0; i < activeBleps; i++)
+	uint32 lastBlep = firstBlep + activeBleps;
+	for(uint32 i = firstBlep; i != lastBlep; i++)
 	{
-		const auto &blep = blepState[i];
+		const auto &blep = blepState[i % MAX_BLEPS];
 		output -= WinSincIntegral[filter][blep.age] * blep.level;
 	}
 	output /= (1 << (Paula::BLEP_SCALE - 2));	// - 2 to compensate for the fact that we reduced the input sample bit depth
@@ -327,12 +324,14 @@ int State::OutputSample(bool filter)
 // Advance the simulation by given number of clock ticks
 void State::Clock(int cycles)
 {
-	for(uint16 i = 0; i < activeBleps; i++)
+	uint32 lastBlep = firstBlep + activeBleps;
+	for(uint32 i = firstBlep; i != lastBlep; i++)
 	{
-		blepState[i].age += static_cast<uint16>(cycles);
-		if(blepState[i].age >= std::size(WinSincIntegral[0]))
+		auto &blep = blepState[i % MAX_BLEPS];
+		blep.age += static_cast<uint16>(cycles);
+		if(blep.age >= std::size(WinSincIntegral[0]))
 		{
-			activeBleps = i;
+			activeBleps = static_cast<uint16>(i - firstBlep);
 			return;
 		}
 	}

@@ -19,11 +19,11 @@ OPENMPT_NAMESPACE_BEGIN
 namespace Paula
 {
 
-const int PAULA_HZ = 3546895;
-const int MINIMUM_INTERVAL = 16;
-const int BLEP_SCALE = 17;
-const int BLEP_SIZE = 2048;
-const int MAX_BLEPS = (BLEP_SIZE / MINIMUM_INTERVAL);
+constexpr int PAULA_HZ = 3546895;
+constexpr int MINIMUM_INTERVAL = 16;
+constexpr int BLEP_SCALE = 17;
+constexpr int BLEP_SIZE = 2048;
+constexpr uint16 MAX_BLEPS = BLEP_SIZE / MINIMUM_INTERVAL;
 
 class State
 {
@@ -35,10 +35,10 @@ class State
 
 public:
 	SamplePosition remainder, stepRemainder;
-	int numSteps;				// Number of full-length steps
+	int numSteps;  // Number of full-length steps
 private:
-	uint16 activeBleps;			// Count of simultaneous bleps to keep track of
-	int16 globalOutputLevel;	// The instantenous value of Paula output
+	uint16 activeBleps = 0, firstBlep = 0;  // Count of simultaneous bleps to keep track of
+	int16 globalOutputLevel = 0;            // The instantenous value of Paula output
 	Blep blepState[MAX_BLEPS];
 
 public:
