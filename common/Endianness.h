@@ -134,7 +134,7 @@ namespace detail {
 		static_assert(sizeof(endian_probe_type) == 4);
 		constexpr endian_probe_type endian_probe_big    = 0x12345678u;
 		constexpr endian_probe_type endian_probe_little = 0x78563412u;
-		const std::array<std::byte, sizeof(endian_probe_type)> probe{ mpt::as_byte(0x12), mpt::as_byte(0x34), mpt::as_byte(0x56), mpt::as_byte(0x78) };
+		const std::array<std::byte, sizeof(endian_probe_type)> probe{ {mpt::as_byte(0x12), mpt::as_byte(0x34), mpt::as_byte(0x56), mpt::as_byte(0x78)} };
 		const endian_probe_type test = mpt::bit_cast<endian_probe_type>(probe);
 		mpt::endian result = mpt::endian::native;
 		switch(test)
