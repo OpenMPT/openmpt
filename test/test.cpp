@@ -780,14 +780,12 @@ Gregorian TestDate2(int s, int m, int h, int D, int M, int Y) {
 	return Gregorian{Y,M,D,h,m,s};
 }
 
-#if MPT_ENDIAN_IS_CONSTEXPR
-static constexpr int32le TestEndianConstexpr(uint32 x)
+static MPT_CONSTEXPR20_FUN int32le TestEndianConstexpr(uint32 x)
 {
-	int32le foo;
+	int32le foo{};
 	foo = x;
 	return foo;
 }
-#endif
 
 static MPT_NOINLINE void TestMisc1()
 {
@@ -795,24 +793,25 @@ static MPT_NOINLINE void TestMisc1()
 	#if MPT_CXX_BEFORE(20)
 		VERIFY_EQUAL(mpt::get_endian(), mpt::detail::endian_probe());
 	#endif
-	#if MPT_PLATFORM_ENDIAN_KNOWN && defined(MPT_PLATFORM_LITTLE_ENDIAN)
+	MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
+	{
 		VERIFY_EQUAL(mpt::get_endian(), mpt::endian::little);
 		VERIFY_EQUAL(mpt::endian::native, mpt::endian::little);
 		#if MPT_CXX_BEFORE(20)
 			VERIFY_EQUAL(mpt::detail::endian_probe(), mpt::endian::little);
 		#endif
-	#elif MPT_PLATFORM_ENDIAN_KNOWN && defined(MPT_PLATFORM_BIG_ENDIAN)
+	}
+	MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
+	{
 		VERIFY_EQUAL(mpt::get_endian(), mpt::endian::big);
 		VERIFY_EQUAL(mpt::endian::native, mpt::endian::big);
 		#if MPT_CXX_BEFORE(20)
 			VERIFY_EQUAL(mpt::detail::endian_probe(), mpt::endian::big);
 		#endif
-	#endif
+	}
 
-#if MPT_ENDIAN_IS_CONSTEXPR
-	constexpr int32le foo = TestEndianConstexpr(23);
+	MPT_CONSTEXPR20_VAR int32le foo = TestEndianConstexpr(23);
 	(void)foo;
-#endif
 
 	VERIFY_EQUAL(mpt::detail::SwapBytes(uint8(0x12)), 0x12);
 	VERIFY_EQUAL(mpt::detail::SwapBytes(uint16(0x1234)), 0x3412);
