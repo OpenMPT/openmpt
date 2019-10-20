@@ -51,6 +51,15 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPT_CONSTEXPR14_VAR constexpr
 #define MPT_CONSTEXPR17_FUN constexpr MPT_FORCEINLINE
 #define MPT_CONSTEXPR17_VAR constexpr
+#if MPT_CXX_AT_LEAST(20)
+#define MPT_CONSTEXPR20_FUN constexpr MPT_FORCEINLINE
+#define MPT_CONSTEXPR20_VAR constexpr
+#else // !C++20
+#define MPT_CONSTEXPR20_FUN MPT_FORCEINLINE
+#define MPT_CONSTEXPR20_VAR const
+#endif // C++20
+
+
 
 namespace mpt
 {
@@ -61,8 +70,10 @@ template <auto V> struct constant_value { static constexpr decltype(V) value() {
 
 
 #if MPT_CXX_AT_LEAST(20)
+#define MPT_IS_CONSTANT_EVALUATED20() std::is_constant_evaluated()
 #define MPT_IS_CONSTANT_EVALUATED() std::is_constant_evaluated()
 #else // !C++20
+#define MPT_IS_CONSTANT_EVALUATED20() false
 // this pessimizes the case for C++17 by always assuming constexpr context, which implies always running constexpr-friendly code
 #define MPT_IS_CONSTANT_EVALUATED() true
 #endif // C++20
