@@ -796,7 +796,10 @@ static MPT_NOINLINE void TestMisc1()
 	MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
 	{
 		VERIFY_EQUAL(mpt::get_endian(), mpt::endian::little);
-		VERIFY_EQUAL(mpt::endian::native, mpt::endian::little);
+		MPT_MAYBE_CONSTANT_IF((mpt::endian::native == mpt::endian::little) || (mpt::endian::native == mpt::endian::big))
+		{
+			VERIFY_EQUAL(mpt::endian::native, mpt::endian::little);
+		}
 		#if MPT_CXX_BEFORE(20)
 			VERIFY_EQUAL(mpt::detail::endian_probe(), mpt::endian::little);
 		#endif
@@ -804,7 +807,10 @@ static MPT_NOINLINE void TestMisc1()
 	MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
 	{
 		VERIFY_EQUAL(mpt::get_endian(), mpt::endian::big);
-		VERIFY_EQUAL(mpt::endian::native, mpt::endian::big);
+		MPT_MAYBE_CONSTANT_IF((mpt::endian::native == mpt::endian::little) || (mpt::endian::native == mpt::endian::big))
+		{
+			VERIFY_EQUAL(mpt::endian::native, mpt::endian::big);
+		}
 		#if MPT_CXX_BEFORE(20)
 			VERIFY_EQUAL(mpt::detail::endian_probe(), mpt::endian::big);
 		#endif
