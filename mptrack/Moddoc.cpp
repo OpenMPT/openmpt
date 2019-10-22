@@ -118,7 +118,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_INSTRUMENTS,		&CModDoc::OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_PATTERN_MIDIMACRO,		&CModDoc::OnUpdateXMITMPTOnly)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MIDIMAPPING,		&CModDoc::OnUpdateHasMIDIMappings)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_EDITHISTORY,		&CModDoc::OnUpdateITMPTOnly)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_EDITHISTORY,		&CModDoc::OnUpdateHasEditHistory)
 	ON_UPDATE_COMMAND_UI(ID_FILE_SAVECOMPAT,		&CModDoc::OnUpdateCompatExportableOnly)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -974,7 +974,6 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin = m_SndFile.m_MixPlugins[nPlugin - 1].pMixPlugin;
-
 					if(pPlugin != nullptr)
 					{
 						pPlugin->MidiCommand(*pIns, pIns->NoteMap[note - NOTE_MIN], static_cast<uint16>(chn.nVolume), channel);
@@ -1024,7 +1023,6 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 		const ModInstrument *pIns = m_SndFile.Instruments[ins];
 		if(pIns && pIns->HasValidMIDIChannel())	// instro sends to a midi chan
 		{
-
 			PLUGINDEX plug = pIns->nMixPlug;      // First try intrument VST
 			if((!plug || plug > MAX_MIXPLUGINS)   // No good plug yet
 				&& currentChn < MAX_BASECHANNELS) // Chan OK
@@ -2150,10 +2148,10 @@ void CModDoc::OnUpdateXMITMPTOnly(CCmdUI *p)
 
 
 // Enable menu item only for IT / MPTM files
-void CModDoc::OnUpdateITMPTOnly(CCmdUI *p)
+void CModDoc::OnUpdateHasEditHistory(CCmdUI *p)
 {
 	if (p)
-		p->Enable((m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? TRUE : FALSE);
+		p->Enable(((m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || !m_SndFile.GetFileHistory().empty()) ? TRUE : FALSE);
 }
 
 
