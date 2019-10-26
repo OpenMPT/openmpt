@@ -138,7 +138,7 @@ struct IUnknown; // OPENMPT ADDITION
 
 #ifdef _UNIX
 
-#define  NM  2048
+#define NM  2048
 
 #include <unistd.h>
 #include <sys/types.h>

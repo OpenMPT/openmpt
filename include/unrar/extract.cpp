@@ -626,7 +626,6 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
         CurFile.Prealloc(Arc.FileHead.UnpSize);
         Preallocated=Arc.FileHead.UnpSize;
       }
-
       CurFile.SetAllowDelete(!Cmd->KeepBroken);
 
       bool FileCreateMode=!TestMode && !SkipSolid && Command!='P';
