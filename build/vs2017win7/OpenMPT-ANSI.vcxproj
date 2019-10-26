@@ -822,6 +822,7 @@
     <ClInclude Include="..\..\mptrack\ImageLists.h" />
     <ClInclude Include="..\..\mptrack\InputHandler.h" />
     <ClInclude Include="..\..\mptrack\KeyConfigDlg.h" />
+    <ClInclude Include="..\..\mptrack\LinkResolver.h" />
     <ClInclude Include="..\..\mptrack\MIDIMacroDialog.h" />
     <ClInclude Include="..\..\mptrack\MIDIMapping.h" />
     <ClInclude Include="..\..\mptrack\MIDIMappingDialog.h" />
@@ -1057,6 +1058,7 @@
     <ClCompile Include="..\..\mptrack\Image.cpp" />
     <ClCompile Include="..\..\mptrack\InputHandler.cpp" />
     <ClCompile Include="..\..\mptrack\KeyConfigDlg.cpp" />
+    <ClCompile Include="..\..\mptrack\LinkResolver.cpp" />
     <ClCompile Include="..\..\mptrack\MIDIMacroDialog.cpp" />
     <ClCompile Include="..\..\mptrack\MIDIMapping.cpp" />
     <ClCompile Include="..\..\mptrack\MIDIMappingDialog.cpp" />

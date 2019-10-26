@@ -1,5 +1,5 @@
 /*
- * view_tre.cpp
+ * View_tre.cpp
  * ------------
  * Purpose: Tree view for managing open songs, sound files, file browser, ...
  * Notes  : (currently none)
@@ -24,68 +24,16 @@
 #include "Globals.h"
 #include "ExternalSamples.h"
 #include "FolderScanner.h"
+#include "LinkResolver.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
 #include "../soundlib/MIDIEvents.h"
-#include <tchar.h>
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
 CSoundFile *CModTree::m_SongFile = nullptr;
-
-// Resolve shell link targets
-class LinkResolver
-{
-	IShellLink *psl = nullptr;
-	IPersistFile *ppf = nullptr;
-
-public:
-	LinkResolver()
-	{
-		// Create instance
-		HRESULT result = CoCreateInstance(CLSID_ShellLink,
-		                                  0,
-		                                  CLSCTX_INPROC_SERVER,
-		                                  IID_IShellLink,
-		                                  reinterpret_cast<LPVOID *>(&psl));
-		if(SUCCEEDED(result) && psl != nullptr)
-		{
-			psl->QueryInterface(IID_IPersistFile, reinterpret_cast<LPVOID *>(&ppf));
-		}
-	}
-
-	~LinkResolver()
-	{
-		if(ppf != nullptr)
-			ppf->Release();
-		if(psl != nullptr)
-			psl->Release();
-	}
-
-	mpt::PathString Resolve(const TCHAR *inPath)
-	{
-		if(ppf == nullptr)
-			return {};
-
-		SHFILEINFO info;
-		if((SHGetFileInfo(inPath, 0, &info, sizeof(info), SHGFI_ATTRIBUTES) == 0) || !(info.dwAttributes & SFGAO_LINK))
-			return {};
-
-		USES_CONVERSION;  // T2COLE needs this
-		if(ppf != nullptr && SUCCEEDED(ppf->Load(T2COLE(inPath), STGM_READ)))
-		{
-			if(SUCCEEDED(psl->Resolve(AfxGetMainWnd()->m_hWnd, SLR_ANY_MATCH)))
-			{
-				TCHAR outPath[MAX_PATH];
-				psl->GetPath(outPath, mpt::saturate_cast<int>(std::size(outPath)), nullptr, 0);
-				return mpt::PathString::FromNative(outPath);
-			}
-		}
-		return {};
-	}
-};
 
 /////////////////////////////////////////////////////////////////////////////
 // CModTreeDropTarget

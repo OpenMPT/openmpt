@@ -303,6 +303,9 @@
     <ClInclude Include="..\..\mptrack\KeyConfigDlg.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\LinkResolver.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\MIDIMacroDialog.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -1002,6 +1005,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\KeyConfigDlg.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\LinkResolver.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\MIDIMacroDialog.cpp">
