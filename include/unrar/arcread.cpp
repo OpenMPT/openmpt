@@ -1256,8 +1256,9 @@ size_t Archive::ReadHeader14()
     Raw.Read(NameSize);
 
     char FileName[NM];
-    Raw.GetB((byte *)FileName,Min(NameSize,ASIZE(FileName)));
-    FileName[NameSize]=0;
+    size_t ReadNameSize=Min(NameSize,ASIZE(FileName)-1);
+    Raw.GetB((byte *)FileName,ReadNameSize);
+    FileName[ReadNameSize]=0;
     IntToExt(FileName,FileName,ASIZE(FileName));
     CharToWide(FileName,FileHead.FileName,ASIZE(FileHead.FileName));
     ConvertNameCase(FileHead.FileName);

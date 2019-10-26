@@ -328,7 +328,7 @@ void ErrorHandler::Throw(RAR_EXIT Code)
 
 bool ErrorHandler::GetSysErrMsg(wchar *Msg,size_t Size)
 {
-#if !defined(SFX_MODULE) && !defined(SILENT)
+#ifndef SILENT
 #ifdef _WIN_ALL
   int ErrType=GetLastError();
   if (ErrType!=0)
@@ -361,7 +361,7 @@ void ErrorHandler::SysErrMsg()
     return;
 #ifdef _WIN_ALL
   wchar *CurMsg=Msg;
-  while (CurMsg!=NULL)
+  while (CurMsg!=NULL) // Print string with \r\n as several strings to multiple lines.
   {
     while (*CurMsg=='\r' || *CurMsg=='\n')
       CurMsg++;

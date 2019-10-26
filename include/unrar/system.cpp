@@ -190,7 +190,9 @@ SSE_VERSION GetSSEVersion()
 {
   int CPUInfo[4];
   __cpuid(CPUInfo, 0x80000000);
-  uint MaxSupported=CPUInfo[0] & 0x7fffffff;  // Maximum supported cpuid function.
+
+  // Maximum supported cpuid function. For example, Pentium M 755 returns 4 here.
+  uint MaxSupported=CPUInfo[0] & 0x7fffffff;
 
   if (MaxSupported>=7)
   {
