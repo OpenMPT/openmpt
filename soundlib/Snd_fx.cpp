@@ -1402,12 +1402,12 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 			pSmp = chn.pModSample;
 		}
 
-		// Special XM hack (also applies to MOD / S3M+GUS, except when playing IT-style S3Ms and S3M+SB, such as k_vision.s3m)
-		// Test case: PortaSmpChange.mod, PortaSmpChangeGUS.s3m
+		// Special XM hack (also applies to MOD / S3M, except when playing IT-style S3Ms, such as k_vision.s3m)
+		// Test case: PortaSmpChange.mod, PortaSmpChange.s3m
 		if((!instrumentChanged && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)) && pIns)
 			|| (GetType() == MOD_TYPE_PLM)
 			|| (GetType() == MOD_TYPE_MOD && chn.IsSamplePlaying())
-			|| (GetType() == MOD_TYPE_S3M && !m_playBehaviour[kST3PortaSampleChange]))
+			|| m_playBehaviour[kST3PortaSampleChange])
 		{
 			// FT2 doesn't change the sample in this case,
 			// but still uses the sample info from the old one (bug?)
@@ -2681,7 +2681,6 @@ bool CSoundFile::ProcessEffects()
 			// ProTracker Compatibility: If a sample was stopped before, lone instrument numbers can retrigger it
 			// Test case: PTSwapEmpty.mod, PTInstrVolume.mod
 			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
-				|| (m_playBehaviour[kST3PortaSampleChange] && chn.IsSamplePlaying())
 				|| (m_playBehaviour[kMODSampleSwap] && !chn.IsSamplePlaying() && (chn.pModSample == nullptr || !chn.pModSample->HasSampleData()));
 
 			// Now it's time for some FT2 crap...
@@ -2896,11 +2895,6 @@ bool CSoundFile::ProcessEffects()
 					m_opl->Patch(nChn, chn.pModSample->adlib);
 				}
 
-				if(m_playBehaviour[kST3PortaSampleChange] && bPorta && chn.pCurrentSample == nullptr && oldSample != nullptr)
-				{
-					chn.position.SetInt(oldSample->nLength);
-				}
-
 				// IT compatibility: Keep new instrument number for next instrument-less note even if sample playback is stopped
 				// Test case: StoppedInstrSwap.it
 				if(GetType() == MOD_TYPE_MOD)
@@ -2920,15 +2914,10 @@ bool CSoundFile::ProcessEffects()
 						//const bool newInstrument = oldInstrument != chn.pModInstrument && chn.pModInstrument->Keyboard[chn.nNewNote - NOTE_MIN] != 0;
 						chn.position.Set(0);
 					}
-				} else if ((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT) && oldSample != chn.pModSample && ModCommand::IsNote(note)) && !m_playBehaviour[kST3PortaSampleChange])
+				} else if ((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT) && oldSample != chn.pModSample && ModCommand::IsNote(note)))
 				{
 					// Special IT case: portamento+note causes sample change -> ignore portamento
 					bPorta = false;
-				} else if(m_playBehaviour[kST3PortaSampleChange] && oldSample != chn.pModSample && !ModCommand::IsNote(note) && chn.pModSample != nullptr && chn.position.GetUInt() > chn.pModSample->nLength)
-				{
-					// ST3 with SoundBlaster does sample swapping and continues playing the new sample where the old sample was stopped.
-					// If the new sample is shorter than that, it is stopped, even if it could be looped.
-					chn.nPeriod = 0;
 				} else if(m_playBehaviour[kMODSampleSwap] && chn.increment.IsZero())
 				{
 					// If channel was paused and is resurrected by a lone instrument number, reset the sample position.

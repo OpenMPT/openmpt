@@ -284,9 +284,6 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		nonCompatTracker = true;
 		m_nMinPeriod = 1;
-		// k_vision.umx pattern 70 needs these to play the Gxx with sample switch as intended
-		m_playBehaviour.set(kITPortaNoNote);
-		m_playBehaviour.set(kITPortamentoSwapResetsPos);
 		break;
 	case S3MFileHeader::trkSchismTracker:
 		if(fileHeader.cwtv == S3MFileHeader::trkBeRoTrackerOld)
@@ -332,6 +329,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_playBehaviour.reset(kST3NoMutedChannels);
 		m_playBehaviour.reset(kST3EffectMemory);
+		m_playBehaviour.reset(kST3PortaSampleChange);
 		m_playBehaviour.reset(kST3VibratoMemory);
 		m_playBehaviour.reset(KST3PortaAfterArpeggio);
 		m_playBehaviour.reset(kST3OffsetWithoutInstrument);

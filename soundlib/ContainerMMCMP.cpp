@@ -274,7 +274,7 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 					uint32 command = MMCMP16BitCommands[numbits & 0x0F];
 					if (d >= command)
 					{
-						uint8 nFetch = MMCMP16BitFetch[numbits & 0x0F];
+						uint32 nFetch = MMCMP16BitFetch[numbits & 0x0F];
 						uint32 newbits = bitFile.ReadBits(nFetch) + ((d - command) << nFetch);
 						if (newbits != numbits)
 						{

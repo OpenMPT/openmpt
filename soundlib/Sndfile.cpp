@@ -665,12 +665,6 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	{
 		UpgradeModule();
 	}
-	for (auto &c : m_PlayState.Chn)
-	{
-		c.PanEnv.nEnvValueAtReleaseJump = 0;
-		c.PitchEnv.nEnvValueAtReleaseJump = 0;
-		c.VolEnv.nEnvValueAtReleaseJump = 0;
-	}
 	return true;
 }
 
