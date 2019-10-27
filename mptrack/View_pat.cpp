@@ -4116,11 +4116,11 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEditCut:			OnEditCut(); return wParam;
 		case kcEditCopy:		OnEditCopy(); return wParam;
 		case kcCopyAndLoseSelection:
-								{
-								OnEditCopy();
-								SetSelToCursor();
-								return wParam;
-								}
+			OnEditCopy();
+			[[fallthrough]];
+		case kcLoseSelection:
+			SetSelToCursor();
+			return wParam;
 		case kcEditPaste:		OnEditPaste(); return wParam;
 		case kcEditMixPaste:	OnEditMixPaste(); return wParam;
 		case kcEditMixPasteITStyle:	OnEditMixPasteITStyle(); return wParam;

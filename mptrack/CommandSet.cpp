@@ -721,6 +721,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleToggleDrawing, 1990, _T("Toggle Sample Drawing"));
 	DefineKeyCommand(kcSampleResize, 1991, _T("Add Silence / Create Sample"));
 	DefineKeyCommand(kcSampleGrid, 1992, _T("Configure Sample Grid"));
+	DefineKeyCommand(kcLoseSelection, 1993, _T("Lose Selection"));
 
 	// Add new key commands here.
 

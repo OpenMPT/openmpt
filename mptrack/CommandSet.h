@@ -238,7 +238,8 @@ enum CommandID
 	kcSelectEvent,
 	kcSelectBeat,
 	kcSelectMeasure,
-	kcEndSelect = kcSelectMeasure,
+	kcLoseSelection,
+	kcEndSelect = kcLoseSelection,
 
 	kcStartPatternEditMisc,
 	kcToggleFollowSong = kcStartPatternEditMisc,
