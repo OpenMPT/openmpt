@@ -307,9 +307,9 @@ enum IT_ReaderBitMasks
 template<int32 y, int32 m, int32 d>
 struct SchismVersionFromDate
 {
-	static inline constexpr int32 mm = (m + 9) % 12;
-	static inline constexpr int32 yy = y - mm / 10;
-	static inline constexpr int32 date = yy * 365 + yy / 4 - yy / 100 + yy / 400 + (mm * 306 + 5) / 10 + (d - 1);
+	static constexpr int32 mm = (m + 9) % 12;
+	static constexpr int32 yy = y - mm / 10;
+	static constexpr int32 date = yy * 365 + yy / 4 - yy / 100 + yy / 400 + (mm * 306 + 5) / 10 + (d - 1);
 
 	static constexpr int32 Version(const int32 trackerID = 0x1000)
 	{
