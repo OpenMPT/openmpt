@@ -15,11 +15,9 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-OPL::OPL()
+OPL::OPL(uint32 samplerate)
 {
-	m_KeyOnBlock.fill(0);
-	m_OPLtoChan.fill(CHANNELINDEX_INVALID);
-	m_ChanToOPL.fill(OPL_CHANNEL_INVALID);
+	Initialize(samplerate);
 }
 
 

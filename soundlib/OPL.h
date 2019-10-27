@@ -67,7 +67,7 @@ public:
 		STEREO_BITS      = VOICE_TO_LEFT | VOICE_TO_RIGHT,
 	};
 
-	OPL();
+	OPL(uint32 samplerate);
 	~OPL();
 
 	void Initialize(uint32 samplerate);
