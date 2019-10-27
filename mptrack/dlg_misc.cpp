@@ -556,7 +556,12 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kITNoSurroundPan: desc = _T("Panning modulation is disabled on surround channels"); break;
 		case kITShortSampleRetrig: desc = _T("Do not retrigger already stopped channels"); break;
 		case kITPortaNoNote: desc = _T("Do not apply any portamento if no previous note is playing"); break;
-		case kITDontResetNoteOffOnPorta: desc = _T("Only reset note-off status on portamento in IT Compatible Gxx mode"); break;
+		case kITFT2DontResetNoteOffOnPorta:
+			if(m_modType == MOD_TYPE_XM)
+				desc = _T("Reset note-off on portamento if there is an instrument number");
+			else
+				desc = _T("Reset note-off on portamento if there is an instrument number in Compatible Gxx mode");
+			break;
 		case kITVolColMemory: desc = _T("Volume column effects share their memory with the effect column"); break;
 		case kITPortamentoSwapResetsPos: desc = _T("Portamento with sample swap plays the new sample from the beginning"); break;
 		case kITEmptyNoteMapSlot: desc = _T("Ignore instrument note map entries with no note completely"); break;

@@ -451,7 +451,7 @@ enum PlayBehaviour
 	kITNoSurroundPan,               // Panning and surround are mutually exclusive
 	kITShortSampleRetrig,           // Don't retrigger already stopped channels
 	kITPortaNoNote,                 // Don't apply any portamento if no previous note is playing
-	kITDontResetNoteOffOnPorta,     // Only reset note-off status on portamento in IT Compatible Gxx mode
+	kITFT2DontResetNoteOffOnPorta,  // Only reset note-off status on portamento in IT Compatible Gxx mode
 	kITVolColMemory,                // IT volume column effects share their memory with the effect column
 	kITPortamentoSwapResetsPos,     // Portamento with sample swap plays the new sample from the beginning
 	kITEmptyNoteMapSlot,            // IT ignores instrument note map entries with no note completely

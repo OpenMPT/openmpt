@@ -1983,9 +1983,9 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 		}
 	}
 
-	// IT compatibility: Don't reset key-off flag on porta notes unless Compat Gxx is enabled
-	// Test case: Off-Porta.it, Off-Porta-CompatGxx.it
-	if(m_playBehaviour[kITDontResetNoteOffOnPorta] && bPorta && (!m_SongFlags[SONG_ITCOMPATGXX] || chn.rowCommand.instr == 0))
+	// IT compatibility: Don't reset key-off flag on porta notes unless Compat Gxx is enabled.
+	// Test case: Off-Porta.it, Off-Porta-CompatGxx.it, Off-Porta.xm
+	if(m_playBehaviour[kITFT2DontResetNoteOffOnPorta] && bPorta && (!m_SongFlags[SONG_ITCOMPATGXX] || chn.rowCommand.instr == 0))
 		chn.dwFlags.reset(CHN_EXTRALOUD);
 	else
 		chn.dwFlags.reset(CHN_EXTRALOUD | CHN_KEYOFF);

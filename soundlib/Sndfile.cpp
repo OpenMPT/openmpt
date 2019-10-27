@@ -1022,7 +1022,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kITNoSurroundPan);
 		playBehaviour.set(kITShortSampleRetrig);
 		playBehaviour.set(kITPortaNoNote);
-		playBehaviour.set(kITDontResetNoteOffOnPorta);
+		playBehaviour.set(kITFT2DontResetNoteOffOnPorta);
 		playBehaviour.set(kITVolColMemory);
 		playBehaviour.set(kITPortamentoSwapResetsPos);
 		playBehaviour.set(kITEmptyNoteMapSlot);
@@ -1050,6 +1050,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kPerChannelGlobalVolSlide);
 		playBehaviour.set(kPanOverride);
 		playBehaviour.set(kITFT2PatternLoop);
+		playBehaviour.set(kITFT2DontResetNoteOffOnPorta);
 		playBehaviour.set(kFT2Arpeggio);
 		playBehaviour.set(kFT2Retrigger);
 		playBehaviour.set(kFT2VolColVibrato);
