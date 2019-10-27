@@ -1294,7 +1294,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 
 		// Date
 		TCHAR szDate[32];
-		if(entry.loadDate.tm_mday != 0)
+		if(entry.HasValidDate())
 			_tcsftime(szDate, CountOf(szDate), _T("%d %b %Y, %H:%M:%S"), &entry.loadDate);
 		else
 			_tcscpy(szDate, _T("<unknown date>"));
