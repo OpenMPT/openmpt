@@ -828,7 +828,7 @@ public:
 	void LoadExtendedSongProperties(FileReader &file, bool ignoreChannelCount, bool* pInterpretMptMade = nullptr);
 	void LoadMPTMProperties(FileReader &file, uint16 cwtv);
 
-	mpt::ustring GetSchismTrackerVersion(uint16 cwtv);
+	static mpt::ustring GetSchismTrackerVersion(uint16 cwtv, uint32 reserved);
 
 	// Reads extended instrument properties(XM/IT/MPTM).
 	// Returns true if extended instrument properties were found.

@@ -657,4 +657,18 @@ void ITHistoryStruct::ConvertToIT(const FileHistory &mptHistory)
 }
 
 
+uint32 DecodeITEditTimer(uint16 cwtv, uint32 editTime)
+{
+	if((cwtv & 0xFFF) >= 0x0208)
+	{
+		editTime ^= 0x4954524B;  // 'ITRK'
+		editTime = (editTime >> 7) | (editTime << (32 - 7));
+		editTime = -(int32)editTime;
+		editTime = (editTime << 4) | (editTime >> (32 - 4));
+		editTime ^= 0x4A54484C;  // 'JTHL'
+	}
+	return editTime;
+}
+
+
 OPENMPT_NAMESPACE_END
