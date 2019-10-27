@@ -352,7 +352,7 @@ bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, Paste
 // Paste from pattern or channel clipboard.
 bool PatternClipboard::Paste(CSoundFile &sndFile, PATTERNINDEX pattern, CHANNELINDEX channel)
 {
-	ModCommandPos pastePos{0, pattern, channel != CHANNELINDEX_INVALID ? channel : 0};
+	ModCommandPos pastePos{0, pattern, channel != CHANNELINDEX_INVALID ? channel : CHANNELINDEX(0)};
 	PatternRect pasteRect;
 	bool orderChanged = false;
 	return HandlePaste(sndFile, pastePos, pmOverwrite, (channel == CHANNELINDEX_INVALID ? instance.m_patternClipboard : instance.m_channelClipboard).content, ORDERINDEX_INVALID, pasteRect, orderChanged);
