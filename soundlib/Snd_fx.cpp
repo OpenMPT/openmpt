@@ -1569,15 +1569,18 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 	if(bPorta && pSmp == chn.pModSample && pSmp != nullptr)
 	{
 		// If channel length is 0, we cut a previous sample using SCx. In that case, we have to update sample length, loop points, etc...
-		if(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT) && chn.nLength != 0) return;
-		chn.dwFlags.reset(CHN_KEYOFF | CHN_NOTEFADE);
+		if(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT) && chn.nLength != 0)
+			return;
+		// FT2 compatibility: Do not reset key-off status on portamento without instrument number
+		// Test case: Off-Porta.xm
+		if(GetType() != MOD_TYPE_XM || !m_playBehaviour[kITFT2DontResetNoteOffOnPorta] || chn.rowCommand.instr != 0)
+			chn.dwFlags.reset(CHN_KEYOFF | CHN_NOTEFADE);
 		chn.dwFlags = (chn.dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG));
 	} else //if(!instrumentChanged || chn.rowCommand.instr != 0 || !IsCompatibleMode(TRK_FASTTRACKER2))	// SampleChange.xm?
 	{
 		chn.dwFlags.reset(CHN_KEYOFF | CHN_NOTEFADE);
 
-		// IT compatibility tentative fix: Don't change bidi loop direction when
-		// no sample nor instrument is changed.
+		// IT compatibility: Don't change bidi loop direction when no sample nor instrument is changed.
 		if((m_playBehaviour[kITPingPongNoReset] || !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))) && pSmp == chn.pModSample && !instrumentChanged)
 			chn.dwFlags = (chn.dwFlags & (CHN_CHANNELFLAGS | CHN_PINGPONGFLAG));
 		else
