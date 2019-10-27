@@ -4179,6 +4179,31 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			PatternClipboardDialog::UpdateList();
 			return wParam;
 
+		case kcCutPatternChannel:
+			PatternClipboard::Copy(sndFile, GetCurrentPattern(), GetCurrentChannel());
+			OnEditSelectChannel();
+			OnClearSelection(false);
+			return wParam;
+		case kcCutPattern:
+			PatternClipboard::Copy(sndFile, GetCurrentPattern());
+			OnEditSelectAll();
+			OnClearSelection(false);
+			return wParam;
+		case kcCopyPatternChannel:
+			PatternClipboard::Copy(sndFile, GetCurrentPattern(), GetCurrentChannel());
+			return wParam;
+		case kcCopyPattern:
+			PatternClipboard::Copy(sndFile, GetCurrentPattern());
+			return wParam;
+		case kcPastePatternChannel:
+		case kcPastePattern:
+			if(PatternClipboard::Paste(sndFile, GetCurrentPattern(), wParam == kcPastePatternChannel ? GetCurrentChannel() : CHANNELINDEX_INVALID))
+			{
+				SetModified();
+				InvalidatePattern();
+				GetDocument()->UpdateAllViews(this, PatternHint(GetCurrentPattern()).Data(), this);
+			}
+			return wParam;
 	}
 
 	// Ignore note entry if it is on key hold and user is in key-jazz mode or edit step is 0 (so repeated entry would be useless)
@@ -4347,20 +4372,20 @@ void CViewPattern::TempEnterVol(int v)
 		{
 			switch(v + kcSetVolumeStart)
 			{
-			case kcSetVolumeVol: volcmd = VOLCMD_VOLUME; break;
-			case kcSetVolumePan: volcmd = VOLCMD_PANNING; break;
-			case kcSetVolumeVolSlideUp: volcmd = VOLCMD_VOLSLIDEUP; break;
+			case kcSetVolumeVol:          volcmd = VOLCMD_VOLUME; break;
+			case kcSetVolumePan:          volcmd = VOLCMD_PANNING; break;
+			case kcSetVolumeVolSlideUp:   volcmd = VOLCMD_VOLSLIDEUP; break;
 			case kcSetVolumeVolSlideDown: volcmd = VOLCMD_VOLSLIDEDOWN; break;
-			case kcSetVolumeFineVolUp: volcmd = VOLCMD_FINEVOLUP; break;
-			case kcSetVolumeFineVolDown: volcmd = VOLCMD_FINEVOLDOWN; break;
-			case kcSetVolumeVibratoSpd: volcmd = VOLCMD_VIBRATOSPEED; break;
-			case kcSetVolumeVibrato: volcmd = VOLCMD_VIBRATODEPTH; break;
-			case kcSetVolumeXMPanLeft: volcmd = VOLCMD_PANSLIDELEFT; break;
-			case kcSetVolumeXMPanRight: volcmd = VOLCMD_PANSLIDERIGHT; break;
-			case kcSetVolumePortamento: volcmd = VOLCMD_TONEPORTAMENTO; break;
-			case kcSetVolumeITPortaUp: volcmd = VOLCMD_PORTAUP; break;
-			case kcSetVolumeITPortaDown: volcmd = VOLCMD_PORTADOWN; break;
-			case kcSetVolumeITOffset: volcmd = VOLCMD_OFFSET; break;
+			case kcSetVolumeFineVolUp:    volcmd = VOLCMD_FINEVOLUP; break;
+			case kcSetVolumeFineVolDown:  volcmd = VOLCMD_FINEVOLDOWN; break;
+			case kcSetVolumeVibratoSpd:   volcmd = VOLCMD_VIBRATOSPEED; break;
+			case kcSetVolumeVibrato:      volcmd = VOLCMD_VIBRATODEPTH; break;
+			case kcSetVolumeXMPanLeft:    volcmd = VOLCMD_PANSLIDELEFT; break;
+			case kcSetVolumeXMPanRight:   volcmd = VOLCMD_PANSLIDERIGHT; break;
+			case kcSetVolumePortamento:   volcmd = VOLCMD_TONEPORTAMENTO; break;
+			case kcSetVolumeITPortaUp:    volcmd = VOLCMD_PORTAUP; break;
+			case kcSetVolumeITPortaDown:  volcmd = VOLCMD_PORTADOWN; break;
+			case kcSetVolumeITOffset:     volcmd = VOLCMD_OFFSET; break;
 			}
 			if(target.volcmd == VOLCMD_NONE && volcmd == m_cmdOld.volcmd)
 			{

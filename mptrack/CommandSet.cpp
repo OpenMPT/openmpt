@@ -722,6 +722,12 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleResize, 1991, _T("Add Silence / Create Sample"));
 	DefineKeyCommand(kcSampleGrid, 1992, _T("Configure Sample Grid"));
 	DefineKeyCommand(kcLoseSelection, 1993, _T("Lose Selection"));
+	DefineKeyCommand(kcCutPatternChannel, 1994, _T("Cut to Pattern Channel Clipboard"));
+	DefineKeyCommand(kcCutPattern, 1995, _T("Cut to Pattern Clipboard"));
+	DefineKeyCommand(kcCopyPatternChannel, 1996, _T("Copy to Pattern Channel Clipboard"));
+	DefineKeyCommand(kcCopyPattern, 1997, _T("Copy to Pattern Clipboard"));
+	DefineKeyCommand(kcPastePatternChannel, 1998, _T("Paste from Pattern Channel Clipboard"));
+	DefineKeyCommand(kcPastePattern, 1999, _T("Paste from Pattern Clipboard"));
 
 	// Add new key commands here.
 

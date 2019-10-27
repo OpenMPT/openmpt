@@ -13,24 +13,17 @@
 #include "BuildSettings.h"
 
 #include "Snd_defs.h"
-#include "PatternCursor.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 struct ModCommandPos;
+class PatternRect;
 class CSoundFile;
 
-class PatternClipboardElement
+struct PatternClipboardElement
 {
-public:
-	
 	std::string content;
 	CString description;
-
-public:
-
-	PatternClipboardElement() { };
-	PatternClipboardElement(const std::string &data, const CString &desc) : content(data), description(desc) { };
 };
 
 
@@ -39,10 +32,9 @@ class PatternClipboard
 	friend class PatternClipboardDialog;
 
 public:
-
 	enum PasteModes
 	{
-		pmOverwrite = 0,
+		pmOverwrite,
 		pmMixPaste,
 		pmMixPasteIT,
 		pmPasteFlood,
@@ -50,28 +42,32 @@ public:
 	};
 
 	// Clipboard index type
-	typedef size_t clipindex_t;
+	using clipindex_t = size_t;
 
 protected:
-
-	// The one and only pattern clipboard object.
+	// The one and only pattern clipboard object
 	static PatternClipboard instance;
 
 	// Active internal clipboard index
-	clipindex_t activeClipboard;
+	clipindex_t m_activeClipboard = 0;
 	// Internal clipboard collection
-	std::vector<PatternClipboardElement> clipboards;
+	std::vector<PatternClipboardElement> m_clipboards;
+	PatternClipboardElement m_channelClipboard;
+	PatternClipboardElement m_patternClipboard;
 
 public:
-
 	// Copy a range of patterns to both the system clipboard and the internal clipboard.
 	static bool Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERINDEX last, bool onlyOrders);
 	// Copy a pattern selection to both the system clipboard and the internal clipboard.
 	static bool Copy(const CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
+	// Copy a pattern or pattern channel to the internal pattern or channel clipboard.
+	static bool Copy(const CSoundFile &sndFile, PATTERNINDEX pattern, CHANNELINDEX channel = CHANNELINDEX_INVALID);
 	// Try pasting a pattern selection from the system clipboard.
 	static bool Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect, bool &orderChanged);
 	// Try pasting a pattern selection from an internal clipboard.
 	static bool Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect, clipindex_t internalClipboard, bool &orderChanged);
+	// Paste from pattern or channel clipboard.
+	static bool Paste(CSoundFile &sndFile, PATTERNINDEX pattern, CHANNELINDEX channel = CHANNELINDEX_INVALID);
 	// Copy one of the internal clipboards to the system clipboard.
 	static bool SelectClipboard(clipindex_t which);
 	// Switch to the next internal clipboard.
@@ -81,15 +77,16 @@ public:
 	// Set the maximum number of internal clipboards.
 	static void SetClipboardSize(clipindex_t maxEntries);
 	// Return the current number of clipboards.
-	static clipindex_t GetClipboardSize() { return instance.clipboards.size(); };
+	static clipindex_t GetClipboardSize() { return instance.m_clipboards.size(); };
 	// Check whether patterns can be pasted from clipboard
 	static bool CanPaste();
 
 protected:
-
-	PatternClipboard() : activeClipboard(0) { SetClipboardSize(1); };
+	PatternClipboard() { SetClipboardSize(1); };
 
 	static std::string GetFileExtension(const char *ext, bool addPadding);
+
+	static std::string FormatClipboardHeader(const CSoundFile &sndFile);
 
 	// Create the clipboard text for a pattern selection
 	static std::string CreateClipboardString(const CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
@@ -107,7 +104,6 @@ protected:
 class PatternClipboardDialog : public CDialog
 {
 protected:
-
 	// The one and only pattern clipboard dialog object
 	static PatternClipboardDialog instance;
 
@@ -116,6 +112,7 @@ protected:
 	{
 	protected:
 		PatternClipboardDialog &parent;
+
 	public:
 		CInlineEdit(PatternClipboardDialog &dlg);
 
@@ -127,31 +124,36 @@ protected:
 	CSpinButtonCtrl numClipboardsSpin;
 	CListBox clipList;
 	CInlineEdit editNameBox;
-	int posX, posY;
-	bool isLocked, isCreated;
+	int posX = -1, posY = -1;
+	bool isLocked = true, isCreated = false;
 
 public:
-
 	static void UpdateList();
 	static void Show();
-	static void Toggle() { if(instance.isCreated) instance.OnCancel(); else instance.Show(); }
+	static void Toggle()
+	{
+		if(instance.isCreated)
+			instance.OnCancel();
+		else
+			instance.Show();
+	}
 
 protected:
-
 	PatternClipboardDialog();
 
-	virtual void DoDataExchange(CDataExchange* pDX);
-	DECLARE_MESSAGE_MAP();
+	void DoDataExchange(CDataExchange *pDX) override;
 
-	virtual void OnOK();
-	virtual void OnCancel();
-	
+	void OnOK() override;
+	void OnCancel() override;
+
 	afx_msg void OnNumClipboardsChanged();
 	afx_msg void OnSelectClipboard();
 
 	// Edit clipboard name
 	afx_msg void OnEditName();
 	void OnEndEdit(bool apply = true);
+
+	DECLARE_MESSAGE_MAP();
 };
 
 OPENMPT_NAMESPACE_END

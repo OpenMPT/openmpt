@@ -45,8 +45,8 @@ class CCustEdit: public CEdit
 protected:
 	COptionsKeyboard *m_pOptKeyDlg;
 	HWND m_hParent = nullptr;
-	UINT m_nCtrlId;
-	bool isFocussed = false, isDummy;
+	UINT m_nCtrlId = 0;
+	bool isFocussed = false, isDummy = false;
 
 public:
 	FlagSet<Modifiers> mod = ModNone;
@@ -78,9 +78,9 @@ protected:
 	CEdit m_eFind;
 	CEdit m_eReport, m_eChordWaitTime;
 	UINT m_nKeyboardCfg = 0;
-	int m_nCurHotKey, m_nCurCategory, m_nCurKeyChoice;
+	int m_nCurHotKey = -1, m_nCurCategory = -1, m_nCurKeyChoice = -1;
 	mpt::PathString m_sFullPathName;
-	CCommandSet *plocalCmdSet;
+	std::unique_ptr<CCommandSet> m_localCmdSet;
 	bool m_bForceUpdate = false;
 	bool m_bModified = false;
 	bool m_bChoiceModified = false;
@@ -92,7 +92,6 @@ protected:
 
 public:
 	COptionsKeyboard() : CPropertyPage(IDD_OPTIONS_KEYBOARD), m_eCustHotKey(false), m_eFindHotKey(true) { }
-	BOOL SetKey(UINT nId, UINT nChar, UINT nFlags);
 	std::vector<CommandCategory> commandCategories;
 	void DefineCommandCategories();
 
