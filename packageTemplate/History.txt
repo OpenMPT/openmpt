@@ -30,8 +30,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.08.00 (* October 2019, revision 12220)
---------------------------------------------
+v1.28.08.00 (27 October 2019, revision 12247)
+---------------------------------------------
 Playback
 - [Mod] <js> Do not apply ramp from initial global volume to current global volume when jumping around in playback.
 - [Fix] <js> Possible crash when trying to retrigger an OPL note with active filter.
@@ -39,10 +39,19 @@ Playback
 VST::Plugin Bridge
 - [Fix] <js> Bridge process kept hanging around in background if loading or closing plugin failed.
 
+S3M
+- [Imp] <js> Import edit timer from files saved with Impulse Tracker.
+
 Other formats
 - [Fix] <js> MTM: Sample loop length was off by one.
 - [Fix] <js> PSM: Sample loop length was off by one in most files.
 - [Fix] <js> ITP: Possible crash with malformed files.
+
+Misc
+- [Imp] <js> Small performance improvement when opening / creating new modules or starting playback.
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.25.13), UnRAR (v5.8.3)
 
 
 v1.28.07.00 (22 September 2019, revision 12079)

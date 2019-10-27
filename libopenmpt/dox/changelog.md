@@ -7,6 +7,12 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.10-pre
 
+ *  The "date" metadata could contain a bogus date for some older IT files.
+ *  Do not apply global volume ramping from initial global volume when seeking.
+
+ *  MTM: Sample loop length was off by one.
+ *  PSM: Sample loop length was off by one in most files.
+
 ### libopenmpt 0.4.9 (2019-10-02)
 
  *  [**Sec**] libmodplug: C API: Limit the length of strings copied to the
