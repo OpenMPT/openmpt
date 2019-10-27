@@ -166,8 +166,8 @@ void PluginBridge::MainLoop(TCHAR *argv[])
 			if(owner && SendMessage(owner, msg.message + WM_BRIDGE_KEYFIRST - WM_KEYFIRST, msg.wParam, msg.lParam))
 				continue;
 		}
-		::TranslateMessage(&msg);
-		::DispatchMessage(&msg);
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 	}
 
 	DestroyWindow(m_communicationWindow);

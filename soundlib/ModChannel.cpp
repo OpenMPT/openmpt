@@ -46,6 +46,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 
 	if(resetMask & resetSetPosAdvanced)
 	{
+		increment = SamplePosition(0);
 		nPeriod = 0;
 		position.Set(0);
 		nLength = 0;
@@ -60,7 +61,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		rightVol = leftVol = 0;
 		newRightVol = newLeftVol = 0;
 		rightRamp = leftRamp = 0;
-		nVolume = 0;	// Needs to be 0 for SMP_NODEFAULTVOLUME flag
+		nVolume = 0;  // Needs to be 0 for SMP_NODEFAULTVOLUME flag
 		nVibratoPos = nTremoloPos = nPanbrelloPos = 0;
 		nOldHiOffset = 0;
 		nLeftVU = nRightVU = 0;
@@ -89,7 +90,6 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		nRestorePanOnNewNote = 0;
 		nRestoreCutoffOnNewNote = 0;
 		nRestoreResonanceOnNewNote = 0;
-
 	}
 }
 

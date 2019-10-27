@@ -600,7 +600,7 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		case kFT2PortaUpDownMemory: desc = _T("Portamento Up and Down have separate effect memory"); break;
 		case kST3NoMutedChannels: desc = _T("Do not process any effects on muted S3M channels"); break;
 		case kST3EffectMemory: desc = _T("Most effects share the same memory"); break;
-		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself"); break;
+		case kST3PortaSampleChange: desc = _T("Portamento with instrument number and lone instrument numbers apply new sample itself"); break;
 		case kST3VibratoMemory: desc = _T("Do not remember vibrato type in effect memory"); break;
 		case kST3LimitPeriod: desc = _T("ModPlug Tracker frequency limits"); break;
 		case KST3PortaAfterArpeggio: desc = _T("Portamento immediately following an arpeggio effect continues at the last arpeggiated note"); break;

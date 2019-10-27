@@ -580,11 +580,11 @@ void CSoundFile::UpgradeModule()
 			{ kST3NoMutedChannels,         MPT_V("1.18.00.00") },
 			{ kST3EffectMemory,            MPT_V("1.20.00.00") },
 			{ kRowDelayWithNoteDelay,      MPT_V("1.20.00.00") },
-			{ kST3PortaSampleChange,       MPT_V("1.22.00.00") },
 			{ kST3VibratoMemory,           MPT_V("1.26.00.00") },
 			{ kITPanbrelloHold,            MPT_V("1.26.00.00") },
 			{ KST3PortaAfterArpeggio,      MPT_V("1.27.00.00") },
 			{ kST3OffsetWithoutInstrument, MPT_V("1.28.00.00") },
+			{ kST3PortaSampleChange,       MPT_V("1.28.00.00") },
 		};
 
 		for(const auto &b : behaviours)
