@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.2-beta42
 
+ *  mpg123: Update to v1.25.13 (2019-10-26).
+
 ### libopenmpt 0.2-beta41 (2019-10-02)
 
  *  [**Sec**] libmodplug: C API: Limit the length of strings copied to the
@@ -24,7 +26,7 @@ is just a high-level summary.
 
  *  J2B: Ignore notes with non-existing instrument (fixes Ending.j2b).
 
- *  mpg123: Update to v1.25.13 (2019-08-24).
+ *  mpg123: Update to v1.25.12 (2019-08-24).
  *  ogg: Update to v1.3.4. (2019-08-31).
  *  flac: Update to v1.3.3. (2019-08-04).
 
