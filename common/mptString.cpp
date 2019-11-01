@@ -517,7 +517,8 @@ static widestring DecodeCodepage(UINT codepage, const Tsrcstring &src)
 #endif // MPT_OS_WINDOWS
 
 
-static widestring From8bit(const std::string &str, const uint32 (&table)[256], widechar replacement = wide_default_replacement)
+template<typename Tsrcstring>
+static widestring From8bit(const Tsrcstring &str, const uint32 (&table)[256], widechar replacement = wide_default_replacement)
 {
 	widestring res;
 	res.reserve(str.length());
@@ -535,9 +536,10 @@ static widestring From8bit(const std::string &str, const uint32 (&table)[256], w
 	return res;
 }
 
-static std::string To8bit(const widestring &str, const uint32 (&table)[256], char replacement = '?')
+template<typename Tdststring>
+static Tdststring To8bit(const widestring &str, const uint32 (&table)[256], char replacement = '?')
 {
-	std::string res;
+	Tdststring res;
 	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
@@ -550,7 +552,7 @@ static std::string To8bit(const widestring &str, const uint32 (&table)[256], cha
 		{
 			if(c == table[x])
 			{
-				res.push_back(static_cast<char>(static_cast<uint8>(x)));
+				res.push_back(static_cast<typename Tdststring::value_type>(static_cast<uint8>(x)));
 				found = true;
 				break;
 			}
@@ -562,7 +564,7 @@ static std::string To8bit(const widestring &str, const uint32 (&table)[256], cha
 			{
 				if(c == table[x])
 				{
-					res.push_back(static_cast<char>(static_cast<uint8>(x)));
+					res.push_back(static_cast<typename Tdststring::value_type>(static_cast<uint8>(x)));
 					found = true;
 					break;
 				}
@@ -576,7 +578,8 @@ static std::string To8bit(const widestring &str, const uint32 (&table)[256], cha
 	return res;
 }
 
-static widestring FromAscii(const std::string &str, widechar replacement = wide_default_replacement)
+template<typename Tsrcstring>
+static widestring FromAscii(const Tsrcstring &str, widechar replacement = wide_default_replacement)
 {
 	widestring res;
 	res.reserve(str.length());
@@ -594,16 +597,17 @@ static widestring FromAscii(const std::string &str, widechar replacement = wide_
 	return res;
 }
 
-static std::string ToAscii(const widestring &str, char replacement = '?')
+template<typename Tdststring>
+static Tdststring ToAscii(const widestring &str, char replacement = '?')
 {
-	std::string res;
+	Tdststring res;
 	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
 		uint32 c = str[i];
 		if(c <= 0x7f)
 		{
-			res.push_back(static_cast<char>(static_cast<uint8>(c)));
+			res.push_back(static_cast<typename Tdststring::value_type>(static_cast<uint8>(c)));
 		} else
 		{
 			res.push_back(replacement);
@@ -612,7 +616,8 @@ static std::string ToAscii(const widestring &str, char replacement = '?')
 	return res;
 }
 
-static widestring FromISO_8859_1(const std::string &str, widechar replacement = wide_default_replacement)
+template<typename Tsrcstring>
+static widestring FromISO_8859_1(const Tsrcstring &str, widechar replacement = wide_default_replacement)
 {
 	MPT_UNREFERENCED_PARAMETER(replacement);
 	widestring res;
@@ -625,16 +630,17 @@ static widestring FromISO_8859_1(const std::string &str, widechar replacement = 
 	return res;
 }
 
-static std::string ToISO_8859_1(const widestring &str, char replacement = '?')
+template<typename Tdststring>
+static Tdststring ToISO_8859_1(const widestring &str, char replacement = '?')
 {
-	std::string res;
+	Tdststring res;
 	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
 		uint32 c = str[i];
 		if(c <= 0xff)
 		{
-			res.push_back(static_cast<char>(static_cast<uint8>(c)));
+			res.push_back(static_cast<typename Tdststring::value_type>(static_cast<uint8>(c)));
 		} else
 		{
 			res.push_back(replacement);
@@ -830,7 +836,7 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 	return std::string(&(out[0]), out_next);
 }
 
-static std::wstring FromLocale(const std::string &str, wchar_t replacement = L'\uFFFD')
+static std::wstring FromLocaleCpp(const std::string &str, wchar_t replacement)
 {
 	try
 	{
@@ -866,10 +872,10 @@ static std::wstring FromLocale(const std::string &str, wchar_t replacement = L'\
 		// nothing
 	}
 	MPT_ASSERT_NOTREACHED();
-	return String::FromAscii(str, replacement); // fallback
+	return String::FromAscii<std::string>(str, replacement); // fallback
 }
 
-static std::string ToLocale(const std::wstring &str, char replacement = '?')
+static std::string ToLocaleCpp(const std::wstring &str, char replacement)
 {
 	try
 	{
@@ -905,14 +911,31 @@ static std::string ToLocale(const std::wstring &str, char replacement = '?')
 		// nothing
 	}
 	MPT_ASSERT_NOTREACHED();
-	return String::ToAscii(str, replacement); // fallback
+	return String::ToAscii<std::string>(str, replacement); // fallback
 }
+
+
+template <typename Tsrcstring>
+static std::wstring FromLocale(const Tsrcstring &str, wchar_t replacement = L'\uFFFD')
+{
+	std::string tmp(str.begin(), str.end());
+	return FromLocaleCpp(tmp, replacement);
+}
+
+template <typename Tdststring>
+static Tdststring ToLocale(const std::wstring &str, char replacement = '?')
+{
+	std::string tmp = ToLocaleCpp(str, replacement);
+	return Tdststring(tmp.begin(), tmp.end());
+}
+
 
 #endif // MPT_ENABLE_CHARSET_LOCALE && !MPT_LOCALE_ASSUME_CHARSET
 
-static widestring FromUTF8(const std::string &str, widechar replacement = wide_default_replacement)
+template <typename Tsrcstring>
+static widestring FromUTF8(const Tsrcstring &str, widechar replacement = wide_default_replacement)
 {
-	const std::string &in = str;
+	const Tsrcstring &in = str;
 
 	widestring out;
 
@@ -988,11 +1011,12 @@ static widestring FromUTF8(const std::string &str, widechar replacement = wide_d
 
 }
 
-static std::string ToUTF8(const widestring &str, char replacement = '?')
+template <typename Tdststring>
+static Tdststring ToUTF8(const widestring &str, char replacement = '?')
 {
 	const widestring &in = str;
 
-	std::string out;
+	Tdststring out;
 
 	for ( std::size_t i=0; i<in.length(); i++ ) {
 
@@ -1087,26 +1111,26 @@ static Tdststring EncodeImpl(Charset charset, const widestring &src)
 			return EncodeCodepage<Tdststring>(CharsetToCodepage(charset), src);
 		}
 	#endif
-	std::string out;
+	Tdststring out;
 	switch(charset)
 	{
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
 		case CharsetLocale:      MPT_ASSERT_NOTREACHED(); break;
 	#else
-		case CharsetLocale:      out = String::ToLocale(src); break;
+		case CharsetLocale:      out = String::ToLocale<Tdststring>(src); break;
 	#endif
 #endif
-		case CharsetUTF8:        out = String::ToUTF8(src); break;
-		case CharsetASCII:       out = String::ToAscii(src); break;
-		case CharsetISO8859_1:   out = String::ToISO_8859_1(src); break;
-		case CharsetISO8859_15:  out = String::To8bit(src, CharsetTableISO8859_15); break;
-		case CharsetCP437:       out = String::To8bit(src, CharsetTableCP437); break;
-		case CharsetCP437AMS:    out = String::To8bit(src, CharsetTableCP437AMS); break;
-		case CharsetCP437AMS2:   out = String::To8bit(src, CharsetTableCP437AMS2); break;
-		case CharsetWindows1252: out = String::To8bit(src, CharsetTableWindows1252); break;
+		case CharsetUTF8:        out = String::ToUTF8<Tdststring>(src); break;
+		case CharsetASCII:       out = String::ToAscii<Tdststring>(src); break;
+		case CharsetISO8859_1:   out = String::ToISO_8859_1<Tdststring>(src); break;
+		case CharsetISO8859_15:  out = String::To8bit<Tdststring>(src, CharsetTableISO8859_15); break;
+		case CharsetCP437:       out = String::To8bit<Tdststring>(src, CharsetTableCP437); break;
+		case CharsetCP437AMS:    out = String::To8bit<Tdststring>(src, CharsetTableCP437AMS); break;
+		case CharsetCP437AMS2:   out = String::To8bit<Tdststring>(src, CharsetTableCP437AMS2); break;
+		case CharsetWindows1252: out = String::To8bit<Tdststring>(src, CharsetTableWindows1252); break;
 	}
-	return Tdststring(out.begin(), out.end());
+	return out;
 }
 
 
@@ -1130,7 +1154,6 @@ static widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 			return DecodeCodepage<Tsrcstring>(CharsetToCodepage(charset), src);
 		}
 	#endif
-	std::string in(src.begin(), src.end());
 	widestring out;
 	switch(charset)
 	{
@@ -1138,17 +1161,17 @@ static widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
 		case CharsetLocale:      MPT_ASSERT_NOTREACHED(); break;
 	#else
-		case CharsetLocale:      out = String::FromLocale(in); break;
+		case CharsetLocale:      out = String::FromLocale<Tsrcstring>(src); break;
 	#endif
 #endif
-		case CharsetUTF8:        out = String::FromUTF8(in); break;
-		case CharsetASCII:       out = String::FromAscii(in); break;
-		case CharsetISO8859_1:   out = String::FromISO_8859_1(in); break;
-		case CharsetISO8859_15:  out = String::From8bit(in, CharsetTableISO8859_15); break;
-		case CharsetCP437:       out = String::From8bit(in, CharsetTableCP437); break;
-		case CharsetCP437AMS:    out = String::From8bit(in, CharsetTableCP437AMS); break;
-		case CharsetCP437AMS2:   out = String::From8bit(in, CharsetTableCP437AMS2); break;
-		case CharsetWindows1252: out = String::From8bit(in, CharsetTableWindows1252); break;
+		case CharsetUTF8:        out = String::FromUTF8<Tsrcstring>(src); break;
+		case CharsetASCII:       out = String::FromAscii<Tsrcstring>(src); break;
+		case CharsetISO8859_1:   out = String::FromISO_8859_1<Tsrcstring>(src); break;
+		case CharsetISO8859_15:  out = String::From8bit<Tsrcstring>(src, CharsetTableISO8859_15); break;
+		case CharsetCP437:       out = String::From8bit<Tsrcstring>(src, CharsetTableCP437); break;
+		case CharsetCP437AMS:    out = String::From8bit<Tsrcstring>(src, CharsetTableCP437AMS); break;
+		case CharsetCP437AMS2:   out = String::From8bit<Tsrcstring>(src, CharsetTableCP437AMS2); break;
+		case CharsetWindows1252: out = String::From8bit<Tsrcstring>(src, CharsetTableWindows1252); break;
 	}
 	return out;
 }
