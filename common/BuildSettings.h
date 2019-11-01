@@ -92,7 +92,6 @@
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
 //#define MPT_WITH_DL
 #define MPT_WITH_FLAC
-//#define MPT_WITH_ICONV
 //#define MPT_WITH_LTDL
 #if MPT_OS_WINDOWS
 #define MPT_WITH_MEDIAFOUNDATION
@@ -124,7 +123,6 @@
 
 //#define MPT_WITH_DL
 //#define MPT_WITH_FLAC
-//#define MPT_WITH_ICONV
 //#define MPT_WITH_LTDL
 //#define MPT_WITH_MEDIAFOUNDATION
 #define MPT_WITH_MINIMP3
@@ -140,7 +138,6 @@
 
 //#define MPT_WITH_DL
 //#define MPT_WITH_FLAC
-//#define MPT_WITH_ICONV
 //#define MPT_WITH_LTDL
 //#define MPT_WITH_MEDIAFOUNDATION
 //#define MPT_WITH_MINIMP3
@@ -171,7 +168,6 @@
 
 //#define MPT_WITH_DL
 //#define MPT_WITH_FLAC
-//#define MPT_WITH_ICONV
 //#define MPT_WITH_LTDL
 //#define MPT_WITH_MEDIAFOUNDATION
 //#define MPT_WITH_MINIMP3
@@ -317,7 +313,7 @@
 
 #elif MPT_OS_LINUX
 
-	#define MPT_CHARSET_ICONV
+	#define MPT_CHARSET_INTERNAL
 
 #elif MPT_OS_ANDROID
 
@@ -332,17 +328,7 @@
 
 #elif MPT_OS_MACOSX_OR_IOS
 
-	#if defined(MPT_WITH_ICONV)
-		#define MPT_CHARSET_ICONV
-		#ifndef MPT_ICONV_NO_WCHAR
-		#define MPT_ICONV_NO_WCHAR
-		#endif
-	#else
-		#define MPT_CHARSET_INTERNAL
-	#endif
-	//#ifndef MPT_LOCALE_ASSUME_CHARSET
-	//#define MPT_LOCALE_ASSUME_CHARSET CharsetUTF8
-	//#endif
+	#define MPT_CHARSET_INTERNAL
 
 #elif MPT_OS_DJGPP
 
@@ -350,10 +336,6 @@
 	#ifndef MPT_LOCALE_ASSUME_CHARSET
 	#define MPT_LOCALE_ASSUME_CHARSET CharsetCP437
 	#endif
-
-#elif defined(MPT_WITH_ICONV)
-
-	#define MPT_CHARSET_ICONV
 
 #endif
 
@@ -498,7 +480,7 @@
 #define MPT_ENABLE_TEMPFILE
 #endif
 
-#if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_ICONV) && !defined(MPT_CHARSET_INTERNAL)
+#if !defined(MPT_CHARSET_WIN32) && !defined(MPT_CHARSET_INTERNAL)
 #define MPT_CHARSET_INTERNAL
 #endif
 

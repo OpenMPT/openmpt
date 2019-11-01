@@ -93,11 +93,6 @@ Optional dependencies
 
 ### libopenmpt
 
- *  Character set conversion can use one of:
-     *  **Win32**
-     *  **iconv**
-     *  **C++11** codecvt_utf8
-    instead of the internal conversion tables and functions.
  *  **doxygen 1.8** or higher is required to build the documentation.
 
 ### openmpt123

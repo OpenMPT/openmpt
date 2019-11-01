@@ -320,9 +320,6 @@ mpt::ustring GetBuildFeaturesString()
 		#if defined(MPT_CHARSET_WIN32)
 			UL_(" +WINAPI")
 		#endif
-		#if defined(MPT_CHARSET_ICONV)
-			UL_(" +ICONV")
-		#endif
 		#if defined(MPT_CHARSET_INTERNAL)
 			UL_(" +INTERNALCHARSETS")
 		#endif

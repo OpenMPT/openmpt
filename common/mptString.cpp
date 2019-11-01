@@ -32,11 +32,6 @@
 #include <windows.h>
 #endif
 
-#if defined(MPT_CHARSET_ICONV)
-#include <errno.h>
-#include <iconv.h>
-#endif
-
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -1057,88 +1052,9 @@ static UINT CharsetToCodepage(Charset charset)
 
 #endif // MPT_CHARSET_WIN32
 
-#if defined(MPT_CHARSET_ICONV)
 
-static const char * CharsetToString(Charset charset)
-{
-	switch(charset)
-	{
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-		case CharsetLocale:      return "";            break; // "char" breaks with glibc when no locale is set
-#endif
-		case CharsetUTF8:        return "UTF-8";       break;
-		case CharsetASCII:       return "ASCII";       break;
-		case CharsetISO8859_1:   return "ISO-8859-1";  break;
-		case CharsetISO8859_15:  return "ISO-8859-15"; break;
-		case CharsetCP437:       return "CP437";       break;
-		case CharsetCP437AMS:    return "CP437";       break; // fallback, should not happen
-		case CharsetCP437AMS2:   return "CP437";       break; // fallback, should not happen
-		case CharsetWindows1252: return "CP1252";      break;
-	}
-	return 0;
-}
-
-static const char * CharsetToStringTranslit(Charset charset)
-{
-	switch(charset)
-	{
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-		case CharsetLocale:      return "//TRANSLIT";            break; // "char" breaks with glibc when no locale is set
-#endif
-		case CharsetUTF8:        return "UTF-8//TRANSLIT";       break;
-		case CharsetASCII:       return "ASCII//TRANSLIT";       break;
-		case CharsetISO8859_1:   return "ISO-8859-1//TRANSLIT";  break;
-		case CharsetISO8859_15:  return "ISO-8859-15//TRANSLIT"; break;
-		case CharsetCP437:       return "CP437//TRANSLIT";       break;
-		case CharsetCP437AMS:    return "CP437//TRANSLIT";       break; // fallback, should not happen
-		case CharsetCP437AMS2:   return "CP437//TRANSLIT";       break; // fallback, should not happen
-		case CharsetWindows1252: return "CP1252//TRANSLIT";      break;
-	}
-	return 0;
-}
-
-static const char * Charset_widechar()
-{
-	#if !defined(MPT_ICONV_NO_WCHAR) && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-		return "wchar_t";
-	#else // MPT_ICONV_NO_WCHAR
-		// iconv on OSX does not handle wchar_t if no locale is set
-		static_assert(sizeof(widechar) == 2 || sizeof(widechar) == 4);
-		if(sizeof(widechar) == 2)
-		{
-			// "UTF-16" generates BOM
-			MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
-			{
-				return "UTF-16LE";
-			}
-			MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
-			{
-				return "UTF-16BE";
-			}
-			return "UTF-16";
-		} else if(sizeof(widechar) == 4)
-		{
-			// "UTF-32" generates BOM
-			MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
-			{
-				return "UTF-32LE";
-			}
-			MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
-			{
-				return "UTF-32BE";
-			}
-			return "UTF-32";
-		}
-	#endif // !MPT_ICONV_NO_WCHAR | MPT_ICONV_NO_WCHAR
-}
-
-#endif // MPT_CHARSET_ICONV
-
-
-#if !defined(MPT_CHARSET_ICONV)
 template<typename Tdststring>
 static Tdststring EncodeImplFallback(Charset charset, const widestring &src);
-#endif // !MPT_CHARSET_ICONV
 
 // templated on 8bit strings because of type-safe variants
 template<typename Tdststring>
@@ -1176,50 +1092,12 @@ static Tdststring EncodeImpl(Charset charset, const widestring &src)
 		WideCharToMultiByte(codepage, 0, src.c_str(), -1, encoded_string.data(), required_size, nullptr, nullptr);
 		encoded_string.resize(encoded_string.size() - 1); // remove \0
 		return encoded_string;
-	#elif defined(MPT_CHARSET_ICONV)
-		iconv_t conv = iconv_t();
-		conv = iconv_open(CharsetToStringTranslit(charset), Charset_widechar());
-		if(!conv)
-		{
-			conv = iconv_open(CharsetToString(charset), Charset_widechar());
-			if(!conv)
-			{
-				throw std::runtime_error("iconv conversion not working");
-			}
-		}
-		std::vector<widechar> wide_string(src.c_str(), src.c_str() + src.length() + 1);
-		std::vector<char> encoded_string(wide_string.size() * 8); // large enough
-		char * inbuf = reinterpret_cast<char*>(wide_string.data());
-		size_t inbytesleft = wide_string.size() * sizeof(widechar);
-		char * outbuf = encoded_string.data();
-		size_t outbytesleft = encoded_string.size();
-		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == static_cast<size_t>(-1))
-		{
-			if(errno == EILSEQ || errno == EILSEQ)
-			{
-				inbuf += sizeof(widechar);
-				inbytesleft -= sizeof(widechar);
-				outbuf[0] = '?';
-				outbuf++;
-				outbytesleft--;
-				iconv(conv, NULL, NULL, NULL, NULL); // reset state
-			} else
-			{
-				iconv_close(conv);
-				conv = iconv_t();
-				return Tdststring();
-			}
-		}
-		iconv_close(conv);
-		conv = iconv_t();
-		return reinterpret_cast<const typename Tdststring::value_type*>(encoded_string.data());
 	#else
 		return EncodeImplFallback<Tdststring>(charset, src);
 	#endif
 }
 
 
-#if !defined(MPT_CHARSET_ICONV)
 template<typename Tdststring>
 static Tdststring EncodeImplFallback(Charset charset, const widestring &src)
 {
@@ -1252,13 +1130,10 @@ static Tdststring EncodeImplFallback(Charset charset, const widestring &src)
 		}
 		return Tdststring(out.begin(), out.end());
 }
-#endif // !MPT_CHARSET_ICONV
 
 
-#if !defined(MPT_CHARSET_ICONV)
 template<typename Tsrcstring>
 static widestring DecodeImplFallback(Charset charset, const Tsrcstring &src);
-#endif // !MPT_CHARSET_ICONV
 
 // templated on 8bit strings because of type-safe variants
 template<typename Tsrcstring>
@@ -1297,50 +1172,11 @@ static widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 		MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.c_str()), -1, decoded_string.data(), required_size);
 		decoded_string.resize(decoded_string.size() - 1); // remove \0
 		return decoded_string;
-	#elif defined(MPT_CHARSET_ICONV)
-		iconv_t conv = iconv_t();
-		conv = iconv_open(Charset_widechar(), CharsetToString(charset));
-		if(!conv)
-		{
-			throw std::runtime_error("iconv conversion not working");
-		}
-		std::vector<char> encoded_string(reinterpret_cast<const char*>(src.c_str()), reinterpret_cast<const char*>(src.c_str()) + src.length() + 1);
-		std::vector<widechar> wide_string(encoded_string.size() * 8); // large enough
-		char * inbuf = encoded_string.data();
-		size_t inbytesleft = encoded_string.size();
-		char * outbuf = reinterpret_cast<char*>(wide_string.data());
-		size_t outbytesleft = wide_string.size() * sizeof(widechar);
-		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == static_cast<size_t>(-1))
-		{
-			if(errno == EILSEQ || errno == EILSEQ)
-			{
-				inbuf++;
-				inbytesleft--;
-				for(std::size_t i = 0; i < sizeof(widechar); ++i)
-				{
-					outbuf[i] = 0;
-				}
-				widechar tmp = 0xfffd;
-				std::memcpy(outbuf, &tmp, sizeof(widechar));
-				outbuf += sizeof(widechar);
-				outbytesleft -= sizeof(widechar);
-				iconv(conv, NULL, NULL, NULL, NULL); // reset state
-			} else
-			{
-				iconv_close(conv);
-				conv = iconv_t();
-				return widestring();
-			}
-		}
-		iconv_close(conv);
-		conv = iconv_t();
-		return wide_string.data();
 	#else
 		return DecodeImplFallback<Tsrcstring>(charset, src);
 	#endif
 }
 
-#if !defined(MPT_CHARSET_ICONV)
 template<typename Tsrcstring>
 static widestring DecodeImplFallback(Charset charset, const Tsrcstring &src)
 {
@@ -1374,7 +1210,6 @@ static widestring DecodeImplFallback(Charset charset, const Tsrcstring &src)
 		}
 		return out;
 }
-#endif // !MPT_CHARSET_ICONV
 
 
 // templated on 8bit strings because of type-safe variants
@@ -1389,50 +1224,7 @@ static Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 		const typename Tsrcstring::value_type * src_end = src_beg + src.size();
 		return Tdststring(reinterpret_cast<const typename Tdststring::value_type *>(src_beg), reinterpret_cast<const typename Tdststring::value_type *>(src_end));
 	}
-	#if defined(MPT_CHARSET_ICONV)
-		if(to == CharsetCP437AMS || to == CharsetCP437AMS2 || from == CharsetCP437AMS || from == CharsetCP437AMS2)
-		{
-			return EncodeImpl<Tdststring>(to, DecodeImpl(from, src));
-		}
-		iconv_t conv = iconv_t();
-		conv = iconv_open(CharsetToStringTranslit(to), CharsetToString(from));
-		if(!conv)
-		{
-			conv = iconv_open(CharsetToString(to), CharsetToString(from));
-			if(!conv)
-			{
-				throw std::runtime_error("iconv conversion not working");
-			}
-		}
-		std::vector<char> src_string(reinterpret_cast<const char*>(src.c_str()), reinterpret_cast<const char*>(src.c_str()) + src.length() + 1);
-		std::vector<char> dst_string(src_string.size() * 8); // large enough
-		char * inbuf = src_string.data();
-		size_t inbytesleft = src_string.size();
-		char * outbuf = dst_string.data();
-		size_t outbytesleft = dst_string.size();
-		while(iconv(conv, &inbuf, &inbytesleft, &outbuf, &outbytesleft) == static_cast<size_t>(-1))
-		{
-			if(errno == EILSEQ || errno == EILSEQ)
-			{
-				inbuf++;
-				inbytesleft--;
-				outbuf[0] = '?';
-				outbuf++;
-				outbytesleft--;
-				iconv(conv, NULL, NULL, NULL, NULL); // reset state
-			} else
-			{
-				iconv_close(conv);
-				conv = iconv_t();
-				return Tdststring();
-			}
-		}
-		iconv_close(conv);
-		conv = iconv_t();
-		return reinterpret_cast<const typename Tdststring::value_type*>(dst_string.data());
-	#else
-		return EncodeImpl<Tdststring>(to, DecodeImpl(from, src));
-	#endif
+	return EncodeImpl<Tdststring>(to, DecodeImpl(from, src));
 }
 
 
