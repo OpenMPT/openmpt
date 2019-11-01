@@ -1502,13 +1502,13 @@ mpt::ustring ToUnicode(uint16 codepage, mpt::Charset fallback, const std::string
 	#if MPT_OS_WINDOWS
 		mpt::ustring result;
 		bool noCharsetMatch = true;
-		mpt::Charset fileCharset = mpt::CharsetFromCodePage(codepage, fallback, &noCharsetMatch);
+		mpt::Charset charset = mpt::CharsetFromCodePage(codepage, fallback, &noCharsetMatch);
 		if(noCharsetMatch && TestCodePage(codepage))
 		{
 			result = mpt::FromCodePageDirect(codepage, str);
 		} else
 		{
-			result = mpt::ToUnicode(fileCharset, str);
+			result = mpt::ToUnicode(charset, str);
 		}
 		return result;
 	#else // !MPT_OS_WINDOWS
