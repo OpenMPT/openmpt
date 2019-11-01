@@ -1066,78 +1066,48 @@ static widestring DecodeCodepage(UINT codepage, const Tsrcstring &src)
 #endif // MPT_CHARSET_WIN32
 
 
-template<typename Tdststring>
-static Tdststring EncodeImplFallback(Charset charset, const widestring &src);
-
 // templated on 8bit strings because of type-safe variants
 template<typename Tdststring>
 static Tdststring EncodeImpl(Charset charset, const widestring &src)
 {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
 	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
-	if(charset == CharsetCP437AMS || charset == CharsetCP437AMS2)
-	{
-		std::string out;
-		if(charset == CharsetCP437AMS ) out = String::To8bit(src, CharsetTableCP437AMS );
-		if(charset == CharsetCP437AMS2) out = String::To8bit(src, CharsetTableCP437AMS2);
-		return Tdststring(out.begin(), out.end());
-	}
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	#if defined(MPT_LOCALE_ASSUME_CHARSET)
-		if(charset == CharsetLocale)
-		{
-			charset = MPT_LOCALE_ASSUME_CHARSET;
-		}
+	#if defined(MPT_ENABLE_CHARSET_LOCALE)
+		#if defined(MPT_LOCALE_ASSUME_CHARSET)
+			if(charset == CharsetLocale)
+			{
+				charset = MPT_LOCALE_ASSUME_CHARSET;
+			}
+		#endif
 	#endif
-#endif
 	#if defined(MPT_CHARSET_WIN32)
-		if(!HasCharset(charset))
+		if(HasCharset(charset))
 		{
-			return EncodeImplFallback<Tdststring>(charset, src);
+			return EncodeCodepage<Tdststring>(CharsetToCodepage(charset), src);
 		}
-		return EncodeCodepage<Tdststring>(CharsetToCodepage(charset), src);
-	#else
-		return EncodeImplFallback<Tdststring>(charset, src);
 	#endif
-}
-
-
-template<typename Tdststring>
-static Tdststring EncodeImplFallback(Charset charset, const widestring &src)
-{
-		std::string out;
+	std::string out;
+	switch(charset)
+	{
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
-		if(charset == CharsetLocale)
-		{
-			charset = MPT_LOCALE_ASSUME_CHARSET;
-		}
+		case CharsetLocale:      MPT_ASSERT_NOTREACHED(); break;
+	#else
+		case CharsetLocale:      out = String::ToLocale(src); break;
 	#endif
 #endif
-		switch(charset)
-		{
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-#if defined(MPT_LOCALE_ASSUME_CHARSET)
-			case CharsetLocale:      MPT_ASSERT_NOTREACHED(); break;
-#else
-			case CharsetLocale:      out = String::ToLocale(src); break;
-#endif
-#endif
-			case CharsetUTF8:        out = String::ToUTF8(src); break;
-			case CharsetASCII:       out = String::ToAscii(src); break;
-			case CharsetISO8859_1:   out = String::ToISO_8859_1(src); break;
-			case CharsetISO8859_15:  out = String::To8bit(src, CharsetTableISO8859_15); break;
-			case CharsetCP437:       out = String::To8bit(src, CharsetTableCP437); break;
-			case CharsetCP437AMS:    out = String::To8bit(src, CharsetTableCP437AMS); break;
-			case CharsetCP437AMS2:   out = String::To8bit(src, CharsetTableCP437AMS2); break;
-			case CharsetWindows1252: out = String::To8bit(src, CharsetTableWindows1252); break;
-		}
-		return Tdststring(out.begin(), out.end());
+		case CharsetUTF8:        out = String::ToUTF8(src); break;
+		case CharsetASCII:       out = String::ToAscii(src); break;
+		case CharsetISO8859_1:   out = String::ToISO_8859_1(src); break;
+		case CharsetISO8859_15:  out = String::To8bit(src, CharsetTableISO8859_15); break;
+		case CharsetCP437:       out = String::To8bit(src, CharsetTableCP437); break;
+		case CharsetCP437AMS:    out = String::To8bit(src, CharsetTableCP437AMS); break;
+		case CharsetCP437AMS2:   out = String::To8bit(src, CharsetTableCP437AMS2); break;
+		case CharsetWindows1252: out = String::To8bit(src, CharsetTableWindows1252); break;
+	}
+	return Tdststring(out.begin(), out.end());
 }
 
-
-template<typename Tsrcstring>
-static widestring DecodeImplFallback(Charset charset, const Tsrcstring &src);
 
 // templated on 8bit strings because of type-safe variants
 template<typename Tsrcstring>
@@ -1145,65 +1115,41 @@ static widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 {
 	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
 	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
-	if(charset == CharsetCP437AMS || charset == CharsetCP437AMS2)
-	{
-		std::string in(src.begin(), src.end());
-		widestring out;
-		if(charset == CharsetCP437AMS ) out = String::From8bit(in, CharsetTableCP437AMS );
-		if(charset == CharsetCP437AMS2) out = String::From8bit(in, CharsetTableCP437AMS2);
-		return out;
-	}
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	#if defined(MPT_LOCALE_ASSUME_CHARSET)
-		if(charset == CharsetLocale)
-		{
-			charset = MPT_LOCALE_ASSUME_CHARSET;
-		}
+	#if defined(MPT_ENABLE_CHARSET_LOCALE)
+		#if defined(MPT_LOCALE_ASSUME_CHARSET)
+			if(charset == CharsetLocale)
+			{
+				charset = MPT_LOCALE_ASSUME_CHARSET;
+			}
+		#endif
 	#endif
-#endif
 	#if defined(MPT_CHARSET_WIN32)
-		if(!HasCharset(charset))
+		if(HasCharset(charset))
 		{
-			return DecodeImplFallback<Tsrcstring>(charset, src);
+			return DecodeCodepage<Tsrcstring>(CharsetToCodepage(charset), src);
 		}
-		return DecodeCodepage<Tsrcstring>(CharsetToCodepage(charset), src);
-	#else
-		return DecodeImplFallback<Tsrcstring>(charset, src);
 	#endif
-}
-
-template<typename Tsrcstring>
-static widestring DecodeImplFallback(Charset charset, const Tsrcstring &src)
-{
-		std::string in(src.begin(), src.end());
-		widestring out;
+	std::string in(src.begin(), src.end());
+	widestring out;
+	switch(charset)
+	{
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
-		if(charset == CharsetLocale)
-		{
-			charset = MPT_LOCALE_ASSUME_CHARSET;
-		}
+		case CharsetLocale:      MPT_ASSERT_NOTREACHED(); break;
+	#else
+		case CharsetLocale:      out = String::FromLocale(in); break;
 	#endif
 #endif
-		switch(charset)
-		{
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-#if defined(MPT_LOCALE_ASSUME_CHARSET)
-			case CharsetLocale:      MPT_ASSERT_NOTREACHED(); break;
-#else
-			case CharsetLocale:      out = String::FromLocale(in); break;
-#endif
-#endif
-			case CharsetUTF8:        out = String::FromUTF8(in); break;
-			case CharsetASCII:       out = String::FromAscii(in); break;
-			case CharsetISO8859_1:   out = String::FromISO_8859_1(in); break;
-			case CharsetISO8859_15:  out = String::From8bit(in, CharsetTableISO8859_15); break;
-			case CharsetCP437:       out = String::From8bit(in, CharsetTableCP437); break;
-			case CharsetCP437AMS:    out = String::From8bit(in, CharsetTableCP437AMS); break;
-			case CharsetCP437AMS2:   out = String::From8bit(in, CharsetTableCP437AMS2); break;
-			case CharsetWindows1252: out = String::From8bit(in, CharsetTableWindows1252); break;
-		}
-		return out;
+		case CharsetUTF8:        out = String::FromUTF8(in); break;
+		case CharsetASCII:       out = String::FromAscii(in); break;
+		case CharsetISO8859_1:   out = String::FromISO_8859_1(in); break;
+		case CharsetISO8859_15:  out = String::From8bit(in, CharsetTableISO8859_15); break;
+		case CharsetCP437:       out = String::From8bit(in, CharsetTableCP437); break;
+		case CharsetCP437AMS:    out = String::From8bit(in, CharsetTableCP437AMS); break;
+		case CharsetCP437AMS2:   out = String::From8bit(in, CharsetTableCP437AMS2); break;
+		case CharsetWindows1252: out = String::From8bit(in, CharsetTableWindows1252); break;
+	}
+	return out;
 }
 
 
