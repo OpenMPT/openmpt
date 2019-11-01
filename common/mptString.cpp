@@ -921,12 +921,22 @@ static std::wstring FromLocale(const Tsrcstring &str, wchar_t replacement = L'\u
 	std::string tmp(str.begin(), str.end());
 	return FromLocaleCpp(tmp, replacement);
 }
+template <>
+std::wstring FromLocale<std::string>(const std::string &str, wchar_t replacement)
+{
+	return FromLocaleCpp(str, replacement);
+}
 
 template <typename Tdststring>
 static Tdststring ToLocale(const std::wstring &str, char replacement = '?')
 {
 	std::string tmp = ToLocaleCpp(str, replacement);
 	return Tdststring(tmp.begin(), tmp.end());
+}
+template <>
+std::string ToLocale(const std::wstring &str, char replacement)
+{
+	return ToLocaleCpp(str, replacement);
 }
 
 
