@@ -2664,8 +2664,9 @@ bool CSoundFile::ProcessEffects()
 			// Test cases: keyoff+instr.xm, delay.xm
 			bool reloadSampleSettings = (m_playBehaviour[kFT2ReloadSampleSettings] && instr != 0);
 			// ProTracker Compatibility: If a sample was stopped before, lone instrument numbers can retrigger it
-			// Test case: PTSwapEmpty.mod
-			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_playBehaviour[kMODSampleSwap] && !chn.IsSamplePlaying() && chn.pModSample != nullptr && !chn.pModSample->HasSampleData());
+			// Test case: PTSwapEmpty.mod, PTInstrVolume.mod
+			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
+				|| (m_playBehaviour[kMODSampleSwap] && !chn.IsSamplePlaying() && (chn.pModSample == nullptr || !chn.pModSample->HasSampleData()));
 
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
