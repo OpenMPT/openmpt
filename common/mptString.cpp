@@ -1076,7 +1076,7 @@ static Tdststring EncodeImpl(Charset charset, const widestring &src)
 			return Tdststring();
 		}
 		Tdststring encoded_string(required_size, char());
-		WideCharToMultiByte(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), encoded_string.data(), required_size, nullptr, nullptr);
+		WideCharToMultiByte(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), reinterpret_cast<CHAR*>(encoded_string.data()), required_size, nullptr, nullptr);
 		return encoded_string;
 	#else
 		return EncodeImplFallback<Tdststring>(charset, src);
@@ -1149,13 +1149,13 @@ static widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 			return DecodeImplFallback<Tsrcstring>(charset, src);
 		}
 		const UINT codepage = CharsetToCodepage(charset);
-		int required_size = MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.data()), mpt::saturate_cast<int>(src.size()), nullptr, 0);
+		int required_size = MultiByteToWideChar(codepage, 0, reinterpret_cast<const CHAR*>(src.data()), mpt::saturate_cast<int>(src.size()), nullptr, 0);
 		if(required_size <= 0)
 		{
 			return widestring();
 		}
 		widestring decoded_string(required_size, widechar());
-		MultiByteToWideChar(codepage, 0, reinterpret_cast<const char*>(src.data()), mpt::saturate_cast<int>(src.size()), decoded_string.data(), required_size);
+		MultiByteToWideChar(codepage, 0, reinterpret_cast<const CHAR*>(src.data()), mpt::saturate_cast<int>(src.size()), decoded_string.data(), required_size);
 		return decoded_string;
 	#else
 		return DecodeImplFallback<Tsrcstring>(charset, src);
