@@ -1292,7 +1292,8 @@ void CSoundFile::InitAmigaResampler()
 
 void CSoundFile::InitOPL()
 {
-	if(!m_opl) m_opl = mpt::make_unique<OPL>();
+	if(!m_opl)
+		m_opl = mpt::make_unique<OPL>(m_MixerSettings.gdwMixingFreq);
 }
 
 
