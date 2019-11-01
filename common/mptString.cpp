@@ -1121,26 +1121,25 @@ static Tdststring EncodeImpl(Charset charset, const widestring &src)
 			return EncodeCodepage<Tdststring>(CharsetToCodepage(charset), src);
 		}
 	#endif
-	Tdststring out;
 	switch(charset)
 	{
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
 		case CharsetLocale:      MPT_ASSERT_NOTREACHED(); break;
 	#else
-		case CharsetLocale:      out = String::ToLocale<Tdststring>(src); break;
+		case CharsetLocale:      return String::ToLocale<Tdststring>(src); break;
 	#endif
 #endif
-		case CharsetUTF8:        out = String::ToUTF8<Tdststring>(src); break;
-		case CharsetASCII:       out = String::ToAscii<Tdststring>(src); break;
-		case CharsetISO8859_1:   out = String::ToISO_8859_1<Tdststring>(src); break;
-		case CharsetISO8859_15:  out = String::To8bit<Tdststring>(src, CharsetTableISO8859_15); break;
-		case CharsetCP437:       out = String::To8bit<Tdststring>(src, CharsetTableCP437); break;
-		case CharsetCP437AMS:    out = String::To8bit<Tdststring>(src, CharsetTableCP437AMS); break;
-		case CharsetCP437AMS2:   out = String::To8bit<Tdststring>(src, CharsetTableCP437AMS2); break;
-		case CharsetWindows1252: out = String::To8bit<Tdststring>(src, CharsetTableWindows1252); break;
+		case CharsetUTF8:        return String::ToUTF8<Tdststring>(src); break;
+		case CharsetASCII:       return String::ToAscii<Tdststring>(src); break;
+		case CharsetISO8859_1:   return String::ToISO_8859_1<Tdststring>(src); break;
+		case CharsetISO8859_15:  return String::To8bit<Tdststring>(src, CharsetTableISO8859_15); break;
+		case CharsetCP437:       return String::To8bit<Tdststring>(src, CharsetTableCP437); break;
+		case CharsetCP437AMS:    return String::To8bit<Tdststring>(src, CharsetTableCP437AMS); break;
+		case CharsetCP437AMS2:   return String::To8bit<Tdststring>(src, CharsetTableCP437AMS2); break;
+		case CharsetWindows1252: return String::To8bit<Tdststring>(src, CharsetTableWindows1252); break;
 	}
-	return out;
+	return Tdststring();
 }
 
 
@@ -1164,26 +1163,25 @@ static widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 			return DecodeCodepage<Tsrcstring>(CharsetToCodepage(charset), src);
 		}
 	#endif
-	widestring out;
 	switch(charset)
 	{
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
 		case CharsetLocale:      MPT_ASSERT_NOTREACHED(); break;
 	#else
-		case CharsetLocale:      out = String::FromLocale<Tsrcstring>(src); break;
+		case CharsetLocale:      return String::FromLocale<Tsrcstring>(src); break;
 	#endif
 #endif
-		case CharsetUTF8:        out = String::FromUTF8<Tsrcstring>(src); break;
-		case CharsetASCII:       out = String::FromAscii<Tsrcstring>(src); break;
-		case CharsetISO8859_1:   out = String::FromISO_8859_1<Tsrcstring>(src); break;
-		case CharsetISO8859_15:  out = String::From8bit<Tsrcstring>(src, CharsetTableISO8859_15); break;
-		case CharsetCP437:       out = String::From8bit<Tsrcstring>(src, CharsetTableCP437); break;
-		case CharsetCP437AMS:    out = String::From8bit<Tsrcstring>(src, CharsetTableCP437AMS); break;
-		case CharsetCP437AMS2:   out = String::From8bit<Tsrcstring>(src, CharsetTableCP437AMS2); break;
-		case CharsetWindows1252: out = String::From8bit<Tsrcstring>(src, CharsetTableWindows1252); break;
+		case CharsetUTF8:        return String::FromUTF8<Tsrcstring>(src); break;
+		case CharsetASCII:       return String::FromAscii<Tsrcstring>(src); break;
+		case CharsetISO8859_1:   return String::FromISO_8859_1<Tsrcstring>(src); break;
+		case CharsetISO8859_15:  return String::From8bit<Tsrcstring>(src, CharsetTableISO8859_15); break;
+		case CharsetCP437:       return String::From8bit<Tsrcstring>(src, CharsetTableCP437); break;
+		case CharsetCP437AMS:    return String::From8bit<Tsrcstring>(src, CharsetTableCP437AMS); break;
+		case CharsetCP437AMS2:   return String::From8bit<Tsrcstring>(src, CharsetTableCP437AMS2); break;
+		case CharsetWindows1252: return String::From8bit<Tsrcstring>(src, CharsetTableWindows1252); break;
 	}
-	return out;
+	return widestring();
 }
 
 
