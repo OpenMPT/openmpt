@@ -12,13 +12,12 @@
 
 #include "Endianness.h"
 
-#if defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
-#include <cstdlib>
-#endif
 #include <locale>
 #include <string>
 #include <stdexcept>
 #include <vector>
+
+#include <cstdlib>
 
 #if defined(MODPLUG_TRACKER)
 #include <cwctype>
@@ -324,8 +323,6 @@ static const uint32 CharsetTableISO8859_1[256] = {
 };
 */
 
-#if defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
-
 static const uint32 CharsetTableISO8859_15[256] = {
 	0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,0x0008,0x0009,0x000a,0x000b,0x000c,0x000d,0x000e,0x000f,
 	0x0010,0x0011,0x0012,0x0013,0x0014,0x0015,0x0016,0x0017,0x0018,0x0019,0x001a,0x001b,0x001c,0x001d,0x001e,0x001f,
@@ -382,8 +379,6 @@ static const uint32 CharsetTableCP437[256] = {
 	0x03b1,0x00df,0x0393,0x03c0,0x03a3,0x03c3,0x00b5,0x03c4,0x03a6,0x0398,0x03a9,0x03b4,0x221e,0x03c6,0x03b5,0x2229,
 	0x2261,0x00b1,0x2265,0x2264,0x2320,0x2321,0x00f7,0x2248,0x00b0,0x2219,0x00b7,0x221a,0x207f,0x00b2,0x25a0,0x00a0
 };
-
-#endif // MPT_CHARSET_INTERNAL || MPT_CHARSET_WIN32
 
 
 #define C(x) (static_cast<uint8>((x)))
@@ -501,8 +496,6 @@ static std::string To8bit(const widestring &str, const uint32 (&table)[256], cha
 	}
 	return res;
 }
-
-#if defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
 
 static widestring FromAscii(const std::string &str, widechar replacement = wide_default_replacement)
 {
@@ -838,10 +831,6 @@ static std::string ToLocale(const std::wstring &str, char replacement = '?')
 
 #endif // MPT_ENABLE_CHARSET_LOCALE && !MPT_LOCALE_ASSUME_CHARSET
 
-#endif // MPT_CHARSET_INTERNAL || MPT_CHARSET_WIN32
-
-#if defined(MPT_CHARSET_INTERNAL) || defined(MPT_CHARSET_WIN32)
-
 static widestring FromUTF8(const std::string &str, widechar replacement = wide_default_replacement)
 {
 	const std::string &in = str;
@@ -997,8 +986,6 @@ static std::string ToUTF8(const widestring &str, char replacement = '?')
 	return out;
 
 }
-
-#endif // MPT_CHARSET_INTERNAL || MPT_CHARSET_WIN32
 
 #if defined(MPT_CHARSET_WIN32)
 
