@@ -27,9 +27,9 @@ OPENMPT_NAMESPACE_BEGIN
 // PSM File Header
 struct PSMFileHeader
 {
-	char     formatID[4];	// "PSM " (new format)
-	uint32le fileSize;		// Filesize - 12
-	char     fileInfoID[4];	// "FILE"
+	char     formatID[4];    // "PSM " (new format)
+	uint32le fileSize;       // Filesize - 12
+	char     fileInfoID[4];  // "FILE"
 };
 
 MPT_BINARY_STRUCT(PSMFileHeader, 12)
@@ -71,9 +71,9 @@ MPT_BINARY_STRUCT(PSMChunk, 8)
 // Song Information
 struct PSMSongHeader
 {
-	char  songType[9];		// Mostly "MAINSONG " (But not in Extreme Pinball!)
-	uint8 compression;		// 1 - uncompressed
-	uint8 numChannels;		// Number of channels
+	char  songType[9];  // Mostly "MAINSONG " (But not in Extreme Pinball!)
+	uint8 compression;  // 1 - uncompressed
+	uint8 numChannels;  // Number of channels
 
 };
 
@@ -83,20 +83,20 @@ MPT_BINARY_STRUCT(PSMSongHeader, 11)
 struct PSMSampleHeader
 {
 	uint8le  flags;
-	char     fileName[8];		// Filename of the original module (without extension)
-	char     sampleID[4];		// INS0...INS9 (only last digit of sample ID, i.e. sample 1 and sample 11 are equal)
+	char     fileName[8];    // Filename of the original module (without extension)
+	char     sampleID[4];    // Identifier like "INS0" (only last digit of sample ID, i.e. sample 1 and sample 11 are equal) or "I0  "
 	char     sampleName[33];
-	uint8le  unknown1[6];		// 00 00 00 00 00 FF
+	uint8le  unknown1[6];    // 00 00 00 00 00 FF
 	uint16le sampleNumber;
 	uint32le sampleLength;
 	uint32le loopStart;
-	uint32le loopEnd;			// FF FF FF FF = end of sample
+	uint32le loopEnd;        // FF FF FF FF = end of sample
 	uint8le  unknown3;
-	uint8le  finetune;		// unused? always 0
+	uint8le  finetune;       // unused? always 0
 	uint8le  defaultVolume;
 	uint32le unknown4;
-	uint32le c5Freq;			// MASI ignores the high 16 bits
-	char     padding[19];		// 00 ... 00
+	uint32le c5Freq;         // MASI ignores the high 16 bits
+	char     padding[19];
 
 	// Convert header data to OpenMPT's internal format
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -126,20 +126,20 @@ MPT_BINARY_STRUCT(PSMSampleHeader, 96)
 struct PSMSinariaSampleHeader
 {
 	uint8le  flags;
-	char     fileName[8];		// Filename of the original module (without extension)
-	char     sampleID[8];		// INS0...INS99999
+	char     fileName[8];  // Filename of the original module (without extension)
+	char     sampleID[8];  // INS0...INS99999
 	char     sampleName[33];
-	uint8le  unknown1[6];		// 00 00 00 00 00 FF
+	uint8le  unknown1[6];  // 00 00 00 00 00 FF
 	uint16le sampleNumber;
 	uint32le sampleLength;
 	uint32le loopStart;
 	uint32le loopEnd;
 	uint16le unknown3;
-	uint8le  finetune;		// Possibly finetune like in PSM16, but sounds even worse than just ignoring it
+	uint8le  finetune;     // Appears to be unused
 	uint8le  defaultVolume;
 	uint32le unknown4;
 	uint16le c5Freq;
-	char     padding[16];		// 00 ... 00
+	char     padding[16];
 
 	// Convert header data to OpenMPT's internal format
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -167,15 +167,13 @@ struct PSMSubSong // For internal use (pattern conversion)
 	std::vector<bool> channelSurround;
 	ORDERINDEX startOrder = ORDERINDEX_INVALID, endOrder = ORDERINDEX_INVALID, restartPos = 0;
 	uint8 defaultTempo = 125, defaultSpeed = 6;
-	char songName[10];
+	char songName[10] = {};
 
 	PSMSubSong()
-	{
-		channelPanning.assign(MAX_BASECHANNELS, 128);
-		channelVolume.assign(MAX_BASECHANNELS, 64);
-		channelSurround.assign(MAX_BASECHANNELS, false);
-		MemsetZero(songName);
-	}
+	    : channelPanning(MAX_BASECHANNELS, 128)
+	    , channelVolume(MAX_BASECHANNELS, 64)
+	    , channelSurround(MAX_BASECHANNELS, false)
+	{ }
 };
 
 
@@ -245,7 +243,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPSM(MemoryFileReader file, co
 	{
 		return ProbeFailure;
 	}
-	if((chunkHeader.id & 0x7f7f7f7fu) != chunkHeader.id) // ASCII?
+	if((chunkHeader.id & 0x7F7F7F7Fu) != chunkHeader.id) // ASCII?
 	{
 		return ProbeFailure;
 	}
@@ -579,34 +577,28 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				// Original header
 				PSMSampleHeader sampleHeader;
 				if(!chunk.ReadStruct(sampleHeader))
-				{
 					continue;
-				}
 
 				smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
 				if(smp > 0 && smp < MAX_SAMPLES)
 				{
 					m_nSamples = std::max(m_nSamples, smp);
-					m_szNames[smp] = mpt::String::ReadBuf(mpt::String::nullTerminated, sampleHeader.sampleName);
-
 					sampleHeader.ConvertToMPT(Samples[smp]);
+					m_szNames[smp] = mpt::String::ReadBuf(mpt::String::nullTerminated, sampleHeader.sampleName);
 				}
 			} else
 			{
 				// Sinaria uses a slightly different sample header
 				PSMSinariaSampleHeader sampleHeader;
 				if(!chunk.ReadStruct(sampleHeader))
-				{
 					continue;
-				}
 
 				smp = static_cast<SAMPLEINDEX>(sampleHeader.sampleNumber + 1);
 				if(smp > 0 && smp < MAX_SAMPLES)
 				{
 					m_nSamples = std::max(m_nSamples, smp);
-					m_szNames[smp] = mpt::String::ReadBuf(mpt::String::nullTerminated, sampleHeader.sampleName);
-
 					sampleHeader.ConvertToMPT(Samples[smp]);
+					m_szNames[smp] = mpt::String::ReadBuf(mpt::String::nullTerminated, sampleHeader.sampleName);
 				}
 			}
 			if(smp > 0 && smp < MAX_SAMPLES)
@@ -1171,8 +1163,8 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 			}
 
-			SAMPLEINDEX smp = sampleHeader.sampleNumber;
-			if(smp > 0 && smp < MAX_SAMPLES)
+			const SAMPLEINDEX smp = sampleHeader.sampleNumber;
+			if(smp > 0 && smp < MAX_SAMPLES && !Samples[smp].HasSampleData())
 			{
 				m_nSamples = std::max(m_nSamples, smp);
 
