@@ -1014,10 +1014,6 @@ static bool HasCharset(Charset charset)
 	return result;
 }
 
-#endif // MPT_CHARSET_WIN32
-
-#if defined(MPT_CHARSET_WIN32)
-
 static UINT CharsetToCodepage(Charset charset)
 {
 	switch(charset)
@@ -1035,6 +1031,36 @@ static UINT CharsetToCodepage(Charset charset)
 		case CharsetWindows1252: return 1252;    break;
 	}
 	return 0;
+}
+
+template<typename Tdststring>
+static Tdststring EncodeCodepage(UINT codepage, const widestring &src)
+{
+	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
+	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
+	Tdststring encoded_string;
+	int required_size = WideCharToMultiByte(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), nullptr, 0, nullptr, nullptr);
+	if(required_size > 0)
+	{
+		encoded_string.resize(required_size);
+		WideCharToMultiByte(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), reinterpret_cast<CHAR*>(encoded_string.data()), required_size, nullptr, nullptr);
+	}
+	return encoded_string;
+}
+
+template<typename Tsrcstring>
+static widestring DecodeCodepage(UINT codepage, const Tsrcstring &src)
+{
+	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
+	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
+	widestring decoded_string;
+	int required_size = MultiByteToWideChar(codepage, 0, reinterpret_cast<const CHAR*>(src.data()), mpt::saturate_cast<int>(src.size()), nullptr, 0);
+	if(required_size > 0)
+	{
+		decoded_string.resize(required_size);
+		MultiByteToWideChar(codepage, 0, reinterpret_cast<const CHAR*>(src.data()), mpt::saturate_cast<int>(src.size()), decoded_string.data(), required_size);
+	}
+	return decoded_string;
 }
 
 #endif // MPT_CHARSET_WIN32
@@ -1069,15 +1095,7 @@ static Tdststring EncodeImpl(Charset charset, const widestring &src)
 		{
 			return EncodeImplFallback<Tdststring>(charset, src);
 		}
-		const UINT codepage = CharsetToCodepage(charset);
-		int required_size = WideCharToMultiByte(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), nullptr, 0, nullptr, nullptr);
-		if(required_size <= 0)
-		{
-			return Tdststring();
-		}
-		Tdststring encoded_string(required_size, Tdststring::value_type());
-		WideCharToMultiByte(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), reinterpret_cast<CHAR*>(encoded_string.data()), required_size, nullptr, nullptr);
-		return encoded_string;
+		return EncodeCodepage<Tdststring>(CharsetToCodepage(charset), src);
 	#else
 		return EncodeImplFallback<Tdststring>(charset, src);
 	#endif
@@ -1148,15 +1166,7 @@ static widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 		{
 			return DecodeImplFallback<Tsrcstring>(charset, src);
 		}
-		const UINT codepage = CharsetToCodepage(charset);
-		int required_size = MultiByteToWideChar(codepage, 0, reinterpret_cast<const CHAR*>(src.data()), mpt::saturate_cast<int>(src.size()), nullptr, 0);
-		if(required_size <= 0)
-		{
-			return widestring();
-		}
-		widestring decoded_string(required_size, widechar());
-		MultiByteToWideChar(codepage, 0, reinterpret_cast<const CHAR*>(src.data()), mpt::saturate_cast<int>(src.size()), decoded_string.data(), required_size);
-		return decoded_string;
+		return DecodeCodepage<Tsrcstring>(CharsetToCodepage(charset), src);
 	#else
 		return DecodeImplFallback<Tsrcstring>(charset, src);
 	#endif
@@ -1473,36 +1483,15 @@ static mpt::Charset CharsetFromCodePage(uint16 codepage, mpt::Charset fallback, 
 	return result;
 }
 
-#if MPT_OS_WINDOWS
-
-static bool TestCodePage(uint16 codepage)
-{
-	return IsValidCodePage(codepage) ? true : false;
-}
-
-static mpt::ustring FromCodePageDirect(uint16 codepage, const std::string & src)
-{
-	int required_size = MultiByteToWideChar(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), nullptr, 0);
-	if(required_size <= 0)
-	{
-		return mpt::ustring();
-	}
-	std::wstring decoded_string(required_size, wchar_t());
-	MultiByteToWideChar(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), decoded_string.data(), required_size);
-	return mpt::ToUnicode(decoded_string);
-}
-
-#endif // MPT_OS_WINDOWS
-
 mpt::ustring ToUnicode(uint16 codepage, mpt::Charset fallback, const std::string &str)
 {
 	#if MPT_OS_WINDOWS
 		mpt::ustring result;
 		bool noCharsetMatch = true;
 		mpt::Charset charset = mpt::CharsetFromCodePage(codepage, fallback, &noCharsetMatch);
-		if(noCharsetMatch && TestCodePage(codepage))
+		if(noCharsetMatch && mpt::String::TestCodePage(codepage))
 		{
-			result = mpt::FromCodePageDirect(codepage, str);
+			result = mpt::ToUnicode(mpt::String::DecodeCodepage<std::string>(codepage, str));
 		} else
 		{
 			result = mpt::ToUnicode(charset, str);
