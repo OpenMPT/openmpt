@@ -438,6 +438,85 @@ static constexpr widechar wide_default_replacement = L'\uFFFD';
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 
 
+#if MPT_OS_WINDOWS
+
+static bool TestCodePage(UINT cp)
+{
+	return IsValidCodePage(cp) ? true : false;
+}
+
+static bool HasCharset(Charset charset)
+{
+	bool result = false;
+	switch(charset)
+	{
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+		case CharsetLocale:      result = true; break;
+#endif
+		case CharsetUTF8:        result = TestCodePage(CP_UTF8); break;
+		case CharsetASCII:       result = TestCodePage(20127);   break;
+		case CharsetISO8859_1:   result = TestCodePage(28591);   break;
+		case CharsetISO8859_15:  result = TestCodePage(28605);   break;
+		case CharsetCP437:       result = TestCodePage(437);     break;
+		case CharsetWindows1252: result = TestCodePage(1252);    break;
+		case CharsetCP437AMS:    result = false; break;
+		case CharsetCP437AMS2:   result = false; break;
+	}
+	return result;
+}
+
+static UINT CharsetToCodepage(Charset charset)
+{
+	switch(charset)
+	{
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+		case CharsetLocale:      return CP_ACP;  break;
+#endif
+		case CharsetUTF8:        return CP_UTF8; break;
+		case CharsetASCII:       return 20127;   break;
+		case CharsetISO8859_1:   return 28591;   break;
+		case CharsetISO8859_15:  return 28605;   break;
+		case CharsetCP437:       return 437;     break;
+		case CharsetCP437AMS:    return 437;     break; // fallback, should not happen
+		case CharsetCP437AMS2:   return 437;     break; // fallback, should not happen
+		case CharsetWindows1252: return 1252;    break;
+	}
+	return 0;
+}
+
+template<typename Tdststring>
+static Tdststring EncodeCodepage(UINT codepage, const widestring &src)
+{
+	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
+	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
+	Tdststring encoded_string;
+	int required_size = WideCharToMultiByte(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), nullptr, 0, nullptr, nullptr);
+	if(required_size > 0)
+	{
+		encoded_string.resize(required_size);
+		WideCharToMultiByte(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), reinterpret_cast<CHAR*>(encoded_string.data()), required_size, nullptr, nullptr);
+	}
+	return encoded_string;
+}
+
+template<typename Tsrcstring>
+static widestring DecodeCodepage(UINT codepage, const Tsrcstring &src)
+{
+	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
+	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
+	widestring decoded_string;
+	int required_size = MultiByteToWideChar(codepage, 0, reinterpret_cast<const CHAR*>(src.data()), mpt::saturate_cast<int>(src.size()), nullptr, 0);
+	if(required_size > 0)
+	{
+		decoded_string.resize(required_size);
+		MultiByteToWideChar(codepage, 0, reinterpret_cast<const CHAR*>(src.data()), mpt::saturate_cast<int>(src.size()), decoded_string.data(), required_size);
+	}
+	return decoded_string;
+}
+
+#endif // MPT_OS_WINDOWS
+
+
 static widestring From8bit(const std::string &str, const uint32 (&table)[256], widechar replacement = wide_default_replacement)
 {
 	widestring res;
@@ -987,84 +1066,6 @@ static std::string ToUTF8(const widestring &str, char replacement = '?')
 
 }
 
-#if defined(MPT_CHARSET_WIN32)
-
-static bool TestCodePage(UINT cp)
-{
-	return IsValidCodePage(cp) ? true : false;
-}
-
-static bool HasCharset(Charset charset)
-{
-	bool result = false;
-	switch(charset)
-	{
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-		case CharsetLocale:      result = true; break;
-#endif
-		case CharsetUTF8:        result = TestCodePage(CP_UTF8); break;
-		case CharsetASCII:       result = TestCodePage(20127);   break;
-		case CharsetISO8859_1:   result = TestCodePage(28591);   break;
-		case CharsetISO8859_15:  result = TestCodePage(28605);   break;
-		case CharsetCP437:       result = TestCodePage(437);     break;
-		case CharsetWindows1252: result = TestCodePage(1252);    break;
-		case CharsetCP437AMS:    result = false; break;
-		case CharsetCP437AMS2:   result = false; break;
-	}
-	return result;
-}
-
-static UINT CharsetToCodepage(Charset charset)
-{
-	switch(charset)
-	{
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-		case CharsetLocale:      return CP_ACP;  break;
-#endif
-		case CharsetUTF8:        return CP_UTF8; break;
-		case CharsetASCII:       return 20127;   break;
-		case CharsetISO8859_1:   return 28591;   break;
-		case CharsetISO8859_15:  return 28605;   break;
-		case CharsetCP437:       return 437;     break;
-		case CharsetCP437AMS:    return 437;     break; // fallback, should not happen
-		case CharsetCP437AMS2:   return 437;     break; // fallback, should not happen
-		case CharsetWindows1252: return 1252;    break;
-	}
-	return 0;
-}
-
-template<typename Tdststring>
-static Tdststring EncodeCodepage(UINT codepage, const widestring &src)
-{
-	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
-	Tdststring encoded_string;
-	int required_size = WideCharToMultiByte(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), nullptr, 0, nullptr, nullptr);
-	if(required_size > 0)
-	{
-		encoded_string.resize(required_size);
-		WideCharToMultiByte(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), reinterpret_cast<CHAR*>(encoded_string.data()), required_size, nullptr, nullptr);
-	}
-	return encoded_string;
-}
-
-template<typename Tsrcstring>
-static widestring DecodeCodepage(UINT codepage, const Tsrcstring &src)
-{
-	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
-	widestring decoded_string;
-	int required_size = MultiByteToWideChar(codepage, 0, reinterpret_cast<const CHAR*>(src.data()), mpt::saturate_cast<int>(src.size()), nullptr, 0);
-	if(required_size > 0)
-	{
-		decoded_string.resize(required_size);
-		MultiByteToWideChar(codepage, 0, reinterpret_cast<const CHAR*>(src.data()), mpt::saturate_cast<int>(src.size()), decoded_string.data(), required_size);
-	}
-	return decoded_string;
-}
-
-#endif // MPT_CHARSET_WIN32
-
 
 // templated on 8bit strings because of type-safe variants
 template<typename Tdststring>
@@ -1080,7 +1081,7 @@ static Tdststring EncodeImpl(Charset charset, const widestring &src)
 			}
 		#endif
 	#endif
-	#if defined(MPT_CHARSET_WIN32)
+	#if MPT_OS_WINDOWS
 		if(HasCharset(charset))
 		{
 			return EncodeCodepage<Tdststring>(CharsetToCodepage(charset), src);
@@ -1123,7 +1124,7 @@ static widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 			}
 		#endif
 	#endif
-	#if defined(MPT_CHARSET_WIN32)
+	#if MPT_OS_WINDOWS
 		if(HasCharset(charset))
 		{
 			return DecodeCodepage<Tsrcstring>(CharsetToCodepage(charset), src);

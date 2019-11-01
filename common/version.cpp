@@ -317,9 +317,6 @@ mpt::ustring GetBuildFeaturesString()
 	mpt::ustring retval;
 	#ifdef LIBOPENMPT_BUILD
 		retval = UL_("")
-		#if defined(MPT_CHARSET_WIN32)
-			UL_(" +WINAPI")
-		#endif
 		#if defined(MPT_WITH_ZLIB)
 			UL_(" +ZLIB")
 		#endif
