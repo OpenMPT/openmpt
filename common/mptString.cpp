@@ -1075,7 +1075,7 @@ static Tdststring EncodeImpl(Charset charset, const widestring &src)
 		{
 			return Tdststring();
 		}
-		Tdststring encoded_string(required_size, char());
+		Tdststring encoded_string(required_size, Tdststring::value_type());
 		WideCharToMultiByte(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), reinterpret_cast<CHAR*>(encoded_string.data()), required_size, nullptr, nullptr);
 		return encoded_string;
 	#else
