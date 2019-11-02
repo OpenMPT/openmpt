@@ -951,7 +951,7 @@ static widestring FromUTF8(const Tsrcstring &str, widechar replacement = wide_de
 
 	// state:
 	std::size_t charsleft = 0;
-	uint32 ucs4 = 0;
+	char32_t ucs4 = 0;
 
 	for ( uint8 c : in ) {
 
@@ -993,9 +993,9 @@ static widestring FromUTF8(const Tsrcstring &str, widechar replacement = wide_de
 						charsleft = 0;
 					}
 					if ( ucs4 <= 0xffff ) {
-						out.push_back( (uint16)ucs4 );
+						out.push_back( static_cast<widechar>(ucs4) );
 					} else {
-						uint32 surrogate = ucs4 - 0x10000;
+						uint32 surrogate = static_cast<uint32>(ucs4) - 0x10000;
 						uint16 hi_sur = static_cast<uint16>( ( 0x36 << 10 ) | ( (surrogate>>10) & ((1<<10)-1) ) );
 						uint16 lo_sur = static_cast<uint16>( ( 0x37 << 10 ) | ( (surrogate>> 0) & ((1<<10)-1) ) );
 						out.push_back( hi_sur );
@@ -1032,7 +1032,7 @@ static Tdststring ToUTF8(const widestring &str, char replacement = '?')
 
 		wchar_t wc = in[i];
 
-		uint32 ucs4 = 0;
+		char32_t ucs4 = 0;
 		if constexpr ( sizeof( widechar ) == 2 ) {
 			uint16 c = static_cast<uint16>( wc );
 			if ( i + 1 < in.length() ) {
@@ -1047,14 +1047,14 @@ static Tdststring ToUTF8(const widestring &str, char replacement = '?')
 					ucs4 = ( static_cast<uint32>(hi_sur) << 10 ) | ( static_cast<uint32>(lo_sur) << 0 );
 				} else {
 					// no surrogate pair
-					ucs4 = static_cast<uint32>( c );
+					ucs4 = static_cast<char32_t>( c );
 				}
 			} else {
 				// no surrogate possible
-				ucs4 = static_cast<uint32>( c );
+				ucs4 = static_cast<char32_t>( c );
 			}
 		} else {
-			ucs4 = static_cast<uint32>( wc );
+			ucs4 = static_cast<char32_t>( wc );
 		}
 		
 		if ( ucs4 > 0x1fffff ) {
