@@ -95,7 +95,7 @@ namespace MidiExport
 
 		operator ModInstrument& () { return m_instr; }
 
-		MidiTrack(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct, MidiTrack *tempoTrack, const std::string &name, const ModInstrument *oldInstr, bool overlappingInstruments)
+		MidiTrack(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct, MidiTrack *tempoTrack, const mpt::ustring &name, const ModInstrument *oldInstr, bool overlappingInstruments)
 			: IMidiPlugin(factory, sndFile, mixStruct)
 			, m_oldInstr(oldInstr)
 			, m_sndFile(sndFile)
@@ -210,13 +210,9 @@ namespace MidiExport
 			return f;
 		}
 
-		void WriteString(StringType strType, const mpt::ustring &str)
+		void WriteString(StringType strType, const mpt::ustring &ustr)
 		{
-			WriteString(strType, mpt::ToCharset(mpt::CharsetLocaleOrUTF8, str));
-		}
-
-		void WriteString(StringType strType, const std::string_view &str)
-		{
+			std::string str = mpt::ToCharset(mpt::Charset::Locale, ustr);
 			if(!str.empty())
 			{
 				uint8 msg[3] = { 0x00, 0xFF, strType };
@@ -385,8 +381,8 @@ namespace MidiExport
 			}
 
 			m_tracks.reserve(m_sndFile.GetNumInstruments() + 1);
-			MidiTrack &tempoTrack = *(new MidiTrack(m_plugFactory, m_sndFile, &tempoTrackPlugin, nullptr, m_sndFile.m_songName.c_str(), nullptr, overlappingInstruments));
-			tempoTrack.WriteString(kText, m_sndFile.m_songMessage);
+			MidiTrack &tempoTrack = *(new MidiTrack(m_plugFactory, m_sndFile, &tempoTrackPlugin, nullptr, mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.m_songName), nullptr, overlappingInstruments));
+			tempoTrack.WriteString(kText, mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.m_songMessage));
 			tempoTrack.WriteString(kCopyright, m_sndFile.m_songArtist);
 			m_tracks.push_back(&tempoTrack);
 
@@ -403,7 +399,7 @@ namespace MidiExport
 				SNDMIXPLUGIN &mixPlugin = m_sndFile.m_MixPlugins[nextPlug++];
 
 				ModInstrument *oldInstr = m_wasInstrumentMode ? m_oldInstruments[i - 1] : nullptr;
-				MidiTrack &midiInstr = *(new MidiTrack(m_plugFactory, m_sndFile, &mixPlugin, &tempoTrack, m_wasInstrumentMode ? std::string(oldInstr->name) : m_sndFile.GetSampleName(i), oldInstr, overlappingInstruments));
+				MidiTrack &midiInstr = *(new MidiTrack(m_plugFactory, m_sndFile, &mixPlugin, &tempoTrack, m_wasInstrumentMode ? mpt::ToUnicode(m_sndFile.GetCharsetInternal(), oldInstr->name) : mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.GetSampleName(i)), oldInstr, overlappingInstruments));
 				ModInstrument &instr = midiInstr;
 				mixPlugin.pMixPlugin = &midiInstr;
 				
