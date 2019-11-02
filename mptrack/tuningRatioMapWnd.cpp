@@ -90,7 +90,7 @@ void CTuningRatioMapWnd::OnPaint()
 			dc.SetTextColor(highLight ? colorTextSel : colorText);
 
 			rect.SetRect(m_cxFont * 1, ypaint, m_cxFont * 2 - 1, ypaint + m_cyFont);
-			dc.DrawText(mpt::ToCString(mpt::CharsetLocale, m_pTuning->GetNoteName(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
+			dc.DrawText(mpt::ToCString(mpt::Charset::Locale, m_pTuning->GetNoteName(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 
 			rect.SetRect(m_cxFont * 2, ypaint, m_cxFont * 3 - 1, ypaint + m_cyFont);
 			dc.DrawText(mpt::cfmt::val(m_pTuning->GetRatio(noteToDraw)), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);

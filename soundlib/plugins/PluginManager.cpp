@@ -450,7 +450,7 @@ static void GetPluginInformation(Vst::AEffect *effect, VSTPluginLib &library)
 #ifdef MODPLUG_TRACKER
 	std::vector<char> s(256, 0);
 	CVstPlugin::DispatchSEH(effect, Vst::effGetVendorString, 0, 0, s.data(), 0, exception);
-	library.vendor = mpt::ToCString(mpt::CharsetLocale, s.data());
+	library.vendor = mpt::ToCString(mpt::Charset::Locale, s.data());
 #endif // MODPLUG_TRACKER
 }
 #endif // NO_VST
@@ -693,7 +693,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		{
 			// Try plugin cache (search for library name)
 			SettingsContainer &cacheFile = theApp.GetPluginCache();
-			mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, mpt::ToUnicode(mpt::CharsetUTF8, mixPlugin.GetLibraryName()), U_(""));
+			mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, mpt::ToUnicode(mpt::Charset::UTF8, mixPlugin.GetLibraryName()), U_(""));
 			if(IDs.length() >= 16)
 			{
 				fullPath = cacheFile.Read<mpt::PathString>(cacheSection, IDs, P_(""));

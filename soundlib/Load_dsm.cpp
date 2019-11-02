@@ -210,7 +210,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_modFormat.formatName = U_("DSIK Format");
 	m_modFormat.type = U_("dsm");
-	m_modFormat.charset = mpt::CharsetCP437;
+	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, songHeader.songName);
 	m_nChannels = std::max(songHeader.numChannels.get(), uint16(1));

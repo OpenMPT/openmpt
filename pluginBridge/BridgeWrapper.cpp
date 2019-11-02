@@ -439,7 +439,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 		throw BridgeException("Could not initialize plugin bridge, it probably crashed.");
 	} else if(initMsg.init.result != 1)
 	{
-		throw BridgeException(mpt::ToCharset(mpt::CharsetUTF8, initMsg.init.str).c_str());
+		throw BridgeException(mpt::ToCharset(mpt::Charset::UTF8, initMsg.init.str).c_str());
 	}
 
 	if(m_sharedMem->effect.flags & effFlagsCanReplacing)

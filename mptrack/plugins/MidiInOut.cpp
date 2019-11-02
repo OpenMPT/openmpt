@@ -92,11 +92,11 @@ enum ChunkFlags
 
 IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 {
-	const std::string programName8 = mpt::ToCharset(mpt::CharsetUTF8, m_programName);
+	const std::string programName8 = mpt::ToCharset(mpt::Charset::UTF8, m_programName);
 	uint32 flags = kLatencyCompensation | kLatencyPresent | (m_sendTimingInfo ? 0 : kIgnoreTiming);
 #ifdef MODPLUG_TRACKER
-	std::string inFriendlyName = mpt::ToCharset(mpt::CharsetUTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::CharsetUTF8, m_inputDevice.name), true, false));
-	std::string outFriendlyName = mpt::ToCharset(mpt::CharsetUTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::CharsetUTF8, m_outputDevice.name), false, false));
+	std::string inFriendlyName = mpt::ToCharset(mpt::Charset::UTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, m_inputDevice.name), true, false));
+	std::string outFriendlyName = mpt::ToCharset(mpt::Charset::UTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, m_outputDevice.name), false, false));
 	if(inFriendlyName != m_inputDevice.name)
 	{
 		flags |= kFriendlyInputName;
@@ -149,7 +149,7 @@ static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::strin
 			auto portName = midiDevice.GetPortName(i);
 			bool deviceNameMatches = (portName == name);
 #ifdef MODPLUG_TRACKER
-			if(!friendlyName.empty() && friendlyName == mpt::ToCharset(mpt::CharsetUTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::CharsetUTF8, portName), isInput, false)))
+			if(!friendlyName.empty() && friendlyName == mpt::ToCharset(mpt::Charset::UTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, portName), isInput, false)))
 			{
 				// Preferred match
 				id = i;
@@ -191,7 +191,7 @@ void MidiInOut::SetChunk(const ChunkData &chunk, bool /*isBank*/)
 
 	std::string progName, inName, outName, inFriendlyName, outFriendlyName;
 	file.ReadString<mpt::String::maybeNullTerminated>(progName, nameStrSize);
-	m_programName = mpt::ToCString(mpt::CharsetUTF8, progName);
+	m_programName = mpt::ToCString(mpt::Charset::UTF8, progName);
 
 	file.ReadString<mpt::String::maybeNullTerminated>(inName, inStrSize);
 	file.ReadString<mpt::String::maybeNullTerminated>(outName, outStrSize);

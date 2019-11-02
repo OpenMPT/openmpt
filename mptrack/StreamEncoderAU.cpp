@@ -37,7 +37,7 @@ private:
 		{
 			return std::string();
 		}
-		return mpt::format("%1=%2\n")(field, mpt::ToCharset(mpt::CharsetUTF8, mpt::String::Replace(tag, U_("="), MPT_UTF8("\xEF\xBF\xBD")))); // U+FFFD
+		return mpt::format("%1=%2\n")(field, mpt::ToCharset(mpt::Charset::UTF8, mpt::String::Replace(tag, U_("="), MPT_UTF8("\xEF\xBF\xBD")))); // U+FFFD
 	}
 
 public:

@@ -188,23 +188,23 @@ static inline std::string truncate(std::string str, std::size_t maxLen)
 }
 
 
-enum Charset {
+enum class Charset {
 
-	CharsetUTF8,
+	UTF8,
 
-	CharsetASCII, // strictly 7-bit ASCII
+	ASCII, // strictly 7-bit ASCII
 
-	CharsetISO8859_1,
-	CharsetISO8859_15,
+	ISO8859_1,
+	ISO8859_15,
 
-	CharsetCP437,
-	CharsetCP437AMS,
-	CharsetCP437AMS2,
+	CP437,
+	CP437AMS,
+	CP437AMS2,
 
-	CharsetWindows1252,
+	Windows1252,
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-	CharsetLocale, // CP_ACP on windows, current C locale otherwise
+	Locale, // CP_ACP on windows, current C locale otherwise
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 };
@@ -212,9 +212,9 @@ enum Charset {
 
 // Locale in tracker builds, UTF8 in non-locale-aware libopenmpt builds.
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-const Charset CharsetLocaleOrUTF8 = CharsetLocale;
+constexpr Charset CharsetLocaleOrUTF8 = Charset::Locale;
 #else
-const Charset CharsetLocaleOrUTF8 = CharsetUTF8;
+constexpr Charset CharsetLocaleOrUTF8 = Charset::UTF8;
 #endif
 
 
@@ -256,7 +256,7 @@ struct charset_char_traits : std::char_traits<char> {
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 
-using lstring = MPT_ENCODED_STRING_TYPE(mpt::CharsetLocale);
+using lstring = MPT_ENCODED_STRING_TYPE(mpt::Charset::Locale);
 
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
@@ -290,7 +290,7 @@ using u8string = std::u8string;
 
 #else // !C++20
 
-using u8string = MPT_ENCODED_STRING_TYPE(mpt::CharsetUTF8);
+using u8string = MPT_ENCODED_STRING_TYPE(mpt::Charset::UTF8);
 
 #define MPT_U8CHAR_TYPE  char
 #define MPT_U8CHAR(x)    x
@@ -506,7 +506,7 @@ CString ToCString(const mpt::ustring &str);
 // i.e. it is NOT generally available at compile time.
 // Use explicit UTF8 encoding,
 // i.e. U+00FC (LATIN SMALL LETTER U WITH DIAERESIS) would be written as "\xC3\xBC".
-#define MPT_UTF8(x) mpt::ToUnicode(mpt::CharsetUTF8, x )
+#define MPT_UTF8(x) mpt::ToUnicode(mpt::Charset::UTF8, x )
 
 
 
@@ -550,7 +550,7 @@ mpt::ustring ToUpperCase(const mpt::ustring &s);
 // Warning: These types will silently do charset conversions. Only use them when this can be tolerated.
 
 // BasicAnyString is convertable to mpt::ustring and constructable from any string at all.
-template <mpt::Charset charset = mpt::CharsetUTF8, bool tryUTF8 = true>
+template <mpt::Charset charset = mpt::Charset::UTF8, bool tryUTF8 = true>
 class BasicAnyString : public mpt::ustring
 {
 
@@ -558,9 +558,9 @@ private:
 	
 	static mpt::ustring From8bit(const std::string &str)
 	{
-		if constexpr(charset == mpt::CharsetUTF8)
+		if constexpr(charset == mpt::Charset::UTF8)
 		{
-			return mpt::ToUnicode(mpt::CharsetUTF8, str);
+			return mpt::ToUnicode(mpt::Charset::UTF8, str);
 		} else
 		{
 			// auto utf8 detection
@@ -568,7 +568,7 @@ private:
 			{
 				if(mpt::IsUTF8(str))
 				{
-					return mpt::ToUnicode(mpt::CharsetUTF8, str);
+					return mpt::ToUnicode(mpt::Charset::UTF8, str);
 				} else
 				{
 					return mpt::ToUnicode(charset, str);
@@ -647,32 +647,32 @@ public:
 // AnyString
 // Try to do the smartest auto-magic we can do.
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-using AnyString = BasicAnyString<mpt::CharsetLocale, true>;
+using AnyString = BasicAnyString<mpt::Charset::Locale, true>;
 #elif MPT_OS_WINDOWS
-using AnyString = BasicAnyString<mpt::CharsetWindows1252, true>;
+using AnyString = BasicAnyString<mpt::Charset::Windows1252, true>;
 #else
-using AnyString = BasicAnyString<mpt::CharsetISO8859_1, true>;
+using AnyString = BasicAnyString<mpt::Charset::ISO8859_1, true>;
 #endif
 
 // AnyStringLocale
 // char-based strings are assumed to be in locale encoding.
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-using AnyStringLocale = BasicAnyString<mpt::CharsetLocale, false>;
+using AnyStringLocale = BasicAnyString<mpt::Charset::Locale, false>;
 #else
-using AnyStringLocale = BasicAnyString<mpt::CharsetUTF8, false>;
+using AnyStringLocale = BasicAnyString<mpt::Charset::UTF8, false>;
 #endif
 
 // AnyStringUTF8orLocale
 // char-based strings are tried in UTF8 first, if this fails, locale is used.
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-using AnyStringUTF8orLocale = BasicAnyString<mpt::CharsetLocale, true>;
+using AnyStringUTF8orLocale = BasicAnyString<mpt::Charset::Locale, true>;
 #else
-using AnyStringUTF8orLocale = BasicAnyString<mpt::CharsetUTF8, false>;
+using AnyStringUTF8orLocale = BasicAnyString<mpt::Charset::UTF8, false>;
 #endif
 
 // AnyStringUTF8
 // char-based strings are assumed to be in UTF8.
-using AnyStringUTF8 = BasicAnyString<mpt::CharsetUTF8, false>;
+using AnyStringUTF8 = BasicAnyString<mpt::Charset::UTF8, false>;
 
 
 

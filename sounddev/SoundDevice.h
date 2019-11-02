@@ -216,7 +216,7 @@ struct Info
 		{
 			// UTF8-encode the name and convert the utf8 to hex.
 			// This ensures that no special characters are contained in the configuration key.
-			std::string utf8String = mpt::ToCharset(mpt::CharsetUTF8, name);
+			std::string utf8String = mpt::ToCharset(mpt::Charset::UTF8, name);
 			mpt::ustring hexString = Util::BinToHex(mpt::as_span(utf8String));
 			result += hexString;
 		} else

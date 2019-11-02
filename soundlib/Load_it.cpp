@@ -830,7 +830,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 #if defined(MPT_EXTERNAL_SAMPLES)
 					SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
 #elif !defined(LIBOPENMPT_BUILD_TEST)
-					AddToLog(LogWarning, mpt::format(U_("Loading external sample %1 ('%2') failed: External samples are not supported."))(i + 1, mpt::ToUnicode(mpt::CharsetUTF8, filenameU8)));
+					AddToLog(LogWarning, mpt::format(U_("Loading external sample %1 ('%2') failed: External samples are not supported."))(i + 1, mpt::ToUnicode(mpt::Charset::UTF8, filenameU8)));
 #endif  // MPT_EXTERNAL_SAMPLES
 				} else
 				{
@@ -1255,7 +1255,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.formatName = (GetType() == MOD_TYPE_MPT) ? U_("OpenMPT MPTM") : mpt::format(U_("Impulse Tracker %1.%2"))(fileHeader.cmwt >> 8, mpt::ufmt::hex0<2>(fileHeader.cmwt & 0xFF));
 	m_modFormat.type = (GetType() == MOD_TYPE_MPT) ? U_("mptm") : U_("it");
 	m_modFormat.madeWithTracker = std::move(madeWithTracker);
-	m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::CharsetWindows1252 : mpt::CharsetCP437;
+	m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::Charset::Windows1252 : mpt::Charset::CP437;
 
 	return true;
 }
@@ -2268,7 +2268,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 
 	if(!m_songArtist.empty() && specs.hasArtistName)
 	{
-		std::string songArtistU8 = mpt::ToCharset(mpt::CharsetUTF8, m_songArtist);
+		std::string songArtistU8 = mpt::ToCharset(mpt::Charset::UTF8, m_songArtist);
 		uint16 length = mpt::saturate_cast<uint16>(songArtistU8.length());
 		WRITEMODULARHEADER(MagicLE("AUTH"), length);
 		mpt::IO::WriteRaw(f, songArtistU8.c_str(), length);
@@ -2371,7 +2371,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 				{
 					std::string artist;
 					chunk.ReadString<mpt::String::spacePadded>(artist, chunk.GetLength());
-					m_songArtist = mpt::ToUnicode(mpt::CharsetUTF8, artist);
+					m_songArtist = mpt::ToUnicode(mpt::Charset::UTF8, artist);
 				}
 				break;
 			case MagicBE("ChnS"):

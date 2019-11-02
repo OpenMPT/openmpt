@@ -660,7 +660,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	for(const auto &msg : messages)
 	{
 		if(warnings[msg.warning])
-			AddToLog(LogInformation, mpt::ToUnicode(mpt::CharsetUTF8, msg.mesage));
+			AddToLog(LogInformation, mpt::ToUnicode(mpt::Charset::UTF8, msg.mesage));
 	}
 
 	SetModified();

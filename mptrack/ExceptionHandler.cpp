@@ -265,7 +265,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		mpt::SafeOutputFile sf(crashDirectory.path + P_("error.txt"), std::ios::binary, mpt::FlushMode::Full);
 		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
-		f << mpt::String::Replace(mpt::ToCharset(mpt::CharsetUTF8, errorMessage), "\n", "\r\n");
+		f << mpt::String::Replace(mpt::ToCharset(mpt::Charset::UTF8, errorMessage), "\n", "\r\n");
 	}
 
 	{
@@ -308,7 +308,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 					continue;
 				}
 				f
-					<< mpt::ToCharset(mpt::CharsetUTF8, it.first.FormatAsString() + U_(" = ") + it.second.GetRefValue().FormatValueAsString())
+					<< mpt::ToCharset(mpt::Charset::UTF8, it.first.FormatAsString() + U_(" = ") + it.second.GetRefValue().FormatValueAsString())
 					<< std::endl;
 			}
 		}
@@ -354,14 +354,14 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		mpt::SafeOutputFile sf(crashDirectory.path + P_("about-openmpt.txt"), std::ios::binary, mpt::FlushMode::Full);
 		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
-		f << mpt::ToCharset(mpt::CharsetUTF8, CAboutDlg::GetTabText(0));
+		f << mpt::ToCharset(mpt::Charset::UTF8, CAboutDlg::GetTabText(0));
 	}
 
 	{
 		mpt::SafeOutputFile sf(crashDirectory.path + P_("about-components.txt"), std::ios::binary, mpt::FlushMode::Full);
 		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
-		f << mpt::ToCharset(mpt::CharsetUTF8, CAboutDlg::GetTabText(1));
+		f << mpt::ToCharset(mpt::Charset::UTF8, CAboutDlg::GetTabText(1));
 	}
 
 	Reporting::Error(errorMessage, (mode == DumpModeWarning) ? "OpenMPT Warning" : "OpenMPT Crash", CMainFrame::GetMainFrame());
@@ -591,7 +591,7 @@ static void UnhandledExceptionFilterImpl(_EXCEPTION_POINTERS *pExceptionInfo)
 	{
 		const std::exception & e = *pE;
 		errorMessage = mpt::format(U_("Unhandled C++ exception '%1' occurred at address 0x%2: '%3'."))
-			( mpt::ToUnicode(mpt::CharsetASCII, typeid(e).name())
+			( mpt::ToUnicode(mpt::Charset::ASCII, typeid(e).name())
 			, mpt::ufmt::hex0<mpt::pointer_size*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
 			, mpt::get_exception_text<mpt::ustring>(e)
 			);
@@ -715,7 +715,7 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 	if(IsDebuggerPresent())
 	{
 		OutputDebugString(_T("ASSERT("));
-		OutputDebugString(mpt::ToWin(mpt::CharsetASCII, expr).c_str());
+		OutputDebugString(mpt::ToWin(mpt::Charset::ASCII, expr).c_str());
 		OutputDebugString(_T(") failed\n"));
 		DebugBreak();
 	} else
@@ -724,18 +724,18 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 		if(msg)
 		{
 			errorMessage = mpt::format(U_("Internal state inconsistency detected at %1(%2). This is just a warning that could potentially lead to a crash later on: %3 [%4]."))
-				( mpt::ToUnicode(mpt::CharsetASCII, loc.file_name() ? loc.file_name() : "")
+				( mpt::ToUnicode(mpt::Charset::ASCII, loc.file_name() ? loc.file_name() : "")
 				, loc.line()
-				, mpt::ToUnicode(mpt::CharsetASCII, msg)
-				, mpt::ToUnicode(mpt::CharsetASCII, loc.function_name() ? loc.function_name() : "")
+				, mpt::ToUnicode(mpt::Charset::ASCII, msg)
+				, mpt::ToUnicode(mpt::Charset::ASCII, loc.function_name() ? loc.function_name() : "")
 				);
 		} else
 		{
 			errorMessage = mpt::format(U_("Internal error occurred at %1(%2): ASSERT(%3) failed in [%4]."))
-				( mpt::ToUnicode(mpt::CharsetASCII, loc.file_name() ? loc.file_name() : "")
+				( mpt::ToUnicode(mpt::Charset::ASCII, loc.file_name() ? loc.file_name() : "")
 				, loc.line()
-				, mpt::ToUnicode(mpt::CharsetASCII, expr)
-				, mpt::ToUnicode(mpt::CharsetASCII, loc.function_name() ? loc.function_name() : "")
+				, mpt::ToUnicode(mpt::Charset::ASCII, expr)
+				, mpt::ToUnicode(mpt::Charset::ASCII, loc.function_name() ? loc.function_name() : "")
 				);
 		}
 		report.ReportError(errorMessage);

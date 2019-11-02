@@ -99,7 +99,7 @@ bool CRtAudioDevice::InternalOpen()
 		m_StreamOptions.flags = RtAudioStreamFlags();
 		m_StreamOptions.numberOfBuffers = mpt::saturate_round<int>(m_Settings.Latency * m_Settings.Samplerate / m_FramesPerChunk);
 		m_StreamOptions.priority = 0;
-		m_StreamOptions.streamName = mpt::ToCharset(mpt::CharsetUTF8, m_AppInfo.GetName());
+		m_StreamOptions.streamName = mpt::ToCharset(mpt::Charset::UTF8, m_AppInfo.GetName());
 		if(m_Settings.BoostThreadPriority)
 		{
 			m_StreamOptions.flags |= RTAUDIO_SCHEDULE_REALTIME;
@@ -395,7 +395,7 @@ void CRtAudioDevice::SendError(const RtAudioError &e)
 			level = LogError;
 			break;
 	}
-	SendDeviceMessage(level, mpt::ToUnicode(mpt::CharsetUTF8, e.getMessage()));
+	SendDeviceMessage(level, mpt::ToUnicode(mpt::Charset::UTF8, e.getMessage()));
 }
 
 
@@ -406,7 +406,7 @@ RtAudio::Api CRtAudioDevice::GetApi(SoundDevice::Info info)
 	{
 		return RtAudio::UNSPECIFIED;
 	}
-	return RtAudio::getCompiledApiByName(mpt::ToCharset(mpt::CharsetUTF8, apidev[0]));
+	return RtAudio::getCompiledApiByName(mpt::ToCharset(mpt::Charset::UTF8, apidev[0]));
 }
 
 
@@ -450,14 +450,14 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 					continue;
 				}
 				SoundDevice::Info info = SoundDevice::Info();
-				info.type = U_("RtAudio") + U_("-") + mpt::ToUnicode(mpt::CharsetUTF8, RtAudio::getApiName(rtaudio.getCurrentApi()));
+				info.type = U_("RtAudio") + U_("-") + mpt::ToUnicode(mpt::Charset::UTF8, RtAudio::getApiName(rtaudio.getCurrentApi()));
 				std::vector<mpt::ustring> apidev;
-				apidev.push_back(mpt::ToUnicode(mpt::CharsetUTF8, RtAudio::getApiName(rtaudio.getCurrentApi())));
+				apidev.push_back(mpt::ToUnicode(mpt::Charset::UTF8, RtAudio::getApiName(rtaudio.getCurrentApi())));
 				apidev.push_back(mpt::ufmt::val(device));
 				info.internalID = mpt::String::Combine(apidev, U_(","));
-				info.name = mpt::ToUnicode(mpt::CharsetUTF8, rtinfo.name);
-				info.apiName = mpt::ToUnicode(mpt::CharsetUTF8, RtAudio::getApiDisplayName(rtaudio.getCurrentApi()));
-				info.extraData[U_("RtAudio-ApiDisplayName")] = mpt::ToUnicode(mpt::CharsetUTF8, RtAudio::getApiDisplayName(rtaudio.getCurrentApi())); 
+				info.name = mpt::ToUnicode(mpt::Charset::UTF8, rtinfo.name);
+				info.apiName = mpt::ToUnicode(mpt::Charset::UTF8, RtAudio::getApiDisplayName(rtaudio.getCurrentApi()));
+				info.extraData[U_("RtAudio-ApiDisplayName")] = mpt::ToUnicode(mpt::Charset::UTF8, RtAudio::getApiDisplayName(rtaudio.getCurrentApi())); 
 				info.apiPath.push_back(U_("RtAudio"));
 				info.isDefault = rtinfo.isDefaultOutput;
 				info.useNameAsIdentifier = true;

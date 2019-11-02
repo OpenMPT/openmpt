@@ -263,7 +263,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	std::vector<mpt::Windows::Architecture> architectures = mpt::Windows::GetSupportedProcessArchitectures(mpt::Windows::GetHostArchitecture());
 	for(const auto & arch : architectures)
 	{
-		j["System"]["Windows"]["ProcessArchitectures"][mpt::ToCharset(mpt::CharsetUTF8, mpt::Windows::Name(arch))] = true;
+		j["System"]["Windows"]["ProcessArchitectures"][mpt::ToCharset(mpt::Charset::UTF8, mpt::Windows::Name(arch))] = true;
 	}
 	j["System"]["Memory"] = mpt::Windows::GetSystemMemorySize() / 1024 / 1024;  // MB
 	j["System"]["Threads"] = std::thread::hardware_concurrency();
@@ -390,7 +390,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 		requestStatistics.dataMimeType = HTTP::MimeType::JSON();
 		requestStatistics.acceptMimeTypes = HTTP::MimeTypes::JSON();
 		std::string jsondata = statistics;
-		MPT_LOG(LogInformation, "Update", mpt::ToUnicode(mpt::CharsetUTF8, jsondata));
+		MPT_LOG(LogInformation, "Update", mpt::ToUnicode(mpt::Charset::UTF8, jsondata));
 		requestStatistics.data = mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(jsondata));
 		internet(requestStatistics);
 	}
@@ -405,7 +405,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	CUpdateCheck::Result result;
 	result.UpdateAvailable = false;
 	result.CheckTime = time(nullptr);
-	CString resultData = mpt::ToCString(mpt::CharsetUTF8, resultHTTP.Data);
+	CString resultData = mpt::ToCString(mpt::Charset::UTF8, resultHTTP.Data);
 	if(resultData.CompareNoCase(_T("noupdate")) != 0)
 	{
 		CString token;
@@ -517,14 +517,14 @@ void CUpdateCheck::ShowFailureGUI(WPARAM wparam, LPARAM lparam)
 
 
 CUpdateCheck::Error::Error(CString errorMessage)
-	: std::runtime_error(mpt::ToCharset(mpt::CharsetUTF8, errorMessage))
+	: std::runtime_error(mpt::ToCharset(mpt::Charset::UTF8, errorMessage))
 {
 	return;
 }
 
 
 CUpdateCheck::Error::Error(CString errorMessage, DWORD errorCode)
-	: std::runtime_error(mpt::ToCharset(mpt::CharsetUTF8, FormatErrorCode(errorMessage, errorCode)))
+	: std::runtime_error(mpt::ToCharset(mpt::Charset::UTF8, FormatErrorCode(errorMessage, errorCode)))
 {
 	return;
 }
@@ -672,7 +672,7 @@ void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResu
 		{
 			statistics += U_("POST ") + settings.apiURL + U_("statistics/") + UL_("\n");
 		}
-		statistics += mpt::String::Replace(mpt::ToUnicode(mpt::CharsetUTF8, CUpdateCheck::GetStatisticsDataV3(settings)), U_("\t"), U_("    "));
+		statistics += mpt::String::Replace(mpt::ToUnicode(mpt::Charset::UTF8, CUpdateCheck::GetStatisticsDataV3(settings)), U_("\t"), U_("    "));
 	}
 
 	InfoDialog dlg(this);

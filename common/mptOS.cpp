@@ -70,7 +70,7 @@ mpt::OS::Class GetClass()
 		{
 			return mpt::OS::Class::Unknown;
 		}
-		return mpt::OS::GetClassFromSysname(mpt::ToUnicode(mpt::CharsetASCII, mpt::String::ReadAutoBuf(uname_result.sysname)));
+		return mpt::OS::GetClassFromSysname(mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadAutoBuf(uname_result.sysname)));
 	#endif // MPT_OS_WINDOWS
 }
 
@@ -447,7 +447,7 @@ mpt::ustring Version::GetName() const
 			} else
 			{
 				result = mpt::format(U_("Wine (unknown version: '%1') (%2)"))(
-					  mpt::ToUnicode(mpt::CharsetUTF8, v.RawVersion())
+					  mpt::ToUnicode(mpt::Charset::UTF8, v.RawVersion())
 					, name
 					);
 			}
@@ -942,8 +942,8 @@ VersionContext::VersionContext()
 			m_RawHostSysName = wine_host_sysname ? wine_host_sysname : "";
 			m_RawHostRelease = wine_host_release ? wine_host_release : "";
 		}
-		m_Version = mpt::Wine::Version(mpt::ToUnicode(mpt::CharsetUTF8, m_RawVersion));
-		m_HostClass = mpt::OS::GetClassFromSysname(mpt::ToUnicode(mpt::CharsetUTF8, m_RawHostSysName));
+		m_Version = mpt::Wine::Version(mpt::ToUnicode(mpt::Charset::UTF8, m_RawVersion));
+		m_HostClass = mpt::OS::GetClassFromSysname(mpt::ToUnicode(mpt::Charset::UTF8, m_RawHostSysName));
 	#endif // MPT_OS_WINDOWS
 }
 

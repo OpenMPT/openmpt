@@ -148,7 +148,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.formatName = U_("Composer 669");
 	m_modFormat.type = U_("669");
 	m_modFormat.madeWithTracker = !memcmp(fileHeader.magic, "if", 2) ? UL_("Composer 669") : UL_("UNIS 669");
-	m_modFormat.charset = mpt::CharsetCP437;
+	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_nSamples = fileHeader.samples;
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)

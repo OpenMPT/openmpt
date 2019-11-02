@@ -1962,7 +1962,7 @@ void CViewSample::OnEditCopy()
 			MemsetZero(*sampleHeader);
 			sampleHeader->ConvertToS3M(sample);
 			mpt::String::WriteBuf(mpt::String::nullTerminated, sampleHeader->name) = sndFile.m_szNames[m_nSample];
-			mpt::String::WriteBuf(mpt::String::maybeNullTerminated, sampleHeader->reserved2) = mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString());
+			mpt::String::WriteBuf(mpt::String::maybeNullTerminated, sampleHeader->reserved2) = mpt::ToCharset(mpt::Charset::UTF8, Version::Current().GetOpenMPTVersionString());
 		}
 		return;
 	}

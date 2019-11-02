@@ -167,17 +167,17 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 	s.write(reinterpret_cast<const char*>(&tHeader), sizeof(tHeader));
 	totalID3v2Size += sizeof(tHeader);
 
-	WriteID3v2Frame("TIT2", mpt::ToCharset(mpt::CharsetUTF8, tags.title), s);
-	WriteID3v2Frame("TPE1", mpt::ToCharset(mpt::CharsetUTF8, tags.artist), s);
-	WriteID3v2Frame("TCOM", mpt::ToCharset(mpt::CharsetUTF8, tags.artist), s);
-	WriteID3v2Frame("TALB", mpt::ToCharset(mpt::CharsetUTF8, tags.album), s);
-	WriteID3v2Frame("TCON", mpt::ToCharset(mpt::CharsetUTF8, tags.genre), s);
-	//WriteID3v2Frame("TYER", mpt::ToCharset(mpt::CharsetUTF8, tags.year), s);		// Deprecated
-	WriteID3v2Frame("TDRC", mpt::ToCharset(mpt::CharsetUTF8, tags.year), s);
-	WriteID3v2Frame("TBPM", mpt::ToCharset(mpt::CharsetUTF8, tags.bpm), s);
-	WriteID3v2Frame("WXXX", mpt::ToCharset(mpt::CharsetUTF8, tags.url), s);
-	WriteID3v2Frame("TENC", mpt::ToCharset(mpt::CharsetUTF8, tags.encoder), s);
-	WriteID3v2Frame("COMM", mpt::ToCharset(mpt::CharsetUTF8, tags.comments), s);
+	WriteID3v2Frame("TIT2", mpt::ToCharset(mpt::Charset::UTF8, tags.title), s);
+	WriteID3v2Frame("TPE1", mpt::ToCharset(mpt::Charset::UTF8, tags.artist), s);
+	WriteID3v2Frame("TCOM", mpt::ToCharset(mpt::Charset::UTF8, tags.artist), s);
+	WriteID3v2Frame("TALB", mpt::ToCharset(mpt::Charset::UTF8, tags.album), s);
+	WriteID3v2Frame("TCON", mpt::ToCharset(mpt::Charset::UTF8, tags.genre), s);
+	//WriteID3v2Frame("TYER", mpt::ToCharset(mpt::Charset::UTF8, tags.year), s);		// Deprecated
+	WriteID3v2Frame("TDRC", mpt::ToCharset(mpt::Charset::UTF8, tags.year), s);
+	WriteID3v2Frame("TBPM", mpt::ToCharset(mpt::Charset::UTF8, tags.bpm), s);
+	WriteID3v2Frame("WXXX", mpt::ToCharset(mpt::Charset::UTF8, tags.url), s);
+	WriteID3v2Frame("TENC", mpt::ToCharset(mpt::Charset::UTF8, tags.encoder), s);
+	WriteID3v2Frame("COMM", mpt::ToCharset(mpt::Charset::UTF8, tags.comments), s);
 	if(replayGain.Tag == ReplayGain::TagReserve)
 	{
 		paddingSize += GetMaxReplayGainFramesSizes();
@@ -354,7 +354,7 @@ static void GenreEnumCallback(int num, const char *name, void *cookie)
 	Encoder::Traits &traits = *reinterpret_cast<Encoder::Traits*>(cookie);
 	if(name)
 	{
-		traits.genres.push_back(mpt::ToUnicode(mpt::CharsetISO8859_1, name));
+		traits.genres.push_back(mpt::ToUnicode(mpt::Charset::ISO8859_1, name));
 	}
 }
 
@@ -540,13 +540,13 @@ public:
 			if(id3type == ID3v2Lame || id3type == ID3v1)
 			{
 				// Lame API expects Latin1, which is sad, but we cannot change that.
-				if(!tags.title.empty())    id3tag_set_title(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.title   ).c_str());
-				if(!tags.artist.empty())   id3tag_set_artist( gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.artist  ).c_str());
-				if(!tags.album.empty())    id3tag_set_album(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.album   ).c_str());
-				if(!tags.year.empty())     id3tag_set_year(   gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.year    ).c_str());
-				if(!tags.comments.empty()) id3tag_set_comment(gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.comments).c_str());
-				if(!tags.trackno.empty())  id3tag_set_track(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.trackno ).c_str());
-				if(!tags.genre.empty())    id3tag_set_genre(  gfp, mpt::ToCharset(mpt::CharsetISO8859_1, tags.genre   ).c_str());
+				if(!tags.title.empty())    id3tag_set_title(  gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.title   ).c_str());
+				if(!tags.artist.empty())   id3tag_set_artist( gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.artist  ).c_str());
+				if(!tags.album.empty())    id3tag_set_album(  gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.album   ).c_str());
+				if(!tags.year.empty())     id3tag_set_year(   gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.year    ).c_str());
+				if(!tags.comments.empty()) id3tag_set_comment(gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.comments).c_str());
+				if(!tags.trackno.empty())  id3tag_set_track(  gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.trackno ).c_str());
+				if(!tags.genre.empty())    id3tag_set_genre(  gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.genre   ).c_str());
 			} else if(id3type == ID3v2OpenMPT)
 			{
 				Tags = tags;

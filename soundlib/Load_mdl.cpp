@@ -473,10 +473,10 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		: (fileHeader.version == 0x10) ? U_("2.3")
 		: (fileHeader.version == 0x00) ? U_("2.0 - 2.2b") // there was no 1.x release
 		: U_(""));
-	m_modFormat.charset = mpt::CharsetCP437;
+	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, info.title);
-	m_songArtist = mpt::ToUnicode(mpt::CharsetCP437, mpt::String::ReadBuf(mpt::String::spacePadded, info.composer));
+	m_songArtist = mpt::ToUnicode(mpt::Charset::CP437, mpt::String::ReadBuf(mpt::String::spacePadded, info.composer));
 
 	m_nDefaultGlobalVolume = info.globalVol + 1;
 	m_nDefaultSpeed = Clamp<uint8, uint8>(info.speed, 1, 255);

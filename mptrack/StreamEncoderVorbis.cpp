@@ -80,7 +80,7 @@ private:
 	{
 		if(!field.empty() && !data.empty())
 		{
-			vorbis_comment_add_tag(&vc, field.c_str(), mpt::ToCharset(mpt::CharsetUTF8, data).c_str());
+			vorbis_comment_add_tag(&vc, field.c_str(), mpt::ToCharset(mpt::Charset::UTF8, data).c_str());
 		}
 	}
 public:

@@ -110,8 +110,8 @@ void Logger::SendLogMessage(const mpt::source_location &loc, LogLevel level, con
 	#endif // MODPLUG_TRACKER
 	// remove eol if already present and add log level prefix
 	const mpt::ustring message = LogLevelToString(level) + U_(": ") + mpt::String::RTrim(text, U_("\r\n"));
-	const mpt::ustring file = mpt::ToUnicode(mpt::CharsetASCII, loc.file_name() ? loc.file_name() : "");
-	const mpt::ustring function = mpt::ToUnicode(mpt::CharsetASCII, loc.function_name() ? loc.function_name() : "");
+	const mpt::ustring file = mpt::ToUnicode(mpt::Charset::ASCII, loc.file_name() ? loc.file_name() : "");
+	const mpt::ustring function = mpt::ToUnicode(mpt::Charset::ASCII, loc.function_name() ? loc.function_name() : "");
 	const mpt::ustring line = mpt::ufmt::dec(loc.line());
 	#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 #if MPT_OS_WINDOWS
@@ -132,7 +132,7 @@ void Logger::SendLogMessage(const mpt::source_location &loc, LogLevel level, con
 			}
 			if(s_logfile)
 			{
-				mpt::IO::WriteText(s_logfile, mpt::ToCharset(mpt::CharsetUTF8, mpt::format(U_("%1+%2 %3(%4): %5 [%6]\n"))
+				mpt::IO::WriteText(s_logfile, mpt::ToCharset(mpt::Charset::UTF8, mpt::format(U_("%1+%2 %3(%4): %5 [%6]\n"))
 					( mpt::Date::ANSI::ToUString(cur)
 					, mpt::ufmt::right(6, mpt::ufmt::dec(diff))
 					, file
@@ -317,7 +317,7 @@ bool Dump(const mpt::PathString &filename)
 
 	mpt::ofstream f(filename);
 
-	f << "Build: OpenMPT " << mpt::ToCharset(mpt::CharsetUTF8, Build::GetVersionStringExtended()) << std::endl;
+	f << "Build: OpenMPT " << mpt::ToCharset(mpt::Charset::UTF8, Build::GetVersionStringExtended()) << std::endl;
 
 	bool qpcValid = false;
 
@@ -329,7 +329,7 @@ bool Dump(const mpt::PathString &filename)
 		qpcValid = true;
 	}
 
-	f << "Dump: " << mpt::ToCharset(mpt::CharsetUTF8, mpt::Date::ANSI::ToUString(ftNow)) << std::endl;
+	f << "Dump: " << mpt::ToCharset(mpt::Charset::UTF8, mpt::Date::ANSI::ToUString(ftNow)) << std::endl;
 	f << "Captured events: " << Entries.size() << std::endl;
 	if(qpcValid && (Entries.size() > 0))
 	{
@@ -346,7 +346,7 @@ bool Dump(const mpt::PathString &filename)
 		std::string time;
 		if(qpcValid)
 		{
-			time = mpt::ToCharset(mpt::CharsetUTF8, mpt::Date::ANSI::ToUString( ftNow - static_cast<int64>( static_cast<double>(qpcNow.QuadPart - entry.Timestamp) * (10000000.0 / static_cast<double>(qpcFreq.QuadPart) ) ) ) );
+			time = mpt::ToCharset(mpt::Charset::UTF8, mpt::Date::ANSI::ToUString( ftNow - static_cast<int64>( static_cast<double>(qpcNow.QuadPart - entry.Timestamp) * (10000000.0 / static_cast<double>(qpcFreq.QuadPart) ) ) ) );
 		} else
 		{
 			time = mpt::format("0x%1")(mpt::fmt::hex0<16>(entry.Timestamp));

@@ -93,7 +93,7 @@ private:
 	{
 		if(!field.empty() && !data.empty())
 		{
-			opus_comments.push_back(std::make_pair(field, mpt::ToCharset(mpt::CharsetUTF8, data)));
+			opus_comments.push_back(std::make_pair(field, mpt::ToCharset(mpt::Charset::UTF8, data)));
 		}
 	}
 public:

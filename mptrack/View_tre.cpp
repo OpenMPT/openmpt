@@ -217,7 +217,7 @@ void CModTree::Init()
 		m_hMidiLib = InsertItem(_T("MIDI Library"), IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
 		for(UINT iMidGrp = 0; iMidGrp < 17; iMidGrp++)
 		{
-			InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, mpt::ToCString(mpt::CharsetASCII, szMidiGroupNames[iMidGrp]), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, (MODITEM_HDR_MIDIGROUP << MIDILIB_SHIFT) | iMidGrp, m_hMidiLib, TVI_LAST);
+			InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, mpt::ToCString(mpt::Charset::ASCII, szMidiGroupNames[iMidGrp]), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, (MODITEM_HDR_MIDIGROUP << MIDILIB_SHIFT) | iMidGrp, m_hMidiLib, TVI_LAST);
 		}
 	}
 	m_hInsLib = InsertItem(_T("Instrument Library"), IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
@@ -550,7 +550,7 @@ void CModTree::RefreshMidiLibrary()
 	for(UINT iMidi = 0; iMidi < 128; iMidi++)
 	{
 		DWORD dwImage = IMAGE_INSTRMUTE;
-		s = mpt::cfmt::val(iMidi) + _T(": ") + mpt::ToCString(mpt::CharsetASCII, szMidiProgramNames[iMidi]);
+		s = mpt::cfmt::val(iMidi) + _T(": ") + mpt::ToCString(mpt::Charset::ASCII, szMidiProgramNames[iMidi]);
 		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
 		if(!midiLib[iMidi].empty())
 		{
@@ -586,7 +586,7 @@ void CModTree::RefreshMidiLibrary()
 	{
 		DWORD dwImage = IMAGE_NOSAMPLE;
 		s = mpt::ToCString(CSoundFile::GetNoteName((ModCommand::NOTE)(iPerc + NOTE_MIN), CSoundFile::GetDefaultNoteNames()))
-		    + _T(": ") + mpt::ToCString(mpt::CharsetASCII, szMidiPercussionNames[iPerc - 24]);
+		    + _T(": ") + mpt::ToCString(mpt::Charset::ASCII, szMidiPercussionNames[iPerc - 24]);
 		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
 		if(!midiLib[iPerc | 0x80].empty())
 		{
@@ -618,7 +618,7 @@ void CModTree::RefreshMidiLibrary()
 
 void CModTree::RefreshDlsBanks()
 {
-	const mpt::Charset charset = mpt::CharsetLocale;
+	const mpt::Charset charset = mpt::Charset::Locale;
 	TCHAR s[256];
 	HTREEITEM hDlsRoot = m_hMidiLib;
 

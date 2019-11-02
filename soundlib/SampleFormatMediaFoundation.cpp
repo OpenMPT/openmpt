@@ -263,7 +263,7 @@ std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 				guidMap[guid].AddExtension(mpt::PathString::FromWide(handlerType.substr(1)));
 			} else
 			{
-				guidMap[guid].AddMimeType(mpt::ToCharset(mpt::CharsetASCII, handlerType));
+				guidMap[guid].AddMimeType(mpt::ToCharset(mpt::Charset::ASCII, handlerType));
 			}
 
 		}

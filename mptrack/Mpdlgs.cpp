@@ -34,7 +34,7 @@ const TCHAR *gszChnCfgNames[3] =
 
 static double ParseTime(CString str)
 {
-	return ConvertStrTo<double>(mpt::ToCharset(mpt::CharsetASCII, str)) / 1000.0;
+	return ConvertStrTo<double>(mpt::ToCharset(mpt::Charset::ASCII, str)) / 1000.0;
 }
 
 
@@ -1242,13 +1242,13 @@ BOOL CEQSavePresetDlg::OnInitDialog()
 		int ndx = 0;
 		for (UINT i=0; i<4; i++)
 		{
-			int n = pCombo->AddString(mpt::ToCString(mpt::CharsetLocale, TrackerSettings::Instance().m_EqUserPresets[i].szName));
+			int n = pCombo->AddString(mpt::ToCString(mpt::Charset::Locale, TrackerSettings::Instance().m_EqUserPresets[i].szName));
 			pCombo->SetItemData( n, i);
 			if (!lstrcmpiA(TrackerSettings::Instance().m_EqUserPresets[i].szName, m_EQ.szName)) ndx = n;
 		}
 		pCombo->SetCurSel(ndx);
 	}
-	SetDlgItemText(IDC_EDIT1, mpt::ToCString(mpt::CharsetLocale, m_EQ.szName));
+	SetDlgItemText(IDC_EDIT1, mpt::ToCString(mpt::Charset::Locale, m_EQ.szName));
 	return TRUE;
 }
 
@@ -1262,7 +1262,7 @@ void CEQSavePresetDlg::OnOK()
 		if ((n < 0) || (n >= 4)) n = 0;
 		CString s;
 		GetDlgItemText(IDC_EDIT1, s);
-		mpt::String::WriteAutoBuf(m_EQ.szName) = mpt::ToCharset(mpt::CharsetLocale, s);
+		mpt::String::WriteAutoBuf(m_EQ.szName) = mpt::ToCharset(mpt::Charset::Locale, s);
 		TrackerSettings::Instance().m_EqUserPresets[n] = m_EQ;
 	}
 	CDialog::OnOK();
@@ -1634,7 +1634,7 @@ void COptionsPlayer::UpdateDialog()
 	}
 	for(int i = 0; i < CountOf(TrackerSettings::Instance().m_EqUserPresets); i++)
 	{
-		SetDlgItemText(IDC_BUTTON1 + i, mpt::ToCString(mpt::CharsetLocale, TrackerSettings::Instance().m_EqUserPresets[i].szName));
+		SetDlgItemText(IDC_BUTTON1 + i, mpt::ToCString(mpt::Charset::Locale, TrackerSettings::Instance().m_EqUserPresets[i].szName));
 	}
 }
 

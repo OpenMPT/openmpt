@@ -759,9 +759,9 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 				break;
 		}
 		result.internalID = mpt::ufmt::dec(dev);
-		result.name = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->name);
-		result.apiName = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
-		result.extraData[U_("PortAudio-HostAPI-name")] = mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
+		result.name = mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetDeviceInfo(dev)->name);
+		result.apiName = mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
+		result.extraData[U_("PortAudio-HostAPI-name")] = mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
 		result.apiPath.push_back(U_("PortAudio"));
 		result.isDefault = (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev));
 		result.useNameAsIdentifier = true;
@@ -955,7 +955,7 @@ std::vector<std::pair<PaDeviceIndex, mpt::ustring> > CPortaudioDevice::Enumerate
 		{
 			continue;
 		}
-		result.push_back(std::make_pair(dev, mpt::ToUnicode(mpt::CharsetUTF8, Pa_GetDeviceInfo(dev)->name)));
+		result.push_back(std::make_pair(dev, mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetDeviceInfo(dev)->name)));
 	}
 	return result;
 }
@@ -983,7 +983,7 @@ static void PortaudioLog(const char *text)
 	{
 		return;
 	}
-	PALOG(mpt::format(U_("PortAudio: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, text)));
+	PALOG(mpt::format(U_("PortAudio: %1"))(mpt::ToUnicode(mpt::Charset::UTF8, text)));
 }
 #endif // MPT_COMPILER_MSVC
 

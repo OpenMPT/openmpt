@@ -48,7 +48,7 @@ mpt::ustring Pulseaudio::PulseErrorString(int error)
 	{
 		return mpt::format(U_("error=%1"))(error);
 	}
-	return mpt::format(U_("%1 (error=%2)"))(mpt::ToUnicode(mpt::CharsetUTF8, str), error);
+	return mpt::format(U_("%1 (error=%2)"))(mpt::ToUnicode(mpt::Charset::UTF8, str), error);
 }
 
 
@@ -94,8 +94,8 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_
 		}
 		SoundDevice::Info info;
 		info.type = U_("PulseAudio");
-		info.internalID = mpt::ToUnicode(mpt::CharsetUTF8, i->name);
-		info.name = mpt::ToUnicode(mpt::CharsetUTF8, i->description);
+		info.internalID = mpt::ToUnicode(mpt::Charset::UTF8, i->name);
+		info.name = mpt::ToUnicode(mpt::Charset::UTF8, i->description);
 		info.apiName = U_("PulseAudio");
 		info.isDefault = false;
 		info.useNameAsIdentifier = false;
@@ -149,7 +149,7 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(SoundDevice::SysInfo
 		MPT_LOG(LogError, "sounddev", U_("pa_mainloop_new"));
 		goto cleanup;
 	}
-	c = pa_context_new(pa_mainloop_get_api(m), mpt::ToCharset(mpt::CharsetUTF8, mpt::ustring()).c_str()); // TODO: get AppInfo
+	c = pa_context_new(pa_mainloop_get_api(m), mpt::ToCharset(mpt::Charset::UTF8, mpt::ustring()).c_str()); // TODO: get AppInfo
 	if(!c)
 	{
 		MPT_LOG(LogError, "sounddev", U_("pa_context_new"));
@@ -313,10 +313,10 @@ bool Pulseaudio::InternalOpen()
 	m_OutputBuffer.resize(ba.minreq / (m_Settings.sampleFormat.GetBitsPerSample()/8));
 	m_PA_SimpleOutput = pa_simple_new(
 		NULL,
-		mpt::ToCharset(mpt::CharsetUTF8, m_AppInfo.GetName()).c_str(),
+		mpt::ToCharset(mpt::Charset::UTF8, m_AppInfo.GetName()).c_str(),
 		PA_STREAM_PLAYBACK,
-		((GetDeviceInternalID() == U_("0")) ? NULL : mpt::ToCharset(mpt::CharsetUTF8, GetDeviceInternalID()).c_str()),
-		mpt::ToCharset(mpt::CharsetUTF8, m_AppInfo.GetName()).c_str(),
+		((GetDeviceInternalID() == U_("0")) ? NULL : mpt::ToCharset(mpt::Charset::UTF8, GetDeviceInternalID()).c_str()),
+		mpt::ToCharset(mpt::Charset::UTF8, m_AppInfo.GetName()).c_str(),
 		&ss,
 		NULL,
 		(m_Settings.ExclusiveMode ? &ba : NULL),
@@ -405,7 +405,7 @@ void Pulseaudio::InternalStopFromSoundThread()
 {
 	int error = 0;
 	bool oldVersion = false;
-	std::vector<uint64> version = mpt::String::Split<uint64>(mpt::ToUnicode(mpt::CharsetUTF8, pa_get_library_version() ? pa_get_library_version() : ""));
+	std::vector<uint64> version = mpt::String::Split<uint64>(mpt::ToUnicode(mpt::Charset::UTF8, pa_get_library_version() ? pa_get_library_version() : ""));
 	if(!version.empty())
 	{
 		if(version[0] <4)

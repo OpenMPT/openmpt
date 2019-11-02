@@ -393,7 +393,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 	if (genHint.GetType()[HINT_MODTYPE | HINT_MODCHANNELS] || plugHint.GetType()[HINT_PLUGINNAMES])
 	{
 		PopulateChannelPlugins();
-		SetDlgItemText(IDC_EDIT13, mpt::ToCString(mpt::CharsetLocale, sndFile.m_MixPlugins[m_nCurrentPlugin].GetName()));
+		SetDlgItemText(IDC_EDIT13, mpt::ToCString(mpt::Charset::Locale, sndFile.m_MixPlugins[m_nCurrentPlugin].GetName()));
 	}
 	// Update plugin info
 	const bool updatePlug = (plugHint.GetPlugin() == 0 || plugHint.GetPlugin() == m_nCurrentPlugin + 1);
@@ -406,7 +406,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
 		const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
-		SetDlgItemText(IDC_EDIT13, mpt::ToCString(mpt::CharsetLocale, plugin.GetName()));
+		SetDlgItemText(IDC_EDIT13, mpt::ToCString(mpt::Charset::Locale, plugin.GetName()));
 		CheckDlgButton(IDC_CHECK9, plugin.IsMasterEffect() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK10, plugin.IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK11, plugin.IsWetMix() ? BST_CHECKED : BST_UNCHECKED);
@@ -509,7 +509,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			const SNDMIXPLUGIN &outPlug = sndFile.m_MixPlugins[iOut];
 			if(outPlug.IsValidPlugin())
 			{
-				std::string libName = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, outPlug.GetLibraryName());
+				std::string libName = mpt::ToCharset(mpt::Charset::Locale, mpt::Charset::UTF8, outPlug.GetLibraryName());
 				s.Format(_T("FX%d: "), iOut + 1);
 				s += libName.c_str();
 				if(!strcmp(outPlug.GetName(), "") || libName != outPlug.GetName())
@@ -868,7 +868,7 @@ void CViewGlobals::OnPluginNameChanged()
 		GetDlgItemText(IDC_EDIT13, s);
 		if (s != plugin.GetName())
 		{
-			plugin.Info.szName = mpt::ToCharset(mpt::CharsetLocale, s);
+			plugin.Info.szName = mpt::ToCharset(mpt::Charset::Locale, s);
 			if(sndFile.GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, PluginHint(m_nCurrentPlugin + 1).Info().Names(), this);

@@ -233,11 +233,11 @@ std::string PatternClipboard::CreateClipboardString(const CSoundFile &sndFile, P
 				if(m->IsNote())
 				{
 					// Need to guarantee that sharps are used for the clipboard.
-					data += mpt::ToCharset(mpt::CharsetLocale, mpt::ustring(NoteNamesSharp[(m->note - NOTE_MIN) % 12]));
+					data += mpt::ToCharset(mpt::Charset::Locale, mpt::ustring(NoteNamesSharp[(m->note - NOTE_MIN) % 12]));
 					data += ('0' + (m->note - NOTE_MIN) / 12);
 				} else
 				{
-					data += mpt::ToCharset(mpt::CharsetLocale, sndFile.GetNoteName(m->note));
+					data += mpt::ToCharset(mpt::Charset::Locale, sndFile.GetNoteName(m->note));
 				}
 			} else
 			{

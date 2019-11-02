@@ -1030,7 +1030,7 @@ intptr_t CVstPlugin::Dispatch(VstOpcodeToPlugin opCode, int32 index, intptr_t va
 	{
 		mpt::ustring codeStr;
 		if(opCode < CountOf(VstOpCodes))
-			codeStr = mpt::ToUnicode(mpt::CharsetASCII, VstOpCodes[opCode]);
+			codeStr = mpt::ToUnicode(mpt::Charset::ASCII, VstOpCodes[opCode]);
 		else
 			codeStr = mpt::ufmt::val(opCode);
 		MPT_LOG(LogDebug, "VST", mpt::format(U_("About to Dispatch(%1) (Plugin=\"%2\"), index: %3, value: %4, ptr: %5, opt: %6!\n"))(codeStr, m_Factory.libraryName, index, mpt::ufmt::PTR(value), mpt::ufmt::PTR(ptr), mpt::ufmt::flt(opt, 3)));
@@ -1042,7 +1042,7 @@ intptr_t CVstPlugin::Dispatch(VstOpcodeToPlugin opCode, int32 index, intptr_t va
 	{
 		mpt::ustring codeStr;
 		if(opCode < CountOf(VstOpCodes))
-			codeStr = mpt::ToUnicode(mpt::CharsetASCII, VstOpCodes[opCode]);
+			codeStr = mpt::ToUnicode(mpt::Charset::ASCII, VstOpCodes[opCode]);
 		else
 			codeStr = mpt::ufmt::val(opCode);
 		ReportPlugException(mpt::format(U_("Exception %1 in Dispatch(%2)"))(mpt::ufmt::HEX0<8>(exception), codeStr));
@@ -1067,13 +1067,13 @@ CString CVstPlugin::GetCurrentProgramName()
 	std::vector<char> s(256, 0);
 	// kVstMaxProgNameLen is 24... too short for some plugins, so use at least 256 bytes.
 	Dispatch(effGetProgramName, 0, 0, s.data(), 0);
-	return mpt::ToCString(mpt::CharsetLocale, s.data());
+	return mpt::ToCString(mpt::Charset::Locale, s.data());
 }
 
 
 void CVstPlugin::SetCurrentProgramName(const CString &name)
 {
-	Dispatch(effSetProgramName, 0, 0, const_cast<char *>(mpt::ToCharset(mpt::CharsetLocale, name.Left(kVstMaxProgNameLen)).c_str()), 0.0f);
+	Dispatch(effSetProgramName, 0, 0, const_cast<char *>(mpt::ToCharset(mpt::Charset::Locale, name.Left(kVstMaxProgNameLen)).c_str()), 0.0f);
 }
 
 
@@ -1099,7 +1099,7 @@ CString CVstPlugin::GetProgramName(int32 program)
 			}
 		}
 	}
-	return mpt::ToCString(mpt::CharsetLocale, rawname.data());
+	return mpt::ToCString(mpt::Charset::Locale, rawname.data());
 }
 
 
@@ -1187,7 +1187,7 @@ CString CVstPlugin::GetParamPropertyString(int32 param, Vst::VstOpcodeToPlugin o
 		// Increased to 256 bytes since SynthMaster 2.8 writes more than 64 bytes of 0-padding. Kind of ridiculous if you consider that kVstMaxParamStrLen = 8...
 		std::vector<char> s(256, 0);
 		Dispatch(opcode, param, 0, s.data(), 0);
-		return mpt::ToCString(mpt::CharsetLocale, s.data());
+		return mpt::ToCString(mpt::Charset::Locale, s.data());
 	}
 	return CString();
 }
@@ -1199,7 +1199,7 @@ CString CVstPlugin::GetParamName(PlugParamIndex param)
 	if(param < m_Effect.numParams && Dispatch(effGetParameterProperties, param, 0, &properties, 0.0f) == 1)
 	{
 		mpt::String::SetNullTerminator(properties.label);
-		return mpt::ToCString(mpt::CharsetLocale, properties.label);
+		return mpt::ToCString(mpt::Charset::Locale, properties.label);
 	} else
 	{
 		return GetParamPropertyString(param, effGetParamName);
@@ -1213,7 +1213,7 @@ CString CVstPlugin::GetDefaultEffectName()
 	{
 		std::vector<char> s(256, 0);
 		Dispatch(effGetEffectName, 0, 0, s.data(), 0);
-		return mpt::ToCString(mpt::CharsetLocale, s.data());
+		return mpt::ToCString(mpt::Charset::Locale, s.data());
 	}
 	return CString();
 }

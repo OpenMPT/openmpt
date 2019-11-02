@@ -65,12 +65,12 @@ static Version GetPreviousSettingsVersion(const mpt::ustring &iniVersion)
 
 mpt::ustring SettingsModTypeToString(MODTYPE modtype)
 {
-	return mpt::ToUnicode(mpt::CharsetUTF8, CSoundFile::GetModSpecifications(modtype).fileExtension);
+	return mpt::ToUnicode(mpt::Charset::UTF8, CSoundFile::GetModSpecifications(modtype).fileExtension);
 }
 
 MODTYPE SettingsStringToModType(const mpt::ustring &str)
 {
-	return CModSpecifications::ExtensionToType(mpt::ToCharset(mpt::CharsetUTF8, str));
+	return CModSpecifications::ExtensionToType(mpt::ToCharset(mpt::Charset::UTF8, str));
 }
 
 
@@ -296,7 +296,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, PathUserTemplates(theApp.GetConfigPath() + P_("TemplateModules\\"))
 	// Default template
 	, defaultTemplateFile(conf, U_("Paths"), U_("DefaultTemplate"), mpt::PathString())
-	, defaultArtist(conf, U_("Misc"), U_("DefaultArtist"), mpt::ToUnicode(mpt::CharsetLocale, mpt::getenv("USERNAME")))
+	, defaultArtist(conf, U_("Misc"), U_("DefaultArtist"), mpt::ToUnicode(mpt::Charset::Locale, mpt::getenv("USERNAME")))
 	// MRU List
 	, mruListLength(conf, U_("Misc"), U_("MRUListLength"), 10)
 	// Plugins
@@ -1189,7 +1189,7 @@ void TrackerSettings::SaveSettings()
 
 bool TrackerSettings::IsComponentBlocked(const std::string &key)
 {
-	return Setting<bool>(conf, U_("Components"), U_("Block") + mpt::ToUnicode(mpt::CharsetASCII, key), ComponentManagerSettingsDefault().IsBlocked(key));
+	return Setting<bool>(conf, U_("Components"), U_("Block") + mpt::ToUnicode(mpt::Charset::ASCII, key), ComponentManagerSettingsDefault().IsBlocked(key));
 }
 
 

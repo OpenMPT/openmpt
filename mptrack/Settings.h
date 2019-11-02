@@ -225,8 +225,8 @@ inline T FromSettingValue(const SettingValue &val)
 // You may use the SettingValue(value, typeTag) constructor in ToSettingValue
 // and check the typeTag FromSettingsValue to implement runtime type-checking for custom types.
 
-template<> inline SettingValue ToSettingValue(const std::string &val) { return SettingValue(mpt::ToUnicode(mpt::CharsetLocale, val)); }
-template<> inline std::string FromSettingValue(const SettingValue &val) { return mpt::ToCharset(mpt::CharsetLocale, val.as<mpt::ustring>()); }
+template<> inline SettingValue ToSettingValue(const std::string &val) { return SettingValue(mpt::ToUnicode(mpt::Charset::Locale, val)); }
+template<> inline std::string FromSettingValue(const SettingValue &val) { return mpt::ToCharset(mpt::Charset::Locale, val.as<mpt::ustring>()); }
 
 template<> inline SettingValue ToSettingValue(const mpt::lstring &val) { return SettingValue(mpt::ToUnicode(val)); }
 template<> inline mpt::lstring FromSettingValue(const SettingValue &val) { return mpt::ToLocale(val.as<mpt::ustring>()); }

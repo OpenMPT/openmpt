@@ -461,7 +461,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_modFormat.formatName = U_("Imago Orpheus");
 	m_modFormat.type = U_("imf");
-	m_modFormat.charset = mpt::CharsetCP437;
+	m_modFormat.charset = mpt::Charset::CP437;
 
 	//From mikmod: work around an Orpheus bug
 	if(fileHeader.channels[0].status == 0)

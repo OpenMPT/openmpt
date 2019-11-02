@@ -48,7 +48,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 static mpt::ustring UStringFromOpus(const char *str)
 {
-	return str ? mpt::ToUnicode(mpt::CharsetUTF8, str) : mpt::ustring();
+	return str ? mpt::ToUnicode(mpt::Charset::UTF8, str) : mpt::ustring();
 }
 
 static FileTags GetOpusFileTags(OggOpusFile *of)

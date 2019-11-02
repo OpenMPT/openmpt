@@ -2152,14 +2152,14 @@ void CMainFrame::OnTimerGUI()
 			cwnd->GetClientRect(&rect);
 			rect.left += width;
 			rect.top += i * height;
-			auto s = mpt::ToCString(mpt::CharsetASCII, mpt::fmt::right(6, mpt::fmt::fix(cats[i] * 100.0, 3)) + "% " + catnames[i]);
+			auto s = mpt::ToCString(mpt::Charset::ASCII, mpt::fmt::right(6, mpt::fmt::fix(cats[i] * 100.0, 3)) + "% " + catnames[i]);
 			dc.DrawText(s, s.GetLength(), &rect, DT_LEFT);
 		}
 
 		RECT rect;
 		cwnd->GetClientRect(&rect);
 		rect.top += Profiler::CategoriesCount * height;
-		auto s = mpt::ToCString(mpt::CharsetASCII, Profiler::DumpProfiles());
+		auto s = mpt::ToCString(mpt::Charset::ASCII, Profiler::DumpProfiles());
 		dc.DrawText(s, s.GetLength(), &rect, DT_LEFT);
 
 		cwnd->Detach();
@@ -3000,7 +3000,7 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 		str.clear();
 		str += mpt::format(U_("FX%1: "))(iPlug + 1);
 		const size_t size0 = str.size();
-		str += (librarynames) ? mpt::ToUnicode(mpt::CharsetUTF8, plugin.GetLibraryName()) : mpt::ToUnicode(mpt::CharsetLocale, plugin.GetName());
+		str += (librarynames) ? mpt::ToUnicode(mpt::Charset::UTF8, plugin.GetLibraryName()) : mpt::ToUnicode(mpt::Charset::Locale, plugin.GetName());
 		if(str.size() <= size0) str += U_("--");
 		
 		CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);

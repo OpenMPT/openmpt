@@ -451,16 +451,16 @@ static bool HasCharset(Charset charset)
 	switch(charset)
 	{
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-		case CharsetLocale:      result = true; break;
+		case Charset::Locale:      result = true; break;
 #endif
-		case CharsetUTF8:        result = TestCodePage(CP_UTF8); break;
-		case CharsetASCII:       result = TestCodePage(20127);   break;
-		case CharsetISO8859_1:   result = TestCodePage(28591);   break;
-		case CharsetISO8859_15:  result = TestCodePage(28605);   break;
-		case CharsetCP437:       result = TestCodePage(437);     break;
-		case CharsetWindows1252: result = TestCodePage(1252);    break;
-		case CharsetCP437AMS:    result = false; break;
-		case CharsetCP437AMS2:   result = false; break;
+		case Charset::UTF8:        result = TestCodePage(CP_UTF8); break;
+		case Charset::ASCII:       result = TestCodePage(20127);   break;
+		case Charset::ISO8859_1:   result = TestCodePage(28591);   break;
+		case Charset::ISO8859_15:  result = TestCodePage(28605);   break;
+		case Charset::CP437:       result = TestCodePage(437);     break;
+		case Charset::Windows1252: result = TestCodePage(1252);    break;
+		case Charset::CP437AMS:    result = false; break;
+		case Charset::CP437AMS2:   result = false; break;
 	}
 	return result;
 }
@@ -470,16 +470,16 @@ static UINT CharsetToCodepage(Charset charset)
 	switch(charset)
 	{
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-		case CharsetLocale:      return CP_ACP;  break;
+		case Charset::Locale:      return CP_ACP;  break;
 #endif
-		case CharsetUTF8:        return CP_UTF8; break;
-		case CharsetASCII:       return 20127;   break;
-		case CharsetISO8859_1:   return 28591;   break;
-		case CharsetISO8859_15:  return 28605;   break;
-		case CharsetCP437:       return 437;     break;
-		case CharsetCP437AMS:    return 437;     break; // fallback, should not happen
-		case CharsetCP437AMS2:   return 437;     break; // fallback, should not happen
-		case CharsetWindows1252: return 1252;    break;
+		case Charset::UTF8:        return CP_UTF8; break;
+		case Charset::ASCII:       return 20127;   break;
+		case Charset::ISO8859_1:   return 28591;   break;
+		case Charset::ISO8859_15:  return 28605;   break;
+		case Charset::CP437:       return 437;     break;
+		case Charset::CP437AMS:    return 437;     break; // fallback, should not happen
+		case Charset::CP437AMS2:   return 437;     break; // fallback, should not happen
+		case Charset::Windows1252: return 1252;    break;
 	}
 	return 0;
 }
@@ -1109,7 +1109,7 @@ static Tdststring EncodeImpl(Charset charset, const widestring &src)
 	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
 	#if defined(MPT_ENABLE_CHARSET_LOCALE)
 		#if defined(MPT_LOCALE_ASSUME_CHARSET)
-			if(charset == CharsetLocale)
+			if(charset == Charset::Locale)
 			{
 				charset = MPT_LOCALE_ASSUME_CHARSET;
 			}
@@ -1125,19 +1125,19 @@ static Tdststring EncodeImpl(Charset charset, const widestring &src)
 	{
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
-		case CharsetLocale:      MPT_ASSERT_NOTREACHED(); break;
+		case Charset::Locale:      MPT_ASSERT_NOTREACHED(); break;
 	#else
-		case CharsetLocale:      return String::ToLocale<Tdststring>(src); break;
+		case Charset::Locale:      return String::ToLocale<Tdststring>(src); break;
 	#endif
 #endif
-		case CharsetUTF8:        return String::ToUTF8<Tdststring>(src); break;
-		case CharsetASCII:       return String::ToAscii<Tdststring>(src); break;
-		case CharsetISO8859_1:   return String::ToISO_8859_1<Tdststring>(src); break;
-		case CharsetISO8859_15:  return String::To8bit<Tdststring>(src, CharsetTableISO8859_15); break;
-		case CharsetCP437:       return String::To8bit<Tdststring>(src, CharsetTableCP437); break;
-		case CharsetCP437AMS:    return String::To8bit<Tdststring>(src, CharsetTableCP437AMS); break;
-		case CharsetCP437AMS2:   return String::To8bit<Tdststring>(src, CharsetTableCP437AMS2); break;
-		case CharsetWindows1252: return String::To8bit<Tdststring>(src, CharsetTableWindows1252); break;
+		case Charset::UTF8:        return String::ToUTF8<Tdststring>(src); break;
+		case Charset::ASCII:       return String::ToAscii<Tdststring>(src); break;
+		case Charset::ISO8859_1:   return String::ToISO_8859_1<Tdststring>(src); break;
+		case Charset::ISO8859_15:  return String::To8bit<Tdststring>(src, CharsetTableISO8859_15); break;
+		case Charset::CP437:       return String::To8bit<Tdststring>(src, CharsetTableCP437); break;
+		case Charset::CP437AMS:    return String::To8bit<Tdststring>(src, CharsetTableCP437AMS); break;
+		case Charset::CP437AMS2:   return String::To8bit<Tdststring>(src, CharsetTableCP437AMS2); break;
+		case Charset::Windows1252: return String::To8bit<Tdststring>(src, CharsetTableWindows1252); break;
 	}
 	return Tdststring();
 }
@@ -1151,7 +1151,7 @@ static widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
 	#if defined(MPT_ENABLE_CHARSET_LOCALE)
 		#if defined(MPT_LOCALE_ASSUME_CHARSET)
-			if(charset == CharsetLocale)
+			if(charset == Charset::Locale)
 			{
 				charset = MPT_LOCALE_ASSUME_CHARSET;
 			}
@@ -1167,19 +1167,19 @@ static widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 	{
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 	#if defined(MPT_LOCALE_ASSUME_CHARSET)
-		case CharsetLocale:      MPT_ASSERT_NOTREACHED(); break;
+		case Charset::Locale:      MPT_ASSERT_NOTREACHED(); break;
 	#else
-		case CharsetLocale:      return String::FromLocale<Tsrcstring>(src); break;
+		case Charset::Locale:      return String::FromLocale<Tsrcstring>(src); break;
 	#endif
 #endif
-		case CharsetUTF8:        return String::FromUTF8<Tsrcstring>(src); break;
-		case CharsetASCII:       return String::FromAscii<Tsrcstring>(src); break;
-		case CharsetISO8859_1:   return String::FromISO_8859_1<Tsrcstring>(src); break;
-		case CharsetISO8859_15:  return String::From8bit<Tsrcstring>(src, CharsetTableISO8859_15); break;
-		case CharsetCP437:       return String::From8bit<Tsrcstring>(src, CharsetTableCP437); break;
-		case CharsetCP437AMS:    return String::From8bit<Tsrcstring>(src, CharsetTableCP437AMS); break;
-		case CharsetCP437AMS2:   return String::From8bit<Tsrcstring>(src, CharsetTableCP437AMS2); break;
-		case CharsetWindows1252: return String::From8bit<Tsrcstring>(src, CharsetTableWindows1252); break;
+		case Charset::UTF8:        return String::FromUTF8<Tsrcstring>(src); break;
+		case Charset::ASCII:       return String::FromAscii<Tsrcstring>(src); break;
+		case Charset::ISO8859_1:   return String::FromISO_8859_1<Tsrcstring>(src); break;
+		case Charset::ISO8859_15:  return String::From8bit<Tsrcstring>(src, CharsetTableISO8859_15); break;
+		case Charset::CP437:       return String::From8bit<Tsrcstring>(src, CharsetTableCP437); break;
+		case Charset::CP437AMS:    return String::From8bit<Tsrcstring>(src, CharsetTableCP437AMS); break;
+		case Charset::CP437AMS2:   return String::From8bit<Tsrcstring>(src, CharsetTableCP437AMS2); break;
+		case Charset::Windows1252: return String::From8bit<Tsrcstring>(src, CharsetTableWindows1252); break;
 	}
 	return widestring();
 }
@@ -1207,7 +1207,7 @@ static Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
 
 bool IsUTF8(const std::string &str)
 {
-	return (str == String::EncodeImpl<std::string>(mpt::CharsetUTF8, String::DecodeImpl<std::string>(mpt::CharsetUTF8, str)));
+	return (str == String::EncodeImpl<std::string>(mpt::Charset::UTF8, String::DecodeImpl<std::string>(mpt::Charset::UTF8, str)));
 }
 
 
@@ -1219,7 +1219,7 @@ std::wstring ToWide(Charset from, const std::string &str)
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 std::wstring ToWide(const mpt::lstring &str)
 {
-	return String::DecodeImpl(CharsetLocale, str);
+	return String::DecodeImpl(Charset::Locale, str);
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 #endif
@@ -1237,7 +1237,7 @@ std::string ToCharset(Charset to, Charset from, const std::string &str)
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 std::string ToCharset(Charset to, const mpt::lstring &str)
 {
-	return String::ConvertImpl<std::string>(to, CharsetLocale, str);
+	return String::ConvertImpl<std::string>(to, Charset::Locale, str);
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
@@ -1245,12 +1245,12 @@ std::string ToCharset(Charset to, const mpt::lstring &str)
 #if MPT_WSTRING_CONVERT
 mpt::lstring ToLocale(const std::wstring &str)
 {
-	return String::EncodeImpl<mpt::lstring>(CharsetLocale, str);
+	return String::EncodeImpl<mpt::lstring>(Charset::Locale, str);
 }
 #endif
 mpt::lstring ToLocale(Charset from, const std::string &str)
 {
-	return String::ConvertImpl<mpt::lstring>(CharsetLocale, from, str);
+	return String::ConvertImpl<mpt::lstring>(Charset::Locale, from, str);
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
@@ -1293,7 +1293,7 @@ CString ToCString(const std::wstring &str)
 	#ifdef UNICODE
 		return str.c_str();
 	#else
-		return ToCharset(CharsetLocale, str).c_str();
+		return ToCharset(Charset::Locale, str).c_str();
 	#endif
 }
 CString ToCString(Charset from, const std::string &str)
@@ -1301,7 +1301,7 @@ CString ToCString(Charset from, const std::string &str)
 	#ifdef UNICODE
 		return ToWide(from, str).c_str();
 	#else
-		return ToCharset(CharsetLocale, from, str).c_str();
+		return ToCharset(Charset::Locale, from, str).c_str();
 	#endif
 }
 std::wstring ToWide(const CString &str)
@@ -1309,7 +1309,7 @@ std::wstring ToWide(const CString &str)
 	#ifdef UNICODE
 		return str.GetString();
 	#else
-		return ToWide(CharsetLocale, str.GetString());
+		return ToWide(Charset::Locale, str.GetString());
 	#endif
 }
 std::string ToCharset(Charset to, const CString &str)
@@ -1317,7 +1317,7 @@ std::string ToCharset(Charset to, const CString &str)
 	#ifdef UNICODE
 		return ToCharset(to, str.GetString());
 	#else
-		return ToCharset(to, CharsetLocale, str.GetString());
+		return ToCharset(to, Charset::Locale, str.GetString());
 	#endif
 }
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
@@ -1332,7 +1332,7 @@ CString ToCString(const mpt::lstring &str)
 mpt::lstring ToLocale(const CString &str)
 {
 	#ifdef UNICODE
-		return String::EncodeImpl<mpt::lstring>(CharsetLocale, str.GetString());
+		return String::EncodeImpl<mpt::lstring>(Charset::Locale, str.GetString());
 	#else
 		return str.GetString();
 	#endif
@@ -1354,26 +1354,26 @@ mpt::winstring ToWin(const CString &str)
 #if MPT_WSTRING_CONVERT
 mpt::ustring ToUnicode(const std::wstring &str)
 {
-	return String::EncodeImpl<mpt::ustring>(mpt::CharsetUTF8, str);
+	return String::EncodeImpl<mpt::ustring>(mpt::Charset::UTF8, str);
 }
 #endif
 mpt::ustring ToUnicode(Charset from, const std::string &str)
 {
-	return String::ConvertImpl<mpt::ustring>(mpt::CharsetUTF8, from, str);
+	return String::ConvertImpl<mpt::ustring>(mpt::Charset::UTF8, from, str);
 }
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 mpt::ustring ToUnicode(const mpt::lstring &str)
 {
-	return String::ConvertImpl<mpt::ustring>(mpt::CharsetUTF8, mpt::CharsetLocale, str);
+	return String::ConvertImpl<mpt::ustring>(mpt::Charset::UTF8, mpt::Charset::Locale, str);
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 #if defined(_MFC_VER)
 mpt::ustring ToUnicode(const CString &str)
 {
 	#ifdef UNICODE
-		return String::EncodeImpl<mpt::ustring>(mpt::CharsetUTF8, str.GetString());
+		return String::EncodeImpl<mpt::ustring>(mpt::Charset::UTF8, str.GetString());
 	#else // !UNICODE
-		return String::ConvertImpl<mpt::ustring, std::string>(mpt::CharsetUTF8, mpt::CharsetLocale, str.GetString());
+		return String::ConvertImpl<mpt::ustring, std::string>(mpt::Charset::UTF8, mpt::Charset::Locale, str.GetString());
 	#endif // UNICODE
 }
 #endif // MFC
@@ -1385,26 +1385,26 @@ mpt::ustring ToUnicode(const CString &str)
 #if MPT_WSTRING_CONVERT
 std::wstring ToWide(const mpt::ustring &str)
 {
-	return String::DecodeImpl<mpt::ustring>(mpt::CharsetUTF8, str);
+	return String::DecodeImpl<mpt::ustring>(mpt::Charset::UTF8, str);
 }
 #endif
 std::string ToCharset(Charset to, const mpt::ustring &str)
 {
-	return String::ConvertImpl<std::string, mpt::ustring>(to, mpt::CharsetUTF8, str);
+	return String::ConvertImpl<std::string, mpt::ustring>(to, mpt::Charset::UTF8, str);
 }
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 mpt::lstring ToLocale(const mpt::ustring &str)
 {
-	return String::ConvertImpl<mpt::lstring, mpt::ustring>(mpt::CharsetLocale, mpt::CharsetUTF8, str);
+	return String::ConvertImpl<mpt::lstring, mpt::ustring>(mpt::Charset::Locale, mpt::Charset::UTF8, str);
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 #if MPT_OS_WINDOWS
 mpt::winstring ToWin(const mpt::ustring &str)
 {
 	#ifdef UNICODE
-		return String::DecodeImpl<mpt::ustring>(mpt::CharsetUTF8, str);
+		return String::DecodeImpl<mpt::ustring>(mpt::Charset::UTF8, str);
 	#else
-		return String::ConvertImpl<mpt::lstring, mpt::ustring>(mpt::CharsetLocale, mpt::CharsetUTF8, str);
+		return String::ConvertImpl<mpt::lstring, mpt::ustring>(mpt::Charset::Locale, mpt::Charset::UTF8, str);
 	#endif
 }
 #endif // MPT_OS_WINDOWS
@@ -1412,9 +1412,9 @@ mpt::winstring ToWin(const mpt::ustring &str)
 CString ToCString(const mpt::ustring &str)
 {
 	#ifdef UNICODE
-		return String::DecodeImpl<mpt::ustring>(mpt::CharsetUTF8, str).c_str();
+		return String::DecodeImpl<mpt::ustring>(mpt::Charset::UTF8, str).c_str();
 	#else // !UNICODE
-		return String::ConvertImpl<std::string, mpt::ustring>(mpt::CharsetLocale, mpt::CharsetUTF8, str).c_str();
+		return String::ConvertImpl<std::string, mpt::ustring>(mpt::Charset::Locale, mpt::Charset::UTF8, str).c_str();
 	#endif // UNICODE
 }
 #endif // MFC
@@ -1430,27 +1430,27 @@ static mpt::Charset CharsetFromCodePage(uint16 codepage, mpt::Charset fallback, 
 	switch(codepage)
 	{
 	case 65001:
-		result = mpt::CharsetUTF8;
+		result = mpt::Charset::UTF8;
 		if(isFallback) *isFallback = false;
 		break;
 	case 20127:
-		result = mpt::CharsetASCII;
+		result = mpt::Charset::ASCII;
 		if(isFallback) *isFallback = false;
 		break;
 	case 28591:
-		result = mpt::CharsetISO8859_1;
+		result = mpt::Charset::ISO8859_1;
 		if(isFallback) *isFallback = false;
 		break;
 	case 28605:
-		result = mpt::CharsetISO8859_15;
+		result = mpt::Charset::ISO8859_15;
 		if(isFallback) *isFallback = false;
 		break;
 	case 437:
-		result = mpt::CharsetCP437;
+		result = mpt::Charset::CP437;
 		if(isFallback) *isFallback = false;
 		break;
 	case 1252:
-		result = mpt::CharsetWindows1252;
+		result = mpt::Charset::Windows1252;
 		if(isFallback) *isFallback = false;
 		break;
 	default:

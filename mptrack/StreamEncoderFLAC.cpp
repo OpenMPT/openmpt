@@ -77,7 +77,7 @@ private:
 		if(!field.empty() && !data.empty())
 		{
 			FLAC__StreamMetadata_VorbisComment_Entry entry;
-			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, field.c_str(), mpt::ToCharset(mpt::CharsetUTF8, data).c_str());
+			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, field.c_str(), mpt::ToCharset(mpt::Charset::UTF8, data).c_str());
 			FLAC__metadata_object_vorbiscomment_append_comment(flac_metadata[0], entry, false);
 		}
 	}

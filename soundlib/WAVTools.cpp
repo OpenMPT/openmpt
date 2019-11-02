@@ -163,23 +163,23 @@ uint16 WAVReader::GetFileCodePage(ChunkReader::ChunkList<RIFFChunk> &chunks)
 			std::string versionString;
 			iSFT.ReadString<mpt::String::maybeNullTerminated>(versionString, iSFT.BytesLeft());
 			versionString = mpt::String::Trim(versionString);
-			Version version = Version::Parse(mpt::ToUnicode(mpt::CharsetISO8859_1, versionString));
+			Version version = Version::Parse(mpt::ToUnicode(mpt::Charset::ISO8859_1, versionString));
 			if(version && version < MPT_V("1.28.00.02"))
 			{
-				return 1252; // mpt::CharsetWindows1252; // OpenMPT up to and including 1.28.00.01 wrote metadata in windows-1252 encoding
+				return 1252; // mpt::Charset::Windows1252; // OpenMPT up to and including 1.28.00.01 wrote metadata in windows-1252 encoding
 			} else
 			{
-				return 28591; // mpt::CharsetISO8859_1; // as per spec
+				return 28591; // mpt::Charset::ISO8859_1; // as per spec
 			}
 		} else
 		{
-			return 28591; // mpt::CharsetISO8859_1; // as per spec
+			return 28591; // mpt::Charset::ISO8859_1; // as per spec
 		}
 	}
 	if(!csetChunk.CanRead(2))
 	{
 		// chunk not parsable
-		return 28591; // mpt::CharsetISO8859_1;
+		return 28591; // mpt::Charset::ISO8859_1;
 	}
 	uint16 codepage = csetChunk.ReadUint16LE();
 	return codepage;
@@ -194,7 +194,7 @@ void WAVReader::ApplySampleSettings(ModSample &sample, mpt::Charset sampleCharse
 	{
 		std::string sampleNameEncoded;
 		textChunk.ReadString<mpt::String::nullTerminated>(sampleNameEncoded, textChunk.GetLength());
-		sampleName = mpt::ToCharset(sampleCharset, mpt::ToUnicode(codePage, mpt::CharsetWindows1252, sampleNameEncoded));
+		sampleName = mpt::ToCharset(sampleCharset, mpt::ToUnicode(codePage, mpt::Charset::Windows1252, sampleNameEncoded));
 	}
 	if(isDLS)
 	{
@@ -525,7 +525,7 @@ void WAVWriter::WriteMetatags(const FileTags &tags)
 // Write a single tag into a open idLIST chunk
 void WAVWriter::WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &utext)
 {
-	std::string text = mpt::ToCharset(mpt::CharsetUTF8, utext);
+	std::string text = mpt::ToCharset(mpt::Charset::UTF8, utext);
 	text = text.substr(0, uint32_max - 1u);
 	if(!text.empty())
 	{

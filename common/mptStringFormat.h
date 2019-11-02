@@ -71,7 +71,7 @@ namespace mpt
 
 // fallback to member function ToUString()
 #if MPT_USTRING_MODE_UTF8
-template <typename T> auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::CharsetUTF8, x.ToUString())) { return mpt::ToCharset(mpt::CharsetUTF8, x.ToUString()); }
+template <typename T> auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::Charset::UTF8, x.ToUString())) { return mpt::ToCharset(mpt::Charset::UTF8, x.ToUString()); }
 #else
 template <typename T> auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::CharsetLocaleOrUTF8, x.ToUString())) { return mpt::ToCharset(mpt::CharsetLocaleOrUTF8, x.ToUString()); }
 #endif
@@ -285,13 +285,13 @@ template <> struct FormatValTFunctor<mpt::ustring> { template <typename T> inlin
 template <> struct FormatValTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x, const FormatSpec & f) { return FormatValW(x, f); } };
 #endif
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-template <> struct FormatValTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x, const FormatSpec & f) { return mpt::ToLocale(mpt::CharsetLocale, FormatVal(x, f)); } };
+template <> struct FormatValTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x, const FormatSpec & f) { return mpt::ToLocale(mpt::Charset::Locale, FormatVal(x, f)); } };
 #endif // MPT_ENABLE_CHARSET_LOCALE
 #if defined(_MFC_VER)
 #ifdef UNICODE
 template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec & f) { return mpt::ToCString(FormatValW(x, f)); } };
 #else
-template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec & f) { return mpt::ToCString(mpt::CharsetLocale, FormatVal(x, f)); } };
+template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec & f) { return mpt::ToCString(mpt::Charset::Locale, FormatVal(x, f)); } };
 #endif
 #endif
 

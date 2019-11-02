@@ -176,7 +176,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 		m_EditMacro[m].SetWindowText(s);
 
 		// Macro value:
-		m_EditMacroValue[m].SetWindowText(mpt::ToCString(mpt::CharsetASCII, m_MidiCfg.szMidiSFXExt[m]));
+		m_EditMacroValue[m].SetWindowText(mpt::ToCString(mpt::Charset::ASCII, m_MidiCfg.szMidiSFXExt[m]));
 		m_EditMacroValue[m].SetBackColor(m == selectedMacro ? RGB(200, 200, 225) : RGB(245, 245, 245));
 
 		// Macro Type:
@@ -207,7 +207,7 @@ void CMidiMacroSetup::UpdateDialog()
 	if(sfx < std::size(m_MidiCfg.szMidiSFXExt))
 	{
 		ToggleBoxes(sfx_preset, sfx);
-		m_EditSFx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, m_MidiCfg.szMidiSFXExt[sfx]));
+		m_EditSFx.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, m_MidiCfg.szMidiSFXExt[sfx]));
 	}
 
 	UpdateZxxSelection();
@@ -297,7 +297,7 @@ void CMidiMacroSetup::UpdateZxxSelection()
 	UINT zxx = m_CbnZxx.GetCurSel();
 	if(zxx < std::size(m_MidiCfg.szMidiZXXExt))
 	{
-		m_EditZxx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, m_MidiCfg.szMidiZXXExt[zxx]));
+		m_EditZxx.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, m_MidiCfg.szMidiZXXExt[zxx]));
 	}
 }
 
@@ -311,7 +311,7 @@ void CMidiMacroSetup::OnSFxEditChanged()
 		{
 			CString s;
 			m_EditSFx.GetWindowText(s);
-			mpt::String::WriteAutoBuf(m_MidiCfg.szMidiSFXExt[sfx]) = mpt::ToCharset(mpt::CharsetASCII, s);
+			mpt::String::WriteAutoBuf(m_MidiCfg.szMidiSFXExt[sfx]) = mpt::ToCharset(mpt::Charset::ASCII, s);
 
 			int sfx_preset = m_MidiCfg.GetParameteredMacroType(sfx);
 			m_CbnSFxPreset.SetCurSel(sfx_preset);
@@ -331,7 +331,7 @@ void CMidiMacroSetup::OnZxxEditChanged()
 		{
 			CString s;
 			m_EditZxx.GetWindowText(s);
-			mpt::String::WriteAutoBuf(m_MidiCfg.szMidiZXXExt[zxx]) = mpt::ToCharset(mpt::CharsetASCII, s);
+			mpt::String::WriteAutoBuf(m_MidiCfg.szMidiZXXExt[zxx]) = mpt::ToCharset(mpt::Charset::ASCII, s);
 			m_CbnZxxPreset.SetCurSel(m_MidiCfg.GetFixedMacroType());
 		}
 	}
@@ -396,7 +396,7 @@ void CMidiMacroSetup::OnPlugParamChanged()
 	if(param < 384)
 	{
 		const std::string macroText = m_MidiCfg.CreateParameteredMacro(kSFxPlugParam, param);
-		m_EditSFx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, macroText));
+		m_EditSFx.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, macroText));
 	} else
 	{
 		Reporting::Notification("Only parameters 0 to 383 can be controlled using MIDI Macros. Use Parameter Control Events to automate higher parameters.");
@@ -407,7 +407,7 @@ void CMidiMacroSetup::OnCCChanged()
 {
 	int cc = static_cast<int>(m_CbnMacroCC.GetItemData(m_CbnMacroCC.GetCurSel()));
 	const std::string macroText = m_MidiCfg.CreateParameteredMacro(kSFxCC, cc);
-	m_EditSFx.SetWindowText(mpt::ToCString(mpt::CharsetASCII, macroText));
+	m_EditSFx.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, macroText));
 }
 
 void CMidiMacroSetup::ToggleBoxes(UINT sfxPreset, UINT sfx)
@@ -447,7 +447,7 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 {
 	CString macroStrT;
 	wnd.GetWindowText(macroStrT);
-	std::string macroStr = mpt::ToCharset(mpt::CharsetASCII, macroStrT);
+	std::string macroStr = mpt::ToCharset(mpt::Charset::ASCII, macroStrT);
 
 	bool allowed = true, caseChange = false;
 	for(char &c : macroStr)
@@ -479,7 +479,7 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 		// Replace text and keep cursor position if we just typed in an invalid character
 		int start, end;
 		wnd.GetSel(start, end);
-		wnd.SetWindowText(mpt::ToCString(mpt::CharsetASCII, lastMacro));
+		wnd.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, lastMacro));
 		wnd.SetSel(start - 1, end - 1, true);
 		MessageBeep(MB_OK);
 		return false;
@@ -490,7 +490,7 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 			// Replace text and keep cursor position if there was a case conversion
 			int start, end;
 			wnd.GetSel(start, end);
-			wnd.SetWindowText(mpt::ToCString(mpt::CharsetASCII, macroStr));
+			wnd.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, macroStr));
 			wnd.SetSel(start, end, true);
 		}
 		return true;

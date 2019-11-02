@@ -90,7 +90,7 @@ bool CSoundFile::ReadUAX(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals();
 	m_modFormat.formatName = mpt::format(U_("Unreal Package v%1"))(fileHeader.packageVersion);
 	m_modFormat.type = U_("uax");
-	m_modFormat.charset = mpt::CharsetWindows1252;
+	m_modFormat.charset = mpt::Charset::Windows1252;
 	
 	for(uint32 i = 0; i < fileHeader.exportCount && file.CanRead(4); i++)
 	{

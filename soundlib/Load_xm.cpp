@@ -629,7 +629,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		// Something else!
 		madeWith = verUnknown | verConfirmed;
 
-		madeWithTracker = mpt::ToUnicode(mpt::CharsetCP437, mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.trackerName));
+		madeWithTracker = mpt::ToUnicode(mpt::Charset::CP437, mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.trackerName));
 
 		if(!memcmp(fileHeader.trackerName, "OpenMPT ", 8))
 		{
@@ -944,7 +944,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Hey, I know this tracker!
 		std::string mptVersion(fileHeader.trackerName + 8, 12);
-		m_dwLastSavedWithVersion = Version::Parse(mpt::ToUnicode(mpt::CharsetASCII, mptVersion));
+		m_dwLastSavedWithVersion = Version::Parse(mpt::ToUnicode(mpt::Charset::ASCII, mptVersion));
 		madeWith = verOpenMPT | verConfirmed;
 
 		if(m_dwLastSavedWithVersion < MPT_V("1.22.07.19"))
@@ -1031,13 +1031,13 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		m_modFormat.originalFormatName = mpt::format(U_("FastTracker 2 v%1.%2"))(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
 		m_modFormat.originalType = U_("xm");
 		m_modFormat.madeWithTracker = std::move(madeWithTracker);
-		m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::CharsetWindows1252 : mpt::CharsetCP437;
+		m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::Charset::Windows1252 : mpt::Charset::CP437;
 	} else
 	{
 		m_modFormat.formatName = mpt::format(U_("FastTracker 2 v%1.%2"))(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
 		m_modFormat.type = U_("xm");
 		m_modFormat.madeWithTracker = std::move(madeWithTracker);
-		m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::CharsetWindows1252 : mpt::CharsetCP437;
+		m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::Charset::Windows1252 : mpt::Charset::CP437;
 	}
 
 	return true;

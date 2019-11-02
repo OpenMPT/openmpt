@@ -119,7 +119,7 @@ static mpt::ustring ReadMPG123String(const mpg123_string &str)
 	{
 		return result;
 	}
-	result = mpt::ToUnicode(mpt::CharsetUTF8, std::string(str.p, str.p + str.fill - 1));
+	result = mpt::ToUnicode(mpt::Charset::UTF8, std::string(str.p, str.p + str.fill - 1));
 	return result;
 }
 
@@ -137,7 +137,7 @@ static mpt::ustring ReadMPG123String(const mpg123_string *str)
 template <std::size_t N>
 static mpt::ustring ReadMPG123String(const char (&str)[N])
 {
-	return mpt::ToUnicode(mpt::CharsetISO8859_1, mpt::String::ReadBuf(mpt::String::spacePadded, str));
+	return mpt::ToUnicode(mpt::Charset::ISO8859_1, mpt::String::ReadBuf(mpt::String::spacePadded, str));
 }
 
 #endif // MPT_WITH_MPG123

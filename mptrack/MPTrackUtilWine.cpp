@@ -134,7 +134,7 @@ std::string CExecutePosixShellScriptProgressDialog::GetExceptionString() const
 BOOL CExecutePosixShellScriptProgressDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	SetWindowText(mpt::ToCString(mpt::CharsetUTF8, m_Title));
+	SetWindowText(mpt::ToCString(mpt::Charset::UTF8, m_Title));
 	SetDlgItemText(IDCANCEL, _T("Cancel"));
 	SetWindowLong(::GetDlgItem(m_hWnd, IDC_PROGRESS1), GWL_STYLE, GetWindowLong(::GetDlgItem(m_hWnd, IDC_PROGRESS1), GWL_STYLE) | PBS_MARQUEE);
 	::SendMessage(::GetDlgItem(m_hWnd, IDC_PROGRESS1), PBM_SETMARQUEE, 1, 30); // 30 is Windows default, but Wine < 1.7.15 defaults to 0
@@ -168,7 +168,7 @@ void CExecutePosixShellScriptProgressDialog::OnButton1()
 		return;
 	}
 
-	SetDlgItemText(IDC_TEXT1, mpt::ToCString(mpt::CharsetUTF8, m_Status));
+	SetDlgItemText(IDC_TEXT1, mpt::ToCString(mpt::Charset::UTF8, m_Status));
 	MessageLoop();
 	if(m_bAbort)
 	{

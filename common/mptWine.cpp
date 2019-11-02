@@ -351,7 +351,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 	::CreateDirectory((dirWindows + P_("filetree")).AsNative().c_str(), nullptr);
 	for(const auto &file : filetree)
 	{
-		std::vector<mpt::ustring> path = mpt::String::Split<mpt::ustring>(mpt::ToUnicode(mpt::CharsetUTF8, file.first), U_("/"));
+		std::vector<mpt::ustring> path = mpt::String::Split<mpt::ustring>(mpt::ToUnicode(mpt::Charset::UTF8, file.first), U_("/"));
 		mpt::PathString combinedPath = dirWindows + P_("filetree") + P_("\\");
 		if(path.size() > 1)
 		{
@@ -440,8 +440,8 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 
 		progress(userdata);
 
-		std::wstring unixcommandW = mpt::ToWide(mpt::CharsetUTF8, unixcommand);
-		std::wstring titleW = mpt::ToWide(mpt::CharsetUTF8, title);
+		std::wstring unixcommandW = mpt::ToWide(mpt::Charset::UTF8, unixcommand);
+		std::wstring titleW = mpt::ToWide(mpt::Charset::UTF8, title);
 		STARTUPINFOW startupInfo;
 		MemsetZero(startupInfo);
 		startupInfo.lpTitle = titleW.data();
@@ -510,8 +510,8 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 
 		progress(userdata);
 
-		std::wstring unixcommandW = mpt::ToWide(mpt::CharsetUTF8, unixcommand);
-		std::wstring titleW = mpt::ToWide(mpt::CharsetUTF8, title);
+		std::wstring unixcommandW = mpt::ToWide(mpt::Charset::UTF8, unixcommand);
+		std::wstring titleW = mpt::ToWide(mpt::Charset::UTF8, title);
 		STARTUPINFOW startupInfo;
 		MemsetZero(startupInfo);
 		startupInfo.lpTitle = titleW.data();

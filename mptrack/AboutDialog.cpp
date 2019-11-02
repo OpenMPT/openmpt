@@ -338,7 +338,7 @@ static mpt::ustring ProcSupportToString(uint32 procSupport)
 	};
 	for(const auto &f : flags)
 	{
-		if(procSupport & f.flag) features.push_back(mpt::ToUnicode(mpt::CharsetASCII, f.name));
+		if(procSupport & f.flag) features.push_back(mpt::ToUnicode(mpt::Charset::ASCII, f.name));
 	}
 #else
 	MPT_UNUSED_VARIABLE(procSupport);
@@ -398,12 +398,12 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += mpt::format(U_("System Architecture: %1\n"))(mpt::Windows::Name(mpt::Windows::GetHostArchitecture()));
 #ifdef ENABLE_ASM
 			text += mpt::format(U_("CPU: %1, Family %2, Model %3, Stepping %4\n"))
-				( mpt::ToUnicode(mpt::CharsetASCII, (std::strlen(ProcVendorID) > 0) ? std::string(ProcVendorID) : std::string("Generic"))
+				( mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(ProcVendorID) > 0) ? std::string(ProcVendorID) : std::string("Generic"))
 				, ProcFamily
 				, ProcModel
 				, ProcStepping
 				);
-			text += mpt::format(U_("CPU Name: %1\n"))(mpt::ToUnicode(mpt::CharsetASCII, (std::strlen(ProcBrandID) > 0) ? std::string(ProcBrandID) : std::string("")));
+			text += mpt::format(U_("CPU Name: %1\n"))(mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(ProcBrandID) > 0) ? std::string(ProcBrandID) : std::string("")));
 			text += mpt::format(U_("Available CPU features: %1\n"))(ProcSupportToString(GetRealProcSupport()));
 #endif // ENABLE_ASM
 			text += mpt::format(U_("Operating System: %1\n\n"))(mpt::Windows::Version::Current().GetName());
@@ -420,10 +420,10 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 					for(const auto &component : components)
 					{
 						ComponentInfo info = ComponentManager::Instance()->GetComponentInfo(component);
-						mpt::ustring name = mpt::ToUnicode(mpt::CharsetASCII, (info.name.substr(0, 9) == "Component") ? info.name.substr(9) : info.name);
+						mpt::ustring name = mpt::ToUnicode(mpt::Charset::ASCII, (info.name.substr(0, 9) == "Component") ? info.name.substr(9) : info.name);
 						if(!info.settingsKey.empty())
 						{
-							name = mpt::ToUnicode(mpt::CharsetASCII, info.settingsKey);
+							name = mpt::ToUnicode(mpt::Charset::ASCII, info.settingsKey);
 						}
 						text += name + lf;
 					}
@@ -443,10 +443,10 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 							ComponentInfo info = ComponentManager::Instance()->GetComponentInfo(component);
 							if(available  && info.state != ComponentStateAvailable) continue;
 							if(!available && info.state == ComponentStateAvailable) continue;
-							mpt::ustring name = mpt::ToUnicode(mpt::CharsetASCII, (info.name.substr(0, 9) == "Component") ? info.name.substr(9) : info.name);
+							mpt::ustring name = mpt::ToUnicode(mpt::Charset::ASCII, (info.name.substr(0, 9) == "Component") ? info.name.substr(9) : info.name);
 							if(!info.settingsKey.empty())
 							{
-								name = mpt::ToUnicode(mpt::CharsetASCII, info.settingsKey);
+								name = mpt::ToUnicode(mpt::Charset::ASCII, info.settingsKey);
 							}
 							text += mpt::format(U_("%1: %2"))
 								( name
@@ -521,34 +521,34 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 						( mpt::Windows::IsWine() ? yes : no
 						);
 					text += mpt::format(U_("Wine Version: %1\n"))
-						( mpt::ToUnicode(mpt::CharsetUTF8, wine.VersionContext().RawVersion())
+						( mpt::ToUnicode(mpt::Charset::UTF8, wine.VersionContext().RawVersion())
 						);
 					text += mpt::format(U_("Wine Build ID: %1\n"))
-						( mpt::ToUnicode(mpt::CharsetUTF8, wine.VersionContext().RawBuildID())
+						( mpt::ToUnicode(mpt::Charset::UTF8, wine.VersionContext().RawBuildID())
 						);
 					text += mpt::format(U_("Wine Host Sys Name: %1\n"))
-						( mpt::ToUnicode(mpt::CharsetUTF8, wine.VersionContext().RawHostSysName())
+						( mpt::ToUnicode(mpt::Charset::UTF8, wine.VersionContext().RawHostSysName())
 						);
 					text += mpt::format(U_("Wine Host Release: %1\n"))
-						( mpt::ToUnicode(mpt::CharsetUTF8, wine.VersionContext().RawHostRelease())
+						( mpt::ToUnicode(mpt::Charset::UTF8, wine.VersionContext().RawHostRelease())
 						);
 
 					text += U_("\n");
 
 					text += mpt::format(U_("uname -m: %1\n"))
-						( mpt::ToUnicode(mpt::CharsetUTF8, wine.Uname_m())
+						( mpt::ToUnicode(mpt::Charset::UTF8, wine.Uname_m())
 						);
 					text += mpt::format(U_("HOME: %1\n"))
-						( mpt::ToUnicode(mpt::CharsetUTF8, wine.HOME())
+						( mpt::ToUnicode(mpt::Charset::UTF8, wine.HOME())
 						);
 					text += mpt::format(U_("XDG_DATA_HOME: %1\n"))
-						( mpt::ToUnicode(mpt::CharsetUTF8, wine.XDG_DATA_HOME())
+						( mpt::ToUnicode(mpt::Charset::UTF8, wine.XDG_DATA_HOME())
 						);
 					text += mpt::format(U_("XDG_CACHE_HOME: %1\n"))
-						( mpt::ToUnicode(mpt::CharsetUTF8, wine.XDG_CACHE_HOME())
+						( mpt::ToUnicode(mpt::Charset::UTF8, wine.XDG_CACHE_HOME())
 						);
 					text += mpt::format(U_("XDG_CONFIG_HOME: %1\n"))
-						( mpt::ToUnicode(mpt::CharsetUTF8, wine.XDG_CONFIG_HOME())
+						( mpt::ToUnicode(mpt::Charset::UTF8, wine.XDG_CONFIG_HOME())
 						);
 
 					text += U_("\n");
@@ -557,13 +557,13 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 						( theApp.GetInstallPath().ToUnicode()
 						);
 					text += mpt::format(U_("OpenMPT folder (host): %1\n"))
-						( mpt::ToUnicode(mpt::CharsetUTF8, wine.PathToPosix(theApp.GetInstallPath()))
+						( mpt::ToUnicode(mpt::Charset::UTF8, wine.PathToPosix(theApp.GetInstallPath()))
 						);
 					text += mpt::format(U_("OpenMPT config folder: %1\n"))
 						( theApp.GetConfigPath().ToUnicode()
 						);
 					text += mpt::format(U_("OpenMPT config folder (host): %1\n"))
-						( mpt::ToUnicode(mpt::CharsetUTF8, wine.PathToPosix(theApp.GetConfigPath()))
+						( mpt::ToUnicode(mpt::Charset::UTF8, wine.PathToPosix(theApp.GetConfigPath()))
 						);
 					text += mpt::format(U_("Host root: %1\n"))
 						( wine.PathToWindows("/").ToUnicode()

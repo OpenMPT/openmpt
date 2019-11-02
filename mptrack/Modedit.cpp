@@ -790,7 +790,7 @@ INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 
 	ModInstrument &ins = *m_SndFile.Instruments[instr];
 	ins.name = mpt::format("%1: %2")(plug + 1, m_SndFile.m_MixPlugins[plug].GetName());
-	ins.filename = mpt::ToCharset(m_SndFile.GetCharsetInternal(), mpt::CharsetUTF8, m_SndFile.m_MixPlugins[plug].GetLibraryName());
+	ins.filename = mpt::ToCharset(m_SndFile.GetCharsetInternal(), mpt::Charset::UTF8, m_SndFile.m_MixPlugins[plug].GetLibraryName());
 	ins.nMixPlug = plug + 1;
 	ins.nMidiChannel = 1;
 

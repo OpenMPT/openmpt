@@ -82,7 +82,7 @@ void MidiInOutEditor::PopulateList(CComboBox &combo, RtMidi &rtDevice, MidiDevic
 	{
 		try
 		{
-			portName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::CharsetUTF8, midiDevice.GetPortName(i)), isInput);
+			portName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::Charset::UTF8, midiDevice.GetPortName(i)), isInput);
 			int result = combo.AddString(portName);
 			combo.SetItemData(result, i);
 

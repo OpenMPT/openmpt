@@ -191,7 +191,7 @@ void ComponentFactoryBase::PreConstruct() const
 {
 	MPT_LOG(LogInformation, "Components", 
 		mpt::format(U_("Constructing Component %1"))
-			( mpt::ToUnicode(mpt::CharsetASCII, m_ID)
+			( mpt::ToUnicode(mpt::Charset::ASCII, m_ID)
 			)
 		);
 }

@@ -254,7 +254,7 @@ struct ModFormatDetails
 	mpt::ustring madeWithTracker;    // "OpenMPT 1.28.01.00"
 	mpt::ustring originalFormatName; // "FastTracker 2" in the case of converted formats like MO3 or GDM
 	mpt::ustring originalType;       // "xm" in the case of converted formats like MO3 or GDM
-	mpt::Charset charset = mpt::CharsetUTF8;
+	mpt::Charset charset = mpt::Charset::UTF8;
 };
 
 
@@ -666,7 +666,7 @@ public:
 	mpt::Charset GetCharsetInternal() const // 8bit string encoding of strings internal in CSoundFile
 	{
 		#if defined(MODPLUG_TRACKER)
-			return mpt::CharsetLocale;
+			return mpt::Charset::Locale;
 		#else // MODPLUG_TRACKER
 			return GetCharsetFile();
 		#endif // MODPLUG_TRACKER

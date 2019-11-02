@@ -24,8 +24,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Tunings exist even outside of CSoundFile objects. We thus cannot use the
 // GetCharsetInternal() encoding consistently. For now, just always treat
-// tuning strings as CharsetLocale. As of OpenMPT 1.27, this distinction does
-// not yet matter, because GetCharsetInteral() is always mpt::CharsetLocale if
+// tuning strings as Charset::Locale. As of OpenMPT 1.27, this distinction does
+// not yet matter, because GetCharsetInteral() is always mpt::Charset::Locale if
 // MODPLUG_TRACKER anyway.
 extern const mpt::Charset TuningCharset;
 

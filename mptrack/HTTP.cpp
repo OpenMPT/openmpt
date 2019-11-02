@@ -117,7 +117,7 @@ static mpt::ustring LastErrorMessage(DWORD errorCode)
 
 
 exception::exception(const mpt::ustring &m)
-	: std::runtime_error(std::string("HTTP error: ") + mpt::ToCharset(mpt::CharsetASCII, m))
+	: std::runtime_error(std::string("HTTP error: ") + mpt::ToCharset(mpt::Charset::ASCII, m))
 {
 	message = m;
 }
@@ -269,7 +269,7 @@ public:
 	{
 		for(const auto &mimeType : acceptMimeTypes)
 		{
-			strings.push_back(mpt::ToWin(mpt::CharsetASCII, mimeType));
+			strings.push_back(mpt::ToWin(mpt::Charset::ASCII, mimeType));
 		}
 		array.resize(strings.size() + 1);
 		for(std::size_t i = 0; i < strings.size(); ++i)
@@ -354,8 +354,8 @@ Result Request::operator()(InternetSession &internet) const
 		}
 		if(HttpSendRequest(
 			NativeHandle(request),
-			!headersString.empty() ? mpt::ToWin(mpt::CharsetASCII, headersString).c_str() : NULL,
-			!headersString.empty() ? mpt::saturate_cast<DWORD>(mpt::ToWin(mpt::CharsetASCII, headersString).length()) : 0,
+			!headersString.empty() ? mpt::ToWin(mpt::Charset::ASCII, headersString).c_str() : NULL,
+			!headersString.empty() ? mpt::saturate_cast<DWORD>(mpt::ToWin(mpt::Charset::ASCII, headersString).length()) : 0,
 			!data.empty() ? (LPVOID)data.data() : NULL,
 			!data.empty() ? mpt::saturate_cast<DWORD>(data.size()) : 0)
 			== FALSE)

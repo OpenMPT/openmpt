@@ -56,7 +56,7 @@ mpt::ustring SettingValue::FormatTypeAsString() const
 	}
 	if(HasTypeTag() && !GetTypeTag().empty())
 	{
-		result += U_(":") + mpt::ToUnicode(mpt::CharsetASCII, GetTypeTag());
+		result += U_(":") + mpt::ToUnicode(mpt::Charset::ASCII, GetTypeTag());
 	}
 	return result;
 }
@@ -348,7 +348,7 @@ void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const mpt:
 {
 	::WritePrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), mpt::ToWin(val).c_str(), filename.AsNative().c_str());
 
-	if(mpt::ToUnicode(mpt::CharsetLocale, mpt::ToCharset(mpt::CharsetLocale, val)) != val) // explicit round-trip
+	if(mpt::ToUnicode(mpt::Charset::Locale, mpt::ToCharset(mpt::Charset::Locale, val)) != val) // explicit round-trip
 	{
 		// Value is not representable in ANSI CP.
 		// Now check if the string got stored correctly.
@@ -448,7 +448,7 @@ void IniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
 	}
 	const mpt::PathString backupFilename = filename + mpt::PathString::FromUnicode(backupTag.empty() ? U_(".ansi.bak") : U_(".ansi.") + backupTag + U_(".bak"));
 	CopyFile(filename.AsNative().c_str(), backupFilename.AsNative().c_str(), FALSE);
-	WriteFileUTF16LE(filename, mpt::ToWide(mpt::CharsetLocale, std::string(data.data(), data.data() + data.size())));
+	WriteFileUTF16LE(filename, mpt::ToWide(mpt::Charset::Locale, std::string(data.data(), data.data() + data.size())));
 }
 
 SettingValue IniFileSettingsBackend::ReadSetting(const SettingPath &path, const SettingValue &def) const

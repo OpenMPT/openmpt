@@ -218,7 +218,7 @@ mpt::ustring CSoundFile::ModContainerTypeToString(MODCONTAINERTYPE containertype
 	{
 		if(containerInfo.format == containertype)
 		{
-			return mpt::ToUnicode(mpt::CharsetUTF8, containerInfo.extension);
+			return mpt::ToUnicode(mpt::Charset::UTF8, containerInfo.extension);
 		}
 	}
 	return mpt::ustring();

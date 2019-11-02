@@ -689,7 +689,7 @@ void ScopedLogCapturer::ShowLog(const std::string &preamble, bool force)
 {
 	if(force || m_oldLogMode == LogModeInstantReporting)
 	{
-		m_modDoc.ShowLog(mpt::ToCString(mpt::CharsetLocale, preamble), m_title, m_pParent);
+		m_modDoc.ShowLog(mpt::ToCString(mpt::Charset::Locale, preamble), m_title, m_pParent);
 		m_modDoc.ClearLog();
 	}
 }
@@ -1701,7 +1701,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			if(!fileNameAdd.empty())
 			{
 				SanitizeFilename(fileNameAdd);
-				thisName += mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::CharsetLocale, fileNameAdd));
+				thisName += mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::Charset::Locale, fileNameAdd));
 			}
 			thisName += fileExt;
 			if(wsdlg.m_Settings.outputToSample)

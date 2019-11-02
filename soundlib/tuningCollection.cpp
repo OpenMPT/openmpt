@@ -271,7 +271,7 @@ bool UnpackTuningCollection(const CTuningCollection &tc, const mpt::PathString &
 		const CTuning & tuning = tc.GetTuning(i);
 		mpt::PathString fn;
 		fn += prefix;
-		mpt::ustring tuningName = mpt::ToUnicode(mpt::CharsetLocale, tuning.GetName());
+		mpt::ustring tuningName = mpt::ToUnicode(mpt::Charset::Locale, tuning.GetName());
 		if(tuningName.empty())
 		{
 			tuningName = U_("untitled");

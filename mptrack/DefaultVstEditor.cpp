@@ -76,7 +76,7 @@ ParamControlSet::ParamControlSet(CWnd *parent, const CRect &rect, int setID, con
 	valueEdit.SetFont(parent->GetFont());
 
 	// "Per mil" label
-	perMilLabel.Create(mpt::ToCString(mpt::CharsetUTF8, "\xE2\x80\xB0"), WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(horizSplit + m.editWidth + m.spacing, rect.bottom - m.lineHeight, rect.right, rect.bottom), parent);
+	perMilLabel.Create(mpt::ToCString(mpt::Charset::UTF8, "\xE2\x80\xB0"), WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(horizSplit + m.editWidth + m.spacing, rect.bottom - m.lineHeight, rect.right, rect.bottom), parent);
 	perMilLabel.SetFont(parent->GetFont());
 }
 

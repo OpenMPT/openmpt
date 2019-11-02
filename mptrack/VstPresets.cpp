@@ -243,7 +243,7 @@ void VSTPresets::SaveProgram(std::ostream &f, IMixPlugin &plugin)
 	mpt::IO::WriteIntBE(f, numParams);
 
 	char name[28];
-	mpt::String::WriteBuf(mpt::String::maybeNullTerminated, name) = mpt::ToCharset(mpt::CharsetLocale, plugin.GetCurrentProgramName());
+	mpt::String::WriteBuf(mpt::String::maybeNullTerminated, name) = mpt::ToCharset(mpt::Charset::Locale, plugin.GetCurrentProgramName());
 	mpt::IO::WriteRaw(f, name, 28);
 
 	if(writeChunk)

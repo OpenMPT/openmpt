@@ -1677,7 +1677,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 	{
 		CWnd *wnd = GetDlgItem(uId);
 		bool isEnabled = wnd != nullptr && wnd->IsWindowEnabled() != FALSE;
-		const auto plusMinus = mpt::ToWin(mpt::CharsetUTF8, "\xC2\xB1");
+		const auto plusMinus = mpt::ToWin(mpt::Charset::UTF8, "\xC2\xB1");
 		const TCHAR *s = nullptr;
 		CommandID cmd = kcNull;
 		switch(uId)

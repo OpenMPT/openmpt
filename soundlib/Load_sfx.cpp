@@ -475,7 +475,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_modFormat.formatName = m_nSamples == 15 ? mpt::format(U_("SoundFX 1.%1"))(version) : U_("SoundFX 2.0 / MultiMedia Sound");
 	m_modFormat.type = m_nSamples == 15 ? UL_("sfx") : UL_("sfx2");
-	m_modFormat.charset = mpt::CharsetISO8859_1;
+	m_modFormat.charset = mpt::Charset::ISO8859_1;
 
 	return true;
 }

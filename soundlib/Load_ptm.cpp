@@ -173,7 +173,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.formatName = U_("PolyTracker");
 	m_modFormat.type = U_("ptm");
 	m_modFormat.madeWithTracker = mpt::format(U_("PolyTracker %1.%2"))(fileHeader.versionHi.get(), mpt::ufmt::hex0<2>(fileHeader.versionLo.get()));
-	m_modFormat.charset = mpt::CharsetCP437;
+	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_nChannels = fileHeader.numChannels;

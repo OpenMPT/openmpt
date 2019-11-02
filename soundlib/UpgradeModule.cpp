@@ -338,9 +338,9 @@ void CSoundFile::UpgradeModule()
 		for(auto &plugin : m_MixPlugins)
 		{
 #if defined(MODPLUG_TRACKER)
-			const std::string name = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetLocale, plugin.Info.szLibraryName);
+			const std::string name = mpt::ToCharset(mpt::Charset::UTF8, mpt::Charset::Locale, plugin.Info.szLibraryName);
 #else
-			const std::string name = mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetWindows1252, plugin.Info.szLibraryName);
+			const std::string name = mpt::ToCharset(mpt::Charset::UTF8, mpt::Charset::Windows1252, plugin.Info.szLibraryName);
 #endif
 			plugin.Info.szLibraryName = name;
 		}

@@ -398,7 +398,7 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.formatName = U_("Impulse Tracker Project");
 	m_modFormat.type = U_("itp");
 	m_modFormat.madeWithTracker = U_("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
-	m_modFormat.charset = mpt::CharsetWindows1252;
+	m_modFormat.charset = mpt::Charset::Windows1252;
 
 	return true;
 #endif // MPT_EXTERNAL_SAMPLES

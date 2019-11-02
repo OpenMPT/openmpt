@@ -457,8 +457,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_modFormat.formatName = mpt::format(U_("MadTracker %1.%2"))(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
 	m_modFormat.type = U_("mt2");
-	m_modFormat.madeWithTracker = mpt::ToUnicode(mpt::CharsetWindows1252, mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.trackerName));
-	m_modFormat.charset = mpt::CharsetWindows1252;
+	m_modFormat.madeWithTracker = mpt::ToUnicode(mpt::Charset::Windows1252, mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.trackerName));
+	m_modFormat.charset = mpt::Charset::Windows1252;
 
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels;
@@ -649,7 +649,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				chunk.ReadNullString(artist);
 				if(artist != "Unregistered")
 				{
-					m_songArtist = mpt::ToUnicode(mpt::CharsetWindows1252, artist);
+					m_songArtist = mpt::ToUnicode(mpt::Charset::Windows1252, artist);
 				}
 			}
 			break;

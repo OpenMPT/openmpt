@@ -819,7 +819,7 @@ CSoundBankProperties::CSoundBankProperties(const CDLSBank &bank, ::CWnd *parent)
 	if (bi.szComments.size())
 		info += "\r\n\r\nComments:\r\n" + bi.szComments;
 	SetCaption((bank.GetFileName().AsNative() + _T(" - Sound Bank Information")));
-	SetContent(mpt::ToWin(mpt::CharsetLocale, info));
+	SetContent(mpt::ToWin(mpt::Charset::Locale, info));
 }
 
 

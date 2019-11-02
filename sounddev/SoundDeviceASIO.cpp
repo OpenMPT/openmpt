@@ -481,7 +481,7 @@ bool CASIODevice::InternalOpen()
 				, m_ChannelInfo[channel].isActive
 				, m_ChannelInfo[channel].channelGroup
 				, m_ChannelInfo[channel].type
-				, mpt::ToUnicode(mpt::CharsetLocale, m_ChannelInfo[channel].name)
+				, mpt::ToUnicode(mpt::Charset::Locale, m_ChannelInfo[channel].name)
 				));
 		}
 
@@ -846,7 +846,7 @@ void CASIODevice::OpenDriver()
 		return;
 	}
 	std::string driverErrorMessage = mpt::String::ReadAutoBuf(driverErrorMessageBuffer);
-	MPT_LOG(LogInformation, "sounddev", mpt::format(U_("ASIO: Opened driver %1 Version 0x%2: %3"))(mpt::ToUnicode(mpt::CharsetLocale, driverName), mpt::ufmt::HEX0<8>(driverVersion), mpt::ToUnicode(mpt::CharsetLocale, driverErrorMessage)));
+	MPT_LOG(LogInformation, "sounddev", mpt::format(U_("ASIO: Opened driver %1 Version 0x%2: %3"))(mpt::ToUnicode(mpt::Charset::Locale, driverName), mpt::ufmt::HEX0<8>(driverVersion), mpt::ToUnicode(mpt::Charset::Locale, driverErrorMessage)));
 }
 
 
@@ -1632,7 +1632,7 @@ ASIOTime* CASIODevice::CallbackBufferSwitchTimeInfo(ASIOTime* params, long doubl
 void CASIODevice::ReportASIOException(const std::string &str)
 {
 	MPT_TRACE_SCOPE();
-	SendDeviceMessage(LogError, mpt::ToUnicode(mpt::CharsetLocale, str));
+	SendDeviceMessage(LogError, mpt::ToUnicode(mpt::Charset::Locale, str));
 }
 
 
@@ -1725,7 +1725,7 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 			{
 				AsioCall(AsioDriver(), getChannelInfo(&channelInfo));
 				mpt::String::SetNullTerminator(channelInfo.name);
-				name = mpt::ToUnicode(mpt::CharsetLocale, channelInfo.name);
+				name = mpt::ToUnicode(mpt::Charset::Locale, channelInfo.name);
 			} catch(...)
 			{
 				// continue
@@ -1743,7 +1743,7 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 			{
 				AsioCall(AsioDriver(), getChannelInfo(&channelInfo));
 				mpt::String::SetNullTerminator(channelInfo.name);
-				name = mpt::ToUnicode(mpt::CharsetLocale, channelInfo.name);
+				name = mpt::ToUnicode(mpt::Charset::Locale, channelInfo.name);
 			} catch(...)
 			{
 				// continue

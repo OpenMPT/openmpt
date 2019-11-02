@@ -140,7 +140,7 @@ static long VorbisfileFilereaderTell(void *datasource)
 #if defined(MPT_WITH_VORBIS)
 static mpt::ustring UStringFromVorbis(const char *str)
 {
-	return str ? mpt::ToUnicode(mpt::CharsetUTF8, str) : mpt::ustring();
+	return str ? mpt::ToUnicode(mpt::Charset::UTF8, str) : mpt::ustring();
 }
 #endif // MPT_WITH_VORBIS
 

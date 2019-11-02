@@ -1540,7 +1540,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 
 	for (int ctx = 0; ctx < kCtxMaxInputContexts; ctx++)
 	{
-		f << "\n//----( " << mpt::ToCharset(mpt::CharsetUTF8, KeyCombination::GetContextText((InputTargetContext)ctx)) << " )------------\n";
+		f << "\n//----( " << mpt::ToCharset(mpt::Charset::UTF8, KeyCombination::GetContextText((InputTargetContext)ctx)) << " )------------\n";
 
 		for (int cmd=0; cmd<kcNumCommands; cmd++)
 		{
@@ -1568,9 +1568,9 @@ ctx:UID:Description:Modifier:Key:EventMask
 					}
 					f << ":"
 						<< static_cast<int>(kc.EventType().GetRaw()) << "\t\t//"
-						<< mpt::ToCharset(mpt::CharsetUTF8, GetCommandText((CommandID)cmd)).c_str() << ": "
-						<< mpt::ToCharset(mpt::CharsetUTF8, kc.GetKeyText()).c_str() << " ("
-						<< mpt::ToCharset(mpt::CharsetUTF8, kc.GetKeyEventText()).c_str() << ")\n";
+						<< mpt::ToCharset(mpt::Charset::UTF8, GetCommandText((CommandID)cmd)).c_str() << ": "
+						<< mpt::ToCharset(mpt::Charset::UTF8, kc.GetKeyText()).c_str() << " ("
+						<< mpt::ToCharset(mpt::Charset::UTF8, kc.GetKeyEventText()).c_str() << ")\n";
 				}
 
 			}

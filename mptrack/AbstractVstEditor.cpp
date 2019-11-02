@@ -459,8 +459,8 @@ void CAbstractVstEditor::SetTitle()
 
 		bool hasCustomName = strcmp(m_VstPlugin.m_pMixStruct->GetName(), "") != 0 && strcmp(m_VstPlugin.m_pMixStruct->GetName(), m_VstPlugin.m_pMixStruct->GetLibraryName()) != 0;
 		if(hasCustomName)
-			title += mpt::ToCString(mpt::CharsetLocale, m_VstPlugin.m_pMixStruct->GetName()) + _T(" (");
-		title += mpt::ToCString(mpt::CharsetUTF8, m_VstPlugin.m_pMixStruct->GetLibraryName());
+			title += mpt::ToCString(mpt::Charset::Locale, m_VstPlugin.m_pMixStruct->GetName()) + _T(" (");
+		title += mpt::ToCString(mpt::Charset::UTF8, m_VstPlugin.m_pMixStruct->GetLibraryName());
 		if(hasCustomName)
 			title += _T(")");
 

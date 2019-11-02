@@ -169,7 +169,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.madeWithTracker = mpt::format(U_("BWSB 2GDM %1.%2"))(fileHeader.trackerMajorVer, fileHeader.formatMinorVer);
 	m_modFormat.originalType = gdmFormatOriginType[fileHeader.originalFormat];
 	m_modFormat.originalFormatName = gdmFormatOriginFormat[fileHeader.originalFormat];
-	m_modFormat.charset = mpt::CharsetCP437;
+	m_modFormat.charset = mpt::Charset::CP437;
 
 	// Song name
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songTitle);
@@ -179,7 +179,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		std::string artist = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songMusician);
 		if(artist != "Unknown")
 		{
-			m_songArtist = mpt::ToUnicode(mpt::CharsetCP437, artist);
+			m_songArtist = mpt::ToUnicode(mpt::Charset::CP437, artist);
 		}
 	}
 

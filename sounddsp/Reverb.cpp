@@ -119,7 +119,7 @@ static constexpr std::pair<SNDMIX_REVERB_PROPERTIES, const char *> ReverbPresets
 
 mpt::ustring GetReverbPresetName(uint32 preset)
 {
-	return (preset < NUM_REVERBTYPES) ? mpt::ToUnicode(mpt::CharsetASCII, ReverbPresets[preset].second) : mpt::ustring{};
+	return (preset < NUM_REVERBTYPES) ? mpt::ToUnicode(mpt::Charset::ASCII, ReverbPresets[preset].second) : mpt::ustring{};
 }
 
 const SNDMIX_REVERB_PROPERTIES *GetReverbPreset(uint32 preset)

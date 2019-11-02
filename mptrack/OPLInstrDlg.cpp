@@ -227,7 +227,7 @@ BOOL OPLInstrDlg::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT* /*pResult*/)
 	{
 	case IDC_SLIDER1:
 		// Feedback
-		text = mpt::ToWin(mpt::CharsetUTF8, feedback[slider->GetPos() & 7]);
+		text = mpt::ToWin(mpt::Charset::UTF8, feedback[slider->GetPos() & 7]);
 		break;
 
 	case IDC_SLIDER2:

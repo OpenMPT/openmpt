@@ -23,7 +23,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-const mpt::Charset TuningCharset = mpt::CharsetLocale;
+const mpt::Charset TuningCharset = mpt::Charset::Locale;
 
 
 const CTuningDialog::TUNINGTREEITEM CTuningDialog::s_notFoundItemTuning = TUNINGTREEITEM();
@@ -1678,10 +1678,10 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 	mpt::ustring tuningName;
 	if(!description.empty())
 	{
-		tuningName = mpt::ToUnicode(mpt::CharsetISO8859_1, description);
+		tuningName = mpt::ToUnicode(mpt::Charset::ISO8859_1, description);
 	} else if(!filename.empty())
 	{
-		tuningName = mpt::ToUnicode(mpt::CharsetISO8859_1, filename);
+		tuningName = mpt::ToUnicode(mpt::Charset::ISO8859_1, filename);
 	} else if(!name.empty())
 	{
 		tuningName = name;
@@ -1690,7 +1690,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		tuningName = mpt::format(U_("%1 notes: %2:%3"))(nNotes - 1, mpt::ufmt::fix(groupRatio), 1);
 	}
 
-	CTuning* pT = CTuning::CreateGroupGeometric(mpt::ToCharset(mpt::CharsetLocale, tuningName), fRatios, groupRatio, 15);
+	CTuning* pT = CTuning::CreateGroupGeometric(mpt::ToCharset(mpt::Charset::Locale, tuningName), fRatios, groupRatio, 15);
 	if(!pT)
 	{
 		return enSclImportTuningCreationFailure;
@@ -1713,7 +1713,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 	{
 		for(NOTEINDEXTYPE note = 0; note < mpt::saturate_cast<NOTEINDEXTYPE>(names.size()); ++note)
 		{
-			pT->SetNoteName(note, mpt::ToCharset(mpt::CharsetLocale, mpt::ustring(CSoundFile::GetDefaultNoteNames()[note])));
+			pT->SetNoteName(note, mpt::ToCharset(mpt::Charset::Locale, mpt::ustring(CSoundFile::GetDefaultNoteNames()[note])));
 		}
 	} else
 	{

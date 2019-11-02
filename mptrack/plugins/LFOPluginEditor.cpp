@@ -188,7 +188,7 @@ void LFOPluginEditor::UpdateView(UpdateHint &hint)
 			const SNDMIXPLUGIN &outPlug = m_lfoPlugin.GetSoundFile().m_MixPlugins[out];
 			if(outPlug.IsValidPlugin())
 			{
-				std::string libName = mpt::ToCharset(mpt::CharsetLocale, mpt::CharsetUTF8, outPlug.GetLibraryName());
+				std::string libName = mpt::ToCharset(mpt::Charset::Locale, mpt::Charset::UTF8, outPlug.GetLibraryName());
 				s.Format(_T("FX%d: "), out + 1);
 				s += libName.c_str();
 				if(!strcmp(outPlug.GetName(), "") || libName != outPlug.GetName())

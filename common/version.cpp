@@ -94,7 +94,7 @@ namespace Source {
 static mpt::ustring GetUrl()
 {
 	#ifdef OPENMPT_VERSION_URL
-		return mpt::ToUnicode(mpt::CharsetASCII, OPENMPT_VERSION_URL);
+		return mpt::ToUnicode(mpt::Charset::ASCII, OPENMPT_VERSION_URL);
 	#else
 		return mpt::ustring();
 	#endif
@@ -209,7 +209,7 @@ static bool IsPackage()
 static mpt::ustring GetSourceDate()
 {
 	#if defined(OPENMPT_VERSION_DATE)
-		return mpt::ToUnicode(mpt::CharsetASCII, OPENMPT_VERSION_DATE);
+		return mpt::ToUnicode(mpt::Charset::ASCII, OPENMPT_VERSION_DATE);
 	#else
 		return mpt::ustring();
 	#endif
@@ -286,9 +286,9 @@ mpt::ustring GetBuildDateString()
 	mpt::ustring result;
 	#ifdef MODPLUG_TRACKER
 		#if defined(OPENMPT_BUILD_DATE)
-			result = mpt::ToUnicode(mpt::CharsetASCII, OPENMPT_BUILD_DATE );
+			result = mpt::ToUnicode(mpt::Charset::ASCII, OPENMPT_BUILD_DATE );
 		#else
-			result = mpt::ToUnicode(mpt::CharsetASCII, __DATE__ " " __TIME__ );
+			result = mpt::ToUnicode(mpt::Charset::ASCII, __DATE__ " " __TIME__ );
 		#endif
 	#else // !MODPLUG_TRACKER
 		result = SourceInfo::Current().Date();
@@ -576,7 +576,7 @@ mpt::ustring GetURL(Build::Url key)
 
 mpt::ustring GetFullCreditsString()
 {
-	return mpt::ToUnicode(mpt::CharsetUTF8,
+	return mpt::ToUnicode(mpt::Charset::UTF8,
 #ifdef MODPLUG_TRACKER
 		"OpenMPT / ModPlug Tracker\n"
 #else

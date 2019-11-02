@@ -442,7 +442,7 @@ template<> inline SettingValue ToSettingValue(const mpt::Date::Unix &val)
 template<> inline mpt::Date::Unix FromSettingValue(const SettingValue &val)
 {
 	MPT_ASSERT(val.GetTypeTag() == "UTC");
-	std::string s = mpt::ToCharset(mpt::CharsetLocale, val.as<mpt::ustring>());
+	std::string s = mpt::ToCharset(mpt::Charset::Locale, val.as<mpt::ustring>());
 	tm lastUpdate;
 	MemsetZero(lastUpdate);
 	if(sscanf(s.c_str(), "%04d-%02d-%02d %02d:%02d", &lastUpdate.tm_year, &lastUpdate.tm_mon, &lastUpdate.tm_mday, &lastUpdate.tm_hour, &lastUpdate.tm_min) == 5)

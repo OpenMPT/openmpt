@@ -62,7 +62,7 @@ mpt::ustring GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04()
 	{
 		return name;
 	}
-	std::string utf8String = mpt::ToCharset(mpt::CharsetUTF8, name);
+	std::string utf8String = mpt::ToCharset(mpt::Charset::UTF8, name);
 	mpt::ustring hexString = Util::BinToHex(mpt::as_span(utf8String));
 	return U_("DirectSound") + U_("_") + hexString;
 }

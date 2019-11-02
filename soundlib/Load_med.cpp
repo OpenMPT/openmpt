@@ -583,7 +583,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.formatName = mpt::format(U_("OctaMED (MMD%1)"))(version - '0');
 	m_modFormat.type = U_("med");
 	m_modFormat.madeWithTracker = madeWithTracker;
-	m_modFormat.charset = mpt::CharsetISO8859_1;
+	m_modFormat.charset = mpt::Charset::ISO8859_1;
 
 	m_nSamplePreAmp = 32;
 	dwBlockArr = pmmh.blockarr;

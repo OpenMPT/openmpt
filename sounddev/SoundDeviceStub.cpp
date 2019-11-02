@@ -97,7 +97,7 @@ static void __cdecl SoundDevice_MessageReceiver_SoundDeviceMessage(void * inst, 
 	{
 		return;
 	}
-	mr->SoundDeviceMessage((LogLevel)level, mpt::ToUnicode(mpt::CharsetUTF8, message ? message : ""));
+	mr->SoundDeviceMessage((LogLevel)level, mpt::ToUnicode(mpt::Charset::UTF8, message ? message : ""));
 }
 
 void SoundDeviceStub::SetMessageReceiver(SoundDevice::IMessageReceiver *receiver) {

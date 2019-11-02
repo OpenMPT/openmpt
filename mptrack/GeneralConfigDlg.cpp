@@ -131,7 +131,7 @@ BOOL COptionsGeneral::OnInitDialog()
 
 	for(const auto &opt : generalOptionsList)
 	{
-		auto idx = m_CheckList.AddString(mpt::ToCString(mpt::CharsetASCII, opt.name));
+		auto idx = m_CheckList.AddString(mpt::ToCString(mpt::Charset::ASCII, opt.name));
 		const int check = (TrackerSettings::Instance().m_dwPatternSetup & opt.flag) != 0 ? BST_CHECKED : BST_UNCHECKED;
 		m_CheckList.SetCheck(idx, check);
 	}
@@ -187,7 +187,7 @@ void COptionsGeneral::OnOptionSelChanged()
 	{
 		desc = generalOptionsList[sel].description;
 	}
-	SetDlgItemText(IDC_TEXT1, mpt::ToCString(mpt::CharsetASCII, desc));
+	SetDlgItemText(IDC_TEXT1, mpt::ToCString(mpt::Charset::ASCII, desc));
 }
 
 

@@ -118,7 +118,7 @@ mpt::ustring ID::AsString() const
 {
 	if(IsPrintable())
 	{
-		return mpt::ToUnicode(mpt::CharsetISO8859_1, m_ID);
+		return mpt::ToUnicode(mpt::Charset::ISO8859_1, m_ID);
 	}
 	if(m_ID.length() > 8)
 	{

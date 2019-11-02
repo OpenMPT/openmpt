@@ -24,11 +24,11 @@ namespace nlohmann
 	{
 		static void to_json(json& j, const OPENMPT_NAMESPACE::mpt::ustring& val)
 		{
-			j = OPENMPT_NAMESPACE::mpt::ToCharset(OPENMPT_NAMESPACE::mpt::CharsetUTF8, val);
+			j = OPENMPT_NAMESPACE::mpt::ToCharset(OPENMPT_NAMESPACE::mpt::Charset::UTF8, val);
 		}
 		static void from_json(const json& j, OPENMPT_NAMESPACE::mpt::ustring& val)
 		{
-			val = OPENMPT_NAMESPACE::mpt::ToUnicode(OPENMPT_NAMESPACE::mpt::CharsetUTF8, j.get<std::string>());
+			val = OPENMPT_NAMESPACE::mpt::ToUnicode(OPENMPT_NAMESPACE::mpt::Charset::UTF8, j.get<std::string>());
 		}
 	};
 	template <typename Tvalue>
@@ -39,7 +39,7 @@ namespace nlohmann
 			std::map<std::string, Tvalue> utf8map;
 			for(const auto &value : val)
 			{
-				utf8map[OPENMPT_NAMESPACE::mpt::ToCharset(OPENMPT_NAMESPACE::mpt::CharsetUTF8, value.first)] = value.second;
+				utf8map[OPENMPT_NAMESPACE::mpt::ToCharset(OPENMPT_NAMESPACE::mpt::Charset::UTF8, value.first)] = value.second;
 			}
 			j = std::move(utf8map);
 		}
@@ -49,7 +49,7 @@ namespace nlohmann
 			std::map<OPENMPT_NAMESPACE::mpt::ustring, Tvalue> result;
 			for(const auto &value : utf8map)
 			{
-				result[OPENMPT_NAMESPACE::mpt::ToUnicode(OPENMPT_NAMESPACE::mpt::CharsetUTF8, value.first)] = value.second;
+				result[OPENMPT_NAMESPACE::mpt::ToUnicode(OPENMPT_NAMESPACE::mpt::Charset::UTF8, value.first)] = value.second;
 			}
 			val = std::move(result);
 		}

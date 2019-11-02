@@ -736,9 +736,9 @@ Tuning::SerializationResult CTuningRTI::Serialize(std::ostream& outStrm) const
 
 bool CTuningRTI::WriteSCL(std::ostream &f, const mpt::PathString &filename) const
 {
-	mpt::IO::WriteTextCRLF(f, mpt::format("! %1")(mpt::ToCharset(mpt::CharsetISO8859_1, (filename.GetFileName() + filename.GetFileExt()).ToUnicode())));
+	mpt::IO::WriteTextCRLF(f, mpt::format("! %1")(mpt::ToCharset(mpt::Charset::ISO8859_1, (filename.GetFileName() + filename.GetFileExt()).ToUnicode())));
 	mpt::IO::WriteTextCRLF(f, "!");
-	std::string name = mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetName());
+	std::string name = mpt::ToCharset(mpt::Charset::ISO8859_1, mpt::Charset::Locale, GetName());
 	for(auto & c : name) { if(static_cast<uint8>(c) < 32) c = ' '; } // remove control characters
 	if(name.length() >= 1 && name[0] == '!') name[0] = '?'; // do not confuse description with comment
 	mpt::IO::WriteTextCRLF(f, name);
@@ -752,7 +752,7 @@ bool CTuningRTI::WriteSCL(std::ostream &f, const mpt::PathString &filename) cons
 			double cents = std::log2(ratio) * 1200.0;
 			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
 				mpt::fmt::fix(cents),
-				mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetNoteName((n + 1) % m_GroupSize, false))
+				mpt::ToCharset(mpt::Charset::ISO8859_1, mpt::Charset::Locale, GetNoteName((n + 1) % m_GroupSize, false))
 				));
 		}
 	} else if(GetType() == TT_GROUPGEOMETRIC)
@@ -767,7 +767,7 @@ bool CTuningRTI::WriteSCL(std::ostream &f, const mpt::PathString &filename) cons
 			double cents = std::log2(ratio) * 1200.0;
 			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
 				mpt::fmt::fix(cents),
-				mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetNoteName((n + 1) % m_GroupSize, false))
+				mpt::ToCharset(mpt::Charset::ISO8859_1, mpt::Charset::Locale, GetNoteName((n + 1) % m_GroupSize, false))
 				));
 		}
 	} else if(GetType() == TT_GENERAL)
@@ -785,7 +785,7 @@ bool CTuningRTI::WriteSCL(std::ostream &f, const mpt::PathString &filename) cons
 			double cents = std::log2(ratio) * 1200.0;
 			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
 				mpt::fmt::fix(cents),
-				mpt::ToCharset(mpt::CharsetISO8859_1, mpt::CharsetLocale, GetNoteName(n + m_StepMin, false))
+				mpt::ToCharset(mpt::Charset::ISO8859_1, mpt::Charset::Locale, GetNoteName(n + m_StepMin, false))
 				));
 		}
 		mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(

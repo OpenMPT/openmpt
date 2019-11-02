@@ -985,7 +985,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 			char sdbg[5];
 			memcpy(sdbg, &header.id, 4);
 			sdbg[4] = 0;
-			MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("Unsupported SF2 chunk: %1 (%2 bytes)"))(mpt::ToUnicode(mpt::CharsetASCII, mpt::String::ReadAutoBuf(sdbg)), header.len.get()));
+			MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("Unsupported SF2 chunk: %1 (%2 bytes)"))(mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadAutoBuf(sdbg)), header.len.get()));
 		}
 	#endif
 	}
@@ -1417,7 +1417,7 @@ bool CDLSBank::Open(FileReader file)
 				char sdbg[5];
 				memcpy(sdbg, &chunkHeader.id, 4);
 				sdbg[4] = 0;
-				MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("Unsupported chunk: %1 (%2 bytes)"))(mpt::ToUnicode(mpt::CharsetASCII, mpt::String::ReadAutoBuf(sdbg)), chunkHeader.len.get()));
+				MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("Unsupported chunk: %1 (%2 bytes)"))(mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadAutoBuf(sdbg)), chunkHeader.len.get()));
 			}
 			break;
 		#endif
@@ -1710,7 +1710,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 	if(nRgnMin == 0 && (pDlsIns->Regions[0].fuOptions & DLSREGION_ISGLOBAL))
 		nRgnMin++;
 #ifdef DLSINSTR_LOG
-	MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("DLS Instrument #%1: %2"))(nIns, mpt::ToUnicode(mpt::CharsetASCII, mpt::String::ReadAutoBuf(pDlsIns->szName))));
+	MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("DLS Instrument #%1: %2"))(nIns, mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadAutoBuf(pDlsIns->szName))));
 	MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("  Bank=0x%1 Instrument=0x%2"))(mpt::ufmt::HEX0<4>(pDlsIns->ulBank), mpt::ufmt::HEX0<4>(pDlsIns->ulInstrument)));
 	MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("  %1 regions, nMelodicEnv=%2"))(pDlsIns->nRegions, pDlsIns->nMelodicEnv));
 	for (uint32 iDbg=0; iDbg<pDlsIns->nRegions; iDbg++)

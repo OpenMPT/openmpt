@@ -505,7 +505,7 @@ public:
 					bus = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
 					if(!bus)
 					{
-						MPT_LOG(LogError, "sounddev", mpt::format(U_("DBus: dbus_bus_get: %1"))(mpt::ToUnicode(mpt::CharsetUTF8, error.message)));
+						MPT_LOG(LogError, "sounddev", mpt::format(U_("DBus: dbus_bus_get: %1"))(mpt::ToUnicode(mpt::Charset::UTF8, error.message)));
 					}
 					dbus_error_free(&error);
 					if(bus)

@@ -409,7 +409,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.formatName = U_("Extreme's Tracker");
 	m_modFormat.type = U_("ams");
 	m_modFormat.madeWithTracker = mpt::format(U_("Extreme's Tracker %1.%2"))(fileHeader.versionHigh, fileHeader.versionLow);
-	m_modFormat.charset = mpt::CharsetCP437;
+	m_modFormat.charset = mpt::Charset::CP437;
 
 	std::vector<bool> packSample(fileHeader.numSamps);
 
@@ -471,7 +471,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 
-		textOut = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS, textOut);
+		textOut = mpt::ToCharset(mpt::Charset::CP437, mpt::Charset::CP437AMS, textOut);
 
 		// Packed text doesn't include any line breaks!
 		m_songMessage.ReadFixedLineLength(mpt::byte_cast<const std::byte*>(textOut.c_str()), textOut.length(), 76, 0);
@@ -784,7 +784,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.formatName = U_("Velvet Studio");
 	m_modFormat.type = U_("ams");
 	m_modFormat.madeWithTracker = mpt::format(U_("Velvet Studio %1.%2"))(fileHeader.versionHigh.get(), mpt::ufmt::dec0<2>(fileHeader.versionLow.get()));
-	m_modFormat.charset = mpt::CharsetCP437;
+	m_modFormat.charset = mpt::Charset::CP437;
 
 	uint16 headerFlags;
 	if(fileHeader.versionLow >= 2)
@@ -908,7 +908,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		std::string str;
 		file.ReadString<mpt::String::spacePadded>(str, composerLength);
-		m_songArtist = mpt::ToUnicode(mpt::CharsetCP437AMS2, str);
+		m_songArtist = mpt::ToUnicode(mpt::Charset::CP437AMS2, str);
 	}
 
 	// Channel names
@@ -946,7 +946,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 				textOut.push_back(c);
 			}
 		}
-		textOut = mpt::ToCharset(mpt::CharsetCP437, mpt::CharsetCP437AMS2, textOut);
+		textOut = mpt::ToCharset(mpt::Charset::CP437, mpt::Charset::CP437AMS2, textOut);
 		// Packed text doesn't include any line breaks!
 		m_songMessage.ReadFixedLineLength(mpt::byte_cast<const std::byte*>(textOut.c_str()), textOut.length(), 74, 0);
 	}

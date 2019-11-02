@@ -209,7 +209,7 @@ struct FLACDecoder
 				const FLAC__uint32 length = metadata->data.vorbis_comment.comments[i].length;
 				if(length > 6 && !mpt::CompareNoCaseAscii(tag, "TITLE=", 6))
 				{
-					client.sndFile.m_szNames[client.sample] = mpt::ToCharset(client.sndFile.GetCharsetInternal(), mpt::CharsetUTF8, mpt::String::ReadBuf(mpt::String::maybeNullTerminated, tag + 6, length - 6));
+					client.sndFile.m_szNames[client.sample] = mpt::ToCharset(client.sndFile.GetCharsetInternal(), mpt::Charset::UTF8, mpt::String::ReadBuf(mpt::String::maybeNullTerminated, tag + 6, length - 6));
 				} else if(length > 11 && !mpt::CompareNoCaseAscii(tag, "SAMPLERATE=", 11))
 				{
 					uint32 sampleRate = ConvertStrTo<uint32>(tag + 11);
@@ -574,9 +574,9 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 	{
 		// Store sample name
 		FLAC__StreamMetadata_VorbisComment_Entry entry;
-		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "TITLE", mpt::ToCharset(mpt::CharsetUTF8, GetCharsetInternal(), m_szNames[nSample]).c_str());
+		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "TITLE", mpt::ToCharset(mpt::Charset::UTF8, GetCharsetInternal(), m_szNames[nSample]).c_str());
 		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
-		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ENCODER", mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString()).c_str());
+		FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, "ENCODER", mpt::ToCharset(mpt::Charset::UTF8, Version::Current().GetOpenMPTVersionString()).c_str());
 		FLAC__metadata_object_vorbiscomment_append_comment(metadata[0], entry, false);
 		if(sampleRate > FLAC__MAX_SAMPLE_RATE)
 		{

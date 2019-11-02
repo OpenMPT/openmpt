@@ -638,7 +638,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.formatName = U_("Standard MIDI File");
 	m_modFormat.type = isRIFF ? UL_("rmi") : UL_("mid");
 	m_modFormat.madeWithTracker = U_("Standard MIDI File");
-	m_modFormat.charset = mpt::CharsetISO8859_1;
+	m_modFormat.charset = mpt::Charset::ISO8859_1;
 
 	SetMixLevels(mixLevels1_17RC3);
 	m_nTempoMode = tempoModeModern;

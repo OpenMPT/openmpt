@@ -640,7 +640,7 @@ static void Wave64TagFromLISTINFO(mpt::ustring & dst, uint16 codePage, const Chu
 	textChunk.ReadString<mpt::String::maybeNullTerminated>(str, textChunk.GetLength());
 	str = mpt::String::Replace(str, std::string("\r\n"), std::string("\n"));
 	str = mpt::String::Replace(str, std::string("\r"), std::string("\n"));
-	dst = mpt::ToUnicode(codePage, mpt::CharsetWindows1252, str);
+	dst = mpt::ToUnicode(codePage, mpt::Charset::Windows1252, str);
 }
 
 
@@ -755,7 +755,7 @@ bool CSoundFile::ReadW64Sample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 
 	FileTags tags;
 
-	uint16 codePage = 28591; // mpt::CharsetISO8859_1
+	uint16 codePage = 28591; // mpt::Charset::ISO8859_1
 	FileReader csetChunk = chunkList.GetChunk(guidCSET);
 	if(csetChunk.IsValid())
 	{
@@ -1162,7 +1162,7 @@ bool CSoundFile::SaveS3ISample(SAMPLEINDEX smp, std::ostream &f) const
 	MemsetZero(sampleHeader);
 	SmpLength length = sampleHeader.ConvertToS3M(sample);
 	mpt::String::WriteBuf(mpt::String::nullTerminated, sampleHeader.name) = m_szNames[smp];
-	mpt::String::WriteBuf(mpt::String::maybeNullTerminated, sampleHeader.reserved2) = mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString());
+	mpt::String::WriteBuf(mpt::String::maybeNullTerminated, sampleHeader.reserved2) = mpt::ToCharset(mpt::Charset::UTF8, Version::Current().GetOpenMPTVersionString());
 	if(length)
 		sampleHeader.dataPointer[1] = sizeof(S3MSampleHeader) >> 4;
 	mpt::IO::Write(f, sampleHeader);
@@ -1963,7 +1963,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			}
 			if(!region.name.empty())
 			{
-				m_szNames[smp] = mpt::ToCharset(GetCharsetInternal(), mpt::CharsetUTF8, region.name);
+				m_szNames[smp] = mpt::ToCharset(GetCharsetInternal(), mpt::Charset::UTF8, region.name);
 			}
 			if(!m_szNames[smp][0])
 			{
@@ -2151,9 +2151,9 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 
 	if(!ins->name.empty())
 	{
-		f << "// Name: " << mpt::ToCharset(mpt::CharsetUTF8, GetCharsetInternal(), ins->name) << "\n";
+		f << "// Name: " << mpt::ToCharset(mpt::Charset::UTF8, GetCharsetInternal(), ins->name) << "\n";
 	}
-	f << "// Created with " << mpt::ToCharset(mpt::CharsetUTF8, Version::Current().GetOpenMPTVersionString()) << "\n\n";
+	f << "// Created with " << mpt::ToCharset(mpt::Charset::UTF8, Version::Current().GetOpenMPTVersionString()) << "\n\n";
 
 	f << "<control>\ndefault_path=" << sampleDirName.ToUTF8() << "\n\n";
 	f << "<group>";
@@ -2222,7 +2222,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		f << "\n\n<region>";
 		if(!m_szNames[ins->Keyboard[i]].empty())
 		{
-			f << "\nregion_label=" << mpt::ToCharset(mpt::CharsetUTF8, GetCharsetInternal(), m_szNames[ins->Keyboard[i]]);
+			f << "\nregion_label=" << mpt::ToCharset(mpt::Charset::UTF8, GetCharsetInternal(), m_szNames[ins->Keyboard[i]]);
 		}
 		f << "\nsample=" << sampleName.GetFullFileName().ToUTF8();
 		f << "\nlokey=" << i;
@@ -2394,7 +2394,7 @@ static void CAFSetTagFromInfoKey(mpt::ustring & dst, const std::map<std::string,
 	{
 		return;
 	}
-	dst = mpt::ToUnicode(mpt::CharsetUTF8, item->second);
+	dst = mpt::ToUnicode(mpt::Charset::UTF8, item->second);
 }
 
 
@@ -3005,7 +3005,7 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	}
 	annotation = mpt::String::Replace(annotation, "\r\n", "\n");
 	annotation = mpt::String::Replace(annotation, "\r", "\n");
-	mpt::Charset charset = mpt::IsUTF8(annotation) ? mpt::CharsetUTF8 : mpt::CharsetISO8859_1;
+	mpt::Charset charset = mpt::IsUTF8(annotation) ? mpt::Charset::UTF8 : mpt::Charset::ISO8859_1;
 	std::vector<std::string> lines = mpt::String::Split<std::string>(annotation, "\n");
 	bool has_fields = false;
 	for(const auto & line : lines)

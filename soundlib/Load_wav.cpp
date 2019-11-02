@@ -87,7 +87,7 @@ bool CSoundFile::ReadWAV(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_modFormat.formatName = U_("RIFF WAVE");
 	m_modFormat.type = U_("wav");
-	m_modFormat.charset = mpt::CharsetWindows1252;
+	m_modFormat.charset = mpt::Charset::Windows1252;
 	
 	const SmpLength sampleLength = wavFile.GetSampleLength();
 

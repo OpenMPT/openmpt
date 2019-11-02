@@ -51,7 +51,7 @@ static mpt::ustring WineGetWindowTitle()
 
 static std::string WineGetWindowTitleUTF8()
 {
-	return mpt::ToCharset(mpt::CharsetUTF8, WineGetWindowTitle());
+	return mpt::ToCharset(mpt::Charset::UTF8, WineGetWindowTitle());
 }
 
 
@@ -95,11 +95,11 @@ namespace WineIntegration {
 static mpt::checksum::crc64_jones WineHashVersion(mpt::checksum::crc64_jones crc)
 {
 	std::string s;
-	s += mpt::ToCharset(mpt::CharsetUTF8, Build::GetVersionStringExtended());
+	s += mpt::ToCharset(mpt::Charset::UTF8, Build::GetVersionStringExtended());
 	s += " ";
-	s += mpt::ToCharset(mpt::CharsetUTF8, SourceInfo::Current().GetUrlWithRevision());
+	s += mpt::ToCharset(mpt::Charset::UTF8, SourceInfo::Current().GetUrlWithRevision());
 	s += " ";
-	s += mpt::ToCharset(mpt::CharsetUTF8, SourceInfo::Current().GetStateString());
+	s += mpt::ToCharset(mpt::Charset::UTF8, SourceInfo::Current().GetStateString());
 	crc(s.begin(), s.end());
 	return crc;
 }
@@ -225,7 +225,7 @@ static std::map<std::string, std::vector<char> > UnzipToMap(mpt::PathString file
 			stringdata = mpt::String::Replace(stringdata, "\r\n", "\n");
 			data = std::vector<char>(stringdata.data(), stringdata.data() + stringdata.size());
 
-			filetree[mpt::String::Replace(mpt::ToCharset(mpt::CharsetUTF8, mpt::CharsetCP437, name), "\\", "/")] = data;
+			filetree[mpt::String::Replace(mpt::ToCharset(mpt::Charset::UTF8, mpt::Charset::CP437, name), "\\", "/")] = data;
 		}
 		unzClose(zipfile);
 	}
@@ -319,7 +319,7 @@ void Initialize()
 			std::string GetOpenMPTVersion() const
 			{
 				std::string ver;
-				ver += mpt::String::Replace(mpt::ToCharset(mpt::CharsetUTF8, Build::GetVersionStringPure()), std::string(" "), std::string("_"));
+				ver += mpt::String::Replace(mpt::ToCharset(mpt::Charset::UTF8, Build::GetVersionStringPure()), std::string(" "), std::string("_"));
 				mpt::checksum::crc64_jones crc;
 				crc = WineHashVersion(crc);
 				crc = WineHashFile(crc, theApp.GetInstallPath() + WineGetSupportZipFilename());
@@ -411,8 +411,8 @@ void Initialize()
 		script += std::string() + "\n";
 
 		script += std::string() + "printf \"#pragma once\\n\" >> common/svn_version.h" + "\n";
-		script += std::string() + "printf \"#define OPENMPT_VERSION_URL \\\"" + mpt::ToCharset(mpt::CharsetASCII, SourceInfo::Current().Url()) + "\\\"\\n\" >> common/svn_version.h" + "\n";
-		script += std::string() + "printf \"#define OPENMPT_VERSION_DATE \\\"" + mpt::ToCharset(mpt::CharsetASCII, SourceInfo::Current().Date()) + "\\\"\\n\" >> common/svn_version.h" + "\n";
+		script += std::string() + "printf \"#define OPENMPT_VERSION_URL \\\"" + mpt::ToCharset(mpt::Charset::ASCII, SourceInfo::Current().Url()) + "\\\"\\n\" >> common/svn_version.h" + "\n";
+		script += std::string() + "printf \"#define OPENMPT_VERSION_DATE \\\"" + mpt::ToCharset(mpt::Charset::ASCII, SourceInfo::Current().Date()) + "\\\"\\n\" >> common/svn_version.h" + "\n";
 		script += std::string() + "printf \"#define OPENMPT_VERSION_REVISION " + mpt::fmt::dec(SourceInfo::Current().Revision()) + "\\n\" >> common/svn_version.h" + "\n";
 		script += std::string() + "printf \"#define OPENMPT_VERSION_DIRTY " + mpt::fmt::dec(SourceInfo::Current().IsDirty()) + "\\n\" >> common/svn_version.h" + "\n";
 		script += std::string() + "printf \"#define OPENMPT_VERSION_MIXEDREVISIONS " + mpt::fmt::dec(SourceInfo::Current().HasMixedRevisions()) + "\\n\" >> common/svn_version.h" + "\n";

@@ -452,7 +452,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			// Read archive comment if there is no song comment
 			if(m_songMessage.empty())
 			{
-				m_songMessage.assign(mpt::ToCharset(mpt::CharsetLocale, unarchiver.GetComment()));
+				m_songMessage.assign(mpt::ToCharset(mpt::Charset::Locale, unarchiver.GetComment()));
 			}
 #endif
 		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
@@ -592,8 +592,8 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 				{
 					mpt::ustring s = mpt::format(U_("Loading Plugin FX%1: %2 (%3)"))(
 						mpt::ufmt::dec0<2>(plug + 1),
-						mpt::ToUnicode(mpt::CharsetUTF8, plugin.Info.szLibraryName),
-						mpt::ToUnicode(mpt::CharsetLocale, plugin.Info.szName));
+						mpt::ToUnicode(mpt::Charset::UTF8, plugin.Info.szLibraryName),
+						mpt::ToUnicode(mpt::Charset::Locale, plugin.Info.szName));
 					CMainFrame::GetMainFrame()->SetHelpText(mpt::ToCString(s));
 				}
 #endif // MODPLUG_TRACKER
@@ -615,7 +615,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 						notFoundText.append(plugin.GetLibraryName());
 						notFoundText.append("\n");
 #else
-						AddToLog(LogWarning, U_("Plugin not found: ") + mpt::ToUnicode(mpt::CharsetUTF8, plugin.GetLibraryName()));
+						AddToLog(LogWarning, U_("Plugin not found: ") + mpt::ToUnicode(mpt::Charset::UTF8, plugin.GetLibraryName()));
 #endif // MODPLUG_TRACKER
 					}
 				}
@@ -635,7 +635,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		{
 			notFoundText = "The following plugins have not been found:\n\n" + notFoundText + "\nDo you want to search for them online?";
 		}
-		if(Reporting::Confirm(mpt::ToUnicode(mpt::CharsetUTF8, notFoundText), U_("OpenMPT - Plugins missing"), false, true) == cnfYes)
+		if(Reporting::Confirm(mpt::ToUnicode(mpt::Charset::UTF8, notFoundText), U_("OpenMPT - Plugins missing"), false, true) == cnfYes)
 		{
 			std::string url = "https://resources.openmpt.org/plugins/search.php?p=";
 			for(const auto &id : notFoundIDs)
@@ -1448,7 +1448,7 @@ CTuning* CSoundFile::CreateTuning12TET(const std::string &name)
 	CTuning* pT = CTuning::CreateGeometric(name, 12, 2, 15);
 	for(ModCommand::NOTE note = 0; note < 12; ++note)
 	{
-		pT->SetNoteName(note, mpt::ToCharset(mpt::CharsetASCII, mpt::ustring(NoteNamesSharp[note])));
+		pT->SetNoteName(note, mpt::ToCharset(mpt::Charset::ASCII, mpt::ustring(NoteNamesSharp[note])));
 	}
 	return pT;
 }
@@ -1578,7 +1578,7 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE newType)
 	Order.OnModTypeChanged(oldType);
 	Patterns.OnModTypeChanged(oldType);
 
-	m_modFormat.type = mpt::ToUnicode(mpt::CharsetUTF8, GetModSpecifications().fileExtension);
+	m_modFormat.type = mpt::ToUnicode(mpt::Charset::UTF8, GetModSpecifications().fileExtension);
 }
 
 #endif // MODPLUG_TRACKER

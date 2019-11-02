@@ -1826,7 +1826,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				cwtv = chunk.ReadUint16LE();
 				break;
 			case MOD_TYPE_XM:
-				chunk.ReadString<mpt::String::spacePadded>(madeWithTracker, mpt::CharsetCP437, std::min(FileReader::off_t(32), chunk.GetLength()));
+				chunk.ReadString<mpt::String::spacePadded>(madeWithTracker, mpt::Charset::CP437, std::min(FileReader::off_t(32), chunk.GetLength()));
 				break;
 			case MOD_TYPE_MTM:
 				{
@@ -1934,11 +1934,11 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.originalFormatName = std::move(originalFormatName);
 	m_modFormat.madeWithTracker = std::move(madeWithTracker);
 	if(m_dwLastSavedWithVersion)
-		m_modFormat.charset = mpt::CharsetWindows1252;
+		m_modFormat.charset = mpt::Charset::Windows1252;
 	else if(GetType() == MOD_TYPE_MOD)
-		m_modFormat.charset = mpt::CharsetISO8859_1;
+		m_modFormat.charset = mpt::Charset::ISO8859_1;
 	else
-		m_modFormat.charset = mpt::CharsetCP437;
+		m_modFormat.charset = mpt::Charset::CP437;
 
 	if(unsupportedSamples)
 	{
