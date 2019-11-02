@@ -210,6 +210,27 @@ enum class Charset {
 };
 
 
+
+// source code / preprocessor (i.e. # token)
+constexpr Charset CharsetSource = Charset::ASCII;
+
+// debug log files
+constexpr Charset CharsetLogfile = Charset::UTF8;
+
+// std::clog / std::cout / std::cerr
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS && defined(MPT_ENABLE_CHARSET_LOCALE)
+constexpr Charset CharsetStdIO = Charset::Locale;
+#else
+constexpr Charset CharsetStdIO = Charset::UTF8;
+#endif
+
+// std::exception::what()
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+constexpr Charset CharsetException = Charset::Locale;
+#else
+constexpr Charset CharsetException = Charset::UTF8;
+#endif
+
 // Locale in tracker builds, UTF8 in non-locale-aware libopenmpt builds.
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 constexpr Charset CharsetLocaleOrUTF8 = Charset::Locale;
