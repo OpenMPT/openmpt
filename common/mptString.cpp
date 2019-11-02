@@ -303,7 +303,7 @@ namespace mpt { namespace String {
 
 /*
 default 1:1 mapping
-static const uint32 CharsetTableISO8859_1[256] = {
+static constexpr char32_t CharsetTableISO8859_1[256] = {
 	0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,0x0008,0x0009,0x000a,0x000b,0x000c,0x000d,0x000e,0x000f,
 	0x0010,0x0011,0x0012,0x0013,0x0014,0x0015,0x0016,0x0017,0x0018,0x0019,0x001a,0x001b,0x001c,0x001d,0x001e,0x001f,
 	0x0020,0x0021,0x0022,0x0023,0x0024,0x0025,0x0026,0x0027,0x0028,0x0029,0x002a,0x002b,0x002c,0x002d,0x002e,0x002f,
@@ -323,7 +323,7 @@ static const uint32 CharsetTableISO8859_1[256] = {
 };
 */
 
-static const uint32 CharsetTableISO8859_15[256] = {
+static constexpr char32_t CharsetTableISO8859_15[256] = {
 	0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,0x0008,0x0009,0x000a,0x000b,0x000c,0x000d,0x000e,0x000f,
 	0x0010,0x0011,0x0012,0x0013,0x0014,0x0015,0x0016,0x0017,0x0018,0x0019,0x001a,0x001b,0x001c,0x001d,0x001e,0x001f,
 	0x0020,0x0021,0x0022,0x0023,0x0024,0x0025,0x0026,0x0027,0x0028,0x0029,0x002a,0x002b,0x002c,0x002d,0x002e,0x002f,
@@ -342,7 +342,7 @@ static const uint32 CharsetTableISO8859_15[256] = {
 	0x00f0,0x00f1,0x00f2,0x00f3,0x00f4,0x00f5,0x00f6,0x00f7,0x00f8,0x00f9,0x00fa,0x00fb,0x00fc,0x00fd,0x00fe,0x00ff
 };
 
-static const uint32 CharsetTableWindows1252[256] = {
+static constexpr char32_t CharsetTableWindows1252[256] = {
 	0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,0x0008,0x0009,0x000a,0x000b,0x000c,0x000d,0x000e,0x000f,
 	0x0010,0x0011,0x0012,0x0013,0x0014,0x0015,0x0016,0x0017,0x0018,0x0019,0x001a,0x001b,0x001c,0x001d,0x001e,0x001f,
 	0x0020,0x0021,0x0022,0x0023,0x0024,0x0025,0x0026,0x0027,0x0028,0x0029,0x002a,0x002b,0x002c,0x002d,0x002e,0x002f,
@@ -361,7 +361,7 @@ static const uint32 CharsetTableWindows1252[256] = {
 	0x00f0,0x00f1,0x00f2,0x00f3,0x00f4,0x00f5,0x00f6,0x00f7,0x00f8,0x00f9,0x00fa,0x00fb,0x00fc,0x00fd,0x00fe,0x00ff
 };
 
-static const uint32 CharsetTableCP437[256] = {
+static constexpr char32_t CharsetTableCP437[256] = {
 	0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,0x0008,0x0009,0x000a,0x000b,0x000c,0x000d,0x000e,0x000f,
 	0x0010,0x0011,0x0012,0x0013,0x0014,0x0015,0x0016,0x0017,0x0018,0x0019,0x001a,0x001b,0x001c,0x001d,0x001e,0x001f,
 	0x0020,0x0021,0x0022,0x0023,0x0024,0x0025,0x0026,0x0027,0x0028,0x0029,0x002a,0x002b,0x002c,0x002d,0x002e,0x002f,
@@ -385,7 +385,7 @@ static const uint32 CharsetTableCP437[256] = {
 
 // AMS1 actually only supports ASCII plus the modified control characters and no high chars at all.
 // Just default to CP437 for those to keep things simple.
-static const uint32 CharsetTableCP437AMS[256] = {
+static constexpr char32_t CharsetTableCP437AMS[256] = {
 	C(' '),0x0001,0x0002,0x0003,0x00e4,0x0005,0x00e5,0x0007,0x0008,0x0009,0x000a,0x000b,0x000c,0x000d,0x00c4,0x00c5, // differs from CP437
 	0x0010,0x0011,0x0012,0x0013,0x00f6,0x0015,0x0016,0x0017,0x0018,0x00d6,0x001a,0x001b,0x001c,0x001d,0x001e,0x001f, // differs from CP437
 	0x0020,0x0021,0x0022,0x0023,0x0024,0x0025,0x0026,0x0027,0x0028,0x0029,0x002a,0x002b,0x002c,0x002d,0x002e,0x002f,
@@ -405,7 +405,7 @@ static const uint32 CharsetTableCP437AMS[256] = {
 };
 
 // AMS2: Looking at Velvet Studio's bitmap font (TPIC32.PCX), these appear to be the only supported non-ASCII chars.
-static const uint32 CharsetTableCP437AMS2[256] = {
+static constexpr char32_t CharsetTableCP437AMS2[256] = {
 	C(' '),0x00a9,0x221a,0x00b7,C('0'),C('1'),C('2'),C('3'),C('4'),C('5'),C('6'),C('7'),C('8'),C('9'),C('A'),C('B'), // differs from CP437
 	C('C'),C('D'),C('E'),C('F'),C(' '),0x00a7,C(' '),C(' '),C(' '),C(' '),C(' '),C(' '),C(' '),C(' '),C(' '),C(' '), // differs from CP437
 	0x0020,0x0021,0x0022,0x0023,0x0024,0x0025,0x0026,0x0027,0x0028,0x0029,0x002a,0x002b,0x002c,0x002d,0x002e,0x002f,
@@ -518,16 +518,16 @@ static widestring DecodeCodepage(UINT codepage, const Tsrcstring &src)
 
 
 template<typename Tsrcstring>
-static widestring From8bit(const Tsrcstring &str, const uint32 (&table)[256], widechar replacement = wide_default_replacement)
+static widestring From8bit(const Tsrcstring &str, const char32_t (&table)[256], widechar replacement = wide_default_replacement)
 {
 	widestring res;
 	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
-		uint32 c = static_cast<uint32>(static_cast<uint8>(str[i]));
+		std::size_t c = static_cast<std::size_t>(static_cast<uint8>(str[i]));
 		if(c < std::size(table))
 		{
-			res.push_back(static_cast<widechar>(static_cast<uint32>(table[c])));
+			res.push_back(static_cast<widechar>(table[c]));
 		} else
 		{
 			res.push_back(replacement);
@@ -537,13 +537,13 @@ static widestring From8bit(const Tsrcstring &str, const uint32 (&table)[256], wi
 }
 
 template<typename Tdststring>
-static Tdststring To8bit(const widestring &str, const uint32 (&table)[256], char replacement = '?')
+static Tdststring To8bit(const widestring &str, const char32_t (&table)[256], char replacement = '?')
 {
 	Tdststring res;
 	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
-		uint32 c = str[i];
+		char32_t c = static_cast<char32_t>(str[i]);
 		bool found = false;
 		// Try non-control characters first.
 		// In cases where there are actual characters mirrored in this range (like in AMS/AMS2 character sets),
@@ -604,7 +604,7 @@ static Tdststring ToAscii(const widestring &str, char replacement = '?')
 	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
-		uint32 c = str[i];
+		char32_t c = static_cast<char32_t>(str[i]);
 		if(c <= 0x7f)
 		{
 			res.push_back(static_cast<typename Tdststring::value_type>(static_cast<uint8>(c)));
@@ -637,7 +637,7 @@ static Tdststring ToISO_8859_1(const widestring &str, char replacement = '?')
 	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
-		uint32 c = str[i];
+		char32_t c = static_cast<char32_t>(str[i]);
 		if(c <= 0xff)
 		{
 			res.push_back(static_cast<typename Tdststring::value_type>(static_cast<uint8>(c)));
