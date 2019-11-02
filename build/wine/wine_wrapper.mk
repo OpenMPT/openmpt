@@ -77,8 +77,8 @@ MPT_ARCH_TARGET:=-m$(MPT_ARCH_BITS)
 endif
 
 CPPFLAGS += $(MPT_ARCH_TARGET) -DMPT_WINEGCC -Icommon 
-CXXFLAGS += $(MPT_ARCH_TARGET) -std=c++17 -fPIC -fvisibility=hidden
-CFLAGS   += $(MPT_ARCH_TARGET) -std=c99   -fPIC -fvisibility=hidden
+CXXFLAGS += $(MPT_ARCH_TARGET) -std=gnu++17 -fpermissive -fPIC -fvisibility=hidden
+CFLAGS   += $(MPT_ARCH_TARGET) -std=gnu99                -fPIC -fvisibility=hidden
 LDFLAGS  += $(MPT_ARCH_TARGET) 
 LDLIBS   += -lm 
 ARFLAGS  += 
