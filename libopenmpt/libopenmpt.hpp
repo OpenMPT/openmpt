@@ -283,7 +283,7 @@ enum probe_file_header_result {
 
 //! Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
 /*!
-  \param flags Ored mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
+  \param flags Bit mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
   \param data Beginning of the file data.
   \param size Size of the beginning of the file data.
   \param filesize Full size of the file data on disk.
@@ -300,7 +300,7 @@ LIBOPENMPT_CXX_API int probe_file_header( std::uint64_t flags, const std::uint8_
 
 //! Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
 /*!
-  \param flags Ored mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
+  \param flags Bit mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
   \param data Beginning of the file data.
   \param size Size of the beginning of the file data.
   \remarks It is recommended to use the overload of this function that also takes the filesize as parameter if at all possile. libopenmpt can provide more accurate answers if the filesize is known.
@@ -317,7 +317,7 @@ LIBOPENMPT_CXX_API int probe_file_header( std::uint64_t flags, const std::uint8_
 
 //! Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
 /*!
-  \param flags Ored mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
+  \param flags Bit mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
   \param stream Input stream to scan.
   \remarks stream is left in an unspecified state when this function returns.
   \remarks openmpt::could_open_probability() provides a more elaborate interface that might be required for special use cases. It is recommended to use openmpt::probe_file_header() though, if possible.

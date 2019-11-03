@@ -480,7 +480,7 @@ Const OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR = -255
 
 /'* \brief Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
 
-  \param flags Ored mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
+  \param flags Bit mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
   \param data Beginning of the file data.
   \param size Size of the beginning of the file data.
   \param filesize Full size of the file data on disk.
@@ -506,7 +506,7 @@ Declare Function openmpt_probe_file_header(ByVal flags As ULongInt, ByVal Data A
 
 /'* \brief Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
 
-  \param flags Ored mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
+  \param flags Bit mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
   \param data Beginning of the file data.
   \param size Size of the beginning of the file data.
   \param logfunc Logging function where warning and errors are written. May be NULL.
@@ -532,7 +532,7 @@ Declare Function openmpt_probe_file_header_without_filesize(ByVal flags As ULong
 
 /'* \brief Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
 
-  \param flags Ored mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
+  \param flags Bit mask of OPENMPT_PROBE_FILE_HEADER_FLAGS_MODULES and OPENMPT_PROBE_FILE_HEADER_FLAGS_CONTAINERS, or OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT.
   \param stream_callbacks Input stream callback operations.
   \param stream Input stream to scan.
   \param logfunc Logging function where warning and errors are written. May be NULL.
