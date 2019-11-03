@@ -852,16 +852,18 @@ class textout_ostream : public textout {
 private:
 	std::ostream & s;
 #if defined(__DJGPP__)
-	std::uint16_t active_codepage = 437;
-	std::uint16_t system_codepage = 437;
+	std::uint16_t active_codepage;
+	std::uint16_t system_codepage;
 #endif
 public:
 	textout_ostream( std::ostream & s_ )
 		: s(s_)
+#if defined(__DJGPP__)
+		, active_codepage(437)
+		, system_codepage(437)
+#endif
 	{
 		#if defined(__DJGPP__)
-			std::uint16_t active_codepage = 437;
-			std::uint16_t system_codepage = 437;
 			__dpmi_regs regs;
 			std::memset( &regs, 0, sizeof( __dpmi_regs ) );
 			regs.x.ax = 0x6601;
