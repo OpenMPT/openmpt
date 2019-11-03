@@ -44,13 +44,16 @@ static const char * const license =
 #include <iostream>
 #include <iterator>
 #include <limits>
+#include <locale>
 #include <map>
 #include <random>
 #include <set>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
+#include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -60,6 +63,7 @@ static const char * const license =
 
 #if defined(__DJGPP__)
 #include <conio.h>
+#include <dpmi.h>
 #include <fcntl.h>
 #include <io.h>
 #include <sys/stat.h>
@@ -129,12 +133,33 @@ struct show_version_number_exception : public std::exception {
 struct show_long_version_number_exception : public std::exception {
 };
 
+#if defined( WIN32 )
+bool IsConsole( DWORD stdHandle ) {
+	HANDLE hStd = GetStdHandle( stdHandle );
+	if ( ( hStd != NULL ) && ( hStd != INVALID_HANDLE_VALUE ) ) {
+		DWORD mode = 0;
+		if ( GetConsoleMode( hStd, &mode ) != FALSE ) {
+			return true;
+		}
+	}
+	return false;
+}
+#endif
+
 bool IsTerminal( int fd ) {
 #if defined( WIN32 )
-	return true
-		&& ( _isatty( fd ) ? true : false )
-		&& GetConsoleWindow() != NULL
-		;
+	if ( !_isatty( fd ) ) {
+		return false;
+	}
+	DWORD stdHandle = 0;
+	if ( fd == 0 ) {
+		stdHandle = STD_INPUT_HANDLE;
+	} else if ( fd == 1 ) {
+		stdHandle = STD_OUTPUT_HANDLE;
+	} else if ( fd == 2 ) {
+		stdHandle = STD_ERROR_HANDLE;
+	}
+	return IsConsole( stdHandle );
 #else
 	return isatty( fd ) ? true : false;
 #endif
@@ -1101,23 +1126,6 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 	log.writeout();
 
-#if defined( WIN32 )
-	HANDLE hStdErr = NULL;
-	COORD coord_cursor = COORD();
-	if ( multiline ) {
-		log.flush();
-		hStdErr = GetStdHandle( STD_ERROR_HANDLE );
-		if ( hStdErr ) {
-			CONSOLE_SCREEN_BUFFER_INFO csbi;
-			ZeroMemory( &csbi, sizeof( CONSOLE_SCREEN_BUFFER_INFO ) );
-			GetConsoleScreenBufferInfo( hStdErr, &csbi );
-			coord_cursor = csbi.dwCursorPosition;
-			coord_cursor.X = 1;
-			coord_cursor.Y -= lines;
-		}
-	}
-#endif
-
 	double cpu_smooth = 0.0;
 
 	while ( true ) {
@@ -1128,6 +1136,15 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 			while ( kbhit() ) {
 				int c = getch();
+				if ( !handle_keypress( c, flags, mod, audio_stream ) ) {
+					return;
+				}
+			}
+
+#elif defined( WIN32 ) && defined( UNICODE )
+
+			while ( _kbhit() ) {
+				wint_t c = _getwch();
 				if ( !handle_keypress( c, flags, mod, audio_stream ) ) {
 					return;
 				}
@@ -1215,16 +1232,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 		}
 
 		if ( multiline ) {
-#if defined( WIN32 )
-			log.flush();
-			if ( hStdErr ) {
-				SetConsoleCursorPosition( hStdErr, coord_cursor );
-			}
-#else
-			for ( int line = 0; line < lines; ++line ) {
-				log << "\x1b[1A";
-			}
-#endif
+			log.cursor_up( lines );
 			log << std::endl;
 			if ( flags.show_meters ) {
 				draw_meters( log, meter, flags );
@@ -2245,21 +2253,33 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 
 #if defined(WIN32)
 
-class ConsoleCP_utf8_raii {
+class FD_utf8_raii {
 private:
-	const UINT oldCP;
-	const UINT oldOutputCP;
+	FILE * file;
+	int old_mode;
 public:
-	ConsoleCP_utf8_raii()
-		: oldCP(GetConsoleCP())
-		, oldOutputCP(GetConsoleOutputCP())
+	FD_utf8_raii( FILE * file, bool set_utf8 )
+		: file(file)
+		, old_mode(-1)
 	{
-		SetConsoleCP( 65001 ); // UTF-8
-		SetConsoleOutputCP( 65001 ); // UTF-8
+		if ( set_utf8 ) {
+			fflush( file );
+			#if defined(UNICODE)
+				old_mode = _setmode( _fileno( file ), _O_U8TEXT );
+			#else
+				old_mode = _setmode( _fileno( file ), _O_TEXT );
+			#endif
+			if ( old_mode == -1 ) {
+				throw exception( "failed to set TEXT mode on file descriptor" );
+			}
+		}
 	}
-	~ConsoleCP_utf8_raii() {
-		SetConsoleCP( oldCP );
-		SetConsoleOutputCP( oldOutputCP );
+	~FD_utf8_raii()
+	{
+		if ( old_mode != -1 ) {
+			fflush( file );
+			old_mode = _setmode( _fileno( file ), old_mode );
+		}
 	}
 };
 
@@ -2268,7 +2288,7 @@ private:
 	FILE * file;
 	int old_mode;
 public:
-	FD_binary_raii(FILE * file, bool set_binary)
+	FD_binary_raii( FILE * file, bool set_binary )
 		: file(file)
 		, old_mode(-1)
 	{
@@ -2306,12 +2326,14 @@ static int main( int argc, char * argv [] ) {
 	#endif
 
 #if defined(WIN32)
-	ConsoleCP_utf8_raii console_cp;
+	FD_utf8_raii stdin_utf8_guard( stdin, true );
+	FD_utf8_raii stdout_utf8_guard( stdout, true );
+	FD_utf8_raii stderr_utf8_guard( stderr, true );
 #endif
 	textout_dummy dummy_log;
 #if defined(WIN32)
-	textout_console std_out( GetStdHandle( STD_OUTPUT_HANDLE ) );
-	textout_console std_err( GetStdHandle( STD_ERROR_HANDLE ) );
+	textout_ostream_console std_out( std::wcout, STD_OUTPUT_HANDLE );
+	textout_ostream_console std_err( std::wclog, STD_ERROR_HANDLE );
 #else
 	textout_ostream std_out( std::cout );
 	textout_ostream std_err( std::clog );
@@ -2407,7 +2429,7 @@ static int main( int argc, char * argv [] ) {
 		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : static_cast<textout&>( stdout_can_ui ? std_out : std_err );
 
 		show_info( log, flags.verbose );
-		
+
 		if ( !flags.warnings.empty() ) {
 			log << flags.warnings << std::endl;
 		}

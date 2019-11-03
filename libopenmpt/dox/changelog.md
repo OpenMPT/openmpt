@@ -29,6 +29,11 @@ is just a high-level summary.
  *  [**Regression**] It is no longer possible to optionally use iconv for
     character set conversions.
 
+ *  [**Bug**] openmpt123: openmpt123 now honors the current locale and outputs
+    text appropriately.
+ *  [**Bug**] openmpt123: Piping text output to other than console window
+    targets on Windows has been fixed.
+
 ### libopenmpt 0.4.0
 
  *  [**New**] libopenmpt now includes emulation of the OPL chip and thus plays
