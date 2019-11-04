@@ -17,6 +17,7 @@
 
 #if defined(__clang__)
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wimplicit-fallthrough"
 #pragma clang diagnostic ignored "-Wreserved-id-macro"
 #endif // __clang__
 #include <SDL.h>
