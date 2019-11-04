@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include <cstddef>
 #include <cstdint>
 
 /*!
@@ -294,10 +295,42 @@ enum probe_file_header_result {
   \retval probe_file_header_result_wantmoredata An answer could not be determined with the amount of data provided.
   \sa openmpt::probe_file_header_get_recommended_size()
   \sa openmpt::could_open_probability()
+  \since 0.5.0
+*/
+LIBOPENMPT_CXX_API int probe_file_header( std::uint64_t flags, const std::byte * data, std::size_t size, std::uint64_t filesize );
+//! Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
+/*!
+  \param flags Bit mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
+  \param data Beginning of the file data.
+  \param size Size of the beginning of the file data.
+  \param filesize Full size of the file data on disk.
+  \remarks It is recommended to provide openmpt::probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size and filesize to the file's size. 
+  \remarks openmpt::could_open_probability() provides a more elaborate interface that might be required for special use cases. It is recommended to use openmpt::probe_file_header() though, if possible.
+  \retval probe_file_header_result_success The file will most likely be supported by libopenmpt.
+  \retval probe_file_header_result_failure The file is not supported by libopenmpt.
+  \retval probe_file_header_result_wantmoredata An answer could not be determined with the amount of data provided.
+  \sa openmpt::probe_file_header_get_recommended_size()
+  \sa openmpt::could_open_probability()
   \since 0.3.0
 */
 LIBOPENMPT_CXX_API int probe_file_header( std::uint64_t flags, const std::uint8_t * data, std::size_t size, std::uint64_t filesize );
 
+//! Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
+/*!
+  \param flags Bit mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
+  \param data Beginning of the file data.
+  \param size Size of the beginning of the file data.
+  \remarks It is recommended to use the overload of this function that also takes the filesize as parameter if at all possile. libopenmpt can provide more accurate answers if the filesize is known.
+  \remarks It is recommended to provide openmpt::probe_file_header_get_recommended_size() bytes of data for data and size. If the file is smaller, only provide the filesize amount and set size to the file's size. 
+  \remarks openmpt::could_open_probability() provides a more elaborate interface that might be required for special use cases. It is recommended to use openmpt::probe_file_header() though, if possible.
+  \retval probe_file_header_result_success The file will most likely be supported by libopenmpt.
+  \retval probe_file_header_result_failure The file is not supported by libopenmpt.
+  \retval probe_file_header_result_wantmoredata An answer could not be determined with the amount of data provided.
+  \sa openmpt::probe_file_header_get_recommended_size()
+  \sa openmpt::could_open_probability()
+  \since 0.5.0
+*/
+LIBOPENMPT_CXX_API int probe_file_header( std::uint64_t flags, const std::byte * data, std::size_t size );
 //! Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it
 /*!
   \param flags Bit mask of openmpt::probe_file_header_flags_modules and openmpt::probe_file_header_flags_containers, or openmpt::probe_file_header_flags_default.
@@ -417,6 +450,38 @@ public:
 	  \sa \ref libopenmpt_cpp_fileio
 	*/
 	module( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	/*!
+	  \param data Data to load the module from.
+	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
+	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
+	  \sa \ref libopenmpt_cpp_fileio
+	  \since 0.5.0
+	*/
+	module( const std::vector<std::byte> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	/*!
+	  \param beg Begin of data to load the module from.
+	  \param end End of data to load the module from.
+	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
+	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
+	  \sa \ref libopenmpt_cpp_fileio
+	  \since 0.5.0
+	*/
+	module( const std::byte * beg, const std::byte * end, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	/*!
+	  \param data Data to load the module from.
+	  \param size Amount of data available.
+	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
+	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
+	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
+	  \sa \ref libopenmpt_cpp_fileio
+	  \since 0.5.0
+	*/
+	module( const std::byte * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
 	/*!
 	  \param data Data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.

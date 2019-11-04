@@ -9,6 +9,18 @@ is just a high-level summary.
 
  *  [**New**] OggMod compressed FastTracker 2 XM (OXM) modules are now
     supported.
+ *  [**New**] libopenmpt C++: New API
+    `openmpt::module::module(std::vector<std::byte> data)`,
+    `openmpt::module::module(const std::byte * data, std::size_t size)`,
+    `openmpt::module::module(const std::byte * beg, const std::byte * end)`.
+ *  [**New**] libopenmpt C++: New API
+    `openmpt::probe_file_header(flags, const std::byte * data, std::size_t size, filesize)`,
+    `openmpt::probe_file_header(flags, const std::byte * data, std::size_t size)`.
+ *  [**New**] libopenmpt_ext C++: New API
+    `openmpt::module_ext::module_ext(std::vector<std::byte> data)`,
+    `openmpt::module_ext::module_ext(const std::byte * data, std::size_t size)`,
+    `openmpt::module_ext::module_ext(std::vector<std::uint8_t> data)`,
+    `openmpt::module_ext::module_ext(const std::uint8_t * data, std::size_t size)`.
 
  *  [**Change**] std::istream based file I/O has been speed up.
  *  [**Change**] Dependency on iconv on Linux has been removed.

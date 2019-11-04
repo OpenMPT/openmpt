@@ -669,6 +669,24 @@ double module_impl::could_open_probability( std::istream & stream, double effort
 std::size_t module_impl::probe_file_header_get_recommended_size() {
 	return CSoundFile::ProbeRecommendedSize;
 }
+int module_impl::probe_file_header( std::uint64_t flags, const std::byte * data, std::size_t size, std::uint64_t filesize ) {
+	int result = 0;
+	switch ( CSoundFile::Probe( static_cast<CSoundFile::ProbeFlags>( flags ), mpt::span<const std::byte>( data, size ), &filesize ) ) {
+		case CSoundFile::ProbeSuccess:
+			result = probe_file_header_result_success;
+			break;
+		case CSoundFile::ProbeFailure:
+			result = probe_file_header_result_failure;
+			break;
+		case CSoundFile::ProbeWantMoreData:
+			result = probe_file_header_result_wantmoredata;
+			break;
+		default:
+			throw exception("internal error");
+			break;
+	}
+	return result;
+}
 int module_impl::probe_file_header( std::uint64_t flags, const std::uint8_t * data, std::size_t size, std::uint64_t filesize ) {
 	int result = 0;
 	switch ( CSoundFile::Probe( static_cast<CSoundFile::ProbeFlags>( flags ), mpt::span<const std::byte>( mpt::byte_cast<const std::byte*>( data ), size ), &filesize ) ) {
@@ -690,6 +708,24 @@ int module_impl::probe_file_header( std::uint64_t flags, const std::uint8_t * da
 int module_impl::probe_file_header( std::uint64_t flags, const void * data, std::size_t size, std::uint64_t filesize ) {
 	int result = 0;
 	switch ( CSoundFile::Probe( static_cast<CSoundFile::ProbeFlags>( flags ), mpt::span<const std::byte>( mpt::void_cast<const std::byte*>( data ), size ), &filesize ) ) {
+		case CSoundFile::ProbeSuccess:
+			result = probe_file_header_result_success;
+			break;
+		case CSoundFile::ProbeFailure:
+			result = probe_file_header_result_failure;
+			break;
+		case CSoundFile::ProbeWantMoreData:
+			result = probe_file_header_result_wantmoredata;
+			break;
+		default:
+			throw exception("internal error");
+			break;
+	}
+	return result;
+}
+int module_impl::probe_file_header( std::uint64_t flags, const std::byte * data, std::size_t size ) {
+	int result = 0;
+	switch ( CSoundFile::Probe( static_cast<CSoundFile::ProbeFlags>( flags ), mpt::span<const std::byte>( data, size ), nullptr ) ) {
 		case CSoundFile::ProbeSuccess:
 			result = probe_file_header_result_success;
 			break;
@@ -838,6 +874,11 @@ module_impl::module_impl( std::istream & stream, std::unique_ptr<log_interface> 
 	load( make_FileReader( &stream ), ctls );
 	apply_libopenmpt_defaults();
 }
+module_impl::module_impl( const std::vector<std::byte> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
+	ctor( ctls );
+	load( make_FileReader( mpt::as_span( data ) ), ctls );
+	apply_libopenmpt_defaults();
+}
 module_impl::module_impl( const std::vector<std::uint8_t> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
 	load( make_FileReader( mpt::as_span( data ) ), ctls );
@@ -846,6 +887,11 @@ module_impl::module_impl( const std::vector<std::uint8_t> & data, std::unique_pt
 module_impl::module_impl( const std::vector<char> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
 	load( make_FileReader( mpt::byte_cast< mpt::span< const std::byte > >( mpt::as_span( data ) ) ), ctls );
+	apply_libopenmpt_defaults();
+}
+module_impl::module_impl( const std::byte * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
+	ctor( ctls );
+	load( make_FileReader( mpt::as_span( data, size ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
