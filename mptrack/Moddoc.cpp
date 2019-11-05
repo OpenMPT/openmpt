@@ -2286,12 +2286,13 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 		ord = patternViewState.nOrder;
 	}
 
-	if(m_SndFile.Order().empty())
+	const auto &order = m_SndFile.Order();
+	if(order.empty())
 	{
 		ord = ORDERINDEX_INVALID;
 		pat = 0;
 		row = 0;
-	} else if(ord >= m_SndFile.Order().size())
+	} else if(ord >= order.size())
 	{
 		ord = 0;
 		pat = m_SndFile.Order()[ord];
@@ -2306,9 +2307,9 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	}
 
 	//ensure order correlates with pattern.
-	if(m_SndFile.Order()[ord] != pat)
+	if(ord >= order.size() || order[ord] != pat)
 	{
-		ord = m_SndFile.Order().FindOrder(pat);
+		ord = order.FindOrder(pat);
 	}
 
 	return followSonghWnd;

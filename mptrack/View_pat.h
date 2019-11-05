@@ -105,11 +105,12 @@ struct RowMask
 };
 
 
-struct ModCommandPos
+struct PatternEditPos
 {
-	ROWINDEX row;
-	PATTERNINDEX pattern;
-	CHANNELINDEX channel;
+	ROWINDEX row = ROWINDEX_INVALID;
+	ORDERINDEX order = ORDERINDEX_INVALID;
+	PATTERNINDEX pattern = PATTERNINDEX_INVALID;
+	CHANNELINDEX channel = CHANNELINDEX_INVALID;
 };
 
 
@@ -518,17 +519,13 @@ private:
 		return m_Status[psFollowSong] && mainFrm->GetFollowSong(GetDocument()) == m_hWnd && !sndFile->IsPaused();
 	};
 
-	// If given edit positions are valid, sets them to iRow and iPat.
-	// If not valid, set edit cursor position.
-	void SetEditPos(const CSoundFile &sndFile, ROWINDEX &row, PATTERNINDEX &pat, const ROWINDEX rowCandidate, const PATTERNINDEX patCandidate) const;
-
 	// Returns edit position.
-	ModCommandPos GetEditPos(CSoundFile &sndFile, const bool liveRecord) const;
+	PatternEditPos GetEditPos(const CSoundFile &sndFile, const bool liveRecord) const;
 
 	// Returns pointer to modcommand at given position.
 	// If the position is not valid, a pointer to a dummy command is returned.
 	ModCommand &GetModCommand(PatternCursor cursor);
-	ModCommand &GetModCommand(CSoundFile &sndFile, const ModCommandPos &pos);
+	ModCommand &GetModCommand(CSoundFile &sndFile, const PatternEditPos &pos);
 
 	// Returns true if pattern editing is enabled.
 	bool IsEditingEnabled() const { return m_Status[psRecordingEnabled]; }

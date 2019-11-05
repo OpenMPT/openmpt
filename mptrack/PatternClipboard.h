@@ -16,7 +16,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-struct ModCommandPos;
+struct PatternEditPos;
 class PatternRect;
 class CSoundFile;
 
@@ -63,9 +63,9 @@ public:
 	// Copy a pattern or pattern channel to the internal pattern or channel clipboard.
 	static bool Copy(const CSoundFile &sndFile, PATTERNINDEX pattern, CHANNELINDEX channel = CHANNELINDEX_INVALID);
 	// Try pasting a pattern selection from the system clipboard.
-	static bool Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect, bool &orderChanged);
+	static bool Paste(CSoundFile &sndFile, PatternEditPos &pastePos, PasteModes mode, PatternRect &pasteRect, bool &orderChanged);
 	// Try pasting a pattern selection from an internal clipboard.
-	static bool Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect, clipindex_t internalClipboard, bool &orderChanged);
+	static bool Paste(CSoundFile &sndFile, PatternEditPos &pastePos, PasteModes mode, PatternRect &pasteRect, clipindex_t internalClipboard, bool &orderChanged);
 	// Paste from pattern or channel clipboard.
 	static bool Paste(CSoundFile &sndFile, PATTERNINDEX pattern, CHANNELINDEX channel = CHANNELINDEX_INVALID);
 	// Copy one of the internal clipboards to the system clipboard.
@@ -92,7 +92,7 @@ protected:
 	static std::string CreateClipboardString(const CSoundFile &sndFile, PATTERNINDEX pattern, PatternRect selection);
 
 	// Parse clipboard string and perform the pasting operation.
-	static bool HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const std::string &data, ORDERINDEX curOrder, PatternRect &pasteRect, bool &orderChanged);
+	static bool HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos, PasteModes mode, const std::string &data, PatternRect &pasteRect, bool &orderChanged);
 
 	// System-specific clipboard functions
 	static bool ToSystemClipboard(const PatternClipboardElement &clipboard) { return ToSystemClipboard(clipboard.content); };
