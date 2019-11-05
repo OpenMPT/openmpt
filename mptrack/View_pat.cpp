@@ -3203,13 +3203,12 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	//Work out where to put the new data
-	const CHANNELINDEX nChn = GetCurrentChannel();
-	ROWINDEX nRow = GetCurrentRow();
-	PATTERNINDEX nPattern = m_nPattern;
-	if(IsLiveRecord())
-		SetEditPos(sndFile, nRow, nPattern, sndFile.m_PlayState.m_nRow, sndFile.m_PlayState.m_nPattern);
+	const PatternEditPos editPos = GetEditPos(sndFile, IsLiveRecord());
+	const CHANNELINDEX chn = editPos.channel;
+	const ROWINDEX row = editPos.row;
+	const PATTERNINDEX pattern = editPos.pattern;
 
-	ModCommand *pRow = sndFile.Patterns[nPattern].GetpModCommand(nRow, nChn);
+	ModCommand *pRow = sndFile.Patterns[pattern].GetpModCommand(row, chn);
 
 	// TODO: Is the right plugin active? Move to a chan with the right plug
 	// Probably won't do this - finish fluctuator implementation instead.
@@ -3224,18 +3223,18 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		// only overwrite existing PC Notes
 		if(pRow->IsEmpty() || pRow->IsPcNote())
 		{
-			pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
+			pModDoc->GetPatternUndo().PrepareUndo(pattern, chn, row, 1, 1, "Automation Entry");
 
 			pRow->Set(NOTE_PCS, static_cast<ModCommand::INSTR>(plugSlot + 1), static_cast<uint16>(paramIndex), static_cast<uint16>(pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex)) * ModCommand::maxColumnValue));
-			InvalidateRow(nRow);
+			InvalidateRow(row);
 		}
 	} else if(sndFile.GetModSpecifications().HasCommand(CMD_SMOOTHMIDI))
 	{
 		// Other formats: Use MIDI macros
 
 		//Figure out which plug param (if any) is controllable using the active macro on this channel.
-		int activePlugParam  = -1;
-		BYTE activeMacro      = sndFile.m_PlayState.Chn[nChn].nActiveMacro;
+		int activePlugParam = -1;
+		BYTE activeMacro = sndFile.m_PlayState.Chn[chn].nActiveMacro;
 
 		if (sndFile.m_MidiCfg.GetParameteredMacroType(activeMacro) == kSFxPlugParam)
 		{
@@ -3249,15 +3248,15 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 			int foundMacro = sndFile.m_MidiCfg.FindMacroForParam(static_cast<PlugParamIndex>(paramIndex));
 			if (foundMacro >= 0)
 			{
-				sndFile.m_PlayState.Chn[nChn].nActiveMacro = static_cast<uint8>(foundMacro);
+				sndFile.m_PlayState.Chn[chn].nActiveMacro = static_cast<uint8>(foundMacro);
 				if (pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI) //we overwrite existing Zxx and \xx only.
 				{
-					pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
+					pModDoc->GetPatternUndo().PrepareUndo(pattern, chn, row, 1, 1, "Automation Entry");
 
 					pRow->command = CMD_S3MCMDEX;
 					if(!sndFile.GetModSpecifications().HasCommand(CMD_S3MCMDEX)) pRow->command = CMD_MODCMDEX;
 					pRow->param = 0xF0 + (foundMacro & 0x0F);
-					InvalidateRow(nRow);
+					InvalidateRow(row);
 				}
 
 			}
@@ -3266,13 +3265,13 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		// Write the data, but we only overwrite if the command is a macro anyway.
 		if(pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI)
 		{
-			pModDoc->GetPatternUndo().PrepareUndo(nPattern, nChn, nRow, 1, 1, "Automation Entry");
+			pModDoc->GetPatternUndo().PrepareUndo(pattern, chn, row, 1, 1, "Automation Entry");
 
 			pRow->command = CMD_SMOOTHMIDI;
 			PlugParamValue param = pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex));
 			Limit(param, 0.0f, 1.0f);
 			pRow->param = static_cast<ModCommand::PARAM>(param * 127.0f);
-			InvalidateRow(nRow);
+			InvalidateRow(row);
 		}
 
 	}
@@ -3281,23 +3280,43 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 }
 
 
-ModCommandPos CViewPattern::GetEditPos(CSoundFile& rSf, const bool bLiveRecord) const
+PatternEditPos CViewPattern::GetEditPos(const CSoundFile &sndFile, const bool liveRecord) const
 {
-	ModCommandPos editpos;
-	if(bLiveRecord)
+	PatternEditPos editPos;
+	if(liveRecord)
 	{
 		if(m_nPlayPat != PATTERNINDEX_INVALID)
-			SetEditPos(rSf, editpos.row, editpos.pattern, m_nPlayRow, m_nPlayPat);
-		else
-			SetEditPos(rSf, editpos.row, editpos.pattern, rSf.m_PlayState.m_nRow, rSf.m_PlayState.m_nPattern);
+		{
+			editPos.row = m_nPlayRow;
+			editPos.order = GetCurrentOrder();
+			editPos.pattern = m_nPlayPat;
+		} else
+		{
+			editPos.row = sndFile.m_PlayState.m_nRow;
+			editPos.order = sndFile.m_PlayState.m_nCurrentOrder;
+			editPos.pattern = sndFile.m_PlayState.m_nPattern;
+		}
+
+		if(!sndFile.Patterns.IsValidPat(editPos.pattern) || !sndFile.Patterns[editPos.pattern].IsValidRow(editPos.row))
+		{
+			editPos.row = GetCurrentRow();
+			editPos.order = GetCurrentOrder();
+			editPos.pattern = m_nPattern;
+		}
+		if(!sndFile.Order().IsValidPat(editPos.order) || sndFile.Order()[editPos.order] != editPos.pattern)
+		{
+			ORDERINDEX realOrder = sndFile.Order().FindOrder(editPos.pattern, editPos.order);
+			if(realOrder != ORDERINDEX_INVALID)
+				editPos.order = realOrder;
+		}
 	} else
 	{
-		editpos.pattern = m_nPattern;
-		editpos.row = GetCurrentRow();
+		editPos.row = GetCurrentRow();
+		editPos.order = GetCurrentOrder();
+		editPos.pattern = m_nPattern;
 	}
-	editpos.channel = GetCurrentChannel();
-
-	return editpos;
+	editPos.channel = GetCurrentChannel();
+	return editPos;
 }
 
 
@@ -3329,7 +3348,7 @@ void CViewPattern::SanitizeCursor()
 
 // Returns pointer to modcommand at given position.
 // If the position is not valid, a pointer to a dummy command is returned.
-ModCommand &CViewPattern::GetModCommand(CSoundFile &sndFile, const ModCommandPos &pos)
+ModCommand &CViewPattern::GetModCommand(CSoundFile &sndFile, const PatternEditPos &pos)
 {
 	static ModCommand dummy;
 	if(sndFile.Patterns.IsValidPat(pos.pattern) && pos.row < sndFile.Patterns[pos.pattern].GetNumRows() && pos.channel < sndFile.GetNumChannels())
@@ -3401,14 +3420,14 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	{
 		const bool liveRecord = IsLiveRecord();
 
-		ModCommandPos editpos = GetEditPos(sndFile, liveRecord);
-		ModCommand &m = GetModCommand(sndFile, editpos);
-		pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Mapping Record");
+		PatternEditPos editPos = GetEditPos(sndFile, liveRecord);
+		ModCommand &m = GetModCommand(sndFile, editPos);
+		pModDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1, "MIDI Mapping Record");
 		m.Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue) / 16383));
 		if(!liveRecord)
-			InvalidateRow(editpos.row);
+			InvalidateRow(editPos.row);
 		pModDoc->SetModified();
-		pModDoc->UpdateAllViews(this, PatternHint(editpos.pattern).Data(), this);
+		pModDoc->UpdateAllViews(this, PatternHint(editPos.pattern).Data(), this);
 	}
 
 	if(captured)
@@ -3499,7 +3518,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	{
 		const bool liveRecord = IsLiveRecord();
 
-		ModCommandPos editpos = GetEditPos(sndFile, liveRecord);
+		PatternEditPos editpos = GetEditPos(sndFile, liveRecord);
 		ModCommand &m = GetModCommand(sndFile, editpos);
 		bool update = false;
 
@@ -4505,7 +4524,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 	const bool usePlaybackPosition = (!chordMode) && (liveRecord && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_AUTODELAY));
 
 	//Work out where to put the note off
-	ModCommandPos editPos = GetEditPos(sndFile, usePlaybackPosition);
+	PatternEditPos editPos = GetEditPos(sndFile, usePlaybackPosition);
 
 	const bool doQuantize = (liveRecord || (fromMidi && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))) && TrackerSettings::Instance().recordQuantizeRows != 0;
 	if(doQuantize)
@@ -4729,7 +4748,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 	const bool isSpecial = note >= NOTE_MIN_SPECIAL;
 	const bool isSplit = IsNoteSplit(note);
 
-	ModCommandPos editPos = GetEditPos(sndFile, usePlaybackPosition);
+	PatternEditPos editPos = GetEditPos(sndFile, usePlaybackPosition);
 
 	const bool recordEnabled = IsEditingEnabled();
 	CHANNELINDEX nChn = GetCurrentChannel();
@@ -4751,35 +4770,32 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 	}
 
 	// -- Chord autodetection: step back if we just entered a note
-	if (recordEnabled && recordGroup && !liveRecord && !ModCommand::IsPcNote(note))
+	if(recordEnabled && recordGroup && !liveRecord && !ModCommand::IsPcNote(note) && m_nSpacing > 0)
 	{
-		if (m_nSpacing > 0)
+		const auto &order = sndFile.Order();
+		if((timeGetTime() - m_autoChordStartTime) < TrackerSettings::Instance().gnAutoChordWaitTime
+			&& order.IsValidPat(m_autoChordStartOrder)
+			&& sndFile.Patterns[order[m_autoChordStartOrder]].IsValidRow(m_autoChordStartRow))
 		{
-			const auto &order = sndFile.Order();
-			if((timeGetTime() - m_autoChordStartTime) < TrackerSettings::Instance().gnAutoChordWaitTime
-			   && order.IsValidPat(m_autoChordStartOrder)
-			   && sndFile.Patterns[order[m_autoChordStartOrder]].IsValidRow(m_autoChordStartRow))
+			const auto pattern = order[m_autoChordStartOrder];
+			if(pattern != editPos.pattern)
 			{
-				const auto pattern = order[m_autoChordStartOrder];
-				if(pattern != editPos.pattern)
-				{
-					SetCurrentOrder(m_autoChordStartOrder);
-					SetCurrentPattern(pattern, m_autoChordStartRow);
-				}
-				editPos.pattern = pattern;
-				editPos.row = m_autoChordStartRow;
-			} else
-			{
-				m_autoChordStartRow = ROWINDEX_INVALID;
-				m_autoChordStartOrder = ORDERINDEX_INVALID;
+				SetCurrentOrder(m_autoChordStartOrder);
+				SetCurrentPattern(pattern, m_autoChordStartRow);
 			}
+			editPos.pattern = pattern;
+			editPos.row = m_autoChordStartRow;
+		} else
+		{
+			m_autoChordStartRow = ROWINDEX_INVALID;
+			m_autoChordStartOrder = ORDERINDEX_INVALID;
 		}
-	}
-	m_autoChordStartTime = timeGetTime();
-	if(m_autoChordStartOrder == ORDERINDEX_INVALID || m_autoChordStartRow == ROWINDEX_INVALID)
-	{
-		m_autoChordStartOrder = sndFile.Order()[editPos.pattern];
-		m_autoChordStartRow = editPos.row;
+		m_autoChordStartTime = timeGetTime();
+		if(m_autoChordStartOrder == ORDERINDEX_INVALID || m_autoChordStartRow == ROWINDEX_INVALID)
+		{
+			m_autoChordStartOrder = editPos.order;
+			m_autoChordStartRow = editPos.row;
+		}
 	}
 
 	// Quantize
@@ -6353,24 +6369,6 @@ void CViewPattern::OnShowTimeAtRow()
 }
 
 
-// Try setting the cursor position to given coordinates.
-void CViewPattern::SetEditPos(const CSoundFile& rSndFile,
-							  ROWINDEX& iRow, PATTERNINDEX& iPat,
-							  const ROWINDEX iRowCandidate, const PATTERNINDEX iPatCandidate) const
-{
-	if(rSndFile.Patterns.IsValidPat(iPatCandidate) && rSndFile.Patterns[iPatCandidate].IsValidRow(iRowCandidate))
-	{ // Case: Edit position candidates are valid -- use them.
-		iPat = iPatCandidate;
-		iRow = iRowCandidate;
-	}
-	else // Case: Edit position candidates are not valid -- set edit cursor position instead.
-	{
-		iPat = m_nPattern;
-		iRow = GetCurrentRow();
-	}
-}
-
-
 // Set up split keyboard
 void CViewPattern::SetSplitKeyboardSettings()
 {
@@ -6647,14 +6645,14 @@ bool CViewPattern::CopyPattern(PATTERNINDEX nPattern, const PatternRect &selecti
 bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &pastePos, PatternClipboard::PasteModes mode)
 {
 	BeginWaitCursor();
-	ModCommandPos pos;
+	PatternEditPos pos;
 	pos.pattern = nPattern;
 	pos.row = pastePos.GetRow();
 	pos.channel = pastePos.GetChannel();
-	ORDERINDEX curOrder = GetCurrentOrder();
+	pos.order = GetCurrentOrder();
 	PatternRect rect;
 	bool orderChanged = false;
-	bool result = PatternClipboard::Paste(*GetSoundFile(), pos, mode, curOrder, rect, orderChanged);
+	bool result = PatternClipboard::Paste(*GetSoundFile(), pos, mode, rect, orderChanged);
 	EndWaitCursor();
 
 	PatternHint updateHint = PatternHint(PATTERNINDEX_INVALID).Data();
@@ -6662,8 +6660,7 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 	{
 		// Multipaste: Switch to pasted pattern.
 		SetCurrentPattern(pos.pattern);
-		curOrder = GetSoundFile()->Order().FindOrder(pos.pattern, curOrder);
-		SetCurrentOrder(curOrder);
+		SetCurrentOrder(pos.order);
 	}
 	if(orderChanged)
 	{

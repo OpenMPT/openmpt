@@ -293,33 +293,34 @@ std::string PatternClipboard::CreateClipboardString(const CSoundFile &sndFile, P
 
 
 // Try pasting a pattern selection from the system clipboard.
-bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect, bool &orderChanged)
+bool PatternClipboard::Paste(CSoundFile &sndFile, PatternEditPos &pastePos, PasteModes mode, PatternRect &pasteRect, bool &orderChanged)
 {
 	std::string data;
-	if(!FromSystemClipboard(data) || !HandlePaste(sndFile, pastePos, mode, data, curOrder, pasteRect, orderChanged))
+	if(!FromSystemClipboard(data) || !HandlePaste(sndFile, pastePos, mode, data, pasteRect, orderChanged))
 	{
 		// Fall back to internal clipboard if there's no valid pattern data in the system clipboard.
-		return Paste(sndFile, pastePos, mode, curOrder, pasteRect, instance.activeClipboard, orderChanged);
+		return Paste(sndFile, pastePos, mode, pasteRect, instance.activeClipboard, orderChanged);
 	}
 	return true;
 }
 
 
 // Try pasting a pattern selection from an internal clipboard.
-bool PatternClipboard::Paste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, ORDERINDEX curOrder, PatternRect &pasteRect, clipindex_t internalClipboard, bool &orderChanged)
+bool PatternClipboard::Paste(CSoundFile &sndFile, PatternEditPos &pastePos, PasteModes mode, PatternRect &pasteRect, clipindex_t internalClipboard, bool &orderChanged)
 {
 	if(internalClipboard >= instance.clipboards.size())
 		return false;
 	
-	return HandlePaste(sndFile, pastePos, mode, instance.clipboards[internalClipboard].content, curOrder, pasteRect, orderChanged);
+	return HandlePaste(sndFile, pastePos, mode, instance.clipboards[internalClipboard].content, pasteRect, orderChanged);
 }
 
 
 // Parse clipboard string and perform the pasting operation.
-bool PatternClipboard::HandlePaste(CSoundFile &sndFile, ModCommandPos &pastePos, PasteModes mode, const std::string &data, ORDERINDEX curOrder, PatternRect &pasteRect, bool &orderChanged)
+bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos, PasteModes mode, const std::string &data, PatternRect &pasteRect, bool &orderChanged)
 {
 	const std::string whitespace(" \n\r\t");
 	PATTERNINDEX pattern = pastePos.pattern;
+	ORDERINDEX &curOrder = pastePos.order;
 	orderChanged = false;
 	if(sndFile.GetpModDoc() == nullptr)
 		return false;

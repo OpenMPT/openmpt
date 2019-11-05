@@ -59,7 +59,7 @@ protected:
 	const CModSpecifications *oldSpecs;
 	EffectInfo effectInfo;
 	ModCommand *m;
-	ModCommandPos editPos;
+	PatternEditPos editPos;
 	UINT xParam, xMultiplier;
 	bool modified;
 
