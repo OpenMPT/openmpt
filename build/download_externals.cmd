@@ -49,9 +49,9 @@ call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://download.microsoft
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.python.org/ftp/python/3.7.3/python-3.7.3-embed-win32.zip"                            "build\externals\python-3.7.3-embed-win32.zip" 2c1b1f0a29d40a91771ae21a5f733eedc10984cd182cb10c2793bbd24191a89f20612a3f23c34047f37fb06369016bfd4a52915ed1b4a56f8bd2b4ca6994eb31 6526486 || goto error
 
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.48/innounp048.rar"  "build\externals\innounp048.rar"               99d468de185dd62aba845410babe04f70bc4a32ea71a86763c8ad1b8adb04d8425a8cf2e8c581b3e42bc555abc27facd07862ef74b4c322db26c9f388b2f44c4  141049 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.49/innounp049.rar"  "build\externals\innounp049.rar"               a00dbb671de1fb0bc3c94ce97a569d2bbfcc00f6fcbe16578ea9940ffdc0558dcde7c9fa0b4a5d7c17d4b73706f6eb21f479c7e6d6b8de3605f3974d25841da3  140885 || goto error
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "http://files.jrsoftware.org/is/5/innosetup-5.6.1-unicode.exe"                                    "build\externals\innosetup-5.6.1-unicode.exe"  cb978a4c1b8641f9c85c65d37c774896d16ddb525c3835db0d351881282b62df0b5faa8fd6dcf460e8353a0f7686f3ad3d875fe40846e71b01ee94ac93cd567c 2359768 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "http://files.jrsoftware.org/is/6/innosetup-6.0.3.exe"                                            "build\externals\innosetup-6.0.3.exe"  033340a9712072ddc0e46cdaab1d7f7cecb7d5f8ff1c3b8d84ac210fefaf1d8e310a9a12fc28390488e64c679709d0d2eab57f178623af9b32ad10ab4a5a3702 4116992 || goto error
 
 
 call :killdir "build\tools\7zipold" || goto error
@@ -75,8 +75,8 @@ call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.
 
 call :killdir "build\tools\innounp"   || goto error
 call :killdir "build\tools\innosetup" || goto error
-call build\scriptlib\unpack.cmd "build\tools\innounp" "build\externals\innounp048.rar" "." || goto error
-build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-5.6.1-unicode.exe" || goto error
+call build\scriptlib\unpack.cmd "build\tools\innounp" "build\externals\innounp049.rar" "." || goto error
+build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-6.0.3.exe" || goto error
 
 goto ok
 
