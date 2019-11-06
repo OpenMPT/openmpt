@@ -352,13 +352,7 @@ bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib) const
 void CVstPluginManager::EnumerateDirectXDMOs()
 {
 #ifndef NO_DMO
-#if MPT_MSVC_BEFORE(2017,0)
-	// VS2015 crashes if knownDMOs is constexpr.
-	const
-#else
-	constexpr
-#endif
-		mpt::UUID knownDMOs[] =
+	constexpr mpt::UUID knownDMOs[] =
 	{
 		"745057C7-F353-4F2D-A7EE-58434477730E"_uuid, // AEC (Acoustic echo cancellation, not usable)
 		"EFE6629C-81F7-4281-BD91-C9D604A95AF6"_uuid, // Chorus
