@@ -36,7 +36,7 @@ build_script:
 after_build:
   - build\auto\package_openmpt_args.cmd vs2019 default Win32 Release 7z default
   - build\auto\package_openmpt_args.cmd vs2019 default x64   Release 7z default
-  - build\auto\build_openmpt_release_packages.cmd auto
+  - build\auto\build_openmpt_release_packages_no_examples.cmd auto
   - build\auto\package_openmpt_installer_args.cmd vs2019 default Win32 Release 7z default
   - appveyor PushArtifact bin\openmpt-win32.tar
   - appveyor PushArtifact bin\openmpt-win64.tar
