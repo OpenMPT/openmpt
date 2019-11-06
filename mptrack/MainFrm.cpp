@@ -222,7 +222,7 @@ void CMainFrame::Initialize()
 	#ifdef NO_VST
 		title += _T(" NO_VST");
 	#endif
-	#ifdef NO_DMO
+	#ifndef MPT_WITH_DMO
 		title += _T(" NO_DMO");
 	#endif
 	#ifdef NO_PLUGINS

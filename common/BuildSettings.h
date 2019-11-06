@@ -74,6 +74,7 @@
 
 // OpenMPT-only dependencies
 #define MPT_WITH_ASIO
+#define MPT_WITH_DMO
 #define MPT_WITH_LAME
 #define MPT_WITH_LHASA
 #define MPT_WITH_MINIZIP
@@ -240,9 +241,6 @@
 // Define to build without VST plugin support; makes build possible without VST SDK.
 //#define NO_VST
 
-// Define to build without DMO plugin support
-//#define NO_DMO
-
 // (HACK) Define to build without any plugin support
 //#define NO_PLUGINS
 
@@ -293,9 +291,6 @@
 #define NO_EQ
 #define NO_AGC
 #define NO_VST
-//#if !MPT_OS_WINDOWS || MPT_OS_WINDOWS_WINRT || !MPT_COMPILER_MSVC || !defined(LIBOPENMPT_BUILD_FULL)
-#define NO_DMO
-//#endif
 //#define NO_PLUGINS
 //#define NO_LIBOPENMPT_C
 //#define NO_LIBOPENMPT_CXX
@@ -502,7 +497,6 @@
 #if defined(NO_PLUGINS)
 // Any plugin type requires NO_PLUGINS to not be defined.
 #define NO_VST
-#define NO_DMO
 #endif
 
 #if defined(ENABLE_ASM) || !defined(NO_VST)

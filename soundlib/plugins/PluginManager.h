@@ -140,7 +140,7 @@ class CVstPluginManager
 {
 #ifndef NO_PLUGINS
 protected:
-#ifndef NO_DMO
+#if defined(MPT_WITH_DMO)
 	bool MustUnInitilizeCOM = false;
 #endif
 	std::vector<VSTPluginLib *> pluginList;

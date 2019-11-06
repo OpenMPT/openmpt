@@ -352,7 +352,7 @@ mpt::ustring GetBuildFeaturesString()
 		#else
 			UL_(" -PLUGINS")
 		#endif
-		#if !defined(NO_DMO)
+		#if defined(MPT_WITH_DMO)
 			UL_(" +DMO")
 		#endif
 		;
@@ -384,7 +384,7 @@ mpt::ustring GetBuildFeaturesString()
 		#ifdef NO_VST
 			UL_(" NO_VST")
 		#endif
-		#ifdef NO_DMO
+		#ifndef MPT_WITH_DMO
 			UL_(" NO_DMO")
 		#endif
 		#ifdef NO_PLUGINS

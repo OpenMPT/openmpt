@@ -106,4 +106,4 @@ protected:
 
 OPENMPT_NAMESPACE_END
 
-#endif // !NO_PLUGINS && NO_DMO
+#endif // !NO_PLUGINS

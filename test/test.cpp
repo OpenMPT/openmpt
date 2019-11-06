@@ -1503,7 +1503,7 @@ static MPT_NOINLINE void TestMisc2()
 	// UUID
 	{
 		VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull).ToUString(), U_("2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"));
-		#if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
+		#if defined(MODPLUG_TRACKER) || defined(MPT_WITH_DMO)
 			constexpr mpt::UUID uuid_tmp = "2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"_uuid;
 			VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), uuid_tmp);
 			VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), mpt::UUID(Util::StringToGUID(_T("{2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32}"))));
@@ -1514,7 +1514,7 @@ static MPT_NOINLINE void TestMisc2()
 			VERIFY_EQUAL(Util::GUIDToString(mpt::UUID(0x00112233u, 0x4455, 0x6677, 0xC899AABBCCDDEEFFull)), _T("{00112233-4455-6677-C899-AABBCCDDEEFF}"));
 		#endif
 
-#if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
+#if defined(MODPLUG_TRACKER) || defined(MPT_WITH_DMO)
 	VERIFY_EQUAL(Util::IsValid(Util::CreateGUID()), true);
 	{
 		mpt::UUID uuid = mpt::UUID::Generate();

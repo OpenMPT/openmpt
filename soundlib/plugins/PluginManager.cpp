@@ -44,11 +44,11 @@
 #include "../../pluginBridge/BridgeWrapper.h"
 #endif // NO_VST
 
-#ifndef NO_DMO
+#if defined(MPT_WITH_DMO)
 #include <winreg.h>
 #include <strmif.h>
 #include <tchar.h>
-#endif // NO_DMO
+#endif // MPT_WITH_DMO
 
 #ifdef MODPLUG_TRACKER
 #include "../../mptrack/Mptrack.h"
@@ -261,7 +261,7 @@ bool CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
 
 CVstPluginManager::CVstPluginManager()
 {
-#ifndef NO_DMO
+#if defined(MPT_WITH_DMO)
 	HRESULT COMinit = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	if(COMinit == S_OK || COMinit == S_FALSE)
 	{
@@ -333,7 +333,7 @@ CVstPluginManager::~CVstPluginManager()
 		}
 		delete plug;
 	}
-#ifndef NO_DMO
+#if defined(MPT_WITH_DMO)
 	if(MustUnInitilizeCOM)
 	{
 		CoUninitialize();
@@ -351,7 +351,7 @@ bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib) const
 
 void CVstPluginManager::EnumerateDirectXDMOs()
 {
-#ifndef NO_DMO
+#if defined(MPT_WITH_DMO)
 	constexpr mpt::UUID knownDMOs[] =
 	{
 		"745057C7-F353-4F2D-A7EE-58434477730E"_uuid, // AEC (Acoustic echo cancellation, not usable)
@@ -421,7 +421,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 		index++;
 	}
 	if (hkEnum) RegCloseKey(hkEnum);
-#endif // NO_DMO
+#endif // MPT_WITH_DMO
 }
 
 

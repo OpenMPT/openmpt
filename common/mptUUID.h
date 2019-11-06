@@ -16,10 +16,10 @@
 #include "Endianness.h"
 
 #if MPT_OS_WINDOWS
-#if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
+#if defined(MODPLUG_TRACKER) || defined(MPT_WITH_DMO)
 #include <guiddef.h>
 #include <rpc.h>
-#endif // MODPLUG_TRACKER || !NO_DMO
+#endif // MODPLUG_TRACKER || MPT_WITH_DMO
 #endif // MPT_OS_WINDOWS
 
 
@@ -30,7 +30,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace Util
 {
 
-#if defined(MODPLUG_TRACKER) || !defined(NO_DMO)
+#if defined(MODPLUG_TRACKER) || defined(MPT_WITH_DMO)
 
 // COM CLSID<->string conversion
 // A CLSID string is not necessarily a standard UUID string,
@@ -56,7 +56,7 @@ GUID CreateGUID();
 // Checks the UUID against the NULL UUID. Returns false if it is NULL, true otherwise.
 bool IsValid(UUID uuid);
 
-#endif // MODPLUG_TRACKER || !NO_DMO
+#endif // MODPLUG_TRACKER || MPT_WITH_DMO
 
 } // namespace Util
 
@@ -112,10 +112,10 @@ private:
 	MPT_CONSTEXPR11_FUN uint8 Nn() const noexcept { return static_cast<uint8>((Data4 >> 56) & 0xffu); }
 	void MakeRFC4122(uint8 version) noexcept;
 public:
-#if MPT_OS_WINDOWS && (defined(MODPLUG_TRACKER) || !defined(NO_DMO))
+#if MPT_OS_WINDOWS && (defined(MODPLUG_TRACKER) || defined(MPT_WITH_DMO))
 	explicit UUID(::UUID uuid);
 	operator ::UUID () const;
-#endif // MPT_OS_WINDOWS && (MODPLUG_TRACKER || !NO_DMO)
+#endif // MPT_OS_WINDOWS && (MODPLUG_TRACKER || MPT_WITH_DMO)
 private:
 	static MPT_CONSTEXPR11_FUN uint8 NibbleFromChar(char x)
 	{

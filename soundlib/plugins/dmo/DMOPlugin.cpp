@@ -12,7 +12,7 @@
 
 #include "stdafx.h"
 
-#ifndef NO_DMO
+#if defined(MPT_WITH_DMO)
 #include "../../Sndfile.h"
 #include "../../../common/mptUUID.h"
 #include "DMOPlugin.h"
@@ -20,12 +20,12 @@
 #include <uuids.h>
 #include <medparam.h>
 #include <mmsystem.h>
-#endif // !NO_DMO
+#endif // MPT_WITH_DMO
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifndef NO_DMO
+#if defined(MPT_WITH_DMO)
 
 
 #ifdef MPT_ALL_LOGGING
@@ -557,11 +557,11 @@ CString DMOPlugin::GetParamDisplay(PlugParamIndex param)
 
 #endif // MODPLUG_TRACKER
 
-#else // NO_DMO
+#else // !MPT_WITH_DMO
 
 MPT_MSVC_WORKAROUND_LNK4221(DMOPlugin)
 
-#endif // !NO_DMO
+#endif // MPT_WITH_DMO
 
 OPENMPT_NAMESPACE_END
 

@@ -8,7 +8,7 @@
  */
 
 
-#ifndef NO_DMO
+#if defined(MPT_WITH_DMO)
 
 #include "../PlugInterface.h"
 #include <dmoreg.h>
@@ -96,5 +96,5 @@ public:
 
 OPENMPT_NAMESPACE_END
 
-#endif // NO_DMO
+#endif // MPT_WITH_DMO
 
