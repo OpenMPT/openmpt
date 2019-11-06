@@ -387,10 +387,12 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 			}
 
 			CString title = plug.libraryName.ToCString();
+#ifndef NO_VST
 			if(!plug.IsNativeFromCache())
 			{
 				title += mpt::cformat(_T(" (%1)"))(plug.GetDllArchNameUser());
 			}
+#endif // !NO_VST
 			HTREEITEM h = AddTreeItem(title, plug.isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[plug.category], reinterpret_cast<LPARAM>(&plug));
 			categoryUsed[plug.category] = true;
 
@@ -436,7 +438,11 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 				} else if(plug.pluginId2 == lastPluginID && foundPlugin < kSameIdAsLastWithPlatformMatch)
 				{
 					// Previously selected plugin
+#ifndef NO_VST
 					foundPlugin = plug.IsNativeFromCache() ? kSameIdAsLastWithPlatformMatch : kSameIdAsLast;
+#else // NO_VST
+					foundPlugin = kSameIdAsLastWithPlatformMatch;
+#endif // !NO_VST
 					currentPlug = h;
 				}
 			}
@@ -617,6 +623,9 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 			break;
 		}
 	}
+#else // NO_VST
+	MPT_UNREFERENCED_PARAMETER(plug);
+	MPT_UNREFERENCED_PARAMETER(parent);
 #endif // NO_VST
 	return true;
 }

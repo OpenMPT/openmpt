@@ -3003,12 +3003,14 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 		str += (librarynames) ? mpt::ToUnicode(mpt::Charset::UTF8, plugin.GetLibraryName()) : mpt::ToUnicode(mpt::Charset::Locale, plugin.GetName());
 		if(str.size() <= size0) str += U_("--");
 		
+#ifndef NO_VST
 		CVstPlugin *vstPlug = dynamic_cast<CVstPlugin *>(plugin.pMixPlugin);
 		if(vstPlug != nullptr && vstPlug->isBridged)
 		{
 			VSTPluginLib &lib = vstPlug->GetPluginFactory();
 			str += mpt::format(U_(" (%1 Bridged)"))(lib.GetDllArchNameUser());
 		}
+#endif // NO_VST
 
 		CBox.SetItemData(static_cast<int>(::SendMessageW(CBox.m_hWnd, CB_ADDSTRING, 0, (LPARAM)str.c_str())), iPlug + 1);
 	}
