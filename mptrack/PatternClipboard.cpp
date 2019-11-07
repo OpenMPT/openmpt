@@ -964,9 +964,7 @@ bool PatternClipboard::CycleForward()
 {
 	instance.m_activeClipboard++;
 	if(instance.m_activeClipboard >= instance.m_clipboards.size())
-	{
 		instance.m_activeClipboard = 0;
-	}
 
 	return SelectClipboard(instance.m_activeClipboard);
 }
@@ -976,12 +974,9 @@ bool PatternClipboard::CycleForward()
 bool PatternClipboard::CycleBackward()
 {
 	if(instance.m_activeClipboard == 0)
-	{
 		instance.m_activeClipboard = instance.m_clipboards.size() - 1;
-	} else
-	{
+	else
 		instance.m_activeClipboard--;
-	}
 
 	return SelectClipboard(instance.m_activeClipboard);
 }
@@ -1006,16 +1001,14 @@ bool PatternClipboard::CanPaste()
 // System-specific clipboard functions
 bool PatternClipboard::ToSystemClipboard(const std::string_view &data)
 {
-	const size_t clipLength = data.size() + 1;
-	Clipboard clipboard(CF_TEXT, clipLength);
+	Clipboard clipboard(CF_TEXT, data.size() + 1);
 	if(auto dst = clipboard.As<char>())
 	{
-		memcpy(dst, data.data(), clipLength);
+		std::copy(data.begin(), data.end(), dst);
+		dst[data.size()] = '\0';
 		return true;
-	} else
-	{
-		return false;
 	}
+	return false;
 }
 
 
@@ -1026,9 +1019,7 @@ bool PatternClipboard::FromSystemClipboard(std::string &data)
 	if(auto cbdata = clipboard.Get())
 	{
 		if(cbdata.size() > 0)
-		{
 			data.assign(mpt::byte_cast<char *>(cbdata.data()), cbdata.size() - 1);
-		}
 		return !data.empty();
 	}
 	return false;
