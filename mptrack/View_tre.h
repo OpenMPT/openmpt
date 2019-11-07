@@ -177,6 +177,7 @@ protected:
 	mpt::PathString m_InstrLibPath;           // Current path to be explored
 	mpt::PathString m_InstrLibHighlightPath;  // Folder to highlight in browser after a refresh
 	mpt::PathString m_SongFileName;           // Name of open module, without path (== m_szInstrLibPath).
+	mpt::PathString m_previousPath;           // The folder from which we came from when navigating one folder up
 	std::vector<mpt::PathString> m_MediaFoundationExtensions;  // cached in order to avoid querying too often when changing browsed folder
 	bool m_showAllFiles = false;
 
@@ -253,6 +254,7 @@ protected:
 	//{{AFX_MSG(CModTree)
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnBeginDrag(HTREEITEM, bool bLeft, LRESULT *pResult);
 	afx_msg void OnBeginLDrag(LPNMHDR, LRESULT *pResult);

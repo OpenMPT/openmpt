@@ -88,6 +88,7 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONUP()
+	ON_WM_XBUTTONUP()
 	ON_WM_KEYDOWN()
 	ON_WM_DROPFILES()
 	ON_NOTIFY_REFLECT(NM_DBLCLK,		&CModTree::OnItemDblClk)
@@ -335,7 +336,7 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 			// Backspace: Go up one directory
 			if(GetParentRootItem(GetSelectedItem()) == m_hInsLib || IsSampleBrowser())
 			{
-				CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(P_(".."), false);
+				InstrumentLibraryChDir(P_(".."), false);
 				return TRUE;
 			}
 			break;
@@ -2238,6 +2239,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 	BeginWaitCursor();
 
 	bool ok = false;
+	m_previousPath = {};
 	if(isSong)
 	{
 		ok = m_pDataTree->InsLibSetFullPath(m_InstrLibPath, dir);
@@ -2258,6 +2260,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 				m_InstrLibHighlightPath = mpt::PathString::FromNative(prevDir.substr(pos + 1, prevDir.length() - pos - 2));  // Highlight previously accessed directory
 				prevDir = prevDir.substr(0, pos + 1);
 			}
+			m_previousPath = m_InstrLibHighlightPath;
 			dir = mpt::PathString::FromNative(prevDir);
 		} else
 		{
@@ -3144,6 +3147,23 @@ void CModTree::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	OnEndDrag(TREESTATUS_RDRAG);
 	CTreeCtrl::OnRButtonUp(nFlags, point);
+}
+
+
+void CModTree::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
+{
+	if(IsSampleBrowser())
+	{
+		if(nButton == XBUTTON1)
+		{
+			InstrumentLibraryChDir(P_(".."), false);
+		} else if(nButton == XBUTTON2)
+		{
+			const auto &previousPath = CMainFrame::GetMainFrame()->GetUpperTreeview()->m_previousPath;
+			InstrumentLibraryChDir(previousPath, (m_InstrLibPath + previousPath).IsFile());
+		}
+	}
+	CTreeCtrl::OnXButtonUp(nFlags, nButton, point);
 }
 
 
