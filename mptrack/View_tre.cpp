@@ -3152,7 +3152,16 @@ void CModTree::OnRButtonUp(UINT nFlags, CPoint point)
 
 void CModTree::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
 {
-	if(IsSampleBrowser())
+	bool isSampleBrowser = IsSampleBrowser();
+	if(!isSampleBrowser)
+	{
+		// In the upper panel, only do folder navigation if the mouse cursor is somewhere below the "Instrument Library" item
+		CRect rect;
+		GetItemRect(m_hInsLib, rect, FALSE);
+		if(point.y > rect.top)
+			isSampleBrowser = true;
+	}
+	if(isSampleBrowser)
 	{
 		if(nButton == XBUTTON1)
 		{
