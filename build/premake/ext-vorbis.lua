@@ -23,7 +23,7 @@
   files {
    "../../include/vorbis/lib/analysis.c",
    "../../include/vorbis/lib/backends.h",
-   "../../include/vorbis/lib/barkmel.c",
+   --"../../include/vorbis/lib/barkmel.c",
    "../../include/vorbis/lib/bitrate.c",
    "../../include/vorbis/lib/bitrate.h",
    "../../include/vorbis/lib/block.c",
