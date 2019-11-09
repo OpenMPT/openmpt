@@ -130,9 +130,9 @@ low-pass filter's -3 dB point and the Nyquist frequency, and ranges from
 0.5% to 45%.  Stop-band attenuation can be specified in the range 49 to 218
 decibel.  Both transition band and stop-band attenuation affect resampler's
 overall speed performance and initial output delay.  For your information,
-transition frequency range spans 170% of the specified transition band,
+transition frequency range spans 175% of the specified transition band,
 which means that for 2% transition band, frequency response below
-0.966\*Nyquist is linear.
+0.965\*Nyquist is linear.
 
 This SRC library also implements a much faster "power of 2" resampling (e.g.
 2X, 4X, 8X, 16X, 3X, 3\*2X, 3\*4X, 3\*8X, etc. upsampling and downsampling).
@@ -168,6 +168,12 @@ your software product to the list of users. This list is important at
 maintaining confidence in this library among the interested parties.
 
 ## Change log ##
+Version 4.6:
+
+* Removed the `MaxInLen` parameter from the `oneshot()` function.
+* Increased intermediate low-pass filter's transition band slightly, for more
+stable quality.
+
 Version 4.5:
 
 * Fixed VS2017 compiler warnings.

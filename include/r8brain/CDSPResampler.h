@@ -294,7 +294,7 @@ public:
 					DstSampleRate, ReqAtten, false, LatencyFrac ));
 
 				const double tb = 100.0 * ( 1.0 - SrcSampleRate * div /
-					DstSampleRate ) / 1.7; // Divide TransBand by a constant
+					DstSampleRate ) / 1.75; // Divide TransBand by a constant
 					// that assures a linear response in the pass-band.
 
 				addProcessor( new CDSPBlockConvolver(
@@ -482,8 +482,6 @@ public:
 	 * length in the "one-shot" mode. This function can be useful when impulse
 	 * response resampling is required.
 	 *
-	 * @param MaxInLen The max input length value which was previously passed
-	 * to the constructor.
 	 * @param ip Input buffer pointer.
 	 * @param iplen Length of the input buffer in samples.
 	 * @param[out] op Output buffer pointer.
@@ -493,8 +491,7 @@ public:
 	 */
 
 	template< class Tin, class Tout >
-	void oneshot( const int MaxInLen, const Tin* ip, int iplen, Tout* op,
-		int oplen )
+	void oneshot( const Tin* ip, int iplen, Tout* op, int oplen )
 	{
 		CFixedBuffer< double > Buf( MaxInLen );
 		bool IsZero = false;
