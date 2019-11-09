@@ -179,9 +179,6 @@
     <ClCompile Include="..\..\..\include\vorbis\lib\analysis.c">
       <Filter>include\vorbis\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\vorbis\lib\barkmel.c">
-      <Filter>include\vorbis\lib</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\bitrate.c">
       <Filter>include\vorbis\lib</Filter>
     </ClCompile>
