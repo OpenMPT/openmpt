@@ -1,5 +1,7 @@
 libmpg123 library version 1.25.13.
 The following changes have been made:
+- ports/makefile/config.h and ports/makefile/mpg123.h have been added for plain
+  Makefile builds.
 - Obviously, unnecessary folders and files have been removed.
 - For building, premake is used to generate Visual Studio project files.
   See ../build/premake/ for details.

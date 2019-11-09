@@ -2,6 +2,7 @@ libogg library version 1.3.4.
 The following changes have been made:
 - Obviously, unnecessary folders and files (documentation, makefiles, etc.) have
   been removed.
+- ports/makefile/ogg/config_types.h has been added for plain Makefile builds.
 - win32/ogg.def has been modified to not override the linker library name.
 - For building, premake is used to generate Visual Studio project files.
   See ../build/premake/ for details.

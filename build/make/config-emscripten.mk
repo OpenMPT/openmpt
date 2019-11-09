@@ -80,7 +80,12 @@ CXXFLAGS += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffa
 CFLAGS   += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing
 LDFLAGS  += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
 
-CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual
+CFLAGS_SILENT += -Wno-cast-align
+CFLAGS_SILENT += -Wno-cast-qual
+CFLAGS_SILENT += -Wno-missing-prototypes
+CFLAGS_SILENT += -Wno-sign-compare
+CFLAGS_SILENT += -Wno-unused-function
+CFLAGS_SILENT += -Wno-unused-parameter
 
 CXXFLAGS_WARNINGS += -Wmissing-declarations
 CFLAGS_WARNINGS   += -Wmissing-prototypes

@@ -41,7 +41,15 @@ CFLAGS_WARNINGS   += -Wpedantic -Wlogical-op -Wdouble-promotion -Wframe-larger-t
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
 endif
 
-CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual -Wno-old-style-declaration -Wno-type-limits -Wno-unused-but-set-variable
+CFLAGS_SILENT += -Wno-cast-qual
+CFLAGS_SILENT += -Wno-empty-body
+CFLAGS_SILENT += -Wno-implicit-fallthrough
+CFLAGS_SILENT += -Wno-old-style-declaration
+CFLAGS_SILENT += -Wno-sign-compare
+CFLAGS_SILENT += -Wno-type-limits
+CFLAGS_SILENT += -Wno-unused-but-set-variable
+CFLAGS_SILENT += -Wno-unused-function
+CFLAGS_SILENT += -Wno-unused-parameter
 
 EXESUFFIX=
 

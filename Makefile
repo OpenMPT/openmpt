@@ -69,6 +69,11 @@
 #  NO_VORBIS=1      Avoid using libvorbis, even if found
 #  NO_VORBISFILE=1  Avoid using libvorbisfile, even if found
 #
+#  LOCAL_ZLIB=1        Build local copy of zlib, even if found
+#  LOCAL_MPG123=1      Build local copy of libmpg123, even if found
+#  LOCAL_OGG=1         Build local copy of libogg, even if found
+#  LOCAL_VORBIS=1      Build local copy of libvorbis, even if found
+#
 #  NO_MINIMP3=1     Do not fallback to minimp3
 #  NO_STBVORBIS=1   Do not fallback to stb_vorbis
 #
@@ -407,6 +412,30 @@ ifeq ($(HACK_ARCHIVE_SUPPORT),1)
 NO_ZLIB:=1
 endif
 
+ifeq ($(LOCAL_ZLIB),1)
+CPPFLAGS_ZLIB := -DMPT_WITH_ZLIB
+LDFLAGS_ZLIB  :=
+LDLIBS_ZLIB   :=
+CPPFLAGS_ZLIB += -Iinclude/zlib/
+LOCAL_ZLIB_SOURCES := 
+LOCAL_ZLIB_SOURCES += include/zlib/adler32.c
+LOCAL_ZLIB_SOURCES += include/zlib/compress.c
+LOCAL_ZLIB_SOURCES += include/zlib/crc32.c
+LOCAL_ZLIB_SOURCES += include/zlib/deflate.c
+LOCAL_ZLIB_SOURCES += include/zlib/gzclose.c
+LOCAL_ZLIB_SOURCES += include/zlib/gzlib.c
+LOCAL_ZLIB_SOURCES += include/zlib/gzread.c
+LOCAL_ZLIB_SOURCES += include/zlib/gzwrite.c
+LOCAL_ZLIB_SOURCES += include/zlib/infback.c
+LOCAL_ZLIB_SOURCES += include/zlib/inffast.c
+LOCAL_ZLIB_SOURCES += include/zlib/inflate.c
+LOCAL_ZLIB_SOURCES += include/zlib/inftrees.c
+LOCAL_ZLIB_SOURCES += include/zlib/trees.c
+LOCAL_ZLIB_SOURCES += include/zlib/uncompr.c
+LOCAL_ZLIB_SOURCES += include/zlib/zutil.c
+include/zlib/%.o : CFLAGS+=$(CFLAGS_SILENT) -DSTDC -DZ_HAVE_UNISTD_H
+include/zlib/%.test.o : CFLAGS+=$(CFLAGS_SILENT) -DSTDC -DZ_HAVE_UNISTD_H
+else
 ifeq ($(NO_ZLIB),1)
 else
 #LDLIBS   += -lz
@@ -424,7 +453,44 @@ endif
 NO_ZLIB:=1
 endif
 endif
+endif
 
+ifeq ($(LOCAL_MPG123),1)
+CPPFLAGS_MPG123 := -DMPT_WITH_MPG123
+LDFLAGS_MPG123  := 
+LDLIBS_MPG123   := 
+CPPFLAGS_MPG123 += -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/
+LOCAL_MPG123_SOURCES := 
+LOCAL_MPG123_SOURCES += include/mpg123/src/compat/compat.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/compat/compat_str.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/dct64.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/equalizer.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/feature.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/format.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/frame.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/icy.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/icy2utf8.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/id3.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/index.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/layer1.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/layer2.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/layer3.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/libmpg123.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/ntom.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/optimize.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/parse.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/readers.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/stringbuf.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/synth.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/synth_8bit.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/synth_real.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/synth_s32.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/tabinit.c
+include/mpg123/src/compat/%.o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
+include/mpg123/src/compat/%.test.o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
+include/mpg123/src/libmpg123/%.o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
+include/mpg123/src/libmpg123/%.test.o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
+else
 ifeq ($(NO_MPG123),1)
 else
 #LDLIBS   += -lmpg123
@@ -442,7 +508,19 @@ endif
 NO_MPG123:=1
 endif
 endif
+endif
 
+ifeq ($(LOCAL_OGG),1)
+CPPFLAGS_OGG := -DMPT_WITH_OGG
+LDFLAGS_OGG  := 
+LDLIBS_OGG   := 
+CPPFLAGS_OGG += -Iinclude/ogg/include/ -Iinclude/ogg/ports/makefile/
+LOCAL_OGG_SOURCES := 
+LOCAL_OGG_SOURCES += include/ogg/src/bitwise.c
+LOCAL_OGG_SOURCES += include/ogg/src/framing.c
+include/ogg/src/%.o : CFLAGS+=$(CFLAGS_SILENT)
+include/ogg/src/%.test.o : CFLAGS+=$(CFLAGS_SILENT)
+else
 ifeq ($(NO_OGG),1)
 else
 #LDLIBS   += -logg
@@ -460,7 +538,39 @@ endif
 NO_OGG:=1
 endif
 endif
+endif
 
+ifeq ($(LOCAL_VORBIS),1)
+CPPFLAGS_VORBIS := -DMPT_WITH_VORBIS
+LDFLAGS_VORBIS  := 
+LDLIBS_VORBIS   := 
+CPPFLAGS_VORBIS += -Iinclude/vorbis/include/ -Iinclude/vorbis/lib/ -DHAVE_ALLOCA_H
+LOCAL_VORBIS_SOURCES := 
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/analysis.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/bitrate.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/block.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/codebook.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/envelope.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/floor0.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/floor1.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/info.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/lookup.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/lpc.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/lsp.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/mapping0.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/mdct.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/psy.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/registry.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/res0.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/sharedbook.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/smallft.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/synthesis.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/vorbisenc.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/vorbisfile.c
+LOCAL_VORBIS_SOURCES += include/vorbis/lib/window.c
+include/vorbis/lib/%.o : CFLAGS+=$(CFLAGS_SILENT)
+include/vorbis/lib/%.test.o : CFLAGS+=$(CFLAGS_SILENT)
+else
 ifeq ($(NO_VORBIS),1)
 else
 #LDLIBS   += -lvorbis
@@ -478,7 +588,13 @@ endif
 NO_VORBIS:=1
 endif
 endif
+endif
 
+ifeq ($(LOCAL_VORBIS),1)
+CPPFLAGS_VORBISFILE := -DMPT_WITH_VORBISFILE
+LDFLAGS_VORBISFILE  := 
+LDLIBS_VORBISFILE   := 
+else
 ifeq ($(NO_VORBISFILE),1)
 else
 #LDLIBS   += -lvorbisfile
@@ -494,6 +610,7 @@ else
 $(warning warning: vorbisfile not found)
 endif
 NO_VORBISFILE:=1
+endif
 endif
 endif
 
@@ -761,14 +878,23 @@ LIBOPENMPT_CXX_SOURCES += \
  
 include/miniz/miniz.o : CFLAGS+=$(CFLAGS_SILENT)
 include/miniz/miniz.test.o : CFLAGS+=$(CFLAGS_SILENT)
+ifeq ($(LOCAL_ZLIB),1)
+LIBOPENMPT_C_SOURCES += $(LOCAL_ZLIB_SOURCES)
+LIBOPENMPTTEST_C_SOURCES += $(LOCAL_ZLIB_SOURCES)
+else
 ifeq ($(NO_ZLIB),1)
 LIBOPENMPT_C_SOURCES += include/miniz/miniz.c
 LIBOPENMPTTEST_C_SOURCES += include/miniz/miniz.c
 CPPFLAGS += -DMPT_WITH_MINIZ
 endif
+endif
 
 include/minimp3/minimp3.o : CFLAGS+=$(CFLAGS_SILENT)
 include/minimp3/minimp3.test.o : CFLAGS+=$(CFLAGS_SILENT)
+ifeq ($(LOCAL_MPG123),1)
+LIBOPENMPT_C_SOURCES += $(LOCAL_MPG123_SOURCES)
+LIBOPENMPTTEST_C_SOURCES += $(LOCAL_MPG123_SOURCES)
+else
 ifeq ($(NO_MPG123),1)
 ifeq ($(NO_MINIMP3),1)
 else
@@ -777,9 +903,18 @@ LIBOPENMPTTEST_C_SOURCES += include/minimp3/minimp3.c
 CPPFLAGS += -DMPT_WITH_MINIMP3
 endif
 endif
+endif
 
 include/stb_vorbis/stb_vorbis.o : CFLAGS+=$(CFLAGS_SILENT)
 include/stb_vorbis/stb_vorbis.test.o : CFLAGS+=$(CFLAGS_SILENT)
+ifeq ($(LOCAL_VORBIS),1)
+ifeq ($(LOCAL_OGG),1)
+LIBOPENMPT_C_SOURCES += $(LOCAL_OGG_SOURCES)
+LIBOPENMPTTEST_C_SOURCES += $(LOCAL_OGG_SOURCES)
+endif
+LIBOPENMPT_C_SOURCES += $(LOCAL_VORBIS_SOURCES)
+LIBOPENMPTTEST_C_SOURCES += $(LOCAL_VORBIS_SOURCES)
+else
 ifeq ($(NO_OGG),1)
 ifeq ($(NO_STBVORBIS),1)
 else
@@ -804,6 +939,7 @@ LIBOPENMPTTEST_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 CPPFLAGS += -DMPT_WITH_STBVORBIS -DSTB_VORBIS_NO_PULLDATA_API -DSTB_VORBIS_NO_STDIO
 endif
 else
+endif
 endif
 endif
 endif
