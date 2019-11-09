@@ -684,10 +684,6 @@
       <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\vorbis\lib\barkmel.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
-      <CompileAsWinRT>FALSE</CompileAsWinRT>
-    </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\bitrate.c">
       <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>

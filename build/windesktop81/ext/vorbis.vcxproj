@@ -678,9 +678,6 @@
     <ClCompile Include="..\..\..\include\vorbis\lib\analysis.c">
       <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\vorbis\lib\barkmel.c">
-      <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\bitrate.c">
       <ObjectFileName>$(IntDir)include\vorbis\lib\</ObjectFileName>
     </ClCompile>
