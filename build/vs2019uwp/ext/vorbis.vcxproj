@@ -749,9 +749,6 @@
     <ClCompile Include="..\..\..\include\vorbis\lib\analysis.c">
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\vorbis\lib\barkmel.c">
-      <CompileAsWinRT>FALSE</CompileAsWinRT>
-    </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\bitrate.c">
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>

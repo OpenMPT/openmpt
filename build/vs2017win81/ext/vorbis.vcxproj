@@ -731,8 +731,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\include\vorbis\lib\analysis.c">
     </ClCompile>
-    <ClCompile Include="..\..\..\include\vorbis\lib\barkmel.c">
-    </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\bitrate.c">
     </ClCompile>
     <ClCompile Include="..\..\..\include\vorbis\lib\block.c">
