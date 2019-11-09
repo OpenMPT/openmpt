@@ -941,10 +941,6 @@
 						>
 					</File>
 					<File
-						RelativePath="..\..\include\vorbis\lib\barkmel.c"
-						>
-					</File>
-					<File
 						RelativePath="..\..\include\vorbis\lib\bitrate.c"
 						>
 					</File>
