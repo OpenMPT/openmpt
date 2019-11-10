@@ -240,7 +240,7 @@ bool CPattern::Shrink()
 			}
 		}
 	}
-	m_ModCommands.resize(m_ModCommands.size() / 2);
+	m_ModCommands.resize(m_Rows * nChns);
 
 	return true;
 }
