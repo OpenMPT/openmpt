@@ -77,18 +77,15 @@ void ITEnvelope::ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envOffset, uint8
 	{
 		mptEnv[ev].value = Clamp<int8, int8>(data[ev].value + envOffset, 0, 64);
 		mptEnv[ev].tick = data[ev].tick;
-		if(ev > 0 && ev < num && mptEnv[ev].tick < mptEnv[ev - 1].tick)
+		if(ev > 0 && mptEnv[ev].tick < mptEnv[ev - 1].tick && !(mptEnv[ev].tick & 0xFF00))
 		{
 			// Fix broken envelopes... Instruments 2 and 3 in NoGap.it by Werewolf have envelope points where the high byte of envelope nodes is missing.
-			// NoGap.it was saved with MPT 1.07 or MPT 1.09, which *normally* doesn't do this in IT files.
+			// NoGap.it was saved with MPT 1.07 - 1.09, which *normally* doesn't do this in IT files.
 			// However... It turns out that MPT 1.07 omitted the high byte of envelope nodes when saving an XI instrument file, and it looks like
 			// Instrument 2 and 3 in NoGap.it were loaded from XI files.
-			mptEnv[ev].tick &= 0xFF;
-			mptEnv[ev].tick |= (mptEnv[ev].tick & ~0xFF);
+			mptEnv[ev].tick |= mptEnv[ev - 1].tick & 0xFF00;
 			if(mptEnv[ev].tick < mptEnv[ev - 1].tick)
-			{
 				mptEnv[ev].tick += 0x100;
-			}
 		}
 	}
 }
