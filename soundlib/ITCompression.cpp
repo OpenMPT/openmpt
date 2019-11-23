@@ -23,59 +23,42 @@ OPENMPT_NAMESPACE_BEGIN
 // Algorithm parameters for 16-Bit samples
 struct IT16BitParams
 {
-	typedef int16 sample_t;
-	static const int16 lowerTab[];
-	static const int16 upperTab[];
-	static const int8 fetchA;
-	static const int8 lowerB;
-	static const int8 upperB;
-	static const int8 defWidth;
-	static const int mask;
+	using sample_t = int16;
+	static constexpr int16 lowerTab[] = {0, -1, -3, -7, -15, -31, -56, -120, -248, -504, -1016, -2040, -4088, -8184, -16376, -32760, -32768};
+	static constexpr int16 upperTab[] = {0, 1, 3, 7, 15, 31, 55, 119, 247, 503, 1015, 2039, 4087, 8183, 16375, 32759, 32767};
+	static constexpr int8 fetchA = 4;
+	static constexpr int8 lowerB = -8;
+	static constexpr int8 upperB = 7;
+	static constexpr int8 defWidth = 17;
+	static constexpr int mask = 0xFFFF;
 };
-
-const int16 IT16BitParams::lowerTab[] = { 0, -1, -3, -7, -15, -31, -56, -120, -248, -504, -1016, -2040, -4088, -8184, -16376, -32760, -32768 };
-const int16 IT16BitParams::upperTab[] = { 0, 1, 3, 7, 15, 31, 55, 119, 247, 503, 1015, 2039, 4087, 8183, 16375, 32759, 32767 };
-const int8 IT16BitParams::fetchA = 4;
-const int8 IT16BitParams::lowerB = -8;
-const int8 IT16BitParams::upperB = 7;
-const int8 IT16BitParams::defWidth = 17;
-const int IT16BitParams::mask = 0xFFFF;
 
 // Algorithm parameters for 8-Bit samples
 struct IT8BitParams
 {
-	typedef int8 sample_t;
-	static const int8 lowerTab[];
-	static const int8 upperTab[];
-	static const int8 fetchA;
-	static const int8 lowerB;
-	static const int8 upperB;
-	static const int8 defWidth;
-	static const int mask;
+	using sample_t = int8;
+	static constexpr int8 lowerTab[] = {0, -1, -3, -7, -15, -31, -60, -124, -128};
+	static constexpr int8 upperTab[] = {0, 1, 3, 7, 15, 31, 59, 123, 127};
+	static constexpr int8 fetchA = 3;
+	static constexpr int8 lowerB = -4;
+	static constexpr int8 upperB = 3;
+	static constexpr int8 defWidth = 9;
+	static constexpr int mask = 0xFF;
 };
 
-const int8 IT8BitParams::lowerTab[] = { 0, -1, -3, -7, -15, -31, -60, -124, -128 };
-const int8 IT8BitParams::upperTab[] = { 0, 1, 3, 7, 15, 31, 59, 123, 127 };
-const int8 IT8BitParams::fetchA = 3;
-const int8 IT8BitParams::lowerB = -4;
-const int8 IT8BitParams::upperB = 3;
-const int8 IT8BitParams::defWidth = 9;
-const int IT8BitParams::mask = 0xFF;
-
-static const int8 ITWidthChangeSize[] = { 4, 5, 6, 7, 8, 9, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+static constexpr int8 ITWidthChangeSize[] = { 4, 5, 6, 7, 8, 9, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 
 //////////////////////////////////////////////////////////////////////////////
 // IT 2.14 compression
 
 
 ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *f, SmpLength maxLength)
-	: file(f)
-	, mptSample(sample)
-	, is215(it215)
+    : file(f)
+    , mptSample(sample)
+    , is215(it215)
 {
 	packedData = new (std::nothrow) uint8[bufferSize];
 	sampleData = new (std::nothrow) uint8[blockSize];
-	packedTotalLength = 0;
 	if(packedData == nullptr || sampleData == nullptr)
 	{
 		return;
@@ -325,8 +308,8 @@ void ITCompression::WriteByte(uint8 v)
 
 
 ITDecompression::ITDecompression(FileReader &file, ModSample &sample, bool it215)
-	: mptSample(sample)
-	, is215(it215)
+    : mptSample(sample)
+    , is215(it215)
 {
 	for(uint8 chn = 0; chn < mptSample.GetNumChannels(); chn++)
 	{
