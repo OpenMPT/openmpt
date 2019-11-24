@@ -144,55 +144,57 @@ void CCtrlGeneral::OnDeactivatePage()
 	m_modDoc.SetFollowWnd(NULL);
 	m_VuMeterLeft.SetVuMeter(0, true);
 	m_VuMeterRight.SetVuMeter(0, true);
-	m_tapTimer = nullptr;	// Reset high-precision clock if required
+	m_tapTimer = nullptr;  // Reset high-precision clock if required
 }
 
 
 void CCtrlGeneral::OnTapTempo()
 {
-	static uint32 tapLength[16], lastTap = 0;
-	if(m_tapTimer == nullptr)
-	{
-		m_tapTimer = std::make_unique<Util::MultimediaClock>(1);
-	}
+	using TapType = decltype(m_tapTimer->Now());
+	static std::array<TapType, 32> tapTime;
+	static TapType lastTap = 0;
+	static size_t numTaps = 0;
 
-	// Shift back the previously recorded tap history
-	for(size_t i = CountOf(tapLength) - 1; i >= 1; i--)
-	{
-		tapLength[i] = tapLength[i - 1];
-	}
+	if(m_tapTimer == nullptr)
+		m_tapTimer = std::make_unique<Util::MultimediaClock>(1);
+
 	const uint32 now = m_tapTimer->Now();
-	tapLength[0] = now - lastTap;
+	if(now - lastTap >= 2000)
+		numTaps = 0;
 	lastTap = now;
 
-	// Now average over complete tap history
-	uint32 numSamples = 0, delay = 0;
-	for(auto length : tapLength)
+	if(numTaps == tapTime.size())
 	{
-		if(length < 2000)
-		{
-			numSamples++;
-			delay += length;
-		} else
-		{
-			break;
-		}
+		// Shift back the previously recorded tap history
+		std::move(tapTime.begin() + 1, tapTime.end(), tapTime.begin());
+		numTaps--;
 	}
-	if(delay)
-	{
-		uint32 newTempo = 60000 * numSamples;
-		if(m_sndFile.m_nTempoMode != tempoModeModern)
-		{
-			newTempo = Util::muldiv(newTempo, m_sndFile.m_nDefaultSpeed * m_sndFile.m_nDefaultRowsPerBeat, 24);
-		}
-		newTempo = Util::muldivr(newTempo, TEMPO::fractFact, delay);
-		TEMPO t;
-		t.SetRaw(newTempo);
+	
+	tapTime[numTaps++] = now;
 
-		Limit(t, tempoMin, tempoMax);
-		if(!m_sndFile.GetModSpecifications().hasFractionalTempo) t.Set(t.GetInt(), 0);
-		m_EditTempo.SetTempoValue(t);
+	if(numTaps <= 1)
+		return;
+
+	// Now apply least squares to tap history
+	double sum = 0.0, weightedSum = 0.0;
+	for(size_t i = 0; i < numTaps; i++)
+	{
+		sum += tapTime[i] / 1000.0;
+		weightedSum += i * tapTime[i] / 1000.0;
 	}
+
+	const double lengthSum = numTaps * (numTaps - 1) / 2;
+	const double lengthSumSum = lengthSum * (2 * numTaps - 1) / 3.0;
+	const double secondsPerBeat = (numTaps * weightedSum - lengthSum * sum) / (lengthSumSum * numTaps - lengthSum * lengthSum);
+
+	double newTempo = 60.0 / secondsPerBeat;
+	if(m_sndFile.m_nTempoMode != tempoModeModern)
+		newTempo *= (m_sndFile.m_nDefaultSpeed * m_sndFile.m_nDefaultRowsPerBeat) / 24.0;
+	if(!m_sndFile.GetModSpecifications().hasFractionalTempo)
+		newTempo = std::round(newTempo);
+	TEMPO t(newTempo);
+	Limit(t, tempoMin, tempoMax);
+	m_EditTempo.SetTempoValue(t);
 }
 
 
@@ -288,7 +290,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 	if (updateAll || (hint.GetCategory() == HINTCAT_SEQUENCE && hintType[HINT_MODSEQUENCE | HINT_RESTARTPOS]))
 	{
 		// Set max valid restart position
-		m_SpinRestartPos.SetRange32(0, std::max(static_cast<int>(m_sndFile.Order().GetRestartPos()), static_cast<int>(m_sndFile.Order().GetLengthTailTrimmed() - 1)));
+		m_SpinRestartPos.SetRange32(0, std::max(m_sndFile.Order().GetRestartPos(), static_cast<ORDERINDEX>(m_sndFile.Order().GetLengthTailTrimmed() - 1)));
 		SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.Order().GetRestartPos(), FALSE);
 	}
 	if (updateAll || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
