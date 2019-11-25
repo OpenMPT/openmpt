@@ -16,6 +16,7 @@
 #include "ModInstrument.h"
 #include "modcommand.h"
 #include "Paula.h"
+#include "tuningbase.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -70,7 +71,8 @@ struct ModChannel
 	int32 newLeftVol, newRightVol;
 	int32 nRealVolume, nRealPan;
 	int32 nVolume, nPan, nFadeOutVol;
-	int32 nPeriod, nC5Speed, nPortamentoDest;
+	int32 nPeriod;                    // Frequency in Hz if !CSoundFile::PeriodsAreFrequencies() or using custom tuning, 4x Amiga periods otherwise
+	int32 nC5Speed, nPortamentoDest;
 	int32 cachedPeriod, glissandoPeriod;
 	int32 nCalcVolume;                // Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
 	EnvInfo VolEnv, PanEnv, PitchEnv; // Envelope playback info
@@ -119,7 +121,7 @@ struct ModChannel
 
 	//-->Variables used to make user-definable tuning modes work with pattern effects.
 	//If true, freq should be recalculated in ReadNote() on first tick.
-	//Currently used only for vibrato things - using in other context might be 
+	//Currently used only for vibrato things - using in other context might be
 	//problematic.
 	bool m_ReCalculateFreqOnFirstTick : 1;
 
@@ -127,8 +129,6 @@ struct ModChannel
 	bool m_CalculateFreq : 1;
 
 	int32 m_PortamentoFineSteps, m_PortamentoTickSlide;
-
-	uint32 m_Freq;
 
 	//NOTE_PCs memory.
 	float m_plugParamValueStep, m_plugParamTargetValue;
@@ -176,21 +176,25 @@ struct ModChannel
 	void Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELINDEX sourceChannel);
 	void Stop();
 
-	bool IsSamplePlaying() const { return !increment.IsZero(); }
+	bool IsSamplePlaying() const noexcept { return !increment.IsZero(); }
 
-	uint32 GetVSTVolume() { return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume; }
+	uint32 GetVSTVolume() const noexcept { return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume; }
 
 	ModCommand::NOTE GetPluginNote(bool realNoteMapping) const;
 
-	// Check if the channel has a valid MIDI output. This function guarantees that pModInstrument != nullptr.
-	bool HasMIDIOutput() const { return pModInstrument != nullptr && pModInstrument->HasValidMIDIChannel(); }
+	// Check if the channel has a valid MIDI output. A return value of true implies that pModInstrument != nullptr.
+	bool HasMIDIOutput() const noexcept { return pModInstrument != nullptr && pModInstrument->HasValidMIDIChannel(); }
+	// Check if the channel uses custom tuning. A return value of true implies that pModInstrument != nullptr.
+	bool HasCustomTuning() const noexcept { return pModInstrument != nullptr && pModInstrument->pTuning != nullptr; }
 
 	// Check if currently processed loop is a sustain loop. pModSample is not checked for validity!
-	bool InSustainLoop() const { return (dwFlags & (CHN_LOOP | CHN_KEYOFF)) == CHN_LOOP && pModSample->uFlags[CHN_SUSTAINLOOP]; }
+	bool InSustainLoop() const noexcept { return (dwFlags & (CHN_LOOP | CHN_KEYOFF)) == CHN_LOOP && pModSample->uFlags[CHN_SUSTAINLOOP]; }
 
 	void UpdateInstrumentVolume(const ModSample *smp, const ModInstrument *ins);
 
 	void SetInstrumentPan(int32 pan, const CSoundFile &sndFile);
+
+	void RecalcTuningFreq(Tuning::RATIOTYPE vibratoFactor, Tuning::NOTEINDEXTYPE arpeggioSteps, const CSoundFile &sndFile);
 };
 
 

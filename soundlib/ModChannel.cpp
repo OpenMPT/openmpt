@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Sndfile.h"
 #include "ModChannel.h"
+#include "tuning.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -71,7 +72,6 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		m_CalculateFreq = false;
 		m_PortamentoFineSteps = 0;
 		m_PortamentoTickSlide = 0;
-		m_Freq = 0;
 	}
 
 	if(resetMask & resetChannelSettings)
@@ -143,6 +143,20 @@ void ModChannel::SetInstrumentPan(int32 pan, const CSoundFile &sndFile)
 			nRestorePanOnNewNote |= 0x8000;
 	}
 	nPan = pan;
+}
+
+
+void ModChannel::RecalcTuningFreq(Tuning::RATIOTYPE vibratoFactor, Tuning::NOTEINDEXTYPE arpeggioSteps, const CSoundFile &sndFile)
+{
+	if(!HasCustomTuning())
+		return;
+
+	ModCommand::NOTE note = ModCommand::IsNote(nNote) ? nNote : nLastNote;
+
+	if(sndFile.m_playBehaviour[kITRealNoteMapping] && note >= NOTE_MIN && note <= NOTE_MAX)
+		note = pModInstrument->NoteMap[note - NOTE_MIN];
+
+	nPeriod = mpt::saturate_round<uint32>((nC5Speed << FREQ_FRACBITS) * vibratoFactor * pModInstrument->pTuning->GetRatio(note - NOTE_MIDDLEC + arpeggioSteps, nFineTune + m_PortamentoFineSteps));
 }
 
 

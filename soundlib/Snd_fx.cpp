@@ -159,6 +159,14 @@ public:
 
 			if(updateInc || chnSettings[channel].incChanged)
 			{
+				if(chn.m_CalculateFreq || chn.m_ReCalculateFreqOnFirstTick)
+				{
+					chn.RecalcTuningFreq(1, 0, sndFile);
+					if(!chn.m_CalculateFreq)
+						chn.m_ReCalculateFreqOnFirstTick = false;
+					else
+						chn.m_CalculateFreq = false;
+				}
 				chn.increment = sndFile.GetChannelIncrement(chn, period, 0);
 				chnSettings[channel].incChanged = false;
 				inc = chn.increment * tickDuration;
@@ -3889,6 +3897,7 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 
 void CSoundFile::FinePortamentoUp(ModChannel &chn, ModCommand::PARAM param) const
 {
+	MPT_ASSERT(!chn.HasCustomTuning());
 	if(GetType() == MOD_TYPE_XM)
 	{
 		// FT2 compatibility: E1x / E2x / X1x / X2x memory is not linked
@@ -3934,6 +3943,7 @@ void CSoundFile::FinePortamentoUp(ModChannel &chn, ModCommand::PARAM param) cons
 
 void CSoundFile::FinePortamentoDown(ModChannel &chn, ModCommand::PARAM param) const
 {
+	MPT_ASSERT(!chn.HasCustomTuning());
 	if(GetType() == MOD_TYPE_XM)
 	{
 		// FT2 compatibility: E1x / E2x / X1x / X2x memory is not linked
@@ -3971,6 +3981,7 @@ void CSoundFile::FinePortamentoDown(ModChannel &chn, ModCommand::PARAM param) co
 
 void CSoundFile::ExtraFinePortamentoUp(ModChannel &chn, ModCommand::PARAM param) const
 {
+	MPT_ASSERT(!chn.HasCustomTuning());
 	if(GetType() == MOD_TYPE_XM)
 	{
 		// FT2 compatibility: E1x / E2x / X1x / X2x memory is not linked
@@ -4010,6 +4021,7 @@ void CSoundFile::ExtraFinePortamentoUp(ModChannel &chn, ModCommand::PARAM param)
 
 void CSoundFile::ExtraFinePortamentoDown(ModChannel &chn, ModCommand::PARAM param) const
 {
+	MPT_ASSERT(!chn.HasCustomTuning());
 	if(GetType() == MOD_TYPE_XM)
 	{
 		// FT2 compatibility: E1x / E2x / X1x / X2x memory is not linked
@@ -4058,8 +4070,11 @@ void CSoundFile::NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool ret
 		{
 			chn.nNoteSlideCounter = chn.nNoteSlideSpeed;
 			// update it
-			chn.nPeriod = GetPeriodFromNote
-				((slideUp ? 1 : -1)  * chn.nNoteSlideStep + GetNoteFromPeriod(chn.nPeriod), 8363, 0);
+			const int32 delta = (slideUp ? 1 : -1) * chn.nNoteSlideStep;
+			if(chn.HasCustomTuning())
+				chn.m_PortamentoFineSteps += delta * chn.pModInstrument->pTuning->GetFineStepCount();
+			else
+				chn.nPeriod = GetPeriodFromNote(delta + GetNoteFromPeriod(chn.nPeriod), 8363, 0);
 
 			if(retrig)
 			{
@@ -4081,11 +4096,11 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 		chn.nOldPortaUp = chn.nOldPortaDown = static_cast<uint8>(param);
 	}
 
-	if(GetType() == MOD_TYPE_MPT && chn.pModInstrument && chn.pModInstrument->pTuning)
+	if(chn.HasCustomTuning())
 	{
 		//Behavior: Param tells number of finesteps(or 'fullsteps'(notes) with glissando)
 		//to slide per row(not per tick).
-		const int32 old_PortamentoTickSlide = (m_PlayState.m_nTickCount != 0) ? chn.m_PortamentoTickSlide : 0;
+		const int32 oldPortamentoTickSlide = (m_PlayState.m_nTickCount != 0) ? chn.m_PortamentoTickSlide : 0;
 
 		if(param)
 			chn.nPortamentoSlide = param;
@@ -4106,7 +4121,7 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 			//With glissando interpreting param as notes instead of finesteps.
 		}
 
-		const int32 slide = chn.m_PortamentoTickSlide - old_PortamentoTickSlide;
+		const int32 slide = chn.m_PortamentoTickSlide - oldPortamentoTickSlide;
 
 		if(std::abs(chn.nPortamentoDest) <= std::abs(slide))
 		{
@@ -4124,7 +4139,7 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 		}
 
 		return;
-	} //End candidate MPT behavior.
+	}
 
 	bool doPorta = !chn.isFirstTick || (GetType() & (MOD_TYPE_DBM | MOD_TYPE_669)) || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1]);
 	if(GetType() == MOD_TYPE_PLM && param >= 0xF0)
@@ -4528,9 +4543,7 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	case 0x40:	chn.nVibratoType = param & 0x07; break;
 	// E5x: Set FineTune
 	case 0x50:	if(!m_SongFlags[SONG_FIRSTTICK])
-				{
 					break;
-				}
 				if(GetType() & (MOD_TYPE_MOD | MOD_TYPE_DIGI | MOD_TYPE_AMF0 | MOD_TYPE_MED))
 				{
 					chn.nFineTune = MOD2XMFineTune(param);
@@ -4595,12 +4608,14 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	// S1x: Set Glissando Control
 	case 0x10:	chn.dwFlags.set(CHN_GLISSANDO, param != 0); break;
 	// S2x: Set FineTune
-	case 0x20:	if(!m_SongFlags[SONG_FIRSTTICK]) break;
+	case 0x20:	if(!m_SongFlags[SONG_FIRSTTICK])
+					break;
 				if(GetType() != MOD_TYPE_669)
 				{
 					chn.nC5Speed = S3MFineTuneTable[param];
 					chn.nFineTune = MOD2XMFineTune(param);
-					if (chn.nPeriod) chn.nPeriod = GetPeriodFromNote(chn.nNote, chn.nFineTune, chn.nC5Speed);
+					if(chn.nPeriod)
+						chn.nPeriod = GetPeriodFromNote(chn.nNote, chn.nFineTune, chn.nC5Speed);
 				} else if(chn.pModSample != nullptr)
 				{
 					chn.nC5Speed = chn.pModSample->nC5Speed + param * 80;
@@ -5540,7 +5555,10 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 
 void CSoundFile::DoFreqSlide(ModChannel &chn, int32 nFreqSlide) const
 {
-	if(!chn.nPeriod) return;
+	if(!chn.nPeriod)
+		return;
+	MPT_ASSERT(!chn.HasCustomTuning());
+
 	if(GetType() == MOD_TYPE_669)
 	{
 		// Like other oldskool trackers, Composer 669 doesn't have linear slides...

@@ -14,7 +14,6 @@
 #include "Sndfile.h"
 #include "MixerLoops.h"
 #include "MIDIEvents.h"
-#include "tuning.h"
 #include "Tables.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
@@ -25,9 +24,6 @@
 #include "OPL.h"
 
 OPENMPT_NAMESPACE_BEGIN
-
-// VU-Meter
-#define VUMETER_DECAY		4
 
 // Log tables for pre-amp
 // Pre-amp (or more precisely: Pre-attenuation) depends on the number of channels,
@@ -1147,7 +1143,7 @@ int CSoundFile::ProcessPitchFilterEnvelope(ModChannel &chn, int &period) const
 		} else
 		{
 			// Pitch Envelope
-			if(GetType() == MOD_TYPE_MPT && chn.pModInstrument && chn.pModInstrument->pTuning)
+			if(chn.HasCustomTuning())
 			{
 				if(chn.nFineTune != envval)
 				{
@@ -1443,7 +1439,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEIND
 
 	if(chn.nCommand == CMD_ARPEGGIO)
 	{
-		if((GetType() & MOD_TYPE_MPT) && chn.pModInstrument && chn.pModInstrument->pTuning)
+		if(chn.HasCustomTuning())
 		{
 			switch(m_PlayState.m_nTickCount % 3)
 			{
@@ -1585,7 +1581,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 
 		int vdelta = GetVibratoDelta(chn.nVibratoType, chn.nVibratoPos);
 
-		if(GetType() == MOD_TYPE_MPT && chn.pModInstrument && chn.pModInstrument->pTuning)
+		if(chn.HasCustomTuning())
 		{
 			//Hack implementation: Scaling vibratofactor to [0.95; 1.05]
 			//using figure from above tables and vibratodepth parameter
@@ -1709,7 +1705,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel &chn, int &period, Tuning::
 	if(chn.pModSample != nullptr && chn.pModSample->nVibDepth)
 	{
 		const ModSample *pSmp = chn.pModSample;
-		const bool alternativeTuning = chn.pModInstrument && chn.pModInstrument->pTuning;
+		const bool hasTuning = chn.HasCustomTuning();
 
 		// In IT linear slide mode, we use frequencies, otherwise we use periods, which are upside down.
 		// In this context, the "up" tables refer to the tables that increase frequency, and the down tables are the ones that decrease frequency.
@@ -1720,7 +1716,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel &chn, int &period, Tuning::
 		const uint32 (&fineDownTable)[16] = useFreq ? FineLinearSlideDownTable : FineLinearSlideUpTable;
 
 		// IT compatibility: Autovibrato is so much different in IT that I just put this in a separate code block, to get rid of a dozen IsCompatibilityMode() calls.
-		if(m_playBehaviour[kITVibratoTremoloPanbrello] && !alternativeTuning && GetType() != MOD_TYPE_MT2)
+		if(m_playBehaviour[kITVibratoTremoloPanbrello] && !hasTuning && GetType() != MOD_TYPE_MT2)
 		{
 			if(!pSmp->nVibRate)
 				return;
@@ -1839,7 +1835,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel &chn, int &period, Tuning::
 			}
 			int n = (vdelta * chn.nAutoVibDepth) / 256;
 
-			if(alternativeTuning)
+			if(hasTuning)
 			{
 				//Vib sweep is not taken into account here.
 				vibratoFactor += 0.05F * pSmp->nVibDepth * vdelta / 4096.0f; //4096 == 64^2
@@ -1952,20 +1948,16 @@ void CSoundFile::ProcessRamping(ModChannel &chn) const
 SamplePosition CSoundFile::GetChannelIncrement(const ModChannel &chn, uint32 period, int periodFrac) const
 {
 	uint32 freq;
-
-	const ModInstrument *pIns = chn.pModInstrument;
-	if(GetType() != MOD_TYPE_MPT || pIns == nullptr || pIns->pTuning == nullptr)
-	{
+	if(!chn.HasCustomTuning())
 		freq = GetFreqFromPeriod(period, chn.nC5Speed, periodFrac);
-	} else
-	{
-		freq = chn.m_Freq;
-	}
+	else
+		freq = chn.nPeriod;
 
-	// Applying Pitch/Tempo lock.
-	if(pIns && pIns->pitchToTempoLock.GetRaw())
+	// Applying Pitch/Tempo lock
+	const ModInstrument *ins = chn.pModInstrument;
+	if(ins && ins->pitchToTempoLock.GetRaw())
 	{
-		freq = Util::muldivr(freq, m_PlayState.m_nMusicTempo.GetRaw(), pIns->pitchToTempoLock.GetRaw());
+		freq = Util::muldivr(freq, m_PlayState.m_nMusicTempo.GetRaw(), ins->pitchToTempoLock.GetRaw());
 	}
 
 	// Avoid increment to overflow and become negative with unrealisticly high frequencies.
@@ -2247,6 +2239,19 @@ bool CSoundFile::ReadNote()
 				period = m_nMinPeriod;
 			}
 
+			const bool hasTuning = chn.HasCustomTuning();
+			if(hasTuning)
+			{
+				if(chn.m_CalculateFreq || (chn.m_ReCalculateFreqOnFirstTick && m_PlayState.m_nTickCount == 0))
+				{
+					chn.RecalcTuningFreq(vibratoFactor, arpeggioSteps, *this);
+					if(!chn.m_CalculateFreq)
+						chn.m_ReCalculateFreqOnFirstTick = false;
+					else
+						chn.m_CalculateFreq = false;
+				}
+			}
+
 			if((chn.dwFlags & (CHN_ADLIB | CHN_MUTE | CHN_SYNCMUTE)) == CHN_ADLIB && m_opl)
 			{
 				const bool doProcess = m_playBehaviour[kOPLFlexibleNoteOff] || !chn.dwFlags[CHN_NOTEFADE] || GetType() == MOD_TYPE_S3M;
@@ -2254,10 +2259,10 @@ bool CSoundFile::ReadNote()
 				{
 					// In ST3, a sample rate of 8363 Hz is mapped to middle-C, which is 261.625 Hz in a tempered scale at A4 = 440.
 					// Hence, we have to translate our "sample rate" into pitch.
-					const auto freq = GetFreqFromPeriod(period, chn.nC5Speed, nPeriodFrac);
-					const auto oplmilliHertz = Util::muldivr_unsigned(freq, 261625, 8363 << FREQ_FRACBITS);
+					const auto freq = hasTuning ? chn.nPeriod : GetFreqFromPeriod(period, chn.nC5Speed, nPeriodFrac);
+					const auto milliHertz = Util::muldivr_unsigned(freq, 261625, 8363 << FREQ_FRACBITS);
 					const bool keyOff = chn.dwFlags[CHN_KEYOFF] || (chn.dwFlags[CHN_NOTEFADE] && chn.nFadeOutVol == 0);
-					m_opl->Frequency(nChn, oplmilliHertz, keyOff, m_playBehaviour[kOPLBeatingOscillators]);
+					m_opl->Frequency(nChn, milliHertz, keyOff, m_playBehaviour[kOPLBeatingOscillators]);
 				}
 				if(doProcess)
 				{
@@ -2277,23 +2282,6 @@ bool CSoundFile::ReadNote()
 					m_opl->NoteCut(nChn);
 					chn.dwFlags.set(CHN_NOTEFADE);
 					chn.nFadeOutVol = 0;
-				}
-			}
-
-			if(GetType() == MOD_TYPE_MPT && pIns != nullptr && pIns->pTuning != nullptr)
-			{
-				// In this case: GetType() == MOD_TYPE_MPT and using custom tunings.
-				if(chn.m_CalculateFreq || (chn.m_ReCalculateFreqOnFirstTick && m_PlayState.m_nTickCount == 0))
-				{
-					ModCommand::NOTE note = chn.nNote;
-					if(!ModCommand::IsNote(note)) note = chn.nLastNote;
-					if(m_playBehaviour[kITRealNoteMapping] && note >= NOTE_MIN && note <= NOTE_MAX)
-						note = pIns->NoteMap[note - NOTE_MIN];
-					chn.m_Freq = mpt::saturate_round<uint32>((chn.nC5Speed << FREQ_FRACBITS) * vibratoFactor * pIns->pTuning->GetRatio(note - NOTE_MIDDLEC + arpeggioSteps, chn.nFineTune+chn.m_PortamentoFineSteps));
-					if(!chn.m_CalculateFreq)
-						chn.m_ReCalculateFreqOnFirstTick = false;
-					else
-						chn.m_CalculateFreq = false;
 				}
 			}
 
@@ -2319,8 +2307,9 @@ bool CSoundFile::ReadNote()
 		// Volume ramping
 		chn.dwFlags.set(CHN_VOLUMERAMP, (chn.nRealVolume | chn.rightVol | chn.leftVol) != 0);
 
-		if (chn.nLeftVU > VUMETER_DECAY) chn.nLeftVU -= VUMETER_DECAY; else chn.nLeftVU = 0;
-		if (chn.nRightVU > VUMETER_DECAY) chn.nRightVU -= VUMETER_DECAY; else chn.nRightVU = 0;
+		constexpr uint8 VUMETER_DECAY = 4;
+		chn.nLeftVU = (chn.nLeftVU > VUMETER_DECAY) ? (chn.nLeftVU - VUMETER_DECAY) : 0;
+		chn.nRightVU = (chn.nRightVU > VUMETER_DECAY) ? (chn.nRightVU - VUMETER_DECAY) : 0;
 
 		chn.newLeftVol = chn.newRightVol = 0;
 		chn.pCurrentSample = (chn.pModSample && chn.pModSample->HasSampleData() && chn.nLength && chn.IsSamplePlaying()) ? chn.pModSample->samplev() : nullptr;
