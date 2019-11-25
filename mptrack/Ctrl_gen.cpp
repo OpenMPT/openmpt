@@ -153,7 +153,7 @@ void CCtrlGeneral::OnTapTempo()
 	using TapType = decltype(m_tapTimer->Now());
 	static std::array<TapType, 32> tapTime;
 	static TapType lastTap = 0;
-	static size_t numTaps = 0;
+	static uint32 numTaps = 0;
 
 	if(m_tapTimer == nullptr)
 		m_tapTimer = std::make_unique<Util::MultimediaClock>(1);
@@ -163,10 +163,10 @@ void CCtrlGeneral::OnTapTempo()
 		numTaps = 0;
 	lastTap = now;
 
-	if(numTaps == tapTime.size())
+	if(static_cast<size_t>(numTaps) >= tapTime.size())
 	{
 		// Shift back the previously recorded tap history
-		std::move(tapTime.begin() + 1, tapTime.end(), tapTime.begin());
+		std::copy(tapTime.begin() + 1, tapTime.end(), tapTime.begin());
 		numTaps--;
 	}
 	
@@ -177,7 +177,7 @@ void CCtrlGeneral::OnTapTempo()
 
 	// Now apply least squares to tap history
 	double sum = 0.0, weightedSum = 0.0;
-	for(size_t i = 0; i < numTaps; i++)
+	for(uint32 i = 0; i < numTaps; i++)
 	{
 		sum += tapTime[i] / 1000.0;
 		weightedSum += i * tapTime[i] / 1000.0;
