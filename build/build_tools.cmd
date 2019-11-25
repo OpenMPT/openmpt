@@ -27,14 +27,14 @@ goto main
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2019.cmd || goto error
  cd include\genie\build\vs2019 || goto error
- msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+ msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32;WindowsTargetPlatformVersion=10.0 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto geniedone
 )
 if exist "C:\Program Files\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2019.cmd || goto error
  cd include\genie\build\vs2019 || goto error
- msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+ msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32;WindowsTargetPlatformVersion=10.0 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto geniedone
 )
