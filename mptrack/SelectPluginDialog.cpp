@@ -317,16 +317,16 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 		{ VSTPluginLib::catSynth,          _T("Instrument Plugins") },
 	};
 
+	const HTREEITEM noPlug = AddTreeItem(_T("No plugin (empty slot)"), IMAGE_NOPLUGIN, false);
+	HTREEITEM currentPlug = noPlug;
+
 	std::bitset<VSTPluginLib::numCategories> categoryUsed;
 	HTREEITEM categoryFolders[VSTPluginLib::numCategories];
-	for(size_t i = CountOf(categories); i != 0; )
+	for(const auto &cat : categories)
 	{
-		i--;
-		categoryFolders[categories[i].category] = AddTreeItem(categories[i].description, IMAGE_FOLDER, false);
+		categoryFolders[cat.category] = AddTreeItem(cat.description, IMAGE_FOLDER, false);
 	}
 
-	HTREEITEM noPlug = AddTreeItem(_T("No plugin (empty slot)"), IMAGE_NOPLUGIN, false);
-	HTREEITEM currentPlug = noPlug;
 	enum PlugMatchQuality
 	{
 		kNoMatch,
@@ -347,7 +347,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 
 		for(auto p : *pManager)
 		{
-			ASSERT(p);
+			MPT_ASSERT(p);
 			const VSTPluginLib &plug = *p;
 			if(nameFilterActive)
 			{
@@ -450,7 +450,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 	}
 
 	// Remove empty categories
-	for(size_t i = 0; i < CountOf(categoryFolders); i++)
+	for(size_t i = 0; i < std::size(categoryFolders); i++)
 	{
 		if(!categoryUsed[i])
 		{
@@ -478,7 +478,7 @@ HTREEITEM CSelectPluginDlg::AddTreeItem(const TCHAR *title, int image, bool sort
 		0, 0,
 		lParam,
 		hParent,
-		(sort ? TVI_SORT : TVI_FIRST));
+		(sort ? TVI_SORT : TVI_LAST));
 }
 
 
@@ -566,41 +566,46 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 }
 
 
+#ifndef NO_VST
+namespace
+{
+// TODO: Keep these lists up-to-date.
+constexpr struct
+{
+	int32 id1;
+	int32 id2;
+	const char *name;
+	const char *problem;
+} ProblematicPlugins[] =
+{
+	{Vst::kEffectMagic, Vst::FourCC("mdaC"), "MDA Degrade", "* Old versions of this plugin can crash OpenMPT.\nEnsure that you have the latest version of this plugin."},
+	{Vst::kEffectMagic, Vst::FourCC("fV2s"), "Farbrausch V2", "* This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to use V2 only through the Plugin Bridge."},
+	{Vst::kEffectMagic, Vst::FourCC("frV2"), "Farbrausch V2", "* This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to use V2 only through the Plugin Bridge."},
+	{Vst::kEffectMagic, Vst::FourCC("MMID"), "MIDI Input Output", "* The MIDI Input / Output plugin is now built right into OpenMPT and should not be loaded from an external file."},
+};
+
+// Plugins that should always be bridged.
+constexpr struct
+{
+	int32 id1;
+	int32 id2;
+	bool useBridge;
+	bool shareInstance;
+} ForceBridgePlugins[] =
+{
+	{Vst::kEffectMagic, Vst::FourCC("fV2s"), true, false},  // V2 freezes on shutdown if there's more than one instance per process
+	{Vst::kEffectMagic, Vst::FourCC("frV2"), true, false},  // ditto
+	{Vst::kEffectMagic, Vst::FourCC("SKV3"), false, true},  // SideKick v3 always has to run in a shared instance
+	{Vst::kEffectMagic, Vst::FourCC("YWS!"), false, true},  // You Wa Shock ! always has to run in a shared instance
+};
+}  // namespace
+#endif
+
+
 bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 {
 #ifndef NO_VST
-	// TODO: Keep these lists up-to-date.
-	static const struct
-	{
-		int32 id1;
-		int32 id2;
-		const char *name;
-		const char *problem;
-	} problemPlugs[] =
-	{
-		{ Vst::kEffectMagic, Vst::FourCC("Ni4S"), "Native Instruments B4", "*  v1.1.1 hangs on playback. Do not proceed unless you have v1.1.5 or newer.  *" },
-		{ Vst::kEffectMagic, Vst::FourCC("mdaC"), "MDA Degrade", "*  Old versions of this plugin can crash OpenMPT.\nEnsure that you have the latest version of this plugin.  *" },
-		{ Vst::kEffectMagic, Vst::FourCC("fV2s"), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins or use it brigded mode only.  *" },
-		{ Vst::kEffectMagic, Vst::FourCC("frV2"), "Farbrausch V2", "*  This plugin can cause OpenMPT to freeze if being used in a combination with various other plugins.\nIt is recommended to not use V2 in combination with any other plugins or use it brigded mode only.  *" },
-		{ Vst::kEffectMagic, Vst::FourCC("MMID"), "MIDI Input Output", "* The MIDI Input / Output plugin is now built right into OpenMPT and should not be loaded from an external file. *" },
-	};
-
-	// Plugins that should always be bridged.
-	static const struct
-	{
-		int32 id1;
-		int32 id2;
-		bool useBridge;
-		bool shareInstance;
-	} bridgedPlugs[] =
-	{
-		{ Vst::kEffectMagic, Vst::FourCC("fV2s"), true, true },  // Single instances of V2 can communicate (I think)
-		{ Vst::kEffectMagic, Vst::FourCC("frV2"), true, false },
-		{ Vst::kEffectMagic, Vst::FourCC("SKV3"), false, true }, // SideKick v3 always has to run in a shared instance
-		{ Vst::kEffectMagic, Vst::FourCC("YWS!"), false, true }, // You Wa Shock ! always has to run in a shared instance
-	};
-
-	for(const auto &p : problemPlugs)
+	for(const auto &p : ProblematicPlugins)
 	{
 		if(p.id2 == plug->pluginId2 && p.id1 == plug->pluginId1)
 		{
@@ -613,7 +618,7 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 		}
 	}
 
-	for(const auto &p : bridgedPlugs)
+	for(const auto &p : ForceBridgePlugins)
 	{
 		if(p.id2 == plug->pluginId2 && p.id1 == plug->pluginId1)
 		{
