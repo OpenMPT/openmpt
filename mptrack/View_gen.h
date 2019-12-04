@@ -33,10 +33,10 @@ protected:
 	CSliderCtrl m_sbWetDry;
 	CSpinButtonCtrl m_spinVolume[CHANNELS_IN_TAB], m_spinPan[CHANNELS_IN_TAB];
 	CButton m_BtnSelect, m_BtnEdit;
-	int m_nLockCount;
-	PlugParamIndex m_nCurrentParam;
-	CHANNELINDEX m_nActiveTab;
-	PLUGINDEX m_nCurrentPlugin;
+	int m_nLockCount = 1;
+	PlugParamIndex m_nCurrentParam = 0;
+	CHANNELINDEX m_nActiveTab = 0;
+	PLUGINDEX m_nCurrentPlugin = 0;
 
 	CComboBox m_CbnSpecialMixProcessing;
 	CSpinButtonCtrl m_SpinMixGain;			// update#02
@@ -44,18 +44,15 @@ protected:
 	enum {AdjustPattern = true, NoPatternAdjust = false};
 
 protected:
-	CViewGlobals():CFormView(IDD_VIEW_GLOBALS) { m_nLockCount = 1; }
+	CViewGlobals() : CFormView(IDD_VIEW_GLOBALS) { }
 	DECLARE_SERIAL(CViewGlobals)
 
 public:
-	virtual ~CViewGlobals() {}
-
-public:
-	CModDoc* GetDocument() const { return (CModDoc *)m_pDocument; }
+	CModDoc* GetDocument() const { return static_cast<CModDoc *>(m_pDocument); }
 	void RecalcLayout();
 	void LockControls() { m_nLockCount++; }
 	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
-	BOOL IsLocked() const { return (m_nLockCount > 0); }
+	bool IsLocked() const noexcept { return (m_nLockCount > 0); }
 	int GetDlgItemIntEx(UINT nID);
 	void PopulateChannelPlugins();
 	void BuildEmptySlotList(std::vector<PLUGINDEX> &emptySlots);
@@ -63,13 +60,13 @@ public:
 
 public:
 	//{{AFX_VIRTUAL(CViewGlobals)
-	virtual void OnInitialUpdate();
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
-	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
-	virtual LRESULT OnModViewMsg(WPARAM, LPARAM);
+	void OnInitialUpdate() override;
+	void DoDataExchange(CDataExchange *pDX) override;
+	void OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint) override;
+
+	void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
+	LRESULT OnModViewMsg(WPARAM, LPARAM);
 	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
-	virtual HBRUSH OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor);
 
 private:
 	void OnMute(const CHANNELINDEX chnMod4, const UINT itemID);

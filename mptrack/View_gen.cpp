@@ -43,7 +43,6 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
 	ON_WM_DESTROY()
-	ON_WM_CTLCOLOR()
 
 	ON_WM_ACTIVATE()
 	ON_COMMAND(IDC_CHECK1,		&CViewGlobals::OnMute1)
@@ -214,7 +213,8 @@ void CViewGlobals::OnInitialUpdate()
 	OnParamChanged();
 	m_nLockCount = 0;
 
-
+	// Use tab background color rather than regular dialog background color (required for Aero/etc. where they are not the same color)
+	EnableThemeDialogTexture(m_hWnd, ETDT_ENABLETAB);
 }
 
 
@@ -1173,17 +1173,22 @@ void CViewGlobals::OnOutputRoutingChanged()
 			if(!sndFile.m_MixPlugins[i].IsValidPlugin())
 			{
 				CSelectPluginDlg dlg(pModDoc, i, this);
-				if(dlg.DoModal() == IDOK)
-				{
-					plugin.SetOutputPlugin(i);
-					pModDoc->UpdateAllViews(nullptr, PluginHint(m_nCurrentPlugin).Info());
-					nroute = 0x80 + i;
-					m_nCurrentPlugin = i;
-					m_CbnPlugin.SetCurSel(i);
-					OnPluginChanged();
-				}
+				if(dlg.DoModal() != IDOK)
+					return;
+				
+				plugin.SetOutputPlugin(i);
+				SetPluginModified();
+				nroute = 0x80 + i;
+				m_nCurrentPlugin = i;
+				m_CbnPlugin.SetCurSel(i);
+				OnPluginChanged();
 				break;
 			}
+		}
+		if(nroute == 1)
+		{
+			Reporting::Error("All following plugin slots are used.", "Unable to add new plugin");
+			return;
 		}
 	}
 
@@ -1545,20 +1550,6 @@ void CViewGlobals::FillPluginProgramBox(int32 firstProg, int32 lastProg)
 
 	m_CbnPreset.SetRedraw(TRUE);
 	m_CbnPreset.Invalidate(FALSE);
-}
-
-
-// This is used for retrieving the correct background colour for the
-// frames on the general tab when using WinXP Luna or Vista/Win7 Aero.
-HBRUSH CViewGlobals::OnCtlColor(CDC *pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	switch(nCtlColor)
-	{
-	case CTLCOLOR_DLG:
-		EnableThemeDialogTexture(*pWnd, ETDT_ENABLETAB);
-		break;
-	}
-	return CFormView::OnCtlColor(pDC, pWnd, nCtlColor);
 }
 
 
