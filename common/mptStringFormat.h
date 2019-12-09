@@ -73,7 +73,7 @@ namespace mpt
 #if MPT_USTRING_MODE_UTF8
 template <typename T> auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::Charset::UTF8, x.ToUString())) { return mpt::ToCharset(mpt::Charset::UTF8, x.ToUString()); }
 #else
-template <typename T> auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::CharsetUnknownInternal, x.ToUString())) { return mpt::ToCharset(mpt::CharsetUnknownInternal, x.ToUString()); }
+template <typename T> auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::CharsetLocaleOrUTF8, x.ToUString())) { return mpt::ToCharset(mpt::CharsetLocaleOrUTF8, x.ToUString()); }
 #endif
 
 static inline std::string ToString(const std::string & x) { return x; }
