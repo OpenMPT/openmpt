@@ -112,7 +112,7 @@ AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool for
 			if(!isNative)
 			{
 				Reporting::Error("Could not locate the plugin bridge executable, which is required for running non-native plugins.", "OpenMPT Plugin Bridge");
-				return false;
+				return nullptr;
 			}
 		} catch(BridgeWrapper::BridgeException &e)
 		{
