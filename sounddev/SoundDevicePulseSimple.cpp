@@ -108,7 +108,7 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_
 		#else
 			info.apiName = U_("PulseAudio");
 		#endif
-		info.isDefault = false;
+		info.default_ = Info::Default::None;
 		info.useNameAsIdentifier = false;
 		info.flags = {
 			sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
@@ -143,7 +143,7 @@ std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(SoundDevice::S
 	#else
 		info.apiName = U_("PulseAudio");
 	#endif
-	info.isDefault = true;
+	info.default_ = Info::Default::Managed;
 	info.useNameAsIdentifier = false;
 	info.flags = {
 		sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,

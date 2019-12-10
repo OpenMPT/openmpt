@@ -50,6 +50,14 @@ namespace SoundDevice
 		val = SoundDevice::ChannelMapping::FromString(j);
 	}
 
+	inline void to_json(JSON::value &j, const SoundDevice::Info::Default &val)
+	{
+		j = static_cast<int>(val);
+	}
+	inline void from_json(const JSON::value &j, SoundDevice::Info::Default &val)
+	{
+		val = static_cast<SoundDevice::Info::Default>(static_cast<int>(j));
+	}
 } // namespace SoundDevice
 
 
@@ -77,7 +85,7 @@ namespace SoundDevice
 		MPT_JSON_MAP(name);
 		MPT_JSON_MAP(apiName);
 		MPT_JSON_MAP(apiPath);
-		MPT_JSON_MAP(isDefault);
+		MPT_JSON_MAP(default_);
 		MPT_JSON_MAP(useNameAsIdentifier);
 		MPT_JSON_MAP(managerFlags);
 		MPT_JSON_MAP(flags);

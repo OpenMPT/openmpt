@@ -95,7 +95,7 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 	GUID guid = (lpGuid ? *lpGuid : GUID());
 	SoundDevice::Info info;
 	info.type = TypeDSOUND;
-	info.isDefault = (!lpGuid);
+	info.default_ = (!lpGuid ? Info::Default::Managed : Info::Default::None);
 	info.internalID = mpt::ToUnicode(Util::GUIDToString(guid));
 	info.name = mpt::ToUnicode(mpt::winstring(lpstrDescription));
 	if(lpstrDriver)

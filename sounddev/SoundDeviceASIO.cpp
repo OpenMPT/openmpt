@@ -208,7 +208,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 				info.apiName = U_("ASIO");
 				info.name = description;
 				info.useNameAsIdentifier = false;
-				info.isDefault = false;
+				info.default_ = Info::Default::None;
 				info.flags = {
 					sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
 					Info::Level::Primary,

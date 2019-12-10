@@ -61,8 +61,8 @@ struct CompareInfo
 		const auto scorey = score(y);
 		return (scorex > scorey)
 			|| ((scorex == scorey) && (x.type > y.type))
-			|| ((scorex == scorey) && (x.type == y.type) && (x.isDefault && !y.isDefault))
-			|| ((scorex == scorey) && (x.type == y.type) && (x.isDefault == y.isDefault) && (x.name < y.name))
+			|| ((scorex == scorey) && (x.type == y.type) && (x.default_ > y.default_))
+			|| ((scorex == scorey) && (x.type == y.type) && (x.default_ == y.default_) && (x.name < y.name))
 			;
 	}
 };

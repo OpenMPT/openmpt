@@ -459,12 +459,12 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 				info.apiName = mpt::ToUnicode(mpt::Charset::UTF8, RtAudio::getApiDisplayName(rtaudio.getCurrentApi()));
 				info.extraData[U_("RtAudio-ApiDisplayName")] = mpt::ToUnicode(mpt::Charset::UTF8, RtAudio::getApiDisplayName(rtaudio.getCurrentApi())); 
 				info.apiPath.push_back(U_("RtAudio"));
-				info.isDefault = rtinfo.isDefaultOutput;
 				info.useNameAsIdentifier = true;
 				switch(rtaudio.getCurrentApi())
 				{
 				case RtAudio::LINUX_ALSA:
 					info.apiName = U_("ALSA");
+					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Named : Info::Default::None);
 					info.flags = {
 						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
 						Info::Level::Secondary,
@@ -477,6 +477,7 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 					break;
 				case RtAudio::LINUX_PULSE:
 					info.apiName = U_("PulseAudio");
+					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Managed : Info::Default::None);
 					info.flags = {
 						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
 						Info::Level::Secondary,
@@ -489,6 +490,7 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 					break;
 				case RtAudio::LINUX_OSS:
 					info.apiName = U_("OSS");
+					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Named : Info::Default::None);
 					info.flags = {
 						sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Usability::Usable : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
 						Info::Level::Secondary,
@@ -501,6 +503,7 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 					break;
 				case RtAudio::UNIX_JACK:
 					info.apiName = U_("JACK");
+					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Managed : Info::Default::None);
 					info.flags = {
 						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Usability::Usable : Info::Usability::Experimental,
 						Info::Level::Primary,
@@ -513,6 +516,7 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 					break;
 				case RtAudio::MACOSX_CORE:
 					info.apiName = U_("CoreAudio");
+					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Named : Info::Default::None);
 					info.flags = {
 						sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Usability::Usable : Info::Usability::NotAvailable,
 						Info::Level::Primary,
@@ -525,6 +529,7 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 					break;
 				case RtAudio::WINDOWS_WASAPI:
 					info.apiName = U_("WASAPI");
+					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Named : Info::Default::None);
 					info.flags = {
 						sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Usable : Info::Usability::NotAvailable,
 						Info::Level::Secondary,
@@ -537,6 +542,7 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 					break;
 				case RtAudio::WINDOWS_ASIO:
 					info.apiName = U_("ASIO");
+					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Named : Info::Default::None);
 					info.flags = {
 						sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
 						Info::Level::Secondary,
@@ -549,6 +555,7 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 					break;
 				case RtAudio::WINDOWS_DS:
 					info.apiName = U_("DirectSound");
+					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Managed : Info::Default::None);
 					info.flags = {
 						Info::Usability::Broken, // sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
 						Info::Level::Secondary,

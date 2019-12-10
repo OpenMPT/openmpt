@@ -604,7 +604,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInf
 		{
 			info.name = mpt::format(U_("Device %1"))(index - 1);
 		}
-		info.isDefault = (index == 0);
+		info.default_ = ((index == 0) ? Info::Default::Managed : Info::Default::None);
 		info.flags = {
 			sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
 			Info::Level::Primary,

@@ -121,7 +121,12 @@ struct Info
 	mpt::ustring name; // user visible (and configuration key if useNameAsIdentifier)
 	mpt::ustring apiName; // user visible
 	std::vector<mpt::ustring> apiPath; // i.e. Wine-support, PortAudio
-	bool isDefault;
+	enum class Default {
+		None    = 0,
+		Named   = 1,
+		Managed = 2,
+	};
+	Default default_;
 	bool useNameAsIdentifier;
 
 	enum class DefaultFor : int8 {
@@ -188,7 +193,7 @@ struct Info
 	std::map<mpt::ustring, mpt::ustring> extraData; // user visible (hidden by default)
 
 	Info()
-		: isDefault(false)
+		: default_(Default::None)
 		, useNameAsIdentifier(false)
 	{
 	}

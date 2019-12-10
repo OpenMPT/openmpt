@@ -394,7 +394,7 @@ void COptionsSoundcard::UpdateEverything()
 					// nothing
 					break;
 				}
-				if(it.isDefault)
+				if(it.default_ == SoundDevice::Info::Default::Named)
 				{
 					name += U_(" [default]");
 				}

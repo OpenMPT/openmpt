@@ -763,7 +763,6 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 		result.apiName = mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
 		result.extraData[U_("PortAudio-HostAPI-name")] = mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
 		result.apiPath.push_back(U_("PortAudio"));
-		result.isDefault = (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev));
 		result.useNameAsIdentifier = true;
 		result.flags = {
 			Info::Usability::Unknown,
@@ -778,6 +777,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 		{
 		case paDirectSound:
 			result.apiName = U_("DirectSound");
+			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Managed : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
 				Info::Level::Secondary,
@@ -790,6 +790,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 			break;
 		case paMME:
 			result.apiName = U_("MME");
+			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
 				Info::Level::Secondary,
@@ -802,6 +803,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 			break;
 		case paASIO:
 			result.apiName = U_("ASIO");
+			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
 				Info::Level::Secondary,
@@ -814,6 +816,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 			break;
 		case paCoreAudio:
 			result.apiName = U_("CoreAudio");
+			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Usability::Usable : Info::Usability::NotAvailable,
 				Info::Level::Secondary,
@@ -826,6 +829,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 			break;
 		case paOSS:
 			result.apiName = U_("OSS");
+			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Usability::Usable : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
 				Info::Level::Primary,
@@ -838,6 +842,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 			break;
 		case paALSA:
 			result.apiName = U_("ALSA");
+			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
 				Info::Level::Primary,
@@ -850,6 +855,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 			break;
 		case paAL:
 			result.apiName = U_("OpenAL");
+			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				Info::Usability::Usable,
 				Info::Level::Primary,
@@ -862,6 +868,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 			break;
 		case paWDMKS:
 			result.apiName = U_("WaveRT");
+			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Broken : Info::Usability::NotAvailable,
 				Info::Level::Primary,
@@ -874,6 +881,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 			break;
 		case paJACK:
 			result.apiName = U_("JACK");
+			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Managed : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Usability::Usable : Info::Usability::Experimental,
 				Info::Level::Secondary,
@@ -886,6 +894,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 			break;
 		case paWASAPI:
 			result.apiName = U_("WASAPI");
+			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Usable : Info::Usability::NotAvailable,
 				Info::Level::Primary,
@@ -900,17 +909,18 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 			// nothing
 			break;
 		}
-		PALOG(mpt::format(U_("PortAudio: %1, %2, %3, %4"))(result.internalID, result.name, result.apiName, result.isDefault));
+		PALOG(mpt::format(U_("PortAudio: %1, %2, %3, %4"))(result.internalID, result.name, result.apiName, static_cast<int>(result.default_)));
 		PALOG(mpt::format(U_(" low  : %1"))(Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
 		PALOG(mpt::format(U_(" high : %1"))(Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
-		if(result.isDefault && Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type == paWASAPI)
+		if((result.default_ != Info::Default::None) && (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type == paWASAPI))
 		{
 			auto defaultResult = result;
+			defaultResult.default_ = Info::Default::Managed;
 			defaultResult.name = U_("Default Device");
 			defaultResult.internalID = U_("WASAPI-Default");
 			defaultResult.useNameAsIdentifier = false;
 			devices.push_back(defaultResult);
-			result.isDefault = false;
+			result.default_ = Info::Default::Named;
 		}
 		devices.push_back(result);
 	}

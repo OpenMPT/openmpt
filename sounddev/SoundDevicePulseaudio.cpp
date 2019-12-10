@@ -97,7 +97,7 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_
 		info.internalID = mpt::ToUnicode(mpt::Charset::UTF8, i->name);
 		info.name = mpt::ToUnicode(mpt::Charset::UTF8, i->description);
 		info.apiName = U_("PulseAudio");
-		info.isDefault = false;
+		info.default_ = Info::Default::None;
 		info.useNameAsIdentifier = false;
 		info.flags = {
 			sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
@@ -122,7 +122,7 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(SoundDevice::SysInfo
 	info.internalID = U_("0");
 	info.name = U_("Default Device");
 	info.apiName = U_("PulseAudio");
-	info.isDefault = true;
+	info.default_ = Info::Default::Managed;
 	info.useNameAsIdentifier = false;
 	info.flags = {
 		sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
