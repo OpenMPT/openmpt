@@ -827,7 +827,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 			s.Format(_T("%lu"), sample.nC5Speed);
 			m_EditFineTune.SetWindowText(s);
 			if(sample.nC5Speed != 0)
-				transp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
+				transp = ModSample::FrequencyToTranspose(sample.nC5Speed) / 128;
 		} else
 		{
 			int ftune = ((int)sample.nFineTune);
@@ -2819,7 +2819,7 @@ void CCtrlSamples::OnFineTuneChanged()
 		if ((n > 0) && (n <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535 : 9999999)) && (n != (int)m_sndFile.GetSample(m_nSample).nC5Speed))
 		{
 			sample.nC5Speed = n;
-			int transp = ModSample::FrequencyToTranspose(n) >> 7;
+			int transp = ModSample::FrequencyToTranspose(n) / 128;
 			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
 			Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);
 			basenote -= BASENOTE_MIN;
@@ -2877,7 +2877,7 @@ void CCtrlSamples::OnBaseNoteChanged()
 
 	if (m_sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
 	{
-		const int oldTransp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
+		const int oldTransp = ModSample::FrequencyToTranspose(sample.nC5Speed) / 128;
 		const uint32 newTrans = mpt::saturate_round<uint32>(sample.nC5Speed * std::pow(2.0, (n - oldTransp) / 12.0));
 		if (newTrans > 0 && newTrans <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535u : 9999999u) && newTrans != sample.nC5Speed)
 		{
@@ -3287,7 +3287,7 @@ NoSample:
 			if (sample.nC5Speed < 1) sample.nC5Speed = 8363;
 			sample.Transpose((pos * TrackerSettings::Instance().m_nFinetuneStep) / 1200.0);
 			Limit(sample.nC5Speed, 1u, 9999999u); // 9999999 is max. in Impulse Tracker
-			int transp = ModSample::FrequencyToTranspose(sample.nC5Speed) >> 7;
+			int transp = ModSample::FrequencyToTranspose(sample.nC5Speed) / 128;
 			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
 			Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);
 			basenote -= BASENOTE_MIN;

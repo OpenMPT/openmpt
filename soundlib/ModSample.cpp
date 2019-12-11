@@ -66,7 +66,7 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 			uFlags.set(CHN_PINGPONGLOOP, uFlags[CHN_PINGPONGSUSTAIN]);
 		}
 		nSustainStart = nSustainEnd = 0;
-		uFlags.reset(CHN_SUSTAINLOOP|CHN_PINGPONGSUSTAIN);
+		uFlags.reset(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
 	}
 
 	// All XM samples have default panning, and XM's autovibrato settings are rather limited.
@@ -189,7 +189,7 @@ void *ModSample::AllocateSample(SmpLength numFrames, size_t bytesPerSample)
 
 	if(allocSize != 0)
 	{
-		char *p = new (std::nothrow) char[allocSize];
+		char *p = new(std::nothrow) char[allocSize];
 		if(p != nullptr)
 		{
 			memset(p, 0, allocSize);
@@ -209,7 +209,7 @@ size_t ModSample::GetRealSampleBufferSize(SmpLength numSamples, size_t bytesPerS
 	// * 2x InterpolationMaxLookahead before the loop point (because we start at InterpolationMaxLookahead before the loop point and will look backwards from there as well)
 	// * 2x InterpolationMaxLookahead after the loop point (for wrap-around)
 	// * 4x InterpolationMaxLookahead for the sustain loop (same as the two points above)
-	
+
 	const SmpLength maxSize = Util::MaxValueOfType(numSamples);
 	const SmpLength lookaheadBufferSize = (MaxSamplingPointSize + 1 + 4 + 4) * InterpolationMaxLookahead;
 
@@ -239,7 +239,7 @@ void ModSample::FreeSample(void *samplePtr)
 {
 	if(samplePtr)
 	{
-		delete[] (((char *)samplePtr) - (InterpolationMaxLookahead * MaxSamplingPointSize));
+		delete[](((char *)samplePtr) - (InterpolationMaxLookahead * MaxSamplingPointSize));
 	}
 }
 
@@ -282,10 +282,10 @@ void ModSample::SetSustainLoop(SmpLength start, SmpLength end, bool enable, bool
 }
 
 
-namespace // Unnamed namespace for local implementation functions.
+namespace  // Unnamed namespace for local implementation functions.
 {
 
-template<typename T>
+template <typename T>
 class PrecomputeLoop
 {
 protected:
@@ -298,7 +298,7 @@ protected:
 
 public:
 	PrecomputeLoop(T *target, const T *sampleData, SmpLength loopEnd, int numChannels, bool pingpong, bool ITPingPongMode)
-		: target(target), sampleData(sampleData), loopEnd(loopEnd), numChannels(numChannels), pingpong(pingpong), ITPingPongMode(ITPingPongMode)
+	    : target(target), sampleData(sampleData), loopEnd(loopEnd), numChannels(numChannels), pingpong(pingpong), ITPingPongMode(ITPingPongMode)
 	{
 		if(loopEnd > 0)
 		{
@@ -310,8 +310,8 @@ public:
 	void CopyLoop(bool direction) const
 	{
 		// Direction: true = start reading and writing forward, false = start reading and writing backward (write direction never changes)
-		const int numSamples = 2 * InterpolationMaxLookahead + (direction ? 1 : 0);	// Loop point is included in forward loop expansion
-		T *dest = target + numChannels * (2 * InterpolationMaxLookahead - 1);		// Write buffer offset
+		const int numSamples = 2 * InterpolationMaxLookahead + (direction ? 1 : 0);  // Loop point is included in forward loop expansion
+		T *dest = target + numChannels * (2 * InterpolationMaxLookahead - 1);        // Write buffer offset
 		SmpLength readPosition = loopEnd - 1;
 		const int writeIncrement = direction ? 1 : -1;
 		int readIncrement = writeIncrement;
@@ -358,12 +358,12 @@ public:
 };
 
 
-template<typename T>
+template <typename T>
 void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 {
 	const int numChannels = smp.GetNumChannels();
 	const int copySamples = numChannels * InterpolationMaxLookahead;
-	
+
 	T *sampleData = reinterpret_cast<T *>(smp.samplev());
 	T *afterSampleStart = sampleData + smp.nLength * numChannels;
 	T *loopLookAheadStart = afterSampleStart + copySamples;
@@ -400,7 +400,7 @@ void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 	}
 }
 
-} // unnamed namespace
+}  // unnamed namespace
 
 
 void ModSample::PrecomputeLoops(CSoundFile &sndFile, bool updateChannels)
@@ -457,9 +457,12 @@ void ModSample::TransposeToFrequency()
 
 
 // Return tranpose.finetune as 25.7 fixed point value.
-int ModSample::FrequencyToTranspose(uint32 freq)
+int32 ModSample::FrequencyToTranspose(uint32 freq)
 {
-	return mpt::saturate_round<int>(std::log(freq * (1.0 / 8363.0)) * (12.0 * 128.0 * (1.0 / M_LN2)));
+	if(!freq)
+		return 0;
+	else
+		return mpt::saturate_round<int32>(std::log(freq * (1.0 / 8363.0)) * (12.0 * 128.0 * (1.0 / M_LN2)));
 }
 
 
@@ -468,7 +471,7 @@ void ModSample::FrequencyToTranspose()
 	int f2t = 0;
 	if(nC5Speed)
 		f2t = FrequencyToTranspose(nC5Speed);
-	RelativeTone = static_cast<int8>(f2t >> 7);
+	RelativeTone = static_cast<int8>(f2t / 128);
 	nFineTune = static_cast<int8>(f2t & 0x7F);
 }
 
@@ -487,7 +490,8 @@ bool ModSample::HasCustomCuePoints() const
 	{
 		for(SmpLength i = 0; i < CountOf(cues); i++)
 		{
-			if(cues[i] != (i + 1) << 11) return true;
+			if(cues[i] != (i + 1) << 11)
+				return true;
 		}
 	}
 	return false;

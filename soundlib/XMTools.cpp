@@ -331,8 +331,8 @@ void XMSample::ConvertToXM(const ModSample &mptSmp, MODTYPE fromType, bool compa
 	} else
 	{
 		int f2t = ModSample::FrequencyToTranspose(mptSmp.nC5Speed);
-		relnote = (int8)(f2t >> 7);
-		finetune = (int8)(f2t & 0x7F);
+		relnote = static_cast<int8>(f2t / 128);
+		finetune = static_cast<int8>(f2t & 0x7F);
 	}
 
 	flags = 0;
