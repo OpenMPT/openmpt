@@ -32,8 +32,8 @@ TinyFFT::TinyFFT(const uint32 fftSize)
     , k(fftSize)
 {
 	const uint32 m = 1 << k;
-	constexpr double PI2 = 6.28318530717958647692;
-	const double arg = -PI2 / m;
+	constexpr double PI2_ = 6.28318530717958647692;
+	const double arg = -PI2_ / m;
 	for(uint32 i = 1, j = m / 4; j; i <<= 1, j >>= 1)
 	{
 		w[i] = std::exp(I * (arg * j));
