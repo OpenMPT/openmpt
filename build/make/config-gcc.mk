@@ -32,7 +32,7 @@ CXXFLAGS += -fsanitize=undefined
 CFLAGS   += -fsanitize=undefined
 endif
 
-CXXFLAGS_WARNINGS += -Wsuggest-override
+CXXFLAGS_WARNINGS += -Wsuggest-override -Wno-psabi
 
 ifeq ($(MODERN),1)
 LDFLAGS  += -fuse-ld=gold
