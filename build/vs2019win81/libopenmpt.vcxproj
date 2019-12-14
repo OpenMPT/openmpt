@@ -802,6 +802,7 @@
     <ClInclude Include="..\..\soundlib\SoundFilePlayConfig.h" />
     <ClInclude Include="..\..\soundlib\Tables.h" />
     <ClInclude Include="..\..\soundlib\Tagging.h" />
+    <ClInclude Include="..\..\soundlib\TinyFFT.h" />
     <ClInclude Include="..\..\soundlib\tuning.h" />
     <ClInclude Include="..\..\soundlib\tuningbase.h" />
     <ClInclude Include="..\..\soundlib\tuningcollection.h" />
@@ -1047,6 +1048,8 @@
     <ClCompile Include="..\..\soundlib\Tables.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Tagging.cpp">
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\TinyFFT.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\tuning.cpp">
     </ClCompile>

@@ -327,6 +327,9 @@
     <ClInclude Include="..\..\soundlib\Tagging.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\TinyFFT.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\UMXTools.h">
       <Filter>soundlib</Filter>
     </ClInclude>
