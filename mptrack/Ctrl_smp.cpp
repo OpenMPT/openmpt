@@ -639,9 +639,9 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 				break;
 			} else
 			{
-				uint32 ticksPerCycle = 256 / val;
-				uint32 ticksPerBeat = std::max(1u, (m_sndFile.m_PlayState.m_nCurrentRowsPerBeat * m_sndFile.m_PlayState.m_nMusicSpeed));
-				_stprintf(pszText, _T("%.2f beats per cycle (%d ticks)"), ticksPerCycle * (1.0 / ticksPerBeat), ticksPerCycle);
+				const double ticksPerCycle = 256.0 / val;
+				const uint32 ticksPerBeat = std::max(1u, m_sndFile.m_PlayState.m_nCurrentRowsPerBeat * m_sndFile.m_PlayState.m_nMusicSpeed);
+				_stprintf(pszText, _T("%.2f beats per cycle (%.2f ticks)"), ticksPerCycle / ticksPerBeat, ticksPerCycle);
 			}
 			return TRUE;
 
