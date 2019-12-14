@@ -740,7 +740,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		m_EditSustainEnd.EnableWindow(b);
 
 		// Finetune / C-5 Speed / BaseNote
-		b = (m_sndFile.GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)) ? TRUE : FALSE;
+		b = m_sndFile.UseFinetuneAndTranspose() ? FALSE : TRUE;
 		SetDlgItemText(IDC_TEXT7, (b) ? _T("Freq. (Hz)") : _T("Finetune"));
 		m_SpinFineTune.SetRange(-1, 1);
 		m_EditFileName.EnableWindow(b);
@@ -822,7 +822,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 			SetDlgItemInt(IDC_EDIT9, sample.nPan / 4u);	//displayed panning with anything but XM is 0-64 so we divide by 4
 		// FineTune / C-4 Speed / BaseNote
 		int transp = 0;
-		if (m_sndFile.GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
+		if (!m_sndFile.UseFinetuneAndTranspose())
 		{
 			s.Format(_T("%lu"), sample.nC5Speed);
 			m_EditFineTune.SetWindowText(s);
@@ -2875,7 +2875,7 @@ void CCtrlSamples::OnBaseNoteChanged()
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	PrepareUndo("Transpose");
 
-	if (m_sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_S3M|MOD_TYPE_MPT))
+	if(!m_sndFile.UseFinetuneAndTranspose())
 	{
 		const int oldTransp = ModSample::FrequencyToTranspose(sample.nC5Speed) / 128;
 		const uint32 newTrans = mpt::saturate_round<uint32>(sample.nC5Speed * std::pow(2.0, (n - oldTransp) / 12.0));
