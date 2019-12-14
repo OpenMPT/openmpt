@@ -18,8 +18,7 @@ Dependencies
         have mingw-std-threads available otherwise)
      *  **emscripten 1.38.5** or higher
      *  **DJGPP GCC 7.2** or higher
-     *  any other **C++17 compliant** compiler (full standard compliant mode is
-        known to work with GCC >= 5.1 and Clang >= 3.8)
+     *  any other **C++17 compliant** compiler
         
         libopenmpt makes the following assumptions about the C++ implementation
         used for building:
