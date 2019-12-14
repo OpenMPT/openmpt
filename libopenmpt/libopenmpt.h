@@ -1409,6 +1409,11 @@ LIBOPENMPT_API const char * openmpt_module_highlight_pattern_row_channel( openmp
  *          - play.tempo_factor: Set a floating point tempo factor. "1.0" is the default tempo.
  *          - play.pitch_factor: Set a floating point pitch factor. "1.0" is the default pitch.
  *          - render.resampler.emulate_amiga: Set to "1" to enable the Amiga resampler for Amiga modules. This emulates the sound characteristics of the Paula chip and overrides the selected interpolation filter. Non-Amiga module formats are not affected by this setting.
+ *          - render.resampler.emulate_amiga_type: Configures the filter type to use for the Amiga resampler. Supported values are:
+ *                    - "auto": Filter type is chosen by the library and might change. This is the default.
+ *                    - "a500": Amiga A500 filter.
+ *                    - "a1200": Amiga A1200 filter.
+ *                    - "unfiltered": BLEP synthesis without model-specific filters. The LED filter is ignored by this setting. This filter mode is considered to be experimental and might change in the future.
  *          - render.opl.volume_factor: Set volume factor applied to synthesized OPL sounds, relative to the default OPL volume.
  *          - dither: Set the dither algorithm that is used for the 16 bit versions of openmpt_module_read. Supported values are:
  *                    - 0: No dithering.

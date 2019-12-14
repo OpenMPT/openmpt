@@ -299,6 +299,9 @@ template<> inline SoundDevice::ChannelMapping FromSettingValue(const SettingValu
 template<> inline SettingValue ToSettingValue(const ResamplingMode &val) { return SettingValue(int32(val)); }
 template<> inline ResamplingMode FromSettingValue(const SettingValue &val) { return ResamplingMode(val.as<int32>()); }
 
+template<> inline SettingValue ToSettingValue(const Resampling::AmigaFilter &val) { return SettingValue(int32(val)); }
+template<> inline Resampling::AmigaFilter FromSettingValue(const SettingValue &val) { return static_cast<Resampling::AmigaFilter>(val.as<int32>()); }
+
 template<> inline SettingValue ToSettingValue(const NewFileAction &val) { return SettingValue(int32(val)); }
 template<> inline NewFileAction FromSettingValue(const SettingValue &val) { return NewFileAction(val.as<int32>()); }
 
@@ -678,7 +681,7 @@ public:
 	Setting<ResamplingMode> ResamplerMode;
 	Setting<uint8> ResamplerSubMode;
 	Setting<int32> ResamplerCutoffPercent;
-	Setting<bool> ResamplerEmulateAmiga;
+	Setting<Resampling::AmigaFilter> ResamplerEmulateAmiga;
 	CResamplerSettings GetResamplerSettings() const;
 	void SetResamplerSettings(const CResamplerSettings &settings);
 

@@ -829,6 +829,13 @@
     <ClCompile Include="..\..\soundlib\SoundFilePlayConfig.cpp" />
     <ClCompile Include="..\..\soundlib\Tables.cpp" />
     <ClCompile Include="..\..\soundlib\Tagging.cpp" />
+    <ClCompile Include="..\..\soundlib\TinyFFT.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\UMXTools.cpp" />
     <ClCompile Include="..\..\soundlib\UpgradeModule.cpp" />
     <ClCompile Include="..\..\soundlib\WAVTools.cpp" />

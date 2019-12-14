@@ -13,6 +13,7 @@
 #include "BuildSettings.h"
 
 #include "Snd_defs.h"
+#include "Mixer.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -20,13 +21,43 @@ namespace Paula
 {
 
 constexpr int PAULA_HZ = 3546895;
-constexpr int MINIMUM_INTERVAL = 16;
-constexpr int BLEP_SCALE = 17;
+constexpr int MINIMUM_INTERVAL = 4;  // Tradeoff between quality and speed (lower = less aliasing)
+constexpr int BLEP_SCALE = 17;  // TODO: Should be 1 for float mixer
 constexpr int BLEP_SIZE = 2048;
-constexpr uint16 MAX_BLEPS = BLEP_SIZE / MINIMUM_INTERVAL;
+
+using BlepArray = std::array<mixsample_t, BLEP_SIZE>;
+
+
+class BlepTables
+{
+	enum AmigaFilter
+	{
+		A500Off = 0,
+		A500On,
+		A1200Off,
+		A1200On,
+		Unfiltered,
+		NumFilterTypes
+	};
+
+	std::array<Paula::BlepArray, AmigaFilter::NumFilterTypes> WinSincIntegral;
+
+public:
+	void InitTables();
+	const Paula::BlepArray &GetAmigaTable(Resampling::AmigaFilter amigaType, bool enableFilter) const;
+};
+
 
 class State
 {
+	// MAX_BLEPS configures how many BLEPs (volume steps) are being kept track of per channel,
+	// and thus directly influences how much memory this feature wastes per virtual channel.
+	// Paula::BLEP_SIZE / Paula::MINIMUM_INTERVAL would be a safe maximum,
+	// but even a sample (alternating at +1/-1, thus causing a step on every frame) played at 200 kHz,
+	// which is way out of spec for the Amiga, will only get close to 128 active BLEPs with Paula::MINIMUM_INTERVAL == 4.
+	// Hence 128 is chosen as a tradeoff between quality and memory consumption.
+	static constexpr uint16 MAX_BLEPS = 128;
+
 	struct Blep
 	{
 		int16 level;
@@ -46,7 +77,7 @@ public:
 
 	void Reset();
 	void InputSample(int16 sample);
-	int OutputSample(bool filter);
+	int OutputSample(const BlepArray &WinSincIntegral);
 	void Clock(int cycles);
 };
 

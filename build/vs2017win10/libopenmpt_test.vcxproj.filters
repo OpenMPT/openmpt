@@ -746,6 +746,9 @@
     <ClCompile Include="..\..\soundlib\Tagging.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\TinyFFT.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\UMXTools.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

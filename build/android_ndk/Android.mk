@@ -193,6 +193,7 @@ LOCAL_SRC_FILES += \
 	soundlib/UpgradeModule.cpp \
 	soundlib/Tables.cpp \
 	soundlib/Tagging.cpp \
+	soundlib/TinyFFT.cpp \
 	soundlib/tuningbase.cpp \
 	soundlib/tuningCollection.cpp \
 	soundlib/tuning.cpp \

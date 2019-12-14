@@ -67,13 +67,14 @@ protected:
 	CSliderCtrl m_SliderCtrlGain;
 	CComboBox m_ComboBoxInterpolation;
 	CButton m_CheckBoxAmigaResampler;
+	CComboBox m_ComboBoxAmigaFilter;
 	CComboBox m_ComboBoxRepeat;
 	CSliderCtrl m_SliderCtrlStereoSeparation;
 	CComboBox m_ComboBoxRamping;
 
 public:
 
-	CSettingsDialog( libopenmpt_settings * s_, CString title, CWnd * parent = NULL )
+	CSettingsDialog( libopenmpt_settings * s_, CString title, CWnd * parent = nullptr )
 		: CDialog( IDD_SETTINGS, parent )
 		, s( s_ )
 		, m_Title( title )
@@ -91,6 +92,7 @@ protected:
 		DDX_Control( pDX, IDC_SLIDER_GAIN, m_SliderCtrlGain );
 		DDX_Control( pDX, IDC_COMBO_INTERPOLATION, m_ComboBoxInterpolation );
 		DDX_Control( pDX, IDC_CHECK_AMIGA_RESAMPLER, m_CheckBoxAmigaResampler );
+		DDX_Control( pDX, IDC_COMBO_AMIGA_FILTER, m_ComboBoxAmigaFilter );
 		DDX_Control( pDX, IDC_COMBO_REPEAT, m_ComboBoxRepeat );
 		DDX_Control( pDX, IDC_SLIDER_STEREOSEPARATION, m_SliderCtrlStereoSeparation );
 		DDX_Control( pDX, IDC_COMBO_RAMPING, m_ComboBoxRamping );
@@ -98,9 +100,7 @@ protected:
 
 	afx_msg BOOL OnInitDialog() override {
 
-		if ( !CDialog::OnInitDialog() ) {
-			return false;
-		}
+		CDialog::OnInitDialog();
 
 		SetWindowText( m_Title );
 		EnableToolTips();
@@ -176,6 +176,21 @@ protected:
 		}
 		
 		m_CheckBoxAmigaResampler.SetCheck( s->use_amiga_resampler ? BST_CHECKED : BST_UNCHECKED );
+		selected = false;
+		m_ComboBoxAmigaFilter.EnableWindow( s->use_amiga_resampler ? TRUE : FALSE );
+		m_ComboBoxAmigaFilter.SetItemData( m_ComboBoxAmigaFilter.AddString( L"Default" ), 0 );
+		m_ComboBoxAmigaFilter.SetItemData( m_ComboBoxAmigaFilter.AddString( L"A500 Filter" ), 0xA500 );
+		m_ComboBoxAmigaFilter.SetItemData( m_ComboBoxAmigaFilter.AddString( L"A1200 Filter" ), 0xA1200 );
+		m_ComboBoxAmigaFilter.SetItemData( m_ComboBoxAmigaFilter.AddString( L"Unfiltered" ), 1 );
+		for ( int index = 0; index < m_ComboBoxAmigaFilter.GetCount(); ++index ) {
+			if ( m_ComboBoxAmigaFilter.GetItemData( index ) == s->amiga_filter_type ) {
+				m_ComboBoxAmigaFilter.SetCurSel( index );
+				selected = true;
+			}
+		}
+		if ( !selected ) {
+			m_ComboBoxAmigaFilter.SelectString( 0, L"Default" );
+		}
 
 		selected = false;
 		m_ComboBoxRepeat.SetItemData( m_ComboBoxRepeat.AddString( L"Forever" ), -1 );
@@ -230,6 +245,7 @@ protected:
 		s->interpolationfilterlength = m_ComboBoxInterpolation.GetItemData( m_ComboBoxInterpolation.GetCurSel() );
 
 		s->use_amiga_resampler = ( m_CheckBoxAmigaResampler.GetCheck() != BST_UNCHECKED ) ? 1 : 0;
+		s->amiga_filter_type = m_ComboBoxAmigaFilter.GetItemData( m_ComboBoxAmigaFilter.GetCurSel() );
 
 		s->repeatcount = m_ComboBoxRepeat.GetItemData( m_ComboBoxRepeat.GetCurSel() );
 
@@ -270,10 +286,15 @@ protected:
 		return TRUE;
 	}
 
+	void OnAmigaResamplerChanged() {
+		m_ComboBoxAmigaFilter.EnableWindow( IsDlgButtonChecked( IDC_CHECK_AMIGA_RESAMPLER ) != BST_UNCHECKED ? TRUE : FALSE );
+	}
+
 };
 
 BEGIN_MESSAGE_MAP(CSettingsDialog, CDialog)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, &CSettingsDialog::OnToolTipText)
+	ON_COMMAND( IDC_CHECK_AMIGA_RESAMPLER, &CSettingsDialog::OnAmigaResamplerChanged )
 END_MESSAGE_MAP()
 
 

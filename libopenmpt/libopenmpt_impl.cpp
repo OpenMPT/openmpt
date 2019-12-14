@@ -369,6 +369,19 @@ static std::int32_t resamplingmode_to_filterlength(ResamplingMode mode) {
 	}
 }
 
+static Resampling::AmigaFilter translate_amiga_filter_type( module_impl::amiga_filter_type amiga_type ) {
+	switch (amiga_type ) {
+		case module_impl::amiga_filter_type::a500:
+			return Resampling::AmigaFilter::A500;
+		case module_impl::amiga_filter_type::a1200:
+		case module_impl::amiga_filter_type::auto_filter:
+		default:
+			return Resampling::AmigaFilter::A1200;
+		case module_impl::amiga_filter_type::unfiltered:
+			return Resampling::AmigaFilter::Unfiltered;
+	}
+}
+
 static void ramping_to_mixersettings( MixerSettings & settings, int ramping ) {
 	if ( ramping == -1 ) {
 		settings.SetVolumeRampUpMicroseconds( MixerSettings().GetVolumeRampUpMicroseconds() );
@@ -1557,20 +1570,20 @@ std::string module_impl::highlight_pattern_row_channel( std::int32_t p, std::int
 }
 
 std::vector<std::string> module_impl::get_ctls() const {
-	return
-	{
-		"load.skip_samples",
-		"load.skip_patterns",
-		"load.skip_plugins",
-		"load.skip_subsongs_init",
-		"seek.sync_samples",
-		"subsong",
-		"play.tempo_factor",
-		"play.pitch_factor",
-		"play.at_end",
-		"render.resampler.emulate_amiga",
-		"render.opl.volume_factor",
-		"dither",
+	return {
+	  "load.skip_samples",
+	  "load.skip_patterns",
+	  "load.skip_plugins",
+	  "load.skip_subsongs_init",
+	  "seek.sync_samples",
+	  "subsong",
+	  "play.tempo_factor",
+	  "play.pitch_factor",
+	  "play.at_end",
+	  "render.resampler.emulate_amiga",
+	  "render.resampler.emulate_amiga_type",
+	  "render.opl.volume_factor",
+	  "dither",
 	};
 }
 std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const {
@@ -1624,7 +1637,20 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 		}
 		return mpt::fmt::val( m_sndFile->m_nFreqFactor / 65536.0 );
 	} else if ( ctl == "render.resampler.emulate_amiga" ) {
-		return mpt::fmt::val( m_sndFile->m_Resampler.m_Settings.emulateAmiga );
+		return mpt::fmt::val( m_sndFile->m_Resampler.m_Settings.emulateAmiga != Resampling::AmigaFilter::Off );
+	} else if ( ctl == "render.resampler.emulate_amiga_type" ) {
+		switch ( m_ctl_render_resampler_emulate_amiga_type ) {
+			case amiga_filter_type::a500:
+				return "a500";
+			case amiga_filter_type::a1200:
+				return "a1200";
+			case amiga_filter_type::unfiltered:
+				return "unfiltered";
+			case amiga_filter_type::auto_filter:
+				return "auto";
+			default:
+				return {};
+		}
 	} else if ( ctl == "render.opl.volume_factor" ) {
 		return mpt::fmt::val( static_cast<double>( m_sndFile->m_OPLVolumeFactor ) / static_cast<double>( m_sndFile->m_OPLVolumeFactorScale ) );
 	} else if ( ctl == "dither" ) {
@@ -1633,7 +1659,7 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 		if ( throw_if_unknown ) {
 			throw openmpt::exception("unknown ctl: " + ctl);
 		} else {
-			return std::string();
+			return {};
 		}
 	}
 }
@@ -1697,9 +1723,33 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 		m_sndFile->RecalculateSamplesPerTick();
 	} else if ( ctl == "render.resampler.emulate_amiga" ) {
 		CResamplerSettings newsettings = m_sndFile->m_Resampler.m_Settings;
-		newsettings.emulateAmiga = ConvertStrTo<bool>( value );
+		const bool enabled = ConvertStrTo<bool>( value );
+		if ( enabled )
+			newsettings.emulateAmiga = translate_amiga_filter_type( m_ctl_render_resampler_emulate_amiga_type );
+		else
+			newsettings.emulateAmiga = Resampling::AmigaFilter::Off;
 		if ( newsettings != m_sndFile->m_Resampler.m_Settings ) {
 			m_sndFile->SetResamplerSettings( newsettings );
+		}
+	} else if ( ctl == "render.resampler.emulate_amiga_type" ) {
+		if ( value == "a500" ) {
+			m_ctl_render_resampler_emulate_amiga_type = amiga_filter_type::a500;
+		} else if ( value == "a1200" ) {
+			m_ctl_render_resampler_emulate_amiga_type = amiga_filter_type::a1200;
+		} else if ( value == "unfiltered" ) {
+			m_ctl_render_resampler_emulate_amiga_type = amiga_filter_type::unfiltered;
+		} else if ( value == "auto" ) {
+			m_ctl_render_resampler_emulate_amiga_type = amiga_filter_type::auto_filter;
+		} else {
+			throw openmpt::exception( "invalid amiga filter type" );
+		}
+
+		if ( m_sndFile->m_Resampler.m_Settings.emulateAmiga != Resampling::AmigaFilter::Off ) {
+			CResamplerSettings newsettings = m_sndFile->m_Resampler.m_Settings;
+			newsettings.emulateAmiga = translate_amiga_filter_type( m_ctl_render_resampler_emulate_amiga_type );
+			if ( newsettings != m_sndFile->m_Resampler.m_Settings ) {
+				m_sndFile->SetResamplerSettings( newsettings );
+			}
 		}
 	} else if ( ctl == "render.opl.volume_factor" ) {
 		m_sndFile->m_OPLVolumeFactor = mpt::saturate_round<int32>( ConvertStrTo<double>( value ) * static_cast<double>( m_sndFile->m_OPLVolumeFactorScale ) );

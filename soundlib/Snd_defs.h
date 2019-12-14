@@ -314,6 +314,14 @@ enum ResamplingMode : uint8
 namespace Resampling
 {
 
+enum class AmigaFilter
+{
+	Off        = 0,
+	A500       = 1,
+	A1200      = 2,
+	Unfiltered = 3,
+};
+
 static inline std::array<ResamplingMode, 5> AllModes() noexcept { return { { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_CUBIC, SRCMODE_SINC8, SRCMODE_SINC8LP } }; }
 
 static inline std::array<ResamplingMode, 6> AllModesWithDefault() noexcept { return { { SRCMODE_NEAREST, SRCMODE_LINEAR, SRCMODE_CUBIC, SRCMODE_SINC8, SRCMODE_SINC8LP, SRCMODE_DEFAULT } }; }

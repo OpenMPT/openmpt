@@ -931,6 +931,7 @@
 #define IDC_CURSORINHEX                 2460
 #define IDC_STATIC_BASECHANNEL          2461
 #define IDC_COMBO_FILTER                2462
+#define IDC_COMBO_AMIGA_TYPE            2463
 #define IDC_SLIDER_STEREOSEP            2464
 #define IDC_CHECK_SOFTPAN               2465
 #define IDC_COMBO_FILTERWINDOW          2466

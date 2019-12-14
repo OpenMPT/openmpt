@@ -645,6 +645,9 @@ mpt::ustring GetFullCreditsString()
 		"Shayde / Reality Productions for Opal OPL3 emulator\n"
 		"https://www.3eality.com/\n"
 		"\n"
+		"Ryuhei Mori for TinyFFT\n"
+		"https://github.com/ryuhei-mori/tinyfft\n"
+		"\n"
 #ifdef MPT_WITH_ZLIB
 		"Jean-loup Gailly and Mark Adler for zlib\n"
 		"https://zlib.net/\n"

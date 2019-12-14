@@ -72,6 +72,14 @@ struct callback_stream_wrapper {
 }; // struct callback_stream_wrapper
 
 class module_impl {
+public:
+	enum class amiga_filter_type {
+		a500,
+		a1200,
+		unfiltered,
+		auto_filter,
+	};
+
 protected:
 	struct subsong_data {
 		double duration;
@@ -89,7 +97,7 @@ protected:
 		stop_song,
 	};
 
-	static const std::int32_t all_subsongs = -1;
+	static constexpr std::int32_t all_subsongs = -1;
 
 	std::unique_ptr<log_interface> m_Log;
 	std::unique_ptr<log_forwarder> m_LogForwarder;
@@ -102,6 +110,7 @@ protected:
 	subsongs_type m_subsongs;
 	float m_Gain;
 	song_end_action m_ctl_play_at_end;
+	amiga_filter_type m_ctl_render_resampler_emulate_amiga_type = amiga_filter_type::auto_filter;
 	bool m_ctl_load_skip_samples;
 	bool m_ctl_load_skip_patterns;
 	bool m_ctl_load_skip_plugins;

@@ -688,6 +688,7 @@
     <ClInclude Include="..\..\soundlib\SoundFilePlayConfig.h" />
     <ClInclude Include="..\..\soundlib\Tables.h" />
     <ClInclude Include="..\..\soundlib\Tagging.h" />
+    <ClInclude Include="..\..\soundlib\TinyFFT.h" />
     <ClInclude Include="..\..\soundlib\UMXTools.h" />
     <ClInclude Include="..\..\soundlib\WAVTools.h" />
     <ClInclude Include="..\..\soundlib\WindowedFIR.h" />
@@ -829,6 +830,7 @@
     <ClCompile Include="..\..\soundlib\SoundFilePlayConfig.cpp" />
     <ClCompile Include="..\..\soundlib\Tables.cpp" />
     <ClCompile Include="..\..\soundlib\Tagging.cpp" />
+    <ClCompile Include="..\..\soundlib\TinyFFT.cpp" />
     <ClCompile Include="..\..\soundlib\UMXTools.cpp" />
     <ClCompile Include="..\..\soundlib\UpgradeModule.cpp" />
     <ClCompile Include="..\..\soundlib\WAVTools.cpp" />

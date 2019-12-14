@@ -247,6 +247,7 @@ static void save_settings_to_map( std::map<std::string,int> & result, const libo
 	result[ "RepeatCount" ] = s.repeatcount;
 	result[ "InterpolationFilterLength" ] = s.interpolationfilterlength;
 	result[ "UseAmigaResampler" ] = s.use_amiga_resampler;
+	result[ "AmigaFilterType" ] = s.amiga_filter_type;
 	result[ "VolumeRampingStrength" ] = s.ramping;
 }
 
@@ -265,6 +266,7 @@ static void load_settings_from_map( libopenmpt::plugin::settings & s, const std:
 	load_map_setting( map, "RepeatCount", s.repeatcount );
 	load_map_setting( map, "InterpolationFilterLength", s.interpolationfilterlength );
 	load_map_setting( map, "UseAmigaResampler", s.use_amiga_resampler );
+	load_map_setting( map, "AmigaFilterType", s.amiga_filter_type );
 	load_map_setting( map, "VolumeRampingStrength", s.ramping );
 }
 
@@ -306,6 +308,20 @@ static void apply_options() {
 		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, self->settings.interpolationfilterlength );
 		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, self->settings.ramping );
 		self->mod->ctl_set( "render.resampler.emulate_amiga", self->settings.use_amiga_resampler ? "1" : "0" );
+		switch (self->settings.amiga_filter_type) {
+			case 0:
+				self->mod->ctl_set( "render.resampler.emulate_amiga_type", "auto" );
+				break;
+			case 1:
+				self->mod->ctl_set( "render.resampler.emulate_amiga_type", "unfiltered" );
+				break;
+			case 0xA500:
+				self->mod->ctl_set( "render.resampler.emulate_amiga_type", "a500" );
+				break;
+			case 0xA1200:
+				self->mod->ctl_set( "render.resampler.emulate_amiga_type", "a1200" );
+				break;
+		}
 	}
 }
 

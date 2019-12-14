@@ -91,7 +91,7 @@ class COptionsMixer: public CPropertyPage
 {
 protected:
 
-	CComboBox m_CbnResampling;
+	CComboBox m_CbnResampling, m_CbnAmigaType;
 
 	CEdit m_CEditRampUp;
 	CEdit m_CEditRampDown;
@@ -122,7 +122,7 @@ protected:
 	void DoDataExchange(CDataExchange* pDX) override;
 
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
-	afx_msg void OnResamplerChanged();
+	afx_msg void OnAmigaChanged();
 	afx_msg void OnRampingChanged();
 
 	afx_msg void OnHScroll(UINT n, UINT pos, CScrollBar *p);

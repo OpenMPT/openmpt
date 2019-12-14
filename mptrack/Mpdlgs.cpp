@@ -1017,11 +1017,12 @@ void COptionsSoundcard::UpdateStatistics()
 BEGIN_MESSAGE_MAP(COptionsMixer, CPropertyPage)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
-	ON_CBN_SELCHANGE(IDC_COMBO_FILTER,			&COptionsMixer::OnResamplerChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_FILTER,			&COptionsMixer::OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_AMIGA_TYPE,		&COptionsMixer::OnSettingsChanged)
 	ON_EN_UPDATE(IDC_RAMPING_IN,				&COptionsMixer::OnRampingChanged)
 	ON_EN_UPDATE(IDC_RAMPING_OUT,				&COptionsMixer::OnRampingChanged)
 	ON_COMMAND(IDC_CHECK_SOFTPAN,				&COptionsMixer::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK1,						&COptionsMixer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK1,						&COptionsMixer::OnAmigaChanged)
 END_MESSAGE_MAP()
 
 
@@ -1030,6 +1031,7 @@ void COptionsMixer::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsSoundcard)
 	DDX_Control(pDX, IDC_COMBO_FILTER, m_CbnResampling);
+	DDX_Control(pDX, IDC_COMBO_AMIGA_TYPE, m_CbnAmigaType);
 	DDX_Control(pDX, IDC_RAMPING_IN, m_CEditRampUp);
 	DDX_Control(pDX, IDC_RAMPING_OUT, m_CEditRampDown);
 	DDX_Control(pDX, IDC_EDIT_VOLRAMP_SAMPLES_UP, m_CInfoRampUp);
@@ -1060,7 +1062,24 @@ BOOL COptionsMixer::OnInitDialog()
 	}
 
 	// Amiga Resampler
-	CheckDlgButton(IDC_CHECK1, TrackerSettings::Instance().ResamplerEmulateAmiga ? BST_CHECKED : BST_UNCHECKED);
+	const bool enableAmigaResampler = TrackerSettings::Instance().ResamplerEmulateAmiga != Resampling::AmigaFilter::Off;
+	CheckDlgButton(IDC_CHECK1, enableAmigaResampler ? BST_CHECKED : BST_UNCHECKED);
+	m_CbnAmigaType.EnableWindow(enableAmigaResampler ? TRUE : FALSE);
+	static constexpr std::pair<const TCHAR *, Resampling::AmigaFilter> Filters[] =
+	{
+		{_T("A500 Filter"),  Resampling::AmigaFilter::A500},
+		{_T("A1200 Filter"), Resampling::AmigaFilter::A1200},
+		{_T("Unfiltered"),   Resampling::AmigaFilter::Unfiltered},
+	};
+	int sel = 0;
+	for(const auto [name, filter] : Filters)
+	{
+		const int item = m_CbnAmigaType.AddString(name);
+		m_CbnAmigaType.SetItemData(item, static_cast<DWORD_PTR>(filter));
+		if(filter == TrackerSettings::Instance().ResamplerEmulateAmiga)
+			sel = item;
+	}
+	m_CbnAmigaType.SetCurSel(sel);
 
 	// volume ramping
 	{
@@ -1113,8 +1132,10 @@ BOOL COptionsMixer::OnSetActive()
 }
 
 
-void COptionsMixer::OnResamplerChanged()
+void COptionsMixer::OnAmigaChanged()
 {
+	const bool enableAmigaResampler = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
+	m_CbnAmigaType.EnableWindow(enableAmigaResampler ? TRUE : FALSE);
 	OnSettingsChanged();
 }
 
@@ -1170,7 +1191,10 @@ void COptionsMixer::OnOK()
 	}
 
 	// Amiga Resampler
-	TrackerSettings::Instance().ResamplerEmulateAmiga = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
+	if(IsDlgButtonChecked(IDC_CHECK1) == BST_UNCHECKED)
+		TrackerSettings::Instance().ResamplerEmulateAmiga = Resampling::AmigaFilter::Off;
+	else
+		TrackerSettings::Instance().ResamplerEmulateAmiga = static_cast<Resampling::AmigaFilter>(m_CbnAmigaType.GetItemData(m_CbnAmigaType.GetCurSel()));
 
 	// volume ramping
 	{

@@ -683,27 +683,29 @@ const int16 CResampler::FastSincTable[256*4] =
 
 
 // Compute Bessel function Izero(y) using a series approximation
-static double izero(double y)
+double Izero(double y)
 {
-	double s=1, ds=1, d=0;
+	double s = 1, ds = 1, d = 0;
 	do
 	{
-		d = d + 2; ds = ds * (y*y)/(d*d);
+		d = d + 2;
+		ds = ds * (y * y) / (d * d);
 		s = s + ds;
-	} while (ds > 1E-7 * s);
+	} while(ds > 1E-7 * s);
 	return s;
 }
 
-static void getsinc(SINC_TYPE *psinc, double beta, double lowpass_factor)
+
+static void getsinc(SINC_TYPE *psinc, double beta, double cutoff)
 {
-	if(lowpass_factor >= 0.999)
+	if(cutoff >= 0.999)
 	{
 		// Avoid mixer overflows.
 		// 1.0 itself does not make much sense.
-		lowpass_factor = 0.999;
+		cutoff = 0.999;
 	}
-	const double izero_beta = izero(beta);
-	const double kPi = 4.0*atan(1.0)*lowpass_factor;
+	const double izeroBeta = Izero(beta);
+	const double kPi = 4.0 * std::atan(1.0) * cutoff;
 	for (int isrc=0; isrc<8*SINC_PHASES; isrc++)
 	{
 		double fsinc;
@@ -714,10 +716,11 @@ static void getsinc(SINC_TYPE *psinc, double beta, double lowpass_factor)
 			fsinc = 1.0;
 		} else
 		{
-			double x = (double)(ix - (4*SINC_PHASES)) * (double)(1.0/SINC_PHASES);
-			fsinc = sin(x*kPi) * izero(beta*sqrt(1-x*x*(1.0/16.0))) / (izero_beta*x*kPi); // Kaiser window
+			const double x = (double)(ix - (4*SINC_PHASES)) * (double)(1.0/SINC_PHASES);
+			const double xPi = x * kPi;
+			fsinc = std::sin(xPi) * Izero(beta * std::sqrt(1 - x * x * (1.0 / 16.0))) / (izeroBeta * xPi); // Kaiser window
 		}
-		double coeff = fsinc * lowpass_factor;
+		double coeff = fsinc * cutoff;
 #ifdef MPT_INTMIXER
 		int n = (int)std::floor(coeff * (1<<SINC_QUANTSHIFT) + 0.5);
 		MPT_ASSERT(n <= int16_max);
@@ -732,11 +735,12 @@ static void getsinc(SINC_TYPE *psinc, double beta, double lowpass_factor)
 
 #ifdef MODPLUG_TRACKER
 bool CResampler::StaticTablesInitialized = false;
-SINC_TYPE CResampler::gKaiserSinc[SINC_PHASES*8];     // Upsampling
-SINC_TYPE CResampler::gDownsample13x[SINC_PHASES*8];	// Downsample 1.333x
-SINC_TYPE CResampler::gDownsample2x[SINC_PHASES*8];		// Downsample 2x
+SINC_TYPE CResampler::gKaiserSinc[SINC_PHASES * 8];     // Upsampling
+SINC_TYPE CResampler::gDownsample13x[SINC_PHASES * 8];  // Downsample 1.333x
+SINC_TYPE CResampler::gDownsample2x[SINC_PHASES * 8];   // Downsample 2x
+Paula::BlepTables CResampler::blepTables;               // Amiga BLEP resampler
 #ifndef MPT_INTMIXER
-mixsample_t CResampler::FastSincTablef[256 * 4];		// Cubic spline LUT
+mixsample_t CResampler::FastSincTablef[256 * 4];        // Cubic spline LUT
 #endif // !defined(MPT_INTMIXER)
 #endif // MODPLUG_TRACKER
 
@@ -774,13 +778,15 @@ void CResampler::InitializeTablesFromScratch(bool force)
 	{
 		InitFloatmixerTables();
 
+		blepTables.InitTables();
+
 		getsinc(gKaiserSinc, 9.6377, 0.97);
 		getsinc(gDownsample13x, 8.5, 0.5);
 		getsinc(gDownsample2x, 2.7625, 0.425);
 
-		#ifdef MODPLUG_TRACKER
-			StaticTablesInitialized = true;
-		#endif // MODPLUG_TRACKER
+#ifdef MODPLUG_TRACKER
+		StaticTablesInitialized = true;
+#endif  // MODPLUG_TRACKER
 	}
 
 	if((m_OldSettings == m_Settings) && !force)
@@ -791,7 +797,6 @@ void CResampler::InitializeTablesFromScratch(bool force)
 	m_WindowedFIR.InitTable(m_Settings.gdWFIRCutoff, m_Settings.gbWFIRType);
 
 	m_OldSettings = m_Settings;
-
 }
 
 
@@ -812,6 +817,7 @@ void CResampler::InitializeTablesFromCache()
 	std::copy(s_CachedResampler.gDownsample13x, s_CachedResampler.gDownsample13x + SINC_PHASES*8, gDownsample13x);
 	std::copy(s_CachedResampler.gDownsample2x, s_CachedResampler.gDownsample2x + SINC_PHASES*8, gDownsample2x);
 	std::copy(s_CachedResampler.m_WindowedFIR.lut, s_CachedResampler.m_WindowedFIR.lut + WFIR_LUTLEN*WFIR_WIDTH, m_WindowedFIR.lut);
+	blepTables = s_CachedResampler.blepTables;
 }
 
 #endif // MPT_RESAMPLER_TABLES_CACHED

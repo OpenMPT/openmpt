@@ -209,7 +209,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 	if (hintType == HINT_MPTOPTIONS || updateAll)
 	{
 		CString defaultResampler;
-		if(m_sndFile.m_SongFlags[SONG_ISAMIGA] && TrackerSettings::Instance().ResamplerEmulateAmiga)
+		if(m_sndFile.m_SongFlags[SONG_ISAMIGA] && TrackerSettings::Instance().ResamplerEmulateAmiga != Resampling::AmigaFilter::Off)
 			defaultResampler = _T("Amiga Resampler");
 		else
 			defaultResampler = CTrackApp::GetResamplingModeName(TrackerSettings::Instance().ResamplerMode, 1, false);
