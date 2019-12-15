@@ -9,6 +9,10 @@ is just a high-level summary.
 
  *  [**New**] OggMod compressed FastTracker 2 XM (OXM) modules are now
     supported.
+ *  [**New**] The emulated Amiga type when Amiga resampler emulation is enabled
+    can now be selected via ctl `render.resampler.emulate_amiga_type`. Possible
+    values are: `"auto"`, `"a500"`, `"a1200"`, and an experimental option
+    `"unfiltered"`.
  *  [**New**] libopenmpt C++: New API
     `openmpt::module::module(std::vector<std::byte> data)`,
     `openmpt::module::module(const std::byte * data, std::size_t size)`,
