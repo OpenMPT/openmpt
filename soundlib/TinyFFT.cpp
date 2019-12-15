@@ -51,7 +51,7 @@ uint32 TinyFFT::Size() const noexcept
 // Computes in-place FFT of size 2^k of A, result is in bit-reversed order.
 void TinyFFT::FFT(std::vector<std::complex<double>> &A) const
 {
-	MPT_ASSERT(A.size() == size_t(1 << k));
+	MPT_ASSERT(A.size() == (std::size_t(1) << k));
 	const uint32 m = 1 << k;
 	uint32 u = 1;
 	uint32 v = m / 4;
@@ -100,7 +100,7 @@ void TinyFFT::FFT(std::vector<std::complex<double>> &A) const
 // Computes in-place IFFT of size 2^k of A, input is expected to be in bit-reversed order.
 void TinyFFT::IFFT(std::vector<std::complex<double>> &A) const
 {
-	MPT_ASSERT(A.size() == size_t(1 << k));
+	MPT_ASSERT(A.size() == (std::size_t(1) << k));
 	const uint32 m = 1 << k;
 	uint32 u = m / 4;
 	uint32 v = 1;
