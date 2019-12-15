@@ -28,7 +28,7 @@ void TinyFFT::GenerateTwiddleFactors(uint32 i, uint32 b, std::complex<double> z)
 
 
 TinyFFT::TinyFFT(const uint32 fftSize)
-    : w(1 << (fftSize - 1))
+    : w(std::size_t(1) << (fftSize - 1))
     , k(fftSize)
 {
 	const uint32 m = 1 << k;
@@ -146,7 +146,7 @@ void TinyFFT::IFFT(std::vector<std::complex<double>> &A) const
 
 void TinyFFT::Normalize(std::vector<std::complex<double>> &data)
 {
-	const double s = data.size();
+	const double s = static_cast<double>(data.size());
 	for(auto &v : data)
 		v /= s;
 }
