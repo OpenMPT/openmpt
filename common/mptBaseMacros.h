@@ -30,6 +30,40 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
+#if MPT_COMPILER_MSVC
+#define MPT_COMPILER_HAVE_PRAGMA_MESSAGE 1
+#endif
+
+#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#define MPT_COMPILER_HAVE_WARNING 1
+#endif
+
+#ifndef MPT_COMPILER_HAVE_PRAGMA_MESSAGE
+#define MPT_COMPILER_HAVE_PRAGMA_MESSAGE 0
+#endif
+#ifndef MPT_COMPILER_HAVE_WARNING
+#define MPT_COMPILER_HAVE_WARNING 0
+#endif
+
+// portable #pragma message or #warning replacement
+#define MPT_PP_JOIN_HELPER( a, b ) a ## b
+#define MPT_PP_JOIN( a , b ) MPT_PP_JOIN_HELPER( a, b )
+#define MPT_UNIQUE_IDENTIFIER( prefix ) MPT_PP_JOIN( prefix , __LINE__ )
+#define MPT_WARNING(text) \
+	static inline int MPT_UNIQUE_IDENTIFIER(MPT_WARNING_NAME) () noexcept { \
+		int warning [[deprecated(text)]] = 0; \
+		return warning; \
+	} \
+/**/
+#define MPT_WARNING_STATEMENT(text) \
+	int MPT_UNIQUE_IDENTIFIER(MPT_WARNING_NAME) = [](){ \
+		int warning [[deprecated(text)]] = 0; \
+		return warning; \
+	}() \
+/**/
+
+
+
 // Advanced inline attributes
 #if MPT_COMPILER_MSVC
 #define MPT_FORCEINLINE __forceinline
