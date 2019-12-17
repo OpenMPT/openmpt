@@ -43,8 +43,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if MPT_COMPILER_MSVC
 
-#define MPT_WARNING(text)           __pragma(message("Warning: " text))
-#define MPT_WARNING_STATEMENT(text) __pragma(message("Warning: " text))
+#define MPT_WARNING(text)           __pragma(message(__FILE__ "(" MPT_PP_DEFER(MPT_PP_STRINGIFY, __LINE__) "): Warning: " text))
+#define MPT_WARNING_STATEMENT(text) __pragma(message(__FILE__ "(" MPT_PP_DEFER(MPT_PP_STRINGIFY, __LINE__) "): Warning: " text))
 
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
