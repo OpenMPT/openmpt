@@ -132,13 +132,7 @@ static int GetRevision()
 		}
 		return ConvertStrTo<int>(svnversion);
 	#else
-		#if MPT_COMPILER_HAVE_PRAGMA_MESSAGE
-			#pragma message("SVN revision unknown. Please check your build system.")
-		#elif MPT_COMPILER_HAVE_WARNING
-			#warning "SVN revision unknown. Please check your build system."
-		#else
-			MPT_WARNING_STATEMENT("SVN revision unknown. Please check your build system.");
-		#endif
+		MPT_WARNING_STATEMENT("SVN revision unknown. Please check your build system.");
 		return 0;
 	#endif
 }

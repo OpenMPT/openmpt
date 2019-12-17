@@ -41,13 +41,7 @@ OPENMPT_NAMESPACE_BEGIN
 #if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
 #if defined(_WIN32_WINNT)
 #if (_WIN32_WINNT < 0x0602)
-#if MPT_COMPILER_HAVE_PRAGMA_MESSAGE
-#pragma message("Warning: libopenmpt for WinRT is built with reduced functionality. Please #define _WIN32_WINNT 0x0602.")
-#elif MPT_COMPILER_HAVE_WARNING
-#warning "Warning: libopenmpt for WinRT is built with reduced functionality. Please #define _WIN32_WINNT 0x0602."
-#else
 MPT_WARNING("Warning: libopenmpt for WinRT is built with reduced functionality. Please #define _WIN32_WINNT 0x0602.")
-#endif
 #endif // _WIN32_WINNT
 #endif // _WIN32_WINNT
 #endif // MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
@@ -65,23 +59,11 @@ MPT_WARNING("Warning: libopenmpt for WinRT is built with reduced functionality. 
 #endif // MPT_BUILD_MSVC
 
 #if MPT_PLATFORM_MULTITHREADED && MPT_MUTEX_NONE
-#if MPT_COMPILER_HAVE_PRAGMA_MESSAGE
-#pragma message("Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available.")
-#elif MPT_COMPILER_HAVE_WARNING
-#warning "Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available."
-#else
 MPT_WARNING("Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available.")
-#endif
 #endif // MPT_MUTEX_NONE
 
 #if (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(_GLIBCXX_HAS_GTHREADS) && !defined(MPT_WITH_MINGWSTDTHREADS)
-#if MPT_COMPILER_HAVE_PRAGMA_MESSAGE
-#pragma message("Warning: Building libopenmpt with MinGW-w64 without std::thread support is not recommended and is deprecated. Please use MinGW-w64 with posix threading model (as opposed to win32 threading model), or build with mingw-std-threads.")
-#elif MPT_COMPILER_HAVE_WARNING
-#warning "Warning: Building libopenmpt with MinGW-w64 without std::thread support is not recommended and is deprecated. Please use MinGW-w64 with posix threading model (as opposed to win32 threading model), or build with mingw-std-threads."
-#else
 MPT_WARNING("Warning: Building libopenmpt with MinGW-w64 without std::thread support is not recommended and is deprecated. Please use MinGW-w64 with posix threading model (as opposed to win32 threading model), or build with mingw-std-threads.")
-#endif
 #endif // MINGW
 
 #endif // !MPT_BUILD_SILENCE_LIBOPENMPT_CONFIGURATION_WARNINGS
