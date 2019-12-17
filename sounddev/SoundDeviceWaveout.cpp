@@ -436,8 +436,8 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 	// We could thereby try to avoid any potential wraparound inside the driver on older
 	// Windows versions, which would be, once converted into other units, really
 	// difficult to detect or handle.
-	static const UINT timeType = TIME_SAMPLES; // shpuld work for sane systems
-	//static const std::size_t valid_bits = 32; // shpuld work for sane systems
+	static const UINT timeType = TIME_SAMPLES; // should work for sane systems
+	//static const std::size_t valid_bits = 32; // should work for sane systems
 	//static const UINT timeType = TIME_BYTES; // safest
 	static const std::size_t valid_bits = 27; // safe for WinXP TIME_SAMPLES
 	static const uint32 valid_mask = static_cast<uint32>((uint64(1) << valid_bits) - 1u);
