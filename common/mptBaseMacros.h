@@ -30,14 +30,14 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#define MPT_PP_DEFER( m, ... ) m( __VA_ARGS__ )
+#define MPT_PP_DEFER(m, ...) m(__VA_ARGS__)
 
-#define MPT_PP_STRINGIFY( x ) #x
+#define MPT_PP_STRINGIFY(x) #x
 
-#define MPT_PP_JOIN_HELPER( a, b ) a ## b
-#define MPT_PP_JOIN( a , b ) MPT_PP_JOIN_HELPER( a, b )
+#define MPT_PP_JOIN_HELPER(a, b) a ## b
+#define MPT_PP_JOIN(a, b) MPT_PP_JOIN_HELPER(a, b)
 
-#define MPT_PP_UNIQUE_IDENTIFIER( prefix ) MPT_PP_JOIN( prefix , __LINE__ )
+#define MPT_PP_UNIQUE_IDENTIFIER(prefix) MPT_PP_JOIN(prefix , __LINE__)
 
 
 
