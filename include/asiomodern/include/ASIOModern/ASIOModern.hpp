@@ -105,6 +105,12 @@ struct CallbacksWrapperState {
 };
 
 
+#if ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
+#pragma push_macro("cdecl")
+#ifdef cdecl
+#undef cdecl
+#endif
+#endif // ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
 template <typename Tarray, Tarray * A, std::size_t I>
 class CallbacksWrapper {
 public:
@@ -126,6 +132,9 @@ public:
 		return (*A)[I].callbacks.bufferSwitchTimeInfo((*A)[I].context, params, doubleBufferIndex, directProcess);
 	}
 };
+#if ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
+#pragma pop_macro("cdecl")
+#endif // ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
 
 
 namespace detail {

@@ -399,11 +399,11 @@ private:
 
 private:
 
-	template <typename Tfn> auto TranslateSEtry(std::unique_ptr<IState> & state, Tfn fn, std::string_view func) -> decltype(fn()) {
+	template <typename Tfn> static auto TranslateSEtry(std::unique_ptr<ITranslator> & translator, std::unique_ptr<IState> & state, Tfn fn, std::string_view func) -> decltype(fn()) {
 		__try {
 			return fn();
-		} __except(m_Translator->TranslatorFilter(state, GetExceptionCode(), GetExceptionInformation(), func)) {
-			m_Translator->TranslatorHandler(state, GetExceptionCode(), func);
+		} __except(translator->TranslatorFilter(state, GetExceptionCode(), GetExceptionInformation(), func)) {
+			translator->TranslatorHandler(state, GetExceptionCode(), func);
 		}
 		throw DriverCrash(0, func);
 	}
@@ -411,7 +411,7 @@ private:
 	template <typename Tfn> auto TranslateSE(Tfn fn, std::string_view func) -> decltype(fn()) {
 		assert(m_Translator);
 		std::unique_ptr<IState> state;
-		return TranslateSEtry(state, fn, func);
+		return TranslateSEtry(m_Translator, state, fn, func);
 	}
 
 	template <typename Tfn> auto CallDriver(Tfn fn, std::string_view func) -> decltype(fn()) {

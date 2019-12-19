@@ -112,8 +112,13 @@ namespace ASIO {
 #define ASIO_ATTR_DRIVERCALL
 #define ASIO_DRIVERCALL __thiscall
 #elif ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG
+#pragma push_macro("thiscall")
+#ifdef thiscall
+#undef thiscall
+#endif
 #define ASIO_ATTR_DRIVERCALL [[gnu::thiscall]]
 #define ASIO_DRIVERCALL
+#pragma pop_macro("thiscall")
 #else
 #define ASIO_ATTR_DRIVERCALL
 #define ASIO_DRIVERCALL __thiscall
@@ -123,8 +128,13 @@ namespace ASIO {
 #define ASIO_ATTR_CALL
 #define ASIO_CALL __cdecl
 #elif ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG
+#pragma push_macro("cdecl")
+#ifdef cdecl
+#undef cdecl
+#endif
 #define ASIO_ATTR_CALL [[gnu::cdecl]]
 #define ASIO_CALL
+#pragma pop_macro("cdecl")
 #else
 #define ASIO_ATTR_CALL
 #define ASIO_CALL __cdecl

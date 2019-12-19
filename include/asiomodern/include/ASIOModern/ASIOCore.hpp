@@ -171,12 +171,21 @@ static_assert(sizeof(MessageSelector) == SizeOfLong);
 #if ASIO_SYSTEM_WINDOWS && ASIO_HAVE_PRAGMA_PACK
 #pragma pack( push, 4 )
 #endif // ASIO_SYSTEM_WINDOWS && ASIO_HAVE_PRAGMA_PACK
+#if ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
+#pragma push_macro("cdecl")
+#ifdef cdecl
+#undef cdecl
+#endif
+#endif // ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
 struct Callbacks {
 	void         (ASIO_CALL *bufferSwitch         ASIO_ATTR_CALL) ( Long doubleBufferIndex, Bool directProcess )                                     noexcept = nullptr;
 	void         (ASIO_CALL *sampleRateDidChange  ASIO_ATTR_CALL) ( SampleRate sRate )                                                               noexcept = nullptr;
 	Long         (ASIO_CALL *asioMessage          ASIO_ATTR_CALL) ( MessageSelector selector, Long value, void const * message, Double const * opt ) noexcept = nullptr;
 	Time const * (ASIO_CALL *bufferSwitchTimeInfo ASIO_ATTR_CALL) ( Time const * params, Long doubleBufferIndex, Bool directProcess )                noexcept = nullptr;
 };
+#if ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
+#pragma pop_macro("cdecl")
+#endif // ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
 #if ASIO_SYSTEM_WINDOWS && ASIO_HAVE_PRAGMA_PACK
 #pragma pack( pop )
 #endif // ASIO_SYSTEM_WINDOWS && ASIO_HAVE_PRAGMA_PACK
@@ -351,6 +360,12 @@ typedef ASIO_INTERFACE ISystemDriver ISystemDriver;
 using DriverName = CharBuf<32>;
 using ErrorMessage = CharBuf<124>;
 
+#if ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
+#pragma push_macro("thiscall")
+#ifdef thiscall
+#undef thiscall
+#endif
+#endif // ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
 ASIO_INTERFACE ISystemDriver : public IUnknown {
 	[[nodiscard]] virtual ResultBool ASIO_DRIVERCALL init              ASIO_ATTR_DRIVERCALL ( SysHandle sysHandle )                                                                      = 0;
 	              virtual void       ASIO_DRIVERCALL getDriverName     ASIO_ATTR_DRIVERCALL ( DriverName * name )                                                                        = 0;
@@ -374,6 +389,9 @@ ASIO_INTERFACE ISystemDriver : public IUnknown {
 	[[nodiscard]] virtual ErrorCode  ASIO_DRIVERCALL future            ASIO_ATTR_DRIVERCALL ( FutureSelector selector, void * opt )                                                      = 0;
 	[[nodiscard]] virtual ErrorCode  ASIO_DRIVERCALL outputReady       ASIO_ATTR_DRIVERCALL ()                                                                                           = 0;
 };
+#if ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
+#pragma pop_macro("thiscall")
+#endif // ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
 
 
 

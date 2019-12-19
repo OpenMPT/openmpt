@@ -25,10 +25,10 @@
 #include <chrono>
 #include <thread>
 
-#include <asiomodern/ASIO.hpp>
-#include <asiomodern/ASIOSystemWindows.hpp>
-#include <asiomodern/ASIOSampleConvert.hpp>
-#include <asiomodern/ASIOVerifyABI.hpp>
+#include <ASIOModern/ASIO.hpp>
+#include <ASIOModern/ASIOSystemWindows.hpp>
+#include <ASIOModern/ASIOSampleConvert.hpp>
+#include <ASIOModern/ASIOVerifyABI.hpp>
 
 #endif // MPT_WITH_ASIO
 

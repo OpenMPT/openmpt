@@ -20,8 +20,8 @@
 #include "../common/ComponentManager.h"
 
 #ifdef MPT_WITH_ASIO
-#include <asiomodern/ASIO.hpp>
-#include <asiomodern/ASIOSystemWindows.hpp>
+#include <ASIOModern/ASIO.hpp>
+#include <ASIOModern/ASIOSystemWindows.hpp>
 #endif // MPT_WITH_ASIO
 
 OPENMPT_NAMESPACE_BEGIN
