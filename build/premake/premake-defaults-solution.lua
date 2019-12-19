@@ -1,10 +1,11 @@
 
 	preferredtoolarchitecture "x86_64"
 
-if _OPTIONS["win10"] and not _OPTIONS["clang"]  then
+	filter { "action:vs2017" }
+		if _OPTIONS["win10"] then
+			systemversion "10.0.16299.0"
+		end
 	filter {}
-		systemversion "10.0.16299.0"
-end
 
 	filter { "platforms:x86" }
 		system "Windows"
