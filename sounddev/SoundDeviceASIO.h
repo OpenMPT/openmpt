@@ -19,11 +19,9 @@
 
 #include "../common/ComponentManager.h"
 
-#include "../common/Endianness.h"
-#include "../common/FlagSet.h"
-
 #ifdef MPT_WITH_ASIO
-#include <iasiodrv.h>
+#include <asiomodern/ASIO.hpp>
+#include <asiomodern/ASIOSystemWindows.hpp>
 #endif // MPT_WITH_ASIO
 
 OPENMPT_NAMESPACE_BEGIN
@@ -52,47 +50,34 @@ public:
 	}
 };
 
-enum AsioFeatures
+class CASIODevice
+	: public SoundDevice::Base
+	, private ASIO::Driver::CallbackHandler
 {
-	AsioFeatureResetRequest     = 1<<0,
-	AsioFeatureResyncRequest    = 1<<1,
-	AsioFeatureLatenciesChanged = 1<<2,
-	AsioFeatureBufferSizeChange = 1<<3,
-	AsioFeatureOverload         = 1<<4,
-	AsioFeatureNoDirectProcess  = 1<<5,
-	AsioFeatureSampleRateChange = 1<<6,
-	AsioFeatureNone = 0
-};
-DECLARE_FLAGSET(AsioFeatures)
 
-class CASIODevice: public SoundDevice::Base
-{
 	friend class TemporaryASIODriverOpener;
 
 protected:
 
-	IASIO *m_pAsioDrv;
-	IASIO &AsioDriver()
+	std::unique_ptr<ASIO::Windows::IBufferSwitchDispatcher> m_DeferredBufferSwitchDispatcher;
+	std::unique_ptr<ASIO::Driver> m_Driver;
+	ASIO::Driver &AsioDriver()
 	{
-		MPT_ASSERT(m_pAsioDrv);
-		return *m_pAsioDrv;
+		MPT_ASSERT(m_Driver);
+		return *m_Driver;
 	}
 
-	template <typename Tfn> auto CallDriverImpl(Tfn fn, const char * funcName) -> decltype(fn());
-	template <typename Tfn> auto CallDriverAndMaskCrashesImpl(Tfn fn, const char * funcName) -> decltype(fn());
-	template <typename Tfn> auto CallDriver(Tfn fn, const char * funcName) -> decltype(fn());
-
 	double m_BufferLatency;
-	long m_nAsioBufferLen;
-	std::vector<ASIOBufferInfo> m_BufferInfo;
-	ASIOCallbacks m_Callbacks;
-	static CASIODevice *g_CallbacksInstance; // only 1 opened instance allowed for ASIO
+	ASIO::Long m_nAsioBufferLen;
+	std::vector<ASIO::BufferInfo> m_BufferInfo;
 	bool m_BuffersCreated;
-	std::vector<ASIOChannelInfo> m_ChannelInfo;
+	std::vector<ASIO::ChannelInfo> m_ChannelInfo;
+	std::vector<double> m_SampleBufferDouble;
 	std::vector<float> m_SampleBufferFloat;
 	std::vector<int16> m_SampleBufferInt16;
 	std::vector<int24> m_SampleBufferInt24;
 	std::vector<int32> m_SampleBufferInt32;
+	std::vector<double> m_SampleInputBufferDouble;
 	std::vector<float> m_SampleInputBufferFloat;
 	std::vector<int16> m_SampleInputBufferInt16;
 	std::vector<int24> m_SampleInputBufferInt24;
@@ -101,36 +86,50 @@ protected:
 
 	bool m_DeviceRunning;
 	uint64 m_TotalFramesWritten;
-	long m_BufferIndex;
-	std::atomic<uint32> m_RenderSilence;
-	std::atomic<uint32> m_RenderingSilence;
+	bool m_DeferredProcessing;
+	ASIO::BufferIndex m_BufferIndex;
+	std::atomic<bool> m_RenderSilence;
+	std::atomic<bool> m_RenderingSilence;
 
 	int64 m_StreamPositionOffset;
 
-	static const uint32 AsioRequestFlagLatenciesChanged = 1<<0;
-	std::atomic<uint32> m_AsioRequestFlags;
+	using AsioRequests = uint8;
+	struct AsioRequest
+	{
+		enum AsioRequestEnum : AsioRequests
+		{
+			LatenciesChanged = 1<<0,
+		};
+	};
+	std::atomic<AsioRequests> m_AsioRequest;
 
-	FlagSet<AsioFeatures> m_QueriedFeatures;
-	FlagSet<AsioFeatures> m_UsedFeatures;
+	using AsioFeatures = uint16;
+	struct AsioFeature
+	{
+		enum AsioFeatureEnum : AsioFeatures
+		{
+			ResetRequest     = 1<<0,
+			ResyncRequest    = 1<<1,
+			BufferSizeChange = 1<<2,
+			Overload         = 1<<3,
+			SampleRateChange = 1<<4,
+			DeferredProcess  = 1<<5,
+		};
+	};
+	mutable std::atomic<AsioFeatures> m_UsedFeatures;
+	static mpt::ustring AsioFeaturesToString(AsioFeatures features);
 
 	mutable std::atomic<uint32> m_DebugRealtimeThreadID;
 
-private:
-	void ApplyAsioTimeInfo(AsioTimeInfo asioTimeInfo);
-
-	static bool IsSampleTypeFloat(ASIOSampleType sampleType);
-	static bool IsSampleTypeInt16(ASIOSampleType sampleType);
-	static bool IsSampleTypeInt24(ASIOSampleType sampleType);
-	static std::size_t GetSampleSize(ASIOSampleType sampleType);
-	static bool IsSampleTypeBigEndian(ASIOSampleType sampleType);
-	
 	void SetRenderSilence(bool silence, bool wait=false);
 
 public:
+
 	CASIODevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CASIODevice();
 
 private:
+
 	void InitMembers();
 	bool HandleRequests(); // return true if any work has been done
 	void UpdateLatency();
@@ -138,6 +137,7 @@ private:
 	void InternalStopImpl(bool force);
 
 public:
+
 	bool InternalOpen();
 	bool InternalClose();
 	void InternalFillAudioBuffer();
@@ -162,37 +162,51 @@ public:
 	SoundDevice::Statistics GetStatistics() const;
 
 public:
+	
 	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::SysInfo sysInfo);
 
 protected:
+
 	void OpenDriver();
 	void CloseDriver();
-	bool IsDriverOpen() const { return (m_pAsioDrv != nullptr); }
+	bool IsDriverOpen() const { return (m_Driver != nullptr); }
 
 	bool InternalHasTimeInfo() const;
 
 	SoundDevice::BufferAttributes InternalGetEffectiveBufferAttributes() const;
 
 protected:
+
 	void FillAsioBuffer(bool useSource = true);
 
-	long AsioMessage(long selector, long value, void* message, double* opt);
-	void SampleRateDidChange(ASIOSampleRate sRate);
-	void BufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
-	ASIOTime* BufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
-
-	static long CallbackAsioMessage(long selector, long value, void* message, double* opt);
-	static void CallbackSampleRateDidChange(ASIOSampleRate sRate);
-	static void CallbackBufferSwitch(long doubleBufferIndex, ASIOBool directProcess);
-	static ASIOTime* CallbackBufferSwitchTimeInfo(ASIOTime* params, long doubleBufferIndex, ASIOBool directProcess);
+private:
 	
-	void ReportASIOException(const std::string &str);
+	// CallbackHandler
+
+	void MessageResetRequest() noexcept override;
+	bool MessageBufferSizeChange(ASIO::Long newSize) noexcept override;
+	bool MessageResyncRequest() noexcept override;
+	void MessageLatenciesChanged() noexcept override;
+	ASIO::Long MessageMMCCommand(ASIO::Long value, const void * message, const ASIO::Double * opt) noexcept override;
+	void MessageOverload() noexcept override;
+
+	ASIO::Long MessageUnknown(ASIO::MessageSelector selector, ASIO::Long value, const void * message, const ASIO::Double * opt) noexcept override;
+
+	void RealtimeSampleRateDidChange(ASIO::SampleRate sRate) noexcept override;
+	void RealtimeRequestDeferredProcessing(bool value) noexcept override;
+	void RealtimeTimeInfo(ASIO::Time time) noexcept override;
+	void RealtimeBufferSwitch(ASIO::BufferIndex bufferIndex) noexcept override;
+
+	void RealtimeBufferSwitchImpl(ASIO::BufferIndex bufferIndex) noexcept;
+
+private:
+
+	void ExceptionHandler(const char * func);
+
 };
 
 #endif // MPT_WITH_ASIO
 
-
 } // namespace SoundDevice
-
 
 OPENMPT_NAMESPACE_END

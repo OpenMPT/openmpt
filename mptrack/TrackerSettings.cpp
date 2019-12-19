@@ -230,6 +230,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, SoundBoostedThreadNicenessPosix(conf, U_("Sound Settings"), U_("BoostedThreadNicenessPosix"), SoundDevice::AppInfo().BoostedThreadNicenessPosix)
 	, SoundBoostedThreadRtprioPosix(conf, U_("Sound Settings"), U_("BoostedThreadRtprioLinux"), SoundDevice::AppInfo().BoostedThreadRtprioPosix)
 	, SoundMaskDriverCrashes(conf, U_("Sound Settings"), U_("MaskDriverCrashes"), SoundDevice::AppInfo().MaskDriverCrashes)
+	, SoundAllowDeferredProcessing(conf, U_("Sound Settings"), U_("AllowDeferredProcessing"), SoundDevice::AppInfo().AllowDeferredProcessing)
 	// MIDI Settings
 	, m_nMidiDevice(conf, U_("MIDI Settings"), U_("MidiDevice"), 0)
 	, midiDeviceName(conf, U_("MIDI Settings"), U_("MidiDeviceName"), "")

@@ -16,6 +16,18 @@
     <Filter Include="common">
       <UniqueIdentifier>{AEFEE3F6-9AA0-0ECD-835B-22216F9C951D}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{89AF369E-F58E-B539-FEA6-40106A051C9B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\asiomodern">
+      <UniqueIdentifier>{E97649C5-D55A-0A1B-3EBB-046E2ABEF49C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\asiomodern\include">
+      <UniqueIdentifier>{5C772F5A-4887-DB2A-B140-40499D6FCAC3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\asiomodern\include\ASIOModern">
+      <UniqueIdentifier>{3C486619-A80C-6509-7172-95D3DDF5003F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="misc">
       <UniqueIdentifier>{B1A29A7C-9DD9-9B0D-46C6-811032DC170F}</UniqueIdentifier>
     </Filter>
@@ -182,6 +194,33 @@
     </ClInclude>
     <ClInclude Include="..\..\common\versionNumber.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIO.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOConfig.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOCore.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOModern.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOSampleConvert.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOSystemWindows.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOVerifyABI.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOVersion.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOstdcxx20bit.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
     </ClInclude>
     <ClInclude Include="..\..\misc\JSON.h">
       <Filter>misc</Filter>

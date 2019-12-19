@@ -347,6 +347,7 @@ struct AppInfo
 	int BoostedThreadNicenessPosix;
 	int BoostedThreadRtprioPosix;
 	bool MaskDriverCrashes;
+	bool AllowDeferredProcessing;
 	AppInfo()
 		: UIHandle(0)
 		, BoostedThreadPriorityXP(mpt::ThreadPriorityHighest)
@@ -355,6 +356,7 @@ struct AppInfo
 		, BoostedThreadNicenessPosix(-5)
 		, BoostedThreadRtprioPosix(10)
 		, MaskDriverCrashes(false)
+		, AllowDeferredProcessing(true)
 	{
 		return;
 	}

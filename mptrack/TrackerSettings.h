@@ -691,6 +691,7 @@ public:
 	Setting<int> SoundBoostedThreadNicenessPosix;
 	Setting<int> SoundBoostedThreadRtprioPosix;
 	Setting<bool> SoundMaskDriverCrashes;
+	Setting<bool> SoundAllowDeferredProcessing;
 
 	// MIDI Settings
 

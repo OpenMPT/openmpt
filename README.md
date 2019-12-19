@@ -49,28 +49,6 @@ How to compile
 
  -  Microsoft Foundation Classes (MFC) are required to build OpenMPT.
 
- -  The ASIO SDK is needed for compiling with ASIO support.
-
-    If you don't want this, comment out `#define MPT_WITH_ASIO` in the file
-    `common/BuildSettings.h`.
-
-    The ASIO SDK can be downloaded automatically on Windows 7 or later by just
-    running the `build/download_externals.cmd` script.
-
-    If you do not want to or cannot use this script, you may follow these manual
-    steps instead:
-
-     -  Visit
-        [steinberg.net](https://www.steinberg.net/en/company/developers.html) to
-        download the SDK.
-
-     -  Put the ASIO SDK in the `include/ASIOSDK2` folder. The top level
-        directory of the SDK is already named `ASIOSDK2`, so simply move that
-        directory in the include folder.
-
-    If you need further help with the ASIO SDK, get in touch with the
-    main OpenMPT developers. 
-
 
 ### libopenmpt and openmpt123
 

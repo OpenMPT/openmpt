@@ -29,6 +29,7 @@ end
   filter {}
   local extincludedirs = {
    "../../include",
+   "../../include/asiomodern/include",
    "../../include/ASIOSDK2/common",
    "../../include/flac/include",
    "../../include/lame/include",
@@ -60,6 +61,7 @@ end
    "../../mptrack/res/OpenMPT.manifest",
   }
   files {
+   "../../include/asiomodern/include/ASIOModern/*.hpp",
    "../../common/*.cpp",
    "../../common/*.h",
    "../../soundbase/*.cpp",
@@ -173,6 +175,7 @@ end
    "../../common",
    "../../include",
    "../../include/msinttypes/inttypes",
+   "../../include/asiomodern/include",
    "../../include/ASIOSDK2/common",
    "../../include/nlohmann-json/include",
    "../../include/portaudio/include",
@@ -181,6 +184,7 @@ end
    "../../build/svn_version",
   }
   files {
+   "../../include/asiomodern/include/ASIOModern/*.hpp",
    "../../common/*.cpp",
    "../../common/*.h",
    "../../soundbase/*.cpp",
