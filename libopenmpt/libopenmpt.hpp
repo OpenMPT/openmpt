@@ -17,6 +17,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <cstddef>
@@ -232,8 +233,16 @@ LIBOPENMPT_CXX_API std::vector<std::string> get_supported_extensions();
 /*!
   \param extension file extension to query without a leading dot. The case is ignored.
   \return true if the extension is supported by libopenmpt, false otherwise.
+  \deprecated Please use openmpt::is_extension_supported2().
 */
-LIBOPENMPT_CXX_API bool is_extension_supported( const std::string & extension );
+LIBOPENMPT_ATTR_DEPRECATED LIBOPENMPT_CXX_API bool is_extension_supported( const std::string & extension );
+//! Query whether a file extension is supported
+/*!
+  \param extension file extension to query without a leading dot. The case is ignored.
+  \return true if the extension is supported by libopenmpt, false otherwise.
+  \since 0.5.0
+*/
+LIBOPENMPT_CXX_API bool is_extension_supported2( std::string_view extension );
 
 //! Roughly scan the input stream to find out whether libopenmpt might be able to open it
 /*!
@@ -1027,26 +1036,26 @@ public:
 	/*!
 	  \return A vector containing all supported ctl keys.
 	  \remarks Currently supported ctl values are:
-	           - load.skip_samples: Set to "1" to avoid loading samples into memory
-	           - load.skip_patterns: Set to "1" to avoid loading patterns into memory
-	           - load.skip_plugins: Set to "1" to avoid loading plugins
-	           - load.skip_subsongs_init: Set to "1" to avoid pre-initializing sub-songs. Skipping results in faster module loading but slower seeking.
-	           - seek.sync_samples: Set to "1" to sync sample playback when using openmpt::module::set_position_seconds or openmpt::module::set_position_order_row.
-	           - subsong: The current subsong. Setting it has identical semantics as openmpt::module::select_subsong(), getting it returns the currently selected subsong.
-	           - play.at_end: Chooses the behaviour when the end of song is reached:
+	           - load.skip_samples (boolean): Set to "1" to avoid loading samples into memory
+	           - load.skip_patterns (boolean): Set to "1" to avoid loading patterns into memory
+	           - load.skip_plugins (boolean): Set to "1" to avoid loading plugins
+	           - load.skip_subsongs_init (boolean): Set to "1" to avoid pre-initializing sub-songs. Skipping results in faster module loading but slower seeking.
+	           - seek.sync_samples (boolean): Set to "1" to sync sample playback when using openmpt::module::set_position_seconds or openmpt::module::set_position_order_row.
+	           - subsong (integer): The current subsong. Setting it has identical semantics as openmpt::module::select_subsong(), getting it returns the currently selected subsong.
+	           - play.at_end (text): Chooses the behaviour when the end of song is reached:
 	                          - "fadeout": Fades the module out for a short while. Subsequent reads after the fadeout will return 0 rendered frames.
 	                          - "continue": Returns 0 rendered frames when the song end is reached. Subsequent reads will continue playing from the song start or loop start.
 	                          - "stop": Returns 0 rendered frames when the song end is reached. Subsequent reads will return 0 rendered frames.
-	           - play.tempo_factor: Set a floating point tempo factor. "1.0" is the default tempo.
-	           - play.pitch_factor: Set a floating point pitch factor. "1.0" is the default pitch.
-	           - render.resampler.emulate_amiga: Set to "1" to enable the Amiga resampler for Amiga modules. This emulates the sound characteristics of the Paula chip and overrides the selected interpolation filter. Non-Amiga module formats are not affected by this setting.
-	           - render.resampler.emulate_amiga_type: Configures the filter type to use for the Amiga resampler. Supported values are:
+	           - play.tempo_factor (floatingpoint): Set a floating point tempo factor. "1.0" is the default tempo.
+	           - play.pitch_factor (floatingpoint): Set a floating point pitch factor. "1.0" is the default pitch.
+	           - render.resampler.emulate_amiga (boolean): Set to "1" to enable the Amiga resampler for Amiga modules. This emulates the sound characteristics of the Paula chip and overrides the selected interpolation filter. Non-Amiga module formats are not affected by this setting. 
+	           - render.resampler.emulate_amiga_type (string): Configures the filter type to use for the Amiga resampler. Supported values are:
 	                     - "auto": Filter type is chosen by the library and might change. This is the default.
 	                     - "a500": Amiga A500 filter.
 	                     - "a1200": Amiga A1200 filter.
 	                     - "unfiltered": BLEP synthesis without model-specific filters. The LED filter is ignored by this setting. This filter mode is considered to be experimental and might change in the future.
-	           - render.opl.volume_factor: Set volume factor applied to synthesized OPL sounds, relative to the default OPL volume.
-	           - dither: Set the dither algorithm that is used for the 16 bit versions of openmpt::module::read. Supported values are:
+	           - render.opl.volume_factor (floatingpoint): Set volume factor applied to synthesized OPL sounds, relative to the default OPL volume.
+	           - dither (integer): Set the dither algorithm that is used for the 16 bit versions of openmpt::module::read. Supported values are:
 	                     - 0: No dithering.
 	                     - 1: Default mode. Chosen by OpenMPT code, might change.
 	                     - 2: Rectangular, 0.5 bit depth, no noise shaping (original ModPlug Tracker).
@@ -1061,16 +1070,87 @@ public:
 	  \param ctl The ctl key whose value should be retrieved.
 	  \return The associated ctl value.
 	  \sa openmpt::module::get_ctls
+	  \deprecated Please use openmpt::module::ctl_get_boolean(), openmpt::module::ctl_get_integer(), openmpt::module::ctl_get_floatingpoint(), or openmpt::module::ctl_get_text().
 	*/
-	std::string ctl_get( const std::string & ctl ) const;
+	LIBOPENMPT_ATTR_DEPRECATED std::string ctl_get( const std::string & ctl ) const;
+	//! Get current ctl boolean value
+	/*!
+	  \param ctl The ctl key whose value should be retrieved.
+	  \return The associated ctl value.
+	  \sa openmpt::module::get_ctls
+	  \since 0.5.0
+	*/
+	bool ctl_get_boolean( std::string_view ctl ) const;
+	//! Get current ctl integer value
+	/*!
+	  \param ctl The ctl key whose value should be retrieved.
+	  \return The associated ctl value.
+	  \sa openmpt::module::get_ctls
+	  \since 0.5.0
+	*/
+	std::int64_t ctl_get_integer( std::string_view ctl ) const;
+	//! Get current ctl floatingpoint value
+	/*!
+	  \param ctl The ctl key whose value should be retrieved.
+	  \return The associated ctl value.
+	  \sa openmpt::module::get_ctls
+	  \since 0.5.0
+	*/
+	double ctl_get_floatingpoint( std::string_view ctl ) const;
+	//! Get current ctl text value
+	/*!
+	  \param ctl The ctl key whose value should be retrieved.
+	  \return The associated ctl value.
+	  \sa openmpt::module::get_ctls
+	  \since 0.5.0
+	*/
+	std::string ctl_get_text( std::string_view ctl ) const;
+
 	//! Set ctl value
 	/*!
 	  \param ctl The ctl key whose value should be set.
 	  \param value The value that should be set.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the value is not sensible (e.g. negative tempo factor) or under the circumstances outlined in openmpt::module::get_ctls.
 	  \sa openmpt::module::get_ctls
+	  \deprecated Please use openmpt::module::ctl_set_bool(), openmpt::module::ctl_set_int(), openmpt::module::ctl_set_float(), or openmpt::module::ctl_set_string().
 	*/
-	void ctl_set( const std::string & ctl, const std::string & value );
+	LIBOPENMPT_ATTR_DEPRECATED void ctl_set( const std::string & ctl, const std::string & value );
+	//! Set ctl boolean value
+	/*!
+	  \param ctl The ctl key whose value should be set.
+	  \param value The value that should be set.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the value is not sensible (e.g. negative tempo factor) or under the circumstances outlined in openmpt::module::get_ctls.
+	  \sa openmpt::module::get_ctls
+	  \since 0.5.0
+	*/
+	void ctl_set_boolean( std::string_view ctl, bool value );
+	//! Set ctl integer value
+	/*!
+	  \param ctl The ctl key whose value should be set.
+	  \param value The value that should be set.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the value is not sensible (e.g. negative tempo factor) or under the circumstances outlined in openmpt::module::get_ctls.
+	  \sa openmpt::module::get_ctls
+	  \since 0.5.0
+	*/
+	void ctl_set_integer( std::string_view ctl, std::int64_t value );
+	//! Set ctl floatingpoint value
+	/*!
+	  \param ctl The ctl key whose value should be set.
+	  \param value The value that should be set.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the value is not sensible (e.g. negative tempo factor) or under the circumstances outlined in openmpt::module::get_ctls.
+	  \sa openmpt::module::get_ctls
+	  \since 0.5.0
+	*/
+	void ctl_set_floatingpoint( std::string_view ctl, double value );
+	//! Set ctl text value
+	/*!
+	  \param ctl The ctl key whose value should be set.
+	  \param value The value that should be set.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the value is not sensible (e.g. negative tempo factor) or under the circumstances outlined in openmpt::module::get_ctls.
+	  \sa openmpt::module::get_ctls
+	  \since 0.5.0
+	*/
+	void ctl_set_text( std::string_view ctl, std::string_view value );
 
 	// remember to add new functions to both C and C++ interfaces and to increase OPENMPT_API_VERSION_MINOR
 

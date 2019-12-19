@@ -13,6 +13,19 @@ is just a high-level summary.
     can now be selected via ctl `render.resampler.emulate_amiga_type`. Possible
     values are: `"auto"`, `"a500"`, `"a1200"`, and an experimental option
     `"unfiltered"`.
+ *  [**New**] libopenmpt: New type-aware ctl APIs that do not require memory
+    allocations and are thus realtime-safe:
+    `openmpt::module::ctl_get_boolean()`, `openmpt::module::ctl_get_integer()`,
+    `openmpt::module::ctl_get_floatingpoint()`,
+    `openmpt::module::ctl_get_text()`, `openmpt::module::ctl_set_boolean()`,
+    `openmpt::module::ctl_set_integer()`,
+    `openmpt::module::ctl_set_floatingpoint()` (C++), and
+    `openmpt_module_ctl_get_boolean()`, `openmpt_module_ctl_get_integer()`,
+    `openmpt_module_ctl_get_floatingpoint()`, `openmpt_module_ctl_get_text()`,
+    `openmpt_module_ctl_set_boolean()`, `openmpt_module_ctl_set_integer()`,
+    `openmpt_module_ctl_set_floatingpoint()` (C).
+ *  [**New**] libopenmpt C++ New API `openmpt::is_extension_supported2()` which
+    takes a `std::string_view` parameter instead of `std::string`.
  *  [**New**] libopenmpt C++: New API
     `openmpt::module::module(std::vector<std::byte> data)`,
     `openmpt::module::module(const std::byte * data, std::size_t size)`,

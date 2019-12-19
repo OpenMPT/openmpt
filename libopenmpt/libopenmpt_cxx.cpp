@@ -126,6 +126,9 @@ std::vector<std::string> get_supported_extensions() {
 bool is_extension_supported( const std::string & extension ) {
 	return openmpt::module_impl::is_extension_supported( extension );
 }
+bool is_extension_supported( std::string_view extension ) {
+	return openmpt::module_impl::is_extension_supported( extension );
+}
 
 double could_open_probability( std::istream & stream, double effort, std::ostream & log ) {
 	return openmpt::module_impl::could_open_probability( stream, effort, openmpt::helper::make_unique<std_ostream_log>( log ) );
@@ -403,11 +406,37 @@ std::string module::highlight_pattern_row_channel( std::int32_t pattern, std::in
 std::vector<std::string> module::get_ctls() const {
 	return impl->get_ctls();
 }
+
 std::string module::ctl_get( const std::string & ctl ) const {
 	return impl->ctl_get( ctl );
 }
+bool module::ctl_get_boolean( std::string_view ctl ) const {
+	return impl->ctl_get_boolean( ctl );
+}
+std::int64_t module::ctl_get_integer( std::string_view ctl ) const {
+	return impl->ctl_get_integer( ctl );
+}
+double module::ctl_get_floatingpoint( std::string_view ctl ) const {
+	return impl->ctl_get_floatingpoint( ctl );
+}
+std::string module::ctl_get_text( std::string_view ctl ) const {
+	return impl->ctl_get_text( ctl );
+}
+
 void module::ctl_set( const std::string & ctl, const std::string & value ) {
 	impl->ctl_set( ctl, value );
+}
+void module::ctl_set_boolean( std::string_view ctl, bool value ) {
+	impl->ctl_set_boolean( ctl, value );
+}
+void module::ctl_set_integer( std::string_view ctl, std::int64_t value ) {
+	impl->ctl_set_integer( ctl, value );
+}
+void module::ctl_set_floatingpoint( std::string_view ctl, double value ) {
+	impl->ctl_set_floatingpoint( ctl, value );
+}
+void module::ctl_set_text( std::string_view ctl, std::string_view value ) {
+	impl->ctl_set_text( ctl, value );
 }
 
 module_ext::module_ext( std::istream & stream, std::ostream & log, const std::map< std::string, std::string > & ctls ) : ext_impl(0) {

@@ -1533,7 +1533,7 @@ int CompareNoCaseAscii(const char *a, const char *b, std::size_t n)
 	return 0;
 }
 
-int CompareNoCaseAscii(const std::string &a, const std::string &b)
+int CompareNoCaseAscii(std::string_view a, std::string_view b)
 {
 	for(std::size_t i = 0; i < std::min(a.length(), b.length()); ++i)
 	{
@@ -1553,6 +1553,12 @@ int CompareNoCaseAscii(const std::string &a, const std::string &b)
 	}
 	return a.length() < b.length() ? -1 : 1;
 }
+
+int CompareNoCaseAscii(const std::string &a, const std::string &b)
+{
+	return CompareNoCaseAscii(std::string_view(a), std::string_view(b));
+}
+
 
 #if defined(MODPLUG_TRACKER)
 

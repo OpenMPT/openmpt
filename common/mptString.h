@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <limits>
 #include <string>
+#include <string_view>
 
 #include <cstring>
 
@@ -545,7 +546,9 @@ std::string ToLowerCaseAscii(std::string s);
 std::string ToUpperCaseAscii(std::string s);
 
 int CompareNoCaseAscii(const char *a, const char *b, std::size_t n);
+int CompareNoCaseAscii(std::string_view a, std::string_view b);
 int CompareNoCaseAscii(const std::string &a, const std::string &b);
+
 
 #if defined(MODPLUG_TRACKER)
 

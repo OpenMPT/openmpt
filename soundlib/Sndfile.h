@@ -824,7 +824,7 @@ public:
 	bool ReadWAV(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
-	static bool IsExtensionSupported(const char *ext); // UTF8, casing of ext is ignored
+	static bool IsExtensionSupported(std::string_view ext); // UTF8, casing of ext is ignored
 	static mpt::ustring ModContainerTypeToString(MODCONTAINERTYPE containertype);
 	static mpt::ustring ModContainerTypeToTracker(MODCONTAINERTYPE containertype);
 

@@ -582,11 +582,8 @@ std::vector<std::string> module_impl::get_supported_extensions() {
 	std::copy( extensions.begin(), extensions.end(), std::back_insert_iterator<std::vector<std::string> >( retval ) );
 	return retval;
 }
-bool module_impl::is_extension_supported( const char * extension ) {
+bool module_impl::is_extension_supported( std::string_view extension ) {
 	return CSoundFile::IsExtensionSupported( extension );
-}
-bool module_impl::is_extension_supported( const std::string & extension ) {
-	return CSoundFile::IsExtensionSupported( extension.c_str() );
 }
 double module_impl::could_open_probability( const OpenMPT::FileReader & file, double effort, std::unique_ptr<log_interface> log ) {
 	try {
@@ -1545,23 +1542,35 @@ std::string module_impl::highlight_pattern_row_channel( std::int32_t p, std::int
 	return format_and_highlight_pattern_row_channel( p, r, c, width, pad ).second;
 }
 
-std::vector<std::string> module_impl::get_ctls() const {
-	return {
-	  "load.skip_samples",
-	  "load.skip_patterns",
-	  "load.skip_plugins",
-	  "load.skip_subsongs_init",
-	  "seek.sync_samples",
-	  "subsong",
-	  "play.tempo_factor",
-	  "play.pitch_factor",
-	  "play.at_end",
-	  "render.resampler.emulate_amiga",
-	  "render.resampler.emulate_amiga_type",
-	  "render.opl.volume_factor",
-	  "dither",
+std::pair<const module_impl::ctl_info *, const module_impl::ctl_info *> module_impl::get_ctl_infos() const {
+	static constexpr ctl_info ctl_infos[] = {
+		{ "load.skip_samples", ctl_type::boolean },
+		{ "load.skip_patterns", ctl_type::boolean },
+		{ "load.skip_plugins", ctl_type::boolean },
+		{ "load.skip_subsongs_init", ctl_type::boolean },
+		{ "seek.sync_samples", ctl_type::boolean },
+		{ "subsong", ctl_type::integer },
+		{ "play.tempo_factor", ctl_type::floatingpoint },
+		{ "play.pitch_factor", ctl_type::floatingpoint },
+		{ "play.at_end", ctl_type::text },
+		{ "render.resampler.emulate_amiga", ctl_type::boolean },
+		{ "render.resampler.emulate_amiga_type", ctl_type::text },
+		{ "render.opl.volume_factor", ctl_type::floatingpoint },
+		{ "dither", ctl_type::integer }
 	};
+	return std::make_pair(std::begin(ctl_infos), std::end(ctl_infos));
 }
+
+std::vector<std::string> module_impl::get_ctls() const {
+	std::vector<std::string> result;
+	auto ctl_infos = get_ctl_infos();
+	result.reserve(std::distance(ctl_infos.first, ctl_infos.second));
+	for ( std::ptrdiff_t i = 0; i < std::distance(ctl_infos.first, ctl_infos.second); ++i ) {
+		result.push_back(ctl_infos.first[i].name);
+	}
+	return result;
+}
+
 std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const {
 	if ( !ctl.empty() ) {
 		// cppcheck false-positive
@@ -1576,20 +1585,189 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 			ctl = ctl.substr( 0, ctl.length() - 1 );
 		}
 	}
+	auto found_ctl = std::find_if(get_ctl_infos().first, get_ctl_infos().second, [&](const ctl_info & info) -> bool { return info.name == ctl; });
+	if ( found_ctl == get_ctl_infos().second ) {
+		if ( ctl == "" ) {
+			throw openmpt::exception("empty ctl");
+		} else if ( throw_if_unknown ) {
+			throw openmpt::exception("unknown ctl: " + ctl);
+		} else {
+			return std::string();
+		}
+	}
+	std::string result;
+	switch ( found_ctl->type ) {
+		case ctl_type::boolean:
+			return mpt::fmt::val( ctl_get_boolean( ctl, throw_if_unknown ) );
+			break;
+		case ctl_type::integer:
+			return mpt::fmt::val( ctl_get_integer( ctl, throw_if_unknown ) );
+			break;
+		case ctl_type::floatingpoint:
+			return mpt::fmt::val( ctl_get_floatingpoint( ctl, throw_if_unknown ) );
+			break;
+		case ctl_type::text:
+			return ctl_get_text( ctl, throw_if_unknown );
+			break;
+	}
+	return result;
+}
+bool module_impl::ctl_get_boolean( std::string_view ctl, bool throw_if_unknown ) const {
+	if ( !ctl.empty() ) {
+		// cppcheck false-positive
+		// cppcheck-suppress containerOutOfBounds
+		char rightmost = ctl.back();
+		if ( rightmost == '!' || rightmost == '?' ) {
+			if ( rightmost == '!' ) {
+				throw_if_unknown = true;
+			} else if ( rightmost == '?' ) {
+				throw_if_unknown = false;
+			}
+			ctl = ctl.substr( 0, ctl.length() - 1 );
+		}
+	}
+	auto found_ctl = std::find_if(get_ctl_infos().first, get_ctl_infos().second, [&](const ctl_info & info) -> bool { return info.name == ctl; });
+	if ( found_ctl == get_ctl_infos().second ) {
+		if ( ctl == "" ) {
+			throw openmpt::exception("empty ctl");
+		} else if ( throw_if_unknown ) {
+			throw openmpt::exception("unknown ctl: " + std::string(ctl));
+		} else {
+			return false;
+		}
+	}
+	if ( found_ctl->type != ctl_type::boolean ) {
+		throw openmpt::exception("wrong ctl value type");
+	}
 	if ( ctl == "" ) {
 		throw openmpt::exception("empty ctl");
 	} else if ( ctl == "load.skip_samples" || ctl == "load_skip_samples" ) {
-		return mpt::fmt::val( m_ctl_load_skip_samples );
+		return m_ctl_load_skip_samples;
 	} else if ( ctl == "load.skip_patterns" || ctl == "load_skip_patterns" ) {
-		return mpt::fmt::val( m_ctl_load_skip_patterns );
+		return m_ctl_load_skip_patterns;
 	} else if ( ctl == "load.skip_plugins" ) {
-		return mpt::fmt::val( m_ctl_load_skip_plugins );
+		return m_ctl_load_skip_plugins;
 	} else if ( ctl == "load.skip_subsongs_init" ) {
-		return mpt::fmt::val( m_ctl_load_skip_subsongs_init );
+		return m_ctl_load_skip_subsongs_init;
 	} else if ( ctl == "seek.sync_samples" ) {
-		return mpt::fmt::val( m_ctl_seek_sync_samples );
+		return m_ctl_seek_sync_samples;
+	} else if ( ctl == "render.resampler.emulate_amiga" ) {
+		return ( m_sndFile->m_Resampler.m_Settings.emulateAmiga != Resampling::AmigaFilter::Off );
+	} else {
+		MPT_ASSERT_NOTREACHED();
+		return false;
+	}
+}
+std::int64_t module_impl::ctl_get_integer( std::string_view ctl, bool throw_if_unknown ) const {
+	if ( !ctl.empty() ) {
+		// cppcheck false-positive
+		// cppcheck-suppress containerOutOfBounds
+		char rightmost = ctl.back();
+		if ( rightmost == '!' || rightmost == '?' ) {
+			if ( rightmost == '!' ) {
+				throw_if_unknown = true;
+			} else if ( rightmost == '?' ) {
+				throw_if_unknown = false;
+			}
+			ctl = ctl.substr( 0, ctl.length() - 1 );
+		}
+	}
+	auto found_ctl = std::find_if(get_ctl_infos().first, get_ctl_infos().second, [&](const ctl_info & info) -> bool { return info.name == ctl; });
+	if ( found_ctl == get_ctl_infos().second ) {
+		if ( ctl == "" ) {
+			throw openmpt::exception("empty ctl");
+		} else if ( throw_if_unknown ) {
+			throw openmpt::exception("unknown ctl: " + std::string(ctl));
+		} else {
+			return 0;
+		}
+	}
+	if ( found_ctl->type != ctl_type::integer ) {
+		throw openmpt::exception("wrong ctl value type");
+	}
+	if ( ctl == "" ) {
+		throw openmpt::exception("empty ctl");
 	} else if ( ctl == "subsong" ) {
-		return mpt::fmt::val( get_selected_subsong() );
+		return get_selected_subsong();
+	} else if ( ctl == "dither" ) {
+		return static_cast<int>( m_Dither->GetMode() );
+	} else {
+		MPT_ASSERT_NOTREACHED();
+		return 0;
+	}
+}
+double module_impl::ctl_get_floatingpoint( std::string_view ctl, bool throw_if_unknown ) const {
+	if ( !ctl.empty() ) {
+		// cppcheck false-positive
+		// cppcheck-suppress containerOutOfBounds
+		char rightmost = ctl.back();
+		if ( rightmost == '!' || rightmost == '?' ) {
+			if ( rightmost == '!' ) {
+				throw_if_unknown = true;
+			} else if ( rightmost == '?' ) {
+				throw_if_unknown = false;
+			}
+			ctl = ctl.substr( 0, ctl.length() - 1 );
+		}
+	}
+	auto found_ctl = std::find_if(get_ctl_infos().first, get_ctl_infos().second, [&](const ctl_info & info) -> bool { return info.name == ctl; });
+	if ( found_ctl == get_ctl_infos().second ) {
+		if ( ctl == "" ) {
+			throw openmpt::exception("empty ctl");
+		} else if ( throw_if_unknown ) {
+			throw openmpt::exception("unknown ctl: " + std::string(ctl));
+		} else {
+			return 0.0;
+		}
+	}
+	if ( found_ctl->type != ctl_type::floatingpoint ) {
+		throw openmpt::exception("wrong ctl value type");
+	}
+	if ( ctl == "" ) {
+		throw openmpt::exception("empty ctl");
+	} else if ( ctl == "play.tempo_factor" ) {
+		if ( !is_loaded() ) {
+			return 1.0;
+		}
+		return 65536.0 / m_sndFile->m_nTempoFactor;
+	} else if ( ctl == "play.pitch_factor" ) {
+		if ( !is_loaded() ) {
+			return 1.0;
+		}
+		return m_sndFile->m_nFreqFactor / 65536.0;
+	} else if ( ctl == "render.opl.volume_factor" ) {
+		return static_cast<double>( m_sndFile->m_OPLVolumeFactor ) / static_cast<double>( m_sndFile->m_OPLVolumeFactorScale );
+	} else {
+		MPT_ASSERT_NOTREACHED();
+		return 0.0;
+	}
+}
+std::string module_impl::ctl_get_text( std::string_view ctl, bool throw_if_unknown ) const {
+	if ( !ctl.empty() ) {
+		// cppcheck false-positive
+		// cppcheck-suppress containerOutOfBounds
+		char rightmost = ctl.back();
+		if ( rightmost == '!' || rightmost == '?' ) {
+			if ( rightmost == '!' ) {
+				throw_if_unknown = true;
+			} else if ( rightmost == '?' ) {
+				throw_if_unknown = false;
+			}
+			ctl = ctl.substr( 0, ctl.length() - 1 );
+		}
+	}
+	auto found_ctl = std::find_if(get_ctl_infos().first, get_ctl_infos().second, [&](const ctl_info & info) -> bool { return info.name == ctl; });
+	if ( found_ctl == get_ctl_infos().second ) {
+		if ( ctl == "" ) {
+			throw openmpt::exception("empty ctl");
+		} else if ( throw_if_unknown ) {
+			throw openmpt::exception("unknown ctl: " + std::string(ctl));
+		} else {
+			return std::string();
+		}
+	}
+	if ( ctl == "" ) {
+		throw openmpt::exception("empty ctl");
 	} else if ( ctl == "play.at_end" ) {
 		switch ( m_ctl_play_at_end )
 		{
@@ -1602,18 +1780,6 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 		default:
 			return std::string();
 		}
-	} else if ( ctl == "play.tempo_factor" ) {
-		if ( !is_loaded() ) {
-			return "1.0";
-		}
-		return mpt::fmt::val( 65536.0 / m_sndFile->m_nTempoFactor );
-	} else if ( ctl == "play.pitch_factor" ) {
-		if ( !is_loaded() ) {
-			return "1.0";
-		}
-		return mpt::fmt::val( m_sndFile->m_nFreqFactor / 65536.0 );
-	} else if ( ctl == "render.resampler.emulate_amiga" ) {
-		return mpt::fmt::val( m_sndFile->m_Resampler.m_Settings.emulateAmiga != Resampling::AmigaFilter::Off );
 	} else if ( ctl == "render.resampler.emulate_amiga_type" ) {
 		switch ( m_ctl_render_resampler_emulate_amiga_type ) {
 			case amiga_filter_type::a500:
@@ -1625,20 +1791,14 @@ std::string module_impl::ctl_get( std::string ctl, bool throw_if_unknown ) const
 			case amiga_filter_type::auto_filter:
 				return "auto";
 			default:
-				return {};
+				return std::string();
 		}
-	} else if ( ctl == "render.opl.volume_factor" ) {
-		return mpt::fmt::val( static_cast<double>( m_sndFile->m_OPLVolumeFactor ) / static_cast<double>( m_sndFile->m_OPLVolumeFactorScale ) );
-	} else if ( ctl == "dither" ) {
-		return mpt::fmt::val( static_cast<int>( m_Dither->GetMode() ) );
 	} else {
-		if ( throw_if_unknown ) {
-			throw openmpt::exception("unknown ctl: " + ctl);
-		} else {
-			return {};
-		}
+		MPT_ASSERT_NOTREACHED();
+		return std::string();
 	}
 }
+
 void module_impl::ctl_set( std::string ctl, const std::string & value, bool throw_if_unknown ) {
 	if ( !ctl.empty() ) {
 		// cppcheck false-positive
@@ -1653,35 +1813,152 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 			ctl = ctl.substr( 0, ctl.length() - 1 );
 		}
 	}
-	if ( ctl == "" ) {
-		throw openmpt::exception("empty ctl: := " + value);
-	} else if ( ctl == "load.skip_samples" || ctl == "load_skip_samples" ) {
-		m_ctl_load_skip_samples = ConvertStrTo<bool>( value );
-	} else if ( ctl == "load.skip_patterns" || ctl == "load_skip_patterns" ) {
-		m_ctl_load_skip_patterns = ConvertStrTo<bool>( value );
-	} else if ( ctl == "load.skip_plugins" ) {
-		m_ctl_load_skip_plugins = ConvertStrTo<bool>( value );
-	} else if ( ctl == "load.skip_subsongs_init" ) {
-		m_ctl_load_skip_subsongs_init = ConvertStrTo<bool>( value );
-	} else if ( ctl == "seek.sync_samples" ) {
-		m_ctl_seek_sync_samples = ConvertStrTo<bool>( value );
-	} else if ( ctl == "subsong" ) {
-		select_subsong( ConvertStrTo<int32>( value ) );
-	} else if ( ctl == "play.at_end" ) {
-		if ( value == "fadeout" ) {
-			m_ctl_play_at_end = song_end_action::fadeout_song;
-		} else if(value == "continue") {
-			m_ctl_play_at_end = song_end_action::continue_song;
-		} else if(value == "stop") {
-			m_ctl_play_at_end = song_end_action::stop_song;
+	auto found_ctl = std::find_if(get_ctl_infos().first, get_ctl_infos().second, [&](const ctl_info & info) -> bool { return info.name == ctl; });
+	if ( found_ctl == get_ctl_infos().second ) {
+		if ( ctl == "" ) {
+			throw openmpt::exception("empty ctl: := " + value);
+		} else if ( throw_if_unknown ) {
+			throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
 		} else {
-			throw openmpt::exception("unknown song end action:" + value);
+			return;
 		}
+	}
+	switch ( found_ctl->type ) {
+		case ctl_type::boolean:
+			ctl_set_boolean( ctl, ConvertStrTo<bool>( value ), throw_if_unknown );
+			break;
+		case ctl_type::integer:
+			ctl_set_integer( ctl, ConvertStrTo<int64>( value ), throw_if_unknown );
+			break;
+		case ctl_type::floatingpoint:
+			ctl_set_floatingpoint( ctl, ConvertStrTo<double>( value ), throw_if_unknown );
+			break;
+		case ctl_type::text:
+			ctl_set_text( ctl, value, throw_if_unknown );
+			break;
+	}
+}
+void module_impl::ctl_set_boolean( std::string_view ctl, bool value, bool throw_if_unknown ) {
+	if ( !ctl.empty() ) {
+		// cppcheck false-positive
+		// cppcheck-suppress containerOutOfBounds
+		char rightmost = ctl.back();
+		if ( rightmost == '!' || rightmost == '?' ) {
+			if ( rightmost == '!' ) {
+				throw_if_unknown = true;
+			} else if ( rightmost == '?' ) {
+				throw_if_unknown = false;
+			}
+			ctl = ctl.substr( 0, ctl.length() - 1 );
+		}
+	}
+	auto found_ctl = std::find_if(get_ctl_infos().first, get_ctl_infos().second, [&](const ctl_info & info) -> bool { return info.name == ctl; });
+	if ( found_ctl == get_ctl_infos().second ) {
+		if ( ctl == "" ) {
+			throw openmpt::exception("empty ctl: := " + mpt::fmt::val( value ) );
+		} else if ( throw_if_unknown ) {
+			throw openmpt::exception("unknown ctl: " + std::string(ctl) + " := " + mpt::fmt::val(value));
+		} else {
+			return;
+		}
+	}
+	if ( ctl == "" ) {
+		throw openmpt::exception("empty ctl: := " + mpt::fmt::val( value ) );
+	} else if ( ctl == "load.skip_samples" || ctl == "load_skip_samples" ) {
+		m_ctl_load_skip_samples = value;
+	} else if ( ctl == "load.skip_patterns" || ctl == "load_skip_patterns" ) {
+		m_ctl_load_skip_patterns = value;
+	} else if ( ctl == "load.skip_plugins" ) {
+		m_ctl_load_skip_plugins = value;
+	} else if ( ctl == "load.skip_subsongs_init" ) {
+		m_ctl_load_skip_subsongs_init = value;
+	} else if ( ctl == "seek.sync_samples" ) {
+		m_ctl_seek_sync_samples = value;
+	} else if ( ctl == "render.resampler.emulate_amiga" ) {
+		CResamplerSettings newsettings = m_sndFile->m_Resampler.m_Settings;
+		const bool enabled = value;
+		if ( enabled )
+			newsettings.emulateAmiga = translate_amiga_filter_type( m_ctl_render_resampler_emulate_amiga_type );
+		else
+			newsettings.emulateAmiga = Resampling::AmigaFilter::Off;
+		if ( newsettings != m_sndFile->m_Resampler.m_Settings ) {
+			m_sndFile->SetResamplerSettings( newsettings );
+		}
+	} else {
+		MPT_ASSERT_NOTREACHED();
+	}
+}
+void module_impl::ctl_set_integer( std::string_view ctl, std::int64_t value, bool throw_if_unknown ) {
+	if ( !ctl.empty() ) {
+		// cppcheck false-positive
+		// cppcheck-suppress containerOutOfBounds
+		char rightmost = ctl.back();
+		if ( rightmost == '!' || rightmost == '?' ) {
+			if ( rightmost == '!' ) {
+				throw_if_unknown = true;
+			} else if ( rightmost == '?' ) {
+				throw_if_unknown = false;
+			}
+			ctl = ctl.substr( 0, ctl.length() - 1 );
+		}
+	}
+	auto found_ctl = std::find_if(get_ctl_infos().first, get_ctl_infos().second, [&](const ctl_info & info) -> bool { return info.name == ctl; });
+	if ( found_ctl == get_ctl_infos().second ) {
+		if ( ctl == "" ) {
+			throw openmpt::exception("empty ctl: := " + mpt::fmt::val( value ) );
+		} else if ( throw_if_unknown ) {
+			throw openmpt::exception("unknown ctl: " + std::string(ctl) + " := " + mpt::fmt::val(value));
+		} else {
+			return;
+		}
+	}
+
+	if ( ctl == "" ) {
+		throw openmpt::exception("empty ctl: := " + mpt::fmt::val( value ) );
+	} else if ( ctl == "subsong" ) {
+		select_subsong( mpt::saturate_cast<int32>( value ) );
+	} else if ( ctl == "dither" ) {
+		int dither = mpt::saturate_cast<int>( value );
+		if ( dither < 0 || dither >= NumDitherModes ) {
+			dither = DitherDefault;
+		}
+		m_Dither->SetMode( static_cast<DitherMode>( dither ) );
+	} else {
+		MPT_ASSERT_NOTREACHED();
+	}
+}
+void module_impl::ctl_set_floatingpoint( std::string_view ctl, double value, bool throw_if_unknown ) {
+	if ( !ctl.empty() ) {
+		// cppcheck false-positive
+		// cppcheck-suppress containerOutOfBounds
+		char rightmost = ctl.back();
+		if ( rightmost == '!' || rightmost == '?' ) {
+			if ( rightmost == '!' ) {
+				throw_if_unknown = true;
+			} else if ( rightmost == '?' ) {
+				throw_if_unknown = false;
+			}
+			ctl = ctl.substr( 0, ctl.length() - 1 );
+		}
+	}
+	auto found_ctl = std::find_if(get_ctl_infos().first, get_ctl_infos().second, [&](const ctl_info & info) -> bool { return info.name == ctl; });
+	if ( found_ctl == get_ctl_infos().second ) {
+		if ( ctl == "" ) {
+			throw openmpt::exception("empty ctl: := " + mpt::fmt::val( value ) );
+		} else if ( throw_if_unknown ) {
+			throw openmpt::exception("unknown ctl: " + std::string(ctl) + " := " + mpt::fmt::val(value));
+		} else {
+			return;
+		}
+	}
+
+	if ( ctl == "" ) {
+		throw openmpt::exception("empty ctl: := " + mpt::fmt::val( value ) );
 	} else if ( ctl == "play.tempo_factor" ) {
 		if ( !is_loaded() ) {
 			return;
 		}
-		double factor = ConvertStrTo<double>( value );
+		double factor = value;
 		if ( factor <= 0.0 || factor > 4.0 ) {
 			throw openmpt::exception("invalid tempo factor");
 		}
@@ -1691,21 +1968,54 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 		if ( !is_loaded() ) {
 			return;
 		}
-		double factor = ConvertStrTo<double>( value );
+		double factor = value;
 		if ( factor <= 0.0 || factor > 4.0 ) {
 			throw openmpt::exception("invalid pitch factor");
 		}
 		m_sndFile->m_nFreqFactor = mpt::saturate_round<uint32_t>( 65536.0 * factor );
 		m_sndFile->RecalculateSamplesPerTick();
-	} else if ( ctl == "render.resampler.emulate_amiga" ) {
-		CResamplerSettings newsettings = m_sndFile->m_Resampler.m_Settings;
-		const bool enabled = ConvertStrTo<bool>( value );
-		if ( enabled )
-			newsettings.emulateAmiga = translate_amiga_filter_type( m_ctl_render_resampler_emulate_amiga_type );
-		else
-			newsettings.emulateAmiga = Resampling::AmigaFilter::Off;
-		if ( newsettings != m_sndFile->m_Resampler.m_Settings ) {
-			m_sndFile->SetResamplerSettings( newsettings );
+	} else if ( ctl == "render.opl.volume_factor" ) {
+		m_sndFile->m_OPLVolumeFactor = mpt::saturate_round<int32>( value * static_cast<double>( m_sndFile->m_OPLVolumeFactorScale ) );
+	} else {
+		MPT_ASSERT_NOTREACHED();
+	}
+}
+void module_impl::ctl_set_text( std::string_view ctl, std::string_view value, bool throw_if_unknown ) {
+	if ( !ctl.empty() ) {
+		// cppcheck false-positive
+		// cppcheck-suppress containerOutOfBounds
+		char rightmost = ctl.back();
+		if ( rightmost == '!' || rightmost == '?' ) {
+			if ( rightmost == '!' ) {
+				throw_if_unknown = true;
+			} else if ( rightmost == '?' ) {
+				throw_if_unknown = false;
+			}
+			ctl = ctl.substr( 0, ctl.length() - 1 );
+		}
+	}
+	auto found_ctl = std::find_if(get_ctl_infos().first, get_ctl_infos().second, [&](const ctl_info & info) -> bool { return info.name == ctl; });
+	if ( found_ctl == get_ctl_infos().second ) {
+		if ( ctl == "" ) {
+			throw openmpt::exception("empty ctl: := " + std::string( value ) );
+		} else if ( throw_if_unknown ) {
+			throw openmpt::exception("unknown ctl: " + std::string(ctl) + " := " + std::string(value));
+		} else {
+			return;
+		}
+	}
+
+	if ( ctl == "" ) {
+		throw openmpt::exception("empty ctl: := " + std::string( value ) );
+	} else if ( ctl == "play.at_end" ) {
+		if ( value == "fadeout" ) {
+			m_ctl_play_at_end = song_end_action::fadeout_song;
+		} else if(value == "continue") {
+			m_ctl_play_at_end = song_end_action::continue_song;
+		} else if(value == "stop") {
+			m_ctl_play_at_end = song_end_action::stop_song;
+		} else {
+			throw openmpt::exception("unknown song end action:" + std::string(value));
 		}
 	} else if ( ctl == "render.resampler.emulate_amiga_type" ) {
 		if ( value == "a500" ) {
@@ -1719,7 +2029,6 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 		} else {
 			throw openmpt::exception( "invalid amiga filter type" );
 		}
-
 		if ( m_sndFile->m_Resampler.m_Settings.emulateAmiga != Resampling::AmigaFilter::Off ) {
 			CResamplerSettings newsettings = m_sndFile->m_Resampler.m_Settings;
 			newsettings.emulateAmiga = translate_amiga_filter_type( m_ctl_render_resampler_emulate_amiga_type );
@@ -1727,20 +2036,8 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 				m_sndFile->SetResamplerSettings( newsettings );
 			}
 		}
-	} else if ( ctl == "render.opl.volume_factor" ) {
-		m_sndFile->m_OPLVolumeFactor = mpt::saturate_round<int32>( ConvertStrTo<double>( value ) * static_cast<double>( m_sndFile->m_OPLVolumeFactorScale ) );
-	} else if ( ctl == "dither" ) {
-		int dither = ConvertStrTo<int>( value );
-		if ( dither < 0 || dither >= NumDitherModes ) {
-			dither = DitherDefault;
-		}
-		m_Dither->SetMode( static_cast<DitherMode>( dither ) );
 	} else {
-		if ( throw_if_unknown ) {
-			throw openmpt::exception("unknown ctl: " + ctl + " := " + value);
-		} else {
-			// ignore
-		}
+		MPT_ASSERT_NOTREACHED();
 	}
 }
 

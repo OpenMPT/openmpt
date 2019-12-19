@@ -736,33 +736,6 @@ static void show_help_keyboard( textout & log ) {
 }
 
 
-template < typename T, typename Tmod >
-T ctl_get( Tmod & mod, const std::string & ctl ) {
-	T result = T();
-	try {
-		std::istringstream str;
-		str.imbue( std::locale::classic() );
-		str.str( mod.ctl_get( ctl ) );
-		str >> std::fixed >> std::setprecision(16) >> result;
-	} catch ( const openmpt::exception & ) {
-		// ignore
-	}
-	return result;
-}
-
-template < typename T, typename Tmod >
-void ctl_set( Tmod & mod, const std::string & ctl, const T & val ) {
-	try {
-		std::ostringstream str;
-		str.imbue( std::locale::classic() );
-		str << std::fixed << std::setprecision(16) << val;
-		mod.ctl_set( ctl, str.str() );
-	} catch ( const openmpt::exception & ) {
-		// ignore
-	}
-	return;
-}
-
 template < typename Tmod >
 static void apply_mod_settings( commandlineflags & flags, Tmod & mod ) {
 	flags.separation = std::max( flags.separation, std::int32_t(   0 ) );
@@ -778,12 +751,17 @@ static void apply_mod_settings( commandlineflags & flags, Tmod & mod ) {
 	mod.set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, flags.separation );
 	mod.set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, flags.filtertaps );
 	mod.set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, flags.ramping );
-	ctl_set( mod, "play.tempo_factor", tempo_flag_to_double( flags.tempo ) );
-	ctl_set( mod, "play.pitch_factor", pitch_flag_to_double( flags.pitch ) );
-	std::ostringstream dither_str;
-	dither_str.imbue( std::locale::classic() );
-	dither_str << flags.dither;
-	mod.ctl_set( "dither", dither_str.str() );
+	try {
+		mod.ctl_set_floatingpoint( "play.tempo_factor", tempo_flag_to_double( flags.tempo ) );
+	} catch ( const openmpt::exception & ) {
+		// ignore
+	}
+	try {
+		mod.ctl_set_floatingpoint( "play.pitch_factor", pitch_flag_to_double( flags.pitch ) );
+	} catch ( const openmpt::exception & ) {
+		// ignore
+	}
+	mod.ctl_set_integer( "dither", flags.dither );
 }
 
 struct prev_file { int count; prev_file( int c ) : count(c) { } };

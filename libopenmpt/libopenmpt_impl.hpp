@@ -15,6 +15,7 @@
 
 #include <iosfwd>
 #include <memory>
+#include <utility>
 
 #if defined(_MSC_VER)
 #pragma warning(push)
@@ -99,6 +100,17 @@ protected:
 
 	static constexpr std::int32_t all_subsongs = -1;
 
+	enum class ctl_type {
+		boolean,
+		integer,
+		floatingpoint,
+		text,
+	};
+	struct ctl_info {
+		const char * name;
+		ctl_type type;
+	};
+
 	std::unique_ptr<log_interface> m_Log;
 	std::unique_ptr<log_forwarder> m_LogForwarder;
 	std::int32_t m_current_subsong;
@@ -139,8 +151,7 @@ protected:
 	static double could_open_probability( const OpenMPT::FileReader & file, double effort, std::unique_ptr<log_interface> log );
 public:
 	static std::vector<std::string> get_supported_extensions();
-	static bool is_extension_supported( const char * extension );
-	static bool is_extension_supported( const std::string & extension );
+	static bool is_extension_supported( std::string_view extension );
 	static double could_open_probability( callback_stream_wrapper stream, double effort, std::unique_ptr<log_interface> log );
 	static double could_open_probability( std::istream & stream, double effort, std::unique_ptr<log_interface> log );
 	static std::size_t probe_file_header_get_recommended_size();
@@ -215,9 +226,18 @@ public:
 	std::string highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const;
 	std::string format_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
 	std::string highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
+	std::pair<const module_impl::ctl_info *, const module_impl::ctl_info *> get_ctl_infos() const;
 	std::vector<std::string> get_ctls() const;
 	std::string ctl_get( std::string ctl, bool throw_if_unknown = true ) const;
+	bool ctl_get_boolean( std::string_view ctl, bool throw_if_unknown = true ) const;
+	std::int64_t ctl_get_integer( std::string_view ctl, bool throw_if_unknown = true ) const;
+	double ctl_get_floatingpoint( std::string_view ctl, bool throw_if_unknown = true ) const;
+	std::string ctl_get_text( std::string_view ctl, bool throw_if_unknown = true ) const;
 	void ctl_set( std::string ctl, const std::string & value, bool throw_if_unknown = true );
+	void ctl_set_boolean( std::string_view ctl, bool value, bool throw_if_unknown = true );
+	void ctl_set_integer( std::string_view ctl, std::int64_t value, bool throw_if_unknown = true );
+	void ctl_set_floatingpoint( std::string_view ctl, double value, bool throw_if_unknown = true );
+	void ctl_set_text( std::string_view ctl, std::string_view value, bool throw_if_unknown = true );
 }; // class module_impl
 
 namespace helper {

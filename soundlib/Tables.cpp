@@ -176,21 +176,19 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 }
 
 
-static bool IsEqualExtension(const char *a, const char *b)
+static bool IsEqualExtension(std::string_view a, std::string_view b)
 {
-	std::size_t lena = std::strlen(a);
-	std::size_t lenb = std::strlen(b);
-	if(lena != lenb)
+	if(a.length() != b.length())
 	{
 		return false;
 	}
-	return mpt::CompareNoCaseAscii(a, b, lena) == 0;
+	return mpt::CompareNoCaseAscii(a, b) == 0;
 }
 
 
-bool CSoundFile::IsExtensionSupported(const char *ext)
+bool CSoundFile::IsExtensionSupported(std::string_view ext)
 {
-	if(ext == nullptr || ext[0] == 0)
+	if(ext.length() == 0)
 	{
 		return false;
 	}

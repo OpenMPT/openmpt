@@ -1278,6 +1278,46 @@ const char * openmpt_module_ctl_get( openmpt_module * mod, const char * ctl ) {
 	}
 	return NULL;
 }
+int openmpt_module_ctl_get_boolean( openmpt_module * mod, const char * ctl ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		openmpt::interface::check_pointer( ctl );
+		return mod->impl->ctl_get_boolean( ctl );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+int64_t openmpt_module_ctl_get_integer( openmpt_module * mod, const char * ctl ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		openmpt::interface::check_pointer( ctl );
+		return mod->impl->ctl_get_integer( ctl );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+double openmpt_module_ctl_get_floatingpoint( openmpt_module * mod, const char * ctl ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		openmpt::interface::check_pointer( ctl );
+		return mod->impl->ctl_get_floatingpoint( ctl );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0.0;
+}
+const char * openmpt_module_ctl_get_text( openmpt_module * mod, const char * ctl ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		openmpt::interface::check_pointer( ctl );
+		return openmpt::strdup( mod->impl->ctl_get_text( ctl ).c_str() );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return NULL;
+}
 
 int openmpt_module_ctl_set( openmpt_module * mod, const char * ctl, const char * value ) {
 	try {
@@ -1291,7 +1331,51 @@ int openmpt_module_ctl_set( openmpt_module * mod, const char * ctl, const char *
 	}
 	return 0;
 }
-
+int openmpt_module_ctl_set_boolean( openmpt_module * mod, const char * ctl, int value ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		openmpt::interface::check_pointer( ctl );
+		mod->impl->ctl_set_boolean( ctl, value );
+		return 1;
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+int openmpt_module_ctl_set_integer( openmpt_module * mod, const char * ctl, int64_t value ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		openmpt::interface::check_pointer( ctl );
+		mod->impl->ctl_set_integer( ctl, value );
+		return 1;
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+int openmpt_module_ctl_set_floatingpoint( openmpt_module * mod, const char * ctl, double value ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		openmpt::interface::check_pointer( ctl );
+		mod->impl->ctl_set_floatingpoint( ctl, value );
+		return 1;
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+int openmpt_module_ctl_set_text( openmpt_module * mod, const char * ctl, const char * value ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		openmpt::interface::check_pointer( ctl );
+		openmpt::interface::check_pointer( value );
+		mod->impl->ctl_set_text( ctl, value );
+		return 1;
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
 
 openmpt_module_ext * openmpt_module_ext_create( openmpt_stream_callbacks stream_callbacks, void * stream, openmpt_log_func logfunc, void * loguser, openmpt_error_func errfunc, void * erruser, int * error, const char * * error_message, const openmpt_module_initial_ctl * ctls ) {
 	try {
