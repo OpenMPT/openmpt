@@ -70,7 +70,8 @@ inline namespace Ansi {
 
 struct DriverInfo {
 	std::basic_string<TCHAR> Key;
-	CLSID Id;
+	std::basic_string<TCHAR> Id;
+	CLSID Clsid;
 	std::basic_string<TCHAR> Name;
 	std::basic_string<TCHAR> Description;
 	std::basic_string<TCHAR> DisplayName() const {
@@ -172,7 +173,8 @@ inline std::vector<DriverInfo> EnumerateDrivers() {
 		}
 		DriverInfo info;
 		info.Key = key;
-		info.Id = clsid;
+		info.Id = strClsid;
+		info.Clsid = clsid;
 		info.Name = name;
 		info.Description = desc;
 		drivers.push_back(std::move(info));

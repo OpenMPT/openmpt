@@ -106,7 +106,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 	{
 		SoundDevice::Info info;
 		info.type = TypeASIO;
-		info.internalID = mpt::ToUnicode(Util::CLSIDToString(driver.Id));
+		info.internalID = mpt::ToUnicode(Util::CLSIDToString(driver.Clsid));
 		info.apiName = U_("ASIO");
 		info.name = mpt::ToUnicode(AsWinstring(driver.DisplayName()));
 		info.useNameAsIdentifier = false;
@@ -121,12 +121,14 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 			Info::Implementor::OpenMPT
 		};
 		info.extraData[U_("Key")] = mpt::ToUnicode(AsWinstring(driver.Key));;
-		info.extraData[U_("CLSID")] = mpt::ToUnicode(Util::CLSIDToString(driver.Id));
+		info.extraData[U_("Id")] = mpt::ToUnicode(AsWinstring(driver.Id));
+		info.extraData[U_("CLSID")] = mpt::ToUnicode(Util::CLSIDToString(driver.Clsid));
 		info.extraData[U_("Name")] = mpt::ToUnicode(AsWinstring(driver.Name));;
 		info.extraData[U_("Description")] = mpt::ToUnicode(AsWinstring(driver.Description));;
 		info.extraData[U_("DisplayName")] = mpt::ToUnicode(AsWinstring(driver.DisplayName()));;
 		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("ASIO: Found driver:"))());
 		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("ASIO:  Key         = '%1'"))(info.extraData[U_("Key")]));
+		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("ASIO:  Id          = '%1'"))(info.extraData[U_("Id")]));
 		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("ASIO:  CLSID       = '%1'"))(info.extraData[U_("CLSID")]));
 		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("ASIO:  Name        = '%1'"))(info.extraData[U_("Name")]));
 		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("ASIO:  Description = '%1'"))(info.extraData[U_("Description")]));

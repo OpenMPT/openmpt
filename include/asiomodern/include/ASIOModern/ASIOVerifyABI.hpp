@@ -15,13 +15,7 @@
 #include <iasiodrv.h>
 #else
 #define ASIO_ABI_VERIFIED 0
-#if ASIO_HAVE_PRAGMA_MESSAGE
-#pragma message("Warning: iasiodrv.h not found. ASIO ABI is not verified.")
-#elif ASIO_HAVE_WARNING
-#warning "Warning: iasiodrv.h not found. ASIO ABI is not verified."
-#else
 ASIO_WARNING("Warning: iasiodrv.h not found. ASIO ABI is not verified.")
-#endif
 #endif
 
 
