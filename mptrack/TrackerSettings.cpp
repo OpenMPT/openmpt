@@ -688,6 +688,17 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		conf.Forget(UpdateUpdateURL_DEPRECATED.GetPath());
 		conf.Forget(UpdateSendGUID_DEPRECATED.GetPath());
 	}
+	if(storedVersion < MPT_V("1.29.00.39"))
+	{
+		// ASIO device IDs are now normalized to upper-case in the device enumeration code.
+		// Previous device IDs could be mixed-case (as retrieved from the registry), which would make direct ID comparison fail now.
+		auto device = m_SoundDeviceIdentifier.Get();
+		if(device.substr(0, 5) == UL_("ASIO_"))
+		{
+			device = mpt::ToUpperCase(device);
+			m_SoundDeviceIdentifier = device;
+		}
+	}
 
 	// Effects
 #ifndef NO_EQ
