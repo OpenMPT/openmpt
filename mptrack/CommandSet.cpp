@@ -478,12 +478,6 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcSampleAmplify, 1385, _T("Amplify Sample"));
 	DefineKeyCommand(kcSampleZoomUp, 1386, _T("Zoom In"));
 	DefineKeyCommand(kcSampleZoomDown, 1387, _T("Zoom Out"));
-	//time saving HACK:
-	for(int j = kcSampStartNotes; j <= kcInsNoteMapEndNoteStops; j++)
-	{
-		DefineKeyCommand((CommandID)j, 1388 + j - kcSampStartNotes, _T("Sample editor note entry"), kcHidden, kcNoDummy);
-	}
-	//end hack
 	DefineKeyCommand(kcPatternGrowSelection, 1660, _T("Grow selection"));
 	DefineKeyCommand(kcPatternShrinkSelection, 1661, _T("Shrink selection"));
 	DefineKeyCommand(kcTogglePluginEditor, 1662, _T("Toggle channel's plugin editor"));
@@ -518,12 +512,6 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcNavigateUpBySpacing, 1692, _T("Navigate up by spacing"));
 	DefineKeyCommand(kcPrevDocument, 1693, _T("Previous Document"));
 	DefineKeyCommand(kcNextDocument, 1694, _T("Next Document"));
-	//time saving HACK:
-	for(int j = kcVSTGUIStartNotes; j <= kcVSTGUIEndNoteStops; j++)
-	{
-		DefineKeyCommand((CommandID)j, 1695 + j - kcVSTGUIStartNotes, _T("Plugin note entry"), kcHidden, kcNoDummy);
-	}
-	//end hack
 	DefineKeyCommand(kcVSTGUIPrevPreset, 1763, _T("Previous Plugin Preset"));
 	DefineKeyCommand(kcVSTGUINextPreset, 1764, _T("Next Plugin Preset"));
 	DefineKeyCommand(kcVSTGUIRandParams, 1765, _T("Randomize Plugin Parameters"));
@@ -743,7 +731,26 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcPastePatternChannel, 1998, _T("Paste from Pattern Channel Clipboard"));
 	DefineKeyCommand(kcPastePattern, 1999, _T("Paste from Pattern Clipboard"));
 
-	// Add new key commands here.
+	// Add new key commands before this line.
+
+	// Automatically generated note entry keys in non-pattern contexts
+	int noteEntryID = 1000000000;
+	for(const auto ctx : NoteContexts)
+	{
+		const auto contextStartNotes = std::get<1>(ctx);
+		const auto contextStopNotes = std::get<2>(ctx);
+		if(contextStartNotes == kcVPStartNotes)
+			continue;
+
+		for(int i = kcVPStartNotes; i <= kcVPEndNotes; i++)
+		{
+			DefineKeyCommand(static_cast<CommandID>(i - kcVPStartNotes + contextStartNotes), noteEntryID++, commands[i].Message, kcHidden, kcNoDummy);
+		}
+		for(int i = kcVPStartNoteStops; i <= kcVPEndNoteStops; i++)
+		{
+			DefineKeyCommand(static_cast<CommandID>(i - kcVPStartNoteStops + contextStopNotes), noteEntryID++, commands[i].Message, kcHidden, kcNoDummy);
+		}
+	}
 
 #ifdef _DEBUG
 	for(size_t i = 0; i < kcNumCommands; i++)
