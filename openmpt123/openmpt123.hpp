@@ -754,6 +754,8 @@ static inline std::string ToUTF8(const widestring &str, char replacement = '?')
 			if ( charsleft == numchars ) {
 				out.push_back( utf8[ charsleft - 1 ] | ( ((1<<numchars)-1) << (8-numchars) ) );
 			} else {
+				// cppcheck false-positive
+				// cppcheck-suppress arrayIndexOutOfBounds
 				out.push_back( utf8[ charsleft - 1 ] | 0x80 );
 			}
 			charsleft--;
