@@ -294,7 +294,7 @@ BOOL CCtrlSamples::OnInitDialog()
 		for(int i = -12 ; i <= 12 ; i++)
 		{
 			if(i == 0) _tcscpy(str, _T("none"));
-			else wsprintf(str, i < 0 ? _T(" %d") : _T("+%d"), i);
+			else wsprintf(str, i < 0 ? _T("%d") : _T("+%d"), i);
 			combo->SetItemData(combo->AddString(str), i + 12);
 		}
 		// Set "none" as default pitch
