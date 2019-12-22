@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.11-pre
 
+ *  MOD: Fix initial instrument change with no note playing. Fixes first pattern
+    of Beyond Music by Captain.
+
 ### libopenmpt 0.4.10 (2019-10-30)
 
  *  The "date" metadata could contain a bogus date for some older IT files.

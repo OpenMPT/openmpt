@@ -30,11 +30,12 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.28.09.00 (* November 2019, revision 12305)
+v1.28.09.00 (22 December 2019, revision 12387)
 ---------------------------------------------
 Pattern tab
-- [Fix] <js> Fix potential crash when entering notes, in particular if the order list was empty (http://bugs.openmpt.org/view.php?id=1278).
 - [Fix] <js> Chord detect interval was broken if the pattern number didn't match its location in the order list (e.g. pattern 3 at position 3) since OpenMPT 1.28.07.00. 
+- [Fix] <js> Potential crash when entering notes, in particular if the order list was empty (http://bugs.openmpt.org/view.php?id=1278).
+- [Fix] <js> Potential crash when halving a pattern with an odd number of rows and then expanding it again (http://bugs.openmpt.org/view.php?id=1282).
 
 MOD
 - [Fix] <js> Fix initial instrument change with no note playing. Fixes first pattern of Beyond Music by Captain (http://bugs.openmpt.org/view.php?id=1275).
@@ -42,6 +43,9 @@ MOD
 Misc
 - [Fix] <js> Loading / creating the first OPL instrument while playback was already running didn't start the OPL emulator until the next time playback was restarted.
 - [Fix] <jh> Fix compilation of Wine Integration on recent Wine versions (http://bugs.openmpt.org/view.php?id=1263).
+
+Third-Party Libraries
+- [Imp] Update UnRAR (v5.8.5)
 
 
 v1.28.08.00 (27 October 2019, revision 12247)
