@@ -14,6 +14,7 @@
 #include "Mainfrm.h"
 #include "InputHandler.h"
 #include "Childfrm.h"
+#include "Clipboard.h"
 #include "ImageLists.h"
 #include "Moddoc.h"
 #include "Globals.h"
@@ -22,7 +23,6 @@
 #include "../common/mptStringBuffer.h"
 #include "view_com.h"
 #include "../soundlib/mod_specifications.h"
-#include <set>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -85,25 +85,18 @@ BEGIN_MESSAGE_MAP(CViewComments, CModScrollView)
 	//{{AFX_MSG_MAP(CViewComments)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,		&CViewComments::OnCustomKeyMsg)
 	ON_MESSAGE(WM_MOD_MIDIMSG,			&CViewComments::OnMidiMsg)
 	ON_COMMAND(IDC_LIST_SAMPLES,		&CViewComments::OnShowSamples)
 	ON_COMMAND(IDC_LIST_INSTRUMENTS,	&CViewComments::OnShowInstruments)
 	ON_COMMAND(IDC_LIST_PATTERNS,		&CViewComments::OnShowPatterns)
+	ON_COMMAND(ID_COPY_ALL_NAMES,		&CViewComments::OnCopyNames)
 	ON_NOTIFY(LVN_ENDLABELEDIT,		IDC_LIST_DETAILS,	&CViewComments::OnEndLabelEdit)
 	ON_NOTIFY(LVN_BEGINLABELEDIT,	IDC_LIST_DETAILS,	&CViewComments::OnBeginLabelEdit)
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST_DETAILS,	&CViewComments::OnDblClickListItem)
+	ON_NOTIFY(NM_RCLICK, IDC_LIST_DETAILS,	&CViewComments::OnRClickListItem)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
-
-
-///////////////////////////////////////////////////////////////
-// CViewComments operations
-
-CViewComments::CViewComments()
-{
-	m_nCurrentListId = 0;
-	m_nListId = 0;//IDC_LIST_SAMPLES;
-}
 
 
 void CViewComments::OnInitialUpdate()
@@ -114,7 +107,7 @@ void CViewComments::OnInitialUpdate()
 		m_nListId = IDC_LIST_SAMPLES;
 
 		// For XM, set the instrument list as the default list
-		CModDoc *pModDoc = GetDocument();
+		const CModDoc *pModDoc = GetDocument();
 		if(pModDoc && (pModDoc->GetModType() & MOD_TYPE_XM) && pModDoc->GetNumInstruments() > 0)
 		{
 			m_nListId = IDC_LIST_INSTRUMENTS;
@@ -149,6 +142,9 @@ void CViewComments::OnInitialUpdate()
 
 void CViewComments::OnDestroy()
 {
+	if(m_lastNote != NOTE_NONE)
+		GetDocument()->NoteOff(m_lastNote, true, m_noteInstr, m_noteChannel);
+
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if (pFrame)
 	{
@@ -171,12 +167,72 @@ LRESULT CViewComments::OnMidiMsg(WPARAM midiData_, LPARAM)
 }
 
 
+LRESULT CViewComments::OnCustomKeyMsg(WPARAM wParam, LPARAM)
+{
+	const int item = m_ItemList.GetSelectionMark() + 1;
+	if(item == 0)
+		return NULL;
+
+	auto modDoc = GetDocument();
+	const auto noteOffset = wParam + NOTE_MIN + CMainFrame::GetMainFrame()->GetBaseOctave() * 12;
+	const auto lastInstr = m_noteInstr;
+	if(wParam >= kcCommentsStartNotes && wParam <= kcCommentsEndNotes)
+	{
+		const auto note = static_cast<ModCommand::NOTE>(noteOffset - kcCommentsStartNotes);
+		PlayNoteParam params(note);
+		m_noteInstr = INSTRUMENTINDEX_INVALID;
+		if(m_nListId == IDC_LIST_SAMPLES)
+			params.Sample(static_cast<SAMPLEINDEX>(item));
+		else if(m_nListId == IDC_LIST_INSTRUMENTS)
+			params.Instrument(m_noteInstr = static_cast<INSTRUMENTINDEX>(item));
+		else
+			return NULL;
+		if(m_lastNote != NOTE_NONE)
+			modDoc->NoteOff(m_lastNote, true, lastInstr, m_noteChannel);
+		m_noteChannel = modDoc->PlayNote(params);
+		m_lastNote = note;
+		return wParam;
+	} else if(wParam >= kcCommentsStartNoteStops && wParam <= kcCommentsEndNoteStops)
+	{
+		const auto note = static_cast<ModCommand::NOTE>(noteOffset - kcCommentsStartNoteStops);
+		modDoc->NoteOff(note, false, lastInstr, m_noteChannel);
+		return wParam;
+	}
+	return NULL;
+}
+
+
+BOOL CViewComments::PreTranslateMessage(MSG *pMsg)
+{
+	if(pMsg)
+	{
+		if((pMsg->message == WM_SYSKEYUP) || (pMsg->message == WM_KEYUP)
+			|| (pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
+		{
+			CInputHandler *ih = CMainFrame::GetInputHandler();
+
+			//Translate message manually
+			UINT nChar = static_cast<UINT>(pMsg->wParam);
+			UINT nRepCnt = LOWORD(pMsg->lParam);
+			UINT nFlags = HIWORD(pMsg->lParam);
+			KeyEventType kT = ih->GetKeyEventType(nFlags);
+			if(ih->KeyEvent(kCtxViewComments, nChar, nRepCnt, nFlags, kT) != kcNull)
+			{
+				return TRUE;  // Mapped to a command, no need to pass message on.
+			}
+		}
+	}
+
+	return CModScrollView::PreTranslateMessage(pMsg);
+}
+
+
 ///////////////////////////////////////////////////////////////
 // CViewComments drawing
 
 void CViewComments::UpdateView(UpdateHint hint, CObject *)
 {
-	CModDoc *pModDoc = GetDocument();
+	const CModDoc *pModDoc = GetDocument();
 
 	if ((!pModDoc) || (!(m_ItemList.m_hWnd))) return;
 	const FlagSet<HintType> hintType = hint.GetType();
@@ -293,7 +349,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 					lvi.pszText = const_cast<TCHAR *>(s.GetString());
 					if ((iCol) || (iSmp < nCount))
 					{
-						bool bOk = true;
+						bool update = true;
 						if (iSmp < nCount)
 						{
 							TCHAR stmp[512];
@@ -302,9 +358,9 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 							lvi2.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
 							stmp[0] = 0;
 							m_ItemList.GetItem(&lvi2);
-							if (s == stmp) bOk = false;
+							if (s == stmp) update = false;
 						}
-						if (bOk) m_ItemList.SetItem(&lvi);
+						if (update) m_ItemList.SetItem(&lvi);
 					} else
 					{
 						m_ItemList.InsertItem(&lvi);
@@ -342,10 +398,8 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 					case INSLIST_SAMPLES:
 						if (pIns)
 						{
-							const auto referencedSamples = pIns->GetSamples();
-
 							bool first = true;
-							for(auto sample : referencedSamples)
+							for(auto sample : pIns->GetSamples())
 							{
 								if(!first) s.AppendChar(_T(','));
 								first = false;
@@ -381,7 +435,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 					lvi.pszText = const_cast<TCHAR *>(s.GetString());
 					if ((iCol) || (iIns < nCount))
 					{
-						BOOL bOk = TRUE;
+						bool update = true;
 						if (iIns < nCount)
 						{
 							TCHAR stmp[512];
@@ -390,9 +444,9 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 							lvi2.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
 							stmp[0] = 0;
 							m_ItemList.GetItem(&lvi2);
-							if (s == stmp) bOk = FALSE;
+							if (s == stmp) update = false;
 						}
-						if (bOk) m_ItemList.SetItem(&lvi);
+						if (update) m_ItemList.SetItem(&lvi);
 					} else
 					{
 						m_ItemList.InsertItem(&lvi);
@@ -427,7 +481,7 @@ void CViewComments::RecalcLayout()
 
 void CViewComments::UpdateButtonState()
 {
-	CModDoc *pModDoc = GetDocument();
+	const CModDoc *pModDoc = GetDocument();
 	if (pModDoc)
 	{
 		m_ToolBar.SetState(IDC_LIST_SAMPLES, ((m_nListId == IDC_LIST_SAMPLES) ? TBSTATE_CHECKED : 0)|TBSTATE_ENABLED);
@@ -516,7 +570,7 @@ void CViewComments::OnShowInstruments()
 {
 	if (m_nListId != IDC_LIST_INSTRUMENTS)
 	{
-		CModDoc *pModDoc = GetDocument();
+		const CModDoc *pModDoc = GetDocument();
 		if (pModDoc && pModDoc->GetNumInstruments())
 		{
 			m_nListId = IDC_LIST_INSTRUMENTS;
@@ -561,13 +615,38 @@ void CViewComments::OnDblClickListItem(NMHDR *, LRESULT *)
 }
 
 
-LRESULT CViewComments::OnModViewMsg(WPARAM wParam, LPARAM lParam)
+void CViewComments::OnRClickListItem(NMHDR *, LRESULT *)
 {
-//	switch(wParam)
-//	{
-//		default:
-			return CModScrollView::OnModViewMsg(wParam, lParam);
-//	}
+	HMENU menu = ::CreatePopupMenu();
+	::AppendMenu(menu, MF_STRING, ID_COPY_ALL_NAMES, _T("&Copy Names"));
+	CPoint pt;
+	::GetCursorPos(&pt);
+	::TrackPopupMenu(menu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
+	::DestroyMenu(menu);
+
 }
+
+
+void CViewComments::OnCopyNames()
+{
+	std::wstring names;
+	const CSoundFile &sndFile = GetDocument()->GetSoundFile();
+	if(m_nListId == IDC_LIST_SAMPLES)
+	{
+		for(SAMPLEINDEX i = 1; i <= sndFile.GetNumSamples(); i++)
+			names += mpt::ToWide(sndFile.GetCharsetInternal(), sndFile.GetSampleName(i)) + L"\r\n";
+	} else if(m_nListId == IDC_LIST_INSTRUMENTS)
+	{
+		for(INSTRUMENTINDEX i = 1; i <= sndFile.GetNumInstruments(); i++)
+			names += mpt::ToWide(sndFile.GetCharsetInternal(), sndFile.GetInstrumentName(i)) + L"\r\n";
+	}
+	Clipboard clipboard(CF_UNICODETEXT, (names.size() + 1) * sizeof(wchar_t));
+	if(auto dst = clipboard.As<wchar_t>())
+	{
+		std::copy(names.begin(), names.end(), dst);
+		dst[names.size()] = '\0';
+	}
+}
+
 
 OPENMPT_NAMESPACE_END

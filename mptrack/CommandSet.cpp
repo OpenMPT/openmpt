@@ -34,6 +34,7 @@ constexpr std::tuple<InputTargetContext, CommandID, CommandID> NoteContexts[] =
 	{kCtxViewTree, kcTreeViewStartNotes, kcTreeViewStartNoteStops},
 	{kCtxInsNoteMap, kcInsNoteMapStartNotes, kcInsNoteMapStartNoteStops},
 	{kCtxVSTGUI, kcVSTGUIStartNotes, kcVSTGUIStartNoteStops},
+	{kCtxViewComments, kcCommentsStartNotes, kcCommentsStartNoteStops},
 };
 
 };  // namespace
@@ -287,7 +288,7 @@ void CCommandSet::SetupCommands()
 	DefineKeyCommand(kcVPChordStopFS2, 1196, _T("Stop base octave +2 chord F#"), kcHidden, kcNoDummy);
 	DefineKeyCommand(kcVPChordStopG_2, 1197, _T("Stop base octave +2 chord G"), kcHidden, kcNoDummy);
 	DefineKeyCommand(kcVPChordStopGS2, 1198, _T("Stop base octave +2 chord G#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopA_3, 1199, _T("Stop base octave +3 chord  A"), kcHidden, kcNoDummy);
+	DefineKeyCommand(kcVPChordStopA_3, 1199, _T("Stop base octave +3 chord A"), kcHidden, kcNoDummy);
 	DefineKeyCommand(kcNoteCut, 1200, _T("Note Cut"));
 	DefineKeyCommand(kcNoteOff, 1201, _T("Note Off"));
 	DefineKeyCommand(kcSetIns0, 1202, _T("Set instrument digit 0"));
