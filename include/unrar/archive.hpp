@@ -29,7 +29,6 @@ class Archive:public File
     void UpdateLatestTime(FileHeader *CurBlock);
     void ConvertNameCase(wchar *Name);
     void ConvertFileHeader(FileHeader *hd);
-    void WriteBlock50(HEADER_TYPE HeaderType,BaseBlock *wb,bool OnlySetSize,bool NonFinalWrite);
     size_t ReadHeader14();
     size_t ReadHeader15();
     size_t ReadHeader50();
@@ -65,8 +64,6 @@ class Archive:public File
     size_t SearchBlock(HEADER_TYPE HeaderType);
     size_t SearchSubBlock(const wchar *Type);
     size_t SearchRR();
-    void WriteBlock(HEADER_TYPE HeaderType,BaseBlock *wb=NULL,bool OnlySetSize=false,bool NonFinalWrite=false);
-    void SetBlockSize(HEADER_TYPE HeaderType,BaseBlock *wb=NULL) {WriteBlock(HeaderType,wb,true);}
     size_t ReadHeader();
     void CheckArc(bool EnableBroken);
     void CheckOpen(const wchar *Name);
