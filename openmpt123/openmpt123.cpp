@@ -191,10 +191,10 @@ static void set_input_mode() {
 
 class file_audio_stream_raii : public file_audio_stream_base {
 private:
-	file_audio_stream_base * impl;
+	std::unique_ptr<file_audio_stream_base> impl;
 public:
 	file_audio_stream_raii( const commandlineflags & flags, const std::string & filename, std::ostream & log )
-		: impl(0)
+		: impl(nullptr)
 	{
 		if ( !flags.force_overwrite ) {
 			std::ifstream testfile( filename, std::ios::binary );
@@ -205,18 +205,18 @@ public:
 		if ( false ) {
 			// nothing
 		} else if ( flags.output_extension == "raw" ) {
-			impl = new raw_stream_raii( filename, flags, log );
+			impl = std::make_unique<raw_stream_raii>( filename, flags, log );
 #ifdef MPT_WITH_MMIO
 		} else if ( flags.output_extension == "wav" ) {
-			impl = new mmio_stream_raii( filename, flags, log );
+			impl = std::make_unique<mmio_stream_raii>( filename, flags, log );
 #endif				
 #ifdef MPT_WITH_FLAC
 		} else if ( flags.output_extension == "flac" ) {
-			impl = new flac_stream_raii( filename, flags, log );
+			impl = std::make_unique<flac_stream_raii>( filename, flags, log );
 #endif				
 #ifdef MPT_WITH_SNDFILE
 		} else {
-			impl = new sndfile_stream_raii( filename, flags, log );
+			impl = std::make_unique<sndfile_stream_raii>( filename, flags, log );
 #endif
 		}
 		if ( !impl ) {
@@ -224,10 +224,7 @@ public:
 		}
 	}
 	virtual ~file_audio_stream_raii() {
-		if ( impl ) {
-			delete impl;
-			impl = 0;
-		}
+		return;
 	}
 	void write_metadata( std::map<std::string,std::string> metadata ) override {
 		impl->write_metadata( metadata );
