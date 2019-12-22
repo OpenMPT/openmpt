@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.4.12-pre
+
 ### libopenmpt 0.4.11 (2019-12-22)
 
  *  MOD: Fix initial instrument change with no note playing. Fixes first pattern
