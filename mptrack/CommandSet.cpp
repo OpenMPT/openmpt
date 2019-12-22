@@ -21,8 +21,22 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-enum { KEYMAP_VERSION = 1 };	// Version of the .mkb format
+namespace
+{
+// Version of the .mkb format
+constexpr int KEYMAP_VERSION = 1;
 
+constexpr std::tuple<InputTargetContext, CommandID, CommandID> NoteContexts[] =
+{
+	{kCtxViewPatternsNote, kcVPStartNotes, kcVPStartNoteStops},
+	{kCtxViewSamples, kcSampStartNotes, kcSampStartNoteStops},
+	{kCtxViewInstruments, kcInstrumentStartNotes, kcInstrumentStartNoteStops},
+	{kCtxViewTree, kcTreeViewStartNotes, kcTreeViewStartNoteStops},
+	{kCtxInsNoteMap, kcInsNoteMapStartNotes, kcInsNoteMapStartNoteStops},
+	{kCtxVSTGUI, kcVSTGUIStartNotes, kcVSTGUIStartNoteStops},
+};
+
+};  // namespace
 
 #ifdef MPT_ALL_LOGGING
 #define MPT_COMMANDSET_LOGGING
@@ -1280,74 +1294,31 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	}
 	if (enforceRule[krPropagateNotes])
 	{
-		int noteOffset = 0;
-		//newKc=inKc;
-
-		if (inCmd>=kcVPStartNotes && inCmd<=kcVPEndNotes)
+		if((inCmd >= kcVPStartNotes && inCmd <= kcVPEndNotes) || (inCmd >= kcVPStartNoteStops && inCmd <= kcVPEndNoteStops))
 		{
-			KeyCombination newKcSamp = inKc;
-			KeyCombination newKcIns  = inKc;
-			KeyCombination newKcTree = inKc;
-			KeyCombination newKcInsNoteMap = inKc;
-			KeyCombination newKcVSTGUI = inKc;
-
-			newKcSamp.Context(kCtxViewSamples);
-			newKcIns.Context(kCtxViewInstruments);
-			newKcTree.Context(kCtxViewTree);
-			newKcInsNoteMap.Context(kCtxInsNoteMap);
-			newKcVSTGUI.Context(kCtxVSTGUI);
-
-			noteOffset = inCmd - kcVPStartNotes;
-			if (adding)
+			const bool areNoteStarts = (inCmd >= kcVPStartNotes && inCmd <= kcVPEndNotes);
+			const auto startNote = areNoteStarts ? kcVPStartNotes : kcVPStartNoteStops;
+			const auto noteOffset = inCmd - startNote;
+			for(const auto ctx : NoteContexts)
 			{
-				LOG_COMMANDSET(U_("Enforcing rule krPropagateNotesToSampAndIns: adding Note on in samp ctx"));
-				Add(newKcSamp, (CommandID)(kcSampStartNotes+noteOffset), false);
-				Add(newKcIns, (CommandID)(kcInstrumentStartNotes+noteOffset), false);
-				Add(newKcTree, (CommandID)(kcTreeViewStartNotes+noteOffset), false);
-				Add(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNotes+noteOffset), false);
-				Add(newKcVSTGUI, (CommandID)(kcVSTGUIStartNotes+noteOffset), false);
-			}
-			else
-			{
-				LOG_COMMANDSET(U_("Enforcing rule krPropagateNotesToSampAndIns: removing Note on in samp ctx"));
-				Remove(newKcSamp, (CommandID)(kcSampStartNotes+noteOffset));
-				Remove(newKcIns, (CommandID)(kcInstrumentStartNotes+noteOffset));
-				Remove(newKcTree, (CommandID)(kcTreeViewStartNotes+noteOffset));
-				Remove(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNotes+noteOffset));
-				Remove(newKcVSTGUI, (CommandID)(kcVSTGUIStartNotes+noteOffset));
-			}
-		} else if (inCmd>=kcVPStartNoteStops && inCmd<=kcVPEndNoteStops)
-		{
-			KeyCombination newKcSamp = inKc;
-			KeyCombination newKcIns  = inKc;
-			KeyCombination newKcTree = inKc;
-			KeyCombination newKcInsNoteMap = inKc;
-			KeyCombination newKcVSTGUI = inKc;
+				const auto context = std::get<0>(ctx);
+				const auto contextStartNote = areNoteStarts ? std::get<1>(ctx) : std::get<2>(ctx);
 
-			newKcSamp.Context(kCtxViewSamples);
-			newKcIns.Context(kCtxViewInstruments);
-			newKcTree.Context(kCtxViewTree);
-			newKcInsNoteMap.Context(kCtxInsNoteMap);
-			newKcVSTGUI.Context(kCtxVSTGUI);
+				if(contextStartNote == startNote)
+					continue;
 
-			noteOffset = inCmd - kcVPStartNoteStops;
-			if (adding)
-			{
-				LOG_COMMANDSET(U_("Enforcing rule krPropagateNotesToSampAndIns: adding Note stop on in samp ctx"));
-				Add(newKcSamp, (CommandID)(kcSampStartNoteStops+noteOffset), false);
-				Add(newKcIns, (CommandID)(kcInstrumentStartNoteStops+noteOffset), false);
-				Add(newKcTree, (CommandID)(kcTreeViewStartNoteStops+noteOffset), false);
-				Add(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNoteStops+noteOffset), false);
-				Add(newKcVSTGUI, (CommandID)(kcVSTGUIStartNoteStops+noteOffset), false);
-			}
-			else
-			{
-				LOG_COMMANDSET(U_("Enforcing rule krPropagateNotesToSampAndIns: removing Note stop on in samp ctx"));
-				Remove(newKcSamp, (CommandID)(kcSampStartNoteStops+noteOffset));
-				Remove(newKcIns, (CommandID)(kcInstrumentStartNoteStops+noteOffset));
-				Remove(newKcTree, (CommandID)(kcTreeViewStartNoteStops+noteOffset));
-				Remove(newKcInsNoteMap, (CommandID)(kcInsNoteMapStartNoteStops+noteOffset));
-				Remove(newKcVSTGUI, (CommandID)(kcVSTGUIStartNoteStops+noteOffset));
+				newKc = inKc;
+				newKc.Context(context);
+
+				if(adding)
+				{
+					LOG_COMMANDSET(U_("Enforcing rule krPropagateNotes: adding Note on/off"));
+					Add(newKc, static_cast<CommandID>(contextStartNote + noteOffset), false);
+				} else
+				{
+					LOG_COMMANDSET(U_("Enforcing rule krPropagateNotes: removing Note on/off"));
+					Remove(newKc, static_cast<CommandID>(contextStartNote + noteOffset));
+				}
 			}
 		} else if(inCmd == kcNoteCut || inCmd == kcNoteOff || inCmd == kcNoteFade)
 		{
