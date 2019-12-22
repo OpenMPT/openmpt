@@ -696,14 +696,11 @@ void CAbstractVstEditor::UpdateInputMenu()
 		m_InputMenu.CreatePopupMenu();
 	}
 
-	CString name;
-
 	std::vector<IMixPlugin *> inputPlugs;
 	m_VstPlugin.GetInputPlugList(inputPlugs);
 	for(auto plug : inputPlugs)
 	{
-		name.Format(_T("FX%02u: "), plug->m_nSlot + 1u);
-		name += plug->m_pMixStruct->GetName();
+		CString name = mpt::cformat(_T("FX%1: %2"))(mpt::cfmt::dec0<2>(plug->m_nSlot + 1), mpt::ToCString(mpt::Charset::Locale, plug->m_pMixStruct->GetName()));
 		m_InputMenu.AppendMenu(MF_STRING, ID_PLUGSELECT + plug->m_nSlot, name);
 	}
 
@@ -717,8 +714,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 			m_InputMenu.AppendMenu(MF_SEPARATOR);
 			addSeparator = false;
 		}
-		name.Format(_T("Chn%02u: "), chn + 1);
-		name += mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[chn].szName);
+		CString name = mpt::cformat(_T("Chn%1: %2"))(mpt::cfmt::dec0<2>(chn + 1), mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[chn].szName));
 		m_InputMenu.AppendMenu(MF_STRING, NULL, name);
 	}
 
@@ -732,8 +728,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 			m_InputMenu.AppendMenu(MF_SEPARATOR);
 			addSeparator = false;
 		}
-		name.Format(_T("Ins%02u: "), ins);
-		name += sndFile.GetInstrumentName(ins);
+		CString name = mpt::cformat(_T("Ins%1: %2"))(mpt::cfmt::dec0<2>(ins), mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetInstrumentName(ins)));
 		m_InputMenu.AppendMenu(MF_STRING | ((ins == m_nInstrument) ? MF_CHECKED : 0), ID_SELECTINST + ins, name);
 	}
 

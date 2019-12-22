@@ -240,7 +240,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						s = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[iSmp + 1]);
 						break;
 					case SMPLIST_SAMPLENO:
-						s.Format(_T("%02u"), iSmp + 1);
+						s = mpt::cfmt::dec0<2>(iSmp + 1);
 						break;
 					case SMPLIST_SIZE:
 						if(sample.nLength && !sample.uFlags[CHN_ADLIB])
@@ -256,7 +256,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						if(sample.uFlags[CHN_ADLIB])
 							s = _T("OPL");
 						else if(sample.HasSampleData())
-							s.Format(_T("%u Bit"), sample.GetElementarySampleSize() * 8);
+							s = mpt::cformat(_T("%1 Bit"))(sample.GetElementarySampleSize() * 8);
 						break;
 					case SMPLIST_INSTR:
 						if (sndFile.GetNumInstruments())
@@ -337,7 +337,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						if (pIns) s = mpt::ToCString(sndFile.GetCharsetInternal(), pIns->name);
 						break;
 					case INSLIST_INSTRUMENTNO:
-						s.Format(_T("%02u"), iIns+1);
+						s = mpt::cfmt::dec0<2>(iIns + 1);
 						break;
 					case INSLIST_SAMPLES:
 						if (pIns)

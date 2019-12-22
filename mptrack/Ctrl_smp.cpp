@@ -278,17 +278,24 @@ BOOL CCtrlSamples::OnInitDialog()
 	GetDlgItem(IDC_TEXT_FFT)->ShowWindow(SW_SHOW);
 	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);
 
-	TCHAR str[16];
-
 	// Pitch selection
 	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO4);
 	if(combo)
 	{
 		// Allow pitch from -12 (1 octave down) to +12 (1 octave up)
+		CString str;
 		for(int i = -12 ; i <= 12 ; i++)
 		{
-			if(i == 0) _tcscpy(str, _T("none"));
-			else wsprintf(str, i < 0 ? _T("%d") : _T("+%d"), i);
+			if(i == 0)
+			{
+				str = _T("none");
+			} else if(i < 0)
+			{
+				str = mpt::cfmt::dec(i);
+			} else
+			{
+				str = _T("+") + mpt::cfmt::dec(i);
+			}
 			combo->SetItemData(combo->AddString(str), i + 12);
 		}
 		// Set "none" as default pitch
@@ -300,9 +307,10 @@ BOOL CCtrlSamples::OnInitDialog()
 	if(combo)
 	{
 		// Allow quality from 4 to 128
+		CString str;
 		for(int i = 4 ; i <= 128 ; i++)
 		{
-			wsprintf(str, _T("%u"), i);
+			str = mpt::cfmt::dec(i);
 			combo->SetItemData(combo->AddString(str), i-4);
 		}
 		// Set 32 as default quality
@@ -316,9 +324,10 @@ BOOL CCtrlSamples::OnInitDialog()
 		// Deduce exponent from equation : MAX_FRAME_LENGTH = 2^exponent
 		const int exponent = PowerOf2Exponent(MAX_FRAME_LENGTH);
 		// Allow FFT size from 2^8 (256) to 2^exponent (MAX_FRAME_LENGTH)
+		CString str;
 		for(int i = 8 ; i <= exponent ; i++)
 		{
-			wsprintf(str, _T("%u"), 1 << i);
+			str = mpt::cfmt::dec(1 << i);
 			combo->SetItemData(combo->AddString(str), i - 8);
 		}
 		// Set 4096 as default FFT size
@@ -598,7 +607,7 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 			if ((m_sndFile.UseFinetuneAndTranspose()) && (m_nSample))
 			{
 				uint32 freqHz = m_sndFile.GetSample(m_nSample).GetSampleRate(m_sndFile.GetType());
-				wsprintf(pszText, _T("%luHz"), freqHz);
+				wsprintf(pszText, _T("%uHz"), static_cast<unsigned int>(freqHz));
 				return TRUE;
 			}
 			break;
@@ -629,7 +638,7 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 			return TRUE;
 		case IDC_EDIT15:
 			// Vibrato Depth
-			_stprintf(pszText, _T("%d cents"), Util::muldivr_unsigned(val, 100, 64));
+			_stprintf(pszText, _T("%u cents"), Util::muldivr_unsigned(val, 100, 64));
 			return TRUE;
 		case IDC_EDIT16:
 			// Vibrato Rate
@@ -798,7 +807,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		if(isOPL)
 			s = _T("OPL instrument");
 		else
-			s.Format(_T("%u-bit %s, len: %s"), sample.GetElementarySampleSize() * 8, sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono"), mpt::cfmt::dec(3, ',', sample.nLength).GetString());
+			s = mpt::cformat(_T("%1-bit %2, len: %3"))(sample.GetElementarySampleSize() * 8, CString(sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono")), mpt::cfmt::dec(3, ',', sample.nLength));
 		SetDlgItemText(IDC_TEXT5, s);
 		// Name
 		s = mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[m_nSample]);
@@ -824,7 +833,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		int transp = 0;
 		if (!m_sndFile.UseFinetuneAndTranspose())
 		{
-			s.Format(_T("%lu"), sample.nC5Speed);
+			s = mpt::cfmt::val(sample.nC5Speed);
 			m_EditFineTune.SetWindowText(s);
 			if(sample.nC5Speed != 0)
 				transp = ModSample::FrequencyToTranspose(sample.nC5Speed) / 128;
@@ -871,17 +880,17 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		if (sample.uFlags[CHN_LOOP]) d = sample.uFlags[CHN_PINGPONGLOOP] ? 2 : 1;
 		if (sample.uFlags[CHN_REVERSE]) d |= 4;
 		m_ComboLoopType.SetCurSel(d);
-		s.Format(_T("%lu"), sample.nLoopStart);
+		s = mpt::cfmt::val(sample.nLoopStart);
 		m_EditLoopStart.SetWindowText(s);
-		s.Format(_T("%lu"), sample.nLoopEnd);
+		s = mpt::cfmt::val(sample.nLoopEnd);
 		m_EditLoopEnd.SetWindowText(s);
 		// Sustain Loop
 		d = 0;
 		if (sample.uFlags[CHN_SUSTAINLOOP]) d = sample.uFlags[CHN_PINGPONGSUSTAIN] ? 2 : 1;
 		m_ComboSustainType.SetCurSel(d);
-		s.Format(_T("%lu"), sample.nSustainStart);
+		s = mpt::cfmt::val(sample.nSustainStart);
 		m_EditSustainStart.SetWindowText(s);
-		s.Format(_T("%lu"), sample.nSustainEnd);
+		s = mpt::cfmt::val(sample.nSustainEnd);
 		m_EditSustainEnd.SetWindowText(s);
 	}
 	if (hintType[HINT_MODTYPE | HINT_SAMPLEINFO | HINT_SMPNAMES])

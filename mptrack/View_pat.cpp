@@ -1450,10 +1450,10 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 			if(TrackerSettings::Instance().recordQuantizeRows != 0)
 			{
 				uint32 rows = TrackerSettings::Instance().recordQuantizeRows.Get();
-				s.AppendFormat(_T("(Currently: %d Row%s)"), rows, rows == 1 ? _T("") : _T("s"));
+				s += mpt::cformat(_T("(Currently: %1 Row%2)"))(rows, rows == 1 ? _T("") : _T("s"));
 			} else
 			{
-				s.Append(_T("Settings..."));
+				s += _T("Settings...");
 			}
 			AppendMenu(hMenu, MF_STRING | (TrackerSettings::Instance().recordQuantizeRows != 0 ? MF_CHECKED : 0), ID_SETQUANTIZE, ih->GetKeyTextFromCommand(kcQuantizeSettings, s));
 		}
@@ -6243,8 +6243,7 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	{
 		if(sndFile->m_MixPlugins[nPlg].pMixPlugin != nullptr)
 		{
-			s.Format(_T("%02u: "), nPlg + 1);
-			s += sndFile->m_MixPlugins[nPlg].GetName();
+			s = mpt::cformat(_T("%1: %2"))(mpt::cfmt::dec0<2>(nPlg + 1), mpt::ToCString(mpt::Charset::Locale, sndFile->m_MixPlugins[nPlg].GetName()));
 			AppendMenu(pluginChangeMenu, MF_STRING | (((nPlg + 1) == selStart.instr) ? MF_CHECKED : 0), ID_CHANGE_INSTRUMENT + nPlg + 1, s);
 		}
 	}
@@ -6506,12 +6505,12 @@ void CViewPattern::OnShowTimeAtRow()
 	{
 		const double t = pSndFile->GetPlaybackTimeAt(currentOrder, GetCurrentRow(), false, false);
 		if(t < 0)
-			msg.Format(_T("Unable to determine the time. Possible cause: No order %d, row %d found in play sequence."), currentOrder, GetCurrentRow());
+			msg.Format(_T("Unable to determine the time. Possible cause: No order %d, row %u found in play sequence."), currentOrder, GetCurrentRow());
 		else
 		{
 			const uint32 minutes = static_cast<uint32>(t / 60.0);
 			const double seconds = t - (minutes * 60);
-			msg.Format(_T("Estimate for playback time at order %d (pattern %d), row %d: %d minute%s %.2f seconds."), currentOrder, m_nPattern, GetCurrentRow(), minutes, (minutes == 1) ? _T("") : _T("s"), seconds);
+			msg.Format(_T("Estimate for playback time at order %d (pattern %d), row %u: %u minute%s %.2f seconds."), currentOrder, m_nPattern, GetCurrentRow(), minutes, (minutes == 1) ? _T("") : _T("s"), seconds);
 		}
 	} else
 	{

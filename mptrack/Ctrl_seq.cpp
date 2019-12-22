@@ -1102,9 +1102,9 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 			{
 				CString str;
 				if(sndFile.Order(i).GetName().empty())
-					str.Format(_T("Sequence %u"), i + 1);
+					str = mpt::cformat(_T("Sequence %1"))(i + 1);
 				else
-					str.Format(_T("%u: %s"), i + 1, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Order(i).GetName()).GetString());
+					str = mpt::cformat(_T("%1: %2"))(i + 1, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Order(i).GetName()));
 				const UINT flags = (sndFile.Order.GetCurrentSequenceIndex() == i) ? MF_STRING | MF_CHECKED : MF_STRING;
 				AppendMenu(menuSequence, flags, ID_SEQUENCE_ITEM + i, str);
 			}
