@@ -307,19 +307,19 @@ static void apply_options() {
 		self->mod->set_render_param( openmpt::module::RENDER_STEREOSEPARATION_PERCENT, self->settings.stereoseparation );
 		self->mod->set_render_param( openmpt::module::RENDER_INTERPOLATIONFILTER_LENGTH, self->settings.interpolationfilterlength );
 		self->mod->set_render_param( openmpt::module::RENDER_VOLUMERAMPING_STRENGTH, self->settings.ramping );
-		self->mod->ctl_set( "render.resampler.emulate_amiga", self->settings.use_amiga_resampler ? "1" : "0" );
-		switch (self->settings.amiga_filter_type) {
+		self->mod->ctl_set_boolean( "render.resampler.emulate_amiga", self->settings.use_amiga_resampler ? true : false );
+		switch ( self->settings.amiga_filter_type ) {
 			case 0:
-				self->mod->ctl_set( "render.resampler.emulate_amiga_type", "auto" );
+				self->mod->ctl_set_text( "render.resampler.emulate_amiga_type", "auto" );
 				break;
 			case 1:
-				self->mod->ctl_set( "render.resampler.emulate_amiga_type", "unfiltered" );
+				self->mod->ctl_set_text( "render.resampler.emulate_amiga_type", "unfiltered" );
 				break;
 			case 0xA500:
-				self->mod->ctl_set( "render.resampler.emulate_amiga_type", "a500" );
+				self->mod->ctl_set_text( "render.resampler.emulate_amiga_type", "a500" );
 				break;
 			case 0xA1200:
-				self->mod->ctl_set( "render.resampler.emulate_amiga_type", "a1200" );
+				self->mod->ctl_set_text( "render.resampler.emulate_amiga_type", "a1200" );
 				break;
 		}
 	}
