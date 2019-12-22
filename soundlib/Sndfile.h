@@ -592,6 +592,8 @@ private:
 
 public:
 	CSoundFile();
+	CSoundFile(const CSoundFile &) = delete;
+	CSoundFile & operator=(const CSoundFile &) = delete;
 	~CSoundFile();
 
 public:
