@@ -32,14 +32,14 @@ public:
 	static constexpr size_t blockSize = 0x8000;       // Block size (in bytes) in which samples are being processed
 
 protected:
-	std::vector<int8> bwt;         // Bit width table for each sampling point
-	uint8 *packedData = nullptr;   // Compressed data for current sample block
-	std::ostream *file = nullptr;  // File to which compressed data will be written (can be nullptr if you only want to find out the sample size)
-	void *sampleData = nullptr;    // Pre-processed sample data for currently compressed sample block
-	const ModSample &mptSample;    // Sample that is being processed
-	size_t packedLength = 0;       // Size of currently compressed sample block
-	size_t packedTotalLength = 0;  // Size of all compressed data so far
-	SmpLength baseLength = 0;      // Length of the currently compressed sample block (in samples)
+	std::vector<int8> bwt;             // Bit width table for each sampling point
+	std::vector<uint8> packedData;     // Compressed data for current sample block
+	std::ostream *file = nullptr;      // File to which compressed data will be written (can be nullptr if you only want to find out the sample size)
+	std::vector<std::byte> sampleData; // Pre-processed sample data for currently compressed sample block
+	const ModSample &mptSample;        // Sample that is being processed
+	size_t packedLength = 0;           // Size of currently compressed sample block
+	size_t packedTotalLength = 0;      // Size of all compressed data so far
+	SmpLength baseLength = 0;          // Length of the currently compressed sample block (in samples)
 
 	// Bit writer
 	int8 bitPos = 0;    // Current bit position in this byte
