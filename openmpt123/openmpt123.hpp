@@ -880,10 +880,10 @@ public:
 		return;
 	}
 	virtual ~textout_ostream() {
-		writeout();
+		writeout_impl();
 	}
-public:
-	void writeout() override {
+private:
+	void writeout_impl() {
 		std::string text = pop();
 		if ( text.length() > 0 ) {
 			#if defined(__DJGPP__)
@@ -908,7 +908,11 @@ public:
 				s << ToLocale( FromUTF8( text ) );
 			#endif
 			s.flush();
-		}
+		}	
+	}
+public:
+	void writeout() override {
+		writeout_impl();
 	}
 	void cursor_up( std::size_t lines ) override {
 		s.flush();
@@ -934,10 +938,10 @@ public:
 		return;
 	}
 	virtual ~textout_ostream_console() {
-		writeout();
+		writeout_impl();
 	}
-public:
-	void writeout() override {
+private:
+	void writeout_impl() {
 		std::string text = pop();
 		if ( text.length() > 0 ) {
 			if ( console ) {
@@ -957,6 +961,10 @@ public:
 				s.flush();
 			}
 		}
+	}
+public:
+	void writeout() override {
+		writeout_impl();
 	}
 	void cursor_up( std::size_t lines ) override {
 		if ( console ) {
