@@ -23,7 +23,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace Tuning {
 
 
-class CTuningRTI
+class CTuning
 {
 
 public:
@@ -93,9 +93,9 @@ public:
 
 	void SetNoteName(const NOTEINDEXTYPE&, const std::string&);
 
-	static CTuningRTI* CreateDeserialize(std::istream & f)
+	static CTuning* CreateDeserialize(std::istream & f)
 	{
-		CTuningRTI *pT = new CTuningRTI();
+		CTuning *pT = new CTuning();
 		if(pT->InitDeserialize(f) != SerializationResult::Success)
 		{
 			delete pT;
@@ -105,9 +105,9 @@ public:
 	}
 
 	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
-	static CTuningRTI* CreateDeserializeOLD(std::istream & f)
+	static CTuning* CreateDeserializeOLD(std::istream & f)
 	{
-		CTuningRTI *pT = new CTuningRTI();
+		CTuning *pT = new CTuning();
 		if(pT->InitDeserializeOLD(f) != SerializationResult::Success)
 		{
 			delete pT;
@@ -116,16 +116,16 @@ public:
 		return pT;
 	}
 
-	static CTuningRTI* CreateGeneral(const std::string &name)
+	static CTuning* CreateGeneral(const std::string &name)
 	{
-		CTuningRTI *pT = new CTuningRTI();
+		CTuning *pT = new CTuning();
 		pT->SetName(name);
 		return pT;
 	}
 
-	static CTuningRTI* CreateGroupGeometric(const std::string &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
+	static CTuning* CreateGroupGeometric(const std::string &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
 	{
-		CTuningRTI *pT = new CTuningRTI();
+		CTuning *pT = new CTuning();
 		pT->SetName(name);
 		if(pT->CreateGroupGeometric(groupsize, groupratio, 0) != false)
 		{
@@ -136,9 +136,9 @@ public:
 		return pT;
 	}
 
-	static CTuningRTI* CreateGroupGeometric(const std::string &name, const std::vector<RATIOTYPE> &ratios, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
+	static CTuning* CreateGroupGeometric(const std::string &name, const std::vector<RATIOTYPE> &ratios, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
 	{
-		CTuningRTI *pT = new CTuningRTI();
+		CTuning *pT = new CTuning();
 		pT->SetName(name);
 		VRPAIR range = std::make_pair(s_StepMinDefault, static_cast<NOTEINDEXTYPE>(s_StepMinDefault + s_RatioTableSizeDefault - 1));
 		range.second = std::max(range.second, mpt::saturate_cast<NOTEINDEXTYPE>(ratios.size() - 1));
@@ -152,9 +152,9 @@ public:
 		return pT;
 	}
 
-	static CTuningRTI* CreateGeometric(const std::string &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
+	static CTuning* CreateGeometric(const std::string &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
 	{
-		CTuningRTI *pT = new CTuningRTI();
+		CTuning *pT = new CTuning();
 		pT->SetName(name);
 		if(pT->CreateGeometric(groupsize, groupratio) != false)
 		{
@@ -179,7 +179,7 @@ public:
 
 private:
 
-	CTuningRTI();
+	CTuning();
 
 	SerializationResult InitDeserialize(std::istream& inStrm);
 
@@ -243,10 +243,7 @@ private:
 
 	std::map<NOTEINDEXTYPE, std::string> m_NoteNameMap;
 
-}; // class CTuningRTI
-
-
-typedef CTuningRTI CTuning;
+}; // class CTuning
 
 
 } // namespace Tuning

@@ -54,10 +54,10 @@ Version changes:
 */
 
 
-static_assert(CTuningRTI::s_RatioTableFineSizeMaxDefault < static_cast<USTEPINDEXTYPE>(FINESTEPCOUNT_MAX));
+static_assert(CTuning::s_RatioTableFineSizeMaxDefault < static_cast<USTEPINDEXTYPE>(FINESTEPCOUNT_MAX));
 
 
-CTuningRTI::CTuningRTI()
+CTuning::CTuning()
 	: m_TuningType(TT_GENERAL)
 	, m_FineStepCount(0)
 {
@@ -72,7 +72,7 @@ CTuningRTI::CTuningRTI()
 }
 
 
-bool CTuningRTI::ProCreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR& vr, const NOTEINDEXTYPE& ratiostartpos)
+bool CTuning::ProCreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR& vr, const NOTEINDEXTYPE& ratiostartpos)
 {
 	if(v.size() == 0
 		|| r <= 0
@@ -102,7 +102,7 @@ bool CTuningRTI::ProCreateGroupGeometric(const std::vector<RATIOTYPE>& v, const 
 }
 
 
-bool CTuningRTI::ProCreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, const VRPAIR& vr)
+bool CTuning::ProCreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, const VRPAIR& vr)
 {
 	if(vr.second - vr.first + 1 > NOTEINDEXTYPE_MAX) return true;
 	//Note: Setting finestep is handled by base class when CreateGeometric is called.
@@ -128,7 +128,7 @@ bool CTuningRTI::ProCreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r,
 	return false;
 }
 
-std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
+std::string CTuning::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
 {
 	if(!IsValidNote(x))
 	{
@@ -184,7 +184,7 @@ std::string CTuningRTI::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) cons
 
 
 //Without finetune
-RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const
+RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const
 {
 	if(stepsFromCentre < m_StepMin) return s_DefaultFallbackRatio;
 	if(stepsFromCentre >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size())) return s_DefaultFallbackRatio;
@@ -193,7 +193,7 @@ RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const
 
 
 //With finetune
-RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const STEPINDEXTYPE& baseStepDiff) const
+RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE& baseNote, const STEPINDEXTYPE& baseStepDiff) const
 {
 	const STEPINDEXTYPE fsCount = static_cast<STEPINDEXTYPE>(GetFineStepCount());
 	if(fsCount < 0 || fsCount > FINESTEPCOUNT_MAX)
@@ -224,7 +224,7 @@ RATIOTYPE CTuningRTI::GetRatio(const NOTEINDEXTYPE& baseNote, const STEPINDEXTYP
 }
 
 
-RATIOTYPE CTuningRTI::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE sd) const
+RATIOTYPE CTuning::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE sd) const
 {
 	if(GetFineStepCount() <= 0 || GetFineStepCount() > static_cast<USTEPINDEXTYPE>(FINESTEPCOUNT_MAX))
 	{
@@ -257,7 +257,7 @@ RATIOTYPE CTuningRTI::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE sd)
 }
 
 
-bool CTuningRTI::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
+bool CTuning::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 {
 	if(GetType() != TT_GROUPGEOMETRIC && GetType() != TT_GENERAL)
 	{
@@ -292,14 +292,14 @@ bool CTuningRTI::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 }
 
 
-void CTuningRTI::SetFineStepCount(const USTEPINDEXTYPE& fs)
+void CTuning::SetFineStepCount(const USTEPINDEXTYPE& fs)
 {
 	m_FineStepCount = std::clamp(mpt::saturate_cast<STEPINDEXTYPE>(fs), STEPINDEXTYPE(0), FINESTEPCOUNT_MAX);
 	UpdateFineStepTable();
 }
 
 
-void CTuningRTI::UpdateFineStepTable()
+void CTuning::UpdateFineStepTable()
 {
 	if(m_FineStepCount <= 0)
 	{
@@ -361,14 +361,14 @@ void CTuningRTI::UpdateFineStepTable()
 }
 
 
-NOTEINDEXTYPE CTuningRTI::GetRefNote(const NOTEINDEXTYPE note) const
+NOTEINDEXTYPE CTuning::GetRefNote(const NOTEINDEXTYPE note) const
 {
 	if((GetType() != TT_GROUPGEOMETRIC) && (GetType() != TT_GEOMETRIC)) return 0;
 	return static_cast<NOTEINDEXTYPE>(mpt::wrapping_modulo(note, GetGroupSize()));
 }
 
 
-SerializationResult CTuningRTI::InitDeserialize(std::istream& iStrm)
+SerializationResult CTuning::InitDeserialize(std::istream& iStrm)
 {
 	// Note: OpenMPT since at least r323 writes version number (4<<24)+4 while it
 	// reads version number (5<<24)+4 or earlier.
@@ -466,7 +466,7 @@ static bool VectorFromBinaryStream(std::istream& inStrm, std::vector<Tdst>& v, c
 }
 
 
-SerializationResult CTuningRTI::InitDeserializeOLD(std::istream& inStrm)
+SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
 {
 	if(!inStrm.good())
 		return SerializationResult::Failure;
@@ -690,7 +690,7 @@ SerializationResult CTuningRTI::InitDeserializeOLD(std::istream& inStrm)
 }
 
 
-Tuning::SerializationResult CTuningRTI::Serialize(std::ostream& outStrm) const
+Tuning::SerializationResult CTuning::Serialize(std::ostream& outStrm) const
 {
 	// Note: OpenMPT since at least r323 writes version number (4<<24)+4 while it
 	// reads version number (5<<24)+4.
@@ -734,7 +734,7 @@ Tuning::SerializationResult CTuningRTI::Serialize(std::ostream& outStrm) const
 
 #ifdef MODPLUG_TRACKER
 
-bool CTuningRTI::WriteSCL(std::ostream &f, const mpt::PathString &filename) const
+bool CTuning::WriteSCL(std::ostream &f, const mpt::PathString &filename) const
 {
 	mpt::IO::WriteTextCRLF(f, mpt::format("! %1")(mpt::ToCharset(mpt::Charset::ISO8859_1, (filename.GetFileName() + filename.GetFileExt()).ToUnicode())));
 	mpt::IO::WriteTextCRLF(f, "!");

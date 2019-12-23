@@ -61,8 +61,7 @@ static MPT_CONSTEXPR11_VAR STEPINDEXTYPE FINESTEPCOUNT_MAX = 0xffff;
 #define USTEPINDEXTYPE_MAX (std::numeric_limits<USTEPINDEXTYPE>::max)()
 
 
-class CTuningRTI;
-typedef CTuningRTI CTuning;
+class CTuning;
 
 
 } // namespace Tuning
