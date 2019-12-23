@@ -817,7 +817,7 @@ static MPT_NOINLINE void TestMisc1()
 	}
 
 	MPT_CONSTEXPR20_VAR int32le foo = TestEndianConstexpr(23);
-	(void)foo;
+	static_cast<void>(foo);
 
 	VERIFY_EQUAL(mpt::detail::SwapBytes(uint8(0x12)), 0x12);
 	VERIFY_EQUAL(mpt::detail::SwapBytes(uint16(0x1234)), 0x3412);

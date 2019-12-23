@@ -190,12 +190,12 @@ static MPT_FORCEINLINE bool endian_is_weird() noexcept
 
 struct BigEndian_tag
 {
-	static MPT_CONSTEXPR11_VAR mpt::endian endian = mpt::endian::big;
+	static constexpr mpt::endian endian = mpt::endian::big;
 };
 
 struct LittleEndian_tag
 {
-	static MPT_CONSTEXPR11_VAR mpt::endian endian = mpt::endian::little;
+	static constexpr mpt::endian endian = mpt::endian::little;
 };
 
 

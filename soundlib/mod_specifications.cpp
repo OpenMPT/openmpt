@@ -24,7 +24,7 @@ namespace ModSpecs
 #define SongFlag(x) (FlagSet<SongFlags>::store_type(0) | x)
 
 
-MPT_CONSTEXPR11_VAR CModSpecifications mptm_ =
+constexpr CModSpecifications mptm_ =
 {
 	/*
 	TODO: Proper, less arbitrarily chosen values here.
@@ -79,7 +79,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mptm_ =
 
 
 
-MPT_CONSTEXPR11_VAR CModSpecifications mod_ =
+constexpr CModSpecifications mod_ =
 {
 	MOD_TYPE_MOD,								// Internal MODTYPE value
 	"mod",										// File extension
@@ -127,7 +127,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications mod_ =
 };
 
 
-MPT_CONSTEXPR11_VAR CModSpecifications xm_ =
+constexpr CModSpecifications xm_ =
 {
 	MOD_TYPE_XM,								// Internal MODTYPE value
 	"xm",										// File extension
@@ -175,7 +175,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications xm_ =
 };
 
 // XM with MPT extensions
-MPT_CONSTEXPR11_VAR CModSpecifications xmEx_ =
+constexpr CModSpecifications xmEx_ =
 {
 	MOD_TYPE_XM,								// Internal MODTYPE value
 	"xm",										// File extension
@@ -222,7 +222,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications xmEx_ =
 	" vpcdabuhlrg????",							// Supported Volume Column commands
 };
 
-MPT_CONSTEXPR11_VAR CModSpecifications s3m_ =
+constexpr CModSpecifications s3m_ =
 {
 	MOD_TYPE_S3M,								// Internal MODTYPE value
 	"s3m",										// File extension
@@ -270,7 +270,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications s3m_ =
 };
 
 // S3M with MPT extensions
-MPT_CONSTEXPR11_VAR CModSpecifications s3mEx_ =
+constexpr CModSpecifications s3mEx_ =
 {
 	MOD_TYPE_S3M,								// Internal MODTYPE value
 	"s3m",										// File extension
@@ -317,7 +317,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications s3mEx_ =
 	" vp?????????????",							// Supported Volume Column commands
 };
 
-MPT_CONSTEXPR11_VAR CModSpecifications it_ =
+constexpr CModSpecifications it_ =
 {
 	MOD_TYPE_IT,								// Internal MODTYPE value
 	"it",										// File extension
@@ -364,7 +364,7 @@ MPT_CONSTEXPR11_VAR CModSpecifications it_ =
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 
-MPT_CONSTEXPR11_VAR CModSpecifications itEx_ =
+constexpr CModSpecifications itEx_ =
 {
 	MOD_TYPE_IT,								// Internal MODTYPE value
 	"it",										// File extension

@@ -119,7 +119,7 @@ inline T random(Trng & rng)
 	{
 		if constexpr(rng_bits < (sizeof(T) * 8))
 		{
-			MPT_CONSTEXPR11_VAR unsigned int shift_bits = rng_bits % (sizeof(T) * 8); // silence utterly stupid MSVC and GCC warnings about shifting by too big amount (in which case this branch is not even taken however)
+			constexpr unsigned int shift_bits = rng_bits % (sizeof(T) * 8); // silence utterly stupid MSVC and GCC warnings about shifting by too big amount (in which case this branch is not even taken however)
 			result = (result << shift_bits) ^ static_cast<unsigned_T>(rng());
 		} else
 		{
@@ -140,7 +140,7 @@ inline T random(Trng & rng)
 	{
 		if constexpr(rng_bits < (sizeof(T) * 8))
 		{
-			MPT_CONSTEXPR11_VAR unsigned int shift_bits = rng_bits % (sizeof(T) * 8); // silence utterly stupid MSVC and GCC warnings about shifting by too big amount (in which case this branch is not even taken however)
+			constexpr unsigned int shift_bits = rng_bits % (sizeof(T) * 8); // silence utterly stupid MSVC and GCC warnings about shifting by too big amount (in which case this branch is not even taken however)
 			result = (result << shift_bits) ^ static_cast<unsigned_T>(rng());
 		} else
 		{
@@ -167,7 +167,7 @@ inline T random(Trng & rng, std::size_t required_entropy_bits)
 	{
 		if constexpr(rng_bits < (sizeof(T) * 8))
 		{
-			MPT_CONSTEXPR11_VAR unsigned int shift_bits = rng_bits % (sizeof(T) * 8); // silence utterly stupid MSVC and GCC warnings about shifting by too big amount (in which case this branch is not even taken however)
+			constexpr unsigned int shift_bits = rng_bits % (sizeof(T) * 8); // silence utterly stupid MSVC and GCC warnings about shifting by too big amount (in which case this branch is not even taken however)
 			result = (result << shift_bits) ^ static_cast<unsigned_T>(rng());
 		} else
 		{

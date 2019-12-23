@@ -27,38 +27,38 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-static MPT_CONSTEXPR11_VAR int opus_bitrates [] = {
+static constexpr int opus_bitrates [] = {
 	8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 192, 224, 256, 320, 384, 448,      510
 };
-static MPT_CONSTEXPR11_VAR int vorbis_bitrates [] = {
+static constexpr int vorbis_bitrates [] = {
 	           32,     48,     64, 80, 96, 112, 128,      160, 192, 224, 256, 320,           500
 };
-static MPT_CONSTEXPR11_VAR int layer3_bitrates [] = {
+static constexpr int layer3_bitrates [] = {
 	8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 192, 224, 256, 320
 };
-static MPT_CONSTEXPR11_VAR int mpeg1layer3_bitrates [] = {
+static constexpr int mpeg1layer3_bitrates [] = {
 	           32, 40, 48, 56, 64, 80, 96, 112, 128,      160, 192, 224, 256, 320
 };
-static MPT_CONSTEXPR11_VAR uint32 opus_samplerates [] = {
+static constexpr uint32 opus_samplerates [] = {
 	48000,
 	24000,           16000,
 	12000,            8000
 };
-static MPT_CONSTEXPR11_VAR uint32 opus_all_samplerates [] = {
+static constexpr uint32 opus_all_samplerates [] = {
 	48000,  44100,  32000,
 	24000,  22050,  16000,
 	12000,  11025,   8000
 };
-static MPT_CONSTEXPR11_VAR uint32 vorbis_samplerates [] = {
+static constexpr uint32 vorbis_samplerates [] = {
 	 48000,  44100,  32000,
 	 24000,  22050,  16000,
 	 12000,  11025,   8000
 };
-static MPT_CONSTEXPR11_VAR uint32 layer3_samplerates [] = {
+static constexpr uint32 layer3_samplerates [] = {
 	 48000,  44100,  32000,
 	 24000,  22050,  16000
 };
-static MPT_CONSTEXPR11_VAR uint32 mpeg1layer3_samplerates [] = {
+static constexpr uint32 mpeg1layer3_samplerates [] = {
 	 48000,  44100,  32000
 };
 

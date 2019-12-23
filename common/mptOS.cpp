@@ -362,7 +362,7 @@ mpt::Windows::Version::TypeId Version::GetTypeId() const noexcept
 }
 
 
-static MPT_CONSTEXPR11_VAR struct { Version::System version; const mpt::uchar * name; bool showDetails; } versionMap[] =
+static constexpr struct { Version::System version; const mpt::uchar * name; bool showDetails; } versionMap[] =
 {
 	{ mpt::Windows::Version::WinNewer, UL_("Windows 10 (or newer)"), false },
 	{ mpt::Windows::Version::Win10, UL_("Windows 10"), true },

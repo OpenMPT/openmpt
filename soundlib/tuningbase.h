@@ -50,7 +50,7 @@ enum class SerializationResult : int {
 
 // Derived from old IsStepCountRangeSufficient(), this is actually a more
 // sensible value than what was calculated in earlier versions.
-static MPT_CONSTEXPR11_VAR STEPINDEXTYPE FINESTEPCOUNT_MAX = 0xffff;
+static constexpr STEPINDEXTYPE FINESTEPCOUNT_MAX = 0xffff;
 
 
 #define NOTEINDEXTYPE_MIN (std::numeric_limits<NOTEINDEXTYPE>::min)()
