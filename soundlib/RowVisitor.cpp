@@ -35,10 +35,9 @@ RowVisitor::RowVisitor(const CSoundFile &sf, SEQUENCEINDEX sequence)
 }
 
 
-RowVisitor& RowVisitor::operator=(RowVisitor &&other)
+void RowVisitor::MoveVisitedRowsFrom(RowVisitor &other)
 {
 	m_visitedRows = std::move(other.m_visitedRows);
-	return *this;
 }
 
 
