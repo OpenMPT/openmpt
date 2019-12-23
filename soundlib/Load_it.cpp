@@ -211,7 +211,7 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 			if(localTuning)
 			{
 				CTuning* pNewTuning = new CTuning(*localTuning);
-				if(!csf.GetTuneSpecificTunings().AddTuning(pNewTuning))
+				if(csf.GetTuneSpecificTunings().AddTuning(pNewTuning))
 				{
 					csf.AddToLog("Local tunings are deprecated and no longer supported. Tuning '" + str + "' found in Local tunings has been copied to Tune-specific tunings and will be saved in the module file.");
 					csf.Instruments[i]->pTuning = pNewTuning;
@@ -231,7 +231,7 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 			if(str == "12TET [[fs15 1.17.02.49]]" || str == "12TET")
 			{
 				CTuning* pNewTuning = csf.CreateTuning12TET(str);
-				if(!csf.GetTuneSpecificTunings().AddTuning(pNewTuning))
+				if(csf.GetTuneSpecificTunings().AddTuning(pNewTuning))
 				{
 					#ifdef MODPLUG_TRACKER
 						csf.AddToLog("Built-in tunings will no longer be used. Tuning '" + str + "' has been copied to Tune-specific tunings and will be saved in the module file.");

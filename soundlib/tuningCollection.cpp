@@ -181,8 +181,10 @@ Tuning::SerializationResult CTuningCollection::DeserializeOLD(std::istream& inSt
 			return Tuning::SerializationResult::Failure;
 		for(size_t i = 0; i<s; i++)
 		{
-			if(AddTuning(inStrm))
+			if(!AddTuning(inStrm))
+			{
 				return Tuning::SerializationResult::Failure;
+			}
 		}
 	}
 
@@ -228,34 +230,39 @@ bool CTuningCollection::Remove(const std::size_t i)
 bool CTuningCollection::AddTuning(CTuning *pT)
 {
 	if(m_Tunings.size() >= s_nMaxTuningCount)
-		return true;
-
-	if(pT == NULL)
-		return true;
-
+	{
+		return false;
+	}
+	if(!pT)
+	{
+		return false;
+	}
 	m_Tunings.push_back(std::unique_ptr<CTuning>(pT));
-
-	return false;
+	return true;
 }
 
 
 bool CTuningCollection::AddTuning(std::istream& inStrm)
 {
 	if(m_Tunings.size() >= s_nMaxTuningCount)
-		return true;
-
-	if(!inStrm.good()) return true;
-
-	CTuning* pT = CTuning::CreateDeserializeOLD(inStrm);
-	if(pT == 0) pT = CTuning::CreateDeserialize(inStrm);
-
-	if(pT == 0)
-		return true;
-	else
 	{
-		m_Tunings.push_back(std::unique_ptr<CTuning>(pT));
 		return false;
 	}
+	if(!inStrm.good())
+	{
+		return false;
+	}
+	CTuning *pT = CTuning::CreateDeserializeOLD(inStrm);
+	if(!pT)
+	{
+		pT = CTuning::CreateDeserialize(inStrm);
+	}
+	if(!pT)
+	{
+		return false;
+	}
+	m_Tunings.push_back(std::unique_ptr<CTuning>(pT));
+	return true;
 }
 
 

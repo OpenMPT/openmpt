@@ -432,7 +432,7 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::TUNINGTYPE type)
 	if(!pTC)
 	{
 		Reporting::Notification("No tuning collection chosen");
-		return true;
+		return false;
 	}
 
 	CTuning* pNewTuning = nullptr;
@@ -452,18 +452,18 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::TUNINGTYPE type)
 		pNewTuning = CTuning::CreateGeneral("Unnamed");
 	}
 
-	if(pTC->AddTuning(pNewTuning))
+	if(!pTC->AddTuning(pNewTuning))
 	{
 		Reporting::Notification("Add tuning failed");
 		delete pNewTuning;
-		return true;
+		return false;
 	}
 	AddTreeItem(pNewTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(pTC)), NULL);
 	m_pActiveTuning = pNewTuning;
 	m_ModifiedTCs[pTC] = true;
 	UpdateView();
 
-	return false;
+	return true;
 }
 
 
@@ -875,7 +875,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 		if(pT)
 		{
 			CTuningCollection &tc = *m_TuningCollections.front();
-			if(tc.AddTuning(pT))
+			if(!tc.AddTuning(pT))
 			{
 				delete pT;
 				pT = nullptr;
@@ -1266,7 +1266,7 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, CTuning* pT)
 	if(!pTC)
 	{
 		Reporting::Notification("No tuning collection chosen");
-		return true;
+		return false;
 	}
 
 	CTuning* pNewTuning = nullptr;
@@ -1276,20 +1276,20 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, CTuning* pT)
 	} else
 	{
 		Reporting::Notification("Add tuning failed");
-		return true;
+		return false;
 	}
-	if(pTC->AddTuning(pNewTuning))
+	if(!pTC->AddTuning(pNewTuning))
 	{
 		Reporting::Notification("Add tuning failed");
 		delete pNewTuning;
-		return true;
+		return false;
 	}
 	AddTreeItem(pNewTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(pTC)), NULL);
 	m_pActiveTuning = pNewTuning;
 	m_ModifiedTCs[pTC] = true;
 	UpdateView();
 
-	return false;
+	return true;
 }
 
 void CTuningDialog::OnAddTuningGeneral()
