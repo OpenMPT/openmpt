@@ -106,7 +106,7 @@ public:
 
 	int32 GetNumPrograms() const override;
 	int32 GetCurrentProgram() override { return m_program; }
-	void SetCurrentProgram(int32) override;
+	void SetCurrentProgram(int32) final;
 
 	PlugParamIndex GetNumParameters() const override { return kI3DL2ReverbNumParameters; }
 	PlugParamValue GetParameter(PlugParamIndex index) override;
