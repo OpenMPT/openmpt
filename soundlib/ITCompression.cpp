@@ -57,9 +57,19 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *
     , mptSample(sample)
     , is215(it215)
 {
-	packedData.resize(bufferSize);
-	sampleData.resize(blockSize);
+	if(mptSample.GetElementarySampleSize() > 1)
+		Compress<IT16BitParams>(mptSample.sample16(), maxLength);
+	else
+		Compress<IT8BitParams>(mptSample.sample8(), maxLength);
+}
 
+
+template<typename Properties>
+void ITCompression::Compress(const typename Properties::sample_t *mptSampleData, SmpLength maxLength)
+{
+	packedData.resize(bufferSize);
+	std::vector<typename Properties::sample_t> sampleData;
+	sampleData.resize(blockSize / sizeof(typename Properties::sample_t));
 	if(maxLength == 0 || maxLength > mptSample.nLength)
 		maxLength = mptSample.nLength;
 	for(uint8 chn = 0; chn < mptSample.GetNumChannels(); chn++)
@@ -74,10 +84,7 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *
 			remBits = 8;
 			byteVal = 0;
 
-			if(mptSample.GetElementarySampleSize() > 1)
-				Compress<IT16BitParams>(sample.sample16() + chn, offset, remain);
-			else
-				Compress<IT8BitParams>(sample.sample8() + chn, offset, remain);
+			CompressBlock<Properties>(mptSampleData + chn, offset, remain, sampleData.data());
 
 			if(file) mpt::IO::WriteRaw(*file, packedData.data(), packedLength);
 			packedTotalLength += packedLength;
@@ -86,19 +93,16 @@ ITCompression::ITCompression(const ModSample &sample, bool it215, std::ostream *
 			remain -= baseLength;
 		}
 	}
-
 	packedData.resize(0);
 	packedData.shrink_to_fit();
-	sampleData.resize(0);
-	sampleData.shrink_to_fit();
 }
 
 
 template<typename T>
-void ITCompression::CopySample(void *target, const void *source, SmpLength offset, SmpLength length, SmpLength skip)
+void ITCompression::CopySample(T *target, const T *source, SmpLength offset, SmpLength length, SmpLength skip)
 {
-	T *out = static_cast<T *>(target);
-	const T *in = static_cast<const T *>(source) + offset * skip;
+	T *out = target;
+	const T *in = source + offset * skip;
 	for(SmpLength i = 0, j = 0; j < length; i += skip, j++)
 	{
 		out[j] = in[i];
@@ -108,9 +112,9 @@ void ITCompression::CopySample(void *target, const void *source, SmpLength offse
 
 // Convert sample to delta values.
 template<typename T>
-void ITCompression::Deltafy()
+void ITCompression::Deltafy(T *sampleData)
 {
-	T *p = reinterpret_cast<T *>(sampleData.data());
+	T *p = sampleData;
 	int oldVal = 0;
 	for(SmpLength i = 0; i < baseLength; i++)
 	{
@@ -122,26 +126,26 @@ void ITCompression::Deltafy()
 
 
 template<typename Properties>
-void ITCompression::Compress(const void *data, SmpLength offset, SmpLength actualLength)
+void ITCompression::CompressBlock(const typename Properties::sample_t *data, SmpLength offset, SmpLength actualLength, typename Properties::sample_t *sampleData)
 {
 	baseLength = std::min(actualLength, SmpLength(blockSize / sizeof(typename Properties::sample_t)));
 
-	CopySample<typename Properties::sample_t>(sampleData.data(), data, offset, baseLength, mptSample.GetNumChannels());
+	CopySample<typename Properties::sample_t>(sampleData, data, offset, baseLength, mptSample.GetNumChannels());
 
-	Deltafy<typename Properties::sample_t>();
+	Deltafy(sampleData);
 	if(is215)
 	{
-		Deltafy<typename Properties::sample_t>();
+		Deltafy(sampleData);
 	}
 
 	// Initialise bit width table with initial values
 	bwt.assign(baseLength, Properties::defWidth);
 
 	// Recurse!
-	SquishRecurse<Properties>(Properties::defWidth, Properties::defWidth, Properties::defWidth, Properties::defWidth - 2, 0, baseLength);
+	SquishRecurse<Properties>(Properties::defWidth, Properties::defWidth, Properties::defWidth, Properties::defWidth - 2, 0, baseLength, sampleData);
 	
 	// Write those bits!
-	const typename Properties::sample_t *p = reinterpret_cast<typename Properties::sample_t *>(sampleData.data());
+	const typename Properties::sample_t *p = sampleData;
 	int8 width = Properties::defWidth;
 	for(size_t i = 0; i < baseLength; i++)
 	{
@@ -188,7 +192,7 @@ int8 ITCompression::GetWidthChangeSize(int8 w, bool is16)
 
 
 template<typename Properties>
-void ITCompression::SquishRecurse(int8 sWidth, int8 lWidth, int8 rWidth, int8 width, SmpLength offset, SmpLength length)
+void ITCompression::SquishRecurse(int8 sWidth, int8 lWidth, int8 rWidth, int8 width, SmpLength offset, SmpLength length, const typename Properties::sample_t *sampleData)
 {
 	if(width + 1 < 1)
 	{
@@ -201,7 +205,7 @@ void ITCompression::SquishRecurse(int8 sWidth, int8 lWidth, int8 rWidth, int8 wi
 
 	SmpLength i = offset;
 	SmpLength end = offset + length;
-	const typename Properties::sample_t *p = reinterpret_cast<typename Properties::sample_t *>(sampleData.data());
+	const typename Properties::sample_t *p = sampleData;
 
 	while(i < end)
 	{
@@ -245,7 +249,7 @@ void ITCompression::SquishRecurse(int8 sWidth, int8 lWidth, int8 rWidth, int8 wi
 
 				comparison = (keepDown <= levelLeft);
 			}
-			SquishRecurse<Properties>(comparison ? (width + 1) : sWidth, xlwidth, xrwidth, width - 1, start, blockLength);
+			SquishRecurse<Properties>(comparison ? (width + 1) : sWidth, xlwidth, xrwidth, width - 1, start, blockLength, sampleData);
 		} else
 		{
 			bwt[i] = sWidth;

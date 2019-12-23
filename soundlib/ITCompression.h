@@ -32,14 +32,15 @@ public:
 	static constexpr size_t blockSize = 0x8000;       // Block size (in bytes) in which samples are being processed
 
 protected:
-	std::vector<int8> bwt;             // Bit width table for each sampling point
-	std::vector<uint8> packedData;     // Compressed data for current sample block
-	std::ostream *file = nullptr;      // File to which compressed data will be written (can be nullptr if you only want to find out the sample size)
-	std::vector<std::byte> sampleData; // Pre-processed sample data for currently compressed sample block
-	const ModSample &mptSample;        // Sample that is being processed
-	size_t packedLength = 0;           // Size of currently compressed sample block
-	size_t packedTotalLength = 0;      // Size of all compressed data so far
-	SmpLength baseLength = 0;          // Length of the currently compressed sample block (in samples)
+	std::vector<int8> bwt;           // Bit width table for each sampling point
+	std::vector<uint8> packedData;   // Compressed data for current sample block
+	std::ostream *file = nullptr;    // File to which compressed data will be written (can be nullptr if you only want to find out the sample size)
+	std::vector<int8> sampleData8;   // Pre-processed sample data for currently compressed sample block
+	std::vector<int16> sampleData16; // Pre-processed sample data for currently compressed sample block
+	const ModSample &mptSample;      // Sample that is being processed
+	size_t packedLength = 0;         // Size of currently compressed sample block
+	size_t packedTotalLength = 0;    // Size of all compressed data so far
+	SmpLength baseLength = 0;        // Length of the currently compressed sample block (in samples)
 
 	// Bit writer
 	int8 bitPos = 0;    // Current bit position in this byte
@@ -48,19 +49,22 @@ protected:
 
 	const bool is215;  // Use IT2.15 compression (double deltas)
 
-	template<typename T>
-	static void CopySample(void *target, const void *source, SmpLength offset, SmpLength length, SmpLength skip);
+	template<typename Properties>
+	void Compress(const typename Properties::sample_t *mptSampleData, SmpLength maxLength);
 
 	template<typename T>
-	void Deltafy();
+	static void CopySample(T *target, const T *source, SmpLength offset, SmpLength length, SmpLength skip);
+
+	template<typename T>
+	void Deltafy(T *sampleData);
 
 	template<typename Properties>
-	void Compress(const void *data, SmpLength offset, SmpLength actualLength);
+	void CompressBlock(const typename Properties::sample_t *data, SmpLength offset, SmpLength actualLength, typename Properties::sample_t *sampleData);
 
 	static int8 GetWidthChangeSize(int8 w, bool is16);
 
 	template<typename Properties>
-	void SquishRecurse(int8 sWidth, int8 lWidth, int8 rWidth, int8 width, SmpLength offset, SmpLength length);
+	void SquishRecurse(int8 sWidth, int8 lWidth, int8 rWidth, int8 width, SmpLength offset, SmpLength length, const typename Properties::sample_t *sampleData);
 
 	static int8 ConvertWidth(int8 curWidth, int8 newWidth);
 	void WriteBits(int8 width, int v);
