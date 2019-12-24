@@ -60,11 +60,11 @@ protected:
 	mutable MMTIME m_PositionLast;
 	mutable std::size_t m_PositionWrappedCount;
 
-	static const uint32 DriverBugDoneNotificationAndHeaderInQueue = (1u<<0u); //  1
-	static const uint32 DriverBugDoneNotificationAndHeaderNotDone = (1u<<1u); //  2
-	static const uint32 DriverBugBufferFillAndHeaderInQueue = (1u<<2u);       //  4
-	static const uint32 DriverBugBufferFillAndHeaderNotDone = (1u<<3u);       //  8
-	static const uint32 DriverBugDoneNotificationOutOfOrder = (1u<<4u);       // 10
+	static constexpr uint32 DriverBugDoneNotificationAndHeaderInQueue = (1u<<0u); //  1
+	static constexpr uint32 DriverBugDoneNotificationAndHeaderNotDone = (1u<<1u); //  2
+	static constexpr uint32 DriverBugBufferFillAndHeaderInQueue = (1u<<2u);       //  4
+	static constexpr uint32 DriverBugBufferFillAndHeaderNotDone = (1u<<3u);       //  8
+	static constexpr uint32 DriverBugDoneNotificationOutOfOrder = (1u<<4u);       // 10
 	std::atomic<uint32> m_DriverBugs;
 
 public:

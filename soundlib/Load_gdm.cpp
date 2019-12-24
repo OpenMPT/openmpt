@@ -90,15 +90,15 @@ struct GDMSampleHeader
 MPT_BINARY_STRUCT(GDMSampleHeader, 62)
 
 
-static const MODTYPE gdmFormatOrigin[] =
+static constexpr MODTYPE gdmFormatOrigin[] =
 {
 	MOD_TYPE_NONE, MOD_TYPE_MOD, MOD_TYPE_MTM, MOD_TYPE_S3M, MOD_TYPE_669, MOD_TYPE_FAR, MOD_TYPE_ULT, MOD_TYPE_STM, MOD_TYPE_MED, MOD_TYPE_PSM
 };
-static const mpt::uchar gdmFormatOriginType[][4] =
+static constexpr mpt::uchar gdmFormatOriginType[][4] =
 {
 	UL_(""), UL_("mod"), UL_("mtm"), UL_("s3m"), UL_("669"), UL_("far"), UL_("ult"), UL_("stm"), UL_("med"), UL_("psm")
 };
-static const mpt::uchar * const gdmFormatOriginFormat[] =
+static constexpr const mpt::uchar * gdmFormatOriginFormat[] =
 {
 	UL_(""),
 	UL_("Generic MOD"),
@@ -243,7 +243,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// Use the same inaccurate table as 2GDM for translating back to finetune, as our own routines
 			// give slightly different results for the provided sample rates that may result in transpose != 0.
-			static const uint16 rate2finetune[] = { 8363, 8424, 8485, 8547, 8608, 8671, 8734, 8797, 7894, 7951, 8009, 8067, 8125, 8184, 8244, 8303 };
+			static constexpr uint16 rate2finetune[] = { 8363, 8424, 8485, 8547, 8608, 8671, 8734, 8797, 7894, 7951, 8009, 8067, 8125, 8184, 8244, 8303 };
 			for(uint8 i = 0; i < 16; i++)
 			{
 				if(sample.nC5Speed == rate2finetune[i])
@@ -386,7 +386,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 						m.param = param;
 
 						// Effect translation LUT
-						static const EffectCommand gdmEffTrans[] =
+						static constexpr EffectCommand gdmEffTrans[] =
 						{
 							CMD_NONE, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
 							CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,

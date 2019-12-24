@@ -28,7 +28,7 @@ OPENMPT_NAMESPACE_BEGIN
 // Log tables for pre-amp
 // Pre-amp (or more precisely: Pre-attenuation) depends on the number of channels,
 // Which this table takes care of.
-static const uint8 PreAmpTable[16] =
+static constexpr uint8 PreAmpTable[16] =
 {
 	0x60, 0x60, 0x60, 0x70,	// 0-7
 	0x80, 0x88, 0x90, 0x98,	// 8-15
@@ -37,7 +37,7 @@ static const uint8 PreAmpTable[16] =
 };
 
 #ifndef NO_AGC
-static const uint8 PreAmpAGCTable[16] =
+static constexpr uint8 PreAmpAGCTable[16] =
 {
 	0x60, 0x60, 0x60, 0x64,
 	0x68, 0x70, 0x78, 0x80,
@@ -786,7 +786,7 @@ int CSoundFile::GetVibratoDelta(int type, int position) const
 	} else if(GetType() & (MOD_TYPE_DIGI | MOD_TYPE_DBM))
 	{
 		// Other waveforms are not supported.
-		static const int8 DBMSinus[] =
+		static constexpr int8 DBMSinus[] =
 		{
 			33, 52, 69, 84, 96, 107, 116, 122,  125, 127,  125, 122, 116, 107, 96, 84,
 			69, 52, 33, 13, -8, -31, -54, -79, -104,-128, -104, -79, -54, -31, -8, 13,

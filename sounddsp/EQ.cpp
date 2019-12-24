@@ -27,7 +27,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-static const UINT gEqLinearToDB[33] =
+static constexpr UINT gEqLinearToDB[33] =
 {
 	16, 19, 22, 25, 28, 31, 34, 37,
 	40, 43, 46, 49, 52, 55, 58, 61,
@@ -35,7 +35,7 @@ static const UINT gEqLinearToDB[33] =
 	160, 172, 184, 196, 208, 220, 232, 244, 256
 };
 
-static const EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
+static constexpr EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 {
 	// Default: Flat EQ
 	{0,0,0,0,0, 0,0,0,0, 1,   120, false},
@@ -119,7 +119,7 @@ EQ_Loop:
 
 static void SSE_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, float32 *pbuffer, UINT nCount)
 {
-	static const float gk1 = 1.0f;
+	static constexpr float gk1 = 1.0f;
 	_asm {
 	mov eax, pbl
 	mov edx, pbr

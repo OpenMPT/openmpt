@@ -66,7 +66,7 @@ OPENMPT_NAMESPACE_BEGIN
 #endif
 
 #ifdef MODPLUG_TRACKER
-static const mpt::uchar *const cacheSection = UL_("PluginCache");
+static constexpr const mpt::uchar *cacheSection = UL_("PluginCache");
 #endif // MODPLUG_TRACKER
 
 

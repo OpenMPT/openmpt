@@ -178,6 +178,7 @@ protected:
 	mpt::PathString m_InstrLibHighlightPath;  // Folder to highlight in browser after a refresh
 	mpt::PathString m_SongFileName;           // Name of open module, without path (== m_szInstrLibPath).
 	mpt::PathString m_previousPath;           // The folder from which we came from when navigating one folder up
+	std::vector<const char*> m_modExtensions;                  // cached in order to avoid querying too often when changing browsed folder
 	std::vector<mpt::PathString> m_MediaFoundationExtensions;  // cached in order to avoid querying too often when changing browsed folder
 	bool m_showAllFiles = false;
 

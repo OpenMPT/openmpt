@@ -258,7 +258,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 		file.Rewind();
 		bool oggOK = false;
 		bool needMoreData = true;
-		static const long bufsize = 65536;
+		constexpr long bufsize = 65536;
 		std::size_t readSize = 0;
 		char *buf = nullptr;
 		ogg_sync_state oy;

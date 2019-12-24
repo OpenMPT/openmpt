@@ -2774,7 +2774,7 @@ void CViewPattern::OnDropSelection()
 	BeginWaitCursor();
 	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.GetNumChannels(), sndFile.Patterns[m_nPattern].GetNumRows(), moveSelection ? "Move Selection" : "Copy Selection");
 
-	static const ModCommand empty = ModCommand::Empty();
+	const ModCommand empty = ModCommand::Empty();
 	auto p = pattern.begin();
 	for(ROWINDEX row = 0; row < sndFile.Patterns[m_nPattern].GetNumRows(); row++)
 	{
@@ -6914,8 +6914,8 @@ HRESULT CViewPattern::get_accName(VARIANT varChild, BSTR *pszName)
 	const ModCommand &m = GetCursorCommand();
 	const size_t columnIndex = m_Cursor.GetColumnType();
 	const TCHAR *column = _T("");
-	static const TCHAR *regularColumns[] = {_T("Note"), _T("Instrument"), _T("Volume"), _T("Effect"), _T("Parameter")};
-	static const TCHAR *pcColumns[] = {_T("Note"), _T("Plugin"), _T("Plugin Parameter"), _T("Parameter Value"), _T("Parameter Value")};
+	static constexpr const TCHAR *regularColumns[] = {_T("Note"), _T("Instrument"), _T("Volume"), _T("Effect"), _T("Parameter")};
+	static constexpr const TCHAR *pcColumns[] = {_T("Note"), _T("Plugin"), _T("Plugin Parameter"), _T("Parameter Value"), _T("Parameter Value")};
 	static_assert(PatternCursor::lastColumn + 1 == std::size(regularColumns));
 	static_assert(PatternCursor::lastColumn + 1 == std::size(pcColumns));
 

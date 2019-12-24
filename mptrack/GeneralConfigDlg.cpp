@@ -33,7 +33,7 @@ BEGIN_MESSAGE_MAP(COptionsGeneral, CPropertyPage)
 END_MESSAGE_MAP()
 
 
-static const struct GeneralOptionsDescriptions
+static constexpr struct GeneralOptionsDescriptions
 {
 	uint32 flag;
 	const char *name, *description;

@@ -35,10 +35,6 @@ Version history:
 
 
 
-const char CTuning::s_FileExtension[5] = ".tun";
-
-
-
 void CTuning::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
 {
 	if(!str.empty())

@@ -69,7 +69,7 @@ namespace SC { // SC = _S_ample_C_onversion
 
 
 // Every sample decoding functor has to typedef its input_t and output_t
-// and has to provide a static const input_inc member
+// and has to provide a static constexpr input_inc member
 // which describes by how many input_t elements inBuf has to be incremented between invocations.
 // input_inc is normally 1 except when decoding e.g. bigger sample values
 // from multiple std::byte values.
@@ -1015,7 +1015,7 @@ struct ConvertFixedPoint<uint8, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef uint8 output_t;
-	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
+	static constexpr int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
@@ -1032,7 +1032,7 @@ struct ConvertFixedPoint<int8, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef int8 output_t;
-	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
+	static constexpr int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
@@ -1049,7 +1049,7 @@ struct ConvertFixedPoint<int16, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef int16 output_t;
-	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
+	static constexpr int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
@@ -1066,7 +1066,7 @@ struct ConvertFixedPoint<int24, int32, fractionalBits>
 {
 	typedef int32 input_t;
 	typedef int24 output_t;
-	static const int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
+	static constexpr int shiftBits = fractionalBits + 1 - sizeof(output_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
@@ -1135,7 +1135,7 @@ struct ConvertToFixedPoint<int32, uint8, fractionalBits>
 {
 	typedef uint8 input_t;
 	typedef int32 output_t;
-	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
+	static constexpr int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
@@ -1149,7 +1149,7 @@ struct ConvertToFixedPoint<int32, int8, fractionalBits>
 {
 	typedef int8 input_t;
 	typedef int32 output_t;
-	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
+	static constexpr int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
@@ -1163,7 +1163,7 @@ struct ConvertToFixedPoint<int32, int16, fractionalBits>
 {
 	typedef int16 input_t;
 	typedef int32 output_t;
-	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
+	static constexpr int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);
@@ -1177,7 +1177,7 @@ struct ConvertToFixedPoint<int32, int24, fractionalBits>
 {
 	typedef int24 input_t;
 	typedef int32 output_t;
-	static const int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
+	static constexpr int shiftBits = fractionalBits + 1 - sizeof(input_t) * 8;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t)*8-1);

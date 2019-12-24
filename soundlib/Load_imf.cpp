@@ -202,7 +202,7 @@ struct IMFSample
 MPT_BINARY_STRUCT(IMFSample, 64)
 
 
-static const EffectCommand imfEffects[] =
+static constexpr EffectCommand imfEffects[] =
 {
 	CMD_NONE,
 	CMD_SPEED,			// 0x01 1xx Set Tempo

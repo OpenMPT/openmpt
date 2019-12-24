@@ -50,7 +50,7 @@ protected:
 	static size_t samples_written;
 
 	typedef int16 sampling_type; // has to match SMPGEN_MIXBYTES!
-	static const sampling_type sample_maxvalue = (1 << ((SMPGEN_MIXBYTES << 3) - 1)) - 1;
+	static constexpr sampling_type sample_maxvalue = (1 << ((SMPGEN_MIXBYTES << 3) - 1)) - 1;
 
 	// muParser object for parsing the expression
 	mu::Parser muParser;

@@ -201,7 +201,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	file.Seek(fileHeader.headerLength);
 	
 	// Pattern effect LUT
-	static const EffectCommand farEffects[] =
+	static constexpr EffectCommand farEffects[] =
 	{
 		CMD_NONE,
 		CMD_PORTAMENTOUP,

@@ -570,7 +570,7 @@ protected:
 
 	static void CreateCommunicationWindow(WNDPROC windowProc)
 	{
-		static const TCHAR windowClassName[] = _T("OpenMPTPluginBridgeCommunication");
+		static constexpr TCHAR windowClassName[] = _T("OpenMPTPluginBridgeCommunication");
 		static bool registered = false;
 		if(!registered)
 		{

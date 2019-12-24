@@ -450,7 +450,7 @@ CString I3DL2Reverb::GetParamLabel(PlugParamIndex param)
 
 CString I3DL2Reverb::GetParamDisplay(PlugParamIndex param)
 {
-	static const TCHAR *modes[] = { _T("LQ"), _T("LQ+"), _T("HQ"), _T("HQ+") };
+	static constexpr const TCHAR * const modes[] = { _T("LQ"), _T("LQ+"), _T("HQ"), _T("HQ+") };
 	float value = m_param[param];
 	switch(param)
 	{
@@ -520,7 +520,7 @@ void I3DL2Reverb::RecalculateI3DL2ReverbParams()
 void I3DL2Reverb::SetDelayTaps()
 {
 	// Early reflections
-	static const float delays[] =
+	static constexpr float delays[] =
 	{
 		1.0000f, 1.0000f, 0.0000f, 0.1078f, 0.1768f, 0.2727f,
 		0.3953f, 0.5386f, 0.6899f, 0.8306f, 0.9400f, 0.9800f,

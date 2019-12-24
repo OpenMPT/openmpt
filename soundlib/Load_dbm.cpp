@@ -127,7 +127,7 @@ MPT_BINARY_STRUCT(DBMEnvelope, 136)
 
 
 // Note: Unlike in MOD, 1Fx, 2Fx, 5Fx / 5xF, 6Fx / 6xF and AFx / AxF are fine slides.
-static const ModCommand::COMMAND dbmEffects[] =
+static constexpr ModCommand::COMMAND dbmEffects[] =
 {
 	CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
 	CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,

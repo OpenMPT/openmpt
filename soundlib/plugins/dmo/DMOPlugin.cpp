@@ -126,8 +126,8 @@ uint32 DMOPlugin::GetLatency() const
 }
 
 
-static const float _f2si = 32768.0f;
-static const float _si2f = 1.0f / 32768.0f;
+static constexpr float _f2si = 32768.0f;
+static constexpr float _si2f = 1.0f / 32768.0f;
 
 
 static void InterleaveStereo(const float * MPT_RESTRICT inputL, const float * MPT_RESTRICT inputR, float * MPT_RESTRICT output, uint32 numFrames)

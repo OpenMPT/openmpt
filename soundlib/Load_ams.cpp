@@ -42,7 +42,7 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 	};
 
 	// Effect translation table for extended (non-Protracker) effects
-	static const ModCommand::COMMAND effTrans[] =
+	static constexpr ModCommand::COMMAND effTrans[] =
 	{
 		CMD_S3MCMDEX,		// Forward / Backward
 		CMD_PORTAMENTOUP,	// Extra fine slide up

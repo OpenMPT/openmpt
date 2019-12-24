@@ -709,7 +709,7 @@ mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 #ifdef MPT_WITH_LAME
 	if(m_Type == MP3EncoderLame)
 	{
-		static const int q_table[11] = { 240, 220, 190, 170, 160, 130, 120, 100, 80, 70, 50 }; // http://wiki.hydrogenaud.io/index.php?title=LAME
+		static constexpr int q_table[11] = { 240, 220, 190, 170, 160, 130, 120, 100, 80, 70, 50 }; // http://wiki.hydrogenaud.io/index.php?title=LAME
 		int q = mpt::saturate_round<int>((1.0f - quality) * 10.0f);
 		if(q < 0) q = 0;
 		if(q >= 10)

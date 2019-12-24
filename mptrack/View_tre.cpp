@@ -171,6 +171,7 @@ CModTree::~CModTree()
 
 void CModTree::Init()
 {
+	m_modExtensions = CSoundFile::GetSupportedExtensions(false);
 	m_MediaFoundationExtensions = FileType(CSoundFile::GetMediaFoundationFileTypes()).GetExtensions();
 
 	DWORD dwRemove = TVS_SINGLEEXPAND;
@@ -1972,10 +1973,9 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 		if((hFind = FindFirstFile(path.AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
 		{
 			static constexpr int FILTER_REJECT_FILE = -1;
-			static const auto modExts = CSoundFile::GetSupportedExtensions(false);
-			static const auto instrExts = {"xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat"};
-			static const auto sampleExts = {"wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf", "sb0", "sb2", "sbi"};
-			static const auto allExtsBlacklist = {"txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "lnk", "url"};
+			static constexpr auto instrExts = {"xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat"};
+			static constexpr auto sampleExts = {"wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf", "sb0", "sb2", "sbi"};
+			static constexpr auto allExtsBlacklist = {"txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "lnk", "url"};
 
 			const auto FilterFile = [this, showInstrs, showDirs](const mpt::PathString &fileName) -> int
 			{
@@ -1997,7 +1997,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 				{
 					if(showInstrs)
 						return IMAGE_SAMPLES;
-				} else if(std::find(modExts.begin(), modExts.end(), ext) != modExts.end())
+				} else if(std::find(m_modExtensions.begin(), m_modExtensions.end(), ext) != m_modExtensions.end())
 				{
 					if(showDirs)
 						return IMAGE_FOLDERSONG;
@@ -2010,7 +2010,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 					// Amiga-style prefix (i.e. mod.songname)
 					std::string prefixExt = fileName.ToUTF8();
 					const auto dotPos = prefixExt.find('.');
-					if(dotPos != std::string::npos && std::find(modExts.begin(), modExts.end(), prefixExt.erase(dotPos)) != modExts.end())
+					if(dotPos != std::string::npos && std::find(m_modExtensions.begin(), m_modExtensions.end(), prefixExt.erase(dotPos)) != m_modExtensions.end())
 						return IMAGE_FOLDERSONG;
 				}
 				

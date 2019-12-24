@@ -622,7 +622,7 @@ public:
 
 	#define PROBE_RECOMMENDED_SIZE 2048u
 
-	static const std::size_t ProbeRecommendedSize;
+	static constexpr std::size_t ProbeRecommendedSize = PROBE_RECOMMENDED_SIZE;
 
 	enum ProbeFlags
 	{

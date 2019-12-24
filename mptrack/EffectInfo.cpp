@@ -47,7 +47,7 @@ struct MPTEFFECTINFO
 #define MOD_TYPE_ALL		(~ModType(0))
 
 
-static const MPTEFFECTINFO gFXInfo[] =
+static constexpr MPTEFFECTINFO gFXInfo[] =
 {
 	{CMD_ARPEGGIO,		0,0,		0,	MOD_TYPE_ALL,	_T("Arpeggio")},
 	{CMD_PORTAMENTOUP,	0,0,		0,	MOD_TYPE_ALL,	_T("Portamento Up")},
@@ -872,7 +872,7 @@ struct MPTVOLCMDINFO
 	FlagSet<MODTYPE> GetSupportedFormats() const { return FlagSet<MODTYPE>(supportedFormats); }
 };
 
-static const MPTVOLCMDINFO gVolCmdInfo[] =
+static constexpr MPTVOLCMDINFO gVolCmdInfo[] =
 {
 	{VOLCMD_VOLUME,			MOD_TYPE_NOMOD,		_T("Set Volume")},
 	{VOLCMD_PANNING,		MOD_TYPE_NOMOD,		_T("Set Panning")},

@@ -53,7 +53,7 @@ OPENMPT_NAMESPACE_BEGIN
 // of trimming is nTrimLengthMin + 1.
 #define MIN_TRIM_LENGTH			4
 
-static const UINT cLeftBarButtons[SMP_LEFTBAR_BUTTONS] =
+static constexpr UINT cLeftBarButtons[SMP_LEFTBAR_BUTTONS] =
 {
 	ID_SAMPLE_ZOOMUP,
 	ID_SAMPLE_ZOOMDOWN,

@@ -252,7 +252,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 				m.command = command;
 				m.param = param;
 
-				static const EffectCommand effTrans[] = { CMD_GLOBALVOLUME, CMD_RETRIG, CMD_FINEVIBRATO, CMD_NOTESLIDEUP, CMD_NOTESLIDEDOWN, CMD_NOTESLIDEUPRETRIG, CMD_NOTESLIDEDOWNRETRIG, CMD_REVERSEOFFSET };
+				static constexpr EffectCommand effTrans[] = { CMD_GLOBALVOLUME, CMD_RETRIG, CMD_FINEVIBRATO, CMD_NOTESLIDEUP, CMD_NOTESLIDEDOWN, CMD_NOTESLIDEUPRETRIG, CMD_NOTESLIDEDOWNRETRIG, CMD_REVERSEOFFSET };
 				if(m.command < 0x10)
 				{
 					// Beware: Effect letters are as in MOD, but portamento and volume slides behave like in S3M (i.e. fine slides share the same effect letters)

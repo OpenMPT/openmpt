@@ -296,7 +296,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 	m_treePlugins.SetRedraw(FALSE);
 	m_treePlugins.DeleteAllItems();
 
-	static const struct
+	static constexpr struct
 	{
 		VSTPluginLib::PluginCategory category;
 		const TCHAR *description;

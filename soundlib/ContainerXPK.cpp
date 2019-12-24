@@ -104,7 +104,7 @@ static int32 bfexts(std::size_t p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
 
 static uint8 XPK_ReadTable(int32 index)
 {
-	static const uint8 xpk_table[] = {
+	static constexpr uint8 xpk_table[] = {
 		2,3,4,5,6,7,8,0,3,2,4,5,6,7,8,0,4,3,5,2,6,7,8,0,5,4,6,2,3,7,8,0,6,5,7,2,3,4,8,0,7,6,8,2,3,4,5,0,8,7,6,2,3,4,5,0
 	};
 	if(index < 0) throw XPK_error();

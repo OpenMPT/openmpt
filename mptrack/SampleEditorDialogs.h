@@ -62,7 +62,7 @@ protected:
 	bool m_bRememberFormat;
 
 public:
-	static const SampleIO GetSampleFormat() { return m_nFormat; }
+	static SampleIO GetSampleFormat() { return m_nFormat; }
 	static void SetSampleFormat(SampleIO nFormat) { m_nFormat = nFormat; }
 	bool GetRemeberFormat() const { return m_bRememberFormat; };
 	void SetRememberFormat(bool bRemember) { m_bRememberFormat = bRemember; };

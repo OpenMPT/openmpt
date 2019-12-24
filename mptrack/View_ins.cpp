@@ -46,7 +46,7 @@ namespace
 #define ENV_LEFTBAR_CYBTN		Util::ScalePixels(22, m_hWnd)
 
 
-static const UINT cLeftBarButtons[ENV_LEFTBAR_BUTTONS] =
+static constexpr UINT cLeftBarButtons[ENV_LEFTBAR_BUTTONS] =
 {
 	ID_ENVSEL_VOLUME,
 	ID_ENVSEL_PANNING,

@@ -31,10 +31,10 @@ namespace SoundDevice {
 MPT_REGISTERED_COMPONENT(ComponentWaveOut, "WaveOut")
 
 
-static const std::size_t WAVEOUT_MINBUFFERS = 3;
-static const std::size_t WAVEOUT_MAXBUFFERS = 4096;
-static const std::size_t WAVEOUT_MINBUFFERFRAMECOUNT = 8;
-static const std::size_t WAVEOUT_MAXBUFFERSIZE = 16384; // fits in int16
+static constexpr std::size_t WAVEOUT_MINBUFFERS = 3;
+static constexpr std::size_t WAVEOUT_MAXBUFFERS = 4096;
+static constexpr std::size_t WAVEOUT_MINBUFFERFRAMECOUNT = 8;
+static constexpr std::size_t WAVEOUT_MAXBUFFERSIZE = 16384; // fits in int16
 
 
 static inline LONG* interlocked_access(DWORD* p)
@@ -436,12 +436,12 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 	// We could thereby try to avoid any potential wraparound inside the driver on older
 	// Windows versions, which would be, once converted into other units, really
 	// difficult to detect or handle.
-	static const UINT timeType = TIME_SAMPLES; // should work for sane systems
-	//static const std::size_t valid_bits = 32; // should work for sane systems
-	//static const UINT timeType = TIME_BYTES; // safest
-	static const std::size_t valid_bits = 27; // safe for WinXP TIME_SAMPLES
-	static const uint32 valid_mask = static_cast<uint32>((uint64(1) << valid_bits) - 1u);
-	static const uint32 valid_watermark = static_cast<uint32>(uint64(1) << (valid_bits - 1u)); // half the valid range in order to be able to catch backwards fluctuations
+	static constexpr UINT timeType = TIME_SAMPLES; // should work for sane systems
+	//static constexpr std::size_t valid_bits = 32; // should work for sane systems
+	//static constexpr UINT timeType = TIME_BYTES; // safest
+	static constexpr std::size_t valid_bits = 27; // safe for WinXP TIME_SAMPLES
+	static constexpr uint32 valid_mask = static_cast<uint32>((uint64(1) << valid_bits) - 1u);
+	static constexpr uint32 valid_watermark = static_cast<uint32>(uint64(1) << (valid_bits - 1u)); // half the valid range in order to be able to catch backwards fluctuations
 
 	MMTIME mmtime;
 	MemsetZero(mmtime);

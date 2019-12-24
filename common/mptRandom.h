@@ -44,7 +44,7 @@ namespace mpt
 
 
 #ifdef MPT_BUILD_FUZZER
-static const uint32 FUZZER_RNG_SEED = 3141592653u; // pi
+static constexpr uint32 FUZZER_RNG_SEED = 3141592653u; // pi
 #endif // MPT_BUILD_FUZZER
 
 

@@ -20,7 +20,7 @@ namespace Util
 {
 
 
-static const mpt::uchar EncodeNibble[16] = {
+static constexpr mpt::uchar EncodeNibble[16] = {
 	UC_('0'), UC_('1'), UC_('2'), UC_('3'),
 	UC_('4'), UC_('5'), UC_('6'), UC_('7'),
 	UC_('8'), UC_('9'), UC_('A'), UC_('B'),

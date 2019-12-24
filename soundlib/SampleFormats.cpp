@@ -339,8 +339,8 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 
 static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint16 blockAlign, uint32 numChannels)
 {
-	static const int32 IMAIndexTab[8] =  { -1, -1, -1, -1, 2, 4, 6, 8 };
-	static const int32 IMAUnpackTable[90] =
+	static constexpr int32 IMAIndexTab[8] =  { -1, -1, -1, -1, 2, 4, 6, 8 };
+	static constexpr int32 IMAUnpackTable[90] =
 	{
 		7,     8,     9,     10,    11,    12,    13,    14,
 		16,    17,    19,    21,    23,    25,    28,    31,
@@ -1621,7 +1621,7 @@ struct SFZRegion
 		} else
 		{
 			// Scientific pitch
-			static const int8 keys[] = { 9, 11, 0, 2, 4, 5, 7 };
+			static constexpr int8 keys[] = { 9, 11, 0, 2, 4, 5, 7 };
 			static_assert(CountOf(keys) == 'g' - 'a' + 1);
 			auto keyC = value[0];
 			if(keyC >= 'A' && keyC <= 'G')

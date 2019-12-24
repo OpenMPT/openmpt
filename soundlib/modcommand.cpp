@@ -900,7 +900,7 @@ bool ModCommand::IsGlobalCommand() const
 size_t ModCommand::GetEffectWeight(COMMAND cmd)
 {
 	// Effect weights, sorted from lowest to highest weight.
-	static const COMMAND weights[] =
+	static constexpr COMMAND weights[] =
 	{
 		CMD_NONE,
 		CMD_DUMMY,

@@ -602,7 +602,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 bool CSoundFile::SaveS3M(std::ostream &f) const
 {
-	static const uint8 filler[16] =
+	static constexpr uint8 filler[16] =
 	{
 		0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
 		0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,

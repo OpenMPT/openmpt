@@ -97,7 +97,7 @@ convert them. */
 static void TranslateULTCommands(uint8 &effect, uint8 &param, uint8 version)
 {
 
-	static const uint8 ultEffTrans[] =
+	static constexpr uint8 ultEffTrans[] =
 	{
 		CMD_ARPEGGIO,
 		CMD_PORTAMENTOUP,

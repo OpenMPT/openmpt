@@ -33,8 +33,8 @@ struct Notification
 
 	typedef uint16 Item;
 
-	static const SmpLength PosInvalid = SmpLength(-1);	// pos[i] is not valid (if it contains sample or envelope position)
-	static const uint32 ClipVU = 0x80000000;			// Master VU clip indicator bit (sound output has previously clipped)
+	static constexpr SmpLength PosInvalid = SmpLength(-1);	// pos[i] is not valid (if it contains sample or envelope position)
+	static constexpr uint32 ClipVU = 0x80000000;			// Master VU clip indicator bit (sound output has previously clipped)
 
 	int64 timestampSamples;
 	FlagSet<Notification::Type> type;

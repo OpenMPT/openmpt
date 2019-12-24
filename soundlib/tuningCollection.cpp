@@ -34,9 +34,6 @@ Version history:
 */
 
 
-const char CTuningCollection::s_FileExtension[4] = ".tc";
-
-
 namespace CTuningS11n
 {
 	void ReadStr(std::istream& iStrm, std::string& str, const size_t);

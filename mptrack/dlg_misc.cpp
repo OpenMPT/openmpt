@@ -826,8 +826,8 @@ CSoundBankProperties::CSoundBankProperties(const CDLSBank &bank, ::CWnd *parent)
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Keyboard Control
 
-static const uint8 whitetab[7] = {0,2,4,5,7,9,11};
-static const uint8 blacktab[7] = {0xff,1,3,0xff,6,8,10};
+static constexpr uint8 whitetab[7] = {0,2,4,5,7,9,11};
+static constexpr uint8 blacktab[7] = {0xff,1,3,0xff,6,8,10};
 
 BEGIN_MESSAGE_MAP(CKeyboardControl, CWnd)
 	ON_WM_DESTROY()

@@ -415,7 +415,7 @@ CString LFOPlugin::GetParamDisplay(PlugParamIndex param)
 		return m_bypassed ? _T("Yes") : _T("No");
 	} else if(param == kWaveform)
 	{
-		static const TCHAR *waveforms[] = { _T("Sine"), _T("Triangle"), _T("Saw"), _T("Square"), _T("Noise"), _T("Smoothed Noise") };
+		static constexpr const TCHAR * const waveforms[] = { _T("Sine"), _T("Triangle"), _T("Saw"), _T("Square"), _T("Noise"), _T("Smoothed Noise") };
 		if(m_waveForm < MPT_ARRAY_COUNT(waveforms))
 			return waveforms[m_waveForm];
 	} else if(param == kLoopMode)

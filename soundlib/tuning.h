@@ -28,7 +28,7 @@ class CTuning
 
 public:
 
-	static const char s_FileExtension[5];
+	static constexpr char s_FileExtension[5] = ".tun";
 
 	static constexpr RATIOTYPE s_DefaultFallbackRatio = 1.0f;
 	static constexpr NOTEINDEXTYPE s_StepMinDefault = -64;

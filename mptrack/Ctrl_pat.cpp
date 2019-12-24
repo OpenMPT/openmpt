@@ -269,7 +269,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 		CString s;
 		if(updateAll || updateSmpNames || updateInsNames)
 		{
-			static const TCHAR szSplitFormat[] = _T("%02u %s %02u: %s/%s");
+			constexpr TCHAR szSplitFormat[] = _T("%02u %s %02u: %s/%s");
 			UINT nPos = 0;
 			m_CbnInstrument.SetRedraw(FALSE);
 			m_CbnInstrument.ResetContent();

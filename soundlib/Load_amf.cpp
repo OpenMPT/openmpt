@@ -263,7 +263,7 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 		} else
 		{
 			// Effect
-			static const ModCommand::COMMAND effTrans[] =
+			static constexpr ModCommand::COMMAND effTrans[] =
 			{
 				CMD_NONE,			CMD_SPEED,			CMD_VOLUMESLIDE,		CMD_VOLUME,
 				CMD_PORTAMENTOUP,	CMD_NONE,			CMD_TONEPORTAMENTO,		CMD_TREMOR,

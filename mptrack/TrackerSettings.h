@@ -156,7 +156,7 @@ struct EQPreset
 	uint32 Freqs[MAX_EQ_BANDS];
 };
 
-static const EQPreset FlatEQPreset = { "Flat", {16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } };
+constexpr EQPreset FlatEQPreset = { "Flat", {16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } };
 
 template<> inline SettingValue ToSettingValue(const EQPreset &val)
 {

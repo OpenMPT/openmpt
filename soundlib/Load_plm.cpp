@@ -229,7 +229,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	const ROWINDEX rowsPerPat = 64;
 	uint32 maxPos = 0;
 
-	static const ModCommand::COMMAND effTrans[] =
+	static constexpr ModCommand::COMMAND effTrans[] =
 	{
 		CMD_NONE,
 		CMD_PORTAMENTOUP,

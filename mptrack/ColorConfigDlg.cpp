@@ -19,7 +19,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-static const struct ColorDescriptions
+static constexpr struct ColorDescriptions
 {
 	const TCHAR *name;
 	int previewImage;

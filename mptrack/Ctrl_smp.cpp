@@ -2246,7 +2246,7 @@ public:
 		memcpy(pNewSample, sample.sampleb(), selection.nStart * sample.GetBytesPerSample());
 		memcpy(static_cast<std::byte *>(pNewSample) + stretchEnd * sample.GetBytesPerSample(), sample.sampleb() + selection.nEnd * sample.GetBytesPerSample(), (sample.nLength - selection.nEnd) * sample.GetBytesPerSample());
 
-		static const SmpLength MaxInputChunkSize = 1024;
+		constexpr SmpLength MaxInputChunkSize = 1024;
 
 		std::vector<float> buffer(MaxInputChunkSize * numChannels);
 		std::vector<SC::Convert<float, int16>> convf32(numChannels);

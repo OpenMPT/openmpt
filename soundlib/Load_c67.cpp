@@ -104,7 +104,7 @@ static void TranslateVolume(ModCommand &m, uint8 volume, bool isFM)
 	// CDFM uses a linear volume scale for FM instruments.
 	// ScreamTracker, on the other hand, directly uses the OPL chip's logarithmic volume scale.
 	// Neither FM nor PCM instruments can be fully muted in CDFM.
-	static const uint8 fmVolume[16] =
+	static constexpr uint8 fmVolume[16] =
 	{
 		0x08, 0x10, 0x18, 0x20, 0x28, 0x2C, 0x30, 0x34,
 		0x36, 0x38, 0x3A, 0x3C, 0x3D, 0x3E, 0x3F, 0x40,

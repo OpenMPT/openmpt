@@ -20,7 +20,7 @@ class CRippleBitmap: public CWnd
 
 public:
 
-	static const DWORD UPDATE_INTERVAL = 15; // milliseconds
+	static constexpr DWORD UPDATE_INTERVAL = 15; // milliseconds
 
 protected:
 
@@ -60,7 +60,7 @@ protected:
 	CTabCtrl m_Tab;
 	CEdit m_TabEdit;
 	UINT_PTR m_TimerID = 0;
-	static const UINT_PTR TIMERID_ABOUT_DEFAULT = 3;
+	static constexpr UINT_PTR TIMERID_ABOUT_DEFAULT = 3;
 
 public:
 	static CAboutDlg *instance;

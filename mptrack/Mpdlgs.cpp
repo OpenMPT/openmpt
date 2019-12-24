@@ -206,7 +206,7 @@ void COptionsSoundcard::UpdateLatency()
 	}
 	// latency
 	{
-		static const double latencies [] = {
+		static constexpr double latencies [] = {
 			0.001,
 			0.002,
 			0.003,
@@ -250,7 +250,7 @@ void COptionsSoundcard::UpdateUpdateInterval()
 	}
 	// update interval
 	{
-		static const double updateIntervals [] = {
+		static constexpr double updateIntervals [] = {
 			0.001,
 			0.002,
 			0.005,

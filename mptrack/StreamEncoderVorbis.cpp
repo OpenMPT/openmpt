@@ -249,7 +249,7 @@ bool VorbisEncoder::IsBitrateSupported(int samplerate, int channels, int bitrate
 
 mpt::ustring VorbisEncoder::DescribeQuality(float quality) const
 {
-	static const int q_table[11] = { 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 500 }; // http://wiki.hydrogenaud.io/index.php?title=Recommended_Ogg_Vorbis
+	static constexpr int q_table[11] = { 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 500 }; // http://wiki.hydrogenaud.io/index.php?title=Recommended_Ogg_Vorbis
 	int q = Clamp(mpt::saturate_round<int>(quality * 10.0f), 0, 10);
 	return mpt::format(U_("Q%1 (~%2 kbit)"))(mpt::ufmt::fix(quality * 10.0f, 1), q_table[q]);
 }

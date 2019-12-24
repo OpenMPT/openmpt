@@ -47,7 +47,7 @@ uint64 Now()
 
 mpt::ustring ToUString(uint64 time100ns)
 {
-	static const std::size_t bufsize = 256;
+	constexpr std::size_t bufsize = 256;
 
 	mpt::ustring result;
 

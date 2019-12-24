@@ -294,9 +294,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeAdditionalSize(MemoryFileReader &file, 
 }
 
 
-const std::size_t CSoundFile::ProbeRecommendedSize = PROBE_RECOMMENDED_SIZE;
-
-
 #define MPT_DO_PROBE( storedResult , call ) \
 	MPT_DO { \
 		ProbeResult lastResult = call ; \

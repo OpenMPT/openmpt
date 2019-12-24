@@ -334,7 +334,7 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 			} else if (vol >= 0x60)
 			{
 				// Volume commands 6-F translation.
-				static const ModCommand::VOLCMD volEffTrans[] =
+				static constexpr ModCommand::VOLCMD volEffTrans[] =
 				{
 					VOLCMD_VOLSLIDEDOWN, VOLCMD_VOLSLIDEUP, VOLCMD_FINEVOLDOWN, VOLCMD_FINEVOLUP,
 					VOLCMD_VIBRATOSPEED, VOLCMD_VIBRATODEPTH, VOLCMD_PANNING, VOLCMD_PANSLIDELEFT,

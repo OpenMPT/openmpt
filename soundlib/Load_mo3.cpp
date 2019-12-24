@@ -1006,7 +1006,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	L= 06 00 22 x
 	*/
 
-	static const ModCommand::COMMAND effTrans[] =
+	static constexpr ModCommand::COMMAND effTrans[] =
 	{
 		CMD_NONE,				CMD_NONE,				CMD_NONE,				CMD_ARPEGGIO,
 		CMD_PORTAMENTOUP,		CMD_PORTAMENTODOWN,		CMD_TONEPORTAMENTO,		CMD_VIBRATO,

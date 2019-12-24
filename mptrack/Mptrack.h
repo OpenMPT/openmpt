@@ -340,7 +340,7 @@ extern CTrackApp theApp;
 class CFastBitmap
 {
 protected:
-	static const uint8 BLEND_OFFSET = 0x80;
+	static constexpr uint8 BLEND_OFFSET = 0x80;
 
 	struct MODPLUGFASTDIB
 	{

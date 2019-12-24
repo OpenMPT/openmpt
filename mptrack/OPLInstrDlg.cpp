@@ -132,7 +132,7 @@ LRESULT OPLInstrDlg::OnDragonDropping(WPARAM wParam, LPARAM lParam)
 // Swap OPL Key Scale Level bits for a "human-readable" value.
 static uint8 KeyScaleLevel(uint8 kslVolume)
 {
-	static const uint8 KSLFix[4] = { 0x00, 0x80, 0x40, 0xC0 };
+	static constexpr uint8 KSLFix[4] = { 0x00, 0x80, 0x40, 0xC0 };
 	return KSLFix[kslVolume >> 6];
 }
 
@@ -163,7 +163,7 @@ void OPLInstrDlg::SetPatch(OPLPatch &patch)
 		if(numWaveforms != m_waveform[op].GetCount())
 		{
 			m_waveform[op].ResetContent();
-			static const TCHAR *waveformNames[] =
+			static constexpr const TCHAR *waveformNames[] =
 			{
 				_T("Sine"), _T("Half Sine"), _T("Absolute Sine"), _T("Pulse Sine"),
 				_T("Sine (Even Periods)"), _T("Absolute Sine (Even Periods)"), _T("Square"), _T("Derived Square")

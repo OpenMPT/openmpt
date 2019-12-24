@@ -999,8 +999,8 @@ BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
 /////////////////////////////////////////////////////////////////////////////////////////
 // Copy/Paste envelope
 
-static const CHAR *pszEnvHdr = "ModPlug Tracker Envelope\r\n";
-static const CHAR *pszEnvFmt = "%d,%d,%d,%d,%d,%d,%d,%d\r\n";
+static constexpr const CHAR *pszEnvHdr = "ModPlug Tracker Envelope\r\n";
+static constexpr const CHAR *pszEnvFmt = "%d,%d,%d,%d,%d,%d,%d,%d\r\n";
 
 static bool EnvelopeToString(CStringA &s, const InstrumentEnvelope &env)
 {

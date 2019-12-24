@@ -28,7 +28,7 @@ class CTuningCollection
 
 public:
 
-	static const char s_FileExtension[4];
+	static constexpr char s_FileExtension[4] = ".tc";
 
 	// OpenMPT <= 1.26 had to following limits:
 	//  *  255 built-in tunings (only 2 were ever actually provided)

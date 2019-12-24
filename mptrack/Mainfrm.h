@@ -207,7 +207,7 @@ template<> inline WINDOWPLACEMENT FromSettingValue(const SettingValue &val)
 class VUMeter
 {
 public:
-	static const std::size_t maxChannels = 4;
+	static constexpr std::size_t maxChannels = 4;
 	static const float dynamicRange; // corresponds to the current implementation of the UI widget diplaying the result
 	struct Channel
 	{
@@ -548,8 +548,8 @@ public:
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 
 	// Defines maximum number of items in example modules menu.
-	static const size_t nMaxItemsInExampleModulesMenu = 50;
-	static const size_t nMaxItemsInTemplateModulesMenu = 50;
+	static constexpr size_t nMaxItemsInExampleModulesMenu = 50;
+	static constexpr size_t nMaxItemsInTemplateModulesMenu = 50;
 
 	/// Array of paths of example modules that are available from help menu.
 	std::vector<mpt::PathString> m_ExampleModulePaths;

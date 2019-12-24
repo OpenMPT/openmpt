@@ -1463,7 +1463,7 @@ bool CVstPlugin::MidiSysexSend(mpt::const_byte_span sysex)
 
 void CVstPlugin::HardAllNotesOff()
 {
-	static const uint32 SCRATCH_BUFFER_SIZE = 64;
+	constexpr uint32 SCRATCH_BUFFER_SIZE = 64;
 	float out[2][SCRATCH_BUFFER_SIZE]; // scratch buffers
 
 	// The JUCE framework doesn't like processing while being suspended.

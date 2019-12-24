@@ -154,9 +154,9 @@ enum
 };
 
 
-static const VibratoType MDLVibratoType[] = { VIB_SINE, VIB_RAMP_DOWN, VIB_SQUARE, VIB_SINE };
+static constexpr VibratoType MDLVibratoType[] = { VIB_SINE, VIB_RAMP_DOWN, VIB_SQUARE, VIB_SINE };
 
-static const ModCommand::COMMAND MDLEffTrans[] =
+static constexpr ModCommand::COMMAND MDLEffTrans[] =
 {
 	/* 0 */ CMD_NONE,
 	/* 1st column only */

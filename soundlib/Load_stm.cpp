@@ -258,7 +258,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 				m->vol = vol;
 			}
 
-			static const EffectCommand stmEffects[] =
+			static constexpr EffectCommand stmEffects[] =
 			{
 				CMD_NONE,        CMD_SPEED,          CMD_POSITIONJUMP, CMD_PATTERNBREAK,   // .ABC
 				CMD_VOLUMESLIDE, CMD_PORTAMENTODOWN, CMD_PORTAMENTOUP, CMD_TONEPORTAMENTO, // DEFG

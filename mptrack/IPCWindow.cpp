@@ -20,7 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace IPCWindow
 {
 
-	static const TCHAR ClassName[] = _T("OpenMPT_IPC_Wnd");
+	static constexpr TCHAR ClassName[] = _T("OpenMPT_IPC_Wnd");
 	static HWND ipcWindow = nullptr;
 
 	static LRESULT CALLBACK IPCWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

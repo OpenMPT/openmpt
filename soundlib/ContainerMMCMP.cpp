@@ -74,23 +74,23 @@ MPT_BINARY_STRUCT(MMCMPSUBBLOCK, 8)
 #define MMCMP_ABS16		0x0200
 #define MMCMP_ENDIAN	0x0400
 
-static const uint8 MMCMP8BitCommands[8] =
+static constexpr uint8 MMCMP8BitCommands[8] =
 {
 	0x01, 0x03, 0x07, 0x0F, 0x1E, 0x3C, 0x78, 0xF8
 };
 
-static const uint8 MMCMP8BitFetch[8] =
+static constexpr uint8 MMCMP8BitFetch[8] =
 {
 	3, 3, 3, 3, 2, 1, 0, 0
 };
 
-static const uint16 MMCMP16BitCommands[16] =
+static constexpr uint16 MMCMP16BitCommands[16] =
 {
 	0x01,  0x03,  0x07,  0x0F,  0x1E,   0x3C,   0x78,   0xF0,
 	0x1F0, 0x3F0, 0x7F0, 0xFF0, 0x1FF0, 0x3FF0, 0x7FF0, 0xFFF0
 };
 
-static const uint8 MMCMP16BitFetch[16] =
+static constexpr uint8 MMCMP16BitFetch[16] =
 {
 	4, 4, 4, 4, 3, 2, 1, 0,
 	0, 0, 0, 0, 0, 0, 0, 0

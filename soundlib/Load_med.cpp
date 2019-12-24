@@ -285,7 +285,7 @@ struct MMD0EXP
 MPT_BINARY_STRUCT(MMD0EXP, 80)
 
 
-static const uint8 bpmvals[9] = { 179,164,152,141,131,123,116,110,104};
+static constexpr uint8 bpmvals[9] = { 179,164,152,141,131,123,116,110,104};
 
 static void MedConvert(ModCommand &p, const MMD0SONGHEADER *pmsh)
 {

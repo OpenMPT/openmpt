@@ -28,7 +28,7 @@ protected:
 	CSpinButtonCtrl m_midiChnSpin;
 	LFOPlugin &m_lfoPlugin;
 	bool m_locked : 1;
-	static const int SLIDER_GRANULARITY = 1000;
+	static constexpr int SLIDER_GRANULARITY = 1000;
 
 public:
 

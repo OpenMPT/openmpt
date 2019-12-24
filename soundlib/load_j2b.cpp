@@ -31,7 +31,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // First off, a nice vibrato translation LUT.
-static const VibratoType j2bAutoVibratoTrans[] = 
+static constexpr VibratoType j2bAutoVibratoTrans[] = 
 {
 	VIB_SINE, VIB_SQUARE, VIB_RAMP_UP, VIB_RAMP_DOWN, VIB_RANDOM,
 };
@@ -471,7 +471,7 @@ MPT_BINARY_STRUCT(AMSampleHeader, 60)
 static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSoundFile &sndFile)
 {
 	// Effect translation LUT
-	static const EffectCommand amEffTrans[] =
+	static constexpr EffectCommand amEffTrans[] =
 	{
 		CMD_ARPEGGIO, CMD_PORTAMENTOUP, CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,
 		CMD_VIBRATO, CMD_TONEPORTAVOL, CMD_VIBRATOVOL, CMD_TREMOLO,

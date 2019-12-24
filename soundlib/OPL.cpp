@@ -67,7 +67,7 @@ uint16 OPL::ChannelToRegister(uint8 oplCh)
 // Translate a channel's first operator address into a register
 uint16 OPL::OperatorToRegister(uint8 oplCh)
 {
-	static const uint8 OPLChannelToOperator[] = { 0, 1, 2, 8, 9, 10, 16, 17, 18 };
+	static constexpr uint8 OPLChannelToOperator[] = { 0, 1, 2, 8, 9, 10, 16, 17, 18 };
 	if(oplCh < 9)
 		return OPLChannelToOperator[oplCh];
 	else

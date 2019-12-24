@@ -73,7 +73,7 @@ public:
 #endif
 	std::vector<ChnSettings> chnSettings;
 	double elapsedTime;
-	static const uint32 IGNORE_CHANNEL = uint32_max;
+	static constexpr uint32 IGNORE_CHANNEL = uint32_max;
 
 	GetLengthMemory(const CSoundFile &sf)
 		: sndFile(sf)
@@ -5705,8 +5705,8 @@ void CSoundFile::SetSpeed(PlayState &playState, uint32 param) const
 // Convert a ST2 tempo byte to classic tempo and speed combination
 TEMPO CSoundFile::ConvertST2Tempo(uint8 tempo)
 {
-	static const uint8 ST2TempoFactor[] = { 140, 50, 25, 15, 10, 7, 6, 4, 3, 3, 2, 2, 2, 2, 1, 1 };
-	static const uint32 st2MixingRate = 23863; // Highest possible setting in ST2
+	static constexpr uint8 ST2TempoFactor[] = { 140, 50, 25, 15, 10, 7, 6, 4, 3, 3, 2, 2, 2, 2, 1, 1 };
+	static constexpr uint32 st2MixingRate = 23863; // Highest possible setting in ST2
 
 	// This underflows at tempo 06...0F, and the resulting tick lengths depend on the mixing rate.
 	int32 samplesPerTick = st2MixingRate / (49 - ((ST2TempoFactor[tempo >> 4u] * (tempo & 0x0F)) >> 4u));
