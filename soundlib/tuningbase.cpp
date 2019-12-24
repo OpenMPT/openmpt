@@ -71,58 +71,6 @@ bool CTuning::Multiply(const RATIOTYPE& r)
 }
 
 
-bool CTuning::CreateGroupGeometric(const NOTEINDEXTYPE& s, const RATIOTYPE& r, const NOTEINDEXTYPE& startindex)
-{
-	if(s < 1 || r <= 0 || startindex < GetValidityRange().first)
-		return true;
-
-	std::vector<RATIOTYPE> v;
-	v.reserve(s);
-	for(NOTEINDEXTYPE i = startindex; i<startindex+s; i++)
-		v.push_back(GetRatio(i));
-	return CreateGroupGeometric(v, r, GetValidityRange(), startindex);
-}
-
-
-bool CTuning::CreateGroupGeometric(const std::vector<RATIOTYPE>& v, const RATIOTYPE& r, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos)
-{
-	{
-		if(vr.first > vr.second || v.size() == 0) return true;
-		if(ratiostartpos < vr.first || vr.second < ratiostartpos || static_cast<UNOTEINDEXTYPE>(vr.second - ratiostartpos) < static_cast<UNOTEINDEXTYPE>(v.size() - 1)) return true;
-		if(GetFineStepCount() > FINESTEPCOUNT_MAX) return true;
-		for(size_t i = 0; i<v.size(); i++) {if(v[i] < 0) return true;}
-		if(ProCreateGroupGeometric(v,r, vr, ratiostartpos))
-			return true;
-		else
-		{
-			m_TuningType = TT_GROUPGEOMETRIC;
-			UpdateFineStepTable();
-			return false;
-		}
-	}
-}
-
-
-
-bool CTuning::CreateGeometric(const UNOTEINDEXTYPE& s, const RATIOTYPE& r, const VRPAIR vr)
-{
-	{
-		if(vr.first > vr.second) return true;
-		if(s < 1 || r <= 0) return true;
-		if(ProCreateGeometric(s,r,vr))
-			return true;
-		else
-		{
-			m_TuningType = TT_GEOMETRIC;
-			UpdateFineStepTable();
-			return false;
-		}
-	}
-}
-
-
-
-
 bool CTuning::ChangeGroupsize(const NOTEINDEXTYPE& s)
 {
 	if(s < 1)

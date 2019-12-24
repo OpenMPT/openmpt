@@ -187,19 +187,15 @@ private:
 	SerializationResult InitDeserializeOLD(std::istream&);
 
 	//Create GroupGeometric tuning of *this using virtual ProCreateGroupGeometric.
-	bool CreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR vr, const NOTEINDEXTYPE ratiostartpos);
+	bool CreateGroupGeometric(const std::vector<RATIOTYPE> &v, const RATIOTYPE &r, const VRPAIR &vr, const NOTEINDEXTYPE &ratiostartpos);
 
 	//Create GroupGeometric of *this using ratios from 'itself' and ratios starting from
 	//position given as third argument.
-	bool CreateGroupGeometric(const NOTEINDEXTYPE&, const RATIOTYPE&, const NOTEINDEXTYPE&);
+	bool CreateGroupGeometric(const NOTEINDEXTYPE &s, const RATIOTYPE &r, const NOTEINDEXTYPE &startindex);
 
 	//Create geometric tuning of *this using ratio(0) = 1.
-	bool CreateGeometric(const UNOTEINDEXTYPE& p, const RATIOTYPE& r) {return CreateGeometric(p,r,GetValidityRange());}
-	bool CreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR vr);
-
-	//The two methods below return false if action was done, true otherwise.
-	bool ProCreateGroupGeometric(const std::vector<RATIOTYPE>&, const RATIOTYPE&, const VRPAIR&, const NOTEINDEXTYPE& ratiostartpos);
-	bool ProCreateGeometric(const UNOTEINDEXTYPE&, const RATIOTYPE&, const VRPAIR&);
+	bool CreateGeometric(const UNOTEINDEXTYPE &p, const RATIOTYPE &r);
+	bool CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const VRPAIR &vr);
 
 	void UpdateFineStepTable();
 
