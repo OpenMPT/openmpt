@@ -41,6 +41,8 @@ is just a high-level summary.
 
  *  [**Change**] std::istream based file I/O has been speed up.
  *  [**Change**] Dependency on iconv on Linux has been removed.
+ *  [**Change**] openmpt123: Support for SDL1 (but not SDL2) output has been
+    deprecated and will be removed in a future release.
 
  *  [**Regression**] foo_openmpt: foo_openmpt is discontinued. Please use
     Kode54's fork foo_openmpt54:

@@ -10,6 +10,36 @@
 #ifndef OPENMPT123_CONFIG_HPP
 #define OPENMPT123_CONFIG_HPP
 
+#define MPT_PP_DEFER(m, ...) m(__VA_ARGS__)
+#define MPT_PP_STRINGIFY(x) #x
+#define MPT_PP_JOIN_HELPER(a, b) a ## b
+#define MPT_PP_JOIN(a, b) MPT_PP_JOIN_HELPER(a, b)
+#define MPT_PP_UNIQUE_IDENTIFIER(prefix) MPT_PP_JOIN(prefix , __LINE__)
+
+#if defined(__clang__)
+#define MPT_WARNING(text)           _Pragma(MPT_PP_STRINGIFY(GCC warning text))
+#define MPT_WARNING_STATEMENT(text) _Pragma(MPT_PP_STRINGIFY(GCC warning text))
+#elif defined(_MSC_VER)
+#define MPT_WARNING(text)           __pragma(message(__FILE__ "(" MPT_PP_DEFER(MPT_PP_STRINGIFY, __LINE__) "): Warning: " text))
+#define MPT_WARNING_STATEMENT(text) __pragma(message(__FILE__ "(" MPT_PP_DEFER(MPT_PP_STRINGIFY, __LINE__) "): Warning: " text))
+#elif defined(__GNUC__)
+#define MPT_WARNING(text)           _Pragma(MPT_PP_STRINGIFY(GCC warning text))
+#define MPT_WARNING_STATEMENT(text) _Pragma(MPT_PP_STRINGIFY(GCC warning text))
+#else
+#define MPT_WARNING(text) \
+	static inline int MPT_PP_UNIQUE_IDENTIFIER(MPT_WARNING_NAME) () noexcept { \
+		int warning [[deprecated("Warning: " text)]] = 0; \
+		return warning; \
+	} \
+/**/
+#define MPT_WARNING_STATEMENT(text) \
+	int MPT_PP_UNIQUE_IDENTIFIER(MPT_WARNING_NAME) = [](){ \
+		int warning [[deprecated("Warning: " text)]] = 0; \
+		return warning; \
+	}() \
+/**/
+#endif
+
 #if defined(HAVE_CONFIG_H)
 // wrapper for autoconf macros
 #include "config.h"
@@ -56,6 +86,7 @@
 #endif
 
 #if defined(MPT_WITH_SDL)
+MPT_WARNING("SDL1 support is deprecated and will be removed in a future openmpt123 version.")
 #ifndef MPT_NEEDS_THREADS
 #define MPT_NEEDS_THREADS
 #endif
