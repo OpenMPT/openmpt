@@ -93,72 +93,67 @@ public:
 
 	void SetNoteName(const NOTEINDEXTYPE&, const std::string&);
 
-	static CTuning* CreateDeserialize(std::istream & f)
+	static std::unique_ptr<CTuning> CreateDeserialize(std::istream & f)
 	{
-		CTuning *pT = new CTuning();
+		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		if(pT->InitDeserialize(f) != SerializationResult::Success)
 		{
-			delete pT;
 			return nullptr;
 		}
 		return pT;
 	}
 
 	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
-	static CTuning* CreateDeserializeOLD(std::istream & f)
+	static std::unique_ptr<CTuning> CreateDeserializeOLD(std::istream & f)
 	{
-		CTuning *pT = new CTuning();
+		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		if(pT->InitDeserializeOLD(f) != SerializationResult::Success)
 		{
-			delete pT;
 			return nullptr;
 		}
 		return pT;
 	}
 
-	static CTuning* CreateGeneral(const std::string &name)
+	static std::unique_ptr<CTuning> CreateGeneral(const std::string &name)
 	{
-		CTuning *pT = new CTuning();
+		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		pT->SetName(name);
 		return pT;
 	}
 
-	static CTuning* CreateGroupGeometric(const std::string &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
+	static std::unique_ptr<CTuning> CreateGroupGeometric(const std::string &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
 	{
-		CTuning *pT = new CTuning();
+		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		pT->SetName(name);
 		if(pT->CreateGroupGeometric(groupsize, groupratio, 0) != false)
 		{
-			delete pT;
 			return nullptr;
 		}
 		pT->SetFineStepCount(finestepcount);
 		return pT;
 	}
 
-	static CTuning* CreateGroupGeometric(const std::string &name, const std::vector<RATIOTYPE> &ratios, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
+	static std::unique_ptr<CTuning> CreateGroupGeometric(const std::string &name, const std::vector<RATIOTYPE> &ratios, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
 	{
-		CTuning *pT = new CTuning();
+		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		pT->SetName(name);
 		VRPAIR range = std::make_pair(s_StepMinDefault, static_cast<NOTEINDEXTYPE>(s_StepMinDefault + s_RatioTableSizeDefault - 1));
 		range.second = std::max(range.second, mpt::saturate_cast<NOTEINDEXTYPE>(ratios.size() - 1));
 		range.first = 0 - range.second - 1;
 		if(pT->CreateGroupGeometric(ratios, groupratio, range, 0) != false)
 		{
-			delete pT;
 			return nullptr;
 		}
 		pT->SetFineStepCount(finestepcount);
 		return pT;
 	}
 
-	static CTuning* CreateGeometric(const std::string &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
+	static std::unique_ptr<CTuning> CreateGeometric(const std::string &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
 	{
-		CTuning *pT = new CTuning();
+		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		pT->SetName(name);
 		if(pT->CreateGeometric(groupsize, groupratio) != false)
 		{
-			delete pT;
 			return nullptr;
 		}
 		pT->SetFineStepCount(finestepcount);

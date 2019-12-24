@@ -227,42 +227,44 @@ bool CTuningCollection::Remove(const std::size_t i)
 }
 
 
-bool CTuningCollection::AddTuning(CTuning *pT)
+CTuning* CTuningCollection::AddTuning(std::unique_ptr<CTuning> pT)
 {
 	if(m_Tunings.size() >= s_nMaxTuningCount)
 	{
-		return false;
+		return nullptr;
 	}
 	if(!pT)
 	{
-		return false;
+		return nullptr;
 	}
-	m_Tunings.push_back(std::unique_ptr<CTuning>(pT));
-	return true;
+	CTuning *result = pT.get();
+	m_Tunings.push_back(std::move(pT));
+	return result;
 }
 
 
-bool CTuningCollection::AddTuning(std::istream& inStrm)
+CTuning* CTuningCollection::AddTuning(std::istream& inStrm)
 {
 	if(m_Tunings.size() >= s_nMaxTuningCount)
 	{
-		return false;
+		return nullptr;
 	}
 	if(!inStrm.good())
 	{
-		return false;
+		return nullptr;
 	}
-	CTuning *pT = CTuning::CreateDeserializeOLD(inStrm);
+	std::unique_ptr<CTuning> pT = CTuning::CreateDeserializeOLD(inStrm);
 	if(!pT)
 	{
 		pT = CTuning::CreateDeserialize(inStrm);
 	}
 	if(!pT)
 	{
-		return false;
+		return nullptr;
 	}
-	m_Tunings.push_back(std::unique_ptr<CTuning>(pT));
-	return true;
+	CTuning *result = pT.get();
+	m_Tunings.push_back(std::move(pT));
+	return result;
 }
 
 

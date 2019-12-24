@@ -1443,9 +1443,9 @@ bool CSoundFile::DestroySampleThreadsafe(SAMPLEINDEX nSample)
 }
 
 
-CTuning* CSoundFile::CreateTuning12TET(const std::string &name)
+std::unique_ptr<CTuning> CSoundFile::CreateTuning12TET(const std::string &name)
 {
-	CTuning* pT = CTuning::CreateGeometric(name, 12, 2, 15);
+	std::unique_ptr<CTuning> pT = CTuning::CreateGeometric(name, 12, 2, 15);
 	for(ModCommand::NOTE note = 0; note < 12; ++note)
 	{
 		pT->SetNoteName(note, mpt::ToCharset(mpt::Charset::ASCII, mpt::ustring(NoteNamesSharp[note])));

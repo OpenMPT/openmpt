@@ -324,7 +324,7 @@ public:
 
 	//Tuning-->
 public:
-	static CTuning* CreateTuning12TET(const std::string &name);
+	static std::unique_ptr<CTuning> CreateTuning12TET(const std::string &name);
 	static CTuning *GetDefaultTuning() {return nullptr;}
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 

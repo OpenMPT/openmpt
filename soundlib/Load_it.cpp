@@ -210,11 +210,12 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 			CTuning *localTuning = TrackerSettings::Instance().oldLocalTunings->GetTuning(str);
 			if(localTuning)
 			{
-				CTuning* pNewTuning = new CTuning(*localTuning);
-				if(csf.GetTuneSpecificTunings().AddTuning(pNewTuning))
+				std::unique_ptr<CTuning> pNewTuning = std::unique_ptr<CTuning>(new CTuning(*localTuning));
+				CTuning *pT = csf.GetTuneSpecificTunings().AddTuning(std::move(pNewTuning));
+				if(pT)
 				{
 					csf.AddToLog("Local tunings are deprecated and no longer supported. Tuning '" + str + "' found in Local tunings has been copied to Tune-specific tunings and will be saved in the module file.");
-					csf.Instruments[i]->pTuning = pNewTuning;
+					csf.Instruments[i]->pTuning = pT;
 					if(csf.GetpModDoc() != nullptr)
 					{
 						csf.GetpModDoc()->SetModified();
@@ -222,7 +223,6 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 					continue;
 				} else
 				{
-					delete pNewTuning;
 					csf.AddToLog("Copying Local tuning '" + str + "' to Tune-specific tunings failed.");
 				}
 			}
@@ -230,12 +230,13 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 
 			if(str == "12TET [[fs15 1.17.02.49]]" || str == "12TET")
 			{
-				CTuning* pNewTuning = csf.CreateTuning12TET(str);
-				if(csf.GetTuneSpecificTunings().AddTuning(pNewTuning))
+				std::unique_ptr<CTuning> pNewTuning = csf.CreateTuning12TET(str);
+				CTuning *pT = csf.GetTuneSpecificTunings().AddTuning(std::move(pNewTuning));
+				if(pT)
 				{
 					#ifdef MODPLUG_TRACKER
 						csf.AddToLog("Built-in tunings will no longer be used. Tuning '" + str + "' has been copied to Tune-specific tunings and will be saved in the module file.");
-						csf.Instruments[i]->pTuning = pNewTuning;
+						csf.Instruments[i]->pTuning = pT;
 						if(csf.GetpModDoc() != nullptr)
 						{
 							csf.GetpModDoc()->SetModified();
@@ -244,7 +245,6 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 					continue;
 				} else
 				{
-					delete pNewTuning;
 					#ifdef MODPLUG_TRACKER
 						csf.AddToLog("Copying Built-in tuning '" + str + "' to Tune-specific tunings failed.");
 					#endif

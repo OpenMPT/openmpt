@@ -44,10 +44,9 @@ public:
 
 public:
 
-	//Note: Given pointer is deleted by CTuningCollection
-	//at some point.
-	bool AddTuning(CTuning *pT);
-	bool AddTuning(std::istream& inStrm);
+	// returns observer ptr if successfull
+	CTuning* AddTuning(std::unique_ptr<CTuning> pT);
+	CTuning* AddTuning(std::istream& inStrm);
 	
 	bool Remove(const std::size_t i);
 	bool Remove(const CTuning *pT);

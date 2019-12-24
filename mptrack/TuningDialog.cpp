@@ -435,7 +435,7 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::TUNINGTYPE type)
 		return false;
 	}
 
-	CTuning* pNewTuning = nullptr;
+	std::unique_ptr<CTuning> pNewTuning;
 	if(type == TT_GROUPGEOMETRIC)
 	{
 		std::vector<Tuning::RATIOTYPE> ratios;
@@ -452,14 +452,14 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::TUNINGTYPE type)
 		pNewTuning = CTuning::CreateGeneral("Unnamed");
 	}
 
-	if(!pTC->AddTuning(pNewTuning))
+	CTuning *pT = pTC->AddTuning(std::move(pNewTuning));
+	if(!pT)
 	{
 		Reporting::Notification("Add tuning failed");
-		delete pNewTuning;
 		return false;
 	}
-	AddTreeItem(pNewTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(pTC)), NULL);
-	m_pActiveTuning = pNewTuning;
+	AddTreeItem(pT, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(pTC)), NULL);
+	m_pActiveTuning = pT;
 	m_ModifiedTCs[pTC] = true;
 	UpdateView();
 
@@ -799,7 +799,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 		CTuningCollection *pTC = nullptr;
 		CString tcName;
 		mpt::PathString tcFilename;
-		CTuning *pT = nullptr;
+		std::unique_ptr<CTuning> pT;
 
 		if(bIsTun && CheckMagic(fin, 0, magicTC))
 		{
@@ -814,7 +814,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				if(pTC->GetNumTunings() == 1)
 				{
 					Reporting::Message(LogInformation, U_("- Tuning Collection with a Tuning file extension (.tun) detected. It only contains a single Tuning, importing the file as a Tuning.\n"), this);
-					pT = new CTuning(pTC->GetTuning(0));
+					pT = std::unique_ptr<CTuning>(new CTuning(pTC->GetTuning(0)));
 					delete pTC;
 					pTC = nullptr;
 					// ok
@@ -863,11 +863,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			EnSclImport a = ImportScl(file, fileName.ToUnicode(), pT);
 			if(a != enSclImportOk)
 			{ // failure
-				if(pT)
-				{
-					delete pT;
-					pT = nullptr;
-				}
+				pT = nullptr;
 			}
 
 		}
@@ -875,10 +871,9 @@ void CTuningDialog::OnBnClickedButtonImport()
 		if(pT)
 		{
 			CTuningCollection &tc = *m_TuningCollections.front();
-			if(!tc.AddTuning(pT))
+			CTuning *activeTuning = tc.AddTuning(std::move(pT));
+			if(!activeTuning)
 			{
-				delete pT;
-				pT = nullptr;
 				if(tc.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 				{
 					sLoadReport += mpt::format(U_("- Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n"))(fileNameExt, static_cast<std::size_t>(CTuningCollection::s_nMaxTuningCount));
@@ -888,7 +883,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				}
 			} else
 			{
-				m_pActiveTuning = pT;
+				m_pActiveTuning = activeTuning;
 				AddTreeItem(m_pActiveTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(&tc)), NULL);
 			}
 		}
@@ -1269,23 +1264,23 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, CTuning* pT)
 		return false;
 	}
 
-	CTuning* pNewTuning = nullptr;
+	std::unique_ptr<CTuning> pNewTuning;
 	if(pT)
 	{
-		pNewTuning = new CTuning(*pT);
+		pNewTuning = std::unique_ptr<CTuning>(new CTuning(*pT));
 	} else
 	{
 		Reporting::Notification("Add tuning failed");
 		return false;
 	}
-	if(!pTC->AddTuning(pNewTuning))
+	CTuning *pNewTuningTmp = pTC->AddTuning(std::move(pNewTuning));
+	if(!pNewTuningTmp)
 	{
 		Reporting::Notification("Add tuning failed");
-		delete pNewTuning;
 		return false;
 	}
-	AddTreeItem(pNewTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(pTC)), NULL);
-	m_pActiveTuning = pNewTuning;
+	AddTreeItem(pNewTuningTmp, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(pTC)), NULL);
+	m_pActiveTuning = pNewTuningTmp;
 	m_ModifiedTCs[pTC] = true;
 	UpdateView();
 
@@ -1543,7 +1538,7 @@ static inline SclFloat CentToRatio(const SclFloat& val)
 }
 
 
-CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filename, const mpt::ustring &name, CTuning * & result)
+CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filename, const mpt::ustring &name, std::unique_ptr<CTuning> & result)
 {
 	MPT_ASSERT(result == nullptr);
 	result = nullptr;
@@ -1556,7 +1551,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filen
 }
 
 
-CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const mpt::ustring &name, CTuning * & result)
+CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const mpt::ustring &name, std::unique_ptr<CTuning> & result)
 {
 	MPT_ASSERT(result == nullptr);
 	result = nullptr;
@@ -1690,7 +1685,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		tuningName = mpt::format(U_("%1 notes: %2:%3"))(nNotes - 1, mpt::ufmt::fix(groupRatio), 1);
 	}
 
-	CTuning* pT = CTuning::CreateGroupGeometric(mpt::ToCharset(mpt::Charset::Locale, tuningName), fRatios, groupRatio, 15);
+	std::unique_ptr<CTuning> pT = CTuning::CreateGroupGeometric(mpt::ToCharset(mpt::Charset::Locale, tuningName), fRatios, groupRatio, 15);
 	if(!pT)
 	{
 		return enSclImportTuningCreationFailure;
@@ -1726,7 +1721,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		}
 	}
 
-	result = pT;
+	result = std::move(pT);
 
 	return enSclImportOk;
 }
