@@ -769,42 +769,6 @@ static inline std::string ToUTF8(const widestring &str, char replacement = '?')
 
 
 
-#if defined(MPT_NEEDS_THREADS)
-
-#if defined(WIN32)
-
-class mutex {
-private:
-	CRITICAL_SECTION impl;
-public:
-	mutex() { InitializeCriticalSection(&impl); }
-	~mutex() { DeleteCriticalSection(&impl); }
-	void lock() { EnterCriticalSection(&impl); }
-	void unlock() { LeaveCriticalSection(&impl); }
-};
-
-#else
-
-class mutex {
-private:
-	pthread_mutex_t impl;
-public:
-	mutex() {
-		pthread_mutexattr_t attr;
-		pthread_mutexattr_init( &attr );
-		pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_NORMAL );
-		pthread_mutex_init( &impl, &attr );
-		pthread_mutexattr_destroy( &attr );
-	}
-	~mutex() { pthread_mutex_destroy( &impl ); }
-	void lock() { pthread_mutex_lock( &impl ); }
-	void unlock() { pthread_mutex_unlock( &impl ); }
-};
-
-#endif
-
-#endif
-
 struct field {
 	std::string key;
 	std::string val;

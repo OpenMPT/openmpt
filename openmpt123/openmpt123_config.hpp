@@ -87,9 +87,6 @@
 
 #if defined(MPT_WITH_SDL)
 MPT_WARNING("SDL1 support is deprecated and will be removed in a future openmpt123 version.")
-#ifndef MPT_NEEDS_THREADS
-#define MPT_NEEDS_THREADS
-#endif
 #endif
 
 #define OPENMPT123_VERSION_STRING OPENMPT_API_VERSION_STRING

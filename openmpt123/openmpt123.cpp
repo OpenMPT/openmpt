@@ -80,9 +80,6 @@ static const char * const license =
 #include <mmsystem.h>
 #include <mmreg.h>
 #else
-#if defined(MPT_NEEDS_THREADS)
-#include <pthread.h>
-#endif
 #include <termios.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
