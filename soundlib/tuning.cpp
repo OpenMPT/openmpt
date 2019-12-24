@@ -58,7 +58,7 @@ static_assert(CTuning::s_RatioTableFineSizeMaxDefault < static_cast<USTEPINDEXTY
 
 
 CTuning::CTuning()
-	: m_TuningType(TT_GENERAL)
+	: m_TuningType(Type::GENERAL)
 	, m_FineStepCount(0)
 {
 	m_RatioTable.clear();
@@ -111,7 +111,7 @@ bool CTuning::CreateGroupGeometric(const std::vector<RATIOTYPE> &v, const RATIOT
 	{
 		return true;
 	}
-	m_TuningType = TT_GROUPGEOMETRIC;
+	m_TuningType = Type::GROUPGEOMETRIC;
 	m_StepMin = vr.first;
 	m_GroupSize = mpt::saturate_cast<NOTEINDEXTYPE>(v.size());
 	m_GroupRatio = std::fabs(r);
@@ -150,7 +150,7 @@ bool CTuning::CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const
 	{
 		return true;
 	}
-	m_TuningType = TT_GEOMETRIC;
+	m_TuningType = Type::GEOMETRIC;
 	m_RatioTable.clear();
 	m_StepMin = s_StepMinDefault;
 	m_RatioTable.resize(s_RatioTableSizeDefault, static_cast<RATIOTYPE>(1.0));
@@ -278,13 +278,13 @@ RATIOTYPE CTuning::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE sd) co
 	if(sd <= 0) sd = 1;
 	if(sd > GetFineStepCount()) sd = GetFineStepCount();
 
-	if(GetType() != TT_GENERAL && m_RatioTableFine.size() > 0) //Taking fineratio from table
+	if(GetType() != Type::GENERAL && m_RatioTableFine.size() > 0) //Taking fineratio from table
 	{
-		if(GetType() == TT_GEOMETRIC)
+		if(GetType() == Type::GEOMETRIC)
 		{
 			return m_RatioTableFine[sd-1];
 		}
-		if(GetType() == TT_GROUPGEOMETRIC)
+		if(GetType() == Type::GROUPGEOMETRIC)
 			return m_RatioTableFine[GetRefNote(note) * GetFineStepCount() + sd - 1];
 
 		MPT_ASSERT_NOTREACHED();
@@ -302,7 +302,7 @@ RATIOTYPE CTuning::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE sd) co
 
 bool CTuning::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 {
-	if(GetType() != TT_GROUPGEOMETRIC && GetType() != TT_GENERAL)
+	if(GetType() != Type::GROUPGEOMETRIC && GetType() != Type::GENERAL)
 	{
 		return false;
 	}
@@ -317,7 +317,7 @@ bool CTuning::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 		return false;
 	}
 	m_RatioTable[s - m_StepMin] = std::fabs(r);
-	if(GetType() == TT_GROUPGEOMETRIC)
+	if(GetType() == Type::GROUPGEOMETRIC)
 	{ // update other groups
 		for(NOTEINDEXTYPE n = m_StepMin; n < m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()); ++n)
 		{
@@ -349,7 +349,7 @@ void CTuning::UpdateFineStepTable()
 		m_RatioTableFine.clear();
 		return;
 	}
-	if(GetType() == TT_GEOMETRIC)
+	if(GetType() == Type::GEOMETRIC)
 	{
 		if(m_FineStepCount > s_RatioTableFineSizeMaxDefault)
 		{
@@ -363,7 +363,7 @@ void CTuning::UpdateFineStepTable()
 			m_RatioTableFine[i-1] = std::pow(rFineStep, static_cast<RATIOTYPE>(i));
 		return;
 	}
-	if(GetType() == TT_GROUPGEOMETRIC)
+	if(GetType() == Type::GROUPGEOMETRIC)
 	{
 		const UNOTEINDEXTYPE p = GetGroupSize();
 		if(p > s_RatioTableFineSizeMaxDefault / m_FineStepCount)
@@ -391,7 +391,7 @@ void CTuning::UpdateFineStepTable()
 		}
 
 	}
-	if(GetType() == TT_GENERAL)
+	if(GetType() == Type::GENERAL)
 	{
 		//Not using table with tuning of type general.
 		m_RatioTableFine.clear();
@@ -406,7 +406,7 @@ void CTuning::UpdateFineStepTable()
 
 NOTEINDEXTYPE CTuning::GetRefNote(const NOTEINDEXTYPE note) const
 {
-	if((GetType() != TT_GROUPGEOMETRIC) && (GetType() != TT_GEOMETRIC)) return 0;
+	if((GetType() != Type::GROUPGEOMETRIC) && (GetType() != Type::GEOMETRIC)) return 0;
 	return static_cast<NOTEINDEXTYPE>(mpt::wrapping_modulo(note, GetGroupSize()));
 }
 
@@ -425,7 +425,9 @@ SerializationResult CTuning::InitDeserialize(std::istream& iStrm)
 	ssb.ReadItem(m_TuningName, "0", ReadStr);
 	uint16 dummyEditMask = 0xffff;
 	ssb.ReadItem(dummyEditMask, "1");
-	ssb.ReadItem(m_TuningType, "2");
+	std::underlying_type<Type>::type type = 0;
+	ssb.ReadItem(type, "2");
+	m_TuningType = static_cast<Type>(type);
 	ssb.ReadItem(m_NoteNameMap, "3", ReadNoteMap);
 	ssb.ReadItem(m_FineStepCount, "4");
 
@@ -444,7 +446,7 @@ SerializationResult CTuning::InitDeserialize(std::istream& iStrm)
 	}
 
 	// reject unknown types
-	if(m_TuningType != TT_GENERAL && m_TuningType != TT_GROUPGEOMETRIC && m_TuningType != TT_GEOMETRIC)
+	if(m_TuningType != Type::GENERAL && m_TuningType != Type::GROUPGEOMETRIC && m_TuningType != Type::GEOMETRIC)
 	{
 		return SerializationResult::Failure;
 	}
@@ -457,13 +459,13 @@ SerializationResult CTuning::InitDeserialize(std::istream& iStrm)
 	{
 		return SerializationResult::Failure;
 	}
-	if((GetType() == TT_GROUPGEOMETRIC) || (GetType() == TT_GEOMETRIC))
+	if((GetType() == Type::GROUPGEOMETRIC) || (GetType() == Type::GEOMETRIC))
 	{
 		if(ratiotableSize < 1 || ratiotableSize > NOTEINDEXTYPE_MAX)
 		{
 			return SerializationResult::Failure;
 		}
-		if(GetType() == TT_GEOMETRIC)
+		if(GetType() == Type::GEOMETRIC)
 		{
 			if(CreateGeometric(GetGroupSize(), GetGroupRatio(), VRPAIR(m_StepMin, static_cast<NOTEINDEXTYPE>(m_StepMin + ratiotableSize - 1))) != false)
 			{
@@ -570,7 +572,7 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
 	//Tuning type
 	int16 tt = 0;
 	mpt::IO::ReadIntLE<int16>(inStrm, tt);
-	m_TuningType = tt;
+	m_TuningType = static_cast<Type>(tt);
 
 	//Notemap
 	uint16 size = 0;
@@ -618,7 +620,7 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
 	}
 
 	// reject unknown types
-	if(m_TuningType != TT_GENERAL && m_TuningType != TT_GROUPGEOMETRIC && m_TuningType != TT_GEOMETRIC)
+	if(m_TuningType != Type::GENERAL && m_TuningType != Type::GROUPGEOMETRIC && m_TuningType != Type::GEOMETRIC)
 	{
 		return SerializationResult::Failure;
 	}
@@ -694,11 +696,11 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
 	{
 		return SerializationResult::Failure;
 	}
-	if((m_GroupSize <= 0 || m_GroupRatio <= 0) && m_TuningType != TT_GENERAL)
+	if((m_GroupSize <= 0 || m_GroupRatio <= 0) && m_TuningType != Type::GENERAL)
 	{
 		return SerializationResult::Failure;
 	}
-	if(m_TuningType == TT_GROUPGEOMETRIC || m_TuningType == TT_GEOMETRIC)
+	if(m_TuningType == Type::GROUPGEOMETRIC || m_TuningType == Type::GEOMETRIC)
 	{
 		if(m_RatioTable.size() < static_cast<std::size_t>(m_GroupSize))
 		{
@@ -714,7 +716,7 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
 	m_FineStepCount = std::clamp(mpt::saturate_cast<STEPINDEXTYPE>(m_FineStepCount), STEPINDEXTYPE(0), FINESTEPCOUNT_MAX);
 	UpdateFineStepTable();
 
-	if(m_TuningType == TT_GEOMETRIC)
+	if(m_TuningType == Type::GEOMETRIC)
 	{
 		// Convert old geometric to new groupgeometric because old geometric tunings
 		// can have ratio(0) != 1.0, which would get lost when saving nowadays.
@@ -744,23 +746,23 @@ Tuning::SerializationResult CTuning::Serialize(std::ostream& outStrm) const
 		ssb.WriteItem(m_TuningName, "0", WriteStr);
 	uint16 dummyEditMask = 0xffff;
 	ssb.WriteItem(dummyEditMask, "1");
-	ssb.WriteItem(m_TuningType, "2");
+	ssb.WriteItem(static_cast<std::underlying_type<Type>::type>(m_TuningType), "2");
 	if (m_NoteNameMap.size() > 0)
 		ssb.WriteItem(m_NoteNameMap, "3", WriteNoteMap);
 	if (GetFineStepCount() > 0)
 		ssb.WriteItem(m_FineStepCount, "4");
 
-	const TUNINGTYPE tt = GetType();
+	const Tuning::Type tt = GetType();
 	if (GetGroupRatio() > 0)
 		ssb.WriteItem(m_GroupRatio, "RTI3");
-	if (tt == TT_GROUPGEOMETRIC)
+	if (tt == Type::GROUPGEOMETRIC)
 		ssb.WriteItem(m_RatioTable, "RTI0", RatioWriter(GetGroupSize()));
-	if (tt == TT_GENERAL)
+	if (tt == Type::GENERAL)
 		ssb.WriteItem(m_RatioTable, "RTI0", RatioWriter());
-	if (tt == TT_GEOMETRIC)
+	if (tt == Type::GEOMETRIC)
 		ssb.WriteItem(m_GroupSize, "RTI2");
 
-	if(tt == TT_GEOMETRIC || tt == TT_GROUPGEOMETRIC)
+	if(tt == Type::GEOMETRIC || tt == Type::GROUPGEOMETRIC)
 	{	//For Groupgeometric this data is the number of ratios in ratiotable.
 		UNOTEINDEXTYPE ratiotableSize = static_cast<UNOTEINDEXTYPE>(m_RatioTable.size());
 		ssb.WriteItem(ratiotableSize, "RTI4");
@@ -785,7 +787,7 @@ bool CTuning::WriteSCL(std::ostream &f, const mpt::PathString &filename) const
 	for(auto & c : name) { if(static_cast<uint8>(c) < 32) c = ' '; } // remove control characters
 	if(name.length() >= 1 && name[0] == '!') name[0] = '?'; // do not confuse description with comment
 	mpt::IO::WriteTextCRLF(f, name);
-	if(GetType() == TT_GEOMETRIC)
+	if(GetType() == Type::GEOMETRIC)
 	{
 		mpt::IO::WriteTextCRLF(f, mpt::format(" %1")(m_GroupSize));
 		mpt::IO::WriteTextCRLF(f, "!");
@@ -798,7 +800,7 @@ bool CTuning::WriteSCL(std::ostream &f, const mpt::PathString &filename) const
 				mpt::ToCharset(mpt::Charset::ISO8859_1, mpt::Charset::Locale, GetNoteName((n + 1) % m_GroupSize, false))
 				));
 		}
-	} else if(GetType() == TT_GROUPGEOMETRIC)
+	} else if(GetType() == Type::GROUPGEOMETRIC)
 	{
 		mpt::IO::WriteTextCRLF(f, mpt::format(" %1")(m_GroupSize));
 		mpt::IO::WriteTextCRLF(f, "!");
@@ -813,7 +815,7 @@ bool CTuning::WriteSCL(std::ostream &f, const mpt::PathString &filename) const
 				mpt::ToCharset(mpt::Charset::ISO8859_1, mpt::Charset::Locale, GetNoteName((n + 1) % m_GroupSize, false))
 				));
 		}
-	} else if(GetType() == TT_GENERAL)
+	} else if(GetType() == Type::GENERAL)
 	{
 		mpt::IO::WriteTextCRLF(f, mpt::format(" %1")(m_RatioTable.size() + 1));
 		mpt::IO::WriteTextCRLF(f, "!");

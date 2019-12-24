@@ -339,7 +339,7 @@ private:
 	static const HTREEITEM s_notFoundItemTree;
 
 	bool AddTuning(CTuningCollection*, CTuning* pT);
-	bool AddTuning(CTuningCollection*, Tuning::TUNINGTYPE type);
+	bool AddTuning(CTuningCollection*, Tuning::Type type);
 
 	//Flag to prevent multiple exit error-messages.
 	bool m_DoErrorExit;

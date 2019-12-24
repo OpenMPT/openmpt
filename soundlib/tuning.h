@@ -30,13 +30,6 @@ public:
 
 	static const char s_FileExtension[5];
 
-	enum TuningType
-	{
-		TT_GENERAL        = 0,
-		TT_GROUPGEOMETRIC = 1,
-		TT_GEOMETRIC      = 3,
-	};
-
 	static constexpr RATIOTYPE s_DefaultFallbackRatio = 1.0f;
 	static constexpr NOTEINDEXTYPE s_StepMinDefault = -64;
 	static constexpr UNOTEINDEXTYPE s_RatioTableSizeDefault = 128;
@@ -87,7 +80,7 @@ public:
 
 	bool SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r);
 
-	TUNINGTYPE GetType() const {return m_TuningType;}
+	Tuning::Type GetType() const {return m_TuningType;}
 
 	std::string GetNoteName(const NOTEINDEXTYPE& x, bool addOctave = true) const;
 
@@ -212,7 +205,7 @@ private:
 
 private:
 
-	TUNINGTYPE m_TuningType;
+	Tuning::Type m_TuningType;
 
 	//Noteratios
 	std::vector<RATIOTYPE> m_RatioTable;

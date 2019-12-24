@@ -32,12 +32,6 @@ const HTREEITEM CTuningDialog::s_notFoundItemTree = NULL;
 using UNOTEINDEXTYPE = Tuning::UNOTEINDEXTYPE;
 using RATIOTYPE = Tuning::RATIOTYPE;
 using NOTEINDEXTYPE = Tuning::NOTEINDEXTYPE;
-enum TuningType
-{
-	TT_GENERAL = CTuning::TT_GENERAL,
-	TT_GROUPGEOMETRIC = CTuning::TT_GROUPGEOMETRIC,
-	TT_GEOMETRIC = CTuning::TT_GEOMETRIC,
-};
 
 
 // CTuningDialog dialog
@@ -175,9 +169,9 @@ BOOL CTuningDialog::OnInitDialog()
 	m_pActiveTuningCollection = GetpTuningCollection(m_pActiveTuning);
 
 	//Adding tuning type names to corresponding combobox.
-	m_CombobTuningType.SetItemData(m_CombobTuningType.AddString(_T("General")), TT_GENERAL);
-	m_CombobTuningType.SetItemData(m_CombobTuningType.AddString(_T("GroupGeometric")), TT_GROUPGEOMETRIC);
-	m_CombobTuningType.SetItemData(m_CombobTuningType.AddString(_T("Geometric")), TT_GEOMETRIC);
+	m_CombobTuningType.SetItemData(m_CombobTuningType.AddString(_T("General")), static_cast<uint16>(Tuning::Type::GENERAL));
+	m_CombobTuningType.SetItemData(m_CombobTuningType.AddString(_T("GroupGeometric")), static_cast<uint16>(Tuning::Type::GROUPGEOMETRIC));
+	m_CombobTuningType.SetItemData(m_CombobTuningType.AddString(_T("Geometric")), static_cast<uint16>(Tuning::Type::GEOMETRIC));
 	m_CombobTuningType.EnableWindow(FALSE);
 
 	m_ButtonSet.EnableWindow(FALSE);
@@ -289,7 +283,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 
 		const UNOTEINDEXTYPE period = m_pActiveTuning->GetGroupSize();
 		const RATIOTYPE GroupRatio = m_pActiveTuning->GetGroupRatio();
-		if(m_pActiveTuning->GetType() == TT_GROUPGEOMETRIC || m_pActiveTuning->GetType() == TT_GEOMETRIC)
+		if(m_pActiveTuning->GetType() == Tuning::Type::GROUPGEOMETRIC || m_pActiveTuning->GetType() == Tuning::Type::GEOMETRIC)
 		{
 			m_EditSteps.EnableWindow(TRUE);
 			m_EditRatioPeriod.EnableWindow(TRUE);
@@ -311,13 +305,13 @@ void CTuningDialog::UpdateView(const int updateMask)
 		m_CombobTuningType.EnableWindow(FALSE);
 		m_EditSteps.SetReadOnly(!enableControls);
 		m_EditRatioPeriod.SetReadOnly(!enableControls);
-		m_EditRatio.SetReadOnly((m_pActiveTuning->GetType() == TT_GEOMETRIC) ? TRUE : !enableControls);
+		m_EditRatio.SetReadOnly((m_pActiveTuning->GetType() == Tuning::Type::GEOMETRIC) ? TRUE : !enableControls);
 		m_EditNotename.SetReadOnly(!enableControls);
-		m_EditMiscActions.SetReadOnly((m_pActiveTuning->GetType() == TT_GEOMETRIC) ? TRUE : !enableControls);
+		m_EditMiscActions.SetReadOnly((m_pActiveTuning->GetType() == Tuning::Type::GEOMETRIC) ? TRUE : !enableControls);
 		m_EditFineTuneSteps.SetReadOnly(!enableControls);
 		m_EditName.SetReadOnly(!enableControls);
 
-		m_ButtonSet.EnableWindow((m_pActiveTuning->GetType() == TT_GEOMETRIC) ? FALSE : enableControls);
+		m_ButtonSet.EnableWindow((m_pActiveTuning->GetType() == Tuning::Type::GEOMETRIC) ? FALSE : enableControls);
 
 		m_CombobTuningType.Invalidate();
 		m_EditSteps.Invalidate();
@@ -415,10 +409,10 @@ void CTuningDialog::UpdateTuningType()
 	{
 		if(m_CombobTuningType.GetCount() < 3) m_DoErrorExit = true;
 
-		if(m_pActiveTuning->GetType() == TT_GEOMETRIC)
+		if(m_pActiveTuning->GetType() == Tuning::Type::GEOMETRIC)
 			m_CombobTuningType.SetCurSel(2);
 		else
-			if(m_pActiveTuning->GetType() == TT_GROUPGEOMETRIC)
+			if(m_pActiveTuning->GetType() == Tuning::Type::GROUPGEOMETRIC)
 				m_CombobTuningType.SetCurSel(1);
 			else
 				m_CombobTuningType.SetCurSel(0);
@@ -427,7 +421,7 @@ void CTuningDialog::UpdateTuningType()
 
 
 
-bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::TUNINGTYPE type)
+bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::Type type)
 {
 	if(!pTC)
 	{
@@ -436,7 +430,7 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::TUNINGTYPE type)
 	}
 
 	std::unique_ptr<CTuning> pNewTuning;
-	if(type == TT_GROUPGEOMETRIC)
+	if(type == Tuning::Type::GROUPGEOMETRIC)
 	{
 		std::vector<Tuning::RATIOTYPE> ratios;
 		for(Tuning::NOTEINDEXTYPE n = 0; n < 12; ++n)
@@ -444,7 +438,7 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::TUNINGTYPE type)
 			ratios.push_back(std::pow(static_cast<Tuning::RATIOTYPE>(2.0), static_cast<Tuning::RATIOTYPE>(n) / static_cast<Tuning::RATIOTYPE>(12)));
 		}
 		pNewTuning = CTuning::CreateGroupGeometric("Unnamed", ratios, 2, 15);
-	} else if(type == TT_GEOMETRIC)
+	} else if(type == Tuning::Type::GEOMETRIC)
 	{
 		pNewTuning = CTuning::CreateGeometric("Unnamed", 12, 2, 15);
 	} else
@@ -631,7 +625,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 			failure = !pT->WriteSCL(fout, dlg.GetFirstFile());
 			if(!failure)
 			{
-				if(m_pActiveTuning->GetType() == TT_GENERAL)
+				if(m_pActiveTuning->GetType() == Tuning::Type::GENERAL)
 				{
 					Reporting::Message(LogWarning, _T("The Scala SCL file format does not contain enough information to represent General Tunings without data loss.\n\nOpenMPT exported as much information as possible, but other software as well as OpenMPT itself will not be able to re-import the just exported Scala SCL in a way that resambles the original data completely.\n\nPlease consider additionally exporting the Tuning as an OpenMPT .tun file."), _T("Tuning - Incompatible export"), this);
 				}
@@ -1298,7 +1292,7 @@ void CTuningDialog::OnAddTuningGeneral()
 	CTuningCollection* pTC = m_CommandItemDest.GetTC();
 	m_CommandItemDest = s_notFoundItemTuning;
 	m_ModifiedTCs[pTC];
-	AddTuning(pTC, TT_GENERAL);
+	AddTuning(pTC, Tuning::Type::GENERAL);
 }
 
 void CTuningDialog::OnAddTuningGroupGeometric()
@@ -1312,7 +1306,7 @@ void CTuningDialog::OnAddTuningGroupGeometric()
 	CTuningCollection* pTC = m_CommandItemDest.GetTC();
 	m_CommandItemDest = s_notFoundItemTuning;
 	m_ModifiedTCs[pTC];
-	AddTuning(pTC, TT_GROUPGEOMETRIC);
+	AddTuning(pTC, Tuning::Type::GROUPGEOMETRIC);
 }
 
 void CTuningDialog::OnAddTuningGeometric()
@@ -1326,7 +1320,7 @@ void CTuningDialog::OnAddTuningGeometric()
 	CTuningCollection* pTC = m_CommandItemDest.GetTC();
 	m_CommandItemDest = s_notFoundItemTuning;
 	m_ModifiedTCs[pTC];
-	AddTuning(pTC, TT_GEOMETRIC);
+	AddTuning(pTC, Tuning::Type::GEOMETRIC);
 }
 
 void CTuningDialog::OnRemoveTuning()
