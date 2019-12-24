@@ -1450,7 +1450,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 			if(TrackerSettings::Instance().recordQuantizeRows != 0)
 			{
 				uint32 rows = TrackerSettings::Instance().recordQuantizeRows.Get();
-				s += mpt::cformat(_T("(Currently: %1 Row%2)"))(rows, rows == 1 ? _T("") : _T("s"));
+				s += mpt::cformat(_T("(Currently: %1 Row%2)"))(rows, CString(rows == 1 ? _T("") : _T("s")));
 			} else
 			{
 				s += _T("Settings...");
