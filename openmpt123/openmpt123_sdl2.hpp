@@ -30,6 +30,9 @@
 #ifdef SDL_main
 #undef SDL_main
 #endif
+#if (SDL_COMPILEDVERSION < SDL_VERSIONNUM(2, 0, 4))
+MPT_WARNING("Support for SDL2 < 2.0.4 has been deprecated and will be removed in a future openmpt123 version.")
+#endif
 
 namespace openmpt123 {
 
