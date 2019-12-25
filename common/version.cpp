@@ -23,6 +23,13 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
+#define MPT_MAKE_VERSION_NUMERIC_HELPER(prefix,v0,v1,v2,v3) Version( prefix ## v0 , prefix ## v1 , prefix ## v2 , prefix ## v3 )
+#define MPT_MAKE_VERSION_NUMERIC(v0,v1,v2,v3) MPT_MAKE_VERSION_NUMERIC_HELPER(0x, v0, v1, v2, v3)
+
+#define MPT_VERSION_CURRENT MPT_MAKE_VERSION_NUMERIC(VER_MAJORMAJOR,VER_MAJOR,VER_MINOR,VER_MINORMINOR)
+
+
+
 static_assert((MPT_VERSION_CURRENT.GetRawVersion() & 0xffffu) != 0x0000u, "Version numbers ending in .00.00 shall never exist again, as they make interpreting the version number ambiguous for file formats which can only store the two major parts of the version number (e.g. IT and S3M).");
 
 

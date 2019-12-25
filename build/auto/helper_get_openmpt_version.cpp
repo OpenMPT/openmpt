@@ -7,6 +7,9 @@
 #include "common/versionNumber.h"
 #include "libopenmpt/libopenmpt_version.h"
 
+#define VER_HELPER_STRINGIZE(x) #x
+#define VER_STRINGIZE(x)        VER_HELPER_STRINGIZE(x)
+
 int main( int argc, char * argv [] ) {
 	std::vector<std::string> args = std::vector<std::string>( argv, argv + argc );
 	for ( std::vector<std::string>::const_iterator i = args.begin(); i != args.end(); ++i ) {
