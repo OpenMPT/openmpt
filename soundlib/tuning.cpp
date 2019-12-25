@@ -72,7 +72,7 @@ CTuning::CTuning()
 
 bool CTuning::CreateGroupGeometric(const NOTEINDEXTYPE &s, const RATIOTYPE &r, const NOTEINDEXTYPE &startindex)
 {
-	if(s < 1 || r <= 0 || startindex < GetValidityRange().first)
+	if(s < 1 || r <= 0 || startindex < GetNoteRange().first)
 	{
 		return true;
 	}
@@ -82,17 +82,17 @@ bool CTuning::CreateGroupGeometric(const NOTEINDEXTYPE &s, const RATIOTYPE &r, c
 	{
 		v.push_back(GetRatio(i));
 	}
-	return CreateGroupGeometric(v, r, GetValidityRange(), startindex);
+	return CreateGroupGeometric(v, r, GetNoteRange(), startindex);
 }
 
 
-bool CTuning::CreateGroupGeometric(const std::vector<RATIOTYPE> &v, const RATIOTYPE &r, const VRPAIR &vr, const NOTEINDEXTYPE &ratiostartpos)
+bool CTuning::CreateGroupGeometric(const std::vector<RATIOTYPE> &v, const RATIOTYPE &r, const NoteRange &range, const NOTEINDEXTYPE &ratiostartpos)
 {
-	if(vr.first > vr.second || v.size() == 0)
+	if(range.first > range.last || v.size() == 0)
 	{
 		return true;
 	}
-	if(ratiostartpos < vr.first || vr.second < ratiostartpos || static_cast<UNOTEINDEXTYPE>(vr.second - ratiostartpos) < static_cast<UNOTEINDEXTYPE>(v.size() - 1))
+	if(ratiostartpos < range.first || range.last < ratiostartpos || static_cast<UNOTEINDEXTYPE>(range.last - ratiostartpos) < static_cast<UNOTEINDEXTYPE>(v.size() - 1))
 	{
 		return true;
 	}
@@ -112,16 +112,16 @@ bool CTuning::CreateGroupGeometric(const std::vector<RATIOTYPE> &v, const RATIOT
 		return true;
 	}
 	m_TuningType = Type::GROUPGEOMETRIC;
-	m_NoteMin = vr.first;
+	m_NoteMin = range.first;
 	m_GroupSize = mpt::saturate_cast<NOTEINDEXTYPE>(v.size());
 	m_GroupRatio = std::fabs(r);
-	m_RatioTable.resize(vr.second - vr.first + 1);
-	std::copy(v.begin(), v.end(), m_RatioTable.begin() + (ratiostartpos - vr.first));
+	m_RatioTable.resize(range.last - range.first + 1);
+	std::copy(v.begin(), v.end(), m_RatioTable.begin() + (ratiostartpos - range.first));
 	for(int32 i = ratiostartpos - 1; i >= m_NoteMin && ratiostartpos > NOTEINDEXTYPE_MIN; i--)
 	{
 		m_RatioTable[i - m_NoteMin] = m_RatioTable[i - m_NoteMin + m_GroupSize] / m_GroupRatio;
 	}
-	for(int32 i = ratiostartpos + m_GroupSize; i <= vr.second && ratiostartpos <= (NOTEINDEXTYPE_MAX - m_GroupSize); i++)
+	for(int32 i = ratiostartpos + m_GroupSize; i <= range.last && ratiostartpos <= (NOTEINDEXTYPE_MAX - m_GroupSize); i++)
 	{
 		m_RatioTable[i - m_NoteMin] = m_GroupRatio * m_RatioTable[i - m_NoteMin - m_GroupSize];
 	}
@@ -132,13 +132,13 @@ bool CTuning::CreateGroupGeometric(const std::vector<RATIOTYPE> &v, const RATIOT
 
 bool CTuning::CreateGeometric(const UNOTEINDEXTYPE &p, const RATIOTYPE &r)
 {
-	return CreateGeometric(p, r, GetValidityRange());
+	return CreateGeometric(p, r, GetNoteRange());
 }
 
 
-bool CTuning::CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const VRPAIR &vr)
+bool CTuning::CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const NoteRange &range)
 {
-	if(vr.first > vr.second)
+	if(range.first > range.last)
 	{
 		return true;
 	}
@@ -146,7 +146,7 @@ bool CTuning::CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const
 	{
 		return true;
 	}
-	if(vr.second - vr.first + 1 > NOTEINDEXTYPE_MAX)
+	if(range.last - range.first + 1 > NOTEINDEXTYPE_MAX)
 	{
 		return true;
 	}
@@ -157,12 +157,12 @@ bool CTuning::CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const
 	m_GroupSize = 0;
 	m_GroupRatio = 0;
 	m_RatioTableFine.clear();
-	m_NoteMin = vr.first;
+	m_NoteMin = range.first;
 	m_GroupSize = mpt::saturate_cast<NOTEINDEXTYPE>(s);
 	m_GroupRatio = std::fabs(r);
 	const RATIOTYPE stepRatio = std::pow(m_GroupRatio, static_cast<RATIOTYPE>(1.0) / static_cast<RATIOTYPE>(m_GroupSize));
-	m_RatioTable.resize(vr.second - vr.first + 1);
-	for(int32 i = vr.first; i <= vr.second; i++)
+	m_RatioTable.resize(range.last - range.first + 1);
+	for(int32 i = range.first; i <= range.last; i++)
 	{
 		m_RatioTable[i - m_NoteMin] = std::pow(stepRatio, static_cast<RATIOTYPE>(i));
 	}
@@ -369,7 +369,7 @@ void CTuning::UpdateFineStepTable()
 			return;
 		}
 		m_RatioTableFine.resize(m_FineStepCount);
-		const RATIOTYPE q = GetRatio(GetValidityRange().first + 1) / GetRatio(GetValidityRange().first);
+		const RATIOTYPE q = GetRatio(GetNoteRange().first + 1) / GetRatio(GetNoteRange().first);
 		const RATIOTYPE rFineStep = std::pow(q, static_cast<RATIOTYPE>(1)/(m_FineStepCount+1));
 		for(USTEPINDEXTYPE i = 1; i<=m_FineStepCount; i++)
 			m_RatioTableFine[i-1] = std::pow(rFineStep, static_cast<RATIOTYPE>(i));
@@ -389,7 +389,7 @@ void CTuning::UpdateFineStepTable()
 		{
 			//Creating 'geometric' finestepping between notes.
 			m_RatioTableFine.resize(p * m_FineStepCount);
-			const NOTEINDEXTYPE startnote = GetRefNote(GetValidityRange().first);
+			const NOTEINDEXTYPE startnote = GetRefNote(GetNoteRange().first);
 			for(UNOTEINDEXTYPE i = 0; i<p; i++)
 			{
 				const NOTEINDEXTYPE refnote = GetRefNote(startnote+i);
@@ -479,13 +479,13 @@ SerializationResult CTuning::InitDeserialize(std::istream& iStrm)
 		}
 		if(GetType() == Type::GEOMETRIC)
 		{
-			if(CreateGeometric(GetGroupSize(), GetGroupRatio(), VRPAIR(m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + ratiotableSize - 1))) != false)
+			if(CreateGeometric(GetGroupSize(), GetGroupRatio(), NoteRange{m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + ratiotableSize - 1)}) != false)
 			{
 				return SerializationResult::Failure;
 			}
 		} else
 		{
-			if(CreateGroupGeometric(m_RatioTable, GetGroupRatio(), VRPAIR(m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + ratiotableSize - 1)), m_NoteMin) != false)
+			if(CreateGroupGeometric(m_RatioTable, GetGroupRatio(), NoteRange{m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + ratiotableSize - 1)}, m_NoteMin) != false)
 			{
 				return SerializationResult::Failure;
 			}
@@ -739,7 +739,7 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
 			{
 				ratios.push_back(m_RatioTable[n - m_NoteMin]);
 			}
-			CreateGroupGeometric(ratios, m_GroupRatio, GetValidityRange(), 0);
+			CreateGroupGeometric(ratios, m_GroupRatio, GetNoteRange(), 0);
 		}
 	}
 

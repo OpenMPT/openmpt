@@ -14,7 +14,6 @@
 
 
 #include <limits>
-#include <utility>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -42,7 +41,11 @@ using RATIOTYPE = float32;      // Some 'real figure' type able to present ratio
 using STEPINDEXTYPE = int32;
 using USTEPINDEXTYPE = uint32;
 
-using VRPAIR = std::pair<NOTEINDEXTYPE, NOTEINDEXTYPE>;
+struct NoteRange
+{
+  NOTEINDEXTYPE first;
+  NOTEINDEXTYPE last;
+};
 
 
 // Derived from old IsStepCountRangeSufficient(), this is actually a more

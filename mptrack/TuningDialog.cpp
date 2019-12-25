@@ -179,7 +179,7 @@ BOOL CTuningDialog::OnInitDialog()
 	m_EditSteps.SetLimitText(2);
 	m_EditFineTuneSteps.SetLimitText(3);
 
-	if(m_pActiveTuning) m_RatioMapWnd.m_nNote =  m_RatioMapWnd.m_nNoteCentre + m_pActiveTuning->GetValidityRange().first + (m_pActiveTuning->GetValidityRange().second - m_pActiveTuning->GetValidityRange().first)/2 + 1;
+	if(m_pActiveTuning) m_RatioMapWnd.m_nNote =  m_RatioMapWnd.m_nNoteCentre + m_pActiveTuning->GetNoteRange().first + (m_pActiveTuning->GetNoteRange().last - m_pActiveTuning->GetNoteRange().first)/2 + 1;
 
 	UpdateView();
 

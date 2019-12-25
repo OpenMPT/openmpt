@@ -53,13 +53,16 @@ public:
 	//Tuning might not be valid for arbitrarily large range,
 	//so this can be used to ask where it is valid. Tells the lowest and highest
 	//note that are valid.
-	VRPAIR GetValidityRange() const
+	NoteRange GetNoteRange() const
 	{
-		return VRPAIR(m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()) - 1));
+		return NoteRange{m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()) - 1)};
 	}
 
-	//Return true if note is within validity range - false otherwise.
-	bool IsValidNote(const NOTEINDEXTYPE n) const {return (n >= GetValidityRange().first && n <= GetValidityRange().second);}
+	// Return true if note is within note range - false otherwise.
+	bool IsValidNote(const NOTEINDEXTYPE n) const
+	{
+		return (n >= GetNoteRange().first && n <= GetNoteRange().last);
+	}
 
 	UNOTEINDEXTYPE GetGroupSize() const {return m_GroupSize;}
 
@@ -136,9 +139,9 @@ public:
 	{
 		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		pT->SetName(name);
-		VRPAIR range = std::make_pair(s_NoteMinDefault, static_cast<NOTEINDEXTYPE>(s_NoteMinDefault + s_RatioTableSizeDefault - 1));
-		range.second = std::max(range.second, mpt::saturate_cast<NOTEINDEXTYPE>(ratios.size() - 1));
-		range.first = 0 - range.second - 1;
+		NoteRange range = NoteRange{s_NoteMinDefault, static_cast<NOTEINDEXTYPE>(s_NoteMinDefault + s_RatioTableSizeDefault - 1)};
+		range.last = std::max(range.last, mpt::saturate_cast<NOTEINDEXTYPE>(ratios.size() - 1));
+		range.first = 0 - range.last - 1;
 		if(pT->CreateGroupGeometric(ratios, groupratio, range, 0) != false)
 		{
 			return nullptr;
@@ -181,7 +184,7 @@ private:
 	SerializationResult InitDeserializeOLD(std::istream&);
 
 	//Create GroupGeometric tuning of *this using virtual ProCreateGroupGeometric.
-	bool CreateGroupGeometric(const std::vector<RATIOTYPE> &v, const RATIOTYPE &r, const VRPAIR &vr, const NOTEINDEXTYPE &ratiostartpos);
+	bool CreateGroupGeometric(const std::vector<RATIOTYPE> &v, const RATIOTYPE &r, const NoteRange &range, const NOTEINDEXTYPE &ratiostartpos);
 
 	//Create GroupGeometric of *this using ratios from 'itself' and ratios starting from
 	//position given as third argument.
@@ -189,7 +192,7 @@ private:
 
 	//Create geometric tuning of *this using ratio(0) = 1.
 	bool CreateGeometric(const UNOTEINDEXTYPE &p, const RATIOTYPE &r);
-	bool CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const VRPAIR &vr);
+	bool CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const NoteRange &range);
 
 	void UpdateFineStepTable();
 
