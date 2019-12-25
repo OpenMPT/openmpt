@@ -31,7 +31,7 @@ public:
 	static constexpr char s_FileExtension[5] = ".tun";
 
 	static constexpr RATIOTYPE s_DefaultFallbackRatio = 1.0f;
-	static constexpr NOTEINDEXTYPE s_StepMinDefault = -64;
+	static constexpr NOTEINDEXTYPE s_NoteMinDefault = -64;
 	static constexpr UNOTEINDEXTYPE s_RatioTableSizeDefault = 128;
 	static constexpr USTEPINDEXTYPE s_RatioTableFineSizeMaxDefault = 1000;
 
@@ -45,12 +45,18 @@ public:
 
 	UNOTEINDEXTYPE GetRatioTableSize() const {return static_cast<UNOTEINDEXTYPE>(m_RatioTable.size());}
 
-	NOTEINDEXTYPE GetRatioTableBeginNote() const {return m_StepMin;}
+	NOTEINDEXTYPE GetRatioTableBeginNote() const
+	{
+		return m_NoteMin;
+	}
 
 	//Tuning might not be valid for arbitrarily large range,
 	//so this can be used to ask where it is valid. Tells the lowest and highest
 	//note that are valid.
-	VRPAIR GetValidityRange() const {return VRPAIR(m_StepMin, static_cast<NOTEINDEXTYPE>(m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()) - 1));}
+	VRPAIR GetValidityRange() const
+	{
+		return VRPAIR(m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()) - 1));
+	}
 
 	//Return true if note is within validity range - false otherwise.
 	bool IsValidNote(const NOTEINDEXTYPE n) const {return (n >= GetValidityRange().first && n <= GetValidityRange().second);}
@@ -130,7 +136,7 @@ public:
 	{
 		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		pT->SetName(name);
-		VRPAIR range = std::make_pair(s_StepMinDefault, static_cast<NOTEINDEXTYPE>(s_StepMinDefault + s_RatioTableSizeDefault - 1));
+		VRPAIR range = std::make_pair(s_NoteMinDefault, static_cast<NOTEINDEXTYPE>(s_NoteMinDefault + s_RatioTableSizeDefault - 1));
 		range.second = std::max(range.second, mpt::saturate_cast<NOTEINDEXTYPE>(ratios.size() - 1));
 		range.first = 0 - range.second - 1;
 		if(pT->CreateGroupGeometric(ratios, groupratio, range, 0) != false)
@@ -197,10 +203,13 @@ private:
 
 	bool IsNoteInTable(const NOTEINDEXTYPE& s) const
 	{
-		if(s < m_StepMin || s >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()))
+		if(s < m_NoteMin || s >= m_NoteMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()))
+		{
 			return false;
-		else
+		} else
+		{
 			return true;
+		}
 	}
 
 private:
@@ -213,8 +222,8 @@ private:
 	//'Fineratios'
 	std::vector<RATIOTYPE> m_RatioTableFine;
 
-	//The lowest index of note in the table
-	NOTEINDEXTYPE m_StepMin; // this should REALLY be called 'm_NoteMin' renaming was missed in r192
+	// The lowest index of note in the table
+	NOTEINDEXTYPE m_NoteMin;
 
 	//For groupgeometric tunings, tells the 'group size' and 'group ratio'
 	//m_GroupSize should always be >= 0.

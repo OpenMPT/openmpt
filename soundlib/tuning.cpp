@@ -62,7 +62,7 @@ CTuning::CTuning()
 	, m_FineStepCount(0)
 {
 	m_RatioTable.clear();
-	m_StepMin = s_StepMinDefault;
+	m_NoteMin = s_NoteMinDefault;
 	m_RatioTable.resize(s_RatioTableSizeDefault, 1);
 	m_GroupSize = 0;
 	m_GroupRatio = 0;
@@ -112,18 +112,18 @@ bool CTuning::CreateGroupGeometric(const std::vector<RATIOTYPE> &v, const RATIOT
 		return true;
 	}
 	m_TuningType = Type::GROUPGEOMETRIC;
-	m_StepMin = vr.first;
+	m_NoteMin = vr.first;
 	m_GroupSize = mpt::saturate_cast<NOTEINDEXTYPE>(v.size());
 	m_GroupRatio = std::fabs(r);
 	m_RatioTable.resize(vr.second - vr.first + 1);
 	std::copy(v.begin(), v.end(), m_RatioTable.begin() + (ratiostartpos - vr.first));
-	for(int32 i = ratiostartpos - 1; i >= m_StepMin && ratiostartpos > NOTEINDEXTYPE_MIN; i--)
+	for(int32 i = ratiostartpos - 1; i >= m_NoteMin && ratiostartpos > NOTEINDEXTYPE_MIN; i--)
 	{
-		m_RatioTable[i - m_StepMin] = m_RatioTable[i - m_StepMin + m_GroupSize] / m_GroupRatio;
+		m_RatioTable[i - m_NoteMin] = m_RatioTable[i - m_NoteMin + m_GroupSize] / m_GroupRatio;
 	}
 	for(int32 i = ratiostartpos + m_GroupSize; i <= vr.second && ratiostartpos <= (NOTEINDEXTYPE_MAX - m_GroupSize); i++)
 	{
-		m_RatioTable[i - m_StepMin] = m_GroupRatio * m_RatioTable[i - m_StepMin - m_GroupSize];
+		m_RatioTable[i - m_NoteMin] = m_GroupRatio * m_RatioTable[i - m_NoteMin - m_GroupSize];
 	}
 	UpdateFineStepTable();
 	return false;
@@ -152,19 +152,19 @@ bool CTuning::CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const
 	}
 	m_TuningType = Type::GEOMETRIC;
 	m_RatioTable.clear();
-	m_StepMin = s_StepMinDefault;
+	m_NoteMin = s_NoteMinDefault;
 	m_RatioTable.resize(s_RatioTableSizeDefault, static_cast<RATIOTYPE>(1.0));
 	m_GroupSize = 0;
 	m_GroupRatio = 0;
 	m_RatioTableFine.clear();
-	m_StepMin = vr.first;
+	m_NoteMin = vr.first;
 	m_GroupSize = mpt::saturate_cast<NOTEINDEXTYPE>(s);
 	m_GroupRatio = std::fabs(r);
 	const RATIOTYPE stepRatio = std::pow(m_GroupRatio, static_cast<RATIOTYPE>(1.0) / static_cast<RATIOTYPE>(m_GroupSize));
 	m_RatioTable.resize(vr.second - vr.first + 1);
 	for(int32 i = vr.first; i <= vr.second; i++)
 	{
-		m_RatioTable[i - m_StepMin] = std::pow(stepRatio, static_cast<RATIOTYPE>(i));
+		m_RatioTable[i - m_NoteMin] = std::pow(stepRatio, static_cast<RATIOTYPE>(i));
 	}
 	UpdateFineStepTable();
 	return false;
@@ -229,9 +229,15 @@ std::string CTuning::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
 //Without finetune
 RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const
 {
-	if(stepsFromCentre < m_StepMin) return s_DefaultFallbackRatio;
-	if(stepsFromCentre >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size())) return s_DefaultFallbackRatio;
-	return m_RatioTable[stepsFromCentre - m_StepMin];
+	if(stepsFromCentre < m_NoteMin)
+	{
+		return s_DefaultFallbackRatio;
+	}
+	if(stepsFromCentre >= m_NoteMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()))
+	{
+		return s_DefaultFallbackRatio;
+	}
+	return m_RatioTable[stepsFromCentre - m_NoteMin];
 }
 
 
@@ -259,11 +265,17 @@ RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE& baseNote, const STEPINDEXTYPE& 
 	note = static_cast<NOTEINDEXTYPE>(baseNote + mpt::wrapping_divide(baseStepDiff, (fsCount+1)));
 	fineStep = mpt::wrapping_modulo(baseStepDiff, (fsCount+1));
 
-	if(note < m_StepMin) return s_DefaultFallbackRatio;
-	if(note >= m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size())) return s_DefaultFallbackRatio;
+	if(note < m_NoteMin)
+	{
+		return s_DefaultFallbackRatio;
+	}
+	if(note >= m_NoteMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()))
+	{
+		return s_DefaultFallbackRatio;
+	}
 
-	if(fineStep) return m_RatioTable[note - m_StepMin] * GetRatioFine(note, fineStep);
-	else return m_RatioTable[note - m_StepMin];
+	if(fineStep) return m_RatioTable[note - m_NoteMin] * GetRatioFine(note, fineStep);
+	else return m_RatioTable[note - m_NoteMin];
 }
 
 
@@ -310,23 +322,23 @@ bool CTuning::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 	if(m_RatioTable.empty())
 	{
 		m_RatioTable.assign(s_RatioTableSizeDefault, 1);
-		m_StepMin = s_StepMinDefault;
+		m_NoteMin = s_NoteMinDefault;
 	}
 	if(!IsNoteInTable(s))
 	{
 		return false;
 	}
-	m_RatioTable[s - m_StepMin] = std::fabs(r);
+	m_RatioTable[s - m_NoteMin] = std::fabs(r);
 	if(GetType() == Type::GROUPGEOMETRIC)
 	{ // update other groups
-		for(NOTEINDEXTYPE n = m_StepMin; n < m_StepMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()); ++n)
+		for(NOTEINDEXTYPE n = m_NoteMin; n < m_NoteMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()); ++n)
 		{
 			if(n == s)
 			{
 				// nothing
 			} else if(std::abs(n - s) % m_GroupSize == 0)
 			{
-				m_RatioTable[n - m_StepMin] = std::pow(m_GroupRatio, static_cast<RATIOTYPE>(n - s) / static_cast<RATIOTYPE>(m_GroupSize)) * m_RatioTable[s - m_StepMin];
+				m_RatioTable[n - m_NoteMin] = std::pow(m_GroupRatio, static_cast<RATIOTYPE>(n - s) / static_cast<RATIOTYPE>(m_GroupSize)) * m_RatioTable[s - m_NoteMin];
 			}
 		}
 		UpdateFineStepTable();
@@ -433,14 +445,14 @@ SerializationResult CTuning::InitDeserialize(std::istream& iStrm)
 
 	// RTI entries.
 	ssb.ReadItem(m_RatioTable, "RTI0", ReadRatioTable);
-	ssb.ReadItem(m_StepMin, "RTI1");
+	ssb.ReadItem(m_NoteMin, "RTI1");
 	ssb.ReadItem(m_GroupSize, "RTI2");
 	ssb.ReadItem(m_GroupRatio, "RTI3");
 	UNOTEINDEXTYPE ratiotableSize = 0;
 	ssb.ReadItem(ratiotableSize, "RTI4");
 
-	// If reader status is ok and m_StepMin is somewhat reasonable, process data.
-	if(!((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && m_StepMin >= -300 && m_StepMin <= 300))
+	// If reader status is ok and m_NoteMin is somewhat reasonable, process data.
+	if(!((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && m_NoteMin >= -300 && m_NoteMin <= 300))
 	{
 		return SerializationResult::Failure;
 	}
@@ -467,13 +479,13 @@ SerializationResult CTuning::InitDeserialize(std::istream& iStrm)
 		}
 		if(GetType() == Type::GEOMETRIC)
 		{
-			if(CreateGeometric(GetGroupSize(), GetGroupRatio(), VRPAIR(m_StepMin, static_cast<NOTEINDEXTYPE>(m_StepMin + ratiotableSize - 1))) != false)
+			if(CreateGeometric(GetGroupSize(), GetGroupRatio(), VRPAIR(m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + ratiotableSize - 1))) != false)
 			{
 				return SerializationResult::Failure;
 			}
 		} else
 		{
-			if(CreateGroupGeometric(m_RatioTable, GetGroupRatio(), VRPAIR(m_StepMin, static_cast<NOTEINDEXTYPE>(m_StepMin+ratiotableSize-1)), m_StepMin) != false)
+			if(CreateGroupGeometric(m_RatioTable, GetGroupRatio(), VRPAIR(m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + ratiotableSize - 1)), m_NoteMin) != false)
 			{
 				return SerializationResult::Failure;
 			}
@@ -656,11 +668,11 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
 	}
 	m_FineStepCount = mpt::saturate_cast<USTEPINDEXTYPE>(m_RatioTableFine.size());
 
-	//m_StepMin
-	int16 stepmin = 0;
-	mpt::IO::ReadIntLE<int16>(inStrm, stepmin);
-	m_StepMin = stepmin;
-	if(m_StepMin < -200 || m_StepMin > 200)
+	// m_NoteMin
+	int16 notemin = 0;
+	mpt::IO::ReadIntLE<int16>(inStrm, notemin);
+	m_NoteMin = notemin;
+	if(m_NoteMin < -200 || m_NoteMin > 200)
 	{
 		return SerializationResult::Failure;
 	}
@@ -720,12 +732,12 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
 	{
 		// Convert old geometric to new groupgeometric because old geometric tunings
 		// can have ratio(0) != 1.0, which would get lost when saving nowadays.
-		if(mpt::saturate_cast<NOTEINDEXTYPE>(m_RatioTable.size()) >= m_GroupSize - m_StepMin)
+		if(mpt::saturate_cast<NOTEINDEXTYPE>(m_RatioTable.size()) >= m_GroupSize - m_NoteMin)
 		{
 			std::vector<RATIOTYPE> ratios;
 			for(NOTEINDEXTYPE n = 0; n < m_GroupSize; ++n)
 			{
-				ratios.push_back(m_RatioTable[n - m_StepMin]);
+				ratios.push_back(m_RatioTable[n - m_NoteMin]);
 			}
 			CreateGroupGeometric(ratios, m_GroupRatio, GetValidityRange(), 0);
 		}
@@ -768,8 +780,8 @@ Tuning::SerializationResult CTuning::Serialize(std::ostream& outStrm) const
 		ssb.WriteItem(ratiotableSize, "RTI4");
 	}
 
-	//m_StepMin
-	ssb.WriteItem(m_StepMin, "RTI1");
+	// m_NoteMin
+	ssb.WriteItem(m_NoteMin, "RTI1");
 
 	ssb.FinishWrite();
 
@@ -830,7 +842,7 @@ bool CTuning::WriteSCL(std::ostream &f, const mpt::PathString &filename) const
 			double cents = std::log2(ratio) * 1200.0;
 			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
 				mpt::fmt::fix(cents),
-				mpt::ToCharset(mpt::Charset::ISO8859_1, mpt::Charset::Locale, GetNoteName(n + m_StepMin, false))
+				mpt::ToCharset(mpt::Charset::ISO8859_1, mpt::Charset::Locale, GetNoteName(n + m_NoteMin, false))
 				));
 		}
 		mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
