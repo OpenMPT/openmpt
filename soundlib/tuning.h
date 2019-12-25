@@ -51,10 +51,10 @@ public:
 		return NoteRange{m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()) - 1)};
 	}
 
-	// Return true if note is within note range - false otherwise.
+	// Return true if note is within note range
 	bool IsValidNote(const NOTEINDEXTYPE n) const
 	{
-		return (n >= GetNoteRange().first && n <= GetNoteRange().last);
+		return (GetNoteRange().first <= n && n <= GetNoteRange().last);
 	}
 
 	UNOTEINDEXTYPE GetGroupSize() const {return m_GroupSize;}
@@ -193,17 +193,6 @@ private:
 	//Get the corresponding note in [0, period-1].
 	//For example GetRefNote(-1) is to return note :'groupsize-1'.
 	NOTEINDEXTYPE GetRefNote(NOTEINDEXTYPE note) const;
-
-	bool IsNoteInTable(const NOTEINDEXTYPE& s) const
-	{
-		if(s < m_NoteMin || s >= m_NoteMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()))
-		{
-			return false;
-		} else
-		{
-			return true;
-		}
-	}
 
 private:
 

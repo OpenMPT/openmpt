@@ -307,7 +307,7 @@ bool CTuning::SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r)
 		m_RatioTable.assign(s_RatioTableSizeDefault, 1);
 		m_NoteMin = s_NoteMinDefault;
 	}
-	if(!IsNoteInTable(s))
+	if(!IsValidNote(s))
 	{
 		return false;
 	}
