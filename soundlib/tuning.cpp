@@ -227,45 +227,35 @@ std::string CTuning::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
 
 
 // Without finetune
-RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE stepsFromCentre) const
+RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE note) const
 {
-	if(!IsValidNote(stepsFromCentre))
-	{
-		return s_DefaultFallbackRatio;
-	}
-	return m_RatioTable[stepsFromCentre - m_NoteMin];
-}
-
-
-// With finetune
-RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE baseNote, const STEPINDEXTYPE baseStepDiff) const
-{
-	const STEPINDEXTYPE fsCount = static_cast<STEPINDEXTYPE>(GetFineStepCount());
-	if(fsCount < 0 || fsCount > FINESTEPCOUNT_MAX)
-	{
-		return s_DefaultFallbackRatio;
-	}
-	if(fsCount == 0 || baseStepDiff == 0)
-	{
-		return GetRatio(static_cast<NOTEINDEXTYPE>(baseNote + baseStepDiff));
-	}
-
-	//If baseStepDiff is more than the number of finesteps between notes,
-	//note is increased. So first figuring out what step and fineStep values to
-	//actually use. Interpreting finestep -1 on note x so that it is the same as
-	//finestep GetFineStepCount() on note x-1.
-	//Note: If finestepcount is n, n+1 steps are needed to get to
-	//next note.
-	NOTEINDEXTYPE note;
-	STEPINDEXTYPE fineStep;
-	note = static_cast<NOTEINDEXTYPE>(baseNote + mpt::wrapping_divide(baseStepDiff, (fsCount + 1)));
-	fineStep = mpt::wrapping_modulo(baseStepDiff, (fsCount + 1));
-
 	if(!IsValidNote(note))
 	{
 		return s_DefaultFallbackRatio;
 	}
+	return m_RatioTable[note - m_NoteMin];
+}
 
+
+// With finetune
+RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE baseNote, const STEPINDEXTYPE baseFineSteps) const
+{
+	const STEPINDEXTYPE fineStepCount = static_cast<STEPINDEXTYPE>(GetFineStepCount());
+	if(fineStepCount == 0 || baseFineSteps == 0)
+	{
+		return GetRatio(static_cast<NOTEINDEXTYPE>(baseNote + baseFineSteps));
+	}
+
+	// If baseFineSteps is more than the number of finesteps between notes, note is increased.
+	// So first figuring out what note and fineStep values to actually use.
+	// Interpreting finestep==-1 on note x so that it is the same as finestep==fineStepCount on note x-1.
+	// Note: If fineStepCount is n, n+1 steps are needed to get to next note.
+	const NOTEINDEXTYPE note = static_cast<NOTEINDEXTYPE>(baseNote + mpt::wrapping_divide(baseFineSteps, (fineStepCount + 1)));
+	const STEPINDEXTYPE fineStep = mpt::wrapping_modulo(baseFineSteps, (fineStepCount + 1));
+	if(!IsValidNote(note))
+	{
+		return s_DefaultFallbackRatio;
+	}
 	if(fineStep == 0)
 	{
 		return m_RatioTable[note - m_NoteMin];
@@ -277,11 +267,11 @@ RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE baseNote, const STEPINDEXTYPE ba
 		fineRatio = m_RatioTableFine[fineStep - 1];
 	} else if(GetType() == Type::GROUPGEOMETRIC && m_RatioTableFine.size() > 0)
 	{
-		fineRatio = m_RatioTableFine[GetRefNote(note) * GetFineStepCount() + fineStep - 1];
+		fineRatio = m_RatioTableFine[GetRefNote(note) * fineStepCount + fineStep - 1];
 	} else
 	{
 		// Geometric finestepping
-		fineRatio = std::pow(GetRatio(note + 1) / GetRatio(note), static_cast<RATIOTYPE>(fineStep) / (GetFineStepCount() + 1));
+		fineRatio = std::pow(GetRatio(note + 1) / GetRatio(note), static_cast<RATIOTYPE>(fineStep) / (fineStepCount + 1));
 	}
 	return m_RatioTable[note - m_NoteMin] * fineRatio;
 }

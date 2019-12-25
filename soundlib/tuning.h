@@ -38,10 +38,10 @@ public:
 public:
 
 	// To return ratio of certain note.
-	RATIOTYPE GetRatio(const NOTEINDEXTYPE stepsFromCentre) const;
+	RATIOTYPE GetRatio(const NOTEINDEXTYPE note) const;
 
 	// To return ratio from a 'step'(noteindex + stepindex)
-	RATIOTYPE GetRatio(const NOTEINDEXTYPE stepsFromCentre, const STEPINDEXTYPE fineSteps) const;
+	RATIOTYPE GetRatio(const NOTEINDEXTYPE baseNote, const STEPINDEXTYPE baseFineSteps) const;
 
 	//Tuning might not be valid for arbitrarily large range,
 	//so this can be used to ask where it is valid. Tells the lowest and highest
@@ -225,7 +225,7 @@ private:
 	NOTEINDEXTYPE m_GroupSize;
 	RATIOTYPE m_GroupRatio;
 
-	USTEPINDEXTYPE m_FineStepCount;
+	USTEPINDEXTYPE m_FineStepCount; // invariant: 0 <= m_FineStepCount <= FINESTEPCOUNT_MAX
 
 	std::string m_TuningName;
 
