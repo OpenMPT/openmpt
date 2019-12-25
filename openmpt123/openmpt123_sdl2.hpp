@@ -37,13 +37,19 @@ MPT_WARNING("Support for SDL2 < 2.0.4 has been deprecated and will be removed in
 namespace openmpt123 {
 
 struct sdl2_exception : public exception {
-	sdl2_exception( int /*code*/ ) : exception( "SDL2 error" ) { }
+private:
+	static std::string text_from_code( int code ) {
+		std::ostringstream s;
+		s << code;
+		return s.str();
+	}
+public:
+	sdl2_exception( int code, const char * error ) : exception( text_from_code( code ) + " (" + ( error ? std::string(error) : std::string("NULL") ) + ")" ) { }
 };
 
 static void check_sdl2_error( int e ) {
 	if ( e < 0 ) {
-		throw sdl2_exception( e );
-		return;
+		throw sdl2_exception( e, SDL_GetError() );
 	}
 }
 
