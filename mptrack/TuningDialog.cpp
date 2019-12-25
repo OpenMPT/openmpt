@@ -862,6 +862,8 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 		}
 
+		bool success = false;
+
 		if(pT)
 		{
 			CTuningCollection &tc = *m_TuningCollections.front();
@@ -879,6 +881,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 			{
 				m_pActiveTuning = activeTuning;
 				AddTreeItem(m_pActiveTuning, m_TreeItemTuningItemMap.GetMapping_21(TUNINGTREEITEM(&tc)), NULL);
+				success = true;
 			}
 		}
 
@@ -889,9 +892,10 @@ void CTuningDialog::OnBnClickedButtonImport()
 			m_TuningCollectionsFilenames[pTC] = tcFilename;
 			m_DeletableTuningCollections.push_back(pTC);
 			AddTreeItem(pTC, NULL, NULL);
+			success = true;
 		}
 
-		if(!pT && !pTC)
+		if(!success)
 		{
 			sLoadReport += mpt::format(U_("- Unable to load \"%1\": unrecognized file format.\n"))(fileNameExt);
 		}
