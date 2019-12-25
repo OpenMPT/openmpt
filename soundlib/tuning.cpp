@@ -226,8 +226,8 @@ std::string CTuning::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
 }
 
 
-//Without finetune
-RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const
+// Without finetune
+RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE &stepsFromCentre) const
 {
 	if(stepsFromCentre < m_NoteMin)
 	{
@@ -241,8 +241,8 @@ RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const
 }
 
 
-//With finetune
-RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE& baseNote, const STEPINDEXTYPE& baseStepDiff) const
+// With finetune
+RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE &baseNote, const STEPINDEXTYPE &baseStepDiff) const
 {
 	const STEPINDEXTYPE fsCount = static_cast<STEPINDEXTYPE>(GetFineStepCount());
 	if(fsCount < 0 || fsCount > FINESTEPCOUNT_MAX)
@@ -262,8 +262,8 @@ RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE& baseNote, const STEPINDEXTYPE& 
 	//next note.
 	NOTEINDEXTYPE note;
 	STEPINDEXTYPE fineStep;
-	note = static_cast<NOTEINDEXTYPE>(baseNote + mpt::wrapping_divide(baseStepDiff, (fsCount+1)));
-	fineStep = mpt::wrapping_modulo(baseStepDiff, (fsCount+1));
+	note = static_cast<NOTEINDEXTYPE>(baseNote + mpt::wrapping_divide(baseStepDiff, (fsCount + 1)));
+	fineStep = mpt::wrapping_modulo(baseStepDiff, (fsCount + 1));
 
 	if(note < m_NoteMin)
 	{
@@ -274,41 +274,24 @@ RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE& baseNote, const STEPINDEXTYPE& 
 		return s_DefaultFallbackRatio;
 	}
 
-	if(fineStep) return m_RatioTable[note - m_NoteMin] * GetRatioFine(note, fineStep);
-	else return m_RatioTable[note - m_NoteMin];
-}
-
-
-RATIOTYPE CTuning::GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE sd) const
-{
-	if(GetFineStepCount() <= 0 || GetFineStepCount() > static_cast<USTEPINDEXTYPE>(FINESTEPCOUNT_MAX))
+	if(fineStep == 0)
 	{
-		return s_DefaultFallbackRatio;
+		return m_RatioTable[note - m_NoteMin];
 	}
 
-	//Neither of these should happen.
-	if(sd <= 0) sd = 1;
-	if(sd > GetFineStepCount()) sd = GetFineStepCount();
-
-	if(GetType() != Type::GENERAL && m_RatioTableFine.size() > 0) //Taking fineratio from table
+	RATIOTYPE fineRatio = static_cast<RATIOTYPE>(1.0);
+	if(GetType() == Type::GEOMETRIC && m_RatioTableFine.size() > 0)
 	{
-		if(GetType() == Type::GEOMETRIC)
-		{
-			return m_RatioTableFine[sd-1];
-		}
-		if(GetType() == Type::GROUPGEOMETRIC)
-			return m_RatioTableFine[GetRefNote(note) * GetFineStepCount() + sd - 1];
-
-		MPT_ASSERT_NOTREACHED();
-		return m_RatioTableFine[0]; //Shouldn't happen.
-	}
-	else //Calculating ratio 'on the fly'.
+		fineRatio = m_RatioTableFine[fineStep - 1];
+	} else if(GetType() == Type::GROUPGEOMETRIC && m_RatioTableFine.size() > 0)
 	{
-		//'Geometric finestepping'.
-		return std::pow(GetRatio(note+1) / GetRatio(note), static_cast<RATIOTYPE>(sd)/(GetFineStepCount()+1));
-
+		fineRatio = m_RatioTableFine[GetRefNote(note) * GetFineStepCount() + fineStep - 1];
+	} else
+	{
+		// Geometric finestepping
+		fineRatio = std::pow(GetRatio(note + 1) / GetRatio(note), static_cast<RATIOTYPE>(fineStep) / (GetFineStepCount() + 1));
 	}
-
+	return m_RatioTable[note - m_NoteMin] * fineRatio;
 }
 
 

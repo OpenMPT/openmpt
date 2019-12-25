@@ -189,9 +189,6 @@ private:
 
 	void UpdateFineStepTable();
 
-	//Note: Stepdiff should be in range [1, finestepcount]
-	RATIOTYPE GetRatioFine(const NOTEINDEXTYPE& note, USTEPINDEXTYPE stepDiff) const;
-
 	//GroupPeriodic-specific.
 	//Get the corresponding note in [0, period-1].
 	//For example GetRefNote(-1) is to return note :'groupsize-1'.
