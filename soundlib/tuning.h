@@ -129,7 +129,7 @@ public:
 	{
 		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		pT->SetName(name);
-		if(pT->CreateGroupGeometric(groupsize, groupratio, 0) != false)
+		if(!pT->CreateGroupGeometric(groupsize, groupratio, 0))
 		{
 			return nullptr;
 		}
@@ -144,7 +144,7 @@ public:
 		NoteRange range = NoteRange{s_NoteMinDefault, static_cast<NOTEINDEXTYPE>(s_NoteMinDefault + s_RatioTableSizeDefault - 1)};
 		range.last = std::max(range.last, mpt::saturate_cast<NOTEINDEXTYPE>(ratios.size() - 1));
 		range.first = 0 - range.last - 1;
-		if(pT->CreateGroupGeometric(ratios, groupratio, range, 0) != false)
+		if(!pT->CreateGroupGeometric(ratios, groupratio, range, 0))
 		{
 			return nullptr;
 		}
@@ -156,7 +156,7 @@ public:
 	{
 		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		pT->SetName(name);
-		if(pT->CreateGeometric(groupsize, groupratio) != false)
+		if(!pT->CreateGeometric(groupsize, groupratio))
 		{
 			return nullptr;
 		}

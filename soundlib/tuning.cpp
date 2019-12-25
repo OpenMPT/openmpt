@@ -74,7 +74,7 @@ bool CTuning::CreateGroupGeometric(const NOTEINDEXTYPE &s, const RATIOTYPE &r, c
 {
 	if(s < 1 || !IsValidRatio(r) || startindex < GetNoteRange().first)
 	{
-		return true;
+		return false;
 	}
 	std::vector<RATIOTYPE> v;
 	v.reserve(s);
@@ -90,26 +90,26 @@ bool CTuning::CreateGroupGeometric(const std::vector<RATIOTYPE> &v, const RATIOT
 {
 	if(range.first > range.last || v.size() == 0)
 	{
-		return true;
+		return false;
 	}
 	if(ratiostartpos < range.first || range.last < ratiostartpos || static_cast<UNOTEINDEXTYPE>(range.last - ratiostartpos) < static_cast<UNOTEINDEXTYPE>(v.size() - 1))
 	{
-		return true;
+		return false;
 	}
 	if(GetFineStepCount() > FINESTEPCOUNT_MAX)
 	{
-		return true;
+		return false;
 	}
 	for(size_t i = 0; i < v.size(); i++)
 	{
 		if(v[i] < 0)
 		{
-			return true;
+			return false;
 		}
 	}
 	if(r <= 0)
 	{
-		return true;
+		return false;
 	}
 	m_TuningType = Type::GROUPGEOMETRIC;
 	m_NoteMin = range.first;
@@ -126,7 +126,7 @@ bool CTuning::CreateGroupGeometric(const std::vector<RATIOTYPE> &v, const RATIOT
 		m_RatioTable[i - m_NoteMin] = m_GroupRatio * m_RatioTable[i - m_NoteMin - m_GroupSize];
 	}
 	UpdateFineStepTable();
-	return false;
+	return true;
 }
 
 
@@ -140,15 +140,15 @@ bool CTuning::CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const
 {
 	if(range.first > range.last)
 	{
-		return true;
+		return false;
 	}
 	if(s < 1 || !IsValidRatio(r))
 	{
-		return true;
+		return false;
 	}
 	if(range.last - range.first + 1 > NOTEINDEXTYPE_MAX)
 	{
-		return true;
+		return false;
 	}
 	m_TuningType = Type::GEOMETRIC;
 	m_RatioTable.clear();
@@ -167,7 +167,7 @@ bool CTuning::CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const
 		m_RatioTable[i - m_NoteMin] = std::pow(stepRatio, static_cast<RATIOTYPE>(i));
 	}
 	UpdateFineStepTable();
-	return false;
+	return true;
 }
 
 
@@ -437,13 +437,13 @@ SerializationResult CTuning::InitDeserialize(std::istream& iStrm)
 		}
 		if(GetType() == Type::GEOMETRIC)
 		{
-			if(CreateGeometric(GetGroupSize(), GetGroupRatio(), NoteRange{m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + ratiotableSize - 1)}) != false)
+			if(!CreateGeometric(GetGroupSize(), GetGroupRatio(), NoteRange{m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + ratiotableSize - 1)}))
 			{
 				return SerializationResult::Failure;
 			}
 		} else
 		{
-			if(CreateGroupGeometric(m_RatioTable, GetGroupRatio(), NoteRange{m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + ratiotableSize - 1)}, m_NoteMin) != false)
+			if(!CreateGroupGeometric(m_RatioTable, GetGroupRatio(), NoteRange{m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + ratiotableSize - 1)}, m_NoteMin))
 			{
 				return SerializationResult::Failure;
 			}
