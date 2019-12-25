@@ -43,13 +43,6 @@ public:
 	//To return ratio from a 'step'(noteindex + stepindex)
 	RATIOTYPE GetRatio(const NOTEINDEXTYPE& stepsFromCentre, const STEPINDEXTYPE& fineSteps) const;
 
-	UNOTEINDEXTYPE GetRatioTableSize() const {return static_cast<UNOTEINDEXTYPE>(m_RatioTable.size());}
-
-	NOTEINDEXTYPE GetRatioTableBeginNote() const
-	{
-		return m_NoteMin;
-	}
-
 	//Tuning might not be valid for arbitrarily large range,
 	//so this can be used to ask where it is valid. Tells the lowest and highest
 	//note that are valid.
