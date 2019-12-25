@@ -84,7 +84,7 @@ public:
 	void SetFineStepCount(const USTEPINDEXTYPE& fs);
 
 	//Multiply all ratios by given number.
-	bool Multiply(const RATIOTYPE&);
+	bool Multiply(const RATIOTYPE r);
 
 	bool SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r);
 
@@ -205,6 +205,11 @@ private:
 	{
 		MPT_ASSERT(GetType() == Type::GROUPGEOMETRIC || GetType() == Type::GEOMETRIC);
 		return static_cast<NOTEINDEXTYPE>(mpt::wrapping_modulo(note, GetGroupSize()));
+	}
+
+	static bool IsValidRatio(RATIOTYPE ratio)
+	{
+		return (ratio > static_cast<RATIOTYPE>(0.0));
 	}
 
 private:

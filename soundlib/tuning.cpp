@@ -72,7 +72,7 @@ CTuning::CTuning()
 
 bool CTuning::CreateGroupGeometric(const NOTEINDEXTYPE &s, const RATIOTYPE &r, const NOTEINDEXTYPE &startindex)
 {
-	if(s < 1 || r <= 0 || startindex < GetNoteRange().first)
+	if(s < 1 || !IsValidRatio(r) || startindex < GetNoteRange().first)
 	{
 		return true;
 	}
@@ -142,7 +142,7 @@ bool CTuning::CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const
 	{
 		return true;
 	}
-	if(s < 1 || r <= 0)
+	if(s < 1 || !IsValidRatio(r))
 	{
 		return true;
 	}

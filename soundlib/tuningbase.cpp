@@ -52,9 +52,9 @@ void CTuning::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
 
 
 
-bool CTuning::Multiply(const RATIOTYPE& r)
+bool CTuning::Multiply(const RATIOTYPE r)
 {
-	if(r <= 0)
+	if(!IsValidRatio(r))
 		return true;
 
 	//Note: Multiplying ratios by constant doesn't
@@ -85,7 +85,7 @@ bool CTuning::ChangeGroupsize(const NOTEINDEXTYPE& s)
 
 bool CTuning::ChangeGroupRatio(const RATIOTYPE& r)
 {
-	if(r <= 0)
+	if(!IsValidRatio(r))
 		return true;
 
 	if(m_TuningType == Type::GROUPGEOMETRIC)
