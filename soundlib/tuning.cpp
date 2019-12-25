@@ -229,11 +229,7 @@ std::string CTuning::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
 // Without finetune
 RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE &stepsFromCentre) const
 {
-	if(stepsFromCentre < m_NoteMin)
-	{
-		return s_DefaultFallbackRatio;
-	}
-	if(stepsFromCentre >= m_NoteMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()))
+	if(!IsValidNote(stepsFromCentre))
 	{
 		return s_DefaultFallbackRatio;
 	}
@@ -265,11 +261,7 @@ RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE &baseNote, const STEPINDEXTYPE &
 	note = static_cast<NOTEINDEXTYPE>(baseNote + mpt::wrapping_divide(baseStepDiff, (fsCount + 1)));
 	fineStep = mpt::wrapping_modulo(baseStepDiff, (fsCount + 1));
 
-	if(note < m_NoteMin)
-	{
-		return s_DefaultFallbackRatio;
-	}
-	if(note >= m_NoteMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()))
+	if(!IsValidNote(note))
 	{
 		return s_DefaultFallbackRatio;
 	}

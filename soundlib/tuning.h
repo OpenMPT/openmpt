@@ -46,13 +46,13 @@ public:
 	//Tuning might not be valid for arbitrarily large range,
 	//so this can be used to ask where it is valid. Tells the lowest and highest
 	//note that are valid.
-	NoteRange GetNoteRange() const
+	MPT_FORCEINLINE NoteRange GetNoteRange() const
 	{
 		return NoteRange{m_NoteMin, static_cast<NOTEINDEXTYPE>(m_NoteMin + static_cast<NOTEINDEXTYPE>(m_RatioTable.size()) - 1)};
 	}
 
 	// Return true if note is within note range
-	bool IsValidNote(const NOTEINDEXTYPE n) const
+	MPT_FORCEINLINE bool IsValidNote(const NOTEINDEXTYPE n) const
 	{
 		return (GetNoteRange().first <= n && n <= GetNoteRange().last);
 	}
