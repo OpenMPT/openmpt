@@ -227,7 +227,7 @@ std::string CTuning::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
 
 
 // Without finetune
-RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE &stepsFromCentre) const
+RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE stepsFromCentre) const
 {
 	if(!IsValidNote(stepsFromCentre))
 	{
@@ -238,7 +238,7 @@ RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE &stepsFromCentre) const
 
 
 // With finetune
-RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE &baseNote, const STEPINDEXTYPE &baseStepDiff) const
+RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE baseNote, const STEPINDEXTYPE baseStepDiff) const
 {
 	const STEPINDEXTYPE fsCount = static_cast<STEPINDEXTYPE>(GetFineStepCount());
 	if(fsCount < 0 || fsCount > FINESTEPCOUNT_MAX)
@@ -388,13 +388,6 @@ void CTuning::UpdateFineStepTable()
 	//Should not reach here.
 	m_RatioTableFine.clear();
 	m_FineStepCount = 0;
-}
-
-
-NOTEINDEXTYPE CTuning::GetRefNote(const NOTEINDEXTYPE note) const
-{
-	if((GetType() != Type::GROUPGEOMETRIC) && (GetType() != Type::GEOMETRIC)) return 0;
-	return static_cast<NOTEINDEXTYPE>(mpt::wrapping_modulo(note, GetGroupSize()));
 }
 
 

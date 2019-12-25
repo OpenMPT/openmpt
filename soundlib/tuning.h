@@ -37,11 +37,11 @@ public:
 
 public:
 
-	//To return ratio of certain note.
-	RATIOTYPE GetRatio(const NOTEINDEXTYPE& stepsFromCentre) const;
+	// To return ratio of certain note.
+	RATIOTYPE GetRatio(const NOTEINDEXTYPE stepsFromCentre) const;
 
-	//To return ratio from a 'step'(noteindex + stepindex)
-	RATIOTYPE GetRatio(const NOTEINDEXTYPE& stepsFromCentre, const STEPINDEXTYPE& fineSteps) const;
+	// To return ratio from a 'step'(noteindex + stepindex)
+	RATIOTYPE GetRatio(const NOTEINDEXTYPE stepsFromCentre, const STEPINDEXTYPE fineSteps) const;
 
 	//Tuning might not be valid for arbitrarily large range,
 	//so this can be used to ask where it is valid. Tells the lowest and highest
@@ -57,12 +57,18 @@ public:
 		return (GetNoteRange().first <= n && n <= GetNoteRange().last);
 	}
 
-	UNOTEINDEXTYPE GetGroupSize() const {return m_GroupSize;}
+	MPT_FORCEINLINE UNOTEINDEXTYPE GetGroupSize() const
+	{
+		return m_GroupSize;
+	}
 
 	RATIOTYPE GetGroupRatio() const {return m_GroupRatio;}
 
-	//To return (fine)stepcount between two consecutive mainsteps.
-	USTEPINDEXTYPE GetFineStepCount() const {return m_FineStepCount;}
+	// To return (fine)stepcount between two consecutive mainsteps.
+	MPT_FORCEINLINE USTEPINDEXTYPE GetFineStepCount() const
+	{
+		return m_FineStepCount;
+	}
 
 	//To return 'directed distance' between given notes.
 	STEPINDEXTYPE GetStepDistance(const NOTEINDEXTYPE& from, const NOTEINDEXTYPE& to) const
@@ -82,7 +88,10 @@ public:
 
 	bool SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r);
 
-	Tuning::Type GetType() const {return m_TuningType;}
+	MPT_FORCEINLINE Tuning::Type GetType() const
+	{
+		return m_TuningType;
+	}
 
 	std::string GetNoteName(const NOTEINDEXTYPE& x, bool addOctave = true) const;
 
@@ -189,10 +198,14 @@ private:
 
 	void UpdateFineStepTable();
 
-	//GroupPeriodic-specific.
-	//Get the corresponding note in [0, period-1].
-	//For example GetRefNote(-1) is to return note :'groupsize-1'.
-	NOTEINDEXTYPE GetRefNote(NOTEINDEXTYPE note) const;
+	// GroupPeriodic-specific.
+	// Get the corresponding note in [0, period-1].
+	// For example GetRefNote(-1) is to return note :'groupsize-1'.
+	MPT_FORCEINLINE NOTEINDEXTYPE GetRefNote(NOTEINDEXTYPE note) const
+	{
+		MPT_ASSERT(GetType() == Type::GROUPGEOMETRIC || GetType() == Type::GEOMETRIC);
+		return static_cast<NOTEINDEXTYPE>(mpt::wrapping_modulo(note, GetGroupSize()));
+	}
 
 private:
 
