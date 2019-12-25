@@ -731,9 +731,6 @@
     <ClCompile Include="..\..\soundlib\tuning.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\tuningbase.cpp">
-      <Filter>soundlib</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

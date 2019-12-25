@@ -306,7 +306,6 @@ MPT_FILES_SOUNDLIB += soundlib/Tagging.cpp
 MPT_FILES_SOUNDLIB += soundlib/Tagging.h
 MPT_FILES_SOUNDLIB += soundlib/TinyFFT.cpp
 MPT_FILES_SOUNDLIB += soundlib/TinyFFT.h
-MPT_FILES_SOUNDLIB += soundlib/tuningbase.cpp
 MPT_FILES_SOUNDLIB += soundlib/tuningbase.h
 MPT_FILES_SOUNDLIB += soundlib/tuningCollection.cpp
 MPT_FILES_SOUNDLIB += soundlib/tuningcollection.h

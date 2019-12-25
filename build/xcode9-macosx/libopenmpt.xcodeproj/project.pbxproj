@@ -268,9 +268,8 @@
 		93573E98FF71A1394894B1CD /* tuning.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 428849012E6F0BF9D7BF7116 /* tuning.cpp */; };
 		F1EAB24B5D7A74366676554E /* tuning.h in Headers */ = {isa = PBXBuildFile; fileRef = 892BBD2D7567C097DE79D88E /* tuning.h */; };
 		3AB3840AA6C42CB12F16BFF0 /* tuningCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 491AC50E359815A81E90D33F /* tuningCollection.cpp */; };
-		CB717DE837E27F610001FAE9 /* tuningbase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FAE625F3E66319360FE1194A /* tuningbase.cpp */; };
-		325045779EB5D8FD278E7AD6 /* tuningbase.h in Headers */ = {isa = PBXBuildFile; fileRef = 412D19EF2D7FF0DE169E2DEF /* tuningbase.h */; };
-		05D9DB19719F3836BAFAC698 /* tuningcollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 74A9B22760BCB28009A68F6D /* tuningcollection.h */; };
+		F09812445CFEA5CAE5D647A3 /* tuningbase.h in Headers */ = {isa = PBXBuildFile; fileRef = 3F87E8962BD9BF8614F8FC96 /* tuningbase.h */; };
+		4338380FAFFE942BF859238E /* tuningcollection.h in Headers */ = {isa = PBXBuildFile; fileRef = F209298EDE1C29E7870606D4 /* tuningcollection.h */; };
 		33F43B0D1FB76C31C8047EAD /* libopenmpt-mpg123.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C253023F2E93C65737738D6F /* libopenmpt-mpg123.dylib */; };
 		295F95881522C6ACBE6FD728 /* libopenmpt-vorbis.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F88CF99364CCBDAC6DAC84C4 /* libopenmpt-vorbis.dylib */; };
 		590C48B3450E8CC32E9182BC /* libopenmpt-ogg.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 88986B03F4B67FD03D8485E2 /* libopenmpt-ogg.dylib */; };
@@ -583,9 +582,8 @@
 		428849012E6F0BF9D7BF7116 /* tuning.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "tuning.cpp"; path = "tuning.cpp"; sourceTree = "<group>"; };
 		892BBD2D7567C097DE79D88E /* tuning.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "tuning.h"; path = "tuning.h"; sourceTree = "<group>"; };
 		491AC50E359815A81E90D33F /* tuningCollection.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "tuningCollection.cpp"; path = "tuningCollection.cpp"; sourceTree = "<group>"; };
-		FAE625F3E66319360FE1194A /* tuningbase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "tuningbase.cpp"; path = "tuningbase.cpp"; sourceTree = "<group>"; };
-		412D19EF2D7FF0DE169E2DEF /* tuningbase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "tuningbase.h"; path = "tuningbase.h"; sourceTree = "<group>"; };
-		74A9B22760BCB28009A68F6D /* tuningcollection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "tuningcollection.h"; path = "tuningcollection.h"; sourceTree = "<group>"; };
+		3F87E8962BD9BF8614F8FC96 /* tuningbase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "tuningbase.h"; path = "tuningbase.h"; sourceTree = "<group>"; };
+		F209298EDE1C29E7870606D4 /* tuningcollection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "tuningcollection.h"; path = "tuningcollection.h"; sourceTree = "<group>"; };
 		C1F3343CADAE24E856669D32 /* liblibopenmpt.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = "liblibopenmpt.dylib"; path = "liblibopenmpt.dylib"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CACB699F8BD5E40810FF17F /* mpg123.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "mpg123.xcodeproj"; path = "ext/mpg123.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		C22F9E152E4146BCB792D8FB /* vorbis.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "vorbis.xcodeproj"; path = "ext/vorbis.xcodeproj"; sourceTree = SOURCE_ROOT; };
@@ -593,7 +591,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		3F19BB5FABE38CBAF4E98BDF /* Frameworks */ = {
+		7D92C8DDE95C9A383263995D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -614,8 +612,8 @@
 				EE103A38DA20E60843DA4A27 /* soundbase */,
 				A060974D0C23CBD755D35964 /* sounddsp */,
 				2F927F599B54B3E3E4044270 /* soundlib */,
-				A442E0F01005147B59B5A207 /* Products */,
-				726F8E94DE31C21E27E250AB /* Projects */,
+				E287F98E4E4A2D1997FABBA5 /* Products */,
+				F950CACC6513FE56AEC38CE3 /* Projects */,
 			);
 			name = "libopenmpt";
 			path = ".";
@@ -887,9 +885,8 @@
 				428849012E6F0BF9D7BF7116 /* tuning.cpp */,
 				892BBD2D7567C097DE79D88E /* tuning.h */,
 				491AC50E359815A81E90D33F /* tuningCollection.cpp */,
-				FAE625F3E66319360FE1194A /* tuningbase.cpp */,
-				412D19EF2D7FF0DE169E2DEF /* tuningbase.h */,
-				74A9B22760BCB28009A68F6D /* tuningcollection.h */,
+				3F87E8962BD9BF8614F8FC96 /* tuningbase.h */,
+				F209298EDE1C29E7870606D4 /* tuningcollection.h */,
 			);
 			name = "soundlib";
 			path = "../../soundlib";
@@ -943,7 +940,7 @@
 			path = "dmo";
 			sourceTree = "<group>";
 		};
-		A442E0F01005147B59B5A207 /* Products */ = {
+		E287F98E4E4A2D1997FABBA5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				C1F3343CADAE24E856669D32 /* liblibopenmpt.dylib */,
@@ -951,7 +948,7 @@
 			name = "Products";
 			sourceTree = "<group>";
 		};
-		726F8E94DE31C21E27E250AB /* Projects */ = {
+		F950CACC6513FE56AEC38CE3 /* Projects */ = {
 			isa = PBXGroup;
 			children = (
 				8CACB699F8BD5E40810FF17F /* mpg123.xcodeproj */,
@@ -991,11 +988,11 @@
 /* Begin PBXNativeTarget section */
 		87EFAFF2F3FCDDD87CE3D9C3 /* libopenmpt */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FB3FCF9C670AA1F7B010A01C /* Build configuration list for PBXNativeTarget "libopenmpt" */;
+			buildConfigurationList = 82AB7744EE75499F377C48C4 /* Build configuration list for PBXNativeTarget "libopenmpt" */;
 			buildPhases = (
-				1DC3C8DD898D9A38D293995D /* Resources */,
-				550CC21EC1D693790ADD929E /* Sources */,
-				3F19BB5FABE38CBAF4E98BDF /* Frameworks */,
+				5B3CD65BC706A8B6100DA7DB /* Resources */,
+				9385CF9CFF4FA1F74856A01C /* Sources */,
+				7D92C8DDE95C9A383263995D /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1065,7 +1062,7 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
-		1DC3C8DD898D9A38D293995D /* Resources */ = {
+		5B3CD65BC706A8B6100DA7DB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1075,7 +1072,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		550CC21EC1D693790ADD929E /* Sources */ = {
+		9385CF9CFF4FA1F74856A01C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1211,7 +1208,6 @@
 				A635073992F597DDFB1280E8 /* WavesReverb.cpp in Sources */,
 				93573E98FF71A1394894B1CD /* tuning.cpp in Sources */,
 				3AB3840AA6C42CB12F16BFF0 /* tuningCollection.cpp in Sources */,
-				CB717DE837E27F610001FAE9 /* tuningbase.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1396,7 +1392,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		FB3FCF9C670AA1F7B010A01C /* Build configuration list for PBXNativeTarget "liblibopenmpt.dylib" */ = {
+		82AB7744EE75499F377C48C4 /* Build configuration list for PBXNativeTarget "liblibopenmpt.dylib" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				09B8609D754722887E4303A0 /* Debug */,

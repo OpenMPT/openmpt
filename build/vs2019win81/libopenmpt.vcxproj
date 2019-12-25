@@ -1053,8 +1053,6 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\tuning.cpp">
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\tuningbase.cpp">
-    </ClCompile>
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\UMXTools.cpp">

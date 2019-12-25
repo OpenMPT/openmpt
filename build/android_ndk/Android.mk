@@ -194,7 +194,6 @@ LOCAL_SRC_FILES += \
 	soundlib/Tables.cpp \
 	soundlib/Tagging.cpp \
 	soundlib/TinyFFT.cpp \
-	soundlib/tuningbase.cpp \
 	soundlib/tuningCollection.cpp \
 	soundlib/tuning.cpp \
 	soundlib/WAVTools.cpp \

@@ -815,9 +815,6 @@
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\tuningbase.cpp">
-      <Filter>soundlib</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\libopenmpt\libopenmpt_version.rc">

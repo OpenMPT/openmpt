@@ -1616,9 +1616,6 @@
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\soundlib\tuningbase.cpp">
-      <Filter>soundlib</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\TestToolsLib.cpp">
       <Filter>test</Filter>
     </ClCompile>
