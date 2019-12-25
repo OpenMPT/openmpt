@@ -459,13 +459,14 @@ SerializationResult CTuning::InitDeserialize(std::istream& iStrm)
 template<class T, class SIZETYPE, class Tdst>
 static bool VectorFromBinaryStream(std::istream& inStrm, std::vector<Tdst>& v, const SIZETYPE maxSize = (std::numeric_limits<SIZETYPE>::max)())
 {
-	if(!inStrm.good()) return true;
+	if(!inStrm.good())
+		return false;
 
 	SIZETYPE size = 0;
 	mpt::IO::ReadIntLE<SIZETYPE>(inStrm, size);
 
 	if(size > maxSize)
-		return true;
+		return false;
 
 	v.resize(size);
 	for(std::size_t i = 0; i<size; i++)
@@ -474,10 +475,8 @@ static bool VectorFromBinaryStream(std::istream& inStrm, std::vector<Tdst>& v, c
 		mpt::IO::Read(inStrm, tmp);
 		v[i] = tmp;
 	}
-	if(inStrm.good())
-		return false;
-	else
-		return true;
+
+	return inStrm.good();
 }
 
 
@@ -598,13 +597,13 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
 	//Ratiotable
 	if(version <= 2)
 	{
-		if(VectorFromBinaryStream<IEEE754binary32LE, uint32>(inStrm, m_RatioTable, 0xffff))
+		if(!VectorFromBinaryStream<IEEE754binary32LE, uint32>(inStrm, m_RatioTable, 0xffff))
 		{
 			return SerializationResult::Failure;
 		}
 	} else
 	{
-		if(VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, m_RatioTable))
+		if(!VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, m_RatioTable))
 		{
 			return SerializationResult::Failure;
 		}
@@ -613,13 +612,13 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
 	//Fineratios
 	if(version <= 2)
 	{
-		if(VectorFromBinaryStream<IEEE754binary32LE, uint32>(inStrm, m_RatioTableFine, 0xffff))
+		if(!VectorFromBinaryStream<IEEE754binary32LE, uint32>(inStrm, m_RatioTableFine, 0xffff))
 		{
 			return SerializationResult::Failure;
 		}
 	} else
 	{
-		if(VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, m_RatioTableFine))
+		if(!VectorFromBinaryStream<IEEE754binary32LE, uint16>(inStrm, m_RatioTableFine))
 		{
 			return SerializationResult::Failure;
 		}
