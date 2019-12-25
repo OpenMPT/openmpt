@@ -83,7 +83,7 @@ public:
 	//stepdistances become the same as note distances.
 	void SetFineStepCount(const USTEPINDEXTYPE& fs);
 
-	//Multiply all ratios by given number.
+	// Multiply all ratios by given number.
 	bool Multiply(const RATIOTYPE r);
 
 	bool SetRatio(const NOTEINDEXTYPE& s, const RATIOTYPE& r);

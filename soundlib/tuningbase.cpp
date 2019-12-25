@@ -55,15 +55,14 @@ void CTuning::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
 bool CTuning::Multiply(const RATIOTYPE r)
 {
 	if(!IsValidRatio(r))
-		return true;
-
-	//Note: Multiplying ratios by constant doesn't
-	//change, e.g. 'geometricness' status.
+	{
+		return false;
+	}
 	for(auto & ratio : m_RatioTable)
 	{
 		ratio *= r;
 	}
-	return false;
+	return true;
 }
 
 
