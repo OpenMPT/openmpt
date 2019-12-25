@@ -47,6 +47,12 @@ using namespace CTuningS11n;
 
 
 /*
+Version history:
+	4->5: Lots of changes, finestep interpretation revamp, fileformat revamp.
+	3->4: Changed sizetypes in serialisation from size_t(uint32) to
+			smaller types (uint8, USTEPTYPE) (March 2007)
+*/
+/*
 Version changes:
 	3->4: Finetune related internal structure and serialization revamp.
 	2->3: The type for the size_type in the serialisation changed
@@ -226,6 +232,22 @@ std::string CTuning::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
 }
 
 
+void CTuning::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
+{
+	if(!str.empty())
+	{
+		m_NoteNameMap[n] = str;
+	} else
+	{
+		const auto iter = m_NoteNameMap.find(n);
+		if(iter != m_NoteNameMap.end())
+		{
+			m_NoteNameMap.erase(iter);
+		}
+	}
+}
+
+
 // Without finetune
 RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE note) const
 {
@@ -378,6 +400,50 @@ void CTuning::UpdateFineStepTable()
 	//Should not reach here.
 	m_RatioTableFine.clear();
 	m_FineStepCount = 0;
+}
+
+
+bool CTuning::Multiply(const RATIOTYPE r)
+{
+	if(!IsValidRatio(r))
+	{
+		return false;
+	}
+	for(auto & ratio : m_RatioTable)
+	{
+		ratio *= r;
+	}
+	return true;
+}
+
+
+bool CTuning::ChangeGroupsize(const NOTEINDEXTYPE& s)
+{
+	if(s < 1)
+		return false;
+
+	if(m_TuningType == Type::GROUPGEOMETRIC)
+		return CreateGroupGeometric(s, GetGroupRatio(), 0);
+
+	if(m_TuningType == Type::GEOMETRIC)
+		return CreateGeometric(s, GetGroupRatio());
+
+	return false;
+}
+
+
+bool CTuning::ChangeGroupRatio(const RATIOTYPE& r)
+{
+	if(!IsValidRatio(r))
+		return false;
+
+	if(m_TuningType == Type::GROUPGEOMETRIC)
+		return CreateGroupGeometric(GetGroupSize(), r, 0);
+
+	if(m_TuningType == Type::GEOMETRIC)
+		return CreateGeometric(GetGroupSize(), r);
+
+	return false;
 }
 
 

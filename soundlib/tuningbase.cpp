@@ -10,94 +10,13 @@
 
 #include "stdafx.h"
 #include "tuningbase.h"
-#include "tuning.h"
-#include "../common/mptIO.h"
-#include "../common/serialization_utils.h"
-
-#include <cmath>
-
-#include <istream>
-#include <ostream>
 
 
 OPENMPT_NAMESPACE_BEGIN
 
-
 namespace Tuning {
 
 
-/*
-Version history:
-	4->5: Lots of changes, finestep interpretation revamp, fileformat revamp.
-	3->4: Changed sizetypes in serialisation from size_t(uint32) to
-			smaller types (uint8, USTEPTYPE) (March 2007)
-*/
-
-
-
-void CTuning::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
-{
-	if(!str.empty())
-	{
-		m_NoteNameMap[n] = str;
-	} else
-	{
-		const auto iter = m_NoteNameMap.find(n);
-		if(iter != m_NoteNameMap.end())
-		{
-			m_NoteNameMap.erase(iter);
-		}
-	}
-}
-
-
-
-bool CTuning::Multiply(const RATIOTYPE r)
-{
-	if(!IsValidRatio(r))
-	{
-		return false;
-	}
-	for(auto & ratio : m_RatioTable)
-	{
-		ratio *= r;
-	}
-	return true;
-}
-
-
-bool CTuning::ChangeGroupsize(const NOTEINDEXTYPE& s)
-{
-	if(s < 1)
-		return false;
-
-	if(m_TuningType == Type::GROUPGEOMETRIC)
-		return CreateGroupGeometric(s, GetGroupRatio(), 0);
-
-	if(m_TuningType == Type::GEOMETRIC)
-		return CreateGeometric(s, GetGroupRatio());
-
-	return false;
-}
-
-
-
-bool CTuning::ChangeGroupRatio(const RATIOTYPE& r)
-{
-	if(!IsValidRatio(r))
-		return false;
-
-	if(m_TuningType == Type::GROUPGEOMETRIC)
-		return CreateGroupGeometric(GetGroupSize(), r, 0);
-
-	if(m_TuningType == Type::GEOMETRIC)
-		return CreateGeometric(GetGroupSize(), r);
-
-	return false;
-}
-
-
 } // namespace Tuning
-
 
 OPENMPT_NAMESPACE_END
