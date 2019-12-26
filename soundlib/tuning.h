@@ -93,14 +93,14 @@ public:
 		return m_TuningType;
 	}
 
-	std::string GetNoteName(const NOTEINDEXTYPE& x, bool addOctave = true) const;
+	mpt::ustring GetNoteName(const NOTEINDEXTYPE &x, bool addOctave = true) const;
 
-	void SetNoteName(const NOTEINDEXTYPE&, const std::string&);
+	void SetNoteName(const NOTEINDEXTYPE &, const mpt::ustring &);
 
-	static std::unique_ptr<CTuning> CreateDeserialize(std::istream & f)
+	static std::unique_ptr<CTuning> CreateDeserialize(std::istream &f, mpt::Charset defaultCharset)
 	{
 		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
-		if(pT->InitDeserialize(f) != SerializationResult::Success)
+		if(pT->InitDeserialize(f, defaultCharset) != SerializationResult::Success)
 		{
 			return nullptr;
 		}
@@ -108,24 +108,24 @@ public:
 	}
 
 	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
-	static std::unique_ptr<CTuning> CreateDeserializeOLD(std::istream & f)
+	static std::unique_ptr<CTuning> CreateDeserializeOLD(std::istream &f, mpt::Charset defaultCharset)
 	{
 		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
-		if(pT->InitDeserializeOLD(f) != SerializationResult::Success)
+		if(pT->InitDeserializeOLD(f, defaultCharset) != SerializationResult::Success)
 		{
 			return nullptr;
 		}
 		return pT;
 	}
 
-	static std::unique_ptr<CTuning> CreateGeneral(const std::string &name)
+	static std::unique_ptr<CTuning> CreateGeneral(const mpt::ustring &name)
 	{
 		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		pT->SetName(name);
 		return pT;
 	}
 
-	static std::unique_ptr<CTuning> CreateGroupGeometric(const std::string &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
+	static std::unique_ptr<CTuning> CreateGroupGeometric(const mpt::ustring &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
 	{
 		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		pT->SetName(name);
@@ -137,7 +137,7 @@ public:
 		return pT;
 	}
 
-	static std::unique_ptr<CTuning> CreateGroupGeometric(const std::string &name, const std::vector<RATIOTYPE> &ratios, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
+	static std::unique_ptr<CTuning> CreateGroupGeometric(const mpt::ustring &name, const std::vector<RATIOTYPE> &ratios, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
 	{
 		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		pT->SetName(name);
@@ -152,7 +152,7 @@ public:
 		return pT;
 	}
 
-	static std::unique_ptr<CTuning> CreateGeometric(const std::string &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
+	static std::unique_ptr<CTuning> CreateGeometric(const mpt::ustring &name, UNOTEINDEXTYPE groupsize, RATIOTYPE groupratio, USTEPINDEXTYPE finestepcount)
 	{
 		std::unique_ptr<CTuning> pT = std::unique_ptr<CTuning>(new CTuning());
 		pT->SetName(name);
@@ -173,17 +173,24 @@ public:
 	bool ChangeGroupsize(const NOTEINDEXTYPE&);
 	bool ChangeGroupRatio(const RATIOTYPE&);
 
-	void SetName(const std::string& s) { m_TuningName = s; }
-	std::string GetName() const {return m_TuningName;}
+	void SetName(const mpt::ustring &s)
+	{
+		m_TuningName = s;
+	}
+
+	mpt::ustring GetName() const
+	{
+		return m_TuningName;
+	}
 
 private:
 
 	CTuning();
 
-	SerializationResult InitDeserialize(std::istream& inStrm);
+	SerializationResult InitDeserialize(std::istream &inStrm, mpt::Charset defaultCharset);
 
 	//Try to read old version (v.3) and return pointer to new instance if succesfull, else nullptr.
-	SerializationResult InitDeserializeOLD(std::istream&);
+	SerializationResult InitDeserializeOLD(std::istream &inStrm, mpt::Charset defaultCharset);
 
 	//Create GroupGeometric tuning of *this using virtual ProCreateGroupGeometric.
 	bool CreateGroupGeometric(const std::vector<RATIOTYPE> &v, const RATIOTYPE &r, const NoteRange &range, const NOTEINDEXTYPE &ratiostartpos);
@@ -232,9 +239,9 @@ private:
 
 	USTEPINDEXTYPE m_FineStepCount; // invariant: 0 <= m_FineStepCount <= FINESTEPCOUNT_MAX
 
-	std::string m_TuningName;
+	mpt::ustring m_TuningName;
 
-	std::map<NOTEINDEXTYPE, std::string> m_NoteNameMap;
+	std::map<NOTEINDEXTYPE, mpt::ustring> m_NoteNameMap;
 
 }; // class CTuning
 

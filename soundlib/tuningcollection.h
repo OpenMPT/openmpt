@@ -46,20 +46,20 @@ public:
 
 	// returns observer ptr if successfull
 	CTuning* AddTuning(std::unique_ptr<CTuning> pT);
-	CTuning* AddTuning(std::istream& inStrm);
+	CTuning* AddTuning(std::istream &inStrm, mpt::Charset defaultCharset);
 	
 	bool Remove(const std::size_t i);
 	bool Remove(const CTuning *pT);
 
 	CTuning& GetTuning(size_t i) {return *m_Tunings.at(i).get();}
 	const CTuning& GetTuning(size_t i) const {return *m_Tunings.at(i).get();}
-	CTuning* GetTuning(const std::string& name);
-	const CTuning* GetTuning(const std::string& name) const;
+	CTuning* GetTuning(const mpt::ustring &name);
+	const CTuning* GetTuning(const mpt::ustring &name) const;
 
 	size_t GetNumTunings() const {return m_Tunings.size();}
 
-	Tuning::SerializationResult Serialize(std::ostream&, const std::string &name) const;
-	Tuning::SerializationResult Deserialize(std::istream&, std::string &name);
+	Tuning::SerializationResult Serialize(std::ostream &oStrm, const mpt::ustring &name) const;
+	Tuning::SerializationResult Deserialize(std::istream &iStrm, mpt::ustring &name, mpt::Charset defaultCharset);
 
 	auto begin() { return m_Tunings.begin(); }
 	auto begin() const { return m_Tunings.begin(); }
@@ -74,7 +74,7 @@ private:
 
 private:
 
-	Tuning::SerializationResult DeserializeOLD(std::istream&, std::string &name);
+	Tuning::SerializationResult DeserializeOLD(std::istream &inStrm, mpt::ustring &uname, mpt::Charset defaultCharset);
 
 };
 

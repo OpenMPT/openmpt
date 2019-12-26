@@ -29,6 +29,7 @@
 #include "../common/mptUUID.h"
 #include "../common/mptFileIO.h"
 #include "../soundlib/tuningcollection.h"
+#include "TuningDialog.h"
 
 
 #include <algorithm>
@@ -839,7 +840,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 		mpt::PathString fn = PathTunings.GetDefaultDir() + P_("Built-in\\12TET.tun");
 		if(!fn.FileOrDirectoryExists())
 		{
-			std::unique_ptr<CTuning> pT = CSoundFile::CreateTuning12TET("12TET");
+			std::unique_ptr<CTuning> pT = CSoundFile::CreateTuning12TET(U_("12TET"));
 			mpt::SafeOutputFile sf(fn, std::ios::binary, mpt::FlushMode::Full);
 			pT->Serialize(sf);
 		}
@@ -848,7 +849,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 		mpt::PathString fn = PathTunings.GetDefaultDir() + P_("Built-in\\12TET [[fs15 1.17.02.49]].tun");
 		if(!fn.FileOrDirectoryExists())
 		{
-			std::unique_ptr<CTuning> pT = CSoundFile::CreateTuning12TET("12TET [[fs15 1.17.02.49]]");
+			std::unique_ptr<CTuning> pT = CSoundFile::CreateTuning12TET(U_("12TET [[fs15 1.17.02.49]]"));
 			mpt::SafeOutputFile sf(fn, std::ios::binary, mpt::FlushMode::Full);
 			pT->Serialize(sf);
 		}
@@ -871,8 +872,8 @@ std::unique_ptr<CTuningCollection> TrackerSettings::LoadLocalTunings()
 		, std::ios::binary);
 	if(f.good())
 	{
-		std::string dummyName;
-		s_pTuningsSharedLocal->Deserialize(f, dummyName);
+		mpt::ustring dummyName;
+		s_pTuningsSharedLocal->Deserialize(f, dummyName, TuningCharsetFallback);
 	}
 	return s_pTuningsSharedLocal;
 }

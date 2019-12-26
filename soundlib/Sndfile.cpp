@@ -1440,12 +1440,12 @@ bool CSoundFile::DestroySampleThreadsafe(SAMPLEINDEX nSample)
 }
 
 
-std::unique_ptr<CTuning> CSoundFile::CreateTuning12TET(const std::string &name)
+std::unique_ptr<CTuning> CSoundFile::CreateTuning12TET(const mpt::ustring &name)
 {
 	std::unique_ptr<CTuning> pT = CTuning::CreateGeometric(name, 12, 2, 15);
 	for(ModCommand::NOTE note = 0; note < 12; ++note)
 	{
-		pT->SetNoteName(note, mpt::ToCharset(mpt::Charset::ASCII, mpt::ustring(NoteNamesSharp[note])));
+		pT->SetNoteName(note, mpt::ustring(NoteNamesSharp[note]));
 	}
 	return pT;
 }
@@ -1456,7 +1456,7 @@ mpt::ustring CSoundFile::GetNoteName(const ModCommand::NOTE note, const INSTRUME
 	// For MPTM instruments with custom tuning, find the appropriate note name. Else, use default note names.
 	if(ModCommand::IsNote(note) && GetType() == MOD_TYPE_MPT && inst >= 1 && inst <= GetNumInstruments() && Instruments[inst] && Instruments[inst]->pTuning)
 	{
-		return mpt::ToUnicode(GetCharsetInternal(), Instruments[inst]->pTuning->GetNoteName(note - NOTE_MIDDLEC));
+		return Instruments[inst]->pTuning->GetNoteName(note - NOTE_MIDDLEC);
 	} else
 	{
 		return GetNoteName(note);

@@ -72,7 +72,7 @@ static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
 
 static void WriteTuningCollection(std::ostream& oStrm, const CTuningCollection& tc)
 {
-	tc.Serialize(oStrm, "Tune specific tunings");
+	tc.Serialize(oStrm, U_("Tune specific tunings"));
 }
 
 static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
@@ -113,7 +113,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 		for(auto &iter : tNameToShort_Map)
 		{
 			if(iter.first)
-				mpt::IO::WriteSizedStringLE<uint8>(oStrm, iter.first->GetName());
+				mpt::IO::WriteSizedStringLE<uint8>(oStrm, mpt::ToCharset(mpt::Charset::UTF8, iter.first->GetName()));
 			else //Case: Using original IT tuning.
 				mpt::IO::WriteSizedStringLE<uint8>(oStrm, "->MPT_ORIGINAL_IT<-");
 
@@ -142,15 +142,16 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 #endif // MODPLUG_NO_FILESAVE
 
 
-static void ReadTuningCollection(std::istream& iStrm, CTuningCollection& tc, const size_t)
+static void ReadTuningCollection(std::istream &iStrm, CTuningCollection &tc, const std::size_t dummy, mpt::Charset defaultCharset)
 {
-	std::string name;
-	tc.Deserialize(iStrm, name);
+	MPT_UNREFERENCED_PARAMETER(dummy);
+	mpt::ustring name;
+	tc.Deserialize(iStrm, name, defaultCharset);
 }
 
 
 template<class TUNNUMTYPE, class STRSIZETYPE>
-static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::string>& shortToTNameMap, const size_t maxNum = 500)
+static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, mpt::ustring> &shortToTNameMap, mpt::Charset charset, const size_t maxNum = 500)
 {
 	TUNNUMTYPE numTuning = 0;
 	mpt::IO::ReadIntLE<TUNNUMTYPE>(iStrm, numTuning);
@@ -165,7 +166,7 @@ static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::str
 			return true;
 
 		mpt::IO::ReadIntLE<uint16>(iStrm, ui);
-		shortToTNameMap[ui] = temp;
+		shortToTNameMap[ui] = mpt::ToUnicode(charset, temp);
 	}
 	if(iStrm.good())
 		return false;
@@ -174,19 +175,19 @@ static bool ReadTuningMapTemplate(std::istream& iStrm, std::map<uint16, std::str
 }
 
 
-static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t = 0, bool old = false)
+static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, mpt::Charset charset, const size_t = 0, bool old = false)
 {
-	std::map<uint16, std::string> shortToTNameMap;
+	std::map<uint16, mpt::ustring> shortToTNameMap;
 	if(old)
 	{
-		ReadTuningMapTemplate<uint32, uint32>(iStrm, shortToTNameMap);
+		ReadTuningMapTemplate<uint32, uint32>(iStrm, shortToTNameMap, charset);
 	} else
 	{
-		ReadTuningMapTemplate<uint16, uint8>(iStrm, shortToTNameMap);
+		ReadTuningMapTemplate<uint16, uint8>(iStrm, shortToTNameMap, charset);
 	}
 
 	// Read & set tunings for instruments
-	std::vector<std::string> notFoundTunings;
+	std::vector<mpt::ustring> notFoundTunings;
 	for(INSTRUMENTINDEX i = 1; i<=csf.GetNumInstruments(); i++)
 	{
 		uint16 ui = 0;
@@ -194,9 +195,9 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 		auto iter = shortToTNameMap.find(ui);
 		if(csf.Instruments[i] && iter != shortToTNameMap.end())
 		{
-			const std::string str = iter->second;
+			const mpt::ustring str = iter->second;
 
-			if(str == "->MPT_ORIGINAL_IT<-")
+			if(str == U_("->MPT_ORIGINAL_IT<-"))
 			{
 				csf.Instruments[i]->pTuning = nullptr;
 				continue;
@@ -214,7 +215,7 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 				CTuning *pT = csf.GetTuneSpecificTunings().AddTuning(std::move(pNewTuning));
 				if(pT)
 				{
-					csf.AddToLog("Local tunings are deprecated and no longer supported. Tuning '" + str + "' found in Local tunings has been copied to Tune-specific tunings and will be saved in the module file.");
+					csf.AddToLog(U_("Local tunings are deprecated and no longer supported. Tuning '") + str + U_("' found in Local tunings has been copied to Tune-specific tunings and will be saved in the module file."));
 					csf.Instruments[i]->pTuning = pT;
 					if(csf.GetpModDoc() != nullptr)
 					{
@@ -223,19 +224,19 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 					continue;
 				} else
 				{
-					csf.AddToLog("Copying Local tuning '" + str + "' to Tune-specific tunings failed.");
+					csf.AddToLog(U_("Copying Local tuning '") + str + U_("' to Tune-specific tunings failed."));
 				}
 			}
 #endif
 
-			if(str == "12TET [[fs15 1.17.02.49]]" || str == "12TET")
+			if(str == U_("12TET [[fs15 1.17.02.49]]") || str == U_("12TET"))
 			{
 				std::unique_ptr<CTuning> pNewTuning = csf.CreateTuning12TET(str);
 				CTuning *pT = csf.GetTuneSpecificTunings().AddTuning(std::move(pNewTuning));
 				if(pT)
 				{
 					#ifdef MODPLUG_TRACKER
-						csf.AddToLog("Built-in tunings will no longer be used. Tuning '" + str + "' has been copied to Tune-specific tunings and will be saved in the module file.");
+						csf.AddToLog(U_("Built-in tunings will no longer be used. Tuning '") + str + U_("' has been copied to Tune-specific tunings and will be saved in the module file."));
 						csf.Instruments[i]->pTuning = pT;
 						if(csf.GetpModDoc() != nullptr)
 						{
@@ -246,7 +247,7 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 				} else
 				{
 					#ifdef MODPLUG_TRACKER
-						csf.AddToLog("Copying Built-in tuning '" + str + "' to Tune-specific tunings failed.");
+						csf.AddToLog(U_("Copying Built-in tuning '") + str + U_("' to Tune-specific tunings failed."));
 					#endif
 				}
 			}
@@ -255,7 +256,7 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 			if(std::find(notFoundTunings.begin(), notFoundTunings.end(), str) == notFoundTunings.end())
 			{
 				notFoundTunings.push_back(str);
-				csf.AddToLog("Tuning '" + str + "' used by the module was not found.");
+				csf.AddToLog(U_("Tuning '") + str + U_("' used by the module was not found."));
 #ifdef MODPLUG_TRACKER
 				if(csf.GetpModDoc() != nullptr)
 				{
@@ -278,9 +279,9 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, const size_t
 }
 
 
-static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t dummy = 0)
+static void ReadTuningMap(std::istream& iStrm, CSoundFile& csf, const size_t dummy, mpt::Charset charset)
 {
-	ReadTuningMapImpl(iStrm, csf, dummy, false);
+	ReadTuningMapImpl(iStrm, csf, charset, dummy, false);
 }
 
 
@@ -1269,8 +1270,11 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 	{
 		srlztn::SsbRead ssb(iStrm);
 		ssb.BeginRead("mptm", Version::Current().GetRawVersion());
-		ssb.ReadItem(GetTuneSpecificTunings(), "0", &ReadTuningCollection);
-		ssb.ReadItem(*this, "1", &ReadTuningMap);
+		int8 useUTF8Tuning = 0;
+		ssb.ReadItem(useUTF8Tuning, "UTF8Tuning");
+		mpt::Charset TuningChraset = useUTF8Tuning ? mpt::Charset::UTF8 : GetCharsetInternal();
+		ssb.ReadItem(GetTuneSpecificTunings(), "0", [TuningChraset](std::istream &iStrm, CTuningCollection &tc, const std::size_t dummy){ return ReadTuningCollection(iStrm, tc, dummy, TuningChraset); });
+		ssb.ReadItem(*this, "1", [TuningChraset](std::istream& iStrm, CSoundFile& csf, const std::size_t dummy){ return ReadTuningMap(iStrm, csf, dummy, TuningChraset); });
 		ssb.ReadItem(Order, "2", &ReadModSequenceOld);
 		ssb.ReadItem(Patterns, FileIdPatterns, &ReadModPatterns);
 		ssb.ReadItem(Order, FileIdSequences, &ReadModSequences);
@@ -1282,13 +1286,13 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 	} else
 	{
 		// Loading for older files.
-		std::string name;
-		if(GetTuneSpecificTunings().Deserialize(iStrm, name) != Tuning::SerializationResult::Success)
+		mpt::ustring name;
+		if(GetTuneSpecificTunings().Deserialize(iStrm, name, GetCharsetInternal()) != Tuning::SerializationResult::Success)
 		{
 			AddToLog(LogError, U_("Loading tune specific tunings failed."));
 		} else
 		{
-			ReadTuningMapImpl(iStrm, *this, 0, cwtv < 0x88C);
+			ReadTuningMapImpl(iStrm, *this, GetCharsetInternal(), 0, cwtv < 0x88C);
 		}
 	}
 }
@@ -1881,6 +1885,8 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 	srlztn::SsbWrite ssb(f);
 	ssb.BeginWrite("mptm", Version::Current().GetRawVersion());
 
+	if(GetTuneSpecificTunings().GetNumTunings() > 0 || AreNonDefaultTuningsUsed(*this))
+		ssb.WriteItem(int8(1), "UTF8Tuning");
 	if(GetTuneSpecificTunings().GetNumTunings() > 0)
 		ssb.WriteItem(GetTuneSpecificTunings(), "0", &WriteTuningCollection);
 	if(AreNonDefaultTuningsUsed(*this))

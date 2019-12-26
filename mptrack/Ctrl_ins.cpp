@@ -2940,7 +2940,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 		}
 	}
 
-	Reporting::Notification(mpt::cformat(_T("Tuning %1 was not found. Setting to default tuning."))(mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.Instruments[m_nInstrument]->pTuning->GetName())));
+	Reporting::Notification(mpt::cformat(_T("Tuning %1 was not found. Setting to default tuning."))(mpt::ToCString(m_sndFile.Instruments[m_nInstrument]->pTuning->GetName())));
 
 	CriticalSection cs;
 	pIns->SetTuning(m_sndFile.GetDefaultTuning());
@@ -3124,7 +3124,7 @@ void CCtrlInstruments::BuildTuningComboBox()
 	m_ComboTuning.AddString(_T("OpenMPT IT behaviour")); //<-> Instrument pTuning pointer == NULL
 	for(const auto &tuning : m_sndFile.GetTuneSpecificTunings())
 	{
-		m_ComboTuning.AddString(mpt::ToCString(TuningCharset, tuning->GetName()));
+		m_ComboTuning.AddString(mpt::ToCString(tuning->GetName()));
 	}
 	m_ComboTuning.AddString(_T("Control Tunings..."));
 	UpdateTuningComboBox();

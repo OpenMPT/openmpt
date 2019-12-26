@@ -26,12 +26,12 @@ namespace Tuning {
 
 namespace CTuningS11n
 {
-	void ReadStr(std::istream& iStrm, std::string& str, const size_t);
-	void ReadNoteMap(std::istream& iStrm, std::map<NOTEINDEXTYPE, std::string>& m, const size_t);
+	void ReadStr(std::istream &iStrm, mpt::ustring &ustr, const std::size_t dummy, mpt::Charset charset);
+	void ReadNoteMap(std::istream &iStrm, std::map<NOTEINDEXTYPE, mpt::ustring> &m, const std::size_t dummy, mpt::Charset charset);
 	void ReadRatioTable(std::istream& iStrm, std::vector<RATIOTYPE>& v, const size_t);
 
-	void WriteNoteMap(std::ostream& oStrm, const std::map<NOTEINDEXTYPE, std::string>& m);
-	void WriteStr(std::ostream& oStrm, const std::string& str);
+	void WriteNoteMap(std::ostream &oStrm, const std::map<NOTEINDEXTYPE, mpt::ustring> &m);
+	void WriteStr(std::ostream &oStrm, const mpt::ustring &ustr);
 
 	struct RatioWriter
 	{
@@ -177,11 +177,11 @@ bool CTuning::CreateGeometric(const UNOTEINDEXTYPE &s, const RATIOTYPE &r, const
 }
 
 
-std::string CTuning::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
+mpt::ustring CTuning::GetNoteName(const NOTEINDEXTYPE &x, bool addOctave) const
 {
 	if(!IsValidNote(x))
 	{
-		return std::string();
+		return mpt::ustring();
 	}
 	if(GetGroupSize() < 1)
 	{
@@ -189,20 +189,20 @@ std::string CTuning::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
 		if(i != m_NoteNameMap.end())
 			return i->second;
 		else
-			return mpt::fmt::val(x);
+			return mpt::ufmt::val(x);
 	}
 	else
 	{
 		const NOTEINDEXTYPE pos = static_cast<NOTEINDEXTYPE>(mpt::wrapping_modulo(x, m_GroupSize));
 		const NOTEINDEXTYPE middlePeriodNumber = 5;
-		std::string rValue;
+		mpt::ustring rValue;
 		const auto nmi = m_NoteNameMap.find(pos);
 		if(nmi != m_NoteNameMap.end())
 		{
 			rValue = nmi->second;
 			if(addOctave)
 			{
-				rValue += mpt::fmt::val(middlePeriodNumber + mpt::wrapping_divide(x, m_GroupSize));
+				rValue += mpt::ufmt::val(middlePeriodNumber + mpt::wrapping_divide(x, m_GroupSize));
 			}
 		}
 		else
@@ -212,19 +212,19 @@ std::string CTuning::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
 			//C:5, D:3, R:7
 			if(m_GroupSize <= 26)
 			{
-				rValue = std::string(1, static_cast<char>(pos + 'A'));
-				rValue += ":";
+				rValue = mpt::ToUnicode(mpt::Charset::UTF8, std::string(1, static_cast<char>(pos + 'A')));
+				rValue += UL_(":");
 			} else
 			{
-				rValue = mpt::fmt::HEX0<1>(pos % 16) + mpt::fmt::HEX0<1>((pos / 16) % 16);
+				rValue = mpt::ufmt::HEX0<1>(pos % 16) + mpt::ufmt::HEX0<1>((pos / 16) % 16);
 				if(pos > 0xff)
 				{
-					rValue = mpt::ToLowerCaseAscii(rValue);
+					rValue = mpt::ToUnicode(mpt::Charset::UTF8, mpt::ToLowerCaseAscii(mpt::ToCharset(mpt::Charset::UTF8, rValue)));
 				}
 			}
 			if(addOctave)
 			{
-				rValue += mpt::fmt::val(middlePeriodNumber + mpt::wrapping_divide(x, m_GroupSize));
+				rValue += mpt::ufmt::val(middlePeriodNumber + mpt::wrapping_divide(x, m_GroupSize));
 			}
 		}
 		return rValue;
@@ -232,7 +232,7 @@ std::string CTuning::GetNoteName(const NOTEINDEXTYPE& x, bool addOctave) const
 }
 
 
-void CTuning::SetNoteName(const NOTEINDEXTYPE& n, const std::string& str)
+void CTuning::SetNoteName(const NOTEINDEXTYPE &n, const mpt::ustring &str)
 {
 	if(!str.empty())
 	{
@@ -447,7 +447,7 @@ bool CTuning::ChangeGroupRatio(const RATIOTYPE& r)
 }
 
 
-SerializationResult CTuning::InitDeserialize(std::istream& iStrm)
+SerializationResult CTuning::InitDeserialize(std::istream &iStrm, mpt::Charset defaultCharset)
 {
 	// Note: OpenMPT since at least r323 writes version number (4<<24)+4 while it
 	// reads version number (5<<24)+4 or earlier.
@@ -458,13 +458,16 @@ SerializationResult CTuning::InitDeserialize(std::istream& iStrm)
 
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead("CTB244RTI", (5 << 24) + 4); // version
-	ssb.ReadItem(m_TuningName, "0", ReadStr);
+	int8 use_utf8 = 0;
+	ssb.ReadItem(use_utf8, "UTF8");
+	const mpt::Charset charset = use_utf8 ? mpt::Charset::UTF8 : defaultCharset;
+	ssb.ReadItem(m_TuningName, "0", [charset](std::istream &iStrm, mpt::ustring &ustr, const std::size_t dummy){ return ReadStr(iStrm, ustr, dummy, charset); });
 	uint16 dummyEditMask = 0xffff;
 	ssb.ReadItem(dummyEditMask, "1");
 	std::underlying_type<Type>::type type = 0;
 	ssb.ReadItem(type, "2");
 	m_TuningType = static_cast<Type>(type);
-	ssb.ReadItem(m_NoteNameMap, "3", ReadNoteMap);
+	ssb.ReadItem(m_NoteNameMap, "3", [charset](std::istream &iStrm, std::map<NOTEINDEXTYPE, mpt::ustring> &m, const std::size_t dummy){ return ReadNoteMap(iStrm, m, dummy, charset); });
 	ssb.ReadItem(m_FineStepCount, "4");
 
 	// RTI entries.
@@ -546,7 +549,7 @@ static bool VectorFromBinaryStream(std::istream& inStrm, std::vector<Tdst>& v, c
 }
 
 
-SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
+SerializationResult CTuning::InitDeserializeOLD(std::istream &inStrm, mpt::Charset defaultCharset)
 {
 	if(!inStrm.good())
 		return SerializationResult::Failure;
@@ -588,16 +591,20 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
 	//Tuning name
 	if(version2 <= 3)
 	{
-		if(!mpt::IO::ReadSizedStringLE<uint32>(inStrm, m_TuningName, 0xffff))
+		std::string tmpName;
+		if(!mpt::IO::ReadSizedStringLE<uint32>(inStrm, tmpName, 0xffff))
 		{
 			return SerializationResult::Failure;
 		}
+		m_TuningName = mpt::ToUnicode(defaultCharset, tmpName);
 	} else
 	{
-		if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, m_TuningName))
+		std::string tmpName;
+		if(!mpt::IO::ReadSizedStringLE<uint8>(inStrm, tmpName))
 		{
 			return SerializationResult::Failure;
 		}
+		m_TuningName = mpt::ToUnicode(defaultCharset, tmpName);
 	}
 
 	//Const mask
@@ -642,7 +649,7 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream& inStrm)
 				return SerializationResult::Failure;
 			}
 		}
-		m_NoteNameMap[n] = str;
+		m_NoteNameMap[n] = mpt::ToUnicode(defaultCharset, str);
 	}
 
 	//End marker
@@ -777,6 +784,7 @@ Tuning::SerializationResult CTuning::Serialize(std::ostream& outStrm) const
 	// We keep this behaviour.
 	srlztn::SsbWrite ssb(outStrm);
 	ssb.BeginWrite("CTB244RTI", (4 << 24) + 4); // version
+	ssb.WriteItem(int8(1), "UTF8");
 	if (m_TuningName.length() > 0)
 		ssb.WriteItem(m_TuningName, "0", WriteStr);
 	uint16 dummyEditMask = 0xffff;
@@ -818,7 +826,7 @@ bool CTuning::WriteSCL(std::ostream &f, const mpt::PathString &filename) const
 {
 	mpt::IO::WriteTextCRLF(f, mpt::format("! %1")(mpt::ToCharset(mpt::Charset::ISO8859_1, (filename.GetFileName() + filename.GetFileExt()).ToUnicode())));
 	mpt::IO::WriteTextCRLF(f, "!");
-	std::string name = mpt::ToCharset(mpt::Charset::ISO8859_1, mpt::Charset::Locale, GetName());
+	std::string name = mpt::ToCharset(mpt::Charset::ISO8859_1, GetName());
 	for(auto & c : name) { if(static_cast<uint8>(c) < 32) c = ' '; } // remove control characters
 	if(name.length() >= 1 && name[0] == '!') name[0] = '?'; // do not confuse description with comment
 	mpt::IO::WriteTextCRLF(f, name);
@@ -832,7 +840,7 @@ bool CTuning::WriteSCL(std::ostream &f, const mpt::PathString &filename) const
 			double cents = std::log2(ratio) * 1200.0;
 			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
 				mpt::fmt::fix(cents),
-				mpt::ToCharset(mpt::Charset::ISO8859_1, mpt::Charset::Locale, GetNoteName((n + 1) % m_GroupSize, false))
+				mpt::ToCharset(mpt::Charset::ISO8859_1, GetNoteName((n + 1) % m_GroupSize, false))
 				));
 		}
 	} else if(GetType() == Type::GROUPGEOMETRIC)
@@ -847,7 +855,7 @@ bool CTuning::WriteSCL(std::ostream &f, const mpt::PathString &filename) const
 			double cents = std::log2(ratio) * 1200.0;
 			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
 				mpt::fmt::fix(cents),
-				mpt::ToCharset(mpt::Charset::ISO8859_1, mpt::Charset::Locale, GetNoteName((n + 1) % m_GroupSize, false))
+				mpt::ToCharset(mpt::Charset::ISO8859_1, GetNoteName((n + 1) % m_GroupSize, false))
 				));
 		}
 	} else if(GetType() == Type::GENERAL)
@@ -865,7 +873,7 @@ bool CTuning::WriteSCL(std::ostream &f, const mpt::PathString &filename) const
 			double cents = std::log2(ratio) * 1200.0;
 			mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
 				mpt::fmt::fix(cents),
-				mpt::ToCharset(mpt::Charset::ISO8859_1, mpt::Charset::Locale, GetNoteName(n + m_NoteMin, false))
+				mpt::ToCharset(mpt::Charset::ISO8859_1, GetNoteName(n + m_NoteMin, false))
 				));
 		}
 		mpt::IO::WriteTextCRLF(f, mpt::format(" %1 ! %2")(
@@ -894,8 +902,9 @@ void RatioWriter::operator()(std::ostream& oStrm, const std::vector<float>& v)
 }
 
 
-void ReadNoteMap(std::istream& iStrm, std::map<NOTEINDEXTYPE,std::string>& m, const size_t)
+void ReadNoteMap(std::istream &iStrm, std::map<NOTEINDEXTYPE, mpt::ustring> &m, const std::size_t dummy, mpt::Charset charset)
 {
+	MPT_UNREFERENCED_PARAMETER(dummy);
 	uint64 val;
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
 	LimitMax(val, 256u); // Read 256 at max.
@@ -905,7 +914,7 @@ void ReadNoteMap(std::istream& iStrm, std::map<NOTEINDEXTYPE,std::string>& m, co
 		mpt::IO::ReadIntLE<int16>(iStrm, key);
 		std::string str;
 		mpt::IO::ReadSizedStringLE<uint8>(iStrm, str);
-		m[key] = str;
+		m[key] = mpt::ToUnicode(charset, str);
 	}
 }
 
@@ -924,8 +933,10 @@ void ReadRatioTable(std::istream& iStrm, std::vector<RATIOTYPE>& v, const size_t
 }
 
 
-void ReadStr(std::istream& iStrm, std::string& str, const size_t)
+void ReadStr(std::istream &iStrm, mpt::ustring &ustr, const std::size_t dummy, mpt::Charset charset)
 {
+	MPT_UNREFERENCED_PARAMETER(dummy);
+	std::string str;
 	uint64 val;
 	mpt::IO::ReadAdaptiveInt64LE(iStrm, val);
 	size_t nSize = (val > 255) ? 255 : static_cast<size_t>(val); // Read 255 characters at max.
@@ -937,22 +948,24 @@ void ReadStr(std::istream& iStrm, std::string& str, const size_t)
 	{ // trim \0 at the end
 		str.resize(str.find_first_of('\0'));
 	}
+	ustr = mpt::ToUnicode(charset, str);
 }
 
 
-void WriteNoteMap(std::ostream& oStrm, const std::map<NOTEINDEXTYPE, std::string>& m)
+void WriteNoteMap(std::ostream &oStrm, const std::map<NOTEINDEXTYPE, mpt::ustring> &m)
 {
 	mpt::IO::WriteAdaptiveInt64LE(oStrm, m.size());
 	for(auto &mi : m)
 	{
 		mpt::IO::WriteIntLE<int16>(oStrm, mi.first);
-		mpt::IO::WriteSizedStringLE<uint8>(oStrm, mi.second);
+		mpt::IO::WriteSizedStringLE<uint8>(oStrm, mpt::ToCharset(mpt::Charset::UTF8, mi.second));
 	}
 }
 
 
-void WriteStr(std::ostream& oStrm, const std::string& str)
+void WriteStr(std::ostream &oStrm, const mpt::ustring &ustr)
 {
+	std::string str = mpt::ToCharset(mpt::Charset::UTF8, ustr);
 	mpt::IO::WriteAdaptiveInt64LE(oStrm, str.size());
 	oStrm.write(str.c_str(), str.size());
 }

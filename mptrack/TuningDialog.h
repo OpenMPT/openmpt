@@ -27,7 +27,7 @@ OPENMPT_NAMESPACE_BEGIN
 // tuning strings as Charset::Locale. As of OpenMPT 1.27, this distinction does
 // not yet matter, because GetCharsetInteral() is always mpt::Charset::Locale if
 // MODPLUG_TRACKER anyway.
-extern const mpt::Charset TuningCharset;
+extern const mpt::Charset TuningCharsetFallback;
 
 template<class T1, class T2>
 class CBijectiveMap

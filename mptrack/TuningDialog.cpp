@@ -23,7 +23,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-const mpt::Charset TuningCharset = mpt::Charset::Locale;
+const mpt::Charset TuningCharsetFallback = mpt::Charset::Locale;
 
 
 const CTuningDialog::TUNINGTREEITEM CTuningDialog::s_notFoundItemTuning = TUNINGTREEITEM();
@@ -80,7 +80,7 @@ HTREEITEM CTuningDialog::AddTreeItem(CTuningCollection* pTC, HTREEITEM parent, H
 
 HTREEITEM CTuningDialog::AddTreeItem(CTuning* pT, HTREEITEM parent, HTREEITEM insertAfter)
 {
-	const HTREEITEM temp = m_TreeCtrlTuning.InsertItem(mpt::ToCString(TuningCharset, pT->GetName()), parent, insertAfter);
+	const HTREEITEM temp = m_TreeCtrlTuning.InsertItem(mpt::ToCString(pT->GetName()), parent, insertAfter);
 	m_TreeItemTuningItemMap.AddPair(temp, TUNINGTREEITEM(pT));
 	m_TreeCtrlTuning.EnsureVisible(temp);
 	return temp;
@@ -243,7 +243,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 		{
 			m_TreeCtrlTuning.Select(treeitem, TVGN_CARET);
 			if(m_pActiveTuning)
-				m_TreeCtrlTuning.SetItemText(treeitem, mpt::ToCString(TuningCharset, m_pActiveTuning->GetName()));
+				m_TreeCtrlTuning.SetItemText(treeitem, mpt::ToCString(m_pActiveTuning->GetName()));
 			else
 				m_TreeCtrlTuning.SetItemText(treeitem, (IsDeletable(m_pActiveTuningCollection) ? CString(_T("loaded: ")) : CString()) + m_TuningCollectionsNames[m_pActiveTuningCollection]);
 		}
@@ -266,7 +266,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 	{
 		UpdateTuningType();
 
-		m_EditName.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuning->GetName()));
+		m_EditName.SetWindowText(mpt::ToCString(m_pActiveTuning->GetName()));
 		m_EditName.Invalidate();
 
 		//Finetunesteps-edit
@@ -437,13 +437,13 @@ bool CTuningDialog::AddTuning(CTuningCollection* pTC, Tuning::Type type)
 		{
 			ratios.push_back(std::pow(static_cast<Tuning::RATIOTYPE>(2.0), static_cast<Tuning::RATIOTYPE>(n) / static_cast<Tuning::RATIOTYPE>(12)));
 		}
-		pNewTuning = CTuning::CreateGroupGeometric("Unnamed", ratios, 2, 15);
+		pNewTuning = CTuning::CreateGroupGeometric(U_("Unnamed"), ratios, 2, 15);
 	} else if(type == Tuning::Type::GEOMETRIC)
 	{
-		pNewTuning = CTuning::CreateGeometric("Unnamed", 12, 2, 15);
+		pNewTuning = CTuning::CreateGeometric(U_("Unnamed"), 12, 2, 15);
 	} else
 	{
-		pNewTuning = CTuning::CreateGeneral("Unnamed");
+		pNewTuning = CTuning::CreateGeneral(U_("Unnamed"));
 	}
 
 	CTuning *pT = pTC->AddTuning(std::move(pNewTuning));
@@ -485,7 +485,7 @@ void CTuningDialog::OnEnChangeEditNotename()
 	const NOTEINDEXTYPE currentNote = m_RatioMapWnd.GetShownCentre();
 	CString buffer;
 	m_EditNotename.GetWindowText(buffer);
-	std::string str = mpt::ToCharset(TuningCharset, buffer);
+	mpt::ustring str = mpt::ToUnicode(buffer);
 	{
 		if(str.size() > 3)
 			str.resize(3);
@@ -546,7 +546,7 @@ void CTuningDialog::UpdateRatioMapEdits(const NOTEINDEXTYPE& note)
 	m_RatioEditApply = false;
 	m_EditRatio.SetWindowText(mpt::cfmt::val(m_pActiveTuning->GetRatio(note)));
 	m_NoteEditApply = false;
-	m_EditNotename.SetWindowText(mpt::ToCString(TuningCharset, m_pActiveTuning->GetNoteName(note, false)));
+	m_EditNotename.SetWindowText(mpt::ToCString(m_pActiveTuning->GetNoteName(note, false)));
 
 	m_EditRatio.Invalidate();
 	m_EditNotename.Invalidate();
@@ -673,7 +673,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 		{
 			const CTuning & tuning = pTC->GetTuning(i);
 			fileName = dlg.GetFirstFile();
-			mpt::ustring tuningName = mpt::ToUnicode(TuningCharset, tuning.GetName());
+			mpt::ustring tuningName = mpt::ToUnicode(tuning.GetName());
 			if(tuningName.empty())
 			{
 				tuningName = U_("untitled");
@@ -802,8 +802,8 @@ void CTuningDialog::OnBnClickedButtonImport()
 			// For .tc files containing multiple Tunings, we sadly cannot decide which one the user wanted.
 			// In that case, we import as a Collection (an alternative might be to display a dialog in this case).
 			pTC = new CTuningCollection();
-			std::string name;
-			if(pTC->Deserialize(fin, name) == Tuning::SerializationResult::Success)
+			mpt::ustring name;
+			if(pTC->Deserialize(fin, name, TuningCharsetFallback) == Tuning::SerializationResult::Success)
 			{ // success
 				if(pTC->GetNumTunings() == 1)
 				{
@@ -828,15 +828,15 @@ void CTuningDialog::OnBnClickedButtonImport()
 		{
 
 			pTC = new CTuningCollection();
-			std::string name;
-			if(pTC->Deserialize(fin, name) != Tuning::SerializationResult::Success)
+			mpt::ustring name;
+			if(pTC->Deserialize(fin, name, TuningCharsetFallback) != Tuning::SerializationResult::Success)
 			{ // failure
 				delete pTC;
 				pTC = nullptr;
 				// fail
 			} else
 			{
-				tcName = mpt::ToCString(TuningCharset, name);
+				tcName = mpt::ToCString(name);
 				tcFilename = file;
 				// ok
 			}
@@ -844,12 +844,12 @@ void CTuningDialog::OnBnClickedButtonImport()
 		} else if(CheckMagic(fin, 0, magicTUNoldV3) || CheckMagic(fin, 0, magicTUNoldV2))
 		{
 
-			pT = CTuning::CreateDeserializeOLD(fin);
+			pT = CTuning::CreateDeserializeOLD(fin, TuningCharsetFallback);
 
 		} else if(CheckMagic(fin, 0, magicTUN))
 		{
 
-			pT = CTuning::CreateDeserialize(fin);
+			pT = CTuning::CreateDeserialize(fin, TuningCharsetFallback);
 
 		} else if(bIsScl)
 		{
@@ -932,7 +932,7 @@ void CTuningDialog::OnEnKillfocusEditName()
 	{
 		CString buffer;
 		m_EditName.GetWindowText(buffer);
-		m_pActiveTuning->SetName(mpt::ToCharset(TuningCharset, buffer));
+		m_pActiveTuning->SetName(mpt::ToUnicode(buffer));
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		UpdateView(UM_TUNINGDATA);
 		UpdateView(UM_TUNINGCOLLECTION);
@@ -1345,7 +1345,7 @@ void CTuningDialog::OnRemoveTuning()
 			}
 			if(used)
 			{
-				CString s = _T("Tuning '") + mpt::ToCString(TuningCharset, pT->GetName()) + _T("' is used by instruments. Remove anyway?");
+				CString s = _T("Tuning '") + mpt::ToCString(pT->GetName()) + _T("' is used by instruments. Remove anyway?");
 				if(Reporting::Confirm(s, false, true) == cnfYes)
 				{
 					CriticalSection cs;
@@ -1364,7 +1364,7 @@ void CTuningDialog::OnRemoveTuning()
 				}
 			} else
 			{
-				CString s = _T("Remove tuning '") + mpt::ToCString(TuningCharset, pT->GetName()) + _T("'?");
+				CString s = _T("Remove tuning '") + mpt::ToCString(pT->GetName()) + _T("'?");
 				if(Reporting::Confirm(s) == cnfYes)
 				{
 					pTC->Remove(pT);
@@ -1578,7 +1578,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 	if (nNotes - 1 > s_nSclImportMaxNoteCount)
 		return enSclImportFailTooManyNotes;
 
-	std::vector<std::string> names;
+	std::vector<mpt::ustring> names;
 	std::vector<Tuning::RATIOTYPE> fRatios;
 	fRatios.reserve(nNotes);
 	fRatios.push_back(1);
@@ -1652,7 +1652,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		{
 			remainder = std::string();
 		}
-		names.push_back(remainder);
+		names.push_back(mpt::ToUnicode(mpt::Charset::ISO8859_1, remainder));
 		
 	}
 
@@ -1683,7 +1683,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		tuningName = mpt::format(U_("%1 notes: %2:%3"))(nNotes - 1, mpt::ufmt::fix(groupRatio), 1);
 	}
 
-	std::unique_ptr<CTuning> pT = CTuning::CreateGroupGeometric(mpt::ToCharset(mpt::Charset::Locale, tuningName), fRatios, groupRatio, 15);
+	std::unique_ptr<CTuning> pT = CTuning::CreateGroupGeometric(tuningName, fRatios, groupRatio, 15);
 	if(!pT)
 	{
 		return enSclImportTuningCreationFailure;
@@ -1706,7 +1706,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 	{
 		for(NOTEINDEXTYPE note = 0; note < mpt::saturate_cast<NOTEINDEXTYPE>(names.size()); ++note)
 		{
-			pT->SetNoteName(note, mpt::ToCharset(mpt::Charset::Locale, mpt::ustring(CSoundFile::GetDefaultNoteNames()[note])));
+			pT->SetNoteName(note, mpt::ustring(CSoundFile::GetDefaultNoteNames()[note]));
 		}
 	} else
 	{

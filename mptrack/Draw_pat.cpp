@@ -389,9 +389,9 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 		if(pTuning)
 		{
 			// Drawing custom note names
-			std::string noteStr = pTuning->GetNoteName(static_cast<Tuning::NOTEINDEXTYPE>(note - NOTE_MIDDLEC));
+			std::wstring noteStr = mpt::ToWide(pTuning->GetNoteName(static_cast<Tuning::NOTEINDEXTYPE>(note - NOTE_MIDDLEC)));
 			if(noteStr.size() < 3)
-				noteStr.resize(3, ' ');
+				noteStr.resize(3, L' ');
 			
 			DrawLetter(x, y, noteStr[0], pfnt->nNoteWidth[0], 0);
 			DrawLetter(x + pfnt->nNoteWidth[0], y, noteStr[1], pfnt->nNoteWidth[1], 0);
