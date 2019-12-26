@@ -433,7 +433,7 @@ void WAVWriter::Write(const void *data, size_t numBytes)
 {
 	if(s != nullptr)
 	{
-		s->write(static_cast<const char*>(data), numBytes);
+		s->write(mpt::void_cast<const char*>(data), numBytes);
 	} else if(!memory.empty())
 	{
 		if(position <= memory.size() && numBytes <= memory.size() - position)

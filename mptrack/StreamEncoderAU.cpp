@@ -118,7 +118,7 @@ public:
 		MPT_ASSERT(formatInfo.Sampleformat.IsFloat());
 		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
 		{
-			WriteInterleavedConverted(count, reinterpret_cast<const char*>(interleaved));
+			WriteInterleavedConverted(count, reinterpret_cast<const std::byte*>(interleaved));
 		} else
 		{
 			std::vector<IEEE754binary32BE> frameData(formatInfo.Channels);
@@ -133,7 +133,7 @@ public:
 			}
 		}
 	}
-	void WriteInterleavedConverted(size_t frameCount, const char *data) override
+	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
 	{
 		if(formatInfo.Sampleformat.GetBitsPerSample() == 8)
 		{
@@ -141,7 +141,7 @@ public:
 			{
 				for(int channel = 0; channel < formatInfo.Channels; ++channel)
 				{
-					int8 sample = static_cast<int8>(static_cast<uint8>(*data) - 0x80);
+					int8 sample = static_cast<int8>(mpt::byte_cast<uint8>(*data) - 0x80);
 					mpt::IO::WriteIntBE<int8>(f, sample);
 					data++;
 				}

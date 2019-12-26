@@ -225,7 +225,7 @@ public:
 public:
 	virtual mpt::endian GetConvertedEndianness() const = 0;
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
-	virtual void WriteInterleavedConverted(size_t frameCount, const char *data) = 0;
+	virtual void WriteInterleavedConverted(size_t frameCount, const std::byte *data) = 0;
 	virtual void WriteCues(const std::vector<uint64> &cues) = 0; // optional
 };
 
@@ -243,7 +243,7 @@ public:
 public:
 	virtual mpt::endian GetConvertedEndianness() const;
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
-	virtual void WriteInterleavedConverted(size_t frameCount, const char *data);
+	virtual void WriteInterleavedConverted(size_t frameCount, const std::byte *data);
 	virtual void WriteCues(const std::vector<uint64> &cues);
 protected:
 	void WriteBuffer();

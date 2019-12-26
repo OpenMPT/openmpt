@@ -64,7 +64,7 @@ public:
 		ASSERT(formatInfo.Sampleformat.IsFloat());
 		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
 		{
-			WriteInterleavedConverted(count, reinterpret_cast<const char*>(interleaved));
+			WriteInterleavedConverted(count, reinterpret_cast<const std::byte*>(interleaved));
 		} else
 		{
 			std::vector<IEEE754binary32LE> frameData(formatInfo.Channels);
@@ -74,12 +74,12 @@ public:
 				{
 					frameData[channel] = IEEE754binary32LE(interleaved[channel]);
 				}
-				fileWAV->WriteBuffer(reinterpret_cast<const char*>(frameData.data()), formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8));
+				fileWAV->WriteBuffer(reinterpret_cast<const std::byte*>(frameData.data()), formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8));
 				interleaved += formatInfo.Channels;
 			}
 		}
 	}
-	void WriteInterleavedConverted(size_t frameCount, const char *data) override
+	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
 	{
 		fileWAV->WriteBuffer(data, frameCount * formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8));
 	}

@@ -49,9 +49,9 @@ public:
 	void WriteInterleaved(size_t count, const float *interleaved) override
 	{
 		ASSERT(formatInfo.Sampleformat.IsFloat());
-		WriteInterleavedConverted(count, reinterpret_cast<const char*>(interleaved));
+		WriteInterleavedConverted(count, reinterpret_cast<const std::byte*>(interleaved));
 	}
-	void WriteInterleavedConverted(size_t frameCount, const char *data) override
+	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
 	{
 		mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample() / 8));
 	}

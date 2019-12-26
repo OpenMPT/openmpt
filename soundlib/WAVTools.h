@@ -378,7 +378,7 @@ public:
 	}
 
 	// Write a buffer to the file.
-	void WriteBuffer(const char *data, size_t size)
+	void WriteBuffer(const std::byte *data, size_t size)
 	{
 		Write(data, size);
 	}

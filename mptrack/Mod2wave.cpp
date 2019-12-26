@@ -1223,7 +1223,7 @@ void CDoWaveConvert::Run()
 				{
 					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetBitsPerSample()/8, buffer, lRead * encSettings.Channels);
 				}
-				fileEnc->WriteInterleavedConverted(lRead, mpt::byte_cast<const char*>(buffer));
+				fileEnc->WriteInterleavedConverted(lRead, buffer);
 			}
 			const std::streampos newPos = fileStream.tellp();
 			bytesWritten += static_cast<uint64>(newPos - oldPos);
@@ -1357,7 +1357,7 @@ void CDoWaveConvert::Run()
 				{
 					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetBitsPerSample()/8, buffer, framesChunk * channels);
 				}
-				fileEnc->WriteInterleavedConverted(framesChunk, mpt::byte_cast<const char*>(buffer));
+				fileEnc->WriteInterleavedConverted(framesChunk, buffer);
 			}
 			const std::streampos newPos = fileStream.tellp();
 			bytesWritten += static_cast<std::size_t>(newPos - oldPos);
