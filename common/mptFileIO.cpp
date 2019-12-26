@@ -249,7 +249,7 @@ LazyFileRef & LazyFileRef::operator = (const std::vector<std::byte> &data)
 {
 	mpt::ofstream file(m_Filename, std::ios::binary);
 	file.exceptions(std::ios_base::failbit | std::ios_base::badbit);
-	mpt::IO::WriteRaw(file, data.data(), data.size());
+	mpt::IO::WriteRaw(file, mpt::as_span(data));
 	mpt::IO::Flush(file);
 	return *this;
 }
@@ -258,7 +258,7 @@ LazyFileRef & LazyFileRef::operator = (const std::vector<char> &data)
 {
 	mpt::ofstream file(m_Filename, std::ios::binary);
 	file.exceptions(std::ios_base::failbit | std::ios_base::badbit);
-	mpt::IO::WriteRaw(file, data.data(), data.size());
+	mpt::IO::WriteRaw(file, mpt::as_span(data));
 	mpt::IO::Flush(file);
 	return *this;
 }
@@ -267,7 +267,7 @@ LazyFileRef & LazyFileRef::operator = (const std::string &data)
 {
 	mpt::ofstream file(m_Filename, std::ios::binary);
 	file.exceptions(std::ios_base::failbit | std::ios_base::badbit);
-	mpt::IO::WriteRaw(file, data.data(), data.size());
+	mpt::IO::WriteRaw(file, mpt::as_span(data));
 	mpt::IO::Flush(file);
 	return *this;
 }
@@ -283,7 +283,7 @@ LazyFileRef::operator std::vector<std::byte> () const
 	mpt::IO::SeekEnd(file);
 	std::vector<std::byte> buf(mpt::saturate_cast<std::size_t>(mpt::IO::TellRead(file)));
 	mpt::IO::SeekBegin(file);
-	mpt::IO::ReadRaw(file, buf.data(), buf.size());
+	mpt::IO::ReadRaw(file, mpt::as_span(buf));
 	return buf;
 }
 
@@ -298,7 +298,7 @@ LazyFileRef::operator std::vector<char> () const
 	mpt::IO::SeekEnd(file);
 	std::vector<char> buf(mpt::saturate_cast<std::size_t>(mpt::IO::TellRead(file)));
 	mpt::IO::SeekBegin(file);
-	mpt::IO::ReadRaw(file, buf.data(), buf.size());
+	mpt::IO::ReadRaw(file, mpt::as_span(buf));
 	return buf;
 }
 
@@ -313,7 +313,7 @@ LazyFileRef::operator std::string () const
 	mpt::IO::SeekEnd(file);
 	std::vector<char> buf(mpt::saturate_cast<std::size_t>(mpt::IO::TellRead(file)));
 	mpt::IO::SeekBegin(file);
-	mpt::IO::ReadRaw(file, buf.data(), buf.size());
+	mpt::IO::ReadRaw(file, mpt::as_span(buf));
 	return std::string(buf.begin(), buf.end());
 }
 

@@ -66,8 +66,8 @@ bool SeekAbsolute(std::iostream & f, IO::Offset pos);
 bool SeekRelative(std::ostream & f, IO::Offset off);
 bool SeekRelative(std::istream & f, IO::Offset off);
 bool SeekRelative(std::iostream & f, IO::Offset off);
-IO::Offset ReadRawImpl(std::istream & f, std::byte * data, std::size_t size);
-bool WriteRawImpl(std::ostream & f, const std::byte * data, std::size_t size);
+IO::Offset ReadRawImpl(std::istream & f, mpt::byte_span data);
+bool WriteRawImpl(std::ostream & f, mpt::const_byte_span data);
 bool IsEof(std::istream & f);
 bool Flush(std::ostream & f);
 
@@ -84,8 +84,8 @@ template <typename Tfile> bool SeekBegin(WriteBuffer<Tfile> & f) { f.FlushLocal(
 template <typename Tfile> bool SeekEnd(WriteBuffer<Tfile> & f) { f.FlushLocal(); return SeekEnd(f.file()); }
 template <typename Tfile> bool SeekAbsolute(WriteBuffer<Tfile> & f, IO::Offset pos) { return f.FlushLocal(); SeekAbsolute(f.file(), pos); }
 template <typename Tfile> bool SeekRelative(WriteBuffer<Tfile> & f, IO::Offset off) { return f.FlushLocal(); SeekRelative(f.file(), off); }
-template <typename Tfile> IO::Offset ReadRawImpl(WriteBuffer<Tfile> & f, std::byte * data, std::size_t size) { f.FlushLocal(); return ReadRawImpl(f.file(), data, size); }
-template <typename Tfile> bool WriteRawImpl(WriteBuffer<Tfile> & f, const std::byte * data, std::size_t size) { return f.Write(mpt::as_span(data, size)); }
+template <typename Tfile> IO::Offset ReadRawImpl(WriteBuffer<Tfile> & f, mpt::byte_span data) { f.FlushLocal(); return ReadRawImpl(f.file(), data); }
+template <typename Tfile> bool WriteRawImpl(WriteBuffer<Tfile> & f, mpt::const_byte_span data) { return f.Write(data); }
 template <typename Tfile> bool IsEof(WriteBuffer<Tfile> & f) { f.FlushLocal(); return IsEof(f.file()); }
 template <typename Tfile> bool Flush(WriteBuffer<Tfile> & f) { f.FlushLocal(); return Flush(f.file()); }
 
@@ -129,7 +129,7 @@ template <typename Tbyte> bool SeekRelative(std::pair<mpt::span<Tbyte>, IO::Offs
 	f.second += off;
 	return true;
 }
-template <typename Tbyte> IO::Offset ReadRawImpl(std::pair<mpt::span<Tbyte>, IO::Offset> & f, std::byte * data, std::size_t size)
+template <typename Tbyte> IO::Offset ReadRawImpl(std::pair<mpt::span<Tbyte>, IO::Offset> & f, mpt::byte_span data)
 {
 	if(f.second < 0)
 	{
@@ -139,12 +139,12 @@ template <typename Tbyte> IO::Offset ReadRawImpl(std::pair<mpt::span<Tbyte>, IO:
 	{
 		return 0;
 	}
-	std::size_t num = mpt::saturate_cast<std::size_t>(std::min(static_cast<IO::Offset>(f.first.size()) - f.second, static_cast<IO::Offset>(size)));
-	std::copy(mpt::byte_cast<const std::byte*>(f.first.data() + f.second), mpt::byte_cast<const std::byte*>(f.first.data() + f.second + num), data);
+	std::size_t num = mpt::saturate_cast<std::size_t>(std::min(static_cast<IO::Offset>(f.first.size()) - f.second, static_cast<IO::Offset>(data.size())));
+	std::copy(mpt::byte_cast<const std::byte*>(f.first.data() + f.second), mpt::byte_cast<const std::byte*>(f.first.data() + f.second + num), data.data());
 	f.second += num;
 	return num;
 }
-template <typename Tbyte> bool WriteRawImpl(std::pair<mpt::span<Tbyte>, IO::Offset> & f, const std::byte * data, std::size_t size)
+template <typename Tbyte> bool WriteRawImpl(std::pair<mpt::span<Tbyte>, IO::Offset> & f, mpt::const_byte_span data)
 {
 	if(f.second < 0)
 	{
@@ -154,12 +154,12 @@ template <typename Tbyte> bool WriteRawImpl(std::pair<mpt::span<Tbyte>, IO::Offs
 	{
 		return false;
 	}
-	std::size_t num = mpt::saturate_cast<std::size_t>(std::min(static_cast<IO::Offset>(f.first.size()) - f.second, static_cast<IO::Offset>(size)));
-	if(num != size)
+	std::size_t num = mpt::saturate_cast<std::size_t>(std::min(static_cast<IO::Offset>(f.first.size()) - f.second, static_cast<IO::Offset>(data.size())));
+	if(num != data.size())
 	{
 		return false;
 	}
-	std::copy(data, data + num, mpt::byte_cast<std::byte*>(f.first.data() + f.second));
+	std::copy(data.data(), data.data() + num, mpt::byte_cast<std::byte*>(f.first.data() + f.second));
 	f.second += num;
 	return true;
 }
@@ -178,25 +178,25 @@ template <typename Tbyte> bool Flush(std::pair<mpt::span<Tbyte>, IO::Offset> & f
 template <typename Tbyte, typename Tfile>
 inline IO::Offset ReadRaw(Tfile & f, Tbyte * data, std::size_t size)
 {
-	return IO::ReadRawImpl(f, mpt::byte_cast<std::byte*>(data), size);
+	return IO::ReadRawImpl(f, mpt::as_span(mpt::byte_cast<std::byte*>(data), size));
 }
 
 template <typename Tbyte, typename Tfile>
 inline IO::Offset ReadRaw(Tfile & f, mpt::span<Tbyte> data)
 {
-	return IO::ReadRawImpl(f, mpt::byte_cast<std::byte*>(data.data()), data.size());
+	return IO::ReadRawImpl(f, mpt::byte_cast<mpt::byte_span>(data));
 }
 
 template <typename Tbyte, typename Tfile>
 inline bool WriteRaw(Tfile & f, const Tbyte * data, std::size_t size)
 {
-	return IO::WriteRawImpl(f, mpt::byte_cast<const std::byte*>(data), size);
+	return IO::WriteRawImpl(f, mpt::as_span(mpt::byte_cast<const std::byte*>(data), size));
 }
 
 template <typename Tbyte, typename Tfile>
 inline bool WriteRaw(Tfile & f, mpt::span<Tbyte> data)
 {
-	return IO::WriteRawImpl(f, mpt::byte_cast<const std::byte*>(data.data()), data.size());
+	return IO::WriteRawImpl(f, mpt::byte_cast<mpt::const_byte_span>(data));
 }
 
 template <typename Tbinary, typename Tfile>
