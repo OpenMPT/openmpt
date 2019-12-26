@@ -140,10 +140,10 @@ public:
 namespace detail {
 
 template <typename T, std::size_t N, typename Tx>
-constexpr std::array<T, N> init_array(Tx && x) {
+constexpr std::array<T, N> init_array(const Tx & x) {
 	std::array<T, N> result;
 	for (std::size_t i = 0; i < N; ++i) {
-		result[i] = std::forward<Tx>(x);
+		result[i] = x;
 	}
 	return result;
 }
