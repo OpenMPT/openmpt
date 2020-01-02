@@ -91,7 +91,6 @@
 #  (defaults are 0):
 #
 #  NO_PULSEAUDIO=1     Avoid using PulseAudio, even if found
-#  NO_SDL=1            Avoid using SDL, even if found
 #  NO_SDL2=1           Avoid using SDL2, even if found
 #  NO_FLAC=1           Avoid using FLAC, even if found
 #  NO_SNDFILE=1        Avoid using libsndfile, even if found
@@ -617,11 +616,10 @@ endif
 ifeq ($(NO_SDL2),1)
 else
 #LDLIBS   += -lsdl2
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists sdl2 && echo yes),yes)
-CPPFLAGS_SDL := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I sdl2 ) -DMPT_WITH_SDL2
-LDFLAGS_SDL  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   sdl2 ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other sdl2 )
-LDLIBS_SDL   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   sdl2 )
-NO_SDL:=1
+ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists 'sdl2 >= 2.0.4' && echo yes),yes)
+CPPFLAGS_SDL2 := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I 'sdl2 >= 2.0.4' ) -DMPT_WITH_SDL2
+LDFLAGS_SDL2  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   'sdl2 >= 2.0.4' ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other 'sdl2 >= 2.0.4' )
+LDLIBS_SDL2   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   'sdl2 >= 2.0.4' )
 else
 ifeq ($(FORCE_DEPS),1)
 $(error sdl2 not found)
@@ -629,23 +627,6 @@ else
 $(warning warning: sdl2 not found)
 endif
 NO_SDL2:=1
-endif
-endif
-
-ifeq ($(NO_SDL),1)
-else
-#LDLIBS   += -lsdl
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists sdl && echo yes),yes)
-CPPFLAGS_SDL := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I sdl ) -DMPT_WITH_SDL
-LDFLAGS_SDL  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   sdl ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other sdl )
-LDLIBS_SDL   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   sdl )
-else
-ifeq ($(FORCE_DEPS),1)
-$(error sdl not found)
-else
-$(warning warning: sdl not found)
-endif
-NO_SDL:=1
 endif
 endif
 
@@ -756,9 +737,9 @@ CPPFLAGS += $(CPPFLAGS_ZLIB) $(CPPFLAGS_MPG123) $(CPPFLAGS_OGG) $(CPPFLAGS_VORBI
 LDFLAGS += $(LDFLAGS_ZLIB) $(LDFLAGS_MPG123) $(LDFLAGS_OGG) $(LDFLAGS_VORBIS) $(LDFLAGS_VORBISFILE)
 LDLIBS += $(LDLIBS_ZLIB) $(LDLIBS_MPG123) $(LDLIBS_OGG) $(LDLIBS_VORBIS) $(LDLIBS_VORBISFILE)
 
-CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL2) $(CPPFLAGS_SDL) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_PULSEAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_SNDFILE) $(CPPFLAGS_ALLEGRO42)
-LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL2) $(LDFLAGS_SDL) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_PULSEAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_SNDFILE) $(LDFLAGS_ALLEGRO42)
-LDLIBS_OPENMPT123   += $(LDLIBS_SDL2) $(LDLIBS_SDL) $(LDLIBS_PORTAUDIO) $(LDLIBS_PULSEAUDIO) $(LDLIBS_FLAC) $(LDLIBS_SNDFILE) $(LDLIBS_ALLEGRO42)
+CPPFLAGS_OPENMPT123 += $(CPPFLAGS_SDL2) $(CPPFLAGS_PORTAUDIO) $(CPPFLAGS_PULSEAUDIO) $(CPPFLAGS_FLAC) $(CPPFLAGS_SNDFILE) $(CPPFLAGS_ALLEGRO42)
+LDFLAGS_OPENMPT123  += $(LDFLAGS_SDL2) $(LDFLAGS_PORTAUDIO) $(LDFLAGS_PULSEAUDIO) $(LDFLAGS_FLAC) $(LDFLAGS_SNDFILE) $(LDFLAGS_ALLEGRO42)
+LDLIBS_OPENMPT123   += $(LDLIBS_SDL2) $(LDLIBS_PORTAUDIO) $(LDLIBS_PULSEAUDIO) $(LDLIBS_FLAC) $(LDLIBS_SNDFILE) $(LDLIBS_ALLEGRO42)
 
 
 %: %.o

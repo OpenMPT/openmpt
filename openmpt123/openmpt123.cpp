@@ -100,7 +100,6 @@ static const char * const license =
 #include "openmpt123_allegro42.hpp"
 #include "openmpt123_portaudio.hpp"
 #include "openmpt123_pulseaudio.hpp"
-#include "openmpt123_sdl.hpp"
 #include "openmpt123_sdl2.hpp"
 #include "openmpt123_waveout.hpp"
 
@@ -513,18 +512,6 @@ static void show_info( std::ostream & log, bool verbose ) {
 	std::memset( &sdlver, 0, sizeof( SDL_version ) );
 	SDL_VERSION( &sdlver );
 	log << "API: " << static_cast<int>( sdlver.major ) << "." << static_cast<int>( sdlver.minor ) << "." << static_cast<int>( sdlver.patch ) << "";
-	log << " <https://libsdl.org/>" << std::endl;
-#endif
-#ifdef MPT_WITH_SDL
-	const SDL_version * linked_sdlver = SDL_Linked_Version();
-	log << " libSDL ";
-	if ( linked_sdlver ) {
-		log << static_cast<int>( linked_sdlver->major ) << "." << static_cast<int>( linked_sdlver->minor ) << "." << static_cast<int>( linked_sdlver->patch ) << " ";
-	}
-	SDL_version sdlver;
-	std::memset( &sdlver, 0, sizeof( SDL_version ) );
-	SDL_VERSION( &sdlver );
-	log << "(API: " << static_cast<int>( sdlver.major ) << "." << static_cast<int>( sdlver.minor ) << "." << static_cast<int>( sdlver.patch ) << ")";
 	log << " <https://libsdl.org/>" << std::endl;
 #endif
 #ifdef MPT_WITH_PULSEAUDIO
@@ -2052,9 +2039,6 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 #if defined( MPT_WITH_SDL2 )
 					drivers << "    " << "sdl2" << std::endl;
 #endif
-#if defined( MPT_WITH_SDL )
-					drivers << "    " << "sdl" << std::endl;
-#endif
 #if defined( MPT_WITH_PORTAUDIO )
 					drivers << "    " << "portaudio" << std::endl;
 #endif
@@ -2448,11 +2432,6 @@ static int main( int argc, char * argv [] ) {
 					sdl2_stream_raii sdl2_stream( flags, log );
 					render_files( flags, log, sdl2_stream, prng );
 #endif
-#if defined( MPT_WITH_SDL )
-				} else if ( flags.driver == "sdl" || flags.driver.empty() ) {
-					sdl_stream_raii sdl_stream( flags, log );
-					render_files( flags, log, sdl_stream, prng );
-#endif
 #if defined( MPT_WITH_PORTAUDIO )
 				} else if ( flags.driver == "portaudio" || flags.driver.empty() ) {
 					portaudio_stream_raii portaudio_stream( flags, log );
@@ -2506,12 +2485,6 @@ static int main( int argc, char * argv [] ) {
 #ifdef MPT_WITH_PORTAUDIO
 	} catch ( portaudio_exception & e ) {
 		std_err << "PortAudio error: " << e.what() << std::endl;
-		std_err.writeout();
-		return 1;
-#endif
-#ifdef MPT_WITH_SDL
-	} catch ( sdl_exception & e ) {
-		std_err << "SDL error: " << e.what() << std::endl;
 		std_err.writeout();
 		return 1;
 #endif

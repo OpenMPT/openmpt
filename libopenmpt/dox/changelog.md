@@ -41,10 +41,6 @@ is just a high-level summary.
 
  *  [**Change**] std::istream based file I/O has been speed up.
  *  [**Change**] Dependency on iconv on Linux has been removed.
- *  [**Change**] openmpt123: Support for SDL1 (but not SDL2) output has been
-    deprecated and will be removed in a future release.
- *  [**Change**] openmpt123: Support for SDL2 older than 2.0.4 has been
-    deprecated and will be removed in a future release.
 
  *  [**Regression**] foo_openmpt: foo_openmpt is discontinued. Please use
     Kode54's fork foo_openmpt54:
@@ -58,6 +54,10 @@ is just a high-level summary.
  *  [**Regression**] Support for Clang 3.6, 3.7, 3.8, 3.9, 4 has been removed.
  *  [**Regression**] Building with Android NDK older than NDK r18b is not
     supported any more.
+ *  [**Regression**] openmpt123: Support for SDL1 (but not SDL2) output has been
+    removed.
+ *  [**Regression**] openmpt123: Support for SDL2 older than 2.0.4 has been
+    removed.
  *  [**Regression**] Windows XP and Windows Vista are no longer supported.
  *  [**Regression**] It is no longer possible to optionally use iconv for
     character set conversions.

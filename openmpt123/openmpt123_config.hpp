@@ -81,14 +81,6 @@
 
 #endif // MPT_BUILD_MSVC
 
-#if defined(MPT_WITH_SDL) && defined(MPT_WITH_SDL2)
-#error "MPT_WITH_SDL2 and MPT_WITH_SDL are mutually exclusive."
-#endif
-
-#if defined(MPT_WITH_SDL)
-MPT_WARNING("SDL1 support is deprecated and will be removed in a future openmpt123 version.")
-#endif
-
 #define OPENMPT123_VERSION_STRING OPENMPT_API_VERSION_STRING
 
 #endif // OPENMPT123_CONFIG_HPP
