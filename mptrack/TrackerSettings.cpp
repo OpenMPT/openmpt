@@ -303,6 +303,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, mruListLength(conf, U_("Misc"), U_("MRUListLength"), 10)
 	// Plugins
 	, bridgeAllPlugins(conf, U_("VST Plugins"), U_("BridgeAllPlugins"), false)
+	, FullyUnloadPlugins(conf, U_("VST Plugins"), U_("FullyUnloadPlugins"), false)
 	, enableAutoSuspend(conf, U_("VST Plugins"), U_("EnableAutoSuspend"), false)
 	, midiMappingInPluginEditor(conf, U_("VST Plugins"), U_("EnableMidiMappingInEditor"), true)
 	, pluginProjectPath(conf, U_("VST Plugins"), U_("ProjectPath"), mpt::ustring())
@@ -664,25 +665,20 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 			UpdateEnabled = true;
 			UpdateIntervalDays = UpdateUpdateCheckPeriod_DEPRECATED.Get();
 		}
-		if(UpdateUpdateURL_DEPRECATED.Get() == U_(""))
+		const auto url = UpdateUpdateURL_DEPRECATED.Get();
+		if(url.empty() ||
+		   url == UL_("http://update.openmpt.org/check/$VERSION/$GUID") ||
+		   url == UL_("https://update.openmpt.org/check/$VERSION/$GUID"))
 		{
 			UpdateChannel = UpdateChannelRelease;
-		} else if(UpdateUpdateURL_DEPRECATED.Get() == U_("http://update.openmpt.org/check/$VERSION/$GUID"))
-		{
-			UpdateChannel = UpdateChannelRelease;
-		} else if(UpdateUpdateURL_DEPRECATED.Get() == U_("https://update.openmpt.org/check/$VERSION/$GUID"))
-		{
-			UpdateChannel = UpdateChannelRelease;
-		} else if(UpdateUpdateURL_DEPRECATED.Get() == U_("http://update.openmpt.org/check/testing/$VERSION/$GUID"))
-		{
-			UpdateChannel = UpdateChannelDevelopment;
-		} else if(UpdateUpdateURL_DEPRECATED.Get() == U_("https://update.openmpt.org/check/testing/$VERSION/$GUID"))
+		} else if(url == UL_("http://update.openmpt.org/check/testing/$VERSION/$GUID") ||
+		          url == UL_("https://update.openmpt.org/check/testing/$VERSION/$GUID"))
 		{
 			UpdateChannel = UpdateChannelDevelopment;
 		} else
 		{
 			UpdateChannel = UpdateChannelDevelopment;
-			UpdateChannelDevelopmentURL = UpdateUpdateURL_DEPRECATED.Get();
+			UpdateChannelDevelopmentURL = url;
 		}
 		UpdateStatistics = UpdateSendGUID_DEPRECATED.Get();
 		conf.Forget(UpdateUpdateCheckPeriod_DEPRECATED.GetPath());

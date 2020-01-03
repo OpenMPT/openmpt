@@ -818,6 +818,7 @@ public:
 	// Plugins
 
 	Setting<bool> bridgeAllPlugins;
+	Setting<bool> FullyUnloadPlugins;
 	Setting<bool> enableAutoSuspend;
 	CachedSetting<bool> midiMappingInPluginEditor;
 	Setting<mpt::ustring> pluginProjectPath;

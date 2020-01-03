@@ -947,10 +947,11 @@ CVstPlugin::~CVstPlugin()
 	m_isInitialized = false;
 
 	Dispatch(effClose, 0, 0, nullptr, 0);
-	if(m_hLibrary)
+	// Buggy SynthEdit 1.4 plugins: Showing a SynthEdit 1.4 plugin's editor, fully unloading the plugin,
+	// then loading another (unrelated) SynthEdit 1.4 plugin and showing its editor causes a crash.
+	if(m_hLibrary && TrackerSettings::Instance().FullyUnloadPlugins)
 	{
 		FreeLibrary(m_hLibrary);
-		m_hLibrary = nullptr;
 	}
 
 }
