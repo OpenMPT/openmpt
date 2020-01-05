@@ -1145,6 +1145,40 @@ std::vector<std::string> module_impl::get_metadata_keys() const {
 		"warnings",
 	};
 }
+std::string module_impl::get_message_instruments() const {
+	std::string retval;
+	std::string tmp;
+	bool valid = false;
+	for ( INSTRUMENTINDEX i = 1; i <= m_sndFile->GetNumInstruments(); ++i ) {
+		std::string instname = m_sndFile->GetInstrumentName( i );
+		if ( !instname.empty() ) {
+			valid = true;
+		}
+		tmp += instname;
+		tmp += "\n";
+	}
+	if ( valid ) {
+		retval = tmp;
+	}
+	return retval;
+}
+std::string module_impl::get_message_samples() const {
+	std::string retval;
+	std::string tmp;
+	bool valid = false;
+	for ( SAMPLEINDEX i = 1; i <= m_sndFile->GetNumSamples(); ++i ) {
+		std::string samplename = m_sndFile->GetSampleName( i );
+		if ( !samplename.empty() ) {
+			valid = true;
+		}
+		tmp += samplename;
+		tmp += "\n";
+	}
+	if ( valid ) {
+		retval = tmp;
+	}
+	return retval;
+}
 std::string module_impl::get_metadata( const std::string & key ) const {
 	if ( key == std::string("type") ) {
 		return mpt::ToCharset(mpt::Charset::UTF8, m_sndFile->m_modFormat.type );
@@ -1172,33 +1206,53 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 	} else if ( key == std::string("message") ) {
 		std::string retval = m_sndFile->m_songMessage.GetFormatted( SongMessage::leLF );
 		if ( retval.empty() ) {
-			std::string tmp;
-			bool valid = false;
-			for ( INSTRUMENTINDEX i = 1; i <= m_sndFile->GetNumInstruments(); ++i ) {
-				std::string instname = m_sndFile->GetInstrumentName( i );
-				if ( !instname.empty() ) {
-					valid = true;
-				}
-				tmp += instname;
-				tmp += "\n";
-			}
-			if ( valid ) {
-				retval = tmp;
-			}
-		}
-		if ( retval.empty() ) {
-			std::string tmp;
-			bool valid = false;
-			for ( SAMPLEINDEX i = 1; i <= m_sndFile->GetNumSamples(); ++i ) {
-				std::string samplename = m_sndFile->GetSampleName( i );
-				if ( !samplename.empty() ) {
-					valid = true;
-				}
-				tmp += samplename;
-				tmp += "\n";
-			}
-			if ( valid ) {
-				retval = tmp;
+			switch ( m_sndFile->GetMessageHeuristic() ) {
+				case ModMessageHeuristicOrder::Instruments:
+					retval = get_message_instruments();
+					break;
+				case ModMessageHeuristicOrder::Samples:
+					retval = get_message_samples();
+					break;
+				case ModMessageHeuristicOrder::InstrumentsSamples:
+					if ( retval.empty() ) {
+						retval = get_message_instruments();
+					}
+					if ( retval.empty() ) {
+						retval = get_message_samples();
+					}
+					break;
+				case ModMessageHeuristicOrder::SamplesInstruments:
+					if ( retval.empty() ) {
+						retval = get_message_samples();
+					}
+					if ( retval.empty() ) {
+						retval = get_message_instruments();
+					}
+					break;
+				case ModMessageHeuristicOrder::BothInstrumentsSamples:
+					{
+						std::string message_instruments = get_message_instruments();
+						std::string message_samples = get_message_samples();
+						if ( !message_instruments.empty() ) {
+							retval += std::move( message_instruments );
+						}
+						if ( !message_samples.empty() ) {
+							retval += std::move( message_samples );
+						}
+					}
+					break;
+				case ModMessageHeuristicOrder::BothSamplesInstruments:
+					{
+						std::string message_instruments = get_message_instruments();
+						std::string message_samples = get_message_samples();
+						if ( !message_samples.empty() ) {
+							retval += std::move( message_samples );
+						}
+						if ( !message_instruments.empty() ) {
+							retval += std::move( message_instruments );
+						}
+					}
+					break;
 			}
 		}
 		return mod_string_to_utf8( retval );

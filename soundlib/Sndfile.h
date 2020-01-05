@@ -247,6 +247,17 @@ struct TimingInfo
 };
 
 
+enum class ModMessageHeuristicOrder
+{
+	Instruments,
+	Samples,
+	InstrumentsSamples,
+	SamplesInstruments,
+	BothInstrumentsSamples,
+	BothSamplesInstruments,
+	Default = InstrumentsSamples,
+};
+
 struct ModFormatDetails
 {
 	mpt::ustring formatName;         // "FastTracker 2"
@@ -673,6 +684,8 @@ public:
 			return GetCharsetFile();
 		#endif // MODPLUG_TRACKER
 	}
+
+	ModMessageHeuristicOrder GetMessageHeuristic() const;
 
 	void SetPreAmp(uint32 vol);
 	uint32 GetPreAmp() const { return m_MixerSettings.m_nPreAmp; }

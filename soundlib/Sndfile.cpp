@@ -1581,6 +1581,34 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE newType)
 #endif // MODPLUG_TRACKER
 
 
+ModMessageHeuristicOrder CSoundFile::GetMessageHeuristic() const
+{
+	ModMessageHeuristicOrder result = ModMessageHeuristicOrder::Default;
+	switch(GetType())
+	{
+	case MOD_TYPE_MPT:
+		result = ModMessageHeuristicOrder::Samples;
+		break;
+	case MOD_TYPE_IT:
+		result = ModMessageHeuristicOrder::Samples;
+		break;
+	case MOD_TYPE_XM:
+		result = ModMessageHeuristicOrder::InstrumentsSamples;
+		break;
+	case MOD_TYPE_MDL:
+		result = ModMessageHeuristicOrder::InstrumentsSamples;
+		break;
+	case MOD_TYPE_IMF:
+		result = ModMessageHeuristicOrder::InstrumentsSamples;
+		break;
+	default:
+		result = ModMessageHeuristicOrder::Default;
+		break;
+	}
+	return result;
+}
+
+
 bool CSoundFile::SetTitle(const std::string &newTitle)
 {
 	if(m_songName != newTitle)
