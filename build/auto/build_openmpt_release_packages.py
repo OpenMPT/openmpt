@@ -2,6 +2,7 @@
 # OpenMPT packaging script by Saga Musix
 # https://openmpt.org/
 
+from pathlib import Path
 from subprocess import Popen
 from sys import executable
 import os, shutil, hashlib
@@ -109,10 +110,14 @@ remove_file("installer/" + openmpt_version_name + "-Setup.exe")
 remove_file("installer/" + openmpt_version_name + "-Setup-x64.exe")
 remove_file("installer/" + openmpt_version_name + ".zip")
 remove_file("installer/" + openmpt_version_name + "-x64.zip")
+remove_file("installer/" + openmpt_version_name + "-portable.zip")
+remove_file("installer/" + openmpt_version_name + "-portable-x64.zip")
 remove_file("installer/" + openmpt_version_name + "-Setup.exe.digests")
 remove_file("installer/" + openmpt_version_name + "-Setup-x64.exe.digests")
 remove_file("installer/" + openmpt_version_name + ".zip.digests")
 remove_file("installer/" + openmpt_version_name + "-x64.zip.digests")
+remove_file("installer/" + openmpt_version_name + "-portable.zip.digests")
+remove_file("installer/" + openmpt_version_name + "-portable-x64.zip.digests")
 
 print("Generating manual...")
 pManual = Popen([executable, "wiki.py"], cwd="mptrack/manual_generator/")
@@ -126,11 +131,13 @@ shutil.rmtree(openmpt_zip_32bit_basepath, ignore_errors=True)
 copy_binaries("bin/release/vs2019-win7-static/x86/", openmpt_zip_32bit_path)
 copy_pluginbridge("bin/release/vs2019-win7-static/", "x86", openmpt_zip_32bit_path)
 copy_pluginbridge("bin/release/vs2019-win7-static/", "amd64", openmpt_zip_32bit_path)
+Path(openmpt_zip_32bit_path + "OpenMPT.portable").touch()
 print("Copying 64-bit binaries...")
 shutil.rmtree(openmpt_zip_64bit_basepath, ignore_errors=True)
 copy_binaries("bin/release/vs2019-win7-static/amd64/", openmpt_zip_64bit_path)
 copy_pluginbridge("bin/release//vs2019-win7-static/", "x86", openmpt_zip_64bit_path)
 copy_pluginbridge("bin/release//vs2019-win7-static/", "amd64", openmpt_zip_64bit_path)
+Path(openmpt_zip_64bit_path + "OpenMPT.portable").touch()
 
 if not singleThreaded:
 	pManual.communicate()
@@ -156,10 +163,10 @@ copy_other(openmpt_zip_32bit_path,    openmpt_version_short)
 copy_other(openmpt_zip_64bit_path,    openmpt_version_short)
 
 print("Creating zip files and installers...")
-p7z32    = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + ".zip",            openmpt_version_name + "/"], cwd=openmpt_zip_32bit_basepath)
+p7z32    = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable.zip",            openmpt_version_name + "/"], cwd=openmpt_zip_32bit_basepath)
 if singleThreaded:
 	p7z32.communicate()
-p7z64    = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-x64.zip",        openmpt_version_name + "/"], cwd=openmpt_zip_64bit_basepath)
+p7z64    = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-x64.zip",        openmpt_version_name + "/"], cwd=openmpt_zip_64bit_basepath)
 if singleThreaded:
 	p7z64.communicate()
 pInno32  = Popen([pathISCC, "win32.iss"], cwd="installer/")
@@ -195,8 +202,8 @@ def hash_file(filename):
 
 hash_file("installer/" + openmpt_version_name + "-Setup.exe")
 hash_file("installer/" + openmpt_version_name + "-Setup-x64.exe")
-hash_file("installer/" + openmpt_version_name + ".zip")
-hash_file("installer/" + openmpt_version_name + "-x64.zip")
+hash_file("installer/" + openmpt_version_name + "-portable.zip")
+hash_file("installer/" + openmpt_version_name + "-portable-x64.zip")
 
 shutil.rmtree(openmpt_zip_32bit_basepath)
 shutil.rmtree(openmpt_zip_64bit_basepath)
