@@ -16,7 +16,16 @@ OPENMPT_NAMESPACE_BEGIN
 
 class ExceptionHandler
 {
+
 public:
+
+	struct Context
+	{
+		mpt::ustring description;
+	};
+
+public:
+
 	static bool fullMemDump;
 	static bool stopSoundDeviceOnCrash;
 	static bool stopSoundDeviceBeforeDump;
@@ -38,7 +47,35 @@ public:
 	static void UnconfigureSystemHandler();
 	static void Unregister();
 
+	enum class TaintReason
+	{
+		Driver,
+		Plugin,
+	};
+
+	static void TaintProcess(TaintReason reason);
+
 public:
+
+	static Context *SetContext(Context *newContext) noexcept;
+
+	class ContextSetter
+	{
+	private:
+		Context *m_OldContext;
+	public:
+		inline ContextSetter(Context *newContext) noexcept
+			: m_OldContext(SetContext(newContext))
+		{
+			return;
+		}
+		ContextSetter(const ContextSetter &) = delete;
+		ContextSetter &operator=(const ContextSetter &) = delete;
+		inline ~ContextSetter()
+		{
+			SetContext(m_OldContext);
+		}
+	};
 
 	static LONG WINAPI UnhandledExceptionFilterContinue(_EXCEPTION_POINTERS *pExceptionInfo);
 	static LONG WINAPI ExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo);

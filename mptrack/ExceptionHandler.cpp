@@ -53,16 +53,57 @@ bool ExceptionHandler::handleStdTerminate = false;
 bool ExceptionHandler::handleMfcExceptions = false;
 
 
+static thread_local ExceptionHandler::Context *g_Context = nullptr;
+
 static LPTOP_LEVEL_EXCEPTION_FILTER g_OriginalUnhandledExceptionFilter = nullptr;
 static std::terminate_handler g_OriginalTerminateHandler = nullptr;
 
 static UINT g_OriginalErrorMode = 0;
 
 
+ExceptionHandler::Context *ExceptionHandler::SetContext(Context *newContext) noexcept
+{
+	Context *oldContext = g_Context;
+	g_Context = newContext;
+	return oldContext;
+}
+
+
 static std::atomic<int> & g_CrashCount()
 {
 	static std::atomic<int> s_CrashCount(0);
 	return s_CrashCount;
+}
+
+
+static std::atomic<int> & g_TaintCountDriver()
+{
+	static std::atomic<int> s_TaintCountDriver(0);
+	return s_TaintCountDriver;
+}
+
+
+static std::atomic<int> & g_TaintCountPlugin()
+{
+	static std::atomic<int> s_TaintCountPlugin(0);
+	return s_TaintCountPlugin;
+}
+
+
+void ExceptionHandler::TaintProcess(ExceptionHandler::TaintReason reason)
+{
+	switch(reason)
+	{
+	case ExceptionHandler::TaintReason::Driver:
+		g_TaintCountDriver().fetch_add(1);
+		break;
+	case ExceptionHandler::TaintReason::Plugin:
+		g_TaintCountPlugin().fetch_add(1);
+		break;
+	default:
+		MPT_ASSERT_NOTREACHED();
+		break;
+	}
 }
 
 
@@ -110,6 +151,8 @@ class DebugReporter
 {
 private:
 	int crashCount;
+	int taintCountDriver;
+	int taintCountPlugin;
 	bool stateFrozen;
 	const DumpMode mode;
 	const CrashOutputDirectory crashDirectory;
@@ -133,6 +176,8 @@ public:
 
 DebugReporter::DebugReporter(DumpMode mode, _EXCEPTION_POINTERS *pExceptionInfo)
 	: crashCount(g_CrashCount().fetch_add(1) + 1)
+	, taintCountDriver(g_TaintCountDriver().load())
+	, taintCountPlugin(g_TaintCountPlugin().load())
 	, stateFrozen(FreezeState(mode))
 	, mode(mode)
 	, writtenMiniDump(false)
@@ -257,9 +302,15 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		);
 
 	errorMessage += UL_("\n\n");
-	errorMessage += mpt::format(U_("Session error count: %1"))(crashCount);
+	errorMessage += mpt::format(U_("Session error count: %1\n"))(crashCount);
+	if(taintCountDriver > 0 || taintCountPlugin > 0)
+	{
+		errorMessage += UL_("Process is in tainted state!\n");
+		errorMessage += mpt::format(U_("Previously masked driver crashes: %1\n"))(taintCountDriver);
+		errorMessage += mpt::format(U_("Previously masked plugin crashes: %1\n"))(taintCountPlugin);
+	}
 
-	errorMessage += UL_("\n\n");
+	errorMessage += UL_("\n");
 
 	{
 		mpt::SafeOutputFile sf(crashDirectory.path + P_("error.txt"), std::ios::binary, mpt::FlushMode::Full);
@@ -587,17 +638,27 @@ static void UnhandledExceptionFilterImpl(_EXCEPTION_POINTERS *pExceptionInfo)
 
 	mpt::ustring errorMessage;
 	const std::exception * pE = GetCxxException<std::exception>(pExceptionInfo);
+	if(g_Context)
+	{
+		if(!g_Context->description.empty())
+		{
+			errorMessage += mpt::format(U_("OpenMPT detected a crash in '%1'.This is very likely not an OpenMPT bug. Please report the problem to the respective software author.\n"))(g_Context->description);
+		} else
+		{
+			errorMessage += mpt::format(U_("OpenMPT detected a crash in unknown foreign code.\nThis is likely not an OpenMPT bug.\n"))();
+		}
+	}
 	if(pE)
 	{
 		const std::exception & e = *pE;
-		errorMessage = mpt::format(U_("Unhandled C++ exception '%1' occurred at address 0x%2: '%3'."))
+		errorMessage += mpt::format(U_("Unhandled C++ exception '%1' occurred at address 0x%2: '%3'."))
 			( mpt::ToUnicode(mpt::Charset::ASCII, typeid(e).name())
 			, mpt::ufmt::hex0<mpt::pointer_size*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
 			, mpt::get_exception_text<mpt::ustring>(e)
 			);
 	} else
 	{
-		errorMessage = mpt::format(U_("Unhandled exception 0x%1 at address 0x%2 occurred."))
+		errorMessage += mpt::format(U_("Unhandled exception 0x%1 at address 0x%2 occurred."))
 			( mpt::ufmt::HEX0<8>(pExceptionInfo->ExceptionRecord->ExceptionCode)
 			, mpt::ufmt::hex0<mpt::pointer_size*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
 			);
