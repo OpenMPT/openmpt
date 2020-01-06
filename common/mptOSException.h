@@ -91,7 +91,7 @@ auto TryFilterHandleDefault(Tfn fn, const Tfilter &filter, const Thandler &handl
 
 
 template <typename Tfn>
-auto TryOrThrow(Tfn fn) -> decltype(fn())
+auto TryReturnOrThrow(Tfn fn) -> decltype(fn())
 {
 	return TryFilterHandle(
 		fn,
@@ -108,11 +108,11 @@ auto TryOrThrow(Tfn fn) -> decltype(fn())
 }
 
 
-template <typename Tcode, typename Tfn>
-auto TryOrCapture(Tcode & dstCode, Tfn fn) -> decltype(fn())
+template <typename Tfn>
+DWORD TryOrError(Tfn fn)
 {
-	dstCode = DWORD{0};
-	return TryFilterHandle(
+	DWORD result = DWORD{0};
+	TryFilterHandle(
 		fn,
 		[](auto code, auto eptr)
 		{
@@ -120,17 +120,19 @@ auto TryOrCapture(Tcode & dstCode, Tfn fn) -> decltype(fn())
 			MPT_UNREFERENCED_PARAMETER(eptr);
 			return EXCEPTION_EXECUTE_HANDLER;
 		},
-		[](auto code)
+		[&result](auto code)
 		{
-			dstCode = code;
+			result = code;
 		});
+	return result;
 }
 
 
 template <typename Tfn>
-auto TryOrDefault(Tfn fn, decltype(fn()) def = decltype(fn()){}) -> decltype(fn())
+auto TryReturnOrDefault(Tfn fn, decltype(fn()) def = decltype(fn()){}) -> decltype(fn())
 {
-	return TryFilterHandleReturn(fn,
+	return TryFilterHandleReturn(
+		fn,
 		[](auto code, auto eptr)
 		{
 			MPT_UNREFERENCED_PARAMETER(code);
