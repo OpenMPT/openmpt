@@ -20,6 +20,12 @@
 #include "../common/ComponentManager.h"
 
 #ifdef MPT_WITH_ASIO
+#if !defined(MPT_BUILD_WINESUPPORT)
+#include "../mptrack/ExceptionHandler.h"
+#endif // !MPT_BUILD_WINESUPPORT
+#endif // MPT_WITH_ASIO
+
+#ifdef MPT_WITH_ASIO
 #include <ASIOModern/ASIO.hpp>
 #include <ASIOModern/ASIOSystemWindows.hpp>
 #endif // MPT_WITH_ASIO
@@ -61,10 +67,47 @@ protected:
 
 	std::unique_ptr<ASIO::Windows::IBufferSwitchDispatcher> m_DeferredBufferSwitchDispatcher;
 	std::unique_ptr<ASIO::Driver> m_Driver;
-	ASIO::Driver &AsioDriver()
+
+	#if !defined(MPT_BUILD_WINESUPPORT)
+		using CrashContext = ExceptionHandler::Context;
+		using CrashContextGuard = ExceptionHandler::ContextSetter;
+	#else // MPT_BUILD_WINESUPPORT
+		using CrashContext = void *;
+		struct CrashContextGuard
+		{
+			CrashContextGuard(CrashContext *)
+			{
+				return;
+			}
+		};
+	#endif // !MPT_BUILD_WINESUPPORT
+	CrashContext m_Ectx;
+
+	class ASIODriverWithContext
+	{
+	private:
+		ASIO::Driver *m_Driver;
+		CrashContextGuard m_Guard;
+	public:
+		ASIODriverWithContext(ASIO::Driver *driver, CrashContext * ectx)
+			: m_Driver(driver)
+			, m_Guard(ectx)
+		{
+			MPT_ASSERT(driver);
+			MPT_ASSERT(ectx);
+		}
+		ASIODriverWithContext(const ASIODriverWithContext &) = delete;
+		ASIODriverWithContext &operator=(const ASIODriverWithContext &) = delete;
+		ASIO::Driver *operator->()
+		{
+			return m_Driver;
+		}
+	};
+
+	ASIODriverWithContext AsioDriver()
 	{
 		MPT_ASSERT(m_Driver);
-		return *m_Driver;
+		return ASIODriverWithContext{m_Driver.get(), &m_Ectx};
 	}
 
 	double m_BufferLatency;
