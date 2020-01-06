@@ -35,12 +35,16 @@ namespace Windows
 {
 
 
-struct StructuredException
+namespace SEH
+{
+
+
+struct Code
 {
 private:
 	DWORD m_Code;
 public:
-	constexpr StructuredException(DWORD code) noexcept
+	constexpr Code(DWORD code) noexcept
 		: m_Code(code)
 	{
 		return;
@@ -53,19 +57,95 @@ public:
 };
 
 
-template <typename Tfn>
-auto ThrowOnStructuredException(Tfn fn) -> decltype(fn())
+template <typename Tfn, typename Tfilter, typename Thandler>
+auto TryFilterHandle(Tfn fn, const Tfilter &filter, const Thandler &handler) -> decltype(fn())
 {
 	DWORD code = 0;
 	__try
 	{
 		return fn();
-	} __except(EXCEPTION_EXECUTE_HANDLER)
+	} __except(filter(GetExceptionCode(), GetExceptionInformation()))
 	{
 		code = GetExceptionCode();
+		handler(code);
 	}
-	throw StructuredException(code);
+	throw Windows::SEH::Code(code);
 }
+
+
+template <typename Tfn, typename Tfilter, typename Thandler>
+auto TryFilterHandleDefault(Tfn fn, const Tfilter &filter, const Thandler &handler, decltype(fn()) def = decltype(fn()){}) -> decltype(fn())
+{
+	auto result = def;
+	DWORD code = 0;
+	__try
+	{
+		result = fn();
+	} __except(filter(GetExceptionCode(), GetExceptionInformation()))
+	{
+		code = GetExceptionCode();
+		result = handler(code);
+	}
+	return result;
+}
+
+
+template <typename Tfn>
+auto TryOrThrow(Tfn fn) -> decltype(fn())
+{
+	return TryFilterHandle(
+		fn,
+		[](auto code, auto eptr)
+		{
+			MPT_UNREFERENCED_PARAMETER(code);
+			MPT_UNREFERENCED_PARAMETER(eptr);
+			return EXCEPTION_EXECUTE_HANDLER;
+		},
+		[](auto code)
+		{
+			throw Windows::SEH::Code(code);
+		});
+}
+
+
+template <typename Tcode, typename Tfn>
+auto TryOrCapture(Tcode & dstCode, Tfn fn) -> decltype(fn())
+{
+	dstCode = DWORD{0};
+	return TryFilterHandle(
+		fn,
+		[](auto code, auto eptr)
+		{
+			MPT_UNREFERENCED_PARAMETER(code);
+			MPT_UNREFERENCED_PARAMETER(eptr);
+			return EXCEPTION_EXECUTE_HANDLER;
+		},
+		[](auto code)
+		{
+			dstCode = code;
+		});
+}
+
+
+template <typename Tfn>
+auto TryOrDefault(Tfn fn, decltype(fn()) def = decltype(fn()){}) -> decltype(fn())
+{
+	return TryFilterHandleReturn(fn,
+		[](auto code, auto eptr)
+		{
+			MPT_UNREFERENCED_PARAMETER(code);
+			MPT_UNREFERENCED_PARAMETER(eptr);
+			return EXCEPTION_EXECUTE_HANDLER;
+		},
+		[def](auto code)
+		{
+			MPT_UNREFERENCED_PARAMETER(code);
+			return def;
+		});
+}
+
+
+} // namspace SEH
 
 
 }  // namespace Windows
