@@ -53,20 +53,20 @@ constexpr std::tuple<InputTargetContext, CommandID, CommandID> NoteContexts[] =
 CCommandSet::CCommandSet()
 {
 	// Which key binding rules to enforce?
-	m_enforceRule[krPreventDuplicate]				= true;
-	m_enforceRule[krDeleteOldOnConflict]			= true;
-	m_enforceRule[krAllowNavigationWithSelection]	= true;
+	m_enforceRule[krPreventDuplicate]             = true;
+	m_enforceRule[krDeleteOldOnConflict]          = true;
+	m_enforceRule[krAllowNavigationWithSelection] = true;
 	m_enforceRule[krAllowSelectionWithNavigation] = true;
-	m_enforceRule[krAllowSelectCopySelectCombos]	= true;
-	m_enforceRule[krLockNotesToChords]			= true;
-	m_enforceRule[krNoteOffOnKeyRelease]			= true;
-	m_enforceRule[krPropagateNotes]				= true;
-	m_enforceRule[krReassignDigitsToOctaves]		= false;
-	m_enforceRule[krAutoSelectOff]				= true;
-	m_enforceRule[krAutoSpacing]					= true;
-	m_enforceRule[krCheckModifiers]				= true;
+	m_enforceRule[krAllowSelectCopySelectCombos]  = true;
+	m_enforceRule[krLockNotesToChords]            = true;
+	m_enforceRule[krNoteOffOnKeyRelease]          = true;
+	m_enforceRule[krPropagateNotes]               = true;
+	m_enforceRule[krReassignDigitsToOctaves]      = false;
+	m_enforceRule[krAutoSelectOff]                = true;
+	m_enforceRule[krAutoSpacing]                  = true;
+	m_enforceRule[krCheckModifiers]               = true;
 	m_enforceRule[krPropagateSampleManipulation]  = true;
-//	enforceRule[krCheckContextHierarchy]		= true;
+//	enforceRule[krCheckContextHierarchy]          = true;
 
 	SetupCommands();
 	SetupContextHierarchy();
@@ -75,667 +75,671 @@ CCommandSet::CCommandSet()
 
 // Setup
 
-// Helper function for setting up commands
-void CCommandSet::DefineKeyCommand(CommandID kc, UINT uid, const TCHAR *message, enmKcVisibility visibility, enmKcDummy dummy)
+void KeyCommand::Define(uint32 uid, const TCHAR *message)
 {
-	m_commands[kc].UID = uid;
-	m_commands[kc].isHidden = (visibility == kcHidden);
-	m_commands[kc].isDummy = (dummy == kcDummy);
-	m_commands[kc].Message = message;
+	Message = message;
+	UID = uid;
 }
 
+static constexpr struct
+{
+	uint32 uid = 0;  // ID | Hidden | Dummy
+	CommandID cmd = kcNull;
+	const TCHAR *description = nullptr;
+} CommandDefinitions[] =
+{
+	{1001, kcPatternRecord, _T("Enable Recording")},
+	{1002, kcPatternPlayRow, _T("Play Row")},
+	{1003, kcCursorCopy, _T("Quick Copy")},
+	{1004, kcCursorPaste, _T("Quick Paste")},
+	{1005, kcChannelMute, _T("Mute Current Channel")},
+	{1006, kcChannelSolo, _T("Solo Current Channel")},
+	{1007, kcTransposeUp, _T("Transpose +1")},
+	{1008, kcTransposeDown, _T("Transpose -1")},
+	{1009, kcTransposeOctUp, _T("Transpose +1 Octave")},
+	{1010, kcTransposeOctDown, _T("Transpose -1 Octave")},
+	{1011, kcSelectChannel, _T("Select Channel / Select All")},
+	{1012, kcPatternAmplify, _T("Amplify selection")},
+	{1013, kcPatternSetInstrument, _T("Apply current instrument")},
+	{1014, kcPatternInterpolateVol, _T("Interpolate Volume")},
+	{1015, kcPatternInterpolateEffect, _T("Interpolate Effect")},
+	{1016, kcPatternVisualizeEffect, _T("Open Effect Visualizer")},
+	{1017, kcPatternJumpDownh1, _T("Jump down by measure")},
+	{1018, kcPatternJumpUph1, _T("Jump up by measure")},
+	{1019, kcPatternSnapDownh1, _T("Snap down to measure")},
+	{1020, kcPatternSnapUph1, _T("Snap up to measure")},
+	{1021, kcViewGeneral, _T("View General")},
+	{1022, kcViewPattern, _T("View Pattern")},
+	{1023, kcViewSamples, _T("View Samples")},
+	{1024, kcViewInstruments, _T("View Instruments")},
+	{1025, kcViewComments, _T("View Comments")},
+	{1026, kcPlayPatternFromCursor, _T("Play Pattern from Cursor")},
+	{1027, kcPlayPatternFromStart, _T("Play Pattern from Start")},
+	{1028, kcPlaySongFromCursor, _T("Play Song from Cursor")},
+	{1029, kcPlaySongFromStart, _T("Play Song from Start")},
+	{1030, kcPlayPauseSong, _T("Play Song / Pause song")},
+	{1031, kcPauseSong, _T("Pause Song")},
+	{1032, kcPrevInstrument, _T("Previous Instrument")},
+	{1033, kcNextInstrument, _T("Next Instrument")},
+	{1034, kcPrevOrder, _T("Previous Order")},
+	{1035, kcNextOrder, _T("Next Order")},
+	{1036, kcPrevOctave, _T("Previous Octave")},
+	{1037, kcNextOctave, _T("Next Octave")},
+	{1038, kcNavigateDown, _T("Navigate down by 1 row")},
+	{1039, kcNavigateUp, _T("Navigate up by 1 row")},
+	{1040, kcNavigateLeft, _T("Navigate left")},
+	{1041, kcNavigateRight, _T("Navigate right")},
+	{1042, kcNavigateNextChan, _T("Navigate to next channel")},
+	{1043, kcNavigatePrevChan, _T("Navigate to previous channel")},
+	{1044, kcHomeHorizontal, _T("Go to first channel")},
+	{1045, kcHomeVertical, _T("Go to first row")},
+	{1046, kcHomeAbsolute, _T("Go to first row of first channel")},
+	{1047, kcEndHorizontal, _T("Go to last channel")},
+	{1048, kcEndVertical, _T("Go to last row")},
+	{1049, kcEndAbsolute, _T("Go to last row of last channel")},
+	{1050, kcSelect, _T("Selection key")},
+	{1051, kcCopySelect, _T("Copy select key")},
+	{KeyCommand::Hidden, kcSelectOff, _T("Deselect")},
+	{KeyCommand::Hidden, kcCopySelectOff, _T("Copy deselect key")},
+	{1054, kcNextPattern, _T("Next pattern")},
+	{1055, kcPrevPattern, _T("Previous pattern")},
+	//{1056, kcClearSelection, _T("Wipe selection")},
+	{1057, kcClearRow, _T("Clear row")},
+	{1058, kcClearField, _T("Clear field")},
+	{1059, kcClearRowStep, _T("Clear row and step")},
+	{1060, kcClearFieldStep, _T("Clear field and step")},
+	{1061, kcDeleteRows, _T("Delete rows")},
+	{1062, kcShowNoteProperties, _T("Show Note Properties")},
+	{1063, kcShowEditMenu, _T("Show Context (Right-Click) Menu")},
+	{1064, kcVPNoteC_0, _T("Base octave C")},
+	{1065, kcVPNoteCS0, _T("Base octave C#")},
+	{1066, kcVPNoteD_0, _T("Base octave D")},
+	{1067, kcVPNoteDS0, _T("Base octave D#")},
+	{1068, kcVPNoteE_0, _T("Base octave E")},
+	{1069, kcVPNoteF_0, _T("Base octave F")},
+	{1070, kcVPNoteFS0, _T("Base octave F#")},
+	{1071, kcVPNoteG_0, _T("Base octave G")},
+	{1072, kcVPNoteGS0, _T("Base octave G#")},
+	{1073, kcVPNoteA_1, _T("Base octave A")},
+	{1074, kcVPNoteAS1, _T("Base octave A#")},
+	{1075, kcVPNoteB_1, _T("Base octave B")},
+	{1076, kcVPNoteC_1, _T("Base octave +1 C")},
+	{1077, kcVPNoteCS1, _T("Base octave +1 C#")},
+	{1078, kcVPNoteD_1, _T("Base octave +1 D")},
+	{1079, kcVPNoteDS1, _T("Base octave +1 D#")},
+	{1080, kcVPNoteE_1, _T("Base octave +1 E")},
+	{1081, kcVPNoteF_1, _T("Base octave +1 F")},
+	{1082, kcVPNoteFS1, _T("Base octave +1 F#")},
+	{1083, kcVPNoteG_1, _T("Base octave +1 G")},
+	{1084, kcVPNoteGS1, _T("Base octave +1 G#")},
+	{1085, kcVPNoteA_2, _T("Base octave +1 A")},
+	{1086, kcVPNoteAS2, _T("Base octave +1 A#")},
+	{1087, kcVPNoteB_2, _T("Base octave +1 B")},
+	{1088, kcVPNoteC_2, _T("Base octave +2 C")},
+	{1089, kcVPNoteCS2, _T("Base octave +2 C#")},
+	{1090, kcVPNoteD_2, _T("Base octave +2 D")},
+	{1091, kcVPNoteDS2, _T("Base octave +2 D#")},
+	{1092, kcVPNoteE_2, _T("Base octave +2 E")},
+	{1093, kcVPNoteF_2, _T("Base octave +2 F")},
+	{1094, kcVPNoteFS2, _T("Base octave +2 F#")},
+	{1095, kcVPNoteG_2, _T("Base octave +2 G")},
+	{1096, kcVPNoteGS2, _T("Base octave +2 G#")},
+	{1097, kcVPNoteA_3, _T("Base octave +2 A")},
+	{KeyCommand::Hidden, kcVPNoteStopC_0, _T("Stop base octave C")},
+	{KeyCommand::Hidden, kcVPNoteStopCS0, _T("Stop base octave C#")},
+	{KeyCommand::Hidden, kcVPNoteStopD_0, _T("Stop base octave D")},
+	{KeyCommand::Hidden, kcVPNoteStopDS0, _T("Stop base octave D#")},
+	{KeyCommand::Hidden, kcVPNoteStopE_0, _T("Stop base octave E")},
+	{KeyCommand::Hidden, kcVPNoteStopF_0, _T("Stop base octave F")},
+	{KeyCommand::Hidden, kcVPNoteStopFS0, _T("Stop base octave F#")},
+	{KeyCommand::Hidden, kcVPNoteStopG_0, _T("Stop base octave G")},
+	{KeyCommand::Hidden, kcVPNoteStopGS0, _T("Stop base octave G#")},
+	{KeyCommand::Hidden, kcVPNoteStopA_1, _T("Stop base octave +1 A")},
+	{KeyCommand::Hidden, kcVPNoteStopAS1, _T("Stop base octave +1 A#")},
+	{KeyCommand::Hidden, kcVPNoteStopB_1, _T("Stop base octave +1 B")},
+	{KeyCommand::Hidden, kcVPNoteStopC_1, _T("Stop base octave +1 C")},
+	{KeyCommand::Hidden, kcVPNoteStopCS1, _T("Stop base octave +1 C#")},
+	{KeyCommand::Hidden, kcVPNoteStopD_1, _T("Stop base octave +1 D")},
+	{KeyCommand::Hidden, kcVPNoteStopDS1, _T("Stop base octave +1 D#")},
+	{KeyCommand::Hidden, kcVPNoteStopE_1, _T("Stop base octave +1 E")},
+	{KeyCommand::Hidden, kcVPNoteStopF_1, _T("Stop base octave +1 F")},
+	{KeyCommand::Hidden, kcVPNoteStopFS1, _T("Stop base octave +1 F#")},
+	{KeyCommand::Hidden, kcVPNoteStopG_1, _T("Stop base octave +1 G")},
+	{KeyCommand::Hidden, kcVPNoteStopGS1, _T("Stop base octave +1 G#")},
+	{KeyCommand::Hidden, kcVPNoteStopA_2, _T("Stop base octave +2 A")},
+	{KeyCommand::Hidden, kcVPNoteStopAS2, _T("Stop base octave +2 A#")},
+	{KeyCommand::Hidden, kcVPNoteStopB_2, _T("Stop base octave +2 B")},
+	{KeyCommand::Hidden, kcVPNoteStopC_2, _T("Stop base octave +2 C")},
+	{KeyCommand::Hidden, kcVPNoteStopCS2, _T("Stop base octave +2 C#")},
+	{KeyCommand::Hidden, kcVPNoteStopD_2, _T("Stop base octave +2 D")},
+	{KeyCommand::Hidden, kcVPNoteStopDS2, _T("Stop base octave +2 D#")},
+	{KeyCommand::Hidden, kcVPNoteStopE_2, _T("Stop base octave +2 E")},
+	{KeyCommand::Hidden, kcVPNoteStopF_2, _T("Stop base octave +2 F")},
+	{KeyCommand::Hidden, kcVPNoteStopFS2, _T("Stop base octave +2 F#")},
+	{KeyCommand::Hidden, kcVPNoteStopG_2, _T("Stop base octave +2 G")},
+	{KeyCommand::Hidden, kcVPNoteStopGS2, _T("Stop base octave +2 G#")},
+	{KeyCommand::Hidden, kcVPNoteStopA_3, _T("Stop base octave +3 A")},
+	{KeyCommand::Hidden, kcVPChordC_0, _T("base octave chord C")},
+	{KeyCommand::Hidden, kcVPChordCS0, _T("base octave chord C#")},
+	{KeyCommand::Hidden, kcVPChordD_0, _T("base octave chord D")},
+	{KeyCommand::Hidden, kcVPChordDS0, _T("base octave chord D#")},
+	{KeyCommand::Hidden, kcVPChordE_0, _T("base octave chord E")},
+	{KeyCommand::Hidden, kcVPChordF_0, _T("base octave chord F")},
+	{KeyCommand::Hidden, kcVPChordFS0, _T("base octave chord F#")},
+	{KeyCommand::Hidden, kcVPChordG_0, _T("base octave chord G")},
+	{KeyCommand::Hidden, kcVPChordGS0, _T("base octave chord G#")},
+	{KeyCommand::Hidden, kcVPChordA_1, _T("base octave +1 chord A")},
+	{KeyCommand::Hidden, kcVPChordAS1, _T("base octave +1 chord A#")},
+	{KeyCommand::Hidden, kcVPChordB_1, _T("base octave +1 chord B")},
+	{KeyCommand::Hidden, kcVPChordC_1, _T("base octave +1 chord C")},
+	{KeyCommand::Hidden, kcVPChordCS1, _T("base octave +1 chord C#")},
+	{KeyCommand::Hidden, kcVPChordD_1, _T("base octave +1 chord D")},
+	{KeyCommand::Hidden, kcVPChordDS1, _T("base octave +1 chord D#")},
+	{KeyCommand::Hidden, kcVPChordE_1, _T("base octave +1 chord E")},
+	{KeyCommand::Hidden, kcVPChordF_1, _T("base octave +1 chord F")},
+	{KeyCommand::Hidden, kcVPChordFS1, _T("base octave +1 chord F#")},
+	{KeyCommand::Hidden, kcVPChordG_1, _T("base octave +1 chord G")},
+	{KeyCommand::Hidden, kcVPChordGS1, _T("base octave +1 chord G#")},
+	{KeyCommand::Hidden, kcVPChordA_2, _T("base octave +2 chord A")},
+	{KeyCommand::Hidden, kcVPChordAS2, _T("base octave +2 chord A#")},
+	{KeyCommand::Hidden, kcVPChordB_2, _T("base octave +2 chord B")},
+	{KeyCommand::Hidden, kcVPChordC_2, _T("base octave +2 chord C")},
+	{KeyCommand::Hidden, kcVPChordCS2, _T("base octave +2 chord C#")},
+	{KeyCommand::Hidden, kcVPChordD_2, _T("base octave +2 chord D")},
+	{KeyCommand::Hidden, kcVPChordDS2, _T("base octave +2 chord D#")},
+	{KeyCommand::Hidden, kcVPChordE_2, _T("base octave +2 chord E")},
+	{KeyCommand::Hidden, kcVPChordF_2, _T("base octave +2 chord F")},
+	{KeyCommand::Hidden, kcVPChordFS2, _T("base octave +2 chord F#")},
+	{KeyCommand::Hidden, kcVPChordG_2, _T("base octave +2 chord G")},
+	{KeyCommand::Hidden, kcVPChordGS2, _T("base octave +2 chord G#")},
+	{KeyCommand::Hidden, kcVPChordA_3, _T("base octave chord +3 A")},
+	{KeyCommand::Hidden, kcVPChordStopC_0, _T("Stop base octave chord C")},
+	{KeyCommand::Hidden, kcVPChordStopCS0, _T("Stop base octave chord C#")},
+	{KeyCommand::Hidden, kcVPChordStopD_0, _T("Stop base octave chord D")},
+	{KeyCommand::Hidden, kcVPChordStopDS0, _T("Stop base octave chord D#")},
+	{KeyCommand::Hidden, kcVPChordStopE_0, _T("Stop base octave chord E")},
+	{KeyCommand::Hidden, kcVPChordStopF_0, _T("Stop base octave chord F")},
+	{KeyCommand::Hidden, kcVPChordStopFS0, _T("Stop base octave chord F#")},
+	{KeyCommand::Hidden, kcVPChordStopG_0, _T("Stop base octave chord G")},
+	{KeyCommand::Hidden, kcVPChordStopGS0, _T("Stop base octave chord G#")},
+	{KeyCommand::Hidden, kcVPChordStopA_1, _T("Stop base octave +1 chord A")},
+	{KeyCommand::Hidden, kcVPChordStopAS1, _T("Stop base octave +1 chord A#")},
+	{KeyCommand::Hidden, kcVPChordStopB_1, _T("Stop base octave +1 chord B")},
+	{KeyCommand::Hidden, kcVPChordStopC_1, _T("Stop base octave +1 chord C")},
+	{KeyCommand::Hidden, kcVPChordStopCS1, _T("Stop base octave +1 chord C#")},
+	{KeyCommand::Hidden, kcVPChordStopD_1, _T("Stop base octave +1 chord D")},
+	{KeyCommand::Hidden, kcVPChordStopDS1, _T("Stop base octave +1 chord D#")},
+	{KeyCommand::Hidden, kcVPChordStopE_1, _T("Stop base octave +1 chord E")},
+	{KeyCommand::Hidden, kcVPChordStopF_1, _T("Stop base octave +1 chord F")},
+	{KeyCommand::Hidden, kcVPChordStopFS1, _T("Stop base octave +1 chord F#")},
+	{KeyCommand::Hidden, kcVPChordStopG_1, _T("Stop base octave +1 chord G")},
+	{KeyCommand::Hidden, kcVPChordStopGS1, _T("Stop base octave +1 chord G#")},
+	{KeyCommand::Hidden, kcVPChordStopA_2, _T("Stop base octave +2 chord A")},
+	{KeyCommand::Hidden, kcVPChordStopAS2, _T("Stop base octave +2 chord A#")},
+	{KeyCommand::Hidden, kcVPChordStopB_2, _T("Stop base octave +2 chord B")},
+	{KeyCommand::Hidden, kcVPChordStopC_2, _T("Stop base octave +2 chord C")},
+	{KeyCommand::Hidden, kcVPChordStopCS2, _T("Stop base octave +2 chord C#")},
+	{KeyCommand::Hidden, kcVPChordStopD_2, _T("Stop base octave +2 chord D")},
+	{KeyCommand::Hidden, kcVPChordStopDS2, _T("Stop base octave +2 chord D#")},
+	{KeyCommand::Hidden, kcVPChordStopE_2, _T("Stop base octave +2 chord E")},
+	{KeyCommand::Hidden, kcVPChordStopF_2, _T("Stop base octave +2 chord F")},
+	{KeyCommand::Hidden, kcVPChordStopFS2, _T("Stop base octave +2 chord F#")},
+	{KeyCommand::Hidden, kcVPChordStopG_2, _T("Stop base octave +2 chord G")},
+	{KeyCommand::Hidden, kcVPChordStopGS2, _T("Stop base octave +2 chord G#")},
+	{KeyCommand::Hidden, kcVPChordStopA_3, _T("Stop base octave +3 chord A")},
+	{1200, kcNoteCut, _T("Note Cut")},
+	{1201, kcNoteOff, _T("Note Off")},
+	{1202, kcSetIns0, _T("Set instrument digit 0")},
+	{1203, kcSetIns1, _T("Set instrument digit 1")},
+	{1204, kcSetIns2, _T("Set instrument digit 2")},
+	{1205, kcSetIns3, _T("Set instrument digit 3")},
+	{1206, kcSetIns4, _T("Set instrument digit 4")},
+	{1207, kcSetIns5, _T("Set instrument digit 5")},
+	{1208, kcSetIns6, _T("Set instrument digit 6")},
+	{1209, kcSetIns7, _T("Set instrument digit 7")},
+	{1210, kcSetIns8, _T("Set instrument digit 8")},
+	{1211, kcSetIns9, _T("Set instrument digit 9")},
+	{1212, kcSetOctave0, _T("Set octave 0")},
+	{1213, kcSetOctave1, _T("Set octave 1")},
+	{1214, kcSetOctave2, _T("Set octave 2")},
+	{1215, kcSetOctave3, _T("Set octave 3")},
+	{1216, kcSetOctave4, _T("Set octave 4")},
+	{1217, kcSetOctave5, _T("Set octave 5")},
+	{1218, kcSetOctave6, _T("Set octave 6")},
+	{1219, kcSetOctave7, _T("Set octave 7")},
+	{1220, kcSetOctave8, _T("Set octave 8")},
+	{1221, kcSetOctave9, _T("Set octave 9")},
+	{1222, kcSetVolume0, _T("Set volume digit 0")},
+	{1223, kcSetVolume1, _T("Set volume digit 1")},
+	{1224, kcSetVolume2, _T("Set volume digit 2")},
+	{1225, kcSetVolume3, _T("Set volume digit 3")},
+	{1226, kcSetVolume4, _T("Set volume digit 4")},
+	{1227, kcSetVolume5, _T("Set volume digit 5")},
+	{1228, kcSetVolume6, _T("Set volume digit 6")},
+	{1229, kcSetVolume7, _T("Set volume digit 7")},
+	{1230, kcSetVolume8, _T("Set volume digit 8")},
+	{1231, kcSetVolume9, _T("Set volume digit 9")},
+	{1232, kcSetVolumeVol, _T("Volume Command - Volume")},
+	{1233, kcSetVolumePan, _T("Volume Command - Panning")},
+	{1234, kcSetVolumeVolSlideUp, _T("Volume Command - Volume Slide Up")},
+	{1235, kcSetVolumeVolSlideDown, _T("Volume Command - Volume Slide Down")},
+	{1236, kcSetVolumeFineVolUp, _T("Volume Command - Fine Volume Slide Up")},
+	{1237, kcSetVolumeFineVolDown, _T("Volume Command - Fine Volume Slide Down")},
+	{1238, kcSetVolumeVibratoSpd, _T("Volume Command - Vibrato Speed")},
+	{1239, kcSetVolumeVibrato, _T("Volume Command - Vibrato Depth")},
+	{1240, kcSetVolumeXMPanLeft, _T("Volume Command - XM Pan Slide Left")},
+	{1241, kcSetVolumeXMPanRight, _T("Volume Command - XM Pan Slide Right")},
+	{1242, kcSetVolumePortamento, _T("Volume Command - Tone Portamento")},
+	{1243, kcSetVolumeITPortaUp, _T("Volume Command - Portamento Up")},
+	{1244, kcSetVolumeITPortaDown, _T("Volume Command - Portamento Down")},
+	{KeyCommand::Hidden, kcSetVolumeITUnused, _T("Volume Command - Unused")},
+	{1246, kcSetVolumeITOffset, _T("Volume Command - Offset")},
+	{1247, kcSetFXParam0, _T("Effect Parameter Digit 0")},
+	{1248, kcSetFXParam1, _T("Effect Parameter Digit 1")},
+	{1249, kcSetFXParam2, _T("Effect Parameter Digit 2")},
+	{1250, kcSetFXParam3, _T("Effect Parameter Digit 3")},
+	{1251, kcSetFXParam4, _T("Effect Parameter Digit 4")},
+	{1252, kcSetFXParam5, _T("Effect Parameter Digit 5")},
+	{1253, kcSetFXParam6, _T("Effect Parameter Digit 6")},
+	{1254, kcSetFXParam7, _T("Effect Parameter Digit 7")},
+	{1255, kcSetFXParam8, _T("Effect Parameter Digit 8")},
+	{1256, kcSetFXParam9, _T("Effect Parameter Digit 9")},
+	{1257, kcSetFXParamA, _T("Effect Parameter Digit A")},
+	{1258, kcSetFXParamB, _T("Effect Parameter Digit B")},
+	{1259, kcSetFXParamC, _T("Effect Parameter Digit C")},
+	{1260, kcSetFXParamD, _T("Effect Parameter Digit D")},
+	{1261, kcSetFXParamE, _T("Effect Parameter Digit E")},
+	{1262, kcSetFXParamF, _T("Effect Parameter Digit F")},
+	{KeyCommand::Hidden, kcSetFXarp, _T("FX Arpeggio")},
+	{KeyCommand::Hidden, kcSetFXportUp, _T("FX Portamento Up")},
+	{KeyCommand::Hidden, kcSetFXportDown, _T("FX Portamento Down")},
+	{KeyCommand::Hidden, kcSetFXport, _T("FX Tone Portamento")},
+	{KeyCommand::Hidden, kcSetFXvibrato, _T("FX Vibrato")},
+	{KeyCommand::Hidden, kcSetFXportSlide, _T("FX Portamento + Volume Slide")},
+	{KeyCommand::Hidden, kcSetFXvibSlide, _T("FX Vibrato + Volume Slide")},
+	{KeyCommand::Hidden, kcSetFXtremolo, _T("FX Tremolo")},
+	{KeyCommand::Hidden, kcSetFXpan, _T("FX Pan")},
+	{KeyCommand::Hidden, kcSetFXoffset, _T("FX Offset")},
+	{KeyCommand::Hidden, kcSetFXvolSlide, _T("FX Volume Slide")},
+	{KeyCommand::Hidden, kcSetFXgotoOrd, _T("FX Pattern Jump")},
+	{KeyCommand::Hidden, kcSetFXsetVol, _T("FX Set Volume")},
+	{KeyCommand::Hidden, kcSetFXgotoRow, _T("FX Break To Row")},
+	{KeyCommand::Hidden, kcSetFXretrig, _T("FX Retrigger")},
+	{KeyCommand::Hidden, kcSetFXspeed, _T("FX Set Speed")},
+	{KeyCommand::Hidden, kcSetFXtempo, _T("FX Set Tempo")},
+	{KeyCommand::Hidden, kcSetFXtremor, _T("FX Tremor")},
+	{KeyCommand::Hidden, kcSetFXextendedMOD, _T("FX Extended MOD Commands")},
+	{KeyCommand::Hidden, kcSetFXextendedS3M, _T("FX Extended S3M Commands")},
+	{KeyCommand::Hidden, kcSetFXchannelVol, _T("FX Set Channel Volume")},
+	{KeyCommand::Hidden, kcSetFXchannelVols, _T("FX Channel Volume Slide")},
+	{KeyCommand::Hidden, kcSetFXglobalVol, _T("FX Set Global Volume")},
+	{KeyCommand::Hidden, kcSetFXglobalVols, _T("FX Global Volume Slide")},
+	{KeyCommand::Hidden, kcSetFXkeyoff, _T("FX Key Off (XM)")},
+	{KeyCommand::Hidden, kcSetFXfineVib, _T("FX Fine Vibrato")},
+	{KeyCommand::Hidden, kcSetFXpanbrello, _T("FX Panbrello")},
+	{KeyCommand::Hidden, kcSetFXextendedXM, _T("FX Extended XM Commands")},
+	{KeyCommand::Hidden, kcSetFXpanSlide, _T("FX Pan Slide")},
+	{KeyCommand::Hidden, kcSetFXsetEnvPos, _T("FX Set Envelope Position (XM)")},
+	{KeyCommand::Hidden, kcSetFXmacro, _T("FX MIDI Macro")},
+	{1294, kcSetFXmacroSlide, _T("Smooth MIDI Macro Slide")},
+	{1295, kcSetFXdelaycut, _T("Combined Note Delay and Note Cut")},
+	{KeyCommand::Hidden, kcPatternJumpDownh1Select, _T("kcPatternJumpDownh1Select")},
+	{KeyCommand::Hidden, kcPatternJumpUph1Select, _T("kcPatternJumpUph1Select")},
+	{KeyCommand::Hidden, kcPatternSnapDownh1Select, _T("kcPatternSnapDownh1Select")},
+	{KeyCommand::Hidden, kcPatternSnapUph1Select, _T("kcPatternSnapUph1Select")},
+	{KeyCommand::Hidden, kcNavigateDownSelect, _T("kcNavigateDownSelect")},
+	{KeyCommand::Hidden, kcNavigateUpSelect, _T("kcNavigateUpSelect")},
+	{KeyCommand::Hidden, kcNavigateLeftSelect, _T("kcNavigateLeftSelect")},
+	{KeyCommand::Hidden, kcNavigateRightSelect, _T("kcNavigateRightSelect")},
+	{KeyCommand::Hidden, kcNavigateNextChanSelect, _T("kcNavigateNextChanSelect")},
+	{KeyCommand::Hidden, kcNavigatePrevChanSelect, _T("kcNavigatePrevChanSelect")},
+	{KeyCommand::Hidden, kcHomeHorizontalSelect, _T("kcHomeHorizontalSelect")},
+	{KeyCommand::Hidden, kcHomeVerticalSelect, _T("kcHomeVerticalSelect")},
+	{KeyCommand::Hidden, kcHomeAbsoluteSelect, _T("kcHomeAbsoluteSelect")},
+	{KeyCommand::Hidden, kcEndHorizontalSelect, _T("kcEndHorizontalSelect")},
+	{KeyCommand::Hidden, kcEndVerticalSelect, _T("kcEndVerticalSelect")},
+	{KeyCommand::Hidden, kcEndAbsoluteSelect, _T("kcEndAbsoluteSelect")},
+	{KeyCommand::Hidden, kcSelectWithNav, _T("kcSelectWithNav")},
+	{KeyCommand::Hidden, kcSelectOffWithNav, _T("kcSelectOffWithNav")},
+	{KeyCommand::Hidden, kcCopySelectWithNav, _T("kcCopySelectWithNav")},
+	{KeyCommand::Hidden, kcCopySelectOffWithNav, _T("kcCopySelectOffWithNav")},
+	{1316 | KeyCommand::Dummy, kcChordModifier, _T("Chord Modifier")},
+	{1317 | KeyCommand::Dummy, kcSetSpacing, _T("Set edit step on note entry")},
+	{KeyCommand::Hidden, kcSetSpacing0, _T("")},
+	{KeyCommand::Hidden, kcSetSpacing1, _T("")},
+	{KeyCommand::Hidden, kcSetSpacing2, _T("")},
+	{KeyCommand::Hidden, kcSetSpacing3, _T("")},
+	{KeyCommand::Hidden, kcSetSpacing4, _T("")},
+	{KeyCommand::Hidden, kcSetSpacing5, _T("")},
+	{KeyCommand::Hidden, kcSetSpacing6, _T("")},
+	{KeyCommand::Hidden, kcSetSpacing7, _T("")},
+	{KeyCommand::Hidden, kcSetSpacing8, _T("")},
+	{KeyCommand::Hidden, kcSetSpacing9, _T("")},
+	{KeyCommand::Hidden, kcCopySelectWithSelect, _T("kcCopySelectWithSelect")},
+	{KeyCommand::Hidden, kcCopySelectOffWithSelect, _T("kcCopySelectOffWithSelect")},
+	{KeyCommand::Hidden, kcSelectWithCopySelect, _T("kcSelectWithCopySelect")},
+	{KeyCommand::Hidden, kcSelectOffWithCopySelect, _T("kcSelectOffWithCopySelect")},
+	/*
+	{1332, kcCopy, _T("Copy pattern data")},
+	{1333, kcCut, _T("Cut pattern data")},
+	{1334, kcPaste, _T("Paste pattern data")},
+	{1335, kcMixPaste, _T("Mix-paste pattern data")},
+	{1336, kcSelectAll, _T("Select all pattern data")},
+	{CommandStruct::Hidden, kcSelectCol, _T("Select Channel / Select All")},
+	*/
+	{1338, kcPatternJumpDownh2, _T("Jump down by beat")},
+	{1339, kcPatternJumpUph2, _T("Jump up by beat")},
+	{1340, kcPatternSnapDownh2, _T("Snap down to beat")},
+	{1341, kcPatternSnapUph2, _T("Snap up to beat")},
+	{KeyCommand::Hidden, kcPatternJumpDownh2Select, _T("kcPatternJumpDownh2Select")},
+	{KeyCommand::Hidden, kcPatternJumpUph2Select, _T("kcPatternJumpUph2Select")},
+	{KeyCommand::Hidden, kcPatternSnapDownh2Select, _T("kcPatternSnapDownh2Select")},
+	{KeyCommand::Hidden, kcPatternSnapUph2Select, _T("kcPatternSnapUph2Select")},
+	{1346, kcFileOpen, _T("File/Open")},
+	{1347, kcFileNew, _T("File/New")},
+	{1348, kcFileClose, _T("File/Close")},
+	{1349, kcFileSave, _T("File/Save")},
+	{1350, kcFileSaveAs, _T("File/Save As")},
+	{1351, kcFileSaveAsWave, _T("File/Stream Export")},
+	{1352 | KeyCommand::Hidden, kcFileSaveAsMP3, _T("File/Stream Export")}, // Legacy
+	{1353, kcFileSaveMidi, _T("File/Export as MIDI")},
+	{1354, kcFileImportMidiLib, _T("File/Import MIDI Library")},
+	{1355, kcFileAddSoundBank, _T("File/Add Sound Bank")},
+	{1359, kcEditUndo, _T("Undo")},
+	{1360, kcEditCut, _T("Cut")},
+	{1361, kcEditCopy, _T("Copy")},
+	{1362, kcEditPaste, _T("Paste")},
+	{1363, kcEditMixPaste, _T("Mix Paste")},
+	{1364, kcEditSelectAll, _T("Select All")},
+	{1365, kcEditFind, _T("Find / Replace")},
+	{1366, kcEditFindNext, _T("Find Next")},
+	{1367, kcViewMain, _T("Toggle Main Toolbar")},
+	{1368, kcViewTree, _T("Toggle Tree View")},
+	{1369, kcViewOptions, _T("View Options")},
+	{1370, kcHelp, _T("Help")},
+	/*
+	{1370, kcWindowNew, _T("New Window")},
+	{1371, kcWindowCascade, _T("Cascade Windows")},
+	{1372, kcWindowTileHorz, _T("Tile Windows Horizontally")},
+	{1373, kcWindowTileVert, _T("Tile Windows Vertically")},
+	*/
+	{1374, kcEstimateSongLength, _T("Estimate Song Length")},
+	{1375, kcStopSong, _T("Stop Song")},
+	{1376, kcMidiRecord, _T("Toggle MIDI Record")},
+	{1377, kcDeleteAllRows, _T("Delete all rows")},
+	{1378, kcInsertRow, _T("Insert Row")},
+	{1379, kcInsertAllRows, _T("Insert All Rows")},
+	{1380, kcSampleTrim, _T("Trim sample around loop points")},
+	{1381, kcSampleReverse, _T("Reverse Sample")},
+	{1382, kcSampleDelete, _T("Delete Sample Selection")},
+	{1383, kcSampleSilence, _T("Silence Sample Selection")},
+	{1384, kcSampleNormalize, _T("Normalize Sample")},
+	{1385, kcSampleAmplify, _T("Amplify Sample")},
+	{1386, kcSampleZoomUp, _T("Zoom In")},
+	{1387, kcSampleZoomDown, _T("Zoom Out")},
+	{1660, kcPatternGrowSelection, _T("Grow selection")},
+	{1661, kcPatternShrinkSelection, _T("Shrink selection")},
+	{1662, kcTogglePluginEditor, _T("Toggle channel's plugin editor")},
+	{1663, kcToggleFollowSong, _T("Toggle follow song")},
+	{1664, kcClearFieldITStyle, _T("Clear field (IT Style)")},
+	{1665, kcClearFieldStepITStyle, _T("Clear field and step (IT Style)")},
+	{1666, kcSetFXextension, _T("Parameter Extension Command")},
+	{1667 | KeyCommand::Hidden, kcNoteCutOld, _T("Note Cut")},  // Legacy
+	{1668 | KeyCommand::Hidden, kcNoteOffOld, _T("Note Off")},  // Legacy
+	{1669, kcViewAddPlugin, _T("View Plugin Manager")},
+	{1670, kcViewChannelManager, _T("View Channel Manager")},
+	{1671, kcCopyAndLoseSelection, _T("Copy and lose selection")},
+	{1672, kcNewPattern, _T("Insert new pattern")},
+	{1673, kcSampleLoad, _T("Load Sample")},
+	{1674, kcSampleSave, _T("Save Sample")},
+	{1675, kcSampleNew, _T("New Sample")},
+	//{CommandStruct::Hidden, kcSampleCtrlLoad, _T("Load Sample")},
+	//{CommandStruct::Hidden, kcSampleCtrlSave, _T("Save Sample")},
+	//{CommandStruct::Hidden, kcSampleCtrlNew, _T("New Sample")},
+	{KeyCommand::Hidden, kcInstrumentLoad, _T("Load Instrument")},
+	{KeyCommand::Hidden, kcInstrumentSave, _T("Save Instrument")},
+	{KeyCommand::Hidden, kcInstrumentNew, _T("New Instrument")},
+	{KeyCommand::Hidden, kcInstrumentCtrlLoad, _T("Load Instrument")},
+	{KeyCommand::Hidden, kcInstrumentCtrlSave, _T("Save Instrument")},
+	{KeyCommand::Hidden, kcInstrumentCtrlNew, _T("New Instrument")},
+	{1685, kcSwitchToOrderList, _T("Switch to Order List")},
+	{1686, kcEditMixPasteITStyle, _T("Mix Paste (old IT Style)")},
+	{1687, kcApproxRealBPM, _T("Show approx. real BPM")},
+	{KeyCommand::Hidden, kcNavigateDownBySpacingSelect, _T("kcNavigateDownBySpacingSelect")},
+	{KeyCommand::Hidden, kcNavigateUpBySpacingSelect, _T("kcNavigateUpBySpacingSelect")},
+	{1691, kcNavigateDownBySpacing, _T("Navigate down by spacing")},
+	{1692, kcNavigateUpBySpacing, _T("Navigate up by spacing")},
+	{1693, kcPrevDocument, _T("Previous Document")},
+	{1694, kcNextDocument, _T("Next Document")},
+	{1763, kcVSTGUIPrevPreset, _T("Previous Plugin Preset")},
+	{1764, kcVSTGUINextPreset, _T("Next Plugin Preset")},
+	{1765, kcVSTGUIRandParams, _T("Randomize Plugin Parameters")},
+	{1766, kcPatternGoto, _T("Go to row/channel/...")},
+	{KeyCommand::Hidden, kcPatternOpenRandomizer, _T("Pattern Randomizer")},  // while there's not randomizer yet, let's just disable it for now
+	{1768, kcPatternInterpolateNote, _T("Interpolate Note")},
+	{KeyCommand::Hidden, kcViewGraph, _T("View Graph")},  // while there's no graph yet, let's just disable it for now
+	{1770, kcToggleChanMuteOnPatTransition, _T("(Un)mute channel on pattern transition")},
+	{1771, kcChannelUnmuteAll, _T("Unmute all channels")},
+	{1772, kcShowPatternProperties, _T("Show Pattern Properties")},
+	{1773, kcShowMacroConfig, _T("View Zxx Macro Configuration")},
+	{1775, kcViewSongProperties, _T("View Song Properties")},
+	{1776, kcChangeLoopStatus, _T("Toggle Loop Pattern")},
+	{1777, kcFileExportCompat, _T("File/Compatibility Export")},
+	{1778, kcUnmuteAllChnOnPatTransition, _T("Unmute all channels on pattern transition")},
+	{1779, kcSoloChnOnPatTransition, _T("Solo channel on pattern transition")},
+	{1780, kcTimeAtRow, _T("Show playback time at current row")},
+	{1781, kcViewMIDImapping, _T("View MIDI Mapping")},
+	{1782, kcVSTGUIPrevPresetJump, _T("Plugin preset backward jump")},
+	{1783, kcVSTGUINextPresetJump, _T("Plugin preset forward jump")},
+	{1784, kcSampleInvert, _T("Invert Sample Phase")},
+	{1785, kcSampleSignUnsign, _T("Signed / Unsigned Conversion")},
+	{1786, kcChannelReset, _T("Reset Channel")},
+	{1787, kcToggleOverflowPaste, _T("Toggle overflow paste")},
+	{1788, kcNotePC, _T("Parameter Control")},
+	{1789, kcNotePCS, _T("Parameter Control (smooth)")},
+	{1790, kcSampleRemoveDCOffset, _T("Remove DC Offset")},
+	{1791, kcNoteFade, _T("Note Fade")},
+	{1792 | KeyCommand::Hidden, kcNoteFadeOld, _T("Note Fade")},  // Legacy
+	{1793, kcEditPasteFlood, _T("Paste Flood")},
+	{1794, kcOrderlistNavigateLeft, _T("Previous Order")},
+	{1795, kcOrderlistNavigateRight, _T("Next Order")},
+	{1796, kcOrderlistNavigateFirst, _T("First Order")},
+	{1797, kcOrderlistNavigateLast, _T("Last Order")},
+	{KeyCommand::Hidden, kcOrderlistNavigateLeftSelect, _T("kcOrderlistNavigateLeftSelect")},
+	{KeyCommand::Hidden, kcOrderlistNavigateRightSelect, _T("kcOrderlistNavigateRightSelect")},
+	{KeyCommand::Hidden, kcOrderlistNavigateFirstSelect, _T("kcOrderlistNavigateFirstSelect")},
+	{KeyCommand::Hidden, kcOrderlistNavigateLastSelect, _T("kcOrderlistNavigateLastSelect")},
+	{1802, kcOrderlistEditDelete, _T("Delete Order")},
+	{1803, kcOrderlistEditInsert, _T("Insert Order")},
+	{1804, kcOrderlistEditPattern, _T("Edit Pattern")},
+	{1805, kcOrderlistSwitchToPatternView, _T("Switch to pattern editor")},
+	{1806, kcDuplicatePattern, _T("Duplicate Pattern")},
+	{1807, kcOrderlistPat0, _T("Pattern index digit 0")},
+	{1808, kcOrderlistPat1, _T("Pattern index digit 1")},
+	{1809, kcOrderlistPat2, _T("Pattern index digit 2")},
+	{1810, kcOrderlistPat3, _T("Pattern index digit 3")},
+	{1811, kcOrderlistPat4, _T("Pattern index digit 4")},
+	{1812, kcOrderlistPat5, _T("Pattern index digit 5")},
+	{1813, kcOrderlistPat6, _T("Pattern index digit 6")},
+	{1814, kcOrderlistPat7, _T("Pattern index digit 7")},
+	{1815, kcOrderlistPat8, _T("Pattern index digit 8")},
+	{1816, kcOrderlistPat9, _T("Pattern index digit 9")},
+	{1817, kcOrderlistPatPlus, _T("Increase pattern index ")},
+	{1818, kcOrderlistPatMinus, _T("Decrease pattern index")},
+	{1819, kcShowSplitKeyboardSettings, _T("Split Keyboard Settings dialog")},
+	{1820, kcEditPushForwardPaste, _T("Push Forward Paste (Insert)")},
+	{1821, kcInstrumentEnvelopePointMoveLeft, _T("Move envelope point left")},
+	{1822, kcInstrumentEnvelopePointMoveRight, _T("Move envelope point right")},
+	{1823, kcInstrumentEnvelopePointMoveUp, _T("Move envelope point up")},
+	{1824, kcInstrumentEnvelopePointMoveDown, _T("Move envelope point down")},
+	{1825, kcInstrumentEnvelopePointPrev, _T("Select previous envelope point")},
+	{1826, kcInstrumentEnvelopePointNext, _T("Select next envelope point")},
+	{1827, kcInstrumentEnvelopePointInsert, _T("Insert Envelope Point")},
+	{1828, kcInstrumentEnvelopePointRemove, _T("Remove Envelope Point")},
+	{1829, kcInstrumentEnvelopeSetLoopStart, _T("Set Loop Start")},
+	{1830, kcInstrumentEnvelopeSetLoopEnd, _T("Set Loop End")},
+	{1831, kcInstrumentEnvelopeSetSustainLoopStart, _T("Set sustain loop start")},
+	{1832, kcInstrumentEnvelopeSetSustainLoopEnd, _T("Set sustain loop end")},
+	{1833, kcInstrumentEnvelopeToggleReleaseNode, _T("Toggle release node")},
+	{1834, kcInstrumentEnvelopePointMoveUp8, _T("Move envelope point up (Coarse)")},
+	{1835, kcInstrumentEnvelopePointMoveDown8, _T("Move envelope point down (Coarse)")},
+	{1836, kcPatternEditPCNotePlugin, _T("Toggle PC Event/instrument plugin editor")},
+	{1837, kcInstrumentEnvelopeZoomIn, _T("Zoom In")},
+	{1838, kcInstrumentEnvelopeZoomOut, _T("Zoom Out")},
+	{1839, kcVSTGUIToggleRecordParams, _T("Toggle Parameter Recording")},
+	{1840, kcVSTGUIToggleSendKeysToPlug, _T("Pass Key Presses to Plugin")},
+	{1841, kcVSTGUIBypassPlug, _T("Bypass Plugin")},
+	{1842, kcInsNoteMapTransposeDown, _T("Transpose -1 (Note Map)")},
+	{1843, kcInsNoteMapTransposeUp, _T("Transpose +1 (Note Map)")},
+	{1844, kcInsNoteMapTransposeOctDown, _T("Transpose -1 Octave (Note Map)")},
+	{1845, kcInsNoteMapTransposeOctUp, _T("Transpose +1 Octave (Note Map)")},
+	{1846, kcInsNoteMapCopyCurrentNote, _T("Map all notes to selected note")},
+	{1847, kcInsNoteMapCopyCurrentSample, _T("Map all notes to selected sample")},
+	{1848, kcInsNoteMapReset, _T("Reset Note Mapping")},
+	{1849, kcInsNoteMapEditSample, _T("Edit Current Sample")},
+	{1850, kcInsNoteMapEditSampleMap, _T("Edit Sample Map")},
+	{1851, kcInstrumentCtrlDuplicate, _T("Duplicate Instrument")},
+	{1852, kcPanic, _T("Panic")},
+	{1853, kcOrderlistPatIgnore, _T("Separator (+++) Index")},
+	{1854, kcOrderlistPatInvalid, _T("Stop (---) Index")},
+	{1855, kcViewEditHistory, _T("View Edit History")},
+	{1856, kcSampleQuickFade, _T("Quick Fade")},
+	{1857, kcSampleXFade, _T("Crossfade Sample Loop")},
+	{1858, kcSelectBeat, _T("Select Beat")},
+	{1859, kcSelectMeasure, _T("Select Measure")},
+	{1860, kcFileSaveTemplate, _T("File/Save As Template")},
+	{1861, kcIncreaseSpacing, _T("Increase Edit Step")},
+	{1862, kcDecreaseSpacing, _T("Decrease Edit Step")},
+	{1863, kcSampleAutotune, _T("Tune Sample to given Note")},
+	{1864, kcFileCloseAll, _T("File/Close All")},
+	{KeyCommand::Hidden, kcSetOctaveStop0, _T("")},
+	{KeyCommand::Hidden, kcSetOctaveStop1, _T("")},
+	{KeyCommand::Hidden, kcSetOctaveStop2, _T("")},
+	{KeyCommand::Hidden, kcSetOctaveStop3, _T("")},
+	{KeyCommand::Hidden, kcSetOctaveStop4, _T("")},
+	{KeyCommand::Hidden, kcSetOctaveStop5, _T("")},
+	{KeyCommand::Hidden, kcSetOctaveStop6, _T("")},
+	{KeyCommand::Hidden, kcSetOctaveStop7, _T("")},
+	{KeyCommand::Hidden, kcSetOctaveStop8, _T("")},
+	{KeyCommand::Hidden, kcSetOctaveStop9, _T("")},
+	{1875, kcOrderlistLockPlayback, _T("Lock Playback to Selection")},
+	{1876, kcOrderlistUnlockPlayback, _T("Unlock Playback")},
+	{1877, kcChannelSettings, _T("Quick Channel Settings")},
+	{1878, kcChnSettingsPrev, _T("Previous Channel")},
+	{1879, kcChnSettingsNext, _T("Next Channel")},
+	{1880, kcChnSettingsClose, _T("Switch to Pattern Editor")},
+	{1881, kcTransposeCustom, _T("Transpose Custom")},
+	{1882, kcSampleZoomSelection, _T("Zoom into Selection")},
+	{1883, kcChannelRecordSelect, _T("Channel Record Select")},
+	{1884, kcChannelSplitRecordSelect, _T("Channel Split Record Select")},
+	{1885, kcDataEntryUp, _T("Data Entry +1")},
+	{1886, kcDataEntryDown, _T("Data Entry -1")},
+	{1887, kcSample8Bit, _T("Convert to 8-bit / 16-bit")},
+	{1888, kcSampleMonoMix, _T("Convert to Mono (Mix)")},
+	{1889, kcSampleMonoLeft, _T("Convert to Mono (Left Channel)")},
+	{1890, kcSampleMonoRight, _T("Convert to Mono (Right Channel)")},
+	{1891, kcSampleMonoSplit, _T("Convert to Mono (Split Sample)")},
+	{1892, kcQuantizeSettings, _T("Quantize Settings")},
+	{1893, kcDataEntryUpCoarse, _T("Data Entry Up (Coarse)")},
+	{1894, kcDataEntryDownCoarse, _T("Data Entry Down (Coarse)")},
+	{1895, kcToggleNoteOffRecordPC, _T("Toggle Note Off record (PC keyboard)")},
+	{1896, kcToggleNoteOffRecordMIDI, _T("Toggle Note Off record (MIDI)")},
+	{1897, kcFindInstrument, _T("Pick up nearest instrument number")},
+	{1898, kcPlaySongFromPattern, _T("Play Song from Pattern Start")},
+	{1899, kcVSTGUIToggleRecordMIDIOut, _T("Record MIDI Out to Pattern Editor")},
+	{1900, kcToggleClipboardManager, _T("Toggle Clipboard Manager")},
+	{1901, kcClipboardPrev, _T("Cycle to Previous Clipboard")},
+	{1902, kcClipboardNext, _T("Cycle to Next Clipboard")},
+	{1903, kcSelectRow, _T("Select Row")},
+	{1904, kcSelectEvent, _T("Select Event")},
+	{1905, kcEditRedo, _T("Redo")},
+	{1906, kcFileAppend, _T("File/Append Module")},
+	{1907, kcSampleTransposeUp, _T("Transpose +1")},
+	{1908, kcSampleTransposeDown, _T("Transpose -1")},
+	{1909, kcSampleTransposeOctUp, _T("Transpose +1 Octave")},
+	{1910, kcSampleTransposeOctDown, _T("Transpose -1 Octave")},
+	{1911, kcPatternInterpolateInstr, _T("Interpolate Instrument")},
+	{1912, kcDummyShortcut, _T("Dummy Shortcut")},
+	{1913, kcSampleUpsample, _T("Upsample")},
+	{1914, kcSampleDownsample, _T("Downsample")},
+	{1915, kcSampleResample, _T("Resample")},
+	{1916, kcSampleCenterLoopStart, _T("Center loop start in view")},
+	{1917, kcSampleCenterLoopEnd, _T("Center loop end in view")},
+	{1918, kcSampleCenterSustainStart, _T("Center sustain loop start in view")},
+	{1919, kcSampleCenterSustainEnd, _T("Center sustain loop end in view")},
+	{1920, kcInstrumentEnvelopeLoad, _T("Load Envelope")},
+	{1921, kcInstrumentEnvelopeSave, _T("Save Envelope")},
+	{1922, kcChannelTranspose, _T("Transpose Channel")},
+	{1923, kcChannelDuplicate, _T("Duplicate Channel")},
+	// Reserved range 1924...1949 for kcStartSampleCues...kcEndSampleCues (generated below)
+	{1950, kcOrderlistEditCopyOrders, _T("Copy Orders")},
+	{KeyCommand::Hidden, kcTreeViewStopPreview, _T("Stop sample preview")},
+	{1952, kcSampleDuplicate, _T("Duplicate Sample")},
+	{1953, kcSampleSlice, _T("Slice at cue points")},
+	{1954, kcInstrumentEnvelopeScale, _T("Scale Envelope Points")},
+	{1955, kcInsNoteMapRemove, _T("Remove All Samples")},
+	{1956, kcInstrumentEnvelopeSelectLoopStart, _T("Select Envelope Loop Start")},
+	{1957, kcInstrumentEnvelopeSelectLoopEnd, _T("Select Envelope Loop End")},
+	{1958, kcInstrumentEnvelopeSelectSustainStart, _T("Select Envelope Sustain Start")},
+	{1959, kcInstrumentEnvelopeSelectSustainEnd, _T("Select Envelope Sustain End")},
+	{1960, kcInstrumentEnvelopePointMoveLeftCoarse, _T("Move envelope point left (Coarse)")},
+	{1961, kcInstrumentEnvelopePointMoveRightCoarse, _T("Move envelope point right (Coarse)")},
+	{1962, kcSampleCenterSampleStart, _T("Zoom into sample start")},
+	{1963, kcSampleCenterSampleEnd, _T("Zoom into sample end")},
+	{1964, kcSampleTrimToLoopEnd, _T("Trim to loop end")},
+	{1965, kcLockPlaybackToRows, _T("Lock Playback to Rows")},
+	{1966, kcSwitchToInstrLibrary, _T("Switch To Instrument Library")},
+	{1967, kcPatternSetInstrumentNotEmpty, _T("Apply current instrument to existing only")},
+	{1968, kcSelectColumn, _T("Select Column")},
+	{1969, kcSampleStereoSep, _T("Change Stereo Separation")},
+	{1970, kcTransposeCustomQuick, _T("Transpose Custom (Quick)")},
+	{1971, kcPrevEntryInColumn, _T("Jump to previous entry in column")},
+	{1972, kcNextEntryInColumn, _T("Jump to next entry in column")},
+	{1973, kcViewTempoSwing, _T("View Global Tempo Swing Settings")},
+	{1974, kcChordEditor, _T("Show Chord Editor")},
+	{1975, kcToggleLoopSong, _T("Toggle Loop Song")},
+	{1976, kcInstrumentEnvelopeSwitchToVolume, _T("Switch to Volume Envelope")},
+	{1977, kcInstrumentEnvelopeSwitchToPanning, _T("Switch to Panning Envelope")},
+	{1978, kcInstrumentEnvelopeSwitchToPitch, _T("Switch to Pitch / Filter Envelope")},
+	{1979, kcInstrumentEnvelopeToggleVolume, _T("Toggle Volume Envelope")},
+	{1980, kcInstrumentEnvelopeTogglePanning, _T("Toggle Panning Envelope")},
+	{1981, kcInstrumentEnvelopeTogglePitch, _T("Toggle Pitch Envelope")},
+	{1982, kcInstrumentEnvelopeToggleFilter, _T("Toggle Filter Envelope")},
+	{1983, kcInstrumentEnvelopeToggleLoop, _T("Toggle Envelope Loop")},
+	{1984, kcInstrumentEnvelopeToggleSustain, _T("Toggle Envelope Sustain Loop")},
+	{1985, kcInstrumentEnvelopeToggleCarry, _T("Toggle Envelope Carry")},
+	{1986, kcSampleInitializeOPL, _T("Initialize OPL Instrument")},
+	{1987, kcFileSaveCopy, _T("File/Save Copy")},
+	{1988, kcMergePatterns, _T("Merge Patterns")},
+	{1989, kcSplitPattern, _T("Split Pattern")},
+	{1990, kcSampleToggleDrawing, _T("Toggle Sample Drawing")},
+	{1991, kcSampleResize, _T("Add Silence / Create Sample")},
+	{1992, kcSampleGrid, _T("Configure Sample Grid")},
+	{1993, kcLoseSelection, _T("Lose Selection")},
+	{1994, kcCutPatternChannel, _T("Cut to Pattern Channel Clipboard")},
+	{1995, kcCutPattern, _T("Cut to Pattern Clipboard")},
+	{1996, kcCopyPatternChannel, _T("Copy to Pattern Channel Clipboard")},
+	{1997, kcCopyPattern, _T("Copy to Pattern Clipboard")},
+	{1998, kcPastePatternChannel, _T("Paste from Pattern Channel Clipboard")},
+	{1999, kcPastePattern, _T("Paste from Pattern Clipboard")},
+};
 
 //Get command descriptions etc.. loaded up.
 void CCommandSet::SetupCommands()
-{	//TODO: make this hideous list a bit nicer, with a constructor or somthing.
-	//NOTE: isHidden implies automatically set, since the user will not be able to see it.
+{
+	for(const auto &def : CommandDefinitions)
+	{
+		m_commands[def.cmd].Define(def.uid, def.description);
+	}
 
-	DefineKeyCommand(kcPatternRecord, 1001, _T("Enable Recording"));
-	DefineKeyCommand(kcPatternPlayRow, 1002, _T("Play Row"));
-	DefineKeyCommand(kcCursorCopy, 1003, _T("Quick Copy"));
-	DefineKeyCommand(kcCursorPaste, 1004, _T("Quick Paste"));
-	DefineKeyCommand(kcChannelMute, 1005, _T("Mute Current Channel"));
-	DefineKeyCommand(kcChannelSolo, 1006, _T("Solo Current Channel"));
-	DefineKeyCommand(kcTransposeUp, 1007, _T("Transpose +1"));
-	DefineKeyCommand(kcTransposeDown, 1008, _T("Transpose -1"));
-	DefineKeyCommand(kcTransposeOctUp, 1009, _T("Transpose +1 Octave"));
-	DefineKeyCommand(kcTransposeOctDown, 1010, _T("Transpose -1 Octave"));
-	DefineKeyCommand(kcSelectChannel, 1011, _T("Select Channel / Select All"));
-	DefineKeyCommand(kcPatternAmplify, 1012, _T("Amplify selection"));
-	DefineKeyCommand(kcPatternSetInstrument, 1013, _T("Apply current instrument"));
-	DefineKeyCommand(kcPatternInterpolateVol, 1014, _T("Interpolate Volume"));
-	DefineKeyCommand(kcPatternInterpolateEffect, 1015, _T("Interpolate Effect"));
-	DefineKeyCommand(kcPatternVisualizeEffect, 1016, _T("Open Effect Visualizer"));
-	DefineKeyCommand(kcPatternJumpDownh1, 1017, _T("Jump down by measure"));
-	DefineKeyCommand(kcPatternJumpUph1, 1018, _T("Jump up by measure"));
-	DefineKeyCommand(kcPatternSnapDownh1, 1019, _T("Snap down to measure"));
-	DefineKeyCommand(kcPatternSnapUph1, 1020, _T("Snap up to measure"));
-	DefineKeyCommand(kcViewGeneral, 1021, _T("View General"));
-	DefineKeyCommand(kcViewPattern, 1022, _T("View Pattern"));
-	DefineKeyCommand(kcViewSamples, 1023, _T("View Samples"));
-	DefineKeyCommand(kcViewInstruments, 1024, _T("View Instruments"));
-	DefineKeyCommand(kcViewComments, 1025, _T("View Comments"));
-	DefineKeyCommand(kcPlayPatternFromCursor, 1026, _T("Play Pattern from Cursor"));
-	DefineKeyCommand(kcPlayPatternFromStart, 1027, _T("Play Pattern from Start"));
-	DefineKeyCommand(kcPlaySongFromCursor, 1028, _T("Play Song from Cursor"));
-	DefineKeyCommand(kcPlaySongFromStart, 1029, _T("Play Song from Start"));
-	DefineKeyCommand(kcPlayPauseSong, 1030, _T("Play Song / Pause song"));
-	DefineKeyCommand(kcPauseSong, 1031, _T("Pause Song"));
-	DefineKeyCommand(kcPrevInstrument, 1032, _T("Previous Instrument"));
-	DefineKeyCommand(kcNextInstrument, 1033, _T("Next Instrument"));
-	DefineKeyCommand(kcPrevOrder, 1034, _T("Previous Order"));
-	DefineKeyCommand(kcNextOrder, 1035, _T("Next Order"));
-	DefineKeyCommand(kcPrevOctave, 1036, _T("Previous Octave"));
-	DefineKeyCommand(kcNextOctave, 1037, _T("Next Octave"));
-	DefineKeyCommand(kcNavigateDown, 1038, _T("Navigate down by 1 row"));
-	DefineKeyCommand(kcNavigateUp, 1039, _T("Navigate up by 1 row"));
-	DefineKeyCommand(kcNavigateLeft, 1040, _T("Navigate left"));
-	DefineKeyCommand(kcNavigateRight, 1041, _T("Navigate right"));
-	DefineKeyCommand(kcNavigateNextChan, 1042, _T("Navigate to next channel"));
-	DefineKeyCommand(kcNavigatePrevChan, 1043, _T("Navigate to previous channel"));
-	DefineKeyCommand(kcHomeHorizontal, 1044, _T("Go to first channel"));
-	DefineKeyCommand(kcHomeVertical, 1045, _T("Go to first row"));
-	DefineKeyCommand(kcHomeAbsolute, 1046, _T("Go to first row of first channel"));
-	DefineKeyCommand(kcEndHorizontal, 1047, _T("Go to last channel"));
-	DefineKeyCommand(kcEndVertical, 1048, _T("Go to last row"));
-	DefineKeyCommand(kcEndAbsolute, 1049, _T("Go to last row of last channel"));
-	DefineKeyCommand(kcSelect, 1050, _T("Selection key"));
-	DefineKeyCommand(kcCopySelect, 1051, _T("Copy select key"));
-	DefineKeyCommand(kcSelectOff, 1052, _T("Deselect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcCopySelectOff, 1053, _T("Copy deselect key"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcNextPattern, 1054, _T("Next pattern"));
-	DefineKeyCommand(kcPrevPattern, 1055, _T("Previous pattern"));
-	//DefineKeyCommand(kcClearSelection, 1056, _T("Wipe selection"));
-	DefineKeyCommand(kcClearRow, 1057, _T("Clear row"));
-	DefineKeyCommand(kcClearField, 1058, _T("Clear field"));
-	DefineKeyCommand(kcClearRowStep, 1059, _T("Clear row and step"));
-	DefineKeyCommand(kcClearFieldStep, 1060, _T("Clear field and step"));
-	DefineKeyCommand(kcDeleteRows, 1061, _T("Delete rows"));
-	DefineKeyCommand(kcShowNoteProperties, 1062, _T("Show Note Properties"));
-	DefineKeyCommand(kcShowEditMenu, 1063, _T("Show Context (Right-Click) Menu"));
-	DefineKeyCommand(kcVPNoteC_0, 1064, _T("Base octave C"));
-	DefineKeyCommand(kcVPNoteCS0, 1065, _T("Base octave C#"));
-	DefineKeyCommand(kcVPNoteD_0, 1066, _T("Base octave D"));
-	DefineKeyCommand(kcVPNoteDS0, 1067, _T("Base octave D#"));
-	DefineKeyCommand(kcVPNoteE_0, 1068, _T("Base octave E"));
-	DefineKeyCommand(kcVPNoteF_0, 1069, _T("Base octave F"));
-	DefineKeyCommand(kcVPNoteFS0, 1070, _T("Base octave F#"));
-	DefineKeyCommand(kcVPNoteG_0, 1071, _T("Base octave G"));
-	DefineKeyCommand(kcVPNoteGS0, 1072, _T("Base octave G#"));
-	DefineKeyCommand(kcVPNoteA_1, 1073, _T("Base octave A"));
-	DefineKeyCommand(kcVPNoteAS1, 1074, _T("Base octave A#"));
-	DefineKeyCommand(kcVPNoteB_1, 1075, _T("Base octave B"));
-	DefineKeyCommand(kcVPNoteC_1, 1076, _T("Base octave +1 C"));
-	DefineKeyCommand(kcVPNoteCS1, 1077, _T("Base octave +1 C#"));
-	DefineKeyCommand(kcVPNoteD_1, 1078, _T("Base octave +1 D"));
-	DefineKeyCommand(kcVPNoteDS1, 1079, _T("Base octave +1 D#"));
-	DefineKeyCommand(kcVPNoteE_1, 1080, _T("Base octave +1 E"));
-	DefineKeyCommand(kcVPNoteF_1, 1081, _T("Base octave +1 F"));
-	DefineKeyCommand(kcVPNoteFS1, 1082, _T("Base octave +1 F#"));
-	DefineKeyCommand(kcVPNoteG_1, 1083, _T("Base octave +1 G"));
-	DefineKeyCommand(kcVPNoteGS1, 1084, _T("Base octave +1 G#"));
-	DefineKeyCommand(kcVPNoteA_2, 1085, _T("Base octave +1 A"));
-	DefineKeyCommand(kcVPNoteAS2, 1086, _T("Base octave +1 A#"));
-	DefineKeyCommand(kcVPNoteB_2, 1087, _T("Base octave +1 B"));
-	DefineKeyCommand(kcVPNoteC_2, 1088, _T("Base octave +2 C"));
-	DefineKeyCommand(kcVPNoteCS2, 1089, _T("Base octave +2 C#"));
-	DefineKeyCommand(kcVPNoteD_2, 1090, _T("Base octave +2 D"));
-	DefineKeyCommand(kcVPNoteDS2, 1091, _T("Base octave +2 D#"));
-	DefineKeyCommand(kcVPNoteE_2, 1092, _T("Base octave +2 E"));
-	DefineKeyCommand(kcVPNoteF_2, 1093, _T("Base octave +2 F"));
-	DefineKeyCommand(kcVPNoteFS2, 1094, _T("Base octave +2 F#"));
-	DefineKeyCommand(kcVPNoteG_2, 1095, _T("Base octave +2 G"));
-	DefineKeyCommand(kcVPNoteGS2, 1096, _T("Base octave +2 G#"));
-	DefineKeyCommand(kcVPNoteA_3, 1097, _T("Base octave +2 A"));
-	DefineKeyCommand(kcVPNoteStopC_0, 1098, _T("Stop base octave C"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopCS0, 1099, _T("Stop base octave C#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopD_0, 1100, _T("Stop base octave D"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopDS0, 1101, _T("Stop base octave D#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopE_0, 1102, _T("Stop base octave E"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopF_0, 1103, _T("Stop base octave F"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopFS0, 1104, _T("Stop base octave F#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopG_0, 1105, _T("Stop base octave G"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopGS0, 1106, _T("Stop base octave G#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopA_1, 1107, _T("Stop base octave +1 A"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopAS1, 1108, _T("Stop base octave +1 A#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopB_1, 1109, _T("Stop base octave +1 B"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopC_1, 1110, _T("Stop base octave +1 C"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopCS1, 1111, _T("Stop base octave +1 C#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopD_1, 1112, _T("Stop base octave +1 D"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopDS1, 1113, _T("Stop base octave +1 D#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopE_1, 1114, _T("Stop base octave +1 E"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopF_1, 1115, _T("Stop base octave +1 F"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopFS1, 1116, _T("Stop base octave +1 F#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopG_1, 1117, _T("Stop base octave +1 G"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopGS1, 1118, _T("Stop base octave +1 G#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopA_2, 1119, _T("Stop base octave +2 A"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopAS2, 1120, _T("Stop base octave +2 A#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopB_2, 1121, _T("Stop base octave +2 B"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopC_2, 1122, _T("Stop base octave +2 C"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopCS2, 1123, _T("Stop base octave +2 C#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopD_2, 1124, _T("Stop base octave +2 D"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopDS2, 1125, _T("Stop base octave +2 D#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopE_2, 1126, _T("Stop base octave +2 E"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopF_2, 1127, _T("Stop base octave +2 F"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopFS2, 1128, _T("Stop base octave +2 F#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopG_2, 1129, _T("Stop base octave +2 G"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopGS2, 1130, _T("Stop base octave +2 G#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPNoteStopA_3, 1131, _T("Stop base octave +3 A"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordC_0, 1132, _T("base octave chord C"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordCS0, 1133, _T("base octave chord C#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordD_0, 1134, _T("base octave chord D"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordDS0, 1135, _T("base octave chord D#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordE_0, 1136, _T("base octave chord E"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordF_0, 1137, _T("base octave chord F"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordFS0, 1138, _T("base octave chord F#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordG_0, 1139, _T("base octave chord G"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordGS0, 1140, _T("base octave chord G#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordA_1, 1141, _T("base octave +1 chord A"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordAS1, 1142, _T("base octave +1 chord A#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordB_1, 1143, _T("base octave +1 chord B"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordC_1, 1144, _T("base octave +1 chord C"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordCS1, 1145, _T("base octave +1 chord C#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordD_1, 1146, _T("base octave +1 chord D"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordDS1, 1147, _T("base octave +1 chord D#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordE_1, 1148, _T("base octave +1 chord E"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordF_1, 1149, _T("base octave +1 chord F"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordFS1, 1150, _T("base octave +1 chord F#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordG_1, 1151, _T("base octave +1 chord G"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordGS1, 1152, _T("base octave +1 chord G#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordA_2, 1153, _T("base octave +2 chord A"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordAS2, 1154, _T("base octave +2 chord A#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordB_2, 1155, _T("base octave +2 chord B"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordC_2, 1156, _T("base octave +2 chord C"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordCS2, 1157, _T("base octave +2 chord C#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordD_2, 1158, _T("base octave +2 chord D"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordDS2, 1159, _T("base octave +2 chord D#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordE_2, 1160, _T("base octave +2 chord E"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordF_2, 1161, _T("base octave +2 chord F"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordFS2, 1162, _T("base octave +2 chord F#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordG_2, 1163, _T("base octave +2 chord G"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordGS2, 1164, _T("base octave +2 chord G#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordA_3, 1165, _T("base octave chord +3 A"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopC_0, 1166, _T("Stop base octave chord C"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopCS0, 1167, _T("Stop base octave chord C#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopD_0, 1168, _T("Stop base octave chord D"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopDS0, 1169, _T("Stop base octave chord D#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopE_0, 1170, _T("Stop base octave chord E"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopF_0, 1171, _T("Stop base octave chord F"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopFS0, 1172, _T("Stop base octave chord F#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopG_0, 1173, _T("Stop base octave chord G"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopGS0, 1174, _T("Stop base octave chord G#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopA_1, 1175, _T("Stop base octave +1 chord A"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopAS1, 1176, _T("Stop base octave +1 chord A#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopB_1, 1177, _T("Stop base octave +1 chord B"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopC_1, 1178, _T("Stop base octave +1 chord C"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopCS1, 1179, _T("Stop base octave +1 chord C#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopD_1, 1180, _T("Stop base octave +1 chord D"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopDS1, 1181, _T("Stop base octave +1 chord D#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopE_1, 1182, _T("Stop base octave +1 chord E"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopF_1, 1183, _T("Stop base octave +1 chord F"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopFS1, 1184, _T("Stop base octave +1 chord F#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopG_1, 1185, _T("Stop base octave +1 chord G"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopGS1, 1186, _T("Stop base octave +1 chord G#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopA_2, 1187, _T("Stop base octave +2 chord A"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopAS2, 1188, _T("Stop base octave +2 chord A#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopB_2, 1189, _T("Stop base octave +2 chord B"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopC_2, 1190, _T("Stop base octave +2 chord C"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopCS2, 1191, _T("Stop base octave +2 chord C#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopD_2, 1192, _T("Stop base octave +2 chord D"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopDS2, 1193, _T("Stop base octave +2 chord D#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopE_2, 1194, _T("Stop base octave +2 chord E"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopF_2, 1195, _T("Stop base octave +2 chord F"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopFS2, 1196, _T("Stop base octave +2 chord F#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopG_2, 1197, _T("Stop base octave +2 chord G"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopGS2, 1198, _T("Stop base octave +2 chord G#"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcVPChordStopA_3, 1199, _T("Stop base octave +3 chord A"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcNoteCut, 1200, _T("Note Cut"));
-	DefineKeyCommand(kcNoteOff, 1201, _T("Note Off"));
-	DefineKeyCommand(kcSetIns0, 1202, _T("Set instrument digit 0"));
-	DefineKeyCommand(kcSetIns1, 1203, _T("Set instrument digit 1"));
-	DefineKeyCommand(kcSetIns2, 1204, _T("Set instrument digit 2"));
-	DefineKeyCommand(kcSetIns3, 1205, _T("Set instrument digit 3"));
-	DefineKeyCommand(kcSetIns4, 1206, _T("Set instrument digit 4"));
-	DefineKeyCommand(kcSetIns5, 1207, _T("Set instrument digit 5"));
-	DefineKeyCommand(kcSetIns6, 1208, _T("Set instrument digit 6"));
-	DefineKeyCommand(kcSetIns7, 1209, _T("Set instrument digit 7"));
-	DefineKeyCommand(kcSetIns8, 1210, _T("Set instrument digit 8"));
-	DefineKeyCommand(kcSetIns9, 1211, _T("Set instrument digit 9"));
-	DefineKeyCommand(kcSetOctave0, 1212, _T("Set octave 0"));
-	DefineKeyCommand(kcSetOctave1, 1213, _T("Set octave 1"));
-	DefineKeyCommand(kcSetOctave2, 1214, _T("Set octave 2"));
-	DefineKeyCommand(kcSetOctave3, 1215, _T("Set octave 3"));
-	DefineKeyCommand(kcSetOctave4, 1216, _T("Set octave 4"));
-	DefineKeyCommand(kcSetOctave5, 1217, _T("Set octave 5"));
-	DefineKeyCommand(kcSetOctave6, 1218, _T("Set octave 6"));
-	DefineKeyCommand(kcSetOctave7, 1219, _T("Set octave 7"));
-	DefineKeyCommand(kcSetOctave8, 1220, _T("Set octave 8"));
-	DefineKeyCommand(kcSetOctave9, 1221, _T("Set octave 9"));
-	DefineKeyCommand(kcSetVolume0, 1222, _T("Set volume digit 0"));
-	DefineKeyCommand(kcSetVolume1, 1223, _T("Set volume digit 1"));
-	DefineKeyCommand(kcSetVolume2, 1224, _T("Set volume digit 2"));
-	DefineKeyCommand(kcSetVolume3, 1225, _T("Set volume digit 3"));
-	DefineKeyCommand(kcSetVolume4, 1226, _T("Set volume digit 4"));
-	DefineKeyCommand(kcSetVolume5, 1227, _T("Set volume digit 5"));
-	DefineKeyCommand(kcSetVolume6, 1228, _T("Set volume digit 6"));
-	DefineKeyCommand(kcSetVolume7, 1229, _T("Set volume digit 7"));
-	DefineKeyCommand(kcSetVolume8, 1230, _T("Set volume digit 8"));
-	DefineKeyCommand(kcSetVolume9, 1231, _T("Set volume digit 9"));
-	DefineKeyCommand(kcSetVolumeVol, 1232, _T("Volume Command - Volume"));
-	DefineKeyCommand(kcSetVolumePan, 1233, _T("Volume Command - Panning"));
-	DefineKeyCommand(kcSetVolumeVolSlideUp, 1234, _T("Volume Command - Volume Slide Up"));
-	DefineKeyCommand(kcSetVolumeVolSlideDown, 1235, _T("Volume Command - Volume Slide Down"));
-	DefineKeyCommand(kcSetVolumeFineVolUp, 1236, _T("Volume Command - Fine Volume Slide Up"));
-	DefineKeyCommand(kcSetVolumeFineVolDown, 1237, _T("Volume Command - Fine Volume Slide Down"));
-	DefineKeyCommand(kcSetVolumeVibratoSpd, 1238, _T("Volume Command - Vibrato Speed"));
-	DefineKeyCommand(kcSetVolumeVibrato, 1239, _T("Volume Command - Vibrato Depth"));
-	DefineKeyCommand(kcSetVolumeXMPanLeft, 1240, _T("Volume Command - XM Pan Slide Left"));
-	DefineKeyCommand(kcSetVolumeXMPanRight, 1241, _T("Volume Command - XM Pan Slide Right"));
-	DefineKeyCommand(kcSetVolumePortamento, 1242, _T("Volume Command - Portamento"));
-	DefineKeyCommand(kcSetVolumeITPortaUp, 1243, _T("Volume Command - Portamento Up"));
-	DefineKeyCommand(kcSetVolumeITPortaDown, 1244, _T("Volume Command - Portamento Down"));
-	DefineKeyCommand(kcSetVolumeITUnused, 1245, _T("Volume Command - Unused"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetVolumeITOffset, 1246, _T("Volume Command - Offset"));
-	DefineKeyCommand(kcSetFXParam0, 1247, _T("Effect Parameter Digit 0"));
-	DefineKeyCommand(kcSetFXParam1, 1248, _T("Effect Parameter Digit 1"));
-	DefineKeyCommand(kcSetFXParam2, 1249, _T("Effect Parameter Digit 2"));
-	DefineKeyCommand(kcSetFXParam3, 1250, _T("Effect Parameter Digit 3"));
-	DefineKeyCommand(kcSetFXParam4, 1251, _T("Effect Parameter Digit 4"));
-	DefineKeyCommand(kcSetFXParam5, 1252, _T("Effect Parameter Digit 5"));
-	DefineKeyCommand(kcSetFXParam6, 1253, _T("Effect Parameter Digit 6"));
-	DefineKeyCommand(kcSetFXParam7, 1254, _T("Effect Parameter Digit 7"));
-	DefineKeyCommand(kcSetFXParam8, 1255, _T("Effect Parameter Digit 8"));
-	DefineKeyCommand(kcSetFXParam9, 1256, _T("Effect Parameter Digit 9"));
-	DefineKeyCommand(kcSetFXParamA, 1257, _T("Effect Parameter Digit A"));
-	DefineKeyCommand(kcSetFXParamB, 1258, _T("Effect Parameter Digit B"));
-	DefineKeyCommand(kcSetFXParamC, 1259, _T("Effect Parameter Digit C"));
-	DefineKeyCommand(kcSetFXParamD, 1260, _T("Effect Parameter Digit D"));
-	DefineKeyCommand(kcSetFXParamE, 1261, _T("Effect Parameter Digit E"));
-	DefineKeyCommand(kcSetFXParamF, 1262, _T("Effect Parameter Digit F"));
-	DefineKeyCommand(kcSetFXarp, 1263, _T("FX arpeggio"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXportUp, 1264, _T("FX portamentao Up"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXportDown, 1265, _T("FX portamentao Down"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXport, 1266, _T("FX portamentao"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXvibrato, 1267, _T("FX vibrato"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXportSlide, 1268, _T("FX portamento slide"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXvibSlide, 1269, _T("FX vibrato slide"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXtremolo, 1270, _T("FX tremolo"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXpan, 1271, _T("FX pan"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXoffset, 1272, _T("FX offset"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXvolSlide, 1273, _T("FX Volume slide"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXgotoOrd, 1274, _T("FX go to order"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXsetVol, 1275, _T("FX set volume"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXgotoRow, 1276, _T("FX go to row"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXretrig, 1277, _T("FX retrigger"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXspeed, 1278, _T("FX set speed"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXtempo, 1279, _T("FX set tempo"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXtremor, 1280, _T("FX tremor"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXextendedMOD, 1281, _T("FX extended MOD cmds"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXextendedS3M, 1282, _T("FX extended S3M cmds"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXchannelVol, 1283, _T("FX set channel vol"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXchannelVols, 1284, _T("FX channel vol slide"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXglobalVol, 1285, _T("FX set global volume"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXglobalVols, 1286, _T("FX global volume slide"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXkeyoff, 1287, _T("FX Some XM Command :D"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXfineVib, 1288, _T("FX fine vibrato"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXpanbrello, 1289, _T("FX set panbrello"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXextendedXM, 1290, _T("FX extended XM effects "), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXpanSlide, 1291, _T("FX pan slide"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXsetEnvPos, 1292, _T("FX set envelope position (XM only)"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXmacro, 1293, _T("FX MIDI Macro"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetFXmacroSlide, 1294, _T("Smooth MIDI Macro Slide"));
-	DefineKeyCommand(kcSetFXdelaycut, 1295, _T("Combined Note Delay and Note Cut"));
-	DefineKeyCommand(kcPatternJumpDownh1Select, 1296, _T("kcPatternJumpDownh1Select"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcPatternJumpUph1Select, 1297, _T("kcPatternJumpUph1Select"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcPatternSnapDownh1Select, 1298, _T("kcPatternSnapDownh1Select"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcPatternSnapUph1Select, 1299, _T("kcPatternSnapUph1Select"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcNavigateDownSelect, 1300, _T("kcNavigateDownSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcNavigateUpSelect, 1301, _T("kcNavigateUpSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcNavigateLeftSelect, 1302, _T("kcNavigateLeftSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcNavigateRightSelect, 1303, _T("kcNavigateRightSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcNavigateNextChanSelect, 1304, _T("kcNavigateNextChanSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcNavigatePrevChanSelect, 1305, _T("kcNavigatePrevChanSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcHomeHorizontalSelect, 1306, _T("kcHomeHorizontalSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcHomeVerticalSelect, 1307, _T("kcHomeVerticalSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcHomeAbsoluteSelect, 1308, _T("kcHomeAbsoluteSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcEndHorizontalSelect, 1309, _T("kcEndHorizontalSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcEndVerticalSelect, 1310, _T("kcEndVerticalSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcEndAbsoluteSelect, 1311, _T("kcEndAbsoluteSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSelectWithNav, 1312, _T("kcSelectWithNav"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSelectOffWithNav, 1313, _T("kcSelectOffWithNav"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcCopySelectWithNav, 1314, _T("kcCopySelectWithNav"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcCopySelectOffWithNav, 1315, _T("kcCopySelectOffWithNav"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcChordModifier, 1316, _T("Chord Modifier"), kcVisible, kcDummy);
-	DefineKeyCommand(kcSetSpacing, 1317, _T("Set edit step on note entry"), kcVisible, kcDummy);
-	DefineKeyCommand(kcSetSpacing0, 1318, _T(""), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetSpacing1, 1319, _T(""), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetSpacing2, 1320, _T(""), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetSpacing3, 1321, _T(""), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetSpacing4, 1322, _T(""), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetSpacing5, 1323, _T(""), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetSpacing6, 1324, _T(""), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetSpacing7, 1325, _T(""), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetSpacing8, 1326, _T(""), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSetSpacing9, 1327, _T(""), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcCopySelectWithSelect, 1328, _T("kcCopySelectWithSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcCopySelectOffWithSelect, 1329, _T("kcCopySelectOffWithSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSelectWithCopySelect, 1330, _T("kcSelectWithCopySelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcSelectOffWithCopySelect, 1331, _T("kcSelectOffWithCopySelect"), kcHidden, kcNoDummy);
-	/*
-	DefineKeyCommand(kcCopy, 1332, _T("Copy pattern data"));
-	DefineKeyCommand(kcCut, 1333, _T("Cut pattern data"));
-	DefineKeyCommand(kcPaste, 1334, _T("Paste pattern data"));
-	DefineKeyCommand(kcMixPaste, 1335, _T("Mix-paste pattern data"));
-	DefineKeyCommand(kcSelectAll, 1336, _T("Select all pattern data"));
-	DefineKeyCommand(kcSelectCol, 1337, _T("Select channel / select all"), kcHidden, kcNoDummy);
-	*/
-	DefineKeyCommand(kcPatternJumpDownh2, 1338, _T("Jump down by beat"));
-	DefineKeyCommand(kcPatternJumpUph2, 1339, _T("Jump up by beat"));
-	DefineKeyCommand(kcPatternSnapDownh2, 1340, _T("Snap down to beat"));
-	DefineKeyCommand(kcPatternSnapUph2, 1341, _T("Snap up to beat"));
-	DefineKeyCommand(kcPatternJumpDownh2Select, 1342, _T("kcPatternJumpDownh2Select"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcPatternJumpUph2Select, 1343, _T("kcPatternJumpUph2Select"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcPatternSnapDownh2Select, 1344, _T("kcPatternSnapDownh2Select"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcPatternSnapUph2Select, 1345, _T("kcPatternSnapUph2Select"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcFileOpen, 1346, _T("File/Open"));
-	DefineKeyCommand(kcFileNew, 1347, _T("File/New"));
-	DefineKeyCommand(kcFileClose, 1348, _T("File/Close"));
-	DefineKeyCommand(kcFileSave, 1349, _T("File/Save"));
-	DefineKeyCommand(kcFileSaveAs, 1350, _T("File/Save As"));
-	DefineKeyCommand(kcFileSaveAsWave, 1351, _T("File/Stream Export"));
-	DefineKeyCommand(kcFileSaveAsMP3, 1352, _T("File/Stream Export"), kcHidden);
-	DefineKeyCommand(kcFileSaveMidi, 1353, _T("File/Export as MIDI"));
-	DefineKeyCommand(kcFileImportMidiLib, 1354, _T("File/Import MIDI Library"));
-	DefineKeyCommand(kcFileAddSoundBank, 1355, _T("File/Add Sound Bank"));
-	DefineKeyCommand(kcEditUndo, 1359, _T("Undo"));
-	DefineKeyCommand(kcEditCut, 1360, _T("Cut"));
-	DefineKeyCommand(kcEditCopy, 1361, _T("Copy"));
-	DefineKeyCommand(kcEditPaste, 1362, _T("Paste"));
-	DefineKeyCommand(kcEditMixPaste, 1363, _T("Mix Paste"));
-	DefineKeyCommand(kcEditSelectAll, 1364, _T("Select All"));
-	DefineKeyCommand(kcEditFind, 1365, _T("Find / Replace"));
-	DefineKeyCommand(kcEditFindNext, 1366, _T("Find Next"));
-	DefineKeyCommand(kcViewMain, 1367, _T("Toggle Main Toolbar"));
-	DefineKeyCommand(kcViewTree, 1368, _T("Toggle Tree View"));
-	DefineKeyCommand(kcViewOptions, 1369, _T("View Options"));
-	DefineKeyCommand(kcHelp, 1370, _T("Help"));
-	/*
-	DefineKeyCommand(kcWindowNew, 1370, _T("New Window"));
-	DefineKeyCommand(kcWindowCascade, 1371, _T("Cascade Windows"));
-	DefineKeyCommand(kcWindowTileHorz, 1372, _T("Tile Windows Horizontally"));
-	DefineKeyCommand(kcWindowTileVert, 1373, _T("Tile Windows Vertically"));
-	*/
-	DefineKeyCommand(kcEstimateSongLength, 1374, _T("Estimate Song Length"));
-	DefineKeyCommand(kcStopSong, 1375, _T("Stop Song"));
-	DefineKeyCommand(kcMidiRecord, 1376, _T("Toggle MIDI Record"));
-	DefineKeyCommand(kcDeleteAllRows, 1377, _T("Delete all rows"));
-	DefineKeyCommand(kcInsertRow, 1378, _T("Insert Row"));
-	DefineKeyCommand(kcInsertAllRows, 1379, _T("Insert All Rows"));
-	DefineKeyCommand(kcSampleTrim, 1380, _T("Trim sample around loop points"));
-	DefineKeyCommand(kcSampleReverse, 1381, _T("Reverse Sample"));
-	DefineKeyCommand(kcSampleDelete, 1382, _T("Delete Sample Selection"));
-	DefineKeyCommand(kcSampleSilence, 1383, _T("Silence Sample Selection"));
-	DefineKeyCommand(kcSampleNormalize, 1384, _T("Normalize Sample"));
-	DefineKeyCommand(kcSampleAmplify, 1385, _T("Amplify Sample"));
-	DefineKeyCommand(kcSampleZoomUp, 1386, _T("Zoom In"));
-	DefineKeyCommand(kcSampleZoomDown, 1387, _T("Zoom Out"));
-	DefineKeyCommand(kcPatternGrowSelection, 1660, _T("Grow selection"));
-	DefineKeyCommand(kcPatternShrinkSelection, 1661, _T("Shrink selection"));
-	DefineKeyCommand(kcTogglePluginEditor, 1662, _T("Toggle channel's plugin editor"));
-	DefineKeyCommand(kcToggleFollowSong, 1663, _T("Toggle follow song"));
-	DefineKeyCommand(kcClearFieldITStyle, 1664, _T("Clear field (IT Style)"));
-	DefineKeyCommand(kcClearFieldStepITStyle, 1665, _T("Clear field and step (IT Style)"));
-	DefineKeyCommand(kcSetFXextension, 1666, _T("Parameter Extension Command"));
-	DefineKeyCommand(kcNoteCutOld, 1667, _T("Note Cut"), kcHidden);	// Legacy
-	DefineKeyCommand(kcNoteOffOld, 1668, _T("Note Off"), kcHidden);	// Legacy
-	DefineKeyCommand(kcViewAddPlugin, 1669, _T("View Plugin Manager"));
-	DefineKeyCommand(kcViewChannelManager, 1670, _T("View Channel Manager"));
-	DefineKeyCommand(kcCopyAndLoseSelection, 1671, _T("Copy and lose selection"));
-	DefineKeyCommand(kcNewPattern, 1672, _T("Insert new pattern"));
-	DefineKeyCommand(kcSampleLoad, 1673, _T("Load Sample"));
-	DefineKeyCommand(kcSampleSave, 1674, _T("Save Sample"));
-	DefineKeyCommand(kcSampleNew, 1675, _T("New Sample"));
-	//DefineKeyCommand(kcSampleCtrlLoad, 1676, _T("Load Sample"), kcHidden);
-	//DefineKeyCommand(kcSampleCtrlSave, 1677, _T("Save Sample"), kcHidden);
-	//DefineKeyCommand(kcSampleCtrlNew, 1678, _T("New Sample"), kcHidden);
-	DefineKeyCommand(kcInstrumentLoad, 1679, _T("Load Instrument"), kcHidden);
-	DefineKeyCommand(kcInstrumentSave, 1680, _T("Save Instrument"), kcHidden);
-	DefineKeyCommand(kcInstrumentNew, 1681, _T("New Instrument"), kcHidden);
-	DefineKeyCommand(kcInstrumentCtrlLoad, 1682, _T("Load Instrument"), kcHidden);
-	DefineKeyCommand(kcInstrumentCtrlSave, 1683, _T("Save Instrument"), kcHidden);
-	DefineKeyCommand(kcInstrumentCtrlNew, 1684, _T("New Instrument"), kcHidden);
-	DefineKeyCommand(kcSwitchToOrderList, 1685, _T("Switch to Order List"));
-	DefineKeyCommand(kcEditMixPasteITStyle, 1686, _T("Mix Paste (old IT Style)"));
-	DefineKeyCommand(kcApproxRealBPM, 1687, _T("Show approx. real BPM"));
-	DefineKeyCommand(kcNavigateDownBySpacingSelect, 1689, _T("kcNavigateDownBySpacingSelect"), kcHidden);
-	DefineKeyCommand(kcNavigateUpBySpacingSelect, 1690, _T("kcNavigateUpBySpacingSelect"), kcHidden);
-	DefineKeyCommand(kcNavigateDownBySpacing, 1691, _T("Navigate down by spacing"));
-	DefineKeyCommand(kcNavigateUpBySpacing, 1692, _T("Navigate up by spacing"));
-	DefineKeyCommand(kcPrevDocument, 1693, _T("Previous Document"));
-	DefineKeyCommand(kcNextDocument, 1694, _T("Next Document"));
-	DefineKeyCommand(kcVSTGUIPrevPreset, 1763, _T("Previous Plugin Preset"));
-	DefineKeyCommand(kcVSTGUINextPreset, 1764, _T("Next Plugin Preset"));
-	DefineKeyCommand(kcVSTGUIRandParams, 1765, _T("Randomize Plugin Parameters"));
-	DefineKeyCommand(kcPatternGoto, 1766, _T("Go to row/channel/..."));
-	DefineKeyCommand(kcPatternOpenRandomizer, 1767, _T("Pattern Randomizer"), kcHidden, kcNoDummy); // while there's not randomizer yet, let's just disable it for now
-	DefineKeyCommand(kcPatternInterpolateNote, 1768, _T("Interpolate Note"));
-	//rewbs.graph
-	DefineKeyCommand(kcViewGraph, 1769, _T("View Graph"), kcHidden, kcNoDummy);  // while there's no graph yet, let's just disable it for now
-	//end rewbs.graph
-	DefineKeyCommand(kcToggleChanMuteOnPatTransition, 1770, _T("(Un)mute channel on pattern transition"));
-	DefineKeyCommand(kcChannelUnmuteAll, 1771, _T("Unmute all channels"));
-	DefineKeyCommand(kcShowPatternProperties, 1772, _T("Show Pattern Properties"));
-	DefineKeyCommand(kcShowMacroConfig, 1773, _T("View Zxx Macro Configuration"));
-	DefineKeyCommand(kcViewSongProperties, 1775, _T("View Song Properties"));
-	DefineKeyCommand(kcChangeLoopStatus, 1776, _T("Toggle Loop Pattern"));
-	DefineKeyCommand(kcFileExportCompat, 1777, _T("File/Compatibility Export"));
-	DefineKeyCommand(kcUnmuteAllChnOnPatTransition, 1778, _T("Unmute all channels on pattern transition"));
-	DefineKeyCommand(kcSoloChnOnPatTransition, 1779, _T("Solo channel on pattern transition"));
-	DefineKeyCommand(kcTimeAtRow, 1780, _T("Show playback time at current row"));
-	DefineKeyCommand(kcViewMIDImapping, 1781, _T("View MIDI Mapping"));
-	DefineKeyCommand(kcVSTGUIPrevPresetJump, 1782, _T("Plugin preset backward jump"));
-	DefineKeyCommand(kcVSTGUINextPresetJump, 1783, _T("Plugin preset forward jump"));
-	DefineKeyCommand(kcSampleInvert, 1784, _T("Invert Sample Phase"));
-	DefineKeyCommand(kcSampleSignUnsign, 1785, _T("Signed / Unsigned Conversion"));
-	DefineKeyCommand(kcChannelReset, 1786, _T("Reset Channel"));
-	DefineKeyCommand(kcToggleOverflowPaste, 1787, _T("Toggle overflow paste"));
-	DefineKeyCommand(kcNotePC, 1788, _T("Parameter Control"));
-	DefineKeyCommand(kcNotePCS, 1789, _T("Parameter Control (smooth)"));
-	DefineKeyCommand(kcSampleRemoveDCOffset, 1790, _T("Remove DC Offset"));
-	DefineKeyCommand(kcNoteFade, 1791, _T("Note Fade"));
-	DefineKeyCommand(kcNoteFadeOld, 1792, _T("Note Fade"), kcHidden);	// Legacy
-	DefineKeyCommand(kcEditPasteFlood, 1793, _T("Paste Flood"));
-	DefineKeyCommand(kcOrderlistNavigateLeft, 1794, _T("Previous Order"));
-	DefineKeyCommand(kcOrderlistNavigateRight, 1795, _T("Next Order"));
-	DefineKeyCommand(kcOrderlistNavigateFirst, 1796, _T("First Order"));
-	DefineKeyCommand(kcOrderlistNavigateLast, 1797, _T("Last Order"));
-	DefineKeyCommand(kcOrderlistNavigateLeftSelect, 1798, _T("kcOrderlistNavigateLeftSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcOrderlistNavigateRightSelect, 1799, _T("kcOrderlistNavigateRightSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcOrderlistNavigateFirstSelect, 1800, _T("kcOrderlistNavigateFirstSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcOrderlistNavigateLastSelect, 1801, _T("kcOrderlistNavigateLastSelect"), kcHidden, kcNoDummy);
-	DefineKeyCommand(kcOrderlistEditDelete, 1802, _T("Delete Order"));
-	DefineKeyCommand(kcOrderlistEditInsert, 1803, _T("Insert Order"));
-	DefineKeyCommand(kcOrderlistEditPattern, 1804, _T("Edit Pattern"));
-	DefineKeyCommand(kcOrderlistSwitchToPatternView, 1805, _T("Switch to pattern editor"));
-	DefineKeyCommand(kcDuplicatePattern, 1806, _T("Duplicate Pattern"));
-	DefineKeyCommand(kcOrderlistPat0, 1807, _T("Pattern index digit 0"));
-	DefineKeyCommand(kcOrderlistPat1, 1808, _T("Pattern index digit 1"));
-	DefineKeyCommand(kcOrderlistPat2, 1809, _T("Pattern index digit 2"));
-	DefineKeyCommand(kcOrderlistPat3, 1810, _T("Pattern index digit 3"));
-	DefineKeyCommand(kcOrderlistPat4, 1811, _T("Pattern index digit 4"));
-	DefineKeyCommand(kcOrderlistPat5, 1812, _T("Pattern index digit 5"));
-	DefineKeyCommand(kcOrderlistPat6, 1813, _T("Pattern index digit 6"));
-	DefineKeyCommand(kcOrderlistPat7, 1814, _T("Pattern index digit 7"));
-	DefineKeyCommand(kcOrderlistPat8, 1815, _T("Pattern index digit 8"));
-	DefineKeyCommand(kcOrderlistPat9, 1816, _T("Pattern index digit 9"));
-	DefineKeyCommand(kcOrderlistPatPlus, 1817, _T("Increase pattern index "));
-	DefineKeyCommand(kcOrderlistPatMinus, 1818, _T("Decrease pattern index"));
-	DefineKeyCommand(kcShowSplitKeyboardSettings, 1819, _T("Split Keyboard Settings dialog"));
-	DefineKeyCommand(kcEditPushForwardPaste, 1820, _T("Push Forward Paste (Insert)"));
-	DefineKeyCommand(kcInstrumentEnvelopePointMoveLeft, 1821, _T("Move envelope point left"));
-	DefineKeyCommand(kcInstrumentEnvelopePointMoveRight, 1822, _T("Move envelope point right"));
-	DefineKeyCommand(kcInstrumentEnvelopePointMoveUp, 1823, _T("Move envelope point up"));
-	DefineKeyCommand(kcInstrumentEnvelopePointMoveDown, 1824, _T("Move envelope point down"));
-	DefineKeyCommand(kcInstrumentEnvelopePointPrev, 1825, _T("Select previous envelope point"));
-	DefineKeyCommand(kcInstrumentEnvelopePointNext, 1826, _T("Select next envelope point"));
-	DefineKeyCommand(kcInstrumentEnvelopePointInsert, 1827, _T("Insert Envelope Point"));
-	DefineKeyCommand(kcInstrumentEnvelopePointRemove, 1828, _T("Remove Envelope Point"));
-	DefineKeyCommand(kcInstrumentEnvelopeSetLoopStart, 1829, _T("Set Loop Start"));
-	DefineKeyCommand(kcInstrumentEnvelopeSetLoopEnd, 1830, _T("Set Loop End"));
-	DefineKeyCommand(kcInstrumentEnvelopeSetSustainLoopStart, 1831, _T("Set sustain loop start"));
-	DefineKeyCommand(kcInstrumentEnvelopeSetSustainLoopEnd, 1832, _T("Set sustain loop end"));
-	DefineKeyCommand(kcInstrumentEnvelopeToggleReleaseNode, 1833, _T("Toggle release node"));
-	DefineKeyCommand(kcInstrumentEnvelopePointMoveUp8, 1834, _T("Move envelope point up (Coarse)"));
-	DefineKeyCommand(kcInstrumentEnvelopePointMoveDown8, 1835, _T("Move envelope point down (Coarse)"));
-	DefineKeyCommand(kcPatternEditPCNotePlugin, 1836, _T("Toggle PC Event/instrument plugin editor"));
-	DefineKeyCommand(kcInstrumentEnvelopeZoomIn, 1837, _T("Zoom In"));
-	DefineKeyCommand(kcInstrumentEnvelopeZoomOut, 1838, _T("Zoom Out"));
-	DefineKeyCommand(kcVSTGUIToggleRecordParams, 1839, _T("Toggle Parameter Recording"));
-	DefineKeyCommand(kcVSTGUIToggleSendKeysToPlug, 1840, _T("Pass Key Presses to Plugin"));
-	DefineKeyCommand(kcVSTGUIBypassPlug, 1841, _T("Bypass Plugin"));
-	DefineKeyCommand(kcInsNoteMapTransposeDown, 1842, _T("Transpose -1 (Note Map)"));
-	DefineKeyCommand(kcInsNoteMapTransposeUp, 1843, _T("Transpose +1 (Note Map)"));
-	DefineKeyCommand(kcInsNoteMapTransposeOctDown, 1844, _T("Transpose -1 Octave (Note Map)"));
-	DefineKeyCommand(kcInsNoteMapTransposeOctUp, 1845, _T("Transpose +1 Octave (Note Map)"));
-	DefineKeyCommand(kcInsNoteMapCopyCurrentNote, 1846, _T("Map all notes to selected note"));
-	DefineKeyCommand(kcInsNoteMapCopyCurrentSample, 1847, _T("Map all notes to selected sample"));
-	DefineKeyCommand(kcInsNoteMapReset, 1848, _T("Reset Note Mapping"));
-	DefineKeyCommand(kcInsNoteMapEditSample, 1849, _T("Edit Current Sample"));
-	DefineKeyCommand(kcInsNoteMapEditSampleMap, 1850, _T("Edit Sample Map"));
-	DefineKeyCommand(kcInstrumentCtrlDuplicate, 1851, _T("Duplicate Instrument"));
-	DefineKeyCommand(kcPanic, 1852, _T("Panic"));
-	DefineKeyCommand(kcOrderlistPatIgnore, 1853, _T("Separator (+++) Index"));
-	DefineKeyCommand(kcOrderlistPatInvalid, 1854, _T("Stop (---) Index"));
-	DefineKeyCommand(kcViewEditHistory, 1855, _T("View Edit History"));
-	DefineKeyCommand(kcSampleQuickFade, 1856, _T("Quick Fade"));
-	DefineKeyCommand(kcSampleXFade, 1857, _T("Crossfade Sample Loop"));
-	DefineKeyCommand(kcSelectBeat, 1858, _T("Select Beat"));
-	DefineKeyCommand(kcSelectMeasure, 1859, _T("Select Measure"));
-	DefineKeyCommand(kcFileSaveTemplate, 1860, _T("File/Save As Template"));
-	DefineKeyCommand(kcIncreaseSpacing, 1861, _T("Increase Edit Step"));
-	DefineKeyCommand(kcDecreaseSpacing, 1862, _T("Decrease Edit Step"));
-	DefineKeyCommand(kcSampleAutotune, 1863, _T("Tune Sample to given Note"));
-	DefineKeyCommand(kcFileCloseAll, 1864, _T("File/Close All"));
-	DefineKeyCommand(kcSetOctaveStop0, 1865, _T(""), kcHidden);
-	DefineKeyCommand(kcSetOctaveStop1, 1866, _T(""), kcHidden);
-	DefineKeyCommand(kcSetOctaveStop2, 1867, _T(""), kcHidden);
-	DefineKeyCommand(kcSetOctaveStop3, 1868, _T(""), kcHidden);
-	DefineKeyCommand(kcSetOctaveStop4, 1869, _T(""), kcHidden);
-	DefineKeyCommand(kcSetOctaveStop5, 1870, _T(""), kcHidden);
-	DefineKeyCommand(kcSetOctaveStop6, 1871, _T(""), kcHidden);
-	DefineKeyCommand(kcSetOctaveStop7, 1872, _T(""), kcHidden);
-	DefineKeyCommand(kcSetOctaveStop8, 1873, _T(""), kcHidden);
-	DefineKeyCommand(kcSetOctaveStop9, 1874, _T(""), kcHidden);
-	DefineKeyCommand(kcOrderlistLockPlayback, 1875, _T("Lock Playback to Selection"));
-	DefineKeyCommand(kcOrderlistUnlockPlayback, 1876, _T("Unlock Playback"));
-	DefineKeyCommand(kcChannelSettings, 1877, _T("Quick Channel Settings"));
-	DefineKeyCommand(kcChnSettingsPrev, 1878, _T("Previous Channel"));
-	DefineKeyCommand(kcChnSettingsNext, 1879, _T("Next Channel"));
-	DefineKeyCommand(kcChnSettingsClose, 1880, _T("Switch to Pattern Editor"));
-	DefineKeyCommand(kcTransposeCustom, 1881, _T("Transpose Custom"));
-	DefineKeyCommand(kcSampleZoomSelection, 1882, _T("Zoom into Selection"));
-	DefineKeyCommand(kcChannelRecordSelect, 1883, _T("Channel Record Select"));
-	DefineKeyCommand(kcChannelSplitRecordSelect, 1884, _T("Channel Split Record Select"));
-	DefineKeyCommand(kcDataEntryUp, 1885, _T("Data Entry +1"));
-	DefineKeyCommand(kcDataEntryDown, 1886, _T("Data Entry -1"));
-	DefineKeyCommand(kcSample8Bit, 1887, _T("Convert to 8-bit / 16-bit"));
-	DefineKeyCommand(kcSampleMonoMix, 1888, _T("Convert to Mono (Mix)"));
-	DefineKeyCommand(kcSampleMonoLeft, 1889, _T("Convert to Mono (Left Channel)"));
-	DefineKeyCommand(kcSampleMonoRight, 1890, _T("Convert to Mono (Right Channel)"));
-	DefineKeyCommand(kcSampleMonoSplit, 1891, _T("Convert to Mono (Split Sample)"));
-	DefineKeyCommand(kcQuantizeSettings, 1892, _T("Quantize Settings"));
-	DefineKeyCommand(kcDataEntryUpCoarse, 1893, _T("Data Entry Up (Coarse)"));
-	DefineKeyCommand(kcDataEntryDownCoarse, 1894, _T("Data Entry Down (Coarse)"));
-	DefineKeyCommand(kcToggleNoteOffRecordPC, 1895, _T("Toggle Note Off record (PC keyboard)"));
-	DefineKeyCommand(kcToggleNoteOffRecordMIDI, 1896, _T("Toggle Note Off record (MIDI)"));
-	DefineKeyCommand(kcFindInstrument, 1897, _T("Pick up nearest instrument number"));
-	DefineKeyCommand(kcPlaySongFromPattern, 1898, _T("Play Song from Pattern Start"));
-	DefineKeyCommand(kcVSTGUIToggleRecordMIDIOut, 1899, _T("Record MIDI Out to Pattern Editor"));
-	DefineKeyCommand(kcToggleClipboardManager, 1900, _T("Toggle Clipboard Manager"));
-	DefineKeyCommand(kcClipboardPrev, 1901, _T("Cycle to Previous Clipboard"));
-	DefineKeyCommand(kcClipboardNext, 1902, _T("Cycle to Next Clipboard"));
-	DefineKeyCommand(kcSelectRow, 1903, _T("Select Row"));
-	DefineKeyCommand(kcSelectEvent, 1904, _T("Select Event"));
-	DefineKeyCommand(kcEditRedo, 1905, _T("Redo"));
-	DefineKeyCommand(kcFileAppend, 1906, _T("File/Append Module"));
-	DefineKeyCommand(kcSampleTransposeUp, 1907, _T("Transpose +1"));
-	DefineKeyCommand(kcSampleTransposeDown, 1908, _T("Transpose -1"));
-	DefineKeyCommand(kcSampleTransposeOctUp, 1909, _T("Transpose +1 Octave"));
-	DefineKeyCommand(kcSampleTransposeOctDown, 1910, _T("Transpose -1 Octave"));
-	DefineKeyCommand(kcPatternInterpolateInstr, 1911, _T("Interpolate Instrument"));
-	DefineKeyCommand(kcDummyShortcut, 1912, _T("Dummy Shortcut"));
-	DefineKeyCommand(kcSampleUpsample, 1913, _T("Upsample"));
-	DefineKeyCommand(kcSampleDownsample, 1914, _T("Downsample"));
-	DefineKeyCommand(kcSampleResample, 1915, _T("Resample"));
-	DefineKeyCommand(kcSampleCenterLoopStart, 1916, _T("Center loop start in view"));
-	DefineKeyCommand(kcSampleCenterLoopEnd, 1917, _T("Center loop end in view"));
-	DefineKeyCommand(kcSampleCenterSustainStart, 1918, _T("Center sustain loop start in view"));
-	DefineKeyCommand(kcSampleCenterSustainEnd, 1919, _T("Center sustain loop end in view"));
-	DefineKeyCommand(kcInstrumentEnvelopeLoad, 1920, _T("Load Envelope"));
-	DefineKeyCommand(kcInstrumentEnvelopeSave, 1921, _T("Save Envelope"));
-	DefineKeyCommand(kcChannelTranspose, 1922, _T("Transpose Channel"));
-	DefineKeyCommand(kcChannelDuplicate, 1923, _T("Duplicate Channel"));
 	for(int j = kcStartSampleCues; j <= kcEndSampleCues; j++)
 	{
 		CString s = mpt::cformat(_T("Preview Sample Cue %1"))(j - kcStartSampleCues + 1);
-		DefineKeyCommand((CommandID)j, 1924 + j - kcStartSampleCues, s);
+		m_commands[j].Define(1924 + j - kcStartSampleCues, s);
 	}
-	// Safety margin if we want to add more cues
-	DefineKeyCommand(kcOrderlistEditCopyOrders, 1950, _T("Copy Orders"));
-	DefineKeyCommand(kcTreeViewStopPreview, 1951, _T("Stop sample preview"), kcHidden);
-	DefineKeyCommand(kcSampleDuplicate, 1952, _T("Duplicate Sample"));
-	DefineKeyCommand(kcSampleSlice, 1953, _T("Slice at cue points"));
-	DefineKeyCommand(kcInstrumentEnvelopeScale, 1954, _T("Scale Envelope Points"));
-	DefineKeyCommand(kcInsNoteMapRemove, 1955, _T("Remove All Samples"));
-	DefineKeyCommand(kcInstrumentEnvelopeSelectLoopStart, 1956, _T("Select Envelope Loop Start"));
-	DefineKeyCommand(kcInstrumentEnvelopeSelectLoopEnd, 1957, _T("Select Envelope Loop End"));
-	DefineKeyCommand(kcInstrumentEnvelopeSelectSustainStart, 1958, _T("Select Envelope Sustain Start"));
-	DefineKeyCommand(kcInstrumentEnvelopeSelectSustainEnd, 1959, _T("Select Envelope Sustain End"));
-	DefineKeyCommand(kcInstrumentEnvelopePointMoveLeftCoarse, 1960, _T("Move envelope point left (Coarse)"));
-	DefineKeyCommand(kcInstrumentEnvelopePointMoveRightCoarse, 1961, _T("Move envelope point right (Coarse)"));
-	DefineKeyCommand(kcSampleCenterSampleStart, 1962, _T("Zoom into sample start"));
-	DefineKeyCommand(kcSampleCenterSampleEnd, 1963, _T("Zoom into sample end"));
-	DefineKeyCommand(kcSampleTrimToLoopEnd, 1964, _T("Trim to loop end"));
-	DefineKeyCommand(kcLockPlaybackToRows, 1965, _T("Lock Playback to Rows"));
-	DefineKeyCommand(kcSwitchToInstrLibrary, 1966, _T("Switch To Instrument Library"));
-	DefineKeyCommand(kcPatternSetInstrumentNotEmpty, 1967, _T("Apply current instrument to existing only"));
-	DefineKeyCommand(kcSelectColumn, 1968, _T("Select Column"));
-	DefineKeyCommand(kcSampleStereoSep, 1969, _T("Change Stereo Separation"));
-	DefineKeyCommand(kcTransposeCustomQuick, 1970, _T("Transpose Custom (Quick)"));
-	DefineKeyCommand(kcPrevEntryInColumn, 1971, _T("Jump to previous entry in column"));
-	DefineKeyCommand(kcNextEntryInColumn, 1972, _T("Jump to next entry in column"));
-	DefineKeyCommand(kcViewTempoSwing, 1973, _T("View Global Tempo Swing Settings"));
-	DefineKeyCommand(kcChordEditor, 1974, _T("Show Chord Editor"));
-	DefineKeyCommand(kcToggleLoopSong, 1975, _T("Toggle Loop Song"));
-	DefineKeyCommand(kcInstrumentEnvelopeSwitchToVolume, 1976, _T("Switch to Volume Envelope"));
-	DefineKeyCommand(kcInstrumentEnvelopeSwitchToPanning, 1977, _T("Switch to Panning Envelope"));
-	DefineKeyCommand(kcInstrumentEnvelopeSwitchToPitch, 1978, _T("Switch to Pitch / Filter Envelope"));
-	DefineKeyCommand(kcInstrumentEnvelopeToggleVolume, 1979, _T("Toggle Volume Envelope"));
-	DefineKeyCommand(kcInstrumentEnvelopeTogglePanning, 1980, _T("Toggle Panning Envelope"));
-	DefineKeyCommand(kcInstrumentEnvelopeTogglePitch, 1981, _T("Toggle Pitch Envelope"));
-	DefineKeyCommand(kcInstrumentEnvelopeToggleFilter, 1982, _T("Toggle Filter Envelope"));
-	DefineKeyCommand(kcInstrumentEnvelopeToggleLoop, 1983, _T("Toggle Envelope Loop"));
-	DefineKeyCommand(kcInstrumentEnvelopeToggleSustain, 1984, _T("Toggle Envelope Sustain Loop"));
-	DefineKeyCommand(kcInstrumentEnvelopeToggleCarry, 1985, _T("Toggle Envelope Carry"));
-	DefineKeyCommand(kcSampleInitializeOPL, 1986, _T("Initialize OPL Instrument"));
-	DefineKeyCommand(kcFileSaveCopy, 1987, _T("File/Save Copy"));
-	DefineKeyCommand(kcMergePatterns, 1988, _T("Merge Patterns"));
-	DefineKeyCommand(kcSplitPattern, 1989, _T("Split Pattern"));
-	DefineKeyCommand(kcSampleToggleDrawing, 1990, _T("Toggle Sample Drawing"));
-	DefineKeyCommand(kcSampleResize, 1991, _T("Add Silence / Create Sample"));
-	DefineKeyCommand(kcSampleGrid, 1992, _T("Configure Sample Grid"));
-	DefineKeyCommand(kcLoseSelection, 1993, _T("Lose Selection"));
-	DefineKeyCommand(kcCutPatternChannel, 1994, _T("Cut to Pattern Channel Clipboard"));
-	DefineKeyCommand(kcCutPattern, 1995, _T("Cut to Pattern Clipboard"));
-	DefineKeyCommand(kcCopyPatternChannel, 1996, _T("Copy to Pattern Channel Clipboard"));
-	DefineKeyCommand(kcCopyPattern, 1997, _T("Copy to Pattern Clipboard"));
-	DefineKeyCommand(kcPastePatternChannel, 1998, _T("Paste from Pattern Channel Clipboard"));
-	DefineKeyCommand(kcPastePattern, 1999, _T("Paste from Pattern Clipboard"));
-
-	// Add new key commands before this line.
+	static_assert(1924 + kcEndSampleCues - kcStartSampleCues < 1950);
 
 	// Automatically generated note entry keys in non-pattern contexts
-	int noteEntryID = 1000000000;
 	for(const auto ctx : NoteContexts)
 	{
 		const auto contextStartNotes = std::get<1>(ctx);
@@ -745,25 +749,25 @@ void CCommandSet::SetupCommands()
 
 		for(int i = kcVPStartNotes; i <= kcVPEndNotes; i++)
 		{
-			DefineKeyCommand(static_cast<CommandID>(i - kcVPStartNotes + contextStartNotes), noteEntryID++, m_commands[i].Message, kcHidden, kcNoDummy);
+			m_commands[i - kcVPStartNotes + contextStartNotes].Define(KeyCommand::Hidden, m_commands[i].Message);
 		}
 		for(int i = kcVPStartNoteStops; i <= kcVPEndNoteStops; i++)
 		{
-			DefineKeyCommand(static_cast<CommandID>(i - kcVPStartNoteStops + contextStopNotes), noteEntryID++, m_commands[i].Message, kcHidden, kcNoDummy);
+			m_commands[i - kcVPStartNoteStops + contextStopNotes].Define(KeyCommand::Hidden, m_commands[i].Message);
 		}
 	}
 
 #ifdef _DEBUG
 	for(size_t i = 0; i < kcNumCommands; i++)
 	{
-		if(m_commands[i].UID != 0)	// ignore unset UIDs
+		if(m_commands[i].ID() != 0)  // ignore unset UIDs
 		{
 			for(size_t j = i + 1; j < kcNumCommands; j++)
 			{
-				if(m_commands[i].UID == m_commands[j].UID)
+				if(m_commands[i].ID() == m_commands[j].ID())
 				{
-					LOG_COMMANDSET(mpt::format(U_("Duplicate command UID: %1\n"))(m_commands[i].UID));
-					ASSERT(false);
+					LOG_COMMANDSET(mpt::format(U_("Duplicate command UID: %1\n"))(m_commands[i].ID()));
+					MPT_ASSERT_NOTREACHED();
 				}
 			}
 		}
@@ -819,8 +823,8 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 
 std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination kc, CommandID cmd, bool checkEventConflict) const
 {
-	if(IsDummyCommand(cmd))	// no need to search if we are adding a dummy key
-		return std::make_pair(kcNull, KeyCombination());
+	if(m_commands[cmd].IsDummy())  // no need to search if we are adding a dummy key
+		return {kcNull, KeyCombination()};
 	
 	for(int pass = 0; pass < 2; pass++)
 	{
@@ -828,7 +832,7 @@ std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination k
 		// such conflicts are errors. Cross-context conflicts only emit warnings.
 		for(int curCmd = 0; curCmd < kcNumCommands; curCmd++)
 		{
-			if(IsDummyCommand((CommandID)curCmd))
+			if(m_commands[curCmd].IsDummy())
 				continue;
 
 			for(auto &curKc : m_commands[curCmd].kcList)
@@ -838,21 +842,13 @@ std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination k
 
 				if(KeyCombinationConflict(curKc, kc, checkEventConflict))
 				{
-					return std::make_pair((CommandID)curCmd, curKc);
+					return {(CommandID)curCmd, curKc};
 				}
 			}
 		}
 	}
 
 	return std::make_pair(kcNull, KeyCombination());
-}
-
-
-bool CCommandSet::IsDummyCommand(CommandID cmd) const
-{
-	// e.g. Chord modifier is a dummy command, which serves only to automatically
-	// generate a set of keycombinations for chords (I'm not proud of this design).
-	return m_commands[cmd].isDummy;
 }
 
 
@@ -1382,15 +1378,6 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 
 	}
 
-	// Legacy: Note off commands with and without instrument numbers are now the same.
-	m_commands[kcNoteCut].kcList.insert(m_commands[kcNoteCut].kcList.end(), m_commands[kcNoteCutOld].kcList.begin(), m_commands[kcNoteCutOld].kcList.end());
-	m_commands[kcNoteCutOld].kcList.clear();
-	m_commands[kcNoteOff].kcList.insert(m_commands[kcNoteOff].kcList.end(), m_commands[kcNoteOffOld].kcList.begin(), m_commands[kcNoteOffOld].kcList.end());
-	m_commands[kcNoteOffOld].kcList.clear();
-	m_commands[kcNoteFade].kcList.insert(m_commands[kcNoteFade].kcList.end(), m_commands[kcNoteFadeOld].kcList.begin(), m_commands[kcNoteFadeOld].kcList.end());
-	m_commands[kcNoteFadeOld].kcList.clear();
-
-
 /*	if (enforceRule[krFoldEffectColumnAnd])
 	{
 		if (inKc.ctx == kCtxViewPatternsFX) {
@@ -1431,7 +1418,7 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 	// Copy commandlist content into map:
 	for(UINT cmd = 0; cmd < kcNumCommands; cmd++)
 	{
-		if(IsDummyCommand((CommandID)cmd))
+		if(m_commands[cmd].IsDummy())
 			continue;
 
 		for(auto curKc : m_commands[cmd].kcList)
@@ -1517,41 +1504,38 @@ ctx:UID:Description:Modifier:Key:EventMask
 	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
 	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
 
-	for (int ctx = 0; ctx < kCtxMaxInputContexts; ctx++)
+	for(int ctx = 0; ctx < kCtxMaxInputContexts; ctx++)
 	{
 		f << "\n//----( " << mpt::ToCharset(mpt::Charset::UTF8, KeyCombination::GetContextText((InputTargetContext)ctx)) << " )------------\n";
 
-		for (int cmd=0; cmd<kcNumCommands; cmd++)
+		for(int cmd = kcFirst; cmd < kcNumCommands; cmd++)
 		{
-			for (int k=0; k<GetKeyListSize((CommandID)cmd); k++)
+			if(m_commands[cmd].IsHidden())
+				continue;
+
+			for(const auto kc : m_commands[cmd].kcList)
 			{
-				KeyCombination kc = GetKey((CommandID)cmd, k);
+				if(kc.Context() != ctx)
+					continue;  // Sort by context
 
-				if (kc.Context() != ctx)
-					continue;		//sort by context
-
-				if (!m_commands[cmd].isHidden)
+				f << ctx << ":"
+					<< m_commands[cmd].ID() << ":"
+					<< static_cast<int>(kc.Modifier().GetRaw()) << ":"
+					<< kc.KeyCode();
+				if(cmd >= kcVPStartNotes && cmd <= kcVPEndNotes)
 				{
-					f << ctx << ":"
-						<< m_commands[cmd].UID << ":"
-						<< static_cast<int>(kc.Modifier().GetRaw()) << ":"
-						<< kc.KeyCode();
-					if(cmd >= kcVPStartNotes && cmd <= kcVPEndNotes)
+					UINT sc = 0, vk = kc.KeyCode();
+					for(auto i = layouts.begin(); i != layouts.end() && sc == 0; i++)
 					{
-						UINT sc = 0, vk = kc.KeyCode();
-						for(auto i = layouts.begin(); i != layouts.end() && sc == 0; i++)
-						{
-							sc = MapVirtualKeyEx(vk, MAPVK_VK_TO_VSC, *i);
-						}
-						f << "/" << sc;
+						sc = MapVirtualKeyEx(vk, MAPVK_VK_TO_VSC, *i);
 					}
-					f << ":"
-						<< static_cast<int>(kc.EventType().GetRaw()) << "\t\t//"
-						<< mpt::ToCharset(mpt::Charset::UTF8, GetCommandText((CommandID)cmd)).c_str() << ": "
-						<< mpt::ToCharset(mpt::Charset::UTF8, kc.GetKeyText()).c_str() << " ("
-						<< mpt::ToCharset(mpt::Charset::UTF8, kc.GetKeyEventText()).c_str() << ")\n";
+					f << "/" << sc;
 				}
-
+				f << ":"
+					<< static_cast<int>(kc.EventType().GetRaw()) << "\t\t//"
+					<< mpt::ToCharset(mpt::Charset::UTF8, GetCommandText((CommandID)cmd)).c_str() << ": "
+					<< mpt::ToCharset(mpt::Charset::UTF8, kc.GetKeyText()).c_str() << " ("
+					<< mpt::ToCharset(mpt::Charset::UTF8, kc.GetKeyEventText()).c_str() << ")\n";
 			}
 		}
 	}
@@ -1567,15 +1551,14 @@ static std::string GetDefaultKeymap()
 }
 
 
-bool CCommandSet::LoadFile(std::istream& iStrm, const mpt::ustring &filenameDescription, CCommandSet *commandSet)
+bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription, CCommandSet *commandSet)
 {
 	KeyCombination kc;
-	CommandID cmd = kcNumCommands;
 	char s[1024];
 	std::string curLine;
 	std::vector<std::string> tokens;
 	int l = 0;
-	m_oldSpecs = nullptr;	// After clearing the key set, need to fix effect letters
+	m_oldSpecs = nullptr;  // After clearing the key set, need to fix effect letters
 
 	const bool fillExistingSet = commandSet != nullptr;
 
@@ -1596,12 +1579,15 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const mpt::ustring &filenameDesc
 
 		// Cut everything after a //, trim whitespace
 		auto pos = curLine.find("//");
-		if(pos != std::string::npos) curLine.resize(pos);
+		if(pos != std::string::npos)
+			curLine.resize(pos);
 		pos = curLine.find_first_not_of(whitespace);
-		if(pos == std::string::npos) continue;
+		if(pos == std::string::npos)
+			continue;
 		curLine.erase(0, pos);
 		pos = curLine.find_last_not_of(whitespace);
-		if(pos != std::string::npos) curLine.resize(pos + 1);
+		if(pos != std::string::npos)
+			curLine.resize(pos + 1);
 
 		if (curLine.empty())
 			continue;
@@ -1619,10 +1605,11 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const mpt::ustring &filenameDesc
 		}
 
 		// Format: ctx:UID:Description:Modifier:Key:EventMask
+		CommandID cmd = kcNumCommands;
 		if(tokens.size() >= 5)
 		{
 			kc.Context(static_cast<InputTargetContext>(ConvertStrTo<int>(tokens[0])));
-			cmd = FindCmd(ConvertStrTo<UINT>(tokens[1]));
+			cmd = FindCmd(ConvertStrTo<uint32>(tokens[1]));
 
 			// Modifier
 			kc.Modifier(static_cast<Modifiers>(ConvertStrTo<int>(tokens[2])));
@@ -1648,7 +1635,7 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const mpt::ustring &filenameDesc
 			// Event
 			kc.EventType(static_cast<KeyEventType>(ConvertStrTo<int>(tokens[4])));
 
-			if(fillExistingSet && pTempCS->GetKeyListSize(cmd) != 0)
+			if(fillExistingSet && cmd != kcNull && pTempCS->GetKeyListSize(cmd) != 0)
 			{
 				// Do not map shortcuts that already have custom keys assigned.
 				// In particular with default note keys, this can create awkward keymaps when loading
@@ -1657,19 +1644,16 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const mpt::ustring &filenameDesc
 			}
 		}
 
-		// Error checking (TODO):
+		// Error checking
 		if (cmd < 0 || cmd >= kcNumCommands || kc.Context() >= kCtxMaxInputContexts || tokens.size() < 4)
 		{
 			errorCount++;
 			if (errorCount < 10)
 			{
 				if(tokens.size() < 4)
-				{
 					errText.AppendFormat(_T("Line %d was not understood.\n"), l);
-				} else
-				{
+				else
 					errText.AppendFormat(_T("Line %d contained an unknown command.\n"), l);
-				}
 			} else if (errorCount == 10)
 			{
 				errText += _T("Too many errors detected, not reporting any more.\n");
@@ -1691,9 +1675,19 @@ bool CCommandSet::LoadFile(std::istream& iStrm, const mpt::ustring &filenameDesc
 		return true;
 	}
 
-	// Fix up old keymaps
-	m_commands[kcFileSaveAsWave].kcList.insert(m_commands[kcFileSaveAsWave].kcList.end(), m_commands[kcFileSaveAsMP3].kcList.begin(), m_commands[kcFileSaveAsMP3].kcList.end());
-	m_commands[kcFileSaveAsMP3].kcList.clear();
+	// Fix up old keymaps containing legacy commands that have been merged into other commands
+	static constexpr std::pair<CommandID, CommandID> MergeCommands[] =
+	{
+		{kcFileSaveAsMP3, kcFileSaveAsWave},
+		{kcNoteCutOld, kcNoteCut},
+		{kcNoteOffOld, kcNoteOff},
+		{kcNoteFadeOld, kcNoteFade},
+	};
+	for(const auto cmd : MergeCommands)
+	{
+		m_commands[cmd.second].kcList.insert(m_commands[cmd.second].kcList.end(), m_commands[cmd.first].kcList.begin(), m_commands[cmd.first].kcList.end());
+		m_commands[cmd.first].kcList.clear();
+	}
 
 	if(!errText.IsEmpty())
 	{
@@ -1729,14 +1723,13 @@ bool CCommandSet::LoadDefaultKeymap()
 }
 
 
-CommandID CCommandSet::FindCmd(UINT uid) const
+CommandID CCommandSet::FindCmd(uint32 uid) const
 {
-	for (int i=0; i<kcNumCommands; i++)
+	for(int i = 0; i < kcNumCommands; i++)
 	{
-		if (m_commands[i].UID == uid)
+		if(m_commands[i].ID() == uid)
 			return static_cast<CommandID>(i);
 	}
-
 	return kcNull;
 }
 

@@ -955,13 +955,29 @@ using KeyMapRange = std::pair<KeyMap::const_iterator, KeyMap::const_iterator>;
 
 //KeyMap
 
-struct CommandStruct
+struct KeyCommand
 {
+	static constexpr uint32 Dummy = 1u << 31;
+	static constexpr uint32 Hidden = 1u << 30;
+	static constexpr uint32 UIDMask = Hidden - 1u;
+
 	std::vector<KeyCombination> kcList;
 	CString Message;
-	UINT UID;
-	bool isDummy;
-	bool isHidden;
+
+protected:
+	uint32 UID;
+
+public:
+	void Define(uint32 uid, const TCHAR *message);
+
+	// Unique ID for on-disk keymap format.
+	// Note that hidden commands do not have a unique ID, because they are never written to keymap files.
+	uint32 ID() const noexcept { return UID & UIDMask; }
+	// e.g. Chord modifier is a dummy command, which serves only to automatically
+	// generate a set of key combinations for chords
+	bool IsDummy() const noexcept { return (UID & Dummy) != 0; }
+	// Hidden commands are not configurable by the user (e.g. derived from dummy commands or note entry keys duplicated into other contexts)
+	bool IsHidden() const noexcept { return (UID & Hidden) != 0; }
 };
 
 
@@ -984,36 +1000,21 @@ enum RuleID
 	kNumRules
 };
 
-// For defining key commands
-enum enmKcVisibility
-{
-	kcVisible,
-	kcHidden
-};
-
-enum enmKcDummy
-{
-	kcNoDummy,
-	kcDummy
-};
-
 struct CModSpecifications;
 
 class CCommandSet
 {
 protected:
 	//util
-	inline void DefineKeyCommand(CommandID kc, UINT uid, const TCHAR *message, enmKcVisibility visible = kcVisible, enmKcDummy dummy = kcNoDummy);
 	void SetupCommands();
 	void SetupContextHierarchy();
-	bool IsDummyCommand(CommandID cmd) const;
 	CString EnforceAll(KeyCombination kc, CommandID cmd, bool adding);
 
-	CommandID FindCmd(UINT uid) const;
+	CommandID FindCmd(uint32 uid) const;
 	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool checkEventConflict = true) const;
 
 	const CModSpecifications *m_oldSpecs = nullptr;
-	CommandStruct m_commands[kcNumCommands];
+	KeyCommand m_commands[kcNumCommands];
 	std::bitset<kCtxMaxInputContexts> m_isParentContext[kCtxMaxInputContexts];
 	std::bitset<kNumRules> m_enforceRule;
 
@@ -1034,7 +1035,7 @@ public:
 
 	// Communication
 	KeyCombination GetKey(CommandID cmd, UINT key) const { return m_commands[cmd].kcList[key]; }
-	bool isHidden(UINT c) const { return m_commands[c].isHidden; }
+	bool isHidden(UINT c) const { return m_commands[c].IsHidden(); }
 	int GetKeyListSize(CommandID cmd) const { return (int)m_commands[cmd].kcList.size(); }
 	CString GetCommandText(CommandID cmd) const { return m_commands[cmd].Message; }
 	CString GetKeyTextFromCommand(CommandID c, UINT key) const;
