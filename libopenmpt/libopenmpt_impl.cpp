@@ -1364,7 +1364,7 @@ std::vector<std::string> module_impl::get_subsong_names() const {
 	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
 	for ( const auto & subsong : subsongs ) {
-		retval.push_back( mod_string_to_utf8( m_sndFile->Order( static_cast<SEQUENCEINDEX>( subsong.sequence ) ).GetName() ) );
+		retval.push_back( mpt::ToCharset( mpt::Charset::UTF8, m_sndFile->Order( static_cast<SEQUENCEINDEX>( subsong.sequence ) ).GetName() ) );
 	}
 	return retval;
 }
