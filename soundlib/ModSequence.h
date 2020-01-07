@@ -26,9 +26,9 @@ class ModSequence: public std::vector<PATTERNINDEX>
 	friend class ModSequenceSet;
 
 protected:
-	std::string m_name;			// Sequence name.
-	CSoundFile &m_sndFile;		// Associated CSoundFile.
-	ORDERINDEX m_restartPos;	// Restart position when playback of this order ended
+	mpt::ustring m_name;      // Sequence name.
+	CSoundFile &m_sndFile;    // Associated CSoundFile.
+	ORDERINDEX m_restartPos;  // Restart position when playback of this order ended
 
 public:
 	ModSequence(CSoundFile &sndFile);
@@ -113,8 +113,8 @@ public:
 #endif // MODPLUG_TRACKER
 
 	// Sequence name setter / getter
-	inline void SetName(const std::string &newName) { m_name = newName;}
-	inline std::string GetName() const { return m_name; }
+	inline void SetName(const mpt::ustring &newName) { m_name = newName;}
+	inline mpt::ustring GetName() const { return m_name; }
 
 	// Restart position setter / getter
 	inline void SetRestartPos(ORDERINDEX restartPos) { m_restartPos = restartPos; }
@@ -125,7 +125,7 @@ public:
 class ModSequenceSet
 {
 	friend void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t);
-	friend void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t);
+	friend void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t, mpt::Charset defaultCharset);
 
 protected:
 	std::vector<ModSequence> m_Sequences;	// Array of sequences.
@@ -196,12 +196,12 @@ const char FileIdSequence[] = "mptSeq";
 #ifndef MODPLUG_NO_FILESAVE
 void WriteModSequences(std::ostream& oStrm, const ModSequenceSet& seq);
 #endif // MODPLUG_NO_FILESAVE
-void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t nSize = 0);
+void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t nSize, mpt::Charset defaultCharset);
 
 #ifndef MODPLUG_NO_FILESAVE
 void WriteModSequence(std::ostream& oStrm, const ModSequence& seq);
 #endif // MODPLUG_NO_FILESAVE
-void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t);
+void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t, mpt::Charset defaultCharset);
 
 #ifndef MODPLUG_NO_FILESAVE
 void WriteModSequenceOld(std::ostream& oStrm, const ModSequenceSet& seq);

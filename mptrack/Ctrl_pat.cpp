@@ -175,7 +175,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 
 	m_SpinSequence.SetRange32(1, m_sndFile.Order.GetNumSequences());
 	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex() + 1);
-	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.Order().GetName()));
+	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(m_sndFile.Order().GetName()));
 
 	m_OrderList.SetFocus();
 
@@ -228,7 +228,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 
 	if(updateAll || updateSeq)
 	{
-		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.Order().GetName()));
+		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(m_sndFile.Order().GetName()));
 
 		m_SpinSequence.SetRange(1, m_sndFile.Order.GetNumSequences());
 		m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex() + 1);
@@ -1104,7 +1104,7 @@ void CCtrlPatterns::OnSequenceNameChanged()
 {
 	CString tmp;
 	GetDlgItemText(IDC_EDIT_SEQUENCE_NAME, tmp);
-	const std::string str = mpt::ToCharset(m_sndFile.GetCharsetInternal(), tmp);
+	const mpt::ustring str = mpt::ToUnicode(tmp);
 	if(str != m_sndFile.Order().GetName())
 	{
 		m_sndFile.Order().SetName(str);

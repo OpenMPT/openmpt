@@ -1614,7 +1614,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	for(SEQUENCEINDEX seq = wsdlg.m_Settings.minSequence; seq <= wsdlg.m_Settings.maxSequence; seq++)
 	{
 		m_SndFile.Order.SetSequence(seq);
-		std::string fileNameAdd;
+		mpt::ustring fileNameAdd;
 		for(int i = 0; i < nRenderPasses; i++)
 		{
 			mpt::PathString thisName = fileName;
@@ -1622,11 +1622,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			fileNameAdd.clear();
 			if(wsdlg.m_Settings.minSequence != wsdlg.m_Settings.maxSequence)
 			{
-				fileNameAdd = mpt::format("-%1")(mpt::fmt::dec0<2>(seq + 1));
-				std::string seqName = m_SndFile.Order(seq).GetName();
+				fileNameAdd = mpt::format(U_("-%1"))(mpt::ufmt::dec0<2>(seq + 1));
+				mpt::ustring seqName = m_SndFile.Order(seq).GetName();
 				if(!seqName.empty())
 				{
-					fileNameAdd += "-" + seqName;
+					fileNameAdd += UL_("-") + seqName;
 				}
 			}
 
@@ -1643,11 +1643,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 				// Add channel number & name (if available) to path string
 				if(!m_SndFile.ChnSettings[i].szName.empty())
 				{
-					fileNameAdd += mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.ChnSettings[i].szName);
+					fileNameAdd += mpt::format(U_("-%1_%2"))(mpt::ufmt::dec0<3>(i + 1), mpt::ToUnicode(m_SndFile.GetCharsetInternal(), m_SndFile.ChnSettings[i].szName));
 					caption = mpt::cformat(_T("%1:%2"))(i + 1, mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.ChnSettings[i].szName));
 				} else
 				{
-					fileNameAdd += mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
+					fileNameAdd += mpt::format(U_("-%1"))(mpt::ufmt::dec0<3>(i + 1));
 					caption = mpt::cformat(_T("channel %1"))(i + 1);
 				}
 				// Unmute channel to process
@@ -1667,11 +1667,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 					// Add sample number & name (if available) to path string
 					if(!m_SndFile.m_szNames[i + 1].empty())
 					{
-						fileNameAdd += mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.m_szNames[i + 1]);
+						fileNameAdd += mpt::format(U_("-%1_%2"))(mpt::ufmt::dec0<3>(i + 1), mpt::ToUnicode(m_SndFile.GetCharsetInternal(), m_SndFile.m_szNames[i + 1]));
 						caption = mpt::cformat(_T("%1: %2"))(i + 1, mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.m_szNames[i + 1]));
 					} else
 					{
-						fileNameAdd += mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
+						fileNameAdd += mpt::format(U_("-%1"))(mpt::ufmt::dec0<3>(i + 1));
 						caption = mpt::cformat(_T("sample %1"))(i + 1);
 					}
 					// Unmute sample to process
@@ -1686,11 +1686,11 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 					if(!m_SndFile.Instruments[i + 1]->name.empty())
 					{
-						fileNameAdd += mpt::format("-%1_%2")(mpt::fmt::dec0<3>(i + 1), m_SndFile.Instruments[i + 1]->name);
+						fileNameAdd += mpt::format(U_("-%1_%2"))(mpt::ufmt::dec0<3>(i + 1), mpt::ToUnicode(m_SndFile.GetCharsetInternal(), m_SndFile.Instruments[i + 1]->name));
 						caption = mpt::cformat(_T("%1:%2"))(i + 1, mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.Instruments[i + 1]->name));
 					} else
 					{
-						fileNameAdd += mpt::format("-%1")(mpt::fmt::dec0<3>(i + 1));
+						fileNameAdd += mpt::format(U_("-%1"))(mpt::ufmt::dec0<3>(i + 1));
 						caption = mpt::cformat(_T("instrument %1"))(i + 1);
 					}
 					// Unmute instrument to process
@@ -1701,7 +1701,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			if(!fileNameAdd.empty())
 			{
 				SanitizeFilename(fileNameAdd);
-				thisName += mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::Charset::Locale, fileNameAdd));
+				thisName += mpt::PathString::FromUnicode(fileNameAdd);
 			}
 			thisName += fileExt;
 			if(wsdlg.m_Settings.outputToSample)
@@ -1757,7 +1757,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 							GetSampleUndo().PrepareUndo(smp, sundo_replace, "Render To Sample");
 							if(m_SndFile.ReadSampleFromFile(smp, file, false))
 							{
-								m_SndFile.m_szNames[smp] = "Render To Sample" + fileNameAdd;
+								m_SndFile.m_szNames[smp] = "Render To Sample" + mpt::ToCharset(m_SndFile.GetCharsetInternal(), fileNameAdd);
 								UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
 								if(m_SndFile.GetNumInstruments() && !IsSampleUsed(smp))
 								{

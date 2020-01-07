@@ -1686,11 +1686,11 @@ BOOL CModTree::SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName)
 	return FALSE;
 }
 
-static mpt::ustring TreeDeletionString(const CSoundFile &sndFile, const mpt::uchar *type, uint32 id, const std::string &name)
+static mpt::ustring TreeDeletionString(const mpt::uchar *type, uint32 id, const mpt::ustring &name)
 {
 	mpt::ustring s = mpt::format(U_("Remove %1 %2"))(mpt::ustring(type), id);
 	if(!name.empty())
-		s += U_(": ") + mpt::ToUnicode(sndFile.GetCharsetInternal(), name);
+		s += U_(": ") + name;
 	s.append(1, UC_('?'));
 	return s;
 }
@@ -1712,7 +1712,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 	case MODITEM_SEQUENCE:
 		{
 			const SEQUENCEINDEX seq = static_cast<SEQUENCEINDEX>(modItemID);
-			if(Reporting::Confirm(TreeDeletionString(*sndFile, UL_("sequence"), seq + 1, sndFile->Order(seq).GetName()), false, true) == cnfNo) break;
+			if(Reporting::Confirm(TreeDeletionString(UL_("sequence"), seq + 1, sndFile->Order(seq).GetName()), false, true) == cnfNo) break;
 			sndFile->Order.RemoveSequence(seq);
 			modDoc->UpdateAllViews(nullptr, SequenceHint().Data());
 		}
@@ -1739,7 +1739,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 					break;
 				}
 			}
-			mpt::ustring s = TreeDeletionString(*sndFile, UL_("pattern"), modItemID, sndFile->Patterns[pat].GetName());
+			mpt::ustring s = TreeDeletionString(UL_("pattern"), modItemID, mpt::ToUnicode(sndFile->GetCharsetInternal(), sndFile->Patterns[pat].GetName()));
 			s += mpt::format(U_("\nThis pattern is currently %1used."))(isUsed ? U_("") : U_("un"));
 			if(Reporting::Confirm(s, false, isUsed) == cnfYes && modDoc->RemovePattern(pat))
 			{
@@ -1750,7 +1750,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_SAMPLE:
 		if(!sndFile->GetSample(static_cast<SAMPLEINDEX>(modItemID)).HasSampleData()
-		   || Reporting::Confirm(TreeDeletionString(*sndFile, UL_("sample"), modItemID, sndFile->m_szNames[modItemID]), false, true) == cnfYes)
+		   || Reporting::Confirm(TreeDeletionString(UL_("sample"), modItemID, mpt::ToUnicode(sndFile->GetCharsetInternal(), sndFile->m_szNames[modItemID])), false, true) == cnfYes)
 		{
 			const SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(modItemID);
 			modDoc->GetSampleUndo().PrepareUndo(smp, sundo_replace, "Delete");
@@ -1764,7 +1764,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_INSTRUMENT:
 		if(sndFile->Instruments[modItemID] == nullptr
-		   || Reporting::Confirm(TreeDeletionString(*sndFile, UL_("instrument"), modItemID, sndFile->Instruments[modItemID]->name), false, true) == cnfYes)
+		   || Reporting::Confirm(TreeDeletionString(UL_("instrument"), modItemID, mpt::ToUnicode(sndFile->GetCharsetInternal(), sndFile->Instruments[modItemID]->name)), false, true) == cnfYes)
 		{
 			const INSTRUMENTINDEX ins = static_cast<INSTRUMENTINDEX>(modItemID);
 			modDoc->GetInstrumentUndo().PrepareUndo(ins, "Delete");
@@ -3977,7 +3977,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 	{
 		const CSoundFile &sndFile = modDoc->GetSoundFile();
 		const CModSpecifications &modSpecs = sndFile.GetModSpecifications();
-		std::string text;
+		mpt::ustring text;
 		m_doLabelEdit = false;
 
 		switch(modItem.type)
@@ -3986,11 +3986,11 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				PATTERNINDEX pat = sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val2)).at(static_cast<ORDERINDEX>(modItem.val1));
 				if(pat == sndFile.Order.GetInvalidPatIndex())
-					text = "---";
+					text = UL_("---");
 				else if(pat == sndFile.Order.GetIgnoreIndex())
-					text = "+++";
+					text = UL_("+++");
 				else
-					text = mpt::fmt::val(pat);
+					text = mpt::ufmt::val(pat);
 				m_doLabelEdit = true;
 			}
 			break;
@@ -4012,7 +4012,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_PATTERN:
 			if(modItem.val1 < sndFile.Patterns.GetNumPatterns() && modSpecs.hasPatternNames)
 			{
-				text = sndFile.Patterns[modItem.val1].GetName();
+				text = mpt::ToUnicode(sndFile.GetCharsetInternal(), sndFile.Patterns[modItem.val1].GetName());
 				editCtrl->SetLimitText(MAX_PATTERNNAME - 1);
 				m_doLabelEdit = true;
 			}
@@ -4021,7 +4021,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_SAMPLE:
 			if(modItem.val1 <= sndFile.GetNumSamples())
 			{
-				text = sndFile.m_szNames[modItem.val1];
+				text = mpt::ToUnicode(sndFile.GetCharsetInternal(), sndFile.m_szNames[modItem.val1]);
 				editCtrl->SetLimitText(modSpecs.sampleNameLengthMax);
 				m_doLabelEdit = true;
 			}
@@ -4030,7 +4030,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_INSTRUMENT:
 			if(modItem.val1 <= sndFile.GetNumInstruments() && sndFile.Instruments[modItem.val1] != nullptr)
 			{
-				text = sndFile.Instruments[modItem.val1]->name;
+				text = mpt::ToUnicode(sndFile.GetCharsetInternal(), sndFile.Instruments[modItem.val1]->name);
 				editCtrl->SetLimitText(modSpecs.instrNameLengthMax);
 				m_doLabelEdit = true;
 			}
@@ -4040,7 +4040,7 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		if(m_doLabelEdit)
 		{
 			CMainFrame::GetInputHandler()->Bypass(true);
-			editCtrl->SetWindowText(mpt::ToCString(sndFile.GetCharsetInternal(), text));
+			editCtrl->SetWindowText(mpt::ToCString(text));
 			*result = FALSE;
 			return;
 		}
@@ -4064,7 +4064,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		CSoundFile &sndFile = modDoc->GetSoundFile();
 		const CModSpecifications &modSpecs = sndFile.GetModSpecifications();
 
-		const std::string itemText = mpt::ToCharset(sndFile.GetCharsetInternal(), CString(info->item.pszText));
+		const mpt::ustring itemText = mpt::ToUnicode(CString(info->item.pszText));
 		switch(modItem.type)
 		{
 		case MODITEM_ORDER:
@@ -4072,10 +4072,10 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				PATTERNINDEX pat = ConvertStrTo<PATTERNINDEX>(itemText);
 				bool valid = true;
-				if(itemText[0] == '-')
+				if(itemText[0] == UC_('-'))
 				{
 					pat = sndFile.Order.GetInvalidPatIndex();
-				} else if(itemText[0] == '+')
+				} else if(itemText[0] == UC_('+'))
 				{
 					if(modSpecs.hasIgnoreIndex)
 						pat = sndFile.Order.GetIgnoreIndex();
@@ -4109,27 +4109,27 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			break;
 
 		case MODITEM_PATTERN:
-			if(modItem.val1 < sndFile.Patterns.GetNumPatterns() && modSpecs.hasPatternNames && sndFile.Patterns[modItem.val1].GetName() != itemText)
+			if(modItem.val1 < sndFile.Patterns.GetNumPatterns() && modSpecs.hasPatternNames && mpt::ToUnicode(sndFile.GetCharsetInternal(), sndFile.Patterns[modItem.val1].GetName()) != itemText)
 			{
-				sndFile.Patterns[modItem.val1].SetName(itemText);
+				sndFile.Patterns[modItem.val1].SetName(mpt::ToCharset(sndFile.GetCharsetInternal(), itemText));
 				modDoc->SetModified();
 				modDoc->UpdateAllViews(nullptr, PatternHint(static_cast<PATTERNINDEX>(modItem.val1)).Data().Names());
 			}
 			break;
 
 		case MODITEM_SAMPLE:
-			if(modItem.val1 <= sndFile.GetNumSamples() && sndFile.m_szNames[modItem.val1] != itemText)
+			if(modItem.val1 <= sndFile.GetNumSamples() && mpt::ToUnicode(sndFile.GetCharsetInternal(), sndFile.m_szNames[modItem.val1]) != itemText)
 			{
-				sndFile.m_szNames[modItem.val1] = mpt::truncate(itemText, modSpecs.sampleNameLengthMax);
+				sndFile.m_szNames[modItem.val1] = mpt::truncate(mpt::ToCharset(sndFile.GetCharsetInternal(), itemText), modSpecs.sampleNameLengthMax);
 				modDoc->SetModified();
 				modDoc->UpdateAllViews(nullptr, SampleHint(static_cast<SAMPLEINDEX>(modItem.val1)).Info().Names());
 			}
 			break;
 
 		case MODITEM_INSTRUMENT:
-			if(modItem.val1 <= sndFile.GetNumInstruments() && sndFile.Instruments[modItem.val1] != nullptr && sndFile.Instruments[modItem.val1]->name != itemText)
+			if(modItem.val1 <= sndFile.GetNumInstruments() && sndFile.Instruments[modItem.val1] != nullptr && mpt::ToUnicode(sndFile.GetCharsetInternal(), sndFile.Instruments[modItem.val1]->name) != itemText)
 			{
-				sndFile.Instruments[modItem.val1]->name = mpt::truncate(itemText, modSpecs.instrNameLengthMax);
+				sndFile.Instruments[modItem.val1]->name = mpt::truncate(mpt::ToCharset(sndFile.GetCharsetInternal(), itemText), modSpecs.instrNameLengthMax);
 				modDoc->SetModified();
 				modDoc->UpdateAllViews(nullptr, InstrumentHint(static_cast<INSTRUMENTINDEX>(modItem.val1)).Info().Names());
 			}

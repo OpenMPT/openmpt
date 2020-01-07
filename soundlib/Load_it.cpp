@@ -1272,12 +1272,13 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 		ssb.BeginRead("mptm", Version::Current().GetRawVersion());
 		int8 useUTF8Tuning = 0;
 		ssb.ReadItem(useUTF8Tuning, "UTF8Tuning");
-		mpt::Charset TuningChraset = useUTF8Tuning ? mpt::Charset::UTF8 : GetCharsetInternal();
-		ssb.ReadItem(GetTuneSpecificTunings(), "0", [TuningChraset](std::istream &iStrm, CTuningCollection &tc, const std::size_t dummy){ return ReadTuningCollection(iStrm, tc, dummy, TuningChraset); });
-		ssb.ReadItem(*this, "1", [TuningChraset](std::istream& iStrm, CSoundFile& csf, const std::size_t dummy){ return ReadTuningMap(iStrm, csf, dummy, TuningChraset); });
+		mpt::Charset TuningCharset = useUTF8Tuning ? mpt::Charset::UTF8 : GetCharsetInternal();
+		ssb.ReadItem(GetTuneSpecificTunings(), "0", [TuningCharset](std::istream &iStrm, CTuningCollection &tc, const std::size_t dummy){ return ReadTuningCollection(iStrm, tc, dummy, TuningCharset); });
+		ssb.ReadItem(*this, "1", [TuningCharset](std::istream& iStrm, CSoundFile& csf, const std::size_t dummy){ return ReadTuningMap(iStrm, csf, dummy, TuningCharset); });
 		ssb.ReadItem(Order, "2", &ReadModSequenceOld);
 		ssb.ReadItem(Patterns, FileIdPatterns, &ReadModPatterns);
-		ssb.ReadItem(Order, FileIdSequences, &ReadModSequences);
+		mpt::Charset sequenceDefaultCharset = GetCharsetInternal();
+		ssb.ReadItem(Order, FileIdSequences, [sequenceDefaultCharset](std::istream &iStrm, ModSequenceSet &seq, std::size_t nSize){ return ReadModSequences(iStrm, seq, nSize, sequenceDefaultCharset); });
 
 		if(ssb.GetStatus() & srlztn::SNT_FAILURE)
 		{

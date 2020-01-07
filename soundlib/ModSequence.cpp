@@ -564,7 +564,9 @@ void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 {
 	srlztn::SsbWrite ssb(oStrm);
 	ssb.BeginWrite(FileIdSequence, Version::Current().GetRawVersion());
-	ssb.WriteItem(seq.GetName(), "n");
+	int8 useUTF8 = 1;
+	ssb.WriteItem(useUTF8, "u");
+	ssb.WriteItem(mpt::ToCharset(mpt::Charset::UTF8, seq.GetName()), "n");
 	const uint16 length = seq.GetLengthTailTrimmed();
 	ssb.WriteItem<uint16>(length, "l");
 	ssb.WriteItem(seq, "a", srlztn::VectorWriter<uint16>(length));
@@ -575,15 +577,17 @@ void WriteModSequence(std::ostream& oStrm, const ModSequence& seq)
 #endif // MODPLUG_NO_FILESAVE
 
 
-void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t)
+void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t, mpt::Charset defaultCharset)
 {
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdSequence, Version::Current().GetRawVersion());
 	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
 		return;
+	int8 useUTF8 = 0;
+	ssb.ReadItem(useUTF8, "u");
 	std::string str;
 	ssb.ReadItem(str, "n");
-	seq.SetName(str);
+	seq.SetName(mpt::ToUnicode(useUTF8 ? mpt::Charset::UTF8 : defaultCharset, str));
 	ORDERINDEX nSize = 0;
 	ssb.ReadItem(nSize, "l");
 	LimitMax(nSize, ModSpecs::mptm.ordersMax);
@@ -613,7 +617,7 @@ void WriteModSequences(std::ostream& oStrm, const ModSequenceSet& seq)
 #endif // MODPLUG_NO_FILESAVE
 
 
-void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
+void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t, mpt::Charset defaultCharset)
 {
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdSequences, Version::Current().GetRawVersion());
@@ -635,7 +639,7 @@ void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	for(SEQUENCEINDEX i = 0; i < seqs; i++)
 	{
 		seq(i).SetRestartPos(legacyRestartPos);
-		ssb.ReadItem(seq(i), srlztn::ID::FromInt<uint8>(i), &ReadModSequence);
+		ssb.ReadItem(seq(i), srlztn::ID::FromInt<uint8>(i), [defaultCharset](std::istream &iStrm, ModSequence &seq, std::size_t dummy) { return ReadModSequence(iStrm, seq, dummy, defaultCharset); });
 	}
 	seq.m_currentSeq = (currentSeq < seq.GetNumSequences()) ? currentSeq : 0;
 }
