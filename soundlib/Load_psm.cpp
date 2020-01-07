@@ -338,7 +338,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			if(Order.AddSequence(false) == SEQUENCEINDEX_INVALID)
 				break;
 		}
-		Order().SetName(subsong.songName);
+		Order().SetName(mpt::ToUnicode(mpt::Charset::CP437, subsong.songName));
 #endif // MPT_PSM_USE_REAL_SUBSONGS
 
 		// Read "Sub chunks"

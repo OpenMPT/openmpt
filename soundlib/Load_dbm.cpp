@@ -381,7 +381,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			if(Order.AddSequence(false) == SEQUENCEINDEX_INVALID)
 				break;
 		}
-		Order().SetName(name);
+		Order().SetName(mpt::ToUnicode(mpt::Charset::ISO8859_1, name));
 		ReadOrderFromFile<uint16be>(Order(), songChunk, numOrders);
 #else
 		const ORDERINDEX startIndex = Order().GetLength();
