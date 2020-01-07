@@ -1448,18 +1448,7 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 			// If it's a shell link, resolve the link target
 			if(auto file = LinkResolver().Resolve(m_InstrLibPath.ToCString() + GetItemText(hItem)); !file.empty())
 			{
-				if(file.IsDirectory())
-				{
-					file.EnsureTrailingSlash();
-					InstrumentLibraryChDir(file, false);
-				} else if(file.IsFile())
-				{
-					// Browse module contents
-					CModTree *dirBrowser = CMainFrame::GetMainFrame()->GetUpperTreeview();
-					dirBrowser->m_InstrLibPath = file.GetPath();
-					dirBrowser->RefreshInstrumentLibrary();
-					dirBrowser->InstrumentLibraryChDir(file.GetFullFileName(), true);
-				}
+				SetFullInstrumentLibraryPath(file);
 			} else
 			{
 				InstrumentLibraryChDir(mpt::PathString::FromCString(GetItemText(hItem)), modItem.type == MODITEM_INSLIB_SONG);
@@ -1481,9 +1470,7 @@ BOOL CModTree::ExecuteItem(HTREEITEM hItem)
 				BrowseForFolder dlg(m_InstrLibPath, _T("Select a new instrument library folder..."));
 				if(dlg.Show())
 				{
-					mpt::PathString dir = dlg.GetDirectory();
-					dir.EnsureTrailingSlash();
-					CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(dir, false);
+					SetFullInstrumentLibraryPath(dlg.GetDirectory());
 				}
 			}
 			return TRUE;
@@ -2223,6 +2210,23 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 		}
 	}
 	return static_cast<int>(lParam1 - lParam2);
+}
+
+
+void CModTree::SetFullInstrumentLibraryPath(mpt::PathString path)
+{
+	if(path.IsDirectory())
+	{
+		path.EnsureTrailingSlash();
+		InstrumentLibraryChDir(path, false);
+	} else if(path.IsFile())
+	{
+		// Browse module contents
+		CModTree *dirBrowser = CMainFrame::GetMainFrame()->GetUpperTreeview();
+		dirBrowser->m_InstrLibPath = path.GetPath();
+		dirBrowser->RefreshInstrumentLibrary();
+		dirBrowser->InstrumentLibraryChDir(path.GetFullFileName(), true);
+	}
 }
 
 
@@ -3790,13 +3794,13 @@ void CModTree::OnShowSoundFiles()
 
 void CModTree::OnGotoInstrumentDir()
 {
-	CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(TrackerSettings::Instance().PathInstruments.GetDefaultDir(), false);
+	SetFullInstrumentLibraryPath(TrackerSettings::Instance().PathInstruments.GetDefaultDir());
 }
 
 
 void CModTree::OnGotoSampleDir()
 {
-	CMainFrame::GetMainFrame()->GetUpperTreeview()->InstrumentLibraryChDir(TrackerSettings::Instance().PathSamples.GetDefaultDir(), false);
+	SetFullInstrumentLibraryPath(TrackerSettings::Instance().PathSamples.GetDefaultDir());
 }
 
 
@@ -3970,15 +3974,19 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 {
 	NMTVDISPINFO *info = reinterpret_cast<NMTVDISPINFO *>(nmhdr);
 	CEdit *editCtrl = GetEditControl();
+	if(editCtrl == nullptr)
+		return;
+
 	const ModItem modItem = GetModItem(info->item.hItem);
 	const CModDoc *modDoc = modItem.IsSongItem() ? GetDocumentFromItem(info->item.hItem) : nullptr;
 
-	if(editCtrl != nullptr && modDoc != nullptr)
+	mpt::ustring text;
+	m_doLabelEdit = false;
+
+	if(modDoc != nullptr)
 	{
 		const CSoundFile &sndFile = modDoc->GetSoundFile();
 		const CModSpecifications &modSpecs = sndFile.GetModSpecifications();
-		mpt::ustring text;
-		m_doLabelEdit = false;
 
 		switch(modItem.type)
 		{
@@ -4036,16 +4044,18 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			}
 			break;
 		}
-
-		if(m_doLabelEdit)
-		{
-			CMainFrame::GetInputHandler()->Bypass(true);
-			editCtrl->SetWindowText(mpt::ToCString(text));
-			*result = FALSE;
-			return;
-		}
+	} else if(modItem.type == MODITEM_HDR_INSTRUMENTLIB)
+	{
+		text = m_InstrLibPath.ToUnicode();
+		m_doLabelEdit = true;
 	}
-	*result = TRUE;
+
+	if(m_doLabelEdit)
+	{
+		CMainFrame::GetInputHandler()->Bypass(true);
+		editCtrl->SetWindowText(mpt::ToCString(text));
+	}
+	*result = m_doLabelEdit ? FALSE : TRUE;
 }
 
 
@@ -4059,7 +4069,11 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 	const ModItem modItem = GetModItem(info->item.hItem);
 	CModDoc *modDoc = modItem.IsSongItem() ? GetDocumentFromItem(info->item.hItem) : nullptr;
 
-	if(info->item.pszText != nullptr && modDoc != nullptr)
+	*result = FALSE;
+	if(info->item.pszText == nullptr)
+		return;
+
+	if(modDoc != nullptr)
 	{
 		CSoundFile &sndFile = modDoc->GetSoundFile();
 		const CModSpecifications &modSpecs = sndFile.GetModSpecifications();
@@ -4135,8 +4149,10 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			}
 			break;
 		}
+	} else if(modItem.type == MODITEM_HDR_INSTRUMENTLIB)
+	{
+		SetFullInstrumentLibraryPath(mpt::PathString::FromNative(info->item.pszText));
 	}
-	*result = FALSE;
 }
 
 
@@ -4156,12 +4172,7 @@ void CModTree::OnDropFiles(HDROP hDropInfo)
 			if(IsSampleBrowser())
 			{
 				// Set sample browser location to this directory or file
-				const bool isSong = !file.IsDirectory();
-				CModTree *dirBrowser = CMainFrame::GetMainFrame()->GetUpperTreeview();
-				dirBrowser->m_InstrLibPath = file.GetPath();
-				if(isSong)
-					dirBrowser->RefreshInstrumentLibrary();
-				dirBrowser->InstrumentLibraryChDir(file.GetFullFileName(), isSong);
+				SetFullInstrumentLibraryPath(file);
 				break;
 			} else
 			{

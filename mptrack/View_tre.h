@@ -209,6 +209,7 @@ public:
 	BOOL PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume = -1);
 	BOOL OpenTreeItem(HTREEITEM hItem);
 	BOOL OpenMidiInstrument(DWORD dwItem);
+	void SetFullInstrumentLibraryPath(mpt::PathString path);
 	void InstrumentLibraryChDir(mpt::PathString dir, bool isSong);
 	bool GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath);
 	void OnOptionsChanged();
