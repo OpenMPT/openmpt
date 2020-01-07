@@ -222,14 +222,17 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 	FlagSet<HintType> hintType = hint.GetType();
 
 	const bool updateAll = hintType[HINT_MODTYPE];
-	const bool updateSeq = hint.GetCategory() == HINTCAT_SEQUENCE && hintType[HINT_MODSEQUENCE];
+	const bool updateSeq = hint.GetCategory() == HINTCAT_SEQUENCE;
 	const bool updatePlug = hint.GetCategory() == HINTCAT_PLUGINS && hintType[HINT_MIXPLUGINS];
 	const PatternHint patternHint = hint.ToType<PatternHint>();
 
-	if(updateAll || updateSeq)
+	if(updateAll || (updateSeq && hintType[HINT_SEQNAMES]))
 	{
 		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(m_sndFile.Order().GetName()));
+	}
 
+	if(updateAll || (updateSeq && hintType[HINT_MODSEQUENCE]))
+	{
 		m_SpinSequence.SetRange(1, m_sndFile.Order.GetNumSequences());
 		m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex() + 1);
 
@@ -1291,6 +1294,7 @@ void CCtrlPatterns::OnSequenceNumChanged()
 			SetDlgItemInt(IDC_EDIT_SEQNUM, newSeq + 1, FALSE);
 		}
 		m_OrderList.SelectSequence(newSeq);
+		UpdateView(SequenceHint(newSeq).Names(), nullptr);
 	}
 }
 

@@ -4118,7 +4118,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 			{
 				sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val1)).SetName(itemText);
 				modDoc->SetModified();
-				modDoc->UpdateAllViews(nullptr, SequenceHint(static_cast<SEQUENCEINDEX>(modItem.val1)).Data().Names());
+				modDoc->UpdateAllViews(nullptr, SequenceHint(static_cast<SEQUENCEINDEX>(modItem.val1)).Names());
 			}
 			break;
 
