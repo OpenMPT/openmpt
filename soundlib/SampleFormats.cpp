@@ -538,14 +538,15 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 #ifndef MODPLUG_NO_FILESAVE
 bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, std::ostream &f) const
 {
+	const ModSample &sample = Samples[nSample];
+	if(sample.uFlags[CHN_ADLIB])
+		return false;
+
 	WAVWriter file(&f);
 
 	if(!file.IsValid())
-	{
 		return false;
-	}
 
-	const ModSample &sample = Samples[nSample];
 	file.WriteFormat(sample.GetSampleRate(GetType()), sample.GetElementarySampleSize() * 8, sample.GetNumChannels(), WAVFormatChunk::fmtPCM);
 
 	// Write sample data

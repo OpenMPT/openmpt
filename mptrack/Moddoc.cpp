@@ -383,9 +383,9 @@ bool CModDoc::SaveSample(SAMPLEINDEX smp)
 		const mpt::PathString filename = m_SndFile.GetSamplePath(smp);
 		if(!filename.empty())
 		{
-			const mpt::PathString dotExt = filename.GetFileExt();
-			const bool wav = !mpt::PathString::CompareNoCase(dotExt, P_(".wav"));
-			const bool flac  = !mpt::PathString::CompareNoCase(dotExt, P_(".flac"));
+			auto &sample = m_SndFile.GetSample(smp);
+			const auto ext = filename.GetFileExt().ToUnicode().substr(1);
+			const auto format = FromSettingValue<SampleEditorDefaultFormat>(ext);
 
 			try
 			{
@@ -394,7 +394,9 @@ bool CModDoc::SaveSample(SAMPLEINDEX smp)
 				{
 					//f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
 
-					if(flac || (!wav && TrackerSettings::Instance().m_defaultSampleFormat != dfWAV))
+					if(sample.uFlags[CHN_ADLIB] || format == dfS3I)
+						success = m_SndFile.SaveS3ISample(smp, f);
+					else if(format != dfWAV)
 						success = m_SndFile.SaveFLACSample(smp, f);
 					else
 						success = m_SndFile.SaveWAVSample(smp, f);
@@ -405,7 +407,7 @@ bool CModDoc::SaveSample(SAMPLEINDEX smp)
 			}
 
 			if(success)
-				m_SndFile.GetSample(smp).uFlags.reset(SMP_MODIFIED);
+				sample.uFlags.reset(SMP_MODIFIED);
 			else
 				Reporting::Error(mpt::cformat(_T("Unable to save sample:\n"))(filename));
 		}

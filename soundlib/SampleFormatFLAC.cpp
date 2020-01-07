@@ -551,13 +551,14 @@ public:
 bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 {
 #ifdef MPT_WITH_FLAC
+	const ModSample &sample = Samples[nSample];
+	if(sample.uFlags[CHN_ADLIB])
+		return false;
+
 	FLAC__StreamEncoder_RAII encoder(f);
 	if(encoder == nullptr)
-	{
 		return false;
-	}
 
-	const ModSample &sample = Samples[nSample];
 	uint32 sampleRate = sample.GetSampleRate(GetType());
 
 	// First off, set up all the metadata...

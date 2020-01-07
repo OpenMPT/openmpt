@@ -229,6 +229,7 @@ enum SampleEditorDefaultFormat
 	dfFLAC,
 	dfWAV,
 	dfRAW,
+	dfS3I,
 };
 
 
@@ -329,6 +330,10 @@ template<> inline SettingValue ToSettingValue(const SampleEditorDefaultFormat &v
 		break;
 	case dfRAW:
 		format = U_("raw");
+		break;
+	case dfS3I:
+		format = U_("s3i");
+		break;
 	}
 	return SettingValue(format);
 }
@@ -339,7 +344,9 @@ template<> inline SampleEditorDefaultFormat FromSettingValue(const SettingValue 
 		return dfWAV;
 	if(format == U_("raw"))
 		return dfRAW;
-	else // if(format == U_("flac"))
+	if(format == U_("s3i"))
+		return dfS3I;
+	else  // if(format == U_("flac"))
 		return dfFLAC;
 }
 

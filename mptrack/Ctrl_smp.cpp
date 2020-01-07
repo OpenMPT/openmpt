@@ -1466,7 +1466,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 
 	BeginWaitCursor();
 
-	const mpt::PathString ext = dlg.GetExtension();
+	const auto saveFormat = FromSettingValue<SampleEditorDefaultFormat>(dlg.GetExtension().ToUnicode());
 
 	SAMPLEINDEX minSmp = m_nSample, maxSmp = m_nSample;
 	if(doBatchSave)
@@ -1474,29 +1474,35 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		minSmp = 1;
 		maxSmp = m_sndFile.GetNumSamples();
 	}
-	auto numberFmt = mpt::FormatSpec().Dec().FillNul().Width(1 + static_cast<int>(std::log10(maxSmp)));
+	const auto numberFmt = mpt::FormatSpec().Dec().FillNul().Width(1 + static_cast<int>(std::log10(maxSmp)));
 
 	bool ok = false;
-	CString sSampleName, sSampleFilename;
+	CString sampleName, sampleFilename;
 
 	for(SAMPLEINDEX smp = minSmp; smp <= maxSmp; smp++)
 	{
 		ModSample &sample = m_sndFile.GetSample(smp);
-		if (sample.HasSampleData())
+		if(sample.HasSampleData())
 		{
+			const bool isAdlib = sample.uFlags[CHN_ADLIB];
+
 			fileName = dlg.GetFirstFile();
 			if(doBatchSave)
 			{
-				sSampleName = mpt::ToCString(m_sndFile.GetCharsetInternal(), (!m_sndFile.m_szNames[smp].empty()) ? std::string(m_sndFile.m_szNames[smp]) : "untitled");
-				sSampleFilename = mpt::ToCString(m_sndFile.GetCharsetInternal(), (!sample.filename.empty()) ? sample.GetFilename() : m_sndFile.m_szNames[smp]);
-				SanitizeFilename(sSampleName);
-				SanitizeFilename(sSampleFilename);
+				sampleName = mpt::ToCString(m_sndFile.GetCharsetInternal(), (!m_sndFile.m_szNames[smp].empty()) ? std::string(m_sndFile.m_szNames[smp]) : "untitled");
+				sampleFilename = mpt::ToCString(m_sndFile.GetCharsetInternal(), (!sample.filename.empty()) ? sample.GetFilename() : m_sndFile.m_szNames[smp]);
+				SanitizeFilename(sampleName);
+				SanitizeFilename(sampleFilename);
 
-				mpt::ustring fileNameW = fileName.ToUnicode();
-				fileNameW = mpt::String::Replace(fileNameW, U_("%sample_number%"), mpt::ufmt::fmt(smp, numberFmt));
-				fileNameW = mpt::String::Replace(fileNameW, U_("%sample_filename%"), mpt::ToUnicode(sSampleFilename));
-				fileNameW = mpt::String::Replace(fileNameW, U_("%sample_name%"), mpt::ToUnicode(sSampleName));
-				fileName = mpt::PathString::FromUnicode(fileNameW);
+				mpt::ustring fileNameU = fileName.ToUnicode();
+				fileNameU = mpt::String::Replace(fileNameU, U_("%sample_number%"), mpt::ufmt::fmt(smp, numberFmt));
+				fileNameU = mpt::String::Replace(fileNameU, U_("%sample_filename%"), mpt::ToUnicode(sampleFilename));
+				fileNameU = mpt::String::Replace(fileNameU, U_("%sample_name%"), mpt::ToUnicode(sampleName));
+				fileName = mpt::PathString::FromUnicode(fileNameU);
+
+				// Need to enforce S3I for Adlib samples
+				if(isAdlib && saveFormat != dfS3I)
+					fileName = fileName.ReplaceExt(P_(".s3i"));
 			}
 
 			try
@@ -1509,11 +1515,13 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 				}
 				//f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
 
-				if (!mpt::PathString::CompareNoCase(ext, P_("raw")))
+				// Need to enforce S3I for Adlib samples
+				const auto thisFormat = isAdlib ? dfS3I : saveFormat;
+				if(thisFormat == dfRAW)
 					ok = m_sndFile.SaveRAWSample(smp, f);
-				else if (!mpt::PathString::CompareNoCase(ext, P_("flac")))
+				else if(thisFormat == dfFLAC)
 					ok = m_sndFile.SaveFLACSample(smp, f);
-				else if (!mpt::PathString::CompareNoCase(ext, P_("s3i")))
+				else if(thisFormat == dfS3I)
 					ok = m_sndFile.SaveS3ISample(smp, f);
 				else
 					ok = m_sndFile.SaveWAVSample(smp, f);
