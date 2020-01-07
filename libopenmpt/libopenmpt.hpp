@@ -815,6 +815,13 @@ public:
 	*/
 	std::string get_metadata( const std::string & key ) const;
 
+	//! Get the current estimated beats per minute (BPM).
+	/*!
+	  \remarks Many module formats lack time signature metadata. It is common that this estimate is off by a factor of two, but other multipliers are also possible.
+	  \remarks Due to the nature of how module tempo works, the estimate may change slightly after switching libopenmpt's output to a different sample rate.
+	  \return The current estimated BPM.
+	*/
+	double get_current_estimated_bpm() const;
 	//! Get the current speed
 	/*!
 	  \return The current speed in ticks per row.

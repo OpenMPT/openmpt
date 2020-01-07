@@ -305,6 +305,9 @@ std::string module::get_metadata( const std::string & key ) const {
 	return impl->get_metadata( key );
 }
 
+double module::get_current_estimated_bpm() const {
+	return impl->get_current_estimated_bpm();
+}
 std::int32_t module::get_current_speed() const {
 	return impl->get_current_speed();
 }

@@ -198,6 +198,7 @@ public:
 	std::size_t read_interleaved_quad( std::int32_t samplerate, std::size_t count, float * interleaved_quad );
 	std::vector<std::string> get_metadata_keys() const;
 	std::string get_metadata( const std::string & key ) const;
+	double get_current_estimated_bpm() const;
 	std::int32_t get_current_speed() const;
 	std::int32_t get_current_tempo() const;
 	std::int32_t get_current_order() const;

@@ -1140,6 +1140,14 @@ LIBOPENMPT_API const char * openmpt_module_get_metadata_keys( openmpt_module * m
  */
 LIBOPENMPT_API const char * openmpt_module_get_metadata( openmpt_module * mod, const char * key );
 
+/*! Get the current estimated beats per minute (BPM).
+ *
+ * \param mod The module handle to work on.
+ * \remarks Many module formats lack time signature metadata. It is common that this estimate is off by a factor of two, but other multipliers are also possible.
+ * \remarks Due to the nature of how module tempo works, the estimate may change slightly after switching libopenmpt's output to a different sample rate.
+ * \return The current estimated BPM.
+ */
+double openmpt_module_get_current_estimated_bpm( openmpt_module * mod );
 /*! \brief Get the current speed
  *
  * \param mod The module handle to work on.

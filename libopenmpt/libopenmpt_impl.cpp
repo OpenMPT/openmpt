@@ -1275,6 +1275,9 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 	return "";
 }
 
+double module_impl::get_current_estimated_bpm() const {
+	return m_sndFile->GetCurrentBPM();
+}
 std::int32_t module_impl::get_current_speed() const {
 	return m_sndFile->m_PlayState.m_nMusicSpeed;
 }

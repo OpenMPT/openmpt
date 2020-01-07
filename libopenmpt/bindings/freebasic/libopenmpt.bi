@@ -1055,6 +1055,15 @@ Declare Function openmpt_module_get_metadata_keys_ Alias "openmpt_module_get_met
 '/
 Declare Function openmpt_module_get_metadata_ Alias "openmpt_module_get_metadata" (ByVal module As openmpt_module Ptr, ByVal key As Const ZString Ptr) As Const ZString Ptr
 
+/'* \brief Get the current estimated beats per minute (BPM).
+
+  \param module The module handle to work on.
+  \remarks Many module formats lack time signature metadata. It is common that this estimate is off by a factor of two, but other multipliers are also possible.
+  \remarks Due to the nature of how module tempo works, the estimate may change slightly after switching libopenmpt's output to a different sample rate.
+  \return The current estimated BPM.
+'/
+Declare Function openmpt_module_get_current_estimated_bpm(ByVal module As openmpt_module Ptr) As Double
+
 /'* \brief Get the current speed
 
   \param module The module handle to work on.

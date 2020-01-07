@@ -924,6 +924,15 @@ const char * openmpt_module_get_metadata( openmpt_module * mod, const char * key
 	return NULL;
 }
 
+LIBOPENMPT_API double openmpt_module_get_current_estimated_bpm( openmpt_module * mod ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->get_current_estimated_bpm();
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0.0;
+}
 LIBOPENMPT_API int32_t openmpt_module_get_current_speed( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
