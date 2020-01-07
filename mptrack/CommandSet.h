@@ -65,7 +65,7 @@ DECLARE_FLAGSET(KeyEventType)
 
 enum CommandID
 {
-	kcCommandSetNumNotes = 33,
+	kcCommandSetNumNotes = 33,  // kcVPEndNotes - kcVPStartNotes
 
 	kcNull = -1,
 	kcFirst,
@@ -924,11 +924,14 @@ public:
 	void EventType(FlagSet<KeyEventType> type) { event = type; }
 	constexpr FlagSet<KeyEventType> EventType() const { return event; }
 
-	static KeyCombination FromLPARAM(LPARAM lParam) { return KeyCombination(
-		static_cast<InputTargetContext>((lParam >> 0) & 0xFF),
-		static_cast<Modifiers>((lParam >> 8) & 0xFF),
-		static_cast<UINT>((lParam >> 16) & 0xFF),
-		static_cast<KeyEventType>((lParam >> 24) & 0xFF)); }
+	static KeyCombination FromLPARAM(LPARAM lParam)
+	{
+		return KeyCombination(
+		    static_cast<InputTargetContext>((lParam >> 0) & 0xFF),
+		    static_cast<Modifiers>((lParam >> 8) & 0xFF),
+		    static_cast<UINT>((lParam >> 16) & 0xFF),
+		    static_cast<KeyEventType>((lParam >> 24) & 0xFF));
+	}
 	LPARAM AsLPARAM() const { return AsUint32(); }
 
 	// Key combination to string
@@ -1009,10 +1012,10 @@ protected:
 	CommandID FindCmd(UINT uid) const;
 	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool checkEventConflict = true) const;
 
-	const CModSpecifications *oldSpecs = nullptr;
-	CommandStruct commands[kcNumCommands];
+	const CModSpecifications *m_oldSpecs = nullptr;
+	CommandStruct m_commands[kcNumCommands];
 	std::bitset<kCtxMaxInputContexts> m_isParentContext[kCtxMaxInputContexts];
-	std::bitset<kNumRules> enforceRule;
+	std::bitset<kNumRules> m_enforceRule;
 
 public:
 	CCommandSet();
@@ -1030,10 +1033,10 @@ public:
 	bool QuickChange_NotesRepeat(bool repeat);
 
 	// Communication
-	KeyCombination GetKey(CommandID cmd, UINT key) const { return commands[cmd].kcList[key]; }
-	bool isHidden(UINT c) const { return commands[c].isHidden; }
-	int GetKeyListSize(CommandID cmd) const { return (int)commands[cmd].kcList.size(); }
-	CString GetCommandText(CommandID cmd) const { return commands[cmd].Message; }
+	KeyCombination GetKey(CommandID cmd, UINT key) const { return m_commands[cmd].kcList[key]; }
+	bool isHidden(UINT c) const { return m_commands[c].isHidden; }
+	int GetKeyListSize(CommandID cmd) const { return (int)m_commands[cmd].kcList.size(); }
+	CString GetCommandText(CommandID cmd) const { return m_commands[cmd].Message; }
 	CString GetKeyTextFromCommand(CommandID c, UINT key) const;
 
 	// Pululation ;)
