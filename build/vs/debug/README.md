@@ -14,4 +14,4 @@ written for OpenMPT, so if you want to debug libopenmpt, you need to modify them
 by prepending all internal type names with "OpenMPT::".
 
 Basic documentation on the "natvis" visualizer format can be found e.g. at
-https://msdn.microsoft.com/en-US/library/jj620914(v=vs.110).aspx
+https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects
