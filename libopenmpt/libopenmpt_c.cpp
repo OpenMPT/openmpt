@@ -923,7 +923,7 @@ const char * openmpt_module_get_metadata( openmpt_module * mod, const char * key
 	return NULL;
 }
 
-LIBOPENMPT_API int32_t openmpt_module_get_current_speed( openmpt_module * mod ) {
+int32_t openmpt_module_get_current_speed( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_current_speed();
@@ -932,7 +932,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_current_speed( openmpt_module * mod ) 
 	}
 	return 0;
 }
-LIBOPENMPT_API int32_t openmpt_module_get_current_tempo( openmpt_module * mod ) {
+int32_t openmpt_module_get_current_tempo( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_current_tempo();
@@ -941,7 +941,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_current_tempo( openmpt_module * mod ) 
 	}
 	return 0;
 }
-LIBOPENMPT_API int32_t openmpt_module_get_current_order( openmpt_module * mod ) {
+int32_t openmpt_module_get_current_order( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_current_order();
@@ -950,7 +950,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_current_order( openmpt_module * mod ) 
 	}
 	return 0;
 }
-LIBOPENMPT_API int32_t openmpt_module_get_current_pattern( openmpt_module * mod ) {
+int32_t openmpt_module_get_current_pattern( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_current_pattern();
@@ -959,7 +959,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_current_pattern( openmpt_module * mod 
 	}
 	return 0;
 }
-LIBOPENMPT_API int32_t openmpt_module_get_current_row( openmpt_module * mod ) {
+int32_t openmpt_module_get_current_row( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_current_row();
@@ -968,7 +968,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_current_row( openmpt_module * mod ) {
 	}
 	return 0;
 }
-LIBOPENMPT_API int32_t openmpt_module_get_current_playing_channels( openmpt_module * mod ) {
+int32_t openmpt_module_get_current_playing_channels( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_current_playing_channels();
@@ -978,7 +978,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_current_playing_channels( openmpt_modu
 	return 0;
 }
 
-LIBOPENMPT_API float openmpt_module_get_current_channel_vu_mono( openmpt_module * mod, int32_t channel ) {
+float openmpt_module_get_current_channel_vu_mono( openmpt_module * mod, int32_t channel ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_current_channel_vu_mono( channel );
@@ -987,7 +987,7 @@ LIBOPENMPT_API float openmpt_module_get_current_channel_vu_mono( openmpt_module 
 	}
 	return 0.0;
 }
-LIBOPENMPT_API float openmpt_module_get_current_channel_vu_left( openmpt_module * mod, int32_t channel ) {
+float openmpt_module_get_current_channel_vu_left( openmpt_module * mod, int32_t channel ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_current_channel_vu_left( channel );
@@ -996,7 +996,7 @@ LIBOPENMPT_API float openmpt_module_get_current_channel_vu_left( openmpt_module 
 	}
 	return 0.0;
 }
-LIBOPENMPT_API float openmpt_module_get_current_channel_vu_right( openmpt_module * mod, int32_t channel ) {
+float openmpt_module_get_current_channel_vu_right( openmpt_module * mod, int32_t channel ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_current_channel_vu_right( channel );
@@ -1005,7 +1005,7 @@ LIBOPENMPT_API float openmpt_module_get_current_channel_vu_right( openmpt_module
 	}
 	return 0.0;
 }
-LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_left( openmpt_module * mod, int32_t channel ) {
+float openmpt_module_get_current_channel_vu_rear_left( openmpt_module * mod, int32_t channel ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_current_channel_vu_rear_left( channel );
@@ -1014,7 +1014,7 @@ LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_left( openmpt_mo
 	}
 	return 0.0;
 }
-LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_right( openmpt_module * mod, int32_t channel ) {
+float openmpt_module_get_current_channel_vu_rear_right( openmpt_module * mod, int32_t channel ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_current_channel_vu_rear_right( channel );
@@ -1024,7 +1024,7 @@ LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_right( openmpt_m
 	return 0.0;
 }
 
-LIBOPENMPT_API int32_t openmpt_module_get_num_subsongs( openmpt_module * mod ) {
+int32_t openmpt_module_get_num_subsongs( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_num_subsongs();
@@ -1033,7 +1033,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_num_subsongs( openmpt_module * mod ) {
 	}
 	return 0;
 }
-LIBOPENMPT_API int32_t openmpt_module_get_num_channels( openmpt_module * mod ) {
+int32_t openmpt_module_get_num_channels( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_num_channels();
@@ -1042,7 +1042,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_num_channels( openmpt_module * mod ) {
 	}
 	return 0;
 }
-LIBOPENMPT_API int32_t openmpt_module_get_num_orders( openmpt_module * mod ) {
+int32_t openmpt_module_get_num_orders( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_num_orders();
@@ -1051,7 +1051,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_num_orders( openmpt_module * mod ) {
 	}
 	return 0;
 }
-LIBOPENMPT_API int32_t openmpt_module_get_num_patterns( openmpt_module * mod ) {
+int32_t openmpt_module_get_num_patterns( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_num_patterns();
@@ -1060,7 +1060,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_num_patterns( openmpt_module * mod ) {
 	}
 	return 0;
 }
-LIBOPENMPT_API int32_t openmpt_module_get_num_instruments( openmpt_module * mod ) {
+int32_t openmpt_module_get_num_instruments( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_num_instruments();
@@ -1069,7 +1069,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_num_instruments( openmpt_module * mod 
 	}
 	return 0;
 }
-LIBOPENMPT_API int32_t openmpt_module_get_num_samples( openmpt_module * mod ) {
+int32_t openmpt_module_get_num_samples( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_num_samples();
@@ -1079,7 +1079,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_num_samples( openmpt_module * mod ) {
 	return 0;
 }
 
-LIBOPENMPT_API const char * openmpt_module_get_subsong_name( openmpt_module * mod, int32_t index ) {
+const char * openmpt_module_get_subsong_name( openmpt_module * mod, int32_t index ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		std::vector<std::string> names = mod->impl->get_subsong_names();
@@ -1095,7 +1095,7 @@ LIBOPENMPT_API const char * openmpt_module_get_subsong_name( openmpt_module * mo
 	}
 	return NULL;
 }
-LIBOPENMPT_API const char * openmpt_module_get_channel_name( openmpt_module * mod, int32_t index ) {
+const char * openmpt_module_get_channel_name( openmpt_module * mod, int32_t index ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		std::vector<std::string> names = mod->impl->get_channel_names();
@@ -1111,7 +1111,7 @@ LIBOPENMPT_API const char * openmpt_module_get_channel_name( openmpt_module * mo
 	}
 	return NULL;
 }
-LIBOPENMPT_API const char * openmpt_module_get_order_name( openmpt_module * mod, int32_t index ) {
+const char * openmpt_module_get_order_name( openmpt_module * mod, int32_t index ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		std::vector<std::string> names = mod->impl->get_order_names();
@@ -1127,7 +1127,7 @@ LIBOPENMPT_API const char * openmpt_module_get_order_name( openmpt_module * mod,
 	}
 	return NULL;
 }
-LIBOPENMPT_API const char * openmpt_module_get_pattern_name( openmpt_module * mod, int32_t index ) {
+const char * openmpt_module_get_pattern_name( openmpt_module * mod, int32_t index ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		std::vector<std::string> names = mod->impl->get_pattern_names();
@@ -1143,7 +1143,7 @@ LIBOPENMPT_API const char * openmpt_module_get_pattern_name( openmpt_module * mo
 	}
 	return NULL;
 }
-LIBOPENMPT_API const char * openmpt_module_get_instrument_name( openmpt_module * mod, int32_t index ) {
+const char * openmpt_module_get_instrument_name( openmpt_module * mod, int32_t index ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		std::vector<std::string> names = mod->impl->get_instrument_names();
@@ -1159,7 +1159,7 @@ LIBOPENMPT_API const char * openmpt_module_get_instrument_name( openmpt_module *
 	}
 	return NULL;
 }
-LIBOPENMPT_API const char * openmpt_module_get_sample_name( openmpt_module * mod, int32_t index ) {
+const char * openmpt_module_get_sample_name( openmpt_module * mod, int32_t index ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		std::vector<std::string> names = mod->impl->get_sample_names();
@@ -1176,7 +1176,7 @@ LIBOPENMPT_API const char * openmpt_module_get_sample_name( openmpt_module * mod
 	return NULL;
 }
 
-LIBOPENMPT_API int32_t openmpt_module_get_order_pattern( openmpt_module * mod, int32_t order ) {
+int32_t openmpt_module_get_order_pattern( openmpt_module * mod, int32_t order ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_order_pattern( order );
@@ -1186,7 +1186,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_order_pattern( openmpt_module * mod, i
 	return 0;
 }
 
-LIBOPENMPT_API int32_t openmpt_module_get_pattern_num_rows( openmpt_module * mod, int32_t pattern ) {
+int32_t openmpt_module_get_pattern_num_rows( openmpt_module * mod, int32_t pattern ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_pattern_num_rows( pattern );
@@ -1196,7 +1196,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_pattern_num_rows( openmpt_module * mod
 	return 0;
 }
 
-LIBOPENMPT_API uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command ) {
+uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return mod->impl->get_pattern_row_channel_command( pattern, row, channel, command );
@@ -1206,7 +1206,7 @@ LIBOPENMPT_API uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_m
 	return 0;
 }
 
-LIBOPENMPT_API const char * openmpt_module_format_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command ) {
+const char * openmpt_module_format_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return openmpt::strdup( mod->impl->format_pattern_row_channel_command( pattern, row, channel, command ).c_str() );
@@ -1216,7 +1216,7 @@ LIBOPENMPT_API const char * openmpt_module_format_pattern_row_channel_command( o
 	return 0;
 }
 
-LIBOPENMPT_API const char * openmpt_module_highlight_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command ) {
+const char * openmpt_module_highlight_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return openmpt::strdup( mod->impl->highlight_pattern_row_channel_command( pattern, row, channel, command ).c_str() );
@@ -1226,7 +1226,7 @@ LIBOPENMPT_API const char * openmpt_module_highlight_pattern_row_channel_command
 	return 0;
 }
 
-LIBOPENMPT_API const char * openmpt_module_format_pattern_row_channel( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, size_t width, int pad ) {
+const char * openmpt_module_format_pattern_row_channel( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, size_t width, int pad ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return openmpt::strdup( mod->impl->format_pattern_row_channel( pattern, row, channel, width, pad ? true : false ).c_str() );
@@ -1236,7 +1236,7 @@ LIBOPENMPT_API const char * openmpt_module_format_pattern_row_channel( openmpt_m
 	return 0;
 }
 
-LIBOPENMPT_API const char * openmpt_module_highlight_pattern_row_channel( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, size_t width, int pad ) {
+const char * openmpt_module_highlight_pattern_row_channel( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, size_t width, int pad ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
 		return openmpt::strdup( mod->impl->highlight_pattern_row_channel( pattern, row, channel, width, pad ? true : false ).c_str() );
