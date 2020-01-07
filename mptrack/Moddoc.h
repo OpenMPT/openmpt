@@ -135,6 +135,10 @@ public:
 	bool m_bHasValidPath = false; //becomes true if document is loaded or saved.
 
 protected:
+	// Note-off event buffer for MIDI sustain pedal
+	std::array<std::vector<uint32>, 16> m_midiSustainBuffer;
+	std::bitset<16> m_midiSustainActive;
+
 	std::bitset<MAX_BASECHANNELS> m_bsMultiRecordMask;
 	std::bitset<MAX_BASECHANNELS> m_bsMultiSplitRecordMask;
 

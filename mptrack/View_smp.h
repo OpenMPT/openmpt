@@ -58,6 +58,10 @@ protected:
 	CPoint m_lastDrawPoint;		// For drawing horizontal lines
 	int m_drawChannel;			// Which sample channel are we drawing on?
 
+	// Note-off event buffer for MIDI sustain pedal
+	std::array<std::vector<uint32>, 16> m_midiSustainBuffer;
+	std::bitset<16> m_midiSustainActive;
+
 	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
 	std::array<SmpLength, MAX_CHANNELS> m_dwNotifyPos;
 	CModDoc::NoteToChannelMap m_noteChannel;	// Note -> Preview channel assignment

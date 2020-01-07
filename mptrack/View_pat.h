@@ -200,6 +200,10 @@ protected:
 	CHANNELINDEX chordPatternChannels[MPTChord::notesPerChord];
 	ModCommand::NOTE prevChordNote, prevChordBaseNote;
 
+	// Note-off event buffer for MIDI sustain pedal
+	std::array<std::vector<uint32>, 16> m_midiSustainBuffer;
+	std::bitset<16> m_midiSustainActive;
+
 	std::array<uint16, MAX_BASECHANNELS> ChnVUMeters;
 	std::array<uint16, MAX_BASECHANNELS> OldVUMeters;
 

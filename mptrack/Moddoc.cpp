@@ -392,8 +392,6 @@ bool CModDoc::SaveSample(SAMPLEINDEX smp)
 				mpt::SafeOutputFile f(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 				if(f)
 				{
-					//f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
-
 					if(sample.uFlags[CHN_ADLIB] || format == dfS3I)
 						success = m_SndFile.SaveS3ISample(smp, f);
 					else if(format != dfWAV)
@@ -795,12 +793,14 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 	static uint8 midiVolume = 127;
 
 	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(midiData);
-	uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
-	uint8 midiByte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
+	const uint8 channel = MIDIEvents::GetChannelFromEvent(midiData);
+	const uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
+	const uint8 midiByte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
 	uint8 note  = midiByte1 + NOTE_MIN;
 	int vol = midiByte2;
 
-	if((event == MIDIEvents::evNoteOn) && !vol) event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
+	if((event == MIDIEvents::evNoteOn) && !vol)
+		event = MIDIEvents::evNoteOff;  //Convert event to note-off if req'd
 
 	PLUGINDEX mappedIndex = 0;
 	PlugParamIndex paramIndex = 0;
@@ -825,6 +825,11 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 	switch(event)
 	{
 	case MIDIEvents::evNoteOff:
+		if(m_midiSustainActive[channel])
+		{
+			m_midiSustainBuffer[channel].push_back(midiData);
+			return;
+		}
 		if(ins > 0 && ins <= GetNumInstruments())
 		{
 			LimitMax(note, NOTE_MAX);
@@ -851,11 +856,25 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 		break;
 
 	case MIDIEvents::evControllerChange:
-		if(midiByte1 == MIDIEvents::MIDICC_Volume_Coarse)
+		switch(midiByte1)
 		{
+		case MIDIEvents::MIDICC_Volume_Coarse:
 			midiVolume = midiByte2;
 			break;
+		case MIDIEvents::MIDICC_HoldPedal_OnOff:
+			m_midiSustainActive[channel] = (midiByte2 >= 0x40);
+			if(!m_midiSustainActive[channel])
+			{
+				// Release all notes
+				for(const auto offEvent : m_midiSustainBuffer[channel])
+				{
+					ProcessMIDI(offEvent, ins, plugin, ctx);
+				}
+				m_midiSustainBuffer[channel].clear();
+			}
+			break;
 		}
+		break;
 	}
 
 	if((TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDITOPLUG) && CMainFrame::GetMainFrame()->GetModPlaying() == this && plugin != nullptr)

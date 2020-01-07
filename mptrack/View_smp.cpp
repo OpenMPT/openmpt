@@ -2880,22 +2880,21 @@ void CViewSample::OnAddSilence()
 LRESULT CViewSample::OnMidiMsg(WPARAM midiDataParam, LPARAM)
 {
 	const uint32 midiData = static_cast<uint32>(midiDataParam);
-	static BYTE midivolume = 127;
+	static uint8 midiVolume = 127;
 
 	CModDoc *pModDoc = GetDocument();
-	uint8 midibyte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
-	uint8 midibyte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
+	const uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
+	const uint8 midiByte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
+	const uint8 channel = MIDIEvents::GetChannelFromEvent(midiData);
 
 	CSoundFile *pSndFile = (pModDoc) ? &pModDoc->GetSoundFile() : nullptr;
 	if (!pSndFile) return 0;
 
-	uint8 nNote = midibyte1 + NOTE_MIN;
-	int nVol = midibyte2;
+	uint8 nNote = midiByte1 + NOTE_MIN;
+	int nVol = midiByte2;
 	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(midiData);
 	if(event == MIDIEvents::evNoteOn && !nVol)
-	{
 		event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
-	}
 
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetInputHandler();
@@ -2909,26 +2908,42 @@ LRESULT CViewSample::OnMidiMsg(WPARAM midiDataParam, LPARAM)
 	switch(event)
 	{
 	case MIDIEvents::evNoteOff: // Note Off
-		midibyte2 = 0;
-
+		if(m_midiSustainActive[channel])
+		{
+			m_midiSustainBuffer[channel].push_back(midiData);
+			return 1;
+		}
+		[[fallthrough]];
 	case MIDIEvents::evNoteOn: // Note On
 		LimitMax(nNote, NOTE_MAX);
 		pModDoc->NoteOff(nNote, true);
-		if(midibyte2 & 0x7F)
+		if(event != MIDIEvents::evNoteOff)
 		{
-			nVol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midivolume);
+			nVol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
 			PlayNote(nNote, 0, nVol);
 		}
 		break;
 
 	case MIDIEvents::evControllerChange: //Controller change
-		switch(midibyte1)
+		switch(midiByte1)
 		{
 		case MIDIEvents::MIDICC_Volume_Coarse: //Volume
-			midivolume = midibyte2;
+			midiVolume = midiByte2;
+			break;
+
+		case MIDIEvents::MIDICC_HoldPedal_OnOff:
+			m_midiSustainActive[channel] = (midiByte2 >= 0x40);
+			if(!m_midiSustainActive[channel])
+			{
+				// Release all notes
+				for(const auto offEvent : m_midiSustainBuffer[channel])
+				{
+					OnMidiMsg(offEvent, 0);
+				}
+				m_midiSustainBuffer[channel].clear();
+			}
 			break;
 		}
-		break;
 	}
 
 	return 1;

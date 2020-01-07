@@ -3486,16 +3486,16 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	//  BYTE event  = (dwMidiData>>16) & 0x64;
 	//. Sample- and instrumentview handle midi mesages in their own methods.
 
-	const uint8 nByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
-	const uint8 nByte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
+	const uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
+	const uint8 midiByte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
+	const uint8 channel = MIDIEvents::GetChannelFromEvent(midiData);
 
-	const uint8 nNote = nByte1 + NOTE_MIN;
-	int nVol = nByte2;  // At this stage nVol is a non linear value in [0;127]
+	const uint8 nNote = midiByte1 + NOTE_MIN;
+	int vol = midiByte2;  // At this stage nVol is a non linear value in [0;127]
 	                    // Need to convert to linear in [0;64] - see below
 	MIDIEvents::EventType event = MIDIEvents::GetTypeFromEvent(midiData);
-	uint8 channel = MIDIEvents::GetChannelFromEvent(midiData);
 
-	if((event == MIDIEvents::evNoteOn) && !nVol)
+	if((event == MIDIEvents::evNoteOn) && !vol)
 		event = MIDIEvents::evNoteOff;  //Convert event to note-off if req'd
 
 
@@ -3541,6 +3541,11 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	switch(event)
 	{
 	case MIDIEvents::evNoteOff:  // Note Off
+		if(m_midiSustainActive[channel])
+		{
+			m_midiSustainBuffer[channel].push_back(midiData);
+			return 1;
+		}
 		// The following method takes care of:
 		// . Silencing specific active notes (just setting nNote to 255 as was done before is not acceptible)
 		// . Entering a note off in pattern if required
@@ -3552,20 +3557,20 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		if((pMainFrm->GetSoundFilePlaying() != &sndFile || sndFile.IsPaused()) && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN))
 			pModDoc->OnPatternPlayNoLoop();
 
-		nVol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
-		if(nVol < 0)
-			nVol = -1;
+		vol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
+		if(vol < 0)
+			vol = -1;
 		else
-			nVol = (nVol + 3) / 4;  //Value from [0,256] to [0,64]
-		TempEnterNote(nNote, nVol, true);
+			vol = (vol + 3) / 4;  //Value from [0,256] to [0,64]
+		TempEnterNote(nNote, vol, true);
 		break;
 
 	case MIDIEvents::evPolyAftertouch:  // Polyphonic aftertouch
-		EnterAftertouch(nNote, nVol);
+		EnterAftertouch(nNote, vol);
 		break;
 
 	case MIDIEvents::evChannelAftertouch:  // Channel aftertouch
-		EnterAftertouch(NOTE_NONE, nByte1);
+		EnterAftertouch(NOTE_NONE, midiByte1);
 		break;
 
 	case MIDIEvents::evPitchBend:  // Pitch wheel
@@ -3573,20 +3578,34 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		break;
 
 	case MIDIEvents::evControllerChange:  //Controller change
-		switch(nByte1)
-		{
-		case MIDIEvents::MIDICC_Volume_Coarse:  //Volume
-			midiVolume = nByte2;
-			break;
-		}
-
 		// Checking whether to record MIDI controller change as MIDI macro change.
 		// Don't write this if command was already written by MIDI mapping.
 		if((paramValue == uint16_max || sndFile.GetType() != MOD_TYPE_MPT)
 		   && (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL)
-		   && !TrackerSettings::Instance().midiIgnoreCCs.Get()[nByte1 & 0x7F])
+		   && !TrackerSettings::Instance().midiIgnoreCCs.Get()[midiByte1 & 0x7F])
 		{
 			recordParamAsZxx = true;
+		}
+
+		switch(midiByte1)
+		{
+		case MIDIEvents::MIDICC_Volume_Coarse:
+			midiVolume = midiByte2;
+			break;
+
+		case MIDIEvents::MIDICC_HoldPedal_OnOff:
+			m_midiSustainActive[channel] = (midiByte2 >= 0x40);
+			if(!m_midiSustainActive[channel])
+			{
+				// Release all notes
+				for(const auto offEvent : m_midiSustainBuffer[channel])
+				{
+					OnMidiMsg(offEvent, 0);
+				}
+				m_midiSustainBuffer[channel].clear();
+			}
+			recordParamAsZxx = false;
+			break;
 		}
 		break;
 
@@ -3627,14 +3646,14 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		if(m.IsPcNote())
 		{
 			pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
-			m.SetValueEffectCol(static_cast<decltype(m.GetValueEffectCol())>(Util::muldivr(nByte2, ModCommand::maxColumnValue, 127)));
+			m.SetValueEffectCol(static_cast<decltype(m.GetValueEffectCol())>(Util::muldivr(midiByte2, ModCommand::maxColumnValue, 127)));
 			update = true;
 		} else if(m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI)
 		{
 			// Write command only if there's no existing command or already a midi macro command.
 			pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
 			m.command = CMD_SMOOTHMIDI;
-			m.param = nByte2;
+			m.param = midiByte2;
 			update = true;
 		}
 		if(update)
