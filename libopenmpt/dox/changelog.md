@@ -13,6 +13,10 @@ is just a high-level summary.
     can now be selected via ctl `render.resampler.emulate_amiga_type`. Possible
     values are: `"auto"`, `"a500"`, `"a1200"`, and an experimental option
     `"unfiltered"`.
+ *  [**New**] libopenmpt: New API `openmpt::module::get_current_estimated_bpm()`
+    (C++), and `openmpt_module_get_current_estimated_bpm()` (C) which provides
+    accurate beats per minute information for module formats with time signature
+    and an educated guess based on speed and tempo for others.
  *  [**New**] libopenmpt: New type-aware ctl APIs that do not require memory
     allocations and are thus realtime-safe:
     `openmpt::module::ctl_get_boolean()`, `openmpt::module::ctl_get_integer()`,
