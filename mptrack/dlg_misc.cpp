@@ -319,7 +319,10 @@ void CModTypeDlg::OnTempoSwing()
 void CModTypeDlg::OnLegacyPlaybackSettings()
 {
 	CLegacyPlaybackSettingsDlg dlg(this, m_playBehaviour, m_nType);
-	dlg.DoModal();
+	if(dlg.DoModal() == IDOK)
+	{
+		m_playBehaviour = dlg.GetPlayBehaviour();
+	}
 	UpdateDialog();
 }
 
@@ -489,25 +492,64 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 
 
 //////////////////////////////////////////////////////////////////////////////
-// CLegacyPlaybackSettings
+// Legacy Playback Settings dialog
 
-BEGIN_MESSAGE_MAP(CLegacyPlaybackSettingsDlg, CDialog)
-	ON_COMMAND(IDC_BUTTON1,			&CLegacyPlaybackSettingsDlg::OnSelectDefaults)
-	ON_CLBN_CHKCHANGE(IDC_LIST1,	&CLegacyPlaybackSettingsDlg::UpdateSelectDefaults)
+BEGIN_MESSAGE_MAP(CLegacyPlaybackSettingsDlg, ResizableDialog)
+	ON_COMMAND(IDC_BUTTON1,      &CLegacyPlaybackSettingsDlg::OnSelectDefaults)
+	ON_EN_UPDATE(IDC_EDIT1,      &CLegacyPlaybackSettingsDlg::OnFilterStringChanged)
+	ON_CLBN_CHKCHANGE(IDC_LIST1, &CLegacyPlaybackSettingsDlg::UpdateSelectDefaults)
 END_MESSAGE_MAP()
+
 
 void CLegacyPlaybackSettingsDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	ResizableDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST1,	m_CheckList);
 }
 
 
 BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	ResizableDialog::OnInitDialog();
+	OnFilterStringChanged();
+	UpdateSelectDefaults();
+	return TRUE;
+}
 
-	PlayBehaviourSet allowedFlags = CSoundFile::GetSupportedPlaybackBehaviour(m_modType);
+
+void CLegacyPlaybackSettingsDlg::OnSelectDefaults()
+{
+	const int count = m_CheckList.GetCount();
+	m_playBehaviour = CSoundFile::GetDefaultPlaybackBehaviour(m_modType);
+	for(int i = 0; i < count; i++)
+	{
+		m_CheckList.SetCheck(i, m_playBehaviour[m_CheckList.GetItemData(i)] ? BST_CHECKED : BST_UNCHECKED);
+	}
+}
+
+
+void CLegacyPlaybackSettingsDlg::UpdateSelectDefaults()
+{
+	const int count = m_CheckList.GetCount();
+	for(int i = 0; i < count; i++)
+	{
+		m_playBehaviour.set(m_CheckList.GetItemData(i),  m_CheckList.GetCheck(i) != BST_UNCHECKED);
+	}
+	const auto defaults = CSoundFile::GetDefaultPlaybackBehaviour(m_modType);
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(m_playBehaviour != defaults ? TRUE : FALSE);
+}
+
+
+void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
+{
+	CString s;
+	GetDlgItemText(IDC_EDIT1, s);
+	const bool filterActive = !s.IsEmpty();
+
+	m_CheckList.SetRedraw(FALSE);
+	m_CheckList.ResetContent();
+
+	const auto allowedFlags = CSoundFile::GetSupportedPlaybackBehaviour(m_modType);
 	for(size_t i = 0; i < kMaxPlayBehaviours; i++)
 	{
 		const TCHAR *desc = _T("");
@@ -629,57 +671,20 @@ BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 		default: MPT_ASSERT_NOTREACHED();
 		}
 
+		if(filterActive && _tcsstr(desc, s) == nullptr)
+			continue;
+
 		if(m_playBehaviour[i] || allowedFlags[i])
 		{
 			int item = m_CheckList.AddString(desc);
 			m_CheckList.SetItemData(item, i);
 			int check = m_playBehaviour[i] ? BST_CHECKED : BST_UNCHECKED;
-			if(!allowedFlags[i]) check = BST_INDETERMINATE;	// Is checked but not supported by format -> grey out
+			if(!allowedFlags[i])
+				check = BST_INDETERMINATE;  // Is checked but not supported by format -> grey out
 			m_CheckList.SetCheck(item, check);
 		}
 	}
-	UpdateSelectDefaults();
-	return TRUE;
-}
-
-
-void CLegacyPlaybackSettingsDlg::OnOK()
-{
-	CDialog::OnOK();
-
-	const int count = m_CheckList.GetCount();
-	for(int i = 0; i < count; i++)
-	{
-		m_playBehaviour.set(m_CheckList.GetItemData(i), m_CheckList.GetCheck(i) != BST_UNCHECKED);
-	}
-}
-
-
-void CLegacyPlaybackSettingsDlg::OnSelectDefaults()
-{
-	const int count = m_CheckList.GetCount();
-	PlayBehaviourSet defaults = CSoundFile::GetDefaultPlaybackBehaviour(m_modType);
-	for(int i = 0; i < count; i++)
-	{
-		m_CheckList.SetCheck(i, defaults[m_CheckList.GetItemData(i)] ? BST_CHECKED : BST_UNCHECKED);
-	}
-}
-
-
-void CLegacyPlaybackSettingsDlg::UpdateSelectDefaults()
-{
-	bool usesDefaults = false;
-	const int count = m_CheckList.GetCount();
-	PlayBehaviourSet defaults = CSoundFile::GetDefaultPlaybackBehaviour(m_modType);
-	for(int i = 0; i < count; i++)
-	{
-		if((m_CheckList.GetCheck(i) != BST_UNCHECKED) != defaults[m_CheckList.GetItemData(i)])
-		{
-			usesDefaults = true;
-			break;
-		}
-	}
-	GetDlgItem(IDC_BUTTON1)->EnableWindow(usesDefaults ? TRUE : FALSE);
+	m_CheckList.SetRedraw(TRUE);
 }
 
 
@@ -695,7 +700,7 @@ BOOL CShowLogDlg::OnInitDialog()
 }
 
 
-INT_PTR CShowLogDlg::ShowLog(LPCTSTR pszLog, LPCTSTR lpszTitle)
+INT_PTR CShowLogDlg::ShowLog(const TCHAR *pszLog, const TCHAR *lpszTitle)
 {
 	m_lpszLog = pszLog;
 	m_lpszTitle = lpszTitle;
@@ -723,7 +728,8 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 {
 	CString s;
 	CDialog::OnInitDialog();
-	for (CHANNELINDEX n = 0; n < m_nChannels; n++)
+	const CHANNELINDEX numChannels = sndFile.GetNumChannels();
+	for(CHANNELINDEX n = 0; n < numChannels; n++)
 	{
 		s.Format(_T("Channel %u"), n + 1);
 		if(sndFile.ChnSettings[n].szName[0] >= 0x20)
@@ -754,7 +760,7 @@ void CRemoveChannelsDlg::OnOK()
 	std::vector<int> selected(selCount);
 	m_RemChansList.GetSelItems(selCount, selected.data());
 
-	m_bKeepMask.assign(m_nChannels, true);
+	m_bKeepMask.assign(sndFile.GetNumChannels(), true);
 	for (const auto sel : selected)
 	{
 		m_bKeepMask[sel] = false;

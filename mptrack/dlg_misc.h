@@ -27,18 +27,18 @@ class CModTypeDlg: public CDialog
 protected:
 	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
 	CButton m_CheckBox1, m_CheckBox2, m_CheckBox3, m_CheckBox4, m_CheckBox5, m_CheckBoxPT1x, m_CheckBoxFt2VolRamp, m_CheckBoxAmigaLimits;
-	HICON m_warnIcon;
+	HICON m_warnIcon = nullptr;
 
 	CSoundFile &sndFile;
 public:
 	TempoSwing m_tempoSwing;
 	PlayBehaviourSet m_playBehaviour;
-	CHANNELINDEX m_nChannels;
-	MODTYPE m_nType;
-	bool initialized;
+	CHANNELINDEX m_nChannels = 0;
+	MODTYPE m_nType = MOD_TYPE_NONE;
+	bool initialized = false;
 
 public:
-	CModTypeDlg(CSoundFile &sf, CWnd *parent) : CDialog(IDD_MODDOC_MODTYPE, parent), sndFile(sf) { m_nType = MOD_TYPE_NONE; m_nChannels = 0; }
+	CModTypeDlg(CSoundFile &sf, CWnd *parent) : CDialog(IDD_MODDOC_MODTYPE, parent), sndFile(sf) { }
 	bool VerifyData();
 	void UpdateDialog();
 	void OnPTModeChanged();
@@ -64,27 +64,30 @@ protected:
 };
 
 
-class CLegacyPlaybackSettingsDlg : public CDialog
+class CLegacyPlaybackSettingsDlg : public ResizableDialog
 {
 protected:
 	CCheckListBox m_CheckList;
-	PlayBehaviourSet &m_playBehaviour;
+	PlayBehaviourSet m_playBehaviour;
 	MODTYPE m_modType;
 
 public:
 	CLegacyPlaybackSettingsDlg(CWnd *parent, PlayBehaviourSet &playBehaviour, MODTYPE modType)
-		: CDialog(IDD_LEGACY_PLAYBACK, parent)
-		, m_playBehaviour(playBehaviour)
-		, m_modType(modType)
-	{ }
+	    : ResizableDialog{IDD_LEGACY_PLAYBACK, parent}
+	    , m_playBehaviour{playBehaviour}
+	    , m_modType{modType}
+	{
+	}
+
+	PlayBehaviourSet GetPlayBehaviour() const { return m_playBehaviour; }
 
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;
 	BOOL OnInitDialog() override;
-	void OnOK() override;
 
 	afx_msg void OnSelectDefaults();
 	afx_msg void UpdateSelectDefaults();
+	afx_msg void OnFilterStringChanged();
 
 	DECLARE_MESSAGE_MAP()
 };
@@ -93,11 +96,12 @@ protected:
 class CShowLogDlg: public CDialog
 {
 public:
-	LPCTSTR m_lpszLog, m_lpszTitle;
+	const TCHAR *m_lpszLog = nullptr, *m_lpszTitle = nullptr;
 
 public:
-	CShowLogDlg(CWnd *parent = nullptr):CDialog(IDD_SHOWLOG, parent) { m_lpszLog = NULL; m_lpszTitle = NULL; }
-	INT_PTR ShowLog(LPCTSTR pszLog, LPCTSTR lpszTitle=NULL);
+	CShowLogDlg(CWnd *parent = nullptr)
+	    : CDialog{IDD_SHOWLOG, parent} {}
+	INT_PTR ShowLog(const TCHAR *pszLog, const TCHAR *lpszTitle = nullptr);
 
 protected:
 	BOOL OnInitDialog() override;
@@ -109,17 +113,18 @@ class CRemoveChannelsDlg: public CDialog
 public:
 	CSoundFile &sndFile;
 	std::vector<bool> m_bKeepMask;
-	CHANNELINDEX m_nChannels, m_nRemove;
+	CHANNELINDEX m_nRemove;
 	CListBox m_RemChansList;
 	bool m_ShowCancel;
 
 public:
-	CRemoveChannelsDlg(CSoundFile &sf, CHANNELINDEX nChns, bool showCancel = true, CWnd *parent=NULL) : CDialog(IDD_REMOVECHANNELS, parent), sndFile(sf)
+	CRemoveChannelsDlg(CSoundFile &sf, CHANNELINDEX toRemove, bool showCancel = true, CWnd *parent = nullptr)
+	    : CDialog{IDD_REMOVECHANNELS, parent}
+	    , sndFile{sf}
+	    , m_bKeepMask(sf.GetNumChannels(), true)
+	    , m_nRemove{toRemove}
+	    , m_ShowCancel{showCancel}
 	{
-		m_nChannels = sndFile.GetNumChannels(); 
-		m_nRemove = nChns;
-		m_bKeepMask.assign(m_nChannels, true);
-		m_ShowCancel = showCancel;
 	}
 
 protected:
