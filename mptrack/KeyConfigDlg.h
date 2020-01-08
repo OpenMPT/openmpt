@@ -31,7 +31,7 @@ public:
 		return std::find(separators.begin(), separators.end(), c) != separators.end();
 	}
 
-	void AddCommands(CommandID first, CommandID last);
+	void AddCommands(CommandID first, CommandID last, bool addSeparatorAtEnd = false);
 
 	CString name;
 	InputTargetContext id;
@@ -46,14 +46,19 @@ protected:
 	COptionsKeyboard *m_pOptKeyDlg;
 	HWND m_hParent = nullptr;
 	UINT m_nCtrlId = 0;
-	bool isFocussed = false, isDummy = false;
+	bool m_isFocussed = false, m_isDummy = false;
 
 public:
 	FlagSet<Modifiers> mod = ModNone;
 	UINT code = 0;
 
-	CCustEdit(bool dummyField) : isDummy(dummyField) { }
-	VOID SetParent(HWND h, UINT nID, COptionsKeyboard* pOKD) { m_hParent = h; m_nCtrlId = nID; m_pOptKeyDlg = pOKD;}
+	CCustEdit(bool dummyField) : m_isDummy(dummyField) { }
+	void SetParent(HWND h, UINT nID, COptionsKeyboard *pOKD)
+	{
+		m_hParent = h;
+		m_nCtrlId = nID;
+		m_pOptKeyDlg = pOKD;
+	}
 	void SetKey(FlagSet<Modifiers> mod, UINT code);
 	
 	BOOL PreTranslateMessage(MSG *pMsg) override;
@@ -77,13 +82,11 @@ protected:
 	CCustEdit m_eCustHotKey, m_eFindHotKey;
 	CEdit m_eFind;
 	CEdit m_eReport, m_eChordWaitTime;
-	UINT m_nKeyboardCfg = 0;
-	int m_nCurHotKey = -1, m_nCurCategory = -1, m_nCurKeyChoice = -1;
-	mpt::PathString m_sFullPathName;
+	CommandID m_curCommand = kcNull;
+	int m_curCategory = -1, m_curKeyChoice = -1;
+	mpt::PathString m_fullPathName;
 	std::unique_ptr<CCommandSet> m_localCmdSet;
-	bool m_bForceUpdate = false;
-	bool m_bModified = false;
-	bool m_bChoiceModified = false;
+	bool m_forceUpdate = false;
 
 	void ForceUpdateGUI();
 	void UpdateShortcutList(int category = -1);
@@ -123,7 +126,8 @@ protected:
 	afx_msg void OnClearHotKey();
 	afx_msg void OnFindHotKey();
 	afx_msg void OnDestroy();
-	DECLARE_MESSAGE_MAP();
+
+	DECLARE_MESSAGE_MAP()
 };
 
 OPENMPT_NAMESPACE_END
