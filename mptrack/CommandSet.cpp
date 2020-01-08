@@ -75,10 +75,11 @@ CCommandSet::CCommandSet()
 
 // Setup
 
-void KeyCommand::Define(uint32 uid, const TCHAR *message)
+KeyCommand::KeyCommand(uint32 uid, const TCHAR *message, std::vector<KeyCombination> keys)
+    : kcList{std::move(keys)}
+    , Message{message}
+    , UID{uid}
 {
-	Message = message;
-	UID = uid;
 }
 
 static constexpr struct
@@ -219,40 +220,40 @@ static constexpr struct
 	{KeyCommand::Hidden, kcVPNoteStopG_2, _T("Stop base octave +2 G")},
 	{KeyCommand::Hidden, kcVPNoteStopGS2, _T("Stop base octave +2 G#")},
 	{KeyCommand::Hidden, kcVPNoteStopA_3, _T("Stop base octave +3 A")},
-	{KeyCommand::Hidden, kcVPChordC_0, _T("base octave chord C")},
-	{KeyCommand::Hidden, kcVPChordCS0, _T("base octave chord C#")},
-	{KeyCommand::Hidden, kcVPChordD_0, _T("base octave chord D")},
-	{KeyCommand::Hidden, kcVPChordDS0, _T("base octave chord D#")},
-	{KeyCommand::Hidden, kcVPChordE_0, _T("base octave chord E")},
-	{KeyCommand::Hidden, kcVPChordF_0, _T("base octave chord F")},
-	{KeyCommand::Hidden, kcVPChordFS0, _T("base octave chord F#")},
-	{KeyCommand::Hidden, kcVPChordG_0, _T("base octave chord G")},
-	{KeyCommand::Hidden, kcVPChordGS0, _T("base octave chord G#")},
-	{KeyCommand::Hidden, kcVPChordA_1, _T("base octave +1 chord A")},
-	{KeyCommand::Hidden, kcVPChordAS1, _T("base octave +1 chord A#")},
-	{KeyCommand::Hidden, kcVPChordB_1, _T("base octave +1 chord B")},
-	{KeyCommand::Hidden, kcVPChordC_1, _T("base octave +1 chord C")},
-	{KeyCommand::Hidden, kcVPChordCS1, _T("base octave +1 chord C#")},
-	{KeyCommand::Hidden, kcVPChordD_1, _T("base octave +1 chord D")},
-	{KeyCommand::Hidden, kcVPChordDS1, _T("base octave +1 chord D#")},
-	{KeyCommand::Hidden, kcVPChordE_1, _T("base octave +1 chord E")},
-	{KeyCommand::Hidden, kcVPChordF_1, _T("base octave +1 chord F")},
-	{KeyCommand::Hidden, kcVPChordFS1, _T("base octave +1 chord F#")},
-	{KeyCommand::Hidden, kcVPChordG_1, _T("base octave +1 chord G")},
-	{KeyCommand::Hidden, kcVPChordGS1, _T("base octave +1 chord G#")},
-	{KeyCommand::Hidden, kcVPChordA_2, _T("base octave +2 chord A")},
-	{KeyCommand::Hidden, kcVPChordAS2, _T("base octave +2 chord A#")},
-	{KeyCommand::Hidden, kcVPChordB_2, _T("base octave +2 chord B")},
-	{KeyCommand::Hidden, kcVPChordC_2, _T("base octave +2 chord C")},
-	{KeyCommand::Hidden, kcVPChordCS2, _T("base octave +2 chord C#")},
-	{KeyCommand::Hidden, kcVPChordD_2, _T("base octave +2 chord D")},
-	{KeyCommand::Hidden, kcVPChordDS2, _T("base octave +2 chord D#")},
-	{KeyCommand::Hidden, kcVPChordE_2, _T("base octave +2 chord E")},
-	{KeyCommand::Hidden, kcVPChordF_2, _T("base octave +2 chord F")},
-	{KeyCommand::Hidden, kcVPChordFS2, _T("base octave +2 chord F#")},
-	{KeyCommand::Hidden, kcVPChordG_2, _T("base octave +2 chord G")},
-	{KeyCommand::Hidden, kcVPChordGS2, _T("base octave +2 chord G#")},
-	{KeyCommand::Hidden, kcVPChordA_3, _T("base octave chord +3 A")},
+	{KeyCommand::Hidden, kcVPChordC_0, _T("Base octave chord C")},
+	{KeyCommand::Hidden, kcVPChordCS0, _T("Base octave chord C#")},
+	{KeyCommand::Hidden, kcVPChordD_0, _T("Base octave chord D")},
+	{KeyCommand::Hidden, kcVPChordDS0, _T("Base octave chord D#")},
+	{KeyCommand::Hidden, kcVPChordE_0, _T("Base octave chord E")},
+	{KeyCommand::Hidden, kcVPChordF_0, _T("Base octave chord F")},
+	{KeyCommand::Hidden, kcVPChordFS0, _T("Base octave chord F#")},
+	{KeyCommand::Hidden, kcVPChordG_0, _T("Base octave chord G")},
+	{KeyCommand::Hidden, kcVPChordGS0, _T("Base octave chord G#")},
+	{KeyCommand::Hidden, kcVPChordA_1, _T("Base octave +1 chord A")},
+	{KeyCommand::Hidden, kcVPChordAS1, _T("Base octave +1 chord A#")},
+	{KeyCommand::Hidden, kcVPChordB_1, _T("Base octave +1 chord B")},
+	{KeyCommand::Hidden, kcVPChordC_1, _T("Base octave +1 chord C")},
+	{KeyCommand::Hidden, kcVPChordCS1, _T("Base octave +1 chord C#")},
+	{KeyCommand::Hidden, kcVPChordD_1, _T("Base octave +1 chord D")},
+	{KeyCommand::Hidden, kcVPChordDS1, _T("Base octave +1 chord D#")},
+	{KeyCommand::Hidden, kcVPChordE_1, _T("Base octave +1 chord E")},
+	{KeyCommand::Hidden, kcVPChordF_1, _T("Base octave +1 chord F")},
+	{KeyCommand::Hidden, kcVPChordFS1, _T("Base octave +1 chord F#")},
+	{KeyCommand::Hidden, kcVPChordG_1, _T("Base octave +1 chord G")},
+	{KeyCommand::Hidden, kcVPChordGS1, _T("Base octave +1 chord G#")},
+	{KeyCommand::Hidden, kcVPChordA_2, _T("Base octave +2 chord A")},
+	{KeyCommand::Hidden, kcVPChordAS2, _T("Base octave +2 chord A#")},
+	{KeyCommand::Hidden, kcVPChordB_2, _T("Base octave +2 chord B")},
+	{KeyCommand::Hidden, kcVPChordC_2, _T("Base octave +2 chord C")},
+	{KeyCommand::Hidden, kcVPChordCS2, _T("Base octave +2 chord C#")},
+	{KeyCommand::Hidden, kcVPChordD_2, _T("Base octave +2 chord D")},
+	{KeyCommand::Hidden, kcVPChordDS2, _T("Base octave +2 chord D#")},
+	{KeyCommand::Hidden, kcVPChordE_2, _T("Base octave +2 chord E")},
+	{KeyCommand::Hidden, kcVPChordF_2, _T("Base octave +2 chord F")},
+	{KeyCommand::Hidden, kcVPChordFS2, _T("Base octave +2 chord F#")},
+	{KeyCommand::Hidden, kcVPChordG_2, _T("Base octave +2 chord G")},
+	{KeyCommand::Hidden, kcVPChordGS2, _T("Base octave +2 chord G#")},
+	{KeyCommand::Hidden, kcVPChordA_3, _T("Base octave chord +3 A")},
 	{KeyCommand::Hidden, kcVPChordStopC_0, _T("Stop base octave chord C")},
 	{KeyCommand::Hidden, kcVPChordStopCS0, _T("Stop base octave chord C#")},
 	{KeyCommand::Hidden, kcVPChordStopD_0, _T("Stop base octave chord D")},
@@ -724,18 +725,18 @@ static constexpr struct
 	{1999, kcPastePattern, _T("Paste from Pattern Clipboard")},
 };
 
-//Get command descriptions etc.. loaded up.
+// Get command descriptions etc.. loaded up.
 void CCommandSet::SetupCommands()
 {
 	for(const auto &def : CommandDefinitions)
 	{
-		m_commands[def.cmd].Define(def.uid, def.description);
+		m_commands[def.cmd] = {def.uid, def.description};
 	}
 
 	for(int j = kcStartSampleCues; j <= kcEndSampleCues; j++)
 	{
 		CString s = mpt::cformat(_T("Preview Sample Cue %1"))(j - kcStartSampleCues + 1);
-		m_commands[j].Define(1924 + j - kcStartSampleCues, s);
+		m_commands[j] = {static_cast<uint32>(1924 + j - kcStartSampleCues), s};
 	}
 	static_assert(1924 + kcEndSampleCues - kcStartSampleCues < 1950);
 
@@ -749,31 +750,31 @@ void CCommandSet::SetupCommands()
 
 		for(int i = kcVPStartNotes; i <= kcVPEndNotes; i++)
 		{
-			m_commands[i - kcVPStartNotes + contextStartNotes].Define(KeyCommand::Hidden, m_commands[i].Message);
+			m_commands[i - kcVPStartNotes + contextStartNotes] = {KeyCommand::Hidden, m_commands[i].Message};
 		}
 		for(int i = kcVPStartNoteStops; i <= kcVPEndNoteStops; i++)
 		{
-			m_commands[i - kcVPStartNoteStops + contextStopNotes].Define(KeyCommand::Hidden, m_commands[i].Message);
+			m_commands[i - kcVPStartNoteStops + contextStopNotes] = {KeyCommand::Hidden, m_commands[i].Message};
 		}
 	}
 
-#ifdef _DEBUG
+#ifdef MPT_BUILD_DEBUG
+	// Ensure that every visible command has a unique ID
 	for(size_t i = 0; i < kcNumCommands; i++)
 	{
-		if(m_commands[i].ID() != 0)  // ignore unset UIDs
+		if(m_commands[i].ID() != 0 || !m_commands[i].IsHidden())
 		{
 			for(size_t j = i + 1; j < kcNumCommands; j++)
 			{
 				if(m_commands[i].ID() == m_commands[j].ID())
 				{
-					LOG_COMMANDSET(mpt::format(U_("Duplicate command UID: %1\n"))(m_commands[i].ID()));
+					LOG_COMMANDSET(mpt::format(U_("Duplicate or unset command UID: %1\n"))(m_commands[i].ID()));
 					MPT_ASSERT_NOTREACHED();
 				}
 			}
 		}
 	}
-#endif //_DEBUG
-
+#endif  // MPT_BUILD_DEBUG
 }
 
 
@@ -1437,19 +1438,11 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 
 			// Handle super-contexts (contexts that represent a set of sub contexts)
 			if(curKc.Context() == kCtxViewPatterns)
-			{
-				contexts.push_back(kCtxViewPatternsNote);
-				contexts.push_back(kCtxViewPatternsIns);
-				contexts.push_back(kCtxViewPatternsVol);
-				contexts.push_back(kCtxViewPatternsFX);
-				contexts.push_back(kCtxViewPatternsFXparam);
-			} else if(curKc.Context() == kCtxCtrlPatterns)
-			{
+				contexts.insert(contexts.end(), {kCtxViewPatternsNote, kCtxViewPatternsIns, kCtxViewPatternsVol, kCtxViewPatternsFX, kCtxViewPatternsFXparam});
+			else if(curKc.Context() == kCtxCtrlPatterns)
 				contexts.push_back(kCtxCtrlOrderlist);
-			} else
-			{
+			else
 				contexts.push_back(curKc.Context());
-			}
 
 			for(auto ctx : contexts)
 			{
@@ -1495,11 +1488,11 @@ ctx:UID:Description:Modifier:Key:EventMask
 		ErrorBox(IDS_CANT_OPEN_FILE_FOR_WRITING);
 		return false;
 	}
-	f << "//----------------- OpenMPT key binding definition file  ---------------\n";
-	f << "//- Format is:                                                         -\n";
-	f << "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n";
-	f << "//----------------------------------------------------------------------\n";
-	f << "version:" << KEYMAP_VERSION << "\n";
+	f << "//----------------- OpenMPT key binding definition file  ---------------\n"
+	     "//- Format is:                                                         -\n"
+	     "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n"
+	     "//----------------------------------------------------------------------\n"
+	     "version:" << KEYMAP_VERSION << "\n";
 
 	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
 	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
@@ -1533,9 +1526,9 @@ ctx:UID:Description:Modifier:Key:EventMask
 				}
 				f << ":"
 					<< static_cast<int>(kc.EventType().GetRaw()) << "\t\t//"
-					<< mpt::ToCharset(mpt::Charset::UTF8, GetCommandText((CommandID)cmd)).c_str() << ": "
-					<< mpt::ToCharset(mpt::Charset::UTF8, kc.GetKeyText()).c_str() << " ("
-					<< mpt::ToCharset(mpt::Charset::UTF8, kc.GetKeyEventText()).c_str() << ")\n";
+					<< mpt::ToCharset(mpt::Charset::UTF8, GetCommandText((CommandID)cmd)) << ": "
+					<< mpt::ToCharset(mpt::Charset::UTF8, kc.GetKeyText()) << " ("
+					<< mpt::ToCharset(mpt::Charset::UTF8, kc.GetKeyEventText()) << ")\n";
 			}
 		}
 	}

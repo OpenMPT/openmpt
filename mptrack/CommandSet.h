@@ -965,10 +965,11 @@ struct KeyCommand
 	CString Message;
 
 protected:
-	uint32 UID;
+	uint32 UID = 0;
 
 public:
-	void Define(uint32 uid, const TCHAR *message);
+	KeyCommand() = default;
+	KeyCommand(uint32 uid, const TCHAR *message = _T(""), std::vector<KeyCombination> keys = {});
 
 	// Unique ID for on-disk keymap format.
 	// Note that hidden commands do not have a unique ID, because they are never written to keymap files.
