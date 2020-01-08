@@ -25,7 +25,6 @@
 #define IDD_EDIT_REPLACE                122
 #define IDD_PATTERN_PROPERTIES          123
 #define IDD_PATTERN_EDITCOMMAND         124
-#define IDD_SHOWLOG                     125
 #define IDD_VIEW_GLOBALS                126
 #define IDD_SAMPLE_AMPLIFY              130
 #define IDD_SAMPLE_RESAMPLE             131
@@ -578,7 +577,6 @@
 #define IDC_SPIN_CURRENTSPEED           2018
 #define IDC_TEXT_CURRENTTEMPO           2019
 #define IDC_TEXT_CURRENTSPEED           2020
-#define IDC_EDIT_LOG                    2021
 #define IDC_ORDERLIST                   2024
 #define IDC_PATTERN_PLAY                2025
 #define IDC_PATTERN_PLAYFROMSTART       2026

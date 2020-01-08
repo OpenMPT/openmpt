@@ -93,21 +93,6 @@ protected:
 };
 
 
-class CShowLogDlg: public CDialog
-{
-public:
-	const TCHAR *m_lpszLog = nullptr, *m_lpszTitle = nullptr;
-
-public:
-	CShowLogDlg(CWnd *parent = nullptr)
-	    : CDialog{IDD_SHOWLOG, parent} {}
-	INT_PTR ShowLog(const TCHAR *pszLog, const TCHAR *lpszTitle = nullptr);
-
-protected:
-	BOOL OnInitDialog() override;
-};
-
-
 class CRemoveChannelsDlg: public CDialog
 {
 public:

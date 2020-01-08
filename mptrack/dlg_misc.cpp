@@ -688,26 +688,6 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 }
 
 
-
-//////////////////////////////////////////////////////////////////////////////
-// CShowLogDlg
-
-BOOL CShowLogDlg::OnInitDialog()
-{
-	CDialog::OnInitDialog();
-	if (m_lpszTitle) SetWindowText(m_lpszTitle);
-	return FALSE;
-}
-
-
-INT_PTR CShowLogDlg::ShowLog(const TCHAR *pszLog, const TCHAR *lpszTitle)
-{
-	m_lpszLog = pszLog;
-	m_lpszTitle = lpszTitle;
-	return DoModal();
-}
-
-
 ///////////////////////////////////////////////////////////
 // CRemoveChannelsDlg
 
