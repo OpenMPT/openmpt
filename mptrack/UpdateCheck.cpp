@@ -543,7 +543,8 @@ CString CUpdateCheck::Error::FormatErrorCode(CString errorMessage, DWORD errorCo
 		NULL);
 	if(!lpMsgBuf)
 	{
-		if(GetLastError() == ERROR_NOT_ENOUGH_MEMORY)
+		DWORD e = GetLastError();
+		if((e == ERROR_NOT_ENOUGH_MEMORY) || (e == ERROR_OUTOFMEMORY))
 		{
 			MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
 		}
