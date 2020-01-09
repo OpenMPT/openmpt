@@ -16,10 +16,10 @@
 
 // GDI+
 #include <atlbase.h>
-#define max(a,b) (((a) > (b)) ? (a) : (b))
-#define min(a,b) (((a) < (b)) ? (a) : (b))
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#define min(a, b) (((a) < (b)) ? (a) : (b))
 #pragma warning(push)
-#pragma warning(disable:4458) // declaration of 'x' hides class member
+#pragma warning(disable : 4458)  // declaration of 'x' hides class member
 #include <gdiplus.h>
 #pragma warning(pop)
 #undef min
@@ -30,7 +30,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 GdiplusRAII::GdiplusRAII()
-	: gdiplusToken(0)
 {
 	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
@@ -45,9 +44,9 @@ GdiplusRAII::~GdiplusRAII()
 
 
 RawGDIDIB::RawGDIDIB(uint32 width, uint32 height)
-	: width(width)
-	, height(height)
-	, pixels(width * height)
+    : width(width)
+    , height(height)
+    , pixels(width * height)
 {
 	MPT_ASSERT(width > 0);
 	MPT_ASSERT(height > 0);
@@ -61,7 +60,7 @@ namespace GDIP
 static CComPtr<IStream> GetStream(mpt::const_byte_span data)
 {
 	CComPtr<IStream> stream;
-	stream.Attach(SHCreateMemStream(mpt::byte_cast<const unsigned char*>(data.data()), mpt::saturate_cast<UINT>(data.size())));
+	stream.Attach(SHCreateMemStream(mpt::byte_cast<const unsigned char *>(data.data()), mpt::saturate_cast<UINT>(data.size())));
 	if(!stream)
 	{
 		throw bad_image();
@@ -116,35 +115,74 @@ std::unique_ptr<Gdiplus::Metafile> LoadVectorImage(FileReader file)
 }
 
 
-std::unique_ptr<Gdiplus::Image> ResizeImage(Gdiplus::Image &src, double scaling)
+static std::unique_ptr<Gdiplus::Bitmap> DoResize(Gdiplus::Image &src, double scaling, int spriteWidth, int spriteHeight)
 {
-	const int newWidth = mpt::saturate_round<int>(src.GetWidth() * scaling), newHeight = mpt::saturate_round<int>(src.GetHeight() * scaling);
-	std::unique_ptr<Gdiplus::Image> resizedImage = std::make_unique<Gdiplus::Bitmap>(newWidth, newHeight, PixelFormat32bppARGB);
-	std::unique_ptr<Gdiplus::Graphics> resizedGraphics(Gdiplus::Graphics::FromImage(resizedImage.get()));
+	const int width = src.GetWidth(), height = src.GetHeight();
+	int newWidth = 0, newHeight = 0, newSpriteWidth = 0, newSpriteHeight = 0;
 
-	resizedGraphics->SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);
-	resizedGraphics->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHalf);
-	resizedGraphics->SetSmoothingMode(Gdiplus::SmoothingModeNone);
-	resizedGraphics->DrawImage(&src, 0, 0, newWidth, newHeight);
-	return resizedImage;
-}
+	if(spriteWidth <= 0 || spriteHeight <= 0)
+	{
+		newWidth = mpt::saturate_round<int>(width * scaling);
+		newHeight = mpt::saturate_round<int>(height * scaling);
+	} else
+	{
+		// Sprite mode: Source images consists of several sprites / icons that should be scaled individually
+		newSpriteWidth = mpt::saturate_round<int>(spriteWidth * scaling);
+		newSpriteHeight = mpt::saturate_round<int>(spriteHeight * scaling);
+		newWidth = width * newSpriteWidth / spriteWidth;
+		newHeight = height * newSpriteHeight / spriteHeight;
+	}
 
-
-std::unique_ptr<Gdiplus::Bitmap> ResizeImage(Gdiplus::Bitmap &src, double scaling)
-{
-	const int newWidth = mpt::saturate_round<int>(src.GetWidth() * scaling), newHeight = mpt::saturate_round<int>(src.GetHeight() * scaling);
 	std::unique_ptr<Gdiplus::Bitmap> resizedImage = std::make_unique<Gdiplus::Bitmap>(newWidth, newHeight, PixelFormat32bppARGB);
 	std::unique_ptr<Gdiplus::Graphics> resizedGraphics(Gdiplus::Graphics::FromImage(resizedImage.get()));
+	if(scaling >= 1.5)
+	{
+		// Prefer crisp look on real high-DPI devices
+		resizedGraphics->SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);
+		resizedGraphics->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHalf);
+		resizedGraphics->SetSmoothingMode(Gdiplus::SmoothingModeNone);
+	} else
+	{
+		resizedGraphics->SetInterpolationMode(Gdiplus::InterpolationModeHighQualityBicubic);
+		resizedGraphics->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHighQuality);
+		resizedGraphics->SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
+	}
+	if(spriteWidth <= 0 || spriteHeight <= 0)
+	{
+		resizedGraphics->DrawImage(&src, 0, 0, newWidth, newHeight);
+	} else
+	{
+		// Draw each source sprite individually into separate image to avoid neighbouring source sprites bleeding in
+		std::unique_ptr<Gdiplus::Bitmap> spriteImage = std::make_unique<Gdiplus::Bitmap>(spriteWidth, spriteHeight, PixelFormat32bppARGB);
+		std::unique_ptr<Gdiplus::Graphics> spriteGraphics(Gdiplus::Graphics::FromImage(spriteImage.get()));
 
-	resizedGraphics->SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);
-	resizedGraphics->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHalf);
-	resizedGraphics->SetSmoothingMode(Gdiplus::SmoothingModeNone);
-	resizedGraphics->DrawImage(&src, 0, 0, newWidth, newHeight);
+		for(int srcY = 0, destY = 0; srcY < height; srcY += spriteHeight, destY += newSpriteHeight)
+		{
+			for(int srcX = 0, destX = 0; srcX < width; srcX += spriteWidth, destX += newSpriteWidth)
+			{
+				spriteGraphics->Clear({0, 0, 0, 0});
+				spriteGraphics->DrawImage(&src, Gdiplus::Rect(0, 0, spriteWidth, spriteHeight), srcX, srcY, spriteWidth, spriteHeight, Gdiplus::UnitPixel);
+				resizedGraphics->DrawImage(spriteImage.get(), destX, destY, newSpriteWidth, newSpriteHeight);
+			}
+		}
+	}
 	return resizedImage;
 }
 
 
-} // namespace GDPI
+std::unique_ptr<Gdiplus::Image> ResizeImage(Gdiplus::Image &src, double scaling, int spriteWidth, int spriteHeight)
+{
+	return DoResize(src, scaling, spriteWidth, spriteHeight);
+}
+
+
+std::unique_ptr<Gdiplus::Bitmap> ResizeImage(Gdiplus::Bitmap &src, double scaling, int spriteWidth, int spriteHeight)
+{
+	return DoResize(src, scaling, spriteWidth, spriteHeight);
+}
+
+
+}  // namespace GDIP
 
 
 std::unique_ptr<RawGDIDIB> ToRawGDIDIB(Gdiplus::Bitmap &bitmap)
@@ -172,20 +210,20 @@ std::unique_ptr<RawGDIDIB> ToRawGDIDIB(Gdiplus::Bitmap &bitmap)
 }
 
 
-std::unique_ptr<RawGDIDIB> LoadPixelImage(mpt::const_byte_span file, double scaling)
+std::unique_ptr<RawGDIDIB> LoadPixelImage(mpt::const_byte_span file, double scaling, int spriteWidth, int spriteHeight)
 {
 	auto bitmap = GDIP::LoadPixelImage(file);
 	if(scaling != 1.0)
-		bitmap = GDIP::ResizeImage(*bitmap, scaling);
+		bitmap = GDIP::ResizeImage(*bitmap, scaling, spriteWidth, spriteHeight);
 	return ToRawGDIDIB(*bitmap);
 }
 
 
-std::unique_ptr<RawGDIDIB> LoadPixelImage(FileReader file, double scaling)
+std::unique_ptr<RawGDIDIB> LoadPixelImage(FileReader file, double scaling, int spriteWidth, int spriteHeight)
 {
 	auto bitmap = GDIP::LoadPixelImage(file);
 	if(scaling != 1.0)
-		bitmap = GDIP::ResizeImage(*bitmap, scaling);
+		bitmap = GDIP::ResizeImage(*bitmap, scaling, spriteWidth, spriteHeight);
 	return ToRawGDIDIB(*bitmap);
 }
 

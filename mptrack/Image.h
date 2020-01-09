@@ -39,8 +39,10 @@ public:
 		uint8 g;
 		uint8 r;
 		uint8 a;
-		MPT_CONSTEXPR11_FUN Pixel() noexcept : b(0), g(0), r(0), a(0) {}
-		MPT_CONSTEXPR11_FUN Pixel(uint8 r, uint8 g, uint8 b, uint8 a) noexcept : b(b), g(g), r(r), a(a) {}
+		constexpr Pixel() noexcept
+		    : b(0), g(0), r(0), a(0) {}
+		constexpr Pixel(uint8 r, uint8 g, uint8 b, uint8 a) noexcept
+		    : b(b), g(g), r(r), a(a) {}
 	};
 private:
 	uint32 width;
@@ -49,10 +51,10 @@ private:
 public:
 	RawGDIDIB(uint32 width, uint32 height);
 public:
-	MPT_CONSTEXPR11_FUN uint32 Width() const noexcept { return width; }
-	MPT_CONSTEXPR11_FUN uint32 Height() const noexcept { return height; }
-	MPT_FORCEINLINE Pixel & operator()(uint32 x, uint32 y) noexcept { return pixels[y*width + x]; }
-	MPT_FORCEINLINE const Pixel & operator()(uint32 x, uint32 y) const noexcept { return pixels[y*width + x]; }
+	constexpr uint32 Width() const noexcept { return width; }
+	constexpr uint32 Height() const noexcept { return height; }
+	MPT_FORCEINLINE Pixel &operator()(uint32 x, uint32 y) noexcept { return pixels[y * width + x]; }
+	MPT_FORCEINLINE const Pixel &operator()(uint32 x, uint32 y) const noexcept { return pixels[y * width + x]; }
 	std::vector<Pixel> &Pixels() { return pixels; }
 	const std::vector<Pixel> &Pixels() const { return pixels; }
 };
@@ -61,7 +63,7 @@ public:
 class GdiplusRAII
 {
 private:
-	ULONG_PTR gdiplusToken;
+	ULONG_PTR gdiplusToken = 0;
 public:
 	GdiplusRAII();
 	~GdiplusRAII();
@@ -77,8 +79,8 @@ namespace GDIP
 	std::unique_ptr<Gdiplus::Metafile> LoadVectorImage(mpt::const_byte_span file);
 	std::unique_ptr<Gdiplus::Metafile> LoadVectorImage(FileReader file);
 
-	std::unique_ptr<Gdiplus::Image> ResizeImage(Gdiplus::Image &src, double scaling);
-	std::unique_ptr<Gdiplus::Bitmap> ResizeImage(Gdiplus::Bitmap &src, double scaling);
+	std::unique_ptr<Gdiplus::Image> ResizeImage(Gdiplus::Image &src, double scaling, int spriteWidth = 0, int spriteHeight = 0);
+	std::unique_ptr<Gdiplus::Bitmap> ResizeImage(Gdiplus::Bitmap &src, double scaling, int spriteWidth = 0, int spriteHeight = 0);
 
 	using Pixel = Gdiplus::ARGB;
 
@@ -94,7 +96,7 @@ namespace GDIP
 		}
 	}
 
-	MPT_CONSTEXPR11_FUN Pixel AsPixel(uint8 r, uint8 g, uint8 b, uint8 a) noexcept
+	constexpr Pixel AsPixel(uint8 r, uint8 g, uint8 b, uint8 a) noexcept
 	{
 		return Pixel(0)
 			| (static_cast<Pixel>(r) << RED_SHIFT)
@@ -104,12 +106,12 @@ namespace GDIP
 			;
 	}
 
-	MPT_CONSTEXPR11_FUN uint8 R(Pixel p) noexcept { return static_cast<uint8>(p >> RED_SHIFT); }
-	MPT_CONSTEXPR11_FUN uint8 G(Pixel p) noexcept { return static_cast<uint8>(p >> GREEN_SHIFT); }
-	MPT_CONSTEXPR11_FUN uint8 B(Pixel p) noexcept { return static_cast<uint8>(p >> BLUE_SHIFT); }
-	MPT_CONSTEXPR11_FUN uint8 A(Pixel p) noexcept { return static_cast<uint8>(p >> ALPHA_SHIFT); }
+	constexpr uint8 R(Pixel p) noexcept { return static_cast<uint8>(p >> RED_SHIFT); }
+	constexpr uint8 G(Pixel p) noexcept { return static_cast<uint8>(p >> GREEN_SHIFT); }
+	constexpr uint8 B(Pixel p) noexcept { return static_cast<uint8>(p >> BLUE_SHIFT); }
+	constexpr uint8 A(Pixel p) noexcept { return static_cast<uint8>(p >> ALPHA_SHIFT); }
 
-	MPT_CONSTEXPR11_FUN RawGDIDIB::Pixel ToRawGDIDIB(Pixel p) noexcept
+	constexpr RawGDIDIB::Pixel ToRawGDIDIB(Pixel p) noexcept
 	{
 		return RawGDIDIB::Pixel(GDIP::R(p), GDIP::G(p), GDIP::B(p), GDIP::A(p));
 	}
@@ -123,8 +125,8 @@ bool CopyToCompatibleBitmap(CBitmap &dst, CDC &dc, const RawGDIDIB &src);
 
 bool CopyToCompatibleBitmap(CBitmap &dst, CDC &dc, Gdiplus::Image &src);
 
-std::unique_ptr<RawGDIDIB> LoadPixelImage(mpt::const_byte_span file, double scaling = 1.0);
-std::unique_ptr<RawGDIDIB> LoadPixelImage(FileReader file, double scaling = 1.0);
+std::unique_ptr<RawGDIDIB> LoadPixelImage(mpt::const_byte_span file, double scaling = 1.0, int spriteWidth = 0, int spriteHeight = 0);
+std::unique_ptr<RawGDIDIB> LoadPixelImage(FileReader file, double scaling = 1.0, int spriteWidth = 0, int spriteHeight = 0);
 
 bool LoadCompatibleBitmapFromPixelImage(CBitmap &dst, CDC &dc, mpt::const_byte_span file);
 bool LoadCompatibleBitmapFromPixelImage(CBitmap &dst, CDC &dc, FileReader file);

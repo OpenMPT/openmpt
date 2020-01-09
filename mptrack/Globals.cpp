@@ -692,8 +692,7 @@ BOOL CModScrollView::OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll)
 			nPos = info.nTrackPos;
 		m_nScrollPosY = nPos;
 	}
-	BOOL ret = CScrollView::OnScroll(nScrollCode, nPos, bDoScroll);
-	return ret;
+	return CScrollView::OnScroll(nScrollCode, nPos, bDoScroll);
 }
 
 
@@ -760,7 +759,7 @@ END_MESSAGE_MAP()
 
 BOOL CModControlBar::Init(CImageList &icons, CImageList &disabledIcons)
 {
-	const int imgSize = Util::ScalePixels(16, m_hWnd), btnSizeX = Util::ScalePixels(27, m_hWnd), btnSizeY = Util::ScalePixels(24, m_hWnd);
+	const int imgSize = Util::ScalePixels(16, m_hWnd), btnSizeX = Util::ScalePixels(26, m_hWnd), btnSizeY = Util::ScalePixels(24, m_hWnd);
 	SetButtonStructSize(sizeof(TBBUTTON));
 	SetBitmapSize(CSize(imgSize, imgSize));
 	SetButtonSize(CSize(btnSizeX, btnSizeY));
@@ -807,9 +806,8 @@ LRESULT CModControlBar::OnHelpHitTest(WPARAM, LPARAM lParam)
 {
 	TBBUTTON tbbn;
 	POINT point;
-
-	point.x = (signed short)(LOWORD(lParam));
-	point.y = (signed short)(HIWORD(lParam));
+	point.x = GET_X_LPARAM(lParam);
+	point.y = GET_Y_LPARAM(lParam);
 	int ndx = HitTest(&point);
 	if ((ndx >= 0) && (GetButton(ndx, &tbbn)))
 	{

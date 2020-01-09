@@ -22,7 +22,7 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 	std::unique_ptr<RawGDIDIB> bitmap;
 	try
 	{
-		bitmap = LoadPixelImage(GetResource(MAKEINTRESOURCE(resourceID), _T("PNG")), scaling);
+		bitmap = LoadPixelImage(GetResource(MAKEINTRESOURCE(resourceID), _T("PNG")), scaling, cx, cy);
 		cx = mpt::saturate_round<int>(cx * scaling);
 		cy = mpt::saturate_round<int>(cy * scaling);
 	} catch(...)
