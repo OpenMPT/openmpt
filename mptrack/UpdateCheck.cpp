@@ -532,10 +532,31 @@ CUpdateCheck::Error::Error(CString errorMessage, DWORD errorCode)
 
 CString CUpdateCheck::Error::FormatErrorCode(CString errorMessage, DWORD errorCode)
 {
-	void *lpMsgBuf;
-	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		GetModuleHandle(TEXT("wininet.dll")), errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
-	errorMessage.Append((LPTSTR)lpMsgBuf);
+	void *lpMsgBuf = nullptr;
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		GetModuleHandle(TEXT("wininet.dll")),
+		errorCode,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&lpMsgBuf,
+		0,
+		NULL);
+	if(!lpMsgBuf)
+	{
+		if(GetLastError() == ERROR_NOT_ENOUGH_MEMORY)
+		{
+			MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+		}
+		return errorMessage;
+	}
+	try
+	{
+		errorMessage.Append((LPTSTR)lpMsgBuf);
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		LocalFree(lpMsgBuf);
+		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+	}
 	LocalFree(lpMsgBuf);
 	return errorMessage;
 }

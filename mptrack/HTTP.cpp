@@ -101,7 +101,7 @@ namespace HTTP
 
 static mpt::ustring LastErrorMessage(DWORD errorCode)
 {
-	void *lpMsgBuf;
+	void *lpMsgBuf = nullptr;
 	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		GetModuleHandle(TEXT("wininet.dll")),
@@ -110,7 +110,23 @@ static mpt::ustring LastErrorMessage(DWORD errorCode)
 		(LPTSTR)&lpMsgBuf,
 		0,
 		NULL);
-	mpt::ustring message = mpt::ToUnicode(mpt::winstring((LPTSTR)lpMsgBuf));
+	if(!lpMsgBuf)
+	{
+		if(GetLastError() == ERROR_NOT_ENOUGH_MEMORY)
+		{
+			MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+		}
+		return {};
+	}
+	mpt::ustring message;
+	try
+	{
+		message = mpt::ToUnicode(mpt::winstring((LPTSTR)lpMsgBuf));
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		LocalFree(lpMsgBuf);
+		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+	}
 	LocalFree(lpMsgBuf);
 	return message;
 }
