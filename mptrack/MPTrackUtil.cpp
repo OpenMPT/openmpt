@@ -35,6 +35,7 @@ mpt::const_byte_span GetResource(LPCTSTR lpName, LPCTSTR lpType)
 // Returns WinAPI error message corresponding to error code returned by GetLastError().
 CString GetErrorMessage(DWORD nErrorCode)
 {
+	CString msg;
 	LPTSTR lpMsgBuf = NULL;
 	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -53,7 +54,6 @@ CString GetErrorMessage(DWORD nErrorCode)
 		}
 		return {};
 	}
-	CString msg;
 	try
 	{
 		msg = lpMsgBuf;

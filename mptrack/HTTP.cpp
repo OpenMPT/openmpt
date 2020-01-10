@@ -101,6 +101,7 @@ namespace HTTP
 
 static mpt::ustring LastErrorMessage(DWORD errorCode)
 {
+	mpt::ustring message;
 	void *lpMsgBuf = nullptr;
 	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -119,7 +120,6 @@ static mpt::ustring LastErrorMessage(DWORD errorCode)
 		}
 		return {};
 	}
-	mpt::ustring message;
 	try
 	{
 		message = mpt::ToUnicode(mpt::winstring((LPTSTR)lpMsgBuf));
