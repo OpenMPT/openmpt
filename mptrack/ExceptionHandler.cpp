@@ -642,7 +642,7 @@ static void UnhandledExceptionFilterImpl(_EXCEPTION_POINTERS *pExceptionInfo)
 	{
 		if(!g_Context->description.empty())
 		{
-			errorMessage += mpt::format(U_("OpenMPT detected a crash in '%1'.This is very likely not an OpenMPT bug. Please report the problem to the respective software author.\n"))(g_Context->description);
+			errorMessage += mpt::format(U_("OpenMPT detected a crash in '%1'.\nThis is very likely not an OpenMPT bug. Please report the problem to the respective software author.\n"))(g_Context->description);
 		} else
 		{
 			errorMessage += mpt::format(U_("OpenMPT detected a crash in unknown foreign code.\nThis is likely not an OpenMPT bug.\n"))();
