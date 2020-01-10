@@ -58,8 +58,12 @@ public:
 
 
 template <typename Tfn, typename Tfilter, typename Thandler>
-auto TryFilterHandle(Tfn fn, const Tfilter &filter, const Thandler &handler) -> decltype(fn())
+auto TryFilterHandleThrow(const Tfn &fn, const Tfilter &filter, const Thandler &handler) -> decltype(fn())
 {
+	static_assert(std::is_trivially_copy_assignable<decltype(fn())>::value);
+	static_assert(std::is_trivially_copy_constructible<decltype(fn())>::value);
+	static_assert(std::is_trivially_move_assignable<decltype(fn())>::value);
+	static_assert(std::is_trivially_move_constructible<decltype(fn())>::value);
 	DWORD code = 0;
 	__try
 	{
@@ -67,23 +71,45 @@ auto TryFilterHandle(Tfn fn, const Tfilter &filter, const Thandler &handler) -> 
 	} __except(filter(GetExceptionCode(), GetExceptionInformation()))
 	{
 		code = GetExceptionCode();
-		handler(code);
 	}
 	throw Windows::SEH::Code(code);
 }
 
 
 template <typename Tfn, typename Tfilter, typename Thandler>
-auto TryFilterHandleDefault(Tfn fn, const Tfilter &filter, const Thandler &handler, decltype(fn()) def = decltype(fn()){}) -> decltype(fn())
+void TryFilterHandleVoid(const Tfn &fn, const Tfilter &filter, const Thandler &handler)
 {
+	static_assert(std::is_same<decltype(fn()), void>::value || std::is_trivially_copy_assignable<decltype(fn())>::value);
+	static_assert(std::is_same<decltype(fn()), void>::value || std::is_trivially_copy_constructible<decltype(fn())>::value);
+	static_assert(std::is_same<decltype(fn()), void>::value || std::is_trivially_move_assignable<decltype(fn())>::value);
+	static_assert(std::is_same<decltype(fn()), void>::value || std::is_trivially_move_constructible<decltype(fn())>::value);
+	__try
+	{
+		fn();
+		return;
+	} __except(filter(GetExceptionCode(), GetExceptionInformation()))
+	{
+		DWORD code = GetExceptionCode();
+		handler(code);
+	}
+	return;
+}
+
+
+template <typename Tfn, typename Tfilter, typename Thandler>
+auto TryFilterHandleDefault(const Tfn &fn, const Tfilter &filter, const Thandler &handler, decltype(fn()) def = decltype(fn()){}) -> decltype(fn())
+{
+	static_assert(std::is_trivially_copy_assignable<decltype(fn())>::value);
+	static_assert(std::is_trivially_copy_constructible<decltype(fn())>::value);
+	static_assert(std::is_trivially_move_assignable<decltype(fn())>::value);
+	static_assert(std::is_trivially_move_constructible<decltype(fn())>::value);
 	auto result = def;
-	DWORD code = 0;
 	__try
 	{
 		result = fn();
 	} __except(filter(GetExceptionCode(), GetExceptionInformation()))
 	{
-		code = GetExceptionCode();
+		DWORD code = GetExceptionCode();
 		result = handler(code);
 	}
 	return result;
@@ -91,9 +117,9 @@ auto TryFilterHandleDefault(Tfn fn, const Tfilter &filter, const Thandler &handl
 
 
 template <typename Tfn>
-auto TryReturnOrThrow(Tfn fn) -> decltype(fn())
+auto TryReturnOrThrow(const Tfn &fn) -> decltype(fn())
 {
-	return TryFilterHandle(
+	return TryFilterHandleThrow(
 		fn,
 		[](auto code, auto eptr)
 		{
@@ -109,10 +135,10 @@ auto TryReturnOrThrow(Tfn fn) -> decltype(fn())
 
 
 template <typename Tfn>
-DWORD TryOrError(Tfn fn)
+DWORD TryOrError(const Tfn &fn)
 {
 	DWORD result = DWORD{0};
-	TryFilterHandle(
+	TryFilterHandleVoid(
 		fn,
 		[](auto code, auto eptr)
 		{
@@ -129,9 +155,9 @@ DWORD TryOrError(Tfn fn)
 
 
 template <typename Tfn>
-auto TryReturnOrDefault(Tfn fn, decltype(fn()) def = decltype(fn()){}) -> decltype(fn())
+auto TryReturnOrDefault(const Tfn &fn, decltype(fn()) def = decltype(fn()){}) -> decltype(fn())
 {
-	return TryFilterHandleReturn(
+	return TryFilterHandleDefault(
 		fn,
 		[](auto code, auto eptr)
 		{
