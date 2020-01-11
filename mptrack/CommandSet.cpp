@@ -468,7 +468,7 @@ static constexpr struct
 	{1375, kcStopSong, _T("Stop Song")},
 	{1376, kcMidiRecord, _T("Toggle MIDI Record")},
 	{1377, kcDeleteWholeRow, _T("Delete Row(s) (All Channels)")},
-	{1378, kcInsertRow, _T("Insert Row")},
+	{1378, kcInsertRow, _T("Insert Row(s)")},
 	{1379, kcInsertWholeRow, _T("Insert Row(s) (All Channels)")},
 	{1380, kcSampleTrim, _T("Trim sample around loop points")},
 	{1381, kcSampleReverse, _T("Reverse Sample")},
