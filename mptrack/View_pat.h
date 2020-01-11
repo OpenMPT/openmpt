@@ -302,9 +302,11 @@ public:
 	bool PrepareUndo(const PatternCursor &beginSel, const PatternCursor &endSel, const char *description);
 	void UndoRedo(bool undo);
 
-	void DeleteRows(CHANNELINDEX colmin, CHANNELINDEX colmax, ROWINDEX nrows);
+	bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, ROWINDEX numRows, bool globalEdit, bool deleteRows);
+	void DeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, bool globalEdit = false);
+	void InsertRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, bool globalEdit = false);
+
 	void OnDropSelection();
-	void ProcessChar(UINT nChar, UINT nFlags);
 
 public:
 	void DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnable, bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint);
@@ -345,7 +347,6 @@ public:
 
 	void SetSpacing(int n);
 	void OnClearField(const RowMask &mask, bool step, bool ITStyle = false);
-	void InsertRows(CHANNELINDEX colmin, CHANNELINDEX colmax);
 	void SetSelectionInstrument(const INSTRUMENTINDEX instr, bool setEmptyInstrument);
 
 	void FindInstrument();
@@ -417,9 +418,14 @@ protected:
 	afx_msg void OnUnmuteAll();
 	afx_msg void OnRecordSelect();
 	afx_msg void OnSplitRecordSelect();
-	afx_msg void OnDeleteRows();
-	afx_msg void OnDeleteRowsEx();
-	afx_msg void OnInsertRows();
+	afx_msg void OnDeleteRow();
+	afx_msg void OnDeleteWholeRow();
+	afx_msg void OnDeleteRowGlobal();
+	afx_msg void OnDeleteWholeRowGlobal();
+	afx_msg void OnInsertRow();
+	afx_msg void OnInsertWholeRow();
+	afx_msg void OnInsertRowGlobal();
+	afx_msg void OnInsertWholeRowGlobal();
 	afx_msg void OnSplitPattern();
 	afx_msg void OnPatternStep();
 	afx_msg void OnSwitchToOrderList();

@@ -86,14 +86,19 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PATTERN_TRANSITIONSOLO, &CViewPattern::OnPendingSoloChnFromClick)
 	ON_COMMAND(ID_PATTERN_TRANSITION_UNMUTEALL, &CViewPattern::OnPendingUnmuteAllChnFromClick)
 	ON_COMMAND(ID_PATTERN_UNMUTEALL,&CViewPattern::OnUnmuteAll)
-	ON_COMMAND(ID_PATTERN_DELETEROW,&CViewPattern::OnDeleteRows)
-	ON_COMMAND(ID_PATTERN_DELETEALLROW,&CViewPattern::OnDeleteRowsEx)
-	ON_COMMAND(ID_PATTERN_INSERTROW,&CViewPattern::OnInsertRows)
 	ON_COMMAND(ID_PATTERN_SPLIT,	&CViewPattern::OnSplitPattern)
 	ON_COMMAND(ID_NEXTINSTRUMENT,	&CViewPattern::OnNextInstrument)
 	ON_COMMAND(ID_PREVINSTRUMENT,	&CViewPattern::OnPrevInstrument)
 	ON_COMMAND(ID_PATTERN_PLAYROW,	&CViewPattern::OnPatternStep)
 	ON_COMMAND(IDC_PATTERN_RECORD,	&CViewPattern::OnPatternRecord)
+	ON_COMMAND(ID_PATTERN_DELETEROW,			&CViewPattern::OnDeleteRow)
+	ON_COMMAND(ID_PATTERN_DELETEALLROW,			&CViewPattern::OnDeleteWholeRow)
+	ON_COMMAND(ID_PATTERN_DELETEROWGLOBAL,		&CViewPattern::OnDeleteRowGlobal)
+	ON_COMMAND(ID_PATTERN_DELETEALLROWGLOBAL,	&CViewPattern::OnDeleteWholeRowGlobal)
+	ON_COMMAND(ID_PATTERN_INSERTROW,			&CViewPattern::OnInsertRow)
+	ON_COMMAND(ID_PATTERN_INSERTALLROW,			&CViewPattern::OnInsertWholeRow)
+	ON_COMMAND(ID_PATTERN_INSERTROWGLOBAL,		&CViewPattern::OnInsertRowGlobal)
+	ON_COMMAND(ID_PATTERN_INSERTALLROWGLOBAL,	&CViewPattern::OnInsertWholeRowGlobal)
 	ON_COMMAND(ID_RUN_SCRIPT,					&CViewPattern::OnRunScript)
 	ON_COMMAND(ID_TRANSPOSE_UP,					&CViewPattern::OnTransposeUp)
 	ON_COMMAND(ID_TRANSPOSE_DOWN,				&CViewPattern::OnTransposeDown)
@@ -1823,108 +1828,179 @@ void CViewPattern::OnUnmuteAll()
 }
 
 
-void CViewPattern::DeleteRows(CHANNELINDEX colmin, CHANNELINDEX colmax, ROWINDEX nrows)
+bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, ROWINDEX numRows, bool globalEdit, bool deleteRows)
 {
-	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern) || !IsEditingEnabled_bmsg())
+	CModDoc &modDoc = *GetDocument();
+	CSoundFile &sndFile = *GetSoundFile();
+	if(!sndFile.Patterns.IsValidPat(m_nPattern) || !IsEditingEnabled_bmsg())
+		return false;
+
+	LimitMax(lastChn, CHANNELINDEX(sndFile.GetNumChannels() - 1));
+	if(firstChn > lastChn)
+		return false;
+
+	const char *undoDescription = "";
+	if(deleteRows)
+		undoDescription = numRows != 1 ? "Delete Rows" : "Delete Row";
+	else
+		undoDescription = numRows != 1 ? "Insert Rows" : "Insert Row";
+
+	const ROWINDEX startRow = m_Selection.GetStartRow();
+	const CHANNELINDEX numChannels = lastChn - firstChn + 1;
+
+	std::vector<PATTERNINDEX> patterns;
+	if(globalEdit)
 	{
-		return;
-	}
+		auto &order = sndFile.Order();
+		const auto start = order.begin() + GetCurrentOrder();
+		const auto end = std::find(start, order.end(), order.GetInvalidPatIndex());
 
-	ROWINDEX row = m_Selection.GetStartRow();
-	ROWINDEX maxrow = pSndFile->Patterns[m_nPattern].GetNumRows();
-
-	LimitMax(colmax, CHANNELINDEX(pSndFile->GetNumChannels() - 1));
-	if(colmin > colmax)
-		return;
-
-	PrepareUndo(PatternCursor(0), PatternCursor(maxrow - 1, pSndFile->GetNumChannels() - 1), nrows != 1 ? "Delete Rows" : "Delete Row");
-
-	for(ROWINDEX r = row; r < maxrow; r++)
-	{
-		ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(r, colmin);
-		for(CHANNELINDEX c = colmin; c <= colmax; c++, m++)
+		// As this is a global operation, ensure that all modified patterns are unique
+		bool orderListChanged = false;
+		const ORDERINDEX ordEnd = GetCurrentOrder() + static_cast<ORDERINDEX>(std::distance(start, end));
+		for(ORDERINDEX ord = GetCurrentOrder(); ord < ordEnd; ord++)
 		{
-			if(r + nrows >= maxrow)
-			{
-				m->Clear();
-			} else
-			{
-				*m = *(m + pSndFile->GetNumChannels() * nrows);
-			}
+			const auto pat = order[ord];
+			if(pat != order.EnsureUnique(ord))
+				orderListChanged = true;
 		}
+		if(orderListChanged)
+			modDoc.UpdateAllViews(this, SequenceHint().Data(), nullptr);
+
+		patterns.assign(start, end);
+
+		const std::set<PATTERNINDEX> uniquePatterns{start, end};
+		bool linkToPrev = false;
+		for(auto pat : uniquePatterns)
+		{
+			if(!sndFile.Patterns.IsValidPat(pat))
+				continue;
+			const auto &pattern = sndFile.Patterns[pat];
+			modDoc.GetPatternUndo().PrepareUndo(pat, firstChn, 0, lastChn, pattern.GetNumRows(), undoDescription, linkToPrev);
+			linkToPrev = true;
+		}
+	} else
+	{
+		patterns = {m_nPattern};
+		const auto &pattern = sndFile.Patterns[m_nPattern];
+		PrepareUndo(PatternCursor(startRow, firstChn), PatternCursor(pattern.GetNumRows() - 1, lastChn), undoDescription);
 	}
+
+	// Backup source data
+	std::vector<ModCommand> patternData;
+	if(!deleteRows)
+		patternData.insert(patternData.begin(), numRows * numChannels, ModCommand{});
+
+	bool first = true;
+	for(auto pat : patterns)
+	{
+		if(!sndFile.Patterns.IsValidPat(pat))
+			continue;
+		const auto &pattern = sndFile.Patterns[pat];
+		for(ROWINDEX row = first ? startRow : 0; row < pattern.GetNumRows(); row++)
+		{
+			const auto *m = pattern.GetRow(row) + firstChn;
+			patternData.insert(patternData.end(), m, m + numChannels);
+		}
+		first = false;
+	}
+
+	if(deleteRows)
+		patternData.insert(patternData.end(), numRows * numChannels, ModCommand{});
+
+	// Now do the actual shifting
+	auto src = patternData.cbegin();
+	if(deleteRows)
+		src += numRows * numChannels;
+
+	first = true;
+	for(auto pat : patterns)
+	{
+		if(!sndFile.Patterns.IsValidPat(pat))
+			continue;
+		auto &pattern = sndFile.Patterns[pat];
+		for(ROWINDEX row = first ? startRow : 0; row < pattern.GetNumRows(); row++, src += numChannels)
+		{
+			ModCommand *dest = pattern.GetpModCommand(row, firstChn);
+			std::copy(src, src + numChannels, dest);
+		}
+		first = false;
+		modDoc.UpdateAllViews(this, PatternHint(pat).Data(), this);
+	}
+
+	SetModified();
+	InvalidatePattern();
+
+	return true;
+}
+
+
+void CViewPattern::DeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, bool globalEdit)
+{
+	if(!InsertOrDeleteRows(firstChn, lastChn, m_Selection.GetNumRows(), globalEdit, true))
+		return;
+
 	PatternRect sel = m_Selection;
 	PatternCursor finalPos(m_Selection.GetStartRow(), m_Selection.GetLowerRight());
 	//SetCurSel(finalPos);
 	// Fix: Horizontal scrollbar pos screwed when selecting with mouse
 	SetCursorPosition(finalPos);
 	SetCurSel(sel);
-	SetModified();
-	InvalidatePattern(false);
 }
 
 
-void CViewPattern::OnDeleteRows()
+void CViewPattern::OnDeleteRow()
 {
-	DeleteRows(m_Selection.GetStartChannel(), m_Selection.GetEndChannel(), m_Selection.GetNumRows());
+	DeleteRows(m_Selection.GetStartChannel(), m_Selection.GetEndChannel());
 }
 
 
-void CViewPattern::OnDeleteRowsEx()
+void CViewPattern::OnDeleteWholeRow()
 {
-	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr)
-	{
-		return;
-	}
-
-	DeleteRows(0, pSndFile->GetNumChannels() - 1, m_Selection.GetNumRows());
+	DeleteRows(0, GetSoundFile()->GetNumChannels() - 1);
 }
 
 
-void CViewPattern::InsertRows(CHANNELINDEX colmin, CHANNELINDEX colmax)
+void CViewPattern::OnDeleteRowGlobal()
 {
-	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern) || !IsEditingEnabled_bmsg())
-	{
-		return;
-	}
-
-	ROWINDEX row = m_Selection.GetStartRow();
-	ROWINDEX maxrow = pSndFile->Patterns[m_nPattern].GetNumRows();
-
-	LimitMax(colmax, CHANNELINDEX(pSndFile->GetNumChannels() - 1));
-	if(colmin > colmax)
-		return;
-
-	PrepareUndo(PatternCursor(0), PatternCursor(maxrow - 1, pSndFile->GetNumChannels() - 1), "Insert Row");
-
-	for(ROWINDEX r = maxrow; r > row;)
-	{
-		r--;
-		ModCommand *m = pSndFile->Patterns[m_nPattern].GetpModCommand(r, colmin);
-		for(CHANNELINDEX c = colmin; c <= colmax; c++, m++)
-		{
-			if(r <= row)
-			{
-				m->Clear();
-			} else
-			{
-				*m = *(m - pSndFile->GetNumChannels());
-			}
-		}
-	}
-	InvalidatePattern(false);
-	SetModified();
+	DeleteRows(m_Selection.GetStartChannel(), m_Selection.GetEndChannel(), true);
 }
 
 
-void CViewPattern::OnInsertRows()
+void CViewPattern::OnDeleteWholeRowGlobal()
+{
+	DeleteRows(0, GetSoundFile()->GetNumChannels() - 1, true);
+}
+
+
+void CViewPattern::InsertRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, bool globalEdit)
+{
+	InsertOrDeleteRows(firstChn, lastChn, m_Selection.GetNumRows(), globalEdit, false);
+}
+
+
+void CViewPattern::OnInsertRow()
 {
 	InsertRows(m_Selection.GetStartChannel(), m_Selection.GetEndChannel());
 }
 
+
+void CViewPattern::OnInsertWholeRow()
+{
+	InsertRows(0, GetSoundFile()->GetNumChannels() - 1);
+}
+
+
+void CViewPattern::OnInsertRowGlobal()
+{
+	InsertRows(m_Selection.GetStartChannel(), m_Selection.GetEndChannel(), true);
+}
+
+
+void CViewPattern::OnInsertWholeRowGlobal()
+{
+	InsertRows(0, GetSoundFile()->GetNumChannels() - 1, true);
+}
 
 void CViewPattern::OnSplitPattern()
 {
@@ -3492,7 +3568,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 	const uint8 nNote = midiByte1 + NOTE_MIN;
 	int vol = midiByte2;  // At this stage nVol is a non linear value in [0;127]
-	                    // Need to convert to linear in [0;64] - see below
+	                      // Need to convert to linear in [0;64] - see below
 	MIDIEvents::EventType event = MIDIEvents::GetTypeFromEvent(midiData);
 
 	if((event == MIDIEvents::evNoteOn) && !vol)
@@ -4110,10 +4186,16 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcClearRowStep:	OnClearField(RowMask(), true);	return wParam;
 		case kcClearFieldStep:	OnClearField(RowMask(m_Cursor), true);	return wParam;
 		case kcClearFieldStepITStyle:	OnClearField(RowMask(m_Cursor), true, true);	return wParam;
-		case kcDeleteRows:		OnDeleteRows(); return wParam;
-		case kcDeleteAllRows:	OnDeleteRowsEx(); return wParam;
-		case kcInsertRow:		OnInsertRows(); return wParam;
-		case kcInsertAllRows:	InsertRows(0, sndFile.GetNumChannels() - 1); return wParam;
+
+		case kcDeleteRow:				OnDeleteRow(); return wParam;
+		case kcDeleteWholeRow:			OnDeleteWholeRow(); return wParam;
+		case kcDeleteRowGlobal:			OnDeleteRowGlobal(); return wParam;
+		case kcDeleteWholeRowGlobal:	OnDeleteWholeRowGlobal(); return wParam;
+
+		case kcInsertRow:				OnInsertRow(); return wParam;
+		case kcInsertWholeRow:			OnInsertWholeRow(); return wParam;
+		case kcInsertRowGlobal:			OnInsertRowGlobal(); return wParam;
+		case kcInsertWholeRowGlobal:	OnInsertWholeRowGlobal(); return wParam;
 
 		case kcShowNoteProperties: ShowEditWindow(); return wParam;
 		case kcShowPatternProperties: OnPatternProperties(); return wParam;
@@ -5974,10 +6056,23 @@ bool CViewPattern::BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, CHANNELIND
 
 bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const
 {
-	const CString label = (m_Selection.GetStartRow() != m_Selection.GetEndRow() ? _T("Rows") : _T("Row"));
+	HMENU subMenuInsert = CreatePopupMenu();
+	HMENU subMenuDelete = CreatePopupMenu();
 
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_INSERTROW, ih->GetKeyTextFromCommand(kcInsertRow, _T("&Insert ") + label));
-	AppendMenu(hMenu, MF_STRING, ID_PATTERN_DELETEROW, ih->GetKeyTextFromCommand(kcDeleteRows, _T("&Delete ") + label));
+	const auto numRows = m_Selection.GetNumRows();
+	const CString label = (numRows != 1) ? mpt::cformat(_T("%1 Rows"))(numRows) : _T("Row");
+
+	AppendMenu(subMenuInsert, MF_STRING, ID_PATTERN_INSERTROW, ih->GetKeyTextFromCommand(kcInsertRow, _T("Insert ") + label + _T(" (&Selection)")));
+	AppendMenu(subMenuInsert, MF_STRING, ID_PATTERN_INSERTALLROW, ih->GetKeyTextFromCommand(kcInsertWholeRow, _T("Insert ") + label + _T(" (&All Channels)")));
+	AppendMenu(subMenuInsert, MF_STRING, ID_PATTERN_INSERTROWGLOBAL, ih->GetKeyTextFromCommand(kcInsertRowGlobal, _T("Insert ") + label + _T(" (Selection, &Global)")));
+	AppendMenu(subMenuInsert, MF_STRING, ID_PATTERN_INSERTALLROWGLOBAL, ih->GetKeyTextFromCommand(kcInsertWholeRowGlobal, _T("Insert ") + label + _T(" (All &Channels, Global)")));
+	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(subMenuInsert), _T("&Insert ") + label);
+	
+	AppendMenu(subMenuDelete, MF_STRING, ID_PATTERN_DELETEROW, ih->GetKeyTextFromCommand(kcDeleteRow, _T("Delete ") + label + _T(" (&Selection)")));
+	AppendMenu(subMenuDelete, MF_STRING, ID_PATTERN_DELETEALLROW, ih->GetKeyTextFromCommand(kcDeleteWholeRow, _T("Delete ") + label + _T(" (&All Channels)")));
+	AppendMenu(subMenuDelete, MF_STRING, ID_PATTERN_DELETEROWGLOBAL, ih->GetKeyTextFromCommand(kcDeleteRowGlobal, _T("Delete ") + label + _T(" (Selection, &Global)")));
+	AppendMenu(subMenuDelete, MF_STRING, ID_PATTERN_DELETEALLROWGLOBAL, ih->GetKeyTextFromCommand(kcDeleteWholeRowGlobal, _T("Delete ") + label + _T(" (All &Channels, Global)")));
+	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(subMenuDelete), _T("&Delete ") + label);
 	return true;
 }
 

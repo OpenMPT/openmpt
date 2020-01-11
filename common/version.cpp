@@ -597,6 +597,7 @@ mpt::ustring GetFullCreditsString()
 		"\n"
 		"Additional patch submitters:\n"
 		"coda (https://coda.s3m.us/)\n"
+		"Jo\xC3\xA3o Baptista de Paula e Silva (https://joaobapt.com/)\n"
 		"kode54 (https://kode54.net/)\n"
 		"Revenant (https://revenant1.net/)\n"
 		"xaimus (http://xaimus.com/)\n"

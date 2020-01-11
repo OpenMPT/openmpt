@@ -149,7 +149,7 @@ static constexpr struct
 	{1058, kcClearField, _T("Clear field")},
 	{1059, kcClearRowStep, _T("Clear row and step")},
 	{1060, kcClearFieldStep, _T("Clear field and step")},
-	{1061, kcDeleteRows, _T("Delete rows")},
+	{1061, kcDeleteRow, _T("Delete Row(s)")},
 	{1062, kcShowNoteProperties, _T("Show Note Properties")},
 	{1063, kcShowEditMenu, _T("Show Context (Right-Click) Menu")},
 	{1064, kcVPNoteC_0, _T("Base octave C")},
@@ -467,9 +467,9 @@ static constexpr struct
 	{1374, kcEstimateSongLength, _T("Estimate Song Length")},
 	{1375, kcStopSong, _T("Stop Song")},
 	{1376, kcMidiRecord, _T("Toggle MIDI Record")},
-	{1377, kcDeleteAllRows, _T("Delete all rows")},
+	{1377, kcDeleteWholeRow, _T("Delete Row(s) (All Channels)")},
 	{1378, kcInsertRow, _T("Insert Row")},
-	{1379, kcInsertAllRows, _T("Insert All Rows")},
+	{1379, kcInsertWholeRow, _T("Insert Row(s) (All Channels)")},
 	{1380, kcSampleTrim, _T("Trim sample around loop points")},
 	{1381, kcSampleReverse, _T("Reverse Sample")},
 	{1382, kcSampleDelete, _T("Delete Sample Selection")},
@@ -725,6 +725,10 @@ static constexpr struct
 	{1999, kcPastePattern, _T("Paste from Pattern Clipboard")},
 	{2000, kcToggleSmpInsList, _T("Toggle between lists")},
 	{2001, kcExecuteSmpInsListItem, _T("Open item in editor")},
+	{2002, kcDeleteRowGlobal, _T("Delete Row(s) (Global)")},
+	{2003, kcDeleteWholeRowGlobal, _T("Delete Row(s) (All Channels, Global)")},
+	{2004, kcInsertRowGlobal, _T("Insert Row(s) (Global)")},
+	{2005, kcInsertWholeRowGlobal, _T("Insert Row(s) (All Channels, Global)")},
 };
 
 // Get command descriptions etc.. loaded up.

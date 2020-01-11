@@ -231,6 +231,9 @@ ORDERINDEX ModSequence::FindOrder(PATTERNINDEX pat, ORDERINDEX startSearchAt, bo
 PATTERNINDEX ModSequence::EnsureUnique(ORDERINDEX ord)
 {
 	PATTERNINDEX pat = at(ord);
+	if(!IsValidPat(ord))
+		return pat;
+
 	for(const auto &sequence : m_sndFile.Order)
 	{
 		ORDERINDEX ords = sequence.GetLength();
