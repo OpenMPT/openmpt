@@ -302,7 +302,12 @@ void COptionsKeyboard::DefineCommandCategories()
 	}
 
 	commandCategories.emplace_back(_T("  Comments [Top]"), kCtxCtrlComments);
-	commandCategories.emplace_back(_T("  Comments [Bottom]"), kCtxViewComments);
+
+	{
+		CommandCategory newCat(_T("  Comments [Bottom]"), kCtxViewComments);
+		newCat.AddCommands(kcStartCommentsCommands, kcEndCommentsCommands);
+		commandCategories.push_back(newCat);
+	}
 
 	{
 		CommandCategory newCat(_T("  Plugin Editor"), kCtxVSTGUI);

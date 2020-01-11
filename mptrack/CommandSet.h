@@ -852,6 +852,11 @@ enum CommandID
 	kcChnSettingsClose,
 	kcEndChnSettingsCommands = kcChnSettingsClose,
 
+	kcStartCommentsCommands,
+	kcToggleSmpInsList = kcStartCommentsCommands,
+	kcExecuteSmpInsListItem,
+	kcEndCommentsCommands = kcExecuteSmpInsListItem,
+
 	kcNumCommands,
 };
 

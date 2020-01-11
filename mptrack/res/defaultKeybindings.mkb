@@ -378,6 +378,8 @@ version:1
 9:1833:2:82:1		//Toggle release node: Ctrl+R (KeyDown)
 
 //----( Comments Context [bottom] )------------
+10:2000:0:9:1		//Toggle between lists: TAB (KeyDown)
+10:2001:0:13:1		//Open item in editor: ENTER (KeyDown)
 
 //----( Unknown Context )------------
 

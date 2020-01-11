@@ -723,6 +723,8 @@ static constexpr struct
 	{1997, kcCopyPattern, _T("Copy to Pattern Clipboard")},
 	{1998, kcPastePatternChannel, _T("Paste from Pattern Channel Clipboard")},
 	{1999, kcPastePattern, _T("Paste from Pattern Clipboard")},
+	{2000, kcToggleSmpInsList, _T("Toggle between lists")},
+	{2001, kcExecuteSmpInsListItem, _T("Open item in editor")},
 };
 
 // Get command descriptions etc.. loaded up.
@@ -867,7 +869,6 @@ CString CCommandSet::Remove(int pos, CommandID cmd)
 
 CString CCommandSet::Remove(KeyCombination kc, CommandID cmd)
 {
-
 	auto &kcList = m_commands[cmd].kcList;
 	auto index = std::find(kcList.begin(), kcList.end(), kc);
 	if (index != kcList.end())
@@ -1405,7 +1406,6 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 }
 
 
-// Export
 //Generate a keymap from a command set
 void CCommandSet::GenKeyMap(KeyMap &km)
 {
@@ -1454,7 +1454,7 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 						KeyMapRange dupes = km.equal_range(kc);
 						km.erase(dupes.first, dupes.second);
 					}
-					km.insert(std::make_pair(kc, (CommandID)cmd));
+					km.insert(std::make_pair(kc, static_cast<CommandID>(cmd)));
 				}
 			}
 		}
@@ -1468,6 +1468,8 @@ void CCommandSet::Copy(const CCommandSet *source)
 	std::copy(std::begin(source->m_commands), std::end(source->m_commands), std::begin(m_commands));
 }
 
+
+// Export
 
 bool CCommandSet::SaveFile(const mpt::PathString &filename)
 {

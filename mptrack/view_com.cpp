@@ -108,7 +108,7 @@ void CViewComments::OnInitialUpdate()
 
 		// For XM, set the instrument list as the default list
 		const CModDoc *pModDoc = GetDocument();
-		if(pModDoc && (pModDoc->GetModType() & MOD_TYPE_XM) && pModDoc->GetNumInstruments() > 0)
+		if(pModDoc && pModDoc->GetSoundFile().GetMessageHeuristic() == ModMessageHeuristicOrder::InstrumentsSamples && pModDoc->GetNumInstruments() > 0)
 		{
 			m_nListId = IDC_LIST_INSTRUMENTS;
 		}
@@ -128,7 +128,7 @@ void CViewComments::OnInitialUpdate()
 	GetClientRect(&rect);
 	m_ToolBar.Create(WS_CHILD|WS_VISIBLE|CCS_NOPARENTALIGN, rect, this, IDC_TOOLBAR_DETAILS);
 	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_MiscIcons, CMainFrame::GetMainFrame()->m_MiscIconsDisabled);
-	m_ItemList.Create(WS_CHILD|WS_VISIBLE|LVS_REPORT|LVS_SINGLESEL|LVS_EDITLABELS|LVS_NOSORTHEADER, rect, this, IDC_LIST_DETAILS);
+	m_ItemList.Create(WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SINGLESEL | LVS_EDITLABELS | LVS_NOSORTHEADER, rect, this, IDC_LIST_DETAILS);
 	m_ItemList.ModifyStyleEx(0, WS_EX_STATICEDGE);
 	// Add ToolBar Buttons
 	m_ToolBar.AddButton(IDC_LIST_SAMPLES, IMAGE_SAMPLES);
@@ -152,7 +152,7 @@ void CViewComments::OnDestroy()
 		commentState.initialized = true;
 		commentState.nId = m_nListId;
 	}
-	CView::OnDestroy();
+	CModScrollView::OnDestroy();
 }
 
 
@@ -196,6 +196,36 @@ LRESULT CViewComments::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	{
 		const auto note = static_cast<ModCommand::NOTE>(noteOffset - kcCommentsStartNoteStops);
 		modDoc->NoteOff(note, false, lastInstr, m_noteChannel);
+		return wParam;
+	} else if(wParam == kcToggleSmpInsList)
+	{
+		bool ok = SwitchToList(m_nListId == IDC_LIST_SAMPLES ? IDC_LIST_INSTRUMENTS : IDC_LIST_SAMPLES);
+		if(ok)
+		{
+			int newItem = 0;
+			switch(m_nListId)
+			{
+			case IDC_LIST_SAMPLES:
+				// Switch to a sample belonging to previously selected instrument
+				if(SAMPLEINDEX smp = modDoc->FindInstrumentChild(static_cast<INSTRUMENTINDEX>(item)); smp != 0 && smp != SAMPLEINDEX_INVALID)
+					newItem = smp - 1;
+				break;
+
+			case IDC_LIST_INSTRUMENTS:
+				// Switch to parent instrument of previously selected sample
+				if(INSTRUMENTINDEX ins = modDoc->FindSampleParent(static_cast<SAMPLEINDEX>(item)); ins != 0 && ins != INSTRUMENTINDEX_INVALID)
+					newItem = ins - 1;
+				break;
+			}
+			m_ItemList.SetItemState(newItem, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+			m_ItemList.SetSelectionMark(newItem);
+			m_ItemList.EnsureVisible(newItem, FALSE);
+			m_ItemList.SetFocus();
+		}
+		return wParam;
+	} else if(wParam == kcExecuteSmpInsListItem)
+	{
+		OnDblClickListItem(nullptr, nullptr);
 		return wParam;
 	}
 	return NULL;
@@ -464,7 +494,6 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 	{
 	}
 	m_ItemList.SetRedraw(TRUE);
-	m_ItemList.Invalidate(FALSE);
 }
 
 
@@ -547,7 +576,7 @@ void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 
 void CViewComments::OnSize(UINT nType, int cx, int cy)
 {
-	CView::OnSize(nType, cx, cy);
+	CModScrollView::OnSize(nType, cx, cy);
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0) && (m_hWnd))
 	{
 		RecalcLayout();
@@ -555,41 +584,37 @@ void CViewComments::OnSize(UINT nType, int cx, int cy)
 }
 
 
-void CViewComments::OnShowSamples()
+bool CViewComments::SwitchToList(int list)
 {
-	if (m_nListId != IDC_LIST_SAMPLES)
+	if(list == m_nListId)
+		return false;
+
+	if(list == IDC_LIST_SAMPLES)
 	{
 		m_nListId = IDC_LIST_SAMPLES;
 		UpdateButtonState();
 		UpdateView(UpdateHint().ModType());
-	}
-}
-
-
-void CViewComments::OnShowInstruments()
-{
-	if (m_nListId != IDC_LIST_INSTRUMENTS)
+	} else if(list == IDC_LIST_INSTRUMENTS)
 	{
-		const CModDoc *pModDoc = GetDocument();
-		if (pModDoc && pModDoc->GetNumInstruments())
-		{
-			m_nListId = IDC_LIST_INSTRUMENTS;
-			UpdateButtonState();
-			UpdateView(UpdateHint().ModType());
-		}
-	}
-}
+		const CModDoc *modDoc = GetDocument();
+		if(!modDoc || !modDoc->GetNumInstruments())
+			return false;
 
-
-void CViewComments::OnShowPatterns()
-{
-	if (m_nListId != IDC_LIST_PATTERNS)
-	{
-		//m_nListId = IDC_LIST_PATTERNS;
+		m_nListId = IDC_LIST_INSTRUMENTS;
 		UpdateButtonState();
 		UpdateView(UpdateHint().ModType());
+	/*} else if(list == IDC_LIST_PATTERNS)
+	{
+		m_nListId = IDC_LIST_PATTERNS;
+		UpdateButtonState();
+		UpdateView(UpdateHint().ModType());*/
+	} else
+	{
+		return false;
 	}
+	return true;
 }
+
 
 void CViewComments::OnDblClickListItem(NMHDR *, LRESULT *)
 {
