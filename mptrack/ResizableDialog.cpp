@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "ResizableDialog.h"
+#include "resource.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -28,6 +29,11 @@ BOOL ResizableDialog::OnInitDialog()
 	CRect rect;
 	GetWindowRect(rect);
 	m_minSize = rect.Size();
+	
+	HICON icon = ::LoadIcon(AfxGetResourceHandle(), MAKEINTRESOURCE(IDR_MODULETYPE));
+	SetIcon(icon, FALSE);
+	SetIcon(icon, TRUE);
+
 	return CDialog::OnInitDialog();
 }
 

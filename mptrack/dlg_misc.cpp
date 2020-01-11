@@ -1270,14 +1270,14 @@ void CSampleMapDlg::OnOK()
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Edit history dialog
 
-BEGIN_MESSAGE_MAP(CEditHistoryDlg, CDialog)
+BEGIN_MESSAGE_MAP(CEditHistoryDlg, ResizableDialog)
 	ON_COMMAND(IDC_BTN_CLEAR,	&CEditHistoryDlg::OnClearHistory)
 END_MESSAGE_MAP()
 
 
 BOOL CEditHistoryDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	ResizableDialog::OnInitDialog();
 
 	CString s;
 	uint64 totalTime = 0;
@@ -1321,7 +1321,6 @@ BOOL CEditHistoryDlg::OnInitDialog()
 	GetDlgItem(IDC_BTN_CLEAR)->EnableWindow(isEmpty ? FALSE : TRUE);
 
 	return TRUE;
-
 }
 
 

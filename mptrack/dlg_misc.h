@@ -244,14 +244,14 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Edit history dialog
 
-class CEditHistoryDlg: public CDialog
+class CEditHistoryDlg: public ResizableDialog
 {
-
 protected:
 	CModDoc &m_modDoc;
 
 public:
-	CEditHistoryDlg(CWnd *parent, CModDoc &modDoc) : CDialog(IDD_EDITHISTORY, parent), m_modDoc(modDoc) { }
+	CEditHistoryDlg(CWnd *parent, CModDoc &modDoc)
+	    : ResizableDialog(IDD_EDITHISTORY, parent), m_modDoc(modDoc) {}
 
 protected:
 	BOOL OnInitDialog() override;
