@@ -6060,7 +6060,7 @@ bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	HMENU subMenuDelete = CreatePopupMenu();
 
 	const auto numRows = m_Selection.GetNumRows();
-	const CString label = (numRows != 1) ? mpt::cformat(_T("%1 Rows"))(numRows) : _T("Row");
+	const CString label = (numRows != 1) ? mpt::cformat(_T("%1 Rows"))(numRows) : CString(_T("Row"));
 
 	AppendMenu(subMenuInsert, MF_STRING, ID_PATTERN_INSERTROW, ih->GetKeyTextFromCommand(kcInsertRow, _T("Insert ") + label + _T(" (&Selection)")));
 	AppendMenu(subMenuInsert, MF_STRING, ID_PATTERN_INSERTALLROW, ih->GetKeyTextFromCommand(kcInsertWholeRow, _T("Insert ") + label + _T(" (&All Channels)")));
