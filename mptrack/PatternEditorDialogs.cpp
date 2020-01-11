@@ -897,6 +897,12 @@ BOOL CChordEditor::OnInitDialog()
 {
 	ResizableDialog::OnInitDialog();
 	m_Keyboard.Init(this, (CHORD_MAX - CHORD_MIN) / 12, true);
+
+	m_CbnShortcut.SetRedraw(FALSE);
+	m_CbnBaseNote.SetRedraw(FALSE);
+	for(auto &combo : m_CbnNote)
+		combo.SetRedraw(FALSE);
+
 	// Shortcut key combo box
 	AppendNotesToControl(m_CbnShortcut, NOTE_MIN, NOTE_MIN + static_cast<int>(kcVPEndChords) - static_cast<int>(kcVPStartChords));
 
@@ -926,6 +932,12 @@ BOOL CChordEditor::OnInitDialog()
 		for(auto &combo : m_CbnNote)
 			combo.SetItemData(combo.AddString(s), noteVal);
 	}
+
+	m_CbnShortcut.SetRedraw(TRUE);
+	m_CbnBaseNote.SetRedraw(TRUE);
+	for(auto &combo : m_CbnNote)
+		combo.SetRedraw(TRUE);
+
 	// Update Dialog
 	OnChordChanged();
 	return TRUE;
