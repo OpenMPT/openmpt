@@ -302,7 +302,7 @@ public:
 	bool PrepareUndo(const PatternCursor &beginSel, const PatternCursor &endSel, const char *description);
 	void UndoRedo(bool undo);
 
-	bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, ROWINDEX numRows, bool globalEdit, bool deleteRows);
+	bool InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, ROWINDEX numRows, bool globalEdit, bool deleteRows);
 	void DeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, bool globalEdit = false);
 	void InsertRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, bool globalEdit = false);
 
