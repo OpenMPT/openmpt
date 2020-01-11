@@ -194,6 +194,14 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 		InvalidateChannelsHeaders();
 		UpdateScrollSize();
 	}
+	if(hint.ToType<GeneralHint>().GetType()[HINT_MODTYPE])
+	{
+		// If sequence and pattern view became inconsistent (e.g. due to rearranging patterns during cleanup), synchronize to order list again
+		const auto &sndFile = *GetSoundFile();
+		const ORDERINDEX ord = GetCurrentOrder();
+		if(sndFile.Order().IsValidPat(ord) && sndFile.Order().at(ord) != m_nPattern)
+			SetCurrentPattern(sndFile.Order().at(ord));
+	}
 
 	const PatternHint patternHint = hint.ToType<PatternHint>();
 	const PATTERNINDEX updatePat = patternHint.GetPattern();
