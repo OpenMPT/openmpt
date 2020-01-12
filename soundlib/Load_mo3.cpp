@@ -399,9 +399,7 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 		if(!carry)
 		{
 			// a 0 ctrl bit means 'copy', not compressed byte
-			if(!file.Read(*dst))
-				break;
-			dst++;
+			*dst++ = file.ReadUint8();
 			size--;
 		} else
 		{
@@ -417,10 +415,7 @@ static bool UnpackMO3Data(FileReader &file, uint8 *dst, uint32 size)
 			} else
 			{
 				// LZ ptr in ctrl stream
-				uint8 b;
-				if(!file.Read(b))
-					break;
-				strOffset = (strLen << 8) | b;  // read less significant offset byte from stream
+				strOffset = (strLen << 8) | file.ReadUint8(); // read less significant offset byte from stream
 				strLen = 0;
 				strOffset = ~strOffset;
 				if(strOffset < -1280)
