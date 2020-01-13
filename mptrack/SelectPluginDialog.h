@@ -12,7 +12,7 @@
 #pragma once
 
 #include "BuildSettings.h"
-
+#include "ResizableDialog.h"
 #include "../common/ComponentManager.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -25,13 +25,13 @@ class ComponentPluginBridge_amd64;
 #if defined(MPT_WITH_WINDOWS10)
 class ComponentPluginBridge_arm;
 class ComponentPluginBridge_arm64;
-#endif // MPT_WITH_WINDOWS10
+#endif  // MPT_WITH_WINDOWS10
 
-class CSelectPluginDlg: public CDialog
+class CSelectPluginDlg : public ResizableDialog
 {
 protected:
-	SNDMIXPLUGIN *m_pPlugin;
-	CModDoc *m_pModDoc;
+	SNDMIXPLUGIN *m_pPlugin = nullptr;
+	CModDoc *m_pModDoc = nullptr;
 	CTreeCtrl m_treePlugins;
 	CButton m_chkBridge, m_chkShare;
 	mpt::ustring m_nameFilter;
@@ -41,19 +41,19 @@ protected:
 #if defined(MPT_WITH_WINDOWS10)
 	ComponentHandle<ComponentPluginBridge_arm> pluginBridge_arm;
 	ComponentHandle<ComponentPluginBridge_arm64> pluginBridge_arm64;
-#endif // MPT_WITH_WINDOWS10
+#endif  // MPT_WITH_WINDOWS10
 #endif
-	PLUGINDEX m_nPlugSlot;
-
-	HTREEITEM AddTreeItem(const TCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
+	PLUGINDEX m_nPlugSlot = 0;
 
 public:
-	CSelectPluginDlg(CModDoc *pModDoc, PLUGINDEX nPlugSlot, CWnd *parent);
+	CSelectPluginDlg(CModDoc *pModDoc, PLUGINDEX pluginSlot, CWnd *parent);
 	~CSelectPluginDlg();
 
 	static VSTPluginLib *ScanPlugins(const mpt::PathString &path, CWnd *parent);
 
 protected:
+	HTREEITEM AddTreeItem(const TCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
+
 	VSTPluginLib *GetSelectedPlugin();
 	void SaveWindowPos() const;
 
@@ -61,8 +61,8 @@ protected:
 
 	void UpdatePluginsList(const VSTPluginLib *forceSelect = nullptr);
 	static bool VerifyPlug(VSTPluginLib *plug, CWnd *parent);
-	
-	void DoDataExchange(CDataExchange* pDX) override;
+
+	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;
 	void OnOK() override;
 	void OnCancel() override;
@@ -76,8 +76,6 @@ protected:
 	afx_msg void OnSetBridge();
 	afx_msg void OnSelChanged(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnSelDblClk(NMHDR *pNotifyStruct, LRESULT *result);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg void OnPluginTagsChanged();
 };
 
