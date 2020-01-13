@@ -1868,25 +1868,12 @@ bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastCh
 			modDoc.UpdateAllViews(this, SequenceHint().Data(), nullptr);
 
 		patterns.assign(start, end);
-
-		const std::set<PATTERNINDEX> uniquePatterns{start, end};
-		bool linkToPrev = false;
-		for(auto pat : uniquePatterns)
-		{
-			if(!sndFile.Patterns.IsValidPat(pat))
-				continue;
-			const auto &pattern = sndFile.Patterns[pat];
-			modDoc.GetPatternUndo().PrepareUndo(pat, firstChn, 0, lastChn, pattern.GetNumRows(), undoDescription, linkToPrev);
-			linkToPrev = true;
-		}
 	} else
 	{
 		patterns = {m_nPattern};
-		const auto &pattern = sndFile.Patterns[m_nPattern];
-		PrepareUndo(PatternCursor(startRow, firstChn), PatternCursor(pattern.GetNumRows() - 1, lastChn), undoDescription);
 	}
 
-	// Backup source data
+	// Backup source data and create undo points
 	std::vector<ModCommand> patternData;
 	if(!deleteRows)
 		patternData.insert(patternData.begin(), numRows * numChannels, ModCommand{});
@@ -1897,11 +1884,13 @@ bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastCh
 		if(!sndFile.Patterns.IsValidPat(pat))
 			continue;
 		const auto &pattern = sndFile.Patterns[pat];
-		for(ROWINDEX row = first ? startRow : 0; row < pattern.GetNumRows(); row++)
+		const ROWINDEX firstRow = first ? startRow : 0;
+		for(ROWINDEX row = firstRow; row < pattern.GetNumRows(); row++)
 		{
 			const auto *m = pattern.GetRow(row) + firstChn;
 			patternData.insert(patternData.end(), m, m + numChannels);
 		}
+		modDoc.GetPatternUndo().PrepareUndo(pat, firstChn, firstRow, numChannels, pattern.GetNumRows(), undoDescription, !first);
 		first = false;
 	}
 
@@ -1913,6 +1902,7 @@ bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastCh
 	if(deleteRows)
 		src += numRows * numChannels;
 
+	PATTERNINDEX firstNewPattern = m_nPattern;
 	first = true;
 	for(auto pat : patterns)
 	{
@@ -1924,11 +1914,14 @@ bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastCh
 			ModCommand *dest = pattern.GetpModCommand(row, firstChn);
 			std::copy(src, src + numChannels, dest);
 		}
+		if(first)
+			firstNewPattern = pat;
 		first = false;
 		modDoc.UpdateAllViews(this, PatternHint(pat).Data(), this);
 	}
 
 	SetModified();
+	SetCurrentPattern(firstNewPattern);
 	InvalidatePattern();
 
 	return true;
