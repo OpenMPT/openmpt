@@ -550,9 +550,6 @@ void CNoteMapWnd::OnInstrumentDuplicate()
 
 LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam == kcNull)
-		return NULL;
-
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	ModInstrument *pIns = m_modDoc.GetSoundFile().Instruments[m_nInstrument];
 
@@ -599,7 +596,7 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	case kcPrevInstrument:				m_pParent.PostMessage(WM_COMMAND, ID_PREVINSTRUMENT); return wParam;
 	}
 
-	return NULL;
+	return kcNull;
 }
 
 void CNoteMapWnd::EnterNote(UINT note)
@@ -2864,7 +2861,7 @@ LRESULT CCtrlInstruments::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcInstrumentCtrlDuplicate:	InsertInstrument(true); return wParam;
 	}
 
-	return 0;
+	return kcNull;
 }
 
 

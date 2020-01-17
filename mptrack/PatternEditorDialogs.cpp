@@ -1522,9 +1522,6 @@ BOOL QuickChannelProperties::PreTranslateMessage(MSG *pMsg)
 
 LRESULT QuickChannelProperties::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 {
-	if(wParam == kcNull)
-		return 0;
-
 	switch(wParam)
 	{
 	case kcChnSettingsPrev:
@@ -1538,7 +1535,7 @@ LRESULT QuickChannelProperties::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		return wParam;
 	}
 
-	return 0;
+	return kcNull;
 }
 
 

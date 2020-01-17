@@ -3818,9 +3818,6 @@ void CModTree::OnSoundBankProperties()
 
 LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 {
-	if(wParam == kcNull)
-		return NULL;
-
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	ModCommand::NOTE note = NOTE_NONE;
@@ -3841,10 +3838,10 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		if(PlayItem(GetSelectedItem(), note))
 			return wParam;
 		else
-			return NULL;
+			return kcNull;
 	}
 
-	return NULL;
+	return kcNull;
 }
 
 

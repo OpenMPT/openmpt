@@ -2461,9 +2461,6 @@ void CMainFrame::OnRButtonDown(UINT, CPoint pt)
 
 LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam == kcNull)
-		return NULL;
-
 	switch(wParam)
 	{
 		case kcViewTree: OnBarCheck(IDD_TREEVIEW); break;
@@ -2535,11 +2532,11 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		default:
 			//If the treeview has focus, post command to the tree view
 			if (m_bModTreeHasFocus)
-				return m_wndTree.PostMessageToModTree(WM_MOD_KEYCOMMAND, wParam, lParam);
+				return m_wndTree.SendMessageToModTree(WM_MOD_KEYCOMMAND, wParam, lParam);
 			if (m_pNoteMapHasFocus)
-				return m_pNoteMapHasFocus->PostMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
+				return m_pNoteMapHasFocus->SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
 			if (m_pOrderlistHasFocus)
-				return m_pOrderlistHasFocus->PostMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
+				return m_pOrderlistHasFocus->SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
 
 			//Else send it to the active view
 			CMDIChildWnd *pMDIActive = MDIGetActive();
@@ -2553,7 +2550,9 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 					wnd = static_cast<CModControlView *>(wnd)->GetCurrentControlDlg();
 				}
 			}
-			if(wnd) return wnd->SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
+			if(wnd)
+				return wnd->SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
+			return kcNull;
 	}
 
 	return wParam;

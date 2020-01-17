@@ -477,9 +477,6 @@ void CAbstractVstEditor::SetTitle()
 
 LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 {
-	if(wParam == kcNull)
-		return NULL;
-
 	switch(wParam)
 	{
 		case kcVSTGUIPrevPreset:			OnSetPreviousVSTPreset(); return wParam;
@@ -520,7 +517,7 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		return wParam;
 	}
 
-	return NULL;
+	return kcNull;
 }
 
 

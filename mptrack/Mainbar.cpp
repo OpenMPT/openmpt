@@ -1156,7 +1156,7 @@ HWND CModTreeBar::GetModTreeHWND()
 }
 
 
-LRESULT CModTreeBar::PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
+LRESULT CModTreeBar::SendMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam)
 {
 	if(::GetFocus() == m_pModTree->m_hWnd)
 		return m_pModTree->SendMessage(cmdID, wParam, lParam);

@@ -3984,12 +3984,9 @@ void CViewPattern::CursorJump(int distance, bool snap)
 
 LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 {
-	if(wParam == kcNull)
-		return NULL;
-
 	CModDoc *pModDoc = GetDocument();
 	if(!pModDoc)
-		return NULL;
+		return kcNull;
 
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -4377,7 +4374,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		return wParam;
 	}
 
-	return NULL;
+	return kcNull;
 }
 
 

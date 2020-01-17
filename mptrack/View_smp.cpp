@@ -2984,11 +2984,9 @@ BOOL CViewSample::PreTranslateMessage(MSG *pMsg)
 
 LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam == kcNull)
-		return NULL;
-
 	CModDoc *pModDoc = GetDocument();
-	if (!pModDoc) return NULL;
+	if(!pModDoc)
+		return kcNull;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	switch(wParam)
@@ -3117,7 +3115,9 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	{
 		const ModSample &sample = sndFile.GetSample(m_nSample);
 		SmpLength offset = sample.cues[wParam - kcStartSampleCues];
-		if(offset < sample.nLength) PlayNote(NOTE_MIDDLEC, offset);
+		if(offset < sample.nLength)
+			PlayNote(NOTE_MIDDLEC, offset);
+		return wParam;
 	}
 
 	// Pass on to ctrl_smp

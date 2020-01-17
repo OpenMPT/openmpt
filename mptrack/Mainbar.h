@@ -160,7 +160,7 @@ public:
 	void OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint = nullptr);
 	void UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify);
 	HWND GetModTreeHWND(); //rewbs.customKeys
-	LRESULT PostMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam);
+	LRESULT SendMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam);
 	bool SetTreeSoundfile(FileReader &file);
 
 

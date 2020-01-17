@@ -3340,7 +3340,6 @@ NoSample:
 }
 
 
-//rewbs.customKeys
 BOOL CCtrlSamples::PreTranslateMessage(MSG *pMsg)
 {
 	if (pMsg)
@@ -3363,15 +3362,12 @@ BOOL CCtrlSamples::PreTranslateMessage(MSG *pMsg)
 		}
 
 	}
-
 	return CModControlDlg::PreTranslateMessage(pMsg);
 }
 
+
 LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 {
-	if (wParam == kcNull)
-		return NULL;
-
 	int transpose = 0;
 	switch(wParam)
 	{
@@ -3391,16 +3387,16 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 			uint32 oldRate = m_sndFile.GetSample(m_nSample).GetSampleRate(m_sndFile.GetType());
 			ApplyResample(wParam == kcSampleUpsample ? oldRate * 2 : oldRate / 2, TrackerSettings::Instance().sampleEditorDefaultResampler);
 		}
-		break;
+		return wParam;
 	case kcSampleResample:
 		OnResample();
-		break;
+		return wParam;
 	case kcSampleStereoSep:
 		OnStereoSeparation();
-		break;
+		return wParam;
 	case kcSampleInitializeOPL:
 		OnInitOPLInstrument();
-		break;
+		return wParam;
 	}
 
 	if(transpose)
@@ -3417,9 +3413,8 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		return wParam;
 	}
 
-	return 0;
+	return kcNull;
 }
-//end rewbs.customKeys
 
 
 // Return currently selected part of the sample.

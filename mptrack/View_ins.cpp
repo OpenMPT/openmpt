@@ -2259,12 +2259,9 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 
 LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 {
-	if(wParam == kcNull)
-		return NULL;
-
 	CModDoc *pModDoc = GetDocument();
 	if(!pModDoc)
-		return NULL;
+		return kcNull;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
@@ -2335,7 +2332,7 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		return wParam;
 	}
 
-	return NULL;
+	return kcNull;
 }
 
 

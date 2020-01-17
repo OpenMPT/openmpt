@@ -171,7 +171,7 @@ LRESULT CViewComments::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 {
 	const int item = m_ItemList.GetSelectionMark() + 1;
 	if(item == 0)
-		return NULL;
+		return kcNull;
 
 	auto modDoc = GetDocument();
 	const auto noteOffset = wParam + NOTE_MIN + CMainFrame::GetMainFrame()->GetBaseOctave() * 12;
@@ -186,7 +186,7 @@ LRESULT CViewComments::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		else if(m_nListId == IDC_LIST_INSTRUMENTS)
 			params.Instrument(m_noteInstr = static_cast<INSTRUMENTINDEX>(item));
 		else
-			return NULL;
+			return kcNull;
 		if(m_lastNote != NOTE_NONE)
 			modDoc->NoteOff(m_lastNote, true, lastInstr, m_noteChannel);
 		m_noteChannel = modDoc->PlayNote(params);
@@ -228,7 +228,7 @@ LRESULT CViewComments::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		OnDblClickListItem(nullptr, nullptr);
 		return wParam;
 	}
-	return NULL;
+	return kcNull;
 }
 
 

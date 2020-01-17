@@ -471,9 +471,6 @@ BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 
 LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 {
-	if(wParam == kcNull)
-		return 0;
-
 	bool isPlaying = IsPlaying();
 	switch(wParam)
 	{
@@ -551,7 +548,7 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	case kcChannelUnmuteAll:
 	case kcUnmuteAllChnOnPatTransition:
-		::PostMessage(m_pParent.GetViewWnd(), WM_MOD_KEYCOMMAND, wParam, lParam); return wParam;
+		return m_pParent.SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
 
 	case kcOrderlistLockPlayback:
 		OnLockPlayback(); return wParam;
@@ -566,7 +563,7 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		OnCreateNewPattern(); return wParam;
 	}
 
-	return 0;
+	return kcNull;
 }
 
 

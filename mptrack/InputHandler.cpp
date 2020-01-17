@@ -83,7 +83,7 @@ static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd)
 		}
 		for(const auto &i : commands)
 		{
-			if(wnd->SendMessage(WM_MOD_KEYCOMMAND, i.second, i.first.AsLPARAM()))
+			if(wnd->SendMessage(WM_MOD_KEYCOMMAND, i.second, i.first.AsLPARAM()) != kcNull)
 			{
 				// Command was handled, no need to let the OS handle the key
 				executeCommand = i.second;

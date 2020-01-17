@@ -2550,9 +2550,6 @@ void CModDoc::OnViewTempoSwingSettings()
 
 LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 {
-	if (wParam == kcNull)
-		return NULL;
-
 	switch(wParam)
 	{
 		case kcViewGeneral: OnEditGlobals(); break;
@@ -2588,6 +2585,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcStopSong: OnPlayerStop(); break;
 		case kcPanic: OnPanic(); break;
 		case kcToggleLoopSong: SetLoopSong(!TrackerSettings::Instance().gbLoopSong); break;
+		default: return kcNull;
 	}
 
 	return wParam;
