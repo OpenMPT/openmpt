@@ -1591,14 +1591,10 @@ void CViewPattern::UpdateIndicator()
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm != nullptr && pSndFile != nullptr && pSndFile->Patterns.IsValidPat(m_nPattern))
 	{
-		CHANNELINDEX nChn;
 		pMainFrm->SetUserText(mpt::cformat(_T("Row %1, Col %2"))(GetCurrentRow(), GetCurrentChannel() + 1));
 		if(::GetFocus() == m_hWnd)
 		{
-			nChn = m_Cursor.GetChannel();
-			if(!m_Status[psKeyboardDragSelect]
-				&& m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()
-				&& GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows() && nChn < pSndFile->GetNumChannels())
+			if(GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows() && m_Cursor.GetChannel() < pSndFile->GetNumChannels())
 			{
 				pMainFrm->SetInfoText(GetCursorDescription());
 				UpdateXInfoText();
