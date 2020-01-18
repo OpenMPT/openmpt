@@ -213,7 +213,7 @@ protected:
 	std::array<ModCommand::NOTE, MAX_BASECHANNELS> previousNote;
 	std::array<uint8, NOTE_MAX + NOTE_MIN> activeNoteChannel;
 	std::array<uint8, NOTE_MAX + NOTE_MIN> splitActiveNoteChannel;
-	static inline const uint8 NOTE_CHANNEL_MAP_INVALID = 0xFF;
+	static constexpr uint8 NOTE_CHANNEL_MAP_INVALID = 0xFF;
 
 public:
 	std::unique_ptr<CEffectVis> m_pEffectVis;
@@ -302,7 +302,7 @@ public:
 	bool PrepareUndo(const PatternCursor &beginSel, const PatternCursor &endSel, const char *description);
 	void UndoRedo(bool undo);
 
-	bool InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, ROWINDEX numRows, bool globalEdit, bool deleteRows);
+	bool InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, bool globalEdit, bool deleteRows);
 	void DeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, bool globalEdit = false);
 	void InsertRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, bool globalEdit = false);
 
@@ -458,7 +458,7 @@ protected:
 	afx_msg void OnPatternAmplify();
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
-	afx_msg void OnSelectPlugin(UINT nID);  //rewbs.patPlugName
+	afx_msg void OnSelectPlugin(UINT nID);
 	afx_msg LRESULT OnUpdatePosition(WPARAM nOrd, LPARAM nRow);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnRecordPlugParamChange(WPARAM, LPARAM);

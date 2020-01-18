@@ -1828,7 +1828,7 @@ void CViewPattern::OnUnmuteAll()
 }
 
 
-bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, ROWINDEX numRows, bool globalEdit, bool deleteRows)
+bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, bool globalEdit, bool deleteRows)
 {
 	CModDoc &modDoc = *GetDocument();
 	CSoundFile &sndFile = *GetSoundFile();
@@ -1839,13 +1839,16 @@ bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastCh
 	if(firstChn > lastChn)
 		return false;
 
+	const auto selection = (firstChn != lastChn || m_Selection.GetNumRows() > 1) ? PatternRect{{m_Selection.GetStartRow(), firstChn, PatternCursor::firstColumn}, {m_Selection.GetEndRow(), lastChn, PatternCursor::lastColumn}} : m_Selection;
+	const ROWINDEX numRows = selection.GetNumRows();
+
 	const char *undoDescription = "";
 	if(deleteRows)
 		undoDescription = numRows != 1 ? "Delete Rows" : "Delete Row";
 	else
 		undoDescription = numRows != 1 ? "Insert Rows" : "Insert Row";
 
-	const ROWINDEX startRow = m_Selection.GetStartRow();
+	const ROWINDEX startRow = selection.GetStartRow();
 	const CHANNELINDEX numChannels = lastChn - firstChn + 1;
 
 	std::vector<PATTERNINDEX> patterns;
@@ -1887,7 +1890,7 @@ bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastCh
 		const ROWINDEX firstRow = first ? startRow : 0;
 		for(ROWINDEX row = firstRow; row < pattern.GetNumRows(); row++)
 		{
-			const auto *m = pattern.GetRow(row) + firstChn;
+			const auto *m = pattern.GetpModCommand(row, firstChn);
 			patternData.insert(patternData.end(), m, m + numChannels);
 		}
 		modDoc.GetPatternUndo().PrepareUndo(pat, firstChn, firstRow, numChannels, pattern.GetNumRows(), undoDescription, !first);
@@ -1924,21 +1927,16 @@ bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastCh
 	SetCurrentPattern(firstNewPattern);
 	InvalidatePattern();
 
+	SetCursorPosition(selection.GetUpperLeft());
+	SetCurSel(selection);
+
 	return true;
 }
 
 
 void CViewPattern::DeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, bool globalEdit)
 {
-	if(!InsertOrDeleteRows(firstChn, lastChn, m_Selection.GetNumRows(), globalEdit, true))
-		return;
-
-	PatternRect sel = m_Selection;
-	PatternCursor finalPos(m_Selection.GetStartRow(), m_Selection.GetLowerRight());
-	//SetCurSel(finalPos);
-	// Fix: Horizontal scrollbar pos screwed when selecting with mouse
-	SetCursorPosition(finalPos);
-	SetCurSel(sel);
+	InsertOrDeleteRows(firstChn, lastChn, globalEdit, true);
 }
 
 
@@ -1968,7 +1966,7 @@ void CViewPattern::OnDeleteWholeRowGlobal()
 
 void CViewPattern::InsertRows(CHANNELINDEX firstChn, CHANNELINDEX lastChn, bool globalEdit)
 {
-	InsertOrDeleteRows(firstChn, lastChn, m_Selection.GetNumRows(), globalEdit, false);
+	InsertOrDeleteRows(firstChn, lastChn, globalEdit, false);
 }
 
 
@@ -2834,18 +2832,18 @@ void CViewPattern::OnDropSelection()
 		// Extend to parameter column
 		end.Move(0, 0, 1);
 	}
-	begin.Sanitize(sndFile.Patterns[m_nPattern].GetNumRows(), sndFile.GetNumChannels());
-	end.Sanitize(sndFile.Patterns[m_nPattern].GetNumRows(), sndFile.GetNumChannels());
+	begin.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels());
+	end.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels());
 	PatternRect destination(begin, end);
 
 	const bool moveSelection = !m_Status[psKeyboardDragSelect | psCtrlDragSelect];
 
 	BeginWaitCursor();
-	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.GetNumChannels(), sndFile.Patterns[m_nPattern].GetNumRows(), moveSelection ? "Move Selection" : "Copy Selection");
+	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.GetNumChannels(), pattern.GetNumRows(), moveSelection ? "Move Selection" : "Copy Selection");
 
 	const ModCommand empty = ModCommand::Empty();
 	auto p = pattern.begin();
-	for(ROWINDEX row = 0; row < sndFile.Patterns[m_nPattern].GetNumRows(); row++)
+	for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
 	{
 		for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++, p++)
 		{
@@ -4440,9 +4438,7 @@ void CViewPattern::TempEnterVol(int v)
 	CSoundFile *pSndFile = GetSoundFile();
 
 	if(pSndFile == nullptr || !IsEditingEnabled_bmsg())
-	{
 		return;
-	}
 
 	PrepareUndo(m_Cursor, m_Cursor, "Volume Entry");
 
