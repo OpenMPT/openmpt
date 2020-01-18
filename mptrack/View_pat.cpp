@@ -4416,20 +4416,19 @@ void CViewPattern::MoveCursor(bool moveRight)
 	}
 }
 
-#define ENTER_PCNOTE_VALUE(v, method) \
-	{ \
-		if((v >= 0) && (v <= 9)) \
-		{ \
-			uint16 val = target.Get##method(); \
-			/* Move existing digits to left, drop out leftmost digit and */ \
-			/* push new digit to the least meaning digit. */ \
-			val = (val % 100) * 10 + v; \
-			if(val > ModCommand::maxColumnValue) \
-				val = ModCommand::maxColumnValue; \
-			target.Set##method(val); \
-			m_PCNoteEditMemory = target; \
-		} \
-	}
+
+static bool EnterPCNoteValue(int v, ModCommand &m, uint16 (ModCommand::*getMethod)() const, void (ModCommand::*setMethod)(uint16))
+{
+	if(v < 0 || v > 9)
+		return false;
+
+	uint16 val = (m.*getMethod)();
+	// Move existing digits to left, drop out leftmost digit and push new digit to the least significant digit.
+	val = static_cast<uint16>((val % 100) * 10 + v);
+	LimitMax(val, static_cast<uint16>(ModCommand::maxColumnValue));
+	(m.*setMethod)(val);
+	return true;
+}
 
 
 // Enter volume effect / number in the pattern.
@@ -4448,7 +4447,8 @@ void CViewPattern::TempEnterVol(int v)
 
 	if(target.IsPcNote())
 	{
-		ENTER_PCNOTE_VALUE(static_cast<uint16>(v), ValueVolCol);
+		if(EnterPCNoteValue(v, target, &ModCommand::GetValueVolCol, &ModCommand::SetValueVolCol))
+			m_PCNoteEditMemory = target;
 	} else
 	{
 		ModCommand::VOLCMD volcmd = target.volcmd;
@@ -4551,7 +4551,8 @@ void CViewPattern::TempEnterFX(ModCommand::COMMAND c, int v)
 
 	if(target.IsPcNote())
 	{
-		ENTER_PCNOTE_VALUE(static_cast<uint16>(c), ValueEffectCol);
+		if(EnterPCNoteValue(c, target, &ModCommand::GetValueEffectCol, &ModCommand::SetValueEffectCol))
+			m_PCNoteEditMemory = target;
 	} else if(pSndFile->GetModSpecifications().HasCommand(c))
 	{
 		if(c != CMD_NONE)
@@ -4616,7 +4617,8 @@ void CViewPattern::TempEnterFXparam(int v)
 
 	if(target.IsPcNote())
 	{
-		ENTER_PCNOTE_VALUE(static_cast<uint16>(v), ValueEffectCol);
+		if(EnterPCNoteValue(v, target, &ModCommand::GetValueEffectCol, &ModCommand::SetValueEffectCol))
+			m_PCNoteEditMemory = target;
 	} else
 	{
 
