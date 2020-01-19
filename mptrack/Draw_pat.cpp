@@ -535,7 +535,11 @@ void CViewPattern::OnDraw(CDC *pDC)
 		hdc = pDC->m_hDC;
 	}
 
-	HPEN oldpen = SelectPen(hdc, CMainFrame::penDarkGray);
+	const auto dcBrush = GetStockBrush(DC_BRUSH);
+	const auto faceColor = GetSysColor(COLOR_BTNFACE);
+	const auto shadowColor = GetSysColor(COLOR_BTNSHADOW);
+	const auto textColor = GetSysColor(COLOR_BTNTEXT);
+
 	CHANNELINDEX xofs = static_cast<CHANNELINDEX>(GetXScrollPos());
 	ROWINDEX yofs = static_cast<ROWINDEX>(GetYScrollPos());
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
@@ -587,9 +591,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 			}
 			if ((rect.bottom > rect.top) && (rect.right > rect.left))
 			{
-				::FillRect(hdc, &rect, CMainFrame::brushGray);
-				::MoveToEx(hdc, 0, rect.bottom, NULL);
-				::LineTo(hdc, rect.right, rect.bottom);
+				::SetDCBrushColor(hdc, faceColor);
+				::FillRect(hdc, &rect, dcBrush);
+				auto shadowRect = rect;
+				shadowRect.top = shadowRect.bottom++;
+				::SetDCBrushColor(hdc, shadowColor);
+				::FillRect(hdc, &shadowRect, dcBrush);
 			}
 			yofs = 0;
 		}
@@ -631,7 +638,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 	if ((xpaint < rcClient.right) && (ypaint > rcClient.top))
 	{
 		rc.SetRect(xpaint, rcClient.top, rcClient.right, ypaint);
-		::FillRect(hdc, &rc, CMainFrame::brushGray);
+		::SetDCBrushColor(hdc, faceColor);
+		::FillRect(hdc, &rc, dcBrush);
 	}
 	if (ypaint < rcClient.bottom)
 	{
@@ -652,7 +660,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	xpaint = m_szHeader.cx;
 	ypaint = rcClient.top;
 	rect.SetRect(0, rcClient.top, rcClient.right, rcClient.top + m_szHeader.cy);
-	if (::RectVisible(hdc, &rect))
+	if(::RectVisible(hdc, &rect))
 	{
 		sprintf(s, "#%u", m_nPattern);
 		rect.right = m_szHeader.cx;
@@ -690,7 +698,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 					// Drop position depends on whether hovered channel is left or right of dragged item.
 					r.left = (m_nDropItem.Value() < m_nDragItem.Value() || m_Status[psShiftDragging]) ? rect.left : rect.right - dropWidth;
 					r.right = r.left + dropWidth;
-					::FillRect(hdc, r, CMainFrame::brushText);
+					::SetDCBrushColor(hdc, textColor);
+					::FillRect(hdc, r, dcBrush);
 				}
 
 				rect.bottom = rect.top + colHeight;
@@ -740,8 +749,6 @@ void CViewPattern::OnDraw(CDC *pDC)
 			xpaint += nColumnWidth;
 		}
 	}
-
-	if (oldpen) SelectPen(hdc, oldpen);
 
 	if(doSmoothScroll)
 	{
