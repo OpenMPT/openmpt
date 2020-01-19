@@ -1483,19 +1483,11 @@ void CViewPattern::SetCurSel(PatternCursor beginSel, PatternCursor endSel)
 
 	// Get new selection area
 	m_Selection = PatternRect(beginSel, endSel);
-	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(m_nPattern))
+	if(const CSoundFile *sndFile = GetSoundFile(); sndFile != nullptr && sndFile->Patterns.IsValidPat(m_nPattern))
 	{
-		m_Selection.Sanitize(pSndFile->Patterns[m_nPattern].GetNumRows(), pSndFile->GetNumChannels());
+		m_Selection.Sanitize(sndFile->Patterns[m_nPattern].GetNumRows(), sndFile->GetNumChannels());
 	}
-	if(m_Selection.GetUpperLeft() != m_Selection.GetLowerRight())
-	{
-		TCHAR s[64];
-		wsprintf(s, _T("Selection: %u row%s, %u channel%s"),
-			m_Selection.GetNumRows(), m_Selection.GetNumRows() != 1 ? _T("s") : _T(""),
-			m_Selection.GetNumChannels(), m_Selection.GetNumChannels() != 1 ? _T("s") : _T(""));
-		CMainFrame::GetMainFrame()->SetInfoText(s);
-	}
+	UpdateIndicator();
 
 	pt = GetPointFromPosition(m_Selection.GetUpperLeft());
 	rect2.left = pt.x;
@@ -1594,18 +1586,25 @@ void CViewPattern::InvalidateChannelsHeaders()
 
 void CViewPattern::UpdateIndicator()
 {
-	const CSoundFile *pSndFile = GetSoundFile();
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if(pMainFrm != nullptr && pSndFile != nullptr && pSndFile->Patterns.IsValidPat(m_nPattern))
+	const CSoundFile *sndFile = GetSoundFile();
+	CMainFrame *mainFrm = CMainFrame::GetMainFrame();
+	if(mainFrm == nullptr || sndFile == nullptr || !sndFile->Patterns.IsValidPat(m_nPattern))
+		return;
+
+	mainFrm->SetUserText(mpt::cformat(_T("Row %1, Col %2"))(GetCurrentRow(), GetCurrentChannel() + 1));
+	const bool hasSelection = m_Selection.GetUpperLeft() != m_Selection.GetLowerRight();
+	if(hasSelection)
 	{
-		pMainFrm->SetUserText(mpt::cformat(_T("Row %1, Col %2"))(GetCurrentRow(), GetCurrentChannel() + 1));
-		if(::GetFocus() == m_hWnd)
+		mainFrm->SetInfoText(mpt::cformat(_T("Selection: %1 row%2, %3 channel%4"))
+			(m_Selection.GetNumRows(), m_Selection.GetNumRows() != 1 ? _T("s") : _T(""), m_Selection.GetNumChannels(), m_Selection.GetNumChannels() != 1 ? _T("s") : _T("")));
+	}
+	if(::GetFocus() == m_hWnd)
+	{
+		if(GetCurrentRow() < sndFile->Patterns[m_nPattern].GetNumRows() && m_Cursor.GetChannel() < sndFile->GetNumChannels())
 		{
-			if(GetCurrentRow() < pSndFile->Patterns[m_nPattern].GetNumRows() && m_Cursor.GetChannel() < pSndFile->GetNumChannels())
-			{
-				pMainFrm->SetInfoText(GetCursorDescription());
-				UpdateXInfoText();
-			}
+			if(!hasSelection)
+				mainFrm->SetInfoText(GetCursorDescription());
+			UpdateXInfoText();
 		}
 	}
 }

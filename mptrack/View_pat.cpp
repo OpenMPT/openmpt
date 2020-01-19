@@ -345,12 +345,6 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 		selStart.Set(m_StartSel);
 	}
 	SetCurSel(selStart, m_Cursor);
-	UpdateIndicator();
-
-	// 	Log("Row: %d; Chan: %d; ColType: %d;\n",
-	// 		selStart.GetRow(),
-	// 		selStart.GetChannel(),
-	// 		selStart.GetColumnType());
 
 	return row;
 }
@@ -376,7 +370,6 @@ bool CViewPattern::SetCurrentColumn(CHANNELINDEX channel, PatternCursor::Columns
 	SetCurSel(selStart, m_Cursor);
 	// Fix: If cursor isn't on screen move both scrollbars to make it visible
 	UpdateScrollbarPositions();
-	UpdateIndicator();
 	return true;
 }
 
