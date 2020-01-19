@@ -5310,9 +5310,11 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 	
 	chn.prevNoteOffset += param;
 
-	if(param >= chn.nLoopEnd && GetType() == MOD_TYPE_MTM && chn.dwFlags[CHN_LOOP] && chn.nLoopEnd > 0)
+	if(param >= chn.nLoopEnd && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_MTM)) && chn.dwFlags[CHN_LOOP] && chn.nLoopEnd > 0)
 	{
 		// Offset wrap-around
+		// Note that ST3 only does this in GUS mode. SoundBlaster stops the sample entirely instead.
+		// Test case: OffsetLoopWraparound.s3m
 		param = (param - chn.nLoopStart) % (chn.nLoopEnd - chn.nLoopStart) + chn.nLoopStart;
 	}
 
