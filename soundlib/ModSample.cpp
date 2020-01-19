@@ -364,7 +364,7 @@ void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 	const int numChannels = smp.GetNumChannels();
 	const int copySamples = numChannels * InterpolationMaxLookahead;
 
-	T *sampleData = reinterpret_cast<T *>(smp.samplev());
+	T *sampleData = static_cast<T *>(smp.samplev());
 	T *afterSampleStart = sampleData + smp.nLength * numChannels;
 	T *loopLookAheadStart = afterSampleStart + copySamples;
 	T *sustainLookAheadStart = loopLookAheadStart + 4 * copySamples;
@@ -470,7 +470,7 @@ void ModSample::FrequencyToTranspose()
 {
 	int f2t = 0;
 	if(nC5Speed)
-		f2t = FrequencyToTranspose(nC5Speed);
+		f2t = Clamp(FrequencyToTranspose(nC5Speed), -16384, 16383);
 	RelativeTone = static_cast<int8>(f2t / 128);
 	nFineTune = static_cast<int8>(f2t & 0x7F);
 }
