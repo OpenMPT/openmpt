@@ -48,7 +48,7 @@ mpt::PathString LinkResolver::Resolve(const TCHAR *inPath)
 	USES_CONVERSION;  // T2COLE needs this
 	if(ppf != nullptr && SUCCEEDED(ppf->Load(T2COLE(inPath), STGM_READ)))
 	{
-		if(SUCCEEDED(psl->Resolve(AfxGetMainWnd()->m_hWnd, SLR_ANY_MATCH)))
+		if(SUCCEEDED(psl->Resolve(AfxGetMainWnd()->m_hWnd, MAKELONG(SLR_ANY_MATCH | SLR_NO_UI | SLR_NOSEARCH, 100))))
 		{
 			TCHAR outPath[MAX_PATH];
 			psl->GetPath(outPath, mpt::saturate_cast<int>(std::size(outPath)), nullptr, 0);
