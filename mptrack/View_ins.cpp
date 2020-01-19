@@ -1316,13 +1316,15 @@ void CViewInstrument::OnNcPaint()
 	if((rect.left < rect.right) && (rect.top < rect.bottom))
 	{
 		CDC *pDC = GetWindowDC();
-		HDC hdc = pDC->m_hDC;
-		HGDIOBJ oldpen = SelectObject(hdc, (HGDIOBJ)CMainFrame::penDarkGray);
+		{
+			// Shadow
+			auto shadowRect = rect;
+			shadowRect.top = shadowRect.bottom - 1;
+			pDC->FillSolidRect(&shadowRect, GetSysColor(COLOR_BTNSHADOW));
+		}
 		rect.bottom--;
-		MoveToEx(hdc, rect.left, rect.bottom, NULL);
-		LineTo(hdc, rect.right, rect.bottom);
 		if(rect.top < rect.bottom)
-			FillRect(hdc, &rect, CMainFrame::brushGray);
+			pDC->FillSolidRect(&rect, GetSysColor(COLOR_BTNFACE));
 		if(rect.top + 2 < rect.bottom)
 		{
 			for(UINT i = 0; i < ENV_LEFTBAR_BUTTONS; i++)
@@ -1330,8 +1332,6 @@ void CViewInstrument::OnNcPaint()
 				DrawNcButton(pDC, i);
 			}
 		}
-		if(oldpen)
-			SelectObject(hdc, oldpen);
 		ReleaseDC(pDC);
 	}
 }
