@@ -572,6 +572,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 					{
 						m_OrderList.SelectSequence(seq);
 						m_OrderList.SetCurSel(ord, true);
+						UpdateView(SequenceHint(static_cast<SEQUENCEINDEX>(seq)).Names(), nullptr);
 						break;
 					}
 				}
@@ -591,6 +592,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 				m_OrderList.SetCurSel(ord);
 				SetCurrentPattern(m_sndFile.Order()[ord]);
 			}
+			UpdateView(SequenceHint(static_cast<SEQUENCEINDEX>(seq)).Names(), nullptr);
 		}
 	}
 	if(m_hWndView)
