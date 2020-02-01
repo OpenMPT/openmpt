@@ -508,6 +508,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 	case CTRLMSG_PAT_SETSEQUENCE:
 		m_OrderList.SelectSequence(static_cast<SEQUENCEINDEX>(lParam));
+		UpdateView(SequenceHint(static_cast<SEQUENCEINDEX>(lParam)).Names(), nullptr);
 		break;
 
 	default:
