@@ -1079,9 +1079,9 @@ BOOL CSampleMapDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
-	if (pIns)
+	if(pIns)
 	{
-		for (UINT i=0; i<NOTE_MAX; i++)
+		for(UINT i = 0; i < NOTE_MAX; i++)
 		{
 			KeyboardMap[i] = pIns->Keyboard[i];
 		}
@@ -1105,48 +1105,36 @@ void CSampleMapDlg::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pBar)
 
 void CSampleMapDlg::OnUpdateSamples()
 {
-	UINT nOldPos = 0;
-	UINT nNewPos = 0;
-	bool showAll;
-	
-	if ((m_nInstrument >= MAX_INSTRUMENTS)) return;
-	if (m_CbnSample.GetCount() > 0)
-	{
-		nOldPos = static_cast<UINT>(m_CbnSample.GetItemData(m_CbnSample.GetCurSel()));
-	}
+	UINT oldPos = 0;
+	UINT newPos = 0;
+
+	if(m_nInstrument >= MAX_INSTRUMENTS)
+		return;
+	if(m_CbnSample.GetCount() > 0)
+		oldPos = static_cast<UINT>(m_CbnSample.GetItemData(m_CbnSample.GetCurSel()));
+	m_CbnSample.SetRedraw(FALSE);
 	m_CbnSample.ResetContent();
-	showAll = (IsDlgButtonChecked(IDC_CHECK1) != FALSE);
-	
-	UINT nInsertPos;
-	nInsertPos = m_CbnSample.AddString(_T("0: No sample"));
-	m_CbnSample.SetItemData(nInsertPos, 0);
+	const bool showAll = (IsDlgButtonChecked(IDC_CHECK1) != FALSE) || (*std::max_element(std::begin(KeyboardMap), std::end(KeyboardMap)) == 0);
 
-	for (SAMPLEINDEX i = 1; i <= sndFile.GetNumSamples(); i++)
+	UINT insertPos = m_CbnSample.AddString(_T("0: No sample"));
+	m_CbnSample.SetItemData(insertPos, 0);
+
+	for(SAMPLEINDEX i = 1; i <= sndFile.GetNumSamples(); i++)
 	{
-		bool isUsed = showAll;
-
-		if (!isUsed)
-		{
-			for (auto smp : KeyboardMap)
-			{
-				if (smp == i)
-				{
-					isUsed = true;
-					break;
-				}
-			}
-		}
-		if (isUsed)
+		bool isUsed = showAll || std::find(std::begin(KeyboardMap), std::end(KeyboardMap), i) != std::end(KeyboardMap);
+		if(isUsed)
 		{
 			CString sampleName;
 			sampleName.Format(_T("%d: %s"), i, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetSampleName(i)).GetString());
-			nInsertPos = m_CbnSample.AddString(sampleName);
-			
-			m_CbnSample.SetItemData(nInsertPos, i);
-			if (i == nOldPos) nNewPos = nInsertPos;
+			insertPos = m_CbnSample.AddString(sampleName);
+
+			m_CbnSample.SetItemData(insertPos, i);
+			if(i == oldPos)
+				newPos = insertPos;
 		}
 	}
-	m_CbnSample.SetCurSel(nNewPos);
+	m_CbnSample.SetRedraw(TRUE);
+	m_CbnSample.SetCurSel(newPos);
 	OnUpdateKeyboard();
 }
 
@@ -1154,9 +1142,8 @@ void CSampleMapDlg::OnUpdateSamples()
 void CSampleMapDlg::OnUpdateOctave()
 {
 	TCHAR s[64];
-
-	UINT nBaseOctave = m_SbOctave.GetPos() & 7;
-	wsprintf(s, _T("Octaves %u-%u"), nBaseOctave, nBaseOctave+2);
+	const UINT baseOctave = m_SbOctave.GetPos() & 7;
+	wsprintf(s, _T("Octaves %u-%u"), baseOctave, baseOctave + 2);
 	SetDlgItemText(IDC_TEXT1, s);
 }
 
@@ -1165,24 +1152,27 @@ void CSampleMapDlg::OnUpdateOctave()
 void CSampleMapDlg::OnUpdateKeyboard()
 {
 	SAMPLEINDEX nSample = static_cast<SAMPLEINDEX>(m_CbnSample.GetItemData(m_CbnSample.GetCurSel()));
-	UINT nBaseOctave = m_SbOctave.GetPos() & 7;
-	BOOL bRedraw = FALSE;
-	for (UINT iNote=0; iNote<3*12; iNote++)
+	const UINT baseOctave = m_SbOctave.GetPos() & 7;
+	bool redraw = false;
+	for(UINT iNote = 0; iNote < 3 * 12; iNote++)
 	{
-		uint8 nOld = m_Keyboard.GetFlags(iNote);
+		uint8 oldFlags = m_Keyboard.GetFlags(iNote);
 		SAMPLEINDEX oldSmp = m_Keyboard.GetSample(iNote);
-		UINT ndx = nBaseOctave*12+iNote;
-		uint8 nNew = CKeyboardControl::KEYFLAG_NORMAL;
-		if(KeyboardMap[ndx] == nSample) nNew = CKeyboardControl::KEYFLAG_REDDOT;
-		else if(KeyboardMap[ndx] != 0) nNew = CKeyboardControl::KEYFLAG_BRIGHTDOT;
-		if (nNew != nOld || oldSmp != KeyboardMap[ndx])
+		UINT ndx = baseOctave * 12 + iNote;
+		uint8 newFlags = CKeyboardControl::KEYFLAG_NORMAL;
+		if(KeyboardMap[ndx] == nSample)
+			newFlags = CKeyboardControl::KEYFLAG_REDDOT;
+		else if(KeyboardMap[ndx] != 0)
+			newFlags = CKeyboardControl::KEYFLAG_BRIGHTDOT;
+		if(newFlags != oldFlags || oldSmp != KeyboardMap[ndx])
 		{
-			m_Keyboard.SetFlags(iNote, nNew);
+			m_Keyboard.SetFlags(iNote, newFlags);
 			m_Keyboard.SetSample(iNote, KeyboardMap[ndx]);
-			bRedraw = TRUE;
+			redraw = true;
 		}
 	}
-	if (bRedraw) m_Keyboard.InvalidateRect(NULL, FALSE);
+	if(redraw)
+		m_Keyboard.InvalidateRect(NULL, FALSE);
 }
 
 
@@ -1190,44 +1180,44 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 {
 	TCHAR s[32] = _T("--");
 
-	if ((lParam >= 0) && (lParam < 3*12))
+	if((lParam >= 0) && (lParam < 3 * 12))
 	{
-		SAMPLEINDEX nSample = static_cast<SAMPLEINDEX>(m_CbnSample.GetItemData(m_CbnSample.GetCurSel()));
-		uint32 nBaseOctave = m_SbOctave.GetPos() & 7;
-		
-		const CString temp = mpt::ToCString(sndFile.GetNoteName(static_cast<ModCommand::NOTE>(lParam + 1 + 12 * nBaseOctave), m_nInstrument));
+		const SAMPLEINDEX sample = static_cast<SAMPLEINDEX>(m_CbnSample.GetItemData(m_CbnSample.GetCurSel()));
+		const uint32 baseOctave = m_SbOctave.GetPos() & 7;
+
+		const CString temp = mpt::ToCString(sndFile.GetNoteName(static_cast<ModCommand::NOTE>(lParam + 1 + 12 * baseOctave), m_nInstrument));
 		if(temp.GetLength() >= CountOf(s))
 			wsprintf(s, _T("%s"), _T("..."));
 		else
 			wsprintf(s, _T("%s"), temp.GetString());
 
 		ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
-		if ((wParam == KBDNOTIFY_LBUTTONDOWN) && (nSample < MAX_SAMPLES) && (pIns))
+		if((wParam == KBDNOTIFY_LBUTTONDOWN) && (sample < MAX_SAMPLES) && (pIns))
 		{
-			uint32 iNote = static_cast<uint32>(nBaseOctave * 12 + lParam);
+			const uint32 note = static_cast<uint32>(baseOctave * 12 + lParam);
 
 			if(mouseAction == mouseUnknown)
 			{
 				// Mouse down -> decide if we are going to set or remove notes
 				mouseAction = mouseSet;
-				if(KeyboardMap[iNote] == nSample)
+				if(KeyboardMap[note] == sample)
 				{
-					 mouseAction = (KeyboardMap[iNote] == pIns->Keyboard[iNote]) ? mouseZero : mouseUnset;
+					mouseAction = (KeyboardMap[note] == pIns->Keyboard[note]) ? mouseZero : mouseUnset;
 				}
 			}
 
 			switch(mouseAction)
 			{
 			case mouseSet:
-				KeyboardMap[iNote] = nSample;
+				KeyboardMap[note] = sample;
 				break;
 			case mouseUnset:
-				KeyboardMap[iNote] = pIns->Keyboard[iNote];
+				KeyboardMap[note] = pIns->Keyboard[note];
 				break;
 			case mouseZero:
-				if(KeyboardMap[iNote] == nSample)
+				if(KeyboardMap[note] == sample)
 				{
-					KeyboardMap[iNote] = 0;
+					KeyboardMap[note] = 0;
 				}
 				break;
 			}
@@ -1246,18 +1236,18 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 void CSampleMapDlg::OnOK()
 {
 	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
-	if (pIns)
+	if(pIns)
 	{
-		BOOL bModified = FALSE;
-		for (UINT i=0; i<NOTE_MAX; i++)
+		bool modified = false;
+		for(UINT i = 0; i < NOTE_MAX; i++)
 		{
-			if (KeyboardMap[i] != pIns->Keyboard[i])
+			if(KeyboardMap[i] != pIns->Keyboard[i])
 			{
 				pIns->Keyboard[i] = KeyboardMap[i];
-				bModified = TRUE;
+				modified = true;
 			}
 		}
-		if (bModified)
+		if(modified)
 		{
 			CDialog::OnOK();
 			return;
