@@ -4133,6 +4133,10 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 									SetCurrentOrder(newOrder);
 								return wParam;
 							}
+		case kcPrevSequence:
+		case kcNextSequence:
+			SendCtrlMessage(CTRLMSG_PAT_SETSEQUENCE, mpt::wrapping_modulo(sndFile.Order.GetCurrentSequenceIndex() + (wParam == kcPrevSequence ? -1 : 1), sndFile.Order.GetNumSequences()));
+			return wParam;
 		case kcSelectWithCopySelect:
 		case kcSelectWithNav:
 		case kcSelect:			if(!m_Status[psDragnDropEdit | psRowSelection | psChannelSelection | psMouseDragSelect]) m_StartSel = m_Cursor;

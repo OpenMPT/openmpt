@@ -353,7 +353,9 @@ enum CommandID
 	kcInsertWholeRowGlobal,
 	kcPrevPattern,
 	kcNextPattern,
-	kcEndPatternEditing = kcNextPattern,
+	kcPrevSequence,
+	kcNextSequence,
+	kcEndPatternEditing = kcNextSequence,
 
 	//Notes
 	kcVPStartNotes,

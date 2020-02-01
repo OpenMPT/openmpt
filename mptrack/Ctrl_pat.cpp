@@ -506,6 +506,10 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		OnPatternDuplicate();
 		break;
 
+	case CTRLMSG_PAT_SETSEQUENCE:
+		m_OrderList.SelectSequence(static_cast<SEQUENCEINDEX>(lParam));
+		break;
+
 	default:
 		return CModControlDlg::OnModCtrlMsg(wParam, lParam);
 	}

@@ -142,8 +142,8 @@ static constexpr struct
 	{1051, kcCopySelect, _T("Copy select key")},
 	{KeyCommand::Hidden, kcSelectOff, _T("Deselect")},
 	{KeyCommand::Hidden, kcCopySelectOff, _T("Copy deselect key")},
-	{1054, kcNextPattern, _T("Next pattern")},
-	{1055, kcPrevPattern, _T("Previous pattern")},
+	{1054, kcNextPattern, _T("Next Pattern")},
+	{1055, kcPrevPattern, _T("Previous Pattern")},
 	//{1056, kcClearSelection, _T("Wipe selection")},
 	{1057, kcClearRow, _T("Clear row")},
 	{1058, kcClearField, _T("Clear field")},
@@ -729,6 +729,8 @@ static constexpr struct
 	{2003, kcDeleteWholeRowGlobal, _T("Delete Row(s) (All Channels, Global)")},
 	{2004, kcInsertRowGlobal, _T("Insert Row(s) (Global)")},
 	{2005, kcInsertWholeRowGlobal, _T("Insert Row(s) (All Channels, Global)")},
+	{2006, kcPrevSequence, _T("Previous Sequence")},
+	{2007, kcNextSequence, _T("Next Sequence")},
 };
 
 // Get command descriptions etc.. loaded up.
