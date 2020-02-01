@@ -228,7 +228,7 @@ void COptionsKeyboard::DefineCommandCategories()
 		newCat.AddCommands(kcStartPlainNavigate, kcEndPlainNavigate, true);
 		newCat.AddCommands(kcStartJumpSnap, kcEndJumpSnap, true);
 		newCat.AddCommands(kcStartHomeEnd, kcEndHomeEnd, true);
-		newCat.AddCommands(kcPrevPattern, kcNextPattern, true);
+		newCat.AddCommands(kcPrevPattern, kcNextSequence, true);
 		newCat.AddCommands(kcStartSelect, kcEndSelect, true);
 		newCat.AddCommands(kcStartPatternClipboard, kcEndPatternClipboard, true);
 		newCat.AddCommands(kcClearRow, kcInsertWholeRowGlobal, true);
