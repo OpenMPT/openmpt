@@ -140,6 +140,10 @@ version:1
 2:2005:6:45:5		//Insert Row(s) (All Channels, Global): Ctrl+Alt+INSERT (KeyDown|KeyHold)
 2:1055:0:109:5		//Previous pattern: NUM SUB (KeyDown|KeyHold)
 2:1054:0:107:5		//Next pattern: NUM PLUS (KeyDown|KeyHold)
+2:2006:6:189:5		//Previous Sequence: Ctrl+Alt+- (KeyDown|KeyHold)
+2:2006:6:109:5		//Previous Sequence: Ctrl+Alt+NUM SUB (KeyDown|KeyHold)
+2:2007:6:187:5		//Next Sequence: Ctrl+Alt++ (KeyDown|KeyHold)
+2:2007:6:107:5		//Next Sequence: Ctrl+Alt+NUM PLUS (KeyDown|KeyHold)
 
 //----( Pattern Context [bottom] - Note Col )------------
 3:1064:0:81/16:1		//Base octave C: Q (KeyDown)
