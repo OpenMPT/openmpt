@@ -280,6 +280,7 @@ protected:
 	afx_msg void OnInsertTreeItem() { InsertOrDupItem(true); }
 	afx_msg void OnSwitchToTreeItem();	// hack for sequence items to avoid double-click action
 	afx_msg void OnCloseItem();
+	afx_msg void OnRenameItem();
 	afx_msg void OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result);
 	afx_msg void OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result);
 	afx_msg void OnDropFiles(HDROP hDropInfo);

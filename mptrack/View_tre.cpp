@@ -119,6 +119,7 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_MODTREE_RELOADITEM,	&CModTree::OnReloadItem)
 	ON_COMMAND(ID_MODTREE_RELOADALL,	&CModTree::OnReloadAll)
 	ON_COMMAND(ID_MODTREE_FINDMISSING,	&CModTree::OnFindMissing)
+	ON_COMMAND(ID_MODTREE_RENAME,		&CModTree::OnRenameItem)
 	ON_COMMAND(ID_ADD_SOUNDBANK,		&CModTree::OnAddDlsBank)
 	ON_COMMAND(ID_IMPORT_MIDILIB,		&CModTree::OnImportMidiLib)
 	ON_COMMAND(ID_EXPORT_MIDILIB,		&CModTree::OnExportMidiLib)
@@ -2842,6 +2843,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 				nDefault = ID_MODTREE_EXECUTE;
 				AppendMenu(hMenu, MF_STRING, nDefault, _T("&View"));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_CLOSE, _T("&Close"));
+				AppendMenu(hMenu, MF_STRING, ID_MODTREE_RENAME, _T("Re&name"));
 				break;
 
 			case MODITEM_COMMENTS:
@@ -2855,6 +2857,10 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 				AppendMenu(hMenu, MF_STRING, nDefault, _T("&Edit Pattern"));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE,
 								(modItem.type == MODITEM_ORDER) ? _T("&Delete from list") : _T("&Delete Pattern"));
+				if(modItem.type == MODITEM_PATTERN && sndFile && sndFile->GetModSpecifications().hasPatternNames)
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_RENAME, _T("Re&name Pattern"));
+				else if(modItem.type == MODITEM_ORDER)
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_RENAME, _T("&Set Pattern"));
 				break;
 
 			case MODITEM_SEQUENCE:
@@ -2876,6 +2882,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 					AppendMenu(hMenu, MF_STRING | (sndFile->Order.GetNumSequences() < MAX_SEQUENCES ? 0 : MF_GRAYED), ID_MODTREE_INSERT, _T("&Insert Sequence"));
 					AppendMenu(hMenu, MF_STRING | (sndFile->Order.GetNumSequences() < MAX_SEQUENCES ? 0 : MF_GRAYED), ID_MODTREE_DUPLICATE , _T("D&uplicate Sequence"));
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, _T("&Delete Sequence"));
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_RENAME, _T("Re&name Sequence"));
 				}
 				break;
 
@@ -2886,6 +2893,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, _T("&Insert Sequence"));
 					if(sndFile->Order.GetNumSequences() == 1) // this is a sequence
 						AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, _T("D&uplicate Sequence"));
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_RENAME, _T("Re&name Sequence"));
 				}
 				break;
 
@@ -2897,6 +2905,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, _T("&Insert Sample"));
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, _T("D&uplicate Sample"));
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, _T("&Delete Sample"));
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_RENAME, _T("Re&name Sample"));
 					if ((modDoc) && (!modDoc->GetNumInstruments()))
 					{
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
@@ -2951,6 +2960,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_INSERT, _T("&Insert Instrument"));
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_DUPLICATE, _T("D&uplicate Instrument"));
 					AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, _T("&Delete Instrument"));
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_RENAME, _T("Re&name Instrument"));
 					if (modDoc)
 					{
 						AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
@@ -2994,6 +3004,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			case MODITEM_INSLIB_FOLDER:
 				nDefault = ID_MODTREE_EXECUTE;
 				AppendMenu(hMenu, MF_STRING, nDefault, _T("&Browse..."));
+				AppendMenu(hMenu, MF_STRING, ID_MODTREE_RENAME, _T("Set &Path"));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_OPENITEM, _T("&Open in Explorer"));
 				{
 					auto insDir = TrackerSettings::Instance().PathInstruments.GetDefaultDir();
@@ -3966,6 +3977,12 @@ HTREEITEM CModTree::GetParentRootItem(HTREEITEM hItem) const
 }
 
 
+void CModTree::OnRenameItem()
+{
+	EditLabel(GetSelectedItem());
+}
+
+
 // Editing sample, instrument, order, pattern, etc. labels
 void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 {
@@ -3987,6 +4004,12 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 
 		switch(modItem.type)
 		{
+		case MODITEM_HDR_SONG:
+			text = mpt::ToUnicode(sndFile.GetCharsetInternal(), sndFile.m_songName);
+			editCtrl->SetLimitText(modSpecs.modNameLengthMax);
+			m_doLabelEdit = true;
+			break;
+
 		case MODITEM_ORDER:
 			{
 				PATTERNINDEX pat = sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val2)).at(static_cast<ORDERINDEX>(modItem.val1));
@@ -4078,6 +4101,15 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		const mpt::ustring itemText = mpt::ToUnicode(CString(info->item.pszText));
 		switch(modItem.type)
 		{
+		case MODITEM_HDR_SONG:
+			if(mpt::ToUnicode(sndFile.GetCharsetInternal(), sndFile.m_songName) != itemText)
+			{
+				sndFile.m_songName = mpt::truncate(mpt::ToCharset(sndFile.GetCharsetInternal(), itemText), modSpecs.modNameLengthMax);
+				modDoc->SetModified();
+				modDoc->UpdateAllViews(nullptr, GeneralHint().General());
+			}
+			break;
+
 		case MODITEM_ORDER:
 			if(!itemText.empty())
 			{
