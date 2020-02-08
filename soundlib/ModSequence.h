@@ -128,9 +128,9 @@ class ModSequenceSet
 	friend void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t, mpt::Charset defaultCharset);
 
 protected:
-	std::vector<ModSequence> m_Sequences;	// Array of sequences.
+	std::vector<ModSequence> m_Sequences;  // Array of sequences.
 	CSoundFile &m_sndFile;
-	SEQUENCEINDEX m_currentSeq;				// Index of current sequence.
+	SEQUENCEINDEX m_currentSeq;  // Index of current sequence.
 
 public:
 	ModSequenceSet(CSoundFile &sndFile);
@@ -151,10 +151,9 @@ public:
 
 	// Sets working sequence.
 	void SetSequence(SEQUENCEINDEX);
-	// Add new sequence.
-	// If duplicate is true, new sequence is a duplicate of the current sequence.
+	// Add new empty sequence.
 	// Returns the ID of the new sequence, or SEQUENCEINDEX_INVALID on failure.
-	SEQUENCEINDEX AddSequence(bool duplicate = true);
+	SEQUENCEINDEX AddSequence();
 	// Removes given sequence.
 	void RemoveSequence(SEQUENCEINDEX);
 
@@ -164,6 +163,10 @@ public:
 	static PATTERNINDEX GetIgnoreIndex() { return ModSequence::GetIgnoreIndex(); }
 
 #ifdef MODPLUG_TRACKER
+	// Assigns a new set of sequences. The vector contents indicate which existing sequences to keep / duplicate or if a new sequences should be inserted (SEQUENCEINDEX_INVALID)
+	// The function fails if the vector is empty or contains too many sequences.
+	bool Rearrange(const std::vector<SEQUENCEINDEX> &newOrder);
+
 	// Adjust sequence when converting between module formats
 	void OnModTypeChanged(MODTYPE oldType);
 	// Check if there is a single sequences that qualifies for subsong splitting

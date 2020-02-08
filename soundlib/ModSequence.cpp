@@ -281,18 +281,11 @@ void ModSequenceSet::SetSequence(SEQUENCEINDEX n)
 }
 
 
-SEQUENCEINDEX ModSequenceSet::AddSequence(bool duplicate)
+SEQUENCEINDEX ModSequenceSet::AddSequence()
 {
-	if(GetNumSequences() == MAX_SEQUENCES)
+	if(GetNumSequences() >= MAX_SEQUENCES)
 		return SEQUENCEINDEX_INVALID;
-	if(duplicate)
-	{
-		m_Sequences.push_back(m_Sequences[m_currentSeq]);
-		m_Sequences.back().m_name.clear();	// Don't copy sequence name.
-	} else
-	{
-		m_Sequences.push_back(ModSequence(m_sndFile));
-	}
+	m_Sequences.push_back(ModSequence{m_sndFile});
 	SetSequence(GetNumSequences() - 1);
 	return GetNumSequences() - 1;
 }
@@ -310,6 +303,25 @@ void ModSequenceSet::RemoveSequence(SEQUENCEINDEX i)
 
 
 #ifdef MODPLUG_TRACKER
+
+bool ModSequenceSet::Rearrange(const std::vector<SEQUENCEINDEX> &newOrder)
+{
+	if(newOrder.empty() || newOrder.size() > MAX_SEQUENCES)
+		return false;
+
+	const auto oldSequences = std::move(m_Sequences);
+	m_Sequences.assign(newOrder.size(), ModSequence{m_sndFile});
+	for(size_t i = 0; i < newOrder.size(); i++)
+	{
+		if(newOrder[i] < oldSequences.size())
+			m_Sequences[i] = oldSequences[newOrder[i]];
+	}
+
+	if(m_currentSeq > m_Sequences.size())
+		m_currentSeq = GetNumSequences() - 1u;
+	return true;
+}
+
 
 void ModSequenceSet::OnModTypeChanged(MODTYPE oldType)
 {
@@ -352,7 +364,7 @@ bool ModSequenceSet::SplitSubsongsToMultipleSequences()
 			if(ord >= length)
 				break;
 
-			const SEQUENCEINDEX newSeq = AddSequence(false);
+			const SEQUENCEINDEX newSeq = AddSequence();
 			if(newSeq == SEQUENCEINDEX_INVALID)
 				break;
 

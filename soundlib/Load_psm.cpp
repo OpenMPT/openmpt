@@ -335,7 +335,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		if(!Order().empty())
 		{
 			// Add a new sequence for this subsong
-			if(Order.AddSequence(false) == SEQUENCEINDEX_INVALID)
+			if(Order.AddSequence() == SEQUENCEINDEX_INVALID)
 				break;
 		}
 		Order().SetName(mpt::ToUnicode(mpt::Charset::CP437, subsong.songName));

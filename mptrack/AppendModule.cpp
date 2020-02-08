@@ -165,7 +165,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		ORDERINDEX insertPos = 0;
 		if(m_SndFile.Order.GetNumSequences() < specs.sequencesMax)
 		{
-			m_SndFile.Order.AddSequence(false);
+			m_SndFile.Order.AddSequence();
 			m_SndFile.Order().SetName(srcOrder.GetName());
 		} else
 		{

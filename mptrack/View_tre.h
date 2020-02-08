@@ -135,6 +135,8 @@ protected:
 
 		ModItem(ModItemType t = MODITEM_NULL, uint32 v1 = 0, uint16 v2 = 0) : val1(v1), val2(v2), type(t) { }
 		bool IsSongItem() const { return type >= MODITEM_BEGIN_SONGITEMS && type <= MODITEM_END_SONGITEMS; }
+		bool operator==(const ModItem &other) const { return val1 == other.val1 && val2 == other.val2 && type == other.type; }
+		bool operator!=(const ModItem &other) const { return !(*this == other); }
 	};
 
 	struct DlsItem : public ModItem
@@ -203,7 +205,7 @@ public:
 	ModItem GetModItem(HTREEITEM hItem);
 	BOOL SetMidiInstrument(UINT nIns, const mpt::PathString &fileName);
 	BOOL SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName);
-	BOOL ExecuteItem(HTREEITEM hItem);
+	bool ExecuteItem(HTREEITEM hItem);
 	void DeleteTreeItem(HTREEITEM hItem);
 	static void PlayDLSItem(CDLSBank &dlsBank, const DlsItem &item, ModCommand::NOTE note);
 	BOOL PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume = -1);

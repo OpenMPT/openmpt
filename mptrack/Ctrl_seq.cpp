@@ -1453,10 +1453,22 @@ void COrderList::SelectSequence(const SEQUENCEINDEX seq)
 			sndFile.Order.RemoveSequence(curSeq);
 		else
 			return;
+	} else if(seq == kAddSequence || seq == kDuplicateSequence)
+	{
+		const bool duplicate = (seq == kDuplicateSequence);
+		const SEQUENCEINDEX newIndex = sndFile.Order.GetCurrentSequenceIndex() + 1u;
+		std::vector<SEQUENCEINDEX> newOrder(sndFile.Order.GetNumSequences());
+		std::iota(newOrder.begin(), newOrder.end(), SEQUENCEINDEX(0));
+		newOrder.insert(newOrder.begin() + newIndex, duplicate ? sndFile.Order.GetCurrentSequenceIndex() : SEQUENCEINDEX_INVALID);
+		if(m_modDoc.ReArrangeSequences(newOrder))
+		{
+			sndFile.Order.SetSequence(newIndex);
+			if(const auto name = sndFile.Order().GetName(); duplicate && !name.empty())
+				sndFile.Order().SetName(name + U_(" (Copy)"));
+			m_modDoc.UpdateAllViews(nullptr, SequenceHint(SEQUENCEINDEX_INVALID).Names().Data());
+		}
 	} else if(seq == sndFile.Order.GetCurrentSequenceIndex())
 		return;
-	else if(seq == kAddSequence || seq == kDuplicateSequence)
-		sndFile.Order.AddSequence((seq == kDuplicateSequence));
 	else if(seq < sndFile.Order.GetNumSequences())
 		sndFile.Order.SetSequence(seq);
 	ORDERINDEX posCandidate = Order().GetLengthTailTrimmed() - 1;

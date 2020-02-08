@@ -220,8 +220,8 @@ public:
 	void CheckUsedChannels(std::vector<bool> &usedMask, CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS) const;
 
 	SAMPLEINDEX ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder);
-
 	INSTRUMENTINDEX ReArrangeInstruments(const std::vector<INSTRUMENTINDEX> &newOrder, deleteInstrumentSamples removeSamples = doNoDeleteAssociatedSamples);
+	SEQUENCEINDEX ReArrangeSequences(const std::vector<SEQUENCEINDEX> &newOrder);
 
 	bool ConvertInstrumentsToSamples();
 	bool ConvertSamplesToInstruments();

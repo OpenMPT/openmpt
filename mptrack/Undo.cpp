@@ -144,10 +144,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 			// Add or remove channels
 			std::vector<CHANNELINDEX> channels(undo.channelInfo.size(), CHANNELINDEX_INVALID);
 			const CHANNELINDEX copyCount = std::min(sndFile.GetNumChannels(), static_cast<CHANNELINDEX>(undo.channelInfo.size()));
-			for(CHANNELINDEX i = 0; i < copyCount; i++)
-			{
-				channels[i] = i;
-			}
+			std::iota(channels.begin(), channels.begin() + copyCount, CHANNELINDEX(0));
 			modDoc.ReArrangeChannels(channels, false);
 		}
 		std::move(undo.channelInfo.cbegin(), undo.channelInfo.cend(), sndFile.ChnSettings);

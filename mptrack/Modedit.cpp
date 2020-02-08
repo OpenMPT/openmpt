@@ -507,6 +507,13 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const std::vector<INSTRUMENTINDEX>
 }
 
 
+SEQUENCEINDEX CModDoc::ReArrangeSequences(const std::vector<SEQUENCEINDEX> &newOrder)
+{
+	CriticalSection cs;
+	return m_SndFile.Order.Rearrange(newOrder) ? m_SndFile.Order.GetNumSequences() : SEQUENCEINDEX_INVALID;
+}
+
+
 bool CModDoc::ConvertInstrumentsToSamples()
 {
 	if(!m_SndFile.GetNumInstruments())

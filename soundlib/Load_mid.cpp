@@ -1187,7 +1187,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			// Add another sub-song for type-2 files
 			if(isType2 && finishedTracks < numTracks)
 			{
-				if(Order.AddSequence(false) == SEQUENCEINDEX_INVALID)
+				if(Order.AddSequence() == SEQUENCEINDEX_INVALID)
 					break;
 				Order().clear();
 			}
