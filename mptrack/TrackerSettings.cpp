@@ -303,7 +303,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, mruListLength(conf, U_("Misc"), U_("MRUListLength"), 10)
 	// Plugins
 	, bridgeAllPlugins(conf, U_("VST Plugins"), U_("BridgeAllPlugins"), false)
-	, FullyUnloadPlugins(conf, U_("VST Plugins"), U_("FullyUnloadPlugins"), false)
+	, FullyUnloadPlugins(conf, U_("VST Plugins"), U_("FullyUnloadPlugins"), true)
 	, enableAutoSuspend(conf, U_("VST Plugins"), U_("EnableAutoSuspend"), false)
 	, midiMappingInPluginEditor(conf, U_("VST Plugins"), U_("EnableMidiMappingInEditor"), true)
 	, pluginProjectPath(conf, U_("VST Plugins"), U_("ProjectPath"), mpt::ustring())
