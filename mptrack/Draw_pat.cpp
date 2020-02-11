@@ -197,10 +197,10 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 	if(hint.ToType<GeneralHint>().GetType()[HINT_MODTYPE])
 	{
 		// If sequence and pattern view became inconsistent (e.g. due to rearranging patterns during cleanup), synchronize to order list again
-		const auto &sndFile = *GetSoundFile();
+		const auto &order = Order();
 		const ORDERINDEX ord = GetCurrentOrder();
-		if(sndFile.Order().IsValidPat(ord) && sndFile.Order().at(ord) != m_nPattern)
-			SetCurrentPattern(sndFile.Order().at(ord));
+		if(order.IsValidPat(ord) && order.at(ord) != m_nPattern)
+			SetCurrentPattern(order.at(ord));
 	}
 
 	const PatternHint patternHint = hint.ToType<PatternHint>();
@@ -547,7 +547,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 	UINT ncols = sndFile.GetNumChannels();
 	int xpaint = m_szHeader.cx;
 	int ypaint = rcClient.top + m_szHeader.cy - GetSmoothScrollOffset();
-	const ORDERINDEX ordCount = sndFile.Order().GetLength();
+	const auto &order = Order();
+	const ORDERINDEX ordCount = Order().GetLength();
 
 	if (m_nMidRow)
 	{
@@ -564,12 +565,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 			{
 				if(m_nOrder > 0 && m_nOrder < ordCount)
 				{
-					ORDERINDEX prevOrder = sndFile.Order().GetPreviousOrderIgnoringSkips(m_nOrder);
+					ORDERINDEX prevOrder = order.GetPreviousOrderIgnoringSkips(m_nOrder);
 					//Skip +++ items
 
-					if(m_nOrder < sndFile.Order().size() && sndFile.Order()[m_nOrder] == m_nPattern)
+					if(m_nOrder < order.size() && order[m_nOrder] == m_nPattern)
 					{
-						nPrevPat = sndFile.Order()[prevOrder];
+						nPrevPat = order[prevOrder];
 					}
 				}
 			}
@@ -613,13 +614,13 @@ void CViewPattern::OnDraw(CDC *pDC)
 		if ((nVisRows > 0) && (m_nMidRow))
 		{
 			PATTERNINDEX nNextPat = PATTERNINDEX_INVALID;
-			ORDERINDEX nNextOrder = sndFile.Order().GetNextOrderIgnoringSkips(m_nOrder);
+			ORDERINDEX nNextOrder = order.GetNextOrderIgnoringSkips(m_nOrder);
 			if(nNextOrder == m_nOrder) nNextOrder = ORDERINDEX_INVALID;
 			//Ignore skip items(+++) from sequence.
 
-			if(m_nOrder < ordCount && nNextOrder < ordCount && sndFile.Order()[m_nOrder] == m_nPattern)
+			if(m_nOrder < ordCount && nNextOrder < ordCount && order[m_nOrder] == m_nPattern)
 			{
-				nNextPat = sndFile.Order()[nNextOrder];
+				nNextPat = order[nNextOrder];
 			}
 			if(sndFile.Patterns.IsValidPat(nNextPat))
 			{
@@ -646,7 +647,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		int width = Util::ScalePixels(1, m_hWnd);
 		rc.SetRect(0, ypaint, rcClient.right + 1, rcClient.bottom + 1);
 		if(width == 1)
-			DrawButtonRect(hdc, &rc, "");
+			DrawButtonRect(hdc, &rc, _T(""));
 		else
 			DrawEdge(hdc, rc, EDGE_RAISED, BF_TOPLEFT | BF_MIDDLE);	// Prevent lower edge from being drawn
 	}
@@ -771,7 +772,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 	bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint)
 {
 	uint8 selectedCols[MAX_BASECHANNELS];	// Bit mask of selected channel components
-	static_assert(PatternCursor::lastColumn <= 7, "Columns are used as bitmasks here.");
+	static_assert(1 << PatternCursor::lastColumn <= Util::MaxValueOfType(selectedCols[0]) , "Columns are used as bitmasks.");
 
 	const CSoundFile &sndFile = GetDocument()->GetSoundFile();
 	if(!sndFile.Patterns.IsValidPat(nPattern))
@@ -810,18 +811,13 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		} while (ibmp + nColumnWidth <= maxndx);
 	}
 	
+	const bool hexNumbers = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY);
 	bool bRowSel = false;
 	int row_col = -1, row_bkcol = -1;
-	for (ROWINDEX row=startRow; row<numRows; row++)
+	for(ROWINDEX row = startRow; row < numRows; row++)
 	{
 		UINT col, xbmp, nbmp, oldrowcolor;
 		const int compRow = row + TrackerSettings::Instance().rowDisplayOffset;
-
-		CHAR s[32];
-		if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY))
-			wsprintfA(s, "%s%02X", compRow < 0 ? "-" : "", std::abs(compRow));
-		else
-			wsprintfA(s, "%d", compRow);
 
 		rect.left = 0;
 		rect.top = ypaint;
@@ -830,17 +826,25 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		if (!::RectVisible(hdc, &rect))
 		{
 			// No speedup for these columns next time
-			for (CHANNELINDEX iup=startChan; iup<maxcol; iup++) selectedCols[iup] &= ~COLUMN_BITS_SKIP;
+			for(CHANNELINDEX iup = startChan; iup < maxcol; iup++)
+				selectedCols[iup] &= ~COLUMN_BITS_SKIP;
 			// skip row
-			{
-				ypaint += m_szCell.cy;
-				if (ypaint >= rcClient.bottom) break;
-				continue;
-			}
+			ypaint += m_szCell.cy;
+			if(ypaint >= rcClient.bottom)
+				break;
+			continue;
 		}
 		rect.right = rect.left + m_szHeader.cx;
+
 		bool rowDisabled = sndFile.m_lockRowStart != ROWINDEX_INVALID && (row < sndFile.m_lockRowStart || row > sndFile.m_lockRowEnd);
+		TCHAR s[32];
+		if(hexNumbers)
+			wsprintf(s, _T("%s%02X"), compRow < 0 ? _T("-") : _T(""), std::abs(compRow));
+		else
+			wsprintf(s, _T("%d"), compRow);
+
 		DrawButtonRect(hdc, &rect, s, !selEnable || rowDisabled);
+
 		oldrowcolor = (row_bkcol << 16) | (row_col << 8) | (bRowSel ? 1 : 0);
 		bRowSel = (m_Selection.ContainsVertical(PatternCursor(row)));
 		row_col = MODCOLOR_TEXTNORMAL;
@@ -1734,27 +1738,26 @@ CString CViewPattern::GetCursorDescription() const
 
 void CViewPattern::UpdateXInfoText()
 {
-	CHANNELINDEX nChn = GetCurrentChannel();
+	const CSoundFile *sndFile = GetSoundFile();
+	CMainFrame *mainFrm = CMainFrame::GetMainFrame();
+	if(mainFrm == nullptr || sndFile == nullptr)
+		return;
+
+	CHANNELINDEX chn = GetCurrentChannel();
+	const auto &channel = sndFile->m_PlayState.Chn[chn];
 	CString xtraInfo;
 
-	const CSoundFile *pSndFile = GetSoundFile();
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if(pMainFrm != nullptr && pSndFile != nullptr)
-	{
-		xtraInfo.Format(_T("Chn:%d; Vol:%X; Mac:%X; Cut:%X%s; Res:%X; Pan:%X%s"),
-			nChn + 1,
-			pSndFile->m_PlayState.Chn[nChn].nGlobalVol,
-			pSndFile->m_PlayState.Chn[nChn].nActiveMacro,
-			pSndFile->m_PlayState.Chn[nChn].nCutOff,
-			(pSndFile->m_PlayState.Chn[nChn].nFilterMode == FLTMODE_HIGHPASS) ? _T("-Hi") : _T(""),
-			pSndFile->m_PlayState.Chn[nChn].nResonance,
-			pSndFile->m_PlayState.Chn[nChn].nPan,
-			pSndFile->m_PlayState.Chn[nChn].dwFlags[CHN_SURROUND] ? _T("-S") : _T(""));
+	xtraInfo.Format(_T("Chn:%d; Vol:%X; Mac:%X; Cut:%X%s; Res:%X; Pan:%X%s"),
+	                chn + 1,
+	                channel.nGlobalVol,
+	                channel.nActiveMacro,
+	                channel.nCutOff,
+	                (channel.nFilterMode == FLTMODE_HIGHPASS) ? _T("-Hi") : _T(""),
+	                channel.nResonance,
+	                channel.nPan,
+	                channel.dwFlags[CHN_SURROUND] ? _T("-S") : _T(""));
 
-		pMainFrm->SetXInfoText(xtraInfo);
-	}
-
-	return;
+	mainFrm->SetXInfoText(xtraInfo);
 }
 
 

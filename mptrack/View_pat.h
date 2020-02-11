@@ -226,6 +226,9 @@ public:
 	const CSoundFile *GetSoundFile() const;
 	CSoundFile *GetSoundFile();
 
+	const ModSequence &Order() const;
+	ModSequence &Order();
+
 	void SetModified(bool updateAllViews = true);
 
 	bool UpdateSizes();

@@ -144,6 +144,9 @@ static_assert(ModCommand::maxColumnValue <= 999, "Command range for ID_CHANGE_PC
 const CSoundFile *CViewPattern::GetSoundFile() const { return (GetDocument() != nullptr) ? &GetDocument()->GetSoundFile() : nullptr; };
 CSoundFile *CViewPattern::GetSoundFile() { return (GetDocument() != nullptr) ? &GetDocument()->GetSoundFile() : nullptr; };
 
+const ModSequence &CViewPattern::Order() const { return GetSoundFile()->Order(); }
+ModSequence &CViewPattern::Order() { return GetSoundFile()->Order(); }
+
 
 CViewPattern::CViewPattern()
 {
@@ -267,6 +270,7 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 
 	if(wrap && pSndFile->Patterns[m_nPattern].GetNumRows())
 	{
+		const auto &order = Order();
 		if((int)row < 0)
 		{
 			if(m_Status[psKeyboardDragSelect | psMouseDragSelect])
@@ -275,10 +279,10 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				ORDERINDEX curOrder = GetCurrentOrder();
-				const ORDERINDEX prevOrd = pSndFile->Order().GetPreviousOrderIgnoringSkips(curOrder);
-				if(prevOrd < curOrder && m_nPattern == pSndFile->Order()[curOrder])
+				const ORDERINDEX prevOrd = order.GetPreviousOrderIgnoringSkips(curOrder);
+				if(prevOrd < curOrder && m_nPattern == order[curOrder])
 				{
-					const PATTERNINDEX nPrevPat = pSndFile->Order()[prevOrd];
+					const PATTERNINDEX nPrevPat = order[prevOrd];
 					if((nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nPrevPat].GetNumRows()))
 					{
 						SetCurrentOrder(prevOrd);
@@ -302,10 +306,10 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				ORDERINDEX curOrder = GetCurrentOrder();
-				ORDERINDEX nextOrder = pSndFile->Order().GetNextOrderIgnoringSkips(curOrder);
-				if(nextOrder > curOrder && m_nPattern == pSndFile->Order()[curOrder])
+				ORDERINDEX nextOrder = order.GetNextOrderIgnoringSkips(curOrder);
+				if(nextOrder > curOrder && m_nPattern == order[curOrder])
 				{
-					PATTERNINDEX nextPat = pSndFile->Order()[nextOrder];
+					PATTERNINDEX nextPat = order[nextOrder];
 					if((nextPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nextPat].GetNumRows()))
 					{
 						const ROWINDEX newRow = row - pSndFile->Patterns[m_nPattern].GetNumRows();
@@ -1847,7 +1851,7 @@ bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastCh
 	std::vector<PATTERNINDEX> patterns;
 	if(globalEdit)
 	{
-		auto &order = sndFile.Order();
+		auto &order = Order();
 		const auto start = order.begin() + GetCurrentOrder();
 		const auto end = std::find(start, order.end(), order.GetInvalidPatIndex());
 
@@ -3074,7 +3078,7 @@ void CViewPattern::UndoRedo(bool undo)
 			if(pat != m_nPattern)
 			{
 				// Find pattern in sequence.
-				ORDERINDEX matchingOrder = sndFile.Order().FindOrder(pat, GetCurrentOrder());
+				ORDERINDEX matchingOrder = Order().FindOrder(pat, GetCurrentOrder());
 				if(matchingOrder != ORDERINDEX_INVALID)
 				{
 					SetCurrentOrder(matchingOrder);
@@ -3251,41 +3255,42 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 
 	if(pnotify->type[Notification::Position])
 	{
-		ORDERINDEX nOrd = pnotify->order;
-		ROWINDEX nRow = pnotify->row;
-		PATTERNINDEX nPat = pnotify->pattern;  //get player pattern
+		ORDERINDEX ord = pnotify->order;
+		ROWINDEX row = pnotify->row;
+		PATTERNINDEX pat = pnotify->pattern;
 		bool updateOrderList = false;
 
-		if(m_nLastPlayedOrder != nOrd)
+		if(m_nLastPlayedOrder != ord)
 		{
 			updateOrderList = true;
-			m_nLastPlayedOrder = nOrd;
+			m_nLastPlayedOrder = ord;
 		}
 
-		if(nRow < m_nLastPlayedRow)
+		if(row < m_nLastPlayedRow)
 		{
 			InvalidateChannelsHeaders();
 		}
-		m_nLastPlayedRow = nRow;
+		m_nLastPlayedRow = row;
 
 		if(!pSndFile->m_SongFlags[SONG_PAUSED | SONG_STEP])
 		{
-			if(nOrd >= pSndFile->Order().GetLength() || pSndFile->Order()[nOrd] != nPat)
+			const auto &order = Order();
+			if(ord >= order.GetLength() || order[ord] != pat)
 			{
 				//order doesn't correlate with pattern, so mark it as invalid
-				nOrd = ORDERINDEX_INVALID;
+				ord = ORDERINDEX_INVALID;
 			}
 
 			if(m_pEffectVis && m_pEffectVis->m_hWnd)
 			{
-				m_pEffectVis->SetPlayCursor(nPat, nRow);
+				m_pEffectVis->SetPlayCursor(pat, row);
 			}
 
 			// Simple detection of backwards-going patterns to avoid jerky animation
 			m_nNextPlayRow = ROWINDEX_INVALID;
-			if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) && pSndFile->Patterns.IsValidPat(nPat) && pSndFile->Patterns[nPat].IsValidRow(nRow))
+			if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) && pSndFile->Patterns.IsValidPat(pat) && pSndFile->Patterns[pat].IsValidRow(row))
 			{
-				for(const ModCommand *m = pSndFile->Patterns[nPat].GetRow(nRow), *mEnd = m + pSndFile->GetNumChannels(); m != mEnd; m++)
+				for(const ModCommand *m = pSndFile->Patterns[pat].GetRow(row), *mEnd = m + pSndFile->GetNumChannels(); m != mEnd; m++)
 				{
 					if(m->command == CMD_PATTERNBREAK)
 						m_nNextPlayRow = m->param;
@@ -3294,32 +3299,32 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 				}
 			}
 			if(m_nNextPlayRow == ROWINDEX_INVALID)
-				m_nNextPlayRow = nRow + 1;
+				m_nNextPlayRow = row + 1;
 
 			m_nTicksOnRow = pnotify->ticksOnRow;
-			SetPlayCursor(nPat, nRow, pnotify->tick);
+			SetPlayCursor(pat, row, pnotify->tick);
 			// Don't follow song if user drags selections or scrollbars.
 			if((m_Status & (psFollowSong | psDragActive)) == psFollowSong)
 			{
-				if(nPat < pSndFile->Patterns.Size())
+				if(pat < pSndFile->Patterns.Size())
 				{
-					if(nPat != m_nPattern || updateOrderList)
+					if(pat != m_nPattern || updateOrderList)
 					{
-						if(nPat != m_nPattern)
-							SetCurrentPattern(nPat, nRow);
+						if(pat != m_nPattern)
+							SetCurrentPattern(pat, row);
 						else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
 							InvalidatePattern(true, true);  // Redraw previous / next pattern
 
-						if(nOrd < pSndFile->Order().GetLength())
+						if(ord < order.GetLength())
 						{
-							m_nOrder = nOrd;
-							SendCtrlMessage(CTRLMSG_NOTIFYCURRENTORDER, nOrd);
+							m_nOrder = ord;
+							SendCtrlMessage(CTRLMSG_NOTIFYCURRENTORDER, ord);
 						}
 						updateOrderList = false;
 					}
-					if(nRow != GetCurrentRow())
+					if(row != GetCurrentRow())
 					{
-						SetCurrentRow((nRow < pSndFile->Patterns[nPat].GetNumRows()) ? nRow : 0, false, false);
+						SetCurrentRow((row < pSndFile->Patterns[pat].GetNumRows()) ? row : 0, false, false);
 					}
 				}
 			} else
@@ -3461,9 +3466,10 @@ PatternEditPos CViewPattern::GetEditPos(const CSoundFile &sndFile, const bool li
 			editPos.order = GetCurrentOrder();
 			editPos.pattern = m_nPattern;
 		}
-		if(!sndFile.Order().IsValidPat(editPos.order) || sndFile.Order()[editPos.order] != editPos.pattern)
+		const auto &order = Order();
+		if(!order.IsValidPat(editPos.order) || order[editPos.order] != editPos.pattern)
 		{
-			ORDERINDEX realOrder = sndFile.Order().FindOrder(editPos.pattern, editPos.order);
+			ORDERINDEX realOrder = order.FindOrder(editPos.pattern, editPos.order);
 			if(realOrder != ORDERINDEX_INVALID)
 				editPos.order = realOrder;
 		}
@@ -4119,7 +4125,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 								while ((n < sndFile.Patterns.Size()) && !sndFile.Patterns.IsValidPat(n)) n++;
 								SetCurrentPattern((n < sndFile.Patterns.Size()) ? n : 0);
 								ORDERINDEX currentOrder = GetCurrentOrder();
-								ORDERINDEX newOrder = sndFile.Order().FindOrder(m_nPattern, currentOrder, true);
+								ORDERINDEX newOrder = Order().FindOrder(m_nPattern, currentOrder, true);
 								if(newOrder != ORDERINDEX_INVALID)
 									SetCurrentOrder(newOrder);
 								return wParam;
@@ -4128,7 +4134,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 								while (n > 0 && !sndFile.Patterns.IsValidPat(n)) n--;
 								SetCurrentPattern(n);
 								ORDERINDEX currentOrder = GetCurrentOrder();
-								ORDERINDEX newOrder = sndFile.Order().FindOrder(m_nPattern, currentOrder, false);
+								ORDERINDEX newOrder = Order().FindOrder(m_nPattern, currentOrder, false);
 								if(newOrder != ORDERINDEX_INVALID)
 									SetCurrentOrder(newOrder);
 								return wParam;
@@ -4991,10 +4997,10 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 	// -- Chord autodetection: step back if we just entered a note
 	if(recordEnabled && recordGroup && !liveRecord && !ModCommand::IsPcNote(note) && m_nSpacing > 0)
 	{
-		const auto &order = sndFile.Order();
+		const auto &order = Order();
 		if((timeGetTime() - m_autoChordStartTime) < TrackerSettings::Instance().gnAutoChordWaitTime
-			&& order.IsValidPat(m_autoChordStartOrder)
-			&& sndFile.Patterns[order[m_autoChordStartOrder]].IsValidRow(m_autoChordStartRow))
+		   && order.IsValidPat(m_autoChordStartOrder)
+		   && sndFile.Patterns[order[m_autoChordStartOrder]].IsValidRow(m_autoChordStartRow))
 		{
 			const auto pattern = order[m_autoChordStartOrder];
 			if(pattern != editPos.pattern)
@@ -5634,11 +5640,12 @@ PATTERNINDEX CViewPattern::GetPrevPattern() const
 	const CSoundFile *sndFile = GetSoundFile();
 	if(sndFile != nullptr)
 	{
+		const auto &order = Order();
 		const ORDERINDEX curOrder = GetCurrentOrder();
-		if(curOrder > 0 && m_nPattern == sndFile->Order()[curOrder])
+		if(curOrder > 0 && m_nPattern == order[curOrder])
 		{
-			const ORDERINDEX nextOrder = sndFile->Order().GetPreviousOrderIgnoringSkips(curOrder);
-			const PATTERNINDEX nextPat = sndFile->Order()[nextOrder];
+			const ORDERINDEX nextOrder = order.GetPreviousOrderIgnoringSkips(curOrder);
+			const PATTERNINDEX nextPat = order[nextOrder];
 			if(sndFile->Patterns.IsValidPat(nextPat) && sndFile->Patterns[nextPat].GetNumRows())
 			{
 				return nextPat;
@@ -5655,11 +5662,12 @@ PATTERNINDEX CViewPattern::GetNextPattern() const
 	const CSoundFile *sndFile = GetSoundFile();
 	if(sndFile != nullptr)
 	{
+		const auto &order = Order();
 		const ORDERINDEX curOrder = GetCurrentOrder();
-		if(curOrder + 1 < sndFile->Order().GetLength() && m_nPattern == sndFile->Order()[curOrder])
+		if(curOrder + 1 < order.GetLength() && m_nPattern == order[curOrder])
 		{
-			const ORDERINDEX nextOrder = sndFile->Order().GetNextOrderIgnoringSkips(curOrder);
-			const PATTERNINDEX nextPat = sndFile->Order()[nextOrder];
+			const ORDERINDEX nextOrder = order.GetNextOrderIgnoringSkips(curOrder);
+			const PATTERNINDEX nextPat = order[nextOrder];
 			if(sndFile->Patterns.IsValidPat(nextPat) && sndFile->Patterns[nextPat].GetNumRows())
 			{
 				return nextPat;
@@ -6052,7 +6060,7 @@ bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	AppendMenu(subMenuInsert, MF_STRING, ID_PATTERN_INSERTROWGLOBAL, ih->GetKeyTextFromCommand(kcInsertRowGlobal, _T("Insert ") + label + _T(" (Selection, &Global)")));
 	AppendMenu(subMenuInsert, MF_STRING, ID_PATTERN_INSERTALLROWGLOBAL, ih->GetKeyTextFromCommand(kcInsertWholeRowGlobal, _T("Insert ") + label + _T(" (All &Channels, Global)")));
 	AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(subMenuInsert), _T("&Insert ") + label);
-	
+
 	AppendMenu(subMenuDelete, MF_STRING, ID_PATTERN_DELETEROW, ih->GetKeyTextFromCommand(kcDeleteRow, _T("Delete ") + label + _T(" (&Selection)")));
 	AppendMenu(subMenuDelete, MF_STRING, ID_PATTERN_DELETEALLROW, ih->GetKeyTextFromCommand(kcDeleteWholeRow, _T("Delete ") + label + _T(" (&All Channels)")));
 	AppendMenu(subMenuDelete, MF_STRING, ID_PATTERN_DELETEROWGLOBAL, ih->GetKeyTextFromCommand(kcDeleteRowGlobal, _T("Delete ") + label + _T(" (Selection, &Global)")));
@@ -6599,8 +6607,9 @@ void CViewPattern::OnShowTimeAtRow()
 	}
 
 	CString msg;
+	const auto &order = Order();
 	ORDERINDEX currentOrder = GetCurrentOrder();
-	if(currentOrder < pSndFile->Order().size() && pSndFile->Order()[currentOrder] == m_nPattern)
+	if(currentOrder < order.size() && order[currentOrder] == m_nPattern)
 	{
 		const double t = pSndFile->GetPlaybackTimeAt(currentOrder, GetCurrentRow(), false, false);
 		if(t < 0)
@@ -6788,6 +6797,7 @@ void CViewPattern::FindInstrument()
 	{
 		return;
 	}
+	const auto &order = Order();
 	ORDERINDEX ord = GetCurrentOrder();
 	PATTERNINDEX pat = m_nPattern;
 	ROWINDEX row = m_Cursor.GetRow();
@@ -6811,8 +6821,8 @@ void CViewPattern::FindInstrument()
 		{
 			return;
 		}
-		ord = sndFile->Order().GetPreviousOrderIgnoringSkips(ord);
-		pat = sndFile->Order()[ord];
+		ord = order.GetPreviousOrderIgnoringSkips(ord);
+		pat = order[ord];
 		if(!sndFile->Patterns.IsValidPat(pat))
 		{
 			return;
@@ -6826,10 +6836,11 @@ void CViewPattern::FindInstrument()
 void CViewPattern::JumpToPrevOrNextEntry(bool nextEntry)
 {
 	const CSoundFile *sndFile = GetSoundFile();
-	if(sndFile == nullptr || GetCurrentOrder() >= sndFile->Order().size())
+	if(sndFile == nullptr || GetCurrentOrder() >= Order().size())
 	{
 		return;
 	}
+	const auto &order = Order();
 	ORDERINDEX ord = GetCurrentOrder();
 	PATTERNINDEX pat = m_nPattern;
 	CHANNELINDEX chn = m_Cursor.GetChannel();
@@ -6873,8 +6884,8 @@ void CViewPattern::JumpToPrevOrNextEntry(bool nextEntry)
 		}
 
 		// Continue search in prev/next pattern
-		ORDERINDEX nextOrd = nextEntry ? sndFile->Order().GetNextOrderIgnoringSkips(ord) : sndFile->Order().GetPreviousOrderIgnoringSkips(ord);
-		pat = sndFile->Order()[nextOrd];
+		ORDERINDEX nextOrd = nextEntry ? order.GetNextOrderIgnoringSkips(ord) : order.GetPreviousOrderIgnoringSkips(ord);
+		pat = order[nextOrd];
 		if(nextOrd == ord || !sndFile->Patterns.IsValidPat(pat))
 			return;
 		ord = nextOrd;
