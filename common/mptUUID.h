@@ -15,6 +15,8 @@
 
 #include "Endianness.h"
 
+#include <stdexcept>
+
 #if MPT_OS_WINDOWS
 #if defined(MODPLUG_TRACKER) || defined(MPT_WITH_DMO)
 #include <guiddef.h>
