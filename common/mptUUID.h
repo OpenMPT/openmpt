@@ -14,6 +14,7 @@
 
 
 #include "Endianness.h"
+#include <ostream>
 
 #if MPT_OS_WINDOWS
 #if defined(MODPLUG_TRACKER) || defined(MPT_WITH_DMO)
