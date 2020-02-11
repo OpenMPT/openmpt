@@ -183,10 +183,10 @@ protected:
 class CPatEdit: public CEdit
 {
 protected:
-	CCtrlPatterns *m_pParent;
+	CCtrlPatterns *m_pParent = nullptr;
 
 public:
-	CPatEdit() { m_pParent = nullptr; }
+	CPatEdit() = default;
 	void SetParent(CCtrlPatterns *parent) { m_pParent = parent; }
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 };
@@ -202,15 +202,18 @@ protected:
 	CPatEdit m_EditSpacing, m_EditPatName, m_EditSequence;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing, m_SpinSequence;
 	CModControlBar m_ToolBar;
-	INSTRUMENTINDEX m_nInstrument;
-	PatternCursor::Columns m_nDetailLevel;			// Visible Columns
-	BOOL m_bRecord, m_bVUMeters, m_bPluginNames;
+	INSTRUMENTINDEX m_nInstrument = 0;
+	PatternCursor::Columns m_nDetailLevel = PatternCursor::lastColumn;  // Visible Columns
+	bool m_bRecord = false, m_bVUMeters = false, m_bPluginNames = false;
 
 public:
 	CCtrlPatterns(CModControlView &parent, CModDoc &document);
 	Setting<LONG> &GetSplitPosRef() override { return TrackerSettings::Instance().glPatternWindowHeight; }
 
 public:
+	const ModSequence &Order() const;
+	ModSequence &Order();
+
 	void SetCurrentPattern(PATTERNINDEX nPat);
 	BOOL SetCurrentInstrument(UINT nIns);
 	BOOL GetFollowSong() { return IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG); }

@@ -98,15 +98,16 @@ void CCtrlPatterns::DoDataExchange(CDataExchange *pDX)
 }
 
 
+const ModSequence &CCtrlPatterns::Order() const { return m_sndFile.Order(); }
+ModSequence &CCtrlPatterns::Order() { return m_sndFile.Order(); }
+
+
 CCtrlPatterns::CCtrlPatterns(CModControlView &parent, CModDoc &document)
     : CModControlDlg(parent, document), m_OrderList(*this, document)
 {
-	m_nInstrument = 0;
-
 	m_bVUMeters = TrackerSettings::Instance().gbPatternVUMeters;
 	m_bPluginNames = TrackerSettings::Instance().gbPatternPluginNames;
 	m_bRecord = TrackerSettings::Instance().gbPatternRecord;
-	m_nDetailLevel = PatternCursor::lastColumn;
 }
 
 
@@ -175,7 +176,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 
 	m_SpinSequence.SetRange32(1, m_sndFile.Order.GetNumSequences());
 	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex() + 1);
-	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(m_sndFile.Order().GetName()));
+	SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(Order().GetName()));
 
 	m_OrderList.SetFocus();
 
@@ -228,7 +229,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 
 	if(updateAll || (updateSeq && hintType[HINT_SEQNAMES]))
 	{
-		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(m_sndFile.Order().GetName()));
+		SetDlgItemText(IDC_EDIT_SEQUENCE_NAME, mpt::ToCString(Order().GetName()));
 	}
 
 	if(updateAll || (updateSeq && hintType[HINT_MODSEQUENCE]))
@@ -461,11 +462,11 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_PREVORDER:
-		m_OrderList.SetCurSel(m_sndFile.Order().GetPreviousOrderIgnoringSkips(m_OrderList.GetCurSel(true).firstOrd), true);
+		m_OrderList.SetCurSel(Order().GetPreviousOrderIgnoringSkips(m_OrderList.GetCurSel(true).firstOrd), true);
 		break;
 
 	case CTRLMSG_NEXTORDER:
-		m_OrderList.SetCurSel(m_sndFile.Order().GetNextOrderIgnoringSkips(m_OrderList.GetCurSel(true).firstOrd), true);
+		m_OrderList.SetCurSel(Order().GetNextOrderIgnoringSkips(m_OrderList.GetCurSel(true).firstOrd), true);
 		break;
 
 	//rewbs.customKeys
@@ -586,11 +587,12 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		auto seq = static_cast<SEQUENCEINDEX>((lParam >> 16) & 0x7FFF);
 		if(seq < m_sndFile.Order.GetNumSequences())
 		{
+			const auto &order = Order();
 			m_OrderList.SelectSequence(seq);
-			if((ord < m_sndFile.Order().size()))
+			if(ord < order.size())
 			{
 				m_OrderList.SetCurSel(ord);
-				SetCurrentPattern(m_sndFile.Order()[ord]);
+				SetCurrentPattern(order[ord]);
 			}
 			UpdateView(SequenceHint(static_cast<SEQUENCEINDEX>(seq)).Names(), nullptr);
 		}
@@ -745,8 +747,9 @@ void CCtrlPatterns::OnPlayerPause()
 
 void CCtrlPatterns::OnPatternNew()
 {
+	const auto &order = Order();
 	ORDERINDEX curOrd = m_OrderList.GetCurSel(true).firstOrd;
-	PATTERNINDEX curPat = (curOrd < m_sndFile.Order().size()) ? m_sndFile.Order()[curOrd] : 0;
+	PATTERNINDEX curPat = (curOrd < order.size()) ? order[curOrd] : 0;
 	ROWINDEX rows = 64;
 	if(m_sndFile.Patterns.IsValidPat(curPat))
 	{
@@ -801,7 +804,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 	// Has this pattern been duplicated already? (for multiselect)
 	std::vector<PATTERNINDEX> patReplaceIndex(m_sndFile.Patterns.Size(), PATTERNINDEX_INVALID);
 
-	ModSequence &order = m_sndFile.Order();
+	ModSequence &order = Order();
 	for(ORDERINDEX i = 0; i < insertCount; i++)
 	{
 		PATTERNINDEX curPat = order[insertFrom + i];
@@ -877,7 +880,7 @@ void CCtrlPatterns::OnPatternMerge()
 
 	// Get the total number of lines to be merged
 	ROWINDEX numRows = 0u;
-	ModSequence &order = m_sndFile.Order();
+	ModSequence &order = Order();
 	for(ORDERINDEX i = 0; i < numOrders; i++)
 	{
 		PATTERNINDEX pat = order[firstOrder + i];
@@ -1115,9 +1118,10 @@ void CCtrlPatterns::OnSequenceNameChanged()
 	CString tmp;
 	GetDlgItemText(IDC_EDIT_SEQUENCE_NAME, tmp);
 	const mpt::ustring str = mpt::ToUnicode(tmp);
-	if(str != m_sndFile.Order().GetName())
+	auto &order = Order();
+	if(str != order.GetName())
 	{
-		m_sndFile.Order().SetName(str);
+		order.SetName(str);
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(nullptr, SequenceHint(m_sndFile.Order.GetCurrentSequenceIndex()).Names(), this);
 	}
