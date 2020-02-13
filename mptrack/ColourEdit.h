@@ -14,12 +14,11 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-class CColourEdit :
-	public CEdit
+class CColourEdit : public CEdit
 {
 public:
-	CColourEdit(void);
-	~CColourEdit(void);
+	CColourEdit();
+	~CColourEdit();
 
 public:
 	void SetTextColor(COLORREF rgb);

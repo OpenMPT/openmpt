@@ -20,13 +20,13 @@ OPENMPT_NAMESPACE_BEGIN
 
 CColourEdit::CColourEdit()
 {
-	m_crText = RGB(0,0,0);				//default text color
+	m_crText = RGB(0, 0, 0);  //default text color
 }
 
 CColourEdit::~CColourEdit()
 {
-	if (m_brBackGnd.GetSafeHandle())	//delete brush
-       m_brBackGnd.DeleteObject();
+	if(m_brBackGnd.GetSafeHandle())  //delete brush
+		m_brBackGnd.DeleteObject();
 }
 
 
@@ -37,7 +37,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CColourEdit message handlers
 
-HBRUSH CColourEdit::CtlColor(CDC* pDC, UINT nCtlColor) 
+HBRUSH CColourEdit::CtlColor(CDC *pDC, UINT nCtlColor)
 {
 	MPT_UNREFERENCED_PARAMETER(nCtlColor);
 	pDC->SetTextColor(m_crText);		//set text color
@@ -51,17 +51,17 @@ HBRUSH CColourEdit::CtlColor(CDC* pDC, UINT nCtlColor)
 void CColourEdit::SetBackColor(COLORREF rgb)
 {
 	m_crBackGnd = rgb;					//set background color ref (used for text's background)
-	if (m_brBackGnd.GetSafeHandle())	//free brush
-       m_brBackGnd.DeleteObject();
-	m_brBackGnd.CreateSolidBrush(rgb);	//set brush to new color
+	if(m_brBackGnd.GetSafeHandle())  //free brush
+		m_brBackGnd.DeleteObject();
+	m_brBackGnd.CreateSolidBrush(rgb);  //set brush to new color
 	Invalidate(TRUE);					//redraw
 }
 
 
 void CColourEdit::SetTextColor(COLORREF rgb)
 {
-	m_crText = rgb;				//set text color ref
-	Invalidate(TRUE);			//redraw
+	m_crText = rgb;    // set text color ref
+	Invalidate(TRUE);  // redraw
 }
 
 
