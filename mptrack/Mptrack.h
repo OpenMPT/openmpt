@@ -81,7 +81,7 @@ enum DragonDropType
 
 struct DRAGONDROP
 {
-	CSoundFile *sndFile = nullptr;
+	const CSoundFile *sndFile = nullptr;
 	DragonDropType dropType = DRAGONDROP_NOTHING;
 	uint32 dropItem = 0;
 	LPARAM dropParam = 0;
@@ -362,8 +362,13 @@ public:
 public:
 	void Init(MODPLUGDIB *lpTextDib = nullptr);
 	void Blit(HDC hdc, int x, int y, int cx, int cy);
-	void Blit(HDC hdc, LPCRECT lprc) { Blit(hdc, lprc->left, lprc->top, lprc->right-lprc->left, lprc->bottom-lprc->top); }
-	void SetTextColor(int nText, int nBk=-1) { m_nTextColor = nText; if (nBk >= 0) m_nBkColor = nBk; }
+	void Blit(HDC hdc, LPCRECT lprc) { Blit(hdc, lprc->left, lprc->top, lprc->right - lprc->left, lprc->bottom - lprc->top); }
+	void SetTextColor(int nText, int nBk = -1)
+	{
+		m_nTextColor = nText;
+		if(nBk >= 0)
+			m_nBkColor = nBk;
+	}
 	void SetTextBkColor(UINT nBk) { m_nBkColor = nBk; }
 	void SetColor(UINT nIndex, COLORREF cr);
 	void SetAllColors(UINT nBaseIndex, UINT nColors, COLORREF *pcr);
@@ -383,8 +388,10 @@ MODPLUGDIB *LoadDib(LPCTSTR lpszName);
 RGBQUAD rgb2quad(COLORREF c);
 
 // Other bitmap functions
-void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText = NULL, BOOL bDisabled = FALSE, BOOL bPushed = FALSE, DWORD dwFlags = (DT_CENTER | DT_VCENTER));
-void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCWSTR lpszText = NULL, BOOL bDisabled = FALSE, BOOL bPushed = FALSE, DWORD dwFlags = (DT_CENTER | DT_VCENTER));
+int DrawTextT(HDC hdc, const wchar_t *lpchText, int cchText, LPRECT lprc, UINT format);
+int DrawTextT(HDC hdc, const char *lpchText, int cchText, LPRECT lprc, UINT format);
+void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCSTR lpszText = nullptr, BOOL bDisabled = FALSE, BOOL bPushed = FALSE, DWORD dwFlags = (DT_CENTER | DT_VCENTER));
+void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCWSTR lpszText = nullptr, BOOL bDisabled = FALSE, BOOL bPushed = FALSE, DWORD dwFlags = (DT_CENTER | DT_VCENTER));
 
 // Misc functions
 void ErrorBox(UINT nStringID, CWnd *p = nullptr);

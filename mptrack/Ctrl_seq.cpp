@@ -723,6 +723,7 @@ void COrderList::OnPaint()
 	HGDIOBJ oldfont = dc.SelectObject(m_hFont);
 	HGDIOBJ oldpen = dc.SelectObject(GetStockObject(DC_PEN));
 	const auto separatorColor = GetSysColor(COLOR_WINDOW) ^ 0x808080;
+	const auto windowBrush = GetSysColorBrush(COLOR_WINDOW), highlightBrush = GetSysColorBrush(COLOR_HIGHLIGHT), faceBrush = GetSysColorBrush(COLOR_BTNFACE);
 	SetDCPenColor(dc, separatorColor);
 
 	// First time ?
@@ -769,15 +770,15 @@ void COrderList::OnPaint()
 			if(highLight)
 			{
 				// Currently selected order item
-				::FillRect(dc, &rect, CMainFrame::brushHighLight);
+				::FillRect(dc, &rect, highlightBrush);
 			} else if(order.IsPositionLocked(ord))
 			{
 				// "Playback lock" indicator - grey out all order items which aren't played.
-				::FillRect(dc, &rect, CMainFrame::brushGray);
+				::FillRect(dc, &rect, faceBrush);
 			} else
 			{
 				// Normal, unselected item.
-				::FillRect(dc, &rect, CMainFrame::brushWindow);
+				::FillRect(dc, &rect, windowBrush);
 			}
 
 			// Drawing the shown pattern-indicator or drag position.

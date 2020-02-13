@@ -908,19 +908,22 @@ void CViewInstrument::DrawGrid(CDC *pDC, uint32 speed)
 		const uint32 startTick = (ScreenToTick(0) / speed) * speed;
 		const uint32 endTick = (ScreenToTick(width) / speed) * speed;
 
+		auto oldPen = m_dcGrid.SelectStockObject(DC_PEN);
 		for(uint32 tick = startTick, row = startTick / speed; tick <= endTick; tick += speed, row++)
 		{
 			if(rowsPerMeasure > 0 && row % rowsPerMeasure == 0)
-				m_dcGrid.SelectObject(CMainFrame::penGray80);
+				m_dcGrid.SetDCPenColor(RGB(0x80, 0x80, 0x80));
 			else if(rowsPerBeat > 0 && row % rowsPerBeat == 0)
-				m_dcGrid.SelectObject(CMainFrame::penGray55);
+				m_dcGrid.SetDCPenColor(RGB(0x55, 0x55, 0x55));
 			else
-				m_dcGrid.SelectObject(CMainFrame::penGray33);
+				m_dcGrid.SetDCPenColor(RGB(0x33, 0x33, 0x33));
 
 			int x = TickToScreen(tick);
 			m_dcGrid.MoveTo(x, 0);
 			m_dcGrid.LineTo(x, m_rcClient.bottom);
 		}
+		if(oldPen)
+			m_dcGrid.SelectObject(oldPen);
 	}
 
 	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), &m_dcGrid, 0, 0, SRCCOPY);
@@ -932,7 +935,6 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	CModDoc *pModDoc = GetDocument();
 	if((!pModDoc) || (!pDC))
 		return;
-	HGDIOBJ oldpen;
 
 	// to avoid flicker, establish a memory dc, draw to it
 	// and then BitBlt it to the destination "pDC"
@@ -958,7 +960,7 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	m_rcOldClient = m_rcClient;
 	oldBitmap = *m_dcMemMain.SelectObject(&m_bmpMemMain);
 
-	oldpen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
+	auto stockBrush = CBrush::FromHandle(GetStockBrush(DC_BRUSH));
 	if(m_bGrid)
 	{
 		DrawGrid(&m_dcMemMain, pModDoc->GetSoundFile().m_PlayState.m_nMusicSpeed);
@@ -967,6 +969,8 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		// Paint it black!
 		m_dcMemMain.FillSolidRect(&m_rcClient, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKENV]);
 	}
+
+	auto oldPen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
 
 	// Middle line (half volume or pitch / panning center)
 	const int ymed = (m_rcClient.bottom - 1) / 2;
@@ -1022,23 +1026,27 @@ void CViewInstrument::OnDraw(CDC *pDC)
 				m_dcMemMain.LineTo(x, y);
 			else
 				m_dcMemMain.MoveTo(x, y);
+
 			if(i == releaseNode)
 			{
-				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushHighLightRed));
+				m_dcMemMain.SetDCBrushColor(RGB(0xFF, 0x00, 0x00));
+				m_dcMemMain.FrameRect(&rect, stockBrush);
 				m_dcMemMain.SetDCPenColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_ENVELOPE_RELEASE]);
 			} else if(i == m_nDragItem - 1)
 			{
 				// currently selected env point
-				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushYellow));
+				m_dcMemMain.SetDCBrushColor(RGB(0xFF, 0xFF, 0x00));
+				m_dcMemMain.FrameRect(&rect, stockBrush);
 			} else
 			{
-				m_dcMemMain.FrameRect(&rect, CBrush::FromHandle(CMainFrame::brushWhite));
+				m_dcMemMain.SetDCBrushColor(RGB(0xFF, 0xFF, 0xFF));
+				m_dcMemMain.FrameRect(&rect, stockBrush);
 			}
 		}
 	}
 	DrawPositionMarks();
-	if(oldpen)
-		m_dcMemMain.SelectObject(oldpen);
+	if(oldPen)
+		m_dcMemMain.SelectObject(oldPen);
 
 	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), &m_dcMemMain, 0, 0, SRCCOPY);
 }

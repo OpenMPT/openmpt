@@ -657,6 +657,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		DrawDragSel(hdc);
 	}
 
+	const auto buttonBrush = GetSysColorBrush(COLOR_BTNFACE), blackBrush = GetStockBrush(BLACK_BRUSH);
 	UINT ncolhdr = xofs;
 	xpaint = m_szHeader.cx;
 	ypaint = rcClient.top;
@@ -709,20 +710,20 @@ void CViewPattern::OnDraw(CDC *pDC)
 				insRect.SetRect(xpaint, ypaint, xpaint + nColumnWidth / 8 + recordInsX, ypaint + colHeight);
 				if (pModDoc->IsChannelRecord1(static_cast<CHANNELINDEX>(ncolhdr)))
 				{
-					FrameRect(hdc,&rect,CMainFrame::brushGray);
+					FrameRect(hdc, &rect, buttonBrush);
 					InvertRect(hdc, &rect);
 					s[0] = '1';
 					s[1] = '\0';
 					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
-					FrameRect(hdc,&insRect,CMainFrame::brushBlack);
-				} else if (pModDoc->IsChannelRecord2(static_cast<CHANNELINDEX>(ncolhdr)))
+					FrameRect(hdc, &insRect, blackBrush);
+				} else if(pModDoc->IsChannelRecord2(static_cast<CHANNELINDEX>(ncolhdr)))
 				{
-					FrameRect(hdc,&rect,CMainFrame::brushGray);
+					FrameRect(hdc, &rect, buttonBrush);
 					InvertRect(hdc, &rect);
 					s[0] = '2';
 					s[1] = '\0';
 					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
-					FrameRect(hdc,&insRect,CMainFrame::brushBlack);
+					FrameRect(hdc, &insRect, blackBrush);
 				}
 
 				if(m_Status[psShowVUMeters])

@@ -1089,7 +1089,7 @@ void CModTreeBar::OnNcPaint()
 	{
 		CDC *pDC = GetWindowDC();
 		HDC hdc = pDC->m_hDC;
-		FillRect(hdc, &rect, CMainFrame::brushGray);
+		FillRect(hdc, &rect, GetSysColorBrush(COLOR_BTNFACE));
 		ReleaseDC(pDC);
 	}
 }

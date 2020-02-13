@@ -303,9 +303,7 @@ void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 	if (!lpdis) return;
 	if (nColor >= 0)
 	{
-		HPEN pen1, pen2;
-		pen1 = (HPEN)::GetStockObject(WHITE_PEN);
-		pen2 = (HPEN)::GetStockObject(BLACK_PEN);
+		HPEN pen1 = GetStockPen(WHITE_PEN), pen2 = GetStockPen(BLACK_PEN);
 		if (lpdis->itemState & ODS_SELECTED)
 		{
 			HPEN pentmp = pen1;
@@ -386,12 +384,14 @@ void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 			p[2] = rgb2quad(CustomColors[MODCOLOR_ENVELOPE_RELEASE]);
 			break;
 		}
+
 		HDC hdc = lpdis->hDC;
-		HPEN oldpen = (HPEN)::SelectObject(hdc, CMainFrame::penDarkGray);
+		HPEN oldpen = SelectPen(hdc, GetStockPen(DC_PEN));
+		::SetDCPenColor(hdc, GetSysColor(COLOR_BTNSHADOW));
 		::MoveToEx(hdc, lpdis->rcItem.left, lpdis->rcItem.bottom-1, NULL);
 		::LineTo(hdc, lpdis->rcItem.left, lpdis->rcItem.top);
 		::LineTo(hdc, lpdis->rcItem.right, lpdis->rcItem.top);
-		::SelectObject(hdc, CMainFrame::penLightGray);
+		::SetDCPenColor(hdc, GetSysColor(COLOR_BTNHIGHLIGHT));
 		::MoveToEx(hdc, lpdis->rcItem.right-1, lpdis->rcItem.top, NULL);
 		::LineTo(hdc, lpdis->rcItem.right-1, lpdis->rcItem.bottom-1);
 		::LineTo(hdc, lpdis->rcItem.left, lpdis->rcItem.bottom-1);

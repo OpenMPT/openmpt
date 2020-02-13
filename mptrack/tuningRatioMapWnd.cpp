@@ -45,6 +45,7 @@ void CTuningRatioMapWnd::OnPaint()
 	
 	const auto colorText = GetSysColor(COLOR_WINDOWTEXT);
 	const auto colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
+	const auto highlightBrush = GetSysColorBrush(COLOR_HIGHLIGHT), windowBrush = GetSysColorBrush(COLOR_WINDOW);
 
 	auto oldFont = dc.SelectObject(CMainFrame::GetGUIFont());
 	dc.SetBkMode(TRANSPARENT);
@@ -80,7 +81,7 @@ void CTuningRatioMapWnd::OnPaint()
 			const bool highLight = focus && (nPos == (int)m_nNote);
 			rect.left = rect.right;
 			rect.right = m_cxFont*4-1;
-			FillRect(dc, &rect, highLight ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
+			FillRect(dc, &rect, highLight ? highlightBrush : windowBrush);
 			if(nPos == (int)m_nNote)
 			{
 				rect.InflateRect(-1, -1);
@@ -100,11 +101,11 @@ void CTuningRatioMapWnd::OnPaint()
 
 		}
 		rect.SetRect(rcClient.left + m_cxFont * 4 - 1, rcClient.top, rcClient.left + m_cxFont * 4 + 3, ypaint);
-		DrawButtonRect(dc, &rect, "", FALSE, FALSE);
+		DrawButtonRect(dc, &rect, _T(""));
 		if (ypaint < rcClient.bottom)
 		{
 			rect.SetRect(rcClient.left, ypaint, rcClient.right, rcClient.bottom);
-			FillRect(dc, &rect, CMainFrame::brushGray);
+			FillRect(dc, &rect, GetSysColorBrush(COLOR_BTNFACE));
 		}
 	}
 	dc.SelectObject(oldFont);

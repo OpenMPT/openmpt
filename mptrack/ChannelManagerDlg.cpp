@@ -537,7 +537,7 @@ void CChannelManagerDlg::DrawChannelButton(HDC hdc, CRect rect, const TCHAR *tex
 	DrawEdge(hdc, rect, enable ? EDGE_RAISED : EDGE_SUNKEN, BF_RECT | BF_MIDDLE | BF_ADJUST);
 	if(activate)
 	{
-		::FillRect(hdc, rect, CMainFrame::brushWindow);
+		::FillRect(hdc, rect, GetSysColorBrush(COLOR_WINDOW));
 	}
 
 	rect.left += Util::ScalePixels(13, m_hWnd);
@@ -670,22 +670,20 @@ void CChannelManagerDlg::OnPaint()
 	if(!m_bkgnd)
 		m_bkgnd = ::CreateCompatibleBitmap(pDC.hdc, client.Width(), client.Height());
 	HGDIOBJ oldBmp = ::SelectObject(dc, m_bkgnd);
+	const auto blackBrush = (HBRUSH)::GetStockObject(BLACK_BRUSH);
 
 	client.SetRect(client.left + MulDiv(2, dpiX, 96), client.top + MulDiv(32, dpiY, 96), client.right - MulDiv(2, dpiX, 96), client.bottom - MulDiv(24, dpiY, 96));
 	// Draw background
 	{
-		auto brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
-		FillRect(dc, &pDC.rcPaint, brush);
-		DeleteObject(brush);
-
-		FillRect(dc, &client, CMainFrame::brushHighLight);
-		FrameRect(dc, &client, CMainFrame::brushBlack);
+		FillRect(dc, &pDC.rcPaint, GetSysColorBrush(COLOR_BTNFACE));
+		FillRect(dc, &client, GetSysColorBrush(COLOR_HIGHLIGHT));
+		FrameRect(dc, &client, blackBrush);
 	}
 
 	client.SetRect(client.left + 8,client.top + 6,client.right - 6,client.bottom - 6);
 
-	HBRUSH red = CreateSolidBrush(RGB(192, 96, 96));
-	HBRUSH green = CreateSolidBrush(RGB(96, 192, 96));
+	auto highlight = GetSysColorBrush(COLOR_HIGHLIGHT), red = CreateSolidBrush(RGB(192, 96, 96)), green = CreateSolidBrush(RGB(96, 192, 96));
+	const HBRUSH brushes[] = {highlight, green, red};
 
 	UINT c = 0, l = 0;
 	const CSoundFile &sndFile = m_ModDoc->GetSoundFile();
@@ -720,7 +718,6 @@ void CChannelManagerDlg::OnPaint()
 				break;
 			case kRecordSelect:
 			{
-				const HBRUSH brushes[] = { CMainFrame::brushHighLight, green, red };
 				auto r = m_ModDoc->IsChannelRecord(nThisChn);
 				FillRect(dc, btn, brushes[r % std::size(brushes)]);
 				break;
@@ -733,7 +730,7 @@ void CChannelManagerDlg::OnPaint()
 				break;
 		}
 		// Draw border around marker
-		FrameRect(dc, btn, CMainFrame::brushBlack);
+		FrameRect(dc, btn, blackBrush);
 
 		c++;
 		if(c >= CM_NB_COLS) { c = 0; l++; }

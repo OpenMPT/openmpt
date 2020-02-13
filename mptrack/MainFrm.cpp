@@ -130,29 +130,10 @@ HICON CMainFrame::m_hIcon = NULL;
 HFONT CMainFrame::m_hGUIFont = NULL;
 HFONT CMainFrame::m_hFixedFont = NULL;
 HPEN CMainFrame::penDarkGray = NULL;
-HPEN CMainFrame::penScratch = NULL;
-HPEN CMainFrame::penGray00 = NULL;
-HPEN CMainFrame::penGray33 = NULL;
-HPEN CMainFrame::penGray40 = NULL;
-HPEN CMainFrame::penGray55 = NULL;
-HPEN CMainFrame::penGray80 = NULL;
 HPEN CMainFrame::penGray99 = NULL;
-HPEN CMainFrame::penGraycc = NULL;
-HPEN CMainFrame::penGrayff = NULL;
-HPEN CMainFrame::penLightGray = NULL;
-HPEN CMainFrame::penBlack = NULL;
-HPEN CMainFrame::penWhite = NULL;
 HPEN CMainFrame::penHalfDarkGray = NULL;
 HPEN CMainFrame::penSample = NULL;
-HBRUSH CMainFrame::brushGray = NULL;
-HBRUSH CMainFrame::brushBlack = NULL;
-HBRUSH CMainFrame::brushWhite = NULL;
-HBRUSH CMainFrame::brushText = NULL;
 
-HBRUSH CMainFrame::brushHighLight = NULL;
-HBRUSH CMainFrame::brushHighLightRed = NULL;
-HBRUSH CMainFrame::brushWindow = NULL;
-HBRUSH CMainFrame::brushYellow = NULL;
 HCURSOR CMainFrame::curDragging = NULL;
 HCURSOR CMainFrame::curArrow = NULL;
 HCURSOR CMainFrame::curNoDrop = NULL;
@@ -287,27 +268,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0);
 	m_hGUIFont = CreateFontIndirect(&metrics.lfMessageFont);
 
-	brushBlack = (HBRUSH)::GetStockObject(BLACK_BRUSH);
-	brushWhite = (HBRUSH)::GetStockObject(WHITE_BRUSH);
-	brushText = ::CreateSolidBrush(GetSysColor(COLOR_BTNTEXT));
-	brushGray = ::CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
-	penLightGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNHIGHLIGHT));
 	penDarkGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNSHADOW));
-	penScratch = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNSHADOW));
-	penGray00 = ::CreatePen(PS_SOLID,0, RGB(0x00, 0x00, 0x00));
-	penGray33 = ::CreatePen(PS_SOLID,0, RGB(0x33, 0x33, 0x33));
-	penGray40 = ::CreatePen(PS_SOLID,0, RGB(0x40, 0x40, 0x40));
-	penGray55 = ::CreatePen(PS_SOLID,0, RGB(0x55, 0x55, 0x55));
-	penGray80 = ::CreatePen(PS_SOLID,0, RGB(0x80, 0x80, 0x80));
 	penGray99 = ::CreatePen(PS_SOLID,0, RGB(0x99, 0x99, 0x99));
-	penGraycc = ::CreatePen(PS_SOLID,0, RGB(0xcc, 0xcc, 0xcc));
-	penGrayff = ::CreatePen(PS_SOLID,0, RGB(0xff, 0xff, 0xff));
-
 	penHalfDarkGray = ::CreatePen(PS_DOT, 0, GetSysColor(COLOR_BTNSHADOW));
-	penBlack = (HPEN)::GetStockObject(BLACK_PEN);
-	penWhite = (HPEN)::GetStockObject(WHITE_PEN);
-
-
 
 	// Cursors
 	curDragging = theApp.LoadCursor(IDC_DRAGGING);
@@ -390,21 +353,11 @@ BOOL CMainFrame::DestroyWindow()
 
 	// Kill GDI Objects
 #define DeleteGDIObject(h) ::DeleteObject(h); h = NULL;
-	DeleteGDIObject(brushGray);
-	DeleteGDIObject(penLightGray);
 	DeleteGDIObject(penDarkGray);
 	DeleteGDIObject(penSample);
 	DeleteGDIObject(m_hGUIFont);
 	DeleteGDIObject(m_hFixedFont);
-	DeleteGDIObject(penScratch);
-	DeleteGDIObject(penGray00);
-	DeleteGDIObject(penGray33);
-	DeleteGDIObject(penGray40);
-	DeleteGDIObject(penGray55);
-	DeleteGDIObject(penGray80);
 	DeleteGDIObject(penGray99);
-	DeleteGDIObject(penGraycc);
-	DeleteGDIObject(penGrayff);
 #undef DeleteGDIObject
 
 	return CMDIFrameWnd::DestroyWindow();
@@ -1264,20 +1217,6 @@ void CMainFrame::UpdateColors()
 	if(mainFrm != nullptr)
 	{
 		mainFrm->m_wndToolBar.m_VuMeter.Invalidate();
-	}
-
-	// Sequence window
-	{
-		COLORREF crBkgnd = GetSysColor(COLOR_WINDOW);
-		if (brushHighLight) DeleteObject(brushHighLight);
-		brushHighLight = CreateSolidBrush(GetSysColor(COLOR_HIGHLIGHT));
-		if (brushHighLightRed) DeleteObject(brushHighLightRed);
-		brushHighLightRed = CreateSolidBrush(RGB(0xFF,0x00,0x00));
-		if (brushYellow) DeleteObject(brushYellow);
-		brushYellow = CreateSolidBrush(RGB(0xFF,0xFF,0x00));
-
-		if (brushWindow) DeleteObject(brushWindow);
-		brushWindow = CreateSolidBrush(crBkgnd);
 	}
 }
 

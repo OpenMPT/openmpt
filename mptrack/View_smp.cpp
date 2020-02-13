@@ -988,7 +988,7 @@ void CViewSample::OnDraw(CDC *pDC)
 		offScreenDC.SelectObject(offScreenBitmap);
 	}
 
-	const HGDIOBJ oldpen = offScreenDC.SelectObject(CMainFrame::penBlack);
+	const auto oldPen = offScreenDC.SelectObject(CMainFrame::penDarkGray);
 	rect = rcClient;
 	if ((rcClient.bottom > rcClient.top) && (rcClient.right > rcClient.left))
 	{
@@ -1126,7 +1126,8 @@ void CViewSample::OnDraw(CDC *pDC)
 
 	BitBlt(pDC->m_hDC, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), offScreenDC, 0, 0, SRCCOPY);
 
-	if (oldpen) offScreenDC.SelectObject(oldpen);
+	if(oldPen)
+		offScreenDC.SelectObject(oldPen);
 }
 
 

@@ -1638,82 +1638,65 @@ MODPLUGDIB *LoadDib(LPCTSTR lpszName)
 	return pmd;
 }
 
-
-void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCSTR lpszText, BOOL bDisabled, BOOL bPushed, DWORD dwFlags)
+int DrawTextT(HDC hdc, const wchar_t *lpchText, int cchText, LPRECT lprc, UINT format)
 {
-	CRect rect = *lpRect;
+	return ::DrawTextW(hdc, lpchText, cchText, lprc, format);
+}
 
+int DrawTextT(HDC hdc, const char *lpchText, int cchText, LPRECT lprc, UINT format)
+{
+	return ::DrawTextA(hdc, lpchText, cchText, lprc, format);
+}
+
+template<typename Tchar>
+static void DrawButtonRectImpl(HDC hdc, CRect rect, const Tchar *lpszText, bool disabled, bool pushed, DWORD textFlags)
+{
 	int width = Util::ScalePixels(1, WindowFromDC(hdc));
-	rect.DeflateRect(width, width);
 	if(width != 1)
 	{
 		// Draw "real" buttons in Hi-DPI mode
-		DrawFrameControl(hdc, lpRect, DFC_BUTTON, bPushed ? (DFCS_PUSHED | DFCS_BUTTONPUSH) : DFCS_BUTTONPUSH);
+		DrawFrameControl(hdc, rect, DFC_BUTTON, pushed ? (DFCS_PUSHED | DFCS_BUTTONPUSH) : DFCS_BUTTONPUSH);
 	} else
 	{
-		HGDIOBJ oldpen = SelectPen(hdc, (bPushed) ? CMainFrame::penDarkGray : CMainFrame::penLightGray);
-		::FillRect(hdc, lpRect, CMainFrame::brushGray);
-		::MoveToEx(hdc, lpRect->left, lpRect->bottom-1, NULL);
-		::LineTo(hdc, lpRect->left, lpRect->top);
-		::LineTo(hdc, lpRect->right-1, lpRect->top);
-		SelectPen(hdc, (bPushed) ? CMainFrame::penLightGray : CMainFrame::penDarkGray);
-		::LineTo(hdc, lpRect->right-1, lpRect->bottom-1);
-		::LineTo(hdc, lpRect->left, lpRect->bottom-1);
+		const auto colorHighlight = GetSysColor(COLOR_BTNHIGHLIGHT), colorShadow = GetSysColor(COLOR_BTNSHADOW);
+		auto oldpen = SelectPen(hdc, GetStockObject(DC_PEN));
+		::SetDCPenColor(hdc, pushed ? colorShadow : colorHighlight);
+		::FillRect(hdc, rect, GetSysColorBrush(COLOR_BTNFACE));
+		::MoveToEx(hdc, rect.left, rect.bottom - 1, nullptr);
+		::LineTo(hdc, rect.left, rect.top);
+		::LineTo(hdc, rect.right - 1, rect.top);
+		::SetDCPenColor(hdc, pushed ? colorHighlight : colorShadow);
+		::LineTo(hdc, rect.right - 1, rect.bottom - 1);
+		::LineTo(hdc, rect.left, rect.bottom - 1);
 		SelectPen(hdc, oldpen);
 	}
 	
-	if ((lpszText) && (lpszText[0]))
+	if(lpszText && lpszText[0])
 	{
-		if (bPushed)
+		rect.DeflateRect(width, width);
+		if(pushed)
 		{
 			rect.top += width;
 			rect.left += width;
 		}
-		::SetTextColor(hdc, GetSysColor((bDisabled) ? COLOR_GRAYTEXT : COLOR_BTNTEXT));
+		::SetTextColor(hdc, GetSysColor(disabled ? COLOR_GRAYTEXT : COLOR_BTNTEXT));
 		::SetBkMode(hdc, TRANSPARENT);
-		HGDIOBJ oldfont = ::SelectObject(hdc, CMainFrame::GetGUIFont());
-		::DrawTextA(hdc, lpszText, -1, &rect, dwFlags | DT_SINGLELINE | DT_NOPREFIX);
-		::SelectObject(hdc, oldfont);
+		auto oldfont = SelectFont(hdc, CMainFrame::GetGUIFont());
+		DrawTextT(hdc, lpszText, -1, &rect, textFlags | DT_SINGLELINE | DT_NOPREFIX);
+		SelectFont(hdc, oldfont);
 	}
 }
 
 
-void DrawButtonRect(HDC hdc, LPRECT lpRect, LPCWSTR lpszText, BOOL bDisabled, BOOL bPushed, DWORD dwFlags)
+void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCSTR lpszText, BOOL bDisabled, BOOL bPushed, DWORD dwFlags)
 {
-	CRect rect = *lpRect;
+	DrawButtonRectImpl(hdc, *lpRect, lpszText, bDisabled, bPushed, dwFlags);
+}
 
-	int width = Util::ScalePixels(1, WindowFromDC(hdc));
-	rect.DeflateRect(width, width);
-	if(width != 1)
-	{
-		// Draw "real" buttons in Hi-DPI mode
-		DrawFrameControl(hdc, lpRect, DFC_BUTTON, bPushed ? (DFCS_PUSHED | DFCS_BUTTONPUSH) : DFCS_BUTTONPUSH);
-	} else
-	{
-		HGDIOBJ oldpen = SelectPen(hdc, (bPushed) ? CMainFrame::penDarkGray : CMainFrame::penLightGray);
-		::MoveToEx(hdc, lpRect->left, lpRect->bottom-1, NULL);
-		::LineTo(hdc, lpRect->left, lpRect->top);
-		::LineTo(hdc, lpRect->right-1, lpRect->top);
-		SelectPen(hdc, (bPushed) ? CMainFrame::penLightGray : CMainFrame::penDarkGray);
-		::LineTo(hdc, lpRect->right-1, lpRect->bottom-1);
-		::LineTo(hdc, lpRect->left, lpRect->bottom-1);
-		::FillRect(hdc, rect, CMainFrame::brushGray);
-		SelectPen(hdc, oldpen);
-	}
-	
-	if ((lpszText) && (lpszText[0]))
-	{
-		if (bPushed)
-		{
-			rect.top += width;
-			rect.left += width;
-		}
-		::SetTextColor(hdc, GetSysColor((bDisabled) ? COLOR_GRAYTEXT : COLOR_BTNTEXT));
-		::SetBkMode(hdc, TRANSPARENT);
-		HGDIOBJ oldfont = ::SelectObject(hdc, CMainFrame::GetGUIFont());
-		::DrawTextW(hdc, lpszText, -1, &rect, dwFlags | DT_SINGLELINE | DT_NOPREFIX);
-		::SelectObject(hdc, oldfont);
-	}
+
+void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCWSTR lpszText, BOOL bDisabled, BOOL bPushed, DWORD dwFlags)
+{
+	DrawButtonRectImpl(hdc, *lpRect, lpszText, bDisabled, bPushed, dwFlags);
 }
 
 

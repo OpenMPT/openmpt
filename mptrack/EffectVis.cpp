@@ -236,39 +236,38 @@ void CEffectVis::DrawGrid()
 	}
 
 	m_dcGrid.FillSolidRect(&m_rcDraw, 0);
-	for (ROWINDEX row = m_startRow; row <= m_endRow; row++)
+	auto oldPen = m_dcGrid.SelectStockObject(DC_PEN);
+	for(ROWINDEX row = m_startRow; row <= m_endRow; row++)
 	{
-		if (row % nMeasure == 0)
-			CMainFrame::penScratch = CMainFrame::penGrayff;
-		else if (row % nBeat == 0)
-			CMainFrame::penScratch = CMainFrame::penGray99;
+		if(row % nMeasure == 0)
+			m_dcGrid.SetDCPenColor(RGB(0xFF, 0xFF, 0xFF));
+		else if(row % nBeat == 0)
+			m_dcGrid.SetDCPenColor(RGB(0x99, 0x99, 0x99));
 		else
-			CMainFrame::penScratch = CMainFrame::penGray55;
-		m_dcGrid.SelectObject(CMainFrame::penScratch);
+			m_dcGrid.SetDCPenColor(RGB(0x55, 0x55, 0x55));
 		int x1 = RowToScreenX(row);
 		m_dcGrid.MoveTo(x1, m_rcDraw.top);
 		m_dcGrid.LineTo(x1, m_rcDraw.bottom);
 	}
 
 	// Draw horizontal grid lines
-	const UINT numHorizontalLines = 4;
-	for (UINT i=0; i<numHorizontalLines; i++)
+	constexpr UINT numHorizontalLines = 4;
+	for(UINT i = 0; i < numHorizontalLines; i++)
 	{
-		switch (i % 4)
+		COLORREF c = 0;
+		switch(i % 4)
 		{
-			case 0: CMainFrame::penScratch = CMainFrame::penGray00; break;
-			case 1: CMainFrame::penScratch = CMainFrame::penGray40; break;
-			case 2: CMainFrame::penScratch = CMainFrame::penGray80; break;
-			case 3: CMainFrame::penScratch = CMainFrame::penGraycc; break;
+		case 0: c = RGB(0x00, 0x00, 0x00); break;
+		case 1: c = RGB(0x40, 0x40, 0x40); break;
+		case 2: c = RGB(0x80, 0x80, 0x80); break;
+		case 3: c = RGB(0xCC, 0xCC, 0xCC); break;
 		}
-
-		m_dcGrid.SelectObject(CMainFrame::penScratch);
-
-		int y1 = m_rcDraw.bottom/numHorizontalLines * i;
+		m_dcGrid.SetDCPenColor(c);
+		int y1 = m_rcDraw.bottom / numHorizontalLines * i;
 		m_dcGrid.MoveTo(m_rcDraw.left + m_innerBorder, y1);
 		m_dcGrid.LineTo(m_rcDraw.right - m_innerBorder, y1);
 	}
-
+	m_dcGrid.SelectObject(oldPen);
 }
 
 
@@ -282,7 +281,7 @@ void CEffectVis::SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow)
 	if (m_nOldPlayPos>=m_startRow &&  m_nOldPlayPos<=m_endRow)
 	{
 		x1 = RowToScreenX(m_nOldPlayPos);
-		m_dcPlayPos.SelectObject(CMainFrame::penBlack);
+		m_dcPlayPos.SelectStockObject(BLACK_PEN);
 		m_dcPlayPos.MoveTo(x1,m_rcDraw.top);
 		m_dcPlayPos.LineTo(x1,m_rcDraw.bottom);
 	}

@@ -166,6 +166,7 @@ void CNoteMapWnd::OnPaint()
 
 	CRect rcClient;
 	GetClientRect(&rcClient);
+	const auto highlightBrush = GetSysColorBrush(COLOR_HIGHLIGHT), windowBrush = GetSysColorBrush(COLOR_WINDOW);
 	const auto colorText = GetSysColor(COLOR_WINDOWTEXT);
 	const auto colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
 	auto oldFont = dc.SelectObject(CMainFrame::GetGUIFont());
@@ -182,7 +183,7 @@ void CNoteMapWnd::OnPaint()
 	const CSoundFile &sndFile = m_modDoc.GetSoundFile();
 	if (m_cxFont > 0 && m_cyFont > 0)
 	{
-		bool bFocus = (::GetFocus() == m_hWnd);
+		const bool focus = (::GetFocus() == m_hWnd);
 		const ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 		CRect rect;
 
@@ -205,11 +206,11 @@ void CNoteMapWnd::OnPaint()
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
 			DrawButtonRect(dc, &rect, s.c_str(), FALSE, FALSE);
 			// Mapped Note
-			bool highlight = ((bFocus) && (nPos == (int)m_nNote));
+			bool highlight = ((focus) && (nPos == (int)m_nNote));
 			rect.left = rect.right;
 			rect.right = m_cxFont*2-1;
 			s = _T("...");
-			if (pIns != nullptr && isValidPos && (pIns->NoteMap[nPos] != NOTE_NONE))
+			if(pIns != nullptr && isValidPos && (pIns->NoteMap[nPos] != NOTE_NONE))
 			{
 				ModCommand::NOTE n = pIns->NoteMap[nPos];
 				if(ModCommand::IsNote(n))
@@ -221,8 +222,8 @@ void CNoteMapWnd::OnPaint()
 					s = _T("???");
 				}
 			}
-			FillRect(dc, &rect, highlight ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
-			if ((nPos == (int)m_nNote) && (!m_bIns))
+			FillRect(dc, &rect, highlight ? highlightBrush : windowBrush);
+			if(nPos == (int)m_nNote && !m_bIns)
 			{
 				rect.InflateRect(-1, -1);
 				dc.DrawFocusRect(&rect);
@@ -231,16 +232,16 @@ void CNoteMapWnd::OnPaint()
 			dc.SetTextColor(highlight ? colorTextSel : colorText);
 			dc.DrawText(mpt::ToCString(s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 			// Sample
-			highlight = ((bFocus) && (nPos == (int)m_nNote) /*&& (m_bIns)*/);
-			rect.left = rcClient.left + m_cxFont*2+3;
+			highlight = (focus && nPos == (int)m_nNote);
+			rect.left = rcClient.left + m_cxFont * 2 + 3;
 			rect.right = rcClient.right;
 			s = _T(" ..");
-			if ((pIns) && (nPos >= 0) && (nPos < NOTE_MAX) && (pIns->Keyboard[nPos]))
+			if(pIns && nPos >= 0 && nPos < NOTE_MAX && pIns->Keyboard[nPos])
 			{
 				s = mpt::tfmt::right(3, mpt::tfmt::dec(pIns->Keyboard[nPos]));
 			}
-			FillRect(dc, &rect, (highlight) ? CMainFrame::brushHighLight : CMainFrame::brushWindow);
-			if ((nPos == (int)m_nNote) && (m_bIns))
+			FillRect(dc, &rect, highlight ? highlightBrush : windowBrush);
+			if((nPos == (int)m_nNote) && (m_bIns))
 			{
 				rect.InflateRect(-1, -1);
 				dc.DrawFocusRect(&rect);
@@ -249,12 +250,12 @@ void CNoteMapWnd::OnPaint()
 			dc.SetTextColor((highlight) ? colorTextSel : colorText);
 			dc.DrawText(mpt::ToCString(s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 		}
-		rect.SetRect(rcClient.left+m_cxFont*2-1, rcClient.top, rcClient.left+m_cxFont*2+3, ypaint);
+		rect.SetRect(rcClient.left + m_cxFont * 2 - 1, rcClient.top, rcClient.left + m_cxFont * 2 + 3, ypaint);
 		DrawButtonRect(dc, &rect, _T(""), FALSE, FALSE);
 		if (ypaint < rcClient.bottom)
 		{
 			rect.SetRect(rcClient.left, ypaint, rcClient.right, rcClient.bottom);
-			FillRect(dc, &rect, CMainFrame::brushGray);
+			FillRect(dc, &rect, GetSysColorBrush(COLOR_BTNFACE));
 		}
 	}
 	dc.SelectObject(oldFont);
