@@ -670,7 +670,7 @@ void CChannelManagerDlg::OnPaint()
 	if(!m_bkgnd)
 		m_bkgnd = ::CreateCompatibleBitmap(pDC.hdc, client.Width(), client.Height());
 	HGDIOBJ oldBmp = ::SelectObject(dc, m_bkgnd);
-	const auto blackBrush = (HBRUSH)::GetStockObject(BLACK_BRUSH);
+	const auto blackBrush = GetStockBrush(BLACK_BRUSH);
 
 	client.SetRect(client.left + MulDiv(2, dpiX, 96), client.top + MulDiv(32, dpiY, 96), client.right - MulDiv(2, dpiX, 96), client.bottom - MulDiv(24, dpiY, 96));
 	// Draw background

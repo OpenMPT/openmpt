@@ -58,6 +58,8 @@ static char THIS_FILE[] = __FILE__;
 
 OPENMPT_NAMESPACE_BEGIN
 
+#define TIMERID_GUI 1
+#define TIMERID_NOTIFY 2
 
 #define MPTTIMER_PERIOD		200
 
@@ -132,7 +134,6 @@ HFONT CMainFrame::m_hFixedFont = NULL;
 HPEN CMainFrame::penDarkGray = NULL;
 HPEN CMainFrame::penGray99 = NULL;
 HPEN CMainFrame::penHalfDarkGray = NULL;
-HPEN CMainFrame::penSample = NULL;
 
 HCURSOR CMainFrame::curDragging = NULL;
 HCURSOR CMainFrame::curArrow = NULL;
@@ -162,24 +163,6 @@ CMainFrame::CMainFrame()
 	: m_SoundDeviceFillBufferCriticalSection(CriticalSection::InitialUnlocked)
 	, m_Dither(theApp.PRNG())
 {
-	m_NotifyTimer = 0;
-	gpSoundDevice = NULL;
-
-	m_AudioThreadId = 0;
-	m_InNotifyHandler = false;
-
-	m_bModTreeHasFocus = false;
-	m_pNoteMapHasFocus = nullptr;
-	m_pOrderlistHasFocus = nullptr;
-	m_bOptionsLocked = false;
-
-	m_SoundCardOptionsDialog = nullptr;
-
-	m_hWndMidi = NULL;
-	m_pSndFile = nullptr;
-	m_dwTimeSec = 0;
-	m_nTimer = 0;
-	m_nAvgMixChn = m_nMixChn = 0;
 	m_szUserText[0] = 0;
 	m_szInfoText[0] = 0;
 	m_szXInfoText[0]= 0;
@@ -354,7 +337,6 @@ BOOL CMainFrame::DestroyWindow()
 	// Kill GDI Objects
 #define DeleteGDIObject(h) ::DeleteObject(h); h = NULL;
 	DeleteGDIObject(penDarkGray);
-	DeleteGDIObject(penSample);
 	DeleteGDIObject(m_hGUIFont);
 	DeleteGDIObject(m_hFixedFont);
 	DeleteGDIObject(penGray99);
@@ -1173,11 +1155,9 @@ void CMainFrame::UpdateColors()
 		meter.bitmap->bmiColors[3] = rgb2quad((colors[meter.med] >> 1) & 0x7F7F7F);
 		meter.bitmap->bmiColors[1] = rgb2quad((colors[meter.hi] >> 1) & 0x7F7F7F);
 	}
-	if (penSample) DeleteObject(penSample);
-	penSample = ::CreatePen(PS_SOLID, 0, colors[MODCOLOR_SAMPLE]);
 
 	// Generel tab VU meters
-	for (UINT i=0; i<NUM_VUMETER_PENS*2; i++)
+	for(UINT i = 0; i < NUM_VUMETER_PENS * 2; i++)
 	{
 		int r0,g0,b0, r1,g1,b1;
 		int r, g, b;
@@ -2834,9 +2814,6 @@ BOOL CMainFrame::OnQueryEndSession()
 // ITfLanguageProfileNotifySink implementation
 
 TfLanguageProfileNotifySink::TfLanguageProfileNotifySink()
-	: m_pProfiles(nullptr)
-	, m_pSource(nullptr)
-	, m_dwCookie(TF_INVALID_COOKIE)
 {
 	HRESULT hr = CoCreateInstance(CLSID_TF_InputProcessorProfiles, NULL, CLSCTX_INPROC_SERVER, IID_ITfInputProcessorProfiles, (void**)&m_pProfiles);
 	if(SUCCEEDED(hr))
@@ -2847,8 +2824,8 @@ TfLanguageProfileNotifySink::TfLanguageProfileNotifySink()
 			hr = m_pSource->AdviseSink(IID_ITfLanguageProfileNotifySink,
 				static_cast<ITfLanguageProfileNotifySink *>(this),
 				&m_dwCookie);
-			ASSERT(SUCCEEDED(hr));
-			ASSERT(m_dwCookie != TF_INVALID_COOKIE);
+			MPT_ASSERT(SUCCEEDED(hr));
+			MPT_ASSERT(m_dwCookie != TF_INVALID_COOKIE);
 		}
 	}
 }

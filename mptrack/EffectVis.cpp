@@ -276,21 +276,21 @@ void CEffectVis::SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow)
 	if(nPat == m_nPattern && nRow == m_nOldPlayPos)
 		return;
 
-	int x1;
-	//erase current playpos:
-	if (m_nOldPlayPos>=m_startRow &&  m_nOldPlayPos<=m_endRow)
+	if(m_nOldPlayPos >= m_startRow && m_nOldPlayPos <= m_endRow)
 	{
-		x1 = RowToScreenX(m_nOldPlayPos);
+		// erase current playpos
+		int x1 = RowToScreenX(m_nOldPlayPos);
 		m_dcPlayPos.SelectStockObject(BLACK_PEN);
 		m_dcPlayPos.MoveTo(x1,m_rcDraw.top);
 		m_dcPlayPos.LineTo(x1,m_rcDraw.bottom);
 	}
 
-	if ((nRow<m_startRow) || (nRow>m_endRow) || (nPat != m_nPattern))
+	if((nRow < m_startRow) || (nRow > m_endRow) || (nPat != m_nPattern))
 		return;
 
-	x1 = RowToScreenX(nRow);
-	m_dcPlayPos.SelectObject(CMainFrame::penSample);
+	int x1 = RowToScreenX(nRow);
+	m_dcPlayPos.SelectStockObject(DC_PEN);
+	m_dcPlayPos.SetDCPenColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_SAMPLE]);
 	m_dcPlayPos.MoveTo(x1,m_rcDraw.top);
 	m_dcPlayPos.LineTo(x1,m_rcDraw.bottom);
 

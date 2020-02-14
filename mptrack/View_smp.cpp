@@ -972,6 +972,7 @@ void CViewSample::OnDraw(CDC *pDC)
 
 	if ((!pModDoc) || (!pDC)) return;
 
+	const auto &colors = TrackerSettings::Instance().rgbCustomColors;
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 	const ModSample &sample = sndFile.GetSample((m_nSample <= sndFile.GetNumSamples()) ? m_nSample : 0);
 	if(sample.uFlags[CHN_ADLIB])
@@ -1003,20 +1004,22 @@ void CViewSample::OnDraw(CDC *pDC)
 			{
 				rc.right = SampleToScreen(m_dwBeginSel);
 				if (rc.right > rcClient.right) rc.right = rcClient.right;
-				if (rc.right > rc.left) offScreenDC.FillSolidRect(&rc, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKSAMPLE]);
+				if (rc.right > rc.left) offScreenDC.FillSolidRect(&rc, colors[MODCOLOR_BACKSAMPLE]);
 				rc.left = rc.right;
 			}
 			if (rc.left < 0) rc.left = 0;
 			rc.right = SampleToScreen(m_dwEndSel) + 1;
 			if (rc.right > rcClient.right) rc.right = rcClient.right;
-			if (rc.right > rc.left) offScreenDC.FillSolidRect(&rc, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_SAMPLESELECTED]);
+			if(rc.right > rc.left)
+				offScreenDC.FillSolidRect(&rc, colors[MODCOLOR_SAMPLESELECTED]);
 			rc.left = rc.right;
 			if (rc.left < 0) rc.left = 0;
 			rc.right = rcClient.right;
-			if (rc.right > rc.left) offScreenDC.FillSolidRect(&rc, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKSAMPLE]);
+			if(rc.right > rc.left)
+				offScreenDC.FillSolidRect(&rc, colors[MODCOLOR_BACKSAMPLE]);
 		} else
 		{
-			offScreenDC.FillSolidRect(&rcClient, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKSAMPLE]);
+			offScreenDC.FillSolidRect(&rcClient, colors[MODCOLOR_BACKSAMPLE]);
 		}
 		offScreenDC.SelectObject(CMainFrame::penDarkGray);
 		if (sample.uFlags[CHN_STEREO])
@@ -1068,7 +1071,8 @@ void CViewSample::OnDraw(CDC *pDC)
 				}
 			}
 			// Drawing Sample Data
-			offScreenDC.SelectObject(CMainFrame::penSample);
+			offScreenDC.SelectStockObject(DC_PEN);
+			offScreenDC.SetDCPenColor(colors[MODCOLOR_SAMPLE]);
 			int smplsize = sample.GetBytesPerSample();
 			if (m_nZoom == 1 || m_nZoom < 0 || ((!m_nZoom) && (sample.nLength <= (SmpLength)rect.Width())))
 			{

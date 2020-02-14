@@ -184,9 +184,6 @@ OPENMPT_NAMESPACE_END
 #include "Notification.h"
 OPENMPT_NAMESPACE_BEGIN
 
-#define TIMERID_GUI 1
-#define TIMERID_NOTIFY 2
-
 OPENMPT_NAMESPACE_END
 #include "CImageListEx.h"
 #include "Mainbar.h"
@@ -248,9 +245,9 @@ public:
 	ULONG STDMETHODCALLTYPE Release() override;
 
 protected:
-	ITfInputProcessorProfiles *m_pProfiles;
-	ITfSource *m_pSource;
-	DWORD m_dwCookie;
+	ITfInputProcessorProfiles *m_pProfiles = nullptr;
+	ITfSource *m_pSource = nullptr;
+	DWORD m_dwCookie = TF_INVALID_COOKIE;
 };
 
 
@@ -267,7 +264,7 @@ public:
 	// GDI
 	static HICON m_hIcon;
 	static HFONT m_hGUIFont, m_hFixedFont;
-	static HPEN penDarkGray, penHalfDarkGray, penSample, penGray99;
+	static HPEN penDarkGray, penHalfDarkGray, penGray99;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
 	static MODPLUGDIB *bmpNotes, *bmpVUMeters, *bmpPluginVUMeters;
 	static COLORREF gcolrefVuMeter[NUM_VUMETER_PENS * 2];	// General tab VU meters
@@ -277,14 +274,14 @@ public:
 	// Low-Level Audio
 	CriticalSection m_SoundDeviceFillBufferCriticalSection;
 	Util::MultimediaClock m_SoundDeviceClock;
-	SoundDevice::IBase *gpSoundDevice;
-	UINT_PTR m_NotifyTimer;
+	SoundDevice::IBase *gpSoundDevice = nullptr;
+	UINT_PTR m_NotifyTimer = 0;
 	Dither m_Dither;
 	VUMeter m_VUMeterInput;
 	VUMeter m_VUMeterOutput;
 
-	DWORD m_AudioThreadId;
-	bool m_InNotifyHandler;
+	DWORD m_AudioThreadId = 0;
+	bool m_InNotifyHandler = false;
 
 	// Midi Input
 public:
@@ -297,19 +294,18 @@ public:
 	CImageListEx m_SampleIcons;								// Sample editor icons
 
 protected:
-
 	CModTreeBar m_wndTree;
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
-	CSoundFile *m_pSndFile; // != NULL only when currently playing or rendering
-	HWND m_hWndMidi;
-	CSoundFile::samplecount_t m_dwTimeSec;
-	UINT_PTR m_nTimer;
-	UINT m_nAvgMixChn, m_nMixChn;
+	CSoundFile *m_pSndFile = nullptr; // != NULL only when currently playing or rendering
+	HWND m_hWndMidi = nullptr;
+	CSoundFile::samplecount_t m_dwTimeSec = 0;
+	UINT_PTR m_nTimer = 0;
+	UINT m_nAvgMixChn = 0, m_nMixChn = 0;
 	// Misc
-	class COptionsSoundcard *m_SoundCardOptionsDialog;
-	DWORD helpCookie;
-	bool m_bOptionsLocked;
+	class COptionsSoundcard *m_SoundCardOptionsDialog = nullptr;
+	DWORD helpCookie = 0;
+	bool m_bOptionsLocked = false;
 
 	// Notification Buffer
 	mpt::mutex m_NotificationBufferMutex; // to avoid deadlocks, this mutex should only be taken as a innermost lock, i.e. do not block on anything while holding this mutex
@@ -321,6 +317,11 @@ protected:
 	TCHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512];
 
 	CAutoSaver m_AutoSaver;
+
+public:
+	CWnd *m_pNoteMapHasFocus = nullptr;
+	CWnd *m_pOrderlistHasFocus = nullptr;
+	bool m_bModTreeHasFocus = false;
 
 public:
 	CMainFrame(/*CString regKeyExtension*/);
@@ -360,7 +361,6 @@ public:
 public:
 	bool midiOpenDevice(bool showSettings = true);
 	void midiCloseDevice();
-	void midiReceive();
 	void SetMidiRecordWnd(HWND hwnd) { m_hWndMidi = hwnd; }
 	HWND GetMidiRecordWnd() const { return m_hWndMidi; }
 
@@ -388,11 +388,8 @@ public:
 	CView *GetActiveView() const;
 	void OnDocumentCreated(CModDoc *pModDoc);
 	void OnDocumentClosed(CModDoc *pModDoc);
-	void UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint=NULL);
+	void UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint = nullptr);
 	static CInputHandler* GetInputHandler() { return m_InputHandler; }
-	bool m_bModTreeHasFocus;
-	CWnd *m_pNoteMapHasFocus;
-	CWnd* m_pOrderlistHasFocus;
 	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<CSoundFile::samplecount_t>(t); }
 
 	CModTree *GetUpperTreeview() { return m_wndTree.m_pModTree; }
@@ -505,8 +502,6 @@ protected:
 	afx_msg void OnTimer(UINT_PTR);
 
 	afx_msg void OnPluginManager();
-
-	afx_msg void OnChannelManager();
 	afx_msg void OnClipboardManager();
 
 	afx_msg LRESULT OnViewMIDIMapping(WPARAM wParam, LPARAM lParam);
@@ -542,7 +537,7 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnInitMenu(CMenu* pMenu);
+	afx_msg void OnInitMenu(CMenu *pMenu);
 	bool UpdateEffectKeys(const CModDoc *modDoc);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
