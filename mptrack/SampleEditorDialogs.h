@@ -40,6 +40,7 @@ protected:
 	CComboBoxEx m_fadeBox;
 	CImageList m_list;
 	CNumberEdit m_edit, m_editFadeIn, m_editFadeOut;
+	bool m_locked = true;
 
 public:
 	CAmpDlg(CWnd *parent, AmpSettings &settings, int16 factorMin = int16_min, int16 factorMax = int16_max);
@@ -49,6 +50,11 @@ protected:
 	BOOL OnInitDialog() override;
 	void OnOK() override;
 	void OnDestroy();
+
+	afx_msg void EnableFadeIn() { if(!m_locked) CheckDlgButton(IDC_CHECK1, BST_CHECKED); }
+	afx_msg void EnableFadeOut() { if(!m_locked) CheckDlgButton(IDC_CHECK2, BST_CHECKED); }
+
+	DECLARE_MESSAGE_MAP()
 };
 
 
@@ -59,7 +65,7 @@ class CRawSampleDlg: public CDialog
 {
 protected:
 	static SampleIO m_nFormat;
-	bool m_bRememberFormat;
+	bool m_bRememberFormat = false;
 
 public:
 	static SampleIO GetSampleFormat() { return m_nFormat; }
@@ -68,10 +74,8 @@ public:
 	void SetRememberFormat(bool bRemember) { m_bRememberFormat = bRemember; };
 
 public:
-	CRawSampleDlg(CWnd *parent = NULL):CDialog(IDD_LOADRAWSAMPLE, parent)
-	{ 
-		m_bRememberFormat = false;
-	}
+	CRawSampleDlg(CWnd *parent = nullptr)
+	    : CDialog(IDD_LOADRAWSAMPLE, parent) {}
 
 protected:
 	BOOL OnInitDialog() override;
@@ -157,7 +161,7 @@ public:
 	static uint32 m_fadeLaw;
 	static bool m_afterloopFade;
 	static bool m_useSustainLoop;
-	SmpLength m_loopLength, m_maxLength;
+	SmpLength m_loopLength = 0, m_maxLength = 0;
 
 protected:
 	CSliderCtrl m_SliderLength, m_SliderFadeLaw;
@@ -165,15 +169,12 @@ protected:
 	CSpinButtonCtrl m_SpinSamples;
 	CButton m_RadioNormalLoop, m_RadioSustainLoop;
 	ModSample &m_sample;
-	bool m_editLocked : 1;
+	bool m_editLocked = true;
 
 public:
 	CSampleXFadeDlg(CWnd *parent, ModSample &sample)
-		: CDialog(IDD_SAMPLE_XFADE, parent)
-		, m_loopLength(0)
-		, m_maxLength(0)
-		, m_sample(sample)
-		, m_editLocked(true) { };
+	    : CDialog(IDD_SAMPLE_XFADE, parent)
+	    , m_sample(sample) {}
 
 	SmpLength PercentToSamples(uint32 percent) const { return Util::muldivr_unsigned(percent, m_loopLength, 100000); }
 	uint32 SamplesToPercent(SmpLength samples) const { return Util::muldivr_unsigned(samples, 100000, m_loopLength); }
@@ -182,6 +183,7 @@ protected:
 	void DoDataExchange(CDataExchange* pDX) override;
 	BOOL OnInitDialog() override;
 	void OnOK() override;
+
 	afx_msg void OnLoopTypeChanged();
 	afx_msg void OnFadeLengthChanged();
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
@@ -240,7 +242,6 @@ public:
 	static int amplifyMix;
 
 public:
-
 	CMixSampleDlg(CWnd *parent);
 
 protected:

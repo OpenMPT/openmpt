@@ -26,11 +26,17 @@ OPENMPT_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////////////////////
 // Sample amplification dialog
 
+BEGIN_MESSAGE_MAP(CAmpDlg, CDialog)
+	ON_WM_DESTROY()
+	ON_EN_CHANGE(IDC_EDIT2, &CAmpDlg::EnableFadeIn)
+	ON_EN_CHANGE(IDC_EDIT3, &CAmpDlg::EnableFadeOut)
+END_MESSAGE_MAP()
+
 void CAmpDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CAmpDlg)
-	DDX_Control(pDX, IDC_COMBO1,	m_fadeBox);
+	DDX_Control(pDX, IDC_COMBO1, m_fadeBox);
 	//}}AFX_DATA_MAP
 }
 
@@ -130,6 +136,8 @@ BOOL CAmpDlg::OnInitDialog()
 		m_fadeBox.InsertItem(&cbi);
 		if(fadeLaws[i].id == m_settings.fadeLaw) m_fadeBox.SetCurSel(i);
 	}
+
+	m_locked = false;
 
 	return TRUE;
 }
