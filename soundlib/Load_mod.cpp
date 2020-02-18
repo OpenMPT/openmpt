@@ -1519,7 +1519,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	if(!memcmp(songname, "jjk55", 6))
 		fileHeader.restartPos = 0x78;
 	// Sample 7 in echoing.mod won't "loop" correctly if we don't convert the VBlank tempo.
-	m_nDefaultTempo.Set(fileHeader.restartPos * 25 / 24);
+	m_nDefaultTempo.Set(125);
 	if(fileHeader.restartPos != 0x78)
 	{
 		// Convert to CIA timing
