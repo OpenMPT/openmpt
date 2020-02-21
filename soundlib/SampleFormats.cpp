@@ -1623,7 +1623,7 @@ struct SFZRegion
 		{
 			// Scientific pitch
 			static constexpr int8 keys[] = { 9, 11, 0, 2, 4, 5, 7 };
-			static_assert(CountOf(keys) == 'g' - 'a' + 1);
+			static_assert(std::size(keys) == 'g' - 'a' + 1);
 			auto keyC = value[0];
 			if(keyC >= 'A' && keyC <= 'G')
 				key = keys[keyC - 'A'];
@@ -1650,7 +1650,7 @@ struct SFZRegion
 		}
 		key += control.octaveOffset * 12 + control.noteOffset;
 		return static_cast<uint8>(Clamp(key, 0, 127));
-}
+	}
 
 	void Parse(const std::string &key, const std::string &value, const SFZControl &control)
 	{
@@ -1781,10 +1781,8 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			s.erase(0, s.find_first_not_of(" \t"));
 
 			// Replace macros
-			for(const auto &m : macros)
+			for(const auto &[oldStr, newStr] : macros)
 			{
-				auto &oldStr = m.first;
-				auto &newStr = m.second;
 				std::string::size_type pos = 0;
 				while((pos = s.find(oldStr, pos)) != std::string::npos)
 				{
@@ -1883,7 +1881,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				{
 					charsRead = s.find_first_of(" \t<", valueStart);
 				}
-				std::string value = s.substr(valueStart, charsRead - valueStart);
+				const std::string value = s.substr(valueStart, charsRead - valueStart);
 
 				switch(section)
 				{
@@ -1906,7 +1904,6 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			} else
 			{
 				// Garbage, probably not an sfz file
-				MPT_ASSERT(false);
 				return false;
 			}
 
@@ -2893,7 +2890,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 }
 
 
-static bool AUIsAnnotationLineWithField(const std::string & line)
+static bool AUIsAnnotationLineWithField(const std::string &line)
 {
 	std::size_t pos = line.find('=');
 	if(pos == std::string::npos)
@@ -2904,23 +2901,19 @@ static bool AUIsAnnotationLineWithField(const std::string & line)
 	{
 		return false;
 	}
-	std::string field = line.substr(0, pos);
-	bool invalidChars = false;
+	const auto field = std::string_view(line).substr(0, pos);
+	// Scan for invalid chars
 	for(auto c : field)
 	{
 		if(!IsInRange(c, 'a', 'z') && !IsInRange(c, 'A', 'Z') && !IsInRange(c, '0', '9') && c != '-' && c != '_')
 		{
-			invalidChars = true;
+			return false;
 		}
-	}
-	if(invalidChars)
-	{
-		return false;
 	}
 	return true;
 }
 
-static std::string AUTrimFieldFromAnnotationLine(const std::string & line)
+static std::string AUTrimFieldFromAnnotationLine(const std::string &line)
 {
 	if(!AUIsAnnotationLineWithField(line))
 	{
@@ -2930,7 +2923,7 @@ static std::string AUTrimFieldFromAnnotationLine(const std::string & line)
 	return line.substr(pos + 1);
 }
 
-static std::string AUGetAnnotationFieldFromLine(const std::string & line)
+static std::string AUGetAnnotationFieldFromLine(const std::string &line)
 {
 	if(!AUIsAnnotationLineWithField(line))
 	{
@@ -2945,14 +2938,19 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	file.Rewind();
 
 	// Verify header
-	if(!file.ReadMagic(".snd"))
+	const auto magic = file.ReadArray<char, 4>();
+	const bool bigEndian = !std::memcmp(magic.data(), ".snd", 4);
+	const bool littleEndian = !std::memcmp(magic.data(), "dns.", 4);
+	if(!bigEndian && !littleEndian)
 		return false;
 
-	uint32 dataOffset = file.ReadUint32BE();  // must be divisible by 8 according to spec, however, there are files that ignore this requirement
-	uint32 dataSize = file.ReadUint32BE();
-	uint32 encoding = file.ReadUint32BE();
-	uint32 sampleRate = file.ReadUint32BE();
-	uint32 channels = file.ReadUint32BE();
+	auto readUint32 = std::bind(bigEndian ? &FileReader::ReadUint32BE : &FileReader::ReadUint32LE, file);
+
+	uint32 dataOffset = readUint32();  // must be divisible by 8 according to spec, however, there are files that ignore this requirement
+	uint32 dataSize = readUint32();
+	uint32 encoding = readUint32();
+	uint32 sampleRate = readUint32();
+	uint32 channels = readUint32();
 
 	// According to spec, a minimum 8 byte annotation field after the header fields is required,
 	// however, there are files in the wild that violate this requirement.
@@ -2965,22 +2963,22 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	if(channels < 1 || channels > 2)
 		return false;
 
-	SampleIO sampleIO(SampleIO::_8bit, channels == 1 ? SampleIO::mono : SampleIO::stereoInterleaved, SampleIO::bigEndian, SampleIO::signedPCM);
+	SampleIO sampleIO(SampleIO::_8bit, channels == 1 ? SampleIO::mono : SampleIO::stereoInterleaved, bigEndian ? SampleIO::bigEndian : SampleIO::littleEndian, SampleIO::signedPCM);
 	switch(encoding)
 	{
-	case 1: sampleIO |= SampleIO::_16bit;			// u-law
+	case 1: sampleIO |= SampleIO::_16bit;         // u-law
 		sampleIO |= SampleIO::uLaw; break;
-	case 2: break;									// 8-bit linear PCM
-	case 3: sampleIO |= SampleIO::_16bit; break;	// 16-bit linear PCM
-	case 4: sampleIO |= SampleIO::_24bit; break;	// 24-bit linear PCM
-	case 5: sampleIO |= SampleIO::_32bit; break;	// 32-bit linear PCM
-	case 6: sampleIO |= SampleIO::_32bit;			// 32-bit IEEE floating point
+	case 2: break;                                // 8-bit linear PCM
+	case 3: sampleIO |= SampleIO::_16bit; break;  // 16-bit linear PCM
+	case 4: sampleIO |= SampleIO::_24bit; break;  // 24-bit linear PCM
+	case 5: sampleIO |= SampleIO::_32bit; break;  // 32-bit linear PCM
+	case 6: sampleIO |= SampleIO::_32bit;         // 32-bit IEEE floating point
 		sampleIO |= SampleIO::floatPCM;
 		break;
-	case 7: sampleIO |= SampleIO::_64bit;			// 64-bit IEEE floating point
+	case 7: sampleIO |= SampleIO::_64bit;         // 64-bit IEEE floating point
 		sampleIO |= SampleIO::floatPCM;
 		break;
-	case 27: sampleIO |= SampleIO::_16bit;			// a-law
+	case 27: sampleIO |= SampleIO::_16bit;        // a-law
 		sampleIO |= SampleIO::aLaw; break;
 	default: return false;
 	}
@@ -2994,46 +2992,41 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 
 	// This reads annotation metadata as written by OpenMPT, sox, ffmpeg.
 	// Additionally, we fall back to just reading the whole field as a single comment.
+	// We only read up to the first \0 byte.
 	file.Seek(24);
-	std::vector<char> annotationData;
-	file.ReadVector<char>(annotationData, dataOffset - 24);
-	std::string annotation(annotationData.begin(), annotationData.end());
-	annotation = mpt::String::RTrim(annotation, std::string(1, '\0'));
-	std::size_t term = annotation.find(std::string(1, '\0'));
-	if(term != std::string::npos)
-	{ // only up to first \0 byte
-		annotation = annotation.substr(0, term);
-	}
+	std::string annotation;
+	file.ReadString<mpt::String::maybeNullTerminated>(annotation, dataOffset - 24);
 	annotation = mpt::String::Replace(annotation, "\r\n", "\n");
 	annotation = mpt::String::Replace(annotation, "\r", "\n");
 	mpt::Charset charset = mpt::IsUTF8(annotation) ? mpt::Charset::UTF8 : mpt::Charset::ISO8859_1;
-	std::vector<std::string> lines = mpt::String::Split<std::string>(annotation, "\n");
-	bool has_fields = false;
-	for(const auto & line : lines)
+	const auto lines = mpt::String::Split<std::string>(annotation, "\n");
+	bool hasFields = false;
+	for(const auto &line : lines)
 	{
 		if(AUIsAnnotationLineWithField(line))
 		{
-			has_fields = true;
+			hasFields = true;
+			break;
 		}
 	}
-	if(has_fields)
+	if(hasFields)
 	{
-		std::map<std::string, std::vector<std::string>> lines_per_field;
-		std::string last_field = "comment";
-		for(const auto & line : lines)
+		std::map<std::string, std::vector<std::string>> linesPerField;
+		std::string lastField = "comment";
+		for(const auto &line : lines)
 		{
 			if(AUIsAnnotationLineWithField(line))
 			{
-				last_field = mpt::ToLowerCaseAscii(mpt::String::Trim(AUGetAnnotationFieldFromLine(line)));
+				lastField = mpt::ToLowerCaseAscii(mpt::String::Trim(AUGetAnnotationFieldFromLine(line)));
 			}
-			lines_per_field[last_field].push_back(AUTrimFieldFromAnnotationLine(line));
+			linesPerField[lastField].push_back(AUTrimFieldFromAnnotationLine(line));
 		}
-		tags.title    = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["title"  ], std::string("\n")));
-		tags.artist   = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["artist" ], std::string("\n")));
-		tags.album    = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["album"  ], std::string("\n")));
-		tags.trackno  = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["track"  ], std::string("\n")));
-		tags.genre    = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["genre"  ], std::string("\n")));
-		tags.comments = mpt::ToUnicode(charset, mpt::String::Combine(lines_per_field["comment"], std::string("\n")));
+		tags.title    = mpt::ToUnicode(charset, mpt::String::Combine(linesPerField["title"  ], std::string("\n")));
+		tags.artist   = mpt::ToUnicode(charset, mpt::String::Combine(linesPerField["artist" ], std::string("\n")));
+		tags.album    = mpt::ToUnicode(charset, mpt::String::Combine(linesPerField["album"  ], std::string("\n")));
+		tags.trackno  = mpt::ToUnicode(charset, mpt::String::Combine(linesPerField["track"  ], std::string("\n")));
+		tags.genre    = mpt::ToUnicode(charset, mpt::String::Combine(linesPerField["genre"  ], std::string("\n")));
+		tags.comments = mpt::ToUnicode(charset, mpt::String::Combine(linesPerField["comment"], std::string("\n")));
 	} else
 	{
 		// Most applications tend to write their own name here,
