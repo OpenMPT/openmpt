@@ -33,6 +33,7 @@
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/ModSampleCopy.h"
+#include <functional>
 #include <map>
 
 
