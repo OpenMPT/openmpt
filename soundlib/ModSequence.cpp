@@ -22,13 +22,13 @@ OPENMPT_NAMESPACE_BEGIN
 
 ModSequence::ModSequence(CSoundFile &sndFile)
 	: m_sndFile(sndFile)
-	, m_restartPos(0)
 {
 }
 
 
 ModSequence& ModSequence::operator=(const ModSequence &other)
 {
+	MPT_ASSERT(&other.m_sndFile == &m_sndFile);
 	if(&other == this)
 		return *this;
 	std::vector<PATTERNINDEX>::assign(other.begin(), other.end());

@@ -26,9 +26,9 @@ class ModSequence: public std::vector<PATTERNINDEX>
 	friend class ModSequenceSet;
 
 protected:
-	mpt::ustring m_name;      // Sequence name.
-	CSoundFile &m_sndFile;    // Associated CSoundFile.
-	ORDERINDEX m_restartPos;  // Restart position when playback of this order ended
+	mpt::ustring m_name;          // Sequence name.
+	CSoundFile &m_sndFile;        // Associated CSoundFile.
+	ORDERINDEX m_restartPos = 0;  // Restart position when playback of this order ended
 
 public:
 	ModSequence(CSoundFile &sndFile);
@@ -80,9 +80,9 @@ public:
 	void AdjustToNewModType(const MODTYPE oldtype);
 
 	// Returns the internal representation of a stop '---' index
-	static PATTERNINDEX GetInvalidPatIndex() { return uint16_max; }
+	static constexpr PATTERNINDEX GetInvalidPatIndex() { return uint16_max; }
 	// Returns the internal representation of an ignore '+++' index
-	static PATTERNINDEX GetIgnoreIndex() { return uint16_max - 1; }
+	static constexpr PATTERNINDEX GetIgnoreIndex() { return uint16_max - 1; }
 
 	// Returns the previous/next order ignoring skip indices (+++).
 	// If no previous/next order exists, return first/last order, and zero
@@ -130,7 +130,7 @@ class ModSequenceSet
 protected:
 	std::vector<ModSequence> m_Sequences;  // Array of sequences.
 	CSoundFile &m_sndFile;
-	SEQUENCEINDEX m_currentSeq;  // Index of current sequence.
+	SEQUENCEINDEX m_currentSeq = 0;  // Index of current sequence.
 
 public:
 	ModSequenceSet(CSoundFile &sndFile);
@@ -158,9 +158,9 @@ public:
 	void RemoveSequence(SEQUENCEINDEX);
 
 	// Returns the internal representation of a stop '---' index
-	static PATTERNINDEX GetInvalidPatIndex() { return ModSequence::GetInvalidPatIndex(); }
+	static constexpr PATTERNINDEX GetInvalidPatIndex() { return ModSequence::GetInvalidPatIndex(); }
 	// Returns the internal representation of an ignore '+++' index
-	static PATTERNINDEX GetIgnoreIndex() { return ModSequence::GetIgnoreIndex(); }
+	static constexpr PATTERNINDEX GetIgnoreIndex() { return ModSequence::GetIgnoreIndex(); }
 
 #ifdef MODPLUG_TRACKER
 	// Assigns a new set of sequences. The vector contents indicate which existing sequences to keep / duplicate or if a new sequences should be inserted (SEQUENCEINDEX_INVALID)
