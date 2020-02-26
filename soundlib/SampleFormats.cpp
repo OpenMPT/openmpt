@@ -1513,7 +1513,7 @@ struct SFZEnvelope
 	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile, EnvelopeType envType) const
 	{
 		auto &env = ins->GetEnvelope(envType);
-		float tickDuration = sndFile.m_PlayState.m_nSamplesPerTick / static_cast<float>(sndFile.GetSampleRate());
+		const float tickDuration = sndFile.m_PlayState.m_nSamplesPerTick / static_cast<float>(sndFile.GetSampleRate());
 		if(tickDuration <= 0)
 			return;
 		env.clear();
@@ -2008,6 +2008,14 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		region.pitchEnv.ConvertToMPT(pIns, *this, ENV_PITCH);
 		//region.filterEnv.ConvertToMPT(pIns, *this, ENV_PITCH);
 
+		if(region.ampEnv.release > 0)
+		{
+			const float tickDuration = m_PlayState.m_nSamplesPerTick / static_cast<float>(GetSampleRate());
+			pIns->nFadeOut = std::min(mpt::saturate_cast<uint32>(32768.0f * tickDuration / region.ampEnv.release), uint32(32767));
+			if(GetType() == MOD_TYPE_IT)
+				pIns->nFadeOut = std::min((pIns->nFadeOut + 16u) & ~31u, uint32(8192));
+		}
+		
 		sample.rootNote = region.keyRoot + NOTE_MIN;
 		sample.nGlobalVol = mpt::saturate_round<decltype(sample.nGlobalVol)>(64 * std::pow(10.0, region.volume / 20.0));
 		if(region.panning != -128)
@@ -2159,11 +2167,11 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	f << "\nbend_up=" << ins->midiPWD * 100;
 	if(ins->IsCutoffEnabled())
 	{
-		f << "\ncutoff=" << CSoundFile::CutOffToFrequency(ins->GetCutoff());
+		f << "\ncutoff=" << CSoundFile::CutOffToFrequency(ins->GetCutoff()) << " // " << static_cast<int>(ins->GetCutoff());
 	}
 	if(ins->IsResonanceEnabled())
 	{
-		f << "\nresonance=" << Util::muldivr_unsigned(ins->GetResonance(), 24, 128);
+		f << "\nresonance=" << Util::muldivr_unsigned(ins->GetResonance(), 24, 128) << " // " << static_cast<int>(ins->GetResonance());
 	}
 	if(ins->IsCutoffEnabled() || ins->IsResonanceEnabled())
 	{
@@ -2171,11 +2179,17 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	}
 	if(ins->dwFlags[INS_SETPANNING])
 	{
-		f << "\npan=" << (Util::muldivr_unsigned(ins->nPan, 200, 256) - 100);
+		f << "\npan=" << (Util::muldivr_unsigned(ins->nPan, 200, 256) - 100) << " // " << ins->nPan;
 	}
 	if(ins->nGlobalVol != 64)
 	{
-		f << "\nvolume=" << SFZLinear2dB(ins->nGlobalVol / 64.0);
+		f << "\nvolume=" << SFZLinear2dB(ins->nGlobalVol / 64.0) << " // " << ins->nGlobalVol;
+	}
+	if(ins->nFadeOut)
+	{
+		const double tickDuration = m_PlayState.m_nSamplesPerTick / static_cast<double>(m_MixerSettings.gdwMixingFreq);
+		const double time = (32768.0 * tickDuration / ins->nFadeOut);
+		f << "\nampeg_release=" << time << " // " << ins->nFadeOut;
 	}
 
 	size_t numSamples = 0;
@@ -2235,11 +2249,11 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		}
 		if(sample.uFlags[CHN_PANNING])
 		{
-			f << "\npan=" << (Util::muldivr_unsigned(sample.nPan, 200, 256) - 100);
+			f << "\npan=" << (Util::muldivr_unsigned(sample.nPan, 200, 256) - 100) << " // " << sample.nPan;
 		}
 		if(sample.nGlobalVol != 64)
 		{
-			f << "\nvolume=" << SFZLinear2dB((ins->nGlobalVol * sample.nGlobalVol) / 4096.0);
+			f << "\nvolume=" << SFZLinear2dB((ins->nGlobalVol * sample.nGlobalVol) / 4096.0) << " // " << sample.nGlobalVol;
 		}
 		const char *loopMode;
 		SmpLength loopStart = 0, loopEnd = 0;
@@ -2265,7 +2279,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		if(loopStart < loopEnd)
 		{
 			f << "\nloop_start=" << loopStart;
-			f << "\nloop_end=" << loopEnd;
+			f << "\nloop_end=" << (loopEnd - 1);
 			f << "\nloop_type=" << (loopType ? "alternate" : "forward");
 		}
 		if(sample.uFlags.test_all(CHN_SUSTAINLOOP | CHN_LOOP))
