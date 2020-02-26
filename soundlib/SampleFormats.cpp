@@ -2136,6 +2136,27 @@ static double SFZLinear2dB(double volume)
 	return (volume > 0.0 ? 20.0 * std::log10(volume) : -144.0);
 }
 
+static void WriteSFZEnvelope(std::ostream &f, double tickDuration, int index, const InstrumentEnvelope &env, const char *type, double scale, std::function<double(int32)> convFunc)
+{
+	if(!env.dwFlags[ENV_ENABLED] || env.empty())
+		return;
+
+	const auto prefix = mpt::format("\neg%1_")(mpt::fmt::dec0<2>(index));
+	f << "\n" << prefix << type << "=" << scale;
+	f << prefix << "points=" << env.size();
+	double lastTime = 0.0;
+	int nodeIndex = 0;
+	for(const auto &node : env)
+	{
+		double time = (node.tick * tickDuration) - lastTime;
+		lastTime = time;
+		f << prefix << "time" << nodeIndex << "=" << time;
+		f << prefix << "level" << nodeIndex << "=" << convFunc(node.value);
+		nodeIndex++;
+	}
+	f << prefix << "sustain=" << (env.dwFlags[ENV_SUSTAIN] ? env.nSustainStart : (env.size() - 1));
+}
+
 bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, const mpt::PathString &filename, bool useFLACsamples) const
 {
 #ifdef MODPLUG_TRACKER
@@ -2156,13 +2177,31 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		return false;
 	}
 
+	const double tickDuration = m_PlayState.m_nSamplesPerTick / static_cast<double>(m_MixerSettings.gdwMixingFreq);
+
 	if(!ins->name.empty())
 	{
 		f << "// Name: " << mpt::ToCharset(mpt::Charset::UTF8, GetCharsetInternal(), ins->name) << "\n";
 	}
-	f << "// Created with " << mpt::ToCharset(mpt::Charset::UTF8, Version::Current().GetOpenMPTVersionString()) << "\n\n";
+	f << "// Created with " << mpt::ToCharset(mpt::Charset::UTF8, Version::Current().GetOpenMPTVersionString()) << "\n";
+	f << "// Envelope tempo base: tempo " << m_PlayState.m_nMusicTempo.ToDouble();
+	switch(m_nTempoMode)
+	{
+	case tempoModeClassic:
+		f << " (classic tempo mode)";
+		break;
+	case tempoModeAlternative:
+		f << " (alternative tempo mode)";
+		break;
+	case tempoModeModern:
+		f << ", " << m_PlayState.m_nMusicSpeed << " ticks per row, " << m_PlayState.m_nCurrentRowsPerBeat << " rows per beat (modern tempo mode)";
+		break;
+	default:
+		MPT_ASSERT_NOTREACHED();
+		break;
+	}
 
-	f << "<control>\ndefault_path=" << sampleDirName.ToUTF8() << "\n\n";
+	f << "\n\n<control>\ndefault_path=" << sampleDirName.ToUTF8() << "\n\n";
 	f << "<group>";
 	f << "\nbend_up=" << ins->midiPWD * 100;
 	if(ins->IsCutoffEnabled())
@@ -2187,10 +2226,16 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	}
 	if(ins->nFadeOut)
 	{
-		const double tickDuration = m_PlayState.m_nSamplesPerTick / static_cast<double>(m_MixerSettings.gdwMixingFreq);
 		const double time = (32768.0 * tickDuration / ins->nFadeOut);
 		f << "\nampeg_release=" << time << " // " << ins->nFadeOut;
 	}
+
+	WriteSFZEnvelope(f, tickDuration, 1, ins->VolEnv, "amplitude", 144.0, [](int32 val) { return val / static_cast<double>(ENVELOPE_MAX); });
+	WriteSFZEnvelope(f, tickDuration, 2, ins->PanEnv, "pan", 100.0, [](int32 val) { return 2.0 * (val - ENVELOPE_MID) / (ENVELOPE_MAX - ENVELOPE_MIN); });
+	if(ins->PitchEnv.dwFlags[ENV_FILTER])
+		WriteSFZEnvelope(f, tickDuration, 3, ins->PitchEnv, "cutoff", 20000.0, [this](int32 val) { return CSoundFile::CutOffToFrequency(val) / 20000.0; });
+	else
+		WriteSFZEnvelope(f, tickDuration, 3, ins->PitchEnv, "pitch", 1600.0, [](int32 val) { return 2.0 * (val - ENVELOPE_MID) / (ENVELOPE_MAX - ENVELOPE_MIN); });
 
 	size_t numSamples = 0;
 	for(size_t i = 0; i < std::size(ins->Keyboard); i++)
