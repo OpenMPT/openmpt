@@ -836,6 +836,7 @@
     <ClCompile Include="..\..\soundlib\SampleFormatMP3.cpp" />
     <ClCompile Include="..\..\soundlib\SampleFormatMediaFoundation.cpp" />
     <ClCompile Include="..\..\soundlib\SampleFormatOpus.cpp" />
+    <ClCompile Include="..\..\soundlib\SampleFormatSFZ.cpp" />
     <ClCompile Include="..\..\soundlib\SampleFormatVorbis.cpp" />
     <ClCompile Include="..\..\soundlib\SampleFormats.cpp" />
     <ClCompile Include="..\..\soundlib\SampleIO.cpp" />

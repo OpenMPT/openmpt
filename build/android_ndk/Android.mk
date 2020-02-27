@@ -182,6 +182,7 @@ LOCAL_SRC_FILES += \
 	soundlib/SampleFormatMediaFoundation.cpp \
 	soundlib/SampleFormatMP3.cpp \
 	soundlib/SampleFormatOpus.cpp \
+	soundlib/SampleFormatSFZ.cpp \
 	soundlib/SampleFormatVorbis.cpp \
 	soundlib/SampleIO.cpp \
 	soundlib/Sndfile.cpp \

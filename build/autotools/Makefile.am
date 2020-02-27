@@ -289,6 +289,7 @@ MPT_FILES_SOUNDLIB += soundlib/SampleFormatFLAC.cpp
 MPT_FILES_SOUNDLIB += soundlib/SampleFormatMediaFoundation.cpp
 MPT_FILES_SOUNDLIB += soundlib/SampleFormatMP3.cpp
 MPT_FILES_SOUNDLIB += soundlib/SampleFormatOpus.cpp
+MPT_FILES_SOUNDLIB += soundlib/SampleFormatSFZ.cpp
 MPT_FILES_SOUNDLIB += soundlib/SampleFormatVorbis.cpp
 MPT_FILES_SOUNDLIB += soundlib/SampleIO.cpp
 MPT_FILES_SOUNDLIB += soundlib/SampleIO.h

@@ -1024,6 +1024,8 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleFormats.cpp">
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\SampleFormatSFZ.cpp">
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleFormatVorbis.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleIO.cpp">

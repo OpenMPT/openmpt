@@ -719,6 +719,9 @@
     <ClCompile Include="..\..\soundlib\SampleFormatOpus.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\SampleFormatSFZ.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleFormatVorbis.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
