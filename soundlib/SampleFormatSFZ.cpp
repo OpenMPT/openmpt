@@ -17,6 +17,7 @@
 #include "../common/mptFileIO.h"
 #endif // !MODPLUG_NO_FILESAVE
 #include "modsmp_ctrl.h"
+#include <functional>
 
 
 OPENMPT_NAMESPACE_BEGIN
