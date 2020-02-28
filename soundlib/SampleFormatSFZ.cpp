@@ -17,13 +17,10 @@
 #include "../common/mptFileIO.h"
 #endif // !MODPLUG_NO_FILESAVE
 #include "modsmp_ctrl.h"
+
 #include <functional>
 
-
 OPENMPT_NAMESPACE_BEGIN
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// SFZ Instrument
 
 #ifdef MPT_EXTERNAL_SAMPLES
 
@@ -319,18 +316,18 @@ struct SFZRegion
 	double loopCrossfade = 0.0;
 	LoopMode loopMode = LoopMode::kUnspecified;
 	LoopType loopType = LoopType::kUnspecified;
-	int32 cutoff = 0;			// in Hz
-	int32 filterRandom = 0;		// 0...9600 cents
-	int16 volume = 0;			// -144dB...+6dB
-	int16 pitchBend = 200;		// -9600...9600 cents
-	float pitchLfoFade = 0;		// 0...100 seconds
-	int16 pitchLfoDepth = 0;	// -1200...12000
-	uint8 pitchLfoFreq = 0;		// 0...20 Hz
-	int8 panning = -128;		// -100...+100
+	int32 cutoff = 0;         // in Hz
+	int32 filterRandom = 0;   // 0...9600 cents
+	int16 volume = 0;         // -144dB...+6dB
+	int16 pitchBend = 200;    // -9600...9600 cents
+	float pitchLfoFade = 0;   // 0...100 seconds
+	int16 pitchLfoDepth = 0;  // -1200...12000
+	uint8 pitchLfoFreq = 0;   // 0...20 Hz
+	int8 panning = -128;      // -100...+100
 	int8 transpose = 0;
 	int8 finetune = 0;
 	uint8 keyLo = 0, keyHi = 127, keyRoot = 60;
-	uint8 resonance = 0;		// 0...40dB
+	uint8 resonance = 0;  // 0...40dB
 	InstrFilterMode filterType = FLTMODE_UNCHANGED;
 	uint8 polyphony = 255;
 	bool useSampleKeyRoot = false;
@@ -541,9 +538,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			}
 
 			if(s.empty())
-			{
 				break;
-			}
 
 			std::string::size_type charsRead = 0;
 
@@ -582,14 +577,19 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			} else if(SFZStartsWith(s, "#define ") || SFZStartsWith(s, "#define\t"))
 			{
 				// Macro definition
+				charsRead += 8;
 				auto keyStart = s.find_first_not_of(" \t", 8);
 				auto keyEnd = s.find_first_of(" \t", keyStart);
 				auto valueStart = s.find_first_not_of(" \t", keyEnd);
-				const auto key = s.substr(keyStart, keyEnd - keyStart);
-				if(valueStart != std::string::npos && key.length() > 1 && key[0] == '$')
+				if(valueStart != std::string::npos)
 				{
 					charsRead = s.find_first_of(" \t", valueStart);
-					macros[key] = s.substr(valueStart, charsRead - valueStart);
+					const auto key = s.substr(keyStart, keyEnd - keyStart);
+					if(key.length() > 1 && key[0] == '$')
+						macros[std::move(key)] = s.substr(valueStart, charsRead - valueStart);
+				} else if (keyEnd != std::string::npos)
+				{
+					charsRead = keyEnd;
 				}
 			} else if(SFZStartsWith(s, "#include ") || SFZStartsWith(s, "#include\t"))
 			{
