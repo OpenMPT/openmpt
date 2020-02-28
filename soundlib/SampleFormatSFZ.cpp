@@ -207,57 +207,34 @@ struct SFZFlexEG
 	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile) const
 	{
 		if(amplitude)
-			ConvertToMPT(ins, sndFile, ENV_VOLUME);
+			ConvertToMPT(ins, sndFile, ENV_VOLUME, amplitude / 100.0f, 0.0f, 1.0f);
 		if(pan)
-			ConvertToMPT(ins, sndFile, ENV_PANNING);
+			ConvertToMPT(ins, sndFile, ENV_PANNING, pan / 100.0f, -1.0f, 1.0f);
 		if(pitch)
-			ConvertToMPT(ins, sndFile, ENV_PITCH);
+			ConvertToMPT(ins, sndFile, ENV_PITCH, pitch / 1600.0f, -1.0f, 1.0f);
 		if(cutoff)
-			ConvertToMPT(ins, sndFile, ENV_PITCH, true);
+			ConvertToMPT(ins, sndFile, ENV_PITCH, cutoff, 0.0f, 1.0f, true);
 	}
 
-	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile, EnvelopeType envType, bool forceFilter = false) const
+	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile, EnvelopeType envType, float scale, float minVal, float maxVal, bool forceFilter = false) const
 	{
-		auto &env = ins->GetEnvelope(envType);
 		const float tickDuration = sndFile.m_PlayState.m_nSamplesPerTick / static_cast<float>(sndFile.GetSampleRate());
-		if(tickDuration <= 0 || points.empty())
+		if(tickDuration <= 0 || points.empty() || scale == 0.0f)
 			return;
 
+		auto &env = ins->GetEnvelope(envType);
 		std::function<float(float)> conversionFunc = [](float v) { return v; };
-		float scale = 0.0f, minVal = 0.0f, maxVal = 1.0f;
 		const auto envBaseCutoff = ins->IsCutoffEnabled() ? ins->GetCutoff() : 127;
 		const auto envBaseFreq = sndFile.CutOffToFrequency(envBaseCutoff);
-		switch(envType)
+		if(forceFilter && envType == ENV_PITCH)
 		{
-		case ENV_VOLUME:
-			scale = amplitude / 100.0f;
-			break;
-		case ENV_PANNING:
-			scale = pan / 100.0f;
-			minVal = -1.0f;
-			break;
-		case ENV_PITCH:
-			if(forceFilter)
-			{
-				scale = cutoff;
-				conversionFunc = [&sndFile, envBaseCutoff, envBaseFreq](float v) {
-					// Convert from cents
-					const auto freq = envBaseFreq * std::pow(2.0f, v / 1200.0f);
-					return Util::muldivr(sndFile.FrequencyToCutOff(freq), 127, envBaseCutoff) / 127.0f;
-				};
-			} else
-			{
-				scale = pitch / 1600.0f;
-				minVal = -1.0f;
-			}
-			break;
-		default:
-			MPT_ASSERT_NOTREACHED();
-			break;
+			env.dwFlags.set(ENV_FILTER);
+			conversionFunc = [&sndFile, envBaseCutoff, envBaseFreq](float v) {
+				// Convert from cents
+				const auto freq = envBaseFreq * std::pow(2.0f, v / 1200.0f);
+				return Util::muldivr(sndFile.FrequencyToCutOff(freq), 127, envBaseCutoff) / 127.0f;
+			};
 		}
-
-		if(scale == 0.0f)
-			return;
 
 		env.clear();
 		env.reserve(points.size());
@@ -272,8 +249,8 @@ struct SFZFlexEG
 
 		for(const auto &point : points)
 		{
-			auto tick = static_cast<EnvelopeNode::tick_t>(prevTick + SFZEnvelope::ToTicks(point.first, tickDuration));
-			auto value = ToValue(point.second, scale, minVal, maxVal, conversionFunc);
+			const auto tick = static_cast<EnvelopeNode::tick_t>(prevTick + SFZEnvelope::ToTicks(point.first, tickDuration));
+			const auto value = ToValue(point.second, scale, minVal, maxVal, conversionFunc);
 			env.push_back({ tick, value });
 			prevTick = tick;
 		}
@@ -284,8 +261,6 @@ struct SFZFlexEG
 			env.dwFlags.set(ENV_SUSTAIN);
 		}
 		env.dwFlags.set(ENV_ENABLED);
-		if(envType == ENV_PITCH && forceFilter)
-			env.dwFlags.set(ENV_FILTER);
 	}
 };
 
@@ -491,22 +466,54 @@ struct SFZRegion
 	}
 };
 
+struct SFZIncludeFile
+{
+	FileReader file;
+	std::unique_ptr<InputFile> inputFile; // FileReader has pointers into this so its address must not change
+	std::string remain;
+
+	SFZIncludeFile(FileReader f = {}, std::unique_ptr<InputFile> i = {}, std::string r = {})
+		: file{std::move(f)}, inputFile{std::move(i)}, remain{std::move(r)} {}
+	SFZIncludeFile(SFZIncludeFile &&) = default;
+};
+
 bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 {
 	file.Rewind();
 
-	enum { kNone, kGlobal, kMaster, kGroup, kRegion, kControl, kCurve, kUnknown } section = kNone;
+	enum { kNone, kGlobal, kMaster, kGroup, kRegion, kControl, kCurve, kEffect, kUnknown } section = kNone;
+	bool inMultiLineComment = false;
 	SFZControl control;
 	SFZRegion group, master, globals;
 	std::vector<SFZRegion> regions;
 	std::map<std::string, std::string> macros;
+	std::vector<SFZIncludeFile> files;
+	files.emplace_back(file);
 
 	std::string s;
-	while(file.ReadLine(s, 1024))
+	while(!files.empty())
 	{
+		if(!files.back().file.ReadLine(s, 1024))
+		{
+			// Finished reading file, so back to remaining characters of the #include line from the previous file
+			s = std::move(files.back().remain);
+			files.pop_back();
+		}
+
+		if(inMultiLineComment)
+		{
+			if(auto commentEnd = s.find("*/"); commentEnd != std::string::npos)
+			{
+				s.erase(0, commentEnd + 2);
+				inMultiLineComment = false;
+			} else
+			{
+				continue;
+			}
+		}
+
 		// First, terminate line at the start of a comment block
-		auto commentPos = s.find("//");
-		if(commentPos != std::string::npos)
+		if(auto commentPos = s.find("//"); commentPos != std::string::npos)
 		{
 			s.resize(commentPos);
 		}
@@ -572,6 +579,9 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				} else if(sec == "curve")
 				{
 					section = kCurve;
+				} else if(sec == "effect")
+				{
+					section = kEffect;
 				}
 				charsRead++;
 			} else if(SFZStartsWith(s, "#define ") || SFZStartsWith(s, "#define\t"))
@@ -587,21 +597,53 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 					const auto key = s.substr(keyStart, keyEnd - keyStart);
 					if(key.length() > 1 && key[0] == '$')
 						macros[std::move(key)] = s.substr(valueStart, charsRead - valueStart);
-				} else if (keyEnd != std::string::npos)
+				} else
 				{
-					charsRead = keyEnd;
+					charsRead = s.length();
 				}
 			} else if(SFZStartsWith(s, "#include ") || SFZStartsWith(s, "#include\t"))
 			{
-				AddToLog(LogWarning, U_("#include directive is not supported."));
-				auto fileStart = s.find("\"", 9);	// Yes, there can be arbitrary characters before the opening quote, at least that's how sforzando does it.
+				// Include other sfz file
+				auto fileStart = s.find("\"", 9);  // Yes, there can be arbitrary characters before the opening quote, at least that's how sforzando does it.
 				auto fileEnd = s.find("\"", fileStart + 1);
 				if(fileStart != std::string::npos && fileEnd != std::string::npos)
 				{
 					charsRead = fileEnd + 1;
+					fileStart++;
 				} else
 				{
-					return false;
+					charsRead = s.length();
+				}
+
+				std::string filenameU8 = s.substr(fileStart, fileEnd - fileStart);
+				mpt::PathString filename = mpt::PathString::FromUTF8(filenameU8);
+				if(!filename.empty())
+				{
+					if(filenameU8.find(':') == std::string::npos)
+					{
+						filename = file.GetFileName().GetPath() + filename;
+					}
+					auto f = std::make_unique<InputFile>(filename);
+					if(f->IsValid())
+					{
+						files.emplace_back(GetFileReader(*f), std::move(f), s.substr(charsRead));
+						s.clear();
+						break;
+					} else
+					{
+						AddToLog(LogWarning, U_("Unable to load include file: ") + filename.ToUnicode());
+					}
+				}
+			} else if(SFZStartsWith(s, "/*"))
+			{
+				// Multi-line comment
+				if(auto commentEnd = s.find("*/", charsRead + 2); commentEnd != std::string::npos)
+				{
+					charsRead = commentEnd;
+				} else
+				{
+					inMultiLineComment = true;
+					charsRead = s.length();
 				}
 			} else if(section == kNone)
 			{
@@ -908,6 +950,13 @@ static void WriteSFZEnvelope(std::ostream &f, double tickDuration, int index, co
 		nodeIndex++;
 	}
 	f << prefix << "sustain=" << (env.dwFlags[ENV_SUSTAIN] ? env.nSustainStart : (env.size() - 1));
+
+	if(env.dwFlags[ENV_LOOP])
+		f << "\n// Loop: " << static_cast<uint32>(env.nLoopStart) << "-" << static_cast<uint32>(env.nLoopEnd);
+	if(env.dwFlags[ENV_LOOP])
+		f << "\n// Sustain Loop: " << static_cast<uint32>(env.nSustainStart) << "-" << static_cast<uint32>(env.nSustainEnd);
+	if(env.nReleaseNode != ENV_RELEASE_NODE_UNSET)
+		f << "\n// Release Node: " << static_cast<uint32>(env.nReleaseNode);
 }
 
 bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, const mpt::PathString &filename, bool useFLACsamples) const
@@ -959,43 +1008,30 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	f << "<group>";
 	f << "\nbend_up=" << ins->midiPWD * 100;
 	const uint32 cutoff = ins->IsCutoffEnabled() ? ins->GetCutoff() : 127;
+	// If filter envelope is active but cutoff is not set, we still need to set the base cutoff frequency to be modulated by the envelope.
 	if(ins->IsCutoffEnabled() || ins->PitchEnv.dwFlags[ENV_FILTER])
-	{
-		// If filter envelope is active but cutoff is not set, we still need to set the base cutoff frequency to be modulated by the envelope.
 		f << "\ncutoff=" << CSoundFile::CutOffToFrequency(cutoff) << " // " << cutoff;
-	}
 	if(ins->IsResonanceEnabled())
-	{
 		f << "\nresonance=" << Util::muldivr_unsigned(ins->GetResonance(), 24, 128) << " // " << static_cast<int>(ins->GetResonance());
-	}
 	if(ins->IsCutoffEnabled() || ins->IsResonanceEnabled())
-	{
 		f << "\nfil_type=" << (ins->nFilterMode == FLTMODE_HIGHPASS ? "hpf_2p" : "lpf_2p");
-	}
 	if(ins->dwFlags[INS_SETPANNING])
-	{
 		f << "\npan=" << (Util::muldivr_unsigned(ins->nPan, 200, 256) - 100) << " // " << ins->nPan;
-	}
 	if(ins->nGlobalVol != 64)
-	{
 		f << "\nvolume=" << SFZLinear2dB(ins->nGlobalVol / 64.0) << " // " << ins->nGlobalVol;
-	}
 	if(ins->nFadeOut)
-	{
-		const double time = (32768.0 * tickDuration / ins->nFadeOut);
-		f << "\nampeg_release=" << time << " // " << ins->nFadeOut;
-	}
+		f << "\nampeg_release=" << (32768.0 * tickDuration / ins->nFadeOut) << " // " << ins->nFadeOut;
 
 	WriteSFZEnvelope(f, tickDuration, 1, ins->VolEnv, "amplitude", 100.0, [](int32 val) { return val / static_cast<double>(ENVELOPE_MAX); });
 	WriteSFZEnvelope(f, tickDuration, 2, ins->PanEnv, "pan", 100.0, [](int32 val) { return 2.0 * (val - ENVELOPE_MID) / (ENVELOPE_MAX - ENVELOPE_MIN); });
 	if(ins->PitchEnv.dwFlags[ENV_FILTER])
 	{
-		const auto envScale = 1200.0 * std::log(CutOffToFrequency(127, 256) / static_cast<double>(CutOffToFrequency(0, -256))) / std::log(2.0);
+		const auto envScale = 1200.0 * std::log(CutOffToFrequency(127, 256) / static_cast<double>(CutOffToFrequency(0, -256))) / M_LN2;
 		const auto cutoffNormal = CutOffToFrequency(cutoff);
 		WriteSFZEnvelope(f, tickDuration, 3, ins->PitchEnv, "cutoff", envScale, [this, cutoff, cutoffNormal, envScale](int32 val) {
 			// Convert interval between center frequency and envelope into cents
-			auto freq = CutOffToFrequency(cutoff, (val - ENVELOPE_MID) * 256 / (ENVELOPE_MAX - ENVELOPE_MID));
-			return 1200.0 * std::log(freq / static_cast<double>(cutoffNormal)) / std::log(2.0) / envScale;
+			const auto freq = CutOffToFrequency(cutoff, (val - ENVELOPE_MID) * 256 / (ENVELOPE_MAX - ENVELOPE_MID));
+			return 1200.0 * std::log(freq / static_cast<double>(cutoffNormal)) / M_LN2 / envScale;
 		});
 	} else
 	{
@@ -1063,20 +1099,13 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		f << "\nlokey=" << i;
 		f << "\nhikey=" << endOfRegion;
 		if(sample.rootNote != NOTE_NONE)
-		{
 			f << "\npitch_keycenter=" << sample.rootNote - NOTE_MIN;
-		} else
-		{
+		else
 			f << "\npitch_keycenter=" << NOTE_MIDDLEC + i - ins->NoteMap[i];
-		}
 		if(sample.uFlags[CHN_PANNING])
-		{
 			f << "\npan=" << (Util::muldivr_unsigned(sample.nPan, 200, 256) - 100) << " // " << sample.nPan;
-		}
 		if(sample.nGlobalVol != 64)
-		{
 			f << "\nvolume=" << SFZLinear2dB((ins->nGlobalVol * sample.nGlobalVol) / 4096.0) << " // " << sample.nGlobalVol;
-		}
 		const char *loopMode;
 		SmpLength loopStart = 0, loopEnd = 0;
 		bool loopType = false;
