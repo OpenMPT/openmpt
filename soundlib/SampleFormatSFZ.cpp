@@ -90,19 +90,29 @@ struct SFZEnvelope
 		return std::max(EnvelopeNode::tick_t(1), mpt::saturate_round<EnvelopeNode::tick_t>(duration / tickDuration));
 	}
 
-	EnvelopeNode::value_t ToValue(float value, EnvelopeType envType) const
+	static EnvelopeNode::value_t ToValue(float value, float scale, float minVal, float maxVal, const std::function<float(float)> &conversionFunc)
 	{
-		value *= (ENVELOPE_MAX / 100.0f);
-		if(envType == ENV_PITCH)
-		{
-			value *= depth / 3200.0f;
-			value += ENVELOPE_MID;
-		}
+		value = conversionFunc((value * scale - minVal) / (maxVal - minVal)) * ENVELOPE_MAX + ENVELOPE_MIN;
 		Limit<float, float>(value, ENVELOPE_MIN, ENVELOPE_MAX);
 		return mpt::saturate_round<EnvelopeNode::value_t>(value);
 	}
 
-	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile, EnvelopeType envType) const
+	static float Identity(float v) noexcept { return v; }
+
+	static float CentsToFilterCutoff(float v, const CSoundFile &sndFile, int envBaseCutoff, uint32 envBaseFreq)
+	{
+		const auto freq = envBaseFreq * std::pow(2.0f, v / 1200.0f);
+		return Util::muldivr(sndFile.FrequencyToCutOff(freq), 127, envBaseCutoff) / 127.0f;
+	}
+
+	static std::function<float(float)> FilterConversionFunc(const ModInstrument &ins, const CSoundFile &sndFile)
+	{
+		const auto envBaseCutoff = ins.IsCutoffEnabled() ? ins.GetCutoff() : 127;
+		const auto envBaseFreq = sndFile.CutOffToFrequency(envBaseCutoff);
+		return std::bind(SFZEnvelope::CentsToFilterCutoff, std::placeholders::_1, std::cref(sndFile), envBaseCutoff, envBaseFreq);
+	}
+
+	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile, EnvelopeType envType, bool forceFilter = false) const
 	{
 		auto &env = ins->GetEnvelope(envType);
 		const float tickDuration = sndFile.m_PlayState.m_nSamplesPerTick / static_cast<float>(sndFile.GetSampleRate());
@@ -114,22 +124,38 @@ struct SFZEnvelope
 			env.dwFlags.reset(ENV_SUSTAIN | ENV_ENABLED);
 			return;
 		}
+
+		float scale = 1.0f / 100.0f, minVal = 0.0f, maxVal = 1.0f;
+		std::function<float(float)> conversionFunc = Identity;
+		if(forceFilter && envType == ENV_PITCH)
+		{
+			env.dwFlags.set(ENV_FILTER);
+			conversionFunc = FilterConversionFunc(*ins, sndFile);
+			scale *= depth;
+		} else if (envType == ENV_PITCH)
+		{
+			scale *= depth / 1600.0f;
+			minVal = -1.0f;
+		}
+
+		const auto ToValue = std::bind(SFZEnvelope::ToValue, std::placeholders::_1, scale, minVal, maxVal, conversionFunc);
+
 		if(attack > 0 || delay > 0)
 		{
-			env.push_back(0, ToValue(startLevel, envType));
+			env.push_back(0, ToValue(startLevel));
 			if(delay > 0)
 				env.push_back(ToTicks(delay, tickDuration), env.back().value);
-			env.push_back(env.back().tick + ToTicks(attack, tickDuration), ToValue(100, envType));
+			env.push_back(env.back().tick + ToTicks(attack, tickDuration), ToValue(100.0f));
 		}
 		if(hold > 0)
 		{
 			if(env.empty())
-				env.push_back(0, ToValue(100, envType));
+				env.push_back(0, ToValue(100.0f));
 			env.push_back(env.back().tick + ToTicks(hold, tickDuration), env.back().value);
 		}
 		if(env.empty())
-			env.push_back(0, ToValue(100, envType));
-		auto sustain = ToValue(sustainLevel, envType);
+			env.push_back(0, ToValue(100.0f));
+		auto sustain = ToValue(sustainLevel);
 		if(env.back().value != sustain)
 			env.push_back(env.back().tick + ToTicks(decay, tickDuration), sustain);
 		env.nSustainStart = env.nSustainEnd = static_cast<uint8>(env.size() - 1);
@@ -137,7 +163,7 @@ struct SFZEnvelope
 		{
 			if(envType == ENV_VOLUME && env.nSustainEnd > 0)
 				env.nReleaseNode = env.nSustainEnd;
-			env.push_back(env.back().tick + ToTicks(release, tickDuration), ToValue(0, envType));
+			env.push_back(env.back().tick + ToTicks(release, tickDuration), ToValue(0.0f));
 			env.dwFlags.set(ENV_SUSTAIN);
 		}
 		env.dwFlags.set(ENV_ENABLED);
@@ -197,13 +223,6 @@ struct SFZFlexEG
 			cutoff = v;
 	}
 
-	static EnvelopeNode::value_t ToValue(float value, float scale, float minVal, float maxVal, const std::function<float(float)> &conversionFunc)
-	{
-		value = conversionFunc((value * scale - minVal) / (maxVal - minVal)) * ENVELOPE_MAX + ENVELOPE_MIN;
-		Limit<float, float>(value, ENVELOPE_MIN, ENVELOPE_MAX);
-		return mpt::saturate_round<EnvelopeNode::value_t>(value);
-	}
-
 	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile) const
 	{
 		if(amplitude)
@@ -223,34 +242,30 @@ struct SFZFlexEG
 			return;
 
 		auto &env = ins->GetEnvelope(envType);
-		std::function<float(float)> conversionFunc = [](float v) { return v; };
-		const auto envBaseCutoff = ins->IsCutoffEnabled() ? ins->GetCutoff() : 127;
-		const auto envBaseFreq = sndFile.CutOffToFrequency(envBaseCutoff);
+		std::function<float(float)> conversionFunc = SFZEnvelope::Identity;
 		if(forceFilter && envType == ENV_PITCH)
 		{
 			env.dwFlags.set(ENV_FILTER);
-			conversionFunc = [&sndFile, envBaseCutoff, envBaseFreq](float v) {
-				// Convert from cents
-				const auto freq = envBaseFreq * std::pow(2.0f, v / 1200.0f);
-				return Util::muldivr(sndFile.FrequencyToCutOff(freq), 127, envBaseCutoff) / 127.0f;
-			};
+			conversionFunc = SFZEnvelope::FilterConversionFunc(*ins, sndFile);
 		}
 
 		env.clear();
 		env.reserve(points.size());
 
+		const auto ToValue = std::bind(SFZEnvelope::ToValue, std::placeholders::_1, scale, minVal, maxVal, conversionFunc);
+
 		int32 prevTick = -1;
 		// If the first envelope point's time is greater than 0, we fade in from a neutral value
 		if(points.front().first > 0)
 		{
-			env.push_back({0, ToValue(0.0f, scale, minVal, maxVal, conversionFunc)});
+			env.push_back({0, ToValue(0.0f)});
 			prevTick = 0;
 		}
 
 		for(const auto &point : points)
 		{
 			const auto tick = static_cast<EnvelopeNode::tick_t>(prevTick + SFZEnvelope::ToTicks(point.first, tickDuration));
-			const auto value = ToValue(point.second, scale, minVal, maxVal, conversionFunc);
+			const auto value = ToValue(point.second);
 			env.push_back({ tick, value });
 			prevTick = tick;
 		}
@@ -469,7 +484,7 @@ struct SFZRegion
 struct SFZIncludeFile
 {
 	FileReader file;
-	std::unique_ptr<InputFile> inputFile; // FileReader has pointers into this so its address must not change
+	std::unique_ptr<InputFile> inputFile;  // FileReader has pointers into this so its address must not change
 	std::string remain;
 
 	SFZIncludeFile(FileReader f = {}, std::unique_ptr<InputFile> i = {}, std::string r = {})
@@ -533,14 +548,19 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		{
 			s.erase(0, s.find_first_not_of(" \t"));
 
-			// Replace macros
-			for(const auto &[oldStr, newStr] : macros)
+			const bool isDefine = SFZStartsWith(s, "#define ") || SFZStartsWith(s, "#define\t");
+
+			// Replace macros (unless this is a #define statement, to allow for macro re-definition)
+			if(!isDefine)
 			{
-				std::string::size_type pos = 0;
-				while((pos = s.find(oldStr, pos)) != std::string::npos)
+				for(const auto &[oldStr, newStr] : macros)
 				{
-					s.replace(pos, oldStr.length(), newStr);
-					pos += newStr.length();
+					std::string::size_type pos = 0;
+					while((pos = s.find(oldStr, pos)) != std::string::npos)
+					{
+						s.replace(pos, oldStr.length(), newStr);
+						pos += newStr.length();
+					}
 				}
 			}
 
@@ -584,7 +604,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 					section = kEffect;
 				}
 				charsRead++;
-			} else if(SFZStartsWith(s, "#define ") || SFZStartsWith(s, "#define\t"))
+			} else if(isDefine)
 			{
 				// Macro definition
 				charsRead += 8;
@@ -795,8 +815,10 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			pIns->nDCT = DCT_SAMPLE;
 		}
 		region.ampEnv.ConvertToMPT(pIns, *this, ENV_VOLUME);
-		region.pitchEnv.ConvertToMPT(pIns, *this, ENV_PITCH);
-		//region.filterEnv.ConvertToMPT(pIns, *this, ENV_PITCH);
+		if(region.pitchEnv.depth)
+			region.pitchEnv.ConvertToMPT(pIns, *this, ENV_PITCH);
+		else
+			region.filterEnv.ConvertToMPT(pIns, *this, ENV_PITCH, true);
 
 		for(const auto &flexEG : region.flexEGs)
 		{
