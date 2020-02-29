@@ -486,15 +486,15 @@ struct SFZRegion
 	}
 };
 
-struct SFZIncludeFile
+struct SFZInputFile
 {
 	FileReader file;
 	std::unique_ptr<InputFile> inputFile;  // FileReader has pointers into this so its address must not change
 	std::string remain;
 
-	SFZIncludeFile(FileReader f = {}, std::unique_ptr<InputFile> i = {}, std::string r = {})
+	SFZInputFile(FileReader f = {}, std::unique_ptr<InputFile> i = {}, std::string r = {})
 		: file{std::move(f)}, inputFile{std::move(i)}, remain{std::move(r)} {}
-	SFZIncludeFile(SFZIncludeFile &&) = default;
+	SFZInputFile(SFZInputFile &&) = default;
 };
 
 bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
@@ -507,7 +507,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	SFZRegion group, master, globals;
 	std::vector<SFZRegion> regions;
 	std::map<std::string, std::string> macros;
-	std::vector<SFZIncludeFile> files;
+	std::vector<SFZInputFile> files;
 	files.emplace_back(file);
 
 	std::string s;
@@ -645,18 +645,24 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				if(!filename.empty())
 				{
 					if(filenameU8.find(':') == std::string::npos)
-					{
 						filename = file.GetFileName().GetPath() + filename;
-					}
-					auto f = std::make_unique<InputFile>(filename);
-					if(f->IsValid())
+					filename = filename.Simplify();
+					// Avoid recursive #include
+					if(std::find_if(files.begin(), files.end(), [&filename](const SFZInputFile &f) { return f.file.GetFileName() == filename; }) == files.end())
 					{
-						files.emplace_back(GetFileReader(*f), std::move(f), s.substr(charsRead));
-						s.clear();
-						break;
+						auto f = std::make_unique<InputFile>(filename);
+						if(f->IsValid())
+						{
+							files.emplace_back(GetFileReader(*f), std::move(f), s.substr(charsRead));
+							s.clear();
+							break;
+						} else
+						{
+							AddToLog(LogWarning, U_("Unable to load include file: ") + filename.ToUnicode());
+						}
 					} else
 					{
-						AddToLog(LogWarning, U_("Unable to load include file: ") + filename.ToUnicode());
+						AddToLog(LogWarning, U_("Recursive include file ignored: ") + filename.ToUnicode());
 					}
 				}
 			} else if(SFZStartsWith(s, "/*"))
@@ -815,13 +821,12 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				continue;
 			}
 			if(!region.name.empty())
-			{
 				m_szNames[smp] = mpt::ToCharset(GetCharsetInternal(), mpt::Charset::UTF8, region.name);
-			}
 			if(!m_szNames[smp][0])
-			{
 				m_szNames[smp] = filename.GetFileName().ToLocale();
-			}
+
+			if(UseFinetuneAndTranspose())
+				sample.TransposeToFrequency();
 		}
 		sample.uFlags.set(SMP_KEEPONDISK, sample.HasSampleData());
 
@@ -878,7 +883,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		}
 		
 		sample.rootNote = region.keyRoot + NOTE_MIN;
-		sample.nGlobalVol = mpt::saturate_round<decltype(sample.nGlobalVol)>(64 * std::pow(10.0, region.volume / 20.0));
+		sample.nGlobalVol = mpt::saturate_round<decltype(sample.nGlobalVol)>(64 * Clamp(std::pow(10.0, region.volume / 20.0), 0.0, 1.0));
 		if(region.panning != -128)
 		{
 			sample.nPan = mpt::saturate_round<decltype(sample.nPan)>((region.panning + 100) * 256.0 / 200.0);
@@ -1079,6 +1084,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	f << "\n\n<control>\ndefault_path=" << sampleDirName.ToUTF8() << "\n\n";
 	f << "<group>";
 	f << "\nbend_up=" << ins->midiPWD * 100;
+	f << "\nbend_down=" << -ins->midiPWD * 100;
 	const uint32 cutoff = ins->IsCutoffEnabled() ? ins->GetCutoff() : 127;
 	// If filter envelope is active but cutoff is not set, we still need to set the base cutoff frequency to be modulated by the envelope.
 	if(ins->IsCutoffEnabled() || ins->PitchEnv.dwFlags[ENV_FILTER])
