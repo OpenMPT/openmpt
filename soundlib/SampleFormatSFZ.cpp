@@ -299,6 +299,7 @@ struct SFZRegion
 		kAlternate,
 	};
 
+	size_t filenameOffset = 0;
 	std::string filename, name;
 	SFZEnvelope ampEnv, pitchEnv, filterEnv;
 	std::vector<SFZFlexEG> flexEGs;
@@ -385,7 +386,10 @@ struct SFZRegion
 	void Parse(const std::string_view key, const std::string &value, const SFZControl &control)
 	{
 		if(key == "sample")
+		{
 			filename = control.defaultPath + value;
+			filenameOffset = control.defaultPath.size();
+		}
 		else if(key == "region_label")
 			name = value;
 		else if(key == "lokey")
@@ -751,8 +755,47 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		prevSmp = smp;
 
 		ModSample &sample = Samples[smp];
-		mpt::PathString filename = mpt::PathString::FromUTF8(region.filename);
-		if(!filename.empty())
+		if(const auto synthSample = std::string_view(region.filename).substr(region.filenameOffset); SFZStartsWith(synthSample, "*"))
+		{
+			sample.nLength = 256;
+			sample.nC5Speed = mpt::saturate_round<uint32>(sample.nLength * 261.6255653);
+			sample.uFlags.set(CHN_16BIT);
+			std::function<uint16(int32)> generator;
+			if(synthSample == "*sine")
+				generator = [](int32 i) { return mpt::saturate_round<int16>(std::sin(i * 2.0 * M_PI / 256.0) * int16_max); };
+			else if(synthSample == "*square")
+				generator = [](int32 i) { return i < 128 ? int16_max : int16_min; };
+			else if(synthSample == "*triangle")
+				generator = [](int32 i) { return static_cast<int16>(i < 128 ? ((63 - i) * 512) : ((i - 192) * 512)); };
+			else if(synthSample == "*saw")
+				generator = [](int32 i) { return static_cast<int16>((i - 128) * 256); };
+			else if(synthSample == "*silence")
+				generator = [](int32) { return int16(0); };
+			else if(synthSample == "*noise")
+			{
+				sample.nLength = sample.nC5Speed;
+				generator = [this](int32) { return mpt::random<int16>(AccessPRNG()); };
+			} else
+			{
+				AddToLog(LogWarning, U_("Unknown sample type: ") + mpt::ToUnicode(mpt::Charset::UTF8, std::string(synthSample)));
+				prevSmp--;
+				continue;
+			}
+			if(sample.AllocateSample())
+			{
+				for(SmpLength i = 0; i < sample.nLength; i++)
+				{
+					sample.sample16()[i] = generator(static_cast<int32>(i));
+				}
+				if(smp > m_nSamples)
+					m_nSamples = smp;
+				region.offset = 0;
+				region.loopMode = SFZRegion::LoopMode::kContinuous;
+				region.loopStart = 0;
+				region.loopEnd = sample.nLength - 1;
+				region.loopCrossfade = 0;
+			}
+		} else if(auto filename = mpt::PathString::FromUTF8(region.filename); !filename.empty())
 		{
 			if(region.filename.find(':') == std::string::npos)
 			{
