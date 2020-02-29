@@ -40,7 +40,7 @@ struct SFZControl
 	std::string defaultPath;
 	int8 octaveOffset = 0, noteOffset = 0;
 
-	void Parse(const std::string &key, const std::string &value)
+	void Parse(const std::string_view key, const std::string &value)
 	{
 		if(key == "default_path")
 			defaultPath = value;
@@ -53,19 +53,19 @@ struct SFZControl
 
 struct SFZEnvelope
 {
-	float startLevel = 0, delay = 0, attack = 0, hold = 0,
+	double startLevel = 0, delay = 0, attack = 0, hold = 0,
 		decay = 0, sustainLevel = 100, release = 0, depth = 0;
 
 	void Parse(std::string_view key, const std::string &value)
 	{
 		key = key.substr(key.find('_') + 1);
-		float v = ConvertStrTo<float>(value);
+		double v = ConvertStrTo<double>(value);
 		if(key == "depth")
-			Limit(v, -12000.0f, 12000.0f);
+			Limit(v, -12000.0, 12000.0);
 		else if(key == "start" || key == "sustain")
-			Limit(v, -100.0f, 100.0f);
+			Limit(v, -100.0, 100.0);
 		else
-			Limit(v, 0.0f, 100.0f);
+			Limit(v, 0.0, 100.0);
 
 		if(key == "start")
 			startLevel = v;
@@ -85,27 +85,27 @@ struct SFZEnvelope
 			depth = v;
 	}
 
-	static EnvelopeNode::tick_t ToTicks(float duration, float tickDuration)
+	static EnvelopeNode::tick_t ToTicks(double duration, double tickDuration)
 	{
 		return std::max(EnvelopeNode::tick_t(1), mpt::saturate_round<EnvelopeNode::tick_t>(duration / tickDuration));
 	}
 
-	static EnvelopeNode::value_t ToValue(float value, float scale, float minVal, float maxVal, const std::function<float(float)> &conversionFunc)
+	static EnvelopeNode::value_t ToValue(double value, double scale, double minVal, double maxVal, const std::function<double(double)> &conversionFunc)
 	{
 		value = conversionFunc((value * scale - minVal) / (maxVal - minVal)) * ENVELOPE_MAX + ENVELOPE_MIN;
-		Limit<float, float>(value, ENVELOPE_MIN, ENVELOPE_MAX);
+		Limit<double, double>(value, ENVELOPE_MIN, ENVELOPE_MAX);
 		return mpt::saturate_round<EnvelopeNode::value_t>(value);
 	}
 
-	static float Identity(float v) noexcept { return v; }
+	static double Identity(double v) noexcept { return v; }
 
-	static float CentsToFilterCutoff(float v, const CSoundFile &sndFile, int envBaseCutoff, uint32 envBaseFreq)
+	static double CentsToFilterCutoff(double v, const CSoundFile &sndFile, int envBaseCutoff, uint32 envBaseFreq)
 	{
-		const auto freq = envBaseFreq * std::pow(2.0f, v / 1200.0f);
-		return Util::muldivr(sndFile.FrequencyToCutOff(freq), 127, envBaseCutoff) / 127.0f;
+		const auto freq = envBaseFreq * std::pow(2.0, v / 1200.0);
+		return Util::muldivr(sndFile.FrequencyToCutOff(freq), 127, envBaseCutoff) / 127.0;
 	}
 
-	static std::function<float(float)> FilterConversionFunc(const ModInstrument &ins, const CSoundFile &sndFile)
+	static std::function<double(double)> FilterConversionFunc(const ModInstrument &ins, const CSoundFile &sndFile)
 	{
 		const auto envBaseCutoff = ins.IsCutoffEnabled() ? ins.GetCutoff() : 127;
 		const auto envBaseFreq = sndFile.CutOffToFrequency(envBaseCutoff);
@@ -114,10 +114,11 @@ struct SFZEnvelope
 
 	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile, EnvelopeType envType, bool forceFilter = false) const
 	{
-		auto &env = ins->GetEnvelope(envType);
-		const float tickDuration = sndFile.m_PlayState.m_nSamplesPerTick / static_cast<float>(sndFile.GetSampleRate());
+		const double tickDuration = sndFile.m_PlayState.m_nSamplesPerTick / static_cast<double>(sndFile.GetSampleRate());
 		if(tickDuration <= 0)
 			return;
+
+		auto &env = ins->GetEnvelope(envType);
 		env.clear();
 		if(envType != ENV_VOLUME && attack == 0 && delay == 0 && hold == 0 && decay == 0 && sustainLevel == 100 && release == 0 && depth == 0)
 		{
@@ -125,8 +126,8 @@ struct SFZEnvelope
 			return;
 		}
 
-		float scale = 1.0f / 100.0f, minVal = 0.0f, maxVal = 1.0f;
-		std::function<float(float)> conversionFunc = Identity;
+		double scale = 1.0 / 100.0, minVal = 0.0, maxVal = 1.0;
+		std::function<double(double)> conversionFunc = Identity;
 		if(forceFilter && envType == ENV_PITCH)
 		{
 			env.dwFlags.set(ENV_FILTER);
@@ -134,8 +135,8 @@ struct SFZEnvelope
 			scale *= depth;
 		} else if (envType == ENV_PITCH)
 		{
-			scale *= depth / 1600.0f;
-			minVal = -1.0f;
+			scale *= depth / 1600.0;
+			minVal = -1.0;
 		}
 
 		const auto ToValue = std::bind(SFZEnvelope::ToValue, std::placeholders::_1, scale, minVal, maxVal, conversionFunc);
@@ -145,16 +146,16 @@ struct SFZEnvelope
 			env.push_back(0, ToValue(startLevel));
 			if(delay > 0)
 				env.push_back(ToTicks(delay, tickDuration), env.back().value);
-			env.push_back(env.back().tick + ToTicks(attack, tickDuration), ToValue(100.0f));
+			env.push_back(env.back().tick + ToTicks(attack, tickDuration), ToValue(100.0));
 		}
 		if(hold > 0)
 		{
 			if(env.empty())
-				env.push_back(0, ToValue(100.0f));
+				env.push_back(0, ToValue(100.0));
 			env.push_back(env.back().tick + ToTicks(hold, tickDuration), env.back().value);
 		}
 		if(env.empty())
-			env.push_back(0, ToValue(100.0f));
+			env.push_back(0, ToValue(100.0));
 		auto sustain = ToValue(sustainLevel);
 		if(env.back().value != sustain)
 			env.push_back(env.back().tick + ToTicks(decay, tickDuration), sustain);
@@ -163,7 +164,7 @@ struct SFZEnvelope
 		{
 			if(envType == ENV_VOLUME && env.nSustainEnd > 0)
 				env.nReleaseNode = env.nSustainEnd;
-			env.push_back(env.back().tick + ToTicks(release, tickDuration), ToValue(0.0f));
+			env.push_back(env.back().tick + ToTicks(release, tickDuration), ToValue(0.0));
 			env.dwFlags.set(ENV_SUSTAIN);
 		}
 		env.dwFlags.set(ENV_ENABLED);
@@ -174,17 +175,17 @@ struct SFZFlexEG
 {
 	using PointIndex = decltype(InstrumentEnvelope().nLoopStart);
 
-	std::vector<std::pair<float, float>> points;
-	float amplitude = 0.0f;  // percentage (100 = full volume range)
-	float pan = 0.0f;        // percentage (100 = full pan range)
-	float pitch = 0.0f;      // in cents
-	float cutoff = 0.0f;     // in cents
+	std::vector<std::pair<double, double>> points;
+	double amplitude = 0;  // percentage (100 = full volume range)
+	double pan = 0;        // percentage (100 = full pan range)
+	double pitch = 0;      // in cents
+	double cutoff = 0;     // in cents
 	PointIndex sustain = 0;
 
 	void Parse(std::string_view key, const std::string &value)
 	{
 		key = key.substr(key.find('_') + 1);
-		const float v = ConvertStrTo<float>(value);
+		const double v = ConvertStrTo<double>(value);
 
 		const bool isTime = SFZStartsWith(key, "time"), isLevel = SFZStartsWith(key, "level");
 		std::string_view pointStr;
@@ -226,23 +227,23 @@ struct SFZFlexEG
 	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile) const
 	{
 		if(amplitude)
-			ConvertToMPT(ins, sndFile, ENV_VOLUME, amplitude / 100.0f, 0.0f, 1.0f);
+			ConvertToMPT(ins, sndFile, ENV_VOLUME, amplitude / 100.0, 0.0, 1.0);
 		if(pan)
-			ConvertToMPT(ins, sndFile, ENV_PANNING, pan / 100.0f, -1.0f, 1.0f);
+			ConvertToMPT(ins, sndFile, ENV_PANNING, pan / 100.0, -1.0, 1.0);
 		if(pitch)
-			ConvertToMPT(ins, sndFile, ENV_PITCH, pitch / 1600.0f, -1.0f, 1.0f);
+			ConvertToMPT(ins, sndFile, ENV_PITCH, pitch / 1600.0, -1.0, 1.0);
 		if(cutoff)
-			ConvertToMPT(ins, sndFile, ENV_PITCH, cutoff, 0.0f, 1.0f, true);
+			ConvertToMPT(ins, sndFile, ENV_PITCH, cutoff, 0.0, 1.0, true);
 	}
 
-	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile, EnvelopeType envType, float scale, float minVal, float maxVal, bool forceFilter = false) const
+	void ConvertToMPT(ModInstrument *ins, const CSoundFile &sndFile, EnvelopeType envType, double scale, double minVal, double maxVal, bool forceFilter = false) const
 	{
-		const float tickDuration = sndFile.m_PlayState.m_nSamplesPerTick / static_cast<float>(sndFile.GetSampleRate());
-		if(tickDuration <= 0 || points.empty() || scale == 0.0f)
+		const double tickDuration = sndFile.m_PlayState.m_nSamplesPerTick / static_cast<double>(sndFile.GetSampleRate());
+		if(tickDuration <= 0 || points.empty() || scale == 0.0)
 			return;
 
 		auto &env = ins->GetEnvelope(envType);
-		std::function<float(float)> conversionFunc = SFZEnvelope::Identity;
+		std::function<double(double)> conversionFunc = SFZEnvelope::Identity;
 		if(forceFilter && envType == ENV_PITCH)
 		{
 			env.dwFlags.set(ENV_FILTER);
@@ -258,7 +259,7 @@ struct SFZFlexEG
 		// If the first envelope point's time is greater than 0, we fade in from a neutral value
 		if(points.front().first > 0)
 		{
-			env.push_back({0, ToValue(0.0f)});
+			env.push_back({0, ToValue(0.0)});
 			prevTick = 0;
 		}
 
@@ -303,21 +304,21 @@ struct SFZRegion
 	std::vector<SFZFlexEG> flexEGs;
 	SmpLength loopStart = 0, loopEnd = 0;
 	SmpLength end = MAX_SAMPLE_LENGTH, offset = 0;
-	double loopCrossfade = 0.0;
 	LoopMode loopMode = LoopMode::kUnspecified;
 	LoopType loopType = LoopType::kUnspecified;
-	int32 cutoff = 0;         // in Hz
-	int32 filterRandom = 0;   // 0...9600 cents
-	int16 volume = 0;         // -144dB...+6dB
-	int16 pitchBend = 200;    // -9600...9600 cents
-	float pitchLfoFade = 0;   // 0...100 seconds
-	int16 pitchLfoDepth = 0;  // -1200...12000
-	uint8 pitchLfoFreq = 0;   // 0...20 Hz
-	int8 panning = -128;      // -100...+100
+	double loopCrossfade = 0.0;
+	double cutoff = 0;         // in Hz
+	double resonance = 0;      // 0...40dB
+	double filterRandom = 0;   // 0...9600 cents
+	double volume = 0;         // -144dB...+6dB
+	double pitchBend = 200;    // -9600...9600 cents
+	double pitchLfoFade = 0;   // 0...100 seconds
+	double pitchLfoDepth = 0;  // -1200...12000
+	double pitchLfoFreq = 0;   // 0...20 Hz
+	double panning = -128;     // -100...+100
+	double finetune = 0;       // in cents
 	int8 transpose = 0;
-	int8 finetune = 0;
 	uint8 keyLo = 0, keyHi = 127, keyRoot = 60;
-	uint8 resonance = 0;  // 0...40dB
 	InstrFilterMode filterType = FLTMODE_UNCHANGED;
 	uint8 polyphony = 255;
 	bool useSampleKeyRoot = false;
@@ -402,21 +403,21 @@ struct SFZRegion
 			useSampleKeyRoot = false;
 		}
 		else if(key == "bend_up" || key == "bendup")
-			Read(value, pitchBend, -9600, 9600);
+			Read(value, pitchBend, -9600.0, 9600.0);
 		else if(key == "pitchlfo_fade")
-			Read(value, pitchLfoFade, 0.0f, 100.0f);
+			Read(value, pitchLfoFade, 0.0, 100.0);
 		else if(key == "pitchlfo_depth")
-			Read(value, pitchLfoDepth, -12000, 12000);
+			Read(value, pitchLfoDepth, -12000.0, 12000.0);
 		else if(key == "pitchlfo_freq")
-			Read(value, pitchLfoFreq, 0, 20);
+			Read(value, pitchLfoFreq, 0.0, 20.0);
 		else if(key == "volume")
-			Read(value, volume, -144, 6);
+			Read(value, volume, -144.0, 6.0);
 		else if(key == "pan")
-			Read(value, panning, -100, 100);
+			Read(value, panning, -100.0, 100.0);
 		else if(key == "transpose")
 			Read(value, transpose, -127, 127);
 		else if(key == "tune")
-			Read(value, finetune, -100, 100);
+			Read(value, finetune, -100.0, 100.0);
 		else if(key == "end")
 			Read(value, end, SmpLength(0), MAX_SAMPLE_LENGTH);
 		else if(key == "offset")
@@ -448,13 +449,13 @@ struct SFZRegion
 				loopType = LoopType::kAlternate;
 		}
 		else if(key == "cutoff")
-			Read(value, cutoff, 0, 96000);
+			Read(value, cutoff, 0.0, 96000.0);
 		else if(key == "fil_random")
-			Read(value, filterRandom, 0, 9600);
+			Read(value, filterRandom, 0.0, 9600.0);
 		else if(key == "resonance")
-			Read(value, resonance, 0u, 40u);
+			Read(value, resonance, 0.0, 40.0);
 		else if(key == "polyphony")
-			Read(value, polyphony, 0u, 255u);
+			Read(value, polyphony, 0.0, 255.0);
 		else if(key == "phase")
 			invertPhase = (value == "invert");
 		else if(key == "fil_type" || key == "filtype")
@@ -724,16 +725,12 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	}
 
 	if(regions.empty())
-	{
 		return false;
-	}
 
 
 	ModInstrument *pIns = new (std::nothrow) ModInstrument();
 	if(pIns == nullptr)
-	{
 		return false;
-	}
 
 	RecalculateSamplesPerTick();
 	DestroyInstrument(nInstr, deleteAssociatedSamples);
@@ -804,9 +801,9 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		if(region.cutoff != 0)
 			pIns->SetCutoff(FrequencyToCutOff(region.cutoff), true);
 		if(region.resonance != 0)
-			pIns->SetResonance(mpt::saturate_cast<uint8>(Util::muldivr(region.resonance, 128, 24)), true);
-		pIns->nCutSwing = mpt::saturate_cast<uint8>(Util::muldivr(region.filterRandom, m_SongFlags[SONG_EXFILTERRANGE] ? 20 : 24, 1200));
-		pIns->midiPWD = static_cast<int8>(region.pitchBend / 100);
+			pIns->SetResonance(mpt::saturate_round<uint8>(region.resonance * 128.0 / 24.0), true);
+		pIns->nCutSwing = mpt::saturate_round<uint8>(region.filterRandom * (m_SongFlags[SONG_EXFILTERRANGE] ? 20 : 24) / 1200.0);
+		pIns->midiPWD = mpt::saturate_round<int8>(region.pitchBend / 100.0);
 
 		pIns->nNNA = NNA_NOTEOFF;
 		if(region.polyphony == 1)
@@ -827,8 +824,8 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 
 		if(region.ampEnv.release > 0)
 		{
-			const float tickDuration = m_PlayState.m_nSamplesPerTick / static_cast<float>(GetSampleRate());
-			pIns->nFadeOut = std::min(mpt::saturate_cast<uint32>(32768.0f * tickDuration / region.ampEnv.release), uint32(32767));
+			const double tickDuration = m_PlayState.m_nSamplesPerTick / static_cast<double>(GetSampleRate());
+			pIns->nFadeOut = std::min(mpt::saturate_cast<uint32>(32768.0 * tickDuration / region.ampEnv.release), uint32(32767));
 			if(GetType() == MOD_TYPE_IT)
 				pIns->nFadeOut = std::min((pIns->nFadeOut + 16u) & ~31u, uint32(8192));
 		}
@@ -837,7 +834,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		sample.nGlobalVol = mpt::saturate_round<decltype(sample.nGlobalVol)>(64 * std::pow(10.0, region.volume / 20.0));
 		if(region.panning != -128)
 		{
-			sample.nPan = static_cast<decltype(sample.nPan)>(Util::muldivr_unsigned(region.panning + 100, 256, 200));
+			sample.nPan = mpt::saturate_round<decltype(sample.nPan)>((region.panning + 100) * 256.0 / 200.0);
 			sample.uFlags.set(CHN_PANNING);
 		}
 		sample.Transpose(region.finetune / 1200.0);
@@ -846,9 +843,9 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		{
 			sample.nVibSweep = 255;
 			if(region.pitchLfoFade > 0)
-				sample.nVibSweep = mpt::saturate_round<uint8>(255 / region.pitchLfoFade);
-			sample.nVibDepth = static_cast<uint8>(Util::muldivr(region.pitchLfoDepth, 32, 100));
-			sample.nVibRate = region.pitchLfoFreq * 4;
+				sample.nVibSweep = mpt::saturate_round<uint8>(255.0 / region.pitchLfoFade);
+			sample.nVibDepth = mpt::saturate_round<uint8>(region.pitchLfoDepth * 32.0 / 100.0);
+			sample.nVibRate = mpt::saturate_round<uint8>(region.pitchLfoFreq * 4.0);
 		}
 
 		if(region.loopMode != SFZRegion::LoopMode::kUnspecified)
@@ -958,7 +955,7 @@ static void WriteSFZEnvelope(std::ostream &f, double tickDuration, int index, co
 	if(!env.dwFlags[ENV_ENABLED] || env.empty())
 		return;
 
-	const bool sustainAtEnd = (!env.dwFlags[ENV_SUSTAIN] || env.nSustainStart == (env.size() - 1)) && convFunc(env.back().value) != 0.0f;
+	const bool sustainAtEnd = (!env.dwFlags[ENV_SUSTAIN] || env.nSustainStart == (env.size() - 1)) && convFunc(env.back().value) != 0.0;
 
 	const auto prefix = mpt::format("\neg%1_")(mpt::fmt::dec0<2>(index));
 	f << "\n" << prefix << type << "=" << scale;
@@ -999,16 +996,13 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 #endif
 	const ModInstrument *ins = Instruments[nInstr];
 	if(ins == nullptr)
-	{
 		return false;
-	}
+
 	const mpt::PathString sampleBaseName = filename.GetFileName();
 	const mpt::PathString sampleDirName = sampleBaseName + P_("/");
 	const mpt::PathString sampleBasePath = filename.GetPath() + sampleDirName;
 	if(!sampleBasePath.IsDirectory() && !::CreateDirectory(sampleBasePath.AsNative().c_str(), nullptr))
-	{
 		return false;
-	}
 
 	const double tickDuration = m_PlayState.m_nSamplesPerTick / static_cast<double>(m_MixerSettings.gdwMixingFreq);
 
