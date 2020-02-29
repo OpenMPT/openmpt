@@ -958,24 +958,33 @@ static void WriteSFZEnvelope(std::ostream &f, double tickDuration, int index, co
 	if(!env.dwFlags[ENV_ENABLED] || env.empty())
 		return;
 
+	const bool sustainAtEnd = (!env.dwFlags[ENV_SUSTAIN] || env.nSustainStart == (env.size() - 1)) && convFunc(env.back().value) != 0.0f;
+
 	const auto prefix = mpt::format("\neg%1_")(mpt::fmt::dec0<2>(index));
 	f << "\n" << prefix << type << "=" << scale;
-	f << prefix << "points=" << env.size();
+	f << prefix << "points=" << (env.size() + sustainAtEnd ? 1 : 0);
 	EnvelopeNode::tick_t lastTick = 0;
 	int nodeIndex = 0;
 	for(const auto &node : env)
 	{
-		double time = (node.tick - lastTick) * tickDuration;
+		const double time = (node.tick - lastTick) * tickDuration;
 		lastTick = node.tick;
 		f << prefix << "time" << nodeIndex << "=" << time;
 		f << prefix << "level" << nodeIndex << "=" << convFunc(node.value);
 		nodeIndex++;
 	}
+	if(sustainAtEnd)
+	{
+		// Prevent envelope from going back to neutral
+		f << prefix << "time" << nodeIndex << "=0";
+		f << prefix << "level" << nodeIndex << "=" << convFunc(env.back().value);
+	}
+	// We always must write a sustain point, or the envelope will be sustained on the first point of the envelope
 	f << prefix << "sustain=" << (env.dwFlags[ENV_SUSTAIN] ? env.nSustainStart : (env.size() - 1));
 
 	if(env.dwFlags[ENV_LOOP])
 		f << "\n// Loop: " << static_cast<uint32>(env.nLoopStart) << "-" << static_cast<uint32>(env.nLoopEnd);
-	if(env.dwFlags[ENV_LOOP])
+	if(env.dwFlags[ENV_SUSTAIN] && env.nSustainEnd > env.nSustainStart)
 		f << "\n// Sustain Loop: " << static_cast<uint32>(env.nSustainStart) << "-" << static_cast<uint32>(env.nSustainEnd);
 	if(env.nReleaseNode != ENV_RELEASE_NODE_UNSET)
 		f << "\n// Release Node: " << static_cast<uint32>(env.nReleaseNode);
