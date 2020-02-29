@@ -680,36 +680,53 @@ void COrderList::OnSwitchToView()
 
 void COrderList::UpdateInfoText()
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if(pMainFrm != nullptr && ::GetFocus() == m_hWnd)
+	if(::GetFocus() != m_hWnd)
+		return;
+
+	CSoundFile &sndFile = m_modDoc.GetSoundFile();
+	const auto &order = Order();
+
+	const ORDERINDEX length = order.GetLengthTailTrimmed();
+	CString s;
+	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY)
+		s.Format(_T("Position %02Xh of %02Xh"), m_nScrollPos, length);
+	else
+		s.Format(_T("Position %u of %u (%02Xh of %02Xh)"), m_nScrollPos, length, m_nScrollPos, length);
+
+	if(order.IsValidPat(m_nScrollPos))
 	{
-		CSoundFile &sndFile = m_modDoc.GetSoundFile();
-		CString s;
-
-		const ORDERINDEX nLength = Order().GetLengthTailTrimmed();
-
-		if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY)
-		{
-			s.Format(_T("Position %02Xh of %02Xh"), m_nScrollPos, nLength);
-		} else
-		{
-			s.Format(_T("Position %u of %u (%02Xh of %02Xh)"), m_nScrollPos, nLength, m_nScrollPos, nLength);
-		}
-
-		if(m_nScrollPos < Order().size())
-		{
-			PATTERNINDEX nPat = Order()[m_nScrollPos];
-			if(nPat < sndFile.Patterns.Size())
-			{
-				CString patName = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Patterns[nPat].GetName());
-				if(!patName.IsEmpty())
-				{
-					s += _T(": ") + patName;
-				}
-			}
-		}
-		pMainFrm->SetInfoText(s);
+		if(const auto patName = sndFile.Patterns[order[m_nScrollPos]].GetName(); !patName.empty())
+			s += _T(": ") + mpt::ToCString(sndFile.GetCharsetInternal(), patName);
 	}
+	CMainFrame::GetMainFrame()->SetInfoText(s);
+
+	// Set window title for screen readers
+	const bool singleSel = m_nScrollPos2nd == ORDERINDEX_INVALID || m_nScrollPos2nd == m_nScrollPos;
+	const auto firstOrd = singleSel ? m_nScrollPos : std::min(m_nScrollPos, m_nScrollPos2nd), lastOrd = singleSel ? m_nScrollPos : std::max(m_nScrollPos, m_nScrollPos2nd);
+	if(singleSel)
+		s = mpt::cformat(_T("Order %1, "))(m_nScrollPos);
+	else
+		s = mpt::cformat(_T("Order selection %1 to %2: "))(firstOrd, lastOrd);
+	bool first = true;
+	for(ORDERINDEX o = firstOrd; o <= lastOrd; o++)
+	{
+		if(!first)
+			s += _T(", ");
+		first = false;
+		PATTERNINDEX pat = order[o];
+		if(pat == ModSequence::GetIgnoreIndex())
+			s += _T(" Skip");
+		else if(pat == ModSequence::GetInvalidPatIndex())
+			s += _T(" Stop");
+		else
+			s += mpt::cformat(_T("Pattern %1"))(pat);
+		if(sndFile.Patterns.IsValidPat(pat))
+		{
+			if(const auto patName = sndFile.Patterns[pat].GetName(); !patName.empty())
+				s += _T(" (") + mpt::ToCString(sndFile.GetCharsetInternal(), patName) + _T(")");
+		}
+	}
+	SetWindowText(s);
 }
 
 
