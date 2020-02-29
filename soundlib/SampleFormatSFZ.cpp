@@ -616,7 +616,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				auto keyStart = s.find_first_not_of(" \t", 8);
 				auto keyEnd = s.find_first_of(" \t", keyStart);
 				auto valueStart = s.find_first_not_of(" \t", keyEnd);
-				if(valueStart != std::string::npos)
+				if(keyStart != std::string::npos && valueStart != std::string::npos)
 				{
 					charsRead = s.find_first_of(" \t", valueStart);
 					const auto key = s.substr(keyStart, keyEnd - keyStart);
@@ -624,7 +624,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 						macros[std::move(key)] = s.substr(valueStart, charsRead - valueStart);
 				} else
 				{
-					charsRead = s.length();
+					break;
 				}
 			} else if(SFZStartsWith(s, "#include ") || SFZStartsWith(s, "#include\t"))
 			{
@@ -637,7 +637,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 					fileStart++;
 				} else
 				{
-					charsRead = s.length();
+					break;
 				}
 
 				std::string filenameU8 = s.substr(fileStart, fileEnd - fileStart);
@@ -679,6 +679,10 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				// Read key=value pair
 				auto keyEnd = s.find_first_of(" \t=");
 				auto valueStart = s.find_first_not_of(" \t=", keyEnd);
+				if(valueStart == std::string::npos)
+				{
+					break;
+				}
 				const std::string key = mpt::ToLowerCaseAscii(s.substr(0, keyEnd));
 				if(key == "sample" || key == "default_path" || SFZStartsWith(key, "label_cc") || SFZStartsWith(key, "region_label"))
 				{
