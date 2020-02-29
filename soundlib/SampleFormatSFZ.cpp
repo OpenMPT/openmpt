@@ -653,8 +653,8 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 						auto f = std::make_unique<InputFile>(filename);
 						if(f->IsValid())
 						{
-							files.emplace_back(GetFileReader(*f), std::move(f), s.substr(charsRead));
-							s.clear();
+							s.erase(0, charsRead);
+							files.emplace_back(GetFileReader(*f), std::move(f), std::move(s));
 							break;
 						} else
 						{
@@ -820,15 +820,17 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				prevSmp--;
 				continue;
 			}
-			if(!region.name.empty())
-				m_szNames[smp] = mpt::ToCharset(GetCharsetInternal(), mpt::Charset::UTF8, region.name);
-			if(!m_szNames[smp][0])
-				m_szNames[smp] = filename.GetFileName().ToLocale();
 
 			if(UseFinetuneAndTranspose())
 				sample.TransposeToFrequency();
+
+			sample.uFlags.set(SMP_KEEPONDISK, sample.HasSampleData());
 		}
-		sample.uFlags.set(SMP_KEEPONDISK, sample.HasSampleData());
+
+		if(!region.name.empty())
+			m_szNames[smp] = mpt::ToCharset(GetCharsetInternal(), mpt::Charset::UTF8, region.name);
+		if(!m_szNames[smp][0])
+			m_szNames[smp] = mpt::ToCharset(GetCharsetInternal(), mpt::PathString::FromUTF8(region.filename).GetFileName().ToUnicode());
 
 		if(region.useSampleKeyRoot)
 		{
