@@ -5,7 +5,9 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.2-beta43
+### libopenmpt 0.2-beta43 (2020-03-01)
+
+ *  Minor final cleanups.
 
 ### libopenmpt 0.2-beta42 (2019-10-30)
 
