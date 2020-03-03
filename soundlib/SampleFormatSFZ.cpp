@@ -459,7 +459,7 @@ struct SFZRegion
 		else if(key == "resonance")
 			Read(value, resonance, 0.0, 40.0);
 		else if(key == "polyphony")
-			Read(value, polyphony, 0.0, 255.0);
+			Read(value, polyphony, 0, 255);
 		else if(key == "phase")
 			invertPhase = (value == "invert");
 		else if(key == "fil_type" || key == "filtype")
@@ -1102,6 +1102,9 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	if(ins->nFadeOut)
 		f << "\nampeg_release=" << (32768.0 * tickDuration / ins->nFadeOut) << " // " << ins->nFadeOut;
 
+	if(ins->nDNA == DNA_NOTECUT && ins->nDCT == DCT_SAMPLE)
+		f << "\npolyphony=1";
+
 	WriteSFZEnvelope(f, tickDuration, 1, ins->VolEnv, "amplitude", 100.0, [](int32 val) { return val / static_cast<double>(ENVELOPE_MAX); });
 	WriteSFZEnvelope(f, tickDuration, 2, ins->PanEnv, "pan", 100.0, [](int32 val) { return 2.0 * (val - ENVELOPE_MID) / (ENVELOPE_MAX - ENVELOPE_MIN); });
 	if(ins->PitchEnv.dwFlags[ENV_FILTER])
@@ -1186,32 +1189,31 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 			f << "\npan=" << (Util::muldivr_unsigned(sample.nPan, 200, 256) - 100) << " // " << sample.nPan;
 		if(sample.nGlobalVol != 64)
 			f << "\nvolume=" << SFZLinear2dB((ins->nGlobalVol * sample.nGlobalVol) / 4096.0) << " // " << sample.nGlobalVol;
-		const char *loopMode;
+		const char *loopMode = "no_loop", *loopType = "forward";
 		SmpLength loopStart = 0, loopEnd = 0;
-		bool loopType = false;
 		if(sample.uFlags[CHN_SUSTAINLOOP])
 		{
 			loopMode = "loop_sustain";
 			loopStart = sample.nSustainStart;
 			loopEnd = sample.nSustainEnd;
-			loopType = sample.uFlags[CHN_PINGPONGSUSTAIN];
+			if(sample.uFlags[CHN_PINGPONGSUSTAIN])
+				loopType = "alternate";
 		} else if(sample.uFlags[CHN_LOOP])
 		{
 			loopMode = "loop_continuous";
 			loopStart = sample.nLoopStart;
 			loopEnd = sample.nLoopEnd;
-			loopType = sample.uFlags[CHN_SUSTAINLOOP];
-			// TODO backward loop (supported by engine but no UI)
-		} else
-		{
-			loopMode = "no_loop";
+			if(sample.uFlags[CHN_PINGPONGLOOP])
+				loopType = "alternate";
+			else if(sample.uFlags[CHN_REVERSE])
+				loopType = "backward";
 		}
 		f << "\nloop_mode=" << loopMode;
 		if(loopStart < loopEnd)
 		{
 			f << "\nloop_start=" << loopStart;
 			f << "\nloop_end=" << (loopEnd - 1);
-			f << "\nloop_type=" << (loopType ? "alternate" : "forward");
+			f << "\nloop_type=" << loopType;
 		}
 		if(sample.uFlags.test_all(CHN_SUSTAINLOOP | CHN_LOOP))
 		{
