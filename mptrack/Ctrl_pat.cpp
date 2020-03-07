@@ -562,24 +562,21 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 	if(!(lParam & 0x80000000))
 	{
 		// Pattern item
-		PATTERNINDEX nPat = (PATTERNINDEX)(lParam & 0x7FFF);
-		if(m_sndFile.Patterns.IsValidIndex(nPat))
+		auto pat = static_cast<PATTERNINDEX>(lParam & 0xFFFF);
+		if(m_sndFile.Patterns.IsValidIndex(pat))
 		{
 			for(SEQUENCEINDEX seq = 0; seq < m_sndFile.Order.GetNumSequences(); seq++)
 			{
-				for(ORDERINDEX ord = 0; ord < m_sndFile.Order(seq).GetLength(); ord++)
+				if(ORDERINDEX ord = m_sndFile.Order(seq).FindOrder(pat); ord != ORDERINDEX_INVALID)
 				{
-					if(m_sndFile.Order(seq)[ord] == nPat)
-					{
-						m_OrderList.SelectSequence(seq);
-						m_OrderList.SetCurSel(ord, true);
-						UpdateView(SequenceHint(static_cast<SEQUENCEINDEX>(seq)).Names(), nullptr);
-						break;
-					}
+					m_OrderList.SelectSequence(seq);
+					m_OrderList.SetCurSel(ord, true);
+					UpdateView(SequenceHint(seq).Names(), nullptr);
+					break;
 				}
 			}
 		}
-		SetCurrentPattern(nPat);
+		SetCurrentPattern(pat);
 	} else if((lParam & 0x80000000))
 	{
 		// Order item
@@ -587,8 +584,8 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		auto seq = static_cast<SEQUENCEINDEX>((lParam >> 16) & 0x7FFF);
 		if(seq < m_sndFile.Order.GetNumSequences())
 		{
-			const auto &order = Order();
 			m_OrderList.SelectSequence(seq);
+			const auto &order = Order();
 			if(ord < order.size())
 			{
 				m_OrderList.SetCurSel(ord);
@@ -604,7 +601,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 			SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 		CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 
-		//Restore all save pattern state, except pattern number which we might have just set.
+		// Restore all save pattern state, except pattern number which we might have just set.
 		PATTERNVIEWSTATE &patternViewState = pFrame->GetPatternViewState();
 		if(patternViewState.initialOrder != ORDERINDEX_INVALID)
 		{
