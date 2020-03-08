@@ -34,8 +34,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#pragma warning(disable:4244) //conversion from 'type1' to 'type2', possible loss of data
-
 /////////////////////////////////////////////////////////////////////////
 // CNoteMapWnd
 
@@ -64,9 +62,9 @@ END_MESSAGE_MAP()
 
 BOOL CNoteMapWnd::PreTranslateMessage(MSG* pMsg)
 {
-	UINT wParam;
-	if (!pMsg) return TRUE;
-	wParam = pMsg->wParam;
+	if(!pMsg)
+		return TRUE;
+	uint32 wParam = static_cast<uint32>(pMsg->wParam);
 
 	if (pMsg)
 	{
@@ -77,7 +75,7 @@ BOOL CNoteMapWnd::PreTranslateMessage(MSG* pMsg)
 			CInputHandler* ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
-			UINT nChar = pMsg->wParam;
+			UINT nChar = wParam;
 			UINT nRepCnt = LOWORD(pMsg->lParam);
 			UINT nFlags = HIWORD(pMsg->lParam);
 			KeyEventType kT = ih->GetKeyEventType(nFlags);
@@ -145,7 +143,7 @@ void CNoteMapWnd::SetCurrentInstrument(INSTRUMENTINDEX nIns)
 			m_modDoc.InitializeInstrument(instrument);
 		}
 
-		InvalidateRect(NULL, FALSE);
+		Invalidate(FALSE);
 		UpdateTitle();
 	}
 }
@@ -156,7 +154,7 @@ void CNoteMapWnd::SetCurrentNote(UINT nNote)
 	if(nNote != m_nNote && ModCommand::IsNote(static_cast<ModCommand::NOTE>(nNote + NOTE_MIN)))
 	{
 		m_nNote = nNote;
-		InvalidateRect(NULL, FALSE);
+		Invalidate(FALSE);
 		UpdateTitle();
 	}
 }
@@ -267,7 +265,7 @@ void CNoteMapWnd::OnPaint()
 void CNoteMapWnd::OnSetFocus(CWnd *pOldWnd)
 {
 	CStatic::OnSetFocus(pOldWnd);
-	InvalidateRect(NULL, FALSE);
+	Invalidate(FALSE);
 	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus = this;
 	m_undo = true;
 }
@@ -276,7 +274,7 @@ void CNoteMapWnd::OnSetFocus(CWnd *pOldWnd)
 void CNoteMapWnd::OnKillFocus(CWnd *pNewWnd)
 {
 	CStatic::OnKillFocus(pNewWnd);
-	InvalidateRect(NULL, FALSE);
+	Invalidate(FALSE);
 	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus = nullptr;
 }
 
@@ -286,12 +284,12 @@ void CNoteMapWnd::OnLButtonDown(UINT, CPoint pt)
 	if ((pt.x >= m_cxFont) && (pt.x < m_cxFont*2) && (m_bIns))
 	{
 		m_bIns = false;
-		InvalidateRect(NULL, FALSE);
+		Invalidate(FALSE);
 	}
 	if ((pt.x > m_cxFont*2) && (pt.x <= m_cxFont*3) && (!m_bIns))
 	{
 		m_bIns = true;
-		InvalidateRect(NULL, FALSE);
+		Invalidate(FALSE);
 	}
 	if ((pt.x >= 0) && (m_cyFont))
 	{
@@ -394,7 +392,7 @@ void CNoteMapWnd::OnMapCopyNote()
 		if (bModified)
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
-			InvalidateRect(NULL, FALSE);
+			Invalidate(FALSE);
 		}
 	}
 }
@@ -419,7 +417,7 @@ void CNoteMapWnd::OnMapCopySample()
 		if (bModified)
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
-			InvalidateRect(NULL, FALSE);
+			Invalidate(FALSE);
 			UpdateTitle();
 		}
 	}
@@ -445,7 +443,7 @@ void CNoteMapWnd::OnMapReset()
 		if(modified)
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
-			InvalidateRect(NULL, FALSE);
+			Invalidate(FALSE);
 			UpdateTitle();
 		}
 	}
@@ -471,7 +469,7 @@ void CNoteMapWnd::OnMapRemove()
 		if(modified)
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
-			InvalidateRect(NULL, FALSE);
+			Invalidate(FALSE);
 			UpdateTitle();
 		}
 	}
@@ -525,7 +523,7 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 		if(modified)
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
-			InvalidateRect(NULL, FALSE);
+			Invalidate(FALSE);
 			UpdateTitle();
 		}
 	}
@@ -567,7 +565,7 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		if(m_bIns && ((key >= '0' && key <= '9') || (key == ' ')))
 			HandleChar(key);
 		else
-			EnterNote(wParam-kcInsNoteMapStartNotes+1+pMainFrm->GetBaseOctave()*12);
+			EnterNote(static_cast<uint32>(wParam - kcInsNoteMapStartNotes + 1 + pMainFrm->GetBaseOctave() * 12));
 
 		return wParam;
 	}
@@ -624,7 +622,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 				StopNote(); // Stop old note according to current instrument settings
 				pIns->NoteMap[m_nNote] = static_cast<ModCommand::NOTE>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
-				InvalidateRect(NULL, FALSE);
+				Invalidate(FALSE);
 				UpdateTitle();
 			}
 			if(ok)
@@ -663,7 +661,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 				StopNote(); // Stop old note according to current instrument settings
 				pIns->Keyboard[m_nNote] = static_cast<SAMPLEINDEX>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
-				InvalidateRect(NULL, FALSE);
+				Invalidate(FALSE);
 				UpdateTitle();
 				PlayNote(m_nNote);
 			}
@@ -678,14 +676,14 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 
 		else if ((!m_bIns) && (sndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))	//in note column
 		{
-			UINT n = pIns->NoteMap[m_nNote];
+			uint32 n = pIns->NoteMap[m_nNote];
 
 			if ((c >= '0') && (c <= '9'))
 			{
 				if (n)
-					n = ((n-1) % 12) + (c-'0')*12 + 1;
+					n = static_cast<uint32>(((n - 1) % 12) + (c - '0') * 12 + 1);
 				else
-					n = (m_nNote % 12) + (c-'0')*12 + 1;
+					n = static_cast<uint32>((m_nNote % 12) + (c - '0') * 12 + 1);
 			} else if (c == ' ')
 			{
 				n = (m_nOldNote) ? m_nOldNote : m_nNote+1;
@@ -702,7 +700,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 				StopNote(); // Stop old note according to current instrument settings
 				pIns->NoteMap[m_nNote] = static_cast<ModCommand::NOTE>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
-				InvalidateRect(NULL, FALSE);
+				Invalidate(FALSE);
 				UpdateTitle();
 			}
 
@@ -777,7 +775,7 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 	if(redraw)
 	{
 		m_undo = true;
-		InvalidateRect(NULL, FALSE);
+		Invalidate(FALSE);
 		UpdateTitle();
 	}
 
@@ -813,7 +811,7 @@ void CNoteMapWnd::UpdateTitle()
 		return;
 
 	const auto &sndFile = m_modDoc.GetSoundFile();
-	mpt::winstring s = mpt::ToWin(sndFile.GetNoteName(m_nNote + NOTE_MIN, m_nInstrument)) + _T(": ");
+	mpt::winstring s = mpt::ToWin(sndFile.GetNoteName(static_cast<ModCommand::NOTE>(m_nNote + NOTE_MIN), m_nInstrument)) + _T(": ");
 	if(ins->Keyboard[m_nNote] == 0)
 	{
 		s += _T("no sample");
@@ -945,10 +943,6 @@ void CCtrlInstruments::DoDataExchange(CDataExchange* pDX)
 CCtrlInstruments::CCtrlInstruments(CModControlView &parent, CModDoc &document)
 	: CModControlDlg(parent, document)
 	, m_NoteMap(*this, document)
-	, m_nInstrument(1)
-	, m_openendPluginListWithMouse(false)
-	, m_startedHScroll(false)
-	, m_startedEdit(false)
 {
 	m_nLockCount = 1;
 }
@@ -1133,10 +1127,10 @@ BOOL CCtrlInstruments::SetCurrentInstrument(UINT nIns, BOOL bUpdNum)
 		m_SpinInstrument.SetRange(1, m_sndFile.GetNumInstruments());
 		m_SpinInstrument.EnableWindow((m_sndFile.GetNumInstruments()) ? TRUE : FALSE);
 		// Is this a bug ?
-		m_SliderCutOff.InvalidateRect(NULL, FALSE);
-		m_SliderResonance.InvalidateRect(NULL, FALSE);
+		m_SliderCutOff.Invalidate(FALSE);
+		m_SliderResonance.Invalidate(FALSE);
 		// Volume ramping (attack)
-		m_SliderAttack.InvalidateRect(NULL, FALSE);
+		m_SliderAttack.Invalidate(FALSE);
 	}
 	PostViewMessage(VIEWMSG_SETCURRENTINSTRUMENT, m_nInstrument);
 	UnlockControls();
@@ -1153,10 +1147,9 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 		int nIns = m_parent.GetInstrumentChange();
 		if (nIns > 0) lParam = nIns;
 		m_parent.InstrumentChanged(-1);
-	} else
-	if (lParam > 0)
+	} else if(lParam > 0)
 	{
-		m_parent.InstrumentChanged(lParam);
+		m_parent.InstrumentChanged(static_cast<INSTRUMENTINDEX>(lParam));
 	}
 
 	UpdatePluginList();
@@ -1169,7 +1162,7 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 		instrumentState.initialInstrument = 0;
 	}
 
-	SetCurrentInstrument((lParam > 0) ? lParam : m_nInstrument);
+	SetCurrentInstrument(static_cast<INSTRUMENTINDEX>((lParam > 0) ? lParam : m_nInstrument));
 
 	// Initial Update
 	if (!m_bInitialized) UpdateView(InstrumentHint(m_nInstrument).Info().Envelope().ModType(), NULL);
@@ -1234,7 +1227,7 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_SETCURRENTINSTRUMENT:
-		SetCurrentInstrument(lParam);
+		SetCurrentInstrument(static_cast<INSTRUMENTINDEX>(lParam));
 		break;
 
 	case CTRLMSG_INS_SAMPLEMAP:
@@ -1419,21 +1412,19 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 				m_CbnMixPlug.SetCurSel(0);
 			}
 			OnMixPlugChanged();
-			for(int nRes = 0; nRes<m_CbnResampling.GetCount(); nRes++)
+			for(int resMode = 0; resMode<m_CbnResampling.GetCount(); resMode++)
 			{
-				DWORD v = m_CbnResampling.GetItemData(nRes);
-				if (pIns->resampling == v)
+				if(pIns->resampling == m_CbnResampling.GetItemData(resMode))
 				{
-					m_CbnResampling.SetCurSel(nRes);
+					m_CbnResampling.SetCurSel(resMode);
 					break;
 				}
 			}
-			for(int nFltMode = 0; nFltMode<m_CbnFilterMode.GetCount(); nFltMode++)
+			for(int fltMode = 0; fltMode<m_CbnFilterMode.GetCount(); fltMode++)
 			{
-				DWORD v = m_CbnFilterMode.GetItemData(nFltMode);
-				if (pIns->nFilterMode == v)
+				if(pIns->nFilterMode == m_CbnFilterMode.GetItemData(fltMode))
 				{
-					m_CbnFilterMode.SetCurSel(nFltMode);
+					m_CbnFilterMode.SetCurSel(fltMode);
 					break;
 				}
 			}
@@ -1504,7 +1495,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 				SetCurrentInstrument(m_sndFile.GetNumInstruments());
 
 		}
-		m_NoteMap.InvalidateRect(NULL, FALSE);
+		m_NoteMap.Invalidate(FALSE);
 	}
 	if(hint.ToType<PluginHint>().GetType()[HINT_MIXPLUGINS | HINT_PLUGINNAMES | HINT_MODTYPE])
 	{
@@ -2551,7 +2542,7 @@ void CCtrlInstruments::OnPPCChanged()
 			if (pIns->nPPC != n)
 			{
 				PrepareUndo("Set Pitch/Pan Center");
-				pIns->nPPC = n;
+				pIns->nPPC = static_cast<decltype(pIns->nPPC)>(n);
 				SetModified(InstrumentHint().Info(), false);
 			}
 		}
@@ -2564,20 +2555,19 @@ void CCtrlInstruments::OnAttackChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if(!IsLocked() && pIns)
 	{
-		int n = GetDlgItemInt(IDC_EDIT2);
-		if(n < 0) n = 0;
-		if(n > MAX_ATTACK_VALUE) n = MAX_ATTACK_VALUE;
-		int newRamp = n; //? MAX_ATTACK_LENGTH - n : 0;
-
+		int n = Clamp(static_cast<int>(GetDlgItemInt(IDC_EDIT2)), 0, MAX_ATTACK_VALUE);
+		auto newRamp = static_cast<decltype(pIns->nVolRampUp)>(n);
 		if(pIns->nVolRampUp != newRamp)
 		{
-			if(!m_startedEdit) PrepareUndo("Set Ramping");
+			if(!m_startedEdit)
+				PrepareUndo("Set Ramping");
 			pIns->nVolRampUp = newRamp;
 			SetModified(InstrumentHint().Info(), false);
 		}
 
 		m_SliderAttack.SetPos(n);
-		if( CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1) ) spin->SetPos(n);
+		if(CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1))
+			spin->SetPos(n);
 		LockControls();
 		if (n == 0) SetDlgItemText(IDC_EDIT2, _T("default"));
 		UnlockControls();
@@ -2587,18 +2577,18 @@ void CCtrlInstruments::OnAttackChanged()
 
 void CCtrlInstruments::OnEnableCutOff()
 {
-	const bool bCutOff = IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED;
+	const bool enableCutOff = IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED;
 
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if (pIns)
 	{
 		PrepareUndo("Toggle Cutoff");
-		pIns->SetCutoff(pIns->GetCutoff(), bCutOff);
+		pIns->SetCutoff(pIns->GetCutoff(), enableCutOff);
 		for(auto &chn : m_sndFile.m_PlayState.Chn)
 		{
 			if (chn.pModInstrument == pIns)
 			{
-				if (bCutOff)
+				if(enableCutOff)
 					chn.nCutOff = pIns->GetCutoff();
 				else
 					chn.nCutOff = 0x7F;
@@ -2613,18 +2603,18 @@ void CCtrlInstruments::OnEnableCutOff()
 
 void CCtrlInstruments::OnEnableResonance()
 {
-	const bool bReso = IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED;
+	const bool enableReso = IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED;
 
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if (pIns)
 	{
 		PrepareUndo("Toggle Resonance");
-		pIns->SetResonance(pIns->GetResonance(), bReso);
+		pIns->SetResonance(pIns->GetResonance(), enableReso);
 		for(auto &chn : m_sndFile.m_PlayState.Chn)
 		{
 			if (chn.pModInstrument == pIns)
 			{
-				if (bReso)
+				if (enableReso)
 					chn.nResonance = pIns->GetResonance();
 				else
 					chn.nResonance = 0;
@@ -2678,134 +2668,122 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 	if ((m_nInstrument) && (!IsLocked()) && (nCode != SB_ENDSCROLL))
 	{
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
+		if(!pIns)
+			return;
+			
+		auto *pSlider = reinterpret_cast<const CSliderCtrl *>(pSB);
+		int32 n = pSlider->GetPos();
+		bool filterChanged = false;
 
-		if (pIns)
+		if(pSlider == &m_SliderAttack)
 		{
-			CSliderCtrl* pSlider = (CSliderCtrl*) pSB;
-			short int n;
-			bool filterChanged = false;
-
 			// Volume ramping (attack)
-			if (pSlider == &m_SliderAttack)
+			if(pIns->nVolRampUp != n)
 			{
-				n = m_SliderAttack.GetPos();
-				if(pIns->nVolRampUp != n)
+				if(!m_startedHScroll)
 				{
-					if(!m_startedHScroll)
-					{
-						PrepareUndo("Set Ramping");
-						m_startedHScroll = true;
-					}
-					pIns->nVolRampUp = n;
-					SetDlgItemInt(IDC_EDIT2,n);
-					SetModified(InstrumentHint().Info(), false);
+					PrepareUndo("Set Ramping");
+					m_startedHScroll = true;
 				}
+				pIns->nVolRampUp = static_cast<decltype(pIns->nVolRampUp)>(n);
+				SetDlgItemInt(IDC_EDIT2, n);
+				SetModified(InstrumentHint().Info(), false);
 			}
+		} else if(pSlider == &m_SliderVolSwing)
+		{
 			// Volume Swing
-			else if (pSlider == &m_SliderVolSwing)
+			if((n >= 0) && (n <= 100) && (n != pIns->nVolSwing))
 			{
-				n = m_SliderVolSwing.GetPos();
-				if ((n >= 0) && (n <= 100) && (n != (int)pIns->nVolSwing))
+				if(!m_startedHScroll)
 				{
-					if(!m_startedHScroll)
-					{
-						PrepareUndo("Set Volume Random Variation");
-						m_startedHScroll = true;
-					}
-					pIns->nVolSwing = static_cast<uint8>(n);
-					SetModified(InstrumentHint().Info(), false);
+					PrepareUndo("Set Volume Random Variation");
+					m_startedHScroll = true;
 				}
+				pIns->nVolSwing = static_cast<uint8>(n);
+				SetModified(InstrumentHint().Info(), false);
 			}
+		} else if(pSlider == &m_SliderPanSwing)
+		{
 			// Pan Swing
-			else if (pSlider == &m_SliderPanSwing)
+			if((n >= 0) && (n <= 64) && (n != pIns->nPanSwing))
 			{
-				n = m_SliderPanSwing.GetPos();
-				if ((n >= 0) && (n <= 64) && (n != (int)pIns->nPanSwing))
+				if(!m_startedHScroll)
 				{
-					if(!m_startedHScroll)
-					{
-						PrepareUndo("Set Panning Random Variation");
-						m_startedHScroll = true;
-					}
-					pIns->nPanSwing = static_cast<uint8>(n);
-					SetModified(InstrumentHint().Info(), false);
+					PrepareUndo("Set Panning Random Variation");
+					m_startedHScroll = true;
 				}
+				pIns->nPanSwing = static_cast<uint8>(n);
+				SetModified(InstrumentHint().Info(), false);
 			}
-			//Cutoff swing
-			else if (pSlider == &m_SliderCutSwing)
+		} else if(pSlider == &m_SliderCutSwing)
+		{
+			// Cutoff swing
+			if((n >= 0) && (n <= 64) && (n != pIns->nCutSwing))
 			{
-				n = m_SliderCutSwing.GetPos();
-				if ((n >= 0) && (n <= 64) && (n != (int)pIns->nCutSwing))
+				if(!m_startedHScroll)
 				{
-					if(!m_startedHScroll)
-					{
-						PrepareUndo("Set Cutoff Random Variation");
-						m_startedHScroll = true;
-					}
-					pIns->nCutSwing = static_cast<uint8>(n);
-					SetModified(InstrumentHint().Info(), false);
+					PrepareUndo("Set Cutoff Random Variation");
+					m_startedHScroll = true;
 				}
+				pIns->nCutSwing = static_cast<uint8>(n);
+				SetModified(InstrumentHint().Info(), false);
 			}
-			//Resonance swing
-			else if (pSlider == &m_SliderResSwing)
+		} else if(pSlider == &m_SliderResSwing)
+		{
+			// Resonance swing
+			if((n >= 0) && (n <= 64) && (n != pIns->nResSwing))
 			{
-				n = m_SliderResSwing.GetPos();
-				if ((n >= 0) && (n <= 64) && (n != (int)pIns->nResSwing))
+				if(!m_startedHScroll)
 				{
-					if(!m_startedHScroll)
-					{
-						PrepareUndo("Set Resonance Random Variation");
-						m_startedHScroll = true;
-					}
-					pIns->nResSwing = static_cast<uint8>(n);
-					SetModified(InstrumentHint().Info(), false);
+					PrepareUndo("Set Resonance Random Variation");
+					m_startedHScroll = true;
 				}
+				pIns->nResSwing = static_cast<uint8>(n);
+				SetModified(InstrumentHint().Info(), false);
 			}
-			// Filter CutOff
-			else if (pSlider == &m_SliderCutOff)
+		} else if(pSlider == &m_SliderCutOff)
+		{
+			// Filter Cutoff
+			if((n >= 0) && (n < 0x80) && (n != (int)(pIns->GetCutoff())))
 			{
-				n = m_SliderCutOff.GetPos();
-				if ((n >= 0) && (n < 0x80) && (n != (int)(pIns->GetCutoff())))
+				if(!m_startedHScroll)
 				{
-					if(!m_startedHScroll)
-					{
-						PrepareUndo("Set Cutoff");
-						m_startedHScroll = true;
-					}
-					pIns->SetCutoff(static_cast<uint8>(n), pIns->IsCutoffEnabled());
-					SetModified(InstrumentHint().Info(), false);
-					UpdateFilterText();
-					filterChanged = true;
+					PrepareUndo("Set Cutoff");
+					m_startedHScroll = true;
 				}
+				pIns->SetCutoff(static_cast<uint8>(n), pIns->IsCutoffEnabled());
+				SetModified(InstrumentHint().Info(), false);
+				UpdateFilterText();
+				filterChanged = true;
 			}
-			else if (pSlider == &m_SliderResonance)
+		} else if(pSlider == &m_SliderResonance)
+		{
+			// Filter Resonance
+			if((n >= 0) && (n < 0x80) && (n != (int)(pIns->GetResonance())))
 			{
-				// Filter Resonance
-				n = m_SliderResonance.GetPos();
-				if ((n >= 0) && (n < 0x80) && (n != (int)(pIns->GetResonance())))
+				if(!m_startedHScroll)
 				{
-					if(!m_startedHScroll)
-					{
-						PrepareUndo("Set Resonance");
-						m_startedHScroll = true;
-					}
-					pIns->SetResonance(static_cast<uint8>(n), pIns->IsResonanceEnabled());
-					SetModified(InstrumentHint().Info(), false);
-					UpdateFilterText();
-					filterChanged = true;
+					PrepareUndo("Set Resonance");
+					m_startedHScroll = true;
 				}
+				pIns->SetResonance(static_cast<uint8>(n), pIns->IsResonanceEnabled());
+				SetModified(InstrumentHint().Info(), false);
+				UpdateFilterText();
+				filterChanged = true;
 			}
+		}
 
-			// Update channels
-			if (filterChanged)
+		// Update channels
+		if(filterChanged)
+		{
+			for(auto &chn : m_sndFile.m_PlayState.Chn)
 			{
-				for(auto &chn : m_sndFile.m_PlayState.Chn)
+				if(chn.pModInstrument == pIns)
 				{
-					if (chn.pModInstrument == pIns)
-					{
-						if (pIns->IsCutoffEnabled()) chn.nCutOff = pIns->GetCutoff();
-						if (pIns->IsResonanceEnabled()) chn.nResonance = pIns->GetResonance();
-					}
+					if(pIns->IsCutoffEnabled())
+						chn.nCutOff = pIns->GetCutoff();
+					if(pIns->IsResonanceEnabled())
+						chn.nResonance = pIns->GetResonance();
 				}
 			}
 		}
@@ -2833,7 +2811,7 @@ void CCtrlInstruments::OnEditSampleMap()
 			if (dlg.DoModal() == IDOK)
 			{
 				SetModified(InstrumentHint().Info(), true);
-				m_NoteMap.InvalidateRect(NULL, FALSE);
+				m_NoteMap.Invalidate(FALSE);
 			} else
 			{
 				m_modDoc.GetInstrumentUndo().RemoveLastUndoStep(m_nInstrument);
@@ -2847,14 +2825,14 @@ void CCtrlInstruments::TogglePluginEditor()
 {
 	if(m_nInstrument)
 	{
-		m_modDoc.TogglePluginEditor(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()) - 1, CMainFrame::GetInputHandler()->ShiftPressed());
+		m_modDoc.TogglePluginEditor(static_cast<PLUGINDEX>(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()) - 1), CMainFrame::GetInputHandler()->ShiftPressed());
 	}
 }
 
 
 BOOL CCtrlInstruments::PreTranslateMessage(MSG *pMsg)
 {
-	if (pMsg)
+	if(pMsg)
 	{
 		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
 		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
@@ -2863,7 +2841,7 @@ BOOL CCtrlInstruments::PreTranslateMessage(MSG *pMsg)
 			CInputHandler* ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
-			UINT nChar = pMsg->wParam;
+			UINT nChar = static_cast<UINT>(pMsg->wParam);
 			UINT nRepCnt = LOWORD(pMsg->lParam);
 			UINT nFlags = HIWORD(pMsg->lParam);
 			KeyEventType kT = ih->GetKeyEventType(nFlags);

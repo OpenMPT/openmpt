@@ -86,8 +86,6 @@ protected:
 
 class CCtrlInstruments: public CModControlDlg
 {
-	friend class PrepareInstrUndo;
-
 protected:
 	CModControlBar m_ToolBar;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinFadeOut, m_SpinGlobalVol, m_SpinPanning;
@@ -96,28 +94,25 @@ protected:
 	CEdit m_EditName, m_EditFileName, m_EditGlobalVol, m_EditPanning, m_EditFadeOut;
 	CNumberEdit m_EditPPS, m_EditPWD;
 	CButton m_CheckPanning, m_CheckCutOff, m_CheckResonance, velocityStyle;
-	CSliderCtrl m_SliderVolSwing, m_SliderPanSwing, m_SliderCutSwing, m_SliderResSwing, 
-		        m_SliderCutOff, m_SliderResonance;
+	CSliderCtrl m_SliderVolSwing, m_SliderPanSwing, m_SliderCutSwing, m_SliderResSwing, m_SliderCutOff, m_SliderResonance;
 	CNoteMapWnd m_NoteMap;
 	CSliderCtrl m_SliderAttack;
 	CSpinButtonCtrl m_SpinAttack;
 	//Tuning
 	CComboBox m_ComboTuning;
+	// Pitch/Tempo lock
+	CNumberEdit m_EditPitchTempoLock;
+	CButton m_CheckPitchTempoLock;
 
-	INSTRUMENTINDEX m_nInstrument;
-	bool m_openendPluginListWithMouse : 1;
-	bool m_startedHScroll : 1;
-	bool m_startedEdit : 1;
+	INSTRUMENTINDEX m_nInstrument = 1;
+	bool m_openendPluginListWithMouse = false;
+	bool m_startedHScroll = false;
+	bool m_startedEdit = false;
 
 	void UpdateTuningComboBox();
 	void BuildTuningComboBox();
 
 	void UpdatePluginList();
-
-	//Pitch/Tempo lock
-	CNumberEdit m_EditPitchTempoLock;
-	CButton m_CheckPitchTempoLock;
-
 	
 public:
 	CCtrlInstruments(CModControlView &parent, CModDoc &document);
