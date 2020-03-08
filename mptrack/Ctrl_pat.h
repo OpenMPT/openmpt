@@ -32,7 +32,6 @@ class COrderList: public CWnd
 	friend class CCtrlPatterns;
 protected:
 	HFONT m_hFont = nullptr;
-	COLORREF colorText, colorTextSel, colorInvalid;
 	int m_cxFont = 0, m_cyFont = 0;
 	//m_nXScroll  : The order at the beginning of shown orderlist
 	//m_nScrollPos: The same as order

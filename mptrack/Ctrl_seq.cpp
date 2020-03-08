@@ -212,9 +212,6 @@ BOOL COrderList::Init(const CRect &rect, HFONT hFont)
 {
 	CreateEx(WS_EX_STATICEDGE, NULL, _T(""), WS_CHILD | WS_VISIBLE, rect, &m_pParent, IDC_ORDERLIST);
 	m_hFont = hFont;
-	colorText = GetSysColor(COLOR_WINDOWTEXT);
-	colorInvalid = GetSysColor(COLOR_GRAYTEXT);
-	colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
 	SendMessage(WM_SETFONT, (WPARAM)m_hFont);
 	SetScrollPos(0);
 	EnableScrollBarCtrl(SB_HORZ, TRUE);
@@ -740,10 +737,12 @@ void COrderList::OnPaint()
 	HGDIOBJ oldfont = dc.SelectObject(m_hFont);
 	HGDIOBJ oldpen = dc.SelectObject(GetStockObject(DC_PEN));
 	const auto separatorColor = GetSysColor(COLOR_WINDOW) ^ 0x808080;
+	const auto colorText = GetSysColor(COLOR_WINDOWTEXT), colorInvalid = GetSysColor(COLOR_GRAYTEXT), colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
 	const auto windowBrush = GetSysColorBrush(COLOR_WINDOW), highlightBrush = GetSysColorBrush(COLOR_HIGHLIGHT), faceBrush = GetSysColorBrush(COLOR_BTNFACE);
+
 	SetDCPenColor(dc, separatorColor);
 
-	// First time ?
+	// First time?
 	if(m_cxFont <= 0 || m_cyFont <= 0)
 	{
 		CSize sz = dc.GetTextExtent(_T("000+"), 4);

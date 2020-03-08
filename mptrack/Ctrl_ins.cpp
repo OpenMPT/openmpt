@@ -146,6 +146,7 @@ void CNoteMapWnd::SetCurrentInstrument(INSTRUMENTINDEX nIns)
 		}
 
 		InvalidateRect(NULL, FALSE);
+		UpdateTitle();
 	}
 }
 
@@ -156,6 +157,7 @@ void CNoteMapWnd::SetCurrentNote(UINT nNote)
 	{
 		m_nNote = nNote;
 		InvalidateRect(NULL, FALSE);
+		UpdateTitle();
 	}
 }
 
@@ -230,7 +232,7 @@ void CNoteMapWnd::OnPaint()
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor(highlight ? colorTextSel : colorText);
-			dc.DrawText(mpt::ToCString(s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
+			dc.DrawText(s.c_str(), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 			// Sample
 			highlight = (focus && nPos == (int)m_nNote);
 			rect.left = rcClient.left + m_cxFont * 2 + 3;
@@ -248,7 +250,7 @@ void CNoteMapWnd::OnPaint()
 				rect.InflateRect(1, 1);
 			}
 			dc.SetTextColor((highlight) ? colorTextSel : colorText);
-			dc.DrawText(mpt::ToCString(s), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
+			dc.DrawText(s.c_str(), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 		}
 		rect.SetRect(rcClient.left + m_cxFont * 2 - 1, rcClient.top, rcClient.left + m_cxFont * 2 + 3, ypaint);
 		DrawButtonRect(dc, &rect, _T(""), FALSE, FALSE);
@@ -264,7 +266,7 @@ void CNoteMapWnd::OnPaint()
 
 void CNoteMapWnd::OnSetFocus(CWnd *pOldWnd)
 {
-	CWnd::OnSetFocus(pOldWnd);
+	CStatic::OnSetFocus(pOldWnd);
 	InvalidateRect(NULL, FALSE);
 	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus = this;
 	m_undo = true;
@@ -273,7 +275,7 @@ void CNoteMapWnd::OnSetFocus(CWnd *pOldWnd)
 
 void CNoteMapWnd::OnKillFocus(CWnd *pNewWnd)
 {
-	CWnd::OnKillFocus(pNewWnd);
+	CStatic::OnKillFocus(pNewWnd);
 	InvalidateRect(NULL, FALSE);
 	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus = nullptr;
 }
@@ -330,9 +332,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 			if (hSubMenu)
 			{
 				// Create sub menu with a list of all samples that are referenced by this instrument.
-				const std::set<SAMPLEINDEX> referencedSamples = pIns->GetSamples();
-
-				for(auto sample : referencedSamples)
+				for(auto sample : pIns->GetSamples())
 				{
 					if(sample <= sndFile.GetNumSamples())
 					{
@@ -420,6 +420,7 @@ void CNoteMapWnd::OnMapCopySample()
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
 			InvalidateRect(NULL, FALSE);
+			UpdateTitle();
 		}
 	}
 }
@@ -431,20 +432,21 @@ void CNoteMapWnd::OnMapReset()
 	if (pIns)
 	{
 		m_undo = true;
-		bool bModified = false;
+		bool modified = false;
 		for (size_t i = 0; i < CountOf(pIns->NoteMap); i++) if (pIns->NoteMap[i] != i + 1)
 		{
-			if(!bModified)
+			if(!modified)
 			{
 				PrepareUndo("Reset Note Map");
 			}
 			pIns->NoteMap[i] = static_cast<ModCommand::NOTE>(i + 1);
-			bModified = true;
+			modified = true;
 		}
-		if (bModified)
+		if(modified)
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
 			InvalidateRect(NULL, FALSE);
+			UpdateTitle();
 		}
 	}
 }
@@ -456,20 +458,21 @@ void CNoteMapWnd::OnMapRemove()
 	if (pIns)
 	{
 		m_undo = true;
-		bool bModified = false;
+		bool modified = false;
 		for (auto &sample: pIns->Keyboard) if (sample != 0)
 		{
-			if(!bModified)
+			if(!modified)
 			{
 				PrepareUndo("Remove Sample Assocations");
 			}
 			sample = 0;
-			bModified = true;
+			modified = true;
 		}
-		if (bModified)
+		if(modified)
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
 			InvalidateRect(NULL, FALSE);
+			UpdateTitle();
 		}
 	}
 }
@@ -501,7 +504,7 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 	m_undo = true;
 	if (pIns)
 	{
-		bool bModified = false;
+		bool modified = false;
 		for(NOTEINDEXTYPE i = 0; i < NOTE_MAX; i++)
 		{
 			int n = pIns->NoteMap[i];
@@ -510,19 +513,20 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 				n = Clamp(n + nAmount, NOTE_MIN, NOTE_MAX);
 				if(n != pIns->NoteMap[i])
 				{
-					if(!bModified)
+					if(!modified)
 					{
 						PrepareUndo("Transpose Map");
 					}
 					pIns->NoteMap[i] = static_cast<uint8>(n);
-					bModified = true;
+					modified = true;
 				}
 			}
 		}
-		if (bModified)
+		if(modified)
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
 			InvalidateRect(NULL, FALSE);
+			UpdateTitle();
 		}
 	}
 }
@@ -609,11 +613,11 @@ void CNoteMapWnd::EnterNote(UINT note)
 		if (!m_bIns && (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)))
 		{
 			UINT n = pIns->NoteMap[m_nNote];
-			bool bOk = false;
+			bool ok = false;
 			if ((note >= sndFile.GetModSpecifications().noteMin) && (note <= sndFile.GetModSpecifications().noteMax))
 			{
 				n = note;
-				bOk = true;
+				ok = true;
 			}
 			if (n != pIns->NoteMap[m_nNote])
 			{
@@ -621,12 +625,12 @@ void CNoteMapWnd::EnterNote(UINT note)
 				pIns->NoteMap[m_nNote] = static_cast<ModCommand::NOTE>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				InvalidateRect(NULL, FALSE);
+				UpdateTitle();
 			}
-			if (bOk)
+			if(ok)
 			{
 				PlayNote(m_nNote);
 			}
-
 		}
 	}
 }
@@ -660,13 +664,13 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 				pIns->Keyboard[m_nNote] = static_cast<SAMPLEINDEX>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				InvalidateRect(NULL, FALSE);
+				UpdateTitle();
 				PlayNote(m_nNote);
 			}
 
 			if (c == ' ')
 			{
-				if (m_nNote < NOTE_MAX - 1) m_nNote++;
-				InvalidateRect(NULL, FALSE);
+				SetCurrentNote(m_nNote + 1);
 				PlayNote(m_nNote);
 			}
 			return true;
@@ -699,11 +703,12 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 				pIns->NoteMap[m_nNote] = static_cast<ModCommand::NOTE>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				InvalidateRect(NULL, FALSE);
+				UpdateTitle();
 			}
 
-			if (c == ' ')
+			if(c == ' ')
 			{
-				SetCurrentNote(m_nNote+1);
+				SetCurrentNote(m_nNote + 1);
 			}
 
 			PlayNote(m_nNote);
@@ -716,7 +721,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 
 bool CNoteMapWnd::HandleNav(WPARAM k)
 {
-	bool bRedraw = false;
+	bool redraw = false;
 
 	//HACK: handle numpad (convert numpad number key to normal number key)
 	if ((k >= VK_NUMPAD0) && (k <= VK_NUMPAD9)) return HandleChar(k-VK_NUMPAD0+'0');
@@ -724,32 +729,32 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 	switch(k)
 	{
 	case VK_RIGHT:
-		if (!m_bIns) { m_bIns = true; bRedraw = true; } else
-		if (m_nNote < NOTE_MAX - 1) { m_nNote++; m_bIns = false; bRedraw = true; }
+		if (!m_bIns) { m_bIns = true; redraw = true; } else
+		if (m_nNote < NOTE_MAX - NOTE_MIN) { m_nNote++; m_bIns = false; redraw = true; }
 		break;
 	case VK_LEFT:
-		if (m_bIns) { m_bIns = false; bRedraw = true; } else
-		if (m_nNote) { m_nNote--; m_bIns = true; bRedraw = true; }
+		if (m_bIns) { m_bIns = false; redraw = true; } else
+		if (m_nNote) { m_nNote--; m_bIns = true; redraw = true; }
 		break;
 	case VK_UP:
-		if (m_nNote > 0) { m_nNote--; bRedraw = true; }
+		if (m_nNote > 0) { m_nNote--; redraw = true; }
 		break;
 	case VK_DOWN:
-		if (m_nNote < NOTE_MAX - 1) { m_nNote++; bRedraw = true; }
+		if (m_nNote < NOTE_MAX - 1) { m_nNote++; redraw = true; }
 		break;
 	case VK_PRIOR:
-		if (m_nNote > 3) { m_nNote -= 3; bRedraw = true; } else
-		if (m_nNote > 0) { m_nNote = 0; bRedraw = true; }
+		if (m_nNote > 3) { m_nNote -= 3; redraw = true; } else
+		if (m_nNote > 0) { m_nNote = 0; redraw = true; }
 		break;
 	case VK_NEXT:
-		if (m_nNote+3 < NOTE_MAX) { m_nNote += 3; bRedraw = true; } else
-		if (m_nNote < NOTE_MAX - 1) { m_nNote = NOTE_MAX - 1; bRedraw = true; }
+		if (m_nNote+3 < NOTE_MAX) { m_nNote += 3; redraw = true; } else
+		if (m_nNote < NOTE_MAX - NOTE_MIN) { m_nNote = NOTE_MAX - NOTE_MIN; redraw = true; }
 		break;
 	case VK_HOME:
-		if(m_nNote > 0) { m_nNote = 0; bRedraw = true; }
+		if(m_nNote > 0) { m_nNote = 0; redraw = true; }
 		break;
 	case VK_END:
-		if(m_nNote < NOTE_MAX - 1) { m_nNote = NOTE_MAX - 1; bRedraw = true; }
+		if(m_nNote < NOTE_MAX - NOTE_MIN) { m_nNote = NOTE_MAX - NOTE_MIN; redraw = true; }
 		break;
 // 	case VK_TAB:
 // 		return true;
@@ -769,10 +774,11 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 	default:
 		return false;
 	}
-	if (bRedraw)
+	if(redraw)
 	{
 		m_undo = true;
 		InvalidateRect(NULL, FALSE);
+		UpdateTitle();
 	}
 
 	return true;
@@ -797,6 +803,26 @@ void CNoteMapWnd::StopNote()
 
 	m_modDoc.NoteOff(m_nPlayingNote, true, m_nInstrument, m_noteChannel);
 	m_nPlayingNote = NOTE_NONE;
+}
+
+
+void CNoteMapWnd::UpdateTitle()
+{
+	const auto *ins = m_modDoc.GetSoundFile().Instruments[m_nInstrument];
+	if(!ins || m_nNote >= std::size(ins->NoteMap))
+		return;
+
+	const auto &sndFile = m_modDoc.GetSoundFile();
+	mpt::winstring s = mpt::ToWin(sndFile.GetNoteName(m_nNote + NOTE_MIN, m_nInstrument)) + _T(": ");
+	if(ins->Keyboard[m_nNote] == 0)
+	{
+		s += _T("no sample");
+	} else
+	{
+		auto mappedNote = ins->NoteMap[m_nNote];
+		s += mpt::tformat(_T("sample %1 at %2"))(ins->Keyboard[m_nNote], mpt::ToWin(sndFile.GetNoteName(mappedNote, m_nInstrument)));
+	}
+	SetWindowText(s.c_str());
 }
 
 
