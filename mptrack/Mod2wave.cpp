@@ -1350,7 +1350,15 @@ void CDoWaveConvert::Run()
 						}
 					);
 					break;
-				default: MPT_ASSERT(false); break;
+				case SampleFormatFloat64:
+					dither.WithDither(
+						[&](auto &ditherInstance)
+						{
+							ConvertBufferMixFloatToBuffer<false>(audio_buffer_interleaved<double>(reinterpret_cast<double*>(buffer), channels, framesChunk), audio_buffer_interleaved<const MixSampleFloat>(floatbuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
+						}
+					);
+					break;
+				default: MPT_ASSERT_NOTREACHED(); break;
 				}
 				MPT_ASSERT(!mpt::endian_is_weird());
 				if(fileEnc->GetConvertedEndianness() != mpt::get_endian())
