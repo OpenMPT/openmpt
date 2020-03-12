@@ -144,7 +144,7 @@ void CNoteMapWnd::SetCurrentInstrument(INSTRUMENTINDEX nIns)
 		}
 
 		Invalidate(FALSE);
-		UpdateTitle();
+		UpdateAccessibleTitle();
 	}
 }
 
@@ -155,7 +155,7 @@ void CNoteMapWnd::SetCurrentNote(UINT nNote)
 	{
 		m_nNote = nNote;
 		Invalidate(FALSE);
-		UpdateTitle();
+		UpdateAccessibleTitle();
 	}
 }
 
@@ -418,7 +418,7 @@ void CNoteMapWnd::OnMapCopySample()
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
 			Invalidate(FALSE);
-			UpdateTitle();
+			UpdateAccessibleTitle();
 		}
 	}
 }
@@ -444,7 +444,7 @@ void CNoteMapWnd::OnMapReset()
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
 			Invalidate(FALSE);
-			UpdateTitle();
+			UpdateAccessibleTitle();
 		}
 	}
 }
@@ -470,7 +470,7 @@ void CNoteMapWnd::OnMapRemove()
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
 			Invalidate(FALSE);
-			UpdateTitle();
+			UpdateAccessibleTitle();
 		}
 	}
 }
@@ -524,7 +524,7 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 		{
 			m_pParent.SetModified(InstrumentHint().Info(), false);
 			Invalidate(FALSE);
-			UpdateTitle();
+			UpdateAccessibleTitle();
 		}
 	}
 }
@@ -623,7 +623,7 @@ void CNoteMapWnd::EnterNote(UINT note)
 				pIns->NoteMap[m_nNote] = static_cast<ModCommand::NOTE>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				Invalidate(FALSE);
-				UpdateTitle();
+				UpdateAccessibleTitle();
 			}
 			if(ok)
 			{
@@ -662,7 +662,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 				pIns->Keyboard[m_nNote] = static_cast<SAMPLEINDEX>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				Invalidate(FALSE);
-				UpdateTitle();
+				UpdateAccessibleTitle();
 				PlayNote(m_nNote);
 			}
 
@@ -701,7 +701,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 				pIns->NoteMap[m_nNote] = static_cast<ModCommand::NOTE>(n);
 				m_pParent.SetModified(InstrumentHint().Info(), false);
 				Invalidate(FALSE);
-				UpdateTitle();
+				UpdateAccessibleTitle();
 			}
 
 			if(c == ' ')
@@ -776,7 +776,7 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 	{
 		m_undo = true;
 		Invalidate(FALSE);
-		UpdateTitle();
+		UpdateAccessibleTitle();
 	}
 
 	return true;
@@ -804,9 +804,10 @@ void CNoteMapWnd::StopNote()
 }
 
 
-void CNoteMapWnd::UpdateTitle()
+void CNoteMapWnd::UpdateAccessibleTitle()
 {
-	NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
+	if(!CMainFrame::GetMainFrame()->IsPlaying())
+		NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
 }
 
 

@@ -103,10 +103,11 @@ END_MESSAGE_MAP()
 
 
 COrderList::COrderList(CCtrlPatterns &parent, CModDoc &document)
-	: m_nOrderlistMargins(TrackerSettings::Instance().orderlistMargins)
-	, m_modDoc(document)
-	, m_pParent(parent)
+    : m_nOrderlistMargins(TrackerSettings::Instance().orderlistMargins)
+    , m_modDoc(document)
+    , m_pParent(parent)
 {
+	EnableActiveAccessibility();
 }
 
 
@@ -697,7 +698,18 @@ void COrderList::UpdateInfoText()
 	}
 	CMainFrame::GetMainFrame()->SetInfoText(s);
 
-	// Set window title for screen readers
+	if(!CMainFrame::GetMainFrame()->IsPlaying())
+		NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
+}
+
+
+// Accessible description for screen readers
+HRESULT COrderList::get_accName(VARIANT, BSTR *pszName)
+{
+	CSoundFile &sndFile = m_modDoc.GetSoundFile();
+	const auto &order = Order();
+
+	CString s;
 	const bool singleSel = m_nScrollPos2nd == ORDERINDEX_INVALID || m_nScrollPos2nd == m_nScrollPos;
 	const auto firstOrd = singleSel ? m_nScrollPos : std::min(m_nScrollPos, m_nScrollPos2nd), lastOrd = singleSel ? m_nScrollPos : std::max(m_nScrollPos, m_nScrollPos2nd);
 	if(singleSel)
@@ -723,7 +735,9 @@ void COrderList::UpdateInfoText()
 				s += _T(" (") + mpt::ToCString(sndFile.GetCharsetInternal(), patName) + _T(")");
 		}
 	}
-	SetWindowText(s);
+	
+	*pszName = s.AllocSysString();
+	return S_OK;
 }
 
 

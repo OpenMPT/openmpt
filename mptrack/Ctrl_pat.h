@@ -121,6 +121,7 @@ public:
 	//{{AFX_VIRTUAL(COrderList)
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const override;
+	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override;
 	//}}AFX_VIRTUAL
 
 protected:

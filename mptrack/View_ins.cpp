@@ -205,7 +205,8 @@ void CViewInstrument::SetModified(InstrumentHint hint, bool updateAll)
 	CModDoc *pModDoc = GetDocument();
 	pModDoc->SetModified();
 	pModDoc->UpdateAllViews(nullptr, hint.SetData(m_nInstrument), updateAll ? nullptr : this);
-	NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
+	if(!CMainFrame::GetMainFrame()->IsPlaying())
+		NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
 }
 
 
@@ -1602,7 +1603,8 @@ void CViewInstrument::UpdateIndicator(int tick, int val)
 	CString s;
 	s.Format(TrackerSettings::Instance().cursorPositionInHex ? _T("Tick %X, [%s]") : _T("Tick %d, [%s]"), tick, EnvValueToString(tick, val).GetString());
 	CModScrollView::UpdateIndicator(s);
-	NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
+	if(!CMainFrame::GetMainFrame()->IsPlaying())
+		NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
 }
 
 

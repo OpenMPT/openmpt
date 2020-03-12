@@ -1611,7 +1611,8 @@ void CViewPattern::UpdateIndicator()
 				mainFrm->SetInfoText(GetCursorDescription());
 			UpdateXInfoText();
 		}
-		NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
+		if(!mainFrm->IsPlaying())
+			NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
 	}
 }
 

@@ -53,7 +53,7 @@ public:
 	void PlayNote(UINT note);
 	void StopNote();
 
-	void UpdateTitle();
+	void UpdateAccessibleTitle();
 
 public:
 	//{{AFX_VIRTUAL(CNoteMapWnd)
