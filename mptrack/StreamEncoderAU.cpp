@@ -205,7 +205,7 @@ AUEncoder::AUEncoder()
 	traits.defaultSamplerate = 48000;
 	traits.defaultChannels = 2;
 	traits.defaultMode = Encoder::ModeEnumerated;
-	traits.defaultFormat = 0;
+	traits.defaultFormat = 1;  // 32-bit float
 	SetTraits(traits);
 }
 
