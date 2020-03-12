@@ -68,11 +68,11 @@ namespace Encoder
 
 	struct Format
 	{
-		uint32 Samplerate;
-		int Channels;
-		SampleFormat Sampleformat;
+		uint32 Samplerate = 0;
+		int Channels = 0;
+		SampleFormat Sampleformat = SampleFormatInvalid;
 
-		int Bitrate;
+		int Bitrate = 0;
 		mpt::ustring Description;
 	};
 
@@ -124,45 +124,27 @@ namespace Encoder
 
 		mpt::ustring fileDescription;
 
-		bool canTags;
+		bool canTags = false;
 		std::vector<mpt::ustring> genres;
-		int modesWithFixedGenres;
+		int modesWithFixedGenres = 0;
 		
-		bool canCues;
+		bool canCues = false;
 
-		int maxChannels;
+		int maxChannels = 0;
 		std::vector<uint32> samplerates;
 		
-		int modes;
+		int modes = Encoder::ModeInvalid;
 		std::vector<int> bitrates;
 		std::vector<Encoder::Format> formats;
 		
-		uint32 defaultSamplerate;
-		uint16 defaultChannels;
+		uint32 defaultSamplerate = 48000;
+		uint16 defaultChannels = 2;
 
-		Encoder::Mode defaultMode;
-		int defaultBitrate;
-		float defaultQuality;
-		int defaultFormat;
-		int defaultDitherType;
-
-		Traits()
-			: canTags(false)
-			, modesWithFixedGenres(0)
-			, canCues(false)
-			, maxChannels(0)
-			, modes(Encoder::ModeInvalid)
-			, defaultSamplerate(44100)
-			, defaultChannels(2)
-			, defaultMode(Encoder::ModeInvalid)
-			, defaultBitrate(0)
-			, defaultQuality(0.0f)
-			, defaultFormat(0)
-			, defaultDitherType(1)
-		{
-			return;
-		}
-
+		Encoder::Mode defaultMode = Encoder::ModeInvalid;
+		int defaultBitrate = 0;
+		float defaultQuality = 0.0f;
+		int defaultFormat = 0;
+		int defaultDitherType = 1;
 	};
 
 	struct Settings
@@ -241,10 +223,10 @@ public:
 	StreamWriterBase(std::ostream &stream);
 	virtual ~StreamWriterBase();
 public:
-	virtual mpt::endian GetConvertedEndianness() const;
-	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
-	virtual void WriteInterleavedConverted(size_t frameCount, const std::byte *data);
-	virtual void WriteCues(const std::vector<uint64> &cues);
+	mpt::endian GetConvertedEndianness() const override;
+	void WriteInterleaved(size_t count, const float *interleaved) override = 0;
+	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override;
+	void WriteCues(const std::vector<uint64> &cues) override;
 protected:
 	void WriteBuffer();
 };
