@@ -806,21 +806,30 @@ void CNoteMapWnd::StopNote()
 
 void CNoteMapWnd::UpdateTitle()
 {
+	NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
+}
+
+
+// Accessible description for screen readers
+HRESULT CNoteMapWnd::get_accName(VARIANT varChild, BSTR *pszName)
+{
 	const auto *ins = m_modDoc.GetSoundFile().Instruments[m_nInstrument];
 	if(!ins || m_nNote >= std::size(ins->NoteMap))
-		return;
+		return CStatic::get_accName(varChild, pszName);
 
 	const auto &sndFile = m_modDoc.GetSoundFile();
-	mpt::winstring s = mpt::ToWin(sndFile.GetNoteName(static_cast<ModCommand::NOTE>(m_nNote + NOTE_MIN), m_nInstrument)) + _T(": ");
+	CString str = mpt::ToCString(sndFile.GetNoteName(static_cast<ModCommand::NOTE>(m_nNote + NOTE_MIN), m_nInstrument)) + _T(": ");
 	if(ins->Keyboard[m_nNote] == 0)
 	{
-		s += _T("no sample");
+		str += _T("no sample");
 	} else
 	{
 		auto mappedNote = ins->NoteMap[m_nNote];
-		s += mpt::tformat(_T("sample %1 at %2"))(ins->Keyboard[m_nNote], mpt::ToWin(sndFile.GetNoteName(mappedNote, m_nInstrument)));
+		str += mpt::cformat(_T("sample %1 at %2"))(ins->Keyboard[m_nNote], mpt::ToWin(sndFile.GetNoteName(mappedNote, m_nInstrument)));
 	}
-	SetWindowText(s.c_str());
+
+	*pszName = str.AllocSysString();
+	return S_OK;
 }
 
 

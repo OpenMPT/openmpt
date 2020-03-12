@@ -387,6 +387,7 @@ void CViewPattern::SetModified(bool updateAllViews)
 		pModDoc->SetModified();
 		pModDoc->UpdateAllViews(this, PatternHint(m_nPattern).Data(), updateAllViews ? nullptr : this);
 	}
+	NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
 }
 
 

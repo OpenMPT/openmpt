@@ -42,7 +42,9 @@ public:
 	CNoteMapWnd(CCtrlInstruments &parent, CModDoc &document)
 		: m_modDoc(document)
 		, m_pParent(parent)
-	{ }
+	{
+		EnableActiveAccessibility();
+	}
 	void SetCurrentInstrument(INSTRUMENTINDEX nIns);
 	void SetCurrentNote(UINT nNote);
 	void EnterNote(UINT note);
@@ -56,6 +58,7 @@ public:
 public:
 	//{{AFX_VIRTUAL(CNoteMapWnd)
 	BOOL PreTranslateMessage(MSG* pMsg) override;
+	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override;
 	//}}AFX_VIRTUAL
 
 protected:
