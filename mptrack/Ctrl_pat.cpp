@@ -125,11 +125,12 @@ BOOL CCtrlPatterns::OnInitDialog()
 	// Order List
 	m_BtnNext.GetWindowRect(&rect);
 	ScreenToClient(&rect);
-	rcOrderList.left = rect.right + 4;
+	auto margins = Util::ScalePixels(4, m_hWnd);
+	rcOrderList.left = rect.right + margins;
 	rcOrderList.top = rect.top;
 	rcOrderList.bottom = rect.bottom + GetSystemMetrics(SM_CYHSCROLL);
 	GetClientRect(&rect);
-	rcOrderList.right = rect.right - 4;
+	rcOrderList.right = rect.right - margins;
 	m_OrderList.Init(rcOrderList, pMainFrm->GetGUIFont());
 	// Toolbar buttons
 	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_PatternIcons, CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
