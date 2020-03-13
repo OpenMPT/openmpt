@@ -401,12 +401,12 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 	// Snap to grid
 	if(m_nGridSegments > 0 && m_nGridSegments < sample.nLength)
 	{
-		auto sampsPerSegment = static_cast<double>(sample.nLength / m_nGridSegments);
-		nBegin = static_cast<SmpLength>(mpt::round((nBegin / sampsPerSegment)) * sampsPerSegment);
-		nEnd = static_cast<SmpLength>(mpt::round((nEnd / sampsPerSegment)) * sampsPerSegment);
+		auto samplesPerSegment = static_cast<double>(sample.nLength) / m_nGridSegments;
+		nBegin = static_cast<SmpLength>(mpt::round(nBegin / samplesPerSegment) * samplesPerSegment);
+		nEnd = static_cast<SmpLength>(mpt::round(nEnd / samplesPerSegment) * samplesPerSegment);
 	}
 
-	if (nBegin > nEnd)
+	if(nBegin > nEnd)
 	{
 		std::swap(nBegin, nEnd);
 	}
@@ -965,13 +965,11 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 
 void CViewSample::OnDraw(CDC *pDC)
 {
-	CRect rcClient = m_rcClient, rect, rc;
 	const CModDoc *pModDoc = GetDocument();
-
-	const SmpLength nSmpScrollPos = ScrollPosToSamplePos();
-
 	if ((!pModDoc) || (!pDC)) return;
 
+	CRect rcClient = m_rcClient, rect, rc;
+	const SmpLength smpScrollPos = ScrollPosToSamplePos();
 	const auto &colors = TrackerSettings::Instance().rgbCustomColors;
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 	const ModSample &sample = sndFile.GetSample((m_nSample <= sndFile.GetNumSamples()) ? m_nSample : 0);
@@ -991,16 +989,16 @@ void CViewSample::OnDraw(CDC *pDC)
 
 	const auto oldPen = offScreenDC.SelectObject(CMainFrame::penDarkGray);
 	rect = rcClient;
-	if ((rcClient.bottom > rcClient.top) && (rcClient.right > rcClient.left))
+	if((rcClient.bottom > rcClient.top) && (rcClient.right > rcClient.left))
 	{
 		int ymed = (rect.top + rect.bottom) / 2;
 		int yrange = (rect.bottom - rect.top) / 2;
 
 		// Erase background
-		if ((m_dwBeginSel < m_dwEndSel) && (m_dwEndSel > nSmpScrollPos))
+		if ((m_dwBeginSel < m_dwEndSel) && (m_dwEndSel > smpScrollPos))
 		{
 			rc = rect;
-			if (m_dwBeginSel > nSmpScrollPos)
+			if (m_dwBeginSel > smpScrollPos)
 			{
 				rc.right = SampleToScreen(m_dwBeginSel);
 				if (rc.right > rcClient.right) rc.right = rcClient.right;
@@ -1037,7 +1035,7 @@ void CViewSample::OnDraw(CDC *pDC)
 		if (sample.HasSampleData() && (yrange) && (sample.nLength > 1) && (rect.right > 1))
 		{
 			// Loop Start/End
-			if ((sample.nLoopEnd > nSmpScrollPos) && (sample.nLoopEnd > sample.nLoopStart))
+			if ((sample.nLoopEnd > smpScrollPos) && (sample.nLoopEnd > sample.nLoopStart))
 			{
 				int xl = SampleToScreen(sample.nLoopStart);
 				if ((xl >= 0) && (xl < rcClient.right))
@@ -1053,7 +1051,7 @@ void CViewSample::OnDraw(CDC *pDC)
 				}
 			}
 			// Sustain Loop Start/End
-			if ((sample.nSustainEnd > nSmpScrollPos) && (sample.nSustainEnd > sample.nSustainStart))
+			if ((sample.nSustainEnd > smpScrollPos) && (sample.nSustainEnd > sample.nSustainStart))
 			{
 				offScreenDC.SetBkColor(RGB(0xFF, 0xFF, 0xFF));
 				offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
@@ -1077,8 +1075,8 @@ void CViewSample::OnDraw(CDC *pDC)
 			if (m_nZoom == 1 || m_nZoom < 0 || ((!m_nZoom) && (sample.nLength <= (SmpLength)rect.Width())))
 			{
 				// Draw sample data in 1:1 ratio or higher (zoom in)
-				SmpLength len = sample.nLength - nSmpScrollPos;
-				const std::byte *psample = sample.sampleb() + nSmpScrollPos * smplsize;
+				SmpLength len = sample.nLength - smpScrollPos;
+				const std::byte *psample = sample.sampleb() + smpScrollPos * smplsize;
 				if (sample.uFlags[CHN_STEREO])
 				{
 					DrawSampleData1(offScreenDC, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
@@ -1094,8 +1092,8 @@ void CViewSample::OnDraw(CDC *pDC)
 				int xscroll = 0;
 				if (m_nZoom > 0)
 				{
-					xscroll = nSmpScrollPos;
-					len -= nSmpScrollPos;
+					xscroll = smpScrollPos;
+					len -= smpScrollPos;
 				}
 				const std::byte *psample = sample.sampleb() + xscroll * smplsize;
 				if (sample.uFlags[CHN_STEREO])
@@ -1110,19 +1108,20 @@ void CViewSample::OnDraw(CDC *pDC)
 		}
 	}
 
-	if(m_nGridSegments && m_nGridSegments < sample.nLength)
+	if(m_nGridSegments > 0 && m_nGridSegments < sample.nLength && sample.nLength != 0)
 	{
 		// Draw sample grid
 		offScreenDC.SetBkColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKSAMPLE]);
 		offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
-		for(SmpLength i = 1; i < m_nGridSegments; i++)
+		const auto segmentsByLength = static_cast<double>(m_nGridSegments) / sample.nLength;
+		const auto samplesPerSegment = static_cast<double>(sample.nLength) / m_nGridSegments;
+		const auto leftSegment = std::max(uint32(1), mpt::saturate_round<uint32>(ScreenToSample(rect.left) * segmentsByLength));
+		const auto rightSegment = std::min(m_nGridSegments, mpt::saturate_round<uint32>(ScreenToSample(rect.right) * segmentsByLength));
+		for(uint32 i = leftSegment; i <= rightSegment; i++)
 		{
-			int screenPos = SampleToScreen(sample.nLength * i / m_nGridSegments);
-			if(screenPos >= rect.left && screenPos <= rect.right)
-			{
-				offScreenDC.MoveTo(screenPos, rect.top);
-				offScreenDC.LineTo(screenPos, rect.bottom);
-			}
+			int screenPos = SampleToScreen(mpt::saturate_round<SmpLength>(samplesPerSegment * i));
+			offScreenDC.MoveTo(screenPos, rect.top);
+			offScreenDC.LineTo(screenPos, rect.bottom);
 		}
 	}
 

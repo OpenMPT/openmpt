@@ -826,7 +826,7 @@ HRESULT CNoteMapWnd::get_accName(VARIANT varChild, BSTR *pszName)
 	} else
 	{
 		auto mappedNote = ins->NoteMap[m_nNote];
-		str += mpt::cformat(_T("sample %1 at %2"))(ins->Keyboard[m_nNote], mpt::ToWin(sndFile.GetNoteName(mappedNote, m_nInstrument)));
+		str += mpt::cformat(_T("sample %1 at %2"))(ins->Keyboard[m_nNote], mpt::ToCString(sndFile.GetNoteName(mappedNote, m_nInstrument)));
 	}
 
 	*pszName = str.AllocSysString();
