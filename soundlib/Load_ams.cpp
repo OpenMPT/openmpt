@@ -835,7 +835,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		static_assert(CountOf(instrument->Keyboard) >= CountOf(sampleAssignment));
+		static_assert(mpt::array_size<decltype(instrument->Keyboard)>::size >= std::size(sampleAssignment));
 		for(size_t i = 0; i < 120; i++)
 		{
 			instrument->Keyboard[i] = sampleAssignment[i] + GetNumSamples() + 1;

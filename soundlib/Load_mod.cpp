@@ -2212,11 +2212,11 @@ bool CSoundFile::SaveMod(std::ostream &f) const
 		for(INSTRUMENTINDEX ins = 1; ins <= lastIns; ins++) if (Instruments[ins])
 		{
 			// Find some valid sample associated with this instrument.
-			for(size_t i = 0; i < CountOf(Instruments[ins]->Keyboard); i++)
+			for(auto smp : Instruments[ins]->Keyboard)
 			{
-				if(Instruments[ins]->Keyboard[i] > 0 && Instruments[ins]->Keyboard[i] <= GetNumSamples())
+				if(smp > 0 && smp <= GetNumSamples())
 				{
-					sampleSource[ins] = Instruments[ins]->Keyboard[i];
+					sampleSource[ins] = smp;
 					break;
 				}
 			}

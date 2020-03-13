@@ -207,8 +207,8 @@ struct AMFFInstrumentHeader
 	{
 		mptIns.name = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, name);
 
-		static_assert(CountOf(sampleMap) <= CountOf(mptIns.Keyboard));
-		for(size_t i = 0; i < CountOf(sampleMap); i++)
+		static_assert(mpt::array_size<decltype(sampleMap)>::size <= mpt::array_size<decltype(mptIns.Keyboard)>::size);
+		for(size_t i = 0; i < std::size(sampleMap); i++)
 		{
 			mptIns.Keyboard[i] = sampleMap[i] + baseSample + 1;
 		}
@@ -384,8 +384,8 @@ struct AMInstrumentHeader
 	{
 		mptIns.name = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, name);
 
-		static_assert(CountOf(sampleMap) <= CountOf(mptIns.Keyboard));
-		for(uint8 i = 0; i < CountOf(sampleMap); i++)
+		static_assert(mpt::array_size<decltype(sampleMap)>::size <= mpt::array_size<decltype(mptIns.Keyboard)>::size);
+		for(uint8 i = 0; i < std::size(sampleMap); i++)
 		{
 			mptIns.Keyboard[i] = sampleMap[i] + baseSample + 1;
 		}

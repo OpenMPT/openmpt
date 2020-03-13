@@ -300,7 +300,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		if(instr == nullptr) continue;
 
 		// Extended instrument attributes
-		if(instr->nFilterMode != FLTMODE_UNCHANGED || instr->nVolRampUp != 0 || instr->resampling != SRCMODE_DEFAULT ||
+		if(instr->filterMode != FilterMode::Unchanged || instr->nVolRampUp != 0 || instr->resampling != SRCMODE_DEFAULT ||
 			instr->nCutSwing != 0 || instr->nResSwing != 0 || instr->nMixPlug != 0 || instr->pitchToTempoLock.GetRaw() != 0 ||
 			instr->nDCT == DCT_PLUGIN ||
 			instr->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET ||
@@ -311,7 +311,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 			foundHere = foundHacks = true;
 			if(autofix)
 			{
-				instr->nFilterMode = FLTMODE_UNCHANGED;
+				instr->filterMode = FilterMode::Unchanged;
 				instr->nVolRampUp = 0;
 				instr->resampling = SRCMODE_DEFAULT;
 				instr->nCutSwing = 0;

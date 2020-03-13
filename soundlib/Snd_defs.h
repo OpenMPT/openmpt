@@ -205,11 +205,11 @@ enum EnvelopeType : uint8
 };
 
 // Filter Modes
-enum InstrFilterMode : uint8
+enum class FilterMode : uint8
 {
-	FLTMODE_UNCHANGED = 0xFF,
-	FLTMODE_LOWPASS   = 0,
-	FLTMODE_HIGHPASS  = 1,
+	Unchanged = 0xFF,
+	LowPass   = 0,
+	HighPass  = 1,
 };
 
 

@@ -124,7 +124,7 @@ int CSoundFile::SetupChannelFilter(ModChannel &chn, bool bReset, int envModifier
 
 	switch(chn.nFilterMode)
 	{
-	case FLTMODE_HIGHPASS:
+	case FilterMode::HighPass:
 		chn.nFilter_A0 = FILTER_CONVERT(1.0f - fg);
 		chn.nFilter_B0 = FILTER_CONVERT(fb0);
 		chn.nFilter_B1 = FILTER_CONVERT(fb1);

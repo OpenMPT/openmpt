@@ -431,7 +431,7 @@ void CNoteMapWnd::OnMapReset()
 	{
 		m_undo = true;
 		bool modified = false;
-		for (size_t i = 0; i < CountOf(pIns->NoteMap); i++) if (pIns->NoteMap[i] != i + 1)
+		for (size_t i = 0; i < std::size(pIns->NoteMap); i++) if (pIns->NoteMap[i] != i + 1)
 		{
 			if(!modified)
 			{
@@ -1020,9 +1020,9 @@ BOOL CCtrlInstruments::OnInitDialog()
 		m_CbnResampling.SetItemData(m_CbnResampling.AddString(CTrackApp::GetResamplingModeName(mode, 1, false)), mode);
 	}
 
-	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString(_T("Channel default")), FLTMODE_UNCHANGED);
-	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString(_T("Force lowpass")), FLTMODE_LOWPASS);
-	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString(_T("Force highpass")), FLTMODE_HIGHPASS);
+	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString(_T("Channel default")), static_cast<DWORD_PTR>(FilterMode::Unchanged));
+	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString(_T("Force lowpass")), static_cast<DWORD_PTR>(FilterMode::LowPass));
+	m_CbnFilterMode.SetItemData(m_CbnFilterMode.AddString(_T("Force highpass")), static_cast<DWORD_PTR>(FilterMode::HighPass));
 
 	//VST velocity/volume handling
 	m_CbnPluginVolumeHandling.AddString(_T("MIDI volume"));
@@ -1381,7 +1381,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		// Backwards compatibility with legacy IT/XM modules that use now deprecated hack features.
 		m_SliderCutSwing.EnableWindow(pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nCutSwing != 0));
 		m_SliderResSwing.EnableWindow(pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nResSwing != 0));
-		m_CbnFilterMode.EnableWindow (pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nFilterMode != FLTMODE_UNCHANGED));
+		m_CbnFilterMode.EnableWindow (pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->filterMode != FilterMode::Unchanged));
 		m_CbnResampling.EnableWindow (pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->resampling != SRCMODE_DEFAULT));
 		m_SliderAttack.EnableWindow  (pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nVolRampUp));
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), pIns != nullptr && (m_sndFile.GetType() == MOD_TYPE_MPT || pIns->nVolRampUp));
@@ -1432,7 +1432,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			}
 			for(int fltMode = 0; fltMode<m_CbnFilterMode.GetCount(); fltMode++)
 			{
-				if(pIns->nFilterMode == m_CbnFilterMode.GetItemData(fltMode))
+				if(pIns->filterMode == static_cast<FilterMode>(m_CbnFilterMode.GetItemData(fltMode)))
 				{
 					m_CbnFilterMode.SetCurSel(fltMode);
 					break;
@@ -2641,16 +2641,16 @@ void CCtrlInstruments::OnFilterModeChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
-		InstrFilterMode instFiltermode = static_cast<InstrFilterMode>(m_CbnFilterMode.GetItemData(m_CbnFilterMode.GetCurSel()));
+		FilterMode instFiltermode = static_cast<FilterMode>(m_CbnFilterMode.GetItemData(m_CbnFilterMode.GetCurSel()));
 
-		if(pIns->nFilterMode != instFiltermode)
+		if(pIns->filterMode != instFiltermode)
 		{
 			PrepareUndo("Set Filter Mode");
-			pIns->nFilterMode = instFiltermode;
+			pIns->filterMode = instFiltermode;
 			SetModified(InstrumentHint().Info(), false);
 
 			//Update channel settings where this instrument is active, if required.
-			if(instFiltermode != FLTMODE_UNCHANGED)
+			if(instFiltermode != FilterMode::Unchanged)
 			{
 				for(auto &chn : m_sndFile.m_PlayState.Chn)
 				{

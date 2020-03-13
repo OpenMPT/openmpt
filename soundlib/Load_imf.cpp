@@ -123,8 +123,8 @@ struct IMFInstrument
 
 		if(smpNum)
 		{
-			static_assert(CountOf(mptIns.Keyboard) >= CountOf(map));
-			for(size_t note = 0; note < CountOf(map); note++)
+			static_assert(mpt::array_size<decltype(mptIns.Keyboard)>::size >= mpt::array_size<decltype(map)>::size);
+			for(size_t note = 0; note < std::size(map); note++)
 			{
 				mptIns.Keyboard[note] = firstSample + map[note];
 			}

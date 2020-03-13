@@ -320,7 +320,7 @@ struct SFZRegion
 	double finetune = 0;       // in cents
 	int8 transpose = 0;
 	uint8 keyLo = 0, keyHi = 127, keyRoot = 60;
-	InstrFilterMode filterType = FLTMODE_UNCHANGED;
+	FilterMode filterType = FilterMode::Unchanged;
 	uint8 polyphony = 255;
 	bool useSampleKeyRoot = false;
 	bool invertPhase = false;
@@ -465,9 +465,9 @@ struct SFZRegion
 		else if(key == "fil_type" || key == "filtype")
 		{
 			if(value == "lpf_1p" || value == "lpf_2p" || value == "lpf_4p" || value == "lpf_6p")
-				filterType = FLTMODE_LOWPASS;
+				filterType = FilterMode::LowPass;
 			else if(value == "hpf_1p" || value == "hpf_2p" || value == "hpf_4p" || value == "hpf_6p")
-				filterType = FLTMODE_HIGHPASS;
+				filterType = FilterMode::HighPass;
 			// Alternatives: bpf_2p, brf_2p
 		}
 		else if(SFZStartsWith(key, "ampeg_"))
@@ -851,7 +851,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		if(GetType() == MOD_TYPE_XM)
 			sample.Transpose(transp / 12.0);
 
-		pIns->nFilterMode = region.filterType;
+		pIns->filterMode = region.filterType;
 		if(region.cutoff != 0)
 			pIns->SetCutoff(FrequencyToCutOff(region.cutoff), true);
 		if(region.resonance != 0)
@@ -1094,7 +1094,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	if(ins->IsResonanceEnabled())
 		f << "\nresonance=" << Util::muldivr_unsigned(ins->GetResonance(), 24, 128) << " // " << static_cast<int>(ins->GetResonance());
 	if(ins->IsCutoffEnabled() || ins->IsResonanceEnabled())
-		f << "\nfil_type=" << (ins->nFilterMode == FLTMODE_HIGHPASS ? "hpf_2p" : "lpf_2p");
+		f << "\nfil_type=" << (ins->filterMode == FilterMode::HighPass ? "hpf_2p" : "lpf_2p");
 	if(ins->dwFlags[INS_SETPANNING])
 		f << "\npan=" << (Util::muldivr_unsigned(ins->nPan, 200, 256) - 100) << " // " << ins->nPan;
 	if(ins->nGlobalVol != 64)

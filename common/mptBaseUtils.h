@@ -525,9 +525,22 @@ MPT_FORCEINLINE auto lshift_signed(T x, int y) -> decltype(x << y)
 
 #endif
 
-} // namespace mpt
+template<typename>
+struct array_size;
 
+template <typename T, std::size_t N>
+struct array_size<std::array<T, N>>
+{
+	static constexpr std::size_t size = N;
+};
 
+template <typename T, std::size_t N>
+struct array_size<T[N]>
+{
+	static constexpr std::size_t size = N;
+};
+
+}  // namespace mpt
 
 namespace Util
 {
@@ -535,7 +548,7 @@ namespace Util
 	// Returns maximum value of given integer type.
 	template <class T> constexpr T MaxValueOfType(const T&) {static_assert(std::numeric_limits<T>::is_integer == true, "Only integer types are allowed."); return (std::numeric_limits<T>::max)();}
 
-}
+}  // namespace Util
 
 namespace mpt
 {

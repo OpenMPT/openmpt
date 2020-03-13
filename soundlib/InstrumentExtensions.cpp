@@ -79,7 +79,7 @@ DT..	[EXT]	nDefaultTempo;
 DTFR	[EXT]	Fractional part of default tempo
 DNA.			nDNA;
 EBIH	[EXT]	embeded instrument header tag (ITP file format)
-FM..			nFilterMode;
+FM..			filterMode;
 fn[.			filename[12];
 FO..			nFadeOut;
 GV..			nGlobalVol;
@@ -317,7 +317,7 @@ void WriteInstrumentHeaderStructOrField(ModInstrument * input, std::ostream &fil
 	WRITE_MPTHEADER_sized_member(	resampling					, uint8		, MagicBE("R...")	)
 	WRITE_MPTHEADER_sized_member(	nCutSwing					, uint8		, MagicBE("CS..")	)
 	WRITE_MPTHEADER_sized_member(	nResSwing					, uint8		, MagicBE("RS..")	)
-	WRITE_MPTHEADER_sized_member(	nFilterMode					, uint8		, MagicBE("FM..")	)
+	WRITE_MPTHEADER_sized_member(	filterMode					, uint8		, MagicBE("FM..")	)
 	WRITE_MPTHEADER_sized_member(	pluginVelocityHandling		, uint8		, MagicBE("PVEH")	)
 	WRITE_MPTHEADER_sized_member(	pluginVolumeHandling		, uint8		, MagicBE("PVOH")	)
 	WRITE_MPTHEADER_trunc_member(	pitchToTempoLock.GetInt()	, uint16	, MagicBE("PTTL")	)
@@ -387,7 +387,7 @@ void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX numInstruments
 		WritePropertyIfNeeded(*this, &ModInstrument::nPan, MagicBE("P..."), sizeof(ModInstrument::nPan), f, numInstruments);
 		WritePropertyIfNeeded(*this, &ModInstrument::nCutSwing, MagicBE("CS.."), sizeof(ModInstrument::nCutSwing), f, numInstruments);
 		WritePropertyIfNeeded(*this, &ModInstrument::nResSwing, MagicBE("RS.."), sizeof(ModInstrument::nResSwing), f, numInstruments);
-		WritePropertyIfNeeded(*this, &ModInstrument::nFilterMode, MagicBE("FM.."), sizeof(ModInstrument::nFilterMode), f, numInstruments);
+		WritePropertyIfNeeded(*this, &ModInstrument::filterMode, MagicBE("FM.."), sizeof(ModInstrument::filterMode), f, numInstruments);
 		if(IsPropertyNeeded(Instruments, &ModInstrument::pitchToTempoLock))
 		{
 			WriteInstrumentPropertyForAllInstruments(MagicBE("PTTL"), sizeof(uint16), f, numInstruments);
@@ -485,10 +485,10 @@ void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, uint16 si
 #define GET_MPTHEADER_array_member(name,type,code) \
 	case code: \
 	{\
-		if( fsize <= sizeof( type ) * CountOf(input-> name) ) \
+		if( fsize <= sizeof( type ) * std::size(input-> name) ) \
 		{ \
 			FileReader arrayChunk = file.ReadChunk(fsize); \
-			for(std::size_t i = 0; i < CountOf(input-> name); ++i) \
+			for(std::size_t i = 0; i < std::size(input-> name); ++i) \
 			{ \
 				input-> name [i] = arrayChunk.ReadIntLE<type>(); \
 			} \
@@ -583,7 +583,7 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 	GET_MPTHEADER_sized_member(	nVolRampUp				, uint16		, MagicBE("VR..")	)
 	GET_MPTHEADER_sized_member(	nCutSwing				, uint8			, MagicBE("CS..")	)
 	GET_MPTHEADER_sized_member(	nResSwing				, uint8			, MagicBE("RS..")	)
-	GET_MPTHEADER_sized_member(	nFilterMode				, uint8			, MagicBE("FM..")	)
+	GET_MPTHEADER_sized_member(	filterMode				, uint8			, MagicBE("FM..")	)
 	GET_MPTHEADER_sized_member(	pluginVelocityHandling	, uint8			, MagicBE("PVEH")	)
 	GET_MPTHEADER_sized_member(	pluginVolumeHandling	, uint8			, MagicBE("PVOH")	)
 	GET_MPTHEADER_sized_member(	PitchEnv.nReleaseNode	, uint8			, MagicBE("PERN")	)

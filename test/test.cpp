@@ -3135,7 +3135,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(pIns->GetCutoff(), 0);
 	VERIFY_EQUAL_NONCONT(pIns->IsResonanceEnabled(), false);
 	VERIFY_EQUAL_NONCONT(pIns->GetResonance(), 0);
-	VERIFY_EQUAL_NONCONT(pIns->nFilterMode, FLTMODE_UNCHANGED);
+	VERIFY_EQUAL_NONCONT(pIns->filterMode, FilterMode::Unchanged);
 
 	VERIFY_EQUAL_NONCONT(pIns->nVolSwing, 0);
 	VERIFY_EQUAL_NONCONT(pIns->nPanSwing, 0);
@@ -3428,7 +3428,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(pIns->GetCutoff(), 0x32);
 		VERIFY_EQUAL_NONCONT(pIns->IsResonanceEnabled(), true);
 		VERIFY_EQUAL_NONCONT(pIns->GetResonance(), 0x64);
-		VERIFY_EQUAL_NONCONT(pIns->nFilterMode, FLTMODE_HIGHPASS);
+		VERIFY_EQUAL_NONCONT(pIns->filterMode, FilterMode::HighPass);
 
 		VERIFY_EQUAL_NONCONT(pIns->nVolSwing, 0x30);
 		VERIFY_EQUAL_NONCONT(pIns->nPanSwing, 0x18);

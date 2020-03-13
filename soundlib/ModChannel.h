@@ -112,7 +112,8 @@ struct ModChannel
 	uint8 nTremorCount, nTremorParam;
 	uint8 nPatternLoopCount;
 	uint8 nLeftVU, nRightVU;
-	uint8 nActiveMacro, nFilterMode;
+	uint8 nActiveMacro;
+	FilterMode nFilterMode;
 	uint8 nEFxSpeed, nEFxDelay; // memory for Invert Loop (EFx, .MOD only)
 	uint8 nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep; // IMF / PTM Note Slide
 	uint8 lastZxxParam; // Memory for \xx slides

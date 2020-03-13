@@ -1755,7 +1755,7 @@ void CViewPattern::UpdateXInfoText()
 	                channel.nGlobalVol,
 	                channel.nActiveMacro,
 	                channel.nCutOff,
-	                (channel.nFilterMode == FLTMODE_HIGHPASS) ? _T("-Hi") : _T(""),
+	                (channel.nFilterMode == FilterMode::HighPass) ? _T("-Hi") : _T(""),
 	                channel.nResonance,
 	                channel.nPan,
 	                channel.dwFlags[CHN_SURROUND] ? _T("-S") : _T(""));

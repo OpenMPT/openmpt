@@ -974,7 +974,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				mptIns->SetCutoff(FrequencyToCutOff(synthData.cutoff), true);
 				mptIns->SetResonance(synthData.resonance, true);
 			}
-			mptIns->nFilterMode = synthData.effectID == 1 ? FLTMODE_HIGHPASS : FLTMODE_LOWPASS;
+			mptIns->filterMode = synthData.effectID == 1 ? FilterMode::HighPass : FilterMode::LowPass;
 			if(flags & 4)
 			{
 				// VSTi / MIDI synth enabled
@@ -987,7 +987,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				if(synthData.transpose)
 				{
-					for(uint32 n = 0; n < CountOf(mptIns->NoteMap); n++)
+					for(uint32 n = 0; n < std::size(mptIns->NoteMap); n++)
 					{
 						int note = NOTE_MIN + n + synthData.transpose;
 						Limit(note, NOTE_MIN, NOTE_MAX);

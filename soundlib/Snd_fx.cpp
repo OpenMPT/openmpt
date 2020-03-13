@@ -285,7 +285,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			const PATTERNINDEX seekPat = orderList[target.pos.order];
 			if(Patterns.IsValidPat(seekPat) && Patterns[seekPat].IsValidRow(target.pos.row))
 			{
-				const ModCommand *m = Patterns[seekPat].GetRow(target.pos.row);
+				const ModCommand *m = Patterns[seekPat].GetpModCommand(target.pos.row, 0);
 				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++, m++)
 				{
 					if(m->note == NOTE_NOTECUT || m->note == NOTE_KEYOFF || (m->note == NOTE_FADE && GetNumInstruments())
@@ -1715,7 +1715,7 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 	// save the note that's actually used, as it's necessary to properly calculate PPS and stuff
 	const int realnote = note;
 
-	if((pIns) && (note - NOTE_MIN < (int)CountOf(pIns->Keyboard)))
+	if((pIns) && (note - NOTE_MIN < (int)std::size(pIns->Keyboard)))
 	{
 		uint32 n = pIns->Keyboard[note - NOTE_MIN];
 		if((n) && (n < MAX_SAMPLES))
@@ -2039,9 +2039,9 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 				chn.nCutOff = pIns->GetCutoff();
 				useFilter = true;
 			}
-			if(useFilter && (pIns->nFilterMode != FLTMODE_UNCHANGED))
+			if(useFilter && (pIns->filterMode != FilterMode::Unchanged))
 			{
-				chn.nFilterMode = pIns->nFilterMode;
+				chn.nFilterMode = pIns->filterMode;
 			}
 		} else
 		{
@@ -5183,7 +5183,7 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 			// F0.F0.02.xx: Set filter mode (high nibble determines filter mode)
 			if(param < 0x20)
 			{
-				chn.nFilterMode = (param >> 4);
+				chn.nFilterMode = static_cast<FilterMode>(param >> 4);
 				SetupChannelFilter(chn, !chn.dwFlags[CHN_FILTER]);
 			}
 

@@ -138,38 +138,10 @@ void InstrumentEnvelope::Sanitize(uint8 maxValue)
 
 ModInstrument::ModInstrument(SAMPLEINDEX sample)
 {
-	nFadeOut = 256;
-	dwFlags.reset();
-	nGlobalVol = 64;
-	nPan = 32 * 4;
-
-	nNNA = NNA_NOTECUT;
-	nDCT = DCT_NONE;
-	nDNA = DNA_NOTECUT;
-
-	nPanSwing = 0;
-	nVolSwing = 0;
 	SetCutoff(0, false);
 	SetResonance(0, false);
 
-	wMidiBank = 0;
-	nMidiProgram = 0;
-	nMidiChannel = 0;
-	nMidiDrumKey = 0;
-	midiPWD = 2;
-
-	nPPC = NOTE_MIDDLEC - 1;
-	nPPS = 0;
-
-	nMixPlug = 0;
-	nVolRampUp = 0;
-	resampling = SRCMODE_DEFAULT;
-	nCutSwing = 0;
-	nResSwing = 0;
-	nFilterMode = FLTMODE_UNCHANGED;
 	pitchToTempoLock.Set(0);
-	pluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;
-	pluginVolumeHandling = PLUGIN_VOLUMEHANDLING_IGNORE;
 
 	pTuning = CSoundFile::GetDefaultTuning();
 
@@ -192,7 +164,7 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 		dwFlags.reset(INS_SETPANNING);
 		SetCutoff(GetCutoff(), false);
 		SetResonance(GetResonance(), false);
-		nFilterMode = FLTMODE_UNCHANGED;
+		filterMode = FilterMode::Unchanged;
 
 		nCutSwing = nPanSwing = nResSwing = nVolSwing = 0;
 
@@ -205,7 +177,7 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 
 		if(nMidiChannel == MidiMappedChannel)
 		{
-			nMidiChannel = 1;
+			nMidiChannel = MidiFirstChannel;
 		}
 
 		// FT2 only has unsigned Pitch Wheel Depth, and it's limited to 0...36 (in the GUI, at least. As you would expect it from FT2, this value is actually not sanitized on load).
@@ -250,7 +222,7 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 		SetTuning(nullptr);
 		pitchToTempoLock.Set(0);
 		nCutSwing = nResSwing = 0;
-		nFilterMode = FLTMODE_UNCHANGED;
+		filterMode = FilterMode::Unchanged;
 		nVolRampUp = 0;
 	}
 }
@@ -319,7 +291,7 @@ void ModInstrument::Sanitize(MODTYPE modType)
 	PanEnv.Sanitize();
 	PitchEnv.Sanitize(range);
 
-	for(size_t i = 0; i < CountOf(NoteMap); i++)
+	for(size_t i = 0; i < std::size(NoteMap); i++)
 	{
 		if(NoteMap[i] < NOTE_MIN || NoteMap[i] > NOTE_MAX)
 			NoteMap[i] = static_cast<uint8>(i + NOTE_MIN);
@@ -327,6 +299,15 @@ void ModInstrument::Sanitize(MODTYPE modType)
 
 	if(!Resampling::IsKnownMode(resampling))
 		resampling = SRCMODE_DEFAULT;
+}
+
+
+void ModInstrument::Transpose(int8 amount)
+{
+	for(auto &note : NoteMap)
+	{
+		note = static_cast<uint8>(Clamp(note + amount, NOTE_MIN, NOTE_MAX));
+	}
 }
 
 

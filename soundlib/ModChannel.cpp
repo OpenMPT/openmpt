@@ -58,7 +58,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		pModInstrument = nullptr;
 		nCutOff = 0x7F;
 		nResonance = 0;
-		nFilterMode = 0;
+		nFilterMode = FilterMode::LowPass;
 		rightVol = leftVol = 0;
 		newRightVol = newLeftVol = 0;
 		rightRamp = leftRamp = 0;
