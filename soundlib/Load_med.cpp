@@ -15,6 +15,8 @@
 #include "plugins/PluginManager.h"
 #endif
 
+#include <map>
+
 OPENMPT_NAMESPACE_BEGIN
 
 struct MMD0FileHeader
