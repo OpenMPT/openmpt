@@ -719,7 +719,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				numPlugins++;
 			}
 		} else
-#endif
+#endif  // NO_VST
 		if(isSynth)
 		{
 			// TODO: Figure out synth instruments
@@ -791,6 +791,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			instr.nMidiChannel = sampleHeader.midiChannel - 1 + MidiFirstChannel;
 			needInstruments = true;
 
+#ifndef NO_VST
 			if(!isSynth)
 			{
 				auto &mixPlug = m_MixPlugins[numPlugins];
@@ -806,6 +807,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 				numPlugins++;
 			}
+#endif  // NO_VST
 		}
 		if(sampleHeader.midiPreset > 0 && sampleHeader.midiPreset <= 128)
 		{
@@ -888,7 +890,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				ins.VolEnv.assign({
 					EnvelopeNode{0u, ENVELOPE_MAX},
-					EnvelopeNode{instrExt.hold - 1u, ENVELOPE_MAX},
+					EnvelopeNode{static_cast<EnvelopeNode::tick_t>(instrExt.hold - 1), ENVELOPE_MAX},
 					EnvelopeNode{static_cast<EnvelopeNode::tick_t>(instrExt.hold + (instrExt.decay ? 64u / instrExt.decay : 0u)), ENVELOPE_MIN},
 				});
 				if(instrExt.hold == 1)
@@ -901,6 +903,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				ins.wMidiBank = instrExt.longMidiPreset;
 			}
+#ifndef NO_VST
 			if(ins.nMixPlug > 0)
 			{
 				PLUGINDEX plug = ins.nMixPlug - 1;
@@ -929,6 +932,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 					}
 				}
 			}
+#endif  // NO_VST
 
 			ModSample &sample = Samples[ins.Keyboard[NOTE_MIDDLEC]];
 
