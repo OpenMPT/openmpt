@@ -37,7 +37,7 @@ struct MMD0FileHeader
 	uint8be  extraSongs;           // Number of songs - 1
 };
 
-MPT_BINARY_STRUCT(MMD0FileHeader, 52);
+MPT_BINARY_STRUCT(MMD0FileHeader, 52)
 
 
 struct MMD0Sample
@@ -50,7 +50,7 @@ struct MMD0Sample
 	int8be   sampleTranspose;
 };
 
-MPT_BINARY_STRUCT(MMD0Sample, 8);
+MPT_BINARY_STRUCT(MMD0Sample, 8)
 
 
 // Song header for MMD0/MMD1
@@ -59,7 +59,7 @@ struct MMD0Song
 	uint8be sequence[256];
 };
 
-MPT_BINARY_STRUCT(MMD0Song, 256);
+MPT_BINARY_STRUCT(MMD0Song, 256)
 
 
 // Song header for MMD2/MMD3
@@ -87,7 +87,7 @@ struct MMD2Song
 	char     pad0[223];
 };
 
-MPT_BINARY_STRUCT(MMD2Song, 256);
+MPT_BINARY_STRUCT(MMD2Song, 256)
 
 
 // Common song header
@@ -129,7 +129,7 @@ struct MMDSong
 	uint8be  numSamples;
 };
 
-MPT_BINARY_STRUCT(MMDSong, 284);
+MPT_BINARY_STRUCT(MMDSong, 284)
 
 
 struct MMD2PlaySeq
@@ -140,7 +140,7 @@ struct MMD2PlaySeq
 	uint16be length;  // Number of entries
 };
 
-MPT_BINARY_STRUCT(MMD2PlaySeq, 42);
+MPT_BINARY_STRUCT(MMD2PlaySeq, 42)
 
 
 struct MMD0PatternHeader
@@ -149,7 +149,7 @@ struct MMD0PatternHeader
 	uint8be numRows;
 };
 
-MPT_BINARY_STRUCT(MMD0PatternHeader, 2);
+MPT_BINARY_STRUCT(MMD0PatternHeader, 2)
 
 
 struct MMD1PatternHeader
@@ -159,7 +159,7 @@ struct MMD1PatternHeader
 	uint32be blockInfoOffset;
 };
 
-MPT_BINARY_STRUCT(MMD1PatternHeader, 8);
+MPT_BINARY_STRUCT(MMD1PatternHeader, 8)
 
 
 struct MMDPlaySeqCommand
@@ -188,7 +188,7 @@ struct MMDBlockInfo
 	uint32be reserved[4];
 };
 
-MPT_BINARY_STRUCT(MMDBlockInfo, 36);
+MPT_BINARY_STRUCT(MMDBlockInfo, 36)
 
 
 struct MMDInstrHeader
@@ -223,7 +223,7 @@ struct MMDInstrHeader
 	int16be  type;
 };
 
-MPT_BINARY_STRUCT(MMDInstrHeader, 6);
+MPT_BINARY_STRUCT(MMDInstrHeader, 6)
 
 
 struct MMDPackedSampleHeader
@@ -240,7 +240,7 @@ struct MMDPackedSampleHeader
 	uint32be rightChLen;  // packed length of right channel in bytes (ONLY PRESENT IN STEREO SAMPLES)
 };
 
-MPT_BINARY_STRUCT(MMDPackedSampleHeader, 14);
+MPT_BINARY_STRUCT(MMDPackedSampleHeader, 14)
 
 
 struct MMDInstrExt
@@ -306,7 +306,7 @@ struct MMD0Exp
 	uint32be tagEnd;
 };
 
-MPT_BINARY_STRUCT(MMD0Exp, 80);
+MPT_BINARY_STRUCT(MMD0Exp, 80)
 
 
 struct MMDTag
