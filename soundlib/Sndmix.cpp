@@ -671,7 +671,7 @@ bool CSoundFile::ProcessRow()
 		}
 
 		// Reset channel values
-		ModCommand *m = Patterns[m_PlayState.m_nPattern].GetRow(m_PlayState.m_nRow);
+		ModCommand *m = Patterns[m_PlayState.m_nPattern].GetpModCommand(m_PlayState.m_nRow, 0);
 		for (ModChannel *pChn = m_PlayState.Chn, *pEnd = pChn + m_nChannels; pChn != pEnd; pChn++, m++)
 		{
 			// First, handle some quirks that happen after the last tick of the previous row...
@@ -1299,6 +1299,8 @@ void CSoundFile::IncrementEnvelopePosition(ModChannel &chn, EnvelopeType envType
 
 void CSoundFile::IncrementEnvelopePositions(ModChannel &chn) const
 {
+	if (chn.isFirstTick && GetType() == MOD_TYPE_MED)
+		return;
 	IncrementEnvelopePosition(chn, ENV_VOLUME);
 	IncrementEnvelopePosition(chn, ENV_PANNING);
 	IncrementEnvelopePosition(chn, ENV_PITCH);

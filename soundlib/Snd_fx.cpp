@@ -2820,7 +2820,7 @@ bool CSoundFile::ProcessEffects()
 					}
 				}
 
-				if (GetNumInstruments() && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)))
+				if(GetNumInstruments() && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED)))
 				{
 					chn.ResetEnvelopes();
 					chn.dwFlags.set(CHN_FASTVOLRAMP);
@@ -3775,7 +3775,10 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const 
 		}
 	}
 	// Regular Slide
-	if(!chn.isFirstTick || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1]) || GetType() == MOD_TYPE_669)
+	if(!chn.isFirstTick
+	   || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])
+	   || GetType() == MOD_TYPE_669
+	   || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]))
 	{
 		DoFreqSlide(chn, -int(param) * 4);
 	}
@@ -3840,7 +3843,10 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, cons
 		}
 	}
 
-	if(!chn.isFirstTick || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1]) || GetType() == MOD_TYPE_669)
+	if(!chn.isFirstTick
+	   || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])
+	   || GetType() == MOD_TYPE_669
+	   || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]))
 	{
 		DoFreqSlide(chn, int(param) * 4);
 	}
@@ -4141,7 +4147,10 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 		return;
 	}
 
-	bool doPorta = !chn.isFirstTick || (GetType() & (MOD_TYPE_DBM | MOD_TYPE_669)) || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1]);
+	bool doPorta = !chn.isFirstTick
+	               || (GetType() & (MOD_TYPE_DBM | MOD_TYPE_669))
+	               || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])
+	               || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]);
 	if(GetType() == MOD_TYPE_PLM && param >= 0xF0)
 	{
 		param -= 0xF0;
