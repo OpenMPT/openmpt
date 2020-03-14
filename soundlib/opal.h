@@ -1,6 +1,7 @@
 // This is the Opal OPL3 emulator from Reality Adlib Tracker v2.0a (http://www.3eality.com/productions/reality-adlib-tracker).
 // It was released by Shayde/Reality into the public domain.
 // Minor modifications to silence some warnings and fix a bug in the envelope generator have been applied.
+// Additional fixes by JP Cimalando.
 
 /*
 
@@ -144,6 +145,7 @@ class Opal {
             uint16_t        GetOctave() const {  return Octave;  }
             uint16_t        GetKeyScaleNumber() const {  return KeyScaleNumber;  }
             uint16_t        GetModulationType() const {  return ModulationType;  }
+            Channel *       GetChannelPair() const { return ChannelPair; }
 
             void            ComputeKeyScaleNumber();
 
@@ -451,20 +453,28 @@ void Opal::Port(uint16_t reg_num, uint8_t val) {
 
         Channel &chan = Chan[chan_num];
 
+        // Registers Ax and Bx affect both channels
+        Channel *chans[2] = {&chan, chan.GetChannelPair()};
+        int numchans = chans[1] ? 2 : 1;
+
         // Do specific registers
         switch (reg_num & 0xF0) {
 
             // Frequency low
             case 0xA0: {
-                chan.SetFrequencyLow(val);
+                for (int i = 0; i < numchans; i++) {
+                    chans[i]->SetFrequencyLow(val);
+                }
                 break;
             }
 
             // Key-on / Octave / Frequency High
             case 0xB0: {
-                chan.SetKeyOn((val & 0x20) != 0);
-                chan.SetOctave(val >> 2 & 7);
-                chan.SetFrequencyHigh(val & 3);
+                for (int i = 0; i < numchans; i++) {
+                    chans[i]->SetKeyOn((val & 0x20) != 0);
+                    chans[i]->SetOctave(val >> 2 & 7);
+                    chans[i]->SetFrequencyHigh(val & 3);
+                }
                 break;
             }
 
