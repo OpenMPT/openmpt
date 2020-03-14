@@ -1275,6 +1275,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		file.Seek(expData.nextModOffset);
 	}
+	Order.SetSequence(0);
 
 	if(!needInstruments)
 	{

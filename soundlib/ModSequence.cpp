@@ -329,8 +329,7 @@ void ModSequenceSet::OnModTypeChanged(MODTYPE oldType)
 	{
 		seq.AdjustToNewModType(oldType);
 	}
-	// Multisequences not suppported by other formats
-	if(oldType != MOD_TYPE_NONE && m_sndFile.GetModSpecifications().sequencesMax <= 1)
+	if(m_sndFile.GetModSpecifications(oldType).sequencesMax > 1 && m_sndFile.GetModSpecifications().sequencesMax <= 1)
 		MergeSequences();
 }
 
