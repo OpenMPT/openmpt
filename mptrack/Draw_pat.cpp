@@ -1589,7 +1589,7 @@ void CViewPattern::InvalidateChannelsHeaders()
 }
 
 
-void CViewPattern::UpdateIndicator()
+void CViewPattern::UpdateIndicator(bool updateAccessibility)
 {
 	const CSoundFile *sndFile = GetSoundFile();
 	CMainFrame *mainFrm = CMainFrame::GetMainFrame();
@@ -1611,8 +1611,8 @@ void CViewPattern::UpdateIndicator()
 				mainFrm->SetInfoText(GetCursorDescription());
 			UpdateXInfoText();
 		}
-		if(!mainFrm->IsPlaying())
-			NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
+		if(updateAccessibility)
+			mainFrm->NotifyAccessibilityUpdate(*this);
 	}
 }
 

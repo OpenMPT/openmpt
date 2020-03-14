@@ -806,8 +806,7 @@ void CNoteMapWnd::StopNote()
 
 void CNoteMapWnd::UpdateAccessibleTitle()
 {
-	if(!CMainFrame::GetMainFrame()->IsPlaying())
-		NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
+	CMainFrame::GetMainFrame()->NotifyAccessibilityUpdate(*this);
 }
 
 

@@ -209,9 +209,8 @@ public:
 	static const float dynamicRange; // corresponds to the current implementation of the UI widget diplaying the result
 	struct Channel
 	{
-		int32 peak;
-		bool clipped;
-		Channel() : peak(0), clipped(false) { }
+		int32 peak = 0;
+		bool clipped = false;
 	};
 private:
 	Channel channels[maxChannels];
@@ -426,8 +425,8 @@ public:
 	void GenerateStopNotification();
 
 	bool PlayMod(CModDoc *);
-	bool StopMod(CModDoc *pDoc=NULL);
-	bool PauseMod(CModDoc *pDoc=NULL);
+	bool StopMod(CModDoc *pDoc = nullptr);
+	bool PauseMod(CModDoc *pDoc = nullptr);
 
 	bool StopSoundFile(CSoundFile *);
 	bool PlaySoundFile(CSoundFile *);
@@ -458,16 +457,18 @@ public:
 
 	void SetupMidi(DWORD d, UINT n);
 	HWND GetFollowSong() const;
-	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == GetModPlaying()) ? GetFollowSong() : NULL; }
+	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == GetModPlaying()) ? GetFollowSong() : nullptr; }
 	void ResetNotificationBuffer();
 
+	// Notify accessbility software that it should read out updated UI elements
+	void NotifyAccessibilityUpdate(CWnd &source);
 
 // Overrides
 protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CMainFrame)
 	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
-	BOOL PreTranslateMessage(MSG* pMsg) override;
+	BOOL PreTranslateMessage(MSG *pMsg) override;
 	BOOL DestroyWindow() override;
 	void OnUpdateFrameTitle(BOOL bAddToTitle) override;
 	//}}AFX_VIRTUAL

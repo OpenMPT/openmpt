@@ -2811,6 +2811,12 @@ BOOL CMainFrame::OnQueryEndSession()
 }
 
 
+void CMainFrame::NotifyAccessibilityUpdate(CWnd &source)
+{
+	if(!IsPlaying() || m_pSndFile->m_SongFlags[SONG_PAUSED])
+		source.NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
+}
+
 // ITfLanguageProfileNotifySink implementation
 
 TfLanguageProfileNotifySink::TfLanguageProfileNotifySink()

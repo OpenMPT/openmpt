@@ -698,8 +698,7 @@ void COrderList::UpdateInfoText()
 	}
 	CMainFrame::GetMainFrame()->SetInfoText(s);
 
-	if(!CMainFrame::GetMainFrame()->IsPlaying())
-		NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
+	CMainFrame::GetMainFrame()->NotifyAccessibilityUpdate(*this);
 }
 
 

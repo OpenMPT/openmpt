@@ -387,8 +387,7 @@ void CViewPattern::SetModified(bool updateAllViews)
 		pModDoc->SetModified();
 		pModDoc->UpdateAllViews(this, PatternHint(m_nPattern).Data(), updateAllViews ? nullptr : this);
 	}
-	if(!CMainFrame::GetMainFrame()->IsPlaying())
-		NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
+	CMainFrame::GetMainFrame()->NotifyAccessibilityUpdate(*this);
 }
 
 
@@ -3352,7 +3351,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 		SetPlayCursor(PATTERNINDEX_INVALID, ROWINDEX_INVALID, 0);
 	}
 
-	UpdateIndicator();
+	UpdateIndicator(false);
 
 	return 0;
 }

@@ -234,8 +234,8 @@ public:
 	bool UpdateSizes();
 	void UpdateScrollSize();
 	void UpdateScrollPos();
-	void UpdateIndicator();
-	void UpdateXInfoText();  //rewbs.xinfo
+	void UpdateIndicator(bool updateAccessibility = true);
+	void UpdateXInfoText();
 	void UpdateColors();
 
 	CString GetCursorDescription() const;
