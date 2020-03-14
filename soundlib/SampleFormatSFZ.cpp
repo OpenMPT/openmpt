@@ -312,6 +312,7 @@ struct SFZRegion
 	double resonance = 0;      // 0...40dB
 	double filterRandom = 0;   // 0...9600 cents
 	double volume = 0;         // -144dB...+6dB
+	double amplitude = 100.0;  // 0...100
 	double pitchBend = 200;    // -9600...9600 cents
 	double pitchLfoFade = 0;   // 0...100 seconds
 	double pitchLfoDepth = 0;  // -1200...12000
@@ -416,6 +417,8 @@ struct SFZRegion
 			Read(value, pitchLfoFreq, 0.0, 20.0);
 		else if(key == "volume")
 			Read(value, volume, -144.0, 6.0);
+		else if(key == "amplitude")
+			Read(value, amplitude, 0.0, 100.0);
 		else if(key == "pan")
 			Read(value, panning, -100.0, 100.0);
 		else if(key == "transpose")
@@ -885,7 +888,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		}
 		
 		sample.rootNote = region.keyRoot + NOTE_MIN;
-		sample.nGlobalVol = mpt::saturate_round<decltype(sample.nGlobalVol)>(64 * Clamp(std::pow(10.0, region.volume / 20.0), 0.0, 1.0));
+		sample.nGlobalVol = mpt::saturate_round<decltype(sample.nGlobalVol)>(64.0 * Clamp(std::pow(10.0, region.volume / 20.0) * region.amplitude / 100.0, 0.0, 1.0));
 		if(region.panning != -128)
 		{
 			sample.nPan = mpt::saturate_round<decltype(sample.nPan)>((region.panning + 100) * 256.0 / 200.0);
@@ -1102,7 +1105,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	if(ins->nFadeOut)
 		f << "\nampeg_release=" << (32768.0 * tickDuration / ins->nFadeOut) << " // " << ins->nFadeOut;
 
-	if(ins->nDNA == DNA_NOTECUT && ins->nDCT == DCT_SAMPLE)
+	if(ins->nDNA == DNA_NOTECUT && ins->nDCT != DCT_NONE)
 		f << "\npolyphony=1";
 
 	WriteSFZEnvelope(f, tickDuration, 1, ins->VolEnv, "amplitude", 100.0, [](int32 val) { return val / static_cast<double>(ENVELOPE_MAX); });
