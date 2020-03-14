@@ -307,6 +307,7 @@ void Opal::Init(int sample_rate) {
 
     Clock = 0;
     TremoloClock = 0;
+    TremoloLevel = 0;
     VibratoTick = 0;
     VibratoClock = 0;
     NoteSel = false;
@@ -900,11 +901,11 @@ int16_t Opal::Operator::Output(uint16_t /*keyscalenum*/, uint32_t phase_step, in
 
         // Attack stage
         case EnvAtt: {
-            if (AttackRate == 0)
-                break;
-            if (AttackMask && (Master->Clock & AttackMask))
-                break;
             uint16_t add = ((AttackAdd >> AttackTab[Master->Clock >> AttackShift & 7]) * ~EnvelopeLevel) >> 3;
+            if (AttackRate == 0)
+                add = 0;
+            if (AttackMask && (Master->Clock & AttackMask))
+                add = 0;
             EnvelopeLevel += add;
             if (EnvelopeLevel <= 0) {
                 EnvelopeLevel = 0;
@@ -915,12 +916,12 @@ int16_t Opal::Operator::Output(uint16_t /*keyscalenum*/, uint32_t phase_step, in
 
         // Decay stage
         case EnvDec: {
+            uint16_t add = DecayAdd >> DecayTab[Master->Clock >> DecayShift & 7];
+            if (DecayRate == 0)
+                add = 0;
             if (DecayMask && (Master->Clock & DecayMask))
-                break;
-            if (DecayRate != 0) {
-                uint16_t add = DecayAdd >> DecayTab[Master->Clock >> DecayShift & 7];
-                EnvelopeLevel += add;
-            }
+                add = 0;
+            EnvelopeLevel += add;
             if (EnvelopeLevel >= SustainLevel) {
                 EnvelopeLevel = SustainLevel;
                 EnvelopeStage = EnvSus;
@@ -940,11 +941,11 @@ int16_t Opal::Operator::Output(uint16_t /*keyscalenum*/, uint32_t phase_step, in
 
         // Release stage
         case EnvRel: {
-            if (ReleaseRate == 0)
-                break;
-            if (ReleaseMask && (Master->Clock & ReleaseMask))
-                break;
             uint16_t add = ReleaseAdd >> ReleaseTab[Master->Clock >> ReleaseShift & 7];
+            if (ReleaseRate == 0)
+                add = 0;
+            if (ReleaseMask && (Master->Clock & ReleaseMask))
+                add = 0;
             EnvelopeLevel += add;
             if (EnvelopeLevel >= 0x1FF) {
                 EnvelopeLevel = 0x1FF;
@@ -1185,7 +1186,7 @@ void Opal::Operator::SetFrequencyMultiplier(uint16_t scale) {
 //==================================================================================================
 void Opal::Operator::SetKeyScale(uint16_t scale) {
 
-    static constexpr uint8_t kslShift[4] = { 15, 1, 2, 0 };
+    static constexpr uint8_t kslShift[4] = { 8, 1, 2, 0 };
     KeyScaleShift = kslShift[scale];
     ComputeKeyScaleLevel();
 }
