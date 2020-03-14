@@ -1187,7 +1187,7 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 	case MOD_TYPE_STP:
 		return MOD_TYPE_MOD;
 	case MOD_TYPE_MED:
-		if(m_nDefaultTempo == TEMPO(125, 0) && m_nDefaultSpeed == 6 && !m_nInstruments)
+		if(!m_nInstruments)
 		{
 			for(const auto &pat : Patterns)
 			{
