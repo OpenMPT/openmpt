@@ -592,9 +592,8 @@ static CHANNELINDEX MEDScanNumChannels(FileReader &file, const uint8 version)
 			numChannels = std::max(numChannels, static_cast<CHANNELINDEX>(version < 1 ? file.ReadUint8() : file.ReadUint16BE()));
 		}
 
-		if(!expData.nextModOffset)
+		if(!expData.nextModOffset || !file.Seek(expData.nextModOffset))
 			break;
-		file.Seek(expData.nextModOffset);
 		MEDReadNextSong(file, fileHeader, expData, songHeader);
 	}
 	return numChannels;
@@ -606,8 +605,10 @@ static bool ValidateHeader(const MMD0FileHeader &fileHeader)
 	if(std::memcmp(fileHeader.mmd, "MMD", 3)
 	   || fileHeader.version < '0' || fileHeader.version > '3'
 	   || fileHeader.songOffset < sizeof(MMD0FileHeader)
+	   || fileHeader.songOffset > uint32_max - 63 * sizeof(MMD0Sample) - sizeof(MMDSong)
 	   || fileHeader.blockArrOffset < sizeof(MMD0FileHeader)
-	   || fileHeader.sampleArrOffset < sizeof(MMD0FileHeader))
+	   || fileHeader.sampleArrOffset < sizeof(MMD0FileHeader)
+	   || fileHeader.expDataOffset > uint32_max - sizeof(MMD0Exp))
 	{
 		return false;
 	}
@@ -1271,9 +1272,8 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 		basePattern += numPatterns;
 		
-		if(!expData.nextModOffset)
+		if(!expData.nextModOffset || !file.Seek(expData.nextModOffset))
 			break;
-		file.Seek(expData.nextModOffset);
 	}
 	Order.SetSequence(0);
 
