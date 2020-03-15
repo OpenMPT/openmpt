@@ -181,7 +181,7 @@ class SafeOutputFile
 private:
 	FlushMode m_FlushMode;
 #if MPT_COMPILER_MSVC
-	FILE *m_f;
+	FILE *m_f = nullptr;
 #endif // MPT_COMPILER_MSVC
 	mpt::ofstream m_s;
 #if MPT_COMPILER_MSVC
@@ -198,6 +198,8 @@ public:
 		, m_s(filename, mode)
 #endif // MPT_COMPILER_MSVC
 	{
+		if(!stream().is_open())
+			stream().setstate(mpt::ofstream::failbit);
 	}
 	mpt::ofstream& stream()
 	{
