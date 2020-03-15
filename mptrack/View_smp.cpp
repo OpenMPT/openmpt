@@ -177,7 +177,8 @@ void CViewSample::SetModified(SampleHint hint, bool updateAll, bool waveformModi
 	{
 		// Update on-disk sample status in tree
 		ModSample &sample = pModDoc->GetSoundFile().GetSample(m_nSample);
-		if(sample.uFlags[SMP_KEEPONDISK] && !sample.uFlags[SMP_MODIFIED]) hint.Names();
+		if(sample.uFlags[SMP_KEEPONDISK] && !sample.uFlags[SMP_MODIFIED])
+			hint.Names();
 		sample.uFlags.set(SMP_MODIFIED);
 	}
 	pModDoc->UpdateAllViews(nullptr, hint.SetData(m_nSample), updateAll ? nullptr : this);
@@ -571,7 +572,7 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 
 	case VIEWMSG_SETMODIFIED:
 		// Update from OPL editor
-		SetModified(UpdateHint::FromLPARAM(lParam).ToType<SampleHint>(), false, false);
+		SetModified(UpdateHint::FromLPARAM(lParam).ToType<SampleHint>(), false, true);
 		GetDocument()->UpdateOPLInstrument(m_nSample);
 		break;
 
