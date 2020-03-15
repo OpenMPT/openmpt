@@ -371,7 +371,7 @@ bool CModDoc::SaveAllSamples()
 
 	ConfirmAnswer ans = cnfYes;
 	bool success = true;
-	if(modified && (ans = Reporting::Confirm(promptModified + promptMissing + U_("Do you want to save them?"), U_("External Samples"), true)) == cnfYes)
+	if((modified || missing) && (ans = Reporting::Confirm(promptModified + promptMissing + U_("Do you want to save them?"), U_("External Samples"), true)) == cnfYes)
 	{
 		for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 		{
