@@ -342,24 +342,41 @@ BOOL CModDoc::SaveModified()
 
 bool CModDoc::SaveAllSamples()
 {
-	mpt::ustring prompt = U_("The following external samples have been modified:\n");
-	bool modified = false;
+	mpt::ustring promptModified = U_("The following external samples have been modified:\n");
+	mpt::ustring promptMissing = U_("The following external samples are missing on disk:\n");
+	bool modified = false, missing = false;
 	for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 	{
-		if(m_SndFile.GetSample(i).uFlags.test_all(SMP_KEEPONDISK | SMP_MODIFIED))
+		if(!m_SndFile.GetSample(i).uFlags[SMP_KEEPONDISK])
+			continue;
+
+		mpt::ustring *str = nullptr;
+		if(m_SndFile.GetSample(i).uFlags[SMP_MODIFIED])
 		{
 			modified = true;
-			prompt += mpt::ufmt::dec0<2>(i) + U_(": ") + m_SndFile.GetSamplePath(i).ToUnicode() + U_("\n");
+			str = &promptModified;
+		} else if (!m_SndFile.GetSamplePath(i).IsFile())
+		{
+			missing = true;
+			str = &promptMissing;
 		}
+		if(str)
+			*str += mpt::ufmt::dec0<2>(i) + U_(": ") + m_SndFile.GetSamplePath(i).ToUnicode() + U_("\n");
 	}
+
+	if(modified)
+		promptModified += U_("\n");
+	if(missing)
+		promptMissing += U_("\n");
 
 	ConfirmAnswer ans = cnfYes;
 	bool success = true;
-	if(modified && (ans = Reporting::Confirm(prompt + U_("Do you want to save them?"), U_("External Samples"), true)) == cnfYes)
+	if(modified && (ans = Reporting::Confirm(promptModified + promptMissing + U_("Do you want to save them?"), U_("External Samples"), true)) == cnfYes)
 	{
 		for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 		{
-			if(m_SndFile.GetSample(i).uFlags.test_all(SMP_KEEPONDISK | SMP_MODIFIED))
+			if(m_SndFile.GetSample(i).uFlags[SMP_KEEPONDISK]
+			   && (m_SndFile.GetSample(i).uFlags[SMP_MODIFIED] || !m_SndFile.GetSamplePath(i).IsFile()))
 			{
 				if(!SaveSample(i))
 				{

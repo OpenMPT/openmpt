@@ -807,6 +807,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				region.loopStart = 0;
 				region.loopEnd = sample.nLength - 1;
 				region.loopCrossfade = 0;
+				region.keyRoot = 60;
 			}
 		} else if(auto filename = mpt::PathString::FromUTF8(region.filename); !filename.empty())
 		{
@@ -962,6 +963,8 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			sample.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
 		}
 
+		mpt::PathString filenameModifier;
+
 		// Loop cross-fade
 		SmpLength fadeSamples = mpt::saturate_round<SmpLength>(region.loopCrossfade * origSampleRate);
 		LimitMax(fadeSamples, sample.uFlags[CHN_SUSTAINLOOP] ? sample.nSustainStart : sample.nLoopStart);
@@ -969,6 +972,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		{
 			ctrlSmp::XFadeSample(sample, fadeSamples, 50000, true, sample.uFlags[CHN_SUSTAINLOOP], *this);
 			sample.uFlags.set(SMP_MODIFIED);
+			filenameModifier += P_(" (cross-fade)");
 		}
 
 		// Sample offset
@@ -982,6 +986,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			sample.nLoopStart -= region.offset;
 			sample.nLoopEnd -= region.offset;
 			sample.uFlags.set(SMP_MODIFIED);
+			filenameModifier += P_(" (offset)");
 		}
 		LimitMax(sample.nLength, region.end);
 
@@ -989,6 +994,17 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		{
 			ctrlSmp::InvertSample(sample, 0, sample.nLength, *this);
 			sample.uFlags.set(SMP_MODIFIED);
+			filenameModifier += P_(" (inverted)");
+		}
+
+		if(sample.uFlags.test_all(SMP_KEEPONDISK | SMP_MODIFIED))
+		{
+			// Avoid ruining the original samples
+			if(auto filename = GetSamplePath(smp); !filename.empty())
+			{
+				filename = filename.GetPath() + filename.GetFileName() + filenameModifier + filename.GetFileExt();
+				SetSamplePath(smp, filename);
+			}
 		}
 
 		sample.PrecomputeLoops(*this, false);
