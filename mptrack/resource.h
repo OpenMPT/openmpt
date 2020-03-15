@@ -123,6 +123,7 @@
 #define IDD_WECLOME                     539
 #define IDD_TEMPO_SWING                 540
 #define IDD_OPTIONS_WINE                541
+#define IDD_MODIFIEDSAMPLES             542
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON2                     1002
 #define IDC_BUTTON3                     1003

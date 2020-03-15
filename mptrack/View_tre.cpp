@@ -3682,7 +3682,7 @@ void CModTree::OnFindMissing()
 	{
 		return;
 	}
-	ExternalSamplesDlg dlg(*pModDoc, CMainFrame::GetMainFrame());
+	MissingExternalSamplesDlg dlg(*pModDoc, CMainFrame::GetMainFrame());
 	dlg.DoModal();
 }
 

@@ -269,7 +269,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	{
 		if(m_SndFile.IsExternalSampleMissing(smp))
 		{
-			ExternalSamplesDlg dlg(*this, CMainFrame::GetMainFrame());
+			MissingExternalSamplesDlg dlg(*this, CMainFrame::GetMainFrame());
 			dlg.DoModal();
 			break;
 		}
@@ -342,53 +342,8 @@ BOOL CModDoc::SaveModified()
 
 bool CModDoc::SaveAllSamples()
 {
-	mpt::ustring promptModified = U_("The following external samples have been modified:\n");
-	mpt::ustring promptMissing = U_("The following external samples are missing on disk:\n");
-	bool modified = false, missing = false;
-	for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
-	{
-		if(!m_SndFile.GetSample(i).uFlags[SMP_KEEPONDISK])
-			continue;
-
-		mpt::ustring *str = nullptr;
-		if(m_SndFile.GetSample(i).uFlags[SMP_MODIFIED])
-		{
-			modified = true;
-			str = &promptModified;
-		} else if (!m_SndFile.GetSamplePath(i).IsFile())
-		{
-			missing = true;
-			str = &promptMissing;
-		}
-		if(str)
-			*str += mpt::ufmt::dec0<2>(i) + U_(": ") + m_SndFile.GetSamplePath(i).ToUnicode() + U_("\n");
-	}
-
-	if(modified)
-		promptModified += U_("\n");
-	if(missing)
-		promptMissing += U_("\n");
-
-	ConfirmAnswer ans = cnfYes;
-	bool success = true;
-	if((modified || missing) && (ans = Reporting::Confirm(promptModified + promptMissing + U_("Do you want to save them?"), U_("External Samples"), true)) == cnfYes)
-	{
-		for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
-		{
-			if(m_SndFile.GetSample(i).uFlags[SMP_KEEPONDISK]
-			   && (m_SndFile.GetSample(i).uFlags[SMP_MODIFIED] || !m_SndFile.GetSamplePath(i).IsFile()))
-			{
-				if(!SaveSample(i))
-				{
-					success = false;
-				}
-			}
-		}
-	} else if(ans == cnfCancel)
-	{
-		return false;
-	}
-	return success;
+	ModifiedExternalSamplesDlg dlg(*this, CMainFrame::GetMainFrame());
+	return dlg.DoModal() == IDOK;
 }
 
 
@@ -424,7 +379,7 @@ bool CModDoc::SaveSample(SAMPLEINDEX smp)
 			if(success)
 				sample.uFlags.reset(SMP_MODIFIED);
 			else
-				Reporting::Error(mpt::cformat(_T("Unable to save sample:\n"))(filename));
+				AddToLog(LogError, mpt::uformat(U_("Unable to save sample %1: %2"))(smp, filename));
 		}
 	}
 	return success;
