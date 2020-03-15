@@ -678,6 +678,13 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	file.Seek(fileHeader.sampleArrOffset);
 	file.ReadVector(instrOffsets, songHeader.numSamples);
 	m_nInstruments = m_nSamples = songHeader.numSamples;
+
+	// In MMD0 / MMD1, octave wrapping is only done in 4-channel modules (hardware mixing!), and not for synth instruments
+	// - It's required e.g. for automatic terminated to.mmd0
+	// - dissociate.mmd0 (8 channels) and starkelsesirap.mmd0 (synth) on the other hand don't need it
+	// In MMD2 / MMD3, the mix flag is used instead.
+	const bool hardwareMixSamples = (version < 2 && m_nChannels == 4) || (version >= 2 && !(songHeader.flags2 & MMDSong::FLAG2_MIX));
+
 	bool needInstruments = false;
 	bool anySynthInstrs = false;
 #ifndef NO_VST
@@ -717,6 +724,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				instr.nMixPlug = numPlugins + 1;
 				instr.nMidiChannel = MidiFirstChannel;
 				instr.Transpose(-24);
+				instr.AssignSample(0);
 				// TODO: Figure out patch and routing data
 
 				numPlugins++;
@@ -727,6 +735,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// TODO: Figure out synth instruments
 			anySynthInstrs = true;
+			instr.AssignSample(0);
 		}
 
 		uint8 numSamples = 1;
@@ -771,11 +780,8 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			needInstruments = true;
 			instr.Transpose(-24);
-		} else if(!isSynth && m_nChannels == 4)
+		} else if(!isSynth && hardwareMixSamples)
 		{
-			// Octave wrapping is only done in 4-channel modules (hardware mixing!), and not for synth instruments
-			// - It's required e.g. for automatic terminated to.mmd0
-			// - dissociate.mmd0 (8 channels) and starkelsesirap.mmd0 (synth) on the other hand don't need it
 			for(int octave = 7; octave < 10; octave++)
 			{
 				for(int note = 0; note < 12; note++)
@@ -1205,6 +1211,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 			CPattern &pattern = Patterns[basePattern + pat];
 			pattern.SetName(patName);
+			LimitMax(numTracks, m_nChannels);
 
 			for(ROWINDEX row = 0; row < numRows; row++)
 			{
@@ -1217,12 +1224,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 						const auto [noteInstr, instrCmd, param] = file.ReadArray<uint8, 3>();
 
 						if(noteInstr & 0x3F)
-						{
 							note = (noteInstr & 0x3F) + transpose;
-							// Octave wrapping for 4-channel modules (TODO: this should not be set because of synth instruments)
-							if (m_nChannels == 4 && note >= NOTE_MIDDLEC + 2 * 12)
-								needInstruments = true;
-						}
 
 						m->instr = (instrCmd >> 4) | ((noteInstr & 0x80) >> 3) | ((noteInstr & 0x40) >> 1);
 
@@ -1242,6 +1244,10 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 						m->command = command;
 						m->param = param1;
 					}
+					// Octave wrapping for 4-channel modules (TODO: this should not be set because of synth instruments)
+					if(hardwareMixSamples && note >= NOTE_MIDDLEC + 2 * 12)
+						needInstruments = true;
+
 					if(note >= NOTE_MIN && note <= NOTE_MAX)
 						m->note = static_cast<ModCommand::NOTE>(note);
 					ConvertMEDEffect(*m, is8Ch, bpmMode, rowsPerBeat, volHex);
