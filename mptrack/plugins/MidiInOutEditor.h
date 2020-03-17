@@ -27,7 +27,7 @@ protected:
 	CComboBox m_inputCombo, m_outputCombo;
 	CNumberEdit m_latencyEdit;
 	CSpinButtonCtrl m_latencySpin;
-	bool m_locked : 1;
+	bool m_locked = true;
 
 public:
 
@@ -40,9 +40,9 @@ public:
 		SetCurrentDevice(combo, device);
 	}
 
-	virtual bool OpenEditor(CWnd *parent);
-	virtual bool IsResizable() const { return false; }
-	virtual bool SetSize(int, int) { return false; }
+	bool OpenEditor(CWnd *parent) override;
+	bool IsResizable() const override { return false; }
+	bool SetSize(int, int) override { return false; }
 
 protected:
 
@@ -51,7 +51,7 @@ protected:
 	// Refresh current input / output device in GUI
 	void SetCurrentDevice(CComboBox &combo, MidiDevice::ID device);
 
-	virtual void DoDataExchange(CDataExchange* pDX);
+	void DoDataExchange(CDataExchange* pDX) override;
 
 	afx_msg void OnInputChanged();
 	afx_msg void OnOutputChanged();

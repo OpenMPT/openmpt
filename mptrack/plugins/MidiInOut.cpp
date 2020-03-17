@@ -37,10 +37,8 @@ IMixPlugin* MidiInOut::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIX
 
 MidiInOut::MidiInOut(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMidiPlugin(factory, sndFile, mixStruct)
-	, m_latency(0.0)
 	, m_inputDevice(m_midiIn)
 	, m_outputDevice(m_midiOut)
-	, m_sendTimingInfo(true)
 #ifdef MODPLUG_TRACKER
 	, m_programName(_T("Default"))
 #endif // MODPLUG_TRACKER
@@ -95,8 +93,8 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 	const std::string programName8 = mpt::ToCharset(mpt::Charset::UTF8, m_programName);
 	uint32 flags = kLatencyCompensation | kLatencyPresent | (m_sendTimingInfo ? 0 : kIgnoreTiming);
 #ifdef MODPLUG_TRACKER
-	std::string inFriendlyName = mpt::ToCharset(mpt::Charset::UTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, m_inputDevice.name), true, false));
-	std::string outFriendlyName = mpt::ToCharset(mpt::Charset::UTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, m_outputDevice.name), false, false));
+	const std::string inFriendlyName = (m_inputDevice.index == MidiDevice::NO_MIDI_DEVICE) ? m_inputDevice.name : mpt::ToCharset(mpt::Charset::UTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, m_inputDevice.name), true, false));
+	const std::string outFriendlyName = (m_outputDevice.index == MidiDevice::NO_MIDI_DEVICE) ? m_outputDevice.name : mpt::ToCharset(mpt::Charset::UTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, m_outputDevice.name), false, false));
 	if(inFriendlyName != m_inputDevice.name)
 	{
 		flags |= kFriendlyInputName;

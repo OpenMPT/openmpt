@@ -44,7 +44,6 @@ void MidiInOutEditor::DoDataExchange(CDataExchange* pDX)
 
 MidiInOutEditor::MidiInOutEditor(MidiInOut &plugin)
 	: CAbstractVstEditor(plugin)
-	, m_locked(true)
 {
 }
 

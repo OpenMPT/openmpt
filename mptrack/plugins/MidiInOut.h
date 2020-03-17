@@ -26,17 +26,17 @@ OPENMPT_NAMESPACE_BEGIN
 class MidiDevice
 {
 public:
-	typedef unsigned int ID;
+	using ID = decltype(RtMidiIn().getPortCount());
+	static constexpr ID NO_MIDI_DEVICE = ID(-1);
 
 	RtMidi &stream;
 	std::string name;
-	ID index;
+	ID index = NO_MIDI_DEVICE;
 
 public:
 	MidiDevice(RtMidi &stream)
 		: stream(stream)
 		, name("<none>")
-		, index(ID(-1))	// MidiInOut::kNoDevice
 	{ }
 
 	std::string GetPortName(ID port);
@@ -56,8 +56,8 @@ protected:
 		kNumPrograms = 1,
 		kNumParams   = 2,
 
-		kNoDevice   = -1,
-		kMaxDevices = 65536,		// Should be a power of 2 to avoid rounding errors.
+		kNoDevice   = MidiDevice::NO_MIDI_DEVICE,
+		kMaxDevices = 65536,  // Should be a power of 2 to avoid rounding errors.
 	};
 
 	// MIDI queue entry with small storage optimiziation.
@@ -68,7 +68,7 @@ protected:
 	public:
 		double m_time;
 		size_t m_size;
-		unsigned char *m_message;
+		unsigned char *m_message = nullptr;
 	protected:
 		std::array<unsigned char, 32> m_msgSmall;
 
@@ -76,9 +76,8 @@ protected:
 		Message(double time, const void *data, size_t size)
 			: m_time(time)
 			, m_size(size)
-			, m_message(nullptr)
 		{
-			if(size > sizeof(m_msgSmall))
+			if(size > m_msgSmall.size())
 				m_message = new unsigned char[size];
 			else
 				m_message = m_msgSmall.data();
@@ -94,14 +93,14 @@ protected:
 			, m_msgSmall(other.m_msgSmall)
 		{
 			other.m_message = nullptr;
-			if(m_size <= sizeof(m_msgSmall))
+			if(m_size <= m_msgSmall.size())
 				m_message = m_msgSmall.data();
 			
 		}
 
 		~Message()
 		{
-			if(m_size > sizeof(m_msgSmall))
+			if(m_size > m_msgSmall.size())
 				delete[] m_message;
 		}
 
@@ -109,19 +108,19 @@ protected:
 		{
 			m_time = other.m_time;
 			m_size = other.m_size;
-			m_message = (m_size <= sizeof(m_msgSmall)) ? m_msgSmall.data() : other.m_message;
+			m_message = (m_size <= m_msgSmall.size()) ? m_msgSmall.data() : other.m_message;
 			m_msgSmall = other.m_msgSmall;
 			other.m_message = nullptr;
 			return *this;
 		}
 	};
 
-	std::string m_chunkData;					// Storage for GetChunk
-	std::deque<Message> m_outQueue;				// Latency-compensated output
-	std::vector<unsigned char> m_bufferedInput;	// For receiving long SysEx messages
+	std::string m_chunkData;                     // Storage for GetChunk
+	std::deque<Message> m_outQueue;              // Latency-compensated output
+	std::vector<unsigned char> m_bufferedInput;  // For receiving long SysEx messages
 	mpt::mutex m_mutex;
-	double m_nextClock;	// Remaining samples until next MIDI clock tick should be sent
-	double m_latency;	// User-adjusted latency in seconds
+	double m_nextClock = 0.0;  // Remaining samples until next MIDI clock tick should be sent
+	double m_latency = 0.0;    // User-adjusted latency in seconds
 
 	// I/O device settings
 	Util::MultimediaClock m_clock;
@@ -129,7 +128,7 @@ protected:
 	RtMidiOut m_midiOut;
 	MidiDevice m_inputDevice;
 	MidiDevice m_outputDevice;
-	bool m_sendTimingInfo;
+	bool m_sendTimingInfo = true;
 
 #ifdef MODPLUG_TRACKER
 	CString m_programName;
