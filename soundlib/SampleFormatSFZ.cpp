@@ -778,7 +778,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				generator = [](int32 i) { return mpt::saturate_round<int16>(std::sin(i * 2.0 * M_PI / 256.0) * int16_max); };
 			else if(synthSample == "*square")
 				generator = [](int32 i) { return i < 128 ? int16_max : int16_min; };
-			else if(synthSample == "*triangle")
+			else if(synthSample == "*triangle" || synthSample == "*tri")
 				generator = [](int32 i) { return static_cast<int16>(i < 128 ? ((63 - i) * 512) : ((i - 192) * 512)); };
 			else if(synthSample == "*saw")
 				generator = [](int32 i) { return static_cast<int16>((i - 128) * 256); };
