@@ -480,18 +480,16 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 				//const int tickspeed = (tempoRealBPMmode) ? MAX(1, (tempoData * beat * 4) / 60) : tempoData;
 				const int tickspeed = (settings.realBPMmode) ? std::max(1, settings.tempoBPM * settings.beat * 2) : ((settings.tempoTicks + 1) * 30);
 				// Try to find matching speed - try higher speeds first, so that effects like arpeggio and tremor work better.
-				for(speed = 255; speed > 2; speed--)
+				for(speed = 255; speed >= 1; speed--)
 				{
 					// Original unoptimized formula:
 					// tempo = 30 * tickspeed * speed / 48;
 					tempo = tickspeed * speed / 48;
 					if(tempo >= 32 && tempo <= 255)
-					{
 						break;
-					}
 				}
 				Limit(tempo, 32, 255);
-				settings.internalTicks = (uint8)speed;
+				settings.internalTicks = static_cast<uint8>(std::max(1, speed));
 			} else
 			{
 				tempoChange = false;
