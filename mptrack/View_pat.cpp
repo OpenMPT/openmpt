@@ -635,12 +635,12 @@ bool CViewPattern::ShowEditWindow()
 bool CViewPattern::PrepareUndo(const PatternCursor &beginSel, const PatternCursor &endSel, const char *description)
 {
 	CModDoc *pModDoc = GetDocument();
-	const CHANNELINDEX nChnBeg = beginSel.GetChannel(), nChnEnd = endSel.GetChannel();
-	const ROWINDEX nRowBeg = beginSel.GetRow(), nRowEnd = endSel.GetRow();
+	const CHANNELINDEX chnBegin = beginSel.GetChannel(), chnEnd = endSel.GetChannel();
+	const ROWINDEX rowBegin = beginSel.GetRow(), rowEnd = endSel.GetRow();
 
-	if((nChnEnd < nChnBeg) || (nRowEnd < nRowBeg) || pModDoc == nullptr)
+	if((chnEnd < chnBegin) || (rowEnd < rowBegin) || pModDoc == nullptr)
 		return false;
-	return pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, nChnBeg, nRowBeg, nChnEnd - nChnBeg + 1, nRowEnd - nRowBeg + 1, description);
+	return pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, chnBegin, rowBegin, chnEnd - chnBegin + 1, rowEnd - rowBegin + 1, description);
 }
 
 
@@ -5509,19 +5509,18 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 void CViewPattern::EnterAftertouch(ModCommand::NOTE note, int atValue)
 {
 	if(TrackerSettings::Instance().aftertouchBehaviour == atDoNotRecord || !IsEditingEnabled())
-	{
 		return;
-	}
 
-	PatternCursor cursor(m_Cursor);
+	const CHANNELINDEX numChannels = GetSoundFile()->GetNumChannels();
+	std::set<CHANNELINDEX> channels;
 
 	if(ModCommand::IsNote(note))
 	{
 		// For polyphonic aftertouch, map the aftertouch note to the correct pattern channel.
 		const auto &activeNoteMap = IsNoteSplit(note) ? splitActiveNoteChannel : activeNoteChannel;
-		if(activeNoteMap[note] < GetSoundFile()->GetNumChannels())
+		if(activeNoteMap[note] < numChannels)
 		{
-			cursor.SetColumn(activeNoteMap[note], PatternCursor::firstColumn);
+			channels.insert(activeNoteMap[note]);
 		} else
 		{
 			// Couldn't find the channel that belongs to this note... Don't bother writing aftertouch messages.
@@ -5530,65 +5529,87 @@ void CViewPattern::EnterAftertouch(ModCommand::NOTE note, int atValue)
 			// that particular note was, so it will just put the message on some other channel. We don't want that!
 			return;
 		}
+	} else
+	{
+		for(const auto &noteMap : { activeNoteChannel, splitActiveNoteChannel })
+		{
+			for(const auto chn : noteMap)
+			{
+				if(chn < numChannels)
+					channels.insert(chn);
+			}
+		}
+		if(channels.empty())
+			channels.insert(m_Cursor.GetChannel());
 	}
 
 	Limit(atValue, 0, 127);
 
-	ModCommand &target = GetModCommand(cursor);
-	ModCommand newCommand = target;
-	const CModSpecifications &specs = GetSoundFile()->GetModSpecifications();
-
-	if(target.IsPcNote())
+	const PatternCursor endOfRow{ m_Cursor.GetRow(), numChannels - 1u, PatternCursor::lastColumn };
+	const auto &specs = GetSoundFile()->GetModSpecifications();
+	bool first = true, modified = false;
+	for(const auto chn : channels)
 	{
-		return;
-	}
+		const PatternCursor cursor{ m_Cursor.GetRow(), chn };
+		ModCommand &target = GetModCommand(cursor);
+		ModCommand newCommand = target;
 
-	switch(TrackerSettings::Instance().aftertouchBehaviour)
-	{
-	case atRecordAsVolume:
-		// Record aftertouch messages as volume commands
-		if(specs.HasVolCommand(VOLCMD_VOLUME))
+		if(target.IsPcNote())
+			continue;
+
+		switch(TrackerSettings::Instance().aftertouchBehaviour)
 		{
-			if(newCommand.volcmd == VOLCMD_NONE || newCommand.volcmd == VOLCMD_VOLUME)
+		case atRecordAsVolume:
+			// Record aftertouch messages as volume commands
+			if(specs.HasVolCommand(VOLCMD_VOLUME))
 			{
-				newCommand.volcmd = VOLCMD_VOLUME;
-				newCommand.vol = static_cast<ModCommand::VOL>((atValue * 64 + 64) / 127);
-			}
-		} else if(specs.HasCommand(CMD_VOLUME))
-		{
-			if(newCommand.command == CMD_NONE || newCommand.command == CMD_VOLUME)
+				if(newCommand.volcmd == VOLCMD_NONE || newCommand.volcmd == VOLCMD_VOLUME)
+				{
+					newCommand.volcmd = VOLCMD_VOLUME;
+					newCommand.vol = static_cast<ModCommand::VOL>((atValue * 64 + 64) / 127);
+				}
+			} else if(specs.HasCommand(CMD_VOLUME))
 			{
-				newCommand.command = CMD_VOLUME;
-				newCommand.param = static_cast<ModCommand::PARAM>((atValue * 64 + 64) / 127);
+				if(newCommand.command == CMD_NONE || newCommand.command == CMD_VOLUME)
+				{
+					newCommand.command = CMD_VOLUME;
+					newCommand.param = static_cast<ModCommand::PARAM>((atValue * 64 + 64) / 127);
+				}
 			}
+			break;
+
+		case atRecordAsMacro:
+			// Record aftertouch messages as MIDI Macros
+			if(newCommand.command == CMD_NONE || newCommand.command == CMD_SMOOTHMIDI || newCommand.command == CMD_MIDI)
+			{
+				auto cmd = 
+					specs.HasCommand(CMD_SMOOTHMIDI) ? CMD_SMOOTHMIDI :
+					specs.HasCommand(CMD_MIDI) ? CMD_MIDI :
+					CMD_NONE;
+
+				if(cmd != CMD_NONE)
+				{
+					newCommand.command = static_cast<ModCommand::COMMAND>(cmd);
+					newCommand.param = static_cast<ModCommand::PARAM>(atValue);
+				}
+			}
+			break;
 		}
-		break;
 
-	case atRecordAsMacro:
-		// Record aftertouch messages as MIDI Macros
-		if(newCommand.command == CMD_NONE || newCommand.command == CMD_SMOOTHMIDI || newCommand.command == CMD_MIDI)
+		if(target != newCommand)
 		{
-			ModCommand::COMMAND cmd = static_cast<ModCommand::COMMAND>(
-				specs.HasCommand(CMD_SMOOTHMIDI) ? CMD_SMOOTHMIDI :
-				specs.HasCommand(CMD_MIDI) ? CMD_MIDI :
-				CMD_NONE);
+			if(first)
+				PrepareUndo(cursor, endOfRow, "Aftertouch Entry");
+			first = false;
+			modified = true;
+			target = newCommand;
 
-			if(cmd != CMD_NONE)
-			{
-				newCommand.command = cmd;
-				newCommand.param = static_cast<ModCommand::PARAM>(atValue);
-			}
+			InvalidateCell(cursor);
 		}
-		break;
 	}
-
-	if(target != newCommand)
+	if(modified)
 	{
-		PrepareUndo(cursor, cursor, "Aftertouch Entry");
-		target = newCommand;
-
 		SetModified(false);
-		InvalidateCell(cursor);
 		UpdateIndicator();
 	}
 }

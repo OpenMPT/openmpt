@@ -58,7 +58,7 @@ public:
 
 
 // Edit Step aka Row Spacing
-const ROWINDEX MAX_SPACING = MAX_PATTERN_ROWS;
+static constexpr ROWINDEX MAX_SPACING = MAX_PATTERN_ROWS;
 
 
 // Struct for controlling selection clearing. This is used to define which data fields should be cleared.
