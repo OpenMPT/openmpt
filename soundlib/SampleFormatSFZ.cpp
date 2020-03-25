@@ -1119,7 +1119,10 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	if(ins->nGlobalVol != 64)
 		f << "\nvolume=" << SFZLinear2dB(ins->nGlobalVol / 64.0) << " // " << ins->nGlobalVol;
 	if(ins->nFadeOut)
+	{
 		f << "\nampeg_release=" << (32768.0 * tickDuration / ins->nFadeOut) << " // " << ins->nFadeOut;
+		f << "\nampeg_release_shape=0";
+	}
 
 	if(ins->nDNA == DNA_NOTECUT && ins->nDCT != DCT_NONE)
 		f << "\npolyphony=1";
