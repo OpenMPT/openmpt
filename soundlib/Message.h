@@ -64,6 +64,8 @@ public:
 	// [out] returns true if the message has been changed.
 	bool SetFormatted(std::string message, LineEnding lineEnding);
 
+	// Sets the song message. Expects the provided string to already use the internal line ending character.
+	void SetRaw(std::string message) noexcept { assign(std::move(message)); }
 };
 
 OPENMPT_NAMESPACE_END

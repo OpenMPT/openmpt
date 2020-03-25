@@ -203,7 +203,7 @@ std::string SongMessage::GetFormatted(const LineEnding lineEnding) const
 bool SongMessage::SetFormatted(std::string message, LineEnding lineEnding)
 {
 	MPT_ASSERT(lineEnding == leLF || lineEnding == leCR || lineEnding == leCRLF);
-	switch (lineEnding)
+	switch(lineEnding)
 	{
 	case leLF:
 		message = mpt::String::Replace(message, "\n", std::string(1, InternalLineEnding));
@@ -222,7 +222,7 @@ bool SongMessage::SetFormatted(std::string message, LineEnding lineEnding)
 	{
 		return false;
 	}
-	assign(message);
+	assign(std::move(message));
 	return true;
 }
 

@@ -1127,6 +1127,22 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			m_songMessage.Read(file, expData.annoLength - 1, SongMessage::leAutodetect);
 		}
 
+		if(expData.mmdInfoOffset && file.Seek(expData.mmdInfoOffset))
+		{
+			file.Skip(6);  // Next info file (unused) + reserved
+			if(file.ReadUint16BE() == 1)  // ASCII text
+			{
+				uint32 length = file.ReadUint32BE();
+				if(length && file.CanRead(length))
+				{
+					const auto oldMsg = std::move(m_songMessage);
+					m_songMessage.Read(file, length, SongMessage::leAutodetect);
+					if(!oldMsg.empty())
+						m_songMessage.SetRaw(oldMsg + std::string(2, SongMessage::InternalLineEnding) + m_songMessage);
+				}
+			}
+		}
+
 		// Track Names
 		if(version >= 2 && expData.trackInfoOffset)
 		{
