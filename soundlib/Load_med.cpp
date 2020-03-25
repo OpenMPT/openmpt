@@ -832,7 +832,10 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		if(isSynth || !(loadFlags & loadSampleData))
+		{
+			smp += numSamples;
 			continue;
+		}
 
 		SampleIO sampleIO(
 			SampleIO::_8bit,
