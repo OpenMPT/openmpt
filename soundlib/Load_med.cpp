@@ -359,7 +359,7 @@ static TEMPO MMDTempoToBPM(uint32 tempo, bool is8Ch, bool bpmMode, uint8 rowsPer
 		tempo = tempos[tempo - 1];
 	}
 
-	return TEMPO(tempo * (5.0 * 715909.0) / (2.0 * 474326.0));
+	return TEMPO(tempo / 0.264);
 }
 
 
