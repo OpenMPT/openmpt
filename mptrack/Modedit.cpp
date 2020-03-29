@@ -1248,14 +1248,14 @@ bool CModDoc::IsSampleUsed(SAMPLEINDEX sample, bool searchInMutedChannels) const
 		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 		{
 			if(m_SndFile.IsSampleReferencedByInstrument(sample, i))
-			{
 				return true;
-			}
 		}
 	} else
 	{
-		for(const auto &pattern : m_SndFile.Patterns) if (pattern.IsValid())
+		for(const auto &pattern : m_SndFile.Patterns)
 		{
+			if(!pattern.IsValid())
+				continue;
 			auto m = pattern.cbegin();
 			for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
 			{
@@ -1263,7 +1263,8 @@ bool CModDoc::IsSampleUsed(SAMPLEINDEX sample, bool searchInMutedChannels) const
 				{
 					if(searchInMutedChannels || !m_SndFile.ChnSettings[chn].dwFlags[CHN_MUTE])
 					{
-						if(m->instr == sample && !m->IsPcNote()) return true;
+						if(m->instr == sample && !m->IsPcNote())
+							return true;
 					}
 				}
 			}
@@ -1275,9 +1276,12 @@ bool CModDoc::IsSampleUsed(SAMPLEINDEX sample, bool searchInMutedChannels) const
 
 bool CModDoc::IsInstrumentUsed(INSTRUMENTINDEX instr, bool searchInMutedChannels) const
 {
-	if(instr < 1 || instr > GetNumInstruments()) return false;
-	for(const auto &pattern : m_SndFile.Patterns) if(pattern.IsValid())
+	if(instr < 1 || instr > GetNumInstruments())
+		return false;
+	for(const auto &pattern : m_SndFile.Patterns)
 	{
+		if(!pattern.IsValid())
+			continue;
 		auto m = pattern.cbegin();
 		for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
 		{
@@ -1285,7 +1289,8 @@ bool CModDoc::IsInstrumentUsed(INSTRUMENTINDEX instr, bool searchInMutedChannels
 			{
 				if(searchInMutedChannels || !m_SndFile.ChnSettings[chn].dwFlags[CHN_MUTE])
 				{
-					if(m->instr == instr && !m->IsPcNote()) return true;
+					if(m->instr == instr && !m->IsPcNote())
+						return true;
 				}
 			}
 		}
