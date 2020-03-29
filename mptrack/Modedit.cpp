@@ -360,8 +360,8 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 		} else
 		{
 			// Invalid sample reference.
+			target.pData.pSample = nullptr;
 			target.Initialize(m_SndFile.GetType());
-			target.pSample = nullptr;
 			strcpy(m_SndFile.m_szNames[i + 1], "");
 			m_SndFile.ResetSamplePath(i + 1);
 		}
