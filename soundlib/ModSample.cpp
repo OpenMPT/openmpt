@@ -125,6 +125,7 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 // Initialize sample slot with default values.
 void ModSample::Initialize(MODTYPE type)
 {
+	FreeSample();
 	nLength = 0;
 	nLoopStart = nLoopEnd = 0;
 	nSustainStart = nSustainEnd = 0;
