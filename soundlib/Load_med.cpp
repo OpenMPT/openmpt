@@ -1038,11 +1038,13 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			}
 
-			for(uint32 sec = 0; sec < songHeader.songLength; sec++)
+			std::vector<uint16be> sections;
+			if(!file.Seek(header.sectionTableOffset)
+			   || !file.CanRead(songHeader.songLength * 2)
+			   || !file.ReadVector(sections, songHeader.songLength))
+				continue;
+			for(uint16 section : sections)
 			{
-				if(!file.Seek(header.sectionTableOffset + sec * 2))
-					return false;
-				uint16 section = file.ReadUint16BE();
 				if(section > header.numPlaySeqs)
 					continue;
 
@@ -1052,7 +1054,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 					MMD2PlaySeq playSeq;
 					file.ReadStruct(playSeq);
 
-					if(sec > 0)
+					if(!order.empty())
 						order.push_back(order.GetIgnoreIndex());
 
 					size_t readOrders = playSeq.length;
