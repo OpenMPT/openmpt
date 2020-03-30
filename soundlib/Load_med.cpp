@@ -1040,6 +1040,9 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					ChnSettings[chn].nPan = (Clamp<int8, int8>(file.ReadInt8(), -16, 16) + 16) * 8;
 				}
+			} else
+			{
+				SetupMODPanning(true);
 			}
 
 			std::vector<uint16be> sections;
