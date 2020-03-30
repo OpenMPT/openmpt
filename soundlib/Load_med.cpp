@@ -947,6 +947,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 #endif  // NO_VST
 
 			ModSample &sample = Samples[ins.Keyboard[NOTE_MIDDLEC]];
+			sample.nFineTune = MOD2XMFineTune(instrExt.finetune);
 
 			if(size > offsetof(MMDInstrExt, loopLength))
 			{
