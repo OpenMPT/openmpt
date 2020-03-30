@@ -1021,8 +1021,11 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			if(header.numTracks < 1 || header.numTracks > 64 || m_nChannels > 64)
 				return false;
 
+			const bool freePan = (header.flags3 & MMD2Song::FLAG3_FREEPAN);
 			if(header.volAdjust)
 				preamp = Util::muldivr_unsigned(preamp, std::min<uint16>(header.volAdjust, 800), 100);
+			if (freePan)
+				preamp /= 2;
 
 			if(file.Seek(header.trackVolsOffset))
 			{
