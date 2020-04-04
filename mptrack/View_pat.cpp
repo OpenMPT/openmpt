@@ -2311,11 +2311,10 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 
 		for (int i = 0; i <= distance; i++, pcmd += sndFile->GetNumChannels())
 		{
-
 			switch(type)
 			{
 				case PatternCursor::noteColumn:
-					if ((pcmd->note == NOTE_NONE) || (pcmd->instr == vcmd))
+					if((pcmd->note == NOTE_NONE || pcmd->instr == vcmd) && !pcmd->IsPcNote())
 					{
 						int note = vsrc + ((vdest - vsrc) * i + verr) / distance;
 						pcmd->note = static_cast<ModCommand::NOTE>(note);
@@ -2332,7 +2331,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 					break;
 
 				case PatternCursor::volumeColumn:
-					if ((pcmd->volcmd == VOLCMD_NONE) || (pcmd->volcmd == vcmd))
+					if((pcmd->volcmd == VOLCMD_NONE || pcmd->volcmd == vcmd) && !pcmd->IsPcNote())
 					{
 						int vol = vsrc + ((vdest - vsrc) * i + verr) / distance;
 						pcmd->vol = static_cast<ModCommand::VOL>(vol);
@@ -2345,15 +2344,14 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 					{	// With PC/PCs notes, copy PCs note and plug index to all rows where
 						// effect interpolation is done if no PC note with non-zero instrument is there.
 						const uint16 val = static_cast<uint16>(vsrc + ((vdest - vsrc) * i + verr) / distance);
-						if (pcmd->IsPcNote() == false || pcmd->instr == 0)
+						if (!pcmd->IsPcNote() || pcmd->instr == 0)
 						{
 							pcmd->note = PCnote;
 							pcmd->instr = static_cast<ModCommand::INSTR>(PCinst);
 						}
 						pcmd->SetValueVolCol(PCparam);
 						pcmd->SetValueEffectCol(val);
-					}
-					else
+					} else if(!pcmd->IsPcNote())
 					{
 						if ((pcmd->command == CMD_NONE) || (pcmd->command == vcmd))
 						{
