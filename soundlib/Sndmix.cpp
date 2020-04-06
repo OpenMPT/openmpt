@@ -1498,6 +1498,8 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 
 	if(chn.dwFlags[CHN_VIBRATO])
 	{
+		const bool advancePosition = !m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !(m_SongFlags[SONG_ITOLDEFFECTS]));
+
 		if(GetType() == MOD_TYPE_669)
 		{
 			if(chn.nVibratoPos % 2u)
@@ -1509,7 +1511,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 		}
 
 		// IT compatibility: IT has its own, more precise tables and pre-increments the vibrato position
-		if(m_playBehaviour[kITVibratoTremoloPanbrello])
+		if(advancePosition && m_playBehaviour[kITVibratoTremoloPanbrello])
 			chn.nVibratoPos += 4 * chn.nVibratoSpeed;
 
 		int vdelta = GetVibratoDelta(chn.nVibratoType, chn.nVibratoPos);
@@ -1612,12 +1614,9 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 		}
 
 		// Advance vibrato position - IT updates on every tick, unless "old effects" are enabled (in this case it only updates on non-first ticks like other trackers)
-		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !(m_SongFlags[SONG_ITOLDEFFECTS])))
-		{
-			// IT compatibility: IT has its own, more precise tables and pre-increments the vibrato position
-			if(!m_playBehaviour[kITVibratoTremoloPanbrello])
-				chn.nVibratoPos += chn.nVibratoSpeed;
-		}
+		// IT compatibility: IT has its own, more precise tables and pre-increments the vibrato position
+		if(advancePosition && !m_playBehaviour[kITVibratoTremoloPanbrello])
+			chn.nVibratoPos += chn.nVibratoSpeed;
 	} else if(chn.dwOldFlags[CHN_VIBRATO])
 	{
 		// Stop MIDI vibrato for plugins:
