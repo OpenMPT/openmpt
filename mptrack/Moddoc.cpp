@@ -2701,22 +2701,24 @@ void CModDoc::LearnMacro(int macroToSet, PlugParamIndex paramToUse)
 void CModDoc::OnSongProperties()
 {
 	CModTypeDlg dlg(m_SndFile, CMainFrame::GetMainFrame());
-	if (dlg.DoModal() == IDOK)
+	if(dlg.DoModal() == IDOK)
 	{
+		UpdateAllViews(nullptr, GeneralHint().General());
 		ScopedLogCapturer logcapturer(*this, _T("Conversion Status"));
-		bool bShowLog = false;
+		bool showLog = false;
 		if(dlg.m_nType != GetModType())
 		{
-			if (!ChangeModType(dlg.m_nType)) return;
-			bShowLog = true;
+			if(!ChangeModType(dlg.m_nType))
+				return;
+			showLog = true;
 		}
 
-		CHANNELINDEX nNewChannels = Clamp(dlg.m_nChannels, m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
-
-		if (nNewChannels != GetNumChannels())
+		CHANNELINDEX newChannels = Clamp(dlg.m_nChannels, m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
+		if(newChannels != GetNumChannels())
 		{
 			const bool showCancelInRemoveDlg = m_SndFile.GetModSpecifications().channelsMax >= m_SndFile.GetNumChannels();
-			if(ChangeNumChannels(nNewChannels, showCancelInRemoveDlg)) bShowLog = true;
+			if(ChangeNumChannels(newChannels, showCancelInRemoveDlg))
+				showLog = true;
 
 			// Force update of pattern highlights / num channels
 			UpdateAllViews(nullptr, PatternHint().Data());
