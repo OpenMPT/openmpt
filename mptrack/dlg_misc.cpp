@@ -376,6 +376,7 @@ void CModTypeDlg::OnOK()
 	{
 		m_nType = static_cast<MODTYPE>(m_TypeBox.GetItemData(sel));
 	}
+	const auto &newModSpecs = sndFile.GetModSpecifications(m_nType);
 
 	sndFile.m_SongFlags.set(SONG_LINEARSLIDES, m_CheckBox1.GetCheck() != BST_UNCHECKED);
 	sndFile.m_SongFlags.set(SONG_FASTVOLSLIDES, m_CheckBox2.GetCheck() != BST_UNCHECKED);
@@ -395,9 +396,17 @@ void CModTypeDlg::OnOK()
 	sndFile.m_nDefaultRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
 
 	sel = m_TempoModeBox.GetCurSel();
-	if (sel >= 0)
+	if(sel >= 0)
 	{
+		const auto oldMode = sndFile.m_nTempoMode;
 		sndFile.m_nTempoMode = static_cast<TempoMode>(m_TempoModeBox.GetItemData(sel));
+		if(oldMode == tempoModeModern && sndFile.m_nTempoMode != tempoModeModern)
+		{
+			double newTempo = sndFile.m_nDefaultTempo.ToDouble() * (sndFile.m_nDefaultSpeed * sndFile.m_nDefaultRowsPerBeat) / ((sndFile.m_nTempoMode == tempoModeClassic) ? 24 : 60);
+			if(!newModSpecs.hasFractionalTempo)
+				newTempo = std::round(newTempo);
+			sndFile.m_nDefaultTempo = Clamp(TEMPO(newTempo), newModSpecs.GetTempoMin(), newModSpecs.GetTempoMax());
+		}
 	}
 	if(sndFile.m_nTempoMode == tempoModeModern)
 	{
