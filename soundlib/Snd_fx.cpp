@@ -127,22 +127,21 @@ public:
 			if(i >= portaStart)
 			{
 				chn.isFirstTick = false;
-				const ModCommand &p = *sndFile.Patterns[state->m_nPattern].GetpModCommand(state->m_nRow, channel);
-				if(p.command == CMD_TONEPORTAMENTO) sndFile.TonePortamento(chn, p.param);
-				else if(p.command == CMD_TONEPORTAVOL) sndFile.TonePortamento(chn, 0);
-				if(p.volcmd == VOLCMD_TONEPORTAMENTO)
+				const ModCommand &m = *sndFile.Patterns[state->m_nPattern].GetpModCommand(state->m_nRow, channel);
+				auto command = m.command;
+				if(m.volcmd == VOLCMD_TONEPORTAMENTO)
 				{
-					uint32 param = p.vol;
-					if(sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
-					{
-						param = ImpulseTrackerPortaVolCmd[param & 0x0F];
-					} else
-					{
-						// Close enough. Do not bother with idiosyncratic FT2 behaviour here.
-						param <<= 4;
-					}
-					sndFile.TonePortamento(chn, param);
+					const auto retVal = sndFile.GetVolCmdTonePorta(m, 0);
+					const auto porta = retVal.first;
+					const auto clearEffectCommand = retVal.second;
+					sndFile.TonePortamento(chn, porta);
+					if(clearEffectCommand)
+						command = CMD_NONE;
 				}
+				if(command == CMD_TONEPORTAMENTO)
+					sndFile.TonePortamento(chn, m.param);
+				else if(command == CMD_TONEPORTAVOL)
+					sndFile.TonePortamento(chn, 0);
 				updateInc = true;
 			}
 
@@ -570,6 +569,17 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case VOLCMD_VOLSLIDEDOWN:
 				if(chn.rowCommand.vol != 0)
 					chn.nOldVolParam = chn.rowCommand.vol;
+				break;
+			case VOLCMD_TONEPORTAMENTO:
+				if(chn.rowCommand.vol)
+				{
+					const auto retVal = GetVolCmdTonePorta(chn.rowCommand, 0);
+					const auto porta = retVal.first;
+					const auto clearEffectCommand = retVal.second;
+					chn.nPortamentoSlide = porta * 4;
+					if(clearEffectCommand)
+						command = CMD_NONE;
+				}
 				break;
 			}
 
@@ -2959,30 +2969,13 @@ bool CSoundFile::ProcessEffects()
 		{
 			if (volcmd == VOLCMD_TONEPORTAMENTO)
 			{
-				uint32 porta = 0;
-				if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
-				{
-					porta = ImpulseTrackerPortaVolCmd[vol & 0x0F];
-				} else
-				{
-					if(cmd == CMD_TONEPORTAMENTO && GetType() == MOD_TYPE_XM)
-					{
-						// Yes, FT2 is *that* weird. If there is a Mx command in the volume column
-						// and a normal 3xx command, the 3xx command is ignored but the Mx command's
-						// effectiveness is doubled.
-						// Test case: TonePortamentoMemory.xm
-						cmd = CMD_NONE;
-						vol *= 2;
-					}
-					porta = vol << 4;
+				const auto retVal = GetVolCmdTonePorta(chn.rowCommand, nStartTick);
+				const auto porta = retVal.first;
+				const auto clearEffectCommand = retVal.second;
 
-					// FT2 compatibility: If there's a portamento and a note delay, execute the portamento, but don't update the parameter
-					// Test case: PortaDelay.xm
-					if(m_playBehaviour[kFT2PortaDelay] && nStartTick != 0)
-					{
-						porta = 0;
-					}
-				}
+				if(clearEffectCommand)
+					cmd = CMD_NONE;
+
 				TonePortamento(chn, porta);
 			} else
 			{
@@ -4025,6 +4018,36 @@ void CSoundFile::NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool ret
 		}
 	}
 }
+
+
+std::pair<uint32, bool> CSoundFile::GetVolCmdTonePorta(const ModCommand &m, uint32 startTick) const
+{
+	if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
+	{
+		return {ImpulseTrackerPortaVolCmd[m.vol & 0x0F], false};
+	} else
+	{
+		bool clearEffectColumn = false;
+		uint32 vol = m.vol;
+		if(m.command == CMD_TONEPORTAMENTO && GetType() == MOD_TYPE_XM)
+		{
+			// Yes, FT2 is *that* weird. If there is a Mx command in the volume column
+			// and a normal 3xx command, the 3xx command is ignored but the Mx command's
+			// effectiveness is doubled.
+			// Test case: TonePortamentoMemory.xm
+			clearEffectColumn = true;
+			vol *= 2;
+		}
+
+		// FT2 compatibility: If there's a portamento and a note delay, execute the portamento, but don't update the parameter
+		// Test case: PortaDelay.xm
+		if(m_playBehaviour[kFT2PortaDelay] && startTick != 0)
+			return {0, clearEffectColumn};
+		else
+			return {vol * 16, clearEffectColumn};
+	}
+}
+
 
 // Portamento Slide
 void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
