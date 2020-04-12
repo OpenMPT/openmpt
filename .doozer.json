@@ -46,15 +46,15 @@
 				"unzip",
 				"zip",
 				"zlib1g-dev",
-				"build-essential",
-				"g++-9",
-				"gcc-9",
-				"libstdc++-9-dev"
+				"build-essential"
 			],
 			"environment": {
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
+				"sudo add-apt-repository ppa:ubuntu-toolchain-r/test",
+				"sudo apt-get update",
+				"sudo apt-get install gcc-9 g++-9 libstdc++-9-dev",
 				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} CC=gcc-9 CXX=g++-9 LD=g++-9 STRICT=1",
 				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} CC=gcc-9 CXX=g++-9 LD=g++-9 STRICT=1 check"
 			]
