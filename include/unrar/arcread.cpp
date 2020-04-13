@@ -521,7 +521,6 @@ size_t Archive::ReadHeader15()
     {
       // Last 7 bytes of recovered volume can contain zeroes, because
       // REV files store its own information (volume number, etc.) here.
-      SaveFilePos SavePos(*this);
       int64 Length=Tell();
       Seek(Length-7,SEEK_SET);
       Recovered=true;
