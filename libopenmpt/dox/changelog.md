@@ -7,6 +7,11 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.21-pre
 
+ *  IT: Vibrato was too fast in Old Effects mode since libopenmpt 0.3.
+ *  XM: Treat 8bitbubsy's FT2 clone exactly like Fasttracker 2 with respect to
+    compatibility and playback flags. For example, FT2 Pan Law was not applied.
+ *  DMF: Some files had a wrong tempo since libopenmpt 0.2.5705-beta15.
+
 ### libopenmpt 0.3.20 (2019-10-30)
 
  *  mpg123: Update to v1.25.13 (2019-10-26).
