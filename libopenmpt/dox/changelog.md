@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.4.13-pre
+
 ### libopenmpt 0.4.12 (2020-04-13)
 
  *  IT: Vibrato was too fast in Old Effects mode since libopenmpt 0.3.
