@@ -40,6 +40,8 @@ void CmdExtract::DoExtract()
   {
     if (Cmd->ManualPassword)
       Cmd->Password.Clean(); // Clean user entered password before processing next archive.
+  
+    ReconstructDone=false; // Must be reset here, not in ExtractArchiveInit().
     while (true)
     {
       EXTRACT_ARC_CODE Code=ExtractArchive();
@@ -93,7 +95,6 @@ void CmdExtract::ExtractArchiveInit(Archive &Arc)
 
   PrevProcessed=false;
   AllMatchesExact=true;
-  ReconstructDone=false;
   AnySolidDataUnpackedWell=false;
 
   StartTime.SetCurrentTime();

@@ -379,3 +379,4 @@
 #define   MNeedAdmin         L"\nYou may need to run RAR as administrator"
 #define   MDictOutMem        L"\nNot enough memory for %d MB compression dictionary, changed to %d MB."
 #define   MUseSmalllerDict   L"\nPlease use a smaller compression dictionary."
+#define   MOpenErrAtime      L"\nYou may need to remove -tsp switch to open this file."
