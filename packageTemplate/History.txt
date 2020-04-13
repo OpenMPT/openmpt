@@ -30,10 +30,36 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.28.10.00 (13 April 2020, revision 12628)
+-------------------------------------------
+Pattern tab
+- [Fix] <js> Do not modify existing Parameter Control Events incorrectly when interpolating normal (volume) commands or notes.
+- [Fix] <js> Volume column tone portamento commands did not update portamento effect memory when seeking. XM volume column portamento quirks are now handled better when seeking.
+
+Sample tab
+- [Fix] <js> When OPL instruments were set up as external samples, changing their parameters didn't mark them as modified.
+
+IT
+- [Fix] <js> Vibrato was too fast in Old Effects mode since OpenMPT 1.27 (http://bugs.openmpt.org/view.php?id=1309).
+
+XM
+- [Fix] <js> Treat 8bitbubsy's FT2 clone exactly like Fasttracker 2 with respect to compatibility and playback flags. For example, FT2 Pan Law was not applied.
+
+Other formats
+- [Fix] <js> DMF: Some files had a wrong tempo since OpenMPT 1.25.02.00 (http://bugs.openmpt.org/view.php?id=1303).
+
+Misc
+- [Imp] <js> When changing from modern tempo mode to classic or alternative tempo mode, the initial song tempo is now retained better. 
+- [Fix] <js> Potential crash when trying to save a file to a drive that no longer exists.
+
+Third-Party Libraries
+- [Imp] Update UnRAR (v5.9.2)
+
+
 v1.28.09.00 (22 December 2019, revision 12387)
 ---------------------------------------------
 Pattern tab
-- [Fix] <js> Chord detect interval was broken if the pattern number didn't match its location in the order list (e.g. pattern 3 at position 3) since OpenMPT 1.28.07.00. 
+- [Fix] <js> Chord detect interval was broken if the pattern number didn't match its location in the order list (e.g. pattern 3 at position 3) since OpenMPT 1.28.07.00.
 - [Fix] <js> Potential crash when entering notes, in particular if the order list was empty (http://bugs.openmpt.org/view.php?id=1278).
 - [Fix] <js> Potential crash when halving a pattern with an odd number of rows and then expanding it again (http://bugs.openmpt.org/view.php?id=1282).
 
