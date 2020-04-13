@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.12-pre
+### libopenmpt 0.4.12 (2020-04-13)
 
  *  IT: Vibrato was too fast in Old Effects mode since libopenmpt 0.3.
  *  XM: Treat 8bitbubsy's FT2 clone exactly like Fasttracker 2 with respect to
