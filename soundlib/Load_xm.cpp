@@ -361,6 +361,10 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				m_nMixLevels = mixLevelsCompatibleFT2;
 			}
+		} else if(!memcmp(fileHeader.trackerName, "Fasttracker II clone", 20))
+		{
+			// 8bitbubsy's FT2 clone should be treated exactly like FT2
+			madeWith = verFT2Generic | verConfirmed;
 		} else if(!memcmp(fileHeader.trackerName, "MadTracker 2.0\0", 15))
 		{
 			// Fix channel 2 in m3_cha.xm
