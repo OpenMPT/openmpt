@@ -52,9 +52,11 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
+				"sudo echo 'deb http://archive.ubuntu.com/ubuntu/ xenial-updates main restricted universe multiverse' >> /etc/apt/sources.list",
 				"sudo add-apt-repository ppa:ubuntu-toolchain-r/test",
-				"sudo apt-get update",
-				"sudo apt-get install gcc-9 g++-9 libstdc++-9-dev binutils",
+				"sudo apt update",
+				"sudo apt full-update",
+				"sudo apt install gcc-9 g++-9 libstdc++-9-dev binutils",
 				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} CC=gcc-9 CXX=g++-9 LD=g++-9 STRICT=1",
 				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} CC=gcc-9 CXX=g++-9 LD=g++-9 STRICT=1 check"
 			]
