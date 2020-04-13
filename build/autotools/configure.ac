@@ -321,11 +321,11 @@ AS_IF([test "x$have_mingwstdtthreads" = "x1"],
 AC_SUBST([MINGWSTDTHREADS_CPPFLAGS])
 
 # libmodplug emulation
-AC_ARG_ENABLE([libopenmpt_modplug], AS_HELP_STRING([--enable-libopenmpt_modplug], [Enable the libopenmpt_modplug emulation library of the libmodplug interface.]))
+AC_ARG_ENABLE([libopenmpt_modplug], AS_HELP_STRING([--enable-libopenmpt_modplug], [DEPRECATED (use separate libopenmpt-modplug source package instead): Enable the libopenmpt_modplug emulation library of the libmodplug interface.]))
 AM_CONDITIONAL([ENABLE_LIBOPENMPT_MODPLUG], [test "x$enable_libopenmpt_modplug" = "xyes"])
 
 # libmodplug replacement
-AC_ARG_ENABLE([libmodplug], AS_HELP_STRING([--enable-libmodplug], [Enable libmodplug replacement library based on libopenmpt.
+AC_ARG_ENABLE([libmodplug], AS_HELP_STRING([--enable-libmodplug], [DEPRECATED (use separate libopenmpt-modplug source package instead): Enable libmodplug replacement library based on libopenmpt.
 WARNING: This will replace your current libmodplug installation.
 CAUTION: The emulation of the libmodplug interface is not complete as libmodplug exposes lots of internal implementation details. If any of those is used by an application, the emulation via libopenmpt will fail and/or crash.
 ]))

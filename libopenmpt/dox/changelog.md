@@ -45,6 +45,10 @@ is just a high-level summary.
 
  *  [**Change**] std::istream based file I/O has been speed up.
  *  [**Change**] Dependency on iconv on Linux has been removed.
+ *  [**Change**] libmodplug: The libmodplug emulation layer is now deprecated in
+    the libopenmpt tree. Please use the separate `libopenmpt-modplug` package
+    instead. The `Makefile` build system now requires `LIBMODPLUG=1` option to
+    build the libmodplug emulation layer.
 
  *  [**Regression**] foo_openmpt: foo_openmpt is discontinued. Please use
     Kode54's fork foo_openmpt54:

@@ -46,6 +46,33 @@ Metadata and other state is not provided or updated.
 #include <cstdlib>
 #include <cstring>
 
+#define MPT_PP_DEFER(m, ...) m(__VA_ARGS__)
+#define MPT_PP_STRINGIFY(x) #x
+#define MPT_PP_JOIN_HELPER(a, b) a ## b
+#define MPT_PP_JOIN(a, b) MPT_PP_JOIN_HELPER(a, b)
+#define MPT_PP_UNIQUE_IDENTIFIER(prefix) MPT_PP_JOIN(prefix , __LINE__)
+#if defined(__clang__)
+	#define MPT_WARNING(text) _Pragma(MPT_PP_STRINGIFY(GCC warning text))
+#elif defined(__GNUC__)
+	#define MPT_WARNING(text) _Pragma(MPT_PP_STRINGIFY(GCC warning text))
+#elif defined(_MSC_VER)
+	#define MPT_WARNING(text) __pragma(message(__FILE__ "(" MPT_PP_DEFER(MPT_PP_STRINGIFY, __LINE__) "): Warning: " text))
+#elif defined(__cplusplus)
+	#if (__cplusplus >= 201402L)
+		#define MPT_WARNING(text) \
+			static inline int MPT_PP_UNIQUE_IDENTIFIER(MPT_WARNING_NAME) () noexcept { \
+				int warning [[deprecated("Warning: " text)]] = 0; \
+				return warning; \
+			} \
+		/**/
+	#else
+		#define MPT_WARNING(text) /**/
+	#endif
+#else
+	#define MPT_WARNING(text) /**/
+#endif
+MPT_WARNING("libopenmpt-modplug from the libopenmpt source package is deprecated. Please migrate client code to native libopenmpt C or C++ APIs, or use the separate libopenmpt-modplug source package instead.")
+
 #define MODPLUG_BUILD
 #ifdef _MSC_VER
 /* libmodplug C++ header is broken for MSVC DLL builds */
