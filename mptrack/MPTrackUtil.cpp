@@ -32,39 +32,4 @@ mpt::const_byte_span GetResource(LPCTSTR lpName, LPCTSTR lpType)
 }
 
 
-// Returns WinAPI error message corresponding to error code returned by GetLastError().
-CString GetErrorMessage(DWORD nErrorCode)
-{
-	CString msg;
-	LPTSTR lpMsgBuf = NULL;
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL,
-		nErrorCode,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR)&lpMsgBuf,
-		0,
-		NULL);
-	if(!lpMsgBuf)
-	{
-		DWORD e = GetLastError();
-		if((e == ERROR_NOT_ENOUGH_MEMORY) || (e == ERROR_OUTOFMEMORY))
-		{
-			MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
-		}
-		return {};
-	}
-	try
-	{
-		msg = lpMsgBuf;
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-	{
-		LocalFree(lpMsgBuf);
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
-	}
-	LocalFree(lpMsgBuf);
-	return msg;
-}
-
-
 OPENMPT_NAMESPACE_END

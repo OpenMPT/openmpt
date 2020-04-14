@@ -121,6 +121,12 @@
 
 #include "../common/mptStringBuffer.h"
 
+#include "../common/mptOSError.h"
+// "mptException.h"
+// "mptString.h"
+// <exception>
+// <stdexcept>
+
 #include "../common/mptExceptionText.h"
 // "mptException.h"
 // "mptString.h"

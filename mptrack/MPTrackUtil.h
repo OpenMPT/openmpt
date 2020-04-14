@@ -27,8 +27,6 @@ OPENMPT_NAMESPACE_BEGIN
 mpt::const_byte_span GetResource(LPCTSTR lpName, LPCTSTR lpType);
 
 
-CString GetErrorMessage(DWORD nErrorCode);
-
 namespace Util
 {
 	// Get horizontal DPI resolution

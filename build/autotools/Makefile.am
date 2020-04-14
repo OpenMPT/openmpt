@@ -144,6 +144,7 @@ MPT_FILES_COMMON += common/mptMemory.h
 MPT_FILES_COMMON += common/mptMutex.h
 MPT_FILES_COMMON += common/mptOS.cpp
 MPT_FILES_COMMON += common/mptOS.h
+MPT_FILES_COMMON += common/mptOSError.h
 MPT_FILES_COMMON += common/mptOSException.h
 MPT_FILES_COMMON += common/mptPathString.cpp
 MPT_FILES_COMMON += common/mptPathString.h

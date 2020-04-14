@@ -99,6 +99,9 @@
     <ClInclude Include="..\..\common\mptOS.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptOSError.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptOSException.h">
       <Filter>common</Filter>
     </ClInclude>

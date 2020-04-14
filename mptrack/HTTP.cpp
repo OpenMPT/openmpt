@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "HTTP.h"
 #include "../common/mptIO.h"
+#include "../common/mptOSError.h"
 #include <WinInet.h>
 
 
@@ -99,40 +100,6 @@ namespace HTTP
 {
 
 
-static mpt::ustring LastErrorMessage(DWORD errorCode)
-{
-	mpt::ustring message;
-	void *lpMsgBuf = nullptr;
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		GetModuleHandle(TEXT("wininet.dll")),
-		errorCode,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR)&lpMsgBuf,
-		0,
-		NULL);
-	if(!lpMsgBuf)
-	{
-		DWORD e = GetLastError();
-		if((e == ERROR_NOT_ENOUGH_MEMORY) || (e == ERROR_OUTOFMEMORY))
-		{
-			MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
-		}
-		return {};
-	}
-	try
-	{
-		message = mpt::ToUnicode(mpt::winstring((LPTSTR)lpMsgBuf));
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-	{
-		LocalFree(lpMsgBuf);
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
-	}
-	LocalFree(lpMsgBuf);
-	return message;
-}
-
-
 exception::exception(const mpt::ustring &m)
 	: std::runtime_error(std::string("HTTP error: ") + mpt::ToCharset(mpt::Charset::ASCII, m))
 {
@@ -150,7 +117,7 @@ class LastErrorException
 {
 public:
 	LastErrorException()
-		: exception(LastErrorMessage(GetLastError()))
+		: exception(Windows::GetErrorMessage(GetLastError(), GetModuleHandle(TEXT("wininet.dll"))))
 	{
 	}
 };

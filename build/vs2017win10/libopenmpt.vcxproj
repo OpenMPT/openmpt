@@ -1237,6 +1237,7 @@
     <ClInclude Include="..\..\common\mptMemory.h" />
     <ClInclude Include="..\..\common\mptMutex.h" />
     <ClInclude Include="..\..\common\mptOS.h" />
+    <ClInclude Include="..\..\common\mptOSError.h" />
     <ClInclude Include="..\..\common\mptOSException.h" />
     <ClInclude Include="..\..\common\mptPathString.h" />
     <ClInclude Include="..\..\common\mptRandom.h" />

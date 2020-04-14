@@ -54,6 +54,7 @@
 #include "../common/mptExceptionText.h"
 #include "../common/mptStringFormat.h"
 #include "../common/mptStringParse.h"
+#include "../common/mptOSError.h"
 #include "../common/mptPathString.h"
 #include "../common/Logging.h"
 #include "../common/misc_util.h"
