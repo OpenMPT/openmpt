@@ -19,17 +19,18 @@
 #include "mptString.h"
 #include "mptStringFormat.h"
 
-#include <exception>
-
+#if defined(MODPLUG_TRACKER)
 #if MPT_OS_WINDOWS
 #include <windows.h>
 #endif // MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
 
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
+#if defined(MODPLUG_TRACKER)
 #if MPT_OS_WINDOWS
 
 namespace Windows
@@ -85,6 +86,7 @@ public:
 } // namespace Windows
 
 #endif // MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
 
 
 
