@@ -535,7 +535,9 @@ bool CSoundFile::ProcessRow()
 		// the pattern loop (editor flag, not to be confused with the pattern loop effect)
 		// flag is set - because in that case, the module would stop after the first pattern loop...
 		const bool overrideLoopCheck = (m_nRepeatCount != -1) && m_SongFlags[SONG_PATTERNLOOP];
-		if(!overrideLoopCheck && visitedSongRows.IsVisited(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow, true))
+		// If a row is jumped over due to a ProTracker quirk, don't add it to the visited rows (unless we notice that we are stuck in a loop by repeatedly playing that row)
+		const bool checkIgnoreRow = !ignoreRow || visitedSongRows.GetLastVisitedRow() == m_PlayState.m_nRow;
+		if(!overrideLoopCheck && checkIgnoreRow && visitedSongRows.IsVisited(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow, true))
 		{
 			if(m_nRepeatCount)
 			{
