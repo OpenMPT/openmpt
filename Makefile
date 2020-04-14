@@ -46,6 +46,7 @@
 #  STATIC_LIB=1     Build static library
 #  EXAMPLES=1       Build examples
 #  OPENMPT123=1     Build openmpt123
+#  LIBMODPLUG=0     Build libmodplug emulation layer (deprecated)
 #  SHARED_SONAME=1  Set SONAME of shared library
 #  DEBUG=0          Build debug binaries without optimization and with symbols
 #  OPTIMIZE=1       Build optimized binaries
@@ -290,7 +291,10 @@ INSTALL_LIB = $(INSTALL) -m 0644
 INSTALL_DATA_DIR = $(INSTALL_DIR)
 INSTALL_MAKE_DIR += -m 0755
 
-CPPFLAGS += -Icommon -I. -Iinclude/modplug/include -Iinclude
+CPPFLAGS += -Icommon -I. -Iinclude
+ifeq ($(LIBMODPLUG),1)
+CPPFLAGS += -Iinclude/modplug/include 
+endif
 
 ifeq ($(MPT_COMPILER_GENERIC),1)
 
@@ -820,6 +824,7 @@ OBJECTS_LIBOPENMPT += $(LIBOPENMPT_OBJECTS)
 endif
 
 
+ifeq ($(LIBMODPLUG),1)
 LIBOPENMPT_MODPLUG_C_SOURCES += \
  libopenmpt/libopenmpt_modplug.c \
  
@@ -830,6 +835,7 @@ LIBOPENMPT_MODPLUG_OBJECTS = $(LIBOPENMPT_MODPLUG_C_SOURCES:.c=.o) $(LIBOPENMPT_
 LIBOPENMPT_MODPLUG_DEPENDS = $(LIBOPENMPT_MODPLUG_OBJECTS:.o=.d)
 ALL_OBJECTS += $(LIBOPENMPT_MODPLUG_OBJECTS)
 ALL_DEPENDS += $(LIBOPENMPT_MODPLUG_DEPENDS)
+endif
 
 
 OPENMPT123_CXX_SOURCES += \
@@ -879,7 +885,9 @@ all:
 
 ifeq ($(DYNLINK),1)
 OUTPUTS += bin/libopenmpt$(SOSUFFIX)
+ifeq ($(LIBMODPLUG),1)
 OUTPUTS += bin/libopenmpt_modplug$(SOSUFFIX)
+endif
 endif
 ifeq ($(SHARED_LIB),1)
 OUTPUTS += bin/libopenmpt$(SOSUFFIX)
@@ -1095,6 +1103,7 @@ ifeq ($(MPT_WITH_DOXYGEN),1)
 	$(INSTALL_DATA_DIR) bin/docs/html $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/html
 endif
 
+ifeq ($(LIBMODPLUG),1)
 .PHONY: install-openmpt-modplug
 install-openmpt-modplug: $(OUTPUTS)
 ifeq ($(SHARED_LIB),1)
@@ -1103,7 +1112,9 @@ ifeq ($(SHARED_LIB),1)
 	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug$(SOSUFFIX).1
 	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug$(SOSUFFIX).1.0.0
 endif
+endif
 
+ifeq ($(LIBMODPLUG),1)
 .PHONY: install-modplug
 install-modplug: $(OUTPUTS)
 ifeq ($(SHARED_LIB),1)
@@ -1111,6 +1122,7 @@ ifeq ($(SHARED_LIB),1)
 	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX)
 	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX).1
 	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX).1.0.0
+endif
 endif
 
 .PHONY: dist
@@ -1367,9 +1379,11 @@ ifeq ($(SHARED_SONAME),1)
 	$(SILENT)ln -sf $(LIBOPENMPT_SONAME) bin/libopenmpt$(SOSUFFIX)
 endif
 
+ifeq ($(LIBMODPLUG),1)
 bin/libopenmpt_modplug$(SOSUFFIX): $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) -shared $(SO_LDFLAGS) $(LDFLAGS_LIBOPENMPT) $(LIBOPENMPT_MODPLUG_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
+endif
 
 bin/openmpt123.1: bin/openmpt123$(EXESUFFIX) openmpt123/openmpt123.h2m
 	$(INFO) [HELP2MAN] $@

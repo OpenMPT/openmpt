@@ -7,6 +7,11 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.13-pre
 
+ *  [**Change**] libmodplug: The libmodplug emulation layer is now deprecated in
+    the libopenmpt tree. Please use the separate `libopenmpt-modplug` package
+    instead. The `Makefile` build system now requires `LIBMODPLUG=1` option to
+    build the libmodplug emulation layer.
+
 ### libopenmpt 0.4.12 (2020-04-13)
 
  *  IT: Vibrato was too fast in Old Effects mode since libopenmpt 0.3.
