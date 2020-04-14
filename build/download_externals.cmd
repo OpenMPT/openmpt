@@ -51,7 +51,7 @@ call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.python.org/ftp
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.49/innounp049.rar"  "build\externals\innounp049.rar"               a00dbb671de1fb0bc3c94ce97a569d2bbfcc00f6fcbe16578ea9940ffdc0558dcde7c9fa0b4a5d7c17d4b73706f6eb21f479c7e6d6b8de3605f3974d25841da3  140885 || goto error
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "http://files.jrsoftware.org/is/6/innosetup-6.0.3.exe"                                            "build\externals\innosetup-6.0.3.exe"  033340a9712072ddc0e46cdaab1d7f7cecb7d5f8ff1c3b8d84ac210fefaf1d8e310a9a12fc28390488e64c679709d0d2eab57f178623af9b32ad10ab4a5a3702 4116992 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "http://files.jrsoftware.org/is/6/innosetup-6.0.4.exe"                                            "build\externals\innosetup-6.0.4.exe"  396cd154e8210c4524748301105037e4cc6e9def6800c266c7de5ab1252df403d435125bbdee048dd35fd85c0df938afeb6df8dc8ff369b86c9648c521079d27 4217832 || goto error
 
 
 call :killdir "build\tools\7zipold" || goto error
