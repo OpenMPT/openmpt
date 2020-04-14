@@ -4,7 +4,7 @@ AC_PREREQ([2.68])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_FILES([Makefile libopenmpt/libopenmpt.pc libmodplug/libmodplug.pc Doxyfile])
+AC_CONFIG_FILES([Makefile libopenmpt/libopenmpt.pc Doxyfile])
 
 AM_INIT_AUTOMAKE([1.11 -Wall -Werror foreign subdir-objects])
 
@@ -319,17 +319,6 @@ AS_IF([test "x$have_mingwstdtthreads" = "x1"],
  ]
 )
 AC_SUBST([MINGWSTDTHREADS_CPPFLAGS])
-
-# libmodplug emulation
-AC_ARG_ENABLE([libopenmpt_modplug], AS_HELP_STRING([--enable-libopenmpt_modplug], [DEPRECATED (use separate libopenmpt-modplug source package instead): Enable the libopenmpt_modplug emulation library of the libmodplug interface.]))
-AM_CONDITIONAL([ENABLE_LIBOPENMPT_MODPLUG], [test "x$enable_libopenmpt_modplug" = "xyes"])
-
-# libmodplug replacement
-AC_ARG_ENABLE([libmodplug], AS_HELP_STRING([--enable-libmodplug], [DEPRECATED (use separate libopenmpt-modplug source package instead): Enable libmodplug replacement library based on libopenmpt.
-WARNING: This will replace your current libmodplug installation.
-CAUTION: The emulation of the libmodplug interface is not complete as libmodplug exposes lots of internal implementation details. If any of those is used by an application, the emulation via libopenmpt will fail and/or crash.
-]))
-AM_CONDITIONAL([ENABLE_LIBMODPLUG], [test "x$enable_libmodplug" = "xyes"])
 
 DX_DOXYGEN_FEATURE(ON)
 DX_DOT_FEATURE(OFF)

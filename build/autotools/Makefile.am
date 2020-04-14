@@ -3,7 +3,6 @@ EXTRA_DIST =
 EXTRA_DIST += .clang-format
 EXTRA_DIST += m4/emptydir
 EXTRA_DIST += libopenmpt/libopenmpt.pc.in
-EXTRA_DIST += libmodplug/libmodplug.pc.in
 EXTRA_DIST += LICENSE
 EXTRA_DIST += README.md
 EXTRA_DIST += Doxyfile.in
@@ -400,32 +399,6 @@ libopenmpt_la_SOURCES += libopenmpt/libopenmpt_stream_callbacks_buffer.h
 libopenmpt_la_SOURCES += libopenmpt/libopenmpt_stream_callbacks_fd.h
 libopenmpt_la_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file.h
 libopenmpt_la_SOURCES += libopenmpt/libopenmpt_version.h
-
-if ENABLE_LIBOPENMPT_MODPLUG
-lib_LTLIBRARIES += libopenmpt_modplug.la
-libopenmpt_modplug_la_LDFLAGS = -version-info 1:0:0 -no-undefined
-libopenmpt_modplug_la_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -I$(srcdir)/
-libopenmpt_modplug_la_CXXFLAGS = 
-libopenmpt_modplug_la_CFLAGS = 
-libopenmpt_modplug_la_LIBADD = libopenmpt.la
-libopenmpt_modplug_la_SOURCES = 
-libopenmpt_modplug_la_SOURCES += libopenmpt/libopenmpt_modplug.c
-libopenmpt_modplug_la_SOURCES += libopenmpt/libopenmpt_modplug_cpp.cpp
-endif
-
-if ENABLE_LIBMODPLUG
-pkgconfig_DATA += libmodplug/libmodplug.pc
-lib_LTLIBRARIES += libmodplug.la
-libmodplug_la_LDFLAGS = -version-info 1:0:0 -no-undefined
-nobase_include_HEADERS += libmodplug/modplug.h libmodplug/sndfile.h libmodplug/stdafx.h
-libmodplug_la_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -I$(srcdir)/
-libmodplug_la_CXXFLAGS = 
-libmodplug_la_CFLAGS = 
-libmodplug_la_LIBADD = libopenmpt.la
-libmodplug_la_SOURCES = 
-libmodplug_la_SOURCES += libopenmpt/libopenmpt_modplug.c
-libmodplug_la_SOURCES += libopenmpt/libopenmpt_modplug_cpp.cpp
-endif
 
 if ENABLE_TESTS
 check_PROGRAMS += libopenmpttest

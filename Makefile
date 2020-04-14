@@ -46,7 +46,6 @@
 #  STATIC_LIB=1     Build static library
 #  EXAMPLES=1       Build examples
 #  OPENMPT123=1     Build openmpt123
-#  LIBMODPLUG=0     Build libmodplug emulation layer (deprecated)
 #  SHARED_SONAME=1  Set SONAME of shared library
 #  DEBUG=0          Build debug binaries without optimization and with symbols
 #  OPTIMIZE=1       Build optimized binaries
@@ -296,9 +295,6 @@ INSTALL_DATA_DIR = $(INSTALL_DIR)
 INSTALL_MAKE_DIR += -m 0755
 
 CPPFLAGS += -Icommon -I. -Iinclude
-ifeq ($(LIBMODPLUG),1)
-CPPFLAGS += -Iinclude/modplug/include 
-endif
 
 ifeq ($(MPT_COMPILER_GENERIC),1)
 
@@ -941,20 +937,6 @@ OBJECTS_LIBOPENMPT += $(LIBOPENMPT_OBJECTS)
 endif
 
 
-ifeq ($(LIBMODPLUG),1)
-LIBOPENMPT_MODPLUG_C_SOURCES += \
- libopenmpt/libopenmpt_modplug.c \
- 
-LIBOPENMPT_MODPLUG_CPP_SOURCES += \
- libopenmpt/libopenmpt_modplug_cpp.cpp \
- 
-LIBOPENMPT_MODPLUG_OBJECTS = $(LIBOPENMPT_MODPLUG_C_SOURCES:.c=.o) $(LIBOPENMPT_MODPLUG_CPP_SOURCES:.cpp=.o)
-LIBOPENMPT_MODPLUG_DEPENDS = $(LIBOPENMPT_MODPLUG_OBJECTS:.o=.d)
-ALL_OBJECTS += $(LIBOPENMPT_MODPLUG_OBJECTS)
-ALL_DEPENDS += $(LIBOPENMPT_MODPLUG_DEPENDS)
-endif
-
-
 OPENMPT123_CXX_SOURCES += \
  $(sort $(wildcard openmpt123/*.cpp)) \
  
@@ -1002,9 +984,6 @@ all:
 
 ifeq ($(DYNLINK),1)
 OUTPUTS += bin/libopenmpt$(SOSUFFIX)
-ifeq ($(LIBMODPLUG),1)
-OUTPUTS += bin/libopenmpt_modplug$(SOSUFFIX)
-endif
 endif
 ifeq ($(SHARED_LIB),1)
 OUTPUTS += bin/libopenmpt$(SOSUFFIX)
@@ -1220,28 +1199,6 @@ ifeq ($(MPT_WITH_DOXYGEN),1)
 	$(INSTALL_DATA_DIR) bin/docs/html $(DESTDIR)$(PREFIX)/share/doc/libopenmpt/html
 endif
 
-ifeq ($(LIBMODPLUG),1)
-.PHONY: install-openmpt-modplug
-install-openmpt-modplug: $(OUTPUTS)
-ifeq ($(SHARED_LIB),1)
-	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/lib
-	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug$(SOSUFFIX)
-	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug$(SOSUFFIX).1
-	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libopenmpt_modplug$(SOSUFFIX).1.0.0
-endif
-endif
-
-ifeq ($(LIBMODPLUG),1)
-.PHONY: install-modplug
-install-modplug: $(OUTPUTS)
-ifeq ($(SHARED_LIB),1)
-	$(INSTALL_MAKE_DIR) $(DESTDIR)$(PREFIX)/lib
-	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX)
-	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX).1
-	$(INSTALL_LIB) bin/libopenmpt_modplug$(SOSUFFIX) $(DESTDIR)$(PREFIX)/lib/libmodplug$(SOSUFFIX).1.0.0
-endif
-endif
-
 .PHONY: dist
 dist: bin/dist-tar.tar bin/dist-zip.tar bin/dist-doc.tar
 
@@ -1359,7 +1316,6 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/dist.mk bin
 	svn export ./include/cwsdpmi    bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/cwsdpmi
 	svn export ./include/minimp3    bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/minimp3
 	svn export ./include/miniz      bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/miniz
-	svn export ./include/modplug    bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/modplug
 	svn export ./include/stb_vorbis bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/stb_vorbis
 	cp bin/dist.mk bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
 	cp bin/svn_version_dist.h bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version/svn_version.h
@@ -1414,7 +1370,6 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/dist.mk bin/svn
 	svn export ./include/mpg123        bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/mpg123        --native-eol CRLF
 	svn export ./include/flac          bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/flac          --native-eol CRLF
 	svn export ./include/portaudio     bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/portaudio     --native-eol CRLF
-	svn export ./include/modplug       bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/modplug       --native-eol CRLF
 	svn export ./include/ogg           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/ogg           --native-eol CRLF
 	svn export ./include/pugixml       bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/pugixml       --native-eol CRLF
 	svn export ./include/stb_vorbis    bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/stb_vorbis    --native-eol CRLF
@@ -1496,12 +1451,6 @@ bin/libopenmpt$(SOSUFFIX): $(LIBOPENMPT_OBJECTS)
 ifeq ($(SHARED_SONAME),1)
 	$(SILENT)mv bin/libopenmpt$(SOSUFFIX) bin/$(LIBOPENMPT_SONAME)
 	$(SILENT)ln -sf $(LIBOPENMPT_SONAME) bin/libopenmpt$(SOSUFFIX)
-endif
-
-ifeq ($(LIBMODPLUG),1)
-bin/libopenmpt_modplug$(SOSUFFIX): $(LIBOPENMPT_MODPLUG_OBJECTS) $(OUTPUT_LIBOPENMPT)
-	$(INFO) [LD] $@
-	$(SILENT)$(LINK.cc) -shared $(SO_LDFLAGS) $(LDFLAGS_LIBOPENMPT) $(LIBOPENMPT_MODPLUG_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
 endif
 
 bin/openmpt123.1: bin/openmpt123$(EXESUFFIX) openmpt123/openmpt123.h2m

@@ -44,7 +44,6 @@ svn export ./test            bin/dist-autotools/test
 svn export ./libopenmpt      bin/dist-autotools/libopenmpt
 svn export ./examples        bin/dist-autotools/examples
 svn export ./openmpt123      bin/dist-autotools/openmpt123
-svn export ./include/modplug/include/libmodplug bin/dist-autotools/libmodplug
 mkdir bin/dist-autotools/build
 mkdir bin/dist-autotools/build/svn_version
 svn export ./build/svn_version/svn_version.h bin/dist-autotools/build/svn_version/svn_version.h
@@ -71,7 +70,6 @@ cp -r ./test            bin/dist-autotools/test
 cp -r ./libopenmpt      bin/dist-autotools/libopenmpt
 cp -r ./examples        bin/dist-autotools/examples
 cp -r ./openmpt123      bin/dist-autotools/openmpt123
-cp -r ./include/modplug/include/libmodplug bin/dist-autotools/libmodplug
 mkdir bin/dist-autotools/build
 mkdir bin/dist-autotools/build/svn_version
 cp -r ./build/svn_version/svn_version.h bin/dist-autotools/build/svn_version/svn_version.h
