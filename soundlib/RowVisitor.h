@@ -70,6 +70,9 @@ public:
 	// Set all rows of a previous pattern loop as unvisited.
 	void ResetPatternLoop(ORDERINDEX ord, ROWINDEX startRow);
 
+	// Returns the last visited row index of the current pattern, or ROWINDEX_INVALID if there is none.
+	ROWINDEX GetLastVisitedRow() const;
+
 protected:
 
 	// (Un)sets a given row as visited.

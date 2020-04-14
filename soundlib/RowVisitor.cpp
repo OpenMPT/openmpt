@@ -253,4 +253,13 @@ void RowVisitor::AddVisitedRow(ORDERINDEX ord, ROWINDEX row)
 }
 
 
+// Returns the last visited row index of the current pattern, or ROWINDEX_INVALID if there is none.
+ROWINDEX RowVisitor::GetLastVisitedRow() const
+{
+	if(m_visitOrder.empty())
+		return ROWINDEX_INVALID;
+	return m_visitOrder.back();
+}
+
+
 OPENMPT_NAMESPACE_END
