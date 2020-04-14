@@ -31,9 +31,9 @@ if not exist "build\tools"     mkdir "build\tools"
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.7-zip.org/a/7za920.zip"                                                              "build\externals\7za920.zip"                   84e830c91a0e8ae499cc4814080da6569d8a6acbddc585c8b62abc86c809793aeb669b0a741063a379fd281ade85f120bc27efeb67d63bf961be893eec8bc3b3  384846 || goto error
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.7-zip.org/a/7z1805-extra.7z"                                                         "build\externals\7z1805-extra.7z"              09bca8018272c3a4e7dd68f62a832acfe0581d3713f29473463725fa5c1708bc34b30a126b069e741e0e4939b645f6818e1f100cf1b2b021e851d132a6abcca5  923870 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.7-zip.org/a/7z1900-extra.7z"                                                         "build\externals\7z1900-extra.7z"              17713037504215ae277037ea7e61d78afe2863a1ff3b8b9ff0a0f6af80969c054df35f4f2bf5ba79a35601a29b8600a8b71a16ced23d17e55eeb1cc131d55f65  929117 || goto error
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.7-zip.org/a/7z1805.exe"                                                              "build\externals\7z1805.exe"                   e81805f2039c18d4311fb1e04297656f6efbbe600a7eda91c835375dad03dbe805dc6f704355cfd085600a0f755392e96df7a1d80d4b6f416e177314cc20d666 1181017 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.7-zip.org/a/7z1900.exe"                                                              "build\externals\7z1900.exe"                   2924fd60f5dd636f643b68d402b65c2bfab5536122aa688ebba5ae142c7d04ce8b1c8e078f54db8adadce9d5c6fa74c0794604ecc16a4c5489f9ca70a6d9e1c4 1185968 || goto error
 
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"                                   "build\externals\WA5.55_SDK.exe"               394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5  336166 || goto error
@@ -62,8 +62,8 @@ rem Get current 7zip commandline version which can unpack 7zip and the 7zip inst
 rem Get 7zip installer and unpack it with current commandline 7zip
 rem This is a mess for automatic. Oh well.
 cscript build\scriptlib\unpack-zip.vbs "build\externals\7za920.zip" "build\tools\7zipold" || goto error
-build\tools\7zipold\7za.exe x -y -obuild\tools\7zipa "build\externals\7z1805-extra.7z" || goto error
-build\tools\7zipa\7za.exe x -y -obuild\tools\7zip "build\externals\7z1805.exe" || goto error
+build\tools\7zipold\7za.exe x -y -obuild\tools\7zipa "build\externals\7z1900-extra.7z" || goto error
+build\tools\7zipa\7za.exe x -y -obuild\tools\7zip "build\externals\7z1900.exe" || goto error
 
 call build\scriptlib\unpack.cmd "build\tools\htmlhelp" "build\externals\htmlhelp.exe" "." || goto error
 
