@@ -76,7 +76,7 @@ call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.
 call :killdir "build\tools\innounp"   || goto error
 call :killdir "build\tools\innosetup" || goto error
 call build\scriptlib\unpack.cmd "build\tools\innounp" "build\externals\innounp049.rar" "." || goto error
-build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-6.0.3.exe" || goto error
+build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-6.0.4.exe" || goto error
 
 goto ok
 
