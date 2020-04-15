@@ -159,7 +159,7 @@ AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool for
 #ifdef _DEBUG
 		mpt::ustring buf = mpt::format(U_("Warning: encountered problem when loading plugin dll. Error %1: %2"))
 			( mpt::ufmt::hex(error)
-			, mpt::ToUnicode(GetErrorMessage(error))
+			, mpt::ToUnicode(Windows::GetErrorMessage(error))
 			);
 		Reporting::Error(buf, "DEBUG: Error when loading plugin dll");
 #endif //_DEBUG
