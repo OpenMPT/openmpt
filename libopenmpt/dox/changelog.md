@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.22-pre
 
+ *  stb_vorbis: Update to v1.19 commit 37b9b20fdec06c75a0493e0bb59e2d0f288bfb51
+    (2020-02-05).
+
 ### libopenmpt 0.3.21 (2020-04-13)
 
  *  IT: Vibrato was too fast in Old Effects mode since libopenmpt 0.3.
