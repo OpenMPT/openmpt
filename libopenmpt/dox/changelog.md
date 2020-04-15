@@ -12,6 +12,11 @@ is just a high-level summary.
     instead. The `Makefile` build system now requires `LIBMODPLUG=1` option to
     build the libmodplug emulation layer.
 
+ *  minimp3: Update to commit 55da78cbeea5fb6757f8df672567714e1e8ca3e9
+    (2020-03-04).
+ *  stb_vorbis: Update to v1.19 commit 37b9b20fdec06c75a0493e0bb59e2d0f288bfb51
+    (2020-02-05).
+
 ### libopenmpt 0.4.12 (2020-04-13)
 
  *  IT: Vibrato was too fast in Old Effects mode since libopenmpt 0.3.
