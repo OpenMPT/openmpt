@@ -161,9 +161,10 @@ public:
 #endif // MPT_COMPILER_CLANG
 	void SetModified(bool modified = true);
 	bool ModifiedSinceLastAutosave();
-	void SetShowSaveDialog(bool b) {m_ShowSavedialog = b;}
-	void PostMessageToAllViews(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
-	void SendMessageToActiveView(UINT uMsg, WPARAM wParam=0, LPARAM lParam=0);
+	void SetShowSaveDialog(bool b) { m_ShowSavedialog = b; }
+	void PostMessageToAllViews(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0);
+	void SendNotifyMessageToAllViews(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0);
+	void SendMessageToActiveView(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0);
 	MODTYPE GetModType() const { return m_SndFile.m_nType; }
 	INSTRUMENTINDEX GetNumInstruments() const { return m_SndFile.m_nInstruments; }
 	SAMPLEINDEX GetNumSamples() const { return m_SndFile.m_nSamples; }
@@ -216,9 +217,9 @@ public:
 
 	bool ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancelInRemoveDlg = true);
 	bool RemoveChannels(const std::vector<bool> &keepMask, bool verbose = false);
-	CHANNELINDEX ReArrangeChannels(const std::vector<CHANNELINDEX> &fromToArray, const bool createUndoPoint = true);
 	void CheckUsedChannels(std::vector<bool> &usedMask, CHANNELINDEX maxRemoveCount = MAX_BASECHANNELS) const;
 
+	CHANNELINDEX ReArrangeChannels(const std::vector<CHANNELINDEX> &fromToArray, const bool createUndoPoint = true);
 	SAMPLEINDEX ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder);
 	INSTRUMENTINDEX ReArrangeInstruments(const std::vector<INSTRUMENTINDEX> &newOrder, deleteInstrumentSamples removeSamples = doNoDeleteAssociatedSamples);
 	SEQUENCEINDEX ReArrangeSequences(const std::vector<SEQUENCEINDEX> &newOrder);

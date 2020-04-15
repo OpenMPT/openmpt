@@ -3360,9 +3360,8 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr || !IsEditingEnabled())
-	{
 		return 0;
-	}
+	
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	//Work out where to put the new data
@@ -3371,7 +3370,8 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 	const ROWINDEX row = editPos.row;
 	const PATTERNINDEX pattern = editPos.pattern;
 
-	ModCommand *pRow = sndFile.Patterns[pattern].GetpModCommand(row, chn);
+	ModCommand &mSrc = *sndFile.Patterns[pattern].GetpModCommand(row, chn);
+	ModCommand m = mSrc;
 
 	// TODO: Is the right plugin active? Move to a chan with the right plug
 	// Probably won't do this - finish fluctuator implementation instead.
@@ -3380,63 +3380,60 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 	if(pPlug == nullptr)
 		return 0;
 
-	if(sndFile.GetType() == MOD_TYPE_MPT)
+	if(sndFile.GetModSpecifications().HasNote(NOTE_PCS))
 	{
 		// MPTM: Use PC Notes
 
 		// only overwrite existing PC Notes
-		if(pRow->IsEmpty() || pRow->IsPcNote())
+		if(m.IsEmpty() || m.IsPcNote())
 		{
-			pModDoc->GetPatternUndo().PrepareUndo(pattern, chn, row, 1, 1, "Automation Entry");
-
-			pRow->Set(NOTE_PCS, static_cast<ModCommand::INSTR>(plugSlot + 1), static_cast<uint16>(paramIndex), static_cast<uint16>(pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex)) * ModCommand::maxColumnValue));
-			InvalidateRow(row);
+			m.Set(NOTE_PCS, static_cast<ModCommand::INSTR>(plugSlot + 1), static_cast<uint16>(paramIndex), static_cast<uint16>(pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex)) * ModCommand::maxColumnValue));
 		}
 	} else if(sndFile.GetModSpecifications().HasCommand(CMD_SMOOTHMIDI))
 	{
 		// Other formats: Use MIDI macros
 
-		//Figure out which plug param (if any) is controllable using the active macro on this channel.
+		// Figure out which plug param (if any) is controllable using the active macro on this channel.
 		int activePlugParam = -1;
-		BYTE activeMacro = sndFile.m_PlayState.Chn[chn].nActiveMacro;
+		auto activeMacro = sndFile.m_PlayState.Chn[chn].nActiveMacro;
 
 		if(sndFile.m_MidiCfg.GetParameteredMacroType(activeMacro) == kSFxPlugParam)
-		{
 			activePlugParam = sndFile.m_MidiCfg.MacroToPlugParam(activeMacro);
-		}
 
-		//If the wrong macro is active, see if we can find the right one.
-		//If we can, activate it for this chan by writing appropriate SFx command it.
+		// If the wrong macro is active, see if we can find the right one.
+		// If we can, activate it for this chan by writing appropriate SFx command it.
 		if(activePlugParam != paramIndex)
 		{
 			int foundMacro = sndFile.m_MidiCfg.FindMacroForParam(static_cast<PlugParamIndex>(paramIndex));
 			if(foundMacro >= 0)
 			{
 				sndFile.m_PlayState.Chn[chn].nActiveMacro = static_cast<uint8>(foundMacro);
-				if(pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI)  //we overwrite existing Zxx and \xx only.
+				if(m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI)  //we overwrite existing Zxx and \xx only.
 				{
-					pModDoc->GetPatternUndo().PrepareUndo(pattern, chn, row, 1, 1, "Automation Entry");
-
-					pRow->command = CMD_S3MCMDEX;
+					m.command = CMD_S3MCMDEX;
 					if(!sndFile.GetModSpecifications().HasCommand(CMD_S3MCMDEX))
-						pRow->command = CMD_MODCMDEX;
-					pRow->param = 0xF0 + (foundMacro & 0x0F);
-					InvalidateRow(row);
+						m.command = CMD_MODCMDEX;
+					m.param = 0xF0 | (foundMacro & 0x0F);
 				}
 			}
 		}
 
 		// Write the data, but we only overwrite if the command is a macro anyway.
-		if(pRow->command == CMD_NONE || pRow->command == CMD_SMOOTHMIDI || pRow->command == CMD_MIDI)
+		if(m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI)
 		{
-			pModDoc->GetPatternUndo().PrepareUndo(pattern, chn, row, 1, 1, "Automation Entry");
-
-			pRow->command = CMD_SMOOTHMIDI;
+			m.command = CMD_SMOOTHMIDI;
 			PlugParamValue param = pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex));
 			Limit(param, 0.0f, 1.0f);
-			pRow->param = static_cast<ModCommand::PARAM>(param * 127.0f);
-			InvalidateRow(row);
+			m.param = static_cast<ModCommand::PARAM>(param * 127.0f);
 		}
+	}
+
+	if(m != mSrc)
+	{
+		pModDoc->GetPatternUndo().PrepareUndo(pattern, chn, row, 1, 1, "Automation Entry");
+		mSrc = m;
+		InvalidateCell(PatternCursor(row, chn));
+		SetModified(false);
 	}
 
 	return 0;

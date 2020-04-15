@@ -613,6 +613,17 @@ void CModDoc::PostMessageToAllViews(UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 
+void CModDoc::SendNotifyMessageToAllViews(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	POSITION pos = GetFirstViewPosition();
+	while(pos != nullptr)
+	{
+		if(CView *pView = GetNextView(pos); pView != nullptr)
+			pView->SendNotifyMessage(uMsg, wParam, lParam);
+	}
+}
+
+
 void CModDoc::SendMessageToActiveView(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	if(auto *lastActiveFrame = CChildFrame::LastActiveFrame(); lastActiveFrame != nullptr)

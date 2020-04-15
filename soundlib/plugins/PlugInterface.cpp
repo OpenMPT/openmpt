@@ -590,7 +590,7 @@ void IMixPlugin::AutomateParameter(PlugParamIndex param)
 		modDoc->RecordParamChange(GetSlot(), param);
 	}
 
-	modDoc->PostMessageToAllViews(WM_MOD_PLUGPARAMAUTOMATE, m_nSlot, param);
+	modDoc->SendNotifyMessageToAllViews(WM_MOD_PLUGPARAMAUTOMATE, m_nSlot, param);
 
 	if(auto *vstEditor = GetEditor(); vstEditor && vstEditor->m_hWnd)
 	{

@@ -1323,7 +1323,7 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 			if(ev->type == kVstMidiType)
 			{
 				VstMidiEvent *event = static_cast<VstMidiEvent *>(ev);
-				::PostMessage(CMainFrame::GetMainFrame()->GetMidiRecordWnd(), WM_MOD_MIDIMSG, event->midiData, reinterpret_cast<LPARAM>(this));
+				::SendNotifyMessage(CMainFrame::GetMainFrame()->GetMidiRecordWnd(), WM_MOD_MIDIMSG, event->midiData, reinterpret_cast<LPARAM>(this));
 			}
 		}
 	}
