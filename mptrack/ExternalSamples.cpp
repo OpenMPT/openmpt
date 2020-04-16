@@ -353,6 +353,7 @@ void ModifiedExternalSamplesDlg::Execute(bool doSave)
 		} else
 		{
 			m_sndFile.GetSample(smp).uFlags.reset(SMP_KEEPONDISK);
+			m_modDoc.SetModified();
 		}
 	}
 	

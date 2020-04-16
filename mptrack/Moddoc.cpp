@@ -330,13 +330,9 @@ bool CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool setPath
 
 BOOL CModDoc::SaveModified()
 {
-	BOOL result = CDocument::SaveModified();
-	if(result && m_SndFile.GetType() == MOD_TYPE_MPT)
-	{
-		result = SaveAllSamples() ? TRUE : FALSE;
-	}
-
-	return result;
+	if(m_SndFile.GetType() == MOD_TYPE_MPT && !SaveAllSamples())
+		return FALSE;
+	return CDocument::SaveModified();
 }
 
 
