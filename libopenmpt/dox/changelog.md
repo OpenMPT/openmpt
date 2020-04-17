@@ -74,7 +74,7 @@ is just a high-level summary.
  *  [**Bug**] openmpt123: Piping text output to other than console window
     targets on Windows has been fixed.
 
-### libopenmpt 0.4.0
+### libopenmpt 0.4.0 (2018-12-23)
 
  *  [**New**] libopenmpt now includes emulation of the OPL chip and thus plays
     OPL instruments in S3M, C67 and MPTM files. OPL chip emulation volume can be
