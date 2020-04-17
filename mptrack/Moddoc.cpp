@@ -336,10 +336,21 @@ BOOL CModDoc::SaveModified()
 }
 
 
-bool CModDoc::SaveAllSamples()
+bool CModDoc::SaveAllSamples(bool showPrompt)
 {
-	ModifiedExternalSamplesDlg dlg(*this, CMainFrame::GetMainFrame());
-	return dlg.DoModal() == IDOK;
+	if(showPrompt)
+	{
+		ModifiedExternalSamplesDlg dlg(*this, CMainFrame::GetMainFrame());
+		return dlg.DoModal() == IDOK;
+	} else
+	{
+		bool ok = true;
+		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+		{
+			ok &= SaveSample(smp);
+		}
+		return ok;
+	}
 }
 
 

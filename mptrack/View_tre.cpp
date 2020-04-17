@@ -3600,7 +3600,7 @@ void CModTree::OnSaveAll()
 	CModDoc *pModDoc = GetDocumentFromItem(GetSelectedItem());
 	if(pModDoc != nullptr)
 	{
-		pModDoc->SaveAllSamples();
+		pModDoc->SaveAllSamples(false);
 		if(pModDoc)
 			pModDoc->UpdateAllViews(nullptr, SampleHint().Info());
 		OnRefreshTree();

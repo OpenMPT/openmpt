@@ -102,7 +102,7 @@ struct PlayNoteParam
 };
 
 
-class CModDoc: public CDocument
+class CModDoc final : public CDocument
 {
 protected:
 	friend ScopedLogCapturer;
@@ -369,7 +369,7 @@ protected:
 	}
 
 	BOOL SaveModified() override;
-	bool SaveAllSamples();
+	bool SaveAllSamples(bool showPrompt = true);
 	bool SaveSample(SAMPLEINDEX smp);
 
 	BOOL DoSave(LPCTSTR lpszPathName, BOOL /*bSaveAs*/ = TRUE) override
