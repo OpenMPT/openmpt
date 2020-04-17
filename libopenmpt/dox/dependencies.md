@@ -81,7 +81,6 @@ Dependencies
  *  Live sound output requires one of:
      *  **PulseAudio**
      *  **SDL 2**
-     *  **SDL 1.2**
      *  **PortAudio v19**
      *  **Win32**
      *  **liballegro 4.2** on DJGPP/DOS

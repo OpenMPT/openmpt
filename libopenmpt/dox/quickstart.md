@@ -18,7 +18,7 @@ Quick Start {#quickstart}
      -  **libFLAC** (required only by openmpt123)
      -  **libsndfile** (required only by openmpt123)
  3. *Optional*:
-     -  **libSDL >= 1.2.x** (required only by openmpt123)
+     -  **libSDL2 >= 2.0.4** (required only by openmpt123)
  4. Run:
     
         ./configure
@@ -52,7 +52,7 @@ Quick Start {#quickstart}
      -  **libFLAC** (required only by openmpt123)
      -  **libsndfile** (required only by openmpt123)
  2. *Optional*:
-     -  **libSDL >= 1.2.x** (required only by openmpt123)
+     -  **libSDL2 >= 2.0.4** (required only by openmpt123)
      -  **doxygen >= 1.8**
      -  **help2man**
  3. Run:
