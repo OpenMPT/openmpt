@@ -737,6 +737,7 @@ mpt::ustring GetFullCreditsString()
 #if defined(MPT_WITH_LAME)
 		"The LAME project for LAME\n"
 		"http://lame.sourceforge.net/\n"
+		"\n"
 #endif
 #if defined(MPT_WITH_NLOHMANNJSON)
 		"Niels Lohmann et al. for nlohmann-json\n"
