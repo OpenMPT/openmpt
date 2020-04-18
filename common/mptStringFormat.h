@@ -87,9 +87,9 @@ std::string ToString(const wchar_t &x ) = delete; // deprecated to catch potenti
 #if MPT_USTRING_MODE_UTF8
 std::string ToString(const mpt::ustring & x) = delete; // Unknown encoding.
 #endif
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 std::string ToString(const CString & x) = delete; // unknown encoding
-#endif
+#endif // MPT_WITH_MFC
 std::string ToString(const bool & x);
 std::string ToString(const signed char & x);
 std::string ToString(const unsigned char & x);
@@ -119,9 +119,9 @@ mpt::ustring ToUString(const std::wstring & x);
 mpt::ustring ToUString(const wchar_t * const & x);
 mpt::ustring ToUString(const wchar_t & x) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #endif
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 mpt::ustring ToUString(const CString & x);
-#endif
+#endif // MPT_WITH_MFC
 mpt::ustring ToUString(const bool & x);
 mpt::ustring ToUString(const signed char & x);
 mpt::ustring ToUString(const unsigned char & x);
@@ -147,9 +147,9 @@ std::wstring ToWString(const wchar_t & x) = delete; // deprecated to catch poten
 #if MPT_USTRING_MODE_UTF8
 std::wstring ToWString(const mpt::ustring & x);
 #endif
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 std::wstring ToWString(const CString & x);
-#endif
+#endif // MPT_WITH_MFC
 std::wstring ToWString(const bool & x);
 std::wstring ToWString(const signed char & x);
 std::wstring ToWString(const unsigned char & x);
@@ -173,10 +173,10 @@ template <typename T> struct ToLocaleHelper { mpt::lstring operator () (const T 
 template <> struct ToLocaleHelper<mpt::lstring> { mpt::lstring operator () (const mpt::lstring & v) { return v; } };
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 template <typename T> struct ToCStringHelper { CString operator () (const T & v) { return mpt::ToCString(ToUString(v)); } };
 template <> struct ToCStringHelper<CString> { CString operator () (const CString & v) { return v; } };
-#endif
+#endif // MPT_WITH_MFC
 
 template <typename Tstring> struct ToStringTFunctor {};
 template <> struct ToStringTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x) { return ToString(x); } };
@@ -187,9 +187,9 @@ template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 template <> struct ToStringTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x) { return mpt::ToLocaleHelper<T>()(x); } };
 #endif // MPT_ENABLE_CHARSET_LOCALE
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 template <> struct ToStringTFunctor<CString> { template <typename T> inline CString operator() (const T & x) { return mpt::ToCStringHelper<T>()(x); } };
-#endif
+#endif // MPT_WITH_MFC
 
 template<typename Tstring, typename T> inline Tstring ToStringT(const T & x) { return ToStringTFunctor<Tstring>()(x); }
 
@@ -287,13 +287,13 @@ template <> struct FormatValTFunctor<std::wstring> { template <typename T> inlin
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 template <> struct FormatValTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x, const FormatSpec & f) { return mpt::ToLocale(mpt::Charset::Locale, FormatVal(x, f)); } };
 #endif // MPT_ENABLE_CHARSET_LOCALE
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC )
 #ifdef UNICODE
 template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec & f) { return mpt::ToCString(FormatValW(x, f)); } };
-#else
+#else // !UNICODE
 template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec & f) { return mpt::ToCString(mpt::Charset::Locale, FormatVal(x, f)); } };
-#endif
-#endif
+#endif // UNICODE
+#endif // MPT_WITH_MFC
 
 
 class FormatSpec
@@ -549,9 +549,9 @@ typedef fmtT<mpt::lstring> lfmt;
 #if MPT_OS_WINDOWS
 typedef fmtT<mpt::tstring> tfmt;
 #endif
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 typedef fmtT<CString> cfmt;
-#endif
+#endif // MPT_WITH_MFC
 
 } // namespace mpt
 
@@ -581,9 +581,9 @@ template <> struct to_string_type<mpt::ustring   > { typedef mpt::ustring type; 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 template <> struct to_string_type<mpt::lstring   > { typedef mpt::lstring type; };
 #endif // MPT_ENABLE_CHARSET_LOCALE
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 template <> struct to_string_type<CString        > { typedef CString      type; };
-#endif
+#endif // MPT_WITH_MFC
 template <typename T, std::size_t N> struct to_string_type<T [N]> { typedef typename to_string_type<T>::type type; };
 
 } // namespace detail
@@ -686,12 +686,12 @@ static inline message_formatter<mpt::tstring> tformat(mpt::tstring format)
 }
 #endif
 
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 static inline message_formatter<CString> cformat(CString format)
 {
 	return message_formatter<CString>(std::move(format));
 }
-#endif
+#endif // MPT_WITH_MFC
 
 } // namespace mpt
 

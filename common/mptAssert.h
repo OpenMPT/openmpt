@@ -56,7 +56,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#if defined(_MFC_VER) && !defined(MPT_CPPCHECK_CUSTOM)
+#if defined(MPT_WITH_MFC) && !defined(MPT_CPPCHECK_CUSTOM)
 
 #if !defined(ASSERT)
 #error "MFC is expected to #define ASSERT"
@@ -72,7 +72,7 @@ OPENMPT_NAMESPACE_BEGIN
 // let MFC handle our asserts
 #define MPT_ASSERT_USE_FRAMEWORK 1
 
-#else // !_MFC_VER
+#else // !MPT_WITH_MFC
 
 #if defined(ASSERT)
 #define MPT_FRAMEWORK_ASSERT_IS_DEFINED
@@ -86,7 +86,7 @@ OPENMPT_NAMESPACE_BEGIN
 // handle assert in our own way without relying on some platform-/framework-specific assert implementation
 #define MPT_ASSERT_USE_FRAMEWORK 0
 
-#endif // _MFC_VER
+#endif // MPT_WITH_MFC
 
 #if defined(MPT_FRAMEWORK_ASSERT_IS_DEFINED) && (MPT_ASSERT_USE_FRAMEWORK == 1)
 

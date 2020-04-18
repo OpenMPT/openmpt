@@ -10,8 +10,7 @@
 
 
 #if defined(MODPLUG_TRACKER)
-#if MPT_OS_WINDOWS
-#if !defined(MPT_BUILD_WINESUPPORT)
+#if defined(MPT_WITH_MFC)
 #include <afx.h>
 #include <afxwin.h>
 #include <afxext.h>
@@ -22,8 +21,7 @@
 #include <afxlistctrl.h>
 #endif // MPT_MFC_FULL
 #include <afxole.h>
-#endif // !MPT_BUILD_WINESUPPORT
-#endif // MPT_OS_WINDOWS
+#endif // MPT_WITH_MFC
 #endif // MODPLUG_TRACKER
 
 

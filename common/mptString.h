@@ -69,7 +69,7 @@ struct string_traits
 
 };
 
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 template <>
 struct string_traits<CString>
 {
@@ -95,7 +95,7 @@ struct string_traits<CString>
 	}
 
 };
-#endif
+#endif // MPT_WITH_MFC
 
 
 
@@ -391,7 +391,7 @@ mpt::winstring ToWin(const mpt::lstring &str);
 #endif // MPT_OS_WINDOWS
 
 
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 #if !(MPT_WSTRING_CONVERT)
 #error "MFC depends on MPT_WSTRING_CONVERT)"
 #endif
@@ -418,7 +418,7 @@ mpt::winstring ToWin(const CString &str);
 std::wstring ToWide(const CString &str);
 std::string ToCharset(Charset to, const CString &str);
 
-#endif // MFC
+#endif // MPT_WITH_MFC
 
 
 // mpt::ustring
@@ -483,7 +483,7 @@ static inline mpt::ustring ToUnicode(Charset from, const char * str) { return To
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 static inline mpt::ustring ToUnicode(const mpt::lstring &str) { return ToWide(str); }
 #endif // MPT_ENABLE_CHARSET_LOCALE
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 static inline mpt::ustring ToUnicode(const CString &str) { return ToWide(str); }
 #endif // MFC
 #else // !MPT_USTRING_MODE_WIDE
@@ -497,9 +497,9 @@ static inline mpt::ustring ToUnicode(Charset from, const char * str) { return To
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 mpt::ustring ToUnicode(const mpt::lstring &str);
 #endif // MPT_ENABLE_CHARSET_LOCALE
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 mpt::ustring ToUnicode(const CString &str);
-#endif // MFC
+#endif // MPT_WITH_MFC
 #endif // MPT_USTRING_MODE_WIDE
 
 #if MPT_USTRING_MODE_WIDE
@@ -518,9 +518,9 @@ mpt::lstring ToLocale(const mpt::ustring &str);
 #if MPT_OS_WINDOWS
 mpt::winstring ToWin(const mpt::ustring &str);
 #endif // MPT_OS_WINDOWS
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 CString ToCString(const mpt::ustring &str);
-#endif // MFC
+#endif // MPT_WITH_MFC
 #endif // MPT_USTRING_MODE_WIDE
 
 // The MPT_UTF8 allows specifying UTF8 char arrays.
@@ -626,9 +626,9 @@ public:
 #endif
 
 	// mfc
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 	BasicAnyString(const CString &str) : mpt::ustring(mpt::ToUnicode(str)) { }
-#endif
+#endif // MPT_WITH_MFC
 
 	// fallback for custom string types
 	template <typename Tstring> BasicAnyString(const Tstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
@@ -658,9 +658,9 @@ public:
 #endif
 
 	// mfc
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 	AnyUnicodeString(const CString &str) : mpt::ustring(mpt::ToUnicode(str)) { }
-#endif
+#endif // MPT_WITH_MFC
 
 	// fallback for custom string types
 	template <typename Tstring> AnyUnicodeString(const Tstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }

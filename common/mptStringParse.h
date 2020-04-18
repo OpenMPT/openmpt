@@ -80,7 +80,7 @@ template<> inline double ConvertStrTo(const std::wstring &str) { return ConvertS
 template<> inline long double ConvertStrTo(const std::wstring &str) { return ConvertStrToLongDouble(str); }
 #endif
 
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 template<typename T>
 inline T ConvertStrTo(const CString &str)
 {
@@ -92,7 +92,7 @@ inline T ConvertStrTo(const CString &str)
 		return ConvertStrTo<T>(mpt::ToCharset(mpt::Charset::Locale, str));
 	#endif // UNICODE
 }
-#endif // _MFC_VER
+#endif // MPT_WITH_MFC
 
 template<typename T>
 inline T ConvertStrTo(const char *str)

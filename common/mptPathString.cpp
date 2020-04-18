@@ -735,7 +735,7 @@ void SanitizeFilename(mpt::u8string &str)
 }
 #endif // MPT_USTRING_MODE_UTF8
 
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 void SanitizeFilename(CString &str)
 {
 	for(int i = 0; i < str.GetLength(); i++)
@@ -743,7 +743,7 @@ void SanitizeFilename(CString &str)
 		str.SetAt(i, SanitizeFilenameChar(str.GetAt(i)));
 	}
 }
-#endif // MFC
+#endif // MPT_WITH_MFC
 
 #endif // MODPLUG_TRACKER
 

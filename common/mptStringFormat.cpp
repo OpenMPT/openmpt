@@ -169,9 +169,9 @@ mpt::ustring ToUString(const std::wstring & x) { return mpt::ToUnicode(x); }
 #endif
 mpt::ustring ToUString(const wchar_t * const & x) { return mpt::ToUnicode(x); }
 #endif
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 mpt::ustring ToUString(const CString & x)  { return mpt::ToUnicode(x); }
-#endif
+#endif // MPT_WITH_MFC
 #if MPT_USTRING_MODE_WIDE
 mpt::ustring ToUString(const bool & x) { return ToWStringHelperInt(static_cast<int>(x)); }
 mpt::ustring ToUString(const signed char & x) { return ToWStringHelperInt(x); }
@@ -209,9 +209,9 @@ mpt::ustring ToUString(const long double & x) { return mpt::ToUnicode(mpt::Chars
 #if MPT_USTRING_MODE_UTF8
 std::wstring ToWString(const mpt::ustring & x) { return mpt::ToWide(x); }
 #endif
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 std::wstring ToWString(const CString & x) { return mpt::ToWide(x); }
-#endif
+#endif // MPT_WITH_MFC
 std::wstring ToWString(const bool & x) { return ToWStringHelperInt(static_cast<int>(x)); }
 std::wstring ToWString(const signed char & x) { return ToWStringHelperInt(x); }
 std::wstring ToWString(const unsigned char & x) { return ToWStringHelperInt(x); }

@@ -220,11 +220,11 @@ public:
 	// Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
 	RawPathString AsNativePrefixed() const;
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
 	CString ToCString() const { return mpt::ToCString(path); }
 	static PathString FromCString(const CString &path) { return PathString(mpt::ToWin(path)); }
-#endif
+#endif // MPT_WITH_MFC
 
 	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
 	mpt::PathString Simplify() const;
@@ -429,9 +429,9 @@ void SanitizeFilename(wchar_t (&buffer)[size])
 	SanitizeFilename(buffer, buffer + size);
 }
 
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 void SanitizeFilename(CString &str);
-#endif
+#endif // MPT_WITH_MFC
 
 #endif // MODPLUG_TRACKER
 

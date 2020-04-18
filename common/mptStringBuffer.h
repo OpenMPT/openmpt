@@ -379,7 +379,7 @@ inline StringBufRefImpl<typename mpt::windows_char_traits<typename std::remove_c
 }
 } // namespace String
 
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 
 template <typename Tchar>
 class CStringBufRefImpl
@@ -463,7 +463,7 @@ inline CStringBufRefImpl<Tchar> WriteCStringBuf(Tchar * buf, std::size_t size)
 }
 } // namespace String
 
-#endif // _MFC_VER
+#endif // MPT_WITH_MFC
 
 #endif // MPT_OS_WINDOWS
 

@@ -1288,7 +1288,7 @@ mpt::winstring ToWin(const mpt::lstring &str)
 #endif // MPT_OS_WINDOWS
 
 
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 
 CString ToCString(const std::wstring &str)
 {
@@ -1347,7 +1347,7 @@ mpt::winstring ToWin(const CString &str)
 }
 #endif // MPT_OS_WINDOWS
 
-#endif // MFC
+#endif // MPT_WITH_MFC
 
 
 #if MPT_USTRING_MODE_WIDE
@@ -1369,7 +1369,7 @@ mpt::ustring ToUnicode(const mpt::lstring &str)
 	return String::ConvertImpl<mpt::ustring>(mpt::Charset::UTF8, mpt::Charset::Locale, str);
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 mpt::ustring ToUnicode(const CString &str)
 {
 	#ifdef UNICODE
@@ -1378,7 +1378,7 @@ mpt::ustring ToUnicode(const CString &str)
 		return String::ConvertImpl<mpt::ustring, std::string>(mpt::Charset::UTF8, mpt::Charset::Locale, str.GetString());
 	#endif // UNICODE
 }
-#endif // MFC
+#endif // MPT_WITH_MFC
 #endif // MPT_USTRING_MODE_WIDE
 
 #if MPT_USTRING_MODE_WIDE
@@ -1410,7 +1410,7 @@ mpt::winstring ToWin(const mpt::ustring &str)
 	#endif
 }
 #endif // MPT_OS_WINDOWS
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 CString ToCString(const mpt::ustring &str)
 {
 	#ifdef UNICODE
@@ -1419,7 +1419,7 @@ CString ToCString(const mpt::ustring &str)
 		return String::ConvertImpl<std::string, mpt::ustring>(mpt::Charset::Locale, mpt::Charset::UTF8, str).c_str();
 	#endif // UNICODE
 }
-#endif // MFC
+#endif // MPT_WITH_MFC
 #endif // MPT_USTRING_MODE_WIDE
 
 
@@ -1566,7 +1566,7 @@ int CompareNoCaseAscii(const std::string &a, const std::string &b)
 
 mpt::ustring ToLowerCase(const mpt::ustring &s)
 {
-	#if defined(_MFC_VER)
+	#if defined(MPT_WITH_MFC)
 		#if defined(UNICODE)
 			CString tmp = mpt::ToCString(s);
 			tmp.MakeLower();
@@ -1576,16 +1576,16 @@ mpt::ustring ToLowerCase(const mpt::ustring &s)
 			tmp.MakeLower();
 			return mpt::ToUnicode(tmp.GetString());
 		#endif // UNICODE
-	#else // !_MFC_VER
+	#else // !MPT_WITH_MFC
 		std::wstring ws = mpt::ToWide(s);
 		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);
 		return mpt::ToUnicode(ws);
-	#endif // _MFC_VER
+	#endif // MPT_WITH_MFC
 }
 
 mpt::ustring ToUpperCase(const mpt::ustring &s)
 {
-	#if defined(_MFC_VER)
+	#if defined(MPT_WITH_MFC)
 		#if defined(UNICODE)
 			CString tmp = mpt::ToCString(s);
 			tmp.MakeUpper();
@@ -1595,11 +1595,11 @@ mpt::ustring ToUpperCase(const mpt::ustring &s)
 			tmp.MakeUpper();
 			return mpt::ToUnicode(tmp.GetString());
 		#endif // UNICODE
-	#else // !_MFC_VER
+	#else // !MPT_WITH_MFC
 		std::wstring ws = mpt::ToWide(s);
 		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);
 		return mpt::ToUnicode(ws);
-	#endif // _MFC_VER
+	#endif // MPT_WITH_MFC
 }
 
 #endif // MODPLUG_TRACKER

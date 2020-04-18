@@ -75,7 +75,7 @@
 #define MPT_TEST_HAS_FILESYSTEM 0
 #endif
 
-#if MPT_COMPILER_MSVC && defined(_MFC_VER) && defined(_DEBUG)
+#if MPT_COMPILER_MSVC && defined(MPT_WITH_MFC) && defined(_DEBUG)
 	#define new DEBUG_NEW
 #endif
 
@@ -627,12 +627,12 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::fmt::center(3, "a"), " a ");
 	VERIFY_EQUAL(mpt::fmt::center(4, "a"), " a  ");
 
-	#if defined(_MFC_VER)
+	#if defined(MPT_WITH_MFC)
 		VERIFY_EQUAL(mpt::cfmt::left(3, CString(_T("a"))), CString(_T("a  ")));
 		VERIFY_EQUAL(mpt::cfmt::right(3, CString(_T("a"))), CString(_T("  a")));
 		VERIFY_EQUAL(mpt::cfmt::center(3, CString(_T("a"))), CString(_T(" a ")));
 		VERIFY_EQUAL(mpt::cfmt::center(4, CString(_T("a"))), CString(_T(" a  ")));
-	#endif
+	#endif // MPT_WITH_MFC
 
 	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586u);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), (uint32)int32_max);
@@ -729,12 +729,12 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::format("%%%1")("a"), "%a");
 	VERIFY_EQUAL(mpt::format("%b")("a"), "%b");
 
-#if defined(_MFC_VER)
+#if defined(MPT_WITH_MFC)
 	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), U_("foobar"));
 	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), U_("foobar"));
 	VERIFY_EQUAL(mpt::format(CString(_T("%1%2%3")))(1,2,3), _T("123"));
 	VERIFY_EQUAL(mpt::format(CString(_T("%1%2%3")))(1,mpt::cfmt::dec0<3>(2),3), _T("10023"));
-#endif
+#endif // MPT_WITH_MFC
 
 }
 

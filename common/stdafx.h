@@ -18,9 +18,7 @@
 
 #if defined(MODPLUG_TRACKER)
 
-#if MPT_OS_WINDOWS
-
-#if !defined(MPT_BUILD_WINESUPPORT)
+#if defined(MPT_WITH_MFC)
 
 // cppcheck-suppress missingInclude
 #include <afx.h>            // MFC core
@@ -41,7 +39,9 @@
 // cppcheck-suppress missingInclude
 #include <afxole.h>
 
-#endif // !MPT_BUILD_WINESUPPORT
+#endif // MPT_WITH_MFC
+
+#if MPT_OS_WINDOWS
 
 #include <windows.h>
 #include <windowsx.h>
