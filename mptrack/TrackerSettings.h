@@ -656,6 +656,7 @@ public:
 
 	bool m_SoundShowRecordingSettings;
 	Setting<bool> m_SoundShowDeprecatedDevices;
+	Setting<bool> m_SoundDeprecatedDeviceWarningShown;
 	Setting<std::vector<uint32> > m_SoundSampleRates;
 	Setting<bool> m_SoundSettingsOpenDeviceAtStartup;
 	Setting<SoundDeviceStopMode> m_SoundSettingsStopMode;

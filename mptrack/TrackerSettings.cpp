@@ -204,6 +204,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Sound Settings
 	, m_SoundShowRecordingSettings(false)
 	, m_SoundShowDeprecatedDevices(conf, U_("Sound Settings"), U_("ShowDeprecatedDevices"), true)
+	, m_SoundDeprecatedDeviceWarningShown(conf, U_("Sound Settings"), U_("DeprecatedDeviceWarningShown"), false)
 	, m_SoundSampleRates(conf, U_("Sound Settings"), U_("SampleRates"), GetDefaultSampleRates())
 	, m_SoundSettingsOpenDeviceAtStartup(conf, U_("Sound Settings"), U_("OpenDeviceAtStartup"), false)
 	, m_SoundSettingsStopMode(conf, U_("Sound Settings"), U_("StopMode"), SoundDeviceStopModeClosed)
