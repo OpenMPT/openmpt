@@ -26,7 +26,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace MidiExport
 {
 	// MIDI file resolution
-	const int32 ppq = 480;
+	constexpr int32 ppq = 480;
 
 	enum StringType : uint8
 	{
@@ -39,24 +39,26 @@ namespace MidiExport
 		kCue = 7,
 	};
 
-	class MidiTrack : public IMidiPlugin
+	class MidiTrack final : public IMidiPlugin
 	{
 		ModInstrument m_instr;
-		const ModInstrument *m_oldInstr;
+		const ModInstrument *const m_oldInstr;
 		const CSoundFile &m_sndFile;
-		MidiTrack *m_tempoTrack;	// Pointer to tempo track, nullptr if this is the tempo track
+		MidiTrack *const m_tempoTrack;  // Pointer to tempo track, nullptr if this is the tempo track
 		decltype(m_MidiCh) *m_lastMidiCh = nullptr;
 		std::array<decltype(m_instr.midiPWD), 16> m_pitchWheelDepth = { 0 };
 
+		std::vector<std::array<char, 4>> m_queuedEvents;
+
 		std::ostringstream f;
 		double m_tempo = 0.0;
-		double m_ticks = 0.0;							// MIDI ticks since previous event
-		CSoundFile::samplecount_t m_samplePos = 0;		// Current sample position
-		CSoundFile::samplecount_t m_prevEventTime = 0;	// Sample position of previous event
+		double m_ticks = 0.0;                           // MIDI ticks since previous event
+		CSoundFile::samplecount_t m_samplePos = 0;      // Current sample position
+		CSoundFile::samplecount_t m_prevEventTime = 0;  // Sample position of previous event
 		uint32 m_sampleRate;
 		uint32 m_oldSigNumerator = 0;
 		int32 m_oldGlobalVol = -1;
-		bool m_overlappingInstruments;
+		const bool m_overlappingInstruments;
 
 		// Calculate how many MIDI ticks have passed since the last written event
 		void UpdateTicksSinceLastEvent()
@@ -87,7 +89,7 @@ namespace MidiExport
 		void SynchronizeMidiPitchWheelDepth(CHANNELINDEX trackerChn)
 		{
 			const auto midiCh = GetMidiChannel(trackerChn);
-			if (!m_overlappingInstruments && m_tempoTrack && m_tempoTrack->m_pitchWheelDepth[midiCh] != m_instr.midiPWD)
+			if(!m_overlappingInstruments && m_tempoTrack && m_tempoTrack->m_pitchWheelDepth[midiCh] != m_instr.midiPWD)
 				WritePitchWheelDepth(static_cast<MidiChannel>(midiCh + MidiFirstChannel));
 		}
 
@@ -105,10 +107,6 @@ namespace MidiExport
 		{
 			// Write instrument / song name
 			WriteString(kTrackName, name);
-
-			// This is the tempo track, don't write any playback-related stuff
-			if(tempoTrack == nullptr) return;
-
 			m_pMixStruct->pMixPlugin = this;
 		}
 
@@ -132,7 +130,6 @@ namespace MidiExport
 			}
 		}
 
-
 		void UpdateGlobals()
 		{
 			m_samplePos = m_sndFile.GetTotalSampleCount();
@@ -146,16 +143,14 @@ namespace MidiExport
 			const bool sigChanged = timeSigNumerator != m_oldSigNumerator;
 			const bool volChanged = m_sndFile.m_PlayState.m_nGlobalVolume != m_oldGlobalVol;
 
-			UpdateTicksSinceLastEvent();
-
-			if(curTempo > 0.0) m_tempo = curTempo;
+			if(curTempo > 0.0)
+				m_tempo = curTempo;
 			m_oldSigNumerator = timeSigNumerator;
 			m_oldGlobalVol = m_sndFile.m_PlayState.m_nGlobalVolume;
 
 			if(m_tempoTrack != nullptr)
-			{
 				return;
-			}
+
 			// This is the tempo track
 			if(tempoChanged && curTempo > 0.0)
 			{
@@ -187,14 +182,26 @@ namespace MidiExport
 			}
 		}
 
-
 		void Process(float *, float *, uint32 numFrames) override
 		{
 			UpdateGlobals();
-			if(m_tempoTrack != nullptr) m_tempoTrack->UpdateGlobals();
+			if(m_tempoTrack != nullptr)
+				m_tempoTrack->UpdateGlobals();
+
+			for(const auto &midiData : m_queuedEvents)
+			{
+				WriteTicks();
+				mpt::IO::WriteRaw(f, midiData.data(), MIDIEvents::GetEventLength(midiData[0]));
+			}
+			m_queuedEvents.clear();
 
 			m_samplePos += numFrames;
-			if(m_tempoTrack != nullptr) m_tempoTrack->m_samplePos = std::max(m_tempoTrack->m_samplePos, m_samplePos);
+			if (m_tempoTrack != nullptr)
+			{
+				m_tempoTrack->m_samplePos = std::max(m_tempoTrack->m_samplePos, m_samplePos);
+				m_tempoTrack->UpdateTicksSinceLastEvent();
+			}
+			UpdateTicksSinceLastEvent();
 		}
 
 		// Write end marker and return the stream
@@ -238,23 +245,26 @@ namespace MidiExport
 
 		float RenderSilence(uint32) override { return 0.0f; }
 
-		bool MidiSend(uint32 dwMidiCode) override
+		bool MidiSend(uint32 midiCode) override
 		{
-			UpdateGlobals();
-			UpdateTicksSinceLastEvent();
+			std::array<char, 4> midiData;
+			memcpy(midiData.data(), &midiCode, 4);
 
+			// Note-On events go last to prevent early note-off in a situation like this:
+			// ... ..|C-5 01
+			// C-5 01|=== ..
+			if(MIDIEvents::GetTypeFromEvent(midiCode) == MIDIEvents::evNoteOn)
+			{
+				m_queuedEvents.push_back(midiData);
+				return true;
+			}
 			WriteTicks();
-			char midiData[4];
-			memcpy(midiData, &dwMidiCode, 4);
-			mpt::IO::WriteRaw(f, midiData, MIDIEvents::GetEventLength(midiData[0]));
+			mpt::IO::WriteRaw(f, midiData.data(), MIDIEvents::GetEventLength(midiData[0]));
 			return true;
 		}
 
 		bool MidiSysexSend(mpt::const_byte_span sysex) override
 		{
-			UpdateGlobals();
-			UpdateTicksSinceLastEvent();
-
 			if(sysex.size() > 1)
 			{
 				WriteTicks();
@@ -271,7 +281,8 @@ namespace MidiExport
 			{
 				// For mapped channels, distribute tracker channels evenly over MIDI channels, but avoid channel 10 (drums)
 				uint8 midiCh = trackChannel % 15u;
-				if(midiCh >= 9) midiCh++;
+				if(midiCh >= 9)
+					midiCh++;
 				return midiCh;
 			}
 			return IMidiPlugin::GetMidiChannel(trackChannel);
@@ -358,12 +369,12 @@ namespace MidiExport
 		VSTPluginLib m_plugFactory;
 		CSoundFile &m_sndFile;
 		mpt::ofstream &m_file;
-		bool m_wasInstrumentMode;
+		const bool m_wasInstrumentMode;
 
 	public:
 		Conversion(CSoundFile &sndFile, const InstrMap &instrMap, mpt::ofstream &file, bool overlappingInstruments)
 			: m_oldInstruments(sndFile.GetNumInstruments())
-			, m_plugFactory(nullptr, true, mpt::PathString(), mpt::PathString(), mpt::ustring())
+			, m_plugFactory(nullptr, true, {}, {}, {})
 			, m_sndFile(sndFile)
 			, m_file(file)
 			, m_wasInstrumentMode(sndFile.GetNumInstruments() > 0)
@@ -376,8 +387,7 @@ namespace MidiExport
 			}
 			if(!m_wasInstrumentMode)
 			{
-				m_sndFile.m_nInstruments = m_sndFile.m_nSamples;
-				LimitMax(m_sndFile.m_nInstruments, INSTRUMENTINDEX(MAX_INSTRUMENTS - 1));
+				m_sndFile.m_nInstruments = std::min<INSTRUMENTINDEX>(m_sndFile.m_nSamples, MAX_INSTRUMENTS - 1u);
 			}
 
 			m_tracks.reserve(m_sndFile.GetNumInstruments() + 1);
@@ -391,9 +401,7 @@ namespace MidiExport
 			{
 				m_sndFile.Instruments[i] = nullptr;
 				if(!m_sndFile.GetpModDoc()->IsInstrumentUsed(i) || (m_wasInstrumentMode && m_oldInstruments[i - 1] == nullptr) || nextPlug >= MAX_MIXPLUGINS)
-				{
 					continue;
-				}
 
 				// FIXME: Having > MAX_MIXPLUGINS used instruments won't work! So in MPTM, you can only use 250 out of 255 instruments...
 				SNDMIXPLUGIN &mixPlugin = m_sndFile.m_MixPlugins[nextPlug++];
