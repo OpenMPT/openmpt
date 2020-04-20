@@ -404,7 +404,7 @@ void CTempoSwingDlg::SliderContainer::OnHScroll(UINT nSBCode, UINT nPos, CScroll
 	for(size_t i = 0; i < m_parent.m_tempoSwing.size(); i++)
 	{
 		TCHAR s[32];
-		wsprintf(s, _T("%u%%"), Util::muldivr(m_parent.m_tempoSwing[i], 100, TempoSwing::Unity));
+		wsprintf(s, _T("%i%%"), Util::muldivr(m_parent.m_tempoSwing[i], 100, TempoSwing::Unity));
 		m_parent.m_controls[i]->valueLabel.SetWindowText(s);
 	}
 

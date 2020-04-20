@@ -137,8 +137,7 @@ bool PatternClipboard::Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERIN
 	if(instance.m_activeClipboard < instance.m_clipboards.size())
 	{
 		// Copy to internal clipboard
-		CString desc;
-		desc.Format(_T("%u %s (%u to %u)"), last - first + 1, onlyOrders ? _T("Orders") : _T("Patterns"), first, last);
+		CString desc = mpt::cformat(_T("%1 %2 (%3 to %4)"))(last - first + 1, onlyOrders ? CString(_T("Orders")) : CString(_T("Patterns")), first, last);
 		instance.m_clipboards[instance.m_activeClipboard] = {data, desc};
 	}
 

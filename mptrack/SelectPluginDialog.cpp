@@ -86,8 +86,7 @@ BOOL CSelectPluginDlg::OnInitDialog()
 
 	if (m_pPlugin)
 	{
-		CString targetSlot;
-		targetSlot.Format(_T("&Put in FX%02u"), m_nPlugSlot + 1);
+		CString targetSlot = mpt::cformat(_T("&Put in FX%1"))(mpt::cfmt::dec0<2>(m_nPlugSlot + 1));
 		SetDlgItemText(IDOK, targetSlot);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), TRUE);
 	} else

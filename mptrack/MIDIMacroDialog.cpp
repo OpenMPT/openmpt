@@ -172,7 +172,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 	for(int m = start; m <= end; m++)
 	{
 		// SFx
-		s.Format(_T("SF%X"), m);
+		s.Format(_T("SF%X"), static_cast<unsigned int>(m));
 		m_EditMacro[m].SetWindowText(s);
 
 		// Macro value:

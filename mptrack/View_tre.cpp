@@ -781,7 +781,7 @@ void CModTree::RefreshInstrumentLibrary()
 
 void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 {
-	TCHAR s[256], stmp[256];
+	TCHAR stmp[256];
 	TVITEM tvi;
 	MemsetZero(tvi);
 	const FlagSet<HintType> hintType = hint.GetType();
@@ -792,7 +792,6 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	const CSoundFile &sndFile = modDoc.GetSoundFile();
 
 	// Create headers
-	s[0] = 0;
 	const GeneralHint generalHint = hint.ToType<GeneralHint>();
 	if(generalHint.GetType()[HINT_MODTYPE | HINT_MODGENERAL] || (!info.hSong))
 	{
@@ -857,7 +856,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					info.hEffects = InsertItem(_T("Plugins"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, info.hInstruments ? info.hInstruments : info.hSamples);
 				}
 
-				wsprintf(s, _T("FX%u: %s"), i + 1, mpt::ToCString(m_SongFile->GetCharsetInternal(), plugin.GetName()).GetString());
+				CString s = mpt::cformat(_T("FX%1: %2"))(i + 1, mpt::ToCString(m_SongFile->GetCharsetInternal(), plugin.GetName()));
 				int nImage = IMAGE_NOPLUGIN;
 				if(plugin.pMixPlugin != nullptr)
 					nImage = (plugin.pMixPlugin->IsInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
@@ -870,7 +869,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.pszText = stmp;
 					tvi.cchTextMax = CountOf(stmp);
 					GetItem(&tvi);
-					if(tvi.iImage != nImage || tvi.lParam != i || _tcscmp(s, tvi.pszText))
+					if(tvi.iImage != nImage || tvi.lParam != i || s != CString(tvi.pszText))
 					{
 						SetItem(hItem, TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, i);
 					}
@@ -982,10 +981,10 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				// more than one sequence -> add folder
 				if(sndFile.Order(seq).GetName().empty())
 				{
-					seqName.Format(_T("Sequence %u"), seq + 1);
+					seqName = mpt::cformat(_T("Sequence %1"))(seq + 1);
 				} else
 				{
-					seqName.Format(_T("%u: "), seq + 1);
+					seqName = mpt::cformat(_T("%1: "))(seq + 1);
 					seqName += sndFile.Order(seq).GetName().c_str();
 				}
 
@@ -1025,6 +1024,8 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 			CString patName;
 			for(ORDERINDEX iOrd = 0; iOrd < ordLength; iOrd++)
 			{
+				TCHAR s[256];
+				s[0] = 0;
 				if(patNamesOnly && sndFile.Order(seq)[iOrd] != nPat)
 					continue;
 				UINT state = (iOrd == info.ordSel && seq == info.seqSel) ? TVIS_BOLD : 0;
@@ -1093,6 +1094,8 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		mpt::winstring patName;
 		for(PATTERNINDEX pat = minPat; pat < maxPat; pat++)
 		{
+			TCHAR s[256];
+			s[0] = 0;
 			if(sndFile.Patterns.IsValidPat(pat))
 			{
 				patName = mpt::ToWin(sndFile.GetCharsetInternal(), sndFile.Patterns[pat].GetName());
@@ -1136,6 +1139,8 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		HTREEITEM hChild = GetNthChildItem(info.hSamples, smin - 1);
 		for(SAMPLEINDEX nSmp = smin; nSmp <= smax; nSmp++)
 		{
+			TCHAR s[256];
+			s[0] = 0;
 			HTREEITEM hNextChild = GetNextSiblingItem(hChild);
 			if(nSmp <= sndFile.GetNumSamples())
 			{
@@ -1220,6 +1225,8 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		HTREEITEM hChild = GetNthChildItem(info.hInstruments, smin - 1);
 		for(INSTRUMENTINDEX nIns = smin; nIns <= smax; nIns++)
 		{
+			TCHAR s[256];
+			s[0] = 0;
 			HTREEITEM hNextChild = GetNextSiblingItem(hChild);
 			if(nIns <= sndFile.GetNumInstruments())
 			{

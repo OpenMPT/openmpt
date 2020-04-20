@@ -2229,7 +2229,7 @@ void CModDoc::OnApproximateBPM()
 	switch(m_SndFile.m_nTempoMode)
 	{
 		case tempoModeAlternative:
-			s.Format(_T("Using alternative tempo interpretation.\n\nAssuming:\n. %.8g ticks per second\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM"),
+			s.Format(_T("Using alternative tempo interpretation.\n\nAssuming:\n. %.8g ticks per second\n. %u ticks per row\n. %u rows per beat\nthe tempo is approximately: %.8g BPM"),
 			m_SndFile.m_PlayState.m_nMusicTempo.ToDouble(), m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
 			break;
 
@@ -2239,7 +2239,7 @@ void CModDoc::OnApproximateBPM()
 
 		case tempoModeClassic:
 		default:
-			s.Format(_T("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %.8g\n. %d ticks per row\n. %d rows per beat\nthe tempo is approximately: %.8g BPM"),
+			s.Format(_T("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %.8g\n. %u ticks per row\n. %u rows per beat\nthe tempo is approximately: %.8g BPM"),
 			m_SndFile.m_PlayState.m_nMusicTempo.ToDouble(), m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
 			break;
 	}

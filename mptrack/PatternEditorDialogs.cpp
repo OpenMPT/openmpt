@@ -122,7 +122,7 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 
 	if(m_nPattern < sndFile.Patterns.Size() && combo)
 	{
-		TCHAR s[256];
+		CString s;
 		const CPattern &pattern = sndFile.Patterns[m_nPattern];
 		ROWINDEX nrows = pattern.GetNumRows();
 
@@ -130,29 +130,28 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		combo->SetRedraw(FALSE);
 		for(UINT irow = specs.patternRowsMin; irow <= specs.patternRowsMax; irow++)
 		{
-			_stprintf(s, _T("%d"), irow);
-			combo->AddString(s);
+			combo->AddString(mpt::cfmt::dec(irow));
 		}
 		combo->SetCurSel(nrows - specs.patternRowsMin);
 		combo->SetRedraw(TRUE);
 
 		CheckRadioButton(IDC_RADIO1, IDC_RADIO2, IDC_RADIO2);
 
-		_stprintf(s, _T("Pattern #%d: %d row%s (%dK)"),
+		s = mpt::cformat(_T("Pattern #%1: %2 row%3 (%4K)"))(
 			m_nPattern,
 			pattern.GetNumRows(),
-			(pattern.GetNumRows() == 1) ? _T("") : _T("s"),
+			(pattern.GetNumRows() == 1) ? CString(_T("")) : CString(_T("s")),
 			static_cast<int>((pattern.GetNumRows() * sndFile.GetNumChannels() * sizeof(ModCommand)) / 1024));
 		SetDlgItemText(IDC_TEXT1, s);
 
 		// Window title
-		const CString patternName = pattern.GetName().c_str();
-		_stprintf(s, _T("Pattern Properties for Pattern #%d"), m_nPattern);
+		const CString patternName = mpt::ToCString(sndFile.GetCharsetInternal(), pattern.GetName());
+		s = mpt::cformat(_T("Pattern Properties for Pattern #%1"))(m_nPattern);
 		if(!patternName.IsEmpty())
 		{
-			_tcscat(s, _T(" ("));
-			_tcscat(s, patternName);
-			_tcscat(s, _T(")"));
+			s += _T(" (");
+			s += patternName;
+			s += _T(")");
 		}
 		SetWindowText(s);
 
@@ -395,9 +394,7 @@ bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor,
 	}
 
 	// Update Window Title
-	TCHAR s[64];
-	_stprintf(s, _T("Note Properties - Row %d, Channel %d"), row, chn + 1);
-	SetWindowText(s);
+	SetWindowText(mpt::cformat(_T("Note Properties - Row %1, Channel %2"))(row, chn + 1));
 
 	CRect rectParent, rectWnd;
 	parent->GetWindowRect(&rectParent);

@@ -461,7 +461,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 
 			if (nCurrentSpeed < 0) m_SpinSpeed.EnableWindow(TRUE);
 			nCurrentSpeed = nSpeed;
-			wsprintf(s, _T("%u"), nCurrentSpeed);
+			wsprintf(s, _T("%u"), static_cast<unsigned int>(nCurrentSpeed));
 			m_EditSpeed.SetWindowText(s);
 		}
 		TEMPO nTempo = pSndFile->m_PlayState.m_nMusicTempo;
@@ -480,7 +480,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		{
 			if (nCurrentRowsPerBeat < 0) m_SpinRowsPerBeat.EnableWindow(TRUE);
 			nCurrentRowsPerBeat = nRowsPerBeat;
-			wsprintf(s, _T("%u"), nCurrentRowsPerBeat);
+			wsprintf(s, _T("%u"), static_cast<unsigned int>(nCurrentRowsPerBeat));
 			m_EditRowsPerBeat.SetWindowText(s);
 		}
 	} else

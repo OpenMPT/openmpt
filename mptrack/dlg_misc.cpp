@@ -720,7 +720,7 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 	const CHANNELINDEX numChannels = sndFile.GetNumChannels();
 	for(CHANNELINDEX n = 0; n < numChannels; n++)
 	{
-		s.Format(_T("Channel %u"), n + 1);
+		s = mpt::cformat(_T("Channel %1"))(n + 1);
 		if(sndFile.ChnSettings[n].szName[0] >= 0x20)
 		{
 			s += _T(": ");
