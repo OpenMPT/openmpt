@@ -1352,7 +1352,9 @@ static void WINAPI VisClose() {
 
 	DeleteFont( visfont );
 	DeleteBitmap( visbitmap );
-	DeleteDC( visDC );
+	if ( visDC ) {
+		DeleteDC( visDC );
+	}
 }
 static void WINAPI VisSize(HDC dc, SIZE *size) {
 	xmpopenmpt_lock guard;
@@ -1444,7 +1446,9 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 
 	if ( !visDC || last_pattern != pattern ) {
 		DeleteBitmap( visbitmap );
-		DeleteDC( visDC );
+		if ( visDC ) {
+			DeleteDC( visDC );
+		}
 
 		visDC = CreateCompatibleDC( dc );
 		visbitmap = CreateCompatibleBitmap( dc, pattern_width, pattern_height );
@@ -1659,7 +1663,14 @@ static char * file_formats;
 
 static void xmp_openmpt_on_dll_load() {
 	ZeroMemory( &xmpopenmpt_mutex, sizeof( xmpopenmpt_mutex ) );
-	InitializeCriticalSection( &xmpopenmpt_mutex );
+	#if defined(_MSC_VER)
+	#pragma warning(push)
+	#pragma warning(disable:28125) // The function 'InitializeCriticalSection' must be called from within a try/except block:  The requirement might be conditional.
+	#endif // _MSC_VER
+		InitializeCriticalSection( &xmpopenmpt_mutex );
+	#if defined(_MSC_VER)
+	#pragma warning(pop)
+	#endif // _MSC_VER
 	std::vector<std::string> extensions = openmpt::get_supported_extensions();
 	std::string filetypes_string = "OpenMPT";
 	filetypes_string.push_back('\0');
