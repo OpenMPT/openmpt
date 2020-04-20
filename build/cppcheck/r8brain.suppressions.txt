@@ -6,3 +6,7 @@ uninitMemberVarPrivate:include/r8brain/CDSPFIRFilter.h
 uninitMemberVarPrivate:include/r8brain/CDSPFracInterpolator.h
 uninitMemberVarPrivate:include/r8brain/CDSPRealFFT.h
 uninitMemberVarPrivate:include/r8brain/r8bbase.h
+virtualCallInConstructor:include/r8brain/CDSPBlockConvolver.h
+virtualCallInConstructor:include/r8brain/CDSPFracInterpolator.h
+virtualCallInConstructor:include/r8brain/CDSPHBDownsampler.h
+virtualCallInConstructor:include/r8brain/CDSPHBUpsampler.h
