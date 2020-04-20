@@ -164,6 +164,7 @@ PluginBridge::PluginBridge(const wchar_t *memName, HANDLE otherProcess_)
 PluginBridge::~PluginBridge()
 {
 	SignalObjectAndWait(sigThreadExit, otherThread, INFINITE, FALSE);
+	CloseHandle(otherThread);
 
 	sharedMem = nullptr;
 	queueMem.Close();
