@@ -143,6 +143,8 @@ public:
 		wchar_t *str;
 	public:
 		BridgeRemoteException(const wchar_t *str_) : str(_wcsdup(str_)) { }
+		BridgeRemoteException(const BridgeRemoteException &) = delete;
+		BridgeRemoteException & operator=(const BridgeRemoteException &) = delete;
 		~BridgeRemoteException() { free(str); }
 		const wchar_t *what() const { return str; }
 	};
