@@ -21,7 +21,7 @@ typedef interface IMediaParams IMediaParams;
 
 OPENMPT_NAMESPACE_BEGIN
 
-class DMOPlugin : public IMixPlugin
+class DMOPlugin final : public IMixPlugin
 {
 protected:
 	IMediaObject *m_pMediaObject;

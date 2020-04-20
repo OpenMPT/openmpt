@@ -21,7 +21,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace DMO
 {
 
-class I3DL2Reverb : public IMixPlugin
+class I3DL2Reverb final : public IMixPlugin
 {
 protected:
 	enum Parameters

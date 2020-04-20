@@ -19,7 +19,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-class LFOPlugin : public IMixPlugin
+class LFOPlugin final : public IMixPlugin
 {
 	friend class LFOPluginEditor;
 

@@ -17,7 +17,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace DMO
 {
 
-class Compressor : public IMixPlugin
+class Compressor final : public IMixPlugin
 {
 protected:
 	enum Parameters
