@@ -88,7 +88,7 @@ protected:
 		store_t rawData;
 	};
 	
-	UpdateHint(HintCategory category, store_t item = 0) : type(HINT_NONE), category(category), item(item)
+	UpdateHint(HintCategory category_, store_t item_ = 0) : type(HINT_NONE), category(category_), item(item_)
 	{
 		static_assert(sizeof(UpdateHint) == sizeof(store_t), "Internal UpdateHint size inconsistency");
 		static_assert(sizeof(UpdateHint) <= sizeof(LPARAM), "Update hints are currently tunnelled through LPARAMs in MFC");
