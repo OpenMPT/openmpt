@@ -20,3 +20,6 @@
    "../../include/pugixml/src/pugiconfig.hpp",
    "../../include/pugixml/src/pugixml.hpp",
   }
+  filter { "action:vs*" }
+    buildoptions { "/wd6054", "/wd28182" } -- /analyze
+  filter {}
