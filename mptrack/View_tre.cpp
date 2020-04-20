@@ -1957,7 +1957,56 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 
 		// Enumerating Directories and samples/instruments
 		const mpt::PathString path = m_InstrLibPath + P_("*.*");
-		const bool showDirs = !IsSampleBrowser() || TrackerSettings::Instance().showDirsInSampleBrowser, showInstrs = IsSampleBrowser();
+		const bool showDirs = !IsSampleBrowser() || TrackerSettings::Instance().showDirsInSampleBrowser;
+		const bool showInstrs = IsSampleBrowser();
+
+		static constexpr int FILTER_REJECT_FILE = -1;
+		static constexpr auto instrExts = {"xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat"};
+		static constexpr auto sampleExts = {"wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf", "sb0", "sb2", "sbi"};
+		static constexpr auto allExtsBlacklist = {"txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "lnk", "url"};
+
+		const auto FilterFile = [this, showInstrs, showDirs](const mpt::PathString &fileName) -> int
+		{
+			// Get lower-case file extension without dot.
+			mpt::PathString extPS = fileName.GetFileExt();
+			std::string ext = extPS.ToUTF8();
+			if(!ext.empty())
+			{
+				ext.erase(0, 1);
+				ext = mpt::ToLowerCaseAscii(ext);
+				extPS = mpt::PathString::FromUTF8(ext);
+			}
+
+			if(std::find(instrExts.begin(), instrExts.end(), ext) != instrExts.end())
+			{
+				if(showInstrs)
+					return IMAGE_INSTRUMENTS;
+			} else if(std::find(sampleExts.begin(), sampleExts.end(), ext) != sampleExts.end())
+			{
+				if(showInstrs)
+					return IMAGE_SAMPLES;
+			} else if(std::find(m_modExtensions.begin(), m_modExtensions.end(), ext) != m_modExtensions.end())
+			{
+				if(showDirs)
+					return IMAGE_FOLDERSONG;
+			} else if(!extPS.empty() && std::find(m_MediaFoundationExtensions.begin(), m_MediaFoundationExtensions.end(), extPS) != m_MediaFoundationExtensions.end())
+			{
+				if(showInstrs)
+					return IMAGE_SAMPLES;
+			} else if(showDirs)
+			{
+				// Amiga-style prefix (i.e. mod.songname)
+				std::string prefixExt = fileName.ToUTF8();
+				const auto dotPos = prefixExt.find('.');
+				if(dotPos != std::string::npos && std::find(m_modExtensions.begin(), m_modExtensions.end(), prefixExt.erase(dotPos)) != m_modExtensions.end())
+					return IMAGE_FOLDERSONG;
+			}
+				
+			if(m_showAllFiles && std::find(allExtsBlacklist.begin(), allExtsBlacklist.end(), ext) == allExtsBlacklist.end())
+				return IMAGE_SAMPLES;
+				
+			return FILTER_REJECT_FILE;
+		};
 
 		LinkResolver linkResolver;
 		HANDLE hFind;
@@ -1965,53 +2014,6 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 		MemsetZero(wfd);
 		if((hFind = FindFirstFile(path.AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
 		{
-			static constexpr int FILTER_REJECT_FILE = -1;
-			static constexpr auto instrExts = {"xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat"};
-			static constexpr auto sampleExts = {"wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf", "sb0", "sb2", "sbi"};
-			static constexpr auto allExtsBlacklist = {"txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "lnk", "url"};
-
-			const auto FilterFile = [this, showInstrs, showDirs](const mpt::PathString &fileName) -> int
-			{
-				// Get lower-case file extension without dot.
-				mpt::PathString extPS = fileName.GetFileExt();
-				std::string ext = extPS.ToUTF8();
-				if(!ext.empty())
-				{
-					ext.erase(0, 1);
-					ext = mpt::ToLowerCaseAscii(ext);
-					extPS = mpt::PathString::FromUTF8(ext);
-				}
-
-				if(std::find(instrExts.begin(), instrExts.end(), ext) != instrExts.end())
-				{
-					if(showInstrs)
-						return IMAGE_INSTRUMENTS;
-				} else if(std::find(sampleExts.begin(), sampleExts.end(), ext) != sampleExts.end())
-				{
-					if(showInstrs)
-						return IMAGE_SAMPLES;
-				} else if(std::find(m_modExtensions.begin(), m_modExtensions.end(), ext) != m_modExtensions.end())
-				{
-					if(showDirs)
-						return IMAGE_FOLDERSONG;
-				} else if(!extPS.empty() && std::find(m_MediaFoundationExtensions.begin(), m_MediaFoundationExtensions.end(), extPS) != m_MediaFoundationExtensions.end())
-				{
-					if(showInstrs)
-						return IMAGE_SAMPLES;
-				} else if(showDirs)
-				{
-					// Amiga-style prefix (i.e. mod.songname)
-					std::string prefixExt = fileName.ToUTF8();
-					const auto dotPos = prefixExt.find('.');
-					if(dotPos != std::string::npos && std::find(m_modExtensions.begin(), m_modExtensions.end(), prefixExt.erase(dotPos)) != m_modExtensions.end())
-						return IMAGE_FOLDERSONG;
-				}
-				
-				if(m_showAllFiles && std::find(allExtsBlacklist.begin(), allExtsBlacklist.end(), ext) == allExtsBlacklist.end())
-					return IMAGE_SAMPLES;
-				
-				return FILTER_REJECT_FILE;
-			};
 
 			do
 			{
