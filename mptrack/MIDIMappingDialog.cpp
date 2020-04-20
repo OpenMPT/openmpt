@@ -245,9 +245,13 @@ void CMIDIMappingDialog::UpdateDialog(int selItem)
 	UpdateEvent();
 	UpdateParameters();
 
-	const bool enableMover = selItem >= 0 && (
-		(selItem > 0 && m_rMIDIMapper.AreOrderEqual(selItem - 1, selItem)) ||
-		(selItem + 1 < m_List.GetItemCount() && m_rMIDIMapper.AreOrderEqual(selItem, selItem + 1)));
+	bool enableMover = selItem >= 0;
+	if(enableMover)
+	{
+		const bool previousEqual = (selItem > 0 && m_rMIDIMapper.AreOrderEqual(selItem - 1, selItem));
+		const bool nextEqual = (selItem + 1 < m_List.GetItemCount() && m_rMIDIMapper.AreOrderEqual(selItem, selItem + 1));
+		enableMover = previousEqual || nextEqual;
+	}
 	m_SpinMoveMapping.EnableWindow(enableMover);
 }
 
