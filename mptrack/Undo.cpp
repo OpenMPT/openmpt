@@ -707,6 +707,8 @@ bool CInstrumentUndo::PrepareBuffer(undobuf_t &buffer, const INSTRUMENTINDEX ins
 	{
 		undo.instr = *sndFile.Instruments[ins];
 	}
+	// cppcheck false-positive
+	// cppcheck-suppress uninitStructMember
 	insBuffer.push_back(std::move(undo));
 
 	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
