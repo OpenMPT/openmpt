@@ -1,0 +1,8 @@
+operatorEqVarError:include/r8brain/CDSPFIRFilter.h
+operatorEqVarError:include/r8brain/CDSPFracInterpolator.h
+operatorEqVarError:include/r8brain/CDSPRealFFT.h
+operatorEqVarError:include/r8brain/r8bbase.h
+uninitMemberVarPrivate:include/r8brain/CDSPFIRFilter.h
+uninitMemberVarPrivate:include/r8brain/CDSPFracInterpolator.h
+uninitMemberVarPrivate:include/r8brain/CDSPRealFFT.h
+uninitMemberVarPrivate:include/r8brain/r8bbase.h
