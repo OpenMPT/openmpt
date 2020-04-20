@@ -92,7 +92,7 @@ protected:
 	{
 		static_assert(sizeof(UpdateHint) == sizeof(store_t), "Internal UpdateHint size inconsistency");
 		static_assert(sizeof(UpdateHint) <= sizeof(LPARAM), "Update hints are currently tunnelled through LPARAMs in MFC");
-		MPT_ASSERT(static_cast<HintCategory>(UpdateHint::category) == category);
+		MPT_ASSERT(static_cast<HintCategory>(category) == category_);
 		MPT_ASSERT(UpdateHint::item == item);
 	}
 
