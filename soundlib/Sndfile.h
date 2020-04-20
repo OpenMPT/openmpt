@@ -489,44 +489,49 @@ public:
 	struct PlayState
 	{
 		friend class CSoundFile;
-	protected:
-		samplecount_t m_nBufferCount = 0;
-		double m_dBufferDiff = 0.0;
-	public:
-		samplecount_t m_lTotalSampleCount = 0;
 
 	public:
-		uint32 m_nTickCount = 0;
+		samplecount_t m_lTotalSampleCount = 0;  // Total number of rendered samples
 	protected:
-		uint32 m_nPatternDelay = 0, m_nFrameDelay = 0;	// m_nPatternDelay = pattern delay (rows), m_nFrameDelay = fine pattern delay (ticks)
+		samplecount_t m_nBufferCount = 0;  // Remaining number samples to render for this tick
+		double m_dBufferDiff = 0.0;        // Modern tempo rounding error compensation
+
+	public:
+		uint32 m_nTickCount = 0;  // Current tick being processed
+	protected:
+		uint32 m_nPatternDelay = 0;  // Pattern delay (rows)
+		uint32 m_nFrameDelay = 0;    // Fine pattern delay (ticks)
 	public:
 		uint32 m_nSamplesPerTick = 0;
-		ROWINDEX m_nCurrentRowsPerBeat = 0, m_nCurrentRowsPerMeasure = 0;	// current rows per beat and measure for this module
-		uint32 m_nMusicSpeed = 0; // Current speed
-		TEMPO m_nMusicTempo;  // Current tempo
+		ROWINDEX m_nCurrentRowsPerBeat = 0;     // Current time signature
+		ROWINDEX m_nCurrentRowsPerMeasure = 0;  // Current time signature
+		uint32 m_nMusicSpeed = 0;               // Current speed
+		TEMPO m_nMusicTempo;                    // Current tempo
 
 		// Playback position
-		ROWINDEX m_nRow = 0;
-		ROWINDEX m_nNextRow = 0;
+		ROWINDEX m_nRow = 0;      // Current row being processed
+		ROWINDEX m_nNextRow = 0;  // Next row to process
 	protected:
-		ROWINDEX m_nNextPatStartRow = 0; // for FT2's E60 bug
+		ROWINDEX m_nNextPatStartRow = 0;  // For FT2's E60 bug
 	public:
-		PATTERNINDEX m_nPattern = 0;
-		ORDERINDEX m_nCurrentOrder = 0, m_nNextOrder = 0, m_nSeqOverride = ORDERINDEX_INVALID;
+		PATTERNINDEX m_nPattern = 0;                     // Current pattern being processed
+		ORDERINDEX m_nCurrentOrder = 0;                  // Current order being processed
+		ORDERINDEX m_nNextOrder = 0;                     // Next order to process
+		ORDERINDEX m_nSeqOverride = ORDERINDEX_INVALID;  // Queued order to be processed next, regardless of what order would normally follow
 
 		// Global volume
 	public:
-		int32 m_nGlobalVolume = MAX_GLOBAL_VOLUME;
+		int32 m_nGlobalVolume = MAX_GLOBAL_VOLUME;  // Current global volume (0...MAX_GLOBAL_VOLUME)
 	protected:
 		int32 m_nSamplesToGlobalVolRampDest = 0, m_nGlobalVolumeRampAmount = 0,
-			m_nGlobalVolumeDestination = 0;
-		int32 m_lHighResRampingGlobalVolume = 0;
+		      m_nGlobalVolumeDestination = 0;     // Global volume ramping
+		int32 m_lHighResRampingGlobalVolume = 0;  // Global volume ramping
 
 	public:
 		bool m_bPositionChanged = true; // Report to plugins that we jumped around in the module
 
 	public:
-		CHANNELINDEX ChnMix[MAX_CHANNELS]; // Channels to be mixed
+		CHANNELINDEX ChnMix[MAX_CHANNELS]; // Index of channels in Chn to be actually mixed
 		ModChannel Chn[MAX_CHANNELS];      // Mixing channels... First m_nChannels channels are master channels (i.e. they are never NNA channels)!
 
 	public:
@@ -709,8 +714,12 @@ public:
 #ifdef MODPLUG_TRACKER
 	void PatternTranstionChnSolo(const CHANNELINDEX chnIndex);
 	void PatternTransitionChnUnmuteAll();
-#endif // MODPLUG_TRACKER
 
+protected:
+	void HandlePatternTransitionEvents();
+#endif  // MODPLUG_TRACKER
+
+public:
 	double GetCurrentBPM() const;
 	void DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 	CHANNELINDEX GetMixStat() const { return m_nMixStat; }
@@ -1150,8 +1159,6 @@ private:
 	PLUGINDEX GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
 	PLUGINDEX GetActiveInstrumentPlugin(CHANNELINDEX, PluginMutePriority respectMutes) const;
 	IMixPlugin *GetChannelInstrumentPlugin(CHANNELINDEX chn) const;
-
-	void HandlePatternTransitionEvents();
 
 public:
 	PLUGINDEX GetBestPlugin(CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;
