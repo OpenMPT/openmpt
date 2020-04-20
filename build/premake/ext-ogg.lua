@@ -23,3 +23,6 @@
   filter { "kind:SharedLib" }
    files { "../../include/ogg/win32/ogg.def" }
   filter {}
+  filter { "action:vs*" }
+    buildoptions { "/wd6001", "/wd6011" } -- /analyze
+  filter {}

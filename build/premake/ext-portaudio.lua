@@ -86,6 +86,9 @@
     buildoptions { "/wd4018", "/wd4091", "/wd4267", "/wd4312" }
   filter {}
   filter { "action:vs*" }
+    buildoptions { "/wd6001", "/wd6011", "/wd6053", "/wd6216", "/wd6217", "/wd6255", "/wd6258", "/wd6385", "/wd6386", "/wd6387", "/wd28159" } -- /analyze
+  filter {}
+  filter { "action:vs*" }
    files { "../../build/premake/lnk/ext-portaudio.c" }
   filter {}
   filter { "configurations:Debug" }

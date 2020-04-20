@@ -273,7 +273,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -291,7 +291,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -316,7 +316,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -341,7 +341,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -367,7 +367,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -392,7 +392,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -413,7 +413,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -434,7 +434,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -460,7 +460,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -487,7 +487,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -515,7 +515,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -542,7 +542,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
