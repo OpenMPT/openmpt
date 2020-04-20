@@ -206,6 +206,7 @@ PluginBridge::PluginBridge(const wchar_t *memName, HANDLE otherProcess)
 PluginBridge::~PluginBridge()
 {
 	SignalObjectAndWait(m_sigThreadExit, m_audioThread, INFINITE, FALSE);
+	CloseHandle(m_audioThread);
 	BridgeMessage dispatchMsg;
 	dispatchMsg.Dispatch(effClose, 0, 0, 0, 0.0f, 0);
 	DispatchToPlugin(dispatchMsg.dispatch);
