@@ -3946,6 +3946,8 @@ void CViewPattern::CursorJump(int distance, bool snap)
 	const int distanceAbs = std::abs(distance);
 
 	if(snap)
+		// cppcheck false-positive
+		// cppcheck-suppress signConversion
 		row = (((row + (upwards ? -1 : 0)) / distanceAbs) + (upwards ? 0 : 1)) * distanceAbs;
 	else
 		row += distance;
