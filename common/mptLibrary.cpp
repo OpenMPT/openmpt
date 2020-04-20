@@ -194,6 +194,10 @@ public:
 
 	}
 
+	LibraryHandle(const LibraryHandle &) = delete;
+
+	LibraryHandle & operator=(const LibraryHandle &) = delete;
+
 	~LibraryHandle()
 	{
 		if(IsValid())
@@ -236,6 +240,10 @@ public:
 	{
 		return;
 	}
+
+	LibraryHandle(const LibraryHandle &) = delete;
+
+	LibraryHandle & operator=(const LibraryHandle &) = delete;
 
 	~LibraryHandle()
 	{
@@ -286,6 +294,10 @@ public:
 		inited = true;
 		handle = lt_dlopenext(path.GetFileName().AsNative().c_str());
 	}
+
+	LibraryHandle(const LibraryHandle &) = delete;
+
+	LibraryHandle & operator=(const LibraryHandle &) = delete;
 
 	~LibraryHandle()
 	{
@@ -338,6 +350,10 @@ public:
 		handle = dlopen(path.GetFileName().AsNative().c_str(), RTLD_NOW);
 	}
 
+	LibraryHandle(const LibraryHandle &) = delete;
+
+	LibraryHandle & operator=(const LibraryHandle &) = delete;
+
 	~LibraryHandle()
 	{
 		if(IsValid())
@@ -380,6 +396,10 @@ public:
 		MPT_UNREFERENCED_PARAMETER(path);
 		return;
 	}
+
+	LibraryHandle(const LibraryHandle &) = delete;
+
+	LibraryHandle & operator=(const LibraryHandle &) = delete;
 
 	~LibraryHandle()
 	{
