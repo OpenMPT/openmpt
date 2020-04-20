@@ -166,6 +166,8 @@ void CCtrlGeneral::OnTapTempo()
 	if(static_cast<size_t>(numTaps) >= tapTime.size())
 	{
 		// Shift back the previously recorded tap history
+		// cppcheck false-positive
+		// cppcheck-suppress mismatchingContainers
 		std::copy(tapTime.begin() + 1, tapTime.end(), tapTime.begin());
 		numTaps--;
 	}
