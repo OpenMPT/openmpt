@@ -277,7 +277,7 @@ public:
 template< class T >
 class CFixedBuffer : public R8B_MEMALLOCCLASS
 {
-	// cppcheck-suppress uninitMemberVarPrivate
+	// cppcheck-suppress uninitMemberVarPrivate operatorEqVarError
 	R8BNOCTOR( CFixedBuffer );
 
 public:
@@ -598,7 +598,7 @@ private:
 
 class CSyncKeeper
 {
-	// cppcheck-suppress uninitMemberVarPrivate
+	// cppcheck-suppress uninitMemberVarPrivate operatorEqVarError
 	R8BNOCTOR( CSyncKeeper );
 
 public:

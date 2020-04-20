@@ -56,7 +56,7 @@ enum EDSPFilterPhaseResponse
 
 class CDSPFIRFilter : public R8B_BASECLASS
 {
-	// cppcheck-suppress uninitMemberVarPrivate
+	// cppcheck-suppress uninitMemberVarPrivate operatorEqVarError
 	R8BNOCTOR( CDSPFIRFilter );
 
 	friend class CDSPFIRFilterCache;
