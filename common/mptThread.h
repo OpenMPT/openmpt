@@ -112,7 +112,9 @@ public:
 	UnmanagedThread & operator=(const UnmanagedThread &) = delete;
 
 	// unmanaged, user has to free resources
-	~UnmanagedThread() = default;
+	~UnmanagedThread()
+	{
+	}
 
 };
 
