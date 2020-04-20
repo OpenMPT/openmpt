@@ -653,6 +653,7 @@
 // Disable Visual Studio static analyzer warnings that generate too many false positives in VS2010.
 //#pragma warning(disable:6246)
 //#pragma warning(disable:6262)
+#pragma warning(disable:6297) // 32-bit value is shifted, then cast to 64-bit value.  Results might not be an expected value. 
 #pragma warning(disable:6326) // Potential comparison of a constant with another constant
 //#pragma warning(disable:6385)
 //#pragma warning(disable:6386)
