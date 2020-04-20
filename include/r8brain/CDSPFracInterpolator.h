@@ -40,7 +40,8 @@ namespace r8b {
 
 class CDSPFracDelayFilterBank : public R8B_BASECLASS
 {
-	// cppcheck-suppress uninitMemberVarPrivate operatorEqVarError
+	// cppcheck-suppress uninitMemberVarPrivate
+	// cppcheck-suppress operatorEqVarError
 	R8BNOCTOR( CDSPFracDelayFilterBank );
 
 	friend class CDSPFracDelayFilterBankCache;

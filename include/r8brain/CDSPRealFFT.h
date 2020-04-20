@@ -46,7 +46,8 @@ namespace r8b {
 
 class CDSPRealFFT : public R8B_BASECLASS
 {
-	// cppcheck-suppress uninitMemberVarPrivate operatorEqVarError
+	// cppcheck-suppress uninitMemberVarPrivate
+	// cppcheck-suppress operatorEqVarError
 	R8BNOCTOR( CDSPRealFFT );
 
 	friend class CDSPRealFFTKeeper;
@@ -359,7 +360,8 @@ private:
 
 	class CObjKeeper
 	{
-		// cppcheck-suppress uninitMemberVarPrivate operatorEqVarError
+		// cppcheck-suppress uninitMemberVarPrivate
+		// cppcheck-suppress operatorEqVarError
 		R8BNOCTOR( CObjKeeper );
 
 	public:
@@ -462,7 +464,8 @@ private:
 
 class CDSPRealFFTKeeper : public R8B_BASECLASS
 {
-	// cppcheck-suppress uninitMemberVarPrivate operatorEqVarError
+	// cppcheck-suppress uninitMemberVarPrivate
+	// cppcheck-suppress operatorEqVarError
 	R8BNOCTOR( CDSPRealFFTKeeper );
 
 public:
