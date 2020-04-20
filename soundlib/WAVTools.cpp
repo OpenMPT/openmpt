@@ -365,6 +365,7 @@ size_t WAVWriter::Finalize()
 	FinalizeChunk();
 
 	RIFFHeader fileHeader;
+	Clear(fileHeader);
 	fileHeader.magic = RIFFHeader::idRIFF;
 	fileHeader.length = static_cast<uint32>(totalSize - 8);
 	fileHeader.type = RIFFHeader::idWAVE;
@@ -455,6 +456,7 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 {
 	StartChunk(RIFFChunk::idfmt_);
 	WAVFormatChunk wavFormat;
+	Clear(wavFormat);
 
 	bool extensible = (numChannels > 2);
 
@@ -470,6 +472,7 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 	if(extensible)
 	{
 		WAVFormatChunkExtension extFormat;
+		Clear(extFormat);
 		extFormat.size = sizeof(WAVFormatChunkExtension) - sizeof(uint16);
 		extFormat.validBitsPerSample = bitDepth;
 		switch(numChannels)
@@ -532,6 +535,7 @@ void WAVWriter::WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &ute
 		const uint32 length = mpt::saturate_cast<uint32>(text.length() + 1);
 
 		RIFFChunk chunk;
+		Clear(chunk);
 		chunk.id = static_cast<uint32>(id);
 		chunk.length = length;
 		Write(chunk);
@@ -567,6 +571,7 @@ void WAVWriter::WriteLoopInformation(const ModSample &sample)
 
 	// Set up loops
 	WAVSampleLoop loops[2];
+	Clear(loops);
 	if(sample.uFlags[CHN_SUSTAINLOOP])
 	{
 		loops[info.numLoops++].ConvertToWAV(sample.nSustainStart, sample.nSustainEnd, sample.uFlags[CHN_PINGPONGSUSTAIN]);

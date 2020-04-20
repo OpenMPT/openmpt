@@ -156,6 +156,10 @@ namespace detail {
 
 static MPT_FORCEINLINE mpt::endian get_endian() noexcept
 {
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:6285) // false-positive: (<non-zero constant> || <non-zero constant>) is always a non-zero constant.
+#endif // MPT_COMPILER_MSVC
 	if constexpr((mpt::endian::native == mpt::endian::little) || (mpt::endian::native == mpt::endian::big))
 	{
 		return mpt::endian::native;
@@ -163,6 +167,9 @@ static MPT_FORCEINLINE mpt::endian get_endian() noexcept
 	{
 		return detail::endian_probe();
 	}
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 }
 
 static MPT_FORCEINLINE bool endian_is_little() noexcept

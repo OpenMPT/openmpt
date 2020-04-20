@@ -3550,8 +3550,11 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(plug.IsMasterEffect(), true);
 	VERIFY_EQUAL_NONCONT(plug.GetGain(), 11);
 	VERIFY_EQUAL_NONCONT(plug.pMixPlugin != nullptr, true);
-	VERIFY_EQUAL_NONCONT(plug.pMixPlugin->GetParameter(1), 0.5f);
-	VERIFY_EQUAL_NONCONT(plug.pMixPlugin->IsInstrument(), false);
+	if(plug.pMixPlugin)
+	{
+		VERIFY_EQUAL_NONCONT(plug.pMixPlugin->GetParameter(1), 0.5f);
+		VERIFY_EQUAL_NONCONT(plug.pMixPlugin->IsInstrument(), false);
+	}
 #endif // NO_PLUGINS
 
 #ifdef MODPLUG_TRACKER
@@ -3997,6 +4000,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		// and only writes the first array element.
 		std::ostringstream f;
 		uint16be data[2];
+		Clear(data);
 		data[0] = 0x1234;
 		data[1] = 0x5678;
 		mpt::IO::Write(f, data);
@@ -4015,6 +4019,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	{
 		std::ostringstream f;
 		int16be data[3];
+		Clear(data);
 		data[0] = 0x1234;
 		data[1] = 0x5678;
 		data[2] = 0x1234;

@@ -535,6 +535,7 @@ UUID::UUID(GUIDms guid)
 UUID::operator UUIDbin() const
 {
 	UUIDbin result;
+	Clear(result);
 	result.Data1 = GetData1();
 	result.Data2 = GetData2();
 	result.Data3 = GetData3();
@@ -545,6 +546,7 @@ UUID::operator UUIDbin() const
 UUID::operator GUIDms() const
 {
 	GUIDms result;
+	Clear(result);
 	result.Data1 = GetData1();
 	result.Data2 = GetData2();
 	result.Data3 = GetData3();

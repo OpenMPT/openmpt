@@ -543,7 +543,14 @@ openmpt_module * openmpt_module_create2( openmpt_stream_callbacks stream_callbac
 			mod->impl = new openmpt::module_impl( istream, openmpt::helper::make_unique<openmpt::logfunc_logger>( mod->logfunc, mod->loguser ), ctls_map );
 			return mod;
 		} catch ( ... ) {
-			openmpt::report_exception( __func__, mod, error, error_message );
+			#if defined(_MSC_VER)
+			#pragma warning(push)
+			#pragma warning(disable:6001) // false-positive: Using uninitialized memory 'mod'.
+			#endif // _MSC_VER
+				openmpt::report_exception( __func__, mod, error, error_message );
+			#if defined(_MSC_VER)
+			#pragma warning(pop)
+			#endif // _MSC_VER
 		}
 		delete mod->impl;
 		mod->impl = 0;
@@ -591,7 +598,14 @@ openmpt_module * openmpt_module_create_from_memory2( const void * filedata, size
 			mod->impl = new openmpt::module_impl( filedata, filesize, openmpt::helper::make_unique<openmpt::logfunc_logger>( mod->logfunc, mod->loguser ), ctls_map );
 			return mod;
 		} catch ( ... ) {
-			openmpt::report_exception( __func__, mod, error, error_message );
+			#if defined(_MSC_VER)
+			#pragma warning(push)
+			#pragma warning(disable:6001) // false-positive: Using uninitialized memory 'mod'.
+			#endif // _MSC_VER
+				openmpt::report_exception( __func__, mod, error, error_message );
+			#if defined(_MSC_VER)
+			#pragma warning(pop)
+			#endif // _MSC_VER
 		}
 		delete mod->impl;
 		mod->impl = 0;
@@ -1421,7 +1435,14 @@ openmpt_module_ext * openmpt_module_ext_create( openmpt_stream_callbacks stream_
 		} catch ( ... ) {
 			openmpt::report_exception( __func__, mod, error, error_message );
 		}
-		delete mod_ext->impl;
+		#if defined(_MSC_VER)
+		#pragma warning(push)
+		#pragma warning(disable:6001) // false-positive: Using uninitialized memory 'mod_ext'.
+		#endif // _MSC_VER
+			delete mod_ext->impl;
+		#if defined(_MSC_VER)
+		#pragma warning(pop)
+		#endif // _MSC_VER
 		mod_ext->impl = 0;
 		mod->impl = 0;
 		if ( mod->error_message ) {
@@ -1470,7 +1491,14 @@ openmpt_module_ext * openmpt_module_ext_create_from_memory( const void * filedat
 		} catch ( ... ) {
 			openmpt::report_exception( __func__, mod, error, error_message );
 		}
-		delete mod_ext->impl;
+		#if defined(_MSC_VER)
+		#pragma warning(push)
+		#pragma warning(disable:6001) // false-positive: Using uninitialized memory 'mod_ext'.
+		#endif // _MSC_VER
+			delete mod_ext->impl;
+		#if defined(_MSC_VER)
+		#pragma warning(pop)
+		#endif // _MSC_VER
 		mod_ext->impl = 0;
 		mod->impl = 0;
 		if ( mod->error_message ) {

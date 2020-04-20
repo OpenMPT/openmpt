@@ -138,6 +138,7 @@ static mpt::Windows::Version GatherWindowsVersion() noexcept
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4996) // 'GetVersionExW': was declared deprecated
+#pragma warning(disable:28159) // Consider using 'IsWindows*' instead of 'GetVersionExW'. Reason: Deprecated. Use VerifyVersionInfo* or IsWindows* macros from VersionHelpers.
 #endif // MPT_COMPILER_MSVC
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic push
