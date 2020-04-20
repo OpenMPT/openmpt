@@ -157,17 +157,10 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 							}
 							break;
 						}
-					} else if(effect - 0x10 < static_cast<int>(std::size(effTrans)))
+					} else if(effect < 0x10 + CountOf(effTrans))
 					{
 						// Extended commands
-						#if MPT_COMPILER_MSVC
-						#pragma warning(push)
-						#pragma warning(disable:6385) // false-positive: Reading invalid data from 'effTrans':  the readable size is '29' bytes, but '48' bytes may be read.
-						#endif // MPT_COMPILER_MSVC
-							m.command = effTrans[effect - 0x10];
-						#if MPT_COMPILER_MSVC
-						#pragma warning(pop)
-						#endif // MPT_COMPILER_MSVC
+						m.command = effTrans[effect - 0x10];
 
 						// Post-fix some commands
 						switch(effect)
