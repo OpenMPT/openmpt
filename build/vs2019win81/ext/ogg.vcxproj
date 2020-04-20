@@ -291,7 +291,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd6001 /wd6011  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -323,7 +323,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd6001 /wd6011  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -355,7 +355,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd6001 /wd6011  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -386,7 +386,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd6001 /wd6011  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -421,7 +421,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd6001 /wd6011  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -456,7 +456,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd6001 /wd6011  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -490,7 +490,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd6001 /wd6011  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -523,7 +523,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd6001 /wd6011  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -556,7 +556,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd6001 /wd6011  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -588,7 +588,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd6001 /wd6011  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -624,7 +624,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd6001 /wd6011  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -660,7 +660,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd6001 /wd6011  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>

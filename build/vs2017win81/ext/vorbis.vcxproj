@@ -279,7 +279,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -311,7 +311,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -343,7 +343,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -374,7 +374,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -409,7 +409,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -444,7 +444,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -478,7 +478,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -511,7 +511,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -544,7 +544,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -576,7 +576,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -612,7 +612,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -648,7 +648,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;%(PreprocessorDefinitions)</PreprocessorDefinitions>

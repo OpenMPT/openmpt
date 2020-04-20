@@ -291,7 +291,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -324,7 +324,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -357,7 +357,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -389,7 +389,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -425,7 +425,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -461,7 +461,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -496,7 +496,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -529,7 +529,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -562,7 +562,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -594,7 +594,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -630,7 +630,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -666,7 +666,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
     <ClCompile>
-      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++17 /wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_WIN32_WINNT=0x0603;DYNAMIC_BUILD;OPT_GENERIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>

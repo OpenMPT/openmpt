@@ -19,3 +19,4 @@
   configuration "DebugShared or ReleaseShared"
    files { "../../include/ogg/win32/ogg.def" }
   configuration {}
+    buildoptions { "/wd6001", "/wd6011" } -- /analyze

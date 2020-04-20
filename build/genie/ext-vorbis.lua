@@ -93,6 +93,7 @@
    "../../include/vorbis/lib/modes/setup_X.h",
   }
     buildoptions { "/wd4101", "/wd4244", "/wd4267", "/wd4305" }
+    buildoptions { "/wd6001", "/wd6011", "/wd6255", "/wd6262", "/wd6263", "/wd6297", "/wd6308", "/wd6385", "/wd6386", "/wd6387", "/wd28182" } -- /analyze
   links { "ogg" }
   configuration "DebugShared or ReleaseShared"
    files { "../../build/genie/def/ext-vorbis.def" }

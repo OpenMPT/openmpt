@@ -45,3 +45,4 @@
    defines { "ZLIB_DLL" }
   configuration {}
     buildoptions { "/wd4267" }
+    buildoptions { "/wd6297", "/wd6385" } -- /analyze
