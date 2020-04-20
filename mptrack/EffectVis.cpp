@@ -666,7 +666,7 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 	}
 
 	status.Format(_T("Pat: %d\tChn: %d\tRow: %d\tVal: %02X (%03d) [%s]"),
-				m_nPattern, m_nChan+1, row, paramValue, paramValue, effectName.GetString());
+				m_nPattern, m_nChan+1, row, static_cast<signed int>(paramValue), paramValue, effectName.GetString());
 	m_edVisStatus.SetWindowText(status);
 }
 

@@ -184,7 +184,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 		switch(macroType)
 		{
 		case kSFxPlugParam:
-			s.Format(_T("Control Plugin Param %u"), m_MidiCfg.MacroToPlugParam(m));
+			s.Format(_T("Control Plugin Param %u"), static_cast<unsigned int>(m_MidiCfg.MacroToPlugParam(m)));
 			break;
 
 		default:
