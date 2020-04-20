@@ -36,9 +36,12 @@ CXXFLAGS_WARNINGS += -Wsuggest-override -Wno-psabi
 
 ifeq ($(MODERN),1)
 LDFLAGS  += -fuse-ld=gold
-CXXFLAGS_WARNINGS += -Wpedantic -Wlogical-op -Wdouble-promotion -Wframe-larger-than=16000
-CFLAGS_WARNINGS   += -Wpedantic -Wlogical-op -Wdouble-promotion -Wframe-larger-than=4000
+CXXFLAGS_WARNINGS += -Wpedantic -Wlogical-op -Wframe-larger-than=16000
+CFLAGS_WARNINGS   += -Wpedantic -Wlogical-op -Wframe-larger-than=4000
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
+# re-renable after 1.29 branch
+#CXXFLAGS_WARNINGS += -Wdouble-promotion
+#CFLAGS_WARNINGS   += -Wdouble-promotion
 endif
 
 CFLAGS_SILENT += -Wno-cast-qual

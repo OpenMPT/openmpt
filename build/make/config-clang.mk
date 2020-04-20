@@ -47,9 +47,12 @@ CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wnon-virtual-dtor -Wreserved-id-
 
 ifeq ($(MODERN),1)
 LDFLAGS  += -fuse-ld=lld
-CXXFLAGS_WARNINGS += -Wpedantic -Wdouble-promotion -Wframe-larger-than=16000
-CFLAGS_WARNINGS   += -Wpedantic -Wdouble-promotion -Wframe-larger-than=4000
+CXXFLAGS_WARNINGS += -Wpedantic -Wframe-larger-than=16000
+CFLAGS_WARNINGS   += -Wpedantic -Wframe-larger-than=4000
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
+# re-renable after 1.29 branch
+#CXXFLAGS_WARNINGS += -Wdouble-promotion
+#CFLAGS_WARNINGS   += -Wdouble-promotion
 endif
 
 CFLAGS_SILENT += -Wno-cast-align
