@@ -102,10 +102,10 @@ CString IMixPlugin::GetFormattedParamName(PlugParamIndex param)
 	CString name;
 	if(paramName.IsEmpty())
 	{
-		name.Format(_T("%02u: Parameter %02u"), param, param);
+		name = mpt::cformat(_T("%1: Parameter %2"))(mpt::cfmt::dec0<2>(param), mpt::cfmt::dec0<2>(param));
 	} else
 	{
-		name.Format(_T("%02u: %s"), param, paramName.GetString());
+		name = mpt::cformat(_T("%1: %2"))(mpt::cfmt::dec0<2>(param), paramName);
 	}
 	return name;
 }
