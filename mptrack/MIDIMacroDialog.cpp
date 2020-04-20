@@ -371,7 +371,7 @@ void CMidiMacroSetup::OnPlugChanged()
 #ifndef NO_PLUGINS
 	DWORD_PTR plug = m_CbnMacroPlug.GetItemData(m_CbnMacroPlug.GetCurSel());
 
-	if(plug > MAX_MIXPLUGINS)
+	if(plug >= MAX_MIXPLUGINS)
 		return;
 
 	IMixPlugin *pVstPlugin = m_SndFile.m_MixPlugins[plug].pMixPlugin;
