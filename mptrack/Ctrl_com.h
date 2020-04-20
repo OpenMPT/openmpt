@@ -15,31 +15,28 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-class CCtrlComments: public CModControlDlg
+class CCtrlComments final : public CModControlDlg
 {
 protected:
-	int charWidth;
-	bool m_Reformatting;
-	UINT m_nLockCount;
+	CEdit m_EditComments;
+	int charWidth = 0;
+	bool m_Reformatting = false;
 
 public:
 	CCtrlComments(CModControlView &parent, CModDoc &document);
-	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glCommentsWindowHeight;} 	//rewbs.varWindowSize
 
-public:
-	//{{AFX_DATA(CCtrlComments)
-	CEdit m_EditComments;
-	//}}AFX_DATA
 	//{{AFX_VIRTUAL(CCtrlComments)
-	virtual BOOL OnInitDialog();
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-	virtual void RecalcLayout();
-	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
-	virtual CRuntimeClass *GetAssociatedViewClass();
-	virtual void OnActivatePage(LPARAM);
-	virtual void OnDeactivatePage();
-	virtual BOOL PreTranslateMessage(MSG *pMsg);
+	Setting<LONG> &GetSplitPosRef() override { return TrackerSettings::Instance().glCommentsWindowHeight; }
+	BOOL OnInitDialog() override;
+	void DoDataExchange(CDataExchange *pDX) override;  // DDX/DDV support
+	void RecalcLayout() override;
+	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
+	CRuntimeClass *GetAssociatedViewClass() override;
+	void OnActivatePage(LPARAM) override;
+	void OnDeactivatePage() override;
+	BOOL PreTranslateMessage(MSG *pMsg) override;
 	//}}AFX_VIRTUAL
+
 protected:
 	//{{AFX_MSG(CCtrlComments)
 	afx_msg void OnCommentsUpdated();

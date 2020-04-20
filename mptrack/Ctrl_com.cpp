@@ -49,9 +49,6 @@ void CCtrlComments::DoDataExchange(CDataExchange* pDX)
 
 CCtrlComments::CCtrlComments(CModControlView &parent, CModDoc &document) : CModControlDlg(parent, document)
 {
-	m_nLockCount = 0;
-	m_Reformatting = false;
-	charWidth = 0;
 }
 
 
