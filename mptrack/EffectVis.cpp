@@ -178,24 +178,24 @@ int CEffectVis::RowToScreenY(ROWINDEX row) const
 
 int CEffectVis::FXParamToScreenY(uint16 param) const
 {
-	if ((param >= 0x00) || (param <= 0xFF))
+	if(param >= 0x00 && param <= 0xFF)
 		return mpt::saturate_round<int>(m_rcDraw.bottom - param * m_pixelsPerFXParam);
 	return -1;
 }
 
 int CEffectVis::PCParamToScreenY(uint16 param) const
 {
-	if ((param >= 0x00) || (param <= ModCommand::maxColumnValue))
+	if(param >= 0x00 && param <= ModCommand::maxColumnValue)
 		return mpt::saturate_round<int>(m_rcDraw.bottom - param*m_pixelsPerPCParam);
 	return -1;
 }
 
 ModCommand::PARAM CEffectVis::ScreenYToFXParam(int y) const
 {
-	if (y <= FXParamToScreenY(0xFF))
+	if(y <= FXParamToScreenY(0xFF))
 		return 0xFF;
 
-	if (y >= FXParamToScreenY(0x00))
+	if(y >= FXParamToScreenY(0x00))
 		return 0x00;
 
 	return mpt::saturate_round<ModCommand::PARAM>((m_rcDraw.bottom - y) / m_pixelsPerFXParam);
@@ -203,10 +203,10 @@ ModCommand::PARAM CEffectVis::ScreenYToFXParam(int y) const
 
 uint16 CEffectVis::ScreenYToPCParam(int y) const
 {
-	if (y <= PCParamToScreenY(ModCommand::maxColumnValue))
+	if(y <= PCParamToScreenY(ModCommand::maxColumnValue))
 		return ModCommand::maxColumnValue;
 
-	if (y >= PCParamToScreenY(0x00))
+	if(y >= PCParamToScreenY(0x00))
 		return 0x00;
 
 	return mpt::saturate_round<uint16>((m_rcDraw.bottom - y) / m_pixelsPerPCParam);
@@ -214,10 +214,10 @@ uint16 CEffectVis::ScreenYToPCParam(int y) const
 
 ROWINDEX CEffectVis::ScreenXToRow(int x) const
 {
-	if (x <= RowToScreenX(m_startRow))
+	if(x <= RowToScreenX(m_startRow))
 		return m_startRow;
 
-	if (x >= RowToScreenX(m_endRow))
+	if(x >= RowToScreenX(m_endRow))
 		return m_endRow;
 
 	return mpt::saturate_round<ROWINDEX>(m_startRow + (x - m_innerBorder) / m_pixelsPerRow);
