@@ -28,7 +28,7 @@ struct SNDMIXPLUGIN;
 struct VSTPluginLib;
 
 
-class CVstPlugin: public IMidiPlugin
+class CVstPlugin final : public IMidiPlugin
 {
 protected:
 	HMODULE m_hLibrary;

@@ -43,7 +43,7 @@ public:
 };
 
 
-class MidiInOut : public IMidiPlugin
+class MidiInOut final : public IMidiPlugin
 {
 	friend class MidiInOutEditor;
 
