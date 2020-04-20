@@ -922,8 +922,17 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 		// Problem: if a note dies out naturally and we never send a note off, this counter
 		// will block at max until note off. Is this a problem?
 		// Safe to assume we won't need more than 16 note offs max on a given note?
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:6385) // false-positive: Reading invalid data from 'channel.noteOnMap': the readable size is '32768' bytes, but 'note' bytes may be read.
+#endif // MPT_COMPILER_MSVC
 		if(channel.noteOnMap[note][trackChannel] < uint8_max)
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
+		{
 			channel.noteOnMap[note][trackChannel]++;
+		}
 
 		MidiSend(MIDIEvents::NoteOn(midiCh, static_cast<uint8>(note), volume));
 	}
