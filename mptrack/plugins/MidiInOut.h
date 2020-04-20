@@ -84,6 +84,9 @@ protected:
 			std::memcpy(m_message, data, size);
 		}
 
+		Message(const Message &) = delete;
+		Message & operator=(const Message &) = delete;
+
 		Message(double time, unsigned char msg) noexcept : Message(time, &msg, 1) { }
 
 		Message(Message &&other) noexcept
