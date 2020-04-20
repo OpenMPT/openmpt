@@ -56,6 +56,7 @@ enum EDSPFilterPhaseResponse
 
 class CDSPFIRFilter : public R8B_BASECLASS
 {
+	// cppcheck-suppress uninitMemberVarPrivate
 	R8BNOCTOR( CDSPFIRFilter );
 
 	friend class CDSPFIRFilterCache;
@@ -212,6 +213,7 @@ private:
 		///< Memory-aligned.
 		///<
 
+	// cppcheck-suppress uninitMemberVarPrivate
 	CDSPFIRFilter()
 		: RefCount( 1 )
 	{
