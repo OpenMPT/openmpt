@@ -209,6 +209,9 @@ public:
 
 	}
 
+	CPeriodicWaker(const CPeriodicWaker &) = delete;
+	CPeriodicWaker & operator=(const CPeriodicWaker &) = delete;
+
 	long GetSleepMilliseconds() const
 	{
 		return sleepMilliseconds;

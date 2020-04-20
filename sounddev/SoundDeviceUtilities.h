@@ -79,6 +79,8 @@ private:
 	bool IsActive();
 public:
 	CAudioThread(CSoundDeviceWithThread &SoundDevice);
+	CAudioThread(const CAudioThread &) = delete;
+	CAudioThread& operator=(const CAudioThread &) = delete;
 	~CAudioThread();
 	void Activate();
 	void Deactivate();
