@@ -53,7 +53,8 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9C5101EF-3E20-4558-809B-277FDD50E878}</ProjectGuid>
     <RootNamespace>libopenmpt</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.10240.0</WindowsTargetPlatformMinVersion>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

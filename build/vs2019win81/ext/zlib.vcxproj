@@ -53,7 +53,8 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1654FB18-FDE6-406F-9D84-BA12BFBD67B2}</ProjectGuid>
     <RootNamespace>zlib</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.10240.0</WindowsTargetPlatformMinVersion>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
