@@ -57,9 +57,8 @@
 			solutionVersion = "12",
 			targetFramework = "4.7.2",
 			toolsVersion    = "16.0",
-			windowsTargetPlatformVersion = "8.1",
+			windowsTargetPlatformVersion = "10.0",
 			supports64bitEditContinue    = true,
-			--intDirAbsolute  = true, --OpenMPT
 			intDirAbsolute  = false,
 		}
 	}

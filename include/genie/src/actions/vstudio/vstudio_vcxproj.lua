@@ -303,8 +303,15 @@
 				defines = defines:gsub('"', '\\"')
 			end
 
-			_p(indent,'<PreprocessorDefinitions>%s;%%(PreprocessorDefinitions)</PreprocessorDefinitions>'
-				,premake.esc(defines))
+			-- do not add `%(PreprocessorDefinitions)` if it's already part of defines
+			local isPreprocessorDefinitionPresent = string.find(defines, "%%%(PreprocessorDefinitions%)")
+			if isPreprocessorDefinitionPresent then
+				_p(indent,'<PreprocessorDefinitions>%s</PreprocessorDefinitions>'
+					,premake.esc(defines))
+			else
+				_p(indent,'<PreprocessorDefinitions>%s;%%(PreprocessorDefinitions)</PreprocessorDefinitions>'
+					,premake.esc(defines))
+			end
 		else
 			_p(indent,'<PreprocessorDefinitions></PreprocessorDefinitions>')
 		end
@@ -926,6 +933,10 @@
 
 		if cfg.flags.Hotpatchable then
 			_p(3, '<CreateHotPatchableImage>Enabled</CreateHotPatchableImage>')
+		end
+
+		if cfg.flags.GenerateMapFiles then
+			_p(3, '<GenerateMapFile>true</GenerateMapFile>')
 		end
 
 		_p(2,'</Link>')
