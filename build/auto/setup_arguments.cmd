@@ -16,8 +16,8 @@ if "%MPT_PKG_FORMAT%" == "" goto setupargumentserror
 goto setupargumentsstart
 
 :setupargumentserror
-echo "Usage: foo.cmd vs2010 xp Win32 Release 7z default"
-rem vs2010     xp            Win32       Release     x86-32       winxp          release      static
+echo "Usage: foo.cmd vs2019 xp Win32 Release 7z default"
+rem vs2019     xp            Win32       Release     x86-32       winxp          release      static
 rem MPT_VS_VER MPT_VS_TARGET MPT_VS_ARCH MPT_VS_CONF MPT_BIN_ARCH MPT_BIN_TARGET MPT_BIN_CONF MPT_BIN_RUNTIME
 exit 1
 

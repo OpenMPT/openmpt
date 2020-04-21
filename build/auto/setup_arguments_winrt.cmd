@@ -16,7 +16,7 @@ if "%MPT_PKG_FORMAT%" == "" goto setupargumentserror
 goto setupargumentsstart
 
 :setupargumentserror
-echo "Usage: foo.cmd vs2015 winstore82 Win32 Release 7z default"
+echo "Usage: foo.cmd vs2019 winstore82 Win32 Release 7z default"
 exit 1
 
 :setupargumentsstart
