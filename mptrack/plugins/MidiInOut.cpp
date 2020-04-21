@@ -50,7 +50,7 @@ MidiInOut::MidiInOut(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 
 MidiInOut::~MidiInOut()
 {
-	Suspend();
+	MidiInOut::Suspend();
 }
 
 

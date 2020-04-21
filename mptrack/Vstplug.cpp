@@ -943,7 +943,7 @@ CVstPlugin::~CVstPlugin()
 		Dispatch(effConnectOutput, 0, 0, nullptr, 0);
 		if (m_Effect.numOutputs > 1) Dispatch(effConnectOutput, 1, 0, nullptr, 0);
 	}
-	Suspend();
+	CVstPlugin::Suspend();
 	m_isInitialized = false;
 
 	Dispatch(effClose, 0, 0, nullptr, 0);
