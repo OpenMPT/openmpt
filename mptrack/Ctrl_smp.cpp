@@ -46,9 +46,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-constexpr int PowerOf2Exponent(int val) { return (val <= 1) ? 0 : 1 + PowerOf2Exponent(val / 2); };
-
-
 #define	BASENOTE_MIN	(1*12)		// C-1
 #define	BASENOTE_MAX	(10*12+11)	// B-10
 
@@ -322,7 +319,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	if(combo)
 	{
 		// Deduce exponent from equation : MAX_FRAME_LENGTH = 2^exponent
-		const int exponent = PowerOf2Exponent(MAX_FRAME_LENGTH);
+		constexpr int exponent = mpt::log2p1(uint32(MAX_FRAME_LENGTH)) - 1;
 		// Allow FFT size from 2^8 (256) to 2^exponent (MAX_FRAME_LENGTH)
 		CString str;
 		for(int i = 8 ; i <= exponent ; i++)
@@ -3568,6 +3565,7 @@ void CCtrlSamples::OnAutotune()
 				sample.nC5Speed = mpt::saturate_round<uint32>(dlg.GetPitchReference() * (8363.0 / 440.0) * std::pow(2.0, dlg.GetTargetNote() / 12.0));
 			else
 				at.Apply(static_cast<double>(dlg.GetPitchReference()), dlg.GetTargetNote());
+			OnFineTuneChangedDone();
 			SetModified(SampleHint().Info(), true, false);
 			EndWaitCursor();
 		}
@@ -3588,8 +3586,11 @@ void CCtrlSamples::OnKeepSampleOnDisk()
 	const bool enable = IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED;
 	for(SAMPLEINDEX i = first; i <= last; i++)
 	{
-		m_sndFile.GetSample(i).uFlags.set(SMP_KEEPONDISK, enable && m_sndFile.SampleHasPath(i));
-		m_modDoc.UpdateAllViews(nullptr, SampleHint(i).Info().Names(), this);
+		if(bool newState = enable && m_sndFile.SampleHasPath(i); newState != m_sndFile.GetSample(i).uFlags[SMP_KEEPONDISK])
+		{
+			m_sndFile.GetSample(i).uFlags.set(SMP_KEEPONDISK, newState);
+			m_modDoc.UpdateAllViews(nullptr, SampleHint(i).Info().Names(), this);
+		}
 	}
 	m_modDoc.SetModified();
 }
