@@ -73,30 +73,22 @@ BOOL COptionsAdvanced::OnInitDialog()
 
 	if(m_listGrouped)
 	{
-#ifdef MPT_MFC_FULL
-		const CMFCListCtrlEx::Header headers[] =
-#else // !MPT_MFC_FULL
-		const CListCtrlEx::Header headers[] =
-#endif // MPT_MFC_FULL
+		static constexpr ListCtrl::Header headers[] =
 		{
 			{ _T("Setting"), 150, LVCFMT_LEFT },
-			{ _T("Type"),    40, LVCFMT_LEFT },
+			{ _T("Type"),    40,  LVCFMT_LEFT },
 			{ _T("Value"),   140, LVCFMT_LEFT },
-			{ _T("Default"), 62, LVCFMT_LEFT },
+			{ _T("Default"), 62,  LVCFMT_LEFT },
 		};
 		m_List.SetHeaders(headers);
 	} else
 	{
-#ifdef MPT_MFC_FULL
-		const CMFCListCtrlEx::Header headers[] =
-#else // !MPT_MFC_FULL
-		const CListCtrlEx::Header headers[] =
-#endif // MPT_MFC_FULL
+		static constexpr ListCtrl::Header headers[] =
 		{
 			{ _T("Setting"), 200, LVCFMT_LEFT },
-			{ _T("Type"),    40, LVCFMT_LEFT },
+			{ _T("Type"),    40,  LVCFMT_LEFT },
 			{ _T("Value"),   100, LVCFMT_LEFT },
-			{ _T("Default"), 52, LVCFMT_LEFT },
+			{ _T("Default"), 52,  LVCFMT_LEFT },
 		};
 		m_List.SetHeaders(headers);
 	}

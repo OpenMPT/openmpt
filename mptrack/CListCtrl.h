@@ -21,16 +21,18 @@ class CListCtrlEx : public CListCtrl
 public:
 	struct Header
 	{
-		const TCHAR *text;
-		int width;
-		UINT mask;
+		const TCHAR *text = nullptr;
+		int width = 0;
+		UINT mask = 0;
 	};
-	template<int numItems>
-	void SetHeaders(const Header (&header)[numItems])
+	void SetHeaders(const mpt::span<const Header> &header)
 	{
-		for(int i = 0; i < numItems; i++)
+		for(int i = 0; i < static_cast<int>(header.size()); i++)
 		{
-			InsertColumn(i, header[i].text, header[i].mask, Util::ScalePixels(header[i].width, m_hWnd));
+			int width = header[i].width;
+			InsertColumn(i, header[i].text, header[i].mask, width >= 0 ? Util::ScalePixels(width, m_hWnd) : 16);
+			if(width < 0)
+				SetColumnWidth(i, width);
 		}
 	}
 
@@ -68,14 +70,13 @@ class CMFCListCtrlEx : public CMFCListCtrl
 public:
 	struct Header
 	{
-		const TCHAR *text;
-		int width;
-		UINT mask;
+		const TCHAR *text = nullptr;
+		int width = 0;
+		UINT mask = 0;
 	};
-	template<size_t numItems>
-	void SetHeaders(const Header (&header)[numItems])
+	void SetHeaders(const mpt::span<const Header> &header)
 	{
-		for(int i = 0; i < numItems; i++)
+		for(int i = 0; i < static_cast<int>(header.size()); i++)
 		{
 			InsertColumn(i, header[i].text, header[i].mask, Util::ScalePixels(header[i].width, m_hWnd));
 		}

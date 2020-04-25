@@ -39,12 +39,14 @@ public:
 
 class COptionsAdvanced: public CPropertyPage
 {
-protected:
 #ifdef MPT_MFC_FULL
-	CAdvancedSettingsList m_List;
-#else // MPT_MFC_FULL
-	CListCtrlEx m_List;
-#endif // !MPT_MFC_FULL
+	using ListCtrl = CAdvancedSettingsList;
+#else   // MPT_MFC_FULL
+	using ListCtrl = CListCtrlEx;
+#endif  // !MPT_MFC_FULL
+
+protected:
+	ListCtrl m_List;
 #if MPT_USTRING_MODE_WIDE
 	using GroupMap = std::unordered_map<mpt::ustring, int>;
 #else
