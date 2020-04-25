@@ -14,7 +14,6 @@
 
 #ifndef NO_PLUGINS
 
-#include <vector>
 #include "MIDIMapping.h"
 #include "CListCtrl.h"
 
