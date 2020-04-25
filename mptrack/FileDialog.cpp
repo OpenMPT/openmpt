@@ -123,6 +123,10 @@ bool FileDialog::Show(CWnd *parent)
 	{
 		dlg.AddPlace(place->GetDefaultDir());
 	}
+	for(const auto &place : m_places)
+	{
+		dlg.AddPlace(place);
+	}
 #endif
 
 	// Do it!

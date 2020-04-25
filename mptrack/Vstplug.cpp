@@ -698,7 +698,8 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 				dlg = OpenFileDialog().AllowMultiSelect();
 			}
 			dlg.ExtensionFilter(extensions)
-				.WorkingDirectory(mpt::PathString::FromLocale(workingDir));
+				.WorkingDirectory(mpt::PathString::FromLocale(workingDir))
+				.AddPlace(GetPluginFactory().dllPath.GetPath());
 			if(!dlg.Show(GetEditor()))
 				return 0;
 

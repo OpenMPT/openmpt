@@ -30,6 +30,7 @@ protected:
 	mpt::RawPathString m_workingDirectory;
 	mpt::RawPathString m_extension;
 	PathList m_filenames;
+	PathList m_places;
 	int *m_filterIndex = nullptr;
 	bool m_load;
 	bool m_multiSelect = false;
@@ -54,6 +55,8 @@ public:
 	FileDialog &FilterIndex(int *index) { m_filterIndex = index; return *this; }
 	// Enable preview of instrument files (if globally enabled).
 	FileDialog &EnableAudioPreview() { m_preview = true; return *this; }
+	// Add a directory to the application-specific quick-access directories in the file dialog
+	FileDialog &AddPlace(mpt::PathString path) { m_places.push_back(std::move(path)); return *this; }
 
 	// Show the file selection dialog.
 	bool Show(CWnd *parent = nullptr);
@@ -62,12 +65,9 @@ public:
 	mpt::PathString GetFirstFile() const
 	{
 		if(!m_filenames.empty())
-		{
 			return m_filenames.front();
-		} else
-		{
-			return mpt::PathString();
-		}
+		else
+			return {};
 	}
 	// Gets a reference to all selected filenames.
 	const PathList &GetFilenames() const { return m_filenames; }
