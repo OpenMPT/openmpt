@@ -603,27 +603,19 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	FlagSet<TrackerVersions> madeWith(verUnknown);
 	mpt::ustring madeWithTracker;
 
-	if(!memcmp(fileHeader.trackerName, "FastTracker ", 12))
+	if(!memcmp(fileHeader.trackerName, "FastTracker v2.00   ", 20) && fileHeader.size == 276)
 	{
-		if(fileHeader.size == 276 && !memcmp(fileHeader.trackerName + 12, "v2.00   ", 8))
-		{
-			if(fileHeader.version < 0x0104)
-				madeWith = verFT2Generic | verConfirmed;
-			else if(memchr(fileHeader.songName, '\0', 20) != nullptr)
-				// FT2 pads the song title with spaces, some other trackers use null chars
-				madeWith = verFT2Clone | verNewModPlug | verEmptyOrders;
-			else
-				madeWith = verFT2Generic | verNewModPlug;
-		} else if(!memcmp(fileHeader.trackerName + 12, "v 2.00  ", 8))
-		{
-			// MPT 1.0 (exact version to be determined later)
-			madeWith = verOldModPlug;
-		} else
-		{
-			// ???
-			madeWith.set(verConfirmed);
-			madeWithTracker = U_("FastTracker Clone");
-		}
+		if(fileHeader.version < 0x0104)
+			madeWith = verFT2Generic | verConfirmed;
+		else if(memchr(fileHeader.songName, '\0', 20) != nullptr)
+			// FT2 pads the song title with spaces, some other trackers use null chars
+			madeWith = verFT2Clone | verNewModPlug | verEmptyOrders;
+		else
+			madeWith = verFT2Generic | verNewModPlug;
+	} else if(!memcmp(fileHeader.trackerName, "FastTracker v 2.00  ", 20))
+	{
+		// MPT 1.0 (exact version to be determined later)
+		madeWith = verOldModPlug;
 	} else
 	{
 		// Something else!
