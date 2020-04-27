@@ -257,10 +257,10 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 		// A packed size of 0 indicates a completely empty pattern.
 		const uint16 packedSize = file.ReadUint16LE();
 
-		if(numRows == 0 || numRows > MAX_PATTERN_ROWS)
-		{
+		if(numRows == 0)
 			numRows = 64;
-		}
+		else if(numRows > MAX_PATTERN_ROWS)
+			numRows = MAX_PATTERN_ROWS;
 
 		file.Seek(curPos + headerSize);
 		FileReader patternChunk = file.ReadChunk(packedSize);
