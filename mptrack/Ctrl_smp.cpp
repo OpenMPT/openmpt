@@ -3470,11 +3470,18 @@ void CCtrlSamples::OnXFade()
 		return;
 	}
 	if((sample.nLoopEnd <= sample.nLoopStart || sample.nLoopEnd > sample.nLength)
-		&& (sample.nSustainEnd <= sample.nSustainStart|| sample.nSustainEnd > sample.nLength))
+		&& (sample.nSustainEnd <= sample.nSustainStart || sample.nSustainEnd > sample.nLength))
 	{
-		Reporting::Error("Crossfade requires a sample loop to work.", this);
-		SwitchToView();
-		return;
+		const auto selection = GetSelectionPoints();
+		if(selection.nStart > 0 && selection.nEnd > selection.nStart)
+		{
+			sample.SetLoop(selection.nStart, selection.nEnd, true, false, m_sndFile);
+		} else
+		{
+			Reporting::Error("Crossfade requires a sample loop to work.", this);
+			SwitchToView();
+			return;
+		}
 	}
 	if(sample.nLoopStart == 0 && sample.nSustainStart == 0)
 	{
