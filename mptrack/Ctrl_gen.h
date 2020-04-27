@@ -19,50 +19,41 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace Util { class MultimediaClock; }
 
-class CVuMeter: public CWnd
+class CVuMeter final : public CWnd
 {
 protected:
-	LONG m_nDisplayedVu, m_nVuMeter;
-	DWORD lastVuUpdateTime;
+	int m_lastDisplayedLevel = -1, m_lastLevel = 0;
+	DWORD m_lastVuUpdateTime;
 
 public:
-	CVuMeter() { m_nDisplayedVu = -1; lastVuUpdateTime = timeGetTime(); m_nVuMeter = 0; }
-	void SetVuMeter(LONG lVuMeter, bool force=false);
+	CVuMeter() { m_lastVuUpdateTime = timeGetTime(); }
+	void SetVuMeter(int level, bool force = false);
 
 protected:
-	void DrawVuMeter(CDC &dc, bool redraw=false);
+	void DrawVuMeter(CDC &dc, bool redraw = false);
 
 protected:
 	afx_msg void OnPaint();
 	DECLARE_MESSAGE_MAP();
 };
 
-enum
-{
-	MAX_SLIDER_GLOBAL_VOL=256,
-	MAX_SLIDER_VSTI_VOL=255,
-	MAX_SLIDER_SAMPLE_VOL=255
-};
 
-
-class CCtrlGeneral: public CModControlDlg
+class CCtrlGeneral final : public CModControlDlg
 {
 public:
 	CCtrlGeneral(CModControlView &parent, CModDoc &document);
-	Setting<LONG> &GetSplitPosRef() {return TrackerSettings::Instance().glGeneralWindowHeight;} 	//rewbs.varWindowSize
+	Setting<LONG> &GetSplitPosRef() override { return TrackerSettings::Instance().glGeneralWindowHeight; }
 
 private:
 
 	// Determine how the global volume slider should be scaled to actual global volume.
 	// Display range for XM / S3M should be 0...64, for other formats it's 0...256.
-	UINT GetGlobalVolumeFactor()
+	uint32 GetGlobalVolumeFactor() const
 	{
-		return (m_sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_S3M)) ? UINT(MAX_SLIDER_GLOBAL_VOL / 64) : UINT(MAX_SLIDER_GLOBAL_VOL / 128);
+		return (m_sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_S3M)) ? uint32(MAX_SLIDER_GLOBAL_VOL / 64) : uint32(MAX_SLIDER_GLOBAL_VOL / 128);
 	}
 
 public:
-	bool m_bEditsLocked;
-	//{{AFX_DATA(CCtrlGeneral)
 	CEdit m_EditTitle, m_EditArtist;
 	CEdit m_EditSpeed, m_EditGlobalVol, m_EditRestartPos,
 		  m_EditSamplePA, m_EditVSTiVol;
@@ -75,20 +66,34 @@ public:
 	CSliderCtrl m_SliderTempo, m_SliderSamplePreAmp, m_SliderGlobalVol, m_SliderVSTiVol;
 	CVuMeter m_VuMeterLeft, m_VuMeterRight;
 	std::unique_ptr<Util::MultimediaClock> m_tapTimer;
+	bool m_editsLocked = false;
 
-	TEMPO tempoMin, tempoMax;
-	//}}AFX_DATA
+	TEMPO m_tempoMin, m_tempoMax;
+
 	//{{AFX_VIRTUAL(CCtrlGeneral)
-	virtual BOOL OnInitDialog();
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
-	virtual void RecalcLayout();
-	virtual void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
-	virtual CRuntimeClass *GetAssociatedViewClass();
-	virtual void OnActivatePage(LPARAM);
-	virtual void OnDeactivatePage();
-	virtual BOOL GetToolTipText(UINT uId, LPTSTR pszText);
+	BOOL OnInitDialog() override;
+	void DoDataExchange(CDataExchange *pDX) override;  // DDX/DDV support
+	void RecalcLayout() override;
+	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
+	CRuntimeClass *GetAssociatedViewClass() override;
+	void OnActivatePage(LPARAM) override;
+	void OnDeactivatePage() override;
+	BOOL GetToolTipText(UINT uId, LPTSTR pszText) override;
 	//}}AFX_VIRTUAL
+
 protected:
+	static constexpr int MAX_SLIDER_GLOBAL_VOL = 256;
+	static constexpr int MAX_SLIDER_VSTI_VOL = 255;
+	static constexpr int MAX_SLIDER_SAMPLE_VOL = 255;
+
+	// At this point, the tempo slider moves in more coarse steps to provide detailed values in the regions where it matters
+	static constexpr auto TEMPO_SPLIT_THRESHOLD = TEMPO(256, 0);
+	static constexpr int TEMPO_SPLIT_PRECISION = 3;
+
+	TEMPO TempoSliderRange() const;
+	TEMPO SliderToTempo(int value) const;
+	int TempoToSlider(TEMPO tempo) const;
+
 	//{{AFX_MSG(CCtrlGeneral)
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM);
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);

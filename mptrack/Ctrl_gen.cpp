@@ -65,7 +65,6 @@ void CCtrlGeneral::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_RESTARTPOS,	m_EditRestartPos);
 	DDX_Control(pDX, IDC_SPIN_RESTARTPOS,	m_SpinRestartPos);
 
-
 	DDX_Control(pDX, IDC_SLIDER_SONGTEMPO,	m_SliderTempo);
 	DDX_Control(pDX, IDC_SLIDER_VSTIVOL,	m_SliderVSTiVol);
 	DDX_Control(pDX, IDC_SLIDER_GLOBALVOL,	m_SliderGlobalVol);
@@ -87,7 +86,7 @@ CCtrlGeneral::CCtrlGeneral(CModControlView &parent, CModDoc &document) : CModCon
 
 BOOL CCtrlGeneral::OnInitDialog()
 {
-	const CModSpecifications specs = m_sndFile.GetModSpecifications();
+	const auto &specs = m_sndFile.GetModSpecifications();
 	CModControlDlg::OnInitDialog();
 	// Song Title
 	m_EditTitle.SetLimitText(specs.modNameLengthMax);
@@ -107,7 +106,7 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_EditTempo.SubclassDlgItem(IDC_EDIT_TEMPO, this);
 	m_EditTempo.AllowNegative(false);
 	
-	m_bEditsLocked = false;
+	m_editsLocked = false;
 	UpdateView(GeneralHint().ModType());
 	OnActivatePage(0);
 	m_bInitialized = TRUE;
@@ -145,6 +144,41 @@ void CCtrlGeneral::OnDeactivatePage()
 	m_VuMeterLeft.SetVuMeter(0, true);
 	m_VuMeterRight.SetVuMeter(0, true);
 	m_tapTimer = nullptr;  // Reset high-precision clock if required
+}
+
+
+TEMPO CCtrlGeneral::TempoSliderRange() const
+{
+	return (TEMPO_SPLIT_THRESHOLD - m_tempoMin) + TEMPO((m_tempoMax - TEMPO_SPLIT_THRESHOLD).GetInt() / TEMPO_SPLIT_PRECISION, 0);
+}
+
+
+TEMPO CCtrlGeneral::SliderToTempo(int value) const
+{
+	if(m_tempoMax < TEMPO_SPLIT_THRESHOLD)
+	{
+		return m_tempoMax - TEMPO(value, 0);
+	} else
+	{
+		auto tempo = TempoSliderRange() - TEMPO(value, 0) + m_tempoMin;
+		if(tempo >= TEMPO_SPLIT_THRESHOLD)
+			tempo = TEMPO((tempo - TEMPO_SPLIT_THRESHOLD).GetInt() * TEMPO_SPLIT_PRECISION, 0) + TEMPO_SPLIT_THRESHOLD;
+		return tempo;
+	}
+}
+
+
+int CCtrlGeneral::TempoToSlider(TEMPO tempo) const
+{
+	if(m_tempoMax < TEMPO_SPLIT_THRESHOLD)
+	{
+		return (m_tempoMax - tempo).GetInt();
+	} else
+	{
+		if(tempo >= TEMPO_SPLIT_THRESHOLD)
+			tempo = TEMPO((tempo - TEMPO_SPLIT_THRESHOLD).GetInt() / TEMPO_SPLIT_PRECISION + TEMPO_SPLIT_THRESHOLD.GetInt(), 0);
+		return (TempoSliderRange() - tempo).GetInt();
+	}
 }
 
 
@@ -195,7 +229,7 @@ void CCtrlGeneral::OnTapTempo()
 	if(!m_sndFile.GetModSpecifications().hasFractionalTempo)
 		newTempo = std::round(newTempo);
 	TEMPO t(newTempo);
-	Limit(t, tempoMin, tempoMax);
+	Limit(t, m_tempoMin, m_tempoMax);
 	m_EditTempo.SetTempoValue(t);
 }
 
@@ -227,7 +261,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 
 	if(updateAll)
 	{
-		CModSpecifications specs = m_sndFile.GetModSpecifications();
+		const auto &specs = m_sndFile.GetModSpecifications();
 
 		// S3M HACK: ST3 will ignore speed 255, even though it can be used with Axx.
 		if(m_sndFile.GetType() == MOD_TYPE_S3M)
@@ -235,13 +269,17 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		else
 			m_SpinSpeed.SetRange32(specs.speedMin, specs.speedMax);
 
-		tempoMin = specs.GetTempoMin();
-		tempoMax = specs.GetTempoMax();
+		m_tempoMin = specs.GetTempoMin();
+		m_tempoMax = specs.GetTempoMax();
 		// IT Hack: There are legacy OpenMPT-made ITs out there which use a higher default speed than 255.
 		// Changing the upper tempo limit in the mod specs would break them, so do it here instead.
 		if(m_sndFile.GetType() == MOD_TYPE_IT && m_sndFile.m_nDefaultTempo <= TEMPO(255, 0))
-			tempoMax.Set(255);
-		m_SliderTempo.SetRange(0, tempoMax.GetInt() - tempoMin.GetInt());
+			m_tempoMax.Set(255);
+		// Lower resolution for BPM above 256
+		if(m_tempoMax >= TEMPO_SPLIT_THRESHOLD)
+			m_SliderTempo.SetRange(0, TempoSliderRange().GetInt());
+		else
+			m_SliderTempo.SetRange(0, m_tempoMax.GetInt() - m_tempoMin.GetInt());
 		m_EditTempo.AllowFractions(specs.hasFractionalTempo);
 
 		const BOOL bIsNotMOD = (m_sndFile.GetType() != MOD_TYPE_MOD);
@@ -297,7 +335,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 	}
 	if (updateAll || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
 	{
-		if (!m_bEditsLocked)
+		if (!m_editsLocked)
 		{
 			m_EditTitle.SetWindowText(mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.GetTitle()));
 			m_EditArtist.SetWindowText(mpt::ToCString(m_sndFile.m_songArtist));
@@ -311,7 +349,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_SliderGlobalVol.SetPos(MAX_SLIDER_GLOBAL_VOL - m_sndFile.m_nDefaultGlobalVolume);
 		m_SliderVSTiVol.SetPos(MAX_SLIDER_VSTI_VOL - m_sndFile.m_nVSTiVolume);
 		m_SliderSamplePreAmp.SetPos(MAX_SLIDER_SAMPLE_VOL - m_sndFile.m_nSamplePreAmp);
-		m_SliderTempo.SetPos((tempoMax - m_sndFile.m_nDefaultTempo).GetInt());
+		m_SliderTempo.SetPos(TempoToSlider(m_sndFile.m_nDefaultTempo));
 	}
 
 	if(updateAll || hintType == HINT_MPTOPTIONS || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
@@ -345,7 +383,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 
 		if (pSlider == &m_SliderTempo)
 		{
-			const TEMPO tempo = tempoMax - TEMPO(m_SliderTempo.GetPos(), 0);
+			const TEMPO tempo = SliderToTempo(m_SliderTempo.GetPos());
 			if ((tempo >= m_sndFile.GetModSpecifications().GetTempoMin()) && (tempo <= m_sndFile.GetModSpecifications().GetTempoMax()) && (tempo != m_sndFile.m_nDefaultTempo))
 			{
 				m_sndFile.m_nDefaultTempo = m_sndFile.m_PlayState.m_nMusicTempo = tempo;
@@ -413,13 +451,13 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 					newTempo = TEMPO(pos32, 0);
 				}
 				newTempo += m_sndFile.m_nDefaultTempo;
-				Limit(newTempo, tempoMin, tempoMax);
+				Limit(newTempo, m_tempoMin, m_tempoMax);
 				m_sndFile.m_nDefaultTempo = m_sndFile.m_PlayState.m_nMusicTempo = newTempo;
 				m_modDoc.SetModified();
 				LockControls();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 				UnlockControls();
-				m_SliderTempo.SetPos((tempoMax - newTempo).GetInt());
+				m_SliderTempo.SetPos(TempoToSlider(newTempo));
 				m_EditTempo.SetTempoValue(newTempo);
 			}
 			m_SpinTempo.SetPos(0);
@@ -463,17 +501,17 @@ void CCtrlGeneral::OnTempoChanged()
 	if (m_bInitialized && m_EditTempo.GetWindowTextLength() > 0)
 	{
 		TEMPO tempo = m_EditTempo.GetTempoValue();
-		Limit(tempo, tempoMin, tempoMax);
+		Limit(tempo, m_tempoMin, m_tempoMax);
 		if(!m_sndFile.GetModSpecifications().hasFractionalTempo) tempo.Set(tempo.GetInt());
 		if (tempo != m_sndFile.m_nDefaultTempo)
 		{
-			m_bEditsLocked=true;
+			m_editsLocked = true;
 			m_EditTempo.SetModify(FALSE);
 			m_sndFile.m_nDefaultTempo = tempo;
 			m_sndFile.m_PlayState.m_nMusicTempo = tempo;
 			m_modDoc.SetModified();
 			m_modDoc.UpdateAllViews(nullptr, GeneralHint().General());
-			m_bEditsLocked=false;
+			m_editsLocked = false;
 		}
 	}
 }
@@ -491,7 +529,7 @@ void CCtrlGeneral::OnSpeedChanged()
 			n = Clamp(n, m_sndFile.GetModSpecifications().speedMin, m_sndFile.GetModSpecifications().speedMax);
 			if (n != m_sndFile.m_nDefaultSpeed)
 			{
-				m_bEditsLocked=true;
+				m_editsLocked = true;
 				m_EditSpeed.SetModify(FALSE);
 				m_sndFile.m_nDefaultSpeed = n;
 				m_sndFile.m_PlayState.m_nMusicSpeed = n;
@@ -499,7 +537,7 @@ void CCtrlGeneral::OnSpeedChanged()
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 				// Update envelope grid view
 				m_modDoc.UpdateAllViews(nullptr, InstrumentHint().Envelope(), this);
-				m_bEditsLocked=false;
+				m_editsLocked = false;
 			}
 		}
 	}
@@ -518,13 +556,13 @@ void CCtrlGeneral::OnVSTiVolChanged()
 			Limit(n, 0u, 2000u);
 			if (n != m_sndFile.m_nVSTiVolume)
 			{
-				m_bEditsLocked=true;
+				m_editsLocked = true;
 				m_sndFile.m_nVSTiVolume = n;
 				m_sndFile.RecalculateGainForAllPlugs();
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 				UpdateView(GeneralHint().General());
-				m_bEditsLocked=false;
+				m_editsLocked = false;
 			}
 		}
 	}
@@ -542,12 +580,12 @@ void CCtrlGeneral::OnSamplePAChanged()
 			Limit(n, 0u, 2000u);
 			if (n != m_sndFile.m_nSamplePreAmp)
 			{
-				m_bEditsLocked=true;
+				m_editsLocked = true;
 				m_sndFile.m_nSamplePreAmp = n;
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 				UpdateView(GeneralHint().General());
-				m_bEditsLocked=false;
+				m_editsLocked = false;
 			}
 		}
 	}
@@ -565,14 +603,14 @@ void CCtrlGeneral::OnGlobalVolChanged()
 			Limit(n, 0u, 256u);
 			if (n != m_sndFile.m_nDefaultGlobalVolume)
 			{ 
-				m_bEditsLocked = true;
+				m_editsLocked = true;
 				m_EditGlobalVol.SetModify(FALSE);
 				m_sndFile.m_nDefaultGlobalVolume = n;
 				m_sndFile.m_PlayState.m_nGlobalVolume = n;
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 				UpdateView(GeneralHint().General());
-				m_bEditsLocked = false;
+				m_editsLocked = false;
 			}
 		}
 	}
@@ -701,23 +739,23 @@ void CVuMeter::OnPaint()
 	CPaintDC dc(this);
 	GetClientRect(&rect);
 	dc.FillSolidRect(rect.left, rect.top, rect.Width(), rect.Height(), RGB(0,0,0));
-	m_nDisplayedVu = -1;
+	m_lastDisplayedLevel = -1;
 	DrawVuMeter(dc, true);
 }
 
 
-void CVuMeter::SetVuMeter(LONG lVuMeter, bool force)
+void CVuMeter::SetVuMeter(int level, bool force)
 {
-	lVuMeter >>= 8;
-	if (lVuMeter != m_nVuMeter)
+	level >>= 8;
+	if (level != m_lastLevel)
 	{
 		DWORD curTime = timeGetTime();
-		if(curTime - lastVuUpdateTime >= TrackerSettings::Instance().VuMeterUpdateInterval || force)
+		if(curTime - m_lastVuUpdateTime >= TrackerSettings::Instance().VuMeterUpdateInterval || force)
 		{
-			m_nVuMeter = lVuMeter;
+			m_lastLevel = level;
 			CClientDC dc(this);
 			DrawVuMeter(dc);
-			lastVuUpdateTime = curTime;
+			m_lastVuUpdateTime = curTime;
 		}
 	}
 }
@@ -725,13 +763,10 @@ void CVuMeter::SetVuMeter(LONG lVuMeter, bool force)
 
 void CVuMeter::DrawVuMeter(CDC &dc, bool /*redraw*/)
 {
-	LONG vu;
-	LONG lastvu;
 	CRect rect;
-
 	GetClientRect(&rect);
-	vu = (m_nVuMeter * (rect.bottom-rect.top)) >> 8;
-	lastvu = (m_nDisplayedVu * (rect.bottom-rect.top)) >> 8;
+	int vu = (m_lastLevel * (rect.bottom-rect.top)) >> 8;
+	int lastvu = (m_lastDisplayedLevel * (rect.bottom-rect.top)) >> 8;
 	int cy = rect.bottom - rect.top;
 	if (cy < 1) cy = 1;
 	for (int ry=rect.bottom-1; ry>rect.top; ry-=2)
@@ -742,7 +777,7 @@ void CVuMeter::DrawVuMeter(CDC &dc, bool /*redraw*/)
 			n += NUM_VUMETER_PENS;
 		dc.FillSolidRect(rect.left, ry, rect.Width(), 1, CMainFrame::gcolrefVuMeter[n]);
 	}
-	m_nDisplayedVu = m_nVuMeter;
+	m_lastDisplayedLevel = m_lastLevel;
 }
 
 

@@ -41,7 +41,7 @@ constexpr CModSpecifications mptm_ =
 	1,											// Channel min
 	127,										// Channel max
 	32,											// Min tempo
-	512,										// Max tempo
+	1000,										// Max tempo
 	1,											// Min Speed
 	255,										// Max Speed
 	1,											// Min pattern rows
@@ -139,7 +139,7 @@ constexpr CModSpecifications xm_ =
 	1,											// Channel min
 	32,											// Channel max
 	32,											// Min tempo
-	512,										// Max tempo
+	1000,										// Max tempo
 	1,											// Min Speed
 	31,											// Max Speed
 	1,											// Min pattern rows
@@ -187,7 +187,7 @@ constexpr CModSpecifications xmEx_ =
 	1,											// Channel min
 	127,										// Channel max
 	32,											// Min tempo
-	512,										// Max tempo
+	1000,										// Max tempo
 	1,											// Min Speed
 	31,											// Max Speed
 	1,											// Min pattern rows
