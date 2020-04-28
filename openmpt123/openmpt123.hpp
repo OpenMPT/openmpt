@@ -981,23 +981,23 @@ static inline std::string get_extension( std::string filename ) {
 	return "";
 }
 
-enum Mode {
-	ModeNone,
-	ModeProbe,
-	ModeInfo,
-	ModeUI,
-	ModeBatch,
-	ModeRender
+enum class Mode {
+	None,
+	Probe,
+	Info,
+	UI,
+	Batch,
+	Render
 };
 
 static inline std::string mode_to_string( Mode mode ) {
 	switch ( mode ) {
-		case ModeNone:   return "none"; break;
-		case ModeProbe:  return "probe"; break;
-		case ModeInfo:   return "info"; break;
-		case ModeUI:     return "ui"; break;
-		case ModeBatch:  return "batch"; break;
-		case ModeRender: return "render"; break;
+		case Mode::None:   return "none"; break;
+		case Mode::Probe:  return "probe"; break;
+		case Mode::Info:   return "info"; break;
+		case Mode::UI:     return "ui"; break;
+		case Mode::Batch:  return "batch"; break;
+		case Mode::Render: return "render"; break;
 	}
 	return "";
 }
@@ -1069,7 +1069,7 @@ struct commandlineflags {
 		}
 	}
 	commandlineflags() {
-		mode = ModeUI;
+		mode = Mode::UI;
 		ui_redraw_interval = default_high;
 		driver = "";
 		device = "";
@@ -1188,45 +1188,45 @@ struct commandlineflags {
 			}
 		}
 		show_ui = canUI;
-		if ( mode == ModeNone ) {
+		if ( mode == Mode::None ) {
 			if ( canUI ) {
-				mode = ModeUI;
+				mode = Mode::UI;
 			} else {
-				mode = ModeBatch;
+				mode = Mode::Batch;
 			}
 		}
-		if ( mode == ModeUI && !canUI ) {
+		if ( mode == Mode::UI && !canUI ) {
 			throw args_error_exception();
 		}
 		if ( show_progress && !canProgress ) {
 			throw args_error_exception();
 		}
 		switch ( mode ) {
-			case ModeNone:
+			case Mode::None:
 				throw args_error_exception();
 			break;
-			case ModeProbe:
+			case Mode::Probe:
 				show_ui = false;
 				show_progress = false;
 				show_meters = false;
 				show_channel_meters = false;
 				show_pattern = false;
 			break;
-			case ModeInfo:
+			case Mode::Info:
 				show_ui = false;
 				show_progress = false;
 				show_meters = false;
 				show_channel_meters = false;
 				show_pattern = false;
 			break;
-			case ModeUI:
+			case Mode::UI:
 			break;
-			case ModeBatch:
+			case Mode::Batch:
 				show_meters = false;
 				show_channel_meters = false;
 				show_pattern = false;
 			break;
-			case ModeRender:
+			case Mode::Render:
 				show_meters = false;
 				show_channel_meters = false;
 				show_pattern = false;
@@ -1252,13 +1252,13 @@ struct commandlineflags {
 		if ( output_extension == "auto" ) {
 			output_extension = "";
 		}
-		if ( mode != ModeRender && !output_extension.empty() ) {
+		if ( mode != Mode::Render && !output_extension.empty() ) {
 			throw args_error_exception();
 		}
-		if ( mode == ModeRender && !output_filename.empty() ) {
+		if ( mode == Mode::Render && !output_filename.empty() ) {
 			throw args_error_exception();
 		}
-		if ( mode != ModeRender && !output_filename.empty() ) {
+		if ( mode != Mode::Render && !output_filename.empty() ) {
 			output_extension = get_extension( output_filename );
 		}
 		if ( output_extension.empty() ) {

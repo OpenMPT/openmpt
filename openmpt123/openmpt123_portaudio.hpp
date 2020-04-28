@@ -120,7 +120,7 @@ public:
 			streamparameters.suggestedLatency = flags.buffer * 0.001;
 		}
 		unsigned long framesperbuffer = 0;
-		if ( flags.mode != ModeUI ) {
+		if ( flags.mode != Mode::UI ) {
 			framesperbuffer = paFramesPerBufferUnspecified;
 			flags.period = 50;
 			flags.period = std::min( flags.period, flags.buffer / 3 );

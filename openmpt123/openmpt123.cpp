@@ -1020,9 +1020,9 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 	log.writeout();
 
 	std::size_t bufsize;
-	if ( flags.mode == ModeUI ) {
+	if ( flags.mode == Mode::UI ) {
 		bufsize = std::min( flags.ui_redraw_interval, flags.period ) * flags.samplerate / 1000;
-	} else if ( flags.mode == ModeBatch ) {
+	} else if ( flags.mode == Mode::Batch ) {
 		bufsize = flags.period * flags.samplerate / 1000;
 	} else {
 		bufsize = 1024;
@@ -1089,7 +1089,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 	while ( true ) {
 
-		if ( flags.mode == ModeUI ) {
+		if ( flags.mode == Mode::UI ) {
 
 #if defined( __DJGPP__ )
 
@@ -1473,7 +1473,7 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 
 	log.writeout();
 
-	if ( flags.mode != ModeProbe && flags.mode != ModeInfo ) {
+	if ( flags.mode != Mode::Probe && flags.mode != Mode::Info ) {
 		mod.set_repeat_count( flags.repeatcount );
 		apply_mod_settings( flags, mod );
 	}
@@ -1543,13 +1543,13 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 
 	log.writeout();
 
-	if ( flags.filenames.size() == 1 || flags.mode == ModeRender ) {
+	if ( flags.filenames.size() == 1 || flags.mode == Mode::Render ) {
 		audio_stream.write_metadata( get_metadata( mod ) );
 	} else {
 		audio_stream.write_updated_metadata( get_metadata( mod ) );
 	}
 
-	if ( flags.mode == ModeProbe || flags.mode == ModeInfo ) {
+	if ( flags.mode == Mode::Probe || flags.mode == Mode::Info ) {
 		return;
 	}
 
@@ -1985,15 +1985,15 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 			} else if ( arg == "--license" ) {
 				throw show_license_exception();
 			} else if ( arg == "--probe" ) {
-				flags.mode = ModeProbe;
+				flags.mode = Mode::Probe;
 			} else if ( arg == "--info" ) {
-				flags.mode = ModeInfo;
+				flags.mode = Mode::Info;
 			} else if ( arg == "--ui" ) {
-				flags.mode = ModeUI;
+				flags.mode = Mode::UI;
 			} else if ( arg == "--batch" ) {
-				flags.mode = ModeBatch;
+				flags.mode = Mode::Batch;
 			} else if ( arg == "--render" ) {
-				flags.mode = ModeRender;
+				flags.mode = Mode::Render;
 			} else if ( arg == "--terminal-width" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
 				istr >> flags.terminal_width;
@@ -2376,7 +2376,7 @@ static int main( int argc, char * argv [] ) {
 		// setup terminal
 		#if !defined(WIN32)
 			if ( stdin_can_ui ) {
-				if ( flags.mode == ModeUI ) {
+				if ( flags.mode == Mode::UI ) {
 					set_input_mode();
 				}
 			}
@@ -2402,18 +2402,18 @@ static int main( int argc, char * argv [] ) {
 		std::srand( std::uniform_int_distribution<unsigned int>()( prng ) );
 
 		switch ( flags.mode ) {
-			case ModeProbe: {
+			case Mode::Probe: {
 				for ( const auto & filename : flags.filenames ) {
 					probe_file( flags, filename, log );
 					flags.playlist_index++;
 				}
 			} break;
-			case ModeInfo: {
+			case Mode::Info: {
 				void_audio_stream dummy;
 				render_files( flags, log, dummy, prng );
 			} break;
-			case ModeUI:
-			case ModeBatch: {
+			case Mode::UI:
+			case Mode::Batch: {
 				if ( flags.use_stdout ) {
 					flags.apply_default_buffer_sizes();
 					stdout_stream_raii stdout_audio_stream;
@@ -2455,7 +2455,7 @@ static int main( int argc, char * argv [] ) {
 					}
 				}
 			} break;
-			case ModeRender: {
+			case Mode::Render: {
 				for ( const auto & filename : flags.filenames ) {
 					flags.apply_default_buffer_sizes();
 					file_audio_stream_raii file_audio_stream( flags, filename + std::string(".") + flags.output_extension, log );
@@ -2463,7 +2463,7 @@ static int main( int argc, char * argv [] ) {
 					flags.playlist_index++;
 				}
 			} break;
-			case ModeNone:
+			case Mode::None:
 			break;
 		}
 
