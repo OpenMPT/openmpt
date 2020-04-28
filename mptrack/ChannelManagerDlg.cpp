@@ -121,17 +121,10 @@ void CChannelManagerDlg::Hide()
 CChannelManagerDlg::CChannelManagerDlg()
 	: m_drawableArea(0, 0, 0, 0)
 	, m_buttonHeight(CM_BT_HEIGHT)
-	, m_leftButton(false)
-	, m_rightButton(false)
-	, m_moveRect(false)
-	, m_show(false)
 {
 	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
 	{
 		pattern[nChn] = nChn;
-		removed[nChn] = false;
-		select[nChn] = false;
-		state[nChn] = false;
 		memory[0][nChn] = 0;
 		memory[1][nChn] = 0;
 		memory[2][nChn] = 0;
@@ -141,8 +134,10 @@ CChannelManagerDlg::CChannelManagerDlg()
 
 CChannelManagerDlg::~CChannelManagerDlg()
 {
-	if(this == sharedInstance_) sharedInstance_ = nullptr;
-	if(m_bkgnd) DeleteBitmap(m_bkgnd);
+	if(this == sharedInstance_)
+		sharedInstance_ = nullptr;
+	if(m_bkgnd)
+		DeleteBitmap(m_bkgnd);
 	DestroyWindow();
 }
 
@@ -175,21 +170,21 @@ void CChannelManagerDlg::OnApply()
 {
 	if(!m_ModDoc) return;
 
-	CHANNELINDEX nChannels, newMemory[4][MAX_BASECHANNELS];
+	CHANNELINDEX numChannels, newMemory[4][MAX_BASECHANNELS];
 	std::vector<CHANNELINDEX> newChnOrder;
 	newChnOrder.reserve(m_ModDoc->GetNumChannels());
 
 	// Count new number of channels, copy pattern pointers & manager internal store memory
-	nChannels = 0;
-	for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+	numChannels = 0;
+	for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 	{
-		if(!removed[pattern[nChn]])
+		if(!removed[pattern[chn]])
 		{
-			newMemory[0][nChannels] = memory[0][nChannels];
-			newMemory[1][nChannels] = memory[1][nChannels];
-			newMemory[2][nChannels] = memory[2][nChannels];
-			newChnOrder.push_back(pattern[nChn]);
-			nChannels++;
+			newMemory[0][numChannels] = memory[0][numChannels];
+			newMemory[1][numChannels] = memory[1][numChannels];
+			newMemory[2][numChannels] = memory[2][numChannels];
+			newChnOrder.push_back(pattern[chn]);
+			numChannels++;
 		}
 	}
 
@@ -197,7 +192,7 @@ void CChannelManagerDlg::OnApply()
 
 	//Creating new order-vector for ReArrangeChannels.
 	CriticalSection cs;
-	if(m_ModDoc->ReArrangeChannels(newChnOrder) != nChannels)
+	if(m_ModDoc->ReArrangeChannels(newChnOrder) != numChannels)
 	{
 		cs.Leave();
 		EndWaitCursor();
@@ -206,7 +201,7 @@ void CChannelManagerDlg::OnApply()
 	
 
 	// Update manager internal store memory
-	for(CHANNELINDEX nChn = 0; nChn < nChannels; nChn++)
+	for(CHANNELINDEX nChn = 0; nChn < numChannels; nChn++)
 	{
 		CHANNELINDEX newChn = newChnOrder[nChn];
 		if(nChn != newChn)
@@ -269,60 +264,68 @@ void CChannelManagerDlg::OnAction1()
 		switch(m_currentTab)
 		{
 			case kSoloMute:
-				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 				{
-					CHANNELINDEX nThisChn = pattern[nChn];
-					if(!removed[nThisChn])
+					CHANNELINDEX sourceChn = pattern[chn];
+					if(!removed[sourceChn])
 					{
-						if(select[nThisChn]) nbSelect++;
-						if(select[nThisChn] && m_ModDoc->IsChannelSolo(nThisChn)) nbOk++;
+						if(select[sourceChn])
+							nbSelect++;
+						if(select[sourceChn] && m_ModDoc->IsChannelSolo(sourceChn))
+							nbOk++;
 					}
 				}
-				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 				{
-					CHANNELINDEX nThisChn = pattern[nChn];
-					if(select[nThisChn] && !removed[nThisChn])
+					CHANNELINDEX sourceChn = pattern[chn];
+					if(select[sourceChn] && !removed[sourceChn])
 					{
-						if(m_ModDoc->IsChannelMuted(nThisChn)) m_ModDoc->MuteChannel(nThisChn, false);
-						if(nbSelect == nbOk) m_ModDoc->SoloChannel(nThisChn, !m_ModDoc->IsChannelSolo(nThisChn));
-						else m_ModDoc->SoloChannel(nThisChn, true);
+						if(m_ModDoc->IsChannelMuted(sourceChn))
+							m_ModDoc->MuteChannel(sourceChn, false);
+						if(nbSelect == nbOk)
+							m_ModDoc->SoloChannel(sourceChn, !m_ModDoc->IsChannelSolo(sourceChn));
+						else
+							m_ModDoc->SoloChannel(sourceChn, true);
 					}
-					else if(!m_ModDoc->IsChannelSolo(nThisChn)) m_ModDoc->MuteChannel(nThisChn, true);
+					else if(!m_ModDoc->IsChannelSolo(sourceChn))
+						m_ModDoc->MuteChannel(sourceChn, true);
 				}
 				break;
 			case kRecordSelect:
-				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 				{
-					CHANNELINDEX nThisChn = pattern[nChn];
-					if(!removed[nThisChn])
+					CHANNELINDEX sourceChn = pattern[chn];
+					if(!removed[sourceChn])
 					{
-						if(select[nThisChn]) nbSelect++;
-						BYTE rec = m_ModDoc->IsChannelRecord(nThisChn);
-						if(select[nThisChn] && rec == 1) nbOk++;
+						if(select[sourceChn]) nbSelect++;
+						BYTE rec = m_ModDoc->IsChannelRecord(sourceChn);
+						if(select[sourceChn] && rec == 1) nbOk++;
 					}
 				}
-				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 				{
-					CHANNELINDEX nThisChn = pattern[nChn];
-					if(!removed[nThisChn] && select[nThisChn])
+					CHANNELINDEX sourceChn = pattern[chn];
+					if(!removed[sourceChn] && select[sourceChn])
 					{
-						if(select[nThisChn] && nbSelect != nbOk && m_ModDoc->IsChannelRecord(nThisChn) != 1) m_ModDoc->Record1Channel(nThisChn);
-						else if(nbSelect == nbOk) m_ModDoc->Record1Channel(nThisChn, false);
+						if(select[sourceChn] && nbSelect != nbOk && m_ModDoc->IsChannelRecord(sourceChn) != 1) m_ModDoc->Record1Channel(sourceChn);
+						else if(nbSelect == nbOk) m_ModDoc->Record1Channel(sourceChn, false);
 					}
 				}
 				break;
 			case kPluginState:
-				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 				{
-					CHANNELINDEX nThisChn = pattern[nChn];
-					if(select[nThisChn] && !removed[nThisChn]) m_ModDoc->NoFxChannel(nThisChn, false);
+					CHANNELINDEX sourceChn = pattern[chn];
+					if(select[sourceChn] && !removed[sourceChn])
+						m_ModDoc->NoFxChannel(sourceChn, false);
 				}
 				break;
 			case kReorderRemove:
-				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 				{
-					CHANNELINDEX nThisChn = pattern[nChn];
-					if(select[nThisChn]) removed[nThisChn] = !removed[nThisChn];
+					CHANNELINDEX sourceChn = pattern[chn];
+					if(select[sourceChn])
+						removed[sourceChn] = !removed[sourceChn];
 				}
 				break;
 			default:
@@ -347,52 +350,58 @@ void CChannelManagerDlg::OnAction2()
 		switch(m_currentTab)
 		{
 			case kSoloMute:
-				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 				{
-					CHANNELINDEX nThisChn = pattern[nChn];
-					if(!removed[nThisChn])
+					CHANNELINDEX sourceChn = pattern[chn];
+					if(!removed[sourceChn])
 					{
-						if(select[nThisChn]) nbSelect++;
-						if(select[nThisChn] && m_ModDoc->IsChannelMuted(nThisChn)) nbOk++;
+						if(select[sourceChn])
+							nbSelect++;
+						if(select[sourceChn] && m_ModDoc->IsChannelMuted(sourceChn))
+							nbOk++;
 					}
 				}
-				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 				{
-					CHANNELINDEX nThisChn = pattern[nChn];
-					if(select[nThisChn] && !removed[nThisChn])
+					CHANNELINDEX sourceChn = pattern[chn];
+					if(select[sourceChn] && !removed[sourceChn])
 					{
-						if(m_ModDoc->IsChannelSolo(nThisChn)) m_ModDoc->SoloChannel(nThisChn, false);
-						if(nbSelect == nbOk) m_ModDoc->MuteChannel(nThisChn, !m_ModDoc->IsChannelMuted(nThisChn));
-						else m_ModDoc->MuteChannel(nThisChn, true);
+						if(m_ModDoc->IsChannelSolo(sourceChn))
+							m_ModDoc->SoloChannel(sourceChn, false);
+						if(nbSelect == nbOk)
+							m_ModDoc->MuteChannel(sourceChn, !m_ModDoc->IsChannelMuted(sourceChn));
+						else
+							m_ModDoc->MuteChannel(sourceChn, true);
 					}
 				}
 				break;
 			case kRecordSelect:
-				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 				{
-					CHANNELINDEX nThisChn = pattern[nChn];
-					if(!removed[nThisChn])
+					CHANNELINDEX sourceChn = pattern[chn];
+					if(!removed[sourceChn])
 					{
-						if(select[nThisChn]) nbSelect++;
-						BYTE rec = m_ModDoc->IsChannelRecord(nThisChn);
-						if(select[nThisChn] && rec == 2) nbOk++;
+						if(select[sourceChn]) nbSelect++;
+						BYTE rec = m_ModDoc->IsChannelRecord(sourceChn);
+						if(select[sourceChn] && rec == 2) nbOk++;
 					}
 				}
-				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 				{
-					CHANNELINDEX nThisChn = pattern[nChn];
-					if(!removed[nThisChn] && select[nThisChn])
+					CHANNELINDEX sourceChn = pattern[chn];
+					if(!removed[sourceChn] && select[sourceChn])
 					{
-						if(select[nThisChn] && nbSelect != nbOk && m_ModDoc->IsChannelRecord(nThisChn) != 2) m_ModDoc->Record2Channel(nThisChn);
-						else if(nbSelect == nbOk) m_ModDoc->Record2Channel(nThisChn, false);
+						if(select[sourceChn] && nbSelect != nbOk && m_ModDoc->IsChannelRecord(sourceChn) != 2) m_ModDoc->Record2Channel(sourceChn);
+						else if(nbSelect == nbOk) m_ModDoc->Record2Channel(sourceChn, false);
 					}
 				}
 				break;
 			case kPluginState:
-				for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 				{
-					CHANNELINDEX nThisChn = pattern[nChn];
-					if(select[nThisChn] && !removed[nThisChn]) m_ModDoc->NoFxChannel(nThisChn, true);
+					CHANNELINDEX sourceChn = pattern[chn];
+					if(select[sourceChn] && !removed[sourceChn])
+						m_ModDoc->NoFxChannel(sourceChn, true);
 				}
 				break;
 			case kReorderRemove:
@@ -421,10 +430,10 @@ void CChannelManagerDlg::OnStore(void)
 		case kSoloMute:
 			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 			{
-				CHANNELINDEX nThisChn = pattern[nChn];
-				memory[0][nThisChn] = 0;
-				if(m_ModDoc->IsChannelMuted(nThisChn)) memory[0][nChn] |= 1;
-				if(m_ModDoc->IsChannelSolo(nThisChn))  memory[0][nChn] |= 2;
+				CHANNELINDEX sourceChn = pattern[nChn];
+				memory[0][sourceChn] = 0;
+				if(m_ModDoc->IsChannelMuted(sourceChn)) memory[0][nChn] |= 1;
+				if(m_ModDoc->IsChannelSolo(sourceChn))  memory[0][nChn] |= 2;
 			}
 			break;
 		case kRecordSelect:
@@ -456,9 +465,9 @@ void CChannelManagerDlg::OnRestore(void)
 		case kSoloMute:
 			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
 			{
-				CHANNELINDEX nThisChn = pattern[nChn];
-				m_ModDoc->MuteChannel(nThisChn, (memory[0][nChn] & 1) != 0);
-				m_ModDoc->SoloChannel(nThisChn, (memory[0][nChn] & 2) != 0);
+				CHANNELINDEX sourceChn = pattern[nChn];
+				m_ModDoc->MuteChannel(sourceChn, (memory[0][nChn] & 1) != 0);
+				m_ModDoc->SoloChannel(sourceChn, (memory[0][nChn] & 2) != 0);
 			}
 			break;
 		case kRecordSelect:
@@ -646,10 +655,10 @@ void CChannelManagerDlg::OnPaint()
 
 		for(CHANNELINDEX nChn = 0; nChn < channels; nChn++)
 		{
-			CHANNELINDEX nThisChn = pattern[nChn];
-			if(select[nThisChn])
+			CHANNELINDEX sourceChn = pattern[nChn];
+			if(select[sourceChn])
 			{
-				CRect btn = move[nThisChn];
+				CRect btn = move[sourceChn];
 				btn.DeflateRect(3, 3, 0, 0);
 
 				AlphaBlend(pDC.hdc, btn.left + m_moveX - m_downX, btn.top + m_moveY - m_downY, btn.Width(), btn.Height(), bdc,
@@ -692,10 +701,10 @@ void CChannelManagerDlg::OnPaint()
 	CString s;
 	for(CHANNELINDEX nChn = 0; nChn < channels; nChn++)
 	{
-		CHANNELINDEX nThisChn = pattern[nChn];
+		CHANNELINDEX sourceChn = pattern[nChn];
 
-		CString fmt = !sndFile.ChnSettings[nThisChn].szName.empty() ? _T("%1: %2") : _T("Channel %1");
-		s = mpt::cformat(fmt)(nThisChn + 1, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[nThisChn].szName));
+		CString fmt = !sndFile.ChnSettings[sourceChn].szName.empty() ? _T("%1: %2") : _T("Channel %1");
+		s = mpt::cformat(fmt)(sourceChn + 1, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[sourceChn].szName));
 
 		const int borderX = MulDiv(3, dpiX, 96), borderY = MulDiv(3, dpiY, 96);
 		CRect btn;
@@ -706,27 +715,27 @@ void CChannelManagerDlg::OnPaint()
 
 		CRect intersection;
 		if(intersection.IntersectRect(&pDC.rcPaint, &btn))
-			DrawChannelButton(dc, btn, s, select[nThisChn], !removed[nThisChn], DT_RIGHT | DT_VCENTER);
+			DrawChannelButton(dc, btn, s, select[sourceChn], !removed[sourceChn], DT_RIGHT | DT_VCENTER);
 
 		btn.right = btn.left + chnSizeX / 7;
 
 		btn.DeflateRect(borderX, borderY, borderX, borderY);
 
 		// Draw red/green markers
-		COLORREF color;
+		COLORREF color = 0;
 		switch(m_currentTab)
 		{
 		case kSoloMute:
-			color = sndFile.ChnSettings[nThisChn].dwFlags[CHN_MUTE] ? red : green;
+			color = sndFile.ChnSettings[sourceChn].dwFlags[CHN_MUTE] ? red : green;
 			break;
 		case kRecordSelect:
-			color = brushColors[m_ModDoc->IsChannelRecord(nThisChn) % std::size(brushColors)];
+			color = brushColors[m_ModDoc->IsChannelRecord(sourceChn) % std::size(brushColors)];
 			break;
 		case kPluginState:
-			color = sndFile.ChnSettings[nThisChn].dwFlags[CHN_NOFX] ? red : green;
+			color = sndFile.ChnSettings[sourceChn].dwFlags[CHN_NOFX] ? red : green;
 			break;
 		case kReorderRemove:
-			color = removed[nThisChn] ? red : green;
+			color = removed[sourceChn] ? red : green;
 			break;
 		}
 		SetDCBrushColor(dc, color);
@@ -735,7 +744,11 @@ void CChannelManagerDlg::OnPaint()
 		FrameRect(dc, btn, blackBrush);
 
 		c++;
-		if(c >= CM_NB_COLS) { c = 0; l++; }
+		if(c >= CM_NB_COLS)
+		{
+			c = 0;
+			l++;
+		}
 	}
 
 	::BitBlt(pDC.hdc, rcPaint.left, rcPaint.top, rcPaint.Width(), rcPaint.Height(), dc, rcPaint.left, rcPaint.top, SRCCOPY);
@@ -823,54 +836,29 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 
 	if(m_moveRect && m_ModDoc)
 	{
-		CHANNELINDEX n, i, k;
-		CHANNELINDEX newpat[MAX_BASECHANNELS];
-
-		k = CHANNELINDEX_INVALID;
-		bool hit = ButtonHit(point, &n, nullptr);
-		for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
-			if(k == CHANNELINDEX_INVALID && select[pattern[nChn]]) k = nChn;
-
-		if(hit && k != CHANNELINDEX_INVALID)
+		CHANNELINDEX dropChn = 0;
+		bool hit = ButtonHit(point, &dropChn, nullptr);
+		if(hit)
 		{
-			i = 0;
-			k = 0;
-			while(i < n)
-			{
-				while(i < n && select[pattern[i]]) i++;
-				if(i < n && !select[pattern[i]])
-				{
-					newpat[k] = pattern[i];
-					pattern[i] = CHANNELINDEX_INVALID;
-					k++;
-					i++;
-				}
-			}
-			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels() ; nChn++)
-			{
-				if(pattern[nChn] != CHANNELINDEX_INVALID && select[pattern[nChn]])
-				{
-					newpat[k] = pattern[nChn];
-					pattern[nChn] = CHANNELINDEX_INVALID;
-					k++;
-				}
-			}
-			i = 0;
-			while(i < m_ModDoc->GetNumChannels())
-			{
-				while(i < m_ModDoc->GetNumChannels() && pattern[i] == CHANNELINDEX_INVALID) i++;
-				if(i < m_ModDoc->GetNumChannels() && pattern[i] != CHANNELINDEX_INVALID)
-				{
-					newpat[k] = pattern[i];
-					k++;
-					i++;
-				}
-			}
-			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
-			{
-				pattern[nChn] = newpat[nChn];
-				select[nChn] = false;
-			}
+			// Rearrange channels
+			const auto IsSelected = [this](PATTERNINDEX sourceChn) {
+				return select[sourceChn];
+			};
+
+			const auto numChannels = m_ModDoc->GetNumChannels();
+			std::vector<CHANNELINDEX> newOrder{ pattern.begin(), pattern.begin() + numChannels };
+			// How many selected channels are there before the drop target?
+			const CHANNELINDEX selectedBeforeDropChn = static_cast<CHANNELINDEX>(std::count_if(pattern.begin(), pattern.begin() + dropChn, IsSelected));
+			dropChn -= selectedBeforeDropChn;
+			// Remove all selected channels from the order
+			newOrder.erase(std::remove_if(newOrder.begin(), newOrder.end(), IsSelected), newOrder.end());
+			const CHANNELINDEX numSelected = static_cast<CHANNELINDEX>(numChannels - newOrder.size());
+			// Then insert them at the drop position
+			newOrder.insert(newOrder.begin() + dropChn, numSelected, PATTERNINDEX_INVALID);
+			std::copy_if(pattern.begin(), pattern.begin() + numChannels, newOrder.begin() + dropChn, IsSelected);
+
+			std::copy(newOrder.begin(), newOrder.begin() + numChannels, pattern.begin());
+			select.reset();
 		} else
 		{
 			ResetState(true, false, false, false, false);

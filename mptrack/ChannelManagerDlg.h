@@ -43,14 +43,14 @@ private:
 
 protected:
 
-	enum ButtonAction
+	enum ButtonAction : uint8
 	{
 		kUndetermined,
 		kAction1,
 		kAction2,
 	};
 
-	enum MouseButton
+	enum MouseButton : uint8
 	{
 		CM_BT_NONE,
 		CM_BT_LEFT,
@@ -61,7 +61,7 @@ protected:
 	~CChannelManagerDlg();
 
 	CHANNELINDEX memory[4][MAX_BASECHANNELS];
-	CHANNELINDEX pattern[MAX_BASECHANNELS];
+	std::array<CHANNELINDEX, MAX_BASECHANNELS> pattern;
 	std::bitset<MAX_BASECHANNELS> removed;
 	std::bitset<MAX_BASECHANNELS> select;
 	std::bitset<MAX_BASECHANNELS> state;
@@ -70,14 +70,14 @@ protected:
 	CModDoc *m_ModDoc = nullptr;
 	HBITMAP m_bkgnd = nullptr;
 	Tab m_currentTab = kSoloMute;
-	int m_downX, m_downY;
-	int m_moveX, m_moveY;
-	int m_buttonHeight;
+	int m_downX = 0, m_downY = 0;
+	int m_moveX = 0, m_moveY = 0;
+	int m_buttonHeight = 0;
 	ButtonAction m_buttonAction;
-	bool m_leftButton : 1;
-	bool m_rightButton : 1;
-	bool m_moveRect : 1;
-	bool m_show : 1;
+	bool m_leftButton = false;
+	bool m_rightButton = false;
+	bool m_moveRect = false;
+	bool m_show = false;
 
 	bool ButtonHit(CPoint point, CHANNELINDEX *id, CRect *invalidate) const;
 	void MouseEvent(UINT nFlags, CPoint point, MouseButton button);
