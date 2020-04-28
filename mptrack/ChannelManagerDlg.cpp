@@ -675,15 +675,17 @@ void CChannelManagerDlg::OnPaint()
 	client.SetRect(client.left + MulDiv(2, dpiX, 96), client.top + MulDiv(32, dpiY, 96), client.right - MulDiv(2, dpiX, 96), client.bottom - MulDiv(24, dpiY, 96));
 	// Draw background
 	{
+		const auto bgIntersected = client & pDC.rcPaint;  // In case of partial redraws, FillRect may still draw into areas that are not part of the redraw area and thus make some buttons disappear
 		FillRect(dc, &pDC.rcPaint, GetSysColorBrush(COLOR_BTNFACE));
-		FillRect(dc, &client, GetSysColorBrush(COLOR_HIGHLIGHT));
+		FillRect(dc, &bgIntersected, GetSysColorBrush(COLOR_HIGHLIGHT));
 		FrameRect(dc, &client, blackBrush);
 	}
 
 	client.SetRect(client.left + 8,client.top + 6,client.right - 6,client.bottom - 6);
 
-	auto highlight = GetSysColorBrush(COLOR_HIGHLIGHT), red = CreateSolidBrush(RGB(192, 96, 96)), green = CreateSolidBrush(RGB(96, 192, 96));
-	const HBRUSH brushes[] = {highlight, green, red};
+	const COLORREF highlight = GetSysColor(COLOR_HIGHLIGHT), red = RGB(192, 96, 96), green = RGB(96, 192, 96);
+	const COLORREF brushColors[] = {highlight, green, red};
+	const auto dcBrush = GetStockBrush(DC_BRUSH);
 
 	UINT c = 0, l = 0;
 	const CSoundFile &sndFile = m_ModDoc->GetSoundFile();
@@ -711,24 +713,24 @@ void CChannelManagerDlg::OnPaint()
 		btn.DeflateRect(borderX, borderY, borderX, borderY);
 
 		// Draw red/green markers
+		COLORREF color;
 		switch(m_currentTab)
 		{
-			case kSoloMute:
-				FillRect(dc, btn, sndFile.ChnSettings[nThisChn].dwFlags[CHN_MUTE] ? red : green);
-				break;
-			case kRecordSelect:
-			{
-				auto r = m_ModDoc->IsChannelRecord(nThisChn);
-				FillRect(dc, btn, brushes[r % std::size(brushes)]);
-				break;
-			}
-			case kPluginState:
-				FillRect(dc, btn, sndFile.ChnSettings[nThisChn].dwFlags[CHN_NOFX] ? red : green);
-				break;
-			case kReorderRemove:
-				FillRect(dc, btn, removed[nThisChn] ? red : green);
-				break;
+		case kSoloMute:
+			color = sndFile.ChnSettings[nThisChn].dwFlags[CHN_MUTE] ? red : green;
+			break;
+		case kRecordSelect:
+			color = brushColors[m_ModDoc->IsChannelRecord(nThisChn) % std::size(brushColors)];
+			break;
+		case kPluginState:
+			color = sndFile.ChnSettings[nThisChn].dwFlags[CHN_NOFX] ? red : green;
+			break;
+		case kReorderRemove:
+			color = removed[nThisChn] ? red : green;
+			break;
 		}
+		SetDCBrushColor(dc, color);
+		FillRect(dc, btn, dcBrush);
 		// Draw border around marker
 		FrameRect(dc, btn, blackBrush);
 
@@ -739,9 +741,6 @@ void CChannelManagerDlg::OnPaint()
 	::BitBlt(pDC.hdc, rcPaint.left, rcPaint.top, rcPaint.Width(), rcPaint.Height(), dc, rcPaint.left, rcPaint.top, SRCCOPY);
 	::SelectObject(dc, oldBmp);
 	::DeleteDC(dc);
-
-	DeleteBrush(green);
-	DeleteBrush(red);
 
 	::EndPaint(m_hWnd, &pDC);
 }
