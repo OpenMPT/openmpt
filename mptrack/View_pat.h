@@ -124,7 +124,7 @@ OPENMPT_NAMESPACE_BEGIN
 // Pattern editing class
 
 
-class CViewPattern : public CModScrollView
+class CViewPattern final : public CModScrollView
 {
 public:
 	// Pattern status flags
@@ -167,7 +167,7 @@ protected:
 	ORDERINDEX m_nOrder = 0;
 	static int32 m_nTransposeAmount;
 
-	int m_nXScroll, m_nYScroll;
+	int m_nXScroll = 0, m_nYScroll = 0;
 	PatternCursor::Columns m_nDetailLevel = PatternCursor::lastColumn;  // Visible Columns
 
 	// Cursor and selection positions
@@ -180,9 +180,9 @@ protected:
 	DragItem m_nDragItem;  // Currently dragged item
 	DragItem m_nDropItem;  // Currently hovered item during dragondrop
 	RECT m_rcDragItem, m_rcDropItem;
-	bool m_bInItemRect : 1;
+	bool m_bInItemRect = false;
 
-	UINT m_nFoundInstrument;
+	ModCommand::INSTR m_fallbackInstrument = 0;
 
 	// Chord auto-detect interval
 	DWORD m_autoChordStartTime = 0;
@@ -194,11 +194,11 @@ protected:
 	ModCommand m_PCNoteEditMemory;  // PC Note edit memory
 	static ModCommand m_cmdOld;     // Quick cursor copy/paste data
 
-	QuickChannelProperties quickChannelProperties;
+	QuickChannelProperties m_quickChannelProperties;
 
 	// Chord preview
-	CHANNELINDEX chordPatternChannels[MPTChord::notesPerChord];
-	ModCommand::NOTE prevChordNote, prevChordBaseNote;
+	CHANNELINDEX m_chordPatternChannels[MPTChord::notesPerChord];
+	ModCommand::NOTE m_prevChordNote, m_prevChordBaseNote;
 
 	// Note-off event buffer for MIDI sustain pedal
 	std::array<std::vector<uint32>, 16> m_midiSustainBuffer;
@@ -210,10 +210,12 @@ protected:
 	std::bitset<128> m_baPlayingNote;
 	CModDoc::NoteToChannelMap m_noteChannel;  // Note -> Preview channel assignment
 	std::array<ModCommand::NOTE, 10> m_octaveKeyMemory;
-	std::array<ModCommand::NOTE, MAX_BASECHANNELS> previousNote;
-	std::array<uint8, NOTE_MAX + NOTE_MIN> activeNoteChannel;
-	std::array<uint8, NOTE_MAX + NOTE_MIN> splitActiveNoteChannel;
+	std::array<ModCommand::NOTE, MAX_BASECHANNELS> m_previousNote;
+	std::array<uint8, NOTE_MAX + NOTE_MIN> m_activeNoteChannel;
+	std::array<uint8, NOTE_MAX + NOTE_MIN> m_splitActiveNoteChannel;
 	static constexpr uint8 NOTE_CHANNEL_MAP_INVALID = 0xFF;
+	static_assert(MAX_BASECHANNELS <= std::numeric_limits<decltype(m_activeNoteChannel)::value_type>::max());
+	static_assert(MAX_BASECHANNELS <= NOTE_CHANNEL_MAP_INVALID);
 
 public:
 	std::unique_ptr<CEffectVis> m_pEffectVis;
