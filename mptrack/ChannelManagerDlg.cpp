@@ -15,6 +15,7 @@
 #include "dlg_misc.h"
 #include "../common/mptStringBuffer.h"
 
+#include <functional>
 
 OPENMPT_NAMESPACE_BEGIN
 
