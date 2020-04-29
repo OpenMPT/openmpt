@@ -253,13 +253,13 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 			channel.Reset(ModChannel::resetTotal, m_SndFile, chn);
 	}
 
-	std::vector<ModChannel> chns(m_SndFile.m_PlayState.Chn, m_SndFile.m_PlayState.Chn + oldNumChannels);
-	std::vector<ModChannelSettings> settings(m_SndFile.ChnSettings, m_SndFile.ChnSettings + oldNumChannels);
-	std::vector<BYTE> recordStates(oldNumChannels, 0);
+	std::vector<ModChannel> chns(std::begin(m_SndFile.m_PlayState.Chn), std::begin(m_SndFile.m_PlayState.Chn) + oldNumChannels);
+	std::vector<ModChannelSettings> settings(std::begin(m_SndFile.ChnSettings), std::begin(m_SndFile.ChnSettings) + oldNumChannels);
+	std::vector<RecordGroup> recordStates(oldNumChannels);
 	auto chnMutePendings = m_SndFile.m_bChannelMuteTogglePending;
 	for(CHANNELINDEX chn = 0; chn < oldNumChannels; chn++)
 	{
-		recordStates[chn] = IsChannelRecord(chn);
+		recordStates[chn] = GetChannelRecordGroup(chn);
 	}
 	ReinitRecordState();
 
@@ -270,10 +270,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 		{
 			m_SndFile.ChnSettings[chn] = settings[srcChn];
 			m_SndFile.m_PlayState.Chn[chn] = chns[srcChn];
-			if(recordStates[srcChn] == 1)
-				Record1Channel(chn, true);
-			if(recordStates[srcChn] == 2)
-				Record2Channel(chn, true);
+			SetChannelRecordGroup(chn, recordStates[srcChn]);
 			m_SndFile.m_bChannelMuteTogglePending[chn] = chnMutePendings[srcChn];
 			if(m_SndFile.m_opl)
 				m_SndFile.m_opl->MoveChannel(srcChn, chn);

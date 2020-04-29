@@ -71,7 +71,7 @@ private:
 	CWnd *m_pParent;
 	bool m_showLog;
 public:
-	ScopedLogCapturer(CModDoc &modDoc, const CString &title = _T(""), CWnd *parent = nullptr, bool showLog = true);
+	ScopedLogCapturer(CModDoc &modDoc, const CString &title = {}, CWnd *parent = nullptr, bool showLog = true);
 	~ScopedLogCapturer();
 	void ShowLog(bool force = false);
 	void ShowLog(const CString &preamble, bool force = false);
@@ -99,6 +99,14 @@ struct PlayNoteParam
 	PlayNoteParam& Sample(SAMPLEINDEX sample) { m_sample = sample; return *this; }
 	PlayNoteParam& Instrument(INSTRUMENTINDEX instr) { m_instr = instr; return *this; }
 	PlayNoteParam& Channel(CHANNELINDEX channel) { m_currentChannel = channel; return *this; }
+};
+
+
+enum class RecordGroup : uint8
+{
+	NoGroup = 0,
+	Group1 = 1,
+	Group2 = 2,
 };
 
 
@@ -173,7 +181,7 @@ public:
 	void AddToLog(LogLevel level, const mpt::ustring &text) const;
 	/*[[deprecated]]*/ void AddToLog(const CString &text) const { AddToLog(LogInformation, mpt::ToUnicode(text)); }
 	/*[[deprecated]]*/ void AddToLog(const std::string &text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::Charset::Locale, text)); }
-	/*[[deprecated]]*/ void AddToLog(const char *text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::Charset::Locale, text?text:"")); }
+	/*[[deprecated]]*/ void AddToLog(const char *text) const { AddToLog(LogInformation, mpt::ToUnicode(mpt::Charset::Locale, text ? text : "")); }
 
 	const std::vector<LogEntry> & GetLog() const { return m_Log; }
 	mpt::ustring GetLogString() const;
@@ -182,8 +190,8 @@ protected:
 	LogMode GetLogMode() const { return m_LogMode; }
 	void SetLogMode(LogMode mode) { m_LogMode = mode; }
 	void ClearLog();
-	UINT ShowLog(const CString &preamble, const CString &title = "", CWnd *parent = nullptr);
-	UINT ShowLog(const CString &title = "", CWnd *parent = nullptr) { return ShowLog(_T(""), title, parent); }
+	UINT ShowLog(const CString &preamble, const CString &title = {}, CWnd *parent = nullptr);
+	UINT ShowLog(const CString &title = {}, CWnd *parent = nullptr) { return ShowLog(_T(""), title, parent); }
 
 public:
 
@@ -269,11 +277,10 @@ public:
 
 	bool NoFxChannel(CHANNELINDEX nChn, bool bNoFx, bool updateMix = true);
 	bool IsChannelNoFx(CHANNELINDEX nChn) const;
-	bool IsChannelRecord1(CHANNELINDEX channel) const;
-	bool IsChannelRecord2(CHANNELINDEX channel) const;
-	BYTE IsChannelRecord(CHANNELINDEX channel) const;
-	void Record1Channel(CHANNELINDEX channel, bool select = true);
-	void Record2Channel(CHANNELINDEX channel, bool select = true);
+
+	RecordGroup GetChannelRecordGroup(CHANNELINDEX channel) const;
+	void SetChannelRecordGroup(CHANNELINDEX channel, RecordGroup recordGroup);
+	void ToggleChannelRecordGroup(CHANNELINDEX channel, RecordGroup recordGroup);
 	void ReinitRecordState(bool unselect = true);
 
 	CHANNELINDEX GetNumChannels() const { return m_SndFile.m_nChannels; }

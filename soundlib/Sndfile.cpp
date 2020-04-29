@@ -1268,8 +1268,7 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 #ifdef MODPLUG_TRACKER
 	if(GetpModDoc() != nullptr)
 	{
-		GetpModDoc()->Record1Channel(nChn, false);
-		GetpModDoc()->Record2Channel(nChn, false);
+		GetpModDoc()->SetChannelRecordGroup(nChn, RecordGroup::NoGroup);
 	}
 #endif // MODPLUG_TRACKER
 

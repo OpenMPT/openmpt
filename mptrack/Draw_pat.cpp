@@ -152,7 +152,8 @@ UINT CViewPattern::GetColumnOffset(PatternCursor::Columns column) const
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	LimitMax(column, PatternCursor::lastColumn);
 	UINT offset = 0;
-	for(int i = PatternCursor::firstColumn; i < column; i++) offset += pfnt->nEltWidths[i];
+	for(int i = PatternCursor::firstColumn; i < column; i++)
+		offset += pfnt->nEltWidths[i];
 	return offset;
 }
 
@@ -677,16 +678,19 @@ void CViewPattern::OnDraw(CDC *pDC)
 			rect.SetRect(xpaint, ypaint, xpaint + nColumnWidth, ypaint + m_szHeader.cy);
 			if (ncolhdr < ncols)
 			{
+				const auto recordGroup = pModDoc->GetChannelRecordGroup(static_cast<CHANNELINDEX>(ncolhdr));
 				const char *pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr]? "[Channel %u]" : "Channel %u";
 				if (sndFile.ChnSettings[ncolhdr].szName[0] != 0)
 					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "%u: [%s]" : "%u: %s";
-				else if (m_nDetailLevel < PatternCursor::volumeColumn) pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Ch%u]" : "Ch%u";
-				else if (m_nDetailLevel < PatternCursor::effectColumn) pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %u]" : "Chn %u";
+				else if (m_nDetailLevel < PatternCursor::volumeColumn)
+					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Ch%u]" : "Ch%u";
+				else if (m_nDetailLevel < PatternCursor::effectColumn)
+					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %u]" : "Chn %u";
 				sprintf(s, pszfmt, ncolhdr + 1, sndFile.ChnSettings[ncolhdr].szName.buf);
 				DrawButtonRect(hdc, &rect, s,
 					sndFile.ChnSettings[ncolhdr].dwFlags[CHN_MUTE] ? TRUE : FALSE,
 					(m_bInItemRect && m_nDragItem.Type() == DragItem::ChannelHeader && m_nDragItem.Value() == ncolhdr) ? TRUE : FALSE,
-					pModDoc->IsChannelRecord(static_cast<CHANNELINDEX>(ncolhdr)) ? DT_RIGHT : DT_CENTER);
+					recordGroup != RecordGroup::NoGroup ? DT_RIGHT : DT_CENTER);
 
 				// When dragging around channel headers, mark insertion position
 				if(m_Status[psDragging] && !m_bInItemRect
@@ -708,19 +712,11 @@ void CViewPattern::OnDraw(CDC *pDC)
 
 				CRect insRect;
 				insRect.SetRect(xpaint, ypaint, xpaint + nColumnWidth / 8 + recordInsX, ypaint + colHeight);
-				if (pModDoc->IsChannelRecord1(static_cast<CHANNELINDEX>(ncolhdr)))
+				if(recordGroup != RecordGroup::NoGroup)
 				{
 					FrameRect(hdc, &rect, buttonBrush);
 					InvertRect(hdc, &rect);
-					s[0] = '1';
-					s[1] = '\0';
-					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
-					FrameRect(hdc, &insRect, blackBrush);
-				} else if(pModDoc->IsChannelRecord2(static_cast<CHANNELINDEX>(ncolhdr)))
-				{
-					FrameRect(hdc, &rect, buttonBrush);
-					InvertRect(hdc, &rect);
-					s[0] = '2';
+					s[0] = (recordGroup == RecordGroup::Group1) ? '1' : '2';
 					s[1] = '\0';
 					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
 					FrameRect(hdc, &insRect, blackBrush);
@@ -1580,11 +1576,16 @@ void CViewPattern::InvalidateCell(PatternCursor cursor)
 }
 
 
-void CViewPattern::InvalidateChannelsHeaders()
+void CViewPattern::InvalidateChannelsHeaders(CHANNELINDEX chn)
 {
 	CRect rect;
 	GetClientRect(&rect);
 	rect.bottom = rect.top + m_szHeader.cy;
+	if(chn != CHANNELINDEX_INVALID)
+	{
+		rect.left = GetPointFromPosition(PatternCursor{ 0u, chn }).x;
+		rect.right = rect.left + GetChannelWidth();
+	}
 	InvalidateRect(&rect, FALSE);
 }
 

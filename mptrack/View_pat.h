@@ -1,5 +1,5 @@
 /*
- * view_pat.h
+ * View_pat.h
  * ----------
  * Purpose: Pattern tab, lower panel.
  * Notes  : (currently none)
@@ -182,6 +182,9 @@ protected:
 	RECT m_rcDragItem, m_rcDropItem;
 	bool m_bInItemRect = false;
 
+	// Drag-select record group
+	std::vector<RecordGroup> m_initialDragRecordStatus;
+
 	ModCommand::INSTR m_fallbackInstrument = 0;
 
 	// Chord auto-detect interval
@@ -266,6 +269,10 @@ public:
 	PatternCursor GetPositionFromPoint(POINT pt) const;
 
 	DragItem GetDragItem(CPoint point, RECT &rect) const;
+	
+	void StartRecordGroupDragging(const DragItem source);
+	void ResetRecordGroupDragging() { m_initialDragRecordStatus.clear(); }
+	bool IsDraggingRecordGroup() const { return !m_initialDragRecordStatus.empty(); }
 
 	ROWINDEX GetRowsPerBeat() const;
 	ROWINDEX GetRowsPerMeasure() const;
@@ -277,7 +284,7 @@ public:
 	void InvalidateArea(PatternCursor begin, PatternCursor end);
 	void InvalidateSelection() { InvalidateArea(m_Selection); }
 	void InvalidateCell(PatternCursor cursor);
-	void InvalidateChannelsHeaders();
+	void InvalidateChannelsHeaders(CHANNELINDEX chn = CHANNELINDEX_INVALID);
 
 	// Selection functions
 	void SetCurSel(const PatternRect &rect) { SetCurSel(rect.GetUpperLeft(), rect.GetLowerRight()); };
@@ -492,7 +499,7 @@ private:
 	bool HandleSplit(ModCommand &m, int note);
 	bool IsNoteSplit(int note) const;
 
-	CHANNELINDEX FindGroupRecordChannel(BYTE recordGroup, bool forceFreeChannel, CHANNELINDEX startChannel = 0) const;
+	CHANNELINDEX FindGroupRecordChannel(RecordGroup recordGroup, bool forceFreeChannel, CHANNELINDEX startChannel = 0) const;
 
 	bool BuildChannelControlCtxMenu(HMENU hMenu, CInputHandler *ih) const;
 	bool BuildPluginCtxMenu(HMENU hMenu, UINT nChn, const CSoundFile &sndFile) const;
@@ -560,7 +567,6 @@ public:
 private:
 	void TogglePendingMute(CHANNELINDEX nChn);
 	void PendingSoloChn(CHANNELINDEX nChn);
-	void PendingUnmuteAllChn();
 
 	template <typename Func>
 	void ApplyToSelection(Func func);

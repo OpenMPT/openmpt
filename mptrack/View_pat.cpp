@@ -1088,13 +1088,29 @@ void CViewPattern::OnEditCopy()
 }
 
 
+void CViewPattern::StartRecordGroupDragging(const DragItem source)
+{
+	// Drag-select record channels
+	const auto *modDoc = GetDocument();
+	if(modDoc == nullptr)
+		return;
+
+	m_initialDragRecordStatus.resize(modDoc->GetNumChannels());
+	for(CHANNELINDEX chn = 0; chn < modDoc->GetNumChannels(); chn++)
+	{
+		m_initialDragRecordStatus[chn] = modDoc->GetChannelRecordGroup(chn);
+	}
+	m_Status.reset(psDragging);
+	m_nDropItem = m_nDragItem = source;
+}
+
+
 void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr)
-	{
+	const auto *modDoc = GetDocument();
+	if(modDoc == nullptr)
 		return;
-	}
+	const auto &sndFile = modDoc->GetSoundFile();
 
 	SetFocus();
 	m_nDropItem = m_nDragItem = GetDragItem(point, m_rcDragItem);
@@ -1109,8 +1125,11 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		// Click on channel header
 		if(nFlags & MK_CONTROL)
-		{
 			TogglePendingMute(pointCursor.GetChannel());
+		if(nFlags & MK_SHIFT)
+		{
+			// Drag-select record channels
+			StartRecordGroupDragging(m_nDragItem);
 		}
 	} else if(point.x >= m_szHeader.cx && point.y > m_szHeader.cy)
 	{
@@ -1137,7 +1156,7 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 		{
 			// Set first selection point
 			m_StartSel = pointCursor;
-			if(m_StartSel.GetChannel() < pSndFile->GetNumChannels())
+			if(m_StartSel.GetChannel() < sndFile.GetNumChannels())
 			{
 				m_Status.set(psMouseDragSelect);
 
@@ -1164,10 +1183,10 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		// Mark row number => mark whole row (start)
 		InvalidateSelection();
-		if(pointCursor.GetRow() < pSndFile->Patterns[m_nPattern].GetNumRows())
+		if(pointCursor.GetRow() < sndFile.Patterns[m_nPattern].GetNumRows())
 		{
 			m_StartSel.Set(pointCursor);
-			SetCurSel(pointCursor, PatternCursor(pointCursor.GetRow(), pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn));
+			SetCurSel(pointCursor, PatternCursor(pointCursor.GetRow(), sndFile.GetNumChannels() - 1, PatternCursor::lastColumn));
 			m_Status.set(psRowSelection);
 		}
 	}
@@ -1204,13 +1223,15 @@ void CViewPattern::OnLButtonDblClk(UINT uFlags, CPoint point)
 
 void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr)
+	CModDoc *modDoc = GetDocument();
+	if(modDoc == nullptr)
 		return;
 
 	const auto dragType = m_nDragItem.Type();
+	const bool wasDraggingRecordGroup = IsDraggingRecordGroup();
 	const bool itemSelected = m_bInItemRect || (dragType == DragItem::ChannelHeader);
 	m_bInItemRect = false;
+	ResetRecordGroupDragging();
 	ReleaseCapture();
 	m_Status.reset(psMouseDragSelect | psRowSelection | psChannelSelection | psDragging);
 	// Drag & Drop Editing
@@ -1244,62 +1265,62 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 	if(!itemSelected || !m_nDragItem.IsValid())
 		return;
 	InvalidateRect(&m_rcDragItem, FALSE);
-	const CHANNELINDEX nItemNo = static_cast<CHANNELINDEX>(m_nDragItem.Value());
-	const CHANNELINDEX nTargetNo = m_nDropItem.IsValid() ? static_cast<CHANNELINDEX>(m_nDropItem.Value()) : CHANNELINDEX_INVALID;
+	const CHANNELINDEX sourceChn = static_cast<CHANNELINDEX>(m_nDragItem.Value());
+	const CHANNELINDEX targetChn = m_nDropItem.IsValid() ? static_cast<CHANNELINDEX>(m_nDropItem.Value()) : CHANNELINDEX_INVALID;
 
 	switch(m_nDragItem.Type())
 	{
 	case DragItem::ChannelHeader:
-		if(nItemNo == nTargetNo && nTargetNo < pModDoc->GetNumChannels())
+		if(sourceChn == targetChn && targetChn < modDoc->GetNumChannels())
 		{
 			// Just clicked a channel header...
 			if(nFlags & MK_SHIFT)
 			{
 				// Toggle record state
-				pModDoc->Record1Channel(nItemNo);
-				InvalidateChannelsHeaders();
+				modDoc->ToggleChannelRecordGroup(sourceChn, RecordGroup::Group1);
+				InvalidateChannelsHeaders(sourceChn);
 			} else if(CMainFrame::GetInputHandler()->AltPressed())
 			{
 				// Solo / Unsolo
-				OnSoloChannel(nItemNo);
+				OnSoloChannel(sourceChn);
 			} else if(!(nFlags & MK_CONTROL))
 			{
 				// Mute / Unmute
-				OnMuteChannel(nItemNo);
+				OnMuteChannel(sourceChn);
 			}
-		} else if(nTargetNo < pModDoc->GetNumChannels() && m_nDropItem.Type() == DragItem::ChannelHeader)
+		} else if(!wasDraggingRecordGroup && targetChn < modDoc->GetNumChannels() && m_nDropItem.Type() == DragItem::ChannelHeader)
 		{
 			// Dragged to other channel header => move or copy channel
 
 			InvalidateRect(&m_rcDropItem, FALSE);
 
 			const bool duplicate = (nFlags & MK_SHIFT) != 0;
-			const CHANNELINDEX newChannels = pModDoc->GetNumChannels() + (duplicate ? 1 : 0);
+			const CHANNELINDEX newChannels = modDoc->GetNumChannels() + (duplicate ? 1 : 0);
 			std::vector<CHANNELINDEX> channels(newChannels, 0);
 			CHANNELINDEX i = 0;
 			bool modified = duplicate;
 
-			for(CHANNELINDEX nChn = 0; nChn < newChannels; nChn++)
+			for(CHANNELINDEX chn = 0; chn < newChannels; chn++)
 			{
-				if(nChn == nTargetNo)
+				if(chn == targetChn)
 				{
-					channels[nChn] = nItemNo;
+					channels[chn] = sourceChn;
 				} else
 				{
-					if(i == nItemNo && !duplicate)  // Don't want that source channel twice if we're just moving
+					if(i == sourceChn && !duplicate)  // Don't want that source channel twice if we're just moving
 					{
 						i++;
 					}
-					channels[nChn] = i++;
+					channels[chn] = i++;
 				}
-				if(channels[nChn] != nChn)
+				if(channels[chn] != chn)
 				{
 					modified = true;
 				}
 			}
-			if(modified && pModDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
+			if(modified && modDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
 			{
-				pModDoc->UpdateAllViews(this, GeneralHint().Channels().ModType(), this);
+				modDoc->UpdateAllViews(this, GeneralHint().Channels().ModType(), this);
 				if(duplicate)
 				{
 					// Number of channels changed: Update channel headers and other information.
@@ -1316,8 +1337,8 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 		break;
 
 	case DragItem::PluginName:
-		if(nItemNo < MAX_BASECHANNELS)
-			TogglePluginEditor(nItemNo);
+		if(sourceChn < MAX_BASECHANNELS)
+			TogglePluginEditor(sourceChn);
 		break;
 	}
 
@@ -1345,11 +1366,11 @@ void CViewPattern::OnPatternProperties()
 
 void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 {
-	CModDoc *pModDoc = GetDocument();
+	CModDoc *modDoc = GetDocument();
 	HMENU hMenu;
 
 	// Too far left to get a ctx menu:
-	if((!pModDoc) || (pt.x < m_szHeader.cx))
+	if(!modDoc || pt.x < m_szHeader.cx)
 	{
 		return;
 	}
@@ -1378,7 +1399,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 		return;
 	}
 
-	CSoundFile &sndFile = pModDoc->GetSoundFile();
+	CSoundFile &sndFile = modDoc->GetSoundFile();
 	m_MenuCursor = GetPositionFromPoint(pt);
 
 	// Right-click outside single-point selection? Reposition cursor to the new location
@@ -1393,25 +1414,30 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 		}
 	}
 	const CHANNELINDEX nChn = m_MenuCursor.GetChannel();
+	const bool inChannelHeader = (pt.y < m_szHeader.cy);
 
-	if((flags & MK_CONTROL) != 0 && nChn < sndFile.GetNumChannels() && (pt.y < m_szHeader.cy))
+	if((flags & MK_CONTROL) && nChn < sndFile.GetNumChannels() && inChannelHeader)
 	{
 		// Ctrl+Right-Click: Open quick channel properties.
 		ClientToScreen(&pt);
 		m_quickChannelProperties.Show(GetDocument(), nChn, m_nPattern, pt);
+	} else if((flags & MK_SHIFT) && inChannelHeader)
+	{
+		// Drag-select record channels
+		StartRecordGroupDragging(GetDragItem(pt, m_rcDragItem));
 	} else if(nChn < sndFile.GetNumChannels() && sndFile.Patterns.IsValidPat(m_nPattern) && !(flags & (MK_CONTROL | MK_SHIFT)))
 	{
 		CInputHandler *ih = CMainFrame::GetInputHandler();
 
 		//------ Plugin Header Menu --------- :
 		if(m_Status[psShowPluginNames] &&
-			(pt.y > m_szHeader.cy - m_szPluginHeader.cy) && (pt.y < m_szHeader.cy))
+			inChannelHeader && (pt.y > m_szHeader.cy - m_szPluginHeader.cy))
 		{
 			BuildPluginCtxMenu(hMenu, nChn, sndFile);
 		}
 
 		//------ Channel Header Menu ---------- :
-		else if(pt.y < m_szHeader.cy)
+		else if(inChannelHeader)
 		{
 			if(ih->ShiftPressed())
 			{
@@ -1431,7 +1457,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 			// When combining menus, use bitwise ORs to avoid shortcuts
 			if(BuildSelectionCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
-			if(BuildEditCtxMenu(hMenu, ih, pModDoc))
+			if(BuildEditCtxMenu(hMenu, ih, modDoc))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			if(BuildInterpolationCtxMenu(hMenu, ih)
 			   | BuildTransposeCtxMenu(hMenu, ih))
@@ -1480,17 +1506,18 @@ void CViewPattern::OnRButtonUp(UINT nFlags, CPoint point)
 	if(!pModDoc)
 		return;
 
-	m_nDragItem = GetDragItem(point, m_rcDragItem);
-	CHANNELINDEX nItemNo = static_cast<CHANNELINDEX>(m_nDragItem.Value());
+	ResetRecordGroupDragging();
+	const CHANNELINDEX sourceChn = static_cast<CHANNELINDEX>(m_nDragItem.Value());
+	const CHANNELINDEX targetChn = m_nDropItem.IsValid() ? static_cast<CHANNELINDEX>(m_nDropItem.Value()) : CHANNELINDEX_INVALID;
 	switch(m_nDragItem.Type())
 	{
 	case DragItem::ChannelHeader:
 		if(nFlags & MK_SHIFT)
 		{
-			if(nItemNo < MAX_BASECHANNELS)
+			if(sourceChn < MAX_BASECHANNELS && sourceChn == targetChn)
 			{
-				pModDoc->Record2Channel(nItemNo);
-				InvalidateChannelsHeaders();
+				pModDoc->ToggleChannelRecordGroup(sourceChn, RecordGroup::Group2);
+				InvalidateChannelsHeaders(sourceChn);
 			}
 		}
 		break;
@@ -1531,16 +1558,22 @@ void CViewPattern::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
 void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 {
 	CModScrollView::OnMouseMove(nFlags, point);
-	if(!m_Status[psDragging])
-	{
+
+	const bool isDraggingRecordGroup = IsDraggingRecordGroup();
+	if(!m_Status[psDragging] && !isDraggingRecordGroup)
 		return;
-	}
 
 	// Drag&Drop actions
 	if(m_nDragItem.IsValid())
 	{
 		const CRect oldDropRect = m_rcDropItem;
 		const auto oldDropItem = m_nDropItem;
+
+		if(isDraggingRecordGroup)
+		{
+			// When drag-selecting record channels, ignore y position
+			point.y = m_rcDragItem.top;
+		}
 
 		m_Status.set(psShiftDragging, (nFlags & MK_SHIFT) != 0);
 		m_nDropItem = GetDragItem(point, m_rcDropItem);
@@ -1553,11 +1586,41 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 			m_bInItemRect = b;
 			InvalidateRect(&m_rcDragItem, FALSE);
 
-			// Dragging around channel headers? Update move indicator...
-			if(m_nDropItem.Type() == DragItem::ChannelHeader)
-				InvalidateRect(&m_rcDropItem, FALSE);
-			if(oldDropItem.Type() == DragItem::ChannelHeader)
-				InvalidateRect(&oldDropRect, FALSE);
+			// Drag-select record channels
+			if(isDraggingRecordGroup && m_nDropItem.Type() == DragItem::ChannelHeader)
+			{
+				auto modDoc = GetDocument();
+				auto startChn = static_cast<CHANNELINDEX>(m_nDragItem.Value());
+				auto endChn = static_cast<CHANNELINDEX>(m_nDropItem.Value());
+
+				RecordGroup setRecord = RecordGroup::NoGroup;
+				if(m_initialDragRecordStatus[startChn] != RecordGroup::Group1 && (nFlags & MK_LBUTTON))
+					setRecord = RecordGroup::Group1;
+				else if (m_initialDragRecordStatus[startChn] != RecordGroup::Group2 && (nFlags & MK_RBUTTON))
+					setRecord = RecordGroup::Group2;
+
+				if(startChn > endChn)
+					std::swap(startChn, endChn);
+
+				CHANNELINDEX numChannels = std::min(modDoc->GetNumChannels(), static_cast<CHANNELINDEX>(m_initialDragRecordStatus.size()));
+				for(CHANNELINDEX chn = 0; chn < numChannels; chn++)
+				{
+					auto oldState = modDoc->GetChannelRecordGroup(chn);
+					if(chn >= startChn && chn <= endChn)
+						GetDocument()->SetChannelRecordGroup(chn, setRecord);
+					else
+						GetDocument()->SetChannelRecordGroup(chn, m_initialDragRecordStatus[chn]);
+					if(oldState != modDoc->GetChannelRecordGroup(chn))
+						InvalidateChannelsHeaders(chn);
+				}
+			} else
+			{
+				// Dragging around channel headers? Update move indicator...
+				if(m_nDropItem.Type() == DragItem::ChannelHeader)
+					InvalidateRect(&m_rcDropItem, FALSE);
+				if(oldDropItem.Type() == DragItem::ChannelHeader)
+					InvalidateRect(&oldDropRect, FALSE);
+			}
 
 			UpdateWindow();
 		}
@@ -1785,11 +1848,11 @@ void CViewPattern::OnRecordSelect()
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc)
 	{
-		CHANNELINDEX nChn = m_MenuCursor.GetChannel();
-		if(nChn < pModDoc->GetNumChannels())
+		CHANNELINDEX chn = m_MenuCursor.GetChannel();
+		if(chn < pModDoc->GetNumChannels())
 		{
-			pModDoc->Record1Channel(nChn);
-			InvalidateChannelsHeaders();
+			pModDoc->ToggleChannelRecordGroup(chn, RecordGroup::Group1);
+			InvalidateChannelsHeaders(chn);
 		}
 	}
 }
@@ -1800,11 +1863,11 @@ void CViewPattern::OnSplitRecordSelect()
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc)
 	{
-		CHANNELINDEX nChn = m_MenuCursor.GetChannel();
-		if(nChn < pModDoc->GetNumChannels())
+		CHANNELINDEX chn = m_MenuCursor.GetChannel();
+		if(chn < pModDoc->GetNumChannels())
 		{
-			pModDoc->Record2Channel(nChn);
-			InvalidateChannelsHeaders();
+			pModDoc->ToggleChannelRecordGroup(chn, RecordGroup::Group2);
+			InvalidateChannelsHeaders(chn);
 		}
 	}
 }
@@ -1815,11 +1878,11 @@ void CViewPattern::OnUnmuteAll()
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc)
 	{
-		const CHANNELINDEX nChns = pModDoc->GetNumChannels();
-		for(CHANNELINDEX i = 0; i < nChns; i++)
+		const CHANNELINDEX numChannels = pModDoc->GetNumChannels();
+		for(CHANNELINDEX chn = 0; chn < numChannels; chn++)
 		{
-			pModDoc->MuteChannel(i, false);
-			pModDoc->SoloChannel(i, false);
+			pModDoc->MuteChannel(chn, false);
+			pModDoc->SoloChannel(chn, false);
 		}
 		InvalidateChannelsHeaders();
 	}
@@ -4007,10 +4070,10 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 											return wParam;
 		case kcUnmuteAllChnOnPatTransition:	OnPendingUnmuteAllChnFromClick(); return wParam;
 		case kcChannelRecordSelect:			for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
-												pModDoc->Record1Channel(c);
+												pModDoc->ToggleChannelRecordGroup(c, RecordGroup::Group1);
 											InvalidateChannelsHeaders(); return wParam;
 		case kcChannelSplitRecordSelect:	for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
-												pModDoc->Record2Channel(c);
+												pModDoc->ToggleChannelRecordGroup(c, RecordGroup::Group2);
 											InvalidateChannelsHeaders(); return wParam;
 		case kcChannelReset:				for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
 												ResetChannel(m_Cursor.GetChannel());
@@ -4977,24 +5040,25 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 	const bool recordEnabled = IsEditingEnabled();
 	CHANNELINDEX nChn = GetCurrentChannel();
 
-	BYTE recordGroup = pModDoc->IsChannelRecord(nChn);
+	auto recordGroup = pModDoc->GetChannelRecordGroup(nChn);
 
 	if(!isSpecial && pModDoc->GetSplitKeyboardSettings().IsSplitActive()
-	   && ((recordGroup == 1 && isSplit) || (recordGroup == 2 && !isSplit)))
+	   && ((recordGroup == RecordGroup::Group1 && isSplit) || (recordGroup == RecordGroup::Group2 && !isSplit)))
 	{
 		// Record group 1 should be used for normal notes, record group 2 for split notes.
 		// If there are any channels assigned to the "other" record group, we switch to another channel.
-		const CHANNELINDEX newChannel = FindGroupRecordChannel(3 - recordGroup, true);
+		auto otherGroup = (recordGroup == RecordGroup::Group1) ? RecordGroup::Group2 : RecordGroup::Group1;
+		const CHANNELINDEX newChannel = FindGroupRecordChannel(otherGroup, true);
 		if(newChannel != CHANNELINDEX_INVALID)
 		{
 			// Found a free channel, switch to other record group.
 			nChn = newChannel;
-			recordGroup = 3 - recordGroup;
+			recordGroup = otherGroup;
 		}
 	}
 
 	// -- Chord autodetection: step back if we just entered a note
-	if(recordEnabled && recordGroup && !liveRecord && !ModCommand::IsPcNote(note) && m_nSpacing > 0)
+	if(recordEnabled && recordGroup != RecordGroup::NoGroup && !liveRecord && !ModCommand::IsPcNote(note) && m_nSpacing > 0)
 	{
 		const auto &order = Order();
 		if((timeGetTime() - m_autoChordStartTime) < TrackerSettings::Instance().gnAutoChordWaitTime
@@ -5230,7 +5294,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 		if(newcmd.note <= NOTE_MAX)
 			activeNoteMap[newcmd.note] = static_cast<decltype(m_activeNoteChannel)::value_type>(nChn);
 
-		if(recordGroup)
+		if(recordGroup != RecordGroup::NoGroup)
 		{
 			// Move to next channel in record group
 			nChn = FindGroupRecordChannel(recordGroup, false, nChn + 1);
@@ -5374,13 +5438,13 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 
 	// -- establish note data
 	HandleSplit(newRow[chn], note);
-	const BYTE recordGroup = pModDoc->IsChannelRecord(chn);
+	const auto recordGroup = pModDoc->GetChannelRecordGroup(chn);
 
 	CHANNELINDEX curChn = chn;
 	for(int i = 0; i < numNotes; i++)
 	{
 		// Find appropriate channel
-		while(curChn < sndFile.GetNumChannels() && pModDoc->IsChannelRecord(curChn) != recordGroup)
+		while(curChn < sndFile.GetNumChannels() && pModDoc->GetChannelRecordGroup(curChn) != recordGroup)
 		{
 			curChn++;
 		}
@@ -5725,31 +5789,27 @@ void CViewPattern::OnLockPatternRows()
 
 // Find a free channel for a record group, starting search from a given channel.
 // If forceFreeChannel is true and all channels in the specified record group are active, some channel is picked from the specified record group.
-CHANNELINDEX CViewPattern::FindGroupRecordChannel(BYTE recordGroup, bool forceFreeChannel, CHANNELINDEX startChannel) const
+CHANNELINDEX CViewPattern::FindGroupRecordChannel(RecordGroup recordGroup, bool forceFreeChannel, CHANNELINDEX startChannel) const
 {
 	const CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr)
-	{
 		return CHANNELINDEX_INVALID;
-	}
 
-	CHANNELINDEX nChn = startChannel;
+	CHANNELINDEX chn = startChannel;
 	CHANNELINDEX foundChannel = CHANNELINDEX_INVALID;
 
-	for(CHANNELINDEX i = 1; i < pModDoc->GetNumChannels(); i++, nChn++)
+	for(CHANNELINDEX i = 1; i < pModDoc->GetNumChannels(); i++, chn++)
 	{
-		if(nChn >= pModDoc->GetNumChannels())
-		{
-			nChn = 0;  // loop around
-		}
+		if(chn >= pModDoc->GetNumChannels())
+			chn = 0;  // loop around
 
-		if(pModDoc->IsChannelRecord(nChn) == recordGroup)
+		if(pModDoc->GetChannelRecordGroup(chn) == recordGroup)
 		{
 			// Check if any notes are playing on this channel
 			bool channelLocked = false;
 			for(size_t k = 0; k < m_activeNoteChannel.size(); k++)
 			{
-				if(m_activeNoteChannel[k] == nChn || m_splitActiveNoteChannel[k] == nChn)
+				if(m_activeNoteChannel[k] == chn || m_splitActiveNoteChannel[k] == chn)
 				{
 					channelLocked = true;
 					break;
@@ -5759,13 +5819,13 @@ CHANNELINDEX CViewPattern::FindGroupRecordChannel(BYTE recordGroup, bool forceFr
 			if(!channelLocked)
 			{
 				// Channel belongs to correct record group and no note is currently playing.
-				return nChn;
+				return chn;
 			}
 
 			if(forceFreeChannel)
 			{
 				// If all channels are active, we might still pick a random channel from the specified group.
-				foundChannel = nChn;
+				foundChannel = chn;
 			}
 		}
 	}
@@ -5775,11 +5835,9 @@ CHANNELINDEX CViewPattern::FindGroupRecordChannel(BYTE recordGroup, bool forceFr
 
 void CViewPattern::OnClearField(const RowMask &mask, bool step, bool ITStyle)
 {
-	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr || !IsEditingEnabled_bmsg())
-	{
+	CSoundFile *sndFile = GetSoundFile();
+	if(sndFile == nullptr || !IsEditingEnabled_bmsg())
 		return;
-	}
 
 	// If we have a selection, we want to do something different
 	if(m_Selection.GetUpperLeft() != m_Selection.GetLowerRight())
@@ -5845,7 +5903,7 @@ void CViewPattern::OnClearField(const RowMask &mask, bool step, bool ITStyle)
 		UpdateIndicator();
 	}
 
-	if(step && (pSndFile->IsPaused() || !m_Status[psFollowSong] ||
+	if(step && (sndFile->IsPaused() || !m_Status[psFollowSong] ||
 		(CMainFrame::GetMainFrame() != nullptr && CMainFrame::GetMainFrame()->GetFollowSong(GetDocument()) != m_hWnd)))
 	{
 		// Preview Row
@@ -5870,13 +5928,13 @@ void CViewPattern::OnInitMenu(CMenu *pMenu)
 
 void CViewPattern::TogglePluginEditor(int chan)
 {
-	CModDoc *pModDoc = GetDocument();
-	if(!pModDoc)
+	CModDoc *modDoc = GetDocument();
+	if(!modDoc)
 		return;
 
-	int plug = pModDoc->GetSoundFile().ChnSettings[chan].nMixPlugin;
+	int plug = modDoc->GetSoundFile().ChnSettings[chan].nMixPlugin;
 	if(plug > 0)
-		pModDoc->TogglePluginEditor(plug - 1);
+		modDoc->TogglePluginEditor(plug - 1);
 
 	return;
 }
@@ -5890,11 +5948,9 @@ void CViewPattern::OnSelectInstrument(UINT nID)
 
 void CViewPattern::OnSelectPCNoteParam(UINT nID)
 {
-	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern))
-	{
+	CSoundFile *sndFile = GetSoundFile();
+	if(sndFile == nullptr || !sndFile->Patterns.IsValidPat(m_nPattern))
 		return;
-	}
 
 	uint16 paramNdx = static_cast<uint16>(nID - ID_CHANGE_PCNOTE_PARAM);
 	bool modified = false;
@@ -5916,20 +5972,18 @@ void CViewPattern::OnSelectPCNoteParam(UINT nID)
 
 void CViewPattern::OnSelectPlugin(UINT nID)
 {
-	CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr)
-	{
+	CSoundFile *sndFile = GetSoundFile();
+	if(sndFile == nullptr)
 		return;
-	}
 
 	const CHANNELINDEX plugChannel = m_MenuCursor.GetChannel();
-	if(plugChannel < pSndFile->GetNumChannels())
+	if(plugChannel < sndFile->GetNumChannels())
 	{
 		PLUGINDEX newPlug = static_cast<PLUGINDEX>(nID - ID_PLUGSELECT);
-		if(newPlug <= MAX_MIXPLUGINS && newPlug != pSndFile->ChnSettings[plugChannel].nMixPlugin)
+		if(newPlug <= MAX_MIXPLUGINS && newPlug != sndFile->ChnSettings[plugChannel].nMixPlugin)
 		{
-			pSndFile->ChnSettings[plugChannel].nMixPlugin = newPlug;
-			if(pSndFile->GetModSpecifications().supportsPlugins)
+			sndFile->ChnSettings[plugChannel].nMixPlugin = newPlug;
+			if(sndFile->GetModSpecifications().supportsPlugins)
 			{
 				SetModified(false);
 			}
@@ -5946,19 +6000,19 @@ bool CViewPattern::HandleSplit(ModCommand &m, int note)
 
 	if(isSplit)
 	{
-		CModDoc *pModDoc = GetDocument();
-		if(pModDoc == nullptr)
+		CModDoc *modDoc = GetDocument();
+		if(modDoc == nullptr)
 			return false;
-		const CSoundFile &sndFile = pModDoc->GetSoundFile();
+		const CSoundFile &sndFile = modDoc->GetSoundFile();
 
-		if(pModDoc->GetSplitKeyboardSettings().octaveLink && note <= NOTE_MAX)
+		if(modDoc->GetSplitKeyboardSettings().octaveLink && note <= NOTE_MAX)
 		{
-			note += 12 * pModDoc->GetSplitKeyboardSettings().octaveModifier;
+			note += 12 * modDoc->GetSplitKeyboardSettings().octaveModifier;
 			Limit(note, sndFile.GetModSpecifications().noteMin, sndFile.GetModSpecifications().noteMax);
 		}
-		if(pModDoc->GetSplitKeyboardSettings().splitInstrument)
+		if(modDoc->GetSplitKeyboardSettings().splitInstrument)
 		{
-			ins = pModDoc->GetSplitKeyboardSettings().splitInstrument;
+			ins = modDoc->GetSplitKeyboardSettings().splitInstrument;
 		}
 	}
 
@@ -5985,7 +6039,6 @@ bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, const CSoundFile &
 {
 	for(PLUGINDEX plug = 0; plug <= MAX_MIXPLUGINS; plug++)
 	{
-
 		bool itemFound = false;
 
 		CString s;
@@ -6059,9 +6112,9 @@ bool CViewPattern::BuildSoloMuteCtxMenu(HMENU hMenu, CInputHandler *ih, UINT nCh
 
 bool CViewPattern::BuildRecordCtxMenu(HMENU hMenu, CInputHandler *ih, CHANNELINDEX nChn) const
 {
-	const CModDoc *pModDoc = GetDocument();
-	AppendMenu(hMenu, pModDoc->IsChannelRecord1(nChn) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_RECSELECT, ih->GetKeyTextFromCommand(kcChannelRecordSelect, _T("R&ecord select")));
-	AppendMenu(hMenu, pModDoc->IsChannelRecord2(nChn) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_SPLITRECSELECT, ih->GetKeyTextFromCommand(kcChannelSplitRecordSelect, _T("S&plit Record select")));
+	const auto recordGroup = GetDocument()->GetChannelRecordGroup(nChn);
+	AppendMenu(hMenu, (recordGroup == RecordGroup::Group1) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_RECSELECT, ih->GetKeyTextFromCommand(kcChannelRecordSelect, _T("R&ecord Select")));
+	AppendMenu(hMenu, (recordGroup == RecordGroup::Group2) ? (MF_STRING | MF_CHECKED) : MF_STRING, ID_EDIT_SPLITRECSELECT, ih->GetKeyTextFromCommand(kcChannelSplitRecordSelect, _T("S&plit Record Select")));
 	return true;
 }
 

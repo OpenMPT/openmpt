@@ -766,7 +766,6 @@ void CVuMeter::DrawVuMeter(CDC &dc, bool /*redraw*/)
 	CRect rect;
 	GetClientRect(&rect);
 	int vu = (m_lastLevel * (rect.bottom-rect.top)) >> 8;
-	int lastvu = (m_lastDisplayedLevel * (rect.bottom-rect.top)) >> 8;
 	int cy = rect.bottom - rect.top;
 	if (cy < 1) cy = 1;
 	for (int ry=rect.bottom-1; ry>rect.top; ry-=2)

@@ -1237,53 +1237,46 @@ bool CModDoc::NoFxChannel(CHANNELINDEX nChn, bool bNoFx, bool updateMix)
 }
 
 
-bool CModDoc::IsChannelRecord1(CHANNELINDEX channel) const
+RecordGroup CModDoc::GetChannelRecordGroup(CHANNELINDEX channel) const
 {
-	return m_bsMultiRecordMask[channel];
+	if(channel >= GetNumChannels())
+		return RecordGroup::NoGroup;
+	if(m_bsMultiRecordMask[channel])
+		return RecordGroup::Group1;
+	if(m_bsMultiSplitRecordMask[channel])
+		return RecordGroup::Group2;
+	return RecordGroup::NoGroup;
 }
 
 
-bool CModDoc::IsChannelRecord2(CHANNELINDEX channel) const
+void CModDoc::SetChannelRecordGroup(CHANNELINDEX channel, RecordGroup recordGroup)
 {
-	return m_bsMultiSplitRecordMask[channel];
+	if(channel >= GetNumChannels())
+		return;
+	m_bsMultiRecordMask.set(channel, recordGroup == RecordGroup::Group1);
+	m_bsMultiSplitRecordMask.set(channel, recordGroup == RecordGroup::Group2);
 }
 
-BYTE CModDoc::IsChannelRecord(CHANNELINDEX channel) const
-{
-	if(IsChannelRecord1(channel)) return 1;
-	if(IsChannelRecord2(channel)) return 2;
-	return 0;
-}
 
-void CModDoc::Record1Channel(CHANNELINDEX channel, bool select)
+void CModDoc::ToggleChannelRecordGroup(CHANNELINDEX channel, RecordGroup recordGroup)
 {
-	if (!select)
-	{
-		m_bsMultiRecordMask.reset(channel);
-		m_bsMultiSplitRecordMask.reset(channel);
-	} else
+	if(channel >= GetNumChannels())
+		return;
+	if(recordGroup == RecordGroup::Group1)
 	{
 		m_bsMultiRecordMask.flip(channel);
 		m_bsMultiSplitRecordMask.reset(channel);
+	} else if(recordGroup == RecordGroup::Group2)
+	{
+		m_bsMultiRecordMask.reset(channel);
+		m_bsMultiSplitRecordMask.flip(channel);
 	}
 }
 
-void CModDoc::Record2Channel(CHANNELINDEX channel, bool select)
-{
-	if (!select)
-	{
-		m_bsMultiRecordMask.reset(channel);
-		m_bsMultiSplitRecordMask.reset(channel);
-	} else
-	{
-		m_bsMultiSplitRecordMask.flip(channel);
-		m_bsMultiRecordMask.reset(channel);
-	}
-}
 
 void CModDoc::ReinitRecordState(bool unselect)
 {
-	if (unselect)
+	if(unselect)
 	{
 		m_bsMultiRecordMask.reset();
 		m_bsMultiSplitRecordMask.reset();

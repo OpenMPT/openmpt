@@ -122,13 +122,13 @@ CChannelManagerDlg::CChannelManagerDlg()
 	: m_drawableArea(0, 0, 0, 0)
 	, m_buttonHeight(CM_BT_HEIGHT)
 {
-	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
+	for(CHANNELINDEX chn = 0; chn < MAX_BASECHANNELS; chn++)
 	{
-		pattern[nChn] = nChn;
-		memory[0][nChn] = 0;
-		memory[1][nChn] = 0;
-		memory[2][nChn] = 0;
-		memory[3][nChn] = nChn;
+		pattern[chn] = chn;
+		memory[0][chn] = 0;
+		memory[1][chn] = 0;
+		memory[2][chn] = 0;
+		memory[3][chn] = chn;
 	}
 }
 
@@ -198,21 +198,19 @@ void CChannelManagerDlg::OnApply()
 		EndWaitCursor();
 		return;
 	}
-	
 
 	// Update manager internal store memory
-	for(CHANNELINDEX nChn = 0; nChn < numChannels; nChn++)
+	for(CHANNELINDEX chn = 0; chn < numChannels; chn++)
 	{
-		CHANNELINDEX newChn = newChnOrder[nChn];
-		if(nChn != newChn)
+		CHANNELINDEX newChn = newChnOrder[chn];
+		if(chn != newChn)
 		{
-			memory[0][nChn] = newMemory[0][newChn];
-			memory[1][nChn] = newMemory[1][newChn];
-			memory[2][nChn] = newMemory[2][newChn];
+			memory[0][chn] = newMemory[0][newChn];
+			memory[1][chn] = newMemory[1][newChn];
+			memory[2][chn] = newMemory[2][newChn];
 		}
-		memory[3][nChn] = nChn;
+		memory[3][chn] = chn;
 	}
-
 
 	cs.Leave();
 	EndWaitCursor();
@@ -240,18 +238,13 @@ void CChannelManagerDlg::OnClose()
 
 void CChannelManagerDlg::OnSelectAll()
 {
-	if(m_ModDoc)
-		for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
-			select[nChn] = true;
-
+	select.set();
 	InvalidateRect(m_drawableArea, FALSE);
 }
 
 void CChannelManagerDlg::OnInvert()
 {
-	if(m_ModDoc)
-		for(CHANNELINDEX nChn = 0 ; nChn < m_ModDoc->GetNumChannels() ; nChn++)
-			select[nChn] = !select[nChn];
+	select.flip();
 	InvalidateRect(m_drawableArea, FALSE);
 }
 
@@ -297,9 +290,10 @@ void CChannelManagerDlg::OnAction1()
 					CHANNELINDEX sourceChn = pattern[chn];
 					if(!removed[sourceChn])
 					{
-						if(select[sourceChn]) nbSelect++;
-						BYTE rec = m_ModDoc->IsChannelRecord(sourceChn);
-						if(select[sourceChn] && rec == 1) nbOk++;
+						if(select[sourceChn])
+							nbSelect++;
+						if(select[sourceChn] && m_ModDoc->GetChannelRecordGroup(sourceChn) == RecordGroup::Group1)
+							nbOk++;
 					}
 				}
 				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
@@ -307,8 +301,10 @@ void CChannelManagerDlg::OnAction1()
 					CHANNELINDEX sourceChn = pattern[chn];
 					if(!removed[sourceChn] && select[sourceChn])
 					{
-						if(select[sourceChn] && nbSelect != nbOk && m_ModDoc->IsChannelRecord(sourceChn) != 1) m_ModDoc->Record1Channel(sourceChn);
-						else if(nbSelect == nbOk) m_ModDoc->Record1Channel(sourceChn, false);
+						if(select[sourceChn] && nbSelect != nbOk && m_ModDoc->GetChannelRecordGroup(sourceChn) != RecordGroup::Group1)
+							m_ModDoc->SetChannelRecordGroup(sourceChn, RecordGroup::Group1);
+						else if(nbSelect == nbOk)
+							m_ModDoc->SetChannelRecordGroup(sourceChn, RecordGroup::NoGroup);
 					}
 				}
 				break;
@@ -381,9 +377,10 @@ void CChannelManagerDlg::OnAction2()
 					CHANNELINDEX sourceChn = pattern[chn];
 					if(!removed[sourceChn])
 					{
-						if(select[sourceChn]) nbSelect++;
-						BYTE rec = m_ModDoc->IsChannelRecord(sourceChn);
-						if(select[sourceChn] && rec == 2) nbOk++;
+						if(select[sourceChn])
+							nbSelect++;
+						if(select[sourceChn] && m_ModDoc->GetChannelRecordGroup(sourceChn) == RecordGroup::Group2)
+							nbOk++;
 					}
 				}
 				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
@@ -391,8 +388,10 @@ void CChannelManagerDlg::OnAction2()
 					CHANNELINDEX sourceChn = pattern[chn];
 					if(!removed[sourceChn] && select[sourceChn])
 					{
-						if(select[sourceChn] && nbSelect != nbOk && m_ModDoc->IsChannelRecord(sourceChn) != 2) m_ModDoc->Record2Channel(sourceChn);
-						else if(nbSelect == nbOk) m_ModDoc->Record2Channel(sourceChn, false);
+						if(select[sourceChn] && nbSelect != nbOk && m_ModDoc->GetChannelRecordGroup(sourceChn) != RecordGroup::Group2)
+							m_ModDoc->SetChannelRecordGroup(sourceChn, RecordGroup::Group2);
+						else if(nbSelect == nbOk)
+							m_ModDoc->SetChannelRecordGroup(sourceChn, RecordGroup::NoGroup);
 					}
 				}
 				break;
@@ -428,25 +427,25 @@ void CChannelManagerDlg::OnStore(void)
 	switch(m_currentTab)
 	{
 		case kSoloMute:
-			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+			for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 			{
-				CHANNELINDEX sourceChn = pattern[nChn];
+				CHANNELINDEX sourceChn = pattern[chn];
 				memory[0][sourceChn] = 0;
-				if(m_ModDoc->IsChannelMuted(sourceChn)) memory[0][nChn] |= 1;
-				if(m_ModDoc->IsChannelSolo(sourceChn))  memory[0][nChn] |= 2;
+				if(m_ModDoc->IsChannelMuted(sourceChn)) memory[0][chn] |= 1;
+				if(m_ModDoc->IsChannelSolo(sourceChn))  memory[0][chn] |= 2;
 			}
 			break;
 		case kRecordSelect:
-			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
-				memory[1][nChn] = m_ModDoc->IsChannelRecord(pattern[nChn]);
+			for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
+				memory[1][chn] = static_cast<uint8>(m_ModDoc->GetChannelRecordGroup(pattern[chn]));
 			break;
 		case kPluginState:
-			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
-				memory[2][nChn] = m_ModDoc->IsChannelNoFx(pattern[nChn]);
+			for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
+				memory[2][chn] = m_ModDoc->IsChannelNoFx(pattern[chn]);
 			break;
 		case kReorderRemove:
-			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
-				memory[3][nChn] = pattern[nChn];
+			for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
+				memory[3][chn] = pattern[chn];
 			break;
 		default:
 			break;
@@ -463,28 +462,27 @@ void CChannelManagerDlg::OnRestore(void)
 	switch(m_currentTab)
 	{
 		case kSoloMute:
-			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+			for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 			{
-				CHANNELINDEX sourceChn = pattern[nChn];
-				m_ModDoc->MuteChannel(sourceChn, (memory[0][nChn] & 1) != 0);
-				m_ModDoc->SoloChannel(sourceChn, (memory[0][nChn] & 2) != 0);
+				CHANNELINDEX sourceChn = pattern[chn];
+				m_ModDoc->MuteChannel(sourceChn, (memory[0][chn] & 1) != 0);
+				m_ModDoc->SoloChannel(sourceChn, (memory[0][chn] & 2) != 0);
 			}
 			break;
 		case kRecordSelect:
 			m_ModDoc->ReinitRecordState(true);
-			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
+			for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 			{
-				if(memory[1][nChn] != 2) m_ModDoc->Record1Channel(pattern[nChn], memory[1][nChn] == 1);
-				if(memory[1][nChn] != 1) m_ModDoc->Record2Channel(pattern[nChn], memory[1][nChn] == 2);
+				m_ModDoc->SetChannelRecordGroup(chn, static_cast<RecordGroup>(memory[1][chn]));
 			}
 			break;
 		case kPluginState:
-			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
-				m_ModDoc->NoFxChannel(pattern[nChn], memory[2][nChn] != 0);
+			for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
+				m_ModDoc->NoFxChannel(pattern[chn], memory[2][chn] != 0);
 			break;
 		case kReorderRemove:
-			for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++)
-				pattern[nChn] = memory[3][nChn];
+			for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
+				pattern[chn] = memory[3][chn];
 			ResetState(false, false, false, false, true);
 			break;
 		default:
@@ -653,9 +651,9 @@ void CChannelManagerDlg::OnPaint()
 		ftn.SourceConstantAlpha = 192;
 		ftn.AlphaFormat = 0;
 
-		for(CHANNELINDEX nChn = 0; nChn < channels; nChn++)
+		for(CHANNELINDEX chn = 0; chn < channels; chn++)
 		{
-			CHANNELINDEX sourceChn = pattern[nChn];
+			CHANNELINDEX sourceChn = pattern[chn];
 			if(select[sourceChn])
 			{
 				CRect btn = move[sourceChn];
@@ -699,9 +697,9 @@ void CChannelManagerDlg::OnPaint()
 	UINT c = 0, l = 0;
 	const CSoundFile &sndFile = m_ModDoc->GetSoundFile();
 	CString s;
-	for(CHANNELINDEX nChn = 0; nChn < channels; nChn++)
+	for(CHANNELINDEX chn = 0; chn < channels; chn++)
 	{
-		CHANNELINDEX sourceChn = pattern[nChn];
+		CHANNELINDEX sourceChn = pattern[chn];
 
 		CString fmt = !sndFile.ChnSettings[sourceChn].szName.empty() ? _T("%1: %2") : _T("Channel %1");
 		s = mpt::cformat(fmt)(sourceChn + 1, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[sourceChn].szName));
@@ -729,7 +727,7 @@ void CChannelManagerDlg::OnPaint()
 			color = sndFile.ChnSettings[sourceChn].dwFlags[CHN_MUTE] ? red : green;
 			break;
 		case kRecordSelect:
-			color = brushColors[m_ModDoc->IsChannelRecord(sourceChn) % std::size(brushColors)];
+			color = brushColors[static_cast<size_t>(m_ModDoc->GetChannelRecordGroup(sourceChn)) % std::size(brushColors)];
 			break;
 		case kPluginState:
 			color = sndFile.ChnSettings[sourceChn].dwFlags[CHN_NOFX] ? red : green;
@@ -841,9 +839,7 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 		if(hit)
 		{
 			// Rearrange channels
-			const auto IsSelected = [this](PATTERNINDEX sourceChn) {
-				return select[sourceChn];
-			};
+			const auto IsSelected = std::bind(&decltype(select)::test, &select, std::placeholders::_1);
 
 			const auto numChannels = m_ModDoc->GetNumChannels();
 			std::vector<CHANNELINDEX> newOrder{ pattern.begin(), pattern.begin() + numChannels };
@@ -973,7 +969,11 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point, MouseButton button
 						{
 							m_ModDoc->MuteChannel(n, false);
 							m_ModDoc->SoloChannel(n, true);
-							for(CHANNELINDEX nChn = 0; nChn < m_ModDoc->GetNumChannels(); nChn++) if(nChn != n) m_ModDoc->MuteChannel(nChn, true);
+							for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
+							{
+								if(chn != n)
+									m_ModDoc->MuteChannel(chn, true);
+							}
 							invalidate = client = m_drawableArea;
 						}
 						else m_ModDoc->SoloChannel(n, false);
@@ -989,17 +989,16 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point, MouseButton button
 					break;
 				case kRecordSelect:
 				{
-					auto rec = m_ModDoc->IsChannelRecord(n);
+					auto rec = m_ModDoc->GetChannelRecordGroup(n);
 					if(m_buttonAction == kUndetermined)
-						m_buttonAction = (!rec || rec != (button == CM_BT_LEFT ? 1 : 2)) ? kAction1 : kAction2;
+						m_buttonAction = (rec == RecordGroup::NoGroup || rec != (button == CM_BT_LEFT ? RecordGroup::Group1 : RecordGroup::Group2)) ? kAction1 : kAction2;
 
-					m_ModDoc->Record1Channel(n, false);
-					m_ModDoc->Record2Channel(n, false);
-					if(m_buttonAction == kAction1)
-					{
-						if(button == CM_BT_LEFT) m_ModDoc->Record1Channel(n);
-						else m_ModDoc->Record2Channel(n);
-					}
+					if(m_buttonAction == kAction1 && button == CM_BT_LEFT)
+						m_ModDoc->SetChannelRecordGroup(n, RecordGroup::Group1);
+					else if(m_buttonAction == kAction1 && button == CM_BT_RIGHT)
+						m_ModDoc->SetChannelRecordGroup(n, RecordGroup::Group2);
+					else
+						m_ModDoc->SetChannelRecordGroup(n, RecordGroup::NoGroup);
 					m_ModDoc->UpdateAllViews(nullptr, GeneralHint(n).Channels(), this);
 					break;
 				}
