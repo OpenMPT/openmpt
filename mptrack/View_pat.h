@@ -242,8 +242,8 @@ public:
 
 	int GetXScrollPos() const { return m_nXScroll; }
 	int GetYScrollPos() const { return m_nYScroll; }
-	int GetColumnWidth() const { return m_szCell.cx; }
-	int GetColumnHeight() const { return m_szCell.cy; }
+	int GetChannelWidth() const { return m_szCell.cx; }
+	int GetRowHeight() const { return m_szCell.cy; }
 	int GetSmoothScrollOffset() const;
 
 	PATTERNINDEX GetCurrentPattern() const { return m_nPattern; }

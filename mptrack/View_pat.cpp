@@ -240,7 +240,7 @@ bool CViewPattern::SetCurrentPattern(PATTERNINDEX pat, ROWINDEX row)
 	if(m_bWholePatternFitsOnScreen)
 		SetScrollPos(SB_VERT, 0);
 	else if(updateScroll)
-		SetScrollPos(SB_VERT, (int)GetCurrentRow() * GetColumnHeight());
+		SetScrollPos(SB_VERT, (int)GetCurrentRow() * GetRowHeight());
 
 	UpdateScrollPos();
 	InvalidatePattern(true, true);
@@ -476,8 +476,8 @@ DragItem CViewPattern::GetDragItem(CPoint point, RECT &outRect) const
 	CRect rcClient, rect, plugRect;
 
 	GetClientRect(&rcClient);
-	rect.SetRect(m_szHeader.cx, 0, m_szHeader.cx + GetColumnWidth(), m_szHeader.cy);
-	plugRect.SetRect(m_szHeader.cx, m_szHeader.cy - m_szPluginHeader.cy, m_szHeader.cx + GetColumnWidth(), m_szHeader.cy);
+	rect.SetRect(m_szHeader.cx, 0, m_szHeader.cx + GetChannelWidth(), m_szHeader.cy);
+	plugRect.SetRect(m_szHeader.cx, m_szHeader.cy - m_szPluginHeader.cy, m_szHeader.cx + GetChannelWidth(), m_szHeader.cy);
 
 	const auto xOffset = static_cast<CHANNELINDEX>(GetXScrollPos());
 	const CHANNELINDEX numChannels = pSndFile->GetNumChannels();
@@ -492,7 +492,7 @@ DragItem CViewPattern::GetDragItem(CPoint point, RECT &outRect) const
 				outRect = plugRect;
 				return {DragItem::PluginName, n};
 			}
-			plugRect.OffsetRect(GetColumnWidth(), 0);
+			plugRect.OffsetRect(GetChannelWidth(), 0);
 		}
 	}
 	for(CHANNELINDEX n = xOffset; n < numChannels; n++)
@@ -502,7 +502,7 @@ DragItem CViewPattern::GetDragItem(CPoint point, RECT &outRect) const
 			outRect = rect;
 			return {DragItem::ChannelHeader, n};
 		}
-		rect.OffsetRect(GetColumnWidth(), 0);
+		rect.OffsetRect(GetChannelWidth(), 0);
 	}
 	if(pSndFile->Patterns.IsValidPat(m_nPattern) && (pSndFile->GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)))
 	{
@@ -570,7 +570,7 @@ bool CViewPattern::DragToSel(const PatternCursor &cursor, bool scrollHorizontal,
 	{
 		int maxcol = (rect.right - m_szHeader.cx) - 4;
 		maxcol -= GetColumnOffset(cursor.GetColumnType());
-		maxcol /= GetColumnWidth();
+		maxcol /= GetChannelWidth();
 		if(col < xofs)
 		{
 			CSize size(-m_szCell.cx, 0);

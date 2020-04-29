@@ -239,7 +239,7 @@ POINT CViewPattern::GetPointFromPosition(PatternCursor cursor) const
 // 		cursor.Move(0, 1, 0);
 // 	}
 
-	pt.x = (cursor.GetChannel() - xofs) * GetColumnWidth();
+	pt.x = (cursor.GetChannel() - xofs) * GetChannelWidth();
 
 	for(int i = 0; i < imax; i++)
 	{
@@ -262,12 +262,12 @@ PatternCursor CViewPattern::GetPositionFromPoint(POINT pt) const
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	int xofs = GetXScrollPos();
 	int yofs = GetYScrollPos();
-	int x = xofs + (pt.x - m_szHeader.cx) / GetColumnWidth();
+	int x = xofs + (pt.x - m_szHeader.cx) / GetChannelWidth();
 	if (pt.x < m_szHeader.cx) x = (xofs) ? xofs - 1 : 0;
 
 	int y = yofs - m_nMidRow + (pt.y - m_szHeader.cy + GetSmoothScrollOffset()) / m_szCell.cy;
 	if (y < 0) y = 0;
-	int xx = (pt.x - m_szHeader.cx) % GetColumnWidth(), dx = 0;
+	int xx = (pt.x - m_szHeader.cx) % GetChannelWidth(), dx = 0;
 	int imax = 4;
 	if (imax > (int)m_nDetailLevel + 1) imax = m_nDetailLevel + 1;
 	int i = 0;
@@ -1420,7 +1420,7 @@ BOOL CViewPattern::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 				InvalidateRect(&rect, FALSE);
 			} else
 			{
-				ScrollWindow((m_nXScroll-x)*GetColumnWidth(), 0, &rect, &rect);
+				ScrollWindow((m_nXScroll - x) * GetChannelWidth(), 0, &rect, &rect);
 			}
 			m_nXScroll = x;
 		}
@@ -1433,7 +1433,7 @@ BOOL CViewPattern::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 				InvalidateRect(&rect, FALSE);
 			} else
 			{
-				ScrollWindow(0, (m_nYScroll-y)*GetColumnHeight(), &rect, &rect);
+				ScrollWindow(0, (m_nYScroll - y) * GetRowHeight(), &rect, &rect);
 			}
 			m_nYScroll = y;
 		}
