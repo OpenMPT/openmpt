@@ -107,7 +107,7 @@ BOOL COptionsColors::OnInitDialog()
 		m_ComboItem.SetItemData(m_ComboItem.AddString(colorDefs[i].name), i);
 	}
 	m_ComboItem.SetCurSel(0);
-	m_BtnPreview.SetWindowPos(NULL,
+	m_BtnPreview.SetWindowPos(nullptr,
 		0, 0,
 		Util::ScalePixels(PREVIEWBMP_WIDTH * 2, m_hWnd) + 2, Util::ScalePixels(PREVIEWBMP_HEIGHT * 2, m_hWnd) + 2,
 		SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
@@ -163,10 +163,10 @@ BOOL COptionsColors::OnInitDialog()
 
 BOOL COptionsColors::OnKillActive()
 {
-	int temp_nRowSpacing = GetDlgItemInt(IDC_PRIMARYHILITE);
-	int temp_nRowSpacing2 = GetDlgItemInt(IDC_SECONDARYHILITE);
+	int highlightMeasures = GetDlgItemInt(IDC_PRIMARYHILITE);
+	int highlightBeats = GetDlgItemInt(IDC_SECONDARYHILITE);
 
-	if ((temp_nRowSpacing2 > temp_nRowSpacing))
+	if(highlightBeats > highlightMeasures)
 	{
 		Reporting::Warning("Error: Primary highlight must be greater than or equal secondary highlight.");
 		::SetFocus(::GetDlgItem(m_hWnd, IDC_PRIMARYHILITE));
@@ -296,35 +296,20 @@ void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 	int nColor = -1;
 	switch(nIdCtl)
 	{
-	case IDC_BUTTON1:	nColor = colorDefs[m_nColorItem].colorIndex1; break;
-	case IDC_BUTTON2:	nColor = colorDefs[m_nColorItem].colorIndex2; break;
-	case IDC_BUTTON3:	nColor = colorDefs[m_nColorItem].colorIndex3; break;
+	case IDC_BUTTON1: nColor = colorDefs[m_nColorItem].colorIndex1; break;
+	case IDC_BUTTON2: nColor = colorDefs[m_nColorItem].colorIndex2; break;
+	case IDC_BUTTON3: nColor = colorDefs[m_nColorItem].colorIndex3; break;
 	}
-	if (!lpdis) return;
-	if (nColor >= 0)
+	if(!lpdis)
+		return;
+	CRect rect = lpdis->rcItem;
+	if(nColor >= 0)
 	{
-		HPEN pen1 = GetStockPen(WHITE_PEN), pen2 = GetStockPen(BLACK_PEN);
-		if (lpdis->itemState & ODS_SELECTED)
-		{
-			HPEN pentmp = pen1;
-			pen1 = pen2;
-			pen2 = pentmp;
-		}
 		HDC hdc = lpdis->hDC;
-		HBRUSH brush = ::CreateSolidBrush(CustomColors[nColor]);
-		::FillRect(hdc, &lpdis->rcItem, brush);
-		::DeleteObject(brush);
-		HPEN oldpen = (HPEN)::SelectObject(hdc, pen1);
-		::MoveToEx(hdc, lpdis->rcItem.left, lpdis->rcItem.bottom-1, NULL);
-		::LineTo(hdc, lpdis->rcItem.left, lpdis->rcItem.top);
-		::LineTo(hdc, lpdis->rcItem.right, lpdis->rcItem.top);
-		::SelectObject(hdc, pen2);
-		::MoveToEx(hdc, lpdis->rcItem.right-1, lpdis->rcItem.top, NULL);
-		::LineTo(hdc, lpdis->rcItem.right-1, lpdis->rcItem.bottom-1);
-		::LineTo(hdc, lpdis->rcItem.left, lpdis->rcItem.bottom-1);
-		if (oldpen) ::SelectObject(hdc, oldpen);
-	} else
-	if ((nIdCtl == IDC_BUTTON4) && (m_pPreviewDib))
+		::SetDCBrushColor(hdc, CustomColors[nColor]);
+		::DrawEdge(hdc, rect, (lpdis->itemState & ODS_SELECTED) ? BDR_SUNKENINNER : BDR_RAISEDINNER, BF_RECT | BF_ADJUST);
+		::FillRect(hdc, rect, GetStockBrush(DC_BRUSH));
+	} else if((nIdCtl == IDC_BUTTON4) && (m_pPreviewDib))
 	{
 		int y = colorDefs[m_nColorItem].previewImage;
 		RGBQUAD *p = m_pPreviewDib->bmiColors;
@@ -386,21 +371,12 @@ void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 		}
 
 		HDC hdc = lpdis->hDC;
-		HPEN oldpen = SelectPen(hdc, GetStockPen(DC_PEN));
-		::SetDCPenColor(hdc, GetSysColor(COLOR_BTNSHADOW));
-		::MoveToEx(hdc, lpdis->rcItem.left, lpdis->rcItem.bottom-1, NULL);
-		::LineTo(hdc, lpdis->rcItem.left, lpdis->rcItem.top);
-		::LineTo(hdc, lpdis->rcItem.right, lpdis->rcItem.top);
-		::SetDCPenColor(hdc, GetSysColor(COLOR_BTNHIGHLIGHT));
-		::MoveToEx(hdc, lpdis->rcItem.right-1, lpdis->rcItem.top, NULL);
-		::LineTo(hdc, lpdis->rcItem.right-1, lpdis->rcItem.bottom-1);
-		::LineTo(hdc, lpdis->rcItem.left, lpdis->rcItem.bottom-1);
-		if (oldpen) ::SelectObject(hdc, oldpen);
+		::DrawEdge(hdc, rect, BDR_SUNKENINNER, BF_RECT | BF_ADJUST);
 		StretchDIBits(	hdc,
-						lpdis->rcItem.left+1,
-						lpdis->rcItem.top+1,
-						lpdis->rcItem.right - lpdis->rcItem.left - 2,
-						lpdis->rcItem.bottom - lpdis->rcItem.top - 2,
+						rect.left,
+						rect.top,
+						rect.Width(),
+						rect.Height(),
 						0,
 						m_pPreviewDib->bmiHeader.biHeight - ((y+1) * PREVIEWBMP_HEIGHT),
 						m_pPreviewDib->bmiHeader.biWidth,
@@ -413,7 +389,7 @@ void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 }
 
 
-static DWORD rgbCustomColors[16] =
+static COLORREF rgbCustomColors[16] =
 {
 	0x808080,	0x0000FF,	0x00FF00,	0x00FFFF,
 	0xFF0000,	0xFF00FF,	0xFFFF00,	0xFFFFFF,
@@ -422,22 +398,22 @@ static DWORD rgbCustomColors[16] =
 };
 
 
-void COptionsColors::SelectColor(COLORREF *lprgb)
+void COptionsColors::SelectColor(COLORREF &color)
 {
 	CHOOSECOLOR cc;
 	cc.lStructSize = sizeof(CHOOSECOLOR);
 	cc.hwndOwner = m_hWnd;
 	cc.hInstance = NULL;
-	cc.rgbResult = *lprgb;
+	cc.rgbResult = color;
 	cc.lpCustColors = rgbCustomColors;
 	cc.Flags = CC_RGBINIT | CC_FULLOPEN;
 	cc.lCustData = 0;
-	cc.lpfnHook = NULL;
-	cc.lpTemplateName = NULL;
+	cc.lpfnHook = nullptr;
+	cc.lpTemplateName = nullptr;
 	if (::ChooseColor(&cc))
 	{
-		*lprgb = cc.rgbResult;
-		InvalidateRect(NULL, FALSE);
+		color = cc.rgbResult;
+		Invalidate(FALSE);
 		OnSettingsChanged();
 	}
 }
@@ -445,19 +421,19 @@ void COptionsColors::SelectColor(COLORREF *lprgb)
 
 void COptionsColors::OnSelectColor1()
 {
-	SelectColor(&CustomColors[colorDefs[m_nColorItem].colorIndex1]);
+	SelectColor(CustomColors[colorDefs[m_nColorItem].colorIndex1]);
 }
 
 
 void COptionsColors::OnSelectColor2()
 {
-	SelectColor(&CustomColors[colorDefs[m_nColorItem].colorIndex2]);
+	SelectColor(CustomColors[colorDefs[m_nColorItem].colorIndex2]);
 }
 
 
 void COptionsColors::OnSelectColor3()
 {
-	SelectColor(&CustomColors[colorDefs[m_nColorItem].colorIndex3]);
+	SelectColor(CustomColors[colorDefs[m_nColorItem].colorIndex3]);
 }
 
 
@@ -498,7 +474,7 @@ void COptionsColors::OnUpdateDialog()
 		m_TxtColor2.SetWindowText(cd.descText2);
 		m_TxtColor2.ShowWindow(SW_SHOW);
 		m_BtnColor2.ShowWindow(SW_SHOW);
-		m_BtnColor2.InvalidateRect(NULL, FALSE);
+		m_BtnColor2.Invalidate(FALSE);
 	} else
 	{
 		m_TxtColor2.ShowWindow(SW_HIDE);
@@ -509,24 +485,24 @@ void COptionsColors::OnUpdateDialog()
 		m_TxtColor3.SetWindowText(cd.descText3);
 		m_TxtColor3.ShowWindow(SW_SHOW);
 		m_BtnColor3.ShowWindow(SW_SHOW);
-		m_BtnColor3.InvalidateRect(NULL, FALSE);
+		m_BtnColor3.Invalidate(FALSE);
 	} else
 	{
 		m_TxtColor3.ShowWindow(SW_HIDE);
 		m_BtnColor3.ShowWindow(SW_HIDE);
 	}
-	m_BtnColor1.InvalidateRect(NULL, FALSE);
-	m_BtnPreview.InvalidateRect(NULL, FALSE);
+	m_BtnColor1.Invalidate(FALSE);
+	m_BtnPreview.Invalidate(FALSE);
 }
 
 
 void COptionsColors::OnPreviewChanged()
 {
 	OnSettingsChanged();
-	m_BtnPreview.InvalidateRect(NULL, FALSE);
-	m_BtnColor1.InvalidateRect(NULL, FALSE);
-	m_BtnColor2.InvalidateRect(NULL, FALSE);
-	m_BtnColor3.InvalidateRect(NULL, FALSE);
+	m_BtnPreview.Invalidate(FALSE);
+	m_BtnColor1.Invalidate(FALSE);
+	m_BtnColor2.Invalidate(FALSE);
+	m_BtnColor3.Invalidate(FALSE);
 }
 
 

@@ -29,7 +29,7 @@ protected:
 public:
 	COptionsColors():CPropertyPage(IDD_OPTIONS_COLORS) { }
 	~COptionsColors() { delete m_pPreviewDib; }
-	void SelectColor(COLORREF *);
+	void SelectColor(COLORREF &color);
 
 protected:
 	BOOL OnInitDialog() override;
