@@ -12,7 +12,8 @@
 
 #include "BuildSettings.h"
 
-#include "Snd_defs.h"
+#include "ResizableDialog.h"
+#include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -101,7 +102,7 @@ protected:
 };
 
 
-class PatternClipboardDialog : public CDialog
+class PatternClipboardDialog : public ResizableDialog
 {
 protected:
 	// The one and only pattern clipboard dialog object
@@ -121,18 +122,18 @@ protected:
 		afx_msg void OnKillFocus(CWnd *newWnd);
 	};
 
-	CSpinButtonCtrl numClipboardsSpin;
-	CListBox clipList;
-	CInlineEdit editNameBox;
-	int posX = -1, posY = -1;
-	bool isLocked = true, isCreated = false;
+	CSpinButtonCtrl m_numClipboardsSpin;
+	CListBox m_clipList;
+	CInlineEdit m_editNameBox;
+	int m_posX = -1, m_posY = -1;
+	bool m_isLocked = true, m_isCreated = false;
 
 public:
 	static void UpdateList();
 	static void Show();
 	static void Toggle()
 	{
-		if(instance.isCreated)
+		if(instance.m_isCreated)
 			instance.OnCancel();
 		else
 			instance.Show();

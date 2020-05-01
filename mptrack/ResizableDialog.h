@@ -21,6 +21,7 @@ private:
 	CPoint m_minSize;
 
 public:
+	ResizableDialog() = default;
 	explicit ResizableDialog(UINT nIDTemplate, CWnd *pParentWnd = nullptr);
 
 protected:

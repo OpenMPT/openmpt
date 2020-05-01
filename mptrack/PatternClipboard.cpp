@@ -1025,46 +1025,46 @@ bool PatternClipboard::FromSystemClipboard(std::string &data)
 }
 
 
-BEGIN_MESSAGE_MAP(PatternClipboardDialog, CDialog)
-	ON_EN_UPDATE(IDC_EDIT1,		&PatternClipboardDialog::OnNumClipboardsChanged)
-	ON_LBN_SELCHANGE(IDC_LIST1,	&PatternClipboardDialog::OnSelectClipboard)
-	ON_LBN_DBLCLK(IDC_LIST1,	&PatternClipboardDialog::OnEditName)
+BEGIN_MESSAGE_MAP(PatternClipboardDialog, ResizableDialog)
+	ON_EN_UPDATE(IDC_EDIT1,     &PatternClipboardDialog::OnNumClipboardsChanged)
+	ON_LBN_SELCHANGE(IDC_LIST1, &PatternClipboardDialog::OnSelectClipboard)
+	ON_LBN_DBLCLK(IDC_LIST1,    &PatternClipboardDialog::OnEditName)
 END_MESSAGE_MAP()
 
 PatternClipboardDialog PatternClipboardDialog::instance;
 
 void PatternClipboardDialog::DoDataExchange(CDataExchange *pDX)
 {
-	DDX_Control(pDX, IDC_SPIN1,	numClipboardsSpin);
-	DDX_Control(pDX, IDC_LIST1,	clipList);
+	DDX_Control(pDX, IDC_SPIN1, m_numClipboardsSpin);
+	DDX_Control(pDX, IDC_LIST1, m_clipList);
 }
 
 
-PatternClipboardDialog::PatternClipboardDialog() : editNameBox(*this)
+PatternClipboardDialog::PatternClipboardDialog() : m_editNameBox(*this)
 {
 }
 
 
 void PatternClipboardDialog::Show()
 {
-	instance.isLocked = true;
-	if(!instance.isCreated)
+	instance.m_isLocked = true;
+	if(!instance.m_isCreated)
 	{
 		instance.Create(IDD_CLIPBOARD, CMainFrame::GetMainFrame());
-		instance.numClipboardsSpin.SetRange(0, int16_max);
+		instance.m_numClipboardsSpin.SetRange(0, int16_max);
 	}
 	instance.SetDlgItemInt(IDC_EDIT1, mpt::saturate_cast<UINT>(PatternClipboard::GetClipboardSize()), FALSE);
-	instance.isLocked = false;
-	instance.isCreated = true;
+	instance.m_isLocked = false;
+	instance.m_isCreated = true;
 	instance.UpdateList();
 	
-	instance.SetWindowPos(nullptr, instance.posX, instance.posY, 0, 0, SWP_SHOWWINDOW | SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOZORDER | (instance.posX == -1 ? SWP_NOMOVE : 0));
+	instance.SetWindowPos(nullptr, instance.m_posX, instance.m_posY, 0, 0, SWP_SHOWWINDOW | SWP_NOOWNERZORDER | SWP_NOSIZE | SWP_NOZORDER | (instance.m_posX == -1 ? SWP_NOMOVE : 0));
 }
 
 
 void PatternClipboardDialog::OnNumClipboardsChanged()
 {
-	if(isLocked)
+	if(m_isLocked)
 	{
 		return;
 	}
@@ -1076,19 +1076,19 @@ void PatternClipboardDialog::OnNumClipboardsChanged()
 
 void PatternClipboardDialog::UpdateList()
 {
-	if(instance.isLocked)
+	if(instance.m_isLocked)
 	{
 		return;
 	}
-	instance.clipList.ResetContent();
+	instance.m_clipList.ResetContent();
 	PatternClipboard::clipindex_t i = 0;
 	for(const auto &clip : PatternClipboard::instance.m_clipboards)
 	{
-		const int item = instance.clipList.AddString(clip.description);
-		instance.clipList.SetItemDataPtr(item, reinterpret_cast<void *>(i));
+		const int item = instance.m_clipList.AddString(clip.description);
+		instance.m_clipList.SetItemDataPtr(item, reinterpret_cast<void *>(i));
 		if(PatternClipboard::instance.m_activeClipboard == i)
 		{
-			instance.clipList.SetCurSel(item);
+			instance.m_clipList.SetCurSel(item);
 		}
 		i++;
 	}
@@ -1097,11 +1097,11 @@ void PatternClipboardDialog::UpdateList()
 
 void PatternClipboardDialog::OnSelectClipboard()
 {
-	if(isLocked)
+	if(m_isLocked)
 	{
 		return;
 	}
-	PatternClipboard::clipindex_t item = reinterpret_cast<PatternClipboard::clipindex_t>(clipList.GetItemDataPtr(clipList.GetCurSel()));
+	PatternClipboard::clipindex_t item = reinterpret_cast<PatternClipboard::clipindex_t>(m_clipList.GetItemDataPtr(m_clipList.GetCurSel()));
 	PatternClipboard::SelectClipboard(item);
 	OnEndEdit();
 }
@@ -1110,39 +1110,39 @@ void PatternClipboardDialog::OnSelectClipboard()
 void PatternClipboardDialog::OnOK()
 {
 	const CWnd *focus = GetFocus();
-	if(focus == &editNameBox)
+	if(focus == &m_editNameBox)
 	{
 		// User pressed enter in clipboard name edit box => cancel editing
 		OnEndEdit();
-	} else if(focus == &clipList)
+	} else if(focus == &m_clipList)
 	{
 		// User pressed enter in the clipboard name list => start editing
 		OnEditName();
 	} else
 	{
-		CDialog::OnOK();
+		ResizableDialog::OnOK();
 	}
 }
 
 
 void PatternClipboardDialog::OnCancel()
 {
-	if(GetFocus() == &editNameBox)
+	if(GetFocus() == &m_editNameBox)
 	{
 		// User pressed enter in clipboard name edit box => just cancel editing
-		editNameBox.DestroyWindow();
+		m_editNameBox.DestroyWindow();
 		return;
 	}
 
 	OnEndEdit(false);
 
-	isCreated = false;
-	isLocked = true;
+	m_isCreated = false;
+	m_isLocked = true;
 
 	RECT rect;
 	GetWindowRect(&rect);
-	posX = rect.left;
-	posY = rect.top;
+	m_posX = rect.left;
+	m_posY = rect.top;
 
 	DestroyWindow();
 }
@@ -1152,36 +1152,36 @@ void PatternClipboardDialog::OnEditName()
 {
 	OnEndEdit();
 
-	const int sel = clipList.GetCurSel();
+	const int sel = m_clipList.GetCurSel();
 	if(sel == LB_ERR)
 	{
 		return;
 	}
 
 	CRect rect;
-	clipList.GetItemRect(sel, rect);
+	m_clipList.GetItemRect(sel, rect);
 	rect.InflateRect(0, 2, 0, 2);
 
 	// Create the edit control
-	editNameBox.Create(WS_VISIBLE | WS_CHILD | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL, rect, &clipList, 1);
-	editNameBox.SetFont(clipList.GetFont());
-	editNameBox.SetWindowText(PatternClipboard::instance.m_clipboards[sel].description);
-	editNameBox.SetSel(0, -1, TRUE);
-	editNameBox.SetFocus();
-	SetWindowLongPtr(editNameBox.m_hWnd, GWLP_USERDATA, (LONG_PTR)clipList.GetItemDataPtr(sel));
+	m_editNameBox.Create(WS_VISIBLE | WS_CHILD | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL, rect, &m_clipList, 1);
+	m_editNameBox.SetFont(m_clipList.GetFont());
+	m_editNameBox.SetWindowText(PatternClipboard::instance.m_clipboards[sel].description);
+	m_editNameBox.SetSel(0, -1, TRUE);
+	m_editNameBox.SetFocus();
+	SetWindowLongPtr(m_editNameBox.m_hWnd, GWLP_USERDATA, (LONG_PTR)m_clipList.GetItemDataPtr(sel));
 }
 
 
 void PatternClipboardDialog::OnEndEdit(bool apply)
 {
-	if(editNameBox.GetSafeHwnd() == NULL)
+	if(m_editNameBox.GetSafeHwnd() == NULL)
 	{
 		return;
 	}
 
 	if(apply)
 	{
-		size_t sel = GetWindowLongPtr(editNameBox.m_hWnd, GWLP_USERDATA);
+		size_t sel = GetWindowLongPtr(m_editNameBox.m_hWnd, GWLP_USERDATA);
 		if(sel >= PatternClipboard::instance.m_clipboards.size())
 		{
 			// What happened?
@@ -1189,13 +1189,13 @@ void PatternClipboardDialog::OnEndEdit(bool apply)
 		}
 
 		CString newName;
-		editNameBox.GetWindowText(newName);
+		m_editNameBox.GetWindowText(newName);
 
 		PatternClipboard::instance.m_clipboards[sel].description = newName;
 	}
 
-	SetWindowLongPtr(editNameBox.m_hWnd, GWLP_USERDATA, LONG_PTR(-1));
-	editNameBox.DestroyWindow();
+	SetWindowLongPtr(m_editNameBox.m_hWnd, GWLP_USERDATA, LONG_PTR(-1));
+	m_editNameBox.DestroyWindow();
 
 	UpdateList();
 }
