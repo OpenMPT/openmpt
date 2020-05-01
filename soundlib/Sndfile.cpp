@@ -1094,6 +1094,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(KST3PortaAfterArpeggio);
 		playBehaviour.set(kRowDelayWithNoteDelay);
 		playBehaviour.set(kST3OffsetWithoutInstrument);
+		playBehaviour.set(kST3RetrigAfterNoteCut);
 		break;
 
 	case MOD_TYPE_MOD:

@@ -586,6 +586,7 @@ void CSoundFile::UpgradeModule()
 			{ kITPanbrelloHold,            MPT_V("1.26.00.00") },
 			{ KST3PortaAfterArpeggio,      MPT_V("1.27.00.00") },
 			{ kST3OffsetWithoutInstrument, MPT_V("1.28.00.00") },
+			{ kST3RetrigAfterNoteCut,      MPT_V("1.29.00.00") },
 		};
 
 		for(const auto &b : behaviours)
