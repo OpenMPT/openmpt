@@ -1929,7 +1929,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		if(m_dwLastSavedWithVersion < MPT_V("1.18.00.00"))
 		{
 			m_playBehaviour.reset(kITOffset);
-			m_playBehaviour.reset(kFT2OffsetOutOfRange);
+			m_playBehaviour.reset(kFT2ST3OffsetOutOfRange);
 		}
 		if(m_dwLastSavedWithVersion < MPT_V("1.23.00.00"))
 			m_playBehaviour.reset(kFT2Periods);

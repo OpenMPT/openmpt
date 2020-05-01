@@ -629,7 +629,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kFT2PortaNoNote: desc = _T("Do not play portamento-ed note if no previous note is playing"); break;
 		case kFT2KeyOff: desc = _T("FT2-style Kxx handling"); break;
 		case kFT2PanSlide: desc = _T("Volume-column pan slides are finer"); break;
-		case kFT2OffsetOutOfRange: desc = _T("FT2-style 9xx edge case handling"); break;
+		case kFT2ST3OffsetOutOfRange: desc = _T("Offset past sample end stops the note"); break;
 		case kFT2RestrictXCommand: desc = _T("Do not allow ModPlug extensions to X command"); break;
 		case kFT2RetrigWithNoteDelay: desc = _T("Retrigger envelopes if there is a note delay with no note"); break;
 		case kFT2SetPanEnvPos: desc = _T("Lxx only sets the pan envelope position if the volume envelope's sustain flag is set"); break;

@@ -5374,7 +5374,16 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 		if (chn.position.GetUInt() >= chn.nLength || (chn.dwFlags[CHN_LOOP] && chn.position.GetUInt() >= chn.nLoopEnd))
 		{
 			// Offset beyond sample size
-			if (!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MOD | MOD_TYPE_MTM)))
+			if(m_playBehaviour[kFT2ST3OffsetOutOfRange] || GetType() == MOD_TYPE_MTM)
+			{
+				// FT2 Compatibility: Don't play note if offset is beyond sample length
+				// ST3 Compatibility: Don't play note if offset is beyond sample length (non-looped samples only)
+				// Test cases: 3xx-no-old-samp.xm, OffsetPastSampleEnd.s3m
+				chn.dwFlags.set(CHN_FASTVOLRAMP);
+				chn.nPeriod = 0;
+				if(m_playBehaviour[kST3OffsetWithoutInstrument])
+					chn.prevNoteOffset = 0;
+			} else if(!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MOD)))
 			{
 				// IT Compatibility: Offset
 				if(m_playBehaviour[kITOffset])
@@ -5391,12 +5400,6 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 						chn.position.Set(chn.nLength - 2);
 					}
 				}
-			} else if(m_playBehaviour[kFT2OffsetOutOfRange] || GetType() == MOD_TYPE_MTM)
-			{
-				// FT2 Compatibility: Don't play note if offset is beyond sample length
-				// Test case: 3xx-no-old-samp.xm
-				chn.dwFlags.set(CHN_FASTVOLRAMP);
-				chn.nPeriod = 0;
 			} else if(GetType() == MOD_TYPE_MOD && chn.dwFlags[CHN_LOOP])
 			{
 				chn.position.Set(chn.nLoopStart);

@@ -477,7 +477,7 @@ enum PlayBehaviour
 	kFT2PortaNoNote,                // Don't play portamento-ed note if no previous note is playing
 	kFT2KeyOff,                     // FT2-style Kxx handling
 	kFT2PanSlide,                   // Volume-column pan slides should be handled like fine slides
-	kFT2OffsetOutOfRange,           // FT2-style 9xx edge case handling
+	kFT2ST3OffsetOutOfRange,        // Offset past sample end stops the note
 	kFT2RestrictXCommand,           // Don't allow MPT extensions to Xxx command in XM
 	kFT2RetrigWithNoteDelay,        // Retrigger envelopes if there is a note delay with no note
 	kFT2SetPanEnvPos,               // Lxx only sets the pan env position if the volume envelope's sustain flag is set

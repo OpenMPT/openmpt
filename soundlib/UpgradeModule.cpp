@@ -506,7 +506,7 @@ void CSoundFile::UpgradeModule()
 			{ kFT2PortaNoNote,           MPT_V("1.17.03.02") },
 			{ kFT2KeyOff,                MPT_V("1.17.03.02") },
 			{ kFT2PanSlide,              MPT_V("1.17.03.02") },
-			{ kFT2OffsetOutOfRange,      MPT_V("1.17.03.02") },
+			{ kFT2ST3OffsetOutOfRange,   MPT_V("1.17.03.02") },
 			{ kFT2RestrictXCommand,      MPT_V("1.18.00.00") },
 			{ kFT2RetrigWithNoteDelay,   MPT_V("1.18.00.00") },
 			{ kFT2SetPanEnvPos,          MPT_V("1.18.00.00") },
@@ -587,6 +587,7 @@ void CSoundFile::UpgradeModule()
 			{ KST3PortaAfterArpeggio,      MPT_V("1.27.00.00") },
 			{ kST3OffsetWithoutInstrument, MPT_V("1.28.00.00") },
 			{ kST3RetrigAfterNoteCut,      MPT_V("1.29.00.00") },
+			{ kFT2ST3OffsetOutOfRange,     MPT_V("1.29.00.00") },
 		};
 
 		for(const auto &b : behaviours)

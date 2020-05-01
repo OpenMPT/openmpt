@@ -647,7 +647,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			m_playBehaviour.reset(kFT2Arpeggio);
 		} else if(!memcmp(fileHeader.trackerName, "Skale Tracker\0", 14))
 		{
-			m_playBehaviour.reset(kFT2OffsetOutOfRange);
+			m_playBehaviour.reset(kFT2ST3OffsetOutOfRange);
 		} else if(!memcmp(fileHeader.trackerName, "*Converted ", 11))
 		{
 			madeWith = verDigiTrakker;

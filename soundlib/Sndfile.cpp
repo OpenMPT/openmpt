@@ -1054,7 +1054,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kFT2PortaNoNote);
 		playBehaviour.set(kFT2KeyOff);
 		playBehaviour.set(kFT2PanSlide);
-		playBehaviour.set(kFT2OffsetOutOfRange);
+		playBehaviour.set(kFT2ST3OffsetOutOfRange);
 		playBehaviour.set(kFT2RestrictXCommand);
 		playBehaviour.set(kFT2RetrigWithNoteDelay);
 		playBehaviour.set(kFT2SetPanEnvPos);
@@ -1087,6 +1087,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kTempoClamp);
 		playBehaviour.set(kPanOverride);
 		playBehaviour.set(kITPanbrelloHold);
+		playBehaviour.set(kFT2ST3OffsetOutOfRange);
 		playBehaviour.set(kST3NoMutedChannels);
 		playBehaviour.set(kST3PortaSampleChange);
 		playBehaviour.set(kST3EffectMemory);
