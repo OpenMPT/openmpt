@@ -5381,8 +5381,6 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 				// Test cases: 3xx-no-old-samp.xm, OffsetPastSampleEnd.s3m
 				chn.dwFlags.set(CHN_FASTVOLRAMP);
 				chn.nPeriod = 0;
-				if(m_playBehaviour[kST3OffsetWithoutInstrument])
-					chn.prevNoteOffset = 0;
 			} else if(!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MOD)))
 			{
 				// IT Compatibility: Offset
@@ -5555,10 +5553,14 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 			if(param < 0x100)
 				resetEnv = true;
 		}
-		bool fading = chn.dwFlags[CHN_NOTEFADE];
+		const bool fading = chn.dwFlags[CHN_NOTEFADE];
+		const auto oldPrevNoteOffset = chn.prevNoteOffset;
+		chn.prevNoteOffset = 0;  // Retriggered notes should not use previous offset (test case: OxxMemoryWithRetrig.s3m)
 		// IT compatibility: Really weird combination of envelopes and retrigger (see Storlek's q.it testcase)
 		// Test case: retrig.it
 		NoteChange(chn, note, m_playBehaviour[kITRetrigger], resetEnv, false, nChn);
+		if(!chn.rowCommand.instr)
+			chn.prevNoteOffset = oldPrevNoteOffset;
 		// XM compatibility: Prevent NoteChange from resetting the fade flag in case an instrument number + note-off is present.
 		// Test case: RetrigFade.xm
 		if(fading && GetType() == MOD_TYPE_XM)
