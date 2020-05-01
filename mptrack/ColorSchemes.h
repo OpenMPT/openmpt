@@ -18,7 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 struct ColorScheme
 {
 	const TCHAR *name;
-	struct { ModColor id; COLORREF color; } colors[MAX_MODCOLORS];
+	struct { ModColor id : 8; COLORREF color : 24; } colors[MAX_MODCOLORS];
 };
 
 static constexpr ColorScheme ColorSchemes[] =

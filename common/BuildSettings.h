@@ -648,6 +648,7 @@
 #pragma warning(disable:4512) // assignment operator could not be generated
 
 #pragma warning(error:4309) // Treat "truncation of constant value"-warning as error.
+#pragma warning(error:4463) // Treat overflow; assigning value to bit-field that can only hold values from low_value to high_value"-warning as error.
 
 #ifdef MPT_BUILD_ANALYZED
 // Disable Visual Studio static analyzer warnings that generate too many false positives in VS2010.
