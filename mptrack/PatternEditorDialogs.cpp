@@ -1025,7 +1025,7 @@ LRESULT CChordEditor::OnKeyboardNotify(WPARAM cmd, LPARAM nKey)
 	{
 		std::sort(chord.notes.begin(), chord.notes.end(), [](MPTChord::NoteType left, MPTChord::NoteType right)
 		{
-			return (left == MPTChord::noNote)  ? false : left < right;
+			return (left == MPTChord::noNote)  ? false : (left < right);
 		});
 		OnChordChanged();
 	}
@@ -1118,7 +1118,7 @@ void CSplitKeyboardSettings::DoDataExchange(CDataExchange *pDX)
 BOOL CSplitKeyboardSettings::OnInitDialog()
 {
 	if(sndFile.GetpModDoc() == nullptr)
-		return FALSE;
+		return TRUE;
 
 	CDialog::OnInitDialog();
 
@@ -1129,17 +1129,21 @@ BOOL CSplitKeyboardSettings::OnInitDialog()
 	m_CbnSplitNote.SetCurSel(m_Settings.splitNote - (sndFile.GetModSpecifications().noteMin - NOTE_MIN));
 
 	// Octave modifier
+	m_CbnOctaveModifier.SetRedraw(FALSE);
+	m_CbnSplitVolume.InitStorage(SplitKeyboardSettings::splitOctaveRange * 2 + 1, 9);
 	for(int i = -SplitKeyboardSettings::splitOctaveRange; i < SplitKeyboardSettings::splitOctaveRange + 1; i++)
 	{
 		s.Format(i < 0 ? _T("Octave -%d") : i > 0 ? _T("Octave +%d") : _T("No Change"), std::abs(i));
 		int n = m_CbnOctaveModifier.AddString(s);
 		m_CbnOctaveModifier.SetItemData(n, i);
 	}
-
+	m_CbnOctaveModifier.SetRedraw(TRUE);
 	m_CbnOctaveModifier.SetCurSel(m_Settings.octaveModifier + SplitKeyboardSettings::splitOctaveRange);
 	CheckDlgButton(IDC_PATTERN_OCTAVELINK, (m_Settings.octaveLink && m_Settings.octaveModifier != 0) ? BST_CHECKED : BST_UNCHECKED);
 
 	// Volume
+	m_CbnSplitVolume.SetRedraw(FALSE);
+	m_CbnSplitVolume.InitStorage(65, 4);
 	m_CbnSplitVolume.AddString(_T("No Change"));
 	m_CbnSplitVolume.SetItemData(0, 0);
 	for(int i = 1; i <= 64; i++)
@@ -1148,10 +1152,12 @@ BOOL CSplitKeyboardSettings::OnInitDialog()
 		int n = m_CbnSplitVolume.AddString(s);
 		m_CbnSplitVolume.SetItemData(n, i);
 	}
+	m_CbnSplitVolume.SetRedraw(TRUE);
 	m_CbnSplitVolume.SetCurSel(m_Settings.splitVolume);
 
 	// Instruments
-	m_CbnSplitInstrument.ResetContent();
+	m_CbnSplitInstrument.SetRedraw(FALSE);
+	m_CbnSplitInstrument.InitStorage(1 + (sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples()), 16);
 	m_CbnSplitInstrument.SetItemData(m_CbnSplitInstrument.AddString(_T("No Change")), 0);
 
 	if(sndFile.GetNumInstruments())
@@ -1178,6 +1184,7 @@ BOOL CSplitKeyboardSettings::OnInitDialog()
 			}
 		}
 	}
+	m_CbnSplitInstrument.SetRedraw(TRUE);
 	m_CbnSplitInstrument.SetCurSel(m_Settings.splitInstrument);
 
 	return TRUE;
@@ -1190,7 +1197,7 @@ void CSplitKeyboardSettings::OnOK()
 
 	m_Settings.splitNote = static_cast<ModCommand::NOTE>(m_CbnSplitNote.GetItemData(m_CbnSplitNote.GetCurSel()) - 1);
 	m_Settings.octaveModifier = m_CbnOctaveModifier.GetCurSel() - SplitKeyboardSettings::splitOctaveRange;
-	m_Settings.octaveLink = (IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK) == TRUE);
+	m_Settings.octaveLink = (IsDlgButtonChecked(IDC_PATTERN_OCTAVELINK) != BST_UNCHECKED);
 	m_Settings.splitVolume = static_cast<ModCommand::VOL>(m_CbnSplitVolume.GetCurSel());
 	m_Settings.splitInstrument = static_cast<ModCommand::INSTR>(m_CbnSplitInstrument.GetItemData(m_CbnSplitInstrument.GetCurSel()));
 }
@@ -1227,11 +1234,11 @@ END_MESSAGE_MAP()
 
 void QuickChannelProperties::DoDataExchange(CDataExchange *pDX)
 {
-	DDX_Control(pDX, IDC_SLIDER1, volSlider);
-	DDX_Control(pDX, IDC_SLIDER2, panSlider);
-	DDX_Control(pDX, IDC_SPIN1,   volSpin);
-	DDX_Control(pDX, IDC_SPIN2,   panSpin);
-	DDX_Control(pDX, IDC_EDIT3,   nameEdit);
+	DDX_Control(pDX, IDC_SLIDER1, m_volSlider);
+	DDX_Control(pDX, IDC_SLIDER2, m_panSlider);
+	DDX_Control(pDX, IDC_SPIN1,   m_volSpin);
+	DDX_Control(pDX, IDC_SPIN2,   m_panSpin);
+	DDX_Control(pDX, IDC_EDIT3,   m_nameEdit);
 }
 
 
@@ -1246,7 +1253,7 @@ void QuickChannelProperties::OnActivate(UINT nState, CWnd *, BOOL)
 	if(nState == WA_INACTIVE)
 	{
 		// Hide window when changing focus to another window.
-		visible = false;
+		m_visible = false;
 		ShowWindow(SW_HIDE);
 	}
 }
@@ -1259,19 +1266,19 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDE
 	{
 		Create(IDD_CHANNELSETTINGS, nullptr);
 
-		volSlider.SetRange(0, 64);
-		volSlider.SetTicFreq(8);
-		volSpin.SetRange(0, 64);
+		m_volSlider.SetRange(0, 64);
+		m_volSlider.SetTicFreq(8);
+		m_volSpin.SetRange(0, 64);
 
-		panSlider.SetRange(0, 64);
-		panSlider.SetTicFreq(8);
-		panSpin.SetRange(0, 256);
+		m_panSlider.SetRange(0, 64);
+		m_panSlider.SetTicFreq(8);
+		m_panSpin.SetRange(0, 256);
 
-		nameEdit.SetFocus();
+		m_nameEdit.SetFocus();
 	}
-	document = modDoc;
-	channel = chn;
-	pattern = ptn;
+	m_document = modDoc;
+	m_channel = chn;
+	m_pattern = ptn;
 
 	SetParent(nullptr);
 
@@ -1286,67 +1293,67 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDE
 
 	UpdateDisplay();
 
-	const BOOL enablePan = (document->GetModType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) ? FALSE : TRUE;
-	const BOOL itOnly = (document->GetModType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? TRUE : FALSE;
+	const BOOL enablePan = (m_document->GetModType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) ? FALSE : TRUE;
+	const BOOL itOnly = (m_document->GetModType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) ? TRUE : FALSE;
 
 	// Volume controls
-	volSlider.EnableWindow(itOnly);
-	volSpin.EnableWindow(itOnly);
+	m_volSlider.EnableWindow(itOnly);
+	m_volSpin.EnableWindow(itOnly);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT1), itOnly);
 
 	// Pan controls
-	panSlider.EnableWindow(enablePan);
-	panSpin.EnableWindow(enablePan);
+	m_panSlider.EnableWindow(enablePan);
+	m_panSpin.EnableWindow(enablePan);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT2), enablePan);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK2), itOnly);
 
 	// Channel name
-	nameEdit.EnableWindow((document->GetModType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) ? TRUE : FALSE);
+	m_nameEdit.EnableWindow((m_document->GetModType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) ? TRUE : FALSE);
 
 	ShowWindow(SW_SHOW);
-	visible = true;
+	m_visible = true;
 }
 
 
 void QuickChannelProperties::UpdateDisplay()
 {
 	// Set up channel properties
-	visible = false;
-	const ModChannelSettings &settings = document->GetSoundFile().ChnSettings[channel];
+	m_visible = false;
+	const ModChannelSettings &settings = m_document->GetSoundFile().ChnSettings[m_channel];
 	SetDlgItemInt(IDC_EDIT1, settings.nVolume, FALSE);
 	SetDlgItemInt(IDC_EDIT2, settings.nPan, FALSE);
-	volSlider.SetPos(settings.nVolume);
-	panSlider.SetPos(settings.nPan / 4u);
+	m_volSlider.SetPos(settings.nVolume);
+	m_panSlider.SetPos(settings.nPan / 4u);
 	CheckDlgButton(IDC_CHECK1, (settings.dwFlags[CHN_MUTE]) ? TRUE : FALSE);
 	CheckDlgButton(IDC_CHECK2, (settings.dwFlags[CHN_SURROUND]) ? TRUE : FALSE);
 
 	TCHAR description[16];
-	wsprintf(description, _T("Channel %d:"), channel + 1);
+	wsprintf(description, _T("Channel %d:"), m_channel + 1);
 	SetDlgItemText(IDC_STATIC_CHANNEL_NAME, description);
-	nameEdit.LimitText(MAX_CHANNELNAME - 1);
-	nameEdit.SetWindowText(mpt::ToCString(document->GetSoundFile().GetCharsetInternal(), settings.szName));
+	m_nameEdit.LimitText(MAX_CHANNELNAME - 1);
+	m_nameEdit.SetWindowText(mpt::ToCString(m_document->GetSoundFile().GetCharsetInternal(), settings.szName));
 
-	settingsChanged = false;
-	visible = true;
+	m_settingsChanged = false;
+	m_visible = true;
 
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1), channel > 0 ? TRUE : FALSE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON2), channel < document->GetNumChannels() - 1 ? TRUE : FALSE);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1), m_channel > 0 ? TRUE : FALSE);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON2), m_channel < m_document->GetNumChannels() - 1 ? TRUE : FALSE);
 }
 
 void QuickChannelProperties::PrepareUndo()
 {
-	if(!settingsChanged)
+	if(!m_settingsChanged)
 	{
 		// Backup old channel settings through pattern undo.
-		settingsChanged = true;
-		document->GetPatternUndo().PrepareUndo(pattern, 0, 0, 1, 1, "Channel Settings", false, true);
+		m_settingsChanged = true;
+		m_document->GetPatternUndo().PrepareUndo(m_pattern, 0, 0, 1, 1, "Channel Settings", false, true);
 	}
 }
 
 
 void QuickChannelProperties::OnVolChanged()
 {
-	if(!visible)
+	if(!m_visible)
 	{
 		return;
 	}
@@ -1355,16 +1362,16 @@ void QuickChannelProperties::OnVolChanged()
 	if(volume >= 0 && volume <= 64)
 	{
 		PrepareUndo();
-		document->SetChannelGlobalVolume(channel, volume);
-		volSlider.SetPos(volume);
-		document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
+		m_document->SetChannelGlobalVolume(m_channel, volume);
+		m_volSlider.SetPos(volume);
+		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
 	}
 }
 
 
 void QuickChannelProperties::OnPanChanged()
 {
-	if(!visible)
+	if(!m_visible)
 	{
 		return;
 	}
@@ -1373,9 +1380,9 @@ void QuickChannelProperties::OnPanChanged()
 	if(panning >= 0 && panning <= 256)
 	{
 		PrepareUndo();
-		document->SetChannelDefaultPan(channel, panning);
-		panSlider.SetPos(panning / 4u);
-		document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
+		m_document->SetChannelDefaultPan(m_channel, panning);
+		m_panSlider.SetPos(panning / 4u);
+		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
 		// Surround is forced off when changing pan, so uncheck the checkbox.
 		CheckDlgButton(IDC_CHECK2, BST_UNCHECKED);
 	}
@@ -1384,7 +1391,7 @@ void QuickChannelProperties::OnPanChanged()
 
 void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *bar)
 {
-	if(!visible)
+	if(!m_visible)
 	{
 		return;
 	}
@@ -1392,22 +1399,22 @@ void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *bar)
 	bool update = false;
 
 	// Volume slider
-	if(bar == reinterpret_cast<CScrollBar *>(&volSlider))
+	if(bar == reinterpret_cast<CScrollBar *>(&m_volSlider))
 	{
-		uint16 pos = static_cast<uint16>(volSlider.GetPos());
+		uint16 pos = static_cast<uint16>(m_volSlider.GetPos());
 		PrepareUndo();
-		if(document->SetChannelGlobalVolume(channel, pos))
+		if(m_document->SetChannelGlobalVolume(m_channel, pos))
 		{
 			SetDlgItemInt(IDC_EDIT1, pos);
 			update = true;
 		}
 	}
 	// Pan slider
-	if(bar == reinterpret_cast<CScrollBar *>(&panSlider))
+	if(bar == reinterpret_cast<CScrollBar *>(&m_panSlider))
 	{
-		uint16 pos = static_cast<uint16>(panSlider.GetPos());
+		uint16 pos = static_cast<uint16>(m_panSlider.GetPos());
 		PrepareUndo();
-		if(document->SetChannelDefaultPan(channel, pos * 4u))
+		if(m_document->SetChannelDefaultPan(m_channel, pos * 4u))
 		{
 			SetDlgItemInt(IDC_EDIT2, pos * 4u);
 			CheckDlgButton(IDC_CHECK2, BST_UNCHECKED);
@@ -1417,64 +1424,64 @@ void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *bar)
 
 	if(update)
 	{
-		document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
+		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
 	}
 }
 
 
 void QuickChannelProperties::OnMuteChanged()
 {
-	if(!visible)
+	if(!m_visible)
 	{
 		return;
 	}
 
-	document->MuteChannel(channel, IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
-	document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
+	m_document->MuteChannel(m_channel, IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
+	m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
 }
 
 
 void QuickChannelProperties::OnSurroundChanged()
 {
-	if(!visible)
+	if(!m_visible)
 	{
 		return;
 	}
 
 	PrepareUndo();
-	document->SurroundChannel(channel, IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
-	document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
+	m_document->SurroundChannel(m_channel, IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
+	m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
 	UpdateDisplay();
 }
 
 
 void QuickChannelProperties::OnNameChanged()
 {
-	if(!visible)
+	if(!m_visible)
 	{
 		return;
 	}
 
-	ModChannelSettings &settings = document->GetSoundFile().ChnSettings[channel];
+	ModChannelSettings &settings = m_document->GetSoundFile().ChnSettings[m_channel];
 	CString newNameTmp;
-	nameEdit.GetWindowText(newNameTmp);
-	std::string newName = mpt::ToCharset(document->GetSoundFile().GetCharsetInternal(), newNameTmp);
+	m_nameEdit.GetWindowText(newNameTmp);
+	std::string newName = mpt::ToCharset(m_document->GetSoundFile().GetCharsetInternal(), newNameTmp);
 
 	if(newName != settings.szName)
 	{
 		PrepareUndo();
 		settings.szName = newName;
-		document->SetModified();
-		document->UpdateAllViews(nullptr, GeneralHint(channel).Channels());
+		m_document->SetModified();
+		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
 	}
 }
 
 
 void QuickChannelProperties::OnPrevChannel()
 {
-	if(channel > 0)
+	if(m_channel > 0)
 	{
-		channel--;
+		m_channel--;
 		UpdateDisplay();
 	}
 }
@@ -1482,9 +1489,9 @@ void QuickChannelProperties::OnPrevChannel()
 
 void QuickChannelProperties::OnNextChannel()
 {
-	if(channel < document->GetNumChannels() - 1)
+	if(m_channel < m_document->GetNumChannels() - 1)
 	{
-		channel++;
+		m_channel++;
 		UpdateDisplay();
 	}
 }

@@ -113,11 +113,9 @@ protected:
 	CComboBox m_CbnShortcut, m_CbnBaseNote, m_CbnNote[MPTChord::notesPerChord - 1];
 	MPTChords m_chords;
 	MPTChord::NoteType m_mouseDownKey = MPTChord::noNote, m_dragKey = MPTChord::noNote;
-	enum : MPTChord::NoteType
-	{
-		CHORD_MIN = -24,
-		CHORD_MAX = 24
-	};
+	
+	static constexpr MPTChord::NoteType CHORD_MIN = -24;
+	static constexpr MPTChord::NoteType CHORD_MAX = 24;
 
 public:
 	CChordEditor(CWnd *parent = nullptr);
@@ -173,15 +171,15 @@ protected:
 class QuickChannelProperties : public CDialog
 {
 protected:
-	CModDoc *document = nullptr;
-	CHANNELINDEX channel = 0;
-	PATTERNINDEX pattern = 0;
-	bool visible = false;
-	bool settingsChanged = false;
+	CModDoc *m_document = nullptr;
+	CHANNELINDEX m_channel = 0;
+	PATTERNINDEX m_pattern = 0;
+	bool m_visible = false;
+	bool m_settingsChanged = false;
 
-	CSliderCtrl volSlider, panSlider;
-	CSpinButtonCtrl volSpin, panSpin;
-	CEdit nameEdit;
+	CSliderCtrl m_volSlider, m_panSlider;
+	CSpinButtonCtrl m_volSpin, m_panSpin;
+	CEdit m_nameEdit;
 
 public:
 	QuickChannelProperties() = default;
