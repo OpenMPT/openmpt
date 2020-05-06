@@ -32,7 +32,7 @@
 #include <ASIOModern/ASIO.hpp>
 #include <ASIOModern/ASIOSystemWindows.hpp>
 #include <ASIOModern/ASIOSampleConvert.hpp>
-#include <ASIOModern/ASIOVerifyABI.hpp>
+//#include <ASIOModern/ASIOVerifyABI.hpp>
 
 #endif // MPT_WITH_ASIO
 
