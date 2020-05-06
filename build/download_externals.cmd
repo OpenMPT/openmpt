@@ -40,8 +40,6 @@ call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "http://download.nullsoft.c
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.un4seen.com/files/xmp-sdk.zip"                                                       "build\externals\xmp-sdk.zip"                  62c442d656d4bb380360368a0f5f01da11b4ed54333d7f54f875a9a5ec390b08921e00bd08e62cd7a0a5fe642e3377023f20a950cc2a42898ff4cda9ab88fc91  322744 || goto error
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                                          "build\externals\asiosdk2.3.zip"               aba21883cd026a789395757f7dcc127d7d6372965693ddc3794c8adfc3a9675c255cedf2a87177729fa0b094e1bdb4de9d2e47555c61ddd6976c24d71cbd5e38  422934 || goto error
-
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "build\externals\htmlhelp.exe"                 d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856 3509072 || goto error
 
@@ -69,7 +67,6 @@ call build\scriptlib\unpack.cmd "build\tools\htmlhelp" "build\externals\htmlhelp
 
 call build\scriptlib\unpack.cmd "include\winamp"   "build\externals\WA5.55_SDK.exe" "."          || goto error
 call build\scriptlib\unpack.cmd "include\xmplay"   "build\externals\xmp-sdk.zip"    "."          || goto error
-call build\scriptlib\unpack.cmd "include\ASIOSDK2" "build\externals\asiosdk2.3.zip" "ASIOSDK2.3" || goto error
 
 call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.8.2-embed-win32.zip" "." || goto error
 
