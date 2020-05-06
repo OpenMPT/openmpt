@@ -16,6 +16,7 @@ branching release braches
      1. set OpenMPT version in `common/versionNumber.h` to
         `1.$(($VER + 1)).00.01`
      2. run `build/update_libopenmpt_version.sh bumpminor`
+     3. run `build/update_libopenmpt_version.sh bumpltabi`
  6. update versions in branch
     `https://source.openmpt.org/svn/openmpt/branches/OpenMPT-$VER`:
      1. set OpenMPT version in `common/versionNumber.h` to
