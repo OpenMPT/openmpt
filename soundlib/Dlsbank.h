@@ -37,6 +37,7 @@ struct DLSREGION
 	uint8  uKeyMin;
 	uint8  uKeyMax;
 	uint8  uUnityNote;
+	uint8  tuning;
 };
 
 struct DLSENVELOPE
