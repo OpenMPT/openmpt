@@ -1605,7 +1605,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 				// ProTracker doesn't apply vibrato nor advance on the first tick.
 				// Test case: VibratoReset.mod
 				return;
-			} else if((GetType() & MOD_TYPE_XM | MOD_TYPE_MOD) && (chn.nVibratoType & 0x03) == 1)
+			} else if((GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) && (chn.nVibratoType & 0x03) == 1)
 			{
 				// FT2 compatibility: Vibrato ramp down table is upside down.
 				// Test case: VibratoWaveforms.xm
