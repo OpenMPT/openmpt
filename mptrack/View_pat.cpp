@@ -5607,7 +5607,7 @@ void CViewPattern::EnterAftertouch(ModCommand::NOTE note, int atValue)
 
 	Limit(atValue, 0, 127);
 
-	const PatternCursor endOfRow{ m_Cursor.GetRow(), numChannels - 1u, PatternCursor::lastColumn };
+	const PatternCursor endOfRow{ m_Cursor.GetRow(), static_cast<CHANNELINDEX>(numChannels - 1u), PatternCursor::lastColumn };
 	const auto &specs = GetSoundFile()->GetModSpecifications();
 	bool first = true, modified = false;
 	for(const auto chn : channels)
