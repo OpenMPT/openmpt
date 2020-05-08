@@ -18,6 +18,13 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.28/doc/libopenmpt_rele
 0.5
 ---
 
+For libopenmpt 0.4, see
+https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.29/doc/libopenmpt_release.txt
+.
+
+0.6
+---
+
  1. ensure that the OpenMPT version is preferrably at a aa.bb.cc.00 version,
     otherwise increment the minorminor part to a new value used specifically for
     the libopenmpt release
