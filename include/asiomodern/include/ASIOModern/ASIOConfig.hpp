@@ -131,13 +131,8 @@ namespace ASIO {
 #define ASIO_ATTR_CALL
 #define ASIO_CALL __cdecl
 #elif ASIO_COMPILER_CLANG
-#pragma push_macro("cdecl")
-#ifdef cdecl
-#undef cdecl
-#endif
-#define ASIO_ATTR_CALL [[gnu::cdecl]]
-#define ASIO_CALL
-#pragma pop_macro("cdecl")
+#define ASIO_ATTR_CALL
+#define ASIO_CALL __cdecl
 #elif ASIO_COMPILER_GCC
 #pragma push_macro("cdecl")
 #ifdef cdecl
