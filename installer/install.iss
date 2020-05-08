@@ -4,8 +4,8 @@
 ; https://sagamusix.de/
 
 ; This file cannot be compiled on its own. You need to compile any of these files:
-; win32.iss - For generating the standard Win32 setup.
-; win64.iss - For generating the standard Win64 setup.
+; win32.iss - For generating a Win32 setup.
+; win64.iss - For generating a Win64 setup.
 
 #ifndef PlatformName
 #error You must specify which installer to build by compiling either win32.iss or win64.iss
@@ -136,7 +136,7 @@ Type: dirifempty; Name: {app}\SoundTouch
 Type: files; Name: {app}\Plugins\MIDI\MIDI Input Output.dll
 Type: dirifempty; Name: {app}\Plugins\MIDI
 Type: dirifempty; Name: {app}\Plugins
-; PLuginBridge uses arch naming now
+; PluginBridge uses arch naming now
 Type: files; Name: {app}\PluginBridge32.exe
 Type: files; Name: {app}\PluginBridge64.exe
 ; mptrack got finally renamed to OpenMPT
@@ -163,8 +163,7 @@ Type: dirifempty; Name: {userappdata}\OpenMPT\Components; Tasks: portable
 
 [Code]
 var
-    BitnessPage: TInputOptionWizardPage;
-    ShouldSkipBitnessPage: Boolean;
+    mptrackExeExisted: Boolean;
 
 // Copy old config files to the AppData directory, if there are any (and if the files don't exist already)
 procedure CopyConfigsToAppDataDir();
@@ -180,7 +179,10 @@ begin
         Exit;
     end;
 
-    // If there was an INI file with portable mode flag set, we have to reset it (or else, the mptrack.ini in %appdata% will never be used!)
+    // OpenMPT 1.29 and later: Portable mode is indicated by file called "OpenMPT.portable"
+    DeleteFile(ExpandConstant('{app}\OpenMPT.portable'));
+
+    // Pre-1.29: If there was an INI file with portable mode flag set, we have to reset it (or else, the mptrack.ini in %appdata% will never be used!)
     if(IniKeyExists('Paths', 'UseAppDataDirectory', ExpandConstant('{app}\mptrack.ini'))) then
     begin
         DeleteIniEntry('Paths', 'UseAppDataDirectory', ExpandConstant('{app}\mptrack.ini'));
@@ -198,6 +200,20 @@ begin
         SetIniString('Paths', 'Key_Config_File', ExpandConstant('{userappdata}\OpenMPT\Keybindings.mkb'), ExpandConstant('{userappdata}\OpenMPT\mptrack.ini'));
     end;
 
+end;
+
+function CreateSymbolicLink(lpSymlinkFileName, lpTargetFileName: string;
+  dwFlags: Integer): Boolean;
+  external 'CreateSymbolicLinkW@kernel32.dll stdcall';
+
+procedure CreateMptrackSymlink();
+begin
+  if(not mptrackExeExisted) then
+  begin
+    Exit;
+  end;
+
+  CreateSymbolicLink(ExpandConstant('{app}\mptrack.exe'), ExpandConstant('{app}\OpenMPT.exe'), 0);
 end;
 
 // Picks a random example song file to play
@@ -220,48 +236,6 @@ begin
     end;
 end;
 
-function IsProcessorFeaturePresent(Feature: Integer): Integer;
-external 'IsProcessorFeaturePresent@Kernel32.dll stdcall delayload';
-
-function IsWine(): PAnsiChar;
-external 'wine_get_version@ntdll.dll stdcall delayload';
-
-procedure InitializeWizard();
-var
-    WineVersion: PAnsiChar;
-begin
-    BitnessPage := CreateInputOptionPage(wpWelcome, 'OpenMPT Version', 'Select the version of OpenMPT you want to install.',
-        'Select the version of OpenMPT you want to install. Setup already determined the most suitable version for your system.', True, False);
-    ShouldSkipBitnessPage := False;
-
-    // Add items
-    try
-        // Check if installing on Wine 1.8 or later
-        WineVersion := IsWine();
-#if PlatformName == "32-Bit"
-        BitnessPage.Add('32-Bit, for CPU with SSE2 instruction set');
-#else
-        BitnessPage.Add('64-Bit, for Wine 1.8 or newer');
-        ShouldSkipBitnessPage := True;
-#endif
-    except
-        // Installing on Windows 7 or later
-#if PlatformName == "32-Bit"
-        BitnessPage.Add('32-Bit, for Windows 7 or newer and CPU with SSE2 instruction set');
-#else
-        BitnessPage.Add('64-Bit, for Windows 7 or newer');
-#endif
-    end;
-    BitnessPage.Values[0] := True;
-end;
-
-function ShouldSkipPage(PageID: Integer): Boolean;
-begin
-  Result := False;
-  if PageID = BitnessPage.ID then
-    Result := ShouldSkipBitnessPage;
-end;
-
 function NextButtonClick(CurPageID: Integer): Boolean;
 var
     programfiles: String;
@@ -269,15 +243,13 @@ begin
     case CurPageID of
     wpSelectTasks:
         begin
+            mptrackExeExisted := FileExists(ExpandConstant('{app}\mptrack.exe'));
+
             programfiles := ExpandConstant('{pf}\');
             if((CompareText(programfiles, Copy(ExpandConstant('{app}\'), 0, Length(programfiles))) = 0) and IsTaskSelected('portable')) then
             begin
                 MsgBox('Warning: Installing OpenMPT to' #10 + programfiles + #10 'in portable mode may lead to problems if you are not running it with an administrator account!', mbInformation, MB_OK);
             end;
-        end;
-
-    BitnessPage.ID:
-        begin;
         end;
     end;
     Result := true;
@@ -290,6 +262,7 @@ begin
         begin
             // Copy old config files from app's directory, if possible and necessary.
             CopyConfigsToAppDataDir();
+            CreateMptrackSymlink();
         end;
     end;
 end;
