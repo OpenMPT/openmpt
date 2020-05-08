@@ -1,13 +1,6 @@
 libopenmpt release process
 ==========================
 
-0.2
----
-
-For libopenmpt 0.2, see
-https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.26/doc/libopenmpt_release.txt
-.
-
 0.3
 ---
 
