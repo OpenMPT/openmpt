@@ -1213,7 +1213,7 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 						loopStart += static_cast<int16>(value) * 32768;
 						break;
 					case SF2_GEN_END_LOOP_COARSE:
-						loopStart += static_cast<int16>(value) * 32768;
+						loopEnd += static_cast<int16>(value) * 32768;
 						break;
 					//default:
 					//	Log("    gen=%d value=%04X\n", pgen->sfGenOper, pgen->genAmount);
