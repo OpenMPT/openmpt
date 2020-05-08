@@ -143,10 +143,10 @@ protected:
 ////////////////////////////////////////////////////////////////////////
 // Sound Banks
 
-class CSoundBankProperties: public InfoDialog
+class CSoundBankProperties : public InfoDialog
 {
 public:
-	CSoundBankProperties(const CDLSBank &bank, ::CWnd *parent = nullptr);
+	CSoundBankProperties(const CDLSBank &bank, CWnd *parent = nullptr);
 };
 
 
@@ -271,17 +271,19 @@ protected:
 	CString m_description;
 	double m_minValueDbl = 0.0, m_maxValueDbl = 0.0;
 	int32 m_minValueInt = 0, m_maxValueInt = 0;
+	int32 m_maxLength = 0;
 
 public:
-	CString resultAsString;
-	double resultAsDouble = 0.0;
 	int32 resultAsInt = 0;
+	double resultAsDouble = 0.0;
+	CString resultAsString;
 
 public:
 	// Initialize text input box
-	CInputDlg(CWnd *parent, const TCHAR *desc, const TCHAR *defaultString) : CDialog(IDD_INPUT, parent)
+	CInputDlg(CWnd *parent, const TCHAR *desc, const TCHAR *defaultString, int32 maxLength = -1) : CDialog(IDD_INPUT, parent)
 		, m_description(desc)
 		, resultAsString(defaultString)
+		, m_maxLength(maxLength)
 	{ }
 	// Initialize numeric input box (float)
 	CInputDlg(CWnd *parent, const TCHAR *desc, double minVal, double maxVal, double defaultNumber) : CDialog(IDD_INPUT, parent)
