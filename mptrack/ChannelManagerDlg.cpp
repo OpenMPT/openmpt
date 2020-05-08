@@ -120,8 +120,7 @@ void CChannelManagerDlg::Hide()
 
 
 CChannelManagerDlg::CChannelManagerDlg()
-	: m_drawableArea(0, 0, 0, 0)
-	, m_buttonHeight(CM_BT_HEIGHT)
+	: m_buttonHeight(CM_BT_HEIGHT)
 {
 	for(CHANNELINDEX chn = 0; chn < MAX_BASECHANNELS; chn++)
 	{
@@ -548,7 +547,7 @@ void CChannelManagerDlg::DrawChannelButton(HDC hdc, CRect rect, const TCHAR *tex
 		::FillRect(hdc, rect, GetSysColorBrush(COLOR_WINDOW));
 	}
 
-	rect.left += Util::ScalePixels(13, m_hWnd);
+	rect.left += Util::ScalePixels(11, m_hWnd);
 	rect.right -= Util::ScalePixels(5, m_hWnd);
 
 	::SetBkMode(hdc, TRANSPARENT);
@@ -922,8 +921,8 @@ void CChannelManagerDlg::OnMButtonDown(UINT /*nFlags*/, CPoint point)
 	if(m_ModDoc != nullptr && (m_ModDoc->GetModType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && ButtonHit(point, &chn, &rect))
 	{
 		// Rename channel
-		CString s = mpt::cformat(_T("New name for channel %1:"))(chn +1);
-		CInputDlg dlg(this, s, mpt::ToCString(m_ModDoc->GetSoundFile().GetCharsetInternal(), m_ModDoc->GetSoundFile().ChnSettings[chn].szName));
+		CString s = mpt::cformat(_T("New name for channel %1:"))(chn + 1);
+		CInputDlg dlg(this, s, mpt::ToCString(m_ModDoc->GetSoundFile().GetCharsetInternal(), m_ModDoc->GetSoundFile().ChnSettings[chn].szName), MAX_CHANNELNAME - 1);
 		if(dlg.DoModal() == IDOK)
 		{
 			m_ModDoc->GetSoundFile().ChnSettings[chn].szName = mpt::ToCharset(m_ModDoc->GetSoundFile().GetCharsetInternal(), dlg.resultAsString);

@@ -795,7 +795,7 @@ void InfoDialog::SetCaption(mpt::winstring caption)
 ////////////////////////////////////////////////////////////////////////////////
 // Sound Bank Information
 
-CSoundBankProperties::CSoundBankProperties(const CDLSBank &bank, ::CWnd *parent)
+CSoundBankProperties::CSoundBankProperties(const CDLSBank &bank, CWnd *parent)
 	: InfoDialog(parent)
 {
 	const SOUNDBANKINFO &bi = bank.GetBankInfo();
@@ -1408,6 +1408,8 @@ BOOL CInputDlg::OnInitDialog()
 	{
 		// Text
 		m_spin.ShowWindow(SW_HIDE);
+		if(m_maxLength > 0)
+			Edit_LimitText(m_edit, m_maxLength);
 		SetDlgItemText(IDC_EDIT1, resultAsString);
 	}
 
