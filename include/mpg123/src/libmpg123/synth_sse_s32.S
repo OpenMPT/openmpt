@@ -22,7 +22,7 @@
 	return value: number of clipped samples
 */
 
-#ifndef __APPLE__
+#if !defined ( __APPLE__) && !defined (__OS2__)
 	.section	.rodata
 #else
 	.data
