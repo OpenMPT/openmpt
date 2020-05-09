@@ -19,7 +19,7 @@
 	void dct36_sse(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf);
 */
 	
-#ifndef __APPLE__
+#if !defined ( __APPLE__) && !defined (__OS2__)
 	.section	.rodata
 #else
 	.data
