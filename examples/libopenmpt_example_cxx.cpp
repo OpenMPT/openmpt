@@ -49,24 +49,43 @@ int main( int argc, char * argv[] ) {
 		}
 		constexpr std::size_t buffersize = 480;
 		constexpr std::int32_t samplerate = 48000;
-		std::vector<float> left( buffersize );
-		std::vector<float> right( buffersize );
 		std::ifstream file( argv[1], std::ios::binary );
 		openmpt::module mod( file );
 		portaudio::AutoSystem portaudio_initializer;
 		portaudio::System & portaudio = portaudio::System::instance();
-		portaudio::DirectionSpecificStreamParameters outputstream_parameters( portaudio.defaultOutputDevice(), 2, portaudio::FLOAT32, false, portaudio.defaultOutputDevice().defaultHighOutputLatency(), 0 );
-		portaudio::StreamParameters stream_parameters( portaudio::DirectionSpecificStreamParameters::null(), outputstream_parameters, samplerate, paFramesPerBufferUnspecified, paNoFlag );
-		portaudio::BlockingStream stream( stream_parameters );
+		std::vector<float> left( buffersize );
+		std::vector<float> right( buffersize );
+		std::vector<float> interleaved_buffer( buffersize * 2 );
+		bool is_interleaved = false;
+		portaudio::BlockingStream stream = [&]() {
+			try {
+				is_interleaved = false;
+				portaudio::DirectionSpecificStreamParameters outputstream_parameters( portaudio.defaultOutputDevice(), 2, portaudio::FLOAT32, false, portaudio.defaultOutputDevice().defaultHighOutputLatency(), 0 );
+				portaudio::StreamParameters stream_parameters( portaudio::DirectionSpecificStreamParameters::null(), outputstream_parameters, samplerate, paFramesPerBufferUnspecified, paNoFlag );
+				return portaudio::BlockingStream( stream_parameters );
+			} catch ( const portaudio::PaException & e ) {
+				if ( e.paError() != paSampleFormatNotSupported ) {
+					throw;
+				}
+				is_interleaved = true;
+				portaudio::DirectionSpecificStreamParameters outputstream_parameters( portaudio.defaultOutputDevice(), 2, portaudio::FLOAT32, true, portaudio.defaultOutputDevice().defaultHighOutputLatency(), 0 );
+				portaudio::StreamParameters stream_parameters( portaudio::DirectionSpecificStreamParameters::null(), outputstream_parameters, samplerate, paFramesPerBufferUnspecified, paNoFlag );
+				return portaudio::BlockingStream( stream_parameters );
+			}
+		}();
 		stream.start();
 		while ( true ) {
-			std::size_t count = mod.read( samplerate, buffersize, left.data(), right.data() );
+			std::size_t count = is_interleaved ? mod.read_interleaved_stereo( samplerate, buffersize, interleaved_buffer.data() ) : mod.read( samplerate, buffersize, left.data(), right.data() );
 			if ( count == 0 ) {
 				break;
 			}
 			try {
-				const float * const buffers[2] = { left.data(), right.data() };
-				stream.write( buffers, static_cast<unsigned long>( count ) );
+				if ( is_interleaved ) {
+					stream.write( interleaved_buffer.data(), static_cast<unsigned long>( count ) );
+				} else {
+					const float * const buffers[2] = { left.data(), right.data() };
+					stream.write( buffers, static_cast<unsigned long>( count ) );
+				}
 			} catch ( const portaudio::PaException & pa_exception ) {
 				if ( pa_exception.paError() != paOutputUnderflowed ) {
 					throw;
