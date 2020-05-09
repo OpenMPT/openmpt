@@ -99,7 +99,6 @@ def copy_other(to_path, openmpt_version_short):
     copy_file("packageTemplate/", to_path, "ModPlug Central.url")
     copy_file("packageTemplate/", to_path, "mpt.ico")
     copy_file("packageTemplate/", to_path, "OMPT_" + openmpt_version_short + "_ReleaseNotes.html")
-    copy_file("packageTemplate/", to_path, "open_settings_folder.bat")
     copy_file("packageTemplate/", to_path, "OpenMPT Manual.chm")
     copy_file("packageTemplate/", to_path, "readme.txt")
 

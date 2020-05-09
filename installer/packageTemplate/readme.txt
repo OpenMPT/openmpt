@@ -38,8 +38,8 @@ Package contents
   available in several flavours (including MPT classic, Fasttracker 2 and
   Impulse Tracker) and country-specific layouts.
 * ReleaseNotesImages (folder): Files used in the release notes document.
-* ExampleSongs (folder): A set of module files which should give an impression of
-  what can be done in OpenMPT with only a few kilobytes.
+* ExampleSongs (folder): A set of module files which should give an impression
+  of what can be done in OpenMPT with only a few kilobytes.
 * ExampleSongs\Samples (folder): A set of samples used by some of the example
   songs. You may use them for your own songs as well!
 * History.txt: Version history.
@@ -55,7 +55,7 @@ Package contents
 * openmpt-lame.dll: MP3 encoder for stream export.
 * openmpt-mpg123.dll: MPEG sample import support.
 * openmpt-wine-support.zip: Optional component for sound device integration into Wine on Linux systems
-* OMPT_1.28_ReleaseNotes.html: Release notes for this version.
+* OMPT_1.29_ReleaseNotes.html: Release notes for this version.
 
 
 License
