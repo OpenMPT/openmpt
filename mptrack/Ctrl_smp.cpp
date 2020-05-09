@@ -213,23 +213,34 @@ BOOL CCtrlSamples::OnInitDialog()
 	SetRedraw(FALSE);
 
 	// Zoom Selection
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("Auto")), 0);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:1")), 1);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("2:1")), (DWORD_PTR)-2);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("4:1")), (DWORD_PTR)-3);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("8:1")), (DWORD_PTR)-4);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("16:1")), (DWORD_PTR)-5);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("32:1")), (DWORD_PTR)-6);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:2")), 2);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:4")), 3);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:8")), 4);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:16")), 5);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:32")), 6);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:64")), 7);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:128")), 8);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:256")), 9);
-	m_ComboZoom.SetItemData(m_ComboZoom.AddString(_T("1:512")), 10);
+	static constexpr std::pair<const TCHAR *, int> ZoomLevels[] =
+	{
+		{_T("Auto"),  0},
+		{_T("1:1"),   1},
+		{_T("2:1"),  -2},
+		{_T("4:1"),  -3},
+		{_T("8:1"),  -4},
+		{_T("16:1"), -5},
+		{_T("32:1"), -6},
+		{_T("1:2"),   2},
+		{_T("1:4"),   3},
+		{_T("1:8"),   4},
+		{_T("1:16"),  5},
+		{_T("1:32"),  6},
+		{_T("1:64"),  7},
+		{_T("1:128"), 8},
+		{_T("1:256"), 9},
+		{_T("1:512"), 10},
+	};
+	m_ComboZoom.SetRedraw(FALSE);
+	m_ComboZoom.InitStorage(static_cast<int>(std::size(ZoomLevels)), 4);
+	for(const auto &[str, data] : ZoomLevels)
+	{
+		m_ComboZoom.SetItemData(m_ComboZoom.AddString(str), static_cast<DWORD_PTR>(data));
+	}
+	m_ComboZoom.SetRedraw(TRUE);
 	m_ComboZoom.SetCurSel(0);
+
 	// File ToolBar
 	m_ToolBar1.SetExtendedStyle(m_ToolBar1.GetExtendedStyle() | TBSTYLE_EX_DRAWDDARROWS);
 	m_ToolBar1.Init(CMainFrame::GetMainFrame()->m_PatternIcons,CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
@@ -254,11 +265,14 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
 
-	for (ModCommand::NOTE i = BASENOTE_MIN; i <= BASENOTE_MAX; i++)
+	m_CbnBaseNote.InitStorage(BASENOTE_MAX - BASENOTE_MIN, 4);
+	m_CbnBaseNote.SetRedraw(FALSE);
+	for(ModCommand::NOTE i = BASENOTE_MIN; i <= BASENOTE_MAX; i++)
 	{
 		CString noteName = mpt::ToCString(CSoundFile::GetDefaultNoteName(i % 12)) + mpt::cfmt::val(i / 12);
 		m_CbnBaseNote.SetItemData(m_CbnBaseNote.AddString(noteName), i - (NOTE_MIDDLEC - NOTE_MIN));
 	}
+	m_CbnBaseNote.SetRedraw(TRUE);
 
 	m_ComboFFT.ShowWindow(SW_SHOW);
 	m_ComboPitch.ShowWindow(SW_SHOW);
@@ -276,60 +290,49 @@ BOOL CCtrlSamples::OnInitDialog()
 	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);
 
 	// Pitch selection
-	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO4);
-	if(combo)
+	// Allow pitch from -12 (1 octave down) to +12 (1 octave up)
+	m_ComboPitch.InitStorage(25, 4);
+	m_ComboPitch.SetRedraw(FALSE);
+	for(int i = -12 ; i <= 12 ; i++)
 	{
-		// Allow pitch from -12 (1 octave down) to +12 (1 octave up)
-		CString str;
-		for(int i = -12 ; i <= 12 ; i++)
-		{
-			if(i == 0)
-			{
-				str = _T("none");
-			} else if(i < 0)
-			{
-				str = mpt::cfmt::dec(i);
-			} else
-			{
-				str = _T("+") + mpt::cfmt::dec(i);
-			}
-			combo->SetItemData(combo->AddString(str), i + 12);
-		}
-		// Set "none" as default pitch
-		combo->SetCurSel(12);
+		mpt::tstring str;
+		if(i == 0)
+			str = _T("none");
+		else if(i < 0)
+			str = mpt::tfmt::dec(i);
+		else
+			str = _T("+") + mpt::tfmt::dec(i);
+		m_ComboPitch.SetItemData(m_ComboPitch.AddString(str.c_str()), i + 12);
 	}
+	m_ComboPitch.SetRedraw(TRUE);
+	// Set "none" as default pitch
+	m_ComboPitch.SetCurSel(12);
 
 	// Quality selection
-	combo = (CComboBox *)GetDlgItem(IDC_COMBO5);
-	if(combo)
+	// Allow quality from 4 to 128
+	m_ComboQuality.InitStorage(128 - 4, 4);
+	m_ComboQuality.SetRedraw(FALSE);
+	for(int i = 4; i <= 128; i++)
 	{
-		// Allow quality from 4 to 128
-		CString str;
-		for(int i = 4 ; i <= 128 ; i++)
-		{
-			str = mpt::cfmt::dec(i);
-			combo->SetItemData(combo->AddString(str), i-4);
-		}
-		// Set 32 as default quality
-		combo->SetCurSel(32 - 4);
+		m_ComboQuality.SetItemData(m_ComboQuality.AddString(mpt::tfmt::dec(i).c_str()), i - 4);
 	}
+	m_ComboQuality.SetRedraw(TRUE);
+	// Set 32 as default quality
+	m_ComboQuality.SetCurSel(32 - 4);
 
 	// FFT size selection
-	combo = (CComboBox *)GetDlgItem(IDC_COMBO6);
-	if(combo)
+	// Deduce exponent from equation : MAX_FRAME_LENGTH = 2^exponent
+	constexpr int exponent = mpt::log2p1(uint32(MAX_FRAME_LENGTH)) - 1;
+	// Allow FFT size from 2^8 (256) to 2^exponent (MAX_FRAME_LENGTH)
+	m_ComboFFT.InitStorage(exponent - 8, 4);
+	m_ComboFFT.SetRedraw(FALSE);
+	for(int i = 8 ; i <= exponent ; i++)
 	{
-		// Deduce exponent from equation : MAX_FRAME_LENGTH = 2^exponent
-		constexpr int exponent = mpt::log2p1(uint32(MAX_FRAME_LENGTH)) - 1;
-		// Allow FFT size from 2^8 (256) to 2^exponent (MAX_FRAME_LENGTH)
-		CString str;
-		for(int i = 8 ; i <= exponent ; i++)
-		{
-			str = mpt::cfmt::dec(1 << i);
-			combo->SetItemData(combo->AddString(str), i - 8);
-		}
-		// Set 4096 as default FFT size
-		combo->SetCurSel(4);
+		m_ComboFFT.SetItemData(m_ComboFFT.AddString(mpt::tfmt::dec(1 << i).c_str()), i - 8);
 	}
+	m_ComboFFT.SetRedraw(TRUE);
+	// Set 4096 as default FFT size
+	m_ComboFFT.SetCurSel(4);
 
 	// Stretch to size check box
 	OnEnableStretchToSize();
@@ -346,21 +349,23 @@ void CCtrlSamples::RecalcLayout()
 
 bool CCtrlSamples::SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom, bool bUpdNum)
 {
-	if (m_sndFile.GetNumSamples() < 1) m_sndFile.m_nSamples = 1;
-	if ((nSmp < 1) || (nSmp > m_sndFile.GetNumSamples())) return FALSE;
+	if(m_sndFile.GetNumSamples() < 1)
+		m_sndFile.m_nSamples = 1;
+	if((nSmp < 1) || (nSmp > m_sndFile.GetNumSamples()))
+		return FALSE;
 
 	LockControls();
-	if (m_nSample != nSmp)
+	if(m_nSample != nSmp)
 	{
 		m_nSample = nSmp;
 		UpdateView(SampleHint(m_nSample).Info());
 	}
-	if (bUpdNum)
+	if(bUpdNum)
 	{
 		SetDlgItemInt(IDC_EDIT_SAMPLE, m_nSample);
 		m_SpinSample.SetRange(1, m_sndFile.GetNumSamples());
 	}
-	if (lZoom == -1)
+	if(lZoom == -1)
 	{
 		lZoom = static_cast<int>(m_ComboZoom.GetItemData(m_ComboZoom.GetCurSel()));
 	} else
