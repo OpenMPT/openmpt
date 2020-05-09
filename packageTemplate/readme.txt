@@ -8,9 +8,8 @@ Installation
 * If you have an existing *portable* installation of OpenMPT and wish to re-use
   its settings, copy mptrack.ini, SongSettings.ini, Keybindings.mkb and
   plugin.cache to the directory into which you extract the archive.
-* If there is no previous installation or if you have an existing *standard*
-  installation of OpenMPT, you're done: just extract the archive and launch
-  OpenMPT.exe.
+* If there is no previous installation, you're done: just extract the archive
+  and launch OpenMPT.exe.
 * Hints on making an OpenMPT installation portable can be found in the
   System Setup chapter of the manual (OpenMPT Manual.chm).
 
@@ -18,8 +17,9 @@ Installation
 Uninstallation
 --------------
 
-Delete the files extracted from the archive and optionally the OpenMPT
-setting files, which are stored in %APPDATA%\OpenMPT by default.
+Delete the files extracted from the archive and optionally the OpenMPT setting
+files, which are stored in %APPDATA%\OpenMPT if OpenMPT is not configured to be
+portable.
 
 
 Detailed help and documentation
@@ -49,8 +49,8 @@ Package contents
   available in several flavours (including MPT classic, Fasttracker 2 and
   Impulse Tracker) and country-specific layouts.
 * ReleaseNotesImages (folder): Files used in the release notes document.
-* ExampleSongs (folder): A set of module files which should give an impression of
-  what can be done in OpenMPT with only a few kilobytes.
+* ExampleSongs (folder): A set of module files which should give an impression
+  of what can be done in OpenMPT with only a few kilobytes.
 * ExampleSongs\Samples (folder): A set of samples used by some of the example
   songs. You may use them for your own songs as well!
 * History.txt: Version history.
@@ -60,13 +60,12 @@ Package contents
 * OpenMPT.exe: Main executable.
 * PluginBridge-x86.exe: Plugin bridge server for 32-bit (x86) VST plugins.
 * PluginBridge-amd64.exe: Plugin bridge server for 64-bit (amd64) VST plugins.
-* open_settings_folder.bat: Opens settings folder (%APPDATA\OpenMPT).
 * OpenMPT_SoundTouch_f32.dll: SoundTouch library used for time stretching.
 * readme.txt: This document.
 * openmpt-lame.dll: MP3 encoder for stream export.
 * openmpt-mpg123.dll: MPEG sample import support.
 * openmpt-wine-support.zip: Optional component for sound device integration into Wine on Linux systems
-* OMPT_1.28_ReleaseNotes.html: Release notes for this version.
+* OMPT_1.29_ReleaseNotes.html: Release notes for this version.
 
 
 License
