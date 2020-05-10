@@ -1,7 +1,7 @@
 ; OpenMPT Install script - File associations
 ; Written by Johannes Schultz
 ; https://openmpt.org/
-; http://sagamusix.de/
+; https://sagamusix.de/
 
 [Setup]
 ChangesAssociations=yes
