@@ -35,6 +35,7 @@ Compression=lzma2
 SolidCompression=yes
 WizardImageFile=install-big.bmp
 WizardSmallImageFile=install-small.bmp
+WizardStyle=modern
 CreateUninstallRegKey=not IsTaskSelected('portable')
 Uninstallable=not IsTaskSelected('portable')
 UninstallDisplayIcon={app}\OpenMPT.exe
@@ -158,8 +159,6 @@ Type: dirifempty; Name: {app}\TemplateModules; Tasks: portable
 Type: dirifempty; Name: {app}\tunings; Tasks: portable
 Type: dirifempty; Name: {userappdata}\OpenMPT\Components\{#PlatformArchitecture}; Tasks: portable
 Type: dirifempty; Name: {userappdata}\OpenMPT\Components; Tasks: portable
-
-#include "utilities.iss"
 
 [Code]
 var
