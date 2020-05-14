@@ -14,15 +14,15 @@ call "build\auto\setup_%MPT_VS_VER%.cmd"
 
 cd "build\%MPT_VS_WITHTARGET%" || goto error
 
- msbuild libopenmpt_test.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH%;XPDeprecationWarning=false /maxcpucount /verbosity:minimal || goto error
+ msbuild libopenmpt_test.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
 
- msbuild libopenmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH%;XPDeprecationWarning=false /maxcpucount /verbosity:minimal || goto error
- msbuild openmpt123.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH%;XPDeprecationWarning=false /maxcpucount /verbosity:minimal || goto error
+ msbuild libopenmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+ msbuild openmpt123.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
  if "%MPT_VS_ARCH%" == "Win32" (
-  msbuild in_openmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH%;XPDeprecationWarning=false /maxcpucount /verbosity:minimal || goto error
-  msbuild xmp-openmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH%;XPDeprecationWarning=false /maxcpucount /verbosity:minimal || goto error
+  msbuild in_openmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+  msbuild xmp-openmpt.sln /target:Clean /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
  )
- msbuild libopenmpt.sln /target:Clean /property:Configuration=ReleaseShared;Platform=%MPT_VS_ARCH%;XPDeprecationWarning=false /maxcpucount /verbosity:minimal || goto error
+ msbuild libopenmpt.sln /target:Clean /property:Configuration=ReleaseShared;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
  
 cd ..\.. || goto error
 
