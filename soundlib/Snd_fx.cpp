@@ -2194,13 +2194,18 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	// If no instrument is given, assume previous instrument to still be valid.
 	// Test case: DNA-NoInstr.it
 	pIns = instr > 0 ? Instruments[instr] : srcChn.pModInstrument;
+	auto dnaNote = note;
 	if(pIns != nullptr)
 	{
-		uint32 n = pIns->Keyboard[note - NOTE_MIN];
-		note = pIns->NoteMap[note - NOTE_MIN];
-		if ((n) && (n < MAX_SAMPLES))
+		auto smp = pIns->Keyboard[note - NOTE_MIN];
+		// IT compatibility: DCT = note uses pattern notes for comparison
+		// Note: This is not applied in case kITRealNoteMapping is not set to keep playback of legacy modules simple (chn.nNote is translated note in that case)
+		// Test case: dct_smp_note_test.it
+		if(!m_playBehaviour[kITDCTBehaviour] || !m_playBehaviour[kITRealNoteMapping])
+			dnaNote = pIns->NoteMap[note - NOTE_MIN];
+		if(smp > 0 && smp < MAX_SAMPLES)
 		{
-			pSample = &Samples[n];
+			pSample = &Samples[smp];
 		} else if(m_playBehaviour[kITEmptyNoteMapSlot] && !pIns->HasValidMIDIChannel())
 		{
 			// Impulse Tracker ignores empty slots.
@@ -2209,17 +2214,20 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			return CHANNELINDEX_INVALID;
 		}
 	}
-	if (srcChn.dwFlags[CHN_MUTE])
+	if(srcChn.dwFlags[CHN_MUTE])
 		return CHANNELINDEX_INVALID;
 
 	for(CHANNELINDEX i = nChn; i < MAX_CHANNELS; i++)
-	if(i >= m_nChannels || i == nChn)
 	{
+		// Only apply to background channels, or the same pattern channel
+		if(i < m_nChannels && i != nChn)
+			continue;
+
 		ModChannel &chn = m_PlayState.Chn[i];
 		bool applyDNAtoPlug = false;
 		if((chn.nMasterChn == nChn + 1 || i == nChn) && chn.pModInstrument != nullptr)
 		{
-			bool bOk = false;
+			bool applyDNA = false;
 			// Duplicate Check Type
 			switch(chn.pModInstrument->nDCT)
 			{
@@ -2227,33 +2235,40 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 				break;
 			// Note
 			case DCT_NOTE:
-				if(note && chn.nNote == note && pIns == chn.pModInstrument) bOk = true;
-				if(pIns && pIns->nMixPlug) applyDNAtoPlug = true;
+				if(dnaNote != NOTE_NONE && chn.nNote == dnaNote && pIns == chn.pModInstrument)
+					applyDNA = true;
+				if(pIns && pIns->nMixPlug)
+					applyDNAtoPlug = true;
 				break;
 			// Sample
 			case DCT_SAMPLE:
-				if(pSample != nullptr && pSample == chn.pModSample) bOk = true;
+				// IT compatibility: DCT = sample only applies to same instrument
+				// Test case: dct_smp_note_test.it
+				if(pSample != nullptr && pSample == chn.pModSample && (pIns == chn.pModInstrument || !m_playBehaviour[kITDCTBehaviour]))
+					applyDNA = true;
 				break;
 			// Instrument
 			case DCT_INSTRUMENT:
-				if(pIns == chn.pModInstrument) bOk = true;
-				if(pIns && pIns->nMixPlug) applyDNAtoPlug = true;
+				if(pIns == chn.pModInstrument)
+					applyDNA = true;
+				if(pIns && pIns->nMixPlug)
+					applyDNAtoPlug = true;
 				break;
 			// Plugin
 			case DCT_PLUGIN:
 				if(pIns && (pIns->nMixPlug) && (pIns->nMixPlug == chn.pModInstrument->nMixPlug))
 				{
 					applyDNAtoPlug = true;
-					bOk = true;
+					applyDNA = true;
 				}
 				break;
-
 			}
+			
 			// Duplicate Note Action
-			if (bOk)
+			if(applyDNA)
 			{
 #ifndef NO_PLUGINS
-				if (applyDNAtoPlug && chn.nNote != NOTE_NONE)
+				if(applyDNAtoPlug && chn.nNote != NOTE_NONE)
 				{
 					switch(chn.pModInstrument->nDNA)
 					{

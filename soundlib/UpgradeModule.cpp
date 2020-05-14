@@ -544,6 +544,7 @@ void CSoundFile::UpgradeModule()
 			{ kITInstrWithNoteOffOldEffects,  MPT_V("1.28.02.06") },
 			{ kITDoNotOverrideChannelPan,     MPT_V("1.29.00.22") },
 			{ kITPatternLoopWithJumps,        MPT_V("1.29.00.32") },
+			{ kITDCTBehaviour,                MPT_V("1.29.00.57") },
 		};
 
 		for(const auto &b : behaviours)
