@@ -57,6 +57,13 @@ int main( int argc, char * argv[] ) {
 		std::vector<float> right( buffersize );
 		std::vector<float> interleaved_buffer( buffersize * 2 );
 		bool is_interleaved = false;
+#if defined(_MSC_VER) && defined(_PREFAST_)
+		// work-around bug in VS2019 MSVC 16.5.5 static analyzer
+		is_interleaved = false;
+		portaudio::DirectionSpecificStreamParameters outputstream_parameters( portaudio.defaultOutputDevice(), 2, portaudio::FLOAT32, false, portaudio.defaultOutputDevice().defaultHighOutputLatency(), 0 );
+		portaudio::StreamParameters stream_parameters( portaudio::DirectionSpecificStreamParameters::null(), outputstream_parameters, samplerate, paFramesPerBufferUnspecified, paNoFlag );
+		portaudio::BlockingStream stream( stream_parameters );
+#else
 		portaudio::BlockingStream stream = [&]() {
 			try {
 				is_interleaved = false;
@@ -73,6 +80,7 @@ int main( int argc, char * argv[] ) {
 				return portaudio::BlockingStream( stream_parameters );
 			}
 		}();
+#endif
 		stream.start();
 		while ( true ) {
 			std::size_t count = is_interleaved ? mod.read_interleaved_stereo( samplerate, buffersize, interleaved_buffer.data() ) : mod.read( samplerate, buffersize, left.data(), right.data() );
