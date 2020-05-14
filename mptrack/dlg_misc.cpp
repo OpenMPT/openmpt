@@ -676,7 +676,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kMIDIVolumeOnNoteOffBug: desc = _T("Reset VST volume on note-off"); break;
 		case kITDoNotOverrideChannelPan: desc = _T("Instruments / samples with forced panning do not override channel panning for following instruments / samples"); break;
 		case kITPatternLoopWithJumps: desc = _T("Bxx right of SBx terminates the loop in IT"); break;
-		case kITDNABehaviour: desc = _T("Duplicate Sample Check requires same instrument, Duplicate Note Check uses pattern notes for comparison"); break;
+		case kITDCTBehaviour: desc = _T("Duplicate Sample Check requires same instrument, Duplicate Note Check uses pattern notes for comparison"); break;
 		case kST3RetrigAfterNoteCut: desc = _T("Notes cannot be retriggered after they have been cut"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
