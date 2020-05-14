@@ -529,6 +529,7 @@ enum PlayBehaviour
 	kMIDIVolumeOnNoteOffBug,        // Update MIDI channel volume on note-off (legacy bug emulation)
 	kITDoNotOverrideChannelPan,     // Sample / instrument pan does not override channel pan for following samples / instruments that are not panned
 	kITPatternLoopWithJumps,        // Bxx right of SBx terminates the loop in IT
+	kITDCTBehaviour,                // DCT="Sample" requires sample instrument, DCT="Note" checks old pattern note against new pattern note (previously was checking old pattern note against new translated note)
 	kST3RetrigAfterNoteCut,         // Qxy does not retrigger note after it has been cut with ^^^ or SCx
 
 	// Add new play behaviours here.
