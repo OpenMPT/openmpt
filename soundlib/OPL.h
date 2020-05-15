@@ -74,14 +74,13 @@ public:
 	void Mix(int32 *buffer, size_t count, uint32 volumeFactorQ16);
 
 	void NoteOff(CHANNELINDEX c);
-	void NoteCut(CHANNELINDEX c);
+	void NoteCut(CHANNELINDEX c, bool unassign = true);
 	void Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff, bool beatingOscillators);
 	void Volume(CHANNELINDEX c, uint8 vol, bool applyToModulator);
 	int8 Pan(CHANNELINDEX c, int32 pan);
 	void Patch(CHANNELINDEX c, const OPLPatch &patch);
 	bool IsActive(CHANNELINDEX c) const { return GetVoice(c) != OPL_CHANNEL_INVALID; }
 	void MoveChannel(CHANNELINDEX from, CHANNELINDEX to);
-	void UnassignChannel(CHANNELINDEX c);
 	void Reset();
 
 protected:

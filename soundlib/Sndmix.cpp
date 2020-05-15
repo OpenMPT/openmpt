@@ -2280,16 +2280,20 @@ bool CSoundFile::ReadNote()
 				}
 
 				// Deallocate OPL channels for notes that are most definitely never going to play again.
-				const auto *ins = chn.pModInstrument;
-				if(ins != nullptr
+				if(const auto *ins = chn.pModInstrument; ins != nullptr
 					&& (ins->VolEnv.dwFlags & (ENV_ENABLED | ENV_LOOP | ENV_SUSTAIN)) == ENV_ENABLED
 					&& !ins->VolEnv.empty()
 					&& chn.GetEnvelope(ENV_VOLUME).nEnvPosition >= ins->VolEnv.back().tick
 					&& ins->VolEnv.back().value == 0)
 				{
 					m_opl->NoteCut(nChn);
+					chn.dwFlags.reset(CHN_ADLIB);
 					chn.dwFlags.set(CHN_NOTEFADE);
 					chn.nFadeOutVol = 0;
+				} else if(m_playBehaviour[kOPLFlexibleNoteOff] && chn.dwFlags[CHN_NOTEFADE] && chn.nFadeOutVol == 0)
+				{
+					m_opl->NoteCut(nChn);
+					chn.dwFlags.reset(CHN_ADLIB);
 				}
 			}
 

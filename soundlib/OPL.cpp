@@ -123,17 +123,6 @@ void OPL::MoveChannel(CHANNELINDEX from, CHANNELINDEX to)
 }
 
 
-void OPL::UnassignChannel(CHANNELINDEX c)
-{
-	uint8 oplCh = m_ChanToOPL[c];
-	if(oplCh == OPL_CHANNEL_INVALID)
-		return;
-	NoteCut(c);
-	m_OPLtoChan[oplCh] = CHANNELINDEX_INVALID;
-	m_ChanToOPL[c] = OPL_CHANNEL_INVALID;
-}
-
-
 void OPL::NoteOff(CHANNELINDEX c)
 {
 	uint8 oplCh = GetVoice(c);
@@ -144,10 +133,17 @@ void OPL::NoteOff(CHANNELINDEX c)
 }
 
 
-void OPL::NoteCut(CHANNELINDEX c)
+void OPL::NoteCut(CHANNELINDEX c, bool unassign)
 {
+	uint8 oplCh = GetVoice(c);
+	if(oplCh == OPL_CHANNEL_INVALID)
+		return;
 	NoteOff(c);
 	Volume(c, 0, false);
+	if(!unassign)
+		return;
+	m_OPLtoChan[oplCh] = CHANNELINDEX_INVALID;
+	m_ChanToOPL[c] = OPL_CHANNEL_INVALID;
 }
 
 
