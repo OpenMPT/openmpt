@@ -180,7 +180,9 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	m_modFormat = ModFormatDetails();
 	m_FileHistory.clear();
 	m_tempoSwing.clear();
+#ifdef MPT_EXTERNAL_SAMPLES
 	m_samplePaths.clear();
+#endif // MPT_EXTERNAL_SAMPLES
 
 	// Note: we do not use the Amiga resampler for DBM as it's a multichannel format and can make use of higher-quality Amiga soundcards instead of Paula.
 	if(GetType() & (/*MOD_TYPE_DBM | */MOD_TYPE_DIGI | MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_OKT | MOD_TYPE_SFX | MOD_TYPE_STP))
@@ -683,7 +685,9 @@ bool CSoundFile::Destroy()
 	m_songArtist.clear();
 	m_songMessage.clear();
 	m_FileHistory.clear();
+#ifdef MPT_EXTERNAL_SAMPLES
 	m_samplePaths.clear();
+#endif // MPT_EXTERNAL_SAMPLES
 
 	for(auto &smp : Samples)
 	{
