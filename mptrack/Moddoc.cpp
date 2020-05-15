@@ -202,7 +202,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		if (f.IsValid())
 		{
 			FileReader file = GetFileReader(f);
-			ASSERT(GetPathNameMpt() == mpt::PathString());
+			MPT_ASSERT(GetPathNameMpt().empty());
 			SetPathName(filename, FALSE);	// Path is not set yet, but loaders processing external samples/instruments (ITP/MPTM) need this for relative paths.
 			m_SndFile.Create(file, CSoundFile::loadCompleteModule, this);
 		}
@@ -217,7 +217,8 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		mpt::cformat(_T("File: %1\nLast saved with: %2, you are using OpenMPT %3\n\n"))
 		(filename, m_SndFile.m_modFormat.madeWithTracker, Version::Current()));
 
-	if ((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels())) return FALSE;
+	if((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels()))
+		return FALSE;
 
 	// Convert to MOD/S3M/XM/IT
 	switch(m_SndFile.GetType())
@@ -2656,7 +2657,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 CHANNELINDEX CModDoc::FindAvailableChannel() const
 {
 	CHANNELINDEX chn = m_SndFile.GetNNAChannel(CHANNELINDEX_INVALID);
-	if(chn != 0)
+	if(chn != CHANNELINDEX_INVALID)
 		return chn;
 	else
 		return GetNumChannels();
