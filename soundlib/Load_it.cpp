@@ -1170,6 +1170,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && !memcmp(&fileHeader.reserved, "CHBI", 4))
 			{
 				m_madeWithTracker = MPT_USTRING("ChibiTracker");
+				m_playBehaviour.reset(kITShortSampleRetrig);
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && fileHeader.special <= 1 && fileHeader.pwd == 0 && fileHeader.reserved == 0
 				&& (fileHeader.flags & (ITFileHeader::vol0Optimisations | ITFileHeader::instrumentMode | ITFileHeader::useMIDIPitchController | ITFileHeader::reqEmbeddedMIDIConfig | ITFileHeader::extendedFilterRange)) == ITFileHeader::instrumentMode
 				&& m_nSamples > 0 && !strcmp(Samples[1].filename, "XXXXXXXX.YYY"))
