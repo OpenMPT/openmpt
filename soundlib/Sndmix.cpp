@@ -509,28 +509,33 @@ bool CSoundFile::ProcessRow()
 						m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
 						for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 						{
-							m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
-							m_PlayState.Chn[i].nFadeOutVol = 0;
-
-							if (i < m_nChannels)
+							auto &chn = m_PlayState.Chn[i];
+							if(chn.dwFlags[CHN_ADLIB] && m_opl)
 							{
-								m_PlayState.Chn[i].nGlobalVol = ChnSettings[i].nVolume;
-								m_PlayState.Chn[i].nVolume = ChnSettings[i].nVolume;
-								m_PlayState.Chn[i].nPan = ChnSettings[i].nPan;
-								m_PlayState.Chn[i].nPanSwing = m_PlayState.Chn[i].nVolSwing = 0;
-								m_PlayState.Chn[i].nCutSwing = m_PlayState.Chn[i].nResSwing = 0;
-								m_PlayState.Chn[i].nOldVolParam = 0;
-								m_PlayState.Chn[i].oldOffset = 0;
-								m_PlayState.Chn[i].nOldHiOffset = 0;
-								m_PlayState.Chn[i].nPortamentoDest = 0;
+								m_opl->NoteCut(i);
+							}
+							chn.dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
+							chn.nFadeOutVol = 0;
 
-								if (!m_PlayState.Chn[i].nLength)
+							if(i < m_nChannels)
+							{
+								chn.nGlobalVol = ChnSettings[i].nVolume;
+								chn.nVolume = ChnSettings[i].nVolume;
+								chn.nPan = ChnSettings[i].nPan;
+								chn.nPanSwing = chn.nVolSwing = 0;
+								chn.nCutSwing = chn.nResSwing = 0;
+								chn.nOldVolParam = 0;
+								chn.oldOffset = 0;
+								chn.nOldHiOffset = 0;
+								chn.nPortamentoDest = 0;
+
+								if(!chn.nLength)
 								{
-									m_PlayState.Chn[i].dwFlags = ChnSettings[i].dwFlags;
-									m_PlayState.Chn[i].nLoopStart = 0;
-									m_PlayState.Chn[i].nLoopEnd = 0;
-									m_PlayState.Chn[i].pModInstrument = nullptr;
-									m_PlayState.Chn[i].pModSample = nullptr;
+									chn.dwFlags = ChnSettings[i].dwFlags;
+									chn.nLoopStart = 0;
+									chn.nLoopEnd = 0;
+									chn.pModInstrument = nullptr;
+									chn.pModSample = nullptr;
 								}
 							}
 						}
