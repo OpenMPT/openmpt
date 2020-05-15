@@ -2105,7 +2105,7 @@ void CSoundFile::ApplyInstrumentPanning(ModChannel &chn, const ModInstrument *in
 CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 {
 	// Check for empty channel
-	for (CHANNELINDEX i = m_nChannels; i < MAX_CHANNELS; i++)
+	for(CHANNELINDEX i = m_nChannels; i < MAX_CHANNELS; i++)
 	{
 		const ModChannel &c = m_PlayState.Chn[i];
 		// No sample and no plugin playing
@@ -2114,20 +2114,24 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 		// Plugin channel with already released note
 		if(!c.nLength && c.dwFlags[CHN_KEYOFF | CHN_NOTEFADE])
 			return i;
+		// Stopped OPL channel
+		if(!c.nFadeOutVol && c.dwFlags[CHN_ADLIB] && (!m_opl || !m_opl->IsActive(i)))
+			return i;
 	}
 
 	uint32 vol = 0x800000;
 	if(nChn < MAX_CHANNELS)
 	{
 		const ModChannel &srcChn = m_PlayState.Chn[nChn];
-		if(!srcChn.nFadeOutVol && srcChn.nLength) return 0;
+		if(!srcChn.nFadeOutVol && srcChn.nLength)
+			return CHANNELINDEX_INVALID;
 		vol = (srcChn.nRealVolume << 9) | srcChn.nVolume;
 	}
 
 	// All channels are used: check for lowest volume
-	CHANNELINDEX result = 0;
+	CHANNELINDEX result = CHANNELINDEX_INVALID;
 	uint32 envpos = 0;
-	for (CHANNELINDEX i = m_nChannels; i < MAX_CHANNELS; i++)
+	for(CHANNELINDEX i = m_nChannels; i < MAX_CHANNELS; i++)
 	{
 		const ModChannel &c = m_PlayState.Chn[i];
 		if(c.nLength && !c.nFadeOutVol)
@@ -2136,7 +2140,8 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 		// Rationale: We need volume envelopes in case e.g. all NNA channels are playing at full volume but are looping on a 0-volume envelope node.
 		// But if global volume is not applied to master and the global volume temporarily drops to 0, we would kill arbitrary channels. Hence, add the note volume as well.
 		uint32 v = (c.nRealVolume << 9) | c.nVolume;
-		if(c.dwFlags[CHN_LOOP]) v /= 2;
+		if(c.dwFlags[CHN_LOOP])
+			v /= 2;
 		if((v < vol) || ((v == vol) && (c.VolEnv.nEnvPosition > envpos)))
 		{
 			envpos = c.VolEnv.nEnvPosition;
@@ -2150,23 +2155,20 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 
 CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, bool forceCut)
 {
-	CHANNELINDEX nnaChn = CHANNELINDEX_INVALID;
 	ModChannel &srcChn = m_PlayState.Chn[nChn];
 	const ModInstrument *pIns = nullptr;
 	if(!ModCommand::IsNote(static_cast<ModCommand::NOTE>(note)))
-	{
-		return nnaChn;
-	}
+		return CHANNELINDEX_INVALID;
+
 	// Always NNA cut - using
 	if((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2)) || !m_nInstruments || forceCut) && !srcChn.HasMIDIOutput())
 	{
 		if(!srcChn.nLength || srcChn.dwFlags[CHN_MUTE] || !(srcChn.rightVol | srcChn.leftVol))
-		{
 			return CHANNELINDEX_INVALID;
-		}
 
-		nnaChn = GetNNAChannel(nChn);
-		if(!nnaChn) return CHANNELINDEX_INVALID;
+		const CHANNELINDEX nnaChn = GetNNAChannel(nChn);
+		if(nnaChn == CHANNELINDEX_INVALID)
+			return CHANNELINDEX_INVALID;
 		ModChannel &chn = m_PlayState.Chn[nnaChn];
 		// Copy Channel
 		chn = srcChn;
@@ -2189,7 +2191,8 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		}
 		return nnaChn;
 	}
-	if(instr > GetNumInstruments()) instr = 0;
+	if(instr > GetNumInstruments())
+		instr = 0;
 	const ModSample *pSample = srcChn.pModSample;
 	// If no instrument is given, assume previous instrument to still be valid.
 	// Test case: DNA-NoInstr.it
@@ -2336,72 +2339,75 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 #endif // NO_PLUGINS
 
 	// New Note Action
-	if(srcChn.IsSamplePlaying() || applyNNAtoPlug)
-	{
-		nnaChn = GetNNAChannel(nChn);
-		if(nnaChn != 0)
-		{
-			ModChannel &chn = m_PlayState.Chn[nnaChn];
-			// Copy Channel
-			chn = srcChn;
-			chn.dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PORTAMENTO);
-			chn.nPanbrelloOffset = 0;
+	if(!srcChn.IsSamplePlaying() && !applyNNAtoPlug)
+		return CHANNELINDEX_INVALID;
 
-			chn.nMasterChn = nChn < GetNumChannels() ? nChn + 1 : 0;
-			chn.nCommand = CMD_NONE;
+	CHANNELINDEX nnaChn = GetNNAChannel(nChn);
+	if(nnaChn == CHANNELINDEX_INVALID)
+		return CHANNELINDEX_INVALID;
+
+	ModChannel &chn = m_PlayState.Chn[nnaChn];
+	if(chn.dwFlags[CHN_ADLIB] && m_opl)
+		m_opl->UnassignChannel(nnaChn);
+	// Copy Channel
+	chn = srcChn;
+	chn.dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PORTAMENTO);
+	chn.nPanbrelloOffset = 0;
+
+	chn.nMasterChn = nChn < GetNumChannels() ? nChn + 1 : 0;
+	chn.nCommand = CMD_NONE;
 #ifndef NO_PLUGINS
-			if(applyNNAtoPlug && pPlugin)
-			{
-				switch(srcChn.nNNA)
-				{
-				case NNA_NOTEOFF:
-				case NNA_NOTECUT:
-				case NNA_NOTEFADE:
-					// Switch off note played on this plugin, on this tracker channel and midi channel
-					SendMIDINote(nChn, NOTE_KEYOFF, 0);
-					srcChn.nArpeggioLastNote = NOTE_NONE;
-					break;
-				case NNA_CONTINUE:
-					break;
-				}
-			}
-#endif // NO_PLUGINS
-
-			// Key Off the note
-			switch(srcChn.nNNA)
-			{
-			case NNA_NOTEOFF:
-				KeyOff(chn);
-				if(chn.dwFlags[CHN_ADLIB] && m_opl)
-					m_opl->NoteOff(nChn);
-				break;
-			case NNA_NOTECUT:
-				chn.nFadeOutVol = 0;
-				chn.dwFlags.set(CHN_NOTEFADE);
-				if(chn.dwFlags[CHN_ADLIB] && m_opl)
-					m_opl->NoteCut(nChn);
-				break;
-			case NNA_NOTEFADE:
-				chn.dwFlags.set(CHN_NOTEFADE);
-				if(chn.dwFlags[CHN_ADLIB] && m_opl)
-					m_opl->NoteOff(nChn);
-				break;
-			case NNA_CONTINUE:
-				if(chn.dwFlags[CHN_ADLIB] && m_opl)
-					m_opl->MoveChannel(nChn, nnaChn);
-				break;
-			}
-			if(!chn.nVolume)
-			{
-				chn.nFadeOutVol = 0;
-				chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
-			}
-			// Stop this channel
-			srcChn.nLength = 0;
-			srcChn.position.Set(0);
-			srcChn.nROfs = srcChn.nLOfs = 0;
+	if(applyNNAtoPlug && pPlugin)
+	{
+		switch(srcChn.nNNA)
+		{
+		case NNA_NOTEOFF:
+		case NNA_NOTECUT:
+		case NNA_NOTEFADE:
+			// Switch off note played on this plugin, on this tracker channel and midi channel
+			SendMIDINote(nChn, NOTE_KEYOFF, 0);
+			srcChn.nArpeggioLastNote = NOTE_NONE;
+			break;
+		case NNA_CONTINUE:
+			break;
 		}
 	}
+#endif // NO_PLUGINS
+
+	// Key Off the note
+	switch(srcChn.nNNA)
+	{
+	case NNA_NOTEOFF:
+		KeyOff(chn);
+		if(chn.dwFlags[CHN_ADLIB] && m_opl)
+			m_opl->NoteOff(nChn);
+		break;
+	case NNA_NOTECUT:
+		chn.nFadeOutVol = 0;
+		chn.dwFlags.set(CHN_NOTEFADE);
+		if(chn.dwFlags[CHN_ADLIB] && m_opl)
+			m_opl->NoteCut(nChn);
+		break;
+	case NNA_NOTEFADE:
+		chn.dwFlags.set(CHN_NOTEFADE);
+		if(chn.dwFlags[CHN_ADLIB] && m_opl)
+			m_opl->NoteOff(nChn);
+		break;
+	case NNA_CONTINUE:
+		if(chn.dwFlags[CHN_ADLIB] && m_opl)
+			m_opl->MoveChannel(nChn, nnaChn);
+		break;
+	}
+	if(!chn.nVolume)
+	{
+		chn.nFadeOutVol = 0;
+		chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+	}
+	// Stop this channel
+	srcChn.nLength = 0;
+	srcChn.position.Set(0);
+	srcChn.nROfs = srcChn.nLOfs = 0;
+	
 	return nnaChn;
 }
 
