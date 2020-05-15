@@ -2115,7 +2115,7 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 		if(!c.nLength && c.dwFlags[CHN_KEYOFF | CHN_NOTEFADE])
 			return i;
 		// Stopped OPL channel
-		if(!c.nFadeOutVol && c.dwFlags[CHN_ADLIB] && (!m_opl || !m_opl->IsActive(i)))
+		if(c.dwFlags[CHN_ADLIB] && (!m_opl || !m_opl->IsActive(i)))
 			return i;
 	}
 
@@ -2304,7 +2304,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 				// Note Fade
 				case DNA_NOTEFADE:
 					chn.dwFlags.set(CHN_NOTEFADE);
-					if(chn.dwFlags[CHN_ADLIB] && m_opl)
+					if(chn.dwFlags[CHN_ADLIB] && m_opl && !m_playBehaviour[kOPLwithNNA])
 						m_opl->NoteOff(i);
 					break;
 				}
@@ -2348,7 +2348,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 
 	ModChannel &chn = m_PlayState.Chn[nnaChn];
 	if(chn.dwFlags[CHN_ADLIB] && m_opl)
-		m_opl->UnassignChannel(nnaChn);
+		m_opl->NoteCut(nnaChn);
 	// Copy Channel
 	chn = srcChn;
 	chn.dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PORTAMENTO);
@@ -2380,7 +2380,11 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	case NNA_NOTEOFF:
 		KeyOff(chn);
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
+		{
 			m_opl->NoteOff(nChn);
+			if(m_playBehaviour[kOPLwithNNA])
+				m_opl->MoveChannel(nChn, nnaChn);
+		}
 		break;
 	case NNA_NOTECUT:
 		chn.nFadeOutVol = 0;
@@ -2391,7 +2395,12 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	case NNA_NOTEFADE:
 		chn.dwFlags.set(CHN_NOTEFADE);
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
-			m_opl->NoteOff(nChn);
+		{
+			if(m_playBehaviour[kOPLwithNNA])
+				m_opl->MoveChannel(nChn, nnaChn);
+			else
+				m_opl->NoteOff(nChn);
+		}
 		break;
 	case NNA_CONTINUE:
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
@@ -5690,7 +5699,7 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample)
 		
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
 		{
-			m_opl->NoteCut(nChn);
+			m_opl->NoteCut(nChn, false);
 		}
 	}
 }

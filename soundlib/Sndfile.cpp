@@ -1044,6 +1044,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		if(type == MOD_TYPE_MPT)
 		{
 			playBehaviour.set(kOPLFlexibleNoteOff);
+			playBehaviour.set(kOPLwithNNA);
 		}
 		break;
 
@@ -1161,6 +1162,7 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kOPLFlexibleNoteOff);
 		playBehaviour.set(kITDoNotOverrideChannelPan);
 		playBehaviour.set(kITDCTBehaviour);
+		playBehaviour.set(kOPLwithNNA);
 		break;
 
 	case MOD_TYPE_XM:
