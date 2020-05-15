@@ -538,45 +538,45 @@ EXSTYLE WS_EX_ACCEPTFILES
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "Additive Synthesis",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,7,174,10
-    LTEXT           "Modulation Feedback:",IDC_STATIC,216,8,71,8
+    LTEXT           "Modulation Feedback:",IDC_STATIC,216,8,72,8
     CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,6,108,12
     GROUPBOX        "Carrier",IDC_STATIC,6,24,198,192
-    LTEXT           "Attack Rate:",IDC_STATIC,12,38,42,8
+    LTEXT           "Attack Rate:",IDC_STATIC,12,38,72,8
     CONTROL         "",IDC_SLIDER9,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,36,108,12
-    LTEXT           "Decay Rate:",IDC_STATIC,12,50,41,8
+    LTEXT           "Decay Rate:",IDC_STATIC,12,50,72,8
     CONTROL         "",IDC_SLIDER10,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,48,108,12
-    LTEXT           "Sustain Level:",IDC_STATIC,12,62,46,8
+    LTEXT           "Sustain Level:",IDC_STATIC,12,62,72,8
     CONTROL         "",IDC_SLIDER11,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,60,108,12
-    LTEXT           "Release Rate:",IDC_STATIC,12,74,46,8
+    LTEXT           "Release Rate:",IDC_STATIC,12,74,72,8
     CONTROL         "",IDC_SLIDER12,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,72,108,12
     CONTROL         "Sustain Sound",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,87,174,10
-    LTEXT           "Volume:",IDC_STATIC,12,104,26,8
+    LTEXT           "Volume:",IDC_STATIC,12,104,72,8
     CONTROL         "",IDC_SLIDER13,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,102,108,12
     CONTROL         "Scale Envelope with Keys",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,120,174,10
-    LTEXT           "Key Scale Level:",IDC_STATIC,12,134,53,8
+    LTEXT           "Key Scale Level:",IDC_STATIC,12,134,72,8
     CONTROL         "",IDC_SLIDER14,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,132,108,12
-    LTEXT           "Frequency Multiplier:",IDC_STATIC,12,152,68,8
+    LTEXT           "Frequency Multiplier:",IDC_STATIC,12,152,72,8
     CONTROL         "",IDC_SLIDER15,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,84,150,108,12
     LTEXT           "Waveform:",IDC_STATIC,12,168,68,8
     COMBOBOX        IDC_COMBO2,84,168,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Vibrato",IDC_CHECK8,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,186,180,10
     CONTROL         "Tremolo",IDC_CHECK9,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,198,180,10
     GROUPBOX        "Modulator",IDC_STATIC,210,24,198,192
-    LTEXT           "Attack Rate:",IDC_STATIC,216,38,42,8
+    LTEXT           "Attack Rate:",IDC_STATIC,216,38,72,8
     CONTROL         "",IDC_SLIDER2,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,36,108,12
-    LTEXT           "Decay Rate:",IDC_STATIC,216,50,41,8
+    LTEXT           "Decay Rate:",IDC_STATIC,216,50,72,8
     CONTROL         "",IDC_SLIDER3,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,48,108,12
-    LTEXT           "Sustain Level:",IDC_STATIC,216,62,46,8
+    LTEXT           "Sustain Level:",IDC_STATIC,216,62,72,8
     CONTROL         "",IDC_SLIDER4,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,60,108,12
-    LTEXT           "Release Rate:",IDC_STATIC,216,74,46,8
+    LTEXT           "Release Rate:",IDC_STATIC,216,74,72,8
     CONTROL         "",IDC_SLIDER5,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,72,108,12
     CONTROL         "Sustain Sound",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,216,86,174,10
-    LTEXT           "Volume:",IDC_STATIC,216,104,26,8
+    LTEXT           "Volume:",IDC_STATIC,216,104,72,8
     CONTROL         "",IDC_SLIDER6,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,102,108,12
     CONTROL         "Scale Envelope with Keys",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,216,120,174,10
-    LTEXT           "Key Scale Level:",IDC_STATIC,216,134,53,8
+    LTEXT           "Key Scale Level:",IDC_STATIC,216,134,72,8
     CONTROL         "",IDC_SLIDER7,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,132,108,12
-    LTEXT           "Frequency Multiplier:",IDC_STATIC,216,152,68,8
+    LTEXT           "Frequency Multiplier:",IDC_STATIC,216,152,72,8
     CONTROL         "",IDC_SLIDER8,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,288,150,108,12
     LTEXT           "Waveform:",IDC_STATIC,216,168,68,8
     COMBOBOX        IDC_COMBO1,288,168,108,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
