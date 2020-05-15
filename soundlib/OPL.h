@@ -79,9 +79,10 @@ public:
 	void Volume(CHANNELINDEX c, uint8 vol, bool applyToModulator);
 	int8 Pan(CHANNELINDEX c, int32 pan);
 	void Patch(CHANNELINDEX c, const OPLPatch &patch);
-	void Reset();
 	bool IsActive(CHANNELINDEX c) const { return GetVoice(c) != OPL_CHANNEL_INVALID; }
 	void MoveChannel(CHANNELINDEX from, CHANNELINDEX to);
+	void UnassignChannel(CHANNELINDEX c);
+	void Reset();
 
 protected:
 	static uint16 ChannelToRegister(uint8 oplCh);

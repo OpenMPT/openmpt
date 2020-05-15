@@ -2347,6 +2347,8 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		return CHANNELINDEX_INVALID;
 
 	ModChannel &chn = m_PlayState.Chn[nnaChn];
+	if(chn.dwFlags[CHN_ADLIB] && m_opl)
+		m_opl->UnassignChannel(nnaChn);
 	// Copy Channel
 	chn = srcChn;
 	chn.dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO | CHN_PORTAMENTO);
