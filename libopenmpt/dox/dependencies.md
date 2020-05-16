@@ -16,7 +16,7 @@ Dependencies
      *  **MinGW-W64 7.1** or higher (it is recommended to preferably use
         posix threading model as opposed to win32 threading model, or at least
         have mingw-std-threads available otherwise)
-     *  **emscripten 1.38.5** or higher
+     *  **emscripten 1.39.1** or higher
      *  **DJGPP GCC 7.2** or higher
      *  any other **C++17 compliant** compiler
         
