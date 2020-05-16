@@ -836,7 +836,7 @@ void COrderList::OnPaint()
 			// Drawing drop indicator
 			if(m_bDragging && ord == m_nDropPos && !inSelection)
 			{
-				const bool dropLeft = (m_nDropPos < selection.firstOrd);
+				const bool dropLeft = (m_nDropPos < selection.firstOrd) || TrackerSettings::Instance().orderListOldDropBehaviour;
 				dc.FillSolidRect(CRect{dropLeft ? (rect.left + 2) : (rect.right - 2 - lineWidth2), rect.top + 2, dropLeft ? (rect.left + 2 + lineWidth2) : (rect.right - 2), rect.bottom - 2}, separatorColor);
 			}
 
@@ -852,12 +852,13 @@ void COrderList::OnPaint()
 					wsprintf(s, _T("%u"), pat);
 			}
 
-			const COLORREF &textCol =
-			    (highLight
-			         ? colorTextSel  // Highlighted pattern
-			         : (sndFile.Patterns.IsValidPat(pat)
-			                ? colorText        // Normal pattern
-			                : colorInvalid));  // Non-existent pattern
+			COLORREF textCol;
+			if(highLight)
+				textCol = colorTextSel;  // Highlighted pattern
+			else if(sndFile.Patterns.IsValidPat(pat))
+				textCol = colorText;  // Normal pattern
+			else
+				textCol = colorInvalid;  // Non-existent pattern
 			dc.SetTextColor(textCol);
 			dc.DrawText(s, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 		}
@@ -950,7 +951,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 				const bool moveBack = m_nDropPos < m_nDragOrder;
 				ORDERINDEX moveCount = (selection.lastOrd - selection.firstOrd), movePos = selection.firstOrd;
 
-				if(!moveBack)
+				if(!moveBack && !TrackerSettings::Instance().orderListOldDropBehaviour)
 					m_nDropPos++;
 
 				bool modified = false;

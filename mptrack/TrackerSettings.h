@@ -739,6 +739,7 @@ public:
 	Setting<int32> effectVisHeight;
 	Setting<CString> patternAccessibilityFormat;
 	CachedSetting<bool> patternAlwaysDrawWholePatternOnScrollSlow;
+	CachedSetting<bool> orderListOldDropBehaviour;
 
 	// Sample Editor
 

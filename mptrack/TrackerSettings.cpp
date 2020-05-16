@@ -264,6 +264,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, effectVisHeight(conf, U_("Pattern Editor"), U_("EffectVisHeight"), -1)
 	, patternAccessibilityFormat(conf, U_("Pattern Editor"), U_("AccessibilityFormat"), _T("Row %row%, Channel %channel%, %column_type%: %column_description%"))
 	, patternAlwaysDrawWholePatternOnScrollSlow(conf, U_("Pattern Editor"), U_("AlwaysDrawWholePatternOnScrollSlow"), false)
+	, orderListOldDropBehaviour(conf, U_("Pattern Editor"), U_("OrderListOldDropBehaviour"), false)
 	// Sample Editor
 	, m_SampleUndoBufferSize(conf, U_("Sample Editor"), U_("UndoBufferSize"), SampleUndoBufferSize())
 	, sampleEditorKeyBehaviour(conf, U_("Sample Editor"), U_("KeyBehaviour"), seNoteOffOnNewKey)
