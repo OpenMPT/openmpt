@@ -292,7 +292,7 @@ void CSoundFile::CreateStereoMix(int count)
 	{
 		ModChannel &chn = m_PlayState.Chn[m_PlayState.ChnMix[nChn]];
 
-		if(!chn.pCurrentSample)
+		if(!chn.pCurrentSample && !chn.nLOfs && !chn.nROfs)
 			continue;
 
 		pOfsR = &m_dryROfsVol;
