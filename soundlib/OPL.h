@@ -92,7 +92,9 @@ protected:
 
 	enum
 	{
-		OPL_CHANNELS = 18,	// 9 for OPL2 or 18 for OPL3
+		OPL_CHANNELS = 18,       // 9 for OPL2 or 18 for OPL3
+		OPL_CHANNEL_CUT = 0x80,  // Indicates that the channel has been cut and used as a hint to re-use the channel for the same tracker channel if possible
+		OPL_CHANNEL_MASK = 0x7F,
 		OPL_CHANNEL_INVALID = 0xFF,
 		OPL_BASERATE = 49716,
 	};

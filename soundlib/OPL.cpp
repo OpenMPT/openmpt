@@ -77,33 +77,49 @@ uint16 OPL::OperatorToRegister(uint8 oplCh)
 
 uint8 OPL::GetVoice(CHANNELINDEX c) const
 {
-	return m_ChanToOPL[c];
+	if((m_ChanToOPL[c] & OPL_CHANNEL_CUT) || m_ChanToOPL[c] == OPL_CHANNEL_INVALID)
+		return OPL_CHANNEL_INVALID;
+	return m_ChanToOPL[c] & OPL_CHANNEL_MASK;
 }
 
 
 uint8 OPL::AllocateVoice(CHANNELINDEX c)
 {
 	// Can we re-use a previous channel?
-	if(m_ChanToOPL[c] != OPL_CHANNEL_INVALID)
+	if(auto oplCh = m_ChanToOPL[c]; oplCh != OPL_CHANNEL_INVALID)
 	{
-		return GetVoice(c);
+		if(!(m_ChanToOPL[c] & OPL_CHANNEL_CUT))
+			return oplCh;
+		// Check re-use hint
+		oplCh &= OPL_CHANNEL_MASK;
+		if(m_OPLtoChan[oplCh] == CHANNELINDEX_INVALID || m_OPLtoChan[oplCh] == c)
+		{
+			m_OPLtoChan[oplCh] = c;
+			m_ChanToOPL[c] = oplCh;
+			return oplCh;
+		}
 	}
 	// Search for unused channel or channel with released note
-	uint8 releasedChn = OPL_CHANNEL_INVALID;
+	uint8 releasedChn = OPL_CHANNEL_INVALID, releasedCutChn = OPL_CHANNEL_INVALID;
 	for(uint8 oplCh = 0; oplCh < OPL_CHANNELS; oplCh++)
 	{
 		if(m_OPLtoChan[oplCh] == CHANNELINDEX_INVALID)
 		{
 			m_OPLtoChan[oplCh] = c;
 			m_ChanToOPL[c] = oplCh;
-			return GetVoice(c);
+			return oplCh;
 		} else if(!(m_KeyOnBlock[oplCh] & KEYON_BIT))
 		{
 			releasedChn = oplCh;
+			if(m_ChanToOPL[m_OPLtoChan[oplCh]] & OPL_CHANNEL_CUT)
+				releasedCutChn = oplCh;
 		}
 	}
 	if(releasedChn != OPL_CHANNEL_INVALID)
 	{
+		// Prefer channel that has been marked as cut over channel that has just been released
+		if(releasedCutChn != OPL_CHANNEL_INVALID)
+			releasedChn = releasedCutChn;
 		m_ChanToOPL[m_OPLtoChan[releasedChn]] = OPL_CHANNEL_INVALID;
 		m_OPLtoChan[releasedChn] = c;
 		m_ChanToOPL[c] = releasedChn;
@@ -114,7 +130,7 @@ uint8 OPL::AllocateVoice(CHANNELINDEX c)
 
 void OPL::MoveChannel(CHANNELINDEX from, CHANNELINDEX to)
 {
-	uint8 oplCh = m_ChanToOPL[from];
+	uint8 oplCh = GetVoice(from);
 	if(oplCh == OPL_CHANNEL_INVALID)
 		return;
 	m_OPLtoChan[oplCh] = to;
@@ -139,11 +155,9 @@ void OPL::NoteCut(CHANNELINDEX c, bool unassign)
 	if(oplCh == OPL_CHANNEL_INVALID)
 		return;
 	NoteOff(c);
-	Volume(c, 0, false);
-	if(!unassign)
-		return;
-	m_OPLtoChan[oplCh] = CHANNELINDEX_INVALID;
-	m_ChanToOPL[c] = OPL_CHANNEL_INVALID;
+	Volume(c, 0, false);  // Note that a volume of 0 is not complete silence; the release portion of the sound will still be heard at -48dB
+	if(unassign)
+		m_ChanToOPL[c] |= OPL_CHANNEL_CUT;
 }
 
 
