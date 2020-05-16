@@ -20,8 +20,8 @@
 #include "Sndfile.h"
 #include "MixerLoops.h"
 #include "MixFuncTable.h"
-#include <cfloat>	// For FLT_EPSILON
 #include "plugins/PlugInterface.h"
+#include <cfloat>  // For FLT_EPSILON
 #include <algorithm>
 
 
@@ -276,11 +276,13 @@ void CSoundFile::CreateStereoMix(int count)
 {
 	mixsample_t *pOfsL, *pOfsR;
 
-	if (!count) return;
+	if(!count)
+		return;
 
 	// Resetting sound buffer
-	StereoFill(MixSoundBuffer, count, gnDryROfsVol, gnDryLOfsVol);
-	if(m_MixerSettings.gnChannels > 2) InitMixBuffer(MixRearBuffer, count*2);
+	StereoFill(MixSoundBuffer, count, m_dryROfsVol, m_dryLOfsVol);
+	if(m_MixerSettings.gnChannels > 2)
+		StereoFill(MixRearBuffer, count, m_surroundROfsVol, m_surroundLOfsVol);
 
 	CHANNELINDEX nchmixed = 0;
 
@@ -290,9 +292,11 @@ void CSoundFile::CreateStereoMix(int count)
 	{
 		ModChannel &chn = m_PlayState.Chn[m_PlayState.ChnMix[nChn]];
 
-		if(!chn.pCurrentSample) continue;
-		pOfsR = &gnDryROfsVol;
-		pOfsL = &gnDryLOfsVol;
+		if(!chn.pCurrentSample)
+			continue;
+
+		pOfsR = &m_dryROfsVol;
+		pOfsL = &m_dryLOfsVol;
 
 		uint32 functionNdx = MixFuncTable::ResamplingModeToMixFlags(static_cast<ResamplingMode>(chn.resamplingMode));
 		if(chn.dwFlags[CHN_16BIT]) functionNdx |= MixFuncTable::ndx16Bit;
@@ -311,7 +315,11 @@ void CSoundFile::CreateStereoMix(int count)
 		}
 #endif
 		if(chn.dwFlags[CHN_SURROUND] && m_MixerSettings.gnChannels > 2)
+		{
 			pbuffer = MixRearBuffer;
+			pOfsR = &m_surroundROfsVol;
+			pOfsL = &m_surroundLOfsVol;
+		}
 
 		//Look for plugins associated with this implicit tracker channel.
 #ifndef NO_PLUGINS

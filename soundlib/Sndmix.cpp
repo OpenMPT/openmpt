@@ -83,8 +83,8 @@ void CSoundFile::InitPlayer(bool bReset)
 	if(bReset)
 	{
 		ResetMixStat();
-		gnDryLOfsVol = 0;
-		gnDryROfsVol = 0;
+		m_dryLOfsVol = m_dryROfsVol = 0;
+		m_surroundLOfsVol = m_surroundROfsVol = 0;
 		InitAmigaResampler();
 	}
 	m_Resampler.UpdateTables();

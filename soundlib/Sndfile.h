@@ -381,9 +381,11 @@ private:
 	mixsample_t MixRearBuffer[MIXBUFFERSIZE * 2];
 	// Non-interleaved plugin processing buffer
 	float MixFloatBuffer[2][MIXBUFFERSIZE];
-	mixsample_t gnDryLOfsVol = 0;
-	mixsample_t gnDryROfsVol = 0;
 	mixsample_t MixInputBuffer[NUMMIXINPUTBUFFERS][MIXBUFFERSIZE];
+
+	// End-of-sample pop reduction tail level
+	mixsample_t m_dryLOfsVol = 0, m_dryROfsVol = 0;
+	mixsample_t m_surroundLOfsVol = 0, m_surroundROfsVol = 0;
 
 public:
 	MixerSettings m_MixerSettings;
