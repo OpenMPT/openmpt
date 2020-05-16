@@ -126,8 +126,19 @@ crand::result_type crand::operator()()
 #endif // MODPLUG_TRACKER
 
 sane_random_device::sane_random_device()
-	: rd_reliable(rd.entropy() > 0.0)
+	: rd_reliable(false)
 {
+	try
+	{
+		prd = std::make_unique<std::random_device>();
+		rd_reliable = ((*prd).entropy() > 0.0);
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+	} catch(const std::exception &)
+	{
+		rd_reliable = false;	
+	}
 	if(!rd_reliable)
 	{
 		init_fallback();
@@ -136,9 +147,19 @@ sane_random_device::sane_random_device()
 
 sane_random_device::sane_random_device(const std::string & token_)
 	: token(token_)
-	, rd(token)
-	, rd_reliable(rd.entropy() > 0.0)
+	, rd_reliable(false)
 {
+	try
+	{
+		prd = std::make_unique<std::random_device>(token);
+		rd_reliable = ((*prd).entropy() > 0.0);
+	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	{
+		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+	} catch(const std::exception &)
+	{
+		rd_reliable = false;	
+	}
 	if(!rd_reliable)
 	{
 		init_fallback();
@@ -177,44 +198,50 @@ sane_random_device::result_type sane_random_device::operator()()
 {
 	MPT_LOCK_GUARD<mpt::mutex> l(m);
 	result_type result = 0;
-	try
+	if(prd)
 	{
-		if constexpr(decltype(rd)::min() != 0 || !mpt::is_mask(decltype(rd)::max()))
-		{ // insane std::random_device
-			//  This implementation is not exactly uniformly distributed but good enough
-			// for OpenMPT.
-			double rd_min = static_cast<double>(decltype(rd)::min());
-			double rd_max = static_cast<double>(decltype(rd)::max());
-			double rd_range = rd_max - rd_min;
-			double rd_size = rd_range + 1.0;
-			double rd_entropy = mpt::log2(rd_size);
-			int iterations = static_cast<int>(std::ceil(result_bits() / rd_entropy));
-			double tmp = 0.0;
-			for(int i = 0; i < iterations; ++i)
-			{
-				tmp = (tmp * rd_size) + (static_cast<double>(rd()) - rd_min);
-			}
-			double result_01 = std::floor(tmp / std::pow(rd_size, iterations));
-			result = static_cast<result_type>(std::floor(result_01 * (static_cast<double>(max() - min()) + 1.0))) + min();
-		} else
-		{ // sane std::random_device
-			result = 0;
-			std::size_t rd_bits = mpt::lower_bound_entropy_bits(decltype(rd)::max());
-			for(std::size_t entropy = 0; entropy < (sizeof(result_type) * 8); entropy += rd_bits)
-			{
-				if(rd_bits < (sizeof(result_type) * 8))
+		try
+		{
+			if constexpr(std::random_device::min() != 0 || !mpt::is_mask(std::random_device::max()))
+			{ // insane std::random_device
+				//  This implementation is not exactly uniformly distributed but good enough
+				// for OpenMPT.
+				double rd_min = static_cast<double>(std::random_device::min());
+				double rd_max = static_cast<double>(std::random_device::max());
+				double rd_range = rd_max - rd_min;
+				double rd_size = rd_range + 1.0;
+				double rd_entropy = mpt::log2(rd_size);
+				int iterations = static_cast<int>(std::ceil(result_bits() / rd_entropy));
+				double tmp = 0.0;
+				for(int i = 0; i < iterations; ++i)
 				{
-					result = (result << rd_bits) | static_cast<result_type>(rd());
-				} else
+					tmp = (tmp * rd_size) + (static_cast<double>((*prd)()) - rd_min);
+				}
+				double result_01 = std::floor(tmp / std::pow(rd_size, iterations));
+				result = static_cast<result_type>(std::floor(result_01 * (static_cast<double>(max() - min()) + 1.0))) + min();
+			} else
+			{ // sane std::random_device
+				result = 0;
+				std::size_t rd_bits = mpt::lower_bound_entropy_bits(std::random_device::max());
+				for(std::size_t entropy = 0; entropy < (sizeof(result_type) * 8); entropy += rd_bits)
 				{
-					result = result | static_cast<result_type>(rd());
+					if(rd_bits < (sizeof(result_type) * 8))
+					{
+						result = (result << rd_bits) | static_cast<result_type>((*prd)());
+					} else
+					{
+						result = result | static_cast<result_type>((*prd)());
+					}
 				}
 			}
+		} catch(const std::exception &)
+		{
+			rd_reliable = false;
+			init_fallback();
 		}
-	} catch(const std::exception &)
+	} else
 	{
 		rd_reliable = false;
-		init_fallback();
 	}
 	if(!rd_reliable)
 	{ // std::random_device is unreliable

@@ -386,7 +386,7 @@ class sane_random_device
 private:
 	mpt::mutex m;
 	std::string token;
-	std::random_device rd;
+	std::unique_ptr<std::random_device> prd;
 	bool rd_reliable;
 	std::unique_ptr<std::mt19937> rd_fallback;
 public:
