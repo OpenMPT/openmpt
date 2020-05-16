@@ -349,6 +349,10 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 		srcx = pfnt->nAlphaAM_X;
 		srcy = pfnt->nAlphaAM_Y + 17 * pfnt->spacingY;
 		break;
+	case '.':
+		srcx = pfnt->nNoteX;
+		srcy = pfnt->nNoteY;
+		break;
 	}
 	m_Dib.TextBlt(x, y, sizex, pfnt->spacingY, srcx+ofsx, srcy, pfnt->dib);
 }
