@@ -1,8 +1,9 @@
 
-CC  = emcc
-CXX = em++
+CC  = emcc -c
+CXX = em++ -c
 LD  = em++
 AR  = emar
+LINK.cc = em++ $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)
 
 EMSCRIPTEN_TARGET?=default
 
@@ -76,16 +77,19 @@ LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
 endif
 
-CXXFLAGS += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math
-CFLAGS   += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -ffast-math -fno-strict-aliasing
-LDFLAGS  += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s EXPORT_NAME="'libopenmpt'"
+CXXFLAGS += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s ERROR_ON_MISSING_LIBRARIES=1 -ffast-math
+CFLAGS   += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s ERROR_ON_MISSING_LIBRARIES=1 -ffast-math -fno-strict-aliasing
+LDFLAGS  += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s ERROR_ON_MISSING_LIBRARIES=1 -s EXPORT_NAME="'libopenmpt'"
 
+CFLAGS_SILENT += -Wno-\#warnings
 CFLAGS_SILENT += -Wno-cast-align
 CFLAGS_SILENT += -Wno-cast-qual
+CFLAGS_SILENT += -Wno-format
 CFLAGS_SILENT += -Wno-missing-prototypes
 CFLAGS_SILENT += -Wno-sign-compare
 CFLAGS_SILENT += -Wno-unused-function
 CFLAGS_SILENT += -Wno-unused-parameter
+CFLAGS_SILENT += -Wno-unused-variable
 
 CXXFLAGS_WARNINGS += -Wmissing-declarations
 CFLAGS_WARNINGS   += -Wmissing-prototypes
@@ -95,7 +99,7 @@ REQUIRES_RUNPREFIX=1
 EXESUFFIX=.js
 SOSUFFIX=.js
 RUNPREFIX=node 
-TEST_LDFLAGS= --pre-js build/make/test-pre.js 
+TEST_LDFLAGS= --pre-js build/make/test-pre.js -lnodefs.js 
 
 DYNLINK=0
 SHARED_LIB=1
