@@ -1,8 +1,8 @@
 
-CC  = i586-pc-msdosdjgpp-gcc
-CXX = i586-pc-msdosdjgpp-g++
-LD  = i586-pc-msdosdjgpp-g++
-AR  = i586-pc-msdosdjgpp-ar
+CC  = i386-pc-msdosdjgpp-gcc
+CXX = i386-pc-msdosdjgpp-g++
+LD  = i386-pc-msdosdjgpp-g++
+AR  = i386-pc-msdosdjgpp-ar
 
 # Note that we are using GNU extensions instead of 100% standards-compliant
 # mode, because otherwise DJGPP-specific headers/functions are unavailable.
