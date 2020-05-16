@@ -59,6 +59,8 @@ is just a high-level summary.
  *  [**Regression**] Support for Visual Studio 2015 has been removed.
  *  [**Regression**] Support for GCC 4.8, 4.9, 5, 6 has been removed.
  *  [**Regression**] Support for Clang 3.6, 3.7, 3.8, 3.9, 4 has been removed.
+ *  [**Regression**] Support for Emscripten versions older than 1.39.1 has been
+    removed.
  *  [**Regression**] Building with Android NDK older than NDK r18b is not
     supported any more.
  *  [**Regression**] openmpt123: Support for SDL1 (but not SDL2) output has been

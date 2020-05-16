@@ -202,10 +202,10 @@
 	#if defined(__EMSCRIPTEN_major__) && defined(__EMSCRIPTEN_minor__)
 		#if (__EMSCRIPTEN_major__ > 1)
 			// ok 
-		#elif (__EMSCRIPTEN_major__ == 1) && (__EMSCRIPTEN_minor__ >= 38)
+		#elif (__EMSCRIPTEN_major__ == 1) && (__EMSCRIPTEN_minor__ >= 39)
 			// ok 		
 		#else
-			#error "Emscripten >= 1.38 is required."
+			#error "Emscripten >= 1.39 is required."
 		#endif
 	#endif
 #elif defined(_WIN32)
