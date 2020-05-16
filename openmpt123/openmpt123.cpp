@@ -2399,9 +2399,15 @@ static int main( int argc, char * argv [] ) {
 
 		log.writeout();
 
-		std::random_device rd;
-		std::seed_seq seq{ rd(), static_cast<unsigned int>( std::time( NULL ) ) };
-		std::default_random_engine prng( seq );
+		std::default_random_engine prng;
+		try {
+			std::random_device rd;
+			std::seed_seq seq{ rd(), static_cast<unsigned int>( std::time( NULL ) ) };
+			prng = std::default_random_engine{ seq };
+		} catch ( const std::exception & ) {
+			std::seed_seq seq{ static_cast<unsigned int>( std::time( NULL ) ) };
+			prng = std::default_random_engine{ seq };
+		}
 		std::srand( std::uniform_int_distribution<unsigned int>()( prng ) );
 
 		switch ( flags.mode ) {
