@@ -3629,7 +3629,12 @@ bool CSoundFile::ProcessEffects()
 			// Pattern Loop
 			m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder;
 			m_PlayState.m_nNextRow = nPatLoopRow;
-			if(m_PlayState.m_nPatternDelay)
+			// FT2 skips the first row of the pattern loop if there's a pattern delay, ProTracker sometimes does it too (didn't quite figure it out yet).
+			// But IT and ST3 don't do this.
+			// Test cases: PatLoopWithDelay.it, PatLoopWithDelay.s3m
+			if(m_PlayState.m_nPatternDelay
+			   && (GetType() != MOD_TYPE_IT || !m_playBehaviour[kITPatternLoopWithJumps])
+			   && GetType() != MOD_TYPE_S3M)
 			{
 				m_PlayState.m_nNextRow++;
 			}
