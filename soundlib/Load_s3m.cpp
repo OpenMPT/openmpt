@@ -283,6 +283,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			m_FileHistory.push_back(hist);
 		}
 		nonCompatTracker = true;
+		m_playBehaviour.set(kST3SampleSwap);  // Not exactly like ST3, but close enough
 		m_nMinPeriod = 1;
 		break;
 	case S3MFileHeader::trkSchismTracker:

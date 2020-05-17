@@ -1104,6 +1104,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kRowDelayWithNoteDelay);
 		playBehaviour.set(kST3OffsetWithoutInstrument);
 		playBehaviour.set(kST3RetrigAfterNoteCut);
+		playBehaviour.set(kST3SampleSwap);
 		break;
 
 	case MOD_TYPE_MOD:
@@ -1163,6 +1164,13 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kITDoNotOverrideChannelPan);
 		playBehaviour.set(kITDCTBehaviour);
 		playBehaviour.set(kOPLwithNNA);
+		break;
+
+	case MOD_TYPE_S3M:
+		playBehaviour = GetSupportedPlaybackBehaviour(type);
+		// Default behaviour was chosen to follow GUS, so kST3PortaSampleChange is enabled and kST3SampleSwap is disabled.
+		// For SoundBlaster behaviour, those two flags would need to be swapped.
+		playBehaviour.reset(kST3SampleSwap);
 		break;
 
 	case MOD_TYPE_XM:
