@@ -422,18 +422,15 @@ namespace MidiExport
 				}
 
 				instr.nMidiChannel = instrMap[i].channel;
-				if (instrMap[i].channel == MidiNoChannel)
-				{
-					// Do not export
-					instr.nMidiProgram = MidiNoChannel;
-				} else if(instrMap[i].channel != MidiFirstChannel + 9)
+				if(instrMap[i].channel != MidiFirstChannel + 9)
 				{
 					// Melodic instrument
-					instr.nMidiProgram = instrMap[i].program + 1;
+					instr.nMidiProgram = instrMap[i].program;
 				} else
 				{
 					// Drums
-					if(oldInstr != nullptr && oldInstr->nMidiChannel != MidiFirstChannel + 9) instr.nMidiProgram = 0;
+					if(oldInstr != nullptr && oldInstr->nMidiChannel != MidiFirstChannel + 9)
+						instr.nMidiProgram = 0;
 					if(instrMap[i].program != 128)
 					{
 						for(auto &key : instr.NoteMap)
@@ -554,7 +551,7 @@ CModToMidi::CModToMidi(CSoundFile &sndFile, CWnd *pWndParent)
 			{
 				if(!pIns->HasValidMIDIChannel())
 					m_instrMap[i].channel = MidiMappedChannel;
-				m_instrMap[i].program = (pIns->nMidiProgram > 0) ? ((pIns->nMidiProgram - 1) & 0x7F) : 0;
+				m_instrMap[i].program = pIns->nMidiProgram;
 			}
 		}
 	}
@@ -566,16 +563,18 @@ BOOL CModToMidi::OnInitDialog()
 	CString s;
 
 	CDialog::OnInitDialog();
+
 	// Fill instruments box
 	m_SpinInstrument.SetRange(-1, 1);
 	m_SpinInstrument.SetPos(0);
-	m_nCurrInstr = 1;
-	if (m_sndFile.GetNumInstruments())
+	m_currentInstr = 1;
+	m_CbnInstrument.SetRedraw(FALSE);
+	if(m_sndFile.GetNumInstruments())
 	{
 		for(INSTRUMENTINDEX nIns = 1; nIns <= m_sndFile.GetNumInstruments(); nIns++)
 		{
 			ModInstrument *pIns = m_sndFile.Instruments[nIns];
-			if ((pIns) && (m_sndFile.GetpModDoc()->IsInstrumentUsed(nIns, false)))
+			if(pIns && m_sndFile.GetpModDoc()->IsInstrumentUsed(nIns, false))
 			{
 				const CString name = m_sndFile.GetpModDoc()->GetPatternViewInstrumentName(nIns);
 				m_CbnInstrument.SetItemData(m_CbnInstrument.AddString(name), nIns);
@@ -585,7 +584,7 @@ BOOL CModToMidi::OnInitDialog()
 	{
 		for(SAMPLEINDEX nSmp = 1; nSmp <= m_sndFile.GetNumSamples(); nSmp++)
 		{
-			if (m_sndFile.GetSample(nSmp).HasSampleData() && m_sndFile.GetpModDoc()->IsSampleUsed(nSmp, false))
+			if(m_sndFile.GetpModDoc()->IsSampleUsed(nSmp, false))
 			{
 				s.Format(_T("%02d: "), nSmp);
 				s += mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[nSmp]);
@@ -593,19 +592,26 @@ BOOL CModToMidi::OnInitDialog()
 			}
 		}
 	}
+	m_CbnInstrument.SetRedraw(TRUE);
+	m_CbnInstrument.SetCurSel(0);
+
 	// Fill channels box
+	m_CbnChannel.SetRedraw(FALSE);
 	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Don't Export")), MidiNoChannel);
 	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Melodic (any)")), MidiMappedChannel);
 	m_CbnChannel.SetItemData(m_CbnChannel.AddString(_T("Percussions")), MidiFirstChannel + 9);
-	for(uint32 chn = 1; chn <= 16; chn++) if (chn != 10)
+	for(uint32 chn = 1; chn <= 16; chn++)
 	{
+		if(chn == 10)
+			continue;
 		s.Format(_T("Melodic %u"), chn);
 		m_CbnChannel.SetItemData(m_CbnChannel.AddString(s), MidiFirstChannel - 1 + chn);
 	}
-	m_nCurrInstr = 1;
-	m_bPerc = true;
+	m_CbnChannel.SetRedraw(TRUE);
 	m_CbnChannel.SetCurSel(1);
-	m_CbnInstrument.SetCurSel(0);
+
+	m_currentInstr = 1;
+	m_percussion = true;
 	FillProgramBox(false);
 	m_CbnProgram.SetCurSel(0);
 	UpdateDialog();
@@ -616,11 +622,13 @@ BOOL CModToMidi::OnInitDialog()
 
 void CModToMidi::FillProgramBox(bool percussion)
 {
-	if (m_bPerc == percussion) return;
+	if(m_percussion == percussion)
+		return;
+	m_CbnProgram.SetRedraw(FALSE);
 	m_CbnProgram.ResetContent();
-	if (percussion)
+	if(percussion)
 	{
-		for (ModCommand::NOTE i = 0; i < 61; i++)
+		for(ModCommand::NOTE i = 0; i < 61; i++)
 		{
 			ModCommand::NOTE note = i + 24;
 			auto s = mpt::format(CString(_T("%1 (%2): %3")))(
@@ -632,71 +640,86 @@ void CModToMidi::FillProgramBox(bool percussion)
 		m_CbnProgram.SetItemData(m_CbnProgram.AddString(_T("Mapped")), 128);
 	} else
 	{
-		for (int i = 0; i < 128; i++)
+		m_CbnProgram.SetItemData(m_CbnProgram.AddString(_T("No Program Change")), 0);
+		for(int i = 1; i <= 128; i++)
 		{
 			auto s = mpt::format(CString(_T("%1: %2")))(
-				mpt::cfmt::dec0<3>(i + 1),
-				mpt::ToCString(mpt::Charset::ASCII, szMidiProgramNames[i]));
+				mpt::cfmt::dec0<3>(i),
+				mpt::ToCString(mpt::Charset::ASCII, szMidiProgramNames[i - 1]));
 			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), i);
 		}
 	}
-	m_bPerc = percussion;
+	m_CbnProgram.SetRedraw(TRUE);
+	m_CbnProgram.Invalidate(FALSE);
+	m_percussion = percussion;
 }
 
 
 void CModToMidi::UpdateDialog()
 {
-	m_nCurrInstr = static_cast<UINT>(m_CbnInstrument.GetItemData(m_CbnInstrument.GetCurSel()));
-	if ((m_nCurrInstr > 0) && (m_nCurrInstr < MAX_SAMPLES))
+	m_currentInstr = static_cast<UINT>(m_CbnInstrument.GetItemData(m_CbnInstrument.GetCurSel()));
+	const bool validInstr = (m_currentInstr > 0 && m_currentInstr < m_instrMap.size());
+
+	m_CbnProgram.EnableWindow(validInstr && m_instrMap[m_currentInstr].channel != MidiNoChannel);
+
+	if(!validInstr)
+		return;
+
+	uint8 nMidiCh = m_instrMap[m_currentInstr].channel;
+	int sel;
+	switch(nMidiCh)
 	{
-		uint8 nMidiCh = m_instrMap[m_nCurrInstr].channel;
-		int sel;
-		switch(nMidiCh)
-		{
-		case MidiNoChannel:
-			sel = 0; break;
-		case MidiMappedChannel:
-			sel = 1; break;
-		case MidiFirstChannel + 9:
-			sel = 2; break;
-		default:
-			sel = nMidiCh - MidiFirstChannel + 2;
-			if(nMidiCh < MidiFirstChannel + 9) sel++;
-		}
-		if ((!m_bPerc) && (nMidiCh == MidiFirstChannel + 9))
-		{
-			FillProgramBox(true);
-		} else if ((m_bPerc) && (nMidiCh != MidiFirstChannel + 9))
-		{
-			FillProgramBox(false);
-		}
-		m_CbnChannel.SetCurSel(sel);
-		UINT nMidiProgram = m_instrMap[m_nCurrInstr].program;
-		if (m_bPerc)
-		{
-			nMidiProgram -= 24;
-			if (nMidiProgram > 60) nMidiProgram = 24;
-		} else
-		{
-			if (nMidiProgram > 127) nMidiProgram = 0;
-		}
-		m_CbnProgram.SetCurSel(nMidiProgram);
+	case MidiNoChannel:
+		sel = 0;
+		break;
+	case MidiMappedChannel:
+		sel = 1;
+		break;
+	case MidiFirstChannel + 9:
+		sel = 2;
+		break;
+	default:
+		sel = nMidiCh - MidiFirstChannel + 2;
+		if(nMidiCh < MidiFirstChannel + 9)
+			sel++;
 	}
+	if(!m_percussion && (nMidiCh == MidiFirstChannel + 9))
+	{
+		FillProgramBox(true);
+	} else if(m_percussion && (nMidiCh != MidiFirstChannel + 9))
+	{
+		FillProgramBox(false);
+	}
+	m_CbnChannel.SetCurSel(sel);
+	UINT nMidiProgram = m_instrMap[m_currentInstr].program;
+	if(m_percussion)
+	{
+		nMidiProgram -= 24;
+		if(nMidiProgram > 60)
+			nMidiProgram = 24;
+	} else
+	{
+		if(nMidiProgram > 127)
+			nMidiProgram = 0;
+	}
+	m_CbnProgram.SetCurSel(nMidiProgram);
 }
 
 
 void CModToMidi::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
-	short int pos = (short int)m_SpinInstrument.GetPos();
-	if (pos)
+	int pos = m_SpinInstrument.GetPos32();
+	if(pos)
 	{
 		m_SpinInstrument.SetPos(0);
-		int nmax = m_CbnInstrument.GetCount();
-		int nins = m_CbnInstrument.GetCurSel() + pos;
-		if (nins < 0) nins = nmax-1;
-		if (nins >= nmax) nins = 0;
-		m_CbnInstrument.SetCurSel(nins);
+		int numIns = m_CbnInstrument.GetCount();
+		int ins = m_CbnInstrument.GetCurSel() + pos;
+		if(ins < 0)
+			ins = numIns - 1;
+		if(ins >= numIns)
+			ins = 0;
+		m_CbnInstrument.SetCurSel(ins);
 		UpdateDialog();
 	}
 }
@@ -704,11 +727,15 @@ void CModToMidi::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 void CModToMidi::OnChannelChanged()
 {
-	uint8 nMidiCh = static_cast<uint8>(m_CbnChannel.GetItemData(m_CbnChannel.GetCurSel()));
-	if(m_nCurrInstr >= m_instrMap.size())
+	uint8 midiCh = static_cast<uint8>(m_CbnChannel.GetItemData(m_CbnChannel.GetCurSel()));
+	if(m_currentInstr >= m_instrMap.size())
 		return;
-	m_instrMap[m_nCurrInstr].channel = nMidiCh;
-	if((!m_bPerc && nMidiCh == MidiFirstChannel + 9) || (m_bPerc && nMidiCh != MidiFirstChannel + 9))
+	const auto oldCh = m_instrMap[m_currentInstr].channel;
+	m_instrMap[m_currentInstr].channel = midiCh;
+	if(midiCh == MidiNoChannel
+	   || oldCh == MidiNoChannel
+	   || (!m_percussion && midiCh == MidiFirstChannel + 9)
+	   || (m_percussion && midiCh != MidiFirstChannel + 9))
 	{
 		UpdateDialog();
 	}
@@ -719,9 +746,9 @@ void CModToMidi::OnProgramChanged()
 {
 	DWORD_PTR nProgram = m_CbnProgram.GetItemData(m_CbnProgram.GetCurSel());
 	if (nProgram == CB_ERR) return;
-	if ((m_nCurrInstr > 0) && (m_nCurrInstr < MAX_SAMPLES))
+	if ((m_currentInstr > 0) && (m_currentInstr < MAX_SAMPLES))
 	{
-		m_instrMap[m_nCurrInstr].program = static_cast<uint8>(nProgram);
+		m_instrMap[m_currentInstr].program = static_cast<uint8>(nProgram);
 	}
 }
 
@@ -729,6 +756,25 @@ void CModToMidi::OnProgramChanged()
 void CModToMidi::OnOverlapChanged()
 {
 	s_overlappingInstruments = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
+}
+
+
+void CModToMidi::OnOK()
+{
+	for(size_t i = 1; i < m_instrMap.size(); i++)
+	{
+		if(m_instrMap[i].channel != MidiNoChannel)
+		{
+			CDialog::OnOK();
+			return;
+		}
+	}
+
+	auto choice = Reporting::Confirm(_T("No instruments have been selected for export. Would you still like to export the file?"), true, true);
+	if(choice == cnfYes)
+		CDialog::OnOK();
+	else if(choice == cnfNo)
+		CDialog::OnCancel();
 }
 
 

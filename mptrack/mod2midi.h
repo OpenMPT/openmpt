@@ -35,8 +35,8 @@ protected:
 	CComboBox m_CbnInstrument, m_CbnChannel, m_CbnProgram;
 	CSpinButtonCtrl m_SpinInstrument;
 	CSoundFile &m_sndFile;
-	UINT m_nCurrInstr;
-	bool m_bPerc;
+	UINT m_currentInstr;
+	bool m_percussion;
 public:
 	MidiExport::InstrMap m_instrMap;
 	static bool s_overlappingInstruments;
@@ -45,6 +45,7 @@ public:
 	CModToMidi(CSoundFile &sndFile, CWnd *pWndParent = nullptr);
 
 protected:
+	void OnOK() override;
 	BOOL OnInitDialog() override;
 	void DoDataExchange(CDataExchange *pDX) override;
 	void FillProgramBox(bool percussion);
