@@ -32,13 +32,16 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct MixLoopState
 {
-	const int8 * samplePointer;
-	const int8 * lookaheadPointer;
-	SmpLength lookaheadStart;
-	uint32 maxSamples;
+	const int8 * samplePointer = nullptr;
+	const int8 * lookaheadPointer = nullptr;
+	SmpLength lookaheadStart = 0;
+	uint32 maxSamples = 0;
 
 	MixLoopState(const ModChannel &chn)
 	{
+		if(chn.pCurrentSample == nullptr)
+			return;
+
 		UpdateLookaheadPointers(chn);
 
 		// For platforms that have no fast 64-bit division, precompute this constant
@@ -47,7 +50,8 @@ struct MixLoopState
 		if(increment.IsNegative())
 			increment.Negate();
 		maxSamples = 16384u / (increment.GetUInt() + 1u);
-		if(maxSamples < 2) maxSamples = 2;
+		if(maxSamples < 2)
+			maxSamples = 2;
 	}
 
 	// Calculate offset of loop wrap-around buffer for this sample.
