@@ -760,6 +760,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		prevSmp = smp;
 
 		ModSample &sample = Samples[smp];
+		sample.Initialize(MOD_TYPE_MPT);
 		if(const auto synthSample = std::string_view(region.filename).substr(region.filenameOffset); SFZStartsWith(synthSample, "*"))
 		{
 			sample.nLength = 256;

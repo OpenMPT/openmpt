@@ -357,6 +357,10 @@ static TEMPO MMDTempoToBPM(uint32 tempo, bool is8Ch, bool bpmMode, uint8 rowsPer
 		LimitMax(tempo, 10u);
 		static constexpr uint8 tempos[10] = { 47, 43, 40, 37, 35, 32, 30, 29, 27, 26 };
 		tempo = tempos[tempo - 1];
+	} else if(tempo > 0 && tempo <= 10)
+	{
+		// SoundTracker compatible tempo
+		return TEMPO((6.0 * 1773447.0 / 14500.0) / tempo);
 	}
 
 	return TEMPO(tempo / 0.264);
@@ -399,12 +403,10 @@ static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rows
 		if(m.param == 0)
 		{
 			m.command = CMD_PATTERNBREAK;
-			break;
 		} else if(m.param <= 0xF0)
 		{
 			m.command = CMD_TEMPO;
 			m.param = mpt::saturate_round<ModCommand::PARAM>(MMDTempoToBPM(m.param, is8ch, bpmMode, rowsPerBeat).ToDouble());
-			break;
 		} else switch(m.command)
 		{
 			case 0xF1:  // Play note twice
