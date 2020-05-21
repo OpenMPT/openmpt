@@ -656,7 +656,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kFT2PortaUpDownMemory: desc = _T("Portamento Up and Down have separate effect memory"); break;
 		case kST3NoMutedChannels: desc = _T("Do not process any effects on muted S3M channels"); break;
 		case kST3EffectMemory: desc = _T("Most effects share the same memory"); break;
-		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself"); break;
+		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself (GUS)"); break;
 		case kST3VibratoMemory: desc = _T("Do not remember vibrato type in effect memory"); break;
 		case kST3LimitPeriod: desc = _T("ModPlug Tracker frequency limits"); break;
 		case KST3PortaAfterArpeggio: desc = _T("Portamento immediately following an arpeggio effect continues at the last arpeggiated note"); break;
@@ -679,6 +679,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kITDCTBehaviour: desc = _T("Duplicate Sample Check requires same instrument, Duplicate Note Check uses pattern notes for comparison"); break;
 		case kOPLwithNNA: desc = _T("New Note Action / Duplicate Note Action set to Note Off and Note Fade affect OPL notes like samples"); break;
 		case kST3RetrigAfterNoteCut: desc = _T("Notes cannot be retriggered after they have been cut"); break;
+		case kST3SampleSwap: desc = _T("Enable on-the-fly sample swapping (SoundBlaster driver)"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

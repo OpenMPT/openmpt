@@ -500,7 +500,7 @@ enum PlayBehaviour
 
 	kST3NoMutedChannels,            // Don't process any effects on muted S3M channels
 	kST3EffectMemory,               // Most effects share the same memory in ST3
-	kST3PortaSampleChange,          // Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself.
+	kST3PortaSampleChange,          // Portamento plus instrument number applies the volume settings of the new sample, but not the new sample itself (GUS behaviour).
 	kST3VibratoMemory,              // Do not remember vibrato type in effect memory
 	kST3LimitPeriod,                // Cut note instead of limiting  final period (ModPlug Tracker style)
 	KST3PortaAfterArpeggio,         // Portamento after arpeggio continues at the note where the arpeggio left off
@@ -532,6 +532,7 @@ enum PlayBehaviour
 	kITDCTBehaviour,                // DCT="Sample" requires sample instrument, DCT="Note" checks old pattern note against new pattern note (previously was checking old pattern note against new translated note)
 	kOPLwithNNA,                    // NNA note-off / fade are applied to OPL channels
 	kST3RetrigAfterNoteCut,         // Qxy does not retrigger note after it has been cut with ^^^ or SCx
+	kST3SampleSwap,                 // On-the-fly sample swapping (SoundBlaster behaviour)
 
 	// Add new play behaviours here.
 

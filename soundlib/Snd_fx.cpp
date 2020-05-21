@@ -1417,11 +1417,11 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 		}
 
 		// Special XM hack (also applies to MOD / S3M, except when playing IT-style S3Ms, such as k_vision.s3m)
-		// Test case: PortaSmpChange.mod, PortaSmpChange.s3m
+		// Test case: PortaSmpChange.mod, PortaSmpChange.s3m, PortaSwap.s3m
 		if((!instrumentChanged && (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)) && pIns)
 			|| (GetType() == MOD_TYPE_PLM)
 			|| (GetType() == MOD_TYPE_MOD && chn.IsSamplePlaying())
-			|| m_playBehaviour[kST3PortaSampleChange])
+			|| (m_playBehaviour[kST3PortaSampleChange] && chn.IsSamplePlaying()))
 		{
 			// FT2 doesn't change the sample in this case,
 			// but still uses the sample info from the old one (bug?)
@@ -1476,11 +1476,16 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 		}
 	}
 
-	if(returnAfterVolumeAdjust && sampleChanged && m_playBehaviour[kMODSampleSwap] && pSmp != nullptr)
+	if(returnAfterVolumeAdjust && sampleChanged && pSmp != nullptr)
 	{
 		// ProTracker applies new instrument's finetune but keeps the old sample playing.
 		// Test case: PortaSwapPT.mod
-		chn.nFineTune = pSmp->nFineTune;
+		if(m_playBehaviour[kMODSampleSwap])
+			chn.nFineTune = pSmp->nFineTune;
+		// ST3 does it similarly for middle-C speed.
+		// Test case: PortaSwap.s3m, SampleSwap.s3m
+		if(GetType() == MOD_TYPE_S3M)
+			chn.nC5Speed = pSmp->nC5Speed;
 	}
 
 	if(returnAfterVolumeAdjust) return;
@@ -2726,8 +2731,9 @@ bool CSoundFile::ProcessEffects()
 			// Test cases: keyoff+instr.xm, delay.xm
 			bool reloadSampleSettings = (m_playBehaviour[kFT2ReloadSampleSettings] && instr != 0);
 			// ProTracker Compatibility: If a sample was stopped before, lone instrument numbers can retrigger it
-			// Test case: PTSwapEmpty.mod, PTInstrVolume.mod
+			// Test case: PTSwapEmpty.mod, PTInstrVolume.mod, SampleSwap.s3m
 			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
+				|| m_playBehaviour[kST3SampleSwap]
 				|| (m_playBehaviour[kMODSampleSwap] && !chn.IsSamplePlaying() && (chn.pModSample == nullptr || !chn.pModSample->HasSampleData()));
 
 			// Now it's time for some FT2 crap...
@@ -2961,11 +2967,18 @@ bool CSoundFile::ProcessEffects()
 						//const bool newInstrument = oldInstrument != chn.pModInstrument && chn.pModInstrument->Keyboard[chn.nNewNote - NOTE_MIN] != 0;
 						chn.position.Set(0);
 					}
-				} else if ((GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT) && oldSample != chn.pModSample && ModCommand::IsNote(note)))
+				} else if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && oldSample != chn.pModSample && ModCommand::IsNote(note))
 				{
 					// Special IT case: portamento+note causes sample change -> ignore portamento
 					bPorta = false;
-				} else if(m_playBehaviour[kMODSampleSwap] && chn.increment.IsZero())
+				} else if(m_playBehaviour[kST3SampleSwap] && oldSample != chn.pModSample && (bPorta || !ModCommand::IsNote(note)) && chn.position.GetUInt() > chn.nLength)
+				{
+					// ST3 with SoundBlaster does sample swapping and continues playing the new sample where the old sample was stopped.
+					// If the new sample is shorter than that, it is stopped, even if it could be looped.
+					// This also applies to portamento between different samples.
+					// Test case: SampleSwap.s3m
+					chn.nLength = 0;
+				} else if(m_playBehaviour[kMODSampleSwap] && !chn.IsSamplePlaying())
 				{
 					// If channel was paused and is resurrected by a lone instrument number, reset the sample position.
 					// Test case: PTSwapEmpty.mod
@@ -3629,7 +3642,12 @@ bool CSoundFile::ProcessEffects()
 			// Pattern Loop
 			m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder;
 			m_PlayState.m_nNextRow = nPatLoopRow;
-			if(m_PlayState.m_nPatternDelay)
+			// FT2 skips the first row of the pattern loop if there's a pattern delay, ProTracker sometimes does it too (didn't quite figure it out yet).
+			// But IT and ST3 don't do this.
+			// Test cases: PatLoopWithDelay.it, PatLoopWithDelay.s3m
+			if(m_PlayState.m_nPatternDelay
+			   && (GetType() != MOD_TYPE_IT || !m_playBehaviour[kITPatternLoopWithJumps])
+			   && GetType() != MOD_TYPE_S3M)
 			{
 				m_PlayState.m_nNextRow++;
 			}
