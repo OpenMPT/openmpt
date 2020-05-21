@@ -27,6 +27,7 @@
 #include <CommDlg.h>
 #include <tchar.h>
 #include <algorithm>
+#include <string>
 
 #if defined(MPT_BUILD_MSVC)
 #pragma comment(lib, "comdlg32.lib")
