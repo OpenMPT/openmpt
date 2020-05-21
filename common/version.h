@@ -12,7 +12,10 @@
 
 #include "BuildSettings.h"
 
+#include "mptString.h"
 #include "FlagSet.h"
+
+#include <stdexcept>
 
 
 OPENMPT_NAMESPACE_BEGIN
