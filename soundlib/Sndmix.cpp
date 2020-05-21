@@ -83,8 +83,8 @@ void CSoundFile::InitPlayer(bool bReset)
 	if(bReset)
 	{
 		ResetMixStat();
-		gnDryLOfsVol = 0;
-		gnDryROfsVol = 0;
+		m_dryLOfsVol = m_dryROfsVol = 0;
+		m_surroundLOfsVol = m_surroundROfsVol = 0;
 		InitAmigaResampler();
 	}
 	m_Resampler.UpdateTables();
@@ -2455,6 +2455,9 @@ bool CSoundFile::ReadNote()
 		{
 			chn.rightVol = chn.leftVol = 0;
 			chn.nLength = 0;
+			// Put the channel back into the mixer for end-of-sample pop reduction
+			if(chn.nLOfs || chn.nROfs)
+				m_PlayState.ChnMix[m_nMixChannels++] = nChn;
 		}
 
 		chn.dwOldFlags = chn.dwFlags;
