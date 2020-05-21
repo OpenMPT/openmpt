@@ -58,7 +58,11 @@
 #elif defined(_MSC_VER)
 
 #define MPT_COMPILER_MSVC                            1
-#if (_MSC_VER >= 1924)
+#if (_MSC_VER >= 1926)
+#define MPT_COMPILER_MSVC_VERSION                    MPT_COMPILER_MAKE_VERSION2(2019,6)
+#elif (_MSC_VER >= 1925)
+#define MPT_COMPILER_MSVC_VERSION                    MPT_COMPILER_MAKE_VERSION2(2019,5)
+#elif (_MSC_VER >= 1924)
 #define MPT_COMPILER_MSVC_VERSION                    MPT_COMPILER_MAKE_VERSION2(2019,4)
 #elif (_MSC_VER >= 1923)
 #define MPT_COMPILER_MSVC_VERSION                    MPT_COMPILER_MAKE_VERSION2(2019,3)
