@@ -626,6 +626,10 @@
 
 // platform configuration
 
+#ifdef MPT_WITH_MFC
+//#define MPT_MFC_FULL  // use full MFC, including MFC controls
+#endif // MPT_WITH_MFC
+
 #if defined(MODPLUG_TRACKER)
 #if MPT_OS_WINDOWS
 #if !defined(MPT_BUILD_WINESUPPORT)
@@ -754,10 +758,6 @@
 
 
 // third-party library configuration
-
-#if defined(MODPLUG_TRACKER)
-//#define MPT_MFC_FULL  // use full MFC, including MFC controls
-#endif
 
 #ifdef MPT_WITH_FLAC
 #ifdef MPT_BUILD_MSVC_STATIC
