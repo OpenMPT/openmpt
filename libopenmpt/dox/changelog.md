@@ -76,6 +76,16 @@ is just a high-level summary.
  *  [**Bug**] openmpt123: Piping text output to other than console window
     targets on Windows has been fixed.
 
+ *  mpg123: v1.26rc3.
+ *  ogg: v1.3.4.
+ *  vorbis: v1.3.6.
+ *  zlib: v1.2.11.
+ *  minimp3: commit 55da78cbeea5fb6757f8df672567714e1e8ca3e9 (2020-03-04).
+ *  stb_vorbis: v1.19 commit 37b9b20fdec06c75a0493e0bb59e2d0f288bfb51 (2020-02-05).
+ *  miniz: v2.1.0.
+ *  FLAC: v1.3.3.
+ *  PortAudio: commit 799a6834a58592eadc5712cba73b35956dc51579 (2020-03-26).
+
 ### libopenmpt 0.4.0 (2018-12-23)
 
  *  [**New**] libopenmpt now includes emulation of the OPL chip and thus plays
