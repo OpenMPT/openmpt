@@ -196,7 +196,7 @@ void sane_random_device::init_fallback()
 
 sane_random_device::result_type sane_random_device::operator()()
 {
-	MPT_LOCK_GUARD<mpt::mutex> l(m);
+	mpt::lock_guard<mpt::mutex> l(m);
 	result_type result = 0;
 	if(prd)
 	{

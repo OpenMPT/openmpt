@@ -82,7 +82,7 @@ public:
 			e.sysexDump = sysexDump;
 		}
 
-		MPT_LOCK_GUARD<mpt::mutex> lock(criticalSection);
+		mpt::lock_guard<mpt::mutex> lock(criticalSection);
 		if(insertFront)
 			eventQueue.push_front(copyEvent);
 		else
@@ -93,7 +93,7 @@ public:
 	// Set up the queue for transmitting to the plugin. Returns number of elements that are going to be transmitted.
 	int32 Finalise()
 	{
-		MPT_LOCK_GUARD<mpt::mutex> lock(criticalSection);
+		mpt::lock_guard<mpt::mutex> lock(criticalSection);
 		numEvents = static_cast<int32>(std::min(eventQueue.size(), MAX_EVENTS));
 		for(int32 i = 0; i < numEvents; i++)
 		{
@@ -105,7 +105,7 @@ public:
 	// Remove transmitted events from the queue
 	void Clear()
 	{
-		MPT_LOCK_GUARD<mpt::mutex> lock(criticalSection);
+		mpt::lock_guard<mpt::mutex> lock(criticalSection);
 		if(numEvents)
 		{
 			// Release temporarily allocated buffer for SysEx messages

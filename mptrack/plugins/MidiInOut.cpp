@@ -272,7 +272,7 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 {
 	if(m_midiOut.isPortOpen())
 	{
-		MPT_LOCK_GUARD<mpt::mutex> lock(m_mutex);
+		mpt::lock_guard<mpt::mutex> lock(m_mutex);
 
 		// Send MIDI clock
 		if(m_nextClock < 1)
@@ -396,7 +396,7 @@ void MidiInOut::Bypass(bool bypass)
 {
 	if(bypass)
 	{
-		MPT_LOCK_GUARD<mpt::mutex> lock(m_mutex);
+		mpt::lock_guard<mpt::mutex> lock(m_mutex);
 		m_outQueue.clear();
 	}
 	IMidiPlugin::Bypass(bypass);
@@ -411,7 +411,7 @@ bool MidiInOut::MidiSend(uint32 midiCode)
 		return true;
 	}
 
-	MPT_LOCK_GUARD<mpt::mutex> lock(m_mutex);
+	mpt::lock_guard<mpt::mutex> lock(m_mutex);
 	m_outQueue.push_back(Message(GetOutputTimestamp(), &midiCode, 3));
 	return true;
 }
@@ -425,7 +425,7 @@ bool MidiInOut::MidiSysexSend(mpt::const_byte_span sysex)
 		return true;
 	}
 
-	MPT_LOCK_GUARD<mpt::mutex> lock(m_mutex);
+	mpt::lock_guard<mpt::mutex> lock(m_mutex);
 	m_outQueue.push_back(Message(GetOutputTimestamp(), sysex.data(), sysex.size()));
 	return true;
 }
@@ -493,7 +493,7 @@ void MidiInOut::OpenDevice(MidiDevice::ID newDevice, bool asInputDevice)
 	device.name = device.GetPortName(newDevice);
 	//if(m_isResumed)
 	{
-		MPT_LOCK_GUARD<mpt::mutex> lock(m_mutex);
+		mpt::lock_guard<mpt::mutex> lock(m_mutex);
 		
 		try
 		{
@@ -521,7 +521,7 @@ void MidiInOut::CloseDevice(MidiDevice &device)
 {
 	if(device.stream.isPortOpen())
 	{
-		MPT_LOCK_GUARD<mpt::mutex> lock(m_mutex);
+		mpt::lock_guard<mpt::mutex> lock(m_mutex);
 		device.stream.closePort();
 	}
 }

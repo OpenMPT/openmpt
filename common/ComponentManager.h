@@ -442,7 +442,7 @@ std::shared_ptr<const type> GetComponent()
 {
 	static std::weak_ptr<type> cache;
 	static mpt::mutex m;
-	MPT_LOCK_GUARD<mpt::mutex> l(m);
+	mpt::lock_guard<mpt::mutex> l(m);
 	std::shared_ptr<type> component = cache.lock();
 	if(!component)
 	{
