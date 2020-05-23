@@ -612,7 +612,7 @@ public:
 		, path(std::move(section), std::move(key))
 	{
 		{
-			MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
+			mpt::lock_guard<mpt::mutex> l(valueMutex);
 			value = conf.Read(path, def);
 		}
 		conf.Register(this, path);
@@ -623,7 +623,7 @@ public:
 		, path(path_)
 	{
 		{
-			MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
+			mpt::lock_guard<mpt::mutex> l(valueMutex);
 			value = conf.Read(path, def);
 		}
 		conf.Register(this, path);
@@ -639,7 +639,7 @@ public:
 	CachedSetting & operator = (const T &val)
 	{
 		{
-			MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
+			mpt::lock_guard<mpt::mutex> l(valueMutex);
 			value = val;
 		}
 		conf.Write(path, val);
@@ -647,12 +647,12 @@ public:
 	}
 	operator T () const
 	{
-		MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
+		mpt::lock_guard<mpt::mutex> l(valueMutex);
 		return value;
 	}
 	T Get() const
 	{
-		MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
+		mpt::lock_guard<mpt::mutex> l(valueMutex);
 		return value;
 	}
 	bool IsDefault() const
@@ -662,7 +662,7 @@ public:
 	CachedSetting & Update()
 	{
 		{
-			MPT_LOCK_GUARD<mpt::mutex> l(valueMutex);
+			mpt::lock_guard<mpt::mutex> l(valueMutex);
 			value = conf.Read<T>(path);
 		}
 		return *this;

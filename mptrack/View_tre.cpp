@@ -2072,7 +2072,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 	SetRedraw(TRUE);
 
 	{
-		MPT_LOCK_GUARD<mpt::mutex> l(m_WatchDirMutex);
+		mpt::lock_guard<mpt::mutex> l(m_WatchDirMutex);
 		if(m_InstrLibPath != m_WatchDir)
 		{
 			m_WatchDir = m_InstrLibPath;
@@ -2096,7 +2096,7 @@ void CModTree::MonitorInstrumentLibrary()
 	do
 	{
 		{
-			MPT_LOCK_GUARD<mpt::mutex> l(m_WatchDirMutex);
+			mpt::lock_guard<mpt::mutex> l(m_WatchDirMutex);
 			if(m_WatchDir != lastWatchDir)
 			{
 				if(hWatchDir != INVALID_HANDLE_VALUE)
@@ -2321,7 +2321,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 
 	if(ok)
 	{
-		MPT_LOCK_GUARD<mpt::mutex> l(m_WatchDirMutex);
+		mpt::lock_guard<mpt::mutex> l(m_WatchDirMutex);
 		m_WatchDir = mpt::PathString();
 	} else
 	{

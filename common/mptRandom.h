@@ -572,7 +572,7 @@ public:
 	}
 	result_type operator()()
 	{
-		MPT_LOCK_GUARD<mpt::mutex> l(m);
+		mpt::lock_guard<mpt::mutex> l(m);
 		return mpt::random<unsigned int>(rng);
 	}
 };
@@ -647,7 +647,7 @@ public:
 public:
 	typename engine_traits<Trng>::result_type operator()()
 	{
-		MPT_LOCK_GUARD<mpt::mutex> l(m);
+		mpt::lock_guard<mpt::mutex> l(m);
 		return Trng::operator()();
 	}
 };

@@ -22,6 +22,7 @@ OpenMPT 1.28 / libopenmpt 0.4
  *  Replace `static_assert` by `MPT_STATIC_ASSERT`.
  *  Replace `[[nodiscard]]` by `MPT_NODISCARD`.
  *  Replace `[[fallthrough]]` by `MPT_FALLTHROUGH`.
+ *  Reokace `mpt::lock_guard` by `MPT_LOCK_GUARD`.
 
 OpenMPT 1.27 / libopenmpt 0.3 
 -----------------------------
