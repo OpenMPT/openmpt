@@ -146,6 +146,8 @@ Type: files; Name: {app}\mptrack.exe
 [UninstallDelete]
 ; internet shortcut has to be deleted manually
 Type: files; Name: {app}\ModPlug Central.url
+; in case mptrack.exe got recreated as a symlink
+Type: files; Name: {app}\mptrack.exe
 ; normal installation
 Type: dirifempty; Name: {userappdata}\OpenMPT\Autosave; Tasks: not portable
 Type: dirifempty; Name: {userappdata}\OpenMPT\TemplateModules; Tasks: not portable
