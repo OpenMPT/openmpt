@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.23-pre
+
 ### libopenmpt 0.3.22 (2020-05-24)
 
  *  IT: Disable retrigger with short notes quirk for modules saved with
