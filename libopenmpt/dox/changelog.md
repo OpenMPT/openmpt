@@ -76,6 +76,53 @@ is just a high-level summary.
  *  [**Bug**] openmpt123: Piping text output to other than console window
     targets on Windows has been fixed.
 
+ *  Greatly improved MED import. Synthesized instruments are still not supported
+    but support was added for: Multisampled instruments, delta samples, more
+    pattern commands, Hold and Decay, VSTi and MIDI output, multiple songs and
+    many other small changes.
+ *  Improved OPL channel allocation when more than 18 notes are active, so that
+    channels that have completely faded out are prioritized over channels that
+    have already been released but have not faded out yet.
+ *  Interactively triggering an OPL instrument could cause the first pattern
+    channel to no longer be played back correctly.
+ *  Fix some inaccuracies in OPL emulator.
+ *  Fix overflow of OPL amplification happening at a synth volume level of 510.
+ *  End-of-sample pop reduction of surround channels was applied to front
+    channels instead, causing a pop on the front channels instead of removing it
+    on the back channels.
+ *  IT: Disable retrigger with short notes quirk for modules saved with
+    Chibi Tracker, as it does not implement that quirk.
+ *  IT: Instrument and sample panning should not override channel panning for
+    following notes.
+ *  IT: SBx is now prioritized over Bxx commands that are to the left of it.
+ *  IT: Duplicate Check Type "Sample" should only be applied if the instruments
+    match, too.
+ *  IT: Duplicate Check Type "Note" should compare pattern notes, but it was
+    comparing the new pattern note against the old translated note.
+ *  IT: Various fixes for envelope resetting.
+ *  IT / S3M: When combining SBx and EEx effects, don't skip the first row of
+    the loop like in FastTracker 2.
+ *  S3M: Empty pattern commands now affect effect memory as well.
+ *  S3M: Offset beyond loop end wraps around to loop start like in
+    Scream Tracker 3 + GUS (previously it just keep playing from the loop start,
+    which is neither what GUS nor Sound Blaster drivers do).
+ *  S3M: Notes cannot be retriggered after they have been cut.
+ *  S3M: Fix portamento after note cut (fixes antediluvian_song.s3m).
+ *  S3M / MOD: Previous note offset is no longer used for retriggered notes if
+    there was no instrument number next to the Qxy effect.
+ *  MOD: Sample swapping now also works if the sample that is being swapped from
+    does not loop. Swapping to a non-looped sample now stops playback once the
+    swapped-from sample reaches its (loop) end.
+ *  MOD: Fix early song ending due to ProTracker pattern jump quirk
+    (EEx + Dxx on same row) if infinite looping is disabled.
+    Fixes Haunted Tracks.mod by Triace.
+ *  MOD: Previous note offset is no longer used for retriggered notes if there was no instrument number next to the E9x effect.
+ *  MOD: Vibrato type "ramp down" was upside down.
+ *  XM: If a file contains patterns longer than 1024 rows, they are now clamped
+    to 1024 rows instead of 64 rows.
+ *  XM: Do not reset note-off status on portamento if there is no instrument
+    number.
+
  *  mpg123: v1.26rc3.
  *  ogg: v1.3.4.
  *  vorbis: v1.3.6.

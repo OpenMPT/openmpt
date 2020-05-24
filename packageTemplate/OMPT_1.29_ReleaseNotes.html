@@ -5,7 +5,7 @@
   <meta name="language" content="en">
   <title>OpenMPT 1.29 Release Notes</title>
   <style type="text/css">
-    * { font-family: Calibri, sans-serif; }
+    * { font-family: Calibri, Roboto, sans-serif; }
     body
     {
         color: #222;
@@ -103,31 +103,107 @@
 
     <h2>What's new?</h2>
 
+    <h3>Breaking Changes</h3>
+    <ul>
+      <li>Support for <strong>Windows XP</strong> and <strong>Windows Vista</strong> has been dropped. Pre-SSE2 x86 CPUs are no longer supported. This includes Intel Pentium 3 and older, AMD Athlon XP and older and various other third-party CPUs.</li>
+      <li>A <strong>portable installation</strong> of OpenMPT is now identified by the presence of a file called "OpenMPT.portable" rather than an entry in mptrack.ini. Existing portable installations are migrated accordingly.</li>
+      <li>mptrack.exe was renamed to OpenMPT.exe. Please update any old custom shortcuts or file associations to point to the new executable. For existing installations, the installer will try to create a symbolic link to keep the old filename working.</li>
+    </ul>
+
     <h3>General</h3>
     <ul>
+      <li>While OpenMPT is still not DPI-aware by default, it now uses a new scaling mode for non-DPI-aware applications on Windows 10 1809 or newer that makes fonts look less blurry on high-DPI displays.</li>
+      <li>Improved <strong>tempo tap button accuracy</strong>.</li>
+      <li>The Comments tab has been made more useful: Samples and instruments can be <strong>previewed</strong> using regular note entry keys, and there are new keyboard shortcuts to toggle between samples and instruments and edit the selected item. Sample and instrument names can now be copied to the clipboard through the context menu.</li>
+      <li><strong>Improved screen reader access</strong> to order list, pattern and instrument editors.</li>
+      <li>Loading <strong>sound fonts</strong> no longer requires to pre-cache the entire file in memory. This makes it possible to load huge sound fonts even in 32-Bit builds.</li>
     </ul>
 
     <h3>Pattern Editor</h3>
+    <div class="screenshots">
+        <a href="ReleaseNotesImages/1.29/merge_patters.png"><img src="ReleaseNotesImages/1.29/merge_patters.png" width="300" height="244" alt="Merge Patterns" title="Merge Patterns"></a>
+    </div>
     <ul>
+      <li>Can now <strong>merge a selection of patterns</strong> into a single pattern from the order list context menu.</li>
+      <li>Can now <strong>split a pattern</strong> into two patterns from the pattern editor context menu.</li>
+      <li><strong>Row insertion and deletion</strong> can now also be done <strong>globally</strong>, affecting all patterns up to the next stop (<tt>---</tt>) pattern.</li>
+      <li>MIDI recording now supports <strong>Hold Pedal</strong> CC messages.</li>
+      <li>ProTracker- / FastTracker-like shortcuts for cutting, copying and <strong>pasting entire channels and patterns</strong> to separate clipboards have been added.</li>
+      <li>New shortcut "<strong>Lose Selection</strong>".</li>
+      <li><strong>Tooltips</strong> are shown for pattern properties, channel headers and plugin names.</li>
+      <li>Moving patterns in the <strong>order list now behaves more logically</strong> (moving them to the right inserts them to the right of the dragged-on item). To make this change obvious, the insertion point is now displayed with a bold line. The old behaviour can be restored with the hidden setting "Pattern Editor.OrderListOldDropBehaviour"</li>
+      <li>Previous / Next Order <strong>shortcuts now ignore skip patterns</strong> (<tt>+++</tt>).</li>
+      <li>A <strong>group of channels can now be assigned</strong> to a record group at once by drag-selecting their channel headers.</li>
+      <li>The <strong>chord editor</strong> has been revamped: It now possible to add notes below the base note. Notes can now be dragged round on the keyboard. Closing the dialog using the X button no longer saves the modified chords.</li>
+      <li>Seeking with sample sync now follows instruments with custom tuning.</li>
+      <li><strong>Duplicating / inserting sequences</strong> inserts them next to the current sequence rather than adding it at the end. Duplicating a sequence now keeps its original name and adds "(Copy)" to it.</li>
+      <li>New shortcuts to cycle between sequences.</li>
     </ul>
-    
+
     <h3>Plugins</h3>
     <ul>
+      <li>There are some hybrid VST 2 / 3 plugins using the .vst3 file extension. It is now possible to drag &amp; drop them on OpenMPT and add them through the Plugin Manager. Folder scan does not pick them up for now, as it might result in too many annoying warnings (OpenMPT does not support VST 3 at this point).</li>
+      <li>Narrow plugin windows now resizes appropriately if switching between presets results in a change of the menu bar height.</li>
+      <li>A warning is shown when the likely cause for a plugin loading failure is a shortage of Fiber Local Storage indices.</li>
+      <li>Speed up retrieval of parameter values when saving data from bridged plugins.</li>
+      <li>The <strong>stability of bridged plugins</strong> has been greatly improved. Most, if not all plugins that did not work previously should run just fine now.</li>
     </ul>
 
     <h3>Sample / Instrument Editor</h3>
     <ul>
+      <li>Support little-endian AU / SND files.</li>
+      <li>The result of auto-tuning is now applied instantly to playing channels.</li>
+      <li>Allow resampling ratios greater than 1:512 or 512:1 again with r8brain.</li>
+      <li><strong>Cross-fading</strong> can now also be applied if no loop has been set but a selection has been made. The selection is then automatically set to be the sample loop.</li>
+      <li>Fix <strong>accuracy and consistency of sample grid</strong> selection and grid markers with very long samples.</li>
+      <li>Instrument envelopes can now be imported from / exported to SFZ with SFZv2 flexible EGs.</li>
+      <li><strong>Improved SFZ import</strong>: Support for #include, macro redefinition, multiline comments, filter envelope import, synthesized samples, amplitude opcode, fractional finetune values and various other small improvements in both import and export.</li>
+    </ul>
+
+    <h3>Tree View</h3>
+    <ul>
+      <li>Can now <strong>rearrange sequences</strong> through drag &amp; drop.</li>
+      <li>Shortcut (.lnk) files to modules, samples and directories are now resolved.</li>
+      <li>Allow <strong>Forward / Backward mouse buttons</strong> to be used for folder navigation in Instrument Library.</li>
+      <li>Changing the instrument library directory / module can now also be achieved by editing the library header item (slow double-click).</li>
+      <li>Can now also import samples and instrument from modules in sample browser using Ctrl + (Shift +) Enter.</li>
+      <li>Added rename context menu entry in addition to slow double-click.</li>
     </ul>
 
     <h3>Playback</h3>
+    <div class="screenshots">
+        <a href="ReleaseNotesImages/1.29/a1200_filter.png"><img src="ReleaseNotesImages/1.29/a1200_filter.png" width="300" height="115" alt="A1200 Filter" title="A1200 Filter"></a>
+    </div>
     <p>
         A couple of playback behaviours have been changed and improved:
     </p>
     <ul>
+      <li>In addition to A500 filter settings, the Amiga resampler can now also use <strong>A1200 filter settings</strong> and unfiltered output.</li>
+      <li>Fix some inaccuracies in OPL emulator.</li>
     </ul>
 
     <h3>File Format Support</h3>
+    <div class="screenshots">
+        <a href="ReleaseNotesImages/1.29/modified_samples.png"><img src="ReleaseNotesImages/1.29/modified_samples.png" width="300" height="210" alt="Modified / Missing External Samples" title="Modified / Missing External Samples"></a>
+    </div>
     <ul>
+      <li><strong>Raise tempo limit</strong> from 512 to 1000 BPM in MPTM and XM files.</li>
+      <li><strong>Custom tunings</strong> can now be used with OPL instruments.</li>
+      <li>Custom tuning and sequence names can now contain any Unicode characters.</li>
+      <li>When closing a file, a proper dialog is shown for handling modified / missing external samples.</li>
+      <li>Sequence names now start at 1 rather than 0.</li>
+      <li>IT: Instrument and sample panning does no longer override channel panning for following notes.</li>
+      <li>Add support for reading <strong>OggMod OXM</strong> files (XM with Vorbis-compressed samples).</li>
+      <li>Greatly <strong>improved MED import</strong>. Synthesized instruments are still not supported but support was added for: Multisampled instruments, delta samples, more pattern commands, Hold and Decay, VSTi and MIDI output, multiple songs and many other small changes.</li>
+      <li>SF2: Support instrument-global regions, region-specific sample loops, region tuning (only with a value of 0 for drum programs) and multi-instrument presets.</li>
+      <li>Various other playback fixes for MOD, XM, S3M, IT and other formats.</li>
+    </ul>
+
+    <h3>Audio I/O</h3>
+    <ul>
+      <li>There is now a <strong>default WASAPI device</strong> which automatically follows changes in the system's default audio device.</li>
+      <li>Audio driver crashes are no longer silently masked as they may leave the program in an inconsistent state.</li>
+      <li>Deprecated sound devices are no longer shown by default. Use the "Show deprecated devices" checkbox to re-enable them.</li>
     </ul>
 
     <h3>There's more...</h3>
@@ -141,6 +217,7 @@
     </p>
     <ul>
         <li>The plugin bridge is still rather experimental. It is known that some plugins don't work in it at all. Custom plugin GUIs are known to not work in Wine. Please report any issues you may be having with the plugin bridge!</li>
+        <li>In particular, there are currently issues with some JUCE-based plugin editors where context menus or popups will not show up correctly. This will hopefully be fixed soon.</li>
         <li>Far from perfect VST support (no buses for audio / MIDI routing, not all tracker effects are supported, etc...)</li>
         <li>Previewing samples from the tree view's file browser stops the playing module.</li>
         <li>There is no really <em>convenient</em> way to find out what features of the tracker are supported by the original trackers (Impulse Tracker, Fasttracker 2, etc...) when working with those file formats...</li>
