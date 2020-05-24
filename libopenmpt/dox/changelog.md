@@ -12,6 +12,16 @@ is just a high-level summary.
     instead. The `Makefile` build system now requires `LIBMODPLUG=1` option to
     build the libmodplug emulation layer.
 
+ *  IT: Disable retrigger with short notes quirk for modules saved with
+    Chibi Tracker, as it does not implement that quirk.
+ *  S3M / MOD: Previous note offset is no longer used for retriggered notes if
+    there was no instrument number next to the Qxy effect.
+ *  MOD: Fix early song ending due to ProTracker pattern jump quirk
+    (EEx + Dxx on same row) if infinite looping is disabled.
+    Fixes Haunted Tracks.mod by Triace.
+ *  MOD: Vibrato type "ramp down" was upside down.
+ *  Fix overflow of OPL amplification happening at a synth volume level of 510.
+
  *  minimp3: Update to commit 55da78cbeea5fb6757f8df672567714e1e8ca3e9
     (2020-03-04).
  *  stb_vorbis: Update to v1.19 commit 37b9b20fdec06c75a0493e0bb59e2d0f288bfb51
