@@ -118,7 +118,8 @@ is just a high-level summary.
  *  MOD: Fix early song ending due to ProTracker pattern jump quirk
     (EEx + Dxx on same row) if infinite looping is disabled.
     Fixes Haunted Tracks.mod by Triace.
- *  MOD: Previous note offset is no longer used for retriggered notes if there was no instrument number next to the E9x effect.
+ *  MOD: Previous note offset is no longer used for retriggered notes if there
+    was no instrument number next to the E9x effect.
  *  MOD: Vibrato type "ramp down" was upside down.
  *  XM: If a file contains patterns longer than 1024 rows, they are now clamped
     to 1024 rows instead of 64 rows.
