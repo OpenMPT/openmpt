@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.13-pre
+### libopenmpt 0.4.13 (2020-05-24)
 
  *  [**Change**] libmodplug: The libmodplug emulation layer is now deprecated in
     the libopenmpt tree. Please use the separate `libopenmpt-modplug` package
