@@ -7,6 +7,13 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.22-pre
 
+ *  IT: Disable retrigger with short notes quirk for modules saved with
+    Chibi Tracker, as it does not implement that quirk.
+ *  MOD: Fix early song ending due to ProTracker pattern jump quirk
+    (EEx + Dxx on same row) if infinite looping is disabled.
+    Fixes Haunted Tracks.mod by Triace.
+ *  MOD: Vibrato type "ramp down" was upside down.
+
  *  stb_vorbis: Update to v1.19 commit 37b9b20fdec06c75a0493e0bb59e2d0f288bfb51
     (2020-02-05).
 
