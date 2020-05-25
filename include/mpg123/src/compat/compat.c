@@ -4,7 +4,7 @@
 	The mpg123 code is determined to keep it's legacy. A legacy of old, old UNIX.
 	So anything possibly somewhat advanced should be considered to be put here, with proper #ifdef;-)
 
-	copyright 2007-2016 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 2007-2020 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Thomas Orgis, Windows Unicode stuff by JonY.
 */
@@ -39,12 +39,6 @@
 #include <shlwapi.h>
 #endif
 
-#ifdef USE_MODULES
-#  ifdef HAVE_DLFCN_H
-#    include <dlfcn.h>
-#  endif
-#endif
-
 #include "debug.h"
 
 #ifndef WINDOWS_UWP
@@ -70,112 +64,9 @@ char *compat_getenv(const char* name)
 	return ret;
 }
 
-#ifdef WANT_WIN32_UNICODE
-
-/* Convert unix UTF-8 (or ASCII) paths to Windows wide character paths. */
-static wchar_t* u2wpath(const char *upath)
-{
-	wchar_t* wpath, *p;
-	if(!upath || win32_utf8_wide(upath, &wpath, NULL) < 1)
-		return NULL;
-	for(p=wpath; *p; ++p)
-		if(*p == L'/')
-			*p = L'\\';
-	return wpath;
-}
-
-/* Convert Windows wide character paths to unix UTF-8. */
-static char* w2upath(const wchar_t *wpath)
-{
-	char* upath, *p;
-	if(!wpath || win32_wide_utf8(wpath, &upath, NULL) < 1)
-		return NULL;
-	for(p=upath; *p; ++p)
-		if(*p == '\\')
-			*p = '/';
-	return upath;
-}
-
-/* An absolute path that is too long and not already marked with
-   \\?\ can be marked as a long one and still work. */
-static int wpath_need_elongation(wchar_t *wpath)
-{
-	if( wpath && !PathIsRelativeW(wpath)
-	&&	wcslen(wpath) > MAX_PATH-1
-	&&	wcsncmp(L"\\\\?\\", wpath, 4) )
-		return 1;
-	else
-		return 0;
-}
-
-/* Take any wide windows path and turn it into a path that is allowed
-   to be longer than MAX_PATH, if it is not already. */
-static wchar_t* wlongpath(wchar_t *wpath)
-{
-	size_t len, plen;
-	const wchar_t *prefix = L"";
-	wchar_t *wlpath = NULL;
-	if(!wpath)
-		return NULL;
-
-	/* Absolute paths that do not start with \\?\ get that prepended
-	   to allow them being long. */
-	if(!PathIsRelativeW(wpath) && wcsncmp(L"\\\\?\\", wpath, 4))
-	{
-		if(wcslen(wpath) >= 2 && PathIsUNCW(wpath))
-		{
-			/* \\server\path -> \\?\UNC\server\path */
-			prefix = L"\\\\?\\UNC";
-			++wpath; /* Skip the first \. */
-		}
-		else /* c:\some/path -> \\?\c:\some\path */
-			prefix = L"\\\\?\\";
-	}
-	plen = wcslen(prefix);
-	len = plen + wcslen(wpath);
-	wlpath = malloc(len+1*sizeof(wchar_t));
-	if(wlpath)
-	{
-		/* Brute force memory copying, swprintf is too dandy. */
-		memcpy(wlpath, prefix, sizeof(wchar_t)*plen);
-		memcpy(wlpath+plen, wpath, sizeof(wchar_t)*(len-plen));
-		wlpath[len] = 0;
-	}
-	return wlpath;
-}
-
-/* Convert unix path to wide windows path, optionally marking
-   it as long path if necessary. */
-static wchar_t* u2wlongpath(const char *upath)
-{
-	wchar_t *wpath  = NULL;
-	wchar_t *wlpath = NULL;
-	wpath = u2wpath(upath);
-	if(wpath_need_elongation(wpath))
-	{
-		wlpath = wlongpath(wpath);
-		free(wpath);
-		wpath = wlpath;
-	}
-	return wpath;
-}
-
 #endif
 
-#else
-
-static wchar_t* u2wlongpath(const char *upath)
-{
-	wchar_t* wpath, *p;
-	if (!upath || win32_utf8_wide(upath, &wpath, NULL) < 1)
-		return NULL;
-	for (p = wpath; *p; ++p)
-		if (*p == L'/')
-			*p = L'\\';
-	return wpath;
-}
-
-#endif
+#include "wpathconv.h"
 
 /* Always add a default permission mask in case of flags|O_CREAT. */
 int compat_open(const char *filename, int flags)
@@ -562,67 +453,38 @@ char* compat_nextdir(struct compat_dir *cd)
 
 #endif
 
-#ifdef USE_MODULES
-/*
-	This is what I expected the platform-specific dance for dynamic module
-	support to be. Little did I know about the peculiarities of (long)
-	paths and directory/file search on Windows.
-*/
+// Revisit logic of write():
+// Return -1 if interrupted before any data was written,
+// set errno to EINTR. Any other error value is serious
+// for blocking I/O, which we assume here. EAGAIN should be
+// handed through.
+// Reaction to zero-sized write attempts could also be funky, so avoid that.
+// May return short count for various reasons. I assume that
+// any serious condition will show itself as return value -1
+// eventually.
 
-void *compat_dlopen(const char *path)
-{
-	void *handle = NULL;
-#ifdef WANT_WIN32_UNICODE
-	wchar_t *wpath;
-	wpath = u2wlongpath(path);
-	if(wpath)
-		handle = LoadLibraryW(wpath);
-	free(wpath);
-#else
-	handle = dlopen(path, RTLD_NOW);
-#endif
-	return handle;
-}
+// These uninterruptible write/read functions shall persist as long as
+// possible to finish the desired operation. A short byte count is short
+// because of a serious reason (maybe EOF, maybe out of disk space). You
+// can inspect errno.
 
-void *compat_dlsym(void *handle, const char *name)
-{
-	void *sym = NULL;
-	if(!handle)
-		return NULL;
-#ifdef WANT_WIN32_UNICODE
-	sym = GetProcAddress(handle, name);
-#else
-	sym = dlsym(handle, name);
-#endif
-	return sym;
-}
-
-void compat_dlclose(void *handle)
-{
-	if(!handle)
-		return;
-#ifdef WANT_WIN32_UNICODE
-	FreeLibrary(handle);
-#else
-	dlclose(handle);
-#endif
-}
-
-#endif /* USE_MODULES */
-
-
-/* This shall survive signals and any return value less than given byte count
-   is an error */
 size_t unintr_write(int fd, void const *buffer, size_t bytes)
 {
 	size_t written = 0;
+	errno = 0;
 	while(bytes)
 	{
+		errno = 0;
 		ssize_t part = write(fd, (char*)buffer+written, bytes);
-		if(part < 0 && errno != EINTR)
+		// Just on short writes, we do not abort. Only when
+		// there was no successful operation (even zero write) at all.
+		// Any other error than EINTR ends things here.
+		if(part >= 0)
+		{
+			bytes   -= part;
+			written += part;
+		} else if(errno != EINTR)
 			break;
-		bytes   -= part;
-		written += part;
 	}
 	return written;
 }
@@ -631,15 +493,38 @@ size_t unintr_write(int fd, void const *buffer, size_t bytes)
 size_t unintr_read(int fd, void *buffer, size_t bytes)
 {
 	size_t got = 0;
+	errno = 0;
 	while(bytes)
 	{
+		errno = 0;
 		ssize_t part = read(fd, (char*)buffer+got, bytes);
-		if(part < 0 && errno != EINTR)
+		if(part >= 0)
+		{
+			bytes -= part;
+			got   += part;
+		} else if(errno != EINTR)
 			break;
-		bytes -= part;
-		got   += part;
 	}
 	return got;
+}
+
+// and again for streams
+size_t unintr_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
+{
+	size_t written = 0;
+	errno = 0;
+	while(size && nmemb)
+	{
+		errno = 0;
+		size_t part = fwrite((char*)ptr+written*size, size, nmemb, stream);
+		if(part > 0)
+		{
+			nmemb   -= part;
+			written += part;
+		} else if(errno != EINTR)
+			break;
+	}
+	return written;
 }
 
 #ifndef NO_CATCHSIGNAL
