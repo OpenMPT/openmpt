@@ -81,7 +81,8 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 	// Filtering is only ever done in IT if either cutoff is not full or if resonance is set.
 	if(m_playBehaviour[kITFilterBehaviour] && resonance == 0 && computedCutoff >= 254)
 	{
-		if(pChn->rowCommand.IsNote() && !pChn->rowCommand.IsPortamento() && !pChn->nMasterChn && m_SongFlags[SONG_FIRSTTICK])
+		if(pChn->rowCommand.IsNote() && !pChn->rowCommand.IsPortamento() && !pChn->nMasterChn
+		   && pChn->position.IsZero() && !pChn->dwFlags[CHN_WRAPPED_LOOP])
 		{
 			// Z7F next to a note disables the filter, however in other cases this should not happen.
 			// Test cases: filter-reset.it, filter-reset-carry.it, filter-nna.it
