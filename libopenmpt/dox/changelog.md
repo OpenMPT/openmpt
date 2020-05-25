@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.23-pre
 
+ *  mpg123: Update to v1.26.0 (2020-05-25).
+
 ### libopenmpt 0.3.22 (2020-05-24)
 
  *  IT: Disable retrigger with short notes quirk for modules saved with
