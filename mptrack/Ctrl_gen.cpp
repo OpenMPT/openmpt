@@ -215,8 +215,9 @@ void CCtrlGeneral::OnTapTempo()
 	double sum = 0.0, weightedSum = 0.0;
 	for(uint32 i = 0; i < numTaps; i++)
 	{
-		sum += tapTime[i] / 1000.0;
-		weightedSum += i * tapTime[i] / 1000.0;
+		const double tapMs = tapTime[i] / 1000.0;
+		sum += tapMs;
+		weightedSum += i * tapMs;
 	}
 
 	const double lengthSum = numTaps * (numTaps - 1) / 2;
