@@ -25,9 +25,6 @@
     <Filter Include="include\portaudio\src\hostapi">
       <UniqueIdentifier>{CD6F053A-3988-EC63-0235-7CFD6E0C81FD}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\portaudio\src\hostapi\dsound">
-      <UniqueIdentifier>{C9EDFEF1-B5D4-C0E9-5E25-27074AEB3950}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\portaudio\src\hostapi\skeleton">
       <UniqueIdentifier>{C10780C5-AD59-57B5-9678-94C58269709E}</UniqueIdentifier>
     </Filter>
@@ -129,9 +126,6 @@
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_util.h">
       <Filter>include\portaudio\src\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\portaudio\src\hostapi\dsound\pa_win_ds_dynlink.h">
-      <Filter>include\portaudio\src\hostapi\dsound</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\portaudio\src\os\win\pa_win_coinitialize.h">
       <Filter>include\portaudio\src\os\win</Filter>
     </ClInclude>
@@ -172,12 +166,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\include\portaudio\src\common\pa_trace.c">
       <Filter>include\portaudio\src\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\portaudio\src\hostapi\dsound\pa_win_ds.c">
-      <Filter>include\portaudio\src\hostapi\dsound</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\portaudio\src\hostapi\dsound\pa_win_ds_dynlink.c">
-      <Filter>include\portaudio\src\hostapi\dsound</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\portaudio\src\hostapi\skeleton\pa_hostapi_skeleton.c">
       <Filter>include\portaudio\src\hostapi\skeleton</Filter>

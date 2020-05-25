@@ -14,12 +14,10 @@
 	filter {}
 	filter { "action:vs2017" }
 		defines {
-			"__WINDOWS_DS__",
 			-- WASAPI causes link failure due to confused SDK headers
 		}
 	filter { "not action:vs2017" }
 		defines {
-			"__WINDOWS_DS__",
 			"__WINDOWS_WASAPI__",
 		}
 	filter {}
@@ -27,15 +25,6 @@
    "../../include/rtaudio/RtAudio.cpp",
    "../../include/rtaudio/RtAudio.h",
   }
-	if _OPTIONS["clang"] then
-		filter { "not kind:StaticLib" }
-			links { "dsound" }
-		filter {}
-	else
-		filter {}
-			links { "dsound" }
-		filter {}
-	end
   filter { "action:vs*", "architecture:ARM or architecture:ARM64" }
     links { "ole32" }
   filter { }

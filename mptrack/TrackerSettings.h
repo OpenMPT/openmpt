@@ -665,7 +665,6 @@ public:
 	SoundDevice::Legacy::ID m_SoundDeviceID_DEPRECATED;
 	SoundDevice::Settings m_SoundDeviceSettingsDefaults;
 	SoundDevice::Settings GetSoundDeviceSettingsDefaults() const;
-	bool m_SoundDeviceDirectSoundOldDefaultIdentifier;
 
 	Setting<SoundDevice::Identifier> m_SoundDeviceIdentifier;
 	SoundDevice::Identifier GetSoundDeviceIdentifier() const;

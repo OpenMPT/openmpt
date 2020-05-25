@@ -210,7 +210,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SoundSettingsStopMode(conf, U_("Sound Settings"), U_("StopMode"), SoundDeviceStopModeClosed)
 	, m_SoundDeviceSettingsUseOldDefaults(false)
 	, m_SoundDeviceID_DEPRECATED(SoundDevice::Legacy::ID())
-	, m_SoundDeviceDirectSoundOldDefaultIdentifier(false)
 	, m_SoundDeviceIdentifier(conf, U_("Sound Settings"), U_("Device"), SoundDevice::Identifier())
 	, MixerMaxChannels(conf, U_("Sound Settings"), U_("MixChannels"), MixerSettings().m_nMaxMixChannels)
 	, MixerDSPMask(conf, U_("Sound Settings"), U_("Quality"), MixerSettings().DSPMask)
@@ -549,10 +548,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		// and in general, it should not get changed anyway
 		ResamplerCutoffPercent = mpt::saturate_round<int32>(CResamplerSettings().gdWFIRCutoff * 100.0);
 	}
-	if(storedVersion < MPT_V("1.25.00.04"))
-	{
-		m_SoundDeviceDirectSoundOldDefaultIdentifier = true;
-	}
 	if(MixerSamplerate == 0)
 	{
 		MixerSamplerate = MixerSettings().gdwMixingFreq;
@@ -773,48 +768,6 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 		for(const auto &it : manager)
 		{
 			SetSoundDeviceSettings(it.GetIdentifier(), GetSoundDeviceSettingsDefaults());
-		}
-	}
-	if(m_SoundDeviceDirectSoundOldDefaultIdentifier)
-	{
-		mpt::ustring oldIdentifier = SoundDevice::Legacy::GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04();
-		mpt::ustring newIdentifier = SoundDevice::Legacy::GetDirectSoundDefaultDeviceIdentifier_1_25_00_04();
-		if(!oldIdentifier.empty())
-		{
-			SoundDevice::Info info = manager.FindDeviceInfo(newIdentifier);
-			if(info.IsValid())
-			{
-				SoundDevice::Settings defaults =
-					m_SoundDeviceSettingsUseOldDefaults ?
-						GetSoundDeviceSettingsDefaults()
-					:
-						manager.GetDeviceCaps(newIdentifier).DefaultSettings
-					;
-				const mpt::ustring newIdentifierW = newIdentifier + U_("_");
-				const mpt::ustring oldIdentifierW = oldIdentifier + U_("_");
-				conf.Write(U_("Sound Settings"), newIdentifierW + U_("Latency"),
-					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("Latency"), mpt::saturate_round<int32>(defaults.Latency * 1000000.0)));
-				conf.Write(U_("Sound Settings"), newIdentifierW + U_("UpdateInterval"),
-					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("UpdateInterval"), mpt::saturate_round<int32>(defaults.UpdateInterval * 1000000.0)));
-				conf.Write(U_("Sound Settings"), newIdentifierW + U_("SampleRate"),
-					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("SampleRate"), defaults.Samplerate));
-				conf.Write(U_("Sound Settings"), newIdentifierW + U_("Channels"),
-					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("Channels"), defaults.Channels.GetNumHostChannels()));
-				conf.Write(U_("Sound Settings"), newIdentifierW + U_("SampleFormat"),
-					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("SampleFormat"), defaults.sampleFormat));
-				conf.Write(U_("Sound Settings"), newIdentifierW + U_("ExclusiveMode"),
-					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("ExclusiveMode"), defaults.ExclusiveMode));
-				conf.Write(U_("Sound Settings"), newIdentifierW + U_("BoostThreadPriority"),
-					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("BoostThreadPriority"), defaults.BoostThreadPriority));
-				conf.Write(U_("Sound Settings"), newIdentifierW + U_("KeepDeviceRunning"),
-					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("KeepDeviceRunning"), defaults.KeepDeviceRunning));
-				conf.Write(U_("Sound Settings"), newIdentifierW + U_("UseHardwareTiming"),
-					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("UseHardwareTiming"), defaults.UseHardwareTiming));
-				conf.Write(U_("Sound Settings"), newIdentifierW + U_("DitherType"),
-					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("DitherType"), defaults.DitherType));
-				conf.Write(U_("Sound Settings"), newIdentifierW + U_("ChannelMapping"),
-					conf.Read(U_("Sound Settings"), oldIdentifierW + U_("ChannelMapping"), defaults.Channels));
-			}
 		}
 	}
 }

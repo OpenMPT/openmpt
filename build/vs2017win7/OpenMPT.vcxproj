@@ -914,7 +914,6 @@
     <ClInclude Include="..\..\sounddev\SoundDeviceASIO.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceBase.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceBuffer.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceDirectSound.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceManager.h" />
     <ClInclude Include="..\..\sounddev\SoundDevicePortAudio.h" />
     <ClInclude Include="..\..\sounddev\SoundDevicePulseSimple.h" />
@@ -1144,7 +1143,6 @@
     <ClCompile Include="..\..\sounddev\SoundDeviceASIO.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceBuffer.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceDirectSound.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceManager.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDevicePortAudio.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDevicePulseSimple.cpp" />
