@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.14-pre
 
+ *  mpg123: Update to v1.26.0 (2020-05-25).
+
 ### libopenmpt 0.4.13 (2020-05-24)
 
  *  [**Change**] libmodplug: The libmodplug emulation layer is now deprecated in
