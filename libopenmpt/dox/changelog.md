@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.1-pre
 
+ *  mpg123: Update to v1.26.0 (2020-05-25).
+
 ### libopenmpt 0.5.0 (2020-05-24)
 
  *  [**New**] OggMod compressed FastTracker 2 XM (OXM) modules are now
