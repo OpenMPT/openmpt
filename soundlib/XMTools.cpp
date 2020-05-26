@@ -400,7 +400,7 @@ void XMSample::ConvertToMPT(ModSample &mptSmp) const
 		mptSmp.nLoopEnd /= 2;
 	}
 
-	if((flags & (XMSample::sampleLoop | XMSample::sampleBidiLoop)) && mptSmp.nLoopStart < mptSmp.nLength && mptSmp.nLoopEnd > mptSmp.nLoopStart)
+	if((flags & (XMSample::sampleLoop | XMSample::sampleBidiLoop)) && mptSmp.nLoopEnd > mptSmp.nLoopStart)
 	{
 		mptSmp.uFlags.set(CHN_LOOP);
 		if((flags & XMSample::sampleBidiLoop))
