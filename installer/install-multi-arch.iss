@@ -1,15 +1,9 @@
 ; OpenMPT Install script
-; Written by Johannes Schultz
 ; https://openmpt.org/
-; https://sagamusix.de/
 
-; This file cannot be compiled on its own. You need to compile any of these files:
-; win32.iss - For generating a Win32 setup.
-; win64.iss - For generating a Win64 setup.
-
-#ifndef PlatformName
-#error You must specify which installer to build by compiling either win32.iss or win64.iss
-#endif
+#define PlatformFolder "release\vs2019-win10-static\x86"
+#define PlatformName "32-Bit"
+#define PlatformArchitecture "x86"
 
 #define GetAppVersion StringChange(GetFileProductVersion("..\bin\" + PlatformFolder + "\OpenMPT.exe"), ",", ".")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
@@ -19,6 +13,7 @@
 #endif
 
 [Setup]
+AppId={{40c97d3e-7763-4b88-8c6a-0901befee4af}
 AppVerName=OpenMPT {#GetAppVersionShort} ({#PlatformName})
 AppVersion={#GetAppVersion}
 AppName=OpenMPT ({#PlatformName})
@@ -30,8 +25,8 @@ DefaultDirName={pf}\OpenMPT
 DisableDirPage=no
 DisableProgramGroupPage=yes
 OutputDir=.\
-OutputBaseFilename=OpenMPT-{#GetAppVersion}-Setup{#BaseNameAddition}
-Compression=lzma2
+OutputBaseFilename=OpenMPT-{#GetAppVersion}-Installer
+Compression=lzma2/ultra64
 SolidCompression=yes
 WizardImageFile=install-big.bmp
 WizardSmallImageFile=install-small.bmp
@@ -45,7 +40,7 @@ Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:Ad
 Name: startmenuicon; Description: "Create a Start Menu icon"; GroupDescription: {cm:AdditionalIcons}
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
 ; file associations - put this below all other [tasks]!
-#include "filetypes.iss"
+#include "filetypes-multi-arch.iss"
 
 [Languages]
 Name: english; MessagesFile: compiler:Default.isl

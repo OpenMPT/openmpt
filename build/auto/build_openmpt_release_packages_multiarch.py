@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# OpenMPT packaging script by Saga Musix
+# OpenMPT packaging script
 # https://openmpt.org/
 
 from pathlib import Path
@@ -66,10 +66,14 @@ def remove_dir(dirname):
 		shutil.rmtree(dirname)
 
 openmpt_version_name = "OpenMPT-" + openmpt_version
-openmpt_zip_32bit_basepath = "installer/OpenMPT-" + openmpt_version + "/"
-openmpt_zip_64bit_basepath = "installer/OpenMPT-" + openmpt_version + "-x64/"
-openmpt_zip_32bit_path = openmpt_zip_32bit_basepath + openmpt_version_name + "/"
-openmpt_zip_64bit_path = openmpt_zip_64bit_basepath + openmpt_version_name + "/"
+openmpt_zip_x86_basepath = "installer/OpenMPT-" + openmpt_version + "-x86/"
+openmpt_zip_amd64_basepath = "installer/OpenMPT-" + openmpt_version + "-amd64/"
+openmpt_zip_arm_basepath = "installer/OpenMPT-" + openmpt_version + "-arm/"
+openmpt_zip_arm64_basepath = "installer/OpenMPT-" + openmpt_version + "-arm64/"
+openmpt_zip_x86_path = openmpt_zip_x86_basepath + openmpt_version_name + "/"
+openmpt_zip_amd64_path = openmpt_zip_amd64_basepath + openmpt_version_name + "/"
+openmpt_zip_arm_path = openmpt_zip_arm_basepath + openmpt_version_name + "/"
+openmpt_zip_arm64_path = openmpt_zip_arm64_basepath + openmpt_version_name + "/"
 
 def copy_file(from_path, to_path, filename):
     shutil.copyfile(from_path + filename, to_path + filename)
@@ -102,21 +106,21 @@ def copy_other(to_path, openmpt_version_short):
     copy_file("packageTemplate/", to_path, "OpenMPT Manual.chm")
     copy_file("packageTemplate/", to_path, "readme.txt")
 
-remove_dir(openmpt_zip_32bit_basepath)
-remove_dir(openmpt_zip_64bit_basepath)
+remove_dir(openmpt_zip_x86_basepath)
+remove_dir(openmpt_zip_amd64_basepath)
+remove_dir(openmpt_zip_arm_basepath)
+remove_dir(openmpt_zip_arm64_basepath)
 
-remove_file("installer/" + openmpt_version_name + "-Setup.exe")
-remove_file("installer/" + openmpt_version_name + "-Setup-x64.exe")
-remove_file("installer/" + openmpt_version_name + ".zip")
-remove_file("installer/" + openmpt_version_name + "-x64.zip")
-remove_file("installer/" + openmpt_version_name + "-portable.zip")
-remove_file("installer/" + openmpt_version_name + "-portable-x64.zip")
-remove_file("installer/" + openmpt_version_name + "-Setup.exe.digests")
-remove_file("installer/" + openmpt_version_name + "-Setup-x64.exe.digests")
-remove_file("installer/" + openmpt_version_name + ".zip.digests")
-remove_file("installer/" + openmpt_version_name + "-x64.zip.digests")
-remove_file("installer/" + openmpt_version_name + "-portable.zip.digests")
-remove_file("installer/" + openmpt_version_name + "-portable-x64.zip.digests")
+remove_file("installer/" + openmpt_version_name + "-Installer.exe")
+remove_file("installer/" + openmpt_version_name + "-portable-x86.zip")
+remove_file("installer/" + openmpt_version_name + "-portable-amd64.zip")
+remove_file("installer/" + openmpt_version_name + "-portable-arm.zip")
+remove_file("installer/" + openmpt_version_name + "-portable-arm64.zip")
+remove_file("installer/" + openmpt_version_name + "-Installer.exe.digests")
+remove_file("installer/" + openmpt_version_name + "-portable-x86.zip.digests")
+remove_file("installer/" + openmpt_version_name + "-portable-amd64.zip.digests")
+remove_file("installer/" + openmpt_version_name + "-portable-arm.zip.digests")
+remove_file("installer/" + openmpt_version_name + "-portable-arm64.zip.digests")
 
 print("Generating manual...")
 pManual = Popen([executable, "wiki.py"], cwd="mptrack/manual_generator/")
@@ -125,18 +129,38 @@ if singleThreaded:
 	if(pManual.returncode != 0):
 			raise Exception("Something went wrong during manual creation!")
 
-print("Copying 32-bit binaries...")
-shutil.rmtree(openmpt_zip_32bit_basepath, ignore_errors=True)
-copy_binaries("bin/release/vs2019-win7-static/x86/", openmpt_zip_32bit_path)
-copy_pluginbridge("bin/release/vs2019-win7-static/", "x86", openmpt_zip_32bit_path)
-copy_pluginbridge("bin/release/vs2019-win7-static/", "amd64", openmpt_zip_32bit_path)
-Path(openmpt_zip_32bit_path + "OpenMPT.portable").touch()
-print("Copying 64-bit binaries...")
-shutil.rmtree(openmpt_zip_64bit_basepath, ignore_errors=True)
-copy_binaries("bin/release/vs2019-win7-static/amd64/", openmpt_zip_64bit_path)
-copy_pluginbridge("bin/release//vs2019-win7-static/", "x86", openmpt_zip_64bit_path)
-copy_pluginbridge("bin/release//vs2019-win7-static/", "amd64", openmpt_zip_64bit_path)
-Path(openmpt_zip_64bit_path + "OpenMPT.portable").touch()
+print("Copying x86 binaries...")
+shutil.rmtree(openmpt_zip_x86_basepath, ignore_errors=True)
+copy_binaries("bin/release/vs2019-win10-static/x86/", openmpt_zip_x86_path)
+copy_pluginbridge("bin/release/vs2019-win10-static/", "x86", openmpt_zip_x86_path)
+copy_pluginbridge("bin/release/vs2019-win10-static/", "amd64", openmpt_zip_x86_path)
+copy_pluginbridge("bin/release/vs2019-win10-static/", "arm", openmpt_zip_x86_path)
+copy_pluginbridge("bin/release/vs2019-win10-static/", "arm64", openmpt_zip_x86_path)
+Path(openmpt_zip_x86_path + "OpenMPT.portable").touch()
+print("Copying amd64 binaries...")
+shutil.rmtree(openmpt_zip_amd64_basepath, ignore_errors=True)
+copy_binaries("bin/release/vs2019-win10-static/amd64/", openmpt_zip_amd64_path)
+copy_pluginbridge("bin/release//vs2019-win10-static/", "x86", openmpt_zip_amd64_path)
+copy_pluginbridge("bin/release//vs2019-win10-static/", "amd64", openmpt_zip_amd64_path)
+copy_pluginbridge("bin/release//vs2019-win10-static/", "arm", openmpt_zip_amd64_path)
+copy_pluginbridge("bin/release//vs2019-win10-static/", "arm64", openmpt_zip_amd64_path)
+Path(openmpt_zip_amd64_path + "OpenMPT.portable").touch()
+print("Copying arm binaries...")
+shutil.rmtree(openmpt_zip_arm_basepath, ignore_errors=True)
+copy_binaries("bin/release/vs2019-win10-static/arm/", openmpt_zip_arm_path)
+copy_pluginbridge("bin/release//vs2019-win10-static/", "x86", openmpt_zip_arm_path)
+copy_pluginbridge("bin/release//vs2019-win10-static/", "amd64", openmpt_zip_arm_path)
+copy_pluginbridge("bin/release//vs2019-win10-static/", "arm", openmpt_zip_arm_path)
+copy_pluginbridge("bin/release//vs2019-win10-static/", "arm64", openmpt_zip_arm_path)
+Path(openmpt_zip_arm_path + "OpenMPT.portable").touch()
+print("Copying arm64 binaries...")
+shutil.rmtree(openmpt_zip_arm64_basepath, ignore_errors=True)
+copy_binaries("bin/release/vs2019-win10-static/arm64/", openmpt_zip_arm64_path)
+copy_pluginbridge("bin/release//vs2019-win10-static/", "x86", openmpt_zip_arm64_path)
+copy_pluginbridge("bin/release//vs2019-win10-static/", "amd64", openmpt_zip_arm64_path)
+copy_pluginbridge("bin/release//vs2019-win10-static/", "arm", openmpt_zip_arm64_path)
+copy_pluginbridge("bin/release//vs2019-win10-static/", "arm64", openmpt_zip_arm64_path)
+Path(openmpt_zip_arm64_path + "OpenMPT.portable").touch()
 
 if not singleThreaded:
 	pManual.communicate()
@@ -158,54 +182,62 @@ if(pTemplate.returncode != 0):
     raise Exception("Something went wrong during updating package template!")
 
 print("Other package contents...")
-copy_other(openmpt_zip_32bit_path,    openmpt_version_short)
-copy_other(openmpt_zip_64bit_path,    openmpt_version_short)
+copy_other(openmpt_zip_x86_path, openmpt_version_short)
+copy_other(openmpt_zip_amd64_path, openmpt_version_short)
+copy_other(openmpt_zip_arm_path, openmpt_version_short)
+copy_other(openmpt_zip_arm64_path, openmpt_version_short)
 
 print("Creating zip files and installers...")
-p7z32    = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable.zip",            openmpt_version_name + "/"], cwd=openmpt_zip_32bit_basepath)
+
+pInno = Popen([pathISCC, "install-multi-arch.iss"], cwd="installer/")
 if singleThreaded:
-	p7z32.communicate()
-p7z64    = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-x64.zip",        openmpt_version_name + "/"], cwd=openmpt_zip_64bit_basepath)
+	pInno.communicate()
+
+p7zx86 = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-x86.zip", openmpt_version_name + "/"], cwd=openmpt_zip_x86_basepath)
 if singleThreaded:
-	p7z64.communicate()
-pInno32  = Popen([pathISCC, "win32.iss"], cwd="installer/")
+	p7zx86.communicate()
+p7zamd64 = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-amd64.zip", openmpt_version_name + "/"], cwd=openmpt_zip_amd64_basepath)
 if singleThreaded:
-	pInno32.communicate()
-pInno64  = Popen([pathISCC, "win64.iss"], cwd="installer/")
+	p7zamd64.communicate()
+p7zarm = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-arm.zip", openmpt_version_name + "/"], cwd=openmpt_zip_arm_basepath)
 if singleThreaded:
-	pInno64.communicate()
+	p7zarm.communicate()
+p7zarm64 = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-arm64.zip", openmpt_version_name + "/"], cwd=openmpt_zip_arm64_basepath)
+if singleThreaded:
+	p7zarm64.communicate()
+
 if not singleThreaded:
-	p7z32.communicate()
-	p7z64.communicate()
-	pInno32.communicate()
-	pInno64.communicate()
+	pInno.communicate()
+	p7zx86.communicate()
+	p7zamd64.communicate()
+	p7zarm.communicate()
+	p7zarm64.communicate()
 
 if os.path.isfile('packageTemplate/ExampleSongs/nosongs.txt'):
 	os.remove('packageTemplate/ExampleSongs/nosongs.txt')
 
-if(p7z32.returncode != 0 or p7z64.returncode != 0 or pInno32.returncode != 0 or pInno64.returncode != 0):
+if(p7zx86.returncode != 0 or p7zamd64.returncode != 0 or p7zarm.returncode != 0 or p7zarm64.returncode != 0 or pInno.returncode != 0):
     raise Exception("Something went wrong during packaging!")
 
 def hash_file(filename):
-    md5 = hashlib.md5()
-    sha1 = hashlib.sha1()
-    sha512 = hashlib.sha512()
+    sha3_512 = hashlib.sha3_512()
     with open(filename, "rb") as f:
         buf = f.read()
-        md5.update(buf)
-        sha1.update(buf)
-        sha512.update(buf)
+        sha3_512.update(buf)
     with open(filename + ".digests", "wb") as f:
-        f.write(("MD5: " + md5.hexdigest() + "\nSHA-1: " + sha1.hexdigest() + "\nSHA-512: " + sha512.hexdigest()).encode('utf-8'))
+        f.write(("SHA3-512: " + sha3_512.hexdigest() + "\n").encode('utf-8'))
         f.close()
 
-hash_file("installer/" + openmpt_version_name + "-Setup.exe")
-hash_file("installer/" + openmpt_version_name + "-Setup-x64.exe")
-hash_file("installer/" + openmpt_version_name + "-portable.zip")
-hash_file("installer/" + openmpt_version_name + "-portable-x64.zip")
+hash_file("installer/" + openmpt_version_name + "-Installer.exe")
+hash_file("installer/" + openmpt_version_name + "-portable-x86.zip")
+hash_file("installer/" + openmpt_version_name + "-portable-amd64.zip")
+hash_file("installer/" + openmpt_version_name + "-portable-arm.zip")
+hash_file("installer/" + openmpt_version_name + "-portable-arm64.zip")
 
-shutil.rmtree(openmpt_zip_32bit_basepath)
-shutil.rmtree(openmpt_zip_64bit_basepath)
+shutil.rmtree(openmpt_zip_x86_basepath)
+shutil.rmtree(openmpt_zip_amd64_basepath)
+shutil.rmtree(openmpt_zip_arm_basepath)
+shutil.rmtree(openmpt_zip_arm64_basepath)
 
 if interactive:
 	input(openmpt_version_name + " has been packaged successfully.")
