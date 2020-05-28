@@ -36,8 +36,6 @@ SolidCompression=yes
 WizardImageFile=install-big.bmp
 WizardSmallImageFile=install-small.bmp
 WizardStyle=modern
-CreateUninstallRegKey=not IsTaskSelected('portable')
-Uninstallable=not IsTaskSelected('portable')
 UninstallDisplayIcon={app}\OpenMPT.exe
 DisableWelcomePage=yes
 
@@ -46,7 +44,6 @@ DisableWelcomePage=yes
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}
 Name: startmenuicon; Description: "Create a Start Menu icon"; GroupDescription: {cm:AdditionalIcons}
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
-Name: portable; Description: Portable mode (use program folder for storing settings, no registry changes); GroupDescription: Options:; Flags: unchecked
 ; file associations - put this below all other [tasks]!
 #include "filetypes.iss"
 
@@ -67,8 +64,6 @@ Source: ..\bin\{#PlatformFolder}\openmpt-mpg123.dll; DestDir: {app}; Flags: igno
 Source: ..\bin\{#PlatformFolder}\openmpt-soundtouch.dll; DestDir: {app}; Flags: ignoreversion
 ; Wine support
 Source: ..\bin\{#PlatformFolder}\openmpt-wine-support.zip; DestDir: {app}; Flags: ignoreversion
-; portable mode
-Source: ..\packageTemplate\OpenMPT.portable; DestDir: {app}; Flags: ignoreversion; Tasks: portable
 
 Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension recursesubdirs
 
@@ -89,25 +84,23 @@ Source: ..\packageTemplate\Licenses\*.*; DestDir: {app}\Licenses; Flags: ignorev
 Source: ..\packageTemplate\ExtraKeymaps\*.*; DestDir: {app}\ExtraKeymaps; Flags: ignoreversion sortfilesbyextension
 
 ; kind of auto-backup - handy!
-Source: {userappdata}\OpenMPT\Keybindings.mkb; DestDir: {userappdata}\OpenMPT; DestName: Keybindings.mkb.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
-Source: {userappdata}\OpenMPT\mptrack.ini; DestDir: {userappdata}\OpenMPT; DestName: mptrack.ini.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
-Source: {userappdata}\OpenMPT\SongSettings.ini; DestDir: {userappdata}\OpenMPT; DestName: SongSettings.ini.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
-Source: {userappdata}\OpenMPT\plugin.cache; DestDir: {userappdata}\OpenMPT; DestName: plugin.cache.old; Flags: external skipifsourcedoesntexist; Tasks: not portable
+Source: {userappdata}\OpenMPT\Keybindings.mkb; DestDir: {userappdata}\OpenMPT; DestName: Keybindings.mkb.old; Flags: external skipifsourcedoesntexist
+Source: {userappdata}\OpenMPT\mptrack.ini; DestDir: {userappdata}\OpenMPT; DestName: mptrack.ini.old; Flags: external skipifsourcedoesntexist
+Source: {userappdata}\OpenMPT\SongSettings.ini; DestDir: {userappdata}\OpenMPT; DestName: SongSettings.ini.old; Flags: external skipifsourcedoesntexist
+Source: {userappdata}\OpenMPT\plugin.cache; DestDir: {userappdata}\OpenMPT; DestName: plugin.cache.old; Flags: external skipifsourcedoesntexist
 
 [Dirs]
-; option dirs for non-portable mode
-Name: {userappdata}\OpenMPT; Tasks: not portable
-Name: {userappdata}\OpenMPT\tunings; Tasks: not portable
-; dirst for portable mode
-Name: {app}\tunings; Tasks: portable
+; option dirs
+Name: {userappdata}\OpenMPT
+Name: {userappdata}\OpenMPT\tunings
 
 [Icons]
 ; start menu
 Name: {userprograms}\OpenMPT; Filename: {app}\OpenMPT.exe; Tasks: startmenuicon
 
 ; app's directory and keymaps directory (for ease of use)
-Name: {app}\Configuration files; Filename: {userappdata}\OpenMPT\; Tasks: not portable
-Name: {userappdata}\OpenMPT\More Keymaps; Filename: {app}\extraKeymaps\; Tasks: not portable
+Name: {app}\Configuration files; Filename: {userappdata}\OpenMPT\
+Name: {userappdata}\OpenMPT\More Keymaps; Filename: {app}\extraKeymaps\
 
 ; desktop, quick launch
 Name: {userdesktop}\OpenMPT; Filename: {app}\OpenMPT.exe; Tasks: desktopicon
@@ -149,18 +142,12 @@ Type: files; Name: {app}\ModPlug Central.url
 ; in case mptrack.exe got recreated as a symlink
 Type: files; Name: {app}\mptrack.exe
 ; normal installation
-Type: dirifempty; Name: {userappdata}\OpenMPT\Autosave; Tasks: not portable
-Type: dirifempty; Name: {userappdata}\OpenMPT\TemplateModules; Tasks: not portable
-Type: dirifempty; Name: {userappdata}\OpenMPT\tunings; Tasks: not portable
-Type: dirifempty; Name: {userappdata}\OpenMPT\Components\{#PlatformArchitecture}; Tasks: not portable
-Type: dirifempty; Name: {userappdata}\OpenMPT\Components; Tasks: not portable
-Type: dirifempty; Name: {userappdata}\OpenMPT; Tasks: not portable
-; portable installation
-Type: dirifempty; Name: {app}\Autosave; Tasks: portable
-Type: dirifempty; Name: {app}\TemplateModules; Tasks: portable
-Type: dirifempty; Name: {app}\tunings; Tasks: portable
-Type: dirifempty; Name: {userappdata}\OpenMPT\Components\{#PlatformArchitecture}; Tasks: portable
-Type: dirifempty; Name: {userappdata}\OpenMPT\Components; Tasks: portable
+Type: dirifempty; Name: {userappdata}\OpenMPT\Autosave
+Type: dirifempty; Name: {userappdata}\OpenMPT\TemplateModules
+Type: dirifempty; Name: {userappdata}\OpenMPT\tunings
+Type: dirifempty; Name: {userappdata}\OpenMPT\Components\{#PlatformArchitecture}
+Type: dirifempty; Name: {userappdata}\OpenMPT\Components
+Type: dirifempty; Name: {userappdata}\OpenMPT
 
 [Code]
 var
@@ -173,12 +160,6 @@ var
     keyFile: String;
 
 begin
-
-    // Not needed if portable mode is enabled.
-    if(IsTaskSelected('portable')) then
-    begin
-        Exit;
-    end;
 
     // OpenMPT 1.29 and later: Portable mode is indicated by file called "OpenMPT.portable"
     DeleteFile(ExpandConstant('{app}\OpenMPT.portable'));
@@ -238,19 +219,11 @@ begin
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
-var
-    programfiles: String;
 begin
     case CurPageID of
     wpSelectTasks:
         begin
             mptrackExeExisted := FileExists(ExpandConstant('{app}\mptrack.exe'));
-
-            programfiles := ExpandConstant('{pf}\');
-            if((CompareText(programfiles, Copy(ExpandConstant('{app}\'), 0, Length(programfiles))) = 0) and IsTaskSelected('portable')) then
-            begin
-                MsgBox('Warning: Installing OpenMPT to' #10 + programfiles + #10 'in portable mode may lead to problems if you are not running it with an administrator account!', mbInformation, MB_OK);
-            end;
         end;
     end;
     Result := true;
