@@ -2,22 +2,16 @@
 ; https://openmpt.org/
 
 #define PlatformFolder "release\vs2019-win10-static\x86"
-#define PlatformName "32-Bit"
-#define PlatformArchitecture "x86"
 
-#define GetAppVersion StringChange(GetFileProductVersion("..\bin\" + PlatformFolder + "\OpenMPT.exe"), ",", ".")
+#define GetAppVersion GetFileProductVersion("..\bin\" + PlatformFolder + "\OpenMPT.exe")
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
-
-#ifndef BaseNameAddition
-#define BaseNameAddition
-#endif
 
 [Setup]
 AppId={{40c97d3e-7763-4b88-8c6a-0901befee4af}
-AppVerName=OpenMPT {#GetAppVersionShort} ({#PlatformName})
+AppVerName=OpenMPT {#GetAppVersionShort}
 AppVersion={#GetAppVersion}
-AppName=OpenMPT ({#PlatformName})
-AppPublisher=OpenMPT Devs
+AppName=OpenMPT
+AppPublisher=OpenMPT Developers
 AppPublisherURL=https://openmpt.org/
 AppSupportURL=https://forum.openmpt.org/
 AppUpdatesURL=https://openmpt.org/
@@ -140,7 +134,6 @@ Type: files; Name: {app}\mptrack.exe
 Type: dirifempty; Name: {userappdata}\OpenMPT\Autosave
 Type: dirifempty; Name: {userappdata}\OpenMPT\TemplateModules
 Type: dirifempty; Name: {userappdata}\OpenMPT\tunings
-Type: dirifempty; Name: {userappdata}\OpenMPT\Components\{#PlatformArchitecture}
 Type: dirifempty; Name: {userappdata}\OpenMPT\Components
 Type: dirifempty; Name: {userappdata}\OpenMPT
 
