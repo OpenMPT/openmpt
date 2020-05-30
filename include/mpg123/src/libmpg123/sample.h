@@ -185,7 +185,7 @@ static inline int16_t ftoi16(float x)
 #ifdef WORDS_BIGENDIAN
 /* Highest byte first. Drop last. */
 #define DROP4BYTE(w,r) {(w)[0]=(r)[0]; (w)[1]=(r)[1]; (w)[2]=(r)[2];}
-#define ADD4BYTE(w,r)  {(w)[0]=(r)[0]; (w)[1]=(r)[1]; (w)[2]=(r)[2]; (w)[3]=0}
+#define ADD4BYTE(w,r)  {(w)[0]=(r)[0]; (w)[1]=(r)[1]; (w)[2]=(r)[2]; (w)[3]=0;}
 #else
 /* Lowest byte first, drop that. */
 #define DROP4BYTE(w,r) {(w)[0]=(r)[1]; (w)[1]=(r)[2]; (w)[2]=(r)[3];}
