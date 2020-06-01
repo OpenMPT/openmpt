@@ -80,8 +80,8 @@ is just a high-level summary.
 
  *  Greatly improved MED import. Synthesized instruments are still not supported
     but support was added for: Multisampled instruments, delta samples, more
-    pattern commands, Hold and Decay, VSTi and MIDI output, multiple songs and
-    many other small changes.
+    pattern commands, Hold and Decay, multiple songs and many other small
+    changes.
  *  Improved OPL channel allocation when more than 18 notes are active, so that
     channels that have completely faded out are prioritized over channels that
     have already been released but have not faded out yet.
