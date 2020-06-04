@@ -796,19 +796,14 @@ void COrderList::OnPaint()
 				rect.right = rcClient.right;
 			rect.right--;
 
+			HBRUSH background;
 			if(highLight)
-			{
-				// Currently selected order item
-				::FillRect(dc, &rect, highlightBrush);
-			} else if(order.IsPositionLocked(ord))
-			{
-				// "Playback lock" indicator - grey out all order items which aren't played.
-				::FillRect(dc, &rect, faceBrush);
-			} else
-			{
-				// Normal, unselected item.
-				::FillRect(dc, &rect, windowBrush);
-			}
+				background = highlightBrush;  // Currently selected order item
+			else if(order.IsPositionLocked(ord))
+				background = faceBrush;  // "Playback lock" indicator - grey out all order items which aren't played.
+			else
+				background = windowBrush;  // Normal, unselected item.
+			::FillRect(dc, &rect, background);
 
 			// Drawing the shown pattern-indicator or drag position.
 			if(ord == (m_bDragging ? m_nDropPos : m_nScrollPos))
