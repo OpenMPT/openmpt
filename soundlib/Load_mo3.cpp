@@ -354,10 +354,7 @@ struct MO3SampleChunk
 	data &= 0xFF; \
 	if(data == 0) \
 	{ \
-		uint8 nextByte; \
-		if(!file.Read(nextByte)) \
-			break; \
-		data = nextByte; \
+		data = file.ReadUint8(); \
 		data = (data << 1) + 1; \
 		carry = (data > 0xFF); \
 		data &= 0xFF; \
