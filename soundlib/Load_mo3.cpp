@@ -264,18 +264,19 @@ struct MO3Sample
 {
 	enum MO3SampleFlags
 	{
-		smp16Bit			= 0x01,
-		smpLoop				= 0x10,
-		smpPingPongLoop		= 0x20,
-		smpSustain			= 0x100,
-		smpSustainPingPong	= 0x200,
-		smpStereo			= 0x400,
-		smpCompressionMPEG	= 0x1000,					// MPEG 1.0 / 2.0 / 2.5 sample
-		smpCompressionOgg	= 0x1000 | 0x2000,			// Ogg sample
-		smpSharedOgg		= 0x1000 | 0x2000 | 0x4000,	// Ogg sample with shared vorbis header
-		smpDeltaCompression	= 0x2000,					// Deltas + compression
-		smpDeltaPrediction	= 0x4000,					// Delta prediction + compression
-		smpCompressionMask	= 0x1000 | 0x2000 | 0x4000
+		smp16Bit            = 0x01,
+		smpLoop             = 0x10,
+		smpPingPongLoop     = 0x20,
+		smpSustain          = 0x100,
+		smpSustainPingPong  = 0x200,
+		smpStereo           = 0x400,
+		smpCompressionMPEG  = 0x1000,                    // MPEG 1.0 / 2.0 / 2.5 sample
+		smpCompressionOgg   = 0x1000 | 0x2000,           // Ogg sample
+		smpSharedOgg        = 0x1000 | 0x2000 | 0x4000,  // Ogg sample with shared vorbis header
+		smpDeltaCompression = 0x2000,                    // Deltas + compression
+		smpDeltaPrediction  = 0x4000,                    // Delta prediction + compression
+		smpOPLInstrument    = 0x8000,                    // OPL patch data
+		smpCompressionMask  = 0x1000 | 0x2000 | 0x4000 | 0x8000
 	};
 
 	int32le  freqFinetune;	// Frequency in S3M and IT, finetune (0...255) in MOD, MTM, XM
@@ -373,7 +374,10 @@ struct MO3SampleChunk
 	data &= 0xFF; \
 	if(data == 0) \
 	{ \
-		data = file.ReadUint8(); \
+		uint8 nextByte; \
+		if(!file.Read(nextByte)) \
+			break; \
+		data = nextByte; \
 		data = (data << 1) + 1; \
 		carry = (data > 0xFF); \
 		data &= 0xFF; \
@@ -1443,6 +1447,13 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				} else
 				{
 					unsupportedSamples = true;
+				}
+			} else if(compression == MO3Sample::smpOPLInstrument)
+			{
+				OPLPatch patch;
+				if(sampleData.ReadArray(patch))
+				{
+					sample.SetAdlib(true, patch);
 				}
 			} else
 			{
