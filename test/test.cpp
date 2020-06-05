@@ -927,11 +927,11 @@ static MPT_NOINLINE void TestMisc1()
 	VERIFY_EQUAL( mpt::saturate_round<int8>(110.1), 110 );
 	VERIFY_EQUAL( mpt::saturate_round<int8>(-110.1), -110 );
 
-	VERIFY_EQUAL(mpt::popcount(int32(-1)), 32);
-	VERIFY_EQUAL(mpt::popcount(0), 0);
-	VERIFY_EQUAL(mpt::popcount(1), 1);
-	VERIFY_EQUAL(mpt::popcount(2), 1);
-	VERIFY_EQUAL(mpt::popcount(3), 2);
+	VERIFY_EQUAL(mpt::popcount(static_cast<uint32>(int32(-1))), 32);
+	VERIFY_EQUAL(mpt::popcount(0u), 0);
+	VERIFY_EQUAL(mpt::popcount(1u), 1);
+	VERIFY_EQUAL(mpt::popcount(2u), 1);
+	VERIFY_EQUAL(mpt::popcount(3u), 2);
 
 	VERIFY_EQUAL(mpt::has_single_bit(0u), false);
 	VERIFY_EQUAL(mpt::has_single_bit(1u), true);
