@@ -46,11 +46,6 @@ enum ThreadPriority
 	ThreadPriorityHighest = THREAD_PRIORITY_HIGHEST
 };
 
-inline void SetThreadPriority(std::thread &t, mpt::ThreadPriority priority)
-{
-	::SetThreadPriority(t.native_handle(), priority);
-}
-
 inline void SetCurrentThreadPriority(mpt::ThreadPriority priority)
 {
 	::SetThreadPriority(GetCurrentThread(), priority);
@@ -66,11 +61,6 @@ enum ThreadPriority
 	ThreadPriorityHigh    =  1,
 	ThreadPriorityHighest =  2
 };
-
-inline void SetThreadPriority(std::thread & /*t*/ , mpt::ThreadPriority /*priority*/ )
-{
-	// nothing
-}
 
 inline void SetCurrentThreadPriority(mpt::ThreadPriority /*priority*/ )
 {
