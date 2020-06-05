@@ -2268,6 +2268,23 @@ static MPT_NOINLINE void TestMisc2()
 
 static MPT_NOINLINE void TestRandom()
 {
+
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0xffffffffu), 32);
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0xfffffffeu), 31);
+
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x80000000u), 31);
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x7fffffffu), 31);
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x7ffffffeu), 30);
+
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000007u), 3);
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000006u), 2);
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000005u), 2);
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000004u), 2);
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000003u), 2);
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000002u), 1);
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000001u), 1);
+	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000000u), 0);
+
 	mpt::default_prng & prng = *s_PRNG;
 	for(std::size_t i = 0; i < 10000; ++i)
 	{
