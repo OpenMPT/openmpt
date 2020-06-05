@@ -213,7 +213,7 @@ void BlepTables::InitTables()
 	auto unfilteredA1200 = KaiserFIR(Paula::BLEP_SIZE, 21000.0 / sampleRate * 2.0, 9.0);
 	// Move filtering effects to start to allow IIRs more time to settle
 	constexpr size_t padSize = 8;
-	constexpr int fftSize = static_cast<int>(mpt::log2p1(size_t(Paula::BLEP_SIZE)) + mpt::log2p1(padSize) - 2);
+	constexpr int fftSize = static_cast<int>(mpt::bit_width(size_t(Paula::BLEP_SIZE)) + mpt::bit_width(padSize) - 2);
 	const TinyFFT fft(fftSize);
 	FIR_MinPhase(unfilteredA500, fft);
 	FIR_MinPhase(unfilteredA1200, fft);
