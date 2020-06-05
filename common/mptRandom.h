@@ -51,43 +51,9 @@ static constexpr uint32 FUZZER_RNG_SEED = 3141592653u; // pi
 namespace detail
 {
 
-MPT_CONSTEXPR11_FUN int lower_bound_entropy_bits(unsigned int x)
+MPT_CONSTEXPR14_FUN int lower_bound_entropy_bits(unsigned int x)
 {
-	// easy to compile-time evaluate even for stupid compilers
-	return
-		x >= 0xffffffffu ? 32 :
-		x >= 0x7fffffffu ? 31 :
-		x >= 0x3fffffffu ? 30 :
-		x >= 0x1fffffffu ? 29 :
-		x >= 0x0fffffffu ? 28 :
-		x >= 0x07ffffffu ? 27 :
-		x >= 0x03ffffffu ? 26 :
-		x >= 0x01ffffffu ? 25 :
-		x >= 0x00ffffffu ? 24 :
-		x >= 0x007fffffu ? 23 :
-		x >= 0x003fffffu ? 22 :
-		x >= 0x001fffffu ? 21 :
-		x >= 0x000fffffu ? 20 :
-		x >= 0x0007ffffu ? 19 :
-		x >= 0x0003ffffu ? 18 :
-		x >= 0x0001ffffu ? 17 :
-		x >= 0x0000ffffu ? 16 :
-		x >= 0x00007fffu ? 15 :
-		x >= 0x00003fffu ? 14 :
-		x >= 0x00001fffu ? 13 :
-		x >= 0x00000fffu ? 12 :
-		x >= 0x000007ffu ? 11 :
-		x >= 0x000003ffu ? 10 :
-		x >= 0x000001ffu ?  9 :
-		x >= 0x000000ffu ?  8 :
-		x >= 0x0000007fu ?  7 :
-		x >= 0x0000003fu ?  6 :
-		x >= 0x0000001fu ?  5 :
-		x >= 0x0000000fu ?  4 :
-		x >= 0x00000007u ?  3 :
-		x >= 0x00000003u ?  2 :
-		x >= 0x00000001u ?  1 :
-		0;
+	return mpt::bit_width(x) == static_cast<unsigned int>(mpt::popcount(x)) ? mpt::bit_width(x) : mpt::bit_width(x) - 1;
 }
 
 }
