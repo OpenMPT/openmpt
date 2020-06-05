@@ -186,8 +186,23 @@ inline Tdst saturate_cast(float src)
 }
 
 
+#if MPT_CXX_AT_LEAST(20)
+
+using std::popcount;
+using std::has_single_bit;
+using std::bit_ceil;
+using std::bit_floor;
+using std::bit_width;
+using std::rotl;
+using std::rotr;
+
+#else
+
+// C++20 <bit> header.
+// Note that we do not use SFINAE here but instead rely on static_assert.
+
 template <typename T>
-MPT_CONSTEXPR14_FUN std::size_t weight(T val) noexcept
+MPT_CONSTEXPR14_FUN std::size_t popcount(T val) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	typedef typename std::make_unsigned<T>::type Tunsigned;
@@ -204,32 +219,16 @@ MPT_CONSTEXPR14_FUN std::size_t weight(T val) noexcept
 	return result;
 }
 
-#if MPT_CXX_AT_LEAST(20)
-
-using std::ispow2;
-using std::ceil2;
-using std::floor2;
-using std::log2p1;
-using std::rotl;
-using std::rotr;
-
-#else
-
-// C++20 <bit> header.
-// Note that we do not use SFINAE here but instead rely on static_assert.
-// Also note that for C++11 compilers, these functions are not constexpr.
-// They could be implemented recursively to make them C++11 constexpr compatible if needed.
-
 template <typename T>
-MPT_CONSTEXPR14_FUN bool ispow2(T x) noexcept
+MPT_CONSTEXPR14_FUN bool has_single_bit(T x) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
-	return mpt::weight(x) == 1;
+	return mpt::popcount(x) == 1;
 }
 
 template <typename T>
-MPT_CONSTEXPR14_FUN T ceil2(T x) noexcept
+MPT_CONSTEXPR14_FUN T bit_ceil(T x) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -247,7 +246,7 @@ MPT_CONSTEXPR14_FUN T ceil2(T x) noexcept
 }
 
 template <typename T>
-MPT_CONSTEXPR14_FUN T floor2(T x) noexcept
+MPT_CONSTEXPR14_FUN T bit_floor(T x) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -269,7 +268,7 @@ MPT_CONSTEXPR14_FUN T floor2(T x) noexcept
 }
  
 template <typename T>
-MPT_CONSTEXPR14_FUN T log2p1(T x) noexcept
+MPT_CONSTEXPR14_FUN T bit_width(T x) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);

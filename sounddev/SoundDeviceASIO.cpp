@@ -289,7 +289,7 @@ bool CASIODevice::InternalOpen()
 		} else if(bufferSizes.Granularity < -1)
 		{ // bufferSizes.Granularity value not allowed, just clamp value
 			m_nAsioBufferLen = std::clamp(m_nAsioBufferLen, bufferSizes.Min, bufferSizes.Max);
-		} else if(bufferSizes.Granularity == -1 && (mpt::weight(bufferSizes.Min) != 1 || mpt::weight(bufferSizes.Max) != 1))
+		} else if(bufferSizes.Granularity == -1 && (mpt::popcount(bufferSizes.Min) != 1 || mpt::popcount(bufferSizes.Max) != 1))
 		{ // bufferSizes.Granularity tells us we need power-of-2 sizes, but min or max sizes are no power-of-2
 			m_nAsioBufferLen = std::clamp(m_nAsioBufferLen, bufferSizes.Min, bufferSizes.Max);
 			// just start at 1 and find a matching power-of-2 in range

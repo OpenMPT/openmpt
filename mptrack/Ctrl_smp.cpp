@@ -322,7 +322,7 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	// FFT size selection
 	// Deduce exponent from equation : MAX_FRAME_LENGTH = 2^exponent
-	constexpr int exponent = mpt::log2p1(uint32(MAX_FRAME_LENGTH)) - 1;
+	constexpr int exponent = mpt::bit_width(uint32(MAX_FRAME_LENGTH)) - 1;
 	// Allow FFT size from 2^8 (256) to 2^exponent (MAX_FRAME_LENGTH)
 	m_ComboFFT.InitStorage(exponent - 8, 4);
 	m_ComboFFT.SetRedraw(FALSE);
