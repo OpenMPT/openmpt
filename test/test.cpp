@@ -997,6 +997,78 @@ static MPT_NOINLINE void TestMisc1()
 	VERIFY_EQUAL(mpt::bit_width(uint32(0xfffffffeu)), 32u);
 	VERIFY_EQUAL(mpt::bit_width(uint32(0xffffffffu)), 32u);
 
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b00000000)), 0);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b00000001)), 0);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b00000011)), 0);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b00000111)), 0);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b00001111)), 0);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b00011111)), 0);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b00111111)), 0);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b01111111)), 0);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b11111111)), 8);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b11111110)), 7);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b11111100)), 6);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b11111000)), 5);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b11110000)), 4);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b11100000)), 3);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b11000000)), 2);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b10000000)), 1);
+	VERIFY_EQUAL(mpt::countl_one(uint8(0b00000000)), 0);
+
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00000000)), 8);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00000001)), 7);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00000011)), 6);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00000111)), 5);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00001111)), 4);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00011111)), 3);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00111111)), 2);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b01111111)), 1);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11111111)), 0);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11111110)), 0);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11111100)), 0);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11111000)), 0);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11110000)), 0);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11100000)), 0);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11000000)), 0);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b10000000)), 0);
+	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00000000)), 8);
+
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b00000000)), 0);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b00000001)), 1);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b00000011)), 2);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b00000111)), 3);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b00001111)), 4);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b00011111)), 5);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b00111111)), 6);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b01111111)), 7);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b11111111)), 8);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b11111110)), 0);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b11111100)), 0);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b11111000)), 0);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b11110000)), 0);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b11100000)), 0);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b11000000)), 0);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b10000000)), 0);
+	VERIFY_EQUAL(mpt::countr_one(uint8(0b00000000)), 0);
+
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00000000)), 8);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00000001)), 0);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00000011)), 0);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00000111)), 0);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00001111)), 0);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00011111)), 0);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00111111)), 0);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b01111111)), 0);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11111111)), 0);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11111110)), 1);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11111100)), 2);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11111000)), 3);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11110000)), 4);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11100000)), 5);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11000000)), 6);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b10000000)), 7);
+	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00000000)), 8);
+
 	// trivials
 	VERIFY_EQUAL( mpt::saturate_cast<int>(-1), -1 );
 	VERIFY_EQUAL( mpt::saturate_cast<int>(0), 0 );

@@ -193,6 +193,10 @@ using std::has_single_bit;
 using std::bit_ceil;
 using std::bit_floor;
 using std::bit_width;
+using std::countl_zero;
+using std::countl_one;
+using std::countr_zero;
+using std::countr_one;
 using std::rotl;
 using std::rotr;
 
@@ -278,6 +282,82 @@ MPT_CONSTEXPR14_FUN T bit_width(T x) noexcept
 		result += 1;
 	}
 	return result;
+}
+
+template <typename T>
+MPT_CONSTEXPR14_FUN int countl_zero(T x) noexcept
+{
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::is_unsigned<T>::value);
+	int count = 0;
+	for(int bit = std::numeric_limits<T>::digits - 1; bit >= 0; --bit)
+	{
+		if((x & (1u<<bit)) == 0u)
+		{
+			count++;
+		} else
+		{
+			break;
+		}
+	}
+	return count;
+}
+
+template <typename T>
+MPT_CONSTEXPR14_FUN int countl_one(T x) noexcept
+{
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::is_unsigned<T>::value);
+	int count = 0;
+	for(int bit = std::numeric_limits<T>::digits - 1; bit >= 0; --bit)
+	{
+		if((x & (1u<<bit)) != 0u)
+		{
+			count++;
+		} else
+		{
+			break;
+		}
+	}
+	return count;
+}
+
+template <typename T>
+MPT_CONSTEXPR14_FUN int countr_zero(T x) noexcept
+{
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::is_unsigned<T>::value);
+	int count = 0;
+	for(int bit = 0; bit < std::numeric_limits<T>::digits; ++bit)
+	{
+		if((x & (1u<<bit)) == 0u)
+		{
+			count++;
+		} else
+		{
+			break;
+		}
+	}
+	return count;
+}
+
+template <typename T>
+MPT_CONSTEXPR14_FUN int countr_one(T x) noexcept
+{
+	static_assert(std::numeric_limits<T>::is_integer);
+	static_assert(std::is_unsigned<T>::value);
+	int count = 0;
+	for(int bit = 0; bit < std::numeric_limits<T>::digits; ++bit)
+	{
+		if((x & (1u<<bit)) != 0u)
+		{
+			count++;
+		} else
+		{
+			break;
+		}
+	}
+	return count;
 }
 
 namespace detail
