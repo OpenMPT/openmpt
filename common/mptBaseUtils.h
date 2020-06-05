@@ -202,19 +202,18 @@ using std::rotr;
 // Note that we do not use SFINAE here but instead rely on static_assert.
 
 template <typename T>
-MPT_CONSTEXPR14_FUN std::size_t popcount(T val) noexcept
+MPT_CONSTEXPR14_FUN int popcount(T val) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	typedef typename std::make_unsigned<T>::type Tunsigned;
-	Tunsigned uval = static_cast<Tunsigned>(val);
-	std::size_t result = 0;
-	while(uval > 0)
+	static_assert(std::is_unsigned<T>::value);
+	int result = 0;
+	while(val > 0)
 	{
-		if(uval & 0x1)
+		if(val & 0x1)
 		{
 			result++;
 		}
-		uval >>= 1;
+		val >>= 1;
 	}
 	return result;
 }
