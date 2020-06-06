@@ -1155,9 +1155,14 @@ void CViewPattern::DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn)
 		if (vul > 8) vul = 8;
 		if (vur > 8) vur = 8;
 		x += (m_szCell.cx / 2);
+
 		const auto &channel = GetSoundFile()->m_PlayState.Chn[nChn];
-		auto bmp = ((channel.pModSample != nullptr && channel.pModSample->HasSampleData()) || !channel.HasMIDIOutput()) && !channel.dwFlags[CHN_ADLIB]
-			? CMainFrame::bmpVUMeters : CMainFrame::bmpPluginVUMeters;
+		const bool isSynth =
+		    channel.dwFlags[CHN_ADLIB]
+		    || (channel.pModSample != nullptr && channel.pModSample->uFlags[CHN_ADLIB])
+		    || ((channel.pModSample == nullptr || !channel.pModSample->HasSampleData()) && channel.HasMIDIOutput());
+		const auto bmp = isSynth ? CMainFrame::bmpPluginVUMeters : CMainFrame::bmpVUMeters;
+
 		if (m_nDetailLevel <= PatternCursor::instrColumn)
 		{
 			DibBlt(hdc, x-VUMETERS_LOWIDTH-1, y, VUMETERS_LOWIDTH, VUMETERS_BMPHEIGHT,
