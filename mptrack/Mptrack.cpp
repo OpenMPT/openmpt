@@ -35,6 +35,7 @@
 #include "../sounddev/SoundDeviceManager.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include "MPTrackWine.h"
+#include "MPTrackUtil.h"
 
 // GDI+
 #define max(a,b) (((a) > (b)) ? (a) : (b))
@@ -641,6 +642,10 @@ void CTrackApp::CreatePaths()
 	if(!(GetConfigPath() + P_("Components\\") + BuildVariants::GetComponentArch()).IsDirectory())
 	{
 		CreateDirectory((GetConfigPath() + P_("Components\\") + BuildVariants::GetComponentArch()).AsNative().c_str(), 0);
+	}
+	if(!(GetConfigPath() + P_("More Keymaps")).FileOrDirectoryExists())
+	{
+		CreateShellFolderLink(GetConfigPath() + P_("More Keymaps"), GetInstallPath() + P_("packageTemplate\\extraKeymaps"));
 	}
 
 	// Handle updates from old versions.
