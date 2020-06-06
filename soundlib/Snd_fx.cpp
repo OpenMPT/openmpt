@@ -1484,7 +1484,7 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 			chn.nFineTune = pSmp->nFineTune;
 		// ST3 does it similarly for middle-C speed.
 		// Test case: PortaSwap.s3m, SampleSwap.s3m
-		if(GetType() == MOD_TYPE_S3M)
+		if(GetType() == MOD_TYPE_S3M && pSmp->HasSampleData())
 			chn.nC5Speed = pSmp->nC5Speed;
 	}
 
@@ -2804,7 +2804,7 @@ bool CSoundFile::ProcessEffects()
 
 				if(oldSample != nullptr)
 				{
-					if(!oldSample->uFlags[SMP_NODEFAULTVOLUME])
+					if(!oldSample->uFlags[SMP_NODEFAULTVOLUME] && (GetType() != MOD_TYPE_S3M || oldSample->HasSampleData()))
 						chn.nVolume = oldSample->nVolume;
 					if(reloadSampleSettings)
 					{
