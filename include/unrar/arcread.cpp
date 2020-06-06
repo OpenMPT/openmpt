@@ -1262,6 +1262,7 @@ size_t Archive::ReadHeader14()
     IntToExt(FileName,FileName,ASIZE(FileName));
     CharToWide(FileName,FileHead.FileName,ASIZE(FileHead.FileName));
     ConvertNameCase(FileHead.FileName);
+    ConvertFileHeader(&FileHead);
 
     if (Raw.Size()!=0)
       NextBlockPos=CurBlockPos+FileHead.HeadSize+FileHead.PackSize;
