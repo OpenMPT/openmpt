@@ -1,271 +1,334 @@
 ; OpenMPT Install script
 ; https://openmpt.org/
 
-#define PlatformFolder "release\vs2019-win10-static\x86"
 
-#define GetAppVersion GetFileProductVersion("..\bin\" + PlatformFolder + "\OpenMPT.exe")
+
+#define BuildFolder "release\vs2019-win10-static"
+
+#define DefaultArchName "x86"
+
+#define GetAppVersion GetFileProductVersion("..\bin\" + BuildFolder + "\" + DefaultArchName + "\OpenMPT.exe")
+#define GetAppVersionMedium Copy(GetAppVersion, 1, 7)
 #define GetAppVersionShort Copy(GetAppVersion, 1, 4)
 
+
+
 [Setup]
+
+AlwaysShowComponentsList=no
 AppId={{40c97d3e-7763-4b88-8c6a-0901befee4af}
-AppVerName=OpenMPT {#GetAppVersionShort}
+AppVerName=OpenMPT {#GetAppVersionMedium}
 AppVersion={#GetAppVersion}
 AppName=OpenMPT
 AppPublisher=OpenMPT Developers
 AppPublisherURL=https://openmpt.org/
 AppSupportURL=https://forum.openmpt.org/
 AppUpdatesURL=https://openmpt.org/
-DefaultDirName={pf}\OpenMPT
+ArchitecturesInstallIn64BitMode=x64 arm64 ia64
+ChangesAssociations=yes
+Compression=lzma2/ultra64
+;DefaultDirName={autopf}\OpenMPT
+DefaultDirName={code:CodeGetDefaultDirName|}
+DefaultGroupName=OpenMPT
+DirExistsWarning=auto
 DisableDirPage=no
 DisableProgramGroupPage=yes
+DisableReadyMemo=yes
+DisableWelcomePage=no
+MinVersion=10.0
 OutputDir=.\
-OutputBaseFilename=OpenMPT-{#GetAppVersion}-Installer
-Compression=lzma2/ultra64
+OutputBaseFilename=OpenMPT-{#GetAppVersion}-Setup
+PrivilegesRequired=admin
+PrivilegesRequiredOverridesAllowed=commandline dialog
+SetupIconFile=..\mptrack\res\MPTRACK.ICO
 SolidCompression=yes
+TimeStampsInUTC=yes
+UninstallDisplayIcon={app}\OpenMPT App Icon.ico
+VersionInfoCopyright=Copyright © 1997-2020 OpenMPT Developers
+VersionInfoProductTextVersion={#GetAppVersion}
+VersionInfoProductVersion={#GetAppVersion}
+VersionInfoTextVersion={#GetAppVersion}
+VersionInfoVersion={#GetAppVersion}
 WizardImageFile=install-big.bmp
 WizardSmallImageFile=install-small.bmp
 WizardStyle=modern
-UninstallDisplayIcon={app}\OpenMPT.exe
-DisableWelcomePage=yes
 
-[Tasks]
-; icons and install mode
-Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}
-Name: startmenuicon; Description: "Create a Start Menu icon"; GroupDescription: {cm:AdditionalIcons}
-Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
-; file associations - put this below all other [tasks]!
-#include "filetypes-multi-arch.iss"
+
+
+[Types]
+
+Name: "default"; Description: "Default installation"; Flags: iscustom
+
+
+
+[Components]
+
+Name: "archx86"; Description: "OpenMPT x86"; Types: default; Flags: fixed disablenouninstallwarning
+Name: "archamd64"; Description: "OpenMPT amd64"; Types: default; Flags: fixed disablenouninstallwarning
+Name: "archarm"; Description: "OpenMPT arm"; Types: default; Flags: fixed disablenouninstallwarning
+Name: "archarm64"; Description: "OpenMPT arm64"; Types: default; Flags: fixed disablenouninstallwarning
+
+
 
 [Languages]
-Name: english; MessagesFile: compiler:Default.isl
+
+Name: en; MessagesFile: compiler:Default.isl
+
+
 
 [Files]
+
 ; note: packageTemplate\ contains files specific for the "install package".
 ; for files that are common with the "zip package", use ..\packageTemplate\
 
-; preserve file type order for best solid compression results (first binary, then text)
-; base folder
-Source: ..\bin\{#PlatformFolder}\OpenMPT.exe; DestDir: {app}; Flags: ignoreversion
-Source: ..\bin\{#PlatformFolder}\..\x86\PluginBridge-x86.exe; DestDir: {app}; Flags: ignoreversion
-Source: ..\bin\{#PlatformFolder}\..\amd64\PluginBridge-amd64.exe; DestDir: {app}; Flags: ignoreversion
-Source: ..\bin\{#PlatformFolder}\openmpt-lame.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\bin\{#PlatformFolder}\openmpt-mpg123.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\bin\{#PlatformFolder}\openmpt-soundtouch.dll; DestDir: {app}; Flags: ignoreversion
-; Wine support
-Source: ..\bin\{#PlatformFolder}\openmpt-wine-support.zip; DestDir: {app}; Flags: ignoreversion
+Source: ..\bin\{#BuildFolder}\x86\OpenMPT.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86
+Source: ..\bin\{#BuildFolder}\x86\PluginBridge-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86
+Source: ..\bin\{#BuildFolder}\x86\openmpt-lame.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86
+Source: ..\bin\{#BuildFolder}\x86\openmpt-mpg123.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86
+Source: ..\bin\{#BuildFolder}\x86\openmpt-soundtouch.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86
 
-Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion sortfilesbyextension recursesubdirs
+Source: ..\bin\{#BuildFolder}\amd64\OpenMPT.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64
+Source: ..\bin\{#BuildFolder}\amd64\PluginBridge-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64
+Source: ..\bin\{#BuildFolder}\amd64\openmpt-lame.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64
+Source: ..\bin\{#BuildFolder}\amd64\openmpt-mpg123.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64
+Source: ..\bin\{#BuildFolder}\amd64\openmpt-soundtouch.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64
+
+Source: ..\bin\{#BuildFolder}\arm\OpenMPT.exe; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm
+Source: ..\bin\{#BuildFolder}\arm\PluginBridge-arm.exe; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm
+Source: ..\bin\{#BuildFolder}\arm\openmpt-lame.dll; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm
+Source: ..\bin\{#BuildFolder}\arm\openmpt-mpg123.dll; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm
+Source: ..\bin\{#BuildFolder}\arm\openmpt-soundtouch.dll; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm
+
+Source: ..\bin\{#BuildFolder}\arm64\OpenMPT.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64
+Source: ..\bin\{#BuildFolder}\arm64\PluginBridge-arm64.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64
+Source: ..\bin\{#BuildFolder}\arm64\openmpt-lame.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64
+Source: ..\bin\{#BuildFolder}\arm64\openmpt-mpg123.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64
+Source: ..\bin\{#BuildFolder}\arm64\openmpt-soundtouch.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64
+
+Source: "..\mptrack\res\MPTRACK.ICO"; DestName: "OpenMPT App Icon.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\packageTemplate\mpt.ico"; DestName: "OpenMPT File Icon.ico"; DestDir: "{app}"; Flags: ignoreversion
+
+Source: ..\bin\{#BuildFolder}\{#DefaultArchName}\openmpt-wine-support.zip; DestDir: {app}; Flags: ignoreversion
+
+; todo: use proper folder
+Source: ..\packageTemplate\ExampleSongs\*.*; DestDir: {app}\ExampleSongs\; Flags: ignoreversion recursesubdirs
 
 Source: packageTemplate\readme.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\History.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\OpenMPT Manual.chm; DestDir: {app}; Flags: ignoreversion
 
-; release notes
-Source: ..\packageTemplate\ReleaseNotesImages\general\*.*; DestDir: {app}\ReleaseNotesImages\general\; Flags: ignoreversion sortfilesbyextension
-Source: ..\packageTemplate\ReleaseNotesImages\{#GetAppVersionShort}\*.*; DestDir: {app}\ReleaseNotesImages\{#GetAppVersionShort}\; Flags: ignoreversion sortfilesbyextension
-Source: ..\packageTemplate\OMPT_{#GetAppVersionShort}_ReleaseNotes.html; DestDir: {app}; Flags: ignoreversion
+Source: ..\packageTemplate\ReleaseNotesImages\general\*.*; DestDir: {app}\ReleaseNotesImages\general\; Flags: ignoreversion
+Source: ..\packageTemplate\ReleaseNotesImages\{#GetAppVersionShort}\*.*; DestDir: {app}\ReleaseNotesImages\{#GetAppVersionShort}\; Flags: ignoreversion
+Source: ..\packageTemplate\OMPT_{#GetAppVersionShort}_ReleaseNotes.html; DestName: OpenMPT {#GetAppVersionShort} Release Notes.html; DestDir: {app}; Flags: ignoreversion
 
-; license stuff
+Source: ..\packageTemplate\ModPlug Central.url; DestName: OpenMPT Support and Community Forum.url; DestDir: {app}; Flags: ignoreversion
+
 Source: ..\packageTemplate\License.txt; DestDir: {app}; Flags: ignoreversion
-Source: ..\packageTemplate\Licenses\*.*; DestDir: {app}\Licenses; Flags: ignoreversion sortfilesbyextension
+Source: ..\packageTemplate\Licenses\*.*; DestDir: {app}\Licenses; Flags: ignoreversion
 
-; keymaps
-Source: ..\packageTemplate\ExtraKeymaps\*.*; DestDir: {app}\ExtraKeymaps; Flags: ignoreversion sortfilesbyextension
+Source: ..\packageTemplate\ExtraKeymaps\*.*; DestDir: {app}\ExtraKeymaps; Flags: ignoreversion
 
-; kind of auto-backup - handy!
-Source: {userappdata}\OpenMPT\Keybindings.mkb; DestDir: {userappdata}\OpenMPT; DestName: Keybindings.mkb.old; Flags: external skipifsourcedoesntexist
-Source: {userappdata}\OpenMPT\mptrack.ini; DestDir: {userappdata}\OpenMPT; DestName: mptrack.ini.old; Flags: external skipifsourcedoesntexist
-Source: {userappdata}\OpenMPT\SongSettings.ini; DestDir: {userappdata}\OpenMPT; DestName: SongSettings.ini.old; Flags: external skipifsourcedoesntexist
-Source: {userappdata}\OpenMPT\plugin.cache; DestDir: {userappdata}\OpenMPT; DestName: plugin.cache.old; Flags: external skipifsourcedoesntexist
 
-[Dirs]
-; option dirs
-Name: {userappdata}\OpenMPT
-Name: {userappdata}\OpenMPT\tunings
 
 [Icons]
-; start menu
-Name: {userprograms}\OpenMPT; Filename: {app}\OpenMPT.exe; Tasks: startmenuicon
 
-; app's directory and keymaps directory (for ease of use)
-Name: {app}\Configuration files; Filename: {userappdata}\OpenMPT\
-Name: {userappdata}\OpenMPT\More Keymaps; Filename: {app}\extraKeymaps\
+Name: {autodesktop}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('x86')
+Name: {autodesktop}\OpenMPT; Filename: {app}\bin\amd64\OpenMPT.exe; Check: CheckDefaultArch('amd64')
+Name: {autodesktop}\OpenMPT; Filename: {app}\bin\arm\OpenMPT.exe; Check: CheckDefaultArch('arm')
+Name: {autodesktop}\OpenMPT; Filename: {app}\bin\arm64\OpenMPT.exe; Check: CheckDefaultArch('arm64')
 
-; desktop, quick launch
-Name: {userdesktop}\OpenMPT; Filename: {app}\OpenMPT.exe; Tasks: desktopicon
-Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenMPT; Filename: {app}\OpenMPT.exe; Tasks: quicklaunchicon
+Name: {group}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('x86')
+Name: {group}\OpenMPT; Filename: {app}\bin\amd64\OpenMPT.exe; Check: CheckDefaultArch('amd64')
+Name: {group}\OpenMPT; Filename: {app}\bin\arm\OpenMPT.exe; Check: CheckDefaultArch('arm')
+Name: {group}\OpenMPT; Filename: {app}\bin\arm64\OpenMPT.exe; Check: CheckDefaultArch('arm64')
 
-[INI]
-; internet shortcut
-Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String: https://forum.openmpt.org/; Flags: createkeyifdoesntexist
+Name: {group}\OpenMPT (x86); Filename: {app}\bin\x86\OpenMPT.exe; Components: archx86
+Name: {group}\OpenMPT (amd64); Filename: {app}\bin\amd64\OpenMPT.exe; Components: archamd64
+Name: {group}\OpenMPT (arm); Filename: {app}\bin\arm\OpenMPT.exe; Components: archarm
+Name: {group}\OpenMPT (arm64); Filename: {app}\bin\arm64\OpenMPT.exe; Components: archarm64
+
+Name: {group}\Manual; Filename: {app}\OpenMPT Manual.chm
+Name: {group}\Support and Community Forum; Filename: {app}\OpenMPT Support and Community Forum.url
+
+
+
+[Registry]
+
+#include "filetypes-multi-arch.iss"
+
+
 
 [Run]
-; duh
-Filename: "{app}\OMPT_{#GetAppVersionShort}_ReleaseNotes.html"; Description: "View Release Notes"; Flags: shellexec nowait postinstall skipifsilent
-Filename: {app}\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: nowait postinstall skipifsilent
+
+Filename: "{app}\OpenMPT {#GetAppVersionShort} Release Notes.html"; Description: "View Release Notes"; Flags: runasoriginaluser shellexec nowait postinstall skipifsilent
+
+Filename: {app}\bin\x86\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('x86')
+Filename: {app}\bin\amd64\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('amd64')
+Filename: {app}\bin\arm\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm')
+Filename: {app}\bin\arm64\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm64')
+
+
 
 [InstallDelete]
-; We no longer require unmo3
-Type: files; Name: {app}\unmo3.dll
-; i16 -> f32
-Type: files; Name: {app}\OpenMPT_SoundTouch_i16.dll
-; f32 -> openmpt-soundtouch.dll
-Type: files; Name: {app}\OpenMPT_SoundTouch_f32.dll
-; Old SoundTouch documents
-Type: files; Name: {app}\SoundTouch\README.html
-Type: files; Name: {app}\SoundTouch\COPYING.TXT
-Type: dirifempty; Name: {app}\SoundTouch
-; MIDI Input/Output plugin was previously shipped as separate DLL
-Type: files; Name: {app}\Plugins\MIDI\MIDI Input Output.dll
-Type: dirifempty; Name: {app}\Plugins\MIDI
-Type: dirifempty; Name: {app}\Plugins
-; PluginBridge uses arch naming now
-Type: files; Name: {app}\PluginBridge32.exe
-Type: files; Name: {app}\PluginBridge64.exe
-; mptrack got finally renamed to OpenMPT
-Type: files; Name: {app}\mptrack.exe
 
-[UninstallDelete]
-; internet shortcut has to be deleted manually
-Type: files; Name: {app}\ModPlug Central.url
-; in case mptrack.exe got recreated as a symlink
-Type: files; Name: {app}\mptrack.exe
-; normal installation
-Type: dirifempty; Name: {userappdata}\OpenMPT\Autosave
-Type: dirifempty; Name: {userappdata}\OpenMPT\TemplateModules
-Type: dirifempty; Name: {userappdata}\OpenMPT\tunings
-Type: dirifempty; Name: {userappdata}\OpenMPT\Components
-Type: dirifempty; Name: {userappdata}\OpenMPT
+; as recommended by Inno Setup manual on [Components]
+
+Type: files; Name: {app}\bin\x86\OpenMPT.exe
+Type: files; Name: {app}\bin\x86\PluginBridge-x86.exe
+Type: files; Name: {app}\bin\x86\openmpt-lame.dll
+Type: files; Name: {app}\bin\x86\openmpt-mpg123.dll
+Type: files; Name: {app}\bin\x86\openmpt-soundtouch.dll
+
+Type: files; Name: {app}\bin\amd64\OpenMPT.exe
+Type: files; Name: {app}\bin\amd64\PluginBridge-amd64.exe
+Type: files; Name: {app}\bin\amd64\openmpt-lame.dll
+Type: files; Name: {app}\bin\amd64\openmpt-mpg123.dll
+Type: files; Name: {app}\bin\amd64\openmpt-soundtouch.dll
+
+Type: files; Name: {app}\bin\arm\OpenMPT.exe
+Type: files; Name: {app}\bin\arm\PluginBridge-arm.exe
+Type: files; Name: {app}\bin\arm\openmpt-lame.dll
+Type: files; Name: {app}\bin\arm\openmpt-mpg123.dll
+Type: files; Name: {app}\bin\arm\openmpt-soundtouch.dll
+
+Type: files; Name: {app}\bin\arm64\OpenMPT.exe
+Type: files; Name: {app}\bin\arm64\PluginBridge-arm64.exe
+Type: files; Name: {app}\bin\arm64\openmpt-lame.dll
+Type: files; Name: {app}\bin\arm64\openmpt-mpg123.dll
+Type: files; Name: {app}\bin\arm64\openmpt-soundtouch.dll
+
+
+
+#include "uninstall-single-arch.iss"
+
+
 
 [Code]
-var
-    mptrackExeExisted: Boolean;
 
-// Copy old config files to the AppData directory, if there are any (and if the files don't exist already)
-procedure CopyConfigsToAppDataDir();
-var
-    adjustIniPath: Boolean;
-    keyFile: String;
-
+procedure InitializeWizard();
 begin
-
-    // OpenMPT 1.29 and later: Portable mode is indicated by file called "OpenMPT.portable"
-    DeleteFile(ExpandConstant('{app}\OpenMPT.portable'));
-
-    // Pre-1.29: If there was an INI file with portable mode flag set, we have to reset it (or else, the mptrack.ini in %appdata% will never be used!)
-    if(IniKeyExists('Paths', 'UseAppDataDirectory', ExpandConstant('{app}\mptrack.ini'))) then
-    begin
-        DeleteIniEntry('Paths', 'UseAppDataDirectory', ExpandConstant('{app}\mptrack.ini'));
-    end;
-
-    FileCopy(ExpandConstant('{app}\mptrack.ini'), ExpandConstant('{userappdata}\OpenMPT\mptrack.ini'), true);
-    FileCopy(ExpandConstant('{app}\plugin.cache'), ExpandConstant('{userappdata}\OpenMPT\plugin.cache'), true);
-    adjustIniPath := FileCopy(ExpandConstant('{app}\Keybindings.mkb'), ExpandConstant('{userappdata}\OpenMPT\Keybindings.mkb'), true);
-    adjustIniPath := adjustIniPath or FileCopy(ExpandConstant('{app}\default.mkb'), ExpandConstant('{userappdata}\OpenMPT\Keybindings.mkb'), true);
-
-    // If the keymappings moved, we might have to update the path in the INI file.
-    keyFile := GetIniString('Paths', 'Key_Config_File', '', ExpandConstant('{userappdata}\OpenMPT\mptrack.ini'));
-    if(((keyFile = ExpandConstant('{app}\Keybindings.mkb')) or (keyFile = ExpandConstant('{app}\default.mkb'))) and (adjustIniPath)) then
-    begin
-        SetIniString('Paths', 'Key_Config_File', ExpandConstant('{userappdata}\OpenMPT\Keybindings.mkb'), ExpandConstant('{userappdata}\OpenMPT\mptrack.ini'));
-    end;
-
+	WizardSelectComponents('archx86,!archamd64,!archarm,!archarm64');
+	case ProcessorArchitecture() of
+		paUnknown:
+			begin
+				WizardSelectComponents('archx86,!archamd64,!archarm,!archarm64');
+			end;
+		paX86:
+			begin
+				WizardSelectComponents('archx86,!archamd64,!archarm,!archarm64');
+			end;
+		paX64:
+			begin
+				WizardSelectComponents('archx86,archamd64,!archarm,!archarm64');
+			end;
+		paIA64:
+			begin
+				WizardSelectComponents('archx86,!archamd64,!archarm,!archarm64');
+			end;
+		paARM64:
+			begin
+				WizardSelectComponents('archx86,!archamd64,archarm,archarm64');
+			end;
+	end;
 end;
 
-function CreateSymbolicLink(lpSymlinkFileName, lpTargetFileName: string;
-  dwFlags: Integer): Boolean;
-  external 'CreateSymbolicLinkW@kernel32.dll stdcall';
-
-procedure CreateMptrackSymlink();
+function GetDefaultArch(): String;
 begin
-  if(not mptrackExeExisted) then
-  begin
-    Exit;
-  end;
+	Result := 'x86';
+	case ProcessorArchitecture() of
+		paUnknown:
+			begin
+				Result := 'x86';
+			end;
+		paX86:
+			begin
+				Result := 'x86';
+			end;
+		paX64:
+			begin
+				Result := 'amd64';
+			end;
+		paIA64:
+			begin
+				Result := 'x86';
+			end;
+		paARM64:
+			begin
+				Result := 'arm64';
+			end;
+	end;
+end;
 
-  CreateSymbolicLink(ExpandConstant('{app}\mptrack.exe'), ExpandConstant('{app}\OpenMPT.exe'), 0);
+function CodeGetDefaultArch(Param: String): String;
+begin
+	Result := GetDefaultArch();
+end;
+
+function CheckDefaultArch(Arch: String): Boolean;
+begin
+	Result := Arch = GetDefaultArch();
+end;
+
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+	Result := False;
+	case PageID of
+		wpSelectDir:
+			begin
+				Result := IsAdmin() and HasPreviousSingleArchInstallPath();
+			end;
+	end;
+	case PageID of
+		wpSelectComponents:
+			begin
+				Result := True;
+			end;
+	end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+	case CurStep of
+		ssInstall:
+			begin
+				if not UninstallSingleArch() then
+				begin
+					RaiseException('Uninstallation of previous OpenMPT installation failed. Please uninstall manually.');
+				end;
+			end;
+	end;
 end;
 
 // Picks a random example song file to play
 Function RandomExampleFile(Dummy: String): String;
 var
-    Files: TstringList;
-    FindRec: TFindRec;
+	Files: TstringList;
+	FindRec: TFindRec;
 begin
-    Result := '';
-    if FindFirst(ExpandConstant('{app}\ExampleSongs\*'), FindRec) then
-    try
-        Files := TstringList.Create;
-        repeat
-            if FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY = 0 then
-            Files.Add(FindRec.Name);
-        until not FindNext(FindRec);
-        Result := ExpandConstant('{app}\ExampleSongs\') + Files[Random(Files.Count)];
-    finally
-        FindClose(FindRec);
-    end;
+	Result := '';
+	if FindFirst(ExpandConstant('{app}\ExampleSongs\*'), FindRec) then
+	try
+		Files := TstringList.Create;
+		repeat
+			if FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY = 0 then
+			Files.Add(FindRec.Name);
+		until not FindNext(FindRec);
+		Result := ExpandConstant('{app}\ExampleSongs\') + Files[Random(Files.Count)];
+	finally
+		FindClose(FindRec);
+	end;
 end;
 
-function NextButtonClick(CurPageID: Integer): Boolean;
+function CodeGetDefaultDirName(Param: String): String;
 begin
-    case CurPageID of
-    wpSelectTasks:
-        begin
-            mptrackExeExisted := FileExists(ExpandConstant('{app}\mptrack.exe'));
-        end;
-    end;
-    Result := true;
+	if IsAdmin() and HasPreviousSingleArchInstallPath() then
+	begin
+		Result := GetPreviousSingleArchInstallPath();
+	end
+	else
+	begin
+		Result := ExpandConstant('{autopf}\OpenMPT');
+	end;
 end;
 
-procedure CurStepChanged(CurStep: TSetupStep);
-begin
-    case CurStep of
-    ssPostInstall:
-        begin
-            // Copy old config files from app's directory, if possible and necessary.
-            CopyConfigsToAppDataDir();
-            CreateMptrackSymlink();
-        end;
-    end;
-end;
 
-// Crappy workaround for uninstall stuff
-procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
-var
-    filepath: String;
-
-begin
-    case CurUninstallStep of
-    usUninstall:
-        begin
-            if UninstallSilent() then
-            begin
-                // Keep user settings if uninstalling silently
-                Exit;
-            end;
-            if MsgBox('Do you want to keep your OpenMPT settings files (mptrack.ini, SongSettings.ini, Keybindings.mkb, plugin.cache and local_tunings.tc)?', mbConfirmation, MB_YESNO or MB_DEFBUTTON1) = IDNO then
-            begin
-                if(GetIniInt('Paths', 'UseAppDataDirectory', 1, 0, 0, ExpandConstant('{app}\mptrack.ini')) = 1) then
-                begin
-                    filepath := ExpandConstant('{userappdata}\OpenMPT\');
-                end else
-                    filepath := ExpandConstant('{app}\');
-                begin
-                end;
-                DeleteFile(filepath + 'mptrack.ini');
-                DeleteFile(filepath + 'SongSettings.ini');
-                DeleteFile(filepath + 'Keybindings.mkb');
-                DeleteFile(filepath + 'plugin.cache');
-                DeleteFile(filepath + 'tunings\local_tunings.tc');
-                DelTree(filepath + 'Autosave\*.Autosave.*', False, True, False);
-
-                filepath := GetTempDir();
-                if(filepath <> '') then
-                begin
-                  filepath := filepath + 'OpenMPT Crash Files\';
-                  DelTree(filepath, True, True, True);
-                end;
-            end;
-        end;
-    end;
-end;

@@ -38,6 +38,12 @@
 #define VER_FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
 #define VER_FILEFLAGS       (VER_DEBUG|VER_PRERELEASE)
 
+#ifdef VER_ARCHNAME
+#define VER_FILEDESCRIPTION "OpenMPT (" VER_ARCHNAME ")"
+#else
+#define VER_FILEDESCRIPTION "OpenMPT"
+#endif
+
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION      VER_FILEVERSION
  PRODUCTVERSION   VER_FILEVERSION
@@ -51,14 +57,13 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName",      "Olivier Lapicque / OpenMPT team"
-            VALUE "FileDescription",  "OpenMPT / ModPlug Tracker"
+            VALUE "CompanyName",      "OpenMPT Developers"
+            VALUE "FileDescription",  VER_FILEDESCRIPTION
             VALUE "FileVersion",      VER_FILEVERSION_STR
-            VALUE "InternalName",     "ModPlug Tracker"
-            VALUE "LegalCopyright",   "Copyright ©1997-2003 Olivier Lapicque; ©2004-2020 contributors."
-            VALUE "LegalTrademarks",  "M.O.D.P.L.U.G"
+            VALUE "InternalName",     "OpenMPT"
+            VALUE "LegalCopyright",   "Copyright © 1997-2003 Olivier Lapicque; © 2004-2020 OpenMPT Developers."
             VALUE "OriginalFilename", "OpenMPT.exe"
-            VALUE "ProductName",      "OpenMPT / ModPlug Tracker"
+            VALUE "ProductName",      "OpenMPT"
             VALUE "ProductVersion",   VER_FILEVERSION_STR
         END
     END

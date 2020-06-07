@@ -32,6 +32,15 @@
 			spectremitigations "On"
 		end
 	filter {}
+	filter { "action:vs*", "architecture:x86" }
+		resdefines { "VER_ARCHNAME=\"x86\"" }
+	filter { "action:vs*", "architecture:x86_64" }
+		resdefines { "VER_ARCHNAME=\"amd64\"" }
+	filter { "action:vs*", "architecture:ARM" }
+		resdefines { "VER_ARCHNAME=\"arm\"" }
+	filter { "action:vs*", "architecture:ARM64" }
+		resdefines { "VER_ARCHNAME=\"arm64\"" }
+	filter {}
 
   filter { "kind:StaticLib", "configurations:Debug", "architecture:x86" }
    targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/Debug" )
