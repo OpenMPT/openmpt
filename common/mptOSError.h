@@ -89,6 +89,35 @@ public:
 };
 
 
+inline HANDLE CheckFileHANDLE(HANDLE handle)
+{
+	if(handle == INVALID_HANDLE_VALUE)
+	{
+		throw Windows::Error(::GetLastError());
+	}
+	return handle;
+}
+
+
+inline HANDLE CheckHANDLE(HANDLE handle)
+{
+	if(handle == NULL)
+	{
+		throw Windows::Error(::GetLastError());
+	}
+	return handle;
+}
+
+
+inline void CheckBOOL(BOOL result)
+{
+	if(result == FALSE)
+	{
+		throw Windows::Error(::GetLastError());
+	}
+}
+
+
 } // namespace Windows
 
 #endif // MPT_OS_WINDOWS
