@@ -12,8 +12,12 @@
 #include "FileReader.h"
 
 #if defined(MPT_ENABLE_TEMPFILE) && MPT_OS_WINDOWS
-#include <windows.h>
 #include "mptFileIO.h"
+#include "mptOSError.h"
+#endif // MPT_ENABLE_TEMPFILE && MPT_OS_WINDOWS
+
+#if defined(MPT_ENABLE_TEMPFILE) && MPT_OS_WINDOWS
+#include <windows.h>
 #endif // MPT_ENABLE_TEMPFILE && MPT_OS_WINDOWS
 
 
@@ -44,7 +48,7 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 			mpt::ofstream f(tempName, std::ios::binary);
 			if(!f)
 			{
-				throw std::runtime_error("");
+				throw std::runtime_error("Error creating temporary file.");
 			}
 			while(!file.EndOfFile())
 			{
@@ -58,7 +62,7 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 					chunkOk = mpt::IO::WriteRaw(f, mpt::const_byte_span(view.data() + written, chunkSize));
 					if(!chunkOk)
 					{
-						throw std::runtime_error("");
+						throw std::runtime_error("Incomplete Write.");
 					}
 					towrite -= chunkSize;
 					written += chunkSize;
@@ -70,14 +74,10 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 
 			HANDLE hFile = NULL;
 			#if MPT_OS_WINDOWS_WINRT
-				hFile = CreateFile2(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, NULL);
+				hFile = Windows::CheckFileHANDLE(CreateFile2(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, NULL));
 			#else
-				hFile = CreateFile(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
+				hFile = Windows::CheckFileHANDLE(CreateFile(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
 			#endif
-			if(hFile == NULL || hFile == INVALID_HANDLE_VALUE)
-			{
-				throw std::runtime_error("");
-			}
 			while(!file.EndOfFile())
 			{
 				FileReader::PinnedRawDataView view = file.ReadPinnedRawDataView(mpt::IO::BUFFERSIZE_NORMAL);
@@ -87,12 +87,20 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 				{
 					DWORD chunkSize = mpt::saturate_cast<DWORD>(towrite);
 					DWORD chunkDone = 0;
-					WriteFile(hFile, view.data() + written, chunkSize, &chunkDone, NULL);
+					try
+					{
+						Windows::CheckBOOL(WriteFile(hFile, view.data() + written, chunkSize, &chunkDone, NULL));
+					} catch(...)
+					{
+						CloseHandle(hFile);
+						hFile = NULL;
+						throw;
+					}
 					if(chunkDone != chunkSize)
 					{
 						CloseHandle(hFile);
 						hFile = NULL;
-						throw std::runtime_error("");
+						throw std::runtime_error("Incomplete WriteFile().");
 					}
 					towrite -= chunkDone;
 					written += chunkDone;
