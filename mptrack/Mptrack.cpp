@@ -564,16 +564,19 @@ void CTrackApp::SetupPaths(bool overridePortable)
 		m_InstallPath = mpt::GetAbsolutePath(exePath + P_("..\\") + P_("..\\") + P_("..\\") + P_("..\\"));
 		m_InstallBinPath = mpt::GetAbsolutePath(exePath + P_("..\\"));
 		m_InstallBinArchPath = exePath;
+		m_InstallPkgPath = mpt::GetAbsolutePath(exePath + P_("..\\") + P_("..\\") + P_("..\\") + P_("..\\packageTemplate\\"));
 	} else if(modeMultiArch)
 	{
 		m_InstallPath = mpt::GetAbsolutePath(exePath + P_("..\\") + P_("..\\"));
 		m_InstallBinPath = mpt::GetAbsolutePath(exePath + P_("..\\"));
 		m_InstallBinArchPath = exePath;
+		m_InstallPkgPath = mpt::GetAbsolutePath(exePath + P_("..\\") + P_("..\\"));
 	} else
 	{
 		m_InstallPath = exePath;
 		m_InstallBinPath = exePath;
 		m_InstallBinArchPath = exePath;
+		m_InstallPkgPath = exePath;
 	}
 
 	// Determine paths, portable mode, first run. Do not yet update any state.
@@ -642,10 +645,6 @@ void CTrackApp::CreatePaths()
 	if(!(GetConfigPath() + P_("Components\\") + BuildVariants::GetComponentArch()).IsDirectory())
 	{
 		CreateDirectory((GetConfigPath() + P_("Components\\") + BuildVariants::GetComponentArch()).AsNative().c_str(), 0);
-	}
-	if(!(GetConfigPath() + P_("More Keymaps")).FileOrDirectoryExists())
-	{
-		CreateShellFolderLink(GetConfigPath() + P_("More Keymaps"), GetInstallPath() + P_("packageTemplate\\extraKeymaps"));
 	}
 
 	// Handle updates from old versions.

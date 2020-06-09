@@ -715,6 +715,7 @@ void COptionsKeyboard::OnLoad()
 	               .DefaultExtension("mkb")
 	               .DefaultFilename(m_fullPathName)
 	               .ExtensionFilter("OpenMPT Key Bindings (*.mkb)|*.mkb||")
+	               .AddPlace(theApp.GetInstallPkgPath() + P_("extraKeymaps"))
 	               .WorkingDirectory(TrackerSettings::Instance().m_szKbdFile);
 	if(!dlg.Show(this))
 		return;

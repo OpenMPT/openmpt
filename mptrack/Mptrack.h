@@ -140,6 +140,7 @@ protected:
 	mpt::PathString m_InstallPath;         // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)
 	mpt::PathString m_InstallBinPath;      // i.e. "C:\Program Files\OpenMPT\bin\" (multi-arch mode) or InstallPath (legacy mode)
 	mpt::PathString m_InstallBinArchPath;  // i.e. "C:\Program Files\OpenMPT\bin\amd64\" (multi-arch mode) or InstallPath (legacy mode)
+	mpt::PathString m_InstallPkgPath;      // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)
 
 	mpt::PathString m_ConfigPath;  // InstallPath (portable mode) or "%AppData%\OpenMPT\"
 
@@ -167,6 +168,7 @@ public:
 	mpt::PathString GetInstallPath() const { return m_InstallPath; }                // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)
 	mpt::PathString GetInstallBinPath() const { return m_InstallBinPath; }          // i.e. "C:\Program Files\OpenMPT\bin\" (multi-arch mode) or InstallPath (legacy mode)
 	mpt::PathString GetInstallBinArchPath() const { return m_InstallBinArchPath; }  // i.e. "C:\Program Files\OpenMPT\bin\amd64\" (multi-arch mode) or InstallPath (legacy mode)
+	mpt::PathString GetInstallPkgPath() const { return m_InstallPkgPath; }          // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)
 
 	static MODTYPE GetDefaultDocType() { return m_nDefaultDocType; }
 	static void SetDefaultDocType(MODTYPE n) { m_nDefaultDocType = n; }
