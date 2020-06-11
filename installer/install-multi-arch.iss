@@ -122,6 +122,7 @@ Source: ..\packageTemplate\ReleaseNotesImages\{#GetAppVersionShort}\*.*; DestDir
 Source: ..\packageTemplate\OMPT_{#GetAppVersionShort}_ReleaseNotes.html; DestName: OpenMPT {#GetAppVersionShort} Release Notes.html; DestDir: {app}; Flags: ignoreversion
 
 Source: ..\packageTemplate\OpenMPT Support and Community Forum.url; DestDir: {app}; Flags: ignoreversion
+Source: ..\packageTemplate\OpenMPT Issue Tracker.url; DestDir: {app}; Flags: ignoreversion
 
 Source: ..\packageTemplate\License.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\Licenses\*.*; DestDir: {app}\Licenses; Flags: ignoreversion

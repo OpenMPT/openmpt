@@ -116,6 +116,7 @@ Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenMPT; Filename: 
 [INI]
 ; internet shortcut
 Filename: {app}\OpenMPT Support and Community Forum.url; Section: InternetShortcut; Key: URL; String: https://forum.openmpt.org/; Flags: createkeyifdoesntexist
+Filename: {app}\OpenMPT Issue Tracker.url; Section: InternetShortcut; Key: URL; String: https://bugs.openmpt.org/; Flags: createkeyifdoesntexist
 
 [Run]
 ; duh
@@ -147,7 +148,8 @@ Type: files; Name: {app}\ModPlug Central.url
 
 [UninstallDelete]
 ; internet shortcut has to be deleted manually
-Type: files; Name: {app}\ModPlug Central.url
+Type: files; Name: {app}\OpenMPT Support and Community Forum.url
+Type: files; Name: {app}\OpenMPT Issue Tracker.url
 ; in case mptrack.exe got recreated as a symlink
 Type: files; Name: {app}\mptrack.exe
 ; normal installation
