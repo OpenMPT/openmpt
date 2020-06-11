@@ -100,7 +100,7 @@ def copy_other(to_path, openmpt_version_short):
     copy_tree("packageTemplate/", to_path, "Licenses")
     copy_file("packageTemplate/", to_path, "History.txt")
     copy_file("packageTemplate/", to_path, "License.txt")
-    copy_file("packageTemplate/", to_path, "ModPlug Central.url")
+    copy_file("packageTemplate/", to_path, "OpenMPT Support and Community Forum.url")
     copy_file("packageTemplate/", to_path, "mpt.ico")
     copy_file("packageTemplate/", to_path, "OMPT_" + openmpt_version_short + "_ReleaseNotes.html")
     copy_file("packageTemplate/", to_path, "OpenMPT Manual.chm")

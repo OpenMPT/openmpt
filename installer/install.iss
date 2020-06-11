@@ -115,7 +115,7 @@ Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\OpenMPT; Filename: 
 
 [INI]
 ; internet shortcut
-Filename: {app}\ModPlug Central.url; Section: InternetShortcut; Key: URL; String: https://forum.openmpt.org/; Flags: createkeyifdoesntexist
+Filename: {app}\OpenMPT Support and Community Forum.url; Section: InternetShortcut; Key: URL; String: https://forum.openmpt.org/; Flags: createkeyifdoesntexist
 
 [Run]
 ; duh
@@ -142,6 +142,8 @@ Type: files; Name: {app}\PluginBridge32.exe
 Type: files; Name: {app}\PluginBridge64.exe
 ; mptrack got finally renamed to OpenMPT
 Type: files; Name: {app}\mptrack.exe
+;
+Type: files; Name: {app}\ModPlug Central.url
 
 [UninstallDelete]
 ; internet shortcut has to be deleted manually
