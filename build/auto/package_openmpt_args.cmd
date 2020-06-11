@@ -31,7 +31,7 @@ del /f /q openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%.%MPT_PKG_FORMAT%
 del /f /q openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%-symbols.%MPT_PKG_FORMAT_SYMBOLS%
 mkdir openmpt-%MPT_DIST_VARIANT_TRK%
 cd openmpt-%MPT_DIST_VARIANT_TRK% || goto error
-copy /y ..\..\LICENSE .\LICENSE.txt || goto error
+copy /y ..\..\LICENSE .\License.txt || goto error
 rmdir /s /q Licenses
 mkdir Licenses
 copy /y ..\..\packageTemplate\Licenses\*.* .\Licenses\ || goto error
@@ -52,7 +52,7 @@ copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\amd64\PluginBridge-amd64.pdb .\ || goto error
 copy /y ..\..\bin\%MPT_BIN_CONF%\%MPT_VS_VER%-%MPT_BIN_TARGET%-%MPT_BIN_RUNTIME%\%MPT_BIN_ARCH_TRK%\openmpt-wine-support.zip .\ || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 ..\openmpt\bin.%MPT_DIST_VARIANT_TRK%\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\openmpt-%MPT_DIST_VARIANT_TRK%-%MPT_REVISION%.%MPT_PKG_FORMAT% ^
- LICENSE.txt ^
+ License.txt ^
  Licenses ^
  OpenMPT%MPT_VS_FLAVOUR%.exe ^
  openmpt-lame.dll ^
