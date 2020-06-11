@@ -42,7 +42,7 @@ Quick Start {#quickstart}
 
  1. Get dependencies:
      -  **GNU make**
-     -  **gcc >= 5.1** or **clang >= 3.8**
+     -  **gcc >= 7.1** or **clang >= 5**
      -  **pkg-config**
      -  **zlib**
      -  **libogg**, **libvorbis**, **libvorbisfile**
