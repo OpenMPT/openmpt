@@ -110,7 +110,7 @@ Root: HKCR; Subkey: ".wow"; ValueType: string; ValueName: ""; ValueData: "OpenMP
 ; important (setup)
 Root: HKCR; Subkey: "OpenMPTFile"; ValueType: string; ValueName: ""; ValueData: "OpenMPT Module"; Flags: uninsdeletekey; Tasks: associate_common or associate_exotic or not portable
 Root: HKCR; SubKey: "OpenMPTFile"; ValueType: string; ValueName: "PerceivedType"; ValueData: "audio"; Tasks: associate_common or associate_exotic or not portable
-Root: HKCR; Subkey: "OpenMPTFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\mpt.ico,0"; Tasks: associate_common or associate_exotic or not portable
+Root: HKCR; Subkey: "OpenMPTFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\OpenMPT File Icon.ico,0"; Tasks: associate_common or associate_exotic or not portable
 Root: HKCR; Subkey: "OpenMPTFile\shell\Open"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: associate_common or associate_exotic or not portable
 Root: HKCR; Subkey: "OpenMPTFile\shell\Open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\OpenMPT.exe"" /shared ""%1"""; Tasks: associate_common or associate_exotic or not portable
 ; remove DDE action if it still exists from OpenMPT 1.27 or earlier
@@ -238,4 +238,4 @@ Root: HKLM; Subkey: "Software\Classes\Applications\mptrack.exe"; ValueType: none
 
 [Files]
 ; icon file (should be moved into EXE)
-Source: "..\packageTemplate\mpt.ico";            DestDir: "{app}"; Flags: ignoreversion
+Source: "..\packageTemplate\OpenMPT File Icon.ico"; DestDir: "{app}"; Flags: ignoreversion

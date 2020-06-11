@@ -144,6 +144,8 @@ Type: files; Name: {app}\PluginBridge64.exe
 Type: files; Name: {app}\mptrack.exe
 ;
 Type: files; Name: {app}\ModPlug Central.url
+;
+Type: files; Name: {app}\mpt.ico
 
 [UninstallDelete]
 ; internet shortcut has to be deleted manually

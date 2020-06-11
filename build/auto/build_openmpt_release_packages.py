@@ -97,7 +97,7 @@ def copy_other(to_path, openmpt_version_short):
     copy_file("packageTemplate/", to_path, "License.txt")
     copy_file("packageTemplate/", to_path, "OpenMPT Issue Tracker.url")
     copy_file("packageTemplate/", to_path, "OpenMPT Support and Community Forum.url")
-    copy_file("packageTemplate/", to_path, "mpt.ico")
+    copy_file("packageTemplate/", to_path, "OpenMPT Fie Icon.ico")
     copy_file("packageTemplate/", to_path, "Release Notes.html")
     copy_file("packageTemplate/", to_path, "OpenMPT Manual.chm")
     copy_file("packageTemplate/", to_path, "readme.txt")
