@@ -117,9 +117,8 @@ Source: packageTemplate\readme.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\History.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\OpenMPT Manual.chm; DestDir: {app}; Flags: ignoreversion
 
-Source: ..\packageTemplate\ReleaseNotesImages\general\*.*; DestDir: {app}\ReleaseNotesImages\general\; Flags: ignoreversion
-Source: ..\packageTemplate\ReleaseNotesImages\{#GetAppVersionShort}\*.*; DestDir: {app}\ReleaseNotesImages\{#GetAppVersionShort}\; Flags: ignoreversion
-Source: ..\packageTemplate\OMPT_{#GetAppVersionShort}_ReleaseNotes.html; DestName: OpenMPT {#GetAppVersionShort} Release Notes.html; DestDir: {app}; Flags: ignoreversion
+Source: ..\packageTemplate\ReleaseNotesImages\*.*; DestDir: {app}\ReleaseNotesImages\; Flags: ignoreversion
+Source: ..\packageTemplate\Release Notes.html; DestDir: {app}; Flags: ignoreversion
 
 Source: ..\packageTemplate\OpenMPT Support and Community Forum.url; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\OpenMPT Issue Tracker.url; DestDir: {app}; Flags: ignoreversion
@@ -161,7 +160,7 @@ Name: {group}\Support and Community Forum; Filename: {app}\OpenMPT Support and C
 
 [Run]
 
-Filename: "{app}\OpenMPT {#GetAppVersionShort} Release Notes.html"; Description: "View Release Notes"; Flags: runasoriginaluser shellexec nowait postinstall skipifsilent
+Filename: "{app}\Release Notes.html"; Description: "View Release Notes"; Flags: runasoriginaluser shellexec nowait postinstall skipifsilent
 
 Filename: {app}\bin\x86\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('x86')
 Filename: {app}\bin\amd64\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('amd64')

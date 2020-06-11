@@ -77,9 +77,8 @@ Source: ..\packageTemplate\History.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\OpenMPT Manual.chm; DestDir: {app}; Flags: ignoreversion
 
 ; release notes
-Source: ..\packageTemplate\ReleaseNotesImages\general\*.*; DestDir: {app}\ReleaseNotesImages\general\; Flags: ignoreversion sortfilesbyextension
-Source: ..\packageTemplate\ReleaseNotesImages\{#GetAppVersionShort}\*.*; DestDir: {app}\ReleaseNotesImages\{#GetAppVersionShort}\; Flags: ignoreversion sortfilesbyextension
-Source: ..\packageTemplate\OMPT_{#GetAppVersionShort}_ReleaseNotes.html; DestDir: {app}; Flags: ignoreversion
+Source: ..\packageTemplate\ReleaseNotesImages\*.*; DestDir: {app}\ReleaseNotesImages\; Flags: ignoreversion sortfilesbyextension
+Source: ..\packageTemplate\Release Notes.html; DestDir: {app}; Flags: ignoreversion
 
 ; license stuff
 Source: ..\packageTemplate\License.txt; DestDir: {app}; Flags: ignoreversion
@@ -120,7 +119,7 @@ Filename: {app}\OpenMPT Issue Tracker.url; Section: InternetShortcut; Key: URL; 
 
 [Run]
 ; duh
-Filename: "{app}\OMPT_{#GetAppVersionShort}_ReleaseNotes.html"; Description: "View Release Notes"; Flags: shellexec runasoriginaluser nowait postinstall skipifsilent
+Filename: "{app}\Release Notes.html"; Description: "View Release Notes"; Flags: shellexec runasoriginaluser nowait postinstall skipifsilent
 Filename: {app}\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent
 
 [InstallDelete]
