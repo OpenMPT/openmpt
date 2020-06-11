@@ -1421,30 +1421,40 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEIND
 					// Arpeggio is added on top of current note, but cannot do it the IT way because of
 					// the behaviour in ArpeggioClamp.xm.
 					// Test case: ArpSlide.xm
-					auto note = GetNoteFromPeriod(period, pChn->nFineTune, pChn->nC5Speed);
+					uint32 note = 0;
 
 					// The fact that arpeggio behaves in a totally fucked up way at 16 ticks/row or more is that the arpeggio offset LUT only has 16 entries in FT2.
 					// At more than 16 ticks/row, FT2 reads into the vibrato table, which is placed right after the arpeggio table.
 					// Test case: Arpeggio.xm
 					int arpPos = m_PlayState.m_nMusicSpeed - (m_PlayState.m_nTickCount % m_PlayState.m_nMusicSpeed);
-					if(arpPos > 16) arpPos = 2;
-					else if(arpPos == 16) arpPos = 0;
-					else arpPos %= 3;
+					if(arpPos > 16)
+						arpPos = 2;
+					else if(arpPos == 16)
+						arpPos = 0;
+					else
+						arpPos %= 3;
 					switch(arpPos)
 					{
-					case 1: note += (pChn->nArpeggio >> 4); break;
-					case 2: note += (pChn->nArpeggio & 0x0F); break;
+					case 1: note = (pChn->nArpeggio >> 4); break;
+					case 2: note = (pChn->nArpeggio & 0x0F); break;
 					}
 
-					period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
-
-					// FT2 compatibility: FT2 has a different note limit for Arpeggio.
-					// Test case: ArpeggioClamp.xm
-					if(note >= 108 + NOTE_MIN && arpPos != 0)
+					if(arpPos != 0)
 					{
-						period = std::max<uint32>(period, GetPeriodFromNote(108 + NOTE_MIN, 0, pChn->nC5Speed));
-					}
+						// Arpeggio is added on top of current note, but cannot do it the IT way because of
+						// the behaviour in ArpeggioClamp.xm.
+						// Test case: ArpSlide.xm
+						note += GetNoteFromPeriod(period, pChn->nFineTune, pChn->nC5Speed);
 
+						period = GetPeriodFromNote(note, pChn->nFineTune, pChn->nC5Speed);
+
+						// FT2 compatibility: FT2 has a different note limit for Arpeggio.
+						// Test case: ArpeggioClamp.xm
+						if(note >= 108 + NOTE_MIN)
+						{
+							period = std::max(static_cast<uint32>(period), GetPeriodFromNote(108 + NOTE_MIN, 0, pChn->nC5Speed));
+						}
+					}
 				}
 			}
 			// Other trackers
