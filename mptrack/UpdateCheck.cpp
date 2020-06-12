@@ -32,9 +32,9 @@ OPENMPT_NAMESPACE_BEGIN
 class UpdateDialog : public CDialog
 {
 protected:
-	const CString &m_releaseVersion;
-	const CString &m_releaseDate;
-	const CString &m_releaseURL;
+	const CString m_releaseVersion;
+	const CString m_releaseDate;
+	const CString m_releaseURL;
 	CFont m_boldFont;
 
 public:
