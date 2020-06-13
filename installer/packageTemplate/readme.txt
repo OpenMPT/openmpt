@@ -1,42 +1,38 @@
-Open ModPlug Tracker
-====================
+
+OpenMPT / Open ModPlug Tracker
+==============================
 
 
 Uninstallation
 --------------
 
-An uninstaller is provided. It will ask you if you want to keep your personal
-settings, none of these will be deleted automatically.
-Custom files that are created by the user (e.g. key bindings) will never be
-removed.
+An uninstaller is provided. It will not delete your personal settings or files
+you created.
 
 
-Detailed help and documentation
--------------------------------
+What's New in this Version?
+---------------------------
 
-...can be found in OpenMPT Manual.chm.
-
-
-Changes in this version
------------------------
-
-...can be found in History.txt.
+Major changes in the current version are listed in [Release Notes.html] and a
+detailed list of changes for all versions can be found in [History.txt].
 
 
-Questions, comments, bug reports...
------------------------------------
+More Information
+----------------
 
-For help and general talk, visit our forums at https://forum.openmpt.org/.
-If you found a bug or want to request a new feature, you can do so at our issue
-tracker at https://bugs.openmpt.org/
+The user manual can be found in [OpenMPT Manual.chm]. Further questions can be
+asked in the [OpenMPT Support and Community Forum](https://forum.openmpt.org/).
+Please report any bugs or request new features in the
+[OpenMPT Issue Tracker](https://bugs.openmpt.org/).
 
 
 License
 -------
 
-OpenMPT is released under the 3-clause BSD license. See License.txt for details.
-OpenMPT uses various other open source projects.
-Their respective license information can be found in the Licenses folder.
+OpenMPT is released under the 3-clause BSD license. See [License.txt] for
+details. OpenMPT uses various other open source projects. Their respective
+license information can be found in the [Licenses] folder.
 
-ASIO is a trademark and software of Steinberg Media Technologies GmbH
-VST is a trademark of Steinberg Media Technologies GmbH
+ASIO is a trademark and software of Steinberg Media Technologies GmbH.
+
+VST is a trademark of Steinberg Media Technologies GmbH.
