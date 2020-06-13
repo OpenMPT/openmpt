@@ -60,12 +60,15 @@ Package contents
 * OpenMPT.exe: Main executable.
 * PluginBridge-x86.exe: Plugin bridge server for 32-bit (x86) VST plugins.
 * PluginBridge-amd64.exe: Plugin bridge server for 64-bit (amd64) VST plugins.
-* OpenMPT_SoundTouch_f32.dll: SoundTouch library used for time stretching.
 * readme.txt: This document.
 * openmpt-lame.dll: MP3 encoder for stream export.
 * openmpt-mpg123.dll: MPEG sample import support.
+* openmpt-soundtouch.dll: SoundTouch library used for time stretching.
 * openmpt-wine-support.zip: Optional component for sound device integration into Wine on Linux systems
 * OMPT_1.29_ReleaseNotes.html: Release notes for this version.
+* mpt.ico: Icon for files associated with OpenMPT.
+* OpenMPT.portable: Marker file to indicate this as a portable folder of OpenMPT.
+* OpenMPT Manual.chm: The OpenMPT documentation.
 
 
 License
