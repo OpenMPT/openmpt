@@ -203,7 +203,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, MiscCacheCompleteFileBeforeLoading(conf, U_("Misc"), U_("CacheCompleteFileBeforeLoading"), false)
 	// Sound Settings
 	, m_SoundShowRecordingSettings(false)
-	, m_SoundShowDeprecatedDevices(conf, U_("Sound Settings"), U_("ShowDeprecatedDevices"), true)
+	, m_SoundShowDeprecatedDevices(conf, U_("Sound Settings"), U_("ShowDeprecatedDevices"), false)
 	, m_SoundDeprecatedDeviceWarningShown(conf, U_("Sound Settings"), U_("DeprecatedDeviceWarningShown"), false)
 	, m_SoundSampleRates(conf, U_("Sound Settings"), U_("SampleRates"), GetDefaultSampleRates())
 	, m_SoundSettingsOpenDeviceAtStartup(conf, U_("Sound Settings"), U_("OpenDeviceAtStartup"), false)
