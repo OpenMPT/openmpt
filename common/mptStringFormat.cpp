@@ -331,6 +331,10 @@ static inline Tstring PostProcessDigits(Tstring str, const FormatSpec & format)
 	return str;
 }
 
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4723) // potential divide by 0
+#endif // MPT_COMPILER_MSVC
 template<typename Tstring>
 static inline Tstring PostProcessGroup(Tstring str, const FormatSpec & format)
 {
@@ -352,6 +356,9 @@ static inline Tstring PostProcessGroup(Tstring str, const FormatSpec & format)
 	}
 	return str;
 }
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 
 #if MPT_FORMAT_CXX17_INT
 
