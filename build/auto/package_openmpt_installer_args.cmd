@@ -19,6 +19,7 @@ set MPT_REVISION=%OPENMPT_VERSION%-%SVNVERSION%
 
 cd bin || goto error
 rmdir /s /q openmpt
+del /f /q openmpt-pkg.win.tar
 mkdir openmpt
 mkdir openmpt\pkg.win
 mkdir openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%
