@@ -37,7 +37,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\pluginBridge\PluginBridge.manifest">
+    <None Include="..\..\pluginBridge\PluginBridge-win7.manifest">
       <Filter>pluginBridge</Filter>
     </None>
   </ItemGroup>

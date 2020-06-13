@@ -563,7 +563,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -595,7 +595,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -625,7 +625,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -656,7 +656,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -695,7 +695,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -734,7 +734,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -771,7 +771,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -809,7 +809,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -848,7 +848,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -887,7 +887,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -924,7 +924,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -962,7 +962,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -994,7 +994,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1027,7 +1027,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1058,7 +1058,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1090,7 +1090,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1129,7 +1129,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1168,7 +1168,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1205,7 +1205,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1243,7 +1243,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1282,7 +1282,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1321,7 +1321,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1358,7 +1358,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1396,7 +1396,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../pluginBridge/PluginBridge-win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1414,7 +1414,7 @@
     <ClCompile Include="..\..\pluginBridge\Bridge.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\pluginBridge\PluginBridge.manifest" />
+    <None Include="..\..\pluginBridge\PluginBridge-win10.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\pluginBridge\PluginBridge.rc" />

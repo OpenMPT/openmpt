@@ -1657,7 +1657,7 @@
     <None Include="..\..\mptrack\res\NODROP.CUR">
       <Filter>mptrack\res</Filter>
     </None>
-    <None Include="..\..\mptrack\res\OpenMPT.manifest">
+    <None Include="..\..\mptrack\res\OpenMPT-win7.manifest">
       <Filter>mptrack\res</Filter>
     </None>
     <None Include="..\..\mptrack\res\defaultKeybindings.mkb">

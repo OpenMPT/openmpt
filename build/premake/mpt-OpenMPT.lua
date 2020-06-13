@@ -57,9 +57,15 @@ end
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }
-  files {
-   "../../mptrack/res/OpenMPT.manifest",
-  }
+	if _OPTIONS["win10"] then
+		files {
+			"../../mptrack/res/OpenMPT-win10.manifest",
+		}
+	else
+		files {
+			"../../mptrack/res/OpenMPT-win7.manifest",
+		}
+	end
   files {
    "../../include/asiomodern/include/ASIOModern/*.hpp",
    "../../common/*.cpp",
@@ -96,6 +102,15 @@ end
    "../../mptrack/mptrack.rc",
    "../../mptrack/res/*.*", -- resource data files
   }
+	if _OPTIONS["win10"] then
+		excludes {
+			"../../mptrack/res/OpenMPT-win7.manifest",
+		}
+	else
+		excludes {
+			"../../mptrack/res/OpenMPT-win10.manifest",
+		}
+	end
 
 	defines { "MPT_BUILD_ENABLE_PCH" }
 	pchsource "../../build/pch/PCH.cpp"

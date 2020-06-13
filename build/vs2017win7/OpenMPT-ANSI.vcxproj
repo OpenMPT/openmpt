@@ -309,7 +309,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT-win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -342,7 +342,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT-win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -383,7 +383,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT-win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -423,7 +423,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT-win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -464,7 +464,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT-win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -504,7 +504,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT-win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -538,7 +538,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT-win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -572,7 +572,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT-win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -613,7 +613,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT-win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -653,7 +653,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT-win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -694,7 +694,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT-win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -734,7 +734,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../mptrack/res/OpenMPT-win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1274,7 +1274,7 @@
     <None Include="..\..\mptrack\res\MPTRACK.ICO" />
     <None Include="..\..\mptrack\res\MPTRACK.RC2" />
     <None Include="..\..\mptrack\res\NODROP.CUR" />
-    <None Include="..\..\mptrack\res\OpenMPT.manifest" />
+    <None Include="..\..\mptrack\res\OpenMPT-win7.manifest" />
     <None Include="..\..\mptrack\res\defaultKeybindings.mkb" />
     <None Include="..\..\mptrack\res\moddoc.ico" />
     <None Include="..\..\mptrack\res\nodrag.cur" />

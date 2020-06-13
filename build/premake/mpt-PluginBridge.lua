@@ -31,9 +31,15 @@
   files {
    "../../pluginBridge/PluginBridge.rc",
   }
-  files {
-   "../../pluginBridge/PluginBridge.manifest",
-  }
+	if _OPTIONS["win10"] then
+		files {
+			"../../pluginBridge/PluginBridge-win10.manifest",
+		}
+	else
+		files {
+			"../../pluginBridge/PluginBridge-win7.manifest",
+		}
+	end
   defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
   largeaddressaware ( true )
