@@ -70,10 +70,12 @@ openmpt_zip_x86_basepath = "installer/OpenMPT-" + openmpt_version + "-x86/"
 openmpt_zip_amd64_basepath = "installer/OpenMPT-" + openmpt_version + "-amd64/"
 openmpt_zip_arm_basepath = "installer/OpenMPT-" + openmpt_version + "-arm/"
 openmpt_zip_arm64_basepath = "installer/OpenMPT-" + openmpt_version + "-arm64/"
+openmpt_zip_symbols_basepath = "installer/OpenMPT-" + openmpt_version + "-symbols/"
 openmpt_zip_x86_path = openmpt_zip_x86_basepath + openmpt_version_name + "/"
 openmpt_zip_amd64_path = openmpt_zip_amd64_basepath + openmpt_version_name + "/"
 openmpt_zip_arm_path = openmpt_zip_arm_basepath + openmpt_version_name + "/"
 openmpt_zip_arm64_path = openmpt_zip_arm64_basepath + openmpt_version_name + "/"
+openmpt_zip_symbols_path = openmpt_zip_symbols_basepath + openmpt_version_name + "/"
 
 def copy_file(from_path, to_path, filename):
     shutil.copyfile(from_path + filename, to_path + filename)
@@ -91,6 +93,16 @@ def copy_binaries(from_path, to_path):
 
 def copy_pluginbridge(from_path, arch, to_path):
     copy_file(from_path + arch + "/", to_path, "PluginBridge-" + arch + ".exe")
+
+def copy_symbols(from_path, to_path):
+    os.makedirs(to_path)
+    copy_file(from_path, to_path, "OpenMPT.pdb")
+    copy_file(from_path, to_path, "openmpt-lame.pdb")
+    copy_file(from_path, to_path, "openmpt-mpg123.pdb")
+    copy_file(from_path, to_path, "openmpt-soundtouch.pdb")
+
+def copy_symbols_pluginbridge(from_path, to_path, arch):
+    copy_file(from_path, to_path, "PluginBridge-" + arch + ".pdb")
 
 def copy_other(to_path, openmpt_version_short):
     copy_tree("packageTemplate/", to_path, "ExampleSongs")
@@ -110,17 +122,20 @@ remove_dir(openmpt_zip_x86_basepath)
 remove_dir(openmpt_zip_amd64_basepath)
 remove_dir(openmpt_zip_arm_basepath)
 remove_dir(openmpt_zip_arm64_basepath)
+remove_dir(openmpt_zip_symbols_basepath)
 
 remove_file("installer/" + openmpt_version_name + "-Setup.exe")
 remove_file("installer/" + openmpt_version_name + "-portable-x86.zip")
 remove_file("installer/" + openmpt_version_name + "-portable-amd64.zip")
 remove_file("installer/" + openmpt_version_name + "-portable-arm.zip")
 remove_file("installer/" + openmpt_version_name + "-portable-arm64.zip")
+remove_file("installer/" + openmpt_version_name + "-symbols.7z")
 remove_file("installer/" + openmpt_version_name + "-Setup.exe.digests")
 remove_file("installer/" + openmpt_version_name + "-portable-x86.zip.digests")
 remove_file("installer/" + openmpt_version_name + "-portable-amd64.zip.digests")
 remove_file("installer/" + openmpt_version_name + "-portable-arm.zip.digests")
 remove_file("installer/" + openmpt_version_name + "-portable-arm64.zip.digests")
+remove_file("installer/" + openmpt_version_name + "-symbols.7z.digests")
 
 print("Generating manual...")
 pManual = Popen([executable, "wiki.py"], cwd="mptrack/manual_generator/")
@@ -161,6 +176,17 @@ copy_pluginbridge("bin/release//vs2019-win10-static/", "amd64", openmpt_zip_arm6
 copy_pluginbridge("bin/release//vs2019-win10-static/", "arm", openmpt_zip_arm64_path)
 copy_pluginbridge("bin/release//vs2019-win10-static/", "arm64", openmpt_zip_arm64_path)
 Path(openmpt_zip_arm64_path + "OpenMPT.portable").touch()
+
+print("Copying symbols...")
+shutil.rmtree(openmpt_zip_symbols_basepath, ignore_errors=True)
+copy_symbols("bin/release/vs2019-win10-static/" + "x86/", openmpt_zip_symbols_path  + "x86/")
+copy_symbols("bin/release/vs2019-win10-static/" + "amd64/", openmpt_zip_symbols_path  + "amd64/")
+copy_symbols("bin/release/vs2019-win10-static/" + "arm/", openmpt_zip_symbols_path  + "arm/")
+copy_symbols("bin/release/vs2019-win10-static/" + "arm64/", openmpt_zip_symbols_path  + "arm64/")
+copy_symbols_pluginbridge("bin/release/vs2019-win10-static/" + "x86/", openmpt_zip_symbols_path  + "x86/", "x86")
+copy_symbols_pluginbridge("bin/release/vs2019-win10-static/" + "amd64/", openmpt_zip_symbols_path  + "amd64/", "amd64")
+copy_symbols_pluginbridge("bin/release/vs2019-win10-static/" + "arm/", openmpt_zip_symbols_path  + "arm/", "arm")
+copy_symbols_pluginbridge("bin/release/vs2019-win10-static/" + "arm64/", openmpt_zip_symbols_path  + "arm64/", "arm64")
 
 if not singleThreaded:
 	pManual.communicate()
@@ -206,12 +232,17 @@ p7zarm64 = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + 
 if singleThreaded:
 	p7zarm64.communicate()
 
+p7zsymbols = Popen([path7z, "a", "-t7z", "-mx=9", "../" + openmpt_version_name + "-symbols.7z", openmpt_version_name + "/"], cwd=openmpt_zip_symbols_basepath)
+if singleThreaded:
+	p7zsymbols.communicate()
+
 if not singleThreaded:
 	pInno.communicate()
 	p7zx86.communicate()
 	p7zamd64.communicate()
 	p7zarm.communicate()
 	p7zarm64.communicate()
+	p7zsymbols.communicate()
 
 if os.path.isfile('packageTemplate/ExampleSongs/nosongs.txt'):
 	os.remove('packageTemplate/ExampleSongs/nosongs.txt')
@@ -233,11 +264,13 @@ hash_file("installer/" + openmpt_version_name + "-portable-x86.zip")
 hash_file("installer/" + openmpt_version_name + "-portable-amd64.zip")
 hash_file("installer/" + openmpt_version_name + "-portable-arm.zip")
 hash_file("installer/" + openmpt_version_name + "-portable-arm64.zip")
+hash_file("installer/" + openmpt_version_name + "-symbols.7z")
 
 shutil.rmtree(openmpt_zip_x86_basepath)
 shutil.rmtree(openmpt_zip_amd64_basepath)
 shutil.rmtree(openmpt_zip_arm_basepath)
 shutil.rmtree(openmpt_zip_arm64_basepath)
+shutil.rmtree(openmpt_zip_symbols_basepath)
 
 if interactive:
 	input(openmpt_version_name + " has been packaged successfully.")
