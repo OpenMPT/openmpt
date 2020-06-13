@@ -25,8 +25,6 @@
    "../../include/rtaudio/RtAudio.cpp",
    "../../include/rtaudio/RtAudio.h",
   }
-  filter { "action:vs*", "architecture:ARM or architecture:ARM64" }
-    links { "ole32" }
   filter { }
   filter { "action:vs*" }
     buildoptions { "/wd4267" }
