@@ -792,7 +792,7 @@ mpt::ustring GetLicenseString()
 		"      names of its contributors may be used to endorse or promote products" "\n"
 		"      derived from this software without specific prior written permission." "\n"
 		"" "\n"
-		"THIS SOFTWARE IS PROVIDED BY THE CONTRIBUTORS ``AS IS'' AND ANY" "\n"
+		"THIS SOFTWARE IS PROVIDED BY THE CONTRIBUTORS \"AS IS\" AND ANY" "\n"
 		"EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED" "\n"
 		"WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE" "\n"
 		"DISCLAIMED. IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY" "\n"
