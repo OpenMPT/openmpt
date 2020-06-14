@@ -375,34 +375,7 @@ void COptionsSoundcard::UpdateEverything()
 				}
 				cbi.iSelectedImage = cbi.iImage;
 				cbi.iOverlay = cbi.iImage;
-				mpt::ustring name = it.apiName + U_(" - ") + mpt::String::Trim(it.name);
-				switch(it.flags.usability)
-				{
-				case SoundDevice::Info::Usability::Experimental:
-					name += U_(" [experimental]");
-					break;
-				case SoundDevice::Info::Usability::Deprecated:
-					name += U_(" [deprecated]");
-					break;
-				case SoundDevice::Info::Usability::Broken:
-					name += U_(" [broken]");
-					break;
-				case SoundDevice::Info::Usability::NotAvailable:
-					name += U_(" [alien]");
-					break;
-				default:
-					// nothing
-					break;
-				}
-				if(it.default_ == SoundDevice::Info::Default::Named)
-				{
-					name += U_(" [default]");
-				}
-				if(it.apiPath.size() > 0)
-				{
-					name += U_(" (") + mpt::String::Combine(it.apiPath, U_("/")) + U_(")");
-				}
-				CString tmp = mpt::ToCString(name);
+				CString tmp = mpt::ToCString(it.GetDisplayName());
 				cbi.pszText = const_cast<TCHAR *>(tmp.GetString());
 				cbi.iIndent = 0;
 				int pos = m_CbnDevice.InsertItem(&cbi);

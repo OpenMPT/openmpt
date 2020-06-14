@@ -764,12 +764,12 @@ bool CMainFrame::IsAudioDeviceOpen() const
 bool CMainFrame::audioOpenDevice()
 {
 	MPT_TRACE_SCOPE();
+	const SoundDevice::Identifier deviceIdentifier = TrackerSettings::Instance().GetSoundDeviceIdentifier();
 	if(!TrackerSettings::Instance().GetMixerSettings().IsValid())
 	{
-		Reporting::Error("Unable to open sound device: Invalid mixer settings.");
+		Reporting::Error(mpt::format(U_("Unable to open sound device '%1': Invalid mixer settings."))(deviceIdentifier));
 		return false;
 	}
-	const SoundDevice::Identifier deviceIdentifier = TrackerSettings::Instance().GetSoundDeviceIdentifier();
 	if(gpSoundDevice && (gpSoundDevice->GetDeviceInfo().GetIdentifier() != deviceIdentifier))
 	{
 		gpSoundDevice->Stop();
@@ -787,7 +787,7 @@ bool CMainFrame::audioOpenDevice()
 	}
 	if(!gpSoundDevice)
 	{
-		Reporting::Error("Unable to open sound device: Could not find sound device.");
+		Reporting::Error(mpt::format(U_("Unable to open sound device '%1': Could not find sound device."))(deviceIdentifier));
 		return false;
 	}
 	gpSoundDevice->SetMessageReceiver(this);
@@ -797,17 +797,17 @@ bool CMainFrame::audioOpenDevice()
 	{
 		if(!gpSoundDevice->IsAvailable())
 		{
-			Reporting::Error("Unable to open sound device: Device not available.");
+			Reporting::Error(mpt::format(U_("Unable to open sound device '%1': Device not available."))(gpSoundDevice->GetDeviceInfo().GetDisplayName()));
 		} else
 		{
-			Reporting::Error("Unable to open sound device.");
+			Reporting::Error(mpt::format(U_("Unable to open sound device '%1'."))(gpSoundDevice->GetDeviceInfo().GetDisplayName()));
 		}
 		return false;
 	}
 	SampleFormat actualSampleFormat = gpSoundDevice->GetActualSampleFormat();
 	if(!actualSampleFormat.IsValid())
 	{
-		Reporting::Error("Unable to open sound device: Unknown sample format.");
+		Reporting::Error(mpt::format(U_("Unable to open sound device '%1': Unknown sample format."))(gpSoundDevice->GetDeviceInfo().GetDisplayName()));
 		return false;
 	}
 	deviceSettings.sampleFormat = actualSampleFormat;
