@@ -13,6 +13,7 @@
 
 #include "SoundDevice.h"
 
+#include "../common/mptStringFormat.h"
 #include "../common/misc_util.h"
 
 #include <map>
@@ -51,6 +52,39 @@ SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
 		return SoundDevice::Type();
 	}
 	return tmp[0];
+}
+
+
+mpt::ustring Info::GetDisplayName() const
+{
+	mpt::ustring result = apiName + U_(" - ") + mpt::String::Trim(name);
+	switch(flags.usability)
+	{
+	case SoundDevice::Info::Usability::Experimental:
+		result += U_(" [experimental]");
+		break;
+	case SoundDevice::Info::Usability::Deprecated:
+		result += U_(" [deprecated]");
+		break;
+	case SoundDevice::Info::Usability::Broken:
+		result += U_(" [broken]");
+		break;
+	case SoundDevice::Info::Usability::NotAvailable:
+		result += U_(" [alien]");
+		break;
+	default:
+		// nothing
+		break;
+	}
+	if(default_ == SoundDevice::Info::Default::Named)
+	{
+		result += U_(" [default]");
+	}
+	if(apiPath.size() > 0)
+	{
+		result += U_(" (") + mpt::String::Combine(apiPath, U_("/")) + U_(")");
+	}
+	return result;
 }
 
 

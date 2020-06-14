@@ -230,6 +230,9 @@ struct Info
 		}
 		return result;
 	}
+
+	mpt::ustring GetDisplayName() const;
+
 };
 
 
