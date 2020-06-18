@@ -154,10 +154,12 @@ public:
 	bool IsBefore(mpt::Windows::Version::System version) const noexcept;
 	bool IsBefore(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack) const noexcept;
 	bool IsBefore(mpt::Windows::Version::System version, mpt::Windows::Version::Build build) const noexcept;
+	bool IsBefore(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack, mpt::Windows::Version::Build build) const noexcept;
 
 	bool IsAtLeast(mpt::Windows::Version::System version) const noexcept;
 	bool IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack) const noexcept;
 	bool IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Version::Build build) const noexcept;
+	bool IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack, mpt::Windows::Version::Build build) const noexcept;
 
 	mpt::Windows::Version::System GetSystem() const noexcept;
 	mpt::Windows::Version::ServicePack GetServicePack() const noexcept;

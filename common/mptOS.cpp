@@ -291,6 +291,32 @@ bool Version::IsBefore(mpt::Windows::Version::System version, mpt::Windows::Vers
 }
 
 
+bool Version::IsBefore(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack, mpt::Windows::Version::Build build) const noexcept
+{
+	if(!m_SystemIsWindows)
+	{
+		return false;
+	}
+	if(m_System > version)
+	{
+		return false;
+	}
+	if(m_System < version)
+	{
+		return true;
+	}
+	if(m_ServicePack > servicePack)
+	{
+		return false;
+	}
+	if(m_ServicePack < servicePack)
+	{
+		return true;
+	}
+	return m_Build < build;
+}
+
+
 bool Version::IsAtLeast(mpt::Windows::Version::System version) const noexcept
 {
 	if(!m_SystemIsWindows)
@@ -330,6 +356,32 @@ bool Version::IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Ver
 		return false;
 	}
 	if(m_System > version)
+	{
+		return true;
+	}
+	return m_Build >= build;
+}
+
+
+bool Version::IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack, mpt::Windows::Version::Build build) const noexcept
+{
+	if(!m_SystemIsWindows)
+	{
+		return false;
+	}
+	if(m_System < version)
+	{
+		return false;
+	}
+	if(m_System > version)
+	{
+		return true;
+	}
+	if(m_ServicePack < servicePack)
+	{
+		return false;
+	}
+	if(m_ServicePack > servicePack)
 	{
 		return true;
 	}
