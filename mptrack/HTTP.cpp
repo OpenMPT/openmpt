@@ -270,8 +270,18 @@ public:
 }
 
 
+void Request::progress(Progress progress, uint64 transferred, std::optional<uint64> expectedSize) const
+{
+	if(progressCallback)
+	{
+		progressCallback(progress, transferred, expectedSize);
+	}
+}
+
+
 Result Request::operator()(InternetSession &internet) const
 {
+	progress(Progress::Start, 0, std::nullopt);
 	Port actualPort = port;
 	if(actualPort == Port::Default)
 	{
@@ -290,6 +300,7 @@ Result Request::operator()(InternetSession &internet) const
 	{
 		throw HTTP::LastErrorException();
 	}
+	progress(Progress::ConnectionEstablished, 0, std::nullopt);
 	mpt::ustring queryPath = path;
 	if(!query.empty())
 	{
@@ -323,6 +334,7 @@ Result Request::operator()(InternetSession &internet) const
 	{
 		throw HTTP::LastErrorException();
 	}
+	progress(Progress::RequestOpened, 0, std::nullopt);
 	{
 		std::string headersString;
 		if(!dataMimeType.empty())
@@ -347,6 +359,7 @@ Result Request::operator()(InternetSession &internet) const
 			throw HTTP::LastErrorException();
 		}
 	}
+	progress(Progress::RequestSent, 0, std::nullopt);
 	Result result;
 	{
 		DWORD statusCode = 0;
@@ -357,6 +370,22 @@ Result Request::operator()(InternetSession &internet) const
 		}
 		result.Status = statusCode;
 	}
+	progress(Progress::ResponseReceived, 0, std::nullopt);
+	DWORD contentLength = static_cast<DWORD>(-1);
+	{
+		DWORD length = sizeof(contentLength);
+		if(HttpQueryInfo(NativeHandle(request), HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, &contentLength, &length, NULL) == FALSE)
+		{
+			contentLength = static_cast<DWORD>(-1);
+		}
+	}
+	uint64 transferred = 0;
+	if(contentLength != static_cast<DWORD>(-1))
+	{
+		result.ContentLength = contentLength;
+	}
+	std::optional<uint64> expectedSize = result.ContentLength;
+	progress(Progress::TransferBegin, transferred, expectedSize);
 	{
 		std::string resultBuffer;
 		DWORD bytesRead = 0;
@@ -373,10 +402,22 @@ Result Request::operator()(InternetSession &internet) const
 			{
 				throw HTTP::LastErrorException();
 			}
-			resultBuffer.append(downloadBuffer, downloadBuffer + bytesRead);
+			if(outputStream)
+			{ 
+				if(!mpt::IO::WriteRaw(*outputStream, mpt::as_span(downloadBuffer, downloadBuffer + bytesRead)))
+				{
+					throw HTTP::exception(U_("Writing output file failed."));
+				}
+			} else
+			{
+				resultBuffer.append(downloadBuffer, downloadBuffer + bytesRead);
+			}
+			transferred += bytesRead;
+			progress(Progress::TransferRunning, transferred, expectedSize);
 		} while(bytesRead != 0);
 		result.Data = std::move(resultBuffer);
 	}
+	progress(Progress::TransferDone, transferred, expectedSize);
 	return result;
 }
 

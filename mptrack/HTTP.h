@@ -12,6 +12,11 @@
 
 #include "BuildSettings.h"
 
+#include <functional>
+#include <iosfwd>
+#include <optional>
+
+
 OPENMPT_NAMESPACE_BEGIN
 
 
@@ -52,6 +57,18 @@ private:
 public:
 	exception(const mpt::ustring &m);
 	mpt::ustring GetMessage() const;
+};
+
+
+class Abort
+	: public exception
+{
+public:
+	Abort() :
+		exception(U_("Operation aborted."))
+	{
+		return;
+	}
 };
 
 
@@ -154,13 +171,28 @@ enum Flags
 
 struct Result
 {
-	uint64 Status;
+	uint64 Status = 0;
+	std::optional<uint64> ContentLength;
 	std::string Data;
+};
+
+
+enum class Progress
+{
+	Start = 1,
+	ConnectionEstablished = 2,
+	RequestOpened = 3,
+	RequestSent = 4,
+	ResponseReceived = 5,
+	TransferBegin = 6,
+	TransferRunning = 7,
+	TransferDone = 8,
 };
 
 
 struct Request
 {
+
 	Protocol protocol = Protocol::HTTPS;
 	mpt::ustring host;
 	Port port = Port::Default;
@@ -176,9 +208,17 @@ struct Request
 	std::string dataMimeType;
 	mpt::const_byte_span data;
 
+	std::ostream *outputStream = nullptr;
+	std::function<void(Progress, uint64, std::optional<uint64>)> progressCallback = nullptr;
+
 	Request &SetURI(const URI &uri);
 
 	Result operator()(InternetSession &internet) const;
+
+private:
+
+	void progress(Progress progress, uint64 transferred, std::optional<uint64> expectedSize) const;
+
 };
 
 
