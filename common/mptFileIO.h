@@ -213,7 +213,9 @@ public:
 #endif // MPT_COMPILER_MSVC
 	{
 		if(!stream().is_open())
+		{
 			stream().setstate(mpt::ofstream::failbit);
+		}
 	}
 	mpt::ofstream& stream()
 	{
