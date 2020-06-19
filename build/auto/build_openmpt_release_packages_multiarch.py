@@ -12,7 +12,6 @@ path7z = "C:\\Program Files\\7-Zip\\7z.exe"
 pathISCC = "C:\\Program Files (x86)\\Inno Setup\\ISCC.exe"
 singleThreaded = False
 interactive = True
-exampleSongs = True
 
 for arg in sys.argv:
 	if arg == '--localtools':
@@ -22,8 +21,6 @@ for arg in sys.argv:
 		singleThreaded = True
 	if arg == '--noninteractive':
 		interactive = False
-	if arg == '--noexamplesongs':
-		exampleSongs = False
 
 def get_version_number():
     with open('common/versionNumber.h', 'r') as f:
@@ -217,14 +214,6 @@ if not singleThreaded:
 	if(pManual.returncode != 0):
 		raise Exception("Something went wrong during manual creation!")
 
-if os.path.isfile('packageTemplate/ExampleSongs/nosongs.txt'):
-	os.remove('packageTemplate/ExampleSongs/nosongs.txt')
-if not exampleSongs:
-	os.makedirs('packageTemplate/ExampleSongs', exist_ok=True)
-	with open('packageTemplate/ExampleSongs/nosongs.txt', 'w') as f:
-		f.write('Installer for OpenMPT test versions contains no example songs.')
-		f.write('\n')
-
 print("Updating package template...")
 pTemplate = Popen(["build\\auto\\update_package_template.cmd"], cwd="./")
 pTemplate.communicate()
@@ -277,9 +266,6 @@ if not singleThreaded:
 	p7zarm.communicate()
 	p7zarm64.communicate()
 	p7zsymbols.communicate()
-
-if os.path.isfile('packageTemplate/ExampleSongs/nosongs.txt'):
-	os.remove('packageTemplate/ExampleSongs/nosongs.txt')
 
 if(p7zx86.returncode != 0 or p7zx86legacy.returncode != 0 or p7zamd64.returncode != 0 or p7zamd64legacy.returncode != 0 or p7zarm.returncode != 0 or p7zarm64.returncode != 0 or pInno.returncode != 0):
     raise Exception("Something went wrong during packaging!")
