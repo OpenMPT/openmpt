@@ -70,13 +70,13 @@ openmpt_zip_amd64_legacy_basepath = "installer/OpenMPT-" + openmpt_version + "-a
 openmpt_zip_arm_basepath = "installer/OpenMPT-" + openmpt_version + "-arm/"
 openmpt_zip_arm64_basepath = "installer/OpenMPT-" + openmpt_version + "-arm64/"
 openmpt_zip_symbols_basepath = "installer/OpenMPT-" + openmpt_version + "-symbols/"
-openmpt_zip_x86_path = openmpt_zip_x86_basepath + openmpt_version_name + "/"
-openmpt_zip_x86_legacy_path = openmpt_zip_x86_legacy_basepath + openmpt_version_name + "/"
-openmpt_zip_amd64_path = openmpt_zip_amd64_basepath + openmpt_version_name + "/"
-openmpt_zip_amd64_legacy_path = openmpt_zip_amd64_legacy_basepath + openmpt_version_name + "/"
-openmpt_zip_arm_path = openmpt_zip_arm_basepath + openmpt_version_name + "/"
-openmpt_zip_arm64_path = openmpt_zip_arm64_basepath + openmpt_version_name + "/"
-openmpt_zip_symbols_path = openmpt_zip_symbols_basepath + openmpt_version_name + "/"
+openmpt_zip_x86_path = openmpt_zip_x86_basepath
+openmpt_zip_x86_legacy_path = openmpt_zip_x86_legacy_basepath
+openmpt_zip_amd64_path = openmpt_zip_amd64_basepath
+openmpt_zip_amd64_legacy_path = openmpt_zip_amd64_legacy_basepath
+openmpt_zip_arm_path = openmpt_zip_arm_basepath
+openmpt_zip_arm64_path = openmpt_zip_arm64_basepath
+openmpt_zip_symbols_path = openmpt_zip_symbols_basepath
 
 def copy_file(from_path, to_path, filename):
     shutil.copyfile(from_path + filename, to_path + filename)
@@ -235,26 +235,26 @@ pInno = Popen([pathISCC, "install-multi-arch.iss"], cwd="installer/")
 if singleThreaded:
 	pInno.communicate()
 
-p7zx86 = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-x86.zip", openmpt_version_name + "/"], cwd=openmpt_zip_x86_basepath)
+p7zx86 = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-x86.zip", "."], cwd=openmpt_zip_x86_basepath)
 if singleThreaded:
 	p7zx86.communicate()
-p7zx86legacy = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-x86-legacy.zip", openmpt_version_name + "/"], cwd=openmpt_zip_x86_legacy_basepath)
+p7zx86legacy = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-x86-legacy.zip", "."], cwd=openmpt_zip_x86_legacy_basepath)
 if singleThreaded:
 	p7zx86legacy.communicate()
-p7zamd64 = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-amd64.zip", openmpt_version_name + "/"], cwd=openmpt_zip_amd64_basepath)
+p7zamd64 = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-amd64.zip", "."], cwd=openmpt_zip_amd64_basepath)
 if singleThreaded:
 	p7zamd64.communicate()
-p7zamd64legacy = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-amd64-legacy.zip", openmpt_version_name + "/"], cwd=openmpt_zip_amd64_legacy_basepath)
+p7zamd64legacy = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-amd64-legacy.zip", "."], cwd=openmpt_zip_amd64_legacy_basepath)
 if singleThreaded:
 	p7zamd64legacy.communicate()
-p7zarm = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-arm.zip", openmpt_version_name + "/"], cwd=openmpt_zip_arm_basepath)
+p7zarm = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-arm.zip", "."], cwd=openmpt_zip_arm_basepath)
 if singleThreaded:
 	p7zarm.communicate()
-p7zarm64 = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-arm64.zip", openmpt_version_name + "/"], cwd=openmpt_zip_arm64_basepath)
+p7zarm64 = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + "-portable-arm64.zip", "."], cwd=openmpt_zip_arm64_basepath)
 if singleThreaded:
 	p7zarm64.communicate()
 
-p7zsymbols = Popen([path7z, "a", "-t7z", "-mx=9", "../" + openmpt_version_name + "-symbols.7z", openmpt_version_name + "/"], cwd=openmpt_zip_symbols_basepath)
+p7zsymbols = Popen([path7z, "a", "-t7z", "-mx=9", "../" + openmpt_version_name + "-symbols.7z", "."], cwd=openmpt_zip_symbols_basepath)
 if singleThreaded:
 	p7zsymbols.communicate()
 
