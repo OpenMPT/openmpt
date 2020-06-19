@@ -150,7 +150,7 @@ pManual = Popen([executable, "wiki.py"], cwd="mptrack/manual_generator/")
 if singleThreaded:
 	pManual.communicate()
 	if(pManual.returncode != 0):
-			raise Exception("Something went wrong during manual creation!")
+		raise Exception("Something went wrong during manual creation!")
 
 print("Copying x86 binaries...")
 shutil.rmtree(openmpt_zip_x86_basepath, ignore_errors=True)
@@ -215,7 +215,7 @@ copy_symbols_pluginbridge("bin/release/vs2019-win10-static/" + "arm64/", openmpt
 if not singleThreaded:
 	pManual.communicate()
 	if(pManual.returncode != 0):
-			raise Exception("Something went wrong during manual creation!")
+		raise Exception("Something went wrong during manual creation!")
 
 if os.path.isfile('packageTemplate/ExampleSongs/nosongs.txt'):
 	os.remove('packageTemplate/ExampleSongs/nosongs.txt')
