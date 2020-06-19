@@ -1,0 +1,220 @@
+
+Getting Started {#gettingstarted}
+===============
+
+
+How to compile
+--------------
+
+
+### libopenmpt and openmpt123
+
+ -  Autotools
+
+    Grab a `libopenmpt-VERSION-autotools.tar.gz` tarball.
+
+        ./configure
+        make
+        make check
+        sudo make install
+
+    Cross-compilation is generally supported (although only tested for
+    targetting MinGW-w64).
+
+    Note that some MinGW-w64 distributions come with the `win32` threading model
+    enabled by default instead of the `posix` threading model. The `win32`
+    threading model lacks proper support for C++11 `<thread>` and `<mutex>` as
+    well as thread-safe magic statics. It is recommended to use the `posix`
+    threading model for libopenmpt for this reason. On Debian, the appropriate
+    configure command is
+    `./configure --host=x86_64-w64-mingw32 CC=x86_64-w64-mingw32-gcc-posix CXX=x86_64-w64-mingw32-g++-posix`
+    for 64bit, or
+    `./configure --host=i686-w64-mingw32 CC=i686-w64-mingw32-gcc-posix CXX=i686-w64-mingw32-g++-posix`
+    for 32bit. Other MinGW-w64 distributions may differ.
+
+ -  Visual Studio:
+
+     -  You will find solutions for Visual Studio 2017 and 2019 in the
+        corresponding `build/vsVERSIONwin7/` folder.
+        Projects that target Windows versions before Windows 7 are available in
+        `build/vsVERSIONwinxp/`.
+        Projects that target Windows 10 1709 Desktop (10.0.16299.0, including
+        ARM and ARM64) or later versions are available in
+        `build/vsVERSIONwin10/`.
+        Minimal projects that target Windows 10 UWP are available in
+        `build/vsVERSIONuwp/`.
+        Most projects are supported with any of the mentioned Visual Studio
+        verions, with the following exceptions:
+
+         -  in_openmpt: Requires Visual Studio with MFC.
+
+         -  xmp-openmpt: Requires Visual Studio with MFC.
+
+     -  libopenmpt requires the compile host system to be 64bit x86-64 when
+        building with Visual Studio.
+
+     -  You will need the Winamp 5 SDK and the XMPlay SDK if you want to
+        compile the plugins for these 2 players. They can be downloaded
+        automatically on Windows 7 or later by just running the
+        `build/download_externals.cmd` script.
+
+        If you do not want to or cannot use this script, you may follow these
+        manual steps instead:
+
+         -  Winamp 5 SDK:
+
+            To build libopenmpt as a winamp input plugin, copy the contents of
+            `WA5.55_SDK.exe` to include/winamp/.
+
+            Please visit
+            [winamp.com](http://wiki.winamp.com/wiki/Plug-in_Developer) to
+            download the SDK.
+            You can disable in_openmpt in the solution configuration.
+
+         -  XMPlay SDK:
+
+            To build libopenmpt with XMPlay input plugin support, copy the
+            contents of xmp-sdk.zip into include/xmplay/.
+
+            Please visit [un4seen.com](https://www.un4seen.com/xmplay.html) to
+            download the SDK.
+            You can disable xmp-openmpt in the solution configuration.
+
+ -  Makefile
+
+    The makefile supports different build environments and targets via the
+    `CONFIG=` parameter directly to the make invocation.
+    Use `make CONFIG=$newconfig clean` when switching between different configs
+    because the makefile cleans only intermediates and target that are active
+    for the current config and no configuration state is kept around across
+    invocations.
+
+     -  mingw-w64:
+
+        The required compiler version is at least GCC 7.
+
+            make CONFIG=mingw64-win32    # for win32
+
+            make CONFIG=mingw64-win64    # for win64
+
+     -  gcc or clang (on Unix-like systems, including Mac OS X with MacPorts,
+        and Haiku (32-bit Hybrid and 64-bit)):
+
+        The minimum required compiler versions are:
+
+         -  gcc 7
+
+         -  clang 5
+
+        The Makefile requires pkg-config for native builds.
+        For sound output in openmpt123, PortAudio or SDL is required.
+        openmpt123 can optionally use libflac and libsndfile to render PCM
+        files to disk.
+
+        When using gcc, run:
+
+            make CONFIG=gcc
+
+        When using clang, it is recommended to do:
+
+            make CONFIG=clang
+
+        Otherwise, simply run
+
+            make
+
+        which will try to guess the compiler based on your operating system.
+
+     -  emscripten (on Unix-like systems):
+
+        libopenmpt has been tested and verified to work with emscripten 1.38.5
+        or later. Earlier versions are not supported.
+
+        Run:
+
+            # generates WebAssembly with dynamic heap growth
+            make CONFIG=emscripten EMSCRIPTEN_TARGET=wasm
+
+        or
+
+            # generates asm.js with a fixed size 128MB heap
+            make CONFIG=emscripten EMSCRIPTEN_TARGET=asmjs128m
+
+        or
+
+            # generates asm.js with a fixed default size heap (as of Emscripten
+            # 1.38.11, this amounts to 16MB)
+            make CONFIG=emscripten EMSCRIPTEN_TARGET=asmjs
+
+        or
+
+            # generates JavaScript with dynamic heap growth and with
+            # compatibility for older VMs
+            make CONFIG=emscripten EMSCRIPTEN_TARGET=js
+
+        Running the test suite on the command line is also supported by using
+        node.js. Version 8.9.1 or greater has been tested. Earlier versions
+        might or might not work. Depending on how your distribution calls the
+        `node.js` binary, you might have to edit
+        `build/make/config-emscripten.mk`.
+
+     -  DJGPP / DOS
+
+        Cross-compilation from Linux systems is supported with DJGPP GCC 7.2 or
+        later via
+
+            make CONFIG=djgpp
+
+        `openmpt123` can use liballegro 4.2 for sound output on DJGPP/DOS.
+        liballegro can either be installed system-wide in the DJGPP environment
+        or downloaded into the `libopenmpt` source tree.
+
+            make CONFIG=djgpp USE_ALLEGRO42=1    # use installed liballegro
+
+        or
+
+            ./build/download_externals.sh    # download liballegro binaries
+            make CONFIG=djgpp USE_ALLEGRO42=1 BUNDLED_ALLEGRO42=1
+
+     -  American Fuzzy Lop:
+
+        To compile libopenmpt with fuzzing instrumentation for afl-fuzz, run:
+        
+            make CONFIG=afl
+        
+        For more detailed instructions, read `contrib/fuzzing/readme.md`.
+
+     -  other compilers:
+
+        To compile libopenmpt with other C++14 compliant compilers, run:
+        
+            make CONFIG=generic
+        
+    
+    The `Makefile` supports some customizations. You might want to read the top
+    which should get you some possible make settings, like e.g.
+    `make DYNLINK=0` or similar. Cross compiling or different compiler would
+    best be implemented via new `config-*.mk` files.
+
+    The `Makefile` also supports building doxygen documentation by using
+
+        make doc
+
+    Binaries and documentation can be installed systen-wide with
+
+        make PREFIX=/yourprefix install
+        make PREFIX=/yourprefix install-doc
+
+    Some systems (i.e. Linux) require running
+
+        sudo ldconfig
+
+    in order for the system linker to be able to pick up newly installed
+    libraries.
+
+    `PREFIX` defaults to `/usr/local`. A `DESTDIR=` parameter is also
+    supported.
+
+ -  Android NDK
+
+    See `build/android_ndk/README.AndroidNDK.txt`.

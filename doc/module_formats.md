@@ -1,5 +1,5 @@
-How to add support for new module formats
-=========================================
+Adding support for new module formats
+=====================================
 
 This document describes the basics of writing a new module loader and related
 work that has to be done. We will not discuss in detail how to write the loader,

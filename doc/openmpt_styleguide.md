@@ -1,6 +1,6 @@
 
-Coding conventions
-------------------
+OpenMPT Style Guide
+===================
 
 
 ### OpenMPT
