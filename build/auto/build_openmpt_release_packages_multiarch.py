@@ -141,6 +141,7 @@ remove_file("installer/" + openmpt_version_name + "-portable-amd64-legacy.zip.di
 remove_file("installer/" + openmpt_version_name + "-portable-arm.zip.digests")
 remove_file("installer/" + openmpt_version_name + "-portable-arm64.zip.digests")
 remove_file("installer/" + openmpt_version_name + "-symbols.7z.digests")
+remove_file("installer/" + openmpt_version_name + "-update.json")
 
 print("Generating manual...")
 pManual = Popen([executable, "wiki.py"], cwd="mptrack/manual_generator/")

@@ -44,6 +44,7 @@ copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-arm64.zip               
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-arm64.zip.digests        openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-arm64.zip.digests
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-symbols.7z                        openmpt\dbg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-symbols.7z
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-symbols.7z.digests                openmpt\dbg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-symbols.7z.digests
+copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-update.json                       openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-update.json
 ..\build\tools\7zip\7z.exe a -ttar openmpt-pkg.win-multi.tar openmpt || goto error
 rmdir /s /q openmpt
 cd .. || goto error
