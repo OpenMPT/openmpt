@@ -6,8 +6,6 @@ cd ..\..
 
 set MY_DIR=%CD%
 
-call "build\auto\setup_arguments.cmd" %1 %2 %3 %4 %5 %6
-
 call build\auto\setup_vs_any.cmd
 
 call build\auto\helper_get_svnversion.cmd
