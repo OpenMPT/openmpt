@@ -25,100 +25,114 @@ update = {
 			"installer": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-Setup.exe",
 				"filename": "OpenMPT-" + version + "-Setup.exe",
-				"is_installer": True,
-				"is_archive": False,
-				"autoupdate": True,
-				"autoupdate_installer_arguments": [ "/SP-", "/SILENT", "/NOCANCEL", "/AUTOUPDATE=yes" ],
-				"autoupdate_installer_required_architectures": { "x86":True },
-				"autoupdate_archive_subfolder": "",
-				"autoupdate_archive_restartbinary": "",
+				"type": "installer",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
+				"autoupdate_installer": {
+					"required_architectures": { "x86":True },
+					"arguments": [ "/SP-", "/SILENT", "/NOCANCEL", "/AUTOUPDATE=yes" ]
+				},
+				"autoupdate_archive": None,
+				"os": "windows",
+				"required_windows_version": { "version_major":6, "version_minor":1, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"supported_architectures": { "x86":True,"amd64":True,"arm":True,"arm64":True },
-				"required_processor_features": { "x86":{"sse2":True}, "amd64":{"sse2":True} },
-				"required_os": { "version_major":6, "version_minor":1, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 }
+				"required_processor_features": { "x86":{"sse2":True}, "amd64":{"sse2":True} }
 			},
 			"portable-x86": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-x86.zip",
 				"filename": "OpenMPT-" + version + "-portable-x86.zip",
-				"is_installer": False,
-				"is_archive": True,
-				"autoupdate": True,
-				"autoupdate_installer_arguments": [],
-				"autoupdate_installer_required_architectures": {},
-				"autoupdate_archive_subfolder": "",
-				"autoupdate_archive_restartbinary": "OpenMPT.exe",
+				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
+				"autoupdate_installer": None,
+				"autoupdate_archive": {
+					"subfolder": "",
+					"restartbinary": "OpenMPT.exe"
+				},
+				"os": "windows",
+				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"supported_architectures": { "x86":True },
-				"required_processor_features": { "x86":{"sse2":True} },
-				"required_os": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 }
+				"required_processor_features": { "x86":{"sse2":True} }
 			},
 			"portable-x86-legacy": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-x86-legacy.zip",
 				"filename": "OpenMPT-" + version + "-portable-x86-legacy.zip",
-				"is_installer": False,
-				"is_archive": True,
-				"autoupdate": True,
-				"autoupdate_installer_arguments": [],
-				"autoupdate_installer_required_architectures": {},
-				"autoupdate_archive_subfolder": "",
-				"autoupdate_archive_restartbinary": "OpenMPT.exe",
+				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
+				"autoupdate_installer": None,
+				"autoupdate_archive": {
+					"subfolder": "",
+					"restartbinary": "OpenMPT.exe"
+				},
+				"os": "windows",
+				"required_windows_version": { "version_major":6, "version_minor":1, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"supported_architectures": { "x86":True },
-				"required_processor_features": { "x86":{"sse2":True} },
-				"required_os": { "version_major":6, "version_minor":1, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 }
+				"required_processor_features": { "x86":{"sse2":True} }
 			},
 			"portable-amd64": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-amd64.zip",
 				"filename": "OpenMPT-" + version + "-portable-amd64.zip",
-				"is_installer": False,
-				"is_archive": True,
-				"autoupdate": True,
-				"autoupdate_installer_arguments": [],
-				"autoupdate_installer_required_architectures": {},
-				"autoupdate_archive_subfolder": "",
-				"autoupdate_archive_restartbinary": "OpenMPT.exe",
+				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
+				"autoupdate_installer": None,
+				"autoupdate_archive": {
+					"subfolder": "",
+					"restartbinary": "OpenMPT.exe"
+				},
+				"os": "windows",
+				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"supported_architectures": { "amd64":True },
-				"required_processor_features": { "amd64":{"sse2":True} },
-				"required_os": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 }
+				"required_processor_features": { "amd64":{"sse2":True} }
 			},
 			"portable-amd64-legacy": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-amd64-legacy.zip",
 				"filename": "OpenMPT-" + version + "-portable-amd64-legacy.zip",
-				"is_installer": False,
-				"is_archive": True,
-				"autoupdate": True,
-				"autoupdate_installer_arguments": [],
-				"autoupdate_installer_required_architectures": {},
-				"autoupdate_archive_subfolder": "",
-				"autoupdate_archive_restartbinary": "OpenMPT.exe",
+				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
+				"autoupdate_installer": None,
+				"autoupdate_archive": {
+					"subfolder": "",
+					"restartbinary": "OpenMPT.exe"
+				},
+				"os": "windows",
+				"required_windows_version": { "version_major":6, "version_minor":1, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"supported_architectures": { "amd64":True },
-				"required_processor_features": { "amd64":{"sse2":True} },
-				"required_os": { "version_major":6, "version_minor":1, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 }
+				"required_processor_features": { "amd64":{"sse2":True} }
 			},
 			"portable-arm": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm.zip",
 				"filename": "OpenMPT-" + version + "-portable-arm.zip",
-				"is_installer": False,
-				"is_archive": True,
-				"autoupdate": True,
-				"autoupdate_installer_arguments": [],
-				"autoupdate_installer_required_architectures": {},
-				"autoupdate_archive_subfolder": "",
-				"autoupdate_archive_restartbinary": "OpenMPT.exe",
+				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
+				"autoupdate_installer": None,
+				"autoupdate_archive": {
+					"subfolder": "",
+					"restartbinary": "OpenMPT.exe"
+				},
+				"os": "windows",
+				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"supported_architectures": { "arm":True },
-				"required_processor_features": { "arm":{} },
-				"required_os": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 }
+				"required_processor_features": { "arm":{} }
 			},
 			"portable-arm64": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm64.zip",
 				"filename": "OpenMPT-" + version + "-portable-arm64.zip",
-				"is_installer": False,
-				"is_archive": True,
-				"autoupdate": True,
-				"autoupdate_installer_arguments": [],
-				"autoupdate_installer_required_architectures": {},
-				"autoupdate_archive_subfolder": "",
-				"autoupdate_archive_restartbinary": "OpenMPT.exe",
+				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
+				"autoupdate_installer": None,
+				"autoupdate_archive": {
+					"subfolder": "",
+					"restartbinary": "OpenMPT.exe"
+				},
+				"os": "windows",
+				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"supported_architectures": { "arm64":True },
-				"required_processor_features": { "arm64":{} },
-				"required_os": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 }
+				"required_processor_features": { "arm64":{} }
 			}
 		}
 	}
