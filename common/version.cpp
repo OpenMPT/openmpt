@@ -577,9 +577,9 @@ mpt::ustring GetFullCreditsString()
 {
 	return mpt::ToUnicode(mpt::Charset::UTF8,
 #ifdef MODPLUG_TRACKER
-		"OpenMPT / ModPlug Tracker\n"
+		"OpenMPT / Open ModPlug Tracker\n"
 #else
-		"libopenmpt (based on OpenMPT / ModPlug Tracker)\n"
+		"libopenmpt (based on OpenMPT / Open ModPlug Tracker)\n"
 #endif
 		"\n"
 		"Copyright \xC2\xA9 2004-2020 Contributors\n"
