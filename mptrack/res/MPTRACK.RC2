@@ -57,11 +57,11 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName",      "OpenMPT Developers"
+            VALUE "CompanyName",      "OpenMPT (https://openmpt.org)"
             VALUE "FileDescription",  VER_FILEDESCRIPTION
             VALUE "FileVersion",      VER_FILEVERSION_STR
             VALUE "InternalName",     "OpenMPT"
-            VALUE "LegalCopyright",   "Copyright © 1997-2003 Olivier Lapicque; © 2004-2020 OpenMPT Developers."
+            VALUE "LegalCopyright",   "Copyright © 2004-2020 OpenMPT Project Developers and Contributors, Copyright © 1997-2003 Olivier Lapicque"
             VALUE "OriginalFilename", "OpenMPT.exe"
             VALUE "ProductName",      "OpenMPT"
             VALUE "ProductVersion",   VER_FILEVERSION_STR
