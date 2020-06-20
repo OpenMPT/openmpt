@@ -638,7 +638,6 @@ public:
 
 	// Misc
 
-	Setting<bool> ShowSettingsOnNewVersion;
 	Setting<MODTYPE> defaultModType;
 	Setting<NewFileAction> defaultNewFileAction;
 	Setting<PlugVolumeHandling> DefaultPlugVolumeHandling;

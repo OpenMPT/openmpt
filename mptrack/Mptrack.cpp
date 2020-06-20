@@ -1162,9 +1162,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		if(showSettings)
 		{
 			TrackerSettings::Instance().m_SoundDeprecatedDeviceWarningShown = true;
-		}
-		if(showSettings || (TrackerSettings::Instance().ShowSettingsOnNewVersion && (TrackerSettings::Instance().PreviousSettingsVersion < Version::Current())))
-		{
 			m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
 		}
 	}

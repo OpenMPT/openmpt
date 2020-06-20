@@ -188,7 +188,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, showDirsInSampleBrowser(conf, U_("Display"), U_("ShowDirsInSampleBrowser"), false)
 	, commentsFont(conf, U_("Display"), U_("Comments Font"), FontSetting(U_("Courier New"), 120))
 	// Misc
-	, ShowSettingsOnNewVersion(conf, U_("Misc"), U_("ShowSettingsOnNewVersion"), true)
 	, defaultModType(conf, U_("Misc"), U_("DefaultModType"), MOD_TYPE_IT)
 	, defaultNewFileAction(conf, U_("Misc"), U_("DefaultNewFileAction"), nfDefaultFormat)
 	, DefaultPlugVolumeHandling(conf, U_("Misc"), U_("DefaultPlugVolumeHandling"), PLUGIN_VOLUMEHANDLING_IGNORE)
