@@ -91,6 +91,7 @@ LOCAL_SRC_FILES += \
 	common/misc_util.cpp \
 	common/mptAlloc.cpp \
 	common/mptCPU.cpp \
+	common/mptCrypto.cpp \
 	common/mptFileIO.cpp \
 	common/mptIO.cpp \
 	common/mptLibrary.cpp \

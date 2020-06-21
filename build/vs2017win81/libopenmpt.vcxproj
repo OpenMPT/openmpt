@@ -716,6 +716,7 @@
     <ClInclude Include="..\..\common\mptBaseUtils.h" />
     <ClInclude Include="..\..\common\mptCPU.h" />
     <ClInclude Include="..\..\common\mptCRC.h" />
+    <ClInclude Include="..\..\common\mptCrypto.h" />
     <ClInclude Include="..\..\common\mptException.h" />
     <ClInclude Include="..\..\common\mptExceptionText.h" />
     <ClInclude Include="..\..\common\mptFileIO.h" />
@@ -845,6 +846,8 @@
     <ClCompile Include="..\..\common\mptAlloc.cpp">
     </ClCompile>
     <ClCompile Include="..\..\common\mptCPU.cpp">
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptCrypto.cpp">
     </ClCompile>
     <ClCompile Include="..\..\common\mptFileIO.cpp">
     </ClCompile>

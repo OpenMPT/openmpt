@@ -40,6 +40,7 @@
 #include "../mptrack/Mainfrm.h"
 #include "../mptrack/Settings.h"
 #include "../mptrack/HTTP.h"
+#include "../common/mptCrypto.h"
 #endif // MODPLUG_TRACKER
 #include "../common/mptFileIO.h"
 #ifdef LIBOPENMPT_BUILD
@@ -102,6 +103,7 @@ static MPT_NOINLINE void TestMisc2();
 static MPT_NOINLINE void TestRandom();
 static MPT_NOINLINE void TestCharsets();
 static MPT_NOINLINE void TestStringFormatting();
+static MPT_NOINLINE void TestCrypto();
 static MPT_NOINLINE void TestSettings();
 static MPT_NOINLINE void TestStringIO();
 static MPT_NOINLINE void TestMIDIEvents();
@@ -202,6 +204,7 @@ void DoTests()
 	DO_TEST(TestRandom);
 	DO_TEST(TestCharsets);
 	DO_TEST(TestStringFormatting);
+	DO_TEST(TestCrypto);
 	DO_TEST(TestSettings);
 	DO_TEST(TestStringIO);
 	DO_TEST(TestMIDIEvents);
@@ -1622,6 +1625,15 @@ static MPT_NOINLINE void TestMisc2()
 	constexpr mpt::UUID uuid3 = "2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"_uuid;
 	VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), uuid3);
 
+#if defined(MODPLUG_TRACKER)
+	{
+		constexpr mpt::UUID uuid_ns_dns = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"_uuid;
+		constexpr mpt::UUID expected = "74738ff5-5367-5958-9aee-98fffdcd1876"_uuid;
+		mpt::UUID gotten = mpt::UUID::RFC4122NamespaceV5(uuid_ns_dns, U_("www.example.org"));
+		VERIFY_EQUAL(gotten, expected);
+	}
+#endif
+
 	// check that empty stringstream behaves correctly with our MSVC workarounds when using iostream interface directly
 
 	{ std::ostringstream ss; VERIFY_EQUAL(ss.tellp(), std::streampos(0)); }
@@ -2999,6 +3011,29 @@ inline SettingValue ToSettingValue(const Test::CustomSettingsTestType &val)
 namespace Test {
 
 #endif // MODPLUG_TRACKER
+
+
+static MPT_NOINLINE void TestCrypto()
+{
+
+#ifdef MODPLUG_TRACKER
+
+	mpt::crypto::hash::SHA512::result_type sha512_abc{
+		std::byte{0xdd},std::byte{0xaf},std::byte{0x35},std::byte{0xa1},std::byte{0x93},std::byte{0x61},std::byte{0x7a},std::byte{0xba},
+		std::byte{0xcc},std::byte{0x41},std::byte{0x73},std::byte{0x49},std::byte{0xae},std::byte{0x20},std::byte{0x41},std::byte{0x31},
+		std::byte{0x12},std::byte{0xe6},std::byte{0xfa},std::byte{0x4e},std::byte{0x89},std::byte{0xa9},std::byte{0x7e},std::byte{0xa2},
+		std::byte{0x0a},std::byte{0x9e},std::byte{0xee},std::byte{0xe6},std::byte{0x4b},std::byte{0x55},std::byte{0xd3},std::byte{0x9a},
+		std::byte{0x21},std::byte{0x92},std::byte{0x99},std::byte{0x2a},std::byte{0x27},std::byte{0x4f},std::byte{0xc1},std::byte{0xa8},
+		std::byte{0x36},std::byte{0xba},std::byte{0x3c},std::byte{0x23},std::byte{0xa3},std::byte{0xfe},std::byte{0xeb},std::byte{0xbd},
+		std::byte{0x45},std::byte{0x4d},std::byte{0x44},std::byte{0x23},std::byte{0x64},std::byte{0x3c},std::byte{0xe8},std::byte{0x0e},
+		std::byte{0x2a},std::byte{0x9a},std::byte{0xc9},std::byte{0x4f},std::byte{0xa5},std::byte{0x4c},std::byte{0xa4},std::byte{0x9f}
+	};
+	VERIFY_EQUAL(mpt::crypto::hash::SHA512().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(std::string("abc")))).result(), sha512_abc);
+
+#endif // MODPLUG_TRACKER
+
+}
+
 
 static MPT_NOINLINE void TestSettings()
 {

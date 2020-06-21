@@ -100,6 +100,7 @@
 #include <mutex>
 #include <new>
 #include <numeric>
+#include <optional>
 #include <ostream>
 #include <random>
 #include <set>
