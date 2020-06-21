@@ -34,10 +34,10 @@ copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-x86.zip.digests         
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-x86.update.json          openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-x86.update.json
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-x86-legacy.zip           openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-x86-legacy.zip
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-x86-legacy.zip.digests   openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-x86-legacy.zip.digests
-copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-x86-legacy.update.json   openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-x86-update.json
+copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-x86-legacy.update.json   openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-x86-legacy.update.json
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-amd64.zip                openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-amd64.zip
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-amd64.zip.digests        openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-amd64.zip.digests
-copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-amd64.update.json        openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-update.json
+copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-amd64.update.json        openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-amd64.update.json
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-amd64-legacy.zip         openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-amd64-legacy.zip
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-amd64-legacy.zip.digests openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-amd64-legacy.zip.digests
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-portable-amd64-legacy.update.json openmpt\pkg.win\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-portable-amd64-legacy.update.json
