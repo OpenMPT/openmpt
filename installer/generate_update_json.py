@@ -38,7 +38,6 @@ update = {
 	"can_autoupdate": True,
 	"autoupdate_minversion": "1.30.00.04",
 	"autoupdate_installer": {
-		"required_architectures": { "x86":True },
 		"arguments": [ "/SP-", "/SILENT", "/NOCANCEL", "/AUTOUPDATE=yes" ]
 	},
 	"autoupdate_archive": None
@@ -175,6 +174,7 @@ update = {
 				"type": "installer",
 				"os": "windows",
 				"required_windows_version": { "version_major":6, "version_minor":1, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_architectures": { "x86":True },
 				"supported_architectures": { "x86":True,"amd64":True,"arm":True,"arm64":True },
 				"required_processor_features": { "x86":{"sse2":True}, "amd64":{"sse2":True} }
 			},
@@ -183,6 +183,7 @@ update = {
 				"type": "archive",
 				"os": "windows",
 				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_architectures": {},
 				"supported_architectures": { "x86":True },
 				"required_processor_features": { "x86":{"sse2":True} }
 			},
@@ -191,6 +192,7 @@ update = {
 				"type": "archive",
 				"os": "windows",
 				"required_windows_version": { "version_major":6, "version_minor":1, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_architectures": {},
 				"supported_architectures": { "x86":True },
 				"required_processor_features": { "x86":{"sse2":True} }
 			},
@@ -199,6 +201,7 @@ update = {
 				"type": "archive",
 				"os": "windows",
 				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_architectures": {},
 				"supported_architectures": { "amd64":True },
 				"required_processor_features": { "amd64":{"sse2":True} }
 			},
@@ -207,6 +210,7 @@ update = {
 				"type": "archive",
 				"os": "windows",
 				"required_windows_version": { "version_major":6, "version_minor":1, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_architectures": {},
 				"supported_architectures": { "amd64":True },
 				"required_processor_features": { "amd64":{"sse2":True} }
 			},
@@ -215,6 +219,7 @@ update = {
 				"type": "archive",
 				"os": "windows",
 				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_architectures": {},
 				"supported_architectures": { "arm":True },
 				"required_processor_features": { "arm":{} }
 			},
@@ -223,6 +228,7 @@ update = {
 				"type": "archive",
 				"os": "windows",
 				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_architectures": {},
 				"supported_architectures": { "arm64":True },
 				"required_processor_features": { "arm64":{} }
 			}
