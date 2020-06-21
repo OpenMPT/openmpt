@@ -7,8 +7,6 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#pragma once
-
 #include "stdafx.h"
 #include "mptCrypto.h"
 
