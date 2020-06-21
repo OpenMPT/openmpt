@@ -35,8 +35,6 @@ update = {
 		"SHA3-512": hash_file_sha3_512("installer/OpenMPT-" + plainversion + "-Setup.exe"),
 	},
 	"filename": "OpenMPT-" + version + "-Setup.exe",
-	"can_autoupdate": True,
-	"autoupdate_minversion": "1.30.00.04",
 	"autoupdate_installer": {
 		"arguments": [ "/SP-", "/SILENT", "/NOCANCEL", "/AUTOUPDATE=yes" ]
 	},
@@ -53,8 +51,6 @@ update = {
 		"SHA3-512": hash_file_sha3_512("installer/OpenMPT-" + plainversion + "-portable-x86.zip"),
 	},
 	"filename": "OpenMPT-" + version + "-portable-x86.zip",
-	"can_autoupdate": True,
-	"autoupdate_minversion": "1.30.00.04",
 	"autoupdate_installer": None,
 	"autoupdate_archive": {
 		"subfolder": "",
@@ -72,8 +68,6 @@ update = {
 		"SHA3-512": hash_file_sha3_512("installer/OpenMPT-" + plainversion + "-portable-x86-legacy.zip"),
 	},
 	"filename": "OpenMPT-" + version + "-portable-x86-legacy.zip",
-	"can_autoupdate": True,
-	"autoupdate_minversion": "1.30.00.04",
 	"autoupdate_installer": None,
 	"autoupdate_archive": {
 		"subfolder": "",
@@ -91,8 +85,6 @@ update = {
 		"SHA3-512": hash_file_sha3_512("installer/OpenMPT-" + plainversion + "-portable-amd64.zip"),
 	},
 	"filename": "OpenMPT-" + version + "-portable-amd64.zip",
-	"can_autoupdate": True,
-	"autoupdate_minversion": "1.30.00.04",
 	"autoupdate_installer": None,
 	"autoupdate_archive": {
 		"subfolder": "",
@@ -110,8 +102,6 @@ update = {
 		"SHA3-512": hash_file_sha3_512("installer/OpenMPT-" + plainversion + "-portable-amd64-legacy.zip"),
 	},
 	"filename": "OpenMPT-" + version + "-portable-amd64-legacy.zip",
-	"can_autoupdate": True,
-	"autoupdate_minversion": "1.30.00.04",
 	"autoupdate_installer": None,
 	"autoupdate_archive": {
 		"subfolder": "",
@@ -129,8 +119,6 @@ update = {
 		"SHA3-512": hash_file_sha3_512("installer/OpenMPT-" + plainversion + "-portable-arm.zip"),
 	},
 	"filename": "OpenMPT-" + version + "-portable-arm.zip",
-	"can_autoupdate": True,
-	"autoupdate_minversion": "1.30.00.04",
 	"autoupdate_installer": None,
 	"autoupdate_archive": {
 		"subfolder": "",
@@ -148,8 +136,6 @@ update = {
 		"SHA3-512": hash_file_sha3_512("installer/OpenMPT-" + plainversion + "-portable-arm64.zip"),
 	},
 	"filename": "OpenMPT-" + version + "-portable-arm64.zip",
-	"can_autoupdate": True,
-	"autoupdate_minversion": "1.30.00.04",
 	"autoupdate_installer": None,
 	"autoupdate_archive": {
 		"subfolder": "",
@@ -172,6 +158,8 @@ update = {
 			"installer": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-Setup.update.json",
 				"type": "installer",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
 				"os": "windows",
 				"required_windows_version": { "version_major":6, "version_minor":1, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": { "x86":True },
@@ -181,6 +169,8 @@ update = {
 			"portable-x86": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-x86.update.json",
 				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
 				"os": "windows",
 				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
@@ -190,6 +180,8 @@ update = {
 			"portable-x86-legacy": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-x86-legacy.update.json",
 				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
 				"os": "windows",
 				"required_windows_version": { "version_major":6, "version_minor":1, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
@@ -199,6 +191,8 @@ update = {
 			"portable-amd64": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-amd64.update.json",
 				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
 				"os": "windows",
 				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
@@ -208,6 +202,8 @@ update = {
 			"portable-amd64-legacy": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-amd64-legacy.update.json",
 				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
 				"os": "windows",
 				"required_windows_version": { "version_major":6, "version_minor":1, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
@@ -217,6 +213,8 @@ update = {
 			"portable-arm": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm.update.json",
 				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
 				"os": "windows",
 				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
@@ -226,6 +224,8 @@ update = {
 			"portable-arm64": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm64.update.json",
 				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.04",
 				"os": "windows",
 				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
