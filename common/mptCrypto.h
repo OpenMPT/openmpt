@@ -18,7 +18,7 @@
 #include "mptException.h"
 #include "mptSpan.h"
 
-#include <algoritm>
+#include <algorithm>
 #include <vector>
 
 #include <cstddef>
