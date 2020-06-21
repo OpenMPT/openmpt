@@ -282,7 +282,7 @@ bool SeekRelative(std::iostream & f, IO::Offset off)
 	#endif
 	f.seekg(static_cast<std::streamoff>(off), std::ios::cur); f.seekp(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail();
 }
-IO::Offset ReadRawImpl(std::istream & f, mpt::byte * data, std::size_t size) { return f.read(mpt::byte_cast<char *>(data), size) ? f.gcount() : std::streamsize(0); }
+IO::Offset ReadRawImpl(std::istream & f, mpt::byte * data, std::size_t size) { f.read(mpt::byte_cast<char *>(data), size); return f.gcount(); }
 bool WriteRawImpl(std::ostream & f, const mpt::byte * data, std::size_t size) { f.write(mpt::byte_cast<const char *>(data), size); return !f.fail(); }
 bool IsEof(std::istream & f) { return f.eof(); }
 bool Flush(std::ostream & f) { f.flush(); return !f.fail(); }
