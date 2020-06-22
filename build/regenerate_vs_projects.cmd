@@ -27,10 +27,8 @@ if errorlevel 1 goto errversion
 
 echo dofile "build/genie/genie.lua" > genie.lua || goto err
 
-%GENIE% --target="windesktop81" vs2017 || goto err
 %GENIE% --target="winstore82"   vs2017 || goto err
 
-%GENIE% --target="windesktop81" vs2019 || goto err
 %GENIE% --target="winstore82"   vs2019 || goto err
 
 del genie.lua || goto err
@@ -52,15 +50,15 @@ del genie.lua || goto err
 
 echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 
-%PREMAKE% --group=libopenmpt_test vs2017 || goto err
-%PREMAKE% --group=in_openmpt vs2017 || goto err
-%PREMAKE% --group=xmp-openmpt vs2017 || goto err
-%PREMAKE% --group=libopenmpt-small vs2017 || goto err
-%PREMAKE% --group=libopenmpt vs2017 || goto err
-%PREMAKE% --group=openmpt123 vs2017 || goto err
-%PREMAKE% --group=PluginBridge vs2017 || goto err
-%PREMAKE% --group=OpenMPT vs2017 || goto err
-%PREMAKE% --group=all-externals vs2017 || goto err
+%PREMAKE% --group=libopenmpt_test vs2017 --win7 || goto err
+%PREMAKE% --group=in_openmpt vs2017 --win7 || goto err
+%PREMAKE% --group=xmp-openmpt vs2017 --win7 || goto err
+%PREMAKE% --group=libopenmpt-small vs2017 --win7 || goto err
+%PREMAKE% --group=libopenmpt vs2017 --win7 || goto err
+%PREMAKE% --group=openmpt123 vs2017 --win7 || goto err
+%PREMAKE% --group=PluginBridge vs2017 --win7 || goto err
+%PREMAKE% --group=OpenMPT vs2017 --win7 || goto err
+%PREMAKE% --group=all-externals vs2017 --win7 || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2017 --win10 || goto err
 %PREMAKE% --group=in_openmpt vs2017 --win10 || goto err
@@ -72,15 +70,25 @@ echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 %PREMAKE% --group=OpenMPT vs2017 --win10 || goto err
 %PREMAKE% --group=all-externals vs2017 --win10 || goto err
 
-%PREMAKE% --group=libopenmpt_test vs2019 || goto err
-%PREMAKE% --group=in_openmpt vs2019 || goto err
-%PREMAKE% --group=xmp-openmpt vs2019 || goto err
-%PREMAKE% --group=libopenmpt-small vs2019 || goto err
-%PREMAKE% --group=libopenmpt vs2019 || goto err
-%PREMAKE% --group=openmpt123 vs2019 || goto err
-%PREMAKE% --group=PluginBridge vs2019 || goto err
-%PREMAKE% --group=OpenMPT vs2019 || goto err
-%PREMAKE% --group=all-externals vs2019 || goto err
+%PREMAKE% --group=libopenmpt_test vs2019 --win7 || goto err
+%PREMAKE% --group=in_openmpt vs2019 --win7 || goto err
+%PREMAKE% --group=xmp-openmpt vs2019 --win7 || goto err
+%PREMAKE% --group=libopenmpt-small vs2019 --win7 || goto err
+%PREMAKE% --group=libopenmpt vs2019 --win7 || goto err
+%PREMAKE% --group=openmpt123 vs2019 --win7 || goto err
+%PREMAKE% --group=PluginBridge vs2019 --win7 || goto err
+%PREMAKE% --group=OpenMPT vs2019 --win7 || goto err
+%PREMAKE% --group=all-externals vs2019 --win7 || goto err
+
+%PREMAKE% --group=libopenmpt_test vs2019 --win81 || goto err
+%PREMAKE% --group=in_openmpt vs2019 --win81 || goto err
+%PREMAKE% --group=xmp-openmpt vs2019 --win81 || goto err
+%PREMAKE% --group=libopenmpt-small vs2019 --win81 || goto err
+%PREMAKE% --group=libopenmpt vs2019 --win81 || goto err
+%PREMAKE% --group=openmpt123 vs2019 --win81 || goto err
+%PREMAKE% --group=PluginBridge vs2019 --win81 || goto err
+%PREMAKE% --group=OpenMPT vs2019 --win81 || goto err
+%PREMAKE% --group=all-externals vs2019 --win81 || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2019 --win10 || goto err
 %PREMAKE% --group=in_openmpt vs2019 --win10 || goto err

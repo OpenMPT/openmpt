@@ -27,6 +27,7 @@ exit 1
 if "%MPT_VS_TARGET%" == "xp"      set MPT_VS_WITHTARGET=%MPT_VS_VER%winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_VS_WITHTARGET=%MPT_VS_VER%winvista
 if "%MPT_VS_TARGET%" == "win7"    set MPT_VS_WITHTARGET=%MPT_VS_VER%win7
+if "%MPT_VS_TARGET%" == "win81"   set MPT_VS_WITHTARGET=%MPT_VS_VER%win81
 if "%MPT_VS_TARGET%" == "win10"   set MPT_VS_WITHTARGET=%MPT_VS_VER%win10
 if "%MPT_VS_TARGET%" == "default" set MPT_VS_WITHTARGET=%MPT_VS_VER%win7
 
@@ -40,6 +41,7 @@ if "%MPT_VS_ARCH%" == "Win32" (
 	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
+	if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET=win81
 	if "%MPT_VS_TARGET%" == "win10"   set MPT_BIN_TARGET=win10
 	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win7
 )
@@ -47,6 +49,7 @@ if "%MPT_VS_ARCH%" == "x64" (
 	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
+	if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET=win81
 	if "%MPT_VS_TARGET%" == "win10"   set MPT_BIN_TARGET=win10
 	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win7
 )
@@ -54,6 +57,7 @@ if "%MPT_VS_ARCH%" == "ARM" (
 	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
+	if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET=win81
 	if "%MPT_VS_TARGET%" == "win10"   set MPT_BIN_TARGET=win10
 	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win7
 )
@@ -61,6 +65,7 @@ if "%MPT_VS_ARCH%" == "ARM64" (
 	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
+	if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET=win81
 	if "%MPT_VS_TARGET%" == "win10"   set MPT_BIN_TARGET=win10
 	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win7
 )
@@ -68,12 +73,14 @@ if "%MPT_VS_ARCH%" == "ARM64" (
 if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET32=winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET32=vista
 if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET32=win7
+if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET32=win81
 if "%MPT_VS_TARGET%" == "win10"   set MPT_BIN_TARGET32=win10
 if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET32=win7
 
 if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET64=winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET64=vista
 if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET64=win7
+if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET64=win81
 if "%MPT_VS_TARGET%" == "win10"   set MPT_BIN_TARGET64=win10
 if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET64=win7
 

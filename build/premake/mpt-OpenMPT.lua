@@ -61,7 +61,11 @@ end
 		files {
 			"../../mptrack/res/OpenMPT-win10.manifest",
 		}
-	else
+	elseif  _OPTIONS["win81"] then
+		files {
+			"../../mptrack/res/OpenMPT-win81.manifest",
+		}
+	elseif  _OPTIONS["win7"] then
 		files {
 			"../../mptrack/res/OpenMPT-win7.manifest",
 		}
@@ -105,9 +109,16 @@ end
 	if _OPTIONS["win10"] then
 		excludes {
 			"../../mptrack/res/OpenMPT-win7.manifest",
+			"../../mptrack/res/OpenMPT-win81.manifest",
 		}
-	else
+	elseif  _OPTIONS["win81"] then
 		excludes {
+			"../../mptrack/res/OpenMPT-win7.manifest",
+			"../../mptrack/res/OpenMPT-win10.manifest",
+		}
+	elseif  _OPTIONS["win7"] then
+		excludes {
+			"../../mptrack/res/OpenMPT-win81.manifest",
 			"../../mptrack/res/OpenMPT-win10.manifest",
 		}
 	end
