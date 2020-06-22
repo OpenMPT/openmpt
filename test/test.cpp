@@ -1560,6 +1560,68 @@ static MPT_NOINLINE void TestMisc2()
 	VERIFY_EQUAL( mpt::String::RTrim(std::string("\0\ta\0b ",6)), std::string("\0\ta\0b",5) );
 	VERIFY_EQUAL( mpt::String::Trim(std::string("\0\ta\0b\0",6),std::string("\0",1)), std::string("\ta\0b",4) );
 
+	{
+		std::string expecteds = std::string("pleasure.");
+		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
+		VERIFY_EQUAL(Util::BinToBase64(expected), U_("cGxlYXN1cmUu"));
+	}
+	{
+		std::string expecteds = std::string("leasure.");
+		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
+		VERIFY_EQUAL(Util::BinToBase64(expected), U_("bGVhc3VyZS4="));
+	}
+	{
+		std::string expecteds = std::string("easure.");
+		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
+		VERIFY_EQUAL(Util::BinToBase64(expected), U_("ZWFzdXJlLg=="));
+	}
+	{
+		std::string expecteds = std::string("pleasure.");
+		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
+		VERIFY_EQUAL(expected, Util::Base64ToBin(U_("cGxlYXN1cmUu")));
+	}
+	{
+		std::string expecteds = std::string("leasure.");
+		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
+		VERIFY_EQUAL(expected, Util::Base64ToBin(U_("bGVhc3VyZS4=")));
+	}
+	{
+		std::string expecteds = std::string("easure.");
+		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
+		VERIFY_EQUAL(expected, Util::Base64ToBin(U_("ZWFzdXJlLg==")));
+	}
+
+	{
+		std::string expecteds = std::string("pleasure.");
+		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
+		VERIFY_EQUAL(Util::BinToBase64url(expected), U_("cGxlYXN1cmUu"));
+	}
+	{
+		std::string expecteds = std::string("leasure.");
+		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
+		VERIFY_EQUAL(Util::BinToBase64url(expected), U_("bGVhc3VyZS4"));
+	}
+	{
+		std::string expecteds = std::string("easure.");
+		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
+		VERIFY_EQUAL(Util::BinToBase64url(expected), U_("ZWFzdXJlLg"));
+	}
+	{
+		std::string expecteds = std::string("pleasure.");
+		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
+		VERIFY_EQUAL(expected, Util::Base64urlToBin(U_("cGxlYXN1cmUu")));
+	}
+	{
+		std::string expecteds = std::string("leasure.");
+		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
+		VERIFY_EQUAL(expected, Util::Base64urlToBin(U_("bGVhc3VyZS4")));
+	}
+	{
+		std::string expecteds = std::string("easure.");
+		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
+		VERIFY_EQUAL(expected, Util::Base64urlToBin(U_("ZWFzdXJlLg")));
+	}
+
 	// These should fail to compile
 	//mpt::saturate_round<std::string>(1.0);
 	//mpt::saturate_round<int64>(1.0);

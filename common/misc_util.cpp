@@ -87,6 +87,236 @@ std::vector<std::byte> HexToBin(const mpt::ustring &src)
 }
 
 
+
+static constexpr mpt::uchar base64url[64] = {
+	UC_('A'),UC_('B'),UC_('C'),UC_('D'),UC_('E'),UC_('F'),UC_('G'),UC_('H'),UC_('I'),UC_('J'),UC_('K'),UC_('L'),UC_('M'),UC_('N'),UC_('O'),UC_('P'),
+	UC_('Q'),UC_('R'),UC_('S'),UC_('T'),UC_('U'),UC_('V'),UC_('W'),UC_('X'),UC_('Y'),UC_('Z'),UC_('a'),UC_('b'),UC_('c'),UC_('d'),UC_('e'),UC_('f'),
+	UC_('g'),UC_('h'),UC_('i'),UC_('j'),UC_('k'),UC_('l'),UC_('m'),UC_('n'),UC_('o'),UC_('p'),UC_('q'),UC_('r'),UC_('s'),UC_('t'),UC_('u'),UC_('v'),
+	UC_('w'),UC_('x'),UC_('y'),UC_('z'),UC_('0'),UC_('1'),UC_('2'),UC_('3'),UC_('4'),UC_('5'),UC_('6'),UC_('7'),UC_('8'),UC_('9'),UC_('-'),UC_('_')
+};
+
+mpt::ustring BinToBase64url(mpt::const_byte_span src)
+{
+	mpt::ustring result;
+	result.reserve(4 * ((src.size() + 2) / 3));
+	uint32 bits = 0;
+	std::size_t bytes = 0;
+	for(std::byte byte : src)
+	{
+		bits <<= 8;
+		bits |= mpt::byte_cast<uint8>(byte);
+		bytes++;
+		if(bytes == 3)
+		{
+			result.push_back(base64url[(bits >> 18) & 0x3f]);
+			result.push_back(base64url[(bits >> 12) & 0x3f]);
+			result.push_back(base64url[(bits >> 6) & 0x3f]);
+			result.push_back(base64url[(bits >> 0) & 0x3f]);
+			bits = 0;
+			bytes = 0;
+		}
+	}
+	std::size_t padding = 0;
+	while(bytes != 0)
+	{
+		bits <<= 8;
+		padding++;
+		bytes++;
+		if(bytes == 3)
+		{
+			result.push_back(base64url[(bits >> 18) & 0x3f]);
+			result.push_back(base64url[(bits >> 12) & 0x3f]);
+			if(padding <= 1)
+			{
+				result.push_back(base64url[(bits >> 6) & 0x3f]);
+			}
+			if(padding <= 0)
+			{
+				result.push_back(base64url[(bits >> 0) & 0x3f]);
+			}
+			bits = 0;
+			bytes = 0;
+		}
+	}
+	return result;
+}
+
+static uint8 GetBase64urlBits(mpt::uchar c)
+{
+	for(uint8 i = 0; i < 64; ++i)
+	{
+		if(base64url[i] == c)
+		{
+			return i;
+		}
+	}
+	throw base64_parse_error();
+}
+
+std::vector<std::byte> Base64urlToBin(const mpt::ustring &src)
+{
+	std::vector<std::byte> result;
+	result.reserve(3 * ((src.length() + 2) / 4));
+	uint32 bits = 0;
+	std::size_t chars = 0;
+	for(mpt::uchar c : src)
+	{
+		bits <<= 6;
+		bits |= GetBase64urlBits(c);
+		chars++;
+		if(chars == 4)
+		{
+			result.push_back(mpt::byte_cast<std::byte>(static_cast<uint8>((bits >> 16) & 0xff)));
+			result.push_back(mpt::byte_cast<std::byte>(static_cast<uint8>((bits >> 8) & 0xff)));
+			result.push_back(mpt::byte_cast<std::byte>(static_cast<uint8>((bits >> 0) & 0xff)));
+			bits = 0;
+			chars = 0;
+		}
+	}
+	uint32 padding = 0;
+	if(chars != 0 && chars < 2)
+	{
+		throw base64_parse_error();
+	}
+	while(chars != 0)
+	{
+		bits <<= 6;
+		padding++;
+		chars++;
+		if(chars == 4)
+		{
+			result.push_back(mpt::byte_cast<std::byte>(static_cast<uint8>((bits >> 16) & 0xff)));
+			if(padding < 2)
+			{
+				result.push_back(mpt::byte_cast<std::byte>(static_cast<uint8>((bits >> 8) & 0xff)));
+			}
+			if(padding < 1)
+			{
+				result.push_back(mpt::byte_cast<std::byte>(static_cast<uint8>((bits >> 0) & 0xff)));
+			}
+			bits = 0;
+			chars = 0;
+			padding = 0;
+		}
+	}
+	return result;
+}
+
+
+
+static constexpr mpt::uchar base64[64] = {
+	UC_('A'),UC_('B'),UC_('C'),UC_('D'),UC_('E'),UC_('F'),UC_('G'),UC_('H'),UC_('I'),UC_('J'),UC_('K'),UC_('L'),UC_('M'),UC_('N'),UC_('O'),UC_('P'),
+	UC_('Q'),UC_('R'),UC_('S'),UC_('T'),UC_('U'),UC_('V'),UC_('W'),UC_('X'),UC_('Y'),UC_('Z'),UC_('a'),UC_('b'),UC_('c'),UC_('d'),UC_('e'),UC_('f'),
+	UC_('g'),UC_('h'),UC_('i'),UC_('j'),UC_('k'),UC_('l'),UC_('m'),UC_('n'),UC_('o'),UC_('p'),UC_('q'),UC_('r'),UC_('s'),UC_('t'),UC_('u'),UC_('v'),
+	UC_('w'),UC_('x'),UC_('y'),UC_('z'),UC_('0'),UC_('1'),UC_('2'),UC_('3'),UC_('4'),UC_('5'),UC_('6'),UC_('7'),UC_('8'),UC_('9'),UC_('+'),UC_('/')
+};
+
+mpt::ustring BinToBase64(mpt::const_byte_span src)
+{
+	mpt::ustring result;
+	result.reserve(4 * ((src.size() + 2) / 3));
+	uint32 bits = 0;
+	std::size_t bytes = 0;
+	for(std::byte byte : src)
+	{
+		bits <<= 8;
+		bits |= mpt::byte_cast<uint8>(byte);
+		bytes++;
+		if(bytes == 3)
+		{
+			result.push_back(base64[(bits >> 18) & 0x3f]);
+			result.push_back(base64[(bits >> 12) & 0x3f]);
+			result.push_back(base64[(bits >> 6) & 0x3f]);
+			result.push_back(base64[(bits >> 0) & 0x3f]);
+			bits = 0;
+			bytes = 0;
+		}
+	}
+	std::size_t padding = 0;
+	while(bytes != 0)
+	{
+		bits <<= 8;
+		padding++;
+		bytes++;
+		if(bytes == 3)
+		{
+			result.push_back(base64[(bits >> 18) & 0x3f]);
+			result.push_back(base64[(bits >> 12) & 0x3f]);
+			if(padding > 1)
+			{
+				result.push_back(UC_('='));
+			} else
+			{
+				result.push_back(base64[(bits >> 6) & 0x3f]);
+			}
+			if(padding > 0)
+			{
+				result.push_back(UC_('='));
+			} else
+			{
+				result.push_back(base64[(bits >> 0) & 0x3f]);
+			}
+			bits = 0;
+			bytes = 0;
+		}
+	}
+	return result;
+}
+
+static uint8 GetBase64Bits(mpt::uchar c)
+{
+	for(uint8 i = 0; i < 64; ++i)
+	{
+		if(base64[i] == c)
+		{
+			return i;
+		}
+	}
+	throw base64_parse_error();
+}
+
+std::vector<std::byte> Base64ToBin(const mpt::ustring &src)
+{
+	std::vector<std::byte> result;
+	result.reserve(3 * (src.length() / 4));
+	uint32 bits = 0;
+	std::size_t chars = 0;
+	std::size_t padding = 0;
+	for(mpt::uchar c : src)
+	{
+		bits <<= 6;
+		if(c == UC_('='))
+		{
+			padding++;
+		} else
+		{
+			bits |= GetBase64Bits(c);
+		}
+		chars++;
+		if(chars == 4)
+		{
+			result.push_back(mpt::byte_cast<std::byte>(static_cast<uint8>((bits >> 16) & 0xff)));
+			if(padding < 2)
+			{
+				result.push_back(mpt::byte_cast<std::byte>(static_cast<uint8>((bits >> 8) & 0xff)));
+			}
+			if(padding < 1)
+			{
+				result.push_back(mpt::byte_cast<std::byte>(static_cast<uint8>((bits >> 0) & 0xff)));
+			}
+			bits = 0;
+			chars = 0;
+			padding = 0;
+		}
+	}
+	if(chars != 0)
+	{
+		throw base64_parse_error();
+	}
+	return result;
+}
+
+
 } // namespace Util
 
 
