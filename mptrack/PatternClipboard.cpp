@@ -1015,7 +1015,7 @@ bool PatternClipboard::ToSystemClipboard(const std::string_view &data)
 bool PatternClipboard::FromSystemClipboard(std::string &data)
 {
 	Clipboard clipboard(CF_TEXT);
-	if(auto cbdata = clipboard.Get())
+	if(auto cbdata = clipboard.Get(); cbdata.data())
 	{
 		if(cbdata.size() > 0)
 			data.assign(mpt::byte_cast<char *>(cbdata.data()), cbdata.size() - 1);

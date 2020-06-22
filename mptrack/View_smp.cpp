@@ -2012,7 +2012,7 @@ void CViewSample::OnEditCopy()
 
 	BeginWaitCursor();
 	Clipboard clipboard(CF_WAVE, memSize);
-	if(auto data = clipboard.Get())
+	if(auto data = clipboard.Get(); data.data())
 	{
 		WAVWriter file(data);
 
@@ -2105,7 +2105,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 	CModDoc *pModDoc = GetDocument();
 	BeginWaitCursor();
 	Clipboard clipboard(CF_WAVE);
-	if(auto data = clipboard.Get())
+	if(auto data = clipboard.Get(); data.data())
 	{
 		SmpLength selBegin = 0, selEnd = 0;
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Paste");

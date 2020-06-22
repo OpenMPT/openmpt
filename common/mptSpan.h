@@ -21,6 +21,7 @@
 #else // !C++20
 #include <array>
 #include <iterator>
+#include <limits>
 #include <type_traits>
 #endif // C++20
 
@@ -38,6 +39,7 @@ namespace mpt {
 #if MPT_CXX_AT_LEAST(20)
 
 using std::span;
+using std::dynamic_extent;
 
 #else // !C++20
 
@@ -46,6 +48,9 @@ using std::span;
 // objects, i.e. equivalent to a (beg,end) or (data,size) tuple.
 //  Can eventually be replaced without further modifications with a full C++20
 // std::span.
+
+inline constexpr std::size_t dynamic_extent = std::numeric_limits<std::size_t>::max();
+
 template <typename T>
 class span
 {
@@ -98,8 +103,6 @@ public:
 	const_iterator cbegin() const { return const_iterator(begin()); }
 	const_iterator cend() const { return const_iterator(end()); }
 
-	operator bool () const noexcept { return m_beg != nullptr; }
-
 	reference operator[](index_type index) { return at(index); }
 	const_reference operator[](index_type index) const { return at(index); }
 
@@ -115,6 +118,11 @@ public:
 
 	index_type size() const noexcept { return static_cast<index_type>(std::distance(m_beg, m_end)); }
 	index_type length() const noexcept { return size(); }
+
+	span subspan(std::size_t offset, std::size_t count = mpt::dynamic_extent) const
+	{
+		return span(m_beg + offset, (count == mpt::dynamic_extent) ? (size() - offset) : count);
+	}
 
 }; // class span
 

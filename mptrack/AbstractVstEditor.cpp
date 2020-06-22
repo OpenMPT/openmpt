@@ -220,7 +220,7 @@ void CAbstractVstEditor::OnPasteParameters()
 
 	BeginWaitCursor();
 	Clipboard clipboard(m_clipboardFormat);
-	if(auto data = clipboard.Get())
+	if(auto data = clipboard.Get(); data.data())
 	{
 		FileReader file(data);
 		VSTPresets::ErrorCode error = VSTPresets::LoadFile(file, m_VstPlugin);
