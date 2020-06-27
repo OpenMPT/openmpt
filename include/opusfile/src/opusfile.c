@@ -5,8 +5,8 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE libopusfile SOURCE CODE IS (C) COPYRIGHT 1994-2012           *
- * by the Xiph.Org Foundation and contributors http://www.xiph.org/ *
+ * THE libopusfile SOURCE CODE IS (C) COPYRIGHT 1994-2020           *
+ * by the Xiph.Org Foundation and contributors https://xiph.org/    *
  *                                                                  *
  ********************************************************************
 
@@ -1531,7 +1531,9 @@ static int op_open1(OggOpusFile *_of,
     ogg_sync_wrote(&_of->oy,(long)_initial_bytes);
   }
   /*Can we seek?
-    Stevens suggests the seek test is portable.*/
+    Stevens suggests the seek test is portable.
+    It's actually not for files on win32, but we address that by fixing it in
+     our callback implementation (see stream.c).*/
   seekable=_cb->seek!=NULL&&(*_cb->seek)(_stream,0,SEEK_CUR)!=-1;
   /*If seek is implemented, tell must also be implemented.*/
   if(seekable){
@@ -1780,6 +1782,7 @@ int op_current_link(const OggOpusFile *_of){
 /*Compute an average bitrate given a byte and sample count.
   Return: The bitrate in bits per second.*/
 static opus_int32 op_calc_bitrate(opus_int64 _bytes,ogg_int64_t _samples){
+  if(OP_UNLIKELY(_samples<=0))return OP_INT32_MAX;
   /*These rates are absurd, but let's handle them anyway.*/
   if(OP_UNLIKELY(_bytes>(OP_INT64_MAX-(_samples>>1))/(48000*8))){
     ogg_int64_t den;
@@ -1789,7 +1792,6 @@ static opus_int32 op_calc_bitrate(opus_int64 _bytes,ogg_int64_t _samples){
     den=_samples/(48000*8);
     return (opus_int32)((_bytes+(den>>1))/den);
   }
-  if(OP_UNLIKELY(_samples<=0))return OP_INT32_MAX;
   /*This can't actually overflow in normal operation: even with a pre-skip of
      545 2.5 ms frames with 8 streams running at 1282*8+1 bytes per packet
      (1275 byte frames + Opus framing overhead + Ogg lacing values), that all
@@ -1988,9 +1990,12 @@ static int op_fetch_and_process_page(OggOpusFile *_of,
           Drain the packets from the page anyway.
           If we don't, they'll still be there when we fetch the next page.
           Then, when we go to pull out packets, we might get more than 255,
-           which would overrun our packet buffer.*/
-        total_duration=op_collect_audio_packets(_of,durations);
-        OP_ASSERT(total_duration>=0);
+           which would overrun our packet buffer.
+          We repeat this call until we get any actual packets, since we might
+           have buffered multiple out-of-sequence pages with no packets on
+           them.*/
+        do total_duration=op_collect_audio_packets(_of,durations);
+        while(total_duration<0);
         if(!_ignore_holes){
           /*Report the hole to the caller after we finish timestamping the
              packets.*/
@@ -2649,11 +2654,12 @@ int op_pcm_seek(OggOpusFile *_of,ogg_int64_t _pcm_offset){
     ret=op_fetch_and_process_page(_of,NULL,-1,0,1);
     if(OP_UNLIKELY(ret<0))return OP_EBADLINK;
   }
-  OP_ALWAYS_TRUE(!op_granpos_diff(&diff,prev_packet_gp,pcm_start));
-  /*We skipped too far.
+  /*We skipped too far, or couldn't get within 2 billion samples of the target.
     Either the timestamps were illegal or there was a hole in the data.*/
-  if(diff>skip)return OP_EBADLINK;
-  OP_ASSERT(_pcm_offset-diff<OP_INT32_MAX);
+  if(op_granpos_diff(&diff,prev_packet_gp,pcm_start)||diff>skip
+   ||_pcm_offset-diff>=OP_INT32_MAX){
+    return OP_EBADLINK;
+  }
   /*TODO: If there are further holes/illegal timestamps, we still won't decode
      to the correct sample.
     However, at least op_pcm_tell() will report the correct value immediately
@@ -2816,10 +2822,17 @@ static int op_read_native(OggOpusFile *_of,
       /*If we have buffered samples, return them.*/
       if(nsamples>0){
         if(nsamples*nchannels>_buf_size)nsamples=_buf_size/nchannels;
-        memcpy(_pcm,_of->od_buffer+nchannels*od_buffer_pos,
-         sizeof(*_pcm)*nchannels*nsamples);
-        od_buffer_pos+=nsamples;
-        _of->od_buffer_pos=od_buffer_pos;
+        OP_ASSERT(_pcm!=NULL||nsamples<=0);
+        /*Check nsamples again so we don't pass NULL to memcpy() if _buf_size
+           is zero.
+          That would technically be undefined behavior, even if the number of
+           bytes to copy were zero.*/
+        if(nsamples>0){
+          memcpy(_pcm,_of->od_buffer+nchannels*od_buffer_pos,
+           sizeof(*_pcm)*nchannels*nsamples);
+          od_buffer_pos+=nsamples;
+          _of->od_buffer_pos=od_buffer_pos;
+        }
         if(_li!=NULL)*_li=_of->cur_link;
         return nsamples;
       }
@@ -2873,6 +2886,7 @@ static int op_read_native(OggOpusFile *_of,
           _of->samples_tracked+=trimmed_duration-od_buffer_pos;
         }
         else{
+          OP_ASSERT(_pcm!=NULL);
           /*Otherwise decode directly into the user's buffer.*/
           ret=op_decode(_of,_pcm,pop,duration,nchannels);
           if(OP_UNLIKELY(ret<0))return ret;
@@ -3165,7 +3179,7 @@ static opus_uint32 op_rand(opus_uint32 _seed){
 
 # define OP_GAIN (32753.0F)
 
-# define OP_PRNG_GAIN (1.0F/0xFFFFFFFF)
+# define OP_PRNG_GAIN (1.0F/(float)0xFFFFFFFF)
 
 /*48 kHz noise shaping filter, sd=2.34.*/
 

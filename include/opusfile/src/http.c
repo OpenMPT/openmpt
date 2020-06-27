@@ -5,8 +5,8 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE libopusfile SOURCE CODE IS (C) COPYRIGHT 2012                *
- * by the Xiph.Org Foundation and contributors http://www.xiph.org/ *
+ * THE libopusfile SOURCE CODE IS (C) COPYRIGHT 2012-2020           *
+ * by the Xiph.Org Foundation and contributors https://xiph.org/    *
  *                                                                  *
  ********************************************************************/
 #ifdef HAVE_CONFIG_H
@@ -334,6 +334,9 @@ int SSL_CTX_set_default_verify_paths_win32(SSL_CTX *_ssl_ctx);
 
 # else
 /*Normal Berkeley sockets.*/
+#  ifndef BSD_COMP
+#   define BSD_COMP 1        /* for FIONREAD on Solaris/Illumos */
+#  endif
 #  include <sys/ioctl.h>
 #  include <sys/types.h>
 #  include <sys/socket.h>
@@ -355,8 +358,21 @@ typedef int op_sock;
 #  define op_reset_errno() (errno=0)
 
 # endif
-# include <sys/timeb.h>
+
+# ifdef OP_HAVE_CLOCK_GETTIME
+#  include <time.h>
+typedef struct timespec op_time;
+# else
+#  include <sys/timeb.h>
+typedef struct timeb op_time;
+# endif
+
 # include <openssl/x509v3.h>
+
+# if (defined(LIBRESSL_VERSION_NUMBER)&&OPENSSL_VERSION_NUMBER==0x20000000L)
+#  undef OPENSSL_VERSION_NUMBER
+#  define OPENSSL_VERSION_NUMBER 0x1000115fL
+# endif
 
 /*The maximum number of simultaneous connections.
   RFC 2616 says this SHOULD NOT be more than 2, but everyone on the modern web
@@ -548,7 +564,7 @@ static int op_parse_url_impl(OpusParsedURL *_dst,const char *_src){
   /*Discard the <fragment> component, if any.
     This doesn't get sent to the server.
     Some day we should add support for Media Fragment URIs
-     <http://www.w3.org/TR/media-frags/>.*/
+     <https://www.w3.org/TR/media-frags/>.*/
   if(*path_end=='#')uri_end=path_end+1+strspn(path_end+1,OP_URL_QUERY_FRAG);
   else uri_end=path_end;
   /*If there's anything left, this was not a valid URL.*/
@@ -799,7 +815,7 @@ struct OpusHTTPConn{
   /*The next connection in either the LRU or free list.*/
   OpusHTTPConn *next;
   /*The last time we blocked for reading from this connection.*/
-  struct timeb  read_time;
+  op_time       read_time;
   /*The number of bytes we've read since the last time we blocked.*/
   opus_int64    read_bytes;
   /*The estimated throughput of this connection, in bytes/s.*/
@@ -849,7 +865,7 @@ struct OpusHTTPStream{
     struct sockaddr_in6 v6;
   }                addr;
   /*The last time we re-resolved the host.*/
-  struct timeb     resolve_time;
+  op_time          resolve_time;
   /*A buffer used to build HTTP requests.*/
   OpusStringBuf    request;
   /*A buffer used to build proxy CONNECT requests.*/
@@ -1004,8 +1020,31 @@ static int op_http_conn_estimate_available(OpusHTTPConn *_conn){
   return available;
 }
 
-static opus_int32 op_time_diff_ms(const struct timeb *_end,
- const struct timeb *_start){
+static void op_time_get(op_time *now){
+# ifdef OP_HAVE_CLOCK_GETTIME
+  /*Prefer a monotonic clock that continues to increment during suspend.*/
+#  ifdef CLOCK_BOOTTIME
+  if(clock_gettime(CLOCK_BOOTTIME,now)!=0)
+#  endif
+#  ifdef CLOCK_MONOTONIC
+  if(clock_gettime(CLOCK_MONOTONIC,now)!=0)
+#  endif
+  OP_ALWAYS_TRUE(!clock_gettime(CLOCK_REALTIME,now));
+# else
+  ftime(now);
+# endif
+}
+
+static opus_int32 op_time_diff_ms(const op_time *_end, const op_time *_start){
+# ifdef OP_HAVE_CLOCK_GETTIME
+  opus_int64 dtime;
+  dtime=_end->tv_sec-(opus_int64)_start->tv_sec;
+  OP_ASSERT(_end->tv_nsec<1000000000);
+  OP_ASSERT(_start->tv_nsec<1000000000);
+  if(OP_UNLIKELY(dtime>(OP_INT32_MAX-1000)/1000))return OP_INT32_MAX;
+  if(OP_UNLIKELY(dtime<(OP_INT32_MIN+1000)/1000))return OP_INT32_MIN;
+  return (opus_int32)dtime*1000+(_end->tv_nsec-_start->tv_nsec)/1000000;
+# else
   opus_int64 dtime;
   dtime=_end->time-(opus_int64)_start->time;
   OP_ASSERT(_end->millitm<1000);
@@ -1013,17 +1052,18 @@ static opus_int32 op_time_diff_ms(const struct timeb *_end,
   if(OP_UNLIKELY(dtime>(OP_INT32_MAX-1000)/1000))return OP_INT32_MAX;
   if(OP_UNLIKELY(dtime<(OP_INT32_MIN+1000)/1000))return OP_INT32_MIN;
   return (opus_int32)dtime*1000+_end->millitm-_start->millitm;
+# endif
 }
 
 /*Update the read rate estimate for this connection.*/
 static void op_http_conn_read_rate_update(OpusHTTPConn *_conn){
-  struct timeb read_time;
+  op_time      read_time;
   opus_int32   read_delta_ms;
   opus_int64   read_delta_bytes;
   opus_int64   read_rate;
   read_delta_bytes=_conn->read_bytes;
   if(read_delta_bytes<=0)return;
-  ftime(&read_time);
+  op_time_get(&read_time);
   read_delta_ms=op_time_diff_ms(&read_time,&_conn->read_time);
   read_rate=_conn->read_rate;
   read_delta_ms=OP_MAX(read_delta_ms,1);
@@ -1530,7 +1570,7 @@ static long op_bio_retry_ctrl(BIO *_b,int _cmd,long _num,void *_ptr){
   return ret;
 }
 
-# if OPENSSL_VERSION_NUMBER<0x10100000L
+# if (OPENSSL_VERSION_NUMBER<0x10100000L&&LIBRESSL_VERSION_NUMBER<0x2070000fL)
 #  define BIO_set_data(_b,_ptr) ((_b)->ptr=(_ptr))
 #  define BIO_set_init(_b,_init) ((_b)->init=(_init))
 #  define ASN1_STRING_get0_data ASN1_STRING_data
@@ -1538,7 +1578,7 @@ static long op_bio_retry_ctrl(BIO *_b,int _cmd,long _num,void *_ptr){
 
 static int op_bio_retry_new(BIO *_b){
   BIO_set_init(_b,1);
-# if OPENSSL_VERSION_NUMBER<0x10100000L
+# if (OPENSSL_VERSION_NUMBER<0x10100000L&&LIBRESSL_VERSION_NUMBER<0x2070000fL)
   _b->num=0;
 # endif
   BIO_set_data(_b,NULL);
@@ -1549,7 +1589,7 @@ static int op_bio_retry_free(BIO *_b){
   return _b!=NULL;
 }
 
-# if OPENSSL_VERSION_NUMBER<0x10100000L
+# if (OPENSSL_VERSION_NUMBER<0x10100000L&&LIBRESSL_VERSION_NUMBER<0x2070000fL)
 /*This is not const because OpenSSL doesn't allow it, even though it won't
    write to it.*/
 static BIO_METHOD op_bio_retry_method={
@@ -1570,7 +1610,7 @@ static BIO_METHOD op_bio_retry_method={
    proxying https URL requests.*/
 static int op_http_conn_establish_tunnel(OpusHTTPStream *_stream,
  OpusHTTPConn *_conn,op_sock _fd,SSL *_ssl_conn,BIO *_ssl_bio){
-# if OPENSSL_VERSION_NUMBER>=0x10100000L
+# if (OPENSSL_VERSION_NUMBER>=0x10100000L||LIBRESSL_VERSION_NUMBER>=0x2070000fL)
   BIO_METHOD *bio_retry_method;
 # endif
   BIO  *retry_bio;
@@ -1583,7 +1623,7 @@ static int op_http_conn_establish_tunnel(OpusHTTPStream *_stream,
   ret=op_http_conn_write_fully(_conn,
    _stream->proxy_connect.buf,_stream->proxy_connect.nbuf);
   if(OP_UNLIKELY(ret<0))return ret;
-# if OPENSSL_VERSION_NUMBER>=0x10100000L
+# if (OPENSSL_VERSION_NUMBER>=0x10100000L||LIBRESSL_VERSION_NUMBER>=0x2070000fL)
   bio_retry_method=BIO_meth_new(BIO_TYPE_NULL,"retry");
   if(bio_retry_method==NULL)return OP_EFAULT;
   BIO_meth_set_write(bio_retry_method,op_bio_retry_write);
@@ -1606,7 +1646,7 @@ static int op_http_conn_establish_tunnel(OpusHTTPStream *_stream,
   /*This shouldn't succeed, since we can't read yet.*/
   OP_ALWAYS_TRUE(SSL_connect(_ssl_conn)<0);
   SSL_set_bio(_ssl_conn,_ssl_bio,_ssl_bio);
-# if OPENSSL_VERSION_NUMBER>=0x10100000L
+# if (OPENSSL_VERSION_NUMBER>=0x10100000L||LIBRESSL_VERSION_NUMBER>=0x2070000fL)
   BIO_meth_free(bio_retry_method);
 # endif
   /*Only now do we disable write coalescing, to allow the CONNECT
@@ -1635,7 +1675,7 @@ static struct addrinfo *op_inet_pton(const char *_host){
   return NULL;
 }
 
-# if OPENSSL_VERSION_NUMBER<0x10002000L
+# if (OPENSSL_VERSION_NUMBER<0x10002000L&&LIBRESSL_VERSION_NUMBER<0x2070000fL)
 /*Match a host name against a host with a possible wildcard pattern according
    to the rules of RFC 6125 Section 6.4.3.
   Return: 0 if the pattern doesn't match, and a non-zero value if it does.*/
@@ -1893,7 +1933,7 @@ static int op_http_conn_start_tls(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
   SSL_set_tlsext_host_name(_ssl_conn,_stream->url.host);
 # endif
   skip_certificate_check=_stream->skip_certificate_check;
-# if OPENSSL_VERSION_NUMBER>=0x10002000L
+# if (OPENSSL_VERSION_NUMBER>=0x10002000L||LIBRESSL_VERSION_NUMBER>=0x2070000fL)
   /*As of version 1.0.2, OpenSSL can finally do hostname checks automatically.
     Of course, they make it much more complicated than it needs to be.*/
   if(!skip_certificate_check){
@@ -1956,13 +1996,13 @@ static int op_http_conn_start_tls(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
   if(OP_UNLIKELY(ret<=0))return OP_FALSE;
   ssl_session=_stream->ssl_session;
   if(ssl_session==NULL
-# if OPENSSL_VERSION_NUMBER<0x10002000L
+# if (OPENSSL_VERSION_NUMBER<0x10002000L&&LIBRESSL_VERSION_NUMBER<0x2070000fL)
    ||!skip_certificate_check
 # endif
    ){
     ret=op_do_ssl_step(_ssl_conn,_fd,SSL_do_handshake);
     if(OP_UNLIKELY(ret<=0))return OP_FALSE;
-# if OPENSSL_VERSION_NUMBER<0x10002000L
+# if (OPENSSL_VERSION_NUMBER<0x10002000L&&LIBRESSL_VERSION_NUMBER<0x2070000fL)
     /*OpenSSL before version 1.0.2 does not do automatic hostname verification,
        despite the fact that we just passed it the hostname above in the call
        to SSL_set_tlsext_host_name().
@@ -2015,7 +2055,7 @@ static int op_sock_connect_next(op_sock _fd,
 # define OP_NPROTOS (2)
 
 static int op_http_connect_impl(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
- struct addrinfo *_addrs,struct timeb *_start_time){
+ struct addrinfo *_addrs,op_time *_start_time){
   struct addrinfo *addr;
   struct addrinfo *addrs[OP_NPROTOS];
   struct pollfd    fds[OP_NPROTOS];
@@ -2045,7 +2085,7 @@ static int op_http_connect_impl(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
   _stream->free_head=_conn->next;
   _conn->next=_stream->lru_head;
   _stream->lru_head=_conn;
-  ftime(_start_time);
+  op_time_get(_start_time);
   *&_conn->read_time=*_start_time;
   _conn->read_bytes=0;
   _conn->read_rate=0;
@@ -2147,14 +2187,14 @@ static int op_http_connect_impl(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
 }
 
 static int op_http_connect(OpusHTTPStream *_stream,OpusHTTPConn *_conn,
- struct addrinfo *_addrs,struct timeb *_start_time){
-  struct timeb     resolve_time;
+ struct addrinfo *_addrs,op_time *_start_time){
+  op_time          resolve_time;
   struct addrinfo *new_addrs;
   int              ret;
   /*Re-resolve the host if we need to (RFC 6555 says we MUST do so
      occasionally).*/
   new_addrs=NULL;
-  ftime(&resolve_time);
+  op_time_get(&resolve_time);
   if(_addrs!=&_stream->addr_info||op_time_diff_ms(&resolve_time,
    &_stream->resolve_time)>=OP_RESOLVE_CACHE_TIMEOUT_MS){
     new_addrs=op_resolve(_stream->connect_host,_stream->connect_port);
@@ -2305,8 +2345,8 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
   addrs=NULL;
   for(nredirs=0;nredirs<OP_REDIRECT_LIMIT;nredirs++){
     OpusParsedURL  next_url;
-    struct timeb   start_time;
-    struct timeb   end_time;
+    op_time        start_time;
+    op_time        end_time;
     char          *next;
     char          *status_code;
     int            minor_version_pos;
@@ -2314,7 +2354,7 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
     /*Initialize the SSL library if necessary.*/
     if(OP_URL_IS_SSL(&_stream->url)&&_stream->ssl_ctx==NULL){
       SSL_CTX *ssl_ctx;
-# if OPENSSL_VERSION_NUMBER<0x10100000L
+# if (OPENSSL_VERSION_NUMBER<0x10100000L&&LIBRESSL_VERSION_NUMBER<0x2070000fL)
 #  if !defined(OPENSSL_NO_LOCKING)
       /*The documentation says SSL_library_init() is not reentrant.
         We don't want to add our own depenencies on a threading library, and it
@@ -2440,7 +2480,7 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
     if(OP_UNLIKELY(ret<0))return ret;
     ret=op_http_conn_read_response(_stream->conns+0,&_stream->response);
     if(OP_UNLIKELY(ret<0))return ret;
-    ftime(&end_time);
+    op_time_get(&end_time);
     next=op_http_parse_status_line(&v1_1_compat,&status_code,
      _stream->response.buf);
     if(OP_UNLIKELY(next==NULL))return OP_FALSE;
@@ -2852,8 +2892,8 @@ static int op_http_conn_handle_response(OpusHTTPStream *_stream,
                 converted into a request for the rest.*/
 static int op_http_conn_open_pos(OpusHTTPStream *_stream,
  OpusHTTPConn *_conn,opus_int64 _pos,opus_int32 _chunk_size){
-  struct timeb  start_time;
-  struct timeb  end_time;
+  op_time       start_time;
+  op_time       end_time;
   opus_int32    connect_rate;
   opus_int32    connect_time;
   int           ret;
@@ -2863,7 +2903,7 @@ static int op_http_conn_open_pos(OpusHTTPStream *_stream,
   if(OP_UNLIKELY(ret<0))return ret;
   ret=op_http_conn_handle_response(_stream,_conn);
   if(OP_UNLIKELY(ret!=0))return OP_FALSE;
-  ftime(&end_time);
+  op_time_get(&end_time);
   _stream->cur_conni=(int)(_conn-_stream->conns);
   OP_ASSERT(_stream->cur_conni>=0&&_stream->cur_conni<OP_NCONNS_MAX);
   /*The connection has been successfully opened.
@@ -3115,7 +3155,7 @@ static int op_http_conn_read_ahead(OpusHTTPStream *_stream,
 }
 
 static int op_http_stream_seek(void *_stream,opus_int64 _offset,int _whence){
-  struct timeb     seek_time;
+  op_time          seek_time;
   OpusHTTPStream  *stream;
   OpusHTTPConn    *conn;
   OpusHTTPConn   **pnext;
@@ -3146,8 +3186,10 @@ static int op_http_stream_seek(void *_stream,opus_int64 _offset,int _whence){
     }break;
     case SEEK_END:{
       /*Check for overflow:*/
-      if(_offset>content_length||_offset<content_length-OP_INT64_MAX)return -1;
-      pos=content_length-_offset;
+      if(_offset<-content_length||_offset>OP_INT64_MAX-content_length){
+        return -1;
+      }
+      pos=content_length+_offset;
     }break;
     default:return -1;
   }
@@ -3156,7 +3198,7 @@ static int op_http_stream_seek(void *_stream,opus_int64 _offset,int _whence){
     op_http_conn_read_rate_update(stream->conns+ci);
     *&seek_time=*&stream->conns[ci].read_time;
   }
-  else ftime(&seek_time);
+  else op_time_get(&seek_time);
   /*If we seeked past the end of the stream, just disable the active
      connection.*/
   if(pos>=content_length){
