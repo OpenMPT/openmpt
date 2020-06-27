@@ -64,12 +64,6 @@ namespace mpt
 namespace detail
 {
 
-#if defined(MPT_FSTREAM_NO_WCHAR)
-#if MPT_GCC_BEFORE(9,1,0)
-MPT_WARNING("Warning: Standard library does neither provide std::fstream wchar_t overloads nor std::filesystem with wchar_t support. Unicode filename support is thus unavailable.")
-#endif // MPT_GCC_AT_LEAST(9,1,0)
-#endif // MPT_FSTREAM_NO_WCHAR
-
 template<typename Tbase>
 inline void fstream_open(Tbase & base, const mpt::PathString & filename, std::ios_base::openmode mode)
 {
@@ -77,7 +71,7 @@ inline void fstream_open(Tbase & base, const mpt::PathString & filename, std::io
 		#if MPT_GCC_AT_LEAST(9,1,0)
 			base.open(static_cast<std::filesystem::path>(filename.AsNative()), mode);
 		#else // !MPT_GCC_AT_LEAST(9,1,0)
-			MPT_WARNING("Warning: MinGW with GCC earlier than 9.1 detected. Unicode filename support is unavailable.")
+			// Warning: MinGW with GCC earlier than 9.1 detected. Standard library does neither provide std::fstream wchar_t overloads nor std::filesystem with wchar_t support. Unicode filename support is thus unavailable.
 			base.open(mpt::ToCharset(mpt::Charset::Locale, filename.AsNative()).c_str(), mode);
 		#endif // MPT_GCC_AT_LEAST(9,1,0)
 	#else // !MPT_FSTREAM_NO_WCHAR
@@ -91,6 +85,8 @@ class SafeOutputFile;
 
 // We cannot rely on implicit conversion of mpt::PathString to std::filesystem::path when constructing std::fstream
 // because of broken overload implementation in GCC libstdc++ 8, 9, 10.
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95642
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90704
 
 class fstream
 	: public std::fstream
