@@ -5,8 +5,8 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE libopusfile SOURCE CODE IS (C) COPYRIGHT 2012                *
- * by the Xiph.Org Foundation and contributors http://www.xiph.org/ *
+ * THE libopusfile SOURCE CODE IS (C) COPYRIGHT 2012-2020           *
+ * by the Xiph.Org Foundation and contributors https://xiph.org/    *
  *                                                                  *
  ********************************************************************/
 #ifdef HAVE_CONFIG_H
@@ -96,6 +96,9 @@ void opus_tags_clear(OpusTags *_tags){
   int ci;
   ncomments=_tags->comments;
   if(_tags->user_comments!=NULL)ncomments++;
+  else{
+    OP_ASSERT(ncomments==0);
+  }
   for(ci=ncomments;ci-->0;)_ogg_free(_tags->user_comments[ci]);
   _ogg_free(_tags->user_comments);
   _ogg_free(_tags->comment_lengths);
@@ -590,6 +593,7 @@ static int opus_picture_tag_parse_impl(OpusPictureTag *_pic,const char *_tag,
   int          colors_set;
   size_t       i;
   /*Decode the BASE64 data.*/
+  OP_ASSERT(_base64_sz>=11);
   for(i=0;i<_base64_sz;i++){
     opus_uint32 value;
     int         j;
