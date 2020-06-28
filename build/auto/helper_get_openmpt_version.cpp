@@ -1,9 +1,11 @@
 
+#define LIBOPENMPT_BUILD
+#include "common/BuildSettings.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
 
-#define LIBOPENMPT_BUILD
 #include "common/versionNumber.h"
 #include "libopenmpt/libopenmpt_version.h"
 
