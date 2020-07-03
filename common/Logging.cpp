@@ -198,7 +198,7 @@ namespace Trace {
 
 // Debugging functionality will use simple globals.
 
-std::atomic<bool> g_Enabled = ATOMIC_VAR_INIT(false);
+std::atomic<bool> g_Enabled{false};
 
 static bool g_Sealed = false;
 
