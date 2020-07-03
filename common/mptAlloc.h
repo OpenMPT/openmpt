@@ -33,9 +33,9 @@ namespace mpt {
 
 
 
-template <typename T> inline span<T> as_span(std::vector<T> & cont) { return span<T>(cont); }
+template <typename T> inline mpt::span<T> as_span(std::vector<T> & cont) { return mpt::span<T>(cont); }
 
-template <typename T> inline span<const T> as_span(const std::vector<T> & cont) { return span<const T>(cont); }
+template <typename T> inline mpt::span<const T> as_span(const std::vector<T> & cont) { return mpt::span<const T>(cont); }
 
 
 

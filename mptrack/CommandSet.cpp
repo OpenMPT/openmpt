@@ -1547,8 +1547,8 @@ ctx:UID:Description:Modifier:Key:EventMask
 
 static std::string GetDefaultKeymap()
 {
-	mpt::const_byte_span data = GetResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"));
-	return std::string(mpt::byte_cast<const char*>(data.begin()), mpt::byte_cast<const char*>(data.end()));
+	mpt::span<const char> data = mpt::byte_cast<mpt::span<const char>>(GetResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS")));
+	return std::string(data.begin(), data.end());
 }
 
 

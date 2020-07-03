@@ -1019,10 +1019,10 @@ public:
 		void invalidate() { size_ = 0; pinnedData = nullptr; cache = std::vector<std::byte>(); }
 		const std::byte *data() const { return span().data(); }
 		std::size_t size() const { return size_; }
-		mpt::const_byte_span::iterator begin() const { return span().begin(); }
-		mpt::const_byte_span::iterator end() const { return span().end(); }
-		mpt::const_byte_span::const_iterator cbegin() const { return span().cbegin(); }
-		mpt::const_byte_span::const_iterator cend() const { return span().cend(); }
+		mpt::const_byte_span::pointer begin() const { return span().data(); }
+		mpt::const_byte_span::pointer end() const { return span().data() + span().size(); }
+		mpt::const_byte_span::const_pointer cbegin() const { return span().data(); }
+		mpt::const_byte_span::const_pointer cend() const { return span().data() + span().size(); }
 	};
 
 	// Returns a pinned view into the remaining raw data from cursor position.
@@ -1122,22 +1122,26 @@ public:
 	std::string GetRawDataAsString() const
 	{
 		PinnedRawDataView view = GetPinnedRawDataView();
-		return std::string(mpt::byte_cast<const char*>(view.span().begin()), mpt::byte_cast<const char*>(view.span().end()));
+		mpt::span<const char> data = mpt::byte_cast<mpt::span<const char>>(view.span());
+		return std::string(data.begin(), data.end());
 	}
 	std::string ReadRawDataAsString()
 	{
 		PinnedRawDataView view = ReadPinnedRawDataView();
-		return std::string(mpt::byte_cast<const char*>(view.span().begin()), mpt::byte_cast<const char*>(view.span().end()));
+		mpt::span<const char> data = mpt::byte_cast<mpt::span<const char>>(view.span());
+		return std::string(data.begin(), data.end());
 	}
 	std::string GetRawDataAsString(std::size_t size) const
 	{
 		PinnedRawDataView view = GetPinnedRawDataView(size);
-		return std::string(mpt::byte_cast<const char*>(view.span().begin()), mpt::byte_cast<const char*>(view.span().end()));
+		mpt::span<const char> data = mpt::byte_cast<mpt::span<const char>>(view.span());
+		return std::string(data.begin(), data.end());
 	}
 	std::string ReadRawDataAsString(std::size_t size)
 	{
 		PinnedRawDataView view = ReadPinnedRawDataView(size);
-		return std::string(mpt::byte_cast<const char*>(view.span().begin()), mpt::byte_cast<const char*>(view.span().end()));
+		mpt::span<const char> data = mpt::byte_cast<mpt::span<const char>>(view.span());
+		return std::string(data.begin(), data.end());
 	}
 
 	template <typename T>
