@@ -325,16 +325,16 @@ std::vector<std::byte> Base64ToBin(const mpt::ustring &src)
 namespace mpt
 {
 
-std::string getenv(const std::string &env_var, const std::string &def)
+std::optional<std::string> getenv(const std::string &env_var)
 {
 #if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
 	MPT_UNREFERENCED_PARAMETER(env_var);
-	return def;
+	return std::nullopt;
 #else
 	const char *val = std::getenv(env_var.c_str());
 	if(!val)
 	{
-		return def;
+		return std::nullopt;
 	}
 	return val;
 #endif

@@ -31,6 +31,7 @@
 #include "mptLibrary.h"
 
 #include <stdexcept>
+#include <optional>
 #include <vector>
 
 #include <cstdlib>
@@ -238,9 +239,7 @@ namespace mpt
 {
 
 // Wrapper around std::getenv.
-// Instead of returning null pointer if the environment variable is not set,
-// this wrapper returns the provided default value.
-std::string getenv(const std::string &env_var, const std::string &def = std::string());
+std::optional<std::string> getenv(const std::string &env_var);
 
 } // namespace mpt
 

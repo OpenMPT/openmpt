@@ -141,6 +141,7 @@
 
 #include "../common/misc_util.h"
 // <stdexcept>
+// <optional>
 // <vector>
 
 // for std::abs

@@ -185,7 +185,7 @@ void DoTests()
 		std::string pathprefix = std::string();
 
 		// set path prefix for test files (if provided)
-		std::string env_srcdir = mpt::getenv( "srcdir" );
+		std::string env_srcdir = mpt::getenv( "srcdir" ).value_or( "" );
 		if ( !env_srcdir.empty() ) {
 			pathprefix = env_srcdir;
 		}
