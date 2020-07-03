@@ -179,7 +179,7 @@ struct byte_cast_impl<mpt::span<Tdst>, mpt::span<Tsrc> >
 		static_assert(mpt::is_byte_castable<Tdst>::value);
 		static_assert(std::is_integral<Tsrc>::value || mpt::is_byte<Tsrc>::value);
 		static_assert(std::is_integral<Tdst>::value || mpt::is_byte<Tdst>::value);
-		return mpt::as_span(mpt::byte_cast_impl<Tdst*, Tsrc*>()(src.begin()), mpt::byte_cast_impl<Tdst*, Tsrc*>()(src.end()));
+		return mpt::as_span(mpt::byte_cast_impl<Tdst*, Tsrc*>()(src.data()), mpt::byte_cast_impl<Tdst*, Tsrc*>()(src.data() + src.size()));
 	}
 };
 template <typename Tdst, typename Tsrc>
