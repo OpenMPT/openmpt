@@ -1984,13 +1984,15 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 		const bool showDirs = !IsSampleBrowser() || TrackerSettings::Instance().showDirsInSampleBrowser;
 		const bool showInstrs = IsSampleBrowser();
 
-		static constexpr int FILTER_REJECT_FILE = -1;
-		static constexpr auto instrExts = {"xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat"};
-		static constexpr auto sampleExts = {"wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf", "sb0", "sb2", "sbi"};
-		static constexpr auto allExtsBlacklist = {"txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "lnk", "url"};
+		constexpr int FILTER_REJECT_FILE = -1;
 
-		const auto FilterFile = [this, showInstrs, showDirs](const mpt::PathString &fileName) -> int
+		const auto FilterFile = [this, showInstrs, showDirs, FILTER_REJECT_FILE](const mpt::PathString &fileName) -> int
 		{
+
+			static constexpr auto instrExts = {"xi", "iti", "sfz", "sf2", "sbk", "dls", "mss", "pat"};
+			static constexpr auto sampleExts = {"wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf", "sb0", "sb2", "sbi"};
+			static constexpr auto allExtsBlacklist = {"txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "lnk", "url"};
+
 			// Get lower-case file extension without dot.
 			mpt::PathString extPS = fileName.GetFileExt();
 			std::string ext = extPS.ToUTF8();
