@@ -19,6 +19,8 @@
 #include "mptSpan.h"
 #include "mptStringParse.h"
 
+#include "misc_util.h"
+
 #ifdef MODPLUG_TRACKER
 #include "../misc/JSON.h"
 #endif // MODPLUG_TRACKER
