@@ -26,6 +26,7 @@ OPENMPT_NAMESPACE_BEGIN
 #pragma comment(lib, "uxtheme.lib")
 
 #pragma comment(lib, "bcrypt.lib")
+#pragma comment(lib, "ncrypt.lib")
 
 #pragma comment(lib, "gdiplus.lib")
 

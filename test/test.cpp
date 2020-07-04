@@ -3092,6 +3092,41 @@ static MPT_NOINLINE void TestCrypto()
 	};
 	VERIFY_EQUAL(mpt::crypto::hash::SHA512().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(std::string("abc")))).result(), sha512_abc);
 
+	{
+
+		std::vector<std::byte> data = { std::byte{0x11}, std::byte{0x12}, std::byte{0x13}, std::byte{0x14} };
+
+		mpt::crypto::keystore keystore(mpt::crypto::keystore::domain::user);
+
+		mpt::crypto::asymmetric::rsassa_pss<>::managed_private_key key(keystore, U_("OpenMPT Test Key 1"));
+
+		auto publickeydata = key.get_public_key_data();
+
+		mpt::crypto::asymmetric::rsassa_pss<>::public_key pk{publickeydata};
+		mpt::crypto::asymmetric::rsassa_pss<>::public_key pk_copy{pk};
+		mpt::ustring jwk = publickeydata.as_jwk();
+
+		std::vector<std::byte> signature = key.sign(mpt::as_span(data));
+		mpt::ustring jws = key.jws_sign(mpt::as_span(data));
+		mpt::ustring jws_compact = key.jws_compact_sign(mpt::as_span(data));
+
+		try
+		{
+			pk.verify(mpt::as_span(data), signature);
+			auto verifieddata1 = mpt::crypto::asymmetric::rsassa_pss<>::public_key(mpt::crypto::asymmetric::rsassa_pss<>::public_key_data::from_jwk(jwk)).jws_verify(jws);
+			auto verifieddata2 = mpt::crypto::asymmetric::rsassa_pss<>::public_key(mpt::crypto::asymmetric::rsassa_pss<>::public_key_data::from_jwk(jwk)).jws_compact_verify(jws_compact);
+			VERIFY_EQUAL(true, true);
+			VERIFY_EQUAL(data, verifieddata1);
+			VERIFY_EQUAL(data, verifieddata2);
+		} catch(const mpt::crypto::asymmetric::signature_verification_failed &)
+		{
+			VERIFY_EQUAL(true, false);
+		}
+
+		key.destroy();
+
+	}
+
 #endif // MODPLUG_TRACKER
 
 }
