@@ -5,6 +5,8 @@ import hashlib
 import json
 import os
 
+from subprocess import Popen
+
 OPENMPT_VERSION_MAJORMAJOR = os.environ['OPENMPT_VERSION_MAJORMAJOR']
 OPENMPT_VERSION_MAJOR = os.environ['OPENMPT_VERSION_MAJOR']
 OPENMPT_VERSION_MINOR = os.environ['OPENMPT_VERSION_MINOR']
@@ -239,3 +241,18 @@ update = {
 with open("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-update.json", "wb") as f:
 	f.write((json.dumps(update, ensure_ascii=False, indent=1)).encode('utf-8'))
 	f.close()
+
+def sign_file(filename):
+	p = Popen(["bin/release/vs2019-win7-static/amd64/signtool.exe", "sign", "jws", "auto", filename, filename + ".jws.json"])
+	p.communicate()
+
+sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-Setup.update.json")
+sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-x86.update.json")
+sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-x86-legacy.update.json")
+sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-amd64.update.json")
+sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-amd64-legacy.update.json")
+sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-arm.update.json")
+sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-arm64.update.json")
+
+pdumpkey = Popen(["bin/release/vs2019-win7-static/amd64/signtool.exe", "dumpkey", "auto", "installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-update-publickey.jwk.json"])
+pdumpkey.communicate()
