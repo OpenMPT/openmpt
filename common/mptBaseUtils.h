@@ -30,6 +30,10 @@
 #include <math.h>
 #include <stdlib.h>
 
+#if MPT_COMPILER_MSVC
+#include <intrin.h>
+#endif
+
 
 
 OPENMPT_NAMESPACE_BEGIN
