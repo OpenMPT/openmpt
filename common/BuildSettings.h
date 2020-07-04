@@ -73,9 +73,9 @@
 #if defined(MODPLUG_TRACKER)
 
 #if MPT_OS_WINDOWS
-#if !defined(MPT_BUILD_WINESUPPORT)
+#if !defined(MPT_BUILD_WINESUPPORT) && !defined(MPT_BUILD_SIGNTOOL)
 #define MPT_WITH_MFC
-#endif // !MPT_BUILD_WINESUPPORT
+#endif // !MPT_BUILD_WINESUPPORT && !MPT_BUILD_SIGNTOOL
 #endif // MPT_OS_WINDOWS
 
 // OpenMPT-only dependencies
