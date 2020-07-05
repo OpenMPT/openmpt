@@ -121,8 +121,7 @@ static void main(const std::vector<mpt::ustring> &args)
 				while(!mpt::IO::IsEof(fi))
 				{
 					std::array<std::byte, mpt::IO::BUFFERSIZE_TINY> buf;
-					mpt::byte_span readBuf = mpt::IO::ReadRaw(fi, mpt::as_span(buf));
-					data.insert(data.end(), readBuf.data(), readBuf.data() + readBuf.size());
+					mpt::append(data, mpt::IO::ReadRaw(fi, mpt::as_span(buf)));
 				}
 			}
 			if(mode == U_(""))
