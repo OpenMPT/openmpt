@@ -28,6 +28,8 @@ public:
 
 	// Set the window title
 	void SetTitle(const TCHAR *title);
+	// Set the text on abort button
+	void SetAbortText(const TCHAR *abort);
 	// Set the text to be displayed along the progress bar.
 	void SetText(const TCHAR *text);
 	// Set the minimum and maximum value of the progress bar.

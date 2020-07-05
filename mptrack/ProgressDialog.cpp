@@ -53,6 +53,13 @@ void CProgressDialog::SetTitle(const TCHAR *title)
 }
 
 
+
+void CProgressDialog::SetAbortText(const TCHAR *abort)
+{
+	SetDlgItemText(IDCANCEL, abort);
+}
+
+
 void CProgressDialog::SetText(const TCHAR *text)
 {
 	SetDlgItemText(IDC_TEXT1, text);
