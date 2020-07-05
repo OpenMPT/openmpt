@@ -173,7 +173,7 @@ struct Result
 {
 	uint64 Status = 0;
 	std::optional<uint64> ContentLength;
-	std::string Data;
+	std::vector<std::byte> Data;
 };
 
 

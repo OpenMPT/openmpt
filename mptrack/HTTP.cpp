@@ -387,30 +387,30 @@ Result Request::operator()(InternetSession &internet) const
 	std::optional<uint64> expectedSize = result.ContentLength;
 	progress(Progress::TransferBegin, transferred, expectedSize);
 	{
-		std::string resultBuffer;
+		std::vector<std::byte> resultBuffer;
 		DWORD bytesRead = 0;
 		do
 		{
-			char downloadBuffer[mpt::IO::BUFFERSIZE_TINY];
+			std::array<std::byte, mpt::IO::BUFFERSIZE_TINY> downloadBuffer;
 			DWORD availableSize = 0;
 			if(InternetQueryDataAvailable(NativeHandle(request), &availableSize, 0, NULL) == FALSE)
 			{
 				throw HTTP::LastErrorException();
 			}
 			availableSize = std::clamp(availableSize, DWORD(0), mpt::saturate_cast<DWORD>(mpt::IO::BUFFERSIZE_TINY));
-			if(InternetReadFile(NativeHandle(request), downloadBuffer, availableSize, &bytesRead) == FALSE)
+			if(InternetReadFile(NativeHandle(request), downloadBuffer.data(), availableSize, &bytesRead) == FALSE)
 			{
 				throw HTTP::LastErrorException();
 			}
 			if(outputStream)
 			{ 
-				if(!mpt::IO::WriteRaw(*outputStream, mpt::as_span(downloadBuffer, downloadBuffer + bytesRead)))
+				if(!mpt::IO::WriteRaw(*outputStream, mpt::as_span(downloadBuffer).subspan(0, bytesRead)))
 				{
 					throw HTTP::exception(U_("Writing output file failed."));
 				}
 			} else
 			{
-				resultBuffer.append(downloadBuffer, downloadBuffer + bytesRead);
+				resultBuffer.insert(resultBuffer.end(), downloadBuffer.data(), downloadBuffer.data() + bytesRead);
 			}
 			transferred += bytesRead;
 			progress(Progress::TransferRunning, transferred, expectedSize);

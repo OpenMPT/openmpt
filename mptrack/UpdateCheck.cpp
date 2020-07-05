@@ -406,7 +406,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	CUpdateCheck::Result result;
 	result.UpdateAvailable = false;
 	result.CheckTime = time(nullptr);
-	CString resultData = mpt::ToCString(mpt::Charset::UTF8, resultHTTP.Data);
+	CString resultData = mpt::ToCString(mpt::Charset::UTF8, mpt::buffer_cast<std::string>(resultHTTP.Data));
 	if(resultData.CompareNoCase(_T("noupdate")) != 0)
 	{
 		CString token;
