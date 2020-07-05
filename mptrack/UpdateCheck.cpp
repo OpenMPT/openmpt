@@ -742,9 +742,6 @@ void CUpdateSetupDlg::OnOK()
 
 	int updateCheckPeriod = (m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()) == ~(DWORD_PTR)0) ? -1 : static_cast<int>(m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()));
 	
-	CString updateURL;
-	GetDlgItemText(IDC_EDIT1, updateURL);
-
 	if(GetDlgItem(IDC_CHECK_UPDATEENABLED)->IsWindowEnabled() != FALSE)
 	{
 		TrackerSettings::Instance().UpdateEnabled = (IsDlgButtonChecked(IDC_CHECK_UPDATEENABLED) != BST_UNCHECKED);
