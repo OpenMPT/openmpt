@@ -5,6 +5,7 @@
 
 
 #ifdef MPT_WITH_NLOHMANNJSON
+#include <optional>
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmismatched-tags"
@@ -52,6 +53,24 @@ namespace nlohmann
 				result[OPENMPT_NAMESPACE::mpt::ToUnicode(OPENMPT_NAMESPACE::mpt::Charset::UTF8, value.first)] = value.second;
 			}
 			val = std::move(result);
+		}
+	};
+	template <typename Tvalue>
+	struct adl_serializer<std::optional<Tvalue>>
+	{
+		static void to_json(json& j, const std::optional<Tvalue>& val)
+		{
+			j = (val ? json{*val} : json{nullptr});
+		}
+		static void from_json(const json& j, std::optional<Tvalue>& val)
+		{
+			if(!j.is_null())
+			{
+				val = j.get<Tvalue>();
+			} else
+			{
+				val = std::nullopt;
+			}
 		}
 	};
 } // namespace nlohmann
