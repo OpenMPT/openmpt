@@ -249,7 +249,7 @@ BOOL CAboutDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	mpt::ustring app;
-	app += mpt::format(U_("OpenMPT %1 (%2 bit)"))(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()), mpt::arch_bits)
+	app += mpt::format(U_("OpenMPT (%1) (%2 bit)"))(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()), mpt::arch_bits)
 		+ (!BuildVariants().CurrentBuildIsModern() ? U_(" for older Windows") : U_(""))
 		+ U_("\n");
 	app += U_("Version ") + Build::GetVersionStringSimple() + U_("\n\n");
