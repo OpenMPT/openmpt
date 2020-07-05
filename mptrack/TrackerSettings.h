@@ -291,6 +291,9 @@ template<> inline PlugVolumeHandling FromSettingValue(const SettingValue &val)
 template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::String::Combine(val, U_(",")); }
 template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) { return mpt::String::Split<uint32>(val, U_(",")); }
 
+template<> inline SettingValue ToSettingValue(const std::vector<mpt::ustring> &val) { return mpt::String::Combine(val, U_(";")); }
+template<> inline std::vector<mpt::ustring> FromSettingValue(const SettingValue &val) { return mpt::String::Split<mpt::ustring>(val, U_(";")); }
+
 template<> inline SettingValue ToSettingValue(const SampleFormat &val) { return SettingValue(val.AsInt()); }
 template<> inline SampleFormat FromSettingValue(const SettingValue &val) { return SampleFormat::FromInt(val.as<int32>()); }
 
