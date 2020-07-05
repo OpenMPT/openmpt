@@ -1101,22 +1101,22 @@ public:
 	std::vector<std::byte> GetRawDataAsByteVector() const
 	{
 		PinnedRawDataView view = GetPinnedRawDataView();
-		return std::vector<std::byte>(view.span().begin(), view.span().end());
+		return mpt::make_vector<std::byte>(view.span());
 	}
 	std::vector<std::byte> ReadRawDataAsByteVector()
 	{
 		PinnedRawDataView view = ReadPinnedRawDataView();
-		return std::vector<std::byte>(view.span().begin(), view.span().end());
+		return mpt::make_vector<std::byte>(view.span());
 	}
 	std::vector<std::byte> GetRawDataAsByteVector(std::size_t size) const
 	{
 		PinnedRawDataView view = GetPinnedRawDataView(size);
-		return std::vector<std::byte>(view.span().begin(), view.span().end());
+		return mpt::make_vector<std::byte>(view.span());
 	}
 	std::vector<std::byte> ReadRawDataAsByteVector(std::size_t size)
 	{
 		PinnedRawDataView view = ReadPinnedRawDataView(size);
-		return std::vector<std::byte>(view.span().begin(), view.span().end());
+		return mpt::make_vector<std::byte>(view.span());
 	}
 
 	std::string GetRawDataAsString() const
