@@ -404,7 +404,7 @@ Result Request::operator()(InternetSession &internet) const
 			}
 			if(outputStream)
 			{ 
-				if(!mpt::IO::WriteRaw(*outputStream, mpt::as_span(downloadBuffer).subspan(0, bytesRead)))
+				if(!mpt::IO::WriteRaw(*outputStream, mpt::as_span(downloadBuffer).first(bytesRead)))
 				{
 					throw HTTP::exception(U_("Writing output file failed."));
 				}
