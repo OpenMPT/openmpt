@@ -28,6 +28,8 @@ OPENMPT_NAMESPACE_BEGIN
 namespace mpt
 {
 
+
+
 template <typename T> T get_exception_text_impl(const std::exception & e)
 {
 	if(e.what() && (std::strlen(e.what()) > 0))
@@ -38,7 +40,7 @@ template <typename T> T get_exception_text_impl(const std::exception & e)
 		return T(typeid(e).name());
 	} else
 	{
-		return T("unknown exception");
+		return T("unknown exception name");
 	}
 }
 
@@ -68,6 +70,60 @@ template <> inline mpt::ustring get_exception_text<mpt::ustring>(const std::exce
 	return mpt::ToUnicode(mpt::CharsetException, mpt::get_exception_text_impl<std::string>(e));
 }
 #endif
+
+
+
+template <typename T> T get_current_exception_text_impl()
+{
+	try
+	{
+		throw;
+	} catch(const std::exception &e)
+	{
+		if(e.what() && (std::strlen(e.what()) > 0))
+		{
+			return T(e.what());
+		} else if(typeid(e).name() && (std::strlen(typeid(e).name()) > 0))
+		{
+			return T(typeid(e).name());
+		} else
+		{
+			return T("unknown exception name");
+		}
+	} catch(...)
+	{
+		return T("unknown exception");
+	}
+}
+
+template <typename T> inline T get_current_exception_text()
+{
+	return mpt::get_current_exception_text_impl<T>();
+}
+template <> inline std::string get_current_exception_text<std::string>()
+{
+	return mpt::get_current_exception_text_impl<std::string>();
+}
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+template <> inline mpt::lstring get_current_exception_text<mpt::lstring>()
+{
+	return mpt::ToLocale(mpt::CharsetException, mpt::get_current_exception_text_impl<std::string>());
+}
+#endif
+#if MPT_WSTRING_FORMAT
+template <> inline std::wstring get_current_exception_text<std::wstring>()
+{
+	return mpt::ToWide(mpt::CharsetException, mpt::get_current_exception_text_impl<std::string>());
+}
+#endif
+#if MPT_USTRING_MODE_UTF8
+template <> inline mpt::ustring get_current_exception_text<mpt::ustring>()
+{
+	return mpt::ToUnicode(mpt::CharsetException, mpt::get_current_exception_text_impl<std::string>());
+}
+#endif
+
+
 
 } // namespace mpt
 
