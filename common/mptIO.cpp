@@ -167,7 +167,7 @@ bool SeekRelative(std::iostream & f, IO::Offset off)
 	if(!OffsetFits<std::streamoff>(off)) { return false; }
 	f.seekg(static_cast<std::streamoff>(off), std::ios::cur); f.seekp(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail();
 }
-IO::Offset ReadRawImpl(std::istream & f, mpt::byte_span data) { f.read(mpt::byte_cast<char *>(data.data()), data.size()); return f.gcount(); }
+mpt::byte_span ReadRawImpl(std::istream & f, mpt::byte_span data) { f.read(mpt::byte_cast<char *>(data.data()), data.size()); return data.first(mpt::saturate_cast<std::size_t>(f.gcount())); }
 bool WriteRawImpl(std::ostream & f, mpt::const_byte_span data) { f.write(mpt::byte_cast<const char *>(data.data()), data.size()); return !f.fail(); }
 bool IsEof(std::istream & f) { return f.eof(); }
 bool Flush(std::ostream & f) { f.flush(); return !f.fail(); }

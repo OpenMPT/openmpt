@@ -1843,7 +1843,7 @@ static MPT_NOINLINE void TestMisc2()
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
 		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
-		VERIFY_EQUAL(mpt::IO::ReadRaw(s, &a, 1), 1);
+		VERIFY_EQUAL(mpt::IO::ReadRaw(s, &a, 1).size(), 1);
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
 		VERIFY_EQUAL(mpt::IO::TellRead(s), 1);
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
@@ -1908,7 +1908,7 @@ static MPT_NOINLINE void TestMisc2()
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
 		VERIFY_EQUAL(mpt::IO::TellRead(s), 0);
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
-		VERIFY_EQUAL(mpt::IO::ReadRaw(s, &a, 1), 1);
+		VERIFY_EQUAL(mpt::IO::ReadRaw(s, &a, 1).size(), 1);
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);
 		VERIFY_EQUAL(mpt::IO::TellRead(s), 1);
 		VERIFY_EQUAL(mpt::IO::IsValid(s), true);

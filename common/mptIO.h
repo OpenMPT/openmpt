@@ -66,7 +66,7 @@ bool SeekAbsolute(std::iostream & f, IO::Offset pos);
 bool SeekRelative(std::ostream & f, IO::Offset off);
 bool SeekRelative(std::istream & f, IO::Offset off);
 bool SeekRelative(std::iostream & f, IO::Offset off);
-IO::Offset ReadRawImpl(std::istream & f, mpt::byte_span data);
+mpt::byte_span ReadRawImpl(std::istream & f, mpt::byte_span data);
 bool WriteRawImpl(std::ostream & f, mpt::const_byte_span data);
 bool IsEof(std::istream & f);
 bool Flush(std::ostream & f);
@@ -84,7 +84,7 @@ template <typename Tfile> bool SeekBegin(WriteBuffer<Tfile> & f) { f.FlushLocal(
 template <typename Tfile> bool SeekEnd(WriteBuffer<Tfile> & f) { f.FlushLocal(); return SeekEnd(f.file()); }
 template <typename Tfile> bool SeekAbsolute(WriteBuffer<Tfile> & f, IO::Offset pos) { return f.FlushLocal(); SeekAbsolute(f.file(), pos); }
 template <typename Tfile> bool SeekRelative(WriteBuffer<Tfile> & f, IO::Offset off) { return f.FlushLocal(); SeekRelative(f.file(), off); }
-template <typename Tfile> IO::Offset ReadRawImpl(WriteBuffer<Tfile> & f, mpt::byte_span data) { f.FlushLocal(); return ReadRawImpl(f.file(), data); }
+template <typename Tfile> mpt::byte_span ReadRawImpl(WriteBuffer<Tfile> & f, mpt::byte_span data) { f.FlushLocal(); return ReadRawImpl(f.file(), data); }
 template <typename Tfile> bool WriteRawImpl(WriteBuffer<Tfile> & f, mpt::const_byte_span data) { return f.Write(data); }
 template <typename Tfile> bool IsEof(WriteBuffer<Tfile> & f) { f.FlushLocal(); return IsEof(f.file()); }
 template <typename Tfile> bool Flush(WriteBuffer<Tfile> & f) { f.FlushLocal(); return Flush(f.file()); }
@@ -129,7 +129,7 @@ template <typename Tbyte> bool SeekRelative(std::pair<mpt::span<Tbyte>, IO::Offs
 	f.second += off;
 	return true;
 }
-template <typename Tbyte> IO::Offset ReadRawImpl(std::pair<mpt::span<Tbyte>, IO::Offset> & f, mpt::byte_span data)
+template <typename Tbyte> mpt::byte_span ReadRawImpl(std::pair<mpt::span<Tbyte>, IO::Offset> & f, mpt::byte_span data)
 {
 	if(f.second < 0)
 	{
@@ -142,7 +142,7 @@ template <typename Tbyte> IO::Offset ReadRawImpl(std::pair<mpt::span<Tbyte>, IO:
 	std::size_t num = mpt::saturate_cast<std::size_t>(std::min(static_cast<IO::Offset>(f.first.size()) - f.second, static_cast<IO::Offset>(data.size())));
 	std::copy(mpt::byte_cast<const std::byte*>(f.first.data() + f.second), mpt::byte_cast<const std::byte*>(f.first.data() + f.second + num), data.data());
 	f.second += num;
-	return num;
+	return data.first(num);
 }
 template <typename Tbyte> bool WriteRawImpl(std::pair<mpt::span<Tbyte>, IO::Offset> & f, mpt::const_byte_span data)
 {
@@ -176,13 +176,13 @@ template <typename Tbyte> bool Flush(std::pair<mpt::span<Tbyte>, IO::Offset> & f
 
 
 template <typename Tbyte, typename Tfile>
-inline IO::Offset ReadRaw(Tfile & f, Tbyte * data, std::size_t size)
+inline mpt::byte_span ReadRaw(Tfile & f, Tbyte * data, std::size_t size)
 {
 	return IO::ReadRawImpl(f, mpt::as_span(mpt::byte_cast<std::byte*>(data), size));
 }
 
 template <typename Tbyte, typename Tfile>
-inline IO::Offset ReadRaw(Tfile & f, mpt::span<Tbyte> data)
+inline mpt::byte_span ReadRaw(Tfile & f, mpt::span<Tbyte> data)
 {
 	return IO::ReadRawImpl(f, mpt::byte_cast<mpt::byte_span>(data));
 }
@@ -202,7 +202,7 @@ inline bool WriteRaw(Tfile & f, mpt::span<Tbyte> data)
 template <typename Tbinary, typename Tfile>
 inline bool Read(Tfile & f, Tbinary & v)
 {
-	return IO::ReadRaw(f, mpt::as_raw_memory(v)) == mpt::saturate_cast<mpt::IO::Offset>(mpt::as_raw_memory(v).size());
+	return IO::ReadRaw(f, mpt::as_raw_memory(v)).size() == mpt::as_raw_memory(v).size();
 }
 
 template <typename Tbinary, typename Tfile>
@@ -230,14 +230,8 @@ inline bool ReadByte(Tfile & f, std::byte & v)
 {
 	bool result = false;
 	std::byte byte = mpt::as_byte(0);
-	const IO::Offset readResult = IO::ReadRaw(f, &byte, sizeof(std::byte));
-	if(readResult < 0)
-	{
-		result = false;
-	} else
-	{
-		result = (static_cast<uint64>(readResult) == sizeof(std::byte));
-	}
+	const std::size_t readResult = IO::ReadRaw(f, &byte, sizeof(std::byte)).size();
+	result = (readResult == sizeof(std::byte));
 	v = byte;
 	return result;
 }
@@ -249,14 +243,8 @@ inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size)
 	static_assert(std::numeric_limits<T>::is_integer);
 	uint8 bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
-	const IO::Offset readResult = IO::ReadRaw(f, bytes, std::min(size, sizeof(T)));
-	if(readResult < 0)
-	{
-		result = false;
-	} else
-	{
-		result = (static_cast<uint64>(readResult) == std::min(size, sizeof(T)));
-	}
+	const std::size_t readResult = IO::ReadRaw(f, bytes, std::min(size, sizeof(T))).size();
+	result = (readResult == std::min(size, sizeof(T)));
 	typename mpt::make_le<T>::type val;
 	std::memcpy(&val, bytes, sizeof(T));
 	v = val;
@@ -270,14 +258,8 @@ inline bool ReadIntLE(Tfile & f, T & v)
 	static_assert(std::numeric_limits<T>::is_integer);
 	uint8 bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
-	const IO::Offset readResult = IO::ReadRaw(f, bytes, sizeof(T));
-	if(readResult < 0)
-	{
-		result = false;
-	} else
-	{
-		result = (static_cast<uint64>(readResult) == sizeof(T));
-	}
+	const std::size_t readResult = IO::ReadRaw(f, bytes, sizeof(T)).size();
+	result = (readResult == sizeof(T));
 	typename mpt::make_le<T>::type val;
 	std::memcpy(&val, bytes, sizeof(T));
 	v = val;
@@ -291,14 +273,8 @@ inline bool ReadIntBE(Tfile & f, T & v)
 	static_assert(std::numeric_limits<T>::is_integer);
 	uint8 bytes[sizeof(T)];
 	std::memset(bytes, 0, sizeof(T));
-	const IO::Offset readResult = IO::ReadRaw(f, bytes, sizeof(T));
-	if(readResult < 0)
-	{
-		result = false;
-	} else
-	{
-		result = (static_cast<uint64>(readResult) == sizeof(T));
-	}
+	const std::size_t readResult = IO::ReadRaw(f, bytes, sizeof(T)).size();
+	result = (readResult == sizeof(T));
 	typename mpt::make_be<T>::type val;
 	std::memcpy(&val, bytes, sizeof(T));
 	v = val;

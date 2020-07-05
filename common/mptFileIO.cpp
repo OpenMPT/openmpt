@@ -384,7 +384,7 @@ bool InputFile::Open(const mpt::PathString &filename, bool allowWholeFileCaching
 			{
 				std::size_t buffersize = mpt::saturate_cast<std::size_t>(filesize);
 				m_Cache.resize(buffersize);
-				if(mpt::IO::ReadRaw(m_File, mpt::as_span(m_Cache)) != filesize)
+				if(mpt::IO::ReadRaw(m_File, mpt::as_span(m_Cache)).size() != filesize)
 				{
 					m_File.close();
 					return false;

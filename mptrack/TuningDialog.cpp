@@ -734,7 +734,7 @@ template <typename Tfile, std::size_t N> static bool CheckMagic(Tfile &f, mpt::I
 	}
 	uint8 buffer[N];
 	MemsetZero(buffer);
-	if(mpt::IO::ReadRaw(f, buffer, N) != N)
+	if(mpt::IO::ReadRaw(f, buffer, N).size() != N)
 	{
 		return false;
 	}
