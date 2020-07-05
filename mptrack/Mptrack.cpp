@@ -623,6 +623,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	}
 	m_pszProfileName = _tcsdup(m_szConfigFileName.ToCString());
 
+	m_bInstallerMode = !modeSourceProject && !portableMode;
 	m_bPortableMode = portableMode;
 
 }

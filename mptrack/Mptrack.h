@@ -152,6 +152,7 @@ protected:
 	// Default macro configuration
 	MIDIMacroConfig m_MidiCfg;
 	DWORD m_dwLastPluginIdleCall = 0;
+	bool m_bInstallerMode = false;
 	bool m_bPortableMode = false;
 
 public:
@@ -221,7 +222,14 @@ public:
 		ASSERT(m_pTrackerSettings);
 		return *m_pTrackerSettings;
 	}
-	bool IsPortableMode() { return m_bPortableMode; }
+	bool IsInstallerMode() const
+	{
+		return m_bInstallerMode;
+	}
+	bool IsPortableMode() const
+	{
+		return m_bPortableMode;
+	}
 	SettingsContainer &GetPluginCache()
 	{
 		ASSERT(m_pPluginCache);
