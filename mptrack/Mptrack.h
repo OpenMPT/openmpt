@@ -273,7 +273,6 @@ public:
 	void SetupPaths(bool overridePortable);
 	void CreatePaths();
 
-	CString SuggestModernBuildText();
 	bool CheckSystemSupport();
 
 	// Relative / absolute paths conversion

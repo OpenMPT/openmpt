@@ -325,7 +325,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, UpdateStatistics(conf, U_("Update"), U_("Statistis"), false)
 	, UpdateSendGUID_DEPRECATED(conf, U_("Update"), U_("SendGUID"), false)
 	, UpdateShowUpdateHint(conf, U_("Update"), U_("ShowUpdateHint"), true)
-	, UpdateSuggestDifferentBuildVariant(conf, U_("Update"), U_("SuggestDifferentBuildVariant"), true)
 	, UpdateIgnoreVersion(conf, U_("Update"), U_("IgnoreVersion"), _T(""))
 	// Wine suppport
 	, WineSupportEnabled(conf, U_("WineSupport"), U_("Enabled"), false)

@@ -225,7 +225,6 @@ CUpdateCheck::Settings::Settings()
 	, apiURL(TrackerSettings::Instance().UpdateAPIURL)
 	, sendStatistics(TrackerSettings::Instance().UpdateStatistics)
 	, statisticsUUID(TrackerSettings::Instance().VersionInstallGUID)
-	, suggestDifferentBuilds(TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant)
 {
 }
 
@@ -694,10 +693,6 @@ void CUpdateSetupDlg::SettingChanged(const SettingPath &changedPath)
 			}
 		}
 		updateText += _T("\r\n");
-		if(TrackerSettings::Instance().UpdateSuggestDifferentBuildVariant)
-		{
-			updateText += theApp.SuggestModernBuildText();
-		}
 		SetDlgItemText(IDC_LASTUPDATE, updateText);
 	}
 }

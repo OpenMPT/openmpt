@@ -849,7 +849,6 @@ public:
 	Setting<bool> UpdateStatistics;
 	Setting<bool> UpdateSendGUID_DEPRECATED;
 	Setting<bool> UpdateShowUpdateHint;
-	Setting<bool> UpdateSuggestDifferentBuildVariant;
 	Setting<CString> UpdateIgnoreVersion;
 
 	// Wine support

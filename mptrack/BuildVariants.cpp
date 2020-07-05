@@ -18,99 +18,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-BuildVariant BuildVariants::GetCurrentBuildVariant()
-{
-	BuildVariant result = { 0
-		, GuessCurrentBuildName()
-		, CurrentBuildIsModern()
-		, mpt::Windows::GetProcessArchitecture()
-		, GetMinimumProcSupportFlags()
-		, GetMinimumSSEVersion()
-		, GetMinimumAVXVersion()
-		, mpt::Windows::Version::GetMinimumKernelLevel()
-		, mpt::Windows::Version::GetMinimumAPILevel()
-		, mpt::Wine::GetMinimumWineVersion()
-	};
-	return result;
-}
-
-
-static bool CompareBuildVariantsByScore(const BuildVariant & a, const BuildVariant & b)
-{
-	if(a.Score > b.Score)
-	{
-		return true;
-	}
-	if(a.Score < b.Score)
-	{
-		return false;
-	}
-	if(mpt::Windows::Bitness(a.Architecture) > mpt::Windows::Bitness(b.Architecture))
-	{
-		return true;
-	}
-	if(mpt::Windows::Bitness(a.Architecture) < mpt::Windows::Bitness(b.Architecture))
-	{
-		return false;
-	}
-	return false;
-}
-
-
-std::vector<BuildVariant> BuildVariants::GetBuildVariants()
-{
-	std::vector<BuildVariant> result
-	{
-		// VS2017
-		{ 2, U_("win32"   ), true , mpt::Windows::Architecture::x86  , PROCSUPPORT_x86_SSE2, 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) },
-		{ 2, U_("win64"   ), true , mpt::Windows::Architecture::amd64, PROCSUPPORT_AMD64   , 2, 0, mpt::Windows::Version::WinVista, mpt::Windows::Version::Win7   , mpt::Wine::Version(1,8,0) },
-	};
-	std::stable_sort(result.begin(), result.end(), CompareBuildVariantsByScore);
-	return result;
-}
-
-
-std::vector<BuildVariant> BuildVariants::GetSupportedBuilds()
-{
-	std::vector<BuildVariant> result;
-	if(IsKnownSystem())
-	{
-		auto builds = GetBuildVariants();
-		for(const auto &b : builds)
-		{
-			if(CanRunBuild(b))
-			{
-				result.push_back(b);
-			}
-		}
-	}
-	return result;
-}
-
-
-std::vector<BuildVariant> BuildVariants::GetRecommendedBuilds()
-{
-	std::vector<BuildVariant> result;
-	if(IsKnownSystem())
-	{
-		auto builds = GetSupportedBuilds();
-		uint8 maxScore = 0;
-		for(const auto &b : builds)
-		{
-			maxScore = std::max(maxScore, b.Score);
-		}
-		for(const auto &b : builds)
-		{
-			if(b.Score == maxScore)
-			{
-				result.push_back(b);
-			}
-		}
-	}
-	return result;
-}
-
-
 bool BuildVariants::IsKnownSystem()
 {
 	return false
@@ -122,26 +29,12 @@ bool BuildVariants::IsKnownSystem()
 
 bool BuildVariants::CurrentBuildIsModern()
 {
-	if(mpt::Windows::GetProcessArchitecture() == mpt::Windows::Architecture::amd64)
-	{
-		return false
-			|| (GetMinimumSSEVersion() > 2)
-			|| (GetMinimumAVXVersion() > 0)
-			|| (mpt::Windows::Version::GetMinimumKernelLevel() > mpt::Windows::Version::WinXP64)
-			|| (mpt::Windows::Version::GetMinimumAPILevel() > mpt::Windows::Version::WinXP64)
-			;
-	} else if(mpt::Windows::GetProcessArchitecture() == mpt::Windows::Architecture::x86)
-	{
-		return false
-			|| (GetMinimumSSEVersion() > 0)
-			|| (GetMinimumAVXVersion() > 0)
-			|| (mpt::Windows::Version::GetMinimumKernelLevel() > mpt::Windows::Version::WinXP)
-			|| (mpt::Windows::Version::GetMinimumAPILevel() > mpt::Windows::Version::WinXP)
-			;
-	} else
-	{
-		return true;
-	}
+	return false
+		|| (GetMinimumSSEVersion() > 2)
+		|| (GetMinimumAVXVersion() > 0)
+		|| (mpt::Windows::Version::GetMinimumKernelLevel() > mpt::Windows::Version::Win7)
+		|| (mpt::Windows::Version::GetMinimumAPILevel() > mpt::Windows::Version::Win7)
+		;
 }
 
 
@@ -172,70 +65,78 @@ mpt::ustring BuildVariants::GuessCurrentBuildName()
 }
 
 
-bool BuildVariants::SystemCanRunModernBuilds()
-{
-	auto builds = GetBuildVariants();
-	for(const auto &b : builds)
-	{
-		if(b.Modern && CanRunBuild(b))
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-
-std::vector<mpt::ustring> BuildVariants::GetBuildNames(std::vector<BuildVariant> builds)
-{
-	std::vector<mpt::ustring> names;
-	for(std::size_t i = 0; i < builds.size(); ++i)
-	{
-		names.push_back(builds[i].Name);
-	}
-	return names;
-}
-
-
 bool BuildVariants::ProcessorCanRunCurrentBuild()
 {
-	BuildVariant build = GetCurrentBuildVariant();
 #ifdef ENABLE_ASM
-	if((GetRealProcSupport() & build.MinimumProcSupportFlags) != build.MinimumProcSupportFlags) return false;
-	if(build.MinimumSSE >= 1)
-	{
-		if(!(GetRealProcSupport() & PROCSUPPORT_SSE)) return false;
-	}
-	if(build.MinimumSSE >= 2)
-	{
-		if(!(GetRealProcSupport() & PROCSUPPORT_SSE2)) return false;
-	}
-#endif
-	return true;
-}
-
-
-bool BuildVariants::CanRunBuild(BuildVariant build) 
-{
-	if(mpt::Windows::HostCanRun(mpt::Windows::GetHostArchitecture(), build.Architecture) == mpt::Windows::EmulationLevel::NA)
-	{
-		return false;
-	}
-#ifdef ENABLE_ASM
-	if((GetRealProcSupport() & build.MinimumProcSupportFlags) != build.MinimumProcSupportFlags)
-	{
-		return false;
-	}
-	if(build.MinimumSSE >= 1)
+	if((GetRealProcSupport() & GetMinimumProcSupportFlags()) != GetMinimumProcSupportFlags()) return false;
+	if(GetMinimumSSEVersion() >= 1)
 	{
 		if(!(GetRealProcSupport() & PROCSUPPORT_SSE))
 		{
 			return false;
 		}
 	}
-	if(build.MinimumSSE >= 2)
+	if(GetMinimumSSEVersion() >= 2)
 	{
 		if(!(GetRealProcSupport() & PROCSUPPORT_SSE2))
+		{
+			return false;
+		}
+	}
+	if(GetMinimumAVXVersion() >= 1)
+	{
+		if(!(GetRealProcSupport() & PROCSUPPORT_AVX))
+		{
+			return false;
+		}
+	}
+	if(GetMinimumAVXVersion() >= 2)
+	{
+		if(!(GetRealProcSupport() & PROCSUPPORT_AVX2))
+		{
+			return false;
+		}
+	}
+#endif
+	return true;
+}
+
+
+bool BuildVariants::SystemCanRunCurrentBuild() 
+{
+	if(mpt::Windows::HostCanRun(mpt::Windows::GetHostArchitecture(), mpt::Windows::GetProcessArchitecture()) == mpt::Windows::EmulationLevel::NA)
+	{
+		return false;
+	}
+#ifdef ENABLE_ASM
+	if((GetRealProcSupport() & GetMinimumProcSupportFlags()) != GetMinimumProcSupportFlags())
+	{
+		return false;
+	}
+	if(GetMinimumSSEVersion() >= 1)
+	{
+		if(!(GetRealProcSupport() & PROCSUPPORT_SSE))
+		{
+			return false;
+		}
+	}
+	if(GetMinimumSSEVersion() >= 2)
+	{
+		if(!(GetRealProcSupport() & PROCSUPPORT_SSE2))
+		{
+			return false;
+		}
+	}
+	if(GetMinimumAVXVersion() >= 1)
+	{
+		if(!(GetRealProcSupport() & PROCSUPPORT_AVX))
+		{
+			return false;
+		}
+	}
+	if(GetMinimumAVXVersion() >= 2)
+	{
+		if(!(GetRealProcSupport() & PROCSUPPORT_AVX2))
 		{
 			return false;
 		}
@@ -245,29 +146,23 @@ bool BuildVariants::CanRunBuild(BuildVariant build)
 	{
 		if(mpt::Windows::IsOriginal())
 		{
-			if (mpt::Windows::Version::Current().IsBefore(build.MinimumWindowsKernel))
+			if(mpt::Windows::Version::Current().IsBefore(mpt::Windows::Version::GetMinimumKernelLevel()))
 			{
 				return false;
 			}
-			if (mpt::Windows::Version::Current().IsBefore(build.MinimumWindowsAPI))
+			if(mpt::Windows::Version::Current().IsBefore(mpt::Windows::Version::GetMinimumAPILevel()))
 			{
 				return false;
 			}
 		} else if(mpt::Windows::IsWine())
 		{
-			if (theApp.GetWineVersion()->Version().IsBefore(build.MinimumWine))
+			if(theApp.GetWineVersion()->Version().IsBefore(mpt::Wine::GetMinimumWineVersion()))
 			{
 				return false;
 			}
 		}
 	}
 	return true;
-}
-
-
-mpt::PathString BuildVariants::GetComponentArch()
-{
-	return mpt::PathString::FromUnicode(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()));
 }
 
 

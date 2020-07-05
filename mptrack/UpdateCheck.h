@@ -75,7 +75,6 @@ public:
 		mpt::ustring apiURL;
 		bool sendStatistics;
 		mpt::UUID statisticsUUID;
-		bool suggestDifferentBuilds;
 		Settings();
 	};
 
