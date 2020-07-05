@@ -347,6 +347,19 @@ namespace asymmetric
 
 
 
+	inline std::vector<mpt::ustring> jws_get_keynames(const mpt::ustring &jws_)
+	{
+		std::vector<mpt::ustring> result;
+		nlohmann::json jws = nlohmann::json::parse(mpt::ToCharset(mpt::Charset::UTF8, jws_));
+		for(const auto & s : jws["signatures"])
+		{
+			result.push_back(s["header"]["kid"]);
+		}
+		return result;
+	}
+
+
+
 	struct RSASSA_PSS_SHA512_traits
 	{
 		using hash_type = mpt::crypto::hash::SHA512;
@@ -355,7 +368,7 @@ namespace asymmetric
 
 
 
-	template <typename Traits = RSASSA_PSS_SHA512_traits>
+	template <typename Traits = RSASSA_PSS_SHA512_traits, std::size_t keysize = 4096>
 	class rsassa_pss
 	{
 
@@ -458,6 +471,27 @@ namespace asymmetric
 		
 		};
 
+
+
+		static std::vector<public_key_data> parse_jwk_set(const mpt::ustring &jwk_set_)
+		{
+			std::vector<public_key_data> result;
+			nlohmann::json jwk_set = nlohmann::json::parse(mpt::ToCharset(mpt::Charset::UTF8, jwk_set_));
+			for(const auto & k : jwk_set["keys"])
+			{
+				try
+				{
+					result.push_back(public_key_data::from_jwk(mpt::ToUnicode(mpt::Charset::UTF8, k.dump())));
+				} catch(...)
+				{
+					// nothing
+				}
+			}
+			return result;
+		}
+
+
+
 		class public_key
 		{
 
@@ -525,6 +559,11 @@ namespace asymmetric
 			~public_key()
 			{
 				cleanup();
+			}
+
+			mpt::ustring get_name() const
+			{
+				return name;
 			}
 
 			public_key_data get_public_key_data() const
@@ -617,6 +656,52 @@ namespace asymmetric
 
 		};
 
+
+
+		static inline void jws_verify_at_least_one(std::vector<public_key> &keys, const std::vector<std::byte> &expectedPayload, const mpt::ustring &signature)
+		{
+			std::vector<mpt::ustring> keynames = mpt::crypto::asymmetric::jws_get_keynames(signature);
+			bool sigchecked = false;
+			for(const auto & keyname : keynames)
+			{
+				for(auto & key : keys)
+				{
+					if(key.get_name() == keyname)
+					{
+						if(expectedPayload != key.jws_verify(signature))
+						{
+							throw mpt::crypto::asymmetric::signature_verification_failed();
+						}
+						sigchecked = true;
+					}
+				}
+			}
+			if(!sigchecked)
+			{
+				throw mpt::crypto::asymmetric::signature_verification_failed();
+			}
+		}
+
+
+
+		static inline std::vector<std::byte> jws_verify_at_least_one(std::vector<public_key> &keys, const mpt::ustring &signature)
+		{
+			std::vector<mpt::ustring> keynames = mpt::crypto::asymmetric::jws_get_keynames(signature);
+			for(const auto & keyname : keynames)
+			{
+				for(auto & key : keys)
+				{
+					if(key.get_name() == keyname)
+					{
+						return key.jws_verify(signature);
+					}
+				}
+			}
+			throw mpt::crypto::asymmetric::signature_verification_failed();
+		}
+
+
+
 		class managed_private_key
 		{
 
@@ -665,7 +750,7 @@ namespace asymmetric
 					if(openKeyStatus == NTE_BAD_KEYSET)
 					{
 						CheckSECURITY_STATUS(NCryptCreatePersistedKey(keystore, &hKey, BCRYPT_RSA_ALGORITHM, mpt::ToWide(name).c_str(), 0, (keystore.store_domain() == keystore::domain::system ? NCRYPT_MACHINE_KEY_FLAG : 0)));
-						DWORD length = 4096;
+						DWORD length = mpt::saturate_cast<DWORD>(keysize);
 						CheckSECURITY_STATUS(NCryptSetProperty(hKey, NCRYPT_LENGTH_PROPERTY, (PBYTE)&length, mpt::saturate_cast<DWORD>(sizeof(DWORD)), 0));
 						CheckSECURITY_STATUS(NCryptFinalizeKey(hKey, 0));
 					} else
