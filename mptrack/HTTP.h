@@ -60,6 +60,18 @@ public:
 };
 
 
+class status_exception
+	: public std::runtime_error
+{
+public:
+	status_exception(uint64 status)
+		: std::runtime_error(mpt::format("HTTP status %1")(status))
+	{
+		return;
+	}
+};
+
+
 class Abort
 	: public exception
 {
@@ -174,6 +186,15 @@ struct Result
 	uint64 Status = 0;
 	std::optional<uint64> ContentLength;
 	std::vector<std::byte> Data;
+
+	void CheckStatus(uint64 expected) const
+	{
+		if(Status != expected)
+		{
+			throw status_exception(Status);
+		}
+	}
+
 };
 
 
