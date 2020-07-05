@@ -280,6 +280,47 @@ static MPT_NOINLINE void TestVersion()
 		// Ensure that bit-shifting works (used in some mod loaders for example)
 		static_assert( MPT_V("01.17.00.00").GetRawVersion() == 0x0117 << 16 );
 		static_assert( MPT_V("01.17.03.00").GetRawVersion() >> 8 == 0x011703 );
+
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsNewerThan(VersionWithRevision::Parse(U_("1.30.00.05-r13100"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsNewerThan(VersionWithRevision::Parse(U_("1.30.00.05-r13099"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsNewerThan(VersionWithRevision::Parse(U_("1.30.00.05-r13098"))), true);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsNewerThan(VersionWithRevision::Parse(U_("1.30.00.05"))), false);
+
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsOlderThan(VersionWithRevision::Parse(U_("1.30.00.05-r13100"))), true);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsOlderThan(VersionWithRevision::Parse(U_("1.30.00.05-r13099"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsOlderThan(VersionWithRevision::Parse(U_("1.30.00.05-r13098"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsOlderThan(VersionWithRevision::Parse(U_("1.30.00.05"))), false);
+
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsNewerThan(VersionWithRevision::Parse(U_("1.30.00.05-r13100"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsNewerThan(VersionWithRevision::Parse(U_("1.30.00.05-r13099"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsNewerThan(VersionWithRevision::Parse(U_("1.30.00.05-r13098"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsNewerThan(VersionWithRevision::Parse(U_("1.30.00.05"))), false);
+
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsOlderThan(VersionWithRevision::Parse(U_("1.30.00.05-r13100"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsOlderThan(VersionWithRevision::Parse(U_("1.30.00.05-r13099"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsOlderThan(VersionWithRevision::Parse(U_("1.30.00.05-r13098"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsOlderThan(VersionWithRevision::Parse(U_("1.30.00.05"))), false);
+
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsEqualTo(VersionWithRevision::Parse(U_("1.30.00.05-r13100"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsEqualTo(VersionWithRevision::Parse(U_("1.30.00.05-r13099"))), true);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsEqualTo(VersionWithRevision::Parse(U_("1.30.00.05-r13098"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsEqualTo(VersionWithRevision::Parse(U_("1.30.00.05"))), false);
+
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsEquivalentTo(VersionWithRevision::Parse(U_("1.30.00.05-r13100"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsEquivalentTo(VersionWithRevision::Parse(U_("1.30.00.05-r13099"))), true);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsEquivalentTo(VersionWithRevision::Parse(U_("1.30.00.05-r13098"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05-r13099")).IsEquivalentTo(VersionWithRevision::Parse(U_("1.30.00.05"))), true);
+
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsEqualTo(VersionWithRevision::Parse(U_("1.30.00.05-r13100"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsEqualTo(VersionWithRevision::Parse(U_("1.30.00.05-r13099"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsEqualTo(VersionWithRevision::Parse(U_("1.30.00.05-r13098"))), false);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsEqualTo(VersionWithRevision::Parse(U_("1.30.00.05"))), true);
+
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsEquivalentTo(VersionWithRevision::Parse(U_("1.30.00.05-r13100"))), true);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsEquivalentTo(VersionWithRevision::Parse(U_("1.30.00.05-r13099"))), true);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsEquivalentTo(VersionWithRevision::Parse(U_("1.30.00.05-r13098"))), true);
+		VERIFY_EQUAL(VersionWithRevision::Parse(U_("1.30.00.05")).IsEquivalentTo(VersionWithRevision::Parse(U_("1.30.00.05"))), true);
+
 	}
 
 #ifdef MODPLUG_TRACKER

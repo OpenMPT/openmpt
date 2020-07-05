@@ -244,6 +244,92 @@ public:
 
 
 
+struct VersionWithRevision
+{
+	Version version;
+	uint64 revision;
+	static VersionWithRevision Current();
+	static VersionWithRevision Parse(const mpt::ustring &s);
+	constexpr bool HasRevision() const noexcept
+	{
+		return revision != 0;
+	}
+	constexpr bool IsEqualTo(VersionWithRevision other) const noexcept
+	{
+		return version == other.version && revision == other.revision;
+	}
+	constexpr bool IsEquivalentTo(VersionWithRevision other) const noexcept
+	{
+		if(version == other.version && revision == other.revision)
+		{
+			return true;
+		}
+		if(HasRevision() && other.HasRevision())
+		{
+			return false;
+		}
+		return version == other.version;
+	}
+	constexpr bool IsNewerThan(VersionWithRevision other) const noexcept
+	{
+		if(version < other.version)
+		{
+			return false;
+		}
+		if(version > other.version)
+		{
+			return true;
+		}
+		if(!HasRevision() && !other.HasRevision())
+		{
+			return false;
+		}
+		if(HasRevision() && other.HasRevision())
+		{
+			if(revision < other.revision)
+			{
+				return false;
+			}
+			if(revision > other.revision)
+			{
+				return true;
+			}
+			return false;
+		}
+		return false;
+	}
+	constexpr bool IsOlderThan(VersionWithRevision other) const noexcept
+	{
+		if(version < other.version)
+		{
+			return true;
+		}
+		if(version > other.version)
+		{
+			return false;
+		}
+		if(!HasRevision() && !other.HasRevision())
+		{
+			return false;
+		}
+		if(HasRevision() && other.HasRevision())
+		{
+			if(revision < other.revision)
+			{
+				return true;
+			}
+			if(revision > other.revision)
+			{
+				return false;
+			}
+			return false;
+		}
+		return false;
+	}
+};
+
+
+
 namespace Build
 {
 

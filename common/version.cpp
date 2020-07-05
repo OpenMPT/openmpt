@@ -264,6 +264,29 @@ SourceInfo SourceInfo::Current()
 
 
 
+VersionWithRevision VersionWithRevision::Current()
+{
+	return {Version::Current(), static_cast<uint64>(SourceInfo::Current().Revision())};
+}
+
+VersionWithRevision VersionWithRevision::Parse(const mpt::ustring &s)
+{
+	Version version = Version::Parse(mpt::ustring());
+	uint64 revision = 0;
+	const auto tokens = mpt::String::Split<mpt::ustring>(s, U_("-"));
+	if(tokens.size() >= 1)
+	{
+		version = Version::Parse(tokens[0]);
+	}
+	if(tokens.size() >= 2)
+	{
+		revision = ConvertStrTo<uint64>(tokens[1].substr(1));
+	}
+	return {version, revision};
+}
+
+
+
 namespace Build {
 
 bool IsReleasedBuild()
