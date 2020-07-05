@@ -410,7 +410,7 @@ Result Request::operator()(InternetSession &internet) const
 				}
 			} else
 			{
-				resultBuffer.insert(resultBuffer.end(), downloadBuffer.data(), downloadBuffer.data() + bytesRead);
+				mpt::append(resultBuffer, downloadBuffer.data(), downloadBuffer.data() + bytesRead);
 			}
 			transferred += bytesRead;
 			progress(Progress::TransferRunning, transferred, expectedSize);

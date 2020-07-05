@@ -49,6 +49,20 @@ template <typename T, std::size_t N> inline std::vector<typename std::remove_con
 
 
 
+template <typename Tcont2, typename Tcont1> inline Tcont1 & append(Tcont1 & cont1, const Tcont2 & cont2)
+{
+	cont1.insert(cont1.end(), cont2.begin(), cont2.end());
+	return cont1;
+}
+
+template <typename Tit2, typename Tcont1> inline Tcont1 & append(Tcont1 & cont1, Tit2 beg, Tit2 end)
+{
+	cont1.insert(cont1.end(), beg, end);
+	return cont1;
+}
+
+
+
 template <typename Tdst, typename Tsrc>
 struct buffer_cast_impl
 {

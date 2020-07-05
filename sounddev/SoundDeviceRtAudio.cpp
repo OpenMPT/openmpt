@@ -311,9 +311,9 @@ SoundDevice::DynamicCaps CRtAudioDevice::GetDeviceDynamicCaps(const std::vector<
 	{
 		caps.inputSourceNames.push_back(std::make_pair(channel, U_("Channel ") + mpt::ufmt::dec(channel + 1)));
 	}
-	caps.supportedSampleRates.insert(caps.supportedSampleRates.end(), rtinfo.sampleRates.begin(), rtinfo.sampleRates.end());
+	mpt::append(caps.supportedSampleRates, rtinfo.sampleRates);
 	std::reverse(caps.supportedSampleRates.begin(), caps.supportedSampleRates.end());
-	caps.supportedExclusiveSampleRates.insert(caps.supportedExclusiveSampleRates.end(), rtinfo.sampleRates.begin(), rtinfo.sampleRates.end());
+	mpt::append(caps.supportedExclusiveSampleRates, rtinfo.sampleRates);
 	std::reverse(caps.supportedExclusiveSampleRates.begin(), caps.supportedExclusiveSampleRates.end());
 	caps.supportedSampleFormats = { SampleFormatFloat32 };
 	caps.supportedExclusiveModeSampleFormats.clear();

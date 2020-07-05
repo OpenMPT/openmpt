@@ -387,7 +387,7 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 			BYTE *data = NULL;
 			DWORD dataSize = 0;
 			MPT_MF_CHECKED(buffer->Lock(&data, NULL, &dataSize));
-			rawData.insert(rawData.end(), mpt::byte_cast<char*>(data), mpt::byte_cast<char*>(data + dataSize));
+			mpt::append(rawData, mpt::byte_cast<char*>(data), mpt::byte_cast<char*>(data + dataSize));
 			MPT_MF_CHECKED(buffer->Unlock());
 			if(rawData.size() / numChannels / (bitsPerSample / 8) > MAX_SAMPLE_LENGTH)
 			{

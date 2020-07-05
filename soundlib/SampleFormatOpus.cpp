@@ -131,7 +131,7 @@ bool CSoundFile::ReadOpusSample(SAMPLEINDEX sample, FileReader &file)
 		}
 		if(framesRead > 0)
 		{
-			raw_sample_data.insert(raw_sample_data.end(), decodeBuf.begin(), decodeBuf.begin() + (framesRead * channels));
+			mpt::append(raw_sample_data, decodeBuf.begin(), decodeBuf.begin() + (framesRead * channels));
 		} else if(framesRead == 0)
 		{
 			eof = true;

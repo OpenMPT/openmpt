@@ -71,7 +71,7 @@ template <typename Tdevice>
 void Manager::EnumerateDevices(SoundDevice::SysInfo sysInfo)
 {
 	const auto infos = Tdevice::EnumerateDevices(sysInfo);
-	m_SoundDevices.insert(m_SoundDevices.end(), infos.begin(), infos.end());
+	mpt::append(m_SoundDevices, infos);
 	for(const auto &info : infos)
 	{
 		SoundDevice::Identifier identifier = info.GetIdentifier();

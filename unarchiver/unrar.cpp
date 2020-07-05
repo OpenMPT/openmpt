@@ -77,7 +77,7 @@ void CRarArchive::RARCallbackProcessData(const char * buf, std::size_t size)
 	{
 		return;
 	}
-	data.insert(data.end(), buf, buf + size);
+	mpt::append(data, buf, buf + size);
 }
 
 

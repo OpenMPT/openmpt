@@ -497,7 +497,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 		mpg123_size_t buf_bytes_decoded = 0;
 		int mpg123_read_result = mpg123_read(mh, mpt::byte_cast<unsigned char*>(buf_bytes.data()), buf_bytes.size(), &buf_bytes_decoded);
 		std::memcpy(buf_samples.data(), buf_bytes.data(), buf_bytes_decoded);
-		data.insert(data.end(), buf_samples.data(), buf_samples.data() + buf_bytes_decoded / sizeof(int16));
+		mpt::append(data, buf_samples.data(), buf_samples.data() + buf_bytes_decoded / sizeof(int16));
 		if((data.size() / channels) > MAX_SAMPLE_LENGTH)
 		{
 			break;
@@ -615,7 +615,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 			{
 				try
 				{
-					raw_sample_data.insert(raw_sample_data.end(), sample_buf, sample_buf + frame_samples * channels);
+					mpt::append(raw_sample_data, sample_buf, sample_buf + frame_samples * channels);
 				} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 				{
 					MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
