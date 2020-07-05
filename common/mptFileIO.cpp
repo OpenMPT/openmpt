@@ -326,7 +326,7 @@ LazyFileRef::operator std::string () const
 	std::vector<char> buf(mpt::saturate_cast<std::size_t>(mpt::IO::TellRead(file)));
 	mpt::IO::SeekBegin(file);
 	mpt::IO::ReadRaw(file, mpt::as_span(buf));
-	return std::string(buf.begin(), buf.end());
+	return mpt::buffer_cast<std::string>(buf);
 }
 
 } // namespace mpt

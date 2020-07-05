@@ -1119,31 +1119,6 @@ public:
 		return mpt::make_vector(view.span());
 	}
 
-	std::string GetRawDataAsString() const
-	{
-		PinnedRawDataView view = GetPinnedRawDataView();
-		mpt::span<const char> data = mpt::byte_cast<mpt::span<const char>>(view.span());
-		return std::string(data.begin(), data.end());
-	}
-	std::string ReadRawDataAsString()
-	{
-		PinnedRawDataView view = ReadPinnedRawDataView();
-		mpt::span<const char> data = mpt::byte_cast<mpt::span<const char>>(view.span());
-		return std::string(data.begin(), data.end());
-	}
-	std::string GetRawDataAsString(std::size_t size) const
-	{
-		PinnedRawDataView view = GetPinnedRawDataView(size);
-		mpt::span<const char> data = mpt::byte_cast<mpt::span<const char>>(view.span());
-		return std::string(data.begin(), data.end());
-	}
-	std::string ReadRawDataAsString(std::size_t size)
-	{
-		PinnedRawDataView view = ReadPinnedRawDataView(size);
-		mpt::span<const char> data = mpt::byte_cast<mpt::span<const char>>(view.span());
-		return std::string(data.begin(), data.end());
-	}
-
 	template <typename T>
 	bool Read(T &target)
 	{

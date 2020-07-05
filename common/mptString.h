@@ -32,13 +32,25 @@ namespace mpt
 
 
 
-template <typename T> inline span<T> as_span(std::basic_string<T> & str) { return span<T>(&(str[0]), str.length()); }
+template <typename T> inline span<T> as_span(std::basic_string<T> & str) { return span<T>(str.data(), str.size()); }
 
-template <typename T> inline span<const T> as_span(const std::basic_string<T> & str) { return span<const T>(&(str[0]), str.length()); }
+template <typename T> inline span<const T> as_span(const std::basic_string<T> & str) { return span<const T>(str.data(), str.size()); }
 
 
 
 template <typename T> inline std::vector<typename std::remove_const<T>::type> make_vector(const std::basic_string<T> & str) { return std::vector<typename std::remove_const<T>::type>(str.begin(), str.end()); }
+
+
+
+template <typename T> inline std::basic_string<typename std::remove_const<T>::type> make_basic_string(T * beg, T * end) { return std::basic_string<typename std::remove_const<T>::type>(beg, end); }
+
+template <typename T> inline std::basic_string<typename std::remove_const<T>::type> make_basic_string(T * data, std::size_t size) { return std::basic_string<typename std::remove_const<T>::type>(data, data + size); }
+
+template <typename T> inline std::basic_string<typename std::remove_const<T>::type> make_basic_string(mpt::span<T> data) { return std::basic_string<typename std::remove_const<T>::type>(data.data(), data.data() + data.size()); }
+
+template <typename T, std::size_t N> inline std::basic_string<typename std::remove_const<T>::type> make_basic_string(T (&arr)[N]) { return std::basic_string<typename std::remove_const<T>::type>(std::begin(arr), std::end(arr)); }
+
+template <typename T> inline std::basic_string<typename std::remove_const<T>::type> make_basic_string(const std::vector<T> & str) { return std::vector<typename std::remove_const<T>::type>(str.begin(), str.end()); }
 
 
 

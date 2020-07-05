@@ -49,6 +49,24 @@ template <typename T, std::size_t N> inline std::vector<typename std::remove_con
 
 
 
+template <typename Tdst, typename Tsrc>
+struct buffer_cast_impl
+{
+	inline Tdst operator () (const Tsrc &src) const
+	{
+		return Tdst(mpt::byte_cast<const typename Tdst::value_type *>(src.data()), mpt::byte_cast<const typename Tdst::value_type *>(src.data()) + src.size());
+	}
+};
+
+// casts between vector<->string of byte-castable types
+template <typename Tdst, typename Tsrc>
+inline Tdst buffer_cast(Tsrc src)
+{
+	return buffer_cast_impl<Tdst, Tsrc>()(src);
+}
+
+
+
 template <typename T>
 struct GetRawBytesFunctor<std::vector<T>>
 {

@@ -579,7 +579,7 @@ namespace asymmetric
 				}
 				std::vector<std::byte> protectedheaderraw = Util::Base64urlToBin(jsignature["protected"]);
 				std::vector<std::byte> signature = Util::Base64urlToBin(jsignature["signature"]);
-				nlohmann::json header = nlohmann::json::parse(std::string(mpt::byte_cast<const char*>(protectedheaderraw.data()), protectedheaderraw.size()));
+				nlohmann::json header = nlohmann::json::parse(mpt::buffer_cast<std::string>(protectedheaderraw));
 				if(header["typ"] != "JWT")
 				{
 					throw signature_verification_failed();
@@ -602,7 +602,7 @@ namespace asymmetric
 				std::vector<std::byte> protectedheaderraw = Util::Base64urlToBin(parts[0]);
 				std::vector<std::byte> payload = Util::Base64urlToBin(parts[1]);
 				std::vector<std::byte> signature = Util::Base64urlToBin(parts[2]);
-				nlohmann::json header = nlohmann::json::parse(std::string(mpt::byte_cast<const char*>(protectedheaderraw.data()), protectedheaderraw.size()));
+				nlohmann::json header = nlohmann::json::parse(mpt::buffer_cast<std::string>(protectedheaderraw));
 				if(header["typ"] != "JWT")
 				{
 					throw signature_verification_failed();

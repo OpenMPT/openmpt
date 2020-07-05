@@ -1265,7 +1265,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 {
-	std::istringstream iStrm(file.GetRawDataAsString());
+	std::istringstream iStrm(mpt::buffer_cast<std::string>(file.GetRawDataAsByteVector()));
 
 	if(cwtv >= 0x88D)
 	{
@@ -2426,7 +2426,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 				// Tempo Swing Factors
 				if(size > 2)
 				{
-					std::istringstream iStrm(chunk.ReadRawDataAsString());
+					std::istringstream iStrm(mpt::buffer_cast<std::string>(chunk.ReadRawDataAsByteVector()));
 					TempoSwing::Deserialize(iStrm, m_tempoSwing, chunk.GetLength());
 				}
 				break;

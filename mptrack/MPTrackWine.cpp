@@ -221,9 +221,7 @@ static std::map<std::string, std::vector<char> > UnzipToMap(mpt::PathString file
 			unzReadCurrentFile(zipfile, &data[0], info.uncompressed_size);
 			unzCloseCurrentFile(zipfile);
 
-			std::string stringdata = std::string(&data[0], &data[0] + data.size());
-			stringdata = mpt::String::Replace(stringdata, "\r\n", "\n");
-			data = std::vector<char>(stringdata.data(), stringdata.data() + stringdata.size());
+			data = mpt::buffer_cast<std::vector<char>>(mpt::String::Replace(mpt::buffer_cast<std::string>(data), "\r\n", "\n"));
 
 			filetree[mpt::String::Replace(mpt::ToCharset(mpt::Charset::UTF8, mpt::Charset::CP437, name), "\\", "/")] = data;
 		}

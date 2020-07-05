@@ -448,7 +448,7 @@ void IniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
 	}
 	const mpt::PathString backupFilename = filename + mpt::PathString::FromUnicode(backupTag.empty() ? U_(".ansi.bak") : U_(".ansi.") + backupTag + U_(".bak"));
 	CopyFile(filename.AsNative().c_str(), backupFilename.AsNative().c_str(), FALSE);
-	WriteFileUTF16LE(filename, mpt::ToWide(mpt::Charset::Locale, std::string(data.data(), data.data() + data.size())));
+	WriteFileUTF16LE(filename, mpt::ToWide(mpt::Charset::Locale, mpt::buffer_cast<std::string>(data)));
 }
 
 SettingValue IniFileSettingsBackend::ReadSetting(const SettingPath &path, const SettingValue &def) const
