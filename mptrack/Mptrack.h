@@ -154,6 +154,7 @@ protected:
 	DWORD m_dwLastPluginIdleCall = 0;
 	bool m_bInstallerMode = false;
 	bool m_bPortableMode = false;
+	bool m_bSourceTreeMode = false;
 
 public:
 	CTrackApp();
@@ -230,6 +231,11 @@ public:
 	{
 		return m_bPortableMode;
 	}
+	bool IsSourceTreeMode() const
+	{
+		return m_bSourceTreeMode;
+	}
+
 	SettingsContainer &GetPluginCache()
 	{
 		ASSERT(m_pPluginCache);

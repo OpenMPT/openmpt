@@ -626,6 +626,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 	m_bInstallerMode = !modeSourceProject && !portableMode;
 	m_bPortableMode = portableMode;
+	m_bSourceTreeMode = modeSourceProject;
 
 }
 
