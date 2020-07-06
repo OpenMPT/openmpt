@@ -326,8 +326,8 @@ Result Request::operator()(InternetSession &internet) const
 		AcceptMimeTypesWrapper(acceptMimeTypes),
 		0
 			| ((protocol != Protocol::HTTP) ? (INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP) : 0)
-			| (IsCachable(method) ? 0 : INTERNET_FLAG_DONT_CACHE)
-			| ((flags & NoCache) ? (INTERNET_FLAG_PRAGMA_NOCACHE | INTERNET_FLAG_RELOAD | INTERNET_FLAG_DONT_CACHE) : 0)
+			| (IsCachable(method) ? 0 : INTERNET_FLAG_NO_CACHE_WRITE)
+			| ((flags & NoCache) ? (INTERNET_FLAG_PRAGMA_NOCACHE | INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE) : 0)
 		,
 		NULL));
 	if(!request)
