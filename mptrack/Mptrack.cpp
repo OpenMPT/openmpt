@@ -415,6 +415,7 @@ END_MESSAGE_MAP()
 
 CTrackApp::CTrackApp()
 {
+	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART | AFX_RESTART_MANAGER_REOPEN_PREVIOUS_FILES;
 }
 
 
@@ -736,12 +737,12 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 		}
 	#endif
 
-	// We probably should call the base class version here,
-	// but we historically did not do that.
-	//if(!CWinApp::InitInstance())
-	//{
-	//	return FALSE;
-	//}
+	// Call the base class.
+	// This is required for MFC RestartManager integration.
+	if(!CWinApp::InitInstance())
+	{
+		return FALSE;
+	}
 
 	#if MPT_COMPILER_MSVC
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
