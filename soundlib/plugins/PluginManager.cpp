@@ -403,9 +403,9 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 									plug->pluginId1 = kDmoMagic;
 									plug->pluginId2 = clsid.Data1;
 									plug->category = VSTPluginLib::catDMO;
-								} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+								} catch(mpt::out_of_memory e)
 								{
-									MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+									mpt::delete_out_of_memory(e);
 									delete plug;
 								}
 #ifdef DMO_LOG

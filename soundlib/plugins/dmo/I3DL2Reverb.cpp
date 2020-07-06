@@ -393,10 +393,10 @@ void I3DL2Reverb::PositionChanged()
 		m_delayLines[17].Init(10, 0, sampleRate, -1);
 		m_delayLines[18].Init(10, 0, sampleRate, -1);
 		m_ok = true;
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
 		m_ok = false;
-		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		mpt::delete_out_of_memory(e);
 	}
 }
 

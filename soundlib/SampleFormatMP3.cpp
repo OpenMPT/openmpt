@@ -616,9 +616,9 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 				try
 				{
 					mpt::append(raw_sample_data, sample_buf, sample_buf + frame_samples * channels);
-				} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+				} catch(mpt::out_of_memory e)
 				{
-					MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+					mpt::delete_out_of_memory(e);
 					break;
 				}
 			}

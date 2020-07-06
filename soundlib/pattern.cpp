@@ -91,9 +91,9 @@ bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits, bool
 			m_ModCommands.erase(m_ModCommands.end() - count, m_ModCommands.end());
 		else
 			m_ModCommands.erase(m_ModCommands.begin(), m_ModCommands.begin() + count);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		mpt::delete_out_of_memory(e);
 		return false;
 	}
 
@@ -180,9 +180,9 @@ bool CPattern::Expand()
 	try
 	{
 		newPattern.assign(m_ModCommands.size() * 2, ModCommand::Empty());
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		mpt::delete_out_of_memory(e);
 		return false;
 	}
 

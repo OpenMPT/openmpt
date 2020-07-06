@@ -101,7 +101,7 @@ inline void CheckNTSTATUS(NTSTATUS status)
 		return;
 	} else if(status == STATUS_NO_MEMORY)
 	{
-		MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+		mpt::throw_out_of_memory();
 	} else
 	{
 		throw exception(status);
@@ -116,7 +116,7 @@ inline void CheckSECURITY_STATUS(SECURITY_STATUS status)
 		return;
 	} else if(status == NTE_NO_MEMORY)
 	{
-		MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+		mpt::throw_out_of_memory();
 	} else
 	{
 		throw security_exception(status);
@@ -434,9 +434,9 @@ namespace asymmetric
 					result.public_exp = Util::Base64urlToBin(json["e"]);
 					result.modulus = Util::Base64urlToBin(json["n"]);
 					result.length = mpt::saturate_cast<uint32>(result.modulus.size() * 8);
-				} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+				} catch(mpt::out_of_memory e)
 				{
-					MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+					mpt::rethrow_out_of_memory(e);
 				} catch(...)
 				{
 					throw std::runtime_error("Cannot parse RSA public key JWK.");

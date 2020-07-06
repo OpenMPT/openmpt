@@ -222,9 +222,9 @@ void CDefaultVstEditor::CreateControls()
 		{
 			controls.push_back(new ParamControlSet(this, rect, i, m));
 			rect.OffsetRect(0, m.totalHeight + m.spacing);
-		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+		} catch(mpt::out_of_memory e)
 		{
-			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+			mpt::delete_out_of_memory(e);
 		}
 	}
 

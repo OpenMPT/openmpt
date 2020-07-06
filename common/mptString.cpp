@@ -842,9 +842,9 @@ static std::wstring FromLocaleCpp(const std::string &str, wchar_t replacement)
 	{
 		std::locale locale(""); // user locale
 		return String::LocaleDecode(str, locale, replacement);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+		mpt::rethrow_out_of_memory(e);
 	} catch(...)
 	{
 		// nothing
@@ -853,9 +853,9 @@ static std::wstring FromLocaleCpp(const std::string &str, wchar_t replacement)
 	{
 		std::locale locale; // current c++ locale
 		return String::LocaleDecode(str, locale, replacement);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+		mpt::rethrow_out_of_memory(e);
 	} catch(...)
 	{
 		// nothing
@@ -864,9 +864,9 @@ static std::wstring FromLocaleCpp(const std::string &str, wchar_t replacement)
 	{
 		std::locale locale = std::locale::classic(); // "C" locale
 		return String::LocaleDecode(str, locale, replacement);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+		mpt::rethrow_out_of_memory(e);
 	} catch(...)
 	{
 		// nothing
@@ -881,9 +881,9 @@ static std::string ToLocaleCpp(const std::wstring &str, char replacement)
 	{
 		std::locale locale(""); // user locale
 		return String::LocaleEncode(str, locale, replacement);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+		mpt::rethrow_out_of_memory(e);
 	} catch(...)
 	{
 		// nothing
@@ -892,9 +892,9 @@ static std::string ToLocaleCpp(const std::wstring &str, char replacement)
 	{
 		std::locale locale; // current c++ locale
 		return String::LocaleEncode(str, locale, replacement);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+		mpt::rethrow_out_of_memory(e);
 	} catch(...)
 	{
 		// nothing
@@ -903,9 +903,9 @@ static std::string ToLocaleCpp(const std::wstring &str, char replacement)
 	{
 		std::locale locale = std::locale::classic(); // "C" locale
 		return String::LocaleEncode(str, locale, replacement);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+		mpt::rethrow_out_of_memory(e);
 	} catch(...)
 	{
 		// nothing

@@ -356,9 +356,9 @@ void CViewSample::UpdateOPLEditor()
 			try
 			{
 				m_oplEditor = std::make_unique<OPLInstrDlg>(*this, sndFile);
-			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+			} catch(mpt::out_of_memory e)
 			{
-				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+				mpt::delete_out_of_memory(e);
 			}
 		}
 		if(m_oplEditor)

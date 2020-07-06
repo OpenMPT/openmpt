@@ -89,9 +89,9 @@ void DigiBoosterEcho::SaveAllParameters()
 	{
 		m_pMixStruct->pluginData.resize(sizeof(m_chunk));
 		memcpy(m_pMixStruct->pluginData.data(), &m_chunk, sizeof(m_chunk));
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		mpt::delete_out_of_memory(e);
 		m_pMixStruct->pluginData.clear();
 	}
 }
@@ -145,9 +145,9 @@ void DigiBoosterEcho::PositionChanged()
 	try
 	{
 		m_delayLine.assign(m_bufferSize * 2, 0);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		mpt::delete_out_of_memory(e);
 		m_bufferSize = 0;
 	}
 	m_writePos = 0;

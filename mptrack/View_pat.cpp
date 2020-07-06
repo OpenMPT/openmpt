@@ -2318,9 +2318,9 @@ void CViewPattern::OnVisualizeEffect()
 				// HACK: to get status window set up; must create clear destinction between
 				// construction, 1st draw code and all draw code.
 				m_pEffectVis->OnSize(0, 0, 0);
-			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+			} catch(mpt::out_of_memory e)
 			{
-				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+				mpt::delete_out_of_memory(e);
 			}
 		}
 	}

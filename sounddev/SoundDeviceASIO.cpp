@@ -1203,7 +1203,7 @@ void CASIODevice::ExceptionHandler(const char * func)
 		SendDeviceMessage(LogError, mpt::format(U_("ASIO Driver Crash: %1"))(mpt::ToUnicode(mpt::CharsetSource, std::string(e.func()))));
 	} catch(const std::bad_alloc &)
 	{
-		MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+		mpt::throw_out_of_memory();
 	} catch(const ASIO::Windows::DriverLoadFailed &e)
 	{
 		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("ASIO: %1: Driver Load: %2"))(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));

@@ -132,9 +132,9 @@ sane_random_device::sane_random_device()
 	{
 		prd = std::make_unique<std::random_device>();
 		rd_reliable = ((*prd).entropy() > 0.0);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+		mpt::rethrow_out_of_memory(e);
 	} catch(const std::exception &)
 	{
 		rd_reliable = false;	
@@ -153,9 +153,9 @@ sane_random_device::sane_random_device(const std::string & token_)
 	{
 		prd = std::make_unique<std::random_device>(token);
 		rd_reliable = ((*prd).entropy() > 0.0);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+		mpt::rethrow_out_of_memory(e);
 	} catch(const std::exception &)
 	{
 		rd_reliable = false;	

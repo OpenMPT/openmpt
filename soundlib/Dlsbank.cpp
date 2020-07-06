@@ -1550,9 +1550,9 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 					{
 						waveData.assign(length + 8, 0);
 						mpt::IO::ReadRaw(f, waveData.data(), length);
-					} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+					} catch(mpt::out_of_memory e)
 					{
-						MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+						mpt::delete_out_of_memory(e);
 					}
 				}
 			}
@@ -1569,9 +1569,9 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 						waveData.assign(chunk.len + sizeof(IFFCHUNK), 0);
 						memcpy(waveData.data(), &chunk, sizeof(chunk));
 						mpt::IO::ReadRaw(f, &waveData[sizeof(chunk)], length - sizeof(chunk));
-					} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+					} catch(mpt::out_of_memory e)
 					{
-						MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+						mpt::delete_out_of_memory(e);
 					}
 				}
 			}

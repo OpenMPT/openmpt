@@ -1558,9 +1558,9 @@ void CVstPlugin::SaveAllParameters()
 				memcpy(data, "fEvN", 4);	// 'NvEf', return value of deprecated effIdentify call
 				memcpy(data + 4, p, byteSize);
 				return;
-			} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+			} catch(mpt::out_of_memory e)
 			{
-				MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+				mpt::delete_out_of_memory(e);
 			}
 		}
 	}
@@ -1604,9 +1604,9 @@ CAbstractVstEditor *CVstPlugin::OpenEditor()
 			return new COwnerVstEditor(*this);
 		else
 			return new CDefaultVstEditor(*this);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		mpt::delete_out_of_memory(e);
 		ReportPlugException(U_("Exception in OpenEditor()"));
 		return nullptr;
 	}

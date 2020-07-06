@@ -492,10 +492,10 @@ void IMixPlugin::SaveAllParameters()
 			mpt::IO::Write(memFile, IEEE754binary32LE(GetParameter(i)));
 		}
 		EndGetProgram();
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
 		m_pMixStruct->pluginData.clear();
-		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		mpt::delete_out_of_memory(e);
 	}
 }
 
@@ -554,9 +554,9 @@ CAbstractVstEditor *IMixPlugin::OpenEditor()
 	try
 	{
 		return new CDefaultVstEditor(*this);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		mpt::delete_out_of_memory(e);
 		return nullptr;
 	}
 }

@@ -56,7 +56,7 @@ mpt::winstring CLSIDToString(CLSID clsid)
 			::CoTaskMemFree(tmp);
 			tmp = nullptr;
 		}
-		MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+		mpt::throw_out_of_memory();
 		break;
 	default:
 		if(tmp)
@@ -74,11 +74,11 @@ mpt::winstring CLSIDToString(CLSID clsid)
 	try
 	{
 		str = tmp;
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
 		::CoTaskMemFree(tmp);
 		tmp = nullptr;
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+		mpt::rethrow_out_of_memory(e);
 	}
 	::CoTaskMemFree(tmp);
 	tmp = nullptr;
@@ -196,7 +196,7 @@ mpt::winstring IIDToString(IID iid)
 			::CoTaskMemFree(tmp);
 			tmp = nullptr;
 		}
-		MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+		mpt::throw_out_of_memory();
 		break;
 	default:
 		if(tmp)
@@ -214,11 +214,11 @@ mpt::winstring IIDToString(IID iid)
 	try
 	{
 		str = tmp;
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
 		::CoTaskMemFree(tmp);
 		tmp = nullptr;
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+		mpt::rethrow_out_of_memory(e);
 	}
 	return mpt::ToWin(str);
 }
@@ -236,7 +236,7 @@ IID StringToIID(const mpt::winstring &str_)
 		break;
 	case E_OUTOFMEMORY:
 		iid = IID();
-		MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+		mpt::throw_out_of_memory();
 		break;
 	case E_INVALIDARG:
 		iid = IID();

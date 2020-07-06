@@ -379,9 +379,9 @@ bool CTrackApp::AddDLSBank(const mpt::PathString &filename)
 			gpDLSBanks.push_back(bank);
 			return true;
 		}
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		mpt::delete_out_of_memory(e);
 	} catch(const std::exception &)
 	{
 	}

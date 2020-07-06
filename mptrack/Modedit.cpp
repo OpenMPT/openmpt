@@ -205,9 +205,9 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 			{
 				newPatterns[i].resize(m_SndFile.Patterns[i].GetNumRows() * newNumChannels);
 			}
-		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+		} catch(mpt::out_of_memory e)
 		{
-			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+			mpt::delete_out_of_memory(e);
 			Reporting::Error("Out of memory!", "Rearrange Channels");
 			return oldNumChannels;
 		}
@@ -1053,9 +1053,9 @@ static bool StringToEnvelope(const std::string_view &s, InstrumentEnvelope &env,
 	try
 	{
 		env.resize(nPoints);
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
-		MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+		mpt::delete_out_of_memory(e);
 		return false;
 	}
 	env.nSustainStart = static_cast<decltype(env.nSustainStart)>(susBegin);

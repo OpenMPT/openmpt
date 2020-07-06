@@ -60,17 +60,17 @@ inline mpt::ustring GetErrorMessage(DWORD errorCode, HANDLE hModule = NULL)
 		DWORD e = GetLastError();
 		if((e == ERROR_NOT_ENOUGH_MEMORY) || (e == ERROR_OUTOFMEMORY))
 		{
-			MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+			mpt::throw_out_of_memory();
 		}
 		return {};
 	}
 	try
 	{
 		message = mpt::ToUnicode(mpt::winstring((LPTSTR)lpMsgBuf));
-	} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+	} catch(mpt::out_of_memory e)
 	{
 		LocalFree(lpMsgBuf);
-		MPT_EXCEPTION_RETHROW_OUT_OF_MEMORY(e);
+		mpt::rethrow_out_of_memory(e);
 	}
 	LocalFree(lpMsgBuf);
 	return message;

@@ -2182,7 +2182,7 @@ public:
 		HANDLE handleSt = soundtouch_createInstance();
 		if(handleSt == NULL)
 		{
-			MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
+			mpt::throw_out_of_memory();
 		}
 
 		const uint8 smpSize = sample.GetElementarySampleSize();
@@ -2420,9 +2420,9 @@ public:
 		try
 		{
 			buffer.resize(bufferSize);
-		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
+		} catch(mpt::out_of_memory e)
 		{
-			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+			mpt::delete_out_of_memory(e);
 			return kOutOfMemory;
 		}
 
