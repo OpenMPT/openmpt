@@ -71,9 +71,13 @@ namespace mpt
 
 // fallback to member function ToUString()
 #if MPT_USTRING_MODE_UTF8
-template <typename T> auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::Charset::UTF8, x.ToUString())) { return mpt::ToCharset(mpt::Charset::UTF8, x.ToUString()); }
+template <typename T> [[deprecated]] auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::Charset::UTF8, x.ToUString())) { return mpt::ToCharset(mpt::Charset::UTF8, x.ToUString()); } // unknown encoding
 #else
-template <typename T> auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::CharsetLocaleOrUTF8, x.ToUString())) { return mpt::ToCharset(mpt::CharsetLocaleOrUTF8, x.ToUString()); }
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+template <typename T> [[deprecated]] auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::Charset::Locale, x.ToUString())) { return mpt::ToCharset(mpt::Charset::Locale, x.ToUString()); } // unknown encoding
+#else // !MPT_ENABLE_CHARSET_LOCALE
+template <typename T> [[deprecated]] auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::Charset::UTF8, x.ToUString())) { return mpt::ToCharset(mpt::Charset::UTF8, x.ToUString()); } // unknown encoding
+#endif // MPT_ENABLE_CHARSET_LOCALE
 #endif
 
 static inline std::string ToString(const std::string & x) { return x; }

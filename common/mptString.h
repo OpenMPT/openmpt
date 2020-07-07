@@ -244,13 +244,6 @@ constexpr Charset CharsetException = Charset::Locale;
 constexpr Charset CharsetException = Charset::UTF8;
 #endif
 
-// Locale in tracker builds, UTF8 in non-locale-aware libopenmpt builds.
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-constexpr Charset CharsetLocaleOrUTF8 = Charset::Locale;
-#else
-constexpr Charset CharsetLocaleOrUTF8 = Charset::UTF8;
-#endif
-
 
 
 // Checks if the std::string represents an UTF8 string.
@@ -283,14 +276,13 @@ bool IsUTF8(const std::string &str);
 
 template <mpt::Charset charset_tag>
 struct charset_char_traits : std::char_traits<char> {
-	static mpt::Charset charset() { return charset_tag; }
+	static constexpr mpt::Charset charset() noexcept { return charset_tag; }
 };
-#define MPT_ENCODED_STRING_TYPE(charset) std::basic_string< char, mpt::charset_char_traits< charset > >
 
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 
-using lstring = MPT_ENCODED_STRING_TYPE(mpt::Charset::Locale);
+using lstring = std::basic_string<char, mpt::charset_char_traits<mpt::Charset::Locale>>;
 
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
@@ -324,7 +316,7 @@ using u8string = std::u8string;
 
 #else // !C++20
 
-using u8string = MPT_ENCODED_STRING_TYPE(mpt::Charset::UTF8);
+using u8string = std::basic_string<char, mpt::charset_char_traits<mpt::Charset::UTF8>>;
 
 #define MPT_U8CHAR_TYPE  char
 #define MPT_U8CHAR(x)    x

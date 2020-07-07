@@ -721,7 +721,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				mixPlug = {};
 				mixPlug.Info.dwPluginId1 = Vst::kEffectMagic;
 				mixPlug.Info.gain = 10;
-				mixPlug.Info.szName = mpt::ToCharset(mpt::CharsetLocaleOrUTF8, name);
+				mixPlug.Info.szName = mpt::ToCharset(mpt::Charset::Locale, name);
 				mixPlug.Info.szLibraryName = mpt::ToCharset(mpt::Charset::UTF8, name);
 				instr.nMixPlug = numPlugins + 1;
 				instr.nMidiChannel = MidiFirstChannel;
