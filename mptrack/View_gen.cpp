@@ -561,8 +561,8 @@ void CViewGlobals::PopulateChannelPlugins()
 			for (PLUGINDEX ifx = 0; ifx < MAX_MIXPLUGINS; ifx++)
 			{
 				if (sndFile.m_MixPlugins[ifx].IsValidPlugin()
-					|| (strcmp(sndFile.m_MixPlugins[ifx].GetName(), "")
-					|| (sndFile.ChnSettings[nChn].nMixPlugin == ifx + 1)))
+					|| (strcmp(sndFile.m_MixPlugins[ifx].GetName(), ""))
+					|| (sndFile.ChnSettings[nChn].nMixPlugin == ifx + 1))
 				{
 					s = mpt::cformat(_T("FX%1: "))(ifx + 1);
 					s += sndFile.m_MixPlugins[ifx].GetName();
