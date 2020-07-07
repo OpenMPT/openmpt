@@ -512,7 +512,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 				std::string libName = mpt::ToCharset(mpt::Charset::Locale, mpt::Charset::UTF8, outPlug.GetLibraryName());
 				s.Format(_T("FX%d: "), iOut + 1);
 				s += libName.c_str();
-				if(!strcmp(outPlug.GetName(), "") || libName != outPlug.GetName())
+				if(strcmp(outPlug.GetName(), "") && libName != outPlug.GetName())
 				{
 					s += _T(" (");
 					s += outPlug.GetName();
