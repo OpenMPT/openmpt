@@ -20,9 +20,11 @@
 
 #if defined(MPT_ENABLE_FILEIO)
 #if MPT_COMPILER_MSVC
+#include <stdio.h>
 #include <tchar.h>
 #endif // MPT_COMPILER_MSVC
 #endif // MPT_ENABLE_FILEIO
+
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -147,19 +149,19 @@ mpt::tstring SafeOutputFile::convert_mode(std::ios_base::openmode mode, FlushMod
 	return fopen_mode;
 }
 
-FILE * SafeOutputFile::internal_fopen(const mpt::PathString &filename, std::ios_base::openmode mode, FlushMode flushMode)
+std::FILE * SafeOutputFile::internal_fopen(const mpt::PathString &filename, std::ios_base::openmode mode, FlushMode flushMode)
 {
 	mpt::tstring fopen_mode = convert_mode(mode, flushMode);
 	if(fopen_mode.empty())
 	{
 		return nullptr;
 	}
-	FILE *f =
-#ifdef UNICODE
-		_wfopen(filename.AsNativePrefixed().c_str(), fopen_mode.c_str())
-#else
-		fopen(filename.AsNativePrefixed().c_str(), fopen_mode.c_str())
-#endif
+	std::FILE *f =
+		#ifdef UNICODE
+			_wfopen(filename.AsNativePrefixed().c_str(), fopen_mode.c_str())
+		#else
+			std::fopen(filename.AsNativePrefixed().c_str(), fopen_mode.c_str())
+		#endif
 		;
 	if(!f)
 	{
@@ -167,9 +169,9 @@ FILE * SafeOutputFile::internal_fopen(const mpt::PathString &filename, std::ios_
 	}
 	if(mode & std::ios_base::ate)
 	{
-		if(fseek(f, 0, SEEK_END) != 0)
+		if(std::fseek(f, 0, SEEK_END) != 0)
 		{
-			fclose(f);
+			std::fclose(f);
 			f = nullptr;
 			return nullptr;
 		}
@@ -212,12 +214,12 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 #if MPT_COMPILER_MSVC
 			if(m_FlushMode != FlushMode::None)
 			{
-				if(fflush(m_f) != 0)
+				if(std::fflush(m_f) != 0)
 				{
 					errorOnFlush = true;
 				}
 			}
-			if(fclose(m_f) != 0)
+			if(std::fclose(m_f) != 0)
 			{
 				errorOnFlush = true;
 			}
@@ -230,12 +232,12 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 #if MPT_COMPILER_MSVC
 	if(m_FlushMode != FlushMode::None)
 	{
-		if(fflush(m_f) != 0)
+		if(std::fflush(m_f) != 0)
 		{
 			errorOnFlush = true;
 		}
 	}
-	if(fclose(m_f) != 0)
+	if(std::fclose(m_f) != 0)
 	{
 		errorOnFlush = true;
 	}

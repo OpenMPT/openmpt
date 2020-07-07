@@ -32,10 +32,6 @@
 #include <cstdio>
 #endif // !MPT_COMPILER_MSVC
 
-#if MPT_COMPILER_MSVC
-#include <stdio.h>
-#endif // !MPT_COMPILER_MSVC
-
 #endif // MPT_ENABLE_FILEIO
 
 
@@ -191,12 +187,12 @@ class SafeOutputFile
 private:
 	FlushMode m_FlushMode;
 #if MPT_COMPILER_MSVC
-	FILE *m_f = nullptr;
+	std::FILE *m_f = nullptr;
 #endif // MPT_COMPILER_MSVC
 	mpt::ofstream m_s;
 #if MPT_COMPILER_MSVC
 	static mpt::tstring convert_mode(std::ios_base::openmode mode, FlushMode flushMode);
-	FILE * internal_fopen(const mpt::PathString &filename, std::ios_base::openmode mode, FlushMode flushMode);
+	std::FILE * internal_fopen(const mpt::PathString &filename, std::ios_base::openmode mode, FlushMode flushMode);
 #endif // MPT_COMPILER_MSVC
 public:
 	SafeOutputFile() = delete;
