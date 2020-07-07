@@ -629,9 +629,9 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 	PlugMatchQuality match = kNoMatch;	// "Match quality" of found plugin. Higher value = better match.
 #if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
-	const mpt::PathString libraryName = mpt::PathString::FromUTF8(mixPlugin.GetLibraryName());
+	const mpt::PathString libraryName = mpt::PathString::FromUnicode(mixPlugin.GetLibraryName());
 #else
-	const std::string libraryName = mpt::ToLowerCaseAscii(mixPlugin.GetLibraryName());
+	const std::string libraryName = mpt::ToLowerCaseAscii(mpt::ToCharset(mpt::Charset::UTF8, mixPlugin.GetLibraryName()));
 #endif
 	for(const auto &plug : pluginList)
 	{
@@ -672,7 +672,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	}
 
 #ifdef MODPLUG_TRACKER
-	if(!pFound && strcmp(mixPlugin.GetLibraryName(), ""))
+	if(!pFound && (mixPlugin.GetLibraryName() != U_("")))
 	{
 		// Try finding the plugin DLL in the plugin directory or plugin cache instead.
 		mpt::PathString fullPath = TrackerSettings::Instance().PathPlugins.GetDefaultDir();
@@ -680,14 +680,14 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		{
 			fullPath = theApp.GetInstallPath() + P_("Plugins\\");
 		}
-		fullPath += mpt::PathString::FromUTF8(mixPlugin.GetLibraryName()) + P_(".dll");
+		fullPath += mpt::PathString::FromUnicode(mixPlugin.GetLibraryName()) + P_(".dll");
 
 		pFound = AddPlugin(fullPath);
 		if(!pFound)
 		{
 			// Try plugin cache (search for library name)
 			SettingsContainer &cacheFile = theApp.GetPluginCache();
-			mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, mpt::ToUnicode(mpt::Charset::UTF8, mixPlugin.GetLibraryName()), U_(""));
+			mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, mixPlugin.GetLibraryName(), U_(""));
 			if(IDs.length() >= 16)
 			{
 				fullPath = cacheFile.Read<mpt::PathString>(cacheSection, IDs, P_(""));

@@ -6052,7 +6052,7 @@ bool CViewPattern::BuildPluginCtxMenu(HMENU hMenu, UINT nChn, const CSoundFile &
 			if(plugin.IsValidPlugin())
 			{
 				s.Format(_T("FX%u: "), plug);
-				s += plugin.GetName();
+				s += mpt::ToCString(plugin.GetName());
 				itemFound = true;
 			}
 		}
@@ -6423,7 +6423,7 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	{
 		if(sndFile->m_MixPlugins[nPlg].pMixPlugin != nullptr)
 		{
-			s = mpt::cformat(_T("%1: %2"))(mpt::cfmt::dec0<2>(nPlg + 1), mpt::ToCString(mpt::Charset::Locale, sndFile->m_MixPlugins[nPlg].GetName()));
+			s = mpt::cformat(_T("%1: %2"))(mpt::cfmt::dec0<2>(nPlg + 1), mpt::ToCString(sndFile->m_MixPlugins[nPlg].GetName()));
 			AppendMenu(pluginChangeMenu, MF_STRING | (((nPlg + 1) == selStart.instr) ? MF_CHECKED : 0), ID_CHANGE_INSTRUMENT + nPlg + 1, s);
 		}
 	}
@@ -7069,7 +7069,7 @@ INT_PTR CViewPattern::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 		{
 			PLUGINDEX mixPlug = sndFile.ChnSettings[value].nMixPlugin;
 			if(mixPlug && mixPlug <= MAX_MIXPLUGINS)
-				text = mpt::tformat(_T("%1: %2"))(mixPlug, mpt::ToWin(sndFile.GetCharsetInternal(), sndFile.m_MixPlugins[mixPlug - 1].GetName()));
+				text = mpt::tformat(_T("%1: %2"))(mixPlug, mpt::ToWin(sndFile.m_MixPlugins[mixPlug - 1].GetName()));
 			else
 				text = _T("No Plugin");
 		}

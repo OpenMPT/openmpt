@@ -3491,7 +3491,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	// Plugins
 #ifndef NO_PLUGINS
 	const SNDMIXPLUGIN &plug = sndFile.m_MixPlugins[0];
-	VERIFY_EQUAL_NONCONT(strcmp(plug.GetName(), "First Plugin"), 0);
+	VERIFY_EQUAL_NONCONT(plug.GetName(), U_("First Plugin"));
 	VERIFY_EQUAL_NONCONT(plug.fDryRatio, 0.26f);
 	VERIFY_EQUAL_NONCONT(plug.IsMasterEffect(), true);
 	VERIFY_EQUAL_NONCONT(plug.GetGain(), 11);
@@ -3807,7 +3807,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	// Plugins
 #ifndef NO_PLUGINS
 	const SNDMIXPLUGIN &plug = sndFile.m_MixPlugins[0];
-	VERIFY_EQUAL_NONCONT(strcmp(plug.GetName(), "First Plugin"), 0);
+	VERIFY_EQUAL_NONCONT(plug.GetName(), U_("First Plugin"));
 	VERIFY_EQUAL_NONCONT(plug.fDryRatio, 0.26f);
 	VERIFY_EQUAL_NONCONT(plug.IsMasterEffect(), true);
 	VERIFY_EQUAL_NONCONT(plug.GetGain(), 11);

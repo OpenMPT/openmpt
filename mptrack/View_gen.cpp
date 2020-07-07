@@ -393,7 +393,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 	if (genHint.GetType()[HINT_MODTYPE | HINT_MODCHANNELS] || plugHint.GetType()[HINT_PLUGINNAMES])
 	{
 		PopulateChannelPlugins();
-		SetDlgItemText(IDC_EDIT13, mpt::ToCString(mpt::Charset::Locale, sndFile.m_MixPlugins[m_nCurrentPlugin].GetName()));
+		SetDlgItemText(IDC_EDIT13, mpt::ToCString(sndFile.m_MixPlugins[m_nCurrentPlugin].GetName()));
 	}
 	// Update plugin info
 	const bool updatePlug = (plugHint.GetPlugin() == 0 || plugHint.GetPlugin() == m_nCurrentPlugin + 1);
@@ -406,7 +406,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
 		const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
-		SetDlgItemText(IDC_EDIT13, mpt::ToCString(mpt::Charset::Locale, plugin.GetName()));
+		SetDlgItemText(IDC_EDIT13, mpt::ToCString(plugin.GetName()));
 		CheckDlgButton(IDC_CHECK9, plugin.IsMasterEffect() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK10, plugin.IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK11, plugin.IsWetMix() ? BST_CHECKED : BST_UNCHECKED);
@@ -509,13 +509,13 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			const SNDMIXPLUGIN &outPlug = sndFile.m_MixPlugins[iOut];
 			if(outPlug.IsValidPlugin())
 			{
-				std::string libName = mpt::ToCharset(mpt::Charset::Locale, mpt::Charset::UTF8, outPlug.GetLibraryName());
+				mpt::ustring libName = outPlug.GetLibraryName();
 				s.Format(_T("FX%d: "), iOut + 1);
-				s += libName.c_str();
-				if(strcmp(outPlug.GetName(), "") && libName != outPlug.GetName())
+				s += mpt::ToCString(libName);
+				if(outPlug.GetName() != U_("") && libName != outPlug.GetName())
 				{
 					s += _T(" (");
-					s += outPlug.GetName();
+					s += mpt::ToCString(outPlug.GetName());
 					s += _T(")");
 				}
 
@@ -561,11 +561,11 @@ void CViewGlobals::PopulateChannelPlugins()
 			for (PLUGINDEX ifx = 0; ifx < MAX_MIXPLUGINS; ifx++)
 			{
 				if (sndFile.m_MixPlugins[ifx].IsValidPlugin()
-					|| (strcmp(sndFile.m_MixPlugins[ifx].GetName(), ""))
+					|| (sndFile.m_MixPlugins[ifx].GetName() != U_(""))
 					|| (sndFile.ChnSettings[nChn].nMixPlugin == ifx + 1))
 				{
 					s = mpt::cformat(_T("FX%1: "))(ifx + 1);
-					s += sndFile.m_MixPlugins[ifx].GetName();
+					s += mpt::ToCString(sndFile.m_MixPlugins[ifx].GetName());
 					int n = m_CbnEffects[ichn].AddString(s);
 					m_CbnEffects[ichn].SetItemData(n, ifx + 1);
 					if (sndFile.ChnSettings[nChn].nMixPlugin == ifx + 1) fxsel = n;
@@ -866,7 +866,7 @@ void CViewGlobals::OnPluginNameChanged()
 
 		CString s;
 		GetDlgItemText(IDC_EDIT13, s);
-		if (s != plugin.GetName())
+		if (s != mpt::ToCString(plugin.GetName()))
 		{
 			plugin.Info.szName = mpt::ToCharset(mpt::Charset::Locale, s);
 			if(sndFile.GetModSpecifications().supportsPlugins)

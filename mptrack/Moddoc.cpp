@@ -2813,7 +2813,7 @@ CString CModDoc::GetPatternViewInstrumentName(INSTRUMENTINDEX nInstr,
 	// Get plugin name.
 	const PLUGINDEX nPlug = m_SndFile.Instruments[nInstr]->nMixPlug;
 	if (nPlug > 0 && nPlug < MAX_MIXPLUGINS)
-		pluginName = m_SndFile.m_MixPlugins[nPlug-1].GetName();
+		pluginName = mpt::ToCString(m_SndFile.m_MixPlugins[nPlug-1].GetName());
 
 	if (pluginName.IsEmpty())
 	{

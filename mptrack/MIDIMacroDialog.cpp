@@ -135,7 +135,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 		if(plugin.IsValidPlugin())
 		{
 			s.Format(_T("FX%d: "), i + 1);
-			s += plugin.GetName();
+			s += mpt::ToCString(plugin.GetName());
 			m_CbnMacroPlug.SetItemData(m_CbnMacroPlug.AddString(s), i);
 		}
 	}
@@ -356,7 +356,7 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 		IMixPlugin *pVstPlugin = m_SndFile.m_MixPlugins[plug].pMixPlugin;
 		if(pVstPlugin && param < pVstPlugin->GetNumParameters())
 		{
-			plugName = m_SndFile.m_MixPlugins[plug].GetName();
+			plugName = mpt::ToCString(m_SndFile.m_MixPlugins[plug].GetName());
 			message.AppendFormat(_T("FX%d: "), plug + 1);
 			message += plugName + _T("\t") + pVstPlugin->GetFormattedParamName(param) + _T("\n");
 		}

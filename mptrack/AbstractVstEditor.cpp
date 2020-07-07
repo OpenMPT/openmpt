@@ -457,10 +457,10 @@ void CAbstractVstEditor::SetTitle()
 	{
 		CString title = mpt::cformat(_T("FX %1: "))(mpt::cfmt::dec0<2>(m_VstPlugin.m_nSlot + 1));
 
-		bool hasCustomName = strcmp(m_VstPlugin.m_pMixStruct->GetName(), "") != 0 && strcmp(m_VstPlugin.m_pMixStruct->GetName(), m_VstPlugin.m_pMixStruct->GetLibraryName()) != 0;
+		bool hasCustomName = (m_VstPlugin.m_pMixStruct->GetName() != U_("")) && (m_VstPlugin.m_pMixStruct->GetName() != m_VstPlugin.m_pMixStruct->GetLibraryName());
 		if(hasCustomName)
-			title += mpt::ToCString(mpt::Charset::Locale, m_VstPlugin.m_pMixStruct->GetName()) + _T(" (");
-		title += mpt::ToCString(mpt::Charset::UTF8, m_VstPlugin.m_pMixStruct->GetLibraryName());
+			title += mpt::ToCString(m_VstPlugin.m_pMixStruct->GetName()) + _T(" (");
+		title += mpt::ToCString(m_VstPlugin.m_pMixStruct->GetLibraryName());
 		if(hasCustomName)
 			title += _T(")");
 
@@ -697,7 +697,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 	m_VstPlugin.GetInputPlugList(inputPlugs);
 	for(auto plug : inputPlugs)
 	{
-		CString name = mpt::cformat(_T("FX%1: %2"))(mpt::cfmt::dec0<2>(plug->m_nSlot + 1), mpt::ToCString(mpt::Charset::Locale, plug->m_pMixStruct->GetName()));
+		CString name = mpt::cformat(_T("FX%1: %2"))(mpt::cfmt::dec0<2>(plug->m_nSlot + 1), mpt::ToCString(plug->m_pMixStruct->GetName()));
 		m_InputMenu.AppendMenu(MF_STRING, ID_PLUGSELECT + plug->m_nSlot, name);
 	}
 
@@ -761,7 +761,7 @@ void CAbstractVstEditor::UpdateOutputMenu()
 		if(plug != nullptr)
 		{
 			name.Format(_T("FX%02d: "), plug->m_nSlot + 1);
-			name += plug->m_pMixStruct->GetName();
+			name += mpt::ToCString(plug->m_pMixStruct->GetName());
 			m_OutputMenu.AppendMenu(MF_STRING, ID_PLUGSELECT + plug->m_nSlot, name);
 		} else
 		{

@@ -576,7 +576,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #ifndef NO_PLUGINS
 	// Load plugins
 #ifdef MODPLUG_TRACKER
-	std::string notFoundText;
+	mpt::ustring notFoundText;
 #endif // MODPLUG_TRACKER
 	std::vector<const SNDMIXPLUGININFO *> notFoundIDs;
 
@@ -613,7 +613,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 						notFoundIDs.push_back(&plugin.Info);
 #ifdef MODPLUG_TRACKER
 						notFoundText.append(plugin.GetLibraryName());
-						notFoundText.append("\n");
+						notFoundText.append(UL_("\n"));
 #else
 						AddToLog(LogWarning, U_("Plugin not found: ") + mpt::ToUnicode(mpt::Charset::UTF8, plugin.GetLibraryName()));
 #endif // MODPLUG_TRACKER
@@ -630,21 +630,21 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	{
 		if(notFoundIDs.size() == 1)
 		{
-			notFoundText = "The following plugin has not been found:\n\n" + notFoundText + "\nDo you want to search for it online?";
+			notFoundText = UL_("The following plugin has not been found:\n\n") + notFoundText + UL_("\nDo you want to search for it online?");
 		} else
 		{
-			notFoundText = "The following plugins have not been found:\n\n" + notFoundText + "\nDo you want to search for them online?";
+			notFoundText = UL_("The following plugins have not been found:\n\n") + notFoundText + UL_("\nDo you want to search for them online?");
 		}
-		if(Reporting::Confirm(mpt::ToUnicode(mpt::Charset::UTF8, notFoundText), U_("OpenMPT - Plugins missing"), false, true) == cnfYes)
+		if(Reporting::Confirm(notFoundText, U_("OpenMPT - Plugins missing"), false, true) == cnfYes)
 		{
-			std::string url = "https://resources.openmpt.org/plugins/search.php?p=";
+			mpt::ustring url = U_("https://resources.openmpt.org/plugins/search.php?p=");
 			for(const auto &id : notFoundIDs)
 			{
-				url += mpt::fmt::HEX0<8>(id->dwPluginId2.get());
-				url += id->szLibraryName;
-				url += "%0a";
+				url += mpt::ufmt::HEX0<8>(id->dwPluginId2.get());
+				url += mpt::ToUnicode(mpt::Charset::UTF8, id->szLibraryName);
+				url += UL_("%0a");
 			}
-			CTrackApp::OpenURL(mpt::PathString::FromUTF8(url));
+			CTrackApp::OpenURL(mpt::PathString::FromUnicode(url));
 		}
 	}
 #endif // MODPLUG_TRACKER

@@ -2919,7 +2919,7 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 		str.clear();
 		str += mpt::format(U_("FX%1: "))(iPlug + 1);
 		const size_t size0 = str.size();
-		str += (librarynames) ? mpt::ToUnicode(mpt::Charset::UTF8, plugin.GetLibraryName()) : mpt::ToUnicode(mpt::Charset::Locale, plugin.GetName());
+		str += (librarynames) ? plugin.GetLibraryName() : plugin.GetName();
 		if(str.size() <= size0) str += U_("--");
 		
 #ifndef NO_VST

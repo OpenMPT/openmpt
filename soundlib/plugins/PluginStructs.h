@@ -80,10 +80,18 @@ struct SNDMIXPLUGIN
 		MemsetZero(Info);
 	}
 
-	const char *GetName() const
-		{ return Info.szName.buf; }
-	const char *GetLibraryName() const
-		{ return Info.szLibraryName.buf; }
+	const char * GetNameLocale() const
+	{
+		return Info.szName.buf;
+	}
+	mpt::ustring GetName() const
+	{
+		return mpt::ToUnicode(mpt::Charset::Locale, Info.szName);
+	}
+	mpt::ustring GetLibraryName() const
+	{
+		return mpt::ToUnicode(mpt::Charset::UTF8, Info.szLibraryName);
+	}
 
 	// Check if a plugin is loaded into this slot (also returns true if the plugin in this slot has not been found)
 	bool IsValidPlugin() const { return (Info.dwPluginId1 | Info.dwPluginId2) != 0; }

@@ -739,7 +739,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 					rect.bottom += m_szPluginHeader.cy;
 					PLUGINDEX mixPlug = sndFile.ChnSettings[ncolhdr].nMixPlugin;
 					if (mixPlug)
-						sprintf(s, "%u: %s", mixPlug, (sndFile.m_MixPlugins[mixPlug - 1]).pMixPlugin ? (sndFile.m_MixPlugins[mixPlug - 1]).GetName() : "[empty]");
+						sprintf(s, "%u: %s", mixPlug, (sndFile.m_MixPlugins[mixPlug - 1]).pMixPlugin ? sndFile.m_MixPlugins[mixPlug - 1].GetNameLocale() : "[empty]");
 					else
 						sprintf(s, "---");
 					DrawButtonRect(hdc, &rect, s, FALSE,
@@ -1659,7 +1659,7 @@ CString CViewPattern::GetCursorDescription() const
 				// display plugin name.
 				if(m->instr <= MAX_MIXPLUGINS)
 				{
-					s += sndFile.m_MixPlugins[m->instr - 1].GetName();
+					s += mpt::ToCString(sndFile.m_MixPlugins[m->instr - 1].GetName());
 				}
 			} else
 			{
