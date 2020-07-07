@@ -80,6 +80,7 @@ struct SNDMIXPLUGIN
 		MemsetZero(Info);
 	}
 
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
 	const char * GetNameLocale() const
 	{
 		return Info.szName.buf;
@@ -88,6 +89,7 @@ struct SNDMIXPLUGIN
 	{
 		return mpt::ToUnicode(mpt::Charset::Locale, Info.szName);
 	}
+#endif // MPT_ENABLE_CHARSET_LOCALE
 	mpt::ustring GetLibraryName() const
 	{
 		return mpt::ToUnicode(mpt::Charset::UTF8, Info.szLibraryName);

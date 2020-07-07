@@ -615,7 +615,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 						notFoundText.append(plugin.GetLibraryName());
 						notFoundText.append(UL_("\n"));
 #else
-						AddToLog(LogWarning, U_("Plugin not found: ") + mpt::ToUnicode(mpt::Charset::UTF8, plugin.GetLibraryName()));
+						AddToLog(LogWarning, U_("Plugin not found: ") + plugin.GetLibraryName());
 #endif // MODPLUG_TRACKER
 					}
 				}
