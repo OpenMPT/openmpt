@@ -157,18 +157,6 @@ constexpr std::size_t extent() noexcept
 
 } // namespace mpt
 
-// legacy
-#if MPT_COMPILER_MSVC
-OPENMPT_NAMESPACE_END
-#include <cstdlib>
-#include <stdlib.h>
-OPENMPT_NAMESPACE_BEGIN
-#define MPT_ARRAY_COUNT(x) _countof(x)
-#else
-#define MPT_ARRAY_COUNT(x) (sizeof((x))/sizeof((x)[0]))
-#endif
-#define CountOf(x) MPT_ARRAY_COUNT(x)
-
 
 
 // Use MPT_RESTRICT to indicate that a pointer is guaranteed to not be aliased.

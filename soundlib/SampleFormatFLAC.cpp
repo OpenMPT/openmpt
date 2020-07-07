@@ -649,14 +649,14 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 		{
 			RIFFChunk header;
 			uint32le numPoints;
-			WAVCuePoint cues[CountOf(sample.cues)];
+			WAVCuePoint cues[mpt::array_size<decltype(sample.cues)>::size];
 		} chunk;
 
 		chunk.header.id = RIFFChunk::idcue_;
 		chunk.header.length = 4 + sizeof(chunk.cues);
-		chunk.numPoints = CountOf(sample.cues);
+		chunk.numPoints = mpt::saturate_cast<uint32>(std::size(sample.cues));
 
-		for(uint32 i = 0; i < CountOf(sample.cues); i++)
+		for(uint32 i = 0; i < std::size(sample.cues); i++)
 		{
 			chunk.cues[i].ConvertToWAV(i, sample.cues[i]);
 		}

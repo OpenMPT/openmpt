@@ -89,7 +89,7 @@ BOOL CAmpDlg::OnInitDialog()
 	// Create icons for fade laws
 	const int cx = Util::ScalePixels(16, m_hWnd);
 	const int cy = Util::ScalePixels(16, m_hWnd);
-	const int imgWidth = cx * CountOf(fadeLaws);
+	const int imgWidth = cx * static_cast<int>(std::size(fadeLaws));
 	m_list.Create(cx, cy, ILC_COLOR32 | ILC_MASK, 0, 1);
 	std::vector<COLORREF> bits(imgWidth * cy, RGB(255, 0, 255));
 	const COLORREF col = GetSysColor(COLOR_WINDOWTEXT);
@@ -118,7 +118,7 @@ BOOL CAmpDlg::OnInitDialog()
 		}
 	}
 	CBitmap bitmap;
-	bitmap.CreateBitmap(cx * CountOf(fadeLaws), cy, 1, 32, bits.data());
+	bitmap.CreateBitmap(cx * static_cast<int>(std::size(fadeLaws)), cy, 1, 32, bits.data());
 	m_list.Add(&bitmap, RGB(255, 0, 255));
 	bitmap.DeleteObject();
 	m_fadeBox.SetImageList(&m_list);

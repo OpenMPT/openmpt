@@ -1199,7 +1199,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 		const uint32 baseOctave = m_SbOctave.GetPos() & 7;
 
 		const CString temp = mpt::ToCString(sndFile.GetNoteName(static_cast<ModCommand::NOTE>(lParam + 1 + 12 * baseOctave), m_nInstrument));
-		if(temp.GetLength() >= CountOf(s))
+		if(temp.GetLength() >= std::size(s))
 			wsprintf(s, _T("%s"), _T("..."));
 		else
 			wsprintf(s, _T("%s"), temp.GetString());
@@ -1294,7 +1294,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 		// Date
 		TCHAR szDate[32];
 		if(entry.HasValidDate())
-			_tcsftime(szDate, CountOf(szDate), _T("%d %b %Y, %H:%M:%S"), &entry.loadDate);
+			_tcsftime(szDate, std::size(szDate), _T("%d %b %Y, %H:%M:%S"), &entry.loadDate);
 		else
 			_tcscpy(szDate, _T("<unknown date>"));
 		// Time + stuff
@@ -1464,7 +1464,7 @@ static constexpr MsgBoxHidableMessage HidableMessages[] =
 	{ _T("Warning: The exported file will not contain any of MPT's file format hacks."), 1 << 4, true },
 };
 
-static_assert(CountOf(HidableMessages) == enMsgBoxHidableMessage_count);
+static_assert(mpt::array_size<decltype(HidableMessages)>::size == enMsgBoxHidableMessage_count);
 
 // Messagebox with 'don't show this again'-checkbox. Uses parameter 'enMsg'
 // to get the needed information from message array, and updates the variable that

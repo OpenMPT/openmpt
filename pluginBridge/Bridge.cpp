@@ -13,6 +13,7 @@
 #include "../common/BuildSettings.h"
 #include "../common/mptBaseMacros.h"
 #include "../common/mptBaseTypes.h"
+#include "../common/mptBaseUtils.h"
 #include <Windows.h>
 #include <ShellAPI.h>
 #include <ShlObj.h>
@@ -57,9 +58,9 @@ static LONG WINAPI CrashHandler(_EXCEPTION_POINTERS *pExceptionInfo)
 		CreateDirectoryW(filename.c_str(), nullptr);
 
 		tempPath[0] = 0;
-		const int ch = GetDateFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"'PluginBridge 'yyyy'-'MM'-'dd ", tempPath, CountOf(tempPath));
+		const int ch = GetDateFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"'PluginBridge 'yyyy'-'MM'-'dd ", tempPath, mpt::saturate_cast<int>(std::size(tempPath)));
 		if(ch)
-			GetTimeFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"HH'.'mm'.'ss'.dmp'", tempPath + ch - 1, CountOf(tempPath) - ch + 1);
+			GetTimeFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"HH'.'mm'.'ss'.dmp'", tempPath + ch - 1, mpt::saturate_cast<int>(std::size(tempPath)) - ch + 1);
 		filename += tempPath;
 		OPENMPT_NAMESPACE::WriteMemoryDump(pExceptionInfo, filename.c_str(), OPENMPT_NAMESPACE::PluginBridge::m_fullMemDump);
 	}
@@ -252,7 +253,7 @@ bool PluginBridge::SendToHost(BridgeMessage &sendMsg)
 	const HANDLE objects[] = {m_sigToHostAudio.confirm, m_sigToBridgeAudio.send, m_otherProcess};
 	do
 	{
-		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+		result = WaitForMultipleObjects(mpt::saturate_cast<DWORD>(std::size(objects)), objects, FALSE, INFINITE);
 		if(result == WAIT_OBJECT_0)
 		{
 			// Message got answered
@@ -288,7 +289,7 @@ void PluginBridge::CreateProcessingFile(std::vector<char> &dispatchData)
 {
 	static uint32 plugId = 0;
 	wchar_t mapName[64];
-	swprintf(mapName, CountOf(mapName), L"Local\\openmpt-%u-%u", GetCurrentProcessId(), plugId++);
+	swprintf(mapName, std::size(mapName), L"Local\\openmpt-%u-%u", GetCurrentProcessId(), plugId++);
 
 	PushToVector(dispatchData, mapName[0], sizeof(mapName));
 
@@ -331,7 +332,7 @@ void PluginBridge::ParseNextMessage(int msgID)
 // Create a new bridge instance within this one (creates a new thread).
 void PluginBridge::NewInstance(NewInstanceMsg &msg)
 {
-	msg.memName[CountOf(msg.memName) - 1] = 0;
+	msg.memName[mpt::array_size<decltype(msg.memName)>::size - 1] = 0;
 	new PluginBridge(msg.memName, m_otherProcess);
 }
 
@@ -344,7 +345,7 @@ void PluginBridge::InitBridge(InitMsg &msg)
 	m_otherPluginID = msg.pluginID;
 	m_fullMemDump = msg.fullMemDump != 0;
 	msg.result = 0;
-	msg.str[CountOf(msg.str) - 1] = 0;
+	msg.str[mpt::array_size<decltype(msg.str)>::size - 1] = 0;
 
 #ifdef _CONSOLE
 	SetConsoleTitleW(msg->str);
@@ -361,7 +362,7 @@ void PluginBridge::InitBridge(InitMsg &msg)
 
 	if(m_library == nullptr)
 	{
-		FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), msg.str, CountOf(msg.str), nullptr);
+		FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), msg.str, mpt::saturate_cast<DWORD>(std::size(msg.str)), nullptr);
 		RequestDelete();
 		return;
 	}
@@ -487,7 +488,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg &msg)
 		// HWND in [ptr] - Note: Window handles are interoperable between 32-bit and 64-bit applications in Windows (http://msdn.microsoft.com/en-us/library/windows/desktop/aa384203%28v=vs.85%29.aspx)
 		{
 			TCHAR str[_MAX_PATH];
-			GetModuleFileName(m_library, str, CountOf(str));
+			GetModuleFileName(m_library, str, mpt::saturate_cast<DWORD>(std::size(str)));
 
 			const auto parentWindow = reinterpret_cast<HWND>(msg.ptr);
 			ptr = m_window = CreateWindow(
@@ -596,14 +597,14 @@ void PluginBridge::DispatchToPlugin(DispatchMsg &msg)
 					Dispatch(effGetParamName, i, 0, param->name, 0.0f);
 					Dispatch(effGetParamLabel, i, 0, param->label, 0.0f);
 					Dispatch(effGetParamDisplay, i, 0, param->display, 0.0f);
-					param->name[CountOf(param->label) - 1] = '\0';
-					param->label[CountOf(param->label) - 1] = '\0';
-					param->display[CountOf(param->display) - 1] = '\0';
+					param->name[mpt::array_size<decltype(param->label)>::size - 1] = '\0';
+					param->label[mpt::array_size<decltype(param->label)>::size - 1] = '\0';
+					param->display[mpt::array_size<decltype(param->display)>::size - 1] = '\0';
 
 					if(Dispatch(effGetParameterProperties, i, 0, &param->props, 0.0f) != 1)
 					{
 						memset(&param->props, 0, sizeof(param->props));
-						strncpy(param->props.label, param->name, CountOf(param->props.label));
+						strncpy(param->props.label, param->name, std::size(param->props.label));
 					}
 				}
 				break;
@@ -757,7 +758,7 @@ void PluginBridge::AutomateParameters()
 	__try
 	{
 		const AutomationQueue::Parameter *param = m_sharedMem->automationQueue.params;
-		const AutomationQueue::Parameter *paramEnd = param + std::min(m_sharedMem->automationQueue.pendingEvents.exchange(0), static_cast<int32>(CountOf(m_sharedMem->automationQueue.params)));
+		const AutomationQueue::Parameter *paramEnd = param + std::min(m_sharedMem->automationQueue.pendingEvents.exchange(0), static_cast<int32>(std::size(m_sharedMem->automationQueue.params)));
 		while(param != paramEnd)
 		{
 			m_nativeEffect->setParameter(m_nativeEffect, param->index, param->value);
@@ -779,7 +780,7 @@ void PluginBridge::AudioThread()
 	DWORD result = 0;
 	do
 	{
-		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+		result = WaitForMultipleObjects(mpt::saturate_cast<DWORD>(std::size(objects)), objects, FALSE, INFINITE);
 		if(result == WAIT_OBJECT_0)
 		{
 			ProcessMsg *msg = m_processMem.Data<ProcessMsg>();
@@ -1129,7 +1130,7 @@ intptr_t PluginBridge::DispatchToHost(VstOpcodeToHost opcode, int32 index, intpt
 		// Extra data doesn't fit in message - use secondary memory
 		wchar_t auxMemName[64];
 		static_assert(sizeof(DispatchMsg) + sizeof(auxMemName) <= sizeof(BridgeMessage), "Check message sizes, this will crash!");
-		swprintf(auxMemName, CountOf(auxMemName), L"Local\\openmpt-%u-auxmem-%u", GetCurrentProcessId(), GetCurrentThreadId());
+		swprintf(auxMemName, std::size(auxMemName), L"Local\\openmpt-%u-auxmem-%u", GetCurrentProcessId(), GetCurrentThreadId());
 		if(auxMem.Create(auxMemName, extraSize))
 		{
 			// Move message data to shared memory and then move shared memory name to message data

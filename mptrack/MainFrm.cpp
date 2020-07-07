@@ -270,7 +270,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (!m_wndToolBar.Create(this)) return -1;
 	if (!m_wndStatusBar.Create(this)) return -1;
 	if (!m_wndTree.Create(this, IDD_TREEVIEW, CBRS_LEFT|CBRS_BORDER_RIGHT, IDD_TREEVIEW)) return -1;
-	m_wndStatusBar.SetIndicators(indicators, CountOf(indicators));
+	m_wndStatusBar.SetIndicators(indicators, mpt::saturate_cast<int>(std::size(indicators)));
 	m_wndStatusBar.SetPaneInfo(0, ID_SEPARATOR, SBPS_STRETCH, 256);
 	m_wndToolBar.Init(this);
 	m_wndTree.RecalcLayout();

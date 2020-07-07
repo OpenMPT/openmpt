@@ -425,7 +425,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 	m_sharedMem->hostCommWindow = m_communicationWindow;
 
 	const HANDLE objects[] = {m_sigBridgeReady, m_otherProcess};
-	if(WaitForMultipleObjects(CountOf(objects), objects, FALSE, 10000) != WAIT_OBJECT_0)
+	if(WaitForMultipleObjects(mpt::saturate_cast<DWORD>(std::size(objects)), objects, FALSE, 10000) != WAIT_OBJECT_0)
 	{
 		throw BridgeException("Could not connect to plugin bridge, it probably crashed.");
 	}
@@ -480,7 +480,7 @@ bool BridgeWrapper::SendToBridge(BridgeMessage &sendMsg)
 	const HANDLE objects[] = {m_sigToBridgeAudio.confirm, m_sigToHostAudio.send, m_otherProcess};
 	do
 	{
-		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+		result = WaitForMultipleObjects(mpt::saturate_cast<DWORD>(std::size(objects)), objects, FALSE, INFINITE);
 		if(result == WAIT_OBJECT_0)
 		{
 			// Message got answered
@@ -1029,10 +1029,10 @@ intptr_t BridgeWrapper::DispatchToPlugin(VstOpcodeToPlugin opcode, int32 index, 
 // Allocate auxiliary shared memory for too long bridge messages
 BridgeWrapper::AuxMem *BridgeWrapper::GetAuxMemory(uint32 size)
 {
-	size_t index = CountOf(m_auxMems);
+	std::size_t index = std::size(m_auxMems);
 	for(int pass = 0; pass < 2; pass++)
 	{
-		for(size_t i = 0; i < CountOf(m_auxMems); i++)
+		for(std::size_t i = 0; i < std::size(m_auxMems); i++)
 		{
 			if(m_auxMems[i].size >= size || pass == 1)
 			{
@@ -1045,10 +1045,10 @@ BridgeWrapper::AuxMem *BridgeWrapper::GetAuxMemory(uint32 size)
 				}
 			}
 		}
-		if(index != CountOf(m_auxMems))
+		if(index != std::size(m_auxMems))
 			break;
 	}
-	if(index == CountOf(m_auxMems))
+	if(index == std::size(m_auxMems))
 		return nullptr;
 
 	AuxMem &auxMem = m_auxMems[index];
@@ -1111,10 +1111,10 @@ void BridgeWrapper::SetParameter(int32 index, float parameter)
 	{
 		// Queue up messages while rendering to reduce latency introduced by every single bridge call
 		uint32 i;
-		while((i = autoQueue.pendingEvents.fetch_add(1)) >= CountOf(autoQueue.params))
+		while((i = autoQueue.pendingEvents.fetch_add(1)) >= std::size(autoQueue.params))
 		{
 			// Queue full!
-			if(i == CountOf(autoQueue.params))
+			if(i == std::size(autoQueue.params))
 			{
 				// We're the first to notice that it's full
 				SendAutomationQueue();
@@ -1235,7 +1235,7 @@ void BridgeWrapper::BuildProcessBuffer(ProcessMsg::ProcessType type, int32 numIn
 	DWORD result;
 	do
 	{
-		result = WaitForMultipleObjects(CountOf(objects), objects, FALSE, INFINITE);
+		result = WaitForMultipleObjects(mpt::saturate_cast<DWORD>(std::size(objects)), objects, FALSE, INFINITE);
 		if(result == WAIT_OBJECT_0 + 1)
 		{
 			ParseNextMessage(m_sharedMem->audioThreadToHostMsgID);

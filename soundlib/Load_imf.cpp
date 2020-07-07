@@ -340,7 +340,7 @@ static void ImportIMFEffect(ModCommand &m)
 			m.param = n | (m.param & 0x0F);
 		break;
 	}
-	m.command = (m.command < CountOf(imfEffects)) ? imfEffects[m.command] : CMD_NONE;
+	m.command = (m.command < std::size(imfEffects)) ? imfEffects[m.command] : CMD_NONE;
 	if(m.command == CMD_VOLUME && m.volcmd == VOLCMD_NONE)
 	{
 		m.volcmd = VOLCMD_VOLUME;

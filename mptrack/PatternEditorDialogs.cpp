@@ -879,7 +879,7 @@ void CChordEditor::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_COMBO3,    m_CbnNote[0]);
 	DDX_Control(pDX, IDC_COMBO4,    m_CbnNote[1]);
 	DDX_Control(pDX, IDC_COMBO5,    m_CbnNote[2]);
-	static_assert(MPT_ARRAY_COUNT(m_CbnNote) == 3);
+	static_assert(mpt::array_size<decltype(m_CbnNote)>::size == 3);
 	//}}AFX_DATA_MAP
 }
 

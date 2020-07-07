@@ -196,7 +196,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 		pf.nClrY = builtinFont->nClrY * font.size;
 		pf.nSpaceX = builtinFont->nSpaceX * font.size;
 		pf.nSpaceY = builtinFont->nSpaceY * font.size;
-		for(size_t i = 0; i < CountOf(pf.nEltWidths); i++)
+		for(std::size_t i = 0; i < std::size(pf.nEltWidths); i++)
 		{
 			pf.nEltWidths[i] = builtinFont->nEltWidths[i] * font.size;
 			pf.padding[i] = builtinFont->padding[i] * font.size;
@@ -370,7 +370,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 
 	// Volume commands
 	const char volEffects[]= " vpcdabuhlrgfe:o";
-	static_assert(CountOf(volEffects) - 1 == MAX_VOLCMDS);
+	static_assert(mpt::array_size<decltype(volEffects)>::size - 1 == MAX_VOLCMDS);
 	for(int i = 0; i < MAX_VOLCMDS; i++)
 	{
 		DrawChar(hDC, volEffects[i], pf.nVolX, pf.nVolY + i * charHeight, charWidth, charHeight);

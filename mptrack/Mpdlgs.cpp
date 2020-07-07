@@ -1629,7 +1629,7 @@ void COptionsPlayer::UpdateDialog()
 		if (n != (m_Sliders[i].GetPos() & 0xFFFF)) m_Sliders[i].SetPos(n);
 		SetDlgItemText(IDC_TEXT1 + i, f2s(m_EQPreset.Freqs[i]));
 	}
-	for(int i = 0; i < CountOf(TrackerSettings::Instance().m_EqUserPresets); i++)
+	for(unsigned int i = 0; i < std::size(TrackerSettings::Instance().m_EqUserPresets); i++)
 	{
 		SetDlgItemText(IDC_BUTTON1 + i, mpt::ToCString(mpt::Charset::Locale, TrackerSettings::Instance().m_EqUserPresets[i].szName));
 	}

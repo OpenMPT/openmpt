@@ -358,7 +358,7 @@ float IMixPlugin::RenderSilence(uint32 numFrames)
 	while(numFrames > 0)
 	{
 		uint32 renderSamples = numFrames;
-		LimitMax(renderSamples, mpt::saturate_cast<uint32>(MPT_ARRAY_COUNT(out[0])));
+		LimitMax(renderSamples, mpt::saturate_cast<uint32>(std::size(out[0])));
 		MemsetZero(out);
 
 		Process(out[0], out[1], renderSamples);
@@ -882,7 +882,7 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, midiCh, 0));
 
 		// Turn off all notes
-		for(uint8 i = 0; i < CountOf(channel.noteOnMap); i++)
+		for(uint8 i = 0; i < std::size(channel.noteOnMap); i++)
 		{
 			channel.noteOnMap[i][trackChannel] = 0;
 			MidiSend(MIDIEvents::NoteOff(midiCh, i, volume));
@@ -894,7 +894,7 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 	// using note mask.
 	else if(note == NOTE_KEYOFF || note == NOTE_FADE) // ==, ~~
 	{
-		for(uint8 i = 0; i < CountOf(channel.noteOnMap); i++)
+		for(uint8 i = 0; i < std::size(channel.noteOnMap); i++)
 		{
 			// Some VSTis need a note off for each instance of a note on, e.g. fabfilter.
 			while(channel.noteOnMap[i][trackChannel])

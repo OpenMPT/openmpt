@@ -71,7 +71,7 @@ static bool ValidateHeader(const _669FileHeader &fileHeader)
 	{
 		return false;
 	}
-	for(std::size_t i = 0; i < CountOf(fileHeader.breaks); i++)
+	for(std::size_t i = 0; i < std::size(fileHeader.breaks); i++)
 	{
 		if(fileHeader.orders[i] >= 128 && fileHeader.orders[i] < 0xFE)
 		{
@@ -169,7 +169,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	m_songMessage.ReadFixedLineLength(mpt::byte_cast<const std::byte*>(fileHeader.songMessage), 108, 36, 0);
 
 	// Reading Orders
-	ReadOrderFromArray(Order(), fileHeader.orders, MPT_ARRAY_COUNT(fileHeader.orders), 0xFF, 0xFE);
+	ReadOrderFromArray(Order(), fileHeader.orders, std::size(fileHeader.orders), 0xFF, 0xFE);
 	if(Order()[fileHeader.restartPos] < fileHeader.patterns)
 		Order().SetRestartPos(fileHeader.restartPos);
 
@@ -243,7 +243,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 				m->param = effect[chn] & 0x0F;
 
 				uint8 command = effect[chn] >> 4;
-				if(command < static_cast<uint8>(CountOf(effTrans)))
+				if(command < static_cast<uint8>(std::size(effTrans)))
 				{
 					m->command = effTrans[command];
 				} else

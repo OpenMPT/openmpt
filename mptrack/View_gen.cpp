@@ -1065,7 +1065,7 @@ void CViewGlobals::OnSetParameter()
 	{
 		const PlugParamIndex nParams = pPlugin->GetNumParameters();
 		TCHAR s[32];
-		GetDlgItemText(IDC_EDIT14, s, CountOf(s));
+		GetDlgItemText(IDC_EDIT14, s, mpt::saturate_cast<int>(std::size(s)));
 		if ((m_nCurrentParam < nParams) && (s[0]))
 		{
 			float fValue = (float)_tstof(s);

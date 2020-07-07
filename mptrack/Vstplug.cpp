@@ -842,7 +842,7 @@ void CVstPlugin::Initialize()
 		VstSpeakerArrangement sa{};
 		sa.numChannels = 2;
 		sa.type = kSpeakerArrStereo;
-		for(size_t i = 0; i < CountOf(sa.speakers); i++)
+		for(std::size_t i = 0; i < std::size(sa.speakers); i++)
 		{
 			// For now, only left and right speaker are used.
 			switch(i)
@@ -1031,7 +1031,7 @@ intptr_t CVstPlugin::Dispatch(VstOpcodeToPlugin opCode, int32 index, intptr_t va
 #ifdef VST_LOG
 	{
 		mpt::ustring codeStr;
-		if(opCode < CountOf(VstOpCodes))
+		if(opCode < std::size(VstOpCodes))
 			codeStr = mpt::ToUnicode(mpt::Charset::ASCII, VstOpCodes[opCode]);
 		else
 			codeStr = mpt::ufmt::val(opCode);
@@ -1043,7 +1043,7 @@ intptr_t CVstPlugin::Dispatch(VstOpcodeToPlugin opCode, int32 index, intptr_t va
 	if(exception)
 	{
 		mpt::ustring codeStr;
-		if(opCode < CountOf(VstOpCodes))
+		if(opCode < std::size(VstOpCodes))
 			codeStr = mpt::ToUnicode(mpt::Charset::ASCII, VstOpCodes[opCode]);
 		else
 			codeStr = mpt::ufmt::val(opCode);
@@ -1499,7 +1499,7 @@ void CVstPlugin::HardAllNotesOff()
 		}
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
 
-		for(size_t i = 0; i < CountOf(channel.noteOnMap); i++)	//all notes
+		for(std::size_t i = 0; i < std::size(channel.noteOnMap); i++)	//all notes
 		{
 			for(auto &c : channel.noteOnMap[i])
 			{

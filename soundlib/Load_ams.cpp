@@ -157,7 +157,7 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 							}
 							break;
 						}
-					} else if(effect < 0x10 + CountOf(effTrans))
+					} else if(effect < 0x10 + std::size(effTrans))
 					{
 						// Extended commands
 						m.command = effTrans[effect - 0x10];
@@ -556,8 +556,8 @@ struct AMS2Envelope
 			return;
 		}
 
-		static_assert(MAX_ENVPOINTS >= CountOf(data));
-		mptEnv.resize(std::min(numPoints, uint8(CountOf(data))));
+		static_assert(MAX_ENVPOINTS >= std::size(data));
+		mptEnv.resize(std::min(numPoints, mpt::saturate_cast<uint8>(std::size(data))));
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
 		mptEnv.nSustainStart = mptEnv.nSustainEnd = sustainPoint;

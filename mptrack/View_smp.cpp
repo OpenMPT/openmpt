@@ -1715,7 +1715,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 						HMENU hCueMenu = ::CreatePopupMenu();
 						bool hasValidCues = false;
-						for(int i = 0; i < CountOf(sample.cues); i++)
+						for(std::size_t i = 0; i < std::size(sample.cues); i++)
 						{
 							const SmpLength cue = sample.cues[i];
 							wsprintf(s, _T("Cue &%c: %s"), '1' + i, mpt::cfmt::dec(3, ',', cue).GetString());
@@ -2005,7 +2005,7 @@ void CViewSample::OnEditCopy()
 		// We want to store some loop metadata as well.
 		memSize += sizeof(RIFFChunk) + sizeof(WAVSampleInfoChunk) + 2 * sizeof(WAVSampleLoop);
 		// ...and cue points, too.
-		memSize += sizeof(RIFFChunk) + sizeof(uint32) + CountOf(sample.cues) * sizeof(WAVCuePoint);
+		memSize += sizeof(RIFFChunk) + sizeof(uint32) + std::size(sample.cues) * sizeof(WAVCuePoint);
 	}
 
 	ASSERT((memSize % 2u) == 0);
@@ -3141,9 +3141,9 @@ void CViewSample::OnSampleSlice()
 	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB]) return;
 
 	// Sort cue points and add two fake cue points to make things easier below...
-	SmpLength cues[CountOf(sample.cues) + 2];
+	SmpLength cues[mpt::array_size<decltype(sample.cues)>::size + 2];
 	bool hasValidCues = false;	// Any cues in ]0, length[
-	for(size_t i = 0; i < CountOf(sample.cues); i++)
+	for(std::size_t i = 0; i < std::size(sample.cues); i++)
 	{
 		cues[i] = sample.cues[i];
 		if(cues[i] >= sample.nLength)
@@ -3155,12 +3155,12 @@ void CViewSample::OnSampleSlice()
 	if(!hasValidCues)
 		return;
 
-	cues[CountOf(sample.cues)] = 0;
-	cues[CountOf(sample.cues) + 1] = sample.nLength;
-	std::sort(cues, cues + CountOf(cues));
+	cues[mpt::array_size<decltype(sample.cues)>::size] = 0;
+	cues[mpt::array_size<decltype(sample.cues)>::size + 1] = sample.nLength;
+	std::sort(cues, cues + std::size(cues));
 
 	// Now slice the sample at each cue point
-	for(size_t i = 1; i < CountOf(cues) - 1; i++)
+	for(std::size_t i = 1; i < std::size(cues) - 1; i++)
 	{
 		const SmpLength cue  = cues[i];
 		if(cue > cues[i - 1] && cue < cues[i + 1])
@@ -3230,8 +3230,8 @@ void CViewSample::DoZoom(int direction, const CPoint &zoomPoint)
 
 	for(int i = 1; i <= MAX_ZOOM; ++i)
 		zoomOrder[i - 1 + (-MIN_ZOOM - 1)] = i; // 1, 2, 3...
-	zoomOrder[CountOf(zoomOrder) - 1] = 0;
-	int* const pZoomOrderEnd = zoomOrder + CountOf(zoomOrder);
+	zoomOrder[mpt::array_size<decltype(zoomOrder)>::size - 1] = 0;
+	int* const pZoomOrderEnd = zoomOrder + std::size(zoomOrder);
 	int autoZoomLevel = GetZoomLevel(sndFile.GetSample(m_nSample).nLength);
 	if(autoZoomLevel < MIN_ZOOM) autoZoomLevel = MIN_ZOOM;
 
@@ -3248,12 +3248,12 @@ void CViewSample::DoZoom(int direction, const CPoint &zoomPoint)
 		else
 			ASSERT(false);
 	}
-	const ptrdiff_t nPos = std::find(zoomOrder, pZoomOrderEnd, m_nZoom) - zoomOrder;
+	const std::ptrdiff_t nPos = std::find(zoomOrder, pZoomOrderEnd, m_nZoom) - zoomOrder;
 
 	int newZoom;
 	if (direction > 0 && nPos > 0)	// Zoom in
 		newZoom = zoomOrder[nPos - 1];
-	else if (direction < 0 && nPos + 1 < CountOf(zoomOrder))
+	else if (direction < 0 && nPos + 1 < static_cast<std::ptrdiff_t>(std::size(zoomOrder)))
 		newZoom = zoomOrder[nPos + 1];
 	else
 		return;

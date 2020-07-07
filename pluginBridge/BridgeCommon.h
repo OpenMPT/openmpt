@@ -385,7 +385,7 @@ union BridgeMessage
 	{
 		SetType(MsgHeader::newInstance, sizeof(NewInstanceMsg));
 
-		wcsncpy(newInstance.memName, memName, CountOf(newInstance.memName) - 1);
+		wcsncpy(newInstance.memName, memName, std::size(newInstance.memName) - 1);
 	}
 
 	void Init(const wchar_t *pluginPath, uint32 mixBufSize, int32 pluginID, bool fullMemDump)
@@ -397,7 +397,7 @@ union BridgeMessage
 		init.mixBufSize = mixBufSize;
 		init.pluginID = pluginID;
 		init.fullMemDump = fullMemDump;
-		wcsncpy(init.str, pluginPath, CountOf(init.str) - 1);
+		wcsncpy(init.str, pluginPath, std::size(init.str) - 1);
 	}
 
 	void Dispatch(int32 opcode, int32 index, int64 value, int64 ptr, float opt, uint32 extraDataSize)
@@ -448,8 +448,8 @@ union BridgeMessage
 	{
 		SetType(MsgHeader::errorMsg, sizeof(ErrorMsg));
 
-		wcsncpy(error.str, text, CountOf(error.str) - 1);
-		error.str[CountOf(error.str) - 1] = 0;
+		wcsncpy(error.str, text, std::size(error.str) - 1);
+		error.str[std::size(error.str) - 1] = 0;
 	}
 
 	// Copy message to target and clear delivery status

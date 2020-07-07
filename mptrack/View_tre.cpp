@@ -869,7 +869,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
 					tvi.hItem = hItem;
 					tvi.pszText = stmp;
-					tvi.cchTextMax = CountOf(stmp);
+					tvi.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
 					GetItem(&tvi);
 					if(tvi.iImage != nImage || tvi.lParam != i || s != CString(tvi.pszText))
 					{
@@ -1003,7 +1003,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				tvi.stateMask = TVIS_BOLD;
 				tvi.hItem = info.tiSequences[seq];
 				tvi.pszText = stmp;
-				tvi.cchTextMax = CountOf(stmp);
+				tvi.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
 				LPARAM param = (seq << SEQU_SHIFT) | ORDERINDEX_INVALID;
 				GetItem(&tvi);
 				if(tvi.state != state || tvi.pszText != seqName || tvi.lParam != param)
@@ -1065,7 +1065,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.stateMask = TVIS_BOLD;
 					tvi.hItem = info.tiOrders[seq][iOrd];
 					tvi.pszText = stmp;
-					tvi.cchTextMax = CountOf(stmp);
+					tvi.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
 					GetItem(&tvi);
 					if(tvi.state != state || _tcscmp(s, stmp))
 						SetItem(info.tiOrders[seq][iOrd], TVIF_TEXT | TVIF_STATE | TVIF_PARAM, s, 0, 0, state, TVIS_BOLD, param);
@@ -1112,7 +1112,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE;
 					tvi.hItem = info.tiPatterns[pat];
 					tvi.pszText = stmp;
-					tvi.cchTextMax = CountOf(stmp);
+					tvi.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
 					GetItem(&tvi);
 					if(_tcscmp(s, stmp))
 						SetItem(info.tiPatterns[pat], TVIF_TEXT, s, 0, 0, 0, 0, 0);
@@ -1196,7 +1196,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
 					tvi.hItem = hChild;
 					tvi.pszText = stmp;
-					tvi.cchTextMax = CountOf(stmp);
+					tvi.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
 					tvi.iImage = tvi.iSelectedImage = image;
 					GetItem(&tvi);
 					if(tvi.iImage != image || _tcscmp(s, stmp) || GetItemData(hChild) != nSmp)
@@ -1248,7 +1248,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.mask = TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE;
 					tvi.hItem = hChild;
 					tvi.pszText = stmp;
-					tvi.cchTextMax = CountOf(stmp);
+					tvi.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
 					tvi.iImage = tvi.iSelectedImage = nImage;
 					GetItem(&tvi);
 					if(tvi.iImage != nImage || _tcscmp(s, stmp) || GetItemData(hChild) != nIns)
@@ -1917,7 +1917,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 			if(pIns)
 			{
 				TCHAR s[MAX_INSTRUMENTNAME + 10];
-				_sntprintf(s, CountOf(s), _T("%3d: %s"), ins, mpt::ToWin(m_SongFile->GetCharsetInternal(), pIns->name).c_str());
+				_sntprintf(s, std::size(s), _T("%3d: %s"), ins, mpt::ToWin(m_SongFile->GetCharsetInternal(), pIns->name).c_str());
 				InsertInsLibItem(s, IMAGE_INSTRUMENTS, selectedItem);
 			}
 		}
@@ -1927,7 +1927,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 			if(sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
 			{
 				TCHAR s[MAX_SAMPLENAME + 10];
-				_sntprintf(s, CountOf(s), _T("%3d: %s"), smp, mpt::ToWin(m_SongFile->GetCharsetInternal(), m_SongFile->m_szNames[smp]).c_str());
+				_sntprintf(s, std::size(s), _T("%3d: %s"), smp, mpt::ToWin(m_SongFile->GetCharsetInternal(), m_SongFile->m_szNames[smp]).c_str());
 				InsertInsLibItem(s, sample.uFlags[CHN_ADLIB] ? IMAGE_OPLINSTR : IMAGE_SAMPLES, selectedItem);
 			}
 		}

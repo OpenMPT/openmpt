@@ -558,7 +558,7 @@ bool CInputHandler::IsKeyPressHandledByTextBox(DWORD key, HWND hWnd) const
 	if(hWnd != nullptr)
 	{
 		TCHAR activeWindowClassName[6];
-		GetClassName(hWnd, activeWindowClassName, CountOf(activeWindowClassName));
+		GetClassName(hWnd, activeWindowClassName, mpt::saturate_cast<int>(std::size(activeWindowClassName)));
 		const bool textboxHasFocus = _tcsicmp(activeWindowClassName, _T("Edit")) == 0;
 		if(!textboxHasFocus)
 		{

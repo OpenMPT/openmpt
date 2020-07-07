@@ -1321,7 +1321,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		accell[0].nInc = (m_sndFile.GetType() == MOD_TYPE_IT ? 32 : 1);
 		accell[1].nSec = 2;
 		accell[1].nInc = 5 * accell[0].nInc;
-		m_SpinFadeOut.SetAccel(CountOf(accell), accell);
+		m_SpinFadeOut.SetAccel(mpt::saturate_cast<int>(std::size(accell)), accell);
 
 		// Panning ranges (0...64 for IT, 0...256 for MPTM)
 		m_SpinPanning.SetRange(0, (m_sndFile.GetType() & MOD_TYPE_IT) ? 64 : 256);

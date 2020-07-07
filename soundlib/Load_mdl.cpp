@@ -189,7 +189,7 @@ static constexpr ModCommand::COMMAND MDLEffTrans[] =
 // receive an MDL effect, give back a 'normal' one.
 static void ConvertMDLCommand(uint8 &cmd, uint8 &param)
 {
-	if(cmd >= CountOf(MDLEffTrans))
+	if(cmd >= std::size(MDLEffTrans))
 		return;
 
 	uint8 origCmd = cmd;

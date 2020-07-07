@@ -249,7 +249,7 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	GetToolBarCtrl().SetImageList(&m_ImageList);
 	GetToolBarCtrl().SetDisabledImageList(&m_ImageListDisabled);
 
-	if (!SetButtons(MainButtons, CountOf(MainButtons))) return FALSE;
+	if (!SetButtons(MainButtons, mpt::saturate_cast<int>(std::size(MainButtons)))) return FALSE;
 
 	CRect temp;
 	GetItemRect(0, temp);

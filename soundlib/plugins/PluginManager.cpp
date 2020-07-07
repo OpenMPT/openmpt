@@ -374,7 +374,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 	DWORD index = 0;
 	while (cr == ERROR_SUCCESS)
 	{
-		if ((cr = RegEnumKey(hkEnum, index, keyname, CountOf(keyname))) == ERROR_SUCCESS)
+		if ((cr = RegEnumKey(hkEnum, index, keyname, mpt::saturate_cast<DWORD>(std::size(keyname)))) == ERROR_SUCCESS)
 		{
 			CLSID clsid;
 			mpt::winstring formattedKey = mpt::winstring(_T("{")) + mpt::winstring(keyname) + mpt::winstring(_T("}"));

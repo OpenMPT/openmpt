@@ -276,7 +276,7 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 			uint8 cmd = (command & 0x7F);
 			uint8 param = value;
 
-			if(cmd < CountOf(effTrans))
+			if(cmd < std::size(effTrans))
 			{
 				cmd = effTrans[cmd];
 			} else

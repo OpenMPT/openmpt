@@ -1496,7 +1496,7 @@ mpt::ustring CSoundFile::GetNoteName(const ModCommand::NOTE note, const NoteName
 		// cppcheck false-positive
 		// cppcheck-suppress constStatement
 		const mpt::uchar specialNoteNames[][4] = { UL_("PCs"), UL_("PC "), UL_("~~~"), UL_("^^^"), UL_("===") };
-		static_assert(CountOf(specialNoteNames) == NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1);
+		static_assert(mpt::array_size<decltype(specialNoteNames)>::size == NOTE_MAX_SPECIAL - NOTE_MIN_SPECIAL + 1);
 		return specialNoteNames[note - NOTE_MIN_SPECIAL];
 	} else if(ModCommand::IsNote(note))
 	{
@@ -1836,7 +1836,7 @@ bool CSoundFile::IsSampleReferencedByInstrument(SAMPLEINDEX sample, INSTRUMENTIN
 	}
 	if(targetIns != nullptr)
 	{
-		for(size_t note = 0; note < NOTE_MAX /*CountOf(targetIns->Keyboard)*/; note++)
+		for(std::size_t note = 0; note < NOTE_MAX /*std::size(targetIns->Keyboard)*/; note++)
 		{
 			if(targetIns->Keyboard[note] == sample)
 			{

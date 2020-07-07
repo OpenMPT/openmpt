@@ -81,8 +81,8 @@ static uint8 ClampSlideParam(uint8 value, uint8 lowNote, uint8 highNote)
 	if(lowNote  < highNote &&
 	   lowNote  >= 24 + NOTE_MIN &&
 	   highNote >= 24 + NOTE_MIN &&
-	   lowNote  < CountOf(ProTrackerPeriodTable) + 24 + NOTE_MIN &&
-	   highNote < CountOf(ProTrackerPeriodTable) + 24 + NOTE_MIN)
+	   lowNote  < std::size(ProTrackerPeriodTable) + 24 + NOTE_MIN &&
+	   highNote < std::size(ProTrackerPeriodTable) + 24 + NOTE_MIN)
 	{
 		lowPeriod  = ProTrackerPeriodTable[lowNote - 24 - NOTE_MIN];
 		highPeriod = ProTrackerPeriodTable[highNote - 24 - NOTE_MIN];

@@ -150,7 +150,7 @@ static constexpr ModCommand::COMMAND dbmEffects[] =
 static void ConvertDBMEffect(uint8 &command, uint8 &param)
 {
 	uint8 oldCmd = command;
-	if(command < CountOf(dbmEffects))
+	if(command < std::size(dbmEffects))
 		command = dbmEffects[command];
 	else
 		command = CMD_NONE;

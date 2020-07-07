@@ -257,7 +257,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					// Beware: Effect letters are as in MOD, but portamento and volume slides behave like in S3M (i.e. fine slides share the same effect letters)
 					ConvertModCommand(m);
-				} else if(m.command < 0x10 + CountOf(effTrans))
+				} else if(m.command < 0x10 + std::size(effTrans))
 				{
 					m.command = effTrans[m.command - 0x10];
 				} else

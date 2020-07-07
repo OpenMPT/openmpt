@@ -400,7 +400,7 @@ struct AMInstrument
 			uint16 level, speed;
 		} points[] = {{startLevel, 0}, {attack1Level, attack1Speed}, {attack2Level, attack2Speed}, {sustainLevel, decaySpeed}, {sustainLevel, sustainTime}, {0, releaseSpeed}};
 
-		for(uint8 i = 1; i < CountOf(points); i++)
+		for(uint8 i = 1; i < std::size(points); i++)
 		{
 			int duration = std::min(points[i].speed, uint16(256));
 			// Sustain time is already in ticks, no need to compute the segment duration.

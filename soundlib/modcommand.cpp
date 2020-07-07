@@ -830,7 +830,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		if(smp > 0 && smp <= sndFile.GetNumInstruments() && IsNote() && sndFile.Instruments[smp] != nullptr)
 			smp = sndFile.Instruments[smp]->Keyboard[note - NOTE_MIN];
 
-		if(smp > 0 && smp <= sndFile.GetNumSamples() && vol > 0 && vol <= CountOf(sndFile.GetSample(smp).cues))
+		if(smp > 0 && smp <= sndFile.GetNumSamples() && vol > 0 && vol <= std::size(sndFile.GetSample(smp).cues))
 			param = mpt::saturate_cast<ModCommand::PARAM>((sndFile.GetSample(smp).cues[vol - 1] + 128) >> 8);
 		else
 			param = vol << 3;

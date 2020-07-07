@@ -523,7 +523,7 @@ void CCtrlGeneral::OnSpeedChanged()
 	TCHAR s[16];
 	if(m_bInitialized)
 	{
-		m_EditSpeed.GetWindowText(s, MPT_ARRAY_COUNT(s));
+		m_EditSpeed.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
 		{
 			UINT n = ConvertStrTo<UINT>(s);
@@ -550,7 +550,7 @@ void CCtrlGeneral::OnVSTiVolChanged()
 	TCHAR s[16];
 	if (m_bInitialized)
 	{
-		m_EditVSTiVol.GetWindowText(s, MPT_ARRAY_COUNT(s));
+		m_EditVSTiVol.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
 		{
 			UINT n = ConvertStrTo<UINT>(s);
@@ -574,7 +574,7 @@ void CCtrlGeneral::OnSamplePAChanged()
 	TCHAR s[16];
 	if(m_bInitialized)
 	{
-		m_EditSamplePA.GetWindowText(s, MPT_ARRAY_COUNT(s));
+		m_EditSamplePA.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
 		{
 			UINT n = ConvertStrTo<UINT>(s);
@@ -597,7 +597,7 @@ void CCtrlGeneral::OnGlobalVolChanged()
 	TCHAR s[16];
 	if(m_bInitialized)
 	{
-		m_EditGlobalVol.GetWindowText(s, MPT_ARRAY_COUNT(s));
+		m_EditGlobalVol.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
 		{
 			UINT n = ConvertStrTo<ORDERINDEX>(s) * GetGlobalVolumeFactor();
@@ -623,7 +623,7 @@ void CCtrlGeneral::OnRestartPosChanged()
 	TCHAR s[32];
 	if(m_bInitialized)
 	{
-		m_EditRestartPos.GetWindowText(s, MPT_ARRAY_COUNT(s));
+		m_EditRestartPos.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
 		{
 			ORDERINDEX n = ConvertStrTo<ORDERINDEX>(s);

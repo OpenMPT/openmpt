@@ -1253,7 +1253,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						}
 						break;
 					default:
-						if(cmd[0] < CountOf(effTrans))
+						if(cmd[0] < std::size(effTrans))
 						{
 							m.command = effTrans[cmd[0]];
 							m.param = cmd[1];

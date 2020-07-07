@@ -248,7 +248,7 @@ void WAVReader::ApplySampleSettings(ModSample &sample, mpt::Charset sampleCharse
 	if(cueChunk.IsValid())
 	{
 		uint32 numPoints = cueChunk.ReadUint32LE();
-		LimitMax(numPoints, mpt::saturate_cast<uint32>(MPT_ARRAY_COUNT(sample.cues)));
+		LimitMax(numPoints, mpt::saturate_cast<uint32>(std::size(sample.cues)));
 		for(uint32 i = 0; i < numPoints; i++)
 		{
 			WAVCuePoint cuePoint;
@@ -600,9 +600,9 @@ void WAVWriter::WriteCueInformation(const ModSample &sample)
 {
 	StartChunk(RIFFChunk::idcue_);
 	{
-		Write(mpt::as_le(static_cast<uint32>(CountOf(sample.cues))));
+		Write(mpt::as_le(mpt::saturate_cast<uint32>(std::size(sample.cues))));
 	}
-	for(uint32 i = 0; i < CountOf(sample.cues); i++)
+	for(uint32 i = 0; i < mpt::saturate_cast<uint32>(std::size(sample.cues)); i++)
 	{
 		WAVCuePoint cuePoint;
 		cuePoint.ConvertToWAV(i, sample.cues[i]);

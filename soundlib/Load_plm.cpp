@@ -305,7 +305,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 				else
 					m->volcmd = VOLCMD_NONE;
 
-				if(command < CountOf(effTrans))
+				if(command < std::size(effTrans))
 				{
 					m->command = effTrans[command];
 					m->param = param;

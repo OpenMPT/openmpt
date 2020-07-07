@@ -753,7 +753,7 @@ void CResampler::InitFloatmixerTables()
 #endif // MPT_BUILD_FUZZER
 #ifndef MPT_INTMIXER
 	// Prepare fast sinc coefficients for floating point mixer
-	for(size_t i = 0; i < CountOf(FastSincTable); i++)
+	for(std::size_t i = 0; i < std::size(FastSincTable); i++)
 	{
 		FastSincTablef[i] = static_cast<mixsample_t>(FastSincTable[i] * mixsample_t(1.0f / 16384.0f));
 	}

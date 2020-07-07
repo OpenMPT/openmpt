@@ -2386,7 +2386,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 				// Channel settings for channels 65+
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
-					static_assert(CountOf(ChnSettings) >= 64);
+					static_assert(mpt::array_size<decltype(ChnSettings)>::size >= 64);
 					const CHANNELINDEX loopLimit = std::min(uint16(64 + size / 2), uint16(std::size(ChnSettings)));
 
 					for(CHANNELINDEX chn = 64; chn < loopLimit; chn++)

@@ -400,7 +400,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 						// Translate effect
 						uint8 command = effByte & effectMask;
-						if(command < CountOf(gdmEffTrans))
+						if(command < std::size(gdmEffTrans))
 							m.command = gdmEffTrans[command];
 						else
 							m.command = CMD_NONE;

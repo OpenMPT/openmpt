@@ -135,22 +135,22 @@ static constexpr MPTEFFECTINFO gFXInfo[] =
 
 UINT EffectInfo::GetNumEffects() const
 {
-	return CountOf(gFXInfo);
+	return static_cast<UINT>(std::size(gFXInfo));
 }
 
 
 bool EffectInfo::IsExtendedEffect(UINT ndx) const
 {
-	return ((ndx < CountOf(gFXInfo)) && (gFXInfo[ndx].paramMask));
+	return ((ndx < std::size(gFXInfo)) && (gFXInfo[ndx].paramMask));
 }
 
 
 bool EffectInfo::GetEffectName(CString &pszDescription, ModCommand::COMMAND command, UINT param, bool bXX) const
 {
 	bool bSupported;
-	UINT fxndx = CountOf(gFXInfo);
+	UINT fxndx = static_cast<UINT>(std::size(gFXInfo));
 	pszDescription.Empty();
-	for (UINT i = 0; i < CountOf(gFXInfo); i++)
+	for (UINT i = 0; i < std::size(gFXInfo); i++)
 	{
 		if ((command == gFXInfo[i].effect) // Effect
 			&& ((param & gFXInfo[i].paramMask) == gFXInfo[i].paramValue)) // Value
@@ -163,7 +163,7 @@ bool EffectInfo::GetEffectName(CString &pszDescription, ModCommand::COMMAND comm
 				break;
 		}
 	}
-	if (fxndx == CountOf(gFXInfo)) return false;
+	if (fxndx == std::size(gFXInfo)) return false;
 	bSupported = ((sndFile.GetType() & gFXInfo[fxndx].GetSupportedFormats()));
 	if (gFXInfo[fxndx].name)
 	{
@@ -183,8 +183,8 @@ bool EffectInfo::GetEffectName(CString &pszDescription, ModCommand::COMMAND comm
 
 LONG EffectInfo::GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PARAM param) const
 {
-	UINT ndx = CountOf(gFXInfo);
-	for (UINT i = 0; i < CountOf(gFXInfo); i++)
+	UINT ndx = static_cast<UINT>(std::size(gFXInfo));
+	for (UINT i = 0; i < std::size(gFXInfo); i++)
 	{
 		if ((command == gFXInfo[i].effect) // Effect
 			&& ((param & gFXInfo[i].paramMask) == gFXInfo[i].paramValue)) // Value
@@ -201,7 +201,7 @@ LONG EffectInfo::GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PAR
 //Returns command and corrects parameter refParam if necessary
 EffectCommand EffectInfo::GetEffectFromIndex(UINT ndx, ModCommand::PARAM &refParam) const
 {
-	if (ndx >= CountOf(gFXInfo))
+	if (ndx >= std::size(gFXInfo))
 	{
 		refParam = 0;
 		return CMD_NONE;
@@ -230,7 +230,7 @@ EffectCommand EffectInfo::GetEffectFromIndex(UINT ndx, ModCommand::PARAM &refPar
 
 EffectCommand EffectInfo::GetEffectFromIndex(UINT ndx) const
 {
-	if (ndx >= CountOf(gFXInfo))
+	if (ndx >= std::size(gFXInfo))
 	{
 		return CMD_NONE;
 	}
@@ -240,7 +240,7 @@ EffectCommand EffectInfo::GetEffectFromIndex(UINT ndx) const
 
 UINT EffectInfo::GetEffectMaskFromIndex(UINT ndx) const
 {
-	if (ndx >= CountOf(gFXInfo))
+	if (ndx >= std::size(gFXInfo))
 	{
 		return 0;
 	}
@@ -255,7 +255,7 @@ bool EffectInfo::GetEffectInfo(UINT ndx, CString *s, bool bXX, ModCommand::PARAM
 	if (s) s->Empty();
 	if (prangeMin) *prangeMin = 0;
 	if (prangeMax) *prangeMax = 0;
-	if ((ndx >= CountOf(gFXInfo)) || (!(sndFile.GetType() & gFXInfo[ndx].GetSupportedFormats()))) return FALSE;
+	if ((ndx >= std::size(gFXInfo)) || (!(sndFile.GetType() & gFXInfo[ndx].GetSupportedFormats()))) return FALSE;
 	if (s) GetEffectName(*s, gFXInfo[ndx].effect, gFXInfo[ndx].paramValue, bXX);
 	if ((prangeMin) && (prangeMax))
 	{
@@ -325,7 +325,7 @@ UINT EffectInfo::MapValueToPos(UINT ndx, UINT param) const
 {
 	UINT pos;
 
-	if (ndx >= CountOf(gFXInfo)) return 0;
+	if (ndx >= std::size(gFXInfo)) return 0;
 	pos = param;
 	if (gFXInfo[ndx].paramMask == 0xF0)
 	{
@@ -377,7 +377,7 @@ UINT EffectInfo::MapPosToValue(UINT ndx, UINT pos) const
 {
 	UINT param;
 
-	if (ndx >= CountOf(gFXInfo)) return 0;
+	if (ndx >= std::size(gFXInfo)) return 0;
 	param = pos;
 	if (gFXInfo[ndx].paramMask == 0xF0) param |= gFXInfo[ndx].paramValue;
 	switch(gFXInfo[ndx].effect)
@@ -422,7 +422,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNEL
 	CString s;
 	const TCHAR *continueOrIgnore;
 
-	if (ndx >= CountOf(gFXInfo) || !gFXInfo[ndx].name) return false;
+	if (ndx >= std::size(gFXInfo) || !gFXInfo[ndx].name) return false;
 	pszName = CString(gFXInfo[ndx].name) + _T(": ");
 
 	// for effects that don't have effect memory in MOD format.
@@ -891,18 +891,18 @@ static constexpr MPTVOLCMDINFO gVolCmdInfo[] =
 	{VOLCMD_OFFSET,			MOD_TYPE_MPT,		_T("Sample Cue")},
 };
 
-static_assert(CountOf(gVolCmdInfo) == (MAX_VOLCMDS - 1));
+static_assert(mpt::array_size<decltype(gVolCmdInfo)>::size == (MAX_VOLCMDS - 1));
 
 
 UINT EffectInfo::GetNumVolCmds() const
 {
-	return CountOf(gVolCmdInfo);
+	return static_cast<UINT>(std::size(gVolCmdInfo));
 }
 
 
 LONG EffectInfo::GetIndexFromVolCmd(ModCommand::VOLCMD volcmd) const
 {
-	for (UINT i = 0; i < CountOf(gVolCmdInfo); i++)
+	for (UINT i = 0; i < std::size(gVolCmdInfo); i++)
 	{
 		if (gVolCmdInfo[i].volCmd == volcmd) return i;
 	}
@@ -912,7 +912,7 @@ LONG EffectInfo::GetIndexFromVolCmd(ModCommand::VOLCMD volcmd) const
 
 VolumeCommand EffectInfo::GetVolCmdFromIndex(UINT ndx) const
 {
-	return (ndx < CountOf(gVolCmdInfo)) ? gVolCmdInfo[ndx].volCmd : VOLCMD_NONE;
+	return (ndx < std::size(gVolCmdInfo)) ? gVolCmdInfo[ndx].volCmd : VOLCMD_NONE;
 }
 
 
@@ -921,7 +921,7 @@ bool EffectInfo::GetVolCmdInfo(UINT ndx, CString *s, ModCommand::VOL *prangeMin,
 	if (s) s->Empty();
 	if (prangeMin) *prangeMin = 0;
 	if (prangeMax) *prangeMax = 0;
-	if (ndx >= CountOf(gVolCmdInfo)) return false;
+	if (ndx >= std::size(gVolCmdInfo)) return false;
 	if (s)
 	{
 		s->Format(_T("%c: %s"), sndFile.GetModSpecifications().GetVolEffectLetter(GetVolCmdFromIndex(ndx)), gVolCmdInfo[ndx].name);
@@ -1000,7 +1000,7 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
 			{
 				smp = sndFile.Instruments[smp]->Keyboard[m.note - NOTE_MIN];
 			}
-			if(smp > 0 && smp <= sndFile.GetNumSamples() && m.vol > 0 && m.vol <= CountOf(sndFile.GetSample(smp).cues))
+			if(smp > 0 && smp <= sndFile.GetNumSamples() && m.vol > 0 && m.vol <= std::size(sndFile.GetSample(smp).cues))
 				param = sndFile.GetSample(smp).cues[m.vol - 1];
 			else
 				param = m.vol << 11;

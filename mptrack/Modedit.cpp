@@ -375,7 +375,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 
 	GetSampleUndo().RearrangeSamples(newIndex);
 
-	for(CHANNELINDEX c = 0; c < CountOf(m_SndFile.m_PlayState.Chn); c++)
+	for(CHANNELINDEX c = 0; c < std::size(m_SndFile.m_PlayState.Chn); c++)
 	{
 		ModChannel &chn = m_SndFile.m_PlayState.Chn[c];
 		for(SAMPLEINDEX i = 1; i <= oldNumSamples; i++)

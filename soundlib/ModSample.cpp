@@ -489,7 +489,7 @@ bool ModSample::HasCustomCuePoints() const
 {
 	if(!uFlags[CHN_ADLIB])
 	{
-		for(SmpLength i = 0; i < CountOf(cues); i++)
+		for(SmpLength i = 0; i < std::size(cues); i++)
 		{
 			if(cues[i] != (i + 1) << 11)
 				return true;
