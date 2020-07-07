@@ -320,14 +320,14 @@ struct MODSampleHeader
 	}
 
 	// Suggested threshold for rejecting invalid files based on cumulated score returned by GetInvalidByteScore
-	enum : uint32 { INVALID_BYTE_THRESHOLD = 40 };
-	
+	static constexpr uint32 INVALID_BYTE_THRESHOLD = 40;
+
 	// This threshold is used for files where the file magic only gives a
 	// fragile result which alone would lead to too many false positives.
 	// In particular, the files from Inconexia demo by Iguana
 	// (https://www.pouet.net/prod.php?which=830) which have 3 \0 bytes in
 	// the file magic tend to cause misdetection of random files.
-	enum : uint32 { INVALID_BYTE_FRAGILE_THRESHOLD = 1 };
+	static constexpr uint32 INVALID_BYTE_FRAGILE_THRESHOLD = 1;
 
 	// Retrieve the internal sample format flags for this sample.
 	static SampleIO GetSampleFormat()
@@ -1546,7 +1546,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	FileReader::off_t patOffset = file.GetPosition();
 
 	// Scan patterns to identify Ultimate Soundtracker modules.
-	uint32 illegalBytes = 0;
+	uint32 illegalBytes = 0, totalNumDxx = 0;
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
 		bool patternInUse = std::find(Order().cbegin(), Order().cend(), pat) != Order().cend();
@@ -1641,7 +1641,12 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			// Not many Dxx commands in one pattern means they were probably pattern breaks
 			minVersion = ST2_00;
 		}
+		totalNumDxx += numDxx;
 	}
+
+	// If there is a huge number of Dxx commands, this is extremely unlikely to be a  SoundTracker 2.0 module
+	if(totalNumDxx > numPatterns + 32u && minVersion == ST2_00)
+		minVersion = MST1_00;
 
 	file.Seek(patOffset);
 
