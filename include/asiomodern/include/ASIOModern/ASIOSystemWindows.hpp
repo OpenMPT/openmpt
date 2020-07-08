@@ -261,7 +261,7 @@ private:
 private:
 
 	Bool initDriver(HWND sysHandle) {
-		return m_Driver->init(reinterpret_cast<SysHandle>(sysHandle));
+		return static_cast<Bool>(m_Driver->init(reinterpret_cast<SysHandle>(sysHandle)));
 	}
 
 public:
@@ -456,7 +456,7 @@ private:
 private:
 
 	Bool initDriver(HWND sysHandle) {
-		return CallDriver([&]() { return m_Driver->init(reinterpret_cast<SysHandle>(sysHandle)); }, __func__);
+		return static_cast<Bool>(CallDriver([&]() { return m_Driver->init(reinterpret_cast<SysHandle>(sysHandle)); }, __func__));
 	}
 
 public:

@@ -243,6 +243,7 @@ private:
 public:
 	constexpr Bool() noexcept : m_val(0) {}
 	constexpr Bool(bool val) noexcept : m_val(val ? 1 : 0) {}
+	constexpr explicit Bool(ULong val) noexcept : m_val(val ? 1 : 0) {}
 	constexpr bool operator!() const noexcept { return m_val ? false : true; }
 	constexpr operator bool() const noexcept { return m_val ? true : false; }
 };
