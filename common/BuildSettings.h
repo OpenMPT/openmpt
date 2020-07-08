@@ -651,6 +651,8 @@
 #define NO_WARN_MBCS_MFC_DEPRECATION
 #endif
 
+#pragma warning(default:4800) // Implicit conversion from 'int' to bool. Possible information loss
+
 #pragma warning(disable:4355) // 'this' : used in base member initializer list
 
 // happens for immutable classes (i.e. classes containing const members)
