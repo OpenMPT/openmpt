@@ -14,7 +14,7 @@
 #if MPT_CXX_AT_LEAST(20)
 #include <version>
 #else // !C++20
-#include <ciso646>
+#include <array>
 #endif // C++20
 
 #if !MPT_PLATFORM_MULTITHREADED
