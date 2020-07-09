@@ -113,6 +113,9 @@
 #include <utility>
 #include <variant>
 #include <vector>
+#if MPT_CXX_AT_LEAST(20)
+#include <version>
+#endif
 
 
 #include <cmath>

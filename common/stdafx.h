@@ -61,6 +61,7 @@
 // this will be available everywhere
 
 #include "../common/mptBaseMacros.h"
+// <version>
 // <array>
 // <iterator>
 // <type_traits>
@@ -106,6 +107,7 @@
 // "mptBaseMacros.h"
 // "mptMemory.h"
 // "mptSpan.h"
+// <version>
 // <array>
 // <memory>
 // <new>

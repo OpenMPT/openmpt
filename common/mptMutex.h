@@ -11,7 +11,11 @@
 
 #include "BuildSettings.h"
 
-#include <vector> // some C++ header in order to have the C++ standard library version information available
+#if MPT_CXX_AT_LEAST(20)
+#include <version>
+#else // !C++20
+#include <ciso646>
+#endif // C++20
 
 #if !MPT_PLATFORM_MULTITHREADED
 #define MPT_MUTEX_STD     0

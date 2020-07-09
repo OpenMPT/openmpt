@@ -18,6 +18,12 @@
 #include "mptMemory.h"
 #include "mptSpan.h"
 
+#if MPT_CXX_AT_LEAST(20)
+#include <version>
+#else // !C++20
+#include <ciso646>
+#endif // C++20
+
 #include <array>
 #include <memory>
 #include <new>
