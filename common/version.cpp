@@ -14,6 +14,8 @@
 #include "mptStringFormat.h"
 #include "mptStringParse.h" 
 
+#include "mptOS.h"
+
 #include "versionNumber.h"
 #include "svn_version.h"
 
@@ -489,6 +491,12 @@ mpt::ustring GetVersionString(FlagSet<Build::Strings> strings)
 			result.push_back(GetRevisionString());
 		}
 	}
+	#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+		if(strings[StringArchitecture])
+		{
+			result.push_back(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()));
+		}
+	#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 	if(strings[StringBitness])
 	{
 		result.push_back(mpt::format(U_(" %1 bit"))(mpt::arch_bits));
@@ -529,7 +537,7 @@ mpt::ustring GetVersionStringPure()
 	strings |= Build::StringVersion;
 	strings |= Build::StringRevision;
 	#ifdef MODPLUG_TRACKER
-		strings |= Build::StringBitness;
+		strings |= Build::StringArchitecture;
 	#endif
 	return GetVersionString(strings);
 }
@@ -549,7 +557,7 @@ mpt::ustring GetVersionStringExtended()
 	strings |= Build::StringVersion;
 	strings |= Build::StringRevision;
 	#ifdef MODPLUG_TRACKER
-		strings |= Build::StringBitness;
+		strings |= Build::StringArchitecture;
 	#endif
 	#ifndef MODPLUG_TRACKER
 		strings |= Build::StringSourceInfo;

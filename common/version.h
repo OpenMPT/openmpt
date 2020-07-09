@@ -353,10 +353,11 @@ namespace Build
 		StringsNone         = 0,
 		StringVersion       = 1<<0, // "1.23.35.45"
 		StringRevision      = 1<<2, // "-r1234+"
-		StringBitness       = 1<<3, // "32 bit"
-		StringSourceInfo    = 1<<4, // "https://source.openmpt.org/svn/openmpt/trunk/OpenMPT@1234 (2016-01-02) +dirty"
-		StringBuildFlags    = 1<<5, // "TEST DEBUG"
-		StringBuildFeatures = 1<<6, // "NO_VST NO_DSOUND"
+		StringArchitecture  = 1<<3, // "amd64"
+		StringBitness       = 1<<4, // "64 Bit"
+		StringSourceInfo    = 1<<5, // "https://source.openmpt.org/svn/openmpt/trunk/OpenMPT@1234 (2016-01-02) +dirty"
+		StringBuildFlags    = 1<<6, // "TEST DEBUG"
+		StringBuildFeatures = 1<<7, // "NO_VST NO_DSOUND"
 	};
 	MPT_DECLARE_ENUM(Strings)
 
@@ -364,13 +365,13 @@ namespace Build
 	mpt::ustring GetVersionString(FlagSet<Build::Strings> strings);
 
 	// Returns a pure version string
-	mpt::ustring GetVersionStringPure(); // e.g. "1.17.02.08-r1234+ 32 bit"
+	mpt::ustring GetVersionStringPure(); // e.g. "1.17.02.08-r1234+ amd64"
 
 	// Returns a simple version string
 	mpt::ustring GetVersionStringSimple(); // e.g. "1.17.02.08-r1234+ TEST"
 
 	// Returns Version::CurrentAsString() if the build is a clean release build straight from the repository or an extended string otherwise (if built from a svn working copy and tsvn was available during build)
-	mpt::ustring GetVersionStringExtended(); // e.g. "1.17.02.08-r1234+ 32 bit DEBUG"
+	mpt::ustring GetVersionStringExtended(); // e.g. "1.17.02.08-r1234+ amd64 DEBUG"
 
 	enum class Url
 	{
