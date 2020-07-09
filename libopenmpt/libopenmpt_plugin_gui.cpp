@@ -125,7 +125,7 @@ protected:
 			m_ComboBoxSamplerate.SelectString( 0, L"Default" );
 		}
 		for ( int index = 0; index < m_ComboBoxSamplerate.GetCount(); ++index ) {
-			if ( m_ComboBoxSamplerate.GetItemData( index ) == s->samplerate ) {
+			if ( static_cast<int>( m_ComboBoxSamplerate.GetItemData( index ) ) == s->samplerate ) {
 				m_ComboBoxSamplerate.SetCurSel( index );
 				selected = true;
 			}
@@ -145,7 +145,7 @@ protected:
 			m_ComboBoxChannels.SelectString( 0, L"Default" );
 		}
 		for ( int index = 0; index < m_ComboBoxChannels.GetCount(); ++index ) {
-			if ( m_ComboBoxChannels.GetItemData( index ) == s->channels ) {
+			if ( static_cast<int>( m_ComboBoxChannels.GetItemData( index ) ) == s->channels ) {
 				m_ComboBoxChannels.SetCurSel( index );
 				selected = true;
 			}
@@ -166,7 +166,7 @@ protected:
 		m_ComboBoxInterpolation.SetItemData( m_ComboBoxInterpolation.AddString( L"4 Tap (Cubic)" ), 4 );
 		m_ComboBoxInterpolation.SetItemData( m_ComboBoxInterpolation.AddString( L"8 Tap (Polyphase FIR)" ), 8 );
 		for ( int index = 0; index < m_ComboBoxInterpolation.GetCount(); ++index ) {
-			if ( m_ComboBoxInterpolation.GetItemData( index ) == s->interpolationfilterlength ) {
+			if ( static_cast<int>( m_ComboBoxInterpolation.GetItemData( index ) ) == s->interpolationfilterlength ) {
 				m_ComboBoxInterpolation.SetCurSel( index );
 				selected = true;
 			}
@@ -183,7 +183,7 @@ protected:
 		m_ComboBoxAmigaFilter.SetItemData( m_ComboBoxAmigaFilter.AddString( L"A1200 Filter" ), 0xA1200 );
 		m_ComboBoxAmigaFilter.SetItemData( m_ComboBoxAmigaFilter.AddString( L"Unfiltered" ), 1 );
 		for ( int index = 0; index < m_ComboBoxAmigaFilter.GetCount(); ++index ) {
-			if ( m_ComboBoxAmigaFilter.GetItemData( index ) == s->amiga_filter_type ) {
+			if ( static_cast<int>( m_ComboBoxAmigaFilter.GetItemData( index ) ) == s->amiga_filter_type ) {
 				m_ComboBoxAmigaFilter.SetCurSel( index );
 				selected = true;
 			}
@@ -193,11 +193,11 @@ protected:
 		}
 
 		selected = false;
-		m_ComboBoxRepeat.SetItemData( m_ComboBoxRepeat.AddString( L"Forever" ), -1 );
+		m_ComboBoxRepeat.SetItemData( m_ComboBoxRepeat.AddString( L"Forever" ), static_cast<unsigned int>( -1 ) );
 		m_ComboBoxRepeat.SetItemData( m_ComboBoxRepeat.AddString( L"Never" ), 0 );
 		m_ComboBoxRepeat.SetItemData( m_ComboBoxRepeat.AddString( L"Once" ), 1 );
 		for ( int index = 0; index < m_ComboBoxRepeat.GetCount(); ++index ) {
-			if ( m_ComboBoxRepeat.GetItemData( index ) == s->repeatcount ) {
+			if ( static_cast<int>( m_ComboBoxRepeat.GetItemData( index ) ) == s->repeatcount ) {
 				m_ComboBoxRepeat.SetCurSel( index );
 				selected = true;
 			}
@@ -213,7 +213,7 @@ protected:
 		m_SliderCtrlStereoSeparation.SetPos( s->stereoseparation );
 
 		selected = false;
-		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"Default" ), -1 );
+		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"Default" ), static_cast<unsigned int>( -1 ) );
 		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"Off" ), 0 );
 		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"1 ms" ), 1 );
 		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"2 ms" ), 2 );
@@ -221,7 +221,7 @@ protected:
 		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"5 ms" ), 5 );
 		m_ComboBoxRamping.SetItemData( m_ComboBoxRamping.AddString( L"10 ms" ), 10 );
 		for ( int index = 0; index < m_ComboBoxRamping.GetCount(); ++index ) {
-			if ( m_ComboBoxRamping.GetItemData( index ) == s->ramping ) {
+			if ( static_cast<int>( m_ComboBoxRamping.GetItemData( index ) ) == s->ramping ) {
 				m_ComboBoxRamping.SetCurSel( index );
 				selected = true;
 			}

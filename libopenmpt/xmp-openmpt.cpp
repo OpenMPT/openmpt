@@ -219,7 +219,7 @@ static inline Tstring StringReplace( Tstring str, const Tstring2 & oldStr_, cons
 }
 
 static std::string StringUpperCase( std::string str ) {
-	std::transform( str.begin(), str.end(), str.begin(), std::toupper );
+	std::transform( str.begin(), str.end(), str.begin(), []( char c ) { return static_cast<char>( std::toupper( c ) ); } );
 	return str;
 }
 
@@ -689,7 +689,7 @@ static char * build_xmplay_tags( const openmpt::module & mod ) {
 	return result;
 }
 
-static float * build_xmplay_length( const openmpt::module & mod ) {
+static float * build_xmplay_length( const openmpt::module & /* mod */ ) {
 	float * result = static_cast<float*>( xmpfmisc->Alloc( sizeof( float ) * self->subsong_lengths.size() ) );
 	if ( !result ) {
 		return nullptr;
@@ -765,6 +765,7 @@ static std::string sanitize_xmplay_multiline_string( const std::string & str ) {
 // check if a file is playable by this plugin
 // more thorough checks can be saved for the GetFileInfo and Open functions
 static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
+	static_cast<void>( filename );
 	try {
 		#ifdef USE_XMPLAY_FILE_IO
 			#ifdef USE_XMPLAY_ISTREAM
@@ -807,6 +808,7 @@ static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
 }
 
 static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, float * * length, char * * tags ) {
+	static_cast<void>( filename );
 	try {
 		std::map< std::string, std::string > ctls
 		{
@@ -883,6 +885,7 @@ static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, fl
 // open a file for playback
 // return:  0=failed, 1=success, 2=success and XMPlay can close the file
 static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
+	static_cast<void>( filename );
 	xmpopenmpt_lock guard;
 	reset_options();
 	try {
@@ -1310,15 +1313,15 @@ static BOOL WINAPI VisOpen(DWORD colors[3]) {
 	viscolors[col_global] = invert_color( viscolors[col_background] );
 
 	const int r = viscolors[col_text].r, g = viscolors[col_text].g, b = viscolors[col_text].b;
-	viscolors[col_empty].r = (r + viscolors[col_background].r) / 2;
-	viscolors[col_empty].g = (g + viscolors[col_background].g) / 2;
-	viscolors[col_empty].b = (b + viscolors[col_background].b) / 2;
+	viscolors[col_empty].r = static_cast<std::uint8_t>( (r + viscolors[col_background].r) / 2 );
+	viscolors[col_empty].g = static_cast<std::uint8_t>( (g + viscolors[col_background].g) / 2 );
+	viscolors[col_empty].b = static_cast<std::uint8_t>( (b + viscolors[col_background].b) / 2 );
 	viscolors[col_empty].a = 0;
 
 #define MIXCOLOR(col, c1, c2, c3) { \
 	viscolors[col] = viscolors[col_text]; \
 	int mix = viscolors[col].c1 + 0xA0; \
-	viscolors[col].c1 = mix; \
+	viscolors[col].c1 = static_cast<std::uint8_t>( mix ); \
 	if ( mix > 0xFF ) { \
 		viscolors[col].c2 = std::max( static_cast<std::uint8_t>( c2 - viscolors[col].c1 / 2 ), std::uint8_t(0) ); \
 		viscolors[col].c3 = std::max( static_cast<std::uint8_t>( c3 - viscolors[col].c1 / 2 ), std::uint8_t(0) ); \
@@ -1356,11 +1359,11 @@ static void WINAPI VisClose() {
 		DeleteDC( visDC );
 	}
 }
-static void WINAPI VisSize(HDC dc, SIZE *size) {
+static void WINAPI VisSize( HDC /* dc */ , SIZE * /* size */ ) {
 	xmpopenmpt_lock guard;
 	last_pattern = -1;	// Force redraw
 }
-static BOOL WINAPI VisRender(DWORD *buf, SIZE size, DWORD flags) {
+static BOOL WINAPI VisRender( DWORD * /* buf */ , SIZE /* size */ , DWORD /* flags */ ) {
 	xmpopenmpt_lock guard;
 	return FALSE;
 }
@@ -1609,7 +1612,7 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 	return TRUE;
 }
 
-static void WINAPI VisButton(DWORD x, DWORD y) {
+static void WINAPI VisButton( DWORD /* x */ , DWORD /* y */ ) {
 	//xmpopenmpt_lock guard;
 }
 
