@@ -239,7 +239,7 @@ static void quit() {
 	}
 }
 
-static int isourfile( const in_char * fn ) {
+static int isourfile( const in_char * /* fn */ ) {
 	return 0;
 }
 
@@ -372,7 +372,7 @@ static void getfileinfo( const in_char * filename, in_char * title, int * length
 	}
 }
 
-static void eq_set( int on, char data[10], int preamp ) {
+static void eq_set( int /* on */ , char /* data */ [10], int /* preamp */ ) {
 	return;
 }
 
