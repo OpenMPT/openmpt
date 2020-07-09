@@ -1199,7 +1199,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 		const uint32 baseOctave = m_SbOctave.GetPos() & 7;
 
 		const CString temp = mpt::ToCString(sndFile.GetNoteName(static_cast<ModCommand::NOTE>(lParam + 1 + 12 * baseOctave), m_nInstrument));
-		if(temp.GetLength() >= std::size(s))
+		if(temp.GetLength() >= mpt::saturate_cast<int>(std::size(s)))
 			wsprintf(s, _T("%s"), _T("..."));
 		else
 			wsprintf(s, _T("%s"), temp.GetString());

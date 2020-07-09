@@ -416,7 +416,7 @@ CString LFOPlugin::GetParamDisplay(PlugParamIndex param)
 	} else if(param == kWaveform)
 	{
 		static constexpr const TCHAR * const waveforms[] = { _T("Sine"), _T("Triangle"), _T("Saw"), _T("Square"), _T("Noise"), _T("Smoothed Noise") };
-		if(m_waveForm < std::size(waveforms))
+		if(m_waveForm < static_cast<int>(std::size(waveforms)))
 			return waveforms[m_waveForm];
 	} else if(param == kLoopMode)
 	{

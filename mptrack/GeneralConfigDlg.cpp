@@ -158,7 +158,7 @@ void COptionsGeneral::OnOK()
 	}
 	TrackerSettings::Instance().defaultNewFileAction = action;
 
-	for(int i = 0; i < std::size(generalOptionsList); i++)
+	for(int i = 0; i < mpt::saturate_cast<int>(std::size(generalOptionsList)); i++)
 	{
 		const bool check = (m_CheckList.GetCheck(i) != BST_UNCHECKED);
 
@@ -183,7 +183,7 @@ void COptionsGeneral::OnOptionSelChanged()
 {
 	const char *desc = "";
 	const int sel = m_CheckList.GetCurSel();
-	if ((sel >= 0) && (sel < std::size(generalOptionsList)))
+	if ((sel >= 0) && (sel < mpt::saturate_cast<int>(std::size(generalOptionsList))))
 	{
 		desc = generalOptionsList[sel].description;
 	}
