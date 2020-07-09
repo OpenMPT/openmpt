@@ -1358,7 +1358,7 @@ int openmpt_module_ctl_set_boolean( openmpt_module * mod, const char * ctl, int 
 	try {
 		openmpt::interface::check_soundfile( mod );
 		openmpt::interface::check_pointer( ctl );
-		mod->impl->ctl_set_boolean( ctl, value );
+		mod->impl->ctl_set_boolean( ctl, value ? true : false );
 		return 1;
 	} catch ( ... ) {
 		openmpt::report_exception( __func__, mod );
