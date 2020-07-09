@@ -714,45 +714,57 @@ namespace Util {
 
 	// Multiply two 32-bit integers, receive 64-bit result.
 	// MSVC generates unnecessarily complicated code for the unoptimized variant using _allmul.
-	MPT_FORCEINLINE int64 mul32to64(int32 a, int32 b)
+	MPT_CONSTEXPR20_FUN int64 mul32to64(int32 a, int32 b)
 	{
-#if MPT_COMPILER_MSVC && (defined(_M_IX86) || defined(_M_X64))
-		return __emul(a, b);
-#else
-		return static_cast<int64>(a) * b;
-#endif
+		#if MPT_COMPILER_MSVC && (defined(_M_IX86) || defined(_M_X64))
+			MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20())
+			{
+				return static_cast<int64>(a) * b;
+			} else
+			{
+				return __emul(a, b);
+			}
+		#else
+			return static_cast<int64>(a) * b;
+		#endif
 	}
 
-	MPT_FORCEINLINE uint64 mul32to64_unsigned(uint32 a, uint32 b)
+	MPT_CONSTEXPR20_FUN uint64 mul32to64_unsigned(uint32 a, uint32 b)
 	{
-#if MPT_COMPILER_MSVC && (defined(_M_IX86) || defined(_M_X64))
-		return __emulu(a, b);
-#else
-		return static_cast<uint64>(a) * b;
-#endif
+		#if MPT_COMPILER_MSVC && (defined(_M_IX86) || defined(_M_X64))
+			MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20())
+			{
+				return static_cast<uint64>(a) * b;
+			} else
+			{
+				return __emulu(a, b);
+			}
+		#else
+			return static_cast<uint64>(a) * b;
+		#endif
 	}
 
-	MPT_FORCEINLINE int32 muldiv(int32 a, int32 b, int32 c)
+	MPT_CONSTEXPR20_FUN int32 muldiv(int32 a, int32 b, int32 c)
 	{
 		return mpt::saturate_cast<int32>( mul32to64( a, b ) / c );
 	}
 
-	MPT_FORCEINLINE int32 muldivr(int32 a, int32 b, int32 c)
+	MPT_CONSTEXPR20_FUN int32 muldivr(int32 a, int32 b, int32 c)
 	{
 		return mpt::saturate_cast<int32>( ( mul32to64( a, b ) + ( c / 2 ) ) / c );
 	}
 
 	// Do not use overloading because catching unsigned version by accident results in slower X86 code.
-	MPT_FORCEINLINE uint32 muldiv_unsigned(uint32 a, uint32 b, uint32 c)
+	MPT_CONSTEXPR20_FUN uint32 muldiv_unsigned(uint32 a, uint32 b, uint32 c)
 	{
 		return mpt::saturate_cast<uint32>( mul32to64_unsigned( a, b ) / c );
 	}
-	MPT_FORCEINLINE uint32 muldivr_unsigned(uint32 a, uint32 b, uint32 c)
+	MPT_CONSTEXPR20_FUN uint32 muldivr_unsigned(uint32 a, uint32 b, uint32 c)
 	{
 		return mpt::saturate_cast<uint32>( ( mul32to64_unsigned( a, b ) + ( c / 2u ) ) / c );
 	}
 
-	MPT_FORCEINLINE int32 muldivrfloor(int64 a, uint32 b, uint32 c)
+	constexpr MPT_FORCEINLINE int32 muldivrfloor(int64 a, uint32 b, uint32 c)
 	{
 		a *= b;
 		a += c / 2u;
@@ -761,14 +773,14 @@ namespace Util {
 
 	// rounds x up to multiples of target
 	template <typename T>
-	inline T AlignUp(T x, T target)
+	constexpr T AlignUp(T x, T target)
 	{
 		return ((x + (target - 1)) / target) * target;
 	}
 
 	// rounds x down to multiples of target
 	template <typename T>
-	inline T AlignDown(T x, T target)
+	constexpr T AlignDown(T x, T target)
 	{
 		return (x / target) * target;
 	}
