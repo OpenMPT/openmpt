@@ -113,7 +113,7 @@ namespace mpt
 {
 
 template <typename T, std::size_t N, typename Tx>
-MPT_CONSTEXPR14_FUN std::array<T, N> init_array(const Tx & x)
+constexpr std::array<T, N> init_array(const Tx & x)
 {
 	std::array<T, N> result;
 	for(std::size_t i = 0; i < N; ++i)
@@ -131,12 +131,12 @@ namespace mpt
 {
 // Work-around for the requirement of at least 1 non-throwing function argument combination in C++ (17,2a).
 template <typename Exception>
-MPT_CONSTEXPR14_FUN bool constexpr_throw_helper(Exception && e, bool really = true)
+constexpr bool constexpr_throw_helper(Exception && e, bool really = true)
 {
 	return !really ? really : throw std::forward<Exception>(e);
 }
 template <typename Exception>
-MPT_CONSTEXPR14_FUN bool constexpr_throw(Exception && e)
+constexpr bool constexpr_throw(Exception && e)
 {
 	return mpt::constexpr_throw_helper(std::forward<Exception>(e));
 }
@@ -151,13 +151,13 @@ namespace mpt {
 // For example, wrapping_modulo(-1, m) == (m - 1).
 // Behaviour is undefined if m<=0.
 template<typename T, typename M>
-MPT_CONSTEXPR11_FUN auto wrapping_modulo(T x, M m) -> decltype(x % m)
+constexpr auto wrapping_modulo(T x, M m) -> decltype(x % m)
 {
 	return (x >= 0) ? (x % m) : (m - 1 - ((-1 - x) % m));
 }
 
 template<typename T, typename D>
-MPT_CONSTEXPR11_FUN auto wrapping_divide(T x, D d) -> decltype(x / d)
+constexpr auto wrapping_divide(T x, D d) -> decltype(x / d)
 {
 	return (x >= 0) ? (x / d) : (((x + 1) / d) - 1);
 }
@@ -172,7 +172,7 @@ namespace mpt {
 
 // Saturate the value of src to the domain of Tdst
 template <typename Tdst, typename Tsrc>
-inline Tdst saturate_cast(Tsrc src)
+constexpr Tdst saturate_cast(Tsrc src) noexcept
 {
 	// This code tries not only to obviously avoid overflows but also to avoid signed/unsigned comparison warnings and type truncation warnings (which in fact would be safe here) by explicit casting.
 	static_assert(std::numeric_limits<Tdst>::is_integer);
@@ -220,7 +220,7 @@ inline Tdst saturate_cast(Tsrc src)
 }
 
 template <typename Tdst>
-inline Tdst saturate_cast(double src)
+constexpr Tdst saturate_cast(double src)
 {
 	if(src >= static_cast<double>(std::numeric_limits<Tdst>::max()))
 	{
@@ -234,7 +234,7 @@ inline Tdst saturate_cast(double src)
 }
 
 template <typename Tdst>
-inline Tdst saturate_cast(float src)
+constexpr Tdst saturate_cast(float src)
 {
 	if(src >= static_cast<float>(std::numeric_limits<Tdst>::max()))
 	{
@@ -268,7 +268,7 @@ using std::rotr;
 // Note that we do not use SFINAE here but instead rely on static_assert.
 
 template <typename T>
-MPT_CONSTEXPR14_FUN int popcount(T val) noexcept
+constexpr int popcount(T val) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -285,7 +285,7 @@ MPT_CONSTEXPR14_FUN int popcount(T val) noexcept
 }
 
 template <typename T>
-MPT_CONSTEXPR14_FUN bool has_single_bit(T x) noexcept
+constexpr bool has_single_bit(T x) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -293,7 +293,7 @@ MPT_CONSTEXPR14_FUN bool has_single_bit(T x) noexcept
 }
 
 template <typename T>
-MPT_CONSTEXPR14_FUN T bit_ceil(T x) noexcept
+constexpr T bit_ceil(T x) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -311,7 +311,7 @@ MPT_CONSTEXPR14_FUN T bit_ceil(T x) noexcept
 }
 
 template <typename T>
-MPT_CONSTEXPR14_FUN T bit_floor(T x) noexcept
+constexpr T bit_floor(T x) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -333,7 +333,7 @@ MPT_CONSTEXPR14_FUN T bit_floor(T x) noexcept
 }
  
 template <typename T>
-MPT_CONSTEXPR14_FUN T bit_width(T x) noexcept
+constexpr T bit_width(T x) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -347,7 +347,7 @@ MPT_CONSTEXPR14_FUN T bit_width(T x) noexcept
 }
 
 template <typename T>
-MPT_CONSTEXPR14_FUN int countl_zero(T x) noexcept
+constexpr int countl_zero(T x) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -366,7 +366,7 @@ MPT_CONSTEXPR14_FUN int countl_zero(T x) noexcept
 }
 
 template <typename T>
-MPT_CONSTEXPR14_FUN int countl_one(T x) noexcept
+constexpr int countl_one(T x) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -385,7 +385,7 @@ MPT_CONSTEXPR14_FUN int countl_one(T x) noexcept
 }
 
 template <typename T>
-MPT_CONSTEXPR14_FUN int countr_zero(T x) noexcept
+constexpr int countr_zero(T x) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -404,7 +404,7 @@ MPT_CONSTEXPR14_FUN int countr_zero(T x) noexcept
 }
 
 template <typename T>
-MPT_CONSTEXPR14_FUN int countr_one(T x) noexcept
+constexpr int countr_one(T x) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -426,14 +426,14 @@ namespace detail
 {
 
 template <typename T>
-MPT_CONSTEXPR14_FUN T rotl(T x, int r) noexcept
+constexpr T rotl(T x, int r) noexcept
 {
 	auto N = std::numeric_limits<T>::digits;
 	return (x >> (N - r)) | (x << r);
 }
 
 template <typename T>
-MPT_CONSTEXPR14_FUN T rotr(T x, int r) noexcept
+constexpr T rotr(T x, int r) noexcept
 {
 	auto N = std::numeric_limits<T>::digits;
 	return (x << (N - r)) | (x >> r);
@@ -442,7 +442,7 @@ MPT_CONSTEXPR14_FUN T rotr(T x, int r) noexcept
 } // namespace detail
 
 template <typename T>
-MPT_CONSTEXPR14_FUN T rotl(T x, int s) noexcept
+constexpr T rotl(T x, int s) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -452,7 +452,7 @@ MPT_CONSTEXPR14_FUN T rotl(T x, int s) noexcept
 }
 
 template <typename T>
-MPT_CONSTEXPR14_FUN T rotr(T x, int s) noexcept
+constexpr T rotr(T x, int s) noexcept
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
@@ -475,7 +475,7 @@ template <typename Tmod, Tmod m>
 struct ModIfNotZeroImpl
 {
 	template <typename Tval>
-	inline Tval mod(Tval x)
+	constexpr Tval mod(Tval x)
 	{
 		static_assert(std::numeric_limits<Tmod>::is_integer);
 		static_assert(!std::numeric_limits<Tmod>::is_signed);
@@ -484,15 +484,15 @@ struct ModIfNotZeroImpl
 		return static_cast<Tval>(x % m);
 	}
 };
-template <> struct ModIfNotZeroImpl<uint8 , 0> { template <typename Tval> inline Tval mod(Tval x) { return x; } };
-template <> struct ModIfNotZeroImpl<uint16, 0> { template <typename Tval> inline Tval mod(Tval x) { return x; } };
-template <> struct ModIfNotZeroImpl<uint32, 0> { template <typename Tval> inline Tval mod(Tval x) { return x; } };
-template <> struct ModIfNotZeroImpl<uint64, 0> { template <typename Tval> inline Tval mod(Tval x) { return x; } };
+template <> struct ModIfNotZeroImpl<uint8 , 0> { template <typename Tval> constexpr Tval mod(Tval x) { return x; } };
+template <> struct ModIfNotZeroImpl<uint16, 0> { template <typename Tval> constexpr Tval mod(Tval x) { return x; } };
+template <> struct ModIfNotZeroImpl<uint32, 0> { template <typename Tval> constexpr Tval mod(Tval x) { return x; } };
+template <> struct ModIfNotZeroImpl<uint64, 0> { template <typename Tval> constexpr Tval mod(Tval x) { return x; } };
 } // namespace detail
 // Returns x % m if m != 0, x otherwise.
 // i.e. "return (m == 0) ? x : (x % m);", but without causing a warning with stupid older compilers
 template <typename Tmod, Tmod m, typename Tval>
-inline Tval ModIfNotZero(Tval x)
+constexpr Tval ModIfNotZero(Tval x)
 {
 	return detail::ModIfNotZeroImpl<Tmod, m>().mod(x);
 }
@@ -572,7 +572,7 @@ inline void LimitMax(T& val, const C upperLimit)
 
 // Returns sign of a number (-1 for negative numbers, 1 for positive numbers, 0 for 0)
 template <class T>
-int sgn(T value)
+constexpr int sgn(T value)
 {
 	return (value > T(0)) - (value < T(0));
 }
@@ -588,7 +588,7 @@ namespace mpt
 {
 
 template <typename T>
-MPT_FORCEINLINE auto rshift_signed_standard(T x, int y) -> decltype(x >> y)
+constexpr auto rshift_signed_standard(T x, int y) noexcept -> decltype(x >> y)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::numeric_limits<T>::is_signed);
@@ -604,7 +604,7 @@ MPT_FORCEINLINE auto rshift_signed_standard(T x, int y) -> decltype(x >> y)
 }
 
 template <typename T>
-MPT_FORCEINLINE auto lshift_signed_standard(T x, int y) -> decltype(x << y)
+constexpr auto lshift_signed_standard(T x, int y) noexcept -> decltype(x << y)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::numeric_limits<T>::is_signed);
@@ -622,7 +622,7 @@ MPT_FORCEINLINE auto lshift_signed_standard(T x, int y) -> decltype(x << y)
 #if MPT_COMPILER_SHIFT_SIGNED
 
 template <typename T>
-MPT_FORCEINLINE auto rshift_signed_undefined(T x, int y) -> decltype(x >> y)
+constexpr auto rshift_signed_undefined(T x, int y) noexcept -> decltype(x >> y)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::numeric_limits<T>::is_signed);
@@ -630,7 +630,7 @@ MPT_FORCEINLINE auto rshift_signed_undefined(T x, int y) -> decltype(x >> y)
 }
 
 template <typename T>
-MPT_FORCEINLINE auto lshift_signed_undefined(T x, int y) -> decltype(x << y)
+constexpr auto lshift_signed_undefined(T x, int y) noexcept -> decltype(x << y)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::numeric_limits<T>::is_signed);
@@ -638,13 +638,13 @@ MPT_FORCEINLINE auto lshift_signed_undefined(T x, int y) -> decltype(x << y)
 }
 
 template <typename T>
-MPT_FORCEINLINE auto rshift_signed(T x, int y) -> decltype(x >> y)
+constexpr auto rshift_signed(T x, int y) noexcept -> decltype(x >> y)
 {
 	return mpt::rshift_signed_undefined(x, y);
 }
 
 template <typename T>
-MPT_FORCEINLINE auto lshift_signed(T x, int y) -> decltype(x << y)
+constexpr auto lshift_signed(T x, int y) noexcept -> decltype(x << y)
 {
 	return mpt::lshift_signed_undefined(x, y);
 }
@@ -652,13 +652,13 @@ MPT_FORCEINLINE auto lshift_signed(T x, int y) -> decltype(x << y)
 #else
 
 template <typename T>
-MPT_FORCEINLINE auto rshift_signed(T x, int y) -> decltype(x >> y)
+constexpr auto rshift_signed(T x, int y) noexcept -> decltype(x >> y)
 {
 	return mpt::rshift_signed_standard(x, y);
 }
 
 template <typename T>
-MPT_FORCEINLINE auto lshift_signed(T x, int y) -> decltype(x << y)
+constexpr auto lshift_signed(T x, int y) noexcept -> decltype(x << y)
 {
 	return mpt::lshift_signed_standard(x, y);
 }
@@ -666,6 +666,8 @@ MPT_FORCEINLINE auto lshift_signed(T x, int y) -> decltype(x << y)
 #endif
 
 }  // namespace mpt
+
+
 
 namespace Util
 {
