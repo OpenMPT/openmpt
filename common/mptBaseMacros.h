@@ -118,47 +118,6 @@ template <auto V> struct constant_value { static constexpr decltype(V) value() {
 
 
 
-namespace mpt
-{
-
-template <typename T>
-struct stdarray_extent : std::integral_constant<std::size_t, 0> {};
-
-template <typename T, std::size_t N>
-struct stdarray_extent<std::array<T, N>> : std::integral_constant<std::size_t, N> {};
-
-template <typename T>
-struct is_stdarray : std::false_type {};
-
-template <typename T, std::size_t N>
-struct is_stdarray<std::array<T, N>> : std::true_type {};
-
-// mpt::extent is the same as std::extent,
-// but also works for std::array,
-// and asserts that the given type is actually an array type instead of returning 0.
-// use as:
-// mpt::extent<decltype(expr)>()
-// mpt::extent<decltype(variable)>()
-// mpt::extent<decltype(type)>()
-// mpt::extent<type>()
-template <typename T>
-constexpr std::size_t extent() noexcept
-{
-	using Tarray = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
-	static_assert(std::is_array<Tarray>::value || mpt::is_stdarray<Tarray>::value);
-	if constexpr(mpt::is_stdarray<Tarray>::value)
-	{
-		return mpt::stdarray_extent<Tarray>();
-	} else
-	{
-		return std::extent<Tarray>();
-	}
-}
-
-} // namespace mpt
-
-
-
 // Use MPT_RESTRICT to indicate that a pointer is guaranteed to not be aliased.
 #if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define MPT_RESTRICT __restrict
