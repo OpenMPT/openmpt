@@ -7,6 +7,7 @@
   mpt_projectname = "xmp-openmpt"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  warnings "Extra"
   local extincludedirs = {
    "../..",
    "../../include",

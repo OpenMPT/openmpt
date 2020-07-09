@@ -7,6 +7,7 @@
   mpt_projectname = "openmpt123"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
+  warnings "Extra"
   local extincludedirs = {
    "../..",
    "../../include/flac/include",
