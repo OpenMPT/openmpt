@@ -118,8 +118,7 @@ template <auto V> struct constant_value { static constexpr decltype(V) value() {
 #define MPT_IS_CONSTANT_EVALUATED() std::is_constant_evaluated()
 #else // !C++20
 #define MPT_IS_CONSTANT_EVALUATED20() false
-// this pessimizes the case for C++17 by always assuming constexpr context, which implies always running constexpr-friendly code
-#define MPT_IS_CONSTANT_EVALUATED() true
+#define MPT_IS_CONSTANT_EVALUATED() true // this pessimizes the case for C++17 by always assuming constexpr context, which implies always running constexpr-friendly code
 #endif // C++20
 
 
