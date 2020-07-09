@@ -599,8 +599,8 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 		if(frame_samples < 0 || info.frame_bytes < 0) break; // internal error in minimp3
 		if(frame_samples > 0 && info.frame_bytes == 0) break; // internal error in minimp3
 		if(frame_samples == 0 && info.frame_bytes == 0) break; // end of stream, no progress
-		if(frame_samples == 0 && info.frame_bytes > 0) MPT_DO { } MPT_WHILE_0; // decoder skipped non-mp3 data
-		if(frame_samples > 0 && info.frame_bytes > 0) MPT_DO { } MPT_WHILE_0; // normal
+		if(frame_samples == 0 && info.frame_bytes > 0) do { } while(0); // decoder skipped non-mp3 data
+		if(frame_samples > 0 && info.frame_bytes > 0) do { } while(0); // normal
 		if(info.frame_bytes > 0)
 		{
 			if(rate != 0 && rate != info.hz) break; // inconsistent stream

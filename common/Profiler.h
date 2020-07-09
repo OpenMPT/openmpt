@@ -117,8 +117,8 @@ public:
 	static std::string DumpProfiles() { return std::string(); }
 	static std::vector<double> DumpCategories() { return std::vector<double>(); }
 };
-#define OPENMPT_PROFILE_SCOPE(cat, name) MPT_DO { } MPT_WHILE_0
-#define OPENMPT_PROFILE_FUNCTION(cat) MPT_DO { } MPT_WHILE_0
+#define OPENMPT_PROFILE_SCOPE(cat, name) do { } while(0)
+#define OPENMPT_PROFILE_FUNCTION(cat) do { } while(0)
 
 
 #endif // USE_PROFILER

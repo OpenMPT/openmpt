@@ -168,23 +168,6 @@ template <auto V> struct constant_value { static constexpr decltype(V) value() {
 
 
 
-#if MPT_COMPILER_MSVC
-// MSVC warns for the well-known and widespread "do { } while(0)" idiom with warning level 4 ("conditional expression is constant").
-// It does not warn with "while(0,0)". However this again causes warnings with other compilers.
-// Solve it with a macro.
-#define MPT_DO do
-#define MPT_WHILE_0 while(0,0)
-#endif
-
-#ifndef MPT_DO
-#define MPT_DO do
-#endif
-#ifndef MPT_WHILE_0
-#define MPT_WHILE_0 while(0)
-#endif
-
-
-
 #if MPT_COMPILER_MSVC && defined(UNREFERENCED_PARAMETER)
 #define MPT_UNREFERENCED_PARAMETER(x) UNREFERENCED_PARAMETER(x)
 #else

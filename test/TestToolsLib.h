@@ -317,7 +317,7 @@ public:
 
 
 #define DO_TEST(func) \
-MPT_DO { \
+do { \
 	Test::Testcase test(Test::FatalityStop, Test::VerbosityVerbose, #func , MPT_SOURCE_LOCATION_CURRENT() ); \
 	try { \
 		test.ShowStart(); \
@@ -330,7 +330,7 @@ MPT_DO { \
 	} catch(...) { \
 		test.ReportException(); \
 	} \
-} MPT_WHILE_0
+} while(0)
 
 
 } // namespace Test

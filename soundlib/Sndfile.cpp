@@ -298,14 +298,14 @@ CSoundFile::ProbeResult CSoundFile::ProbeAdditionalSize(MemoryFileReader &file, 
 
 
 #define MPT_DO_PROBE( storedResult , call ) \
-	MPT_DO { \
+	do { \
 		ProbeResult lastResult = call ; \
 		if(lastResult == ProbeSuccess) { \
 			return ProbeSuccess; \
 		} else if(lastResult == ProbeWantMoreData) { \
 			storedResult = ProbeWantMoreData; \
 		} \
-	} MPT_WHILE_0 \
+	} while(0) \
 /**/
 
 

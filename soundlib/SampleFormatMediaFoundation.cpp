@@ -316,13 +316,13 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 		return false;
 	}
 
-	#define MPT_MF_CHECKED(x) MPT_DO { \
+	#define MPT_MF_CHECKED(x) do { \
 		HRESULT hr = (x); \
 		if(!SUCCEEDED(hr)) \
 		{ \
 			return false; \
 		} \
-	} MPT_WHILE_0
+	} while(0)
 
 	CComPtr<IMFSourceResolver> sourceResolver;
 	MPT_MF_CHECKED(MFCreateSourceResolver(&sourceResolver));

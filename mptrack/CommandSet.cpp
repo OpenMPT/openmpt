@@ -46,7 +46,7 @@ constexpr std::tuple<InputTargetContext, CommandID, CommandID> NoteContexts[] =
 #ifdef MPT_COMMANDSET_LOGGING
 #define LOG_COMMANDSET(x) MPT_LOG(LogDebug, "CommandSet", x)
 #else
-#define LOG_COMMANDSET(x) MPT_DO { } MPT_WHILE_0
+#define LOG_COMMANDSET(x) do { } while(0)
 #endif
 
 

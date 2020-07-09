@@ -2989,19 +2989,19 @@ static MPT_NOINLINE void TestCharsets()
 	_tcscpy(src_TCHAR, _T("ab"));
 
 #define MPT_TEST_PRINTF(dst_type, function, format, src_type) \
-	MPT_DO { \
+	do { \
 		MemsetZero(dst_ ## dst_type); \
 		function(dst_ ## dst_type, format, src_ ## src_type); \
 		VERIFY_EQUAL(std::char_traits< dst_type >::compare(dst_ ## dst_type, src_ ## dst_type, std::char_traits< dst_type >::length( src_ ## dst_type ) + 1), 0); \
-	} MPT_WHILE_0 \
+	} while(0) \
 /**/
 
 #define MPT_TEST_PRINTF_N(dst_type, function, format, src_type) \
-	MPT_DO { \
+	do { \
 		MemsetZero(dst_ ## dst_type); \
 		function(dst_ ## dst_type, 255, format, src_ ## src_type); \
 		VERIFY_EQUAL(std::char_traits< dst_type >::compare(dst_ ## dst_type, src_ ## dst_type, std::char_traits< dst_type >::length( src_ ## dst_type ) + 1), 0); \
-	} MPT_WHILE_0 \
+	} while(0) \
 /**/
 
 	// CRT narrow

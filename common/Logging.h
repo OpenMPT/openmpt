@@ -145,7 +145,7 @@ public:
 };
 
 #define MPT_LOG(level, facility, text) \
-	MPT_DO \
+	do \
 	{ \
 		MPT_MAYBE_CONSTANT_IF(mpt::log::GlobalLogLevel >= ( level )) \
 		{ \
@@ -154,14 +154,14 @@ public:
 				mpt::log::Logger().SendLogMessage( MPT_SOURCE_LOCATION_CURRENT() , ( level ), ( facility ), ( text )); \
 			} \
 		} \
-	} MPT_WHILE_0 \
+	} while(0) \
 /**/
 
 
 #else // !NO_LOGGING
 
 
-#define MPT_LOG(level, facility, text) MPT_DO { } MPT_WHILE_0
+#define MPT_LOG(level, facility, text) do { } while(0)
 
 
 #endif // NO_LOGGING
@@ -233,15 +233,15 @@ public:
 
 #define MPT_TRACE_SCOPE() mpt::log::Trace::Scope MPT_TRACE_CONCAT(MPT_TRACE_VAR, __LINE__)(MPT_SOURCE_LOCATION_CURRENT())
 
-#define MPT_TRACE() MPT_DO { if(mpt::log::Trace::g_Enabled) { mpt::log::Trace::Trace(MPT_SOURCE_LOCATION_CURRENT()); } } MPT_WHILE_0
+#define MPT_TRACE() do { if(mpt::log::Trace::g_Enabled) { mpt::log::Trace::Trace(MPT_SOURCE_LOCATION_CURRENT()); } } while(0)
 
 } // namespace Trace
 
 #else // !MODPLUG_TRACKER
 
-#define MPT_TRACE_SCOPE() MPT_DO { } MPT_WHILE_0
+#define MPT_TRACE_SCOPE() do { } while(0)
 
-#define MPT_TRACE() MPT_DO { } MPT_WHILE_0
+#define MPT_TRACE() do { } while(0)
 
 #endif // MODPLUG_TRACKER
 

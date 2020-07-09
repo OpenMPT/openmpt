@@ -35,11 +35,11 @@ namespace Test {
 // Verify that given parameters are 'equal'. Break directly into the debugger if not.
 // The exact meaning of equality is based on operator!= .
 #define VERIFY_EQUAL(x,y)	\
-	MPT_DO { \
+	do { \
 		if((x) != (y)) { \
 			MyDebugBreak(); \
 		} \
-	} MPT_WHILE_0 \
+	} while(0) \
 /**/
 
 // Like VERIFY_EQUAL, only differs for libopenmpt
@@ -49,20 +49,20 @@ namespace Test {
 #define VERIFY_EQUAL_QUIET_NONCONT VERIFY_EQUAL
 
 #define VERIFY_EQUAL_EPS(x,y,eps)	\
-	MPT_DO { \
+	do { \
 		if(std::abs((x) - (y)) > (eps)) { \
 			MyDebugBreak(); \
 		} \
-	} MPT_WHILE_0 \
+	} while(0) \
 /**/
 
 
 #define DO_TEST(func) \
-	MPT_DO { \
+	do { \
 		if(IsDebuggerPresent()) { \
 			func(); \
 		} \
-	} MPT_WHILE_0 \
+	} while(0) \
 /**/
 
 
