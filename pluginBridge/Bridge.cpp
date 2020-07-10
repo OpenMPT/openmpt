@@ -197,7 +197,8 @@ PluginBridge::PluginBridge(const wchar_t *memName, HANDLE otherProcess)
 	m_otherProcess.DuplicateFrom(otherProcess);
 
 	m_sigThreadExit.Create(true);
-	m_audioThread = mpt::UnmanagedThreadMember<PluginBridge, &PluginBridge::AudioThread>(this);
+	DWORD dummy = 0;	// For Win9x
+	m_audioThread = CreateThread(NULL, 0, &PluginBridge::AudioThread, this, 0, &dummy);
 
 	m_sharedMem->bridgeCommWindow = m_communicationWindow;
 	m_sharedMem->bridgePluginID = m_thisPluginID;
@@ -475,7 +476,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg &msg)
 
 	case effMainsChanged:
 		// [value]: 0 means "turn off", 1 means "turn on"
-		SetThreadPriority(m_audioThread, msg.value ? THREAD_PRIORITY_ABOVE_NORMAL : THREAD_PRIORITY_NORMAL);
+		::SetThreadPriority(m_audioThread, msg.value ? THREAD_PRIORITY_ABOVE_NORMAL : THREAD_PRIORITY_NORMAL);
 		m_sharedMem->tailSize = static_cast<int32>(Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f));
 		break;
 
@@ -772,6 +773,11 @@ void PluginBridge::AutomateParameters()
 
 
 // Audio rendering thread
+DWORD WINAPI PluginBridge::AudioThread(LPVOID param)
+{
+	static_cast<PluginBridge*>(param)->AudioThread();
+	return 0;
+}
 void PluginBridge::AudioThread()
 {
 	m_isAudioThread = true;

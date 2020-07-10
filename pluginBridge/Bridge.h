@@ -52,7 +52,7 @@ protected:
 	std::vector<void *> m_sampleBuffers;
 	uint32 m_mixBufSize = 0;
 
-	mpt::UnmanagedThread m_audioThread;
+	HANDLE m_audioThread = nullptr;
 	Event m_sigThreadExit;  // Signal to kill audio thread
 
 	bool m_needIdle = false;  // Plugin needs idle time
@@ -88,6 +88,7 @@ protected:
 	template<typename buf_t>
 	int32 BuildProcessPointers(buf_t **(&inPointers), buf_t **(&outPointers));
 
+	static DWORD WINAPI AudioThread(LPVOID param);
 	void AudioThread();
 
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
