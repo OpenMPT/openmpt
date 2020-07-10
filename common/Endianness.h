@@ -224,32 +224,39 @@ inline void SwapBufferEndian(std::size_t elementSize, Tbyte * buffer, std::size_
 
 
 
-#define MPT_constexpr_bswap16(x) \
-	( uint16(0) \
-		| ((static_cast<uint16>(x) >> 8) & 0x00FFu) \
-		| ((static_cast<uint16>(x) << 8) & 0xFF00u) \
-	) \
-/**/
-#define MPT_constexpr_bswap32(x) \
-	( uint32(0) \
-		| ((static_cast<uint32>(x) & 0x000000FFu) << 24) \
-		| ((static_cast<uint32>(x) & 0x0000FF00u) <<  8) \
-		| ((static_cast<uint32>(x) & 0x00FF0000u) >>  8) \
-		| ((static_cast<uint32>(x) & 0xFF000000u) >> 24) \
-	) \
-/**/
-#define MPT_constexpr_bswap64(x) \
-	( uint64(0) \
-		| (((static_cast<uint64>(x) >>  0) & 0xffull) << 56) \
-		| (((static_cast<uint64>(x) >>  8) & 0xffull) << 48) \
-		| (((static_cast<uint64>(x) >> 16) & 0xffull) << 40) \
-		| (((static_cast<uint64>(x) >> 24) & 0xffull) << 32) \
-		| (((static_cast<uint64>(x) >> 32) & 0xffull) << 24) \
-		| (((static_cast<uint64>(x) >> 40) & 0xffull) << 16) \
-		| (((static_cast<uint64>(x) >> 48) & 0xffull) <<  8) \
-		| (((static_cast<uint64>(x) >> 56) & 0xffull) <<  0) \
-	) \
-/**/
+namespace mpt {
+namespace detail {
+constexpr inline uint16 constexpr_bswap16(uint16 x) noexcept
+{
+	return uint16(0)
+		| ((x >> 8) & 0x00FFu)
+		| ((x << 8) & 0xFF00u)
+		;
+}
+constexpr inline uint32 constexpr_bswap32(uint32 x) noexcept
+{
+	return uint32(0)
+		| ((x & 0x000000FFu) << 24)
+		| ((x & 0x0000FF00u) <<  8)
+		| ((x & 0x00FF0000u) >>  8)
+		| ((x & 0xFF000000u) >> 24)
+		;
+}
+constexpr inline uint64 constexpr_bswap64(uint64 x) noexcept
+{
+	return uint64(0)
+		| (((x >>  0) & 0xffull) << 56)
+		| (((x >>  8) & 0xffull) << 48)
+		| (((x >> 16) & 0xffull) << 40)
+		| (((x >> 24) & 0xffull) << 32)
+		| (((x >> 32) & 0xffull) << 24)
+		| (((x >> 40) & 0xffull) << 16)
+		| (((x >> 48) & 0xffull) <<  8)
+		| (((x >> 56) & 0xffull) <<  0)
+		;
+}
+} // namespace detail
+} // namespace mpt
 
 #if MPT_COMPILER_GCC
 #define MPT_bswap16 __builtin_bswap16
@@ -285,13 +292,13 @@ static MPT_FORCEINLINE uint64 mpt_bswap64(uint64 x) { return bswap64(x); }
 
 // No intrinsics available
 #ifndef MPT_bswap16
-#define MPT_bswap16(x) MPT_constexpr_bswap16(x)
+#define MPT_bswap16(x) mpt::detail::constexpr_bswap16(x)
 #endif
 #ifndef MPT_bswap32
-#define MPT_bswap32(x) MPT_constexpr_bswap32(x)
+#define MPT_bswap32(x) mpt::detail::constexpr_bswap32(x)
 #endif
 #ifndef MPT_bswap64
-#define MPT_bswap64(x) MPT_constexpr_bswap64(x)
+#define MPT_bswap64(x) mpt::detail::constexpr_bswap64(x)
 #endif
 
 
@@ -359,12 +366,12 @@ namespace mpt
 namespace detail
 {
 
-static MPT_CONSTEXPR20_FUN uint64 SwapBytes(uint64 value) noexcept { MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) { return MPT_constexpr_bswap64(value); } else { return MPT_bswap64(value); } }
-static MPT_CONSTEXPR20_FUN uint32 SwapBytes(uint32 value) noexcept { MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) { return MPT_constexpr_bswap32(value); } else { return MPT_bswap32(value); } }
-static MPT_CONSTEXPR20_FUN uint16 SwapBytes(uint16 value) noexcept { MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) { return MPT_constexpr_bswap16(value); } else { return MPT_bswap16(value); } }
-static MPT_CONSTEXPR20_FUN int64  SwapBytes(int64  value) noexcept { MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) { return MPT_constexpr_bswap64(value); } else { return MPT_bswap64(value); } }
-static MPT_CONSTEXPR20_FUN int32  SwapBytes(int32  value) noexcept { MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) { return MPT_constexpr_bswap32(value); } else { return MPT_bswap32(value); } }
-static MPT_CONSTEXPR20_FUN int16  SwapBytes(int16  value) noexcept { MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) { return MPT_constexpr_bswap16(value); } else { return MPT_bswap16(value); } }
+static MPT_CONSTEXPR20_FUN uint64 SwapBytes(uint64 value) noexcept { MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) { return mpt::detail::constexpr_bswap64(value); } else { return MPT_bswap64(value); } }
+static MPT_CONSTEXPR20_FUN uint32 SwapBytes(uint32 value) noexcept { MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) { return mpt::detail::constexpr_bswap32(value); } else { return MPT_bswap32(value); } }
+static MPT_CONSTEXPR20_FUN uint16 SwapBytes(uint16 value) noexcept { MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) { return mpt::detail::constexpr_bswap16(value); } else { return MPT_bswap16(value); } }
+static MPT_CONSTEXPR20_FUN int64  SwapBytes(int64  value) noexcept { MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) { return mpt::detail::constexpr_bswap64(value); } else { return MPT_bswap64(value); } }
+static MPT_CONSTEXPR20_FUN int32  SwapBytes(int32  value) noexcept { MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) { return mpt::detail::constexpr_bswap32(value); } else { return MPT_bswap32(value); } }
+static MPT_CONSTEXPR20_FUN int16  SwapBytes(int16  value) noexcept { MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) { return mpt::detail::constexpr_bswap16(value); } else { return MPT_bswap16(value); } }
 
 // Do NOT remove these overloads, even if they seem useless.
 // We do not want risking to extend 8bit integers to int and then
@@ -376,10 +383,6 @@ static MPT_CONSTEXPR20_FUN char   SwapBytes(char   value) noexcept { return valu
 
 } // namespace detail
 } // namespace mpt
-
-#undef MPT_constexpr_bswap16
-#undef MPT_constexpr_bswap32
-#undef MPT_constexpr_bswap64
 
 #undef MPT_bswap16
 #undef MPT_bswap32
