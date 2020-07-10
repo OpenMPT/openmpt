@@ -39,19 +39,37 @@ namespace mpt {
 
 
 
-template <typename T> inline mpt::span<T> as_span(std::vector<T> & cont) { return mpt::span<T>(cont); }
+template <typename T> inline mpt::span<T> as_span(std::vector<T> & cont)
+{
+	return mpt::span<T>(cont);
+}
 
-template <typename T> inline mpt::span<const T> as_span(const std::vector<T> & cont) { return mpt::span<const T>(cont); }
+template <typename T> inline mpt::span<const T> as_span(const std::vector<T> & cont)
+{
+	return mpt::span<const T>(cont);
+}
 
 
 
-template <typename T> inline std::vector<typename std::remove_const<T>::type> make_vector(T * beg, T * end) { return std::vector<typename std::remove_const<T>::type>(beg, end); }
+template <typename T> inline std::vector<typename std::remove_const<T>::type> make_vector(T * beg, T * end)
+{
+	return std::vector<typename std::remove_const<T>::type>(beg, end);
+}
 
-template <typename T> inline std::vector<typename std::remove_const<T>::type> make_vector(T * data, std::size_t size) { return std::vector<typename std::remove_const<T>::type>(data, data + size); }
+template <typename T> inline std::vector<typename std::remove_const<T>::type> make_vector(T * data, std::size_t size)
+{
+	return std::vector<typename std::remove_const<T>::type>(data, data + size);
+}
 
-template <typename T> inline std::vector<typename std::remove_const<T>::type> make_vector(mpt::span<T> data) { return std::vector<typename std::remove_const<T>::type>(data.data(), data.data() + data.size()); }
+template <typename T> inline std::vector<typename std::remove_const<T>::type> make_vector(mpt::span<T> data)
+{
+	return std::vector<typename std::remove_const<T>::type>(data.data(), data.data() + data.size());
+}
 
-template <typename T, std::size_t N> inline std::vector<typename std::remove_const<T>::type> make_vector(T (&arr)[N]) { return std::vector<typename std::remove_const<T>::type>(std::begin(arr), std::end(arr)); }
+template <typename T, std::size_t N> inline std::vector<typename std::remove_const<T>::type> make_vector(T (&arr)[N])
+{
+	return std::vector<typename std::remove_const<T>::type>(std::begin(arr), std::end(arr));
+}
 
 
 
