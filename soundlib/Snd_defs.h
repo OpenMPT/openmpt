@@ -566,40 +566,40 @@ protected:
 public:
 	enum : uint32 { fractMax = 0xFFFFFFFFu };
 
-	MPT_CONSTEXPR11_FUN SamplePosition() { }
-	MPT_CONSTEXPR11_FUN explicit SamplePosition(value_t pos) : v(pos) { }
-	MPT_CONSTEXPR11_FUN SamplePosition(int32 intPart, uint32 fractPart) : v((static_cast<value_t>(intPart) * (1ll << 32)) | fractPart) { }
+	MPT_CONSTEXPRINLINE SamplePosition() { }
+	MPT_CONSTEXPRINLINE explicit SamplePosition(value_t pos) : v(pos) { }
+	MPT_CONSTEXPRINLINE SamplePosition(int32 intPart, uint32 fractPart) : v((static_cast<value_t>(intPart) * (1ll << 32)) | fractPart) { }
 	static SamplePosition Ratio(uint32 dividend, uint32 divisor) { return SamplePosition((static_cast<int64>(dividend) << 32) / divisor); }
 	static SamplePosition FromDouble(double pos) { return SamplePosition(static_cast<value_t>(pos * 4294967296.0)); }
 
 	// Set integer and fractional part
-	MPT_CONSTEXPR14_FUN SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { v = (static_cast<int64>(intPart) << 32) | fractPart; return *this; }
+	MPT_CONSTEXPRINLINE SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { v = (static_cast<int64>(intPart) << 32) | fractPart; return *this; }
 	// Set integer part, keep fractional part
-	MPT_CONSTEXPR14_FUN SamplePosition &SetInt(int32 intPart) { v = (static_cast<value_t>(intPart) << 32) | GetFract(); return *this; }
+	MPT_CONSTEXPRINLINE SamplePosition &SetInt(int32 intPart) { v = (static_cast<value_t>(intPart) << 32) | GetFract(); return *this; }
 	// Get integer part (as sample length / position)
-	MPT_CONSTEXPR11_FUN SmpLength GetUInt() const { return static_cast<SmpLength>(static_cast<unsigned_value_t>(v) >> 32); }
+	MPT_CONSTEXPRINLINE SmpLength GetUInt() const { return static_cast<SmpLength>(static_cast<unsigned_value_t>(v) >> 32); }
 	// Get integer part
-	MPT_CONSTEXPR11_FUN int32 GetInt() const { return static_cast<int32>(static_cast<unsigned_value_t>(v) >> 32); }
+	MPT_CONSTEXPRINLINE int32 GetInt() const { return static_cast<int32>(static_cast<unsigned_value_t>(v) >> 32); }
 	// Get fractional part
-	MPT_CONSTEXPR11_FUN uint32 GetFract() const { return static_cast<uint32>(v); }
+	MPT_CONSTEXPRINLINE uint32 GetFract() const { return static_cast<uint32>(v); }
 	// Get the inverted fractional part
-	MPT_CONSTEXPR11_FUN SamplePosition GetInvertedFract() const { return SamplePosition(0x100000000ll - GetFract()); }
+	MPT_CONSTEXPRINLINE SamplePosition GetInvertedFract() const { return SamplePosition(0x100000000ll - GetFract()); }
 	// Get the raw fixed-point value
-	MPT_CONSTEXPR11_FUN int64 GetRaw() const { return v; }
+	MPT_CONSTEXPRINLINE int64 GetRaw() const { return v; }
 	// Negate the current value
-	MPT_CONSTEXPR14_FUN SamplePosition &Negate() { v = -v; return *this; }
+	MPT_CONSTEXPRINLINE SamplePosition &Negate() { v = -v; return *this; }
 	// Multiply and divide by given integer scalars
-	MPT_CONSTEXPR14_FUN SamplePosition &MulDiv(uint32 mul, uint32 div) { v = (v * mul) / div; return *this; }
+	MPT_CONSTEXPRINLINE SamplePosition &MulDiv(uint32 mul, uint32 div) { v = (v * mul) / div; return *this; }
 	// Removes the integer part, only keeping fractions
-	MPT_CONSTEXPR14_FUN SamplePosition &RemoveInt() { v &= fractMax; return *this; }
+	MPT_CONSTEXPRINLINE SamplePosition &RemoveInt() { v &= fractMax; return *this; }
 	// Check if value is 1.0
-	MPT_CONSTEXPR11_FUN bool IsUnity() const { return v == 0x100000000ll; }
+	MPT_CONSTEXPRINLINE bool IsUnity() const { return v == 0x100000000ll; }
 	// Check if value is 0
-	MPT_CONSTEXPR11_FUN bool IsZero() const { return v == 0; }
+	MPT_CONSTEXPRINLINE bool IsZero() const { return v == 0; }
 	// Check if value is > 0
-	MPT_CONSTEXPR11_FUN bool IsPositive() const { return v > 0; }
+	MPT_CONSTEXPRINLINE bool IsPositive() const { return v > 0; }
 	// Check if value is < 0
-	MPT_CONSTEXPR11_FUN bool IsNegative() const { return v < 0; }
+	MPT_CONSTEXPRINLINE bool IsNegative() const { return v < 0; }
 
 	// Addition / subtraction of another fixed-point number
 	SamplePosition operator+ (const SamplePosition &other) const { return SamplePosition(v + other.v); }
@@ -618,12 +618,12 @@ public:
 	// Division by scalar; returns fractional point number
 	SamplePosition operator/ (int div) const { return SamplePosition(v / div); }
 
-	MPT_CONSTEXPR11_FUN bool operator==(const SamplePosition &other) const { return v == other.v; }
-	MPT_CONSTEXPR11_FUN bool operator!=(const SamplePosition &other) const { return v != other.v; }
-	MPT_CONSTEXPR11_FUN bool operator<=(const SamplePosition &other) const { return v <= other.v; }
-	MPT_CONSTEXPR11_FUN bool operator>=(const SamplePosition &other) const { return v >= other.v; }
-	MPT_CONSTEXPR11_FUN bool operator<(const SamplePosition &other) const { return v < other.v; }
-	MPT_CONSTEXPR11_FUN bool operator>(const SamplePosition &other) const { return v > other.v; }
+	MPT_CONSTEXPRINLINE bool operator==(const SamplePosition &other) const { return v == other.v; }
+	MPT_CONSTEXPRINLINE bool operator!=(const SamplePosition &other) const { return v != other.v; }
+	MPT_CONSTEXPRINLINE bool operator<=(const SamplePosition &other) const { return v <= other.v; }
+	MPT_CONSTEXPRINLINE bool operator>=(const SamplePosition &other) const { return v >= other.v; }
+	MPT_CONSTEXPRINLINE bool operator<(const SamplePosition &other) const { return v < other.v; }
+	MPT_CONSTEXPRINLINE bool operator>(const SamplePosition &other) const { return v > other.v; }
 };
 
 
@@ -637,41 +637,41 @@ struct FPInt
 {
 protected:
 	T v;
-	MPT_CONSTEXPR11_FUN FPInt(T rawValue) : v(rawValue) { }
+	MPT_CONSTEXPRINLINE FPInt(T rawValue) : v(rawValue) { }
 
 public:
 	enum : size_t { fractFact = FFact };
 	using store_t = T;
 
-	MPT_CONSTEXPR11_FUN FPInt() : v(0) { }
-	MPT_CONSTEXPR11_FUN FPInt(T intPart, T fractPart) : v((intPart * fractFact) + (fractPart % fractFact)) { }
-	explicit MPT_CONSTEXPR11_FUN FPInt(float f) : v(static_cast<T>(f * float(fractFact))) { }
-	explicit MPT_CONSTEXPR11_FUN FPInt(double f) : v(static_cast<T>(f * double(fractFact))) { }
+	MPT_CONSTEXPRINLINE FPInt() : v(0) { }
+	MPT_CONSTEXPRINLINE FPInt(T intPart, T fractPart) : v((intPart * fractFact) + (fractPart % fractFact)) { }
+	explicit MPT_CONSTEXPRINLINE FPInt(float f) : v(static_cast<T>(f * float(fractFact))) { }
+	explicit MPT_CONSTEXPRINLINE FPInt(double f) : v(static_cast<T>(f * double(fractFact))) { }
 
 	// Set integer and fractional part
-	MPT_CONSTEXPR14_FUN FPInt<fractFact, T> &Set(T intPart, T fractPart = 0) { v = (intPart * fractFact) + (fractPart % fractFact); return *this; }
+	MPT_CONSTEXPRINLINE FPInt<fractFact, T> &Set(T intPart, T fractPart = 0) { v = (intPart * fractFact) + (fractPart % fractFact); return *this; }
 	// Set raw internal representation directly
-	MPT_CONSTEXPR14_FUN FPInt<fractFact, T> &SetRaw(T value) { v = value; return *this; }
+	MPT_CONSTEXPRINLINE FPInt<fractFact, T> &SetRaw(T value) { v = value; return *this; }
 	// Retrieve the integer part of the stored value
-	MPT_CONSTEXPR11_FUN T GetInt() const { return v / fractFact; }
+	MPT_CONSTEXPRINLINE T GetInt() const { return v / fractFact; }
 	// Retrieve the fractional part of the stored value
-	MPT_CONSTEXPR11_FUN T GetFract() const { return v % fractFact; }
+	MPT_CONSTEXPRINLINE T GetFract() const { return v % fractFact; }
 	// Retrieve the raw internal representation of the stored value
-	MPT_CONSTEXPR11_FUN T GetRaw() const { return v; }
+	MPT_CONSTEXPRINLINE T GetRaw() const { return v; }
 	// Formats the stored value as a floating-point value
-	MPT_CONSTEXPR11_FUN double ToDouble() const { return v / double(fractFact); }
+	MPT_CONSTEXPRINLINE double ToDouble() const { return v / double(fractFact); }
 
-	MPT_CONSTEXPR11_FUN friend FPInt<fractFact, T> operator+ (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return FPInt<fractFact, T>(a.v + b.v); }
-	MPT_CONSTEXPR11_FUN friend FPInt<fractFact, T> operator- (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return FPInt<fractFact, T>(a.v - b.v); }
-	MPT_CONSTEXPR14_FUN FPInt<fractFact, T> operator+= (const FPInt<fractFact, T> &other) noexcept { v += other.v; return *this; }
-	MPT_CONSTEXPR14_FUN FPInt<fractFact, T> operator-= (const FPInt<fractFact, T> &other) noexcept { v -= other.v; return *this; }
+	MPT_CONSTEXPRINLINE friend FPInt<fractFact, T> operator+ (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return FPInt<fractFact, T>(a.v + b.v); }
+	MPT_CONSTEXPRINLINE friend FPInt<fractFact, T> operator- (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return FPInt<fractFact, T>(a.v - b.v); }
+	MPT_CONSTEXPRINLINE FPInt<fractFact, T> operator+= (const FPInt<fractFact, T> &other) noexcept { v += other.v; return *this; }
+	MPT_CONSTEXPRINLINE FPInt<fractFact, T> operator-= (const FPInt<fractFact, T> &other) noexcept { v -= other.v; return *this; }
 
-	MPT_CONSTEXPR11_FUN friend bool operator== (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v == b.v; }
-	MPT_CONSTEXPR11_FUN friend bool operator!= (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v != b.v; }
-	MPT_CONSTEXPR11_FUN friend bool operator<= (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v <= b.v; }
-	MPT_CONSTEXPR11_FUN friend bool operator>= (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v >= b.v; }
-	MPT_CONSTEXPR11_FUN friend bool operator< (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v < b.v; }
-	MPT_CONSTEXPR11_FUN friend bool operator> (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v > b.v; }
+	MPT_CONSTEXPRINLINE friend bool operator== (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v == b.v; }
+	MPT_CONSTEXPRINLINE friend bool operator!= (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v != b.v; }
+	MPT_CONSTEXPRINLINE friend bool operator<= (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v <= b.v; }
+	MPT_CONSTEXPRINLINE friend bool operator>= (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v >= b.v; }
+	MPT_CONSTEXPRINLINE friend bool operator< (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v < b.v; }
+	MPT_CONSTEXPRINLINE friend bool operator> (const FPInt<fractFact, T> &a, const FPInt<fractFact, T> &b) noexcept { return a.v > b.v; }
 };
 
 using TEMPO = FPInt<10000, uint32>;

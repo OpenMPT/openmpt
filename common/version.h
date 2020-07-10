@@ -44,15 +44,15 @@ public:
 
 public:
 
-	MPT_CONSTEXPR11_FUN Version() noexcept
+	MPT_CONSTEXPRINLINE Version() noexcept
 		: m_Version(0)
 	{}
 
-	explicit MPT_CONSTEXPR11_FUN Version(uint32 version) noexcept
+	explicit MPT_CONSTEXPRINLINE Version(uint32 version) noexcept
 		: m_Version(version)
 	{}
 
-	explicit MPT_CONSTEXPR11_FUN Version(uint8 v1, uint8 v2, uint8 v3, uint8 v4) noexcept
+	explicit MPT_CONSTEXPRINLINE Version(uint8 v1, uint8 v2, uint8 v3, uint8 v4) noexcept
 		: m_Version((static_cast<uint32>(v1) << 24) | (static_cast<uint32>(v2) << 16) | (static_cast<uint32>(v3) << 8) | (static_cast<uint32>(v4) << 0))
 	{}
 
@@ -65,16 +65,16 @@ public:
 
 public:
 
-	explicit MPT_CONSTEXPR11_FUN operator bool () const noexcept
+	explicit MPT_CONSTEXPRINLINE operator bool () const noexcept
 	{
 		return m_Version != 0;
 	}
-	MPT_CONSTEXPR11_FUN bool operator ! () const noexcept
+	MPT_CONSTEXPRINLINE bool operator ! () const noexcept
 	{
 		return m_Version == 0;
 	}
 
-	MPT_CONSTEXPR11_FUN uint32 GetRawVersion() const noexcept
+	MPT_CONSTEXPRINLINE uint32 GetRawVersion() const noexcept
 	{
 		return m_Version;
 	}
@@ -84,7 +84,7 @@ public:
 		return Version(m_Version & mask);
 	}
 
-	MPT_CONSTEXPR11_FUN uint8 GetField(Field field) const noexcept
+	MPT_CONSTEXPRINLINE uint8 GetField(Field field) const noexcept
 	{
 		return
 			(field == Field::Major) ? static_cast<uint8>((m_Version >> 24) & 0xffu) :
@@ -121,7 +121,7 @@ public:
 
 	private:
 
-		static MPT_CONSTEXPR11_FUN uint8 NibbleFromChar(char x)
+		static MPT_CONSTEXPRINLINE uint8 NibbleFromChar(char x)
 		{
 			return
 				('0' <= x && x <= '9') ? static_cast<uint8>(x - '0' +  0) :
@@ -132,7 +132,7 @@ public:
 
 	public:
 
-		static MPT_CONSTEXPR14_FUN Version Parse(const char * str, std::size_t len)
+		static MPT_CONSTEXPRINLINE Version Parse(const char * str, std::size_t len)
 		{
 			// 0123456789
 			// 1.23.45.67
@@ -179,33 +179,33 @@ public:
 
 };
 
-MPT_CONSTEXPR11_FUN bool operator == (const Version &a, const Version &b) noexcept
+MPT_CONSTEXPRINLINE bool operator == (const Version &a, const Version &b) noexcept
 {
 	return a.GetRawVersion() == b.GetRawVersion();
 }
-MPT_CONSTEXPR11_FUN bool operator != (const Version &a, const Version &b) noexcept
+MPT_CONSTEXPRINLINE bool operator != (const Version &a, const Version &b) noexcept
 {
 	return a.GetRawVersion() != b.GetRawVersion();
 }
-MPT_CONSTEXPR11_FUN bool operator <= (const Version &a, const Version &b) noexcept
+MPT_CONSTEXPRINLINE bool operator <= (const Version &a, const Version &b) noexcept
 {
 	return a.GetRawVersion() <= b.GetRawVersion();
 }
-MPT_CONSTEXPR11_FUN bool operator >= (const Version &a, const Version &b) noexcept
+MPT_CONSTEXPRINLINE bool operator >= (const Version &a, const Version &b) noexcept
 {
 	return a.GetRawVersion() >= b.GetRawVersion();
 }
-MPT_CONSTEXPR11_FUN bool operator < (const Version &a, const Version &b) noexcept
+MPT_CONSTEXPRINLINE bool operator < (const Version &a, const Version &b) noexcept
 {
 	return a.GetRawVersion() < b.GetRawVersion();
 }
-MPT_CONSTEXPR11_FUN bool operator > (const Version &a, const Version &b) noexcept
+MPT_CONSTEXPRINLINE bool operator > (const Version &a, const Version &b) noexcept
 {
 	return a.GetRawVersion() > b.GetRawVersion();
 }
 
 
-MPT_CONSTEXPR14_FUN Version operator "" _LiteralVersionImpl (const char * str, std::size_t len)
+MPT_CONSTEXPRINLINE Version operator "" _LiteralVersionImpl (const char * str, std::size_t len)
 {
 	return Version::LiteralParser::Parse(str, len);
 }

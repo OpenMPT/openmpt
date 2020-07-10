@@ -34,14 +34,14 @@ static T log2(T x)
 }
 
 
-static MPT_CONSTEXPR14_FUN int lower_bound_entropy_bits(unsigned int x)
+static MPT_CONSTEXPRINLINE int lower_bound_entropy_bits(unsigned int x)
 {
 	return detail::lower_bound_entropy_bits(x);
 }
 
 
 template <typename T>
-static MPT_CONSTEXPR14_FUN bool is_mask(T x)
+static MPT_CONSTEXPRINLINE bool is_mask(T x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
 	typedef typename std::make_unsigned<T>::type unsigned_T;

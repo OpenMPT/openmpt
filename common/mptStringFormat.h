@@ -309,52 +309,52 @@ private:
 	unsigned int group;
 	char group_sep;
 public:
-	MPT_CONSTEXPR11_FUN FormatSpec() noexcept : flags(0), width(0), precision(-1), group(0), group_sep(',') {}
-	MPT_CONSTEXPR11_FUN FormatFlags GetFlags() const noexcept { return flags; }
-	MPT_CONSTEXPR11_FUN std::size_t GetWidth() const noexcept { return width; }
-	MPT_CONSTEXPR11_FUN int GetPrecision() const noexcept { return precision; }
-	MPT_CONSTEXPR11_FUN unsigned int GetGroup() const noexcept { return group; }
-	MPT_CONSTEXPR11_FUN char GetGroupSep() const noexcept { return group_sep; }
-	MPT_CONSTEXPR14_FUN FormatSpec & SetFlags(FormatFlags f) noexcept { flags = f; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & SetWidth(std::size_t w) noexcept { width = w; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & SetPrecision(int p) noexcept { precision = p; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & SetGroup(unsigned int g) noexcept { group = g; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & SetGroupSep(char s) noexcept { group_sep = s; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec() noexcept : flags(0), width(0), precision(-1), group(0), group_sep(',') {}
+	MPT_CONSTEXPRINLINE FormatFlags GetFlags() const noexcept { return flags; }
+	MPT_CONSTEXPRINLINE std::size_t GetWidth() const noexcept { return width; }
+	MPT_CONSTEXPRINLINE int GetPrecision() const noexcept { return precision; }
+	MPT_CONSTEXPRINLINE unsigned int GetGroup() const noexcept { return group; }
+	MPT_CONSTEXPRINLINE char GetGroupSep() const noexcept { return group_sep; }
+	MPT_CONSTEXPRINLINE FormatSpec & SetFlags(FormatFlags f) noexcept { flags = f; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & SetWidth(std::size_t w) noexcept { width = w; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & SetPrecision(int p) noexcept { precision = p; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & SetGroup(unsigned int g) noexcept { group = g; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & SetGroupSep(char s) noexcept { group_sep = s; return *this; }
 public:
-	MPT_CONSTEXPR14_FUN FormatSpec & BaseDec() noexcept { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseDec; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & BaseHex() noexcept { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseHex; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & CaseLow() noexcept { flags &= ~(fmt_base::CaseLow|fmt_base::CaseUpp); flags |= fmt_base::CaseLow; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & CaseUpp() noexcept { flags &= ~(fmt_base::CaseLow|fmt_base::CaseUpp); flags |= fmt_base::CaseUpp; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & FillOff() noexcept { flags &= ~(fmt_base::FillOff|fmt_base::FillNul); flags |= fmt_base::FillOff; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & FillNul() noexcept { flags &= ~(fmt_base::FillOff|fmt_base::FillNul); flags |= fmt_base::FillNul; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & NotaNrm() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaNrm; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & NotaFix() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaFix; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & NotaSci() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaSci; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & Width(std::size_t w) noexcept { width = w; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & Prec(int p) noexcept { precision = p; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & Group(unsigned int g) noexcept { group = g; return *this; }
-	MPT_CONSTEXPR14_FUN FormatSpec & GroupSep(char s) noexcept { group_sep = s; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & BaseDec() noexcept { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseDec; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & BaseHex() noexcept { flags &= ~(fmt_base::BaseDec|fmt_base::BaseHex); flags |= fmt_base::BaseHex; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & CaseLow() noexcept { flags &= ~(fmt_base::CaseLow|fmt_base::CaseUpp); flags |= fmt_base::CaseLow; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & CaseUpp() noexcept { flags &= ~(fmt_base::CaseLow|fmt_base::CaseUpp); flags |= fmt_base::CaseUpp; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & FillOff() noexcept { flags &= ~(fmt_base::FillOff|fmt_base::FillNul); flags |= fmt_base::FillOff; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & FillNul() noexcept { flags &= ~(fmt_base::FillOff|fmt_base::FillNul); flags |= fmt_base::FillNul; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & NotaNrm() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaNrm; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & NotaFix() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaFix; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & NotaSci() noexcept { flags &= ~(fmt_base::NotaNrm|fmt_base::NotaFix|fmt_base::NotaSci); flags |= fmt_base::NotaSci; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & Width(std::size_t w) noexcept { width = w; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & Prec(int p) noexcept { precision = p; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & Group(unsigned int g) noexcept { group = g; return *this; }
+	MPT_CONSTEXPRINLINE FormatSpec & GroupSep(char s) noexcept { group_sep = s; return *this; }
 public:
-	MPT_CONSTEXPR14_FUN FormatSpec & Dec() noexcept { return BaseDec(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Hex() noexcept { return BaseHex(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Low() noexcept { return CaseLow(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Upp() noexcept { return CaseUpp(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Off() noexcept { return FillOff(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Nul() noexcept { return FillNul(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Nrm() noexcept { return NotaNrm(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Fix() noexcept { return NotaFix(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Sci() noexcept { return NotaSci(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Dec() noexcept { return BaseDec(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Hex() noexcept { return BaseHex(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Low() noexcept { return CaseLow(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Upp() noexcept { return CaseUpp(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Off() noexcept { return FillOff(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Nul() noexcept { return FillNul(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Nrm() noexcept { return NotaNrm(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Fix() noexcept { return NotaFix(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Sci() noexcept { return NotaSci(); }
 public:
-	MPT_CONSTEXPR14_FUN FormatSpec & Decimal() noexcept { return BaseDec(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Hexadecimal() noexcept { return BaseHex(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Lower() noexcept { return CaseLow(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Upper() noexcept { return CaseUpp(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & FillNone() noexcept { return FillOff(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & FillZero() noexcept { return FillNul(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & FloatNormal() noexcept { return NotaNrm(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & FloatFixed() noexcept { return NotaFix(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & FloatScientific() noexcept { return NotaSci(); }
-	MPT_CONSTEXPR14_FUN FormatSpec & Precision(int p) noexcept { return Prec(p); }
+	MPT_CONSTEXPRINLINE FormatSpec & Decimal() noexcept { return BaseDec(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Hexadecimal() noexcept { return BaseHex(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Lower() noexcept { return CaseLow(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Upper() noexcept { return CaseUpp(); }
+	MPT_CONSTEXPRINLINE FormatSpec & FillNone() noexcept { return FillOff(); }
+	MPT_CONSTEXPRINLINE FormatSpec & FillZero() noexcept { return FillNul(); }
+	MPT_CONSTEXPRINLINE FormatSpec & FloatNormal() noexcept { return NotaNrm(); }
+	MPT_CONSTEXPRINLINE FormatSpec & FloatFixed() noexcept { return NotaFix(); }
+	MPT_CONSTEXPRINLINE FormatSpec & FloatScientific() noexcept { return NotaSci(); }
+	MPT_CONSTEXPRINLINE FormatSpec & Precision(int p) noexcept { return Prec(p); }
 };
 
 template <typename Tdst, typename Tsrc>

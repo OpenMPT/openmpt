@@ -304,7 +304,7 @@ static MPT_FORCEINLINE uint64 mpt_bswap64(uint64 x) { return bswap64(x); }
 
 
 template <typename T, typename Tendian, std::size_t size>
-static MPT_CONSTEXPR17_FUN std::array<std::byte, size> EndianEncode(T val) noexcept
+static MPT_CONSTEXPRINLINE std::array<std::byte, size> EndianEncode(T val) noexcept
 {
 	static_assert(Tendian::endian == mpt::endian::little || Tendian::endian == mpt::endian::big);
 	static_assert(std::numeric_limits<T>::is_integer);
@@ -332,7 +332,7 @@ static MPT_CONSTEXPR17_FUN std::array<std::byte, size> EndianEncode(T val) noexc
 }
 
 template <typename T, typename Tendian, std::size_t size>
-static MPT_CONSTEXPR17_FUN T EndianDecode(std::array<std::byte, size> data) noexcept
+static MPT_CONSTEXPRINLINE T EndianDecode(std::array<std::byte, size> data) noexcept
 {
 	static_assert(Tendian::endian == mpt::endian::little || Tendian::endian == mpt::endian::big);
 	static_assert(std::numeric_limits<T>::is_integer);

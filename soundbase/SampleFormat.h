@@ -43,13 +43,13 @@ Container DefaultSampleFormats()
 }
 
 template<typename Tsample> struct SampleFormatTraits;
-template<> struct SampleFormatTraits<uint8>  { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatUnsigned8; } };
-template<> struct SampleFormatTraits<int8>   { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatInt8;      } };
-template<> struct SampleFormatTraits<int16>  { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatInt16;     } };
-template<> struct SampleFormatTraits<int24>  { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatInt24;     } };
-template<> struct SampleFormatTraits<int32>  { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatInt32;     } };
-template<> struct SampleFormatTraits<float>  { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatFloat32;   } };
-template<> struct SampleFormatTraits<double> { static MPT_CONSTEXPR11_FUN SampleFormatEnum sampleFormat() { return SampleFormatFloat64;   } };
+template<> struct SampleFormatTraits<uint8>  { static MPT_CONSTEXPRINLINE SampleFormatEnum sampleFormat() { return SampleFormatUnsigned8; } };
+template<> struct SampleFormatTraits<int8>   { static MPT_CONSTEXPRINLINE SampleFormatEnum sampleFormat() { return SampleFormatInt8;      } };
+template<> struct SampleFormatTraits<int16>  { static MPT_CONSTEXPRINLINE SampleFormatEnum sampleFormat() { return SampleFormatInt16;     } };
+template<> struct SampleFormatTraits<int24>  { static MPT_CONSTEXPRINLINE SampleFormatEnum sampleFormat() { return SampleFormatInt24;     } };
+template<> struct SampleFormatTraits<int32>  { static MPT_CONSTEXPRINLINE SampleFormatEnum sampleFormat() { return SampleFormatInt32;     } };
+template<> struct SampleFormatTraits<float>  { static MPT_CONSTEXPRINLINE SampleFormatEnum sampleFormat() { return SampleFormatFloat32;   } };
+template<> struct SampleFormatTraits<double> { static MPT_CONSTEXPRINLINE SampleFormatEnum sampleFormat() { return SampleFormatFloat64;   } };
 
 template<SampleFormatEnum sampleFormat> struct SampleFormatToType;
 template<> struct SampleFormatToType<SampleFormatUnsigned8> { typedef uint8  type; };
@@ -69,7 +69,7 @@ private:
 	SampleFormatEnum value;
 
 	template <typename T>
-	static MPT_CONSTEXPR14_FUN SampleFormatEnum Sanitize(T x) noexcept
+	static MPT_CONSTEXPRINLINE SampleFormatEnum Sanitize(T x) noexcept
 	{
 		using uT = typename std::make_unsigned<T>::type;
 		uT ux = x;
@@ -84,34 +84,34 @@ private:
 
 public:
 
-	MPT_CONSTEXPR11_FUN SampleFormat() noexcept
+	MPT_CONSTEXPRINLINE SampleFormat() noexcept
 		: value(SampleFormatInvalid)
 	{
 	}
 
-	MPT_CONSTEXPR14_FUN SampleFormat(SampleFormatEnum v) noexcept
+	MPT_CONSTEXPRINLINE SampleFormat(SampleFormatEnum v) noexcept
 		: value(Sanitize(v))
 	{
 	}
 
-	MPT_CONSTEXPR11_FUN bool IsValid() const noexcept
+	MPT_CONSTEXPRINLINE bool IsValid() const noexcept
 	{
 		return value != SampleFormatInvalid;
 	}
 
-	MPT_CONSTEXPR11_FUN bool IsUnsigned() const noexcept
+	MPT_CONSTEXPRINLINE bool IsUnsigned() const noexcept
 	{
 		return IsValid() && (value == SampleFormatUnsigned8);
 	}
-	MPT_CONSTEXPR11_FUN bool IsFloat() const noexcept
+	MPT_CONSTEXPRINLINE bool IsFloat() const noexcept
 	{
 		return IsValid() && ((value == SampleFormatFloat32) || (value == SampleFormatFloat64));
 	}
-	MPT_CONSTEXPR11_FUN bool IsInt() const noexcept
+	MPT_CONSTEXPRINLINE bool IsInt() const noexcept
 	{
 		return IsValid() && ((value != SampleFormatFloat32) && (value != SampleFormatFloat64));
 	}
-	MPT_CONSTEXPR11_FUN uint8 GetBitsPerSample() const noexcept
+	MPT_CONSTEXPRINLINE uint8 GetBitsPerSample() const noexcept
 	{
 		return
 			!IsValid() ? 0 :
@@ -125,21 +125,21 @@ public:
 			0;
 	}
 
-	MPT_CONSTEXPR11_FUN operator SampleFormatEnum () const noexcept
+	MPT_CONSTEXPRINLINE operator SampleFormatEnum () const noexcept
 	{
 		return value;
 	}
 
 	// backward compatibility, conversion to/from integers
-	static MPT_CONSTEXPR14_FUN SampleFormat FromInt(int x) noexcept
+	static MPT_CONSTEXPRINLINE SampleFormat FromInt(int x) noexcept
 	{
 		return SampleFormat(Sanitize(x));
 	}
-	static MPT_CONSTEXPR14_FUN int ToInt(SampleFormat x) noexcept
+	static MPT_CONSTEXPRINLINE int ToInt(SampleFormat x) noexcept
 	{
 		return x.value;
 	}
-	MPT_CONSTEXPR11_FUN int AsInt() const noexcept
+	MPT_CONSTEXPRINLINE int AsInt() const noexcept
 	{
 		return value;
 	}
