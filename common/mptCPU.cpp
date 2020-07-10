@@ -17,6 +17,10 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+namespace CPU
+{
+
+
 #if defined(ENABLE_ASM)
 
 
@@ -24,6 +28,7 @@ uint32 RealProcSupport = 0;
 uint32 ProcSupport = 0;
 char ProcVendorID[16+1] = "";
 char ProcBrandID[4*4*3+1] = "";
+uint32 ProcRawCPUID = 0;
 uint16 ProcFamily = 0;
 uint8 ProcModel = 0;
 uint8 ProcStepping = 0;
@@ -97,19 +102,20 @@ static cpuid_result cpuid(uint32 function)
 }
 
 
-void InitProcSupport()
+void Init()
 {
 
 	RealProcSupport = 0;
 	ProcSupport = 0;
 	mpt::String::WriteAutoBuf(ProcVendorID) = "";
 	mpt::String::WriteAutoBuf(ProcBrandID) = "";
+	ProcRawCPUID = 0;
 	ProcFamily = 0;
 	ProcModel = 0;
 	ProcStepping = 0;
 
-	ProcSupport |= PROCSUPPORT_ASM_INTRIN;
-	ProcSupport |= PROCSUPPORT_CPUID;
+	ProcSupport |= feature::asm_intrinsics;
+	ProcSupport |= feature::cpuid;
 
 	{
 
@@ -118,6 +124,7 @@ void InitProcSupport()
 		if(VendorString.a >= 0x00000001u)
 		{
 			cpuid_result StandardFeatureFlags = cpuid(0x00000001u);
+			ProcRawCPUID = StandardFeatureFlags.a;
 			uint32 Stepping   = (StandardFeatureFlags.a >>  0) & 0x0f;
 			uint32 BaseModel  = (StandardFeatureFlags.a >>  4) & 0x0f;
 			uint32 BaseFamily = (StandardFeatureFlags.a >>  8) & 0x0f;
@@ -138,21 +145,21 @@ void InitProcSupport()
 				ProcModel = static_cast<uint8>(BaseModel);
 			}
 			ProcStepping = static_cast<uint8>(Stepping);
-			if(StandardFeatureFlags.d & (1<<23)) ProcSupport |= PROCSUPPORT_MMX;
-			if(StandardFeatureFlags.d & (1<<25)) ProcSupport |= PROCSUPPORT_SSE;
-			if(StandardFeatureFlags.d & (1<<26)) ProcSupport |= PROCSUPPORT_SSE2;
-			if(StandardFeatureFlags.c & (1<< 0)) ProcSupport |= PROCSUPPORT_SSE3;
-			if(StandardFeatureFlags.c & (1<< 9)) ProcSupport |= PROCSUPPORT_SSSE3;
-			if(StandardFeatureFlags.c & (1<<19)) ProcSupport |= PROCSUPPORT_SSE4_1;
-			if(StandardFeatureFlags.c & (1<<20)) ProcSupport |= PROCSUPPORT_SSE4_2;
-			if(StandardFeatureFlags.c & (1<<28)) ProcSupport |= PROCSUPPORT_AVX;
+			if(StandardFeatureFlags.d & (1<<23)) ProcSupport |= feature::mmx;
+			if(StandardFeatureFlags.d & (1<<25)) ProcSupport |= feature::sse;
+			if(StandardFeatureFlags.d & (1<<26)) ProcSupport |= feature::sse2;
+			if(StandardFeatureFlags.c & (1<< 0)) ProcSupport |= feature::sse3;
+			if(StandardFeatureFlags.c & (1<< 9)) ProcSupport |= feature::ssse3;
+			if(StandardFeatureFlags.c & (1<<19)) ProcSupport |= feature::sse4_1;
+			if(StandardFeatureFlags.c & (1<<20)) ProcSupport |= feature::sse4_2;
+			if(StandardFeatureFlags.c & (1<<28)) ProcSupport |= feature::avx;
 		}
 
 		cpuid_result ExtendedVendorString = cpuid(0x80000000u);
 		if(ExtendedVendorString.a >= 0x80000001u)
 		{
 			cpuid_result ExtendedFeatureFlags = cpuid(0x80000001u);
-			if(ExtendedFeatureFlags.d & (1<<29)) ProcSupport |= PROCSUPPORT_LM;
+			if(ExtendedFeatureFlags.d & (1<<29)) ProcSupport |= feature::lm;
 		}
 		if(ExtendedVendorString.a >= 0x80000004u)
 		{
@@ -160,7 +167,7 @@ void InitProcSupport()
 			if(ExtendedVendorString.a >= 0x80000007u)
 			{
 				cpuid_result ExtendedFeatures = cpuid(0x80000007u);
-				if(ExtendedFeatures.b & (1<< 5)) ProcSupport |= PROCSUPPORT_AVX2;
+				if(ExtendedFeatures.b & (1<< 5)) ProcSupport |= feature::avx2;
 			}
 		}
 
@@ -174,25 +181,26 @@ void InitProcSupport()
 #elif MPT_COMPILER_MSVC && (defined(ENABLE_X86) || defined(ENABLE_X64))
 
 
-void InitProcSupport()
+void Init()
 {
 
 	RealProcSupport = 0;
 	ProcSupport = 0;
 	mpt::String::WriteAutoBuf(ProcVendorID) = "";
 	mpt::String::WriteAutoBuf(ProcBrandID) = "";
+	ProcRawCPUID = 0;
 	ProcFamily = 0;
 	ProcModel = 0;
 	ProcStepping = 0;
 
-	ProcSupport |= PROCSUPPORT_ASM_INTRIN;
+	ProcSupport |= feature::asm_intrinics;
 
 	{
 
-		if(IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) != 0)    ProcSupport |= PROCSUPPORT_MMX;
-		if(IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0)   ProcSupport |= PROCSUPPORT_SSE;
-		if(IsProcessorFeaturePresent(PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0) ProcSupport |= PROCSUPPORT_SSE2;
-		if(IsProcessorFeaturePresent(PF_SSE3_INSTRUCTIONS_AVAILABLE) != 0)   ProcSupport |= PROCSUPPORT_SSE3;
+		if(IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) != 0)    ProcSupport |= feature::mmx;
+		if(IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0)   ProcSupport |= feature::sse;
+		if(IsProcessorFeaturePresent(PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0) ProcSupport |= feature::sse2;
+		if(IsProcessorFeaturePresent(PF_SSE3_INSTRUCTIONS_AVAILABLE) != 0)   ProcSupport |= feature::sse3;
 
 	}
 
@@ -204,7 +212,7 @@ void InitProcSupport()
 #else // !( MPT_COMPILER_MSVC && ENABLE_X86 )
 
 
-void InitProcSupport()
+void Init()
 {
 	ProcSupport = 0;
 }
@@ -218,22 +226,22 @@ void InitProcSupport()
 #ifdef MODPLUG_TRACKER
 
 
-uint32 GetMinimumProcSupportFlags()
+uint32 GetMinimumFeatures()
 {
 	uint32 flags = 0;
 	#ifdef ENABLE_ASM
 		#if MPT_COMPILER_MSVC
 			#if defined(_M_X64)
-				flags |= PROCSUPPORT_AMD64;
+				flags |= featureset::amd64;
 			#elif defined(_M_IX86)
 				#if defined(_M_IX86_FP)
 					#if (_M_IX86_FP >= 2)
-						flags |= PROCSUPPORT_x86_SSE2;
+						flags |= featureset::x86_sse2;
 					#elif (_M_IX86_FP == 1)
-						flags |= PROCSUPPORT_x86_SSE;
+						flags |= featureset::x86_sse;
 					#endif
 				#else
-					flags |= PROCSUPPORT_i586;
+					flags |= featureset::x86_i586;
 				#endif
 			#endif
 		#endif	
@@ -287,6 +295,9 @@ int GetMinimumAVXVersion()
 MPT_MSVC_WORKAROUND_LNK4221(mptCPU)
 
 #endif
+
+
+} // namespace CPU
 
 
 OPENMPT_NAMESPACE_END

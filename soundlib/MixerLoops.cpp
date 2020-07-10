@@ -181,7 +181,7 @@ void StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCou
 {
 
 	#ifdef ENABLE_SSE2
-	if(GetProcSupport() & PROCSUPPORT_SSE2)
+	if(CPU::HasFeatureSet(CPU::feature::sse2))
 	{
 		SSE2_StereoMixToFloat(pSrc, pOut1, pOut2, nCount, _i2fc);
 		return;
@@ -198,7 +198,7 @@ void StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCou
 void FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 nCount, const float _f2ic)
 {
 	#ifdef ENABLE_SSE2
-	if(GetProcSupport() & PROCSUPPORT_SSE2)
+	if(CPU::HasFeatureSet(CPU::feature::sse2))
 	{
 		SSE2_FloatToStereoMix(pIn1, pIn2, pOut, nCount, _f2ic);
 		return;
@@ -216,7 +216,7 @@ void MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _
 {
 
 	#if defined(ENABLE_X86) && defined(ENABLE_SSE)
-		if(GetProcSupport() & PROCSUPPORT_SSE)
+		if(CPU::HasFeatureSet(CPU::feature::sse))
 		{
 			SSE_MonoMixToFloat(pSrc, pOut, nCount, _i2fc);
 			return;
@@ -234,7 +234,7 @@ void FloatToMonoMix(const float *pIn, int32 *pOut, uint32 nCount, const float _f
 {
 
 	#ifdef ENABLE_X86
-		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		if(CPU::HasFeatureSet(CPU::feature::asm_intrinsics))
 		{
 			X86_FloatToMonoMix(pIn, pOut, nCount, _f2ic);
 			return;
@@ -306,7 +306,7 @@ static void C_InterleaveFrontRear(mixsample_t *pFrontBuf, mixsample_t *pRearBuf,
 void InterleaveFrontRear(mixsample_t *pFrontBuf, mixsample_t *pRearBuf, uint32 nFrames)
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
-		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		if(CPU::HasFeatureSet(CPU::feature::asm_intrinsics))
 		{
 			X86_InterleaveFrontRear(pFrontBuf, pRearBuf, nFrames);
 			return;
@@ -350,7 +350,7 @@ static void C_MonoFromStereo(mixsample_t *pMixBuf, uint32 nSamples)
 void MonoFromStereo(mixsample_t *pMixBuf, uint32 nSamples)
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
-		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		if(CPU::HasFeatureSet(CPU::feature::asm_intrinsics))
 		{
 			X86_MonoFromStereo(pMixBuf, nSamples);
 			return;
@@ -479,7 +479,7 @@ static void C_StereoFill(mixsample_t *pBuffer, uint32 nSamples, mixsample_t &rof
 void StereoFill(mixsample_t *pBuffer, uint32 nSamples, mixsample_t &rofs, mixsample_t &lofs)
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
-		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		if(CPU::HasFeatureSet(CPU::feature::asm_intrinsics))
 		{
 			X86_StereoFill(pBuffer, nSamples, &rofs, &lofs);
 			return;
@@ -573,7 +573,7 @@ static void C_EndChannelOfs(ModChannel &chn, mixsample_t *pBuffer, uint32 nSampl
 void EndChannelOfs(ModChannel &chn, mixsample_t *pBuffer, uint32 nSamples)
 {
 	#if defined(ENABLE_X86) && defined(MPT_INTMIXER)
-		if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+		if(CPU::HasFeatureSet(CPU::feature::asm_intrinsics))
 		{
 			X86_EndChannelOfs(&chn, pBuffer, nSamples);
 			return;

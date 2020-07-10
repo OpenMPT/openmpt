@@ -302,7 +302,7 @@ static mpt::ustring ProcSupportToString(uint32 procSupport)
 	features.push_back(U_("x86"));
 #endif
 #if defined(ENABLE_X64)
-	features.push_back(U_("x86-64"));
+	features.push_back(U_("amd64"));
 #endif
 	struct ProcFlag
 	{
@@ -313,27 +313,27 @@ static mpt::ustring ProcSupportToString(uint32 procSupport)
 	{
 		{ 0, "" },
 #if defined(ENABLE_MMX)
-		{ PROCSUPPORT_MMX, "mmx" },
+		{ CPU::feature::mmx, "mmx" },
 #endif
 #if defined(ENABLE_SSE)
-		{ PROCSUPPORT_SSE, "sse" },
+		{ CPU::feature::sse, "sse" },
 #endif
 #if defined(ENABLE_SSE2)
-		{ PROCSUPPORT_SSE2, "sse2" },
+		{ CPU::feature::sse2, "sse2" },
 #endif
 #if defined(ENABLE_SSE3)
-		{ PROCSUPPORT_SSE3, "sse3" },
-		{ PROCSUPPORT_SSSE3, "ssse3" },
+		{ CPU::feature::sse3, "sse3" },
+		{ CPU::feature::ssse3, "ssse3" },
 #endif
 #if defined(ENABLE_SSE4)
-		{ PROCSUPPORT_SSE4_1, "sse4.1" },
-		{ PROCSUPPORT_SSE4_2, "sse4.2" },
+		{ CPU::feature::sse4_1, "sse4.1" },
+		{ CPU::feature::sse4_2, "sse4.2" },
 #endif
 #if defined(ENABLE_AVX)
-		{ PROCSUPPORT_AVX, "avx" },
+		{ CPU::feature::avx, "avx" },
 #endif
 #if defined(ENABLE_AVX2)
-		{ PROCSUPPORT_AVX2, "avx2" },
+		{ CPU::feature::avx2, "avx2" },
 #endif
 	};
 	for(const auto &f : flags)
@@ -370,41 +370,41 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				#if MPT_COMPILER_MSVC
 					#if defined(_M_X64)
 						features.push_back(U_("x86-64"));
-						if(GetMinimumAVXVersion() >= 1) features.push_back(U_("avx"));
-						if(GetMinimumAVXVersion() >= 2) features.push_back(U_("avx2"));
+						if(CPU::GetMinimumAVXVersion() >= 1) features.push_back(U_("avx"));
+						if(CPU::GetMinimumAVXVersion() >= 2) features.push_back(U_("avx2"));
 					#elif defined(_M_IX86)
-						if(GetMinimumSSEVersion() <= 0 && GetMinimumAVXVersion() <= 0 ) features.push_back(U_("fpu"));
-						if(GetMinimumSSEVersion() >= 1) features.push_back(U_("cmov"));
-						if(GetMinimumSSEVersion() >= 1) features.push_back(U_("sse"));
-						if(GetMinimumSSEVersion() >= 2) features.push_back(U_("sse2"));
-						if(GetMinimumAVXVersion() >= 1) features.push_back(U_("avx"));
-						if(GetMinimumAVXVersion() >= 2) features.push_back(U_("avx2"));
+						if(CPU::GetMinimumSSEVersion() <= 0 && CPU::GetMinimumAVXVersion() <= 0 ) features.push_back(U_("fpu"));
+						if(CPU::GetMinimumSSEVersion() >= 1) features.push_back(U_("cmov"));
+						if(CPU::GetMinimumSSEVersion() >= 1) features.push_back(U_("sse"));
+						if(CPU::GetMinimumSSEVersion() >= 2) features.push_back(U_("sse2"));
+						if(CPU::GetMinimumAVXVersion() >= 1) features.push_back(U_("avx"));
+						if(CPU::GetMinimumAVXVersion() >= 2) features.push_back(U_("avx2"));
 					#else
-						if(GetMinimumSSEVersion() <= 0 && GetMinimumAVXVersion() <= 0 ) features.push_back(U_("fpu"));
-						if(GetMinimumSSEVersion() >= 1) features.push_back(U_("cmov"));
-						if(GetMinimumSSEVersion() >= 1) features.push_back(U_("sse"));
-						if(GetMinimumSSEVersion() >= 2) features.push_back(U_("sse2"));
-						if(GetMinimumAVXVersion() >= 1) features.push_back(U_("avx"));
-						if(GetMinimumAVXVersion() >= 2) features.push_back(U_("avx2"));
+						if(CPU::GetMinimumSSEVersion() <= 0 && CPU::GetMinimumAVXVersion() <= 0 ) features.push_back(U_("fpu"));
+						if(CPU::GetMinimumSSEVersion() >= 1) features.push_back(U_("cmov"));
+						if(CPU::GetMinimumSSEVersion() >= 1) features.push_back(U_("sse"));
+						if(CPU::GetMinimumSSEVersion() >= 2) features.push_back(U_("sse2"));
+						if(CPU::GetMinimumAVXVersion() >= 1) features.push_back(U_("avx"));
+						if(CPU::GetMinimumAVXVersion() >= 2) features.push_back(U_("avx2"));
 					#endif
 				#endif
 				text += mpt::String::Combine(features, U_(" "));
 				text += lf;
 			}
 #ifdef ENABLE_ASM
-			text += mpt::format(U_("Optional CPU features used: %1\n"))(ProcSupportToString(GetProcSupport()));
+			text += mpt::format(U_("Optional CPU features used: %1\n"))(ProcSupportToString(CPU::GetEnabledFeatures()));
 #endif // ENABLE_ASM
 			text += lf;
 			text += mpt::format(U_("System Architecture: %1\n"))(mpt::Windows::Name(mpt::Windows::GetHostArchitecture()));
 #ifdef ENABLE_ASM
 			text += mpt::format(U_("CPU: %1, Family %2, Model %3, Stepping %4\n"))
-				( mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(ProcVendorID) > 0) ? std::string(ProcVendorID) : std::string("Generic"))
-				, ProcFamily
-				, ProcModel
-				, ProcStepping
+				( mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPU::ProcVendorID) > 0) ? std::string(CPU::ProcVendorID) : std::string("Generic"))
+				, CPU::ProcFamily
+				, CPU::ProcModel
+				, CPU::ProcStepping
 				);
-			text += mpt::format(U_("CPU Name: %1\n"))(mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(ProcBrandID) > 0) ? std::string(ProcBrandID) : std::string("")));
-			text += mpt::format(U_("Available CPU features: %1\n"))(ProcSupportToString(GetRealProcSupport()));
+			text += mpt::format(U_("CPU Name: %1\n"))(mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPU::ProcBrandID) > 0) ? std::string(CPU::ProcBrandID) : std::string("")));
+			text += mpt::format(U_("Available CPU features: %1\n"))(ProcSupportToString(CPU::GetAvailableFeatures()));
 #endif // ENABLE_ASM
 			text += mpt::format(U_("Operating System: %1\n\n"))(mpt::Windows::Version::Current().GetName());
 			text += mpt::format(U_("OpenMPT Install Path%2: %1\n"))(theApp.GetInstallPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));

@@ -293,22 +293,23 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	j["OpenMPT"]["SoundDevice"]["Settings"]["UseHardwareTiming"] = deviceSettings.UseHardwareTiming;
 	j["OpenMPT"]["SoundDevice"]["Settings"]["KeepDeviceRunning"] = deviceSettings.KeepDeviceRunning;
 	#ifdef ENABLE_ASM
-		j["OpenMPT"]["cpuid"] = ((GetRealProcSupport() & PROCSUPPORT_CPUID) != 0);
-		j["System"]["Processor"]["Vendor"] = std::string(mpt::String::ReadAutoBuf(ProcVendorID));
-		j["System"]["Processor"]["Brand"] = std::string(mpt::String::ReadAutoBuf(ProcBrandID));
-		j["System"]["Processor"]["Id"]["Family"] = ProcFamily;
-		j["System"]["Processor"]["Id"]["Model"] = ProcModel;
-		j["System"]["Processor"]["Id"]["Stepping"] = ProcStepping;
-		j["System"]["Processor"]["Features"]["lm"] = ((GetRealProcSupport() & PROCSUPPORT_LM) != 0);
-		j["System"]["Processor"]["Features"]["mmx"] = ((GetRealProcSupport() & PROCSUPPORT_MMX) != 0);
-		j["System"]["Processor"]["Features"]["sse"] = ((GetRealProcSupport() & PROCSUPPORT_SSE) != 0);
-		j["System"]["Processor"]["Features"]["sse2"] = ((GetRealProcSupport() & PROCSUPPORT_SSE2) != 0);
-		j["System"]["Processor"]["Features"]["sse3"] = ((GetRealProcSupport() & PROCSUPPORT_SSE3) != 0);
-		j["System"]["Processor"]["Features"]["ssse3"] = ((GetRealProcSupport() & PROCSUPPORT_SSSE3) != 0);
-		j["System"]["Processor"]["Features"]["sse4_1"] = ((GetRealProcSupport() & PROCSUPPORT_SSE4_1) != 0);
-		j["System"]["Processor"]["Features"]["sse4_2"] = ((GetRealProcSupport() & PROCSUPPORT_SSE4_2) != 0);
-		j["System"]["Processor"]["Features"]["avx"] = ((GetRealProcSupport() & PROCSUPPORT_AVX) != 0);
-		j["System"]["Processor"]["Features"]["avx2"] = ((GetRealProcSupport() & PROCSUPPORT_AVX2) != 0);
+		j["OpenMPT"]["cpuid"] = ((CPU::GetAvailableFeatures() & CPU::feature::cpuid) != 0);
+		j["System"]["Processor"]["Vendor"] = std::string(mpt::String::ReadAutoBuf(CPU::ProcVendorID));
+		j["System"]["Processor"]["Brand"] = std::string(mpt::String::ReadAutoBuf(CPU::ProcBrandID));
+		j["System"]["Processor"]["CpuidRaw"] = mpt::fmt::hex0<8>(CPU::ProcRawCPUID);
+		j["System"]["Processor"]["Id"]["Family"] = CPU::ProcFamily;
+		j["System"]["Processor"]["Id"]["Model"] = CPU::ProcModel;
+		j["System"]["Processor"]["Id"]["Stepping"] = CPU::ProcStepping;
+		j["System"]["Processor"]["Features"]["lm"] = ((CPU::GetAvailableFeatures() & CPU::feature::lm) != 0);
+		j["System"]["Processor"]["Features"]["mmx"] = ((CPU::GetAvailableFeatures() & CPU::feature::mmx) != 0);
+		j["System"]["Processor"]["Features"]["sse"] = ((CPU::GetAvailableFeatures() & CPU::feature::sse) != 0);
+		j["System"]["Processor"]["Features"]["sse2"] = ((CPU::GetAvailableFeatures() & CPU::feature::sse2) != 0);
+		j["System"]["Processor"]["Features"]["sse3"] = ((CPU::GetAvailableFeatures() & CPU::feature::sse3) != 0);
+		j["System"]["Processor"]["Features"]["ssse3"] = ((CPU::GetAvailableFeatures() & CPU::feature::ssse3) != 0);
+		j["System"]["Processor"]["Features"]["sse4.1"] = ((CPU::GetAvailableFeatures() & CPU::feature::sse4_1) != 0);
+		j["System"]["Processor"]["Features"]["sse4.2"] = ((CPU::GetAvailableFeatures() & CPU::feature::sse4_2) != 0);
+		j["System"]["Processor"]["Features"]["avx"] = ((CPU::GetAvailableFeatures() & CPU::feature::avx) != 0);
+		j["System"]["Processor"]["Features"]["avx2"] = ((CPU::GetAvailableFeatures() & CPU::feature::avx2) != 0);
 	#endif
 	return j.dump(1, '\t');
 }

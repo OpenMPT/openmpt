@@ -30,8 +30,8 @@ bool BuildVariants::IsKnownSystem()
 bool BuildVariants::CurrentBuildIsModern()
 {
 	return false
-		|| (GetMinimumSSEVersion() > 2)
-		|| (GetMinimumAVXVersion() > 0)
+		|| (CPU::GetMinimumSSEVersion() > 2)
+		|| (CPU::GetMinimumAVXVersion() > 0)
 		|| (mpt::Windows::Version::GetMinimumKernelLevel() > mpt::Windows::Version::Win7)
 		|| (mpt::Windows::Version::GetMinimumAPILevel() > mpt::Windows::Version::Win7)
 		;
@@ -68,31 +68,31 @@ mpt::ustring BuildVariants::GuessCurrentBuildName()
 bool BuildVariants::ProcessorCanRunCurrentBuild()
 {
 #ifdef ENABLE_ASM
-	if((GetRealProcSupport() & GetMinimumProcSupportFlags()) != GetMinimumProcSupportFlags()) return false;
-	if(GetMinimumSSEVersion() >= 1)
+	if((CPU::GetAvailableFeatures() & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures()) return false;
+	if(CPU::GetMinimumSSEVersion() >= 1)
 	{
-		if(!(GetRealProcSupport() & PROCSUPPORT_SSE))
+		if(!(CPU::GetAvailableFeatures() & CPU::feature::sse))
 		{
 			return false;
 		}
 	}
-	if(GetMinimumSSEVersion() >= 2)
+	if(CPU::GetMinimumSSEVersion() >= 2)
 	{
-		if(!(GetRealProcSupport() & PROCSUPPORT_SSE2))
+		if(!(CPU::GetAvailableFeatures() & CPU::feature::sse2))
 		{
 			return false;
 		}
 	}
-	if(GetMinimumAVXVersion() >= 1)
+	if(CPU::GetMinimumAVXVersion() >= 1)
 	{
-		if(!(GetRealProcSupport() & PROCSUPPORT_AVX))
+		if(!(CPU::GetAvailableFeatures() & CPU::feature::avx))
 		{
 			return false;
 		}
 	}
-	if(GetMinimumAVXVersion() >= 2)
+	if(CPU::GetMinimumAVXVersion() >= 2)
 	{
-		if(!(GetRealProcSupport() & PROCSUPPORT_AVX2))
+		if(!(CPU::GetAvailableFeatures() & CPU::feature::avx2))
 		{
 			return false;
 		}
@@ -109,34 +109,34 @@ bool BuildVariants::SystemCanRunCurrentBuild()
 		return false;
 	}
 #ifdef ENABLE_ASM
-	if((GetRealProcSupport() & GetMinimumProcSupportFlags()) != GetMinimumProcSupportFlags())
+	if((CPU::GetAvailableFeatures() & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures())
 	{
 		return false;
 	}
-	if(GetMinimumSSEVersion() >= 1)
+	if(CPU::GetMinimumSSEVersion() >= 1)
 	{
-		if(!(GetRealProcSupport() & PROCSUPPORT_SSE))
+		if(!(CPU::GetAvailableFeatures() & CPU::feature::sse))
 		{
 			return false;
 		}
 	}
-	if(GetMinimumSSEVersion() >= 2)
+	if(CPU::GetMinimumSSEVersion() >= 2)
 	{
-		if(!(GetRealProcSupport() & PROCSUPPORT_SSE2))
+		if(!(CPU::GetAvailableFeatures() & CPU::feature::sse2))
 		{
 			return false;
 		}
 	}
-	if(GetMinimumAVXVersion() >= 1)
+	if(CPU::GetMinimumAVXVersion() >= 1)
 	{
-		if(!(GetRealProcSupport() & PROCSUPPORT_AVX))
+		if(!(CPU::GetAvailableFeatures() & CPU::feature::avx))
 		{
 			return false;
 		}
 	}
-	if(GetMinimumAVXVersion() >= 2)
+	if(CPU::GetMinimumAVXVersion() >= 2)
 	{
-		if(!(GetRealProcSupport() & PROCSUPPORT_AVX2))
+		if(!(CPU::GetAvailableFeatures() & CPU::feature::avx2))
 		{
 			return false;
 		}

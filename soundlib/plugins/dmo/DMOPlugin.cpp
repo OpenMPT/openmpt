@@ -133,7 +133,7 @@ static constexpr float _si2f = 1.0f / 32768.0f;
 static void InterleaveStereo(const float * MPT_RESTRICT inputL, const float * MPT_RESTRICT inputR, float * MPT_RESTRICT output, uint32 numFrames)
 {
 #if defined(ENABLE_SSE)
-	if(GetProcSupport() & PROCSUPPORT_SSE)
+	if(CPU::HasFeatureSet(CPU::feature::sse))
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
 		static_assert((MIXBUFFERSIZE & 7) == 0);
@@ -167,7 +167,7 @@ static void InterleaveStereo(const float * MPT_RESTRICT inputL, const float * MP
 static void DeinterleaveStereo(const float * MPT_RESTRICT input, float * MPT_RESTRICT outputL, float * MPT_RESTRICT outputR, uint32 numFrames)
 {
 #if defined(ENABLE_SSE)
-	if(GetProcSupport() & PROCSUPPORT_SSE)
+	if(CPU::HasFeatureSet(CPU::feature::sse))
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
 		static_assert((MIXBUFFERSIZE & 7) == 0);
@@ -204,7 +204,7 @@ static void InterleaveFloatToInt16(const float * MPT_RESTRICT inputL, const floa
 #if defined(ENABLE_MMX) && defined(ENABLE_SSE)
 	// This uses __m64, so it's not available on the MSVC 64-bit compiler.
 	// But if the user runs a 64-bit operating system, they will go the floating-point path anyway.
-	if((GetProcSupport() & (PROCSUPPORT_MMX | PROCSUPPORT_SSE)) == (PROCSUPPORT_MMX | PROCSUPPORT_SSE))
+	if(CPU::HasFeatureSet(CPU::feature::mmx | CPU::feature::sse))
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
 		static_assert((MIXBUFFERSIZE & 7) == 0);
@@ -256,7 +256,7 @@ static void DeinterleaveInt16ToFloat(const int16 * MPT_RESTRICT input, float * M
 #if defined(ENABLE_MMX) && defined(ENABLE_SSE)
 	// This uses __m64, so it's not available on the MSVC 64-bit compiler.
 	// But if the user runs a 64-bit operating system, they will go the floating-point path anyway.
-	if((GetProcSupport() & (PROCSUPPORT_MMX | PROCSUPPORT_SSE)) == (PROCSUPPORT_MMX | PROCSUPPORT_SSE))
+	if(CPU::HasFeatureSet(CPU::feature::mmx | CPU::feature::sse))
 	{
 		// We may read beyond the wanted length... this works because we know that we will always work on our buffers of size MIXBUFFERSIZE
 		static_assert((MIXBUFFERSIZE & 7) == 0);

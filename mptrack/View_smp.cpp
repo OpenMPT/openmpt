@@ -840,7 +840,7 @@ std::pair<int, int> CViewSample::FindMinMax(const int8 *p, SmpLength numSamples,
 	int minVal = 127;
 	int maxVal = -128;
 #if defined(ENABLE_SSE2)
-	if(GetProcSupport() & PROCSUPPORT_SSE2)
+	if(CPU::HasFeatureSet(CPU::feature::sse2))
 	{
 		sse2_findminmax8(p, numSamples, numChannels, minVal, maxVal);
 	} else
@@ -864,7 +864,7 @@ std::pair<int, int> CViewSample::FindMinMax(const int16 *p, SmpLength numSamples
 	int minVal = 32767;
 	int maxVal = -32768;
 #if defined(ENABLE_SSE2)
-	if(GetProcSupport() & PROCSUPPORT_SSE2)
+	if(CPU::HasFeatureSet(CPU::feature::sse2))
 	{
 		sse2_findminmax16(p, numSamples, numChannels, minVal, maxVal);
 	} else

@@ -237,7 +237,7 @@ void CEQ::ProcessMono(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 	for (UINT b=0; b<MAX_EQ_BANDS; b++)
 	{
 		#ifdef ENABLE_X86
-			if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+			if(CPU::HasFeatureSet(CPU::feature::asm_intrinsics))
 			{
 				if ((gEQ[b].bEnable) && (gEQ[b].Gain != 1.0f)) X86_EQFilter(&gEQ[b], MixFloatBuffer, nCount);
 			} else
@@ -255,7 +255,7 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 
 #if defined(ENABLE_X86) && defined(ENABLE_SSE)
 
-	if(GetProcSupport() & PROCSUPPORT_SSE)
+	if(CPU::HasFeatureSet(CPU::feature::sse))
 	{
 		int sse_state, sse_eqstate;
 		MonoMixToFloat(pbuffer, MixFloatBuffer, nCount*2, 1.0f/MIXING_SCALEF);
@@ -277,7 +277,7 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 #endif // ENABLE_X86 && ENABLE_SSE
 
 #ifdef ENABLE_X86
-	if(GetProcSupport() & PROCSUPPORT_ASM_INTRIN)
+	if(CPU::HasFeatureSet(CPU::feature::asm_intrinsics))
 	{
 
 		StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount, 1.0f/MIXING_SCALEF);

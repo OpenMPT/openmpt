@@ -837,10 +837,10 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	}
 
 	#ifdef ENABLE_ASM
-		InitProcSupport();
+		CPU::Init();
 		if(cmdInfo.m_noAssembly)
 		{
-			ProcSupport = 0;
+			CPU::ProcSupport = 0;
 		}
 	#endif
 
