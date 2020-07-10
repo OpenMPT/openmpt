@@ -542,15 +542,12 @@ struct BufferAttributes
 
 
 
-enum RequestFlags
+enum RequestFlags : uint32
 {
 	RequestFlagClose   = 1<<0,
 	RequestFlagReset   = 1<<1,
 	RequestFlagRestart = 1<<2,
 };
-} // namespace SoundDevice
-template <> struct enum_traits<SoundDevice::RequestFlags> { typedef uint32 store_type; };
-namespace SoundDevice {
 MPT_DECLARE_ENUM(RequestFlags)
 
 

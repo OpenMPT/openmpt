@@ -18,16 +18,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-// Be aware of the required size when specializing this.
-// We cannot assert the minimum size because some compilers always allocate an 'int',
-// even for enums that would fit in smaller integral types.
-template <typename Tenum>
-struct enum_traits
-{
-	using store_type = typename std::make_unsigned<Tenum>::type;
-};
-
-
 // Type-safe wrapper around an enum, that can represent all enum values and bitwise compositions thereof.
 // Conversions to and from plain integers as well as conversions to the base enum are always explicit.
 template <typename enum_t>
@@ -37,7 +27,7 @@ class enum_value_type
 public:
 	using enum_type = enum_t;
 	using value_type = enum_value_type;
-	using store_type = typename enum_traits<enum_t>::store_type;
+	using store_type = typename std::make_unsigned<enum_t>::type;
 private:
 	store_type bits;
 public:
