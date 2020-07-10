@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="lua-lib" InternalType="Library">
+  <Plugins/>
+  <Description/>
+<VirtualDirectory Name="lua-lib">
+  <File Name="../../contrib/lua/src/lapi.c"/>
+  <File Name="../../contrib/lua/src/lapi.h"/>
+  <File Name="../../contrib/lua/src/lauxlib.h"/>
+  <File Name="../../contrib/lua/src/lbaselib.c"/>
+  <File Name="../../contrib/lua/src/lbitlib.c"/>
+  <File Name="../../contrib/lua/src/lcode.c"/>
+  <File Name="../../contrib/lua/src/lcode.h"/>
+  <File Name="../../contrib/lua/src/lcorolib.c"/>
+  <File Name="../../contrib/lua/src/lctype.c"/>
+  <File Name="../../contrib/lua/src/lctype.h"/>
+  <File Name="../../contrib/lua/src/ldblib.c"/>
+  <File Name="../../contrib/lua/src/ldebug.c"/>
+  <File Name="../../contrib/lua/src/ldebug.h"/>
+  <File Name="../../contrib/lua/src/ldo.c"/>
+  <File Name="../../contrib/lua/src/ldo.h"/>
+  <File Name="../../contrib/lua/src/ldump.c"/>
+  <File Name="../../contrib/lua/src/lfunc.c"/>
+  <File Name="../../contrib/lua/src/lfunc.h"/>
+  <File Name="../../contrib/lua/src/lgc.c"/>
+  <File Name="../../contrib/lua/src/lgc.h"/>
+  <File Name="../../contrib/lua/src/linit.c"/>
+  <File Name="../../contrib/lua/src/liolib.c"/>
+  <File Name="../../contrib/lua/src/llex.c"/>
+  <File Name="../../contrib/lua/src/llex.h"/>
+  <File Name="../../contrib/lua/src/llimits.h"/>
+  <File Name="../../contrib/lua/src/lmathlib.c"/>
+  <File Name="../../contrib/lua/src/lmem.c"/>
+  <File Name="../../contrib/lua/src/lmem.h"/>
+  <File Name="../../contrib/lua/src/loadlib.c"/>
+  <File Name="../../contrib/lua/src/lobject.c"/>
+  <File Name="../../contrib/lua/src/lobject.h"/>
+  <File Name="../../contrib/lua/src/lopcodes.c"/>
+  <File Name="../../contrib/lua/src/lopcodes.h"/>
+  <File Name="../../contrib/lua/src/loslib.c"/>
+  <File Name="../../contrib/lua/src/lparser.c"/>
+  <File Name="../../contrib/lua/src/lparser.h"/>
+  <File Name="../../contrib/lua/src/lprefix.h"/>
+  <File Name="../../contrib/lua/src/lstate.c"/>
+  <File Name="../../contrib/lua/src/lstate.h"/>
+  <File Name="../../contrib/lua/src/lstring.c"/>
+  <File Name="../../contrib/lua/src/lstring.h"/>
+  <File Name="../../contrib/lua/src/lstrlib.c"/>
+  <File Name="../../contrib/lua/src/ltable.c"/>
+  <File Name="../../contrib/lua/src/ltable.h"/>
+  <File Name="../../contrib/lua/src/ltablib.c"/>
+  <File Name="../../contrib/lua/src/ltm.c"/>
+  <File Name="../../contrib/lua/src/ltm.h"/>
+  <File Name="../../contrib/lua/src/lua.h"/>
+  <File Name="../../contrib/lua/src/luaconf.h"/>
+  <File Name="../../contrib/lua/src/lualib.h"/>
+  <File Name="../../contrib/lua/src/lundump.c"/>
+  <File Name="../../contrib/lua/src/lundump.h"/>
+  <File Name="../../contrib/lua/src/lutf8lib.c"/>
+  <File Name="../../contrib/lua/src/lvm.c"/>
+  <File Name="../../contrib/lua/src/lvm.h"/>
+  <File Name="../../contrib/lua/src/lzio.c"/>
+  <File Name="../../contrib/lua/src/lzio.h"/>
+</VirtualDirectory>
+  <Dependencies Name="x86-Release"/>
+  <Dependencies Name="x64-Release"/>
+  <Dependencies Name="x86-Debug"/>
+  <Dependencies Name="x64-Debug"/>
+  <Settings Type="Static Library">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="x86-Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32;-flto;-O3;-w;-fno-stack-protector" C_Options="-m32;-flto;-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/lua/src"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="NDEBUG"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m32;-flto">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="bin/x86/Release/lua-lib.lib" IntermediateDirectory="obj/x86/Release/lua-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="x64-Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64;-flto;-O3;-w;-fno-stack-protector" C_Options="-m64;-flto;-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/lua/src"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="NDEBUG"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m64;-flto">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="bin/x64/Release/lua-lib.lib" IntermediateDirectory="obj/x64/Release/lua-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="x86-Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32;-g;-w" C_Options="-m32;-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/lua/src"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="_DEBUG"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m32">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="bin/x86/Debug/lua-lib.lib" IntermediateDirectory="obj/x86/Debug/lua-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="x64-Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64;-g;-w" C_Options="-m64;-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/lua/src"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="_DEBUG"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m64">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="bin/x64/Debug/lua-lib.lib" IntermediateDirectory="obj/x64/Debug/lua-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

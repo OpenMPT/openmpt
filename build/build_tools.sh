@@ -60,7 +60,7 @@ cd include/premake
 ##bin/release/premake5 test
 #bin/release/premake5 embed --bytecode
 #bin/release/premake5 --to=build/gmake.unix gmake --no-curl --no-zlib --no-luasocket
-cd build/gmake.unix
+cd build/gmake2.unix
 make
 cd ../..
 #bin/release/premake5 test --no-curl --no-zlib --no-luasocket

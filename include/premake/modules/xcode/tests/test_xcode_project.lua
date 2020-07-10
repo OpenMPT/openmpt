@@ -98,6 +98,25 @@
 	end
 
 
+---
+-- Verify that files listed in xcodebuildresources are marked as resources
+---
+	function suite.PBXBuildFile_ListsXcodeBuildResources()
+		files { "file1.txt", "file01.png", "file02.png", "file-3.png" }
+		xcodebuildresources { "file1.txt", "**.png" }
+		prepare()
+		xcode.PBXBuildFile(tr)
+		test.capture [[
+/* Begin PBXBuildFile section */
+		628F3826BDD08B98912AD666 /* file-3.png in Resources */ = {isa = PBXBuildFile; fileRef = 992385EEB0362120A0521C2E /* file-3.png */; };
+		93485EDEC2DA2DD09DE76D1E /* file1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9F78562642667CD8D18C5C66 /* file1.txt */; };
+		C87AFEAA23BC521CF7169CEA /* file02.png in Resources */ = {isa = PBXBuildFile; fileRef = D54D8E32EC602964DC7C2472 /* file02.png */; };
+		EE9FC5C849E1193A1D3B6408 /* file01.png in Resources */ = {isa = PBXBuildFile; fileRef = 989B7E70AFAE19A29FCA14B0 /* file01.png */; };
+/* End PBXBuildFile section */
+		]]
+	end
+
+
 ---------------------------------------------------------------------------
 -- PBXFileReference tests
 ---------------------------------------------------------------------------
@@ -279,15 +298,21 @@
 	end
 
 	function suite.PBXFileReference_ListsSourceFilesCompileAs()
-		files { "source.c" }
+		files { "source.c", "objsource.c", "objsource.cpp" }
 		filter { "files:source.c" }
 			compileas "C++"
+		filter { "files:objsource.c" }
+			compileas "Objective-C"
+		filter { "files:objsource.cpp" }
+			compileas "Objective-C++"
 		prepare()
 		xcode.PBXFileReference(tr)
 		test.capture [[
 /* Begin PBXFileReference section */
 		19A5C4E61D1697189E833B26 /* MyProject */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = MyProject; path = MyProject; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DC6D30C8137A53E02A4494C /* source.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; name = source.c; path = source.c; sourceTree = "<group>"; };
+		C8C6CC62F1018514D89D12A2 /* objsource.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; name = objsource.cpp; path = objsource.cpp; sourceTree = "<group>"; };
+		E4BF12E20AE5429471EC3922 /* objsource.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; name = objsource.c; path = objsource.c; sourceTree = "<group>"; };
 		]]
 	end
 
@@ -1080,7 +1105,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nls src\ncp \"a\" \"b\"";
+			shellScript = "set -e\nif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\nls src\ncp \"a\" \"b\"\nfi\nif [ \"${CONFIGURATION}\" = \"Release\" ]; then\nls src\ncp \"a\" \"b\"\nfi";
 		};
 /* End PBXShellScriptBuildPhase section */
 		]]
@@ -1139,7 +1164,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nls src\nif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\ncp a b\nfi";
+			shellScript = "set -e\nif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\nls src\ncp a b\nfi\nif [ \"${CONFIGURATION}\" = \"Release\" ]; then\nls src\nfi";
 		};
 /* End PBXShellScriptBuildPhase section */
 		]]
@@ -1732,6 +1757,49 @@
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				PRODUCT_NAME = MyProject;
 				WRAPPER_EXTENSION = "";
+			};
+			name = Debug;
+		};
+		]]
+	end
+
+    function suite.XCBuildConfigurationTarget_OnOSXMinVersion()
+		_TARGET_OS = "macosx"
+		systemversion "10.11"
+		prepare()
+		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
+		test.capture [[
+		FDC4CBFB4635B02D8AD4823B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = bin/Debug;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_NAME = MyProject;
+			};
+			name = Debug;
+		};
+		]]
+	end
+
+    function suite.XCBuildConfigurationTarget_OnOSXUnSpecificedVersion()
+		_TARGET_OS = "macosx"
+		-- systemversion "10.11"
+		prepare()
+		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
+		test.capture [[
+		FDC4CBFB4635B02D8AD4823B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = bin/Debug;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = MyProject;
 			};
 			name = Debug;
 		};

@@ -79,6 +79,9 @@
     <Filter Include="modules\vstudio\tests\vc2010">
       <UniqueIdentifier>{6845E192-5400-D13E-FDB7-4989E9511BCF}</UniqueIdentifier>
     </Filter>
+    <Filter Include="modules\vstudio\tests\vc2013">
+      <UniqueIdentifier>{6B45E192-5700-D13E-00B8-4989EC511BCF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="modules\xcode">
       <UniqueIdentifier>{80143BC8-ECD4-B6FE-B50F-007C218FFBDA}</UniqueIdentifier>
     </Filter>
@@ -216,6 +219,9 @@
       <Filter>src\host</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_islink.c">
+      <Filter>src\host</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\host\os_listWindowsRegistry.c">
       <Filter>src\host</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_locate.c">
@@ -648,6 +654,9 @@
     <None Include="..\..\modules\vstudio\tests\cs2005\test_icon.lua">
       <Filter>modules\vstudio\tests\cs2005</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\tests\cs2005\test_netcore.lua">
+      <Filter>modules\vstudio\tests\cs2005</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\tests\cs2005\test_no_warn.lua">
       <Filter>modules\vstudio\tests\cs2005</Filter>
     </None>
@@ -702,6 +711,9 @@
     <None Include="..\..\modules\vstudio\tests\sln2005\test_sections.lua">
       <Filter>modules\vstudio\tests\sln2005</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\tests\sln2005\test_shared_projects.lua">
+      <Filter>modules\vstudio\tests\sln2005</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\tests\vc200x\test_assembly_refs.lua">
       <Filter>modules\vstudio\tests\vc200x</Filter>
     </None>
@@ -754,6 +766,9 @@
       <Filter>modules\vstudio\tests\vc2010</Filter>
     </None>
     <None Include="..\..\modules\vstudio\tests\vc2010\test_build_log.lua">
+      <Filter>modules\vstudio\tests\vc2010</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\tests\vc2010\test_build_steps.lua">
       <Filter>modules\vstudio\tests\vc2010</Filter>
     </None>
     <None Include="..\..\modules\vstudio\tests\vc2010\test_character_set.lua">
@@ -867,6 +882,9 @@
     <None Include="..\..\modules\vstudio\tests\vc2010\test_vectorextensions.lua">
       <Filter>modules\vstudio\tests\vc2010</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\tests\vc2013\test_vcxitems.lua">
+      <Filter>modules\vstudio\tests\vc2013</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\vs2005.lua">
       <Filter>modules\vstudio</Filter>
     </None>
@@ -925,6 +943,9 @@
       <Filter>modules\vstudio</Filter>
     </None>
     <None Include="..\..\modules\vstudio\vs2013.lua">
+      <Filter>modules\vstudio</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\vs2013_vcxitems.lua">
       <Filter>modules\vstudio</Filter>
     </None>
     <None Include="..\..\modules\vstudio\vs2015.lua">
@@ -1119,6 +1140,9 @@
       <Filter>src\tools</Filter>
     </None>
     <None Include="..\..\src\tools\gcc.lua">
+      <Filter>src\tools</Filter>
+    </None>
+    <None Include="..\..\src\tools\mingw.lua">
       <Filter>src\tools</Filter>
     </None>
     <None Include="..\..\src\tools\msc.lua">

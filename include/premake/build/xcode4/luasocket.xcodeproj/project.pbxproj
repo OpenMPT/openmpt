@@ -1,0 +1,418 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		066CD28D61AE25FF350870CD /* buffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 1DBC6F5534CF0A8724EB0595 /* buffer.c */; };
+		1D6AEACB78AC3E3D4C06890B /* except.c in Sources */ = {isa = PBXBuildFile; fileRef = 7E0B52B3951DEDE58539E8F3 /* except.c */; };
+		1E16452174A3AF934D1CC361 /* unix.c in Sources */ = {isa = PBXBuildFile; fileRef = 08C4F0A90C35C2DB8DA266E9 /* unix.c */; };
+		2DFA01379F1CA22954E34F77 /* unixdgram.c in Sources */ = {isa = PBXBuildFile; fileRef = 39D0E15F620B9A1149A7279F /* unixdgram.c */; };
+		412921199C6A748B6FC4BF59 /* serial.c in Sources */ = {isa = PBXBuildFile; fileRef = D8F5FB21F0089653E0249161 /* serial.c */; };
+		4200D3D572E4CBC785FD0215 /* usocket.c in Sources */ = {isa = PBXBuildFile; fileRef = 401C751D6642A4CFCD499B5D /* usocket.c */; };
+		4A9D0AF7445EC7697E5DC937 /* auxiliar.c in Sources */ = {isa = PBXBuildFile; fileRef = EE184C1F368930517B28025F /* auxiliar.c */; };
+		59731F718A5717639D6F4DB1 /* options.c in Sources */ = {isa = PBXBuildFile; fileRef = 37D1F8F95DF828ABC4FF1F39 /* options.c */; };
+		6CC9AEB9B118542BF33F8CF9 /* unixstream.c in Sources */ = {isa = PBXBuildFile; fileRef = 742202C195EDAFF3D2A2D901 /* unixstream.c */; };
+		78667B8C71CC7CFE6567D9CC /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 6E0F7DF4115B07262C2BD434 /* main.c */; };
+		8E9D8B19E9DEDE8BBD392959 /* select.c in Sources */ = {isa = PBXBuildFile; fileRef = 4368C5215A7B60534A975B61 /* select.c */; };
+		9C5B7AAF0D7E1BA1C344C8EF /* luasocket.c in Sources */ = {isa = PBXBuildFile; fileRef = 8D601757B59AD0099D365D97 /* luasocket.c */; };
+		A0915379F71EBDEBCF97D1B9 /* inet.c in Sources */ = {isa = PBXBuildFile; fileRef = 317F358134F007B3B65CABC1 /* inet.c */; };
+		A4371561FF7868D3D2D2B3A1 /* compat.c in Sources */ = {isa = PBXBuildFile; fileRef = 26080EE93D1AAA1B2D36A529 /* compat.c */; };
+		B2DD946B9DC9BA5DE5AF82AB /* udp.c in Sources */ = {isa = PBXBuildFile; fileRef = 6184C55305D76305180FAB93 /* udp.c */; };
+		B7BEFA27E8A2F219FBBB2867 /* timeout.c in Sources */ = {isa = PBXBuildFile; fileRef = 43C02D4F69E65D01D0ED538F /* timeout.c */; };
+		D9D5FC09D33BFD7BC6D75A49 /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = 0AECDB11AE386443C9093151 /* io.c */; };
+		E2FCED52D6FC36C45BE74B92 /* libluashim-lib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 13AAE5DA57BEB70C4B903C1A /* libluashim-lib.a */; };
+		EBC12327D6AD49191E931167 /* tcp.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D0D3A4FE15FD801F398208F /* tcp.c */; };
+		F9E1C2E9506F2D5B28E84129 /* mime.c in Sources */ = {isa = PBXBuildFile; fileRef = 02D9C5F1064A982387B73C31 /* mime.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8D95C5B9E8D7192BBC3163F9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CEB8B3CEE0E2908014D37A0E /* luashim-lib.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 92DEF9C67DCB1FB8C5B0E806;
+			remoteInfo = "libluashim-lib.a";
+		};
+		DFD038523B118BC40E6BD692 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CEB8B3CEE0E2908014D37A0E /* luashim-lib.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 732BB0EC9951E09E0058D72C;
+			remoteInfo = "libluashim-lib.a";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		02D9C5F1064A982387B73C31 /* mime.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = mime.c; path = ../../binmodules/luasocket/src/mime.c; sourceTree = "<group>"; };
+		084DEA7DACA0882FBED8D0BD /* udp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = udp.h; path = ../../binmodules/luasocket/src/udp.h; sourceTree = "<group>"; };
+		08C4F0A90C35C2DB8DA266E9 /* unix.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = unix.c; path = ../../binmodules/luasocket/src/unix.c; sourceTree = "<group>"; };
+		0AECDB11AE386443C9093151 /* io.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = io.c; path = ../../binmodules/luasocket/src/io.c; sourceTree = "<group>"; };
+		0C4454EF2356F0211372EB2F /* mime.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = mime.lua; path = ../../binmodules/luasocket/src/mime.lua; sourceTree = "<group>"; };
+		13A6B1BD2AB94CEF1AD547FD /* except.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = except.h; path = ../../binmodules/luasocket/src/except.h; sourceTree = "<group>"; };
+		1DBC6F5534CF0A8724EB0595 /* buffer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = buffer.c; path = ../../binmodules/luasocket/src/buffer.c; sourceTree = "<group>"; };
+		26080EE93D1AAA1B2D36A529 /* compat.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = compat.c; path = ../../binmodules/luasocket/src/compat.c; sourceTree = "<group>"; };
+		317F358134F007B3B65CABC1 /* inet.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = inet.c; path = ../../binmodules/luasocket/src/inet.c; sourceTree = "<group>"; };
+		37D1F8F95DF828ABC4FF1F39 /* options.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = options.c; path = ../../binmodules/luasocket/src/options.c; sourceTree = "<group>"; };
+		39D0E15F620B9A1149A7279F /* unixdgram.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = unixdgram.c; path = ../../binmodules/luasocket/src/unixdgram.c; sourceTree = "<group>"; };
+		3D0D3A4FE15FD801F398208F /* tcp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = tcp.c; path = ../../binmodules/luasocket/src/tcp.c; sourceTree = "<group>"; };
+		3E99EA7D55AC85AF45C880BD /* socket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = socket.h; path = ../../binmodules/luasocket/src/socket.h; sourceTree = "<group>"; };
+		401C751D6642A4CFCD499B5D /* usocket.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = usocket.c; path = ../../binmodules/luasocket/src/usocket.c; sourceTree = "<group>"; };
+		4368C5215A7B60534A975B61 /* select.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = select.c; path = ../../binmodules/luasocket/src/select.c; sourceTree = "<group>"; };
+		43C02D4F69E65D01D0ED538F /* timeout.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = timeout.c; path = ../../binmodules/luasocket/src/timeout.c; sourceTree = "<group>"; };
+		44BAAE496CF566FB5490F489 /* unixdgram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = unixdgram.h; path = ../../binmodules/luasocket/src/unixdgram.h; sourceTree = "<group>"; };
+		48A052274C112459CD7DC867 /* tp.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = tp.lua; path = ../../binmodules/luasocket/src/tp.lua; sourceTree = "<group>"; };
+		6184C55305D76305180FAB93 /* udp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = udp.c; path = ../../binmodules/luasocket/src/udp.c; sourceTree = "<group>"; };
+		6E0F7DF4115B07262C2BD434 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../../binmodules/luasocket/main.c; sourceTree = "<group>"; };
+		7198FD6788AB989978C793A7 /* smtp.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = smtp.lua; path = ../../binmodules/luasocket/src/smtp.lua; sourceTree = "<group>"; };
+		742202C195EDAFF3D2A2D901 /* unixstream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = unixstream.c; path = ../../binmodules/luasocket/src/unixstream.c; sourceTree = "<group>"; };
+		7589E8A39BB0185502B70EE3 /* options.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = options.h; path = ../../binmodules/luasocket/src/options.h; sourceTree = "<group>"; };
+		77783FBB7AE911EDFC55B5FB /* mime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mime.h; path = ../../binmodules/luasocket/src/mime.h; sourceTree = "<group>"; };
+		7D636A7380D43CA50240E0B3 /* unix.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = unix.h; path = ../../binmodules/luasocket/src/unix.h; sourceTree = "<group>"; };
+		7DD464C7A3FA94790B018B07 /* usocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = usocket.h; path = ../../binmodules/luasocket/src/usocket.h; sourceTree = "<group>"; };
+		7E0B52B3951DEDE58539E8F3 /* except.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = except.c; path = ../../binmodules/luasocket/src/except.c; sourceTree = "<group>"; };
+		81781CF9A79E4CAB0EA54339 /* timeout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = timeout.h; path = ../../binmodules/luasocket/src/timeout.h; sourceTree = "<group>"; };
+		8D601757B59AD0099D365D97 /* luasocket.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = luasocket.c; path = ../../binmodules/luasocket/src/luasocket.c; sourceTree = "<group>"; };
+		9849E441C0849CF3A8202A81 /* luasocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = luasocket.h; path = ../../binmodules/luasocket/src/luasocket.h; sourceTree = "<group>"; };
+		A61DAF4BA98E817D2AFB258B /* inet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = inet.h; path = ../../binmodules/luasocket/src/inet.h; sourceTree = "<group>"; };
+		AFD0D20BC6E36D3DB6FF684B /* mbox.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = mbox.lua; path = ../../binmodules/luasocket/src/mbox.lua; sourceTree = "<group>"; };
+		B357CE5FCA6A6991BA86649F /* buffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = buffer.h; path = ../../binmodules/luasocket/src/buffer.h; sourceTree = "<group>"; };
+		B4D5E3C1DAFC137342030A01 /* ltn12.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = ltn12.lua; path = ../../binmodules/luasocket/src/ltn12.lua; sourceTree = "<group>"; };
+		B5F4E937DE2FA1E9C5CB2F77 /* headers.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = headers.lua; path = ../../binmodules/luasocket/src/headers.lua; sourceTree = "<group>"; };
+		BBA36DF3D2B60925C2D20433 /* compat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = compat.h; path = ../../binmodules/luasocket/src/compat.h; sourceTree = "<group>"; };
+		CEB8B3CEE0E2908014D37A0E /* libluashim-lib.a */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = luashim-lib.xcodeproj; path = "luashim-lib.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		D0F61C4BF2C1C97D2F76F28B /* unixstream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = unixstream.h; path = ../../binmodules/luasocket/src/unixstream.h; sourceTree = "<group>"; };
+		D430F993771F20450644FFD3 /* ftp.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = ftp.lua; path = ../../binmodules/luasocket/src/ftp.lua; sourceTree = "<group>"; };
+		D77EE0691FEFC49B648E96A9 /* auxiliar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = auxiliar.h; path = ../../binmodules/luasocket/src/auxiliar.h; sourceTree = "<group>"; };
+		D8F5FB21F0089653E0249161 /* serial.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = serial.c; path = ../../binmodules/luasocket/src/serial.c; sourceTree = "<group>"; };
+		D904242BF016BF5DE032BA6B /* select.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = select.h; path = ../../binmodules/luasocket/src/select.h; sourceTree = "<group>"; };
+		DDB2E86D344052DF0CB966AD /* libluasocket.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = libluasocket.dylib; path = libluasocket.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		E3D65F798828FD2B9A6145B9 /* tcp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = tcp.h; path = ../../binmodules/luasocket/src/tcp.h; sourceTree = "<group>"; };
+		E848989FFF5B33D1EF772EDF /* http.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = http.lua; path = ../../binmodules/luasocket/src/http.lua; sourceTree = "<group>"; };
+		E988BF9B8CD448CDA7A515DB /* io.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = io.h; path = ../../binmodules/luasocket/src/io.h; sourceTree = "<group>"; };
+		EE184C1F368930517B28025F /* auxiliar.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = auxiliar.c; path = ../../binmodules/luasocket/src/auxiliar.c; sourceTree = "<group>"; };
+		F0798631169FB5E37DA6AC71 /* pierror.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = pierror.h; path = ../../binmodules/luasocket/src/pierror.h; sourceTree = "<group>"; };
+		F9CAAF859CB8D6372BDEB5C5 /* url.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = url.lua; path = ../../binmodules/luasocket/src/url.lua; sourceTree = "<group>"; };
+		FF2CA2F1479D87238C3C5931 /* socket.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = socket.lua; path = ../../binmodules/luasocket/src/socket.lua; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AEEFAF5DA855B0CF9BF10D9D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E2FCED52D6FC36C45BE74B92 /* libluashim-lib.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2797DAABAADD381DD424B8EB /* luasocket */ = {
+			isa = PBXGroup;
+			children = (
+				6E0F7DF4115B07262C2BD434 /* main.c */,
+				5775D4184366DFCA959E7A58 /* src */,
+				A6C936B49B3FADE6EA134CF4 /* Products */,
+				9D968EAA920D05DCE0E0A4EA /* Projects */,
+			);
+			name = luasocket;
+			sourceTree = "<group>";
+		};
+		5775D4184366DFCA959E7A58 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				EE184C1F368930517B28025F /* auxiliar.c */,
+				D77EE0691FEFC49B648E96A9 /* auxiliar.h */,
+				1DBC6F5534CF0A8724EB0595 /* buffer.c */,
+				B357CE5FCA6A6991BA86649F /* buffer.h */,
+				26080EE93D1AAA1B2D36A529 /* compat.c */,
+				BBA36DF3D2B60925C2D20433 /* compat.h */,
+				7E0B52B3951DEDE58539E8F3 /* except.c */,
+				13A6B1BD2AB94CEF1AD547FD /* except.h */,
+				D430F993771F20450644FFD3 /* ftp.lua */,
+				B5F4E937DE2FA1E9C5CB2F77 /* headers.lua */,
+				E848989FFF5B33D1EF772EDF /* http.lua */,
+				317F358134F007B3B65CABC1 /* inet.c */,
+				A61DAF4BA98E817D2AFB258B /* inet.h */,
+				0AECDB11AE386443C9093151 /* io.c */,
+				E988BF9B8CD448CDA7A515DB /* io.h */,
+				B4D5E3C1DAFC137342030A01 /* ltn12.lua */,
+				8D601757B59AD0099D365D97 /* luasocket.c */,
+				9849E441C0849CF3A8202A81 /* luasocket.h */,
+				AFD0D20BC6E36D3DB6FF684B /* mbox.lua */,
+				02D9C5F1064A982387B73C31 /* mime.c */,
+				77783FBB7AE911EDFC55B5FB /* mime.h */,
+				0C4454EF2356F0211372EB2F /* mime.lua */,
+				37D1F8F95DF828ABC4FF1F39 /* options.c */,
+				7589E8A39BB0185502B70EE3 /* options.h */,
+				F0798631169FB5E37DA6AC71 /* pierror.h */,
+				4368C5215A7B60534A975B61 /* select.c */,
+				D904242BF016BF5DE032BA6B /* select.h */,
+				D8F5FB21F0089653E0249161 /* serial.c */,
+				7198FD6788AB989978C793A7 /* smtp.lua */,
+				3E99EA7D55AC85AF45C880BD /* socket.h */,
+				FF2CA2F1479D87238C3C5931 /* socket.lua */,
+				3D0D3A4FE15FD801F398208F /* tcp.c */,
+				E3D65F798828FD2B9A6145B9 /* tcp.h */,
+				43C02D4F69E65D01D0ED538F /* timeout.c */,
+				81781CF9A79E4CAB0EA54339 /* timeout.h */,
+				48A052274C112459CD7DC867 /* tp.lua */,
+				6184C55305D76305180FAB93 /* udp.c */,
+				084DEA7DACA0882FBED8D0BD /* udp.h */,
+				08C4F0A90C35C2DB8DA266E9 /* unix.c */,
+				7D636A7380D43CA50240E0B3 /* unix.h */,
+				39D0E15F620B9A1149A7279F /* unixdgram.c */,
+				44BAAE496CF566FB5490F489 /* unixdgram.h */,
+				742202C195EDAFF3D2A2D901 /* unixstream.c */,
+				D0F61C4BF2C1C97D2F76F28B /* unixstream.h */,
+				F9CAAF859CB8D6372BDEB5C5 /* url.lua */,
+				401C751D6642A4CFCD499B5D /* usocket.c */,
+				7DD464C7A3FA94790B018B07 /* usocket.h */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		9536FFD9B702AD0BF3B7D619 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				13AAE5DA57BEB70C4B903C1A /* libluashim-lib.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9D968EAA920D05DCE0E0A4EA /* Projects */ = {
+			isa = PBXGroup;
+			children = (
+				CEB8B3CEE0E2908014D37A0E /* luashim-lib.xcodeproj */,
+			);
+			name = Projects;
+			sourceTree = "<group>";
+		};
+		A6C936B49B3FADE6EA134CF4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DDB2E86D344052DF0CB966AD /* libluasocket.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1858E6B360C9CAE5A5689CF3 /* luasocket */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9D2AF7BC9690F92E8A2C55FC /* Build configuration list for PBXNativeTarget "luasocket" */;
+			buildPhases = (
+				1ED72FFD183D316F0BD88E3D /* Resources */,
+				8884495481EA4AC67585A794 /* Sources */,
+				AEEFAF5DA855B0CF9BF10D9D /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				82EF3CE2A4BAEA14E1701322 /* PBXTargetDependency */,
+			);
+			name = luasocket;
+			productName = luasocket;
+			productReference = DDB2E86D344052DF0CB966AD /* libluasocket.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "luasocket" */;
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 1;
+			mainGroup = 2797DAABAADD381DD424B8EB /* luasocket */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 9536FFD9B702AD0BF3B7D619 /* Products */;
+					ProjectRef = CEB8B3CEE0E2908014D37A0E /* luashim-lib.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				1858E6B360C9CAE5A5689CF3 /* libluasocket.dylib */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		13AAE5DA57BEB70C4B903C1A /* libluashim-lib.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libluashim-lib.a";
+			remoteRef = 8D95C5B9E8D7192BBC3163F9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1ED72FFD183D316F0BD88E3D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8884495481EA4AC67585A794 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78667B8C71CC7CFE6567D9CC /* main.c in Sources */,
+				4A9D0AF7445EC7697E5DC937 /* auxiliar.c in Sources */,
+				066CD28D61AE25FF350870CD /* buffer.c in Sources */,
+				A4371561FF7868D3D2D2B3A1 /* compat.c in Sources */,
+				1D6AEACB78AC3E3D4C06890B /* except.c in Sources */,
+				A0915379F71EBDEBCF97D1B9 /* inet.c in Sources */,
+				D9D5FC09D33BFD7BC6D75A49 /* io.c in Sources */,
+				9C5B7AAF0D7E1BA1C344C8EF /* luasocket.c in Sources */,
+				F9E1C2E9506F2D5B28E84129 /* mime.c in Sources */,
+				59731F718A5717639D6F4DB1 /* options.c in Sources */,
+				8E9D8B19E9DEDE8BBD392959 /* select.c in Sources */,
+				412921199C6A748B6FC4BF59 /* serial.c in Sources */,
+				EBC12327D6AD49191E931167 /* tcp.c in Sources */,
+				B7BEFA27E8A2F219FBBB2867 /* timeout.c in Sources */,
+				B2DD946B9DC9BA5DE5AF82AB /* udp.c in Sources */,
+				1E16452174A3AF934D1CC361 /* unix.c in Sources */,
+				2DFA01379F1CA22954E34F77 /* unixdgram.c in Sources */,
+				6CC9AEB9B118542BF33F8CF9 /* unixstream.c in Sources */,
+				4200D3D572E4CBC785FD0215 /* usocket.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		82EF3CE2A4BAEA14E1701322 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "libluashim-lib.a";
+			targetProxy = DFD038523B118BC40E6BD692 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		0B397B9AAF8C194CC1C461DA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					PREMAKE_COMPRESSION,
+					CURL_STATICLIB,
+					PREMAKE_CURL,
+					_DEBUG,
+					"LUASOCKET_API=__attribute__((visibility(\\\"default\\\")))",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = obj/Debug/luasocket;
+				ONLY_ACTIVE_ARCH = YES;
+				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
+				SYMROOT = ../../bin/debug;
+				USER_HEADER_SEARCH_PATHS = (
+					../../contrib/lua/src,
+					../../contrib/luashim,
+				);
+				WARNING_CFLAGS = "-Wall -Wextra";
+			};
+			name = Debug;
+		};
+		B3EEA454B75F768638CC1A94 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					PREMAKE_COMPRESSION,
+					CURL_STATICLIB,
+					PREMAKE_CURL,
+					NDEBUG,
+					"LUASOCKET_API=__attribute__((visibility(\\\"default\\\")))",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = obj/Release/luasocket;
+				ONLY_ACTIVE_ARCH = NO;
+				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
+				SYMROOT = ../../bin/release;
+				USER_HEADER_SEARCH_PATHS = (
+					../../contrib/lua/src,
+					../../contrib/luashim,
+				);
+				WARNING_CFLAGS = "-Wall -Wextra";
+			};
+			name = Release;
+		};
+		C1E349FC3305EAEEE8CC983C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = ../../bin/release;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = luasocket;
+			};
+			name = Release;
+		};
+		EFE48682E9A642F423A544C2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = ../../bin/debug;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = luasocket;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "luasocket" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B3EEA454B75F768638CC1A94 /* Release */,
+				0B397B9AAF8C194CC1C461DA /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9D2AF7BC9690F92E8A2C55FC /* Build configuration list for PBXNativeTarget "libluasocket.dylib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1E349FC3305EAEEE8CC983C /* Release */,
+				EFE48682E9A642F423A544C2 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+};
+rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

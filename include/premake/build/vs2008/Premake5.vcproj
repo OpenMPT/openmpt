@@ -65,7 +65,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /GL"
-				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib"
+				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib version.lib"
 				OutputFile="$(OutDir)\premake5.exe"
 				LinkIncremental="0"
 				GenerateManifest="false"
@@ -140,7 +140,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /GL"
-				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib"
+				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib version.lib"
 				OutputFile="$(OutDir)\premake5.exe"
 				LinkIncremental="0"
 				GenerateManifest="false"
@@ -214,7 +214,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NOLOGO /DEBUG"
-				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib"
+				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib version.lib"
 				OutputFile="$(OutDir)\premake5.exe"
 				LinkIncremental="0"
 				GenerateManifest="false"
@@ -289,7 +289,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/NOLOGO /DEBUG"
-				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib"
+				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib version.lib"
 				OutputFile="$(OutDir)\premake5.exe"
 				LinkIncremental="0"
 				GenerateManifest="false"
@@ -908,6 +908,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\modules\vstudio\vs2013_vcxitems.lua"
+					>
+				</File>
+				<File
 					RelativePath="..\..\modules\vstudio\vs2015.lua"
 					>
 				</File>
@@ -963,6 +967,10 @@
 						</File>
 						<File
 							RelativePath="..\..\modules\vstudio\tests\cs2005\test_icon.lua"
+							>
+						</File>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\cs2005\test_netcore.lua"
 							>
 						</File>
 						<File
@@ -1049,6 +1057,10 @@
 							RelativePath="..\..\modules\vstudio\tests\sln2005\test_sections.lua"
 							>
 						</File>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\sln2005\test_shared_projects.lua"
+							>
+						</File>
 					</Filter>
 					<Filter
 						Name="vc200x"
@@ -1127,6 +1139,10 @@
 						</File>
 						<File
 							RelativePath="..\..\modules\vstudio\tests\vc2010\test_build_log.lua"
+							>
+						</File>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\vc2010\test_build_steps.lua"
 							>
 						</File>
 						<File
@@ -1275,6 +1291,14 @@
 						</File>
 						<File
 							RelativePath="..\..\modules\vstudio\tests\vc2010\test_vectorextensions.lua"
+							>
+						</File>
+					</Filter>
+					<Filter
+						Name="vc2013"
+						>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\vc2013\test_vcxitems.lua"
 							>
 						</File>
 					</Filter>
@@ -1644,6 +1668,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\host\os_listWindowsRegistry.c"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\host\os_locate.c"
 					>
 				</File>
@@ -1773,6 +1801,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\tools\gcc.lua"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\tools\mingw.lua"
 					>
 				</File>
 				<File

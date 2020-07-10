@@ -182,6 +182,8 @@
 			"Default",
 			"C",
 			"C++",
+			"Objective-C",
+			"Objective-C++",
 		}
 	}
 
@@ -594,6 +596,13 @@
 	}
 
 	api.register {
+		name = "enabledefaultcompileitems",
+		scope = "config",
+		kind = "boolean",
+		default = false
+	}
+
+	api.register {
 		name = "csversion",
 		scope = "config",
 		kind = "string",
@@ -701,6 +710,7 @@
 			"StaticLib",
 			"WindowedApp",
 			"Utility",
+			"SharedItems",
 		},
 	}
 
@@ -1406,6 +1416,12 @@
 		}
 	}
 
+	api.register {
+		name = "assemblydebug",
+		scope = "config",
+		kind  = "boolean"
+	}	
+
 -----------------------------------------------------------------------------
 --
 -- Field name aliases for backward compatibility
@@ -1671,6 +1687,7 @@
 		allowed = {
 			{ "clang", "Clang (clang)" },
 			{ "gcc", "GNU GCC (gcc/g++)" },
+			{ "mingw", "MinGW GCC (gcc/g++)" },
 		}
 	}
 

@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="Premake5" Database="" SWTLW="No">
+  <VirtualDirectory Name="Binary Modules">
+    <Project Name="example" Path="example.project"/>
+    <Project Name="luasocket" Path="luasocket.project"/>
+  </VirtualDirectory>
+  <Project Name="Premake5" Path="Premake5.project"/>
+  <VirtualDirectory Name="contrib">
+    <Project Name="curl-lib" Path="curl-lib.project"/>
+    <Project Name="lua-lib" Path="lua-lib.project"/>
+    <Project Name="luashim-lib" Path="luashim-lib.project"/>
+    <Project Name="mbedtls-lib" Path="mbedtls-lib.project"/>
+    <Project Name="zip-lib" Path="zip-lib.project"/>
+    <Project Name="zlib-lib" Path="zlib-lib.project"/>
+  </VirtualDirectory>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Project Name="example" ConfigName="Release"/>
+      <Project Name="luasocket" ConfigName="Release"/>
+      <Project Name="Premake5" ConfigName="Release"/>
+      <Project Name="curl-lib" ConfigName="Release"/>
+      <Project Name="lua-lib" ConfigName="Release"/>
+      <Project Name="luashim-lib" ConfigName="Release"/>
+      <Project Name="mbedtls-lib" ConfigName="Release"/>
+      <Project Name="zip-lib" ConfigName="Release"/>
+      <Project Name="zlib-lib" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Project Name="example" ConfigName="Debug"/>
+      <Project Name="luasocket" ConfigName="Debug"/>
+      <Project Name="Premake5" ConfigName="Debug"/>
+      <Project Name="curl-lib" ConfigName="Debug"/>
+      <Project Name="lua-lib" ConfigName="Debug"/>
+      <Project Name="luashim-lib" ConfigName="Debug"/>
+      <Project Name="mbedtls-lib" ConfigName="Debug"/>
+      <Project Name="zip-lib" ConfigName="Debug"/>
+      <Project Name="zlib-lib" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

@@ -1,0 +1,300 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="mbedtls-lib" InternalType="Library">
+  <Plugins/>
+  <Description/>
+<VirtualDirectory Name="mbedtls-lib">
+  <VirtualDirectory Name="include">
+    <VirtualDirectory Name="mbedtls">
+      <File Name="../../contrib/mbedtls/include/mbedtls/aes.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/aesni.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/arc4.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/asn1.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/asn1write.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/base64.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/bignum.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/blowfish.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/bn_mul.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/camellia.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ccm.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/certs.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/check_config.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/cipher.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/cipher_internal.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/compat-1.3.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/config.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ctr_drbg.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/debug.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/des.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/dhm.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ecdh.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ecdsa.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ecjpake.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ecp.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/entropy.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/entropy_poll.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/error.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/gcm.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/havege.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/hmac_drbg.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/md.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/md2.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/md4.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/md5.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/md_internal.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/memory_buffer_alloc.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/net.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/oid.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/padlock.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/pem.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/pk.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/pk_internal.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/pkcs11.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/pkcs12.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/pkcs5.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/platform.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ripemd160.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/rsa.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/sha1.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/sha256.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/sha512.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ssl.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ssl_cache.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ssl_ciphersuites.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ssl_cookie.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ssl_internal.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/ssl_ticket.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/threading.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/timing.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/version.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/x509.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/x509_crl.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/x509_crt.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/x509_csr.h"/>
+      <File Name="../../contrib/mbedtls/include/mbedtls/xtea.h"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="library">
+    <File Name="../../contrib/mbedtls/library/aes.c"/>
+    <File Name="../../contrib/mbedtls/library/aesni.c"/>
+    <File Name="../../contrib/mbedtls/library/arc4.c"/>
+    <File Name="../../contrib/mbedtls/library/asn1parse.c"/>
+    <File Name="../../contrib/mbedtls/library/asn1write.c"/>
+    <File Name="../../contrib/mbedtls/library/base64.c"/>
+    <File Name="../../contrib/mbedtls/library/bignum.c"/>
+    <File Name="../../contrib/mbedtls/library/blowfish.c"/>
+    <File Name="../../contrib/mbedtls/library/camellia.c"/>
+    <File Name="../../contrib/mbedtls/library/ccm.c"/>
+    <File Name="../../contrib/mbedtls/library/certs.c"/>
+    <File Name="../../contrib/mbedtls/library/cipher.c"/>
+    <File Name="../../contrib/mbedtls/library/cipher_wrap.c"/>
+    <File Name="../../contrib/mbedtls/library/ctr_drbg.c"/>
+    <File Name="../../contrib/mbedtls/library/debug.c"/>
+    <File Name="../../contrib/mbedtls/library/des.c"/>
+    <File Name="../../contrib/mbedtls/library/dhm.c"/>
+    <File Name="../../contrib/mbedtls/library/ecdh.c"/>
+    <File Name="../../contrib/mbedtls/library/ecdsa.c"/>
+    <File Name="../../contrib/mbedtls/library/ecjpake.c"/>
+    <File Name="../../contrib/mbedtls/library/ecp.c"/>
+    <File Name="../../contrib/mbedtls/library/ecp_curves.c"/>
+    <File Name="../../contrib/mbedtls/library/entropy.c"/>
+    <File Name="../../contrib/mbedtls/library/entropy_poll.c"/>
+    <File Name="../../contrib/mbedtls/library/error.c"/>
+    <File Name="../../contrib/mbedtls/library/gcm.c"/>
+    <File Name="../../contrib/mbedtls/library/havege.c"/>
+    <File Name="../../contrib/mbedtls/library/hmac_drbg.c"/>
+    <File Name="../../contrib/mbedtls/library/md.c"/>
+    <File Name="../../contrib/mbedtls/library/md2.c"/>
+    <File Name="../../contrib/mbedtls/library/md4.c"/>
+    <File Name="../../contrib/mbedtls/library/md5.c"/>
+    <File Name="../../contrib/mbedtls/library/md_wrap.c"/>
+    <File Name="../../contrib/mbedtls/library/memory_buffer_alloc.c"/>
+    <File Name="../../contrib/mbedtls/library/net.c"/>
+    <File Name="../../contrib/mbedtls/library/oid.c"/>
+    <File Name="../../contrib/mbedtls/library/padlock.c"/>
+    <File Name="../../contrib/mbedtls/library/pem.c"/>
+    <File Name="../../contrib/mbedtls/library/pk.c"/>
+    <File Name="../../contrib/mbedtls/library/pk_wrap.c"/>
+    <File Name="../../contrib/mbedtls/library/pkcs11.c"/>
+    <File Name="../../contrib/mbedtls/library/pkcs12.c"/>
+    <File Name="../../contrib/mbedtls/library/pkcs5.c"/>
+    <File Name="../../contrib/mbedtls/library/pkparse.c"/>
+    <File Name="../../contrib/mbedtls/library/pkwrite.c"/>
+    <File Name="../../contrib/mbedtls/library/platform.c"/>
+    <File Name="../../contrib/mbedtls/library/ripemd160.c"/>
+    <File Name="../../contrib/mbedtls/library/rsa.c"/>
+    <File Name="../../contrib/mbedtls/library/sha1.c"/>
+    <File Name="../../contrib/mbedtls/library/sha256.c"/>
+    <File Name="../../contrib/mbedtls/library/sha512.c"/>
+    <File Name="../../contrib/mbedtls/library/ssl_cache.c"/>
+    <File Name="../../contrib/mbedtls/library/ssl_ciphersuites.c"/>
+    <File Name="../../contrib/mbedtls/library/ssl_cli.c"/>
+    <File Name="../../contrib/mbedtls/library/ssl_cookie.c"/>
+    <File Name="../../contrib/mbedtls/library/ssl_srv.c"/>
+    <File Name="../../contrib/mbedtls/library/ssl_ticket.c"/>
+    <File Name="../../contrib/mbedtls/library/ssl_tls.c"/>
+    <File Name="../../contrib/mbedtls/library/threading.c"/>
+    <File Name="../../contrib/mbedtls/library/timing.c"/>
+    <File Name="../../contrib/mbedtls/library/version.c"/>
+    <File Name="../../contrib/mbedtls/library/version_features.c"/>
+    <File Name="../../contrib/mbedtls/library/x509.c"/>
+    <File Name="../../contrib/mbedtls/library/x509_create.c"/>
+    <File Name="../../contrib/mbedtls/library/x509_crl.c"/>
+    <File Name="../../contrib/mbedtls/library/x509_crt.c"/>
+    <File Name="../../contrib/mbedtls/library/x509_csr.c"/>
+    <File Name="../../contrib/mbedtls/library/x509write_crt.c"/>
+    <File Name="../../contrib/mbedtls/library/x509write_csr.c"/>
+    <File Name="../../contrib/mbedtls/library/xtea.c"/>
+  </VirtualDirectory>
+</VirtualDirectory>
+  <Dependencies Name="x86-Release"/>
+  <Dependencies Name="x64-Release"/>
+  <Dependencies Name="x86-Debug"/>
+  <Dependencies Name="x64-Debug"/>
+  <Settings Type="Static Library">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="x86-Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32;-flto;-O3;-w;-fno-stack-protector" C_Options="-m32;-flto;-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/mbedtls/include"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="MBEDTLS_ZLIB_SUPPORT"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m32;-flto">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="bin/x86/Release/mbedtls-lib.lib" IntermediateDirectory="obj/x86/Release/mbedtls-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="x64-Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64;-flto;-O3;-w;-fno-stack-protector" C_Options="-m64;-flto;-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/mbedtls/include"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="MBEDTLS_ZLIB_SUPPORT"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m64;-flto">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="bin/x64/Release/mbedtls-lib.lib" IntermediateDirectory="obj/x64/Release/mbedtls-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="x86-Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32;-g;-w" C_Options="-m32;-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/mbedtls/include"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="MBEDTLS_ZLIB_SUPPORT"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m32">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="bin/x86/Debug/mbedtls-lib.lib" IntermediateDirectory="obj/x86/Debug/mbedtls-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="x64-Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64;-g;-w" C_Options="-m64;-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/mbedtls/include"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="MBEDTLS_ZLIB_SUPPORT"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m64">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="bin/x64/Debug/mbedtls-lib.lib" IntermediateDirectory="obj/x64/Debug/mbedtls-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

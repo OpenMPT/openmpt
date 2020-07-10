@@ -1,4 +1,4 @@
-Premake version 5.0-alpha14
+Premake version 5.0-alpha15
 The following changes have been made:
  *  Modifications have been marked with --OpenMPT
  *  standardconformance option added

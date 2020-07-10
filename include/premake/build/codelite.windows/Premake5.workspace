@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="Premake5" Database="" SWTLW="No">
+  <VirtualDirectory Name="Binary Modules">
+    <Project Name="example" Path="example.project"/>
+    <Project Name="luasocket" Path="luasocket.project"/>
+  </VirtualDirectory>
+  <Project Name="Premake5" Path="Premake5.project"/>
+  <VirtualDirectory Name="contrib">
+    <Project Name="curl-lib" Path="curl-lib.project"/>
+    <Project Name="lua-lib" Path="lua-lib.project"/>
+    <Project Name="luashim-lib" Path="luashim-lib.project"/>
+    <Project Name="mbedtls-lib" Path="mbedtls-lib.project"/>
+    <Project Name="zip-lib" Path="zip-lib.project"/>
+    <Project Name="zlib-lib" Path="zlib-lib.project"/>
+  </VirtualDirectory>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="x86-Release" Selected="yes">
+      <Project Name="example" ConfigName="x86-Release"/>
+      <Project Name="luasocket" ConfigName="x86-Release"/>
+      <Project Name="Premake5" ConfigName="x86-Release"/>
+      <Project Name="curl-lib" ConfigName="x86-Release"/>
+      <Project Name="lua-lib" ConfigName="x86-Release"/>
+      <Project Name="luashim-lib" ConfigName="x86-Release"/>
+      <Project Name="mbedtls-lib" ConfigName="x86-Release"/>
+      <Project Name="zip-lib" ConfigName="x86-Release"/>
+      <Project Name="zlib-lib" ConfigName="x86-Release"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="x64-Release" Selected="yes">
+      <Project Name="example" ConfigName="x64-Release"/>
+      <Project Name="luasocket" ConfigName="x64-Release"/>
+      <Project Name="Premake5" ConfigName="x64-Release"/>
+      <Project Name="curl-lib" ConfigName="x64-Release"/>
+      <Project Name="lua-lib" ConfigName="x64-Release"/>
+      <Project Name="luashim-lib" ConfigName="x64-Release"/>
+      <Project Name="mbedtls-lib" ConfigName="x64-Release"/>
+      <Project Name="zip-lib" ConfigName="x64-Release"/>
+      <Project Name="zlib-lib" ConfigName="x64-Release"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="x86-Debug" Selected="yes">
+      <Project Name="example" ConfigName="x86-Debug"/>
+      <Project Name="luasocket" ConfigName="x86-Debug"/>
+      <Project Name="Premake5" ConfigName="x86-Debug"/>
+      <Project Name="curl-lib" ConfigName="x86-Debug"/>
+      <Project Name="lua-lib" ConfigName="x86-Debug"/>
+      <Project Name="luashim-lib" ConfigName="x86-Debug"/>
+      <Project Name="mbedtls-lib" ConfigName="x86-Debug"/>
+      <Project Name="zip-lib" ConfigName="x86-Debug"/>
+      <Project Name="zlib-lib" ConfigName="x86-Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="x64-Debug" Selected="yes">
+      <Project Name="example" ConfigName="x64-Debug"/>
+      <Project Name="luasocket" ConfigName="x64-Debug"/>
+      <Project Name="Premake5" ConfigName="x64-Debug"/>
+      <Project Name="curl-lib" ConfigName="x64-Debug"/>
+      <Project Name="lua-lib" ConfigName="x64-Debug"/>
+      <Project Name="luashim-lib" ConfigName="x64-Debug"/>
+      <Project Name="mbedtls-lib" ConfigName="x64-Debug"/>
+      <Project Name="zip-lib" ConfigName="x64-Debug"/>
+      <Project Name="zlib-lib" ConfigName="x64-Debug"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

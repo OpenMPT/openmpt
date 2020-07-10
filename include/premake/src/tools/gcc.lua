@@ -121,6 +121,10 @@
 		omitframepointer = {
 			On = "-fomit-frame-pointer",
 			Off = "-fno-omit-frame-pointer"
+		},
+		compileas = {
+			["Objective-C"] = "-x objective-c",
+			["Objective-C++"] = "-x objective-c++",
 		}
 	}
 
@@ -467,11 +471,6 @@
 			end
 		end
 
-		if not nogroups and #result > 1 and (cfg.linkgroups == p.ON) then
-			table.insert(result, 1, "-Wl,--start-group")
-			table.insert(result, "-Wl,--end-group")
-		end
-
 		-- The "-l" flag is fine for system libraries
 		local links = config.getlinks(cfg, "system", "fullpath")
 		local static_syslibs = {"-Wl,-Bstatic"}
@@ -510,6 +509,11 @@
 			move(static_syslibs, result)
 		end
 		move(shared_syslibs, result)
+
+		if not nogroups and #result > 1 and (cfg.linkgroups == p.ON) then
+			table.insert(result, 1, "-Wl,--start-group")
+			table.insert(result, "-Wl,--end-group")
+		end
 
 		return result
 	end

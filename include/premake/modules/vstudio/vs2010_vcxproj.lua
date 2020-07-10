@@ -131,13 +131,14 @@
 			m.keyword,
 			m.projectName,
 			m.preferredToolArchitecture,
-			m.targetPlatformVersionGlobal,
+			m.latestTargetPlatformVersion,
+			m.windowsTargetPlatformVersion,
 		}
 	end
 
 	m.elements.globalsCondition = function(prj, cfg)
 		return {
-			m.targetPlatformVersionCondition,
+			m.windowsTargetPlatformVersion,
 		}
 	end
 
@@ -308,6 +309,7 @@
 		else
 			return {
 				m.clCompile,
+				m.buildStep,
 				m.fxCompile,
 				m.resourceCompile,
 				m.linker,
@@ -397,6 +399,31 @@
 		p.pop('</ClCompile>')
 	end
 
+--
+-- Write the the <CustomBuildStep> compiler settings block.
+--
+
+	m.elements.buildStep = function(cfg)
+		local calls = {
+			m.buildCommands,
+			m.buildMessage,
+			m.buildOutputs,
+			m.buildInputs
+		}
+
+		return calls
+	end
+
+	function m.buildStep(cfg)
+		if #cfg.buildCommands > 0 or #cfg.buildOutputs > 0 or #cfg.buildInputs > 0 or cfg.buildMessage then
+
+			p.push('<CustomBuildStep>')
+			p.callArray(m.elements.buildStep, cfg)
+			p.pop('</CustomBuildStep>')
+
+		end
+	end
+
 
 --
 -- Write the <FxCompile> settings block.
@@ -405,6 +432,7 @@
 	m.elements.fxCompile = function(cfg)
 		return {
 			m.fxCompilePreprocessorDefinition,
+			m.fxCompileAdditionalIncludeDirs,
 			m.fxCompileShaderType,
 			m.fxCompileShaderModel,
 			m.fxCompileShaderEntry,
@@ -509,6 +537,7 @@
 				m.targetMachine,
 				m.additionalLinkOptions,
 				m.programDatabaseFile,
+				m.assemblyDebug,
 			}
 		end
 	end
@@ -754,7 +783,7 @@
 ---
 	m.categories.ClCompile = {
 		name       = "ClCompile",
-		extensions = { ".cc", ".cpp", ".cxx", ".c", ".s", ".m", ".mm" },
+		extensions = { ".cc", ".cpp", ".cxx", ".c++", ".c", ".s", ".m", ".mm" },
 		priority   = 2,
 
 		emitFiles = function(prj, group)
@@ -809,6 +838,7 @@
 					return {
 						m.excludedFromBuild,
 						m.fxCompilePreprocessorDefinition,
+						m.fxCompileAdditionalIncludeDirs,
 						m.fxCompileShaderType,
 						m.fxCompileShaderModel,
 						m.fxCompileShaderEntry,
@@ -865,9 +895,7 @@
 				m.excludedFromBuild
 			}
 
-			m.emitFiles(prj, group, "ResourceCompile", nil, fileCfgFunc, function(cfg)
-				return cfg.system == p.WINDOWS
-			end)
+			m.emitFiles(prj, group, "ResourceCompile", nil, fileCfgFunc)
 		end,
 
 		emitFilter = function(prj, group)
@@ -1213,6 +1241,12 @@
 				end)
 
 				local rel = path.translate(file.relpath)
+
+				-- SharedItems projects paths are prefixed with a magical variable
+				if prj.kind == p.SHAREDITEMS then
+					rel = "$(MSBuildThisFileDirectory)" .. rel
+				end
+
 				if #contents > 0 then
 					p.push('<%s Include="%s">', tag, rel)
 					p.outln(contents)
@@ -1314,14 +1348,39 @@
 
 	function m.projectReferences(prj)
 		local refs = project.getdependencies(prj, 'linkOnly')
-		if #refs > 0 then
-			p.push('<ItemGroup>')
+		-- Handle linked shared items projects
+		local contents = p.capture(function()
+			p.push()
 			for _, ref in ipairs(refs) do
-				local relpath = vstudio.path(prj, vstudio.projectfile(ref))
-				p.push('<ProjectReference Include=\"%s\">', relpath)
-				p.callArray(m.elements.projectReferences, prj, ref)
-				p.pop('</ProjectReference>')
+				if ref.kind == p.SHAREDITEMS then
+					local relpath = vstudio.path(prj, vstudio.projectfile(ref))
+					p.x('<Import Project="%s" Label="Shared" />', relpath)
+				end
 			end
+			p.pop()
+		end)
+		if #contents > 0 then
+			p.push('<ImportGroup Label="Shared">')
+			p.outln(contents)
+			p.pop('</ImportGroup>')
+		end
+
+		-- Handle all other linked projects
+		local contents = p.capture(function()
+			p.push()
+			for _, ref in ipairs(refs) do
+				if ref.kind ~= p.SHAREDITEMS then
+					local relpath = vstudio.path(prj, vstudio.projectfile(ref))
+					p.push('<ProjectReference Include=\"%s\">', relpath)
+					p.callArray(m.elements.projectReferences, prj, ref)
+					p.pop('</ProjectReference>')
+				end
+			end
+			p.pop()
+		end)
+		if #contents > 0 then
+			p.push('<ItemGroup>')
+			p.outln(contents)
 			p.pop('</ItemGroup>')
 		end
 	end
@@ -1498,6 +1557,12 @@
 		end
 	end
 
+	function m.buildInputs(cfg, condition)
+		if cfg.buildinputs and #cfg.buildinputs > 0 then
+			local inputs = project.getrelative(cfg.project, cfg.buildinputs)
+			m.element("Inputs", condition, '%s', table.concat(inputs, ";"))
+		end
+	end
 
 	function m.buildAdditionalInputs(fcfg, condition)
 		if fcfg.buildinputs and #fcfg.buildinputs > 0 then
@@ -1508,9 +1573,10 @@
 
 
 	function m.buildCommands(fcfg, condition)
-		local commands = os.translateCommandsAndPaths(fcfg.buildcommands, fcfg.project.basedir, fcfg.project.location)
-		commands = table.concat(commands,'\r\n')
-		m.element("Command", condition, '%s', commands)
+		if #fcfg.buildcommands > 0 then
+			local commands = os.translateCommandsAndPaths(fcfg.buildcommands, fcfg.project.basedir, fcfg.project.location)
+			m.element("Command", condition, '%s', table.concat(commands,'\r\n'))
+		end
 	end
 
 
@@ -1531,8 +1597,10 @@
 
 
 	function m.buildOutputs(fcfg, condition)
-		local outputs = project.getrelative(fcfg.project, fcfg.buildoutputs)
-		m.element("Outputs", condition, '%s', table.concat(outputs, ";"))
+		if #fcfg.buildoutputs > 0 then
+			local outputs = project.getrelative(fcfg.project, fcfg.buildoutputs)
+			m.element("Outputs", condition, '%s', table.concat(outputs, ";"))
+		end
 	end
 
 
@@ -1801,6 +1869,12 @@
 	function m.fullProgramDatabaseFile(cfg)
 		if _ACTION >= "vs2015" and cfg.symbols == "FastLink" then
 			m.element("FullProgramDatabaseFile", nil, "true")
+		end
+	end
+
+	function m.assemblyDebug(cfg)
+		if cfg.assemblydebug then
+      		m.element("AssemblyDebug", nil, "true")
 		end
 	end
 
@@ -2533,43 +2607,43 @@
 	end
 
 
-	function m.targetPlatformVersion(cfgOrPrj)
+	function m.latestTargetPlatformVersion(prj)
+		-- See https://developercommunity.visualstudio.com/content/problem/140294/windowstargetplatformversion-makes-it-impossible-t.html
+		if _ACTION == "vs2017" then
+			m.element("LatestTargetPlatformVersion", nil, "$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))")
+		end
+	end
 
-		if _ACTION >= "vs2015" then
-			local min = project.systemversion(cfgOrPrj)
-			-- handle special "latest" version
-			if min == "latest" then
-				-- vs2015 and lower can't build against SDK 10
-				-- vs2019 allows for automatic assignment to latest
-				-- Windows 10 sdk if you set to "10.0"
-				if _ACTION >= "vs2019" then
-					min = "10.0"
-				else
-					min = iif(_ACTION == "vs2017", m.latestSDK10Version(), nil)
-				end
+
+	function m.windowsTargetPlatformVersion(prj, cfg)
+		if _ACTION < "vs2015" then
+			return
+		end
+
+		local target = cfg or prj
+		local version = project.systemversion(target)
+
+		-- if this is a config, only emit if different from project
+		if cfg then
+			local prjVersion = project.systemversion(prj)
+			if not prjVersion or version == prjVersion then
+				return
 			end
-
-			return min
 		end
 
-	end
-
-
-	function m.targetPlatformVersionGlobal(prj)
-		local min = m.targetPlatformVersion(prj)
-		if min ~= nil then
-			m.element("WindowsTargetPlatformVersion", nil, min)
+		-- See https://developercommunity.visualstudio.com/content/problem/140294/windowstargetplatformversion-makes-it-impossible-t.html
+		if version == "latest" then
+			if _ACTION == "vs2015" then
+				version = nil   -- SDK v10 is not supported by VS2015
+			elseif _ACTION == "vs2017" then
+				version = "$(LatestTargetPlatformVersion)"
+			else
+				version = "10.0"
+			end
 		end
-	end
 
-
-	function m.targetPlatformVersionCondition(prj, cfg)
-
-		local cfgPlatformVersion = m.targetPlatformVersion(cfg)
-		local prjPlatformVersion = m.targetPlatformVersion(prj)
-
-		if cfgPlatformVersion ~= nil and cfgPlatformVersion ~= prjPlatformVersion then
-		    m.element("WindowsTargetPlatformVersion", nil, cfgPlatformVersion)
+		if version then
+			m.element("WindowsTargetPlatformVersion", nil, version)
 		end
 	end
 
@@ -2687,6 +2761,12 @@
 		end
 	end
 
+	function m.fxCompileAdditionalIncludeDirs(cfg, condition)
+		if cfg.shaderincludedirs and #cfg.shaderincludedirs > 0 then
+			local dirs = vstudio.path(cfg, cfg.shaderincludedirs)
+			m.element('AdditionalIncludeDirectories', condition, "%s;%%(AdditionalIncludeDirectories)", table.concat(dirs, ";"))
+		end
+	end
 
 	function m.fxCompileShaderType(cfg, condition)
 		if cfg.shadertype then

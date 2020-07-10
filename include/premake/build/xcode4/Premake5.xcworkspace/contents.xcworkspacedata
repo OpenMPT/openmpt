@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+	version = "1.0">
+	<Group
+		location = "container:"
+		name = "Binary Modules">
+		<FileRef
+			location = "group:example.xcodeproj">
+		</FileRef>
+		<FileRef
+			location = "group:luasocket.xcodeproj">
+		</FileRef>
+	</Group>
+	<FileRef
+		location = "group:Premake5.xcodeproj">
+	</FileRef>
+	<Group
+		location = "container:"
+		name = "contrib">
+		<FileRef
+			location = "group:curl-lib.xcodeproj">
+		</FileRef>
+		<FileRef
+			location = "group:lua-lib.xcodeproj">
+		</FileRef>
+		<FileRef
+			location = "group:luashim-lib.xcodeproj">
+		</FileRef>
+		<FileRef
+			location = "group:mbedtls-lib.xcodeproj">
+		</FileRef>
+		<FileRef
+			location = "group:zip-lib.xcodeproj">
+		</FileRef>
+		<FileRef
+			location = "group:zlib-lib.xcodeproj">
+		</FileRef>
+	</Group>
+</Workspace>

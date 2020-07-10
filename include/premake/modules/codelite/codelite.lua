@@ -5,8 +5,9 @@
 -- Modified by: Andrea Zanellato
 --              Andrew Gough
 --              Manu Evans
+--              Jason Perkins
 -- Created:     2013/05/06
--- Copyright:   (c) 2008-2015 Jason Perkins and the Premake project
+-- Copyright:   (c) 2008-2020 Jason Perkins and the Premake project
 --
 
 	local p = premake
@@ -21,15 +22,25 @@
 	function codelite.cfgname(cfg)
 		local cfgname = cfg.buildcfg
 		if codelite.workspace.multiplePlatforms then
-			cfgname = string.format("%s|%s", cfg.platform, cfg.buildcfg)
+			-- Codelite breaks if "|" is used here, see #1411
+			cfgname = string.format("%s-%s", cfg.platform, cfg.buildcfg)
 		end
 		return cfgname
+	end
+
+	-- Element text is not escaped the same as element attributes
+	function codelite.escElementText(value)
+		local result = value:gsub('&', '&amp;')
+		result = result:gsub('<', '&lt;')
+		result = result:gsub('>', '&gt;')
+		return result
 	end
 
 	function codelite.esc(value)
 		local result = value:gsub('&', '&amp;')
 		result = result:gsub('<', '&lt;')
 		result = result:gsub('>', '&gt;')
+		result = result:gsub('"', '\\&quot;')
 		return result
 	end
 

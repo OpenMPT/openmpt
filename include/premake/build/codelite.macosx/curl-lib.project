@@ -1,0 +1,371 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="curl-lib" InternalType="Library">
+  <Plugins/>
+  <Description/>
+<VirtualDirectory Name="curl-lib">
+  <VirtualDirectory Name="include">
+    <VirtualDirectory Name="curl">
+      <File Name="../../contrib/curl/include/curl/curl.h"/>
+      <File Name="../../contrib/curl/include/curl/curlbuild.h"/>
+      <File Name="../../contrib/curl/include/curl/curlrules.h"/>
+      <File Name="../../contrib/curl/include/curl/curlver.h"/>
+      <File Name="../../contrib/curl/include/curl/easy.h"/>
+      <File Name="../../contrib/curl/include/curl/mprintf.h"/>
+      <File Name="../../contrib/curl/include/curl/multi.h"/>
+      <File Name="../../contrib/curl/include/curl/stdcheaders.h"/>
+      <File Name="../../contrib/curl/include/curl/typecheck-gcc.h"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="lib">
+    <File Name="../../contrib/curl/lib/amigaos.c"/>
+    <File Name="../../contrib/curl/lib/amigaos.h"/>
+    <File Name="../../contrib/curl/lib/arpa_telnet.h"/>
+    <File Name="../../contrib/curl/lib/asyn-ares.c"/>
+    <File Name="../../contrib/curl/lib/asyn-thread.c"/>
+    <File Name="../../contrib/curl/lib/asyn.h"/>
+    <File Name="../../contrib/curl/lib/base64.c"/>
+    <File Name="../../contrib/curl/lib/config-amigaos.h"/>
+    <File Name="../../contrib/curl/lib/config-dos.h"/>
+    <File Name="../../contrib/curl/lib/config-linux.h"/>
+    <File Name="../../contrib/curl/lib/config-mac.h"/>
+    <File Name="../../contrib/curl/lib/config-os400.h"/>
+    <File Name="../../contrib/curl/lib/config-osx.h"/>
+    <File Name="../../contrib/curl/lib/config-riscos.h"/>
+    <File Name="../../contrib/curl/lib/config-symbian.h"/>
+    <File Name="../../contrib/curl/lib/config-tpf.h"/>
+    <File Name="../../contrib/curl/lib/config-vxworks.h"/>
+    <File Name="../../contrib/curl/lib/config-win32.h"/>
+    <File Name="../../contrib/curl/lib/config-win32ce.h"/>
+    <File Name="../../contrib/curl/lib/conncache.c"/>
+    <File Name="../../contrib/curl/lib/conncache.h"/>
+    <File Name="../../contrib/curl/lib/connect.c"/>
+    <File Name="../../contrib/curl/lib/connect.h"/>
+    <File Name="../../contrib/curl/lib/content_encoding.c"/>
+    <File Name="../../contrib/curl/lib/content_encoding.h"/>
+    <File Name="../../contrib/curl/lib/cookie.c"/>
+    <File Name="../../contrib/curl/lib/cookie.h"/>
+    <File Name="../../contrib/curl/lib/curl_addrinfo.c"/>
+    <File Name="../../contrib/curl/lib/curl_addrinfo.h"/>
+    <File Name="../../contrib/curl/lib/curl_base64.h"/>
+    <File Name="../../contrib/curl/lib/curl_des.c"/>
+    <File Name="../../contrib/curl/lib/curl_des.h"/>
+    <File Name="../../contrib/curl/lib/curl_endian.c"/>
+    <File Name="../../contrib/curl/lib/curl_endian.h"/>
+    <File Name="../../contrib/curl/lib/curl_fnmatch.c"/>
+    <File Name="../../contrib/curl/lib/curl_fnmatch.h"/>
+    <File Name="../../contrib/curl/lib/curl_gethostname.c"/>
+    <File Name="../../contrib/curl/lib/curl_gethostname.h"/>
+    <File Name="../../contrib/curl/lib/curl_gssapi.c"/>
+    <File Name="../../contrib/curl/lib/curl_gssapi.h"/>
+    <File Name="../../contrib/curl/lib/curl_hmac.h"/>
+    <File Name="../../contrib/curl/lib/curl_ldap.h"/>
+    <File Name="../../contrib/curl/lib/curl_md4.h"/>
+    <File Name="../../contrib/curl/lib/curl_md5.h"/>
+    <File Name="../../contrib/curl/lib/curl_memory.h"/>
+    <File Name="../../contrib/curl/lib/curl_memrchr.c"/>
+    <File Name="../../contrib/curl/lib/curl_memrchr.h"/>
+    <File Name="../../contrib/curl/lib/curl_multibyte.c"/>
+    <File Name="../../contrib/curl/lib/curl_multibyte.h"/>
+    <File Name="../../contrib/curl/lib/curl_ntlm_core.c"/>
+    <File Name="../../contrib/curl/lib/curl_ntlm_core.h"/>
+    <File Name="../../contrib/curl/lib/curl_ntlm_wb.c"/>
+    <File Name="../../contrib/curl/lib/curl_ntlm_wb.h"/>
+    <File Name="../../contrib/curl/lib/curl_printf.h"/>
+    <File Name="../../contrib/curl/lib/curl_rtmp.c"/>
+    <File Name="../../contrib/curl/lib/curl_rtmp.h"/>
+    <File Name="../../contrib/curl/lib/curl_sasl.c"/>
+    <File Name="../../contrib/curl/lib/curl_sasl.h"/>
+    <File Name="../../contrib/curl/lib/curl_sec.h"/>
+    <File Name="../../contrib/curl/lib/curl_setup.h"/>
+    <File Name="../../contrib/curl/lib/curl_setup_once.h"/>
+    <File Name="../../contrib/curl/lib/curl_sspi.c"/>
+    <File Name="../../contrib/curl/lib/curl_sspi.h"/>
+    <File Name="../../contrib/curl/lib/curl_threads.c"/>
+    <File Name="../../contrib/curl/lib/curl_threads.h"/>
+    <File Name="../../contrib/curl/lib/curlx.h"/>
+    <File Name="../../contrib/curl/lib/dict.c"/>
+    <File Name="../../contrib/curl/lib/dict.h"/>
+    <File Name="../../contrib/curl/lib/dotdot.c"/>
+    <File Name="../../contrib/curl/lib/dotdot.h"/>
+    <File Name="../../contrib/curl/lib/easy.c"/>
+    <File Name="../../contrib/curl/lib/easyif.h"/>
+    <File Name="../../contrib/curl/lib/escape.c"/>
+    <File Name="../../contrib/curl/lib/escape.h"/>
+    <File Name="../../contrib/curl/lib/file.c"/>
+    <File Name="../../contrib/curl/lib/file.h"/>
+    <File Name="../../contrib/curl/lib/fileinfo.c"/>
+    <File Name="../../contrib/curl/lib/fileinfo.h"/>
+    <File Name="../../contrib/curl/lib/formdata.c"/>
+    <File Name="../../contrib/curl/lib/formdata.h"/>
+    <File Name="../../contrib/curl/lib/ftp.c"/>
+    <File Name="../../contrib/curl/lib/ftp.h"/>
+    <File Name="../../contrib/curl/lib/ftplistparser.c"/>
+    <File Name="../../contrib/curl/lib/ftplistparser.h"/>
+    <File Name="../../contrib/curl/lib/getenv.c"/>
+    <File Name="../../contrib/curl/lib/getinfo.c"/>
+    <File Name="../../contrib/curl/lib/getinfo.h"/>
+    <File Name="../../contrib/curl/lib/gopher.c"/>
+    <File Name="../../contrib/curl/lib/gopher.h"/>
+    <File Name="../../contrib/curl/lib/hash.c"/>
+    <File Name="../../contrib/curl/lib/hash.h"/>
+    <File Name="../../contrib/curl/lib/hmac.c"/>
+    <File Name="../../contrib/curl/lib/hostasyn.c"/>
+    <File Name="../../contrib/curl/lib/hostcheck.c"/>
+    <File Name="../../contrib/curl/lib/hostcheck.h"/>
+    <File Name="../../contrib/curl/lib/hostip.c"/>
+    <File Name="../../contrib/curl/lib/hostip.h"/>
+    <File Name="../../contrib/curl/lib/hostip4.c"/>
+    <File Name="../../contrib/curl/lib/hostip6.c"/>
+    <File Name="../../contrib/curl/lib/hostsyn.c"/>
+    <File Name="../../contrib/curl/lib/http.c"/>
+    <File Name="../../contrib/curl/lib/http.h"/>
+    <File Name="../../contrib/curl/lib/http2.c"/>
+    <File Name="../../contrib/curl/lib/http2.h"/>
+    <File Name="../../contrib/curl/lib/http_chunks.c"/>
+    <File Name="../../contrib/curl/lib/http_chunks.h"/>
+    <File Name="../../contrib/curl/lib/http_digest.c"/>
+    <File Name="../../contrib/curl/lib/http_digest.h"/>
+    <File Name="../../contrib/curl/lib/http_negotiate.c"/>
+    <File Name="../../contrib/curl/lib/http_negotiate.h"/>
+    <File Name="../../contrib/curl/lib/http_ntlm.c"/>
+    <File Name="../../contrib/curl/lib/http_ntlm.h"/>
+    <File Name="../../contrib/curl/lib/http_proxy.c"/>
+    <File Name="../../contrib/curl/lib/http_proxy.h"/>
+    <File Name="../../contrib/curl/lib/idn_win32.c"/>
+    <File Name="../../contrib/curl/lib/if2ip.c"/>
+    <File Name="../../contrib/curl/lib/if2ip.h"/>
+    <File Name="../../contrib/curl/lib/imap.c"/>
+    <File Name="../../contrib/curl/lib/imap.h"/>
+    <File Name="../../contrib/curl/lib/inet_ntop.c"/>
+    <File Name="../../contrib/curl/lib/inet_ntop.h"/>
+    <File Name="../../contrib/curl/lib/inet_pton.c"/>
+    <File Name="../../contrib/curl/lib/inet_pton.h"/>
+    <File Name="../../contrib/curl/lib/krb5.c"/>
+    <File Name="../../contrib/curl/lib/ldap.c"/>
+    <File Name="../../contrib/curl/lib/llist.c"/>
+    <File Name="../../contrib/curl/lib/llist.h"/>
+    <File Name="../../contrib/curl/lib/md4.c"/>
+    <File Name="../../contrib/curl/lib/md5.c"/>
+    <File Name="../../contrib/curl/lib/memdebug.c"/>
+    <File Name="../../contrib/curl/lib/memdebug.h"/>
+    <File Name="../../contrib/curl/lib/mprintf.c"/>
+    <File Name="../../contrib/curl/lib/multi.c"/>
+    <File Name="../../contrib/curl/lib/multihandle.h"/>
+    <File Name="../../contrib/curl/lib/multiif.h"/>
+    <File Name="../../contrib/curl/lib/netrc.c"/>
+    <File Name="../../contrib/curl/lib/netrc.h"/>
+    <File Name="../../contrib/curl/lib/non-ascii.c"/>
+    <File Name="../../contrib/curl/lib/non-ascii.h"/>
+    <File Name="../../contrib/curl/lib/nonblock.c"/>
+    <File Name="../../contrib/curl/lib/nonblock.h"/>
+    <File Name="../../contrib/curl/lib/nwlib.c"/>
+    <File Name="../../contrib/curl/lib/nwos.c"/>
+    <File Name="../../contrib/curl/lib/openldap.c"/>
+    <File Name="../../contrib/curl/lib/parsedate.c"/>
+    <File Name="../../contrib/curl/lib/parsedate.h"/>
+    <File Name="../../contrib/curl/lib/pingpong.c"/>
+    <File Name="../../contrib/curl/lib/pingpong.h"/>
+    <File Name="../../contrib/curl/lib/pipeline.c"/>
+    <File Name="../../contrib/curl/lib/pipeline.h"/>
+    <File Name="../../contrib/curl/lib/pop3.c"/>
+    <File Name="../../contrib/curl/lib/pop3.h"/>
+    <File Name="../../contrib/curl/lib/progress.c"/>
+    <File Name="../../contrib/curl/lib/progress.h"/>
+    <File Name="../../contrib/curl/lib/rand.c"/>
+    <File Name="../../contrib/curl/lib/rand.h"/>
+    <File Name="../../contrib/curl/lib/rtsp.c"/>
+    <File Name="../../contrib/curl/lib/rtsp.h"/>
+    <File Name="../../contrib/curl/lib/security.c"/>
+    <File Name="../../contrib/curl/lib/select.c"/>
+    <File Name="../../contrib/curl/lib/select.h"/>
+    <File Name="../../contrib/curl/lib/sendf.c"/>
+    <File Name="../../contrib/curl/lib/sendf.h"/>
+    <File Name="../../contrib/curl/lib/setup-os400.h"/>
+    <File Name="../../contrib/curl/lib/setup-vms.h"/>
+    <File Name="../../contrib/curl/lib/share.c"/>
+    <File Name="../../contrib/curl/lib/share.h"/>
+    <File Name="../../contrib/curl/lib/sigpipe.h"/>
+    <File Name="../../contrib/curl/lib/slist.c"/>
+    <File Name="../../contrib/curl/lib/slist.h"/>
+    <File Name="../../contrib/curl/lib/smb.c"/>
+    <File Name="../../contrib/curl/lib/smb.h"/>
+    <File Name="../../contrib/curl/lib/smtp.c"/>
+    <File Name="../../contrib/curl/lib/smtp.h"/>
+    <File Name="../../contrib/curl/lib/sockaddr.h"/>
+    <File Name="../../contrib/curl/lib/socks.c"/>
+    <File Name="../../contrib/curl/lib/socks.h"/>
+    <File Name="../../contrib/curl/lib/socks_gssapi.c"/>
+    <File Name="../../contrib/curl/lib/socks_sspi.c"/>
+    <File Name="../../contrib/curl/lib/speedcheck.c"/>
+    <File Name="../../contrib/curl/lib/speedcheck.h"/>
+    <File Name="../../contrib/curl/lib/splay.c"/>
+    <File Name="../../contrib/curl/lib/splay.h"/>
+    <File Name="../../contrib/curl/lib/ssh.c"/>
+    <File Name="../../contrib/curl/lib/ssh.h"/>
+    <File Name="../../contrib/curl/lib/strcase.c"/>
+    <File Name="../../contrib/curl/lib/strcase.h"/>
+    <File Name="../../contrib/curl/lib/strdup.c"/>
+    <File Name="../../contrib/curl/lib/strdup.h"/>
+    <File Name="../../contrib/curl/lib/strerror.c"/>
+    <File Name="../../contrib/curl/lib/strerror.h"/>
+    <File Name="../../contrib/curl/lib/strtok.c"/>
+    <File Name="../../contrib/curl/lib/strtok.h"/>
+    <File Name="../../contrib/curl/lib/strtoofft.c"/>
+    <File Name="../../contrib/curl/lib/strtoofft.h"/>
+    <File Name="../../contrib/curl/lib/system_win32.c"/>
+    <File Name="../../contrib/curl/lib/system_win32.h"/>
+    <File Name="../../contrib/curl/lib/telnet.c"/>
+    <File Name="../../contrib/curl/lib/telnet.h"/>
+    <File Name="../../contrib/curl/lib/tftp.c"/>
+    <File Name="../../contrib/curl/lib/tftp.h"/>
+    <File Name="../../contrib/curl/lib/timeval.c"/>
+    <File Name="../../contrib/curl/lib/timeval.h"/>
+    <File Name="../../contrib/curl/lib/transfer.c"/>
+    <File Name="../../contrib/curl/lib/transfer.h"/>
+    <File Name="../../contrib/curl/lib/url.c"/>
+    <File Name="../../contrib/curl/lib/url.h"/>
+    <File Name="../../contrib/curl/lib/urldata.h"/>
+    <VirtualDirectory Name="vauth">
+      <File Name="../../contrib/curl/lib/vauth/cleartext.c"/>
+      <File Name="../../contrib/curl/lib/vauth/cram.c"/>
+      <File Name="../../contrib/curl/lib/vauth/digest.c"/>
+      <File Name="../../contrib/curl/lib/vauth/digest.h"/>
+      <File Name="../../contrib/curl/lib/vauth/digest_sspi.c"/>
+      <File Name="../../contrib/curl/lib/vauth/krb5_gssapi.c"/>
+      <File Name="../../contrib/curl/lib/vauth/krb5_sspi.c"/>
+      <File Name="../../contrib/curl/lib/vauth/ntlm.c"/>
+      <File Name="../../contrib/curl/lib/vauth/ntlm.h"/>
+      <File Name="../../contrib/curl/lib/vauth/ntlm_sspi.c"/>
+      <File Name="../../contrib/curl/lib/vauth/oauth2.c"/>
+      <File Name="../../contrib/curl/lib/vauth/spnego_gssapi.c"/>
+      <File Name="../../contrib/curl/lib/vauth/spnego_sspi.c"/>
+      <File Name="../../contrib/curl/lib/vauth/vauth.c"/>
+      <File Name="../../contrib/curl/lib/vauth/vauth.h"/>
+    </VirtualDirectory>
+    <File Name="../../contrib/curl/lib/version.c"/>
+    <VirtualDirectory Name="vtls">
+      <File Name="../../contrib/curl/lib/vtls/axtls.c"/>
+      <File Name="../../contrib/curl/lib/vtls/axtls.h"/>
+      <File Name="../../contrib/curl/lib/vtls/cyassl.c"/>
+      <File Name="../../contrib/curl/lib/vtls/cyassl.h"/>
+      <File Name="../../contrib/curl/lib/vtls/darwinssl.c"/>
+      <File Name="../../contrib/curl/lib/vtls/darwinssl.h"/>
+      <File Name="../../contrib/curl/lib/vtls/gskit.c"/>
+      <File Name="../../contrib/curl/lib/vtls/gskit.h"/>
+      <File Name="../../contrib/curl/lib/vtls/gtls.c"/>
+      <File Name="../../contrib/curl/lib/vtls/gtls.h"/>
+      <File Name="../../contrib/curl/lib/vtls/mbedtls.c"/>
+      <File Name="../../contrib/curl/lib/vtls/mbedtls.h"/>
+      <File Name="../../contrib/curl/lib/vtls/nss.c"/>
+      <File Name="../../contrib/curl/lib/vtls/nssg.h"/>
+      <File Name="../../contrib/curl/lib/vtls/openssl.c"/>
+      <File Name="../../contrib/curl/lib/vtls/openssl.h"/>
+      <File Name="../../contrib/curl/lib/vtls/polarssl.c"/>
+      <File Name="../../contrib/curl/lib/vtls/polarssl.h"/>
+      <File Name="../../contrib/curl/lib/vtls/polarssl_threadlock.c"/>
+      <File Name="../../contrib/curl/lib/vtls/polarssl_threadlock.h"/>
+      <File Name="../../contrib/curl/lib/vtls/schannel.c"/>
+      <File Name="../../contrib/curl/lib/vtls/schannel.h"/>
+      <File Name="../../contrib/curl/lib/vtls/vtls.c"/>
+      <File Name="../../contrib/curl/lib/vtls/vtls.h"/>
+    </VirtualDirectory>
+    <File Name="../../contrib/curl/lib/warnless.c"/>
+    <File Name="../../contrib/curl/lib/warnless.h"/>
+    <File Name="../../contrib/curl/lib/wildcard.c"/>
+    <File Name="../../contrib/curl/lib/wildcard.h"/>
+    <File Name="../../contrib/curl/lib/x509asn1.c"/>
+    <File Name="../../contrib/curl/lib/x509asn1.h"/>
+  </VirtualDirectory>
+</VirtualDirectory>
+  <Dependencies Name="Release"/>
+  <Dependencies Name="Debug"/>
+  <Settings Type="Static Library">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-O3;-w;-fno-stack-protector" C_Options="-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/curl/include"/>
+        <IncludePath Value="../../contrib/curl/lib"/>
+        <IncludePath Value="../../contrib/mbedtls/include"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="BUILDING_LIBCURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="HTTP_ONLY"/>
+        <Preprocessor Value="USE_ZLIB"/>
+        <Preprocessor Value="USE_DARWINSSL"/>
+      </Compiler>
+      <Linker Required="yes" Options="">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="bin/Release/libcurl-lib.a" IntermediateDirectory="obj/Release/curl-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-w" C_Options="-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/curl/include"/>
+        <IncludePath Value="../../contrib/curl/lib"/>
+        <IncludePath Value="../../contrib/mbedtls/include"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="BUILDING_LIBCURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="HTTP_ONLY"/>
+        <Preprocessor Value="USE_ZLIB"/>
+        <Preprocessor Value="USE_DARWINSSL"/>
+      </Compiler>
+      <Linker Required="yes" Options="">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="bin/Debug/libcurl-lib.a" IntermediateDirectory="obj/Debug/curl-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

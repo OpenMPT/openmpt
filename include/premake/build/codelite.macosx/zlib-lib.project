@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="zlib-lib" InternalType="Library">
+  <Plugins/>
+  <Description/>
+<VirtualDirectory Name="zlib-lib">
+  <File Name="../../contrib/zlib/adler32.c"/>
+  <File Name="../../contrib/zlib/compress.c"/>
+  <File Name="../../contrib/zlib/crc32.c"/>
+  <File Name="../../contrib/zlib/crc32.h"/>
+  <File Name="../../contrib/zlib/deflate.c"/>
+  <File Name="../../contrib/zlib/deflate.h"/>
+  <File Name="../../contrib/zlib/gzclose.c"/>
+  <File Name="../../contrib/zlib/gzguts.h"/>
+  <File Name="../../contrib/zlib/gzlib.c"/>
+  <File Name="../../contrib/zlib/gzread.c"/>
+  <File Name="../../contrib/zlib/gzwrite.c"/>
+  <File Name="../../contrib/zlib/infback.c"/>
+  <File Name="../../contrib/zlib/inffast.c"/>
+  <File Name="../../contrib/zlib/inffast.h"/>
+  <File Name="../../contrib/zlib/inffixed.h"/>
+  <File Name="../../contrib/zlib/inflate.c"/>
+  <File Name="../../contrib/zlib/inflate.h"/>
+  <File Name="../../contrib/zlib/inftrees.c"/>
+  <File Name="../../contrib/zlib/inftrees.h"/>
+  <File Name="../../contrib/zlib/trees.c"/>
+  <File Name="../../contrib/zlib/trees.h"/>
+  <File Name="../../contrib/zlib/uncompr.c"/>
+  <File Name="../../contrib/zlib/zconf.h"/>
+  <File Name="../../contrib/zlib/zlib.h"/>
+  <File Name="../../contrib/zlib/zutil.c"/>
+  <File Name="../../contrib/zlib/zutil.h"/>
+</VirtualDirectory>
+  <Dependencies Name="Release"/>
+  <Dependencies Name="Debug"/>
+  <Settings Type="Static Library">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-O3;-w;-fno-stack-protector" C_Options="-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="N_FSEEKO"/>
+        <Preprocessor Value="HAVE_UNISTD_H"/>
+      </Compiler>
+      <Linker Required="yes" Options="">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="bin/Release/libzlib-lib.a" IntermediateDirectory="obj/Release/zlib-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-w" C_Options="-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="_DEBUG"/>
+        <Preprocessor Value="N_FSEEKO"/>
+        <Preprocessor Value="HAVE_UNISTD_H"/>
+      </Compiler>
+      <Linker Required="yes" Options="">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="bin/Debug/libzlib-lib.a" IntermediateDirectory="obj/Debug/zlib-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

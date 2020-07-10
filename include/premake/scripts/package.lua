@@ -140,7 +140,7 @@
 -- Bootstrap Premake in the newly cloned repository
 --
 
-	print("Bootstraping Premake...")
+	print("Bootstrapping Premake...")
 	if compilerIsVS then
 		z = os.execute("Bootstrap.bat " .. compiler)
 	else
@@ -183,29 +183,32 @@ if kind == "source" then
 	local ignoreActions = {
 		"clean",
 		"embed",
-		"gmake2",
 		"package",
+		"self-test",
 		"test",
+		"gmake", -- deprecated
+	}
 
-		"codelite",
-		"xcode4",
+	local perOSActions = {
+		"gmake2",
+		"codelite"
 	}
 
 	for action in premake.action.each() do
 
 		if not table.contains(ignoreActions, action.trigger) then
-			if action.trigger == "gmake" then
+			if table.contains(perOSActions, action.trigger) then
 
-				local gmakeOsList = {
+				local osList = {
 					{ "windows", },
 					{ "unix", "linux" },
 					{ "macosx", },
 					{ "bsd", },
 				}
 
-				for _, os in ipairs(gmakeOsList) do
+				for _, os in ipairs(osList) do
 					local osTarget = os[2] or os[1]
-					genProjects(string.format("--to=build/gmake.%s --os=%s gmake", os[1], osTarget))
+					genProjects(string.format("--to=build/%s.%s --os=%s %s", action.trigger, os[1], osTarget, action.trigger))
 				end
 			else
 				genProjects(string.format("--to=build/%s %s", action.trigger, action.trigger))
@@ -215,7 +218,23 @@ if kind == "source" then
 
 	print("Creating source code package...")
 
-	if 	not execQuiet("git add -f build") or
+	local	excludeList = {
+		".gitignore",
+		".gitattributes",
+		".gitmodules",
+		".travis.yml",
+		".editorconfig",
+		"appveyor.yml",
+		"Bootstrap.*",
+		"packages/*",
+	}
+	local	includeList = {
+		"build",
+		"src/scripts.c",
+	}
+
+	if	not execQuiet("git rm --cached -r -f --ignore-unmatch "..table.concat(excludeList, ' ')) or
+		not execQuiet("git add -f "..table.concat(includeList, ' ')) or
 		not execQuiet("git stash") or
 		not execQuiet("git archive --format=zip -9 -o ../%s-src.zip --prefix=%s/ stash@{0}", pkgName, pkgName) or
 		not execQuiet("git stash drop stash@{0}")
@@ -229,8 +248,7 @@ end
 
 --
 -- Create a binary package for this platform. This step requires a working
--- GNU/Make/GCC environment. I use MinGW on Windows as it produces the
--- smallest binaries.
+-- GNU/Make/GCC environment.
 --
 
 if kind == "binary" then

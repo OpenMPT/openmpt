@@ -1,0 +1,672 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="Premake5" InternalType="Console">
+  <Plugins/>
+  <Description/>
+<VirtualDirectory Name="Premake5">
+  <File Name="../../BUILD.txt"/>
+  <File Name="../../CHANGES.txt"/>
+  <File Name="../../CONTRIBUTORS.txt"/>
+  <File Name="../../LICENSE.txt"/>
+  <File Name="../../mobdebug.lua"/>
+  <VirtualDirectory Name="modules">
+    <VirtualDirectory Name="android">
+      <File Name="../../modules/android/LICENSE.txt"/>
+      <File Name="../../modules/android/README.md"/>
+      <File Name="../../modules/android/_manifest.lua"/>
+      <File Name="../../modules/android/_preload.lua"/>
+      <File Name="../../modules/android/android.lua"/>
+      <VirtualDirectory Name="tests">
+        <File Name="../../modules/android/tests/_tests.lua"/>
+        <File Name="../../modules/android/tests/test_android_files.lua"/>
+        <File Name="../../modules/android/tests/test_android_project.lua"/>
+      </VirtualDirectory>
+      <File Name="../../modules/android/vsandroid_androidproj.lua"/>
+      <File Name="../../modules/android/vsandroid_sln2005.lua"/>
+      <File Name="../../modules/android/vsandroid_vcxproj.lua"/>
+      <File Name="../../modules/android/vsandroid_vstudio.lua"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="codelite">
+      <File Name="../../modules/codelite/README.md"/>
+      <File Name="../../modules/codelite/_manifest.lua"/>
+      <File Name="../../modules/codelite/_preload.lua"/>
+      <File Name="../../modules/codelite/codelite.lua"/>
+      <File Name="../../modules/codelite/codelite_project.lua"/>
+      <File Name="../../modules/codelite/codelite_workspace.lua"/>
+      <VirtualDirectory Name="tests">
+        <File Name="../../modules/codelite/tests/_tests.lua"/>
+        <File Name="../../modules/codelite/tests/test_codelite_config.lua"/>
+        <File Name="../../modules/codelite/tests/test_codelite_project.lua"/>
+        <File Name="../../modules/codelite/tests/test_codelite_workspace.lua"/>
+      </VirtualDirectory>
+    </VirtualDirectory>
+    <VirtualDirectory Name="d">
+      <File Name="../../modules/d/LICENSE.txt"/>
+      <File Name="../../modules/d/README.md"/>
+      <File Name="../../modules/d/_manifest.lua"/>
+      <File Name="../../modules/d/_preload.lua"/>
+      <VirtualDirectory Name="actions">
+        <File Name="../../modules/d/actions/gmake.lua"/>
+        <File Name="../../modules/d/actions/vcxproj.lua"/>
+        <File Name="../../modules/d/actions/visuald.lua"/>
+      </VirtualDirectory>
+      <File Name="../../modules/d/d.lua"/>
+      <VirtualDirectory Name="tests">
+        <File Name="../../modules/d/tests/_tests.lua"/>
+        <File Name="../../modules/d/tests/test_dmd.lua"/>
+        <File Name="../../modules/d/tests/test_gdc.lua"/>
+        <File Name="../../modules/d/tests/test_gmake.lua"/>
+        <File Name="../../modules/d/tests/test_ldc.lua"/>
+        <File Name="../../modules/d/tests/test_visualstudio.lua"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="tools">
+        <File Name="../../modules/d/tools/dmd.lua"/>
+        <File Name="../../modules/d/tools/gdc.lua"/>
+        <File Name="../../modules/d/tools/ldc.lua"/>
+      </VirtualDirectory>
+    </VirtualDirectory>
+    <VirtualDirectory Name="gmake">
+      <File Name="../../modules/gmake/_manifest.lua"/>
+      <File Name="../../modules/gmake/_preload.lua"/>
+      <File Name="../../modules/gmake/gmake.lua"/>
+      <File Name="../../modules/gmake/gmake_cpp.lua"/>
+      <File Name="../../modules/gmake/gmake_csharp.lua"/>
+      <File Name="../../modules/gmake/gmake_makefile.lua"/>
+      <File Name="../../modules/gmake/gmake_utility.lua"/>
+      <File Name="../../modules/gmake/gmake_workspace.lua"/>
+      <VirtualDirectory Name="tests">
+        <File Name="../../modules/gmake/tests/_tests.lua"/>
+        <VirtualDirectory Name="cpp">
+          <File Name="../../modules/gmake/tests/cpp/test_clang.lua"/>
+          <File Name="../../modules/gmake/tests/cpp/test_file_rules.lua"/>
+          <File Name="../../modules/gmake/tests/cpp/test_flags.lua"/>
+          <File Name="../../modules/gmake/tests/cpp/test_ldflags.lua"/>
+          <File Name="../../modules/gmake/tests/cpp/test_make_linking.lua"/>
+          <File Name="../../modules/gmake/tests/cpp/test_make_pch.lua"/>
+          <File Name="../../modules/gmake/tests/cpp/test_objects.lua"/>
+          <File Name="../../modules/gmake/tests/cpp/test_target_rules.lua"/>
+          <File Name="../../modules/gmake/tests/cpp/test_tools.lua"/>
+          <File Name="../../modules/gmake/tests/cpp/test_wiidev.lua"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="cs">
+          <File Name="../../modules/gmake/tests/cs/test_embed_files.lua"/>
+          <File Name="../../modules/gmake/tests/cs/test_flags.lua"/>
+          <File Name="../../modules/gmake/tests/cs/test_links.lua"/>
+          <File Name="../../modules/gmake/tests/cs/test_response.lua"/>
+          <File Name="../../modules/gmake/tests/cs/test_sources.lua"/>
+        </VirtualDirectory>
+        <File Name="../../modules/gmake/tests/test_make_escaping.lua"/>
+        <File Name="../../modules/gmake/tests/test_make_tovar.lua"/>
+        <VirtualDirectory Name="workspace">
+          <File Name="../../modules/gmake/tests/workspace/test_config_maps.lua"/>
+          <File Name="../../modules/gmake/tests/workspace/test_default_config.lua"/>
+          <File Name="../../modules/gmake/tests/workspace/test_group_rule.lua"/>
+          <File Name="../../modules/gmake/tests/workspace/test_help_rule.lua"/>
+          <File Name="../../modules/gmake/tests/workspace/test_project_rule.lua"/>
+        </VirtualDirectory>
+      </VirtualDirectory>
+    </VirtualDirectory>
+    <VirtualDirectory Name="gmake2">
+      <File Name="../../modules/gmake2/_manifest.lua"/>
+      <File Name="../../modules/gmake2/_preload.lua"/>
+      <File Name="../../modules/gmake2/gmake2.lua"/>
+      <File Name="../../modules/gmake2/gmake2_cpp.lua"/>
+      <File Name="../../modules/gmake2/gmake2_csharp.lua"/>
+      <File Name="../../modules/gmake2/gmake2_makefile.lua"/>
+      <File Name="../../modules/gmake2/gmake2_utility.lua"/>
+      <File Name="../../modules/gmake2/gmake2_workspace.lua"/>
+      <VirtualDirectory Name="tests">
+        <File Name="../../modules/gmake2/tests/_tests.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_buildcmds.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_clang.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_file_rules.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_flags.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_ldflags.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_linking.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_makefile.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_objects.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_pch.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_perfile_flags.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_target_rules.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_tools.lua"/>
+      </VirtualDirectory>
+    </VirtualDirectory>
+    <VirtualDirectory Name="raw">
+      <File Name="../../modules/raw/README.md"/>
+      <File Name="../../modules/raw/_manifest.lua"/>
+      <File Name="../../modules/raw/_preload.lua"/>
+      <File Name="../../modules/raw/raw.lua"/>
+      <File Name="../../modules/raw/raw_action.lua"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="self-test">
+      <File Name="../../modules/self-test/_manifest.lua"/>
+      <File Name="../../modules/self-test/self-test.lua"/>
+      <File Name="../../modules/self-test/test_assertions.lua"/>
+      <File Name="../../modules/self-test/test_declare.lua"/>
+      <File Name="../../modules/self-test/test_helpers.lua"/>
+      <File Name="../../modules/self-test/test_runner.lua"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="vstudio">
+      <File Name="../../modules/vstudio/_manifest.lua"/>
+      <File Name="../../modules/vstudio/_preload.lua"/>
+      <VirtualDirectory Name="tests">
+        <File Name="../../modules/vstudio/tests/_tests.lua"/>
+        <VirtualDirectory Name="cs2005">
+          <File Name="../../modules/vstudio/tests/cs2005/projectsettings.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_assembly_refs.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_build_events.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_common_props.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_compiler_props.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_debug_props.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_files.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_icon.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_netcore.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_no_warn.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_nuget_config.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_nuget_packages_config.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_nuget_references.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_output_props.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_platform_groups.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_project_refs.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_targets.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_user_file.lua"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="dotnet2005">
+          <File Name="../../modules/vstudio/tests/dotnet2005/projectelement.lua"/>
+          <File Name="../../modules/vstudio/tests/dotnet2005/test_nuget_framework_folders.lua"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="fs2005">
+          <File Name="../../modules/vstudio/tests/fs2005/projectsettings.lua"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="sln2005">
+          <File Name="../../modules/vstudio/tests/sln2005/test_dependencies.lua"/>
+          <File Name="../../modules/vstudio/tests/sln2005/test_header.lua"/>
+          <File Name="../../modules/vstudio/tests/sln2005/test_nested_projects.lua"/>
+          <File Name="../../modules/vstudio/tests/sln2005/test_platforms.lua"/>
+          <File Name="../../modules/vstudio/tests/sln2005/test_projects.lua"/>
+          <File Name="../../modules/vstudio/tests/sln2005/test_sections.lua"/>
+          <File Name="../../modules/vstudio/tests/sln2005/test_shared_projects.lua"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="vc200x">
+          <File Name="../../modules/vstudio/tests/vc200x/test_assembly_refs.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_build_steps.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_compiler_block.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_configuration.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_debug_settings.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_excluded_configs.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_files.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_linker_block.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_manifest_block.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_nmake_settings.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_platforms.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_project.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_project_refs.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_resource_compiler.lua"/>
+          <File Name="../../modules/vstudio/tests/vc200x/test_user_file.lua"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="vc2010">
+          <File Name="../../modules/vstudio/tests/vc2010/test_assembly_refs.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_build_events.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_build_log.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_build_steps.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_character_set.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_compile_settings.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_config_props.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_debug_settings.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_ensure_nuget_imports.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_excluded_configs.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_extension_settings.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_extension_targets.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_files.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_filter_ids.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_filters.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_floatingpoint.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_fxcompile_settings.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_globals.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_header.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_item_def_group.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_language_settings.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_language_targets.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_link.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_manifest.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_nmake_props.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_nuget_package_references.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_nuget_packages_config.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_output_props.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_platform_toolset.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_project_configs.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_project_refs.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_prop_sheet.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_resource_compile.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_rule_props.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_rule_targets.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_rule_vars.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_rule_xml.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_target_machine.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_tokens.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_user_file.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2010/test_vectorextensions.lua"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="vc2013">
+          <File Name="../../modules/vstudio/tests/vc2013/test_vcxitems.lua"/>
+        </VirtualDirectory>
+      </VirtualDirectory>
+      <File Name="../../modules/vstudio/vs2005.lua"/>
+      <File Name="../../modules/vstudio/vs2005_csproj.lua"/>
+      <File Name="../../modules/vstudio/vs2005_csproj_user.lua"/>
+      <File Name="../../modules/vstudio/vs2005_dotnetbase.lua"/>
+      <File Name="../../modules/vstudio/vs2005_fsproj.lua"/>
+      <File Name="../../modules/vstudio/vs2005_fsproj_user.lua"/>
+      <File Name="../../modules/vstudio/vs2005_solution.lua"/>
+      <File Name="../../modules/vstudio/vs2008.lua"/>
+      <File Name="../../modules/vstudio/vs200x_vcproj.lua"/>
+      <File Name="../../modules/vstudio/vs200x_vcproj_user.lua"/>
+      <File Name="../../modules/vstudio/vs2010.lua"/>
+      <File Name="../../modules/vstudio/vs2010_nuget.lua"/>
+      <File Name="../../modules/vstudio/vs2010_rules_props.lua"/>
+      <File Name="../../modules/vstudio/vs2010_rules_targets.lua"/>
+      <File Name="../../modules/vstudio/vs2010_rules_xml.lua"/>
+      <File Name="../../modules/vstudio/vs2010_vcxproj.lua"/>
+      <File Name="../../modules/vstudio/vs2010_vcxproj_filters.lua"/>
+      <File Name="../../modules/vstudio/vs2010_vcxproj_user.lua"/>
+      <File Name="../../modules/vstudio/vs2012.lua"/>
+      <File Name="../../modules/vstudio/vs2013.lua"/>
+      <File Name="../../modules/vstudio/vs2013_vcxitems.lua"/>
+      <File Name="../../modules/vstudio/vs2015.lua"/>
+      <File Name="../../modules/vstudio/vs2017.lua"/>
+      <File Name="../../modules/vstudio/vs2019.lua"/>
+      <File Name="../../modules/vstudio/vstudio.lua"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="xcode">
+      <File Name="../../modules/xcode/LICENSE.TXT"/>
+      <File Name="../../modules/xcode/_manifest.lua"/>
+      <File Name="../../modules/xcode/_preload.lua"/>
+      <VirtualDirectory Name="tests">
+        <File Name="../../modules/xcode/tests/_tests.lua"/>
+        <File Name="../../modules/xcode/tests/test_header_footer.lua"/>
+        <File Name="../../modules/xcode/tests/test_xcode4_project.lua"/>
+        <File Name="../../modules/xcode/tests/test_xcode4_workspace.lua"/>
+        <File Name="../../modules/xcode/tests/test_xcode_dependencies.lua"/>
+        <File Name="../../modules/xcode/tests/test_xcode_project.lua"/>
+      </VirtualDirectory>
+      <File Name="../../modules/xcode/xcode.lua"/>
+      <File Name="../../modules/xcode/xcode4_workspace.lua"/>
+      <File Name="../../modules/xcode/xcode_common.lua"/>
+      <File Name="../../modules/xcode/xcode_project.lua"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <File Name="../../premake4.lua"/>
+  <File Name="../../premake5.lua"/>
+  <VirtualDirectory Name="scripts">
+    <File Name="../../scripts/changes.lua"/>
+    <File Name="../../scripts/embed.lua"/>
+    <File Name="../../scripts/package.lua"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="src">
+    <File Name="../../src/_manifest.lua"/>
+    <File Name="../../src/_modules.lua"/>
+    <File Name="../../src/_premake_init.lua"/>
+    <File Name="../../src/_premake_main.lua"/>
+    <VirtualDirectory Name="actions">
+      <VirtualDirectory Name="clean">
+        <File Name="../../src/actions/clean/_clean.lua"/>
+      </VirtualDirectory>
+    </VirtualDirectory>
+    <VirtualDirectory Name="base">
+      <File Name="../../src/base/_foundation.lua"/>
+      <File Name="../../src/base/action.lua"/>
+      <File Name="../../src/base/api.lua"/>
+      <File Name="../../src/base/config.lua"/>
+      <File Name="../../src/base/configset.lua"/>
+      <File Name="../../src/base/container.lua"/>
+      <File Name="../../src/base/context.lua"/>
+      <File Name="../../src/base/criteria.lua"/>
+      <File Name="../../src/base/detoken.lua"/>
+      <File Name="../../src/base/field.lua"/>
+      <File Name="../../src/base/fileconfig.lua"/>
+      <File Name="../../src/base/global.lua"/>
+      <File Name="../../src/base/globals.lua"/>
+      <File Name="../../src/base/group.lua"/>
+      <File Name="../../src/base/help.lua"/>
+      <File Name="../../src/base/http.lua"/>
+      <File Name="../../src/base/io.lua"/>
+      <File Name="../../src/base/json.lua"/>
+      <File Name="../../src/base/jsonwrapper.lua"/>
+      <File Name="../../src/base/languages.lua"/>
+      <File Name="../../src/base/moduledownloader.lua"/>
+      <File Name="../../src/base/option.lua"/>
+      <File Name="../../src/base/os.lua"/>
+      <File Name="../../src/base/oven.lua"/>
+      <File Name="../../src/base/path.lua"/>
+      <File Name="../../src/base/premake.lua"/>
+      <File Name="../../src/base/project.lua"/>
+      <File Name="../../src/base/rule.lua"/>
+      <File Name="../../src/base/semver.lua"/>
+      <File Name="../../src/base/string.lua"/>
+      <File Name="../../src/base/table.lua"/>
+      <File Name="../../src/base/term.lua"/>
+      <File Name="../../src/base/tools.lua"/>
+      <File Name="../../src/base/tree.lua"/>
+      <File Name="../../src/base/validation.lua"/>
+      <File Name="../../src/base/workspace.lua"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="host">
+      <File Name="../../src/host/buffered_io.c"/>
+      <File Name="../../src/host/buffered_io.h"/>
+      <File Name="../../src/host/criteria_matches.c"/>
+      <File Name="../../src/host/curl_utils.c"/>
+      <File Name="../../src/host/curl_utils.h"/>
+      <File Name="../../src/host/debug_prompt.c"/>
+      <File Name="../../src/host/http_download.c"/>
+      <File Name="../../src/host/http_get.c"/>
+      <File Name="../../src/host/http_post.c"/>
+      <File Name="../../src/host/lua_auxlib.c"/>
+      <File Name="../../src/host/lua_shimtable.h"/>
+      <File Name="../../src/host/os_chdir.c"/>
+      <File Name="../../src/host/os_chmod.c"/>
+      <File Name="../../src/host/os_comparefiles.c"/>
+      <File Name="../../src/host/os_compile.c"/>
+      <File Name="../../src/host/os_copyfile.c"/>
+      <File Name="../../src/host/os_getWindowsRegistry.c"/>
+      <File Name="../../src/host/os_getcwd.c"/>
+      <File Name="../../src/host/os_getpass.c"/>
+      <File Name="../../src/host/os_getversion.c"/>
+      <File Name="../../src/host/os_host.c"/>
+      <File Name="../../src/host/os_is64bit.c"/>
+      <File Name="../../src/host/os_isdir.c"/>
+      <File Name="../../src/host/os_isfile.c"/>
+      <File Name="../../src/host/os_islink.c"/>
+      <File Name="../../src/host/os_listWindowsRegistry.c"/>
+      <File Name="../../src/host/os_locate.c"/>
+      <File Name="../../src/host/os_match.c"/>
+      <File Name="../../src/host/os_mkdir.c"/>
+      <File Name="../../src/host/os_pathsearch.c"/>
+      <File Name="../../src/host/os_realpath.c"/>
+      <File Name="../../src/host/os_remove.c"/>
+      <File Name="../../src/host/os_rename.c"/>
+      <File Name="../../src/host/os_rmdir.c"/>
+      <File Name="../../src/host/os_stat.c"/>
+      <File Name="../../src/host/os_touchfile.c"/>
+      <File Name="../../src/host/os_uuid.c"/>
+      <File Name="../../src/host/os_writefile_ifnotequal.c"/>
+      <File Name="../../src/host/path_getabsolute.c"/>
+      <File Name="../../src/host/path_getrelative.c"/>
+      <File Name="../../src/host/path_isabsolute.c"/>
+      <File Name="../../src/host/path_isabsolute.h"/>
+      <File Name="../../src/host/path_join.c"/>
+      <File Name="../../src/host/path_normalize.c"/>
+      <File Name="../../src/host/path_translate.c"/>
+      <File Name="../../src/host/path_wildcards.c"/>
+      <File Name="../../src/host/premake.c"/>
+      <File Name="../../src/host/premake.h"/>
+      <File Name="../../src/host/premake_main.c"/>
+      <File Name="../../src/host/string_endswith.c"/>
+      <File Name="../../src/host/string_hash.c"/>
+      <File Name="../../src/host/string_sha1.c"/>
+      <File Name="../../src/host/string_startswith.c"/>
+      <File Name="../../src/host/term_textColor.c"/>
+      <File Name="../../src/host/zip_extract.c"/>
+    </VirtualDirectory>
+    <File Name="../../src/scripts.c"/>
+    <VirtualDirectory Name="tools">
+      <File Name="../../src/tools/clang.lua"/>
+      <File Name="../../src/tools/dotnet.lua"/>
+      <File Name="../../src/tools/gcc.lua"/>
+      <File Name="../../src/tools/mingw.lua"/>
+      <File Name="../../src/tools/msc.lua"/>
+      <File Name="../../src/tools/snc.lua"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="tests">
+    <File Name="../../tests/_tests.lua"/>
+    <VirtualDirectory Name="api">
+      <File Name="../../tests/api/test_boolean_kind.lua"/>
+      <File Name="../../tests/api/test_containers.lua"/>
+      <File Name="../../tests/api/test_deprecations.lua"/>
+      <File Name="../../tests/api/test_directory_kind.lua"/>
+      <File Name="../../tests/api/test_list_kind.lua"/>
+      <File Name="../../tests/api/test_path_kind.lua"/>
+      <File Name="../../tests/api/test_register.lua"/>
+      <File Name="../../tests/api/test_string_kind.lua"/>
+      <File Name="../../tests/api/test_table_kind.lua"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="base">
+      <File Name="../../tests/base/test_aliasing.lua"/>
+      <File Name="../../tests/base/test_binmodules.lua"/>
+      <File Name="../../tests/base/test_configset.lua"/>
+      <File Name="../../tests/base/test_context.lua"/>
+      <File Name="../../tests/base/test_criteria.lua"/>
+      <File Name="../../tests/base/test_detoken.lua"/>
+      <File Name="../../tests/base/test_filename.lua"/>
+      <File Name="../../tests/base/test_http.lua"/>
+      <File Name="../../tests/base/test_include.lua"/>
+      <File Name="../../tests/base/test_json.lua"/>
+      <File Name="../../tests/base/test_module_loader.lua"/>
+      <File Name="../../tests/base/test_option.lua"/>
+      <File Name="../../tests/base/test_os.lua"/>
+      <File Name="../../tests/base/test_override.lua"/>
+      <File Name="../../tests/base/test_path.lua"/>
+      <File Name="../../tests/base/test_premake_command.lua"/>
+      <File Name="../../tests/base/test_table.lua"/>
+      <File Name="../../tests/base/test_tree.lua"/>
+      <File Name="../../tests/base/test_uuid.lua"/>
+      <File Name="../../tests/base/test_validation.lua"/>
+      <File Name="../../tests/base/test_versions.lua"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="config">
+      <File Name="../../tests/config/test_linkinfo.lua"/>
+      <File Name="../../tests/config/test_links.lua"/>
+      <File Name="../../tests/config/test_targetinfo.lua"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="folder">
+      <File Name="../../tests/folder/ok.lua"/>
+      <File Name="../../tests/folder/premake5.lua"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="oven">
+      <File Name="../../tests/oven/test_filtering.lua"/>
+      <File Name="../../tests/oven/test_objdirs.lua"/>
+    </VirtualDirectory>
+    <File Name="../../tests/pepperfish_profiler.lua"/>
+    <VirtualDirectory Name="project">
+      <File Name="../../tests/project/test_config_maps.lua"/>
+      <File Name="../../tests/project/test_eachconfig.lua"/>
+      <File Name="../../tests/project/test_getconfig.lua"/>
+      <File Name="../../tests/project/test_location.lua"/>
+      <File Name="../../tests/project/test_sources.lua"/>
+      <File Name="../../tests/project/test_vpaths.lua"/>
+    </VirtualDirectory>
+    <File Name="../../tests/test_premake.lua"/>
+    <File Name="../../tests/test_stress.lua"/>
+    <File Name="../../tests/test_string.lua"/>
+    <VirtualDirectory Name="tools">
+      <File Name="../../tests/tools/test_dotnet.lua"/>
+      <File Name="../../tests/tools/test_gcc.lua"/>
+      <File Name="../../tests/tools/test_msc.lua"/>
+      <File Name="../../tests/tools/test_snc.lua"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="workspace">
+      <File Name="../../tests/workspace/test_eachconfig.lua"/>
+      <File Name="../../tests/workspace/test_location.lua"/>
+      <File Name="../../tests/workspace/test_objdirs.lua"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+</VirtualDirectory>
+  <Dependencies Name="x86-Release">
+    <Project Name="lua-lib"/>
+    <Project Name="zip-lib"/>
+    <Project Name="zlib-lib"/>
+    <Project Name="curl-lib"/>
+  </Dependencies>
+  <Dependencies Name="x64-Release">
+    <Project Name="lua-lib"/>
+    <Project Name="zip-lib"/>
+    <Project Name="zlib-lib"/>
+    <Project Name="curl-lib"/>
+  </Dependencies>
+  <Dependencies Name="x86-Debug">
+    <Project Name="lua-lib"/>
+    <Project Name="zip-lib"/>
+    <Project Name="zlib-lib"/>
+    <Project Name="curl-lib"/>
+  </Dependencies>
+  <Dependencies Name="x64-Debug">
+    <Project Name="lua-lib"/>
+    <Project Name="zip-lib"/>
+    <Project Name="zlib-lib"/>
+    <Project Name="curl-lib"/>
+  </Dependencies>
+  <Settings Type="Executable">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="x86-Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32;-flto;-O3;-Wall;-Wextra;-fno-stack-protector" C_Options="-m32;-flto;-O3;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/lua/src"/>
+        <IncludePath Value="../../contrib/luashim"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <IncludePath Value="../../contrib/libzip"/>
+        <IncludePath Value="../../contrib/curl/include"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="NDEBUG"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m32;-flto;bin/x86/Release/lua-lib.lib;bin/x86/Release/zip-lib.lib;bin/x86/Release/zlib-lib.lib;bin/x86/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../bin/release/premake5.exe" IntermediateDirectory="obj/x86/Release/Premake5" Command="../../bin/release/premake5.exe" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="x64-Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64;-flto;-O3;-Wall;-Wextra;-fno-stack-protector" C_Options="-m64;-flto;-O3;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/lua/src"/>
+        <IncludePath Value="../../contrib/luashim"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <IncludePath Value="../../contrib/libzip"/>
+        <IncludePath Value="../../contrib/curl/include"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="NDEBUG"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m64;-flto;bin/x64/Release/lua-lib.lib;bin/x64/Release/zip-lib.lib;bin/x64/Release/zlib-lib.lib;bin/x64/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../bin/release/premake5.exe" IntermediateDirectory="obj/x64/Release/Premake5" Command="../../bin/release/premake5.exe" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="x86-Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m32;-g;-Wall;-Wextra" C_Options="-m32;-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/lua/src"/>
+        <IncludePath Value="../../contrib/luashim"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <IncludePath Value="../../contrib/libzip"/>
+        <IncludePath Value="../../contrib/curl/include"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="_DEBUG"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m32;bin/x86/Debug/lua-lib.lib;bin/x86/Debug/zip-lib.lib;bin/x86/Debug/zlib-lib.lib;bin/x86/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../bin/debug/premake5.exe" IntermediateDirectory="obj/x86/Debug/Premake5" Command="bin/debug/premake5.exe" CommandArguments="--scripts=./../.. test" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../.." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="x64-Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-m64;-g;-Wall;-Wextra" C_Options="-m64;-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="../../contrib/lua/src"/>
+        <IncludePath Value="../../contrib/luashim"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <IncludePath Value="../../contrib/libzip"/>
+        <IncludePath Value="../../contrib/curl/include"/>
+        <Preprocessor Value="PREMAKE_COMPRESSION"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="_DEBUG"/>
+      </Compiler>
+      <Linker Required="yes" Options="-m64;bin/x64/Debug/lua-lib.lib;bin/x64/Debug/zip-lib.lib;bin/x64/Debug/zlib-lib.lib;bin/x64/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="../../bin/debug/premake5.exe" IntermediateDirectory="obj/x64/Debug/Premake5" Command="bin/debug/premake5.exe" CommandArguments="--scripts=./../.. test" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../.." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <CustomBuild Enabled="no"/>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

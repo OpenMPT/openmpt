@@ -29,6 +29,7 @@
 			[".cc"] = "Sources",
 			[".cpp"] = "Sources",
 			[".cxx"] = "Sources",
+			[".c++"] = "Sources",
 			[".dylib"] = "Frameworks",
 			[".framework"] = "Frameworks",
 			[".m"] = "Sources",
@@ -48,8 +49,7 @@
 	end
 
 	function xcode.isItemResource(project, node)
-
-		local res;
+		local res
 
 		if project and project.xcodebuildresources then
 			if type(project.xcodebuildresources) == "table" then
@@ -59,20 +59,15 @@
 
 		local function checkItemInList(item, list)
 			if item then
-				if list then
-					if type(list) == "table" then
-						for _,v in pairs(list) do
-							if string.find(item, v) then
-								return true
-							end
-						end
+				for _,v in pairs(list) do
+					if string.find(item, path.wildcards(v)) then
+						return true
 					end
 				end
 			end
 			return false
 		end
 
-		--print (node.path, node.buildid, node.cfg, res)
 		if (checkItemInList(node.path, res)) then
 			return true
 		end
@@ -111,9 +106,9 @@
 					return "sourcecode.c.c"
 				elseif p.languages.iscpp(filecfg.compileas) then
 					return "sourcecode.cpp.cpp"
-				elseif filecfg.language == "ObjC" then
+				elseif filecfg.compileas == p.OBJECTIVEC then
 					return "sourcecode.c.objc"
-				elseif 	filecfg.language == "ObjCpp" then
+				elseif filecfg.compileas == p.OBJECTIVECPP then
 					return "sourcecode.cpp.objcpp"
 				end
 			end
@@ -125,6 +120,7 @@
 			[".cpp"]       = "sourcecode.cpp.cpp",
 			[".css"]       = "text.css",
 			[".cxx"]       = "sourcecode.cpp.cpp",
+			[".c++"]       = "sourcecode.cpp.cpp",
 			[".S"]         = "sourcecode.asm.asm",
 			[".framework"] = "wrapper.framework",
 			[".gif"]       = "image.gif",
@@ -749,16 +745,7 @@
 		for _, node in ipairs(tr.products.children) do
 			local name = tr.project.name
 
-			-- This function checks whether there are build commands of a specific
-			-- type to be executed; they will be generated correctly, but the project
-			-- commands will not contain any per-configuration commands, so the logic
-			-- has to be extended a bit to account for that.
 			local function hasBuildCommands(which)
-				-- standard check...this is what existed before
-				if #tr.project[which] > 0 then
-					return true
-				end
-				-- what if there are no project-level commands? check configs...
 				for _, cfg in ipairs(tr.configs) do
 					if #cfg[which] > 0 then
 						return true
@@ -939,16 +926,13 @@
 		local wrapperWritten = false
 
 		local function doblock(id, name, which)
-			-- start with the project-level commands (most common)
-			local prjcmds = tr.project[which]
-			local commands = table.join(prjcmds, {})
-
 			-- see if there are any config-specific commands to add
+			local commands = {}
 			for _, cfg in ipairs(tr.configs) do
 				local cfgcmds = cfg[which]
-				if #cfgcmds > #prjcmds then
+				if #cfgcmds > 0 then
 					table.insert(commands, 'if [ "${CONFIGURATION}" = "' .. cfg.buildcfg .. '" ]; then')
-					for i = #prjcmds + 1, #cfgcmds do
+					for i = 1, #cfgcmds do
 						table.insert(commands, cfgcmds[i])
 					end
 					table.insert(commands, 'fi')
@@ -1232,6 +1216,11 @@
 			local family = families[cfg.iosfamily]
 			if family then
 				settings['TARGETED_DEVICE_FAMILY'] = family
+			end
+		else
+			local minOSVersion = project.systemversion(cfg)
+			if minOSVersion ~= nil then
+				settings['MACOSX_DEPLOYMENT_TARGET'] = minOSVersion
 			end
 		end
 
