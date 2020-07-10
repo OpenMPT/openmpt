@@ -87,12 +87,12 @@ bool CSoundFile::ReadOpusSample(SAMPLEINDEX sample, FileReader &file)
 	std::string sampleName;
 
 	FileReader initial = file.GetChunk(65536); // 512 is recommended by libopusfile
-	if(op_test(NULL, initial.GetRawData<unsigned char>(), initial.GetLength()) != 0)
+	if(op_test(NULL, initial.GetRawData<unsigned char>().data(), initial.GetLength()) != 0)
 	{
 		return false;
 	}
 
-	OggOpusFile *of = op_open_memory(file.GetRawData<unsigned char>(), file.GetLength(), NULL);
+	OggOpusFile *of = op_open_memory(file.GetRawData<unsigned char>().data(), file.GetLength(), NULL);
 	if(!of)
 	{
 		return false;

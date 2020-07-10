@@ -95,7 +95,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 			std::byte *chunkData = new (std::nothrow) std::byte[chunkSize];
 			if(chunkData)
 			{
-				file.ReadRaw(chunkData, chunkSize);
+				file.ReadRaw(mpt::span(chunkData, chunkSize));
 				plugin.SetChunk(mpt::as_span(chunkData, chunkSize), false);
 				delete[] chunkData;
 			} else
@@ -146,7 +146,7 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 			std::byte *chunkData = new (std::nothrow) std::byte[chunkSize];
 			if(chunkData)
 			{
-				file.ReadRaw(chunkData, chunkSize);
+				file.ReadRaw(mpt::span(chunkData, chunkSize));
 				plugin.SetChunk(mpt::as_span(chunkData, chunkSize), true);
 				delete[] chunkData;
 			} else

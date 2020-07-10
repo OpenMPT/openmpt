@@ -241,7 +241,7 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 				MPT_LOG(LogDebug, "MMCMP", mpt::format(U_("  Unpacked sub-block %1: offset %2, size=%3"))(i, static_cast<uint32>(psubblk->unpk_pos), static_cast<uint32>(psubblk->unpk_size)));
 #endif
 				if(!file.Seek(memPos)) return false;
-				if(file.ReadRaw(&(unpackedData[psubblk->unpk_pos]), psubblk->unpk_size) != psubblk->unpk_size) return false;
+				if(file.ReadRaw(mpt::span(&(unpackedData[psubblk->unpk_pos]), psubblk->unpk_size)).size() != psubblk->unpk_size) return false;
 				psubblk++;
 			}
 		} else
@@ -336,7 +336,7 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 			uint32 oldval = 0;
 			if(blk.tt_entries > sizeof(ptable)
 				|| !file.Seek(memPos)
-				|| file.ReadRaw(ptable, blk.tt_entries) < blk.tt_entries)
+				|| file.ReadRaw(mpt::span(ptable, blk.tt_entries)).size() < blk.tt_entries)
 				return false;
 
 			if(!file.CanRead(blk.pk_size - blk.tt_entries)) return false;

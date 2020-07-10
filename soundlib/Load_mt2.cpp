@@ -730,8 +730,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					mixPlug.pluginData.resize(dataSize);
 					if(vstHeader.useChunks)
 					{
-						memcpy(mixPlug.pluginData.data(), "fEvN", 4);	// 'NvEf' plugin data type
-						chunk.ReadRaw(mixPlug.pluginData.data() + 4, vstHeader.n);
+						std::memcpy(mixPlug.pluginData.data(), "fEvN", 4);	// 'NvEf' plugin data type
+						chunk.ReadRaw(mpt::span(mixPlug.pluginData.data() + 4, vstHeader.n));
 					} else
 					{
 						float32 *f = reinterpret_cast<float32 *>(mixPlug.pluginData.data());

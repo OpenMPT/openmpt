@@ -59,7 +59,7 @@ public:
 			// Fetch more bits
 			if(m_bufPos >= m_bufSize)
 			{
-				m_bufSize = ReadRaw(buffer, sizeof(buffer));
+				m_bufSize = ReadRaw(mpt::as_span(buffer)).size();
 				m_bufPos = 0;
 				if(!m_bufSize)
 				{

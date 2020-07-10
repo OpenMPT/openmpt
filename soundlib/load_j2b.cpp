@@ -1032,7 +1032,7 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		Bytef buffer[mpt::IO::BUFFERSIZE_TINY];
 		uint32 readSize = std::min(static_cast<uint32>(sizeof(buffer)), remainRead);
-		file.ReadRaw(buffer, readSize);
+		file.ReadRaw(mpt::span(buffer, readSize));
 		crc = crc32(crc, buffer, readSize);
 
 		strm.avail_in = readSize;

@@ -2092,7 +2092,7 @@ void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
 	if(pluginDataChunk.IsValid())
 	{
 		plugin.pluginData.resize(pluginDataChunkSize);
-		pluginDataChunk.ReadRaw(plugin.pluginData.data(), pluginDataChunkSize);
+		pluginDataChunk.ReadRaw(mpt::as_span(plugin.pluginData));
 	}
 
 	FileReader modularData = file.ReadChunk(file.ReadUint32LE());

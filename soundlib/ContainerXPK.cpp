@@ -421,7 +421,7 @@ bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, Con
 	bool result = false;
 	try
 	{
-		result = XPK_DoUnpack(file.GetRawData<uint8>(), header.SrcLen - (sizeof(XPKFILEHEADER) - 8), unpackedData, header.DstLen);
+		result = XPK_DoUnpack(file.GetRawData<uint8>().data(), header.SrcLen - (sizeof(XPKFILEHEADER) - 8), unpackedData, header.DstLen);
 	} catch(mpt::out_of_memory e)
 	{
 		mpt::delete_out_of_memory(e);

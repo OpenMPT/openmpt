@@ -65,8 +65,8 @@ public:
 	static mpg123_ssize_t FileReaderRead(void *fp, void *buf, mpg123_size_t count)
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
-		size_t readBytes = std::min(count, static_cast<size_t>(file.BytesLeft()));
-		file.ReadRaw(static_cast<char *>(buf), readBytes);
+		std::size_t readBytes = std::min(count, static_cast<size_t>(file.BytesLeft()));
+		file.ReadRaw(mpt::span(mpt::void_cast<std::byte*>(buf), readBytes));
 		return readBytes;
 	}
 	static mpg123_off_t FileReaderLSeek(void *fp, mpg123_off_t offset, int whence)

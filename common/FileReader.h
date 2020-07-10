@@ -97,7 +97,7 @@ namespace FileReader
 	bool Read(TFileCursor &f, T &target)
 	{
 		mpt::byte_span dst = mpt::as_raw_memory(target);
-		if(dst.size() != f.GetRaw(dst))
+		if(dst.size() != f.GetRaw(dst).size())
 		{
 			return false;
 		}
@@ -393,7 +393,7 @@ namespace FileReader
 		{
 			copyBytes = f.BytesLeft();
 		}
-		f.GetRaw(mpt::as_raw_memory(target).data(), copyBytes);
+		f.GetRaw(mpt::span(mpt::as_raw_memory(target).data(), copyBytes));
 		std::memset(mpt::as_raw_memory(target).data() + copyBytes, 0, sizeof(target) - copyBytes);
 		f.Skip(partialSize);
 		return copyBytes;
@@ -496,7 +496,7 @@ namespace FileReader
 		{
 			char buffer[64];
 			typename TFileCursor::off_t avail = 0;
-			while((avail = std::min(f.GetRaw(buffer, std::size(buffer)), maxLength - dest.length())) != 0)
+			while((avail = std::min(f.GetRaw(mpt::as_span(buffer)).size(), maxLength - dest.length())) != 0)
 			{
 				auto end = std::find(buffer, buffer + avail, '\0');
 				dest.insert(dest.end(), buffer, end);
@@ -527,7 +527,7 @@ namespace FileReader
 			char buffer[64];
 			char c = '\0';
 			typename TFileCursor::off_t avail = 0;
-			while((avail = std::min(f.GetRaw(buffer, std::size(buffer)), maxLength - dest.length())) != 0)
+			while((avail = std::min(f.GetRaw(mpt::as_span(buffer)).size(), maxLength - dest.length())) != 0)
 			{
 				auto end = std::find_if(buffer, buffer + avail, mpt::String::Traits<std::string>::IsLineEnding);
 				dest.insert(dest.end(), buffer, end);
@@ -635,7 +635,7 @@ namespace FileReader
 		while(bytesRemain)
 		{
 			typename TFileCursor::off_t numBytes = std::min(static_cast<typename TFileCursor::off_t>(sizeof(buffer)), bytesRemain);
-			if(f.GetRawWithOffset(bytesRead, buffer, numBytes) != numBytes)
+			if(f.GetRawWithOffset(bytesRead, mpt::span(buffer, numBytes)).size() != numBytes)
 				return false;
 			if(memcmp(buffer, magic + bytesRead, numBytes))
 				return false;
@@ -674,7 +674,7 @@ namespace FileReader
 		}
 
 		std::byte bytes[16];	// More than enough for any valid VarInt
-		typename TFileCursor::off_t avail = f.GetRaw(bytes, sizeof(bytes));
+		typename TFileCursor::off_t avail = f.GetRaw(mpt::as_span(bytes)).size();
 		typename TFileCursor::off_t readPos = 1;
 		
 		size_t writtenBits = 0;
@@ -699,7 +699,7 @@ namespace FileReader
 			if(readPos == avail)
 			{
 				f.Skip(readPos);
-				avail = f.GetRaw(bytes, sizeof(bytes));
+				avail = f.GetRaw(mpt::as_span(bytes)).size();
 				readPos = 0;
 			}
 		}
@@ -967,7 +967,7 @@ public:
 				{
 					// cppcheck false-positive
 					// cppcheck-suppress containerOutOfBounds
-					file.GetRaw(&(cache[0]), size);
+					file.GetRaw(mpt::span(&(cache[0]), size));
 				}
 			}
 		}
@@ -1052,52 +1052,52 @@ public:
 	// Returns raw stream data at cursor position.
 	// Should only be used if absolutely necessary, for example for sample reading, or when used with a small chunk of the file retrieved by ReadChunk().
 	// Use GetPinnedRawDataView(size) whenever possible.
-	FILEREADER_DEPRECATED const std::byte *GetRawData() const
+	FILEREADER_DEPRECATED mpt::const_byte_span GetRawData() const
 	{
 		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
-		return DataContainer().GetRawData() + streamPos;
+		return mpt::span(DataContainer().GetRawData() + streamPos, DataContainer().GetLength() - streamPos);
 	}
 	template <typename T>
-	FILEREADER_DEPRECATED const T *GetRawData() const
+	FILEREADER_DEPRECATED mpt::span<const T> GetRawData() const
 	{
 		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
-		return mpt::byte_cast<const T*>(DataContainer().GetRawData() + streamPos);
+		return mpt::span(mpt::byte_cast<const T*>(DataContainer().GetRawData() + streamPos), DataContainer().GetLength() - streamPos);
 	}
 
-	template <typename T>
-	std::size_t GetRawWithOffset(std::size_t offset, T *dst, std::size_t count) const
+	mpt::byte_span GetRawWithOffset(std::size_t offset, mpt::byte_span dst) const
 	{
-		return static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<std::byte*>(dst), streamPos + offset, count));
+		return DataContainer().Read(streamPos + offset, dst);
 	}
-	std::size_t GetRawWithOffset(std::size_t offset, mpt::byte_span dst) const
+	template<typename Tspan>
+	Tspan GetRawWithOffset(std::size_t offset, Tspan dst) const
 	{
-		return static_cast<std::size_t>(DataContainer().Read(streamPos + offset, dst));
-	}
-
-	template <typename T>
-	std::size_t GetRaw(T *dst, std::size_t count) const
-	{
-		return static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<std::byte*>(dst), streamPos, count));
-	}
-	std::size_t GetRaw(mpt::byte_span dst) const
-	{
-		return static_cast<std::size_t>(DataContainer().Read(streamPos, dst));
+		return mpt::byte_cast<Tspan>(DataContainer().Read(streamPos + offset, mpt::byte_cast<mpt::byte_span>(dst)));
 	}
 
-	template <typename T>
-	std::size_t ReadRaw(T *dst, std::size_t count)
+	mpt::byte_span GetRaw(mpt::byte_span dst) const
 	{
-		std::size_t result = static_cast<std::size_t>(DataContainer().Read(mpt::byte_cast<std::byte*>(dst), streamPos, count));
-		streamPos += result;
+		return DataContainer().Read(streamPos, dst);
+	}
+	template<typename Tspan>
+	Tspan GetRaw(Tspan dst) const
+	{
+		return mpt::byte_cast<Tspan>(DataContainer().Read(streamPos, mpt::byte_cast<mpt::byte_span>(dst)));
+	}
+
+	mpt::byte_span ReadRaw(mpt::byte_span dst)
+	{
+		mpt::byte_span result = DataContainer().Read(streamPos, dst);
+		streamPos += result.size();
 		return result;
 	}
-	std::size_t ReadRaw(mpt::byte_span dst)
+	template<typename Tspan>
+	Tspan ReadRaw(Tspan dst)
 	{
-		std::size_t result = static_cast<std::size_t>(DataContainer().Read(streamPos, dst));
-		streamPos += result;
+		Tspan result = mpt::byte_cast<Tspan>(DataContainer().Read(streamPos, mpt::byte_cast<mpt::byte_span>(dst)));
+		streamPos += result.size();
 		return result;
 	}
-	
+
 	std::vector<std::byte> GetRawDataAsByteVector() const
 	{
 		PinnedRawDataView view = GetPinnedRawDataView();

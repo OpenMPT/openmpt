@@ -830,7 +830,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(numSamples == 0
 			|| (fileHeader.versionLow > 0 && !file.ReadArray(sampleAssignment))	// v2.01+: 120 Notes
-			|| (fileHeader.versionLow == 0 && !file.ReadRaw(sampleAssignment + 12, 96)))	// v2.0: 96 Notes
+			|| (fileHeader.versionLow == 0 && !file.ReadRaw(mpt::span(sampleAssignment + 12, 96)).size()))	// v2.0: 96 Notes
 		{
 			continue;
 		}

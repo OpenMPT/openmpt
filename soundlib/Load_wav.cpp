@@ -36,7 +36,7 @@ static bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t cha
 		return false;
 	}
 
-	const std::byte *inBuf = file.GetRawData<std::byte>();
+	const std::byte *inBuf = file.GetRawData<std::byte>().data();
 	CopySample<SampleConversion>(reinterpret_cast<typename SampleConversion::output_t*>(sample.samplev()), sample.nLength, 1, inBuf + offset, file.BytesLeft() - offset, numChannels, conv);
 	return true;
 }

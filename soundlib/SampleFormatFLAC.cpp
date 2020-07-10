@@ -75,7 +75,7 @@ struct FLACDecoder
 		{
 			FileReader::off_t readBytes = *bytes;
 			LimitMax(readBytes, file.BytesLeft());
-			file.ReadRaw(buffer, readBytes);
+			file.ReadRaw(mpt::byte_cast<mpt::byte_span>(mpt::span(buffer, readBytes)));
 			*bytes = readBytes;
 			if(*bytes == 0)
 				return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
@@ -287,7 +287,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 				needMoreData = false;
 				break;
 			}
-			readSize = file.ReadRaw(buf, bufsize);
+			readSize = file.ReadRaw(mpt::span(buf, bufsize)).size();
 			if(ogg_sync_wrote(&oy, static_cast<long>(readSize)) != 0)
 			{
 				oggOK = false;

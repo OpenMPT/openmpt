@@ -670,14 +670,9 @@ public:
 	virtual bool HasPinnedView() const = 0;
 	virtual const std::byte *GetRawData() const = 0;
 	virtual off_t GetLength() const = 0;
-	virtual off_t Read(std::byte *dst, off_t pos, off_t count) const = 0;
+	virtual mpt::byte_span Read(off_t pos, mpt::byte_span dst) const = 0;
 
-	virtual off_t Read(off_t pos, mpt::byte_span dst) const
-	{
-		return Read(dst.data(), pos, dst.size());
-	}
-
-	virtual bool CanRead(off_t pos, off_t length) const
+	virtual bool CanRead(off_t pos, std::size_t length) const
 	{
 		off_t dataLength = GetLength();
 		if((pos == dataLength) && (length == 0))
@@ -691,7 +686,7 @@ public:
 		return length <= dataLength - pos;
 	}
 
-	virtual off_t GetReadableLength(off_t pos, off_t length) const
+	virtual std::size_t GetReadableLength(off_t pos, std::size_t length) const
 	{
 		off_t dataLength = GetLength();
 		if(pos >= dataLength)
@@ -731,9 +726,9 @@ public:
 	{
 		return 0;
 	}
-	off_t Read(std::byte * /*dst*/, off_t /*pos*/, off_t /*count*/) const override
+	mpt::byte_span Read(off_t /* pos */ , mpt::byte_span dst) const override
 	{
-		return 0;
+		return dst.first(0);
 	}
 };
 
@@ -767,15 +762,15 @@ public:
 	{
 		return dataLength;
 	}
-	off_t Read(std::byte *dst, off_t pos, off_t count) const override
+	mpt::byte_span Read(off_t pos, mpt::byte_span dst) const override
 	{
 		if(pos >= dataLength)
 		{
-			return 0;
+			return dst.first(0);
 		}
-		return data->Read(dst, dataOffset + pos, std::min(count, dataLength - pos));
+		return data->Read(dataOffset + pos, dst.first(std::min(dst.size(), dataLength - pos)));
 	}
-	bool CanRead(off_t pos, off_t length) const override
+	bool CanRead(off_t pos, std::size_t length) const override
 	{
 		if((pos == dataLength) && (length == 0))
 		{
@@ -787,7 +782,7 @@ public:
 		}
 		return (length <= dataLength - pos);
 	}
-	off_t GetReadableLength(off_t pos, off_t length) const override
+	off_t GetReadableLength(off_t pos, std::size_t length) const override
 	{
 		if(pos >= dataLength)
 		{
@@ -847,13 +842,13 @@ public:
 	bool HasPinnedView() const override;
 	const std::byte *GetRawData() const override;
 	off_t GetLength() const override;
-	off_t Read(std::byte *dst, off_t pos, off_t count) const override;
+	mpt::byte_span Read(off_t pos, mpt::byte_span dst) const override;
 
 private:
 
-	off_t InternalReadBuffered(std::byte* dst, off_t pos, off_t count) const;
+	mpt::byte_span InternalReadBuffered(off_t pos, mpt::byte_span dst) const;
 
-	virtual off_t InternalRead(std::byte *dst, off_t pos, off_t count) const = 0;
+	virtual mpt::byte_span InternalRead(off_t pos, mpt::byte_span dst) const = 0;
 
 };
 
@@ -873,7 +868,7 @@ public:
 
 private:
 
-	off_t InternalRead(std::byte *dst, off_t pos, off_t count) const override;
+	mpt::byte_span InternalRead(off_t pos, mpt::byte_span dst) const override;
 
 };
 
@@ -903,7 +898,7 @@ private:
 
 private:
 
-	void ReadCached(std::byte *dst, off_t pos, off_t count) const;
+	void ReadCached(off_t pos, mpt::byte_span dst) const;
 
 public:
 
@@ -912,14 +907,14 @@ public:
 	bool HasPinnedView() const override;
 	const std::byte *GetRawData() const override;
 	off_t GetLength() const override;
-	off_t Read(std::byte *dst, off_t pos, off_t count) const override;
-	bool CanRead(off_t pos, off_t length) const override;
-	off_t GetReadableLength(off_t pos, off_t length) const override;
+	mpt::byte_span Read(off_t pos, mpt::byte_span dst) const override;
+	bool CanRead(off_t pos, std::size_t length) const override;
+	std::size_t GetReadableLength(off_t pos, std::size_t length) const override;
 
 private:
 
 	virtual bool InternalEof() const = 0;
-	virtual off_t InternalRead(std::byte *dst, off_t count) const = 0;
+	virtual mpt::byte_span InternalRead(mpt::byte_span dst) const = 0;
 
 };
 
@@ -937,7 +932,7 @@ public:
 private:
 
 	bool InternalEof() const override;
-	off_t InternalRead(std::byte *dst, off_t count) const override;
+	mpt::byte_span InternalRead(mpt::byte_span dst) const override;
 
 };
 
@@ -968,7 +963,7 @@ public:
 	static off_t GetLength(CallbackStream stream);
 	FileDataContainerCallbackStreamSeekable(CallbackStream s);
 private:
-	off_t InternalRead(std::byte *dst, off_t pos, off_t count) const override;
+	mpt::byte_span InternalRead(off_t pos, mpt::byte_span dst) const override;
 };
 
 
@@ -981,7 +976,7 @@ public:
 	FileDataContainerCallbackStream(CallbackStream s);
 private:
 	bool InternalEof() const override;
-	off_t InternalRead(std::byte *dst, off_t count) const override;
+	mpt::byte_span InternalRead(mpt::byte_span dst) const override;
 };
 
 
@@ -1028,23 +1023,18 @@ public:
 		return streamLength;
 	}
 
-	off_t Read(std::byte *dst, off_t pos, off_t count) const override
+	mpt::byte_span Read(off_t pos, mpt::byte_span dst) const override
 	{
 		if(pos >= streamLength)
 		{
-			return 0;
+			return dst.first(0);
 		}
-		off_t avail = std::min(streamLength - pos, count);
-		std::copy(streamData + pos, streamData + pos + avail, dst);
-		return avail;
+		off_t avail = std::min(streamLength - pos, dst.size());
+		std::copy(streamData + pos, streamData + pos + avail, dst.data());
+		return dst.first(avail);
 	}
 
-	off_t Read(off_t pos, mpt::byte_span dst) const override
-	{
-		return Read(dst.data(), pos, dst.size());
-	}
-
-	bool CanRead(off_t pos, off_t length) const override
+	bool CanRead(off_t pos, std::size_t length) const override
 	{
 		if((pos == streamLength) && (length == 0))
 		{
@@ -1057,7 +1047,7 @@ public:
 		return (length <= streamLength - pos);
 	}
 
-	off_t GetReadableLength(off_t pos, off_t length) const override
+	std::size_t GetReadableLength(off_t pos, std::size_t length) const override
 	{
 		if(pos >= streamLength)
 		{

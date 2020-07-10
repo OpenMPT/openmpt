@@ -202,7 +202,7 @@ bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, Co
 		return false;
 	}
 	file.Seek(4);
-	bool result = PP20_DoUnpack(file.GetRawData<uint8>(), static_cast<uint32>(length - 4), mpt::byte_cast<uint8 *>(unpackedData.data()), dstLen);
+	bool result = PP20_DoUnpack(file.GetRawData<uint8>().data(), static_cast<uint32>(length - 4), mpt::byte_cast<uint8 *>(unpackedData.data()), dstLen);
 
 	if(result)
 	{
