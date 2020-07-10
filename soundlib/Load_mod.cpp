@@ -2351,7 +2351,7 @@ bool CSoundFile::SaveMod(std::ostream &f) const
 
 	if(invalidInstruments)
 	{
-		AddToLog("Warning: This track references sample slots higher than 31. Such samples cannot be saved in the MOD format, and thus the notes will not sound correct. Use the Cleanup tool to rearrange and remove unused samples.");
+		AddToLog(LogWarning, U_("Warning: This track references sample slots higher than 31. Such samples cannot be saved in the MOD format, and thus the notes will not sound correct. Use the Cleanup tool to rearrange and remove unused samples."));
 	}
 
 	//Check for unsaved patterns
@@ -2359,7 +2359,7 @@ bool CSoundFile::SaveMod(std::ostream &f) const
 	{
 		if(Patterns.IsValidPat(pat))
 		{
-			AddToLog("Warning: This track contains at least one pattern after the highest pattern number referred to in the sequence. Such patterns are not saved in the MOD format.");
+			AddToLog(LogWarning, U_("Warning: This track contains at least one pattern after the highest pattern number referred to in the sequence. Such patterns are not saved in the MOD format."));
 			break;
 		}
 	}

@@ -17,8 +17,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#define str_SequenceTruncationNote ("Module has sequence of length %1; it will be truncated to maximum supported length, %2.")
-
 
 ModSequence::ModSequence(CSoundFile &sndFile)
 	: m_sndFile(sndFile)
@@ -79,7 +77,7 @@ void ModSequence::AdjustToNewModType(const MODTYPE oldtype)
 			erase(std::remove_if(begin(), end(), [&] (PATTERNINDEX pat) { return !m_sndFile.Patterns.IsValidPat(pat); }), end());
 			if(GetLengthTailTrimmed() > specs.ordersMax)
 			{
-				m_sndFile.AddToLog("WARNING: Order list has been trimmed!");
+				m_sndFile.AddToLog(LogWarning, U_("WARNING: Order list has been trimmed!"));
 			}
 		}
 		resize(specs.ordersMax);
@@ -447,7 +445,7 @@ bool ModSequenceSet::MergeSequences()
 		const ORDERINDEX lengthTrimmed = seq.GetLengthTailTrimmed();
 		if(firstOrder + lengthTrimmed > m_sndFile.GetModSpecifications().ordersMax)
 		{
-			m_sndFile.AddToLog(mpt::format("WARNING: Cannot merge Sequence %1 (too long!)")(seqNum + 1));
+			m_sndFile.AddToLog(LogWarning, mpt::format(U_("WARNING: Cannot merge Sequence %1 (too long!)"))(seqNum + 1));
 			continue;
 		}
 		firstSeq.reserve(firstOrder + lengthTrimmed);
@@ -481,7 +479,7 @@ bool ModSequenceSet::MergeSequences()
 						} else
 						{
 							// Cannot create new pattern: notify the user
-							m_sndFile.AddToLog(mpt::format("CONFLICT: Pattern break commands in Pattern %1 might be broken since it has been used in several sequences!")(pat));
+							m_sndFile.AddToLog(LogWarning, mpt::format(U_("CONFLICT: Pattern break commands in Pattern %1 might be broken since it has been used in several sequences!"))(pat));
 						}
 					}
 					m->param = static_cast<ModCommand::PARAM>(m->param + firstOrder);
@@ -547,7 +545,7 @@ void ReadModSequenceOld(std::istream& iStrm, ModSequenceSet& seq, const size_t)
 	mpt::IO::ReadIntLE<uint16>(iStrm, size);
 	if(size > ModSpecs::mptm.ordersMax)
 	{
-		seq.m_sndFile.AddToLog(mpt::format(str_SequenceTruncationNote)(size, ModSpecs::mptm.ordersMax));
+		seq.m_sndFile.AddToLog(LogWarning, mpt::format(U_("Module has sequence of length %1; it will be truncated to maximum supported length, %2."))(size, ModSpecs::mptm.ordersMax));
 		size = ModSpecs::mptm.ordersMax;
 	}
 	seq(0).resize(size);

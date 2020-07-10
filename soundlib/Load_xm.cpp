@@ -1043,9 +1043,6 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-#define str_tooMuchPatternData	("Warning: File format limit was reached. Some pattern data may not get written to file.")
-#define str_pattern				("pattern")
-
 
 bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 {
@@ -1101,7 +1098,7 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 	}
 	if(changeOrderList)
 	{
-		AddToLog("Skip and stop order list items (+++ and ---) are not saved in XM files.");
+		AddToLog(LogWarning, U_("Skip and stop order list items (+++ and ---) are not saved in XM files."));
 	}
 	orderList.resize(compatibilityExport ? 256 : numOrders);
 
@@ -1257,7 +1254,7 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 		// Reaching the limits of file format?
 		if(len > uint16_max)
 		{
-			AddToLog(mpt::format("%1 (%2 %3)")(str_tooMuchPatternData, str_pattern, pat));
+			AddToLog(LogWarning, mpt::format(U_("Warning: File format limit was reached. Some pattern data may not get written to file. (pattern %1)"))(pat));
 			len = uint16_max;
 		}
 

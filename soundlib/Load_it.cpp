@@ -33,11 +33,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#define str_tooMuchPatternData	("Warning: File format limit was reached. Some pattern data may not get written to file.")
-#define str_pattern				("pattern")
-#define str_PatternSetTruncationNote ("The module contains %1 patterns but only %2 patterns can be loaded in this OpenMPT version.")
-#define str_LoadingIncompatibleVersion	"The file informed that it is incompatible with this version of OpenMPT. Loading was terminated."
-#define str_LoadingMoreRecentVersion	"The loaded file was made with a more recent OpenMPT version and this version may not be able to load all the features or play the file correctly."
 
 const uint16 verMptFileVer = 0x891;
 const uint16 verMptFileVerLoadLimit = 0x1000; // If cwtv-field is greater or equal to this value,
@@ -131,7 +126,7 @@ static void WriteTuningMap(std::ostream& oStrm, const CSoundFile& sf)
 			auto iter = tNameToShort_Map.find(pTuning);
 			if(iter == tNameToShort_Map.end()) //Should never happen
 			{
-				sf.AddToLog("Error: 210807_1");
+				sf.AddToLog(LogError, U_("Error: 210807_1"));
 				return;
 			}
 			mpt::IO::WriteIntLE<uint16>(oStrm, iter->second);
@@ -215,7 +210,7 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, mpt::Charset
 				CTuning *pT = csf.GetTuneSpecificTunings().AddTuning(std::move(pNewTuning));
 				if(pT)
 				{
-					csf.AddToLog(U_("Local tunings are deprecated and no longer supported. Tuning '") + str + U_("' found in Local tunings has been copied to Tune-specific tunings and will be saved in the module file."));
+					csf.AddToLog(LogInformation, U_("Local tunings are deprecated and no longer supported. Tuning '") + str + U_("' found in Local tunings has been copied to Tune-specific tunings and will be saved in the module file."));
 					csf.Instruments[i]->pTuning = pT;
 					if(csf.GetpModDoc() != nullptr)
 					{
@@ -224,7 +219,7 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, mpt::Charset
 					continue;
 				} else
 				{
-					csf.AddToLog(U_("Copying Local tuning '") + str + U_("' to Tune-specific tunings failed."));
+					csf.AddToLog(LogError, U_("Copying Local tuning '") + str + U_("' to Tune-specific tunings failed."));
 				}
 			}
 #endif
@@ -236,7 +231,7 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, mpt::Charset
 				if(pT)
 				{
 					#ifdef MODPLUG_TRACKER
-						csf.AddToLog(U_("Built-in tunings will no longer be used. Tuning '") + str + U_("' has been copied to Tune-specific tunings and will be saved in the module file."));
+						csf.AddToLog(LogInformation, U_("Built-in tunings will no longer be used. Tuning '") + str + U_("' has been copied to Tune-specific tunings and will be saved in the module file."));
 						csf.Instruments[i]->pTuning = pT;
 						if(csf.GetpModDoc() != nullptr)
 						{
@@ -247,7 +242,7 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, mpt::Charset
 				} else
 				{
 					#ifdef MODPLUG_TRACKER
-						csf.AddToLog(U_("Copying Built-in tuning '") + str + U_("' to Tune-specific tunings failed."));
+						csf.AddToLog(LogError, U_("Copying Built-in tuning '") + str + U_("' to Tune-specific tunings failed."));
 					#endif
 				}
 			}
@@ -256,7 +251,7 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, mpt::Charset
 			if(std::find(notFoundTunings.begin(), notFoundTunings.end(), str) == notFoundTunings.end())
 			{
 				notFoundTunings.push_back(str);
-				csf.AddToLog(U_("Tuning '") + str + U_("' used by the module was not found."));
+				csf.AddToLog(LogWarning, U_("Tuning '") + str + U_("' used by the module was not found."));
 #ifdef MODPLUG_TRACKER
 				if(csf.GetpModDoc() != nullptr)
 				{
@@ -458,14 +453,13 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				if(file.Seek(mptStartPos) && file.ReadMagic("228"))
 				{
 					SetType(MOD_TYPE_MPT);
-
 					if(fileHeader.cwtv >= verMptFileVerLoadLimit)
 					{
-						AddToLog(str_LoadingIncompatibleVersion);
+						AddToLog(LogError, U_("The file informed that it is incompatible with this version of OpenMPT. Loading was terminated."));
 						return false;
 					} else if(fileHeader.cwtv > verMptFileVer)
 					{
-						AddToLog(str_LoadingMoreRecentVersion);
+						AddToLog(LogInformation, U_("The loaded file was made with a more recent OpenMPT version and this version may not be able to load all the features or play the file correctly."));
 					}
 				}
 			}
@@ -874,7 +868,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(numPats != patPos.size())
 	{
 		// Hack: Notify user here if file contains more patterns than what can be read.
-		AddToLog(mpt::format(str_PatternSetTruncationNote)(patPos.size(), numPats));
+		AddToLog(LogWarning, mpt::format(U_("The module contains %1 patterns but only %2 patterns can be loaded in this OpenMPT version."))(patPos.size(), numPats));
 	}
 
 	if(!(loadFlags & loadPatternData))
@@ -994,7 +988,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Empty 64-row pattern
 			if(!Patterns.Insert(pat, 64))
 			{
-				AddToLog(mpt::format("Allocating patterns failed starting from pattern %1")(pat));
+				AddToLog(LogWarning, mpt::format(U_("Allocating patterns failed starting from pattern %1"))(pat));
 				break;
 			}
 			// Now (after the Insert() call), we can read the pattern name.
@@ -1347,7 +1341,7 @@ static uint32 SaveITEditHistory(const CSoundFile &sndFile, std::ostream *file)
 			if (p != nullptr)
 				mptHistory.loadDate = *p;
 			else
-				sndFile.AddToLog("Unable to retrieve current time.");
+				sndFile.AddToLog(LogError, U_("Unable to retrieve current time."));
 
 			mptHistory.openTime = (uint32)(difftime(time(nullptr), creationTime) * HISTORY_TIMER_PRECISION);
 #endif // MODPLUG_TRACKER
@@ -1779,7 +1773,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 			buf[len++] = 0;
 			if(writeSize > uint16_max - len)
 			{
-				AddToLog(mpt::format("%1 (%2 %3)")(str_tooMuchPatternData, str_pattern, pat));
+				AddToLog(LogWarning, mpt::format(U_("Warning: File format limit was reached. Some pattern data may not get written to file. (pattern %1)"))(pat));
 				break;
 			} else
 			{
@@ -1816,7 +1810,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 		if(dwPos > uint32_max)
 		{
 			// Sample position does not fit into sample pointer!
-			AddToLog(mpt::format("Cannot save sample %1: File size exceeds 4 GB.")(smp));
+			AddToLog(LogWarning, mpt::format(U_("Cannot save sample %1: File size exceeds 4 GB."))(smp));
 			itss.samplepointer = 0;
 			itss.length = 0;
 		}
@@ -1834,7 +1828,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 			if(sample.nLength > smpLength)
 			{
 				// Sample length does not fit into IT header!
-				AddToLog(mpt::format("Truncating sample %1: Length exceeds exceeds 4 gigasamples.")(smp));
+				AddToLog(LogWarning, mpt::format(U_("Truncating sample %1: Length exceeds exceeds 4 gigasamples."))(smp));
 			}
 			dwPos += itss.GetSampleFormat().WriteSample(f, sample, smpLength);
 		} else
@@ -2289,7 +2283,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 		const size_t objectsize = GetMIDIMapper().Serialize();
 		if(!Util::TypeCanHoldValue<uint16>(objectsize))
 		{
-			AddToLog("Too many MIDI Mapping directives to save; data won't be written.");
+			AddToLog(LogWarning, U_("Too many MIDI Mapping directives to save; data won't be written."));
 		} else
 		{
 			WRITEMODULARHEADER(MagicBE("MIMA"), static_cast<uint16>(objectsize));
