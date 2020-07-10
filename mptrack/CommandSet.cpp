@@ -912,11 +912,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKc.Modifier(kc);	//Add selection modifier's modifiers to this command
 				if(adding)
 				{
-					LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - adding key with modifier:%1 to command: %2"))(newKc.Modifier(), cmdNavSelection));
+					LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - adding key with modifier:%1 to command: %2"))(newKc.Modifier().GetRaw(), cmdNavSelection));
 					Add(newKc, cmdNavSelection, false);
 				} else
 				{
-					LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - removing key with modifier:%1 to command: %2"))(newKc.Modifier(), cmdNavSelection));
+					LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - removing key with modifier:%1 to command: %2"))(newKc.Modifier().GetRaw(), cmdNavSelection));
 					Remove(newKc, cmdNavSelection);
 				}
 			}
@@ -931,11 +931,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 				newKc.AddModifier(kc);	//Add selection modifier's modifiers to this command
 				if(adding)
 				{
-					LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - adding key with modifier:%1 to command: %2"))(newKc.Modifier(), cmdNavSelection));
+					LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - adding key with modifier:%1 to command: %2"))(newKc.Modifier().GetRaw(), cmdNavSelection));
 					Add(newKc, cmdNavSelection, false);
 				} else
 				{
-					LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - removing key with modifier:%1 to command: %2"))(newKc.Modifier(), cmdNavSelection));
+					LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - removing key with modifier:%1 to command: %2"))(newKc.Modifier().GetRaw(), cmdNavSelection));
 					Remove(newKc, cmdNavSelection);
 				}
 			}
@@ -956,11 +956,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					newKc.AddModifier(inKc);	// and the new selection modifier
 					if(adding)
 					{
-						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - adding key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), cmdNavSelection));
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - adding key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier().GetRaw(), cmdNavSelection));
 						Add(newKc, cmdNavSelection, false);
 					} else
 					{
-						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - removing key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), cmdNavSelection));
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - removing key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier().GetRaw(), cmdNavSelection));
 						Remove(newKc, cmdNavSelection);
 					}
 				}
@@ -974,11 +974,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					newKc.AddModifier(inKc);	// and the new selection modifier
 					if(adding)
 					{
-						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - adding key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), cmdNavSelection));
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - adding key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier().GetRaw(), cmdNavSelection));
 						Add(newKc, cmdNavSelection, false);
 					} else
 					{
-						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - removing key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), cmdNavSelection));
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowNavigationWithSelection - removing key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier().GetRaw(), cmdNavSelection));
 						Remove(newKc, cmdNavSelection);
 					}
 				}
@@ -1039,11 +1039,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					newKcSel.AddModifier(kc);	//add the nav keys' modifiers
 					if(adding)
 					{
-						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowSelectionWithNavigation - adding key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), kcSelectWithNav));
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowSelectionWithNavigation - adding key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier().GetRaw(), kcSelectWithNav));
 						Add(newKcSel, kcSelectWithNav, false);
 					} else
 					{
-						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowSelectionWithNavigation - removing key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), kcSelectWithNav));
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowSelectionWithNavigation - removing key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier().GetRaw(), kcSelectWithNav));
 						Remove(newKcSel, kcSelectWithNav);
 					}
 				}
@@ -1057,11 +1057,11 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 					newKcSel.AddModifier(kc);	//add the nav keys' modifiers
 					if(adding)
 					{
-						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowSelectionWithNavigation - adding key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), kcSelectWithNav));
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowSelectionWithNavigation - adding key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier().GetRaw(), kcSelectWithNav));
 						Add(newKcSel, kcSelectWithNav, false);
 					} else
 					{
-						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowSelectionWithNavigation - removing key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier(), kcSelectWithNav));
+						LOG_COMMANDSET(mpt::format(U_("Enforcing rule krAllowSelectionWithNavigation - removing key:%1 with modifier:%2 to command: %3"))(curCmd, inKc.Modifier().GetRaw(), kcSelectWithNav));
 						Remove(newKcSel, kcSelectWithNav);
 					}
 				}
