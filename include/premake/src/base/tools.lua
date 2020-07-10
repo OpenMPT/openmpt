@@ -49,6 +49,10 @@
 			parts[2] = "LLVM-" .. parts[2]:sub(6)
 		end
 
+		if parts[2] == "clangcl" then -- OpenMPT
+			parts[2] = "ClangCL" -- OpenMPT
+		end -- OpenMPT
+
 		return parts[1] .. '-' .. parts[2]
 	end
 
