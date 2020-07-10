@@ -104,6 +104,7 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>mpg123</RootNamespace>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <LatestTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</LatestTargetPlatformVersion>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

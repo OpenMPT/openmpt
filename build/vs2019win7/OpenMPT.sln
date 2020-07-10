@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 16
+# Visual Studio Version 16
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenMPT", "OpenMPT.vcxproj", "{37FC32A4-8DDC-4A9C-A30C-62989DD8ACE9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenMPT-NativeSupport", "OpenMPT-NativeSupport.vcxproj", "{563A631D-FE07-47BC-A98F-9FE5B3EBABFA}"
