@@ -58,20 +58,14 @@
 /build/vs2017win7/Release
 /build/vs2017win7/*.user
 /build/vs2017win7/.vs
-/build/vs2017win81/*.db
-/build/vs2017win81/Generated Files
-/build/vs2017win81/obj
-/build/vs2017win81/*.sdf
-/build/vs2017win81/*.suo
-/build/vs2017win81/.vs
-/build/vs2017win81/ext/Generated Files
-/build/vs2017win81/ext/obj
 /build/vs2019win10/*.user
 /build/vs2019win10/.vs
 /build/vs2019win10clangcl/*.user
 /build/vs2019win10clangcl/.vs
 /build/vs2019win7/*.user
 /build/vs2019win7/.vs
+/build/vs2019win81/*.user
+/build/vs2019win81/.vs
 /common/*.d
 /common/*.o
 /contrib/fuzzing/afl
@@ -125,6 +119,8 @@
 /contrib/libmodplug-0.8.9.0/m4/ltsugar.m4
 /contrib/libmodplug-0.8.9.0/m4/ltversion.m4
 /contrib/libmodplug-0.8.9.0/m4/pkg.m4
+/contrib/toolchain-djgpp/build
+/contrib/toolchain-djgpp/prefix
 /examples/*.d
 /examples/*.o
 /include/htmlhelp
@@ -297,12 +293,22 @@
 /include/lame/mpglib/README
 /include/lhasa/test
 /include/minimp3/*.d
+/include/minimp3/fuzzing
+/include/minimp3/.gitignore
+/include/minimp3/huffopt
 /include/minimp3/Makefile
 /include/minimp3/minimp3.exe
+/include/minimp3/minimp3_ex.h
+/include/minimp3/minimp3_test.c
 /include/minimp3/minimp3.vcproj
 /include/minimp3/*.o
+/include/minimp3/player
 /include/minimp3/player_oss.c
 /include/minimp3/player_win32.c
+/include/minimp3/README.md
+/include/minimp3/scripts
+/include/minimp3/.travis.yml
+/include/minimp3/vectors
 /include/miniz/ChangeLog.md
 /include/miniz/*.d
 /include/miniz/examples
@@ -318,6 +324,7 @@
 /include/mpg123/INSTALL
 /include/mpg123/libmpg123.pc.in
 /include/mpg123/libout123.pc.in
+/include/mpg123/libsyn123.pc.in
 /include/mpg123/m4
 /include/mpg123/makedll.sh
 /include/mpg123/Makefile.am
@@ -328,10 +335,12 @@
 /include/mpg123/NEWS
 /include/mpg123/NEWS.libmpg123
 /include/mpg123/NEWS.libout123
+/include/mpg123/NEWS.libsyn123
 /include/mpg123/README
 /include/mpg123/scripts
 /include/mpg123/TODO
 /include/mpg123/windows-builds.sh
+/include/mpg123/ports/cmake
 /include/mpg123/ports/mpg123_.pas
 /include/mpg123/ports/README
 /include/mpg123/ports/Sony_PSP
@@ -347,6 +356,8 @@
 /include/mpg123/src/config.h.in
 /include/mpg123/src/control_generic.c
 /include/mpg123/src/equalizer.c
+/include/mpg123/src/filters.c
+/include/mpg123/src/filters.h
 /include/mpg123/src/genre.c
 /include/mpg123/src/genre.h
 /include/mpg123/src/getlopt.c
@@ -354,6 +365,7 @@
 /include/mpg123/src/httpget.c
 /include/mpg123/src/httpget.h
 /include/mpg123/src/libout123
+/include/mpg123/src/libsyn123
 /include/mpg123/src/local.c
 /include/mpg123/src/local.h
 /include/mpg123/src/Makemodule.am
@@ -382,6 +394,7 @@
 /include/mpg123/src/win32_net.c
 /include/mpg123/src/win32_support.c
 /include/mpg123/src/win32_support.h
+/include/mpg123/src/compat/compat_dl.c
 /include/mpg123/src/compat/*.d
 /include/mpg123/src/compat/Makemodule.am
 /include/mpg123/src/compat/*.o
@@ -590,8 +603,8 @@
 /include/premake/bin
 /include/premake/OpenMPT-expected.txt
 /include/premake/OpenMPT-version.txt
-/include/premake/build/gmake.unix/bin
-/include/premake/build/gmake.unix/obj
+/include/premake/build/gmake2.unix/bin
+/include/premake/build/gmake2.unix/obj
 /include/premake/build/vs2017/bin
 /include/premake/build/vs2017/obj
 /include/premake/build/vs2017/.vs
@@ -616,16 +629,16 @@
 /include/rtaudio/configure
 /include/rtaudio/._configure.ac
 /include/rtaudio/configure.ac
-/include/rtaudio/contrib
 /include/rtaudio/._contrib
-/include/rtaudio/doc
+/include/rtaudio/contrib
 /include/rtaudio/._doc
+/include/rtaudio/doc
 /include/rtaudio/._.DS_Store
 /include/rtaudio/.DS_Store
-/include/rtaudio/.gitignore
 /include/rtaudio/._.gitignore
-/include/rtaudio/include
+/include/rtaudio/.gitignore
 /include/rtaudio/._include
+/include/rtaudio/include
 /include/rtaudio/._install.txt
 /include/rtaudio/install.txt
 /include/rtaudio/._Makefile.am
@@ -638,8 +651,8 @@
 /include/rtaudio/._RtAudio.h
 /include/rtaudio/._rtaudio.pc.in
 /include/rtaudio/rtaudio.pc.in
-/include/rtaudio/tests
 /include/rtaudio/._tests
+/include/rtaudio/tests
 /include/stb_vorbis/*.d
 /include/stb_vorbis/*.o
 /include/vorbis/aclocal.m4
@@ -699,8 +712,10 @@
 /include/xmplay/*
 /include/zlib/*.d
 /include/zlib/*.o
+/installer/*.7z
 /installer/*.digests
 /installer/*.exe
+/installer/*.json
 /installer/*.zip
 /libopenmpt/*.d
 /libopenmpt/libopenmpt_plugin_gui.aps
@@ -724,6 +739,7 @@
 /packageTemplate/Licenses
 /packageTemplate/License.txt
 /packageTemplate/OpenMPT Manual.chm
+/packageTemplate/ExampleSongs/*
 /pluginBridge/*.aps
 /pluginBridge/*.d
 /pluginBridge/ipch
