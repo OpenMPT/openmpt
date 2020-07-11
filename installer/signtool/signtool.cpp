@@ -129,21 +129,21 @@ static void main(const std::vector<mpt::ustring> &args)
 				throw std::invalid_argument("Usage: signtool sign [raw|jws_compact|jws] KEYNAME INPUTFILENAME OUTPUTFILENAME");
 			} else if(mode == U_("raw"))
 			{
-				std::vector<std::byte> signature = key.sign(data);
+				std::vector<std::byte> signature = key.sign(mpt::as_span(data));
 				mpt::SafeOutputFile sfo(mpt::PathString::FromUnicode(outputfilename));
 				mpt::ofstream & fo = sfo.stream();
 				mpt::IO::WriteRaw(fo, mpt::as_span(signature));
 				fo.flush();
 			} else if(mode == U_("jws_compact"))
 			{
-				mpt::ustring signature = key.jws_compact_sign(data);
+				mpt::ustring signature = key.jws_compact_sign(mpt::as_span(data));
 				mpt::SafeOutputFile sfo(mpt::PathString::FromUnicode(outputfilename));
 				mpt::ofstream & fo = sfo.stream();
 				mpt::IO::WriteText(fo, mpt::ToCharset(mpt::Charset::UTF8, signature));
 				fo.flush();
 			} else if(mode == U_("jws"))
 			{
-				mpt::ustring signature = key.jws_sign(data);
+				mpt::ustring signature = key.jws_sign(mpt::as_span(data));
 				mpt::SafeOutputFile sfo(mpt::PathString::FromUnicode(outputfilename));
 				mpt::ofstream & fo = sfo.stream();
 				mpt::IO::WriteText(fo, mpt::ToCharset(mpt::Charset::UTF8, signature));

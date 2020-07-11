@@ -627,7 +627,7 @@ namespace asymmetric
 				{
 					throw signature_verification_failed();
 				}
-				verify_hash(hash_type().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::ToCharset(mpt::Charset::UTF8, Util::BinToBase64url(protectedheaderraw) + U_(".") + Util::BinToBase64url(payload))))).result(), signature);
+				verify_hash(hash_type().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::ToCharset(mpt::Charset::UTF8, Util::BinToBase64url(mpt::as_span(protectedheaderraw)) + U_(".") + Util::BinToBase64url(mpt::as_span(payload)))))).result(), signature);
 				return payload;
 			}
 
@@ -650,7 +650,7 @@ namespace asymmetric
 				{
 					throw signature_verification_failed();
 				}
-				verify_hash(hash_type().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::ToCharset(mpt::Charset::UTF8, Util::BinToBase64url(protectedheaderraw) + U_(".") + Util::BinToBase64url(payload))))).result(), signature);
+				verify_hash(hash_type().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::ToCharset(mpt::Charset::UTF8, Util::BinToBase64url(mpt::as_span(protectedheaderraw)) + U_(".") + Util::BinToBase64url(mpt::as_span(payload)))))).result(), signature);
 				return payload;
 			}
 
@@ -829,7 +829,7 @@ namespace asymmetric
 				nlohmann::json jsignature = nlohmann::json::object();
 				jsignature["header"] = header;
 				jsignature["protected"] = Util::BinToBase64url(mpt::as_span(protectedheaderstring));
-				jsignature["signature"] = Util::BinToBase64url(signature);
+				jsignature["signature"] = Util::BinToBase64url(mpt::as_span(signature));
 				jws["signatures"].push_back(jsignature);
 				return mpt::ToUnicode(mpt::Charset::UTF8, jws.dump());
 			}

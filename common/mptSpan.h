@@ -113,12 +113,6 @@ public:
 	{
 	}
 
-	template <typename Cont> span(Cont &cont)
-		: m_beg(std::data(cont))
-		, m_end(std::data(cont) + std::size(cont))
-	{
-	}
-
 	span(const span &other) noexcept = default;
 
 	template <typename U> span(const span<U> &other)

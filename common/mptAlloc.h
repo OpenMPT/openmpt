@@ -41,12 +41,12 @@ namespace mpt {
 
 template <typename T> inline mpt::span<T> as_span(std::vector<T> & cont)
 {
-	return mpt::span<T>(cont);
+	return mpt::span<T>(cont.data(), cont.data() + cont.size());
 }
 
 template <typename T> inline mpt::span<const T> as_span(const std::vector<T> & cont)
 {
-	return mpt::span<const T>(cont);
+	return mpt::span<const T>(cont.data(), cont.data() + cont.size());
 }
 
 
