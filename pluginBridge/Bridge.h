@@ -60,6 +60,9 @@ protected:
 public:
 	PluginBridge(const wchar_t *memName, HANDLE otherProcess);
 	~PluginBridge();
+	
+	PluginBridge(const PluginBridge&) = delete;
+	PluginBridge &operator=(const PluginBridge&) = delete;
 
 	static void MainLoop(TCHAR *argv[]);
 
