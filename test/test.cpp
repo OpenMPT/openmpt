@@ -780,6 +780,10 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::format(CString(_T("%1%2%3")))(1,mpt::cfmt::dec0<3>(2),3), _T("10023"));
 #endif // MPT_WITH_MFC
 
+	FlagSet<MODTYPE> foo;
+	foo.set(MOD_TYPE_MOD, true);
+	VERIFY_EQUAL(mpt::format(U_("%1"))(foo), U_("00000000000000000000000000000001"));
+
 }
 
 

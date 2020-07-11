@@ -15,6 +15,8 @@
 
 #include "mptString.h"
 
+#include "FlagSet.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -735,6 +737,22 @@ std::string Combine(const std::vector<T> &vals, const std::string &sep=std::stri
 }
 
 } } // namespace mpt::String
+
+
+
+template <typename enum_t, typename store_t>
+mpt::ustring ToUString(FlagSet<enum_t, store_t> flagset)
+{
+	mpt::ustring str(flagset.size_bits(), UC_('0'));
+
+	for(std::size_t x = 0; x < flagset.size_bits(); ++x)
+	{
+		str[flagset.size_bits() - x - 1] = (flagset.value().as_bits() & (static_cast<typename FlagSet<enum_t>::store_type>(1) << x) ? UC_('1') : UC_('0'));
+	}
+
+	return str;
+}
+
 
 
 

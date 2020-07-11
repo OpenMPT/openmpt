@@ -13,7 +13,6 @@
 
 #include "BuildSettings.h"
 
-#include <string>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -135,7 +134,7 @@ public:
 };
 
 
-template <typename enum_t, typename store_t = typename enum_value_type<enum_t>::store_type >
+template <typename enum_t, typename store_t = typename enum_value_type<enum_t>::store_type>
 // cppcheck-suppress copyCtorAndEqOperator
 class FlagSet
 {
@@ -206,19 +205,6 @@ public:
 		return test(flags);
 	}
 
-	// String representation of flag set
-	std::string to_string() const noexcept
-	{
-		std::string str(size_bits(), '0');
-
-		for(size_t x = 0; x < size_bits(); ++x)
-		{
-			str[size_bits() - x - 1] = (load() & (1 << x) ? '1' : '0');
-		}
-
-		return str;
-	}
-	
 	// Set one or more flags.
 	MPT_CONSTEXPRINLINE FlagSet &set(value_type flags) noexcept
 	{
