@@ -66,6 +66,10 @@ MPT_WARNING("Warning: libopenmpt built in non thread-safe mode because mutexes a
 MPT_WARNING("Warning: Building libopenmpt with MinGW-w64 without std::thread support is not recommended and is deprecated. Please use MinGW-w64 with posix threading model (as opposed to win32 threading model), or build with mingw-std-threads.")
 #endif // MINGW
 
+#if MPT_CLANG_AT_LEAST(5,0,0)
+#if defined(__powerpc__) && !defined(__powerpc64__)
+MPT_WARNING("Warning: libopenmpt is known to trigger bad code generation with Clang 5 or later on powerpc (32bit) when using -O3. See <https://bugs.llvm.org/show_bug.cgi?id=46683>.")
+#endif
 #endif // !MPT_BUILD_SILENCE_LIBOPENMPT_CONFIGURATION_WARNINGS
 
 #if defined(MPT_ASSERT_HANDLER_NEEDED) && !defined(ENABLE_TESTS)
