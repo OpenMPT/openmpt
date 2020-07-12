@@ -13,6 +13,7 @@
 #include "BuildSettings.h"
 
 #include "StreamEncoder.h"
+#include "StreamEncoderSettings.h"
 #include "Settings.h"
 #include "ProgressDialog.h"
 
@@ -24,25 +25,11 @@ OPENMPT_NAMESPACE_BEGIN
 // Direct To Disk Recording
 
 
-struct StoredTags
-{
-	Setting<mpt::ustring> artist;
-	Setting<mpt::ustring> album;
-	Setting<mpt::ustring> trackno;
-	Setting<mpt::ustring> year;
-	Setting<mpt::ustring> url;
-
-	Setting<mpt::ustring> genre;
-
-	StoredTags(SettingsContainer &conf);
-
-};
-
 
 struct CWaveConvertSettings
 {
 	std::vector<EncoderFactoryBase*> EncoderFactories;
-	std::vector<std::unique_ptr<Encoder::Settings>> EncoderSettings;
+	std::vector<std::unique_ptr<EncoderSettingsConf>> EncoderSettings;
 
 	Setting<mpt::ustring> EncoderName;
 	std::size_t EncoderIndex;
@@ -65,7 +52,8 @@ struct CWaveConvertSettings
 	void SelectEncoder(std::size_t index);
 	EncoderFactoryBase *GetEncoderFactory() const;
 	const Encoder::Traits *GetTraits() const;
-	Encoder::Settings &GetEncoderSettings() const;
+	EncoderSettingsConf &GetEncoderSettings() const;
+	Encoder::Settings GetEncoderSettingsWithDetails() const;
 	CWaveConvertSettings(SettingsContainer &conf, const std::vector<EncoderFactoryBase*> &encFactories);
 };
 

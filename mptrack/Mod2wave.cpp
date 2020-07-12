@@ -131,24 +131,6 @@ static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outp
 }
 
 
-static mpt::ustring GetDefaultYear()
-{
-	return mpt::ToUnicode(CTime::GetCurrentTime().Format(_T("%Y")));
-}
-
-
-StoredTags::StoredTags(SettingsContainer &conf)
-	: artist(conf, U_("Export"), U_("TagArtist"), TrackerSettings::Instance().defaultArtist)
-	, album(conf, U_("Export"), U_("TagAlbum"), U_(""))
-	, trackno(conf, U_("Export"), U_("TagTrackNo"), U_(""))
-	, year(conf, U_("Export"), U_("TagYear"), GetDefaultYear())
-	, url(conf, U_("Export"), U_("TagURL"), U_(""))
-	, genre(conf, U_("Export"), U_("TagGenre"), U_(""))
-{
-	return;
-}
-
-
 ///////////////////////////////////////////////////
 // CWaveConvert - setup for converting a wave file
 
@@ -330,7 +312,7 @@ void CWaveConvert::SaveTags()
 
 void CWaveConvert::FillTags()
 {
-	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
+	EncoderSettingsConf &encSettings = m_Settings.GetEncoderSettings();
 
 	DWORD_PTR dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 	Encoder::Mode mode = (Encoder::Mode)((dwFormat >> 24) & 0xff);
@@ -391,7 +373,7 @@ void CWaveConvert::FillFileTypes()
 
 void CWaveConvert::FillSamplerates()
 {
-	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
+	EncoderSettingsConf &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnSampleRate.CComboBox::ResetContent();
 	int sel = -1;
 	if(TrackerSettings::Instance().ExportDefaultToSoundcardSamplerate)
@@ -423,7 +405,7 @@ void CWaveConvert::FillSamplerates()
 
 void CWaveConvert::FillChannels()
 {
-	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
+	EncoderSettingsConf &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnChannels.CComboBox::ResetContent();
 	int sel = 0;
 	for(int channels = 4; channels >= 1; channels /= 2)
@@ -453,7 +435,7 @@ void CWaveConvert::FillChannels()
 
 void CWaveConvert::FillFormats()
 {
-	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
+	EncoderSettingsConf &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnSampleFormat.CComboBox::ResetContent();
 	int sel = -1;
 	int samplerate = static_cast<int>(m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel()));
@@ -594,7 +576,7 @@ void CWaveConvert::FillFormats()
 
 void CWaveConvert::FillDither()
 {
-	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
+	EncoderSettingsConf &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnDither.CComboBox::ResetContent();
 	int format = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()) & 0xffff;
 	if((encTraits->modes & Encoder::ModeEnumerated) && encTraits->formats[format].Sampleformat != SampleFormatInvalid && encTraits->formats[format].Sampleformat != SampleFormatFloat32)
@@ -835,7 +817,7 @@ void CWaveConvert::OnOK()
 
 	SaveEncoderSettings();
 
-	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
+	EncoderSettingsConf &encSettings = m_Settings.GetEncoderSettings();
 
 	m_Settings.Tags = FileTags();
 
@@ -892,7 +874,7 @@ void CWaveConvert::OnOK()
 
 void CWaveConvert::SaveEncoderSettings()
 {
-	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
+	EncoderSettingsConf &encSettings = m_Settings.GetEncoderSettings();
 
 	encSettings.Samplerate = static_cast<uint32>(m_CbnSampleRate.GetItemData(m_CbnSampleRate.GetCurSel()));
 	encSettings.Channels = static_cast<uint16>(m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel()));
@@ -948,8 +930,8 @@ std::size_t CWaveConvertSettings::FindEncoder(const mpt::ustring &name) const
 
 void CWaveConvertSettings::SelectEncoder(std::size_t index)
 {
-	ASSERT(!EncoderFactories.empty());
-	ASSERT(index < EncoderFactories.size());
+	MPT_ASSERT(!EncoderFactories.empty());
+	MPT_ASSERT(index < EncoderFactories.size());
 	EncoderIndex = index;
 	EncoderName = EncoderFactories[EncoderIndex]->GetTraits().encoderSettingsName;
 }
@@ -957,22 +939,31 @@ void CWaveConvertSettings::SelectEncoder(std::size_t index)
 
 EncoderFactoryBase *CWaveConvertSettings::GetEncoderFactory() const
 {
-	ASSERT(!EncoderFactories.empty());
+	MPT_ASSERT(!EncoderFactories.empty());
 	return EncoderFactories[EncoderIndex];
 }
 
 
 const Encoder::Traits *CWaveConvertSettings::GetTraits() const
 {
-	ASSERT(!EncoderFactories.empty());
+	MPT_ASSERT(!EncoderFactories.empty());
 	return &EncoderFactories[EncoderIndex]->GetTraits();
 }
 
 
-Encoder::Settings &CWaveConvertSettings::GetEncoderSettings() const
+EncoderSettingsConf &CWaveConvertSettings::GetEncoderSettings() const
 {
-	ASSERT(!EncoderSettings.empty());
+	MPT_ASSERT(!EncoderSettings.empty());
 	return *(EncoderSettings[EncoderIndex]);
+}
+
+
+Encoder::Settings CWaveConvertSettings::GetEncoderSettingsWithDetails() const
+{
+	MPT_ASSERT(!EncoderSettings.empty());
+	Encoder::Settings settings = static_cast<Encoder::Settings>(*(EncoderSettings[EncoderIndex]));
+	settings.Details = static_cast<Encoder::StreamSettings>(TrackerSettings::Instance().ExportStreamEncoderSettings);
+	return settings;
 }
 
 
@@ -994,7 +985,7 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 	{
 		const Encoder::Traits &encTraits = factory->GetTraits();
 		EncoderSettings.push_back(
-			std::make_unique<Encoder::Settings>(
+			std::make_unique<EncoderSettingsConf>(
 				conf,
 				encTraits.encoderSettingsName,
 				encTraits.canCues,
@@ -1036,7 +1027,7 @@ void CDoWaveConvert::Run()
 		normalizeFile.emplace(normalizeFileName, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
 	}
 
-	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
+	const Encoder::Settings encSettings = m_Settings.GetEncoderSettingsWithDetails();
 	const uint32 samplerate = encSettings.Samplerate;
 	const uint16 channels = encSettings.Channels;
 
@@ -1086,7 +1077,7 @@ void CDoWaveConvert::Run()
 	}
 
 	Dither dither(theApp.PRNG());
-	dither.SetMode((DitherMode)encSettings.Dither.Get());
+	dither.SetMode(static_cast<DitherMode>(encSettings.Dither));
 
 	m_SndFile.ResetChannels();
 	m_SndFile.SetMixerSettings(mixersettings);

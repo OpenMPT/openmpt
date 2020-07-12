@@ -92,11 +92,13 @@ struct ReplayGain
 
 class ID3V2Tagger
 {
+private:
+	Encoder::StreamSettings settings;
 public:
 	// Write Tags
 	void WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGain replayGain = ReplayGain());
 
-	ID3V2Tagger();
+	ID3V2Tagger(const Encoder::StreamSettings &settings_);
 
 private:
 	// Convert Integer to Synchsafe Integer (see ID3v2.4 specs)
@@ -118,8 +120,9 @@ private:
 ///////////////////////////////////////////////////
 // CFileTagging - helper class for writing tags
 
-ID3V2Tagger::ID3V2Tagger()
-	: totalID3v2Size(0)
+ID3V2Tagger::ID3V2Tagger(const Encoder::StreamSettings &settings_)
+	: settings(settings_)
+	, totalID3v2Size(0)
 {
 	return;
 }
@@ -191,11 +194,11 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 
 	// Write Padding
 	uint32 totalID3v2SizeWithoutPadding = totalID3v2Size;
-	paddingSize += StreamEncoderSettings::Instance().MP3ID3v2MinPadding;
+	paddingSize += settings.MP3ID3v2MinPadding;
 	totalID3v2Size += paddingSize;
-	if(StreamEncoderSettings::Instance().MP3ID3v2PaddingAlignHint > 0)
+	if(settings.MP3ID3v2PaddingAlignHint > 0)
 	{
-		totalID3v2Size = Util::AlignUp<uint32>(totalID3v2Size, StreamEncoderSettings::Instance().MP3ID3v2PaddingAlignHint);
+		totalID3v2Size = Util::AlignUp<uint32>(totalID3v2Size, settings.MP3ID3v2PaddingAlignHint);
 		paddingSize = totalID3v2Size - totalID3v2SizeWithoutPadding;
 	}
 	for(size_t i = 0; i < paddingSize; i++)
@@ -225,7 +228,7 @@ uint32 ID3V2Tagger::GetMaxReplayGainTxxxTrackPeakFrameSize()
 uint32 ID3V2Tagger::GetMaxReplayGainFramesSizes()
 {
 	uint32 size = 0;
-	if(StreamEncoderSettings::Instance().MP3ID3v2WriteReplayGainTXXX)
+	if(settings.MP3ID3v2WriteReplayGainTXXX)
 	{
 		size += GetMaxReplayGainTxxxTrackGainFrameSize();
 		size += GetMaxReplayGainTxxxTrackPeakFrameSize();
@@ -236,7 +239,7 @@ uint32 ID3V2Tagger::GetMaxReplayGainFramesSizes()
 void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream &s)
 {
 
-	if(StreamEncoderSettings::Instance().MP3ID3v2WriteReplayGainTXXX && replayGain.TrackGaindBValid)
+	if(settings.MP3ID3v2WriteReplayGainTXXX && replayGain.TrackGaindBValid)
 	{
 
 		std::string content;
@@ -273,7 +276,7 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 	}
 
 
-	if(StreamEncoderSettings::Instance().MP3ID3v2WriteReplayGainTXXX && replayGain.TrackPeakValid)
+	if(settings.MP3ID3v2WriteReplayGainTXXX && replayGain.TrackPeakValid)
 	{
 
 		std::string content;
@@ -393,6 +396,7 @@ class MP3LameStreamWriter : public StreamWriterBase
 {
 private:
 	bool compatible;
+	Encoder::Settings settings;
 	Encoder::Mode Mode;
 	bool gfp_inited;
 	lame_t gfp;
@@ -407,9 +411,10 @@ private:
 	std::streamoff id3v2Size;
 	FileTags Tags;
 public:
-	MP3LameStreamWriter(std::ostream &stream, bool compatible, const Encoder::Settings &settings, const FileTags &tags)
+	MP3LameStreamWriter(std::ostream &stream, bool compatible, const Encoder::Settings &settings_, const FileTags &tags)
 		: StreamWriterBase(stream)
 		, compatible(compatible)
+		, settings(settings_)
 	{
 		Mode = Encoder::ModeInvalid;
 		gfp_inited = false;
@@ -429,7 +434,7 @@ public:
 			if(compatible)
 			{
 				id3type = ID3v1;
-			} else if(StreamEncoderSettings::Instance().MP3LameID3v2UseLame)
+			} else if(settings.Details.MP3LameID3v2UseLame)
 			{
 				id3type = ID3v2Lame;
 			} else
@@ -445,7 +450,7 @@ public:
 		lame_set_in_samplerate(gfp, samplerate);
 		lame_set_num_channels(gfp, channels);
 
-		int lameQuality = StreamEncoderSettings::Instance().MP3LameQuality;
+		int lameQuality = settings.Details.MP3LameQuality;
 		lame_set_quality(gfp, lameQuality);
 
 		if(settings.Mode == Encoder::ModeCBR)
@@ -510,8 +515,8 @@ public:
 
 		}
 
-		lame_set_decode_on_the_fly(gfp, StreamEncoderSettings::Instance().MP3LameCalculatePeakSample ? 1 : 0); // see LAME docs for why
-		lame_set_findReplayGain(gfp, StreamEncoderSettings::Instance().MP3LameCalculateReplayGain ? 1 : 0);
+		lame_set_decode_on_the_fly(gfp, settings.Details.MP3LameCalculatePeakSample ? 1 : 0); // see LAME docs for why
+		lame_set_findReplayGain(gfp, settings.Details.MP3LameCalculateReplayGain ? 1 : 0);
 
 		switch(id3type)
 		{
@@ -526,7 +531,7 @@ public:
 			id3tag_init(gfp);
 			id3tag_add_v2(gfp);
 			id3tag_v2_only(gfp);
-			id3tag_set_pad(gfp, StreamEncoderSettings::Instance().MP3ID3v2MinPadding);
+			id3tag_set_pad(gfp, settings.Details.MP3ID3v2MinPadding);
 			break;
 		case ID3v2OpenMPT:
 			lame_set_write_id3tag_automatic(gfp, 0);
@@ -551,9 +556,9 @@ public:
 			{
 				Tags = tags;
 				std::streampos id3beg = f.tellp();
-				ID3V2Tagger tagger;
+				ID3V2Tagger tagger(settings.Details);
 				ReplayGain replayGain;
-				if(StreamEncoderSettings::Instance().MP3LameCalculatePeakSample || StreamEncoderSettings::Instance().MP3LameCalculateReplayGain)
+				if(settings.Details.MP3LameCalculatePeakSample || settings.Details.MP3LameCalculateReplayGain)
 				{
 					replayGain.Tag = ReplayGain::TagReserve;
 				}
@@ -609,17 +614,17 @@ public:
 		buf.resize(lame_encode_flush(gfp, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size())));
 		WriteBuffer();
 		ReplayGain replayGain;
-		if(StreamEncoderSettings::Instance().MP3LameCalculatePeakSample)
+		if(settings.Details.MP3LameCalculatePeakSample)
 		{
 			replayGain.TrackPeak = std::fabs(lame_get_PeakSample(gfp)) / 32768.0f;
 			replayGain.TrackPeakValid = true;
 		}
-		if(StreamEncoderSettings::Instance().MP3LameCalculateReplayGain)
+		if(settings.Details.MP3LameCalculateReplayGain)
 		{
 			replayGain.TrackGaindB = lame_get_RadioGain(gfp) / 10.0f;
 			replayGain.TrackGaindBValid = true;
 		}
-		if(id3type == ID3v2OpenMPT && (StreamEncoderSettings::Instance().MP3LameCalculatePeakSample || StreamEncoderSettings::Instance().MP3LameCalculateReplayGain))
+		if(id3type == ID3v2OpenMPT && (settings.Details.MP3LameCalculatePeakSample || settings.Details.MP3LameCalculateReplayGain))
 		{ // update ID3v2 tag with replay gain information
 			replayGain.Tag = ReplayGain::TagWrite;
 			std::streampos endPos = f.tellp();
@@ -627,7 +632,7 @@ public:
 			std::string tagdata(static_cast<std::size_t>(id3v2Size), '\0');
 			f.write(tagdata.data(), id3v2Size); // clear out the old tag
 			f.seekp(fStart);
-			ID3V2Tagger tagger;
+			ID3V2Tagger tagger(settings.Details);
 			tagger.WriteID3v2Tags(f, Tags, replayGain);
 			f.seekp(endPos);
 		}

@@ -12,8 +12,6 @@
 
 #include "BuildSettings.h"
 
-#include "Settings.h"
-
 #include "../soundbase/SampleFormat.h"
 #include "../common/Endianness.h"
 #include "../soundlib/Tagging.h"
@@ -86,35 +84,6 @@ namespace Encoder
 		ModeInvalid    = 0
 	};
 
-} // namespace Encoder
-
-template<> inline SettingValue ToSettingValue(const Encoder::Mode &val)
-{
-	switch(val)
-	{
-		case Encoder::ModeCBR: return SettingValue(U_("CBR"), "Encoder::Mode"); break;
-		case Encoder::ModeABR: return SettingValue(U_("ABR"), "Encoder::Mode"); break;
-		case Encoder::ModeVBR: return SettingValue(U_("VBR"), "Encoder::Mode"); break;
-		case Encoder::ModeQuality: return SettingValue(U_("Quality"), "Encoder::Mode"); break;
-		case Encoder::ModeEnumerated: return SettingValue(U_("Enumerated"), "Encoder::Mode"); break;
-		default: return SettingValue(U_("Invalid"), "Encoder::Mode"); break;
-	}
-}
-template<> inline Encoder::Mode FromSettingValue(const SettingValue &val)
-{
-	ASSERT(val.GetTypeTag() == "Encoder::Mode");
-	if(val.as<mpt::ustring>() == U_("")) { return Encoder::ModeInvalid; }
-	else if(val.as<mpt::ustring>() == U_("CBR")) { return Encoder::ModeCBR; }
-	else if(val.as<mpt::ustring>() == U_("ABR")) { return Encoder::ModeABR; }
-	else if(val.as<mpt::ustring>() == U_("VBR")) { return Encoder::ModeVBR; }
-	else if(val.as<mpt::ustring>() == U_("Quality")) { return Encoder::ModeQuality; }
-	else if(val.as<mpt::ustring>() == U_("Enumerated")) { return Encoder::ModeEnumerated; }
-	else { return Encoder::ModeInvalid; }
-}
-
-namespace Encoder
-{
-
 	struct Traits
 	{
 		
@@ -147,55 +116,40 @@ namespace Encoder
 		int defaultDitherType = 1;
 	};
 
+	struct StreamSettings
+	{
+		int32 FLACCompressionLevel = 5; // 8
+		uint32 AUPaddingAlignHint = 4096;
+		uint32 MP3ID3v2MinPadding = 1024;
+		uint32 MP3ID3v2PaddingAlignHint = 4096;
+		bool MP3ID3v2WriteReplayGainTXXX = true;
+		int32 MP3LameQuality = 3; // 0
+		bool MP3LameID3v2UseLame = false;
+		bool MP3LameCalculateReplayGain = true;
+		bool MP3LameCalculatePeakSample = true;
+		int32 OpusComplexity = -1; // 10
+	};
+
 	struct Settings
 	{
-		
-		Setting<bool> Cues;
-		Setting<bool> Tags;
 
-		Setting<uint32> Samplerate;
-		Setting<uint16> Channels;
+		bool Cues;
+		bool Tags;
 
-		Setting<Encoder::Mode> Mode;
-		Setting<int> Bitrate;
-		Setting<float> Quality;
-		Setting<int> Format;
-		Setting<int> Dither;
-		
-		Settings(SettingsContainer &conf, const mpt::ustring &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format, int dither)
-			: Cues(conf, U_("Export"), encoderName + U_("_") + U_("Cues"), cues)
-			, Tags(conf, U_("Export"), encoderName + U_("_") + U_("Tags"), tags)
-			, Samplerate(conf, U_("Export"), encoderName + U_("_") + U_("Samplerate"), samplerate)
-			, Channels(conf, U_("Export"), encoderName + U_("_") + U_("Channels"), channels)
-			, Mode(conf, U_("Export"), encoderName + U_("_") + U_("Mode"), mode)
-			, Bitrate(conf, U_("Export"), encoderName + U_("_") + U_("Bitrate"), bitrate)
-			, Quality(conf, U_("Export"), encoderName + U_("_") + U_("Quality"), quality)
-			, Format(conf, U_("Export"), encoderName + U_("_") + U_("Format"), format)
-			, Dither(conf, U_("Export"), encoderName + U_("_") + U_("Dither"), dither)
-		{
-			return;
-		}
+		uint32 Samplerate;
+		uint16 Channels;
+
+		Encoder::Mode Mode;
+		int Bitrate;
+		float Quality;
+		int Format;
+		int Dither;
+
+		StreamSettings Details;
 
 	};
 
 } // namespace Encoder
-
-
-struct StreamEncoderSettings
-{
-	Setting<int32> FLACCompressionLevel;
-	Setting<uint32> AUPaddingAlignHint;
-	Setting<uint32> MP3ID3v2MinPadding;
-	Setting<uint32> MP3ID3v2PaddingAlignHint;
-	Setting<bool> MP3ID3v2WriteReplayGainTXXX;
-	Setting<int32> MP3LameQuality;
-	Setting<bool> MP3LameID3v2UseLame;
-	Setting<bool> MP3LameCalculateReplayGain;
-	Setting<bool> MP3LameCalculatePeakSample;
-	Setting<int32> OpusComplexity;
-	StreamEncoderSettings(SettingsContainer &conf, const mpt::ustring &section);
-	static StreamEncoderSettings &Instance();
-};
 
 
 class IAudioStreamEncoder

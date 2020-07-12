@@ -12,35 +12,10 @@
 
 #include "StreamEncoder.h"
 
-#include "Mptrack.h"
-#include "TrackerSettings.h"
-
 #include <ostream>
 
 
 OPENMPT_NAMESPACE_BEGIN
-
-
-StreamEncoderSettings &StreamEncoderSettings::Instance()
-{
-	return TrackerSettings::Instance().ExportStreamEncoderSettings;
-}
-
-
-StreamEncoderSettings::StreamEncoderSettings(SettingsContainer &conf, const mpt::ustring &section)
-	: FLACCompressionLevel(conf, section, U_("FLACCompressionLevel"), 5)
-	, AUPaddingAlignHint(conf, section, U_("AUPaddingAlignHint"), 4096)
-	, MP3ID3v2MinPadding(conf, section, U_("MP3ID3v2MinPadding"), 1024)
-	, MP3ID3v2PaddingAlignHint(conf, section, U_("MP3ID3v2PaddingAlignHint"), 4096)
-	, MP3ID3v2WriteReplayGainTXXX(conf, section, U_("MP3ID3v2WriteReplayGainTXXX"), true)
-	, MP3LameQuality(conf, section, U_("MP3LameQuality"), 3)
-	, MP3LameID3v2UseLame(conf, section, U_("MP3LameID3v2UseLame"), false)
-	, MP3LameCalculateReplayGain(conf, section, U_("MP3LameCalculateReplayGain"), true)
-	, MP3LameCalculatePeakSample(conf, section, U_("MP3LameCalculatePeakSample"), true)
-	, OpusComplexity(conf, section, U_("OpusComplexity"), -1)
-{
-	return;
-}
 
 
 StreamWriterBase::StreamWriterBase(std::ostream &stream)

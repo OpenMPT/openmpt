@@ -100,7 +100,7 @@ public:
 		FLAC__stream_encoder_set_bits_per_sample(encoder, formatInfo.Sampleformat.GetBitsPerSample());
 		FLAC__stream_encoder_set_sample_rate(encoder, formatInfo.Samplerate);
 
-		int compressionLevel = StreamEncoderSettings::Instance().FLACCompressionLevel;
+		int compressionLevel = settings.Details.FLACCompressionLevel;
 		FLAC__stream_encoder_set_compression_level(encoder, compressionLevel);
 		
 		if(settings.Tags)

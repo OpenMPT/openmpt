@@ -65,9 +65,9 @@ public:
 			annotation += TagToAnnotation("comment", tags.comments);
 			annotationSize = annotation.length() + 1;
 			annotationTotalSize = annotationSize;
-			if(StreamEncoderSettings::Instance().AUPaddingAlignHint > 0)
+			if(settings.Details.AUPaddingAlignHint > 0)
 			{
-				annotationTotalSize = Util::AlignUp<std::size_t>(24u + annotationTotalSize, StreamEncoderSettings::Instance().AUPaddingAlignHint) - 24u;
+				annotationTotalSize = Util::AlignUp<std::size_t>(24u + annotationTotalSize, settings.Details.AUPaddingAlignHint) - 24u;
 			}
 			annotationTotalSize = Util::AlignUp<std::size_t>(annotationTotalSize, 8u);
 		}

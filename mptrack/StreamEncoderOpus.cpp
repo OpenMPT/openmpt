@@ -153,7 +153,7 @@ public:
 			ope_encoder_ctl(ope_encoder, OPUS_SET_VBR_CONSTRAINT(ctl_vbrcontraint));
 		}
 
-		opus_int32 complexity = StreamEncoderSettings::Instance().OpusComplexity;
+		opus_int32 complexity = settings.Details.OpusComplexity;
 		if(complexity >= 0)
 		{
 			ope_encoder_ctl(ope_encoder, OPUS_SET_COMPLEXITY(complexity));

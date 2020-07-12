@@ -23,7 +23,7 @@
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/Reverb.h"
 #include "../sounddev/SoundDevice.h"
-#include "StreamEncoder.h"
+#include "StreamEncoderSettings.h"
 #include "Settings.h"
 
 #include <array>
@@ -758,7 +758,7 @@ public:
 	// Export
 
 	Setting<bool> ExportDefaultToSoundcardSamplerate;
-	StreamEncoderSettings ExportStreamEncoderSettings;
+	StreamEncoderSettingsConf ExportStreamEncoderSettings;
 
 	// Components
 
