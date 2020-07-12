@@ -150,7 +150,7 @@ template <typename Tbyte> bool WriteRawImpl(std::pair<mpt::span<Tbyte>, IO::Offs
 	{
 		return false;
 	}
-	if(f.second >= static_cast<IO::Offset>(f.first.size()))
+	if(f.second > static_cast<IO::Offset>(f.first.size()))
 	{
 		return false;
 	}
