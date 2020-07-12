@@ -185,6 +185,361 @@ template <typename Tbyte> bool Flush(std::pair<mpt::span<Tbyte>, IO::Offset> & f
 
 
 
+class IFileBase
+{
+protected:
+	IFileBase() = default;
+	virtual ~IFileBase() = default;
+public:
+	virtual bool IsValid() = 0;
+	virtual bool IsReadSeekable() = 0;
+	virtual IO::Offset TellRead() = 0;
+	virtual bool SeekBegin() = 0;
+	virtual bool SeekEnd() = 0;
+	virtual bool SeekAbsolute(IO::Offset pos) = 0;
+	virtual bool SeekRelative(IO::Offset off) = 0;
+	virtual mpt::byte_span ReadRawImpl(mpt::byte_span data) = 0;
+	virtual bool IsEof() = 0;
+};
+
+template <typename Tfile>
+class IFile
+	: public IFileBase
+{
+private:
+	Tfile & f;
+public:
+	IFile(Tfile & f_)
+		: f(f_)
+	{
+	}
+	~IFile() final = default;
+public:
+	bool IsValid() final
+	{
+		return mpt::IO::IsValid(f);
+	}
+	bool IsReadSeekable() final
+	{
+		return mpt::IO::IsReadSeekable(f);
+	}
+	IO::Offset TellRead() final
+	{
+		return mpt::IO::TellRead(f);
+	}
+	bool SeekBegin() final
+	{
+		return mpt::IO::SeekBegin(f);
+	}
+	bool SeekEnd() final
+	{
+		return mpt::IO::SeekEnd(f);
+	}
+	bool SeekAbsolute(IO::Offset pos) final
+	{
+		return mpt::IO::SeekAbsolute(f, pos);
+	}
+	bool SeekRelative(IO::Offset off) final
+	{
+		return mpt::IO::SeekRelative(f, off);
+	}
+	mpt::byte_span ReadRawImpl(mpt::byte_span data) final
+	{
+		return mpt::IO::ReadRawImpl(f, data);
+	}
+	bool IsEof() final
+	{
+		return mpt::IO::IsEof(f);
+	}
+};
+
+inline bool IsValid(IFileBase & f)
+{
+	return f.IsValid();
+}
+inline bool IsReadSeekable(IFileBase & f)
+{
+	return f.IsReadSeekable();
+}
+inline IO::Offset TellRead(IFileBase & f)
+{
+	return f.TellRead();
+}
+inline bool SeekBegin(IFileBase & f)
+{
+	return f.SeekBegin();
+}
+inline bool SeekEnd(IFileBase & f)
+{
+	return f.SeekEnd();
+}
+inline bool SeekAbsolute(IFileBase & f, IO::Offset pos)
+{
+	return f.SeekAbsolute(pos);
+}
+inline bool SeekRelative(IFileBase & f, IO::Offset off)
+{
+	return f.SeekRelative(off);
+}
+inline mpt::byte_span ReadRawImpl(IFileBase & f, mpt::byte_span data)
+{
+	return f.ReadRawImpl(data);
+}
+inline bool IsEof(IFileBase & f)
+{
+	return f.IsEof();
+}
+
+
+class OFileBase
+{
+protected:
+	OFileBase() = default;
+	virtual ~OFileBase() = default;
+public:
+	virtual bool IsValid() = 0;
+	virtual bool IsWriteSeekable() = 0;
+	virtual IO::Offset TellWrite() = 0;
+	virtual bool SeekBegin() = 0;
+	virtual bool SeekEnd() = 0;
+	virtual bool SeekAbsolute(IO::Offset pos) = 0;
+	virtual bool SeekRelative(IO::Offset off) = 0;
+	virtual bool WriteRawImpl(mpt::const_byte_span data) = 0;
+	virtual bool Flush() = 0;
+};
+
+template <typename Tfile>
+class OFile
+	: public OFileBase
+{
+private:
+	Tfile & f;
+public:
+	OFile(Tfile & f_)
+		: f(f_)
+	{
+	}
+	~OFile() final = default;
+public:
+	bool IsValid() final
+	{
+		return mpt::IO::IsValid(f);
+	}
+	bool IsWriteSeekable() final
+	{
+		return mpt::IO::IsWriteSeekable(f);
+	}
+	IO::Offset TellWrite() final
+	{
+		return mpt::IO::TellWrite(f);
+	}
+	bool SeekBegin() final
+	{
+		return mpt::IO::SeekBegin(f);
+	}
+	bool SeekEnd() final
+	{
+		return mpt::IO::SeekEnd(f);
+	}
+	bool SeekAbsolute(IO::Offset pos) final
+	{
+		return mpt::IO::SeekAbsolute(f, pos);
+	}
+	bool SeekRelative(IO::Offset off) final
+	{
+		return mpt::IO::SeekRelative(f, off);
+	}
+	bool WriteRawImpl(mpt::const_byte_span data) final
+	{
+		return mpt::IO::WriteRawImpl(f, data);
+	}
+	bool Flush() final
+	{
+		return mpt::IO::Flush(f);
+	}
+};
+
+inline bool IsValid(OFileBase & f)
+{
+	return f.IsValid();
+}
+inline bool IsWriteSeekable(OFileBase & f)
+{
+	return f.IsWriteSeekable();
+}
+inline IO::Offset TellWrite(OFileBase & f)
+{
+	return f.TellWrite();
+}
+inline bool SeekBegin(OFileBase & f)
+{
+	return f.SeekBegin();
+}
+inline bool SeekEnd(OFileBase & f)
+{
+	return f.SeekEnd();
+}
+inline bool SeekAbsolute(OFileBase & f, IO::Offset pos)
+{
+	return f.SeekAbsolute(pos);
+}
+inline bool SeekRelative(OFileBase & f, IO::Offset off)
+{
+	return f.SeekRelative(off);
+}
+inline bool WriteRawImpl(OFileBase & f, mpt::const_byte_span data)
+{
+	return f.WriteRawImpl(data);
+}
+inline bool Flush(OFileBase & f)
+{
+	return f.Flush();
+}
+
+
+class IOFileBase
+{
+protected:
+	IOFileBase() = default;
+	virtual ~IOFileBase() = default;
+public:
+	virtual bool IsValid() = 0;
+	virtual bool IsReadSeekable() = 0;
+	virtual bool IsWriteSeekable() = 0;
+	virtual IO::Offset TellRead() = 0;
+	virtual IO::Offset TellWrite() = 0;
+	virtual bool SeekBegin() = 0;
+	virtual bool SeekEnd() = 0;
+	virtual bool SeekAbsolute(IO::Offset pos) = 0;
+	virtual bool SeekRelative(IO::Offset off) = 0;
+	virtual mpt::byte_span ReadRawImpl(mpt::byte_span data) = 0;
+	virtual bool WriteRawImpl(mpt::const_byte_span data) = 0;
+	virtual bool IsEof() = 0;
+	virtual bool Flush() = 0;
+};
+
+template <typename Tfile>
+class IOFile
+	: public IOFileBase
+{
+private:
+	Tfile & f;
+public:
+	IOFile(Tfile & f_)
+		: f(f_)
+	{
+	}
+	~IOFile() final = default;
+public:
+	bool IsValid() final
+	{
+		return mpt::IO::IsValid(f);
+	}
+	bool IsReadSeekable() final
+	{
+		return mpt::IO::IsReadSeekable(f);
+	}
+	bool IsWriteSeekable() final
+	{
+		return mpt::IO::IsWriteSeekable(f);
+	}
+	IO::Offset TellRead() final
+	{
+		return mpt::IO::TellRead(f);
+	}
+	IO::Offset TellWrite() final
+	{
+		return mpt::IO::TellWrite(f);
+	}
+	bool SeekBegin() final
+	{
+		return mpt::IO::SeekBegin(f);
+	}
+	bool SeekEnd() final
+	{
+		return mpt::IO::SeekEnd(f);
+	}
+	bool SeekAbsolute(IO::Offset pos) final
+	{
+		return mpt::IO::SeekAbsolute(f, pos);
+	}
+	bool SeekRelative(IO::Offset off) final
+	{
+		return mpt::IO::SeekRelative(f, off);
+	}
+	mpt::byte_span ReadRawImpl(mpt::byte_span data) final
+	{
+		return mpt::IO::ReadRawImpl(f, data);
+	}
+	bool WriteRawImpl(mpt::const_byte_span data) final
+	{
+		return mpt::IO::WriteRawImpl(f, data);
+	}
+	bool IsEof() final
+	{
+		return mpt::IO::IsEof(f);
+	}
+	bool Flush() final
+	{
+		return mpt::IO::Flush(f);
+	}
+};
+
+inline bool IsValid(IOFileBase & f)
+{
+	return f.IsValid();
+}
+inline bool IsReadSeekable(IOFileBase & f)
+{
+	return f.IsReadSeekable();
+}
+inline bool IsWriteSeekable(IOFileBase & f)
+{
+	return f.IsWriteSeekable();
+}
+inline IO::Offset TellRead(IOFileBase & f)
+{
+	return f.TellRead();
+}
+inline IO::Offset TellWrite(IOFileBase & f)
+{
+	return f.TellWrite();
+}
+inline bool SeekBegin(IOFileBase & f)
+{
+	return f.SeekBegin();
+}
+inline bool SeekEnd(IOFileBase & f)
+{
+	return f.SeekEnd();
+}
+inline bool SeekAbsolute(IOFileBase & f, IO::Offset pos)
+{
+	return f.SeekAbsolute(pos);
+}
+inline bool SeekRelative(IOFileBase & f, IO::Offset off)
+{
+	return f.SeekRelative(off);
+}
+inline mpt::byte_span ReadRawImpl(IOFileBase & f, mpt::byte_span data)
+{
+	return f.ReadRawImpl(data);
+}
+inline bool WriteRawImpl(IOFileBase & f, mpt::const_byte_span data)
+{
+	return f.WriteRawImpl(data);
+}
+inline bool IsEof(IOFileBase & f)
+{
+	return f.IsEof();
+}
+inline bool Flush(IOFileBase & f)
+{
+	return f.Flush();
+}
+
+
+
 template <typename Tbyte, typename Tfile>
 inline mpt::byte_span ReadRaw(Tfile & f, Tbyte * data, std::size_t size)
 {
