@@ -1027,13 +1027,13 @@ void CDoWaveConvert::Run()
 
 	float normalizePeak = 0.0f;
 	const mpt::PathString normalizeFileName = mpt::CreateTempFileName(P_("OpenMPT"));
-	mpt::fstream normalizeFile;
+	std::optional<mpt::fstream> normalizeFile;
 	if(m_Settings.normalize)
 	{
 		// Ensure this temporary file is marked as temporary in the file system, to increase the chance it will never be written to disk
 		::CloseHandle(::CreateFile(normalizeFileName.AsNative().c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
 
-		normalizeFile.open(normalizeFileName, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
+		normalizeFile.emplace(normalizeFileName, std::ios::binary | std::ios::in | std::ios::out | std::ios::trunc);
 	}
 
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
@@ -1205,9 +1205,10 @@ void CDoWaveConvert::Run()
 				src++;
 			}
 
-			normalizeFile.write(reinterpret_cast<const char*>(floatbuffer), lRead * m_SndFile.m_MixerSettings.gnChannels * sizeof(float));
-			if(!normalizeFile)
+			if(!mpt::IO::WriteRaw(*normalizeFile, mpt::as_span(reinterpret_cast<const std::byte*>(floatbuffer), lRead * m_SndFile.m_MixerSettings.gnChannels * sizeof(float))))
+			{
 				break;
+			}
 
 		} else
 		{
@@ -1281,7 +1282,7 @@ void CDoWaveConvert::Run()
 		const uint64 framesTotal = ullSamples;
 		int lastPercent = -1;
 
-		normalizeFile.seekp(0);
+		mpt::IO::SeekAbsolute(*normalizeFile, 0);
 
 		uint64 framesProcessed = 0;
 		uint64 framesToProcess = framesTotal;
@@ -1293,9 +1294,11 @@ void CDoWaveConvert::Run()
 			const std::size_t framesChunk = std::min(mpt::saturate_cast<std::size_t>(framesToProcess), std::size_t(MIXBUFFERSIZE));
 			const uint32 samplesChunk = static_cast<uint32>(framesChunk * channels);
 			
-			normalizeFile.read(reinterpret_cast<char*>(floatbuffer), samplesChunk * sizeof(float));
-			if(normalizeFile.gcount() != static_cast<std::streamsize>(samplesChunk * sizeof(float)))
+			const std::size_t bytes = samplesChunk * sizeof(float);
+			if(mpt::IO::ReadRaw(*normalizeFile, mpt::as_span(reinterpret_cast<std::byte*>(floatbuffer), bytes)).size() != bytes)
+			{
 				break;
+			}
 
 			for(std::size_t i = 0; i < samplesChunk; ++i)
 			{
@@ -1389,8 +1392,8 @@ void CDoWaveConvert::Run()
 			framesToProcess -= framesChunk;
 		}
 
-		normalizeFile.flush();
-		normalizeFile.close();
+		mpt::IO::Flush(*normalizeFile);
+		normalizeFile.reset();
 		for(int retry=0; retry<10; retry++)
 		{
 			// stupid virus scanners
