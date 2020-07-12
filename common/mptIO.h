@@ -78,8 +78,8 @@ template <typename Tfile> IO::Offset TellRead(WriteBuffer<Tfile> & f) { f.FlushL
 template <typename Tfile> IO::Offset TellWrite(WriteBuffer<Tfile> & f) { return TellWrite(f.file()) + f.GetCurrentSize(); }
 template <typename Tfile> bool SeekBegin(WriteBuffer<Tfile> & f) { f.FlushLocal(); return SeekBegin(f.file()); }
 template <typename Tfile> bool SeekEnd(WriteBuffer<Tfile> & f) { f.FlushLocal(); return SeekEnd(f.file()); }
-template <typename Tfile> bool SeekAbsolute(WriteBuffer<Tfile> & f, IO::Offset pos) { return f.FlushLocal(); SeekAbsolute(f.file(), pos); }
-template <typename Tfile> bool SeekRelative(WriteBuffer<Tfile> & f, IO::Offset off) { return f.FlushLocal(); SeekRelative(f.file(), off); }
+template <typename Tfile> bool SeekAbsolute(WriteBuffer<Tfile> & f, IO::Offset pos) { f.FlushLocal(); return SeekAbsolute(f.file(), pos); }
+template <typename Tfile> bool SeekRelative(WriteBuffer<Tfile> & f, IO::Offset off) { f.FlushLocal(); return SeekRelative(f.file(), off); }
 template <typename Tfile> IO::Offset ReadRawImpl(WriteBuffer<Tfile> & f, mpt::byte * data, std::size_t size) { f.FlushLocal(); return ReadRawImpl(f.file(), data, size); }
 template <typename Tfile> bool WriteRawImpl(WriteBuffer<Tfile> & f, const mpt::byte * data, std::size_t size) { return f.Write(mpt::as_span(data, size)); }
 template <typename Tfile> bool IsEof(WriteBuffer<Tfile> & f) { f.FlushLocal(); return IsEof(f.file()); }
