@@ -213,41 +213,41 @@ public:
 		: f(f_)
 	{
 	}
-	~IFile() final = default;
+	~IFile() override = default;
 public:
-	bool IsValid() final
+	bool IsValid() override
 	{
 		return mpt::IO::IsValid(f);
 	}
-	bool IsReadSeekable() final
+	bool IsReadSeekable() override
 	{
 		return mpt::IO::IsReadSeekable(f);
 	}
-	IO::Offset TellRead() final
+	IO::Offset TellRead() override
 	{
 		return mpt::IO::TellRead(f);
 	}
-	bool SeekBegin() final
+	bool SeekBegin() override
 	{
 		return mpt::IO::SeekBegin(f);
 	}
-	bool SeekEnd() final
+	bool SeekEnd() override
 	{
 		return mpt::IO::SeekEnd(f);
 	}
-	bool SeekAbsolute(IO::Offset pos) final
+	bool SeekAbsolute(IO::Offset pos) override
 	{
 		return mpt::IO::SeekAbsolute(f, pos);
 	}
-	bool SeekRelative(IO::Offset off) final
+	bool SeekRelative(IO::Offset off) override
 	{
 		return mpt::IO::SeekRelative(f, off);
 	}
-	mpt::byte_span ReadRawImpl(mpt::byte_span data) final
+	mpt::byte_span ReadRawImpl(mpt::byte_span data) override
 	{
 		return mpt::IO::ReadRawImpl(f, data);
 	}
-	bool IsEof() final
+	bool IsEof() override
 	{
 		return mpt::IO::IsEof(f);
 	}
@@ -319,41 +319,41 @@ public:
 		: f(f_)
 	{
 	}
-	~OFile() final = default;
+	~OFile() override = default;
 public:
-	bool IsValid() final
+	bool IsValid() override
 	{
 		return mpt::IO::IsValid(f);
 	}
-	bool IsWriteSeekable() final
+	bool IsWriteSeekable() override
 	{
 		return mpt::IO::IsWriteSeekable(f);
 	}
-	IO::Offset TellWrite() final
+	IO::Offset TellWrite() override
 	{
 		return mpt::IO::TellWrite(f);
 	}
-	bool SeekBegin() final
+	bool SeekBegin() override
 	{
 		return mpt::IO::SeekBegin(f);
 	}
-	bool SeekEnd() final
+	bool SeekEnd() override
 	{
 		return mpt::IO::SeekEnd(f);
 	}
-	bool SeekAbsolute(IO::Offset pos) final
+	bool SeekAbsolute(IO::Offset pos) override
 	{
 		return mpt::IO::SeekAbsolute(f, pos);
 	}
-	bool SeekRelative(IO::Offset off) final
+	bool SeekRelative(IO::Offset off) override
 	{
 		return mpt::IO::SeekRelative(f, off);
 	}
-	bool WriteRawImpl(mpt::const_byte_span data) final
+	bool WriteRawImpl(mpt::const_byte_span data) override
 	{
 		return mpt::IO::WriteRawImpl(f, data);
 	}
-	bool Flush() final
+	bool Flush() override
 	{
 		return mpt::IO::Flush(f);
 	}
@@ -429,57 +429,57 @@ public:
 		: f(f_)
 	{
 	}
-	~IOFile() final = default;
+	~IOFile() override = default;
 public:
-	bool IsValid() final
+	bool IsValid() override
 	{
 		return mpt::IO::IsValid(f);
 	}
-	bool IsReadSeekable() final
+	bool IsReadSeekable() override
 	{
 		return mpt::IO::IsReadSeekable(f);
 	}
-	bool IsWriteSeekable() final
+	bool IsWriteSeekable() override
 	{
 		return mpt::IO::IsWriteSeekable(f);
 	}
-	IO::Offset TellRead() final
+	IO::Offset TellRead() override
 	{
 		return mpt::IO::TellRead(f);
 	}
-	IO::Offset TellWrite() final
+	IO::Offset TellWrite() override
 	{
 		return mpt::IO::TellWrite(f);
 	}
-	bool SeekBegin() final
+	bool SeekBegin() override
 	{
 		return mpt::IO::SeekBegin(f);
 	}
-	bool SeekEnd() final
+	bool SeekEnd() override
 	{
 		return mpt::IO::SeekEnd(f);
 	}
-	bool SeekAbsolute(IO::Offset pos) final
+	bool SeekAbsolute(IO::Offset pos) override
 	{
 		return mpt::IO::SeekAbsolute(f, pos);
 	}
-	bool SeekRelative(IO::Offset off) final
+	bool SeekRelative(IO::Offset off) override
 	{
 		return mpt::IO::SeekRelative(f, off);
 	}
-	mpt::byte_span ReadRawImpl(mpt::byte_span data) final
+	mpt::byte_span ReadRawImpl(mpt::byte_span data) override
 	{
 		return mpt::IO::ReadRawImpl(f, data);
 	}
-	bool WriteRawImpl(mpt::const_byte_span data) final
+	bool WriteRawImpl(mpt::const_byte_span data) override
 	{
 		return mpt::IO::WriteRawImpl(f, data);
 	}
-	bool IsEof() final
+	bool IsEof() override
 	{
 		return mpt::IO::IsEof(f);
 	}
-	bool Flush() final
+	bool Flush() override
 	{
 		return mpt::IO::Flush(f);
 	}
