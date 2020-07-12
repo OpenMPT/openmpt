@@ -125,14 +125,14 @@ void Logger::SendLogMessage(const mpt::source_location &loc, LogLevel level, con
 #endif
 		if(mpt::log::FileEnabled)
 		{
-			static mpt::ofstream s_logfile;
+			static std::optional<mpt::ofstream> s_logfile;
 			if(!s_logfile)
 			{
-				s_logfile.open(P_("mptrack.log"), std::ios::app);
+				s_logfile.emplace(P_("mptrack.log"), std::ios::app);
 			}
 			if(s_logfile)
 			{
-				mpt::IO::WriteText(s_logfile, mpt::ToCharset(mpt::CharsetLogfile, mpt::format(U_("%1+%2 %3(%4): %5 [%6]\n"))
+				mpt::IO::WriteText(*s_logfile, mpt::ToCharset(mpt::CharsetLogfile, mpt::format(U_("%1+%2 %3(%4): %5 [%6]\n"))
 					( mpt::Date::ANSI::ToUString(cur)
 					, mpt::ufmt::right(6, mpt::ufmt::dec(diff))
 					, file
@@ -140,7 +140,7 @@ void Logger::SendLogMessage(const mpt::source_location &loc, LogLevel level, con
 					, message
 					, function
 					)));
-				mpt::IO::Flush(s_logfile);
+				mpt::IO::Flush(*s_logfile);
 			}
 		}
 		if(mpt::log::DebuggerEnabled)
