@@ -306,9 +306,9 @@ using winstring = mpt::tstring;
 using u8string = std::u8string;
 
 #define MPT_U8CHAR_TYPE  char8_t
-#define MPT_U8CHAR(x)    u8 x
-#define MPT_U8LITERAL(x) u8 x
-#define MPT_U8STRING(x)  mpt::u8string( x )
+#define MPT_U8CHAR(x)    u8 ## x
+#define MPT_U8LITERAL(x) u8 ## x
+#define MPT_U8STRING(x)  std::u8string( u8 ## x )
 
 #else // !C++20
 
