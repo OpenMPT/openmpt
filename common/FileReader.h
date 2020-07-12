@@ -1381,6 +1381,7 @@ FileReader GetFileReader(TInputFile &file)
 	{
 		return FileReader();
 	}
+	MPT_ASSERT(!file.GetFilenameRef().empty());
 	if(file.IsCached())
 	{
 		return make_FileReader(file.GetCache(), &file.GetFilenameRef());
