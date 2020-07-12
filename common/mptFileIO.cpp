@@ -414,7 +414,7 @@ bool InputFile::IsCached() const
 }
 
 
-const mpt::PathString& InputFile::GetFilenameRef() const
+mpt::PathString InputFile::GetFilename() const
 {
 	return m_Filename;
 }

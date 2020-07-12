@@ -284,7 +284,7 @@ public:
 	~InputFile();
 	bool IsValid() const;
 	bool IsCached() const;
-	const mpt::PathString& GetFilenameRef() const;
+	mpt::PathString GetFilename() const;
 	std::istream* GetStream();
 	mpt::const_byte_span GetCache();
 private:

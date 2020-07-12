@@ -19,6 +19,7 @@
 #include "mptIO.h"
 #include <algorithm>
 #include <limits>
+#include <optional>
 #include <vector>
 #include <cstring>
 
@@ -45,8 +46,14 @@ public:
 	using shared_data_type = const FileDataContainerMemory &;
 	using value_data_type = FileDataContainerMemory;
 
+	struct empty_type {};
+
+	using shared_filename_type = empty_type;
+
 	static shared_data_type get_shared(const data_type & data) { return data; }
 	static ref_data_type get_ref(const data_type & data) { return data; }
+
+	static mpt::PathString get_filename(shared_filename_type /* filename */ ) { return mpt::PathString(); }
 
 	static value_data_type make_data() { return mpt::const_byte_span(); }
 	static value_data_type make_data(mpt::const_byte_span data) { return data; }
@@ -70,8 +77,12 @@ public:
 	using shared_data_type = std::shared_ptr<const IFileDataContainer>;
 	using value_data_type = std::shared_ptr<const IFileDataContainer>;
 
+	using shared_filename_type = std::shared_ptr<mpt::PathString>;
+
 	static shared_data_type get_shared(const data_type & data) { return data; }
 	static ref_data_type get_ref(const data_type & data) { return *data; }
+
+	static mpt::PathString get_filename(shared_filename_type filename) { return filename ? *filename : mpt::PathString(); }
 
 	static value_data_type make_data() { return std::make_shared<FileDataContainerDummy>(); }
 	static value_data_type make_data(mpt::const_byte_span data) { return std::make_shared<FileDataContainerMemory>(data); }
@@ -742,6 +753,8 @@ public:
 	using shared_data_type = typename traits_type::shared_data_type;
 	using value_data_type  = typename traits_type::value_data_type;
 
+	using shared_filename_type = typename traits_type::shared_filename_type;
+
 protected:
 
 	shared_data_type SharedDataContainer() const { return traits_type::get_shared(m_data); }
@@ -758,28 +771,24 @@ private:
 
 	off_t streamPos;		// Cursor location in the file
 
-	const mpt::PathString *fileName;  // Filename that corresponds to this FileReader. It is only set if this FileReader represents the whole contents of fileName. May be nullptr. Lifetime is managed outside of FileReader.
+	shared_filename_type m_fileName;  // Filename that corresponds to this FileReader. It is only set if this FileReader represents the whole contents of fileName. May be nullopt.
 
 public:
 
 	// Initialize invalid file reader object.
-	FileReader() : m_data(DataInitializer()), streamPos(0), fileName(nullptr) { }
+	FileReader() : m_data(DataInitializer()), streamPos(0), m_fileName(nullptr) { }
 
 	// Initialize file reader object with pointer to data and data length.
-	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename = nullptr) : m_data(DataInitializer(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0), fileName(filename) { }
+	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, shared_filename_type filename = shared_filename_type{}) : m_data(DataInitializer(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0), m_fileName(filename) { }
 
 	// Initialize file reader object based on an existing file reader object window.
-	explicit FileReader(value_data_type other, const mpt::PathString *filename = nullptr) : m_data(other), streamPos(0), fileName(filename) { }
+	explicit FileReader(value_data_type other, shared_filename_type filename = shared_filename_type{}) : m_data(other), streamPos(0), m_fileName(filename) { }
 
 public:
 
 	mpt::PathString GetFileName() const
 	{
-		if(!fileName)
-		{
-			return mpt::PathString();
-		}
-		return *fileName;
+		return traits_type::get_filename(m_fileName);
 	}
 
 	// Returns true if the object points to a valid (non-empty) stream.
@@ -1339,35 +1348,35 @@ using MemoryFileReader = detail::FileReader<FileReaderTraitsMemory>;
 
 
 // Initialize file reader object with pointer to data and data length.
-template <typename Tbyte> static inline FileReader make_FileReader(mpt::span<Tbyte> bytedata, const mpt::PathString *filename = nullptr)
+template <typename Tbyte> static inline FileReader make_FileReader(mpt::span<Tbyte> bytedata, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
-	return FileReader(mpt::byte_cast<mpt::const_byte_span>(bytedata), filename);
+	return FileReader(mpt::byte_cast<mpt::const_byte_span>(bytedata), std::move(filename));
 }
 
 #if defined(MPT_FILEREADER_CALLBACK_STREAM)
 
 // Initialize file reader object with a CallbackStream.
-static inline FileReader make_FileReader(CallbackStream s, const mpt::PathString *filename = nullptr)
+static inline FileReader make_FileReader(CallbackStream s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileReader(
 				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
 				:
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStream>(s))
-			, filename
+			, std::move(filename)
 		);
 }
 #endif // MPT_FILEREADER_CALLBACK_STREAM
 	
 // Initialize file reader object with a std::istream.
-static inline FileReader make_FileReader(std::istream *s, const mpt::PathString *filename = nullptr)
+static inline FileReader make_FileReader(std::istream *s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileReader(
 				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
 				:
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStream>(s))
-			, filename
+			, std::move(filename)
 		);
 }
 
@@ -1381,13 +1390,13 @@ FileReader GetFileReader(TInputFile &file)
 	{
 		return FileReader();
 	}
-	MPT_ASSERT(!file.GetFilenameRef().empty());
+	MPT_ASSERT(!file.GetFilename().empty());
 	if(file.IsCached())
 	{
-		return make_FileReader(file.GetCache(), &file.GetFilenameRef());
+		return make_FileReader(file.GetCache(), std::make_shared<mpt::PathString>(file.GetFilename()));
 	} else
 	{
-		return make_FileReader(file.GetStream(), &file.GetFilenameRef());
+		return make_FileReader(file.GetStream(), std::make_shared<mpt::PathString>(file.GetFilename()));
 	}
 }
 #endif // MPT_ENABLE_FILEIO
