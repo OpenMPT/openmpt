@@ -640,10 +640,10 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				if(!filename.empty())
 				{
 					if(filenameU8.find(':') == std::string::npos)
-						filename = file.GetFileName().GetPath() + filename;
+						filename = file.GetOptionalFileName().value_or(P_("")).GetPath() + filename;
 					filename = filename.Simplify();
 					// Avoid recursive #include
-					if(std::find_if(files.begin(), files.end(), [&filename](const SFZInputFile &f) { return f.file.GetFileName() == filename; }) == files.end())
+					if(std::find_if(files.begin(), files.end(), [&filename](const SFZInputFile &f) { return f.file.GetOptionalFileName().value_or(P_("")) == filename; }) == files.end())
 					{
 						auto f = std::make_unique<InputFile>(filename);
 						if(f->IsValid())
@@ -806,7 +806,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		{
 			if(region.filename.find(':') == std::string::npos)
 			{
-				filename = file.GetFileName().GetPath() + filename;
+				filename = file.GetOptionalFileName().value_or(P_("")).GetPath() + filename;
 			}
 			SetSamplePath(smp, filename);
 			InputFile f(filename, SettingCacheCompleteFileBeforeLoading());

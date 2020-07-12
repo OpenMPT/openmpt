@@ -53,7 +53,7 @@ public:
 	static shared_data_type get_shared(const data_type & data) { return data; }
 	static ref_data_type get_ref(const data_type & data) { return data; }
 
-	static mpt::PathString get_filename(shared_filename_type /* filename */ ) { return mpt::PathString(); }
+	static std::optional<mpt::PathString> get_optional_filename(shared_filename_type /* filename */ ) { return std::nullopt; }
 
 	static value_data_type make_data() { return mpt::const_byte_span(); }
 	static value_data_type make_data(mpt::const_byte_span data) { return data; }
@@ -82,7 +82,15 @@ public:
 	static shared_data_type get_shared(const data_type & data) { return data; }
 	static ref_data_type get_ref(const data_type & data) { return *data; }
 
-	static mpt::PathString get_filename(shared_filename_type filename) { return filename ? *filename : mpt::PathString(); }
+	static std::optional<mpt::PathString> get_optional_filename(shared_filename_type filename)
+	{
+		if(!filename)
+		{
+			return std::nullopt;
+		}
+		MPT_ASSERT(!filename->empty());
+		return *filename;
+	}
 
 	static value_data_type make_data() { return std::make_shared<FileDataContainerDummy>(); }
 	static value_data_type make_data(mpt::const_byte_span data) { return std::make_shared<FileDataContainerMemory>(data); }
@@ -786,9 +794,9 @@ public:
 
 public:
 
-	mpt::PathString GetFileName() const
+	std::optional<mpt::PathString> GetOptionalFileName() const
 	{
-		return traits_type::get_filename(m_fileName);
+		return traits_type::get_optional_filename(m_fileName);
 	}
 
 	// Returns true if the object points to a valid (non-empty) stream.

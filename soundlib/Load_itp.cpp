@@ -237,8 +237,9 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 			instrPaths[ins] = mpt::PathString::FromUTF8(path);
 		}
 #ifdef MODPLUG_TRACKER
-		if(const auto fileName = file.GetFileName(); !fileName.empty())
+		if(file.GetOptionalFileName())
 		{
+			auto fileName = file.GetOptionalFileName().value();
 			instrPaths[ins] = instrPaths[ins].RelativePathToAbsolute(fileName.GetPath());
 		} else if(GetpModDoc() != nullptr)
 		{

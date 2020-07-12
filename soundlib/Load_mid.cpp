@@ -1248,17 +1248,17 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 
 	std::unique_ptr<CDLSBank> cachedBank, embeddedBank;
 
-	if(CDLSBank::IsDLSBank(file.GetFileName()))
+	if(CDLSBank::IsDLSBank(file.GetOptionalFileName().value_or(P_(""))))
 	{
 		// Soundfont embedded in MIDI file
 		embeddedBank = std::make_unique<CDLSBank>();
-		embeddedBank->Open(file.GetFileName());
+		embeddedBank->Open(file.GetOptionalFileName().value_or(P_("")));
 	} else
 	{
 		// Soundfont with same name as MIDI file
 		for(const auto &ext : { P_(".sf2"), P_(".sbk"), P_(".dls") })
 		{
-			mpt::PathString filename = file.GetFileName().ReplaceExt(ext);
+			mpt::PathString filename = file.GetOptionalFileName().value_or(P_("")).ReplaceExt(ext);
 			if(filename.IsFile())
 			{
 				embeddedBank = std::make_unique<CDLSBank>();

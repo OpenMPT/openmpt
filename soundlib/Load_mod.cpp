@@ -1167,9 +1167,9 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 #ifdef MPT_EXTERNAL_SAMPLES
 		std::optional<InputFile> amFile;
 		FileReader amData;
-		mpt::PathString filename = file.GetFileName();
-		if(!filename.empty())
+		if(file.GetOptionalFileName())
 		{
+			mpt::PathString filename = file.GetOptionalFileName().value();
 			// Find instrument definition file
 			const mpt::PathString exts[] = {P_(".nt"), P_(".NT"), P_(".as"), P_(".AS")};
 			for(const auto &ext : exts)

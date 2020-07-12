@@ -1252,8 +1252,8 @@ bool CDLSBank::Open(FileReader file)
 {
 	uint32 nInsDef;
 
-	if(!file.GetFileName().empty())
-		m_szFileName = file.GetFileName();
+	if(file.GetOptionalFileName())
+		m_szFileName = file.GetOptionalFileName().value();
 
 	file.Rewind();
 	size_t dwMemLength = file.GetLength();

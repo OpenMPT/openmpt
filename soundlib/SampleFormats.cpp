@@ -129,7 +129,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file
 	Instruments[nInstr] = pIns;
 
 #if defined(MPT_ENABLE_FILEIO) && defined(MPT_EXTERNAL_SAMPLES)
-	SetSamplePath(nSample, file.GetFileName());
+	SetSamplePath(nSample, file.GetOptionalFileName().value_or(P_("")));
 #endif
 
 	return true;
@@ -2254,9 +2254,9 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 
 		if(!filename.empty())
 		{
-			if(!file.GetFileName().empty())
+			if(file.GetOptionalFileName())
 			{
-				filename = filename.RelativePathToAbsolute(file.GetFileName().GetPath());
+				filename = filename.RelativePathToAbsolute(file.GetOptionalFileName()->GetPath());
 			}
 			if(!LoadExternalSample(nSample, filename))
 			{

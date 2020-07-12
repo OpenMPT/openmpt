@@ -489,9 +489,9 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		if(SampleHasPath(nSmp))
 		{
 			mpt::PathString filename = GetSamplePath(nSmp);
-			if(!file.GetFileName().empty())
+			if(file.GetOptionalFileName())
 			{
-				filename = filename.RelativePathToAbsolute(file.GetFileName().GetPath());
+				filename = filename.RelativePathToAbsolute(file.GetOptionalFileName()->GetPath());
 			} else if(GetpModDoc() != nullptr)
 			{
 				filename = filename.RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());

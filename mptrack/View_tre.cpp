@@ -460,7 +460,7 @@ bool CModTree::SetSoundFile(FileReader &file)
 	m_SongFile = sndFile;
 	m_SongFile->Patterns.DestroyPatterns();
 	m_SongFile->m_songMessage.clear();
-	const mpt::PathString fileName = file.GetFileName();
+	const mpt::PathString fileName = file.GetOptionalFileName().value_or(P_(""));
 	m_InstrLibPath = fileName.GetPath();
 	m_SongFileName = fileName.GetFullFileName();
 	RefreshInstrumentLibrary();
