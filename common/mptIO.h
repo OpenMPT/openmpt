@@ -97,6 +97,16 @@ template <typename Tbyte> bool IsValid(std::pair<mpt::span<Tbyte>, IO::Offset> &
 {
 	return (f.second >= 0);
 }
+template <typename Tbyte> bool IsReadSeekable(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
+{
+	MPT_UNREFERENCED_PARAMETER(f);
+	return true;
+}
+template <typename Tbyte> bool IsWriteSeekable(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
+{
+	MPT_UNREFERENCED_PARAMETER(f);
+	return true;
+}
 template <typename Tbyte> IO::Offset TellRead(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
 {
 	return f.second;
