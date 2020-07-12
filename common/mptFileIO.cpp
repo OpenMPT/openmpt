@@ -342,14 +342,9 @@ bool InputFile::DefaultToLargeAddressSpaceUsage()
 }
 
 
-InputFile::InputFile()
-	: m_IsCached(false)
-{
-	return;
-}
-
 InputFile::InputFile(const mpt::PathString &filename, bool allowWholeFileCaching)
-	: m_IsCached(false)
+	: m_IsValid(false)
+	, m_IsCached(false)
 {
 	Open(filename, allowWholeFileCaching);
 }
@@ -397,17 +392,19 @@ bool InputFile::Open(const mpt::PathString &filename, bool allowWholeFileCaching
 					return false;
 				}
 				m_IsCached = true;
+				m_IsValid = true;
 				return true;
 			}
 		}
 	}
+	m_IsValid = true;
 	return m_File.good();
 }
 
 
 bool InputFile::IsValid() const
 {
-	return m_File.good();
+	return m_IsValid && m_File.good();
 }
 
 

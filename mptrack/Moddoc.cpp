@@ -505,8 +505,8 @@ void CModDoc::OnAppendModule()
 		auto source = std::make_unique<CSoundFile>();
 		for(const auto &file : files)
 		{
-			InputFile f;
-			if(f.Open(file, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading) && source->Create(GetFileReader(f), CSoundFile::loadCompleteModule))
+			InputFile f(file, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+			if(f.IsValid() && source->Create(GetFileReader(f), CSoundFile::loadCompleteModule))
 			{
 				AppendModule(*source);
 				source->Destroy();

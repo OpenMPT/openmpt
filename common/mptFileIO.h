@@ -274,20 +274,21 @@ class InputFile
 private:
 	mpt::PathString m_Filename;
 	mpt::ifstream m_File;
+	bool m_IsValid;
 	bool m_IsCached;
 	std::vector<std::byte> m_Cache;
 public:
 	static bool DefaultToLargeAddressSpaceUsage();
 public:
-	InputFile();
 	InputFile(const mpt::PathString &filename, bool allowWholeFileCaching = DefaultToLargeAddressSpaceUsage());
 	~InputFile();
-	bool Open(const mpt::PathString &filename, bool allowWholeFileCaching = DefaultToLargeAddressSpaceUsage());
 	bool IsValid() const;
 	bool IsCached() const;
 	const mpt::PathString& GetFilenameRef() const;
 	std::istream* GetStream();
 	mpt::const_byte_span GetCache();
+private:
+	bool Open(const mpt::PathString &filename, bool allowWholeFileCaching = DefaultToLargeAddressSpaceUsage());
 };
 
 

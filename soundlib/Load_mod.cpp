@@ -1165,7 +1165,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	if((loadFlags & loadSampleData) && isStartrekker)
 	{
 #ifdef MPT_EXTERNAL_SAMPLES
-		InputFile amFile;
+		std::optional<InputFile> amFile;
 		FileReader amData;
 		mpt::PathString filename = file.GetFileName();
 		if(!filename.empty())
@@ -1176,22 +1176,26 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				mpt::PathString infoName = filename + ext;
 				char stMagic[16];
-				if(infoName.IsFile() && amFile.Open(infoName, SettingCacheCompleteFileBeforeLoading()) && (amData = GetFileReader(amFile)).IsValid() && amData.ReadArray(stMagic))
+				if(infoName.IsFile())
 				{
-					if(!memcmp(stMagic, "ST1.2 ModuleINFO", 16))
-						modMagicResult.madeWithTracker = UL_("Startrekker 1.2");
-					else if(!memcmp(stMagic, "ST1.3 ModuleINFO", 16))
-						modMagicResult.madeWithTracker = UL_("Startrekker 1.3");
-					else if(!memcmp(stMagic, "AudioSculpture10", 16))
-						modMagicResult.madeWithTracker = UL_("AudioSculpture 1.0");
-					else
-						continue;
-
-					if(amData.Seek(144))
+					amFile.emplace(infoName, SettingCacheCompleteFileBeforeLoading());
+					if(amFile->IsValid() && (amData = GetFileReader(*amFile)).IsValid() && amData.ReadArray(stMagic))
 					{
-						// Looks like a valid instrument definition file!
-						m_nInstruments = 31;
-						break;
+						if(!memcmp(stMagic, "ST1.2 ModuleINFO", 16))
+							modMagicResult.madeWithTracker = UL_("Startrekker 1.2");
+						else if(!memcmp(stMagic, "ST1.3 ModuleINFO", 16))
+							modMagicResult.madeWithTracker = UL_("Startrekker 1.3");
+						else if(!memcmp(stMagic, "AudioSculpture10", 16))
+							modMagicResult.madeWithTracker = UL_("AudioSculpture 1.0");
+						else
+							continue;
+
+						if(amData.Seek(144))
+						{
+							// Looks like a valid instrument definition file!
+							m_nInstruments = 31;
+							break;
+						}
 					}
 				}
 			}
