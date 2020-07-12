@@ -165,7 +165,7 @@ template <typename Tbyte> bool IsEof(std::pair<mpt::span<Tbyte>, IO::Offset> & f
 }
 template <typename Tbyte> bool Flush(std::pair<mpt::span<Tbyte>, IO::Offset> & f)
 {
-	MPT_UNREFERENCED_PARAMTER(f);
+	MPT_UNREFERENCED_PARAMETER(f);
 	return true;
 }
 
