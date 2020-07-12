@@ -541,10 +541,8 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, std::ostream &f) const
 	if(sample.uFlags[CHN_ADLIB])
 		return false;
 
-	WAVWriter file(&f);
-
-	if(!file.IsValid())
-		return false;
+	mpt::IO::OFile<std::ostream> ff(f);
+	WAVWriter file(ff);
 
 	file.WriteFormat(sample.GetSampleRate(GetType()), sample.GetElementarySampleSize() * 8, sample.GetNumChannels(), WAVFormatChunk::fmtPCM);
 

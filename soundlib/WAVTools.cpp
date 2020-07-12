@@ -335,15 +335,8 @@ void WAVSampleLoop::ConvertToWAV(SmpLength start, SmpLength end, bool bidi)
 
 
 // Output to stream: Initialize with std::ostream*.
-WAVWriter::WAVWriter(std::ostream *stream) : s(stream)
-{
-	// Skip file header for now
-	Seek(sizeof(RIFFHeader));
-}
-
-
-// Output to clipboard: Initialize with pointer to memory and size of reserved memory.
-WAVWriter::WAVWriter(mpt::byte_span data) : memory(data)
+WAVWriter::WAVWriter(mpt::IO::OFileBase &stream)
+	: s(stream)
 {
 	// Skip file header for now
 	Seek(sizeof(RIFFHeader));
@@ -352,15 +345,12 @@ WAVWriter::WAVWriter(mpt::byte_span data) : memory(data)
 
 WAVWriter::~WAVWriter() noexcept(false)
 {
-	if(!s || s->good())
-	{
-		Finalize();
-	}
+	Finalize();
 }
 
 
 // Finalize the file by closing the last open chunk and updating the file header. Returns total size of file.
-size_t WAVWriter::Finalize()
+std::size_t WAVWriter::Finalize()
 {
 	FinalizeChunk();
 
@@ -372,9 +362,6 @@ size_t WAVWriter::Finalize()
 
 	Seek(0);
 	Write(fileHeader);
-
-	s = nullptr;
-	memory = {};
 
 	return totalSize;
 }
@@ -396,10 +383,10 @@ void WAVWriter::FinalizeChunk()
 {
 	if(chunkStartPos != 0)
 	{
-		const size_t chunkSize = position - (chunkStartPos + sizeof(RIFFChunk));
+		const std::size_t chunkSize = position - (chunkStartPos + sizeof(RIFFChunk));
 		chunkHeader.length = mpt::saturate_cast<uint32>(chunkSize);
 
-		size_t curPos = position;
+		std::size_t curPos = position;
 		Seek(chunkStartPos);
 		Write(chunkHeader);
 
@@ -417,36 +404,19 @@ void WAVWriter::FinalizeChunk()
 
 
 // Seek to a position in file.
-void WAVWriter::Seek(size_t pos)
+void WAVWriter::Seek(std::size_t pos)
 {
 	position = pos;
 	totalSize = std::max(totalSize, position);
-
-	if(s != nullptr)
-	{
-		s->seekp(position);
-	}
+	mpt::IO::SeekAbsolute(s, pos);
 }
 
 
 // Write some data to the file.
-void WAVWriter::Write(const void *data, size_t numBytes)
+void WAVWriter::Write(mpt::const_byte_span data)
 {
-	if(s != nullptr)
-	{
-		s->write(mpt::void_cast<const char*>(data), numBytes);
-	} else if(!memory.empty())
-	{
-		if(position <= memory.size() && numBytes <= memory.size() - position)
-		{
-			memcpy(memory.data() + position, data, numBytes);
-		} else
-		{
-			// Should never happen - did we calculate a wrong memory size?
-			MPT_ASSERT_NOTREACHED();
-		}
-	}
-	position += numBytes;
+	MPT_ASSERT(mpt::IO::WriteRaw(s, data));
+	position += data.size();
 	totalSize = std::max(totalSize, position);
 }
 
@@ -510,7 +480,7 @@ void WAVWriter::WriteMetatags(const FileTags &tags)
 
 	StartChunk(RIFFChunk::idLIST);
 	const char info[] = { 'I', 'N', 'F', 'O' };
-	WriteArray(info);
+	Write(info);
 
 	WriteTag(RIFFChunk::idINAM, tags.title);
 	WriteTag(RIFFChunk::idIART, tags.artist);
@@ -539,7 +509,7 @@ void WAVWriter::WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &ute
 		chunk.id = static_cast<uint32>(id);
 		chunk.length = length;
 		Write(chunk);
-		Write(text.c_str(), length);
+		Write(mpt::byte_cast<mpt::const_byte_span>(mpt::span(text.c_str(), length)));
 
 		if((length % 2u) != 0)
 		{
@@ -630,11 +600,11 @@ void WAVWriter::WriteExtraInformation(const ModSample &sample, MODTYPE modType, 
 
 		char name[MAX_SAMPLENAME];
 		mpt::String::WriteBuf(mpt::String::nullTerminated, name) = sampleName;
-		WriteArray(name);
+		Write(name);
 
 		char filename[MAX_SAMPLEFILENAME];
 		mpt::String::WriteBuf(mpt::String::nullTerminated, filename) = sample.filename;
-		WriteArray(filename);
+		Write(filename);
 	}
 }
 

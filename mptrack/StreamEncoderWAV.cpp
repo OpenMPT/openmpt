@@ -29,6 +29,7 @@ private:
 
 	const WAVEncoder &enc;
 	std::ostream &f;
+	mpt::IO::OFile<std::ostream> ff;
 	std::unique_ptr<WAVWriter> fileWAV;
 	Encoder::Format formatInfo;
 
@@ -36,6 +37,7 @@ public:
 	WavStreamWriter(const WAVEncoder &enc_, std::ostream &file, const Encoder::Settings &settings, const FileTags &tags)
 		: enc(enc_)
 		, f(file)
+		, ff(f)
 		, fileWAV(nullptr)
 	{
 
@@ -44,7 +46,7 @@ public:
 		ASSERT(formatInfo.Samplerate > 0);
 		ASSERT(formatInfo.Channels > 0);
 
-		fileWAV = std::make_unique<WAVWriter>(&f);
+		fileWAV = std::make_unique<WAVWriter>(ff);
 		fileWAV->WriteFormat(formatInfo.Samplerate, formatInfo.Sampleformat.GetBitsPerSample(), (uint16)formatInfo.Channels, formatInfo.Sampleformat.IsFloat() ? WAVFormatChunk::fmtFloat : WAVFormatChunk::fmtPCM);
 
 		if(settings.Tags)
@@ -74,14 +76,14 @@ public:
 				{
 					frameData[channel] = IEEE754binary32LE(interleaved[channel]);
 				}
-				fileWAV->WriteBuffer(reinterpret_cast<const std::byte*>(frameData.data()), formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8));
+				fileWAV->Write(mpt::span(reinterpret_cast<const std::byte*>(frameData.data()), formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8)));
 				interleaved += formatInfo.Channels;
 			}
 		}
 	}
 	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
 	{
-		fileWAV->WriteBuffer(data, frameCount * formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8));
+		fileWAV->Write(mpt::span(data, frameCount * formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8)));
 	}
 	void WriteCues(const std::vector<uint64> &cues) override
 	{

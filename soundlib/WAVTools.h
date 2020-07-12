@@ -331,40 +331,33 @@ public:
 class WAVWriter
 {
 protected:
-	// When writing to a stream: Stream pointer
-	std::ostream *s = nullptr;
-	// When writing to memory: Memory address + length
-	mpt::byte_span memory;
+	// Output stream
+	mpt::IO::OFileBase &s;
 
 	// Cursor position
-	size_t position = 0;
+	std::size_t position = 0;
 	// Total number of bytes written to file / memory
-	size_t totalSize = 0;
+	std::size_t totalSize = 0;
 
 	// Currently written chunk
-	size_t chunkStartPos = 0;
+	std::size_t chunkStartPos = 0;
 	RIFFChunk chunkHeader;
 
 public:
-	// Output to stream: Initialize with std::ostream*.
-	WAVWriter(std::ostream *stream);
-	// Output to clipboard: Initialize with pointer to memory and size of reserved memory.
-	WAVWriter(mpt::byte_span data);
+	// Output to stream
+	WAVWriter(mpt::IO::OFileBase &stream);
 
 	~WAVWriter() noexcept(false);
 
-	// Check if anything can be written to the file.
-	bool IsValid() const { return s != nullptr || !memory.empty(); }
-
 	// Finalize the file by closing the last open chunk and updating the file header. Returns total size of file.
-	size_t Finalize();
+	std::size_t Finalize();
 	// Begin writing a new chunk to the file.
 	void StartChunk(RIFFChunk::ChunkIdentifiers id);
 
 	// Skip some bytes... For example after writing sample data.
 	void Skip(size_t numBytes) { Seek(position + numBytes); }
 	// Get position in file (not counting any changes done to the file from outside this class, i.e. through GetFile())
-	size_t GetPosition() const { return position; }
+	std::size_t GetPosition() const { return position; }
 
 	// Shrink file size to current position.
 	void Truncate() { totalSize = position; }
@@ -373,22 +366,11 @@ public:
 	template<typename T>
 	void Write(const T &data)
 	{
-		static_assert((mpt::is_binary_safe<T>::value));
-		Write(&data, sizeof(T));
+		Write(mpt::as_raw_memory(data));
 	}
 
 	// Write a buffer to the file.
-	void WriteBuffer(const std::byte *data, size_t size)
-	{
-		Write(data, size);
-	}
-
-	// Write an array to the file.
-	template<typename T, size_t size>
-	void WriteArray(const T (&data)[size])
-	{
-		Write(data, sizeof(T) * size);
-	}
+	void Write(mpt::const_byte_span data);
 
 	// Write the WAV format to the file.
 	void WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChannels, WAVFormatChunk::SampleFormats encoding);
@@ -403,12 +385,9 @@ public:
 
 protected:
 	// Seek to a position in file.
-	void Seek(size_t pos);
+	void Seek(std::size_t pos);
 	// End current chunk by updating the chunk header and writing a padding byte if necessary.
 	void FinalizeChunk();
-
-	// Write some data to the file.
-	void Write(const void *data, size_t numBytes);
 
 	// Write a single tag into a open idLIST chunk
 	void WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &utext);
