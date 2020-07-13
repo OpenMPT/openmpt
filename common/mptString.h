@@ -145,9 +145,9 @@ enum Charset {
 
 // Locale in tracker builds, UTF8 in non-locale-aware libopenmpt builds.
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-const Charset CharsetLocaleOrUTF8 = CharsetLocale;
+static const Charset CharsetLocaleOrUTF8 = CharsetLocale;
 #else
-const Charset CharsetLocaleOrUTF8 = CharsetUTF8;
+static const Charset CharsetLocaleOrUTF8 = CharsetUTF8;
 #endif
 
 
