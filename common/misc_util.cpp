@@ -336,7 +336,7 @@ std::optional<mpt::ustring> getenv(const mpt::ustring &env_var)
 		return std::nullopt;
 	#elif MPT_OS_WINDOWS && defined(UNICODE)
 		std::vector<WCHAR> buf(32767);
-		DWORD size = GetEnvironmentVariable(env_var.c_str(), buf.data(), 32767);
+		DWORD size = GetEnvironmentVariable(mpt::ToWide(env_var).c_str(), buf.data(), 32767);
 		if(size == 0)
 		{
 			if(GetLastError() != ERROR_ENVVAR_NOT_FOUND)
@@ -346,7 +346,7 @@ std::optional<mpt::ustring> getenv(const mpt::ustring &env_var)
 			}
 			return std::nullopt;
 		}
-		return buf.data();
+		return mpt::ToUnicode(buf.data());
 	#else
 		const char *val = std::getenv(mpt::ToCharset(mpt::CharsetEnvironment, env_var).c_str());
 		if(!val)
