@@ -11,6 +11,8 @@
 
 #include "BuildSettings.h"
 
+#include <array>
+
 OPENMPT_NAMESPACE_BEGIN
 
 namespace mpt
@@ -29,14 +31,14 @@ public:
 	typedef T value_type;
 	typedef uint8 byte_type;
 
-	enum : std::size_t { size_bytes = sizeof(value_type) };
-	enum : std::size_t { size_bits = sizeof(value_type) * 8 };
-	enum : value_type { top_bit = static_cast<value_type>(1) << ((sizeof(value_type) * 8) - 1) };
+	static constexpr std::size_t size_bytes = sizeof(value_type);
+	static constexpr std::size_t size_bits = sizeof(value_type) * 8;
+	static constexpr value_type top_bit = static_cast<value_type>(1) << ((sizeof(value_type) * 8) - 1);
 
 private:
 	
 	template <typename Tint>
-	static inline Tint reverse(Tint value)
+	static constexpr Tint reverse(Tint value) noexcept
 	{
 		const std::size_t bits = sizeof(Tint) * 8;
 		Tint result = 0;
@@ -49,7 +51,7 @@ private:
 		return result;
 	}
 
-	static inline value_type calculate_table_entry(byte_type pos)
+	static constexpr value_type calculate_table_entry(byte_type pos) noexcept
 	{
 		value_type value = 0;
 		value = (static_cast<value_type>(reverseData ? reverse(pos) : pos) << (size_bits - 8));
@@ -69,32 +71,21 @@ private:
 
 private:
 
-	static value_type table[256];
-	
-	static inline void fill_table()
+	static constexpr std::array<value_type, 256> calculate_table() noexcept
 	{
+		std::array<value_type, 256> t = mpt::init_array<value_type, 256>(value_type{});
 		for(std::size_t i = 0; i < 256; ++i)
 		{
-			table[i] = calculate_table_entry(static_cast<byte_type>(i));
+			t[i] = calculate_table_entry(static_cast<byte_type>(i));
 		}
+		return t;
 	}
+
+	static constexpr std::array<value_type, 256> table = calculate_table();
 	
-	struct table_filler
-	{
-		inline table_filler()
-		{
-			self_type::fill_table();
-		}
-	};
-
-	static inline void init()
-	{
-		static table_filler table_filler;
-	}
-
 private:
 
-	inline value_type read_table(byte_type pos) const
+	constexpr value_type read_table(byte_type pos) const noexcept
 	{
 		return table[pos];
 	}
@@ -105,13 +96,13 @@ private:
 
 public:
 
-	crc()
+	constexpr crc() noexcept
 		: value(initial)
 	{
-		init();
+		return;
 	}
 
-	inline void processByte(byte_type byte)
+	constexpr void processByte(byte_type byte) noexcept
 	{
 		if constexpr(reverseData)
 		{
@@ -122,44 +113,44 @@ public:
 		}
 	}
 
-	inline value_type result() const
+	constexpr value_type result() const noexcept
 	{
 		return (value ^ resultXOR);
 	}
 
 public:
 
-	inline operator value_type () const
+	constexpr operator value_type () const noexcept
 	{
 		return result();
 	}
 
-	inline crc & process(char c)
+	inline crc & process(char c) noexcept
 	{
 		processByte(mpt::byte_cast<byte_type>(c));
 		return *this;
 	}
 
-	inline crc & process(signed char c)
+	inline crc & process(signed char c) noexcept
 	{
 		processByte(static_cast<byte_type>(c));
 		return *this;
 	}
 
-	inline crc & process(unsigned char c)
+	inline crc & process(unsigned char c) noexcept
 	{
 		processByte(mpt::byte_cast<byte_type>(c));
 		return *this;
 	}
 
-	inline crc & process(std::byte c)
+	inline crc & process(std::byte c) noexcept
 	{
 		processByte(mpt::byte_cast<byte_type>(c));
 		return *this;
 	}
 
 	template <typename InputIt>
-	crc & process(InputIt beg, InputIt end)
+	inline crc & process(InputIt beg, InputIt end)
 	{
 		for(InputIt it = beg; it != end; ++it)
 		{
@@ -176,25 +167,25 @@ public:
 		return *this;
 	}
 
-	inline crc & operator () (char c)
+	inline crc & operator () (char c) noexcept
 	{
 		processByte(mpt::byte_cast<byte_type>(c));
 		return *this;
 	}
 
-	inline crc & operator () (signed char c)
+	inline crc & operator () (signed char c) noexcept
 	{
 		processByte(static_cast<byte_type>(c));
 		return *this;
 	}
 
-	inline crc & operator () (unsigned char c)
+	inline crc & operator () (unsigned char c) noexcept
 	{
 		processByte(mpt::byte_cast<byte_type>(c));
 		return *this;
 	}
 
-	inline crc & operator () (std::byte c)
+	inline crc & operator () (std::byte c) noexcept
 	{
 		processByte(mpt::byte_cast<byte_type>(c));
 		return *this;
@@ -222,7 +213,6 @@ public:
 	crc(InputIt beg, InputIt end)
 		: value(initial)
 	{
-		init();
 		for(InputIt it = beg; it != end; ++it)
 		{
 			static_assert(sizeof(*it) == 1, "1 byte type required");
@@ -234,14 +224,10 @@ public:
 	inline crc(const Container &data)
 		: value(initial)
 	{
-		init();
 		process(data.begin(), data.end());
 	}
 
 };
-
-template <typename T, T polynomial, T initial, T resultXOR, bool reverseData>
-typename crc<T, polynomial, initial, resultXOR, reverseData>::value_type crc<T, polynomial, initial, resultXOR, reverseData>::table[256];
 
 typedef crc<uint16, 0x8005, 0, 0, true> crc16;
 typedef crc<uint32, 0x04C11DB7, 0xFFFFFFFF, 0xFFFFFFFF, true> crc32;
