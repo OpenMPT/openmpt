@@ -2559,7 +2559,7 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 			pMainFrm->SetInfoText(mpt::format(CString(_T("%1 (%2.%3 Hz)")))(
 				mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetNoteName((ModCommand::NOTE)note)),
 				freq >> FREQ_FRACBITS,
-				mpt::cfmt::dec0<2>(Util::muldiv(freq & ((1 << FREQ_FRACBITS) - 1), 100, 1 << FREQ_FRACBITS))));
+				mpt::tfmt::dec0<2>(Util::muldiv(freq & ((1 << FREQ_FRACBITS) - 1), 100, 1 << FREQ_FRACBITS))));
 		}
 	}
 }
