@@ -287,6 +287,20 @@ VersionWithRevision VersionWithRevision::Parse(const mpt::ustring &s)
 	return {version, revision};
 }
 
+mpt::ustring VersionWithRevision::ToUString() const
+{
+	if(!HasRevision())
+	{
+		return mpt::ufmt::val(version);
+	}
+	if(!version.IsTestVersion())
+	{
+		return mpt::ufmt::val(version);
+	}
+	return mpt::format(U_("%1-r%2"))(version, revision);
+}
+
+
 
 
 namespace Build {

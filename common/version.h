@@ -250,6 +250,7 @@ struct VersionWithRevision
 	uint64 revision;
 	static VersionWithRevision Current();
 	static VersionWithRevision Parse(const mpt::ustring &s);
+	mpt::ustring ToUString() const;
 	constexpr bool HasRevision() const noexcept
 	{
 		return revision != 0;
