@@ -261,6 +261,13 @@ constexpr Charset CharsetStdIO = Charset::Locale;
 constexpr Charset CharsetStdIO = Charset::UTF8;
 #endif
 
+// getenv
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+constexpr Charset CharsetEnvironment = Charset::Locale;
+#else
+constexpr Charset CharsetEnvironment = Charset::UTF8;
+#endif
+
 // std::exception::what()
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 constexpr Charset CharsetException = Charset::Locale;

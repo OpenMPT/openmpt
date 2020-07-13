@@ -182,15 +182,15 @@ void DoTests()
 	#else
 
 		// prefix for test suite
-		std::string pathprefix = std::string();
+		mpt::ustring pathprefix = mpt::ustring();
 
 		// set path prefix for test files (if provided)
-		std::string env_srcdir = mpt::getenv( "srcdir" ).value_or( "" );
+		mpt::ustring env_srcdir = mpt::getenv( U_("srcdir") ).value_or( U_("") );
 		if ( !env_srcdir.empty() ) {
 			pathprefix = env_srcdir;
 		}
 
-		PathPrefix = new mpt::PathString(mpt::PathString::FromNative(pathprefix));
+		PathPrefix = new mpt::PathString(mpt::PathString::FromUnicode(pathprefix));
 
 	#endif
 

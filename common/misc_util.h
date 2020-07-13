@@ -239,7 +239,7 @@ namespace mpt
 {
 
 // Wrapper around std::getenv.
-std::optional<std::string> getenv(const std::string &env_var);
+std::optional<mpt::ustring> getenv(const mpt::ustring &env_var);
 
 } // namespace mpt
 

@@ -11,6 +11,10 @@
 #include "stdafx.h"
 #include "misc_util.h"
 
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#endif
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -325,19 +329,32 @@ std::vector<std::byte> Base64ToBin(const mpt::ustring &src)
 namespace mpt
 {
 
-std::optional<std::string> getenv(const std::string &env_var)
+std::optional<mpt::ustring> getenv(const mpt::ustring &env_var)
 {
-#if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
-	MPT_UNREFERENCED_PARAMETER(env_var);
-	return std::nullopt;
-#else
-	const char *val = std::getenv(env_var.c_str());
-	if(!val)
-	{
+	#if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
+		MPT_UNREFERENCED_PARAMETER(env_var);
 		return std::nullopt;
-	}
-	return val;
-#endif
+	#elif MPT_OS_WINDOWS && defined(UNICODE)
+		std::vector<WCHAR> buf(32767);
+		DWORD size = GetEnvironmentVariable(env_var.c_str(), buf.data(), 32767);
+		if(size == 0)
+		{
+			if(GetLastError() != ERROR_ENVVAR_NOT_FOUND)
+			{
+				// error
+				return std::nullopt;
+			}
+			return std::nullopt;
+		}
+		return buf.data();
+	#else
+		const char *val = std::getenv(mpt::ToCharset(mpt::CharsetEnvironment, env_var).c_str());
+		if(!val)
+		{
+			return std::nullopt;
+		}
+		return mpt::ToUnicode(mpt::CharsetEnvironment, val);
+	#endif
 }
 
 } // namespace mpt

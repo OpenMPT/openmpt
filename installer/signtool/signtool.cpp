@@ -67,8 +67,8 @@ static mpt::ustring get_keyname(mpt::ustring keyname)
 	if(keyname == U_("auto"))
 	{
 		constexpr mpt::UUID ns = "9a88e12a-a132-4215-8bd0-3a002da65373"_uuid;
-		mpt::ustring computername = mpt::ToUnicode(mpt::Charset::Locale, mpt::getenv("COMPUTERNAME").value_or(""));
-		mpt::ustring username = mpt::ToUnicode(mpt::Charset::Locale, mpt::getenv("USERNAME").value_or(""));
+		mpt::ustring computername = mpt::getenv(U_("COMPUTERNAME")).value_or(U_(""));
+		mpt::ustring username = mpt::getenv(U_("USERNAME")).value_or(U_(""));
 		mpt::ustring name = mpt::format(U_("host=%1 user=%2"))(computername, username);
 		mpt::UUID uuid = mpt::UUID::RFC4122NamespaceV5(ns, name);
 		keyname = mpt::format(U_("OpenMPT Update Signing Key %1"))(uuid);
