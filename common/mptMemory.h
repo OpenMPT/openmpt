@@ -157,7 +157,7 @@ MPT_FORCEINLINE typename std::enable_if<(sizeof(Tdst) == sizeof(Tsrc)) && std::i
 template <typename Tdst, typename Tsrc>
 struct byte_cast_impl
 {
-	inline Tdst operator () (Tsrc src) const
+	inline Tdst operator () (Tsrc src) const noexcept
 	{
 		static_assert(sizeof(Tsrc) == sizeof(std::byte));
 		static_assert(sizeof(Tdst) == sizeof(std::byte));
@@ -171,7 +171,7 @@ struct byte_cast_impl
 template <typename Tdst, typename Tsrc>
 struct byte_cast_impl<mpt::span<Tdst>, mpt::span<Tsrc> >
 {
-	inline mpt::span<Tdst> operator () (mpt::span<Tsrc> src) const
+	inline mpt::span<Tdst> operator () (mpt::span<Tsrc> src) const noexcept
 	{
 		static_assert(sizeof(Tsrc) == sizeof(std::byte));
 		static_assert(sizeof(Tdst) == sizeof(std::byte));
@@ -185,7 +185,7 @@ struct byte_cast_impl<mpt::span<Tdst>, mpt::span<Tsrc> >
 template <typename Tdst, typename Tsrc>
 struct byte_cast_impl<Tdst*, Tsrc*>
 {
-	inline Tdst* operator () (Tsrc* src) const
+	inline Tdst* operator () (Tsrc* src) const noexcept
 	{
 		static_assert(sizeof(Tsrc) == sizeof(std::byte));
 		static_assert(sizeof(Tdst) == sizeof(std::byte));
@@ -203,7 +203,7 @@ struct void_cast_impl;
 template <typename Tdst>
 struct void_cast_impl<Tdst*, void*>
 {
-	inline Tdst* operator () (void* src) const
+	inline Tdst* operator () (void* src) const noexcept
 	{
 		static_assert(sizeof(Tdst) == sizeof(std::byte));
 		static_assert(mpt::is_byte_castable<Tdst>::value);
@@ -214,7 +214,7 @@ struct void_cast_impl<Tdst*, void*>
 template <typename Tdst>
 struct void_cast_impl<Tdst*, const void*>
 {
-	inline Tdst* operator () (const void* src) const
+	inline Tdst* operator () (const void* src) const noexcept
 	{
 		static_assert(sizeof(Tdst) == sizeof(std::byte));
 		static_assert(mpt::is_byte_castable<Tdst>::value);
@@ -225,7 +225,7 @@ struct void_cast_impl<Tdst*, const void*>
 template <typename Tsrc>
 struct void_cast_impl<void*, Tsrc*>
 {
-	inline void* operator () (Tsrc* src) const
+	inline void* operator () (Tsrc* src) const noexcept
 	{
 		static_assert(sizeof(Tsrc) == sizeof(std::byte));
 		static_assert(mpt::is_byte_castable<Tsrc>::value);
@@ -236,7 +236,7 @@ struct void_cast_impl<void*, Tsrc*>
 template <typename Tsrc>
 struct void_cast_impl<const void*, Tsrc*>
 {
-	inline const void* operator () (Tsrc* src) const
+	inline const void* operator () (Tsrc* src) const noexcept
 	{
 		static_assert(sizeof(Tsrc) == sizeof(std::byte));
 		static_assert(mpt::is_byte_castable<Tsrc>::value);
@@ -247,14 +247,14 @@ struct void_cast_impl<const void*, Tsrc*>
 
 // casts between different byte (char) types or pointers to these types
 template <typename Tdst, typename Tsrc>
-inline Tdst byte_cast(Tsrc src)
+inline Tdst byte_cast(Tsrc src) noexcept
 {
 	return byte_cast_impl<Tdst, Tsrc>()(src);
 }
 
 // casts between pointers to void and pointers to byte
 template <typename Tdst, typename Tsrc>
-inline Tdst void_cast(Tsrc src)
+inline Tdst void_cast(Tsrc src) noexcept
 {
 	return void_cast_impl<Tdst, Tsrc>()(src);
 }
