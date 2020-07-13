@@ -54,12 +54,12 @@ MPTM version history for cwtv-field in "IT" header (only for MPTM files!):
 
 #ifndef MODPLUG_NO_FILESAVE
 
-static bool AreNonDefaultTuningsUsed(CSoundFile& sf)
+static bool AreNonDefaultTuningsUsed(const CSoundFile& sf)
 {
-	const INSTRUMENTINDEX iCount = sf.GetNumInstruments();
-	for(INSTRUMENTINDEX i = 1; i <= iCount; i++)
+	const INSTRUMENTINDEX numIns = sf.GetNumInstruments();
+	for(INSTRUMENTINDEX i = 1; i <= numIns; i++)
 	{
-		if(sf.Instruments[i] != nullptr && sf.Instruments[i]->pTuning != 0)
+		if(sf.Instruments[i] != nullptr && sf.Instruments[i]->pTuning != nullptr)
 			return true;
 	}
 	return false;
