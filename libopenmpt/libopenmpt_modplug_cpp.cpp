@@ -71,7 +71,9 @@ Metadata and other state is not provided or updated.
 #else
 	#define MPT_WARNING(text) /**/
 #endif
+#if !defined(LIBOPENMPT_NO_DEPRECATE)
 MPT_WARNING("libopenmpt-modplug from the libopenmpt source package is deprecated. Please migrate client code to native libopenmpt C or C++ APIs, or use the separate libopenmpt-modplug source package instead.")
+#endif /* !LIBOPENMPT_NO_DEPRECATE */
 
 #define MODPLUG_BUILD
 #ifdef _MSC_VER
