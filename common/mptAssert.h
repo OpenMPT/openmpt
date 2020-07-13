@@ -136,10 +136,4 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 
 
 
-#define MPT_CONSTEXPR11_ASSERT static_assert
-#define MPT_CONSTEXPR14_ASSERT static_assert
-#define MPT_CONSTEXPR17_ASSERT static_assert
-
-
-
 OPENMPT_NAMESPACE_END
