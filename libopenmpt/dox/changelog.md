@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.1-pre
 
+ *  [**Bug**] `libopenmpt/libopenmpt.h` failed to compile with
+    `LIBOPENMPT_NO_DEPRECATE` defined.
+
  *  mpg123: Update to v1.26.2 (2020-07-05).
 
 ### libopenmpt 0.5.0 (2020-05-24)
