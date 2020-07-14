@@ -148,6 +148,8 @@
 #else
 #define LIBOPENMPT_DEPRECATED
 #endif
+#else
+#define LIBOPENMPT_DEPRECATED
 #endif
 
 #ifndef __cplusplus
