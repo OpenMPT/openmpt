@@ -11,6 +11,9 @@ is just a high-level summary.
     into a separate `libopenmpt_modplug.sln` solution file for the MSVC build
     system.
 
+ *  [**Bug**] `libopenmpt/libopenmpt.h` failed to compile with
+    `LIBOPENMPT_NO_DEPRECATE` defined.
+
  *  mpg123: Update to v1.26.2 (2020-07-05).
 
 ### libopenmpt 0.4.13 (2020-05-24)
