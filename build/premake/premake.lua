@@ -16,6 +16,7 @@ newoption {
   { "libopenmpt-all", "libopenmpt-all" },
   { "libopenmpt_test", "libopenmpt_test" },
   { "libopenmpt", "libopenmpt" },
+  { "libopenmpt_modplug", "libopenmpt_modplug" },
   { "libopenmpt-small", "libopenmpt-small" },
   { "foo_openmpt", "foo_openmpt" },
   { "in_openmpt", "in_openmpt" },
@@ -287,6 +288,24 @@ solution "libopenmpt-small"
 
 end
 
+if _OPTIONS["group"] == "libopenmpt_modplug" then
+
+solution "libopenmpt_modplug"
+	startproject "libopenmpt_modplug"
+ location ( "../../build/" .. mpt_projectpathname )
+ configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
+ platforms ( allplatforms )
+	dofile "../../build/premake/premake-defaults-solution.lua"
+
+ dofile "../../build/premake/mpt-libopenmpt.lua"
+ dofile "../../build/premake/mpt-libopenmpt_modplug.lua"
+ dofile "../../build/premake/ext-mpg123.lua"
+ dofile "../../build/premake/ext-ogg.lua"
+ dofile "../../build/premake/ext-vorbis.lua"
+ dofile "../../build/premake/ext-zlib.lua"
+
+end
+
 -- should stay the last libopenmpt solution in order to overwrite the libopenmpt base project with all possible configurations
 if _OPTIONS["group"] == "libopenmpt" then
 
@@ -299,7 +318,6 @@ solution "libopenmpt"
 
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt_examples.lua"
- dofile "../../build/premake/mpt-libopenmpt_modplug.lua"
  dofile "../../build/premake/ext-mpg123.lua"
  dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-portaudio.lua"

@@ -7,6 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.14-pre
 
+ *  [**Change**] libmodplug: The libmodplug emulation layer is now split out
+    into a separate `libopenmpt_modplug.sln` solution file for the MSVC build
+    system.
+
  *  mpg123: Update to v1.26.2 (2020-07-05).
 
 ### libopenmpt 0.4.13 (2020-05-24)
