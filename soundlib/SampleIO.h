@@ -97,8 +97,6 @@ public:
 		format = (bits << bitOffset) | (channels << channelOffset) | (endianness << endianOffset) | (encoding << encodingOffset);
 	}
 
-	SampleIO(const SampleIO &other) : format(other.format) { }
-
 	bool operator== (const SampleIO &other) const
 	{
 		return format == other.format;

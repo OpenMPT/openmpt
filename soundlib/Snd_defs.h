@@ -578,7 +578,6 @@ public:
 	typedef T store_t;
 
 	MPT_CONSTEXPR11_FUN FPInt() : v(0) { }
-	MPT_CONSTEXPR11_FUN FPInt(const FPInt<fractFact, T> &other) : v(other.v) { }
 	MPT_CONSTEXPR11_FUN FPInt(T intPart, T fractPart) : v((intPart * fractFact) + (fractPart % fractFact)) { }
 	explicit MPT_CONSTEXPR11_FUN FPInt(float f) : v(static_cast<T>(f * float(fractFact))) { }
 	explicit MPT_CONSTEXPR11_FUN FPInt(double f) : v(static_cast<T>(f * double(fractFact))) { }
