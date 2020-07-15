@@ -157,7 +157,7 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 							}
 							break;
 						}
-					} else if(effect < 0x10 + std::size(effTrans))
+					} else if(effect < 0x10 + mpt::array_size<decltype(effTrans)>::size)
 					{
 						// Extended commands
 						m.command = effTrans[effect - 0x10];
