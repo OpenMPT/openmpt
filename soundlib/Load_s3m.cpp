@@ -328,7 +328,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.flags & S3MFileHeader::amigaLimits) m_SongFlags.set(SONG_AMIGALIMITS);
 	if(fileHeader.flags & S3MFileHeader::st2Vibrato) m_SongFlags.set(SONG_S3MOLDVIBRATO);
 
-	if(fileHeader.cwtv < S3MFileHeader::trkST3_20 || (fileHeader.flags & S3MFileHeader::fastVolumeSlides) != 0)
+	if(fileHeader.cwtv == S3MFileHeader::trkST3_00 || (fileHeader.flags & S3MFileHeader::fastVolumeSlides) != 0)
 	{
 		m_SongFlags.set(SONG_FASTVOLSLIDES);
 	}
@@ -358,8 +358,15 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	}
 
-	// Bit 8 = Stereo (we always use stereo)
-	m_nSamplePreAmp = std::max(fileHeader.masterVolume & 0x7F, 0x10);
+	if(fileHeader.formatVersion == S3MFileHeader::oldVersion && fileHeader.masterVolume < 8)
+		m_nSamplePreAmp = std::min((fileHeader.masterVolume + 1) * 0x10, 0x7F);
+	// These changes were probably only supposed to be done for older format revisions, where supposedly 0x10 was the stereo flag.
+	// However, this version check is missing in ST3, so any mono file with a master volume of 18 will be converted to a stereo file with master volume 32.
+	else if(fileHeader.masterVolume == 2 || fileHeader.masterVolume == (2 | 0x10))
+		m_nSamplePreAmp = 0x20;
+	else
+		m_nSamplePreAmp = std::max(fileHeader.masterVolume & 0x7F, 0x10);  // Bit 7 = Stereo (we always use stereo)
+
 
 	// Channel setup
 	m_nChannels = 4;
