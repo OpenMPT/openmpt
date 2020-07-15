@@ -508,8 +508,8 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 	} else if(mptSmp.uFlags[SMP_KEEPONDISK])
 	{
 #ifndef MPT_EXTERNAL_SAMPLES
-		MPT_UNREFERENCED_PARAMETER(allowExternal);
-#else
+		allowExternal = false;
+#endif  // MPT_EXTERNAL_SAMPLES
 		// Save external sample (filename at sample pointer)
 		if(allowExternal && mptSmp.HasSampleData())
 		{
@@ -518,7 +518,6 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 		{
 			length = loopbegin = loopend = susloopbegin = susloopend = 0;
 		}
-#endif  // MPT_EXTERNAL_SAMPLES
 	}
 }
 
