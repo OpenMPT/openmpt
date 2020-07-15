@@ -514,10 +514,10 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 		{
 			cvt = ITSample::cvtExternalSample;
 		} else
-#endif // MPT_EXTERNAL_SAMPLES
 		{
 			length = loopbegin = loopend = susloopbegin = susloopend = 0;
 		}
+#endif  // MPT_EXTERNAL_SAMPLES
 	}
 }
 
