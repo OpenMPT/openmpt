@@ -5078,10 +5078,7 @@ static MPT_NOINLINE void TestSampleConversion()
 		for(size_t i = 0; i < 65536; i++)
 		{
 			VERIFY_EQUAL_QUIET_NONCONT(sample.sample16()[i], static_cast<int16>(i - 0x8000u));
-			if(std::abs(truncated16[i] - static_cast<int16>((i - 0x8000u) / 2)) > 1)
-			{
-				VERIFY_EQUAL_QUIET_NONCONT(true, false);
-			}
+			VERIFY_EQUAL_QUIET_NONCONT(std::abs(truncated16[i] - static_cast<int16>((i - 0x8000u) / 2)) <= 1, true);
 		}
 	}
 
