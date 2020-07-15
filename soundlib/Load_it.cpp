@@ -1821,7 +1821,7 @@ bool CSoundFile::SaveIT(const mpt::PathString &filename, bool compatibilityExpor
 		fseek(f, static_cast<long>(dwPos), SEEK_SET);
 		if(!isExternal)
 		{
-			if(Samples[smp].nLength != smpLength)
+			if(Samples[smp].nLength != smpLength && smpLength != 0)
 			{
 				// Sample length does not fit into IT header!
 				AddToLog(mpt::format("Truncating sample %1: Length exceeds exceeds 4 gigasamples.")(smp));
