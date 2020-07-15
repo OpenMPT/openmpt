@@ -1973,7 +1973,8 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 					}
 					SHFILEINFO fileInfo;
 					SHGetFileInfo(s, 0, &fileInfo, sizeof(fileInfo), SHGFI_ICON | SHGFI_SMALLICON);
-					InsertInsLibItem(s, images.Add(fileInfo.hIcon), selectedItem);
+					const int imageIndex = fileInfo.hIcon ? images.Add(fileInfo.hIcon) : IMAGE_FOLDER;
+					InsertInsLibItem(s, imageIndex < 0 ? IMAGE_FOLDER : imageIndex, selectedItem);
 					DestroyIcon(fileInfo.hIcon);
 				}
 			}
