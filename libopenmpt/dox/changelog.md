@@ -10,7 +10,7 @@ is just a high-level summary.
  *  [**Bug**] `libopenmpt/libopenmpt.h` failed to compile with
     `LIBOPENMPT_NO_DEPRECATE` defined.
 
- *  mpg123: Update to v1.26.2 (2020-07-05).
+ *  mpg123: Update to v1.26.3 (2020-07-16).
 
 ### libopenmpt 0.5.0 (2020-05-24)
 
