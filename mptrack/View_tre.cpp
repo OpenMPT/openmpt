@@ -29,6 +29,8 @@
 #include "../soundlib/plugins/PlugInterface.h"
 #include "../soundlib/MIDIEvents.h"
 
+#include <winioctl.h>
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -1954,6 +1956,21 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 				auto driveType = GetDriveType(s);
 				if(driveType != DRIVE_UNKNOWN && driveType != DRIVE_NO_ROOT_DIR)
 				{
+					if(driveType == DRIVE_REMOVABLE)
+					{
+						TCHAR sDevice[] = _T("\\\\.\\?:");
+						sDevice[4] = s[0];
+						auto hDevice = CreateFile(sDevice, FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
+						if(hDevice != INVALID_HANDLE_VALUE)
+						{
+							// Check if removable media is inserted
+							DWORD bytesReturned = 0;
+							auto success = DeviceIoControl(hDevice, IOCTL_STORAGE_CHECK_VERIFY2, nullptr, 0, nullptr, 0, &bytesReturned, nullptr);
+							CloseHandle(hDevice);
+							if(!success && GetLastError() == ERROR_NOT_READY)
+								continue;
+						}
+					}
 					SHFILEINFO fileInfo;
 					SHGetFileInfo(s, 0, &fileInfo, sizeof(fileInfo), SHGFI_ICON | SHGFI_SMALLICON);
 					const int imageIndex = fileInfo.hIcon ? images.Add(fileInfo.hIcon) : IMAGE_FOLDER;
