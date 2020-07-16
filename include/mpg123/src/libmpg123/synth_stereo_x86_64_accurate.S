@@ -82,7 +82,7 @@ ASM_NAME(synth_1to1_s_x86_64_accurate_asm):
 #ifdef IS_MSABI
 	shlq		$32, %rax
 	shrq		$30, %rax
-	movq		%rcx, %rbx
+	movq		%rcx, %rsi
 #else
 	movq		%r8, %rax
 	shlq		$32, %rax
@@ -434,16 +434,16 @@ ASM_NAME(synth_1to1_s_x86_64_accurate_asm):
 	andl		$0xffff, %eax
 	
 #ifdef IS_MSABI
-	movaps		(%rsp), %xmm6
-	movaps		16(%rsp), %xmm7
-	movaps		32(%rsp), %xmm8
-	movaps		48(%rsp), %xmm9
-	movaps		64(%rsp), %xmm10
-	movaps		80(%rsp), %xmm11
-	movaps		96(%rsp), %xmm12
-	movaps		112(%rsp), %xmm13
-	movaps		128(%rsp), %xmm14
-	movaps		144(%rsp), %xmm15
+	movaps		16(%rsp), %xmm6
+	movaps		32(%rsp), %xmm7
+	movaps		48(%rsp), %xmm8
+	movaps		64(%rsp), %xmm9
+	movaps		80(%rsp), %xmm10
+	movaps		96(%rsp), %xmm11
+	movaps		112(%rsp), %xmm12
+	movaps		128(%rsp), %xmm13
+	movaps		144(%rsp), %xmm14
+	movaps		160(%rsp), %xmm15
 	addq		$176, %rsp
 	popq		%rsi
 #else
