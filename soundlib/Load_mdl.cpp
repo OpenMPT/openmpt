@@ -361,7 +361,7 @@ static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 e1, uint8 e2, uint
 		e1 = CMD_NONE;
 	} else if(!vol)
 	{
-		lostCommand |= !ModCommand::TwoRegularCommandsToMPT(e1, p1, e2, p2);
+		lostCommand |= (ModCommand::TwoRegularCommandsToMPT(e1, p1, e2, p2).first != CMD_NONE);
 		m.volcmd = e1;
 		m.vol = p1;
 	} else

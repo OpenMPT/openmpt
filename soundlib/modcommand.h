@@ -1,5 +1,5 @@
 /*
- * ModCommand.h
+ * modcommand.h
  * ------------
  * Purpose: ModCommand declarations and helpers. One ModCommand corresponds to one pattern cell.
  * Notes  : (currently none)
@@ -186,7 +186,8 @@ public:
 	// Returns true if any of the commands in this cell trigger a tone portamento.
 	bool IsPortamento() const { return command == CMD_TONEPORTAMENTO || command == CMD_TONEPORTAVOL || volcmd == VOLCMD_TONEPORTAMENTO; }
 	// Returns true if the cell contains an effect command that may affect the global state of the module.
-	bool IsGlobalCommand() const;
+	bool IsGlobalCommand() const { return IsGlobalCommand(command, param); }
+	static bool IsGlobalCommand(COMMAND command, PARAM param);
 
 	// Returns true if the note is inside the Amiga frequency range
 	bool IsAmigaNote() const { return IsAmigaNote(note); }
@@ -209,8 +210,8 @@ public:
 	static size_t GetEffectWeight(COMMAND cmd);
 	// Try to convert a an effect into a volume column effect. Returns true on success.
 	static bool ConvertVolEffect(uint8 &effect, uint8 &param, bool force);
-	// Takes two "normal" effect commands and converts them to volume column + effect column commands. Returns true on success, false (if one effect was lost) otherwise.
-	static bool TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 &effect2, uint8 &param2);
+	// Takes two "normal" effect commands and converts them to volume column + effect column commands. Returns the dropped command + param (CMD_NONE if nothing had to be dropped).
+	static std::pair<EffectCommand, PARAM> TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 &effect2, uint8 &param2);
 	// Try to combine two commands into one. Returns true on success and the combined command is placed in eff1 / param1.
 	static bool CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &param2);
 
