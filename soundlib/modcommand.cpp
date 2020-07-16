@@ -1,5 +1,5 @@
 /*
- * ModCommand.cpp
+ * modcommand.cpp
  * --------------
  * Purpose: Various functions for writing effects to patterns, converting ModCommands, etc.
  * Notes  : (currently none)
@@ -49,24 +49,18 @@ static_assert(std::size(volumeEffectTypes) == MAX_VOLCMDS);
 EffectType ModCommand::GetEffectType(COMMAND cmd)
 {
 	if(cmd < std::size(effectTypes))
-	{
 		return effectTypes[cmd];
-	} else
-	{
+	else
 		return EFFECT_TYPE_NORMAL;
-	}
 }
 
 
 EffectType ModCommand::GetVolumeEffectType(VOLCMD volcmd)
 {
 	if(volcmd < std::size(volumeEffectTypes))
-	{
 		return volumeEffectTypes[volcmd];
-	} else
-	{
+	else
 		return EFFECT_TYPE_NORMAL;
-	}
 }
 
 
@@ -816,7 +810,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		case VOLCMD_VIBRATODEPTH:
 			// OpenMPT-specific commands
 		case VOLCMD_OFFSET:
-			vol = std::min(vol, PARAM(9));
+			vol = std::min(vol, VOL(9));
 			break;
 		}
 	} // End if(newTypeIsIT_MPT)
@@ -853,7 +847,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 }
 
 
-bool ModCommand::IsGlobalCommand() const
+bool ModCommand::IsGlobalCommand(COMMAND command, PARAM param)
 {
 	switch(command)
 	{
@@ -1126,13 +1120,13 @@ bool ModCommand::CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &
 }
 
 
-bool ModCommand::TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 &effect2, uint8 &param2)
+std::pair<EffectCommand, ModCommand::PARAM> ModCommand::TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 &effect2, uint8 &param2)
 {
 	for(uint8 n = 0; n < 4; n++)
 	{
 		if(ModCommand::ConvertVolEffect(effect1, param1, (n > 1)))
 		{
-			return true;
+			return {CMD_NONE, ModCommand::PARAM(0)};
 		}
 		std::swap(effect1, effect2);
 		std::swap(param1, param2);
@@ -1144,9 +1138,10 @@ bool ModCommand::TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 &e
 		std::swap(effect1, effect2);
 		std::swap(param1, param2);
 	}
+	std::pair<EffectCommand, PARAM> lostCommand = {static_cast<EffectCommand>(effect1), param1};
 	effect1 = VOLCMD_NONE;
 	param1 = 0;
-	return false;
+	return lostCommand;
 }
 
 
