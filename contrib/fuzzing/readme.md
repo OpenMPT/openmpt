@@ -20,7 +20,8 @@ Contents:
 
 Prerequisites
 =============
-* afl from http://lcamtuf.coredump.cx/afl/ - the makefile expects this to be
+* [afl++](https://github.com/AFLplusplus/AFLplusplus) or
+  [afl](http://lcamtuf.coredump.cx/afl/) - the makefile expects this to be
   installed in `contrib/fuzzing/afl`, as it is automatically done by the
   `get-afl.sh` install script.
 * Clang with LLVM dev headers (llvm-config needs to be installed).
