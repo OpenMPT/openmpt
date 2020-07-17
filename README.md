@@ -81,8 +81,6 @@ For detailed requirements, see `libopenmpt/dox/quickstart.md`.
 
      -  You will find solutions for Visual Studio 2017 and 2019 in the
         corresponding `build/vsVERSIONwin7/` folder.
-        Projects that target Windows versions before Windows 7 are available in
-        `build/vsVERSIONwinxp/`.
         Projects that target Windows 10 1709 Desktop (10.0.16299.0, including
         ARM and ARM64) or later versions are available in
         `build/vsVERSIONwin10/`.
