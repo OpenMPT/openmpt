@@ -36,11 +36,9 @@ How to compile
 
      -  You will find solutions for Visual Studio 2017 and 2019 in the
         corresponding `build/vsVERSIONwin7/` folder.
-        Projects that target Windows versions before Windows 7 are available in
-        `build/vsVERSIONwinxp/`.
-        Projects that target Windows 10 1709 Desktop (10.0.16299.0, including
-        ARM and ARM64) or later versions are available in
-        `build/vsVERSIONwin10/`.
+        Projects that target Windows 10 Desktop (including ARM and ARM64) are
+        available in `build/vsVERSIONwin10/` (Visual Studio 2017 requires SDK
+        version 10.0.16299).
         Minimal projects that target Windows 10 UWP are available in
         `build/vsVERSIONuwp/`.
         Most projects are supported with any of the mentioned Visual Studio
