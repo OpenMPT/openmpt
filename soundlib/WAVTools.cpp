@@ -415,7 +415,7 @@ void WAVWriter::Seek(std::size_t pos)
 // Write some data to the file.
 void WAVWriter::Write(mpt::const_byte_span data)
 {
-	MPT_ASSERT(mpt::IO::WriteRaw(s, data));
+	mpt::IO::WriteRaw(s, data);
 	position += data.size();
 	totalSize = std::max(totalSize, position);
 }
