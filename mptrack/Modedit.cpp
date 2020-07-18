@@ -1146,16 +1146,22 @@ bool CModDoc::SaveEnvelope(INSTRUMENTINDEX ins, EnvelopeType env, const mpt::Pat
 	CStringA s;
 	EnvelopeToString(s, pIns->GetEnvelope(env));
 
-	mpt::SafeOutputFile sf(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-	mpt::ofstream &f = sf;
-	if(!f)
+	bool ok = false;
+	try
 	{
-		EndWaitCursor();
-		return false;
+		mpt::SafeOutputFile sf(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+		mpt::ofstream &f = sf;
+		f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+		if(f)
+			ok = mpt::IO::WriteRaw(f, s.GetString(), s.GetLength());
+		else
+			ok = false;
+	} catch(const std::exception &)
+	{
+		ok = false;
 	}
-	mpt::IO::WriteRaw(f, s.GetString(), s.GetLength());
 	EndWaitCursor();
-	return true;
+	return ok;
 }
 
 

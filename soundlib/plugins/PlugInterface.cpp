@@ -628,7 +628,7 @@ void IMixPlugin::SetModified()
 bool IMixPlugin::SaveProgram()
 {
 	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
-	bool useDefaultDir = !defaultDir.empty();
+	const bool useDefaultDir = !defaultDir.empty();
 	if(!useDefaultDir && m_Factory.dllPath.IsFile())
 	{
 		defaultDir = m_Factory.dllPath.GetPath();
@@ -650,19 +650,21 @@ bool IMixPlugin::SaveProgram()
 		TrackerSettings::Instance().PathPluginPresets.SetWorkingDir(dlg.GetWorkingDirectory());
 	}
 
-	bool bank = (dlg.GetExtension() == P_("fxb"));
+	const bool isBank = (dlg.GetExtension() == P_("fxb"));
 
-	mpt::SafeOutputFile sf(dlg.GetFirstFile(), std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-	mpt::ofstream& f = sf;
-	if(f.good() && VSTPresets::SaveFile(f, *this, bank))
+	try
 	{
-		return true;
-	} else
+		mpt::SafeOutputFile sf(dlg.GetFirstFile(), std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+		mpt::ofstream &f = sf;
+		f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+		if(f.good() && VSTPresets::SaveFile(f, *this, isBank))
+			return true;
+	} catch(const std::exception &)
 	{
-		Reporting::Error("Error saving preset.", m_pEditor);
-		return false;
+		
 	}
-
+	Reporting::Error("Error saving preset.", m_pEditor);
+	return false;
 }
 
 
