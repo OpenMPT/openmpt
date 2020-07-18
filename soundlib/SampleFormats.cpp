@@ -566,6 +566,7 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, std::ostream &f) const
 	tags.SetEncoder();
 	tags.title = mpt::ToUnicode(GetCharsetInternal(), m_szNames[nSample]);
 	file.WriteMetatags(tags);
+	file.Finalize();
 
 	return true;
 }
@@ -838,15 +839,15 @@ bool CSoundFile::SaveRAWSample(SAMPLEINDEX nSample, std::ostream &f) const
 
 struct GF1PatchFileHeader
 {
-	char     magic[8];		// "GF1PATCH"
-	char     version[4];	// "100", or "110"
-	char     id[10];		// "ID#000002"
-	char     copyright[60];	// Copyright
-	uint8le  numInstr;		// Number of instruments in patch
-	uint8le  voices;		// Number of voices, usually 14
-	uint8le  channels;		// Number of wav channels that can be played concurently to the patch
-	uint16le numSamples;	// Total number of waveforms for all the .PAT
-	uint16le volume;		// Master volume
+	char     magic[8];       // "GF1PATCH"
+	char     version[4];     // "100", or "110"
+	char     id[10];         // "ID#000002"
+	char     copyright[60];  // Copyright
+	uint8le  numInstr;       // Number of instruments in patch
+	uint8le  voices;         // Number of voices, usually 14
+	uint8le  channels;       // Number of wav channels that can be played concurently to the patch
+	uint16le numSamples;     // Total number of waveforms for all the .PAT
+	uint16le volume;         // Master volume
 	uint32le dataSize;
 	char     reserved2[36];
 };
@@ -856,10 +857,10 @@ MPT_BINARY_STRUCT(GF1PatchFileHeader, 129)
 
 struct GF1Instrument
 {
-	uint16le id;			// Instrument id: 0-65535
-	char     name[16];		// Name of instrument. Gravis doesn't seem to use it
-	uint32le size;			// Number of bytes for the instrument with header. (To skip to next instrument)
-	uint8    layers;		// Number of layers in instrument: 1-4
+	uint16le id;        // Instrument id: 0-65535
+	char     name[16];  // Name of instrument. Gravis doesn't seem to use it
+	uint32le size;      // Number of bytes for the instrument with header. (To skip to next instrument)
+	uint8    layers;    // Number of layers in instrument: 1-4
 	char     reserved[40];
 };
 
@@ -868,22 +869,24 @@ MPT_BINARY_STRUCT(GF1Instrument, 63)
 
 struct GF1SampleHeader
 {
-	char     name[7];		// null terminated string. name of the wave.
-	uint8le  fractions;		// Start loop point fraction in 4 bits + End loop point fraction in the 4 other bits.
-	uint32le length;		// total size of wavesample. limited to 65535 now by the drivers, not the card.
-	uint32le loopstart;		// start loop position in the wavesample
-	uint32le loopend;		// end loop position in the wavesample
-	uint16le freq;			// Rate at which the wavesample has been sampled
-	uint32le low_freq, high_freq, root_freq;	// check note.h for the correspondance.
-	int16le  finetune;		// fine tune. -512 to +512, EXCLUDING 0 cause it is a multiplier. 512 is one octave off, and 1 is a neutral value
-	uint8le  balance;		// Balance: 0-15. 0=full left, 15 = full right
-	uint8le  env_rate[6];	// attack rates
-	uint8le  env_volume[6];	// attack volumes
+	char     name[7];        // null terminated string. name of the wave.
+	uint8le  fractions;      // Start loop point fraction in 4 bits + End loop point fraction in the 4 other bits.
+	uint32le length;         // total size of wavesample. limited to 65535 now by the drivers, not the card.
+	uint32le loopstart;      // start loop position in the wavesample
+	uint32le loopend;        // end loop position in the wavesample
+	uint16le freq;           // Rate at which the wavesample has been sampled
+	uint32le low_freq;       // check note.h for the correspondance.
+	uint32le high_freq;      // check note.h for the correspondance.
+	uint32le root_freq;      // check note.h for the correspondance.
+	int16le  finetune;       // fine tune. -512 to +512, EXCLUDING 0 cause it is a multiplier. 512 is one octave off, and 1 is a neutral value
+	uint8le  balance;        // Balance: 0-15. 0=full left, 15 = full right
+	uint8le  env_rate[6];    // attack rates
+	uint8le  env_volume[6];  // attack volumes
 	uint8le  tremolo_sweep, tremolo_rate, tremolo_depth;
 	uint8le  vibrato_sweep, vibrato_rate, vibrato_depth;
 	uint8le  flags;
-	int16le  scale_frequency;	// Note
-	uint16le scale_factor;		// 0...2048 (1024 is normal) or 0...2
+	int16le  scale_frequency;  // Note
+	uint16le scale_factor;     // 0...2048 (1024 is normal) or 0...2
 	char     reserved[36];
 };
 
@@ -891,22 +894,22 @@ MPT_BINARY_STRUCT(GF1SampleHeader, 96)
 
 // -- GF1 Envelopes --
 //
-//	It can be represented like this (the envelope is totally bogus, it is
-//	just to show the concept):
+// It can be represented like this (the envelope is totally bogus, it is
+// just to show the concept):
 //
-//	|
-//	|           /----`               | |
-//	|   /------/      `\         | | | | |
-//	|  /                 \       | | | | |
-//	| /                    \     | | | | |
-//	|/                       \   | | | | |
-//	---------------------------- | | | | | |
-//	<---> attack rate 0          0 1 2 3 4 5 amplitudes
-//	     <----> attack rate 1
-//		     <> attack rate 2
-//			 <--> attack rate 3
-//			     <> attack rate 4
-//				 <-----> attack rate 5
+//  |
+//  |           /----`               | |
+//  |   /------/      `\         | | | | |
+//  |  /                 \       | | | | |
+//  | /                    \     | | | | |
+//  |/                       \   | | | | |
+//  ---------------------------- | | | | | |
+//  <---> attack rate 0          0 1 2 3 4 5 amplitudes
+//       <----> attack rate 1
+//           <> attack rate 2
+//           <--> attack rate 3
+//               <> attack rate 4
+//               <-----> attack rate 5
 //
 // -- GF1 Flags --
 //
@@ -2466,9 +2469,9 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 // IFF File Header
 struct IFFHeader
 {
-	char     form[4];	// "FORM"
+	char     form[4];   // "FORM"
 	uint32be size;
-	char     magic[4];	// "8SVX" or "16SV"
+	char     magic[4];  // "8SVX" or "16SV"
 };
 
 MPT_BINARY_STRUCT(IFFHeader, 12)
@@ -2480,17 +2483,17 @@ struct IFFChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
-		idVHDR	= MagicBE("VHDR"),
-		idBODY	= MagicBE("BODY"),
-		idNAME	= MagicBE("NAME"),
+		idVHDR = MagicBE("VHDR"),
+		idBODY = MagicBE("BODY"),
+		idNAME = MagicBE("NAME"),
 	};
 
-	uint32be id;		// See ChunkIdentifiers
-	uint32be length;	// Chunk size without header
+	uint32be id;      // See ChunkIdentifiers
+	uint32be length;  // Chunk size without header
 
 	size_t GetLength() const
 	{
-		if(length == 0)	// Broken files
+		if(length == 0)  // Broken files
 			return std::numeric_limits<size_t>::max();
 		return length;
 	}
@@ -2506,12 +2509,12 @@ MPT_BINARY_STRUCT(IFFChunk, 8)
 
 struct IFFSampleHeader
 {
-	uint32be oneShotHiSamples;	// Samples in the high octave 1-shot part
-	uint32be repeatHiSamples;	// Samples in the high octave repeat part
-	uint32be samplesPerHiCycle;	// Samples/cycle in high octave, else 0
-	uint16be samplesPerSec;		// Data sampling rate
-	uint8be  octave;			// Octaves of waveforms
-	uint8be  compression;		// Data compression technique used
+	uint32be oneShotHiSamples;   // Samples in the high octave 1-shot part
+	uint32be repeatHiSamples;    // Samples in the high octave repeat part
+	uint32be samplesPerHiCycle;  // Samples/cycle in high octave, else 0
+	uint16be samplesPerSec;      // Data sampling rate
+	uint8be  octave;             // Octaves of waveforms
+	uint8be  compression;        // Data compression technique used
 	uint32be volume;
 };
 

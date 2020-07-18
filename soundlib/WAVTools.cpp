@@ -343,9 +343,9 @@ WAVWriter::WAVWriter(mpt::IO::OFileBase &stream)
 }
 
 
-WAVWriter::~WAVWriter() noexcept(false)
+WAVWriter::~WAVWriter()
 {
-	Finalize();
+	MPT_ASSERT(finalized);
 }
 
 
@@ -362,6 +362,7 @@ std::size_t WAVWriter::Finalize()
 
 	Seek(0);
 	Write(fileHeader);
+	finalized = true;
 
 	return totalSize;
 }
@@ -415,6 +416,7 @@ void WAVWriter::Seek(std::size_t pos)
 // Write some data to the file.
 void WAVWriter::Write(mpt::const_byte_span data)
 {
+	MPT_ASSERT(!finalized);
 	auto success = mpt::IO::WriteRaw(s, data);
 	MPT_ASSERT(success); // this assertion is useful to catch mis-calculation of required buffer size for pre-allocate in-memory file buffers (like in View_smp.cpp for clipboard)
 	if(!success)

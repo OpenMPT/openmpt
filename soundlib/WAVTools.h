@@ -342,12 +342,12 @@ protected:
 	// Currently written chunk
 	std::size_t chunkStartPos = 0;
 	RIFFChunk chunkHeader;
+	bool finalized = false;
 
 public:
 	// Output to stream
 	WAVWriter(mpt::IO::OFileBase &stream);
-
-	~WAVWriter() noexcept(false);
+	~WAVWriter();
 
 	// Finalize the file by closing the last open chunk and updating the file header. Returns total size of file.
 	std::size_t Finalize();
@@ -358,9 +358,6 @@ public:
 	void Skip(size_t numBytes) { Seek(position + numBytes); }
 	// Get position in file (not counting any changes done to the file from outside this class, i.e. through GetFile())
 	std::size_t GetPosition() const { return position; }
-
-	// Shrink file size to current position.
-	void Truncate() { totalSize = position; }
 
 	// Write some data to the file.
 	template<typename T>
