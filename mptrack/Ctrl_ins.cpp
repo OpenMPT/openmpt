@@ -2088,13 +2088,14 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 			try
 			{
 				ScopedLogCapturer logcapturer(m_modDoc);
-				mpt::SafeOutputFile f(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				mpt::SafeOutputFile sf(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				mpt::ofstream &f = sf;
 				if(!f)
 				{
 					ok = false;
 					continue;
 				}
-				//f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+				f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
 
 				if (saveXI)
 					ok &= m_sndFile.SaveXIInstrument(ins, f);

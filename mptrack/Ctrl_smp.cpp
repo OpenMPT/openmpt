@@ -1509,13 +1509,14 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 
 			try
 			{
-				mpt::SafeOutputFile f(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				mpt::SafeOutputFile sf(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				mpt::ofstream &f = sf;
 				if(!f)
 				{
 					ok = false;
 					continue;
 				}
-				//f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+				f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
 
 				// Need to enforce S3I for Adlib samples
 				const auto thisFormat = isAdlib ? dfS3I : saveFormat;
