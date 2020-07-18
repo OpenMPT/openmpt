@@ -110,9 +110,12 @@ public:
 			}
 		}
 	}
-	virtual ~WavStreamWriter()
+	void WriteFinalize() override
 	{
 		fileWAV->Finalize();
+	}
+	virtual ~WavStreamWriter()
+	{
 		fileWAV = nullptr;
 	}
 };

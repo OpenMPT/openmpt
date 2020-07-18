@@ -180,9 +180,12 @@ public:
 			frameCount -= frameCountChunk;
 		}
 	}
-	virtual ~FLACStreamWriter()
+	void WriteFinalize() override
 	{
 		FLAC__stream_encoder_finish(encoder);
+	}
+	virtual ~FLACStreamWriter()
+	{
 		FLAC__stream_encoder_delete(encoder);
 		encoder = nullptr;
 

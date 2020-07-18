@@ -1412,6 +1412,8 @@ void CDoWaveConvert::Run()
 	}
 	m_SndFile.m_PatternCuePoints = nullptr;
 
+	fileEnc->WriteFinalize();
+
 	fileEnc = nullptr;
 
 	CMainFrame::UpdateAudioParameters(m_SndFile, TRUE);

@@ -163,6 +163,7 @@ public:
 	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
 	virtual void WriteInterleavedConverted(size_t frameCount, const std::byte *data) = 0;
 	virtual void WriteCues(const std::vector<uint64> &cues) = 0; // optional
+	virtual void WriteFinalize() = 0;
 };
 
 
@@ -181,6 +182,7 @@ public:
 	void WriteInterleaved(size_t count, const float *interleaved) override = 0;
 	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override;
 	void WriteCues(const std::vector<uint64> &cues) override;
+	void WriteFinalize() override;
 protected:
 	void WriteBuffer();
 };

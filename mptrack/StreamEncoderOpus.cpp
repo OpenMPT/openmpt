@@ -170,10 +170,12 @@ public:
 			count -= static_cast<size_t>(mpt::saturate_cast<int>(count));
 		}
 	}
-	virtual ~OpusStreamWriter()
+	void WriteFinalize() override
 	{
 		ope_encoder_drain(ope_encoder);
-
+	}
+	virtual ~OpusStreamWriter()
+	{
 		ope_encoder_destroy(ope_encoder);
 		ope_encoder = NULL;
 

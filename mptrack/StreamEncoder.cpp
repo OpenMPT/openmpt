@@ -50,6 +50,12 @@ void StreamWriterBase::WriteCues(const std::vector<uint64> &cues)
 }
 
 
+void StreamWriterBase::WriteFinalize()
+{
+	return;
+}
+
+
 void StreamWriterBase::WriteBuffer()
 {
 	if(!f)

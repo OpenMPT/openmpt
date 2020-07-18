@@ -599,12 +599,8 @@ public:
 			count -= static_cast<size_t>(count_chunk);
 		}
 	}
-	virtual ~MP3LameStreamWriter()
+	void WriteFinalize() override
 	{
-		if(!gfp)
-		{
-			return;
-		}
 		if(!gfp_inited)
 		{
 			lame_init_params(gfp);
@@ -651,6 +647,13 @@ public:
 			buf.resize(lame_get_lametag_frame(gfp, (unsigned char*)buf.data(), buf.size()));
 			WriteBuffer();
 			f.seekp(endPos);
+		}
+	}
+	virtual ~MP3LameStreamWriter()
+	{
+		if(!gfp)
+		{
+			return;
 		}
 		lame_close(gfp);
 		gfp = lame_t();

@@ -169,7 +169,7 @@ public:
 			}
     }
 	}
-	virtual ~VorbisStreamWriter()
+	void WriteFinalize() override
 	{
 		vorbis_analysis_wrote(&vd, 0);
 		while(vorbis_analysis_blockout(&vd, &vb) == 1)
@@ -189,6 +189,9 @@ public:
 				}
 			}
 		}
+	}
+	virtual ~VorbisStreamWriter()
+	{
 		ogg_stream_clear(&os);
 		vorbis_block_clear(&vb);
 		vorbis_dsp_clear(&vd);

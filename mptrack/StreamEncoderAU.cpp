@@ -155,6 +155,10 @@ public:
 	{
 		MPT_UNREFERENCED_PARAMETER(cues);
 	}
+	void WriteFinalize() override
+	{
+		return;
+	}
 	virtual ~AUStreamWriter()
 	{
 		return;
