@@ -174,10 +174,22 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 	const bool mayThrow = (std::uncaught_exceptions() == 0);
 	if(!stream())
 	{
+		#if MPT_COMPILER_MSVC
+			if(m_f)
+			{
+				fclose(m_f);
+			}
+		#endif // MPT_COMPILER_MSVC
 		return;
 	}
 	if(!stream().rdbuf())
 	{
+		#if MPT_COMPILER_MSVC
+			if(m_f)
+			{
+				fclose(m_f);
+			}
+		#endif // MPT_COMPILER_MSVC
 		return;
 	}
 #if MPT_COMPILER_MSVC
