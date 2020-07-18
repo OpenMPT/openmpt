@@ -1723,8 +1723,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			{
 				mpt::SafeOutputFile safeFileStream(thisName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 				mpt::ofstream &f = safeFileStream;
-				// Do not enable yet, WAVWriter destructor may throw
-				//f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+				f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
 
 				if(!f)
 				{
