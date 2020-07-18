@@ -11,6 +11,8 @@ is just a high-level summary.
     `LIBOPENMPT_NO_DEPRECATE` defined.
 
  *  mpg123: Update to v1.26.3 (2020-07-16).
+ *  stb_vorbis: Update v1.20 commit b42009b3b9d4ca35bc703f5310eedc74f584be58
+    (2020-07-13).
 
 ### libopenmpt 0.5.0 (2020-05-24)
 
@@ -136,7 +138,8 @@ is just a high-level summary.
  *  vorbis: v1.3.6.
  *  zlib: v1.2.11.
  *  minimp3: commit 55da78cbeea5fb6757f8df672567714e1e8ca3e9 (2020-03-04).
- *  stb_vorbis: v1.19 commit 37b9b20fdec06c75a0493e0bb59e2d0f288bfb51 (2020-02-05).
+ *  stb_vorbis: v1.19 commit 37b9b20fdec06c75a0493e0bb59e2d0f288bfb51
+    (2020-02-05).
  *  miniz: v2.1.0.
  *  FLAC: v1.3.3.
  *  PortAudio: commit 799a6834a58592eadc5712cba73b35956dc51579 (2020-03-26).
