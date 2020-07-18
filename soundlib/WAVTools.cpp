@@ -415,7 +415,12 @@ void WAVWriter::Seek(std::size_t pos)
 // Write some data to the file.
 void WAVWriter::Write(mpt::const_byte_span data)
 {
-	mpt::IO::WriteRaw(s, data);
+	auto success = mpt::IO::WriteRaw(s, data);
+	MPT_ASSERT(success); // this assertion is useful to catch mis-calculation of required buffer size for pre-allocate in-memory file buffers (like in View_smp.cpp for clipboard)
+	if(!success)
+	{
+		return;
+	}
 	position += data.size();
 	totalSize = std::max(totalSize, position);
 }
