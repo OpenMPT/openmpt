@@ -11,6 +11,8 @@ is just a high-level summary.
     `LIBOPENMPT_NO_DEPRECATE` defined.
 
  *  mpg123: Update to v1.26.3 (2020-07-16).
+ *  stb_vorbis: Update v1.20 commit b42009b3b9d4ca35bc703f5310eedc74f584be58
+    (2020-07-13).
 
 ### libopenmpt 0.3.22 (2020-05-24)
 
