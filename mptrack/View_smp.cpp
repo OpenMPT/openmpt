@@ -1964,12 +1964,14 @@ void CViewSample::OnEditCopy()
 	{
 		// We cannot store an OPL patch in a Wave file...
 		Clipboard clipboard(CF_WAVE, sizeof(S3MSampleHeader));
-		if(auto sampleHeader = clipboard.As<S3MSampleHeader>())
+		if(clipboard.IsValid())
 		{
-			MemsetZero(*sampleHeader);
-			sampleHeader->ConvertToS3M(sample);
-			mpt::String::WriteBuf(mpt::String::nullTerminated, sampleHeader->name) = sndFile.m_szNames[m_nSample];
-			mpt::String::WriteBuf(mpt::String::maybeNullTerminated, sampleHeader->reserved2) = mpt::ToCharset(mpt::Charset::UTF8, Version::Current().GetOpenMPTVersionString());
+			S3MSampleHeader sampleHeader;
+			MemsetZero(sampleHeader);
+			sampleHeader.ConvertToS3M(sample);
+			mpt::String::WriteBuf(mpt::String::nullTerminated, sampleHeader.name) = sndFile.m_szNames[m_nSample];
+			mpt::String::WriteBuf(mpt::String::maybeNullTerminated, sampleHeader.reserved2) = mpt::ToCharset(mpt::Charset::UTF8, Version::Current().GetOpenMPTVersionString());
+			clipboard = sampleHeader;
 		}
 		return;
 	}

@@ -665,11 +665,10 @@ void CViewComments::OnCopyNames()
 		for(INSTRUMENTINDEX i = 1; i <= sndFile.GetNumInstruments(); i++)
 			names += mpt::ToWide(sndFile.GetCharsetInternal(), sndFile.GetInstrumentName(i)) + L"\r\n";
 	}
-	Clipboard clipboard(CF_UNICODETEXT, (names.size() + 1) * sizeof(wchar_t));
-	if(auto dst = clipboard.As<wchar_t>())
+	Clipboard clipboard(CF_UNICODETEXT, (names.length() + 1) * sizeof(wchar_t));
+	if(auto dst = clipboard.Get(); dst.data())
 	{
-		std::copy(names.begin(), names.end(), dst);
-		dst[names.size()] = '\0';
+		std::memcpy(dst.data(), names.c_str(), names.length() + 1);
 	}
 }
 

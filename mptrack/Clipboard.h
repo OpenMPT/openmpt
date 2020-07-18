@@ -29,18 +29,23 @@ public:
 		} else
 		{
 			HGLOBAL hCpy = ::GetClipboardData(m_clipFormat);
-			void *p;
+			void *p = nullptr;
 			if(hCpy != nullptr && (p = ::GlobalLock(hCpy)) != nullptr)
 			{
-				m_data = mpt::as_span(static_cast<std::byte *>(p), ::GlobalSize(hCpy));
+				m_data = mpt::as_span(mpt::void_cast<std::byte *>(p), ::GlobalSize(hCpy));
 			}
 		}
+	}
+
+	bool IsValid() const
+	{
+		return m_opened && m_hCpy && m_data.data();
 	}
 
 	template<typename T>
 	T *As()
 	{
-		return reinterpret_cast<T *>(m_data.data());
+		return mpt::byte_cast<T*>(m_data.data());
 	}
 
 	mpt::byte_span Get()
@@ -54,6 +59,22 @@ public:
 			return { mpt::byte_cast<const char *>(m_data.data()), m_data.size() };
 		else
 			return {};
+	}
+
+	Clipboard operator =(mpt::const_byte_span data)
+	{
+		MPT_ASSERT(m_data.size() >= data.size());
+		std::copy(data.begin(), data.end(), m_data.begin());
+		return *this;
+	}
+
+	template <typename T>
+	Clipboard operator =(const T &v)
+	{
+		mpt::const_byte_span data = mpt::as_raw_memory(v);
+		MPT_ASSERT(m_data.size() >= data.size());
+		std::copy(data.begin(), data.end(), m_data.begin());
+		return *this;
 	}
 
 	void Close()
