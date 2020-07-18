@@ -194,6 +194,11 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 				std::fclose(m_f);
 			}
 		#endif // MPT_COMPILER_MSVC
+		if(mayThrow && (stream().exceptions() & (std::ios::badbit | std::ios::failbit)))
+		{
+			// cppcheck-suppress exceptThrowInDestructor
+			throw std::ios_base::failure(std::string("Error before flushing file buffers."));
+		}
 		return;
 	}
 	if(!stream().rdbuf())
@@ -204,6 +209,11 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 				std::fclose(m_f);
 			}
 		#endif // MPT_COMPILER_MSVC
+		if(mayThrow && (stream().exceptions() & (std::ios::badbit | std::ios::failbit)))
+		{
+			// cppcheck-suppress exceptThrowInDestructor
+			throw std::ios_base::failure(std::string("Error before flushing file buffers."));
+		}
 		return;
 	}
 #if MPT_COMPILER_MSVC
