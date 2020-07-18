@@ -411,7 +411,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 	PrepareBuffer(toBuf, smp, redoType, undo.description, undo.changeStart, undo.changeEnd);
 
 	ModSample &sample = sndFile.GetSample(smp);
-	char *pCurrentSample = mpt::void_cast<char*>(sample.samplev());
+	std::byte *pCurrentSample = mpt::void_cast<std::byte*>(sample.samplev());
 	int8 *pNewSample = nullptr;	// a new sample is possibly going to be allocated, depending on what's going to be undone.
 	bool keepOnDisk = sample.uFlags[SMP_KEEPONDISK];
 	bool replace = false;

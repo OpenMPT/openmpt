@@ -732,10 +732,10 @@ void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, s
 		std::size_t frameSize = bufferFormat.Channels * (bufferFormat.sampleFormat.GetBitsPerSample()/8);
 		if(bufferFormat.sampleFormat.IsUnsigned())
 		{
-			std::memset(mpt::void_cast<char*>(buffer) + renderedFrames * frameSize, 0x80, remainingFrames * frameSize);
+			std::memset(mpt::void_cast<std::byte*>(buffer) + renderedFrames * frameSize, 0x80, remainingFrames * frameSize);
 		} else
 		{
-			std::memset(mpt::void_cast<char*>(buffer) + renderedFrames * frameSize, 0, remainingFrames * frameSize);
+			std::memset(mpt::void_cast<std::byte*>(buffer) + renderedFrames * frameSize, 0, remainingFrames * frameSize);
 		}
 	}
 }
