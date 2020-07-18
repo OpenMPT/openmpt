@@ -613,23 +613,29 @@ void CTuningDialog::OnBnClickedButtonExport()
 		if (!dlg.Show(this)) return;
 
 		BeginWaitCursor();
-
-		mpt::SafeOutputFile sfout(dlg.GetFirstFile(), std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-		mpt::ofstream& fout = sfout;
-
-		if(tuningFilter != -1 && filterIndex == tuningFilter)
+		try
 		{
-			failure = (pT->Serialize(fout) != Tuning::SerializationResult::Success);
-		} else if(sclFilter != -1 && filterIndex == sclFilter)
-		{
-			failure = !pT->WriteSCL(fout, dlg.GetFirstFile());
-			if(!failure)
+			mpt::SafeOutputFile sfout(dlg.GetFirstFile(), std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+			mpt::ofstream &fout = sfout;
+			fout.exceptions(fout.exceptions() | std::ios::badbit | std::ios::failbit);
+
+			if(tuningFilter != -1 && filterIndex == tuningFilter)
 			{
-				if(m_pActiveTuning->GetType() == Tuning::Type::GENERAL)
+				failure = (pT->Serialize(fout) != Tuning::SerializationResult::Success);
+			} else if(sclFilter != -1 && filterIndex == sclFilter)
+			{
+				failure = !pT->WriteSCL(fout, dlg.GetFirstFile());
+				if(!failure)
 				{
-					Reporting::Message(LogWarning, _T("The Scala SCL file format does not contain enough information to represent General Tunings without data loss.\n\nOpenMPT exported as much information as possible, but other software as well as OpenMPT itself will not be able to re-import the just exported Scala SCL in a way that resambles the original data completely.\n\nPlease consider additionally exporting the Tuning as an OpenMPT .tun file."), _T("Tuning - Incompatible export"), this);
+					if(m_pActiveTuning->GetType() == Tuning::Type::GENERAL)
+					{
+						Reporting::Message(LogWarning, _T("The Scala SCL file format does not contain enough information to represent General Tunings without data loss.\n\nOpenMPT exported as much information as possible, but other software as well as OpenMPT itself will not be able to re-import the just exported Scala SCL in a way that resembles the original data completely.\n\nPlease consider additionally exporting the Tuning as an OpenMPT .tun file."), _T("Tuning - Incompatible export"), this);
+					}
 				}
 			}
+		} catch(const std::exception &)
+		{
+			failure = true;
 		}
 		EndWaitCursor();
 
@@ -638,7 +644,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 		const CTuningCollection* pTC = m_pActiveTuningCollection;
 
-		std::string filter = std::string("multiple Tuning files (") + CTuning::s_FileExtension + std::string(")|*") + CTuning::s_FileExtension + std::string("|");
+		std::string filter = std::string("Multiple Tuning files (") + CTuning::s_FileExtension + std::string(")|*") + CTuning::s_FileExtension + std::string("|");
 
 		mpt::PathString fileName;
 		if(!m_TuningCollectionsFilenames[pTC].empty())
@@ -686,9 +692,17 @@ void CTuningDialog::OnBnClickedButtonExport()
 			SanitizeFilename(nameW);
 			fileNameW = mpt::String::Replace(fileNameW, U_("%tuning_name%"), nameW);
 			fileName = mpt::PathString::FromUnicode(fileNameW);
-			mpt::SafeOutputFile sfout(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-			mpt::ofstream& fout = sfout;
-			if(tuning.Serialize(fout) != Tuning::SerializationResult::Success)
+
+			try
+			{
+				mpt::SafeOutputFile sfout(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				mpt::ofstream &fout = sfout;
+				fout.exceptions(fout.exceptions() | std::ios::badbit | std::ios::failbit);
+				if(tuning.Serialize(fout) != Tuning::SerializationResult::Success)
+				{
+					failure = true;
+				}
+			} catch(const std::exception &)
 			{
 				failure = true;
 			}

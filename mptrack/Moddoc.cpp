@@ -287,16 +287,16 @@ bool CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool setPath
 		return false;
 
 	bool ok = false;
-	mpt::SafeOutputFile sf(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-	mpt::ofstream& f = sf;
-	if(f)
+	BeginWaitCursor();
+	m_SndFile.m_dwLastSavedWithVersion = Version::Current();
+	try
 	{
-		BeginWaitCursor();
-		FixNullStrings();
-		m_SndFile.m_dwLastSavedWithVersion = Version::Current();
-		try
+		mpt::SafeOutputFile sf(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+		mpt::ofstream &f = sf;
+		if(f)
 		{
 			f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+			FixNullStrings();
 			switch(m_SndFile.GetType())
 			{
 			case MOD_TYPE_MOD: ok = m_SndFile.SaveMod(f); break;
@@ -306,12 +306,13 @@ bool CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool setPath
 			case MOD_TYPE_MPT: ok = m_SndFile.SaveIT(f, filename); break;
 			default:           MPT_ASSERT_NOTREACHED();
 			}
-		} catch(const std::exception &)
-		{
-			ok = false;
 		}
-		EndWaitCursor();
+	} catch(const std::exception &)
+	{
+		ok = false;
 	}
+	EndWaitCursor();
+
 	if (ok)
 	{
 		if (setPath)
@@ -1903,8 +1904,7 @@ void CModDoc::OnFileCompatibilitySave()
 	CString pattern;
 
 	const MODTYPE type = m_SndFile.GetType();
-
-	switch (type)
+	switch(type)
 	{
 		case MOD_TYPE_IT:
 			pattern = FileFilterIT;
@@ -1919,7 +1919,7 @@ void CModDoc::OnFileCompatibilitySave()
 			return;
 	}
 
-	std::string ext = m_SndFile.GetModSpecifications().fileExtension;
+	const std::string ext = m_SndFile.GetModSpecifications().fileExtension;
 
 	mpt::PathString filename;
 
@@ -1947,16 +1947,34 @@ void CModDoc::OnFileCompatibilitySave()
 	if(!dlg.Show()) return;
 
 	filename = dlg.GetFirstFile();
-	mpt::SafeOutputFile f(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-	if(!f)
-		return;
-
-	ScopedLogCapturer logcapturer(*this);
-	FixNullStrings();
-	switch (type)
+	
+	bool ok = false;
+	BeginWaitCursor();
+	try
 	{
-		case MOD_TYPE_XM: m_SndFile.SaveXM(f, true); break;
-		case MOD_TYPE_IT: m_SndFile.SaveIT(f, filename, true); break;
+		mpt::SafeOutputFile sf(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+		mpt::ofstream &f = sf;
+		if(f)
+		{
+			f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+			ScopedLogCapturer logcapturer(*this);
+			FixNullStrings();
+			switch(type)
+			{
+			case MOD_TYPE_XM: ok = m_SndFile.SaveXM(f, true); break;
+			case MOD_TYPE_IT: ok = m_SndFile.SaveIT(f, filename, true); break;
+			default: MPT_ASSERT_NOTREACHED();
+			}
+		}
+	} catch(const std::exception &)
+	{
+		ok = false;
+	}
+	EndWaitCursor();
+
+	if(!ok)
+	{
+		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
 	}
 }
 
