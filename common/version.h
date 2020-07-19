@@ -213,7 +213,7 @@ MPT_CONSTEXPRINLINE Version operator "" _LiteralVersionImpl (const char * str, s
 // Create Version object from version string and check syntax, all at compile time.
 // cppcheck false-positive
 // cppcheck-suppress preprocessorErrorDirective
-#define MPT_V(strver) Version{MPT_FORCE_CONSTEXPR(( strver ## _LiteralVersionImpl ).GetRawVersion())}
+#define MPT_V(strver) MPT_FORCE_CONSTEXPR(Version{( strver ## _LiteralVersionImpl ).GetRawVersion()})
 
 
 
