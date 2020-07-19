@@ -1510,7 +1510,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 	if (nIns >= m_Instruments.size() || !m_dwWavePoolOffset)
 	{
 	#ifdef DLSBANK_LOG
-		MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("ExtractWaveForm(%d) failed: m_Instruments.size()=%1 m_dwWavePoolOffset=%2 m_WaveForms.size()=%3"))(nIns, m_Instruments.size(), m_dwWavePoolOffset, m_WaveForms.size()));
+		MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("ExtractWaveForm(%1) failed: m_Instruments.size()=%2 m_dwWavePoolOffset=%3 m_WaveForms.size()=%4"))(nIns, m_Instruments.size(), m_dwWavePoolOffset, m_WaveForms.size()));
 	#endif
 		return false;
 	}
