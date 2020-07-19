@@ -491,7 +491,7 @@ using uchar = wchar_t;
 #endif
 
 using ustring = mpt::u8string;
-using uchar = MPT_U8CHAR_TYPE;
+using uchar = mpt::u8char;
 #define MPT_UCHAR(x)     MPT_U8CHAR( x )
 #define MPT_ULITERAL(x)  MPT_U8LITERAL( x )
 #define MPT_USTRING(x)   MPT_U8STRING( x )
