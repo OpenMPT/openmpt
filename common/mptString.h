@@ -287,18 +287,15 @@ inline constexpr Charset CharsetException = Charset::UTF8;
 bool IsUTF8(const std::string &str);
 
 
-#define MPT_CHAR_TYPE    char
-#define MPT_CHAR(x)      x
-#define MPT_LITERAL(x)   x
-#define MPT_STRING(x)    std::string( x )
-
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-#define MPT_WCHAR_TYPE   wchar_t
+using wstring = std::wstring;
+using wchar = wchar_t;
 #define MPT_WCHAR(x)     L ## x
 #define MPT_WLITERAL(x)  L ## x
 #define MPT_WSTRING(x)   std::wstring( L ## x )
 #else // MPT_COMPILER_QUIRK_NO_WCHAR
-#define MPT_WCHAR_TYPE   char32_t
+using wstring = std::u32string;
+using wchar = char32_t;
 #define MPT_WCHAR(x)     U ## x
 #define MPT_WLITERAL(x)  U ## x
 #define MPT_WSTRING(x)   std::u32string( U ## x )
@@ -339,8 +336,7 @@ using winstring = mpt::tstring;
 #if MPT_CXX_AT_LEAST(20)
 
 using u8string = std::u8string;
-
-#define MPT_U8CHAR_TYPE  char8_t
+using u8char = char8_t;
 #define MPT_U8CHAR(x)    u8 ## x
 #define MPT_U8LITERAL(x) u8 ## x
 #define MPT_U8STRING(x)  std::u8string( u8 ## x )
@@ -348,8 +344,7 @@ using u8string = std::u8string;
 #else // !C++20
 
 using u8string = std::basic_string<char, mpt::charset_char_traits<mpt::Charset::UTF8>>;
-
-#define MPT_U8CHAR_TYPE  char
+using u8char = char;
 #define MPT_U8CHAR(x)    x
 #define MPT_U8LITERAL(x) x
 #define MPT_U8STRING(x)  mpt::u8string( x )
