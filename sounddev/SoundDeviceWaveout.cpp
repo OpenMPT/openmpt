@@ -596,7 +596,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInf
 		{
 			info.name = mpt::ToUnicode(mpt::String::ReadWinBuf(woc.szPname));
 			info.extraData[U_("DriverID")] = mpt::format(U_("%1:%2"))(mpt::ufmt::hex0<4>(woc.wMid), mpt::ufmt::hex0<4>(woc.wPid));
-			info.extraData[U_("DriverVersion")] = mpt::format(U_("%3.%4"))(mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
+			info.extraData[U_("DriverVersion")] = mpt::format(U_("%1.%2"))(mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
 		}
 		if(info.name.empty())
 		{
