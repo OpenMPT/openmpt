@@ -103,11 +103,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-namespace mpt
-{
-template <auto V> struct constant_value { static constexpr decltype(V) value() { return V; } };
-#define MPT_FORCE_CONSTEXPR(expr) (mpt::constant_value<( expr )>::value())
-}  // namespace mpt
+#define MPT_FORCE_CONSTEXPR(expr) [&]() { \
+  constexpr auto x = (expr); \
+  return x; \
+}()
 
 
 
