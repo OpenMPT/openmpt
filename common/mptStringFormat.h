@@ -610,7 +610,7 @@ private:
 
 private:
 
-	MPT_NOINLINE Tstring do_format(mpt::span<const Tstring> vals) const
+	MPT_NOINLINE Tstring do_format(const mpt::span<const Tstring> vals) const
 	{
 		typedef typename mpt::string_traits<Tstring> traits;
 		Tstring result;
@@ -643,7 +643,7 @@ private:
 
 public:
 
-	message_formatter(Tstring format_)
+	MPT_FORCEINLINE message_formatter(Tstring format_)
 		: format(std::move(format_))
 	{
 	}
@@ -651,49 +651,49 @@ public:
 public:
 
 	template<typename ...Ts>
-	Tstring operator() (const Ts&... xs) const
+	MPT_NOINLINE Tstring operator() (Ts&&... xs) const
 	{
-		const std::array<Tstring, sizeof...(xs)> vals{{ToStringTFunctor<Tstring>()(xs)...}};
+		const std::array<Tstring, sizeof...(xs)> vals{{ToStringTFunctor<Tstring>()(std::forward<Ts>(xs))...}};
 		return do_format(mpt::as_span(vals));
 	}
 
 }; // struct message_formatter<Tformat>
 
 template<typename Tformat>
-message_formatter<typename mpt::String::detail::to_string_type<Tformat>::type> format(Tformat format)
+inline message_formatter<typename mpt::String::detail::to_string_type<Tformat>::type> format(Tformat format)
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
 	return message_formatter<Tstring>(Tstring(std::move(format)));
 }
 
 #if MPT_WSTRING_FORMAT
-static inline message_formatter<std::wstring> wformat(std::wstring format)
+inline message_formatter<std::wstring> wformat(std::wstring format)
 {
 	return message_formatter<std::wstring>(std::move(format));
 }
 #endif
 
-static inline message_formatter<mpt::ustring> uformat(mpt::ustring format)
+inline message_formatter<mpt::ustring> uformat(mpt::ustring format)
 {
 	return message_formatter<mpt::ustring>(std::move(format));
 }
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-static inline message_formatter<mpt::lstring> lformat(mpt::lstring format)
+inline message_formatter<mpt::lstring> lformat(mpt::lstring format)
 {
 	return message_formatter<mpt::lstring>(std::move(format));
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 #if MPT_OS_WINDOWS
-static inline message_formatter<mpt::tstring> tformat(mpt::tstring format)
+inline message_formatter<mpt::tstring> tformat(mpt::tstring format)
 {
 	return message_formatter<mpt::tstring>(std::move(format));
 }
 #endif
 
 #if defined(MPT_WITH_MFC)
-static inline message_formatter<CString> cformat(CString format)
+inline message_formatter<CString> cformat(CString format)
 {
 	return message_formatter<CString>(std::move(format));
 }
