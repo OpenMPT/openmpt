@@ -77,6 +77,26 @@ template <typename T> inline std::basic_string<typename std::remove_const<T>::ty
 }
 
 
+template <typename T>
+MPT_CONSTEXPRINLINE unsigned char char_value(T x) noexcept = delete;
+template <>
+MPT_CONSTEXPRINLINE unsigned char char_value<char>(char x) noexcept
+{
+	return static_cast<unsigned char>(x);
+}
+template <>
+MPT_CONSTEXPRINLINE unsigned char char_value<unsigned char>(unsigned char x) noexcept
+{
+	return static_cast<unsigned char>(x);
+}
+#if MPT_CXX_AT_LEAST(20)
+template <>
+MPT_CONSTEXPRINLINE unsigned char char_value<char8_t>(char8_t x) noexcept
+{
+	return static_cast<unsigned char>(x);
+}
+#endif // C++20
+
 
 // string_traits abstract the API of underlying string classes, in particular they allow adopting to CString without having to specialize for CString explicitly 
 

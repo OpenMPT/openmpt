@@ -381,7 +381,7 @@ static constexpr char32_t CharsetTableCP437[256] = {
 };
 
 
-#define C(x) (static_cast<uint8>((x)))
+#define C(x) (mpt::char_value((x)))
 
 // AMS1 actually only supports ASCII plus the modified control characters and no high chars at all.
 // Just default to CP437 for those to keep things simple.
@@ -513,7 +513,7 @@ static mpt::wstring From8bit(const Tsrcstring &str, const char32_t (&table)[256]
 	res.reserve(str.length());
 	for(std::size_t i = 0; i < str.length(); ++i)
 	{
-		std::size_t c = static_cast<std::size_t>(static_cast<uint8>(str[i]));
+		std::size_t c = static_cast<std::size_t>(mpt::char_value(str[i]));
 		if(c < std::size(table))
 		{
 			res.push_back(static_cast<mpt::wchar>(table[c]));
@@ -1509,8 +1509,8 @@ int CompareNoCaseAscii(const char *a, const char *b, std::size_t n)
 {
 	while(n--)
 	{
-		unsigned char ac = static_cast<unsigned char>(mpt::ToLowerCaseAscii(*a));
-		unsigned char bc = static_cast<unsigned char>(mpt::ToLowerCaseAscii(*b));
+		unsigned char ac = mpt::char_value(mpt::ToLowerCaseAscii(*a));
+		unsigned char bc = mpt::char_value(mpt::ToLowerCaseAscii(*b));
 		if(ac != bc)
 		{
 			return ac < bc ? -1 : 1;
@@ -1528,8 +1528,8 @@ int CompareNoCaseAscii(std::string_view a, std::string_view b)
 {
 	for(std::size_t i = 0; i < std::min(a.length(), b.length()); ++i)
 	{
-		unsigned char ac = static_cast<unsigned char>(mpt::ToLowerCaseAscii(a[i]));
-		unsigned char bc = static_cast<unsigned char>(mpt::ToLowerCaseAscii(b[i]));
+		unsigned char ac = mpt::char_value(mpt::ToLowerCaseAscii(a[i]));
+		unsigned char bc = mpt::char_value(mpt::ToLowerCaseAscii(b[i]));
 		if(ac != bc)
 		{
 			return ac < bc ? -1 : 1;
