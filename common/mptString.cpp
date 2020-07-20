@@ -29,7 +29,11 @@
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
-#endif
+#endif // MPT_OS_WINDOWS
+
+#if MPT_OS_DJGPP && defined(MPT_ENABLE_CHARSET_LOCALE)
+#include <dpmi.h>
+#endif // MPT_OS_DJGPP && MPT_ENABLE_CHARSET_LOCALE
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -1109,6 +1113,50 @@ static Tdststring ToUTF8(const mpt::wstring &str, char replacement = '?')
 	return out;
 
 }
+
+
+#if MPT_OS_DJGPP && defined(MPT_ENABLE_CHARSET_LOCALE)
+
+static mpt::Charset DJGPP_GetLocaleCharset()
+{
+	uint16 active_codepage = 437;
+	uint16 system_codepage = 437;
+	__dpmi_regs regs;
+	std::memset(&regs, 0, sizeof(__dpmi_regs));
+	regs.x.ax = 0x6601;
+	if(__dpmi_int( 0x21, &regs ) == 0)
+	{
+		int cf = (regs.x.flags >> 0) & 1;
+		if(cf == 0)
+		{
+			active_codepage = regs.x.bx;
+			system_codepage = regs.x.dx;
+		}
+	}
+	mpt::Charset result = mpt::Charset::CP437;
+	if(active_codepage == 0)
+	{
+		result = mpt::Charset::CP437;
+	} else if(active_codepage == 437)
+	{
+		result = mpt::Charset::CP437;
+	} else if(active_codepage == 850)
+	{
+		result = mpt::Charset::CP850;
+	} else if(system_codepage == 437)
+	{
+		result = mpt::Charset::CP437;
+	} else if(system_codepage == 850)
+	{
+		result = mpt::Charset::CP850;
+	} else
+	{
+		result = mpt::Charset::CP437;
+	}
+	return result;
+}
+
+#endif // MPT_OS_DJGPP && MPT_ENABLE_CHARSET_LOCALE
 
 
 // templated on 8bit strings because of type-safe variants

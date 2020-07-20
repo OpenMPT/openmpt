@@ -326,7 +326,7 @@
 #elif MPT_OS_DJGPP
 
 	#ifndef MPT_LOCALE_ASSUME_CHARSET
-	#define MPT_LOCALE_ASSUME_CHARSET Charset::CP437
+	#define MPT_LOCALE_ASSUME_CHARSET DJGPP_GetLocaleCharset()
 	#endif
 
 #endif
