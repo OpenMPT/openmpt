@@ -254,6 +254,7 @@ enum class Charset {
 	ISO8859_1,
 	ISO8859_15,
 
+	CP850,
 	CP437,
 	CP437AMS,
 	CP437AMS2,
