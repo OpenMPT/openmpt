@@ -347,17 +347,6 @@
 
 #endif // MPT_COMPILER_MSVC
 
-#if MPT_USTRING_MODE_UTF8
-
-	// MPT_USTRING_MODE_UTF8 mpt::ustring is implemented via mpt::u8string
-	#define MPT_ENABLE_U8STRING 1
-
-#else
-
-	#define MPT_ENABLE_U8STRING 0
-
-#endif
-
 #if defined(MODPLUG_TRACKER) || MPT_USTRING_MODE_WIDE
 
 	// mpt::ToWString, mpt::wfmt, ConvertStrTo<std::wstring>

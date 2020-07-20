@@ -352,8 +352,6 @@ using winstring = mpt::tstring;
 #endif // MPT_OS_WINDOWS
 
 
-#if MPT_ENABLE_U8STRING
-
 #if MPT_CXX_AT_LEAST(20)
 
 using u8string = std::u8string;
@@ -385,8 +383,6 @@ using u8char = char;
 // for implementing the unicode string type mpt::ustring.
 
 #endif // C++20
-
-#endif // MPT_ENABLE_U8STRING
 
 
 #if MPT_WSTRING_CONVERT
