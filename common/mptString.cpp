@@ -469,6 +469,7 @@ static bool HasCharset(Charset charset)
 		case Charset::ASCII:       result = TestCodePage(20127);   break;
 		case Charset::ISO8859_1:   result = TestCodePage(28591);   break;
 		case Charset::ISO8859_15:  result = TestCodePage(28605);   break;
+		case Charset::CP850:       result = TestCodePage(850);     break;
 		case Charset::CP437:       result = TestCodePage(437);     break;
 		case Charset::Windows1252: result = TestCodePage(1252);    break;
 		case Charset::CP437AMS:    result = false; break;
@@ -488,6 +489,7 @@ static UINT CharsetToCodepage(Charset charset)
 		case Charset::ASCII:       return 20127;   break;
 		case Charset::ISO8859_1:   return 28591;   break;
 		case Charset::ISO8859_15:  return 28605;   break;
+		case Charset::CP850:       return 850;     break;
 		case Charset::CP437:       return 437;     break;
 		case Charset::CP437AMS:    return 437;     break; // fallback, should not happen
 		case Charset::CP437AMS2:   return 437;     break; // fallback, should not happen
