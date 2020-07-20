@@ -2578,6 +2578,10 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(mpt::ToUnicode(mpt::Charset::Locale, "a"), MPT_UTF8("a"));
 #endif
 
+#if MPT_OS_EMSCRIPTEN
+	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::Locale, MPT_UTF8("\xe2\x8c\x82")), "\xe2\x8c\x82");
+#endif // MPT_OS_EMSCRIPTEN
+
 	// Check that some character replacement is done (and not just empty strings or truncated strings are returned)
 	// We test german umlaut-a (U+00E4) (\xC3\xA4) and CJK U+5BB6 (\xE5\xAE\xB6)
 
