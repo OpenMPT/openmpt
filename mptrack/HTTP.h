@@ -176,8 +176,9 @@ using Headers = std::vector<std::pair<std::string, std::string>>;
 
 enum Flags
 {
-	None    = 0x00u,
-	NoCache = 0x01u,
+	None         = 0x00u,
+	NoCache      = 0x01u,
+	AutoRedirect = 0x02u,
 };
 
 
