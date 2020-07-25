@@ -680,6 +680,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kOPLwithNNA: desc = _T("New Note Action / Duplicate Note Action set to Note Off and Note Fade affect OPL notes like samples"); break;
 		case kST3RetrigAfterNoteCut: desc = _T("Notes cannot be retriggered after they have been cut"); break;
 		case kST3SampleSwap: desc = _T("Enable on-the-fly sample swapping (SoundBlaster driver)"); break;
+		case kOPLRealRetrig: desc = _T("Retrigger (Qxy) affects OPL notes"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

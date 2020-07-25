@@ -533,6 +533,7 @@ enum PlayBehaviour
 	kOPLwithNNA,                    // NNA note-off / fade are applied to OPL channels
 	kST3RetrigAfterNoteCut,         // Qxy does not retrigger note after it has been cut with ^^^ or SCx
 	kST3SampleSwap,                 // On-the-fly sample swapping (SoundBlaster behaviour)
+	kOPLRealRetrig,                 // Retrigger effect (Qxy) restarts OPL notes
 
 	// Add new play behaviours here.
 
