@@ -681,6 +681,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kST3RetrigAfterNoteCut: desc = _T("Notes cannot be retriggered after they have been cut"); break;
 		case kST3SampleSwap: desc = _T("Enable on-the-fly sample swapping (SoundBlaster driver)"); break;
 		case kOPLRealRetrig: desc = _T("Retrigger (Qxy) affects OPL notes"); break;
+		case kOPLNoResetAtEnvelopeEnd: desc = _T("Do not reset OPL channel status at end of envelopes"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

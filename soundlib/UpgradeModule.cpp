@@ -655,6 +655,18 @@ void CSoundFile::UpgradeModule()
 			}
 		}
 	}
+
+	if(GetType() == MOD_TYPE_MPT && GetNumInstruments() && m_dwLastSavedWithVersion >= MPT_V("1.28.00.20") && m_dwLastSavedWithVersion <= MPT_V("1.29.55.00"))
+	{
+		for(SAMPLEINDEX i = 1; i <= GetNumSamples(); i++)
+		{
+			if(Samples[i].uFlags[CHN_ADLIB])
+			{
+				m_playBehaviour.set(kOPLNoResetAtEnvelopeEnd);
+				break;
+			}
+		}
+	}
 }
 
 OPENMPT_NAMESPACE_END
