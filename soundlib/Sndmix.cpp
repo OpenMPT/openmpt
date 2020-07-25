@@ -2299,7 +2299,8 @@ bool CSoundFile::ReadNote()
 					&& ins->VolEnv.back().value == 0)
 				{
 					m_opl->NoteCut(nChn);
-					chn.dwFlags.reset(CHN_ADLIB);
+					if(!m_playBehaviour[kOPLNoResetAtEnvelopeEnd])
+						chn.dwFlags.reset(CHN_ADLIB);
 					chn.dwFlags.set(CHN_NOTEFADE);
 					chn.nFadeOutVol = 0;
 				} else if(m_playBehaviour[kOPLFlexibleNoteOff] && chn.dwFlags[CHN_NOTEFADE] && chn.nFadeOutVol == 0)
