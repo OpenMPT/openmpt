@@ -29,7 +29,7 @@ protected:
 	off_t m_bufPos = 0, m_bufSize = 0;
 	uint32 bitBuf = 0; // Current bit buffer
 	int m_bitNum = 0;  // Currently available number of bits
-	std::byte buffer[mpt::IO::BUFFERSIZE_TINY];
+	std::byte buffer[mpt::IO::BUFFERSIZE_TINY]{};
 
 public:
 
