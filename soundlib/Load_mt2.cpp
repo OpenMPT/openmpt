@@ -565,11 +565,11 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		if(hasLegacyTempo)
 		{
 			m_nDefaultTempo.SetRaw(Util::muldivr(110250, TEMPO::fractFact, fileHeader.samplesPerTick));
-			m_nTempoMode = tempoModeClassic;
+			m_nTempoMode = TempoMode::Classic;
 		} else
 		{
 			m_nDefaultTempo = TEMPO(44100.0 * 60.0 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick));
-			m_nTempoMode = tempoModeModern;
+			m_nTempoMode = TempoMode::Modern;
 		}
 	}
 
@@ -586,7 +586,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		case MagicLE("BPM+"):
 			if(!hasLegacyTempo)
 			{
-				m_nTempoMode = tempoModeModern;
+				m_nTempoMode = TempoMode::Modern;
 				double d = chunk.ReadDoubleLE();
 				if(d != 0.0)
 				{

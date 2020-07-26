@@ -1899,7 +1899,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 	}
 
 	float tempoScale = 1.0f;
-	if(sndFile.m_nTempoMode == tempoModeModern)
+	if(sndFile.m_nTempoMode == TempoMode::Modern)
 	{
 		uint32 ticksPerBeat = sndFile.m_nDefaultRowsPerBeat * sndFile.m_nDefaultSpeed;
 		if(ticksPerBeat == 0)

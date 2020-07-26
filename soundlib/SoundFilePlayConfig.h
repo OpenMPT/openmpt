@@ -14,28 +14,23 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-enum
+enum class TempoMode : uint8
 {
-	NO_ATTENUATION = 1,
+	Classic     = 0,
+	Alternative = 1,
+	Modern      = 2,
+	NumModes
 };
 
-enum TempoMode
+enum class MixLevels : uint8
 {
-	tempoModeClassic		= 0,
-	tempoModeAlternative	= 1,
-	tempoModeModern			= 2,
-	tempoModeMax
-};
-
-enum MixLevels
-{
-	mixLevelsOriginal		= 0,
-	mixLevels1_17RC1		= 1,
-	mixLevels1_17RC2		= 2,
-	mixLevels1_17RC3		= 3,
-	mixLevelsCompatible		= 4,
-	mixLevelsCompatibleFT2	= 5,
-	mixLevelsMax
+	Original      = 0,
+	v1_17RC1      = 1,
+	v1_17RC2      = 2,
+	v1_17RC3      = 3,
+	Compatible    = 4,
+	CompatibleFT2 = 5,
+	NumMixLevels
 };
 
 enum ForcePanningMode

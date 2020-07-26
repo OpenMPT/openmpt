@@ -974,7 +974,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(interpretModPlugMade && !isBeRoTracker)
 	{
 		m_playBehaviour.reset();
-		m_nMixLevels = mixLevelsOriginal;
+		m_nMixLevels = MixLevels::Original;
 	}
 	// Need to do this before reading the patterns because m_nChannels might be modified by LoadExtendedSongProperties. *sigh*
 	LoadExtendedSongProperties(file, false, &interpretModPlugMade);
@@ -2448,8 +2448,8 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 
 	// Validate read values.
 	Limit(m_nDefaultTempo, GetModSpecifications().GetTempoMin(), GetModSpecifications().GetTempoMax());
-	if(m_nTempoMode >= tempoModeMax) m_nTempoMode = tempoModeClassic;
-	if(m_nMixLevels >= mixLevelsMax) m_nMixLevels = mixLevelsOriginal;
+	if(m_nTempoMode >= TempoMode::NumModes) m_nTempoMode = TempoMode::Classic;
+	if(m_nMixLevels >= MixLevels::NumMixLevels) m_nMixLevels = MixLevels::Original;
 	//m_dwCreatedWithVersion
 	//m_dwLastSavedWithVersion
 	//m_nSamplePreAmp

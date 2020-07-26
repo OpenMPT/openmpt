@@ -599,7 +599,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_XM);
 	InitializeChannels();
-	m_nMixLevels = mixLevelsCompatible;
+	m_nMixLevels = MixLevels::Compatible;
 
 	FlagSet<TrackerVersions> madeWith(verUnknown);
 	mpt::ustring madeWithTracker;
@@ -633,7 +633,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			// Luckily, starting with v0.90.87, MilkyTracker also implements the FT2 panning scheme.
 			if(memcmp(fileHeader.trackerName + 12, "        ", 8))
 			{
-				m_nMixLevels = mixLevelsCompatibleFT2;
+				m_nMixLevels = MixLevels::CompatibleFT2;
 			}
 		} else if(!memcmp(fileHeader.trackerName, "Fasttracker II clone", 20))
 		{
@@ -945,20 +945,20 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		madeWith = verOpenMPT | verConfirmed;
 
 		if(m_dwLastSavedWithVersion < MPT_V("1.22.07.19"))
-			m_nMixLevels = mixLevelsCompatible;
+			m_nMixLevels = MixLevels::Compatible;
 		else
-			m_nMixLevels = mixLevelsCompatibleFT2;
+			m_nMixLevels = MixLevels::CompatibleFT2;
 	}
 
 	if(m_dwLastSavedWithVersion && !madeWith[verOpenMPT])
 	{
-		m_nMixLevels = mixLevelsOriginal;
+		m_nMixLevels = MixLevels::Original;
 		m_playBehaviour.reset();
 	}
 
 	if(madeWith[verFT2Generic])
 	{
-		m_nMixLevels = mixLevelsCompatibleFT2;
+		m_nMixLevels = MixLevels::CompatibleFT2;
 
 		if(!hasMidiConfig)
 		{

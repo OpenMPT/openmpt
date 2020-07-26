@@ -640,8 +640,8 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.madeWithTracker = U_("Standard MIDI File");
 	m_modFormat.charset = mpt::Charset::ISO8859_1;
 
-	SetMixLevels(mixLevels1_17RC3);
-	m_nTempoMode = tempoModeModern;
+	SetMixLevels(MixLevels::v1_17RC3);
+	m_nTempoMode = TempoMode::Modern;
 	m_SongFlags = SONG_LINEARSLIDES;
 	m_nDefaultTempo.Set(120);
 	m_nDefaultSpeed = ticksPerRow;

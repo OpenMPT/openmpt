@@ -1621,7 +1621,7 @@ void CMainFrame::InitPreview()
 	m_WaveFile.m_nType = MOD_TYPE_MPT;
 	m_WaveFile.m_nChannels = 2;
 	m_WaveFile.m_nInstruments = 1;
-	m_WaveFile.m_nTempoMode = tempoModeClassic;
+	m_WaveFile.m_nTempoMode = TempoMode::Classic;
 	m_WaveFile.Order().assign(1, 0);
 	m_WaveFile.Patterns.Insert(0, 2);
 	m_WaveFile.m_SongFlags = SONG_LINEARSLIDES;
@@ -1642,7 +1642,7 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note, int volume)
 	} else
 	{
 		// Preview at 0dB
-		m_WaveFile.SetMixLevels(mixLevels1_17RC3);
+		m_WaveFile.SetMixLevels(MixLevels::v1_17RC3);
 		m_WaveFile.m_nSamplePreAmp = static_cast<uint32>(m_WaveFile.GetPlayConfig().getNormalSamplePreAmp());
 	}
 

@@ -428,7 +428,7 @@ private:
 	CHANNELINDEX m_nMixStat;
 public:
 	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module
-	TempoMode m_nTempoMode = tempoModeClassic;
+	TempoMode m_nTempoMode = TempoMode::Classic;
 
 #ifdef MODPLUG_TRACKER
 	// Lock playback between two rows. Lock is active if lock start != ROWINDEX_INVALID).

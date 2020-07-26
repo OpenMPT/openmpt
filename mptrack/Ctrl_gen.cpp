@@ -225,7 +225,7 @@ void CCtrlGeneral::OnTapTempo()
 	const double secondsPerBeat = (numTaps * weightedSum - lengthSum * sum) / (lengthSumSum * numTaps - lengthSum * lengthSum);
 
 	double newTempo = 60.0 / secondsPerBeat;
-	if(m_sndFile.m_nTempoMode != tempoModeModern)
+	if(m_sndFile.m_nTempoMode != TempoMode::Modern)
 		newTempo *= (m_sndFile.m_nDefaultSpeed * m_sndFile.m_nDefaultRowsPerBeat) / 24.0;
 	if(!m_sndFile.GetModSpecifications().hasFractionalTempo)
 		newTempo = std::round(newTempo);

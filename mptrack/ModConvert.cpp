@@ -566,9 +566,9 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	// Adjust mix levels
 	if(newTypeIsMOD || newTypeIsS3M)
 	{
-		m_SndFile.SetMixLevels(mixLevelsCompatible);
+		m_SndFile.SetMixLevels(MixLevels::Compatible);
 	}
-	if(oldTypeIsMPT && m_SndFile.GetMixLevels() != mixLevelsCompatible && m_SndFile.GetMixLevels() != mixLevelsCompatibleFT2)
+	if(oldTypeIsMPT && m_SndFile.GetMixLevels() != MixLevels::Compatible && m_SndFile.GetMixLevels() != MixLevels::CompatibleFT2)
 	{
 		warnings.set(wMixmode);
 	}

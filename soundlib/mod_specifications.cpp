@@ -54,7 +54,7 @@ constexpr CModSpecifications mptm_ =
 	0,											// Max comment line length
 	3999,										// SamplesMax
 	255,										// instrumentMax
-	mixLevels1_17RC3,							// defaultMixLevels
+	MixLevels::v1_17RC3,						// defaultMixLevels
 	SongFlag(SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX),	// Supported song flags
 	200,										// Max MIDI mapping directives
 	MAX_ENVPOINTS,								// Envelope point count
@@ -104,7 +104,7 @@ constexpr CModSpecifications mod_ =
 	0,											// Max comment line length
 	31,											// SamplesMax
 	0,											// instrumentMax
-	mixLevelsCompatible,						// defaultMixLevels
+	MixLevels::Compatible,						// defaultMixLevels
 	SongFlag(SONG_PT_MODE | SONG_AMIGALIMITS | SONG_ISAMIGA),	// Supported song flags
 	0,											// Max MIDI mapping directives
 	0,											// No instrument envelopes
@@ -152,7 +152,7 @@ constexpr CModSpecifications xm_ =
 	0,											// Max comment line length
 	128 * 16,									// SamplesMax (actually 16 per instrument)
 	128,										// instrumentMax
-	mixLevelsCompatibleFT2,						// defaultMixLevels
+	MixLevels::CompatibleFT2,					// defaultMixLevels
 	SongFlag(SONG_LINEARSLIDES),				// Supported song flags
 	0,											// Max MIDI mapping directives
 	12,											// Envelope point count
@@ -200,7 +200,7 @@ constexpr CModSpecifications xmEx_ =
 	0,											// Max comment line length
 	MAX_SAMPLES - 1,							// SamplesMax (actually 32 per instrument(256 * 32 = 8192), but limited to MAX_SAMPLES = 4000)
 	255,										// instrumentMax
-	mixLevelsCompatibleFT2,						// defaultMixLevels
+	MixLevels::CompatibleFT2,					// defaultMixLevels
 	SongFlag(SONG_LINEARSLIDES | SONG_EXFILTERRANGE),	// Supported song flags
 	200,										// Max MIDI mapping directives
 	12,											// Envelope point count
@@ -247,7 +247,7 @@ constexpr CModSpecifications s3m_ =
 	0,											// Max comment line length
 	99,											// SamplesMax
 	0,											// instrumentMax
-	mixLevelsCompatible,						// defaultMixLevels
+	MixLevels::Compatible,						// defaultMixLevels
 	SongFlag(SONG_FASTVOLSLIDES | SONG_AMIGALIMITS | SONG_S3MOLDVIBRATO),	// Supported song flags
 	0,											// Max MIDI mapping directives
 	0,											// No instrument envelopes
@@ -295,7 +295,7 @@ constexpr CModSpecifications s3mEx_ =
 	0,											// Max comment line length
 	99,											// SamplesMax
 	0,											// instrumentMax
-	mixLevelsCompatible,						// defaultMixLevels
+	MixLevels::Compatible,						// defaultMixLevels
 	SongFlag(SONG_FASTVOLSLIDES | SONG_AMIGALIMITS),	// Supported song flags
 	0,											// Max MIDI mapping directives
 	0,											// No instrument envelopes
@@ -342,7 +342,7 @@ constexpr CModSpecifications it_ =
 	75,											// Max comment line length
 	99,											// SamplesMax
 	99,											// instrumentMax
-	mixLevelsCompatible,						// defaultMixLevels
+	MixLevels::Compatible,						// defaultMixLevels
 	SongFlag(SONG_LINEARSLIDES | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX),	// Supported song flags
 	0,											// Max MIDI mapping directives
 	25,											// Envelope point count
@@ -389,7 +389,7 @@ constexpr CModSpecifications itEx_ =
 	75,											// Max comment line length
 	3999,										// SamplesMax
 	255,										// instrumentMax
-	mixLevelsCompatible,						// defaultMixLevels
+	MixLevels::Compatible,						// defaultMixLevels
 	SongFlag(SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX),	// Supported song flags
 	200,										// Max MIDI mapping directives
 	25,											// Envelope point count

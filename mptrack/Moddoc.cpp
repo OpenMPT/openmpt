@@ -548,7 +548,7 @@ BOOL CModDoc::InitializeMod()
 
 		if(GetModType() == MOD_TYPE_MPT)
 		{
-			m_SndFile.m_nTempoMode = tempoModeModern;
+			m_SndFile.m_nTempoMode = TempoMode::Modern;
 			m_SndFile.m_SongFlags.set(SONG_EXFILTERRANGE);
 		}
 		m_SndFile.SetDefaultPlaybackBehaviour(GetModType());
@@ -2239,16 +2239,16 @@ void CModDoc::OnApproximateBPM()
 	CString s;
 	switch(m_SndFile.m_nTempoMode)
 	{
-		case tempoModeAlternative:
+		case TempoMode::Alternative:
 			s.Format(_T("Using alternative tempo interpretation.\n\nAssuming:\n. %.8g ticks per second\n. %u ticks per row\n. %u rows per beat\nthe tempo is approximately: %.8g BPM"),
 			m_SndFile.m_PlayState.m_nMusicTempo.ToDouble(), m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
 			break;
 
-		case tempoModeModern:
+		case TempoMode::Modern:
 			s.Format(_T("Using modern tempo interpretation.\n\nThe tempo is: %.8g BPM"), bpm);
 			break;
 
-		case tempoModeClassic:
+		case TempoMode::Classic:
 		default:
 			s.Format(_T("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %.8g\n. %u ticks per row\n. %u rows per beat\nthe tempo is approximately: %.8g BPM"),
 			m_SndFile.m_PlayState.m_nMusicTempo.ToDouble(), m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
@@ -2531,7 +2531,7 @@ void CModDoc::OnViewMPTHacks()
 
 void CModDoc::OnViewTempoSwingSettings()
 {
-	if(m_SndFile.m_nDefaultRowsPerBeat > 0 && m_SndFile.m_nTempoMode == tempoModeModern)
+	if(m_SndFile.m_nDefaultRowsPerBeat > 0 && m_SndFile.m_nTempoMode == TempoMode::Modern)
 	{
 		TempoSwing tempoSwing = m_SndFile.m_tempoSwing;
 		tempoSwing.resize(m_SndFile.m_nDefaultRowsPerBeat, TempoSwing::Unity);

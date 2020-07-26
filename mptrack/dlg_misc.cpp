@@ -179,11 +179,11 @@ void CModTypeDlg::UpdateDialog()
 	const TempoMode oldTempoMode = initialized ? static_cast<TempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) : sndFile.m_nTempoMode;
 	m_TempoModeBox.ResetContent();
 
-	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Classic")), tempoModeClassic);
-	if(m_nType == MOD_TYPE_MPT || (sndFile.GetType() != MOD_TYPE_MPT && sndFile.m_nTempoMode == tempoModeAlternative))
-		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Alternative")), tempoModeAlternative);
-	if(m_nType == MOD_TYPE_MPT || (sndFile.GetType() != MOD_TYPE_MPT && sndFile.m_nTempoMode == tempoModeModern))
-		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Modern (accurate)")), tempoModeModern);
+	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Classic")), static_cast<DWORD_PTR>(TempoMode::Classic));
+	if(m_nType == MOD_TYPE_MPT || (sndFile.GetType() != MOD_TYPE_MPT && sndFile.m_nTempoMode == TempoMode::Alternative))
+		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Alternative")), static_cast<DWORD_PTR>(TempoMode::Alternative));
+	if(m_nType == MOD_TYPE_MPT || (sndFile.GetType() != MOD_TYPE_MPT && sndFile.m_nTempoMode == TempoMode::Modern))
+		m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Modern (accurate)")), static_cast<DWORD_PTR>(TempoMode::Modern));
 	m_TempoModeBox.SetCurSel(0);
 	for(int i = m_TempoModeBox.GetCount(); i > 0; i--)
 	{
@@ -198,18 +198,18 @@ void CModTypeDlg::UpdateDialog()
 	// Mix levels
 	const MixLevels oldMixLevels = initialized ? static_cast<MixLevels>(m_PlugMixBox.GetItemData(m_PlugMixBox.GetCurSel())) : sndFile.GetMixLevels();
 	m_PlugMixBox.ResetContent();
-	if(m_nType == MOD_TYPE_MPT || sndFile.GetMixLevels() == mixLevels1_17RC3) // In XM/IT, this is only shown for backwards compatibility with existing tunes
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC3")), mixLevels1_17RC3);
-	if(sndFile.GetMixLevels() == mixLevels1_17RC2) // Only shown for backwards compatibility with existing tunes
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC2")), mixLevels1_17RC2);
-	if(sndFile.GetMixLevels() == mixLevels1_17RC1) // Ditto
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC1")), mixLevels1_17RC1);
-	if(sndFile.GetMixLevels() == mixLevelsOriginal) // Ditto
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Original (MPT 1.16)")), mixLevelsOriginal);
+	if(m_nType == MOD_TYPE_MPT || sndFile.GetMixLevels() == MixLevels::v1_17RC3) // In XM/IT, this is only shown for backwards compatibility with existing tunes
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC3")), static_cast<DWORD_PTR>(MixLevels::v1_17RC3));
+	if(sndFile.GetMixLevels() == MixLevels::v1_17RC2) // Only shown for backwards compatibility with existing tunes
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC2")), static_cast<DWORD_PTR>(MixLevels::v1_17RC2));
+	if(sndFile.GetMixLevels() == MixLevels::v1_17RC1) // Ditto
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC1")), static_cast<DWORD_PTR>(MixLevels::v1_17RC1));
+	if(sndFile.GetMixLevels() == MixLevels::Original) // Ditto
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Original (MPT 1.16)")), static_cast<DWORD_PTR>(MixLevels::Original));
 	int compatMixMode = m_PlugMixBox.AddString(_T("Compatible"));
-	m_PlugMixBox.SetItemData(compatMixMode, mixLevelsCompatible);
+	m_PlugMixBox.SetItemData(compatMixMode, static_cast<DWORD_PTR>(MixLevels::Compatible));
 	if(m_nType == MOD_TYPE_XM)
-		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Compatible (FT2 Pan Law)")), mixLevelsCompatibleFT2);
+		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("Compatible (FT2 Pan Law)")), static_cast<DWORD_PTR>(MixLevels::CompatibleFT2));
 
 	// Default to compatible mix mode
 	m_PlugMixBox.SetCurSel(compatMixMode);
@@ -287,7 +287,7 @@ void CModTypeDlg::OnPTModeChanged()
 
 void CModTypeDlg::OnTempoModeChanged()
 {
-	GetDlgItem(IDC_BUTTON1)->EnableWindow(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel()) == tempoModeModern);
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(static_cast<TempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) == TempoMode::Modern);
 }
 
 
@@ -302,7 +302,7 @@ void CModTypeDlg::OnTempoSwing()
 	ROWINDEX newRPM = std::max(newRPB, GetDlgItemInt(IDC_ROWSPERMEASURE));
 	sndFile.m_nDefaultRowsPerBeat = newRPB;
 	sndFile.m_nDefaultRowsPerMeasure = newRPM;
-	sndFile.m_nTempoMode = tempoModeModern;
+	sndFile.m_nTempoMode = TempoMode::Modern;
 
 	m_tempoSwing.resize(GetDlgItemInt(IDC_ROWSPERBEAT), TempoSwing::Unity);
 	CTempoSwingDlg dlg(this, m_tempoSwing, sndFile);
@@ -403,15 +403,15 @@ void CModTypeDlg::OnOK()
 	{
 		const auto oldMode = sndFile.m_nTempoMode;
 		sndFile.m_nTempoMode = static_cast<TempoMode>(m_TempoModeBox.GetItemData(sel));
-		if(oldMode == tempoModeModern && sndFile.m_nTempoMode != tempoModeModern)
+		if(oldMode == TempoMode::Modern && sndFile.m_nTempoMode != TempoMode::Modern)
 		{
-			double newTempo = sndFile.m_nDefaultTempo.ToDouble() * (sndFile.m_nDefaultSpeed * sndFile.m_nDefaultRowsPerBeat) / ((sndFile.m_nTempoMode == tempoModeClassic) ? 24 : 60);
+			double newTempo = sndFile.m_nDefaultTempo.ToDouble() * (sndFile.m_nDefaultSpeed * sndFile.m_nDefaultRowsPerBeat) / ((sndFile.m_nTempoMode == TempoMode::Classic) ? 24 : 60);
 			if(!newModSpecs.hasFractionalTempo)
 				newTempo = std::round(newTempo);
 			sndFile.m_nDefaultTempo = Clamp(TEMPO(newTempo), newModSpecs.GetTempoMin(), newModSpecs.GetTempoMax());
 		}
 	}
-	if(sndFile.m_nTempoMode == tempoModeModern)
+	if(sndFile.m_nTempoMode == TempoMode::Modern)
 	{
 		sndFile.m_tempoSwing = m_tempoSwing;
 		sndFile.m_tempoSwing.resize(sndFile.m_nDefaultRowsPerBeat);

@@ -2678,7 +2678,7 @@ void CSoundFile::ProcessGlobalVolume(long lCount)
 		const long delta = highResGlobalVolumeDestination - m_PlayState.m_lHighResRampingGlobalVolume;
 		step = delta / static_cast<long>(m_PlayState.m_nSamplesToGlobalVolRampDest);
 
-		if(m_nMixLevels == mixLevels1_17RC2)
+		if(m_nMixLevels == MixLevels::v1_17RC2)
 		{
 			// Define max step size as some factor of user defined ramping value: the lower the value, the more likely the click.
 			// If step is too big (might cause click), extend ramp length.

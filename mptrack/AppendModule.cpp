@@ -260,7 +260,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 				targetPat.SetSignature(source.m_nDefaultRowsPerBeat, source.m_nDefaultRowsPerMeasure);
 			}
 		}
-		if(m_SndFile.m_nTempoMode == tempoModeModern)
+		if(m_SndFile.m_nTempoMode == TempoMode::Modern)
 		{
 			// Swing only works in modern tempo mode
 			if(sourcePat.HasTempoSwing())

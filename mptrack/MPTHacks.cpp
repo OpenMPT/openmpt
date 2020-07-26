@@ -397,12 +397,12 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Check for new tempo modes
-	if(m_SndFile.m_nTempoMode != tempoModeClassic)
+	if(m_SndFile.m_nTempoMode != TempoMode::Classic)
 	{
 		AddToLog("Found incompatible tempo mode (only classic tempo mode allowed)");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.m_nTempoMode = tempoModeClassic;
+			m_SndFile.m_nTempoMode = TempoMode::Classic;
 	}
 
 	// Check for extended filter range flag
@@ -447,12 +447,12 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		}
 	}
 
-	if(m_SndFile.GetMixLevels() != mixLevelsCompatible && m_SndFile.GetMixLevels() != mixLevelsCompatibleFT2)
+	if(m_SndFile.GetMixLevels() != MixLevels::Compatible && m_SndFile.GetMixLevels() != MixLevels::CompatibleFT2)
 	{
 		AddToLog("Found incorrect mix levels (only compatible mix levels allowed)");
 		foundHacks = true;
 		if(autofix)
-			m_SndFile.SetMixLevels(modType == MOD_TYPE_XM ? mixLevelsCompatibleFT2 : mixLevelsCompatible);
+			m_SndFile.SetMixLevels(modType == MOD_TYPE_XM ? MixLevels::CompatibleFT2 : MixLevels::Compatible);
 	}
 
 	// Check for extended MIDI macros

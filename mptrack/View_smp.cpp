@@ -469,7 +469,7 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 
 				// Length in beats
 				double beats = selLength;
-				if(sndFile.m_nTempoMode == tempoModeModern)
+				if(sndFile.m_nTempoMode == TempoMode::Modern)
 				{
 					beats *= sndFile.m_PlayState.m_nMusicTempo.ToDouble() * (1.0 / 60.0) / sampleRate;
 				} else

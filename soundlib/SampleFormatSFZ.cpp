@@ -1081,13 +1081,13 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	f << "// Envelope tempo base: tempo " << m_PlayState.m_nMusicTempo.ToDouble();
 	switch(m_nTempoMode)
 	{
-	case tempoModeClassic:
+	case TempoMode::Classic:
 		f << " (classic tempo mode)";
 		break;
-	case tempoModeAlternative:
+	case TempoMode::Alternative:
 		f << " (alternative tempo mode)";
 		break;
-	case tempoModeModern:
+	case TempoMode::Modern:
 		f << ", " << m_PlayState.m_nMusicSpeed << " ticks per row, " << m_PlayState.m_nCurrentRowsPerBeat << " rows per beat (modern tempo mode)";
 		break;
 	default:

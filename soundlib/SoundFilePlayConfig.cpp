@@ -18,7 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 CSoundFilePlayConfig::CSoundFilePlayConfig()
 {
 	setVSTiVolume(1.0f);
-	SetMixLevels(mixLevelsCompatible);
+	SetMixLevels(MixLevels::Compatible);
 }
 
 void CSoundFilePlayConfig::SetMixLevels(MixLevels mixLevelType)
@@ -27,8 +27,8 @@ void CSoundFilePlayConfig::SetMixLevels(MixLevels mixLevelType)
 	{
 
 		// Olivier's version gives us floats in [-0.5; 0.5] and slightly saturates VSTis.
-		case mixLevelsOriginal:
-			setVSTiAttenuation(NO_ATTENUATION);
+		case MixLevels::Original:
+			setVSTiAttenuation(1.0f);  // no attenuation
 			setIntToFloat(1.0f/static_cast<float>(1<<28));
 			setFloatToInt(static_cast<float>(1<<28));
 			setGlobalVolumeAppliesToMaster(false);
@@ -43,7 +43,7 @@ void CSoundFilePlayConfig::SetMixLevels(MixLevels mixLevelType)
 
 		// Ericus' version gives us floats in [-0.06;0.06] and requires attenuation to
 		// avoid massive VSTi saturation.
-		case mixLevels1_17RC1:
+		case MixLevels::v1_17RC1:
 			setVSTiAttenuation(32.0f);
 			setIntToFloat(1.0f/static_cast<float>(0x07FFFFFFF));
 			setFloatToInt(static_cast<float>(0x07FFFFFFF));
@@ -60,7 +60,7 @@ void CSoundFilePlayConfig::SetMixLevels(MixLevels mixLevelType)
 		// 117RC2 gives us floats in [-1.0; 1.0] and hopefully plays VSTis at
 		// the right volume... but we attenuate by 2x to approx. match sample volume.
 	
-		case mixLevels1_17RC2:
+		case MixLevels::v1_17RC2:
 			setVSTiAttenuation(2.0f);
 			setIntToFloat(1.0f/MIXING_SCALEF);
 			setFloatToInt(MIXING_SCALEF);
@@ -78,7 +78,7 @@ void CSoundFilePlayConfig::SetMixLevels(MixLevels mixLevelType)
 		// treats panning as balance to avoid saturation on loud sample (and because I think it's better :),
 		// and allows display of attenuation in decibels.
 		default:
-		case mixLevels1_17RC3:
+		case MixLevels::v1_17RC3:
 			setVSTiAttenuation(1.0f);
 			setIntToFloat(1.0f/MIXING_SCALEF);
 			setFloatToInt(MIXING_SCALEF);
@@ -95,17 +95,17 @@ void CSoundFilePlayConfig::SetMixLevels(MixLevels mixLevelType)
 		// A mixmode that is intended to be compatible to legacy trackers (IT/FT2/etc).
 		// This is basically derived from mixmode 1.17 RC3, with panning mode and volume levels changed.
 		// Sample attenuation is the same as in Schism Tracker (more attenuation than with RC3, thus VSTi attenuation is also higher).
-		case mixLevelsCompatible:
-		case mixLevelsCompatibleFT2:
+		case MixLevels::Compatible:
+		case MixLevels::CompatibleFT2:
 			setVSTiAttenuation(0.75f);
 			setIntToFloat(1.0f/MIXING_SCALEF);
 			setFloatToInt(MIXING_SCALEF);
 			setGlobalVolumeAppliesToMaster(true);
 			setUseGlobalPreAmp(false);
-			setForcePanningMode(mixLevelType == mixLevelsCompatible ? forceNoSoftPanning : forceFT2Panning);
+			setForcePanningMode(mixLevelType == MixLevels::Compatible ? forceNoSoftPanning : forceFT2Panning);
 			setDisplayDBValues(true);
-			setNormalSamplePreAmp(mixLevelType == mixLevelsCompatible ? 256.0f : 192.0f);
-			setNormalVSTiVol(mixLevelType == mixLevelsCompatible ? 256.0f : 192.0f);
+			setNormalSamplePreAmp(mixLevelType == MixLevels::Compatible ? 256.0f : 192.0f);
+			setNormalVSTiVol(mixLevelType == MixLevels::Compatible ? 256.0f : 192.0f);
 			setNormalGlobalVol(256.0f);
 			setExtraSampleAttenuation(1);
 			break;

@@ -169,7 +169,7 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	m_dwLastSavedWithVersion = Version(0);
 	m_dwCreatedWithVersion = Version(0);
 
-	SetMixLevels(mixLevelsCompatible);
+	SetMixLevels(MixLevels::Compatible);
 
 	Patterns.ClearPatterns();
 	Order.Initialize();
@@ -741,7 +741,7 @@ double CSoundFile::GetCurrentBPM() const
 {
 	double bpm;
 
-	if (m_nTempoMode == tempoModeModern)
+	if (m_nTempoMode == TempoMode::Modern)
 	{
 		// With modern mode, we trust that true bpm is close enough to what user chose.
 		// This avoids oscillation due to tick-to-tick corrections.
@@ -1657,16 +1657,16 @@ void CSoundFile::RecalculateSamplesPerTick()
 {
 	switch(m_nTempoMode)
 	{
-	case tempoModeClassic:
+	case TempoMode::Classic:
 	default:
 		m_PlayState.m_nSamplesPerTick = Util::muldiv(m_MixerSettings.gdwMixingFreq, 5 * TEMPO::fractFact, std::max(TEMPO::store_t(1), m_PlayState.m_nMusicTempo.GetRaw() << 1));
 		break;
 
-	case tempoModeModern:
+	case TempoMode::Modern:
 		m_PlayState.m_nSamplesPerTick = static_cast<uint32>((Util::mul32to64_unsigned(m_MixerSettings.gdwMixingFreq, 60 * TEMPO::fractFact) / std::max(uint64(1),  Util::mul32to64_unsigned(m_PlayState.m_nMusicSpeed, m_PlayState.m_nCurrentRowsPerBeat) * m_PlayState.m_nMusicTempo.GetRaw())));
 		break;
 
-	case tempoModeAlternative:
+	case TempoMode::Alternative:
 		m_PlayState.m_nSamplesPerTick = Util::muldiv(m_MixerSettings.gdwMixingFreq, TEMPO::fractFact, std::max(TEMPO::store_t(1), m_PlayState.m_nMusicTempo.GetRaw()));
 		break;
 	}
@@ -1686,16 +1686,16 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 	uint32 retval = 0;
 	switch(m_nTempoMode)
 	{
-	case tempoModeClassic:
+	case TempoMode::Classic:
 	default:
 		retval = Util::muldiv(m_MixerSettings.gdwMixingFreq, 5 * TEMPO::fractFact, std::max(TEMPO::store_t(1), playState.m_nMusicTempo.GetRaw() << 1));
 		break;
 
-	case tempoModeAlternative:
+	case TempoMode::Alternative:
 		retval = Util::muldiv(m_MixerSettings.gdwMixingFreq, TEMPO::fractFact, std::max(TEMPO::store_t(1), playState.m_nMusicTempo.GetRaw()));
 		break;
 
-	case tempoModeModern:
+	case TempoMode::Modern:
 		{
 			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / (playState.m_nMusicTempo.ToDouble() * Util::mul32to64_unsigned(playState.m_nMusicSpeed, playState.m_nCurrentRowsPerBeat)));
 			const TempoSwing &swing = (Patterns.IsValidPat(playState.m_nPattern) && Patterns[playState.m_nPattern].HasTempoSwing())
@@ -1740,17 +1740,17 @@ double CSoundFile::GetRowDuration(TEMPO tempo, uint32 speed) const
 {
 	switch(m_nTempoMode)
 	{
-	case tempoModeClassic:
+	case TempoMode::Classic:
 	default:
 		return static_cast<double>(2500 * speed) / tempo.ToDouble();
 
-	case tempoModeModern:
+	case TempoMode::Modern:
 		{
 			// If there are any row delay effects, the row length factor compensates for those.
 			return 60000.0 / tempo.ToDouble() / static_cast<double>(m_PlayState.m_nCurrentRowsPerBeat);
 		}
 
-	case tempoModeAlternative:
+	case TempoMode::Alternative:
 		return static_cast<double>(1000 * speed) / tempo.ToDouble();
 	}
 }
