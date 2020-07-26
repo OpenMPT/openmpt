@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.14-pre
+### libopenmpt 0.4.14 (2020-07-26)
 
  *  [**Change**] libmodplug: The libmodplug emulation layer is now split out
     into a separate `libopenmpt_modplug.sln` solution file for the MSVC build
