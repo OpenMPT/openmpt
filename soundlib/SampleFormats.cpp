@@ -1059,8 +1059,8 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	pIns->nFadeOut = 2048;
 	if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 	{
-		pIns->nNNA = NNA_NOTEOFF;
-		pIns->nDNA = DNA_NOTEFADE;
+		pIns->nNNA = NewNoteAction::NoteOff;
+		pIns->nDNA = DuplicateNoteAction::NoteFade;
 	}
 
 	SAMPLEINDEX nextSample = 0;

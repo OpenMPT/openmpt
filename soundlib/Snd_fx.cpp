@@ -2239,31 +2239,31 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			// Duplicate Check Type
 			switch(chn.pModInstrument->nDCT)
 			{
-			case DCT_NONE:
+			case DuplicateCheckType::None:
 				break;
 			// Note
-			case DCT_NOTE:
+			case DuplicateCheckType::Note:
 				if(dnaNote != NOTE_NONE && chn.nNote == dnaNote && pIns == chn.pModInstrument)
 					applyDNA = true;
 				if(pIns && pIns->nMixPlug)
 					applyDNAtoPlug = true;
 				break;
 			// Sample
-			case DCT_SAMPLE:
+			case DuplicateCheckType::Sample:
 				// IT compatibility: DCT = sample only applies to same instrument
 				// Test case: dct_smp_note_test.it
 				if(pSample != nullptr && pSample == chn.pModSample && (pIns == chn.pModInstrument || !m_playBehaviour[kITDCTBehaviour]))
 					applyDNA = true;
 				break;
 			// Instrument
-			case DCT_INSTRUMENT:
+			case DuplicateCheckType::Instrument:
 				if(pIns == chn.pModInstrument)
 					applyDNA = true;
 				if(pIns && pIns->nMixPlug)
 					applyDNAtoPlug = true;
 				break;
 			// Plugin
-			case DCT_PLUGIN:
+			case DuplicateCheckType::Plugin:
 				if(pIns && (pIns->nMixPlug) && (pIns->nMixPlug == chn.pModInstrument->nMixPlug))
 				{
 					applyDNAtoPlug = true;
@@ -2280,9 +2280,9 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 				{
 					switch(chn.pModInstrument->nDNA)
 					{
-					case DNA_NOTECUT:
-					case DNA_NOTEOFF:
-					case DNA_NOTEFADE:
+					case DuplicateNoteAction::NoteCut:
+					case DuplicateNoteAction::NoteOff:
+					case DuplicateNoteAction::NoteFade:
 						// Switch off duplicated note played on this plugin
 						SendMIDINote(i, chn.GetPluginNote(m_playBehaviour[kITRealNoteMapping]) + NOTE_MAX_SPECIAL, 0);
 						chn.nArpeggioLastNote = NOTE_NONE;
@@ -2294,20 +2294,20 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 				switch(chn.pModInstrument->nDNA)
 				{
 				// Cut
-				case DNA_NOTECUT:
+				case DuplicateNoteAction::NoteCut:
 					KeyOff(chn);
 					chn.nVolume = 0;
 					if(chn.dwFlags[CHN_ADLIB] && m_opl)
 						m_opl->NoteCut(i);
 					break;
 				// Note Off
-				case DNA_NOTEOFF:
+				case DuplicateNoteAction::NoteOff:
 					KeyOff(chn);
 					if(chn.dwFlags[CHN_ADLIB] && m_opl)
 						m_opl->NoteOff(i);
 					break;
 				// Note Fade
-				case DNA_NOTEFADE:
+				case DuplicateNoteAction::NoteFade:
 					chn.dwFlags.set(CHN_NOTEFADE);
 					if(chn.dwFlags[CHN_ADLIB] && m_opl && !m_playBehaviour[kOPLwithNNA])
 						m_opl->NoteOff(i);
@@ -2366,14 +2366,14 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	{
 		switch(srcChn.nNNA)
 		{
-		case NNA_NOTEOFF:
-		case NNA_NOTECUT:
-		case NNA_NOTEFADE:
+		case NewNoteAction::NoteOff:
+		case NewNoteAction::NoteCut:
+		case NewNoteAction::NoteFade:
 			// Switch off note played on this plugin, on this tracker channel and midi channel
 			SendMIDINote(nChn, NOTE_KEYOFF, 0);
 			srcChn.nArpeggioLastNote = NOTE_NONE;
 			break;
-		case NNA_CONTINUE:
+		case NewNoteAction::Continue:
 			break;
 		}
 	}
@@ -2382,7 +2382,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	// Key Off the note
 	switch(srcChn.nNNA)
 	{
-	case NNA_NOTEOFF:
+	case NewNoteAction::NoteOff:
 		KeyOff(chn);
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
 		{
@@ -2391,13 +2391,13 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 				m_opl->MoveChannel(nChn, nnaChn);
 		}
 		break;
-	case NNA_NOTECUT:
+	case NewNoteAction::NoteCut:
 		chn.nFadeOutVol = 0;
 		chn.dwFlags.set(CHN_NOTEFADE);
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
 			m_opl->NoteCut(nChn);
 		break;
-	case NNA_NOTEFADE:
+	case NewNoteAction::NoteFade:
 		chn.dwFlags.set(CHN_NOTEFADE);
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
 		{
@@ -2407,7 +2407,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 				m_opl->NoteOff(nChn);
 		}
 		break;
-	case NNA_CONTINUE:
+	case NewNoteAction::Continue:
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
 			m_opl->MoveChannel(nChn, nnaChn);
 		break;
@@ -4788,10 +4788,10 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 						}
 					}
 					break;
-				case 3:		chn.nNNA = NNA_NOTECUT; break;
-				case 4:		chn.nNNA = NNA_CONTINUE; break;
-				case 5:		chn.nNNA = NNA_NOTEOFF; break;
-				case 6:		chn.nNNA = NNA_NOTEFADE; break;
+				case 3:		chn.nNNA = NewNoteAction::NoteCut; break;
+				case 4:		chn.nNNA = NewNoteAction::Continue; break;
+				case 5:		chn.nNNA = NewNoteAction::NoteOff; break;
+				case 6:		chn.nNNA = NewNoteAction::NoteFade; break;
 				case 7:		chn.VolEnv.flags.reset(ENV_ENABLED); break;
 				case 8:		chn.VolEnv.flags.set(ENV_ENABLED); break;
 				case 9:		chn.PanEnv.flags.reset(ENV_ENABLED); break;

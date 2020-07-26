@@ -74,11 +74,12 @@ struct ModInstrument
 	ResamplingMode resampling = SRCMODE_DEFAULT;  // Resampling mode
 
 	FlagSet<InstrumentFlags> dwFlags;        // Instrument flags
-	NewNoteAction nNNA = NNA_NOTECUT;        // New note action
-	DuplicateCheckType nDCT = DCT_NONE;      // Duplicate check type (i.e. which condition will trigger the duplicate note action)
-	DuplicateNoteAction nDNA = DNA_NOTECUT;  // Duplicate note action
-	uint8 nPanSwing = 0;                     // Random panning factor (0...64)
-	uint8 nVolSwing = 0;                     // Random volume factor (0...100)
+	NewNoteAction nNNA = NewNoteAction::NoteCut;              // New note action
+	DuplicateCheckType nDCT = DuplicateCheckType::None;       // Duplicate check type (i.e. which condition will trigger the duplicate note action)
+	DuplicateNoteAction nDNA = DuplicateNoteAction::NoteCut;  // Duplicate note action
+
+	uint8 nPanSwing = 0;  // Random panning factor (0...64)
+	uint8 nVolSwing = 0;  // Random volume factor (0...100)
 
 	uint8 nIFC = 0;                                 // Default filter cutoff (0...127). Used if the high bit is set
 	uint8 nIFR = 0;                                 // Default filter resonance (0...127). Used if the high bit is set
@@ -86,8 +87,8 @@ struct ModInstrument
 	uint8 nResSwing = 0;                            // Random resonance factor (0...64)
 	FilterMode filterMode = FilterMode::Unchanged;  // Default filter mode
 
-	int8 nPPS = 0;                               // Pitch/Pan separation (i.e. how wide the panning spreads, -32...32)
-	uint8 nPPC = NOTE_MIDDLEC - NOTE_MIN;        // Pitch/Pan centre (zero-based)
+	int8 nPPS = 0;                         // Pitch/Pan separation (i.e. how wide the panning spreads, -32...32)
+	uint8 nPPC = NOTE_MIDDLEC - NOTE_MIN;  // Pitch/Pan centre (zero-based)
 
 	uint16 wMidiBank = 0;    // MIDI Bank (1...16384). 0 = Don't send.
 	uint8 nMidiProgram = 0;  // MIDI Program (1...128). 0 = Don't send.

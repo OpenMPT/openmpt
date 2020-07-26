@@ -1439,9 +1439,9 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			}
 
 			// NNA, DCT, DCA
-			m_ComboNNA.SetCurSel(pIns->nNNA);
-			m_ComboDCT.SetCurSel(pIns->nDCT);
-			m_ComboDCA.SetCurSel(pIns->nDNA);
+			m_ComboNNA.SetCurSel(static_cast<int>(pIns->nNNA));
+			m_ComboDCT.SetCurSel(static_cast<int>(pIns->nDCT));
+			m_ComboDCA.SetCurSel(static_cast<int>(pIns->nDNA));
 			// Pitch/Pan Separation
 			if(hintType[HINT_MODTYPE] || pIns->pTuning != (CTuning *)GetWindowLongPtr(m_ComboPPC.m_hWnd, GWLP_USERDATA))
 			{
@@ -2284,10 +2284,11 @@ void CCtrlInstruments::OnNNAChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
-		if (pIns->nNNA != m_ComboNNA.GetCurSel())
+		const auto nna = static_cast<NewNoteAction>(m_ComboNNA.GetCurSel());
+		if(pIns->nNNA != nna)
 		{
 			PrepareUndo("Set New Note Action");
-			pIns->nNNA = static_cast<NewNoteAction>(m_ComboNNA.GetCurSel());
+			pIns->nNNA = nna;
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}
@@ -2299,10 +2300,11 @@ void CCtrlInstruments::OnDCTChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
-		if (pIns->nDCT != m_ComboDCT.GetCurSel())
+		const auto dct = static_cast<DuplicateCheckType>(m_ComboDCT.GetCurSel());
+		if(pIns->nDCT != dct)
 		{
 			PrepareUndo("Set Duplicate Check Type");
-			pIns->nDCT = static_cast<DuplicateCheckType>(m_ComboDCT.GetCurSel());
+			pIns->nDCT = dct;
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}
@@ -2314,10 +2316,11 @@ void CCtrlInstruments::OnDCAChanged()
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 	if ((!IsLocked()) && (pIns))
 	{
-		if (pIns->nDNA != m_ComboDCA.GetCurSel())
+		const auto dna = static_cast<DuplicateNoteAction>(m_ComboDCA.GetCurSel());
+		if (pIns->nDNA != dna)
 		{
 			PrepareUndo("Set Duplicate Check Action");
-			pIns->nDNA = static_cast<DuplicateNoteAction>(m_ComboDCA.GetCurSel());
+			pIns->nDNA = dna;
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}

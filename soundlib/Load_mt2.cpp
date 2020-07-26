@@ -921,9 +921,9 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		if(fileHeader.version >= 0x0202) envMask = instrChunk.ReadUint32LE();
 
 		mptIns->nFadeOut = insHeader.fadeout;
-		const NewNoteAction NNA[4]       = { NNA_NOTECUT, NNA_CONTINUE, NNA_NOTEOFF, NNA_NOTEFADE };
-		const DuplicateCheckType DCT[4]  = { DCT_NONE, DCT_NOTE, DCT_SAMPLE, DCT_INSTRUMENT };
-		const DuplicateNoteAction DNA[4] = { DNA_NOTECUT, DNA_NOTEFADE /* actually continue, but IT doesn't have that */, DNA_NOTEOFF, DNA_NOTEFADE };
+		const NewNoteAction NNA[4]       = { NewNoteAction::NoteCut, NewNoteAction::Continue, NewNoteAction::NoteOff, NewNoteAction::NoteFade };
+		const DuplicateCheckType DCT[4]  = { DuplicateCheckType::None, DuplicateCheckType::Note, DuplicateCheckType::Sample, DuplicateCheckType::Instrument };
+		const DuplicateNoteAction DNA[4] = { DuplicateNoteAction::NoteCut, DuplicateNoteAction::NoteFade /* actually continue, but IT doesn't have that */, DuplicateNoteAction::NoteOff, DuplicateNoteAction::NoteFade };
 		mptIns->nNNA = NNA[insHeader.nna & 3];
 		mptIns->nDCT = DCT[(insHeader.nna >> 8) & 3];
 		mptIns->nDNA = DNA[(insHeader.nna >> 12) & 3];
@@ -956,7 +956,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			envMask >>= 1;
 		}
-		if(!mptIns->VolEnv.dwFlags[ENV_ENABLED] && mptIns->nNNA != NNA_NOTEFADE)
+		if(!mptIns->VolEnv.dwFlags[ENV_ENABLED] && mptIns->nNNA != NewNoteAction::NoteFade)
 		{
 			mptIns->nFadeOut = int16_max;
 		}

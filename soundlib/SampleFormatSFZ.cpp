@@ -856,11 +856,11 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		pIns->nCutSwing = mpt::saturate_round<uint8>(region.filterRandom * (m_SongFlags[SONG_EXFILTERRANGE] ? 20 : 24) / 1200.0);
 		pIns->midiPWD = mpt::saturate_round<int8>(region.pitchBend / 100.0);
 
-		pIns->nNNA = NNA_NOTEOFF;
+		pIns->nNNA = NewNoteAction::NoteOff;
 		if(region.polyphony == 1)
 		{
-			pIns->nDNA = DNA_NOTECUT;
-			pIns->nDCT = DCT_SAMPLE;
+			pIns->nDNA = DuplicateNoteAction::NoteCut;
+			pIns->nDCT = DuplicateCheckType::Sample;
 		}
 		region.ampEnv.ConvertToMPT(pIns, *this, ENV_VOLUME);
 		if(region.pitchEnv.depth)
@@ -1117,7 +1117,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		f << "\nampeg_release_shape=0";
 	}
 
-	if(ins->nDNA == DNA_NOTECUT && ins->nDCT != DCT_NONE)
+	if(ins->nDNA == DuplicateNoteAction::NoteCut && ins->nDCT != DuplicateCheckType::None)
 		f << "\npolyphony=1";
 
 	WriteSFZEnvelope(f, tickDuration, 1, ins->VolEnv, "amplitude", 100.0, [](int32 val) { return val / static_cast<double>(ENVELOPE_MAX); });

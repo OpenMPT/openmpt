@@ -1811,9 +1811,9 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 	pIns->nMidiProgram = (uint8)(pDlsIns->ulInstrument & 0x7F) + 1;
 	pIns->nMidiChannel = (uint8)((pDlsIns->ulBank & F_INSTRUMENT_DRUMS) ? 10 : 0);
 	pIns->wMidiBank = (uint16)(((pDlsIns->ulBank & 0x7F00) >> 1) | (pDlsIns->ulBank & 0x7F));
-	pIns->nNNA = NNA_NOTEOFF;
-	pIns->nDCT = DCT_NOTE;
-	pIns->nDNA = DNA_NOTEFADE;
+	pIns->nNNA = NewNoteAction::NoteOff;
+	pIns->nDCT = DuplicateCheckType::Note;
+	pIns->nDNA = DuplicateNoteAction::NoteFade;
 	sndFile.Instruments[nInstr] = pIns;
 	uint32 nLoadedSmp = 0;
 	SAMPLEINDEX nextSample = 0;

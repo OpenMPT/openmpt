@@ -214,30 +214,30 @@ enum class FilterMode : uint8
 
 
 // NNA types (New Note Action)
-enum NewNoteAction : uint8
+enum class NewNoteAction : uint8
 {
-	NNA_NOTECUT  = 0,
-	NNA_CONTINUE = 1,
-	NNA_NOTEOFF  = 2,
-	NNA_NOTEFADE = 3,
+	NoteCut  = 0,
+	Continue = 1,
+	NoteOff  = 2,
+	NoteFade = 3,
 };
 
 // DCT types (Duplicate Check Types)
-enum DuplicateCheckType : uint8
+enum class DuplicateCheckType : uint8
 {
-	DCT_NONE       = 0,
-	DCT_NOTE       = 1,
-	DCT_SAMPLE     = 2,
-	DCT_INSTRUMENT = 3,
-	DCT_PLUGIN     = 4,
+	None       = 0,
+	Note       = 1,
+	Sample     = 2,
+	Instrument = 3,
+	Plugin     = 4,
 };
 
 // DNA types (Duplicate Note Action)
-enum DuplicateNoteAction : uint8
+enum class DuplicateNoteAction : uint8
 {
-	DNA_NOTECUT  = 0,
-	DNA_NOTEOFF  = 1,
-	DNA_NOTEFADE = 2,
+	NoteCut  = 0,
+	NoteOff  = 1,
+	NoteFade = 2,
 };
 
 

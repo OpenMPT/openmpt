@@ -302,7 +302,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		// Extended instrument attributes
 		if(instr->filterMode != FilterMode::Unchanged || instr->nVolRampUp != 0 || instr->resampling != SRCMODE_DEFAULT ||
 			instr->nCutSwing != 0 || instr->nResSwing != 0 || instr->nMixPlug != 0 || instr->pitchToTempoLock.GetRaw() != 0 ||
-			instr->nDCT == DCT_PLUGIN ||
+			instr->nDCT == DuplicateCheckType::Plugin ||
 			instr->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET ||
 			instr->PanEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET ||
 			instr->PitchEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
@@ -318,7 +318,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 				instr->nResSwing = 0;
 				instr->nMixPlug = 0;
 				instr->pitchToTempoLock.Set(0);
-				if(instr->nDCT == DCT_PLUGIN) instr->nDCT = DCT_NONE;
+				if(instr->nDCT == DuplicateCheckType::Plugin) instr->nDCT = DuplicateCheckType::None;
 				instr->VolEnv.nReleaseNode = instr->PanEnv.nReleaseNode = instr->PitchEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			}
 		}

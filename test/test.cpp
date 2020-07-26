@@ -3421,8 +3421,8 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(pIns->nCutSwing, 0);
 	VERIFY_EQUAL_NONCONT(pIns->nResSwing, 0);
 
-	VERIFY_EQUAL_NONCONT(pIns->nNNA, NNA_NOTECUT);
-	VERIFY_EQUAL_NONCONT(pIns->nDCT, DCT_NONE);
+	VERIFY_EQUAL_NONCONT(pIns->nNNA, NewNoteAction::NoteCut);
+	VERIFY_EQUAL_NONCONT(pIns->nDCT, DuplicateCheckType::None);
 
 	VERIFY_EQUAL_NONCONT(pIns->nMixPlug, 1);
 	VERIFY_EQUAL_NONCONT(pIns->nMidiChannel, 16);
@@ -3714,9 +3714,9 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(pIns->nCutSwing, 0x0C);
 		VERIFY_EQUAL_NONCONT(pIns->nResSwing, 0x3C);
 
-		VERIFY_EQUAL_NONCONT(pIns->nNNA, NNA_CONTINUE);
-		VERIFY_EQUAL_NONCONT(pIns->nDCT, DCT_NOTE);
-		VERIFY_EQUAL_NONCONT(pIns->nDNA, DNA_NOTEFADE);
+		VERIFY_EQUAL_NONCONT(pIns->nNNA, NewNoteAction::Continue);
+		VERIFY_EQUAL_NONCONT(pIns->nDCT, DuplicateCheckType::Note);
+		VERIFY_EQUAL_NONCONT(pIns->nDNA, DuplicateNoteAction::NoteFade);
 
 		VERIFY_EQUAL_NONCONT(pIns->nMixPlug, 1);
 		VERIFY_EQUAL_NONCONT(pIns->nMidiChannel, 16);

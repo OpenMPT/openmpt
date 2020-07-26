@@ -304,9 +304,9 @@ uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChann
 	pIns->wMidiBank = bank + 1;
 	pIns->nMidiProgram = program + 1;
 	pIns->nFadeOut = 1024;
-	pIns->nNNA = NNA_NOTEOFF;
-	pIns->nDCT = isDrum ? DCT_SAMPLE : DCT_NOTE;
-	pIns->nDNA = DNA_NOTEFADE;
+	pIns->nNNA = NewNoteAction::NoteOff;
+	pIns->nDCT = isDrum ? DuplicateCheckType::Sample : DuplicateCheckType::Note;
+	pIns->nDNA = DuplicateNoteAction::NoteFade;
 	if(isDrum)
 	{
 		pIns->nMidiChannel = MIDI_DRUMCHANNEL;
