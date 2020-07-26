@@ -14,6 +14,24 @@ is just a high-level summary.
  *  [**Bug**] `libopenmpt/libopenmpt.h` failed to compile with
     `LIBOPENMPT_NO_DEPRECATE` defined.
 
+ *  IT: Global volume slides with both nibbles set preferred the "slide up"
+    nibble over the "slide down" nibble in old OpenMPT versions, unlike other
+    slides. Such old files are now imported correctly again.
+ *  IT: Fixed an edge case where, if the filter hit full cutoff / no resonance
+    on the first tick of a row where a new delayed note would be triggered, the
+    filter would be disabled even though it should stay active. Fixes trace.it
+    by maddie.
+ *  XM: Out-of-range arpeggio clamping behaviour broke in OpenMPT 1.23.05.00.
+    The arpeggios in Binary World by Dakota now play correctly again.
+ *  S3M: Support old-style sample pre-amp value in very early S3M files.
+ *  S3M: Only force-enable fast slides for files ST 3.00. Previously, any S3M
+    file made with an ST3 version older than 3.20 enabled them.
+ *  M15: Improve tracker detection heuristics to never assume SoundTracker 2.0
+    if there is a huge number of Dxx commands, as that is a definite hint that
+    they should be treated as volume slides. Fixes Monty On The Run by
+    Master Blaster.
+ *  MO3: Support OPL patches in MO3 files created from MPTM and S3M.
+
  *  mpg123: Update to v1.26.3 (2020-07-16).
  *  stb_vorbis: Update v1.20 commit b42009b3b9d4ca35bc703f5310eedc74f584be58
     (2020-07-13).
