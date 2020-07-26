@@ -1335,7 +1335,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	case 3: madeWithTracker = MPT_ULITERAL("OctaMED Soundstudio (MMD3)"); break;
 	}
 
-	m_modFormat.formatName = MPT_UFORMAT("OctaMED (MMD%1)")(version);
+	m_modFormat.formatName = MPT_UFORMAT("OctaMED (MMD{})")(version);
 	m_modFormat.type = MPT_USTRING("med");
 	m_modFormat.madeWithTracker = madeWithTracker;
 	m_modFormat.charset = mpt::Charset::ISO8859_1;

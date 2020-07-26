@@ -86,7 +86,7 @@ BOOL CSelectPluginDlg::OnInitDialog()
 
 	if (m_pPlugin)
 	{
-		CString targetSlot = MPT_CFORMAT("&Put in FX%1")(mpt::cfmt::dec0<2>(m_nPlugSlot + 1));
+		CString targetSlot = MPT_CFORMAT("&Put in FX{}")(mpt::cfmt::dec0<2>(m_nPlugSlot + 1));
 		SetDlgItemText(IDOK, targetSlot);
 		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), TRUE);
 	} else
@@ -392,7 +392,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 #ifndef NO_VST
 			if(!plug.IsNativeFromCache())
 			{
-				title += MPT_CFORMAT(" (%1)")(plug.GetDllArchNameUser());
+				title += MPT_CFORMAT(" ({})")(plug.GetDllArchNameUser());
 			}
 #endif // !NO_VST
 			HTREEITEM h = AddTreeItem(title, plug.isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[plug.category], reinterpret_cast<LPARAM>(&plug));
@@ -611,7 +611,7 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 	{
 		if(p.id2 == plug->pluginId2 && p.id1 == plug->pluginId1)
 		{
-			std::string s = MPT_FORMAT("WARNING: This plugin has been identified as %1,\nwhich is known to have the following problem with OpenMPT:\n\n%2\n\nWould you still like to add this plugin to the library?")(p.name, p.problem);
+			std::string s = MPT_FORMAT("WARNING: This plugin has been identified as {},\nwhich is known to have the following problem with OpenMPT:\n\n{}\n\nWould you still like to add this plugin to the library?")(p.name, p.problem);
 			if(Reporting::Confirm(s, false, false, parent) == cnfNo)
 			{
 				return false;
@@ -750,7 +750,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 	if(update)
 	{
 		// Force selection to last added plug.
-		Reporting::Information(MPT_FORMAT("Found %1 plugin%2.")(files, files == 1 ? "" : "s").c_str(), parent);
+		Reporting::Information(MPT_FORMAT("Found {} plugin{}.")(files, files == 1 ? "" : "s").c_str(), parent);
 		return plugLib;
 	} else
 	{

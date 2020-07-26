@@ -371,7 +371,7 @@ bool CModCleanupDlg::RemoveDuplicatePatterns()
 
 	if(foundDupes != 0)
 	{
-		modDoc.AddToLog(MPT_FORMAT("%1 duplicate pattern%2 merged.")(foundDupes, foundDupes == 1 ? "" : "s"));
+		modDoc.AddToLog(MPT_FORMAT("{} duplicate pattern{} merged.")(foundDupes, foundDupes == 1 ? "" : "s"));
 
 		// Fix order list
 		for(auto &order : sndFile.Order)
@@ -428,7 +428,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns()
 
 	if(numRemovedPatterns)
 	{
-		modDoc.AddToLog(MPT_FORMAT("%1 pattern%2 removed.")(numRemovedPatterns, numRemovedPatterns == 1 ? "" : "s"));
+		modDoc.AddToLog(MPT_FORMAT("{} pattern{} removed.")(numRemovedPatterns, numRemovedPatterns == 1 ? "" : "s"));
 		return true;
 	}
 	return false;
@@ -530,7 +530,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 	if(unusedInsSamples)
 	{
 		// We don't remove an instrument's unused samples in an ITP.
-		mpt::ustring s = MPT_UFORMAT("OpenMPT detected %1 sample%2 referenced by an instrument,\nbut not used in the song. Do you want to remove them?")
+		mpt::ustring s = MPT_UFORMAT("OpenMPT detected {} sample{} referenced by an instrument,\nbut not used in the song. Do you want to remove them?")
 			( unusedInsSamples
 			, (unusedInsSamples == 1) ? U_("") : U_("s")
 			);
@@ -542,7 +542,7 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 	if(nRemoved > 0)
 	{
-		modDoc.AddToLog(LogNotification, MPT_UFORMAT("%1 unused sample%2 removed")(nRemoved, (nRemoved == 1) ? U_("") : U_("s")));
+		modDoc.AddToLog(LogNotification, MPT_UFORMAT("{} unused sample{} removed")(nRemoved, (nRemoved == 1) ? U_("") : U_("s")));
 	}
 
 	return (nRemoved > 0);
@@ -610,9 +610,9 @@ bool CModCleanupDlg::OptimizeSamples()
 
 	std::string s;
 	if(numLoopOpt)
-		s = MPT_FORMAT("%1 sample%2 unused data after the loop end point.\n")(numLoopOpt, (numLoopOpt == 1) ? " has" : "s have");
+		s = MPT_FORMAT("{} sample{} unused data after the loop end point.\n")(numLoopOpt, (numLoopOpt == 1) ? " has" : "s have");
 	if(numStereoOpt)
-		s += MPT_FORMAT("%1 stereo sample%2 actually mono.\n")(numStereoOpt, (numStereoOpt == 1) ? " is" : "s are");
+		s += MPT_FORMAT("{} stereo sample{} actually mono.\n")(numStereoOpt, (numStereoOpt == 1) ? " is" : "s are");
 	if(numLoopOpt + numStereoOpt == 1)
 		s += "Do you want to optimize it and remove this unused data?";
 	else
@@ -655,12 +655,12 @@ bool CModCleanupDlg::OptimizeSamples()
 	}
 	if(numLoopOpt)
 	{
-		s = MPT_FORMAT("%1 sample loop%2 optimized")(numLoopOpt, (numLoopOpt == 1) ? "" : "s");
+		s = MPT_FORMAT("{} sample loop{} optimized")(numLoopOpt, (numLoopOpt == 1) ? "" : "s");
 		modDoc.AddToLog(s);
 	}
 	if(numStereoOpt)
 	{
-		s = MPT_FORMAT("%1 sample%2 converted to mono")(numStereoOpt, (numStereoOpt == 1) ? "" : "s");
+		s = MPT_FORMAT("{} sample{} converted to mono")(numStereoOpt, (numStereoOpt == 1) ? "" : "s");
 		modDoc.AddToLog(s);
 	}
 	return true;
@@ -761,7 +761,7 @@ bool CModCleanupDlg::RemoveUnusedInstruments()
 
 		EndWaitCursor();
 
-		modDoc.AddToLog(LogNotification, MPT_UFORMAT("%1 unused instrument%2 removed")(numRemoved, (numRemoved == 1) ? U_("") : U_("s")));
+		modDoc.AddToLog(LogNotification, MPT_UFORMAT("{} unused instrument{} removed")(numRemoved, (numRemoved == 1) ? U_("") : U_("s")));
 		return true;
 	}
 	return false;
@@ -820,7 +820,7 @@ bool CModCleanupDlg::RemoveUnusedPlugins()
 	PLUGINDEX numRemoved = modDoc.RemovePlugs(usedmap);
 	if(numRemoved != 0)
 	{
-		modDoc.AddToLog(LogInformation, MPT_UFORMAT("%1 unused plugin%2 removed")(numRemoved, (numRemoved == 1) ? U_("") : U_("s")));
+		modDoc.AddToLog(LogInformation, MPT_UFORMAT("{} unused plugin{} removed")(numRemoved, (numRemoved == 1) ? U_("") : U_("s")));
 		return true;
 	}
 	return false;

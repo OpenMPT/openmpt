@@ -41,7 +41,7 @@ CloseMainDialog::CloseMainDialog() : ResizableDialog(IDD_CLOSEDOCUMENTS)
 
 CString CloseMainDialog::FormatTitle(const CModDoc *modDoc, bool fullPath)
 {
-	return MPT_CFORMAT("%1 (%2)")
+	return MPT_CFORMAT("{} ({})")
 		(mpt::ToCString(modDoc->GetSoundFile().GetCharsetInternal(), modDoc->GetSoundFile().GetTitle()),
 		(!fullPath || modDoc->GetPathNameMpt().empty()) ? modDoc->GetTitle() : modDoc->GetPathNameMpt().ToCString());
 }

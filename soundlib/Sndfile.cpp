@@ -500,7 +500,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			{
 #ifndef MODPLUG_TRACKER
 				// OpenMPT has its own way of reporting this error in CModDoc.
-				AddToLog(LogError, MPT_UFORMAT("Unable to load sample %1: %2")(i, filename.ToUnicode()));
+				AddToLog(LogError, MPT_UFORMAT("Unable to load sample {}: {}")(i, filename.ToUnicode()));
 #endif // MODPLUG_TRACKER
 			}
 		} else
@@ -590,7 +590,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #ifdef MODPLUG_TRACKER
 				// Provide some visual feedback
 				{
-					mpt::ustring s = MPT_UFORMAT("Loading Plugin FX%1: %2 (%3)")(
+					mpt::ustring s = MPT_UFORMAT("Loading Plugin FX{}: {} ({})")(
 						mpt::ufmt::dec0<2>(plug + 1),
 						mpt::ToUnicode(mpt::Charset::UTF8, plugin.Info.szLibraryName),
 						mpt::ToUnicode(mpt::Charset::Locale, plugin.Info.szName));

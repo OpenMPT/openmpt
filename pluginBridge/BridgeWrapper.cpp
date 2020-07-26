@@ -312,7 +312,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 	plugId++;
 	const DWORD procId = GetCurrentProcessId();
 
-	const std::wstring mapName = MPT_WFORMAT("Local\\openmpt-%1-%2")(procId, plugId);
+	const std::wstring mapName = MPT_WFORMAT("Local\\openmpt-{}-{}")(procId, plugId);
 
 	// Create our shared memory object.
 	if(!m_queueMem.Create(mapName.c_str(), sizeof(SharedMemLayout))
@@ -383,7 +383,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, BridgeWrapper *share
 
 		m_otherPtrSize = static_cast<int32>(GetPluginArchPointerSize(arch));
 
-		std::wstring cmdLine = MPT_WFORMAT("%1 %2")(mapName, procId);
+		std::wstring cmdLine = MPT_WFORMAT("{} {}")(mapName, procId);
 
 		STARTUPINFOW info;
 		MemsetZero(info);
@@ -1060,7 +1060,7 @@ BridgeWrapper::AuxMem *BridgeWrapper::GetAuxMemory(uint32 size)
 	// Create new memory with appropriate size
 	static_assert(sizeof(DispatchMsg) + sizeof(auxMem.name) <= sizeof(BridgeMessage), "Check message sizes, this will crash!");
 	static unsigned int auxMemCount = 0;
-	mpt::String::WriteAutoBuf(auxMem.name) = MPT_WFORMAT("Local\\openmpt-%1-auxmem-%2")(GetCurrentProcessId(), auxMemCount++);
+	mpt::String::WriteAutoBuf(auxMem.name) = MPT_WFORMAT("Local\\openmpt-{}-auxmem-{}")(GetCurrentProcessId(), auxMemCount++);
 	if(auxMem.memory.Create(auxMem.name, size))
 	{
 		auxMem.size = size;

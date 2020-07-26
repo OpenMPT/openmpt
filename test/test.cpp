@@ -749,39 +749,49 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 4), L"6.123");
 #endif
 
-	// basic
-	VERIFY_EQUAL(MPT_FORMAT("%1%2%3")(1,2,3), "123");
-	VERIFY_EQUAL(mpt::format_unchecked("%1%1%1")(1,2,3), "111");
-	VERIFY_EQUAL(mpt::format_unchecked("%3%3%3")(1,2,3), "333");
+	static_assert(mpt::parse_format_string_argument_count("") == 0);
+	static_assert(mpt::parse_format_string_argument_count("{{") == 0);
+	static_assert(mpt::parse_format_string_argument_count("}}") == 0);
+	static_assert(mpt::parse_format_string_argument_count("{}") == 1);
+	static_assert(mpt::parse_format_string_argument_count("{}{}") == 2);
+	static_assert(mpt::parse_format_string_argument_count("{0}{1}") == 2);
 
-	// template argument deduction of string type
-	VERIFY_EQUAL(mpt::format_unchecked(std::string("%1%2%3"))(1,2,3), "123");
+	// basic
+	VERIFY_EQUAL(MPT_FORMAT("{}{}{}")(1,2,3), "123");
+	VERIFY_EQUAL(MPT_FORMAT("{2}{1}{0}")(1,2,3), "321");
+
+	VERIFY_EQUAL(MPT_FORMAT("{2}{1}{0}{4}{3}{6}{5}{7}{10}{9}{8}")(0,1,2,3,4,5,6,7,8,9,"a"), "21043657a98");
+
+	//VERIFY_EQUAL(MPT_FORMAT("{2}{1}{0}{2}{1}{0}{10}{9}{8}")(0,1,2,3,4,5,6,7,8,9,"a"), "210210a98");
+
 #if MPT_WSTRING_FORMAT
-	VERIFY_EQUAL(MPT_WFORMAT("%1%2%3")(1,2,3), L"123");
+	VERIFY_EQUAL(MPT_WFORMAT("{}{}{}")(1,2,3), L"123");
 #endif
 
-	// escaping and error behviour of '%'
+	// escaping behviour
 	VERIFY_EQUAL(MPT_FORMAT("%")(), "%");
-	VERIFY_EQUAL(MPT_FORMAT("%%")(), "%");
-	VERIFY_EQUAL(mpt::format_unchecked("%%%")(), "%%");
-	VERIFY_EQUAL(MPT_FORMAT("%1")("a"), "a");
-	VERIFY_EQUAL(mpt::format_unchecked("%1%")("a"), "a%");
-	VERIFY_EQUAL(MPT_FORMAT("%1%%")("a"), "a%");
-	VERIFY_EQUAL(mpt::format_unchecked("%1%%%")("a"), "a%%");
-	VERIFY_EQUAL(mpt::format_unchecked("%%1")("a"), "%1");
-	VERIFY_EQUAL(MPT_FORMAT("%%%1")("a"), "%a");
-	VERIFY_EQUAL(mpt::format_unchecked("%b")("a"), "%b");
+	VERIFY_EQUAL(MPT_FORMAT("%")(), "%");
+	VERIFY_EQUAL(MPT_FORMAT("%%")(), "%%");
+	VERIFY_EQUAL(MPT_FORMAT("{}")("a"), "a");
+	VERIFY_EQUAL(MPT_FORMAT("{}%")("a"), "a%");
+	VERIFY_EQUAL(MPT_FORMAT("{}%")("a"), "a%");
+	VERIFY_EQUAL(MPT_FORMAT("{}%%")("a"), "a%%");
+	VERIFY_EQUAL(MPT_FORMAT("%1")(), "%1");
+	VERIFY_EQUAL(MPT_FORMAT("%{}")("a"), "%a");
+	VERIFY_EQUAL(MPT_FORMAT("%b")(), "%b");
+	VERIFY_EQUAL(MPT_FORMAT("{{}}")(), "{}");
+	VERIFY_EQUAL(MPT_FORMAT("{{{}}}")("a"), "{a}");
 
 #if defined(MPT_WITH_MFC)
 	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), U_("foobar"));
 	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), U_("foobar"));
-	VERIFY_EQUAL(MPT_CFORMAT("%1%2%3")(1,2,3), _T("123"));
-	VERIFY_EQUAL(MPT_CFORMAT("%1%2%3")(1,mpt::cfmt::dec0<3>(2),3), _T("10023"));
+	VERIFY_EQUAL(MPT_CFORMAT("{}{}{}")(1,2,3), _T("123"));
+	VERIFY_EQUAL(MPT_CFORMAT("{}{}{}")(1,mpt::cfmt::dec0<3>(2),3), _T("10023"));
 #endif // MPT_WITH_MFC
 
 	FlagSet<MODTYPE> foo;
 	foo.set(MOD_TYPE_MOD, true);
-	VERIFY_EQUAL(MPT_UFORMAT("%1")(foo), U_("00000000000000000000000000000001"));
+	VERIFY_EQUAL(MPT_UFORMAT("{}")(foo), U_("00000000000000000000000000000001"));
 
 }
 

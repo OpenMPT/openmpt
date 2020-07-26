@@ -49,7 +49,7 @@ Testcase::Testcase(Fatality fatality, Verbosity verbosity, const char * const de
 
 std::string Testcase::AsString() const
 {
-	return MPT_FORMAT("%1(%2): %3")(loc.file_name() ? loc.file_name() : "", loc.line(), remove_newlines(desc));
+	return MPT_FORMAT("{}({}): {}")(loc.file_name() ? loc.file_name() : "", loc.line(), remove_newlines(desc));
 }
 
 

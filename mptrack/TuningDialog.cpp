@@ -760,7 +760,7 @@ template <typename Tfile, std::size_t N> static bool CheckMagic(Tfile &f, mpt::I
 
 void CTuningDialog::OnBnClickedButtonImport()
 {
-	std::string sFilter = MPT_FORMAT("Tuning files (*%1, *%2, *.scl)|*%3;*%4;*.scl|")(
+	std::string sFilter = MPT_FORMAT("Tuning files (*{}, *{}, *.scl)|*{};*{};*.scl|")(
 		CTuning::s_FileExtension,
 		CTuningCollection::s_FileExtension,
 		CTuning::s_FileExtension,
@@ -886,10 +886,10 @@ void CTuningDialog::OnBnClickedButtonImport()
 			{
 				if(tc.GetNumTunings() >= CTuningCollection::s_nMaxTuningCount)
 				{
-					sLoadReport += MPT_UFORMAT("- Failed to load file \"%1\": maximum number(%2) of temporary tunings is already open.\n")(fileNameExt, static_cast<std::size_t>(CTuningCollection::s_nMaxTuningCount));
+					sLoadReport += MPT_UFORMAT("- Failed to load file \"{}\": maximum number({}) of temporary tunings is already open.\n")(fileNameExt, static_cast<std::size_t>(CTuningCollection::s_nMaxTuningCount));
 				} else 
 				{
-					sLoadReport += MPT_UFORMAT("- Unable to import file \"%1\": unknown reason.\n")(fileNameExt);
+					sLoadReport += MPT_UFORMAT("- Unable to import file \"{}\": unknown reason.\n")(fileNameExt);
 				}
 			} else
 			{
@@ -911,7 +911,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 
 		if(!success)
 		{
-			sLoadReport += MPT_UFORMAT("- Unable to load \"%1\": unrecognized file format.\n")(fileNameExt);
+			sLoadReport += MPT_UFORMAT("- Unable to load \"{}\": unrecognized file format.\n")(fileNameExt);
 		}
 	}
 
@@ -1502,7 +1502,7 @@ CString CTuningDialog::GetSclImportFailureMsg(EnSclImport id)
 	switch(id)
 	{
 		case enSclImportFailTooManyNotes:
-			return MPT_CFORMAT("OpenMPT supports importing scl-files with at most %1 notes")(mpt::cfmt::val(s_nSclImportMaxNoteCount));
+			return MPT_CFORMAT("OpenMPT supports importing scl-files with at most {} notes")(mpt::cfmt::val(s_nSclImportMaxNoteCount));
 
 		case enSclImportFailTooLargeNumDenomIntegers:
 			return _T("Invalid numerator or denominator");
@@ -1694,7 +1694,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		tuningName = name;
 	} else
 	{
-		tuningName = MPT_UFORMAT("%1 notes: %2:%3")(nNotes - 1, mpt::ufmt::fix(groupRatio), 1);
+		tuningName = MPT_UFORMAT("{} notes: {}:{}")(nNotes - 1, mpt::ufmt::fix(groupRatio), 1);
 	}
 
 	std::unique_ptr<CTuning> pT = CTuning::CreateGroupGeometric(tuningName, fRatios, groupRatio, 15);

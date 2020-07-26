@@ -236,7 +236,7 @@ void CTrackApp::ImportMidiConfig(SettingsContainer &file, const mpt::PathString 
 	const mpt::PathString patchDir = GetUltraSoundPatchDir(file, U_("Ultrasound"), path, forgetSettings);
 	for(uint32 prog = 0; prog < 256; prog++)
 	{
-		mpt::ustring key = MPT_UFORMAT("%1%2")((prog < 128) ? U_("Midi") : U_("Perc"), prog & 0x7F);
+		mpt::ustring key = MPT_UFORMAT("{}{}")((prog < 128) ? U_("Midi") : U_("Perc"), prog & 0x7F);
 		mpt::PathString filename = file.Read<mpt::PathString>(U_("Midi Library"), key, mpt::PathString());
 		// Check for ULTRASND.INI
 		if(filename.empty())
@@ -284,7 +284,7 @@ void CTrackApp::ExportMidiConfig(SettingsContainer &file)
 			if(theApp.IsPortableMode())
 				szFileName = theApp.PathAbsoluteToInstallRelative(szFileName);
 
-			mpt::ustring key = MPT_UFORMAT("%1%2")((prog < 128) ? U_("Midi") : U_("Perc"), prog & 0x7F);
+			mpt::ustring key = MPT_UFORMAT("{}{}")((prog < 128) ? U_("Midi") : U_("Perc"), prog & 0x7F);
 			file.Write<mpt::PathString>(U_("Midi Library"), key, szFileName);
 		}
 	}
@@ -303,7 +303,7 @@ void CTrackApp::LoadDefaultDLSBanks()
 	gpDLSBanks.reserve(numBanks);
 	for(uint32 i = 0; i < numBanks; i++)
 	{
-		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>(U_("DLS Banks"), MPT_UFORMAT("Bank%1")(i + 1), mpt::PathString());
+		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>(U_("DLS Banks"), MPT_UFORMAT("Bank{}")(i + 1), mpt::PathString());
 		path = theApp.PathInstallRelativeToAbsolute(path);
 		AddDLSBank(path);
 	}
@@ -344,7 +344,7 @@ void CTrackApp::SaveDefaultDLSBanks()
 			path = theApp.PathAbsoluteToInstallRelative(path);
 		}
 
-		mpt::ustring key = MPT_UFORMAT("Bank%1")(nBanks + 1);
+		mpt::ustring key = MPT_UFORMAT("Bank{}")(nBanks + 1);
 		theApp.GetSettings().Write<mpt::PathString>(U_("DLS Banks"), key, path);
 		nBanks++;
 
@@ -1846,7 +1846,7 @@ void CTrackApp::InitializeDXPlugins()
 	// Read tags for built-in plugins
 	for(auto plug : *m_pPluginManager)
 	{
-		mpt::ustring key = MPT_UFORMAT("Plugin%1%2.Tags")(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2));
+		mpt::ustring key = MPT_UFORMAT("Plugin{}{}.Tags")(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2));
 		plug->tags = GetSettings().Read<mpt::ustring>(U_("VST Plugins"), key, mpt::ustring());
 	}
 
@@ -1858,9 +1858,9 @@ void CTrackApp::InitializeDXPlugins()
 	}
 
 	m_pPluginManager->reserve(numPlugins);
-	auto plugIDFormat = MPT_UFORMAT("Plugin%1");
-	auto scanFormat = MPT_CFORMAT("Scanning Plugin %1 / %2...\n%3");
-	auto tagFormat = MPT_UFORMAT("Plugin%1.Tags");
+	auto plugIDFormat = MPT_UFORMAT("Plugin{}");
+	auto scanFormat = MPT_CFORMAT("Scanning Plugin {} / {}...\n{}");
+	auto tagFormat = MPT_UFORMAT("Plugin{}.Tags");
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
 		mpt::PathString plugPath = GetSettings().Read<mpt::PathString>(U_("VST Plugins"), plugIDFormat(plug), mpt::PathString());
@@ -1940,14 +1940,14 @@ void CTrackApp::UninitializeDXPlugins()
 			{
 				plugPath = PathAbsoluteToInstallRelative(plugPath);
 			}
-			theApp.GetSettings().Write<mpt::PathString>(U_("VST Plugins"), MPT_UFORMAT("Plugin%1")(plugIndex), plugPath);
+			theApp.GetSettings().Write<mpt::PathString>(U_("VST Plugins"), MPT_UFORMAT("Plugin{}")(plugIndex), plugPath);
 
-			theApp.GetSettings().Write(U_("VST Plugins"), MPT_UFORMAT("Plugin%1.Tags")(plugIndex), plug->tags);
+			theApp.GetSettings().Write(U_("VST Plugins"), MPT_UFORMAT("Plugin{}.Tags")(plugIndex), plug->tags);
 
 			plugIndex++;
 		} else
 		{
-			mpt::ustring key = MPT_UFORMAT("Plugin%1%2.Tags")(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2));
+			mpt::ustring key = MPT_UFORMAT("Plugin{}{}.Tags")(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2));
 			theApp.GetSettings().Write(U_("VST Plugins"), key, plug->tags);
 		}
 	}
@@ -2032,7 +2032,7 @@ CString CTrackApp::GetResamplingModeName(ResamplingMode mode, int length, bool a
 	}
 	if(addTaps)
 	{
-		result += MPT_CFORMAT(" (%1 tap%2)")(Resampling::Length(mode), (Resampling::Length(mode) != 1) ? CString(_T("s")) : CString(_T("")));
+		result += MPT_CFORMAT(" ({} tap{})")(Resampling::Length(mode), (Resampling::Length(mode) != 1) ? CString(_T("s")) : CString(_T("")));
 	}
 	return result;
 }

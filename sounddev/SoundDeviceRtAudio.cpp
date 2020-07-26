@@ -343,11 +343,11 @@ SoundDevice::DynamicCaps CRtAudioDevice::GetDeviceDynamicCaps(const std::vector<
 	}
 	for(unsigned int channel = 0; channel < rtinfo.outputChannels; ++channel)
 	{
-		caps.channelNames.push_back(MPT_UFORMAT("Output Channel %1")(channel));
+		caps.channelNames.push_back(MPT_UFORMAT("Output Channel {}")(channel));
 	}
 	for(unsigned int channel = 0; channel < rtinfo.inputChannels; ++channel)
 	{
-		caps.inputSourceNames.push_back(std::make_pair(static_cast<uint32>(channel), MPT_UFORMAT("Input Channel %1")(channel)));
+		caps.inputSourceNames.push_back(std::make_pair(static_cast<uint32>(channel), MPT_UFORMAT("Input Channel {}")(channel)));
 	}
 	return caps;
 }

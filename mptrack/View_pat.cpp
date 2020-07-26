@@ -1479,7 +1479,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 			if(TrackerSettings::Instance().recordQuantizeRows != 0)
 			{
 				uint32 rows = TrackerSettings::Instance().recordQuantizeRows.Get();
-				s += MPT_CFORMAT("(Currently: %1 Row%2)")(rows, CString(rows == 1 ? _T("") : _T("s")));
+				s += MPT_CFORMAT("(Currently: {} Row{})")(rows, CString(rows == 1 ? _T("") : _T("s")));
 			} else
 			{
 				s += _T("Settings...");
@@ -2074,7 +2074,7 @@ void CViewPattern::OnSplitPattern()
 	if(newPat == PATTERNINDEX_INVALID)
 	{
 		cs.Leave();
-		Reporting::Error(MPT_FORMAT("Pattern limit of the %1 format (%2 patterns) has been reached.")(mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Split Pattern");
+		Reporting::Error(MPT_FORMAT("Pattern limit of the {} format ({} patterns) has been reached.")(mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Split Pattern");
 		return;
 	}
 	auto &sourcePattern = sndFile.Patterns[sourcePat];
@@ -6126,7 +6126,7 @@ bool CViewPattern::BuildRowInsDelCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	HMENU subMenuDelete = CreatePopupMenu();
 
 	const auto numRows = m_Selection.GetNumRows();
-	const CString label = (numRows != 1) ? MPT_CFORMAT("%1 Rows")(numRows) : CString(_T("Row"));
+	const CString label = (numRows != 1) ? MPT_CFORMAT("{} Rows")(numRows) : CString(_T("Row"));
 
 	AppendMenu(subMenuInsert, MF_STRING, ID_PATTERN_INSERTROW, ih->GetKeyTextFromCommand(kcInsertRow, _T("Insert ") + label + _T(" (&Selection)")));
 	AppendMenu(subMenuInsert, MF_STRING, ID_PATTERN_INSERTALLROW, ih->GetKeyTextFromCommand(kcInsertWholeRow, _T("Insert ") + label + _T(" (&All Channels)")));
@@ -6423,7 +6423,7 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 	{
 		if(sndFile->m_MixPlugins[nPlg].pMixPlugin != nullptr)
 		{
-			s = MPT_CFORMAT("%1: %2")(mpt::cfmt::dec0<2>(nPlg + 1), mpt::ToCString(sndFile->m_MixPlugins[nPlg].GetName()));
+			s = MPT_CFORMAT("{}: {}")(mpt::cfmt::dec0<2>(nPlg + 1), mpt::ToCString(sndFile->m_MixPlugins[nPlg].GetName()));
 			AppendMenu(pluginChangeMenu, MF_STRING | (((nPlg + 1) == selStart.instr) ? MF_CHECKED : 0), ID_CHANGE_INSTRUMENT + nPlg + 1, s);
 		}
 	}
@@ -7052,16 +7052,16 @@ INT_PTR CViewPattern::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 		text = _T("Show Pattern Properties");
 		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(kcShowPatternProperties, 0);
 		if(!keyText.IsEmpty())
-			text += MPT_CFORMAT(" (%1)")(keyText);
+			text += MPT_CFORMAT(" ({})")(keyText);
 		break;
 	}
 	case DragItem::ChannelHeader:
 		if(value < sndFile.GetNumChannels())
 		{
 			if(!sndFile.ChnSettings[value].szName.empty())
-				text = MPT_TFORMAT("%1: %2")(value + 1, mpt::ToWin(sndFile.GetCharsetInternal(), sndFile.ChnSettings[value].szName));
+				text = MPT_TFORMAT("{}: {}")(value + 1, mpt::ToWin(sndFile.GetCharsetInternal(), sndFile.ChnSettings[value].szName));
 			else
-				text = MPT_TFORMAT("Channel %1")(value + 1);
+				text = MPT_TFORMAT("Channel {}")(value + 1);
 		}
 		break;
 	case DragItem::PluginName:
@@ -7069,7 +7069,7 @@ INT_PTR CViewPattern::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 		{
 			PLUGINDEX mixPlug = sndFile.ChnSettings[value].nMixPlugin;
 			if(mixPlug && mixPlug <= MAX_MIXPLUGINS)
-				text = MPT_TFORMAT("%1: %2")(mixPlug, mpt::ToWin(sndFile.m_MixPlugins[mixPlug - 1].GetName()));
+				text = MPT_TFORMAT("{}: {}")(mixPlug, mpt::ToWin(sndFile.m_MixPlugins[mixPlug - 1].GetName()));
 			else
 				text = _T("No Plugin");
 		}

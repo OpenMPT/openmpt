@@ -132,7 +132,7 @@ void Logger::SendLogMessage(const mpt::source_location &loc, LogLevel level, con
 			}
 			if(s_logfile)
 			{
-				mpt::IO::WriteText(*s_logfile, mpt::ToCharset(mpt::CharsetLogfile, MPT_UFORMAT("%1+%2 %3(%4): %5 [%6]\n")
+				mpt::IO::WriteText(*s_logfile, mpt::ToCharset(mpt::CharsetLogfile, MPT_UFORMAT("{}+{} {}({}): {} [{}]\n")
 					( mpt::Date::ANSI::ToUString(cur)
 					, mpt::ufmt::right(6, mpt::ufmt::dec(diff))
 					, file
@@ -145,7 +145,7 @@ void Logger::SendLogMessage(const mpt::source_location &loc, LogLevel level, con
 		}
 		if(mpt::log::DebuggerEnabled)
 		{
-			OutputDebugStringW(mpt::ToWide(MPT_UFORMAT("%1(%2): +%3 %4 [%5]\n")
+			OutputDebugStringW(mpt::ToWide(MPT_UFORMAT("{}({}): +{} {} [{}]\n")
 				( file
 				, line
 				, mpt::ufmt::right(6, mpt::ufmt::dec(diff))
@@ -349,7 +349,7 @@ bool Dump(const mpt::PathString &filename)
 			time = mpt::ToCharset(mpt::CharsetLogfile, mpt::Date::ANSI::ToUString( ftNow - static_cast<int64>( static_cast<double>(qpcNow.QuadPart - entry.Timestamp) * (10000000.0 / static_cast<double>(qpcFreq.QuadPart) ) ) ) );
 		} else
 		{
-			time = MPT_FORMAT("0x%1")(mpt::fmt::hex0<16>(entry.Timestamp));
+			time = MPT_FORMAT("0x{}")(mpt::fmt::hex0<16>(entry.Timestamp));
 		}
 		f << time;
 		if(entry.ThreadId == ThreadIdGUI)

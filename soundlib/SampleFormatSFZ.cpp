@@ -1023,7 +1023,7 @@ static void WriteSFZEnvelope(std::ostream &f, double tickDuration, int index, co
 
 	const bool sustainAtEnd = (!env.dwFlags[ENV_SUSTAIN] || env.nSustainStart == (env.size() - 1)) && convFunc(env.back().value) != 0.0;
 
-	const auto prefix = MPT_FORMAT("\neg%1_")(mpt::fmt::dec0<2>(index));
+	const auto prefix = MPT_FORMAT("\neg{}_")(mpt::fmt::dec0<2>(index));
 	f << "\n" << prefix << type << "=" << scale;
 	f << prefix << "points=" << (env.size() + (sustainAtEnd ? 1 : 0));
 	EnvelopeNode::tick_t lastTick = 0;

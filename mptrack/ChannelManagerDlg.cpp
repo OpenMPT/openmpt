@@ -703,11 +703,11 @@ void CChannelManagerDlg::OnPaint()
 
 		if(!sndFile.ChnSettings[sourceChn].szName.empty())
 		{
-			s = MPT_CFORMAT("%1: %2")(sourceChn + 1, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[sourceChn].szName));
+			s = MPT_CFORMAT("{}: {}")(sourceChn + 1, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[sourceChn].szName));
 
 		} else
 		{
-			s = MPT_CFORMAT("Channel %1")(sourceChn + 1);
+			s = MPT_CFORMAT("Channel {}")(sourceChn + 1);
 		}
 
 		const int borderX = MulDiv(3, dpiX, 96), borderY = MulDiv(3, dpiY, 96);
@@ -927,7 +927,7 @@ void CChannelManagerDlg::OnMButtonDown(UINT /*nFlags*/, CPoint point)
 	if(m_ModDoc != nullptr && (m_ModDoc->GetModType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && ButtonHit(point, &chn, &rect))
 	{
 		// Rename channel
-		CString s = MPT_CFORMAT("New name for channel %1:")(chn + 1);
+		CString s = MPT_CFORMAT("New name for channel {}:")(chn + 1);
 		CInputDlg dlg(this, s, mpt::ToCString(m_ModDoc->GetSoundFile().GetCharsetInternal(), m_ModDoc->GetSoundFile().ChnSettings[chn].szName), MAX_CHANNELNAME - 1);
 		if(dlg.DoModal() == IDOK)
 		{

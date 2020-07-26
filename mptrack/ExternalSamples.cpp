@@ -178,7 +178,7 @@ void MissingExternalSamplesDlg::OnScanFolder()
 
 		if(foundFiles)
 		{
-			SetDlgItemText(IDC_STATIC1, MPT_CFORMAT("%1 sample paths were relocated.")(foundFiles));
+			SetDlgItemText(IDC_STATIC1, MPT_CFORMAT("{} sample paths were relocated.")(foundFiles));
 		} else
 		{
 			SetDlgItemText(IDC_STATIC1, _T("No matching sample names found."));

@@ -12,6 +12,7 @@
 
 #include "BuildSettings.h"
 
+#include <stdexcept>
 
 #include "mptString.h"
 
@@ -48,7 +49,7 @@ OPENMPT_NAMESPACE_BEGIN
 //     basically means, it should work for any 7-bit or 8-bit encoding, including for example ASCII, UTF8 or the current locale encoding.
 //     std::string         std::wstring          mpt::ustring                    mpt::tsrtring                        CString
 //     mpt::fmt            mpt::wfmt             mpt::ufmt                       mpt::tfmt                            mpt::cfmt
-//     MPT_FORMAT("%1")    MPT_WFORMAT("%1")     MPT_UFORMAT("%1")               MPT_TFORMAT("%1")                    MPT_CFORMAT("%1")
+//     MPT_FORMAT("{}")    MPT_WFORMAT("{}")     MPT_UFORMAT("{}")               MPT_TFORMAT("{}")                    MPT_CFORMAT("{}")
 //  5. All functionality here delegates real work outside of the header file so that <sstream> and <locale> do not need to be included when
 //     using this functionality.
 //     Advantages:
@@ -595,6 +596,17 @@ template <typename T, std::size_t N> struct to_string_type<T [N]> { typedef type
 
 } // namespace String
 
+class format_string_syntax_error
+	: public std::domain_error
+{
+public:
+	format_string_syntax_error()
+		: std::domain_error("format string syntax error")
+	{
+		return;
+	}
+};
+
 template<typename Tformat>
 class message_formatter
 {
@@ -617,27 +629,138 @@ private:
 		Tstring result;
 		const size_type len = traits::length(format);
 		traits::reserve(result, len);
-		for(size_type pos = 0; pos != len; ++pos)
+		std::size_t max_arg = 0;
+		std::size_t args = 0;
+		bool std_style_success = true; 
 		{
-			char_type c = format[pos];
-			if(pos + 1 != len && c == char_type('%'))
+			enum class state : int {
+				error = -1,
+				text = 0,
+				open_seen = 1,
+				number_seen = 2,
+				close_seen = 3,
+			};
+			state state = state::text;
+			bool numbered_args = false;
+			bool unnumbered_args = false;
+			std::size_t last_arg = 0;
+			std::size_t this_arg = 0;
+			std::size_t current_arg = 0;
+			for(size_type pos = 0; pos != len; ++pos)
 			{
-				pos++;
-				c = format[pos];
-				if(char_type('1') <= c && c <= char_type('9'))
+				char_type c = format[pos];
+				switch(state)
 				{
-					const std::size_t n = c - char_type('0') - 1;
-					if(n < std::size(vals))
+				case state::text:
+					if(c == char_type('{'))
 					{
-						traits::append(result, vals[n]);
+						state = state::open_seen;
+					} else if(c == char_type('}'))
+					{
+						state = state::close_seen;
+					} else
+					{
+						state = state::text;
+						traits::append(result, 1, c);  // output c here
 					}
-					continue;
-				} else if(c != char_type('%'))
-				{
-					traits::append(result, 1, char_type('%'));
+					break;
+				case state::open_seen:
+					if(c == char_type('{'))
+					{
+						state = state::text;
+						traits::append(result, 1, char_type('{'));  // output { here
+					} else if(c == char_type('}'))
+					{
+						state = state::text;
+						unnumbered_args = true;
+						last_arg++;
+						this_arg = last_arg;
+						{ // output this_arg here
+							const std::size_t n = this_arg - 1;
+							if(n < std::size(vals))
+							{
+								traits::append(result, vals[n]);
+							}
+						}
+						if(this_arg > max_arg)
+						{
+							max_arg = this_arg;
+						}
+						args += 1;
+					} else if(char_type('0') <= c && c <= char_type('9'))
+					{
+						state = state::number_seen;
+						numbered_args = true;
+						current_arg = c - char_type('0');
+					} else
+					{
+						state = state::error;
+					}
+					break;
+				case state::number_seen:
+					if(c == char_type('{'))
+					{
+						state = state::error;
+					} else if(c == char_type('}'))
+					{
+						state = state::text;
+						this_arg = current_arg + 1;
+						{ // output this_arg here
+							const std::size_t n = this_arg - 1;
+							if(n < std::size(vals))
+							{
+								traits::append(result, vals[n]);
+							}
+						}
+						if(this_arg > max_arg)
+						{
+							max_arg = this_arg;
+						}
+						args += 1;
+					} else if(char_type('0') <= c && c <= char_type('9'))
+					{
+						state = state::number_seen;
+						numbered_args = true;
+						current_arg = (current_arg * 10) + (c - char_type('0'));
+					} else
+					{
+						state = state::error;
+					}
+					break;
+				case state::close_seen:
+					if(c == char_type('{'))
+					{
+						state = state::error;
+					} else if(c == char_type('}'))
+					{
+						state = state::text;
+						traits::append(result, 1, char_type('}'));  // output } here
+					} else
+					{
+						state = state::error;
+					}
+					break;
+				case state::error:
+					state = state::error;
+					break;
 				}
 			}
-			traits::append(result, 1, c);
+			if(state == state::error)
+			{
+				std_style_success = false;
+			}
+			if(state != state::text)
+			{
+				std_style_success = false;
+			}
+			if(numbered_args && unnumbered_args)
+			{
+				std_style_success = false;
+			}
+		}
+		if(!std_style_success)
+		{
+			throw format_string_syntax_error();
 		}
 		return result;
 	}
@@ -659,10 +782,6 @@ public:
 	}
 
 }; // struct message_formatter<Tformat>
-
-#define MPT_FORMAT_CHECKED
-
-#ifdef MPT_FORMAT_CHECKED
 
 template <std::ptrdiff_t N, typename Tchar, typename Tstring>
 class message_formatter_counted
@@ -697,33 +816,130 @@ MPT_CONSTEXPRINLINE std::ptrdiff_t parse_format_string_argument_count_impl(const
 {
 	std::size_t max_arg = 0;
 	std::size_t args = 0;
-	for(std::size_t pos = 0; pos != len; ++pos)
+	bool std_style_success = true; 
 	{
-		Tchar c = format[pos];
-		if(pos + 1 != len && c == Tchar('%'))
+		enum class state : int {
+			error = -1,
+			text = 0,
+			open_seen = 1,
+			number_seen = 2,
+			close_seen = 3,
+		};
+		state state = state::text;
+		bool numbered_args = false;
+		bool unnumbered_args = false;
+		std::size_t last_arg = 0;
+		std::size_t this_arg = 0;
+		std::size_t current_arg = 0;
+		for(std::size_t pos = 0; pos != len; ++pos)
 		{
-			pos++;
-			c = format[pos];
-			if(Tchar('1') <= c && c <= Tchar('9'))
+			Tchar c = format[pos];
+			switch(state)
 			{
-				const std::size_t n = c - Tchar('0');
-				if(n > max_arg)
+			case state::text:
+				if(c == Tchar('{'))
 				{
-					max_arg = n;
+					state = state::open_seen;
+				} else if(c == Tchar('}'))
+				{
+					state = state::close_seen;
+				} else
+				{
+					state = state::text;
+					// output c here
 				}
-				args += 1;
-				continue;
-			} else if(c != Tchar('%'))
-			{
-				// nothing
+				break;
+			case state::open_seen:
+				if(c == Tchar('{'))
+				{
+					state = state::text;
+					// output { here
+				} else if(c == Tchar('}'))
+				{
+					state = state::text;
+					unnumbered_args = true;
+					last_arg++;
+					this_arg = last_arg;
+					// output this_arg here
+					if(this_arg > max_arg)
+					{
+						max_arg = this_arg;
+					}
+					args += 1;
+				} else if(Tchar('0') <= c && c <= Tchar('9'))
+				{
+					state = state::number_seen;
+					numbered_args = true;
+					current_arg = c - Tchar('0');
+				} else
+				{
+					state = state::error;
+				}
+				break;
+			case state::number_seen:
+				if(c == Tchar('{'))
+				{
+					state = state::error;
+				} else if(c == Tchar('}'))
+				{
+					state = state::text;
+					this_arg = current_arg + 1;
+					// output this_arg here
+					if(this_arg > max_arg)
+					{
+						max_arg = this_arg;
+					}
+					args += 1;
+				} else if(Tchar('0') <= c && c <= Tchar('9'))
+				{
+					state = state::number_seen;
+					numbered_args = true;
+					current_arg = (current_arg * 10) + (c - Tchar('0'));
+				} else
+				{
+					state = state::error;
+				}
+				break;
+			case state::close_seen:
+				if(c == Tchar('{'))
+				{
+					state = state::error;
+				} else if(c == Tchar('}'))
+				{
+					state = state::text;
+					// output } here
+				} else
+				{
+					state = state::error;
+				}
+				break;
+			case state::error:
+				state = state::error;
+				break;
 			}
 		}
+		if(state == state::error)
+		{
+			std_style_success = false;
+		}
+		if(state != state::text)
+		{
+			std_style_success = false;
+		}
+		if(numbered_args && unnumbered_args)
+		{
+			std_style_success = false;
+		}
+	}
+	if(!std_style_success)
+	{
+		throw format_string_syntax_error();
 	}
 	if(max_arg != args)
 	{
-		return -1;
+		throw format_string_syntax_error();
 	}
-	return args;
+	return max_arg;
 }
 
 template <typename Tchar, std::size_t literal_length>
@@ -731,7 +947,6 @@ MPT_CONSTEXPRINLINE std::ptrdiff_t parse_format_string_argument_count(const Tcha
 {
 	return parse_format_string_argument_count_impl(format, literal_length - 1);
 }
-
 
 template<std::size_t args, typename Tchar, std::size_t N>
 inline auto format_counted(const Tchar (&format)[N])
@@ -746,82 +961,24 @@ inline auto format_counted_typed(const Tchar (&format)[N])
 	return message_formatter_counted<args, Tchar, Tstring>(format);
 }
 
-#define MPT_DEPRECATED_FORMAT /* [[deprecated]] */
-
-#else // !MPT_FORMAT_CHECKED
-
-#define MPT_DEPRECATED_FORMAT
-
-#endif // MPT_FORMAT_CHECKED
-
-template<typename Tformat>
-MPT_DEPRECATED_FORMAT inline message_formatter<typename mpt::String::detail::to_string_type<Tformat>::type> format_unchecked(Tformat format)
-{
-	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
-	return message_formatter<Tstring>(Tstring(std::move(format)));
-}
-#ifdef MPT_FORMAT_CHECKED
 #define MPT_FORMAT(f) mpt::format_counted<mpt::parse_format_string_argument_count(f)>(f)
-#else // !MPT_FORMAT_CHECKED
-#define MPT_FORMAT(f) mpt::format_unchecked( f )
-#endif // MPT_FORMAT_CHECKED
 
 #if MPT_WSTRING_FORMAT
-MPT_DEPRECATED_FORMAT inline message_formatter<std::wstring> wformat_unchecked(std::wstring format)
-{
-	return message_formatter<std::wstring>(std::move(format));
-}
-#ifdef MPT_FORMAT_CHECKED
 #define MPT_WFORMAT(f) mpt::format_counted_typed<mpt::parse_format_string_argument_count( L ## f ), std::wstring>( L ## f )
-#else // !MPT_FORMAT_CHECKED
-#define MPT_WFORMAT(f) mpt::format_unchecked( L ## f )
-#endif // MPT_FORMAT_CHECKED
 #endif
 
-MPT_DEPRECATED_FORMAT inline message_formatter<mpt::ustring> uformat_unchecked(mpt::ustring format)
-{
-	return message_formatter<mpt::ustring>(std::move(format));
-}
-#ifdef MPT_FORMAT_CHECKED
 #define MPT_UFORMAT(f) mpt::format_counted_typed<mpt::parse_format_string_argument_count(MPT_ULITERAL(f)), mpt::ustring>(MPT_ULITERAL(f))
-#else // !MPT_FORMAT_CHECKED
-#define MPT_UFORMAT(f) mpt::format_unchecked( U_(f) )
-#endif // MPT_FORMAT_CHECKED
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-MPT_DEPRECATED_FORMAT inline message_formatter<mpt::lstring> lformat_unchecked(mpt::lstring format)
-{
-	return message_formatter<mpt::lstring>(std::move(format));
-}
-#ifdef MPT_FORMAT_CHECKED
 #define MPT_LFORMAT(f) mpt::format_counted_typed<mpt::parse_format_string_argument_count(f), mpt::lstring>(f)
-#else // !MPT_FORMAT_CHECKED
-#define MPT_LFORMAT(f) mpt::format_unchecked( mpt::lstring(f) )
-#endif // MPT_FORMAT_CHECKED
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 #if MPT_OS_WINDOWS
-MPT_DEPRECATED_FORMAT inline message_formatter<mpt::tstring> tformat_unchecked(mpt::tstring format)
-{
-	return message_formatter<mpt::tstring>(std::move(format));
-}
-#ifdef MPT_FORMAT_CHECKED
 #define MPT_TFORMAT(f) mpt::format_counted_typed<mpt::parse_format_string_argument_count(TEXT(f)), mpt::tstring>(TEXT(f))
-#else // !MPT_FORMAT_CHECKED
-#define MPT_TFORMAT(f) mpt::format_unchecked( mpt::tstring(TEXT(f)) )
-#endif // MPT_FORMAT_CHECKED
 #endif
 
 #if defined(MPT_WITH_MFC)
-MPT_DEPRECATED_FORMAT inline message_formatter<CString> cformat_unchecked(CString format)
-{
-	return message_formatter<CString>(std::move(format));
-}
-#ifdef MPT_FORMAT_CHECKED
 #define MPT_CFORMAT(f) mpt::format_counted_typed<mpt::parse_format_string_argument_count(TEXT(f)), CString>(TEXT(f))
-#else // !MPT_FORMAT_CHECKED
-#define MPT_CFORMAT(f) mpt::format_unchecked( CString(_T(f)) )
-#endif // MPT_FORMAT_CHECKED
 #endif // MPT_WITH_MFC
 
 } // namespace mpt

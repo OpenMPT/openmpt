@@ -55,7 +55,7 @@ static CString PrintTime(double seconds)
 	{
 		precision = 0;
 	}
-	return MPT_CFORMAT("%1 ms")(mpt::cfmt::fix(seconds * 1000.0, precision));
+	return MPT_CFORMAT("{} ms")(mpt::cfmt::fix(seconds * 1000.0, precision));
 }
 
 
@@ -535,13 +535,13 @@ void COptionsSoundcard::UpdateSampleFormat()
 		CString name;
 		if(sampleFormat.IsFloat())
 		{
-			name = MPT_CFORMAT("Float %1 bit")(sampleFormat.GetBitsPerSample());
+			name = MPT_CFORMAT("Float {} bit")(sampleFormat.GetBitsPerSample());
 		} else if(sampleFormat.IsUnsigned())
 		{
-			name = MPT_CFORMAT("%1 Bit uint")(sampleFormat.GetBitsPerSample());
+			name = MPT_CFORMAT("{} Bit uint")(sampleFormat.GetBitsPerSample());
 		} else
 		{
-			name = MPT_CFORMAT("%1 Bit")(sampleFormat.GetBitsPerSample());
+			name = MPT_CFORMAT("{} Bit")(sampleFormat.GetBitsPerSample());
 		}
 		UINT ndx = m_CbnSampleFormat.AddString(name);
 		m_CbnSampleFormat.SetItemData(ndx, static_cast<int>(sampleFormat));
@@ -782,7 +782,7 @@ void COptionsSoundcard::UpdateSampleRates()
 	int n = 0;
 	for(size_t i = 0; i < samplerates.size(); i++)
 	{
-		int pos = m_CbnMixingFreq.AddString(MPT_CFORMAT("%1 Hz")(samplerates[i]));
+		int pos = m_CbnMixingFreq.AddString(MPT_CFORMAT("{} Hz")(samplerates[i]));
 		m_CbnMixingFreq.SetItemData(pos, samplerates[i]);
 		if(m_Settings.Samplerate == samplerates[i])
 		{
@@ -962,13 +962,13 @@ void COptionsSoundcard::UpdateStatistics()
 		mpt::ustring s;
 		if(bufferAttributes.NumBuffers > 2)
 		{
-			s += MPT_UFORMAT("Buffer: %1%% (%2/%3)\r\n")((bufferAttributes.Latency > 0.0) ? mpt::saturate_round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0, (stats.LastUpdateInterval > 0.0) ? mpt::saturate_round<int64>(bufferAttributes.Latency / stats.LastUpdateInterval) : 0, bufferAttributes.NumBuffers);
+			s += MPT_UFORMAT("Buffer: {}% ({}/{})\r\n")((bufferAttributes.Latency > 0.0) ? mpt::saturate_round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0, (stats.LastUpdateInterval > 0.0) ? mpt::saturate_round<int64>(bufferAttributes.Latency / stats.LastUpdateInterval) : 0, bufferAttributes.NumBuffers);
 		} else
 		{
-			s += MPT_UFORMAT("Buffer: %1%%\r\n")((bufferAttributes.Latency > 0.0) ? mpt::saturate_round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0);
+			s += MPT_UFORMAT("Buffer: {}%\r\n")((bufferAttributes.Latency > 0.0) ? mpt::saturate_round<int64>(stats.InstantaneousLatency / bufferAttributes.Latency * 100.0) : 0);
 		}
-		s += MPT_UFORMAT("Latency: %1 ms (current: %2 ms, %3 frames)\r\n")(mpt::ufmt::fix(bufferAttributes.Latency * 1000.0, 1), mpt::ufmt::fix(stats.InstantaneousLatency * 1000.0, 1), mpt::saturate_round<int64>(stats.InstantaneousLatency * samplerate));
-		s += MPT_UFORMAT("Period: %1 ms (current: %2 ms, %3 frames)\r\n")(mpt::ufmt::fix(bufferAttributes.UpdateInterval * 1000.0, 1), mpt::ufmt::fix(stats.LastUpdateInterval * 1000.0, 1), mpt::saturate_round<int64>(stats.LastUpdateInterval * samplerate));
+		s += MPT_UFORMAT("Latency: {} ms (current: {} ms, {} frames)\r\n")(mpt::ufmt::fix(bufferAttributes.Latency * 1000.0, 1), mpt::ufmt::fix(stats.InstantaneousLatency * 1000.0, 1), mpt::saturate_round<int64>(stats.InstantaneousLatency * samplerate));
+		s += MPT_UFORMAT("Period: {} ms (current: {} ms, {} frames)\r\n")(mpt::ufmt::fix(bufferAttributes.UpdateInterval * 1000.0, 1), mpt::ufmt::fix(stats.LastUpdateInterval * 1000.0, 1), mpt::saturate_round<int64>(stats.LastUpdateInterval * samplerate));
 		s += stats.text;
 		m_EditStatistics.SetWindowText(mpt::ToCString(s));
 	}	else
@@ -1603,17 +1603,17 @@ static CString f2s(UINT f)
 {
 	if (f < 1000)
 	{
-		return MPT_CFORMAT("%1Hz")(f);
+		return MPT_CFORMAT("{}Hz")(f);
 	} else
 	{
 		UINT fHi = f / 1000u;
 		UINT fLo = f % 1000u;
 		if(fLo)
 		{
-			return MPT_CFORMAT("%1.%2kHz")(fHi, mpt::cfmt::dec0<1>(fLo/100));
+			return MPT_CFORMAT("{}.{}kHz")(fHi, mpt::cfmt::dec0<1>(fLo/100));
 		} else
 		{
-			return MPT_CFORMAT("%1kHz")(fHi);
+			return MPT_CFORMAT("{}kHz")(fHi);
 		}
 	}
 }

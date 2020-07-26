@@ -215,7 +215,7 @@ CString CPatternUndo::GetName(const undobuf_t &buffer)
 	if(info.linkToPrevious)
 		return info.description + CString(_T(" (Multiple Patterns)"));
 	else
-		return (info.description + MPT_FORMAT(" (Pat %1 Row %2 Chn %3)")(info.pattern, info.firstRow, info.firstChannel + 1)).c_str();
+		return (info.description + MPT_FORMAT(" (Pat {} Row {} Chn {})")(info.pattern, info.firstRow, info.firstChannel + 1)).c_str();
 }
 
 
@@ -358,7 +358,7 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 
 #ifdef MPT_ALL_LOGGING
 			const size_t nSize = (GetBufferCapacity(UndoBuffer) + GetBufferCapacity(RedoBuffer) + changeLen * bytesPerSample) >> 10;
-			MPT_LOG(LogDebug, "Undo", MPT_UFORMAT("Sample undo/redo buffer size is now %1.%2 MB")(nSize >> 10, (nSize & 1023) * 100 / 1024));
+			MPT_LOG(LogDebug, "Undo", MPT_UFORMAT("Sample undo/redo buffer size is now {}.{} MB")(nSize >> 10, (nSize & 1023) * 100 / 1024));
 #endif
 
 		}

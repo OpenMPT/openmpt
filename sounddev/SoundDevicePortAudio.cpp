@@ -909,9 +909,9 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 			// nothing
 			break;
 		}
-		PALOG(MPT_UFORMAT("PortAudio: %1, %2, %3, %4")(result.internalID, result.name, result.apiName, static_cast<int>(result.default_)));
-		PALOG(MPT_UFORMAT(" low  : %1")(Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
-		PALOG(MPT_UFORMAT(" high : %1")(Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
+		PALOG(MPT_UFORMAT("PortAudio: {}, {}, {}, {}")(result.internalID, result.name, result.apiName, static_cast<int>(result.default_)));
+		PALOG(MPT_UFORMAT(" low  : {}")(Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
+		PALOG(MPT_UFORMAT(" high : {}")(Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
 		if((result.default_ != Info::Default::None) && (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type == paWASAPI))
 		{
 			auto defaultResult = result;
@@ -993,7 +993,7 @@ static void PortaudioLog(const char *text)
 	{
 		return;
 	}
-	PALOG(MPT_UFORMAT("PortAudio: %1")(mpt::ToUnicode(mpt::Charset::UTF8, text)));
+	PALOG(MPT_UFORMAT("PortAudio: {}")(mpt::ToUnicode(mpt::Charset::UTF8, text)));
 }
 #endif // MPT_COMPILER_MSVC
 

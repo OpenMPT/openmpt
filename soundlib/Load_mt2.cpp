@@ -455,7 +455,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_MT2);
 	InitializeChannels();
 
-	m_modFormat.formatName = MPT_UFORMAT("MadTracker %1.%2")(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
+	m_modFormat.formatName = MPT_UFORMAT("MadTracker {}.{}")(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
 	m_modFormat.type = U_("mt2");
 	m_modFormat.madeWithTracker = mpt::ToUnicode(mpt::Charset::Windows1252, mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.trackerName));
 	m_modFormat.charset = mpt::Charset::Windows1252;
@@ -796,7 +796,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				ModInstrument *mptIns = AllocateInstrument(drumMap[i], drumHeader.DrumSamples[i] + 1);
 				if(mptIns != nullptr)
 				{
-					mptIns->name = MPT_FORMAT("Drum #%1")(i+1);
+					mptIns->name = MPT_FORMAT("Drum #{}")(i+1);
 				}
 			} else
 			{
@@ -1154,7 +1154,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			SetSamplePath(i + 1, mpt::PathString::FromLocaleSilent(filename));
 #elif !defined(LIBOPENMPT_BUILD_TEST)
-			AddToLog(LogWarning, MPT_UFORMAT("Loading external sample %1 ('%2') failed: External samples are not supported.")(i + 1, mpt::ToUnicode(GetCharsetFile(), filename)));
+			AddToLog(LogWarning, MPT_UFORMAT("Loading external sample {} ('{}') failed: External samples are not supported.")(i + 1, mpt::ToUnicode(GetCharsetFile(), filename)));
 #endif // MPT_EXTERNAL_SAMPLES
 		}
 	}

@@ -107,7 +107,7 @@ uint64 Base::SourceGetReferenceClockNowNanoseconds() const
 		return 0;
 	}
 	uint64 result = m_Source->SoundSourceGetReferenceClockNowNanoseconds();
-	//MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("clock: %1")(result));
+	//MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("clock: {}")(result));
 	return result;
 }
 
@@ -120,7 +120,7 @@ uint64 Base::SourceLockedGetReferenceClockNowNanoseconds() const
 		return 0;
 	}
 	uint64 result = m_Source->SoundSourceLockedGetReferenceClockNowNanoseconds();
-	//MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("clock-rt: %1")(result));
+	//MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("clock-rt: {}")(result));
 	return result;
 }
 

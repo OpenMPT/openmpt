@@ -190,7 +190,7 @@ std::string ComponentFactoryBase::GetSettingsKey() const
 void ComponentFactoryBase::PreConstruct() const
 {
 	MPT_LOG(LogInformation, "Components", 
-		MPT_UFORMAT("Constructing Component %1")
+		MPT_UFORMAT("Constructing Component {}")
 			( mpt::ToUnicode(mpt::Charset::ASCII, m_ID)
 			)
 		);

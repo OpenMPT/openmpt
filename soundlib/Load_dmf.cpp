@@ -911,7 +911,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_DMF);
 
-	m_modFormat.formatName = MPT_UFORMAT("X-Tracker v%1")(fileHeader.version);
+	m_modFormat.formatName = MPT_UFORMAT("X-Tracker v{}")(fileHeader.version);
 	m_modFormat.type = U_("dmf");
 	m_modFormat.charset = mpt::Charset::CP437;
 

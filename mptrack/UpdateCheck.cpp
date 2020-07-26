@@ -163,11 +163,11 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 		{
 			TrackerSettings::Instance().UpdateShowUpdateHint = false;
 			const auto checkIntervalDays = TrackerSettings::Instance().UpdateIntervalDays.Get();
-			CString msg = MPT_CFORMAT("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates %1. If you do not want this, you can disable update checks in the setup.")
+			CString msg = MPT_CFORMAT("OpenMPT would like to check for updates now, proceed?\n\nNote: In the future, OpenMPT will check for updates {}. If you do not want this, you can disable update checks in the setup.")
 				(
 					checkIntervalDays == 0 ? CString(_T("on every program start")) :
 					checkIntervalDays == 1 ? CString(_T("every day")) :
-					MPT_CFORMAT("every %1 days")(checkIntervalDays)
+					MPT_CFORMAT("every {} days")(checkIntervalDays)
 				);
 			if(Reporting::Confirm(msg, _T("OpenMPT Internet Update")) == cnfNo)
 			{
@@ -193,7 +193,7 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 		const auto enableStatistics = Reporting::Confirm(
 			U_("Do you want to contribute to OpenMPT by providing system statistics?\r\n\r\n") +
 			mpt::String::Replace(CUpdateCheck::GetStatisticsUserInformation(false), U_("\n"), U_("\r\n")) + U_("\r\n\r\n") +
-			MPT_UFORMAT("This option was previously %1 on your system.\r\n")(TrackerSettings::Instance().UpdateStatistics ? U_("enabled") : U_("disabled")),
+			MPT_UFORMAT("This option was previously {} on your system.\r\n")(TrackerSettings::Instance().UpdateStatistics ? U_("enabled") : U_("disabled")),
 			false, !TrackerSettings::Instance().UpdateStatistics.Get());
 		TrackerSettings::Instance().UpdateStatistics = (enableStatistics == ConfirmAnswer::cnfYes);
 		TrackerSettings::Instance().UpdateStatisticsConsentAsked = true;
@@ -259,7 +259,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	j["System"]["Windows"]["Build"] = mpt::Windows::Version::Current().GetBuild();
 	j["System"]["Windows"]["Architecture"] = mpt::Windows::Name(mpt::Windows::GetHostArchitecture());
 	j["System"]["Windows"]["IsWine"] = mpt::Windows::IsWine();
-	j["System"]["Windows"]["TypeRaw"] = MPT_FORMAT("0x%1")(mpt::fmt::HEX0<8>(mpt::Windows::Version::Current().GetTypeId()));
+	j["System"]["Windows"]["TypeRaw"] = MPT_FORMAT("0x{}")(mpt::fmt::HEX0<8>(mpt::Windows::Version::Current().GetTypeId()));
 	std::vector<mpt::Windows::Architecture> architectures = mpt::Windows::GetSupportedProcessArchitectures(mpt::Windows::GetHostArchitecture());
 	for(const auto & arch : architectures)
 	{
@@ -352,7 +352,7 @@ mpt::ustring CUpdateCheck::GetUpdateURLV2(const CUpdateCheck::Settings &settings
 		updateURL = U_("https://") + updateURL;
 	}
 	// Build update URL
-	updateURL = mpt::String::Replace(updateURL, U_("$VERSION"), MPT_UFORMAT("%1-%2-%3")
+	updateURL = mpt::String::Replace(updateURL, U_("$VERSION"), MPT_UFORMAT("{}-{}-{}")
 		( Version::Current()
 		, BuildVariants().GuessCurrentBuildName()
 		, settings.sendStatistics ? mpt::Windows::Version::Current().GetNameShort() : U_("unknown")
@@ -381,7 +381,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 		HTTP::Request requestStatistics;
 		if(settings.statisticsUUID.IsValid())
 		{
-			requestStatistics.SetURI(ParseURI(settings.apiURL + MPT_UFORMAT("statistics/%1")(settings.statisticsUUID)));
+			requestStatistics.SetURI(ParseURI(settings.apiURL + MPT_UFORMAT("statistics/{}")(settings.statisticsUUID)));
 			requestStatistics.method = HTTP::Method::Put;
 		} else
 		{
@@ -399,7 +399,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 	// Retrieve HTTP status code.
 	if(resultHTTP.Status >= 400)
 	{
-		throw CUpdateCheck::Error(MPT_CFORMAT("Version information could not be found on the server (HTTP status code %1). Maybe your version of OpenMPT is too old!")(resultHTTP.Status));
+		throw CUpdateCheck::Error(MPT_CFORMAT("Version information could not be found on the server (HTTP status code {}). Maybe your version of OpenMPT is too old!")(resultHTTP.Status));
 	}
 
 	// Now, evaluate the downloaded data.
@@ -456,7 +456,7 @@ void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings, const 
 			result = SearchUpdate(settings, context.statistics);
 		} catch(const bad_uri &e)
 		{
-			throw CUpdateCheck::Error(MPT_CFORMAT("Error parsing update URL: %1")(mpt::get_exception_text<CString>(e)));
+			throw CUpdateCheck::Error(MPT_CFORMAT("Error parsing update URL: {}")(mpt::get_exception_text<CString>(e)));
 		} catch(const HTTP::exception &e)
 		{
 			throw CUpdateCheck::Error(CString(_T("HTTP error: ")) + mpt::ToCString(e.GetMessage()));
@@ -664,7 +664,7 @@ void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResu
 	{
 		if(settings.statisticsUUID.IsValid())
 		{
-			statistics += U_("PUT ") + settings.apiURL + MPT_UFORMAT("statistics/%1")(settings.statisticsUUID) + UL_("\n");
+			statistics += U_("PUT ") + settings.apiURL + MPT_UFORMAT("statistics/{}")(settings.statisticsUUID) + UL_("\n");
 		} else
 		{
 			statistics += U_("POST ") + settings.apiURL + U_("statistics/") + UL_("\n");

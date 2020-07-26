@@ -135,6 +135,7 @@
 // <exception>
 
 #include "../common/mptStringFormat.h"
+// <stdexcept>
 
 #include "../common/mptPathString.h"
 

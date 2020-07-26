@@ -226,9 +226,9 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 		uint32 memPos = blkPos + sizeof(MMCMPBLOCK) + blk.sub_blk * sizeof(MMCMPSUBBLOCK);
 
 #ifdef MMCMP_LOG
-		MPT_LOG(LogDebug, "MMCMP", MPT_UFORMAT("block %1: flags=%2 sub_blocks=%3")(nBlock, mpt::ufmt::HEX0<4>(static_cast<uint16>(blk.flags)), static_cast<uint16>(blk.sub_blk)));
-		MPT_LOG(LogDebug, "MMCMP", MPT_UFORMAT(" pksize=%1 unpksize=%2")(static_cast<uint32>(blk.pk_size), static_cast<uint32>(blk.unpk_size)));
-		MPT_LOG(LogDebug, "MMCMP", MPT_UFORMAT(" tt_entries=%1 num_bits=%2")(static_cast<uint16>(blk.tt_entries), static_cast<uint16>(blk.num_bits)));
+		MPT_LOG(LogDebug, "MMCMP", MPT_UFORMAT("block {}: flags={} sub_blocks={}")(nBlock, mpt::ufmt::HEX0<4>(static_cast<uint16>(blk.flags)), static_cast<uint16>(blk.sub_blk)));
+		MPT_LOG(LogDebug, "MMCMP", MPT_UFORMAT(" pksize={} unpksize={}")(static_cast<uint32>(blk.pk_size), static_cast<uint32>(blk.unpk_size)));
+		MPT_LOG(LogDebug, "MMCMP", MPT_UFORMAT(" tt_entries={} num_bits={}")(static_cast<uint16>(blk.tt_entries), static_cast<uint16>(blk.num_bits)));
 #endif
 		// Data is not packed
 		if (!(blk.flags & MMCMP_COMP))
@@ -238,7 +238,7 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 				if(!psubblk) return false;
 				if(!MMCMP_IsDstBlockValid(unpackedData, *psubblk)) return false;
 #ifdef MMCMP_LOG
-				MPT_LOG(LogDebug, "MMCMP", MPT_UFORMAT("  Unpacked sub-block %1: offset %2, size=%3")(i, static_cast<uint32>(psubblk->unpk_pos), static_cast<uint32>(psubblk->unpk_size)));
+				MPT_LOG(LogDebug, "MMCMP", MPT_UFORMAT("  Unpacked sub-block {}: offset {}, size={}")(i, static_cast<uint32>(psubblk->unpk_pos), static_cast<uint32>(psubblk->unpk_size)));
 #endif
 				if(!file.Seek(memPos)) return false;
 				if(file.ReadRaw(mpt::span(&(unpackedData[psubblk->unpk_pos]), psubblk->unpk_size)).size() != psubblk->unpk_size) return false;
@@ -258,7 +258,7 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 			uint32 oldval = 0;
 
 #ifdef MMCMP_LOG
-			MPT_LOG(LogDebug, "MMCMP", MPT_UFORMAT("  16-bit block: pos=%1 size=%2 %3 %4")(psubblk->unpk_pos, psubblk->unpk_size, (blk.flags & MMCMP_DELTA) ? U_("DELTA ") : U_(""), (blk.flags & MMCMP_ABS16) ? U_("ABS16 ") : U_("")));
+			MPT_LOG(LogDebug, "MMCMP", MPT_UFORMAT("  16-bit block: pos={} size={} {} {}")(psubblk->unpk_pos, psubblk->unpk_size, (blk.flags & MMCMP_DELTA) ? U_("DELTA ") : U_(""), (blk.flags & MMCMP_ABS16) ? U_("ABS16 ") : U_("")));
 #endif
 			if(!file.Seek(memPos + blk.tt_entries)) return false;
 			if(!file.CanRead(blk.pk_size - blk.tt_entries)) return false;

@@ -103,7 +103,7 @@ bool PatternClipboard::Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERIN
 				patList[pattern] = insertedPats++;
 
 				const CPattern &pat = sndFile.Patterns[pattern];
-				patternData += MPT_FORMAT("Rows: %1\r\n")(pat.GetNumRows());
+				patternData += MPT_FORMAT("Rows: {}\r\n")(pat.GetNumRows());
 				std::string name = pat.GetName();
 				if(!name.empty())
 				{
@@ -111,7 +111,7 @@ bool PatternClipboard::Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERIN
 				}
 				if(pat.GetOverrideSignature())
 				{
-					patternData += MPT_FORMAT("Signature: %1/%2\r\n")(pat.GetRowsPerBeat(), pat.GetRowsPerMeasure());
+					patternData += MPT_FORMAT("Signature: {}/{}\r\n")(pat.GetRowsPerBeat(), pat.GetRowsPerMeasure());
 				}
 				if(pat.HasTempoSwing())
 				{
@@ -121,10 +121,10 @@ bool PatternClipboard::Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERIN
 					{
 						if(i == 0)
 						{
-							patternData += MPT_FORMAT("%1")(swing[i]);
+							patternData += MPT_FORMAT("{}")(swing[i]);
 						} else
 						{
-							patternData += MPT_FORMAT(",%1")(swing[i]);
+							patternData += MPT_FORMAT(",{}")(swing[i]);
 						}
 					}
 					patternData += "\r\n";
@@ -143,7 +143,7 @@ bool PatternClipboard::Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERIN
 	if(instance.m_activeClipboard < instance.m_clipboards.size())
 	{
 		// Copy to internal clipboard
-		CString desc = MPT_CFORMAT("%1 %2 (%3 to %4)")(last - first + 1, onlyOrders ? CString(_T("Orders")) : CString(_T("Patterns")), first, last);
+		CString desc = MPT_CFORMAT("{} {} ({} to {})")(last - first + 1, onlyOrders ? CString(_T("Orders")) : CString(_T("Patterns")), first, last);
 		instance.m_clipboards[instance.m_activeClipboard] = {data, desc};
 	}
 

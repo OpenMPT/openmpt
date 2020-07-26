@@ -695,7 +695,7 @@ BOOL CMainToolBar::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
 		if(!keyText.IsEmpty())
-			fmt += MPT_TFORMAT(" (%1)")(keyText);
+			fmt += MPT_TFORMAT(" ({})")(keyText);
 	}
 	lstrcpyn(pTTT->szText, fmt.c_str(), mpt::saturate_cast<int>(std::size(pTTT->szText)));
 	*pResult = 0;

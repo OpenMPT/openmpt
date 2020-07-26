@@ -631,7 +631,7 @@ void CModToMidi::FillProgramBox(bool percussion)
 		for(ModCommand::NOTE i = 0; i < 61; i++)
 		{
 			ModCommand::NOTE note = i + 24;
-			auto s = MPT_CFORMAT("%1 (%2): %3")(
+			auto s = MPT_CFORMAT("{} ({}): {}")(
 				note,
 				mpt::ToCString(m_sndFile.GetNoteName(note + NOTE_MIN)),
 				mpt::ToCString(mpt::Charset::ASCII, szMidiPercussionNames[i]));
@@ -643,7 +643,7 @@ void CModToMidi::FillProgramBox(bool percussion)
 		m_CbnProgram.SetItemData(m_CbnProgram.AddString(_T("No Program Change")), 0);
 		for(int i = 1; i <= 128; i++)
 		{
-			auto s = MPT_CFORMAT("%1: %2")(
+			auto s = MPT_CFORMAT("{}: {}")(
 				mpt::cfmt::dec0<3>(i),
 				mpt::ToCString(mpt::Charset::ASCII, szMidiProgramNames[i - 1]));
 			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), i);
@@ -799,7 +799,7 @@ void CDoMidiConvert::Run()
 
 	MidiExport::DummyAudioTarget target;
 	UINT ok = IDOK;
-	const auto fmt = MPT_TFORMAT("Rendering file... (%1mn%2s, %3mn%4s remaining)");
+	const auto fmt = MPT_TFORMAT("Rendering file... ({}mn{}s, {}mn{}s remaining)");
 	while(m_sndFile.Read(MIXBUFFERSIZE, target) > 0)
 	{
 		auto currentTime = timeGetTime();

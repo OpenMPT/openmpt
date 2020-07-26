@@ -334,20 +334,20 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				{
 					if(sample <= sndFile.GetNumSamples())
 					{
-						AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE + sample, MPT_CFORMAT("%1: %2")(sample, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[sample])));
+						AppendMenu(hSubMenu, MF_STRING, ID_NOTEMAP_EDITSAMPLE + sample, MPT_CFORMAT("{}: {}")(sample, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[sample])));
 					}
 				}
 
 				AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hSubMenu), ih->GetKeyTextFromCommand(kcInsNoteMapEditSample, _T("&Edit Sample")));
 				AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
 			}
-			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample, MPT_CFORMAT("Map all notes to &sample %1")(pIns->Keyboard[m_nNote])));
+			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample, MPT_CFORMAT("Map all notes to &sample {}")(pIns->Keyboard[m_nNote])));
 
 			if(sndFile.GetType() != MOD_TYPE_XM)
 			{
 				if(ModCommand::IsNote(pIns->NoteMap[m_nNote]))
 				{
-					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote, MPT_CFORMAT("Map all &notes to %1")(mpt::ToCString(sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument)))));
+					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote, MPT_CFORMAT("Map all &notes to {}")(mpt::ToCString(sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument)))));
 				}
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeUp, _T("Transpose map &up")));
 				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeDown, _T("Transpose map &down")));
@@ -825,7 +825,7 @@ HRESULT CNoteMapWnd::get_accName(VARIANT varChild, BSTR *pszName)
 	} else
 	{
 		auto mappedNote = ins->NoteMap[m_nNote];
-		str += MPT_CFORMAT("sample %1 at %2")(ins->Keyboard[m_nNote], mpt::ToCString(sndFile.GetNoteName(mappedNote, m_nInstrument)));
+		str += MPT_CFORMAT("sample {} at {}")(ins->Keyboard[m_nNote], mpt::ToCString(sndFile.GetNoteName(mappedNote, m_nInstrument)));
 	}
 
 	*pszName = str.AllocSysString();
@@ -1871,7 +1871,7 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 			{
 				auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
 				if (!keyText.IsEmpty())
-					_tcscat(pszText, MPT_TFORMAT(" (%1)")(keyText).c_str());
+					_tcscat(pszText, MPT_TFORMAT(" ({})")(keyText).c_str());
 			}
 			return TRUE;
 		}
@@ -2952,7 +2952,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 		}
 	}
 
-	Reporting::Notification(MPT_CFORMAT("Tuning %1 was not found. Setting to default tuning.")(mpt::ToCString(m_sndFile.Instruments[m_nInstrument]->pTuning->GetName())));
+	Reporting::Notification(MPT_CFORMAT("Tuning {} was not found. Setting to default tuning.")(mpt::ToCString(m_sndFile.Instruments[m_nInstrument]->pTuning->GetName())));
 
 	CriticalSection cs;
 	pIns->SetTuning(m_sndFile.GetDefaultTuning());

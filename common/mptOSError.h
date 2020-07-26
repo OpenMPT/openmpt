@@ -82,7 +82,7 @@ class Error
 {
 public:
 	Error(DWORD errorCode, HANDLE hModule = NULL)
-		: std::runtime_error(mpt::ToCharset(mpt::CharsetException, MPT_UFORMAT("Windows Error: 0x%1: %2")(mpt::ufmt::hex0<8>(errorCode), GetErrorMessage(errorCode, hModule))))
+		: std::runtime_error(mpt::ToCharset(mpt::CharsetException, MPT_UFORMAT("Windows Error: 0x{}: {}")(mpt::ufmt::hex0<8>(errorCode), GetErrorMessage(errorCode, hModule))))
 	{
 		return;
 	}

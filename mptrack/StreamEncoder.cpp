@@ -88,22 +88,22 @@ bool EncoderFactoryBase::IsBitrateSupported(int samplerate, int channels, int bi
 
 mpt::ustring EncoderFactoryBase::DescribeQuality(float quality) const
 {
-	return MPT_UFORMAT("VBR %1%%")(static_cast<int>(quality * 100.0f));
+	return MPT_UFORMAT("VBR {}%")(static_cast<int>(quality * 100.0f));
 }
 
 mpt::ustring EncoderFactoryBase::DescribeBitrateVBR(int bitrate) const
 {
-	return MPT_UFORMAT("VBR %1 kbit")(bitrate);
+	return MPT_UFORMAT("VBR {} kbit")(bitrate);
 }
 
 mpt::ustring EncoderFactoryBase::DescribeBitrateABR(int bitrate) const
 {
-	return MPT_UFORMAT("ABR %1 kbit")(bitrate);
+	return MPT_UFORMAT("ABR {} kbit")(bitrate);
 }
 
 mpt::ustring EncoderFactoryBase::DescribeBitrateCBR(int bitrate) const
 {
-	return MPT_UFORMAT("CBR %1 kbit")(bitrate);
+	return MPT_UFORMAT("CBR {} kbit")(bitrate);
 }
 
 

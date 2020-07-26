@@ -138,7 +138,7 @@ mpt::ustring WineGetSystemInfoString(mpt::Wine::VersionContext & wineVersion)
 
 	msg += U_("\n");
 
-	msg += MPT_UFORMAT("OpenMPT detected Wine %1 running on %2.\n")
+	msg += MPT_UFORMAT("OpenMPT detected Wine {} running on {}.\n")
 		( wineVersion.Version().AsString()
 		, wineVersion.HostClass() == mpt::OS::Class::Linux ? U_("Linux") : U_("unknown system")
 		);

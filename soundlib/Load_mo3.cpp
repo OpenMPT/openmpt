@@ -926,14 +926,14 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		for(uint32 i = 0; i < 16; i++)
 		{
 			if(fileHeader.sfxMacros[i])
-				mpt::String::WriteAutoBuf(m_MidiCfg.szMidiSFXExt[i]) = MPT_FORMAT("F0F0%1z")(mpt::fmt::HEX0<2>(fileHeader.sfxMacros[i] - 1));
+				mpt::String::WriteAutoBuf(m_MidiCfg.szMidiSFXExt[i]) = MPT_FORMAT("F0F0{}z")(mpt::fmt::HEX0<2>(fileHeader.sfxMacros[i] - 1));
 			else
 				mpt::String::WriteAutoBuf(m_MidiCfg.szMidiSFXExt[i]) = "";
 		}
 		for(uint32 i = 0; i < 128; i++)
 		{
 			if(fileHeader.fixedMacros[i][1])
-				mpt::String::WriteAutoBuf(m_MidiCfg.szMidiZXXExt[i]) = MPT_FORMAT("F0F0%1%2")(mpt::fmt::HEX0<2>(fileHeader.fixedMacros[i][1] - 1), mpt::fmt::HEX0<2>(fileHeader.fixedMacros[i][0].get()));
+				mpt::String::WriteAutoBuf(m_MidiCfg.szMidiZXXExt[i]) = MPT_FORMAT("F0F0{}{}")(mpt::fmt::HEX0<2>(fileHeader.fixedMacros[i][1] - 1), mpt::fmt::HEX0<2>(fileHeader.fixedMacros[i][0].get()));
 			else
 				mpt::String::WriteAutoBuf(m_MidiCfg.szMidiZXXExt[i]) = "";
 		}
@@ -1612,13 +1612,13 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 				if(headStreamSerials.size() > 1)
 				{
-					AddToLog(LogWarning, MPT_UFORMAT("Sample %1: Ogg Vorbis data with shared header and multiple logical bitstreams in header chunk found. This may be handled incorrectly.")(smp));
+					AddToLog(LogWarning, MPT_UFORMAT("Sample {}: Ogg Vorbis data with shared header and multiple logical bitstreams in header chunk found. This may be handled incorrectly.")(smp));
 				} else if(dataStreamSerials.size() > 1)
 				{
-					AddToLog(LogWarning, MPT_UFORMAT("Sample %1: Ogg Vorbis sample with shared header and multiple logical bitstreams found. This may be handled incorrectly.")(smp));
+					AddToLog(LogWarning, MPT_UFORMAT("Sample {}: Ogg Vorbis sample with shared header and multiple logical bitstreams found. This may be handled incorrectly.")(smp));
 				} else if((dataStreamSerials.size() == 1) && (headStreamSerials.size() == 1) && (dataStreamSerials[0] != headStreamSerials[0]))
 				{
-					AddToLog(LogInformation, MPT_UFORMAT("Sample %1: Ogg Vorbis data with shared header and different logical bitstream serials found.")(smp));
+					AddToLog(LogInformation, MPT_UFORMAT("Sample {}: Ogg Vorbis data with shared header and different logical bitstream serials found.")(smp));
 				}
 
 				std::string mergedStreamData = mergedStream.str();
@@ -1709,7 +1709,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					}
 				} else
 				{
-					AddToLog(LogWarning, MPT_UFORMAT("Sample %1: Unsupported Ogg Vorbis chained stream found.")(smp));
+					AddToLog(LogWarning, MPT_UFORMAT("Sample {}: Unsupported Ogg Vorbis chained stream found.")(smp));
 					unsupportedSamples = true;
 				}
 				ov_clear(&vf);
@@ -1857,7 +1857,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			case MOD_TYPE_MTM:
 			{
 				uint8 mtmVersion = chunk.ReadUint8();
-				madeWithTracker = MPT_UFORMAT("MultiTracker %1.%2")(mtmVersion >> 4, mtmVersion & 0x0F);
+				madeWithTracker = MPT_UFORMAT("MultiTracker {}.{}")(mtmVersion >> 4, mtmVersion & 0x0F);
 			}
 			break;
 			default:
@@ -1950,11 +1950,11 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	if(madeWithTracker.empty())
-		madeWithTracker = MPT_UFORMAT("MO3 v%1")(version);
+		madeWithTracker = MPT_UFORMAT("MO3 v{}")(version);
 	else
-		madeWithTracker = MPT_UFORMAT("MO3 v%1 (%2)")(version, madeWithTracker);
+		madeWithTracker = MPT_UFORMAT("MO3 v{} ({})")(version, madeWithTracker);
 
-	m_modFormat.formatName = MPT_UFORMAT("Un4seen MO3 v%1")(version);
+	m_modFormat.formatName = MPT_UFORMAT("Un4seen MO3 v{}")(version);
 	m_modFormat.type = U_("mo3");
 	m_modFormat.originalType = std::move(originalFormatType);
 	m_modFormat.originalFormatName = std::move(originalFormatName);

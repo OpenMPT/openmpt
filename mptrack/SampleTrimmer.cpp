@@ -65,7 +65,7 @@ public:
 		m_SndFile.m_bIsRendering = true;
 		for(SEQUENCEINDEX seq = 0; seq < m_SndFile.Order.GetNumSequences() && !m_abort; seq++)
 		{
-			SetWindowText(MPT_CFORMAT("Automatic Sample Trimmer - Sequence %1 / %2")(seq + 1, m_SndFile.Order.GetNumSequences()));
+			SetWindowText(MPT_CFORMAT("Automatic Sample Trimmer - Sequence {} / {}")(seq + 1, m_SndFile.Order.GetNumSequences()));
 
 			m_SndFile.Order.SetSequence(seq);
 			m_SndFile.ResetPlayPos();
@@ -92,7 +92,7 @@ public:
 					{
 						prevTime = currentTime;
 						auto timeSec = totalSamples / m_SndFile.GetSampleRate();
-						SetText(MPT_CFORMAT("Analyzing... %1:%2:%3")(timeSec / 3600, mpt::cfmt::dec0<2>((timeSec / 60) % 60), mpt::cfmt::dec0<2>(timeSec % 60)));
+						SetText(MPT_CFORMAT("Analyzing... {}:{}:{}")(timeSec / 3600, mpt::cfmt::dec0<2>((timeSec / 60) % 60), mpt::cfmt::dec0<2>(timeSec % 60)));
 						SetProgress(mpt::saturate_cast<uint32>(totalSamples));
 						ProcessMessages();
 					}
@@ -141,7 +141,7 @@ void CModDoc::OnShowSampleTrimmer()
 		return;
 	}
 
-	mpt::ustring s = MPT_UFORMAT("%1 sample%2 can be trimmed, saving %3 bytes.")(numTrimmed, (numTrimmed == 1) ? U_("") : U_("s"), mpt::ufmt::dec(3, ',', numBytes));
+	mpt::ustring s = MPT_UFORMAT("{} sample{} can be trimmed, saving {} bytes.")(numTrimmed, (numTrimmed == 1) ? U_("") : U_("s"), mpt::ufmt::dec(3, ',', numBytes));
 	if(dlg.m_abort)
 	{
 		s += U_("\n\nWARNING: Only partial results are available, possibly causing used sample parts to be trimmed.\nContinue anyway?");

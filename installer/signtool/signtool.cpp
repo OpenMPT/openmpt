@@ -69,9 +69,9 @@ static mpt::ustring get_keyname(mpt::ustring keyname)
 		constexpr mpt::UUID ns = "9a88e12a-a132-4215-8bd0-3a002da65373"_uuid;
 		mpt::ustring computername = mpt::getenv(U_("COMPUTERNAME")).value_or(U_(""));
 		mpt::ustring username = mpt::getenv(U_("USERNAME")).value_or(U_(""));
-		mpt::ustring name = MPT_UFORMAT("host=%1 user=%2")(computername, username);
+		mpt::ustring name = MPT_UFORMAT("host={} user={}")(computername, username);
 		mpt::UUID uuid = mpt::UUID::RFC4122NamespaceV5(ns, name);
-		keyname = MPT_UFORMAT("OpenMPT Update Signing Key %1")(uuid);
+		keyname = MPT_UFORMAT("OpenMPT Update Signing Key {}")(uuid);
 	}
 	return keyname;
 }

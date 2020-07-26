@@ -42,13 +42,13 @@ mpt::ustring Pulseaudio::PulseErrorString(int error)
 	const char *str = pa_strerror(error);
 	if(!str)
 	{
-		return MPT_UFORMAT("error=%1")(error);
+		return MPT_UFORMAT("error={}")(error);
 	}
 	if(std::strlen(str) == 0)
 	{
-		return MPT_UFORMAT("error=%1")(error);
+		return MPT_UFORMAT("error={}")(error);
 	}
-	return MPT_UFORMAT("%1 (error=%2)")(mpt::ToUnicode(mpt::Charset::UTF8, str), error);
+	return MPT_UFORMAT("{} (error={})")(mpt::ToUnicode(mpt::Charset::UTF8, str), error);
 }
 
 
@@ -323,7 +323,7 @@ bool Pulseaudio::InternalOpen()
 		&error);
 	if(!m_PA_SimpleOutput)
 	{
-		SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_new failed: %1")(PulseErrorString(error)));
+		SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_new failed: {}")(PulseErrorString(error)));
 		InternalClose();
 		return false;
 	}
@@ -345,7 +345,7 @@ void Pulseaudio::InternalFillAudioBuffer()
 	pa_usec_t latency_usec = pa_simple_get_latency(m_PA_SimpleOutput, &error);
 	if(error != 0)
 	{
-		SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_get_latency failed: %1")(PulseErrorString(error)));
+		SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_get_latency failed: {}")(PulseErrorString(error)));
 		RequestClose();
 		return;
 	}
@@ -365,7 +365,7 @@ void Pulseaudio::InternalFillAudioBuffer()
 	error = 0;
 	if(pa_simple_write(m_PA_SimpleOutput, &(m_OutputBuffer[0]), m_OutputBuffer.size() * sizeof(float32), &error) < 0)
 	{
-		SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_write failed: %1")(PulseErrorString(error)));
+		SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_write failed: {}")(PulseErrorString(error)));
 		needsClose = true;
 	}
 	m_StatisticLastLatencyFrames.store(latencyFrames);
@@ -420,14 +420,14 @@ void Pulseaudio::InternalStopFromSoundThread()
 		error = 0;
 		if(pa_simple_flush(m_PA_SimpleOutput, &error) < 0)
 		{
-			SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_flush failed: %1")(PulseErrorString(error)));
+			SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_flush failed: {}")(PulseErrorString(error)));
 		}
 	} else
 	{
 		error = 0;
 		if(pa_simple_drain(m_PA_SimpleOutput, &error) < 0)
 		{
-			SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_drain failed: %1")(PulseErrorString(error)));
+			SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_drain failed: {}")(PulseErrorString(error)));
 		}
 	}
 	return;

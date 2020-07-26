@@ -222,7 +222,7 @@ FLACEncoder::FLACEncoder()
 				format.Samplerate = samplerate;
 				format.Channels = channels;
 				format.Sampleformat = sampleFormat;
-				format.Description = MPT_UFORMAT("%1 Bit")(sampleFormat.GetBitsPerSample());
+				format.Description = MPT_UFORMAT("{} Bit")(sampleFormat.GetBitsPerSample());
 				format.Bitrate = 0;
 				traits.formats.push_back(format);
 			}

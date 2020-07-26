@@ -519,7 +519,7 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 		{
 			for(int i = 0; i < numChoices; i++)
 			{
-				CString s = MPT_CFORMAT("Choice %1 (of %2)")(i + 1, numChoices);
+				CString s = MPT_CFORMAT("Choice {} (of {})")(i + 1, numChoices);
 				m_cmbKeyChoice.SetItemData(m_cmbKeyChoice.AddString(s), i);
 			}
 		}

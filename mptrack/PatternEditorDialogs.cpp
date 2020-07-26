@@ -137,7 +137,7 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 
 		CheckRadioButton(IDC_RADIO1, IDC_RADIO2, IDC_RADIO2);
 
-		s = MPT_CFORMAT("Pattern #%1: %2 row%3 (%4K)")(
+		s = MPT_CFORMAT("Pattern #{}: {} row{} ({}K)")(
 			m_nPattern,
 			pattern.GetNumRows(),
 			(pattern.GetNumRows() == 1) ? CString(_T("")) : CString(_T("s")),
@@ -146,7 +146,7 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 
 		// Window title
 		const CString patternName = mpt::ToCString(sndFile.GetCharsetInternal(), pattern.GetName());
-		s = MPT_CFORMAT("Pattern Properties for Pattern #%1")(m_nPattern);
+		s = MPT_CFORMAT("Pattern Properties for Pattern #{}")(m_nPattern);
 		if(!patternName.IsEmpty())
 		{
 			s += _T(" (");
@@ -277,7 +277,7 @@ void CPatternPropertiesDlg::OnOK()
 		{
 			if(!sndFile.Patterns[m_nPattern].IsEmptyRow(row))
 			{
-				resize = (Reporting::Confirm(MPT_FORMAT("Data at the %1 of the pattern will be lost.\nDo you want to continue?")(resizeAtEnd ? "end" : "start"), "Shrink Pattern") == cnfYes);
+				resize = (Reporting::Confirm(MPT_FORMAT("Data at the {} of the pattern will be lost.\nDo you want to continue?")(resizeAtEnd ? "end" : "start"), "Shrink Pattern") == cnfYes);
 				break;
 			}
 		}
@@ -394,7 +394,7 @@ bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor,
 	}
 
 	// Update Window Title
-	SetWindowText(MPT_CFORMAT("Note Properties - Row %1, Channel %2")(row, chn + 1));
+	SetWindowText(MPT_CFORMAT("Note Properties - Row {}, Channel {}")(row, chn + 1));
 
 	CRect rectParent, rectWnd;
 	parent->GetWindowRect(&rectParent);

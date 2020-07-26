@@ -67,11 +67,11 @@ mpt::ustring Version::ToUString() const
 	} else if((v & 0xFFFF) == 0)
 	{
 		// Only parts of the version number are known (e.g. when reading the version from the IT or S3M file header)
-		return MPT_UFORMAT("%1.%2")(mpt::ufmt::HEX((v >> 24) & 0xFF), mpt::ufmt::HEX0<2>((v >> 16) & 0xFF));
+		return MPT_UFORMAT("{}.{}")(mpt::ufmt::HEX((v >> 24) & 0xFF), mpt::ufmt::HEX0<2>((v >> 16) & 0xFF));
 	} else
 	{
 		// Full version info available
-		return MPT_UFORMAT("%1.%2.%3.%4")(mpt::ufmt::HEX((v >> 24) & 0xFF), mpt::ufmt::HEX0<2>((v >> 16) & 0xFF), mpt::ufmt::HEX0<2>((v >> 8) & 0xFF), mpt::ufmt::HEX0<2>((v) & 0xFF));
+		return MPT_UFORMAT("{}.{}.{}.{}")(mpt::ufmt::HEX((v >> 24) & 0xFF), mpt::ufmt::HEX0<2>((v >> 16) & 0xFF), mpt::ufmt::HEX0<2>((v >> 8) & 0xFF), mpt::ufmt::HEX0<2>((v) & 0xFF));
 	}
 }
 
@@ -297,7 +297,7 @@ mpt::ustring VersionWithRevision::ToUString() const
 	{
 		return mpt::ufmt::val(version);
 	}
-	return MPT_UFORMAT("%1-r%2")(version, revision);
+	return MPT_UFORMAT("{}-r{}")(version, revision);
 }
 
 
@@ -443,25 +443,25 @@ mpt::ustring GetBuildCompilerString()
 		retval += U_("Generic C++11 Compiler");
 	#elif MPT_COMPILER_MSVC
 		#if defined(_MSC_FULL_VER) && defined(_MSC_BUILD) && (_MSC_BUILD > 0)
-			retval += MPT_UFORMAT("Microsoft Compiler %1.%2.%3.%4")
+			retval += MPT_UFORMAT("Microsoft Compiler {}.{}.{}.{}")
 				( _MSC_FULL_VER / 10000000
 				, mpt::ufmt::dec0<2>((_MSC_FULL_VER / 100000) % 100)
 				, mpt::ufmt::dec0<5>(_MSC_FULL_VER % 100000)
 				, mpt::ufmt::dec0<2>(_MSC_BUILD)
 				);
 		#elif defined(_MSC_FULL_VER)
-			retval += MPT_UFORMAT("Microsoft Compiler %1.%2.%3")
+			retval += MPT_UFORMAT("Microsoft Compiler {}.{}.{}")
 				( _MSC_FULL_VER / 10000000
 				, mpt::ufmt::dec0<2>((_MSC_FULL_VER / 100000) % 100)
 				, mpt::ufmt::dec0<5>(_MSC_FULL_VER % 100000)
 				);
 		#else
-			retval += MPT_UFORMAT("Microsoft Compiler %1.%2")(MPT_COMPILER_MSVC_VERSION / 100, MPT_COMPILER_MSVC_VERSION % 100);
+			retval += MPT_UFORMAT("Microsoft Compiler {}.{}")(MPT_COMPILER_MSVC_VERSION / 100, MPT_COMPILER_MSVC_VERSION % 100);
 		#endif
 	#elif MPT_COMPILER_GCC
-		retval += MPT_UFORMAT("GNU Compiler Collection %1.%2.%3")(MPT_COMPILER_GCC_VERSION / 10000, (MPT_COMPILER_GCC_VERSION / 100) % 100, MPT_COMPILER_GCC_VERSION % 100);
+		retval += MPT_UFORMAT("GNU Compiler Collection {}.{}.{}")(MPT_COMPILER_GCC_VERSION / 10000, (MPT_COMPILER_GCC_VERSION / 100) % 100, MPT_COMPILER_GCC_VERSION % 100);
 	#elif MPT_COMPILER_CLANG
-		retval += MPT_UFORMAT("Clang %1.%2.%3")(MPT_COMPILER_CLANG_VERSION / 10000, (MPT_COMPILER_CLANG_VERSION / 100) % 100, MPT_COMPILER_CLANG_VERSION % 100);
+		retval += MPT_UFORMAT("Clang {}.{}.{}")(MPT_COMPILER_CLANG_VERSION / 10000, (MPT_COMPILER_CLANG_VERSION / 100) % 100, MPT_COMPILER_CLANG_VERSION % 100);
 	#else
 		retval += U_("unknown");
 	#endif
@@ -513,22 +513,22 @@ mpt::ustring GetVersionString(FlagSet<Build::Strings> strings)
 	#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 	if(strings[StringBitness])
 	{
-		result.push_back(MPT_UFORMAT(" %1 bit")(mpt::arch_bits));
+		result.push_back(MPT_UFORMAT(" {} bit")(mpt::arch_bits));
 	}
 	if(strings[StringSourceInfo])
 	{
 		const SourceInfo sourceInfo = SourceInfo::Current();
 		if(!sourceInfo.GetUrlWithRevision().empty())
 		{
-			result.push_back(MPT_UFORMAT(" %1")(sourceInfo.GetUrlWithRevision()));
+			result.push_back(MPT_UFORMAT(" {}")(sourceInfo.GetUrlWithRevision()));
 		}
 		if(!sourceInfo.Date().empty())
 		{
-			result.push_back(MPT_UFORMAT(" (%1)")(sourceInfo.Date()));
+			result.push_back(MPT_UFORMAT(" ({})")(sourceInfo.Date()));
 		}
 		if(!sourceInfo.GetStateString().empty())
 		{
-			result.push_back(MPT_UFORMAT(" %1")(sourceInfo.GetStateString()));
+			result.push_back(MPT_UFORMAT(" {}")(sourceInfo.GetStateString()));
 		}
 	}
 	if(strings[StringBuildFlags])

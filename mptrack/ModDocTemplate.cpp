@@ -141,16 +141,16 @@ CDocument *CModDocManager::OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU
 	{
 		if(!filename.IsFile())
 		{
-			Reporting::Error(MPT_CFORMAT("Unable to open \"%1\": file does not exist.")(filename.ToCString()));
+			Reporting::Error(MPT_CFORMAT("Unable to open \"{}\": file does not exist.")(filename.ToCString()));
 			theApp.RemoveMruItem(filename);
 			CMainFrame::GetMainFrame()->UpdateMRUList();
 		} else
 		{
 			// Case: Valid path but opening failed.
 			const int numDocs = theApp.GetOpenDocumentCount();
-			Reporting::Notification(MPT_CFORMAT("Opening \"%1\" failed. This can happen if "
+			Reporting::Notification(MPT_CFORMAT("Opening \"{}\" failed. This can happen if "
 				"no more modules can be opened or if the file type was not "
-				"recognised (currently there %2 %3 document%4 open).")(
+				"recognised (currently there {} {} document{} open).")(
 					filename.ToCString(), (numDocs == 1) ? CString(_T("is")) : CString(_T("are")), numDocs, (numDocs == 1) ? CString(_T("")) : CString(_T("s"))));
 		}
 	}
@@ -211,7 +211,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 			bActivate = TRUE;
 		}
 	#ifdef DDEDEBUG
-		MPT_LOG(LogDebug, "DDE", MPT_UFORMAT("%1(%2)")(mpt::winstring(pszCmd), mpt::winstring(pszData)));
+		MPT_LOG(LogDebug, "DDE", MPT_UFORMAT("{}({})")(mpt::winstring(pszCmd), mpt::winstring(pszData)));
 	#endif
 		if ((bActivate) && (theApp.m_pMainWnd->m_hWnd))
 		{

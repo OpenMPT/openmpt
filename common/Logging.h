@@ -52,7 +52,7 @@ Facility is some course grained code section identifier (more coarse grained
 than the current file name probably), useful to do some selective logging.
 
 Logging a more complex message:
-MPT_LOG(LogWarning, "sounddev", MPT_UFORMAT("Some message: foo=%1, bar=0x%2")(foo, mpt::ufmt::hex0<8>(bar)));
+MPT_LOG(LogWarning, "sounddev", MPT_UFORMAT("Some message: foo={}, bar=0x{}")(foo, mpt::ufmt::hex0<8>(bar)));
 
 Note that even with full enabled logging and a runtime configurable logging
 level, the runtime overhead of a MPT_LOG(level, facility, text) call is just a

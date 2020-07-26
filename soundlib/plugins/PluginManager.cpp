@@ -409,7 +409,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 									delete plug;
 								}
 #ifdef DMO_LOG
-								MPT_LOG(LogDebug, "DMO", MPT_UFORMAT("Found \"%1\" clsid=%2\n")(plug->libraryName, plug->dllPath));
+								MPT_LOG(LogDebug, "DMO", MPT_UFORMAT("Found \"{}\" clsid={}\n")(plug->libraryName, plug->dllPath));
 #endif
 							}
 						}
@@ -509,13 +509,13 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 			plug->vendor = cacheFile.Read<CString>(cacheSection, IDs + U_(".Vendor"), CString());
 
 #ifdef VST_LOG
-			MPT_LOG(LogDebug, "VST", MPT_UFORMAT("Plugin \"%1\" found in PluginCache")(plug->libraryName));
+			MPT_LOG(LogDebug, "VST", MPT_UFORMAT("Plugin \"{}\" found in PluginCache")(plug->libraryName));
 #endif // VST_LOG
 			return plug;
 		} else
 		{
 #ifdef VST_LOG
-			MPT_LOG(LogDebug, "VST", MPT_UFORMAT("Plugin mismatch in PluginCache: \"%1\" [%2]")(dllPath, IDs));
+			MPT_LOG(LogDebug, "VST", MPT_UFORMAT("Plugin mismatch in PluginCache: \"{}\" [{}]")(dllPath, IDs));
 #endif // VST_LOG
 		}
 	}
@@ -549,7 +549,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 #ifdef VST_LOG
 		intptr_t nver = CVstPlugin::DispatchSEH(pEffect, Vst::effGetVstVersion, 0,0, nullptr, 0, exception);
 		if (!nver) nver = pEffect->version;
-		MPT_LOG(LogDebug, "VST", MPT_UFORMAT("%1: v%2.0, %3 in, %4 out, %5 programs, %6 params, flags=0x%7 realQ=%8 offQ=%9")(
+		MPT_LOG(LogDebug, "VST", MPT_UFORMAT("{}: v{}.0, {} in, {} out, {} programs, {} params, flags=0x{} realQ={} offQ={}")(
 			plug->libraryName, nver,
 			pEffect->numInputs, pEffect->numOutputs,
 			mpt::ufmt::dec0<2>(pEffect->numPrograms), mpt::ufmt::dec0<2>(pEffect->numParams),
@@ -564,7 +564,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	FreeLibrary(hLib);
 	if(exception != 0)
 	{
-		CVstPluginManager::ReportPlugException(MPT_UFORMAT("Exception %1 while trying to load plugin \"%2\"!\n")(mpt::ufmt::HEX0<8>(exception), plug->libraryName));
+		CVstPluginManager::ReportPlugException(MPT_UFORMAT("Exception {} while trying to load plugin \"{}\"!\n")(mpt::ufmt::HEX0<8>(exception), plug->libraryName));
 	}
 #endif // NO_VST
 
@@ -731,7 +731,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		if(!validPlugin)
 		{
 			FreeLibrary(hLibrary);
-			CVstPluginManager::ReportPlugException(MPT_UFORMAT("Unable to create plugin \"%1\"!\n")(pFound->libraryName));
+			CVstPluginManager::ReportPlugException(MPT_UFORMAT("Unable to create plugin \"{}\"!\n")(pFound->libraryName));
 		}
 		return validPlugin;
 	} else

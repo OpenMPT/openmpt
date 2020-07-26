@@ -538,7 +538,7 @@ void COptionsColors::OnLoadColorScheme()
 		IniFileSettingsContainer file(dlg.GetFirstFile());
 		for(uint32 i = 0; i < MAX_MODCOLORS; i++)
 		{
-			CustomColors[i] = file.Read<int32>(U_("Colors"), MPT_UFORMAT("Color%1")(mpt::ufmt::dec0<2>(i)), CustomColors[i]);
+			CustomColors[i] = file.Read<int32>(U_("Colors"), MPT_UFORMAT("Color{}")(mpt::ufmt::dec0<2>(i)), CustomColors[i]);
 		}
 	}
 	OnPreviewChanged();
@@ -556,7 +556,7 @@ void COptionsColors::OnSaveColorScheme()
 		IniFileSettingsContainer file(dlg.GetFirstFile());
 		for(uint32 i = 0; i < MAX_MODCOLORS; i++)
 		{
-			file.Write<int32>(U_("Colors"), MPT_UFORMAT("Color%1")(mpt::ufmt::dec0<2>(i)), CustomColors[i]);
+			file.Write<int32>(U_("Colors"), MPT_UFORMAT("Color{}")(mpt::ufmt::dec0<2>(i)), CustomColors[i]);
 		}
 	}
 }
