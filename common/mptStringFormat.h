@@ -674,7 +674,7 @@ private:
 
 public:
 
-	template <typename Tchar, std::size_t literal_length>
+	template <std::size_t literal_length>
 	inline message_formatter_counted(const Tchar (&format)[literal_length])
 		: formatter(Tstring(format))
 	{
