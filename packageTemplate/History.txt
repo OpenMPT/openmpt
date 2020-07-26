@@ -31,6 +31,64 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.02.00 (26 July 2020, revision 13346)
+------------------------------------------
+Tree view
+- [Imp] <js> Hide empty removable drives.
+- [Fix] <js> Offline / slow network shares could slow down filling of the drive list, which could also dramatically affect OpenMPT startup time (tx qsrmvt).
+
+General tab
+- [Fix] <js> Tempo tap usually broke and wrapped around to 32 BPM after several taps.
+
+Pattern tab
+- [Fix] <js> Fix wrong VU meter color at end of AdLib notes.
+
+MPTM
+- [Imp] <js> Qxy now retriggers OPL notes if new compatibility flag is set.
+- [Fix] <js> Bring back old OPL note end-of-envelope behaviour for files made with OpenMPT 1.28 (http://bugs.openmpt.org/view.php?id=1344).
+
+IT
+  [Fix] <js> Global volume slides with both nibbles set preferred the "slide up" nibble over the "slide down" nibble in old OpenMPT versions, unlike other slides. Such old files are now imported correctly again.
+
+IT::Compatible Playback Mode
+- [Fix] <js> Fixed an edge case where, if the filter hit full cutoff / no resonance on the first tick of a row where a new delayed note would be triggered, the filter would be disabled even though it should stay active. Fixes trace.it by maddie.
+
+XM
+- [Fix] <js> OXM: Some sample loops were not imported correctly (http://bugs.openmpt.org/view.php?id=1329).
+- [Fix] <js> Out-of-range arpeggio clamping behaviour broke in OpenMPT 1.23.05.00. The arpeggios in Binary World by Dakota now play correctly again.
+
+S3M
+- [Imp] <js> Support old-style sample pre-amp value in very early S3M files.
+- [Fix] <js> Only force-enable fast slides for files ST 3.00. Previously, any S3M file made with an ST3 version older than 3.20 enabled them.
+- [Fix] <js> Only apply volume and middle-C speed on instrument change if the new sample slot has sample data.
+
+MOD
+- [Fix] <js> Fix an infinite loop in GamerMan by MrGamer by playing non-ProTracker MODs more like FT2 would (http://bugs.openmpt.org/view.php?id=1337).
+
+Other formats
+- [Imp] <js> M15: Improve tracker detection heuristics to never assume SoundTracker 2.0 if there is a huge number of Dxx commands, as that is a definite hint that they should be treated as volume slides. Fixes Monty On The Run by Master Blaster.
+- [Imp] <js> MO3: Support OPL patches in MO3 files created from MPTM and S3M.
+- [Imp] <js> DBM: If a global pattern command would be lost because both effect commands in a cell would have to go into the regular effect column (e.g. a speed and a tempo command), the lost command is now attempted to be written into a different cell on the same row. Fixes "Party-Question V" by grogon (http://bugs.openmpt.org/view.php?id=1346).
+- [Imp] <js> STM: Try to import ST2 tempo more correctly.
+
+Audio I/O
+- [Fix] <js> Work-around a Windows 10 2004 bug which causes an empty device name to be shown for the Wave Mapper device. Also provide a more useful name in other situations where the name is missing.
+- [Imp] <jh> If opening the sound device failed, the name of the device is now shown.
+- [Mod] <jh> On new installations, deprecated sound device types are no longer shown.
+
+Misc
+- [Imp] <js> OpenMPT now warns if saving a tuning, plugin preset or envelope failed (e.g. because of insufficient storage space, http://bugs.openmpt.org/view.php?id=1161).
+- [Fix] <js> OpenMPT could crash when flushing file contents to disk failed (e.g. because disk was full).
+- [Fix] <js> DLS: Tuning of drum programs was broken in OpenMPT 1.29.01.00.
+- [Fix] <js> SF2: Support negative attenuation in instrument definitions. Region attenuation now adds up to instrument attenuation instead of overriding it (http://bugs.openmpt.org/view.php?id=1336).
+
+Third-Party Libraries
+- [Imp] Update nlohmann json (v3.8.0), mpg123 (v1.26.3), opusfile (v0.12) and UnRAR (v5.9.4)
+
+Installer/release package
+- [Fix] <jh> Run post-install applications as original user. Otherwise OpenMPT will create its configuration files with elevated privileges on first start.
+
+
 v1.29.01.00 (24 May 2020, revision 12900)
 -----------------------------------------
 Tree view
@@ -109,6 +167,7 @@ VST::Plugin Bridge
 
 Playback
 - [New] <js> In addition to A500 filter settings, the Amiga resampler can now also use A1200 filter settings and unfiltered output (http://bugs.openmpt.org/view.php?id=1276).
+- [New] <jh> Added Bit Crush DSP to reduce the bit depth of the final output, e.g. to emulate old hardware or trackers. 
 - [Imp] <js> Allow NNA / DNA note-off / note fade to affect OPL notes the same way they affect samples.
 - [Mod] <js> Improved OPL channel allocation when more than 18 notes are active, so that channels that have completely faded out are prioritized over channels that have already been released but have not faded out yet.
 - [Fix] <js> Previewing an OPL instrument could cause the first pattern channel to no longer be played back correctly (http://bugs.openmpt.org/view.php?id=1323).
@@ -540,7 +599,7 @@ Misc
 - [Imp] <js> MIDI Export: "Melodic (any)" channel mapping now uses up to 15 instead of 8 different channels (all but channel 10).
 - [Imp] <js> New shortcut "Toggle Loop Song" (http://bugs.openmpt.org/view.php?id=338).
 - [Imp] <js> Settings dialog: Added a possibility to set friendly names for MIDI input devices. For output devices, the settings still have to be edited directly.
-- [Imp] <js> OpenMPT now warns if saving a module or MIDI export failed (e.g. because of insufficient storage space).
+- [Imp] <js> OpenMPT now warns if saving a module or MIDI export failed (e.g. because of insufficient storage space, http://bugs.openmpt.org/view.php?id=1161).
 - [Imp] <js> On Windows Vista and later, the Places bar in file dialogs now contains links to OpenMPT's default directories.
 - [Imp] <js> On Windows Vista and later, the new file dialog style is now also used when audio file preview is enabled.
 - [Imp] <jh> Advanced Settings: Use a different background color for settings that have non-default values.
