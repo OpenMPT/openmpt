@@ -290,24 +290,24 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 			errorMessage += UL_("1 modified file has been rescued, but it cannot be guaranteed that it is still intact.");
 		} else
 		{
-			errorMessage += mpt::format(U_("%1 modified files have been rescued, but it cannot be guaranteed that they are still intact."))(rescuedFiles);
+			errorMessage += MPT_UFORMAT("%1 modified files have been rescued, but it cannot be guaranteed that they are still intact.")(rescuedFiles);
 		}
 	}
 
 	errorMessage += UL_("\n\n");
-	errorMessage += mpt::format(U_("OpenMPT %1 (%2 (%3))"))
+	errorMessage += MPT_UFORMAT("OpenMPT %1 (%2 (%3))")
 		( Build::GetVersionStringExtended()
 		, SourceInfo::Current().GetUrlWithRevision()
 		, SourceInfo::Current().GetStateString()
 		);
 
 	errorMessage += UL_("\n\n");
-	errorMessage += mpt::format(U_("Session error count: %1\n"))(crashCount);
+	errorMessage += MPT_UFORMAT("Session error count: %1\n")(crashCount);
 	if(taintCountDriver > 0 || taintCountPlugin > 0)
 	{
 		errorMessage += UL_("Process is in tainted state!\n");
-		errorMessage += mpt::format(U_("Previously masked driver crashes: %1\n"))(taintCountDriver);
-		errorMessage += mpt::format(U_("Previously masked plugin crashes: %1\n"))(taintCountPlugin);
+		errorMessage += MPT_UFORMAT("Previously masked driver crashes: %1\n")(taintCountDriver);
+		errorMessage += MPT_UFORMAT("Previously masked plugin crashes: %1\n")(taintCountPlugin);
 	}
 
 	errorMessage += UL_("\n");
@@ -323,11 +323,11 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		mpt::SafeOutputFile sf(crashDirectory.path + P_("threads.txt"), std::ios::binary, mpt::FlushMode::Full);
 		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
-		f << mpt::format("current : %1")(mpt::fmt::hex0<8>(GetCurrentThreadId())) << "\r\n";
-		f << mpt::format("GUI     : %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindGUI))) << "\r\n";
-		f << mpt::format("Audio   : %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindAudio))) << "\r\n";
-		f << mpt::format("Notify  : %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindNotify))) << "\r\n";
-		f << mpt::format("WatchDir: %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindWatchdir))) << "\r\n";
+		f << MPT_FORMAT("current : %1")(mpt::fmt::hex0<8>(GetCurrentThreadId())) << "\r\n";
+		f << MPT_FORMAT("GUI     : %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindGUI))) << "\r\n";
+		f << MPT_FORMAT("Audio   : %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindAudio))) << "\r\n";
+		f << MPT_FORMAT("Notify  : %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindNotify))) << "\r\n";
+		f << MPT_FORMAT("WatchDir: %1")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindWatchdir))) << "\r\n";
 	}
 
 	static constexpr struct { const mpt::uchar * section; const mpt::uchar * key; } configAnonymize[] =
@@ -610,13 +610,13 @@ void ExceptionHandler::UnhandledMFCException(CException * e, const MSG * pMsg)
 		if(dynamic_cast<CSimpleException*>(e)->GetErrorMessage(tmp, static_cast<UINT>(std::size(tmp) - 1)) != 0)
 		{
 			tmp[1024] = 0;
-			errorMessage = mpt::format(U_("Unhandled MFC exception occurred while processming window message '%1': %2."))
+			errorMessage = MPT_UFORMAT("Unhandled MFC exception occurred while processming window message '%1': %2.")
 				(mpt::ufmt::dec(pMsg ? pMsg->message : 0)
 				, mpt::ToUnicode(CString(tmp))
 				);
 		} else
 		{
-			errorMessage = mpt::format(U_("Unhandled MFC exception occurred while processming window message '%1': %2."))
+			errorMessage = MPT_UFORMAT("Unhandled MFC exception occurred while processming window message '%1': %2.")
 				(mpt::ufmt::dec(pMsg ? pMsg->message : 0)
 				, mpt::ToUnicode(CString(tmp))
 				);
@@ -624,7 +624,7 @@ void ExceptionHandler::UnhandledMFCException(CException * e, const MSG * pMsg)
 	}
 	else
 	{
-		errorMessage = mpt::format(U_("Unhandled MFC exception occurred while processming window message '%1'."))
+		errorMessage = MPT_UFORMAT("Unhandled MFC exception occurred while processming window message '%1'.")
 			( mpt::ufmt::dec(pMsg ? pMsg->message : 0)
 			);
 	}
@@ -642,23 +642,23 @@ static void UnhandledExceptionFilterImpl(_EXCEPTION_POINTERS *pExceptionInfo)
 	{
 		if(!g_Context->description.empty())
 		{
-			errorMessage += mpt::format(U_("OpenMPT detected a crash in '%1'.\nThis is very likely not an OpenMPT bug. Please report the problem to the respective software author.\n"))(g_Context->description);
+			errorMessage += MPT_UFORMAT("OpenMPT detected a crash in '%1'.\nThis is very likely not an OpenMPT bug. Please report the problem to the respective software author.\n")(g_Context->description);
 		} else
 		{
-			errorMessage += mpt::format(U_("OpenMPT detected a crash in unknown foreign code.\nThis is likely not an OpenMPT bug.\n"))();
+			errorMessage += MPT_UFORMAT("OpenMPT detected a crash in unknown foreign code.\nThis is likely not an OpenMPT bug.\n")();
 		}
 	}
 	if(pE)
 	{
 		const std::exception & e = *pE;
-		errorMessage += mpt::format(U_("Unhandled C++ exception '%1' occurred at address 0x%2: '%3'."))
+		errorMessage += MPT_UFORMAT("Unhandled C++ exception '%1' occurred at address 0x%2: '%3'.")
 			( mpt::ToUnicode(mpt::Charset::ASCII, typeid(e).name())
 			, mpt::ufmt::hex0<mpt::pointer_size*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
 			, mpt::get_exception_text<mpt::ustring>(e)
 			);
 	} else
 	{
-		errorMessage += mpt::format(U_("Unhandled exception 0x%1 at address 0x%2 occurred."))
+		errorMessage += MPT_UFORMAT("Unhandled exception 0x%1 at address 0x%2 occurred.")
 			( mpt::ufmt::HEX0<8>(pExceptionInfo->ExceptionRecord->ExceptionCode)
 			, mpt::ufmt::hex0<mpt::pointer_size*2>(reinterpret_cast<std::uintptr_t>(pExceptionInfo->ExceptionRecord->ExceptionAddress))
 			);
@@ -784,7 +784,7 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 		mpt::ustring errorMessage;
 		if(msg)
 		{
-			errorMessage = mpt::format(U_("Internal state inconsistency detected at %1(%2). This is just a warning that could potentially lead to a crash later on: %3 [%4]."))
+			errorMessage = MPT_UFORMAT("Internal state inconsistency detected at %1(%2). This is just a warning that could potentially lead to a crash later on: %3 [%4].")
 				( mpt::ToUnicode(mpt::Charset::ASCII, loc.file_name() ? loc.file_name() : "")
 				, loc.line()
 				, mpt::ToUnicode(mpt::Charset::ASCII, msg)
@@ -792,7 +792,7 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 				);
 		} else
 		{
-			errorMessage = mpt::format(U_("Internal error occurred at %1(%2): ASSERT(%3) failed in [%4]."))
+			errorMessage = MPT_UFORMAT("Internal error occurred at %1(%2): ASSERT(%3) failed in [%4].")
 				( mpt::ToUnicode(mpt::Charset::ASCII, loc.file_name() ? loc.file_name() : "")
 				, loc.line()
 				, mpt::ToUnicode(mpt::Charset::ASCII, expr)

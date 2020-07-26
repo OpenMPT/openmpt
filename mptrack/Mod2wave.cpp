@@ -360,7 +360,7 @@ void CWaveConvert::FillFileTypes()
 	int sel = 0;
 	for(std::size_t i = 0; i < m_Settings.EncoderFactories.size(); ++i)
 	{
-		int ndx = m_CbnFileType.AddString(mpt::cformat(_T("%1 (%2)"))(mpt::ToCString(m_Settings.EncoderFactories[i]->GetTraits().fileShortDescription), mpt::ToCString(m_Settings.EncoderFactories[i]->GetTraits().fileDescription)));
+		int ndx = m_CbnFileType.AddString(MPT_CFORMAT("%1 (%2)")(mpt::ToCString(m_Settings.EncoderFactories[i]->GetTraits().fileShortDescription), mpt::ToCString(m_Settings.EncoderFactories[i]->GetTraits().fileDescription)));
 		m_CbnFileType.SetItemData(ndx, i);
 		if(m_Settings.EncoderIndex == i)
 		{
@@ -388,7 +388,7 @@ void CWaveConvert::FillSamplerates()
 	}
 	for(auto samplerate : encTraits->samplerates)
 	{
-		int ndx = m_CbnSampleRate.AddString(mpt::cformat(_T("%1 Hz"))(samplerate));
+		int ndx = m_CbnSampleRate.AddString(MPT_CFORMAT("%1 Hz")(samplerate));
 		m_CbnSampleRate.SetItemData(ndx, samplerate);
 		if(samplerate == encSettings.Samplerate)
 		{
@@ -1245,10 +1245,10 @@ void CDoWaveConvert::Run()
 
 			if(m_Settings.normalize)
 			{
-				SetText(mpt::format(CString(_T("Rendering %1... (%2mn%3s, %4mn%5s remaining)")))(caption, seconds / 60, mpt::ufmt::dec0<2>(seconds % 60u), timeRemaining / 60, mpt::ufmt::dec0<2>(timeRemaining % 60u)));
+				SetText(MPT_CFORMAT("Rendering %1... (%2mn%3s, %4mn%5s remaining)")(caption, seconds / 60, mpt::ufmt::dec0<2>(seconds % 60u), timeRemaining / 60, mpt::ufmt::dec0<2>(timeRemaining % 60u)));
 			} else
 			{
-				SetText(mpt::format(CString(_T("Writing %1... (%2kB, %3mn%4s, %5mn%6s remaining)")))(caption, bytesWritten >> 10, seconds / 60, mpt::ufmt::dec0<2>(seconds % 60u), timeRemaining / 60, mpt::ufmt::dec0<2>(timeRemaining % 60u)));
+				SetText(MPT_CFORMAT("Writing %1... (%2kB, %3mn%4s, %5mn%6s remaining)")(caption, bytesWritten >> 10, seconds / 60, mpt::ufmt::dec0<2>(seconds % 60u), timeRemaining / 60, mpt::ufmt::dec0<2>(timeRemaining % 60u)));
 			}
 
 			SetProgress(ullSamples);
@@ -1372,7 +1372,7 @@ void CDoWaveConvert::Run()
 				int percent = static_cast<int>(100 * framesProcessed / framesTotal);
 				if(percent != lastPercent)
 				{
-					SetText(mpt::format(CString(_T("Normalizing... (%1%%)")))(percent));
+					SetText(MPT_CFORMAT("Normalizing... (%1%%)")(percent));
 					SetProgress(framesProcessed);
 					lastPercent = percent;
 				}

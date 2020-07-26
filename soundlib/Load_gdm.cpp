@@ -166,7 +166,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_modFormat.formatName = U_("General Digital Music");
 	m_modFormat.type = U_("gdm");
-	m_modFormat.madeWithTracker = mpt::format(U_("BWSB 2GDM %1.%2"))(fileHeader.trackerMajorVer, fileHeader.formatMinorVer);
+	m_modFormat.madeWithTracker = MPT_UFORMAT("BWSB 2GDM %1.%2")(fileHeader.trackerMajorVer, fileHeader.formatMinorVer);
 	m_modFormat.originalType = gdmFormatOriginType[fileHeader.originalFormat];
 	m_modFormat.originalFormatName = gdmFormatOriginFormat[fileHeader.originalFormat];
 	m_modFormat.charset = mpt::Charset::CP437;

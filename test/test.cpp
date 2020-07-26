@@ -750,39 +750,38 @@ static MPT_NOINLINE void TestStringFormatting()
 #endif
 
 	// basic
-	VERIFY_EQUAL(mpt::format("%1%2%3")(1,2,3), "123");
-	VERIFY_EQUAL(mpt::format("%1%1%1")(1,2,3), "111");
-	VERIFY_EQUAL(mpt::format("%3%3%3")(1,2,3), "333");
+	VERIFY_EQUAL(MPT_FORMAT("%1%2%3")(1,2,3), "123");
+	VERIFY_EQUAL(mpt::format_unchecked("%1%1%1")(1,2,3), "111");
+	VERIFY_EQUAL(mpt::format_unchecked("%3%3%3")(1,2,3), "333");
 
 	// template argument deduction of string type
-	VERIFY_EQUAL(mpt::format(std::string("%1%2%3"))(1,2,3), "123");
+	VERIFY_EQUAL(mpt::format_unchecked(std::string("%1%2%3"))(1,2,3), "123");
 #if MPT_WSTRING_FORMAT
-	VERIFY_EQUAL(mpt::format(L"%1%2%3")(1,2,3), L"123");
-	VERIFY_EQUAL(mpt::format(L"%1%2%3")(1,2,3), L"123");
+	VERIFY_EQUAL(MPT_WFORMAT("%1%2%3")(1,2,3), L"123");
 #endif
 
 	// escaping and error behviour of '%'
-	VERIFY_EQUAL(mpt::format("%")(), "%");
-	VERIFY_EQUAL(mpt::format("%%")(), "%");
-	VERIFY_EQUAL(mpt::format("%%%")(), "%%");
-	VERIFY_EQUAL(mpt::format("%1")("a"), "a");
-	VERIFY_EQUAL(mpt::format("%1%")("a"), "a%");
-	VERIFY_EQUAL(mpt::format("%1%%")("a"), "a%");
-	VERIFY_EQUAL(mpt::format("%1%%%")("a"), "a%%");
-	VERIFY_EQUAL(mpt::format("%%1")("a"), "%1");
-	VERIFY_EQUAL(mpt::format("%%%1")("a"), "%a");
-	VERIFY_EQUAL(mpt::format("%b")("a"), "%b");
+	VERIFY_EQUAL(MPT_FORMAT("%")(), "%");
+	VERIFY_EQUAL(MPT_FORMAT("%%")(), "%");
+	VERIFY_EQUAL(mpt::format_unchecked("%%%")(), "%%");
+	VERIFY_EQUAL(MPT_FORMAT("%1")("a"), "a");
+	VERIFY_EQUAL(mpt::format_unchecked("%1%")("a"), "a%");
+	VERIFY_EQUAL(MPT_FORMAT("%1%%")("a"), "a%");
+	VERIFY_EQUAL(mpt::format_unchecked("%1%%%")("a"), "a%%");
+	VERIFY_EQUAL(mpt::format_unchecked("%%1")("a"), "%1");
+	VERIFY_EQUAL(MPT_FORMAT("%%%1")("a"), "%a");
+	VERIFY_EQUAL(mpt::format_unchecked("%b")("a"), "%b");
 
 #if defined(MPT_WITH_MFC)
 	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), U_("foobar"));
 	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), U_("foobar"));
-	VERIFY_EQUAL(mpt::format(CString(_T("%1%2%3")))(1,2,3), _T("123"));
-	VERIFY_EQUAL(mpt::format(CString(_T("%1%2%3")))(1,mpt::cfmt::dec0<3>(2),3), _T("10023"));
+	VERIFY_EQUAL(MPT_CFORMAT("%1%2%3")(1,2,3), _T("123"));
+	VERIFY_EQUAL(MPT_CFORMAT("%1%2%3")(1,mpt::cfmt::dec0<3>(2),3), _T("10023"));
 #endif // MPT_WITH_MFC
 
 	FlagSet<MODTYPE> foo;
 	foo.set(MOD_TYPE_MOD, true);
-	VERIFY_EQUAL(mpt::format(U_("%1"))(foo), U_("00000000000000000000000000000001"));
+	VERIFY_EQUAL(MPT_UFORMAT("%1")(foo), U_("00000000000000000000000000000001"));
 
 }
 

@@ -487,7 +487,7 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 				for(size_t i = 0; i < m_tempoSwing.size(); i++)
 				{
 					if(i > 0) s += _T(" / ");
-					s += mpt::cformat(_T("%1%%"))(Util::muldivr(m_tempoSwing[i], 100, TempoSwing::Unity));
+					s += MPT_CFORMAT("%1%%")(Util::muldivr(m_tempoSwing[i], 100, TempoSwing::Unity));
 				}
 			}
 			lstrcpyn(pTTT->szText, s, mpt::saturate_cast<int>(std::size(pTTT->szText)));
@@ -726,7 +726,7 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 	const CHANNELINDEX numChannels = sndFile.GetNumChannels();
 	for(CHANNELINDEX n = 0; n < numChannels; n++)
 	{
-		s = mpt::cformat(_T("Channel %1"))(n + 1);
+		s = MPT_CFORMAT("Channel %1")(n + 1);
 		if(sndFile.ChnSettings[n].szName[0] >= 0x20)
 		{
 			s += _T(": ");
@@ -737,9 +737,9 @@ BOOL CRemoveChannelsDlg::OnInitDialog()
 	}
 
 	if (m_nRemove > 0)
-		s = mpt::cformat(_T("Select %1 channel%2 to remove:"))(m_nRemove, (m_nRemove != 1) ? CString(_T("s")) : CString(_T("")));
+		s = MPT_CFORMAT("Select %1 channel%2 to remove:")(m_nRemove, (m_nRemove != 1) ? CString(_T("s")) : CString(_T("")));
 	else
-		s = mpt::cformat(_T("Select channels to remove (the minimum number of remaining channels is %1)"))(sndFile.GetModSpecifications().channelsMin);
+		s = MPT_CFORMAT("Select channels to remove (the minimum number of remaining channels is %1)")(sndFile.GetModSpecifications().channelsMin);
 	
 	SetDlgItemText(IDC_QUESTION1, s);
 	if(GetDlgItem(IDCANCEL)) GetDlgItem(IDCANCEL)->ShowWindow(m_ShowCancel);
@@ -1301,7 +1301,7 @@ BOOL CEditHistoryDlg::OnInitDialog()
 			_tcscpy(szDate, _T("<unknown date>"));
 		// Time + stuff
 		uint32 duration = mpt::saturate_round<uint32>(entry.openTime / HISTORY_TIMER_PRECISION);
-		s += mpt::cformat(_T("Loaded %1, open for %2h %3m %4s\r\n"))(
+		s += MPT_CFORMAT("Loaded %1, open for %2h %3m %4s\r\n")(
 			CString(szDate), mpt::cfmt::dec(duration / 3600), mpt::cfmt::dec0<2>((duration / 60) % 60), mpt::cfmt::dec0<2>(duration % 60));
 	}
 	if(isEmpty)

@@ -435,7 +435,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_AMF);
 	InitializeChannels();
 
-	m_modFormat.formatName = mpt::format(U_("DSMI v%1"))(fileHeader.version);
+	m_modFormat.formatName = MPT_UFORMAT("DSMI v%1")(fileHeader.version);
 	m_modFormat.type = U_("amf");
 	m_modFormat.charset = mpt::Charset::CP437;
 

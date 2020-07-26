@@ -92,7 +92,7 @@ std::string SoundDevice_EnumerateDevices()
 
 SoundDevice::IBase * SoundDevice_Construct(std::string info_)
 {
-	MPT_LOG(LogDebug, "NativeSupport", mpt::format(U_("Contruct: %1"))(mpt::ToUnicode(mpt::Charset::UTF8, info_)));
+	MPT_LOG(LogDebug, "NativeSupport", MPT_UFORMAT("Contruct: %1")(mpt::ToUnicode(mpt::Charset::UTF8, info_)));
 	ComponentHandle<ComponentSoundDeviceManager> manager;
 	if(!IsComponentAvailable(manager))
 	{

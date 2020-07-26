@@ -1025,13 +1025,13 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_modFormat.formatName = U_("OggMod FastTracker 2");
 		m_modFormat.type = U_("oxm");
-		m_modFormat.originalFormatName = mpt::format(U_("FastTracker 2 v%1.%2"))(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
+		m_modFormat.originalFormatName = MPT_UFORMAT("FastTracker 2 v%1.%2")(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
 		m_modFormat.originalType = U_("xm");
 		m_modFormat.madeWithTracker = std::move(madeWithTracker);
 		m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::Charset::Windows1252 : mpt::Charset::CP437;
 	} else
 	{
-		m_modFormat.formatName = mpt::format(U_("FastTracker 2 v%1.%2"))(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
+		m_modFormat.formatName = MPT_UFORMAT("FastTracker 2 v%1.%2")(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
 		m_modFormat.type = U_("xm");
 		m_modFormat.madeWithTracker = std::move(madeWithTracker);
 		m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::Charset::Windows1252 : mpt::Charset::CP437;
@@ -1254,7 +1254,7 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 		// Reaching the limits of file format?
 		if(len > uint16_max)
 		{
-			AddToLog(LogWarning, mpt::format(U_("Warning: File format limit was reached. Some pattern data may not get written to file. (pattern %1)"))(pat));
+			AddToLog(LogWarning, MPT_UFORMAT("Warning: File format limit was reached. Some pattern data may not get written to file. (pattern %1)")(pat));
 			len = uint16_max;
 		}
 

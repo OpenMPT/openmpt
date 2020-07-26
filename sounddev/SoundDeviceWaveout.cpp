@@ -322,7 +322,7 @@ bool CWaveDevice::CheckResult(MMRESULT result)
 		TCHAR errortext[MAXERRORLENGTH + 1];
 		MemsetZero(errortext);
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
-		SendDeviceMessage(LogError, mpt::format(U_("WaveOut error: 0x%1: %2"))
+		SendDeviceMessage(LogError, MPT_UFORMAT("WaveOut error: 0x%1: %2")
 			( mpt::ufmt::hex0<8>(result)
 			, mpt::ToUnicode(mpt::String::ReadWinBuf(errortext))
 			));
@@ -344,7 +344,7 @@ bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
 		TCHAR errortext[MAXERRORLENGTH + 1];
 		MemsetZero(errortext);
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
-		SendDeviceMessage(LogError, mpt::format(U_("WaveOut error: 0x%1 (param 0x%2): %3"))
+		SendDeviceMessage(LogError, MPT_UFORMAT("WaveOut error: 0x%1 (param 0x%2): %3")
 			( mpt::ufmt::hex0<8>(result)
 			, mpt::ufmt::hex0<8>(param)
 			, mpt::ToUnicode(mpt::String::ReadWinBuf(errortext))
@@ -569,10 +569,10 @@ SoundDevice::Statistics CWaveDevice::GetStatistics() const
 	uint32 bugs = m_DriverBugs.load();
 	if(bugs != 0)
 	{
-		result.text = mpt::format(U_("Problematic driver detected! Error flags: %1"))(mpt::ufmt::hex0<8>(bugs));
+		result.text = MPT_UFORMAT("Problematic driver detected! Error flags: %1")(mpt::ufmt::hex0<8>(bugs));
 	} else
 	{
-		result.text = mpt::format(U_("Driver working as expected."))();
+		result.text = MPT_UFORMAT("Driver working as expected.")();
 	}
 	return result;
 }
@@ -595,17 +595,17 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInf
 		if(waveOutGetDevCaps((index == 0) ? WAVE_MAPPER : (index - 1), &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 		{
 			info.name = mpt::ToUnicode(mpt::String::ReadWinBuf(woc.szPname));
-			info.extraData[U_("DriverID")] = mpt::format(U_("%1:%2"))(mpt::ufmt::hex0<4>(woc.wMid), mpt::ufmt::hex0<4>(woc.wPid));
-			info.extraData[U_("DriverVersion")] = mpt::format(U_("%1.%2"))(mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
+			info.extraData[U_("DriverID")] = MPT_UFORMAT("%1:%2")(mpt::ufmt::hex0<4>(woc.wMid), mpt::ufmt::hex0<4>(woc.wPid));
+			info.extraData[U_("DriverVersion")] = MPT_UFORMAT("%1.%2")(mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
 		}
 		if(info.name.empty())
 		{
 			if(index == 0)
 			{
-				info.name = mpt::format(U_("Auto (Wave Mapper)"))();
+				info.name = MPT_UFORMAT("Auto (Wave Mapper)")();
 			} else
 			{
-				info.name = mpt::format(U_("Device %1"))(index - 1);
+				info.name = MPT_UFORMAT("Device %1")(index - 1);
 			}
 		}
 		info.default_ = ((index == 0) ? Info::Default::Managed : Info::Default::None);

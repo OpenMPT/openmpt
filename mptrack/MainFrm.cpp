@@ -767,7 +767,7 @@ bool CMainFrame::audioOpenDevice()
 	const SoundDevice::Identifier deviceIdentifier = TrackerSettings::Instance().GetSoundDeviceIdentifier();
 	if(!TrackerSettings::Instance().GetMixerSettings().IsValid())
 	{
-		Reporting::Error(mpt::format(U_("Unable to open sound device '%1': Invalid mixer settings."))(deviceIdentifier));
+		Reporting::Error(MPT_UFORMAT("Unable to open sound device '%1': Invalid mixer settings.")(deviceIdentifier));
 		return false;
 	}
 	if(gpSoundDevice && (gpSoundDevice->GetDeviceInfo().GetIdentifier() != deviceIdentifier))
@@ -787,7 +787,7 @@ bool CMainFrame::audioOpenDevice()
 	}
 	if(!gpSoundDevice)
 	{
-		Reporting::Error(mpt::format(U_("Unable to open sound device '%1': Could not find sound device."))(deviceIdentifier));
+		Reporting::Error(MPT_UFORMAT("Unable to open sound device '%1': Could not find sound device.")(deviceIdentifier));
 		return false;
 	}
 	gpSoundDevice->SetMessageReceiver(this);
@@ -797,17 +797,17 @@ bool CMainFrame::audioOpenDevice()
 	{
 		if(!gpSoundDevice->IsAvailable())
 		{
-			Reporting::Error(mpt::format(U_("Unable to open sound device '%1': Device not available."))(gpSoundDevice->GetDeviceInfo().GetDisplayName()));
+			Reporting::Error(MPT_UFORMAT("Unable to open sound device '%1': Device not available.")(gpSoundDevice->GetDeviceInfo().GetDisplayName()));
 		} else
 		{
-			Reporting::Error(mpt::format(U_("Unable to open sound device '%1'."))(gpSoundDevice->GetDeviceInfo().GetDisplayName()));
+			Reporting::Error(MPT_UFORMAT("Unable to open sound device '%1'.")(gpSoundDevice->GetDeviceInfo().GetDisplayName()));
 		}
 		return false;
 	}
 	SampleFormat actualSampleFormat = gpSoundDevice->GetActualSampleFormat();
 	if(!actualSampleFormat.IsValid())
 	{
-		Reporting::Error(mpt::format(U_("Unable to open sound device '%1': Unknown sample format."))(gpSoundDevice->GetDeviceInfo().GetDisplayName()));
+		Reporting::Error(MPT_UFORMAT("Unable to open sound device '%1': Unknown sample format.")(gpSoundDevice->GetDeviceInfo().GetDisplayName()));
 		return false;
 	}
 	deviceSettings.sampleFormat = actualSampleFormat;
@@ -2803,7 +2803,7 @@ BOOL CMainFrame::OnQueryEndSession()
 	if(modifiedCount > 0)
 	{
 		ShutdownBlockReasonCreate(m_hWnd,
-			mpt::format(L"There %1 %2 unsaved file%3.")(modifiedCount == 1 ? L"is" : L"are", modifiedCount, modifiedCount == 1 ? L"" : L"s").c_str());
+			MPT_WFORMAT("There %1 %2 unsaved file%3.")(modifiedCount == 1 ? L"is" : L"are", modifiedCount, modifiedCount == 1 ? L"" : L"s").c_str());
 	}
 	return modifiedCount ? FALSE : TRUE;
 }
@@ -2917,7 +2917,7 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 	{
 		const SNDMIXPLUGIN &plugin = plugarray[iPlug];
 		str.clear();
-		str += mpt::format(U_("FX%1: "))(iPlug + 1);
+		str += MPT_UFORMAT("FX%1: ")(iPlug + 1);
 		const size_t size0 = str.size();
 		str += (librarynames) ? plugin.GetLibraryName() : plugin.GetName();
 		if(str.size() <= size0) str += U_("--");
@@ -2927,7 +2927,7 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 		if(vstPlug != nullptr && vstPlug->isBridged)
 		{
 			VSTPluginLib &lib = vstPlug->GetPluginFactory();
-			str += mpt::format(U_(" (%1 Bridged)"))(lib.GetDllArchNameUser());
+			str += MPT_UFORMAT(" (%1 Bridged)")(lib.GetDllArchNameUser());
 		}
 #endif // NO_VST
 

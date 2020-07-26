@@ -138,7 +138,7 @@ mpt::ustring WineGetSystemInfoString(mpt::Wine::VersionContext & wineVersion)
 
 	msg += U_("\n");
 
-	msg += mpt::format(U_("OpenMPT detected Wine %1 running on %2.\n"))
+	msg += MPT_UFORMAT("OpenMPT detected Wine %1 running on %2.\n")
 		( wineVersion.Version().AsString()
 		, wineVersion.HostClass() == mpt::OS::Class::Linux ? U_("Linux") : U_("unknown system")
 		);
@@ -815,7 +815,7 @@ bool ComponentWineWrapper::DoInitialize()
 	}
 	if(TrackerSettings::Instance().WineSupportCompileVerbosity >= 6)
 	{
-		Reporting::Notification(mpt::format("OpenMPT Wine integration loaded successfully.")(), WineGetWindowTitle());
+		Reporting::Notification(MPT_FORMAT("OpenMPT Wine integration loaded successfully.")(), WineGetWindowTitle());
 	}
 	return true;
 }

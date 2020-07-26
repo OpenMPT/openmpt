@@ -858,7 +858,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					info.hEffects = InsertItem(_T("Plugins"), IMAGE_FOLDER, IMAGE_FOLDER, info.hSong, info.hInstruments ? info.hInstruments : info.hSamples);
 				}
 
-				CString s = mpt::cformat(_T("FX%1: %2"))(i + 1, mpt::ToCString(plugin.GetName()));
+				CString s = MPT_CFORMAT("FX%1: %2")(i + 1, mpt::ToCString(plugin.GetName()));
 				int nImage = IMAGE_NOPLUGIN;
 				if(plugin.pMixPlugin != nullptr)
 					nImage = (plugin.pMixPlugin->IsInstrument()) ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN;
@@ -983,10 +983,10 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				// more than one sequence -> add folder
 				if(sndFile.Order(seq).GetName().empty())
 				{
-					seqName = mpt::cformat(_T("Sequence %1"))(seq + 1);
+					seqName = MPT_CFORMAT("Sequence %1")(seq + 1);
 				} else
 				{
-					seqName = mpt::cformat(_T("%1: "))(seq + 1);
+					seqName = MPT_CFORMAT("%1: ")(seq + 1);
 					seqName += sndFile.Order(seq).GetName().c_str();
 				}
 
@@ -1689,7 +1689,7 @@ BOOL CModTree::SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName)
 
 static mpt::ustring TreeDeletionString(const mpt::uchar *type, uint32 id, const mpt::ustring &name)
 {
-	mpt::ustring s = mpt::format(U_("Remove %1 %2"))(mpt::ustring(type), id);
+	mpt::ustring s = MPT_UFORMAT("Remove %1 %2")(mpt::ustring(type), id);
 	if(!name.empty())
 		s += U_(": ") + name;
 	s.append(1, UC_('?'));
@@ -1742,7 +1742,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 				}
 			}
 			mpt::ustring s = TreeDeletionString(UL_("pattern"), modItemID, mpt::ToUnicode(sndFile->GetCharsetInternal(), sndFile->Patterns[pat].GetName()));
-			s += mpt::format(U_("\nThis pattern is currently %1used."))(isUsed ? U_("") : U_("un"));
+			s += MPT_UFORMAT("\nThis pattern is currently %1used.")(isUsed ? U_("") : U_("un"));
 			if(Reporting::Confirm(s, false, isUsed) == cnfYes && modDoc->RemovePattern(pat))
 			{
 				modDoc->UpdateAllViews(nullptr, PatternHint(pat).Data().Names());
@@ -2345,7 +2345,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 		m_WatchDir = mpt::PathString();
 	} else
 	{
-		Reporting::Error(mpt::cformat(_T("Unable to browse to \"%1\""))(dir), _T("Instrument Library"));
+		Reporting::Error(MPT_CFORMAT("Unable to browse to \"%1\"")(dir), _T("Instrument Library"));
 	}
 }
 

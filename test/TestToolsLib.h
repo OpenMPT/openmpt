@@ -204,7 +204,7 @@ private:
 	{
 		if(!IsEqual(x, y, std::is_integral<Tx>(), std::is_integral<Ty>()))
 		{
-			throw TestFailed(mpt::format(std::string("%1 != %2"))(ToStringHelper<Tx>()(x), ToStringHelper<Ty>()(y)));
+			throw TestFailed(MPT_FORMAT("%1 != %2")(ToStringHelper<Tx>()(x), ToStringHelper<Ty>()(y)));
 			//throw TestFailed();
 		}
 	}
@@ -214,7 +214,7 @@ private:
 	{
 		if(!IsEqualEpsilon(x, y, eps))
 		{
-			throw TestFailed(mpt::format(std::string("%1 != %2"))(ToStringHelper<Tx>()(x), ToStringHelper<Ty>()(y)));
+			throw TestFailed(MPT_FORMAT("%1 != %2")(ToStringHelper<Tx>()(x), ToStringHelper<Ty>()(y)));
 			//throw TestFailed();
 		}
 	}
@@ -277,7 +277,7 @@ public:
 		{
 			if(!IsEqual(x, y, std::is_integral<Tx>(), std::is_integral<Ty>()))
 			{
-				//throw TestFailed(mpt::format(std::string("%1 != %2"))(x, y));
+				//throw TestFailed(MPT_FORMAT("%1 != %2")(x, y));
 				throw TestFailed();
 			}
 			ReportPassed();
@@ -295,7 +295,7 @@ public:
 		{
 			if(!IsEqualEpsilon(x, y, eps))
 			{
-				//throw TestFailed(mpt::format(std::string("%1 != %2"))(x, y));
+				//throw TestFailed(MPT_FORMAT("%1 != %2")(x, y));
 				throw TestFailed();
 			}
 			ReportPassed();

@@ -321,7 +321,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		case MOD_TYPE_XM:	modType = U_("XM (FastTracker 2)"); break;
 		case MOD_TYPE_IT:	modType = U_("IT (Impulse Tracker)"); break;
 		case MOD_TYPE_MPT:	modType = U_("MPTM (OpenMPT)"); break;
-		default:			modType = mpt::format(U_("%1 (%2)"))(mpt::ToUpperCase(m_sndFile.m_modFormat.type), m_sndFile.m_modFormat.formatName); break;
+		default:			modType = MPT_UFORMAT("%1 (%2)")(mpt::ToUpperCase(m_sndFile.m_modFormat.type), m_sndFile.m_modFormat.formatName); break;
 		}
 		CString s;
 		s.Format(_T("%s, %u channel%s"), mpt::ToCString(modType).GetString(), m_sndFile.GetNumChannels(), (m_sndFile.GetNumChannels() != 1) ? _T("s") : _T(""));
@@ -681,7 +681,7 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPTSTR pszText)
 			{
 				const auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(kcViewSongProperties, 0);
 				if (!keyText.IsEmpty())
-					_tcscat(pszText, mpt::tformat(_T(" (%1)"))(keyText).c_str());
+					_tcscat(pszText, MPT_TFORMAT(" (%1)")(keyText).c_str());
 			}
 			return TRUE;
 		case IDC_BUTTON1:

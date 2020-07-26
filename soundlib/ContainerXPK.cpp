@@ -160,7 +160,7 @@ static bool XPK_DoUnpack(const uint8 *src_, uint32 srcLen, std::vector<char> &un
 		if (type != 1)
 		{
 			#ifdef MMCMP_LOG
-				MPT_LOG(LogDebug, "XPK", mpt::format(U_("Invalid XPK type! (%1 bytes left)"))(len));
+				MPT_LOG(LogDebug, "XPK", MPT_UFORMAT("Invalid XPK type! (%1 bytes left)")(len));
 			#endif
 			break;
 		}
@@ -416,7 +416,7 @@ bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, Con
 	std::vector<char> & unpackedData = *(containerItems.back().data_cache);
 
 	#ifdef MMCMP_LOG
-		MPT_LOG(LogDebug, "XPK", mpt::uformat(U_("XPK detected (SrcLen=%1 DstLen=%2) filesize=%3"))(static_cast<uint32>(header.SrcLen), static_cast<uint32>(header.DstLen), file.GetLength()));
+		MPT_LOG(LogDebug, "XPK", MPT_UFORMAT("XPK detected (SrcLen=%1 DstLen=%2) filesize=%3")(static_cast<uint32>(header.SrcLen), static_cast<uint32>(header.DstLen), file.GetLength()));
 	#endif
 	bool result = false;
 	try

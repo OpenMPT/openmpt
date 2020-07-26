@@ -890,7 +890,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 			m_Instruments.resize(numIns);
 
 		#ifdef DLSBANK_LOG
-			MPT_LOG(LogDebug, "DLSBank", mpt::format(U_("phdr: %1 instruments"))(m_Instruments.size()));
+			MPT_LOG(LogDebug, "DLSBank", MPT_UFORMAT("phdr: %1 instruments")(m_Instruments.size()));
 		#endif
 			SFPRESETHEADER psfh;
 			chunk.ReadStruct(psfh);
@@ -956,7 +956,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 			m_SamplesEx.resize(numSmp);
 			m_WaveForms.resize(numSmp);
 			#ifdef DLSINSTR_LOG
-				MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("shdr: %1 samples"))(m_SamplesEx.size()));
+				MPT_LOG(LogDebug, "DLSINSTR", MPT_UFORMAT("shdr: %1 samples")(m_SamplesEx.size()));
 			#endif
 
 			for (uint32 i = 0; i < numSmp; i++)
@@ -990,7 +990,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 			char sdbg[5];
 			memcpy(sdbg, &header.id, 4);
 			sdbg[4] = 0;
-			MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("Unsupported SF2 chunk: %1 (%2 bytes)"))(mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadAutoBuf(sdbg)), header.len.get()));
+			MPT_LOG(LogDebug, "DLSINSTR", MPT_UFORMAT("Unsupported SF2 chunk: %1 (%2 bytes)")(mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadAutoBuf(sdbg)), header.len.get()));
 		}
 	#endif
 	}
@@ -1334,13 +1334,13 @@ bool CDLSBank::Open(FileReader file)
 		// DLS 1.0: Instruments Collection Header
 		case IFFID_colh:
 		#ifdef DLSBANK_LOG
-			MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("colh (%1 bytes)"))(chunkHeader.len.get()));
+			MPT_LOG(LogDebug, "DLSBANK", MPT_UFORMAT("colh (%1 bytes)")(chunkHeader.len.get()));
 		#endif
 			if (m_Instruments.empty())
 			{
 				m_Instruments.resize(chunk.ReadUint32LE());
 			#ifdef DLSBANK_LOG
-				MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("  %1 instruments"))(m_Instruments.size()));
+				MPT_LOG(LogDebug, "DLSBANK", MPT_UFORMAT("  %1 instruments")(m_Instruments.size()));
 			#endif
 			}
 			break;
@@ -1348,7 +1348,7 @@ bool CDLSBank::Open(FileReader file)
 		// DLS 1.0: Instruments Pointers Table
 		case IFFID_ptbl:
 		#ifdef DLSBANK_LOG
-			MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("ptbl (%1 bytes)"))(chunkHeader.len.get()));
+			MPT_LOG(LogDebug, "DLSBANK", MPT_UFORMAT("ptbl (%1 bytes)")(chunkHeader.len.get()));
 		#endif
 			if (m_WaveForms.empty())
 			{
@@ -1362,7 +1362,7 @@ bool CDLSBank::Open(FileReader file)
 					m_WaveForms.push_back(chunk.ReadUint32LE());
 				}
 			#ifdef DLSBANK_LOG
-				MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("  %1 waveforms"))(m_WaveForms.size()));
+				MPT_LOG(LogDebug, "DLSBANK", MPT_UFORMAT("  %1 waveforms")(m_WaveForms.size()));
 			#endif
 			}
 			break;
@@ -1379,7 +1379,7 @@ bool CDLSBank::Open(FileReader file)
 				{
 					m_dwWavePoolOffset = dwMemPos + 4;
 				#ifdef DLSBANK_LOG
-					MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("Wave Pool offset: %1"))(m_dwWavePoolOffset));
+					MPT_LOG(LogDebug, "DLSBANK", MPT_UFORMAT("Wave Pool offset: %1")(m_dwWavePoolOffset));
 				#endif
 					break;
 				}
@@ -1447,7 +1447,7 @@ bool CDLSBank::Open(FileReader file)
 				char sdbg[5];
 				memcpy(sdbg, &chunkHeader.id, 4);
 				sdbg[4] = 0;
-				MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("Unsupported chunk: %1 (%2 bytes)"))(mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadAutoBuf(sdbg)), chunkHeader.len.get()));
+				MPT_LOG(LogDebug, "DLSBANK", MPT_UFORMAT("Unsupported chunk: %1 (%2 bytes)")(mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadAutoBuf(sdbg)), chunkHeader.len.get()));
 			}
 			break;
 		#endif
@@ -1457,7 +1457,7 @@ bool CDLSBank::Open(FileReader file)
 	if ((m_WaveForms.empty()) && (m_dwWavePoolOffset) && (m_nType & SOUNDBANK_TYPE_DLS) && (m_nMaxWaveLink > 0))
 	{
 	#ifdef DLSBANK_LOG
-		MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("ptbl not present: building table (%1 wavelinks)..."))(m_nMaxWaveLink));
+		MPT_LOG(LogDebug, "DLSBANK", MPT_UFORMAT("ptbl not present: building table (%1 wavelinks)...")(m_nMaxWaveLink));
 	#endif
 		m_WaveForms.reserve(m_nMaxWaveLink);
 		file.Seek(m_dwWavePoolOffset);
@@ -1470,7 +1470,7 @@ bool CDLSBank::Open(FileReader file)
 			file.Skip(chunk.len);
 		}
 #ifdef DLSBANK_LOG
-		MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("Found %1 waveforms"))(m_WaveForms.size()));
+		MPT_LOG(LogDebug, "DLSBANK", MPT_UFORMAT("Found %1 waveforms")(m_WaveForms.size()));
 #endif
 	}
 	// Convert the SF2 data to DLS
@@ -1510,7 +1510,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 	if (nIns >= m_Instruments.size() || !m_dwWavePoolOffset)
 	{
 	#ifdef DLSBANK_LOG
-		MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("ExtractWaveForm(%1) failed: m_Instruments.size()=%2 m_dwWavePoolOffset=%3 m_WaveForms.size()=%4"))(nIns, m_Instruments.size(), m_dwWavePoolOffset, m_WaveForms.size()));
+		MPT_LOG(LogDebug, "DLSBANK", MPT_UFORMAT("ExtractWaveForm(%1) failed: m_Instruments.size()=%2 m_dwWavePoolOffset=%3 m_WaveForms.size()=%4")(nIns, m_Instruments.size(), m_dwWavePoolOffset, m_WaveForms.size()));
 	#endif
 		return false;
 	}
@@ -1518,7 +1518,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 	if (nRgn >= dlsIns.nRegions)
 	{
 	#ifdef DLSBANK_LOG
-		MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("invalid waveform region: nIns=%1 nRgn=%2 pSmp->nRegions=%3"))(nIns, nRgn, dlsIns.nRegions));
+		MPT_LOG(LogDebug, "DLSBANK", MPT_UFORMAT("invalid waveform region: nIns=%1 nRgn=%2 pSmp->nRegions=%3")(nIns, nRgn, dlsIns.nRegions));
 	#endif
 		return false;
 	}
@@ -1526,7 +1526,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 	if(nWaveLink >= m_WaveForms.size())
 	{
 	#ifdef DLSBANK_LOG
-		MPT_LOG(LogDebug, "DLSBANK", mpt::format(U_("Invalid wavelink id: nWaveLink=%1 nWaveForms=%2"))(nWaveLink, m_WaveForms.size()));
+		MPT_LOG(LogDebug, "DLSBANK", MPT_UFORMAT("Invalid wavelink id: nWaveLink=%1 nWaveForms=%2")(nWaveLink, m_WaveForms.size()));
 	#endif
 		return false;
 	}
@@ -1605,7 +1605,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 		{
 			const DLSSAMPLEEX &p = m_SamplesEx[nWaveLink];
 		#ifdef DLSINSTR_LOG
-			MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("  SF2 WaveLink #%1: %2Hz"))(nWaveLink, p.dwSampleRate));
+			MPT_LOG(LogDebug, "DLSINSTR", MPT_UFORMAT("  SF2 WaveLink #%1: %2Hz")(nWaveLink, p.dwSampleRate));
 		#endif
 			sample.Initialize();
 			sample.nLength = dwLen / 2;
@@ -1692,7 +1692,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 				sFineTune += sample.nFineTune;
 			}
 		#ifdef DLSINSTR_LOG
-			MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("WSMP: usUnityNote=%1.%2, %3Hz (transp=%4)"))(usUnityNote, sFineTune, sample.nC5Speed, transpose));
+			MPT_LOG(LogDebug, "DLSINSTR", MPT_UFORMAT("WSMP: usUnityNote=%1.%2, %3Hz (transp=%4)")(usUnityNote, sFineTune, sample.nC5Speed, transpose));
 		#endif
 			if (usUnityNote > 0x7F) usUnityNote = 60;
 			int steps = (60 + transpose - usUnityNote) * 128 + sFineTune;
@@ -1740,17 +1740,17 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 	if(nRgnMin == 0 && (pDlsIns->Regions[0].fuOptions & DLSREGION_ISGLOBAL))
 		nRgnMin++;
 #ifdef DLSINSTR_LOG
-	MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("DLS Instrument #%1: %2"))(nIns, mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadAutoBuf(pDlsIns->szName))));
-	MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("  Bank=0x%1 Instrument=0x%2"))(mpt::ufmt::HEX0<4>(pDlsIns->ulBank), mpt::ufmt::HEX0<4>(pDlsIns->ulInstrument)));
-	MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("  %1 regions, nMelodicEnv=%2"))(pDlsIns->nRegions, pDlsIns->nMelodicEnv));
+	MPT_LOG(LogDebug, "DLSINSTR", MPT_UFORMAT("DLS Instrument #%1: %2")(nIns, mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadAutoBuf(pDlsIns->szName))));
+	MPT_LOG(LogDebug, "DLSINSTR", MPT_UFORMAT("  Bank=0x%1 Instrument=0x%2")(mpt::ufmt::HEX0<4>(pDlsIns->ulBank), mpt::ufmt::HEX0<4>(pDlsIns->ulInstrument)));
+	MPT_LOG(LogDebug, "DLSINSTR", MPT_UFORMAT("  %1 regions, nMelodicEnv=%2")(pDlsIns->nRegions, pDlsIns->nMelodicEnv));
 	for (uint32 iDbg=0; iDbg<pDlsIns->nRegions; iDbg++)
 	{
 		const DLSREGION *prgn = &pDlsIns->Regions[iDbg];
-		MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_(" Region %1:"))(iDbg));
-		MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("  WaveLink = %1 (loop [%2, %3])"))(prgn->nWaveLink, prgn->ulLoopStart, prgn->ulLoopEnd));
-		MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("  Key Range: [%1, %2]"))(prgn->uKeyMin, prgn->uKeyMax));
-		MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("  fuOptions = 0x%1"))(mpt::ufmt::HEX0<4>(prgn->fuOptions)));
-		MPT_LOG(LogDebug, "DLSINSTR", mpt::format(U_("  usVolume = %1, Unity Note = %2"))(prgn->usVolume, prgn->uUnityNote));
+		MPT_LOG(LogDebug, "DLSINSTR", MPT_UFORMAT(" Region %1:")(iDbg));
+		MPT_LOG(LogDebug, "DLSINSTR", MPT_UFORMAT("  WaveLink = %1 (loop [%2, %3])")(prgn->nWaveLink, prgn->ulLoopStart, prgn->ulLoopEnd));
+		MPT_LOG(LogDebug, "DLSINSTR", MPT_UFORMAT("  Key Range: [%1, %2]")(prgn->uKeyMin, prgn->uKeyMax));
+		MPT_LOG(LogDebug, "DLSINSTR", MPT_UFORMAT("  fuOptions = 0x%1")(mpt::ufmt::HEX0<4>(prgn->fuOptions)));
+		MPT_LOG(LogDebug, "DLSINSTR", MPT_UFORMAT("  usVolume = %1, Unity Note = %2")(prgn->usVolume, prgn->uUnityNote));
 	}
 #endif
 
@@ -1773,7 +1773,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			std::string s = szMidiPercussionNames[key-24];
 			if(!mpt::String::ReadAutoBuf(pDlsIns->szName).empty())
 			{
-				s += mpt::format(" (%1)")(mpt::String::RTrim<std::string>(mpt::String::ReadAutoBuf(pDlsIns->szName)));
+				s += MPT_FORMAT(" (%1)")(mpt::String::RTrim<std::string>(mpt::String::ReadAutoBuf(pDlsIns->szName)));
 			}
 			pIns->name = s;
 		} else

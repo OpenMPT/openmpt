@@ -148,13 +148,13 @@ WAVEncoder::WAVEncoder()
 				format.Sampleformat = sampleFormat;
 				if(sampleFormat.IsFloat())
 				{
-					format.Description = mpt::format(U_("Floating Point (%1 Bit)"))(sampleFormat.GetBitsPerSample());
+					format.Description = MPT_UFORMAT("Floating Point (%1 Bit)")(sampleFormat.GetBitsPerSample());
 				} else if(sampleFormat.IsUnsigned())
 				{
-					format.Description = mpt::format(U_("%1 Bit (unsigned)"))(sampleFormat.GetBitsPerSample());
+					format.Description = MPT_UFORMAT("%1 Bit (unsigned)")(sampleFormat.GetBitsPerSample());
 				} else
 				{
-					format.Description = mpt::format(U_("%1 Bit"))(sampleFormat.GetBitsPerSample());
+					format.Description = MPT_UFORMAT("%1 Bit")(sampleFormat.GetBitsPerSample());
 				}
 				format.Bitrate = 0;
 				traits.formats.push_back(format);

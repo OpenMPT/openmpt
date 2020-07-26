@@ -2775,7 +2775,7 @@ void CViewInstrument::OnEnvSave()
 
 	if(!GetDocument()->SaveEnvelope(m_nInstrument, m_nEnv, dlg.GetFirstFile()))
 	{
-		Reporting::Error(mpt::cformat(_T("Unable to save file %1"))(dlg.GetFirstFile()), _T("OpenMPT"), this);
+		Reporting::Error(MPT_CFORMAT("Unable to save file %1")(dlg.GetFirstFile()), _T("OpenMPT"), this);
 	}
 }
 
@@ -2866,7 +2866,7 @@ INT_PTR CViewInstrument::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 	{
 		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
 		if(!keyText.IsEmpty())
-			text += mpt::cformat(_T(" (%1)"))(keyText);
+			text += MPT_CFORMAT(" (%1)")(keyText);
 	}
 
 	// MFC will free() the text
@@ -2901,7 +2901,7 @@ HRESULT CViewInstrument::get_accName(VARIANT varChild, BSTR *pszName)
 		if(env->empty())
 			str += _T(" envelope has no points");
 		else
-			str += mpt::cformat(_T(" envelope, %1 point%2"))(env->size(), env->size() == 1 ? CString(_T("")) : CString(_T("s")));
+			str += MPT_CFORMAT(" envelope, %1 point%2")(env->size(), env->size() == 1 ? CString(_T("")) : CString(_T("s")));
 	} else
 	{
 		bool isEnvPoint = false;
@@ -2917,10 +2917,10 @@ HRESULT CViewInstrument::get_accName(VARIANT varChild, BSTR *pszName)
 		}
 		if(!isEnvPoint)
 		{
-			str += mpt::cformat(_T(" at point %1, tick %2"))(point + 1, tick);
+			str += MPT_CFORMAT(" at point %1, tick %2")(point + 1, tick);
 		} else
 		{
-			str = mpt::cformat(_T("Point %1, tick %2, %3 %4"))(point + 1, tick, CString(typeStr), EnvValueToString(EnvGetTick(point), EnvGetValue(point)));
+			str = MPT_CFORMAT("Point %1, tick %2, %3 %4")(point + 1, tick, CString(typeStr), EnvValueToString(EnvGetTick(point), EnvGetValue(point)));
 			if(env->dwFlags[ENV_LOOP])
 			{
 				if(point == env->nLoopStart)

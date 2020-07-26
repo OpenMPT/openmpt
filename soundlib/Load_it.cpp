@@ -361,13 +361,13 @@ mpt::ustring CSoundFile::GetSchismTrackerVersion(uint16 cwtv, uint32 reserved)
 			ddd = date - (365 * y + y / 4 - y / 100 + y / 400);
 		}
 		int32 mi = (100 * ddd + 52) / 3060;
-		return mpt::format(U_("Schism Tracker %1-%2-%3"))(
+		return MPT_UFORMAT("Schism Tracker %1-%2-%3")(
 			mpt::ufmt::dec0<4>(y + (mi + 2) / 12),
 			mpt::ufmt::dec0<2>((mi + 2) % 12 + 1),
 			mpt::ufmt::dec0<2>(ddd - (mi * 306 + 5) / 10 + 1));
 	} else
 	{
-		return mpt::format(U_("Schism Tracker 0.%1"))(mpt::ufmt::hex0<2>(cwtv));
+		return MPT_UFORMAT("Schism Tracker 0.%1")(mpt::ufmt::hex0<2>(cwtv));
 	}
 }
 
@@ -825,7 +825,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 #if defined(MPT_EXTERNAL_SAMPLES)
 					SetSamplePath(i + 1, mpt::PathString::FromUTF8(filenameU8));
 #elif !defined(LIBOPENMPT_BUILD_TEST)
-					AddToLog(LogWarning, mpt::format(U_("Loading external sample %1 ('%2') failed: External samples are not supported."))(i + 1, mpt::ToUnicode(mpt::Charset::UTF8, filenameU8)));
+					AddToLog(LogWarning, MPT_UFORMAT("Loading external sample %1 ('%2') failed: External samples are not supported.")(i + 1, mpt::ToUnicode(mpt::Charset::UTF8, filenameU8)));
 #endif  // MPT_EXTERNAL_SAMPLES
 				} else
 				{
@@ -868,7 +868,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(numPats != patPos.size())
 	{
 		// Hack: Notify user here if file contains more patterns than what can be read.
-		AddToLog(LogWarning, mpt::format(U_("The module contains %1 patterns but only %2 patterns can be loaded in this OpenMPT version."))(patPos.size(), numPats));
+		AddToLog(LogWarning, MPT_UFORMAT("The module contains %1 patterns but only %2 patterns can be loaded in this OpenMPT version.")(patPos.size(), numPats));
 	}
 
 	if(!(loadFlags & loadPatternData))
@@ -988,7 +988,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Empty 64-row pattern
 			if(!Patterns.Insert(pat, 64))
 			{
-				AddToLog(LogWarning, mpt::format(U_("Allocating patterns failed starting from pattern %1"))(pat));
+				AddToLog(LogWarning, MPT_UFORMAT("Allocating patterns failed starting from pattern %1")(pat));
 				break;
 			}
 			// Now (after the Insert() call), we can read the pattern name.
@@ -1196,10 +1196,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					// Patched update of IT 2.14 (0x0215 - 0x0217 == p1 - p3)
 					// p4 (as found on modland) adds the ITVSOUND driver, but doesn't seem to change
 					// anything as far as file saving is concerned.
-					madeWithTracker = mpt::format(U_("Impulse Tracker 2.14p%1"))(fileHeader.cwtv - 0x0214);
+					madeWithTracker = MPT_UFORMAT("Impulse Tracker 2.14p%1")(fileHeader.cwtv - 0x0214);
 				} else
 				{
-					madeWithTracker = mpt::format(U_("Impulse Tracker %1.%2"))((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>((fileHeader.cwtv & 0xFF)));
+					madeWithTracker = MPT_UFORMAT("Impulse Tracker %1.%2")((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>((fileHeader.cwtv & 0xFF)));
 				}
 				if(m_FileHistory.empty() && fileHeader.reserved != 0)
 				{
@@ -1222,7 +1222,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				m_playBehaviour.reset(kITShortSampleRetrig);
 			break;
 		case 4:
-			madeWithTracker = mpt::format(U_("pyIT %1.%2"))((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
+			madeWithTracker = MPT_UFORMAT("pyIT %1.%2")((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
 			break;
 		case 6:
 			madeWithTracker = U_("BeRoTracker");
@@ -1231,7 +1231,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(fileHeader.cwtv == 0x7FFF && fileHeader.cmwt == 0x0215)
 				madeWithTracker = U_("munch.py");
 			else
-				madeWithTracker = mpt::format(U_("ITMCK %1.%2.%3"))((fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
+				madeWithTracker = MPT_UFORMAT("ITMCK %1.%2.%3")((fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
 			break;
 		case 0xD:
 			madeWithTracker = U_("spc2it");
@@ -1248,7 +1248,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	m_modFormat.formatName = (GetType() == MOD_TYPE_MPT) ? U_("OpenMPT MPTM") : mpt::format(U_("Impulse Tracker %1.%2"))(fileHeader.cmwt >> 8, mpt::ufmt::hex0<2>(fileHeader.cmwt & 0xFF));
+	m_modFormat.formatName = (GetType() == MOD_TYPE_MPT) ? U_("OpenMPT MPTM") : MPT_UFORMAT("Impulse Tracker %1.%2")(fileHeader.cmwt >> 8, mpt::ufmt::hex0<2>(fileHeader.cmwt & 0xFF));
 	m_modFormat.type = (GetType() == MOD_TYPE_MPT) ? U_("mptm") : U_("it");
 	m_modFormat.madeWithTracker = std::move(madeWithTracker);
 	m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::Charset::Windows1252 : mpt::Charset::CP437;
@@ -1773,7 +1773,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 			buf[len++] = 0;
 			if(writeSize > uint16_max - len)
 			{
-				AddToLog(LogWarning, mpt::format(U_("Warning: File format limit was reached. Some pattern data may not get written to file. (pattern %1)"))(pat));
+				AddToLog(LogWarning, MPT_UFORMAT("Warning: File format limit was reached. Some pattern data may not get written to file. (pattern %1)")(pat));
 				break;
 			} else
 			{
@@ -1810,7 +1810,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 		if(dwPos > uint32_max)
 		{
 			// Sample position does not fit into sample pointer!
-			AddToLog(LogWarning, mpt::format(U_("Cannot save sample %1: File size exceeds 4 GB."))(smp));
+			AddToLog(LogWarning, MPT_UFORMAT("Cannot save sample %1: File size exceeds 4 GB.")(smp));
 			itss.samplepointer = 0;
 			itss.length = 0;
 		}
@@ -1828,7 +1828,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 			if(sample.nLength > smpLength && smpLength != 0)
 			{
 				// Sample length does not fit into IT header!
-				AddToLog(LogWarning, mpt::format(U_("Truncating sample %1: Length exceeds exceeds 4 gigasamples."))(smp));
+				AddToLog(LogWarning, MPT_UFORMAT("Truncating sample %1: Length exceeds exceeds 4 gigasamples.")(smp));
 			}
 			dwPos += itss.GetSampleFormat().WriteSample(f, sample, smpLength);
 		} else

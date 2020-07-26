@@ -102,10 +102,10 @@ CString IMixPlugin::GetFormattedParamName(PlugParamIndex param)
 	CString name;
 	if(paramName.IsEmpty())
 	{
-		name = mpt::cformat(_T("%1: Parameter %2"))(mpt::cfmt::dec0<2>(param), mpt::cfmt::dec0<2>(param));
+		name = MPT_CFORMAT("%1: Parameter %2")(mpt::cfmt::dec0<2>(param), mpt::cfmt::dec0<2>(param));
 	} else
 	{
-		name = mpt::cformat(_T("%1: %2"))(mpt::cfmt::dec0<2>(param), paramName);
+		name = MPT_CFORMAT("%1: %2")(mpt::cfmt::dec0<2>(param), paramName);
 	}
 	return name;
 }
@@ -134,9 +134,9 @@ CString IMixPlugin::GetFormattedProgramName(int32 index)
 
 	CString formattedName;
 	if(rawname[0] >= 0 && rawname[0] < _T(' '))
-		formattedName = mpt::cformat(_T("%1 - Program %2"))(mpt::cfmt::dec0<2>(index), index);
+		formattedName = MPT_CFORMAT("%1 - Program %2")(mpt::cfmt::dec0<2>(index), index);
 	else
-		formattedName = mpt::cformat(_T("%1 - %2"))(mpt::cfmt::dec0<2>(index), rawname);
+		formattedName = MPT_CFORMAT("%1 - %2")(mpt::cfmt::dec0<2>(index), rawname);
 
 	return formattedName;
 }

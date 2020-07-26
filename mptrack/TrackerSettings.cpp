@@ -373,7 +373,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	GetDefaultColourScheme(rgbCustomColors);
 	for(int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
 	{
-		const mpt::ustring colorName = mpt::format(U_("Color%1"))(mpt::ufmt::dec0<2>(ncol));
+		const mpt::ustring colorName = MPT_UFORMAT("Color%1")(mpt::ufmt::dec0<2>(ncol));
 		rgbCustomColors[ncol] = conf.Read<uint32>(U_("Display"), colorName, rgbCustomColors[ncol]);
 	}
 	// Paths
@@ -419,11 +419,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	theApp.GetDefaultMidiMacro(macros);
 	for(int isfx = 0; isfx < 16; isfx++)
 	{
-		mpt::String::WriteAutoBuf(macros.szMidiSFXExt[isfx]) = conf.Read<std::string>(U_("Zxx Macros"), mpt::format(U_("SF%1"))(mpt::ufmt::HEX(isfx)), macros.szMidiSFXExt[isfx]);
+		mpt::String::WriteAutoBuf(macros.szMidiSFXExt[isfx]) = conf.Read<std::string>(U_("Zxx Macros"), MPT_UFORMAT("SF%1")(mpt::ufmt::HEX(isfx)), macros.szMidiSFXExt[isfx]);
 	}
 	for(int izxx = 0; izxx < 128; izxx++)
 	{
-		mpt::String::WriteAutoBuf(macros.szMidiZXXExt[izxx]) = conf.Read<std::string>(U_("Zxx Macros"), mpt::format(U_("Z%1"))(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]);
+		mpt::String::WriteAutoBuf(macros.szMidiZXXExt[izxx]) = conf.Read<std::string>(U_("Zxx Macros"), MPT_UFORMAT("Z%1")(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]);
 	}
 
 
@@ -432,7 +432,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	mruFiles.reserve(mruListLength);
 	for(uint32 i = 0; i < mruListLength; i++)
 	{
-		mpt::ustring key = mpt::format(U_("File%1"))(i);
+		mpt::ustring key = MPT_UFORMAT("File%1")(i);
 
 		mpt::PathString path = theApp.PathInstallRelativeToAbsolute(conf.Read<mpt::PathString>(U_("Recent File List"), key, mpt::PathString()));
 		if(!path.empty())
@@ -1101,7 +1101,7 @@ void TrackerSettings::SaveSettings()
 	// Display (Colors)
 	for(int ncol = 0; ncol < MAX_MODCOLORS; ncol++)
 	{
-		conf.Write<uint32>(U_("Display"), mpt::format(U_("Color%1"))(mpt::ufmt::dec0<2>(ncol)), rgbCustomColors[ncol]);
+		conf.Write<uint32>(U_("Display"), MPT_UFORMAT("Color%1")(mpt::ufmt::dec0<2>(ncol)), rgbCustomColors[ncol]);
 	}
 
 	// Paths
@@ -1117,17 +1117,17 @@ void TrackerSettings::SaveSettings()
 	theApp.GetDefaultMidiMacro(macros);
 	for(int isfx = 0; isfx < 16; isfx++)
 	{
-		conf.Write<std::string>(U_("Zxx Macros"), mpt::format(U_("SF%1"))(mpt::ufmt::HEX(isfx)), macros.szMidiSFXExt[isfx]);
+		conf.Write<std::string>(U_("Zxx Macros"), MPT_UFORMAT("SF%1")(mpt::ufmt::HEX(isfx)), macros.szMidiSFXExt[isfx]);
 	}
 	for(int izxx = 0; izxx < 128; izxx++)
 	{
-		conf.Write<std::string>(U_("Zxx Macros"), mpt::format(U_("Z%1"))(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]);
+		conf.Write<std::string>(U_("Zxx Macros"), MPT_UFORMAT("Z%1")(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]);
 	}
 
 	// MRU list
 	for(uint32 i = 0; i < (ID_MRU_LIST_LAST - ID_MRU_LIST_FIRST + 1); i++)
 	{
-		mpt::ustring key = mpt::format(U_("File%1"))(i);
+		mpt::ustring key = MPT_UFORMAT("File%1")(i);
 
 		if(i < mruFiles.size())
 		{
@@ -1184,7 +1184,7 @@ void TrackerSettings::LoadChords(MPTChords &chords)
 	for(std::size_t i = 0; i < std::size(chords); i++)
 	{
 		uint32 chord;
-		mpt::ustring noteName = mpt::format(U_("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
+		mpt::ustring noteName = MPT_UFORMAT("%1%2")(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
 		if((chord = conf.Read<int32>(U_("Chords"), noteName, -1)) != uint32(-1))
 		{
 			if((chord & 0xFFFFFFC0) || chords[i].notes[0] == MPTChord::noNote)
@@ -1222,7 +1222,7 @@ void TrackerSettings::SaveChords(MPTChords &chords)
 			note &= 0x3F;
 		}
 		int32 s = (chords[i].key) | (notes[0] << 6) | (notes[1] << 12) | (notes[2] << 18);
-		mpt::ustring noteName = mpt::format(U_("%1%2"))(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
+		mpt::ustring noteName = MPT_UFORMAT("%1%2")(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
 		conf.Write<int32>(U_("Chords"), noteName, s);
 	}
 }

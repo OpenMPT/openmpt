@@ -214,7 +214,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	EndWaitCursor();
 
 	logcapturer.ShowLog(
-		mpt::cformat(_T("File: %1\nLast saved with: %2, you are using OpenMPT %3\n\n"))
+		MPT_CFORMAT("File: %1\nLast saved with: %2, you are using OpenMPT %3\n\n")
 		(filename, m_SndFile.m_modFormat.madeWithTracker, Version::Current()));
 
 	if((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels()))
@@ -257,7 +257,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	// Show warning if file was made with more recent version of OpenMPT except
 	if(m_SndFile.m_dwLastSavedWithVersion.WithoutTestNumber() > Version::Current())
 	{
-		Reporting::Notification(mpt::format(U_("Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%1. Current version: v%2.\r\n"))(
+		Reporting::Notification(MPT_UFORMAT("Warning: this song was last saved with a more recent version of OpenMPT.\r\nSong saved with: v%1. Current version: v%2.\r\n")(
 			m_SndFile.m_dwLastSavedWithVersion,
 			Version::Current()));
 	}
@@ -388,7 +388,7 @@ bool CModDoc::SaveSample(SAMPLEINDEX smp)
 			if(success)
 				sample.uFlags.reset(SMP_MODIFIED);
 			else
-				AddToLog(LogError, mpt::uformat(U_("Unable to save sample %1: %2"))(smp, filename));
+				AddToLog(LogError, MPT_UFORMAT("Unable to save sample %1: %2")(smp, filename));
 		}
 	}
 	return success;
@@ -1628,7 +1628,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			fileNameAdd.clear();
 			if(wsdlg.m_Settings.minSequence != wsdlg.m_Settings.maxSequence)
 			{
-				fileNameAdd = mpt::format(U_("-%1"))(mpt::ufmt::dec0<2>(seq + 1));
+				fileNameAdd = MPT_UFORMAT("-%1")(mpt::ufmt::dec0<2>(seq + 1));
 				mpt::ustring seqName = m_SndFile.Order(seq).GetName();
 				if(!seqName.empty())
 				{
@@ -1649,12 +1649,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 				// Add channel number & name (if available) to path string
 				if(!m_SndFile.ChnSettings[i].szName.empty())
 				{
-					fileNameAdd += mpt::format(U_("-%1_%2"))(mpt::ufmt::dec0<3>(i + 1), mpt::ToUnicode(m_SndFile.GetCharsetInternal(), m_SndFile.ChnSettings[i].szName));
-					caption = mpt::cformat(_T("%1:%2"))(i + 1, mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.ChnSettings[i].szName));
+					fileNameAdd += MPT_UFORMAT("-%1_%2")(mpt::ufmt::dec0<3>(i + 1), mpt::ToUnicode(m_SndFile.GetCharsetInternal(), m_SndFile.ChnSettings[i].szName));
+					caption = MPT_CFORMAT("%1:%2")(i + 1, mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.ChnSettings[i].szName));
 				} else
 				{
-					fileNameAdd += mpt::format(U_("-%1"))(mpt::ufmt::dec0<3>(i + 1));
-					caption = mpt::cformat(_T("channel %1"))(i + 1);
+					fileNameAdd += MPT_UFORMAT("-%1")(mpt::ufmt::dec0<3>(i + 1));
+					caption = MPT_CFORMAT("channel %1")(i + 1);
 				}
 				// Unmute channel to process
 				m_SndFile.ChnSettings[i].dwFlags.reset(CHN_MUTE);
@@ -1673,12 +1673,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 					// Add sample number & name (if available) to path string
 					if(!m_SndFile.m_szNames[i + 1].empty())
 					{
-						fileNameAdd += mpt::format(U_("-%1_%2"))(mpt::ufmt::dec0<3>(i + 1), mpt::ToUnicode(m_SndFile.GetCharsetInternal(), m_SndFile.m_szNames[i + 1]));
-						caption = mpt::cformat(_T("%1: %2"))(i + 1, mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.m_szNames[i + 1]));
+						fileNameAdd += MPT_UFORMAT("-%1_%2")(mpt::ufmt::dec0<3>(i + 1), mpt::ToUnicode(m_SndFile.GetCharsetInternal(), m_SndFile.m_szNames[i + 1]));
+						caption = MPT_CFORMAT("%1: %2")(i + 1, mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.m_szNames[i + 1]));
 					} else
 					{
-						fileNameAdd += mpt::format(U_("-%1"))(mpt::ufmt::dec0<3>(i + 1));
-						caption = mpt::cformat(_T("sample %1"))(i + 1);
+						fileNameAdd += MPT_UFORMAT("-%1")(mpt::ufmt::dec0<3>(i + 1));
+						caption = MPT_CFORMAT("sample %1")(i + 1);
 					}
 					// Unmute sample to process
 					MuteSample(static_cast<SAMPLEINDEX>(i + 1), false);
@@ -1692,12 +1692,12 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 					if(!m_SndFile.Instruments[i + 1]->name.empty())
 					{
-						fileNameAdd += mpt::format(U_("-%1_%2"))(mpt::ufmt::dec0<3>(i + 1), mpt::ToUnicode(m_SndFile.GetCharsetInternal(), m_SndFile.Instruments[i + 1]->name));
-						caption = mpt::cformat(_T("%1:%2"))(i + 1, mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.Instruments[i + 1]->name));
+						fileNameAdd += MPT_UFORMAT("-%1_%2")(mpt::ufmt::dec0<3>(i + 1), mpt::ToUnicode(m_SndFile.GetCharsetInternal(), m_SndFile.Instruments[i + 1]->name));
+						caption = MPT_CFORMAT("%1:%2")(i + 1, mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.Instruments[i + 1]->name));
 					} else
 					{
-						fileNameAdd += mpt::format(U_("-%1"))(mpt::ufmt::dec0<3>(i + 1));
-						caption = mpt::cformat(_T("instrument %1"))(i + 1);
+						fileNameAdd += MPT_UFORMAT("-%1")(mpt::ufmt::dec0<3>(i + 1));
+						caption = MPT_CFORMAT("instrument %1")(i + 1);
 					}
 					// Unmute instrument to process
 					MuteInstrument(static_cast<SAMPLEINDEX>(i + 1), false);
@@ -2893,7 +2893,7 @@ void CModDoc::OnSaveTemplateModule()
 	{
 		if (!CreateDirectory(templateFolder.AsNative().c_str(), nullptr))
 		{
-			Reporting::Notification(mpt::cformat(_T("Error: Unable to create template folder '%1'"))( templateFolder));
+			Reporting::Notification(MPT_CFORMAT("Error: Unable to create template folder '%1'")( templateFolder));
 			return;
 		}
 	}

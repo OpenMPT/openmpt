@@ -670,7 +670,7 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 			{
 				auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
 				if (!keyText.IsEmpty())
-					_tcscat(pszText, mpt::tformat(_T(" (%1)"))(keyText).c_str());
+					_tcscat(pszText, MPT_TFORMAT(" (%1)")(keyText).c_str());
 			}
 			return TRUE;
 		}
@@ -809,7 +809,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		if(isOPL)
 			s = _T("OPL instrument");
 		else
-			s = mpt::cformat(_T("%1-bit %2, len: %3"))(sample.GetElementarySampleSize() * 8, CString(sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono")), mpt::cfmt::dec(3, ',', sample.nLength));
+			s = MPT_CFORMAT("%1-bit %2, len: %3")(sample.GetElementarySampleSize() * 8, CString(sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono")), mpt::cfmt::dec(3, ',', sample.nLength));
 		SetDlgItemText(IDC_TEXT5, s);
 		// Name
 		s = mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[m_nSample]);
@@ -2591,7 +2591,7 @@ error:
 			break;
 		case kStretchTooShort:
 		case kStretchTooLong:
-			str = mpt::cformat(_T("Stretch ratio is too %1. Must be between 50%% and 200%%."))((errorcode == kStretchTooShort) ? CString(_T("low")) : CString(_T("high")));
+			str = MPT_CFORMAT("Stretch ratio is too %1. Must be between 50%% and 200%%.")((errorcode == kStretchTooShort) ? CString(_T("low")) : CString(_T("high")));
 			break;
 		case kOutOfMemory:
 			str = _T("Out of memory.");

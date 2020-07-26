@@ -169,46 +169,46 @@ void Manager::ReEnumerate()
 		typeDefault[U_("PulseAudio-Simple")].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_RTAUDIO)
-		typeDefault[mpt::format(U_("RtAudio-%1"))(U_("pulse"))].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT("RtAudio-%1")(U_("pulse"))].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_RTAUDIO)
-		typeDefault[mpt::format(U_("RtAudio-%1"))(U_("alsa"))].value = Info::DefaultFor::LowLevel;
+		typeDefault[MPT_UFORMAT("RtAudio-%1")(U_("alsa"))].value = Info::DefaultFor::LowLevel;
 #endif
 #if defined(MPT_WITH_RTAUDIO)
-		typeDefault[mpt::format(U_("RtAudio-%1"))(U_("jack"))].value = Info::DefaultFor::ProAudio;
+		typeDefault[MPT_UFORMAT("RtAudio-%1")(U_("jack"))].value = Info::DefaultFor::ProAudio;
 #endif
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[mpt::format(U_("PortAudio-%1"))(paALSA)].value = Info::DefaultFor::LowLevel;
+		typeDefault[MPT_UFORMAT("PortAudio-%1")(paALSA)].value = Info::DefaultFor::LowLevel;
 #endif
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[mpt::format(U_("PortAudio-%1"))(paJACK)].value = Info::DefaultFor::ProAudio;
+		typeDefault[MPT_UFORMAT("PortAudio-%1")(paJACK)].value = Info::DefaultFor::ProAudio;
 #endif
 	} else if(GetSysInfo().SystemClass == mpt::OS::Class::Darwin)
 	{
 #if defined(MPT_WITH_RTAUDIO)
-		typeDefault[mpt::format(U_("RtAudio-%1"))(U_("core"))].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT("RtAudio-%1")(U_("core"))].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[mpt::format(U_("PortAudio-%1"))(paCoreAudio)].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT("PortAudio-%1")(paCoreAudio)].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_RTAUDIO)
-		typeDefault[mpt::format(U_("RtAudio-%1"))(U_("jack"))].value = Info::DefaultFor::ProAudio;
+		typeDefault[MPT_UFORMAT("RtAudio-%1")(U_("jack"))].value = Info::DefaultFor::ProAudio;
 #endif
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[mpt::format(U_("PortAudio-%1"))(paJACK)].value = Info::DefaultFor::ProAudio;
+		typeDefault[MPT_UFORMAT("PortAudio-%1")(paJACK)].value = Info::DefaultFor::ProAudio;
 #endif
 	} else if(GetSysInfo().SystemClass == mpt::OS::Class::BSD)
 	{
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[mpt::format(U_("PortAudio-%1"))(paOSS)].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT("PortAudio-%1")(paOSS)].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_RTAUDIO)
-		typeDefault[mpt::format(U_("RtAudio-%1"))(U_("oss"))].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT("RtAudio-%1")(U_("oss"))].value = Info::DefaultFor::System;
 #endif
 	} else if(GetSysInfo().SystemClass == mpt::OS::Class::Haiku)
 	{
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[mpt::format(U_("PortAudio-%1"))(paBeOS)].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT("PortAudio-%1")(paBeOS)].value = Info::DefaultFor::System;
 #endif
 	} else
 #endif
@@ -247,17 +247,17 @@ void Manager::ReEnumerate()
 	}
 	std::stable_sort(m_SoundDevices.begin(), m_SoundDevices.end(), CompareInfo());
 
-	MPT_LOG(LogDebug, "sounddev", mpt::format(U_("Sound Devices enumerated:"))());
+	MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("Sound Devices enumerated:")());
 	for(const auto &device : m_SoundDevices)
 	{
-		MPT_LOG(LogDebug, "sounddev", mpt::format(U_(" Identifier : %1"))(device.GetIdentifier()));
-		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("  Type      : %1"))(device.type));
-		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("  InternalID: %1"))(device.internalID));
-		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("  API Name  : %1"))(device.apiName));
-		MPT_LOG(LogDebug, "sounddev", mpt::format(U_("  Name      : %1"))(device.name));
+		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT(" Identifier : %1")(device.GetIdentifier()));
+		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  Type      : %1")(device.type));
+		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  InternalID: %1")(device.internalID));
+		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  API Name  : %1")(device.apiName));
+		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  Name      : %1")(device.name));
 		for(const auto &extra : device.extraData)
 		{
-			MPT_LOG(LogDebug, "sounddev", mpt::format(U_("  Extra Data: %1 = %2"))(extra.first, extra.second));
+			MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  Extra Data: %1 = %2")(extra.first, extra.second));
 		}
 	}
 	

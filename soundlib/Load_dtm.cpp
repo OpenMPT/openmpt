@@ -592,7 +592,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 	} else if(FileReader chunk = chunks.GetChunk(DTMChunk::idVERS))
 	{
 		uint32 version = chunk.ReadUint32BE();
-		tracker = mpt::format(U_("Digital Tracker %1.%2"))(version >> 4, version & 0x0F);
+		tracker = MPT_UFORMAT("Digital Tracker %1.%2")(version >> 4, version & 0x0F);
 	} else
 	{
 		tracker = U_("Digital Tracker");

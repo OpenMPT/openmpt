@@ -445,7 +445,7 @@ mpt::ustring Version::VersionToString(mpt::Windows::Version::System version)
 	}
 	if(result.empty())
 	{
-		result = mpt::format(U_("0x%1"))(mpt::ufmt::hex0<16>(static_cast<uint64>(version)));
+		result = MPT_UFORMAT("0x%1")(mpt::ufmt::hex0<16>(static_cast<uint64>(version)));
 	}
 	return result;
 }
@@ -465,22 +465,22 @@ mpt::ustring Version::GetName() const
 		}
 	}
 	name += U_(" (");
-	name += mpt::format(U_("Version %1.%2"))(m_System.Major, m_System.Minor);
+	name += MPT_UFORMAT("Version %1.%2")(m_System.Major, m_System.Minor);
 	if(showDetails)
 	{
 		if(m_ServicePack.HasServicePack())
 		{
 			if(m_ServicePack.Minor)
 			{
-				name += mpt::format(U_(" Service Pack %1.%2"))(m_ServicePack.Major, m_ServicePack.Minor);
+				name += MPT_UFORMAT(" Service Pack %1.%2")(m_ServicePack.Major, m_ServicePack.Minor);
 			} else
 			{
-				name += mpt::format(U_(" Service Pack %1"))(m_ServicePack.Major);
+				name += MPT_UFORMAT(" Service Pack %1")(m_ServicePack.Major);
 			}
 		}
 		if(m_Build != 0)
 		{
-			name += mpt::format(U_(" (Build %1)"))(m_Build);
+			name += MPT_UFORMAT(" (Build %1)")(m_Build);
 		}
 	}
 	name += U_(")");
@@ -491,13 +491,13 @@ mpt::ustring Version::GetName() const
 			mpt::Wine::VersionContext v;
 			if(v.Version().IsValid())
 			{
-				result = mpt::format(U_("Wine %1 (%2)"))(
+				result = MPT_UFORMAT("Wine %1 (%2)")(
 					  v.Version().AsString()
 					, name
 					);
 			} else
 			{
-				result = mpt::format(U_("Wine (unknown version: '%1') (%2)"))(
+				result = MPT_UFORMAT("Wine (unknown version: '%1') (%2)")(
 					  mpt::ToUnicode(mpt::Charset::UTF8, v.RawVersion())
 					, name
 					);
@@ -517,7 +517,7 @@ mpt::ustring Version::GetNameShort() const
 		mpt::Wine::VersionContext v;
 		if(v.Version().IsValid())
 		{
-			name = mpt::format(U_("wine-%1"))(v.Version().AsString());
+			name = MPT_UFORMAT("wine-%1")(v.Version().AsString());
 		} else if(v.RawVersion().length() > 0)
 		{
 			name = U_("wine-") + Util::BinToHex(mpt::as_span(v.RawVersion()));
@@ -528,7 +528,7 @@ mpt::ustring Version::GetNameShort() const
 		name += U_("-") + Util::BinToHex(mpt::as_span(v.RawHostSysName()));
 	} else
 	{
-		name = mpt::format(U_("%1.%2"))(mpt::ufmt::dec(m_System.Major), mpt::ufmt::dec0<2>(m_System.Minor));
+		name = MPT_UFORMAT("%1.%2")(mpt::ufmt::dec(m_System.Major), mpt::ufmt::dec0<2>(m_System.Minor));
 	}
 	return name;
 }

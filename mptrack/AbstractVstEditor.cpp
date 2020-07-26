@@ -455,7 +455,7 @@ void CAbstractVstEditor::SetTitle()
 {
 	if(m_VstPlugin.m_pMixStruct)
 	{
-		CString title = mpt::cformat(_T("FX %1: "))(mpt::cfmt::dec0<2>(m_VstPlugin.m_nSlot + 1));
+		CString title = MPT_CFORMAT("FX %1: ")(mpt::cfmt::dec0<2>(m_VstPlugin.m_nSlot + 1));
 
 		bool hasCustomName = (m_VstPlugin.m_pMixStruct->GetName() != U_("")) && (m_VstPlugin.m_pMixStruct->GetName() != m_VstPlugin.m_pMixStruct->GetLibraryName());
 		if(hasCustomName)
@@ -467,7 +467,7 @@ void CAbstractVstEditor::SetTitle()
 #ifndef NO_VST
 		const CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(&m_VstPlugin);
 		if(vstPlugin != nullptr && vstPlugin->isBridged)
-			title += mpt::cformat(_T(" (%1 Bridged)"))(m_VstPlugin.GetPluginFactory().GetDllArchNameUser());
+			title += MPT_CFORMAT(" (%1 Bridged)")(m_VstPlugin.GetPluginFactory().GetDllArchNameUser());
 #endif // NO_VST
 
 		SetWindowText(title);
@@ -697,7 +697,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 	m_VstPlugin.GetInputPlugList(inputPlugs);
 	for(auto plug : inputPlugs)
 	{
-		CString name = mpt::cformat(_T("FX%1: %2"))(mpt::cfmt::dec0<2>(plug->m_nSlot + 1), mpt::ToCString(plug->m_pMixStruct->GetName()));
+		CString name = MPT_CFORMAT("FX%1: %2")(mpt::cfmt::dec0<2>(plug->m_nSlot + 1), mpt::ToCString(plug->m_pMixStruct->GetName()));
 		m_InputMenu.AppendMenu(MF_STRING, ID_PLUGSELECT + plug->m_nSlot, name);
 	}
 
@@ -711,7 +711,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 			m_InputMenu.AppendMenu(MF_SEPARATOR);
 			addSeparator = false;
 		}
-		CString name = mpt::cformat(_T("Chn%1: %2"))(mpt::cfmt::dec0<2>(chn + 1), mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[chn].szName));
+		CString name = MPT_CFORMAT("Chn%1: %2")(mpt::cfmt::dec0<2>(chn + 1), mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[chn].szName));
 		m_InputMenu.AppendMenu(MF_STRING, NULL, name);
 	}
 
@@ -725,7 +725,7 @@ void CAbstractVstEditor::UpdateInputMenu()
 			m_InputMenu.AppendMenu(MF_SEPARATOR);
 			addSeparator = false;
 		}
-		CString name = mpt::cformat(_T("Ins%1: %2"))(mpt::cfmt::dec0<2>(ins), mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetInstrumentName(ins)));
+		CString name = MPT_CFORMAT("Ins%1: %2")(mpt::cfmt::dec0<2>(ins), mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.GetInstrumentName(ins)));
 		m_InputMenu.AppendMenu(MF_STRING | ((ins == m_nInstrument) ? MF_CHECKED : 0), ID_SELECTINST + ins, name);
 	}
 

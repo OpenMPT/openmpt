@@ -342,7 +342,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						if(sample.uFlags[CHN_ADLIB])
 							s = _T("OPL");
 						else if(sample.HasSampleData())
-							s = mpt::cformat(_T("%1 Bit"))(sample.GetElementarySampleSize() * 8);
+							s = MPT_CFORMAT("%1 Bit")(sample.GetElementarySampleSize() * 8);
 						break;
 					case SMPLIST_INSTR:
 						if (sndFile.GetNumInstruments())

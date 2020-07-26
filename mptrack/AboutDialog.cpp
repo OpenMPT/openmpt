@@ -249,7 +249,7 @@ BOOL CAboutDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	mpt::ustring app;
-	app += mpt::format(U_("OpenMPT (%1) (%2 bit)"))(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()), mpt::arch_bits)
+	app += MPT_UFORMAT("OpenMPT (%1) (%2 bit)")(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()), mpt::arch_bits)
 		+ (!BuildVariants().CurrentBuildIsModern() ? U_(" for older Windows") : U_(""))
 		+ U_("\n");
 	app += U_("Version ") + Build::GetVersionStringSimple() + U_("\n\n");
@@ -357,13 +357,13 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 	{
 		case 0:
 			text = U_("OpenMPT - Open ModPlug Tracker\n\n")
-				+ mpt::format(U_("Version: %1\n"))(Build::GetVersionStringExtended())
-				+ mpt::format(U_("Source Code: %1\n"))(SourceInfo::Current().GetUrlWithRevision() + UL_(" ") + SourceInfo::Current().GetStateString())
-				+ mpt::format(U_("Build Date: %1\n"))(Build::GetBuildDateString())
-				+ mpt::format(U_("Compiler: %1\n"))(Build::GetBuildCompilerString())
-				+ mpt::format(U_("Architecture: %1\n"))(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()))
-				+ mpt::format(U_("Required Windows Kernel Level: %1\n"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel()))
-				+ mpt::format(U_("Required Windows API Level: %1\n"))(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel()));
+				+ MPT_UFORMAT("Version: %1\n")(Build::GetVersionStringExtended())
+				+ MPT_UFORMAT("Source Code: %1\n")(SourceInfo::Current().GetUrlWithRevision() + UL_(" ") + SourceInfo::Current().GetStateString())
+				+ MPT_UFORMAT("Build Date: %1\n")(Build::GetBuildDateString())
+				+ MPT_UFORMAT("Compiler: %1\n")(Build::GetBuildCompilerString())
+				+ MPT_UFORMAT("Architecture: %1\n")(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()))
+				+ MPT_UFORMAT("Required Windows Kernel Level: %1\n")(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel()))
+				+ MPT_UFORMAT("Required Windows API Level: %1\n")(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel()));
 			{
 				text += U_("Required CPU features: ");
 				std::vector<mpt::ustring> features;
@@ -392,24 +392,24 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				text += lf;
 			}
 #ifdef ENABLE_ASM
-			text += mpt::format(U_("Optional CPU features used: %1\n"))(ProcSupportToString(CPU::GetEnabledFeatures()));
+			text += MPT_UFORMAT("Optional CPU features used: %1\n")(ProcSupportToString(CPU::GetEnabledFeatures()));
 #endif // ENABLE_ASM
 			text += lf;
-			text += mpt::format(U_("System Architecture: %1\n"))(mpt::Windows::Name(mpt::Windows::GetHostArchitecture()));
+			text += MPT_UFORMAT("System Architecture: %1\n")(mpt::Windows::Name(mpt::Windows::GetHostArchitecture()));
 #ifdef ENABLE_ASM
-			text += mpt::format(U_("CPU: %1, Family %2, Model %3, Stepping %4\n"))
+			text += MPT_UFORMAT("CPU: %1, Family %2, Model %3, Stepping %4\n")
 				( mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPU::ProcVendorID) > 0) ? std::string(CPU::ProcVendorID) : std::string("Generic"))
 				, CPU::ProcFamily
 				, CPU::ProcModel
 				, CPU::ProcStepping
 				);
-			text += mpt::format(U_("CPU Name: %1\n"))(mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPU::ProcBrandID) > 0) ? std::string(CPU::ProcBrandID) : std::string("")));
-			text += mpt::format(U_("Available CPU features: %1\n"))(ProcSupportToString(CPU::GetAvailableFeatures()));
+			text += MPT_UFORMAT("CPU Name: %1\n")(mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPU::ProcBrandID) > 0) ? std::string(CPU::ProcBrandID) : std::string("")));
+			text += MPT_UFORMAT("Available CPU features: %1\n")(ProcSupportToString(CPU::GetAvailableFeatures()));
 #endif // ENABLE_ASM
-			text += mpt::format(U_("Operating System: %1\n\n"))(mpt::Windows::Version::Current().GetName());
-			text += mpt::format(U_("OpenMPT Install Path%2: %1\n"))(theApp.GetInstallPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
-			text += mpt::format(U_("OpenMPT Executable Path%2: %1\n"))(theApp.GetInstallBinArchPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
-			text += mpt::format(U_("Settings%2: %1\n"))(theApp.GetConfigFileName(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
+			text += MPT_UFORMAT("Operating System: %1\n\n")(mpt::Windows::Version::Current().GetName());
+			text += MPT_UFORMAT("OpenMPT Install Path%2: %1\n")(theApp.GetInstallPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
+			text += MPT_UFORMAT("OpenMPT Executable Path%2: %1\n")(theApp.GetInstallBinArchPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
+			text += MPT_UFORMAT("Settings%2: %1\n")(theApp.GetConfigFileName(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
 			break;
 		case 1:
 			{
@@ -448,7 +448,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 							{
 								name = mpt::ToUnicode(mpt::Charset::ASCII, info.settingsKey);
 							}
-							text += mpt::format(U_("%1: %2"))
+							text += MPT_UFORMAT("%1: %2")
 								( name
 								, info.state == ComponentStateAvailable ? U_("ok") :
 									info.state == ComponentStateUnavailable? U_("missing") :
@@ -459,7 +459,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 								);
 							if(info.type != ComponentTypeUnknown)
 							{
-								text += mpt::format(U_(" (%1)"))
+								text += MPT_UFORMAT(" (%1)")
 									( info.type == ComponentTypeBuiltin ? U_("builtin") :
 										info.type == ComponentTypeSystem ? U_("system") :
 										info.type == ComponentTypeSystemInstallable ? U_("system, optional") :
@@ -497,10 +497,10 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 
 					mpt::Wine::Context & wine = *theApp.GetWine();
 					
-					text += mpt::format(U_("Windows: %1\n"))
+					text += MPT_UFORMAT("Windows: %1\n")
 						( mpt::Windows::Version::Current().IsWindows() ? yes : no
 						);
-					text += mpt::format(U_("Windows version: %1\n"))
+					text += MPT_UFORMAT("Windows version: %1\n")
 						( 
 						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win81) ? U_("Windows 8.1") :
 						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win8) ? U_("Windows 8") :
@@ -511,61 +511,61 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinNT4) ? U_("Windows NT4") :
 						U_("unknown")
 						);
-					text += mpt::format(U_("Windows original: %1\n"))
+					text += MPT_UFORMAT("Windows original: %1\n")
 						( mpt::Windows::IsOriginal() ? yes : no
 						);
 
 					text += U_("\n");
 
-					text += mpt::format(U_("Wine: %1\n"))
+					text += MPT_UFORMAT("Wine: %1\n")
 						( mpt::Windows::IsWine() ? yes : no
 						);
-					text += mpt::format(U_("Wine Version: %1\n"))
+					text += MPT_UFORMAT("Wine Version: %1\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.VersionContext().RawVersion())
 						);
-					text += mpt::format(U_("Wine Build ID: %1\n"))
+					text += MPT_UFORMAT("Wine Build ID: %1\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.VersionContext().RawBuildID())
 						);
-					text += mpt::format(U_("Wine Host Sys Name: %1\n"))
+					text += MPT_UFORMAT("Wine Host Sys Name: %1\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.VersionContext().RawHostSysName())
 						);
-					text += mpt::format(U_("Wine Host Release: %1\n"))
+					text += MPT_UFORMAT("Wine Host Release: %1\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.VersionContext().RawHostRelease())
 						);
 
 					text += U_("\n");
 
-					text += mpt::format(U_("uname -m: %1\n"))
+					text += MPT_UFORMAT("uname -m: %1\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.Uname_m())
 						);
-					text += mpt::format(U_("HOME: %1\n"))
+					text += MPT_UFORMAT("HOME: %1\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.HOME())
 						);
-					text += mpt::format(U_("XDG_DATA_HOME: %1\n"))
+					text += MPT_UFORMAT("XDG_DATA_HOME: %1\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.XDG_DATA_HOME())
 						);
-					text += mpt::format(U_("XDG_CACHE_HOME: %1\n"))
+					text += MPT_UFORMAT("XDG_CACHE_HOME: %1\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.XDG_CACHE_HOME())
 						);
-					text += mpt::format(U_("XDG_CONFIG_HOME: %1\n"))
+					text += MPT_UFORMAT("XDG_CONFIG_HOME: %1\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.XDG_CONFIG_HOME())
 						);
 
 					text += U_("\n");
 
-					text += mpt::format(U_("OpenMPT folder: %1\n"))
+					text += MPT_UFORMAT("OpenMPT folder: %1\n")
 						( theApp.GetInstallPath().ToUnicode()
 						);
-					text += mpt::format(U_("OpenMPT folder (host): %1\n"))
+					text += MPT_UFORMAT("OpenMPT folder (host): %1\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.PathToPosix(theApp.GetInstallPath()))
 						);
-					text += mpt::format(U_("OpenMPT config folder: %1\n"))
+					text += MPT_UFORMAT("OpenMPT config folder: %1\n")
 						( theApp.GetConfigPath().ToUnicode()
 						);
-					text += mpt::format(U_("OpenMPT config folder (host): %1\n"))
+					text += MPT_UFORMAT("OpenMPT config folder (host): %1\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.PathToPosix(theApp.GetConfigPath()))
 						);
-					text += mpt::format(U_("Host root: %1\n"))
+					text += MPT_UFORMAT("Host root: %1\n")
 						( wine.PathToWindows("/").ToUnicode()
 						);
 

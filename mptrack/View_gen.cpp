@@ -315,7 +315,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		for (int iItem=0; iItem<nTabCount; iItem++)
 		{
 			const int lastItem = std::min(iItem * CHANNELS_IN_TAB + CHANNELS_IN_TAB, static_cast<int>(MAX_BASECHANNELS));
-			s = mpt::cformat(_T("%1 - %2"))(iItem * CHANNELS_IN_TAB + 1, lastItem);
+			s = MPT_CFORMAT("%1 - %2")(iItem * CHANNELS_IN_TAB + 1, lastItem);
 			TC_ITEM tci;
 			tci.mask = TCIF_TEXT | TCIF_PARAM;
 			tci.pszText = const_cast<TCHAR *>(s.GetString());
@@ -344,7 +344,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			{
 				// Text
 				if(bEnable)
-					s = mpt::cformat(_T("Channel %1"))(nChn + 1);
+					s = MPT_CFORMAT("Channel %1")(nChn + 1);
 				else
 					s = _T("");
 				SetDlgItemText(IDC_TEXT1 + ichn, s);
@@ -564,7 +564,7 @@ void CViewGlobals::PopulateChannelPlugins()
 					|| (sndFile.m_MixPlugins[ifx].GetName() != U_(""))
 					|| (sndFile.ChnSettings[nChn].nMixPlugin == ifx + 1))
 				{
-					s = mpt::cformat(_T("FX%1: "))(ifx + 1);
+					s = MPT_CFORMAT("FX%1: ")(ifx + 1);
 					s += mpt::ToCString(sndFile.m_MixPlugins[ifx].GetName());
 					int n = m_CbnEffects[ichn].AddString(s);
 					m_CbnEffects[ichn].SetItemData(n, ifx + 1);

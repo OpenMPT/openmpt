@@ -1606,11 +1606,11 @@ void CViewPattern::UpdateIndicator(bool updateAccessibility)
 	if(mainFrm == nullptr || sndFile == nullptr || !sndFile->Patterns.IsValidPat(m_nPattern))
 		return;
 
-	mainFrm->SetUserText(mpt::cformat(_T("Row %1, Col %2"))(GetCurrentRow(), GetCurrentChannel() + 1));
+	mainFrm->SetUserText(MPT_CFORMAT("Row %1, Col %2")(GetCurrentRow(), GetCurrentChannel() + 1));
 	const bool hasSelection = m_Selection.GetUpperLeft() != m_Selection.GetLowerRight();
 	if(hasSelection)
 	{
-		mainFrm->SetInfoText(mpt::cformat(_T("Selection: %1 row%2, %3 channel%4"))
+		mainFrm->SetInfoText(MPT_CFORMAT("Selection: %1 row%2, %3 channel%4")
 			(m_Selection.GetNumRows(), m_Selection.GetNumRows() != 1 ? CString(_T("s")) : CString(_T("")), m_Selection.GetNumChannels(), m_Selection.GetNumChannels() != 1 ? CString(_T("s")) : CString(_T(""))));
 	}
 	if(::GetFocus() == m_hWnd)

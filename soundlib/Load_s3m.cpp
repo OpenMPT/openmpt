@@ -271,7 +271,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			formatTrackerStr = true;
 		} else
 		{
-			madeWithTracker = mpt::format(U_("Impulse Tracker 2.14p%1"))(fileHeader.cwtv - S3MFileHeader::trkIT2_14);
+			madeWithTracker = MPT_UFORMAT("Impulse Tracker 2.14p%1")(fileHeader.cwtv - S3MFileHeader::trkIT2_14);
 		}
 		if(fileHeader.cwtv >= S3MFileHeader::trkIT2_07 && fileHeader.reserved3 != 0)
 		{
@@ -318,7 +318,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	if(formatTrackerStr)
 	{
-		madeWithTracker = mpt::format(U_("%1 %2.%3"))(madeWithTracker, (fileHeader.cwtv & 0xF00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
+		madeWithTracker = MPT_UFORMAT("%1 %2.%3")(madeWithTracker, (fileHeader.cwtv & 0xF00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
 	}
 
 	m_modFormat.formatName = U_("ScreamTracker 3");
@@ -758,7 +758,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 		mpt::IO::Offset patOffset = mpt::IO::TellWrite(f);
 		if(patOffset > 0xFFFF0)
 		{
-			AddToLog(LogError, mpt::format(U_("Too much pattern data! Writing patterns failed starting from pattern %1."))(pat));
+			AddToLog(LogError, MPT_UFORMAT("Too much pattern data! Writing patterns failed starting from pattern %1.")(pat));
 			break;
 		}
 		MPT_ASSERT((patOffset % 16) == 0);
@@ -934,7 +934,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 			// Write sample data
 			if(sampleDataOffset > 0xFFFFFF0)
 			{
-				AddToLog(LogError, mpt::format(U_("Too much sample data! Writing samples failed starting from sample %1."))(realSmp));
+				AddToLog(LogError, MPT_UFORMAT("Too much sample data! Writing samples failed starting from sample %1.")(realSmp));
 				break;
 			}
 
@@ -961,7 +961,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 		{
 			if(channelType[chn][S3MChannelType::kPCM] && channelType[chn][S3MChannelType::kAdlib])
 			{
-				AddToLog(LogWarning, mpt::format(U_("Pattern channel %1 constains both samples and OPL instruments, which is not supported by Scream Tracker 3."))(chn + 1));
+				AddToLog(LogWarning, MPT_UFORMAT("Pattern channel %1 constains both samples and OPL instruments, which is not supported by Scream Tracker 3.")(chn + 1));
 			}
 			// ST3 only supports 16 PCM channels, so if channels 17-32 are used,
 			// they must be mapped to the same "internal channels" as channels 1-16.
@@ -989,11 +989,11 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 	}
 	if(sampleCh > 16)
 	{
-		AddToLog(LogWarning, mpt::format(U_("This module has more than 16 (%1) sample channels, which is not supported by Scream Tracker 3."))(sampleCh));
+		AddToLog(LogWarning, MPT_UFORMAT("This module has more than 16 (%1) sample channels, which is not supported by Scream Tracker 3.")(sampleCh));
 	}
 	if(adlibCh > 9)
 	{
-		AddToLog(LogWarning, mpt::format(U_("This module has more than 9 (%1) OPL channels, which is not supported by Scream Tracker 3."))(adlibCh));
+		AddToLog(LogWarning, MPT_UFORMAT("This module has more than 9 (%1) OPL channels, which is not supported by Scream Tracker 3.")(adlibCh));
 	}
 
 	mpt::IO::SeekAbsolute(f, 0);

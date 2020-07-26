@@ -97,13 +97,13 @@ RAWEncoder::RAWEncoder()
 				format.Sampleformat = sampleFormat;
 				if(sampleFormat.IsFloat())
 				{
-					format.Description = mpt::format(U_("%1 Bit Floating Point Little-Endian"))(sampleFormat.GetBitsPerSample());
+					format.Description = MPT_UFORMAT("%1 Bit Floating Point Little-Endian")(sampleFormat.GetBitsPerSample());
 				} else if(sampleFormat.IsUnsigned())
 				{
-					format.Description = mpt::format(U_("%1 Bit Little-Endian (unsigned)"))(sampleFormat.GetBitsPerSample());
+					format.Description = MPT_UFORMAT("%1 Bit Little-Endian (unsigned)")(sampleFormat.GetBitsPerSample());
 				} else
 				{
-					format.Description = mpt::format(U_("%1 Bit Little-Endian"))(sampleFormat.GetBitsPerSample());
+					format.Description = MPT_UFORMAT("%1 Bit Little-Endian")(sampleFormat.GetBitsPerSample());
 				}
 				format.Bitrate = 0;
 				traits.formats.push_back(format);

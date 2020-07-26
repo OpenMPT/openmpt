@@ -309,10 +309,10 @@ Result Request::operator()(InternetSession &internet) const
 		{
 			if(!value.empty())
 			{
-				arguments.push_back(mpt::format(U_("%1=%2"))(key, value));
+				arguments.push_back(MPT_UFORMAT("%1=%2")(key, value));
 			} else
 			{
-				arguments.push_back(mpt::format(U_("%1"))(key));
+				arguments.push_back(MPT_UFORMAT("%1")(key));
 			}
 		}
 		queryPath += U_("?") + mpt::String::Combine(arguments, U_("&"));
@@ -340,13 +340,13 @@ Result Request::operator()(InternetSession &internet) const
 		std::string headersString;
 		if(!dataMimeType.empty())
 		{
-			headersString += mpt::format("Content-type: %1\r\n")(dataMimeType);
+			headersString += MPT_FORMAT("Content-type: %1\r\n")(dataMimeType);
 		}
 		if(!headers.empty())
 		{
 			for(const auto &[key, value] : headers)
 			{
-				headersString += mpt::format("%1: %2\r\n")(key, value);
+				headersString += MPT_FORMAT("%1: %2\r\n")(key, value);
 			}
 		}
 		if(HttpSendRequest(

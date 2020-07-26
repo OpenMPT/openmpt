@@ -456,16 +456,16 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 				mpt::ustring (*fmt)(unsigned int, char, const SmpLength &) = &mpt::ufmt::dec<SmpLength>;
 				if(TrackerSettings::Instance().cursorPositionInHex)
 					fmt = &mpt::ufmt::HEX<SmpLength>;
-				s = mpt::format(U_("[%1-%2] (%3 sample%4, "))(fmt(3, ',', m_dwBeginSel), fmt(3, ',', m_dwEndSel), fmt(3, ',', selLength), (selLength == 1) ? U_("") : U_("s"));
+				s = MPT_UFORMAT("[%1-%2] (%3 sample%4, ")(fmt(3, ',', m_dwBeginSel), fmt(3, ',', m_dwEndSel), fmt(3, ',', selLength), (selLength == 1) ? U_("") : U_("s"));
 
 				// Length in seconds
 				auto sampleRate = sample.GetSampleRate(sndFile.GetType());
 				if(sampleRate <= 0) sampleRate = 8363;
 				double sec = selLength / static_cast<double>(sampleRate);
 				if(sec < 1)
-					s += mpt::format(U_("%1ms"))(mpt::ufmt::flt(sec * 1000.0, 3));
+					s += MPT_UFORMAT("%1ms")(mpt::ufmt::flt(sec * 1000.0, 3));
 				else
-					s += mpt::format(U_("%1s"))(mpt::ufmt::flt(sec, 3));
+					s += MPT_UFORMAT("%1s")(mpt::ufmt::flt(sec, 3));
 
 				// Length in beats
 				double beats = selLength;
@@ -477,7 +477,7 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 					sndFile.RecalculateSamplesPerTick();
 					beats *= sndFile.GetSampleRate() / static_cast<double>(Util::mul32to64_unsigned(sndFile.m_PlayState.m_nCurrentRowsPerBeat, sndFile.m_PlayState.m_nMusicSpeed) * Util::mul32to64_unsigned(sndFile.m_PlayState.m_nSamplesPerTick, sampleRate));
 				}
-				s += mpt::format(U_(", %1 beats)"))(mpt::ufmt::flt(beats, 5));
+				s += MPT_UFORMAT(", %1 beats)")(mpt::ufmt::flt(beats, 5));
 			}
 			pMainFrm->SetInfoText(mpt::ToCString(s));
 		}
@@ -1487,7 +1487,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 		CString(*fmt)(unsigned int, char, const SmpLength &) = &mpt::cfmt::dec<SmpLength>;
 		if(TrackerSettings::Instance().cursorPositionInHex)
 			fmt = &mpt::cfmt::HEX<SmpLength>;
-		UpdateIndicator(mpt::cformat(_T("Cursor: %1"))(fmt(3, ',', x)));
+		UpdateIndicator(MPT_CFORMAT("Cursor: %1")(fmt(3, ',', x)));
 
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
@@ -2495,7 +2495,7 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 
 			uint32 freq = sndFile.GetFreqFromPeriod(sndFile.GetPeriodFromNote(note + (sndFile.GetType() == MOD_TYPE_XM ? sample.RelativeTone : 0), sample.nFineTune, sample.nC5Speed), sample.nC5Speed, 0);
 
-			pMainFrm->SetInfoText(mpt::cformat(_T("%1 (%2.%3 Hz)"))(
+			pMainFrm->SetInfoText(MPT_CFORMAT("%1 (%2.%3 Hz)")(
 				mpt::ToCString(sndFile.GetNoteName((ModCommand::NOTE)note)),
 				freq >> FREQ_FRACBITS,
 				mpt::cfmt::dec0<2>(Util::muldiv(freq & ((1 << FREQ_FRACBITS) - 1), 100, 1 << FREQ_FRACBITS))));
@@ -3365,7 +3365,7 @@ INT_PTR CViewSample::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 	{
 		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
 		if(!keyText.IsEmpty())
-			text += mpt::cformat(_T(" (%1)"))(keyText);
+			text += MPT_CFORMAT(" (%1)")(keyText);
 	}
 
 	// MFC will free() the text

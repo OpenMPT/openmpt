@@ -48,8 +48,7 @@ OPENMPT_NAMESPACE_BEGIN
 //     basically means, it should work for any 7-bit or 8-bit encoding, including for example ASCII, UTF8 or the current locale encoding.
 //     std::string         std::wstring          mpt::ustring                    mpt::tsrtring                        CString
 //     mpt::fmt            mpt::wfmt             mpt::ufmt                       mpt::tfmt                            mpt::cfmt
-//     mpt::format("%1")   mpt::wformat(L"%1")   mpt::uformat(MPT_ULITERAL(%1)   mpt::tformat(_T("%1"))               mpt::cformat(_T("%1"))
-//     mpt::format("%1")   mpt::format(L"%1")    mpt::format(MPT_USTRING(%1))    mpt::format(mpt::tstring(_T("%1"))   mpt::format(CString(_T("%1"))
+//     MPT_FORMAT("%1")    MPT_WFORMAT("%1")     MPT_UFORMAT("%1")               MPT_TFORMAT("%1")                    MPT_CFORMAT("%1")
 //  5. All functionality here delegates real work outside of the header file so that <sstream> and <locale> do not need to be included when
 //     using this functionality.
 //     Advantages:
@@ -612,28 +611,30 @@ private:
 
 	MPT_NOINLINE Tstring do_format(const mpt::span<const Tstring> vals) const
 	{
-		typedef typename mpt::string_traits<Tstring> traits;
+		using traits = typename mpt::string_traits<Tstring>;
+		using char_type = typename traits::char_type;
+		using size_type = typename traits::size_type;
 		Tstring result;
-		const typename traits::size_type len = traits::length(format);
+		const size_type len = traits::length(format);
 		traits::reserve(result, len);
-		for(typename traits::size_type pos = 0; pos != len; ++pos)
+		for(size_type pos = 0; pos != len; ++pos)
 		{
-			typename traits::char_type c = format[pos];
-			if(pos + 1 != len && c == typename traits::char_type('%'))
+			char_type c = format[pos];
+			if(pos + 1 != len && c == char_type('%'))
 			{
 				pos++;
 				c = format[pos];
-				if(typename traits::char_type('1') <= c && c <= typename traits::char_type('9'))
+				if(char_type('1') <= c && c <= char_type('9'))
 				{
-					const std::size_t n = c - typename traits::char_type('0') - 1;
+					const std::size_t n = c - char_type('0') - 1;
 					if(n < std::size(vals))
 					{
 						traits::append(result, vals[n]);
 					}
 					continue;
-				} else if(c != typename traits::char_type('%'))
+				} else if(c != char_type('%'))
 				{
-					traits::append(result, 1, typename traits::char_type('%'));
+					traits::append(result, 1, char_type('%'));
 				}
 			}
 			traits::append(result, 1, c);
@@ -659,44 +660,168 @@ public:
 
 }; // struct message_formatter<Tformat>
 
+#define MPT_FORMAT_CHECKED
+
+#ifdef MPT_FORMAT_CHECKED
+
+template <std::ptrdiff_t N, typename Tchar, typename Tstring>
+class message_formatter_counted
+{
+
+private:
+
+	message_formatter<Tstring>formatter;
+
+public:
+
+	template <typename Tchar, std::size_t literal_length>
+	inline message_formatter_counted(const Tchar (&format)[literal_length])
+		: formatter(Tstring(format))
+	{
+		return;
+	}
+
+public:
+
+	template<typename ...Ts>
+	inline Tstring operator() (Ts&&... xs) const
+	{
+		static_assert(static_cast<std::ptrdiff_t>(sizeof...(xs)) == N);
+		return formatter(std::forward<Ts>(xs)...);
+	}
+
+}; // struct message_formatter_counted<Tformat>
+
+template <typename Tchar>
+MPT_CONSTEXPRINLINE std::ptrdiff_t parse_format_string_argument_count_impl(const Tchar * const format, const std::size_t len)
+{
+	std::size_t max_arg = 0;
+	std::size_t args = 0;
+	for(std::size_t pos = 0; pos != len; ++pos)
+	{
+		Tchar c = format[pos];
+		if(pos + 1 != len && c == Tchar('%'))
+		{
+			pos++;
+			c = format[pos];
+			if(Tchar('1') <= c && c <= Tchar('9'))
+			{
+				const std::size_t n = c - Tchar('0');
+				if(n > max_arg)
+				{
+					max_arg = n;
+				}
+				args += 1;
+				continue;
+			} else if(c != Tchar('%'))
+			{
+				// nothing
+			}
+		}
+	}
+	if(max_arg != args)
+	{
+		return -1;
+	}
+	return args;
+}
+
+template <typename Tchar, std::size_t literal_length>
+MPT_CONSTEXPRINLINE std::ptrdiff_t parse_format_string_argument_count(const Tchar (&format)[literal_length])
+{
+	return parse_format_string_argument_count_impl(format, literal_length - 1);
+}
+
+
+template<std::size_t args, typename Tchar, std::size_t N>
+inline auto format_counted(const Tchar (&format)[N])
+{
+	typedef typename mpt::String::detail::to_string_type<Tchar>::type Tstring;
+	return message_formatter_counted<args, Tchar, Tstring>(format);
+}
+
+template<std::size_t args, typename Tstring, typename Tchar, std::size_t N>
+inline auto format_counted_typed(const Tchar (&format)[N])
+{
+	return message_formatter_counted<args, Tchar, Tstring>(format);
+}
+
+#define MPT_DEPRECATED_FORMAT /* [[deprecated]] */
+
+#else // !MPT_FORMAT_CHECKED
+
+#define MPT_DEPRECATED_FORMAT
+
+#endif // MPT_FORMAT_CHECKED
+
 template<typename Tformat>
-inline message_formatter<typename mpt::String::detail::to_string_type<Tformat>::type> format(Tformat format)
+MPT_DEPRECATED_FORMAT inline message_formatter<typename mpt::String::detail::to_string_type<Tformat>::type> format_unchecked(Tformat format)
 {
 	typedef typename mpt::String::detail::to_string_type<Tformat>::type Tstring;
 	return message_formatter<Tstring>(Tstring(std::move(format)));
 }
+#ifdef MPT_FORMAT_CHECKED
+#define MPT_FORMAT(f) mpt::format_counted<mpt::parse_format_string_argument_count(f)>(f)
+#else // !MPT_FORMAT_CHECKED
+#define MPT_FORMAT(f) mpt::format_unchecked( f )
+#endif // MPT_FORMAT_CHECKED
 
 #if MPT_WSTRING_FORMAT
-inline message_formatter<std::wstring> wformat(std::wstring format)
+MPT_DEPRECATED_FORMAT inline message_formatter<std::wstring> wformat_unchecked(std::wstring format)
 {
 	return message_formatter<std::wstring>(std::move(format));
 }
+#ifdef MPT_FORMAT_CHECKED
+#define MPT_WFORMAT(f) mpt::format_counted_typed<mpt::parse_format_string_argument_count( L ## f ), std::wstring>( L ## f )
+#else // !MPT_FORMAT_CHECKED
+#define MPT_WFORMAT(f) mpt::format_unchecked( L ## f )
+#endif // MPT_FORMAT_CHECKED
 #endif
 
-inline message_formatter<mpt::ustring> uformat(mpt::ustring format)
+MPT_DEPRECATED_FORMAT inline message_formatter<mpt::ustring> uformat_unchecked(mpt::ustring format)
 {
 	return message_formatter<mpt::ustring>(std::move(format));
 }
+#ifdef MPT_FORMAT_CHECKED
+#define MPT_UFORMAT(f) mpt::format_counted_typed<mpt::parse_format_string_argument_count(MPT_ULITERAL(f)), mpt::ustring>(MPT_ULITERAL(f))
+#else // !MPT_FORMAT_CHECKED
+#define MPT_UFORMAT(f) mpt::format_unchecked( U_(f) )
+#endif // MPT_FORMAT_CHECKED
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-inline message_formatter<mpt::lstring> lformat(mpt::lstring format)
+MPT_DEPRECATED_FORMAT inline message_formatter<mpt::lstring> lformat_unchecked(mpt::lstring format)
 {
 	return message_formatter<mpt::lstring>(std::move(format));
 }
+#ifdef MPT_FORMAT_CHECKED
+#define MPT_LFORMAT(f) mpt::format_counted_typed<mpt::parse_format_string_argument_count(f), mpt::lstring>(f)
+#else // !MPT_FORMAT_CHECKED
+#define MPT_LFORMAT(f) mpt::format_unchecked( mpt::lstring(f) )
+#endif // MPT_FORMAT_CHECKED
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 #if MPT_OS_WINDOWS
-inline message_formatter<mpt::tstring> tformat(mpt::tstring format)
+MPT_DEPRECATED_FORMAT inline message_formatter<mpt::tstring> tformat_unchecked(mpt::tstring format)
 {
 	return message_formatter<mpt::tstring>(std::move(format));
 }
+#ifdef MPT_FORMAT_CHECKED
+#define MPT_TFORMAT(f) mpt::format_counted_typed<mpt::parse_format_string_argument_count(TEXT(f)), mpt::tstring>(TEXT(f))
+#else // !MPT_FORMAT_CHECKED
+#define MPT_TFORMAT(f) mpt::format_unchecked( mpt::tstring(TEXT(f)) )
+#endif // MPT_FORMAT_CHECKED
 #endif
 
 #if defined(MPT_WITH_MFC)
-inline message_formatter<CString> cformat(CString format)
+MPT_DEPRECATED_FORMAT inline message_formatter<CString> cformat_unchecked(CString format)
 {
 	return message_formatter<CString>(std::move(format));
 }
+#ifdef MPT_FORMAT_CHECKED
+#define MPT_CFORMAT(f) mpt::format_counted_typed<mpt::parse_format_string_argument_count(TEXT(f)), CString>(TEXT(f))
+#else // !MPT_FORMAT_CHECKED
+#define MPT_CFORMAT(f) mpt::format_unchecked( CString(_T(f)) )
+#endif // MPT_FORMAT_CHECKED
 #endif // MPT_WITH_MFC
 
 } // namespace mpt

@@ -722,10 +722,10 @@ mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 		if(q < 0) q = 0;
 		if(q >= 10)
 		{
-			return mpt::format(U_("VBR -V%1 (~%2 kbit)"))(U_("9.999"), q_table[q]);
+			return MPT_UFORMAT("VBR -V%1 (~%2 kbit)")(U_("9.999"), q_table[q]);
 		} else
 		{
-			return mpt::format(U_("VBR -V%1 (~%2 kbit)"))(q, q_table[q]);
+			return MPT_UFORMAT("VBR -V%1 (~%2 kbit)")(q, q_table[q]);
 		}
 	}
 #endif // MPT_WITH_LAME

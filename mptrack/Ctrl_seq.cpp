@@ -712,9 +712,9 @@ HRESULT COrderList::get_accName(VARIANT, BSTR *pszName)
 	const bool singleSel = m_nScrollPos2nd == ORDERINDEX_INVALID || m_nScrollPos2nd == m_nScrollPos;
 	const auto firstOrd = singleSel ? m_nScrollPos : std::min(m_nScrollPos, m_nScrollPos2nd), lastOrd = singleSel ? m_nScrollPos : std::max(m_nScrollPos, m_nScrollPos2nd);
 	if(singleSel)
-		s = mpt::cformat(_T("Order %1, "))(m_nScrollPos);
+		s = MPT_CFORMAT("Order %1, ")(m_nScrollPos);
 	else
-		s = mpt::cformat(_T("Order selection %1 to %2: "))(firstOrd, lastOrd);
+		s = MPT_CFORMAT("Order selection %1 to %2: ")(firstOrd, lastOrd);
 	bool first = true;
 	for(ORDERINDEX o = firstOrd; o <= lastOrd; o++)
 	{
@@ -727,7 +727,7 @@ HRESULT COrderList::get_accName(VARIANT, BSTR *pszName)
 		else if(pat == ModSequence::GetInvalidPatIndex())
 			s += _T(" Stop");
 		else
-			s += mpt::cformat(_T("Pattern %1"))(pat);
+			s += MPT_CFORMAT("Pattern %1")(pat);
 		if(sndFile.Patterns.IsValidPat(pat))
 		{
 			if(const auto patName = sndFile.Patterns[pat].GetName(); !patName.empty())
@@ -1125,9 +1125,9 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 			{
 				CString str;
 				if(sndFile.Order(i).GetName().empty())
-					str = mpt::cformat(_T("Sequence %1"))(i + 1);
+					str = MPT_CFORMAT("Sequence %1")(i + 1);
 				else
-					str = mpt::cformat(_T("%1: %2"))(i + 1, mpt::ToCString(sndFile.Order(i).GetName()));
+					str = MPT_CFORMAT("%1: %2")(i + 1, mpt::ToCString(sndFile.Order(i).GetName()));
 				const UINT flags = (sndFile.Order.GetCurrentSequenceIndex() == i) ? MF_STRING | MF_CHECKED : MF_STRING;
 				AppendMenu(menuSequence, flags, ID_SEQUENCE_ITEM + i, str);
 			}
@@ -1474,7 +1474,7 @@ void COrderList::SelectSequence(const SEQUENCEINDEX seq)
 	} else if(seq == kDeleteSequence)
 	{
 		SEQUENCEINDEX curSeq = sndFile.Order.GetCurrentSequenceIndex();
-		mpt::ustring str = mpt::format(U_("Remove sequence %1: %2?"))(curSeq + 1, mpt::ToUnicode(Order().GetName()));
+		mpt::ustring str = MPT_UFORMAT("Remove sequence %1: %2?")(curSeq + 1, mpt::ToUnicode(Order().GetName()));
 		if(Reporting::Confirm(str) == cnfYes)
 			sndFile.Order.RemoveSequence(curSeq);
 		else

@@ -43,13 +43,13 @@ mpt::ustring PulseaudioSimple::PulseErrorString(int error)
 	const char *str = pa_strerror(error);
 	if(!str)
 	{
-		return mpt::format(U_("error=%1"))(error);
+		return MPT_UFORMAT("error=%1")(error);
 	}
 	if(std::strlen(str) == 0)
 	{
-		return mpt::format(U_("error=%1"))(error);
+		return MPT_UFORMAT("error=%1")(error);
 	}
-	return mpt::format(U_("%1 (error=%2)"))(mpt::ToUnicode(mpt::Charset::UTF8, str), error);
+	return MPT_UFORMAT("%1 (error=%2)")(mpt::ToUnicode(mpt::Charset::UTF8, str), error);
 }
 
 
@@ -348,7 +348,7 @@ bool PulseaudioSimple::InternalOpen()
 		&error);
 	if(!m_PA_SimpleOutput)
 	{
-		SendDeviceMessage(LogError, mpt::format(U_("pa_simple_new failed: %1"))(PulseErrorString(error)));
+		SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_new failed: %1")(PulseErrorString(error)));
 		InternalClose();
 		return false;
 	}
@@ -370,7 +370,7 @@ void PulseaudioSimple::InternalFillAudioBuffer()
 	pa_usec_t latency_usec = pa_simple_get_latency(m_PA_SimpleOutput, &error);
 	if(error != 0)
 	{
-		SendDeviceMessage(LogError, mpt::format(U_("pa_simple_get_latency failed: %1"))(PulseErrorString(error)));
+		SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_get_latency failed: %1")(PulseErrorString(error)));
 		RequestClose();
 		return;
 	}
@@ -390,7 +390,7 @@ void PulseaudioSimple::InternalFillAudioBuffer()
 	error = 0;
 	if(pa_simple_write(m_PA_SimpleOutput, &(m_OutputBuffer[0]), m_OutputBuffer.size() * sizeof(float32), &error) < 0)
 	{
-		SendDeviceMessage(LogError, mpt::format(U_("pa_simple_write failed: %1"))(PulseErrorString(error)));
+		SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_write failed: %1")(PulseErrorString(error)));
 		needsClose = true;
 	}
 	m_StatisticLastLatencyFrames.store(latencyFrames);
@@ -445,14 +445,14 @@ void PulseaudioSimple::InternalStopFromSoundThread()
 		error = 0;
 		if(pa_simple_flush(m_PA_SimpleOutput, &error) < 0)
 		{
-			SendDeviceMessage(LogError, mpt::format(U_("pa_simple_flush failed: %1"))(PulseErrorString(error)));
+			SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_flush failed: %1")(PulseErrorString(error)));
 		}
 	} else
 	{
 		error = 0;
 		if(pa_simple_drain(m_PA_SimpleOutput, &error) < 0)
 		{
-			SendDeviceMessage(LogError, mpt::format(U_("pa_simple_drain failed: %1"))(PulseErrorString(error)));
+			SendDeviceMessage(LogError, MPT_UFORMAT("pa_simple_drain failed: %1")(PulseErrorString(error)));
 		}
 	}
 	return;
