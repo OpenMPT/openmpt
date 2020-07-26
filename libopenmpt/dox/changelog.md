@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.24-pre
+
 ### libopenmpt 0.3.23 (2020-07-26)
 
  *  [**Bug**] `libopenmpt/libopenmpt.h` failed to compile with
