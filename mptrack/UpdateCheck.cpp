@@ -89,6 +89,7 @@ namespace Update {
 
 	struct download {
 		mpt::ustring url = U_("");
+		mpt::ustring download_url = U_("");
 		mpt::ustring type = U_("");
 		bool can_autoupdate = false;
 		mpt::ustring autoupdate_minversion = U_("");
@@ -100,6 +101,7 @@ namespace Update {
 	};
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(download
 		,url
+		,download_url
 		,type
 		,can_autoupdate
 		,autoupdate_minversion
@@ -1518,9 +1520,9 @@ void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 			{
 				return;
 			}
-		} else if(!updateInfo.download.empty())
+		} else if(!updateInfo.download.empty() && !versionInfo.downloads[updateInfo.download].download_url.empty())
 		{
-			CTrackApp::OpenURL(updateInfo.download);
+			CTrackApp::OpenURL(versionInfo.downloads[updateInfo.download].download_url);
 		} else
 		{
 			CTrackApp::OpenURL(versionInfo.announcement_url);

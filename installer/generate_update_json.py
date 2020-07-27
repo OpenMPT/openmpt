@@ -159,6 +159,7 @@ update = {
 		"downloads": {
 			"installer": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-Setup.update.json",
+				"download_url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-Setup.exe",
 				"type": "installer",
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
@@ -170,6 +171,7 @@ update = {
 			},
 			"portable-x86": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-x86.update.json",
+				"download_url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-x86.zip",
 				"type": "archive",
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
@@ -181,6 +183,7 @@ update = {
 			},
 			"portable-x86-legacy": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-x86-legacy.update.json",
+				"download_url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-x86-legacy.zip",
 				"type": "archive",
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
@@ -192,6 +195,7 @@ update = {
 			},
 			"portable-amd64": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-amd64.update.json",
+				"download_url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-amd64.zip",
 				"type": "archive",
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
@@ -203,6 +207,7 @@ update = {
 			},
 			"portable-amd64-legacy": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-amd64-legacy.update.json",
+				"download_url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-amd64-legacy.zip",
 				"type": "archive",
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
@@ -214,6 +219,7 @@ update = {
 			},
 			"portable-arm": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm.update.json",
+				"download_url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm.zip",
 				"type": "archive",
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
@@ -225,6 +231,7 @@ update = {
 			},
 			"portable-arm64": {
 				"url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm64.update.json",
+				"download_url": "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm64.zip",
 				"type": "archive",
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
