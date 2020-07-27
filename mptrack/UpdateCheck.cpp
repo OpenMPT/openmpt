@@ -45,32 +45,32 @@ namespace Update {
 		uint64 wine_minor = 0;
 		uint64 wine_update = 0;
 	};
-	MPT_JSON_INLINE(Update::windowsversion, {
-		MPT_JSON_MAP(version_major);
-		MPT_JSON_MAP(version_minor);
-		MPT_JSON_MAP(servicepack_major);
-		MPT_JSON_MAP(servicepack_minor);
-		MPT_JSON_MAP(build);
-		MPT_JSON_MAP(wine_major);
-		MPT_JSON_MAP(wine_minor);
-		MPT_JSON_MAP(wine_update);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(windowsversion
+		,version_major
+		,version_minor
+		,servicepack_major
+		,servicepack_minor
+		,build
+		,wine_major
+		,wine_minor
+		,wine_update
+	)
 
 	struct autoupdate_installer {
 		std::vector<mpt::ustring> arguments = {};
 	};
-	MPT_JSON_INLINE(Update::autoupdate_installer, {
-		MPT_JSON_MAP(arguments);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(autoupdate_installer
+		,arguments
+	)
 
 	struct autoupdate_archive {
 		mpt::ustring subfolder = U_("");
 		mpt::ustring restartbinary = U_("");
 	};
-	MPT_JSON_INLINE(Update::autoupdate_archive, {
-		MPT_JSON_MAP(subfolder);
-		MPT_JSON_MAP(restartbinary);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(autoupdate_archive
+		,subfolder
+		,restartbinary
+	)
 
 	struct downloadinfo {
 		mpt::ustring url = U_("");
@@ -79,13 +79,13 @@ namespace Update {
 		std::optional<autoupdate_installer> autoupdate_installer;
 		std::optional<autoupdate_archive> autoupdate_archive;
 	};
-	MPT_JSON_INLINE(Update::downloadinfo, {
-		MPT_JSON_MAP(url);
-		MPT_JSON_MAP(checksums);
-		MPT_JSON_MAP(filename);
-		MPT_JSON_MAP(autoupdate_installer);
-		MPT_JSON_MAP(autoupdate_archive);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(downloadinfo
+		,url
+		,checksums
+		,filename
+		,autoupdate_installer
+		,autoupdate_archive
+	)
 
 	struct download {
 		mpt::ustring url = U_("");
@@ -98,17 +98,17 @@ namespace Update {
 		std::map<mpt::ustring, bool> supported_architectures = {};
 		std::map<mpt::ustring, std::map<mpt::ustring, bool>> required_processor_features = {};
 	};
-	MPT_JSON_INLINE(Update::download, {
-		MPT_JSON_MAP(url);
-		MPT_JSON_MAP(type);
-		MPT_JSON_MAP(can_autoupdate);
-		MPT_JSON_MAP(autoupdate_minversion);
-		MPT_JSON_MAP(os);
-		MPT_JSON_MAP(required_windows_version);
-		MPT_JSON_MAP(required_architectures);
-		MPT_JSON_MAP(supported_architectures);
-		MPT_JSON_MAP(required_processor_features);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(download
+		,url
+		,type
+		,can_autoupdate
+		,autoupdate_minversion
+		,os
+		,required_windows_version
+		,required_architectures
+		,supported_architectures
+		,required_processor_features
+	)
 
 	struct versioninfo {
 		mpt::ustring version = U_("");
@@ -117,13 +117,13 @@ namespace Update {
 		mpt::ustring changelog_url = U_("");
 		std::map<mpt::ustring, download> downloads = {};
 	};
-	MPT_JSON_INLINE(Update::versioninfo, {
-		MPT_JSON_MAP(version);
-		MPT_JSON_MAP(date);
-		MPT_JSON_MAP(announcement_url);
-		MPT_JSON_MAP(changelog_url);
-		MPT_JSON_MAP(downloads);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(versioninfo
+		,version
+		,date
+		,announcement_url
+		,changelog_url
+		,downloads
+	)
 
 	using versions = std::map<mpt::ustring, versioninfo>;
 
