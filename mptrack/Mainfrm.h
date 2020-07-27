@@ -60,9 +60,11 @@ enum
 
 enum
 {
-	MPT_WM_APP_UPDATECHECK_PROGRESS = WM_APP + 1,
-	MPT_WM_APP_UPDATECHECK_SUCCESS = WM_APP + 2,
-	MPT_WM_APP_UPDATECHECK_FAILURE = WM_APP + 3,
+	MPT_WM_APP_UPDATECHECK_START = WM_APP + 1,
+	MPT_WM_APP_UPDATECHECK_PROGRESS = WM_APP + 2,
+	MPT_WM_APP_UPDATECHECK_CANCELED = WM_APP + 3,
+	MPT_WM_APP_UPDATECHECK_FAILURE = WM_APP + 4,
+	MPT_WM_APP_UPDATECHECK_SUCCESS = WM_APP + 5,
 };
 
 enum
@@ -303,6 +305,7 @@ protected:
 	UINT m_nAvgMixChn = 0, m_nMixChn = 0;
 	// Misc
 	class COptionsSoundcard *m_SoundCardOptionsDialog = nullptr;
+	class CUpdateSetupDlg *m_UpdateOptionsDialog = nullptr;
 	DWORD helpCookie = 0;
 	bool m_bOptionsLocked = false;
 
@@ -529,9 +532,12 @@ protected:
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnInternetUpdate();
 	afx_msg void OnShowSettingsFolder();
+	afx_msg LRESULT OnUpdateCheckStart(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnUpdateCheckProgress(WPARAM wparam, LPARAM lparam);
-	afx_msg LRESULT OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam);
+	afx_msg LRESULT OnUpdateCheckCanceled(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam);
+	afx_msg LRESULT OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam);
+	afx_msg void OnToolbarUpdateIndicatorClick();
 	afx_msg void OnHelp();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg BOOL OnQueryEndSession();

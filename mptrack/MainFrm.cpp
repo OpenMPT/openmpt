@@ -46,6 +46,7 @@
 #include "../soundlib/plugins/PluginManager.h"
 #include "Vstplug.h"
 #include "FileDialog.h"
+#include "ProgressDialog.h"
 #include <HtmlHelp.h>
 
 
@@ -109,9 +110,11 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_SETMODIFIED,			&CMainFrame::OnSetModified)
 	ON_COMMAND(ID_INTERNETUPDATE,			&CMainFrame::OnInternetUpdate)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	&CMainFrame::OnShowSettingsFolder)
+	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_START, &CMainFrame::OnUpdateCheckStart)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_PROGRESS, &CMainFrame::OnUpdateCheckProgress)
-	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_SUCCESS, &CMainFrame::OnUpdateCheckSuccess)
+	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_CANCELED, &CMainFrame::OnUpdateCheckCanceled)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_FAILURE, &CMainFrame::OnUpdateCheckFailure)
+	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_SUCCESS, &CMainFrame::OnUpdateCheckSuccess)
 	ON_COMMAND(ID_HELPSHOW,					&CMainFrame::OnHelp)
 
 	ON_COMMAND_RANGE(ID_MRU_LIST_FIRST, ID_MRU_LIST_LAST, &CMainFrame::OnOpenMRUItem)
@@ -1904,8 +1907,10 @@ void CMainFrame::OnViewOptions()
 	if(mpt::Windows::IsWine()) dlg.AddPage(&winedlg);
 	m_bOptionsLocked = true;
 	m_SoundCardOptionsDialog = &sounddlg;
+	m_UpdateOptionsDialog = &updatedlg;
 	dlg.DoModal();
 	m_SoundCardOptionsDialog = nullptr;
+	m_UpdateOptionsDialog = nullptr;
 	m_bOptionsLocked = false;
 	m_wndTree.OnOptionsChanged();
 }
@@ -2552,26 +2557,188 @@ void CMainFrame::OnShowSettingsFolder()
 }
 
 
-LRESULT CMainFrame::OnUpdateCheckProgress(WPARAM wparam, LPARAM lparam)
+
+class CUpdateCheckProgressDialog
+	: public CProgressDialog
 {
-	MPT_UNREFERENCED_PARAMETER(wparam);
-	MPT_UNREFERENCED_PARAMETER(lparam);
+public:
+	CUpdateCheckProgressDialog(CWnd *parent)
+		: CProgressDialog(parent)
+	{
+		return;
+	}
+	void Run() override
+	{
+	}
+};
+
+static std::unique_ptr<CUpdateCheckProgressDialog> g_UpdateCheckProgressDialog = nullptr;
+
+
+
+LRESULT CMainFrame::OnUpdateCheckStart(WPARAM wparam, LPARAM lparam)
+{
+	bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
+	CString updateText = _T("Checking for updates...");
+	if(isAutoUpdate)
+	{
+		SetHelpText(updateText);
+	} else if(m_UpdateOptionsDialog)
+	{
+		m_UpdateOptionsDialog->SetDlgItemText(IDC_LASTUPDATE, updateText);
+	} else
+	{
+		if(!g_UpdateCheckProgressDialog)
+		{
+			g_UpdateCheckProgressDialog = std::make_unique<CUpdateCheckProgressDialog>(CMainFrame::GetMainFrame());
+			g_UpdateCheckProgressDialog->Create(IDD_PROGRESS, CMainFrame::GetMainFrame());
+			g_UpdateCheckProgressDialog->SetTitle(_T("Checking for updates..."));
+			g_UpdateCheckProgressDialog->SetText(_T("Checking for updates..."));
+			g_UpdateCheckProgressDialog->SetAbortText(_T("&Cancel"));
+			g_UpdateCheckProgressDialog->SetRange(0, 100);
+			g_UpdateCheckProgressDialog->ShowWindow(SW_SHOWDEFAULT);
+		}
+		if(g_UpdateCheckProgressDialog)
+		{
+			g_UpdateCheckProgressDialog->SetProgress(0);
+		}
+	}
 	return TRUE;
 }
 
 
-LRESULT CMainFrame::OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam)
+LRESULT CMainFrame::OnUpdateCheckProgress(WPARAM wparam, LPARAM lparam)
 {
-	TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(CUpdateCheck::ResultFromMessage(wparam, lparam).CheckTime);
-	CUpdateCheck::ShowSuccessGUI(wparam, lparam);
+	bool isAutoUpdate = wparam ? true : false;
+	CString updateText = MPT_CFORMAT("Checking for updates... {}%")(lparam);
+	if(isAutoUpdate)
+	{
+		SetHelpText(updateText);
+	} else if(m_UpdateOptionsDialog)
+	{
+		m_UpdateOptionsDialog->SetDlgItemText(IDC_LASTUPDATE, updateText);
+	} else
+	{
+		if(g_UpdateCheckProgressDialog)
+		{
+			g_UpdateCheckProgressDialog->SetProgress(lparam);
+			if(g_UpdateCheckProgressDialog->m_abort)
+			{
+				return FALSE;
+			}
+		}
+	}
+	return TRUE;
+}
+
+
+LRESULT CMainFrame::OnUpdateCheckCanceled(WPARAM wparam, LPARAM lparam)
+{
+	bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
+	CString updateText = _T("Checking for updates... Canceled.");
+	if(isAutoUpdate)
+	{
+		SetHelpText(updateText);
+	} else if(m_UpdateOptionsDialog)
+	{
+		m_UpdateOptionsDialog->SetDlgItemText(IDC_LASTUPDATE, updateText);
+		m_UpdateOptionsDialog->SettingChanged(TrackerSettings::Instance().UpdateLastUpdateCheck.GetPath());
+	} else
+	{
+		if(g_UpdateCheckProgressDialog)
+		{
+			g_UpdateCheckProgressDialog->DestroyWindow();
+			g_UpdateCheckProgressDialog = nullptr;
+		}
+	}
+	if(isAutoUpdate)
+	{
+		SetHelpText(_T(""));
+	} else if(m_UpdateOptionsDialog)
+	{
+		// nothing
+	} else
+	{
+		// nothing
+	}
 	return TRUE;
 }
 
 
 LRESULT CMainFrame::OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam)
 {
+	bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
+	CString updateText = MPT_CFORMAT("Checking for updates failed: {}")(CUpdateCheck::GetFailureMessage(wparam, lparam)).GetString();
+	if(isAutoUpdate)
+	{
+		SetHelpText(updateText);
+	} else if(m_UpdateOptionsDialog)
+	{
+		m_UpdateOptionsDialog->SetDlgItemText(IDC_LASTUPDATE, updateText);
+		m_UpdateOptionsDialog->SettingChanged(TrackerSettings::Instance().UpdateLastUpdateCheck.GetPath());
+	} else
+	{
+		if(g_UpdateCheckProgressDialog)
+		{
+			g_UpdateCheckProgressDialog->DestroyWindow();
+			g_UpdateCheckProgressDialog = nullptr;
+		}
+	}
 	CUpdateCheck::ShowFailureGUI(wparam, lparam);
+	if(isAutoUpdate)
+	{
+		SetHelpText(_T(""));
+	} else if(m_UpdateOptionsDialog)
+	{
+		// nothing
+	} else
+	{
+		// nothing
+	}
 	return TRUE;
+}
+
+
+LRESULT CMainFrame::OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam)
+{
+	bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
+	CString updateText = MPT_CFORMAT("Checking for updates... Done.")().GetString();
+	// TODO:
+	// UpdateToolbarUpdateIndicator(CUpdateCheck::ResultFromMessage(wparam, lparam));
+	if(isAutoUpdate)
+	{
+		SetHelpText(updateText);
+	} else if(m_UpdateOptionsDialog)
+	{
+		m_UpdateOptionsDialog->SetDlgItemText(IDC_LASTUPDATE, updateText);
+	} else
+	{
+		SetHelpText(updateText);
+		if(g_UpdateCheckProgressDialog)
+		{
+			g_UpdateCheckProgressDialog->DestroyWindow();
+			g_UpdateCheckProgressDialog = nullptr;
+		}
+	}
+	CUpdateCheck::ShowSuccessGUI(wparam, lparam);
+	if(isAutoUpdate)
+	{
+		SetHelpText(_T(""));
+	} else if(m_UpdateOptionsDialog)
+	{
+		// nothing
+	} else
+	{
+		// nothing
+	}
+	return TRUE;
+}
+
+
+void CMainFrame::OnToolbarUpdateIndicatorClick()
+{
+	// TODO
+	CUpdateCheck::DoManualUpdateCheck();
 }
 
 

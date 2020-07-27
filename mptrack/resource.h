@@ -981,6 +981,7 @@
 #define IDC_STATIC_RECORDING            2513
 #define IDC_COMBO_RECORDING_CHANNELS    2514
 #define IDC_COMBO_RECORDING_SOURCE      2515
+#define IDC_CHECK_UPDATEINSTALLAUTOMATICALLY 2516
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1287,7 +1288,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        543
 #define _APS_NEXT_COMMAND_VALUE         44646
-#define _APS_NEXT_CONTROL_VALUE         2516
+#define _APS_NEXT_CONTROL_VALUE         2517
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif

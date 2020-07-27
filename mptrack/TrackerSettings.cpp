@@ -312,20 +312,28 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, vstHostVendorVersion(conf, U_("VST Plugins"), U_("HostVendorVersion"), Version::Current().GetRawVersion())
 	// Update
 	, UpdateEnabled(conf, U_("Update"), U_("Enabled"), true)
+	, UpdateInstallAutomatically(conf, U_("Update"), U_("InstallAutomatically"), false)
 	, UpdateLastUpdateCheck(conf, U_("Update"), U_("LastUpdateCheck"), mpt::Date::Unix(time_t()))
 	, UpdateUpdateCheckPeriod_DEPRECATED(conf, U_("Update"), U_("UpdateCheckPeriod"), 7)
 	, UpdateIntervalDays(conf, U_("Update"), U_("UpdateCheckIntervalDays"), 7)
 	, UpdateChannel(conf, U_("Update"), U_("Channel"), UpdateChannelRelease)
+#if MPT_UPDATE_LEGACY
 	, UpdateUpdateURL_DEPRECATED(conf, U_("Update"), U_("UpdateURL"), CUpdateCheck::GetDefaultChannelReleaseURL())
 	, UpdateChannelReleaseURL(conf, U_("Update"), U_("ChannelReleaseURL"), CUpdateCheck::GetDefaultChannelReleaseURL())
 	, UpdateChannelNextURL(conf, U_("Update"), U_("ChannelStableURL"), CUpdateCheck::GetDefaultChannelNextURL())
 	, UpdateChannelDevelopmentURL(conf, U_("Update"), U_("ChannelDevelopmentURL"), CUpdateCheck::GetDefaultChannelDevelopmentURL())
+#else // !MPT_UPDATE_LEGACY
+	, UpdateUpdateURL_DEPRECATED(conf, U_("Update"), U_("UpdateURL"), U_("https://update.openmpt.org/check/$VERSION/$GUID"))
+#endif // MPT_UPDATE_LEGACY
 	, UpdateAPIURL(conf, U_("Update"), U_("APIURL"), CUpdateCheck::GetDefaultAPIURL())
 	, UpdateStatisticsConsentAsked(conf, U_("Update"), U_("StatistisConsentAsked"), false)
 	, UpdateStatistics(conf, U_("Update"), U_("Statistis"), false)
 	, UpdateSendGUID_DEPRECATED(conf, U_("Update"), U_("SendGUID"), false)
 	, UpdateShowUpdateHint(conf, U_("Update"), U_("ShowUpdateHint"), true)
 	, UpdateIgnoreVersion(conf, U_("Update"), U_("IgnoreVersion"), _T(""))
+	, UpdateExperimentalNewAutoUpdate(conf, U_("Update"), U_("ExperimentalNewAutoUpdate"), false)
+	, UpdateSkipSignatureVerificationUNSECURE(conf, U_("Update"), U_("SkipSignatureVerification"), false)
+	, UpdateSigningKeysRootAnchors(conf, U_("Update"), U_("SigningKeysRootAnchors"), CUpdateCheck::GetDefaultUpdateSigningKeysRootAnchors())
 	// Wine suppport
 	, WineSupportEnabled(conf, U_("WineSupport"), U_("Enabled"), false)
 	, WineSupportAlwaysRecompile(conf, U_("WineSupport"), U_("AlwaysRecompile"), false)
@@ -673,7 +681,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		} else
 		{
 			UpdateChannel = UpdateChannelDevelopment;
+#if MPT_UPDATE_LEGACY
 			UpdateChannelDevelopmentURL = url;
+#endif // MPT_UPDATE_LEGACY
 		}
 		UpdateStatistics = UpdateSendGUID_DEPRECATED.Get();
 		conf.Forget(UpdateUpdateCheckPeriod_DEPRECATED.GetPath());

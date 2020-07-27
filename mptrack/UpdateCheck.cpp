@@ -20,13 +20,297 @@
 #include "Mainfrm.h"
 #include "../common/mptThread.h"
 #include "../common/mptOSError.h"
+#include "../common/mptCrypto.h"
 #include "HTTP.h"
 #include "../misc/JSON.h"
 #include "dlg_misc.h"
-#include "..//sounddev/SoundDeviceManager.h"
+#include "../sounddev/SoundDeviceManager.h"
+#include "ProgressDialog.h"
+#include "Moddoc.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+
+namespace Update {
+
+	struct windowsversion {
+		uint64 version_major = 0;
+		uint64 version_minor = 0;
+		uint64 servicepack_major = 0;
+		uint64 servicepack_minor = 0;
+		uint64 build = 0;
+		uint64 wine_major = 0;
+		uint64 wine_minor = 0;
+		uint64 wine_update = 0;
+	};
+	MPT_JSON_INLINE(Update::windowsversion, {
+		MPT_JSON_MAP(version_major);
+		MPT_JSON_MAP(version_minor);
+		MPT_JSON_MAP(servicepack_major);
+		MPT_JSON_MAP(servicepack_minor);
+		MPT_JSON_MAP(build);
+		MPT_JSON_MAP(wine_major);
+		MPT_JSON_MAP(wine_minor);
+		MPT_JSON_MAP(wine_update);
+	})
+
+	struct autoupdate_installer {
+		std::vector<mpt::ustring> arguments = {};
+	};
+	MPT_JSON_INLINE(Update::autoupdate_installer, {
+		MPT_JSON_MAP(arguments);
+	})
+
+	struct autoupdate_archive {
+		mpt::ustring subfolder = U_("");
+		mpt::ustring restartbinary = U_("");
+	};
+	MPT_JSON_INLINE(Update::autoupdate_archive, {
+		MPT_JSON_MAP(subfolder);
+		MPT_JSON_MAP(restartbinary);
+	})
+
+	struct downloadinfo {
+		mpt::ustring url = U_("");
+		std::map<mpt::ustring, mpt::ustring> checksums = {};
+		mpt::ustring filename = U_("");
+		std::optional<autoupdate_installer> autoupdate_installer;
+		std::optional<autoupdate_archive> autoupdate_archive;
+	};
+	MPT_JSON_INLINE(Update::downloadinfo, {
+		MPT_JSON_MAP(url);
+		MPT_JSON_MAP(checksums);
+		MPT_JSON_MAP(filename);
+		MPT_JSON_MAP(autoupdate_installer);
+		MPT_JSON_MAP(autoupdate_archive);
+	})
+
+	struct download {
+		mpt::ustring url = U_("");
+		mpt::ustring type = U_("");
+		bool can_autoupdate = false;
+		mpt::ustring autoupdate_minversion = U_("");
+		mpt::ustring os = U_("");
+		std::optional<windowsversion> required_windows_version;
+		std::map<mpt::ustring, bool> required_architectures = {};
+		std::map<mpt::ustring, bool> supported_architectures = {};
+		std::map<mpt::ustring, std::map<mpt::ustring, bool>> required_processor_features = {};
+	};
+	MPT_JSON_INLINE(Update::download, {
+		MPT_JSON_MAP(url);
+		MPT_JSON_MAP(type);
+		MPT_JSON_MAP(can_autoupdate);
+		MPT_JSON_MAP(autoupdate_minversion);
+		MPT_JSON_MAP(os);
+		MPT_JSON_MAP(required_windows_version);
+		MPT_JSON_MAP(required_architectures);
+		MPT_JSON_MAP(supported_architectures);
+		MPT_JSON_MAP(required_processor_features);
+	})
+
+	struct versioninfo {
+		mpt::ustring version = U_("");
+		mpt::ustring date = U_("");
+		mpt::ustring announcement_url = U_("");
+		mpt::ustring changelog_url = U_("");
+		std::map<mpt::ustring, download> downloads = {};
+	};
+	MPT_JSON_INLINE(Update::versioninfo, {
+		MPT_JSON_MAP(version);
+		MPT_JSON_MAP(date);
+		MPT_JSON_MAP(announcement_url);
+		MPT_JSON_MAP(changelog_url);
+		MPT_JSON_MAP(downloads);
+	})
+
+	using versions = std::map<mpt::ustring, versioninfo>;
+
+} // namespace Update
+
+
+struct UpdateInfo {
+	mpt::ustring version;
+	mpt::ustring download;
+	bool IsAvailable() const
+	{
+		return !version.empty();
+	}
+};
+
+static bool IsCurrentArchitecture(const mpt::ustring &architecture)
+{
+	return mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()) == architecture;
+}
+
+static bool IsArchitectureSupported(const mpt::ustring &architecture)
+{
+	const auto & architectures = mpt::Windows::GetSupportedProcessArchitectures(mpt::Windows::GetHostArchitecture());
+	for(const auto & arch : architectures)
+	{
+		if(mpt::Windows::Name(arch) == architecture)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+static bool IsArchitectureFeatureSupported(const mpt::ustring &architecture, const mpt::ustring &feature)
+{
+	MPT_UNUSED_VARIABLE(architecture);
+	#ifdef ENABLE_ASM
+		if(feature == U_("")) return true;
+		else if(feature == U_("lm")) return (CPU::GetAvailableFeatures() & CPU::feature::lm) != 0;
+		else if(feature == U_("mmx")) return (CPU::GetAvailableFeatures() & CPU::feature::mmx) != 0;
+		else if(feature == U_("sse")) return (CPU::GetAvailableFeatures() & CPU::feature::sse) != 0;
+		else if(feature == U_("sse2")) return (CPU::GetAvailableFeatures() & CPU::feature::sse2) != 0;
+		else if(feature == U_("sse3")) return (CPU::GetAvailableFeatures() & CPU::feature::sse3) != 0;
+		else if(feature == U_("ssse3")) return (CPU::GetAvailableFeatures() & CPU::feature::ssse3) != 0;
+		else if(feature == U_("sse4.1")) return (CPU::GetAvailableFeatures() & CPU::feature::sse4_1) != 0;
+		else if(feature == U_("sse4.2")) return (CPU::GetAvailableFeatures() & CPU::feature::sse4_2) != 0;
+		else if(feature == U_("avx")) return (CPU::GetAvailableFeatures() & CPU::feature::avx) != 0;
+		else if(feature == U_("avx2")) return (CPU::GetAvailableFeatures() & CPU::feature::avx2) != 0;
+		else return false;
+	#else
+		return true;
+	#endif
+}
+
+
+static mpt::ustring GetChannelName(UpdateChannel channel)
+{
+	mpt::ustring channelName = U_("release");
+	switch(channel)
+	{
+	case UpdateChannelDevelopment:
+		channelName = U_("development");
+		break;
+	case UpdateChannelNext:
+		channelName = U_("next");
+		break;
+	case UpdateChannelRelease:
+		channelName = U_("release");
+		break;
+	default:
+		channelName = U_("release");
+		break;
+	}
+	return channelName;
+}
+
+
+static UpdateInfo GetBestDownload(const Update::versions &versions)
+{
+	
+	UpdateInfo result;
+	VersionWithRevision bestVersion = VersionWithRevision::Current();
+
+	for(const auto & [versionname, versioninfo] : versions)
+	{
+
+		if(!VersionWithRevision::Parse(versioninfo.version).IsNewerThan(bestVersion))
+		{
+			continue;
+		}
+
+		mpt::ustring bestDownloadName;
+
+		// check if version supports the current system
+		bool is_supported = false;
+		for(auto & [downloadname, download] : versioninfo.downloads)
+		{
+
+			// is it for windows?
+			if(download.os != U_("windows") || !download.required_windows_version)
+			{
+				continue;
+			}
+
+			// can the installer run on the current system?
+			bool download_supported = true;
+			for(const auto & [architecture, required] : download.required_architectures)
+			{
+				if(!(required && IsArchitectureSupported(architecture)))
+				{
+					download_supported = false;
+				}
+			}
+
+			// does the download run on current architecture?
+			bool architecture_supported = false;
+			for(const auto & [architecture, supported] : download.supported_architectures)
+			{
+				if(supported && IsCurrentArchitecture(architecture))
+				{
+					architecture_supported = true;
+				}
+			}
+			if(!architecture_supported)
+			{
+				download_supported = false;
+			}
+
+			// does the current system have all required features?
+			for(const auto & [architecture, features] : download.required_processor_features)
+			{
+				if(IsCurrentArchitecture(architecture))
+				{
+					for(const auto & [feature, required] : features)
+					{
+						if(!(required && IsArchitectureFeatureSupported(architecture, feature)))
+						{
+							download_supported = false;
+						}
+					}
+				}
+			}
+
+			if(mpt::Windows::Version::Current().IsBefore(
+					mpt::Windows::Version::System(mpt::saturate_cast<uint32>(download.required_windows_version->version_major), mpt::saturate_cast<uint32>(download.required_windows_version->version_minor)),
+					mpt::Windows::Version::ServicePack(mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_major), mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_minor)),
+					mpt::Windows::Version::Build(mpt::saturate_cast<uint32>(download.required_windows_version->build))
+				))
+			{
+				download_supported = false;
+			}
+
+			if(mpt::Windows::IsWine() && theApp.GetWineVersion()->Version().IsValid())
+			{
+				if(theApp.GetWineVersion()->Version().IsBefore(mpt::Wine::Version(mpt::saturate_cast<uint8>(download.required_windows_version->wine_major), mpt::saturate_cast<uint8>(download.required_windows_version->wine_minor), mpt::saturate_cast<uint8>(download.required_windows_version->wine_update))))
+				{
+					download_supported = false;
+				}
+			}
+
+			if(download_supported)
+			{
+				is_supported = true;
+				if(theApp.IsInstallerMode() && download.type == U_("installer"))
+				{
+					bestDownloadName = downloadname;
+				} else if(theApp.IsPortableMode() && download.type == U_("archive"))
+				{
+					bestDownloadName = downloadname;
+				}
+			}
+
+		}
+
+		if(is_supported)
+		{
+			bestVersion = VersionWithRevision::Parse(versioninfo.version);
+			result.version = versionname;
+			result.download = bestDownloadName;
+		}
+
+	}
+
+	return result;
+
+}
+
 
 // Update notification dialog
 class UpdateDialog : public CDialog
@@ -35,19 +319,23 @@ protected:
 	const CString m_releaseVersion;
 	const CString m_releaseDate;
 	const CString m_releaseURL;
+	const CString m_buttonText;
 	CFont m_boldFont;
 
 public:
-	UpdateDialog(const CString &releaseVersion, const CString &releaseDate, const CString &releaseURL)
+	UpdateDialog(const CString &releaseVersion, const CString &releaseDate, const CString &releaseURL, const CString &buttonText = _T("&Update"))
 		: CDialog(IDD_UPDATE)
 		, m_releaseVersion(releaseVersion)
 		, m_releaseDate(releaseDate)
 		, m_releaseURL(releaseURL)
+		, m_buttonText(buttonText)
 	{ }
 
 	BOOL OnInitDialog() override
 	{
 		CDialog::OnInitDialog();
+
+		SetDlgItemText(IDOK, m_buttonText);
 
 		CFont *font = GetDlgItem(IDC_VERSION2)->GetFont();
 		LOGFONT lf;
@@ -56,7 +344,7 @@ public:
 		m_boldFont.CreateFontIndirect(&lf);
 		GetDlgItem(IDC_VERSION2)->SetFont(&m_boldFont);
 
-		SetDlgItemText(IDC_VERSION1, mpt::cfmt::val(Version::Current()));
+		SetDlgItemText(IDC_VERSION1, mpt::cfmt::val(VersionWithRevision::Current()));
 		SetDlgItemText(IDC_VERSION2, m_releaseVersion);
 		SetDlgItemText(IDC_DATE, m_releaseDate);
 		SetDlgItemText(IDC_SYSLINK1, _T("More information about this build:\n<a href=\"") + m_releaseURL + _T("\">") + m_releaseURL + _T("</a>"));
@@ -103,6 +391,8 @@ mpt::ustring CUpdateCheck::GetStatisticsUserInformation(bool shortText)
 }
 
 
+#if MPT_UPDATE_LEGACY
+
 mpt::ustring CUpdateCheck::GetDefaultChannelReleaseURL()
 {
 	return U_("https://update.openmpt.org/check/$VERSION/$GUID");
@@ -116,6 +406,20 @@ mpt::ustring CUpdateCheck::GetDefaultChannelNextURL()
 mpt::ustring CUpdateCheck::GetDefaultChannelDevelopmentURL()
 {
 	return U_("https://update.openmpt.org/check/testing/$VERSION/$GUID");
+}
+
+#endif // MPT_UPDATE_LEGACY
+
+
+std::vector<mpt::ustring> CUpdateCheck::GetDefaultUpdateSigningKeysRootAnchors()
+{
+	// IMPORTANT:
+	// Signing keys are *NOT* stored on the same server as openmpt.org or the updates themselves,
+	// because otherwise, a single compromised server could allow for rogue updates.
+	return {
+		U_("https://sagamusix.de/openmpt-update/"),
+		U_("https://manx.datengang.de/openmpt/update/")
+	};
 }
 
 
@@ -134,12 +438,25 @@ int32 CUpdateCheck::GetNumCurrentRunningInstances()
 }
 
 
+
+bool CUpdateCheck::IsSuitableUpdateMoment()
+{
+	const auto documents = theApp.GetOpenDocuments();
+	return std::all_of(documents.begin(), documents.end(), [](auto doc) { return !doc->IsModified(); });
+}
+
+
 // Start update check
 void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 {
+	bool loadPersisted = false;
 	if(isAutoUpdate)
 	{
 		if(!TrackerSettings::Instance().UpdateEnabled)
+		{
+			return;
+		}
+		if(!IsSuitableUpdateMoment())
 		{
 			return;
 		}
@@ -155,7 +472,15 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 		const double secsSinceLastCheck = difftime(now, lastCheck);
 		if(secsSinceLastCheck > 0.0 && secsSinceLastCheck < updateCheckPeriod * 86400.0)
 		{
-			return;
+#if MPT_UPDATE_LEGACY
+			if(!TrackerSettings::Instance().UpdateExperimentalNewAutoUpdate)
+			{
+				return;
+			} else
+#endif // MPT_UPDATE_LEGACY
+			{
+				loadPersisted = true;
+			}
 		}
 
 		// Never ran update checks before, so we notify the user of automatic update checks.
@@ -169,7 +494,7 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 					checkIntervalDays == 1 ? CString(_T("every day")) :
 					MPT_CFORMAT("every {} days")(checkIntervalDays)
 				);
-			if(Reporting::Confirm(msg, _T("OpenMPT Internet Update")) == cnfNo)
+			if(Reporting::Confirm(msg, _T("OpenMPT Update")) == cnfNo)
 			{
 				TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(now);
 				return;
@@ -177,9 +502,14 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 		}
 	} else
 	{
+		if(!IsSuitableUpdateMoment())
+		{
+			Reporting::Notification(_T("Please save all modified modules before updating OpenMPT."), _T("OpenMPT Update"));
+			return;
+		}
 		if(!TrackerSettings::Instance().UpdateEnabled)
 		{
-			if(Reporting::Confirm(_T("Update Check is disabled. Do you want to check anyway?"), _T("OpenMPT Internet Update")) != cnfYes)
+			if(Reporting::Confirm(_T("Update Check is disabled. Do you want to check anyway?"), _T("OpenMPT Update")) != cnfYes)
 			{
 				return;
 			}
@@ -207,10 +537,13 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 
 	CUpdateCheck::Context context;
 	context.window = CMainFrame::GetMainFrame();
+	context.msgStart = MPT_WM_APP_UPDATECHECK_START;
 	context.msgProgress = MPT_WM_APP_UPDATECHECK_PROGRESS;
-	context.msgSuccess = MPT_WM_APP_UPDATECHECK_SUCCESS;
+	context.msgCanceled = MPT_WM_APP_UPDATECHECK_CANCELED;
 	context.msgFailure = MPT_WM_APP_UPDATECHECK_FAILURE;
+	context.msgSuccess = MPT_WM_APP_UPDATECHECK_SUCCESS;
 	context.autoUpdate = isAutoUpdate;
+	context.loadPersisted = loadPersisted;
 	context.statistics = GetStatisticsDataV3(CUpdateCheck::Settings());
 	std::thread(CUpdateCheck::ThreadFunc(CUpdateCheck::Settings(), context)).detach();
 }
@@ -218,10 +551,14 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 
 CUpdateCheck::Settings::Settings()
 	: periodDays(TrackerSettings::Instance().UpdateIntervalDays)
-	, channel(TrackerSettings::Instance().UpdateChannel)
+	, channel(static_cast<UpdateChannel>(TrackerSettings::Instance().UpdateChannel.Get()))
+	, persistencePath(theApp.GetConfigPath())
+#if MPT_UPDATE_LEGACY
+	, modeLegacy(!TrackerSettings::Instance().UpdateExperimentalNewAutoUpdate)
 	, channelReleaseURL(TrackerSettings::Instance().UpdateChannelReleaseURL)
 	, channelNextURL(TrackerSettings::Instance().UpdateChannelNextURL)
 	, channelDevelopmentURL(TrackerSettings::Instance().UpdateChannelDevelopmentURL)
+#endif // MPT_UPDATE_LEGACY
 	, apiURL(TrackerSettings::Instance().UpdateAPIURL)
 	, sendStatistics(TrackerSettings::Instance().UpdateStatistics)
 	, statisticsUUID(TrackerSettings::Instance().VersionInstallGUID)
@@ -240,7 +577,7 @@ CUpdateCheck::ThreadFunc::ThreadFunc(const CUpdateCheck::Settings &settings, con
 void CUpdateCheck::ThreadFunc::operator () ()
 {
 	mpt::SetCurrentThreadPriority(context.autoUpdate ? mpt::ThreadPriorityLower : mpt::ThreadPriorityNormal);
-	CUpdateCheck::CheckForUpdate(settings, context);
+	CheckForUpdate(settings, context);
 }
 
 
@@ -248,7 +585,6 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 {
 	JSON::value j;
 	j["OpenMPT"]["Version"] = mpt::ufmt::val(Version::Current());
-	j["OpenMPT"]["BuildVariant"] = BuildVariants().GuessCurrentBuildName();
 	j["OpenMPT"]["Architecture"] = mpt::Windows::Name(mpt::Windows::GetProcessArchitecture());
 	j["Update"]["PeriodDays"] = settings.periodDays;
 	j["System"]["Windows"]["Version"]["Name"] = mpt::Windows::Version::Current().GetName();
@@ -315,6 +651,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 }
 
 
+#if MPT_UPDATE_LEGACY
 mpt::ustring CUpdateCheck::GetUpdateURLV2(const CUpdateCheck::Settings &settings)
 {
 	mpt::ustring updateURL;
@@ -360,24 +697,126 @@ mpt::ustring CUpdateCheck::GetUpdateURLV2(const CUpdateCheck::Settings &settings
 	updateURL = mpt::String::Replace(updateURL, U_("$GUID"), settings.sendStatistics ? mpt::ufmt::val(settings.statisticsUUID) : U_("anonymous"));
 	return updateURL;
 }
+#endif // MPT_UPDATE_LEGACY
 
 
 // Run update check (independent thread)
-CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &settings, const std::string &statistics)
+CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Context &context, const CUpdateCheck::Settings &settings, const std::string &statistics)
 {
-	
+	CUpdateCheck::Result result;
+	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 0))
+	{
+		throw CUpdateCheck::Cancel();
+	}
+	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 20))
+	{
+		throw CUpdateCheck::Cancel();
+	}
 	HTTP::InternetSession internet(Version::Current().GetOpenMPTVersionString());
+	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 40))
+	{
+		throw CUpdateCheck::Cancel();
+	}
+#if MPT_UPDATE_LEGACY
+	if(settings.modeLegacy)
+	{
+		result = SearchUpdateLegacy(internet, settings);
+	} else
+#endif // MPT_UPDATE_LEGACY
+	{
+		bool loaded = false;
+		if(context.loadPersisted)
+		{
+			try
+			{
+				InputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"));
+				if(f.IsValid())
+				{
+					std::vector<std::byte> data = GetFileReader(f).ReadRawDataAsByteVector();
+					nlohmann::json::parse(mpt::buffer_cast<std::string>(data)).get<Update::versions>();
+					result.CheckTime = time_t{};
+					result.json = data;
+					loaded = true;
+				}
+			} catch(mpt::out_of_memory e)
+			{
+				mpt::delete_out_of_memory(e);
+			}	catch(const std::exception &)
+			{
+				// ignore
+			}
+		}
+		if(!loaded)
+		{
+			result = SearchUpdateModern(internet, settings);
+		}
+		try
+		{
+			{
+				mpt::SafeOutputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"), std::ios::binary);
+				f.stream().imbue(std::locale::classic());
+				mpt::IO::WriteRaw(f.stream(), mpt::as_span(result.json));
+				f.stream().flush();
+			}
+		} catch(mpt::out_of_memory e)
+		{
+			mpt::delete_out_of_memory(e);
+		} catch(const std::exception &)
+		{
+			// ignore
+		}
+	}
+	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 60))
+	{
+		throw CUpdateCheck::Cancel();
+	}
+	SendStatistics(internet, settings, statistics);
+	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 80))
+	{
+		throw CUpdateCheck::Cancel();
+	}
+	CleanOldUpdates(settings, context);
+	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 100))
+	{
+		throw CUpdateCheck::Cancel();
+	}
+	return result;
+}
 
-	// Establish a connection.
-	HTTP::Request request;
-	request.SetURI(ParseURI(GetUpdateURLV2(settings)));
-	request.method = HTTP::Method::Get;
-	request.flags = HTTP::NoCache;
 
-	HTTP::Result resultHTTP = internet(request);
+void CUpdateCheck::CleanOldUpdates(const CUpdateCheck::Settings & /* settings */ , const CUpdateCheck::Context & /* context */ )
+{
+	mpt::PathString dirTemp = mpt::GetTempDirectory();
+	if(dirTemp.empty())
+	{
+		return;
+	}
+	if(PathIsRelative(dirTemp.AsNative().c_str()))
+	{
+		return;
+	}
+	if(!dirTemp.IsDirectory())
+	{
+		return;
+	}
+	mpt::PathString dirTempOpenMPT = dirTemp + P_("OpenMPT") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
+	mpt::PathString dirTempOpenMPTUpdates = dirTempOpenMPT + P_("Updates") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
+	mpt::DeleteWholeDirectoryTree(dirTempOpenMPTUpdates);
+}
 
+
+void CUpdateCheck::SendStatistics(HTTP::InternetSession &internet, const CUpdateCheck::Settings &settings, const std::string &statistics)
+{
 	if(settings.sendStatistics)
 	{
+		if(!settings.modeLegacy)
+		{
+			HTTP::Request requestLegacyUpdate;
+			requestLegacyUpdate.SetURI(ParseURI(GetUpdateURLV2(settings)));
+			requestLegacyUpdate.method = HTTP::Method::Get;
+			requestLegacyUpdate.flags = HTTP::NoCache;
+			HTTP::Result resultLegacyUpdateHTTP = internet(requestLegacyUpdate);
+		}
 		HTTP::Request requestStatistics;
 		if(settings.statisticsUUID.IsValid())
 		{
@@ -395,6 +834,19 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 		requestStatistics.data = mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(jsondata));
 		internet(requestStatistics);
 	}
+}
+
+
+#if MPT_UPDATE_LEGACY
+CUpdateCheck::Result CUpdateCheck::SearchUpdateLegacy(HTTP::InternetSession &internet, const CUpdateCheck::Settings &settings)
+{
+
+	HTTP::Request request;
+	request.SetURI(ParseURI(GetUpdateURLV2(settings)));
+	request.method = HTTP::Method::Get;
+	request.flags = HTTP::NoCache;
+
+	HTTP::Result resultHTTP = internet(request);
 
 	// Retrieve HTTP status code.
 	if(resultHTTP.Status >= 400)
@@ -439,7 +891,47 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Settings &se
 		}
 		result.UpdateAvailable = true;
 	}
+
 	return result;
+
+}
+#endif // MPT_UPDATE_LEGACY
+
+
+CUpdateCheck::Result CUpdateCheck::SearchUpdateModern(HTTP::InternetSession &internet, const CUpdateCheck::Settings &settings)
+{
+
+	HTTP::Request request;
+	request.SetURI(ParseURI(settings.apiURL + MPT_UFORMAT("update/{}")(GetChannelName(static_cast<UpdateChannel>(settings.channel)))));
+	request.method = HTTP::Method::Get;
+	request.acceptMimeTypes = HTTP::MimeTypes::JSON();
+	request.flags = HTTP::NoCache;
+
+	HTTP::Result resultHTTP = internet(request);
+
+	// Retrieve HTTP status code.
+	if(resultHTTP.Status >= 400)
+	{
+		throw CUpdateCheck::Error(MPT_CFORMAT("Version information could not be found on the server (HTTP status code {}). Maybe your version of OpenMPT is too old!")(resultHTTP.Status));
+	}
+
+	// Now, evaluate the downloaded data.
+	CUpdateCheck::Result result;
+	result.CheckTime = time(nullptr);
+	try
+	{
+		nlohmann::json::parse(mpt::buffer_cast<std::string>(resultHTTP.Data)).get<Update::versions>();
+		result.json = resultHTTP.Data;
+	} catch(mpt::out_of_memory e)
+	{
+		mpt::rethrow_out_of_memory(e);
+	}	catch(const nlohmann::json::exception &e)
+	{
+		throw CUpdateCheck::Error(MPT_CFORMAT("Could not understand server response ({}). Maybe your version of OpenMPT is too old!")(mpt::get_exception_text<mpt::ustring>(e)));
+	}
+
+	return result;
+
 }
 
 
@@ -448,12 +940,12 @@ void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings, const 
 	// incremented before starting the thread
 	MPT_ASSERT(s_InstanceCount.load() >= 1);
 	CUpdateCheck::Result result;
-	context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, s_InstanceCount.load());
 	try
 	{
+		context.window->SendMessage(context.msgStart, context.autoUpdate ? 1 : 0, 0);
 		try
 		{
-			result = SearchUpdate(settings, context.statistics);
+			result = SearchUpdate(context, settings, context.statistics);
 		} catch(const bad_uri &e)
 		{
 			throw CUpdateCheck::Error(MPT_CFORMAT("Error parsing update URL: {}")(mpt::get_exception_text<CString>(e)));
@@ -461,6 +953,12 @@ void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings, const 
 		{
 			throw CUpdateCheck::Error(CString(_T("HTTP error: ")) + mpt::ToCString(e.GetMessage()));
 		}
+	} catch(const CUpdateCheck::Cancel &)
+	{
+		context.window->SendMessage(context.msgCanceled, context.autoUpdate ? 1 : 0, 0);
+		s_InstanceCount.fetch_sub(1);
+		MPT_ASSERT(s_InstanceCount.load() >= 0);
+		return;
 	} catch(const CUpdateCheck::Error &e)
 	{
 		context.window->SendMessage(context.msgFailure, context.autoUpdate ? 1 : 0, reinterpret_cast<LPARAM>(&e));
@@ -471,6 +969,12 @@ void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings, const 
 	context.window->SendMessage(context.msgSuccess, context.autoUpdate ? 1 : 0, reinterpret_cast<LPARAM>(&result));
 	s_InstanceCount.fetch_sub(1);
 	MPT_ASSERT(s_InstanceCount.load() >= 0);
+}
+
+
+bool CUpdateCheck::IsAutoUpdateFromMessage(WPARAM wparam, LPARAM /* lparam */ )
+{
+	return wparam ? true : false;
 }
 
 
@@ -488,22 +992,552 @@ CUpdateCheck::Error CUpdateCheck::ErrorFromMessage(WPARAM /*wparam*/ , LPARAM lp
 }
 
 
+
+static const char * const updateScript = R"vbs(
+
+Wscript.Echo
+Wscript.Echo "OpenMPT portable Update"
+Wscript.Echo "======================="
+
+Wscript.Echo "[  0%] Waiting for OpenMPT to close..."
+WScript.Sleep 2000
+
+Wscript.Echo "[ 10%] Loading update settings..."
+zip = WScript.Arguments.Item(0)
+subfolder = WScript.Arguments.Item(1)
+dst = WScript.Arguments.Item(2)
+restartbinary = WScript.Arguments.Item(3)
+
+Wscript.Echo "[ 20%] Preparing update..."
+Set fso = CreateObject("Scripting.FileSystemObject")
+Set shell = CreateObject("Wscript.Shell")
+Set application = CreateObject("Shell.Application")
+
+Sub CreateFolder(pathname)
+	If Not fso.FolderExists(pathname) Then
+		fso.CreateFolder pathname
+	End If
+End Sub
+
+Sub DeleteFolder(pathname)
+	If fso.FolderExists(pathname) Then
+		fso.DeleteFolder pathname
+	End If
+End Sub
+
+Sub UnZIP(zipfilename, destinationfolder)
+	If Not fso.FolderExists(destinationfolder) Then
+		fso.CreateFolder(destinationfolder)
+	End If
+	application.NameSpace(destinationfolder).Copyhere application.NameSpace(zipfilename).Items, 16+256
+End Sub
+
+Wscript.Echo "[ 30%] Changing to temporary directory..."
+shell.CurrentDirectory = fso.GetParentFolderName(WScript.ScriptFullName)
+
+Wscript.Echo "[ 40%] Decompressing update..."
+UnZIP zip, fso.BuildPath(fso.GetAbsolutePathName("."), "tmp")
+
+Wscript.Echo "[ 60%] Installing update..."
+If subfolder = "" Or subfolder = "." Then
+	fso.CopyFolder fso.BuildPath(fso.GetAbsolutePathName("."), "tmp"), dst, True
+Else
+	fso.CopyFolder fso.BuildPath(fso.BuildPath(fso.GetAbsolutePathName("."), "tmp"), subfolder), dst, True
+End If
+
+Wscript.Echo "[ 80%] Deleting temporary directory..."
+DeleteFolder fso.BuildPath(fso.GetAbsolutePathName("."), "tmp")
+
+Wscript.Echo "[ 90%] Restarting OpenMPT..."
+application.ShellExecute fso.BuildPath(dst, restartbinary), , dst, , 10
+
+Wscript.Echo "[100%] Update successful!"
+Wscript.Echo
+WScript.Sleep 1000
+
+Wscript.Echo "Closing update window in 5 seconds..."
+WScript.Sleep 1000
+Wscript.Echo "Closing update window in 4 seconds..."
+WScript.Sleep 1000
+Wscript.Echo "Closing update window in 3 seconds..."
+WScript.Sleep 1000
+Wscript.Echo "Closing update window in 2 seconds..."
+WScript.Sleep 1000
+Wscript.Echo "Closing update window in 1 seconds..."
+WScript.Sleep 1000
+Wscript.Echo "Closing update window..."
+
+WScript.Quit
+
+)vbs";
+
+
+
+class CDoUpdate: public CProgressDialog
+{
+private:
+	Update::download download;
+	class Aborted : public std::exception {};
+	class Warning : public std::exception
+	{
+	private:
+		mpt::ustring msg;
+	public:
+		Warning(const mpt::ustring &msg_)
+			: msg(msg_)
+		{
+			return;
+		}
+		mpt::ustring get_msg() const
+		{
+			return msg;
+		}
+	};
+	class Error : public std::exception
+	{
+	private:
+		mpt::ustring msg;
+	public:
+		Error(const mpt::ustring &msg_)
+			: msg(msg_)
+		{
+			return;
+		}
+		mpt::ustring get_msg() const
+		{
+			return msg;
+		}
+	};
+public:
+	CDoUpdate(Update::download download, CWnd *parent = NULL)
+		: CProgressDialog(parent)
+		, download(download)
+	{
+		return;
+	}
+	void UpdateProgress(const CString &text, double percent)
+	{
+		SetText(text);
+		SetProgress(static_cast<uint64>(percent * 100.0));
+		ProcessMessages();
+		if(m_abort)
+		{
+			throw Aborted();
+		}
+	}
+	void Run() override
+	{
+		try
+		{
+			SetTitle(_T("OpenMPT Update"));
+			SetAbortText(_T("Cancel"));
+			SetText(_T("OpenMPT Update"));
+			SetRange(0, 10000);
+			ProcessMessages();
+
+			Update::downloadinfo downloadinfo;
+			mpt::PathString dirTempOpenMPTUpdates;
+			mpt::PathString updateFilename;
+			{
+
+				UpdateProgress(_T("Connecting..."), 0.0);
+				HTTP::InternetSession internet(Version::Current().GetOpenMPTVersionString());
+
+				UpdateProgress(_T("Downloading update information..."), 1.0);
+				std::vector<std::byte> rawDownloadInfo;
+				{
+					HTTP::Request request;
+					request.SetURI(ParseURI(download.url));
+					request.method = HTTP::Method::Get;
+					request.acceptMimeTypes = HTTP::MimeTypes::JSON();
+					HTTP::Result resultHTTP = internet(request);
+					if(resultHTTP.Status != 200)
+					{
+						throw Error(MPT_UFORMAT("Error downloading update information: HTTP status {}.")(resultHTTP.Status));
+					}
+					rawDownloadInfo = std::move(resultHTTP.Data);
+				}
+
+				if(!TrackerSettings::Instance().UpdateSkipSignatureVerificationUNSECURE)
+				{
+					std::vector<std::byte> rawSignature;
+					UpdateProgress(_T("Retrieving update signature..."), 2.0);
+					{
+						HTTP::Request request;
+						request.SetURI(ParseURI(download.url + U_(".jws.json")));
+						request.method = HTTP::Method::Get;
+						request.acceptMimeTypes = HTTP::MimeTypes::JSON();
+						HTTP::Result resultHTTP = internet(request);
+						if(resultHTTP.Status != 200)
+						{
+							throw Error(MPT_UFORMAT("Error downloading update signature: HTTP status {}.")(resultHTTP.Status));
+						}
+						rawSignature = std::move(resultHTTP.Data);
+					}
+					UpdateProgress(_T("Retrieving update signing public keys..."), 3.0);
+					std::vector<mpt::crypto::asymmetric::rsassa_pss<>::public_key> keys;
+					{
+						std::vector<mpt::ustring> keyAnchors = TrackerSettings::Instance().UpdateSigningKeysRootAnchors;
+						if(keyAnchors.empty())
+						{
+							Reporting::Warning(U_("Warning: No update signing public key root anchors configured. Update cannot be verified."), U_("OpenMPT Update"));
+						}
+						for(const auto & keyAnchor : keyAnchors)
+						{
+							HTTP::Request request;
+							request.SetURI(ParseURI(keyAnchor + U_("signingkeys.jwkset.json")));
+							request.method = HTTP::Method::Get;
+							request.flags = HTTP::NoCache;
+							request.acceptMimeTypes = HTTP::MimeTypes::JSON();
+							try
+							{
+								HTTP::Result resultHTTP = internet(request);
+								resultHTTP.CheckStatus(200);
+								mpt::append(keys, mpt::crypto::asymmetric::rsassa_pss<>::parse_jwk_set(mpt::ToUnicode(mpt::Charset::UTF8, mpt::buffer_cast<std::string>(resultHTTP.Data))));
+							} catch(mpt::out_of_memory e)
+							{
+								mpt::rethrow_out_of_memory(e);
+							} catch(const std::exception &e)
+							{
+								Reporting::Warning(MPT_UFORMAT("Warning: Retrieving update signing public keys from {} failed: {}")(keyAnchor, mpt::get_exception_text<mpt::ustring>(e)), U_("OpenMPT Update"));
+							} catch(...)
+							{
+								Reporting::Warning(MPT_UFORMAT("Warning: Retrieving update signing public keys from {} failed.")(keyAnchor), U_("OpenMPT Update"));
+							}
+						}
+					}
+					if(keys.empty())
+					{
+						throw Error(U_("Error retrieving update signing public keys."));
+					}
+					UpdateProgress(_T("Verifying signature..."), 4.0);
+					std::vector<std::byte> expectedPayload = mpt::buffer_cast<std::vector<std::byte>>(rawDownloadInfo);
+					mpt::ustring signature = mpt::ToUnicode(mpt::Charset::UTF8, mpt::buffer_cast<std::string>(rawSignature));
+
+					mpt::crypto::asymmetric::rsassa_pss<>::jws_verify_at_least_one(keys, expectedPayload, signature);
+			
+				}
+
+				UpdateProgress(_T("Parsing update information..."), 5.0);
+				try
+				{
+					downloadinfo = nlohmann::json::parse(mpt::buffer_cast<std::string>(rawDownloadInfo)).get<Update::downloadinfo>();
+				}	catch(const nlohmann::json::exception &e)
+				{
+					throw Error(MPT_UFORMAT("Error parsing update information: {}.")(mpt::get_exception_text<mpt::ustring>(e)));
+				}
+
+				UpdateProgress(_T("Preparing download..."), 6.0);
+				mpt::PathString dirTemp = mpt::GetTempDirectory();
+				mpt::PathString dirTempOpenMPT = dirTemp + P_("OpenMPT") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
+				dirTempOpenMPTUpdates = dirTempOpenMPT + P_("Updates") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
+				updateFilename = dirTempOpenMPTUpdates + mpt::PathString::FromUnicode(downloadinfo.filename);
+				::CreateDirectory(dirTempOpenMPT.AsNativePrefixed().c_str(), NULL);
+				::CreateDirectory(dirTempOpenMPTUpdates.AsNativePrefixed().c_str(), NULL);
+			
+				{
+			
+					UpdateProgress(_T("Creating file..."), 7.0);
+					mpt::SafeOutputFile file(updateFilename, std::ios::binary);
+					file.stream().imbue(std::locale::classic());
+					file.stream().exceptions(std::ios::failbit | std::ios::badbit);
+				
+					UpdateProgress(_T("Downloading update..."), 8.0);
+					HTTP::Request request;
+					request.SetURI(ParseURI(downloadinfo.url));
+					request.method = HTTP::Method::Get;
+					request.acceptMimeTypes = HTTP::MimeTypes::Binary();
+					request.outputStream = &file.stream();
+					request.progressCallback = [&](HTTP::Progress progress, uint64 transferred, std::optional<uint64> expectedSize) {
+						switch(progress)
+						{
+						case HTTP::Progress::Start:
+							SetProgress(900);
+							break;
+						case HTTP::Progress::ConnectionEstablished:
+							SetProgress(1000);
+							break;
+						case HTTP::Progress::RequestOpened:
+							SetProgress(1100);
+							break;
+						case HTTP::Progress::RequestSent:
+							SetProgress(1200);
+							break;
+						case HTTP::Progress::ResponseReceived:
+							SetProgress(1300);
+							break;
+						case HTTP::Progress::TransferBegin:
+							SetProgress(1400);
+							break;
+						case HTTP::Progress::TransferRunning:
+							if(expectedSize && ((*expectedSize) != 0))
+							{
+								SetProgress(static_cast<int64>((static_cast<double>(transferred) / static_cast<double>(*expectedSize)) * (10000.0-1500.0-400.0) + 1500.0));
+							} else
+							{
+								SetProgress((1500 + 9600) / 2);
+							}
+							break;
+						case HTTP::Progress::TransferDone:
+							SetProgress(9600);
+							break;
+						}
+						ProcessMessages();
+						if(m_abort)
+						{
+							throw HTTP::Abort();
+						}
+					};
+					HTTP::Result resultHTTP = internet(request);
+					if(resultHTTP.Status != 200)
+					{
+						throw Error(MPT_UFORMAT("Error downloading update: HTTP status {}.")(resultHTTP.Status));
+					}
+				}
+
+				UpdateProgress(_T("Disconnecting..."), 97.0);
+			}
+
+			UpdateProgress(_T("Verifying download..."), 98.0);
+			bool verified = false;
+			for(const auto & [algorithm, value] : downloadinfo.checksums)
+			{
+				if(algorithm == U_("SHA-512"))
+				{
+					std::vector<std::byte> binhash = Util::HexToBin(value);
+					if(binhash.size() != 512/8)
+					{
+						throw Error(U_("Download verification failed."));
+					}
+					std::array<std::byte, 512/8> expected;
+					std::copy(binhash.begin(), binhash.end(), expected.begin());
+					mpt::crypto::hash::SHA512 hash;
+					mpt::ifstream f(updateFilename, std::ios::binary);
+					f.imbue(std::locale::classic());
+					f.exceptions(std::ios::badbit);
+					while(!mpt::IO::IsEof(f))
+					{
+						std::array<std::byte, mpt::IO::BUFFERSIZE_TINY> buf;
+						hash.process(mpt::IO::ReadRaw(f, mpt::as_span(buf)));
+					}
+					std::array<std::byte, 512/8> gotten = hash.result();
+					if(gotten != expected)
+					{
+						throw Error(U_("Download verification failed."));
+					}
+					verified = true;
+				}
+			}
+			if(!verified)
+			{
+				throw Error(U_("Error verifying update: No suitable checksum found."));
+			}
+
+			UpdateProgress(_T("Installing update..."), 99.0);
+			bool wantClose = false;
+			if(download.can_autoupdate && (Version::Current() >= Version::Parse(download.autoupdate_minversion)))
+			{
+				if(download.type == U_("installer") && downloadinfo.autoupdate_installer)
+				{
+					if(theApp.IsSourceTreeMode())
+					{
+						throw Warning(MPT_UFORMAT("Refusing to launch update '{} {}' when running from source tree.")(updateFilename, mpt::String::Combine(downloadinfo.autoupdate_installer->arguments, U_(" "))));
+					}
+					if(reinterpret_cast<INT_PTR>(ShellExecute(NULL, NULL,
+						updateFilename.AsNative().c_str(),
+						mpt::ToWin(mpt::String::Combine(downloadinfo.autoupdate_installer->arguments, U_(" "))).c_str(),
+						dirTempOpenMPTUpdates.AsNative().c_str(),
+						SW_SHOWDEFAULT)) < 32)
+					{
+						throw Error(U_("Error launching update."));
+					}
+				} else if(download.type == U_("archive") && downloadinfo.autoupdate_archive)
+				{
+					try
+					{
+						mpt::SafeOutputFile file(dirTempOpenMPTUpdates + P_("update.vbs"), std::ios::binary);
+						file.stream().imbue(std::locale::classic());
+						file.stream().exceptions(std::ios::failbit | std::ios::badbit);
+						mpt::IO::WriteRaw(file.stream(), mpt::as_span(std::string(updateScript)));
+					} catch(...)
+					{
+						throw Error(U_("Error creating update script."));
+					}
+					std::vector<mpt::ustring> arguments;
+					arguments.push_back(U_("\"") + (dirTempOpenMPTUpdates + P_("update.vbs")).ToUnicode() + U_("\""));
+					arguments.push_back(U_("\"") + updateFilename.ToUnicode() + U_("\""));
+					arguments.push_back(U_("\"") + (downloadinfo.autoupdate_archive->subfolder.empty() ? U_(".") : downloadinfo.autoupdate_archive->subfolder) + U_("\""));
+					arguments.push_back(U_("\"") + theApp.GetInstallPath().WithoutTrailingSlash().ToUnicode() + U_("\""));
+					arguments.push_back(U_("\"") + downloadinfo.autoupdate_archive->restartbinary + U_("\""));
+					if(theApp.IsSourceTreeMode())
+					{
+						throw Warning(MPT_UFORMAT("Refusing to launch update '{} {}' when running from source tree.")(P_("cscript.exe"), mpt::String::Combine(arguments, U_(" "))));
+					}
+					if(reinterpret_cast<INT_PTR>(ShellExecute(NULL, NULL,
+						P_("cscript.exe").AsNative().c_str(),
+						mpt::ToWin(mpt::String::Combine(arguments, U_(" "))).c_str(),
+						dirTempOpenMPTUpdates.AsNative().c_str(),
+						SW_SHOWDEFAULT)) < 32)
+					{
+						throw Error(U_("Error launching update."));
+					}
+					wantClose = true;
+				} else
+				{
+					CTrackApp::OpenDirectory(dirTempOpenMPTUpdates);
+					wantClose = true;
+				}
+			} else
+			{
+				CTrackApp::OpenDirectory(dirTempOpenMPTUpdates);
+				wantClose = true;
+			}
+			UpdateProgress(_T("Waiting for installer..."), 100.0);
+			if(wantClose)
+			{
+				CMainFrame::GetMainFrame()->PostMessage(WM_QUIT, 0, 0);
+			}
+			EndDialog(IDOK);
+		} catch(mpt::out_of_memory e)
+		{
+			mpt::delete_out_of_memory(e);
+			Reporting::Error(U_("Not enough memory to install update."), U_("OpenMPT Update Error"));
+			EndDialog(IDCANCEL);
+			return;
+		} catch(const HTTP::Abort &)
+		{
+			EndDialog(IDCANCEL);
+			return;
+		} catch(const Aborted &)
+		{
+			EndDialog(IDCANCEL);
+			return;
+		} catch(const Warning &e)
+		{
+			Reporting::Warning(e.get_msg(), U_("OpenMPT Update"));
+			EndDialog(IDCANCEL);
+			return;
+		} catch(const Error &e)
+		{
+			Reporting::Error(e.get_msg(), U_("OpenMPT Update Error"));
+			EndDialog(IDCANCEL);
+			return;
+		} catch(const std::exception &e)
+		{
+			Reporting::Error(MPT_UFORMAT("Error installing update: {}")(mpt::get_exception_text<mpt::ustring>(e)), U_("OpenMPT Update Error"));
+			EndDialog(IDCANCEL);
+			return;
+		} catch(...)
+		{
+			Reporting::Error(U_("Error installing update."), U_("OpenMPT Update Error"));
+			EndDialog(IDCANCEL);
+			return;
+		}
+	}
+};
+
+
 void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 {
+
 	const CUpdateCheck::Result &result = *reinterpret_cast<CUpdateCheck::Result*>(lparam);
 	bool autoUpdate = wparam != 0;
-	if(result.UpdateAvailable && (!autoUpdate || result.Version != TrackerSettings::Instance().UpdateIgnoreVersion))
+
+	if(result.CheckTime != time_t{})
 	{
-		UpdateDialog dlg(result.Version, result.Date, result.URL);
-		if(dlg.DoModal() == IDOK)
-		{
-			CTrackApp::OpenURL(result.URL);
-		}
-	} else if(!result.UpdateAvailable && !autoUpdate)
-	{
-		Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Internet Update"));
+		TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(result.CheckTime);
 	}
+
+#if MPT_UPDATE_LEGACY
+
+	if(!TrackerSettings::Instance().UpdateExperimentalNewAutoUpdate)
+	{
+		if(result.UpdateAvailable && (!autoUpdate || result.Version != TrackerSettings::Instance().UpdateIgnoreVersion))
+		{
+			UpdateDialog dlg(result.Version, result.Date, result.URL);
+			if(dlg.DoModal() == IDOK)
+			{
+				CTrackApp::OpenURL(result.URL);
+			}
+		} else if(!result.UpdateAvailable && !autoUpdate)
+		{
+			Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Internet Update"));
+		}
+		return;
+	}
+
+#endif // MPT_UPDATE_LEGACY
+
+	Update::versions updateData = nlohmann::json::parse(mpt::buffer_cast<std::string>(result.json)).get<Update::versions>();
+	UpdateInfo updateInfo = GetBestDownload(updateData);
+
+	if(!updateInfo.IsAvailable())
+	{
+		if(!autoUpdate)
+		{
+			Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Update"));
+		}
+		return;
+	}
+
+	auto & versionInfo = updateData[updateInfo.version];
+	if(autoUpdate && (mpt::ToCString(versionInfo.version) == TrackerSettings::Instance().UpdateIgnoreVersion))
+	{
+		return;
+	}
+
+	if(autoUpdate && TrackerSettings::Instance().UpdateInstallAutomatically && !updateInfo.download.empty() && versionInfo.downloads[updateInfo.download].can_autoupdate && (Version::Current() >= Version::Parse(versionInfo.downloads[updateInfo.download].autoupdate_minversion)))
+	{
+
+		CDoUpdate updateDlg(versionInfo.downloads[updateInfo.download], theApp.GetMainWnd());
+		if(updateDlg.DoModal() != IDOK)
+		{
+			return;
+		}
+
+	} else
+	{
+		
+		UpdateDialog dlg(
+			mpt::ToCString(versionInfo.version),
+			mpt::ToCString(versionInfo.date),
+			mpt::ToCString(versionInfo.changelog_url),
+				(!updateInfo.download.empty() && versionInfo.downloads[updateInfo.download].can_autoupdate && (Version::Current() >= Version::Parse(versionInfo.downloads[updateInfo.download].autoupdate_minversion))) ? _T("&Install now...") :
+				(!updateInfo.download.empty()) ? _T("&Download now...") :
+				_T("&View Announcement...")
+			);
+		if(dlg.DoModal() != IDOK)
+		{
+			return;
+		}
+
+		if(!updateInfo.download.empty() && versionInfo.downloads[updateInfo.download].can_autoupdate && (Version::Current() >= Version::Parse(versionInfo.downloads[updateInfo.download].autoupdate_minversion)))
+		{
+			CDoUpdate updateDlg(versionInfo.downloads[updateInfo.download], theApp.GetMainWnd());
+			if(updateDlg.DoModal() != IDOK)
+			{
+				return;
+			}
+		} else if(!updateInfo.download.empty())
+		{
+			CTrackApp::OpenURL(updateInfo.download);
+		} else
+		{
+			CTrackApp::OpenURL(versionInfo.announcement_url);
+		}
+
+	}
+
 }
+
+
+mpt::ustring CUpdateCheck::GetFailureMessage(WPARAM wparam, LPARAM lparam)
+{
+	MPT_UNREFERENCED_PARAMETER(wparam);
+	const CUpdateCheck::Error &error = *reinterpret_cast<CUpdateCheck::Error*>(lparam);
+	return mpt::get_exception_text<mpt::ustring>(error);
+}
+
 
 
 void CUpdateCheck::ShowFailureGUI(WPARAM wparam, LPARAM lparam)
@@ -512,7 +1546,7 @@ void CUpdateCheck::ShowFailureGUI(WPARAM wparam, LPARAM lparam)
 	bool autoUpdate = wparam != 0;
 	if(!autoUpdate)
 	{
-		Reporting::Error(mpt::get_exception_text<mpt::ustring>(error), U_("OpenMPT Internet Update Error"));
+		Reporting::Error(mpt::get_exception_text<mpt::ustring>(error), U_("OpenMPT Update Error"));
 	}
 }
 
@@ -538,6 +1572,13 @@ CString CUpdateCheck::Error::FormatErrorCode(CString errorMessage, DWORD errorCo
 }
 
 
+
+CUpdateCheck::Cancel::Cancel()
+{
+	return;
+}
+
+
 /////////////////////////////////////////////////////////////
 // CUpdateSetupDlg
 
@@ -548,6 +1589,7 @@ BEGIN_MESSAGE_MAP(CUpdateSetupDlg, CPropertyPage)
 	ON_COMMAND(IDC_RADIO3,                      &CUpdateSetupDlg::OnSettingsChanged)
 	ON_COMMAND(IDC_BUTTON1,                     &CUpdateSetupDlg::OnCheckNow)
 	ON_CBN_SELCHANGE(IDC_COMBO_UPDATEFREQUENCY, &CUpdateSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK_UPDATEINSTALLAUTOMATICALLY, &CUpdateSetupDlg::OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK1,                      &CUpdateSetupDlg::OnSettingsChanged)
 	ON_NOTIFY(NM_CLICK, IDC_SYSLINK1,           &CUpdateSetupDlg::OnShowStatisticsData)
 END_MESSAGE_MAP()
@@ -575,7 +1617,7 @@ BOOL CUpdateSetupDlg::OnInitDialog()
 	CheckDlgButton(IDC_CHECK_UPDATEENABLED, TrackerSettings::Instance().UpdateEnabled ? BST_CHECKED : BST_UNCHECKED);
 
 	int radioID = 0;
-	int updateChannel = TrackerSettings::Instance().UpdateChannel;
+	uint32 updateChannel = TrackerSettings::Instance().UpdateChannel;
 	if(updateChannel == UpdateChannelRelease)
 	{
 		radioID = IDC_RADIO1;
@@ -629,6 +1671,8 @@ BOOL CUpdateSetupDlg::OnInitDialog()
 		m_CbnUpdateFrequency.SetCurSel(ndx);
 	}
 
+	CheckDlgButton(IDC_CHECK_UPDATEINSTALLAUTOMATICALLY, TrackerSettings::Instance().UpdateInstallAutomatically ? BST_CHECKED : BST_UNCHECKED);
+
 	CheckDlgButton(IDC_CHECK1, TrackerSettings::Instance().UpdateStatistics ? BST_CHECKED : BST_UNCHECKED);
 
 	GetDlgItem(IDC_STATIC_UPDATEPRIVACYTEXT)->SetWindowText(mpt::ToCString(CUpdateCheck::GetStatisticsUserInformation(true)));
@@ -646,7 +1690,7 @@ void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResu
 {
 	CUpdateCheck::Settings settings;
 
-	int updateChannel = TrackerSettings::Instance().UpdateChannel;
+	uint32 updateChannel = TrackerSettings::Instance().UpdateChannel;
 	if(IsDlgButtonChecked(IDC_RADIO1)) updateChannel = UpdateChannelRelease;
 	if(IsDlgButtonChecked(IDC_RADIO2)) updateChannel = UpdateChannelNext;
 	if(IsDlgButtonChecked(IDC_RADIO3)) updateChannel = UpdateChannelDevelopment;
@@ -654,14 +1698,43 @@ void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResu
 	int updateCheckPeriod = (m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()) == ~(DWORD_PTR)0) ? -1 : static_cast<int>(m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()));
 
 	settings.periodDays = updateCheckPeriod;
-	settings.channel = updateChannel;
+	settings.channel = static_cast<UpdateChannel>(updateChannel);
 	settings.sendStatistics = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
 
 	mpt::ustring statistics;
-	statistics += U_("GET ") + CUpdateCheck::GetUpdateURLV2(settings) + UL_("\n");
+
+	statistics += U_("Update:") + UL_("\n");
 	statistics += UL_("\n");
+
+#if MPT_UPDATE_LEGACY
+	if(settings.modeLegacy)
+	{
+		statistics += U_("GET ") + CUpdateCheck::GetUpdateURLV2(settings) + UL_("\n");
+		statistics += UL_("\n");
+	} else
+#endif // MPT_UPDATE_LEGACY
+	{
+		statistics += U_("GET ") + settings.apiURL + MPT_UFORMAT("update/{}")(GetChannelName(static_cast<UpdateChannel>(settings.channel))) + UL_("\n");
+		statistics += UL_("\n");
+		std::vector<mpt::ustring> keyAnchors = TrackerSettings::Instance().UpdateSigningKeysRootAnchors;
+		for(const auto & keyAnchor : keyAnchors)
+		{
+			statistics += U_("GET ") + keyAnchor + U_("signingkeys.jwkset.json") + UL_("\n");
+			statistics += UL_("\n");
+		}
+	}
+
 	if(settings.sendStatistics)
 	{
+		statistics += U_("Statistics:") + UL_("\n");
+		statistics += UL_("\n");
+#if MPT_UPDATE_LEGACY
+		if(!settings.modeLegacy)
+#endif // MPT_UPDATE_LEGACY
+		{
+			statistics += U_("GET ") + CUpdateCheck::GetUpdateURLV2(settings) + UL_("\n");
+			statistics += UL_("\n");
+		}
 		if(settings.statisticsUUID.IsValid())
 		{
 			statistics += U_("PUT ") + settings.apiURL + MPT_UFORMAT("statistics/{}")(settings.statisticsUUID) + UL_("\n");
@@ -714,6 +1787,7 @@ void CUpdateSetupDlg::EnableDisableDialog()
 	GetDlgItem(IDC_COMBO_UPDATEFREQUENCY)->EnableWindow(status);
 	GetDlgItem(IDC_BUTTON1)->EnableWindow(status);
 	GetDlgItem(IDC_LASTUPDATE)->EnableWindow(status);
+	GetDlgItem(IDC_CHECK_UPDATEINSTALLAUTOMATICALLY)->EnableWindow(status);
 
 	GetDlgItem(IDC_STATIC_UPDATEPRIVACY)->EnableWindow(status);
 	GetDlgItem(IDC_CHECK1)->EnableWindow(status);
@@ -731,7 +1805,7 @@ void CUpdateSetupDlg::OnSettingsChanged()
 
 void CUpdateSetupDlg::OnOK()
 {
-	int updateChannel = TrackerSettings::Instance().UpdateChannel;
+	uint32 updateChannel = TrackerSettings::Instance().UpdateChannel;
 	if(IsDlgButtonChecked(IDC_RADIO1)) updateChannel = UpdateChannelRelease;
 	if(IsDlgButtonChecked(IDC_RADIO2)) updateChannel = UpdateChannelNext;
 	if(IsDlgButtonChecked(IDC_RADIO3)) updateChannel = UpdateChannelDevelopment;
@@ -741,6 +1815,7 @@ void CUpdateSetupDlg::OnOK()
 	TrackerSettings::Instance().UpdateEnabled = (IsDlgButtonChecked(IDC_CHECK_UPDATEENABLED) != BST_UNCHECKED);
 
 	TrackerSettings::Instance().UpdateIntervalDays = updateCheckPeriod;
+	TrackerSettings::Instance().UpdateInstallAutomatically = (IsDlgButtonChecked(IDC_CHECK_UPDATEINSTALLAUTOMATICALLY) != BST_UNCHECKED);
 	TrackerSettings::Instance().UpdateChannel = updateChannel;
 	TrackerSettings::Instance().UpdateStatistics = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
 	
@@ -757,7 +1832,7 @@ BOOL CUpdateSetupDlg::OnSetActive()
 
 void CUpdateSetupDlg::OnCheckNow()
 {
-	CMainFrame::GetMainFrame()->PostMessage(WM_COMMAND, ID_INTERNETUPDATE);
+	CUpdateCheck::DoManualUpdateCheck();
 }
 
 

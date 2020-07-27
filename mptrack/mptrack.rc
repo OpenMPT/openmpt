@@ -246,24 +246,26 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "Enable Online &Update Check",IDC_CHECK_UPDATEENABLED,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,6,106,10
-    GROUPBOX        "Check for Updates",IDC_STATIC_UPDATECHECK,6,24,276,48
-    LTEXT           "Automatically check on program &start:",IDC_STATIC_UPDATEFREQUENCY,12,36,126,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_COMBO_UPDATEFREQUENCY,138,36,48,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "&Check now...",IDC_BUTTON1,216,36,60,12
-    LTEXT           "",IDC_LASTUPDATE,12,55,264,12
-    GROUPBOX        "Privacy Settings",IDC_STATIC_UPDATEPRIVACY,6,78,276,84
+    GROUPBOX        "Check for Updates",IDC_STATIC_UPDATECHECK,6,24,276,66
+    CONTROL         "&Install Updates automatically",IDC_CHECK_UPDATEINSTALLAUTOMATICALLY,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,36,264,12
+    LTEXT           "Automatically check on program &start:",IDC_STATIC_UPDATEFREQUENCY,12,54,126,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO_UPDATEFREQUENCY,138,54,48,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Check now...",IDC_BUTTON1,216,54,60,12
+    LTEXT           "",IDC_LASTUPDATE,12,73,264,12
+    GROUPBOX        "Privacy Settings",IDC_STATIC_UPDATEPRIVACY,6,96,276,84
     CONTROL         "&Allow OpenMPT to collect basic statistics about your system configuration",IDC_CHECK1,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,90,264,12
-    LTEXT           "",IDC_STATIC_UPDATEPRIVACYTEXT,12,102,264,36
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,108,264,12
+    LTEXT           "",IDC_STATIC_UPDATEPRIVACYTEXT,12,120,264,36
     CONTROL         "<a>Show which information would be transmitted to OpenMPT...</a>",IDC_SYSLINK1,
-                    "SysLink",WS_TABSTOP,12,144,264,12
-    GROUPBOX        "Update Channel",IDC_STATIC_UDATECHANNEL,6,174,276,52
+                    "SysLink",WS_TABSTOP,12,162,264,12
+    GROUPBOX        "Update Channel",IDC_STATIC_UDATECHANNEL,6,192,276,52
     CONTROL         "&Release: Official stable released versions only (recommended)",IDC_RADIO1,
-                    "Button",BS_AUTORADIOBUTTON,12,186,264,10
+                    "Button",BS_AUTORADIOBUTTON,12,204,264,10
     CONTROL         "&Next: Previews of the next official stable release",IDC_RADIO2,
-                    "Button",BS_AUTORADIOBUTTON,12,199,264,10
+                    "Button",BS_AUTORADIOBUTTON,12,217,264,10
     CONTROL         "&Development: Bleeding-edge development versions",IDC_RADIO3,
-                    "Button",BS_AUTORADIOBUTTON,12,212,264,10
+                    "Button",BS_AUTORADIOBUTTON,12,230,264,10
 END
 
 IDD_CLOSEDOCUMENTS DIALOGEX 0, 0, 370, 197
@@ -402,10 +404,10 @@ END
 
 IDD_UPDATE DIALOGEX 0, 0, 196, 138
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "OpenMPT Internet Update"
+CAPTION "OpenMPT Update"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "&Update",IDOK,84,120,50,14
+    DEFPUSHBUTTON   "&Update",IDOK,18,120,116,14
     PUSHBUTTON      "&Cancel",IDCANCEL,138,120,50,14
     LTEXT           "A new version of OpenMPT has been released.",IDC_STATIC,6,6,180,12
     LTEXT           "Your version:",IDC_STATIC,6,24,44,8
@@ -1001,6 +1003,11 @@ BEGIN
     100, 100, 0, 0,
     100, 100, 0, 0,
     0, 100, 100, 0
+END
+
+IDD_UPDATE AFX_DIALOG_LAYOUT
+BEGIN
+    0
 END
 
 #endif    // German (Germany) resources
@@ -2738,7 +2745,7 @@ BEGIN
         MENUITEM "&OpenMPT Website",            ID_NETLINK_MODPLUG
         MENUITEM "&Web Resources",              ID_NETLINK_TOP_PICKS
         MENUITEM SEPARATOR
-        MENUITEM "Check for &Updates",          ID_INTERNETUPDATE
+        MENUITEM "Check for &Updates...",       ID_INTERNETUPDATE
         MENUITEM "&About OpenMPT",              ID_APP_ABOUT
     END
 END
