@@ -65,95 +65,95 @@ namespace SoundDevice
 namespace SoundDevice
 {
 
-	MPT_JSON_INLINE(SoundDevice::Info::ManagerFlags, {
-		MPT_JSON_MAP(defaultFor);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SoundDevice::Info::ManagerFlags
+		,defaultFor
+	)
 
-	MPT_JSON_INLINE(SoundDevice::Info::Flags, {
-		MPT_JSON_MAP(usability);
-		MPT_JSON_MAP(level);
-		MPT_JSON_MAP(compatible);
-		MPT_JSON_MAP(api);
-		MPT_JSON_MAP(io);
-		MPT_JSON_MAP(mixing);
-		MPT_JSON_MAP(implementor);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SoundDevice::Info::Flags
+		,usability
+		,level
+		,compatible
+		,api
+		,io
+		,mixing
+		,implementor
+	)
 
-	MPT_JSON_INLINE(SoundDevice::Info, {
-		MPT_JSON_MAP(type);
-		MPT_JSON_MAP(internalID);
-		MPT_JSON_MAP(name);
-		MPT_JSON_MAP(apiName);
-		MPT_JSON_MAP(apiPath);
-		MPT_JSON_MAP(default_);
-		MPT_JSON_MAP(useNameAsIdentifier);
-		MPT_JSON_MAP(managerFlags);
-		MPT_JSON_MAP(flags);
-		MPT_JSON_MAP(extraData);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SoundDevice::Info
+		,type
+		,internalID
+		,name
+		,apiName
+		,apiPath
+		,default_
+		,useNameAsIdentifier
+		,managerFlags
+		,flags
+		,extraData
+	)
 
-	MPT_JSON_INLINE(SoundDevice::AppInfo, {
-		MPT_JSON_MAP(Name);
-		MPT_JSON_MAP(BoostedThreadPriorityXP);
-		MPT_JSON_MAP(BoostedThreadMMCSSClassVista);
-		MPT_JSON_MAP(BoostedThreadRealtimePosix);
-		MPT_JSON_MAP(BoostedThreadNicenessPosix);
-		MPT_JSON_MAP(BoostedThreadRtprioPosix);
-		MPT_JSON_MAP(MaskDriverCrashes);
-		MPT_JSON_MAP(AllowDeferredProcessing);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SoundDevice::AppInfo
+		,Name
+		,BoostedThreadPriorityXP
+		,BoostedThreadMMCSSClassVista
+		,BoostedThreadRealtimePosix
+		,BoostedThreadNicenessPosix
+		,BoostedThreadRtprioPosix
+		,MaskDriverCrashes
+		,AllowDeferredProcessing
+	)
 
-	MPT_JSON_INLINE(SoundDevice::Settings, {
-		MPT_JSON_MAP(Latency);
-		MPT_JSON_MAP(UpdateInterval);
-		MPT_JSON_MAP(Samplerate);
-		MPT_JSON_MAP(Channels);
-		MPT_JSON_MAP(InputChannels);
-		MPT_JSON_MAP(sampleFormat);
-		MPT_JSON_MAP(ExclusiveMode);
-		MPT_JSON_MAP(BoostThreadPriority);
-		MPT_JSON_MAP(KeepDeviceRunning);
-		MPT_JSON_MAP(UseHardwareTiming);
-		MPT_JSON_MAP(DitherType);
-		MPT_JSON_MAP(InputSourceID);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SoundDevice::Settings
+		,Latency
+		,UpdateInterval
+		,Samplerate
+		,Channels
+		,InputChannels
+		,sampleFormat
+		,ExclusiveMode
+		,BoostThreadPriority
+		,KeepDeviceRunning
+		,UseHardwareTiming
+		,DitherType
+		,InputSourceID
+	)
 
-	MPT_JSON_INLINE(SoundDevice::Caps, {
-		MPT_JSON_MAP(Available);
-		MPT_JSON_MAP(CanUpdateInterval);
-		MPT_JSON_MAP(CanSampleFormat);
-		MPT_JSON_MAP(CanExclusiveMode);
-		MPT_JSON_MAP(CanBoostThreadPriority);
-		MPT_JSON_MAP(CanKeepDeviceRunning);
-		MPT_JSON_MAP(CanUseHardwareTiming);
-		MPT_JSON_MAP(CanChannelMapping);
-		MPT_JSON_MAP(CanInput);
-		MPT_JSON_MAP(HasNamedInputSources);
-		MPT_JSON_MAP(CanDriverPanel);
-		MPT_JSON_MAP(HasInternalDither);
-		MPT_JSON_MAP(ExclusiveModeDescription);
-		MPT_JSON_MAP(LatencyMin);
-		MPT_JSON_MAP(LatencyMax);
-		MPT_JSON_MAP(UpdateIntervalMin);
-		MPT_JSON_MAP(UpdateIntervalMax);
-		MPT_JSON_MAP(DefaultSettings);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SoundDevice::Caps
+		,Available
+		,CanUpdateInterval
+		,CanSampleFormat
+		,CanExclusiveMode
+		,CanBoostThreadPriority
+		,CanKeepDeviceRunning
+		,CanUseHardwareTiming
+		,CanChannelMapping
+		,CanInput
+		,HasNamedInputSources
+		,CanDriverPanel
+		,HasInternalDither
+		,ExclusiveModeDescription
+		,LatencyMin
+		,LatencyMax
+		,UpdateIntervalMin
+		,UpdateIntervalMax
+		,DefaultSettings
+	)
 
-	MPT_JSON_INLINE(SoundDevice::DynamicCaps, {
-		MPT_JSON_MAP(currentSampleRate);
-		MPT_JSON_MAP(supportedSampleRates);
-		MPT_JSON_MAP(supportedExclusiveSampleRates);
-		MPT_JSON_MAP(supportedSampleFormats);
-		MPT_JSON_MAP(supportedExclusiveModeSampleFormats);
-		MPT_JSON_MAP(channelNames);
-		MPT_JSON_MAP(inputSourceNames);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SoundDevice::DynamicCaps
+		,currentSampleRate
+		,supportedSampleRates
+		,supportedExclusiveSampleRates
+		,supportedSampleFormats
+		,supportedExclusiveModeSampleFormats
+		,channelNames
+		,inputSourceNames
+	)
 
-	MPT_JSON_INLINE(SoundDevice::Statistics, {
-		MPT_JSON_MAP(InstantaneousLatency);
-		MPT_JSON_MAP(LastUpdateInterval);
-		MPT_JSON_MAP(text);
-	})
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SoundDevice::Statistics
+		,InstantaneousLatency
+		,LastUpdateInterval
+		,text
+	)
 
 } // namespace SoundDevice
 
