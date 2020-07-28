@@ -2382,8 +2382,8 @@ bool CSoundFile::ReadNote()
 					realvol = (chn.nRealVolume * kChnMasterVol) / 256;
 				}
 
-				const ForcePanningMode panningMode = m_PlayConfig.getForcePanningMode();
-				if(panningMode == forceSoftPanning || (panningMode == dontForcePanningMode && (m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING)))
+				const PanningMode panningMode = m_PlayConfig.getPanningMode();
+				if(panningMode == PanningMode::SoftPanning || (panningMode == PanningMode::Undetermined && (m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING)))
 				{
 					if (pan < 128)
 					{
@@ -2394,7 +2394,7 @@ bool CSoundFile::ReadNote()
 						chn.newLeftVol = (realvol * (256 - pan)) / 256;
 						chn.newRightVol = (realvol * 128) / 256;
 					}
-				} else if(panningMode == forceFT2Panning)
+				} else if(panningMode == PanningMode::FT2Panning)
 				{
 					// FT2 uses square root panning. There is a 257-entry LUT for this,
 					// but FT2's internal panning ranges from 0 to 255 only, meaning that

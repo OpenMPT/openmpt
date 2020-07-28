@@ -33,12 +33,12 @@ enum class MixLevels : uint8
 	NumMixLevels
 };
 
-enum ForcePanningMode
+enum class PanningMode : uint8
 {
-	dontForcePanningMode,
-	forceSoftPanning,
-	forceNoSoftPanning,
-	forceFT2Panning,
+	Undetermined,
+	SoftPanning,
+	NoSoftPanning,
+	FT2Panning,
 };
 
 // Class used to store settings for a song file.
@@ -70,8 +70,8 @@ public:
 	bool getUseGlobalPreAmp() const { return m_ignorePreAmp; }
 	void setUseGlobalPreAmp(bool inUseGlobalPreAmp) { m_ignorePreAmp = inUseGlobalPreAmp; }
 
-	ForcePanningMode getForcePanningMode() const { return m_forceSoftPanning; }
-	void setForcePanningMode(ForcePanningMode inForceSoftPanning) { m_forceSoftPanning = inForceSoftPanning; }
+	PanningMode getPanningMode() const { return m_forceSoftPanning; }
+	void setPanningMode(PanningMode inForceSoftPanning) { m_forceSoftPanning = inForceSoftPanning; }
 
 	bool getDisplayDBValues() const { return m_displayDBValues; }
 	void setDisplayDBValues(bool in) { m_displayDBValues = in; }
@@ -100,7 +100,7 @@ protected:
 	float m_normalGlobalVol;
 
 	int m_extraAttenuation;
-	ForcePanningMode m_forceSoftPanning;
+	PanningMode m_forceSoftPanning;
 	bool m_globalVolumeAppliesToMaster;
 	bool m_ignorePreAmp;
 	bool m_displayDBValues;
