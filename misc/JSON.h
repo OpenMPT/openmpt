@@ -106,36 +106,7 @@ namespace JSON {
 	{
 		val = j.get<T>();
 	}
-		
 
-	template <typename T>
-	inline void map(JSON::value &j, const T &val)
-	{
-		j = val;
-	}
-	template <typename T>
-	inline void map(const JSON::value &j, T &val)
-	{
-		val = j.get<T>();
-	}
-
-	#define MPT_JSON_MAP(name) JSON::map(j[ #name ], val. name )
-
-	#define MPT_JSON_INLINE(T, membermap) \
-		inline void   to_json(JSON::value &j, const T &val) { membermap } \
-		inline void from_json(const JSON::value &j, T &val) { membermap } \
-	/**/
-
-	#define MPT_JSON_DECL(T) \
-		void   to_json(JSON::value &j, const T &val); \
-		void from_json(const JSON::value &j, T &val); \
-	/**/
-
-	#define MPT_JSON_IMPL(T, membermap) \
-		void   to_json(JSON::value &j, const T &val) { membermap } \
-		void from_json(const JSON::value &j, T &val) { membermap } \
-	/**/
-	
 } // namespace JSON
 
 #endif // MPT_WITH_NLOHMANNJSON
