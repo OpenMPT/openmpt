@@ -1,0 +1,7 @@
+task:
+    name: freebsd-stable
+    freebsd_instance:
+        image_family: freebsd-12-1
+    install_script: pkg install -y subversion gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2
+    build_script: gmake VERBOSE=1 AUTO_DEPS=1 clean && gmake VERBOSE=1 AUTO_DEPS=1
+    test_script: gmake VERBOSE=1 AUTO_DEPS=1 check
