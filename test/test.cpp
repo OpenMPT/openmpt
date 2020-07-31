@@ -628,14 +628,22 @@ static MPT_NOINLINE void TestStringFormatting()
 #endif
 
 	VERIFY_EQUAL(mpt::fmt::val(-87.0f), "-87");
-	if(mpt::fmt::val(-0.5e-6) != "-5e-007"
-		&& mpt::fmt::val(-0.5e-6) != "-5e-07"
-		&& mpt::fmt::val(-0.5e-6) != "-5e-7"
+	if(mpt::fmt::val(-1.0 / 65536.0) != "-1.52587890625e-005"
+		&& mpt::fmt::val(-1.0 / 65536.0) != "-1.52587890625e-05"
+		&& mpt::fmt::val(-1.0 / 65536.0) != "-1.52587890625e-5"
 		)
 	{
 		VERIFY_EQUAL(true, false);
 	}
-	VERIFY_EQUAL(mpt::fmt::val(58.65403492763), "58.654");
+	if(mpt::fmt::val(-1.0f / 65536.0f) != "-1.52587891e-005"
+		&& mpt::fmt::val(-1.0f / 65536.0f) != "-1.52587891e-05"
+		&& mpt::fmt::val(-1.0f / 65536.0f) != "-1.52587891e-5"
+		)
+	{
+		VERIFY_EQUAL(true, false);
+	}
+	VERIFY_EQUAL(mpt::fmt::val(58.65403492763), "58.654034927630001");
+	VERIFY_EQUAL(mpt::fmt::flt(58.65403492763, 6), "58.654");
 	VERIFY_EQUAL(mpt::fmt::fix(23.42, 1), "23.4");
 	VERIFY_EQUAL(mpt::fmt::fix(234.2, 1), "234.2");
 	VERIFY_EQUAL(mpt::fmt::fix(2342.0, 1), "2342.0");

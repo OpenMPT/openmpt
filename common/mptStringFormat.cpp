@@ -78,7 +78,7 @@ static inline std::string ToStringHelperFloat(const T & x)
 {
 	std::ostringstream o;
 	o.imbue(std::locale::classic());
-	o << x;
+	o << std::setprecision(std::numeric_limits<T>::max_digits10) << x;
 	return o.str();
 }
 
@@ -88,7 +88,7 @@ static inline std::wstring ToWStringHelperFloat(const T & x)
 {
 	std::wostringstream o;
 	o.imbue(std::locale::classic());
-	o << x;
+	o << std::setprecision(std::numeric_limits<T>::max_digits10) << x;
 	return o.str();
 }
 #endif
