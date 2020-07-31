@@ -10,8 +10,17 @@
 #include "stdafx.h"
 #include "mptStringFormat.h"
 
+#if MPT_MSVC_AT_LEAST(2019,4) || MPT_GCC_AT_LEAST(11,1,0)
+#define MPT_FORMAT_CXX17_FLOAT 1
+#else
+#define MPT_FORMAT_CXX17_FLOAT 0
+#endif
+
 #include <charconv>
 #include <iomanip>
+#if MPT_FORMAT_CXX17_FLOAT
+#include <iterator>
+#endif // MPT_FORMAT_CXX17_FLOAT
 #include <locale>
 #include <sstream>
 #include <string>
@@ -40,7 +49,7 @@ static std::wstring ToWideSimple(const std::string &nstr)
 #endif // MPT_WSTRING_FORMAT
 
 template<typename T>
-static inline std::string ToChars(const T & x, int base = 10)
+static inline std::string ToCharsInt(const T & x, int base = 10)
 {
 	std::string str(1, '\0');
 	bool done = false;
@@ -62,16 +71,94 @@ static inline std::string ToChars(const T & x, int base = 10)
 template<typename T>
 static inline std::string ToStringHelperInt(const T & x)
 {
-	return ToChars(x);
+	return ToCharsInt(x);
 }
 
 #if MPT_WSTRING_FORMAT
 template<typename T>
 static inline std::wstring ToWStringHelperInt(const T & x)
 {
-	return ToWideSimple(ToChars(x));
+	return ToWideSimple(ToCharsInt(x));
 }
 #endif
+
+#if MPT_FORMAT_CXX17_FLOAT
+
+template<typename T>
+static inline std::string ToCharsFloat(const T & x)
+{
+	std::string str(1, '\0');
+	bool done = false;
+	while(!done)
+	{
+		std::to_chars_result result = std::to_chars(str.data(), str.data() + str.size(), x);
+		if(result.ec != std::errc{})
+		{
+			str.resize(Util::ExponentialGrow(str.size()), '\0');
+		} else
+		{
+			str.resize(result.ptr - str.data());
+			done = true;
+		}
+	}
+	return str;
+}
+
+template<typename T>
+static inline std::string ToCharsFloat(const T & x, std::chars_format fmt)
+{
+	std::string str(1, '\0');
+	bool done = false;
+	while(!done)
+	{
+		std::to_chars_result result = std::to_chars(str.data(), str.data() + str.size(), x, fmt);
+		if(result.ec != std::errc{})
+		{
+			str.resize(Util::ExponentialGrow(str.size()), '\0');
+		} else
+		{
+			str.resize(result.ptr - str.data());
+			done = true;
+		}
+	}
+	return str;
+}
+
+template<typename T>
+static inline std::string ToCharsFloat(const T & x, std::chars_format fmt, int precision)
+{
+	std::string str(1, '\0');
+	bool done = false;
+	while(!done)
+	{
+		std::to_chars_result result = std::to_chars(str.data(), str.data() + str.size(), x, fmt, precision);
+		if(result.ec != std::errc{})
+		{
+			str.resize(Util::ExponentialGrow(str.size()), '\0');
+		} else
+		{
+			str.resize(result.ptr - str.data());
+			done = true;
+		}
+	}
+	return str;
+}
+
+template<typename T>
+static inline std::string ToStringHelperFloat(const T & x)
+{
+	return ToCharsFloat(x);
+}
+
+#if MPT_WSTRING_FORMAT
+template<typename T>
+static inline std::wstring ToWStringHelperFloat(const T & x)
+{
+	return ToWideSimple(ToCharsFloat(x));
+}
+#endif
+
+#else // !MPT_FORMAT_CXX17_FLOAT
 
 template<typename T>
 static inline std::string ToStringHelperFloat(const T & x)
@@ -92,6 +179,8 @@ static inline std::wstring ToWStringHelperFloat(const T & x)
 	return o.str();
 }
 #endif
+
+#endif // MPT_FORMAT_CXX17_FLOAT
 
 std::string ToString(const bool & x) { return ToStringHelperInt(static_cast<int>(x)); }
 std::string ToString(const signed char & x) { return ToStringHelperInt(x); }
@@ -297,6 +386,44 @@ static inline Tstring PostProcessDigits(Tstring str, const FormatSpec & format)
 	return str;
 }
 
+#if MPT_FORMAT_CXX17_FLOAT
+
+template<typename Tstring>
+static inline Tstring PostProcessFloatWidth(Tstring str, const FormatSpec & format)
+{
+	FormatFlags f = format.GetFlags();
+	std::size_t width = format.GetWidth();
+	if(f & fmt_base::FillNul)
+	{
+		auto pos = str.begin();
+		if(str.length() > 0)
+		{
+			if(str[0] == typename Tstring::value_type('+'))
+			{
+				pos++;
+				width++;
+			} else if(str[0] == typename Tstring::value_type('-'))
+			{
+				pos++;
+				width++;
+			}
+		}
+		if(str.length() - std::distance(str.begin(), pos) < width)
+		{
+			str.insert(pos, width - str.length() - std::distance(str.begin(), pos), '0');
+		}
+	} else
+	{
+		if(str.length() < width)
+		{
+			str.insert(0, width - str.length(), ' ');
+		}
+	}
+	return str;
+}
+
+#endif // MPT_FORMAT_CXX17_FLOAT
+
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4723) // potential divide by 0
@@ -332,7 +459,7 @@ static inline std::string FormatValHelperInt(const T & x, const FormatSpec & f)
 	int base = 10;
 	if(f.GetFlags() & fmt_base::BaseDec) { base = 10; }
 	if(f.GetFlags() & fmt_base::BaseHex) { base = 16; }
-	return PostProcessGroup(PostProcessDigits(PostProcessCase(ToChars(x, base), f), f), f);
+	return PostProcessGroup(PostProcessDigits(PostProcessCase(ToCharsInt(x, base), f), f), f);
 }
 
 #if MPT_WSTRING_FORMAT
@@ -342,9 +469,75 @@ static inline std::wstring FormatValWHelperInt(const T & x, const FormatSpec & f
 	int base = 10;
 	if(f.GetFlags() & fmt_base::BaseDec) { base = 10; }
 	if(f.GetFlags() & fmt_base::BaseHex) { base = 16; }
-	return ToWideSimple(PostProcessGroup(PostProcessDigits(PostProcessCase(ToChars(x, base), f), f), f));
+	return ToWideSimple(PostProcessGroup(PostProcessDigits(PostProcessCase(ToCharsInt(x, base), f), f), f));
 }
 #endif
+
+#if MPT_FORMAT_CXX17_FLOAT
+
+template<typename T>
+static inline std::string FormatValHelperFloat(const T & x, const FormatSpec & f)
+{
+	if(f.GetPrecision() != -1)
+	{
+		if(f.GetFlags() & fmt_base::NotaSci)
+		{
+			return PostProcessFloatWidth(ToCharsFloat(x, std::chars_format::scientific, f.GetPrecision()), f);
+		} else if(f.GetFlags() & fmt_base::NotaFix)
+		{
+			return PostProcessFloatWidth(ToCharsFloat(x, std::chars_format::fixed, f.GetPrecision()), f);
+		} else
+		{
+			return PostProcessFloatWidth(ToCharsFloat(x, std::chars_format::general, f.GetPrecision()), f);
+		}
+	} else
+	{
+		if(f.GetFlags() & fmt_base::NotaSci)
+		{
+			return PostProcessFloatWidth(ToCharsFloat(x, std::chars_format::scientific), f);
+		} else if(f.GetFlags() & fmt_base::NotaFix)
+		{
+			return PostProcessFloatWidth(ToCharsFloat(x, std::chars_format::fixed), f);
+		} else
+		{
+			return PostProcessFloatWidth(ToCharsFloat(x, std::chars_format::general), f);
+		}
+	}
+}
+
+#if MPT_WSTRING_FORMAT
+template<typename T>
+static inline std::wstring FormatValWHelperFloat(const T & x, const FormatSpec & f)
+{
+	if(f.GetPrecision() != -1)
+	{
+		if(f.GetFlags() & fmt_base::NotaSci)
+		{
+			return ToWideSimple(PostProcessFloatWidth(ToCharsFloat(x, std::chars_format::scientific, f.GetPrecision()), f));
+		} else if(f.GetFlags() & fmt_base::NotaFix)
+		{
+			return ToWideSimple(PostProcessFloatWidth(ToCharsFloat(x, std::chars_format::fixed, f.GetPrecision()), f));
+		} else
+		{
+			return ToWideSimple(PostProcessFloatWidth(ToCharsFloat(x, std::chars_format::general, f.GetPrecision()), f));
+		}
+	} else
+	{
+		if(f.GetFlags() & fmt_base::NotaSci)
+		{
+			return ToWideSimple(PostProcessFloatWidth(ToCharsFloat(x, std::chars_format::scientific), f));
+		} else if(f.GetFlags() & fmt_base::NotaFix)
+		{
+			return ToWideSimple(PostProcessFloatWidth(ToCharsFloat(x, std::chars_format::fixed), f));
+		} else
+		{
+			return ToWideSimple(PostProcessFloatWidth(ToCharsFloat(x, std::chars_format::general), f));
+		}
+	}
+}
+#endif
+
+#else // !MPT_FORMAT_CXX17_FLOAT
 
 template<typename T>
 static inline std::string FormatValHelperFloat(const T & x, const FormatSpec & f)
@@ -368,6 +561,7 @@ static inline std::wstring FormatValWHelperFloat(const T & x, const FormatSpec &
 }
 #endif
 
+#endif // MPT_FORMAT_CXX17_FLOAT
 
 std::string FormatVal(const bool & x, const FormatSpec & f) { return FormatValHelperInt(static_cast<int>(x), f); }
 std::string FormatVal(const signed char & x, const FormatSpec & f) { return FormatValHelperInt(x, f); }

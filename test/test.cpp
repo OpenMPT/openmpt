@@ -517,11 +517,18 @@ static void TestFloatFormat(Tfloat x, std::string format, mpt::FormatFlags f, st
 	std::string str_sprintf = StringFormat(format, x);
 #endif
 	std::string str_iostreams = mpt::fmt::fmt(x, mpt::FormatSpec().SetFlags(f).SetWidth(width).SetPrecision(precision));
-	//Log("%s", str_sprintf.c_str());
-	//Log("%s", str_iostreams.c_str());
-	//Log("%s", str_iostreams.c_str());
 #ifdef MODPLUG_TRACKER
-	VERIFY_EQUAL(str_iostreams, str_sprintf); // this will fail with a set c locale (and there is nothing that can be done about that in libopenmpt)
+	//MPT_LOG(LogDebug, "test", mpt::ToUnicode(mpt::Charset::ASCII, str_sprintf));
+#endif
+	//MPT_LOG(LogDebug, "test", mpt::ToUnicode(mpt::Charset::ASCII, str_iostreams));
+#ifdef MODPLUG_TRACKER
+#if MPT_MSVC_AT_LEAST(2019,4) || MPT_GCC_AT_LEAST(11,1,0)
+	// to_chars generates shortest form instead of 0-padded precision
+	if(precision != -1)
+#endif
+	{
+		VERIFY_EQUAL(str_iostreams, str_sprintf); // this will fail with a set c locale (and there is nothing that can be done about that in libopenmpt)
+	}
 #else
 	MPT_UNREFERENCED_PARAMETER(format);
 	MPT_UNUSED_VARIABLE(str_iostreams);
@@ -628,6 +635,16 @@ static MPT_NOINLINE void TestStringFormatting()
 #endif
 
 	VERIFY_EQUAL(mpt::fmt::val(-87.0f), "-87");
+	if(mpt::fmt::val(-0.5e-6) != "-5e-007"
+		&& mpt::fmt::val(-0.5e-6) != "-5e-07"
+		&& mpt::fmt::val(-0.5e-6) != "-5e-7"
+		&& mpt::fmt::val(-0.5e-6) != "-4.9999999999999998e-7"
+		&& mpt::fmt::val(-0.5e-6) != "-4.9999999999999998e-07"
+		&& mpt::fmt::val(-0.5e-6) != "-4.9999999999999998e-007"
+		)
+	{
+		VERIFY_EQUAL(true, false);
+	}
 	if(mpt::fmt::val(-1.0 / 65536.0) != "-1.52587890625e-005"
 		&& mpt::fmt::val(-1.0 / 65536.0) != "-1.52587890625e-05"
 		&& mpt::fmt::val(-1.0 / 65536.0) != "-1.52587890625e-5"
@@ -638,11 +655,19 @@ static MPT_NOINLINE void TestStringFormatting()
 	if(mpt::fmt::val(-1.0f / 65536.0f) != "-1.52587891e-005"
 		&& mpt::fmt::val(-1.0f / 65536.0f) != "-1.52587891e-05"
 		&& mpt::fmt::val(-1.0f / 65536.0f) != "-1.52587891e-5"
+		&& mpt::fmt::val(-1.0f / 65536.0f) != "-1.5258789e-005"
+		&& mpt::fmt::val(-1.0f / 65536.0f) != "-1.5258789e-05"
+		&& mpt::fmt::val(-1.0f / 65536.0f) != "-1.5258789e-5"
 		)
 	{
 		VERIFY_EQUAL(true, false);
 	}
-	VERIFY_EQUAL(mpt::fmt::val(58.65403492763), "58.654034927630001");
+	if(mpt::fmt::val(58.65403492763) != "58.654034927630001"
+		&& mpt::fmt::val(58.65403492763) != "58.65403492763"
+		)
+	{
+		VERIFY_EQUAL(true, false);
+	}
 	VERIFY_EQUAL(mpt::fmt::flt(58.65403492763, 6), "58.654");
 	VERIFY_EQUAL(mpt::fmt::fix(23.42, 1), "23.4");
 	VERIFY_EQUAL(mpt::fmt::fix(234.2, 1), "234.2");
@@ -721,6 +746,7 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::String::Parse::Hex<unsigned int>(U_("ffff")), 65535);
 
 	TestFloatFormats(0.0f);
+	TestFloatFormats(-0.0f);
 	TestFloatFormats(1.0f);
 	TestFloatFormats(-1.0f);
 	TestFloatFormats(0.1f);
@@ -732,6 +758,7 @@ static MPT_NOINLINE void TestStringFormatting()
 	TestFloatFormats(6.12345f);
 
 	TestFloatFormats(0.0);
+	TestFloatFormats(-0.0);
 	TestFloatFormats(1.0);
 	TestFloatFormats(-1.0);
 	TestFloatFormats(0.1);
