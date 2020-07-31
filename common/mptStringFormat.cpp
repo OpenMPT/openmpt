@@ -204,7 +204,7 @@ public:
 template<typename Tostream, typename T>
 static inline void ApplyFormat(Tostream & o, const FormatSpec & format, const T &)
 {
-	MPT_MAYBE_CONSTANT_IF(!std::numeric_limits<T>::is_integer)
+	if constexpr(!std::numeric_limits<T>::is_integer)
 	{
 		if(format.GetGroup() > 0)
 		{
@@ -229,7 +229,7 @@ static inline void ApplyFormat(Tostream & o, const FormatSpec & format, const T 
 	else if(f & fmt_base::NotaSci ) { o << std::setiosflags(std::ios::scientific); }
 	if(f & fmt_base::CaseLow) { o << std::nouppercase; }
 	else if(f & fmt_base::CaseUpp) { o << std::uppercase; }
-	MPT_MAYBE_CONSTANT_IF(!std::numeric_limits<T>::is_integer)
+	if constexpr(!std::numeric_limits<T>::is_integer)
 	{
 		if(f & fmt_base::FillOff) { /* nothing */ }
 		else if(f & fmt_base::FillNul) { o << std::setw(width) << std::setfill(typename Tostream::char_type('0')); }
