@@ -111,6 +111,8 @@ Building the source packages additionally requires:
  *  autoconf
  *  autoconf-archive
  *  automake
+ *  awk (mawk)
+ *  git
  *  gzip
  *  help2man
  *  libtool
