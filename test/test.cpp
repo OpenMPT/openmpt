@@ -492,18 +492,18 @@ static MPT_NOINLINE void TestTypes()
 //     A library is not allowed to mock with that and thus cannot influence the behavior in this case.
 
 template <typename T>
-static std::string StringFormat(const char *format, T x)
+static std::string StringFormat(std::string format, T x)
 {
 	#if MPT_COMPILER_MSVC
 		// Count the needed array size.
-		const size_t nCount = _scprintf(format, x); // null character not included.
+		const size_t nCount = _scprintf(format.c_str(), x); // null character not included.
 		std::vector<char> buf(nCount + 1); // + 1 is for null terminator.
-		sprintf_s(&(buf[0]), buf.size(), format, x);
+		sprintf_s(&(buf[0]), buf.size(), format.c_str(), x);
 		return &(buf[0]);
 	#else
-		int size = snprintf(NULL, 0, format, x); // get required size, requires c99 compliant snprintf which msvc does not have
+		int size = snprintf(NULL, 0, format.c_str(), x); // get required size, requires c99 compliant snprintf which msvc does not have
 		std::vector<char> temp(size + 1);
-		snprintf(&(temp[0]), size + 1, format, x);
+		snprintf(&(temp[0]), size + 1, format.c_str(), x);
 		return &(temp[0]);
 	#endif
 }
@@ -511,7 +511,7 @@ static std::string StringFormat(const char *format, T x)
 #endif
 
 template <typename Tfloat>
-static void TestFloatFormat(Tfloat x, const char * format, mpt::FormatFlags f, std::size_t width = 0, int precision = -1)
+static void TestFloatFormat(Tfloat x, std::string format, mpt::FormatFlags f, std::size_t width = 0, int precision = -1)
 {
 #ifdef MODPLUG_TRACKER
 	std::string str_sprintf = StringFormat(format, x);
@@ -533,10 +533,11 @@ template <typename Tfloat>
 static void TestFloatFormats(Tfloat x)
 {
 
-	TestFloatFormat(x, "%g", mpt::fmt::NotaNrm | mpt::fmt::FillOff);
 	TestFloatFormat(x, "%.8g", mpt::fmt::NotaNrm | mpt::fmt::FillOff, 0, 8);
 
-	TestFloatFormat(x, "%f", mpt::fmt::NotaFix | mpt::fmt::FillOff);
+	TestFloatFormat(x, MPT_FORMAT("%.{}g")(std::numeric_limits<Tfloat>::max_digits10), mpt::fmt::NotaNrm | mpt::fmt::FillOff);
+	TestFloatFormat(x, MPT_FORMAT("%.{}f")(std::numeric_limits<Tfloat>::digits10), mpt::fmt::NotaFix | mpt::fmt::FillOff);
+	TestFloatFormat(x, MPT_FORMAT("%.{}e")(std::numeric_limits<Tfloat>::max_digits10 - 1), mpt::fmt::NotaSci | mpt::fmt::FillOff);
 
 	TestFloatFormat(x, "%.0f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 0);
 	TestFloatFormat(x, "%.1f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 1);
@@ -737,6 +738,10 @@ static MPT_NOINLINE void TestStringFormatting()
 	TestFloatFormats(0.1234567890);
 	TestFloatFormats(1234567890000000.0);
 	TestFloatFormats(0.0000001234567890);
+
+	TestFloatFormats(M_PI);
+	TestFloatFormats(3.14159265358979323846);
+	TestFloatFormats(3.14159265358979323846f);
 
 	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 3), "6.12");
 	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 3), "6.123");

@@ -234,7 +234,28 @@ static inline void ApplyFormat(Tostream & o, const FormatSpec & format, const T 
 		if(f & fmt_base::FillOff) { /* nothing */ }
 		else if(f & fmt_base::FillNul) { o << std::setw(width) << std::setfill(typename Tostream::char_type('0')); }
 	}
-	if(precision != -1) { o << std::setprecision(precision); }
+	if(precision != -1)
+	{
+		o << std::setprecision(precision);
+	} else
+	{
+		if constexpr(std::is_floating_point<T>::value)
+		{
+			if(f & fmt_base::NotaNrm)
+			{
+				o << std::setprecision(std::numeric_limits<T>::max_digits10);
+			} else if(f & fmt_base::NotaFix)
+			{
+				o << std::setprecision(std::numeric_limits<T>::digits10);
+			} else if(f & fmt_base::NotaSci)
+			{
+				o << std::setprecision(std::numeric_limits<T>::max_digits10 - 1);
+			} else
+			{
+				o << std::setprecision(std::numeric_limits<T>::max_digits10);
+			}
+		}
+	}
 }
 
 template<typename Tstring>
