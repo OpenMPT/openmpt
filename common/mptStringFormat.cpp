@@ -10,22 +10,12 @@
 #include "stdafx.h"
 #include "mptStringFormat.h"
 
-#if MPT_COMPILER_MSVC
-#define MPT_FORMAT_CXX17_INT 1
-#else
-#define MPT_FORMAT_CXX17_INT 0
-#endif
-
-#if MPT_FORMAT_CXX17_INT
 #include <charconv>
-#endif // MPT_FORMAT_CXX17_INT
 #include <iomanip>
 #include <locale>
 #include <sstream>
 #include <string>
-#if MPT_FORMAT_CXX17_INT
 #include <system_error>
-#endif // MPT_FORMAT_CXX17_INT
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -43,8 +33,6 @@ template<typename Tstream> inline void SaneInsert(Tstream & s, const bool & x) {
 template<typename Tstream> inline void SaneInsert(Tstream & s, const signed char & x) { s << static_cast<signed int>(x); }
 template<typename Tstream> inline void SaneInsert(Tstream & s, const unsigned char & x) { s << static_cast<unsigned int>(x); }
  
-#if MPT_FORMAT_CXX17_INT
-
 #if MPT_WSTRING_FORMAT
 std::wstring ToWideSimple(const std::string &nstr)
 {
@@ -90,30 +78,6 @@ static inline std::wstring ToWStringHelperInt(const T & x)
 	return ToWideSimple(ToChars(x));
 }
 #endif
-
-#else // !MPT_FORMAT_CXX17_INT
-
-template<typename T>
-static inline std::string ToStringHelperInt(const T & x)
-{
-	std::ostringstream o;
-	o.imbue(std::locale::classic());
-	SaneInsert(o, x);
-	return o.str();
-}
-
-#if MPT_WSTRING_FORMAT
-template<typename T>
-static inline std::wstring ToWStringHelperInt(const T & x)
-{
-	std::wostringstream o;
-	o.imbue(std::locale::classic());
-	SaneInsert(o, x);
-	return o.str();
-}
-#endif
-
-#endif // MPT_FORMAT_CXX17_INT
 
 template<typename T>
 static inline std::string ToStringHelperFloat(const T & x)
@@ -347,8 +311,6 @@ static inline Tstring PostProcessGroup(Tstring str, const FormatSpec & format)
 #pragma warning(pop)
 #endif // MPT_COMPILER_MSVC
 
-#if MPT_FORMAT_CXX17_INT
-
 template<typename T>
 static inline std::string FormatValHelperInt(const T & x, const FormatSpec & f)
 {
@@ -368,58 +330,6 @@ static inline std::wstring FormatValWHelperInt(const T & x, const FormatSpec & f
 	return ToWideSimple(PostProcessGroup(PostProcessDigits(PostProcessCase(ToChars(x, base), f), f), f));
 }
 #endif
-
-#else // !MPT_FORMAT_CXX17_INT
-
-template<typename T>
-static inline std::string FormatValHelperInt(const T & x, const FormatSpec & f)
-{
-	MPT_MAYBE_CONSTANT_IF((f.GetFlags() & fmt_base::BaseHex) && std::is_signed<T>::value)
-	{
-		if(x == std::numeric_limits<T>::min())
-		{
-			return std::string(1, '-') + FormatValHelperInt(static_cast<typename std::make_unsigned<T>::type>(x), f);
-		} else MPT_MAYBE_CONSTANT_IF(x < 0)
-		{
-			return std::string(1, '-') + FormatValHelperInt(static_cast<typename std::make_unsigned<T>::type>(0-x), f);
-		} else
-		{
-			return FormatValHelperInt(static_cast<typename std::make_unsigned<T>::type>(x), f);
-		}
-	}
-	std::ostringstream o;
-	o.imbue(std::locale::classic());
-	ApplyFormat(o, f, x);
-	SaneInsert(o, x);
-	return PostProcessGroup(PostProcessDigits(o.str(), f), f);
-}
-
-#if MPT_WSTRING_FORMAT
-template<typename T>
-static inline std::wstring FormatValWHelperInt(const T & x, const FormatSpec & f)
-{
-	MPT_MAYBE_CONSTANT_IF((f.GetFlags() & fmt_base::BaseHex) && std::is_signed<T>::value)
-	{
-		if(x == std::numeric_limits<T>::min())
-		{
-			return std::wstring(1, L'-') + FormatValWHelperInt(static_cast<typename std::make_unsigned<T>::type>(x), f);
-		} else MPT_MAYBE_CONSTANT_IF(x < 0)
-		{
-			return std::wstring(1, L'-') + FormatValWHelperInt(static_cast<typename std::make_unsigned<T>::type>(0-x), f);
-		} else
-		{
-			return FormatValWHelperInt(static_cast<typename std::make_unsigned<T>::type>(x), f);
-		}
-	}
-	std::wostringstream o;
-	o.imbue(std::locale::classic());
-	ApplyFormat(o, f, x);
-	SaneInsert(o, x);
-	return PostProcessGroup(PostProcessDigits(o.str(), f), f);
-}
-#endif
-
-#endif // MPT_FORMAT_CXX17_INT
 
 template<typename T>
 static inline std::string FormatValHelperFloat(const T & x, const FormatSpec & f)
