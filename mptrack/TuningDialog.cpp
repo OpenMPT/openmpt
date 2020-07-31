@@ -288,7 +288,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 			m_EditSteps.EnableWindow(TRUE);
 			m_EditRatioPeriod.EnableWindow(TRUE);
 			m_EditSteps.SetWindowText(mpt::cfmt::val(period));
-			m_EditRatioPeriod.SetWindowText(mpt::cfmt::val(GroupRatio));
+			m_EditRatioPeriod.SetWindowText(mpt::cfmt::flt(GroupRatio, 6));
 		} else
 		{
 			m_EditSteps.EnableWindow(FALSE);
