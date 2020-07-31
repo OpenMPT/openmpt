@@ -28,7 +28,7 @@ namespace mpt
 
 
 #if MPT_WSTRING_FORMAT
-std::wstring ToWideSimple(const std::string &nstr)
+static std::wstring ToWideSimple(const std::string &nstr)
 {
 	std::wstring wstr(nstr.size(), L'\0');
 	for(std::size_t i = 0; i < nstr.size(); ++i)
