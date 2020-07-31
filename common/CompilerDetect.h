@@ -34,8 +34,8 @@
 #define MPT_CLANG_AT_LEAST(major,minor,patch)        (MPT_COMPILER_CLANG_VERSION >= MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 #define MPT_CLANG_BEFORE(major,minor,patch)          (MPT_COMPILER_CLANG_VERSION <  MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 
-#if MPT_CLANG_BEFORE(5,0,0)
-#error "clang version 5 required"
+#if MPT_CLANG_BEFORE(7,0,0)
+#error "clang version 7 required"
 #endif
 
 #if defined(__clang_analyzer__)
@@ -51,8 +51,8 @@
 #define MPT_GCC_AT_LEAST(major,minor,patch)          (MPT_COMPILER_GCC_VERSION >= MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 #define MPT_GCC_BEFORE(major,minor,patch)            (MPT_COMPILER_GCC_VERSION <  MPT_COMPILER_MAKE_VERSION3((major),(minor),(patch)))
 
-#if MPT_GCC_BEFORE(7,1,0)
-#error "GCC version 7.1 required"
+#if MPT_GCC_BEFORE(8,1,0)
+#error "GCC version 8.1 required"
 #endif
 
 #elif defined(_MSC_VER)

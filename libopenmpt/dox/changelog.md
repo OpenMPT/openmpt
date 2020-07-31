@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.0-pre
 
+ *  [**Regression**] Support for GCC 7 has been removed.
+ *  [**Regression**] Support for Clang 5, 6 has been removed.
+
 ### libopenmpt 0.5.0-pre
 
  *  [**New**] OggMod compressed FastTracker 2 XM (OXM) modules are now
