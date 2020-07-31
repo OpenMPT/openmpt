@@ -293,7 +293,7 @@ template <> struct FormatValTFunctor<std::wstring> { template <typename T> inlin
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 template <> struct FormatValTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x, const FormatSpec & f) { return mpt::ToLocale(mpt::Charset::Locale, FormatVal(x, f)); } };
 #endif // MPT_ENABLE_CHARSET_LOCALE
-#if defined(MPT_WITH_MFC )
+#if defined(MPT_WITH_MFC)
 #ifdef UNICODE
 template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec & f) { return mpt::ToCString(FormatValW(x, f)); } };
 #else // !UNICODE
