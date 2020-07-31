@@ -86,6 +86,7 @@ template <typename T, std::size_t N> struct is_binary_safe<const std::array<T, N
 	static_assert(sizeof( type ) == (size) ); \
 	static_assert(alignof( type ) == 1); \
 	static_assert(std::is_standard_layout< type >::value); \
+	static_assert(std::has_unique_object_representations< type >::value); \
 	namespace mpt { \
 		template <> struct is_binary_safe< type > : public std::true_type { }; \
 	} \
