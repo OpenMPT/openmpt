@@ -27,12 +27,6 @@ namespace mpt
 
 
 
-template<typename Tstream, typename T> inline void SaneInsert(Tstream & s, const T & x) { s << x; }
-// do the right thing for signed/unsigned char and bool
-template<typename Tstream> inline void SaneInsert(Tstream & s, const bool & x) { s << static_cast<int>(x); }
-template<typename Tstream> inline void SaneInsert(Tstream & s, const signed char & x) { s << static_cast<signed int>(x); }
-template<typename Tstream> inline void SaneInsert(Tstream & s, const unsigned char & x) { s << static_cast<unsigned int>(x); }
- 
 #if MPT_WSTRING_FORMAT
 std::wstring ToWideSimple(const std::string &nstr)
 {
@@ -84,7 +78,7 @@ static inline std::string ToStringHelperFloat(const T & x)
 {
 	std::ostringstream o;
 	o.imbue(std::locale::classic());
-	SaneInsert(o, x);
+	o << x;
 	return o.str();
 }
 
@@ -94,7 +88,7 @@ static inline std::wstring ToWStringHelperFloat(const T & x)
 {
 	std::wostringstream o;
 	o.imbue(std::locale::classic());
-	SaneInsert(o, x);
+	o << x;
 	return o.str();
 }
 #endif
@@ -358,7 +352,7 @@ static inline std::string FormatValHelperFloat(const T & x, const FormatSpec & f
 	std::ostringstream o;
 	o.imbue(std::locale::classic());
 	ApplyFormat(o, f, x);
-	SaneInsert(o, x);
+	o << x;
 	return o.str();
 }
 
@@ -369,7 +363,7 @@ static inline std::wstring FormatValWHelperFloat(const T & x, const FormatSpec &
 	std::wostringstream o;
 	o.imbue(std::locale::classic());
 	ApplyFormat(o, f, x);
-	SaneInsert(o, x);
+	o << x;
 	return o.str();
 }
 #endif
