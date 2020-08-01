@@ -67,13 +67,12 @@ static bool PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32
 	{
 		if (!BitBuffer.GetBits(1))
 		{
-			uint32 n = 1;
-			while (n < nBytesLeft)
+			uint32 n = 1, code;
+			do
 			{
-				uint32 code = BitBuffer.GetBits(2);
+				code = BitBuffer.GetBits(2);
 				n += code;
-				if (code != 3) break;
-			}
+			} while(code == 3);
 			LimitMax(n, nBytesLeft);
 			for (uint32 i=0; i<n; i++)
 			{
@@ -89,12 +88,12 @@ static bool PP20_DoUnpack(const uint8 *pSrc, uint32 nSrcLen, uint8 *pDst, uint32
 			if (n==4)
 			{
 				nofs = BitBuffer.GetBits( (BitBuffer.GetBits(1)) ? nbits : 7 );
-				while (n < nBytesLeft)
+				uint32 code;
+				do
 				{
-					uint32 code = BitBuffer.GetBits(3);
+					code = BitBuffer.GetBits(3);
 					n += code;
-					if (code != 7) break;
-				}
+				} while(code == 7);
 			} else
 			{
 				nofs = BitBuffer.GetBits(nbits);
