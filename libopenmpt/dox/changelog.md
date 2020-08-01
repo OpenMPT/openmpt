@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**Regression**] Support for GCC 7 has been removed.
  *  [**Regression**] Support for Clang 5, 6 has been removed.
+ *  [**Regression**] Building with Android NDK older than NDK r19c is not
+    supported any more.
 
 ### libopenmpt 0.5.0-pre
 
