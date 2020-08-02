@@ -13,6 +13,9 @@ matrix:
   include:
     - os: linux
       dist: focal
+    - os: linux
+      dist: focal
+      arch: s390x
     - os: osx
       osx_image: xcode11.6
     - os: osx
