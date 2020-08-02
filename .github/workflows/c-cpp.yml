@@ -1,21 +1,21 @@
 name: C/C++ CI
 
 on:
-	push:
-		branches: [ master ]
-	pull_request:
-		branches: [ master ]
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
-	build:
+  build:
 
-		runs-on: ubuntu-20.04
+    runs-on: ubuntu-20.04
 
-		steps:
-		- uses: actions/checkout@v2
-		- name: install dependencies
-			run: sudo apt install -y subversion libxml-xpath-perl git mawk zip unzip p7zip xz-utils make binutils gcc g++ clang tcc pkg-config help2man doxygen autoconf autoconf-archive automake libtool ccache zlib1g-dev libmpg123-dev libogg-dev libvorbis-dev portaudio19-dev libpulse-dev libflac-dev libsndfile1-dev libltdl-dev
-		- name: make
-			run: make
-		- name: make check
-			run: make check
+    steps:
+    - uses: actions/checkout@v2
+    - name: install dependencies
+      run: sudo apt install -y subversion libxml-xpath-perl git mawk zip unzip p7zip xz-utils make binutils gcc g++ clang tcc pkg-config help2man doxygen autoconf autoconf-archive automake libtool ccache zlib1g-dev libmpg123-dev libogg-dev libvorbis-dev portaudio19-dev libpulse-dev libflac-dev libsndfile1-dev libltdl-dev
+    - name: make
+      run: make
+    - name: make check
+      run: make check
