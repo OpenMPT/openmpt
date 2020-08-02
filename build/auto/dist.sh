@@ -55,8 +55,10 @@ echo " clang 18"
 clang -std=c18 -pedantic -Wall -Wextra -Wpedantic             -Werror -I. bin/headercheck.c -o bin/headercheck.clang18.out
 fi
 if [ `uname -s` != "Darwin" ] ; then
+if [ `uname -m` == "x86_64" ] ; then
 echo " tcc"
 tcc                      -Wall -Wunusupported -Wwrite-strings -Werror -I. bin/headercheck.c -o bin/headercheck.tcc.out
+fi
 fi
 rm bin/headercheck.*.out
 rm bin/headercheck.c
