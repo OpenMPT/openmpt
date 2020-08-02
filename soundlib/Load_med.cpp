@@ -1286,7 +1286,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		// Fix jump order commands
-		for(const auto [from, to] : jumpTargets)
+		for(const auto & [from, to] : jumpTargets)
 		{
 			PATTERNINDEX pat;
 			if(from > 0 && order.IsValidPat(from - 1))
