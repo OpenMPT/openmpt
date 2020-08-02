@@ -1,8 +1,6 @@
 
 language: c++
 
-dist: focal
-osx_image: xcode12
 sudo: required
 
 env:
@@ -14,7 +12,9 @@ matrix:
   fast_finish: true
   include:
     - os: linux
+      dist: focal
     - os: osx
+      osx_image: xcode12
 
 before_install:
   - test -n $CC  && unset CC
