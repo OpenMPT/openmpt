@@ -454,7 +454,7 @@ CString CInputHandler::GetMenuText(UINT id) const
 		{ ID_EXAMPLE_MODULES, kcNull, _T("&Example Modules") },
 	};
 
-	for(const auto [cmdID, command, text] : MenuItems)
+	for(const auto & [cmdID, command, text] : MenuItems)
 	{
 		if(id == cmdID)
 		{

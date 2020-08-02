@@ -1045,7 +1045,7 @@ BOOL COptionsMixer::OnInitDialog()
 		{_T("Unfiltered"),   Resampling::AmigaFilter::Unfiltered},
 	};
 	int sel = 0;
-	for(const auto [name, filter] : Filters)
+	for(const auto & [name, filter] : Filters)
 	{
 		const int item = m_CbnAmigaType.AddString(name);
 		m_CbnAmigaType.SetItemData(item, static_cast<DWORD_PTR>(filter));
@@ -1743,7 +1743,7 @@ BOOL CMidiSetupDlg::OnInitDialog()
 		{ _T("Record as MIDI Macros"), atRecordAsMacro },
 	};
 
-	for(const auto [str, value] : aftertouchOptions)
+	for(const auto & [str, value] : aftertouchOptions)
 	{
 		int item = m_ATBehaviour.AddString(str);
 		m_ATBehaviour.SetItemData(item, value);
@@ -1774,7 +1774,7 @@ BOOL CMidiSetupDlg::OnInitDialog()
 		{ _T("1/64th Notes"), 64 }, { _T("1/96th Notes"), 96 },
 	};
 
-	for(const auto [str, value]: quantizeOptions)
+	for(const auto & [str, value]: quantizeOptions)
 	{
 		int item = m_Quantize.AddString(str);
 		m_Quantize.SetItemData(item, value);
