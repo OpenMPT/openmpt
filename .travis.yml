@@ -2,6 +2,7 @@
 language: c++
 
 dist: focal
+osx_image: xcode12
 sudo: required
 
 env:
