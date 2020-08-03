@@ -698,6 +698,9 @@
     <ClCompile Include="..\..\soundlib\S3MTools.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\SampleFormatBRR.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleFormatFLAC.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

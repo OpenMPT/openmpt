@@ -1964,6 +1964,7 @@
     <ClCompile Include="..\..\soundlib\Paula.cpp" />
     <ClCompile Include="..\..\soundlib\RowVisitor.cpp" />
     <ClCompile Include="..\..\soundlib\S3MTools.cpp" />
+    <ClCompile Include="..\..\soundlib\SampleFormatBRR.cpp" />
     <ClCompile Include="..\..\soundlib\SampleFormatFLAC.cpp" />
     <ClCompile Include="..\..\soundlib\SampleFormatMP3.cpp" />
     <ClCompile Include="..\..\soundlib\SampleFormatMediaFoundation.cpp" />

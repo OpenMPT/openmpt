@@ -1269,6 +1269,7 @@ static constexpr struct
 	{ UL_("CAF Files (*.wav)"), UL_("*.caf") },
 	{ UL_("AIFF Files (*.aiff,*.8svx)"), UL_("*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx") },
 	{ UL_("Sun Audio (*.au,*.snd)"), UL_("*.au;*.snd") },
+	{ UL_("SNES BRR Files (*.brr)"), UL_("*.brr") },
 };
 
 

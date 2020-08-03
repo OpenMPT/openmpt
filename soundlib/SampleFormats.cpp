@@ -52,6 +52,7 @@ bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool 
 		&& !ReadS3ISample(nSample, file)
 		&& !ReadSBISample(nSample, file)
 		&& !ReadAUSample(nSample, file, mayNormalize)
+		&& !ReadBRRSample(nSample, file)
 		&& !ReadFLACSample(nSample, file)
 		&& !ReadOpusSample(nSample, file)
 		&& !ReadVorbisSample(nSample, file)
@@ -338,8 +339,8 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 
 static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file, uint16 blockAlign, uint32 numChannels)
 {
-	static constexpr int32 IMAIndexTab[8] =  { -1, -1, -1, -1, 2, 4, 6, 8 };
-	static constexpr int32 IMAUnpackTable[90] =
+	static constexpr int8 IMAIndexTab[8] =  { -1, -1, -1, -1, 2, 4, 6, 8 };
+	static constexpr int16 IMAUnpackTable[90] =
 	{
 		7,     8,     9,     10,    11,    12,    13,    14,
 		16,    17,    19,    21,    23,    25,    28,    31,

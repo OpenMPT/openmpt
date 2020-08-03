@@ -179,6 +179,7 @@ LOCAL_SRC_FILES += \
 	soundlib/RowVisitor.cpp \
 	soundlib/S3MTools.cpp \
 	soundlib/SampleFormats.cpp \
+	soundlib/SampleFormatBRR.cpp \
 	soundlib/SampleFormatFLAC.cpp \
 	soundlib/SampleFormatMediaFoundation.cpp \
 	soundlib/SampleFormatMP3.cpp \
