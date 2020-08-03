@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
+#include "../common/FileReader.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -43,7 +44,7 @@ static void ProcessBRRSample(int32 sample, int16 *output, uint8 range, uint8 fil
 		break;
 	}
 
-	sample = std::clamp(sample, -32768, 32767) * 2;
+	sample = std::clamp(sample, int32(-32768), int32(32767)) * 2;
 	if(sample > 32767)
 		sample -= 65536;
 	else if(sample < -32768)
