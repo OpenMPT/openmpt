@@ -285,6 +285,7 @@ MPT_FILES_SOUNDLIB += soundlib/RowVisitor.h
 MPT_FILES_SOUNDLIB += soundlib/S3MTools.cpp
 MPT_FILES_SOUNDLIB += soundlib/S3MTools.h
 MPT_FILES_SOUNDLIB += soundlib/SampleFormats.cpp
+MPT_FILES_SOUNDLIB += soundlib/SampleFormatBRR.cpp
 MPT_FILES_SOUNDLIB += soundlib/SampleFormatFLAC.cpp
 MPT_FILES_SOUNDLIB += soundlib/SampleFormatMediaFoundation.cpp
 MPT_FILES_SOUNDLIB += soundlib/SampleFormatMP3.cpp

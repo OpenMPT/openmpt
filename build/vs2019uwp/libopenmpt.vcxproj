@@ -1027,6 +1027,8 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\S3MTools.cpp">
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\SampleFormatBRR.cpp">
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleFormatFLAC.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\SampleFormatMediaFoundation.cpp">
