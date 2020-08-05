@@ -114,11 +114,21 @@ struct MMDSong
 
 	uint16be numBlocks;   // Number of blocks in current song
 	uint16be songLength;  // MMD0: Number of sequence numbers in the play sequence list, MMD2: Number of sections
-	union
+	char song[256];
+	MMD0Song GetMMD0Song() const
 	{
-		MMD0Song mmd0song;
-		MMD2Song mmd2song;
-	};
+		static_assert(sizeof(MMD0Song) == sizeof(song));
+		MMD0Song result;
+		std::memcpy(&result, song, sizeof(result));
+		return result;
+	}
+	MMD2Song GetMMD2Song() const
+	{
+		static_assert(sizeof(MMD2Song) == sizeof(song));
+		MMD2Song result;
+		std::memcpy(&result, song, sizeof(result));
+		return result;
+	}
 	uint16be defaultTempo;
 	int8be   playTranspose;  // The global play transpose value for current song
 	uint8be  flags;
@@ -1006,7 +1016,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			if(songHeader.songLength > 256 || m_nChannels > 16)
 				return false;
-			ReadOrderFromArray(order, songHeader.mmd0song.sequence, songHeader.songLength);
+			ReadOrderFromArray(order, songHeader.GetMMD0Song().sequence, songHeader.songLength);
 			for(auto &ord : order)
 			{
 				ord += basePattern;
@@ -1019,7 +1029,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		} else
 		{
-			const MMD2Song &header = songHeader.mmd2song;
+			const MMD2Song header = songHeader.GetMMD2Song();
 			if(header.numTracks < 1 || header.numTracks > 64 || m_nChannels > 64)
 				return false;
 
