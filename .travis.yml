@@ -13,6 +13,16 @@ matrix:
   fast_finish: true
   include:
     - os: linux
+      dist: bionic
+    - os: linux
+      dist: bionic
+      arch: s390x
+    - os: linux
+      dist: bionic
+      arch: ppc64le
+    - os: linux
+      dist: bionic
+      arch: arm64
     - os: osx
 
 before_install:
@@ -28,5 +38,5 @@ install:
   - true
 
 script:
-  - ./build/auto/dist.sh
-
+  - make STRICT=1 NO_SDL=1 NO_SDL2=1
+  - make STRICT=1 NO_SDL=1 NO_SDL2=1 check
