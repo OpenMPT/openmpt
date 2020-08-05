@@ -16,6 +16,12 @@ matrix:
     - os: linux
       dist: focal
       arch: s390x
+    - os: linux
+      dist: focal
+      arch: ppc64le
+    - os: linux
+      dist: focal
+      arch: arm64
     - os: osx
       osx_image: xcode11.6
     - os: osx
@@ -34,5 +40,6 @@ install:
   - true
 
 script:
-  - ./build/auto/dist.sh
+  - make STRICT=1 NO_SDL=1 NO_SDL2=1
+  - make STRICT=1 NO_SDL=1 NO_SDL2=1 check
 
