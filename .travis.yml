@@ -24,6 +24,7 @@ matrix:
       dist: bionic
       arch: arm64
     - os: osx
+      osx_image: xcode10.2
 
 before_install:
   - test -n $CC  && unset CC
