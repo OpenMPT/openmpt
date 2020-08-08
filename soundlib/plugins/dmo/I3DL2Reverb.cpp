@@ -542,7 +542,7 @@ void I3DL2Reverb::SetDelayTaps()
 	for(int i = 0, power = 0; i < 6; i++)
 	{
 		power += i;
-		float factor = std::pow(0.93, static_cast<float>(power));
+		float factor = std::pow(0.93f, static_cast<float>(power));
 		m_delayTaps[i + 0] = static_cast<int32>(delayL * factor);
 		m_delayTaps[i + 6] = static_cast<int32>(delayR * factor);
 	}
