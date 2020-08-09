@@ -48,7 +48,6 @@ public:
 		}
 	}
 
-#if NTDDI_VERSION >= NTDDI_VISTA
 	// MFC's AddPlace() is declared as throw() but can in fact throw if any of the COM calls fail, e.g. because the place does not exist.
 	// Avoid this by re-implementing our own version which doesn't throw.
 	void AddPlace(const mpt::PathString &path)
@@ -63,7 +62,6 @@ public:
 			}
 		}
 	}
-#endif
 
 protected:
 	std::vector<TCHAR> m_fileNameBuf;
@@ -110,7 +108,6 @@ bool FileDialog::Show(CWnd *parent)
 	{
 		ofn.lpstrInitialDir = m_workingDirectory.c_str();
 	}
-#if NTDDI_VERSION >= NTDDI_VISTA
 	const auto places =
 	{
 		&TrackerSettings::Instance().PathPluginPresets,
@@ -127,7 +124,6 @@ bool FileDialog::Show(CWnd *parent)
 	{
 		dlg.AddPlace(place);
 	}
-#endif
 
 	// Do it!
 	BypassInputHandler bih;
@@ -143,10 +139,31 @@ bool FileDialog::Show(CWnd *parent)
 	if(m_multiSelect)
 	{
 		// Multiple files might have been selected
-		POSITION pos = dlg.GetStartPosition();
-		while(pos != nullptr)
+		if(CComPtr<IShellItemArray> shellItems = dlg.GetResults(); shellItems != nullptr)
 		{
-			m_filenames.push_back(mpt::PathString::FromCString(dlg.GetNextPathName(pos)));
+			// Using the old-style GetNextPathName doesn't work properly when the user performs a search and selects files from different folders.
+			// Hence we use that only as a fallback.
+			DWORD numItems = 0;
+			shellItems->GetCount(&numItems);
+			for(DWORD i = 0; i < numItems; i++)
+			{
+				CComPtr<IShellItem> shellItem;
+				shellItems->GetItemAt(i, &shellItem);
+
+				LPWSTR filePath = nullptr;
+				if(HRESULT hr = shellItem->GetDisplayName(SIGDN_FILESYSPATH, &filePath); SUCCEEDED(hr))
+				{
+					m_filenames.push_back(mpt::PathString::FromWide(filePath));
+					::CoTaskMemFree(filePath);
+				}
+			}
+		} else
+		{
+			POSITION pos = dlg.GetStartPosition();
+			while(pos != nullptr)
+			{
+				m_filenames.push_back(mpt::PathString::FromCString(dlg.GetNextPathName(pos)));
+			}
 		}
 	} else
 	{
