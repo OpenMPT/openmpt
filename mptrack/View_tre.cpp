@@ -198,7 +198,7 @@ void CModTree::Init()
 	{
 		std::vector<TCHAR> curDir(::GetCurrentDirectory(0, nullptr), '\0');
 		::GetCurrentDirectory(static_cast<DWORD>(curDir.size()), curDir.data());
-		const mpt::PathString dirs[] =
+		mpt::PathString dirs[] =
 		{
 			TrackerSettings::Instance().PathSamples.GetDefaultDir(),
 			TrackerSettings::Instance().PathInstruments.GetDefaultDir(),
@@ -207,7 +207,7 @@ void CModTree::Init()
 		};
 		for(auto &path : dirs)
 		{
-			m_InstrLibPath = path;
+			m_InstrLibPath = std::move(path);
 			if(!m_InstrLibPath.empty())
 				break;
 		}
@@ -2035,13 +2035,23 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 			return FILTER_REJECT_FILE;
 		};
 
+		HKEY hkey = nullptr;
+		bool showHidden = false;
+		if(auto cr = RegOpenKeyEx(HKEY_CURRENT_USER, _T("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"), 0, KEY_READ, &hkey); cr == ERROR_SUCCESS)
+		{
+			DWORD dataType = REG_NONE;
+			DWORD data = 0, datasize = sizeof(data);
+			if(RegQueryValueEx(hkey, _T("Hidden"), 0, &dataType, reinterpret_cast<BYTE *>(&data), &datasize) == ERROR_SUCCESS && dataType == REG_DWORD)
+				showHidden = (data == 1);
+			RegCloseKey(hkey);
+		}
+
 		LinkResolver linkResolver;
 		HANDLE hFind;
 		WIN32_FIND_DATA wfd;
 		MemsetZero(wfd);
 		if((hFind = FindFirstFile(path.AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
 		{
-
 			do
 			{
 				// Up Directory
@@ -2050,9 +2060,14 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 				{
 					if(showDirs)
 						type = IMAGE_FOLDERPARENT;
-				} else if(wfd.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_OFFLINE | FILE_ATTRIBUTE_SYSTEM))
+				} else if(wfd.dwFileAttributes & FILE_ATTRIBUTE_OFFLINE)
 				{
-					// Ignore these files
+					// Ignore unavailable files
+					continue;
+				} else if((wfd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
+				          && ((wfd.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM) || !showHidden))
+				{
+					// Only show hidden files if Explorer is configured to do so (and never show hidden system files)
 					continue;
 				} else if(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
@@ -2076,7 +2091,12 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 					}
 				}
 				if(type != FILTER_REJECT_FILE)
-					InsertInsLibItem(wfd.cFileName, type, selectedItem);
+				{
+					auto item = InsertInsLibItem(wfd.cFileName, type, selectedItem);
+					// Apparently TVIS_CUT cannot be set during insertion
+					if(wfd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
+						SetItemState(item, TVIS_CUT, TVIS_CUT);
+				}
 			} while(FindNextFile(hFind, &wfd));
 			FindClose(hFind);
 		}
@@ -2175,7 +2195,7 @@ void CModTree::MonitorInstrumentLibrary()
 
 
 // Insert sample browser item.
-void CModTree::InsertInsLibItem(const TCHAR *name, int image, const TCHAR *selectIfMatch)
+HTREEITEM CModTree::InsertInsLibItem(const TCHAR *name, int image, const TCHAR *selectIfMatch)
 {
 	LPARAM sortOrder = 0;  // The order in which item groups appear in the instrument library
 	switch(image)
@@ -2215,6 +2235,7 @@ void CModTree::InsertInsLibItem(const TCHAR *name, int image, const TCHAR *selec
 		SelectItem(item);
 		EnsureVisible(item);
 	}
+	return item;
 }
 
 

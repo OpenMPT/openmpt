@@ -245,7 +245,7 @@ public:
 protected:
 	static int CALLBACK ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	void InsertInsLibItem(const TCHAR *name, int image, const TCHAR *selectIfMatch);
+	HTREEITEM InsertInsLibItem(const TCHAR *name, int image, const TCHAR *selectIfMatch);
 	ModTreeDocInfo *GetDocumentInfoFromItem(HTREEITEM hItem);
 	CModDoc *GetDocumentFromItem(HTREEITEM hItem) { ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem); return info ? &info->modDoc : nullptr; }
 	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc &modDoc);
