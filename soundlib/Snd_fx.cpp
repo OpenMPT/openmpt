@@ -456,11 +456,15 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 		// For various effects, we need to know first how many ticks there are in this row.
 		const ModCommand *p = Patterns[playState.m_nPattern].GetpModCommand(playState.m_nRow, 0);
+		const bool ignoreMutedChn = m_playBehaviour[kST3NoMutedChannels];
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, p++)
 		{
 			ModChannel &chn = playState.Chn[nChn];
-			if(m_playBehaviour[kST3NoMutedChannels] && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
+			if(p->IsEmpty() || (ignoreMutedChn && ChnSettings[nChn].dwFlags[CHN_MUTE]))  // not even effects are processed on muted S3M channels
+			{
+				chn.rowCommand.Clear();
 				continue;
+			}
 			if(p->IsPcNote())
 			{
 #ifndef NO_PLUGINS
@@ -521,8 +525,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		{
 			ModChannel &chn = playState.Chn[nChn];
 			if(chn.rowCommand.IsEmpty())
-				continue;
-			if(m_playBehaviour[kST3NoMutedChannels] && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
 				continue;
 			ModCommand::COMMAND command = chn.rowCommand.command;
 			ModCommand::PARAM param = chn.rowCommand.param;
@@ -980,6 +982,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 				ModChannel &chn = playState.Chn[nChn];
 				const ModCommand &m = chn.rowCommand;
+				if(!chn.IsSamplePlaying() && m.IsEmpty())
+					continue;
+
 				uint32 paramHi = m.param >> 4, paramLo = m.param & 0x0F;
 				uint32 startTick = 0;
 				bool porta = m.command == CMD_TONEPORTAMENTO || m.command == CMD_TONEPORTAVOL || m.volcmd == VOLCMD_TONEPORTAMENTO;
