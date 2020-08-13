@@ -81,18 +81,7 @@ CXXFLAGS += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s E
 CFLAGS   += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s ERROR_ON_MISSING_LIBRARIES=1 -ffast-math -fno-strict-aliasing
 LDFLAGS  += -s DISABLE_EXCEPTION_CATCHING=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s ERROR_ON_MISSING_LIBRARIES=1 -s EXPORT_NAME="'libopenmpt'"
 
-CFLAGS_SILENT += -Wno-\#warnings
-CFLAGS_SILENT += -Wno-cast-align
-CFLAGS_SILENT += -Wno-cast-qual
-CFLAGS_SILENT += -Wno-format
-CFLAGS_SILENT += -Wno-missing-prototypes
-CFLAGS_SILENT += -Wno-sign-compare
-CFLAGS_SILENT += -Wno-unused-function
-CFLAGS_SILENT += -Wno-unused-parameter
-CFLAGS_SILENT += -Wno-unused-variable
-
-CXXFLAGS_WARNINGS += -Wmissing-declarations
-CFLAGS_WARNINGS   += -Wmissing-prototypes
+include build/make/warnings-clang.mk
 
 REQUIRES_RUNPREFIX=1
 

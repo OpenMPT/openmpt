@@ -32,27 +32,7 @@ CXXFLAGS += -fsanitize=undefined
 CFLAGS   += -fsanitize=undefined
 endif
 
-CXXFLAGS_WARNINGS += -Wfloat-conversion -Wsuggest-override -Wno-psabi
-
-ifeq ($(MODERN),1)
-LDFLAGS  += -fuse-ld=gold
-CXXFLAGS_WARNINGS += -Wpedantic -Wlogical-op -Wframe-larger-than=16000
-CFLAGS_WARNINGS   += -Wpedantic -Wlogical-op -Wframe-larger-than=4000
-LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
-# re-renable after 1.29 branch
-#CXXFLAGS_WARNINGS += -Wdouble-promotion
-#CFLAGS_WARNINGS   += -Wdouble-promotion
-endif
-
-CFLAGS_SILENT += -Wno-cast-qual
-CFLAGS_SILENT += -Wno-empty-body
-CFLAGS_SILENT += -Wno-implicit-fallthrough
-CFLAGS_SILENT += -Wno-old-style-declaration
-CFLAGS_SILENT += -Wno-sign-compare
-CFLAGS_SILENT += -Wno-type-limits
-CFLAGS_SILENT += -Wno-unused-but-set-variable
-CFLAGS_SILENT += -Wno-unused-function
-CFLAGS_SILENT += -Wno-unused-parameter
+include build/make/warnings-gcc.mk
 
 EXESUFFIX=
 

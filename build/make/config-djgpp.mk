@@ -24,7 +24,7 @@ LDFLAGS_ALLEGRO42 :=
 LDLIBS_ALLEGRO42 := include/allegro42/lib/liballeg.a
 endif
 
-CFLAGS_SILENT += -Wno-unused-parameter -Wno-unused-function -Wno-cast-qual -Wno-old-style-declaration -Wno-type-limits -Wno-unused-but-set-variable
+include build/make/warnings-gcc.mk
 
 EXESUFFIX=.exe
 

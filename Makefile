@@ -372,8 +372,8 @@ CXXFLAGS += -fno-omit-frame-pointer
 CFLAGS   += -fno-omit-frame-pointer
 endif
 
-CXXFLAGS += -Wall -Wextra -Wundef -Wcast-qual -Wcast-align $(CXXFLAGS_WARNINGS)
-CFLAGS   += -Wall -Wextra -Wundef -Wcast-qual -Wcast-align $(CFLAGS_WARNINGS)
+CXXFLAGS += -Wall -Wextra -Wpedantic $(CXXFLAGS_WARNINGS)
+CFLAGS   += -Wall -Wextra -Wpedantic $(CFLAGS_WARNINGS)
 LDFLAGS  += $(LDFLAGS_WARNINGS)
 
 endif
