@@ -15,7 +15,15 @@
 
 #if defined(MPT_WITH_ALLEGRO42)
 
+#if defined(__GNUC__) && !defined(__clang__) && !defined(_MSC_VER)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wfloat-conversion"
+#endif
 #include <allegro.h>
+#if defined(__GNUC__) && !defined(__clang__) && !defined(_MSC_VER)
+#pragma GCC diagnostic pop
+#endif
 
 namespace openmpt123 {
 
