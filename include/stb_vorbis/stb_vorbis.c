@@ -921,7 +921,7 @@ static int error(vorb *f, enum STBVorbisError e)
 #define temp_free(f,p)                  (void)0
 #else // OpenMPT
 #define temp_alloc(f,size)              (f->alloc.alloc_buffer ? setup_temp_malloc(f,size) : malloc(size)) // OpenMPT
-#define temp_free(f,p)                  (f->alloc.alloc_buffer ? 0 : free(p)) // OpenMPT
+#define temp_free(f,p)                  (f->alloc.alloc_buffer ? (void)0 : free(p)) // OpenMPT
 #endif // OpenMPT
 #define temp_alloc_save(f)              ((f)->temp_offset)
 #define temp_alloc_restore(f,p)         ((f)->temp_offset = (p))
