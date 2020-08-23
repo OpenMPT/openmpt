@@ -982,7 +982,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 				ModChannel &chn = playState.Chn[nChn];
 				const ModCommand &m = chn.rowCommand;
-				if(!chn.IsSamplePlaying() && m.IsEmpty())
+				if(!chn.nPeriod && m.IsEmpty())
 					continue;
 
 				uint32 paramHi = m.param >> 4, paramLo = m.param & 0x0F;
