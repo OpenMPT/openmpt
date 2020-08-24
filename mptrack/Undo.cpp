@@ -130,12 +130,17 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 
 	bool linkToPrevious = false;
 
-	if(fromBuf.empty()) return PATTERNINDEX_INVALID;
+	if(fromBuf.empty())
+		return PATTERNINDEX_INVALID;
 
 	// Select most recent undo slot
-	UndoInfo &undo = fromBuf.back();
+	const UndoInfo &undo = fromBuf.back();
+	const bool deletePattern = (undo.numPatternRows == DELETE_PATTERN);
 
-	PrepareBuffer(toBuf, undo.pattern, undo.firstChannel, undo.firstRow, undo.numChannels, undo.numRows, undo.description, linkedFromPrevious, !undo.channelInfo.empty());
+	// Add this action to redo buffer if the pattern exists; otherwise add a special deletion redo step later
+	const bool patternExists = sndFile.Patterns.IsValidPat(undo.pattern);
+	if(patternExists)
+		PrepareBuffer(toBuf, undo.pattern, undo.firstChannel, undo.firstRow, undo.numChannels, undo.numRows, undo.description, linkedFromPrevious, !undo.channelInfo.empty());
 
 	if(!undo.channelInfo.empty())
 	{
@@ -154,27 +159,29 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 		{
 			modDoc.UpdateChannelMuteStatus(i);
 		}
-
 	}
 
-	PATTERNINDEX nPattern = undo.pattern;
-	if(undo.firstChannel + undo.numChannels <= sndFile.GetNumChannels())
+	PATTERNINDEX pat = undo.pattern;
+	if(deletePattern)
 	{
-		if(!sndFile.Patterns.IsValidPat(nPattern))
+		sndFile.Patterns.Remove(pat);
+	} else if(undo.firstChannel + undo.numChannels <= sndFile.GetNumChannels())
+	{
+		if(!patternExists)
 		{
-			if(!sndFile.Patterns.Insert(nPattern, undo.numPatternRows))
+			if(!sndFile.Patterns.Insert(pat, undo.numPatternRows))
 			{
 				fromBuf.pop_back();
 				return PATTERNINDEX_INVALID;
 			}
-		} else if(sndFile.Patterns[nPattern].GetNumRows() != undo.numPatternRows)
+		} else if(sndFile.Patterns[pat].GetNumRows() != undo.numPatternRows)
 		{
-			sndFile.Patterns[nPattern].Resize(undo.numPatternRows);
+			sndFile.Patterns[pat].Resize(undo.numPatternRows);
 		}
 
 		linkToPrevious = undo.linkToPrevious;
 		auto pUndoData = undo.content.cbegin();
-		CPattern &pattern = sndFile.Patterns[nPattern];
+		CPattern &pattern = sndFile.Patterns[pat];
 		ModCommand *m = pattern.GetpModCommand(undo.firstRow, undo.firstChannel);
 		const ROWINDEX numRows = std::min(undo.numRows, pattern.GetNumRows());
 		for(ROWINDEX iy = 0; iy < numRows; iy++)
@@ -185,16 +192,31 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 		}
 	}
 
+	if(!patternExists)
+	{
+		// Redo a deletion
+		auto &redo = fromBuf.back();
+		redo.content.clear();
+		redo.numPatternRows = DELETE_PATTERN;
+		toBuf.push_back(std::move(redo));
+	}
 	fromBuf.pop_back();
 
-	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
+	if(patternExists != sndFile.Patterns.IsValidPat(pat))
+	{
+		modDoc.UpdateAllViews(nullptr, PatternHint(pat).Names().Undo());
+		modDoc.UpdateAllViews(nullptr, SequenceHint().Data());  // Pattern color will change in sequence
+	} else
+	{
+		modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
+	}
 
 	if(linkToPrevious)
 	{
-		nPattern = Undo(fromBuf, toBuf, true);
+		pat = Undo(fromBuf, toBuf, true);
 	}
 
-	return nPattern;
+	return pat;
 }
 
 

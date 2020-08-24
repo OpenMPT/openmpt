@@ -13,10 +13,12 @@
 
 #include "BuildSettings.h"
 
+#include "../soundlib/ModChannel.h"
+#include "../soundlib/modcommand.h"
+
 OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
-class ModCommand;
 struct ModSample;
 
 #define MAX_UNDO_LEVEL 100000	// 100,000 undo steps for each undo type!
@@ -28,13 +30,14 @@ struct ModSample;
 class CPatternUndo
 {
 protected:
+	static constexpr auto DELETE_PATTERN = PATTERNINDEX_INVALID;
 
 	struct UndoInfo
 	{
 		std::vector<ModChannelSettings> channelInfo;	// Optional old channel information (pan / volume / etc.)
 		std::vector<ModCommand> content;	// Rescued pattern content
 		const char *description;			// Name of this undo action
-		ROWINDEX numPatternRows;			// Original number of pattern rows (in case of resize)
+		ROWINDEX numPatternRows;			// Original number of pattern rows (in case of resize, DELETE_PATTERN in case of deletion)
 		ROWINDEX firstRow, numRows;
 		PATTERNINDEX pattern;
 		CHANNELINDEX firstChannel, numChannels;
