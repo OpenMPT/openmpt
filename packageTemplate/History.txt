@@ -31,6 +31,31 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.03.00 (* August 2020, revision 13458)
+-------------------------------------------
+Tree view
+- [Imp] <js> Show hidden files if Windows Explorer is configured to do so. System files are now shown unless they are also hidden, as this is closer to Explorer's behaviour.
+- [Fix] <js> Undoing the deletion of a pattern did not update the pattern list correctly (http://bugs.openmpt.org/view.php?id=1357).
+
+Pattern tab
+- [Fix] <js> Choosing Pattern Properties from the order list context menu always showed the properties of the currently edited pattern (http://bugs.openmpt.org/view.php?id=1356).
+- [Fix] <js> It was not possible to redo the deletion of a pattern (http://bugs.openmpt.org/view.php?id=1357).
+- [Fix] <js> Deleting a pattern (or undoing the deletion) did not update the color of that pattern in the order list correctly (http://bugs.openmpt.org/view.php?id=1357).
+
+Sample tab
+- [New] <js> Add support for BRR (SNES Bit Rate Reduction) sample format import.
+
+Other formats
+- [Imp] <js> MID: Support files with initial negative delta time. This is not valid according to the standard, but such files exist in the wild.
+- [Fix] <js> PP20: The first few bytes of some files were not decompressed properly, making some files unplayable (depending on the original format).
+
+Misc
+- [Imp] <js> In file dialogs that can open multiple files, it is now possible to open files from different locations (e.g. through search results).
+
+Third-Party Libraries
+- [Imp] Update nlohmann json (v3.9.1)
+
+
 v1.29.02.00 (26 July 2020, revision 13346)
 ------------------------------------------
 Tree view
