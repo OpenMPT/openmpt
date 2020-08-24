@@ -1746,6 +1746,8 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 			if(Reporting::Confirm(s, false, isUsed) == cnfYes && modDoc->RemovePattern(pat))
 			{
 				modDoc->UpdateAllViews(nullptr, PatternHint(pat).Data().Names());
+				if(isUsed)
+					modDoc->UpdateAllViews(nullptr, SequenceHint().Data());  // Pattern color will change in sequence
 			}
 		}
 		break;
