@@ -1312,7 +1312,10 @@ void COrderList::OnDeleteOrder()
 
 void COrderList::OnPatternProperties()
 {
-	m_pParent.PostViewMessage(VIEWMSG_PATTERNPROPERTIES);
+	ModSequence &order = Order();
+	const auto ord = GetCurSel(true).firstOrd;
+	if(order.IsValidPat(ord))
+		m_pParent.PostViewMessage(VIEWMSG_PATTERNPROPERTIES, order[ord]);
 }
 
 
