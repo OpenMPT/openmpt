@@ -248,7 +248,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 
 	if(updateAll || updatePlug)
 	{
-		GetDlgItem(IDC_PATINSTROPLUGGUI)->EnableWindow(HasValidPlug(m_nInstrument));
+		GetDlgItem(IDC_PATINSTROPLUGGUI)->EnableWindow(HasValidPlug(m_nInstrument) ? TRUE : FALSE);
 	}
 
 	if(updateAll)
@@ -537,10 +537,7 @@ BOOL CCtrlPatterns::SetCurrentInstrument(UINT nIns)
 		{
 			m_CbnInstrument.SetCurSel(i);
 			m_nInstrument = static_cast<INSTRUMENTINDEX>(nIns);
-			if(HasValidPlug(m_nInstrument))
-				::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), true);
-			else
-				::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), false);
+			GetDlgItem(IDC_PATINSTROPLUGGUI)->EnableWindow(HasValidPlug(m_nInstrument) ? TRUE : FALSE);
 			return TRUE;
 		}
 	}
@@ -1006,7 +1003,7 @@ void CCtrlPatterns::OnPatternViewPlugNames()
 
 void CCtrlPatterns::OnPatternProperties()
 {
-	SendViewMessage(VIEWMSG_PATTERNPROPERTIES);
+	SendViewMessage(VIEWMSG_PATTERNPROPERTIES, PATTERNINDEX_INVALID);
 	SwitchToView();
 }
 

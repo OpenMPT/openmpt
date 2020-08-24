@@ -464,7 +464,8 @@ protected:
 	afx_msg void OnTransposeChannel();
 	afx_msg void OnRemoveChannel();
 	afx_msg void OnRemoveChannelDialog();
-	afx_msg void OnPatternProperties();
+	afx_msg void OnPatternProperties() { ShowPatternProperties(PATTERNINDEX_INVALID); }
+	void ShowPatternProperties(PATTERNINDEX pat);
 	void OnCursorCopy();
 	void OnCursorPaste();
 	afx_msg void OnPatternAmplify();

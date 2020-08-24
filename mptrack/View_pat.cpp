@@ -1346,10 +1346,11 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 }
 
 
-void CViewPattern::OnPatternProperties()
+void CViewPattern::ShowPatternProperties(PATTERNINDEX pat)
 {
 	CModDoc *pModDoc = GetDocument();
-	PATTERNINDEX pat = m_nPattern;
+	if(pat == PATTERNINDEX_INVALID)
+		pat = m_nPattern;
 	if(pModDoc && pModDoc->GetSoundFile().Patterns.IsValidPat(pat))
 	{
 		CPatternPropertiesDlg dlg(*pModDoc, pat, this);
@@ -3870,7 +3871,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case VIEWMSG_PATTERNPROPERTIES:
-		OnPatternProperties();
+		ShowPatternProperties(static_cast<PATTERNINDEX>(lParam));
 		GetParentFrame()->SetActiveView(this);
 		break;
 
