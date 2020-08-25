@@ -915,7 +915,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						midiChnStatus[midiCh].pan = data2 * 2u;
 						for(auto chn : midiChnStatus[midiCh].noteOn)
 						{
-							if(chn != CHANNELINDEX_INVALID)
+							if(chn != CHANNELINDEX_INVALID && modChnStatus[chn].pan != midiChnStatus[midiCh].pan)
 							{
 								if(Patterns[pat].WriteEffect(EffectWriter(CMD_PANNING8, midiChnStatus[midiCh].pan).Channel(chn).Row(row)))
 								{
