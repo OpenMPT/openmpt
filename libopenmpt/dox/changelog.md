@@ -7,6 +7,16 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.2-pre
 
+ *  [**Change**] `Makefile` `CONFIG=emscripten` now supports
+    `EMSCRIPTEN_TARGET=all` which provides WebAssembly as well as fallback to
+    JavaScript in a single build.
+
+ *  [**Regression**] `Makefile` `CONFIG=emscripten` does not support
+    `EMSCRIPTEN_TARGET=asmjs` or `EMSCRIPTEN_TARGET=asmjs128m` any more because
+    support has been removed from current Emscripten versions.
+ *  [**Regression**] Support for Emscripten versions older than 1.39.7 has been
+    removed.
+
 ### libopenmpt 0.5.1 (2020-07-26)
 
  *  [**Bug**] `libopenmpt/libopenmpt.h` failed to compile with

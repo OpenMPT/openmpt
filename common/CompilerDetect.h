@@ -205,11 +205,13 @@
 	#define MPT_OS_EMSCRIPTEN 1
 	#if defined(__EMSCRIPTEN_major__) && defined(__EMSCRIPTEN_minor__)
 		#if (__EMSCRIPTEN_major__ > 1)
-			// ok 
-		#elif (__EMSCRIPTEN_major__ == 1) && (__EMSCRIPTEN_minor__ >= 39)
-			// ok 		
+			// ok
+		#elif (__EMSCRIPTEN_major__ == 1) && (__EMSCRIPTEN_minor__ > 39)
+			// ok
+		#elif (__EMSCRIPTEN_major__ == 1) && (__EMSCRIPTEN_minor__ == 39) && (__EMSCRIPTEN_tiny__ >= 7)
+			// ok
 		#else
-			#error "Emscripten >= 1.39 is required."
+			#error "Emscripten >= 1.39.7 is required."
 		#endif
 	#endif
 #elif defined(_WIN32)

@@ -1041,22 +1041,30 @@ MISC_OUTPUTS += libopenmpt$(SOSUFFIX)
 MISC_OUTPUTS += bin/.docs
 MISC_OUTPUTS += bin/libopenmpt_test$(EXESUFFIX)
 MISC_OUTPUTS += bin/libopenmpt_test.wasm
+MISC_OUTPUTS += bin/libopenmpt_test.wasm.js
 MISC_OUTPUTS += bin/libopenmpt_test.js.mem
 MISC_OUTPUTS += bin/made.docs
 MISC_OUTPUTS += bin/$(LIBOPENMPT_SONAME)
 MISC_OUTPUTS += bin/libopenmpt.wasm
+MISC_OUTPUTS += bin/libopenmpt.wasm.js
 MISC_OUTPUTS += bin/libopenmpt.js.mem
 MISC_OUTPUTS += bin/libopenmpt_example_c.wasm 
+MISC_OUTPUTS += bin/libopenmpt_example_c.wasm.js
 MISC_OUTPUTS += bin/libopenmpt_example_c.js.mem 
 MISC_OUTPUTS += bin/libopenmpt_example_c_mem.wasm 
+MISC_OUTPUTS += bin/libopenmpt_example_c_mem.wasm.js
 MISC_OUTPUTS += bin/libopenmpt_example_c_mem.js.mem 
 MISC_OUTPUTS += bin/libopenmpt_example_c_pipe.wasm
+MISC_OUTPUTS += bin/libopenmpt_example_c_pipe.wasm.js
 MISC_OUTPUTS += bin/libopenmpt_example_c_pipe.js.mem
 MISC_OUTPUTS += bin/libopenmpt_example_c_probe.wasm
+MISC_OUTPUTS += bin/libopenmpt_example_c_probe.wasm.js
 MISC_OUTPUTS += bin/libopenmpt_example_c_probe.js.mem
 MISC_OUTPUTS += bin/libopenmpt_example_c_stdout.wasm
+MISC_OUTPUTS += bin/libopenmpt_example_c_stdout.wasm.js
 MISC_OUTPUTS += bin/libopenmpt_example_c_stdout.js.mem
 MISC_OUTPUTS += bin/libopenmpt_example_c_unsafe.wasm
+MISC_OUTPUTS += bin/libopenmpt_example_c_unsafe.wasm.js
 MISC_OUTPUTS += bin/libopenmpt_example_c_unsafe.js.mem
 MISC_OUTPUTS += bin/openmpt.a
 #old
@@ -1400,15 +1408,14 @@ bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).dev.js.tar:
 	svn export ./include/miniz/miniz.c           bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses/license.miniz.txt
 	svn export ./include/stb_vorbis/stb_vorbis.c bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses/license.stb_vorbis.txt
 	mkdir -p                                     bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin
+	mkdir -p                                     bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/all
+	cp bin/stage/all/libopenmpt.js               bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/all/libopenmpt.js
+	cp bin/stage/all/libopenmpt.js.mem           bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/all/libopenmpt.js.mem
+	cp bin/stage/all/libopenmpt.wasm             bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/all/libopenmpt.wasm
+	cp bin/stage/all/libopenmpt.wasm.js          bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/all/libopenmpt.wasm.js
 	mkdir -p                                     bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/wasm
 	cp bin/stage/wasm/libopenmpt.js              bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/wasm/libopenmpt.js
 	cp bin/stage/wasm/libopenmpt.wasm            bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/wasm/libopenmpt.wasm
-	mkdir -p                                     bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/asmjs128m
-	cp bin/stage/asmjs128m/libopenmpt.js         bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/asmjs128m/libopenmpt.js
-	cp bin/stage/asmjs128m/libopenmpt.js.mem     bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/asmjs128m/libopenmpt.js.mem
-	mkdir -p                                     bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/asmjs
-	cp bin/stage/asmjs/libopenmpt.js             bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/asmjs/libopenmpt.js
-	cp bin/stage/asmjs/libopenmpt.js.mem         bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/asmjs/libopenmpt.js.mem
 	mkdir -p                                     bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/js
 	cp bin/stage/js/libopenmpt.js                bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/js/libopenmpt.js
 	cp bin/stage/js/libopenmpt.js.mem            bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/js/libopenmpt.js.mem
