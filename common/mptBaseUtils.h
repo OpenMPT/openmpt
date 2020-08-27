@@ -133,7 +133,12 @@ namespace mpt
 template <typename Exception>
 constexpr bool constexpr_throw_helper(Exception && e, bool really = true)
 {
-	return !really ? really : throw std::forward<Exception>(e);
+	//return !really ? really : throw std::forward<Exception>(e);
+	if(really)
+	{
+		throw std::forward<Exception>(e);
+	}
+	return really;
 }
 template <typename Exception>
 constexpr bool constexpr_throw(Exception && e)
