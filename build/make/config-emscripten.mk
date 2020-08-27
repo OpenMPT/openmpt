@@ -38,40 +38,31 @@ LDFLAGS  +=
 
 LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
-else ifeq ($(EMSCRIPTEN_TARGET),wasm)
-# emits native wasm AND an emulator for running wasm in asmjs/js with full wasm optimizations.
+else ifeq ($(EMSCRIPTEN_TARGET),all)
+# emits native wasm AND javascript with full wasm optimizations.
 # as of emscripten 1.38, this is equivalent to default.
 CPPFLAGS += -DMPT_BUILD_WASM
-CXXFLAGS += -s WASM=1 -s BINARYEN_METHOD='native-wasm'
-CFLAGS   += -s WASM=1 -s BINARYEN_METHOD='native-wasm'
-LDFLAGS  += -s WASM=1 -s BINARYEN_METHOD='native-wasm'
+CXXFLAGS += -s WASM=2 -s LEGACY_VM_SUPPORT=1
+CFLAGS   += -s WASM=2 -s LEGACY_VM_SUPPORT=1
+LDFLAGS  += -s WASM=2 -s LEGACY_VM_SUPPORT=1
 
 LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
-else ifeq ($(EMSCRIPTEN_TARGET),asmjs128m)
-# emits only asmjs
-CPPFLAGS += -DMPT_BUILD_ASMJS
-CXXFLAGS += -s WASM=0 -s ASM_JS=1
-CFLAGS   += -s WASM=0 -s ASM_JS=1
-LDFLAGS  += -s WASM=0 -s ASM_JS=1
+else ifeq ($(EMSCRIPTEN_TARGET),wasm)
+# emits native wasm.
+CPPFLAGS += -DMPT_BUILD_WASM
+CXXFLAGS += -s WASM=1
+CFLAGS   += -s WASM=1
+LDFLAGS  += -s WASM=1
 
-LDFLAGS += -s ALLOW_MEMORY_GROWTH=0 -s ABORTING_MALLOC=0 -s TOTAL_MEMORY=134217728
-
-else ifeq ($(EMSCRIPTEN_TARGET),asmjs)
-# emits only asmjs
-CPPFLAGS += -DMPT_BUILD_ASMJS
-CXXFLAGS += -s WASM=0 -s ASM_JS=1
-CFLAGS   += -s WASM=0 -s ASM_JS=1
-LDFLAGS  += -s WASM=0 -s ASM_JS=1
-
-LDFLAGS += -s ALLOW_MEMORY_GROWTH=0 -s ABORTING_MALLOC=0
+LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
 else ifeq ($(EMSCRIPTEN_TARGET),js)
 # emits only plain javascript with plain javascript focused optimizations.
 CPPFLAGS += -DMPT_BUILD_ASMJS
-CXXFLAGS += -s WASM=0 -s ASM_JS=2 -s LEGACY_VM_SUPPORT=1
-CFLAGS   += -s WASM=0 -s ASM_JS=2 -s LEGACY_VM_SUPPORT=1
-LDFLAGS  += -s WASM=0 -s ASM_JS=2 -s LEGACY_VM_SUPPORT=1
+CXXFLAGS += -s WASM=0 -s LEGACY_VM_SUPPORT=1
+CFLAGS   += -s WASM=0 -s LEGACY_VM_SUPPORT=1
+LDFLAGS  += -s WASM=0 -s LEGACY_VM_SUPPORT=1
 
 LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
