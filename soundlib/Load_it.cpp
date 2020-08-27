@@ -605,7 +605,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	// This is used for finding out whether the edit history is actually stored in the file or not,
 	// as some early versions of Schism Tracker set the history flag, but didn't save anything.
 	// We will consider the history invalid if it ends after the first parapointer.
-	uint32 minPtr = Util::MaxValueOfType(minPtr);
+	uint32 minPtr = std::numeric_limits<decltype(minPtr)>::max();
 	for(uint32 pos : insPos)
 	{
 		if(pos > 0) minPtr = std::min(minPtr, pos);
