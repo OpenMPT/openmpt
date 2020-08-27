@@ -98,6 +98,7 @@ STATIC_LIB=0
 EXAMPLES=1
 OPENMPT123=0
 SHARED_SONAME=0
+NO_SHARED_LINKER_FLAG=1
 
 # Disable the generic compiler optimization flags as emscripten is sufficiently different.
 # Optimization flags are hard-coded for emscripten in this file.
