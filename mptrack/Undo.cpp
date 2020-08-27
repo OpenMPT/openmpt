@@ -57,12 +57,24 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, const char *description, bool linkToPrevious, bool storeChannelInfo) const
 {
 	const CSoundFile &sndFile = modDoc.GetSoundFile();
+	const bool onlyChannelInfo = storeChannelInfo && numChns < 1 && numRows < 1;
 
-	if (!sndFile.Patterns.IsValidPat(pattern)) return false;
-	ROWINDEX nRows = sndFile.Patterns[pattern].GetNumRows();
-	if ((firstRow >= nRows) || (numChns < 1) || (numRows < 1) || (firstChn >= sndFile.GetNumChannels())) return false;
-	if (firstRow + numRows >= nRows) numRows = nRows - firstRow;
-	if (firstChn + numChns >= sndFile.GetNumChannels()) numChns = sndFile.GetNumChannels() - firstChn;
+	ROWINDEX patRows = 0;
+	if(sndFile.Patterns.IsValidPat(pattern))
+	{
+		patRows = sndFile.Patterns[pattern].GetNumRows();
+		if((firstRow >= patRows) || (firstChn >= sndFile.GetNumChannels()))
+			return false;
+		if((numChns < 1 || numRows < 1) && !storeChannelInfo)
+			return false;
+		if(firstRow + numRows >= patRows)
+			numRows = patRows - firstRow;
+		if(firstChn + numChns >= sndFile.GetNumChannels())
+			numChns = sndFile.GetNumChannels() - firstChn;
+	} else if(!onlyChannelInfo)
+	{
+		return false;
+	}
 
 	// Remove an undo step if there are too many.
 	if(buffer.size() >= MAX_UNDO_LEVEL)
@@ -72,28 +84,32 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 
 	UndoInfo undo;
 	undo.pattern = pattern;
-	undo.numPatternRows = sndFile.Patterns[pattern].GetNumRows();
+	undo.numPatternRows = patRows;
 	undo.firstChannel = firstChn;
 	undo.firstRow = firstRow;
 	undo.numChannels = numChns;
 	undo.numRows = numRows;
-	try
-	{
-		undo.content.resize(numRows * numChns);
-	} catch(mpt::out_of_memory e)
-	{
-		mpt::delete_out_of_memory(e);
-		return false;
-	}
 	undo.linkToPrevious = linkToPrevious;
 	undo.description = description;
-	const ModCommand *pPattern = sndFile.Patterns[pattern].GetpModCommand(firstRow, firstChn);
-	auto pUndoData = undo.content.begin();
-	for(ROWINDEX iy = 0; iy < numRows; iy++)
+
+	if(!onlyChannelInfo)
 	{
-		std::copy(pPattern, pPattern + numChns, pUndoData);
-		pUndoData += numChns;
-		pPattern += sndFile.GetNumChannels();
+		try
+		{
+			undo.content.resize(numRows * numChns);
+		} catch(mpt::out_of_memory e)
+		{
+			mpt::delete_out_of_memory(e);
+			return false;
+		}
+		const ModCommand *pPattern = sndFile.Patterns[pattern].GetpModCommand(firstRow, firstChn);
+		auto pUndoData = undo.content.begin();
+		for(ROWINDEX iy = 0; iy < numRows; iy++)
+		{
+			std::copy(pPattern, pPattern + numChns, pUndoData);
+			pUndoData += numChns;
+			pPattern += sndFile.GetNumChannels();
+		}
 	}
 
 	if(storeChannelInfo)
@@ -135,11 +151,12 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 
 	// Select most recent undo slot
 	const UndoInfo &undo = fromBuf.back();
-	const bool deletePattern = (undo.numPatternRows == DELETE_PATTERN);
+	const bool onlyChannelSettings = !undo.numRows && !undo.numChannels && !undo.channelInfo.empty();
+	const bool deletePattern = (undo.numPatternRows == DELETE_PATTERN) && !onlyChannelSettings;
 
 	// Add this action to redo buffer if the pattern exists; otherwise add a special deletion redo step later
 	const bool patternExists = sndFile.Patterns.IsValidPat(undo.pattern);
-	if(patternExists)
+	if(patternExists || onlyChannelSettings)
 		PrepareBuffer(toBuf, undo.pattern, undo.firstChannel, undo.firstRow, undo.numChannels, undo.numRows, undo.description, linkedFromPrevious, !undo.channelInfo.empty());
 
 	if(!undo.channelInfo.empty())
@@ -165,7 +182,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 	if(deletePattern)
 	{
 		sndFile.Patterns.Remove(pat);
-	} else if(undo.firstChannel + undo.numChannels <= sndFile.GetNumChannels())
+	} else if(undo.firstChannel + undo.numChannels <= sndFile.GetNumChannels() && !onlyChannelSettings)
 	{
 		if(!patternExists)
 		{
@@ -192,7 +209,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 		}
 	}
 
-	if(!patternExists)
+	if(!patternExists && !onlyChannelSettings)
 	{
 		// Redo a deletion
 		auto &redo = fromBuf.back();
