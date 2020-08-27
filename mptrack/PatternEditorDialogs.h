@@ -61,7 +61,9 @@ protected:
 	const CModSpecifications *oldSpecs = nullptr;
 	ModCommand *m = nullptr;
 	EffectInfo effectInfo;
-	PatternEditPos editPos;
+	PATTERNINDEX editPattern = PATTERNINDEX_INVALID;
+	CHANNELINDEX editChannel = CHANNELINDEX_INVALID;
+	ROWINDEX editRow = ROWINDEX_INVALID;
 	UINT xParam, xMultiplier;
 	bool modified = false;
 
