@@ -12,6 +12,7 @@
 #pragma once
 
 #include "BuildSettings.h"
+#include "ColorPickerButton.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -28,6 +29,7 @@ protected:
 	CComboBox m_CbnPlugin, m_CbnParam, m_CbnOutput;
 
 	CSliderCtrl m_sbVolume[CHANNELS_IN_TAB], m_sbPan[CHANNELS_IN_TAB], m_sbValue, m_sbDryRatio;
+	ColorPickerButton m_channelColor[CHANNELS_IN_TAB];
 
 	CComboBox m_CbnPreset;
 	CSliderCtrl m_sbWetDry;
@@ -73,6 +75,7 @@ private:
 	void PrepareUndo(CHANNELINDEX chnMod4);
 	void UndoRedo(bool undo);
 
+	void OnEditColor(const CHANNELINDEX chnMod4);
 	void OnMute(const CHANNELINDEX chnMod4, const UINT itemID);
 	void OnSurround(const CHANNELINDEX chnMod4, const UINT itemID);
 	void OnEditVol(const CHANNELINDEX chnMod4, const UINT itemID);
@@ -94,6 +97,10 @@ protected:
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
 
+	afx_msg void OnEditColor1();
+	afx_msg void OnEditColor2();
+	afx_msg void OnEditColor3();
+	afx_msg void OnEditColor4();
 	afx_msg void OnMute1();
 	afx_msg void OnMute2();
 	afx_msg void OnMute3();

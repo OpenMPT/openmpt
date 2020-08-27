@@ -539,26 +539,6 @@ void CChannelManagerDlg::OnTabSelchange(NMHDR* /*header*/, LRESULT* /*pResult*/)
 }
 
 
-void CChannelManagerDlg::DrawChannelButton(HDC hdc, CRect rect, const TCHAR *text, bool activate, bool enable, DWORD dwFlags)
-{
-	DrawEdge(hdc, rect, enable ? EDGE_RAISED : EDGE_SUNKEN, BF_RECT | BF_MIDDLE | BF_ADJUST);
-	if(activate)
-	{
-		::FillRect(hdc, rect, GetSysColorBrush(COLOR_WINDOW));
-	}
-
-	rect.left += Util::ScalePixels(11, m_hWnd);
-	rect.right -= Util::ScalePixels(5, m_hWnd);
-
-	::SetBkMode(hdc, TRANSPARENT);
-	HGDIOBJ oldfont = ::SelectObject(hdc, CMainFrame::GetGUIFont());
-
-	::SetTextColor(hdc, GetSysColor(enable || activate ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
-	::DrawText(hdc, text, -1, &rect, dwFlags | DT_SINGLELINE | DT_NOPREFIX);
-	::SelectObject(hdc, oldfont);
-}
-
-
 void CChannelManagerDlg::ResizeWindow()
 {
 	if(!m_hWnd || !m_ModDoc) return;
@@ -677,85 +657,130 @@ void CChannelManagerDlg::OnPaint()
 	if(!m_bkgnd)
 		m_bkgnd = ::CreateCompatibleBitmap(pDC.hdc, client.Width(), client.Height());
 	HGDIOBJ oldBmp = ::SelectObject(dc, m_bkgnd);
-	const auto blackBrush = GetStockBrush(BLACK_BRUSH);
+	HGDIOBJ oldFont = ::SelectObject(dc, CMainFrame::GetGUIFont());
+
+	const auto dcBrush = GetStockBrush(DC_BRUSH);
 
 	client.SetRect(client.left + MulDiv(2, dpiX, 96), client.top + MulDiv(32, dpiY, 96), client.right - MulDiv(2, dpiX, 96), client.bottom - MulDiv(24, dpiY, 96));
 	// Draw background
 	{
 		const auto bgIntersected = client & pDC.rcPaint;  // In case of partial redraws, FillRect may still draw into areas that are not part of the redraw area and thus make some buttons disappear
-		FillRect(dc, &pDC.rcPaint, GetSysColorBrush(COLOR_BTNFACE));
-		FillRect(dc, &bgIntersected, GetSysColorBrush(COLOR_HIGHLIGHT));
-		FrameRect(dc, &client, blackBrush);
+		::FillRect(dc, &pDC.rcPaint, GetSysColorBrush(COLOR_BTNFACE));
+		::FillRect(dc, &bgIntersected, GetSysColorBrush(COLOR_HIGHLIGHT));
+		::SetDCBrushColor(dc, RGB(20, 20, 20));
+		::FrameRect(dc, &client, dcBrush);
 	}
 
 	client.SetRect(client.left + 8,client.top + 6,client.right - 6,client.bottom - 6);
 
-	const COLORREF highlight = GetSysColor(COLOR_HIGHLIGHT), red = RGB(192, 96, 96), green = RGB(96, 192, 96);
-	const COLORREF brushColors[] = {highlight, green, red};
-	const auto dcBrush = GetStockBrush(DC_BRUSH);
+	const COLORREF highlight = GetSysColor(COLOR_HIGHLIGHT), red = RGB(192, 96, 96), green = RGB(96, 192, 96), redBright = RGB(218, 163, 163), greenBright = RGB(163, 218, 163);
+	const COLORREF brushColors[] = { highlight, green, red };
+	const COLORREF brushColorsBright[] = { highlight, greenBright, redBright };
+	const auto buttonFaceColor = GetSysColor(COLOR_BTNFACE), windowColor = GetSysColor(COLOR_WINDOW);
 
-	UINT c = 0, l = 0;
+	uint32 col = 0, row = 0;
 	const CSoundFile &sndFile = m_ModDoc->GetSoundFile();
 	CString s;
-	for(CHANNELINDEX chn = 0; chn < channels; chn++)
+	for(CHANNELINDEX chn = 0; chn < channels; chn++, col++)
 	{
-		CHANNELINDEX sourceChn = pattern[chn];
-
-		if(!sndFile.ChnSettings[sourceChn].szName.empty())
+		if(col >= CM_NB_COLS)
 		{
-			s = MPT_CFORMAT("{}: {}")(sourceChn + 1, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[sourceChn].szName));
-
-		} else
-		{
-			s = MPT_CFORMAT("Channel {}")(sourceChn + 1);
+			col = 0;
+			row++;
 		}
+
+		const CHANNELINDEX sourceChn = pattern[chn];
+		const auto &chnSettings = sndFile.ChnSettings[sourceChn];
+
+		if(!chnSettings.szName.empty())
+			s = MPT_CFORMAT("{}: {}")(sourceChn + 1, mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[sourceChn].szName));
+		else
+			s = MPT_CFORMAT("Channel {}")(sourceChn + 1);
 
 		const int borderX = MulDiv(3, dpiX, 96), borderY = MulDiv(3, dpiY, 96);
 		CRect btn;
-		btn.left = client.left + c * chnSizeX + borderX;
+		btn.left = client.left + col * chnSizeX + borderX;
 		btn.right = btn.left + chnSizeX - borderX;
-		btn.top = client.top + l * chnSizeY + borderY;
+		btn.top = client.top + row * chnSizeY + borderY;
 		btn.bottom = btn.top + chnSizeY - borderY;
 
-		CRect intersection;
-		if(intersection.IntersectRect(&pDC.rcPaint, &btn))
-			DrawChannelButton(dc, btn, s, select[sourceChn], !removed[sourceChn], DT_RIGHT | DT_VCENTER);
+		if(!CRect{}.IntersectRect(&pDC.rcPaint, &btn))
+			continue;
 
-		btn.right = btn.left + chnSizeX / 7;
+		// Button
+		const bool activate = select[sourceChn];
+		const bool enable = !removed[sourceChn];
+		auto btnAdjusted = btn;  // Without border
+		::DrawEdge(dc, btnAdjusted, enable ? EDGE_RAISED : EDGE_SUNKEN, BF_RECT | BF_MIDDLE | BF_ADJUST);
+		if(activate)
+			::FillRect(dc, btnAdjusted, GetSysColorBrush(COLOR_WINDOW));
 
-		btn.DeflateRect(borderX, borderY, borderX, borderY);
+		if(chnSettings.color != ModChannelSettings::INVALID_COLOR)
+		{
+			// Channel color
+			const auto startColor = chnSettings.color;
+			const auto endColor = activate ? windowColor : buttonFaceColor;
+			const auto width = btnAdjusted.Width() / 2;
+			auto rect = btnAdjusted;
+			rect.right = rect.left + 1;
+			for(int i = 0; i < width; i++)
+			{
+				auto blend = static_cast<double>(i) / width, blendInv = 1.0 - blend;
+				auto blendColor = RGB(mpt::saturate_round<uint8>(GetRValue(startColor) * blendInv + GetRValue(endColor) * blend),
+				                      mpt::saturate_round<uint8>(GetGValue(startColor) * blendInv + GetGValue(endColor) * blend),
+				                      mpt::saturate_round<uint8>(GetBValue(startColor) * blendInv + GetBValue(endColor) * blend));
+				::SetDCBrushColor(dc, blendColor);
+				::FillRect(dc, &rect, dcBrush);
+				rect.left++;
+				rect.right++;
+			}
+		}
+
+		// Text
+		{
+			auto rect = btnAdjusted;
+			rect.left += Util::ScalePixels(9, m_hWnd);
+			rect.right -= Util::ScalePixels(3, m_hWnd);
+
+			::SetBkMode(dc, TRANSPARENT);
+			::SetTextColor(dc, GetSysColor(enable || activate ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
+			::DrawText(dc, s, -1, &rect, DT_RIGHT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+		}
 
 		// Draw red/green markers
-		COLORREF color = 0;
-		switch(m_currentTab)
 		{
-		case kSoloMute:
-			color = sndFile.ChnSettings[sourceChn].dwFlags[CHN_MUTE] ? red : green;
-			break;
-		case kRecordSelect:
-			color = brushColors[static_cast<size_t>(m_ModDoc->GetChannelRecordGroup(sourceChn)) % std::size(brushColors)];
-			break;
-		case kPluginState:
-			color = sndFile.ChnSettings[sourceChn].dwFlags[CHN_NOFX] ? red : green;
-			break;
-		case kReorderRemove:
-			color = removed[sourceChn] ? red : green;
-			break;
-		}
-		SetDCBrushColor(dc, color);
-		FillRect(dc, btn, dcBrush);
-		// Draw border around marker
-		FrameRect(dc, btn, blackBrush);
-
-		c++;
-		if(c >= CM_NB_COLS)
-		{
-			c = 0;
-			l++;
+			const int margin = Util::ScalePixels(1, m_hWnd);
+			auto rect = btnAdjusted;
+			rect.DeflateRect(margin, margin);
+			rect.right = rect.left + Util::ScalePixels(7, m_hWnd);
+			const auto &brushes = activate ? brushColorsBright : brushColors;
+			const auto redBrush = brushes[2], greenBrush = brushes[1];
+			COLORREF color = 0;
+			switch(m_currentTab)
+			{
+			case kSoloMute:
+				color = chnSettings.dwFlags[CHN_MUTE] ? redBrush : greenBrush;
+				break;
+			case kRecordSelect:
+				color = brushColors[static_cast<size_t>(m_ModDoc->GetChannelRecordGroup(sourceChn)) % std::size(brushColors)];
+				break;
+			case kPluginState:
+				color = chnSettings.dwFlags[CHN_NOFX] ? redBrush : greenBrush;
+				break;
+			case kReorderRemove:
+				color = removed[sourceChn] ? redBrush : greenBrush;
+				break;
+			}
+			::SetDCBrushColor(dc, color);
+			::FillRect(dc, rect, dcBrush);
+			// Draw border around marker
+			::SetDCBrushColor(dc, RGB(20, 20, 20));
+			::FrameRect(dc, rect, dcBrush);
 		}
 	}
 
 	::BitBlt(pDC.hdc, rcPaint.left, rcPaint.top, rcPaint.Width(), rcPaint.Height(), dc, rcPaint.left, rcPaint.top, SRCCOPY);
+	::SelectObject(dc, oldFont);
 	::SelectObject(dc, oldBmp);
 	::DeleteDC(dc);
 

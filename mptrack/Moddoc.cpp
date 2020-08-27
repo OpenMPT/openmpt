@@ -220,6 +220,14 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	if((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels()))
 		return FALSE;
 
+	const bool noColors = std::find_if(std::begin(m_SndFile.ChnSettings), std::begin(m_SndFile.ChnSettings) + GetNumChannels(), [](const auto &settings) {
+		return settings.color != ModChannelSettings::INVALID_COLOR;
+	}) == std::begin(m_SndFile.ChnSettings) + GetNumChannels();
+	if(noColors)
+	{
+		SetDefaultChannelColors();
+	}
+
 	// Convert to MOD/S3M/XM/IT
 	switch(m_SndFile.GetType())
 	{
@@ -528,7 +536,7 @@ void CModDoc::OnAppendModule()
 }
 
 
-BOOL CModDoc::InitializeMod()
+void CModDoc::InitializeMod()
 {
 	// New module ?
 	if (!m_SndFile.m_nChannels)
@@ -545,6 +553,8 @@ BOOL CModDoc::InitializeMod()
 			m_SndFile.m_nChannels = 32;
 			break;
 		}
+
+		SetDefaultChannelColors();
 
 		if(GetModType() == MOD_TYPE_MPT)
 		{
@@ -606,8 +616,31 @@ BOOL CModDoc::InitializeMod()
 	}
 	m_SndFile.ResetPlayPos();
 	m_SndFile.m_songArtist = TrackerSettings::Instance().defaultArtist;
+}
 
-	return TRUE;
+
+void CModDoc::SetDefaultChannelColors()
+{
+	if(TrackerSettings::Instance().defaultRainbowChannelColors)
+	{
+		const double hueFactor = (1.5 * M_PI) / std::max(1, GetNumChannels() - 1);  // Three quarters of the color wheel, red to purple
+		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+		{
+			const double hue = i * hueFactor;  // 0...2pi
+			const double saturation = 0.3;     // 0...2/3
+			const double brightness = 1.2;     // 0...4/3
+			const double r = brightness * (1 + saturation * (std::cos(hue) - 1.0));
+			const double g = brightness * (1 + saturation * (std::cos(hue - 2.09439) - 1.0));
+			const double b = brightness * (1 + saturation * (std::cos(hue + 2.09439) - 1.0));
+			m_SndFile.ChnSettings[i].color = RGB(mpt::saturate_round<uint8>(r * 255), mpt::saturate_round<uint8>(g * 255), mpt::saturate_round<uint8>(b * 255));
+		}
+	} else
+	{
+		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+		{
+			m_SndFile.ChnSettings[i].color = ModChannelSettings::INVALID_COLOR;
+		}
+	}
 }
 
 

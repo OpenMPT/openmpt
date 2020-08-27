@@ -11,25 +11,26 @@
 #pragma once
 
 #include "BuildSettings.h"
+#include "ColorPickerButton.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
-class COptionsColors: public CPropertyPage
+class COptionsColors : public CPropertyPage
 {
 protected:
 	std::array<COLORREF, MAX_MODCOLORS> CustomColors;
-	UINT m_nColorItem = 0;
 	CComboBox m_ComboItem, m_ComboFont, m_ComboPreset;
-	CButton m_BtnColor1, m_BtnColor2, m_BtnColor3, m_BtnPreview;
+	ColorPickerButton m_BtnColor[3];
+	CButton m_BtnPreview;
 	CSpinButtonCtrl m_ColorSpin;
-	CStatic m_TxtColor1, m_TxtColor2, m_TxtColor3;
+	CStatic m_TxtColor[3];
 	MODPLUGDIB *m_pPreviewDib = nullptr;
 	FontSetting patternFont, commentFont;
+	uint32 m_nColorItem = 0;
 
 public:
-	COptionsColors():CPropertyPage(IDD_OPTIONS_COLORS) { }
+	COptionsColors();
 	~COptionsColors() { delete m_pPreviewDib; }
-	void SelectColor(COLORREF &color);
 
 protected:
 	BOOL OnInitDialog() override;
@@ -39,15 +40,17 @@ protected:
 	BOOL OnSetActive() override;
 	void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
+	void SelectColor(int colorIndex);
+
 	afx_msg void OnChoosePatternFont();
 	afx_msg void OnChooseCommentFont();
 	afx_msg void OnUpdateDialog();
 	afx_msg void OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis);
 	afx_msg void OnColorSelChanged();
 	afx_msg void OnSettingsChanged();
-	afx_msg void OnSelectColor1();
-	afx_msg void OnSelectColor2();
-	afx_msg void OnSelectColor3();
+	afx_msg void OnSelectColor1() { SelectColor(0); }
+	afx_msg void OnSelectColor2() { SelectColor(1); }
+	afx_msg void OnSelectColor3() { SelectColor(2); }
 	afx_msg void OnPresetChange();
 	afx_msg void OnLoadColorScheme();
 	afx_msg void OnSaveColorScheme();

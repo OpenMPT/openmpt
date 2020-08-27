@@ -1228,6 +1228,8 @@ BEGIN_MESSAGE_MAP(QuickChannelProperties, CDialog)
 	ON_COMMAND(IDC_CHECK2,	&QuickChannelProperties::OnSurroundChanged)
 	ON_COMMAND(IDC_BUTTON1,	&QuickChannelProperties::OnPrevChannel)
 	ON_COMMAND(IDC_BUTTON2,	&QuickChannelProperties::OnNextChannel)
+	ON_COMMAND(IDC_BUTTON3,	&QuickChannelProperties::OnChangeColor)
+	ON_COMMAND(IDC_BUTTON4,	&QuickChannelProperties::OnChangeColor)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	&QuickChannelProperties::OnCustomKeyMsg)
 END_MESSAGE_MAP()
 
@@ -1250,7 +1252,7 @@ QuickChannelProperties::~QuickChannelProperties()
 
 void QuickChannelProperties::OnActivate(UINT nState, CWnd *, BOOL)
 {
-	if(nState == WA_INACTIVE)
+	if(nState == WA_INACTIVE && !m_settingColor)
 	{
 		// Hide window when changing focus to another window.
 		m_visible = false;
@@ -1260,11 +1262,12 @@ void QuickChannelProperties::OnActivate(UINT nState, CWnd *, BOOL)
 
 
 // Show channel properties for a given channel at a given screen position.
-void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDEX ptn, CPoint position)
+void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint position)
 {
 	if(!m_hWnd)
 	{
 		Create(IDD_CHANNELSETTINGS, nullptr);
+		m_colorBtn.SubclassDlgItem(IDC_BUTTON4, this);
 
 		m_volSlider.SetRange(0, 64);
 		m_volSlider.SetTicFreq(8);
@@ -1278,7 +1281,6 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDE
 	}
 	m_document = modDoc;
 	m_channel = chn;
-	m_pattern = ptn;
 
 	SetParent(nullptr);
 
@@ -1290,6 +1292,8 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDE
 	    Clamp(static_cast<int>(position.x) - rect.Width() / 2, 0, static_cast<int>(screenRect.right) - rect.Width()),
 	    Clamp(static_cast<int>(position.y) - rect.Height() / 2, 0, static_cast<int>(screenRect.bottom) - rect.Height()));
 	MoveWindow(rect);
+
+	SetWindowText(MPT_TFORMAT("Settings for Channel {}")(chn).c_str());
 
 	UpdateDisplay();
 
@@ -1333,6 +1337,8 @@ void QuickChannelProperties::UpdateDisplay()
 	m_nameEdit.LimitText(MAX_CHANNELNAME - 1);
 	m_nameEdit.SetWindowText(mpt::ToCString(m_document->GetSoundFile().GetCharsetInternal(), settings.szName));
 
+	m_colorBtn.SetColor(settings.color);
+
 	m_settingsChanged = false;
 	m_visible = true;
 
@@ -1346,7 +1352,7 @@ void QuickChannelProperties::PrepareUndo()
 	{
 		// Backup old channel settings through pattern undo.
 		m_settingsChanged = true;
-		m_document->GetPatternUndo().PrepareUndo(m_pattern, 0, 0, 0, 0, "Channel Settings", false, true);
+		m_document->GetPatternUndo().PrepareUndo(0, m_channel, 0, 0, 0, "Channel Settings", false, true);
 	}
 }
 
@@ -1474,6 +1480,20 @@ void QuickChannelProperties::OnNameChanged()
 		m_document->SetModified();
 		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
 	}
+}
+
+
+void QuickChannelProperties::OnChangeColor()
+{
+	m_settingColor = true;
+	if(auto color = m_colorBtn.PickColor(m_document->GetSoundFile(), m_channel); color.has_value())
+	{
+		PrepareUndo();
+		m_document->GetSoundFile().ChnSettings[m_channel].color = *color;
+		m_document->SetModified();
+		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
+	}
+	m_settingColor = false;
 }
 
 

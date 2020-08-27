@@ -16,7 +16,7 @@
 #include "dlg_misc.h"
 #include "Globals.h"
 #include "View_pat.h"
-#include "EffectVis.h"		//rewbs.fxvis
+#include "EffectVis.h"
 #include "ChannelManagerDlg.h"
 #include "../soundlib/tuning.h"
 #include "../soundlib/mod_specifications.h"
@@ -33,10 +33,10 @@ OPENMPT_NAMESPACE_BEGIN
 // Headers
 enum
 {
-	ROWHDR_WIDTH       = 32,  // Row header
-	COLHDR_HEIGHT      = 16,  // Column header
-	VUMETERS_HEIGHT    = 13,  // Height of vu-meters
-	PLUGNAME_HEIGHT    = 16,  // Height of plugin names
+	ROWHDR_WIDTH       = 32,      // Row header
+	COLHDR_HEIGHT      = 16 + 4,  // Column header (name + color)
+	VUMETERS_HEIGHT    = 13,      // Height of vu-meters
+	PLUGNAME_HEIGHT    = 16,      // Height of plugin names
 	VUMETERS_BMPWIDTH  = 32,
 	VUMETERS_BMPHEIGHT = 10,
 	VUMETERS_MEDWIDTH  = 24,
@@ -66,7 +66,7 @@ enum
 /////////////////////////////////////////////////////////////////////////////
 // Effect colour codes
 
-// CommandTypes => Effect colour assignment
+// EffectType => ModColor mapping
 static constexpr int effectColors[] =
 {
 	0,
@@ -425,7 +425,7 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 				m_Dib.TextBlt(x, y, pfnt->nNoteWidth[0] + pfnt->nNoteWidth[1], pfnt->spacingY, xsrc, ysrc+(n+1)*pfnt->spacingY, pfnt->dib);
 			}
 
-			if(o <= 9)
+			if(o <= 15)
 				m_Dib.TextBlt(x + pfnt->nNoteWidth[0] + pfnt->nNoteWidth[1], y, pfnt->nOctaveWidth, pfnt->spacingY,
 								pfnt->nNumX, pfnt->nNumY+o*pfnt->spacingY, pfnt->dib);
 			else
@@ -463,7 +463,8 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 
 	if(mc.IsPcNote())
-	{	//If note is parameter control note, drawing volume command differently.
+	{
+		//If note is parameter control note, drawing volume command differently.
 		const int val = std::min(ModCommand::maxColumnValue, static_cast<int>(mc.GetValueVolCol()));
 
 		if(pfnt->pcParamMargin) m_Dib.TextBlt(x, y, pfnt->pcParamMargin, pfnt->spacingY, pfnt->nClrX, pfnt->nClrY, pfnt->dib);
@@ -510,12 +511,14 @@ void CViewPattern::OnDraw(CDC *pDC)
 	CRect rcClient, rect, rc;
 	const CModDoc *pModDoc;
 
-	ASSERT(pDC);
+	MPT_ASSERT(pDC);
 	UpdateSizes();
 	if ((pModDoc = GetDocument()) == nullptr) return;
 	
 	const int vuHeight = MulDiv(VUMETERS_HEIGHT, m_nDPIy, 96);
 	const int colHeight = MulDiv(COLHDR_HEIGHT, m_nDPIy, 96);
+	const int chanColorHeight = MulDiv(4, m_nDPIy, 96);
+	const int chanColorOffset = MulDiv(2, m_nDPIy, 96);
 	const int recordInsX = MulDiv(3, m_nDPIx, 96);
 	const bool doSmoothScroll = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) != 0;
 
@@ -654,7 +657,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		if(width == 1)
 			DrawButtonRect(hdc, &rc, _T(""));
 		else
-			DrawEdge(hdc, rc, EDGE_RAISED, BF_TOPLEFT | BF_MIDDLE);	// Prevent lower edge from being drawn
+			DrawEdge(hdc, rc, EDGE_RAISED, BF_TOPLEFT | BF_MIDDLE);  // Prevent lower edge from being drawn
 	}
 	// Drawing pattern selection
 	if(m_Status[psDragnDropping])
@@ -694,7 +697,20 @@ void CViewPattern::OnDraw(CDC *pDC)
 				DrawButtonRect(hdc, &rect, s,
 					sndFile.ChnSettings[ncolhdr].dwFlags[CHN_MUTE] ? TRUE : FALSE,
 					(m_bInItemRect && m_nDragItem.Type() == DragItem::ChannelHeader && m_nDragItem.Value() == ncolhdr) ? TRUE : FALSE,
-					recordGroup != RecordGroup::NoGroup ? DT_RIGHT : DT_CENTER);
+					recordGroup != RecordGroup::NoGroup ? DT_RIGHT : DT_CENTER, chanColorHeight);
+
+				if(sndFile.ChnSettings[ncolhdr].color != ModChannelSettings::INVALID_COLOR)
+				{
+					// Channel color
+					CRect r;
+					r.top = rect.top + chanColorOffset;
+					r.bottom = r.top + chanColorHeight;
+					r.left = rect.left + chanColorOffset;
+					r.right = rect.right - chanColorOffset;
+
+					::SetDCBrushColor(hdc, sndFile.ChnSettings[ncolhdr].color);
+					::FillRect(hdc, r, dcBrush);
+				}
 
 				// When dragging around channel headers, mark insertion position
 				if(m_Status[psDragging] && !m_bInItemRect
@@ -708,16 +724,18 @@ void CViewPattern::OnDraw(CDC *pDC)
 					// Drop position depends on whether hovered channel is left or right of dragged item.
 					r.left = (m_nDropItem.Value() < m_nDragItem.Value() || m_Status[psShiftDragging]) ? rect.left : rect.right - dropWidth;
 					r.right = r.left + dropWidth;
+
 					::SetDCBrushColor(hdc, textColor);
 					::FillRect(hdc, r, dcBrush);
 				}
 
 				rect.bottom = rect.top + colHeight;
+				rect.top += chanColorHeight;
 
-				CRect insRect;
-				insRect.SetRect(xpaint, ypaint, xpaint + nColumnWidth / 8 + recordInsX, ypaint + colHeight);
 				if(recordGroup != RecordGroup::NoGroup)
 				{
+					CRect insRect;
+					insRect.SetRect(xpaint, ypaint + chanColorHeight, xpaint + nColumnWidth / 8 + recordInsX, ypaint + colHeight);
 					FrameRect(hdc, &rect, buttonBrush);
 					InvertRect(hdc, &rect);
 					s[0] = (recordGroup == RecordGroup::Group1) ? '1' : '2';
@@ -735,8 +753,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 				}
 				if(m_Status[psShowPluginNames])
 				{
-					rect.top += m_szPluginHeader.cy;
-					rect.bottom += m_szPluginHeader.cy;
+					rect.top = rect.bottom;
+					rect.bottom = rect.top + m_szPluginHeader.cy;
 					PLUGINDEX mixPlug = sndFile.ChnSettings[ncolhdr].nMixPlugin;
 					if (mixPlug)
 						sprintf(s, "%u: %s", mixPlug, (sndFile.m_MixPlugins[mixPlug - 1]).pMixPlugin ? sndFile.m_MixPlugins[mixPlug - 1].GetNameLocale() : "[empty]");

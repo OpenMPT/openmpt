@@ -17,6 +17,7 @@
 #include "PatternCursor.h"
 #include "TrackerSettings.h"
 #include "ResizableDialog.h"
+#include "ColorPickerButton.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -175,10 +176,11 @@ class QuickChannelProperties : public CDialog
 protected:
 	CModDoc *m_document = nullptr;
 	CHANNELINDEX m_channel = 0;
-	PATTERNINDEX m_pattern = 0;
 	bool m_visible = false;
 	bool m_settingsChanged = false;
+	bool m_settingColor = false;
 
+	ColorPickerButton m_colorBtn;
 	CSliderCtrl m_volSlider, m_panSlider;
 	CSpinButtonCtrl m_volSpin, m_panSpin;
 	CEdit m_nameEdit;
@@ -187,7 +189,7 @@ public:
 	QuickChannelProperties() = default;
 	~QuickChannelProperties();
 
-	void Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDEX ptn, CPoint position);
+	void Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint position);
 
 protected:
 	void DoDataExchange(CDataExchange *pDX) override;
@@ -204,6 +206,7 @@ protected:
 	afx_msg void OnNameChanged();
 	afx_msg void OnPrevChannel();
 	afx_msg void OnNextChannel();
+	afx_msg void OnChangeColor();
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 
 	BOOL PreTranslateMessage(MSG *pMsg);

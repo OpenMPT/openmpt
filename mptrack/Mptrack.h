@@ -405,8 +405,8 @@ RGBQUAD rgb2quad(COLORREF c);
 // Other bitmap functions
 int DrawTextT(HDC hdc, const wchar_t *lpchText, int cchText, LPRECT lprc, UINT format);
 int DrawTextT(HDC hdc, const char *lpchText, int cchText, LPRECT lprc, UINT format);
-void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCSTR lpszText = nullptr, BOOL bDisabled = FALSE, BOOL bPushed = FALSE, DWORD dwFlags = (DT_CENTER | DT_VCENTER));
-void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCWSTR lpszText = nullptr, BOOL bDisabled = FALSE, BOOL bPushed = FALSE, DWORD dwFlags = (DT_CENTER | DT_VCENTER));
+void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCSTR lpszText = nullptr, BOOL bDisabled = FALSE, BOOL bPushed = FALSE, DWORD dwFlags = (DT_CENTER | DT_VCENTER), uint32 topMargin = 0);
+void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCWSTR lpszText = nullptr, BOOL bDisabled = FALSE, BOOL bPushed = FALSE, DWORD dwFlags = (DT_CENTER | DT_VCENTER), uint32 topMargin = 0);
 
 // Misc functions
 void ErrorBox(UINT nStringID, CWnd *p = nullptr);

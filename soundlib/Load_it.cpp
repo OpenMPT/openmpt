@@ -2290,6 +2290,27 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 			GetMIDIMapper().Serialize(&f);
 		}
 	}
+
+	// Channel colors
+	{
+		CHANNELINDEX numChannels = 0;
+		for(CHANNELINDEX i = 0; i < m_nChannels; i++)
+		{
+			if(ChnSettings[i].color != ModChannelSettings::INVALID_COLOR)
+			{
+				numChannels = i + 1;
+			}
+		}
+		if(numChannels > 0)
+		{
+			WRITEMODULARHEADER(MagicLE("CCOL"), numChannels * 3);
+			for(CHANNELINDEX i = 0; i < numChannels; i++)
+			{
+				std::array<uint8, 3> rgb{ static_cast<uint8>(ChnSettings[i].color), static_cast<uint8>(ChnSettings[i].color >> 8), static_cast<uint8>(ChnSettings[i].color >> 16) };
+				mpt::IO::Write(f, rgb);
+			}
+		}
+	}
 #endif
 
 #undef WRITEMODULAR
@@ -2368,6 +2389,18 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 				break;
 #ifdef MODPLUG_TRACKER
 			case MagicBE("MIMA"): GetMIDIMapper().Deserialize(chunk); break;
+
+			case MagicLE("CCOL"):
+				// Channel colors
+				{
+					const CHANNELINDEX numChannels = std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(size / 3u));
+					for(CHANNELINDEX i = 0; i < numChannels; i++)
+					{
+						auto rgb = chunk.ReadArray<uint8, 3>();
+						ChnSettings[i].color = rgb[0] | (rgb[1] << 8) | (rgb[2] << 16);
+					}
+				}
+				break;
 #endif
 			case MagicLE("AUTH"):
 				{

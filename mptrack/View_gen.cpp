@@ -56,6 +56,11 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_COMMAND(IDC_CHECK6,		&CViewGlobals::OnSurround3)
 	ON_COMMAND(IDC_CHECK8,		&CViewGlobals::OnSurround4)
 
+	ON_COMMAND(IDC_BUTTON9,		&CViewGlobals::OnEditColor1)
+	ON_COMMAND(IDC_BUTTON10,	&CViewGlobals::OnEditColor2)
+	ON_COMMAND(IDC_BUTTON11,	&CViewGlobals::OnEditColor3)
+	ON_COMMAND(IDC_BUTTON12,	&CViewGlobals::OnEditColor4)
+
 	ON_EN_UPDATE(IDC_EDIT1,		&CViewGlobals::OnEditVol1)
 	ON_EN_UPDATE(IDC_EDIT3,		&CViewGlobals::OnEditVol2)
 	ON_EN_UPDATE(IDC_EDIT5,		&CViewGlobals::OnEditVol3)
@@ -187,8 +192,10 @@ void CViewGlobals::OnInitialUpdate()
 	RecalcLayout();
 
 	// Initializing scroll ranges
-	for (int ichn = 0; ichn < CHANNELS_IN_TAB; ichn++)
+	for(int ichn = 0; ichn < CHANNELS_IN_TAB; ichn++)
 	{
+		// Color select
+		m_channelColor[ichn].SubclassDlgItem(IDC_BUTTON9 + ichn, this);
 		// Volume Slider
 		m_sbVolume[ichn].SetRange(0, 64);
 		m_sbVolume[ichn].SetTicFreq(8);
@@ -364,6 +371,8 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 				else
 					s = _T("");
 				SetDlgItemText(IDC_TEXT1 + ichn, s);
+				// Channel color
+				m_channelColor[ichn].SetColor(chnSettings.color);
 				// Mute
 				CheckDlgButton(IDC_CHECK1 + ichn * 2, chnSettings.dwFlags[CHN_MUTE] ? TRUE : FALSE);
 				// Surround
@@ -675,6 +684,27 @@ void CViewGlobals::PrepareUndo(CHANNELINDEX chnMod4)
 		GetDocument()->GetPatternUndo().PrepareUndo(0, chn, 0, 0, 0, "Channel Settings", false, true);
 	}
 }
+
+
+void CViewGlobals::OnEditColor(const CHANNELINDEX chnMod4)
+{
+	auto *modDoc = GetDocument();
+	auto &sndFile = modDoc->GetSoundFile();
+	const CHANNELINDEX chn = static_cast<CHANNELINDEX>(m_nActiveTab * CHANNELS_IN_TAB) + chnMod4;
+	if(auto color = m_channelColor[chnMod4].PickColor(sndFile, chn); color.has_value())
+	{
+		PrepareUndo(chnMod4);
+		sndFile.ChnSettings[chn].color = *color;
+		modDoc->SetModified();
+		modDoc->UpdateAllViews(nullptr, GeneralHint(chn).Channels());
+	}
+}
+
+
+void CViewGlobals::OnEditColor1() { OnEditColor(0); }
+void CViewGlobals::OnEditColor2() { OnEditColor(1); }
+void CViewGlobals::OnEditColor3() { OnEditColor(2); }
+void CViewGlobals::OnEditColor4() { OnEditColor(3); }
 
 
 void CViewGlobals::OnMute(const CHANNELINDEX chnMod4, const UINT itemID)

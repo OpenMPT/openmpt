@@ -703,7 +703,7 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 				if(cursor.GetChannel() < GetDocument()->GetNumChannels())
 				{
 					ClientToScreen(&point);
-					m_quickChannelProperties.Show(GetDocument(), cursor.GetChannel(), m_nPattern, point);
+					m_quickChannelProperties.Show(GetDocument(), cursor.GetChannel(), point);
 					return true;
 				}
 			}
@@ -1421,7 +1421,7 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 	{
 		// Ctrl+Right-Click: Open quick channel properties.
 		ClientToScreen(&pt);
-		m_quickChannelProperties.Show(GetDocument(), nChn, m_nPattern, pt);
+		m_quickChannelProperties.Show(GetDocument(), nChn, pt);
 	} else if((flags & MK_SHIFT) && inChannelHeader)
 	{
 		// Drag-select record channels
@@ -4303,7 +4303,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				// Open centered Quick Channel Settings dialog.
 				CRect windowPos;
 				GetWindowRect(windowPos);
-				m_quickChannelProperties.Show(GetDocument(), m_Cursor.GetChannel(), m_nPattern, CPoint(windowPos.left + windowPos.Width() / 2, windowPos.top + windowPos.Height() / 2));
+				m_quickChannelProperties.Show(GetDocument(), m_Cursor.GetChannel(), CPoint(windowPos.left + windowPos.Width() / 2, windowPos.top + windowPos.Height() / 2));
 				return wParam;
 			}
 		case kcChannelTranspose: m_MenuCursor = m_Cursor; OnTransposeChannel(); return wParam;

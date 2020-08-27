@@ -342,7 +342,9 @@ public:
 // protected members
 protected:
 
-	BOOL InitializeMod();
+	void InitializeMod();
+	void SetDefaultChannelColors();
+
 	CChildFrame *GetChildFrame(); //rewbs.customKeys
 
 // Overrides

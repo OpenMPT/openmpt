@@ -202,24 +202,20 @@ struct ModChannel
 // Default pattern channel settings
 struct ModChannelSettings
 {
+#ifdef MODPLUG_TRACKER
+	static constexpr uint32 INVALID_COLOR = 0xFFFFFFFF;
+	uint32 color = INVALID_COLOR;   // For pattern editor
+#endif                              // MODPLUG_TRACKER
 	FlagSet<ChannelFlags> dwFlags;  // Channel flags
-	uint16 nPan;                    // Initial pan (0...256)
-	uint16 nVolume;                 // Initial channel volume (0...64)
-	PLUGINDEX nMixPlugin;           // Assigned plugin
-	mpt::charbuf<MAX_CHANNELNAME> szName; // Channel name
+	uint16 nPan = 128;              // Initial pan (0...256)
+	uint16 nVolume = 64;            // Initial channel volume (0...64)
+	PLUGINDEX nMixPlugin = 0;       // Assigned plugin
 
-	ModChannelSettings()
-	{
-		Reset();
-	}
+	mpt::charbuf<MAX_CHANNELNAME> szName;  // Channel name
 
 	void Reset()
 	{
-		dwFlags.reset();
-		nPan = 128;
-		nVolume = 64;
-		nMixPlugin = 0;
-		szName = "";
+		*this = {};
 	}
 };
 

@@ -279,6 +279,9 @@
     <ClInclude Include="..\..\mptrack\ColorConfigDlg.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\ColorPickerButton.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\ColorSchemes.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -987,6 +990,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ColorConfigDlg.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\ColorPickerButton.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ColourEdit.cpp">

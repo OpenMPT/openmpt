@@ -636,6 +636,7 @@ public:
 	CachedSetting<bool> accidentalFlats;
 	Setting<bool> rememberSongWindows;
 	Setting<bool> showDirsInSampleBrowser;
+	Setting<bool> defaultRainbowChannelColors;
 
 	Setting<FontSetting> commentsFont;
 

@@ -23,23 +23,23 @@ static constexpr struct ColorDescriptions
 {
 	const TCHAR *name;
 	int previewImage;
-	uint32 colorIndex1, colorIndex2, colorIndex3;
-	const TCHAR *descText1, *descText2, *descText3;
+	uint32 colorIndex[3];
+	const TCHAR *descText[3];
 } colorDefs[] =
 {
-	{ _T("Pattern Editor"),      0, MODCOLOR_BACKNORMAL, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKHILIGHT, _T("Background:"), _T("Foreground:"), _T("Highlighted:") },
-	{ _T("Active Row"),          0, MODCOLOR_BACKCURROW, MODCOLOR_TEXTCURROW, 0, _T("Background:"), _T("Foreground:"), nullptr },
-	{ _T("Pattern Selection"),   0, MODCOLOR_BACKSELECTED, MODCOLOR_TEXTSELECTED, 0, _T("Background:"), _T("Foreground:"), nullptr },
-	{ _T("Play Cursor"),         0, MODCOLOR_BACKPLAYCURSOR, MODCOLOR_TEXTPLAYCURSOR, 0, _T("Background:"), _T("Foreground:"), nullptr },
-	{ _T("Note Highlight"),      0, MODCOLOR_NOTE, MODCOLOR_INSTRUMENT, MODCOLOR_VOLUME, _T("Note:"), _T("Instrument:"), _T("Volume:") },
-	{ _T("Effect Highlight"),    0, MODCOLOR_PANNING, MODCOLOR_PITCH, MODCOLOR_GLOBALS, _T("Panning Effects:"), _T("Pitch Effects:"), _T("Global Effects:") },
-	{ _T("Invalid Commands"),    0, MODCOLOR_DODGY_COMMANDS, 0, 0, _T("Invalid Note:"), nullptr, nullptr },
-	{ _T("Channel Separator"),   0, MODCOLOR_SEPHILITE, MODCOLOR_SEPFACE, MODCOLOR_SEPSHADOW, _T("Highlight:"), _T("Face:"), _T("Shadow:") },
-	{ _T("Next/Prev Pattern"),   0, MODCOLOR_BLENDCOLOR, 0, 0, _T("Blend Colour:"), nullptr, nullptr },
-	{ _T("Sample Editor"),       1, MODCOLOR_SAMPLE, MODCOLOR_BACKSAMPLE, MODCOLOR_SAMPLESELECTED, _T("Sample Data:"), _T("Background:"), _T("Selection:") },
-	{ _T("Instrument Editor"),   2, MODCOLOR_ENVELOPES, MODCOLOR_ENVELOPE_RELEASE, MODCOLOR_BACKENV, _T("Envelopes:"), _T("Envelopes (Release):"), _T("Background:") },
-	{ _T("VU-Meters"),           0, MODCOLOR_VUMETER_HI, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_LO, _T("Hi:"), _T("Med:"), _T("Lo:") },
-	{ _T("VU-Meters (Plugins)"), 0, MODCOLOR_VUMETER_HI_VST, MODCOLOR_VUMETER_MED_VST, MODCOLOR_VUMETER_LO_VST, _T("Hi:"), _T("Med:"), _T("Lo:") }
+	{ _T("Pattern Editor"),      0, { MODCOLOR_BACKNORMAL, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKHILIGHT }, { _T("Background:"), _T("Foreground:"), _T("Highlighted:") } },
+	{ _T("Active Row"),          0, { MODCOLOR_BACKCURROW, MODCOLOR_TEXTCURROW, 0 }, { _T("Background:"), _T("Foreground:"), nullptr } },
+	{ _T("Pattern Selection"),   0, { MODCOLOR_BACKSELECTED, MODCOLOR_TEXTSELECTED, 0 }, { _T("Background:"), _T("Foreground:"), nullptr } },
+	{ _T("Play Cursor"),         0, { MODCOLOR_BACKPLAYCURSOR, MODCOLOR_TEXTPLAYCURSOR, 0 }, { _T("Background:"), _T("Foreground:"), nullptr } },
+	{ _T("Note Highlight"),      0, { MODCOLOR_NOTE, MODCOLOR_INSTRUMENT, MODCOLOR_VOLUME }, { _T("Note:"), _T("Instrument:"), _T("Volume:") } },
+	{ _T("Effect Highlight"),    0, { MODCOLOR_PANNING, MODCOLOR_PITCH, MODCOLOR_GLOBALS }, { _T("Panning Effects:"), _T("Pitch Effects:"), _T("Global Effects:") } },
+	{ _T("Invalid Commands"),    0, { MODCOLOR_DODGY_COMMANDS, 0, 0 }, { _T("Invalid Note:"), nullptr, nullptr } },
+	{ _T("Channel Separator"),   0, { MODCOLOR_SEPHILITE, MODCOLOR_SEPFACE, MODCOLOR_SEPSHADOW }, { _T("Highlight:"), _T("Face:"), _T("Shadow:") } },
+	{ _T("Next/Prev Pattern"),   0, { MODCOLOR_BLENDCOLOR, 0, 0 }, { _T("Blend Colour:"), nullptr, nullptr } },
+	{ _T("Sample Editor"),       1, { MODCOLOR_SAMPLE, MODCOLOR_BACKSAMPLE, MODCOLOR_SAMPLESELECTED }, { _T("Sample Data:"), _T("Background:"), _T("Selection:") } },
+	{ _T("Instrument Editor"),   2, { MODCOLOR_ENVELOPES, MODCOLOR_ENVELOPE_RELEASE, MODCOLOR_BACKENV }, { _T("Envelopes:"), _T("Envelopes (Release):"), _T("Background:") } },
+	{ _T("VU-Meters"),           0, { MODCOLOR_VUMETER_HI, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_LO }, { _T("Hi:"), _T("Med:"), _T("Lo:") } },
+	{ _T("VU-Meters (Plugins)"), 0, { MODCOLOR_VUMETER_HI_VST, MODCOLOR_VUMETER_MED_VST, MODCOLOR_VUMETER_LO_VST }, { _T("Hi:"), _T("Med:"), _T("Lo:") } }
 };
 
 #define PREVIEWBMP_WIDTH	88
@@ -69,6 +69,8 @@ BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_COMMAND(IDC_CHECK5,				&COptionsColors::OnSettingsChanged)
 	ON_COMMAND(IDC_RADIO1,				&COptionsColors::OnSettingsChanged)
 	ON_COMMAND(IDC_RADIO2,				&COptionsColors::OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO3,				&COptionsColors::OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO4,				&COptionsColors::OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -79,17 +81,20 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO1,		m_ComboItem);
 	DDX_Control(pDX, IDC_COMBO2,		m_ComboFont);
 	DDX_Control(pDX, IDC_COMBO3,		m_ComboPreset);
-	DDX_Control(pDX, IDC_BUTTON1,		m_BtnColor1);
-	DDX_Control(pDX, IDC_BUTTON2,		m_BtnColor2);
-	DDX_Control(pDX, IDC_BUTTON3,		m_BtnColor3);
 	DDX_Control(pDX, IDC_BUTTON4,		m_BtnPreview);
-	DDX_Control(pDX, IDC_TEXT1,			m_TxtColor1);
-	DDX_Control(pDX, IDC_TEXT2,			m_TxtColor2);
-	DDX_Control(pDX, IDC_TEXT3,			m_TxtColor3);
+	DDX_Control(pDX, IDC_TEXT1,			m_TxtColor[0]);
+	DDX_Control(pDX, IDC_TEXT2,			m_TxtColor[1]);
+	DDX_Control(pDX, IDC_TEXT3,			m_TxtColor[2]);
 	DDX_Control(pDX, IDC_SPIN1,			m_ColorSpin);
 	//}}AFX_DATA_MAP
 }
 
+
+COptionsColors::COptionsColors()
+    : CPropertyPage(IDD_OPTIONS_COLORS)
+    , CustomColors(TrackerSettings::Instance().rgbCustomColors)
+{
+}
 
 static CString FormatFontName(const FontSetting &font)
 {
@@ -101,16 +106,20 @@ BOOL COptionsColors::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	m_pPreviewDib = LoadDib(MAKEINTRESOURCE(IDB_COLORSETUP));
-	CustomColors = TrackerSettings::Instance().rgbCustomColors;
 	for (size_t i = 0; i < std::size(colorDefs); i++)
 	{
 		m_ComboItem.SetItemData(m_ComboItem.AddString(colorDefs[i].name), i);
 	}
 	m_ComboItem.SetCurSel(0);
+
+	m_BtnColor[0].SubclassDlgItem(IDC_BUTTON1, this);
+	m_BtnColor[1].SubclassDlgItem(IDC_BUTTON2, this);
+	m_BtnColor[2].SubclassDlgItem(IDC_BUTTON3, this);
+
 	m_BtnPreview.SetWindowPos(nullptr,
 		0, 0,
 		Util::ScalePixels(PREVIEWBMP_WIDTH * 2, m_hWnd) + 2, Util::ScalePixels(PREVIEWBMP_HEIGHT * 2, m_hWnd) + 2,
-		SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
+		SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_STDHIGHLIGHT) CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) CheckDlgButton(IDC_CHECK2, BST_CHECKED);
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT) CheckDlgButton(IDC_CHECK4, BST_CHECKED);
@@ -118,6 +127,7 @@ BOOL COptionsColors::OnInitDialog()
 	SetDlgItemInt(IDC_PRIMARYHILITE, TrackerSettings::Instance().m_nRowHighlightMeasures);
 	SetDlgItemInt(IDC_SECONDARYHILITE, TrackerSettings::Instance().m_nRowHighlightBeats);
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, TrackerSettings::Instance().accidentalFlats ? IDC_RADIO2 : IDC_RADIO1);
+	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, TrackerSettings::Instance().defaultRainbowChannelColors ? IDC_RADIO4 : IDC_RADIO3);
 
 	patternFont = TrackerSettings::Instance().patternFont;
 	m_ComboFont.AddString(_T("Built-in (small)"));
@@ -180,11 +190,12 @@ BOOL COptionsColors::OnKillActive()
 void COptionsColors::OnOK()
 {
 	TrackerSettings::Instance().m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT);
-	if (IsDlgButtonChecked(IDC_CHECK1)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_STDHIGHLIGHT;
-	if (IsDlgButtonChecked(IDC_CHECK2)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_EFFECTHILIGHT;
-	if (IsDlgButtonChecked(IDC_CHECK4)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_2NDHIGHLIGHT;
+	if(IsDlgButtonChecked(IDC_CHECK1)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_STDHIGHLIGHT;
+	if(IsDlgButtonChecked(IDC_CHECK2)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_EFFECTHILIGHT;
+	if(IsDlgButtonChecked(IDC_CHECK4)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_2NDHIGHLIGHT;
 	TrackerSettings::Instance().rememberSongWindows = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
 	TrackerSettings::Instance().accidentalFlats = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
+	TrackerSettings::Instance().defaultRainbowChannelColors = IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED;
 
 	FontSetting newPatternFont = patternFont;
 	const int fontSel = m_ComboFont.GetCurSel();
@@ -293,99 +304,87 @@ void COptionsColors::OnChooseCommentFont()
 
 void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 {
-	int nColor = -1;
-	switch(nIdCtl)
+	if(!lpdis || nIdCtl != IDC_BUTTON4 || !m_pPreviewDib)
 	{
-	case IDC_BUTTON1: nColor = colorDefs[m_nColorItem].colorIndex1; break;
-	case IDC_BUTTON2: nColor = colorDefs[m_nColorItem].colorIndex2; break;
-	case IDC_BUTTON3: nColor = colorDefs[m_nColorItem].colorIndex3; break;
-	}
-	if(!lpdis)
+		CDialog::OnDrawItem(nIdCtl, lpdis);
 		return;
-	CRect rect = lpdis->rcItem;
-	if(nColor >= 0)
-	{
-		HDC hdc = lpdis->hDC;
-		::SetDCBrushColor(hdc, CustomColors[nColor]);
-		::DrawEdge(hdc, rect, (lpdis->itemState & ODS_SELECTED) ? BDR_SUNKENINNER : BDR_RAISEDINNER, BF_RECT | BF_ADJUST);
-		::FillRect(hdc, rect, GetStockBrush(DC_BRUSH));
-	} else if((nIdCtl == IDC_BUTTON4) && (m_pPreviewDib))
-	{
-		int y = colorDefs[m_nColorItem].previewImage;
-		RGBQUAD *p = m_pPreviewDib->bmiColors;
-		if (IsDlgButtonChecked(IDC_CHECK2))
-		{
-			p[1] = rgb2quad(CustomColors[MODCOLOR_GLOBALS]);
-			p[3] = rgb2quad(CustomColors[MODCOLOR_PITCH]);
-			p[5] = rgb2quad(CustomColors[MODCOLOR_INSTRUMENT]);
-			p[6] = rgb2quad(CustomColors[MODCOLOR_VOLUME]);
-			p[12] = rgb2quad(CustomColors[MODCOLOR_NOTE]);
-			p[14] = rgb2quad(CustomColors[MODCOLOR_PANNING]);
-		} else
-		{
-			p[1] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
-			p[3] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
-			p[5] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
-			p[6] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
-			p[12] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
-			p[14] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
-		}
-		p[4] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
-		p[8] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
-		p[9] = rgb2quad(CustomColors[MODCOLOR_SAMPLE]);
-		p[10] = rgb2quad(CustomColors[MODCOLOR_BACKNORMAL]);
-		p[11] = rgb2quad(CustomColors[MODCOLOR_BACKHILIGHT]);
-		p[13] = rgb2quad(CustomColors[MODCOLOR_ENVELOPES]);
-		p[15] = rgb2quad((y) ? RGB(255,255,255) : CustomColors[MODCOLOR_BACKNORMAL]);
-		// Special cases: same bitmap, different palette
-		switch(m_nColorItem)
-		{
-		// Current Row
-		case 1:
-			p[8] = rgb2quad(CustomColors[MODCOLOR_TEXTCURROW]);
-			p[11] = rgb2quad(CustomColors[MODCOLOR_BACKCURROW]);
-			break;
-		// Selection
-		case 2:
-			p[5] = rgb2quad(CustomColors[MODCOLOR_TEXTSELECTED]);
-			p[6] = rgb2quad(CustomColors[MODCOLOR_TEXTSELECTED]);
-			p[8] = rgb2quad(CustomColors[MODCOLOR_TEXTSELECTED]);
-			p[11] = rgb2quad(CustomColors[MODCOLOR_BACKSELECTED]);
-			p[12] = rgb2quad(CustomColors[MODCOLOR_TEXTSELECTED]);
-			break;
-		// Play Cursor
-		case 3:
-			p[8] = rgb2quad(CustomColors[MODCOLOR_TEXTPLAYCURSOR]);
-			p[11] = rgb2quad(CustomColors[MODCOLOR_BACKPLAYCURSOR]);
-			break;
-		// Sample Editor
-		case 9:
-			p[0] = rgb2quad(CustomColors[MODCOLOR_BACKSAMPLE]);
-			p[15] = rgb2quad(CustomColors[MODCOLOR_SAMPLESELECTED]);
-			break;
-		// Envelope Editor
-		case 10:
-			p[0] = rgb2quad(CustomColors[MODCOLOR_BACKENV]);
-			p[2] = rgb2quad(CustomColors[MODCOLOR_ENVELOPE_RELEASE]);
-			break;
-		}
-
-		HDC hdc = lpdis->hDC;
-		::DrawEdge(hdc, rect, BDR_SUNKENINNER, BF_RECT | BF_ADJUST);
-		StretchDIBits(	hdc,
-						rect.left,
-						rect.top,
-						rect.Width(),
-						rect.Height(),
-						0,
-						m_pPreviewDib->bmiHeader.biHeight - ((y+1) * PREVIEWBMP_HEIGHT),
-						m_pPreviewDib->bmiHeader.biWidth,
-						PREVIEWBMP_HEIGHT,
-						m_pPreviewDib->lpDibBits,
-						(LPBITMAPINFO)m_pPreviewDib,
-						DIB_RGB_COLORS,
-						SRCCOPY);
 	}
+
+	const int img = colorDefs[m_nColorItem].previewImage;
+	auto &p = m_pPreviewDib->bmiColors;
+	if (IsDlgButtonChecked(IDC_CHECK2))
+	{
+		p[1] = rgb2quad(CustomColors[MODCOLOR_GLOBALS]);
+		p[3] = rgb2quad(CustomColors[MODCOLOR_PITCH]);
+		p[5] = rgb2quad(CustomColors[MODCOLOR_INSTRUMENT]);
+		p[6] = rgb2quad(CustomColors[MODCOLOR_VOLUME]);
+		p[12] = rgb2quad(CustomColors[MODCOLOR_NOTE]);
+		p[14] = rgb2quad(CustomColors[MODCOLOR_PANNING]);
+	} else
+	{
+		p[1] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
+		p[3] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
+		p[5] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
+		p[6] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
+		p[12] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
+		p[14] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
+	}
+	p[4] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
+	p[8] = rgb2quad(CustomColors[MODCOLOR_TEXTNORMAL]);
+	p[9] = rgb2quad(CustomColors[MODCOLOR_SAMPLE]);
+	p[10] = rgb2quad(CustomColors[MODCOLOR_BACKNORMAL]);
+	p[11] = rgb2quad(CustomColors[MODCOLOR_BACKHILIGHT]);
+	p[13] = rgb2quad(CustomColors[MODCOLOR_ENVELOPES]);
+	p[15] = rgb2quad(img ? RGB(255, 255, 255) : CustomColors[MODCOLOR_BACKNORMAL]);
+	// Special cases: same bitmap, different palette
+	switch(m_nColorItem)
+	{
+	// Current Row
+	case 1:
+		p[8] = rgb2quad(CustomColors[MODCOLOR_TEXTCURROW]);
+		p[11] = rgb2quad(CustomColors[MODCOLOR_BACKCURROW]);
+		break;
+	// Selection
+	case 2:
+		p[5] = rgb2quad(CustomColors[MODCOLOR_TEXTSELECTED]);
+		p[6] = rgb2quad(CustomColors[MODCOLOR_TEXTSELECTED]);
+		p[8] = rgb2quad(CustomColors[MODCOLOR_TEXTSELECTED]);
+		p[11] = rgb2quad(CustomColors[MODCOLOR_BACKSELECTED]);
+		p[12] = rgb2quad(CustomColors[MODCOLOR_TEXTSELECTED]);
+		break;
+	// Play Cursor
+	case 3:
+		p[8] = rgb2quad(CustomColors[MODCOLOR_TEXTPLAYCURSOR]);
+		p[11] = rgb2quad(CustomColors[MODCOLOR_BACKPLAYCURSOR]);
+		break;
+	// Sample Editor
+	case 9:
+		p[0] = rgb2quad(CustomColors[MODCOLOR_BACKSAMPLE]);
+		p[15] = rgb2quad(CustomColors[MODCOLOR_SAMPLESELECTED]);
+		break;
+	// Envelope Editor
+	case 10:
+		p[0] = rgb2quad(CustomColors[MODCOLOR_BACKENV]);
+		p[2] = rgb2quad(CustomColors[MODCOLOR_ENVELOPE_RELEASE]);
+		break;
+	}
+
+	CRect rect = lpdis->rcItem;
+	HDC hdc = lpdis->hDC;
+	::DrawEdge(hdc, rect, BDR_SUNKENINNER, BF_RECT | BF_ADJUST);
+	StretchDIBits(	hdc,
+					rect.left,
+					rect.top,
+					rect.Width(),
+					rect.Height(),
+					0,
+					m_pPreviewDib->bmiHeader.biHeight - ((img+1) * PREVIEWBMP_HEIGHT),
+					m_pPreviewDib->bmiHeader.biWidth,
+					PREVIEWBMP_HEIGHT,
+					m_pPreviewDib->lpDibBits,
+					(LPBITMAPINFO)m_pPreviewDib,
+					DIB_RGB_COLORS,
+					SRCCOPY);
 }
 
 
@@ -398,8 +397,9 @@ static COLORREF rgbCustomColors[16] =
 };
 
 
-void COptionsColors::SelectColor(COLORREF &color)
+void COptionsColors::SelectColor(int colorIndex)
 {
+	auto &color = CustomColors[colorDefs[m_nColorItem].colorIndex[colorIndex]];
 	CHOOSECOLOR cc;
 	cc.lStructSize = sizeof(CHOOSECOLOR);
 	cc.hwndOwner = m_hWnd;
@@ -410,30 +410,12 @@ void COptionsColors::SelectColor(COLORREF &color)
 	cc.lCustData = 0;
 	cc.lpfnHook = nullptr;
 	cc.lpTemplateName = nullptr;
-	if (::ChooseColor(&cc))
+	if(::ChooseColor(&cc))
 	{
 		color = cc.rgbResult;
-		Invalidate(FALSE);
+		m_BtnColor[colorIndex].SetColor(color);
 		OnSettingsChanged();
 	}
-}
-
-
-void COptionsColors::OnSelectColor1()
-{
-	SelectColor(CustomColors[colorDefs[m_nColorItem].colorIndex1]);
-}
-
-
-void COptionsColors::OnSelectColor2()
-{
-	SelectColor(CustomColors[colorDefs[m_nColorItem].colorIndex2]);
-}
-
-
-void COptionsColors::OnSelectColor3()
-{
-	SelectColor(CustomColors[colorDefs[m_nColorItem].colorIndex3]);
 }
 
 
@@ -468,30 +450,17 @@ void COptionsColors::OnSettingsChanged()
 void COptionsColors::OnUpdateDialog()
 {
 	const ColorDescriptions &cd = colorDefs[m_nColorItem];
-	if (cd.descText1) m_TxtColor1.SetWindowText(cd.descText1);
-	if (cd.descText2)
+	for(int i = 0; i < 3; i++)
 	{
-		m_TxtColor2.SetWindowText(cd.descText2);
-		m_TxtColor2.ShowWindow(SW_SHOW);
-		m_BtnColor2.ShowWindow(SW_SHOW);
-		m_BtnColor2.Invalidate(FALSE);
-	} else
-	{
-		m_TxtColor2.ShowWindow(SW_HIDE);
-		m_BtnColor2.ShowWindow(SW_HIDE);
+		if(cd.descText[i])
+		{
+			m_TxtColor[i].SetWindowText(cd.descText[i]);
+			m_BtnColor[i].SetColor(CustomColors[cd.colorIndex[i]]);
+		}
+		m_TxtColor[i].ShowWindow(cd.descText[i] ? SW_SHOW : SW_HIDE);
+		m_BtnColor[i].ShowWindow(cd.descText[i] ? SW_SHOW : SW_HIDE);
 	}
-	if (cd.descText3)
-	{
-		m_TxtColor3.SetWindowText(cd.descText3);
-		m_TxtColor3.ShowWindow(SW_SHOW);
-		m_BtnColor3.ShowWindow(SW_SHOW);
-		m_BtnColor3.Invalidate(FALSE);
-	} else
-	{
-		m_TxtColor3.ShowWindow(SW_HIDE);
-		m_BtnColor3.ShowWindow(SW_HIDE);
-	}
-	m_BtnColor1.Invalidate(FALSE);
+
 	m_BtnPreview.Invalidate(FALSE);
 }
 
@@ -500,9 +469,10 @@ void COptionsColors::OnPreviewChanged()
 {
 	OnSettingsChanged();
 	m_BtnPreview.Invalidate(FALSE);
-	m_BtnColor1.Invalidate(FALSE);
-	m_BtnColor2.Invalidate(FALSE);
-	m_BtnColor3.Invalidate(FALSE);
+	for(int i = 0; i < 3; i++)
+	{
+		m_BtnColor[i].SetColor(CustomColors[colorDefs[m_nColorItem].colorIndex[i]]);
+	}
 }
 
 
