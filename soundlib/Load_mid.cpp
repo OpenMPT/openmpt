@@ -458,10 +458,10 @@ static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const
 	CHANNELINDEX anyFreeChannel = CHANNELINDEX_INVALID;
 
 	CHANNELINDEX oldsetMidiCh = CHANNELINDEX_INVALID;
-	tick_t oldestMidiChAge = Util::MaxValueOfType(oldestMidiChAge);
+	tick_t oldestMidiChAge = std::numeric_limits<decltype(oldestMidiChAge)>::max();
 
 	CHANNELINDEX oldestAnyCh = 0;
-	tick_t oldestAnyChAge = Util::MaxValueOfType(oldestAnyChAge);
+	tick_t oldestAnyChAge = std::numeric_limits<decltype(oldestAnyChAge)>::max();
 
 	for(size_t i = 0; i < channels.size(); i++)
 	{
@@ -706,7 +706,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	while(finishedTracks < numTracks)
 	{
 		uint16 t = 0;
-		tick_t tick = Util::MaxValueOfType(tick);
+		tick_t tick = std::numeric_limits<decltype(tick)>::max();
 		for(uint16 track = 0; track < numTracks; track++)
 		{
 			if(!tracks[track].finished && tracks[track].nextEvent < tick)
