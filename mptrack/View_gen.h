@@ -36,10 +36,11 @@ protected:
 	int m_nLockCount = 1;
 	PlugParamIndex m_nCurrentParam = 0;
 	CHANNELINDEX m_nActiveTab = 0;
+	CHANNELINDEX m_lastEdit = CHANNELINDEX_INVALID;
 	PLUGINDEX m_nCurrentPlugin = 0;
 
 	CComboBox m_CbnSpecialMixProcessing;
-	CSpinButtonCtrl m_SpinMixGain;			// update#02
+	CSpinButtonCtrl m_SpinMixGain;
 
 	enum {AdjustPattern = true, NoPatternAdjust = false};
 
@@ -69,6 +70,9 @@ public:
 	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 
 private:
+	void PrepareUndo(CHANNELINDEX chnMod4);
+	void UndoRedo(bool undo);
+
 	void OnMute(const CHANNELINDEX chnMod4, const UINT itemID);
 	void OnSurround(const CHANNELINDEX chnMod4, const UINT itemID);
 	void OnEditVol(const CHANNELINDEX chnMod4, const UINT itemID);
@@ -85,6 +89,11 @@ private:
 
 protected:
 	//{{AFX_MSG(CViewGlobals)
+	afx_msg void OnEditUndo();
+	afx_msg void OnEditRedo();
+	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
+
 	afx_msg void OnMute1();
 	afx_msg void OnMute2();
 	afx_msg void OnMute3();
@@ -140,6 +149,7 @@ protected:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnTabSelchange(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg LRESULT OnMDIDeactivate(WPARAM, LPARAM);
 	afx_msg LRESULT OnUnlockControls(WPARAM, LPARAM) { if (m_nLockCount > 0) m_nLockCount--; return 0; }
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

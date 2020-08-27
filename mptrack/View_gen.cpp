@@ -43,8 +43,10 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
 	ON_WM_DESTROY()
+	
+	ON_MESSAGE(WM_MOD_MDIACTIVATE,   &CViewGlobals::OnMDIDeactivate)
+	ON_MESSAGE(WM_MOD_MDIDEACTIVATE, &CViewGlobals::OnMDIDeactivate)
 
-	ON_WM_ACTIVATE()
 	ON_COMMAND(IDC_CHECK1,		&CViewGlobals::OnMute1)
 	ON_COMMAND(IDC_CHECK3,		&CViewGlobals::OnMute2)
 	ON_COMMAND(IDC_CHECK5,		&CViewGlobals::OnMute3)
@@ -109,6 +111,11 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_MESSAGE(WM_MOD_VIEWMSG,	&CViewGlobals::OnModViewMsg)
 	ON_MESSAGE(WM_MOD_MIDIMSG,	&CViewGlobals::OnMidiMsg)
 	ON_MESSAGE(WM_MOD_PLUGPARAMAUTOMATE,	&CViewGlobals::OnParamAutomated)
+
+	ON_COMMAND(ID_EDIT_UNDO, &CViewGlobals::OnEditUndo)
+	ON_COMMAND(ID_EDIT_REDO, &CViewGlobals::OnEditRedo)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, &CViewGlobals::OnUpdateUndo)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO, &CViewGlobals::OnUpdateRedo)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -233,6 +240,14 @@ void CViewGlobals::OnDestroy()
 }
 
 
+LRESULT CViewGlobals::OnMDIDeactivate(WPARAM, LPARAM)
+{
+	// Create new undo point if we switch to / from other window
+	m_lastEdit = CHANNELINDEX_INVALID;
+	return 0;
+}
+
+
 LRESULT CViewGlobals::OnMidiMsg(WPARAM midiData_, LPARAM)
 {
 	uint32 midiData = static_cast<uint32>(midiData_);
@@ -342,6 +357,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			const BOOL bEnable = (nChn < sndFile.GetNumChannels()) ? TRUE : FALSE;
 			if(nChn < MAX_BASECHANNELS)
 			{
+				const auto &chnSettings = sndFile.ChnSettings[nChn];
 				// Text
 				if(bEnable)
 					s = MPT_CFORMAT("Channel {}")(nChn + 1);
@@ -349,22 +365,22 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 					s = _T("");
 				SetDlgItemText(IDC_TEXT1 + ichn, s);
 				// Mute
-				CheckDlgButton(IDC_CHECK1 + ichn * 2, sndFile.ChnSettings[nChn].dwFlags[CHN_MUTE] ? TRUE : FALSE);
+				CheckDlgButton(IDC_CHECK1 + ichn * 2, chnSettings.dwFlags[CHN_MUTE] ? TRUE : FALSE);
 				// Surround
-				CheckDlgButton(IDC_CHECK2 + ichn * 2, sndFile.ChnSettings[nChn].dwFlags[CHN_SURROUND] ? TRUE : FALSE);
+				CheckDlgButton(IDC_CHECK2 + ichn * 2, chnSettings.dwFlags[CHN_SURROUND] ? TRUE : FALSE);
 				// Volume
-				int vol = sndFile.ChnSettings[nChn].nVolume;
+				int vol = chnSettings.nVolume;
 				m_sbVolume[ichn].SetPos(vol);
 				m_sbVolume[ichn].Invalidate(FALSE);
 				SetDlgItemInt(IDC_EDIT1+ichn*2, vol);
 				// Pan
-				int pan = sndFile.ChnSettings[nChn].nPan;
+				int pan = chnSettings.nPan;
 				m_sbPan[ichn].SetPos(pan/4);
 				m_sbPan[ichn].Invalidate(FALSE);
 				SetDlgItemInt(IDC_EDIT2+ichn*2, pan);
 
 				// Channel name
-				s = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.ChnSettings[nChn].szName);
+				s = mpt::ToCString(sndFile.GetCharsetInternal(), chnSettings.szName);
 				SetDlgItemText(IDC_EDIT9 + ichn, s);
 				((CEdit*)(GetDlgItem(IDC_EDIT9 + ichn)))->LimitText(MAX_CHANNELNAME - 1);
 			}
@@ -597,6 +613,70 @@ void CViewGlobals::OnTabSelchange(NMHDR*, LRESULT* pResult)
 }
 
 
+void CViewGlobals::OnUpdateUndo(CCmdUI *pCmdUI)
+{
+	CModDoc *pModDoc = GetDocument();
+	if((pCmdUI) && (pModDoc))
+	{
+		pCmdUI->Enable(pModDoc->GetPatternUndo().CanUndoChannelSettings());
+		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo, _T("Undo ") + pModDoc->GetPatternUndo().GetUndoName()));
+	}
+}
+
+
+void CViewGlobals::OnUpdateRedo(CCmdUI *pCmdUI)
+{
+	CModDoc *pModDoc = GetDocument();
+	if((pCmdUI) && (pModDoc))
+	{
+		pCmdUI->Enable(pModDoc->GetPatternUndo().CanRedoChannelSettings());
+		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo, _T("Redo ") + pModDoc->GetPatternUndo().GetRedoName()));
+	}
+}
+
+
+void CViewGlobals::OnEditUndo()
+{
+	UndoRedo(true);
+}
+
+
+void CViewGlobals::OnEditRedo()
+{
+	UndoRedo(false);
+}
+
+
+void CViewGlobals::UndoRedo(bool undo)
+{
+	CModDoc *pModDoc = GetDocument();
+	if(!pModDoc)
+		return;
+	if(undo && !pModDoc->GetPatternUndo().CanUndoChannelSettings())
+		return;
+	if(!undo && !pModDoc->GetPatternUndo().CanRedoChannelSettings())
+		return;
+	PATTERNINDEX pat = undo ? pModDoc->GetPatternUndo().Undo() : pModDoc->GetPatternUndo().Redo();
+	if(pat != PATTERNINDEX_INVALID)
+	{
+		pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels(), nullptr);
+		pModDoc->SetModified();
+	}
+}
+
+
+void CViewGlobals::PrepareUndo(CHANNELINDEX chnMod4)
+{
+	if(m_lastEdit != chnMod4)
+	{
+		// Backup old channel settings through pattern undo.
+		m_lastEdit = chnMod4;
+		const CHANNELINDEX chn = static_cast<CHANNELINDEX>(m_nActiveTab * CHANNELS_IN_TAB) + chnMod4;
+		GetDocument()->GetPatternUndo().PrepareUndo(0, chn, 0, 0, 0, "Channel Settings", false, true);
+	}
+}
+
+
 void CViewGlobals::OnMute(const CHANNELINDEX chnMod4, const UINT itemID)
 {
 	CModDoc *pModDoc = GetDocument();
@@ -622,6 +702,7 @@ void CViewGlobals::OnSurround(const CHANNELINDEX chnMod4, const UINT itemID)
 
 	if (pModDoc)
 	{
+		PrepareUndo(chnMod4);
 		const bool b = (IsDlgButtonChecked(itemID) != FALSE);
 		const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * CHANNELS_IN_TAB) + chnMod4;
 		pModDoc->SurroundChannel(nChn, b);
@@ -641,6 +722,7 @@ void CViewGlobals::OnEditVol(const CHANNELINDEX chnMod4, const UINT itemID)
 	const int vol = GetDlgItemIntEx(itemID);
 	if ((pModDoc) && (vol >= 0) && (vol <= 64) && (!m_nLockCount))
 	{
+		PrepareUndo(chnMod4);
 		if (pModDoc->SetChannelGlobalVolume(nChn, static_cast<uint16>(vol)))
 		{
 			m_sbVolume[chnMod4].SetPos(vol);
@@ -662,6 +744,7 @@ void CViewGlobals::OnEditPan(const CHANNELINDEX chnMod4, const UINT itemID)
 	const int pan = GetDlgItemIntEx(itemID);
 	if ((pModDoc) && (pan >= 0) && (pan <= 256) && (!m_nLockCount))
 	{
+		PrepareUndo(chnMod4);
 		if (pModDoc->SetChannelDefaultPan(nChn, static_cast<uint16>(pan)))
 		{
 			m_sbPan[chnMod4].SetPos(pan / 4);
@@ -703,6 +786,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				pos = (short int)m_sbVolume[iCh].GetPos();
 				if ((pos >= 0) && (pos <= 64))
 				{
+					PrepareUndo(iCh);
 					if (pModDoc->SetChannelGlobalVolume(nChn + iCh, pos))
 					{
 						SetDlgItemInt(IDC_EDIT1 + iCh * 2, pos);
@@ -715,6 +799,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				pos = (short int)m_sbPan[iCh].GetPos();
 				if(pos >= 0 && pos <= 64 && (static_cast<uint16>(pos) != pModDoc->GetSoundFile().ChnSettings[nChn+iCh].nPan / 4u))
 				{
+					PrepareUndo(iCh);
 					if (pModDoc->SetChannelDefaultPan(nChn + iCh, pos * 4))
 					{
 						SetDlgItemInt(IDC_EDIT2 + iCh * 2, pos * 4);
@@ -816,6 +901,7 @@ void CViewGlobals::OnEditName(const CHANNELINDEX chnMod4, const UINT itemID)
 		const std::string s = mpt::ToCharset(sndFile.GetCharsetInternal(), tmp);
 		if ((sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT)) && (nChn < sndFile.GetNumChannels()) && (s != sndFile.ChnSettings[nChn].szName))
 		{
+			PrepareUndo(chnMod4);
 			sndFile.ChnSettings[nChn].szName = s;
 			pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, GeneralHint(nChn).Channels());
@@ -840,6 +926,7 @@ void CViewGlobals::OnFxChanged(const CHANNELINDEX chnMod4)
 		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < sndFile.GetNumChannels())
 		 && (sndFile.ChnSettings[nChn].nMixPlugin != (UINT)nfx))
 		{
+			PrepareUndo(chnMod4);
 			sndFile.ChnSettings[nChn].nMixPlugin = (PLUGINDEX)nfx;
 			if(sndFile.GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();

@@ -127,6 +127,11 @@ BOOL CChildFrame::OnNcActivate(BOOL bActivate)
 		// Need this in addition to OnMDIActivate when switching from a non-MDI window such as a plugin editor
 		CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_hWndView);
 	}
+	if(m_hWndCtrl)
+		::SendMessage(m_hWndCtrl, bActivate ? WM_MOD_MDIACTIVATE : WM_MOD_MDIDEACTIVATE, 0, 0);
+	if(m_hWndView)
+		::SendMessage(m_hWndView, bActivate ? WM_MOD_MDIACTIVATE : WM_MOD_MDIDEACTIVATE, 0, 0);
+
 	return CMDIChildWnd::OnNcActivate(bActivate);
 }
 
@@ -142,6 +147,10 @@ void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeact
 		CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_hWndView);
 		m_lastActiveFrame = this;
 	}
+	if(m_hWndCtrl)
+		::SendMessage(m_hWndCtrl, bActivate ? WM_MOD_MDIACTIVATE : WM_MOD_MDIDEACTIVATE, 0, 0);
+	if(m_hWndView)
+		::SendMessage(m_hWndView, bActivate ? WM_MOD_MDIACTIVATE : WM_MOD_MDIDEACTIVATE, 0, 0);
 
 	// Update channel manager according to active document
 	auto instance = CChannelManagerDlg::sharedInstance();

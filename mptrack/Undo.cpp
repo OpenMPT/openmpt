@@ -151,7 +151,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 
 	// Select most recent undo slot
 	const UndoInfo &undo = fromBuf.back();
-	const bool onlyChannelSettings = !undo.numRows && !undo.numChannels && !undo.channelInfo.empty();
+	const bool onlyChannelSettings = undo.OnlyChannelSettings();
 	const bool deletePattern = (undo.numPatternRows == DELETE_PATTERN) && !onlyChannelSettings;
 
 	// Add this action to redo buffer if the pattern exists; otherwise add a special deletion redo step later
@@ -253,6 +253,8 @@ CString CPatternUndo::GetName(const undobuf_t &buffer)
 	const UndoInfo &info = buffer.back();
 	if(info.linkToPrevious)
 		return info.description + CString(_T(" (Multiple Patterns)"));
+	else if(info.OnlyChannelSettings())
+		return (info.description + MPT_FORMAT(" (Channel {})")(info.firstChannel + 1)).c_str();
 	else
 		return (info.description + MPT_FORMAT(" (Pat {} Row {} Chn {})")(info.pattern, info.firstRow, info.firstChannel + 1)).c_str();
 }

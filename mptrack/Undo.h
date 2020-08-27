@@ -42,6 +42,11 @@ protected:
 		PATTERNINDEX pattern;
 		CHANNELINDEX firstChannel, numChannels;
 		bool linkToPrevious;			// This undo information is linked with the previous undo information
+
+		bool OnlyChannelSettings() const noexcept
+		{
+			return !channelInfo.empty() && numChannels < 1 && numRows < 1;
+		}
 	};
 
 	using undobuf_t = std::vector<UndoInfo>;
@@ -72,6 +77,10 @@ public:
 	bool CanUndo() const { return !UndoBuffer.empty(); }
 	// Returns true if any actions can currently be redone.
 	bool CanRedo() const { return !RedoBuffer.empty(); }
+	// Returns true if a channel-specific action (no pattern data) can currently be undone.
+	bool CanUndoChannelSettings() const { return !UndoBuffer.empty() && UndoBuffer.back().OnlyChannelSettings() && !UndoBuffer.back().linkToPrevious; }
+	// Returns true if a channel-specific action (no pattern data) actions can currently be redone.
+	bool CanRedoChannelSettings() const { return !RedoBuffer.empty() && RedoBuffer.back().OnlyChannelSettings() && !RedoBuffer.back().linkToPrevious; }
 	// Remove the latest added undo step from the undo buffer
 	void RemoveLastUndoStep();
 	// Get name of next undo item

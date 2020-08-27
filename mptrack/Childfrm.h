@@ -20,7 +20,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 class CModControlView;
 class CModControlDlg;
-class CChildFrame;
 
 struct GENERALVIEWSTATE
 {
