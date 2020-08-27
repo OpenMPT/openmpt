@@ -2303,10 +2303,13 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 		}
 		if(numChannels > 0)
 		{
-			WRITEMODULARHEADER(MagicLE("CCOL"), numChannels * 3);
+			WRITEMODULARHEADER(MagicLE("CCOL"), numChannels * 4);
 			for(CHANNELINDEX i = 0; i < numChannels; i++)
 			{
-				std::array<uint8, 4> rgb{static_cast<uint8>(ChnSettings[i].color), static_cast<uint8>(ChnSettings[i].color >> 8), static_cast<uint8>(ChnSettings[i].color >> 16), static_cast<uint8>(ChnSettings[i].color >> 24)};
+				uint32 color = ChnSettings[i].color;
+				if(color != ModChannelSettings::INVALID_COLOR)
+					color &= 0x00FFFFFF;
+				std::array<uint8, 4> rgb{static_cast<uint8>(color), static_cast<uint8>(color >> 8), static_cast<uint8>(color >> 16), static_cast<uint8>(color >> 24)};
 				mpt::IO::Write(f, rgb);
 			}
 		}
@@ -2393,7 +2396,7 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 			case MagicLE("CCOL"):
 				// Channel colors
 				{
-					const CHANNELINDEX numChannels = std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(size / 3u));
+					const CHANNELINDEX numChannels = std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(size / 4u));
 					for(CHANNELINDEX i = 0; i < numChannels; i++)
 					{
 						auto rgb = chunk.ReadArray<uint8, 4>();
