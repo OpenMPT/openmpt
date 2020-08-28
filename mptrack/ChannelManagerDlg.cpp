@@ -834,13 +834,16 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 	if(m_moveRect && m_ModDoc)
 	{
 		CHANNELINDEX dropChn = 0;
-		bool hit = ButtonHit(point, &dropChn, nullptr);
-		if(hit)
+		CRect dropRect;
+		if(ButtonHit(point, &dropChn, &dropRect))
 		{
 			// Rearrange channels
 			const auto IsSelected = std::bind(&decltype(select)::test, &select, std::placeholders::_1);
 
 			const auto numChannels = m_ModDoc->GetNumChannels();
+			if(point.x > dropRect.left + dropRect.Width() / 2 && dropChn < numChannels)
+				dropChn++;
+
 			std::vector<CHANNELINDEX> newOrder{ pattern.begin(), pattern.begin() + numChannels };
 			// How many selected channels are there before the drop target?
 			const CHANNELINDEX selectedBeforeDropChn = static_cast<CHANNELINDEX>(std::count_if(pattern.begin(), pattern.begin() + dropChn, IsSelected));
