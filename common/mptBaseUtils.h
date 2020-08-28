@@ -138,6 +138,7 @@ constexpr bool constexpr_throw_helper(Exception && e, bool really = true)
 	{
 		throw std::forward<Exception>(e);
 	}
+	// cppcheck-suppress identicalConditionAfterEarlyExit
 	return really;
 }
 template <typename Exception>
