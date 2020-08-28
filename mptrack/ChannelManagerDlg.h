@@ -11,6 +11,7 @@
 #pragma once
 
 #include "BuildSettings.h"
+#include "PatternEditorDialogs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -40,6 +41,7 @@ public:
 
 private:
 	static CChannelManagerDlg *sharedInstance_;
+	QuickChannelProperties m_quickChannelProperties;
 
 protected:
 
