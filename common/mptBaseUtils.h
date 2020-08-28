@@ -80,6 +80,7 @@ MPT_CONSTEXPR14_FUN bool constexpr_throw_helper(Exception && e, bool really = tr
 	{
 		throw std::forward<Exception>(e);
 	}
+	// cppcheck-suppress identicalConditionAfterEarlyExit
 	return really;
 }
 template <typename Exception>
