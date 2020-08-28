@@ -3589,7 +3589,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_tempoSwing[5], 4194305);
 
 	// Edit history
-	VERIFY_EQUAL_NONCONT(sndFile.GetFileHistory().size() > 0, true);
+	VERIFY_EQUAL_NONCONT(sndFile.GetFileHistory().size() > 15, true);
 	const FileHistory &fh = sndFile.GetFileHistory().at(0);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_year, 111);
 	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_mon, 5);
@@ -3889,6 +3889,16 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(mapping.GetParamIndex(), 0);
 	VERIFY_EQUAL_NONCONT(mapping.GetEvent(), MIDIEvents::evControllerChange);
 	VERIFY_EQUAL_NONCONT(mapping.GetController(), MIDIEvents::MIDICC_ModulationWheel_Coarse);
+
+	// Channel colors
+	const auto &chns = sndFile.ChnSettings;
+	VERIFY_EQUAL_NONCONT(chns[0].color, RGB(255, 0, 0));
+	VERIFY_EQUAL_NONCONT(chns[1].color, RGB(0, 255, 0));
+	VERIFY_EQUAL_NONCONT(chns[2].color, RGB(0, 0, 255));
+	VERIFY_EQUAL_NONCONT(chns[3].color, ModChannelSettings::INVALID_COLOR);
+	VERIFY_EQUAL_NONCONT(chns[67].color, RGB(255, 0, 255));
+	VERIFY_EQUAL_NONCONT(chns[68].color, RGB(255, 255, 0));
+	VERIFY_EQUAL_NONCONT(chns[69].color, ModChannelSettings::INVALID_COLOR);
 #endif
 
 	VERIFY_EQUAL_NONCONT(sndFile.FrequencyToCutOff(sndFile.CutOffToFrequency(0)), 0);
