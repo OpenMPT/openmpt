@@ -225,7 +225,7 @@ void VSTPluginLib::WriteToCache() const
 
 	const std::string crcName = dllPath.ToUTF8();
 	const mpt::crc32 crc(crcName);
-	const mpt::ustring IDs = mpt::ufmt::HEX0<8>(pluginId1) + mpt::ufmt::HEX0<8>(pluginId2) + mpt::ufmt::HEX0<8>(crc);
+	const mpt::ustring IDs = mpt::ufmt::HEX0<8>(pluginId1) + mpt::ufmt::HEX0<8>(pluginId2) + mpt::ufmt::HEX0<8>(crc.result());
 
 	mpt::PathString writePath = dllPath;
 	if(theApp.IsPortableMode())
