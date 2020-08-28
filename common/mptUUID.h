@@ -164,7 +164,7 @@ public:
 					| (static_cast<uint64>(ParseHex16(str + 24)) << 32)
 					| (static_cast<uint64>(ParseHex32(str + 28)) <<  0)
 			)
-			: throw std::domain_error("");
+			: mpt::constexpr_throw<mpt::UUID>(std::domain_error(""));
 	}
 public:
 	MPT_CONSTEXPRINLINE UUID() noexcept : Data1(0), Data2(0), Data3(0), Data4(0) { }
