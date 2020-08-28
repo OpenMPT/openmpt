@@ -159,7 +159,7 @@ toc_text = re.sub(r'<!--(.+?)-->', '', toc_page, flags = re.DOTALL)
 toc_text = re.sub(r'<div(.+?)>', '', toc_text, flags = re.DOTALL)
 toc_text = re.sub(r'</div>', '', toc_text, flags = re.DOTALL)
 toc_text = re.sub(r'<a href="' + base_url_regex + '/(.+?)".*?>(.+?)</a>', toc_parse, toc_text)
-toc_text = re.sub(r'<li> ([^<]+)$', toc_parse_chapter, toc_text, flags = re.MULTILINE)
+toc_text = re.sub(r'<li>([^<]+)$', toc_parse_chapter, toc_text, flags = re.MULTILINE)
 toc.write(toc_text)
 
 toc.write("""
