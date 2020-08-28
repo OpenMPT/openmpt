@@ -351,9 +351,9 @@ BOOL CEditCommand::PreTranslateMessage(MSG *pMsg)
 
 bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor, CWnd *parent)
 {
-	editPos.pattern = pat;
-	const ROWINDEX row = editPos.row = cursor.GetRow();
-	const CHANNELINDEX chn = editPos.channel = cursor.GetChannel();
+	editPattern = pat;
+	const ROWINDEX row = editRow = cursor.GetRow();
+	const CHANNELINDEX chn = editChannel = cursor.GetChannel();
 
 	if(!sndFile.Patterns.IsValidPat(pat)
 	   || !sndFile.Patterns[pat].IsValidRow(row)
@@ -518,7 +518,7 @@ void CEditCommand::InitEffect()
 	cbnCommand.ShowWindow(SW_SHOW);
 	xParam = 0;
 	xMultiplier = 1;
-	getXParam(m->command, editPos.pattern, editPos.row, editPos.channel, sndFile, xParam, xMultiplier);
+	getXParam(m->command, editPattern, editRow, editChannel, sndFile, xParam, xMultiplier);
 
 	cbnCommand.SetRedraw(FALSE);
 	cbnCommand.ResetContent();
@@ -653,7 +653,7 @@ void CEditCommand::OnNoteChanged()
 		m->note = newNote;
 		m->instr = newInstr;
 
-		modDoc->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
+		modDoc->UpdateAllViews(nullptr, RowHint(editRow), nullptr);
 
 		if(wasParamControl != m->IsPcNote())
 		{
@@ -697,7 +697,7 @@ void CEditCommand::OnVolCmdChanged()
 		m->volcmd = newVolCmd;
 		m->vol = newVol;
 
-		modDoc->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
+		modDoc->UpdateAllViews(nullptr, RowHint(editRow), nullptr);
 
 		if(volCmdChanged)
 			UpdateVolCmdRange();
@@ -723,7 +723,7 @@ void CEditCommand::OnCommandChanged()
 	{
 		xParam = 0;
 		xMultiplier = 1;
-		getXParam(newCommand, editPos.pattern, editPos.row, editPos.channel, sndFile, xParam, xMultiplier);
+		getXParam(newCommand, editPattern, editRow, editChannel, sndFile, xParam, xMultiplier);
 	}
 
 	if(m->command != newCommand || m->param != newParam)
@@ -737,7 +737,7 @@ void CEditCommand::OnCommandChanged()
 		}
 		UpdateEffectRange(true);
 
-		sndFile.GetpModDoc()->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
+		sndFile.GetpModDoc()->UpdateAllViews(nullptr, RowHint(editRow), nullptr);
 	}
 }
 
@@ -756,7 +756,7 @@ void CEditCommand::OnPlugParamChanged()
 	{
 		PrepareUndo("Effect Entry");
 		m->SetValueVolCol(newPlugParam);
-		sndFile.GetpModDoc()->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
+		sndFile.GetpModDoc()->UpdateAllViews(nullptr, RowHint(editRow), nullptr);
 	}
 }
 
@@ -797,7 +797,7 @@ void CEditCommand::UpdateEffectValue(bool set)
 		if(fxndx >= 0)
 		{
 			newParam = static_cast<ModCommand::PARAM>(effectInfo.MapPosToValue(fxndx, sldParam.GetPos()));
-			effectInfo.GetEffectNameEx(s, fxndx, newParam * xMultiplier + xParam, editPos.channel);
+			effectInfo.GetEffectNameEx(s, fxndx, newParam * xMultiplier + xParam, editChannel);
 		}
 	}
 	SetDlgItemText(IDC_TEXT1, s);
@@ -817,7 +817,7 @@ void CEditCommand::UpdateEffectValue(bool set)
 				m->param = newParam;
 			}
 
-			modDoc->UpdateAllViews(NULL, RowHint(editPos.row), NULL);
+			modDoc->UpdateAllViews(nullptr, RowHint(editRow), nullptr);
 		}
 	}
 }
@@ -829,7 +829,7 @@ void CEditCommand::PrepareUndo(const char *description)
 	if(!modified)
 	{
 		// Let's create just one undo step.
-		modDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1, description);
+		modDoc->GetPatternUndo().PrepareUndo(editPattern, editChannel, editRow, 1, 1, description);
 		modified = true;
 	}
 	modDoc->SetModified();

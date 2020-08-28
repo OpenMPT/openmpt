@@ -16,6 +16,8 @@
 #include "Globals.h"
 #include "PatternCursor.h"
 #include "Moddoc.h"
+#include "PatternEditorDialogs.h"
+#include "PatternClipboard.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -114,13 +116,6 @@ struct PatternEditPos
 };
 
 
-OPENMPT_NAMESPACE_END
-#include "PatternClipboard.h"
-#include "PatternEditorDialogs.h"
-OPENMPT_NAMESPACE_BEGIN
-
-
-//////////////////////////////////////////////////////////////////
 // Pattern editing class
 
 
