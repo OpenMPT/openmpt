@@ -66,7 +66,6 @@ BOOL CNoteMapWnd::PreTranslateMessage(MSG* pMsg)
 		return TRUE;
 	uint32 wParam = static_cast<uint32>(pMsg->wParam);
 
-	if (pMsg)
 	{
 		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
 		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
@@ -1176,7 +1175,7 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 	// Initial Update
 	if (!m_bInitialized) UpdateView(InstrumentHint(m_nInstrument).Info().Envelope().ModType(), NULL);
 
-	if (pFrame) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&instrumentState);
+	PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&instrumentState);
 	SwitchToView();
 
 	// Combo boxes randomly disappear without this... why?

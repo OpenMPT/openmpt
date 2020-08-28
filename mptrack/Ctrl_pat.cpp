@@ -609,8 +609,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		}
 
 		patternViewState.nPattern = static_cast<PATTERNINDEX>(SendViewMessage(VIEWMSG_GETCURRENTPATTERN));
-		if(pFrame)
-			SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&patternViewState);
+		SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&patternViewState);
 
 		SwitchToView();
 	}

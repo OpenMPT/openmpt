@@ -1990,7 +1990,7 @@ void CViewInstrument::OnEditPaste()
 {
 	CModDoc *pModDoc = GetDocument();
 	PrepareUndo("Paste Envelope");
-	if(pModDoc && pModDoc->PasteEnvelope(m_nInstrument, m_nEnv))
+	if(pModDoc->PasteEnvelope(m_nInstrument, m_nEnv))
 	{
 		SetModified(InstrumentHint().Envelope(), true);
 	} else
