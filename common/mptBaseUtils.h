@@ -71,7 +71,9 @@ MPT_CONSTEXPR14_FUN std::array<T, N> init_array(const Tx & x)
 
 namespace mpt
 {
+
 // Work-around for the requirement of at least 1 non-throwing function argument combination in C++ (17,2a).
+
 template <typename Exception>
 MPT_CONSTEXPR14_FUN bool constexpr_throw_helper(Exception && e, bool really = true)
 {
@@ -88,6 +90,23 @@ MPT_CONSTEXPR14_FUN bool constexpr_throw(Exception && e)
 {
 	return mpt::constexpr_throw_helper(std::forward<Exception>(e));
 }
+
+template <typename T, typename Exception>
+constexpr T constexpr_throw_helper(Exception && e, bool really = true)
+{
+	//return !really ? really : throw std::forward<Exception>(e);
+	if(really)
+	{
+		throw std::forward<Exception>(e);
+	}
+	return T{};
+}
+template <typename T, typename Exception>
+constexpr T constexpr_throw(Exception && e)
+{
+	return mpt::constexpr_throw_helper<T>(std::forward<Exception>(e));
+}
+
 }  // namespace mpt
 
 
