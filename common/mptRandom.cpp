@@ -34,7 +34,7 @@ static T log2(T x)
 }
 
 
-static MPT_CONSTEXPR11_FUN int lower_bound_entropy_bits(unsigned int x)
+static MPT_CONSTEXPR14_FUN int lower_bound_entropy_bits(unsigned int x)
 {
 	return detail::lower_bound_entropy_bits(x);
 }

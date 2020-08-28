@@ -51,43 +51,106 @@ static constexpr uint32 FUZZER_RNG_SEED = 3141592653u; // pi
 namespace detail
 {
 
-MPT_CONSTEXPR11_FUN int lower_bound_entropy_bits(unsigned int x)
+MPT_CONSTEXPR14_FUN int lower_bound_entropy_bits(unsigned int x)
 {
-	// easy to compile-time evaluate even for stupid compilers
-	return
-		x >= 0xffffffffu ? 32 :
-		x >= 0x7fffffffu ? 31 :
-		x >= 0x3fffffffu ? 30 :
-		x >= 0x1fffffffu ? 29 :
-		x >= 0x0fffffffu ? 28 :
-		x >= 0x07ffffffu ? 27 :
-		x >= 0x03ffffffu ? 26 :
-		x >= 0x01ffffffu ? 25 :
-		x >= 0x00ffffffu ? 24 :
-		x >= 0x007fffffu ? 23 :
-		x >= 0x003fffffu ? 22 :
-		x >= 0x001fffffu ? 21 :
-		x >= 0x000fffffu ? 20 :
-		x >= 0x0007ffffu ? 19 :
-		x >= 0x0003ffffu ? 18 :
-		x >= 0x0001ffffu ? 17 :
-		x >= 0x0000ffffu ? 16 :
-		x >= 0x00007fffu ? 15 :
-		x >= 0x00003fffu ? 14 :
-		x >= 0x00001fffu ? 13 :
-		x >= 0x00000fffu ? 12 :
-		x >= 0x000007ffu ? 11 :
-		x >= 0x000003ffu ? 10 :
-		x >= 0x000001ffu ?  9 :
-		x >= 0x000000ffu ?  8 :
-		x >= 0x0000007fu ?  7 :
-		x >= 0x0000003fu ?  6 :
-		x >= 0x0000001fu ?  5 :
-		x >= 0x0000000fu ?  4 :
-		x >= 0x00000007u ?  3 :
-		x >= 0x00000003u ?  2 :
-		x >= 0x00000001u ?  1 :
-		0;
+	if(x >= 0xffffffffu)
+	{
+		return 32;
+	} else if(x >= 0x7fffffffu)
+	{
+		return 31;
+	} else if(x >= 0x3fffffffu)
+	{
+		return 30;
+	} else if(x >= 0x1fffffffu)
+	{
+		return 29;
+	} else if(x >= 0x0fffffffu)
+	{
+		return 28;
+	} else if(x >= 0x07ffffffu)
+	{
+		return 27;
+	} else if(x >= 0x03ffffffu)
+	{
+		return 26;
+	} else if(x >= 0x01ffffffu)
+	{
+		return 25;
+	} else if(x >= 0x00ffffffu)
+	{
+		return 24;
+	} else if(x >= 0x007fffffu)
+	{
+		return 23;
+	} else if(x >= 0x003fffffu)
+	{
+		return 22;
+	} else if(x >= 0x001fffffu)
+	{
+		return 21;
+	} else if(x >= 0x000fffffu)
+	{
+		return 20;
+	} else if(x >= 0x0007ffffu)
+	{
+		return 19;
+	} else if(x >= 0x0003ffffu)
+	{
+		return 18;
+	} else if(x >= 0x0001ffffu)
+	{
+		return 17;
+	} else if(x >= 0x0000ffffu)
+	{
+		return 16;
+	} else if(x >= 0x00007fffu)
+	{
+		return 15;
+	} else if(x >= 0x00003fffu)
+	{
+		return 14;
+	} else if(x >= 0x00001fffu)
+	{
+		return 13;
+	} else if(x >= 0x00000fffu)
+	{
+		return 12;
+	} else if(x >= 0x000007ffu)
+	{
+		return 11;
+	} else if(x >= 0x000003ffu)
+	{
+		return 10;
+	} else if(x >= 0x000001ffu)
+	{
+		return  9;
+	} else if(x >= 0x000000ffu)
+	{
+		return  8;
+	} else if(x >= 0x0000007fu)
+	{
+		return  7;
+	} else if(x >= 0x0000003fu)
+	{
+		return  6;
+	} else if(x >= 0x0000001fu)
+	{
+		return  5;
+	} else if(x >= 0x0000000fu)
+	{
+		return  4;
+	} else if(x >= 0x00000007u)
+	{
+		return  3;
+	} else if(x >= 0x00000003u)
+	{
+		return  2;
+	} else if(x >= 0x00000001u)
+	{
+		return  1;
+	}
+	return 0;
 }
 
 }
@@ -363,7 +426,7 @@ public:
 	{
 		return RAND_MAX;
 	}
-	static MPT_CONSTEXPR11_FUN int result_bits()
+	static MPT_CONSTEXPR14_FUN int result_bits()
 	{
 		return detail::lower_bound_entropy_bits(RAND_MAX);
 	}
