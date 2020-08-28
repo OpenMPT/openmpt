@@ -12,7 +12,6 @@
 #include "Moddoc.h"
 #include "Mainfrm.h"
 #include "ChannelManagerDlg.h"
-#include "dlg_misc.h"
 #include "../common/mptStringBuffer.h"
 
 #include <functional>
@@ -951,16 +950,8 @@ void CChannelManagerDlg::OnMButtonDown(UINT /*nFlags*/, CPoint point)
 	CRect rect;
 	if(m_ModDoc != nullptr && (m_ModDoc->GetModType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && ButtonHit(point, &chn, &rect))
 	{
-		// Rename channel
-		CString s = MPT_CFORMAT("New name for channel {}:")(chn + 1);
-		CInputDlg dlg(this, s, mpt::ToCString(m_ModDoc->GetSoundFile().GetCharsetInternal(), m_ModDoc->GetSoundFile().ChnSettings[chn].szName), MAX_CHANNELNAME - 1);
-		if(dlg.DoModal() == IDOK)
-		{
-			m_ModDoc->GetSoundFile().ChnSettings[chn].szName = mpt::ToCharset(m_ModDoc->GetSoundFile().GetCharsetInternal(), dlg.resultAsString);
-			InvalidateRect(rect, FALSE);
-			m_ModDoc->SetModified();
-			m_ModDoc->UpdateAllViews(nullptr, GeneralHint(chn).Channels(), this);
-		}
+		ClientToScreen(&point);
+		m_quickChannelProperties.Show(m_ModDoc, pattern[chn], point);
 	}
 }
 
