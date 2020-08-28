@@ -96,6 +96,8 @@ namespace FileReader
 	template <typename T, typename TFileCursor>
 	bool Read(TFileCursor &f, T &target)
 	{
+		// cppcheck false-positive
+		// cppcheck-suppress uninitvar
 		mpt::byte_span dst = mpt::as_raw_memory(target);
 		if(dst.size() != f.GetRaw(dst))
 		{
