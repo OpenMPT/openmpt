@@ -127,7 +127,7 @@ public:
 				('0' <= x && x <= '9') ? static_cast<uint8>(x - '0' +  0) :
 				('a' <= x && x <= 'z') ? static_cast<uint8>(x - 'a' + 10) :
 				('A' <= x && x <= 'Z') ? static_cast<uint8>(x - 'A' + 10) :
-				throw mpt::constexpr_throw<uint8>(std::domain_error(""));
+				mpt::constexpr_throw<uint8>(std::domain_error(""));
 		}
 
 	public:
