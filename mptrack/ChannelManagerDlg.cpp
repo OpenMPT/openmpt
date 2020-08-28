@@ -920,7 +920,7 @@ void CChannelManagerDlg::OnMButtonDown(UINT /*nFlags*/, CPoint point)
 	if(m_ModDoc != nullptr && (m_ModDoc->GetModType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && ButtonHit(point, &chn, &rect))
 	{
 		ClientToScreen(&point);
-		m_quickChannelProperties.Show(m_ModDoc, pattern[chn], point);
+		m_quickChannelProperties.Show(m_ModDoc, pattern[chn], 0, point);
 	}
 }
 
