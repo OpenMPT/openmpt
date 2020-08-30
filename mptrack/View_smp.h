@@ -1,5 +1,5 @@
 /*
- * view_smp.h
+ * View_smp.h
  * ----------
  * Purpose: Sample tab, lower panel.
  * Notes  : (currently none)
@@ -33,11 +33,18 @@ public:
 	};
 
 protected:
-	enum PasteMode
+	enum class PasteMode
 	{
-		kReplace,
-		kMixPaste,
-		kInsert
+		Replace,
+		MixPaste,
+		Insert
+	};
+
+	enum class HitTestItem
+	{
+		SampleData,
+		SelectionStart,
+		SelectionEnd,
 	};
 
 	std::unique_ptr<OPLInstrDlg> m_oplEditor;
@@ -53,6 +60,7 @@ protected:
 	SmpLength m_dwMenuParam;
 	SmpLength m_nGridSegments = 0;
 	SAMPLEINDEX m_nSample = 1;
+	HitTestItem m_dragItem = HitTestItem::SampleData;
 
 	// Sample drawing
 	CPoint m_lastDrawPoint;		// For drawing horizontal lines
@@ -84,6 +92,7 @@ protected:
 	void SetZoom(int nZoom, SmpLength centeredSample = SmpLength(-1));
 	int32 SampleToScreen(SmpLength pos) const;
 	SmpLength ScreenToSample(int32 x) const;
+	HitTestItem PointToItem(CPoint point) const;
 	void PlayNote(ModCommand::NOTE note, const SmpLength nStartPos = 0, int volume = -1);
 	void NoteOff(ModCommand::NOTE note);
 	void InvalidateSample();
@@ -154,6 +163,7 @@ protected:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDown(UINT, CPoint);
 	afx_msg void OnMouseMove(UINT, CPoint);
+	afx_msg BOOL OnSetCursor(CWnd *pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnEditSelectAll();
 	afx_msg void OnEditDelete();
 	afx_msg void OnEditCut();
