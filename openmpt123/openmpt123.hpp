@@ -514,93 +514,15 @@ static inline std::string LocaleEncode(const std::wstring &str, const std::local
 	return std::string(&(out[0]), out_next);
 }
 
-static inline std::wstring FromLocaleCpp(const std::string &str, wchar_t replacement)
-{
-	try
-	{
-		std::locale locale(""); // user locale
-		return LocaleDecode(str, locale, replacement);
-	} catch ( const std::bad_alloc & )
-	{
-		throw;
-	} catch(...)
-	{
-		// nothing
-	}
-	try
-	{
-		std::locale locale; // current c++ locale
-		return LocaleDecode(str, locale, replacement);
-	} catch ( const std::bad_alloc & )
-	{
-		throw;
-	} catch(...)
-	{
-		// nothing
-	}
-	try
-	{
-		std::locale locale = std::locale::classic(); // "C" locale
-		return LocaleDecode(str, locale, replacement);
-	} catch ( const std::bad_alloc & )
-	{
-		throw;
-	} catch(...)
-	{
-		// nothing
-	}
-	assert(0);
-	return FromAscii(str, replacement); // fallback
-}
-
-static inline std::string ToLocaleCpp(const std::wstring &str, char replacement)
-{
-	try
-	{
-		std::locale locale(""); // user locale
-		return LocaleEncode(str, locale, replacement);
-	} catch ( const std::bad_alloc & )
-	{
-		throw;
-	} catch(...)
-	{
-		// nothing
-	}
-	try
-	{
-		std::locale locale; // current c++ locale
-		return LocaleEncode(str, locale, replacement);
-	} catch ( const std::bad_alloc & )
-	{
-		throw;
-	} catch(...)
-	{
-		// nothing
-	}
-	try
-	{
-		std::locale locale = std::locale::classic(); // "C" locale
-		return LocaleEncode(str, locale, replacement);
-	} catch ( const std::bad_alloc & )
-	{
-		throw;
-	} catch(...)
-	{
-		// nothing
-	}
-	assert(0);
-	return ToAscii(str, replacement); // fallback
-}
-
 
 static inline std::wstring FromLocale(const std::string &str, wchar_t replacement = L'\uFFFD')
 {
-	return FromLocaleCpp(str, replacement);
+	return LocaleDecode(str, std::locale(""), replacement);
 }
 
 static inline std::string ToLocale(const std::wstring &str, char replacement = '?')
 {
-	return ToLocaleCpp(str, replacement);
+	return LocaleEncode(str, std::locale(""), replacement);
 }
 
 

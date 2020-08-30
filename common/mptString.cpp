@@ -850,107 +850,29 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 	return std::string(&(out[0]), out_next);
 }
 
-static std::wstring FromLocaleCpp(const std::string &str, wchar_t replacement)
-{
-	try
-	{
-		std::locale locale(""); // user locale
-		return String::LocaleDecode(str, locale, replacement);
-	} catch(mpt::out_of_memory e)
-	{
-		mpt::rethrow_out_of_memory(e);
-	} catch(...)
-	{
-		// nothing
-	}
-	try
-	{
-		std::locale locale; // current c++ locale
-		return String::LocaleDecode(str, locale, replacement);
-	} catch(mpt::out_of_memory e)
-	{
-		mpt::rethrow_out_of_memory(e);
-	} catch(...)
-	{
-		// nothing
-	}
-	try
-	{
-		std::locale locale = std::locale::classic(); // "C" locale
-		return String::LocaleDecode(str, locale, replacement);
-	} catch(mpt::out_of_memory e)
-	{
-		mpt::rethrow_out_of_memory(e);
-	} catch(...)
-	{
-		// nothing
-	}
-	MPT_ASSERT_NOTREACHED();
-	return String::FromAscii<std::string>(str, replacement); // fallback
-}
-
-static std::string ToLocaleCpp(const std::wstring &str, char replacement)
-{
-	try
-	{
-		std::locale locale(""); // user locale
-		return String::LocaleEncode(str, locale, replacement);
-	} catch(mpt::out_of_memory e)
-	{
-		mpt::rethrow_out_of_memory(e);
-	} catch(...)
-	{
-		// nothing
-	}
-	try
-	{
-		std::locale locale; // current c++ locale
-		return String::LocaleEncode(str, locale, replacement);
-	} catch(mpt::out_of_memory e)
-	{
-		mpt::rethrow_out_of_memory(e);
-	} catch(...)
-	{
-		// nothing
-	}
-	try
-	{
-		std::locale locale = std::locale::classic(); // "C" locale
-		return String::LocaleEncode(str, locale, replacement);
-	} catch(mpt::out_of_memory e)
-	{
-		mpt::rethrow_out_of_memory(e);
-	} catch(...)
-	{
-		// nothing
-	}
-	MPT_ASSERT_NOTREACHED();
-	return String::ToAscii<std::string>(str, replacement); // fallback
-}
-
 
 template <typename Tsrcstring>
 static std::wstring FromLocale(const Tsrcstring &str, wchar_t replacement = L'\uFFFD')
 {
 	std::string tmp(str.begin(), str.end());
-	return FromLocaleCpp(tmp, replacement);
+	return String::LocaleDecode(tmp, std::locale(""), replacement);
 }
 template <>
 std::wstring FromLocale<std::string>(const std::string &str, wchar_t replacement)
 {
-	return FromLocaleCpp(str, replacement);
+	return String::LocaleDecode(str, std::locale(""), replacement);
 }
 
 template <typename Tdststring>
 static Tdststring ToLocale(const std::wstring &str, char replacement = '?')
 {
-	std::string tmp = ToLocaleCpp(str, replacement);
+	std::string tmp = String::LocaleEncode(str, std::locale(""), replacement);
 	return Tdststring(tmp.begin(), tmp.end());
 }
 template <>
 std::string ToLocale(const std::wstring &str, char replacement)
 {
-	return ToLocaleCpp(str, replacement);
+	return String::LocaleEncode(str, std::locale(""), replacement);
 }
 
 
