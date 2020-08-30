@@ -508,25 +508,27 @@ int32 CViewSample::SampleToScreen(SmpLength pos) const
 
 SmpLength CViewSample::ScreenToSample(int32 x) const
 {
-	CModDoc *pModDoc = GetDocument();
+	const CModDoc *pModDoc = GetDocument();
 	SmpLength n = 0;
 
-	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
+	if((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
-		SmpLength nLen = pModDoc->GetSoundFile().GetSample(m_nSample).nLength;
-		if (!nLen) return 0;
+		SmpLength smpLen = pModDoc->GetSoundFile().GetSample(m_nSample).nLength;
+		if(!smpLen)
+			return 0;
 
 		if(m_nZoom > 0)
-			n = (m_nScrollPosX + x) << (m_nZoom - 1);
+			n = std::max(0, m_nScrollPosX + x) << (m_nZoom - 1);
 		else if(m_nZoom < 0)
-			n = m_nScrollPosX + (x >> (-m_nZoom - 1));
+			n = m_nScrollPosX + (std::max(0, x) >> (-m_nZoom - 1));
 		else
 		{
-			if (x < 0) x = 0;
-			if (m_sizeTotal.cx) n = Util::muldiv(x, nLen, m_sizeTotal.cx);
+			if(x < 0)
+				x = 0;
+			if(m_sizeTotal.cx)
+				n = Util::muldiv(x, smpLen, m_sizeTotal.cx);
 		}
-		if (n < 0) n = 0;
-		LimitMax(n, nLen);
+		LimitMax(n, smpLen);
 	}
 	return n;
 }
@@ -1507,9 +1509,9 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 		return;
 	auto &sample = sndFile.GetSample(m_nSample);
 
-	const SmpLength x = ScreenToSample(point.x);
 	if (m_rcClient.PtInRect(point))
 	{
+		const SmpLength x = ScreenToSample(point.x);
 		CString(*fmt)(unsigned int, char, const SmpLength &) = &mpt::cfmt::dec<SmpLength>;
 		if(TrackerSettings::Instance().cursorPositionInHex)
 			fmt = &mpt::cfmt::HEX<SmpLength>;
@@ -1577,6 +1579,9 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				point.x = m_rcClient.right;
 			}
 		}
+
+		// Note: point.x might have changed in if block above in case we're scrolling.
+		const SmpLength x = ScreenToSample(point.x);
 
 		bool update = false;
 		switch(m_dragItem)
