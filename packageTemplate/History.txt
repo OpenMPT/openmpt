@@ -31,8 +31,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.29.03.00 (* August 2020, revision 13486)
--------------------------------------------
+v1.29.03.00 (30 August 2020, revision 13550)
+--------------------------------------------
 Tree view
 - [Imp] <js> Show hidden files if Windows Explorer is configured to do so. System files are now shown unless they are also hidden, as this is closer to Explorer's behaviour.
 - [Fix] <js> Undoing the deletion of a pattern did not update the pattern list correctly (http://bugs.openmpt.org/view.php?id=1357).
@@ -51,6 +51,9 @@ Other formats
 
 Misc
 - [Imp] <js> In file dialogs that can open multiple files, it is now possible to open files from different locations (e.g. through search results).
+- [Imp] <js> Channel Manager: Middle-clicking a channel now shows the quick channel settings rather than just a dialog to rename.
+- [Imp] <js> Channel Manager: Drag & drop now behave more naturally.
+- [Fix] <js> Channel Manager: If channels were rearranged but not applied yet, middle-clicking a channel might have renamed the wrong channel.
 - [Fix] <js> Some instruments with many key zones and instrument layers were no longer imported correctly since OpenMPT 1.29.01.00 (http://forum.openmpt.org/index.php?topic=6462.0).
 
 Third-Party Libraries

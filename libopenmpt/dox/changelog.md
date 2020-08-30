@@ -17,6 +17,9 @@ is just a high-level summary.
  *  [**Regression**] Support for Emscripten versions older than 1.39.7 has been
     removed.
 
+ *  PP20: The first few bytes of some files were not decompressed properly,
+    making some files unplayable (depending on the original format).
+
 ### libopenmpt 0.5.1 (2020-07-26)
 
  *  [**Bug**] `libopenmpt/libopenmpt.h` failed to compile with
