@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.15-pre
 
+ *  PP20: The first few bytes of some files were not decompressed properly,
+    making some files unplayable (depending on the original format).
+
 ### libopenmpt 0.4.14 (2020-07-26)
 
  *  [**Change**] libmodplug: The libmodplug emulation layer is now split out
