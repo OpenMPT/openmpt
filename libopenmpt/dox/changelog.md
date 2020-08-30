@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.4.16-pre
+
 ### libopenmpt 0.4.15 (2020-08-30)
 
  *  PP20: The first few bytes of some files were not decompressed properly,
