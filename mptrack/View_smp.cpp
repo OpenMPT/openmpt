@@ -1,5 +1,5 @@
 /*
- * view_smp.cpp
+ * View_smp.cpp
  * ------------
  * Purpose: Sample tab, lower panel.
  * Notes  : (currently none)
@@ -38,20 +38,20 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Non-client toolbar
-#define SMP_LEFTBAR_CY			Util::ScalePixels(29, m_hWnd)
-#define SMP_LEFTBAR_CXSEP		Util::ScalePixels(14, m_hWnd)
-#define SMP_LEFTBAR_CXSPC		Util::ScalePixels(3, m_hWnd)
-#define SMP_LEFTBAR_CXBTN		Util::ScalePixels(24, m_hWnd)
-#define SMP_LEFTBAR_CYBTN		Util::ScalePixels(22, m_hWnd)
+#define SMP_LEFTBAR_CY    Util::ScalePixels(29, m_hWnd)
+#define SMP_LEFTBAR_CXSEP Util::ScalePixels(14, m_hWnd)
+#define SMP_LEFTBAR_CXSPC Util::ScalePixels(3, m_hWnd)
+#define SMP_LEFTBAR_CXBTN Util::ScalePixels(24, m_hWnd)
+#define SMP_LEFTBAR_CYBTN Util::ScalePixels(22, m_hWnd)
 
-#define MIN_ZOOM	-6
-#define MAX_ZOOM	10
+static constexpr int MIN_ZOOM = -6;
+static constexpr int MAX_ZOOM = 10;
 
 // Defines the minimum length for selection for which
 // trimming will be done. This is the minimum value for
 // selection difference, so the minimum length of result
 // of trimming is nTrimLengthMin + 1.
-#define MIN_TRIM_LENGTH			4
+static constexpr SmpLength MIN_TRIM_LENGTH = 4;
 
 static constexpr UINT cLeftBarButtons[SMP_LEFTBAR_BUTTONS] =
 {
@@ -89,6 +89,8 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_WM_DROPFILES()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_XBUTTONUP()
+	ON_WM_SETCURSOR()
+
 	ON_COMMAND(ID_EDIT_UNDO,				&CViewSample::OnEditUndo)
 	ON_COMMAND(ID_EDIT_REDO,				&CViewSample::OnEditRedo)
 	ON_COMMAND(ID_EDIT_SELECT_ALL,			&CViewSample::OnEditSelectAll)
@@ -527,6 +529,26 @@ SmpLength CViewSample::ScreenToSample(int32 x) const
 		LimitMax(n, nLen);
 	}
 	return n;
+}
+
+
+static bool IsInMargins(int pointX, int objX, int margin)
+{
+	return IsInRange(pointX, objX - margin, objX + margin);
+}
+
+CViewSample::HitTestItem CViewSample::PointToItem(CPoint point) const
+{
+	const int margin = Util::ScalePixels(3, m_hWnd);
+	if(m_dwEndSel > m_dwBeginSel)
+	{
+		if(IsInMargins(point.x, SampleToScreen(m_dwBeginSel), margin))
+			return HitTestItem::SelectionStart;
+		if(IsInMargins(point.x, SampleToScreen(m_dwEndSel), margin))
+			return HitTestItem::SelectionEnd;
+	}
+
+	return HitTestItem::SampleData;
 }
 
 
@@ -1478,23 +1500,26 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if (pMainFrm) pMainFrm->SetHelpText(_T(""));
 	}
-	if (!pModDoc) return;
+	if(!pModDoc)
+		return;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
+	if(m_nSample > sndFile.GetNumSamples())
+		return;
+	auto &sample = sndFile.GetSample(m_nSample);
+
+	const SmpLength x = ScreenToSample(point.x);
 	if (m_rcClient.PtInRect(point))
 	{
-		const SmpLength x = ScreenToSample(point.x);
-
 		CString(*fmt)(unsigned int, char, const SmpLength &) = &mpt::cfmt::dec<SmpLength>;
 		if(TrackerSettings::Instance().cursorPositionInHex)
 			fmt = &mpt::cfmt::HEX<SmpLength>;
 		UpdateIndicator(MPT_CFORMAT("Cursor: {}")(fmt(3, ',', x)));
 
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-
-		if (pMainFrm && m_dwEndSel <= m_dwBeginSel)
+		if(pMainFrm && m_dwEndSel <= m_dwBeginSel)
 		{
 			// Show cursor position as offset effect if no selection is made.
-			if(m_nSample > 0 && m_nSample <= sndFile.GetNumSamples() && x < sndFile.GetSample(m_nSample).nLength)
+			if(m_nSample > 0 && m_nSample <= sndFile.GetNumSamples() && x < sample.nLength)
 			{
 				const SmpLength xLow = (x / 0x100) % 0x100;
 				const SmpLength xHigh = x / 0x10000;
@@ -1524,16 +1549,17 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 	if(m_dwStatus[SMPSTATUS_MOUSEDRAG])
 	{
 		const SmpLength len = sndFile.GetSample(m_nSample).nLength;
-		if (!len) return;
+		if(!len)
+			return;
 		SmpLength old = m_dwEndDrag;
-		if (m_nZoom)
+		if(m_nZoom)
 		{
-			if (point.x < 0)
+			if(point.x < 0)
 			{
 				CPoint pt;
 				pt.x = point.x;
 				pt.y = 0;
-				if (OnScrollBy(pt))
+				if(OnScrollBy(pt))
 				{
 					UpdateWindow();
 				}
@@ -1551,9 +1577,26 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				point.x = m_rcClient.right;
 			}
 		}
-		m_dwEndDrag = ScreenToSample(point.x);
+
+		bool update = false;
+		switch(m_dragItem)
+		{
+		case HitTestItem::SelectionStart:
+		case HitTestItem::SelectionEnd:
+			if(m_dwEndDrag != x)
+			{
+				m_dwEndDrag = x;
+				SetCurSel(m_dwBeginDrag, m_dwEndDrag);
+				update = true;
+			}
+			break;
+		default:
+			break;
+		}
+
 		if(m_dwStatus[SMPSTATUS_DRAWING])
 		{
+			m_dwEndDrag = x;
 			if(m_dwEndDrag < len)
 			{
 				// Shift = draw horizontal lines
@@ -1567,22 +1610,41 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 					m_lastDrawPoint.SetPoint(-1, -1);
 				}
 
-				if(sndFile.GetSample(m_nSample).GetElementarySampleSize() == 2)
-					SetSampleData<int16, uint16>(sndFile.GetSample(m_nSample), point, old);
-				else if(sndFile.GetSample(m_nSample).GetElementarySampleSize() == 1)
-					SetSampleData<int8, uint8>(sndFile.GetSample(m_nSample), point, old);
+				if(sample.GetElementarySampleSize() == 2)
+					SetSampleData<int16, uint16>(sample, point, old);
+				else if(sample.GetElementarySampleSize() == 1)
+					SetSampleData<int8, uint8>(sample, point, old);
 
-				sndFile.GetSample(m_nSample).PrecomputeLoops(sndFile, false);
+				sample.PrecomputeLoops(sndFile, false);
 
 				InvalidateSample();
 				SetModified(SampleHint().Data(), false, true);
 			}
-		} else if(old != m_dwEndDrag)
+		} else if(update)
 		{
-			SetCurSel(m_dwBeginDrag, m_dwEndDrag);
 			UpdateWindow();
 		}
 	}
+}
+
+
+BOOL CViewSample::OnSetCursor(CWnd *pWnd, UINT nHitTest, UINT message)
+{
+	// Update mouse cursor if we are close to a selection point
+	if(nHitTest == HTCLIENT && (message == WM_MOUSEMOVE || message == WM_LBUTTONDOWN) && !m_dwStatus[SMPSTATUS_DRAWING])
+	{
+		CPoint point;
+		GetCursorPos(&point);
+		ScreenToClient(&point);
+		const auto item = PointToItem(point);
+		if(item != HitTestItem::SampleData)
+		{
+			SetCursor(CMainFrame::curVSplit);
+			return TRUE;
+		}
+	}
+	
+	return CModScrollView::OnSetCursor(pWnd, nHitTest, message);
 }
 
 
@@ -1610,11 +1672,34 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 		SetCurSel(m_dwBeginDrag, m_dwEndDrag);
 	} else
 	{
-		m_dwBeginDrag = ScreenToSample(point.x);
-		if (m_dwBeginDrag >= sample.nLength) m_dwBeginDrag = sample.nLength - 1;
-		m_dwEndDrag = m_dwBeginDrag;
+		const auto sampleAtPoint = std::min(ScreenToSample(point.x), sample.nLength - SmpLength(1));
+		m_dragItem = PointToItem(point);
+		if(m_dwStatus[SMPSTATUS_DRAWING])
+			m_dragItem = HitTestItem::SampleData;
+
+		switch(m_dragItem)
+		{
+		case HitTestItem::SampleData:
+			m_dwBeginDrag = sampleAtPoint;
+			m_dwEndDrag = sampleAtPoint;
+			if(!m_dwStatus[SMPSTATUS_DRAWING])
+				m_dragItem = HitTestItem::SelectionEnd;
+			break;
+		case HitTestItem::SelectionStart:
+			m_dwBeginDrag = m_dwEndSel;
+			m_dwEndDrag = sampleAtPoint;
+			break;
+		case HitTestItem::SelectionEnd:
+			m_dwBeginDrag = m_dwBeginSel;
+			m_dwEndDrag = sampleAtPoint;
+			break;
+		default:
+			break;
+		}
 	}
-	if (oldsel) SetCurSel(m_dwBeginDrag, m_dwEndDrag);
+	if(oldsel)
+		SetCurSel(m_dwBeginDrag, m_dwEndDrag);
+
 	// set initial point for sample drawing
 	if (m_dwStatus[SMPSTATUS_DRAWING])
 	{
@@ -1645,6 +1730,7 @@ void CViewSample::OnLButtonUp(UINT, CPoint)
 		m_dwStatus.reset(SMPSTATUS_MOUSEDRAG);
 		ReleaseCapture();
 	}
+	m_dragItem = HitTestItem::SampleData;
 	m_lastDrawPoint.SetPoint(-1, -1);
 }
 
@@ -2055,14 +2141,14 @@ void CViewSample::OnEditCopy()
 
 void CViewSample::OnEditPaste()
 {
-	DoPaste(kReplace);
+	DoPaste(PasteMode::Replace);
 }
 
 
 void CViewSample::OnEditMixPaste()
 {
 	CMixSampleDlg::sampleOffset = m_dwMenuParam;
-	DoPaste(kMixPaste);
+	DoPaste(PasteMode::MixPaste);
 }
 
 
@@ -2070,7 +2156,7 @@ void CViewSample::OnEditInsertPaste()
 {
 	if(m_dwBeginSel <= m_dwEndSel)
 		m_dwBeginSel = m_dwEndSel = m_dwBeginDrag = m_dwEndDrag = m_dwMenuParam;
-	DoPaste(kInsert);
+	DoPaste(PasteMode::Insert);
 }
 
 
@@ -2118,9 +2204,9 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 		ModSample &sample = sndFile.GetSample(m_nSample);
 
 		if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
-			pasteMode = kReplace;
+			pasteMode = PasteMode::Replace;
 		// Show mix paste dialog
-		if(pasteMode == kMixPaste)
+		if(pasteMode == PasteMode::MixPaste)
 		{
 			CMixSampleDlg dlg(this);
 			if(dlg.DoModal() != IDOK)
@@ -2134,7 +2220,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 		ModSample oldSample = sample;
 		std::string oldSampleName = sndFile.m_szNames[m_nSample];
 
-		if(pasteMode != kReplace)
+		if(pasteMode != PasteMode::Replace)
 		{
 			sample.pData.pSample = nullptr;	// prevent old sample from being deleted.
 		}
@@ -2143,13 +2229,13 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 		CriticalSection cs;
 		bool ok = sndFile.ReadSampleFromFile(m_nSample, file, TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad);
 		clipboard.Close();
-		if(sample.uFlags[CHN_ADLIB] != oldSample.uFlags[CHN_ADLIB] && pasteMode != kReplace)
+		if(sample.uFlags[CHN_ADLIB] != oldSample.uFlags[CHN_ADLIB] && pasteMode != PasteMode::Replace)
 		{
 			// Cannot mix PCM with FM
-			pasteMode = kReplace;
+			pasteMode = PasteMode::Replace;
 			oldSample.FreeSample();
 		}
-		if (!sndFile.m_szNames[m_nSample][0] || pasteMode != kReplace)
+		if (!sndFile.m_szNames[m_nSample][0] || pasteMode != PasteMode::Replace)
 		{
 			sndFile.m_szNames[m_nSample] = oldSampleName;
 		}
@@ -2158,7 +2244,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			sample.filename = oldSample.filename;
 		}
 
-		if(pasteMode == kMixPaste && ok)
+		if(pasteMode == PasteMode::MixPaste && ok)
 		{
 			// Mix new sample (stored in the actual sample slot) and old sample (stored in oldSample)
 			SmpLength newLength = std::max(oldSample.nLength, CMixSampleDlg::sampleOffset + sample.nLength);
@@ -2185,7 +2271,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 				sample.uFlags.set(CHN_STEREO, newNumChannels == 2);
 				ctrlSmp::ReplaceSample(sample, pNewSample, newLength, sndFile);
 			}
-		} else if(pasteMode == kInsert && ok)
+		} else if(pasteMode == PasteMode::Insert && ok)
 		{
 			// Insert / replace selection
 			SmpLength oldLength = oldSample.nLength;
@@ -2248,11 +2334,11 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			SetCurSel(selBegin, selEnd);
 			sample.PrecomputeLoops(sndFile, true);
 			SetModified(SampleHint().Info().Data().Names(), true, false);
-			if(pasteMode == kReplace)
+			if(pasteMode == PasteMode::Replace)
 				sndFile.ResetSamplePath(m_nSample);
 		} else
 		{
-			if(pasteMode == kMixPaste)
+			if(pasteMode == PasteMode::MixPaste)
 				ModSample::FreeSample(oldSample.samplev());
 			pModDoc->GetSampleUndo().Undo(m_nSample);
 			sndFile.m_szNames[m_nSample] = oldSampleName;
@@ -3043,8 +3129,8 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEditCopy:		OnEditCopy(); return wParam;
 		case kcEditPaste:		OnEditPaste(); return wParam;
 		case kcEditMixPasteITStyle:
-		case kcEditMixPaste:	DoPaste(kMixPaste); return wParam;
-		case kcEditPushForwardPaste: DoPaste(kInsert); return wParam;
+		case kcEditMixPaste:	DoPaste(PasteMode::MixPaste); return wParam;
+		case kcEditPushForwardPaste: DoPaste(PasteMode::Insert); return wParam;
 		case kcEditUndo:		OnEditUndo(); return wParam;
 		case kcEditRedo:		OnEditRedo(); return wParam;
 		case kcSample8Bit:		if(sndFile.GetSample(m_nSample).uFlags[CHN_16BIT])
