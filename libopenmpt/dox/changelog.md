@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.5.3-pre
+
 ### libopenmpt 0.5.2 (2020-08-30)
 
  *  [**Change**] `Makefile` `CONFIG=emscripten` now supports
