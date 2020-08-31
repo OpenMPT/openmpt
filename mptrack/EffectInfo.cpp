@@ -22,32 +22,26 @@ OPENMPT_NAMESPACE_BEGIN
 ///////////////////////////////////////////////////////////////////////////
 // Effects description
 
-struct MPTEFFECTINFO
+struct MPTEffectInfo
 {
-	EffectCommand     effect;		// CMD_XXXX
-	ModCommand::PARAM paramMask;	// 0 = default
-	ModCommand::PARAM paramValue;	// 0 = default
-	ModCommand::PARAM paramLimit;	// Parameter Editor limit
-	FlagSet<MODTYPE>::store_type supportedFormats;		// MOD_TYPE_XXX combo
-	const TCHAR *name;				// e.g. "Tone Portamento"
-	FlagSet<MODTYPE> GetSupportedFormats() const { return FlagSet<MODTYPE>(supportedFormats); }
+	EffectCommand effect;               // CMD_XXXX
+	ModCommand::PARAM paramMask;        // 0 = default
+	ModCommand::PARAM paramValue;       // 0 = default
+	ModCommand::PARAM paramLimit;       // Parameter Editor limit
+	FlagSet<MODTYPE> supportedFormats;  // MOD_TYPE_XXX combo
+	const TCHAR *name;                  // e.g. "Tone Portamento"
 };
 
-// Force built-in integer operations.
-// C++11 constexpr operations on the enum value_type would also solve this.
-#define ModType FlagSet<MODTYPE>::store_type
+static constexpr FlagSet<MODTYPE> MOD_TYPE_MODXM = MOD_TYPE_MOD | MOD_TYPE_XM;
+static constexpr FlagSet<MODTYPE> MOD_TYPE_S3MIT = MOD_TYPE_S3M | MOD_TYPE_IT;
+static constexpr FlagSet<MODTYPE> MOD_TYPE_S3MITMPT = MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT;
+static constexpr FlagSet<MODTYPE> MOD_TYPE_NOMOD = MOD_TYPE_S3M | MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT;
+static constexpr FlagSet<MODTYPE> MOD_TYPE_XMIT = MOD_TYPE_XM | MOD_TYPE_IT;
+static constexpr FlagSet<MODTYPE> MOD_TYPE_XMITMPT = MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT;
+static constexpr FlagSet<MODTYPE> MOD_TYPE_ITMPT = MOD_TYPE_IT | MOD_TYPE_MPT;
+static constexpr FlagSet<MODTYPE> MOD_TYPE_ALL = MODTYPE(~0);
 
-#define MOD_TYPE_MODXM		(ModType(0) | MOD_TYPE_MOD | MOD_TYPE_XM)
-#define MOD_TYPE_S3MIT		(ModType(0) | MOD_TYPE_S3M | MOD_TYPE_IT)
-#define MOD_TYPE_S3MITMPT	(ModType(0) | MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_NOMOD		(ModType(0) | MOD_TYPE_S3M | MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_XMIT		(ModType(0) | MOD_TYPE_XM | MOD_TYPE_IT)
-#define MOD_TYPE_XMITMPT	(ModType(0) | MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_ITMPT		(ModType(0) | MOD_TYPE_IT | MOD_TYPE_MPT)
-#define MOD_TYPE_ALL		(~ModType(0))
-
-
-static constexpr MPTEFFECTINFO gFXInfo[] =
+static constexpr MPTEffectInfo gFXInfo[] =
 {
 	{CMD_ARPEGGIO,		0,0,		0,	MOD_TYPE_ALL,	_T("Arpeggio")},
 	{CMD_PORTAMENTOUP,	0,0,		0,	MOD_TYPE_ALL,	_T("Portamento Up")},
@@ -122,8 +116,8 @@ static constexpr MPTEFFECTINFO gFXInfo[] =
 	{CMD_S3MCMDEX,		0xF0,0x70,	0,	MOD_TYPE_ITMPT,	_T("Instr. Control")},
 	{CMD_DELAYCUT,		0x00,0x00,	0,	MOD_TYPE_MPT,	_T("Note Delay and Cut")},
 	{CMD_XPARAM,		0,0,	0,	MOD_TYPE_XMITMPT,	_T("Parameter Extension")},
-	{CMD_NOTESLIDEUP,		0,0,	0,	ModType(0) | MOD_TYPE_IMF | MOD_TYPE_PTM,	_T("Note Slide Up")}, // IMF / PTM effect
-	{CMD_NOTESLIDEDOWN,		0,0,	0,	ModType(0) | MOD_TYPE_IMF | MOD_TYPE_PTM,	_T("Note Slide Down")}, // IMF / PTM effect
+	{CMD_NOTESLIDEUP,		0,0,	0,	MOD_TYPE_IMF | MOD_TYPE_PTM,	_T("Note Slide Up")}, // IMF / PTM effect
+	{CMD_NOTESLIDEDOWN,		0,0,	0,	MOD_TYPE_IMF | MOD_TYPE_PTM,	_T("Note Slide Down")}, // IMF / PTM effect
 	{CMD_NOTESLIDEUPRETRIG,	0,0,	0,	MOD_TYPE_PTM,	_T("Note Slide Up + Retrigger Note")}, // PTM effect
 	{CMD_NOTESLIDEDOWNRETRIG,0,0,	0,	MOD_TYPE_PTM,	_T("Note Slide Down + Retrigger Note")}, // PTM effect
 	{CMD_REVERSEOFFSET,		0,0,	0,	MOD_TYPE_PTM,	_T("Revert Sample + Offset")}, // PTM effect
@@ -159,12 +153,12 @@ bool EffectInfo::GetEffectName(CString &pszDescription, ModCommand::COMMAND comm
 			// if format is compatible, everything is fine. if not, let's still search
 			// for another command. this fixes searching for the EFx command, which
 			// does different things in MOD format.
-			if((sndFile.GetType() & gFXInfo[i].GetSupportedFormats()))
+			if((sndFile.GetType() & gFXInfo[i].supportedFormats))
 				break;
 		}
 	}
 	if (fxndx == CountOf(gFXInfo)) return false;
-	bSupported = ((sndFile.GetType() & gFXInfo[fxndx].GetSupportedFormats()));
+	bSupported = ((sndFile.GetType() & gFXInfo[fxndx].supportedFormats));
 	if (gFXInfo[fxndx].name)
 	{
 		if ((bXX) && (bSupported))
@@ -190,7 +184,7 @@ LONG EffectInfo::GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PAR
 			&& ((param & gFXInfo[i].paramMask) == gFXInfo[i].paramValue)) // Value
 		{
 			ndx = i;
-			if((sndFile.GetType() & gFXInfo[i].GetSupportedFormats()))
+			if((sndFile.GetType() & gFXInfo[i].supportedFormats))
 				break; // found fitting format; this is correct for sure
 		}
 	}
@@ -255,7 +249,7 @@ bool EffectInfo::GetEffectInfo(UINT ndx, CString *s, bool bXX, ModCommand::PARAM
 	if (s) s->Empty();
 	if (prangeMin) *prangeMin = 0;
 	if (prangeMax) *prangeMax = 0;
-	if ((ndx >= CountOf(gFXInfo)) || (!(sndFile.GetType() & gFXInfo[ndx].GetSupportedFormats()))) return FALSE;
+	if ((ndx >= std::size(gFXInfo)) || (!(sndFile.GetType() & gFXInfo[ndx].supportedFormats))) return FALSE;
 	if (s) GetEffectName(*s, gFXInfo[ndx].effect, gFXInfo[ndx].paramValue, bXX);
 	if ((prangeMin) && (prangeMax))
 	{
@@ -864,15 +858,14 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNEL
 ////////////////////////////////////////////////////////////////////////////////////////
 // Volume column effects description
 
-struct MPTVOLCMDINFO
+struct MPTVolCmdInfo
 {
-	VolumeCommand volCmd;		// VOLCMD_XXXX
-	FlagSet<MODTYPE>::store_type supportedFormats;		// MOD_TYPE_XXX combo
-	const TCHAR *name;				// e.g. "Set Volume"
-	FlagSet<MODTYPE> GetSupportedFormats() const { return FlagSet<MODTYPE>(supportedFormats); }
+	VolumeCommand volCmd;               // VOLCMD_XXXX
+	FlagSet<MODTYPE> supportedFormats;  // MOD_TYPE_XXX combo
+	const TCHAR *name;                  // e.g. "Set Volume"
 };
 
-static constexpr MPTVOLCMDINFO gVolCmdInfo[] =
+static constexpr MPTVolCmdInfo gVolCmdInfo[] =
 {
 	{VOLCMD_VOLUME,			MOD_TYPE_NOMOD,		_T("Set Volume")},
 	{VOLCMD_PANNING,		MOD_TYPE_NOMOD,		_T("Set Panning")},
@@ -939,7 +932,7 @@ bool EffectInfo::GetVolCmdInfo(UINT ndx, CString *s, ModCommand::VOL *prangeMin,
 			*prangeMax = (sndFile.GetType() & MOD_TYPE_XM) ? 15 : 9;
 		}
 	}
-	return (sndFile.GetType() & gVolCmdInfo[ndx].GetSupportedFormats());
+	return (sndFile.GetType() & gVolCmdInfo[ndx].supportedFormats);
 }
 
 
@@ -957,7 +950,7 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
 		if(m.vol > 0 || sndFile.GetType() == MOD_TYPE_XM)
 		{
 			s->Format(_T("%c%u"),
-				(m.volcmd == VOLCMD_VOLSLIDEUP || m.volcmd == VOLCMD_FINEVOLUP) ? '+' : '-',
+				(m.volcmd == VOLCMD_VOLSLIDEUP || m.volcmd == VOLCMD_FINEVOLUP) ? _T('+') : _T('-'),
 				m.vol);
 		} else
 		{
@@ -994,17 +987,21 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
 	case VOLCMD_OFFSET:
 		if(m.vol)
 		{
-			SmpLength param;
 			SAMPLEINDEX smp = m.instr;
 			if(smp > 0 && smp <= sndFile.GetNumInstruments() && m.IsNote() && sndFile.Instruments[smp] != nullptr)
 			{
 				smp = sndFile.Instruments[smp]->Keyboard[m.note - NOTE_MIN];
 			}
-			if(smp > 0 && smp <= sndFile.GetNumSamples() && m.vol > 0 && m.vol <= CountOf(sndFile.GetSample(smp).cues))
-				param = sndFile.GetSample(smp).cues[m.vol - 1];
-			else
-				param = m.vol << 11;
-			s->Format(_T("Cue %u: %llu"), m.vol, static_cast<unsigned long long>(param));
+			s->Format(_T("Cue %u: "), m.vol);
+			if(smp > 0 && smp <= sndFile.GetNumSamples() && m.vol > 0 && m.vol <= std::size(sndFile.GetSample(smp).cues))
+			{
+				auto cue = sndFile.GetSample(smp).cues[m.vol - 1];
+				if(cue < sndFile.GetSample(smp).nLength)
+					s->Append(mpt::cfmt::dec(3, _T(','), sndFile.GetSample(smp).cues[m.vol - 1]));
+				else
+					s->Append(_T("unused"));
+			} else
+				s->Append(_T("unknown"));
 		} else
 		{
 			*s = _T("continue");
