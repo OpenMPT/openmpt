@@ -35,7 +35,7 @@ public:
 	void SetDocument(CModDoc *modDoc);
 	CModDoc *GetDocument() const { return m_ModDoc; }
 	bool IsDisplayed() const;
-	void Update();
+	void Update(UpdateHint hint, CObject* pHint);
 	void Show();
 	void Hide();
 
