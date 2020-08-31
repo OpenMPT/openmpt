@@ -47,14 +47,14 @@ protected:
 	CSpinButtonCtrl m_SpinFineTune, m_SpinSample;
 	CComboBox m_ComboAutoVib, m_ComboLoopType, m_ComboSustainType, m_ComboZoom, m_CbnBaseNote;
 	CButton m_CheckPanning;
-	SAMPLEINDEX m_nSample;
-	double m_dTimeStretchRatio; //rewbs.timeStretchMods
-	uint32 m_nSequenceMs;
-	uint32 m_nSeekWindowMs;
-	uint32 m_nOverlapMs;
+	double m_dTimeStretchRatio = 100;
+	uint32 m_nSequenceMs = 0;
+	uint32 m_nSeekWindowMs = 0;
+	uint32 m_nOverlapMs = 0;
 	SampleIO m_nPreviousRawFormat;
-	bool m_rememberRawFormat : 1;
-	bool m_startedEdit : 1;
+	SAMPLEINDEX m_nSample = 1;
+	bool m_rememberRawFormat = false;
+	bool m_startedEdit = false;
 
 	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
 
