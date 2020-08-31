@@ -159,7 +159,8 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 	if(patternExists || onlyChannelSettings)
 		PrepareBuffer(toBuf, undo.pattern, undo.firstChannel, undo.firstRow, undo.numChannels, undo.numRows, undo.description, linkedFromPrevious, !undo.channelInfo.empty());
 
-	if(!undo.channelInfo.empty())
+	const bool modifyChannels = !undo.channelInfo.empty();
+	if(modifyChannels)
 	{
 		if(undo.channelInfo.size() != sndFile.GetNumChannels())
 		{
@@ -227,6 +228,8 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 	{
 		modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 	}
+	if(modifyChannels)
+		modDoc.UpdateAllViews(nullptr, GeneralHint().Channels());
 
 	if(linkToPrevious)
 	{
