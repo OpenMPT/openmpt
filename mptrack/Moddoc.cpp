@@ -1495,7 +1495,7 @@ void CModDoc::UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint)
 	{
 		auto instance = CChannelManagerDlg::sharedInstance();
 		if(instance != nullptr && pHint != instance && instance->GetDocument() == this)
-			instance->Update();
+			instance->Update(hint, pHint);
 	}
 #ifndef NO_PLUGINS
 	if(hint.GetType()[HINT_MIXPLUGINS | HINT_PLUGINNAMES])

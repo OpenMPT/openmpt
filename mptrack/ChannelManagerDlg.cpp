@@ -89,9 +89,12 @@ bool CChannelManagerDlg::IsDisplayed() const
 	return m_show;
 }
 
-void CChannelManagerDlg::Update()
+void CChannelManagerDlg::Update(UpdateHint hint, CObject* pHint)
 {
-	if(!m_hWnd || m_show == false) return;
+	if(!m_hWnd || !m_show)
+		return;
+	if(!hint.ToType<GeneralHint>().GetType()[HINT_MODCHANNELS | HINT_MODGENERAL | HINT_MODTYPE | HINT_MPTOPTIONS])
+		return;
 	ResizeWindow();
 	InvalidateRect(nullptr, FALSE);
 }
