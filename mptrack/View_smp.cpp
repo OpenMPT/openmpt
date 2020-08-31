@@ -3825,26 +3825,37 @@ INT_PTR CViewSample::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 		}
 	} else
 	{
+		const ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample <= GetDocument()->GetNumSamples() ? m_nSample : 0);
 		auto item = PointToItem(point, &ncRect);
+		SmpLength pos = MAX_SAMPLE_LENGTH;
 		switch(item)
 		{
 		case HitTestItem::LoopStart:
 			text = _T("Loop Start");
+			pos = sample.nLoopStart;
 			break;
 		case HitTestItem::LoopEnd:
 			text = _T("Loop End");
+			pos = sample.nLoopEnd;
 			break;
 		case HitTestItem::SustainStart:
 			text = _T("Sustain Start");
+			pos = sample.nSustainStart;
 			break;
 		case HitTestItem::SustainEnd:
 			text = _T("Sustain End");
+			pos = sample.nSustainEnd;
 			break;
 		default:
 			if(item < HitTestItem::CuePointFirst || item > HitTestItem::CuePointLast)
 				return CModScrollView::OnToolHitTest(point, pTI);
-			text = MPT_CFORMAT("Cue Point {}")(CuePointFromItem(item) + 1);
+			auto cue = CuePointFromItem(item);
+			text = MPT_CFORMAT("Cue Point {}")(cue + 1);
+			if(static_cast<size_t>(cue) < std::size(sample.cues))
+				pos = sample.cues[cue];
 		}
+		if(pos <= sample.nLength)
+			text += _T(": ") + mpt::cfmt::dec(3, ',', pos);
 		buttonID = static_cast<int>(item) + 1;
 	}
 
