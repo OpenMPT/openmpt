@@ -255,6 +255,7 @@ void WAVReader::ApplySampleSettings(ModSample &sample, mpt::Charset sampleCharse
 			cueChunk.ReadStruct(cuePoint);
 			sample.cues[i] = cuePoint.position;
 		}
+		std::fill(std::begin(sample.cues) + numPoints, std::end(sample.cues), MAX_SAMPLE_LENGTH);
 	}
 
 	// Read MPT extra info
