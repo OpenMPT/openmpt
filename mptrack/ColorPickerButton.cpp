@@ -79,7 +79,7 @@ void ColorPickerButton::DrawItem(DRAWITEMSTRUCT *dis)
 	HDC hdc = dis->hDC;
 	CRect rect = dis->rcItem;
 	::DrawEdge(hdc, rect, (dis->itemState & ODS_SELECTED) ? BDR_SUNKENINNER : BDR_RAISEDINNER, BF_RECT | BF_ADJUST);
-	if (m_color == ModChannelSettings::INVALID_COLOR)
+	if(m_color == ModChannelSettings::INVALID_COLOR || (dis->itemState & ODS_DISABLED))
 	{
 		::FillRect(hdc, rect, GetSysColorBrush(COLOR_BTNFACE));
 	} else

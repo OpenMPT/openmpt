@@ -731,6 +731,8 @@ static constexpr struct
 	{2005, kcInsertWholeRowGlobal, _T("Insert Row(s) (All Channels, Global)")},
 	{2006, kcPrevSequence, _T("Previous Sequence")},
 	{2007, kcNextSequence, _T("Next Sequence")},
+	{2008, kcChnColorFromPrev , _T("Pick Color from Previous Channel")},
+	{2009, kcChnColorFromNext , _T("Pick Color from Next Channel") },
 };
 
 // Get command descriptions etc.. loaded up.

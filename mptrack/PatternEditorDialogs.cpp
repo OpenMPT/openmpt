@@ -1230,6 +1230,8 @@ BEGIN_MESSAGE_MAP(QuickChannelProperties, CDialog)
 	ON_COMMAND(IDC_BUTTON2,	&QuickChannelProperties::OnNextChannel)
 	ON_COMMAND(IDC_BUTTON3,	&QuickChannelProperties::OnChangeColor)
 	ON_COMMAND(IDC_BUTTON4,	&QuickChannelProperties::OnChangeColor)
+	ON_COMMAND(IDC_BUTTON5, &QuickChannelProperties::OnPickPrevColor)
+	ON_COMMAND(IDC_BUTTON6, &QuickChannelProperties::OnPickNextColor)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	&QuickChannelProperties::OnCustomKeyMsg)
 END_MESSAGE_MAP()
 
@@ -1268,6 +1270,8 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint posi
 	{
 		Create(IDD_CHANNELSETTINGS, nullptr);
 		m_colorBtn.SubclassDlgItem(IDC_BUTTON4, this);
+		m_colorBtnPrev.SubclassDlgItem(IDC_BUTTON5, this);
+		m_colorBtnNext.SubclassDlgItem(IDC_BUTTON6, this);
 
 		m_volSlider.SetRange(0, 64);
 		m_volSlider.SetTicFreq(8);
@@ -1338,6 +1342,13 @@ void QuickChannelProperties::UpdateDisplay()
 	m_nameEdit.SetWindowText(mpt::ToCString(m_document->GetSoundFile().GetCharsetInternal(), settings.szName));
 
 	m_colorBtn.SetColor(settings.color);
+	const bool isFirst = (m_channel <= 0), isLast = (m_channel >= m_document->GetNumChannels() - 1);
+	m_colorBtnPrev.EnableWindow(isFirst ? FALSE : TRUE);
+	if(!isFirst)
+		m_colorBtnPrev.SetColor(m_document->GetSoundFile().ChnSettings[m_channel - 1].color);
+	m_colorBtnNext.EnableWindow(isLast ? FALSE : TRUE);
+	if(!isLast)
+		m_colorBtnNext.SetColor(m_document->GetSoundFile().ChnSettings[m_channel + 1].color);
 
 	m_settingsChanged = false;
 	m_visible = true;
@@ -1497,6 +1508,34 @@ void QuickChannelProperties::OnChangeColor()
 }
 
 
+void QuickChannelProperties::OnPickPrevColor()
+{
+	if(m_channel > 0)
+		PickColorFromChannel(m_channel - 1);
+}
+
+
+void QuickChannelProperties::OnPickNextColor()
+{
+	if(m_channel < m_document->GetNumChannels() - 1)
+		PickColorFromChannel(m_channel + 1);
+}
+
+
+void QuickChannelProperties::PickColorFromChannel(CHANNELINDEX channel)
+{
+	auto &channels = m_document->GetSoundFile().ChnSettings;
+	if(channels[channel].color != channels[m_channel].color)
+	{
+		PrepareUndo();
+		channels[m_channel].color = channels[channel].color;
+		m_colorBtn.SetColor(channels[m_channel].color);
+		m_document->SetModified();
+		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
+	}
+}
+
+
 void QuickChannelProperties::OnPrevChannel()
 {
 	if(m_channel > 0)
@@ -1553,6 +1592,12 @@ LRESULT QuickChannelProperties::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		return wParam;
 	case kcChnSettingsNext:
 		OnNextChannel();
+		return wParam;
+	case kcChnColorFromPrev:
+		OnPickPrevColor();
+		return wParam;
+	case kcChnColorFromNext:
+		OnPickNextColor();
 		return wParam;
 	case kcChnSettingsClose:
 		OnActivate(WA_INACTIVE, nullptr, FALSE);

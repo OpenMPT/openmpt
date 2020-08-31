@@ -180,7 +180,7 @@ protected:
 	bool m_settingsChanged = false;
 	bool m_settingColor = false;
 
-	ColorPickerButton m_colorBtn;
+	ColorPickerButton m_colorBtn, m_colorBtnPrev, m_colorBtnNext;
 	CSliderCtrl m_volSlider, m_panSlider;
 	CSpinButtonCtrl m_volSpin, m_panSpin;
 	CEdit m_nameEdit;
@@ -196,6 +196,7 @@ protected:
 
 	void UpdateDisplay();
 	void PrepareUndo();
+	void PickColorFromChannel(CHANNELINDEX channel);
 
 	afx_msg void OnActivate(UINT nState, CWnd *, BOOL);
 	afx_msg void OnVolChanged();
@@ -207,6 +208,8 @@ protected:
 	afx_msg void OnPrevChannel();
 	afx_msg void OnNextChannel();
 	afx_msg void OnChangeColor();
+	afx_msg void OnPickPrevColor();
+	afx_msg void OnPickNextColor();
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 
 	BOOL PreTranslateMessage(MSG *pMsg);

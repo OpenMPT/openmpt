@@ -469,8 +469,10 @@ version:1
 19:1876:2:85:1		//Unlock Playback: Ctrl+U (KeyDown)
 
 //----( Quick Channel Settings Context )------------
-20:1878:1:37:5		//Previous Channel: Shift+Left (KeyDown|KeyHold)
+20:1878:4:37:5		//Previous Channel: Alt+Left (KeyDown|KeyHold)
 20:1878:1:8:5		//Previous Channel: Shift+Backspace (KeyDown|KeyHold)
-20:1879:1:39:5		//Next Channel: Shift+Right (KeyDown|KeyHold)
+20:1879:4:39:5		//Next Channel: Alt+Right (KeyDown|KeyHold)
 20:1879:1:13:5		//Next Channel: Shift+ENTER (KeyDown|KeyHold)
+20:2008:5:37:1		//Pick Color from Previous Channel: Shift+Alt+Left (KeyDown)
+20:2009:5:39:1		//Pick Color from Next Channel: Shift+Alt+Right (KeyDown)
 20:1880:0:13:1		//Switch to Pattern Editor: ENTER (KeyDown)

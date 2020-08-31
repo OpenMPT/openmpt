@@ -855,6 +855,8 @@ enum CommandID
 	kcStartChnSettingsCommands,
 	kcChnSettingsPrev = kcStartChnSettingsCommands,
 	kcChnSettingsNext,
+	kcChnColorFromPrev,
+	kcChnColorFromNext,
 	kcChnSettingsClose,
 	kcEndChnSettingsCommands = kcChnSettingsClose,
 
