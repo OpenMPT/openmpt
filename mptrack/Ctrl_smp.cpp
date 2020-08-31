@@ -174,14 +174,7 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 
 CCtrlSamples::CCtrlSamples(CModControlView &parent, CModDoc &document)
 	: CModControlDlg(parent, document)
-	, m_nSequenceMs(0)
-	, m_dTimeStretchRatio(100)
-	, m_nSeekWindowMs(0)
-	, m_nOverlapMs(0)
 	, m_nPreviousRawFormat(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::unsignedPCM)
-	, m_nSample(1)
-	, m_rememberRawFormat(false)
-	, m_startedEdit(false)
 {
 	m_nLockCount = 1;
 }
@@ -1241,11 +1234,7 @@ bool CCtrlSamples::InsertSample(bool duplicate, int8 *confirm)
 }
 
 
-static constexpr struct
-{
-	const mpt::uchar *name;
-	const mpt::uchar *exts;
-} SampleFormats[]
+static constexpr std::pair<const mpt::uchar *, const mpt::uchar *> SampleFormats[]
 {
 	{ UL_("Wave Files (*.wav)"), UL_("*.wav") },
 #ifdef MPT_WITH_FLAC
@@ -1277,13 +1266,13 @@ static mpt::ustring ConstructFileFilter(bool includeRaw)
 {
 	mpt::ustring s = U_("All Samples|");
 	bool first = true;
-	for(const auto &fmt : SampleFormats)
+	for(const auto &[name, exts] : SampleFormats)
 	{
 		if(!first)
 			s += U_(";");
 		else
 			first = false;
-		s += fmt.exts;
+		s += exts;
 	}
 #if defined(MPT_WITH_MEDIAFOUNDATION)
 	std::vector<FileType> mediaFoundationTypes = CSoundFile::GetMediaFoundationFileTypes();
@@ -1294,10 +1283,10 @@ static mpt::ustring ConstructFileFilter(bool includeRaw)
 		s += U_(";*.raw;*.snd;*.pcm");
 	}
 	s += U_("|");
-	for(const auto &fmt : SampleFormats)
+	for(const auto &[name, exts] : SampleFormats)
 	{
-		s += fmt.name + U_("|");
-		s += fmt.exts + U_("|");
+		s += name + U_("|");
+		s += exts + U_("|");
 	}
 #if defined(MPT_WITH_MEDIAFOUNDATION)
 	s += ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToUnicode();
@@ -3304,8 +3293,12 @@ NoSample:
 		if (!m_sndFile.UseFinetuneAndTranspose())
 		{
 			if(!m_startedEdit && lastScrollbar != scrollBar) PrepareUndo("Finetune");
-			if (sample.nC5Speed < 1) sample.nC5Speed = 8363;
+			if(sample.nC5Speed < 1)
+				sample.nC5Speed = 8363;
+			auto oldFreq = sample.nC5Speed;
 			sample.Transpose((pos * TrackerSettings::Instance().m_nFinetuneStep) / 1200.0);
+			if(sample.nC5Speed == oldFreq)
+				sample.nC5Speed += pos;
 			Limit(sample.nC5Speed, 1u, 9999999u); // 9999999 is max. in Impulse Tracker
 			int transp = ModSample::FrequencyToTranspose(sample.nC5Speed) / 128;
 			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
