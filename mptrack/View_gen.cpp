@@ -661,16 +661,10 @@ void CViewGlobals::UndoRedo(bool undo)
 	CModDoc *pModDoc = GetDocument();
 	if(!pModDoc)
 		return;
-	if(undo && !pModDoc->GetPatternUndo().CanUndoChannelSettings())
-		return;
-	if(!undo && !pModDoc->GetPatternUndo().CanRedoChannelSettings())
-		return;
-	PATTERNINDEX pat = undo ? pModDoc->GetPatternUndo().Undo() : pModDoc->GetPatternUndo().Redo();
-	if(pat != PATTERNINDEX_INVALID)
-	{
-		pModDoc->UpdateAllViews(nullptr, GeneralHint().Channels(), nullptr);
-		pModDoc->SetModified();
-	}
+	if(undo && pModDoc->GetPatternUndo().CanUndoChannelSettings())
+		pModDoc->GetPatternUndo().Undo();
+	else if(!undo && pModDoc->GetPatternUndo().CanRedoChannelSettings())
+		pModDoc->GetPatternUndo().Redo();
 }
 
 
@@ -681,7 +675,7 @@ void CViewGlobals::PrepareUndo(CHANNELINDEX chnMod4)
 		// Backup old channel settings through pattern undo.
 		m_lastEdit = chnMod4;
 		const CHANNELINDEX chn = static_cast<CHANNELINDEX>(m_nActiveTab * CHANNELS_IN_TAB) + chnMod4;
-		GetDocument()->GetPatternUndo().PrepareUndo(0, chn, 0, 0, 0, "Channel Settings", false, true);
+		GetDocument()->GetPatternUndo().PrepareUndo(PATTERNINDEX_INVALID, chn, 0, 0, 0, "Channel Settings", false, true);
 	}
 }
 

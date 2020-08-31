@@ -230,6 +230,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 	}
 	if(modifyChannels)
 		modDoc.UpdateAllViews(nullptr, GeneralHint().Channels());
+	modDoc.SetModified();
 
 	if(linkToPrevious)
 	{
