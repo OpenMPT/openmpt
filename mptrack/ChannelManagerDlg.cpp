@@ -97,6 +97,8 @@ void CChannelManagerDlg::Update(UpdateHint hint, CObject* pHint)
 		return;
 	ResizeWindow();
 	InvalidateRect(nullptr, FALSE);
+	if(hint.ToType<GeneralHint>().GetType()[HINT_MODCHANNELS] && m_quickChannelProperties.m_hWnd && pHint != &m_quickChannelProperties)
+		m_quickChannelProperties.UpdateDisplay();
 }
 
 void CChannelManagerDlg::Show()

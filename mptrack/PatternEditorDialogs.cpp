@@ -1341,8 +1341,9 @@ void QuickChannelProperties::UpdateDisplay()
 	m_nameEdit.LimitText(MAX_CHANNELNAME - 1);
 	m_nameEdit.SetWindowText(mpt::ToCString(m_document->GetSoundFile().GetCharsetInternal(), settings.szName));
 
-	m_colorBtn.SetColor(settings.color);
 	const bool isFirst = (m_channel <= 0), isLast = (m_channel >= m_document->GetNumChannels() - 1);
+
+	m_colorBtn.SetColor(settings.color);
 	m_colorBtnPrev.EnableWindow(isFirst ? FALSE : TRUE);
 	if(!isFirst)
 		m_colorBtnPrev.SetColor(m_document->GetSoundFile().ChnSettings[m_channel - 1].color);
@@ -1353,8 +1354,8 @@ void QuickChannelProperties::UpdateDisplay()
 	m_settingsChanged = false;
 	m_visible = true;
 
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1), m_channel > 0 ? TRUE : FALSE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON2), m_channel < m_document->GetNumChannels() - 1 ? TRUE : FALSE);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1), isFirst ? FALSE : TRUE);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON2), isLast ? FALSE : TRUE);
 }
 
 void QuickChannelProperties::PrepareUndo()
@@ -1381,7 +1382,7 @@ void QuickChannelProperties::OnVolChanged()
 		PrepareUndo();
 		m_document->SetChannelGlobalVolume(m_channel, volume);
 		m_volSlider.SetPos(volume);
-		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
+		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels(), this);
 	}
 }
 
@@ -1399,7 +1400,7 @@ void QuickChannelProperties::OnPanChanged()
 		PrepareUndo();
 		m_document->SetChannelDefaultPan(m_channel, panning);
 		m_panSlider.SetPos(panning / 4u);
-		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
+		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels(), this);
 		// Surround is forced off when changing pan, so uncheck the checkbox.
 		CheckDlgButton(IDC_CHECK2, BST_UNCHECKED);
 	}
@@ -1441,7 +1442,7 @@ void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *bar)
 
 	if(update)
 	{
-		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
+		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels(), this);
 	}
 }
 
@@ -1454,7 +1455,7 @@ void QuickChannelProperties::OnMuteChanged()
 	}
 
 	m_document->MuteChannel(m_channel, IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
-	m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
+	m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels(), this);
 }
 
 
@@ -1467,7 +1468,7 @@ void QuickChannelProperties::OnSurroundChanged()
 
 	PrepareUndo();
 	m_document->SurroundChannel(m_channel, IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
-	m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
+	m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels(), this);
 	UpdateDisplay();
 }
 
@@ -1489,7 +1490,7 @@ void QuickChannelProperties::OnNameChanged()
 		PrepareUndo();
 		settings.szName = newName;
 		m_document->SetModified();
-		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
+		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels(), this);
 	}
 }
 
@@ -1502,7 +1503,7 @@ void QuickChannelProperties::OnChangeColor()
 		PrepareUndo();
 		m_document->GetSoundFile().ChnSettings[m_channel].color = *color;
 		m_document->SetModified();
-		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
+		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels(), this);
 	}
 	m_settingColor = false;
 }
@@ -1531,7 +1532,7 @@ void QuickChannelProperties::PickColorFromChannel(CHANNELINDEX channel)
 		channels[m_channel].color = channels[channel].color;
 		m_colorBtn.SetColor(channels[m_channel].color);
 		m_document->SetModified();
-		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels());
+		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels(), this);
 	}
 }
 

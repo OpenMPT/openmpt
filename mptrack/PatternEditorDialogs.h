@@ -190,11 +190,11 @@ public:
 	~QuickChannelProperties();
 
 	void Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint position);
+	void UpdateDisplay();
 
 protected:
 	void DoDataExchange(CDataExchange *pDX) override;
 
-	void UpdateDisplay();
 	void PrepareUndo();
 	void PickColorFromChannel(CHANNELINDEX channel);
 

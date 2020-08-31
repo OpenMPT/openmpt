@@ -203,6 +203,10 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 		if(order.IsValidPat(ord) && order.at(ord) != m_nPattern)
 			SetCurrentPattern(order.at(ord));
 	}
+	if(hint.ToType<GeneralHint>().GetType()[HINT_MODCHANNELS] && m_quickChannelProperties.m_hWnd && pObj != &m_quickChannelProperties)
+	{
+		m_quickChannelProperties.UpdateDisplay();
+	}
 
 	const PatternHint patternHint = hint.ToType<PatternHint>();
 	const PATTERNINDEX updatePat = patternHint.GetPattern();
@@ -275,7 +279,8 @@ PatternCursor CViewPattern::GetPositionFromPoint(POINT pt) const
 	for (i=0; i<imax; i++)
 	{
 		dx += pfnt->nEltWidths[i];
-		if (xx < dx) break;
+		if(xx < dx)
+			break;
 	}
 	return PatternCursor(static_cast<ROWINDEX>(y), static_cast<CHANNELINDEX>(x), static_cast<PatternCursor::Columns>(i));
 }
@@ -787,6 +792,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 }
 
 
+static constexpr UINT EncodeRowColor(int rowBkCol, int rowCol, bool rowSelected)
+{
+	return (rowBkCol << 16) | (rowCol << 8) | (rowSelected ? 1 : 0);
+}
+
+
 void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnable,
 	bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint)
 {
@@ -863,8 +874,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			wsprintf(s, _T("%d"), compRow);
 
 		DrawButtonRect(hdc, &rect, s, !selEnable || rowDisabled);
-
-		oldrowcolor = (row_bkcol << 16) | (row_col << 8) | (bRowSel ? 1 : 0);
+		oldrowcolor = EncodeRowColor(row_bkcol, row_col, bRowSel);
 		bRowSel = (m_Selection.ContainsVertical(PatternCursor(row)));
 		row_col = MODCOLOR_TEXTNORMAL;
 		row_bkcol = MODCOLOR_BACKNORMAL;
@@ -931,7 +941,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			xpaint += nColumnWidth;
 		}
 		// Optimization: same row color ?
-		bool useSpeedUpMask = (oldrowcolor == (UINT)((row_bkcol << 16) | (row_col << 8) | (bRowSel ? 1 : 0))) && !blendModeChanged;
+		bool useSpeedUpMask = (oldrowcolor == EncodeRowColor(row_bkcol, row_col, bRowSel)) && !blendModeChanged;
 		xbmp = nbmp = 0;
 		do
 		{
