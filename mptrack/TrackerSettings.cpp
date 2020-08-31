@@ -42,6 +42,8 @@ OPENMPT_NAMESPACE_BEGIN
 #define OLD_SOUNDSETUP_SECONDARY             0x40
 #define OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY 0x80
 
+constexpr EQPreset FlatEQPreset = {"Flat", {16, 16, 16, 16, 16, 16}, {125, 300, 600, 1250, 4000, 8000}};
+
 
 TrackerSettings &TrackerSettings::Instance()
 {
@@ -268,6 +270,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_SampleUndoBufferSize(conf, U_("Sample Editor"), U_("UndoBufferSize"), SampleUndoBufferSize())
 	, sampleEditorKeyBehaviour(conf, U_("Sample Editor"), U_("KeyBehaviour"), seNoteOffOnNewKey)
 	, m_defaultSampleFormat(conf, U_("Sample Editor"), U_("DefaultFormat"), dfFLAC)
+	, sampleEditorTimelineFormat(conf, U_("Sample Editor"), U_("TimelineFormat"), TimelineFormat::Seconds)
 	, sampleEditorDefaultResampler(conf, U_("Sample Editor"), U_("DefaultResampler"), SRCMODE_DEFAULT)
 	, m_nFinetuneStep(conf, U_("Sample Editor"), U_("FinetuneStep"), 10)
 	, m_FLACCompressionLevel(conf, U_("Sample Editor"), U_("FLACCompressionLevel"), 5)
@@ -364,10 +367,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	m_EqSettings = conf.Read<EQPreset>(U_("Effects"), U_("EQ_Settings"), FlatEQPreset);
 	const EQPreset userPresets[] =
 	{
-		FlatEQPreset,																// User1
-		{ "User 1",	{16,16,16,16,16,16}, { 150, 350, 700, 1500, 4500, 8000 } },		// User2
-		{ "User 2",	{16,16,16,16,16,16}, { 200, 400, 800, 1750, 5000, 9000 } },		// User3
-		{ "User 3",	{16,16,16,16,16,16}, { 250, 450, 900, 2000, 5000, 10000 } }		// User4
+		FlatEQPreset,
+		{ "User 1", {16,16,16,16,16,16}, { 150, 350, 700, 1500, 4500, 8000 } },
+		{ "User 2", {16,16,16,16,16,16}, { 200, 400, 800, 1750, 5000, 9000 } },
+		{ "User 3", {16,16,16,16,16,16}, { 250, 450, 900, 2000, 5000, 10000 } }
 	};
 
 	m_EqUserPresets[0] = conf.Read<EQPreset>(U_("Effects"), U_("EQ_User1"), userPresets[0]);
@@ -1059,6 +1062,9 @@ void TrackerSettings::GetDefaultColourScheme(std::array<COLORREF, MAX_MODCOLORS>
 	colours[MODCOLOR_BACKENV] = RGB(0x00, 0x00, 0x00);
 	colours[MODCOLOR_ENVELOPES] = RGB(0x00, 0x00, 0xFF);
 	colours[MODCOLOR_ENVELOPE_RELEASE] = RGB(0xFF, 0xFF, 0x00);
+	colours[MODCOLOR_SAMPLE_LOOPMARKER] = RGB(0x30, 0xCC, 0x30);
+	colours[MODCOLOR_SAMPLE_SUSTAINMARKER] = RGB(50, 0xCC, 0xCC);
+	colours[MODCOLOR_SAMPLE_CUEPOINT] = RGB(0xFF, 0xCC, 0x30);
 }
 
 

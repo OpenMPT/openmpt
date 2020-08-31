@@ -45,7 +45,7 @@ using CTuningCollection = Tuning::CTuningCollection;
 
 
 // User-defined colors
-enum ModColor
+enum ModColor : uint8
 {
 	MODCOLOR_BACKNORMAL = 0,
 	MODCOLOR_TEXTNORMAL,
@@ -79,6 +79,9 @@ enum ModColor
 	MODCOLOR_VUMETER_MED_VST,
 	MODCOLOR_VUMETER_HI_VST,
 	MODCOLOR_ENVELOPE_RELEASE,
+	MODCOLOR_SAMPLE_LOOPMARKER,
+	MODCOLOR_SAMPLE_SUSTAINMARKER,
+	MODCOLOR_SAMPLE_CUEPOINT,
 	MAX_MODCOLORS,
 	// Internal color codes (not saved to color preset files)
 	MODCOLOR_2NDHIGHLIGHT,
@@ -156,7 +159,6 @@ struct EQPreset
 	uint32 Freqs[MAX_EQ_BANDS];
 };
 
-constexpr EQPreset FlatEQPreset = { "Flat", {16,16,16,16,16,16}, { 125, 300, 600, 1250, 4000, 8000 } };
 
 template<> inline SettingValue ToSettingValue(const EQPreset &val)
 {
@@ -232,6 +234,12 @@ enum SampleEditorDefaultFormat
 	dfS3I,
 };
 
+enum class TimelineFormat
+{
+	Seconds = 0,
+	Samples,
+};
+
 
 class SampleUndoBufferSize
 {
@@ -270,6 +278,9 @@ template<> inline RecordAftertouchOptions FromSettingValue(const SettingValue &v
 
 template<> inline SettingValue ToSettingValue(const SampleEditorKeyBehaviour &val) { return SettingValue(int32(val)); }
 template<> inline SampleEditorKeyBehaviour FromSettingValue(const SettingValue &val) { return SampleEditorKeyBehaviour(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const TimelineFormat &val) { return SettingValue(int32(val)); }
+template<> inline TimelineFormat FromSettingValue(const SettingValue &val) { return TimelineFormat(val.as<int32>()); }
 
 template<> inline SettingValue ToSettingValue(const MODTYPE &val) { return SettingValue(SettingsModTypeToString(val), "MODTYPE"); }
 template<> inline MODTYPE FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "MODTYPE"); return SettingsStringToModType(val.as<mpt::ustring>()); }
@@ -748,6 +759,7 @@ public:
 	Setting<SampleUndoBufferSize> m_SampleUndoBufferSize;
 	Setting<SampleEditorKeyBehaviour> sampleEditorKeyBehaviour;
 	Setting<SampleEditorDefaultFormat> m_defaultSampleFormat;
+	Setting<TimelineFormat> sampleEditorTimelineFormat;
 	Setting<ResamplingMode> sampleEditorDefaultResampler;
 	Setting<int32> m_nFinetuneStep;	// Increment finetune by x cents when using spin control.
 	Setting<int32> m_FLACCompressionLevel;	// FLAC compression level for saving (0...8)

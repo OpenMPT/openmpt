@@ -43,6 +43,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define SMP_LEFTBAR_CXSPC Util::ScalePixels(3, m_hWnd)
 #define SMP_LEFTBAR_CXBTN Util::ScalePixels(24, m_hWnd)
 #define SMP_LEFTBAR_CYBTN Util::ScalePixels(22, m_hWnd)
+static constexpr int TIMELINE_HEIGHT = 26;
 
 static constexpr int MIN_ZOOM = -6;
 static constexpr int MAX_ZOOM = 10;
@@ -122,6 +123,9 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_GRID,				&CViewSample::OnChangeGridSize)
 	ON_COMMAND(ID_SAMPLE_QUICKFADE,			&CViewSample::OnQuickFade)
 	ON_COMMAND(ID_SAMPLE_SLICE,				&CViewSample::OnSampleSlice)
+	ON_COMMAND(ID_SAMPLE_DELETE_CUEPOINT,	&CViewSample::OnSampleDeleteCuePoint)
+	ON_COMMAND(ID_SAMPLE_TIMELINE_SECONDS,	&CViewSample::OnTimelineFormatSeconds)
+	ON_COMMAND(ID_SAMPLE_TIMELINE_SAMPLES,	&CViewSample::OnTimelineFormatSamples)
 	ON_COMMAND_RANGE(ID_SAMPLE_CUE_1, ID_SAMPLE_CUE_9, &CViewSample::OnSetCuePoint)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,		&CViewSample::OnUpdateUndo)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO,		&CViewSample::OnUpdateRedo)
@@ -140,13 +144,6 @@ CViewSample::CViewSample()
 	MemsetZero(m_NcButtonState);
 	m_dwNotifyPos.fill(Notification::PosInvalid);
 	m_bmpEnvBar.Create(&CMainFrame::GetMainFrame()->m_SampleIcons);
-}
-
-
-CViewSample::~CViewSample()
-{
-	offScreenBitmap.DeleteObject();
-	offScreenDC.DeleteDC();
 }
 
 
@@ -211,11 +208,14 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 	SIZE sizePage, sizeLine;
 	SmpLength dwLen = 0;
+	uint32 sampleRate = 8363;
 
-	if ((m_nSample > 0) && (m_nSample <= sndFile.GetNumSamples()))
+	if((m_nSample > 0) && (m_nSample <= sndFile.GetNumSamples()))
 	{
 		const ModSample &sample = sndFile.GetSample(m_nSample);
-		if (sample.HasSampleData()) dwLen = sample.nLength;
+		if(sample.HasSampleData())
+			dwLen = sample.nLength;
+		sampleRate = sample.GetSampleRate(sndFile.GetType());
 	}
 	// Compute scroll size in pixels
 	if (newZoom == 0)		// Fit to display
@@ -249,6 +249,40 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 			SetScrollPos(SB_HORZ, static_cast<int>(fPosFraction * GetScrollLimit(SB_HORZ)));
 		}
 	}
+
+	// Choose optimal timeline interval for this zoom level
+	if(m_sizeTotal.cx == 0 || dwLen == 0)
+		return;
+
+	const TimelineFormat format = TrackerSettings::Instance().sampleEditorTimelineFormat;
+	m_timelineInterval = MulDiv(150, m_nDPIx, 96);
+	int samplesPerInterval = 1;
+	if(m_nZoom > 0)
+		samplesPerInterval = m_timelineInterval << (m_nZoom - 1);
+	else if(m_nZoom < 0)
+		samplesPerInterval = m_timelineInterval >> (-m_nZoom - 1);
+	else if(m_sizeTotal.cx != 0)
+		samplesPerInterval = Util::muldiv(m_timelineInterval, dwLen, m_sizeTotal.cx);
+	if(format == TimelineFormat::Seconds)
+		samplesPerInterval = Util::muldiv(samplesPerInterval, 1000, sampleRate);
+	if(!samplesPerInterval)
+		samplesPerInterval = 1;
+	m_timelineUnit = mpt::saturate_round<int>(std::log10(static_cast<double>(samplesPerInterval)));
+	if(m_timelineUnit < 1)
+		m_timelineUnit = 0;
+	m_timelineUnit = static_cast<int>(std::pow(10.0, m_timelineUnit));
+	samplesPerInterval = Util::AlignUp(samplesPerInterval, m_timelineUnit);
+	if(format == TimelineFormat::Seconds)
+		samplesPerInterval = Util::muldiv(samplesPerInterval, sampleRate, 1000);
+	
+	if(m_nZoom > 0)
+		m_timelineInterval = (samplesPerInterval >> (m_nZoom - 1));
+	else if(m_nZoom < 0)
+		m_timelineInterval = samplesPerInterval << (-m_nZoom - 1);
+	else
+		m_timelineInterval = Util::muldiv(samplesPerInterval, m_sizeTotal.cx, dwLen);
+
+	m_cachedSampleRate = sampleRate;
 }
 
 
@@ -487,18 +521,20 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 }
 
 
-int32 CViewSample::SampleToScreen(SmpLength pos) const
+int32 CViewSample::SampleToScreen(SmpLength pos, bool ignoreScrollPos) const
 {
 	CModDoc *pModDoc = GetDocument();
-	if ((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
+	if((pModDoc) && (m_nSample <= pModDoc->GetNumSamples()))
 	{
 		SmpLength nLen = pModDoc->GetSoundFile().GetSample(m_nSample).nLength;
-		if (!nLen) return 0;
+		if(!nLen)
+			return 0;
 
+		const SmpLength scrollPos = ignoreScrollPos ? 0 : m_nScrollPosX;
 		if(m_nZoom > 0)
-			return (pos >> (m_nZoom - 1)) - m_nScrollPosX;
+			return (pos >> (m_nZoom - 1)) - scrollPos;
 		else if(m_nZoom < 0)
-			return (pos - m_nScrollPosX) << (-m_nZoom - 1);
+			return (pos - scrollPos) << (-m_nZoom - 1);
 		else
 			return Util::muldiv(pos, m_sizeTotal.cx, nLen);
 	}
@@ -506,7 +542,7 @@ int32 CViewSample::SampleToScreen(SmpLength pos) const
 }
 
 
-SmpLength CViewSample::ScreenToSample(int32 x) const
+SmpLength CViewSample::ScreenToSample(int32 x, bool ignoreSampleLength) const
 {
 	const CModDoc *pModDoc = GetDocument();
 	SmpLength n = 0;
@@ -528,35 +564,95 @@ SmpLength CViewSample::ScreenToSample(int32 x) const
 			if(m_sizeTotal.cx)
 				n = Util::muldiv(x, smpLen, m_sizeTotal.cx);
 		}
-		LimitMax(n, smpLen);
+		if(!ignoreSampleLength)
+			LimitMax(n, smpLen);
 	}
 	return n;
 }
 
 
-static bool IsInMargins(int pointX, int objX, int margin)
+int32 CViewSample::SecondsToScreen(double x) const
 {
-	return IsInRange(pointX, objX - margin, objX + margin);
+	const ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
+	const auto sampleRate = sample.GetSampleRate(GetDocument()->GetModType());
+	if(sampleRate == 0)
+		return 0;
+	return SampleToScreen(mpt::saturate_round<SmpLength>(x * sampleRate));
 }
 
-CViewSample::HitTestItem CViewSample::PointToItem(CPoint point) const
+
+double CViewSample::ScreenToSeconds(int32 x, bool ignoreSampleLength) const
 {
-	const int margin = Util::ScalePixels(3, m_hWnd);
-	if(m_dwEndSel > m_dwBeginSel)
+	const ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
+	const auto sampleRate = sample.GetSampleRate(GetDocument()->GetModType());
+	if(sampleRate == 0)
+		return 0;
+	return ScreenToSample(x, ignoreSampleLength) / static_cast<double>(sampleRate);
+}
+
+
+static bool HitTest(int pointX, int objX, int marginL, int marginR, int top, int bottom, CRect *rect)
+{
+	if(!IsInRange(pointX, objX - marginL, objX + marginR))
+		return false;
+	if(rect)
+		*rect = {objX - marginL, top, objX + marginR + 1, bottom};
+	return true;
+}
+
+CViewSample::HitTestItem CViewSample::PointToItem(CPoint point, CRect *rect) const
+{
+	const int timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
+	const bool inTimeline = point.y < timelineHeight;
+	if(m_dwEndSel > m_dwBeginSel && !inTimeline)
 	{
-		if(IsInMargins(point.x, SampleToScreen(m_dwBeginSel), margin))
+		const int margin = Util::ScalePixels(3, m_hWnd);
+		if(HitTest(point.x, SampleToScreen(m_dwBeginSel), margin, margin, timelineHeight, m_rcClient.bottom, rect))
 			return HitTestItem::SelectionStart;
-		if(IsInMargins(point.x, SampleToScreen(m_dwEndSel), margin))
+		if(HitTest(point.x, SampleToScreen(m_dwEndSel), margin, margin, timelineHeight, m_rcClient.bottom, rect))
 			return HitTestItem::SelectionEnd;
 	}
 
-	return HitTestItem::SampleData;
+	const auto &sndFile = GetDocument()->GetSoundFile();
+	if(m_nSample <= sndFile.GetNumSamples() && inTimeline)
+	{
+		const auto &sample = sndFile.GetSample(m_nSample);
+		if(sample.nSustainStart < sample.nSustainEnd && sample.nSustainStart < sample.nLength)
+		{
+			if(HitTest(point.x, SampleToScreen(sample.nSustainStart), 0, timelineHeight / 2, 0, timelineHeight, rect))
+				return HitTestItem::SustainStart;
+			if(HitTest(point.x, SampleToScreen(sample.nSustainEnd), timelineHeight / 2, 0, 0, timelineHeight, rect))
+				return HitTestItem::SustainEnd;
+		}
+		if (sample.nLoopStart < sample.nLoopEnd && sample.nLoopStart < sample.nLength)
+		{
+			if(HitTest(point.x, SampleToScreen(sample.nLoopStart), 0, timelineHeight / 2, 0, timelineHeight, rect))
+				return HitTestItem::LoopStart;
+			if(HitTest(point.x, SampleToScreen(sample.nLoopEnd), timelineHeight / 2, 0, 0, timelineHeight, rect))
+				return HitTestItem::LoopEnd;
+		}
+		for(size_t i = 0; i < std::size(sample.cues); i++)
+		{
+			size_t cue = std::size(sample.cues) - 1 - i;  // If two cues overlap visually, the cue with the higher ID is drawn on top, so pick it first
+			if(sample.cues[cue] < sample.nLength && HitTest(point.x, SampleToScreen(sample.cues[cue]), timelineHeight / 2, timelineHeight / 2, 0, timelineHeight, rect))
+				return static_cast<HitTestItem>(static_cast<size_t>(HitTestItem::CuePointFirst) + cue);
+		}
+	}
+	return inTimeline ? HitTestItem::Nothing : HitTestItem::SampleData;
 }
 
 
 void CViewSample::InvalidateSample()
 {
-	InvalidateRect(NULL, FALSE);
+	InvalidateRect(nullptr, FALSE);
+}
+
+
+void CViewSample::InvalidateTimeline()
+{
+	auto rect = m_rcClient;
+	rect.bottom = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
+	InvalidateRect(rect, FALSE);
 }
 
 
@@ -620,15 +716,18 @@ void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
 	{
 		return;
 	}
+	auto modDoc = GetDocument();
+	auto &sndFile = modDoc->GetSoundFile();
+
 	const SampleHint sampleHint = hint.ToType<SampleHint>();
 	FlagSet<HintType> hintType = sampleHint.GetType();
 	const SAMPLEINDEX updateSmp = sampleHint.GetSample();
 	if(hintType[HINT_MPTOPTIONS | HINT_MODTYPE]
 		|| (hintType[HINT_SAMPLEDATA] && (m_nSample == updateSmp || updateSmp == 0)))
 	{
-		if(hintType[HINT_SAMPLEDATA] && m_oplEditor && m_nSample <= GetDocument()->GetNumSamples())
+		if(hintType[HINT_SAMPLEDATA] && m_oplEditor && m_nSample <= sndFile.GetNumSamples())
 		{
-			ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
+			ModSample &sample = sndFile.GetSample(m_nSample);
 			if(sample.uFlags[CHN_ADLIB])
 				m_oplEditor->SetPatch(sample.adlib);
 		}
@@ -639,7 +738,13 @@ void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
 	}
 	if(hintType[HINT_SAMPLEINFO])
 	{
-		if(m_nSample > GetDocument()->GetNumSamples() || !GetDocument()->GetSoundFile().GetSample(m_nSample).HasSampleData())
+		// Sample rate change may imply redrawing of timeline
+		if(m_nSample <= sndFile.GetNumSamples() && m_cachedSampleRate != sndFile.GetSample(m_nSample).GetSampleRate(sndFile.GetType()))
+		{
+			UpdateScrollSize();
+			InvalidateTimeline();
+		}
+		if(m_nSample > sndFile.GetNumSamples() || !sndFile.GetSample(m_nSample).HasSampleData())
 		{
 			// Disable sample drawing if we cannot actually draw anymore.
 			m_dwStatus.reset(SMPSTATUS_DRAWING);
@@ -988,12 +1093,40 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 }
 
 
+static void DrawTriangleHorz(CDC &dc, int x, int width, int height, COLORREF color)
+{
+	const POINT points[] =
+	{
+		{x, 0},
+		{x, height},
+		{x + width, height / 2},
+	};
+	dc.SetDCPenColor(RGB(GetRValue(color) / 2, GetGValue(color) / 2, GetBValue(color) / 2));
+	dc.SetDCBrushColor(color);
+	dc.Polygon(points, static_cast<int>(std::size(points)));
+}
+
+static void DrawTriangleVert(CDC &dc, int x, int width, int height, COLORREF color)
+{
+	const POINT points[] =
+	{
+		{x - width, height / 2},
+		{x + width, height / 2},
+		{x, height},
+	};
+	dc.SetDCPenColor(RGB(GetRValue(color) / 2, GetGValue(color) / 2, GetBValue(color) / 2));
+	dc.SetDCBrushColor(color);
+	dc.Polygon(points, static_cast<int>(std::size(points)));
+}
+
+
 void CViewSample::OnDraw(CDC *pDC)
 {
 	const CModDoc *pModDoc = GetDocument();
 	if ((!pModDoc) || (!pDC)) return;
 
-	CRect rcClient = m_rcClient, rect, rc;
+	const CRect rcClient = m_rcClient;
+	CRect rect, rc;
 	const SmpLength smpScrollPos = ScrollPosToSamplePos();
 	const auto &colors = TrackerSettings::Instance().rgbCustomColors;
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
@@ -1004,20 +1137,141 @@ void CViewSample::OnDraw(CDC *pDC)
 		return;
 	}
 	
-	// Create off-screen image
+	// Create off-screen image and timeline font
 	if(offScreenDC.m_hDC == nullptr)
 	{
 		offScreenDC.CreateCompatibleDC(pDC);
 		offScreenBitmap.CreateCompatibleBitmap(pDC, m_rcClient.Width(), m_rcClient.Height());
 		offScreenDC.SelectObject(offScreenBitmap);
+
+		NONCLIENTMETRICS metrics;
+		metrics.cbSize = sizeof(metrics);
+		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0);
+		metrics.lfMessageFont.lfHeight = mpt::saturate_round<int>(metrics.lfMessageFont.lfHeight * 0.8);
+		metrics.lfMessageFont.lfWidth = mpt::saturate_round<int>(metrics.lfMessageFont.lfWidth * 0.8);
+		m_timelineFont.DeleteObject();
+		m_timelineFont.CreateFontIndirect(&metrics.lfMessageFont);
 	}
 
 	const auto oldPen = offScreenDC.SelectObject(CMainFrame::penDarkGray);
+	const auto oldBrush = offScreenDC.SelectStockObject(DC_BRUSH);
+	const auto oldFont = offScreenDC.SelectObject(m_timelineFont);
+
+	// Draw timeline
+	const int timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
+	{
+		const TimelineFormat format = TrackerSettings::Instance().sampleEditorTimelineFormat;
+		CRect timeline = rcClient;
+		timeline.bottom = timeline.top + timelineHeight + 1;
+		offScreenDC.DrawEdge(timeline, EDGE_ETCHED, BF_MIDDLE | BF_BOTTOM);
+		offScreenDC.SetTextColor(GetSysColor(COLOR_BTNTEXT));
+		offScreenDC.SetBkMode(TRANSPARENT);
+		if(!m_timelineUnit)
+			m_timelineUnit = 1;
+
+		if(m_timelineInterval && sample.nLength)
+		{
+			rc = timeline;
+			const auto sampleRate = sample.GetSampleRate(sndFile.GetType());
+			const int textOffset = Util::ScalePixels(4, m_hWnd);
+			mpt::tstring text;
+			for(int x = -(SampleToScreen(ScrollPosToSamplePos(), true) % m_timelineInterval); x < m_rcClient.right + m_timelineInterval; x += m_timelineInterval)
+			{
+				text.clear();
+				if(format == TimelineFormat::Seconds && sampleRate)
+				{
+					const int64 time = mpt::saturate_round<int64>(std::round(ScreenToSeconds(x, true) * 1000.0 / m_timelineUnit) * m_timelineUnit);
+					
+					rc.left = SecondsToScreen(time / 1000.0);
+					if(rc.left >= m_rcClient.right)
+						break;
+
+					if(time >= 1000 || (time == 0 && m_timelineUnit >= 1000))
+					{
+						text += mpt::tfmt::dec(3, _T(','), time / 1000) + _T("s");
+					}
+					if(int remain = time % 1000; remain || (time < 1000 && m_timelineUnit < 1000))
+					{
+						text += mpt::tfmt::val(remain) + _T("ms");
+					}
+				} else
+				{
+					const SmpLength smp = mpt::saturate_round<SmpLength>(std::round(ScreenToSample(x, true) / static_cast<double>(m_timelineUnit)) * m_timelineUnit);
+
+					rc.left = SampleToScreen(smp);
+					if(rc.left >= m_rcClient.right)
+						break;
+
+					text += mpt::tfmt::dec(3, _T(','), smp) + _T(" smp");
+				}
+
+				rc.bottom = timelineHeight;
+				for(int i = 0; i < 10; i++)
+				{
+					rect = rc;
+					rect.left += i * m_timelineInterval / 10;
+					if(i == 0)
+						rect.top = 0;
+					else if(i == 5)
+						rect.top = timelineHeight / 2;
+					else
+						rect.top = timelineHeight - timelineHeight / 4;
+					offScreenDC.DrawEdge(rect, EDGE_ETCHED, BF_LEFT);
+				}
+				rc.bottom = timelineHeight / 2;
+				rc.left += textOffset;
+				offScreenDC.DrawText(text.c_str(), rc, DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+			}
+
+			// Cues
+			offScreenDC.SelectStockObject(DC_PEN);
+			offScreenDC.SetTextColor(RGB(0, 0, 0));
+			const int arrowWidth = timelineHeight / 2;
+			for(size_t i = 0; i < std::size(sample.cues); i++)
+			{
+				if(sample.cues[i] >= sample.nLength)
+					continue;
+				int xl = SampleToScreen(sample.cues[i]);
+				if((xl >= -arrowWidth) && (xl < rcClient.right))
+				{
+					DrawTriangleVert(offScreenDC, xl, arrowWidth, timelineHeight, colors[MODCOLOR_SAMPLE_CUEPOINT]);
+					rc.SetRect(xl - arrowWidth, timelineHeight / 2 - 1, xl + arrowWidth, timelineHeight);
+					offScreenDC.DrawText(mpt::tfmt::val(i + 1).c_str(), rc, DT_CENTER | DT_SINGLELINE | DT_NOPREFIX);
+				}
+			}
+
+			// Loop Start/End
+			if(sample.nLoopEnd > sample.nLoopStart)
+			{
+				int xl = SampleToScreen(sample.nLoopStart);
+				if((xl >= -arrowWidth) && (xl <= rcClient.right + arrowWidth))
+					DrawTriangleHorz(offScreenDC, xl, arrowWidth, timelineHeight, colors[MODCOLOR_SAMPLE_LOOPMARKER]);
+
+				xl = SampleToScreen(sample.nLoopEnd);
+				if((xl >= -arrowWidth) && (xl <= rcClient.right + arrowWidth))
+					DrawTriangleHorz(offScreenDC, xl, -timelineHeight / 2, timelineHeight, colors[MODCOLOR_SAMPLE_LOOPMARKER]);
+			}
+
+			// Sustain Loop Start/End
+			if(sample.nSustainEnd > sample.nSustainStart)
+			{
+				int xl = SampleToScreen(sample.nSustainStart);
+				if((xl >= -arrowWidth) && (xl <= rcClient.right + arrowWidth))
+					DrawTriangleHorz(offScreenDC, xl, timelineHeight / 2, timelineHeight, colors[MODCOLOR_SAMPLE_SUSTAINMARKER]);
+
+				xl = SampleToScreen(sample.nSustainEnd);
+				if((xl >= -arrowWidth) && (xl <= rcClient.right + arrowWidth))
+					DrawTriangleHorz(offScreenDC, xl, -timelineHeight / 2, timelineHeight, colors[MODCOLOR_SAMPLE_SUSTAINMARKER]);
+			}
+		}
+	}
+
 	rect = rcClient;
+	rect.top = timelineHeight;
 	if((rcClient.bottom > rcClient.top) && (rcClient.right > rcClient.left))
 	{
-		int ymed = (rect.top + rect.bottom) / 2;
-		int yrange = (rect.bottom - rect.top) / 2;
+		const int ymed = (rect.top + rect.bottom) / 2;
+		const int yrange = (rect.bottom - rect.top) / 2;
 
 		// Erase background
 		if ((m_dwBeginSel < m_dwEndSel) && (m_dwEndSel > smpScrollPos))
@@ -1042,7 +1296,7 @@ void CViewSample::OnDraw(CDC *pDC)
 				offScreenDC.FillSolidRect(&rc, colors[MODCOLOR_BACKSAMPLE]);
 		} else
 		{
-			offScreenDC.FillSolidRect(&rcClient, colors[MODCOLOR_BACKSAMPLE]);
+			offScreenDC.FillSolidRect(&rect, colors[MODCOLOR_BACKSAMPLE]);
 		}
 		offScreenDC.SelectObject(CMainFrame::penDarkGray);
 		if (sample.uFlags[CHN_STEREO])
@@ -1057,7 +1311,7 @@ void CViewSample::OnDraw(CDC *pDC)
 			offScreenDC.LineTo(rcClient.right, ymed);
 		}
 		// Drawing sample
-		if (sample.HasSampleData() && (yrange) && (sample.nLength > 1) && (rect.right > 1))
+		if(sample.HasSampleData() && yrange && (sample.nLength > 1) && (rect.right > 1))
 		{
 			// Loop Start/End
 			if ((sample.nLoopEnd > smpScrollPos) && (sample.nLoopEnd > sample.nLoopStart))
@@ -1068,8 +1322,9 @@ void CViewSample::OnDraw(CDC *pDC)
 					offScreenDC.MoveTo(xl, rect.top);
 					offScreenDC.LineTo(xl, rect.bottom);
 				}
+
 				xl = SampleToScreen(sample.nLoopEnd);
-				if ((xl >= 0) && (xl < rcClient.right))
+				if((xl >= 0) && (xl < rcClient.right))
 				{
 					offScreenDC.MoveTo(xl, rect.top);
 					offScreenDC.LineTo(xl, rect.bottom);
@@ -1086,6 +1341,7 @@ void CViewSample::OnDraw(CDC *pDC)
 					offScreenDC.MoveTo(xl, rect.top);
 					offScreenDC.LineTo(xl, rect.bottom);
 				}
+
 				xl = SampleToScreen(sample.nSustainEnd);
 				if ((xl >= 0) && (xl < rcClient.right))
 				{
@@ -1093,6 +1349,7 @@ void CViewSample::OnDraw(CDC *pDC)
 					offScreenDC.LineTo(xl, rect.bottom);
 				}
 			}
+
 			// Drawing Sample Data
 			offScreenDC.SelectStockObject(DC_PEN);
 			offScreenDC.SetDCPenColor(colors[MODCOLOR_SAMPLE]);
@@ -1154,6 +1411,10 @@ void CViewSample::OnDraw(CDC *pDC)
 
 	BitBlt(pDC->m_hDC, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), offScreenDC, 0, 0, SRCCOPY);
 
+	if(oldFont)
+		offScreenDC.SelectObject(oldFont);
+	if(oldBrush)
+		offScreenDC.SelectObject(oldBrush);
 	if(oldPen)
 		offScreenDC.SelectObject(oldPen);
 }
@@ -1167,9 +1428,10 @@ void CViewSample::DrawPositionMarks()
 		return;
 	}
 	CRect rect;
+	const int timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
 	for(auto pos : m_dwNotifyPos) if (pos != Notification::PosInvalid)
 	{
-		rect.top = -2;
+		rect.top = timelineHeight;
 		rect.left = SampleToScreen(pos);
 		rect.right = rect.left + 1;
 		rect.bottom = m_rcClient.bottom + 1;
@@ -1584,6 +1846,8 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 		const SmpLength x = ScreenToSample(point.x);
 
 		bool update = false;
+		SmpLength *updateLoopPoint = nullptr;
+		const char *updateLoopDesc = nullptr;
 		switch(m_dragItem)
 		{
 		case HitTestItem::SelectionStart:
@@ -1595,8 +1859,53 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 				update = true;
 			}
 			break;
-		default:
+		case HitTestItem::LoopStart:
+			if(x < sample.nLoopEnd)
+			{
+				updateLoopPoint = &sample.nLoopStart;
+				updateLoopDesc = "Set Loop Start";
+			}
 			break;
+		case HitTestItem::LoopEnd:
+			if(x > sample.nLoopStart)
+			{
+				updateLoopPoint = &sample.nLoopEnd;
+				updateLoopDesc = "Set Loop End";
+			}
+			break;
+		case HitTestItem::SustainStart:
+			if(x < sample.nSustainEnd)
+			{
+				updateLoopPoint = &sample.nSustainStart;
+				updateLoopDesc = "Set Sustain Start";
+			}
+			break;
+		case HitTestItem::SustainEnd:
+			if(x > sample.nSustainStart)
+			{
+				updateLoopPoint = &sample.nSustainEnd;
+				updateLoopDesc = "Set Sustain End";
+			}
+			break;
+		default:
+			if(m_dragItem >= HitTestItem::CuePointFirst && m_dragItem <= HitTestItem::CuePointLast)
+			{
+				int cue = CuePointFromItem(m_dragItem);
+				updateLoopPoint = &sample.cues[cue];
+				updateLoopDesc ="Set Cue Point";
+			}
+			break;
+		}
+
+		if(updateLoopPoint && updateLoopDesc && *updateLoopPoint != x)
+		{
+			if(!m_dragPreparedUndo)
+				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, updateLoopDesc);
+			m_dragPreparedUndo = true;
+			update = true;
+			*updateLoopPoint = x;
+			sample.PrecomputeLoops(sndFile, true);
+			SetModified(SampleHint().Info().Data(), true, false);
 		}
 
 		if(m_dwStatus[SMPSTATUS_DRAWING])
@@ -1642,7 +1951,7 @@ BOOL CViewSample::OnSetCursor(CWnd *pWnd, UINT nHitTest, UINT message)
 		GetCursorPos(&point);
 		ScreenToClient(&point);
 		const auto item = PointToItem(point);
-		if(item != HitTestItem::SampleData)
+		if(item != HitTestItem::Nothing && item != HitTestItem::SampleData)
 		{
 			SetCursor(CMainFrame::curVSplit);
 			return TRUE;
@@ -1679,6 +1988,7 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 	{
 		const auto sampleAtPoint = std::min(ScreenToSample(point.x), sample.nLength - SmpLength(1));
 		m_dragItem = PointToItem(point);
+		m_dragPreparedUndo = false;
 		if(m_dwStatus[SMPSTATUS_DRAWING])
 			m_dragItem = HitTestItem::SampleData;
 
@@ -1735,7 +2045,7 @@ void CViewSample::OnLButtonUp(UINT, CPoint)
 		m_dwStatus.reset(SMPSTATUS_MOUSEDRAG);
 		ReleaseCapture();
 	}
-	m_dragItem = HitTestItem::SampleData;
+	m_dragItem = HitTestItem::Nothing;
 	m_lastDrawPoint.SetPoint(-1, -1);
 }
 
@@ -1755,13 +2065,38 @@ void CViewSample::OnLButtonDblClk(UINT, CPoint)
 void CViewSample::OnRButtonDown(UINT, CPoint pt)
 {
 	CModDoc *pModDoc = GetDocument();
-	if (pModDoc)
+	if(pModDoc)
 	{
 		const CSoundFile &sndFile = pModDoc->GetSoundFile();
 		const ModSample &sample = sndFile.GetSample(m_nSample);
 		HMENU hMenu = ::CreatePopupMenu();
 		CInputHandler* ih = CMainFrame::GetInputHandler();
-		if (!hMenu) return;
+		if(!hMenu)
+			return;
+
+		TCHAR s[256];
+
+		const int timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
+		if(pt.y < timelineHeight)
+		{
+			const auto item = PointToItem(pt);
+			if(item >= HitTestItem::CuePointFirst && item <= HitTestItem::CuePointLast)
+			{
+				m_dwMenuParam = CuePointFromItem(item);
+				wsprintf(s, _T("&Delete Cue Point %d"), 1 + static_cast<int>(m_dwMenuParam));
+				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_DELETE_CUEPOINT, s);
+				::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
+			}
+
+			bool fmtSeconds = TrackerSettings::Instance().sampleEditorTimelineFormat == TimelineFormat::Seconds;
+			::AppendMenu(hMenu, MF_STRING | (fmtSeconds ? MF_CHECKED : 0), ID_SAMPLE_TIMELINE_SECONDS, _T("&Seconds"));
+			::AppendMenu(hMenu, MF_STRING | (fmtSeconds ? 0 : MF_CHECKED), ID_SAMPLE_TIMELINE_SAMPLES, _T("S&amples"));
+			ClientToScreen(&pt);
+			::TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
+			::DestroyMenu(hMenu);
+			return;
+		}
+
 		if (sample.HasSampleData() && !sample.uFlags[CHN_ADLIB])
 		{
 			if (m_dwEndSel >= m_dwBeginSel + 4)
@@ -1773,7 +2108,6 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			} else
 			{
-				TCHAR s[256];
 				SmpLength dwPos = ScreenToSample(pt.x);
 				CString pos = mpt::cfmt::dec(3, ',', dwPos);
 				if (dwPos <= sample.nLength)
@@ -1809,7 +2143,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						for(std::size_t i = 0; i < std::size(sample.cues); i++)
 						{
 							const SmpLength cue = sample.cues[i];
-							wsprintf(s, _T("Cue &%c: %s"), '1' + i, mpt::cfmt::dec(3, ',', cue).GetString());
+							wsprintf(s, _T("Cue &%d: %s"), 1 + static_cast<int>(i),
+								cue < sample.nLength ? mpt::cfmt::dec(3, ',', cue).GetString() : _T("unused"));
 							::AppendMenu(hCueMenu, MF_STRING, ID_SAMPLE_CUE_1 + i, s);
 							if(cue > 0 && cue < sample.nLength) hasValidCues = true;
 						}
@@ -3229,15 +3564,17 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 void CViewSample::OnSampleSlice()
 {
-	CModDoc *pModDoc = GetDocument();
-	if(pModDoc == nullptr) return;
-	CSoundFile &sndFile = pModDoc->GetSoundFile();
+	CModDoc *modDoc = GetDocument();
+	if(modDoc == nullptr || m_nSample > modDoc->GetNumSamples())
+		return;
+	CSoundFile &sndFile = modDoc->GetSoundFile();
 	ModSample &sample = sndFile.GetSample(m_nSample);
-	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB]) return;
+	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
+		return;
 
 	// Sort cue points and add two fake cue points to make things easier below...
-	SmpLength cues[mpt::array_size<decltype(sample.cues)>::size + 2];
-	bool hasValidCues = false;	// Any cues in ]0, length[
+	std::array<SmpLength, mpt::array_size<decltype(sample.cues)>::size + 2> cues;
+	bool hasValidCues = false;  // Any cues in ]0, length[
 	for(std::size_t i = 0; i < std::size(sample.cues); i++)
 	{
 		cues[i] = sample.cues[i];
@@ -3252,7 +3589,7 @@ void CViewSample::OnSampleSlice()
 
 	cues[mpt::array_size<decltype(sample.cues)>::size] = 0;
 	cues[mpt::array_size<decltype(sample.cues)>::size + 1] = sample.nLength;
-	std::sort(cues, cues + std::size(cues));
+	std::sort(cues.begin(), cues.end());
 
 	// Now slice the sample at each cue point
 	for(std::size_t i = 1; i < std::size(cues) - 1; i++)
@@ -3260,7 +3597,7 @@ void CViewSample::OnSampleSlice()
 		const SmpLength cue  = cues[i];
 		if(cue > cues[i - 1] && cue < cues[i + 1])
 		{
-			SAMPLEINDEX nextSmp = pModDoc->InsertSample();
+			SAMPLEINDEX nextSmp = modDoc->InsertSample();
 			if(nextSmp == SAMPLEINDEX_INVALID)
 				break;
 
@@ -3276,17 +3613,33 @@ void CViewSample::OnSampleSlice()
 				newSample.PrecomputeLoops(sndFile, false);
 
 				if(sndFile.GetNumInstruments() > 0)
-					pModDoc->InsertInstrument(nextSmp);
+					modDoc->InsertInstrument(nextSmp);
 			}
 		}
 	}
 	
-	pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Slice Sample", cues[1], sample.nLength);
+	modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Slice Sample", cues[1], sample.nLength);
 	SampleEdit::ResizeSample(sample, cues[1], sndFile);
 	sample.PrecomputeLoops(sndFile, true);
 	SetModified(SampleHint().Info().Data().Names(), true, true);
-	pModDoc->UpdateAllViews(this, SampleHint().Info().Data().Names(), this);
-	pModDoc->UpdateAllViews(this, InstrumentHint().Info().Envelope().Names(), this);
+	modDoc->UpdateAllViews(this, SampleHint().Info().Data().Names(), this);
+	modDoc->UpdateAllViews(this, InstrumentHint().Info().Envelope().Names(), this);
+}
+
+
+void CViewSample::OnSampleDeleteCuePoint()
+{
+	CModDoc *modDoc = GetDocument();
+	if(modDoc == nullptr || m_nSample > modDoc->GetNumSamples())
+		return;
+	CSoundFile &sndFile = modDoc->GetSoundFile();
+	ModSample &sample = sndFile.GetSample(m_nSample);
+	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB] || m_dwMenuParam >= std::size(sample.cues))
+		return;
+
+	modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Delete Cue Point");
+	sample.cues[m_dwMenuParam] = MAX_SAMPLE_LENGTH;
+	SetModified(SampleHint().Info().Data(), true, true);
 }
 
 
@@ -3300,7 +3653,7 @@ bool CViewSample::CanZoomSelection() const
 // Result is not limited to MIN_ZOOM...MAX_ZOOM range.
 int CViewSample::GetZoomLevel(SmpLength length) const
 {
-	if (m_rcClient.Width() == 0 || length == 0)
+	if(m_rcClient.Width() == 0 || length == 0)
 		return MAX_ZOOM + 1;
 
 	// When m_nZoom > 0, 2^(m_nZoom - 1) = samplesPerPixel  [1]
@@ -3319,36 +3672,33 @@ void CViewSample::DoZoom(int direction, const CPoint &zoomPoint)
 {
 	const CSoundFile &sndFile = GetDocument()->GetSoundFile();
 	// zoomOrder: Biggest to smallest zoom order.
-	int zoomOrder[(-MIN_ZOOM - 1) + (MAX_ZOOM + 1)];
+	std::array<int, (-MIN_ZOOM - 1) + (MAX_ZOOM + 1)> zoomOrder;
 	for(int i = 2; i < -MIN_ZOOM + 1; ++i)
 		zoomOrder[i - 2] = MIN_ZOOM + i - 2;	// -6, -5, -4, -3...
 
 	for(int i = 1; i <= MAX_ZOOM; ++i)
 		zoomOrder[i - 1 + (-MIN_ZOOM - 1)] = i; // 1, 2, 3...
-	zoomOrder[mpt::array_size<decltype(zoomOrder)>::size - 1] = 0;
-	int* const pZoomOrderEnd = zoomOrder + std::size(zoomOrder);
-	int autoZoomLevel = GetZoomLevel(sndFile.GetSample(m_nSample).nLength);
-	if(autoZoomLevel < MIN_ZOOM) autoZoomLevel = MIN_ZOOM;
+	zoomOrder.back() = 0;
+	const int autoZoomLevel = std::max(MIN_ZOOM, GetZoomLevel(sndFile.GetSample(m_nSample).nLength));
 
-	// If auto-zoom is not the smallest zoom, move auto-zoom index(=zero)
-	// to the right position in the zoom order.
+	// Move auto-zoom index (=zero) to the right position in the zoom order according to its real zoom strength.
 	if (autoZoomLevel < MAX_ZOOM + 1)
 	{
-		int* p = std::find(zoomOrder, pZoomOrderEnd, autoZoomLevel);
-		if (p != pZoomOrderEnd)
+		auto p = std::find(zoomOrder.begin(), zoomOrder.end(), autoZoomLevel);
+		if(p != zoomOrder.end())
 		{
-			memmove(p + 1, p, sizeof(zoomOrder[0]) * (pZoomOrderEnd - (p+1)));
+			std::move(p, zoomOrder.end() - 1, p + 1);
 			*p = 0;
 		}
 		else
-			ASSERT(false);
+			MPT_ASSERT_NOTREACHED();
 	}
-	const std::ptrdiff_t nPos = std::find(zoomOrder, pZoomOrderEnd, m_nZoom) - zoomOrder;
+	const std::ptrdiff_t nPos = std::distance(zoomOrder.begin(), std::find(zoomOrder.begin(), zoomOrder.end(), m_nZoom));
 
 	int newZoom;
-	if (direction > 0 && nPos > 0)	// Zoom in
+	if(direction > 0 && nPos > 0)  // Zoom in
 		newZoom = zoomOrder[nPos - 1];
-	else if (direction < 0 && nPos + 1 < static_cast<std::ptrdiff_t>(std::size(zoomOrder)))
+	else if(direction < 0 && nPos + 1 < static_cast<std::ptrdiff_t>(zoomOrder.size()))
 		newZoom = zoomOrder[nPos + 1];
 	else
 		return;
@@ -3404,6 +3754,23 @@ void CViewSample::OnQuickFade()
 	PostCtrlMessage(IDC_SAMPLE_QUICKFADE);
 }
 
+
+void CViewSample::OnTimelineFormatSeconds()
+{
+	TrackerSettings::Instance().sampleEditorTimelineFormat = TimelineFormat::Seconds;
+	UpdateScrollSize();
+	InvalidateTimeline();
+}
+
+
+void CViewSample::OnTimelineFormatSamples()
+{
+	TrackerSettings::Instance().sampleEditorTimelineFormat = TimelineFormat::Samples;
+	UpdateScrollSize();
+	InvalidateTimeline();
+}
+
+
 void CViewSample::OnUpdateUndo(CCmdUI *pCmdUI)
 {
 	CModDoc *pModDoc = GetDocument();
@@ -3428,36 +3795,62 @@ void CViewSample::OnUpdateRedo(CCmdUI *pCmdUI)
 
 INT_PTR CViewSample::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 {
+	CString text;
 	CRect ncRect;
-	ClientToScreen(&point);
-	const auto ncButton = GetNcButtonAtPoint(point, &ncRect);
-	if(ncButton == uint32_max)
-		return CModScrollView::OnToolHitTest(point, pTI);
+	CPoint screenPoint = point;
+	ClientToScreen(&screenPoint);
+	const auto ncButton = GetNcButtonAtPoint(screenPoint, &ncRect);
+	int buttonID = 0;
+	if(ncButton != uint32_max)
+	{
+		buttonID = cLeftBarButtons[ncButton];
+		ScreenToClient(&ncRect);
 
-	auto buttonID = cLeftBarButtons[ncButton];
-	ScreenToClient(&ncRect);
+		text.LoadString(buttonID);
+
+		CommandID cmd = kcNull;
+		switch(buttonID)
+		{
+		case ID_SAMPLE_ZOOMUP: cmd = kcSampleZoomUp; break;
+		case ID_SAMPLE_ZOOMDOWN: cmd = kcSampleZoomDown; break;
+		case ID_SAMPLE_DRAW: cmd = kcSampleToggleDrawing; break;
+		case ID_SAMPLE_ADDSILENCE: cmd = kcSampleResize; break;
+		case ID_SAMPLE_GRID: cmd = kcSampleGrid; break;
+		}
+		if(cmd != kcNull)
+		{
+			auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
+			if(!keyText.IsEmpty())
+				text += MPT_CFORMAT(" ({})")(keyText);
+		}
+	} else
+	{
+		auto item = PointToItem(point, &ncRect);
+		switch(item)
+		{
+		case HitTestItem::LoopStart:
+			text = _T("Loop Start");
+			break;
+		case HitTestItem::LoopEnd:
+			text = _T("Loop End");
+			break;
+		case HitTestItem::SustainStart:
+			text = _T("Sustain Start");
+			break;
+		case HitTestItem::SustainEnd:
+			text = _T("Sustain End");
+			break;
+		default:
+			if(item < HitTestItem::CuePointFirst || item > HitTestItem::CuePointLast)
+				return CModScrollView::OnToolHitTest(point, pTI);
+			text = MPT_CFORMAT("Cue Point {}")(CuePointFromItem(item) + 1);
+		}
+		buttonID = static_cast<int>(item) + 1;
+	}
 
 	pTI->hwnd = m_hWnd;
 	pTI->uId = buttonID;
 	pTI->rect = ncRect;
-	CString text;
-	text.LoadString(buttonID);
-
-	CommandID cmd = kcNull;
-	switch(buttonID)
-	{
-	case ID_SAMPLE_ZOOMUP: cmd = kcSampleZoomUp; break;
-	case ID_SAMPLE_ZOOMDOWN: cmd = kcSampleZoomDown; break;
-	case ID_SAMPLE_DRAW: cmd = kcSampleToggleDrawing; break;
-	case ID_SAMPLE_ADDSILENCE: cmd = kcSampleResize; break;
-	case ID_SAMPLE_GRID: cmd = kcSampleGrid; break;
-	}
-	if(cmd != kcNull)
-	{
-		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
-		if(!keyText.IsEmpty())
-			text += MPT_CFORMAT(" ({})")(keyText);
-	}
 
 	// MFC will free() the text
 	auto size = text.GetLength() + 1;

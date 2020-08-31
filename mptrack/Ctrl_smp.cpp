@@ -2822,7 +2822,8 @@ void CCtrlSamples::OnFineTuneChanged()
 {
 	if (IsLocked()) return;
 	int n = GetDlgItemInt(IDC_EDIT5);
-	if(!m_startedEdit) PrepareUndo("Finetune");
+	if(!m_startedEdit)
+		PrepareUndo("Finetune");
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	if (!m_sndFile.UseFinetuneAndTranspose())
 	{
@@ -2845,7 +2846,7 @@ void CCtrlSamples::OnFineTuneChanged()
 	{
 		if(m_sndFile.GetType() & MOD_TYPE_MOD)
 			n = MOD2XMFineTune(n);
-		if ((n >= -128) && (n <= 127))
+		if((n >= -128) && (n <= 127))
 		{
 			sample.nFineTune = static_cast<int8>(n);
 			SetModified(SampleHint().Info(), false, false);

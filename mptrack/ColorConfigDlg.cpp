@@ -23,20 +23,21 @@ static constexpr struct ColorDescriptions
 {
 	const TCHAR *name;
 	int previewImage;
-	uint32 colorIndex[3];
+	ModColor colorIndex[3];
 	const TCHAR *descText[3];
 } colorDefs[] =
 {
 	{ _T("Pattern Editor"),      0, { MODCOLOR_BACKNORMAL, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKHILIGHT }, { _T("Background:"), _T("Foreground:"), _T("Highlighted:") } },
-	{ _T("Active Row"),          0, { MODCOLOR_BACKCURROW, MODCOLOR_TEXTCURROW, 0 }, { _T("Background:"), _T("Foreground:"), nullptr } },
-	{ _T("Pattern Selection"),   0, { MODCOLOR_BACKSELECTED, MODCOLOR_TEXTSELECTED, 0 }, { _T("Background:"), _T("Foreground:"), nullptr } },
-	{ _T("Play Cursor"),         0, { MODCOLOR_BACKPLAYCURSOR, MODCOLOR_TEXTPLAYCURSOR, 0 }, { _T("Background:"), _T("Foreground:"), nullptr } },
+	{ _T("Active Row"),          0, { MODCOLOR_BACKCURROW, MODCOLOR_TEXTCURROW, {} }, { _T("Background:"), _T("Foreground:"), nullptr } },
+	{ _T("Pattern Selection"),   0, { MODCOLOR_BACKSELECTED, MODCOLOR_TEXTSELECTED, {} }, { _T("Background:"), _T("Foreground:"), nullptr } },
+	{ _T("Play Cursor"),         0, { MODCOLOR_BACKPLAYCURSOR, MODCOLOR_TEXTPLAYCURSOR, {} }, { _T("Background:"), _T("Foreground:"), nullptr } },
 	{ _T("Note Highlight"),      0, { MODCOLOR_NOTE, MODCOLOR_INSTRUMENT, MODCOLOR_VOLUME }, { _T("Note:"), _T("Instrument:"), _T("Volume:") } },
 	{ _T("Effect Highlight"),    0, { MODCOLOR_PANNING, MODCOLOR_PITCH, MODCOLOR_GLOBALS }, { _T("Panning Effects:"), _T("Pitch Effects:"), _T("Global Effects:") } },
-	{ _T("Invalid Commands"),    0, { MODCOLOR_DODGY_COMMANDS, 0, 0 }, { _T("Invalid Note:"), nullptr, nullptr } },
+	{ _T("Invalid Commands"),    0, { MODCOLOR_DODGY_COMMANDS, {}, {} }, { _T("Invalid Note:"), nullptr, nullptr } },
 	{ _T("Channel Separator"),   0, { MODCOLOR_SEPHILITE, MODCOLOR_SEPFACE, MODCOLOR_SEPSHADOW }, { _T("Highlight:"), _T("Face:"), _T("Shadow:") } },
-	{ _T("Next/Prev Pattern"),   0, { MODCOLOR_BLENDCOLOR, 0, 0 }, { _T("Blend Colour:"), nullptr, nullptr } },
-	{ _T("Sample Editor"),       1, { MODCOLOR_SAMPLE, MODCOLOR_BACKSAMPLE, MODCOLOR_SAMPLESELECTED }, { _T("Sample Data:"), _T("Background:"), _T("Selection:") } },
+	{ _T("Next/Prev Pattern"),   0, { MODCOLOR_BLENDCOLOR, {}, {} }, { _T("Blend Colour:"), nullptr, nullptr } },
+	{ _T("Sample Waveform"),     1, { MODCOLOR_SAMPLE, MODCOLOR_BACKSAMPLE, MODCOLOR_SAMPLESELECTED }, { _T("Sample Data:"), _T("Background:"), _T("Selection:") } },
+	{ _T("Sample Markers"),      1, { MODCOLOR_SAMPLE_LOOPMARKER, MODCOLOR_SAMPLE_SUSTAINMARKER, MODCOLOR_SAMPLE_CUEPOINT}, { _T("Loop Marker:"), _T("Sustain Marker:"), _T("Cue Point:") } },
 	{ _T("Instrument Editor"),   2, { MODCOLOR_ENVELOPES, MODCOLOR_ENVELOPE_RELEASE, MODCOLOR_BACKENV }, { _T("Envelopes:"), _T("Release Envelope:"), _T("Background:") } },
 	{ _T("VU-Meters"),           0, { MODCOLOR_VUMETER_HI, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_LO }, { _T("Hi:"), _T("Med:"), _T("Lo:") } },
 	{ _T("VU-Meters (Plugins)"), 0, { MODCOLOR_VUMETER_HI_VST, MODCOLOR_VUMETER_MED_VST, MODCOLOR_VUMETER_LO_VST }, { _T("Hi:"), _T("Med:"), _T("Lo:") } }
@@ -359,11 +360,17 @@ void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 		break;
 	// Sample Editor
 	case 9:
+	case 10:
 		p[0] = rgb2quad(CustomColors[MODCOLOR_BACKSAMPLE]);
+		p[7] = rgb2quad(GetSysColor(COLOR_BTNFACE));
+		p[8] = rgb2quad(GetSysColor(COLOR_BTNSHADOW));
+		p[10] = rgb2quad(CustomColors[MODCOLOR_SAMPLE_LOOPMARKER]);
+		p[11] = rgb2quad(CustomColors[MODCOLOR_SAMPLE_CUEPOINT]);
+		p[14] = rgb2quad(CustomColors[MODCOLOR_SAMPLE_SUSTAINMARKER]);
 		p[15] = rgb2quad(CustomColors[MODCOLOR_SAMPLESELECTED]);
 		break;
 	// Envelope Editor
-	case 10:
+	case 11:
 		p[0] = rgb2quad(CustomColors[MODCOLOR_BACKENV]);
 		p[2] = rgb2quad(CustomColors[MODCOLOR_ENVELOPE_RELEASE]);
 		break;

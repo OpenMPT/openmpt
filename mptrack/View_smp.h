@@ -42,9 +42,16 @@ protected:
 
 	enum class HitTestItem
 	{
+		Nothing,
 		SampleData,
 		SelectionStart,
 		SelectionEnd,
+		LoopStart,
+		LoopEnd,
+		SustainStart,
+		SustainEnd,
+		CuePointFirst,
+		CuePointLast = CuePointFirst + mpt::array_size<decltype(ModSample::cues)>::size - 1,
 	};
 
 	std::unique_ptr<OPLInstrDlg> m_oplEditor;
@@ -52,15 +59,20 @@ protected:
 	CRect m_rcClient;
 	CDC offScreenDC;
 	CBitmap offScreenBitmap;
+	CFont m_timelineFont;
 	SIZE m_sizeTotal;
 	UINT m_nBtnMouseOver = 0xFFFF;
 	int m_nZoom = 0;	// < 0: Zoom into sample (2^x:1 ratio), 0: Auto zoom, > 0: Zoom out (1:2^x ratio)
+	int m_timelineUnit = 0;
+	int m_timelineInterval = 0;
+	decltype(ModSample::nC5Speed) m_cachedSampleRate = 8363;
 	FlagSet<Flags> m_dwStatus;
 	SmpLength m_dwBeginSel, m_dwEndSel, m_dwBeginDrag, m_dwEndDrag;
 	SmpLength m_dwMenuParam;
 	SmpLength m_nGridSegments = 0;
 	SAMPLEINDEX m_nSample = 1;
-	HitTestItem m_dragItem = HitTestItem::SampleData;
+	HitTestItem m_dragItem = HitTestItem::Nothing;
+	bool m_dragPreparedUndo = false;
 
 	// Sample drawing
 	CPoint m_lastDrawPoint;		// For drawing horizontal lines
@@ -76,7 +88,6 @@ protected:
 
 public:
 	CViewSample();
-	~CViewSample();
 	DECLARE_SERIAL(CViewSample)
 
 	static std::pair<int, int> FindMinMax(const int8 *p, SmpLength numSamples, int numChannels);
@@ -90,12 +101,15 @@ protected:
 	void SetCurrentSample(SAMPLEINDEX nSmp);
 	bool IsOPLInstrument() const;
 	void SetZoom(int nZoom, SmpLength centeredSample = SmpLength(-1));
-	int32 SampleToScreen(SmpLength pos) const;
-	SmpLength ScreenToSample(int32 x) const;
-	HitTestItem PointToItem(CPoint point) const;
+	int32 SampleToScreen(SmpLength pos, bool ignoreScrollPos = false) const;
+	SmpLength ScreenToSample(int32 x, bool ignoreSampleLength = false) const;
+	int32 SecondsToScreen(double x) const;
+	double ScreenToSeconds(int32 x, bool ignoreSampleLength = false) const;
+	HitTestItem PointToItem(CPoint point, CRect *rect = nullptr) const;
 	void PlayNote(ModCommand::NOTE note, const SmpLength nStartPos = 0, int volume = -1);
 	void NoteOff(ModCommand::NOTE note);
 	void InvalidateSample();
+	void InvalidateTimeline();
 	void SetCurSel(SmpLength nBegin, SmpLength nEnd);
 	void ScrollToPosition(int x);
 	void DrawPositionMarks();
@@ -204,6 +218,9 @@ protected:
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
 	afx_msg void OnSampleSlice();
+	afx_msg void OnSampleDeleteCuePoint();
+	afx_msg void OnTimelineFormatSeconds();
+	afx_msg void OnTimelineFormatSamples();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -212,6 +229,8 @@ protected:
 		DoZoom(lDelta / 10, ptCenter);
 		return TRUE;
 	}
+
+	static int CuePointFromItem(HitTestItem item) { return static_cast<int>(item) - static_cast<int>(HitTestItem::CuePointFirst); }
 };
 
 DECLARE_FLAGSET(CViewSample::Flags)
