@@ -1854,6 +1854,7 @@ void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
 	}
 
 	const uint32 oldRate = sample.GetSampleRate(m_sndFile.GetType());
+	const SmpLength oldLength = sample.nLength;
 	const SmpLength selLength = (selection.nEnd - selection.nStart);
 	const SmpLength newSelLength = Util::muldivr_unsigned(selLength, newRate, oldRate);
 	const SmpLength newSelEnd = selection.nStart + newSelLength;
@@ -2012,18 +2013,19 @@ void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
 
 		PrepareUndo((newRate > oldRate) ? "Upsample" : "Downsample", sundo_replace);
 
-		// Adjust loops
-		if(sample.nLoopStart >= selection.nEnd) sample.nLoopStart += newSelLength - selLength;
-		else if(sample.nLoopStart > selection.nStart) sample.nLoopStart = selection.nStart + Util::muldivr_unsigned(sample.nLoopStart - selection.nStart, newRate, oldRate);
-		if(sample.nLoopEnd >= selection.nEnd) sample.nLoopEnd += newSelLength - selLength;
-		else if(sample.nLoopEnd > selection.nStart) sample.nLoopEnd = selection.nStart + Util::muldivr_unsigned(sample.nLoopEnd - selection.nStart, newRate, oldRate);
-		if(sample.nLoopEnd > newTotalLength) sample.nLoopEnd = newTotalLength;
-
-		if(sample.nSustainStart >= selection.nEnd) sample.nSustainStart += newSelLength - selLength;
-		else if(sample.nSustainStart > selection.nStart) sample.nSustainStart = selection.nStart + Util::muldivr_unsigned(sample.nSustainStart - selection.nStart, newRate, oldRate);
-		if(sample.nSustainEnd >= selection.nEnd) sample.nSustainEnd += newSelLength - selLength;
-		else if(sample.nSustainEnd > selection.nStart) sample.nSustainEnd = selection.nStart + Util::muldivr_unsigned(sample.nSustainEnd - selection.nStart, newRate, oldRate);
-		if(sample.nSustainEnd > newTotalLength) sample.nSustainEnd = newTotalLength;
+		// Adjust loops and cues
+		std::vector<std::reference_wrapper<SmpLength>> loopPoints = {sample.nLoopStart, sample.nLoopEnd, sample.nSustainStart, sample.nSustainEnd};
+		loopPoints.insert(loopPoints.end(), std::begin(sample.cues), std::end(sample.cues));
+		for(SmpLength &point : loopPoints)
+		{
+			if(point >= oldLength)
+				point = newTotalLength;
+			else if(point >= selection.nEnd)
+				point += newSelLength - selLength;
+			else if(point > selection.nStart)
+				point = selection.nStart + Util::muldivr_unsigned(point - selection.nStart, newRate, oldRate);
+			LimitMax(point, newTotalLength);
+		}
 
 		if(!selection.selectionActive)
 		{
