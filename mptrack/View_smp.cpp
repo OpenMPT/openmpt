@@ -139,7 +139,8 @@ END_MESSAGE_MAP()
 // CViewSample operations
 
 CViewSample::CViewSample()
-	: m_lastDrawPoint(-1, -1)
+    : m_lastDrawPoint(-1, -1)
+    , m_timelineHeight(TIMELINE_HEIGHT)
 {
 	MemsetZero(m_NcButtonState);
 	m_dwNotifyPos.fill(Notification::PosInvalid);
@@ -602,14 +603,16 @@ static bool HitTest(int pointX, int objX, int marginL, int marginR, int top, int
 
 std::pair<CViewSample::HitTestItem, SmpLength> CViewSample::PointToItem(CPoint point, CRect *rect) const
 {
-	const int timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
-	const bool inTimeline = point.y < timelineHeight;
-	if(m_dwEndSel > m_dwBeginSel && !inTimeline)
+	if(IsOPLInstrument())
+		return {HitTestItem::Nothing, MAX_SAMPLE_LENGTH};
+
+	const bool inTimeline = point.y < m_timelineHeight;
+	if(m_dwEndSel > m_dwBeginSel && !inTimeline && !m_dwStatus[SMPSTATUS_DRAWING])
 	{
 		const int margin = Util::ScalePixels(5, m_hWnd);
-		if(HitTest(point.x, SampleToScreen(m_dwBeginSel), margin, margin, timelineHeight, m_rcClient.bottom, rect))
+		if(HitTest(point.x, SampleToScreen(m_dwBeginSel), margin, margin, m_timelineHeight, m_rcClient.bottom, rect))
 			return {HitTestItem::SelectionStart, m_dwBeginSel};
-		if(HitTest(point.x, SampleToScreen(m_dwEndSel), margin, margin, timelineHeight, m_rcClient.bottom, rect))
+		if(HitTest(point.x, SampleToScreen(m_dwEndSel), margin, margin, m_timelineHeight, m_rcClient.bottom, rect))
 			return {HitTestItem::SelectionEnd, m_dwEndSel};
 	}
 
@@ -619,22 +622,22 @@ std::pair<CViewSample::HitTestItem, SmpLength> CViewSample::PointToItem(CPoint p
 		const auto &sample = sndFile.GetSample(m_nSample);
 		if(sample.nSustainStart < sample.nSustainEnd && sample.nSustainStart < sample.nLength)
 		{
-			if(HitTest(point.x, SampleToScreen(sample.nSustainStart), 0, timelineHeight / 2, 0, timelineHeight, rect))
+			if(HitTest(point.x, SampleToScreen(sample.nSustainStart), 0, m_timelineHeight / 2, 0, m_timelineHeight, rect))
 				return {HitTestItem::SustainStart, sample.nSustainStart};
-			if(HitTest(point.x, SampleToScreen(sample.nSustainEnd), timelineHeight / 2, 0, 0, timelineHeight, rect))
+			if(HitTest(point.x, SampleToScreen(sample.nSustainEnd), m_timelineHeight / 2, 0, 0, m_timelineHeight, rect))
 				return {HitTestItem::SustainEnd, sample.nSustainEnd};
 		}
 		if (sample.nLoopStart < sample.nLoopEnd && sample.nLoopStart < sample.nLength)
 		{
-			if(HitTest(point.x, SampleToScreen(sample.nLoopStart), 0, timelineHeight / 2, 0, timelineHeight, rect))
+			if(HitTest(point.x, SampleToScreen(sample.nLoopStart), 0, m_timelineHeight / 2, 0, m_timelineHeight, rect))
 				return {HitTestItem::LoopStart, sample.nLoopStart };
-			if(HitTest(point.x, SampleToScreen(sample.nLoopEnd), timelineHeight / 2, 0, 0, timelineHeight, rect))
+			if(HitTest(point.x, SampleToScreen(sample.nLoopEnd), m_timelineHeight / 2, 0, 0, m_timelineHeight, rect))
 				return {HitTestItem::LoopEnd, sample.nLoopEnd};
 		}
 		for(size_t i = 0; i < std::size(sample.cues); i++)
 		{
 			size_t cue = std::size(sample.cues) - 1 - i;  // If two cues overlap visually, the cue with the higher ID is drawn on top, so pick it first
-			if(sample.cues[cue] < sample.nLength && HitTest(point.x, SampleToScreen(sample.cues[cue]), timelineHeight / 2, timelineHeight / 2, 0, timelineHeight, rect))
+			if(sample.cues[cue] < sample.nLength && HitTest(point.x, SampleToScreen(sample.cues[cue]), m_timelineHeight / 2, m_timelineHeight / 2, 0, m_timelineHeight, rect))
 				return {static_cast<HitTestItem>(static_cast<size_t>(HitTestItem::CuePointFirst) + cue), sample.cues[cue]};
 		}
 	}
@@ -654,7 +657,7 @@ void CViewSample::InvalidateSample()
 void CViewSample::InvalidateTimeline()
 {
 	auto rect = m_rcClient;
-	rect.bottom = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
+	rect.bottom = m_timelineHeight;
 	InvalidateRect(rect, FALSE);
 }
 
@@ -1161,7 +1164,7 @@ void CViewSample::OnDraw(CDC *pDC)
 	const auto oldFont = offScreenDC.SelectObject(m_timelineFont);
 
 	// Draw timeline
-	const int timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
+	const int timelineHeight = m_timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
 	{
 		const TimelineFormat format = TrackerSettings::Instance().sampleEditorTimelineFormat;
 		CRect timeline = rcClient;
@@ -1438,10 +1441,9 @@ void CViewSample::DrawPositionMarks()
 		return;
 	}
 	CRect rect;
-	const int timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
 	for(auto pos : m_dwNotifyPos) if (pos != Notification::PosInvalid)
 	{
-		rect.top = timelineHeight;
+		rect.top = m_timelineHeight;
 		rect.left = SampleToScreen(pos);
 		rect.right = rect.left + 1;
 		rect.bottom = m_rcClient.bottom + 1;
@@ -1725,8 +1727,8 @@ template<class T, class uT>
 T CViewSample::GetSampleValueFromPoint(const ModSample &smp, const CPoint &point) const
 {
 	static_assert(sizeof(T) == sizeof(uT) && sizeof(T) <= 2);
-	const int channelHeight = m_rcClient.Height() / smp.GetNumChannels();
-	int yPos = point.y - m_drawChannel * channelHeight - m_rcClient.top;
+	const int channelHeight = (m_rcClient.Height() - m_timelineHeight) / smp.GetNumChannels();
+	int yPos = point.y - m_drawChannel * channelHeight - m_timelineHeight;
 
 	int value = std::numeric_limits<T>::max() - std::numeric_limits<uT>::max() * yPos / channelHeight;
 	Limit(value, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
@@ -1737,7 +1739,10 @@ T CViewSample::GetSampleValueFromPoint(const ModSample &smp, const CPoint &point
 template<class T, class uT>
 void CViewSample::SetInitialDrawPoint(ModSample &smp, const CPoint &point)
 {
-	m_drawChannel = (point.y - m_rcClient.top) * smp.GetNumChannels() / m_rcClient.Height();
+	if(m_rcClient.Height() >= m_timelineHeight)
+		m_drawChannel = (point.y - m_timelineHeight) * smp.GetNumChannels() / (m_rcClient.Height() - m_timelineHeight);
+	else
+		m_drawChannel = 0;
 	Limit(m_drawChannel, 0, (int)smp.GetNumChannels() - 1);
 
 	T *data = static_cast<T *>(smp.samplev()) + m_drawChannel;
@@ -1853,7 +1858,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 		}
 
 		// Note: point.x might have changed in if block above in case we're scrolling.
-		const bool fineDrag = (flags & MK_SHIFT) && m_startDragValue != MAX_SAMPLE_LENGTH;
+		const bool fineDrag = (flags & MK_SHIFT) && m_startDragValue != MAX_SAMPLE_LENGTH && !m_dwStatus[SMPSTATUS_DRAWING];
 		const SmpLength x = fineDrag ? m_startDragValue + (point.x - m_startDragPoint.x) / Util::ScalePixels(2, m_hWnd) : ScreenToSample(point.x);
 		
 		if((flags & MK_SHIFT) && !fineDrag)
@@ -1928,7 +1933,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 			SetModified(SampleHint().Info().Data(), true, false);
 		}
 
-		if(m_dwStatus[SMPSTATUS_DRAWING])
+		if(m_dwStatus[SMPSTATUS_DRAWING] && m_dragItem == HitTestItem::SampleData)
 		{
 			m_dwEndDrag = x;
 			if(m_dwEndDrag < len)
@@ -1965,7 +1970,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 BOOL CViewSample::OnSetCursor(CWnd *pWnd, UINT nHitTest, UINT message)
 {
 	// Update mouse cursor if we are close to a selection point
-	if(nHitTest == HTCLIENT && (message == WM_MOUSEMOVE || message == WM_LBUTTONDOWN) && !m_dwStatus[SMPSTATUS_DRAWING])
+	if(nHitTest == HTCLIENT && (message == WM_MOUSEMOVE || message == WM_LBUTTONDOWN))
 	{
 		CPoint point;
 		GetCursorPos(&point);
@@ -2000,10 +2005,10 @@ void CViewSample::OnLButtonDown(UINT flags, CPoint point)
 
 	// shift + click = update selection
 	const auto [item, itemPos] = PointToItem(point);
-	if(!m_dwStatus[SMPSTATUS_DRAWING] && (flags & MK_SHIFT) && m_dragItem == HitTestItem::SampleData)
+	if(!m_dwStatus[SMPSTATUS_DRAWING] && (flags & MK_SHIFT) && item == HitTestItem::SampleData)
 	{
 		oldsel = true;
-		m_dwEndDrag = ScreenToSample(point.x);
+		m_dwEndDrag = itemPos;
 		SetCurSel(m_dwBeginDrag, m_dwEndDrag);
 	} else
 	{
@@ -2014,8 +2019,6 @@ void CViewSample::OnLButtonDown(UINT flags, CPoint point)
 		else
 			m_startDragValue = MAX_SAMPLE_LENGTH;
 		m_dragPreparedUndo = false;
-		if(m_dwStatus[SMPSTATUS_DRAWING])
-			m_dragItem = HitTestItem::SampleData;
 
 		switch(m_dragItem)
 		{
@@ -2040,7 +2043,7 @@ void CViewSample::OnLButtonDown(UINT flags, CPoint point)
 		SetCurSel(m_dwBeginDrag, m_dwEndDrag);
 
 	// set initial point for sample drawing
-	if (m_dwStatus[SMPSTATUS_DRAWING])
+	if (m_dwStatus[SMPSTATUS_DRAWING] && m_dragItem == HitTestItem::SampleData)
 	{
 		m_lastDrawPoint = point;
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Draw Sample");
@@ -2056,7 +2059,7 @@ void CViewSample::OnLButtonDown(UINT flags, CPoint point)
 	} else
 	{
 		// ctrl + click = play from cursor pos
-		if(CMainFrame::GetInputHandler()->CtrlPressed())
+		if(flags & MK_CONTROL)
 			PlayNote(NOTE_MIDDLEC, ScreenToSample(point.x));
 	}
 }
@@ -2101,8 +2104,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 
 		TCHAR s[256];
 
-		const int timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
-		if(pt.y < timelineHeight)
+		if(pt.y < m_timelineHeight)
 		{
 			const auto item = PointToItem(pt).first;
 			if(item >= HitTestItem::CuePointFirst && item <= HitTestItem::CuePointLast)

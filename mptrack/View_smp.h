@@ -63,6 +63,7 @@ protected:
 	SIZE m_sizeTotal;
 	UINT m_nBtnMouseOver = 0xFFFF;
 	int m_nZoom = 0;	// < 0: Zoom into sample (2^x:1 ratio), 0: Auto zoom, > 0: Zoom out (1:2^x ratio)
+	int m_timelineHeight = 0;
 	int m_timelineUnit = 0;
 	int m_timelineInterval = 0;
 	decltype(ModSample::nC5Speed) m_cachedSampleRate = 8363;
