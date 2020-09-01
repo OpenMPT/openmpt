@@ -302,7 +302,7 @@ public:
 	void UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint=NULL);
 	// Notify all views of document updates (for non-GUI threads)
 	void UpdateAllViews(UpdateHint hint);
-	HWND GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord);
+	void GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord);
 	LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	void TogglePluginEditor(UINT m_nCurrentPlugin, bool onlyThisEditor = false);
 	void RecordParamChange(PLUGINDEX slot, PlugParamIndex param);
