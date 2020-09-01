@@ -987,7 +987,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						SampleOffset(*pChn, offset);
 					} else if(m.command == CMD_OFFSETPERCENTAGE)
 					{
-						SampleOffset(*pChn, Util::muldiv_unsigned(pChn->nLength, m.param, 255));
+						SampleOffset(*pChn, Util::muldiv_unsigned(pChn->nLength, m.param, 256));
 					} else if(m.command == CMD_REVERSEOFFSET && pChn->pModSample != nullptr)
 					{
 						memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
@@ -3074,7 +3074,7 @@ bool CSoundFile::ProcessEffects()
 		case CMD_OFFSETPERCENTAGE:
 			if(triggerNote)
 			{
-				SampleOffset(*pChn, Util::muldiv_unsigned(pChn->nLength, param, 255));
+				SampleOffset(*pChn, Util::muldiv_unsigned(pChn->nLength, param, 256));
 			}
 			break;
 
