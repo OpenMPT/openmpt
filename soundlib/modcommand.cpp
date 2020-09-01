@@ -816,18 +816,26 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 	} // End if(newTypeIsIT_MPT)
 
 	// Fix volume column offset for formats that don't have it.
-	if(volcmd == VOLCMD_OFFSET && !newSpecs.HasVolCommand(VOLCMD_OFFSET) && (command == CMD_NONE || !newSpecs.HasCommand(command)))
+	if(volcmd == VOLCMD_OFFSET && !newSpecs.HasVolCommand(VOLCMD_OFFSET) && (command == CMD_NONE || command == CMD_OFFSET || !newSpecs.HasCommand(command)))
 	{
+		const ModCommand::PARAM oldOffset = (command == CMD_OFFSET) ? param : 0;
 		command = CMD_OFFSET;
 		volcmd = VOLCMD_NONE;
 		SAMPLEINDEX smp = instr;
 		if(smp > 0 && smp <= sndFile.GetNumInstruments() && IsNote() && sndFile.Instruments[smp] != nullptr)
 			smp = sndFile.Instruments[smp]->Keyboard[note - NOTE_MIN];
 
-		if(smp > 0 && smp <= sndFile.GetNumSamples() && vol > 0 && vol <= std::size(sndFile.GetSample(smp).cues))
-			param = mpt::saturate_cast<ModCommand::PARAM>((sndFile.GetSample(smp).cues[vol - 1] + 128) >> 8);
-		else
+		if(smp > 0 && smp <= sndFile.GetNumSamples() && vol <= std::size(ModSample().cues))
+		{
+			const ModSample &sample = sndFile.GetSample(smp);
+			if(vol == 0)
+				param = mpt::saturate_cast<ModCommand::PARAM>(Util::muldivr_unsigned(sample.nLength, oldOffset, 65536u));
+			else
+				param = mpt::saturate_cast<ModCommand::PARAM>((sample.cues[vol - 1] + (oldOffset * 256u) + 128u) / 256u);
+		} else
+		{
 			param = vol << 3;
+		}
 	}
 
 	if((command == CMD_REVERSEOFFSET || command == CMD_OFFSETPERCENTAGE) && !newSpecs.HasCommand(command))

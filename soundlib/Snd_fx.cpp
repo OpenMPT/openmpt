@@ -785,7 +785,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 			// Offset
 			case CMD_OFFSET:
-				if (param) chn.oldOffset = param << 8;
+				if(param)
+					chn.oldOffset = param << 8;
 				break;
 			// Volume Slide
 			case CMD_VOLUMESLIDE:
@@ -1027,15 +1028,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 					if(m.command == CMD_OFFSET)
 					{
-						bool isExtended = false;
-						SmpLength offset = CalculateXParam(playState.m_nPattern, playState.m_nRow, nChn, &isExtended);
-						if(!isExtended)
-						{
-							offset <<= 8;
-							if(offset == 0) offset = chn.oldOffset;
-							offset += static_cast<SmpLength>(chn.nOldHiOffset) << 16;
-						}
-						SampleOffset(chn, offset);
+						ProcessSampleOffset(chn, nChn, playState);
 					} else if(m.command == CMD_OFFSETPERCENTAGE)
 					{
 						SampleOffset(chn, Util::muldiv_unsigned(chn.nLength, m.param, 256));
@@ -3059,7 +3052,7 @@ bool CSoundFile::ProcessEffects()
 		}
 		if(volcmd > VOLCMD_PANNING && doVolumeColumn)
 		{
-			if (volcmd == VOLCMD_TONEPORTAMENTO)
+			if(volcmd == VOLCMD_TONEPORTAMENTO)
 			{
 				const auto [porta, clearEffectCommand] = GetVolCmdTonePorta(chn.rowCommand, nStartTick);
 				if(clearEffectCommand)
@@ -3266,19 +3259,9 @@ bool CSoundFile::ProcessEffects()
 				// FT2 compatibility: Portamento + Offset = Ignore offset
 				// Test case: porta-offset.xm
 				if(bPorta && GetType() == MOD_TYPE_XM)
-				{
 					break;
-				}
-				bool isExtended = false;
-				SmpLength offset = CalculateXParam(m_PlayState.m_nPattern, m_PlayState.m_nRow, nChn, &isExtended);
-				if(!isExtended)
-				{
-					// No X-param (normal behaviour)
-					offset <<= 8;
-					if (offset) chn.oldOffset = offset; else offset = chn.oldOffset;
-					offset += static_cast<SmpLength>(chn.nOldHiOffset) << 16;
-				}
-				SampleOffset(chn, offset);
+
+				ProcessSampleOffset(chn, nChn, m_PlayState);
 			}
 			break;
 
@@ -3697,9 +3680,10 @@ void CSoundFile::UpdateS3MEffectMemory(ModChannel &chn, ModCommand::PARAM param)
 // Calculate full parameter for effects that support parameter extension at the given pattern location.
 // maxCommands sets the maximum number of XParam commands to look at for this effect
 // isExtended returns if the command is actually using any XParam extensions.
-uint32 CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, bool *isExtended) const
+uint32 CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, uint32 *extendedRows) const
 {
-	if(isExtended != nullptr) *isExtended = false;
+	if(extendedRows != nullptr)
+		*extendedRows = 0;
 	ROWINDEX maxCommands = 4;
 	const ModCommand *m = Patterns[pat].GetpModCommand(row, chn);
 	uint32 val = m->param;
@@ -3736,7 +3720,8 @@ uint32 CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX 
 		}
 		val = (val << 8) | m->param;
 		numRows--;
-		if(isExtended != nullptr) *isExtended = true;
+		if(extendedRows != nullptr)
+			(*extendedRows)++;
 	}
 	return val;
 }
@@ -4960,8 +4945,8 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 
 	for(uint32 pos = 0; pos < (MACRO_LENGTH - 1) && macro[pos]; pos++)
 	{
-		bool isNibble = false;		// did we parse a nibble or a byte value?
-		uint8 data = 0;		// data that has just been parsed
+		bool isNibble = false;  // did we parse a nibble or a byte value?
+		uint8 data = 0;         // data that has just been parsed
 
 		// Parse next macro byte... See Impulse Tracker's MIDI.TXT for detailed information on each possible character.
 		if(macro[pos] >= '0' && macro[pos] <= '9')
@@ -5074,7 +5059,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		}
 
 		// Append parsed data
-		if(isNibble)	// parsed a nibble (constant or 'c' variable)
+		if(isNibble)  // parsed a nibble (constant or 'c' variable)
 		{
 			if(firstNibble)
 			{
@@ -5085,7 +5070,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 				outPos++;
 			}
 			firstNibble = !firstNibble;
-		} else			// parsed a byte (variable)
+		} else  // parsed a byte (variable)
 		{
 			if(!firstNibble)	// From MIDI.TXT: '9n' is exactly the same as '09 n' or '9 n' -- so finish current byte first
 			{
@@ -5153,9 +5138,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		}
 
 		if(sendLen == 0)
-		{
 			break;
-		}
 
 		if(out[sendPos] < 0xF0)
 		{
@@ -5164,12 +5147,9 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		uint32 bytesSent = SendMIDIData(nChn, isSmooth, out + sendPos, sendLen, plugin);
 		// If there's no error in the macro data (e.g. unrecognized internal MIDI macro), we have sendLen == bytesSent.
 		if(bytesSent > 0)
-		{
 			sendPos += bytesSent;
-		} else
-		{
+		else
 			sendPos += sendLen;
-		}
 	}
 }
 
@@ -5376,6 +5356,35 @@ void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
 		}
 	}
 #endif // NO_PLUGINS
+}
+
+
+void CSoundFile::ProcessSampleOffset(ModChannel& chn, CHANNELINDEX nChn, const PlayState& playState) const
+{
+	const ModCommand &m = chn.rowCommand;
+	uint32 extendedRows = 0;
+	SmpLength offset = CalculateXParam(playState.m_nPattern, playState.m_nRow, nChn, &extendedRows);
+	if(!extendedRows)
+	{
+		// No X-param (normal behaviour)
+		const bool isPercentageOffset = (m.volcmd == VOLCMD_OFFSET && m.vol == 0);
+		offset <<= 8;
+		if(offset)
+			chn.oldOffset = offset;
+		else if(!isPercentageOffset)
+			offset = chn.oldOffset;
+
+		if(!isPercentageOffset)
+			offset += static_cast<SmpLength>(chn.nOldHiOffset) << 16;
+	}
+	if(m.volcmd == VOLCMD_OFFSET)
+	{
+		if(m.vol == 0)
+			offset = Util::muldivr_unsigned(chn.nLength, offset, 256u << (8u * std::max(uint32(1), extendedRows)));  // o00 + Oxx = Percentage Offset
+		else if(m.vol <= std::size(ModSample().cues) && chn.pModSample != nullptr)
+			offset += chn.pModSample->cues[m.vol - 1];  // Offset relative to cue point
+	}
+	SampleOffset(chn, offset);
 }
 
 

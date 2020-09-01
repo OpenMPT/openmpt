@@ -934,7 +934,7 @@ public:
 	void NoteChange(ModChannel &chn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false, CHANNELINDEX channelHint = CHANNELINDEX_INVALID) const;
 	void InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta = false, bool bUpdVol = true, bool bResetEnv = true) const;
 	void ApplyInstrumentPanning(ModChannel &chn, const ModInstrument *instr, const ModSample *smp) const;
-	uint32 CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, bool *isExtended = nullptr) const;
+	uint32 CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, uint32 *extendedRows = nullptr) const;
 
 	// Channel Effects
 	void KeyOff(ModChannel &chn) const;
@@ -1012,6 +1012,7 @@ protected:
 	void Panbrello(ModChannel &chn, uint32 param) const;
 	void Panning(ModChannel &chn, uint32 param, PanningType panBits) const;
 	void RetrigNote(CHANNELINDEX nChn, int param, int offset = 0);
+	void ProcessSampleOffset(ModChannel& chn, CHANNELINDEX nChn, const PlayState &playState) const;
 	void SampleOffset(ModChannel &chn, SmpLength param) const;
 	void ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const;
 	void NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample);

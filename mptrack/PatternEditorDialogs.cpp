@@ -29,7 +29,8 @@ OPENMPT_NAMESPACE_BEGIN
 void getXParam(ModCommand::COMMAND command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, const CSoundFile &sndFile, UINT &xparam, UINT &multiplier)
 {
 	UINT xp = 0, mult = 1;
-	int nCmdRow = (int)nRow;
+	int nCmdRow = static_cast<int>(nRow);
+	const auto &pattern = sndFile.Patterns[nPat];
 
 	if(command == CMD_XPARAM)
 	{
@@ -39,10 +40,10 @@ void getXParam(ModCommand::COMMAND command, PATTERNINDEX nPat, ROWINDEX nRow, CH
 		// Try to find previous command parameter to be extended
 		while(nCmdRow >= 0)
 		{
-			const ModCommand *m = sndFile.Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
-			if(m->command == CMD_OFFSET || m->command == CMD_PATTERNBREAK || m->command == CMD_POSITIONJUMP || m->command == CMD_TEMPO)
+			const ModCommand &m = *pattern.GetpModCommand(nCmdRow, nChannel);
+			if(m.command == CMD_OFFSET || m.command == CMD_PATTERNBREAK || m.command == CMD_POSITIONJUMP || m.command == CMD_TEMPO)
 				break;
-			if(m->command != CMD_XPARAM)
+			if(m.command != CMD_XPARAM)
 			{
 				nCmdRow = -1;
 				break;
@@ -58,13 +59,13 @@ void getXParam(ModCommand::COMMAND command, PATTERNINDEX nPat, ROWINDEX nRow, CH
 	if(nCmdRow >= 0)
 	{
 		// An 'extendable' command parameter has been found
-		const ModCommand *m = sndFile.Patterns[nPat].GetpModCommand(nCmdRow, nChannel);
+		const ModCommand &m = *pattern.GetpModCommand(nCmdRow, nChannel);
 
 		// Find extension resolution (8 to 24 bits)
-		ROWINDEX n = 1;
-		while(n < 4 && nCmdRow + n < sndFile.Patterns[nPat].GetNumRows())
+		uint32 n = 1;
+		while(n < 4 && nCmdRow + n < pattern.GetNumRows())
 		{
-			if(sndFile.Patterns[nPat].GetpModCommand(nCmdRow + n, nChannel)->command != CMD_XPARAM)
+			if(pattern.GetpModCommand(nCmdRow + n, nChannel)->command != CMD_XPARAM)
 				break;
 			n++;
 		}
@@ -73,27 +74,41 @@ void getXParam(ModCommand::COMMAND command, PATTERNINDEX nPat, ROWINDEX nRow, CH
 		if(n > 1)
 		{
 			// Limit offset command to 24 bits, other commands to 16 bits
-			n = m->command == CMD_OFFSET ? n : (n > 2 ? 2 : n);
+			n = m.command == CMD_OFFSET ? n : (n > 2 ? 2 : n);
 
 			// Compute extended value WITHOUT current row parameter value : this parameter
 			// is being currently edited (this is why this function is being called) so we
 			// only need to compute a multiplier so that we can add its contribution while
 			// its value is changed by user
-			for(UINT j = 0; j < n; j++)
+			for(uint32 j = 0; j < n; j++)
 			{
-				m = sndFile.Patterns[nPat].GetpModCommand(nCmdRow + j, nChannel);
+				const ModCommand &mx = *pattern.GetpModCommand(nCmdRow + j, nChannel);
 
-				UINT k = 8 * (n - j - 1);
+				uint32 k = 8 * (n - j - 1);
 				if(nCmdRow + j == nRow)
 					mult = 1 << k;
 				else
-					xp += (m->param << k);
+					xp += (mx.param << k);
 			}
-		} else if(m->command == CMD_OFFSET)
+		} else if(m.command == CMD_OFFSET)
 		{
 			// No parameter extension to perform (8 bits standard parameter),
 			// just care about offset command special case (16 bits, fake)
 			mult <<= 8;
+		}
+
+		const auto modDoc = sndFile.GetpModDoc();
+		if(m.command == CMD_OFFSET && m.volcmd == VOLCMD_OFFSET && modDoc != nullptr)
+		{
+			SAMPLEINDEX smp = modDoc->GetSampleIndex(m);
+			if(m.vol == 0 && smp != 0)
+			{
+				xp = Util::muldivr_unsigned(sndFile.GetSample(smp).nLength, pattern.GetpModCommand(nRow, nChannel)->param  * mult + xp, 256u << (8u * (std::max(uint32(2), n) - 1u)));
+				mult = 0;
+			} else if(m.vol > 0 && smp != 0)
+			{
+				xp += sndFile.GetSample(smp).cues[m.vol - 1];
+			}
 		}
 	}
 

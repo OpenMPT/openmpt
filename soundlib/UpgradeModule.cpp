@@ -221,6 +221,14 @@ struct UpgradePatternData
 			m.volcmd = VOLCMD_NONE;
 		}
 
+		// Previously CMD_OFFSET simply overrode VOLCMD_OFFSET, now they work together as a combined command
+		if(m.volcmd == VOLCMD_OFFSET && m.command == CMD_OFFSET && version < MPT_V("1.30.00.14"))
+		{
+			if(m.param != 0 || m.vol == 0)
+				m.volcmd = VOLCMD_NONE;
+			else
+				m.command = CMD_NONE;
+		}
 	}
 
 	const CSoundFile &sndFile;
