@@ -672,7 +672,7 @@ namespace FileReader
 		
 		uint8 b = mpt::byte_cast<uint8>(bytes[0]);
 		target = (b & 0x7F);
-		size_t writtenBits = mpt::bit_width(target);  // Bits used in the most significant byte
+		size_t writtenBits = static_cast<size_t>(mpt::bit_width(target));  // Bits used in the most significant byte
 
 		while(readPos < avail && (b & 0x80) != 0)
 		{
