@@ -91,6 +91,7 @@ bool CChannelManagerDlg::IsDisplayed() const
 
 void CChannelManagerDlg::Update(UpdateHint hint, CObject* pHint)
 {
+	MPT_UNREFERENCED_PARAMETER(pHint);
 	if(!m_hWnd || !m_show)
 		return;
 	if(!hint.ToType<GeneralHint>().GetType()[HINT_MODCHANNELS | HINT_MODGENERAL | HINT_MODTYPE | HINT_MPTOPTIONS])
