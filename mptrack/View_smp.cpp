@@ -600,7 +600,7 @@ static bool HitTest(int pointX, int objX, int marginL, int marginR, int top, int
 	return true;
 }
 
-CViewSample::HitTestItem CViewSample::PointToItem(CPoint point, CRect *rect) const
+std::pair<CViewSample::HitTestItem, SmpLength> CViewSample::PointToItem(CPoint point, CRect *rect) const
 {
 	const int timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
 	const bool inTimeline = point.y < timelineHeight;
@@ -608,9 +608,9 @@ CViewSample::HitTestItem CViewSample::PointToItem(CPoint point, CRect *rect) con
 	{
 		const int margin = Util::ScalePixels(3, m_hWnd);
 		if(HitTest(point.x, SampleToScreen(m_dwBeginSel), margin, margin, timelineHeight, m_rcClient.bottom, rect))
-			return HitTestItem::SelectionStart;
+			return {HitTestItem::SelectionStart, m_dwBeginSel};
 		if(HitTest(point.x, SampleToScreen(m_dwEndSel), margin, margin, timelineHeight, m_rcClient.bottom, rect))
-			return HitTestItem::SelectionEnd;
+			return {HitTestItem::SelectionEnd, m_dwEndSel};
 	}
 
 	const auto &sndFile = GetDocument()->GetSoundFile();
@@ -620,25 +620,28 @@ CViewSample::HitTestItem CViewSample::PointToItem(CPoint point, CRect *rect) con
 		if(sample.nSustainStart < sample.nSustainEnd && sample.nSustainStart < sample.nLength)
 		{
 			if(HitTest(point.x, SampleToScreen(sample.nSustainStart), 0, timelineHeight / 2, 0, timelineHeight, rect))
-				return HitTestItem::SustainStart;
+				return {HitTestItem::SustainStart, sample.nSustainStart};
 			if(HitTest(point.x, SampleToScreen(sample.nSustainEnd), timelineHeight / 2, 0, 0, timelineHeight, rect))
-				return HitTestItem::SustainEnd;
+				return {HitTestItem::SustainEnd, sample.nSustainEnd};
 		}
 		if (sample.nLoopStart < sample.nLoopEnd && sample.nLoopStart < sample.nLength)
 		{
 			if(HitTest(point.x, SampleToScreen(sample.nLoopStart), 0, timelineHeight / 2, 0, timelineHeight, rect))
-				return HitTestItem::LoopStart;
+				return {HitTestItem::LoopStart, sample.nLoopStart };
 			if(HitTest(point.x, SampleToScreen(sample.nLoopEnd), timelineHeight / 2, 0, 0, timelineHeight, rect))
-				return HitTestItem::LoopEnd;
+				return {HitTestItem::LoopEnd, sample.nLoopEnd};
 		}
 		for(size_t i = 0; i < std::size(sample.cues); i++)
 		{
 			size_t cue = std::size(sample.cues) - 1 - i;  // If two cues overlap visually, the cue with the higher ID is drawn on top, so pick it first
 			if(sample.cues[cue] < sample.nLength && HitTest(point.x, SampleToScreen(sample.cues[cue]), timelineHeight / 2, timelineHeight / 2, 0, timelineHeight, rect))
-				return static_cast<HitTestItem>(static_cast<size_t>(HitTestItem::CuePointFirst) + cue);
+				return {static_cast<HitTestItem>(static_cast<size_t>(HitTestItem::CuePointFirst) + cue), sample.cues[cue]};
 		}
 	}
-	return inTimeline ? HitTestItem::Nothing : HitTestItem::SampleData;
+	if(inTimeline)
+		return {HitTestItem::Nothing, MAX_SAMPLE_LENGTH};
+	else
+		return {HitTestItem::SampleData, ScreenToSample(point.x)};
 }
 
 
@@ -1752,7 +1755,7 @@ void CViewSample::SetSampleData(ModSample &smp, const CPoint &point, const SmpLe
 }
 
 
-void CViewSample::OnMouseMove(UINT, CPoint point)
+void CViewSample::OnMouseMove(UINT flags, CPoint point)
 {
 	CModDoc *pModDoc = GetDocument();
 
@@ -1843,7 +1846,17 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 		}
 
 		// Note: point.x might have changed in if block above in case we're scrolling.
-		const SmpLength x = ScreenToSample(point.x);
+		const bool fineDrag = (flags & MK_SHIFT) && m_startDragValue != MAX_SAMPLE_LENGTH;
+		const SmpLength x = fineDrag ? m_startDragValue + (point.x - m_startDragPoint.x) / Util::ScalePixels(2, m_hWnd) : ScreenToSample(point.x);
+		
+		if((flags & MK_SHIFT) && !fineDrag)
+		{
+			m_startDragPoint = point;
+			m_startDragValue = x;
+		} else if(!(flags & MK_SHIFT))
+		{
+			m_startDragValue = MAX_SAMPLE_LENGTH;
+		}
 
 		bool update = false;
 		SmpLength *updateLoopPoint = nullptr;
@@ -1914,7 +1927,7 @@ void CViewSample::OnMouseMove(UINT, CPoint point)
 			if(m_dwEndDrag < len)
 			{
 				// Shift = draw horizontal lines
-				if(CMainFrame::GetInputHandler()->ShiftPressed())
+				if(flags & MK_SHIFT)
 				{
 					if(m_lastDrawPoint.y != -1)
 						point.y = m_lastDrawPoint.y;
@@ -1950,7 +1963,7 @@ BOOL CViewSample::OnSetCursor(CWnd *pWnd, UINT nHitTest, UINT message)
 		CPoint point;
 		GetCursorPos(&point);
 		ScreenToClient(&point);
-		const auto item = PointToItem(point);
+		const auto item = PointToItem(point).first;
 		if(item != HitTestItem::Nothing && item != HitTestItem::SampleData)
 		{
 			SetCursor(CMainFrame::curVSplit);
@@ -1962,7 +1975,7 @@ BOOL CViewSample::OnSetCursor(CWnd *pWnd, UINT nHitTest, UINT message)
 }
 
 
-void CViewSample::OnLButtonDown(UINT, CPoint point)
+void CViewSample::OnLButtonDown(UINT flags, CPoint point)
 {
 	CModDoc *pModDoc = GetDocument();
 
@@ -1979,15 +1992,20 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 	bool oldsel = (m_dwBeginSel != m_dwEndSel);
 
 	// shift + click = update selection
-	if(!m_dwStatus[SMPSTATUS_DRAWING] && CMainFrame::GetInputHandler()->ShiftPressed())
+	const auto [item, itemPos] = PointToItem(point);
+	if(!m_dwStatus[SMPSTATUS_DRAWING] && (flags & MK_SHIFT) && m_dragItem == HitTestItem::SampleData)
 	{
 		oldsel = true;
 		m_dwEndDrag = ScreenToSample(point.x);
 		SetCurSel(m_dwBeginDrag, m_dwEndDrag);
 	} else
 	{
-		const auto sampleAtPoint = std::min(ScreenToSample(point.x), sample.nLength - SmpLength(1));
-		m_dragItem = PointToItem(point);
+		m_dragItem = item;
+		m_startDragPoint = point;
+		if(flags & MK_SHIFT)
+			m_startDragValue = itemPos;
+		else
+			m_startDragValue = MAX_SAMPLE_LENGTH;
 		m_dragPreparedUndo = false;
 		if(m_dwStatus[SMPSTATUS_DRAWING])
 			m_dragItem = HitTestItem::SampleData;
@@ -1995,18 +2013,17 @@ void CViewSample::OnLButtonDown(UINT, CPoint point)
 		switch(m_dragItem)
 		{
 		case HitTestItem::SampleData:
-			m_dwBeginDrag = sampleAtPoint;
-			m_dwEndDrag = sampleAtPoint;
+			m_dwBeginDrag = m_dwEndDrag = ScreenToSample(point.x);
 			if(!m_dwStatus[SMPSTATUS_DRAWING])
 				m_dragItem = HitTestItem::SelectionEnd;
 			break;
 		case HitTestItem::SelectionStart:
 			m_dwBeginDrag = m_dwEndSel;
-			m_dwEndDrag = sampleAtPoint;
+			m_dwEndDrag = itemPos;
 			break;
 		case HitTestItem::SelectionEnd:
 			m_dwBeginDrag = m_dwBeginSel;
-			m_dwEndDrag = sampleAtPoint;
+			m_dwEndDrag = itemPos;
 			break;
 		default:
 			break;
@@ -2046,6 +2063,7 @@ void CViewSample::OnLButtonUp(UINT, CPoint)
 		ReleaseCapture();
 	}
 	m_dragItem = HitTestItem::Nothing;
+	m_startDragValue = MAX_SAMPLE_LENGTH;
 	m_lastDrawPoint.SetPoint(-1, -1);
 }
 
@@ -2079,7 +2097,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 		const int timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
 		if(pt.y < timelineHeight)
 		{
-			const auto item = PointToItem(pt);
+			const auto item = PointToItem(pt).first;
 			if(item >= HitTestItem::CuePointFirst && item <= HitTestItem::CuePointLast)
 			{
 				m_dwMenuParam = CuePointFromItem(item);
@@ -3826,33 +3844,26 @@ INT_PTR CViewSample::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 	} else
 	{
 		const ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample <= GetDocument()->GetNumSamples() ? m_nSample : 0);
-		auto item = PointToItem(point, &ncRect);
-		SmpLength pos = MAX_SAMPLE_LENGTH;
+		auto [item, pos] = PointToItem(point, &ncRect);
 		switch(item)
 		{
 		case HitTestItem::LoopStart:
 			text = _T("Loop Start");
-			pos = sample.nLoopStart;
 			break;
 		case HitTestItem::LoopEnd:
 			text = _T("Loop End");
-			pos = sample.nLoopEnd;
 			break;
 		case HitTestItem::SustainStart:
 			text = _T("Sustain Start");
-			pos = sample.nSustainStart;
 			break;
 		case HitTestItem::SustainEnd:
 			text = _T("Sustain End");
-			pos = sample.nSustainEnd;
 			break;
 		default:
 			if(item < HitTestItem::CuePointFirst || item > HitTestItem::CuePointLast)
 				return CModScrollView::OnToolHitTest(point, pTI);
 			auto cue = CuePointFromItem(item);
 			text = MPT_CFORMAT("Cue Point {}")(cue + 1);
-			if(static_cast<size_t>(cue) < std::size(sample.cues))
-				pos = sample.cues[cue];
 		}
 		if(pos <= sample.nLength)
 			text += _T(": ") + mpt::cfmt::dec(3, ',', pos);

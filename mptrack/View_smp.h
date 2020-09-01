@@ -72,6 +72,8 @@ protected:
 	SmpLength m_nGridSegments = 0;
 	SAMPLEINDEX m_nSample = 1;
 	HitTestItem m_dragItem = HitTestItem::Nothing;
+	CPoint m_startDragPoint;
+	SmpLength m_startDragValue = MAX_SAMPLE_LENGTH;
 	bool m_dragPreparedUndo = false;
 
 	// Sample drawing
@@ -105,7 +107,7 @@ protected:
 	SmpLength ScreenToSample(int32 x, bool ignoreSampleLength = false) const;
 	int32 SecondsToScreen(double x) const;
 	double ScreenToSeconds(int32 x, bool ignoreSampleLength = false) const;
-	HitTestItem PointToItem(CPoint point, CRect *rect = nullptr) const;
+	std::pair<HitTestItem, SmpLength> PointToItem(CPoint point, CRect *rect = nullptr) const;
 	void PlayNote(ModCommand::NOTE note, const SmpLength nStartPos = 0, int volume = -1);
 	void NoteOff(ModCommand::NOTE note);
 	void InvalidateSample();
