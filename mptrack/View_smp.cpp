@@ -606,7 +606,7 @@ std::pair<CViewSample::HitTestItem, SmpLength> CViewSample::PointToItem(CPoint p
 	const bool inTimeline = point.y < timelineHeight;
 	if(m_dwEndSel > m_dwBeginSel && !inTimeline)
 	{
-		const int margin = Util::ScalePixels(3, m_hWnd);
+		const int margin = Util::ScalePixels(5, m_hWnd);
 		if(HitTest(point.x, SampleToScreen(m_dwBeginSel), margin, margin, timelineHeight, m_rcClient.bottom, rect))
 			return {HitTestItem::SelectionStart, m_dwBeginSel};
 		if(HitTest(point.x, SampleToScreen(m_dwEndSel), margin, margin, timelineHeight, m_rcClient.bottom, rect))
@@ -1189,13 +1189,20 @@ void CViewSample::OnDraw(CDC *pDC)
 					if(rc.left >= m_rcClient.right)
 						break;
 
-					if(time >= 1000 || (time == 0 && m_timelineUnit >= 1000))
+					const bool showSeconds = time >= 1000 || (time == 0 && m_timelineUnit >= 1000);
+					const auto secMs = std::div(time, int64(1000));
+					if(showSeconds)
 					{
-						text += mpt::tfmt::dec(3, _T(','), time / 1000) + _T("s");
+						const auto minSec = std::div(secMs.quot, int64(60));
+						const bool showMinutes = minSec.quot != 0 || (time == 0 && m_timelineUnit >= 60000);
+						if(showMinutes)
+							text += mpt::tfmt::dec(3, _T(','), minSec.quot) + _T("mn");
+						if(minSec.rem || !showMinutes)
+							text += mpt::tfmt::dec(3, _T(','), minSec.rem) + _T("s");
 					}
-					if(int remain = time % 1000; remain || (time < 1000 && m_timelineUnit < 1000))
+					if(secMs.rem || !showSeconds)
 					{
-						text += mpt::tfmt::val(remain) + _T("ms");
+						text += mpt::tfmt::val(secMs.rem) + _T("ms");
 					}
 				} else
 				{
