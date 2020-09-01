@@ -373,6 +373,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 				SetDlgItemText(IDC_TEXT1 + ichn, s);
 				// Channel color
 				m_channelColor[ichn].SetColor(chnSettings.color);
+				m_channelColor[ichn].EnableWindow(bEnable);
 				// Mute
 				CheckDlgButton(IDC_CHECK1 + ichn * 2, chnSettings.dwFlags[CHN_MUTE] ? TRUE : FALSE);
 				// Surround
