@@ -86,7 +86,6 @@ DMOPlugin::DMOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 
 	m_mixBuffer.Initialize(2, 2);
 	InsertIntoFactoryList();
-
 }
 
 

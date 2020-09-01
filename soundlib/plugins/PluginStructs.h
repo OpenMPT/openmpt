@@ -64,21 +64,12 @@ MPT_BINARY_STRUCT(SNDMIXPLUGININFO, 128)	// this is directly written to files, s
 
 struct SNDMIXPLUGIN
 {
-	IMixPlugin *pMixPlugin;
+	IMixPlugin *pMixPlugin = nullptr;
 	std::vector<std::byte> pluginData;
-	SNDMIXPLUGININFO Info;
-	float fDryRatio;
-	int32 defaultProgram;
-	int32 editorX, editorY;
-
-	SNDMIXPLUGIN()
-		: pMixPlugin(nullptr)
-		, fDryRatio(0.0f)
-		, defaultProgram(0)
-		, editorX(0), editorY(0)
-	{
-		MemsetZero(Info);
-	}
+	SNDMIXPLUGININFO Info = {};
+	float fDryRatio = 0;
+	int32 defaultProgram = 0;
+	int32 editorX = 0, editorY = 0;
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 	const char * GetNameLocale() const
