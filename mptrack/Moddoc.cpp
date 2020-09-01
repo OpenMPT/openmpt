@@ -2316,14 +2316,12 @@ CChildFrame *CModDoc::GetChildFrame()
 
 
 // Get the currently edited pattern position. Note that ord might be ORDERINDEX_INVALID when editing a pattern that is not present in the order list.
-HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
+void CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 {
-	HWND followSonghWnd;
 	CChildFrame *pChildFrm = GetChildFrame();
 
 	if(strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // dirty HACK
 	{
-		followSonghWnd = pChildFrm->GetHwndView();
 		PATTERNVIEWSTATE patternViewState;
 		pChildFrm->SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)(&patternViewState));
 
@@ -2333,7 +2331,6 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	} else
 	{
 		//patern editor object does not exist (i.e. is not active)  - use saved state.
-		followSonghWnd = NULL;
 		PATTERNVIEWSTATE &patternViewState = pChildFrm->GetPatternViewState();
 
 		pat = patternViewState.nPattern;
@@ -2366,9 +2363,6 @@ HWND CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	{
 		ord = order.FindOrder(pat);
 	}
-
-	return followSonghWnd;
-
 }
 
 
@@ -2392,10 +2386,7 @@ void CModDoc::OnPatternRestart(bool loop)
 		ROWINDEX nRow;
 		PATTERNINDEX nPat;
 		ORDERINDEX nOrd;
-
-		HWND followSonghWnd;
-
-		followSonghWnd = GetEditPosition(nRow, nPat, nOrd);
+		GetEditPosition(nRow, nPat, nOrd);
 		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 
 		CriticalSection cs;
@@ -2427,8 +2418,8 @@ void CModDoc::OnPatternRestart(bool loop)
 
 		if(pModPlaying != this)
 		{
-			SetNotifications(m_notifyType|Notification::Position|Notification::VUMeters, m_notifyItem);
-			SetFollowWnd(followSonghWnd);
+			SetNotifications(m_notifyType | Notification::Position | Notification::VUMeters, m_notifyItem);
+			SetFollowWnd(pChildFrm->GetHwndView());
 			pMainFrm->PlayMod(this); //rewbs.fix2977
 		}
 	}
@@ -2451,10 +2442,7 @@ void CModDoc::OnPatternPlay()
 		ROWINDEX nRow;
 		PATTERNINDEX nPat;
 		ORDERINDEX nOrd;
-
-		HWND followSonghWnd;
-
-		followSonghWnd = GetEditPosition(nRow,nPat,nOrd);
+		GetEditPosition(nRow, nPat, nOrd);
 		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 
 		CriticalSection cs;
@@ -2480,8 +2468,8 @@ void CModDoc::OnPatternPlay()
 
 		if(pModPlaying != this)
 		{
-			SetNotifications(m_notifyType|Notification::Position|Notification::VUMeters, m_notifyItem);
-			SetFollowWnd(followSonghWnd);
+			SetNotifications(m_notifyType | Notification::Position | Notification::VUMeters, m_notifyItem);
+			SetFollowWnd(pChildFrm->GetHwndView());
 			pMainFrm->PlayMod(this);  //rewbs.fix2977
 		}
 	}
@@ -2505,10 +2493,7 @@ void CModDoc::OnPatternPlayNoLoop()
 		ROWINDEX nRow;
 		PATTERNINDEX nPat;
 		ORDERINDEX nOrd;
-
-		HWND followSonghWnd;
-
-		followSonghWnd = GetEditPosition(nRow,nPat,nOrd);
+		GetEditPosition(nRow, nPat, nOrd);
 		CModDoc *pModPlaying = pMainFrm->GetModPlaying();
 
 		CriticalSection cs;
@@ -2536,8 +2521,8 @@ void CModDoc::OnPatternPlayNoLoop()
 
 		if(pModPlaying != this)
 		{
-			SetNotifications(m_notifyType|Notification::Position|Notification::VUMeters, m_notifyItem);
-			SetFollowWnd(followSonghWnd);
+			SetNotifications(m_notifyType | Notification::Position | Notification::VUMeters, m_notifyItem);
+			SetFollowWnd(pChildFrm->GetHwndView());
 			pMainFrm->PlayMod(this);  //rewbs.fix2977
 		}
 	}
