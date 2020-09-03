@@ -175,6 +175,8 @@ protected:
 	std::unique_ptr<CDLSBank> m_cachedBank;
 	mpt::PathString m_cachedBankName;
 
+	CString m_compareStrL, m_compareStrR;  // Cache for ModTreeInsLibCompareNamesProc to avoid constant re-allocations
+
 	// Instrument library
 	mpt::PathString m_InstrLibPath;           // Current path to be explored
 	mpt::PathString m_InstrLibHighlightPath;  // Folder to highlight in browser after a refresh
@@ -243,6 +245,8 @@ public:
 	BOOL OnDrop(COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
 
 protected:
+	int ModTreeInsLibCompareNamesGetItem(LPARAM item, CString &resultStr);
+	static int CALLBACK ModTreeInsLibCompareNamesProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	HTREEITEM InsertInsLibItem(const TCHAR *name, int image, const TCHAR *selectIfMatch);
