@@ -320,11 +320,10 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 	}
 	FlagSet<HintType> hintType = hint.GetType();
 	const bool updateAll = hintType[HINT_MODTYPE];
-	const int updateTab = genHint.GetChannel() / CHANNELS_IN_TAB;
-	if(genHint.GetType()[HINT_MODCHANNELS] && updateTab != m_nActiveTab && updateTab != 0)
-	{
+	const auto updateChannel = genHint.GetChannel();
+	const int updateTab = (updateChannel < sndFile.GetNumChannels()) ? (updateChannel / CHANNELS_IN_TAB) : m_nActiveTab;
+	if(genHint.GetType()[HINT_MODCHANNELS] && updateTab != m_nActiveTab)
 		return;
-	}
 
 	CString s;
 	nTabCount = (sndFile.m_nChannels + (CHANNELS_IN_TAB - 1)) / CHANNELS_IN_TAB;

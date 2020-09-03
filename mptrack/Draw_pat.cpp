@@ -190,12 +190,13 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 		InvalidatePattern(true, true);
 		return;
 	}
-	if(hint.ToType<GeneralHint>().GetType()[HINT_MODTYPE | HINT_MODCHANNELS])
+	const auto generalHint = hint.ToType<GeneralHint>();
+	if(generalHint.GetType()[HINT_MODTYPE | HINT_MODCHANNELS])
 	{
 		InvalidateChannelsHeaders();
 		UpdateScrollSize();
 	}
-	if(hint.ToType<GeneralHint>().GetType()[HINT_MODTYPE])
+	if(generalHint.GetType()[HINT_MODTYPE])
 	{
 		// If sequence and pattern view became inconsistent (e.g. due to rearranging patterns during cleanup), synchronize to order list again
 		const auto &order = Order();
@@ -203,7 +204,10 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 		if(order.IsValidPat(ord) && order.at(ord) != m_nPattern)
 			SetCurrentPattern(order.at(ord));
 	}
-	if(hint.ToType<GeneralHint>().GetType()[HINT_MODCHANNELS] && m_quickChannelProperties.m_hWnd && pObj != &m_quickChannelProperties)
+	if(generalHint.GetType()[HINT_MODCHANNELS]
+	   && m_quickChannelProperties.m_hWnd
+	   && pObj != &m_quickChannelProperties
+	   && (generalHint.GetChannel() >= GetDocument()->GetNumChannels() || generalHint.GetChannel() == m_quickChannelProperties.GetChannel()))
 	{
 		m_quickChannelProperties.UpdateDisplay();
 	}

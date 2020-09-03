@@ -191,6 +191,7 @@ public:
 
 	void Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint position);
 	void UpdateDisplay();
+	CHANNELINDEX GetChannel() const { return m_channel; }
 
 protected:
 	void DoDataExchange(CDataExchange *pDX) override;

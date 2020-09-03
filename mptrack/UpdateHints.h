@@ -134,12 +134,13 @@ public:
 struct GeneralHint : public UpdateHint
 {
 	static constexpr HintCategory classCategory = HINTCAT_GENERAL;
-	GeneralHint(int channelTab = 0) : UpdateHint(classCategory, channelTab) { }
+	GeneralHint() : UpdateHint(classCategory, 0) { }
+	GeneralHint(CHANNELINDEX channel) : UpdateHint(classCategory, 1 + channel) { }
 	MPT_FORCEINLINE GeneralHint &General() { type |= HINT_MODGENERAL; return *this; }
 	MPT_FORCEINLINE GeneralHint &Channels() { type |= HINT_MODCHANNELS; return *this; }
 	MPT_FORCEINLINE GeneralHint &Tunings() { type |= HINT_TUNINGS; return *this; }
 
-	MPT_FORCEINLINE int GetChannel() const { return GetData<int>(); }
+	MPT_FORCEINLINE CHANNELINDEX GetChannel() const { return item ? static_cast<CHANNELINDEX>(item - 1) : CHANNELINDEX_INVALID; }
 };
 
 struct PatternHint : public UpdateHint
