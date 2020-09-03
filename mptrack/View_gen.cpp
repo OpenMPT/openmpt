@@ -675,7 +675,7 @@ void CViewGlobals::PrepareUndo(CHANNELINDEX chnMod4)
 		// Backup old channel settings through pattern undo.
 		m_lastEdit = chnMod4;
 		const CHANNELINDEX chn = static_cast<CHANNELINDEX>(m_nActiveTab * CHANNELS_IN_TAB) + chnMod4;
-		GetDocument()->GetPatternUndo().PrepareUndo(PATTERNINDEX_INVALID, chn, 0, 0, 0, "Channel Settings", false, true);
+		GetDocument()->GetPatternUndo().PrepareChannelUndo(chn, 1, "Channel Settings");
 	}
 }
 

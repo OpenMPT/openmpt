@@ -45,7 +45,7 @@ protected:
 
 		bool OnlyChannelSettings() const noexcept
 		{
-			return !channelInfo.empty() && numChannels < 1 && numRows < 1;
+			return !channelInfo.empty() && numRows < 1 && !linkToPrevious;
 		}
 	};
 
@@ -69,6 +69,8 @@ public:
 	void ClearUndo();
 	// Adds a new action to the undo buffer.
 	bool PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, const char *description, bool linkToPrevious = false, bool storeChannelInfo = false);
+	// Adds a new action only affecting channel data to the undo buffer.
+	bool PrepareChannelUndo(CHANNELINDEX firstChn, CHANNELINDEX numChns, const char *description);
 	// Undoes the most recent action.
 	PATTERNINDEX Undo();
 	// Redoes the most recent action.
@@ -78,9 +80,9 @@ public:
 	// Returns true if any actions can currently be redone.
 	bool CanRedo() const { return !RedoBuffer.empty(); }
 	// Returns true if a channel-specific action (no pattern data) can currently be undone.
-	bool CanUndoChannelSettings() const { return !UndoBuffer.empty() && UndoBuffer.back().OnlyChannelSettings() && !UndoBuffer.back().linkToPrevious; }
+	bool CanUndoChannelSettings() const { return !UndoBuffer.empty() && UndoBuffer.back().OnlyChannelSettings(); }
 	// Returns true if a channel-specific action (no pattern data) actions can currently be redone.
-	bool CanRedoChannelSettings() const { return !RedoBuffer.empty() && RedoBuffer.back().OnlyChannelSettings() && !RedoBuffer.back().linkToPrevious; }
+	bool CanRedoChannelSettings() const { return !RedoBuffer.empty() && RedoBuffer.back().OnlyChannelSettings(); }
 	// Remove the latest added undo step from the undo buffer
 	void RemoveLastUndoStep();
 	// Get name of next undo item

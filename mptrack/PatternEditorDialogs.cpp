@@ -1379,7 +1379,7 @@ void QuickChannelProperties::PrepareUndo()
 	{
 		// Backup old channel settings through pattern undo.
 		m_settingsChanged = true;
-		m_document->GetPatternUndo().PrepareUndo(PATTERNINDEX_INVALID, m_channel, 0, 0, 0, "Channel Settings", false, true);
+		m_document->GetPatternUndo().PrepareChannelUndo(m_channel, 1, "Channel Settings");
 	}
 }
 

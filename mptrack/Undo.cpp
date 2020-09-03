@@ -54,10 +54,16 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 }
 
 
+bool CPatternUndo::PrepareChannelUndo(CHANNELINDEX firstChn, CHANNELINDEX numChns, const char* description)
+{
+	return PrepareUndo(PATTERNINDEX_INVALID, firstChn, 0, numChns, 0, description, false, true);
+}
+
+
 bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWINDEX firstRow, CHANNELINDEX numChns, ROWINDEX numRows, const char *description, bool linkToPrevious, bool storeChannelInfo) const
 {
 	const CSoundFile &sndFile = modDoc.GetSoundFile();
-	const bool onlyChannelInfo = storeChannelInfo && numChns < 1 && numRows < 1;
+	const bool onlyChannelInfo = storeChannelInfo && numRows < 1;
 
 	ROWINDEX patRows = 0;
 	if(sndFile.Patterns.IsValidPat(pattern))
@@ -65,7 +71,7 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 		patRows = sndFile.Patterns[pattern].GetNumRows();
 		if((firstRow >= patRows) || (firstChn >= sndFile.GetNumChannels()))
 			return false;
-		if((numChns < 1 || numRows < 1) && !storeChannelInfo)
+		if(numChns < 1 || numRows < 1)
 			return false;
 		if(firstRow + numRows >= patRows)
 			numRows = patRows - firstRow;
@@ -114,7 +120,7 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 
 	if(storeChannelInfo)
 	{
-		undo.channelInfo.assign(sndFile.ChnSettings, sndFile.ChnSettings + sndFile.GetNumChannels());
+		undo.channelInfo.assign(std::begin(sndFile.ChnSettings) + firstChn, std::begin(sndFile.ChnSettings) + firstChn + numChns);
 	}
 
 	buffer.push_back(std::move(undo));
@@ -160,9 +166,13 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 		PrepareBuffer(toBuf, undo.pattern, undo.firstChannel, undo.firstRow, undo.numChannels, undo.numRows, undo.description, linkedFromPrevious, !undo.channelInfo.empty());
 
 	const bool modifyChannels = !undo.channelInfo.empty();
+	const CHANNELINDEX updateChannel = (undo.numChannels == 1) ? undo.firstChannel : CHANNELINDEX_INVALID;
 	if(modifyChannels)
 	{
-		if(undo.channelInfo.size() != sndFile.GetNumChannels())
+		const bool modifyChannelCount =
+		    (!onlyChannelSettings && undo.channelInfo.size() != sndFile.GetNumChannels())
+		    || (onlyChannelSettings && (undo.firstChannel + undo.channelInfo.size()) > sndFile.GetNumChannels());
+		if(modifyChannelCount)
 		{
 			// Add or remove channels
 			std::vector<CHANNELINDEX> channels(undo.channelInfo.size(), CHANNELINDEX_INVALID);
@@ -170,10 +180,13 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 			std::iota(channels.begin(), channels.begin() + copyCount, CHANNELINDEX(0));
 			modDoc.ReArrangeChannels(channels, false);
 		}
-		std::move(undo.channelInfo.cbegin(), undo.channelInfo.cend(), sndFile.ChnSettings);
+		if(undo.firstChannel + undo.channelInfo.size() <= sndFile.GetNumChannels())
+		{
+			std::move(undo.channelInfo.cbegin(), undo.channelInfo.cend(), std::begin(sndFile.ChnSettings) + undo.firstChannel);
+		}
 
 		// Channel mute status might have changed...
-		for(CHANNELINDEX i = 0; i < sndFile.GetNumChannels(); i++)
+		for(CHANNELINDEX i = undo.firstChannel; i < sndFile.GetNumChannels(); i++)
 		{
 			modDoc.UpdateChannelMuteStatus(i);
 		}
@@ -229,7 +242,7 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 		modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 	}
 	if(modifyChannels)
-		modDoc.UpdateAllViews(nullptr, GeneralHint().Channels());
+		modDoc.UpdateAllViews(nullptr, GeneralHint(updateChannel).Channels());
 	modDoc.SetModified();
 
 	if(linkToPrevious)
@@ -255,12 +268,16 @@ CString CPatternUndo::GetName(const undobuf_t &buffer)
 		return CString();
 	
 	const UndoInfo &info = buffer.back();
+	CString desc = mpt::ToCString(mpt::Charset::Locale, info.description);
 	if(info.linkToPrevious)
-		return info.description + CString(_T(" (Multiple Patterns)"));
+		desc += _T(" (Multiple Patterns)");
+	else if(info.OnlyChannelSettings() && info.numChannels > 1)
+		desc += _T(" (Multiple Channels)");
 	else if(info.OnlyChannelSettings())
-		return (info.description + MPT_FORMAT(" (Channel {})")(info.firstChannel + 1)).c_str();
+		desc += MPT_CFORMAT(" (Channel {})")(info.firstChannel + 1);
 	else
-		return (info.description + MPT_FORMAT(" (Pat {} Row {} Chn {})")(info.pattern, info.firstRow, info.firstChannel + 1)).c_str();
+		desc += MPT_CFORMAT(" (Pat {} Row {} Chn {})")(info.pattern, info.firstRow, info.firstChannel + 1);
+	return desc;
 }
 
 
