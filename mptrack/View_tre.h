@@ -176,6 +176,7 @@ protected:
 	mpt::PathString m_cachedBankName;
 
 	CString m_compareStrL, m_compareStrR;  // Cache for ModTreeInsLibCompareNamesProc to avoid constant re-allocations
+	DWORD m_stringCompareFlags = NORM_IGNORECASE | NORM_IGNOREWIDTH | SORT_DIGITSASNUMBERS;
 
 	// Instrument library
 	mpt::PathString m_InstrLibPath;           // Current path to be explored

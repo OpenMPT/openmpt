@@ -154,6 +154,10 @@ CModTree::CModTree(CModTree *pDataTree)
 	}
 	MemsetZero(m_tiMidi);
 	MemsetZero(m_tiPerc);
+
+	// Wine does not support natural sorting with SORT_DIGITSASNUMBERS, fall back to normal sorting
+	if(!::CompareString(LOCALE_USER_DEFAULT, m_stringCompareFlags, _T(""), -1, _T(""), -1))
+		m_stringCompareFlags &= ~SORT_DIGITSASNUMBERS;
 }
 
 
@@ -2266,7 +2270,7 @@ int CALLBACK CModTree::ModTreeInsLibCompareNamesProc(LPARAM lParam1, LPARAM lPar
 	if(sortOrderL != sortOrderR)
 		return sortOrderL - sortOrderR;
 
-	return ::CompareString(LOCALE_USER_DEFAULT, NORM_IGNORECASE | NORM_IGNOREWIDTH | SORT_DIGITSASNUMBERS,
+	return ::CompareString(LOCALE_USER_DEFAULT, that->m_stringCompareFlags,
 		that->m_compareStrL.GetBuffer(), -1,
 		that->m_compareStrR.GetBuffer(), -1) - 2;
 }
