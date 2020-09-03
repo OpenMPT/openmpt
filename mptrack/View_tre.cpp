@@ -226,6 +226,7 @@ void CModTree::Init()
 		}
 	}
 	m_hInsLib = InsertItem(_T("Instrument Library"), IMAGE_FOLDER, IMAGE_FOLDER, TVI_ROOT, TVI_LAST);
+	SetItemData(m_hInsLib, reinterpret_cast<DWORD_PTR>(m_hInsLib));
 	RefreshMidiLibrary();
 	RefreshDlsBanks();
 	RefreshInstrumentLibrary();
@@ -2076,7 +2077,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 					// Directory
 					if(_tcscmp(wfd.cFileName, _T(".")) && showDirs)
 						type = IMAGE_FOLDER;
-				} else if(wfd.nFileSizeHigh > 0 || wfd.nFileSizeLow >= 16)
+				} else if(wfd.nFileSizeHigh > 0 || wfd.nFileSizeLow >= 9)
 				{
 					type = FilterFile(mpt::PathString::FromNative(wfd.cFileName));
 					if(type == FILTER_REJECT_FILE)
@@ -2107,9 +2108,8 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 	// Sort items
 	TVSORTCB tvs;
 	tvs.hParent = (!IsSampleBrowser()) ? m_hInsLib : TVI_ROOT;
-	tvs.lpfnCompare = ModTreeInsLibCompareProc;
+	tvs.lpfnCompare = ModTreeInsLibCompareNamesProc;
 	tvs.lParam = (LPARAM)this;
-	SortChildren(tvs.hParent);
 	SortChildrenCB(&tvs);
 	SetRedraw(TRUE);
 
@@ -2199,45 +2199,76 @@ void CModTree::MonitorInstrumentLibrary()
 // Insert sample browser item.
 HTREEITEM CModTree::InsertInsLibItem(const TCHAR *name, int image, const TCHAR *selectIfMatch)
 {
-	LPARAM sortOrder = 0;  // The order in which item groups appear in the instrument library
-	switch(image)
-	{
-	case IMAGE_FOLDERPARENT:
-		sortOrder = 1;
-		break;
-	case IMAGE_FOLDER:
-		sortOrder = 2;
-		break;
-	case IMAGE_FOLDERSONG:
-		sortOrder = 3;
-		break;
-	case IMAGE_SAMPLES:
-	case IMAGE_OPLINSTR:
-		// Only group instruments and samples separately if we're browsing inside a module file
-		if(!m_SongFileName.empty())
-		{
-			sortOrder = 5;
-			break;
-		}
-		[[fallthrough]];
-	case IMAGE_INSTRUMENTS:
-	default:
-		sortOrder = 4;
-		break;
-	}
-	HTREEITEM item = InsertItem(TVIF_IMAGE | TVIF_PARAM | TVIF_SELECTEDIMAGE | TVIF_TEXT,
+	HTREEITEM item = InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT,
 		name,
 		image, image,
 		0, 0,
-		sortOrder,
+		0,
 		(!IsSampleBrowser()) ? m_hInsLib : TVI_ROOT,
 		TVI_LAST);
+	SetItemData(item, reinterpret_cast<DWORD_PTR>(item));  // Used by ModTreeInsLibCompareNamesProc
 	if(selectIfMatch != nullptr && !_tcscmp(name, selectIfMatch))
 	{
 		SelectItem(item);
 		EnsureVisible(item);
 	}
 	return item;
+}
+
+
+int CModTree::ModTreeInsLibCompareNamesGetItem(LPARAM item, CString &resultStr)
+{
+	TVITEM tvi;
+	tvi.mask = TVIF_TEXT | TVIF_IMAGE;
+	tvi.hItem = reinterpret_cast<HTREEITEM>(item);
+	int len = std::max(64, resultStr.GetAllocLength());
+	while(true)
+	{
+		tvi.pszText = resultStr.GetBuffer(len);
+		tvi.cchTextMax = len + 1;
+		if(!GetItem(&tvi))
+			return int16_max;
+		if(int resultLen = static_cast<int>(_tcsnlen(tvi.pszText, len)); resultLen < len)
+		{
+			resultStr.ReleaseBuffer(resultLen);
+
+			// Item image indicates sort order
+			switch(tvi.iImage)
+			{
+			case IMAGE_FOLDERPARENT:
+				return 1;
+			case IMAGE_FOLDER:
+				return 2;
+			case IMAGE_FOLDERSONG:
+				return 3;
+			case IMAGE_SAMPLES:
+			case IMAGE_OPLINSTR:
+				// Only group instruments and samples separately if we're browsing inside a module file
+				if(!m_SongFileName.empty())
+					return 5;
+				[[fallthrough]];
+			case IMAGE_INSTRUMENTS:
+			default:
+				return 4;
+			}
+		}
+		len *= 2;
+	}
+}
+
+
+int CALLBACK CModTree::ModTreeInsLibCompareNamesProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	auto that = reinterpret_cast<CModTree *>(lParamSort);
+
+	const int sortOrderL = that->ModTreeInsLibCompareNamesGetItem(lParam1, that->m_compareStrL);
+	const int sortOrderR = that->ModTreeInsLibCompareNamesGetItem(lParam2, that->m_compareStrR);
+	if(sortOrderL != sortOrderR)
+		return sortOrderL - sortOrderR;
+
+	return ::CompareString(LOCALE_USER_DEFAULT, NORM_IGNORECASE | NORM_IGNOREWIDTH | SORT_DIGITSASNUMBERS,
+		that->m_compareStrL.GetBuffer(), -1,
+		that->m_compareStrR.GetBuffer(), -1) - 2;
 }
 
 
