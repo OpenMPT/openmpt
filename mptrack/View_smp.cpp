@@ -1164,7 +1164,10 @@ void CViewSample::OnDraw(CDC *pDC)
 	const auto oldFont = offScreenDC.SelectObject(m_timelineFont);
 
 	// Draw timeline
-	const int timelineHeight = m_timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
+	m_timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
+	if(m_timelineHeight % 2)
+		m_timelineHeight++;  // Avoid weird-looking triangles if timeline is scaled to odd height
+	const int timelineHeight = m_timelineHeight;
 	{
 		const TimelineFormat format = TrackerSettings::Instance().sampleEditorTimelineFormat;
 		CRect timeline = rcClient;
