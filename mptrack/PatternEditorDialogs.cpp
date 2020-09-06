@@ -1248,6 +1248,7 @@ BEGIN_MESSAGE_MAP(QuickChannelProperties, CDialog)
 	ON_COMMAND(IDC_BUTTON5, &QuickChannelProperties::OnPickPrevColor)
 	ON_COMMAND(IDC_BUTTON6, &QuickChannelProperties::OnPickNextColor)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	&QuickChannelProperties::OnCustomKeyMsg)
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, &QuickChannelProperties::OnToolTipText)
 END_MESSAGE_MAP()
 
 
@@ -1284,6 +1285,7 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint posi
 	if(!m_hWnd)
 	{
 		Create(IDD_CHANNELSETTINGS, nullptr);
+		EnableToolTips();
 		m_colorBtn.SubclassDlgItem(IDC_BUTTON4, this);
 		m_colorBtnPrev.SubclassDlgItem(IDC_BUTTON5, this);
 		m_colorBtnNext.SubclassDlgItem(IDC_BUTTON6, this);
@@ -1621,6 +1623,45 @@ LRESULT QuickChannelProperties::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	}
 
 	return kcNull;
+}
+
+
+BOOL QuickChannelProperties::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
+{
+	auto pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
+	UINT_PTR id = pNMHDR->idFrom;
+	if(pTTT->uFlags & TTF_IDISHWND)
+	{
+		// idFrom is actually the HWND of the tool
+		id = static_cast<UINT_PTR>(::GetDlgCtrlID(reinterpret_cast<HWND>(id)));
+	}
+
+	const TCHAR *text = nullptr;
+	switch (id)
+	{
+	case IDC_BUTTON1:
+		text = _T("Previous Channel");
+		break;
+	case IDC_BUTTON2:
+		text = _T("Next Channel");
+		break;
+	case IDC_BUTTON5:
+		text = _T("Take color from previous channel");
+		break;
+	case IDC_BUTTON6:
+		text = _T("Take color from next channel");
+		break;
+	default:
+		return FALSE;
+	}
+	
+	mpt::String::WriteWinBuf(pTTT->szText) = text;
+	*pResult = 0;
+
+	// bring the tooltip window above other popup windows
+	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER);
+
+	return TRUE;  // message was handled
 }
 
 

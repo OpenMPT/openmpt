@@ -212,6 +212,7 @@ protected:
 	afx_msg void OnPickPrevColor();
 	afx_msg void OnPickNextColor();
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+	afx_msg BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult);
 
 	BOOL PreTranslateMessage(MSG *pMsg);
 
