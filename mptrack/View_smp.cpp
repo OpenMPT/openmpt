@@ -126,6 +126,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_DELETE_CUEPOINT,	&CViewSample::OnSampleDeleteCuePoint)
 	ON_COMMAND(ID_SAMPLE_TIMELINE_SECONDS,	&CViewSample::OnTimelineFormatSeconds)
 	ON_COMMAND(ID_SAMPLE_TIMELINE_SAMPLES,	&CViewSample::OnTimelineFormatSamples)
+	ON_COMMAND(ID_SAMPLE_TIMELINE_SAMPLES_POW2, &CViewSample::OnTimelineFormatSamplesPow2)
 	ON_COMMAND_RANGE(ID_SAMPLE_CUE_1, ID_SAMPLE_CUE_9, &CViewSample::OnSetCuePoint)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,		&CViewSample::OnUpdateUndo)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO,		&CViewSample::OnUpdateRedo)
@@ -268,10 +269,12 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 		samplesPerInterval = Util::muldiv(samplesPerInterval, 1000, sampleRate);
 	if(!samplesPerInterval)
 		samplesPerInterval = 1;
-	m_timelineUnit = mpt::saturate_round<int>(std::log10(static_cast<double>(samplesPerInterval)));
+
+	const double power = (format == TimelineFormat::SamplesPow2) ? 2.0 : 10.0;
+	m_timelineUnit = mpt::saturate_round<int>(std::log(static_cast<double>(samplesPerInterval)) / std::log(power));
 	if(m_timelineUnit < 1)
 		m_timelineUnit = 0;
-	m_timelineUnit = static_cast<int>(std::pow(10.0, m_timelineUnit));
+	m_timelineUnit = static_cast<int>(std::pow(power, m_timelineUnit));
 	samplesPerInterval = Util::AlignUp(samplesPerInterval, m_timelineUnit);
 	if(format == TimelineFormat::Seconds)
 		samplesPerInterval = Util::muldiv(samplesPerInterval, sampleRate, 1000);
@@ -2118,9 +2121,10 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			}
 
-			bool fmtSeconds = TrackerSettings::Instance().sampleEditorTimelineFormat == TimelineFormat::Seconds;
-			::AppendMenu(hMenu, MF_STRING | (fmtSeconds ? MF_CHECKED : 0), ID_SAMPLE_TIMELINE_SECONDS, _T("&Seconds"));
-			::AppendMenu(hMenu, MF_STRING | (fmtSeconds ? 0 : MF_CHECKED), ID_SAMPLE_TIMELINE_SAMPLES, _T("S&amples"));
+			auto fmt = TrackerSettings::Instance().sampleEditorTimelineFormat.Get();
+			::AppendMenu(hMenu, MF_STRING | (fmt == TimelineFormat::Seconds ? MF_CHECKED : 0), ID_SAMPLE_TIMELINE_SECONDS, _T("&Seconds"));
+			::AppendMenu(hMenu, MF_STRING | (fmt == TimelineFormat::Samples ? MF_CHECKED : 0), ID_SAMPLE_TIMELINE_SAMPLES, _T("S&amples"));
+			::AppendMenu(hMenu, MF_STRING | (fmt == TimelineFormat::SamplesPow2 ? MF_CHECKED : 0), ID_SAMPLE_TIMELINE_SAMPLES_POW2, _T("Samples (&Power of 2)"));
 			ClientToScreen(&pt);
 			::TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
 			::DestroyMenu(hMenu);
@@ -3785,17 +3789,9 @@ void CViewSample::OnQuickFade()
 }
 
 
-void CViewSample::OnTimelineFormatSeconds()
+void CViewSample::SetTimelineFormat(TimelineFormat fmt)
 {
-	TrackerSettings::Instance().sampleEditorTimelineFormat = TimelineFormat::Seconds;
-	UpdateScrollSize();
-	InvalidateTimeline();
-}
-
-
-void CViewSample::OnTimelineFormatSamples()
-{
-	TrackerSettings::Instance().sampleEditorTimelineFormat = TimelineFormat::Samples;
+	TrackerSettings::Instance().sampleEditorTimelineFormat = fmt;
 	UpdateScrollSize();
 	InvalidateTimeline();
 }
