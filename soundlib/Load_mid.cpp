@@ -347,7 +347,7 @@ struct MThd
 	uint16be division;		// Delta timing value: positive = units/beat; negative = smpte compatible units
 };
 
-MPT_BINARY_STRUCT(MThd, 10);
+MPT_BINARY_STRUCT(MThd, 10)
 
 
 typedef uint32 tick_t;
