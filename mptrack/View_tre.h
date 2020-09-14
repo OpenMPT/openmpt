@@ -246,7 +246,7 @@ public:
 	BOOL OnDrop(COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
 
 protected:
-	int ModTreeInsLibCompareNamesGetItem(LPARAM item, CString &resultStr);
+	int ModTreeInsLibCompareNamesGetItem(HTREEITEM item, CString &resultStr);
 	static int CALLBACK ModTreeInsLibCompareNamesProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);

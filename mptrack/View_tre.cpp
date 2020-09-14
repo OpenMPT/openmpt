@@ -2220,11 +2220,11 @@ HTREEITEM CModTree::InsertInsLibItem(const TCHAR *name, int image, const TCHAR *
 }
 
 
-int CModTree::ModTreeInsLibCompareNamesGetItem(LPARAM item, CString &resultStr)
+int CModTree::ModTreeInsLibCompareNamesGetItem(HTREEITEM item, CString &resultStr)
 {
 	TVITEM tvi;
 	tvi.mask = TVIF_TEXT | TVIF_IMAGE;
-	tvi.hItem = reinterpret_cast<HTREEITEM>(item);
+	tvi.hItem = item;
 	int len = std::max(64, resultStr.GetAllocLength());
 	while(true)
 	{
@@ -2264,9 +2264,14 @@ int CModTree::ModTreeInsLibCompareNamesGetItem(LPARAM item, CString &resultStr)
 int CALLBACK CModTree::ModTreeInsLibCompareNamesProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	auto that = reinterpret_cast<CModTree *>(lParamSort);
+	const auto itemL = reinterpret_cast<HTREEITEM>(lParam1), itemR = reinterpret_cast<HTREEITEM>(lParam2);
+	if(itemL == that->m_hInsLib)
+		return -1;
+	else if(itemR == that->m_hInsLib)
+		return 1;
 
-	const int sortOrderL = that->ModTreeInsLibCompareNamesGetItem(lParam1, that->m_compareStrL);
-	const int sortOrderR = that->ModTreeInsLibCompareNamesGetItem(lParam2, that->m_compareStrR);
+	const int sortOrderL = that->ModTreeInsLibCompareNamesGetItem(itemL, that->m_compareStrL);
+	const int sortOrderR = that->ModTreeInsLibCompareNamesGetItem(itemR, that->m_compareStrR);
 	if(sortOrderL != sortOrderR)
 		return sortOrderL - sortOrderR;
 
