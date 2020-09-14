@@ -238,6 +238,7 @@ enum class TimelineFormat
 {
 	Seconds = 0,
 	Samples,
+	SamplesPow2,
 };
 
 
