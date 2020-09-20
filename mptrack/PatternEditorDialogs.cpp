@@ -1636,25 +1636,37 @@ BOOL QuickChannelProperties::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult
 		id = static_cast<UINT_PTR>(::GetDlgCtrlID(reinterpret_cast<HWND>(id)));
 	}
 
-	const TCHAR *text = nullptr;
+	mpt::tstring text;
+	CommandID cmd = kcNull;
 	switch (id)
 	{
 	case IDC_BUTTON1:
 		text = _T("Previous Channel");
+		cmd = kcChnSettingsPrev;
 		break;
 	case IDC_BUTTON2:
 		text = _T("Next Channel");
+		cmd = kcChnSettingsNext;
 		break;
 	case IDC_BUTTON5:
 		text = _T("Take color from previous channel");
+		cmd = kcChnColorFromPrev;
 		break;
 	case IDC_BUTTON6:
 		text = _T("Take color from next channel");
+		cmd = kcChnColorFromNext;
 		break;
 	default:
 		return FALSE;
 	}
 	
+	if(cmd != kcNull)
+	{
+		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
+		if(!keyText.IsEmpty())
+			text += MPT_TFORMAT(" ({})")(keyText);
+	}
+
 	mpt::String::WriteWinBuf(pTTT->szText) = text;
 	*pResult = 0;
 
