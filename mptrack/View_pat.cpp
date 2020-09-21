@@ -7109,14 +7109,22 @@ HRESULT CViewPattern::get_accName(VARIANT varChild, BSTR *pszName)
 		column = regularColumns[columnIndex];
 
 	const CSoundFile *sndFile = GetSoundFile();
+	const CHANNELINDEX chn = m_Cursor.GetChannel();
+
+	const auto channelNumber = mpt::cfmt::val(chn + 1);
+	CString channelName = channelNumber;
+	if(chn < sndFile->GetNumChannels() && !sndFile->ChnSettings[chn].szName.empty())
+		channelName += _T(": ") + mpt::ToCString(sndFile->GetCharsetInternal(), sndFile->ChnSettings[chn].szName);
+
 	CString str = TrackerSettings::Instance().patternAccessibilityFormat;
 	str.Replace(_T("%sequence%"), mpt::cfmt::val(sndFile->Order.GetCurrentSequenceIndex()));
 	str.Replace(_T("%order%"), mpt::cfmt::val(GetCurrentOrder()));
 	str.Replace(_T("%pattern%"), mpt::cfmt::val(GetCurrentPattern()));
 	str.Replace(_T("%row%"), mpt::cfmt::val(m_Cursor.GetRow()));
-	str.Replace(_T("%channel%"), mpt::cfmt::val(m_Cursor.GetChannel() + 1));
+	str.Replace(_T("%channel%"), channelNumber);
 	str.Replace(_T("%column_type%"), column);
 	str.Replace(_T("%column_description%"), GetCursorDescription());
+	str.Replace(_T("%channel_name%"), channelName);
 
 	if(str.IsEmpty())
 		return CModScrollView::get_accName(varChild, pszName);
