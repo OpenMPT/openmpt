@@ -45,8 +45,8 @@ private:
 
 private:
 
-	explicit PathString(const RawPathString & path)
-		: path(path)
+	explicit PathString(const RawPathString & path_)
+		: path(path_)
 	{
 		return;
 	}
