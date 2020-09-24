@@ -1,11 +1,11 @@
 
-CXXFLAGS_WARNINGS += -Wcast-align -Wcast-qual -Wundef
-CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wundef
+CXXFLAGS_WARNINGS += -Wcast-align -Wcast-qual -Wshift-count-negative -Wshift-count-overflow -Wshift-op-parentheses -Wshift-overflow -Wshift-sign-overflow -Wundef
+CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wshift-count-negative -Wshift-count-overflow -Wshift-op-parentheses -Wshift-overflow -Wshift-sign-overflow -Wundef
 
-CXXFLAGS_WARNINGS += -Wmissing-declarations -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
-CFLAGS_WARNINGS   += -Wmissing-prototypes   -Wshift-count-negative -Wshift-count-overflow -Wshift-overflow -Wshift-sign-overflow -Wshift-op-parentheses
+CXXFLAGS_WARNINGS += -Wframe-larger-than=16000 -Wmissing-declarations
+CFLAGS_WARNINGS   +=                           -Wmissing-prototypes
 
-CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wnon-virtual-dtor -Wreserved-id-macro -Wglobal-constructors -Wimplicit-fallthrough
+CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wglobal-constructors -Wimplicit-fallthrough -Wnon-virtual-dtor -Wreserved-id-macro
 
 #CXXFLAGS_WARNINGS += -Wdocumentation
 #CXXFLAGS_WARNINGS += -Wconversion
@@ -13,7 +13,7 @@ CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wnon-virtual-dtor -Wreserved-id-
 
 ifeq ($(MODERN),1)
 LDFLAGS  += -fuse-ld=lld
-CXXFLAGS_WARNINGS += -Wframe-larger-than=16000
+CXXFLAGS_WARNINGS += 
 CFLAGS_WARNINGS   += -Wframe-larger-than=4000
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
 # re-renable after 1.29 branch
