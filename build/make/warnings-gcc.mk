@@ -1,11 +1,14 @@
 
-CXXFLAGS_WARNINGS += -Wcast-align -Wcast-qual -Wfloat-conversion -Wsuggest-override -Wundef -Wno-psabi
-CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wfloat-conversion                    -Wundef
+CXXFLAGS_WARNINGS += -Wcast-align -Wcast-qual -Wfloat-conversion -Wframe-larger-than=16000 -Winit-self -Wlogical-op -Wpointer-arith -Wstrict-aliasing -Wsuggest-override -Wundef
+CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wfloat-conversion -Wframe-larger-than=4000              -Wlogical-op                                                      -Wundef
+
+CXXFLAGS_WARNINGS += -Wno-psabi
 
 ifeq ($(MODERN),1)
 LDFLAGS  += -fuse-ld=gold
-CXXFLAGS_WARNINGS += -Wlogical-op -Wframe-larger-than=16000
-CFLAGS_WARNINGS   += -Wlogical-op -Wframe-larger-than=4000
+CXXFLAGS_WARNINGS += 
+CFLAGS_WARNINGS   += 
+#CXXFLAGS_WARNINGS += -Wstrict-aliasing -Wpointer-arith -Winit-self -Wshadow -Wswitch-enum -Wstrict-prototypes
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
 # re-renable after 1.29 branch
 #CXXFLAGS_WARNINGS += -Wdouble-promotion
