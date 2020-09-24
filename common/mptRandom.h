@@ -156,9 +156,9 @@ private:
 	T a;
 	T b;
 public:
-	inline uniform_real_distribution(T a, T b)
-		: a(a)
-		, b(b)
+	inline uniform_real_distribution(T a_, T b_)
+		: a(a_)
+		, b(b_)
 	{
 		return;
 	}
