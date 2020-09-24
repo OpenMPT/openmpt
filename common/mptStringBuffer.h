@@ -72,9 +72,9 @@ private:
 public:
 	// cppcheck false-positive
 	// cppcheck-suppress uninitMemberVar
-	explicit StringBufRefImpl(Tchar * buf, std::size_t size)
-		: buf(buf)
-		, size(size)
+	explicit StringBufRefImpl(Tchar * buf_, std::size_t size_)
+		: buf(buf_)
+		, size(size_)
 	{
 		static_assert(sizeof(Tchar) == sizeof(typename Tstring::value_type));
 		MPT_ASSERT(size > 0);
@@ -110,9 +110,9 @@ private:
 public:
 	// cppcheck false-positive
 	// cppcheck-suppress uninitMemberVar
-	explicit StringBufRefImpl(const Tchar * buf, std::size_t size)
-		: buf(buf)
-		, size(size)
+	explicit StringBufRefImpl(const Tchar * buf_, std::size_t size_)
+		: buf(buf_)
+		, size(size_)
 	{
 		static_assert(sizeof(Tchar) == sizeof(typename Tstring::value_type));
 		MPT_ASSERT(size > 0);
@@ -231,10 +231,10 @@ private:
 public:
 	// cppcheck false-positive
 	// cppcheck-suppress uninitMemberVar
-	StringModeBufRefImpl(Tchar * buf, std::size_t size, String::ReadWriteMode mode)
-		: buf(buf)
-		, size(size)
-		, mode(mode)
+	StringModeBufRefImpl(Tchar * buf_, std::size_t size_, String::ReadWriteMode mode_)
+		: buf(buf_)
+		, size(size_)
+		, mode(mode_)
 	{
 		static_assert(sizeof(Tchar) == 1);
 	}
@@ -267,10 +267,10 @@ private:
 public:
 	// cppcheck false-positive
 	// cppcheck-suppress uninitMemberVar
-	StringModeBufRefImpl(const Tchar * buf, std::size_t size, String::ReadWriteMode mode)
-		: buf(buf)
-		, size(size)
-		, mode(mode)
+	StringModeBufRefImpl(const Tchar * buf_, std::size_t size_, String::ReadWriteMode mode_)
+		: buf(buf_)
+		, size(size_)
+		, mode(mode_)
 	{
 		static_assert(sizeof(Tchar) == 1);
 	}
@@ -390,9 +390,9 @@ private:
 public:
 	// cppcheck false-positive
 	// cppcheck-suppress uninitMemberVar
-	explicit CStringBufRefImpl(Tchar * buf, std::size_t size)
-		: buf(buf)
-		, size(size)
+	explicit CStringBufRefImpl(Tchar * buf_, std::size_t size_)
+		: buf(buf_)
+		, size(size_)
 	{
 		MPT_ASSERT(size > 0);
 	}
@@ -423,9 +423,9 @@ private:
 public:
 	// cppcheck false-positive
 	// cppcheck-suppress uninitMemberVar
-	explicit CStringBufRefImpl(const Tchar * buf, std::size_t size)
-		: buf(buf)
-		, size(size)
+	explicit CStringBufRefImpl(const Tchar * buf_, std::size_t size_)
+		: buf(buf_)
+		, size(size_)
 	{
 		MPT_ASSERT(size > 0);
 	}
