@@ -1926,16 +1926,18 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.flags & MO3FileHeader::modplugMode)
 	{
 		// Apply some old ModPlug (mis-)behaviour
-		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
+		if(!m_dwLastSavedWithVersion)
 		{
-			if(ModInstrument *ins = Instruments[i])
+			// These fixes are only applied when the OpenMPT version number is not known, as otherwise the song upgrade feature will take care of it.
+			for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 			{
-				// Fix pitch / filter envelope being shortened by one tick
-				if(m_dwLastSavedWithVersion < MPT_V("1.20.00.00"))
+				if(ModInstrument *ins = Instruments[i])
+				{
+					// Fix pitch / filter envelope being shortened by one tick (for files before v1.20)
 					ins->GetEnvelope(ENV_PITCH).Convert(MOD_TYPE_XM, GetType());
-				// Fix excessive pan swing range
-				if(m_dwLastSavedWithVersion < MPT_V("1.26.00.00"))
+					// Fix excessive pan swing range (for files before v1.26)
 					ins->nPanSwing = (ins->nPanSwing + 3) / 4u;
+				}
 			}
 		}
 		if(m_dwLastSavedWithVersion < MPT_V("1.18.00.00"))
