@@ -3612,9 +3612,9 @@ void CViewSample::OnSampleSlice()
 	for(std::size_t i = 0; i < std::size(sample.cues); i++)
 	{
 		cues[i] = sample.cues[i];
-		if(cues[i] >= sample.nLength)
+		if(cues[i] == 0 || cues[i] >= sample.nLength)
 			cues[i] = sample.nLength;
-		else if(cues[i] > 0)
+		else
 			hasValidCues = true;
 	}
 	// Nothing to slice?
