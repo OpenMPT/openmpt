@@ -31,6 +31,10 @@ enum ResetFlag
 	SmpResetVibrato,
 };
 
+// Get a reference to all cue and loop points of the sample
+std::vector<std::reference_wrapper<SmpLength>> GetCuesAndLoops(ModSample &smp);
+
+
 // Insert silence to given location.
 // Note: Is currently implemented only for inserting silence to the beginning and to the end of the sample.
 // Return: Length of the new sample.
