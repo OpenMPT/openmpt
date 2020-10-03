@@ -61,6 +61,7 @@ void CSoundFile::ConvertModCommand(ModCommand &m)
 	case 'P' - 55:	m.command = CMD_PANNINGSLIDE; break;
 	case 'R' - 55:	m.command = CMD_RETRIG; break;
 	case 'T' - 55:	m.command = CMD_TREMOR; break;
+	case 'W' - 55:	m.command = CMD_DUMMY; break;
 	case 'X' - 55:	m.command = CMD_XFINEPORTAUPDOWN;	break;
 	case 'Y' - 55:	m.command = CMD_PANBRELLO; break;			//34
 	case 'Z' - 55:	m.command = CMD_MIDI;	break;				//35
@@ -137,6 +138,7 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 	case CMD_PANNINGSLIDE:		command = 'P' - 55; break;
 	case CMD_RETRIG:			command = 'R' - 55; break;
 	case CMD_TREMOR:			command = 'T' - 55; break;
+	case CMD_DUMMY:				command = 'W' - 55; break;
 	case CMD_XFINEPORTAUPDOWN:	command = 'X' - 55;
 		if(compatibilityExport && param >= 0x30)	// X1x and X2x are legit, everything above are MPT extensions, which don't belong here.
 			param = 0;	// Don't set command to 0 to indicate that there *was* some X command here...
