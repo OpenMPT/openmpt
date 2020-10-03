@@ -2517,7 +2517,7 @@ void CViewSample::TrimSample(bool trimToLoopEnd)
 	SmpLength nStart = m_dwBeginSel;
 	SmpLength nEnd = m_dwEndSel - m_dwBeginSel;
 
-	if ((sample.HasSampleData()) && (nStart+nEnd <= sample.nLength) && (nEnd >= MIN_TRIM_LENGTH))
+	if(sample.HasSampleData() && (nStart + nEnd <= sample.nLength) && (nEnd >= MIN_TRIM_LENGTH))
 	{
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Trim");
 
@@ -2526,12 +2526,13 @@ void CViewSample::TrimSample(bool trimToLoopEnd)
 		// Note: Sample is overwritten in-place! Unused data is not deallocated!
 		memmove(sample.sampleb(), sample.sampleb() + nStart * sample.GetBytesPerSample(), nEnd * sample.GetBytesPerSample());
 
-		if (sample.nLoopStart >= nStart) sample.nLoopStart -= nStart;
-		if (sample.nLoopEnd >= nStart) sample.nLoopEnd -= nStart;
-		if (sample.nSustainStart >= nStart) sample.nSustainStart -= nStart;
-		if (sample.nSustainEnd >= nStart) sample.nSustainEnd -= nStart;
-		if (sample.nLoopEnd > nEnd) sample.nLoopEnd = nEnd;
-		if (sample.nSustainEnd > nEnd) sample.nSustainEnd = nEnd;
+		for(SmpLength &point : SampleEdit::GetCuesAndLoops(sample))
+		{
+			if(point >= nStart)
+				point -= nStart;
+			else
+				point = sample.nLength;
+		}
 		sample.nLength = nEnd;
 		sample.PrecomputeLoops(sndFile);
 		cs.Leave();
@@ -3232,9 +3233,10 @@ void CViewSample::OnSampleSlice()
 	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB]) return;
 
 	// Sort cue points and add two fake cue points to make things easier below...
-	SmpLength cues[CountOf(sample.cues) + 2];
-	bool hasValidCues = false;	// Any cues in ]0, length[
-	for(size_t i = 0; i < CountOf(sample.cues); i++)
+	constexpr size_t NUM_CUES = mpt::array_size<decltype(sample.cues)>::size;
+	std::array<SmpLength, NUM_CUES + 2> cues;
+	bool hasValidCues = false;  // Any cues in ]0, length[
+	for(std::size_t i = 0; i < std::size(sample.cues); i++)
 	{
 		cues[i] = sample.cues[i];
 		if(cues[i] == 0 || cues[i] >= sample.nLength)
@@ -3246,9 +3248,9 @@ void CViewSample::OnSampleSlice()
 	if(!hasValidCues)
 		return;
 
-	cues[CountOf(sample.cues)] = 0;
-	cues[CountOf(sample.cues) + 1] = sample.nLength;
-	std::sort(cues, cues + CountOf(cues));
+	cues[NUM_CUES] = 0;
+	cues[NUM_CUES + 1] = sample.nLength;
+	std::sort(cues.begin(), cues.end());
 
 	// Now slice the sample at each cue point
 	for(size_t i = 1; i < CountOf(cues) - 1; i++)

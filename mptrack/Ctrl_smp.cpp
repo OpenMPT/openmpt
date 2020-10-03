@@ -2013,9 +2013,7 @@ void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
 		PrepareUndo((newRate > oldRate) ? "Upsample" : "Downsample", sundo_replace);
 
 		// Adjust loops and cues
-		std::vector<std::reference_wrapper<SmpLength>> loopPoints = {sample.nLoopStart, sample.nLoopEnd, sample.nSustainStart, sample.nSustainEnd};
-		loopPoints.insert(loopPoints.end(), std::begin(sample.cues), std::end(sample.cues));
-		for(SmpLength &point : loopPoints)
+		for(SmpLength &point : SampleEdit::GetCuesAndLoops(sample))
 		{
 			if(point >= oldLength)
 				point = newTotalLength;

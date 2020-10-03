@@ -21,6 +21,14 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SampleEdit
 {
 
+std::vector<std::reference_wrapper<SmpLength>> GetCuesAndLoops(ModSample &smp)
+{
+	std::vector<std::reference_wrapper<SmpLength>> loopPoints = {smp.nLoopStart, smp.nLoopEnd, smp.nSustainStart, smp.nSustainEnd};
+	loopPoints.insert(loopPoints.end(), std::begin(smp.cues), std::end(smp.cues));
+	return loopPoints;
+}
+
+
 SmpLength InsertSilence(ModSample &smp, const SmpLength silenceLength, const SmpLength startFrom, CSoundFile &sndFile)
 {
 	if(silenceLength == 0 || silenceLength > MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - silenceLength || startFrom > smp.nLength)
@@ -48,13 +56,9 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength silenceLength, const Smp
 		}
 
 		// Update loop points if necessary.
-		if(smp.nLoopStart >= startFrom) smp.nLoopStart += silenceLength;
-		if(smp.nLoopEnd >= startFrom) smp.nLoopEnd += silenceLength;
-		if(smp.nSustainStart >= startFrom) smp.nSustainStart += silenceLength;
-		if(smp.nSustainEnd >= startFrom) smp.nSustainEnd += silenceLength;
-		for(auto &cue : smp.cues)
+		for(SmpLength &point : GetCuesAndLoops(smp))
 		{
-			if(cue >= startFrom) cue += silenceLength;
+			if(point >= startFrom) point += silenceLength;
 		}
 	} else
 	{
