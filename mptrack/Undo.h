@@ -121,10 +121,10 @@ protected:
 	{
 		ModSample OldSample;
 		mpt::charbuf<MAX_SAMPLENAME> oldName;
-		void *samplePtr;
-		const char *description;
-		SmpLength changeStart, changeEnd;
-		sampleUndoTypes changeType;
+		void *samplePtr = nullptr;
+		const char *description = nullptr;
+		SmpLength changeStart = 0, changeEnd = 0;
+		sampleUndoTypes changeType = sundo_none;
 	};
 
 	using undobuf_t = std::vector<std::vector<UndoInfo>>;
@@ -181,8 +181,8 @@ protected:
 	struct UndoInfo
 	{
 		ModInstrument instr;
-		const char *description;
-		EnvelopeType editedEnvelope;
+		const char *description = nullptr;
+		EnvelopeType editedEnvelope = ENV_MAXTYPES;
 	};
 
 	using undobuf_t = std::vector<std::vector<UndoInfo>>;
