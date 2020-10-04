@@ -1571,6 +1571,9 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	// Instrument mode
 	std::vector<bool> instrMuteState;
 
+	// CHN_SYNCMUTE is used with formats where CHN_MUTE would stop processing global effects and could thus mess synchronization between exported channels
+	const ChannelFlags muteFlag = m_SndFile.m_playBehaviour[kST3NoMutedChannels] ? CHN_SYNCMUTE : CHN_MUTE;
+
 	// Channel mode: save song in multiple wav files (one for each enabled channels)
 	if(wsdlg.m_bChannelMode)
 	{
@@ -1586,7 +1589,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			// Ignore muted channels
 			if(channelFlags[i][CHN_MUTE]) usedChannels[i] = false;
 			// Mute each channel
-			m_SndFile.ChnSettings[i].dwFlags.set(CHN_MUTE);
+			m_SndFile.ChnSettings[i].dwFlags.set(muteFlag);
 		}
 	}
 	// Instrument mode: Same as channel mode, but renders per instrument (or sample)
@@ -1640,7 +1643,8 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			if(wsdlg.m_bChannelMode)
 			{
 				// Re-mute previously processed channel
-				if(i > 0) m_SndFile.ChnSettings[i - 1].dwFlags.set(CHN_MUTE);
+				if(i > 0)
+					m_SndFile.ChnSettings[i - 1].dwFlags.set(muteFlag);
 
 				// Was this channel actually muted? Don't process it then.
 				if(!usedChannels[i])
@@ -1657,7 +1661,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 					caption = mpt::cformat(_T("channel %1"))(i + 1);
 				}
 				// Unmute channel to process
-				m_SndFile.ChnSettings[i].dwFlags.reset(CHN_MUTE);
+				m_SndFile.ChnSettings[i].dwFlags.reset(muteFlag);
 			}
 			// Instrument mode
 			if(wsdlg.m_bInstrumentMode)
