@@ -7,6 +7,13 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.3-pre
 
+ *  MO3: Avoid certain ModPlug hacks from being fixed up twice, which could lead
+    to e.g. very narrow pan swing range for old OpenMPT IT files saved with a
+    recent MO3 encoder version. 
+ *  MO3: Some files with corrupted envelope data could be rejected completely
+    (normally libopenmpt should fix up the envelope data).
+ *  PLM: Percentage offset (Mxx) was slightly off.
+
 ### libopenmpt 0.5.2 (2020-08-30)
 
  *  [**Change**] `Makefile` `CONFIG=emscripten` now supports

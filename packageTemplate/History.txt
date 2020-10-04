@@ -31,6 +31,39 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.04.00 (4 October 2020, revision 13649)
+--------------------------------------------
+Tree view
+- [Imp] <js> Use natural sorting for filenames (http://bugs.openmpt.org/view.php?id=1359).
+
+Pattern tab
+- [Imp] <js> Added possibility to use %channel_name% in accessibility description format, which contains the channel name in addition to its index (http://forum.openmpt.org/index.php?topic=6480.0).
+
+Sample tab
+- [Imp] <js> The start and end point of an existing selection can now be modified by dragging it with the mouse.
+- [Mod] <js> WAV / FLAC: When importing cue points and there are less than 9 cue points, remove the default cue points from the sample. On export, cue points past the sample end are no longer written.
+- [Fix] <js> Playback position indication did not work when using a pattern-specific playback function (e.g. "play from current pattern") and the module was not playing before that.
+- [Fix] <js> Ensure that adjusting sample frequency with the fine spinner always adds or subtracts at least one Hz.
+- [Fix] <js> Slicing at cue points lost the first part of the sample if some cue point was 0.
+- [Fix] <js> Trimming and resampling didn't adjust cue points accordingly.
+
+Instrument tab
+- [Fix] <js> Playback position indication did not work when using a pattern-specific playback function (e.g. "play from current pattern") and the module was not playing before that.
+
+Mod Conversion
+- [Fix] <js> Sample frequency to transpose + finetune conversion was wrong if the resulting transpose value was negative.
+
+XM
+- [Imp] <js> Support loading and saving (but not editing for now, apart from using the clipboard) command W, which is used e.g. by BASS for syncing purposes.
+
+Other formats
+- [Fix] MO3: Avoid certain ModPlug hacks from being fixed up twice, which could lead to e.g. very narrow pan swing range for old OpenMPT IT files saved with a recent MO3 encoder version. 
+- [Fix] <js> PLM: Percentage offset (Mxx) was slightly off.
+
+Misc
+- [Fix] <js> Channel Manager is no longer redrawn on almost every unrelated UI update.
+
+
 v1.29.03.00 (30 August 2020, revision 13550)
 --------------------------------------------
 Tree view
