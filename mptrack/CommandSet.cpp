@@ -733,6 +733,8 @@ static constexpr struct
 	{2007, kcNextSequence, _T("Next Sequence")},
 	{2008, kcChnColorFromPrev , _T("Pick Color from Previous Channel")},
 	{2009, kcChnColorFromNext , _T("Pick Color from Next Channel") },
+	{2010, kcChannelMoveLeft, _T("Move Channels to Left")},
+	{2011, kcChannelMoveRight, _T("Move Channels to Right")},
 };
 
 // Get command descriptions etc.. loaded up.
