@@ -110,7 +110,12 @@ SmpLength RemoveRange(ModSample &smp, SmpLength selStart, SmpLength selEnd, CSou
 
 	for(auto &cue : smp.cues)
 	{
-		Util::DeleteItem(selStart, selEnd - 1, cue);
+		if(cue >= selEnd)
+			cue -= (selEnd - selStart);
+		else if(cue >= selStart && selStart == 0)
+			cue = smp.nLength;
+		else if(cue >= selStart)
+			cue = selStart;
 	}
 
 	smp.PrecomputeLoops(sndFile);
