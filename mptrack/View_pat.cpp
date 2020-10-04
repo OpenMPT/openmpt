@@ -1295,40 +1295,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 			InvalidateRect(&m_rcDropItem, FALSE);
 
 			const bool duplicate = (nFlags & MK_SHIFT) != 0;
-			const CHANNELINDEX newChannels = modDoc->GetNumChannels() + (duplicate ? 1 : 0);
-			std::vector<CHANNELINDEX> channels(newChannels, 0);
-			CHANNELINDEX i = 0;
-			bool modified = duplicate;
-
-			for(CHANNELINDEX chn = 0; chn < newChannels; chn++)
-			{
-				if(chn == targetChn)
-				{
-					channels[chn] = sourceChn;
-				} else
-				{
-					if(i == sourceChn && !duplicate)  // Don't want that source channel twice if we're just moving
-					{
-						i++;
-					}
-					channels[chn] = i++;
-				}
-				if(channels[chn] != chn)
-				{
-					modified = true;
-				}
-			}
-			if(modified && modDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
-			{
-				modDoc->UpdateAllViews(this, GeneralHint().Channels().ModType(), this);
-				if(duplicate)
-				{
-					// Number of channels changed: Update channel headers and other information.
-					SetCurrentPattern(m_nPattern);
-				}
-				InvalidatePattern(true, false);
-				SetModified(false);
-			}
+			DragChannel(sourceChn, targetChn, 1, duplicate);
 		}
 		break;
 
@@ -1343,6 +1310,61 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 
 	m_nDropItem = {};
+}
+
+
+void CViewPattern::DragChannel(CHANNELINDEX source, CHANNELINDEX target, CHANNELINDEX numChannels, bool duplicate)
+{
+	auto modDoc = GetDocument();
+	const CHANNELINDEX newChannels = modDoc->GetNumChannels() + (duplicate ? numChannels : 0);
+	std::vector<CHANNELINDEX> channels(newChannels, 0);
+	bool modified = duplicate;
+
+	for(CHANNELINDEX chn = 0, fromChn = 0; chn < newChannels; chn++)
+	{
+		if(chn >= target && chn < target + numChannels)
+		{
+			channels[chn] = source + chn - target;
+		} else
+		{
+			if(fromChn == source && !duplicate)  // Don't want the source channels twice if we're just moving
+			{
+				fromChn += numChannels;
+			}
+			channels[chn] = fromChn++;
+		}
+		if(channels[chn] != chn)
+		{
+			modified = true;
+		}
+	}
+	if(modified && modDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
+	{
+		modDoc->UpdateAllViews(this, GeneralHint().Channels().ModType(), this);
+		if(duplicate)
+		{
+			// Number of channels changed: Update channel headers and other information.
+			SetCurrentPattern(m_nPattern);
+		}
+
+		if(!duplicate)
+		{
+			const auto oldSel = m_Selection;
+			if(auto chn = m_Cursor.GetChannel(); (chn >= source && chn < source + numChannels))
+				SetCurrentColumn(target + chn - source, m_Cursor.GetColumnType());
+			if(oldSel.GetStartChannel() >= source && oldSel.GetEndChannel() < source + numChannels)
+			{
+				const auto diff = static_cast<int>(target) - source;
+				auto upperLeft = oldSel.GetUpperLeft(), lowerRight = oldSel.GetLowerRight();
+				upperLeft.Move(0, diff, 0);
+				lowerRight.Move(0, diff, 0);
+				SetCurSel(upperLeft, lowerRight);
+			}
+		}
+
+		InvalidatePattern(true, false);
+		SetModified(false);
+	}
 }
 
 
@@ -4308,6 +4330,15 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			}
 		case kcChannelTranspose: m_MenuCursor = m_Cursor; OnTransposeChannel(); return wParam;
 		case kcChannelDuplicate: m_MenuCursor = m_Cursor; OnDuplicateChannel(); return wParam;
+		case kcChannelMoveLeft:
+			if(CHANNELINDEX chn = m_Selection.GetStartChannel(); chn > 0)
+				DragChannel(chn, chn - 1u, m_Selection.GetNumChannels(), false);
+			return wParam;
+		case kcChannelMoveRight:
+			if (CHANNELINDEX chn = m_Selection.GetStartChannel(); chn < sndFile.GetNumChannels() - m_Selection.GetNumChannels())
+				DragChannel(chn, chn + 1u, m_Selection.GetNumChannels(), false);
+			return wParam;
+
 		case kcSplitPattern: m_MenuCursor = m_Cursor; OnSplitPattern(); return wParam;
 
 		case kcDecreaseSpacing:

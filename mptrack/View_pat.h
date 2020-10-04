@@ -557,6 +557,8 @@ private:
 	// Add a channel.
 	void AddChannelBefore(CHANNELINDEX nBefore);
 
+	void DragChannel(CHANNELINDEX source, CHANNELINDEX target, CHANNELINDEX numChannels, bool duplicate);
+
 public:
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
 

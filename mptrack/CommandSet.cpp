@@ -731,6 +731,8 @@ static constexpr struct
 	{2005, kcInsertWholeRowGlobal, _T("Insert Row(s) (All Channels, Global)")},
 	{2006, kcPrevSequence, _T("Previous Sequence")},
 	{2007, kcNextSequence, _T("Next Sequence")},
+	{2010, kcChannelMoveLeft, _T("Move Channels to Left")},
+	{2011, kcChannelMoveRight, _T("Move Channels to Right")},
 };
 
 // Get command descriptions etc.. loaded up.

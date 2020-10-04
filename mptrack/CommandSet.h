@@ -310,6 +310,8 @@ enum CommandID
 	kcChannelReset,
 	kcChannelTranspose,
 	kcChannelDuplicate,
+	kcChannelMoveLeft,
+	kcChannelMoveRight,
 	kcChannelSettings,
 	kcEndChannelKeys = kcChannelSettings,
 	kcBeginTranspose,
