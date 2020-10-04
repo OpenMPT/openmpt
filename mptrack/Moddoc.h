@@ -145,6 +145,7 @@ public:
 protected:
 	// Note-off event buffer for MIDI sustain pedal
 	std::array<std::vector<uint32>, 16> m_midiSustainBuffer;
+	std::array<std::bitset<128>, 16> m_midiPlayingNotes;
 	std::bitset<16> m_midiSustainActive;
 
 	std::bitset<MAX_BASECHANNELS> m_bsMultiRecordMask;

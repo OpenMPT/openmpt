@@ -858,6 +858,8 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 		if(ins > 0 && ins <= GetNumInstruments())
 		{
 			LimitMax(note, NOTE_MAX);
+			if(m_midiPlayingNotes[channel][note])
+				m_midiPlayingNotes[channel][note] = false;
 			NoteOff(note, false, ins, m_noteChannel[note - NOTE_MIN]);
 			return;
 		} else if(plugin != nullptr)
@@ -870,7 +872,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 		if(ins > 0 && ins <= GetNumInstruments())
 		{
 			LimitMax(note, NOTE_MAX);
-			NoteOff(note, false, ins);
+			CheckNNA(note, ins, m_midiPlayingNotes[channel]);
 			vol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
 			PlayNote(PlayNoteParam(note).Instrument(ins).Volume(vol), &m_noteChannel);
 			return;
