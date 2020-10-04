@@ -3253,7 +3253,7 @@ void CViewSample::OnSampleSlice()
 	std::sort(cues.begin(), cues.end());
 
 	// Now slice the sample at each cue point
-	for(size_t i = 1; i < CountOf(cues) - 1; i++)
+	for(size_t i = 1; i < std::size(cues) - 1; i++)
 	{
 		const SmpLength cue  = cues[i];
 		if(cue > cues[i - 1] && cue < cues[i + 1])
