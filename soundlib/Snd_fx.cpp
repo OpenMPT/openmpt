@@ -31,11 +31,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Formats which have 7-bit (0...128) instead of 6-bit (0...64) global volume commands, or which are imported to this range (mostly formats which are converted to IT internally)
 #ifdef MODPLUG_TRACKER
-#define GLOBALVOL_7BIT_FORMATS_EXT (MOD_TYPE_MT2)
+static constexpr auto GLOBALVOL_7BIT_FORMATS_EXT = MOD_TYPE_MT2;
 #else
-#define GLOBALVOL_7BIT_FORMATS_EXT (MOD_TYPE_NONE)
+static constexpr auto GLOBALVOL_7BIT_FORMATS_EXT = MOD_TYPE_NONE;
 #endif // MODPLUG_TRACKER
-#define GLOBALVOL_7BIT_FORMATS (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_DBM | MOD_TYPE_PTM | MOD_TYPE_MDL | MOD_TYPE_DTM | GLOBALVOL_7BIT_FORMATS_EXT)
+static constexpr auto GLOBALVOL_7BIT_FORMATS = MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_DBM | MOD_TYPE_PTM | MOD_TYPE_MDL | MOD_TYPE_DTM | GLOBALVOL_7BIT_FORMATS_EXT;
 
 
 // Compensate frequency slide LUTs depending on whether we are handling periods or frequency - "up" and "down" in function name are seen from frequency perspective.
@@ -300,16 +300,15 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 	for (;;)
 	{
+		playState.m_nRow = playState.m_nNextRow;
+		playState.m_nCurrentOrder = playState.m_nNextOrder;
+
 		// Time target reached.
 		if(target.mode == GetLengthTarget::SeekSeconds && memory.elapsedTime >= target.time)
 		{
 			retval.targetReached = true;
 			break;
 		}
-
-		uint32 rowDelay = 0, tickDelay = 0;
-		playState.m_nRow = playState.m_nNextRow;
-		playState.m_nCurrentOrder = playState.m_nNextOrder;
 
 		if(orderList.IsValidPat(playState.m_nCurrentOrder) && playState.m_nRow >= Patterns[orderList[playState.m_nCurrentOrder]].GetNumRows())
 		{
@@ -455,6 +454,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 
 		// For various effects, we need to know first how many ticks there are in this row.
+		uint32 rowDelay = 0, tickDelay = 0;
 		const ModCommand *p = Patterns[playState.m_nPattern].GetpModCommand(playState.m_nRow, 0);
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, p++)
 		{
@@ -1224,14 +1224,15 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					startTimes[start] = std::lcm(startTimes[start], 1 + (param & 0x0F));
 				}
 			}
-			for(const auto &i : startTimes)
+			for(const auto &[startTime, loopCount] : startTimes)
 			{
-				memory.elapsedTime += (memory.elapsedTime - i.first) * (double)(i.second - 1);
+				memory.elapsedTime += (memory.elapsedTime - startTime) * (loopCount - 1);
+				//memory.elapsedBeats += 1.0 / playState.m_nCurrentRowsPerBeat;
 				for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 				{
-					if(memory.chnSettings[nChn].patLoop == i.first)
+					if(memory.chnSettings[nChn].patLoop == startTime)
 					{
-						playState.m_lTotalSampleCount += (playState.m_lTotalSampleCount - memory.chnSettings[nChn].patLoopSmp) * (i.second - 1);
+						playState.m_lTotalSampleCount += (playState.m_lTotalSampleCount - memory.chnSettings[nChn].patLoopSmp) * (loopCount - 1);
 						if(m_playBehaviour[kITPatternLoopTargetReset] || (GetType() == MOD_TYPE_S3M))
 						{
 							memory.chnSettings[nChn].patLoop = memory.elapsedTime;
