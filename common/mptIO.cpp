@@ -455,8 +455,8 @@ mpt::byte_span FileDataContainerUnseekable::Read(IFileDataContainer::off_t pos, 
 		return dst.first(0);
 	}
 	IFileDataContainer::off_t cache_avail = std::min(IFileDataContainer::off_t(cachesize) - pos, dst.size());
-	ReadCached(pos, dst.subspan(cache_avail));
-	return dst.subspan(cache_avail);
+	ReadCached(pos, dst.subspan(0, cache_avail));
+	return dst.subspan(0, cache_avail);
 }
 
 bool FileDataContainerUnseekable::CanRead(IFileDataContainer::off_t pos, std::size_t length) const
