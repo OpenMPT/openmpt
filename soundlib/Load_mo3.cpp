@@ -1969,6 +1969,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		m_modFormat.originalType = U_("mptm");
 		m_modFormat.originalFormatName = U_("OpenMPT MPTM");
 		break;
+	default:
+		MPT_ASSERT_NOTREACHED();
 	}
 	m_modFormat.madeWithTracker = std::move(madeWithTracker);
 	if(m_dwLastSavedWithVersion)
