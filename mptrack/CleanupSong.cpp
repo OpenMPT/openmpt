@@ -112,7 +112,7 @@ BOOL CModCleanupDlg::OnInitDialog()
 
 	CSoundFile &sndFile = modDoc.GetSoundFile();
 
-	GetDlgItem(m_CleanupIDtoDlgID[kMergeSequences])->EnableWindow((sndFile.GetType() & MOD_TYPE_MPT) ? TRUE : FALSE);
+	GetDlgItem(m_CleanupIDtoDlgID[kMergeSequences])->EnableWindow((sndFile.Order.GetNumSequences() > 1) ? TRUE : FALSE);
 
 	GetDlgItem(m_CleanupIDtoDlgID[kRemoveSamples])->EnableWindow((sndFile.GetNumSamples() > 0) ? TRUE : FALSE);
 	GetDlgItem(m_CleanupIDtoDlgID[kRearrangeSamples])->EnableWindow((sndFile.GetNumSamples() > 1) ? TRUE : FALSE);
@@ -529,7 +529,6 @@ bool CModCleanupDlg::RemoveUnusedSamples()
 
 	if(unusedInsSamples)
 	{
-		// We don't remove an instrument's unused samples in an ITP.
 		mpt::ustring s = MPT_UFORMAT("OpenMPT detected {} sample{} referenced by an instrument,\nbut not used in the song. Do you want to remove them?")
 			( unusedInsSamples
 			, (unusedInsSamples == 1) ? U_("") : U_("s")
