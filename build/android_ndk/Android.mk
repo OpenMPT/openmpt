@@ -145,6 +145,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_mod.cpp \
 	soundlib/Load_mt2.cpp \
 	soundlib/Load_mtm.cpp \
+	soundlib/Load_mus_km.cpp \
 	soundlib/Load_okt.cpp \
 	soundlib/Load_plm.cpp \
 	soundlib/Load_psm.cpp \

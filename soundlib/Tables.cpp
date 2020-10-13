@@ -42,9 +42,9 @@ const mpt::uchar NoteNamesFlat[12][4] =
 
 struct ModFormatInfo
 {
-	MODTYPE format;              // MOD_TYPE_XXXX
+	MODTYPE format;          // MOD_TYPE_XXXX
 	const mpt::uchar *name;  // "ProTracker"
-	const char *extension;       // "mod"
+	const char *extension;   // "mod"
 };
 
 // Note: Formats with identical extensions must be grouped together.
@@ -80,6 +80,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_SFX,  UL_("MultiMedia Sound"),           "mms" },
 	{ MOD_TYPE_MT2,  UL_("MadTracker 2"),               "mt2" },
 	{ MOD_TYPE_MTM,  UL_("MultiTracker"),               "mtm" },
+	{ MOD_TYPE_MOD,  UL_("Karl Morton Music Format"),   "mus" },
 	{ MOD_TYPE_MOD,  UL_("NoiseTracker"),               "nst" },
 	{ MOD_TYPE_OKT,  UL_("Oktalyzer"),                  "okt" },
 	{ MOD_TYPE_PLM,  UL_("Disorder Tracker 2"),         "plm" },
@@ -112,9 +113,9 @@ static constexpr ModFormatInfo modFormatInfo[] =
 
 struct ModContainerInfo
 {
-	MODCONTAINERTYPE format;     // MOD_CONTAINERTYPE_XXXX
-	const mpt::uchar *name;  // "Unreal Music"
-	const char *extension;       // "umx"
+	MODCONTAINERTYPE format;  // MOD_CONTAINERTYPE_XXXX
+	const mpt::uchar *name;   // "Unreal Music"
+	const char *extension;    // "umx"
 };
 
 static constexpr ModContainerInfo modContainerInfo[] =
@@ -123,11 +124,10 @@ static constexpr ModContainerInfo modContainerInfo[] =
 	{ MOD_CONTAINERTYPE_UMX,   UL_("Unreal Music"),             "umx"   },
 	{ MOD_CONTAINERTYPE_XPK,   UL_("XPK packed"),               "xpk"   },
 	{ MOD_CONTAINERTYPE_PP20,  UL_("PowerPack PP20"),           "ppm"   },
-	{ MOD_CONTAINERTYPE_MMCMP, UL_("Music Module Compressor"),  "mmcmp" }
+	{ MOD_CONTAINERTYPE_MMCMP, UL_("Music Module Compressor"),  "mmcmp" },
 #ifdef MODPLUG_TRACKER
-	,
 	{ MOD_CONTAINERTYPE_WAV,   UL_("Wave"),                     "wav"   },
-	{ MOD_CONTAINERTYPE_UAX,   UL_("Unreal Sounds"),            "uax"   }
+	{ MOD_CONTAINERTYPE_UAX,   UL_("Unreal Sounds"),            "uax"   },
 #endif
 };
 

@@ -585,6 +585,7 @@
     <ClCompile Include="..\..\soundlib\Load_mod.cpp" />
     <ClCompile Include="..\..\soundlib\Load_mt2.cpp" />
     <ClCompile Include="..\..\soundlib\Load_mtm.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_mus_km.cpp" />
     <ClCompile Include="..\..\soundlib\Load_okt.cpp" />
     <ClCompile Include="..\..\soundlib\Load_plm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_psm.cpp" />

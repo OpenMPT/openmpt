@@ -964,6 +964,8 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_mtm.cpp">
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_mus_km.cpp">
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_okt.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_plm.cpp">
