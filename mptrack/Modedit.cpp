@@ -351,10 +351,8 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 			if(--sampleCount[origSlot] > 0 && sampleHeaders[origSlot].HasSampleData())
 			{
 				// This sample slot is referenced multiple times, so we have to copy the actual sample.
-				target.pData.pSample = ModSample::AllocateSample(target.nLength, target.GetBytesPerSample());
-				if(target.HasSampleData())
+				if(target.CopyWaveform(sampleHeaders[origSlot]))
 				{
-					memcpy(target.sampleb(), sampleHeaders[origSlot].sampleb(), target.GetSampleSizeInBytes());
 					target.PrecomputeLoops(m_SndFile, false);
 				} else
 				{

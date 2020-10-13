@@ -298,13 +298,8 @@ bool CSoundFile::ReadSampleFromSong(SAMPLEINDEX targetSample, const CSoundFile &
 
 	if(sourceSmp.HasSampleData())
 	{
-		targetSmp.pData.pSample = nullptr;	// Don't want to delete the original sample!
-		if(targetSmp.AllocateSample())
-		{
-			SmpLength nSize = sourceSmp.GetSampleSizeInBytes();
-			memcpy(targetSmp.sampleb(), sourceSmp.sampleb(), nSize);
+		if(targetSmp.CopyWaveform(sourceSmp))
 			targetSmp.PrecomputeLoops(*this, false);
-		}
 		// Remember on-disk path (for MPTM files), but don't implicitely enable on-disk storage
 		// (we really don't want this for e.g. duplicating samples or splitting stereo samples)
 #ifdef MPT_EXTERNAL_SAMPLES

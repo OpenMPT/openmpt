@@ -1345,14 +1345,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		} else if(smpHeader.compressedSize < 0 && (smp + smpHeader.compressedSize) > 0)
 		{
 			// Duplicate sample
-			const ModSample &smpFrom = Samples[smp + smpHeader.compressedSize];
-			LimitMax(sample.nLength, smpFrom.nLength);
-			sample.uFlags.set(CHN_16BIT, smpFrom.uFlags[CHN_16BIT]);
-			sample.uFlags.set(CHN_STEREO, smpFrom.uFlags[CHN_STEREO]);
-			if(smpFrom.HasSampleData() && sample.AllocateSample())
-			{
-				memcpy(sample.sampleb(), smpFrom.sampleb(), sample.GetSampleSizeInBytes());
-			}
+			sample.CopyWaveform(Samples[smp + smpHeader.compressedSize]);
 		} else if(smpHeader.compressedSize > 0)
 		{
 			if(smpHeader.flags & MO3Sample::smp16Bit)

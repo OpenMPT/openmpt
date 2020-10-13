@@ -122,6 +122,9 @@ struct ModSample
 	// Initialize sample slot with default values.
 	void Initialize(MODTYPE type = MOD_TYPE_NONE);
 
+	// Copies sample data from another sample slot and ensures that the 16-bit/stereo flags are set accordingly.
+	bool CopyWaveform(const ModSample &smpFrom);
+
 	// Allocate sample based on a ModSample's properties.
 	// Returns number of bytes allocated, 0 on failure.
 	size_t AllocateSample();

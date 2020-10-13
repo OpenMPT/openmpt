@@ -166,6 +166,27 @@ uint32 ModSample::GetSampleRate(const MODTYPE type) const
 }
 
 
+// Copies sample data from another sample slot and ensures that the 16-bit/stereo flags are set accordingly.
+bool ModSample::CopyWaveform(const ModSample &smpFrom)
+{
+	if(!smpFrom.HasSampleData())
+		return false;
+	// If we duplicate a sample slot, avoid deleting the sample we just copy from
+	if(smpFrom.sampleb() == sampleb())
+		pData.pSample = nullptr;
+	LimitMax(nLength, smpFrom.nLength);
+	uFlags.set(CHN_16BIT, smpFrom.uFlags[CHN_16BIT]);
+	uFlags.set(CHN_STEREO, smpFrom.uFlags[CHN_STEREO]);
+	if(AllocateSample())
+	{
+		memcpy(sampleb(), smpFrom.sampleb(), GetSampleSizeInBytes());
+		return true;
+	}
+	return false;
+
+}
+
+
 // Allocate sample based on a ModSample's properties.
 // Returns number of bytes allocated, 0 on failure.
 size_t ModSample::AllocateSample()
