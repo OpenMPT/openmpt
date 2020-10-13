@@ -5827,7 +5827,8 @@ TEMPO CSoundFile::ConvertST2Tempo(uint8 tempo)
 	static constexpr uint32 st2MixingRate = 23863; // Highest possible setting in ST2
 
 	// This underflows at tempo 06...0F, and the resulting tick lengths depend on the mixing rate.
-	int32 samplesPerTick = st2MixingRate / (49 - ((ST2TempoFactor[tempo >> 4u] * (tempo & 0x0F)) >> 4u));
+	// Note: ST2.3 uses the constant 50 below, earlier versions use 49 but they also play samples at a different speed.
+	int32 samplesPerTick = st2MixingRate / (50 - ((ST2TempoFactor[tempo >> 4u] * (tempo & 0x0F)) >> 4u));
 	if(samplesPerTick <= 0)
 		samplesPerTick += 65536;
 	return TEMPO().SetRaw(Util::muldivrfloor(st2MixingRate, 5 * TEMPO::fractFact, samplesPerTick * 2));
