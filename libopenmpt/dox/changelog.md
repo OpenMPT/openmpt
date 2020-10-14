@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.0-pre
 
+ *  [**New**] `MUS` files from Psycho Pinball and Micro Machines 2 are now
+    supported.
+
  *  [**Change**] `Makefile` `CONFIG=emscripten` now supports
     `EMSCRIPTEN_TARGET=all` which provides WebAssembly as well as fallback to
     JavaScript in a single build.
