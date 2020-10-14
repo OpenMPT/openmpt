@@ -3,7 +3,7 @@
  * ---------------
  * Purpose: Karl Morton Music Format module loader
  * Notes  : This is probably not the official name of this format.
- *          Karl Morton's engine has been in Psycho Pinball and Micro Machines 2 and also Back To Baghdad
+ *          Karl Morton's engine has been used in Psycho Pinball and Micro Machines 2 and also Back To Baghdad
  *          but the latter game only uses its sound effect format, not the music format.
  *          So there are only two known games using this music format, and no official tools or documentation are available.
  * Authors: OpenMPT Devs
@@ -179,6 +179,8 @@ bool CSoundFile::ReadMUS_KM(FileReader &file, ModLoadingFlags loadFlags)
 	static constexpr uint16 MUS_SAMPLE_UNUSED = 255;  // Sentinel value to check if a sample needs to be duplicated
 	for(auto &chunk : sampleChunks)
 	{
+		if(!CanAddMoreSamples())
+			break;
 		m_nSamples++;
 		ModSample &mptSample = Samples[m_nSamples];
 		mptSample.Initialize(MOD_TYPE_MOD);
@@ -207,8 +209,8 @@ bool CSoundFile::ReadMUS_KM(FileReader &file, ModLoadingFlags loadFlags)
 	bool firstSong = true;
 	for(auto &chunk : songChunks)
 	{
-		if(!firstSong)
-			Order.AddSequence();
+		if(!firstSong && !Order.AddSequence())
+			break;
 		firstSong = false;
 		Order().clear();
 
