@@ -257,11 +257,23 @@ void CViewPattern::OnEditFindNext()
 						m_Status.reset(psFollowSong);
 						SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG, 0);
 					}
-					// This doesn't find the order if it's in another sequence :(
-					ORDERINDEX matchingOrder = sndFile.Order().FindOrder(pat, GetCurrentOrder());
-					if(matchingOrder != ORDERINDEX_INVALID)
+
+					// Find sequence and order where this pattern is used
+					const auto numSequences = sndFile.Order.GetNumSequences();
+					auto seq = sndFile.Order.GetCurrentSequenceIndex();
+					for(SEQUENCEINDEX i = 0; i < numSequences; i++)
 					{
-						SetCurrentOrder(matchingOrder);
+						const bool isCurrentSeq = (i == 0);
+						ORDERINDEX matchingOrder = sndFile.Order(seq).FindOrder(pat, isCurrentSeq ? GetCurrentOrder() : 0);
+						if(matchingOrder != ORDERINDEX_INVALID)
+						{
+							if(!isCurrentSeq)
+								SendCtrlMessage(CTRLMSG_PAT_SETSEQUENCE, seq);
+							SetCurrentOrder(matchingOrder);
+							break;
+						}
+						if(++seq >= numSequences)
+							seq = 0;
 					}
 					// go to place of finding
 					SetCurrentPattern(pat);
