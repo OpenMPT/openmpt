@@ -16,8 +16,12 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+static uint8 GetLuma(const RawGDIDIB::Pixel pixel)
+{
+	return static_cast<uint8>(pixel.r * 0.299f + pixel.g * 0.587f + pixel.b * 0.114f);
+}
 
-bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGrow, CDC *dc, double scaling, bool disabled)
+bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGrow, CDC *dc, double scaling, bool disabled, const mpt::span<const int> invertImages)
 {
 	std::unique_ptr<RawGDIDIB> bitmap;
 	try
@@ -30,6 +34,26 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 		return false;
 	}
 
+	const RawGDIDIB::Pixel buttonColor = GetSysColor(COLOR_BTNFACE);
+	const bool isDark = GetLuma(buttonColor) < 128;
+	if(isDark)
+	{
+		// Invert icons on dark themes
+		for(const int img : invertImages)
+		{
+			for(int y = 0; y < cy; y++)
+			{
+				RawGDIDIB::Pixel *pixel = &(*bitmap)(img * cx, y);
+				for(int x = 0; x < cx; x++, pixel++)
+				{
+					pixel->r = ~pixel->r;
+					pixel->g = ~pixel->g;
+					pixel->b = ~pixel->b;
+				}
+			}
+		}
+	}
+
 	if(disabled)
 	{
 		// Grayed out icons
@@ -37,9 +61,12 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 		{
 			if(pixel.a != 0)
 			{
-				uint8 y = static_cast<uint8>(pixel.r * 0.299f + pixel.g * 0.587f + pixel.b * 0.114f);
+				uint8 y = GetLuma(pixel);
 				pixel.r = pixel.g = pixel.b = y;
-				pixel.a /= 2;
+				if(isDark)
+					pixel.a -= pixel.a / 3;
+				else
+					pixel.a /= 2;
 			}
 		}
 	}
@@ -51,11 +78,8 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 	// Use 1-bit transperency when there is no alpha channel.
 	if(GetDeviceCaps(dc->GetSafeHdc(), BITSPIXEL) * GetDeviceCaps(dc->GetSafeHdc(), PLANES) < 32)
 	{
-		uint32 rowSize = (bitmap->Width() + 31u) / 32u * 4u;
+		const uint32 rowSize = (bitmap->Width() + 31u) / 32u * 4u;
 		std::vector<uint8> bitmapMask(rowSize * bitmap->Height());
-
-		const COLORREF buttonColor = GetSysColor(COLOR_BTNFACE);
-		const uint8 r = GetRValue(buttonColor), g = GetGValue(buttonColor), b = GetBValue(buttonColor);
 
 		RawGDIDIB::Pixel *pixel = bitmap->Pixels().data();
 		for(uint32 y = 0; y < bitmap->Height(); y++)
@@ -66,7 +90,7 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 				if(pixel->a != 0)
 				{
 					// Pixel not fully transparent - multiply with default background colour
-#define MIXCOLOR(c) (((pixel-> c ) * pixel->a + (c) * (255 - pixel->a)) >> 8);
+#define MIXCOLOR(c) (((pixel-> c ) * pixel->a + (buttonColor. c) * (255 - pixel->a)) >> 8);
 					pixel->r = MIXCOLOR(r);
 					pixel->g = MIXCOLOR(g);
 					pixel->b = MIXCOLOR(b);

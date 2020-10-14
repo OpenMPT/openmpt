@@ -43,6 +43,8 @@ public:
 		    : b(0), g(0), r(0), a(0) {}
 		constexpr Pixel(uint8 r, uint8 g, uint8 b, uint8 a) noexcept
 		    : b(b), g(g), r(r), a(a) {}
+		constexpr Pixel(COLORREF color) noexcept
+		    : b(GetBValue(color)), g(GetGValue(color)), r(GetRValue(color)), a(0) {}
 	};
 private:
 	uint32 width;

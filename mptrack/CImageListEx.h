@@ -11,13 +11,14 @@
 #pragma once
 
 #include "BuildSettings.h"
+#include "../common/mptSpan.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 class CImageListEx : public CImageList
 {
 public:
-	bool Create(UINT resourceID, int cx, int cy, int nInitial, int nGrow, CDC *dc, double scaling, bool disabled);
+	bool Create(UINT resourceID, int cx, int cy, int nInitial, int nGrow, CDC *dc, double scaling, bool disabled, const mpt::span<const int> invertImages = {});
 };
 
 OPENMPT_NAMESPACE_END
