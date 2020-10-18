@@ -40,9 +40,12 @@
 #include "../mptrack/Mainfrm.h"
 #include "../mptrack/Settings.h"
 #include "../mptrack/HTTP.h"
-#include "../common/mptCrypto.h"
 #endif // MODPLUG_TRACKER
 #include "../common/mptFileIO.h"
+#ifdef MODPLUG_TRACKER
+#include "../misc/mptCrypto.h"
+#include "../misc/mptUUIDNamespace.h"
+#endif // MODPLUG_TRACKER
 #ifdef LIBOPENMPT_BUILD
 #include "../libopenmpt/libopenmpt_version.h"
 #endif // LIBOPENMPT_BUILD
@@ -1785,7 +1788,7 @@ static MPT_NOINLINE void TestMisc2()
 	{
 		constexpr mpt::UUID uuid_ns_dns = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"_uuid;
 		constexpr mpt::UUID expected = "74738ff5-5367-5958-9aee-98fffdcd1876"_uuid;
-		mpt::UUID gotten = mpt::UUID::RFC4122NamespaceV5(uuid_ns_dns, U_("www.example.org"));
+		mpt::UUID gotten = mpt::UUIDRFC4122NamespaceV5(uuid_ns_dns, U_("www.example.org"));
 		VERIFY_EQUAL(gotten, expected);
 	}
 #endif

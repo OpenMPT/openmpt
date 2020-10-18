@@ -25,8 +25,8 @@
 #include "../common/mptUUID.h"
 #include "../common/mptOS.h"
 #include "../common/mptCRC.h"
-#include "../common/mptWine.h"
 #include "../common/FileReader.h"
+#include "../misc/mptWine.h"
 #include "MPTrackUtilWine.h"
 
 #include "wine/NativeSoundDevice.h"

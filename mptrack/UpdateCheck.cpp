@@ -20,7 +20,7 @@
 #include "Mainfrm.h"
 #include "../common/mptThread.h"
 #include "../common/mptOSError.h"
-#include "../common/mptCrypto.h"
+#include "../misc/mptCrypto.h"
 #include "HTTP.h"
 #include "../misc/JSON.h"
 #include "dlg_misc.h"

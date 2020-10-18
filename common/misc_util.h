@@ -25,7 +25,6 @@
 #include "mptExceptionText.h"
 #include "mptStringFormat.h"
 #include "mptStringParse.h"
-#include "mptCPU.h"
 #include "mptOS.h"
 #include "mptTime.h"
 #include "mptLibrary.h"

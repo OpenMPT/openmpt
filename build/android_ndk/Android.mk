@@ -90,8 +90,6 @@ LOCAL_SRC_FILES += \
 	common/Logging.cpp \
 	common/misc_util.cpp \
 	common/mptAlloc.cpp \
-	common/mptCPU.cpp \
-	common/mptCrypto.cpp \
 	common/mptFileIO.cpp \
 	common/mptIO.cpp \
 	common/mptLibrary.cpp \
@@ -104,7 +102,6 @@ LOCAL_SRC_FILES += \
 	common/mptStringParse.cpp \
 	common/mptTime.cpp \
 	common/mptUUID.cpp \
-	common/mptWine.cpp \
 	common/Profiler.cpp \
 	common/serialization_utils.cpp \
 	common/version.cpp \

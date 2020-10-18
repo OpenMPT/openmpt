@@ -1228,9 +1228,7 @@
     <ClInclude Include="..\..\common\mptBaseMacros.h" />
     <ClInclude Include="..\..\common\mptBaseTypes.h" />
     <ClInclude Include="..\..\common\mptBaseUtils.h" />
-    <ClInclude Include="..\..\common\mptCPU.h" />
     <ClInclude Include="..\..\common\mptCRC.h" />
-    <ClInclude Include="..\..\common\mptCrypto.h" />
     <ClInclude Include="..\..\common\mptException.h" />
     <ClInclude Include="..\..\common\mptExceptionText.h" />
     <ClInclude Include="..\..\common\mptFileIO.h" />
@@ -1251,7 +1249,6 @@
     <ClInclude Include="..\..\common\mptThread.h" />
     <ClInclude Include="..\..\common\mptTime.h" />
     <ClInclude Include="..\..\common\mptUUID.h" />
-    <ClInclude Include="..\..\common\mptWine.h" />
     <ClInclude Include="..\..\common\serialization_utils.h" />
     <ClInclude Include="..\..\common\stdafx.h" />
     <ClInclude Include="..\..\common\version.h" />
@@ -1354,8 +1351,6 @@
     <ClCompile Include="..\..\common\Profiler.cpp" />
     <ClCompile Include="..\..\common\misc_util.cpp" />
     <ClCompile Include="..\..\common\mptAlloc.cpp" />
-    <ClCompile Include="..\..\common\mptCPU.cpp" />
-    <ClCompile Include="..\..\common\mptCrypto.cpp" />
     <ClCompile Include="..\..\common\mptFileIO.cpp" />
     <ClCompile Include="..\..\common\mptIO.cpp" />
     <ClCompile Include="..\..\common\mptLibrary.cpp" />
@@ -1368,7 +1363,6 @@
     <ClCompile Include="..\..\common\mptStringParse.cpp" />
     <ClCompile Include="..\..\common\mptTime.cpp" />
     <ClCompile Include="..\..\common\mptUUID.cpp" />
-    <ClCompile Include="..\..\common\mptWine.cpp" />
     <ClCompile Include="..\..\common\serialization_utils.cpp" />
     <ClCompile Include="..\..\common\version.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_c.cpp" />

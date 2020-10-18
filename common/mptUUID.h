@@ -181,12 +181,8 @@ public:
 	static UUID GenerateLocalUseOnly();
 	// Create a RFC4122 Random UUID.
 	static UUID RFC4122Random();
-#if defined(MODPLUG_TRACKER)
-	// Create a RFC4122 Version 3 namespace UUID
-	static UUID RFC4122NamespaceV3(const UUID &ns, const mpt::ustring &name);
-	// Create a RFC4122 Version 5 namespace UUID
-	static UUID RFC4122NamespaceV5(const UUID &ns, const mpt::ustring &name);
-#endif // MODPLUG_TRACKER
+	friend UUID UUIDRFC4122NamespaceV3(const UUID &ns, const mpt::ustring &name);
+	friend UUID UUIDRFC4122NamespaceV5(const UUID &ns, const mpt::ustring &name);
 public:
 	// General UUID<->string conversion.
 	// The string must/will be in standard UUID format: 4f9a455d-e7ef-4367-b2f0-0c83a38a5c72

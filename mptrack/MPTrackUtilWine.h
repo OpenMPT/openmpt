@@ -13,7 +13,7 @@
 #include "BuildSettings.h"
 
 
-#include "../common/mptWine.h"
+#include "../misc/mptWine.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

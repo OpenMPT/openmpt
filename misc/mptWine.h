@@ -12,8 +12,8 @@
 
 #include "BuildSettings.h"
 
-#include "mptOS.h"
-#include "FlagSet.h"
+#include "../common/mptOS.h"
+#include "../common/FlagSet.h"
 
 #include <map>
 #include <string>

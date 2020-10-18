@@ -11,8 +11,8 @@
 #include "stdafx.h"
 #include "mptWine.h"
 
-#include "mptOS.h"
-#include "mptFileIO.h"
+#include "../common/mptOS.h"
+#include "../common/mptFileIO.h"
 
 #include <deque>
 #include <map>

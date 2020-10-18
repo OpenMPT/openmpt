@@ -61,7 +61,6 @@
 #include "../common/Endianness.h"
 #include "../common/FileReader.h"
 #include "../common/FlagSet.h"
-#include "../common/mptCPU.h"
 #include "../common/mptCRC.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptIO.h"
@@ -73,10 +72,13 @@
 #include "../common/mptTime.h"
 #include "../common/mptThread.h"
 #include "../common/mptUUID.h"
-#include "../common/mptWine.h"
 #include "../common/Profiler.h"
 #include "../common/serialization_utils.h"
 #include "../common/version.h"
+
+#include "../misc/mptCPU.h"
+#include "../misc/mptCrypto.h"
+#include "../misc/mptWine.h"
 
 
 #include <algorithm>

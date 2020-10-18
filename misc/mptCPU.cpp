@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #include "mptCPU.h"
 
-#include "mptStringBuffer.h"
+#include "../common/mptStringBuffer.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

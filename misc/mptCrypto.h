@@ -11,15 +11,15 @@
 
 #include "BuildSettings.h"
 
-#include "mptAssert.h"
-#include "mptBaseMacros.h"
-#include "mptBaseTypes.h"
-#include "mptBaseUtils.h"
-#include "mptException.h"
-#include "mptSpan.h"
-#include "mptStringParse.h"
+#include "../common/mptAssert.h"
+#include "../common/mptBaseMacros.h"
+#include "../common/mptBaseTypes.h"
+#include "../common/mptBaseUtils.h"
+#include "../common/mptException.h"
+#include "../common/mptSpan.h"
+#include "../common/mptStringParse.h"
 
-#include "misc_util.h"
+#include "../common/misc_util.h"
 
 #ifdef MODPLUG_TRACKER
 #include "../misc/JSON.h"

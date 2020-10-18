@@ -12,7 +12,7 @@
 #include "MPTrackUtilWine.h"
 #include "Mptrack.h"
 #include "../common/misc_util.h"
-#include "../common/mptWine.h"
+#include "../misc/mptWine.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

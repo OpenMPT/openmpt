@@ -16,7 +16,7 @@
 #include "TrackerSettings.h"
 #include "BuildVariants.h"
 #include "../common/version.h"
-#include "../common/mptWine.h"
+#include "../misc/mptWine.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

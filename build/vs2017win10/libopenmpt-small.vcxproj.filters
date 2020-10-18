@@ -69,13 +69,7 @@
     <ClInclude Include="..\..\common\mptBaseUtils.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mptCPU.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\mptCRC.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\mptCrypto.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptException.h">
@@ -136,9 +130,6 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptUUID.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\mptWine.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\serialization_utils.h">
@@ -443,12 +434,6 @@
     <ClCompile Include="..\..\common\mptAlloc.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\mptCPU.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptCrypto.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\common\mptFileIO.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -483,9 +468,6 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptUUID.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptWine.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\serialization_utils.cpp">

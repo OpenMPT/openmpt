@@ -117,13 +117,7 @@
     <ClInclude Include="..\..\common\mptBaseUtils.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mptCPU.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\mptCRC.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\mptCrypto.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptException.h">
@@ -186,9 +180,6 @@
     <ClInclude Include="..\..\common\mptUUID.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mptWine.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\serialization_utils.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -232,6 +223,18 @@
       <Filter>misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\misc\WriteMemoryDump.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptCPU.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptCrypto.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptUUIDNamespace.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptWine.h">
       <Filter>misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\AboutDialog.h">
@@ -899,12 +902,6 @@
     <ClCompile Include="..\..\common\mptAlloc.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\mptCPU.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptCrypto.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\common\mptFileIO.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -941,14 +938,23 @@
     <ClCompile Include="..\..\common\mptUUID.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\mptWine.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\common\serialization_utils.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\version.cpp">
       <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptCPU.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptCrypto.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptUUIDNamespace.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptWine.cpp">
+      <Filter>misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\AboutDialog.cpp">
       <Filter>mptrack</Filter>

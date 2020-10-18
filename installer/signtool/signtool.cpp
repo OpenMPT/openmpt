@@ -7,7 +7,6 @@
 #include "../common/mptString.h"
 #include "../common/mptStringFormat.h"
 #include "../common/mptPathString.h"
-#include "../common/mptCrypto.h"
 #include "../common/mptIO.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptException.h"
@@ -16,6 +15,9 @@
 #include "../common/mptUUID.h"
 #include "../common/Logging.h"
 #include "../common/misc_util.h"
+
+#include "../misc/mptCrypto.h"
+#include "../misc/mptUUIDNamespace.h"
 
 #include <exception>
 #include <iostream>
@@ -70,7 +72,7 @@ static mpt::ustring get_keyname(mpt::ustring keyname)
 		mpt::ustring computername = mpt::getenv(U_("COMPUTERNAME")).value_or(U_(""));
 		mpt::ustring username = mpt::getenv(U_("USERNAME")).value_or(U_(""));
 		mpt::ustring name = MPT_UFORMAT("host={} user={}")(computername, username);
-		mpt::UUID uuid = mpt::UUID::RFC4122NamespaceV5(ns, name);
+		mpt::UUID uuid = mpt::UUIDRFC4122NamespaceV5(ns, name);
 		keyname = MPT_UFORMAT("OpenMPT Update Signing Key {}")(uuid);
 	}
 	return keyname;
