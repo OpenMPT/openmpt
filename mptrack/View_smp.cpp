@@ -278,7 +278,7 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 	samplesPerInterval = Util::AlignUp(samplesPerInterval, m_timelineUnit);
 	if(format == TimelineFormat::Seconds)
 		samplesPerInterval = Util::muldiv(samplesPerInterval, sampleRate, 1000);
-	
+
 	if(m_nZoom > 0)
 		m_timelineInterval = (samplesPerInterval >> (m_nZoom - 1));
 	else if(m_nZoom < 0)
@@ -1352,6 +1352,7 @@ void CViewSample::OnDraw(CDC *pDC)
 			// Sustain Loop Start/End
 			if ((sample.nSustainEnd > smpScrollPos) && (sample.nSustainEnd > sample.nSustainStart))
 			{
+				offScreenDC.SetBkMode(OPAQUE);
 				offScreenDC.SetBkColor(RGB(0xFF, 0xFF, 0xFF));
 				offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
 				int xl = SampleToScreen(sample.nSustainStart);
@@ -1363,6 +1364,18 @@ void CViewSample::OnDraw(CDC *pDC)
 
 				xl = SampleToScreen(sample.nSustainEnd);
 				if ((xl >= 0) && (xl < rcClient.right))
+				{
+					offScreenDC.MoveTo(xl, rect.top);
+					offScreenDC.LineTo(xl, rect.bottom);
+				}
+			}
+			// Active cue point
+			if(IsCuePoint(m_dragItem))
+			{
+				offScreenDC.SetBkMode(TRANSPARENT);
+				offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
+				int xl = SampleToScreen(sample.cues[CuePointFromItem(m_dragItem)]);
+				if((xl >= 0) && (xl < rcClient.right))
 				{
 					offScreenDC.MoveTo(xl, rect.top);
 					offScreenDC.LineTo(xl, rect.bottom);
@@ -1919,7 +1932,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 			}
 			break;
 		default:
-			if(m_dragItem >= HitTestItem::CuePointFirst && m_dragItem <= HitTestItem::CuePointLast)
+			if(IsCuePoint(m_dragItem))
 			{
 				int cue = CuePointFromItem(m_dragItem);
 				updateLoopPoint = &sample.cues[cue];
@@ -2042,6 +2055,8 @@ void CViewSample::OnLButtonDown(UINT flags, CPoint point)
 			m_dwEndDrag = itemPos;
 			break;
 		default:
+			if(IsCuePoint(m_dragItem))
+				InvalidateSample();
 			break;
 		}
 	}
@@ -2078,6 +2093,8 @@ void CViewSample::OnLButtonUp(UINT, CPoint)
 		m_dwStatus.reset(SMPSTATUS_MOUSEDRAG);
 		ReleaseCapture();
 	}
+	if(IsCuePoint(m_dragItem))
+		InvalidateSample();
 	m_dragItem = HitTestItem::Nothing;
 	m_startDragValue = MAX_SAMPLE_LENGTH;
 	m_lastDrawPoint.SetPoint(-1, -1);
@@ -2113,7 +2130,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 		if(pt.y < m_timelineHeight)
 		{
 			const auto item = PointToItem(pt).first;
-			if(item >= HitTestItem::CuePointFirst && item <= HitTestItem::CuePointLast)
+			if(IsCuePoint(item))
 			{
 				m_dwMenuParam = CuePointFromItem(item);
 				wsprintf(s, _T("&Delete Cue Point %d"), 1 + static_cast<int>(m_dwMenuParam));
@@ -3870,7 +3887,7 @@ INT_PTR CViewSample::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 			text = _T("Sustain End");
 			break;
 		default:
-			if(item < HitTestItem::CuePointFirst || item > HitTestItem::CuePointLast)
+			if(!IsCuePoint(item))
 				return CModScrollView::OnToolHitTest(point, pTI);
 			auto cue = CuePointFromItem(item);
 			text = MPT_CFORMAT("Cue Point {}")(cue + 1);

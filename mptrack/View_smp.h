@@ -235,6 +235,7 @@ protected:
 		return TRUE;
 	}
 
+	static bool IsCuePoint(HitTestItem item) { return item >= HitTestItem::CuePointFirst && item <= HitTestItem::CuePointLast; }
 	static int CuePointFromItem(HitTestItem item) { return static_cast<int>(item) - static_cast<int>(HitTestItem::CuePointFirst); }
 };
 
