@@ -409,7 +409,7 @@ bool ModSequenceSet::RestartPosToPattern(SEQUENCEINDEX seq)
 	{
 		if(subSong.endOrder != ORDERINDEX_INVALID && subSong.endRow != ROWINDEX_INVALID)
 		{
-			if(Util::TypeCanHoldValue<ModCommand::PARAM>(order.GetRestartPos()))
+			if(mpt::in_range<ModCommand::PARAM>(order.GetRestartPos()))
 			{
 				PATTERNINDEX writePat = order.EnsureUnique(subSong.endOrder);
 				result = m_sndFile.Patterns[writePat].WriteEffect(

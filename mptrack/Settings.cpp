@@ -291,7 +291,7 @@ SettingsContainer::SettingsContainer(ISettingsBackend *backend)
 std::vector<std::byte> IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const std::vector<std::byte> &def) const
 {
 	std::vector<std::byte> result = def;
-	if(!Util::TypeCanHoldValue<UINT>(result.size()))
+	if(!mpt::in_range<UINT>(result.size()))
 	{
 		return result;
 	}
@@ -340,7 +340,7 @@ bool IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, bool def) c
 
 void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const std::vector<std::byte> &val)
 {
-	MPT_ASSERT(Util::TypeCanHoldValue<UINT>(val.size()));
+	MPT_ASSERT(mpt::in_range<UINT>(val.size()));
 	::WritePrivateProfileStruct(GetSection(path).c_str(), GetKey(path).c_str(), (LPVOID)val.data(), static_cast<UINT>(val.size()), filename.AsNative().c_str());
 }
 

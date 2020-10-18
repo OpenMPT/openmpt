@@ -2138,7 +2138,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 #define WRITEMODULARHEADER(code, fsize) \
 	{ \
 		mpt::IO::WriteIntLE<uint32>(f, code); \
-		MPT_ASSERT(Util::TypeCanHoldValue<uint16>(fsize)); \
+		MPT_ASSERT(mpt::in_range<uint16>(fsize)); \
 		const uint16 _size = fsize; \
 		mpt::IO::WriteIntLE<uint16>(f, _size); \
 	}
@@ -2281,7 +2281,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 	if(GetMIDIMapper().GetCount() > 0)
 	{
 		const size_t objectsize = GetMIDIMapper().Serialize();
-		if(!Util::TypeCanHoldValue<uint16>(objectsize))
+		if(!mpt::in_range<uint16>(objectsize))
 		{
 			AddToLog(LogWarning, U_("Too many MIDI Mapping directives to save; data won't be written."));
 		} else

@@ -76,7 +76,7 @@ public:
 		if(whence == SEEK_CUR) file.Seek(file.GetPosition() + offset);
 		else if(whence == SEEK_END) file.Seek(file.GetLength() + offset);
 		else file.Seek(offset);
-		MPT_MAYBE_CONSTANT_IF(!Util::TypeCanHoldValue<mpg123_off_t>(file.GetPosition()))
+		MPT_MAYBE_CONSTANT_IF(!mpt::in_range<mpg123_off_t>(file.GetPosition()))
 		{
 			file.Seek(oldpos);
 			return static_cast<mpg123_off_t>(-1);

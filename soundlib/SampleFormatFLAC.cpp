@@ -499,7 +499,7 @@ struct FLAC__StreamEncoder_RAII
 	{
 		mpt::ofstream & file = *reinterpret_cast<mpt::ofstream*>(client_data);
 		MPT_UNUSED_VARIABLE(encoder);
-		if(!Util::TypeCanHoldValue<mpt::IO::Offset>(absolute_byte_offset))
+		if(!mpt::in_range<mpt::IO::Offset>(absolute_byte_offset))
 		{
 			return FLAC__STREAM_ENCODER_SEEK_STATUS_ERROR;
 		}

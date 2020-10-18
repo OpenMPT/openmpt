@@ -668,7 +668,7 @@ static int VorbisfileFilereaderSeek(void *datasource, ogg_int64_t offset, int wh
 	switch(whence)
 	{
 	case SEEK_SET:
-		if(!Util::TypeCanHoldValue<FileReader::off_t>(offset))
+		if(!mpt::in_range<FileReader::off_t>(offset))
 		{
 			return -1;
 		}
@@ -681,14 +681,14 @@ static int VorbisfileFilereaderSeek(void *datasource, ogg_int64_t offset, int wh
 			{
 				return -1;
 			}
-			if(!Util::TypeCanHoldValue<FileReader::off_t>(0 - offset))
+			if(!mpt::in_range<FileReader::off_t>(0 - offset))
 			{
 				return -1;
 			}
 			return file.SkipBack(mpt::saturate_cast<FileReader::off_t>(0 - offset)) ? 0 : -1;
 		} else
 		{
-			if(!Util::TypeCanHoldValue<FileReader::off_t>(offset))
+			if(!mpt::in_range<FileReader::off_t>(offset))
 			{
 				return -1;
 			}
@@ -697,11 +697,11 @@ static int VorbisfileFilereaderSeek(void *datasource, ogg_int64_t offset, int wh
 		break;
 
 	case SEEK_END:
-		if(!Util::TypeCanHoldValue<FileReader::off_t>(offset))
+		if(!mpt::in_range<FileReader::off_t>(offset))
 		{
 			return -1;
 		}
-		if(!Util::TypeCanHoldValue<FileReader::off_t>(file.GetLength() + offset))
+		if(!mpt::in_range<FileReader::off_t>(file.GetLength() + offset))
 		{
 			return -1;
 		}
@@ -716,7 +716,7 @@ static long VorbisfileFilereaderTell(void *datasource)
 {
 	FileReader &file = *reinterpret_cast<FileReader *>(datasource);
 	FileReader::off_t result = file.GetPosition();
-	if(!Util::TypeCanHoldValue<long>(result))
+	if(!mpt::in_range<long>(result))
 	{
 		return -1;
 	}

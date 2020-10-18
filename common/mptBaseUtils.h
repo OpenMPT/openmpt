@@ -488,6 +488,22 @@ constexpr T rotr(T x, int s) noexcept
 
 #endif
 
+#if MPT_CXX_AT_LEAST(20)
+
+using std::in_range;
+
+#else
+
+// Returns true iff Tdst can represent the value val.
+// Use as if(mpt::in_range<uint8>(-1)).
+template <typename Tdst, typename Tsrc>
+constexpr bool in_range(Tsrc val)
+{
+	return (static_cast<Tsrc>(mpt::saturate_cast<Tdst>(val)) == val);
+}
+
+#endif
+
 } // namespace mpt
 
 
@@ -520,14 +536,6 @@ template <typename Tmod, Tmod m, typename Tval>
 constexpr Tval ModIfNotZero(Tval x)
 {
 	return detail::ModIfNotZeroImpl<Tmod, m>().mod(x);
-}
-
-// Returns true iff Tdst can represent the value val.
-// Use as if(Util::TypeCanHoldValue<uint8>(-1)).
-template <typename Tdst, typename Tsrc>
-inline bool TypeCanHoldValue(Tsrc val)
-{
-	return (static_cast<Tsrc>(mpt::saturate_cast<Tdst>(val)) == val);
 }
 
 // Grows x with an exponential factor suitable for increasing buffer sizes.

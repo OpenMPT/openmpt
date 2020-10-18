@@ -403,7 +403,7 @@ bool InputFile::Open(const mpt::PathString &filename, bool allowWholeFileCaching
 				m_File.close();
 				return false;
 			}
-			if(Util::TypeCanHoldValue<std::size_t>(filesize))
+			if(mpt::in_range<std::size_t>(filesize))
 			{
 				std::size_t buffersize = mpt::saturate_cast<std::size_t>(filesize);
 				m_Cache.resize(buffersize);

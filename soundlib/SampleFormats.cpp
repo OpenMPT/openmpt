@@ -1580,7 +1580,7 @@ bool CSoundFile::ReadCAFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		return false;
 	}
 
-	if(!Util::TypeCanHoldValue<uint32>(mpt::saturate_round<int64>(audioFormat.mSampleRate)))
+	if(!mpt::in_range<uint32>(mpt::saturate_round<int64>(audioFormat.mSampleRate)))
 	{
 		return false;
 	}
@@ -1658,7 +1658,7 @@ bool CSoundFile::ReadCAFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 			{
 				uint32 stringID = stringsChunk.ReadUint32BE();
 				int64 offset = stringsChunk.ReadIntBE<int64>();
-				if(offset >= 0 && Util::TypeCanHoldValue<FileReader::off_t>(offset))
+				if(offset >= 0 && mpt::in_range<FileReader::off_t>(offset))
 				{
 					stringData.Seek(mpt::saturate_cast<FileReader::off_t>(offset));
 					std::string str;

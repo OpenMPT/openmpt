@@ -79,7 +79,7 @@ struct ZipFileAbstraction
 		default:
 			return -1;
 		}
-		if(!Util::TypeCanHoldValue<FileReader::off_t>(destination))
+		if(!mpt::in_range<FileReader::off_t>(destination))
 		{
 			return 1;
 		}

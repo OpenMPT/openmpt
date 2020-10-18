@@ -126,7 +126,7 @@ namespace IPCWindow
 		{
 			return 0;
 		}
-		if(!Util::TypeCanHoldValue<DWORD>(data.size()))
+		if(!mpt::in_range<DWORD>(data.size()))
 		{
 			return 0;
 		}
