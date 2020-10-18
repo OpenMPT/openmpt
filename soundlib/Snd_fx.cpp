@@ -244,7 +244,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	retval.startRow = target.startRow;
 
 	// Are we trying to reach a certain pattern position?
-	const bool hasSearchTarget = target.mode != GetLengthTarget::NoTarget;
+	const bool hasSearchTarget = target.mode != GetLengthTarget::NoTarget && target.mode != GetLengthTarget::GetAllSubsongs;
 	const bool adjustSamplePos = (adjustMode & eAdjustSamplePositions) == eAdjustSamplePositions;
 
 	SEQUENCEINDEX sequence = target.sequence;
@@ -351,7 +351,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			playState.m_nNextOrder = playState.m_nCurrentOrder;
 			if((!Patterns.IsValidPat(playState.m_nPattern)) && visitedRows.IsVisited(playState.m_nCurrentOrder, 0, true))
 			{
-				if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(playState.m_nNextOrder, playState.m_nRow, true))
+				if(!hasSearchTarget)
+				{
+					retval.lastOrder = playState.m_nCurrentOrder;
+					retval.lastRow = 0;
+				}
+				if(target.mode == GetLengthTarget::NoTarget || !visitedRows.GetFirstUnvisitedRow(playState.m_nNextOrder, playState.m_nRow, true))
 				{
 					// We aren't searching for a specific row, or we couldn't find any more unvisited rows.
 					break;
@@ -383,7 +388,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			// If there isn't even a tune, we should probably stop here.
 			if(playState.m_nCurrentOrder == orderList.GetRestartPos())
 			{
-				if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(playState.m_nNextOrder, playState.m_nRow, true))
+				if(target.mode == GetLengthTarget::NoTarget || !visitedRows.GetFirstUnvisitedRow(playState.m_nNextOrder, playState.m_nRow, true))
 				{
 					// We aren't searching for a specific row, or we couldn't find any more unvisited rows.
 					break;
@@ -415,7 +420,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 		if(visitedRows.IsVisited(playState.m_nCurrentOrder, playState.m_nRow, true))
 		{
-			if(!hasSearchTarget || !visitedRows.GetFirstUnvisitedRow(playState.m_nNextOrder, playState.m_nRow, true))
+			if(!hasSearchTarget)
+			{
+				retval.lastOrder = playState.m_nCurrentOrder;
+				retval.lastRow = playState.m_nRow;
+			}
+			if(target.mode == GetLengthTarget::NoTarget || !visitedRows.GetFirstUnvisitedRow(playState.m_nNextOrder, playState.m_nRow, true))
 			{
 				// We aren't searching for a specific row, or we couldn't find any more unvisited rows.
 				break;
@@ -1269,7 +1279,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 	}
 
-	if(retval.targetReached || target.mode == GetLengthTarget::NoTarget)
+	if(retval.targetReached)
 	{
 		retval.lastOrder = playState.m_nCurrentOrder;
 		retval.lastRow = playState.m_nRow;
@@ -1347,7 +1357,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	}
 
 	return results;
-
 }
 
 
