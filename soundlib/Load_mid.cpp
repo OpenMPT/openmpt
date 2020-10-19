@@ -292,8 +292,9 @@ uint32 CSoundFile::MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChann
 			if (program + 1 == p->nMidiProgram && bank + 1 == p->wMidiBank && p->nMidiDrumKey == 0) return i;
 		}
 	}
-	if ((m_nInstruments + 1 >= MAX_INSTRUMENTS) || (m_nSamples + 1 >= MAX_SAMPLES)) return 0;
-	
+	if(!CanAddMoreInstruments() || !CanAddMoreSamples())
+		return 0;
+
 	pIns = AllocateInstrument(m_nInstruments + 1);
 	if(pIns == nullptr)
 	{

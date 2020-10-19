@@ -707,6 +707,9 @@ public:
 	ORDERINDEX GetCurrentOrder() const { return m_PlayState.m_nCurrentOrder; }
 	CHANNELINDEX GetNumChannels() const { return m_nChannels; }
 
+	constexpr bool CanAddMoreSamples(SAMPLEINDEX amount = 1) const noexcept { return (amount < MAX_SAMPLES) && m_nSamples < (MAX_SAMPLES - amount); }
+	constexpr bool CanAddMoreInstruments(INSTRUMENTINDEX amount = 1) const noexcept { return (amount < MAX_INSTRUMENTS) && m_nInstruments < (MAX_INSTRUMENTS - amount); }
+
 #ifndef NO_PLUGINS
 	IMixPlugin* GetInstrumentPlugin(INSTRUMENTINDEX instr) const;
 #endif
