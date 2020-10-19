@@ -514,7 +514,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
@@ -534,7 +536,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
@@ -554,7 +558,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
@@ -574,7 +580,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>

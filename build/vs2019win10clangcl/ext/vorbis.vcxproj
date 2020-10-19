@@ -502,7 +502,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
@@ -520,7 +522,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
@@ -538,7 +542,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
@@ -556,7 +562,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\vorbis\include;..\..\..\include\vorbis\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>

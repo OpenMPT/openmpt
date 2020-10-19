@@ -272,7 +272,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4244 /wd4334 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
@@ -290,7 +292,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4244 /wd4334 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>

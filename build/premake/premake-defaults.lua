@@ -147,6 +147,7 @@
    defines { "DEBUG" }
    defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
+   flags { "MultiProcessorCompile" }  -- implies NotIncremental
 		symbols "FastLink"
    staticruntime "On"
 	 runtime "Debug"

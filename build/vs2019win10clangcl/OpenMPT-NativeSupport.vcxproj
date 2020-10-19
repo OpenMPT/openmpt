@@ -514,7 +514,9 @@
       <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\asiomodern\include;..\..\include\ASIOSDK2\common;..\..\include\nlohmann-json\include;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
@@ -537,7 +539,9 @@
       <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\asiomodern\include;..\..\include\ASIOSDK2\common;..\..\include\nlohmann-json\include;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
@@ -560,7 +564,9 @@
       <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\asiomodern\include;..\..\include\ASIOSDK2\common;..\..\include\nlohmann-json\include;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
@@ -583,7 +589,9 @@
       <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\msinttypes\inttypes;..\..\include\asiomodern\include;..\..\include\ASIOSDK2\common;..\..\include\nlohmann-json\include;..\..\include\portaudio\include;..\..\include\rtaudio;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>

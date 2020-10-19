@@ -273,7 +273,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -290,7 +292,9 @@
       <AdditionalIncludeDirectories>..\..\..\include\ogg\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
