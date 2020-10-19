@@ -1106,11 +1106,11 @@ double module_impl::set_position_seconds( double seconds ) {
 	} else {
 		subsong = &subsongs[m_current_subsong];
 	}
-	GetLengthType t = m_sndFile->GetLength( eNoAdjust, GetLengthTarget( seconds ).StartPos( static_cast<SEQUENCEINDEX>( subsong->sequence ), static_cast<ORDERINDEX>( subsong->start_order ), static_cast<ROWINDEX>( subsong->start_row ) ) ).back();
+	GetLengthType t = m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( seconds ).StartPos( static_cast<SEQUENCEINDEX>( subsong->sequence ), static_cast<ORDERINDEX>( subsong->start_order ), static_cast<ROWINDEX>( subsong->start_row ) ) ).back();
 	m_sndFile->m_PlayState.m_nCurrentOrder = t.lastOrder;
 	m_sndFile->SetCurrentOrder( t.lastOrder );
 	m_sndFile->m_PlayState.m_nNextRow = t.lastRow;
-	m_currentPositionSeconds = base_seconds + m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( t.lastOrder, t.lastRow ).StartPos( static_cast<SEQUENCEINDEX>( subsong->sequence ), static_cast<ORDERINDEX>( subsong->start_order ), static_cast<ROWINDEX>( subsong->start_row ) ) ).back().duration;
+	m_currentPositionSeconds = t.duration;
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_order_row( std::int32_t order, std::int32_t row ) {
