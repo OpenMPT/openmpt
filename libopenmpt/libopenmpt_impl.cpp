@@ -1367,8 +1367,15 @@ std::vector<std::string> module_impl::get_subsong_names() const {
 	std::vector<std::string> retval;
 	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ?  std::unique_ptr<subsongs_type>() : std::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
+	retval.reserve( subsongs.size() );
 	for ( const auto & subsong : subsongs ) {
-		retval.push_back( mpt::ToCharset( mpt::Charset::UTF8, m_sndFile->Order( static_cast<SEQUENCEINDEX>( subsong.sequence ) ).GetName() ) );
+		const auto & order = m_sndFile->Order( static_cast<SEQUENCEINDEX>( subsong.sequence ) );
+		retval.push_back( mpt::ToCharset( mpt::Charset::UTF8, order.GetName() ) );
+		if ( retval.back().empty() ) {
+			// use first pattern name instead
+			if ( order.IsValidPat( static_cast<SEQUENCEINDEX>( subsong.start_order ) ) )
+				retval.back() = mpt::ToCharset( mpt::Charset::UTF8, m_sndFile->GetCharsetInternal(), m_sndFile->Patterns[ order[ subsong.start_order ] ].GetName() );
+		}
 	}
 	return retval;
 }
