@@ -1961,7 +1961,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	case MOD_TYPE_IT:
 		m_modFormat.originalType = U_("it");
 		if(cmwt)
-			m_modFormat.originalFormatName = MPT_UFORMAT("Impulse Tracker {}.{}")(cmwt >> 8, mpt::ufmt::hex0<2>(cmwt & 0xFF));
+			m_modFormat.originalFormatName = mpt::format(U_("Impulse Tracker %1.%2"))(cmwt >> 8, mpt::ufmt::hex0<2>(cmwt & 0xFF));
 		else
 			m_modFormat.originalFormatName = U_("Impulse Tracker");
 		break;
