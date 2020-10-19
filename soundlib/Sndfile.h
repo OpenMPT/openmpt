@@ -197,6 +197,8 @@ enum enmGetLengthResetMode
 	eAdjustOnSuccess = 0x02 | eAdjust,
 	// Same as previous option, but will also try to emulate sample playback so that voices from previous patterns will sound when continuing playback at the target position.
 	eAdjustSamplePositions = 0x04 | eAdjustOnSuccess,
+	// Only adjust the visited rows state
+	eAdjustOnlyVisitedRows = 0x08,
 };
 
 
