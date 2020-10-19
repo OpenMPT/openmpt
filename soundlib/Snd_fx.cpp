@@ -303,13 +303,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		playState.m_nRow = playState.m_nNextRow;
 		playState.m_nCurrentOrder = playState.m_nNextOrder;
 
-		// Time target reached.
-		if(target.mode == GetLengthTarget::SeekSeconds && memory.elapsedTime >= target.time)
-		{
-			retval.targetReached = true;
-			break;
-		}
-
 		if(orderList.IsValidPat(playState.m_nCurrentOrder) && playState.m_nRow >= Patterns[orderList[playState.m_nCurrentOrder]].GetNumRows())
 		{
 			playState.m_nRow = 0;
@@ -319,6 +312,13 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				playState.m_nNextPatStartRow = 0;
 			}
 			playState.m_nCurrentOrder = ++playState.m_nNextOrder;
+		}
+
+		// Time target reached.
+		if(target.mode == GetLengthTarget::SeekSeconds && memory.elapsedTime >= target.time)
+		{
+			retval.targetReached = true;
+			break;
 		}
 
 		// Check if pattern is valid
