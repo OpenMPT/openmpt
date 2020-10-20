@@ -330,7 +330,7 @@ OrdSelection COrderList::GetCurSel(bool ignoreSelection) const
 		else
 			result.lastOrd = m_nScrollPos2nd;
 	}
-	ORDERINDEX lastIndex = std::min(Order().GetLength(), m_modDoc.GetSoundFile().GetModSpecifications().ordersMax) - 1u;
+	ORDERINDEX lastIndex = std::max(Order().GetLengthTailTrimmed(), m_modDoc.GetSoundFile().GetModSpecifications().ordersMax) - 1u;
 	LimitMax(result.firstOrd, lastIndex);
 	LimitMax(result.lastOrd, lastIndex);
 	return result;
