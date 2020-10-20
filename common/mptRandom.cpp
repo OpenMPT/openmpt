@@ -206,12 +206,12 @@ sane_random_device::result_type sane_random_device::operator()()
 			{ // insane std::random_device
 				//  This implementation is not exactly uniformly distributed but good enough
 				// for OpenMPT.
-				double rd_min = static_cast<double>(std::random_device::min());
-				double rd_max = static_cast<double>(std::random_device::max());
-				double rd_range = rd_max - rd_min;
-				double rd_size = rd_range + 1.0;
-				double rd_entropy = mpt::log2(rd_size);
-				int iterations = static_cast<int>(std::ceil(result_bits() / rd_entropy));
+				constexpr double rd_min = static_cast<double>(std::random_device::min());
+				constexpr double rd_max = static_cast<double>(std::random_device::max());
+				constexpr double rd_range = rd_max - rd_min;
+				constexpr double rd_size = rd_range + 1.0;
+				const double rd_entropy = mpt::log2(rd_size);
+				const int iterations = static_cast<int>(std::ceil(result_bits() / rd_entropy));
 				double tmp = 0.0;
 				for(int i = 0; i < iterations; ++i)
 				{
