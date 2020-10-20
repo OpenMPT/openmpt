@@ -147,7 +147,6 @@
    defines { "DEBUG" }
    defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
-   flags { "MultiProcessorCompile" }  -- implies NotIncremental
 		symbols "FastLink"
    staticruntime "On"
 	 runtime "Debug"
@@ -157,7 +156,6 @@
    defines { "DEBUG" }
    defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_SHARED" }
-   flags { "MultiProcessorCompile" }  -- implies NotIncremental
    symbols "On"
 	 runtime "Debug"
    optimize "Debug"
@@ -168,7 +166,6 @@
    defines { "MPT_BUILD_MSVC_STATIC" }
    defines { "MPT_BUILD_CHECKED" }
    symbols "On"
-   flags { "MultiProcessorCompile" }
    staticruntime "On"
 	 runtime "Release"
    optimize "On"
@@ -180,7 +177,6 @@
    defines { "MPT_BUILD_MSVC_SHARED" }
    defines { "MPT_BUILD_CHECKED" }
    symbols "On"
-   flags { "MultiProcessorCompile" }
 	 runtime "Release"
    optimize "On"
 	 omitframepointer "Off"
@@ -191,7 +187,6 @@
    defines { "NDEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
    symbols "On"
-		flags { "MultiProcessorCompile" }
 		if not _OPTIONS["clang"] then
 			flags { "LinkTimeOptimization" }
 		end
@@ -208,7 +203,6 @@
    defines { "NDEBUG" }
    defines { "MPT_BUILD_MSVC_SHARED" }
    symbols "On"
-		flags { "MultiProcessorCompile" }
 		if not _OPTIONS["clang"] then
 			flags { "LinkTimeOptimization" }
 		end
@@ -222,6 +216,7 @@
 
 
 	filter {}
+		flags { "MultiProcessorCompile" }
 
 	filter { "architecture:x86", "configurations:Checked" }
 		vectorextensions "SSE2"
