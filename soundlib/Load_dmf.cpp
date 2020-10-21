@@ -1046,15 +1046,12 @@ struct DMFHNode
 struct DMFHTree
 {
 	BitReader file;
-	int lastnode, nodecount;
-	DMFHNode nodes[256];
+	int lastnode = 0, nodecount = 0;
+	DMFHNode nodes[256]{};
 
 	DMFHTree(FileReader &file)
 		: file(file)
-		, lastnode(0)
-		, nodecount(0)
 	{
-		MemsetZero(nodes);
 	}
 	
 	//
