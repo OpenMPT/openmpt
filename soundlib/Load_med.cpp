@@ -584,8 +584,7 @@ static CHANNELINDEX MEDScanNumChannels(FileReader &file, const uint8 version)
 	file.Rewind();
 	MEDReadNextSong(file, fileHeader, expData, songHeader);
 
-	auto numSongs = fileHeader.expDataOffset ? fileHeader.extraSongs + 1 : 1;
-
+	SEQUENCEINDEX numSongs = std::min(MAX_SEQUENCES, mpt::saturate_cast<SEQUENCEINDEX>(fileHeader.expDataOffset ? fileHeader.extraSongs + 1 : 1));
 	CHANNELINDEX numChannels = 4;
 	// Scan patterns for max number of channels
 	for(SEQUENCEINDEX song = 0; song < numSongs; song++)
