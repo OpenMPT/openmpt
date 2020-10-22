@@ -331,6 +331,8 @@ static mpt::UUID UUIDFromWin32(::UUID uuid)
 		);
 }
 
+#if defined(MODPLUG_TRACKER) || defined(MPT_WITH_DMO)
+
 static ::UUID UUIDToWin32(mpt::UUID uuid)
 {
 	::UUID result = ::UUID();
@@ -347,8 +349,6 @@ static ::UUID UUIDToWin32(mpt::UUID uuid)
 	result.Data4[7] = static_cast<uint8>(uuid.GetData4() >>  0);
 	return result;
 }
-
-#if defined(MODPLUG_TRACKER) || defined(MPT_WITH_DMO)
 
 UUID::UUID(::UUID uuid)
 {
