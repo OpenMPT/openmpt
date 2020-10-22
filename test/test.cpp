@@ -839,6 +839,8 @@ static MPT_NOINLINE void TestStringFormatting()
 }
 
 
+namespace {
+
 struct Gregorian {
 	int Y,M,D,h,m,s;
 	static Gregorian FromTM(tm t) {
@@ -864,19 +866,23 @@ struct Gregorian {
 	}
 };
 
-bool operator ==(Gregorian a, Gregorian b) {
+inline bool operator ==(Gregorian a, Gregorian b) {
 	return a.Y == b.Y && a.M == b.M && a.D == b.D && a.h == b.h && a.m == b.m && a.s == b.s;
 }
 
-bool operator !=(Gregorian a, Gregorian b) {
+#if 0
+inline bool operator !=(Gregorian a, Gregorian b) {
 	return !(a == b);
 }
+#endif
 
-int64 TestDate1(int s, int m, int h, int D, int M, int Y) {
+}
+
+static int64 TestDate1(int s, int m, int h, int D, int M, int Y) {
 	return mpt::Date::Unix::FromUTC(Gregorian::ToTM(Gregorian{Y,M,D,h,m,s}));
 }
 
-Gregorian TestDate2(int s, int m, int h, int D, int M, int Y) {
+static Gregorian TestDate2(int s, int m, int h, int D, int M, int Y) {
 	return Gregorian{Y,M,D,h,m,s};
 }
 
