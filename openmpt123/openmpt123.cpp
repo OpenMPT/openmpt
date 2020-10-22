@@ -2520,6 +2520,7 @@ static int main( int argc, char * argv [] ) {
 #if defined(WIN32) && defined(UNICODE)
 #if defined(__GNUC__)
 // mingw64 does only default to special C linkage for "main", but not for "wmain".
+extern "C" int wmain( int wargc, wchar_t * wargv [] );
 extern "C"
 #endif
 int wmain( int wargc, wchar_t * wargv [] ) {
