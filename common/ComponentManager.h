@@ -91,7 +91,7 @@ protected:
 
 public:
 
-	virtual ~ComponentBase();
+	~ComponentBase() override;
 
 protected:
 
