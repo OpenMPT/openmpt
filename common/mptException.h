@@ -47,7 +47,7 @@ inline void throw_out_of_memory()
 	AfxThrowMemoryException();
 }
 
-inline void rethrow_out_of_memory(out_of_memory e)
+[[noreturn]] inline void rethrow_out_of_memory(out_of_memory e)
 {
 	MPT_UNREFERENCED_PARAMETER(e);
 	throw;
@@ -66,12 +66,12 @@ inline void delete_out_of_memory(out_of_memory & e)
 
 using out_of_memory = const std::bad_alloc &;
 
-inline void throw_out_of_memory()
+[[noreturn]] inline void throw_out_of_memory()
 {
 	throw std::bad_alloc();
 }
 
-inline void rethrow_out_of_memory(out_of_memory e)
+[[noreturn]] inline void rethrow_out_of_memory(out_of_memory e)
 {
 	MPT_UNREFERENCED_PARAMETER(e);
 	throw;
