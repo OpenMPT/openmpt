@@ -2491,9 +2491,9 @@ bool CSoundFile::ProcessEffects()
 				{
 					PlugParamValue targetvalue = ModCommand::GetValueEffectCol(chn.rowCommand.command, chn.rowCommand.param) / PlugParamValue(ModCommand::maxColumnValue);
 					chn.m_plugParamTargetValue = targetvalue;
-					chn.m_plugParamValueStep = (targetvalue - m_MixPlugins[plugin - 1].pMixPlugin->GetParameter(plugparam)) / PlugParamValue(GetNumTicksOnCurrentRow());
+					chn.m_plugParamValueStep = (targetvalue - m_MixPlugins[plugin - 1].pMixPlugin->GetParameter(plugparam)) / PlugParamValue(m_PlayState.TicksOnRow());
 				}
-				if(m_PlayState.m_nTickCount + 1 == GetNumTicksOnCurrentRow())
+				if(m_PlayState.m_nTickCount + 1 == m_PlayState.TicksOnRow())
 				{	// On last tick, set parameter exactly to target value.
 					m_MixPlugins[plugin - 1].pMixPlugin->SetParameter(plugparam, chn.m_plugParamTargetValue);
 				}
@@ -5168,8 +5168,8 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 // Calculate smooth MIDI macro slide parameter for current tick.
 float CSoundFile::CalculateSmoothParamChange(float currentValue, float param) const
 {
-	MPT_ASSERT(GetNumTicksOnCurrentRow() > m_PlayState.m_nTickCount);
-	const uint32 ticksLeft = GetNumTicksOnCurrentRow() - m_PlayState.m_nTickCount;
+	MPT_ASSERT(m_PlayState.TicksOnRow() > m_PlayState.m_nTickCount);
+	const uint32 ticksLeft = m_PlayState.TicksOnRow() - m_PlayState.m_nTickCount;
 	if(ticksLeft > 1)
 	{
 		// Slide param

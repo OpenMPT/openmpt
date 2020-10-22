@@ -283,7 +283,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 			// If we decide to continue the mix (possible in libopenmpt), the tick count
 			// is valid right now (0), meaning that no new row data will be processed.
 			// This would effectively prolong the last played row.
-			m_PlayState.m_nTickCount = GetNumTicksOnCurrentRow();
+			m_PlayState.m_nTickCount = m_PlayState.TicksOnRow();
 			break;
 		}
 
@@ -417,7 +417,7 @@ void CSoundFile::ProcessDSP(uint32 countChunk)
 
 bool CSoundFile::ProcessRow()
 {
-	while(++m_PlayState.m_nTickCount >= GetNumTicksOnCurrentRow())
+	while(++m_PlayState.m_nTickCount >= m_PlayState.TicksOnRow())
 	{
 		// When having an EEx effect on the same row as a Dxx jump, the target row is not played in ProTracker.
 		// Test case: DelayBreak.mod (based on condom_corruption by Travolta)
@@ -749,7 +749,7 @@ bool CSoundFile::ProcessRow()
 
 	//End of row? stop pattern step (aka "play row").
 #ifdef MODPLUG_TRACKER
-	if (m_PlayState.m_nTickCount >= GetNumTicksOnCurrentRow() - 1)
+	if (m_PlayState.m_nTickCount >= m_PlayState.TicksOnRow() - 1)
 	{
 		if(m_SongFlags[SONG_STEP])
 		{
@@ -764,7 +764,7 @@ bool CSoundFile::ProcessRow()
 		m_SongFlags.reset(SONG_FIRSTTICK);
 		if(!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
 		   && (GetType() != MOD_TYPE_MOD || m_SongFlags[SONG_PT_MODE])  // Fix infinite loop in "GamerMan " by MrGamer, which was made with FT2
-		   && m_PlayState.m_nTickCount < GetNumTicksOnCurrentRow())
+		   && m_PlayState.m_nTickCount < m_PlayState.TicksOnRow())
 		{
 			// Emulate first tick behaviour if Row Delay is set.
 			// Test cases: PatternDelaysRetrig.it, PatternDelaysRetrig.s3m, PatternDelaysRetrig.xm, PatternDelaysRetrig.mod

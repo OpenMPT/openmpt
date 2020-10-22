@@ -556,6 +556,11 @@ public:
 			m_nSamplesToGlobalVolRampDest = 0;
 			m_nGlobalVolumeRampAmount = 0;
 		}
+
+		constexpr uint32 TicksOnRow() const noexcept
+		{
+			return (m_nMusicSpeed + m_nFrameDelay) * std::max(m_nPatternDelay, uint32(1));
+		}
 	};
 
 	PlayState m_PlayState;
@@ -1068,12 +1073,6 @@ public:
 	bool UseFinetuneAndTranspose() const
 	{
 		return UseFinetuneAndTranspose(GetType());
-	}
-
-public:
-	uint32 GetNumTicksOnCurrentRow() const
-	{
-		return (m_PlayState.m_nMusicSpeed  + m_PlayState.m_nFrameDelay) * std::max(m_PlayState.m_nPatternDelay, static_cast<uint32>(1));
 	}
 
 	bool DestroySample(SAMPLEINDEX nSample);
