@@ -1,15 +1,13 @@
 
-CXXFLAGS_WARNINGS += -Wcast-align -Wcast-qual -Wshift-count-negative -Wshift-count-overflow -Wshift-op-parentheses -Wshift-overflow -Wshift-sign-overflow -Wundef
-CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wshift-count-negative -Wshift-count-overflow -Wshift-op-parentheses -Wshift-overflow -Wshift-sign-overflow -Wundef
+CXXFLAGS_WARNINGS += -Wcast-align -Wcast-qual -Wmissing-prototypes -Wshift-count-negative -Wshift-count-overflow -Wshift-op-parentheses -Wshift-overflow -Wshift-sign-overflow -Wundef
+CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wmissing-prototypes -Wshift-count-negative -Wshift-count-overflow -Wshift-op-parentheses -Wshift-overflow -Wshift-sign-overflow -Wundef
 
-CXXFLAGS_WARNINGS += -Wframe-larger-than=16000 -Wmissing-declarations
-CFLAGS_WARNINGS   +=                           -Wmissing-prototypes
+CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wframe-larger-than -Wglobal-constructors -Wimplicit-fallthrough -Wmissing-declarations -Wnon-virtual-dtor -Wreserved-id-macro
 
-CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wglobal-constructors -Wimplicit-fallthrough -Wnon-virtual-dtor -Wreserved-id-macro
-
+#CXXFLAGS_WARNINGS += -Wfloat-equal
 #CXXFLAGS_WARNINGS += -Wdocumentation
 #CXXFLAGS_WARNINGS += -Wconversion
-#CXXFLAGS_WARNINGS += -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-padded -Wno-shadow -Wno-sign-conversion -Wno-weak-vtables
+#CXXFLAGS_WARNINGS += -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-c++98-c++11-c++14-compat -Wno-padded -Wno-weak-vtables -Wno-sign-conversion -Wno-shadow-field-in-constructor -Wno-conversion -Wno-switch-enum -Wno-old-style-cast
 
 ifeq ($(MODERN),1)
 LDFLAGS  += -fuse-ld=lld
