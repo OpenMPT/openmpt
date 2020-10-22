@@ -1,6 +1,6 @@
 
-CXXFLAGS_WARNINGS += -Wcast-align -Wcast-qual -Wfloat-conversion -Wframe-larger-than=16000 -Winit-self -Wlogical-op -Wpointer-arith -Wstrict-aliasing -Wsuggest-override -Wundef
-CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wfloat-conversion                                       -Wlogical-op                                                      -Wundef
+CXXFLAGS_WARNINGS += -Wcast-align -Wcast-qual -Wfloat-conversion -Wframe-larger-than=16000 -Winit-self -Wlogical-op -Wmissing-declarations -Wpointer-arith -Wstrict-aliasing -Wsuggest-override -Wundef
+CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wfloat-conversion                                       -Wlogical-op                                                                             -Wundef
 
 CXXFLAGS_WARNINGS += -Wno-psabi
 
