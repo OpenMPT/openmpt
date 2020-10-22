@@ -11,14 +11,12 @@
 #include "stdafx.h"
 #include "Paula.h"
 #include "TinyFFT.h"
+#include "Tables.h"
 
 #include <complex>
 #include <numeric>
 
 OPENMPT_NAMESPACE_BEGIN
-
-// Compute Bessel function Izero(y) using a series approximation
-double Izero(double y);
 
 namespace Paula
 {
