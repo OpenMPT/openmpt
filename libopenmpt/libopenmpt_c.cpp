@@ -1445,7 +1445,7 @@ static int get_pattern_row_channel_effect_type( openmpt_module_ext * mod_ext, in
 
 
 
-int set_current_speed( openmpt_module_ext * mod_ext, int32_t speed ) {
+static int set_current_speed( openmpt_module_ext * mod_ext, int32_t speed ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		mod_ext->impl->set_current_speed( speed );
@@ -1455,7 +1455,7 @@ int set_current_speed( openmpt_module_ext * mod_ext, int32_t speed ) {
 	}
 	return 0;
 }
-int set_current_tempo( openmpt_module_ext * mod_ext, int32_t tempo ) {
+static int set_current_tempo( openmpt_module_ext * mod_ext, int32_t tempo ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		mod_ext->impl->set_current_tempo( tempo );
@@ -1465,7 +1465,7 @@ int set_current_tempo( openmpt_module_ext * mod_ext, int32_t tempo ) {
 	}
 	return 0;
 }
-int set_tempo_factor( openmpt_module_ext * mod_ext, double factor ) {
+static int set_tempo_factor( openmpt_module_ext * mod_ext, double factor ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		mod_ext->impl->set_tempo_factor( factor );
@@ -1475,7 +1475,7 @@ int set_tempo_factor( openmpt_module_ext * mod_ext, double factor ) {
 	}
 	return 0;
 }
-double get_tempo_factor( openmpt_module_ext * mod_ext ) {
+static double get_tempo_factor( openmpt_module_ext * mod_ext ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		return mod_ext->impl->get_tempo_factor();
@@ -1484,7 +1484,7 @@ double get_tempo_factor( openmpt_module_ext * mod_ext ) {
 	}
 	return 0.0;
 }
-int set_pitch_factor( openmpt_module_ext * mod_ext, double factor ) {
+static int set_pitch_factor( openmpt_module_ext * mod_ext, double factor ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		mod_ext->impl->set_pitch_factor( factor );
@@ -1494,7 +1494,7 @@ int set_pitch_factor( openmpt_module_ext * mod_ext, double factor ) {
 	}
 	return 0;
 }
-double get_pitch_factor( openmpt_module_ext * mod_ext ) {
+static double get_pitch_factor( openmpt_module_ext * mod_ext ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		return mod_ext->impl->get_pitch_factor();
@@ -1503,7 +1503,7 @@ double get_pitch_factor( openmpt_module_ext * mod_ext ) {
 	}
 	return 0.0;
 }
-int set_global_volume( openmpt_module_ext * mod_ext, double volume ) {
+static int set_global_volume( openmpt_module_ext * mod_ext, double volume ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		mod_ext->impl->set_global_volume( volume );
@@ -1513,7 +1513,7 @@ int set_global_volume( openmpt_module_ext * mod_ext, double volume ) {
 	}
 	return 0;
 }
-double get_global_volume( openmpt_module_ext * mod_ext ) {
+static double get_global_volume( openmpt_module_ext * mod_ext ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		return mod_ext->impl->get_global_volume();
@@ -1522,7 +1522,7 @@ double get_global_volume( openmpt_module_ext * mod_ext ) {
 	}
 	return 0.0;
 }
-int set_channel_volume( openmpt_module_ext * mod_ext, int32_t channel, double volume ) {
+static int set_channel_volume( openmpt_module_ext * mod_ext, int32_t channel, double volume ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		mod_ext->impl->set_channel_volume( channel, volume );
@@ -1532,7 +1532,7 @@ int set_channel_volume( openmpt_module_ext * mod_ext, int32_t channel, double vo
 	}
 	return 0;
 }
-double get_channel_volume( openmpt_module_ext * mod_ext, int32_t channel ) {
+static double get_channel_volume( openmpt_module_ext * mod_ext, int32_t channel ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		return mod_ext->impl->get_channel_volume( channel );
@@ -1541,7 +1541,7 @@ double get_channel_volume( openmpt_module_ext * mod_ext, int32_t channel ) {
 	}
 	return 0.0;
 }
-int set_channel_mute_status( openmpt_module_ext * mod_ext, int32_t channel, int mute ) {
+static int set_channel_mute_status( openmpt_module_ext * mod_ext, int32_t channel, int mute ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		mod_ext->impl->set_channel_mute_status( channel, mute ? true : false );
@@ -1551,7 +1551,7 @@ int set_channel_mute_status( openmpt_module_ext * mod_ext, int32_t channel, int 
 	}
 	return 0;
 }
-int get_channel_mute_status( openmpt_module_ext * mod_ext, int32_t channel ) {
+static int get_channel_mute_status( openmpt_module_ext * mod_ext, int32_t channel ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		return mod_ext->impl->get_channel_mute_status( channel ) ? 1 : 0;
@@ -1560,7 +1560,7 @@ int get_channel_mute_status( openmpt_module_ext * mod_ext, int32_t channel ) {
 	}
 	return -1;
 }
-int set_instrument_mute_status( openmpt_module_ext * mod_ext, int32_t instrument, int mute ) {
+static int set_instrument_mute_status( openmpt_module_ext * mod_ext, int32_t instrument, int mute ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		mod_ext->impl->set_instrument_mute_status( instrument, mute ? true : false );
@@ -1570,7 +1570,7 @@ int set_instrument_mute_status( openmpt_module_ext * mod_ext, int32_t instrument
 	}
 	return 0;
 }
-int get_instrument_mute_status( openmpt_module_ext * mod_ext, int32_t instrument ) {
+static int get_instrument_mute_status( openmpt_module_ext * mod_ext, int32_t instrument ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		return mod_ext->impl->get_instrument_mute_status( instrument ) ? 1 : 0;
@@ -1579,7 +1579,7 @@ int get_instrument_mute_status( openmpt_module_ext * mod_ext, int32_t instrument
 	}
 	return -1;
 }
-int32_t play_note( openmpt_module_ext * mod_ext, int32_t instrument, int32_t note, double volume, double panning ) {
+static int32_t play_note( openmpt_module_ext * mod_ext, int32_t instrument, int32_t note, double volume, double panning ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		return mod_ext->impl->play_note( instrument, note, volume, panning );
@@ -1588,7 +1588,7 @@ int32_t play_note( openmpt_module_ext * mod_ext, int32_t instrument, int32_t not
 	}
 	return -1;
 }
-int stop_note( openmpt_module_ext * mod_ext, int32_t channel ) {
+static int stop_note( openmpt_module_ext * mod_ext, int32_t channel ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		mod_ext->impl->stop_note( channel );
