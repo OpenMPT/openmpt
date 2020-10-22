@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.3-pre
 
+ *  [**Bug**] libopenmpt: `openmpt::is_extension_supported2()` exported symbol
+    was missing (C++).
+
  *  MO3: Avoid certain ModPlug hacks from being fixed up twice, which could lead
     to e.g. very narrow pan swing range for old OpenMPT IT files saved with a
     recent MO3 encoder version. 
