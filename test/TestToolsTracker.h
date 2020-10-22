@@ -33,10 +33,10 @@ namespace Test {
 
 
 // Verify that given parameters are 'equal'. Break directly into the debugger if not.
-// The exact meaning of equality is based on operator!= .
+// The exact meaning of equality is based on operator== of the compared types.
 #define VERIFY_EQUAL(x,y)	\
 	do { \
-		if((x) != (y)) { \
+		if(!((x) == (y))) { \
 			MyDebugBreak(); \
 		} \
 	} while(0) \

@@ -870,12 +870,6 @@ inline bool operator ==(Gregorian a, Gregorian b) {
 	return a.Y == b.Y && a.M == b.M && a.D == b.D && a.h == b.h && a.m == b.m && a.s == b.s;
 }
 
-#if 0
-inline bool operator !=(Gregorian a, Gregorian b) {
-	return !(a == b);
-}
-#endif
-
 }
 
 static int64 TestDate1(int s, int m, int h, int D, int M, int Y) {
