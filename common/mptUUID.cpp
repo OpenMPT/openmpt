@@ -312,7 +312,7 @@ namespace mpt
 
 #if MPT_OS_WINDOWS
 
-mpt::UUID UUIDFromWin32(::UUID uuid)
+static mpt::UUID UUIDFromWin32(::UUID uuid)
 {
 	return mpt::UUID
 		( uuid.Data1
@@ -331,7 +331,7 @@ mpt::UUID UUIDFromWin32(::UUID uuid)
 		);
 }
 
-::UUID UUIDToWin32(mpt::UUID uuid)
+static ::UUID UUIDToWin32(mpt::UUID uuid)
 {
 	::UUID result = ::UUID();
 	result.Data1 = uuid.GetData1();
