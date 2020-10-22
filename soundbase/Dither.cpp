@@ -20,14 +20,16 @@ OPENMPT_NAMESPACE_BEGIN
 
 mpt::ustring DitherNames::GetModeName(DitherMode mode)
 {
+	mpt::ustring result;
 	switch(mode)
 	{
-		case DitherNone   : return U_("no"     ); break;
-		case DitherDefault: return U_("default"); break;
-		case DitherModPlug: return U_("0.5 bit"); break;
-		case DitherSimple : return U_("1 bit"  ); break;
-		default           : return U_(""       ); break;
+		case DitherNone   : result = U_("no"     ); break;
+		case DitherDefault: result = U_("default"); break;
+		case DitherModPlug: result = U_("0.5 bit"); break;
+		case DitherSimple : result = U_("1 bit"  ); break;
+		default           : result = U_(""       ); break;
 	}
+	return result;
 }
 
 
