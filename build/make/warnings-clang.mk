@@ -2,7 +2,7 @@
 CXXFLAGS_WARNINGS += -Wcast-align -Wcast-qual -Wmissing-prototypes -Wshift-count-negative -Wshift-count-overflow -Wshift-op-parentheses -Wshift-overflow -Wshift-sign-overflow -Wundef
 CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wmissing-prototypes -Wshift-count-negative -Wshift-count-overflow -Wshift-op-parentheses -Wshift-overflow -Wshift-sign-overflow -Wundef
 
-CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wframe-larger-than -Wglobal-constructors -Wimplicit-fallthrough -Wmissing-declarations -Wnon-virtual-dtor -Wreserved-id-macro
+CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wframe-larger-than=16000 -Wglobal-constructors -Wimplicit-fallthrough -Wmissing-declarations -Wnon-virtual-dtor -Wreserved-id-macro
 
 #CXXFLAGS_WARNINGS += -Wfloat-equal
 #CXXFLAGS_WARNINGS += -Wdocumentation
