@@ -26,10 +26,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-// Sample decompression routines in other source files
-void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
-uintptr_t DMFUnpack(FileReader &file, uint8 *psample, uint32 maxlen);
-
 
 // Read a sample from memory
 size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
