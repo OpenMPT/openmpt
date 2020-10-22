@@ -15,6 +15,7 @@
 #ifndef NO_PLUGINS
 #include "../../Sndfile.h"
 #include "Compressor.h"
+#include "DMOUtils.h"
 #endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
@@ -24,8 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 namespace DMO
 {
 
-// See Distortion.cpp
-float logGain(float x, int32 shiftL, int32 shiftR);
 
 IMixPlugin* Compressor::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 {

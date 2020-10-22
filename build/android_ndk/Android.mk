@@ -202,6 +202,7 @@ LOCAL_SRC_FILES += \
 	soundlib/XMTools.cpp \
 	soundlib/plugins/DigiBoosterEcho.cpp \
 	soundlib/plugins/dmo/DMOPlugin.cpp \
+	soundlib/plugins/dmo/DMOUtils.cpp \
 	soundlib/plugins/dmo/Chorus.cpp \
 	soundlib/plugins/dmo/Compressor.cpp \
 	soundlib/plugins/dmo/Distortion.cpp \

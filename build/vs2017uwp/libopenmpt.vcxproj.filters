@@ -348,6 +348,9 @@
     <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h">
       <Filter>soundlib\plugins\dmo</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\dmo\DMOUtils.h">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h">
       <Filter>soundlib\plugins\dmo</Filter>
     </ClInclude>
@@ -771,6 +774,9 @@
       <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\DMOPlugin.cpp">
+      <Filter>soundlib\plugins\dmo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\DMOUtils.cpp">
       <Filter>soundlib\plugins\dmo</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp">

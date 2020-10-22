@@ -825,6 +825,7 @@
     <ClInclude Include="..\..\soundlib\plugins\dmo\Compressor.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Distortion.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h" />
+    <ClInclude Include="..\..\soundlib\plugins\dmo\DMOUtils.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Echo.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Flanger.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Gargle.h" />
@@ -1086,6 +1087,8 @@
     <ClCompile Include="..\..\soundlib\plugins\dmo\Distortion.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\DMOPlugin.cpp">
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\dmo\DMOUtils.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Echo.cpp">
     </ClCompile>
