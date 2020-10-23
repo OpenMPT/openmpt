@@ -168,8 +168,8 @@ void PluginBridge::MainLoop(TCHAR *argv[])
 			if(owner && SendMessage(owner, msg.message + WM_BRIDGE_KEYFIRST - WM_KEYFIRST, msg.wParam, msg.lParam))
 				continue;
 		}
-		::TranslateMessage(&msg);
-		::DispatchMessage(&msg);
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 	}
 
 	DestroyWindow(m_communicationWindow);
@@ -555,71 +555,75 @@ void PluginBridge::DispatchToPlugin(DispatchMsg &msg)
 				UpdateEffectStruct();
 				break;
 			case kUpdateEventMemName:
-				m_eventMem.Open(static_cast<const wchar_t *>(ptr));
+				if(ptr)
+					m_eventMem.Open(static_cast<const wchar_t *>(ptr));
 				break;
 			case kCacheProgramNames:
-			{
-				int32 progMin = static_cast<const int32 *>(ptr)[0];
-				int32 progMax = static_cast<const int32 *>(ptr)[1];
-				char *name = static_cast<char *>(ptr);
-				for(int32 i = progMin; i < progMax; i++)
+				if(ptr)
 				{
-					strcpy(name, "");
-					if(m_nativeEffect->numPrograms <= 0 || Dispatch(effGetProgramNameIndexed, i, -1, name, 0) != 1)
+					int32 progMin = static_cast<const int32 *>(ptr)[0];
+					int32 progMax = static_cast<const int32 *>(ptr)[1];
+					char *name = static_cast<char *>(ptr);
+					for(int32 i = progMin; i < progMax; i++)
 					{
-						// Fallback: Try to get current program name.
 						strcpy(name, "");
-						int32 curProg = static_cast<int32>(Dispatch(effGetProgram, 0, 0, nullptr, 0.0f));
-						if(i != curProg)
+						if(m_nativeEffect->numPrograms <= 0 || Dispatch(effGetProgramNameIndexed, i, -1, name, 0) != 1)
 						{
-							Dispatch(effSetProgram, 0, i, nullptr, 0.0f);
+							// Fallback: Try to get current program name.
+							strcpy(name, "");
+							int32 curProg = static_cast<int32>(Dispatch(effGetProgram, 0, 0, nullptr, 0.0f));
+							if(i != curProg)
+							{
+								Dispatch(effSetProgram, 0, i, nullptr, 0.0f);
+							}
+							Dispatch(effGetProgramName, 0, 0, name, 0);
+							if(i != curProg)
+							{
+								Dispatch(effSetProgram, 0, curProg, nullptr, 0.0f);
+							}
 						}
-						Dispatch(effGetProgramName, 0, 0, name, 0);
-						if(i != curProg)
-						{
-							Dispatch(effSetProgram, 0, curProg, nullptr, 0.0f);
-						}
+						name[kCachedProgramNameLength - 1] = '\0';
+						name += kCachedProgramNameLength;
 					}
-					name[kCachedProgramNameLength - 1] = '\0';
-					name += kCachedProgramNameLength;
 				}
 				break;
-			}
 			case kCacheParameterInfo:
-			{
-				int32 paramMin = static_cast<const int32 *>(ptr)[0];
-				int32 paramMax = static_cast<const int32 *>(ptr)[1];
-				ParameterInfo *param = static_cast<ParameterInfo *>(ptr);
-				for(int32 i = paramMin; i < paramMax; i++, param++)
+				if(ptr)
 				{
-					strcpy(param->name, "");
-					strcpy(param->label, "");
-					strcpy(param->display, "");
-					Dispatch(effGetParamName, i, 0, param->name, 0.0f);
-					Dispatch(effGetParamLabel, i, 0, param->label, 0.0f);
-					Dispatch(effGetParamDisplay, i, 0, param->display, 0.0f);
-					param->name[mpt::array_size<decltype(param->label)>::size - 1] = '\0';
-					param->label[mpt::array_size<decltype(param->label)>::size - 1] = '\0';
-					param->display[mpt::array_size<decltype(param->display)>::size - 1] = '\0';
-
-					if(Dispatch(effGetParameterProperties, i, 0, &param->props, 0.0f) != 1)
+					int32 paramMin = static_cast<const int32 *>(ptr)[0];
+					int32 paramMax = static_cast<const int32 *>(ptr)[1];
+					ParameterInfo *param = static_cast<ParameterInfo *>(ptr);
+					for(int32 i = paramMin; i < paramMax; i++, param++)
 					{
-						memset(&param->props, 0, sizeof(param->props));
-						strncpy(param->props.label, param->name, std::size(param->props.label));
+						strcpy(param->name, "");
+						strcpy(param->label, "");
+						strcpy(param->display, "");
+						Dispatch(effGetParamName, i, 0, param->name, 0.0f);
+						Dispatch(effGetParamLabel, i, 0, param->label, 0.0f);
+						Dispatch(effGetParamDisplay, i, 0, param->display, 0.0f);
+						param->name[mpt::array_size<decltype(param->label)>::size - 1] = '\0';
+						param->label[mpt::array_size<decltype(param->label)>::size - 1] = '\0';
+						param->display[mpt::array_size<decltype(param->display)>::size - 1] = '\0';
+
+						if(Dispatch(effGetParameterProperties, i, 0, &param->props, 0.0f) != 1)
+						{
+							memset(&param->props, 0, sizeof(param->props));
+							strncpy(param->props.label, param->name, std::size(param->props.label));
+						}
 					}
 				}
 				break;
-			}
 			case kBeginGetProgram:
-			{
-				int32 numParams = static_cast<int32>((msg.size - sizeof(DispatchMsg)) / sizeof(float));
-				float *params = static_cast<float *>(ptr);
-				for(int32 i = 0; i < numParams; i++)
+				if(ptr)
 				{
-					params[i] = m_nativeEffect->getParameter(m_nativeEffect, i);
+					int32 numParams = static_cast<int32>((msg.size - sizeof(DispatchMsg)) / sizeof(float));
+					float *params = static_cast<float *>(ptr);
+					for(int32 i = 0; i < numParams; i++)
+					{
+						params[i] = m_nativeEffect->getParameter(m_nativeEffect, i);
+					}
 				}
 				break;
-			}
 			default:
 				msg.result = 0;
 			}
@@ -680,7 +684,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg &msg)
 		// ERect** in [ptr]
 		{
 			ERect *rectPtr = *reinterpret_cast<ERect **>(extraData.data());
-			if(rectPtr != nullptr)
+			if(rectPtr != nullptr && origPtr != nullptr)
 			{
 				MPT_ASSERT(static_cast<size_t>(msg.ptr) >= sizeof(ERect));
 				std::memcpy(origPtr, rectPtr, std::min(sizeof(ERect), static_cast<size_t>(msg.ptr)));
