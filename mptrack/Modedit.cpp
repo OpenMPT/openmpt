@@ -1325,21 +1325,7 @@ SAMPLEINDEX CModDoc::GetSampleIndex(const ModCommand &m, ModCommand::INSTR lastI
 {
 	if(m.IsPcNote())
 		return 0;
-
-	ModCommand::INSTR instr = m.instr > 0 ? m.instr : lastInstr;
-	SAMPLEINDEX smp = 0;
-	if(m_SndFile.GetNumInstruments())
-	{
-		if(m.IsNote() && instr <= m_SndFile.GetNumInstruments() && m_SndFile.Instruments[instr] != nullptr)
-			smp = m_SndFile.Instruments[instr]->Keyboard[m.note - NOTE_MIN];
-	} else
-	{
-		smp = instr;
-	}
-	if(smp <= m_SndFile.GetNumSamples())
-		return smp;
-	else
-		return 0;
+	return m_SndFile.GetSampleIndex(m.note, m.instr > 0 ? m.instr : lastInstr);
 }
 
 

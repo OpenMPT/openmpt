@@ -1765,6 +1765,25 @@ const CModSpecifications& CSoundFile::GetModSpecifications(const MODTYPE type)
 }
 
 
+// Resolve note/instrument combination to real sample index. Return value is guaranteed to be in [0, GetNumSamples()].
+SAMPLEINDEX CSoundFile::GetSampleIndex(ModCommand::NOTE note, uint32 instr) const noexcept
+{
+	SAMPLEINDEX smp = 0;
+	if(GetNumInstruments())
+	{
+		if(ModCommand::IsNote(note) && instr <= GetNumInstruments() && Instruments[instr] != nullptr)
+			smp = Instruments[instr]->Keyboard[note - NOTE_MIN];
+	} else
+	{
+		smp = static_cast<SAMPLEINDEX>(instr);
+	}
+	if(smp <= GetNumSamples())
+		return smp;
+	else
+		return 0;
+}
+
+
 // Find an unused sample slot. If it is going to be assigned to an instrument, targetInstrument should be specified.
 // SAMPLEINDEX_INVLAID is returned if no free sample slot could be found.
 SAMPLEINDEX CSoundFile::GetNextFreeSample(INSTRUMENTINDEX targetInstrument, SAMPLEINDEX start) const
@@ -1832,22 +1851,15 @@ INSTRUMENTINDEX CSoundFile::GetNextFreeInstrument(INSTRUMENTINDEX start) const
 // Check whether a given sample is used by a given instrument.
 bool CSoundFile::IsSampleReferencedByInstrument(SAMPLEINDEX sample, INSTRUMENTINDEX instr) const
 {
-	ModInstrument *targetIns = nullptr;
-	if(instr > 0 && instr <= GetNumInstruments())
-	{
-		targetIns = Instruments[instr];
-	}
-	if(targetIns != nullptr)
-	{
-		for(std::size_t note = 0; note < NOTE_MAX /*std::size(targetIns->Keyboard)*/; note++)
-		{
-			if(targetIns->Keyboard[note] == sample)
-			{
-				return true;
-			}
-		}
-	}
-	return false;
+	if(instr < 1 || instr > GetNumInstruments())
+		return false;
+
+	const ModInstrument *targetIns = targetIns = Instruments[instr];
+	if(targetIns == nullptr)
+		return false;
+
+	const auto end = targetIns->Keyboard.begin() + NOTE_MAX;  // targetIns->Keyboard.end()
+	return std::find(targetIns->Keyboard.begin(), end, sample) != end;
 }
 
 

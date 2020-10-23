@@ -706,17 +706,17 @@ public:
 	ModMessageHeuristicOrder GetMessageHeuristic() const;
 
 	void SetPreAmp(uint32 vol);
-	uint32 GetPreAmp() const { return m_MixerSettings.m_nPreAmp; }
+	uint32 GetPreAmp() const noexcept { return m_MixerSettings.m_nPreAmp; }
 
 	void SetMixLevels(MixLevels levels);
-	MixLevels GetMixLevels() const { return m_nMixLevels; }
-	const CSoundFilePlayConfig &GetPlayConfig() const { return m_PlayConfig; }
+	MixLevels GetMixLevels() const noexcept { return m_nMixLevels; }
+	const CSoundFilePlayConfig &GetPlayConfig() const noexcept { return m_PlayConfig; }
 
-	INSTRUMENTINDEX GetNumInstruments() const { return m_nInstruments; }
-	SAMPLEINDEX GetNumSamples() const { return m_nSamples; }
-	PATTERNINDEX GetCurrentPattern() const { return m_PlayState.m_nPattern; }
-	ORDERINDEX GetCurrentOrder() const { return m_PlayState.m_nCurrentOrder; }
-	CHANNELINDEX GetNumChannels() const { return m_nChannels; }
+	constexpr INSTRUMENTINDEX GetNumInstruments() const noexcept { return m_nInstruments; }
+	constexpr SAMPLEINDEX GetNumSamples() const noexcept { return m_nSamples; }
+	constexpr PATTERNINDEX GetCurrentPattern() const noexcept { return m_PlayState.m_nPattern; }
+	constexpr ORDERINDEX GetCurrentOrder() const noexcept { return m_PlayState.m_nCurrentOrder; }
+	constexpr CHANNELINDEX GetNumChannels() const noexcept { return m_nChannels; }
 
 	constexpr bool CanAddMoreSamples(SAMPLEINDEX amount = 1) const noexcept { return (amount < MAX_SAMPLES) && m_nSamples < (MAX_SAMPLES - amount); }
 	constexpr bool CanAddMoreInstruments(INSTRUMENTINDEX amount = 1) const noexcept { return (amount < MAX_INSTRUMENTS) && m_nInstruments < (MAX_INSTRUMENTS - amount); }
@@ -1157,6 +1157,9 @@ public:
 	// Misc functions
 	ModSample &GetSample(SAMPLEINDEX sample) { MPT_ASSERT(sample <= m_nSamples && sample < std::size(Samples)); return Samples[sample]; }
 	const ModSample &GetSample(SAMPLEINDEX sample) const { MPT_ASSERT(sample <= m_nSamples && sample < std::size(Samples)); return Samples[sample]; }
+
+	// Resolve note/instrument combination to real sample index. Return value is guaranteed to be in [0, GetNumSamples()].
+	SAMPLEINDEX GetSampleIndex(ModCommand::NOTE note, uint32 instr) const noexcept;
 
 	uint32 MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note, bool isXG, std::bitset<16> drumChns);
 	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);

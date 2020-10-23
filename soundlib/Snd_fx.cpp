@@ -540,63 +540,59 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			ModCommand::PARAM param = chn.rowCommand.param;
 			ModCommand::NOTE note = chn.rowCommand.note;
 
-			if (chn.rowCommand.instr)
+			if(adjustMode & eAdjust)
 			{
-				chn.nNewIns = chn.rowCommand.instr;
-				chn.nLastNote = NOTE_NONE;
-				memory.chnSettings[nChn].vol = 0xFF;
-			}
-			if (chn.rowCommand.IsNote()) chn.nLastNote = note;
+				if(chn.rowCommand.instr)
+				{
+					chn.nNewIns = chn.rowCommand.instr;
+					chn.nLastNote = NOTE_NONE;
+					memory.chnSettings[nChn].vol = 0xFF;
+				}
+				if(chn.rowCommand.IsNote())
+					chn.nLastNote = note;
 
-			// Update channel panning
-			if(chn.rowCommand.IsNote() || chn.rowCommand.instr)
-			{
-				SAMPLEINDEX smp = 0;
-				if(GetNumInstruments())
+				// Update channel panning
+				if(chn.rowCommand.IsNote() || chn.rowCommand.instr)
 				{
 					ModInstrument *pIns;
-					if(chn.nNewIns <= GetNumInstruments() && (pIns = Instruments[chn.nNewIns]) != nullptr)
+					if(chn.nNewIns > 0 && chn.nNewIns <= GetNumInstruments() && (pIns = Instruments[chn.nNewIns]) != nullptr)
 					{
 						if(pIns->dwFlags[INS_SETPANNING])
 							chn.SetInstrumentPan(pIns->nPan, *this);
-						if(ModCommand::IsNote(note))
-							smp = pIns->Keyboard[note - NOTE_MIN];
 					}
-				} else
-				{
-					smp = chn.nNewIns;
-				}
-				if(smp > 0 && smp <= GetNumSamples())
-				{
-					if(Samples[smp].uFlags[CHN_PANNING])
-						chn.SetInstrumentPan(Samples[smp].nPan, *this);
-					if(Samples[smp].uFlags[CHN_ADLIB])
+					const SAMPLEINDEX smp = GetSampleIndex(note, chn.nNewIns);
+					if(smp > 0)
 					{
-						memory.state->Chn[nChn].Stop();
-						memory.chnSettings[nChn].ticksToRender = 0;
+						if(Samples[smp].uFlags[CHN_PANNING])
+							chn.SetInstrumentPan(Samples[smp].nPan, *this);
+						if(Samples[smp].uFlags[CHN_ADLIB])
+						{
+							memory.state->Chn[nChn].Stop();
+							memory.chnSettings[nChn].ticksToRender = 0;
+						}
 					}
 				}
-			}
 
-			switch(chn.rowCommand.volcmd)
-			{
-			case VOLCMD_VOLUME:
-				memory.chnSettings[nChn].vol = chn.rowCommand.vol;
-				break;
-			case VOLCMD_VOLSLIDEUP:
-			case VOLCMD_VOLSLIDEDOWN:
-				if(chn.rowCommand.vol != 0)
-					chn.nOldVolParam = chn.rowCommand.vol;
-				break;
-			case VOLCMD_TONEPORTAMENTO:
-				if(chn.rowCommand.vol)
+				switch(chn.rowCommand.volcmd)
 				{
-					const auto [porta, clearEffectCommand] = GetVolCmdTonePorta(chn.rowCommand, 0);
-					chn.nPortamentoSlide = porta * 4;
-					if(clearEffectCommand)
-						command = CMD_NONE;
+				case VOLCMD_VOLUME:
+					memory.chnSettings[nChn].vol = chn.rowCommand.vol;
+					break;
+				case VOLCMD_VOLSLIDEUP:
+				case VOLCMD_VOLSLIDEDOWN:
+					if(chn.rowCommand.vol != 0)
+						chn.nOldVolParam = chn.rowCommand.vol;
+					break;
+				case VOLCMD_TONEPORTAMENTO:
+					if(chn.rowCommand.vol)
+					{
+						const auto [porta, clearEffectCommand] = GetVolCmdTonePorta(chn.rowCommand, 0);
+						chn.nPortamentoSlide = porta * 4;
+						if(clearEffectCommand)
+							command = CMD_NONE;
+					}
+					break;
 				}
-				break;
 			}
 
 			switch(command)
@@ -2691,23 +2687,9 @@ bool CSoundFile::ProcessEffects()
 				{
 					// Refresh transpose
 					// Test case: NoteLimit2.xm
-					SAMPLEINDEX sample = SAMPLEINDEX_INVALID;
-					if(GetNumInstruments())
-					{
-						// Instrument mode
-						if(instr <= GetNumInstruments() && Instruments[instr] != nullptr)
-						{
-							sample = Instruments[instr]->Keyboard[note - NOTE_MIN];
-						}
-					} else
-					{
-						// Sample mode
-						sample = static_cast<SAMPLEINDEX>(instr);
-					}
-					if(sample <= GetNumSamples())
-					{
+					const SAMPLEINDEX sample = GetSampleIndex(note, instr);
+					if(sample > 0)
 						transpose = GetSample(sample).RelativeTone;
-					}
 				}
 
 				const int computedNote = note + transpose;
@@ -2894,16 +2876,8 @@ bool CSoundFile::ProcessEffects()
 				// Test case: NoteOffInstr.it, noteoff2.it
 				if(m_playBehaviour[kITInstrWithNoteOff] && instr)
 				{
-					SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(instr);
-					if(GetNumInstruments())
-					{
-						smp = 0;
-						if(instr <= GetNumInstruments() && Instruments[instr] != nullptr && ModCommand::IsNote(chn.nLastNote))
-						{
-							smp = Instruments[instr]->Keyboard[chn.nLastNote - NOTE_MIN];
-						}
-					}
-					if(smp > 0 && smp <= GetNumSamples() && !Samples[smp].uFlags[SMP_NODEFAULTVOLUME])
+					const SAMPLEINDEX smp = GetSampleIndex(chn.nLastNote, instr);
+					if(smp > 0 && !Samples[smp].uFlags[SMP_NODEFAULTVOLUME])
 						chn.nVolume = Samples[smp].nVolume;
 				}
 				// IT compatibility: Note-off with instrument number + Old Effects retriggers envelopes.
