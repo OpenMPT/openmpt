@@ -1204,7 +1204,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
 					tvi.iImage = tvi.iSelectedImage = image;
 					GetItem(&tvi);
-					if(tvi.iImage != image || _tcscmp(s, stmp) || GetItemData(hChild) != nSmp)
+					if(tvi.iImage != image || _tcsncmp(s, stmp, std::size(stmp)) || GetItemData(hChild) != nSmp)
 					{
 						SetItem(hChild, TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, image, image, 0, 0, nSmp);
 					}
@@ -1451,6 +1451,7 @@ bool CModTree::ExecuteItem(HTREEITEM hItem)
 
 		case MODITEM_MIDIPERCUSSION:
 			modItemID |= 0x80;
+			[[fallthrough]];
 		case MODITEM_MIDIINSTRUMENT:
 			OpenMidiInstrument(modItemID);
 			return true;
@@ -1606,6 +1607,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 
 		case MODITEM_MIDIPERCUSSION:
 			modItemID |= 0x80;
+			[[fallthrough]];
 		case MODITEM_MIDIINSTRUMENT:
 			{
 				const MidiLibrary &midiLib = CTrackApp::GetMidiLibrary();
@@ -1717,6 +1719,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 	switch(modItem.type)
 	{
 	case MODITEM_SEQUENCE:
+		if(sndFile)
 		{
 			const SEQUENCEINDEX seq = static_cast<SEQUENCEINDEX>(modItemID);
 			if(Reporting::Confirm(TreeDeletionString(UL_("sequence"), seq + 1, sndFile->Order(seq).GetName()), false, true) == cnfNo) break;
@@ -1727,13 +1730,14 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 
 	case MODITEM_ORDER:
 		// might be slightly annoying to ask for confirmation here, and it's rather easy to restore the orderlist anyway.
-		if(modDoc->RemoveOrder(static_cast<SEQUENCEINDEX>(modItem.val2), static_cast<ORDERINDEX>(modItem.val1)))
+		if(modDoc && modDoc->RemoveOrder(static_cast<SEQUENCEINDEX>(modItem.val2), static_cast<ORDERINDEX>(modItem.val1)))
 		{
 			modDoc->UpdateAllViews(nullptr, SequenceHint().Data());
 		}
 		break;
 
 	case MODITEM_PATTERN:
+		if(modDoc && sndFile)
 		{
 			const PATTERNINDEX pat = static_cast<PATTERNINDEX>(modItemID);
 			bool isUsed = false;
@@ -2462,6 +2466,7 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 
 	case MODITEM_MIDIPERCUSSION:
 		dropInfo.dropItem |= 0x80;
+		[[fallthrough]];
 	case MODITEM_MIDIINSTRUMENT:
 		{
 			MidiLibrary &midiLib = CTrackApp::GetMidiLibrary();
@@ -2575,7 +2580,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool doDrop)
 	case MODITEM_HDR_ORDERS:
 		// Drop your sequences here.
 		// At the moment, only dropping sequences into another module is possible and it doesn't copy the patterns themselves.
-		if((m_itemDrag.type == MODITEM_SEQUENCE || m_itemDrag.type == MODITEM_HDR_ORDERS) && sndFile && infoDrag && !sameModDoc)
+		if((m_itemDrag.type == MODITEM_SEQUENCE || m_itemDrag.type == MODITEM_HDR_ORDERS) && modDoc && sndFile && infoDrag && !sameModDoc)
 		{
 			if(doDrop && infoDrag != nullptr)
 			{
@@ -2618,7 +2623,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool doDrop)
 		break;
 
 	case MODITEM_SAMPLE:
-		if(m_itemDrag.type == MODITEM_SAMPLE && infoDrag != nullptr)
+		if(m_itemDrag.type == MODITEM_SAMPLE && modDoc && infoDrag != nullptr)
 		{
 			if(doDrop)
 			{
@@ -2651,7 +2656,7 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool doDrop)
 		break;
 
 	case MODITEM_INSTRUMENT:
-		if(m_itemDrag.type == MODITEM_INSTRUMENT && infoDrag != nullptr)
+		if(m_itemDrag.type == MODITEM_INSTRUMENT && modDoc && infoDrag != nullptr)
 		{
 			if(doDrop)
 			{
@@ -2915,7 +2920,7 @@ void CModTree::OnItemReturn(LPNMHDR, LRESULT *pResult)
 void CModTree::OnItemRightClick(LPNMHDR, LRESULT *pResult)
 {
 	CPoint pt, ptClient;
-	UINT flags;
+	UINT flags = 0;
 
 	GetCursorPos(&pt);
 	ptClient = pt;
@@ -2988,9 +2993,10 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 				break;
 
 			case MODITEM_SEQUENCE:
+				if(sndFile)
 				{
 					bool isCurSeq = false;
-					if(sndFile && sndFile->GetModSpecifications().sequencesMax > 1)
+					if(sndFile->GetModSpecifications().sequencesMax > 1)
 					{
 						if(sndFile->Order((SEQUENCEINDEX)modItemID).GetLength() == 0)
 						{
@@ -3117,6 +3123,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, _T("&Play Instrument"));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, _T("&Unmap Instrument"));
 				AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+				[[fallthrough]];
 			case MODITEM_HDR_MIDILIB:
 			case MODITEM_HDR_MIDIGROUP:
 				AppendMenu(hMenu, MF_STRING, ID_IMPORT_MIDILIB, _T("&Import MIDI Library"));
@@ -3168,6 +3175,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 				nDefault = ID_SOUNDBANK_PROPERTIES;
 				AppendMenu(hMenu, MF_STRING, nDefault, _T("&Properties"));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, _T("Re&move this bank"));
+				[[fallthrough]];
 			case MODITEM_NULL:
 				AppendMenu(hMenu, MF_STRING, ID_ADD_SOUNDBANK, _T("Add Sound &Bank..."));
 				bSep = TRUE;
@@ -3203,7 +3211,7 @@ void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
 	if(!(m_dwStatus & TREESTATUS_RDRAG))
 	{
 		POINT pt;
-		UINT flags;
+		UINT flags = 0;
 		GetCursorPos(&pt);
 		ScreenToClient(&pt);
 		HTREEITEM hItem = HitTest(pt, &flags);
@@ -3323,7 +3331,7 @@ void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 	if(m_dwStatus & TREESTATUS_DRAGGING)
 	{
 		HTREEITEM hItem;
-		UINT flags;
+		UINT flags = 0;
 
 		// Bug?
 		if(!(nFlags & (MK_LBUTTON | MK_RBUTTON)))
@@ -3819,7 +3827,7 @@ DROPEFFECT CModTree::OnDragEnter(COleDataObject *, DWORD, CPoint)
 
 DROPEFFECT CModTree::OnDragOver(COleDataObject *, DWORD, CPoint point)
 {
-	UINT flags;
+	UINT flags = 0;
 	HTREEITEM hItem = HitTest(point, &flags);
 
 	const ModItem modItem = GetModItem(hItem);
