@@ -203,7 +203,7 @@ void CCtrlGeneral::OnTapTempo()
 		// cppcheck false-positive
 		// cppcheck-suppress mismatchingContainers
 		std::copy(tapTime.begin() + 1, tapTime.end(), tapTime.begin());
-		numTaps--;
+		numTaps = static_cast<uint32>(tapTime.size() - 1);
 	}
 	
 	tapTime[numTaps++] = now;
