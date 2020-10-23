@@ -1854,7 +1854,7 @@ bool CSoundFile::IsSampleReferencedByInstrument(SAMPLEINDEX sample, INSTRUMENTIN
 	if(instr < 1 || instr > GetNumInstruments())
 		return false;
 
-	const ModInstrument *targetIns = targetIns = Instruments[instr];
+	const ModInstrument *targetIns = Instruments[instr];
 	if(targetIns == nullptr)
 		return false;
 
