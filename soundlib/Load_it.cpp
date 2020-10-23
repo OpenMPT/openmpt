@@ -1330,7 +1330,7 @@ static uint32 SaveITEditHistory(const CSoundFile &sndFile, std::ostream *file)
 			// Previous timestamps
 			mptHistory = sndFile.GetFileHistory().at(n);
 #ifdef MODPLUG_TRACKER
-		} else
+		} else if(pModDoc != nullptr)
 		{
 			// Current ("new") timestamp
 			const time_t creationTime = pModDoc->GetCreationTime();
