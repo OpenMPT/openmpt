@@ -71,7 +71,7 @@ inline namespace Ansi {
 struct DriverInfo {
 	std::basic_string<TCHAR> Key;
 	std::basic_string<TCHAR> Id;
-	CLSID Clsid;
+	CLSID Clsid{};
 	std::basic_string<TCHAR> Name;
 	std::basic_string<TCHAR> Description;
 	std::basic_string<TCHAR> DisplayName() const {
@@ -131,7 +131,7 @@ inline std::vector<DriverInfo> EnumerateDrivers() {
 		return drivers;
 	}
 	for (DWORD i = 0; i < numSubKeys; ++i) {
-		std::vector<TCHAR> bufKey(maxSubKeyLen + 1);
+		std::vector<TCHAR> bufKey(static_cast<std::size_t>(maxSubKeyLen) + 1);
 		DWORD lenKey = static_cast<DWORD>(bufKey.size());
 		if (CheckLRESULTOutOfMemory(RegEnumKeyEx(hkAsioEnum, i, bufKey.data(), &lenKey, NULL, NULL, NULL, NULL)) != ERROR_SUCCESS) {
 			continue;
@@ -145,31 +145,31 @@ inline std::vector<DriverInfo> EnumerateDrivers() {
 		if (CheckLRESULTOutOfMemory(RegQueryInfoKey(hkDriver, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &maxValueLen, NULL, NULL)) != ERROR_SUCCESS) {
 			continue;
 		}
-		std::vector<TCHAR> bufClsid(maxValueLen + 1);
+		std::vector<TCHAR> bufClsid(static_cast<std::size_t>(maxValueLen) + 1);
 		DWORD lenClsid = static_cast<DWORD>(bufClsid.size()) * sizeof(TCHAR);
 		DWORD typeClsid = REG_SZ;
 		if (CheckLRESULTOutOfMemory(RegQueryValueEx(hkDriver, TEXT("CLSID"), NULL, &typeClsid, reinterpret_cast<LPBYTE>(bufClsid.data()), &lenClsid)) != ERROR_SUCCESS) {
 			continue;
 		}
-		std::basic_string<TCHAR> strClsid(bufClsid.data(), bufClsid.data() + lenClsid);
+		std::basic_string<TCHAR> strClsid(bufClsid.data(), bufClsid.data() + (lenClsid / sizeof(TCHAR)));
 		std::vector<OLECHAR> oleClsid(strClsid.c_str(), strClsid.c_str() + strClsid.length() + 1);
 		CLSID clsid = CLSID();
 		if (CheckHRESULTOutOfMemory(CLSIDFromString(oleClsid.data(), &clsid)) != NOERROR) {
 			continue;
 		}
-		std::vector<TCHAR> bufName(maxValueLen + 1);
+		std::vector<TCHAR> bufName(static_cast<std::size_t>(maxValueLen) + 1);
 		DWORD lenName = static_cast<DWORD>(bufName.size()) * sizeof(TCHAR);
 		DWORD typeName = REG_SZ;
 		std::basic_string<TCHAR> name;
 		if (CheckLRESULTOutOfMemory(RegQueryValueEx(hkDriver, TEXT(""), NULL, &typeName, reinterpret_cast<LPBYTE>(bufName.data()), &lenName)) == ERROR_SUCCESS) {
-			name = std::basic_string<TCHAR>(bufName.data(), bufName.data() + lenName);
+			name = std::basic_string<TCHAR>(bufName.data(), bufName.data() + (lenName / sizeof(TCHAR)));
 		}
-		std::vector<TCHAR> bufDesc(maxValueLen + 1);
+		std::vector<TCHAR> bufDesc(static_cast<std::size_t>(maxValueLen) + 1);
 		DWORD lenDesc = static_cast<DWORD>(bufDesc.size()) * sizeof(TCHAR);
 		DWORD typeDesc = REG_SZ;
 		std::basic_string<TCHAR> desc;
 		if (CheckLRESULTOutOfMemory(RegQueryValueEx(hkDriver, TEXT("Description"), NULL, &typeDesc, reinterpret_cast<LPBYTE>(bufDesc.data()), &lenDesc)) == ERROR_SUCCESS) {
-			desc = std::basic_string<TCHAR>(bufDesc.data(), bufDesc.data() + lenDesc);
+			desc = std::basic_string<TCHAR>(bufDesc.data(), bufDesc.data() + (lenDesc / sizeof(TCHAR)));
 		}
 		DriverInfo info;
 		info.Key = key;
@@ -630,7 +630,9 @@ private:
 		HANDLE hTask = AvSetMmThreadCharacteristics(TEXT("Pro Audio"), &task_idx);
 		SetEvent(m_hStarted);
 		bool result = ThreadLoop();
-		AvRevertMmThreadCharacteristics(hTask);
+		if (hTask) {
+			AvRevertMmThreadCharacteristics(hTask);
+		}
 		hTask = NULL;
 		task_idx = 0;
 		return result;

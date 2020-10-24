@@ -155,7 +155,7 @@ template <typename SampleType> inline SampleType sample_from_value(typename Type
 		}
 		return result;
 	} else {
-		SampleType result;
+		SampleType result{};
 		typename Types<SampleType>::unsigned_type uval = static_cast<typename Types<SampleType>::unsigned_type>(val);
 		for (std::size_t byte = 0; byte < sizeof(SampleType); ++byte) {
 			if constexpr (Types<SampleType>::is_be) {
@@ -252,7 +252,7 @@ inline void ClearBuffer(Tdst * dst, std::size_t dst_stride, std::size_t count) n
 {
 	for(std::size_t i = 0; i < count; ++i)
 	{
-		Tdst val;
+		Tdst val{};
 		std::fill(val.data.begin(), val.data.end(), std::byte{0});
 		*dst = val;
 		dst += dst_stride;

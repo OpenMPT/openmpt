@@ -1,1 +1,1 @@
-ASIO::Modern v0.11.0
+ASIO::Modern v0.11.1
