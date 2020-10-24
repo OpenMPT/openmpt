@@ -73,9 +73,9 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 #endif
 		plugin.BeginSetProgram();
 
-		char prgName[28];
+		std::string prgName;
 		file.ReadString<mpt::String::maybeNullTerminated>(prgName, 28);
-		plugin.SetCurrentProgramName(prgName);
+		plugin.SetCurrentProgramName(prgName.c_str());
 
 		if(!memcmp(header.fxMagic, "FxCk", 4))
 		{
