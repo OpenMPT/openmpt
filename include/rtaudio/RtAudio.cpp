@@ -4960,7 +4960,11 @@ void RtApiWasapi::wasapiThread()
   RtAudioError::Type errorType = RtAudioError::DRIVER_ERROR;
 
   // Attempt to assign "Pro Audio" characteristic to thread
+#if 1  // OpenMPT
+  HMODULE AvrtDll = LoadLibrary( TEXT("AVRT.dll") );  // OpenMPT
+#else  // OpenMPT
   HMODULE AvrtDll = LoadLibrary( (LPCTSTR) "AVRT.dll" );
+#endif  // OpenMPT
   if ( AvrtDll ) {
     DWORD taskIndex = 0;
     TAvSetMmThreadCharacteristicsPtr AvSetMmThreadCharacteristicsPtr =
