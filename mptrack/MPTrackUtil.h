@@ -32,6 +32,9 @@ bool CreateShellFileLink(const mpt::PathString &path, const mpt::PathString &tar
 mpt::const_byte_span GetResource(LPCTSTR lpName, LPCTSTR lpType);
 
 
+CString LoadResourceString(UINT nID);
+
+
 namespace Util
 {
 	// Get horizontal DPI resolution

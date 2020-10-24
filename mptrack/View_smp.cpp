@@ -2270,7 +2270,7 @@ void CViewSample::OnNcMouseMove(UINT nHitTest, CPoint point)
 			CString strText;
 			if(button < SMP_LEFTBAR_BUTTONS && cLeftBarButtons[button] != ID_SEPARATOR)
 			{
-				strText.LoadString(cLeftBarButtons[button]);
+				strText = LoadResourceString(cLeftBarButtons[button]);
 			}
 			pMainFrm->SetHelpText(strText);
 		}
@@ -3851,7 +3851,7 @@ INT_PTR CViewSample::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 		buttonID = cLeftBarButtons[ncButton];
 		ScreenToClient(&ncRect);
 
-		text.LoadString(buttonID);
+		text = LoadResourceString(buttonID);
 
 		CommandID cmd = kcNull;
 		switch(buttonID)

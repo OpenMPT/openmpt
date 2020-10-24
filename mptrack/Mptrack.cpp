@@ -1639,7 +1639,12 @@ void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCWSTR lpszText, BOOL bDisable
 void ErrorBox(UINT nStringID, CWnd *parent)
 {
 	CString str;
-	str.LoadString(nStringID);
+	BOOL resourceLoaded = str.LoadString(nStringID);
+	if(!resourceLoaded)
+	{
+		str.Format(_T("Resource string %u not found."), nStringID);
+	}
+	MPT_ASSERT(resourceLoaded);
 	Reporting::CustomNotification(str, _T("Error!"), MB_OK | MB_ICONERROR, parent);
 }
 

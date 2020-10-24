@@ -69,4 +69,17 @@ mpt::const_byte_span GetResource(LPCTSTR lpName, LPCTSTR lpType)
 }
 
 
+CString LoadResourceString(UINT nID)
+{
+	CString str;
+	BOOL resourceLoaded = str.LoadString(nID);
+	MPT_ASSERT(resourceLoaded);
+	if(!resourceLoaded)
+	{
+		return _T("");
+	}
+	return str;
+}
+
+
 OPENMPT_NAMESPACE_END
