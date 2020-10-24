@@ -31,11 +31,6 @@ if "%MPT_VS_TARGET%" == "win81"   set MPT_VS_WITHTARGET=%MPT_VS_VER%win81
 if "%MPT_VS_TARGET%" == "win10"   set MPT_VS_WITHTARGET=%MPT_VS_VER%win10
 if "%MPT_VS_TARGET%" == "default" set MPT_VS_WITHTARGET=%MPT_VS_VER%win81
 
-if "%MPT_VS_ARCH%" == "Win32" set MPT_VS_ARCH_OTHER=x64
-if "%MPT_VS_ARCH%" == "x64"   set MPT_VS_ARCH_OTHER=Win32
-if "%MPT_VS_ARCH%" == "ARM"   set MPT_VS_ARCH_OTHER=Win32
-if "%MPT_VS_ARCH%" == "ARM64" set MPT_VS_ARCH_OTHER=Win32
-
 
 if "%MPT_VS_ARCH%" == "Win32" (
 	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp
