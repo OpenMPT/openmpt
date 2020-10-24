@@ -122,7 +122,7 @@ struct CrashOutputDirectory
 	CrashOutputDirectory()
 		: valid(true)
 	{
-		const mpt::PathString timestampDir = mpt::PathString::FromCString((CTime::GetCurrentTime()).Format("%Y-%m-%d %H.%M.%S\\"));
+		const mpt::PathString timestampDir = mpt::PathString::FromCString((CTime::GetCurrentTime()).Format(_T("%Y-%m-%d %H.%M.%S\\")));
 		// Create a crash directory
 		path = mpt::GetTempDirectory() + P_("OpenMPT Crash Files\\");
 		if(!path.IsDirectory())
