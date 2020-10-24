@@ -81,7 +81,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	for (int cc = MIDIEvents::MIDICC_start; cc <= MIDIEvents::MIDICC_end; cc++)
 	{
 		s.Format(_T("CC %02d "), cc);
-		s += MIDIEvents::MidiCCNames[cc];
+		s += mpt::ToCString(mpt::Charset::UTF8, MIDIEvents::MidiCCNames[cc]);
 		m_CbnMacroCC.SetItemData(m_CbnMacroCC.AddString(s), cc);
 	}
 

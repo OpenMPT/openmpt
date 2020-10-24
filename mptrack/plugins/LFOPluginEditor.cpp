@@ -73,7 +73,7 @@ bool LFOPluginEditor::OpenEditor(CWnd *parent)
 	for(unsigned int i = 0; i < 128; i++)
 	{
 		s.Format(_T("%3u: "), i);
-		s += MIDIEvents::MidiCCNames[i];
+		s += mpt::ToCString(mpt::Charset::UTF8, MIDIEvents::MidiCCNames[i]);
 		m_midiCC.AddString(s);
 	}
 	if(m_lfoPlugin.m_outputToCC && m_lfoPlugin.m_outputParam != int32_max)

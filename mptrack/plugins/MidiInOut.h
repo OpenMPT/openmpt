@@ -30,7 +30,7 @@ public:
 	static constexpr ID NO_MIDI_DEVICE = ID(-1);
 
 	RtMidi &stream;
-	std::string name;
+	std::string name;  // Charset::UTF8
 	ID index = NO_MIDI_DEVICE;
 
 public:
@@ -39,7 +39,7 @@ public:
 		, name("<none>")
 	{ }
 
-	std::string GetPortName(ID port);
+	std::string GetPortName(ID port);  // Charset::UTF8
 };
 
 

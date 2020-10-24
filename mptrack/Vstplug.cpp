@@ -739,7 +739,7 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 		} else
 		{
 			// Plugin wants a directory
-			BrowseForFolder dlg(mpt::PathString::FromLocale(fileSel.initialPath != nullptr ? fileSel.initialPath : ""), fileSel.title != nullptr ? fileSel.title : "");
+			BrowseForFolder dlg(mpt::PathString::FromLocale(fileSel.initialPath != nullptr ? fileSel.initialPath : ""), mpt::ToCString(mpt::Charset::Locale, fileSel.title != nullptr ? fileSel.title : ""));
 			if(!dlg.Show(GetEditor()))
 				return 0;
 

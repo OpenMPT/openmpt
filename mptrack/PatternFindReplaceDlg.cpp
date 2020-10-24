@@ -378,7 +378,7 @@ void CFindReplaceTab::UpdateInstrumentList()
 		{
 			s.Format(_T("%03d:"), n);
 			if(m_sndFile.GetNumInstruments())
-				s += m_sndFile.GetInstrumentName(n);
+				s += mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.GetInstrumentName(n));
 			else
 				s += mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[n]);
 			m_cbnInstr.SetItemData(m_cbnInstr.AddString(s), n);

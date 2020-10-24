@@ -2250,8 +2250,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_PASTE, ih->GetKeyTextFromCommand(kcEditPaste, _T("&Paste (Replace)")));
 		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_PUSHFORWARDPASTE, ih->GetKeyTextFromCommand(kcEditPushForwardPaste, _T("Paste (&Insert)")));
 		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_MIXPASTE, ih->GetKeyTextFromCommand(kcEditMixPaste, _T("Mi&x Paste")));
-		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, ih->GetKeyTextFromCommand(kcEditUndo, _T("&Undo ") + CString(pModDoc->GetSampleUndo().GetUndoName(m_nSample))));
-		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanRedo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_REDO, ih->GetKeyTextFromCommand(kcEditRedo, _T("&Redo ") + CString(pModDoc->GetSampleUndo().GetRedoName(m_nSample))));
+		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, ih->GetKeyTextFromCommand(kcEditUndo, _T("&Undo ") + mpt::ToCString(pModDoc->GetSoundFile().GetCharsetInternal(), pModDoc->GetSampleUndo().GetUndoName(m_nSample))));
+		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanRedo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_REDO, ih->GetKeyTextFromCommand(kcEditRedo, _T("&Redo ") + mpt::ToCString(pModDoc->GetSoundFile().GetCharsetInternal(), pModDoc->GetSampleUndo().GetRedoName(m_nSample))));
 		ClientToScreen(&pt);
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
 		::DestroyMenu(hMenu);
@@ -3822,7 +3822,7 @@ void CViewSample::OnUpdateUndo(CCmdUI *pCmdUI)
 	if ((pCmdUI) && (pModDoc))
 	{
 		pCmdUI->Enable(pModDoc->GetSampleUndo().CanUndo(m_nSample));
-		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo, _T("Undo ") + CString(pModDoc->GetSampleUndo().GetUndoName(m_nSample))));
+		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditUndo, _T("Undo ") + mpt::ToCString(pModDoc->GetSoundFile().GetCharsetInternal(), pModDoc->GetSampleUndo().GetUndoName(m_nSample))));
 	}
 }
 
@@ -3833,7 +3833,7 @@ void CViewSample::OnUpdateRedo(CCmdUI *pCmdUI)
 	if ((pCmdUI) && (pModDoc))
 	{
 		pCmdUI->Enable(pModDoc->GetSampleUndo().CanRedo(m_nSample));
-		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo, _T("Redo ") + CString(pModDoc->GetSampleUndo().GetRedoName(m_nSample))));
+		pCmdUI->SetText(CMainFrame::GetInputHandler()->GetKeyTextFromCommand(kcEditRedo, _T("Redo ") + mpt::ToCString(pModDoc->GetSoundFile().GetCharsetInternal(), pModDoc->GetSampleUndo().GetRedoName(m_nSample))));
 	}
 }
 

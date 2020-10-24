@@ -119,7 +119,7 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 	for(size_t i = MIDIEvents::MIDICC_start; i <= MIDIEvents::MIDICC_end; i++)
 	{
 		s.Format(_T("%3u "), i);
-		s += MIDIEvents::MidiCCNames[i];
+		s += mpt::ToCString(mpt::Charset::UTF8, MIDIEvents::MidiCCNames[i]);
 		m_ControllerCBox.AddString(s);
 	}
 
@@ -182,7 +182,7 @@ int CMIDIMappingDialog::InsertItem(const CMIDIMappingDirective &m, int insertAt)
 	{
 	case MIDIEvents::evControllerChange:
 		s.Format(_T("CC %u: "), m.GetController());
-		if(m.GetController() <= MIDIEvents::MIDICC_end) s += MIDIEvents::MidiCCNames[m.GetController()];
+		if(m.GetController() <= MIDIEvents::MIDICC_end) s += mpt::ToCString(mpt::Charset::UTF8, MIDIEvents::MidiCCNames[m.GetController()]);
 		break;
 	case MIDIEvents::evPolyAftertouch:
 		s = _T("Polyphonic Aftertouch"); break;

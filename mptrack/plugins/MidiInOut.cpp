@@ -248,7 +248,7 @@ CString MidiInOut::GetParamName(PlugParamIndex param)
 CString MidiInOut::GetParamDisplay(PlugParamIndex param)
 {
 	const MidiDevice &device = (param == kInputParameter) ? m_inputDevice : m_outputDevice;
-	return device.name.c_str();
+	return mpt::ToCString(mpt::Charset::UTF8, device.name);
 }
 
 
