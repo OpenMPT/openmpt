@@ -1393,7 +1393,7 @@ END_MESSAGE_MAP()
 
 static CSplashScreen *gpSplashScreen = NULL;
 
-static DWORD gSplashScreenStartTime = 0;
+static DWORD64 gSplashScreenStartTime = 0;
 
 
 CSplashScreen::~CSplashScreen()
@@ -1459,7 +1459,7 @@ static void StartSplashScreen()
 		gpSplashScreen->ShowWindow(SW_SHOW);
 		gpSplashScreen->UpdateWindow();
 		gpSplashScreen->BeginWaitCursor();
-		gSplashScreenStartTime = GetTickCount();
+		gSplashScreenStartTime = GetTickCount64();
 	}
 }
 
@@ -1480,7 +1480,7 @@ static void TimeoutSplashScreen()
 {
 	if(gpSplashScreen)
 	{
-		if(GetTickCount() - gSplashScreenStartTime > 100)
+		if(GetTickCount64() - gSplashScreenStartTime > 100)
 		{
 			StopSplashScreen();
 		}
@@ -1847,7 +1847,7 @@ void CTrackApp::InitializeDXPlugins()
 
 	CDialog pluginScanDlg;
 	CWnd *textWnd = nullptr;
-	DWORD scanStart = GetTickCount();
+	DWORD64 scanStart = GetTickCount64();
 
 	// Read tags for built-in plugins
 	for(auto plug : *m_pPluginManager)
@@ -1874,14 +1874,14 @@ void CTrackApp::InitializeDXPlugins()
 		{
 			plugPath = PathInstallRelativeToAbsolute(plugPath);
 
-			if(!pluginScanDlg.m_hWnd && GetTickCount() >= scanStart + 2000)
+			if(!pluginScanDlg.m_hWnd && GetTickCount64() >= scanStart + 2000)
 			{
 				// If this is taking too long, show the user what they're waiting for.
 				pluginScanDlg.Create(IDD_SCANPLUGINS, gpSplashScreen);
 				pluginScanDlg.ShowWindow(SW_SHOW);
 				pluginScanDlg.CenterWindow(gpSplashScreen);
 				textWnd = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
-			} else if(pluginScanDlg.m_hWnd && GetTickCount() >= scanStart + 30)
+			} else if(pluginScanDlg.m_hWnd && GetTickCount64() >= scanStart + 30)
 			{
 				textWnd->SetWindowText(scanFormat(plug + 1, numPlugins + 1, plugPath));
 				MSG msg;
@@ -1890,7 +1890,7 @@ void CTrackApp::InitializeDXPlugins()
 					::TranslateMessage(&msg);
 					::DispatchMessage(&msg);
 				}
-				scanStart = GetTickCount();
+				scanStart = GetTickCount64();
 			}
 
 			if(plugPath == failedPlugin)

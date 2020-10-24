@@ -133,7 +133,7 @@ void MissingExternalSamplesDlg::OnScanFolder()
 		GetDlgItem(IDOK)->EnableWindow(FALSE);
 		BeginWaitCursor();
 
-		DWORD lastTick = GetTickCount();
+		DWORD64 lastTick = GetTickCount64();
 		int foundFiles = 0;
 
 		bool anyMissing = true;
@@ -157,7 +157,7 @@ void MissingExternalSamplesDlg::OnScanFolder()
 				}
 			}
 
-			const DWORD tick = GetTickCount();
+			const DWORD64 tick = GetTickCount64();
 			if(tick < lastTick || tick > lastTick + 100)
 			{
 				lastTick = tick;
