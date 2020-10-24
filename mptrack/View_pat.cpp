@@ -6410,7 +6410,7 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 				for(SAMPLEINDEX i = 1; i <= sndFile->GetNumSamples(); i++) if (sndFile->GetSample(i).HasSampleData())
 				{
 					s.Format(_T("%02d: "), i);
-					s += sndFile->GetSampleName(i);
+					s += mpt::ToCString(sndFile->GetCharsetInternal(), sndFile->GetSampleName(i));
 					AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + i, s);
 					addSeparator = true;
 				}

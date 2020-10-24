@@ -236,7 +236,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, SoundAllowDeferredProcessing(conf, U_("Sound Settings"), U_("AllowDeferredProcessing"), SoundDevice::AppInfo().AllowDeferredProcessing)
 	// MIDI Settings
 	, m_nMidiDevice(conf, U_("MIDI Settings"), U_("MidiDevice"), 0)
-	, midiDeviceName(conf, U_("MIDI Settings"), U_("MidiDeviceName"), "")
+	, midiDeviceName(conf, U_("MIDI Settings"), U_("MidiDeviceName"), _T(""))
 	, m_dwMidiSetup(conf, U_("MIDI Settings"), U_("MidiSetup"), MIDISETUP_RECORDVELOCITY | MIDISETUP_RECORDNOTEOFF | MIDISETUP_TRANSPOSEKEYBOARD | MIDISETUP_MIDITOPLUG)
 	, aftertouchBehaviour(conf, U_("MIDI Settings"), U_("AftertouchBehaviour"), atDoNotRecord)
 	, midiVelocityAmp(conf, U_("MIDI Settings"), U_("MidiVelocityAmp"), 100)

@@ -2841,7 +2841,7 @@ CString CModDoc::GetPatternViewInstrumentName(INSTRUMENTINDEX nInstr,
 	CString displayName, instrumentName, pluginName;
 
 	// Get instrument name.
-	instrumentName = m_SndFile.GetInstrumentName(nInstr);
+	instrumentName = mpt::ToCString(m_SndFile.GetCharsetInternal(), m_SndFile.GetInstrumentName(nInstr));
 
 	// If instrument name is empty, use name of the sample mapped to C-5.
 	if (instrumentName.IsEmpty())

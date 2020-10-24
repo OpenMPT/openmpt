@@ -72,7 +72,7 @@ void MissingExternalSamplesDlg::GenerateList()
 		if(m_sndFile.IsExternalSampleMissing(smp))
 		{
 			s.Format(_T("%02u: "), smp);
-			s += m_sndFile.GetSampleName(smp);
+			s += mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.GetSampleName(smp));
 			int insertAt = m_List.InsertItem(m_List.GetItemCount(), s);
 			if(insertAt == -1)
 				continue;
@@ -275,7 +275,7 @@ void ModifiedExternalSamplesDlg::GenerateList()
 			continue;
 
 		s.Format(_T("%02u: "), smp);
-		s += m_sndFile.GetSampleName(smp);
+		s += mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.GetSampleName(smp));
 		int insertAt = m_List.InsertItem(m_List.GetItemCount(), s);
 		if(insertAt == -1)
 			continue;

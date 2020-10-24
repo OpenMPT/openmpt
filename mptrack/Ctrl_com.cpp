@@ -159,7 +159,7 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 		}
 		text[i] = c;
 	}
-	CString new_text = text.c_str();
+	CString new_text = mpt::ToCString(m_sndFile.GetCharsetInternal(), text);
 	CString old_text;
 	m_EditComments.GetWindowText(old_text);
 	if(new_text != old_text)

@@ -687,7 +687,7 @@ void CSelectPluginDlg::OnAddPlugin()
 
 void CSelectPluginDlg::OnScanFolder()
 {
-	BrowseForFolder dlg(TrackerSettings::Instance().PathPlugins.GetWorkingDir(), "Select a folder that should be scanned for VST plugins (including sub-folders)");
+	BrowseForFolder dlg(TrackerSettings::Instance().PathPlugins.GetWorkingDir(), _T("Select a folder that should be scanned for VST plugins (including sub-folders)"));
 	if(!dlg.Show(this)) return;
 
 	TrackerSettings::Instance().PathPlugins.SetWorkingDir(dlg.GetDirectory());

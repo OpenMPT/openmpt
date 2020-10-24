@@ -950,7 +950,7 @@ void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings, const 
 			result = SearchUpdate(context, settings, context.statistics);
 		} catch(const bad_uri &e)
 		{
-			throw CUpdateCheck::Error(MPT_CFORMAT("Error parsing update URL: {}")(mpt::get_exception_text<CString>(e)));
+			throw CUpdateCheck::Error(MPT_CFORMAT("Error parsing update URL: {}")(mpt::get_exception_text<mpt::ustring>(e)));
 		} catch(const HTTP::exception &e)
 		{
 			throw CUpdateCheck::Error(CString(_T("HTTP error: ")) + mpt::ToCString(e.GetMessage()));

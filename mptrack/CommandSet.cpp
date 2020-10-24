@@ -873,7 +873,7 @@ CString CCommandSet::Remove(int pos, CommandID cmd)
 	}
 
 	LOG_COMMANDSET(U_("Failed to remove a key: keychoice out of range."));
-	return "";
+	return _T("");
 }
 
 
