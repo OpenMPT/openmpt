@@ -201,7 +201,7 @@ public:
 			sleepEvent = CreateWaitableTimer(NULL, FALSE, NULL);
 			if(!sleepEvent)
 			{
-				mpt::throw_out_of_memory();
+				MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
 			}
 			LARGE_INTEGER dueTime;
 			dueTime.QuadPart = 0 - sleep100Nanoseconds; // negative time means relative
@@ -211,7 +211,7 @@ public:
 			sleepEvent = CreateWaitableTimer(NULL, TRUE, NULL);
 			if(!sleepEvent)
 			{
-				mpt::throw_out_of_memory();
+				MPT_EXCEPTION_THROW_OUT_OF_MEMORY();
 			}
 		}
 
