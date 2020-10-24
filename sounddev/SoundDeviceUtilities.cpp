@@ -199,12 +199,20 @@ public:
 		if(periodic_nt_timer)
 		{
 			sleepEvent = CreateWaitableTimer(NULL, FALSE, NULL);
+			if(!sleepEvent)
+			{
+				mpt::throw_out_of_memory();
+			}
 			LARGE_INTEGER dueTime;
 			dueTime.QuadPart = 0 - sleep100Nanoseconds; // negative time means relative
 			SetWaitableTimer(sleepEvent, &dueTime, sleepMilliseconds, NULL, NULL, FALSE);
 		} else
 		{
 			sleepEvent = CreateWaitableTimer(NULL, TRUE, NULL);
+			if(!sleepEvent)
+			{
+				mpt::throw_out_of_memory();
+			}
 		}
 
 	}
