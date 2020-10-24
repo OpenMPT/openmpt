@@ -1,1 +1,3 @@
 RtAudio v5.1.0
+
+Modifications have been marked with "// OpenMPT".
