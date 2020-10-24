@@ -42,7 +42,7 @@ namespace mpt
 
 using out_of_memory = CMemoryException *;
 
-inline void throw_out_of_memory()
+[[noreturn]] inline void throw_out_of_memory()
 {
 	AfxThrowMemoryException();
 }
