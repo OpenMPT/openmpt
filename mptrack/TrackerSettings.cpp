@@ -92,11 +92,11 @@ void SampleUndoBufferSize::CalculateSize()
 {
 	if(sizePercent < 0)
 		sizePercent = 0;
-	// Don't use GlobalMemoryStatusEx here since we want a percentage of the memory that's actually *available* to OpenMPT, which is a max of 4GB in 32-bit mode.
 	MEMORYSTATUSEX memStatus;
 	memStatus.dwLength = sizeof(MEMORYSTATUSEX);
 	GlobalMemoryStatusEx(&memStatus);
-	sizeByte = mpt::saturate_cast<size_t>(memStatus.ullTotalPhys * uint64(sizePercent) / 100);
+	// The setting is a percentage of the memory that's actually *available* to OpenMPT, which is a max of 4GB in 32-bit mode.
+	sizeByte = mpt::saturate_cast<size_t>(std::min(memStatus.ullTotalPhys, DWORDLONG(SIZE_T_MAX)) * sizePercent / 100);
 
 	// Pretend there's at least one MiB of memory (haha)
 	if(sizePercent != 0 && sizeByte < 1 * 1024 * 1024)
