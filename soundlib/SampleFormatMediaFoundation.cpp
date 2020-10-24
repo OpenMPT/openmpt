@@ -228,16 +228,16 @@ std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 			continue;
 		}
 
+		std::vector<WCHAR> valueNameBuf(16384);
+		std::vector<BYTE> valueData(16384);
 		for(DWORD valueIndex = 0; ; ++valueIndex)
 		{
-			WCHAR valueNameBuf[16384];
-			MemsetZero(valueNameBuf);
+			std::fill(valueNameBuf.begin(), valueNameBuf.end(), WCHAR{0});
 			DWORD valueNameBufLen = 16384;
 			DWORD valueType = 0;
-			BYTE valueData[16384];
-			MemsetZero(valueData);
+			std::fill(valueData.begin(), valueData.end(), BYTE{0});
 			DWORD valueDataLen = 16384;
-			regResult = RegEnumValueW(hkHandler, valueIndex, valueNameBuf, &valueNameBufLen, NULL, &valueType, valueData, &valueDataLen);
+			regResult = RegEnumValueW(hkHandler, valueIndex, valueNameBuf.data(), &valueNameBufLen, NULL, &valueType, valueData.data(), &valueDataLen);
 			if(regResult != ERROR_SUCCESS)
 			{
 				break;
@@ -247,9 +247,9 @@ std::vector<FileType> CSoundFile::GetMediaFoundationFileTypes()
 				continue;
 			}
 
-			std::wstring guid = std::wstring(valueNameBuf);
+			std::wstring guid = std::wstring(valueNameBuf.data());
 
-			mpt::ustring description = mpt::ToUnicode(std::wstring(reinterpret_cast<WCHAR*>(valueData)));
+			mpt::ustring description = mpt::ToUnicode(std::wstring(reinterpret_cast<WCHAR*>(valueData.data())));
 			description = mpt::String::Replace(description, U_("Byte Stream Handler"), U_("Files"));
 			description = mpt::String::Replace(description, U_("ByteStreamHandler"), U_("Files"));
 
