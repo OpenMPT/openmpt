@@ -142,6 +142,9 @@
 	filter {}
 	filter { "action:vs*" }
 		buildoptions { "/wd4996" }
+	filter {}
+	filter { "action:vs*" }
+		buildoptions { "/wd6262" } -- analyze
   filter {}
   filter { "kind:SharedLib" }
    files { "../../include/unrar/dll_nocrypt.def" }

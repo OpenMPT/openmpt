@@ -49,3 +49,6 @@
   filter { "kind:SharedLib" }
    files { "../../build/premake/def/ext-minizip.def" }
   filter {}
+	filter { "action:vs*" }
+		buildoptions { "/wd6262" } -- analyze
+	filter {}

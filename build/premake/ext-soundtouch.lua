@@ -53,4 +53,8 @@
   }
 	filter { "action:vs*" }
 		buildoptions { "/wd4267" }
+	filter {}
+	filter { "action:vs*" }
+		buildoptions { "/wd6262" } -- analyze
+	filter {}
   defines { "DLL_EXPORTS" }

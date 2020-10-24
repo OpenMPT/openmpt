@@ -61,4 +61,7 @@
   filter {}
   filter { "action:vs*" }
     buildoptions { "/wd4267", "/wd4334" }
-  filter {}
+	filter {}
+	filter { "action:vs*" }
+		buildoptions { "/wd6262" } -- analyze
+	filter {}
