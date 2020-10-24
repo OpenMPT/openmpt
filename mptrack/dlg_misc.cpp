@@ -441,7 +441,6 @@ void CModTypeDlg::OnOK()
 BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 {
 	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
-	const TCHAR *text = _T("");
 	UINT_PTR nID = pNMHDR->idFrom;
 	if(pTTT->uFlags & TTF_IDISHWND)
 	{
@@ -449,6 +448,7 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 		nID = ::GetDlgCtrlID((HWND)nID);
 	}
 
+	mpt::tstring text;
 	switch(nID)
 	{
 	case IDC_CHECK1:
@@ -478,24 +478,23 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 			text = _T("Tempo swing is only available in modern tempo mode.");
 		} else
 		{
-			CString s = _T("Swing setting: ");
+			text = _T("Swing setting: ");
 			if(m_tempoSwing.empty())
 			{
-				s += _T("Default");
+				text += _T("Default");
 			} else
 			{
 				for(size_t i = 0; i < m_tempoSwing.size(); i++)
 				{
-					if(i > 0) s += _T(" / ");
-					s += MPT_CFORMAT("{}%")(Util::muldivr(m_tempoSwing[i], 100, TempoSwing::Unity));
+					if(i > 0)
+						text += _T(" / ");
+					text += MPT_TFORMAT("{}%")(Util::muldivr(m_tempoSwing[i], 100, TempoSwing::Unity));
 				}
 			}
-			lstrcpyn(pTTT->szText, s, mpt::saturate_cast<int>(std::size(pTTT->szText)));
-			return TRUE;
 		}
 	}
 
-	lstrcpyn(pTTT->szText, text, mpt::saturate_cast<int>(std::size(pTTT->szText)));
+	mpt::String::WriteWinBuf(pTTT->szText) = text;
 	return TRUE;
 }
 

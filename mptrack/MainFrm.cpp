@@ -508,24 +508,24 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 {
 	if ((GetStyle() & FWS_ADDTOTITLE) == 0)	return;     // leave it alone!
 
-	CMDIChildWnd* pActiveChild = NULL;
+	CMDIChildWnd* pActiveChild = nullptr;
 	CDocument* pDocument = GetActiveDocument();
 	if (bAddToTitle &&
-	  (pActiveChild = MDIGetActive()) != NULL &&
+	  (pActiveChild = MDIGetActive()) != nullptr &&
 	  (pActiveChild->GetStyle() & WS_MAXIMIZE) == 0 &&
-	  (pDocument != NULL ||
-	   (pDocument = pActiveChild->GetActiveDocument()) != NULL))
+	  (pDocument != nullptr ||
+	   (pDocument = pActiveChild->GetActiveDocument()) != nullptr))
 	{
-		TCHAR szText[256+_MAX_PATH];
-		lstrcpy(szText, pDocument->GetTitle());
-		if (pDocument->IsModified()) lstrcat(szText, _T("*"));
-		UpdateFrameTitleForDocument(szText);
+		CString title = pDocument->GetTitle();
+		if(pDocument->IsModified())
+			title.AppendChar(_T('*'));
+		UpdateFrameTitleForDocument(title);
 	} else
 	{
-		LPCTSTR lpstrTitle = NULL;
+		LPCTSTR lpstrTitle = nullptr;
 		CString strTitle;
 
-		if (pActiveChild != NULL)
+		if (pActiveChild != nullptr)
 		{
 			strTitle = pActiveChild->GetTitle();
 			if (!strTitle.IsEmpty())

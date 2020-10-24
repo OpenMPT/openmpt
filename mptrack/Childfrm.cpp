@@ -380,7 +380,7 @@ BOOL CChildFrame::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 			AfxExtractSubString(strTipText, szFullText, 1, _T('\n'));
 		}
 	}
-	lstrcpyn(pTTT->szText, strTipText, mpt::saturate_cast<int>(std::size(pTTT->szText)));
+	mpt::String::WriteCStringBuf(pTTT->szText) = strTipText;
 	*pResult = 0;
 
 	// bring the tooltip window above other popup windows
