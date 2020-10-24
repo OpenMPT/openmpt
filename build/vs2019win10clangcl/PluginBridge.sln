@@ -5,6 +5,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PluginBridge", "PluginBridg
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Checked|ARM = Checked|ARM
+		Checked|ARM64 = Checked|ARM64
+		Checked|Win32 = Checked|Win32
+		Checked|x64 = Checked|x64
 		Debug|ARM = Debug|ARM
 		Debug|ARM64 = Debug|ARM64
 		Debug|Win32 = Debug|Win32
@@ -15,6 +19,14 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1A147336-891E-49AC-9EAD-A750599A224C}.Checked|ARM.ActiveCfg = Checked|ARM
+		{1A147336-891E-49AC-9EAD-A750599A224C}.Checked|ARM.Build.0 = Checked|ARM
+		{1A147336-891E-49AC-9EAD-A750599A224C}.Checked|ARM64.ActiveCfg = Checked|ARM64
+		{1A147336-891E-49AC-9EAD-A750599A224C}.Checked|ARM64.Build.0 = Checked|ARM64
+		{1A147336-891E-49AC-9EAD-A750599A224C}.Checked|Win32.ActiveCfg = Checked|Win32
+		{1A147336-891E-49AC-9EAD-A750599A224C}.Checked|Win32.Build.0 = Checked|Win32
+		{1A147336-891E-49AC-9EAD-A750599A224C}.Checked|x64.ActiveCfg = Checked|x64
+		{1A147336-891E-49AC-9EAD-A750599A224C}.Checked|x64.Build.0 = Checked|x64
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Debug|ARM.ActiveCfg = Debug|ARM
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Debug|ARM.Build.0 = Debug|ARM
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Debug|ARM64.ActiveCfg = Debug|ARM64

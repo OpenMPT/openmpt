@@ -224,7 +224,7 @@ if _OPTIONS["group"] == "PluginBridge" then
 solution "PluginBridge"
 	startproject "PluginBridge"
  location ( "../../build/" .. mpt_projectpathname )
- configurations { "Debug", "Release" }
+ configurations { "Debug", "Release", "Checked" }
  platforms ( trkplatforms )
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
