@@ -1110,7 +1110,7 @@ double module_impl::set_position_seconds( double seconds ) {
 	m_sndFile->m_PlayState.m_nCurrentOrder = t.lastOrder;
 	m_sndFile->SetCurrentOrder( t.lastOrder );
 	m_sndFile->m_PlayState.m_nNextRow = t.lastRow;
-	m_currentPositionSeconds = t.duration;
+	m_currentPositionSeconds = base_seconds + t.duration;
 	return m_currentPositionSeconds;
 }
 double module_impl::set_position_order_row( std::int32_t order, std::int32_t row ) {
