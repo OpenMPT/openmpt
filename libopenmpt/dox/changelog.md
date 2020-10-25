@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.5.3-pre
+### libopenmpt 0.5.3 (2020-10-25)
 
  *  [**Sec**] Possible hang if a MED file claimed to contain 256 songs. (r13704)
 
