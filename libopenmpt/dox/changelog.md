@@ -7,13 +7,13 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.3-pre
 
+ *  [**Sec**] Possible hang if a MED file claimed to contain 256 songs. (r13704)
+
  *  [**Bug**] libopenmpt: `openmpt::is_extension_supported2()` exported symbol
     was missing (C++).
- *  [**Bug**] Possible hang if a MED file claimed to contain 256 songs.
-
- *  `openmpt::module::set_position_seconds` sometimes behaved as if the song
-    end was reached when seeking into a pattern loop and in some other corner
-    cases.
+ *  [**Bug**] `openmpt::module::set_position_seconds` sometimes behaved as if
+    the song end was reached when seeking into a pattern loop and in some other
+    corner cases.
 
  *  Increase threshold for ignoring panning commands from 820 to 830.
  *  Subsong names now fall back to the first pattern's name if empty.
