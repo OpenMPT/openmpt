@@ -971,7 +971,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		// Adjust caption of the "Sequence" node (if only one sequence exists, it should be labeled with the sequence name)
 		if((seqHint.GetType()[HINT_SEQNAMES] && sndFile.Order.GetNumSequences() == 1) || adjustParentNode)
 		{
-			CString seqName = sndFile.Order(0).GetName().c_str();
+			CString seqName = mpt::ToCString(sndFile.Order(0).GetName());
 			if(seqName.IsEmpty() || sndFile.Order.GetNumSequences() > 1)
 				seqName = _T("Sequence");
 			else
@@ -992,7 +992,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				} else
 				{
 					seqName = MPT_CFORMAT("{}: ")(seq + 1);
-					seqName += sndFile.Order(seq).GetName().c_str();
+					seqName += mpt::ToCString(sndFile.Order(seq).GetName());
 				}
 
 				UINT state = (seq == sndFile.Order.GetCurrentSequenceIndex()) ? TVIS_BOLD : 0;

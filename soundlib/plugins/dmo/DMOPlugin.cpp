@@ -472,7 +472,7 @@ CString DMOPlugin::GetParamName(PlugParamIndex param)
 		mpi.szLabel[0] = 0;
 		if(m_pParamInfo->GetParamInfo(param, &mpi) == S_OK)
 		{
-			return mpi.szLabel;
+			return mpt::ToCString(mpi.szLabel);
 		}
 	}
 	return CString();
@@ -490,7 +490,7 @@ CString DMOPlugin::GetParamLabel(PlugParamIndex param)
 		mpi.szLabel[0] = 0;
 		if(m_pParamInfo->GetParamInfo(param, &mpi) == S_OK)
 		{
-			return mpi.szUnitText;
+			return mpt::ToCString(mpi.szUnitText);
 		}
 	}
 	return CString();
@@ -535,7 +535,7 @@ CString DMOPlugin::GetParamDisplay(PlugParamIndex param)
 						{
 							text += wcslen(text) + 1;
 						}
-						return CString(text);
+						return mpt::ToCString(text);
 					}
 					break;
 
