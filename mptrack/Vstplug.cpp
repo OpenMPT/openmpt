@@ -716,11 +716,14 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 				const auto &files = dlg.GetFilenames();
 				fileSel.numReturnPaths = mpt::saturate_cast<int32>(files.size());
 				fileSel.returnMultiplePaths = new (std::nothrow) char *[fileSel.numReturnPaths];
-				for(size_t i = 0; i < files.size(); i++)
+				if(!fileSel.returnMultiplePaths)
+					return 0;
+				for(int32 i = 0; i < fileSel.numReturnPaths; i++)
 				{
 					const std::string fname_ = files[i].ToLocale();
-					char *fname = new char[fname_.length() + 1];
-					strcpy(fname, fname_.c_str());
+					char *fname = new (std::nothrow) char[fname_.length() + 1];
+					if(fname)
+						strcpy(fname, fname_.c_str());
 					fileSel.returnMultiplePaths[i] = fname;
 				}
 				return 1;
