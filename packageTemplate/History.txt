@@ -31,6 +31,40 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.05.00 (25 October 2020, revision 13771)
+---------------------------------------------
+Pattern tab
+- [New] <js> Added new shortcuts for moving channels (current selection if there is one, edit cursor otherwise, http://forum.openmpt.org/index.php?topic=6480.0).
+- [Fix] <js> Disabling song looping didn't really work for anything but the first subsong in a seqeuence. Some related issues when song looping is disabled have also been fixed.
+- [Fix] <js> Fixed highlighting of the currently selected pattern in the order list past the maximum supported length of the current format (e.g. when importing from some format that supports more than 128 orders into the MOD format).
+
+Pattern tab::Find/Replace
+- [Mod] <js> If a match is found in a pattern that is not part of the current sequence, the active sequence is automatically changed.
+
+Sample tab
+- [Fix] <js> More logical cue point moving when removing sample ranges.
+
+Instrument tab
+- [Imp] <js> Respect instrument NNA settings when playing notes via MIDI (http://bugs.openmpt.org/view.php?id=1371).
+
+MOD
+- [Mod] <js> Increased threshold for considering 8xx as panning commands from 820 to 830.
+
+Other formats
+- [Imp] <js> WOW: Fix loading of several files and harden WOW detection (http://bugs.openmpt.org/view.php?id=1380).
+- [Fix] <js> STM: Changed tempo computation to behave like Scream Tracker 2.3 instead of Scream Tracker 2.2, as the playback frequencies we use for sample playback are closer to those of Scream Tracker 2.3.
+- [Fix] <js> MED: Fix possible hang during load if a MED file claims to contain 256 songs.
+
+Stream Export
+- [Fix] <js> Avoid desynchronization between channels when doing per-channel export for S3M files (http://bugs.openmpt.org/view.php?id=1331).
+
+Module cleanup
+- [Fix] <js> Allow multiple sequences to be merged even if current song format is not MPTM.
+
+Misc
+- [Imp] <js> Improve some icons' visibility in high contrast / dark themes.
+
+
 v1.29.04.00 (4 October 2020, revision 13649)
 --------------------------------------------
 Tree view
@@ -57,7 +91,7 @@ XM
 - [Imp] <js> Support loading and saving (but not editing for now, apart from using the clipboard) command W, which is used e.g. by BASS for syncing purposes.
 
 Other formats
-- [Fix] MO3: Avoid certain ModPlug hacks from being fixed up twice, which could lead to e.g. very narrow pan swing range for old OpenMPT IT files saved with a recent MO3 encoder version. 
+- [Fix] <js> MO3: Avoid certain ModPlug hacks from being fixed up twice, which could lead to e.g. very narrow pan swing range for old OpenMPT IT files saved with a recent MO3 encoder version. 
 - [Fix] <js> PLM: Percentage offset (Mxx) was slightly off.
 
 Misc
