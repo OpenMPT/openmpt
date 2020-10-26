@@ -352,7 +352,7 @@ MPT_BINARY_STRUCT(MMDTag, 8)
 
 static TEMPO MMDTempoToBPM(uint32 tempo, bool is8Ch, bool bpmMode, uint8 rowsPerBeat)
 {
-	if(bpmMode)
+	if(bpmMode && !is8Ch)
 	{
 		// You would have thought that we could use modern tempo mode here.
 		// Alas, the number of ticks per row still influences the tempo. :(
@@ -412,7 +412,14 @@ static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rows
 		} else if(m.param <= 0xF0)
 		{
 			m.command = CMD_TEMPO;
-			m.param = mpt::saturate_round<ModCommand::PARAM>(MMDTempoToBPM(m.param, is8ch, bpmMode, rowsPerBeat).ToDouble());
+			if(m.param < 0x03)  // This appears to be a bug in OctaMED which is not emulated in MED Soundstudio on Windows.
+				m.param = 0x70;
+			else
+				m.param = mpt::saturate_round<ModCommand::PARAM>(MMDTempoToBPM(m.param, is8ch, bpmMode, rowsPerBeat).ToDouble());
+#ifdef MODPLUG_TRACKER
+			if(m.param < 0x20)
+				m.param = 0x20;
+#endif  // MODPLUG_TRACKER
 		} else switch(m.command)
 		{
 			case 0xF1:  // Play note twice
