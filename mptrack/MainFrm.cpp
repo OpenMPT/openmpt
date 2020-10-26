@@ -3029,7 +3029,7 @@ TfLanguageProfileNotifySink::~TfLanguageProfileNotifySink()
 }
 
 
-HRESULT TfLanguageProfileNotifySink::OnLanguageChange(LANGID /*langid*/, BOOL *pfAccept)
+HRESULT TfLanguageProfileNotifySink::OnLanguageChange(LANGID /*langid*/, __RPC__out BOOL *pfAccept)
 {
 	*pfAccept = TRUE;
 	return ResultFromScode(S_OK);
