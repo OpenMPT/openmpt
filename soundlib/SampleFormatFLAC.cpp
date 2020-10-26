@@ -650,7 +650,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 			RIFFChunk header;
 			uint32le numPoints;
 			WAVCuePoint cues[mpt::array_size<decltype(sample.cues)>::size];
-		} chunk;
+		} chunk{};
 
 		chunk.header.id = RIFFChunk::idcue_;
 		chunk.header.length = 4 + sizeof(chunk.cues);
