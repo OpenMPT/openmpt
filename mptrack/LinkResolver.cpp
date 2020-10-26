@@ -42,6 +42,7 @@ mpt::PathString LinkResolver::Resolve(const TCHAR *inPath)
 		return {};
 
 	SHFILEINFO info;
+	Clear(info);
 	if((SHGetFileInfo(inPath, 0, &info, sizeof(info), SHGFI_ATTRIBUTES) == 0) || !(info.dwAttributes & SFGAO_LINK))
 		return {};
 
