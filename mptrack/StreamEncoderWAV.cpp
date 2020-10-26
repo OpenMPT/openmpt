@@ -99,7 +99,7 @@ public:
 			uint32 index = 0;
 			for(auto cue : cues)
 			{
-				WAVCuePoint cuePoint;
+				WAVCuePoint cuePoint{};
 				cuePoint.id = index++;
 				cuePoint.position = static_cast<uint32>(cue);
 				cuePoint.riffChunkID = static_cast<uint32>(RIFFChunk::iddata);
