@@ -94,7 +94,10 @@ void CProgressDialog::SetProgress(uint64 progress)
 
 void CProgressDialog::EnableTaskbarProgress()
 {
-	CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_ALL, IID_ITaskbarList3, (void**)&m_taskBarList);
+	if(CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_ALL, IID_ITaskbarList3, (void**)&m_taskBarList) != S_OK)
+	{
+		return;
+	}
 	if(m_taskBarList != nullptr)
 	{
 		m_taskBarList->SetProgressState(*theApp.m_pMainWnd, TBPF_NORMAL);
