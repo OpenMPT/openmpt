@@ -49,6 +49,11 @@
 			"/wd4706",
 		}
   filter {}
+	filter { "action:vs*" }
+		buildoptions {
+			"/wd6262",
+		} -- analyze
+	filter {}
   filter { "kind:StaticLib" }
    defines { }
   filter { "kind:SharedLib" }

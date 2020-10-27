@@ -67,7 +67,7 @@
     buildoptions { "/wd4244", "/wd4334" }
   filter {}
   filter { "action:vs*" }
-		buildoptions { "/wd6255" } -- analyze
+		buildoptions { "/wd6255", "/wd6297" } -- analyze
   filter {}
   filter { "kind:SharedLib" }
    defines { "DLL_EXPORT" }
