@@ -144,6 +144,9 @@
     <ClInclude Include="..\..\misc\mptCPU.h">
       <Filter>misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\misc\mptColor.h">
+      <Filter>misc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\misc\mptCrypto.h">
       <Filter>misc</Filter>
     </ClInclude>
@@ -219,6 +222,9 @@
       <Filter>installer\signtool</Filter>
     </ClCompile>
     <ClCompile Include="..\..\misc\mptCPU.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptColor.cpp">
       <Filter>misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\misc\mptCrypto.cpp">

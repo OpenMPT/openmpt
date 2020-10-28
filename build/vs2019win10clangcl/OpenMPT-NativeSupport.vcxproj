@@ -1239,6 +1239,7 @@
     <ClInclude Include="..\..\misc\JSON.h" />
     <ClInclude Include="..\..\misc\WriteMemoryDump.h" />
     <ClInclude Include="..\..\misc\mptCPU.h" />
+    <ClInclude Include="..\..\misc\mptColor.h" />
     <ClInclude Include="..\..\misc\mptCrypto.h" />
     <ClInclude Include="..\..\misc\mptUUIDNamespace.h" />
     <ClInclude Include="..\..\misc\mptWine.h" />
@@ -1288,6 +1289,7 @@
     <ClCompile Include="..\..\common\serialization_utils.cpp" />
     <ClCompile Include="..\..\common\version.cpp" />
     <ClCompile Include="..\..\misc\mptCPU.cpp" />
+    <ClCompile Include="..\..\misc\mptColor.cpp" />
     <ClCompile Include="..\..\misc\mptCrypto.cpp" />
     <ClCompile Include="..\..\misc\mptUUIDNamespace.cpp" />
     <ClCompile Include="..\..\misc\mptWine.cpp" />
