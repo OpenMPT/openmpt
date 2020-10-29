@@ -305,7 +305,7 @@ int Ask(const wchar *AskStr)
 
   for (int I=0;I<NumItems;I++)
   {
-    eprintf(I==0 ? (NumItems>4 ? L"\n":L" "):L", ");
+    eprintf(I==0 ? (NumItems>3 ? L"\n":L" "):L", ");
     int KeyPos=ItemKeyPos[I];
     for (int J=0;J<KeyPos;J++)
       eprintf(L"%c",Item[I][J]);
