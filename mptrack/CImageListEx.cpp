@@ -10,16 +10,12 @@
 #include "stdafx.h"
 #include "CImageListEx.h"
 #include "Image.h"
+#include "../misc/mptColor.h"
 
 #include "Mptrack.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
-
-static uint8 GetLuma(const RawGDIDIB::Pixel pixel)
-{
-	return static_cast<uint8>(pixel.r * 0.299f + pixel.g * 0.587f + pixel.b * 0.114f);
-}
 
 bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGrow, CDC *dc, double scaling, bool disabled, const mpt::span<const int> invertImages)
 {
@@ -35,10 +31,10 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 	}
 
 	const RawGDIDIB::Pixel buttonColor = GetSysColor(COLOR_BTNFACE);
-	const bool isDark = GetLuma(buttonColor) < 128;
+	const bool isDark = mpt::Color::GetLuma(buttonColor.r, buttonColor.g, buttonColor.b) < 128;
 	if(isDark)
 	{
-		// Invert icons on dark themes
+		// Invert brightness of icons on dark themes
 		for(const int img : invertImages)
 		{
 			for(int y = 0; y < cy; y++)
@@ -46,9 +42,12 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 				RawGDIDIB::Pixel *pixel = &(*bitmap)(img * cx, y);
 				for(int x = 0; x < cx; x++, pixel++)
 				{
-					pixel->r = ~pixel->r;
-					pixel->g = ~pixel->g;
-					pixel->b = ~pixel->b;
+					auto hsv = mpt::Color::RGB{pixel->r / 255.0f, pixel->g / 255.0f, pixel->b / 255.0f}.ToHSV();
+					hsv.v = (1.0f - hsv.v) * (1.0f - hsv.s) + (hsv.v) * hsv.s;
+					const auto rgb = hsv.ToRGB();
+					pixel->r = mpt::saturate_cast<uint8>(rgb.r * 255.0f);
+					pixel->g = mpt::saturate_cast<uint8>(rgb.g * 255.0f);
+					pixel->b = mpt::saturate_cast<uint8>(rgb.b * 255.0f);
 				}
 			}
 		}
@@ -61,7 +60,7 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 		{
 			if(pixel.a != 0)
 			{
-				uint8 y = GetLuma(pixel);
+				uint8 y = mpt::Color::GetLuma(pixel.r, pixel.g, pixel.b);
 				pixel.r = pixel.g = pixel.b = y;
 				if(isDark)
 					pixel.a -= pixel.a / 3;

@@ -1265,6 +1265,7 @@
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOstdcxx20bit.hpp" />
     <ClInclude Include="..\..\misc\JSON.h" />
     <ClInclude Include="..\..\misc\WriteMemoryDump.h" />
+    <ClInclude Include="..\..\misc\mptColor.h" />
     <ClInclude Include="..\..\mptrack\wine\Native.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeConfig.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeSoundDevice.h" />
@@ -1313,6 +1314,7 @@
     <ClCompile Include="..\..\common\mptWine.cpp" />
     <ClCompile Include="..\..\common\serialization_utils.cpp" />
     <ClCompile Include="..\..\common\version.cpp" />
+    <ClCompile Include="..\..\misc\mptColor.cpp" />
     <ClCompile Include="..\..\mptrack\wine\Native.cpp" />
     <ClCompile Include="..\..\mptrack\wine\NativeSoundDevice.cpp" />
     <ClCompile Include="..\..\mptrack\wine\NativeUtils.cpp" />

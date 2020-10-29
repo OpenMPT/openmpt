@@ -1508,6 +1508,7 @@
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOstdcxx20bit.hpp" />
     <ClInclude Include="..\..\misc\JSON.h" />
     <ClInclude Include="..\..\misc\WriteMemoryDump.h" />
+    <ClInclude Include="..\..\misc\mptColor.h" />
     <ClInclude Include="..\..\mptrack\AboutDialog.h" />
     <ClInclude Include="..\..\mptrack\AbstractVstEditor.h" />
     <ClInclude Include="..\..\mptrack\AdvancedConfigDlg.h" />
@@ -1746,6 +1747,7 @@
     <ClCompile Include="..\..\common\mptWine.cpp" />
     <ClCompile Include="..\..\common\serialization_utils.cpp" />
     <ClCompile Include="..\..\common\version.cpp" />
+    <ClCompile Include="..\..\misc\mptColor.cpp" />
     <ClCompile Include="..\..\mptrack\AboutDialog.cpp" />
     <ClCompile Include="..\..\mptrack\AbstractVstEditor.cpp" />
     <ClCompile Include="..\..\mptrack\AdvancedConfigDlg.cpp" />
