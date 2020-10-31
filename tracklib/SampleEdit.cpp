@@ -563,6 +563,47 @@ bool ConvertTo16Bit(ModSample &smp, CSoundFile &sndFile)
 }
 
 
+template <class T>
+static void ConvertPingPongLoopImpl(T *pStart, SmpLength length)
+{
+	auto *out = pStart, *in = pStart;
+	while(length--)
+	{
+		*(out++) = *(--in);
+	}
+}
+
+// Convert ping-pong loops to regular loops
+bool ConvertPingPongLoop(ModSample &smp, CSoundFile &sndFile, bool sustainLoop)
+{
+	if(!smp.HasSampleData()
+	   || (!smp.HasPingPongLoop() && !sustainLoop)
+	   || (!smp.HasPingPongSustainLoop() && sustainLoop))
+		return false;
+
+	const SmpLength loopStart = sustainLoop ? smp.nSustainStart : smp.nLoopStart;
+	const SmpLength loopEnd = sustainLoop ? smp.nSustainEnd : smp.nLoopEnd;
+	const SmpLength oldLoopLength = loopEnd - loopStart;
+	const SmpLength oldLength = smp.nLength;
+
+	if(InsertSilence(smp, oldLoopLength, loopEnd, sndFile) <= oldLength)
+		return false;
+
+	static_assert(MaxSamplingPointSize <= 4);
+	if(smp.GetBytesPerSample() == 4)  // 16 bit stereo
+		ConvertPingPongLoopImpl(static_cast<int32 *>(smp.samplev()) + loopEnd, oldLoopLength);
+	else if(smp.GetBytesPerSample() == 2)  // 16 bit mono / 8 bit stereo
+		ConvertPingPongLoopImpl(static_cast<int16 *>(smp.samplev()) + loopEnd, oldLoopLength);
+	else if(smp.GetBytesPerSample() == 1)  // 8 bit mono
+		ConvertPingPongLoopImpl(static_cast<int8 *>(smp.samplev()) + loopEnd, oldLoopLength);
+	else
+		return false;
+
+	smp.uFlags.reset(sustainLoop ? CHN_PINGPONGSUSTAIN : CHN_PINGPONGFLAG);
+	smp.PrecomputeLoops(sndFile, true);
+	return true;
+}
+
 } // namespace SampleEdit
 
 OPENMPT_NAMESPACE_END

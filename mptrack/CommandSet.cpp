@@ -735,6 +735,8 @@ static constexpr struct
 	{2009, kcChnColorFromNext , _T("Pick Color from Next Channel") },
 	{2010, kcChannelMoveLeft, _T("Move Channels to Left")},
 	{2011, kcChannelMoveRight, _T("Move Channels to Right")},
+	{2012, kcSampleConvertPingPongLoop, _T("Convert Ping-Pong Loop to Unidirectional") },
+	{2013, kcSampleConvertPingPongSustain, _T("Convert Ping-Pong Sustain Loop to Unidirectional") },
 };
 
 // Get command descriptions etc.. loaded up.

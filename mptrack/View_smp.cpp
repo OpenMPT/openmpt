@@ -114,8 +114,10 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_ZOOMONSEL,			&CViewSample::OnZoomOnSel)
 	ON_COMMAND(ID_SAMPLE_SETLOOPSTART,		&CViewSample::OnSetLoopStart)
 	ON_COMMAND(ID_SAMPLE_SETLOOPEND,		&CViewSample::OnSetLoopEnd)
+	ON_COMMAND(ID_CONVERT_PINGPONG_LOOP,	&CViewSample::OnConvertPingPongLoop)
 	ON_COMMAND(ID_SAMPLE_SETSUSTAINSTART,	&CViewSample::OnSetSustainStart)
 	ON_COMMAND(ID_SAMPLE_SETSUSTAINEND,		&CViewSample::OnSetSustainEnd)
+	ON_COMMAND(ID_CONVERT_PINGPONG_SUSTAIN,	&CViewSample::OnConvertPingPongSustain)
 	ON_COMMAND(ID_SAMPLE_ZOOMUP,			&CViewSample::OnZoomUp)
 	ON_COMMAND(ID_SAMPLE_ZOOMDOWN,			&CViewSample::OnZoomDown)
 	ON_COMMAND(ID_SAMPLE_DRAW,				&CViewSample::OnDrawingToggle)
@@ -2171,6 +2173,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 					wsprintf(s, _T("Set &Loop End to:\t%s"), pos.GetString());
 					::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nLoopStart + 4 ? 0 : MF_GRAYED),
 						ID_SAMPLE_SETLOOPEND, s);
+					if(sample.HasPingPongLoop())
+						::AppendMenu(hMenu, MF_STRING, ID_CONVERT_PINGPONG_LOOP, _T("Convert to Unidirectional Loop"));
 
 					if (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 					{
@@ -2183,6 +2187,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						wsprintf(s, _T("Set &Sustain End to:\t%s"), pos.GetString());
 						::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nSustainStart + 4 ? 0 : MF_GRAYED),
 							ID_SAMPLE_SETSUSTAINEND, s);
+						if(sample.HasPingPongSustainLoop())
+							::AppendMenu(hMenu, MF_STRING, ID_CONVERT_PINGPONG_SUSTAIN, _T("Convert to Unidirectional Sustain Loop"));
 					}
 
 					//if(sndFile.GetModSpecifications().HasVolCommand(VOLCMD_OFFSET))
@@ -3209,6 +3215,25 @@ void CViewSample::OnSetLoopEnd()
 }
 
 
+void CViewSample::OnConvertPingPongLoop()
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc)
+	{
+		CSoundFile &sndFile = pModDoc->GetSoundFile();
+		ModSample &sample = sndFile.GetSample(m_nSample);
+		if(!sample.HasPingPongLoop())
+			return;
+
+		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Convert Bidi Loop");
+		if(SampleEdit::ConvertPingPongLoop(sample, sndFile, false))
+			SetModified(SampleHint().Info().Data(), true, true);
+		else
+			pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
+	}
+}
+
+
 void CViewSample::OnSetSustainStart()
 {
 	CModDoc *pModDoc = GetDocument();
@@ -3240,6 +3265,25 @@ void CViewSample::OnSetSustainEnd()
 			sample.SetSustainLoop(sample.nSustainStart, m_dwMenuParam, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
 			SetModified(SampleHint().Info().Data(), true, false);
 		}
+	}
+}
+
+
+void CViewSample::OnConvertPingPongSustain()
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc)
+	{
+		CSoundFile &sndFile = pModDoc->GetSoundFile();
+		ModSample &sample = sndFile.GetSample(m_nSample);
+		if(!sample.HasPingPongSustainLoop())
+			return;
+
+		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Convert Bidi Sustain Loop");
+		if(SampleEdit::ConvertPingPongLoop(sample, sndFile, true))
+			SetModified(SampleHint().Info().Data(), true, true);
+		else
+			pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
 	}
 }
 
@@ -3525,6 +3569,8 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEditPushForwardPaste: DoPaste(PasteMode::Insert); return wParam;
 		case kcEditUndo:		OnEditUndo(); return wParam;
 		case kcEditRedo:		OnEditRedo(); return wParam;
+		case kcSampleConvertPingPongLoop: OnConvertPingPongLoop(); return wParam;
+		case kcSampleConvertPingPongSustain: OnConvertPingPongSustain(); return wParam;
 		case kcSample8Bit:		if(sndFile.GetSample(m_nSample).uFlags[CHN_16BIT])
 									On8BitConvert();
 								else

@@ -740,6 +740,8 @@ enum CommandID
 	kcSampleCenterLoopEnd,
 	kcSampleCenterSustainStart,
 	kcSampleCenterSustainEnd,
+	kcSampleConvertPingPongLoop,
+	kcSampleConvertPingPongSustain,
 	kcSample8Bit,
 	kcSampleMonoMix,
 	kcSampleMonoLeft,

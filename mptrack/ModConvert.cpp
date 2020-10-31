@@ -41,9 +41,10 @@
 #include "Moddoc.h"
 #include "Mainfrm.h"
 #include "InputHandler.h"
-#include "modsmp_ctrl.h"
-#include "ModConvert.h"
+#include "../tracklib/SampleEdit.h"
+#include "../soundlib/modsmp_ctrl.h"
 #include "../soundlib/mod_specifications.h"
+#include "ModConvert.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -333,6 +334,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 
 
 	// Do some sample conversion
+	const bool newTypeHasPingPongLoops = !(newTypeIsMOD || newTypeIsS3M);
 	for(SAMPLEINDEX smp = 1; smp <= m_SndFile.GetNumSamples(); smp++)
 	{
 		ModSample &sample = m_SndFile.GetSample(smp);
@@ -344,30 +346,35 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			warnings.set(wMOD31Samples);
 		}
 
-		// No Bidi and Autovibrato for MOD/S3M
-		if(newTypeIsMOD || newTypeIsS3M)
+		// No auto-vibrato in MOD/S3M
+		if((newTypeIsMOD || newTypeIsS3M) && (sample.nVibDepth | sample.nVibRate | sample.nVibSweep) != 0)
 		{
-			// Bidi loops
-			if((sample.uFlags[CHN_PINGPONGLOOP]) != 0)
-			{
-				warnings.set(wSampleBidiLoops);
-			}
-
-			// Autovibrato
-			if((sample.nVibDepth | sample.nVibRate | sample.nVibSweep) != 0)
-			{
-				warnings.set(wSampleAutoVibrato);
-			}
+			warnings.set(wSampleAutoVibrato);
 		}
 
 		// No sustain loops for MOD/S3M/XM
+		bool ignoreLoopConversion = false;
 		if(newTypeIsMOD_XM || newTypeIsS3M)
 		{
 			// Sustain loops - convert to normal loops
-			if((sample.uFlags[CHN_SUSTAINLOOP]) != 0)
+			if(sample.uFlags[CHN_SUSTAINLOOP])
 			{
 				warnings.set(wSampleSustainLoops);
+				// Prepare conversion to regular loop
+				if(!newTypeHasPingPongLoops)
+				{
+					ignoreLoopConversion = true;
+					if(!SampleEdit::ConvertPingPongLoop(sample, m_SndFile, true))
+						warnings.set(wSampleBidiLoops);
+				}
 			}
+		}
+
+		// No ping-pong loops in MOD/S3M
+		if(!ignoreLoopConversion && !newTypeHasPingPongLoops && sample.HasPingPongLoop())
+		{
+			if(!SampleEdit::ConvertPingPongLoop(sample, m_SndFile, false))
+				warnings.set(wSampleBidiLoops);
 		}
 
 		if(newTypeIsMOD && sample.RelativeTone != 0)

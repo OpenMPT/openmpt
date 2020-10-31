@@ -52,7 +52,7 @@ void ModSample::Convert(MODTYPE fromType, MODTYPE toType)
 		RelativeTone = 0;
 	}
 
-	// No global volume sustain loops for MOD/S3M/XM
+	// No global volume / sustain loops for MOD/S3M/XM
 	if(toType & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_S3M))
 	{
 		nGlobalVol = 64;

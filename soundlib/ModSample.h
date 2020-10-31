@@ -143,6 +143,11 @@ struct ModSample
 	// Update loop wrap-around buffer
 	void PrecomputeLoops(CSoundFile &sndFile, bool updateChannels = true);
 
+	constexpr bool HasLoop() const noexcept { return uFlags[CHN_LOOP] && nLoopEnd > nLoopStart; }
+	constexpr bool HasSustainLoop() const noexcept { return uFlags[CHN_SUSTAINLOOP] && nSustainEnd > nSustainStart; }
+	constexpr bool HasPingPongLoop() const noexcept { return uFlags.test_all(CHN_LOOP | CHN_PINGPONGLOOP) && nLoopEnd > nLoopStart; }
+	constexpr bool HasPingPongSustainLoop() const noexcept { return uFlags.test_all(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN) && nSustainEnd > nSustainStart; }
+
 	// Remove loop points if they're invalid.
 	void SanitizeLoops();
 

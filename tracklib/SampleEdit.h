@@ -84,6 +84,9 @@ bool ConvertTo8Bit(ModSample &smp, CSoundFile &sndFile);
 // Convert 8-bit sample to 16-bit
 bool ConvertTo16Bit(ModSample &smp, CSoundFile &sndFile);
 
+// Convert ping-pong loops to regular loops
+bool ConvertPingPongLoop(ModSample &smp, CSoundFile &sndFile, bool sustainLoop);
+
 } // namespace SampleEdit
 
 OPENMPT_NAMESPACE_END
