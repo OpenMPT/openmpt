@@ -123,10 +123,9 @@ struct IMFInstrument
 
 		if(smpNum)
 		{
-			STATIC_ASSERT(CountOf(mptIns.Keyboard) >= CountOf(map));
-			for(size_t note = 0; note < CountOf(map); note++)
+			for(size_t note = 0; note < std::min(CountOf(map), CountOf(mptIns.Keyboard) - 12u); note++)
 			{
-				mptIns.Keyboard[note] = firstSample + map[note];
+				mptIns.Keyboard[note + 12] = firstSample + map[note];
 			}
 		}
 
