@@ -2174,7 +2174,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 					::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nLoopStart + 4 ? 0 : MF_GRAYED),
 						ID_SAMPLE_SETLOOPEND, s);
 					if(sample.HasPingPongLoop())
-						::AppendMenu(hMenu, MF_STRING, ID_CONVERT_PINGPONG_LOOP, _T("Convert to Unidirectional Loop"));
+						::AppendMenu(hMenu, MF_STRING, ID_CONVERT_PINGPONG_LOOP, ih->GetKeyTextFromCommand(kcSampleConvertPingPongLoop, _T("Convert to Unidirectional Loop")));
 
 					if (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 					{
@@ -2188,7 +2188,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						::AppendMenu(hMenu, MF_STRING | (dwPos >= sample.nSustainStart + 4 ? 0 : MF_GRAYED),
 							ID_SAMPLE_SETSUSTAINEND, s);
 						if(sample.HasPingPongSustainLoop())
-							::AppendMenu(hMenu, MF_STRING, ID_CONVERT_PINGPONG_SUSTAIN, _T("Convert to Unidirectional Sustain Loop"));
+							::AppendMenu(hMenu, MF_STRING, ID_CONVERT_PINGPONG_SUSTAIN, ih->GetKeyTextFromCommand(kcSampleConvertPingPongSustain, _T("Convert to Unidirectional Sustain Loop")));
 					}
 
 					//if(sndFile.GetModSpecifications().HasVolCommand(VOLCMD_OFFSET))
