@@ -535,6 +535,7 @@ enum PlayBehaviour
 	kST3SampleSwap,                 // On-the-fly sample swapping (SoundBlaster behaviour)
 	kOPLRealRetrig,                 // Retrigger effect (Qxy) restarts OPL notes
 	kOPLNoResetAtEnvelopeEnd,       // Do not reset OPL channel status at end of envelope (OpenMPT 1.28 inconsistency with samples)
+	kOPLNoteStopWith0Hz,            // Set note frequency to 0 Hz to "stop" OPL notes
 
 	// Add new play behaviours here.
 
@@ -546,7 +547,7 @@ enum PlayBehaviour
 class TempoSwing : public std::vector<uint32>
 {
 public:
-	enum { Unity = 1u << 24 };
+	static constexpr uint32 Unity = 1u << 24;
 	// Normalize the tempo swing coefficients so that they add up to exactly the specified tempo again
 	void Normalize();
 	void resize(size_type newSize, value_type val = Unity) { std::vector<uint32>::resize(newSize, val); Normalize(); }

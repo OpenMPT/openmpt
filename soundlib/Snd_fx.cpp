@@ -2071,6 +2071,10 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 				m_opl->Volume(channelHint, chn.nCutOff / 2u, true);
 		}
 	}
+
+	if(m_playBehaviour[kOPLNoteStopWith0Hz] && chn.dwFlags[CHN_ADLIB] && m_opl && channelHint != CHANNELINDEX_INVALID)
+		m_opl->Frequency(channelHint, 0, true, false);
+
 	// Special case for MPT
 	if (bManual) chn.dwFlags.reset(CHN_MUTE);
 	if((chn.dwFlags[CHN_MUTE] && (m_MixerSettings.MixerFlags & SNDMIX_MUTECHNMODE))
@@ -2993,6 +2997,8 @@ bool CSoundFile::ProcessEffects()
 				if(chn.dwFlags[CHN_ADLIB] && m_opl
 					&& ((note == NOTE_NOTECUT || note == NOTE_KEYOFF) || (note == NOTE_FADE && !m_playBehaviour[kOPLFlexibleNoteOff])))
 				{
+					if(m_playBehaviour[kOPLNoteStopWith0Hz])
+						m_opl->Frequency(nChn, 0, true, false);
 					m_opl->NoteOff(nChn);
 				}
 			}

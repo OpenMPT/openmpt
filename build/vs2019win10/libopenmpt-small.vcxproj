@@ -1401,6 +1401,7 @@
     <ClCompile Include="..\..\soundlib\Load_dsm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_dtm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_far.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_fmt.cpp" />
     <ClCompile Include="..\..\soundlib\Load_gdm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_imf.cpp" />
     <ClCompile Include="..\..\soundlib\Load_it.cpp" />

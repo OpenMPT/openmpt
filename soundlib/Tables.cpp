@@ -68,6 +68,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_DSM,  UL_("DSIK Format"),                "dsm" },
 	{ MOD_TYPE_DTM,  UL_("Digital Tracker"),            "dtm" },
 	{ MOD_TYPE_FAR,  UL_("Farandole Composer"),         "far" },
+	{ MOD_TYPE_S3M,  UL_("FM Tracker"),                 "fmt" },
 	{ MOD_TYPE_IMF,  UL_("Imago Orpheus"),              "imf" },
 	{ MOD_TYPE_MOD,  UL_("Ice Tracker"),                "ice" },
 #ifdef MPT_EXTERNAL_SAMPLES

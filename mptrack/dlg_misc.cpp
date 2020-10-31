@@ -681,6 +681,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kST3SampleSwap: desc = _T("Enable on-the-fly sample swapping (SoundBlaster driver)"); break;
 		case kOPLRealRetrig: desc = _T("Retrigger (Qxy) affects OPL notes"); break;
 		case kOPLNoResetAtEnvelopeEnd: desc = _T("Do not reset OPL channel status at end of envelopes"); break;
+		case kOPLNoteStopWith0Hz: desc = _T("OPL key-off sets note frequency to 0 Hz"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}
