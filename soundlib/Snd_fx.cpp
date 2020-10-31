@@ -4658,7 +4658,11 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	// S2x: Set FineTune
 	case 0x20:	if(!m_SongFlags[SONG_FIRSTTICK])
 					break;
-				if(GetType() != MOD_TYPE_669)
+				if(chn.HasCustomTuning())
+				{
+					chn.nFineTune = param - 8;
+					chn.m_CalculateFreq = true;
+				} else if(GetType() != MOD_TYPE_669)
 				{
 					chn.nC5Speed = S3MFineTuneTable[param];
 					chn.nFineTune = MOD2XMFineTune(param);
@@ -4898,7 +4902,8 @@ void CSoundFile::InvertLoop(ModChannel &chn)
 	if(pModSample == nullptr || !pModSample->HasSampleData() || !pModSample->uFlags[CHN_LOOP] || pModSample->uFlags[CHN_16BIT]) return;
 
 	chn.nEFxDelay += ModEFxTable[chn.nEFxSpeed & 0x0F];
-	if((chn.nEFxDelay & 0x80) == 0) return; // only applied if the "delay" reaches 128
+	if(chn.nEFxDelay < 128)
+		return;  // only applied if the "delay" reaches 128
 	chn.nEFxDelay = 0;
 
 	if (++chn.nEFxOffset >= pModSample->nLoopEnd - pModSample->nLoopStart)
