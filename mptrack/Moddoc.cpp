@@ -238,7 +238,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	case MOD_TYPE_MPT:
 		break;
 	default:
-		m_SndFile.ChangeModTypeTo(m_SndFile.GetBestSaveFormat());
+		m_SndFile.ChangeModTypeTo(m_SndFile.GetBestSaveFormat(), false);
 		m_ShowSavedialog = true;
 		break;
 	}

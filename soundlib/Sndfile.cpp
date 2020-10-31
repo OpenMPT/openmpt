@@ -1568,13 +1568,13 @@ void CSoundFile::SetType(MODTYPE type)
 
 #ifdef MODPLUG_TRACKER
 
-void CSoundFile::ChangeModTypeTo(const MODTYPE newType)
+void CSoundFile::ChangeModTypeTo(const MODTYPE newType, bool adjust)
 {
 	const MODTYPE oldType = GetType();
 	m_nType = newType;
 	SetModSpecsPointer(m_pModSpecs, m_nType);
 
-	if(oldType == newType)
+	if(oldType == newType || !adjust)
 		return;
 
 	SetupMODPanning(); // Setup LRRL panning scheme if needed
