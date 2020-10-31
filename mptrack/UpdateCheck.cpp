@@ -419,7 +419,7 @@ std::vector<mpt::ustring> CUpdateCheck::GetDefaultUpdateSigningKeysRootAnchors()
 	// Signing keys are *NOT* stored on the same server as openmpt.org or the updates themselves,
 	// because otherwise, a single compromised server could allow for rogue updates.
 	return {
-		U_("https://sagamusix.de/openmpt-update/"),
+		U_("https://update.openmpt.de/update/"),
 		U_("https://manx.datengang.de/openmpt/update/")
 	};
 }
