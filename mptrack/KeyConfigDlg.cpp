@@ -537,7 +537,7 @@ void COptionsKeyboard::OnKeyChoiceSelect()
 	CommandID cmd = m_curCommand;
 
 	//If nothing there, clear
-	if(choice >= m_localCmdSet->GetKeyListSize(cmd) || choice < 0)
+	if(cmd == kcNull || choice >= m_localCmdSet->GetKeyListSize(cmd) || choice < 0)
 	{
 		m_curKeyChoice = choice;
 		m_forceUpdate = true;
@@ -586,7 +586,7 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 	CInputHandler *ih = CMainFrame::GetInputHandler();
 
 	// Do nothing if there's nothing to restore
-	if(cmd < 0 || m_curKeyChoice < 0 || m_curKeyChoice >= ih->GetKeyListSize(cmd))
+	if(cmd == kcNull || m_curKeyChoice < 0 || m_curKeyChoice >= ih->GetKeyListSize(cmd))
 	{
 		::MessageBeep(MB_ICONWARNING);
 		return;
@@ -623,7 +623,7 @@ void COptionsKeyboard::OnDeleteKeyChoice()
 void COptionsKeyboard::OnSetKeyChoice()
 {
 	CommandID cmd = m_curCommand;
-	if(cmd < 0)
+	if(cmd == kcNull)
 	{
 		Reporting::Warning("Invalid slot.", "Invalid key data", this);
 		return;

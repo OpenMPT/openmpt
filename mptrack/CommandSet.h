@@ -1050,7 +1050,7 @@ public:
 	// Communication
 	KeyCombination GetKey(CommandID cmd, UINT key) const { return m_commands[cmd].kcList[key]; }
 	bool isHidden(UINT c) const { return m_commands[c].IsHidden(); }
-	int GetKeyListSize(CommandID cmd) const { return (int)m_commands[cmd].kcList.size(); }
+	int GetKeyListSize(CommandID cmd) const { return (cmd != kcNull) ? static_cast<int>(m_commands[cmd].kcList.size()) : 0; }
 	CString GetCommandText(CommandID cmd) const { return m_commands[cmd].Message; }
 	CString GetKeyTextFromCommand(CommandID c, UINT key) const;
 
@@ -1059,7 +1059,7 @@ public:
 	void GenKeyMap(KeyMap &km);            // Generate a keymap from this command set
 	bool SaveFile(const mpt::PathString &filename);
 	bool LoadFile(const mpt::PathString &filename);
-	bool LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription, CCommandSet *commandSet = nullptr);
+	bool LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription, const bool fillExistingSet = false);
 	bool LoadDefaultKeymap();
 };
 

@@ -1554,7 +1554,7 @@ static std::string GetDefaultKeymap()
 }
 
 
-bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription, CCommandSet *commandSet)
+bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription, const bool fillExistingSet)
 {
 	KeyCombination kc;
 	char s[1024];
@@ -1563,10 +1563,11 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 	int l = 0;
 	m_oldSpecs = nullptr;  // After clearing the key set, need to fix effect letters
 
-	const bool fillExistingSet = commandSet != nullptr;
-
-	// If commandSet is valid, add new commands to it (this is used for adding the default shortcuts to existing keymaps)
-	CCommandSet *pTempCS = fillExistingSet ? commandSet : new CCommandSet();
+	if(!fillExistingSet)
+	{
+		for(auto &cmd : m_commands)
+			cmd.kcList.clear();
+	}
 
 	CString errText;
 	int errorCount = 0;
@@ -1638,7 +1639,7 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 			// Event
 			kc.EventType(static_cast<KeyEventType>(ConvertStrTo<int>(tokens[4])));
 
-			if(fillExistingSet && cmd != kcNull && pTempCS->GetKeyListSize(cmd) != 0)
+			if(fillExistingSet && cmd != kcNull && GetKeyListSize(cmd) != 0)
 			{
 				// Do not map shortcuts that already have custom keys assigned.
 				// In particular with default note keys, this can create awkward keymaps when loading
@@ -1648,7 +1649,7 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 		}
 
 		// Error checking
-		if (cmd < 0 || cmd >= kcNumCommands || kc.Context() >= kCtxMaxInputContexts || tokens.size() < 4)
+		if(cmd < 0 || cmd >= kcNumCommands || kc.Context() >= kCtxMaxInputContexts || tokens.size() < 4)
 		{
 			errorCount++;
 			if (errorCount < 10)
@@ -1663,7 +1664,7 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 			}
 		} else
 		{
-			pTempCS->Add(kc, cmd, !fillExistingSet, -1, !fillExistingSet);
+			Add(kc, cmd, !fillExistingSet, -1, !fillExistingSet);
 		}
 	}
 
@@ -1671,7 +1672,7 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 	{
 		// Add the default command set to our freshly loaded command set.
 		std::istringstream ss{ GetDefaultKeymap() };
-		LoadFile(ss, mpt::ustring(), pTempCS);
+		LoadFile(ss, mpt::ustring(), true);
 	} else
 	{
 		// We were just adding stuff to an existing command set - don't delete it!
@@ -1686,10 +1687,10 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 		{kcNoteOffOld, kcNoteOff},
 		{kcNoteFadeOld, kcNoteFade},
 	};
-	for(const auto cmd : MergeCommands)
+	for(const auto [from, to] : MergeCommands)
 	{
-		m_commands[cmd.second].kcList.insert(m_commands[cmd.second].kcList.end(), m_commands[cmd.first].kcList.begin(), m_commands[cmd.first].kcList.end());
-		m_commands[cmd.first].kcList.clear();
+		m_commands[to].kcList.insert(m_commands[to].kcList.end(), m_commands[from].kcList.begin(), m_commands[from].kcList.end());
+		m_commands[from].kcList.clear();
 	}
 
 	if(!errText.IsEmpty())
@@ -1698,9 +1699,7 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 			(mpt::ToCString(filenameDescription), errText));
 	}
 
-	Copy(pTempCS);
-	delete pTempCS;
-
+	m_oldSpecs = nullptr;
 	return true;
 }
 
@@ -1721,7 +1720,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 
 bool CCommandSet::LoadDefaultKeymap()
 {
-	std::istringstream ss{ GetDefaultKeymap() };
+	std::istringstream ss;
 	return LoadFile(ss, U_("\"executable resource\""));
 }
 
