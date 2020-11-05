@@ -1054,7 +1054,7 @@ public:
 	// Communication
 	KeyCombination GetKey(CommandID cmd, UINT key) const { return m_commands[cmd].kcList[key]; }
 	bool isHidden(UINT c) const { return m_commands[c].IsHidden(); }
-	int GetKeyListSize(CommandID cmd) const { return (int)m_commands[cmd].kcList.size(); }
+	int GetKeyListSize(CommandID cmd) const { return (cmd != kcNull) ? static_cast<int>(m_commands[cmd].kcList.size()) : 0; }
 	CString GetCommandText(CommandID cmd) const { return m_commands[cmd].Message; }
 	CString GetKeyTextFromCommand(CommandID c, UINT key) const;
 
