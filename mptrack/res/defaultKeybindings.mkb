@@ -205,9 +205,9 @@ version:1
 3:1221:0:57:1		//Set octave 9: 9 (KeyDown)
 3:1221:0:105:1		//Set octave 9: NUM 9 (KeyDown)
 3:1316:1:16:1		//Chord Modifier: Shift (KeyDown)
-3:1667:0:192:1		//Note Cut: ' (KeyDown)
-3:1668:0:187:1		//Note Off: = (KeyDown)
-3:1792:1:187:1		//Note Fade: Shift+= (KeyDown)
+3:1200:0:192:1		//Note Cut: ' (KeyDown)
+3:1201:0:187:1		//Note Off: = (KeyDown)
+3:1791:1:187:1		//Note Fade: Shift+= (KeyDown)
 3:1788:1:189:1		//Parameter Control: Shift+- (KeyDown)
 3:1789:0:189:1		//Parameter Control (smooth): - (KeyDown)
 

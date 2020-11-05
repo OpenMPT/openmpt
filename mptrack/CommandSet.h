@@ -1063,7 +1063,7 @@ public:
 	void GenKeyMap(KeyMap &km);            // Generate a keymap from this command set
 	bool SaveFile(const mpt::PathString &filename);
 	bool LoadFile(const mpt::PathString &filename);
-	bool LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription, CCommandSet *commandSet = nullptr);
+	bool LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription, const bool fillExistingSet = false);
 	bool LoadDefaultKeymap();
 };
 
