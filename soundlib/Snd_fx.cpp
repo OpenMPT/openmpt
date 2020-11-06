@@ -4983,7 +4983,13 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		{
 			// MIDI channel
 			isNibble = true;
-			data = GetBestMidiChannel(nChn);
+			const PLUGINDEX plug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
+			if(plug > 0 && plug <= MAX_MIXPLUGINS)
+			{
+				auto midiPlug = dynamic_cast<const IMidiPlugin *>(m_MixPlugins[plug - 1u].pMixPlugin);
+				if(midiPlug)
+					data = midiPlug->GetMidiChannel(nChn);
+			}
 		} else if(macro[pos] == 'n')
 		{
 			// Last triggered note
@@ -6260,31 +6266,6 @@ IMixPlugin *CSoundFile::GetChannelInstrumentPlugin(CHANNELINDEX chn) const
 	MPT_UNREFERENCED_PARAMETER(chn);
 #endif // NO_PLUGINS
 	return nullptr;
-}
-
-
-// Get the MIDI channel currently associated with a given tracker channel
-uint8 CSoundFile::GetBestMidiChannel(CHANNELINDEX trackerChn) const
-{
-	if(trackerChn >= std::size(m_PlayState.Chn))
-	{
-		return 0;
-	}
-
-	const ModChannel &chn = m_PlayState.Chn[trackerChn];
-	const ModInstrument *ins = chn.pModInstrument;
-	if(ins != nullptr)
-	{
-		if(ins->nMidiChannel == MidiMappedChannel)
-		{
-			// For mapped channels, return their pattern channel, modulo 16 (because there are only 16 MIDI channels)
-			return static_cast<uint8>((chn.nMasterChn ? (chn.nMasterChn - 1u) : trackerChn) % 16u);
-		} else if(ins->HasValidMIDIChannel())
-		{
-			return (ins->nMidiChannel - 1u) % 16u;
-		}
-	}
-	return 0;
 }
 
 
