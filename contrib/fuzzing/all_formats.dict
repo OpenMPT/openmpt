@@ -44,6 +44,8 @@ dtm="DAIT"
 far="FAR\xFE"
 far="\x0D\x0A\x1A"
 
+fmt="FMTracker\x01\x01"
+
 gdm="GDM\xFE"
 gdm="GMFS"
 
