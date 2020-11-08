@@ -1600,14 +1600,14 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 	}
 
 	// Writing Patterns
-	bool bNeedsMptPatSave = false;
+	bool needsMptPatSave = false;
 	for(PATTERNINDEX pat = 0; pat < itHeader.patnum; pat++)
 	{
 		uint32 dwPatPos = static_cast<uint32>(dwPos);
 		if (!Patterns.IsValidPat(pat)) continue;
 
 		if(Patterns[pat].GetOverrideSignature())
-			bNeedsMptPatSave = true;
+			needsMptPatSave = true;
 
 		// Check for empty pattern
 		if(Patterns[pat].GetNumRows() == 64 && Patterns.IsPatternEmpty(pat))
@@ -1630,15 +1630,15 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 		mpt::IO::Write(f, patinfo);
 		dwPos += 8;
 
+		struct ChnState { ModCommand lastCmd; uint8 mask = 0xFF; };
 		const CHANNELINDEX maxChannels = std::min(specs.channelsMax, GetNumChannels());
-		std::vector<uint8> chnmask(maxChannels, 0xFF);
-		std::vector<ModCommand> lastvalue(maxChannels, ModCommand::Empty());
+		std::vector<ChnState> chnStates(maxChannels);
+		// Maximum 7 bytes per cell, plus end of row marker, so this buffer is always large enough to cover one row.
+		std::vector<uint8> buf(7 * maxChannels + 1);
 
 		for(ROWINDEX row = 0; row < writeRows; row++)
 		{
 			uint32 len = 0;
-			// Maximum 7 bytes per cell, plus end of row marker, so this buffer is always large enough to cover one row.
-			uint8 buf[7 * MAX_BASECHANNELS + 1];
 			const ModCommand *m = Patterns[pat].GetpModCommand(row, 0);
 
 			for(CHANNELINDEX ch = 0; ch < maxChannels; ch++, m++)
@@ -1646,10 +1646,11 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 				// Skip mptm-specific notes.
 				if(m->IsPcNote())
 				{
-					bNeedsMptPatSave = true;
+					needsMptPatSave = true;
 					continue;
 				}
 
+				auto &chnState = chnStates[ch];
 				uint8 b = 0;
 				uint8 command = m->command;
 				uint8 param = m->param;
@@ -1664,29 +1665,35 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 					vol = std::min(m->vol, uint8(9));
 					switch(m->volcmd)
 					{
-					case VOLCMD_VOLUME:			vol = std::min(m->vol, uint8(64)); break;
-					case VOLCMD_PANNING:		vol = std::min(m->vol, uint8(64)) + 128; break;
-					case VOLCMD_VOLSLIDEUP:		vol += 85; break;
-					case VOLCMD_VOLSLIDEDOWN:	vol += 95; break;
-					case VOLCMD_FINEVOLUP:		vol += 65; break;
-					case VOLCMD_FINEVOLDOWN:	vol += 75; break;
-					case VOLCMD_VIBRATODEPTH:	vol += 203; break;
-					case VOLCMD_VIBRATOSPEED:	if(command == CMD_NONE)
-												{
-													// illegal command -> move if possible
-													command = CMD_VIBRATO;
-													param = std::min(m->vol, uint8(15)) << 4;
-												} else
-												{
-													vol = 203;
-												}
-												break;
-					case VOLCMD_TONEPORTAMENTO:	vol += 193; break;
-					case VOLCMD_PORTADOWN:		vol += 105; break;
-					case VOLCMD_PORTAUP:		vol += 115; break;
-					case VOLCMD_OFFSET:			if(!compatibilityExport) vol += 223;
-												break;
-					default:					vol = 0xFF;
+					case VOLCMD_VOLUME:         vol = std::min(m->vol, uint8(64)); break;
+					case VOLCMD_PANNING:        vol = std::min(m->vol, uint8(64)) + 128; break;
+					case VOLCMD_VOLSLIDEUP:     vol += 85; break;
+					case VOLCMD_VOLSLIDEDOWN:   vol += 95; break;
+					case VOLCMD_FINEVOLUP:      vol += 65; break;
+					case VOLCMD_FINEVOLDOWN:    vol += 75; break;
+					case VOLCMD_VIBRATODEPTH:   vol += 203; break;
+					case VOLCMD_TONEPORTAMENTO: vol += 193; break;
+					case VOLCMD_PORTADOWN:      vol += 105; break;
+					case VOLCMD_PORTAUP:        vol += 115; break;
+					case VOLCMD_VIBRATOSPEED:
+						if(command == CMD_NONE)
+						{
+							// Move unsupported command if possible
+							command = CMD_VIBRATO;
+							param = std::min(m->vol, uint8(15)) << 4;
+							vol = 0xFF;
+						} else
+						{
+							vol = 203;
+						}
+						break;
+					case VOLCMD_OFFSET:
+						if(!compatibilityExport)
+							vol += 223;
+						else
+							vol = 0xFF;
+						break;
+					default: vol = 0xFF;
 					}
 				}
 				if (vol != 0xFF) b |= 4;
@@ -1701,59 +1708,59 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 					// Same note ?
 					if (b & 1)
 					{
-						if ((note == lastvalue[ch].note) && (lastvalue[ch].volcmd & 1))
+						if ((note == chnState.lastCmd.note) && (chnState.lastCmd.volcmd & 1))
 						{
 							b &= ~1;
 							b |= 0x10;
 						} else
 						{
-							lastvalue[ch].note = note;
-							lastvalue[ch].volcmd |= 1;
+							chnState.lastCmd.note = note;
+							chnState.lastCmd.volcmd |= 1;
 						}
 					}
 					// Same instrument ?
 					if (b & 2)
 					{
-						if ((m->instr == lastvalue[ch].instr) && (lastvalue[ch].volcmd & 2))
+						if ((m->instr == chnState.lastCmd.instr) && (chnState.lastCmd.volcmd & 2))
 						{
 							b &= ~2;
 							b |= 0x20;
 						} else
 						{
-							lastvalue[ch].instr = m->instr;
-							lastvalue[ch].volcmd |= 2;
+							chnState.lastCmd.instr = m->instr;
+							chnState.lastCmd.volcmd |= 2;
 						}
 					}
 					// Same volume column byte ?
 					if (b & 4)
 					{
-						if ((vol == lastvalue[ch].vol) && (lastvalue[ch].volcmd & 4))
+						if ((vol == chnState.lastCmd.vol) && (chnState.lastCmd.volcmd & 4))
 						{
 							b &= ~4;
 							b |= 0x40;
 						} else
 						{
-							lastvalue[ch].vol = vol;
-							lastvalue[ch].volcmd |= 4;
+							chnState.lastCmd.vol = vol;
+							chnState.lastCmd.volcmd |= 4;
 						}
 					}
 					// Same command / param ?
 					if (b & 8)
 					{
-						if ((command == lastvalue[ch].command) && (param == lastvalue[ch].param) && (lastvalue[ch].volcmd & 8))
+						if ((command == chnState.lastCmd.command) && (param == chnState.lastCmd.param) && (chnState.lastCmd.volcmd & 8))
 						{
 							b &= ~8;
 							b |= 0x80;
 						} else
 						{
-							lastvalue[ch].command = command;
-							lastvalue[ch].param = param;
-							lastvalue[ch].volcmd |= 8;
+							chnState.lastCmd.command = command;
+							chnState.lastCmd.param = param;
+							chnState.lastCmd.volcmd |= 8;
 						}
 					}
-					if (b != chnmask[ch])
+					if (b != chnState.mask)
 					{
-						chnmask[ch] = b;
+						chnState.mask = b;
 						buf[len++] = static_cast<uint8>((ch + 1) | IT_bitmask_patternChanEnabled_c);
 						buf[len++] = b;
 					} else
@@ -1779,7 +1786,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 			{
 				dwPos += len;
 				writeSize += (uint16)len;
-				mpt::IO::WriteRaw(f, buf, len);
+				mpt::IO::WriteRaw(f, buf.data(), len);
 			}
 		}
 
@@ -1889,7 +1896,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 		ssb.WriteItem(*this, "1", &WriteTuningMap);
 	if(Order().NeedsExtraDatafield())
 		ssb.WriteItem(Order, "2", &WriteModSequenceOld);
-	if(bNeedsMptPatSave)
+	if(needsMptPatSave)
 		ssb.WriteItem(Patterns, FileIdPatterns, &WriteModPatterns);
 	ssb.WriteItem(Order, FileIdSequences, &WriteModSequences);
 
