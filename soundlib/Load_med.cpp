@@ -627,7 +627,7 @@ static bool ValidateHeader(const MMD0FileHeader &fileHeader)
 	   || fileHeader.songOffset < sizeof(MMD0FileHeader)
 	   || fileHeader.songOffset > uint32_max - 63 * sizeof(MMD0Sample) - sizeof(MMDSong)
 	   || fileHeader.blockArrOffset < sizeof(MMD0FileHeader)
-	   || fileHeader.sampleArrOffset < sizeof(MMD0FileHeader)
+	   || (fileHeader.sampleArrOffset > 0 && fileHeader.sampleArrOffset < sizeof(MMD0FileHeader))
 	   || fileHeader.expDataOffset > uint32_max - sizeof(MMD0Exp))
 	{
 		return false;
@@ -640,7 +640,7 @@ static uint64 GetHeaderMinimumAdditionalSize(const MMD0FileHeader &fileHeader)
 {
 	return std::max<uint64>({ fileHeader.songOffset + 63 * sizeof(MMD0Sample) + sizeof(MMDSong),
 		fileHeader.blockArrOffset,
-		fileHeader.sampleArrOffset,
+		fileHeader.sampleArrOffset ? fileHeader.sampleArrOffset : sizeof(MMD0FileHeader),
 		fileHeader.expDataOffset + sizeof(MMD0Exp) }) - sizeof(MMD0FileHeader);
 }
 
@@ -696,8 +696,14 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	// Start with the instruments, as those are shared between songs
 
 	std::vector<uint32be> instrOffsets;
-	file.Seek(fileHeader.sampleArrOffset);
-	file.ReadVector(instrOffsets, songHeader.numSamples);
+	if(fileHeader.sampleArrOffset)
+	{
+		file.Seek(fileHeader.sampleArrOffset);
+		file.ReadVector(instrOffsets, songHeader.numSamples);
+	} else if(songHeader.numSamples > 0)
+	{
+		return false;
+	}
 	m_nInstruments = m_nSamples = songHeader.numSamples;
 
 	// In MMD0 / MMD1, octave wrapping is only done in 4-channel modules (hardware mixing!), and not for synth instruments
