@@ -1075,56 +1075,57 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			   || !file.CanRead(songHeader.songLength * 2)
 			   || !file.ReadVector(sections, songHeader.songLength))
 				continue;
+
 			for(uint16 section : sections)
 			{
 				if(section > header.numPlaySeqs)
 					continue;
 
 				file.Seek(header.playSeqTableOffset + section * 4);
-				if(file.Seek(file.ReadUint32BE()) || !file.CanRead(sizeof(MMD2PlaySeq)))
+				if(!file.Seek(file.ReadUint32BE()) || !file.CanRead(sizeof(MMD2PlaySeq)))
+					continue;
+
+				MMD2PlaySeq playSeq;
+				file.ReadStruct(playSeq);
+
+				if(!order.empty())
+					order.push_back(order.GetIgnoreIndex());
+
+				size_t readOrders = playSeq.length;
+				if(!file.CanRead(readOrders))
+					LimitMax(readOrders, file.BytesLeft());
+				LimitMax(readOrders, ORDERINDEX_MAX);
+
+				size_t orderStart = order.size();
+				order.reserve(orderStart + readOrders);
+				for(size_t ord = 0; ord < readOrders; ord++)
 				{
-					MMD2PlaySeq playSeq;
-					file.ReadStruct(playSeq);
-
-					if(!order.empty())
-						order.push_back(order.GetIgnoreIndex());
-
-					size_t readOrders = playSeq.length;
-					if(!file.CanRead(readOrders))
-						LimitMax(readOrders, file.BytesLeft());
-					LimitMax(readOrders, ORDERINDEX_MAX);
-
-					size_t orderStart = order.size();
-					order.reserve(orderStart + readOrders);
-					for(size_t ord = 0; ord < readOrders; ord++)
+					PATTERNINDEX pat = file.ReadUint16BE();
+					if(pat < 0x8000)
 					{
-						PATTERNINDEX pat = file.ReadUint16BE();
-						if(pat < 0x8000)
-						{
-							order.push_back(basePattern + pat);
-						}
+						order.push_back(basePattern + pat);
 					}
-					if(playSeq.name[0])
-						order.SetName(mpt::ToUnicode(mpt::Charset::ISO8859_1, playSeq.name));
+				}
+				if(playSeq.name[0])
+					order.SetName(mpt::ToUnicode(mpt::Charset::ISO8859_1, playSeq.name));
 
-					// Play commands (jump / stop)
-					if(playSeq.commandTableOffset > 0 && file.Seek(playSeq.commandTableOffset))
+				// Play commands (jump / stop)
+				if(playSeq.commandTableOffset > 0 && file.Seek(playSeq.commandTableOffset))
+				{
+					MMDPlaySeqCommand command;
+					while(file.ReadStruct(command))
 					{
-						MMDPlaySeqCommand command;
-						while(file.ReadStruct(command))
+						FileReader chunk = file.ReadChunk(command.extraSize);
+						ORDERINDEX ord = mpt::saturate_cast<ORDERINDEX>(orderStart + command.offset);
+						if(command.offset == 0xFFFF || ord >= order.size())
+							break;
+						if(command.command == MMDPlaySeqCommand::kStop)
 						{
-							FileReader chunk = file.ReadChunk(command.extraSize);
-							ORDERINDEX ord = mpt::saturate_cast<ORDERINDEX>(orderStart + command.offset);
-							if(command.offset == 0xFFFF || ord >= order.size())
-								break;
-							if(command.command == MMDPlaySeqCommand::kStop)
-							{
-								order[ord] = order.GetInvalidPatIndex();
-							} else if(command.command == MMDPlaySeqCommand::kJump)
-							{
-								jumpTargets[ord] = chunk.ReadUint16BE();
-								order[ord] = order.GetIgnoreIndex();
-							}
+							order[ord] = order.GetInvalidPatIndex();
+						} else if(command.command == MMDPlaySeqCommand::kJump)
+						{
+							jumpTargets[ord] = chunk.ReadUint16BE();
+							order[ord] = order.GetIgnoreIndex();
 						}
 					}
 				}
