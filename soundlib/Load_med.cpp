@@ -375,8 +375,9 @@ static TEMPO MMDTempoToBPM(uint32 tempo, bool is8Ch, bool bpmMode, uint8 rowsPer
 	if(is8Ch && tempo > 0)
 	{
 		LimitMax(tempo, 10u);
-		static constexpr uint8 tempos[10] = { 47, 43, 40, 37, 35, 32, 30, 29, 27, 26 };
-		tempo = tempos[tempo - 1];
+		// MED Soundstudio uses these tempos when importing old files
+		static constexpr uint8 tempos[10] = {179, 164, 152, 141, 131, 123, 116, 110, 104, 99};
+		return TEMPO(tempos[tempo - 1], 0);
 	} else if(tempo > 0 && tempo <= 10)
 	{
 		// SoundTracker compatible tempo
