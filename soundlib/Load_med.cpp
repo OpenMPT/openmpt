@@ -734,11 +734,11 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	m_nInstruments = m_nSamples = songHeader.numSamples;
 
-	// In MMD0 / MMD1, octave wrapping is only done in 4-channel modules (hardware mixing!), and not for synth instruments
-	// - It's required e.g. for automatic terminated to.mmd0
-	// - dissociate.mmd0 (8 channels) and starkelsesirap.mmd0 (synth) on the other hand don't need it
+	// In MMD0 / MMD1, octave wrapping is not done for synth instruments
+	// - It's required e.g. for automatic terminated to.mmd0 and you got to let the music.mmd1
+	// - starkelsesirap.mmd0 (synth instruments) on the other hand don't need it
 	// In MMD2 / MMD3, the mix flag is used instead.
-	const bool hardwareMixSamples = (version < 2 && m_nChannels == 4) || (version >= 2 && !(songHeader.flags2 & MMDSong::FLAG2_MIX));
+	const bool hardwareMixSamples = (version < 2) || (version >= 2 && !(songHeader.flags2 & MMDSong::FLAG2_MIX));
 
 	bool needInstruments = false;
 	bool anySynthInstrs = false;
