@@ -4901,11 +4901,13 @@ void CSoundFile::InvertLoop(ModChannel &chn)
 {
 	// EFx implementation for MOD files (PT 1.1A and up: Invert Loop)
 	// This effect trashes samples. Thanks to 8bitbubsy for making this work. :)
-	if(GetType() != MOD_TYPE_MOD || chn.nEFxSpeed == 0) return;
+	if(GetType() != MOD_TYPE_MOD || chn.nEFxSpeed == 0)
+		return;
 
 	// we obviously also need a sample for this
 	ModSample *pModSample = const_cast<ModSample *>(chn.pModSample);
-	if(pModSample == nullptr || !pModSample->HasSampleData() || !pModSample->uFlags[CHN_LOOP] || pModSample->uFlags[CHN_16BIT]) return;
+	if(pModSample == nullptr || !pModSample->HasSampleData() || !pModSample->uFlags[CHN_LOOP])
+		return;
 
 	chn.nEFxDelay += ModEFxTable[chn.nEFxSpeed & 0x0F];
 	if(chn.nEFxDelay < 128)
@@ -4916,8 +4918,12 @@ void CSoundFile::InvertLoop(ModChannel &chn)
 		chn.nEFxOffset = 0;
 
 	// TRASH IT!!! (Yes, the sample!)
-	uint8 &sample = mpt::byte_cast<uint8 *>(pModSample->sampleb())[pModSample->nLoopStart + chn.nEFxOffset];
-	sample = ~sample;
+	const uint8 bps = pModSample->GetBytesPerSample();
+	uint8 *begin = mpt::byte_cast<uint8 *>(pModSample->sampleb()) + (pModSample->nLoopStart + chn.nEFxOffset) * bps;
+	for(auto &sample : mpt::as_span(begin, bps))
+	{
+		sample = ~sample;
+	}
 	pModSample->PrecomputeLoops(*this, false);
 }
 
