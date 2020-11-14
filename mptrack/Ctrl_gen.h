@@ -106,6 +106,7 @@ protected:
 	afx_msg void OnVSTiVolChanged();
 	afx_msg void OnSamplePAChanged();
 	afx_msg void OnRestartPosChanged();
+	afx_msg void OnRestartPosDone();
 	afx_msg void OnSongProperties();
 	afx_msg void OnLoopSongChanged();
 	afx_msg void OnEnSetfocusEditSongtitle();
