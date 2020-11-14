@@ -3933,7 +3933,10 @@ void CSoundFile::FinePortamentoUp(ModChannel &chn, ModCommand::PARAM param) cons
 	{
 		if ((chn.nPeriod) && (param))
 		{
-			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
+			if(GetType() == MOD_TYPE_FAR)
+			{
+				chn.nPeriod += (param * 4 * 36318 / 1024);
+			} else if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
 				const auto oldPeriod = chn.nPeriod;
 				chn.nPeriod = Util::muldivr(chn.nPeriod, GetLinearSlideUpTable(this, param & 0x0F), 65536);
@@ -3979,7 +3982,10 @@ void CSoundFile::FinePortamentoDown(ModChannel &chn, ModCommand::PARAM param) co
 	{
 		if ((chn.nPeriod) && (param))
 		{
-			if (m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
+			if (GetType() == MOD_TYPE_FAR)
+			{
+				chn.nPeriod -= (param * 4 * 36318 / 1024);
+			} else if (m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
 				const auto oldPeriod = chn.nPeriod;
 				chn.nPeriod = Util::muldivr(chn.nPeriod, GetLinearSlideDownTable(this, param & 0x0F), 65536);
@@ -3993,7 +3999,8 @@ void CSoundFile::FinePortamentoDown(ModChannel &chn, ModCommand::PARAM param) co
 			} else
 			{
 				chn.nPeriod += (int)(param * 4);
-				if (chn.nPeriod > 0xFFFF) chn.nPeriod = 0xFFFF;
+				if(chn.nPeriod > 0xFFFF)
+					chn.nPeriod = 0xFFFF;
 			}
 		}
 	}
