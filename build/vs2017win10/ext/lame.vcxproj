@@ -600,8 +600,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
-      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2017-win10-static\arm\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>
@@ -622,8 +621,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
-      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2017-win10-static\arm64\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
     </Link>

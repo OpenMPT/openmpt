@@ -147,7 +147,13 @@
    defines { "DEBUG" }
    defines { "MPT_BUILD_DEBUG" }
    defines { "MPT_BUILD_MSVC_STATIC" }
+	filter { "configurations:Debug", "architecture:ARM" }
+		symbols "On"
+	filter { "configurations:Debug", "architecture:ARM64" }
+		symbols "On"
+	filter { "configurations:Debug", "architecture:not ARM", "architecture:not ARM64" }
 		symbols "FastLink"
+	filter { "configurations:Debug" }
    staticruntime "On"
 	 runtime "Debug"
    optimize "Debug"
