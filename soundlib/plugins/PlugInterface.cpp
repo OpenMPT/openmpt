@@ -758,20 +758,10 @@ uint8 IMidiPlugin::GetMidiChannel(CHANNELINDEX trackChannel) const
 	if(trackChannel >= std::size(m_SndFile.m_PlayState.Chn))
 		return 0;
 
-	const ModChannel &chn = m_SndFile.m_PlayState.Chn[trackChannel];
-	const ModInstrument *ins = chn.pModInstrument;
-	if(ins != nullptr)
-	{
-		if(ins->nMidiChannel == MidiMappedChannel)
-		{
-			// For mapped channels, return their pattern channel, modulo 16 (because there are only 16 MIDI channels)
-			return static_cast<uint8>((chn.nMasterChn ? (chn.nMasterChn - 1u) : trackChannel) % 16u);
-		} else if(ins->HasValidMIDIChannel())
-		{
-			return (ins->nMidiChannel - 1u) % 16u;
-		}
-	}
-	return 0;
+	if(auto ins = m_SndFile.m_PlayState.Chn[trackChannel].pModInstrument; ins != nullptr)
+		return ins->GetMIDIChannel(m_SndFile, trackChannel);
+	else
+		return 0;
 }
 
 

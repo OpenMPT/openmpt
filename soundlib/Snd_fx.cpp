@@ -4958,12 +4958,21 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		{
 			// MIDI channel
 			isNibble = true;
+			data = 0xFF;
 			const PLUGINDEX plug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
 			if(plug > 0 && plug <= MAX_MIXPLUGINS)
 			{
 				auto midiPlug = dynamic_cast<const IMidiPlugin *>(m_MixPlugins[plug - 1u].pMixPlugin);
 				if(midiPlug)
 					data = midiPlug->GetMidiChannel(nChn);
+			}
+			if(data == 0xFF)
+			{
+				// Fallback if no plugin was found
+				if(pIns)
+					data = pIns->GetMIDIChannel(*this, nChn);
+				else
+					data = 0;
 			}
 		} else if(macro[pos] == 'n')
 		{
