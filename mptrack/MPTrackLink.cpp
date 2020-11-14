@@ -46,6 +46,13 @@ OPENMPT_NAMESPACE_BEGIN
 #pragma comment(lib, "propsys.lib")
 #endif
 
+// work-around VS2019 16.8.1 bug on ARM and ARM64
+#if MPT_COMPILER_MSVC
+#if defined(_M_ARM) || defined(_M_ARM64)
+#pragma comment(lib, "Synchronization.lib")
+#endif
+#endif
+
 #if MPT_COMPILER_MSVC
 #pragma comment( linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df'\"" )
 #endif // MPT_COMPILER_MSVC
