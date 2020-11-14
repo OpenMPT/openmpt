@@ -42,6 +42,7 @@ BEGIN_MESSAGE_MAP(CCtrlGeneral, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT_SAMPLEPA,			&CCtrlGeneral::OnSamplePAChanged)
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		&CCtrlGeneral::OnUpdatePosition)
 	ON_EN_SETFOCUS(IDC_EDIT_SONGTITLE,		&CCtrlGeneral::OnEnSetfocusEditSongtitle)
+	ON_EN_KILLFOCUS(IDC_EDIT_RESTARTPOS,	&CCtrlGeneral::OnRestartPosDone)
 	ON_CBN_SELCHANGE(IDC_COMBO1,			&CCtrlGeneral::OnResamplingChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -620,26 +621,32 @@ void CCtrlGeneral::OnGlobalVolChanged()
 
 void CCtrlGeneral::OnRestartPosChanged()
 {
+	if(!m_bInitialized)
+		return;
 	TCHAR s[32];
-	if(m_bInitialized)
-	{
-		m_EditRestartPos.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
-		if (s[0])
-		{
-			ORDERINDEX n = ConvertStrTo<ORDERINDEX>(s);
-			LimitMax(n, m_sndFile.Order().GetLastIndex());
-			while(n > 0 && n < m_sndFile.Order().GetLastIndex() && !m_sndFile.Order().IsValidPat(n))
-				n++;
+	m_EditRestartPos.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
+	if(!s[0])
+		return;
 
-			if (n != m_sndFile.Order().GetRestartPos())
-			{
-				m_EditRestartPos.SetModify(FALSE);
-				m_sndFile.Order().SetRestartPos(n);
-				m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(nullptr, SequenceHint(m_sndFile.Order.GetCurrentSequenceIndex()).RestartPos(), this);
-			}
-		}
-	}
+	ORDERINDEX n = ConvertStrTo<ORDERINDEX>(s);
+	LimitMax(n, m_sndFile.Order().GetLastIndex());
+	while(n > 0 && n < m_sndFile.Order().GetLastIndex() && !m_sndFile.Order().IsValidPat(n))
+		n++;
+
+	if(n == m_sndFile.Order().GetRestartPos())
+		return;
+	
+	m_EditRestartPos.SetModify(FALSE);
+	m_sndFile.Order().SetRestartPos(n);
+	m_modDoc.SetModified();
+	m_modDoc.UpdateAllViews(nullptr, SequenceHint(m_sndFile.Order.GetCurrentSequenceIndex()).RestartPos(), this);
+}
+
+
+void CCtrlGeneral::OnRestartPosDone()
+{
+	if(m_bInitialized)
+		SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.Order().GetRestartPos());
 }
 
 
