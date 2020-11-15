@@ -693,7 +693,7 @@ static std::wstring LocaleDecode(const std::string &str, const std::locale & loc
 	codecvt_type::result result = codecvt_type::partial;
 	const char * in_begin = str.data();
 	const char * in_end = in_begin + str.size();
-	out.resize((in_end - in_begin) * (facet.max_length() + 1));
+	out.resize((in_end - in_begin) * (mpt::saturate_cast<std::size_t>(facet.max_length()) + 1));
 	wchar_t * out_begin = &(out[0]);
 	wchar_t * out_end = &(out[0]) + out.size();
 	const char * in_next = nullptr;
@@ -778,7 +778,7 @@ static std::string LocaleEncode(const std::wstring &str, const std::locale & loc
 	codecvt_type::result result = codecvt_type::partial;
 	const wchar_t * in_begin = str.data();
 	const wchar_t * in_end = in_begin + str.size();
-	out.resize((in_end - in_begin) * (facet.max_length() + 1));
+	out.resize((in_end - in_begin) * (mpt::saturate_cast<std::size_t>(facet.max_length()) + 1));
 	char * out_begin = &(out[0]);
 	char * out_end = &(out[0]) + out.size();
 	const wchar_t * in_next = nullptr;
