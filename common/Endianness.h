@@ -443,7 +443,7 @@ static MPT_FORCEINLINE uint64 EncodeIEEE754binary64(float64 f)
 			return i;
 		} else
 		{
-			uint64 expo = e + 1023 - 1;
+			uint64 expo = static_cast<int64>(e) + 1023 - 1;
 			uint64 sign = std::signbit(m) ? 0x01u : 0x00u;
 			uint64 mant = static_cast<uint64>(std::fabs(std::ldexp(m, 53)));
 			uint64 i = 0u;
