@@ -131,30 +131,49 @@ public:
 #ifdef MODPLUG_TRACKER
 
 class recursive_mutex_with_lock_count {
+
 private:
+
 	mpt::recursive_mutex mutex;
+
+#if MPT_COMPILER_MSVC
+	_Guarded_by_(mutex)
+#endif // MPT_COMPILER_MSVC
 	long lockCount;
+
 public:
+
 	recursive_mutex_with_lock_count()
 		: lockCount(0)
 	{
 		return;
 	}
+
 	~recursive_mutex_with_lock_count()
 	{
 		return;
 	}
+
+#if MPT_COMPILER_MSVC
+	_Acquires_lock_(mutex)
+#endif // MPT_COMPILER_MSVC
 	void lock()
 	{
 		mutex.lock();
 		lockCount++;
 	}
+
+#if MPT_COMPILER_MSVC
+	_Requires_lock_held_(mutex) _Releases_lock_(mutex)
+#endif // MPT_COMPILER_MSVC
 	void unlock()
 	{
 		lockCount--;
 		mutex.unlock();
 	}
+
 public:
+
 	bool IsLockedByCurrentThread() // DEBUGGING only
 	{
 		bool islocked = false;
@@ -165,6 +184,7 @@ public:
 		}
 		return islocked;
 	}
+
 };
 
 #endif // MODPLUG_TRACKER
