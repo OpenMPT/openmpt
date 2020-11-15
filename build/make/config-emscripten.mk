@@ -6,6 +6,7 @@ AR  = emar
 LINK.cc = em++ $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)
 
 EMSCRIPTEN_TARGET?=default
+EMSCRIPTEN_THREADS?=0
 
 ifneq ($(STDCXX),)
 CXXFLAGS_STDCXX = -std=$(STDCXX)
@@ -24,6 +25,12 @@ CFLAGS   += -fPIC
 LDFLAGS  +=
 LDLIBS   +=
 ARFLAGS  := rcs
+
+ifeq ($(EMSCRIPTEN_THREADS),1)
+CXXFLAGS += -pthread
+CFLAGS   += -pthread
+LDFLAGS  += -pthread
+endif
 
 CXXFLAGS += -Os
 CFLAGS   += -Os
@@ -80,6 +87,10 @@ EXESUFFIX=.js
 SOSUFFIX=.js
 RUNPREFIX=node 
 TEST_LDFLAGS= --pre-js build/make/test-pre.js -lnodefs.js 
+
+ifeq ($(EMSCRIPTEN_THREADS),1)
+RUNPREFIX+=--experimental-wasm-threads --experimental-wasm-bulk-memory 
+endif
 
 DYNLINK=0
 SHARED_LIB=1

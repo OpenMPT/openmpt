@@ -21,10 +21,6 @@
 #define MPT_MUTEX_STD     0
 #define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
-#elif MPT_OS_EMSCRIPTEN
-#define MPT_MUTEX_STD     0
-#define MPT_MUTEX_PTHREAD 0
-#define MPT_MUTEX_WIN32   0
 #elif MPT_COMPILER_GENERIC
 #define MPT_MUTEX_STD     1
 #define MPT_MUTEX_PTHREAD 0
