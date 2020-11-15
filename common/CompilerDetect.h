@@ -297,10 +297,6 @@
 #define MPT_OS_UNKNOWN 0
 #endif
 
-#ifndef MPT_OS_EMSCRIPTEN_ANCIENT
-#define MPT_OS_EMSCRIPTEN_ANCIENT 0
-#endif
-
 
 
 #if (MPT_OS_DJGPP || MPT_OS_EMSCRIPTEN)
