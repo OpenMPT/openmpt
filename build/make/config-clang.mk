@@ -26,6 +26,11 @@ LDFLAGS  +=
 LDLIBS   += -lm
 ARFLAGS  := rcs
 
+ifeq ($(OPTIMIZE_LTO),1)
+CXXFLAGS += -flto=thin
+CFLAGS   += -flto=thin
+endif
+
 ifeq ($(CHECKED_ADDRESS),1)
 CXXFLAGS += -fsanitize=address
 CFLAGS   += -fsanitize=address

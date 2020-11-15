@@ -50,6 +50,7 @@
 #  DEBUG=0          Build debug binaries without optimization and with symbols
 #  OPTIMIZE=1       Build optimized binaries
 #  OPTIMIZE_SIZE=0  Build size-optimized binaries
+#  OPTIMIZE_LTO=0   Build with link-time-optimizations
 #  TEST=1           Include test suite in default target.
 #  ONLY_TEST=0      Only build the test suite.
 #  STRICT=0         Treat warnings as errors.

@@ -11,6 +11,9 @@ CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wframe-larger-than=16000 -Wgloba
 
 ifeq ($(MODERN),1)
 LDFLAGS  += -fuse-ld=lld
+ifeq ($(OPTIMIZE_LTO),1)
+LDFLAGS  += -Wl,--thinlto-jobs=all
+endif
 CXXFLAGS_WARNINGS += 
 CFLAGS_WARNINGS   += -Wframe-larger-than=4000
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
