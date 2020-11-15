@@ -18,37 +18,24 @@
 #endif // C++20
 
 #if !MPT_PLATFORM_MULTITHREADED
-#define MPT_MUTEX_STD     0
-#define MPT_MUTEX_WIN32   0
+#define MPT_MUTEX_NONE 1
 #elif MPT_COMPILER_GENERIC
-#define MPT_MUTEX_STD     1
-#define MPT_MUTEX_WIN32   0
+#define MPT_MUTEX_STD 1
 #elif (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(_GLIBCXX_HAS_GTHREADS) && defined(MPT_WITH_MINGWSTDTHREADS)
-#define MPT_MUTEX_STD     1
-#define MPT_MUTEX_WIN32   0
+#define MPT_MUTEX_STD 1
 #elif (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(_GLIBCXX_HAS_GTHREADS)
-#define MPT_MUTEX_STD     0
-#define MPT_MUTEX_WIN32   1
-#elif MPT_COMPILER_MSVC
-#define MPT_MUTEX_STD     1
-#define MPT_MUTEX_WIN32   0
-#elif MPT_COMPILER_GCC
-#define MPT_MUTEX_STD     1
-#define MPT_MUTEX_WIN32   0
-#elif MPT_COMPILER_CLANG
-#define MPT_MUTEX_STD     1
-#define MPT_MUTEX_WIN32   0
-#elif MPT_OS_WINDOWS
-#define MPT_MUTEX_STD     0
-#define MPT_MUTEX_WIN32   1
+#define MPT_MUTEX_WIN32 1
 #else
-#define MPT_MUTEX_STD     1
-#define MPT_MUTEX_WIN32   0
+#define MPT_MUTEX_STD 1
 #endif
 
-#if !MPT_MUTEX_STD && !MPT_MUTEX_WIN32
-#define MPT_MUTEX_NONE 1
-#else
+#ifndef MPT_MUTEX_STD
+#define MPT_MUTEX_STD 0
+#endif
+#ifndef MPT_MUTEX_WIN32
+#define MPT_MUTEX_WIN32 0
+#endif
+#ifndef MPT_MUTEX_NONE
 #define MPT_MUTEX_NONE 0
 #endif
 
@@ -57,7 +44,7 @@
 #endif
 
 #if MPT_MUTEX_STD
-#if (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(_GLIBCXX_HAS_GTHREADS) && defined(MPT_WITH_MINGWSTDTHREADS)
+#if !MPT_COMPILER_GENERIC && (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(_GLIBCXX_HAS_GTHREADS) && defined(MPT_WITH_MINGWSTDTHREADS)
 #include <mingw.mutex.h>
 #else
 #include <mutex>
