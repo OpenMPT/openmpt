@@ -43,9 +43,7 @@ namespace mpt
 {
 
 
-#ifdef MPT_BUILD_FUZZER
-static constexpr uint32 FUZZER_RNG_SEED = 3141592653u; // pi
-#endif // MPT_BUILD_FUZZER
+inline constexpr uint32 DETERMINISTIC_RNG_SEED = 3141592653u; // pi
 
 
 namespace detail
@@ -307,10 +305,13 @@ namespace rng
 class crand
 {
 public:
-	typedef void state_type;
-	typedef int result_type;
+	using state_type = void;
+	using result_type = int;
 private:
-	static void reseed(uint32 seed);
+	static void reseed(uint32 seed)
+	{
+		std::srand(seed);
+	}
 public:
 	template <typename Trd>
 	static void reseed(Trd & rd)
@@ -318,8 +319,11 @@ public:
 		reseed(mpt::random<uint32>(rd));
 	}
 public:
-	crand() { }
-	explicit crand(const std::string &) { }
+	crand() = default;
+	explicit crand(const std::string &)
+	{
+		return;
+	}
 public:
 	static MPT_CONSTEXPRINLINE result_type min()
 	{
@@ -333,7 +337,10 @@ public:
 	{
 		return detail::lower_bound_entropy_bits(RAND_MAX);
 	}
-	result_type operator()();
+	result_type operator()()
+	{
+		return std::rand();
+	}
 };
 
 } // namespace rng
@@ -356,7 +363,7 @@ private:
 	bool rd_reliable;
 	std::unique_ptr<std::mt19937> rd_fallback;
 public:
-	typedef unsigned int result_type;
+	using result_type = unsigned int;
 private:
 	void init_fallback();
 public:
@@ -486,7 +493,7 @@ template <> struct engine_traits<std::ranlux48> {
 };
 
 
-class prng_random_device_seeder
+class prng_random_device_time_seeder
 {
 private:
 	uint8 generate_seed8();
@@ -496,31 +503,42 @@ private:
 protected:
 	template <typename T> inline T generate_seed();
 protected:
-	prng_random_device_seeder();
+	prng_random_device_time_seeder() = default;
 };
 
-template <> inline uint8 prng_random_device_seeder::generate_seed() { return generate_seed8(); }
-template <> inline uint16 prng_random_device_seeder::generate_seed() { return generate_seed16(); }
-template <> inline uint32 prng_random_device_seeder::generate_seed() { return generate_seed32(); }
-template <> inline uint64 prng_random_device_seeder::generate_seed() { return generate_seed64(); }
+template <> inline uint8 prng_random_device_time_seeder::generate_seed() { return generate_seed8(); }
+template <> inline uint16 prng_random_device_time_seeder::generate_seed() { return generate_seed16(); }
+template <> inline uint32 prng_random_device_time_seeder::generate_seed() { return generate_seed32(); }
+template <> inline uint64 prng_random_device_time_seeder::generate_seed() { return generate_seed64(); }
 
-template <typename Trng = mpt::rng::lcg_musl>
+class prng_random_device_deterministic_seeder
+{
+protected:
+	template <typename T> constexpr T generate_seed() noexcept
+	{
+		return static_cast<T>(mpt::DETERMINISTIC_RNG_SEED);
+	}
+protected:
+	prng_random_device_deterministic_seeder() = default;
+};
+
+template <typename Trng = mpt::rng::lcg_musl, typename seeder = mpt::prng_random_device_time_seeder>
 class prng_random_device
-	: public prng_random_device_seeder
+	: private seeder
 {
 public:
-	typedef unsigned int result_type;
+	using result_type = unsigned int;
 private:
 	mpt::mutex m;
 	Trng rng;
 public:
 	prng_random_device()
-		: rng(generate_seed<typename Trng::state_type>())
+		: rng(seeder::template generate_seed<typename Trng::state_type>())
 	{
 		return;
 	}
 	prng_random_device(const std::string &)
-		: rng(generate_seed<typename Trng::state_type>())
+		: rng(seeder::template generate_seed<typename Trng::state_type>())
 	{
 		return;
 	}
@@ -544,30 +562,10 @@ public:
 };
 
 
-#ifdef MPT_BUILD_FUZZER
+using deterministc_random_device = mpt::prng_random_device<mpt::rng::lcg_musl>;
 
-//  1. Use deterministic seeding
-typedef mpt::prng_random_device<mpt::rng::lcg_musl> random_device;
-
-//  2. Use fast PRNGs in order to not waste time fuzzing more complex PRNG
-//     implementations.
-typedef mpt::rng::lcg_msvc fast_prng;
-typedef mpt::rng::lcg_musl good_prng;
-
-#else // !MPT_BUILD_FUZZER
-
-// mpt::random_device always generates 32 bits of entropy
-typedef mpt::sane_random_device random_device;
-
-// We cannot use std::minstd_rand here because it has not a power-of-2 sized
-// output domain which we rely upon.
-typedef mpt::rng::lcg_msvc fast_prng; // about 3 ALU operations, ~32bit of state, suited for inner loops
-typedef std::ranlux48      good_prng;
-
-#endif // MPT_BUILD_FUZZER
-
-
-typedef mpt::good_prng default_prng;
+using deterministic_fast_prng = mpt::rng::lcg_msvc;
+using deterministic_good_prng = mpt::rng::lcg_musl;
 
 
 template <typename Trng, typename Trd>
@@ -617,6 +615,32 @@ public:
 		return Trng::operator()();
 	}
 };
+
+
+#ifdef MPT_BUILD_FUZZER
+
+//  1. Use deterministic seeding
+using random_device = deterministc_random_device;
+
+//  2. Use fast PRNGs in order to not waste time fuzzing more complex PRNG
+//     implementations.
+using fast_prng = deterministic_fast_prng;
+using good_prng = deterministic_good_prng;
+
+#else // !MPT_BUILD_FUZZER
+
+// mpt::random_device always generates 32 bits of entropy
+using random_device = mpt::sane_random_device;
+
+// We cannot use std::minstd_rand here because it has not a power-of-2 sized
+// output domain which we rely upon.
+using fast_prng = mpt::rng::lcg_msvc; // about 3 ALU operations, ~32bit of state, suited for inner loops
+using good_prng = std::ranlux48;
+
+#endif // MPT_BUILD_FUZZER
+
+
+using default_prng = mpt::good_prng;
 
 
 mpt::random_device & global_random_device();

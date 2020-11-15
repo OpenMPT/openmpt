@@ -76,12 +76,6 @@ static T generate_timeseed()
 	// or stream cipher with any pre-choosen random key and IV. The only aspect we
 	// really need here is whitening of the bits.
 	typename mpt::default_hash<T>::type hash;
-	
-#ifdef MPT_BUILD_FUZZER
-
-	return static_cast<T>(mpt::FUZZER_RNG_SEED);
-
-#else // !MPT_BUILD_FUZZER
 
 	{
 		uint64be time;
@@ -101,29 +95,8 @@ static T generate_timeseed()
 
 	return static_cast<T>(hash.result());
 
-#endif // MPT_BUILD_FUZZER
-
 }
 
-
-#ifdef MODPLUG_TRACKER
-
-namespace rng
-{
-
-void crand::reseed(uint32 seed)
-{
-	std::srand(seed);
-}
-
-crand::result_type crand::operator()()
-{
-	return std::rand();
-}
-
-} // namespace rng
-
-#endif // MODPLUG_TRACKER
 
 sane_random_device::sane_random_device()
 	: rd_reliable(false)
@@ -255,27 +228,22 @@ sane_random_device::result_type sane_random_device::operator()()
 	return result;
 }
 
-prng_random_device_seeder::prng_random_device_seeder()
-{
-	return;
-}
-
-uint8 prng_random_device_seeder::generate_seed8()
+uint8 prng_random_device_time_seeder::generate_seed8()
 {
 	return mpt::generate_timeseed<uint8>();
 }
 
-uint16 prng_random_device_seeder::generate_seed16()
+uint16 prng_random_device_time_seeder::generate_seed16()
 {
 	return mpt::generate_timeseed<uint16>();
 }
 
-uint32 prng_random_device_seeder::generate_seed32()
+uint32 prng_random_device_time_seeder::generate_seed32()
 {
 	return mpt::generate_timeseed<uint32>();
 }
 
-uint64 prng_random_device_seeder::generate_seed64()
+uint64 prng_random_device_time_seeder::generate_seed64()
 {
 	return mpt::generate_timeseed<uint64>();
 }
