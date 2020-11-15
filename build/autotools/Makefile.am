@@ -122,7 +122,6 @@ MPT_FILES_COMMON += common/Logging.cpp
 MPT_FILES_COMMON += common/Logging.h
 MPT_FILES_COMMON += common/misc_util.cpp
 MPT_FILES_COMMON += common/misc_util.h
-MPT_FILES_COMMON += common/mptAlloc.cpp
 MPT_FILES_COMMON += common/mptAlloc.h
 MPT_FILES_COMMON += common/mptAssert.h
 MPT_FILES_COMMON += common/mptBaseMacros.h

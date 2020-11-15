@@ -858,8 +858,6 @@
     </ClCompile>
     <ClCompile Include="..\..\common\misc_util.cpp">
     </ClCompile>
-    <ClCompile Include="..\..\common\mptAlloc.cpp">
-    </ClCompile>
     <ClCompile Include="..\..\common\mptFileIO.cpp">
     </ClCompile>
     <ClCompile Include="..\..\common\mptIO.cpp">

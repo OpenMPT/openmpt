@@ -449,9 +449,6 @@
     <ClCompile Include="..\..\common\misc_util.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\mptAlloc.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\common\mptFileIO.cpp">
       <Filter>common</Filter>
     </ClCompile>
