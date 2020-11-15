@@ -145,18 +145,6 @@ namespace mpt
 
 
 
-#if !(MPT_COMPILER_CLANG && defined(__GLIBCXX__)) && !(MPT_COMPILER_CLANG && MPT_OS_MACOSX_OR_IOS)
-using std::launder;
-#else
-template <class T>
-MPT_NOINLINE T* launder(T* p) noexcept
-{
-	return p;
-}
-#endif
-
-
-
 template <typename T, std::size_t count, std::align_val_t alignment>
 struct alignas(static_cast<std::size_t>(alignment)) aligned_array
 	: std::array<T, count>
