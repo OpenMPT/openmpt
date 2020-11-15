@@ -150,11 +150,9 @@ version:1
 3:1221:0:105:1		//Set octave 9: 9 (PAVE NUM.) (KeyDown)
 3:1221:0:57:1		//Set octave 9: ç (KeyDown)
 3:1316:1:16:1		//Chord Modifier: Shift+MAJ (KeyDown)
-3:1200:0:222:1		//Note cut: ² (KeyDown)
-3:1201:0:49:1		//Note off: & (KeyDown)
-3:1201:0:187:1		//Note off: = (KeyDown)
-3:1667:1:222:1		//Note cut (don't remember instrument): Shift+² (KeyDown)
-3:1668:1:49:1		//Note off (don't remember instrument): Shift+& (KeyDown)
+3:1200:0:222:1		//Note Cut: ² (KeyDown)
+3:1201:0:49:1		//Note Off: & (KeyDown)
+3:1201:0:187:1		//Note Off: = (KeyDown)
 
 //----( Pattern Context [bottom] - Ins Col (4) )------------
 4:1202:0:96:1		//Set instrument digit 0: 0 (PAVE NUM.) (KeyDown)

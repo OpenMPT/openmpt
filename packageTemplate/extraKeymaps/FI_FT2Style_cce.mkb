@@ -153,9 +153,9 @@ version:1
 3:1220:0:104:1		//Set octave 8: NUM 8 (KeyDown)
 3:1221:0:105:1		//Set octave 9: NUM 9 (KeyDown)
 3:1316:1:16:1		//Chord Modifier: Shift+VAIHTO (KeyDown)
-3:1667:0:222:1		//Note Cut (without instrument number): ä (KeyDown)
-3:1668:0:226:1		//Note Off (without instrument number): < (KeyDown)
-3:1668:0:187:1		//Note Off (without instrument number): + (KeyDown)
+3:1200:0:222:1		//Note Cut: ä (KeyDown)
+3:1201:0:226:1		//Note Off: < (KeyDown)
+3:1201:0:187:1		//Note Off: + (KeyDown)
 3:1788:4:80:5		//Parameter control(MPTm only): Alt+P (KeyDown|KeyHold)
 3:1789:4:221:5		//Parameter control(smooth)(MPTm only): Alt+å (KeyDown|KeyHold)
 

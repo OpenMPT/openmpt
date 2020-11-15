@@ -149,8 +149,8 @@ version:1
 3:1221:0:57:1		//Set octave 9: 9 (KeyDown)
 3:1221:0:105:1		//Set octave 9: Num 9 (KeyDown)
 3:1316:1:16:1		//Chord Modifier: Shift+Shift (KeyDown)
-3:1667:0:192:1		//Note Cut (don't remember instrument): ` (KeyDown)
-3:1668:0:187:1		//Note Off (don't remember instrument): = (KeyDown)
+3:1200:0:192:1		//Note Cut: ` (KeyDown)
+3:1201:0:187:1		//Note Off: = (KeyDown)
 
 //----( Pattern Context [bottom] - Ins Col (4) )------------
 4:1202:0:96:1		//Set instrument digit 0: Num 0 (KeyDown)
