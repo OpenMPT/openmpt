@@ -413,71 +413,59 @@ static MPT_NOINLINE void TestTypes()
 		static_assert(__SIZEOF_POINTER__ == sizeof(void*));
 	#endif
 
-	VERIFY_EQUAL(int8_min, (std::numeric_limits<int8>::min)());
-	VERIFY_EQUAL(int8_max, (std::numeric_limits<int8>::max)());
-	VERIFY_EQUAL(uint8_max, (std::numeric_limits<uint8>::max)());
+	VERIFY_EQUAL(int8_min, std::numeric_limits<int8>::min());
+	VERIFY_EQUAL(int8_max, std::numeric_limits<int8>::max());
+	VERIFY_EQUAL(uint8_max, std::numeric_limits<uint8>::max());
 
-	VERIFY_EQUAL(int16_min, (std::numeric_limits<int16>::min)());
-	VERIFY_EQUAL(int16_max, (std::numeric_limits<int16>::max)());
-	VERIFY_EQUAL(uint16_max, (std::numeric_limits<uint16>::max)());
+	VERIFY_EQUAL(int16_min, std::numeric_limits<int16>::min());
+	VERIFY_EQUAL(int16_max, std::numeric_limits<int16>::max());
+	VERIFY_EQUAL(uint16_max, std::numeric_limits<uint16>::max());
 
-	VERIFY_EQUAL(int32_min, (std::numeric_limits<int32>::min)());
-	VERIFY_EQUAL(int32_max, (std::numeric_limits<int32>::max)());
-	VERIFY_EQUAL(uint32_max, (std::numeric_limits<uint32>::max)());
+	VERIFY_EQUAL(int32_min, std::numeric_limits<int32>::min());
+	VERIFY_EQUAL(int32_max, std::numeric_limits<int32>::max());
+	VERIFY_EQUAL(uint32_max, std::numeric_limits<uint32>::max());
 
-	VERIFY_EQUAL(int64_min, (std::numeric_limits<int64>::min)());
-	VERIFY_EQUAL(int64_max, (std::numeric_limits<int64>::max)());
-	VERIFY_EQUAL(uint64_max, (std::numeric_limits<uint64>::max)());
-
-
-	static_assert(int8_max == (std::numeric_limits<int8>::max)());
-	static_assert(uint8_max == (std::numeric_limits<uint8>::max)());
-
-	static_assert(int16_max == (std::numeric_limits<int16>::max)());
-	static_assert(uint16_max == (std::numeric_limits<uint16>::max)());
-
-	static_assert(int32_max == (std::numeric_limits<int32>::max)());
-	static_assert(uint32_max == (std::numeric_limits<uint32>::max)());
-
-	static_assert(int64_max == (std::numeric_limits<int64>::max)());
-	static_assert(uint64_max == (std::numeric_limits<uint64>::max)());
+	VERIFY_EQUAL(int64_min, std::numeric_limits<int64>::min());
+	VERIFY_EQUAL(int64_max, std::numeric_limits<int64>::max());
+	VERIFY_EQUAL(uint64_max, std::numeric_limits<uint64>::max());
 
 
-	static_assert((mpt::limits<int8>::max)() == (std::numeric_limits<int8>::max)());
-	static_assert((mpt::limits<uint8>::max)() == (std::numeric_limits<uint8>::max)());
+	static_assert(int8_max == std::numeric_limits<int8>::max());
+	static_assert(uint8_max == std::numeric_limits<uint8>::max());
 
-	static_assert((mpt::limits<int16>::max)() == (std::numeric_limits<int16>::max)());
-	static_assert((mpt::limits<uint16>::max)() == (std::numeric_limits<uint16>::max)());
+	static_assert(int16_max == std::numeric_limits<int16>::max());
+	static_assert(uint16_max == std::numeric_limits<uint16>::max());
 
-	static_assert((mpt::limits<int32>::max)() == (std::numeric_limits<int32>::max)());
-	static_assert((mpt::limits<uint32>::max)() == (std::numeric_limits<uint32>::max)());
+	static_assert(int32_max == std::numeric_limits<int32>::max());
+	static_assert(uint32_max == std::numeric_limits<uint32>::max());
 
-	static_assert((mpt::limits<int64>::max)() == (std::numeric_limits<int64>::max)());
-	static_assert((mpt::limits<uint64>::max)() == (std::numeric_limits<uint64>::max)());
+	static_assert(int64_max == std::numeric_limits<int64>::max());
+	static_assert(uint64_max == std::numeric_limits<uint64>::max());
 
-	static_assert((mpt::limits<int8le>::min)() == (std::numeric_limits<int8>::min)());
-	static_assert((mpt::limits<uint8le>::min)() == (std::numeric_limits<uint8>::min)());
 
-	static_assert((mpt::limits<int16le>::min)() == (std::numeric_limits<int16>::min)());
-	static_assert((mpt::limits<uint16le>::min)() == (std::numeric_limits<uint16>::min)());
+	static_assert(std::numeric_limits<int8le>::min() == std::numeric_limits<int8>::min());
+	static_assert(std::numeric_limits<uint8le>::min() == std::numeric_limits<uint8>::min());
 
-	static_assert((mpt::limits<int32le>::min)() == (std::numeric_limits<int32>::min)());
-	static_assert((mpt::limits<uint32le>::min)() == (std::numeric_limits<uint32>::min)());
+	static_assert(std::numeric_limits<int16le>::min() == std::numeric_limits<int16>::min());
+	static_assert(std::numeric_limits<uint16le>::min() == std::numeric_limits<uint16>::min());
 
-	static_assert((mpt::limits<int64le>::min)() == (std::numeric_limits<int64>::min)());
-	static_assert((mpt::limits<uint64le>::min)() == (std::numeric_limits<uint64>::min)());
+	static_assert(std::numeric_limits<int32le>::min() == std::numeric_limits<int32>::min());
+	static_assert(std::numeric_limits<uint32le>::min() == std::numeric_limits<uint32>::min());
 
-	static_assert((mpt::limits<int8le>::max)() == (std::numeric_limits<int8>::max)());
-	static_assert((mpt::limits<uint8le>::max)() == (std::numeric_limits<uint8>::max)());
+	static_assert(std::numeric_limits<int64le>::min() == std::numeric_limits<int64>::min());
+	static_assert(std::numeric_limits<uint64le>::min() == std::numeric_limits<uint64>::min());
 
-	static_assert((mpt::limits<int16le>::max)() == (std::numeric_limits<int16>::max)());
-	static_assert((mpt::limits<uint16le>::max)() == (std::numeric_limits<uint16>::max)());
+	static_assert(std::numeric_limits<int8le>::max() == std::numeric_limits<int8>::max());
+	static_assert(std::numeric_limits<uint8le>::max() == std::numeric_limits<uint8>::max());
 
-	static_assert((mpt::limits<int32le>::max)() == (std::numeric_limits<int32>::max)());
-	static_assert((mpt::limits<uint32le>::max)() == (std::numeric_limits<uint32>::max)());
+	static_assert(std::numeric_limits<int16le>::max() == std::numeric_limits<int16>::max());
+	static_assert(std::numeric_limits<uint16le>::max() == std::numeric_limits<uint16>::max());
 
-	static_assert((mpt::limits<int64le>::max)() == (std::numeric_limits<int64>::max)());
-	static_assert((mpt::limits<uint64le>::max)() == (std::numeric_limits<uint64>::max)());
+	static_assert(std::numeric_limits<int32le>::max() == std::numeric_limits<int32>::max());
+	static_assert(std::numeric_limits<uint32le>::max() == std::numeric_limits<uint32>::max());
+
+	static_assert(std::numeric_limits<int64le>::max() == std::numeric_limits<int64>::max());
+	static_assert(std::numeric_limits<uint64le>::max() == std::numeric_limits<uint64>::max());
 
 }
 

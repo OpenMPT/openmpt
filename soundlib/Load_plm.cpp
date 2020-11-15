@@ -267,7 +267,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		file.ReadStruct(patHeader);
 		if(!patHeader.numRows) continue;
 
-		static_assert(ORDERINDEX_MAX >= ((mpt::limits<decltype(ord.x)>::max)() + 255) / rowsPerPat);
+		static_assert(ORDERINDEX_MAX >= (std::numeric_limits<decltype(ord.x)>::max() + 255) / rowsPerPat);
 		ORDERINDEX curOrd = static_cast<ORDERINDEX>(ord.x / rowsPerPat);
 		ROWINDEX curRow = static_cast<ROWINDEX>(ord.x % rowsPerPat);
 		const CHANNELINDEX numChannels = std::min(patHeader.numChannels.get(), static_cast<uint8>(fileHeader.numChannels - ord.y));
