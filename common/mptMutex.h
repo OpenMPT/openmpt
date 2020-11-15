@@ -19,43 +19,34 @@
 
 #if !MPT_PLATFORM_MULTITHREADED
 #define MPT_MUTEX_STD     0
-#define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
 #elif MPT_COMPILER_GENERIC
 #define MPT_MUTEX_STD     1
-#define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
 #elif (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(_GLIBCXX_HAS_GTHREADS) && defined(MPT_WITH_MINGWSTDTHREADS)
 #define MPT_MUTEX_STD     1
-#define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
 #elif (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(_GLIBCXX_HAS_GTHREADS)
 #define MPT_MUTEX_STD     0
-#define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   1
 #elif MPT_COMPILER_MSVC
 #define MPT_MUTEX_STD     1
-#define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
 #elif MPT_COMPILER_GCC
 #define MPT_MUTEX_STD     1
-#define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
 #elif MPT_COMPILER_CLANG
 #define MPT_MUTEX_STD     1
-#define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   0
 #elif MPT_OS_WINDOWS
 #define MPT_MUTEX_STD     0
-#define MPT_MUTEX_PTHREAD 0
 #define MPT_MUTEX_WIN32   1
 #else
-#define MPT_MUTEX_STD     0
-#define MPT_MUTEX_PTHREAD 1
+#define MPT_MUTEX_STD     1
 #define MPT_MUTEX_WIN32   0
 #endif
 
-#if !MPT_MUTEX_STD && !MPT_MUTEX_PTHREAD && !MPT_MUTEX_WIN32
+#if !MPT_MUTEX_STD && !MPT_MUTEX_WIN32
 #define MPT_MUTEX_NONE 1
 #else
 #define MPT_MUTEX_NONE 0
@@ -73,8 +64,6 @@
 #endif
 #elif MPT_MUTEX_WIN32
 #include <windows.h>
-#elif MPT_MUTEX_PTHREAD
-#include <pthread.h>
 #endif // MPT_MUTEX
 
 OPENMPT_NAMESPACE_BEGIN
@@ -110,44 +99,6 @@ public:
 	void lock() { EnterCriticalSection(&impl); }
 	bool try_lock() { return TryEnterCriticalSection(&impl) ? true : false; }
 	void unlock() { LeaveCriticalSection(&impl); }
-};
-
-#elif MPT_MUTEX_PTHREAD
-
-class mutex {
-private:
-	pthread_mutex_t hLock;
-public:
-	mutex()
-	{
-		pthread_mutexattr_t attr;
-		pthread_mutexattr_init(&attr);
-		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL);
-		pthread_mutex_init(&hLock, &attr);
-		pthread_mutexattr_destroy(&attr);
-	}
-	~mutex() { pthread_mutex_destroy(&hLock); }
-	void lock() { pthread_mutex_lock(&hLock); }
-	bool try_lock() { return (pthread_mutex_trylock(&hLock) == 0); }
-	void unlock() { pthread_mutex_unlock(&hLock); }
-};
-
-class recursive_mutex {
-private:
-	pthread_mutex_t hLock;
-public:
-	recursive_mutex()
-	{
-		pthread_mutexattr_t attr;
-		pthread_mutexattr_init(&attr);
-		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-		pthread_mutex_init(&hLock, &attr);
-		pthread_mutexattr_destroy(&attr);
-	}
-	~recursive_mutex() { pthread_mutex_destroy(&hLock); }
-	void lock() { pthread_mutex_lock(&hLock); }
-	bool try_lock() { return (pthread_mutex_trylock(&hLock) == 0); }
-	void unlock() { pthread_mutex_unlock(&hLock); }
 };
 
 #else // MPT_MUTEX_NONE
