@@ -994,8 +994,12 @@ using uint32be = packed<uint32, BigEndian_tag>;
 using uint16be = packed<uint16, BigEndian_tag>;
 using uint8be  = packed<uint8 , BigEndian_tag>;
 
-template <typename T, typename Tendian> class ::std::numeric_limits<OPENMPT_NAMESPACE::packed<T, Tendian>> : public std::numeric_limits<T> {};
-template <typename T, typename Tendian> class ::std::numeric_limits<const OPENMPT_NAMESPACE::packed<T, Tendian>> : public std::numeric_limits<const T> {};
+OPENMPT_NAMESPACE_END
+namespace std {
+	template <typename T, typename Tendian> class numeric_limits<OPENMPT_NAMESPACE::packed<T, Tendian>> : public std::numeric_limits<T> {};
+	template <typename T, typename Tendian> class numeric_limits<const OPENMPT_NAMESPACE::packed<T, Tendian>> : public std::numeric_limits<const T> {};
+} // namespace std
+OPENMPT_NAMESPACE_BEGIN
 
 MPT_BINARY_STRUCT(int64le, 8)
 MPT_BINARY_STRUCT(int32le, 4)
