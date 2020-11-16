@@ -163,7 +163,7 @@ static UINT indicators[] =
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
 CMainFrame::CMainFrame()
-	: m_SoundDeviceFillBufferCriticalSection(CriticalSection::InitialUnlocked)
+	: m_SoundDeviceFillBufferCriticalSection(CriticalSection::InitialState::Unlocked)
 	, m_Dither(theApp.PRNG())
 {
 	m_szUserText[0] = 0;

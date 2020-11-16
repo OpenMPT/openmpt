@@ -37,12 +37,15 @@ CriticalSection::CriticalSection(InitialState state)
 	: m_refGlobalMutex(Tracker::GetGlobalMutexRef())
 	, inSection(false)
 {
-	if(state == InitialLocked)
+	if(state == InitialState::Locked)
 	{
 		Enter();
 	}
 }
 
+#if MPT_COMPILER_MSVC
+_Acquires_lock_(m_refGlobalMutex.mutex)
+#endif // MPT_COMPILER_MSVC
 void CriticalSection::Enter()
 {
 	if(!inSection)
@@ -52,6 +55,9 @@ void CriticalSection::Enter()
 	}
 }
 
+#if MPT_COMPILER_MSVC
+_Requires_lock_held_(m_refGlobalMutex.mutex) _Releases_lock_(m_refGlobalMutex.mutex)
+#endif // MPT_COMPILER_MSVC
 void CriticalSection::Leave()
 {
 	if(inSection)
