@@ -45,6 +45,15 @@ OPENMPT_NAMESPACE_BEGIN
 #define SMP_LEFTBAR_CYBTN Util::ScalePixels(22, m_hWnd)
 static constexpr int TIMELINE_HEIGHT = 26;
 
+static int TimelineHeight(HWND hwnd)
+{
+	auto height = Util::ScalePixels(TIMELINE_HEIGHT, hwnd);
+	if(height % 2)
+		height++;  // Avoid weird-looking triangles if timeline is scaled to odd height
+	return height;
+}
+
+
 static constexpr int MIN_ZOOM = -6;
 static constexpr int MAX_ZOOM = 10;
 
@@ -653,8 +662,10 @@ std::pair<CViewSample::HitTestItem, SmpLength> CViewSample::PointToItem(CPoint p
 }
 
 
-void CViewSample::InvalidateSample()
+void CViewSample::InvalidateSample(bool invalidateWaveform)
 {
+	if(invalidateWaveform)
+		m_forceRedrawWaveform = true;
 	InvalidateRect(nullptr, FALSE);
 }
 
@@ -761,6 +772,8 @@ void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
 			m_dwStatus.reset(SMPSTATUS_DRAWING);
 			UpdateNcButtonState();
 		}
+		if(m_nSample == updateSmp || updateSmp == 0)
+			InvalidateSample(false);
 	}
 }
 
@@ -1149,11 +1162,11 @@ void CViewSample::OnDraw(CDC *pDC)
 	}
 	
 	// Create off-screen image and timeline font
-	if(offScreenDC.m_hDC == nullptr)
+	if(!m_offScreenDC.m_hDC)
 	{
-		offScreenDC.CreateCompatibleDC(pDC);
-		offScreenBitmap.CreateCompatibleBitmap(pDC, m_rcClient.Width(), m_rcClient.Height());
-		offScreenDC.SelectObject(offScreenBitmap);
+		m_offScreenDC.CreateCompatibleDC(pDC);
+		m_offScreenBitmap.CreateCompatibleBitmap(pDC, m_rcClient.Width(), m_rcClient.Height());
+		m_offScreenDC.SelectObject(m_offScreenBitmap);
 
 		NONCLIENTMETRICS metrics;
 		metrics.cbSize = sizeof(metrics);
@@ -1163,23 +1176,33 @@ void CViewSample::OnDraw(CDC *pDC)
 		m_timelineFont.DeleteObject();
 		m_timelineFont.CreateFontIndirect(&metrics.lfMessageFont);
 	}
+	if(!m_waveformDC.m_hDC)
+	{
+		m_waveformDC.CreateCompatibleDC(pDC);
+		m_waveformBitmap.CreateCompatibleBitmap(pDC, m_rcClient.Width(), m_rcClient.Height());
+		m_waveformDC.SelectObject(m_waveformBitmap);
+		m_forceRedrawWaveform = true;
+	}
 
-	const auto oldPen = offScreenDC.SelectObject(CMainFrame::penDarkGray);
-	const auto oldBrush = offScreenDC.SelectStockObject(DC_BRUSH);
-	const auto oldFont = offScreenDC.SelectObject(m_timelineFont);
+	const auto oldPen = m_offScreenDC.SelectObject(CMainFrame::penDarkGray);
+	const auto oldBrush = m_offScreenDC.SelectStockObject(DC_BRUSH);
+	const auto oldFont = m_offScreenDC.SelectObject(m_timelineFont);
 
 	// Draw timeline
-	m_timelineHeight = Util::ScalePixels(TIMELINE_HEIGHT, m_hWnd);
-	if(m_timelineHeight % 2)
-		m_timelineHeight++;  // Avoid weird-looking triangles if timeline is scaled to odd height
-	const int timelineHeight = m_timelineHeight;
+	const int timelineHeight = TimelineHeight(m_hWnd);
+	if(timelineHeight != m_timelineHeight)
+	{
+		m_timelineHeight = timelineHeight;
+		m_forceRedrawWaveform = true;
+	}
+
 	{
 		const TimelineFormat format = TrackerSettings::Instance().sampleEditorTimelineFormat;
 		CRect timeline = rcClient;
 		timeline.bottom = timeline.top + timelineHeight + 1;
-		offScreenDC.DrawEdge(timeline, EDGE_ETCHED, BF_MIDDLE | BF_BOTTOM);
-		offScreenDC.SetTextColor(GetSysColor(COLOR_BTNTEXT));
-		offScreenDC.SetBkMode(TRANSPARENT);
+		m_offScreenDC.DrawEdge(timeline, EDGE_ETCHED, BF_MIDDLE | BF_BOTTOM);
+		m_offScreenDC.SetTextColor(GetSysColor(COLOR_BTNTEXT));
+		m_offScreenDC.SetBkMode(TRANSPARENT);
 		if(!m_timelineUnit)
 			m_timelineUnit = 1;
 
@@ -1237,16 +1260,16 @@ void CViewSample::OnDraw(CDC *pDC)
 						rect.top = timelineHeight / 2;
 					else
 						rect.top = timelineHeight - timelineHeight / 4;
-					offScreenDC.DrawEdge(rect, EDGE_ETCHED, BF_LEFT);
+					m_offScreenDC.DrawEdge(rect, EDGE_ETCHED, BF_LEFT);
 				}
 				rc.bottom = timelineHeight / 2;
 				rc.left += textOffset;
-				offScreenDC.DrawText(text.c_str(), rc, DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+				m_offScreenDC.DrawText(text.c_str(), rc, DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
 			}
 
 			// Cues
-			offScreenDC.SelectStockObject(DC_PEN);
-			offScreenDC.SetTextColor(RGB(0, 0, 0));
+			m_offScreenDC.SelectStockObject(DC_PEN);
+			m_offScreenDC.SetTextColor(RGB(0, 0, 0));
 			const int arrowWidth = timelineHeight / 2;
 			for(size_t i = 0; i < std::size(sample.cues); i++)
 			{
@@ -1255,9 +1278,9 @@ void CViewSample::OnDraw(CDC *pDC)
 				int xl = SampleToScreen(sample.cues[i]);
 				if((xl >= -arrowWidth) && (xl < rcClient.right))
 				{
-					DrawTriangleVert(offScreenDC, xl, arrowWidth, timelineHeight, colors[MODCOLOR_SAMPLE_CUEPOINT]);
+					DrawTriangleVert(m_offScreenDC, xl, arrowWidth, timelineHeight, colors[MODCOLOR_SAMPLE_CUEPOINT]);
 					rc.SetRect(xl - arrowWidth, timelineHeight / 2 - 1, xl + arrowWidth, timelineHeight);
-					offScreenDC.DrawText(mpt::tfmt::val(i + 1).c_str(), rc, DT_CENTER | DT_SINGLELINE | DT_NOPREFIX);
+					m_offScreenDC.DrawText(mpt::tfmt::val(i + 1).c_str(), rc, DT_CENTER | DT_SINGLELINE | DT_NOPREFIX);
 				}
 			}
 
@@ -1266,11 +1289,11 @@ void CViewSample::OnDraw(CDC *pDC)
 			{
 				int xl = SampleToScreen(sample.nLoopStart);
 				if((xl >= -arrowWidth) && (xl <= rcClient.right + arrowWidth))
-					DrawTriangleHorz(offScreenDC, xl, arrowWidth, timelineHeight, colors[MODCOLOR_SAMPLE_LOOPMARKER]);
+					DrawTriangleHorz(m_offScreenDC, xl, arrowWidth, timelineHeight, colors[MODCOLOR_SAMPLE_LOOPMARKER]);
 
 				xl = SampleToScreen(sample.nLoopEnd);
 				if((xl >= -arrowWidth) && (xl <= rcClient.right + arrowWidth))
-					DrawTriangleHorz(offScreenDC, xl, -timelineHeight / 2, timelineHeight, colors[MODCOLOR_SAMPLE_LOOPMARKER]);
+					DrawTriangleHorz(m_offScreenDC, xl, -timelineHeight / 2, timelineHeight, colors[MODCOLOR_SAMPLE_LOOPMARKER]);
 			}
 
 			// Sustain Loop Start/End
@@ -1278,11 +1301,11 @@ void CViewSample::OnDraw(CDC *pDC)
 			{
 				int xl = SampleToScreen(sample.nSustainStart);
 				if((xl >= -arrowWidth) && (xl <= rcClient.right + arrowWidth))
-					DrawTriangleHorz(offScreenDC, xl, timelineHeight / 2, timelineHeight, colors[MODCOLOR_SAMPLE_SUSTAINMARKER]);
+					DrawTriangleHorz(m_offScreenDC, xl, timelineHeight / 2, timelineHeight, colors[MODCOLOR_SAMPLE_SUSTAINMARKER]);
 
 				xl = SampleToScreen(sample.nSustainEnd);
 				if((xl >= -arrowWidth) && (xl <= rcClient.right + arrowWidth))
-					DrawTriangleHorz(offScreenDC, xl, -timelineHeight / 2, timelineHeight, colors[MODCOLOR_SAMPLE_SUSTAINMARKER]);
+					DrawTriangleHorz(m_offScreenDC, xl, -timelineHeight / 2, timelineHeight, colors[MODCOLOR_SAMPLE_SUSTAINMARKER]);
 			}
 		}
 	}
@@ -1302,34 +1325,34 @@ void CViewSample::OnDraw(CDC *pDC)
 			{
 				rc.right = SampleToScreen(m_dwBeginSel);
 				if (rc.right > rcClient.right) rc.right = rcClient.right;
-				if (rc.right > rc.left) offScreenDC.FillSolidRect(&rc, colors[MODCOLOR_BACKSAMPLE]);
+				if (rc.right > rc.left) m_offScreenDC.FillSolidRect(&rc, colors[MODCOLOR_BACKSAMPLE]);
 				rc.left = rc.right;
 			}
 			if (rc.left < 0) rc.left = 0;
 			rc.right = SampleToScreen(m_dwEndSel) + 1;
 			if (rc.right > rcClient.right) rc.right = rcClient.right;
 			if(rc.right > rc.left)
-				offScreenDC.FillSolidRect(&rc, colors[MODCOLOR_SAMPLESELECTED]);
+				m_offScreenDC.FillSolidRect(&rc, colors[MODCOLOR_SAMPLESELECTED]);
 			rc.left = rc.right;
 			if (rc.left < 0) rc.left = 0;
 			rc.right = rcClient.right;
 			if(rc.right > rc.left)
-				offScreenDC.FillSolidRect(&rc, colors[MODCOLOR_BACKSAMPLE]);
+				m_offScreenDC.FillSolidRect(&rc, colors[MODCOLOR_BACKSAMPLE]);
 		} else
 		{
-			offScreenDC.FillSolidRect(&rect, colors[MODCOLOR_BACKSAMPLE]);
+			m_offScreenDC.FillSolidRect(&rect, colors[MODCOLOR_BACKSAMPLE]);
 		}
-		offScreenDC.SelectObject(CMainFrame::penDarkGray);
+		m_offScreenDC.SelectObject(CMainFrame::penDarkGray);
 		if (sample.uFlags[CHN_STEREO])
 		{
-			offScreenDC.MoveTo(0, ymed - yrange / 2);
-			offScreenDC.LineTo(rcClient.right, ymed - yrange / 2);
-			offScreenDC.MoveTo(0, ymed + yrange / 2);
-			offScreenDC.LineTo(rcClient.right, ymed + yrange / 2);
+			m_offScreenDC.MoveTo(0, ymed - yrange / 2);
+			m_offScreenDC.LineTo(rcClient.right, ymed - yrange / 2);
+			m_offScreenDC.MoveTo(0, ymed + yrange / 2);
+			m_offScreenDC.LineTo(rcClient.right, ymed + yrange / 2);
 		} else
 		{
-			offScreenDC.MoveTo(0, ymed);
-			offScreenDC.LineTo(rcClient.right, ymed);
+			m_offScreenDC.MoveTo(0, ymed);
+			m_offScreenDC.LineTo(rcClient.right, ymed);
 		}
 		// Drawing sample
 		if(sample.HasSampleData() && yrange && (sample.nLength > 1) && (rect.right > 1))
@@ -1340,95 +1363,102 @@ void CViewSample::OnDraw(CDC *pDC)
 				int xl = SampleToScreen(sample.nLoopStart);
 				if ((xl >= 0) && (xl < rcClient.right))
 				{
-					offScreenDC.MoveTo(xl, rect.top);
-					offScreenDC.LineTo(xl, rect.bottom);
+					m_offScreenDC.MoveTo(xl, rect.top);
+					m_offScreenDC.LineTo(xl, rect.bottom);
 				}
 
 				xl = SampleToScreen(sample.nLoopEnd);
 				if((xl >= 0) && (xl < rcClient.right))
 				{
-					offScreenDC.MoveTo(xl, rect.top);
-					offScreenDC.LineTo(xl, rect.bottom);
+					m_offScreenDC.MoveTo(xl, rect.top);
+					m_offScreenDC.LineTo(xl, rect.bottom);
 				}
 			}
 			// Sustain Loop Start/End
 			if ((sample.nSustainEnd > smpScrollPos) && (sample.nSustainEnd > sample.nSustainStart))
 			{
-				offScreenDC.SetBkMode(OPAQUE);
-				offScreenDC.SetBkColor(RGB(0xFF, 0xFF, 0xFF));
-				offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
+				m_offScreenDC.SetBkMode(OPAQUE);
+				m_offScreenDC.SetBkColor(RGB(0xFF, 0xFF, 0xFF));
+				m_offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
 				int xl = SampleToScreen(sample.nSustainStart);
 				if ((xl >= 0) && (xl < rcClient.right))
 				{
-					offScreenDC.MoveTo(xl, rect.top);
-					offScreenDC.LineTo(xl, rect.bottom);
+					m_offScreenDC.MoveTo(xl, rect.top);
+					m_offScreenDC.LineTo(xl, rect.bottom);
 				}
 
 				xl = SampleToScreen(sample.nSustainEnd);
 				if ((xl >= 0) && (xl < rcClient.right))
 				{
-					offScreenDC.MoveTo(xl, rect.top);
-					offScreenDC.LineTo(xl, rect.bottom);
+					m_offScreenDC.MoveTo(xl, rect.top);
+					m_offScreenDC.LineTo(xl, rect.bottom);
 				}
 			}
 			// Active cue point
 			if(IsCuePoint(m_dragItem))
 			{
-				offScreenDC.SetBkMode(TRANSPARENT);
-				offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
+				m_offScreenDC.SetBkMode(TRANSPARENT);
+				m_offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
 				int xl = SampleToScreen(sample.cues[CuePointFromItem(m_dragItem)]);
 				if((xl >= 0) && (xl < rcClient.right))
 				{
-					offScreenDC.MoveTo(xl, rect.top);
-					offScreenDC.LineTo(xl, rect.bottom);
+					m_offScreenDC.MoveTo(xl, rect.top);
+					m_offScreenDC.LineTo(xl, rect.bottom);
 				}
 			}
 
 			// Drawing Sample Data
-			offScreenDC.SelectStockObject(DC_PEN);
-			offScreenDC.SetDCPenColor(colors[MODCOLOR_SAMPLE]);
-			int smplsize = sample.GetBytesPerSample();
-			if (m_nZoom == 1 || m_nZoom < 0 || ((!m_nZoom) && (sample.nLength <= (SmpLength)rect.Width())))
+			const auto backgroundCol = ~colors[MODCOLOR_SAMPLE];
+			if(m_forceRedrawWaveform)
 			{
-				// Draw sample data in 1:1 ratio or higher (zoom in)
-				SmpLength len = sample.nLength - smpScrollPos;
-				const std::byte *psample = sample.sampleb() + smpScrollPos * smplsize;
-				if (sample.uFlags[CHN_STEREO])
+				m_forceRedrawWaveform = false;
+				m_waveformDC.SelectStockObject(DC_PEN);
+				m_waveformDC.FillSolidRect(rect, backgroundCol);
+				m_waveformDC.SetDCPenColor(colors[MODCOLOR_SAMPLE]);
+				const int smplsize = sample.GetBytesPerSample();
+				if(m_nZoom == 1 || m_nZoom < 0 || ((!m_nZoom) && (sample.nLength <= (SmpLength)rect.Width())))
 				{
-					DrawSampleData1(offScreenDC, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
-					DrawSampleData1(offScreenDC, ymed+yrange/2, rect.right, yrange, len, sample.uFlags, psample+smplsize/2);
+					// Draw sample data in 1:1 ratio or higher (zoom in)
+					SmpLength len = sample.nLength - smpScrollPos;
+					const std::byte *psample = sample.sampleb() + smpScrollPos * smplsize;
+					if(sample.uFlags[CHN_STEREO])
+					{
+						DrawSampleData1(m_waveformDC, ymed - yrange / 2, rect.right, yrange, len, sample.uFlags, psample);
+						DrawSampleData1(m_waveformDC, ymed + yrange / 2, rect.right, yrange, len, sample.uFlags, psample + smplsize / 2);
+					} else
+					{
+						DrawSampleData1(m_waveformDC, ymed, rect.right, yrange * 2, len, sample.uFlags, psample);
+					}
 				} else
 				{
-					DrawSampleData1(offScreenDC, ymed, rect.right, yrange*2, len, sample.uFlags, psample);
-				}
-			} else
-			{
-				// Draw zoomed-out saple data
-				SmpLength len = sample.nLength;
-				int xscroll = 0;
-				if (m_nZoom > 0)
-				{
-					xscroll = smpScrollPos;
-					len -= smpScrollPos;
-				}
-				const std::byte *psample = sample.sampleb() + xscroll * smplsize;
-				if (sample.uFlags[CHN_STEREO])
-				{
-					DrawSampleData2(offScreenDC, ymed-yrange/2, rect.right, yrange, len, sample.uFlags, psample);
-					DrawSampleData2(offScreenDC, ymed+yrange/2, rect.right, yrange, len, sample.uFlags, psample+smplsize/2);
-				} else
-				{
-					DrawSampleData2(offScreenDC, ymed, rect.right, yrange*2, len, sample.uFlags, psample);
+					// Draw zoomed-out saple data
+					SmpLength len = sample.nLength;
+					int xscroll = 0;
+					if(m_nZoom > 0)
+					{
+						xscroll = smpScrollPos;
+						len -= smpScrollPos;
+					}
+					const std::byte *psample = sample.sampleb() + xscroll * smplsize;
+					if(sample.uFlags[CHN_STEREO])
+					{
+						DrawSampleData2(m_waveformDC, ymed - yrange / 2, rect.right, yrange, len, sample.uFlags, psample);
+						DrawSampleData2(m_waveformDC, ymed + yrange / 2, rect.right, yrange, len, sample.uFlags, psample + smplsize / 2);
+					} else
+					{
+						DrawSampleData2(m_waveformDC, ymed, rect.right, yrange * 2, len, sample.uFlags, psample);
+					}
 				}
 			}
+			m_offScreenDC.TransparentBlt(rect.left, rect.top, rect.Width(), rect.Height(), &m_waveformDC, rect.left, rect.top, rect.Width(), rect.Height(), backgroundCol);
 		}
 	}
 
 	if(m_nGridSegments > 0 && m_nGridSegments < sample.nLength && sample.nLength != 0)
 	{
 		// Draw sample grid
-		offScreenDC.SetBkColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKSAMPLE]);
-		offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
+		m_offScreenDC.SetBkColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKSAMPLE]);
+		m_offScreenDC.SelectObject(CMainFrame::penHalfDarkGray);
 		const auto segmentsByLength = static_cast<double>(m_nGridSegments) / sample.nLength;
 		const auto samplesPerSegment = static_cast<double>(sample.nLength) / m_nGridSegments;
 		const auto leftSegment = std::max(uint32(1), mpt::saturate_round<uint32>(ScreenToSample(rect.left) * segmentsByLength));
@@ -1436,21 +1466,21 @@ void CViewSample::OnDraw(CDC *pDC)
 		for(uint32 i = leftSegment; i <= rightSegment; i++)
 		{
 			int screenPos = SampleToScreen(mpt::saturate_round<SmpLength>(samplesPerSegment * i));
-			offScreenDC.MoveTo(screenPos, rect.top);
-			offScreenDC.LineTo(screenPos, rect.bottom);
+			m_offScreenDC.MoveTo(screenPos, rect.top);
+			m_offScreenDC.LineTo(screenPos, rect.bottom);
 		}
 	}
 
 	DrawPositionMarks();
 
-	BitBlt(pDC->m_hDC, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), offScreenDC, 0, 0, SRCCOPY);
+	BitBlt(pDC->m_hDC, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), m_offScreenDC, 0, 0, SRCCOPY);
 
 	if(oldFont)
-		offScreenDC.SelectObject(oldFont);
+		m_offScreenDC.SelectObject(oldFont);
 	if(oldBrush)
-		offScreenDC.SelectObject(oldBrush);
+		m_offScreenDC.SelectObject(oldBrush);
 	if(oldPen)
-		offScreenDC.SelectObject(oldPen);
+		m_offScreenDC.SelectObject(oldPen);
 }
 
 
@@ -1468,7 +1498,7 @@ void CViewSample::DrawPositionMarks()
 		rect.left = SampleToScreen(pos);
 		rect.right = rect.left + 1;
 		rect.bottom = m_rcClient.bottom + 1;
-		if ((rect.right >= 0) && (rect.right < m_rcClient.right)) offScreenDC.InvertRect(&rect);
+		if ((rect.right >= 0) && (rect.right < m_rcClient.right)) m_offScreenDC.InvertRect(&rect);
 	}
 }
 
@@ -1489,9 +1519,7 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 			}
 		}
 		if(invalidate)
-		{
-			InvalidateSample();
-		}
+			InvalidateSample(false);
 	} else if (pnotify->type[Notification::Sample] && pnotify->item == m_nSample && !IsOPLInstrument())
 	{
 		if(m_dwNotifyPos != pnotify->pos)
@@ -1500,7 +1528,7 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 			DrawPositionMarks();	// Erase old marks...
 			m_dwNotifyPos = pnotify->pos;
 			DrawPositionMarks();	// ...and draw new ones
-			BitBlt(hdc, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), offScreenDC, 0, 0, SRCCOPY);
+			BitBlt(hdc, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), m_offScreenDC, 0, 0, SRCCOPY);
 			::ReleaseDC(m_hWnd, hdc);
 		}
 	}
@@ -1708,8 +1736,10 @@ void CViewSample::OnSize(UINT nType, int cx, int cy)
 {
 	CModScrollView::OnSize(nType, cx, cy);
 
-	offScreenBitmap.DeleteObject();
-	offScreenDC.DeleteDC();
+	m_offScreenBitmap.DeleteObject();
+	m_offScreenDC.DeleteDC();
+	m_waveformBitmap.DeleteObject();
+	m_waveformDC.DeleteDC();
 
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0))
 	{
@@ -1951,7 +1981,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 			update = true;
 			*updateLoopPoint = x;
 			sample.PrecomputeLoops(sndFile, true);
-			SetModified(SampleHint().Info().Data(), true, false);
+			SetModified(SampleHint().Info(), true, false);
 		}
 
 		if(m_dwStatus[SMPSTATUS_DRAWING] && m_dragItem == HitTestItem::SampleData)
@@ -2058,7 +2088,7 @@ void CViewSample::OnLButtonDown(UINT flags, CPoint point)
 			break;
 		default:
 			if(IsCuePoint(m_dragItem))
-				InvalidateSample();
+				InvalidateSample(false);
 			break;
 		}
 	}
@@ -2096,7 +2126,7 @@ void CViewSample::OnLButtonUp(UINT, CPoint)
 		ReleaseCapture();
 	}
 	if(IsCuePoint(m_dragItem))
-		InvalidateSample();
+		InvalidateSample(false);
 	m_dragItem = HitTestItem::Nothing;
 	m_startDragValue = MAX_SAMPLE_LENGTH;
 	m_lastDrawPoint.SetPoint(-1, -1);
@@ -2357,7 +2387,7 @@ void CViewSample::OnSetLoop()
 			{
 				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Loop");
 				sample.SetLoop(m_dwBeginSel, m_dwEndSel, true, sample.uFlags[CHN_PINGPONGLOOP], sndFile);
-				SetModified(SampleHint().Info().Data(), true, false);
+				SetModified(SampleHint().Info(), true, false);
 			}
 		}
 	}
@@ -2377,7 +2407,7 @@ void CViewSample::OnSetSustainLoop()
 			{
 				pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Sustain Loop");
 				sample.SetSustainLoop(m_dwBeginSel, m_dwEndSel, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
-				SetModified(SampleHint().Info().Data(), true, false);
+				SetModified(SampleHint().Info(), true, false);
 			}
 		}
 	}
@@ -3192,7 +3222,7 @@ void CViewSample::OnSetLoopStart()
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Loop Start");
 			sample.SetLoop(m_dwMenuParam, loopEnd, true, sample.uFlags[CHN_PINGPONGLOOP], sndFile);
-			SetModified(SampleHint().Info().Data(), true, false);
+			SetModified(SampleHint().Info(), true, false);
 		}
 	}
 }
@@ -3209,7 +3239,7 @@ void CViewSample::OnSetLoopEnd()
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Loop End");
 			sample.SetLoop(sample.nLoopStart, m_dwMenuParam, true, sample.uFlags[CHN_PINGPONGLOOP], sndFile);
-			SetModified(SampleHint().Info().Data(), true, false);
+			SetModified(SampleHint().Info(), true, false);
 		}
 	}
 }
@@ -3246,7 +3276,7 @@ void CViewSample::OnSetSustainStart()
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Sustain Start");
 			sample.SetSustainLoop(m_dwMenuParam, sustainEnd, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
-			SetModified(SampleHint().Info().Data(), true, false);
+			SetModified(SampleHint().Info(), true, false);
 		}
 	}
 }
@@ -3263,7 +3293,7 @@ void CViewSample::OnSetSustainEnd()
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Sustain End");
 			sample.SetSustainLoop(sample.nSustainStart, m_dwMenuParam, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
-			SetModified(SampleHint().Info().Data(), true, false);
+			SetModified(SampleHint().Info(), true, false);
 		}
 	}
 }
@@ -3299,7 +3329,7 @@ void CViewSample::OnSetCuePoint(UINT nID)
 
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Cue Point");
 		sample.cues[nID] = m_dwMenuParam;
-		SetModified(SampleHint().Info().Data(), true, false);
+		SetModified(SampleHint().Info(), true, false);
 	}
 }
 
@@ -3843,7 +3873,7 @@ void CViewSample::OnChangeGridSize()
 	if(dlg.DoModal() == IDOK)
 	{
 		m_nGridSegments = dlg.m_nSegments;
-		InvalidateSample();
+		InvalidateSample(false);
 	}
 }
 

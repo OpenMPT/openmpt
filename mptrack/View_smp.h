@@ -57,8 +57,8 @@ protected:
 	std::unique_ptr<OPLInstrDlg> m_oplEditor;
 	CImageList m_bmpEnvBar;
 	CRect m_rcClient;
-	CDC offScreenDC;
-	CBitmap offScreenBitmap;
+	CDC m_offScreenDC, m_waveformDC;
+	CBitmap m_offScreenBitmap, m_waveformBitmap;
 	CFont m_timelineFont;
 	SIZE m_sizeTotal;
 	UINT m_nBtnMouseOver = 0xFFFF;
@@ -75,7 +75,7 @@ protected:
 	HitTestItem m_dragItem = HitTestItem::Nothing;
 	CPoint m_startDragPoint;
 	SmpLength m_startDragValue = MAX_SAMPLE_LENGTH;
-	bool m_dragPreparedUndo = false;
+	bool m_dragPreparedUndo = false, m_forceRedrawWaveform = true;
 
 	// Sample drawing
 	CPoint m_lastDrawPoint;		// For drawing horizontal lines
@@ -111,7 +111,7 @@ protected:
 	std::pair<HitTestItem, SmpLength> PointToItem(CPoint point, CRect *rect = nullptr) const;
 	void PlayNote(ModCommand::NOTE note, const SmpLength nStartPos = 0, int volume = -1);
 	void NoteOff(ModCommand::NOTE note);
-	void InvalidateSample();
+	void InvalidateSample(bool invalidateWaveform = true);
 	void InvalidateTimeline();
 	void SetCurSel(SmpLength nBegin, SmpLength nEnd);
 	void ScrollToPosition(int x);

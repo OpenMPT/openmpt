@@ -3001,7 +3001,7 @@ void CCtrlSamples::OnLoopTypeChanged()
 		{
 			sample.SetLoop(0, sample.nLength, true, n == 2, m_sndFile);
 		}
-		m_modDoc.UpdateAllViews(NULL, SampleHint(m_nSample).Info().Data());
+		m_modDoc.UpdateAllViews(NULL, SampleHint(m_nSample).Info());
 	} else
 	{
 		sample.PrecomputeLoops(m_sndFile);
@@ -3021,7 +3021,7 @@ void CCtrlSamples::OnLoopPointsChanged()
 		if(!m_startedEdit) PrepareUndo("Set Loop");
 		const int n = m_ComboLoopType.GetCurSel();
 		sample.SetLoop(start, end, n > 0, n == 2, m_sndFile);
-		SetModified(SampleHint().Info().Data(), false, false);
+		SetModified(SampleHint().Info(), false, false);
 	}
 }
 
@@ -3050,7 +3050,7 @@ void CCtrlSamples::OnSustainTypeChanged()
 		{
 			sample.SetSustainLoop(0, sample.nLength, true, n == 2, m_sndFile);
 		}
-		m_modDoc.UpdateAllViews(NULL, SampleHint(m_nSample).Info().Data());
+		m_modDoc.UpdateAllViews(NULL, SampleHint(m_nSample).Info());
 	} else
 	{
 		sample.PrecomputeLoops(m_sndFile);
@@ -3070,7 +3070,7 @@ void CCtrlSamples::OnSustainPointsChanged()
 		if(!m_startedEdit) PrepareUndo("Set Sustain Loop");
 		const int n = m_ComboSustainType.GetCurSel();
 		sample.SetSustainLoop(start, end, n > 0, n == 2, m_sndFile);
-		SetModified(SampleHint().Info().Data(), false, false);
+		SetModified(SampleHint().Info(), false, false);
 	}
 }
 
