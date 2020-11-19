@@ -174,6 +174,14 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		bytesRead += sourceSize;
 
 		AMSUnpack(reinterpret_cast<const int8 *>(packedDataView.data()), packedDataView.size(), sample.samplev(), sample.GetSampleSizeInBytes(), packCharacter);
+		if(sample.uFlags[CHN_16BIT] && !mpt::endian_is_little())
+		{
+			auto p = sample.sample16();
+			for(SmpLength length = sample.nLength; length != 0; length--, p++)
+			{
+				*p = mpt::bit_cast<int16le>(*p);
+			}
+		}
 	} else if(GetEncoding() == PTM8Dto16 && GetChannelFormat() == mono && GetBitDepth() == 16)
 	{
 		// PTM 8-Bit delta to 16-Bit sample
