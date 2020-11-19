@@ -108,7 +108,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 			maxLength *= 85;
 		else
 			maxLength = Util::MaxValueOfType(maxLength);
-		LimitMax(sample.nLength, maxLength / (m_bitdepth / 8u));
+		LimitMax(sample.nLength, maxLength / (GetBitDepth() / 8u));
 	}
 
 	if(sample.nLength < 1)
