@@ -21,6 +21,7 @@
 #if MPT_CXX_AT_LEAST(20)
 #include <source_location>
 #endif // C++20
+#include <type_traits>
 
 #include <cstddef>
 #include <cstdint>
@@ -33,26 +34,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-namespace mpt
-{
-template <bool cond, typename Ta, typename Tb>
-struct select_type
-{
-};
-template <typename Ta, typename Tb>
-struct select_type<true, Ta, Tb>
-{
-	using type = Ta;
-};
-template <typename Ta, typename Tb>
-struct select_type<false, Ta, Tb>
-{
-	using type = Tb;
-};
-} // namespace mpt
-
-
-
 using int8   = std::int8_t;
 using int16  = std::int16_t;
 using int32  = std::int32_t;
@@ -62,20 +43,20 @@ using uint16 = std::uint16_t;
 using uint32 = std::uint32_t;
 using uint64 = std::uint64_t;
 
-constexpr int8 int8_min     = std::numeric_limits<int8>::min();
-constexpr int16 int16_min   = std::numeric_limits<int16>::min();
-constexpr int32 int32_min   = std::numeric_limits<int32>::min();
-constexpr int64 int64_min   = std::numeric_limits<int64>::min();
+constexpr inline int8 int8_min     = std::numeric_limits<int8>::min();
+constexpr inline int16 int16_min   = std::numeric_limits<int16>::min();
+constexpr inline int32 int32_min   = std::numeric_limits<int32>::min();
+constexpr inline int64 int64_min   = std::numeric_limits<int64>::min();
 
-constexpr int8 int8_max     = std::numeric_limits<int8>::max();
-constexpr int16 int16_max   = std::numeric_limits<int16>::max();
-constexpr int32 int32_max   = std::numeric_limits<int32>::max();
-constexpr int64 int64_max   = std::numeric_limits<int64>::max();
+constexpr inline int8 int8_max     = std::numeric_limits<int8>::max();
+constexpr inline int16 int16_max   = std::numeric_limits<int16>::max();
+constexpr inline int32 int32_max   = std::numeric_limits<int32>::max();
+constexpr inline int64 int64_max   = std::numeric_limits<int64>::max();
 
-constexpr uint8 uint8_max   = std::numeric_limits<uint8>::max();
-constexpr uint16 uint16_max = std::numeric_limits<uint16>::max();
-constexpr uint32 uint32_max = std::numeric_limits<uint32>::max();
-constexpr uint64 uint64_max = std::numeric_limits<uint64>::max();
+constexpr inline uint8 uint8_max   = std::numeric_limits<uint8>::max();
+constexpr inline uint16 uint16_max = std::numeric_limits<uint16>::max();
+constexpr inline uint32 uint32_max = std::numeric_limits<uint32>::max();
+constexpr inline uint64 uint64_max = std::numeric_limits<uint64>::max();
 
 
 
@@ -104,13 +85,13 @@ constexpr long double operator"" _fe(long double lit)
 // fp quad
 // n/a
 
-using float32 = mpt::select_type<sizeof(float) == 4,
+using float32 = std::conditional<sizeof(float) == 4,
 		float
 	,
-		mpt::select_type<sizeof(double) == 4,
+		std::conditional<sizeof(double) == 4,
 			double
 		,
-      mpt::select_type<sizeof(long double) == 4,
+      std::conditional<sizeof(long double) == 4,
 				long double
 			,
 				float
@@ -122,13 +103,13 @@ constexpr float32 operator"" _f32(long double lit)
 	return static_cast<float32>(lit);
 }
 
-using float64 = mpt::select_type<sizeof(float) == 8,
+using float64 = std::conditional<sizeof(float) == 8,
 		float
 	,
-		mpt::select_type<sizeof(double) == 8,
+		std::conditional<sizeof(double) == 8,
 			double
 		,
-      mpt::select_type<sizeof(long double) == 8,
+      std::conditional<sizeof(long double) == 8,
 				long double
 			,
 				double
@@ -165,13 +146,13 @@ using nativefloat = float32;
 using nativefloat = float64;
 #else
 // prefer smaller floats, but try to use IEEE754 floats
-using nativefloat = mpt::select_type<std::numeric_limits<float>::is_iec559,
+using nativefloat = std::conditional<std::numeric_limits<float>::is_iec559,
 		float
 	,
-		mpt::select_type<std::numeric_limits<double>::is_iec559,
+		std::conditional<std::numeric_limits<double>::is_iec559,
 			double
 		,
-			mpt::select_type<std::numeric_limits<long double>::is_iec559,
+			std::conditional<std::numeric_limits<long double>::is_iec559,
 				long double
 			,
 				float
