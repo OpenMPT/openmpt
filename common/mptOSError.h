@@ -93,7 +93,12 @@ inline HANDLE CheckFileHANDLE(HANDLE handle)
 {
 	if(handle == INVALID_HANDLE_VALUE)
 	{
-		throw Windows::Error(::GetLastError());
+		DWORD err = ::GetLastError();
+		if((err == ERROR_NOT_ENOUGH_MEMORY) || (err == ERROR_OUTOFMEMORY))
+		{
+			mpt::throw_out_of_memory();
+		}
+		throw Windows::Error(err);
 	}
 	return handle;
 }
@@ -103,7 +108,12 @@ inline HANDLE CheckHANDLE(HANDLE handle)
 {
 	if(handle == NULL)
 	{
-		throw Windows::Error(::GetLastError());
+		DWORD err = ::GetLastError();
+		if((err == ERROR_NOT_ENOUGH_MEMORY) || (err == ERROR_OUTOFMEMORY))
+		{
+			mpt::throw_out_of_memory();
+		}
+		throw Windows::Error(err);
 	}
 	return handle;
 }
@@ -113,7 +123,12 @@ inline void CheckBOOL(BOOL result)
 {
 	if(result == FALSE)
 	{
-		throw Windows::Error(::GetLastError());
+		DWORD err = ::GetLastError();
+		if((err == ERROR_NOT_ENOUGH_MEMORY) || (err == ERROR_OUTOFMEMORY))
+		{
+			mpt::throw_out_of_memory();
+		}
+		throw Windows::Error(err);
 	}
 }
 
