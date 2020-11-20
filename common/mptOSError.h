@@ -136,6 +136,20 @@ inline void CheckBOOL(BOOL result)
 }
 
 
+inline void ExpectError(DWORD expected)
+{
+	DWORD err = ::GetLastError();
+	if(err != expected)
+	{
+		if((err == ERROR_NOT_ENOUGH_MEMORY) || (err == ERROR_OUTOFMEMORY))
+		{
+			mpt::throw_out_of_memory();
+		}
+		throw Windows::Error(err);
+	}
+}
+
+
 } // namespace Windows
 
 } // namespace mpt

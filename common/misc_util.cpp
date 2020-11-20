@@ -341,11 +341,7 @@ std::optional<mpt::ustring> getenv(const mpt::ustring &env_var)
 		DWORD size = GetEnvironmentVariable(mpt::ToWide(env_var).c_str(), buf.data(), 32767);
 		if(size == 0)
 		{
-			if(GetLastError() != ERROR_ENVVAR_NOT_FOUND)
-			{
-				// error
-				return std::nullopt;
-			}
+			mpt::Windows::ExpectError(ERROR_ENVVAR_NOT_FOUND);
 			return std::nullopt;
 		}
 		return mpt::ToUnicode(buf.data());
