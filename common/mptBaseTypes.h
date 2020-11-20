@@ -65,19 +65,19 @@ constexpr inline uint64 uint64_max = std::numeric_limits<uint64>::max();
 
 // fp single
 using single = float;
-constexpr single operator"" _fs(long double lit)
+constexpr single operator"" _fs(long double lit) noexcept
 {
 	return static_cast<single>(lit);
 }
 
 // fp double
-constexpr double operator"" _fd(long double lit)
+constexpr double operator"" _fd(long double lit) noexcept
 {
 	return static_cast<double>(lit);
 }
 
 // fp extended
-constexpr long double operator"" _fe(long double lit)
+constexpr long double operator"" _fe(long double lit) noexcept
 {
 	return static_cast<long double>(lit);
 }
@@ -98,7 +98,7 @@ using float32 = std::conditional<sizeof(float) == 4,
 			>::type
 		>::type
 	>::type;
-constexpr float32 operator"" _f32(long double lit)
+constexpr float32 operator"" _f32(long double lit) noexcept
 {
 	return static_cast<float32>(lit);
 }
@@ -116,7 +116,7 @@ using float64 = std::conditional<sizeof(float) == 8,
 			>::type
 		>::type
 	>::type;
-constexpr float64 operator"" _f64(long double lit)
+constexpr float64 operator"" _f64(long double lit) noexcept
 {
 	return static_cast<float64>(lit);
 }
@@ -137,30 +137,34 @@ struct float_traits
 	static constexpr bool is_ieee754_binary64 = is_float && is_ieee754_binary && is_float64;
 	static constexpr bool is_ieee754_binary32ne = is_float && is_ieee754_binary && is_float32 && is_native_endian;
 	static constexpr bool is_ieee754_binary64ne = is_float && is_ieee754_binary && is_float64 && is_native_endian;
+	static constexpr bool is_preferred = is_float && ((is_float32 && MPT_COMPILER_QUIRK_FLOAT_PREFER32) || (is_float64 && MPT_COMPILER_QUIRK_FLOAT_PREFER64));
 };
 }  // namespace mpt
 
-#if MPT_COMPILER_QUIRK_FLOAT_PREFER32
-using nativefloat = float32;
-#elif MPT_COMPILER_QUIRK_FLOAT_PREFER64
-using nativefloat = float64;
-#else
 // prefer smaller floats, but try to use IEEE754 floats
-using nativefloat = std::conditional<std::numeric_limits<float>::is_iec559,
-		float
+using nativefloat =
+	std::conditional<mpt::float_traits<float32>::is_preferred,
+		float32
 	,
-		std::conditional<std::numeric_limits<double>::is_iec559,
-			double
+		std::conditional<mpt::float_traits<float64>::is_preferred,
+			float64
 		,
-			std::conditional<std::numeric_limits<long double>::is_iec559,
-				long double
-			,
+			std::conditional<std::numeric_limits<float>::is_iec559,
 				float
+			,
+				std::conditional<std::numeric_limits<double>::is_iec559,
+					double
+				,
+					std::conditional<std::numeric_limits<long double>::is_iec559,
+						long double
+					,
+						float
+					>::type
+				>::type
 			>::type
 		>::type
-	>::type;	
-#endif
-constexpr nativefloat operator"" _nf(long double lit)
+	>::type;
+constexpr nativefloat operator"" _nf(long double lit) noexcept
 {
 	return static_cast<nativefloat>(lit);
 }
