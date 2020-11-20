@@ -49,6 +49,9 @@ public:
 
 public:
 
+#if MPT_COMPILER_MSVC
+	_Acquires_lock_(m_refGlobalMutex.mutex)
+#endif // MPT_COMPILER_MSVC
 	CriticalSection();
 
 	CriticalSection(CriticalSection &&other) noexcept;

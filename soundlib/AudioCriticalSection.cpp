@@ -19,6 +19,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MODPLUG_TRACKER)
 
+#if MPT_COMPILER_MSVC
+_Acquires_lock_(m_refGlobalMutex.mutex)
+#endif // MPT_COMPILER_MSVC
 CriticalSection::CriticalSection()
 	: m_refGlobalMutex(Tracker::GetGlobalMutexRef())
 	, inSection(false)
