@@ -22,6 +22,9 @@
 #if defined(MODPLUG_TRACKER) || (defined(LIBOPENMPT_BUILD) && defined(LIBOPENMPT_BUILD_TEST))
 #if MPT_OS_WINDOWS
 #include <stdexcept>
+#if MPT_OS_WINDOWS_WINRT
+#include <vector>
+#endif // MPT_OS_WINDOWS_WINRT
 #endif // MPT_OS_WINDOWS
 #endif // MODPLUG_TRACKER || (LIBOPENMPT_BUILD && LIBOPENMPT_BUILD_TEST)
 
@@ -49,22 +52,51 @@ namespace Windows
 inline mpt::ustring GetErrorMessage(DWORD errorCode, HANDLE hModule = NULL)
 {
 	mpt::ustring message;
-	void *lpMsgBuf = nullptr;
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | (hModule ? FORMAT_MESSAGE_FROM_HMODULE : 0) | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+#if MPT_OS_WINDOWS_WINRT
+	std::vector<TCHAR> msgbuf(65536);
+	if(FormatMessage(
+		(hModule ? FORMAT_MESSAGE_FROM_HMODULE : 0) | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		hModule,
 		errorCode,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR)&lpMsgBuf,
-		0,
-		NULL);
-	if(!lpMsgBuf)
+		msgbuf.data(),
+		mpt::saturate_cast<DWORD>(msgbuf.size()),
+		NULL)
+		== 0)
 	{
 		DWORD e = GetLastError();
 		if((e == ERROR_NOT_ENOUGH_MEMORY) || (e == ERROR_OUTOFMEMORY))
 		{
 			mpt::throw_out_of_memory();
 		}
+		return {};
+	}
+	message = mpt::ToUnicode(mpt::winstring(msgbuf.data()));
+#else
+	void *lpMsgBuf = nullptr;
+	if(FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | (hModule ? FORMAT_MESSAGE_FROM_HMODULE : 0) | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		hModule,
+		errorCode,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&lpMsgBuf,
+		0,
+		NULL)
+		== 0)
+	{
+		DWORD e = GetLastError();
+		if(lpMsgBuf)
+		{
+			LocalFree(lpMsgBuf);	
+		}
+		if((e == ERROR_NOT_ENOUGH_MEMORY) || (e == ERROR_OUTOFMEMORY))
+		{
+			mpt::throw_out_of_memory();
+		}
+		return {};
+	}
+	if(!lpMsgBuf)
+	{
 		return {};
 	}
 	try
@@ -76,6 +108,7 @@ inline mpt::ustring GetErrorMessage(DWORD errorCode, HANDLE hModule = NULL)
 		mpt::rethrow_out_of_memory(e);
 	}
 	LocalFree(lpMsgBuf);
+#endif
 	return message;
 }
 
