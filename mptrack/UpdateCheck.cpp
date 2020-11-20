@@ -1569,7 +1569,7 @@ CUpdateCheck::Error::Error(CString errorMessage, DWORD errorCode)
 
 CString CUpdateCheck::Error::FormatErrorCode(CString errorMessage, DWORD errorCode)
 {
-	errorMessage += mpt::ToCString(Windows::GetErrorMessage(errorCode, GetModuleHandle(TEXT("wininet.dll"))));
+	errorMessage += mpt::ToCString(mpt::Windows::GetErrorMessage(errorCode, GetModuleHandle(TEXT("wininet.dll"))));
 	return errorMessage;
 }
 

@@ -117,7 +117,7 @@ class LastErrorException
 {
 public:
 	LastErrorException()
-		: exception(Windows::GetErrorMessage(GetLastError(), GetModuleHandle(TEXT("wininet.dll"))))
+		: exception(mpt::Windows::GetErrorMessage(GetLastError(), GetModuleHandle(TEXT("wininet.dll"))))
 	{
 	}
 };

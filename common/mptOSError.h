@@ -39,6 +39,9 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MODPLUG_TRACKER)
 #if MPT_OS_WINDOWS
 
+namespace mpt
+{
+
 namespace Windows
 {
 
@@ -134,6 +137,8 @@ inline void CheckBOOL(BOOL result)
 
 
 } // namespace Windows
+
+} // namespace mpt
 
 #endif // MPT_OS_WINDOWS
 #endif // MODPLUG_TRACKER

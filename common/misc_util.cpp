@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "misc_util.h"
 
+#include "mptOSError.h"
+
 #if MPT_OS_WINDOWS
 #include <windows.h>
 #endif
