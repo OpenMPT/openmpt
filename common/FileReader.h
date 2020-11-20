@@ -1340,7 +1340,7 @@ using MemoryFileReader = detail::FileReader<FileReaderTraitsMemory>;
 
 
 // Initialize file reader object with pointer to data and data length.
-template <typename Tbyte> static inline FileReader make_FileReader(mpt::span<Tbyte> bytedata, std::shared_ptr<mpt::PathString> filename = nullptr)
+template <typename Tbyte> inline FileReader make_FileReader(mpt::span<Tbyte> bytedata, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileReader(mpt::byte_cast<mpt::const_byte_span>(bytedata), std::move(filename));
 }
@@ -1348,7 +1348,7 @@ template <typename Tbyte> static inline FileReader make_FileReader(mpt::span<Tby
 #if defined(MPT_FILEREADER_CALLBACK_STREAM)
 
 // Initialize file reader object with a CallbackStream.
-static inline FileReader make_FileReader(CallbackStream s, std::shared_ptr<mpt::PathString> filename = nullptr)
+inline FileReader make_FileReader(CallbackStream s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileReader(
 				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
@@ -1361,7 +1361,7 @@ static inline FileReader make_FileReader(CallbackStream s, std::shared_ptr<mpt::
 #endif // MPT_FILEREADER_CALLBACK_STREAM
 	
 // Initialize file reader object with a std::istream.
-static inline FileReader make_FileReader(std::istream *s, std::shared_ptr<mpt::PathString> filename = nullptr)
+inline FileReader make_FileReader(std::istream *s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileReader(
 				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
