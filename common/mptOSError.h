@@ -36,7 +36,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MODPLUG_TRACKER)
+#if defined(MODPLUG_TRACKER) || (defined(LIBOPENMPT_BUILD) && defined(LIBOPENMPT_BUILD_TEST))
 #if MPT_OS_WINDOWS
 
 namespace mpt
@@ -155,7 +155,7 @@ inline void ExpectError(DWORD expected)
 } // namespace mpt
 
 #endif // MPT_OS_WINDOWS
-#endif // MODPLUG_TRACKER
+#endif // MODPLUG_TRACKER || (LIBOPENMPT_BUILD && LIBOPENMPT_BUILD_TEST)
 
 
 
