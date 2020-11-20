@@ -21,7 +21,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #define MAX_EQ_BANDS	6
 
-typedef struct _EQBANDSTRUCT
+typedef struct EQBANDSTRUCT_
 {
 	float32 a0;
 	float32 a1;
@@ -40,7 +40,7 @@ typedef struct _EQBANDSTRUCT
 class CEQ
 {
 private:
-	EQBANDSTRUCT gEQ[MAX_EQ_BANDS*2];
+	std::array<EQBANDSTRUCT, MAX_EQ_BANDS*2> gEQ;
 public:
 	CEQ();
 public:

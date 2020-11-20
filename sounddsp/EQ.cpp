@@ -27,7 +27,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-static constexpr UINT gEqLinearToDB[33] =
+static constexpr std::array<UINT, 33> gEqLinearToDB =
 {
 	16, 19, 22, 25, 28, 31, 34, 37,
 	40, 43, 46, 49, 52, 55, 58, 61,
@@ -35,8 +35,8 @@ static constexpr UINT gEqLinearToDB[33] =
 	160, 172, 184, 196, 208, 220, 232, 244, 256
 };
 
-static constexpr EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
-{
+static constexpr std::array<EQBANDSTRUCT, MAX_EQ_BANDS*2> gEQDefaults =
+{{
 	// Default: Flat EQ
 	{0,0,0,0,0, 0,0,0,0, 1,   120, false},
 	{0,0,0,0,0, 0,0,0,0, 1,   600, false},
@@ -49,8 +49,8 @@ static constexpr EQBANDSTRUCT gEQDefaults[MAX_EQ_BANDS*2] =
 	{0,0,0,0,0, 0,0,0,0, 1,  1200, false},
 	{0,0,0,0,0, 0,0,0,0, 1,  3000, false},
 	{0,0,0,0,0, 0,0,0,0, 1,  6000, false},
-	{0,0,0,0,0, 0,0,0,0, 1, 10000, false},
-};
+	{0,0,0,0,0, 0,0,0,0, 1, 10000, false}
+}};
 
 #ifdef ENABLE_X86
 
@@ -317,7 +317,7 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 
 CEQ::CEQ()
 {
-	memcpy(gEQ, gEQDefaults, sizeof(gEQ));
+	gEQ = gEQDefaults;
 }
 
 
