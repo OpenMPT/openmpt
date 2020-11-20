@@ -658,7 +658,7 @@ namespace asymmetric
 
 
 
-		static inline void jws_verify_at_least_one(std::vector<public_key> &keys, const std::vector<std::byte> &expectedPayload, const mpt::ustring &signature)
+		inline void jws_verify_at_least_one(std::vector<public_key> &keys, const std::vector<std::byte> &expectedPayload, const mpt::ustring &signature)
 		{
 			std::vector<mpt::ustring> keynames = mpt::crypto::asymmetric::jws_get_keynames(signature);
 			bool sigchecked = false;
@@ -684,7 +684,7 @@ namespace asymmetric
 
 
 
-		static inline std::vector<std::byte> jws_verify_at_least_one(std::vector<public_key> &keys, const mpt::ustring &signature)
+		inline std::vector<std::byte> jws_verify_at_least_one(std::vector<public_key> &keys, const mpt::ustring &signature)
 		{
 			std::vector<mpt::ustring> keynames = mpt::crypto::asymmetric::jws_get_keynames(signature);
 			for(const auto & keyname : keynames)
