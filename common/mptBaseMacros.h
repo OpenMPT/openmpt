@@ -129,7 +129,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#define MPT_ATTR_NODISCARD [[nodiscard]]
 #define MPT_DISCARD(expr) static_cast<void>(expr)
 
 
