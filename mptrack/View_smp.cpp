@@ -268,34 +268,34 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 		return;
 
 	const TimelineFormat format = TrackerSettings::Instance().sampleEditorTimelineFormat;
-	m_timelineInterval = MulDiv(150, m_nDPIx, 96);
-	int samplesPerInterval = 1;
+	double timelineInterval = MulDiv(150, m_nDPIx, 96);  // Timeline interval should be around 150 pixels
 	if(m_nZoom > 0)
-		samplesPerInterval = m_timelineInterval << (m_nZoom - 1);
+		timelineInterval *= 1 << (m_nZoom - 1);
 	else if(m_nZoom < 0)
-		samplesPerInterval = m_timelineInterval >> (-m_nZoom - 1);
+		timelineInterval /= 1 << (-m_nZoom - 1);
 	else if(m_sizeTotal.cx != 0)
-		samplesPerInterval = Util::muldiv(m_timelineInterval, dwLen, m_sizeTotal.cx);
+		timelineInterval = timelineInterval * dwLen / m_sizeTotal.cx;
 	if(format == TimelineFormat::Seconds)
-		samplesPerInterval = Util::muldiv(samplesPerInterval, 1000, sampleRate);
-	if(!samplesPerInterval)
-		samplesPerInterval = 1;
+		timelineInterval *= 1000.0 / sampleRate;
+	if(timelineInterval < 1)
+		timelineInterval = 1;
 
 	const double power = (format == TimelineFormat::SamplesPow2) ? 2.0 : 10.0;
-	m_timelineUnit = mpt::saturate_round<int>(std::log(static_cast<double>(samplesPerInterval)) / std::log(power));
+	m_timelineUnit = mpt::saturate_round<int>(std::log(static_cast<double>(timelineInterval)) / std::log(power));
 	if(m_timelineUnit < 1)
 		m_timelineUnit = 0;
 	m_timelineUnit = static_cast<int>(std::pow(power, m_timelineUnit));
-	samplesPerInterval = Util::AlignUp(samplesPerInterval, m_timelineUnit);
+	timelineInterval = std::max(1.0, std::round(timelineInterval / m_timelineUnit)) * m_timelineUnit;
 	if(format == TimelineFormat::Seconds)
-		samplesPerInterval = Util::muldiv(samplesPerInterval, sampleRate, 1000);
+		timelineInterval *= sampleRate / 1000.0;
 
 	if(m_nZoom > 0)
-		m_timelineInterval = (samplesPerInterval >> (m_nZoom - 1));
+		timelineInterval /= 1 << (m_nZoom - 1);
 	else if(m_nZoom < 0)
-		m_timelineInterval = samplesPerInterval << (-m_nZoom - 1);
+		timelineInterval *= 1 << (-m_nZoom - 1);
 	else
-		m_timelineInterval = Util::muldiv(samplesPerInterval, m_sizeTotal.cx, dwLen);
+		timelineInterval = timelineInterval * m_sizeTotal.cx / dwLen;
+	m_timelineInterval = mpt::saturate_round<int>(timelineInterval);
 
 	m_cachedSampleRate = sampleRate;
 }
@@ -571,7 +571,7 @@ SmpLength CViewSample::ScreenToSample(int32 x, bool ignoreSampleLength) const
 		if(m_nZoom > 0)
 			n = std::max(0, m_nScrollPosX + x) << (m_nZoom - 1);
 		else if(m_nZoom < 0)
-			n = m_nScrollPosX + (std::max(0, x) >> (-m_nZoom - 1));
+			n = std::max(0, m_nScrollPosX + mpt::rshift_signed(x, (-m_nZoom - 1)));
 		else
 		{
 			if(x < 0)
@@ -590,9 +590,19 @@ int32 CViewSample::SecondsToScreen(double x) const
 {
 	const ModSample &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
 	const auto sampleRate = sample.GetSampleRate(GetDocument()->GetModType());
-	if(sampleRate == 0)
+	if(sampleRate == 0 || sample.nLength == 0)
 		return 0;
-	return SampleToScreen(mpt::saturate_round<SmpLength>(x * sampleRate));
+
+	x *= sampleRate;
+	// This is essentially duplicated from SampleToScreen but carried out in double precision to avoid rounding errors at very high zoom levels
+	if(m_nZoom > 0)
+		x = x / (1 << (m_nZoom - 1)) - m_nScrollPosX;
+	else if(m_nZoom < 0)
+		x = (x - m_nScrollPosX) * (1 << (-m_nZoom - 1));
+	else
+		x = x * m_sizeTotal.cx / sample.nLength;
+
+	return mpt::saturate_round<int32>(x);
 }
 
 
