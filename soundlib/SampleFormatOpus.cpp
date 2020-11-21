@@ -117,6 +117,9 @@ bool CSoundFile::ReadOpusSample(SAMPLEINDEX sample, FileReader &file)
 
 	sampleName = mpt::ToCharset(GetCharsetInternal(), GetSampleNameFromTags(GetOpusFileTags(of)));
 
+	if(auto length = op_pcm_total(of, 0); length != OP_EINVAL)
+		raw_sample_data.reserve(std::min(MAX_SAMPLE_LENGTH, mpt::saturate_cast<SmpLength>(length)) * channels);
+
 	std::vector<int16> decodeBuf(120 * 48000 / 1000); // 120ms (max Opus packet), 48kHz
 	bool eof = false;
 	while(!eof)
@@ -157,29 +160,30 @@ bool CSoundFile::ReadOpusSample(SAMPLEINDEX sample, FileReader &file)
 		return false;
 	}
 
-	if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
-	{
-		return false;
-	}
-
 	DestroySampleThreadsafe(sample);
-	m_szNames[sample] = sampleName;
-	Samples[sample].Initialize();
-	Samples[sample].nC5Speed = rate;
-	Samples[sample].nLength = mpt::saturate_cast<SmpLength>(raw_sample_data.size() / channels);
+	ModSample &mptSample = Samples[sample];
+	mptSample.Initialize();
+	mptSample.nC5Speed = rate;
+	mptSample.nLength = std::min(MAX_SAMPLE_LENGTH, mpt::saturate_cast<SmpLength>(raw_sample_data.size() / channels));
 
-	Samples[sample].uFlags.set(CHN_16BIT);
-	Samples[sample].uFlags.set(CHN_STEREO, channels == 2);
+	mptSample.uFlags.set(CHN_16BIT);
+	mptSample.uFlags.set(CHN_STEREO, channels == 2);
 
-	if(!Samples[sample].AllocateSample())
+	if(!mptSample.AllocateSample())
 	{
 		return false;
 	}
 
-	std::copy(raw_sample_data.begin(), raw_sample_data.end(), Samples[sample].sample16());
+	if(raw_sample_data.size() / channels > MAX_SAMPLE_LENGTH)
+	{
+		AddToLog(LogWarning, U_("Sample has been truncated!"));
+	}
 
-	Samples[sample].Convert(MOD_TYPE_IT, GetType());
-	Samples[sample].PrecomputeLoops(*this, false);
+	std::copy(raw_sample_data.begin(), raw_sample_data.begin() + mptSample.nLength * channels, mptSample.sample16());
+
+	mptSample.Convert(MOD_TYPE_IT, GetType());
+	mptSample.PrecomputeLoops(*this, false);
+	m_szNames[sample] = sampleName;
 
 	return true;
 
