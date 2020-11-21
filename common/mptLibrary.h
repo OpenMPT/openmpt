@@ -26,13 +26,13 @@ typedef void* (*FuncPtr)(); // pointer to function returning void*
 
 class LibraryHandle;
 
-enum LibrarySearchPath
+enum class LibrarySearchPath
 {
-	LibrarySearchPathInvalid,
-	LibrarySearchPathDefault,
-	LibrarySearchPathApplication,
-	LibrarySearchPathSystem,
-	LibrarySearchPathFullPath,
+	Invalid,
+	Default,
+	Application,
+	System,
+	FullPath,
 };
 
 class LibraryPath
