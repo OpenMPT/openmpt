@@ -357,6 +357,7 @@ BOOL CViewSample::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 		ScrollWindow(scrollByX, scrollByY);
 		if(scrollByX) SetScrollPos(SB_HORZ, x);
 		if(scrollByY) SetScrollPos(SB_VERT, y);
+		m_forceRedrawWaveform  = true;
 	}
 	return TRUE;
 }
