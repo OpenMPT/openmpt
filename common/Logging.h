@@ -126,7 +126,7 @@ extern bool ConsoleEnabled;
 void SetFacilities(const std::string &solo, const std::string &blocked);
 bool IsFacilityActive(const char *facility);
 #else
-static MPT_FORCEINLINE bool IsFacilityActive(const char * /*facility*/ ) { return true; }
+MPT_FORCEINLINE bool IsFacilityActive(const char * /*facility*/ ) { return true; }
 #endif
 
 
