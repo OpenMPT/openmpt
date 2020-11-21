@@ -61,18 +61,18 @@ extern uint8 ProcStepping;
 void Init();
 
 // enabled processor features for inline asm and intrinsics
-static MPT_FORCEINLINE uint32 GetEnabledFeatures()
+MPT_FORCEINLINE uint32 GetEnabledFeatures()
 {
 	return ProcSupport;
 }
 
 // available processor features
-static MPT_FORCEINLINE uint32 GetAvailableFeatures()
+MPT_FORCEINLINE uint32 GetAvailableFeatures()
 {
 	return RealProcSupport;
 }
 
-static MPT_FORCEINLINE bool HasFeatureSet(uint32 features)
+MPT_FORCEINLINE bool HasFeatureSet(uint32 features)
 {
 	return features == (GetEnabledFeatures() & features);
 }
