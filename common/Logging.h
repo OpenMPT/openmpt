@@ -179,7 +179,7 @@ namespace Trace {
 //  if there are not multiple thread adding trace points at high frequency (way greater than 1000Hz),
 //  which, in OpenMPT, is only ever the case for just a single thread (the audio thread), if at all.
 extern std::atomic<bool> g_Enabled;
-static inline bool IsEnabled() { return g_Enabled; }
+inline bool IsEnabled() { return g_Enabled; }
 
 enum class Direction : int8
 {
