@@ -323,21 +323,14 @@ BOOL CMainFrame::DestroyWindow()
 	}
 	if (shMidiIn) midiCloseDevice();
 	// Delete bitmaps
-	if (bmpNotes)
-	{
-		delete bmpNotes;
-		bmpNotes = nullptr;
-	}
-	if (bmpVUMeters)
-	{
-		delete bmpVUMeters;
-		bmpVUMeters = nullptr;
-	}
-	if (bmpPluginVUMeters)
-	{
-		delete bmpPluginVUMeters;
-		bmpPluginVUMeters = nullptr;
-	}
+	delete bmpNotes;
+	bmpNotes = nullptr;
+	
+	delete bmpVUMeters;
+	bmpVUMeters = nullptr;
+	
+	delete bmpPluginVUMeters;
+	bmpPluginVUMeters = nullptr;
 
 	PatternFont::DeleteFontData();
 
@@ -2802,9 +2795,9 @@ LRESULT CMainFrame::OnViewMIDIMapping(WPARAM wParam, LPARAM lParam)
 }
 
 
-HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathString>& vPaths, const mpt::PathString &pszFolderName, const uint16 nIdRangeBegin)
+HMENU CMainFrame::CreateFileMenu(const size_t maxCount, std::vector<mpt::PathString>& paths, const mpt::PathString &folderName, const uint16 idRangeBegin)
 {
-	vPaths.clear();
+	paths.clear();
 	HMENU hMenu = ::CreatePopupMenu();
 	ASSERT(hMenu != NULL);
 	if (hMenu != NULL)
@@ -2818,18 +2811,18 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 
 			mpt::PathString basePath;
 			basePath = (i == 0) ? theApp.GetInstallPath() : theApp.GetConfigPath();
-			basePath += pszFolderName;
+			basePath += folderName;
 			if(!basePath.IsDirectory())
 				continue;
 
 			FolderScanner scanner(basePath, FolderScanner::kOnlyFiles);
 			mpt::PathString fileName;
-			while(filesAdded < nMaxCount && scanner.Next(fileName))
+			while(filesAdded < maxCount && scanner.Next(fileName))
 			{
-				vPaths.push_back(fileName);
+				paths.push_back(fileName);
 				CString file = fileName.GetFullFileName().ToCString();
 				file.Replace(_T("&"), _T("&&"));
-				AppendMenu(hMenu, MF_STRING, nIdRangeBegin + filesAdded, file);
+				AppendMenu(hMenu, MF_STRING, idRangeBegin + filesAdded, file);
 				filesAdded++;
 			}
 		}
@@ -2840,7 +2833,7 @@ HMENU CMainFrame::CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathSt
 		} else
 		{
 			AppendMenu(hMenu, MF_SEPARATOR, 0, 0);
-			AppendMenu(hMenu, MF_STRING, nIdRangeBegin + nMaxCount, _T("Browse..."));
+			AppendMenu(hMenu, MF_STRING, idRangeBegin + maxCount, _T("Browse..."));
 		}
 	}
 

@@ -748,7 +748,7 @@ void COrderList::OnPaint()
 	TCHAR s[64];
 	CPaintDC dc(this);
 	HGDIOBJ oldfont = dc.SelectObject(m_hFont);
-	HGDIOBJ oldpen = dc.SelectObject(GetStockObject(DC_PEN));
+	HGDIOBJ oldpen = dc.SelectStockObject(DC_PEN);
 	const auto separatorColor = GetSysColor(COLOR_WINDOW) ^ 0x808080;
 	const auto colorText = GetSysColor(COLOR_WINDOWTEXT), colorInvalid = GetSysColor(COLOR_GRAYTEXT), colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
 	const auto windowBrush = GetSysColorBrush(COLOR_WINDOW), highlightBrush = GetSysColorBrush(COLOR_HIGHLIGHT), faceBrush = GetSysColorBrush(COLOR_BTNFACE);

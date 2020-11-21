@@ -40,11 +40,11 @@ public:
 	// user to additionally import both built-in tunings.
 	// Older OpenMPT versions will silently skip loading tunings beyond index
 	// 255.
-	enum : size_t { s_nMaxTuningCount = 255 + 255 + 2 };
+	static constexpr size_t s_nMaxTuningCount = 255 + 255 + 2 ;
 
 public:
 
-	// returns observer ptr if successfull
+	// returns observer ptr if successful
 	CTuning* AddTuning(std::unique_ptr<CTuning> pT);
 	CTuning* AddTuning(std::istream &inStrm, mpt::Charset defaultCharset);
 	

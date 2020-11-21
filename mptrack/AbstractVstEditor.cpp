@@ -775,10 +775,6 @@ void CAbstractVstEditor::UpdateOutputMenu()
 
 void CAbstractVstEditor::UpdateMacroMenu()
 {
-	CString label, macroName;
-	bool greyed;
-	int action;
-
 	CMenu *pInfoMenu = m_Menu.GetSubMenu(2);
 	pInfoMenu->DeleteMenu(2, MF_BYPOSITION);
 
@@ -791,10 +787,11 @@ void CAbstractVstEditor::UpdateMacroMenu()
 		m_MacroMenu.CreatePopupMenu();
 	}
 
+	CString label, macroName;
 	for(int nMacro = 0; nMacro < NUM_MACROS; nMacro++)
 	{
-		action = NULL;
-		greyed = true;
+		int action = 0;
+		UINT greyed = MF_GRAYED;
 
 		const MIDIMacroConfig &midiCfg = m_VstPlugin.GetSoundFile().m_MidiCfg;
 
@@ -804,19 +801,19 @@ void CAbstractVstEditor::UpdateMacroMenu()
 		{
 			macroName = _T("Unused. Learn Param...");
 			action= ID_LEARN_MACRO_FROM_PLUGGUI + nMacro;
-			greyed = false;
+			greyed = 0;
 		} else
 		{
 			macroName = midiCfg.GetParameteredMacroName(nMacro, &m_VstPlugin);
 			if(macroType != kSFxPlugParam || macroName.Left(3) != _T("N/A"))
 			{
-				greyed = false;
+				greyed = 0;
 			}
 		}
 
 		label.Format(_T("SF%X: "), nMacro);
 		label += macroName;
-		m_MacroMenu.AppendMenu(MF_STRING | (greyed ? MF_GRAYED : 0), action, label);
+		m_MacroMenu.AppendMenu(MF_STRING | greyed, action, label);
 	}
 
 	pInfoMenu->InsertMenu(2, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(m_MacroMenu.m_hMenu), _T("&Macros"));

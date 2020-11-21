@@ -37,12 +37,12 @@ public:
 
 	size_t size() const { return m_documents.size(); }
 	bool empty() const { return m_documents.empty(); }
-	std::unordered_set<CModDoc *>::iterator begin() { return m_documents.begin(); }
-	std::unordered_set<CModDoc *>::const_iterator begin() const { return m_documents.begin(); }
-	std::unordered_set<CModDoc *>::const_iterator cbegin() const { return m_documents.cbegin(); }
-	std::unordered_set<CModDoc *>::iterator end() { return m_documents.end(); }
-	std::unordered_set<CModDoc *>::const_iterator end() const { return m_documents.end(); }
-	std::unordered_set<CModDoc *>::const_iterator cend() const { return m_documents.cend(); }
+	auto begin() { return m_documents.begin(); }
+	auto begin() const { return m_documents.begin(); }
+	auto cbegin() const { return m_documents.cbegin(); }
+	auto end() { return m_documents.end(); }
+	auto end() const { return m_documents.end(); }
+	auto cend() const { return m_documents.cend(); }
 };
 
 

@@ -719,7 +719,7 @@ mpt::ustring GetFullCreditsString()
 		"\n"
 #endif
 #ifdef MPT_WITH_RTAUDIO
-		"Gary P. Scavone, McGill University\n"
+		"Gary P. Scavone, McGill University for RtAudio\n"
 		"https://www.music.mcgill.ca/~gary/rtaudio/\n"
 		"\n"
 #endif

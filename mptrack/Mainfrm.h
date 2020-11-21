@@ -404,20 +404,20 @@ public:
 	void CreateTemplateModulesMenu();
 	CMenu *GetFileMenu() const;
 
-	/// Creates submenu whose items are filenames of files in both
-	/// AppDirectory\pszFolderName\   (usually C:\program files\OpenMPT\pszFolderName\)
-	/// and
-	/// ConfigDirectory\pszFolderName  (usually %appdata%\OpenMPT\pszFolderName\)
-	/// [in] nMaxCount: Maximum number of items allowed in the menu
-	/// [out] vPaths: Receives the full paths of the files added to the menu.
-	/// [in] pszFolderName: Name of the folder (should end with \)
-	/// [in] nIdRangeBegin: First ID for the menu item.
-	static HMENU CreateFileMenu(const size_t nMaxCount, std::vector<mpt::PathString>& vPaths, const mpt::PathString &pszFolderName, const uint16 nIdRangeBegin);
+	// Creates submenu whose items are filenames of files in both
+	// AppDirectory\folderName\ (usually C:\Program Files\OpenMPT\folderName\)
+	// and
+	// ConfigDirectory\folderName (usually %appdata%\OpenMPT\folderName\)
+	// [in] maxCount: Maximum number of items allowed in the menu
+	// [out] paths: Receives the full paths of the files added to the menu.
+	// [in] folderName: Name of the folder
+	// [in] idRangeBegin: First ID for the menu item.
+	static HMENU CreateFileMenu(const size_t maxCount, std::vector<mpt::PathString>& paths, const mpt::PathString &folderName, const uint16 idRangeBegin);
 
 // Player functions
 public:
 
-	// high level synchronous playback functions, do not hold AudioCriticalSection while calling these
+	// High-level synchronous playback functions, do not hold AudioCriticalSection while calling these
 	bool PreparePlayback();
 	bool StartPlayback();
 	void StopPlayback();
@@ -486,7 +486,7 @@ public:
 
 // Implementation
 public:
-	virtual ~CMainFrame();
+	~CMainFrame() override;
 #ifdef _DEBUG
 	void AssertValid() const override;
 	void Dump(CDumpContext& dc) const override;

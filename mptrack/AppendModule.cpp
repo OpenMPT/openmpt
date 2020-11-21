@@ -234,6 +234,8 @@ void CModDoc::AppendModule(const CSoundFile &source)
 
 	///////////////////////////////////////////////////////////////////////////
 	// Copy patterns
+	const bool tempoSwingDiffers = source.m_tempoSwing != m_SndFile.m_tempoSwing;
+	const bool timeSigDiffers = source.m_nDefaultRowsPerBeat != m_SndFile.m_nDefaultRowsPerBeat || source.m_nDefaultRowsPerMeasure != m_SndFile.m_nDefaultRowsPerMeasure;
 	const CHANNELINDEX copyChannels = std::min(m_SndFile.GetNumChannels(), source.GetNumChannels());
 	for(PATTERNINDEX pat = 0; pat < patternMapping.size(); pat++)
 	{
@@ -254,7 +256,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			if(sourcePat.GetOverrideSignature())
 			{
 				targetPat.SetSignature(sourcePat.GetRowsPerBeat(), sourcePat.GetRowsPerMeasure());
-			} else if(source.m_nDefaultRowsPerBeat != m_SndFile.m_nDefaultRowsPerBeat || source.m_nDefaultRowsPerMeasure != m_SndFile.m_nDefaultRowsPerMeasure)
+			} else if(timeSigDiffers)
 			{
 				// Try fixing differing signature settings by copying them to the newly created patterns
 				targetPat.SetSignature(source.m_nDefaultRowsPerBeat, source.m_nDefaultRowsPerMeasure);
@@ -266,7 +268,7 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			if(sourcePat.HasTempoSwing())
 			{
 				targetPat.SetTempoSwing(sourcePat.GetTempoSwing());
-			} else if(source.m_tempoSwing != m_SndFile.m_tempoSwing)
+			} else if(tempoSwingDiffers)
 			{
 				// Try fixing differing swing settings by copying them to the newly created patterns
 				targetPat.SetSignature(source.m_nDefaultRowsPerBeat, source.m_nDefaultRowsPerMeasure);
