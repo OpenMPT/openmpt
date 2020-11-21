@@ -128,7 +128,7 @@ static_assert(mpt::endian::big != mpt::endian::little, "platform with all scalar
 
 namespace detail {
 
-	static MPT_FORCEINLINE mpt::endian endian_probe() noexcept
+	MPT_FORCEINLINE mpt::endian endian_probe() noexcept
 	{
 		using endian_probe_type = uint32;
 		static_assert(sizeof(endian_probe_type) == 4);
@@ -154,7 +154,7 @@ namespace detail {
 
 } // namespace detail
 
-static MPT_FORCEINLINE mpt::endian get_endian() noexcept
+MPT_FORCEINLINE mpt::endian get_endian() noexcept
 {
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
@@ -172,17 +172,17 @@ static MPT_FORCEINLINE mpt::endian get_endian() noexcept
 #endif // MPT_COMPILER_MSVC
 }
 
-static MPT_FORCEINLINE bool endian_is_little() noexcept
+MPT_FORCEINLINE bool endian_is_little() noexcept
 {
 	return get_endian() == mpt::endian::little;
 }
 
-static MPT_FORCEINLINE bool endian_is_big() noexcept
+MPT_FORCEINLINE bool endian_is_big() noexcept
 {
 	return get_endian() == mpt::endian::big;
 }
 
-static MPT_FORCEINLINE bool endian_is_weird() noexcept
+MPT_FORCEINLINE bool endian_is_weird() noexcept
 {
 	return !endian_is_little() && !endian_is_big();
 }
@@ -265,19 +265,19 @@ namespace mpt { namespace detail {
 // catch system macros
 #ifndef MPT_bswap16
 #ifdef bswap16
-static MPT_FORCEINLINE uint16 mpt_bswap16(uint16 x) { return bswap16(x); }
+MPT_FORCEINLINE uint16 mpt_bswap16(uint16 x) { return bswap16(x); }
 #define MPT_bswap16 mpt::detail::mpt_bswap16
 #endif
 #endif
 #ifndef MPT_bswap32
 #ifdef bswap32
-static MPT_FORCEINLINE uint32 mpt_bswap32(uint32 x) { return bswap32(x); }
+MPT_FORCEINLINE uint32 mpt_bswap32(uint32 x) { return bswap32(x); }
 #define MPT_bswap32 mpt::detail::mpt_bswap32
 #endif
 #endif
 #ifndef MPT_bswap64
 #ifdef bswap64
-static MPT_FORCEINLINE uint64 mpt_bswap64(uint64 x) { return bswap64(x); }
+MPT_FORCEINLINE uint64 mpt_bswap64(uint64 x) { return bswap64(x); }
 #define MPT_bswap64 mpt::detail::mpt_bswap64
 #endif
 #endif
@@ -387,7 +387,7 @@ static MPT_CONSTEXPR20_FUN char   SwapBytes(char   value) noexcept { return valu
 
 
 // 1.0f --> 0x3f800000u
-static MPT_FORCEINLINE uint32 EncodeIEEE754binary32(float32 f)
+MPT_FORCEINLINE uint32 EncodeIEEE754binary32(float32 f)
 {
 	if constexpr(mpt::float_traits<float32>::is_ieee754_binary32ne)
 	{
@@ -419,7 +419,7 @@ static MPT_FORCEINLINE uint32 EncodeIEEE754binary32(float32 f)
 		}
 	}
 }
-static MPT_FORCEINLINE uint64 EncodeIEEE754binary64(float64 f)
+MPT_FORCEINLINE uint64 EncodeIEEE754binary64(float64 f)
 {
 	if constexpr(mpt::float_traits<float64>::is_ieee754_binary64ne)
 	{
@@ -453,7 +453,7 @@ static MPT_FORCEINLINE uint64 EncodeIEEE754binary64(float64 f)
 }
 
 // 0x3f800000u --> 1.0f
-static MPT_FORCEINLINE float32 DecodeIEEE754binary32(uint32 i)
+MPT_FORCEINLINE float32 DecodeIEEE754binary32(uint32 i)
 {
 	if constexpr(mpt::float_traits<float32>::is_ieee754_binary32ne)
 	{
@@ -479,7 +479,7 @@ static MPT_FORCEINLINE float32 DecodeIEEE754binary32(uint32 i)
 		}
 	}
 }
-static MPT_FORCEINLINE float64 DecodeIEEE754binary64(uint64 i)
+MPT_FORCEINLINE float64 DecodeIEEE754binary64(uint64 i)
 {
 	if constexpr(mpt::float_traits<float64>::is_ieee754_binary64ne)
 	{
