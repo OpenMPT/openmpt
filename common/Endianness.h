@@ -44,22 +44,22 @@ using std::endian;
 
 static_assert(mpt::endian::big != mpt::endian::little, "platform with all scalar types having size 1 is not supported");
 
-static constexpr mpt::endian get_endian() noexcept
+constexpr mpt::endian get_endian() noexcept
 {
 	return mpt::endian::native;
 }
 
-static constexpr bool endian_is_little() noexcept
+constexpr bool endian_is_little() noexcept
 {
 	return get_endian() == mpt::endian::little;
 }
 
-static constexpr bool endian_is_big() noexcept
+constexpr bool endian_is_big() noexcept
 {
 	return get_endian() == mpt::endian::big;
 }
 
-static constexpr bool endian_is_weird() noexcept
+constexpr bool endian_is_weird() noexcept
 {
 	return !endian_is_little() && !endian_is_big();
 }
