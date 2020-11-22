@@ -1085,8 +1085,8 @@ struct int24
 	}
 };
 static_assert(sizeof(int24) == 3);
-static constexpr int32 int24_min = (0 - 0x00800000);
-static constexpr int32 int24_max = (0 + 0x007fffff);
+inline constexpr int32 int24_min = (0 - 0x00800000);
+inline constexpr int32 int24_max = (0 + 0x007fffff);
 
 
 
