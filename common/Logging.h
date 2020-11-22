@@ -113,7 +113,7 @@ namespace log
 // All logging code gets compiled and immediately dead-code eliminated.
 #define MPT_LOG_IS_DISABLED
 #endif
-static constexpr int GlobalLogLevel = MPT_LOG_GLOBAL_LEVEL ;
+inline constexpr int GlobalLogLevel = MPT_LOG_GLOBAL_LEVEL ;
 #else
 extern int GlobalLogLevel;
 #endif
