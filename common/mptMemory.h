@@ -61,17 +61,34 @@ template <> struct is_byte<std::byte>       : public std::true_type  { };
 template <> struct is_byte<const std::byte> : public std::true_type  { };
 
 
+template <typename T>
+constexpr bool declare_binary_safe(T) noexcept
+{
+	return false;
+}
+
+constexpr bool declare_binary_safe(char) noexcept
+{
+	return true;
+}
+constexpr bool declare_binary_safe(uint8) noexcept
+{
+	return true;
+}
+constexpr bool declare_binary_safe(int8) noexcept
+{
+	return true;
+}
+constexpr bool declare_binary_safe(std::byte) noexcept
+{
+	return true;
+}
+
 // Tell which types are safe to binary write into files.
 // By default, no types are safe.
 // When a safe type gets defined,
 // also specialize this template so that IO functions will work.
-template <typename T> struct is_binary_safe : public std::false_type { }; 
-
-// Specialization for byte types.
-template <> struct is_binary_safe<char>      : public std::true_type { };
-template <> struct is_binary_safe<uint8>     : public std::true_type { };
-template <> struct is_binary_safe<int8>      : public std::true_type { };
-template <> struct is_binary_safe<std::byte> : public std::true_type { };
+template <typename T> struct is_binary_safe : public std::conditional<declare_binary_safe(T{}), std::true_type, std::false_type>::type { };
 
 // Generic Specialization for arrays.
 template <typename T, std::size_t N> struct is_binary_safe<T[N]> : public is_binary_safe<T> { };
@@ -80,16 +97,24 @@ template <typename T, std::size_t N> struct is_binary_safe<std::array<T, N>> : p
 template <typename T, std::size_t N> struct is_binary_safe<const std::array<T, N>> : public is_binary_safe<T> { };
 
 
+template <typename T>
+constexpr bool check_binary_size(std::size_t size) noexcept
+{
+	return true
+		&& (sizeof(T) == size)
+		&& (alignof(T) == 1)
+		&& std::is_standard_layout<T>::value
+		&& std::has_unique_object_representations<T>::value
+		&& mpt::is_binary_safe<T>::value
+		;
+}
+
+
 } // namespace mpt
 
 #define MPT_BINARY_STRUCT(type, size) \
-	static_assert(sizeof( type ) == (size) ); \
-	static_assert(alignof( type ) == 1); \
-	static_assert(std::is_standard_layout< type >::value); \
-	static_assert(std::has_unique_object_representations< type >::value); \
-	namespace mpt { \
-		template <> struct is_binary_safe< type > : public std::true_type { }; \
-	} \
+	constexpr bool declare_binary_safe(type) { return true; } \
+	static_assert(mpt::check_binary_size<type>(size)); \
 /**/
 
 
