@@ -894,7 +894,7 @@ static mpt::wstring FromUTF8(const Tsrcstring &str, mpt::wchar replacement = MPT
 		if ( charsleft == 0 ) {
 
 			if ( ( c & 0x80 ) == 0x00 ) {
-				out.push_back( (wchar_t)c );
+				out.push_back( (mpt::wchar)c );
 			} else if ( ( c & 0xE0 ) == 0xC0 ) {
 				ucs4 = c & 0x1F;
 				charsleft = 1;
@@ -966,7 +966,7 @@ static Tdststring ToUTF8(const mpt::wstring &str, char replacement = '?')
 
 	for ( std::size_t i=0; i<in.length(); i++ ) {
 
-		wchar_t wc = in[i];
+		mpt::wchar wc = in[i];
 
 		char32_t ucs4 = 0;
 		if constexpr ( sizeof( mpt::wchar ) == 2 ) {
