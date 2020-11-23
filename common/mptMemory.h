@@ -62,24 +62,24 @@ template <> struct is_byte<const std::byte> : public std::true_type  { };
 
 
 template <typename T>
-constexpr bool declare_binary_safe(T) noexcept
+constexpr bool declare_binary_safe(const T &) noexcept
 {
 	return false;
 }
 
-constexpr bool declare_binary_safe(char) noexcept
+constexpr bool declare_binary_safe(const char &) noexcept
 {
 	return true;
 }
-constexpr bool declare_binary_safe(uint8) noexcept
+constexpr bool declare_binary_safe(const uint8 &) noexcept
 {
 	return true;
 }
-constexpr bool declare_binary_safe(int8) noexcept
+constexpr bool declare_binary_safe(const int8 &) noexcept
 {
 	return true;
 }
-constexpr bool declare_binary_safe(std::byte) noexcept
+constexpr bool declare_binary_safe(const std::byte &) noexcept
 {
 	return true;
 }
@@ -113,7 +113,7 @@ constexpr bool check_binary_size(std::size_t size) noexcept
 } // namespace mpt
 
 #define MPT_BINARY_STRUCT(type, size) \
-	constexpr bool declare_binary_safe(type) { return true; } \
+	constexpr bool declare_binary_safe(const type &) { return true; } \
 	static_assert(mpt::check_binary_size<type>(size)); \
 /**/
 
