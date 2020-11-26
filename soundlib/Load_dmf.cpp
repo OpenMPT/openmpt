@@ -917,18 +917,20 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		DMFChunk chunkHeader;
 		file.Read(chunkHeader);
+		uint32 chunkLength = chunkHeader.length, chunkSkip = 0;
 		// When loop start was added to version 3, the chunk size was not updated...
-		if(fileHeader.version == 3 && chunkHeader.GetID() == DMFChunk::idSEQU && chunkHeader.length < uint32_max - 2)
-			chunkHeader.length += 2;
+		if(fileHeader.version == 3 && chunkHeader.GetID() == DMFChunk::idSEQU && chunkLength < uint32_max - 2)
+			chunkSkip = 2;
 		// ...and when the loop end was added to version 4, it was also note updated! Luckily they fixed it in version 5.
-		else if(fileHeader.version == 4 && chunkHeader.GetID() == DMFChunk::idSEQU && chunkHeader.length < uint32_max - 4)
-			chunkHeader.length += 4;
+		else if(fileHeader.version == 4 && chunkHeader.GetID() == DMFChunk::idSEQU && chunkLength < uint32_max - 4)
+			chunkSkip = 4;
 		// Earlier X-Tracker versions also write a garbage length for the SMPD chunk if samples are compressed.
 		// I don't know when exactly this stopped, but I have no version 5-7 files to check (and no X-Tracker version that writes those versions).
 		// Since this is practically always the last chunk in the file, the following code is safe for those versions, though.
 		else if(fileHeader.version < 8 && chunkHeader.GetID() == DMFChunk::idSMPD)
-			chunkHeader.length = uint32_max;
-		chunks.emplace_back(chunkHeader, file.ReadChunk(chunkHeader.length));
+			chunkLength = uint32_max;
+		chunks.emplace_back(chunkHeader, file.ReadChunk(chunkLength));
+		file.Skip(chunkSkip);
 	}
 	FileReader chunk;
 
