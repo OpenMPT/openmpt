@@ -941,6 +941,10 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 		seqLoopStart = chunk.ReadUint16LE();
 	if(fileHeader.version >= 4)
 		seqLoopEnd = chunk.ReadUint16LE();
+	// HIPOMATK.DMF has a loop end of 0, other v4 files have proper loop ends. Later X-Tracker versions import it as-is but it cannot be intentional.
+	// We just assume that this feature might have been buggy in early v4 versions and ignore the loop end in that case.
+	if(fileHeader.version == 4 && seqLoopEnd == 0)
+		seqLoopEnd = ORDERINDEX_MAX;
 	ReadOrderFromFile<uint16le>(Order(), chunk, chunk.BytesLeft() / 2);
 	LimitMax(seqLoopStart, Order().GetLastIndex());
 	LimitMax(seqLoopEnd, Order().GetLastIndex());
@@ -1013,14 +1017,8 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 		if(fileHeader.version >= 8)
 			chunk.ReadString<mpt::String::spacePadded>(sample.filename, 8);
 
-		// Filler
-		if(fileHeader.version > 1)
-			chunk.Skip(2);
-		// CRC
-		if(fileHeader.version < 2)
-			chunk.Skip(2);
-		else
-			chunk.Skip(4);
+		// Filler + CRC
+		chunk.Skip(fileHeader.version > 1 ? 6 : 2);
 
 		// Now read the sample data from the data chunk
 		FileReader sampleData = sampleDataChunk.ReadChunk(sampleDataChunk.ReadUint32LE());
