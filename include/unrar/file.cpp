@@ -120,12 +120,12 @@ bool File::Open(const wchar *Name,uint Mode)
 #ifdef _OSF_SOURCE
   extern "C" int flock(int, int);
 #endif
-
   if (!OpenShared && UpdateMode && handle>=0 && flock(handle,LOCK_EX|LOCK_NB)==-1)
   {
     close(handle);
     return false;
   }
+
 #endif
   if (handle==-1)
     hNewFile=FILE_BAD_HANDLE;
