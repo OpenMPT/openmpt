@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.4-pre
 
+ *  pugixml: Update to v1.11 (2020-11-26).
+
 ### libopenmpt 0.5.3 (2020-10-25)
 
  *  [**Sec**] Possible hang if a MED file claimed to contain 256 songs. (r13704)
