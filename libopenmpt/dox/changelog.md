@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**New**] `MUS` files from Psycho Pinball and Micro Machines 2 are now
     supported.
+ *  [**New**] openmpt123: openmpt123 will now expand file wildcards passed on
+    the command line in Windows when built with MSVC.
 
  *  [**Change**] `Makefile` `CONFIG=emscripten` now supports
     `EMSCRIPTEN_TARGET=all` which provides WebAssembly as well as fallback to
