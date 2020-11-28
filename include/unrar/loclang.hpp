@@ -352,7 +352,7 @@
 #define   MRecVolLimit       L"\nTotal number of usual and recovery volumes must not exceed %d"
 #define   MVolumeNumber      L"volume %d"
 #define   MCannotDelete      L"\nCannot delete %s"
-#define   MRecycleFailed     L"\nCannot move some files and folders to Recycle Bin"
+#define   MRecycleFailed     L"\nCannot move some files and directories to Recycle Bin"
 #define   MCalcCRC           L"\nCalculating the checksum"
 #define   MTooLargeSFXArc    L"\nToo large SFX archive. Windows cannot run the executable file exceeding 4 GB."
 #define   MCalcCRCAllVol     L"\nCalculating checksums of all volumes."
