@@ -58,6 +58,10 @@
     "ksuser",
     "winmm",
   }
+  filter {}
+  filter { "action:vs*" }
+		linkoptions { "wsetargv.obj" }
+  filter {}
   filter { "configurations:*Shared" }
    defines { "LIBOPENMPT_USE_DLL" }
   filter { "not configurations:*Shared" }
