@@ -3,6 +3,7 @@
   <head>
   <meta charset="utf-8">
   <meta name="language" content="en">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OpenMPT 1.29 Release Notes</title>
   <style type="text/css">
     * { font-family: Calibri, Roboto, sans-serif; }
@@ -143,7 +144,7 @@
     <h3>Plugins</h3>
     <ul>
       <li>There are some hybrid VST 2 / 3 plugins using the .vst3 file extension. It is now possible to drag &amp; drop them on OpenMPT and add them through the Plugin Manager. Folder scan does not pick them up for now, as it might result in too many annoying warnings (OpenMPT does not support VST 3 at this point).</li>
-      <li>Narrow plugin windows now resizes appropriately if switching between presets results in a change of the menu bar height.</li>
+      <li>Narrow plugin windows now resize appropriately if switching between presets results in a change of the menu bar height.</li>
       <li>A warning is shown when the likely cause for a plugin loading failure is a shortage of Fiber Local Storage indices.</li>
       <li>Speed up retrieval of parameter values when saving data from bridged plugins.</li>
       <li>The <strong>stability of bridged plugins</strong> has been greatly improved. Most, if not all plugins that did not work previously should run just fine now.</li>

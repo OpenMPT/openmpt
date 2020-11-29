@@ -31,6 +31,32 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.06.00 (29 November 2020, revision 13926)
+----------------------------------------------
+General tab
+- [Imp] <js> When entering a restart position that points to a non-playable order item, immediately show the corrected value when the input field loses focus.
+
+Other formats
+- [Imp] <js> DMF: Support early format beta versions (in particular versions 1-4).
+- [Imp] <js> MED: Support MIDI program change and custom MIDI commands.
+- [Fix] <js> MED: Also use octave wrapping in 8-channel mode for MMD0/MMD1 modules (http://bugs.openmpt.org/view.php?id=1386).
+- [Fix] <js> MED: If 8-channel mode is activated, ignore BPM mode (http://bugs.openmpt.org/view.php?id=1384).
+- [Fix] <js> MED: Emulate tempo commands F01 and F02 quirk (http://bugs.openmpt.org/view.php?id=1384).
+- [Fix] <js> MED: Tempo commands below 32 BPM were interpreted as tempo slides (http://bugs.openmpt.org/view.php?id=1384).
+- [Fix] <js> MED: Do not reject files with no instruments.
+- [Fix] <js> MID: Relative RPN changes (in particular coarse tune) were not implemented correctly.
+- [Fix] <js> IMF: Instrument sample mapping was off by one octave, notable in the guitar part of Astaris by Karsten Koch.
+
+Misc
+- [Imp] <js> When inverting icons in high contrast / dark themes, only invert their brightness but keep the hue.
+- [Fix] <js> Since OpenMPT 1.29.01.00, Note Off / Cut / Fade shortcuts were missing in new installations, when resetting keys to defaults or when importing very old OpenMPT keyboard configurations (http://bugs.openmpt.org/view.php?id=1385).
+- [Fix] <js> Fix possible crash when resetting keyboard mapping while a separator item was focussed.
+- [Fix] <js> MIDI Export: In "Melodic (any)" mode, exported MIDI channels were inconsistent between notes / tracker events and Zxx macros past channel 10 (http://forum.openmpt.org/index.php?topic=6504.0).
+
+Third-Party Libraries
+- [Imp] Update UnRAR (v6.0.2)
+
+
 v1.29.05.00 (25 October 2020, revision 13771)
 ---------------------------------------------
 Pattern tab
@@ -168,7 +194,7 @@ Other formats
 - [Imp] <js> STM: Try to import ST2 tempo more correctly.
 
 Audio I/O
-- [Fix] <js> Work-around a Windows 10 2004 bug which causes an empty device name to be shown for the Wave Mapper device. Also provide a more useful name in other situations where the name is missing.
+- [Fix] <jh> Work-around a Windows 10 2004 bug which causes an empty device name to be shown for the Wave Mapper device. Also provide a more useful name in other situations where the name is missing.
 - [Imp] <jh> If opening the sound device failed, the name of the device is now shown.
 - [Mod] <jh> On new installations, deprecated sound device types are no longer shown.
 
