@@ -20,6 +20,7 @@
 #include "../common/mptFileIO.h"
 #endif // !MODPLUG_NO_FILESAVE
 #include "../common/misc_util.h"
+#include "../common/Endianness.h"
 #include "Tagging.h"
 #include "ITTools.h"
 #include "XMTools.h"
