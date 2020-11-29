@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.26-pre
+
 ### libopenmpt 0.3.25 (2020-11-29)
 
  *  AMS: An upper bound for uncompressed sample size is now established to
