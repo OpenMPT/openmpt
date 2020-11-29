@@ -7,6 +7,15 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.25-pre
 
+ *  AMS: An upper bound for uncompressed sample size is now established to
+    avoid memory exhaustion from malformed files.
+ *  MO3: Avoid certain ModPlug hacks from being fixed up twice, which could lead
+    to e.g. very narrow pan swing range for old OpenMPT IT files saved with a
+    recent MO3 encoder version. 
+ *  IMF: Instrument sample mapping was off by one octave, notable in the guitar
+    part of Astaris by Karsten Koch.
+ *  PLM: Percentage offset (Mxx) was slightly off.
+
 ### libopenmpt 0.3.24 (2020-08-30)
 
  *  PP20: The first few bytes of some files were not decompressed properly,
