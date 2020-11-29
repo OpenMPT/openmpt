@@ -7,8 +7,6 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.4-pre
 
- *  pugixml: Update to v1.11 (2020-11-26).
-
  *  AMS: An upper bound for uncompressed sample size is now established to
     avoid memory exhaustion from malformed files.
  *  DMF: Support early format beta versions (in particular versions 1-4).
@@ -18,6 +16,8 @@ is just a high-level summary.
  *  MED: Tempo commands below 32 BPM were interpreted as tempo slides.
  *  IMF: Instrument sample mapping was off by one octave, notable in the guitar
     part of Astaris by Karsten Koch.
+
+ *  pugixml: Update to v1.11 (2020-11-26).
 
 ### libopenmpt 0.5.3 (2020-10-25)
 
