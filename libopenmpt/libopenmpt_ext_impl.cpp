@@ -18,7 +18,9 @@
 
 #include "soundlib/Sndfile.h"
 
-using namespace OpenMPT;
+#ifndef MPT_NO_NAMESPACE
+using namespace OPENMPT_NAMESPACE;
+#endif
 
 namespace openmpt {
 

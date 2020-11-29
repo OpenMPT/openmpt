@@ -96,7 +96,9 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 
 OPENMPT_NAMESPACE_END
 
-using namespace OpenMPT;
+#ifndef MPT_NO_NAMESPACE
+using namespace OPENMPT_NAMESPACE;
+#endif
 
 namespace openmpt {
 
