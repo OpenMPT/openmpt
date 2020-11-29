@@ -4984,6 +4984,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 			// MIDI channel
 			isNibble = true;
 			data = 0xFF;
+#ifndef NO_PLUGINS
 			const PLUGINDEX plug = (plugin != 0) ? plugin : GetBestPlugin(nChn, PrioritiseChannel, EvenIfMuted);
 			if(plug > 0 && plug <= MAX_MIXPLUGINS)
 			{
@@ -4991,6 +4992,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 				if(midiPlug)
 					data = midiPlug->GetMidiChannel(nChn);
 			}
+#endif // NO_PLUGINS
 			if(data == 0xFF)
 			{
 				// Fallback if no plugin was found
