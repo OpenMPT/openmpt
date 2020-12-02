@@ -811,6 +811,12 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, const uint8 fileVersion,
 				// Prefer instrument effects over any other effects
 				if(effect1 != CMD_NONE)
 				{
+					ModCommand::TwoRegularCommandsToMPT(effect3, effectParam3, effect1, effectParam1);
+					if(m->volcmd == VOLCMD_NONE && effect3 != VOLCMD_NONE)
+					{
+						m->volcmd = effect3;
+						m->vol = effectParam3;
+					}
 					m->command = effect1;
 					m->param = effectParam1;
 				} else if(effect3 != CMD_NONE)
