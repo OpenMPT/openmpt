@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.5-pre
 
+ *  pugixml: Update to v1.11.1 (2020-12-05).
+
 ### libopenmpt 0.5.4 (2020-11-29)
 
  *  AMS: An upper bound for uncompressed sample size is now established to
