@@ -920,9 +920,9 @@ static std::string channel_to_string( int channels, int channel, const meter_cha
 			<< " : "
 			;
 		res2 
-			<< std::string(val,'>') << std::string(48-val,' ')
+			<< std::string(val,'>') << std::string(std::size_t{48}-val,' ')
 			<< ( ( meter.clip != 0.0f ) ? "#" : ":" )
-			<< std::string(headroom,'>') << std::string(12-headroom,' ')
+			<< std::string(headroom,'>') << std::string(std::size_t{12}-headroom,' ')
 			;
 		std::string tmp = res2.str();
 		if ( 0 <= hold_pos && hold_pos <= 60 ) {
@@ -1028,7 +1028,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 		bufsize = 1024;
 	}
 
-	std::int64_t last_redraw_frame = 0 - flags.ui_redraw_interval;
+	std::int64_t last_redraw_frame = std::int64_t{0} - flags.ui_redraw_interval;
 	std::int64_t rendered_frames = 0;
 
 	std::vector<Tsample> left( bufsize );
