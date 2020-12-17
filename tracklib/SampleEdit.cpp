@@ -599,7 +599,7 @@ bool ConvertPingPongLoop(ModSample &smp, CSoundFile &sndFile, bool sustainLoop)
 	else
 		return false;
 
-	smp.uFlags.reset(sustainLoop ? CHN_PINGPONGSUSTAIN : CHN_PINGPONGFLAG);
+	smp.uFlags.reset(sustainLoop ? CHN_PINGPONGSUSTAIN : CHN_PINGPONGLOOP);
 	smp.PrecomputeLoops(sndFile, true);
 	return true;
 }
