@@ -313,7 +313,7 @@ namespace MidiExport
 			IMidiPlugin::MidiVibrato(depth, pwd, trackerChn);
 		}
 
-		bool IsNotePlaying(uint32 note, CHANNELINDEX trackerChn)
+		bool IsNotePlaying(uint8 note, CHANNELINDEX trackerChn) override
 		{
 			SynchronizeMidiChannelState();
 			return IMidiPlugin::IsNotePlaying(note, trackerChn);
