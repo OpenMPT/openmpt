@@ -932,7 +932,7 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 
 bool IMidiPlugin::IsNotePlaying(uint8 note, CHANNELINDEX trackerChn)
 {
-	if(!ModCommand::IsNote(note) || trackerChn >= std::size(m_MidiCh[GetMidiChannel(trackerChn)].noteOnMap[note]))
+	if(!ModCommand::IsNote(note) || trackerChn >= CountOf(m_MidiCh[GetMidiChannel(trackerChn)].noteOnMap[note]))
 		return false;
 
 	note -= NOTE_MIN;
