@@ -32,12 +32,28 @@ END_MESSAGE_MAP()
 
 LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 {
+	if(!m_isFocussed)
+		return 1;
+
 	uint32 midiData = static_cast<uint32>(dwMidiDataParam);
-	if(MIDIEvents::GetTypeFromEvent(midiData) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(midiData) != 0 && m_isFocussed)
+	const auto byte1 = MIDIEvents::GetDataByte1FromEvent(midiData), byte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
+	switch(MIDIEvents::GetTypeFromEvent(midiData))
 	{
-		SetKey(ModMidi, MIDIEvents::GetDataByte1FromEvent(midiData));
+	case MIDIEvents::evControllerChange:
+		if(byte2 != 0)
+		{
+			SetKey(ModMidi, byte1);
+			m_pOptKeyDlg->OnSetKeyChoice();
+		}
+		break;
+
+	case MIDIEvents::evNoteOn:
+	case MIDIEvents::evNoteOff:
+		SetKey(ModMidi, byte1 | 0x80);
 		m_pOptKeyDlg->OnSetKeyChoice();
+		break;
 	}
+
 	return 1;
 }
 

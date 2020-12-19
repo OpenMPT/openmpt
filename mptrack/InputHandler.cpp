@@ -266,12 +266,23 @@ bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType
 // Translate MIDI messages to shortcut commands
 CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 message)
 {
-	if(MIDIEvents::GetTypeFromEvent(message) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(message) != 0)
+	const auto byte1 = MIDIEvents::GetDataByte1FromEvent(message), byte2 = MIDIEvents::GetDataByte2FromEvent(message);
+	switch(MIDIEvents::GetTypeFromEvent(message))
 	{
-		// Only capture MIDI CCs for now. Some controllers constantly send some MIDI CCs with value 0
-		// (e.g. the Roland D-50 sends CC123 whenenver all notes have been released), so we will ignore those.
-		return GeneralKeyEvent(context, HC_MIDI, MIDIEvents::GetDataByte1FromEvent(message), 0);
+	case MIDIEvents::evControllerChange:
+		if(byte2 != 0)
+		{
+			// Only capture MIDI CCs for now. Some controllers constantly send some MIDI CCs with value 0
+			// (e.g. the Roland D-50 sends CC123 whenenver all notes have been released), so we will ignore those.
+			return GeneralKeyEvent(context, HC_MIDI, byte1, 0);
+		}
+		break;
+
+	case MIDIEvents::evNoteOn:
+	case MIDIEvents::evNoteOff:
+		return GeneralKeyEvent(context, HC_MIDI, byte1 | 0x80, 0);
 	}
+
 	return kcNull;
 }
 
@@ -555,16 +566,14 @@ bool CInputHandler::SetEffectLetters(const CModSpecifications &modSpecs)
 
 bool CInputHandler::IsKeyPressHandledByTextBox(DWORD key, HWND hWnd) const
 {
-	if(hWnd != nullptr)
-	{
-		TCHAR activeWindowClassName[6];
-		GetClassName(hWnd, activeWindowClassName, mpt::saturate_cast<int>(std::size(activeWindowClassName)));
-		const bool textboxHasFocus = _tcsicmp(activeWindowClassName, _T("Edit")) == 0;
-		if(!textboxHasFocus)
-		{
-			return false;
-		}
-	}
+	if(hWnd == nullptr)
+		return false;
+	
+	TCHAR activeWindowClassName[6];
+	GetClassName(hWnd, activeWindowClassName, mpt::saturate_cast<int>(std::size(activeWindowClassName)));
+	const bool textboxHasFocus = _tcsicmp(activeWindowClassName, _T("Edit")) == 0;
+	if(!textboxHasFocus)
+		return false;
 
 	//Alpha-numerics (only shift or no modifier):
 	if(!GetModifierMask().test_any_except(ModShift)

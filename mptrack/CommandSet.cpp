@@ -13,6 +13,7 @@
 #include "resource.h"
 #include "Mptrack.h"	// For ErrorBox
 #include "../soundlib/mod_specifications.h"
+#include "../soundlib/Tables.h"
 #include "../mptrack/Reporting.h"
 #include "../common/mptFileIO.h"
 #include <sstream>
@@ -1804,7 +1805,7 @@ CString KeyCombination::GetModifierText(FlagSet<Modifiers> mod)
 	if (mod[ModRCtrl]) text.Append(_T("RCtrl+"));
 	if (mod[ModRAlt]) text.Append(_T("RAlt+"));
 	if (mod[ModWin]) text.Append(_T("Win+")); // Feature: use Windows keys as modifier keys
-	if (mod[ModMidi]) text.Append(_T("MidiCC:"));
+	if (mod[ModMidi]) text.Append(_T("MIDI"));
 	return text;
 }
 
@@ -1813,9 +1814,15 @@ CString KeyCombination::GetKeyText(FlagSet<Modifiers> mod, UINT code)
 {
 	CString keyText = GetModifierText(mod);
 	if(mod[ModMidi])
-		keyText.AppendFormat(_T("%u"),code);
-	else
+	{
+		if(code < 0x80)
+			keyText.AppendFormat(_T(" CC %u"), code);
+		else
+			keyText += MPT_CFORMAT(" {}{}")(NoteNamesSharp[(code & 0x7F) % 12], (code & 0x7F) / 12);
+	} else
+	{
 		keyText.Append(CHotKeyCtrl::GetKeyName(code, IsExtended(code)));
+	}
 	//HACK:
 	if (keyText == _T("Ctrl+CTRL"))			keyText = _T("Ctrl");
 	else if (keyText == _T("Alt+ALT"))		keyText = _T("Alt");
