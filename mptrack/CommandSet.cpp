@@ -1818,7 +1818,7 @@ CString KeyCombination::GetKeyText(FlagSet<Modifiers> mod, UINT code)
 		if(code < 0x80)
 			keyText.AppendFormat(_T(" CC %u"), code);
 		else
-			keyText += MPT_CFORMAT(" {}{}")(NoteNamesSharp[(code & 0x7F) % 12], (code & 0x7F) / 12);
+			keyText += MPT_CFORMAT(" {}{}")(mpt::ustring(NoteNamesSharp[(code & 0x7F) % 12]), (code & 0x7F) / 12);
 	} else
 	{
 		keyText.Append(CHotKeyCtrl::GetKeyName(code, IsExtended(code)));
