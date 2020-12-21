@@ -227,7 +227,7 @@ using std::source_location;
 #else
 
 #define MPT_SOURCE_LOCATION_FILE __FILE__
-#define MPT_SOURCE_LOCATION_FUNCTION __func__
+#define MPT_SOURCE_LOCATION_FUNCTION ""
 #define MPT_SOURCE_LOCATION_LINE __LINE__
 #define MPT_SOURCE_LOCATION_COLUMN 0
 
