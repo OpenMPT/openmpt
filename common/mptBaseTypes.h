@@ -203,6 +203,36 @@ using std::source_location;
 
 #else // !C++20
 
+#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2019,6)
+
+#define MPT_SOURCE_LOCATION_FILE __builtin_FILE()
+#define MPT_SOURCE_LOCATION_FUNCTION __builtin_FUNCTION()
+#define MPT_SOURCE_LOCATION_LINE __builtin_LINE()
+#define MPT_SOURCE_LOCATION_COLUMN __builtin_COLUMN()
+
+#elif MPT_COMPILER_GCC
+
+#define MPT_SOURCE_LOCATION_FILE __builtin_FILE()
+#define MPT_SOURCE_LOCATION_FUNCTION __builtin_FUNCTION()
+#define MPT_SOURCE_LOCATION_LINE __builtin_LINE()
+#define MPT_SOURCE_LOCATION_COLUMN 0
+
+#elif MPT_COMPILER_CLANG && MPT_CLANG_AT_LEAST(9,0,0)
+
+#define MPT_SOURCE_LOCATION_FILE __builtin_FILE()
+#define MPT_SOURCE_LOCATION_FUNCTION __builtin_FUNCTION()
+#define MPT_SOURCE_LOCATION_LINE __builtin_LINE()
+#define MPT_SOURCE_LOCATION_COLUMN __builtin_COLUMN()
+
+#else
+
+#define MPT_SOURCE_LOCATION_FILE __FILE__
+#define MPT_SOURCE_LOCATION_FUNCTION __func__
+#define MPT_SOURCE_LOCATION_LINE __LINE__
+#define MPT_SOURCE_LOCATION_COLUMN 0
+
+#endif
+
 // compatible with std::experimental::source_location from Library Fundamentals TS v2.
 struct source_location
 {
@@ -228,8 +258,7 @@ public:
 	}
 	source_location(const source_location&) = default;
 	source_location(source_location&&) = default;
-	//static constexpr current() noexcept;  // use MPT_SOURCE_LOCATION_CURRENT()
-	static constexpr source_location current(const char* file, const char* function, uint32 line, uint32 column) noexcept
+	static constexpr source_location current(const char * file = MPT_SOURCE_LOCATION_FILE, const char * function = MPT_SOURCE_LOCATION_FUNCTION, uint32 line = MPT_SOURCE_LOCATION_LINE, uint32 column = MPT_SOURCE_LOCATION_COLUMN) noexcept
 	{
 		return source_location(file, function, line, column);
 	}
@@ -251,7 +280,11 @@ public:
 	}
 };
 
+#if (MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2019,6)) || MPT_COMPILER_GCC || (MPT_COMPILER_CLANG && MPT_CLANG_AT_LEAST(9,0,0))
+#define MPT_SOURCE_LOCATION_CURRENT() mpt::source_location::current()
+#else
 #define MPT_SOURCE_LOCATION_CURRENT() mpt::source_location::current( __FILE__ , __func__ , __LINE__ , 0 )
+#endif
 
 #endif // C++20
 
