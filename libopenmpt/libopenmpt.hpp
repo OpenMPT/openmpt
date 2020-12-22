@@ -676,7 +676,7 @@ public:
 	/*!
 	  \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
 	  \param count Number of audio frames to render per channel.
-	  \param interleaved_quad Pointer to a buffer of at least count*4 elements that receives the interleaved suad surround output in the order (L,R,RL,RR).
+	  \param interleaved_quad Pointer to a buffer of at least count*4 elements that receives the interleaved quad surround output in the order (L,R,RL,RR).
 	  \return The number of frames actually rendered.
 	  \retval 0 The end of song has been reached.
 	  \remarks The output buffers are only written to up to the returned number of elements.
@@ -702,7 +702,7 @@ public:
 	/*!
 	  \param samplerate Sample rate to render output. Should be in [8000,192000], but this is not enforced.
 	  \param count Number of audio frames to render per channel.
-	  \param interleaved_quad Pointer to a buffer of at least count*4 elements that receives the interleaved suad surround output in the order (L,R,RL,RR).
+	  \param interleaved_quad Pointer to a buffer of at least count*4 elements that receives the interleaved quad surround output in the order (L,R,RL,RR).
 	  \return The number of frames actually rendered.
 	  \retval 0 The end of song has been reached.
 	  \remarks The output buffers are only written to up to the returned number of elements.
