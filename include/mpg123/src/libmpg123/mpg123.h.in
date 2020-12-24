@@ -812,27 +812,49 @@ MPG123_EXPORT off_t mpg123_framepos(mpg123_handle *mh);
 /** \defgroup mpg123_seek mpg123 position and seeking
  *
  * Functions querying and manipulating position in the decoded audio bitstream.
- * The position is measured in decoded audio samples, or MPEG frame offset for the specific functions.
- * If gapless code is in effect, the positions are adjusted to compensate the skipped padding/delay - meaning, you should not care about that at all and just use the position defined for the samples you get out of the decoder;-)
+ * The position is measured in decoded audio samples or MPEG frame offset for
+ * the specific functions. The term sample refers to a group of samples for
+ * multiple channels, normally dubbed PCM frames. The latter term is
+ * avoided here because frame means something different in the context of MPEG
+ * audio. Since all samples of a PCM frame occur at the same time, there is only
+ * very limited ambiguity when talking about playback offset, as counting each
+ * channel sample individually does not make sense.
+ *
+ * If gapless code is in effect, the positions are adjusted to compensate the
+ * skipped padding/delay - meaning, you should not care about that at all and
+ * just use the position defined for the samples you get out of the decoder;-)
  * The general usage is modelled after stdlib's ftell() and fseek().
- * Especially, the whence parameter for the seek functions has the same meaning as the one for fseek() and needs the same constants from stdlib.h: 
+ * Especially, the whence parameter for the seek functions has the same meaning
+ * as the one for fseek() and needs the same constants from stdlib.h: 
+ *
  * - SEEK_SET: set position to (or near to) specified offset
  * - SEEK_CUR: change position by offset from now
  * - SEEK_END: set position to offset from end
  *
- * Note that sample-accurate seek only works when gapless support has been enabled at compile time; seek is frame-accurate otherwise.
- * Also, really sample-accurate seeking (meaning that you get the identical sample value after seeking compared to plain decoding up to the position) is only guaranteed when you do not mess with the position code by using MPG123_UPSPEED, MPG123_DOWNSPEED or MPG123_START_FRAME. The first two mainly should cause trouble with NtoM resampling, but in any case with these options in effect, you have to keep in mind that the sample offset is not the same as counting the samples you get from decoding since mpg123 counts the skipped samples, too (or the samples played twice only once)!
- * Short: When you care about the sample position, don't mess with those parameters;-)
- * Also, seeking is not guaranteed to work for all streams (underlying stream may not support it).
- * And yet another caveat: If the stream is concatenated out of differing pieces (Frankenstein stream), seeking may suffer, too.
+ * Note that sample-accurate seek only works when gapless support has been
+ * enabled at compile time; seek is frame-accurate otherwise.
+ * Also, really sample-accurate seeking (meaning that you get the identical
+ * sample value after seeking compared to plain decoding up to the position)
+ * is only guaranteed when you do not mess with the position code by using
+ * #MPG123_UPSPEED, #MPG123_DOWNSPEED or #MPG123_START_FRAME. The first two mainly
+ * should cause trouble with NtoM resampling, but in any case with these options
+ * in effect, you have to keep in mind that the sample offset is not the same
+ * as counting the samples you get from decoding since mpg123 counts the skipped
+ * samples, too (or the samples played twice only once)!
+ *
+ * Short: When you care about the sample position, don't mess with those
+ * parameters;-)
+ *
+ * Streams may be openend in ways that do not support seeking. Also, consider
+ * the effect of #MPG123_FUZZY.
  *
  * @{
  */
 
 /** Returns the current position in samples.
- *  On the next successful read, you'd get that sample.
+ *  On the next successful read, you'd get audio data with that offset.
  *  \param mh handle
- *  \return sample offset or MPG123_ERR (null handle)
+ *  \return sample (PCM frame) offset or MPG123_ERR (null handle)
  */
 MPG123_EXPORT off_t mpg123_tell(mpg123_handle *mh);
 
@@ -851,21 +873,23 @@ MPG123_EXPORT off_t mpg123_tell_stream(mpg123_handle *mh);
 /** Seek to a desired sample offset.
  *  Usage is modelled afer the standard lseek().
  * \param mh handle
- * \param sampleoff offset in PCM samples
+ * \param sampleoff offset in samples (PCM frames)
  * \param whence one of SEEK_SET, SEEK_CUR or SEEK_END
  * \return The resulting offset >= 0 or error/message code
  */
 MPG123_EXPORT off_t mpg123_seek( mpg123_handle *mh
 ,	off_t sampleoff, int whence );
 
-/** Seek to a desired sample offset in data feeding mode. 
- *  This just prepares things to be right only if you ensure that the next chunk of input data will be from input_offset byte position.
- *  \param mh handle
- *  \param sampleoff offset in PCM samples
- *  \param whence one of SEEK_SET, SEEK_CUR or SEEK_END
- *  \param input_offset The position it expects to be at the 
- *                      next time data is fed to mpg123_decode().
- *  \return The resulting offset >= 0 or error/message code */
+/** Seek to a desired sample offset in data feeding mode.
+ *  This just prepares things to be right only if you ensure that the next chunk
+ *  of input data will be from input_offset byte position.
+ * \param mh handle
+ * \param sampleoff offset in samples (PCM frames)
+ * \param whence one of SEEK_SET, SEEK_CUR or SEEK_END
+ * \param input_offset The position it expects to be at the 
+ *                     next time data is fed to mpg123_decode().
+ * \return The resulting offset >= 0 or error/message code
+ */
 MPG123_EXPORT off_t mpg123_feedseek( mpg123_handle *mh
 ,	off_t sampleoff, int whence, off_t *input_offset );
 
