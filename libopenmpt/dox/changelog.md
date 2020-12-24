@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.26-pre
 
+ *  mpg123: Update to v1.26.4 (2020-12-24).
+
 ### libopenmpt 0.3.25 (2020-11-29)
 
  *  AMS: An upper bound for uncompressed sample size is now established to
