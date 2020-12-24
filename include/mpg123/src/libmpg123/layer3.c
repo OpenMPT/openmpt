@@ -240,11 +240,37 @@ void init_layer3(void)
 
 	for(i=0;i<16;i++)
 	{
-		double t = tan( (double) i * M_PI / 12.0 );
-		tan1_1[i] = DOUBLE_TO_REAL_15(t / (1.0+t));
-		tan2_1[i] = DOUBLE_TO_REAL_15(1.0 / (1.0 + t));
-		tan1_2[i] = DOUBLE_TO_REAL_15(M_SQRT2 * t / (1.0+t));
-		tan2_2[i] = DOUBLE_TO_REAL_15(M_SQRT2 / (1.0 + t));
+		// Special-casing possibly troublesome values where t=inf or
+		// t=-1 in theory. In practice, this never caused issues, but there might
+		// be a system with enough precision in M_PI to raise an exception.
+		// Actually, the special values are not excluded from use in the code, but
+		// in practice, they even have no effect in the compliance tests.
+		if(i > 11) // It's periodic!
+		{
+			tan1_1[i] = tan1_1[i-12];
+			tan2_1[i] = tan2_1[i-12];
+			tan1_2[i] = tan1_2[i-12];
+			tan2_2[i] = tan2_2[i-12];
+		} else if(i == 6) // t=inf
+		{
+			tan1_1[i] = DOUBLE_TO_REAL_15(1.0);
+			tan2_1[i] = DOUBLE_TO_REAL_15(0.0);
+			tan1_2[i] = DOUBLE_TO_REAL_15(M_SQRT2);
+			tan2_2[i] = DOUBLE_TO_REAL_15(0.0);
+		} else if(i == 9) // t=-1
+		{
+			tan1_1[i] = DOUBLE_TO_REAL_15(-HUGE_VAL);
+			tan2_1[i] = DOUBLE_TO_REAL_15(HUGE_VAL);
+			tan1_2[i] = DOUBLE_TO_REAL_15(-HUGE_VAL);
+			tan2_2[i] = DOUBLE_TO_REAL_15(HUGE_VAL);
+		} else
+		{
+			double t = tan( (double) i * M_PI / 12.0 );
+			tan1_1[i] = DOUBLE_TO_REAL_15(t / (1.0+t));
+			tan2_1[i] = DOUBLE_TO_REAL_15(1.0 / (1.0 + t));
+			tan1_2[i] = DOUBLE_TO_REAL_15(M_SQRT2 * t / (1.0+t));
+			tan2_2[i] = DOUBLE_TO_REAL_15(M_SQRT2 / (1.0 + t));
+		}
 	}
 
 	for(i=0;i<32;i++)
