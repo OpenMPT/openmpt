@@ -80,6 +80,9 @@ struct reader_data
 };
 
 /* start to use off_t to properly do LFS in future ... used to be long */
+#ifdef __MORPHOS__
+#undef tell /* unistd.h defines it as lseek(x, 0L, 1) */
+#endif
 struct reader
 {
 	int     (*init)           (mpg123_handle *);
