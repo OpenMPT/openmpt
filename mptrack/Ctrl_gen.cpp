@@ -445,7 +445,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 					pos32 *= TEMPO::fractFact;
 					if(CMainFrame::GetMainFrame()->GetInputHandler()->CtrlPressed())
 						pos32 /= 100;
-					else
+					else if(CMainFrame::GetMainFrame()->GetInputHandler()->ShiftPressed())
 						pos32 /= 10;
 					newTempo.SetRaw(pos32);
 				} else
