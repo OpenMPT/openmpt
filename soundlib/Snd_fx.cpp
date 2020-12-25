@@ -1688,7 +1688,7 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 		chn.nFineTune = pSmp->nFineTune;
 	}
 
-	chn.nTranspose = pSmp->RelativeTone;
+	chn.nTranspose = UseFinetuneAndTranspose() ? pSmp->RelativeTone : 0;
 
 	// FT2 compatibility: Don't reset portamento target with new instrument numbers.
 	// Test case: Porta-Pickup.xm
