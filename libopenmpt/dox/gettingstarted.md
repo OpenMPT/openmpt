@@ -34,11 +34,8 @@ How to compile
 
  -  Visual Studio:
 
-     -  You will find solutions for Visual Studio 2017 and 2019 in the
-        corresponding `build/vsVERSIONwin7/` folder.
-        Projects that target Windows 10 Desktop (including ARM and ARM64) are
-        available in `build/vsVERSIONwin10/` (Visual Studio 2017 requires SDK
-        version 10.0.16299).
+     -  You will find solutions for Visual Studio in the matching
+        `build/vsVERSIONwinWINDOWSVERSION/` folder.
         Minimal projects that target Windows 10 UWP are available in
         `build/vsVERSIONuwp/`.
         Most projects are supported with any of the mentioned Visual Studio
@@ -87,79 +84,60 @@ How to compile
     for the current config and no configuration state is kept around across
     invocations.
 
-     -  mingw-w64:
+     -  native build:
 
-        The required compiler version is at least GCC 7.
+        Simply run
 
-            make CONFIG=mingw64-win32    # for win32
+            make
 
-            make CONFIG=mingw64-win64    # for win64
+        which will try to guess the compiler based on your operating system.
 
      -  gcc or clang (on Unix-like systems, including Mac OS X with MacPorts,
         and Haiku (32-bit Hybrid and 64-bit)):
-
-        The minimum required compiler versions are:
-
-         -  gcc 7
-
-         -  clang 5
 
         The Makefile requires pkg-config for native builds.
         For sound output in openmpt123, PortAudio or SDL is required.
         openmpt123 can optionally use libflac and libsndfile to render PCM
         files to disk.
 
-        When using gcc, run:
+        When you want to use gcc, run:
 
             make CONFIG=gcc
 
-        When using clang, it is recommended to do:
+        When you want to use clang, it is recommended to do:
 
             make CONFIG=clang
 
-        Otherwise, simply run
+     -  mingw-w64:
 
-            make
+            make CONFIG=mingw64-win32    # for win32
 
-        which will try to guess the compiler based on your operating system.
+            make CONFIG=mingw64-win64    # for win64
 
      -  emscripten (on Unix-like systems):
 
-        libopenmpt has been tested and verified to work with emscripten 1.38.5
-        or later. Earlier versions are not supported.
-
         Run:
 
-            # generates WebAssembly with dynamic heap growth
+            # generates WebAssembly with JavaScript fallback
+            make CONFIG=emscripten EMSCRIPTEN_TARGET=all
+
+        or
+
+            # generates WebAssembly
             make CONFIG=emscripten EMSCRIPTEN_TARGET=wasm
 
         or
 
-            # generates asm.js with a fixed size 128MB heap
-            make CONFIG=emscripten EMSCRIPTEN_TARGET=asmjs128m
-
-        or
-
-            # generates asm.js with a fixed default size heap (as of Emscripten
-            # 1.38.11, this amounts to 16MB)
-            make CONFIG=emscripten EMSCRIPTEN_TARGET=asmjs
-
-        or
-
-            # generates JavaScript with dynamic heap growth and with
-            # compatibility for older VMs
+            # generates JavaScript with compatibility for older VMs
             make CONFIG=emscripten EMSCRIPTEN_TARGET=js
 
         Running the test suite on the command line is also supported by using
-        node.js. Version 8.9.1 or greater has been tested. Earlier versions
-        might or might not work. Depending on how your distribution calls the
-        `node.js` binary, you might have to edit
-        `build/make/config-emscripten.mk`.
+        node.js. Depending on how your distribution calls the `node.js` binary,
+        you might have to edit `build/make/config-emscripten.mk`.
 
      -  DJGPP / DOS
 
-        Cross-compilation from Linux systems is supported with DJGPP GCC 7.2 or
-        later via
+        Cross-compilation from Linux systems is supported with DJGPP GCC via
 
             make CONFIG=djgpp
 
@@ -184,7 +162,7 @@ How to compile
 
      -  other compilers:
 
-        To compile libopenmpt with other C++14 compliant compilers, run:
+        To compile libopenmpt with other compliant compilers, run:
         
             make CONFIG=generic
         
