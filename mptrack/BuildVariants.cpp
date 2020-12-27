@@ -21,8 +21,8 @@ OPENMPT_NAMESPACE_BEGIN
 bool BuildVariants::IsKnownSystem()
 {
 	return false
-		|| mpt::Windows::IsOriginal()
-		|| (mpt::Windows::IsWine() && theApp.GetWineVersion()->Version().IsValid())
+		|| mpt::OS::Windows::IsOriginal()
+		|| (mpt::OS::Windows::IsWine() && theApp.GetWineVersion()->Version().IsValid())
 		;
 }
 
@@ -32,15 +32,15 @@ bool BuildVariants::CurrentBuildIsModern()
 	return false
 		|| (CPU::GetMinimumSSEVersion() > 2)
 		|| (CPU::GetMinimumAVXVersion() > 0)
-		|| (mpt::Windows::Version::GetMinimumKernelLevel() > mpt::Windows::Version::Win7)
-		|| (mpt::Windows::Version::GetMinimumAPILevel() > mpt::Windows::Version::Win7)
+		|| (mpt::OS::Windows::Version::GetMinimumKernelLevel() > mpt::OS::Windows::Version::Win7)
+		|| (mpt::OS::Windows::Version::GetMinimumAPILevel() > mpt::OS::Windows::Version::Win7)
 		;
 }
 
 
 mpt::ustring BuildVariants::GuessCurrentBuildName()
 {
-	if(mpt::Windows::GetProcessArchitecture() == mpt::Windows::Architecture::amd64)
+	if(mpt::OS::Windows::GetProcessArchitecture() == mpt::OS::Windows::Architecture::amd64)
 	{
 		if(CurrentBuildIsModern())
 		{
@@ -49,7 +49,7 @@ mpt::ustring BuildVariants::GuessCurrentBuildName()
 		{
 			return U_("win64old");
 		}
-	} else if(mpt::Windows::GetProcessArchitecture() == mpt::Windows::Architecture::x86)
+	} else if(mpt::OS::Windows::GetProcessArchitecture() == mpt::OS::Windows::Architecture::x86)
 	{
 		if(CurrentBuildIsModern())
 		{
@@ -104,7 +104,7 @@ bool BuildVariants::ProcessorCanRunCurrentBuild()
 
 bool BuildVariants::SystemCanRunCurrentBuild() 
 {
-	if(mpt::Windows::HostCanRun(mpt::Windows::GetHostArchitecture(), mpt::Windows::GetProcessArchitecture()) == mpt::Windows::EmulationLevel::NA)
+	if(mpt::OS::Windows::HostCanRun(mpt::OS::Windows::GetHostArchitecture(), mpt::OS::Windows::GetProcessArchitecture()) == mpt::OS::Windows::EmulationLevel::NA)
 	{
 		return false;
 	}
@@ -144,19 +144,19 @@ bool BuildVariants::SystemCanRunCurrentBuild()
 #endif
 	if(IsKnownSystem())
 	{
-		if(mpt::Windows::IsOriginal())
+		if(mpt::OS::Windows::IsOriginal())
 		{
-			if(mpt::Windows::Version::Current().IsBefore(mpt::Windows::Version::GetMinimumKernelLevel()))
+			if(mpt::OS::Windows::Version::Current().IsBefore(mpt::OS::Windows::Version::GetMinimumKernelLevel()))
 			{
 				return false;
 			}
-			if(mpt::Windows::Version::Current().IsBefore(mpt::Windows::Version::GetMinimumAPILevel()))
+			if(mpt::OS::Windows::Version::Current().IsBefore(mpt::OS::Windows::Version::GetMinimumAPILevel()))
 			{
 				return false;
 			}
-		} else if(mpt::Windows::IsWine())
+		} else if(mpt::OS::Windows::IsWine())
 		{
-			if(theApp.GetWineVersion()->Version().IsBefore(mpt::Wine::GetMinimumWineVersion()))
+			if(theApp.GetWineVersion()->Version().IsBefore(mpt::OS::Wine::GetMinimumWineVersion()))
 			{
 				return false;
 			}

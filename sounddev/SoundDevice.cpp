@@ -27,12 +27,12 @@ namespace SoundDevice {
 
 SysInfo::SysInfo()
 	: SystemClass(mpt::OS::GetClass())
-	, WindowsVersion(mpt::Windows::Version::Current())
-	, IsWine(mpt::Windows::IsWine())
+	, WindowsVersion(mpt::OS::Windows::Version::Current())
+	, IsWine(mpt::OS::Windows::IsWine())
 	, WineHostClass(mpt::OS::Class::Unknown)
-	, WineVersion(mpt::Wine::Version())
+	, WineVersion(mpt::OS::Wine::Version())
 {
-	mpt::Wine::VersionContext wineVersionContext;
+	mpt::OS::Wine::VersionContext wineVersionContext;
 	WineHostClass = wineVersionContext.HostClass();
 	WineVersion = wineVersionContext.Version();
 }

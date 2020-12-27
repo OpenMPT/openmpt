@@ -148,9 +148,9 @@ void DoTests()
 		std::cout << "Version.: " << mpt::ToCharset(mpt::Charset::ASCII, Build::GetVersionString(Build::StringVersion | Build::StringRevision | Build::StringArchitecture | Build::StringSourceInfo | Build::StringBuildFlags | Build::StringBuildFeatures)) << std::endl;
 		std::cout << "Compiler: " << mpt::ToCharset(mpt::Charset::ASCII, Build::GetBuildCompilerString()) << std::endl;
 		#if MPT_OS_WINDOWS
-			std::cout << "Required Windows Kernel Level: " << mpt::ToCharset(mpt::Charset::ASCII, mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel())) << std::endl;
-			std::cout << "Required Windows API Level...: " << mpt::ToCharset(mpt::Charset::ASCII, mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel())) << std::endl;
-			std::cout << "Windows.: " << mpt::ToCharset(mpt::Charset::ASCII, mpt::Windows::Version::Current().GetName()) << std::endl;
+			std::cout << "Required Windows Kernel Level: " << mpt::ToCharset(mpt::Charset::ASCII, mpt::OS::Windows::Version::VersionToString(mpt::OS::Windows::Version::GetMinimumKernelLevel())) << std::endl;
+			std::cout << "Required Windows API Level...: " << mpt::ToCharset(mpt::Charset::ASCII, mpt::OS::Windows::Version::VersionToString(mpt::OS::Windows::Version::GetMinimumAPILevel())) << std::endl;
+			std::cout << "Windows.: " << mpt::ToCharset(mpt::Charset::ASCII, mpt::OS::Windows::Version::Current().GetName()) << std::endl;
 		#endif
 
 		std::cout << std::flush;
@@ -2296,13 +2296,13 @@ static MPT_NOINLINE void TestMisc2()
 
 #if defined(MODPLUG_TRACKER)
 
-	VERIFY_EQUAL(mpt::Wine::Version(U_("1.1.44" )).AsString() , U_("1.1.44"));
-	VERIFY_EQUAL(mpt::Wine::Version(U_("1.6.2"  )).AsString() , U_("1.6.2" ));
-	VERIFY_EQUAL(mpt::Wine::Version(U_("1.8"    )).AsString() , U_("1.8.0" ));
-	VERIFY_EQUAL(mpt::Wine::Version(U_("2.0-rc" )).AsString() , U_("2.0.0" ));
-	VERIFY_EQUAL(mpt::Wine::Version(U_("2.0-rc4")).AsString() , U_("2.0.0" ));
-	VERIFY_EQUAL(mpt::Wine::Version(U_("2.0"    )).AsString() , U_("2.0.0" ));
-	VERIFY_EQUAL(mpt::Wine::Version(U_("2.4"    )).AsString() , U_("2.4.0" ));
+	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("1.1.44" )).AsString() , U_("1.1.44"));
+	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("1.6.2"  )).AsString() , U_("1.6.2" ));
+	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("1.8"    )).AsString() , U_("1.8.0" ));
+	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("2.0-rc" )).AsString() , U_("2.0.0" ));
+	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("2.0-rc4")).AsString() , U_("2.0.0" ));
+	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("2.0"    )).AsString() , U_("2.0.0" ));
+	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("2.4"    )).AsString() , U_("2.4.0" ));
 
 #endif // MODPLUG_TRACKER
 

@@ -105,7 +105,7 @@ void CRippleBitmap::OnMouseMove(UINT nFlags, CPoint point)
 	// control.
 	// Avoid hiding the mouse cursor on Wine. Interferring with the users input
 	// methods is an absolute no-go.
-	if(mpt::Windows::IsWine())
+	if(mpt::OS::Windows::IsWine())
 	{
 		return;
 	}
@@ -249,7 +249,7 @@ BOOL CAboutDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	mpt::ustring app;
-	app += MPT_UFORMAT("OpenMPT ({}) ({} bit)")(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()), mpt::arch_bits)
+	app += MPT_UFORMAT("OpenMPT ({}) ({} bit)")(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()), mpt::arch_bits)
 		+ (!BuildVariants().CurrentBuildIsModern() ? U_(" for older Windows") : U_(""))
 		+ U_("\n");
 	app += U_("Version ") + Build::GetVersionStringSimple() + U_("\n\n");
@@ -263,7 +263,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_Tab.InsertItem(TCIF_TEXT, 2, _T("Credits"), 0, 0, 0, 0);
 	m_Tab.InsertItem(TCIF_TEXT, 3, _T("License"), 0, 0, 0, 0);
 	m_Tab.InsertItem(TCIF_TEXT, 4, _T("Resources"), 0, 0, 0, 0);
-	if(mpt::Windows::IsWine()) m_Tab.InsertItem(TCIF_TEXT, 5, _T("Wine"), 0, 0, 0, 0);
+	if(mpt::OS::Windows::IsWine()) m_Tab.InsertItem(TCIF_TEXT, 5, _T("Wine"), 0, 0, 0, 0);
 	m_Tab.SetCurSel(0);
 
 	OnTabChange(nullptr, nullptr);
@@ -361,9 +361,9 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				+ MPT_UFORMAT("Source Code: {}\n")(SourceInfo::Current().GetUrlWithRevision() + UL_(" ") + SourceInfo::Current().GetStateString())
 				+ MPT_UFORMAT("Build Date: {}\n")(Build::GetBuildDateString())
 				+ MPT_UFORMAT("Compiler: {}\n")(Build::GetBuildCompilerString())
-				+ MPT_UFORMAT("Architecture: {}\n")(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()))
-				+ MPT_UFORMAT("Required Windows Kernel Level: {}\n")(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumKernelLevel()))
-				+ MPT_UFORMAT("Required Windows API Level: {}\n")(mpt::Windows::Version::VersionToString(mpt::Windows::Version::GetMinimumAPILevel()));
+				+ MPT_UFORMAT("Architecture: {}\n")(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))
+				+ MPT_UFORMAT("Required Windows Kernel Level: {}\n")(mpt::OS::Windows::Version::VersionToString(mpt::OS::Windows::Version::GetMinimumKernelLevel()))
+				+ MPT_UFORMAT("Required Windows API Level: {}\n")(mpt::OS::Windows::Version::VersionToString(mpt::OS::Windows::Version::GetMinimumAPILevel()));
 			{
 				text += U_("Required CPU features: ");
 				std::vector<mpt::ustring> features;
@@ -395,7 +395,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += MPT_UFORMAT("Optional CPU features used: {}\n")(ProcSupportToString(CPU::GetEnabledFeatures()));
 #endif // ENABLE_ASM
 			text += lf;
-			text += MPT_UFORMAT("System Architecture: {}\n")(mpt::Windows::Name(mpt::Windows::GetHostArchitecture()));
+			text += MPT_UFORMAT("System Architecture: {}\n")(mpt::OS::Windows::Name(mpt::OS::Windows::GetHostArchitecture()));
 #ifdef ENABLE_ASM
 			text += MPT_UFORMAT("CPU: {}, Family {}, Model {}, Stepping {}\n")
 				( mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPU::ProcVendorID) > 0) ? std::string(CPU::ProcVendorID) : std::string("Generic"))
@@ -406,7 +406,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += MPT_UFORMAT("CPU Name: {}\n")(mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPU::ProcBrandID) > 0) ? std::string(CPU::ProcBrandID) : std::string("")));
 			text += MPT_UFORMAT("Available CPU features: {}\n")(ProcSupportToString(CPU::GetAvailableFeatures()));
 #endif // ENABLE_ASM
-			text += MPT_UFORMAT("Operating System: {}\n\n")(mpt::Windows::Version::Current().GetName());
+			text += MPT_UFORMAT("Operating System: {}\n\n")(mpt::OS::Windows::Version::Current().GetName());
 			text += MPT_UFORMAT("OpenMPT Install Path{1}: {0}\n")(theApp.GetInstallPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
 			text += MPT_UFORMAT("OpenMPT Executable Path{1}: {0}\n")(theApp.GetInstallBinArchPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
 			text += MPT_UFORMAT("Settings{1}: {0}\n")(theApp.GetConfigFileName(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
@@ -498,27 +498,27 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 					mpt::Wine::Context & wine = *theApp.GetWine();
 					
 					text += MPT_UFORMAT("Windows: {}\n")
-						( mpt::Windows::Version::Current().IsWindows() ? yes : no
+						( mpt::OS::Windows::Version::Current().IsWindows() ? yes : no
 						);
 					text += MPT_UFORMAT("Windows version: {}\n")
 						( 
-						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win81) ? U_("Windows 8.1") :
-						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win8) ? U_("Windows 8") :
-						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win7) ? U_("Windows 7") :
-						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinVista) ? U_("Windows Vista") :
-						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinXP) ? U_("Windows XP") :
-						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win2000) ? U_("Windows 2000") :
-						mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::WinNT4) ? U_("Windows NT4") :
+						mpt::OS::Windows::Version::Current().IsAtLeast(mpt::OS::Windows::Version::Win81) ? U_("Windows 8.1") :
+						mpt::OS::Windows::Version::Current().IsAtLeast(mpt::OS::Windows::Version::Win8) ? U_("Windows 8") :
+						mpt::OS::Windows::Version::Current().IsAtLeast(mpt::OS::Windows::Version::Win7) ? U_("Windows 7") :
+						mpt::OS::Windows::Version::Current().IsAtLeast(mpt::OS::Windows::Version::WinVista) ? U_("Windows Vista") :
+						mpt::OS::Windows::Version::Current().IsAtLeast(mpt::OS::Windows::Version::WinXP) ? U_("Windows XP") :
+						mpt::OS::Windows::Version::Current().IsAtLeast(mpt::OS::Windows::Version::Win2000) ? U_("Windows 2000") :
+						mpt::OS::Windows::Version::Current().IsAtLeast(mpt::OS::Windows::Version::WinNT4) ? U_("Windows NT4") :
 						U_("unknown")
 						);
 					text += MPT_UFORMAT("Windows original: {}\n")
-						( mpt::Windows::IsOriginal() ? yes : no
+						( mpt::OS::Windows::IsOriginal() ? yes : no
 						);
 
 					text += U_("\n");
 
 					text += MPT_UFORMAT("Wine: {}\n")
-						( mpt::Windows::IsWine() ? yes : no
+						( mpt::OS::Windows::IsWine() ? yes : no
 						);
 					text += MPT_UFORMAT("Wine Version: {}\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.VersionContext().RawVersion())

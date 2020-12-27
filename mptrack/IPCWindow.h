@@ -21,7 +21,7 @@ namespace IPCWindow
 		Open                               = 0x01,
 		SetWindowForeground                = 0x02,
 		GetVersion                         = 0x03,  // returns Version::GewRawVersion()
-		GetArchitecture                    = 0x04,  // returns mpt::Windows::Architecture
+		GetArchitecture                    = 0x04,  // returns mpt::OS::Windows::Architecture
 		HasSameBinaryPath                  = 0x05,
 		HasSameSettingsPath                = 0x06
 	};

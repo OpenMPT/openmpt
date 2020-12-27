@@ -325,10 +325,10 @@ struct SysInfo
 {
 public:
 	mpt::OS::Class SystemClass;
-	mpt::Windows::Version WindowsVersion;
+	mpt::OS::Windows::Version WindowsVersion;
 	bool IsWine;
 	mpt::OS::Class WineHostClass;
-	mpt::Wine::Version WineVersion;
+	mpt::OS::Wine::Version WineVersion;
 public:
 	bool IsOriginal() const { return !IsWine; }
 	bool IsWindowsOriginal() const { return !IsWine; }

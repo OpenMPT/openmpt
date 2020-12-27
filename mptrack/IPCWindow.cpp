@@ -64,7 +64,7 @@ namespace IPCWindow
 			case Function::GetArchitecture:
 				{
 					#if MPT_OS_WINDOWS
-						result = static_cast<int32>(mpt::Windows::GetProcessArchitecture());
+						result = static_cast<int32>(mpt::OS::Windows::GetProcessArchitecture());
 					#else
 						result = -1;
 					#endif
@@ -168,7 +168,7 @@ namespace IPCWindow
 					}
 					if(state.require[SameArchitecture])
 					{
-						if(SendIPC(hwnd, Function::GetArchitecture) != static_cast<int>(mpt::Windows::GetProcessArchitecture()))
+						if(SendIPC(hwnd, Function::GetArchitecture) != static_cast<int>(mpt::OS::Windows::GetProcessArchitecture()))
 						{
 							return TRUE; // continue
 						}

@@ -501,11 +501,11 @@ public:
 	}
 	mpt::PathString Path() const override
 	{
-		if(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()).empty())
+		if(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()).empty())
 		{
 			return mpt::PathString();
 		}
-		return configPath + P_("Components\\") + mpt::PathString::FromUnicode(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture())) + P_("\\");
+		return configPath + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture())) + P_("\\");
 	}
 };
 
@@ -541,7 +541,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	auto exePathComponents = mpt::String::Split<mpt::ustring>(exePath.GetDir().WithoutTrailingSlash().ToUnicode(), P_("\\").ToUnicode());
 	if(exePathComponents.size() >= 2)
 	{
-		if(exePathComponents[exePathComponents.size()-1] == mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()))
+		if(exePathComponents[exePathComponents.size()-1] == mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))
 		{
 			if(exePathComponents[exePathComponents.size()-2] == U_("bin"))
 			{
@@ -552,7 +552,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// Check if we are running from the source tree.
 	if(!modeMultiArch && exePathComponents.size() >= 4)
 	{
-		if(exePathComponents[exePathComponents.size()-1] == mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()))
+		if(exePathComponents[exePathComponents.size()-1] == mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))
 		{
 			if(exePathComponents[exePathComponents.size()-4] == U_("bin"))
 			{
@@ -645,9 +645,9 @@ void CTrackApp::CreatePaths()
 	{
 		CreateDirectory((GetConfigPath() + P_("Components")).AsNative().c_str(), 0);
 	}
-	if(!(GetConfigPath() + P_("Components\\") + mpt::PathString::FromUnicode(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()))).IsDirectory())
+	if(!(GetConfigPath() + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))).IsDirectory())
 	{
-		CreateDirectory((GetConfigPath() + P_("Components\\") + mpt::PathString::FromUnicode(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()))).AsNative().c_str(), 0);
+		CreateDirectory((GetConfigPath() + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))).AsNative().c_str(), 0);
 	}
 
 	// Handle updates from old versions.
@@ -700,12 +700,12 @@ bool CTrackApp::CheckSystemSupport()
 	{
 		mpt::ustring text;
 		text += U_("Your system does not meet the minimum requirements for this variant of OpenMPT.") + lf;
-		if(mpt::Windows::IsOriginal())
+		if(mpt::OS::Windows::IsOriginal())
 		{
 			text += U_("OpenMPT will exit now.") + lf;
 		}
 		Reporting::Error(text, "OpenMPT");
-		if(mpt::Windows::IsOriginal())
+		if(mpt::OS::Windows::IsOriginal())
 		{
 			return false;
 		} else
@@ -833,7 +833,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	if(cmdInfo.m_noWine)
 	{
-		mpt::Windows::PreventWineDetection();
+		mpt::OS::Windows::PreventWineDetection();
 	}
 
 	#ifdef ENABLE_ASM
@@ -844,9 +844,9 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		}
 	#endif
 
-	if(mpt::Windows::IsWine())
+	if(mpt::OS::Windows::IsWine())
 	{
-		SetWineVersion(std::make_shared<mpt::Wine::VersionContext>());
+		SetWineVersion(std::make_shared<mpt::OS::Wine::VersionContext>());
 	}
 
 	// Create paths to store configuration in
@@ -961,7 +961,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	ComponentManager::Instance()->Startup();
 
 	// Wine Support
-	if(mpt::Windows::IsWine())
+	if(mpt::OS::Windows::IsWine())
 	{
 		WineIntegration::Initialize();
 		WineIntegration::Load();
@@ -1245,7 +1245,7 @@ int CTrackApp::ExitInstanceImpl()
 	delete m_pSongSettingsIniFile;
 	m_pSongSettingsIniFile = nullptr;
 
-	if(mpt::Windows::IsWine())
+	if(mpt::OS::Windows::IsWine())
 	{
 		SetWineVersion(nullptr);
 	}

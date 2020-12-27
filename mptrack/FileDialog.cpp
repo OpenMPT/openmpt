@@ -100,7 +100,7 @@ bool FileDialog::Show(CWnd *parent)
 		m_extFilter.c_str(),
 		parent != nullptr ? parent : CMainFrame::GetMainFrame(),
 		0,
-		mpt::Windows::IsWine() ? FALSE : TRUE,
+		mpt::OS::Windows::IsWine() ? FALSE : TRUE,
 		m_preview && TrackerSettings::Instance().previewInFileDialogs);
 	OPENFILENAME &ofn = dlg.GetOFN();
 	ofn.nFilterIndex = m_filterIndex != nullptr ? *m_filterIndex : 0;

@@ -399,16 +399,16 @@ mpt::ustring GetBuildFeaturesString()
 		if constexpr(mpt::arch_bits == 64)
 		{
 			if (true
-				&& (mpt::Windows::Version::GetMinimumKernelLevel() <= mpt::Windows::Version::WinXP64)
-				&& (mpt::Windows::Version::GetMinimumAPILevel() <= mpt::Windows::Version::WinXP64)
+				&& (mpt::OS::Windows::Version::GetMinimumKernelLevel() <= mpt::OS::Windows::Version::WinXP64)
+				&& (mpt::OS::Windows::Version::GetMinimumAPILevel() <= mpt::OS::Windows::Version::WinXP64)
 			) {
 				retval += UL_(" WIN64OLD");
 			}
 		} else if constexpr(mpt::arch_bits == 32)
 		{
 			if (true
-				&& (mpt::Windows::Version::GetMinimumKernelLevel() <= mpt::Windows::Version::WinXP)
-				&& (mpt::Windows::Version::GetMinimumAPILevel() <= mpt::Windows::Version::WinXP)
+				&& (mpt::OS::Windows::Version::GetMinimumKernelLevel() <= mpt::OS::Windows::Version::WinXP)
+				&& (mpt::OS::Windows::Version::GetMinimumAPILevel() <= mpt::OS::Windows::Version::WinXP)
 			) {
 				retval += UL_(" WIN32OLD");
 			}
@@ -508,7 +508,7 @@ mpt::ustring GetVersionString(FlagSet<Build::Strings> strings)
 	#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 		if(strings[StringArchitecture])
 		{
-			result.push_back(mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()));
+			result.push_back(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()));
 		}
 	#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 	if(strings[StringBitness])

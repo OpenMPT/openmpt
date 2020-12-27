@@ -35,12 +35,12 @@ namespace Wine
 
 
 
-Context::Context(mpt::Wine::VersionContext versionContext)
+Context::Context(mpt::OS::Wine::VersionContext versionContext)
 	: m_VersionContext(versionContext)
 	, wine_get_dos_file_name(nullptr)
 	, wine_get_unix_file_name(nullptr)
 {
-	if(!mpt::Windows::IsWine())
+	if(!mpt::OS::Windows::IsWine())
 	{
 		throw mpt::Wine::Exception("Wine not detected.");
 	}

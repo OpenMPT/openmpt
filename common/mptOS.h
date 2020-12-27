@@ -49,6 +49,8 @@ mpt::OS::Class GetClass();
 
 namespace mpt
 {
+namespace OS
+{
 namespace Windows
 {
 
@@ -122,7 +124,7 @@ public:
 
 	typedef uint32 TypeId;
 
-	static mpt::ustring VersionToString(mpt::Windows::Version::System version);
+	static mpt::ustring VersionToString(mpt::OS::Windows::Version::System version);
 
 private:
 
@@ -141,30 +143,30 @@ public:
 
 	static Version NoWindows() noexcept;
 
-	Version(mpt::Windows::Version::System system, mpt::Windows::Version::ServicePack servicePack, mpt::Windows::Version::Build build, mpt::Windows::Version::TypeId type) noexcept;
+	Version(mpt::OS::Windows::Version::System system, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build, mpt::OS::Windows::Version::TypeId type) noexcept;
 
 public:
 
-	static mpt::Windows::Version Current() noexcept;
+	static mpt::OS::Windows::Version Current() noexcept;
 
 public:
 
 	bool IsWindows() const noexcept;
 
-	bool IsBefore(mpt::Windows::Version::System version) const noexcept;
-	bool IsBefore(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack) const noexcept;
-	bool IsBefore(mpt::Windows::Version::System version, mpt::Windows::Version::Build build) const noexcept;
-	bool IsBefore(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack, mpt::Windows::Version::Build build) const noexcept;
+	bool IsBefore(mpt::OS::Windows::Version::System version) const noexcept;
+	bool IsBefore(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack) const noexcept;
+	bool IsBefore(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::Build build) const noexcept;
+	bool IsBefore(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build) const noexcept;
 
-	bool IsAtLeast(mpt::Windows::Version::System version) const noexcept;
-	bool IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack) const noexcept;
-	bool IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Version::Build build) const noexcept;
-	bool IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack, mpt::Windows::Version::Build build) const noexcept;
+	bool IsAtLeast(mpt::OS::Windows::Version::System version) const noexcept;
+	bool IsAtLeast(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack) const noexcept;
+	bool IsAtLeast(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::Build build) const noexcept;
+	bool IsAtLeast(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build) const noexcept;
 
-	mpt::Windows::Version::System GetSystem() const noexcept;
-	mpt::Windows::Version::ServicePack GetServicePack() const noexcept;
-	mpt::Windows::Version::Build GetBuild() const noexcept;
-	mpt::Windows::Version::TypeId GetTypeId() const noexcept;
+	mpt::OS::Windows::Version::System GetSystem() const noexcept;
+	mpt::OS::Windows::Version::ServicePack GetServicePack() const noexcept;
+	mpt::OS::Windows::Version::Build GetBuild() const noexcept;
+	mpt::OS::Windows::Version::TypeId GetTypeId() const noexcept;
 
 	mpt::ustring GetName() const;
 #ifdef MODPLUG_TRACKER
@@ -173,8 +175,8 @@ public:
 
 public:
 
-	static mpt::Windows::Version::System GetMinimumKernelLevel() noexcept;
-	static mpt::Windows::Version::System GetMinimumAPILevel() noexcept;
+	static mpt::OS::Windows::Version::System GetMinimumKernelLevel() noexcept;
+	static mpt::OS::Windows::Version::System GetMinimumAPILevel() noexcept;
 
 }; // class Version
 
@@ -234,6 +236,7 @@ bool IsWine();
 #endif // MODPLUG_TRACKER
 
 } // namespace Windows
+} // namespace OS
 } // namespace mpt
 
 
@@ -241,7 +244,8 @@ bool IsWine();
 
 namespace mpt
 {
-
+namespace OS
+{
 namespace Wine
 {
 
@@ -260,17 +264,17 @@ public:
 	bool IsValid() const;
 	mpt::ustring AsString() const;
 private:
-	static mpt::Wine::Version FromInteger(uint32 version);
+	static mpt::OS::Wine::Version FromInteger(uint32 version);
 	uint32 AsInteger() const;
 public:
-	bool IsBefore(mpt::Wine::Version other) const;
-	bool IsAtLeast(mpt::Wine::Version other) const;
+	bool IsBefore(mpt::OS::Wine::Version other) const;
+	bool IsAtLeast(mpt::OS::Wine::Version other) const;
 	uint8 GetMajor() const;
 	uint8 GetMinor() const;
 	uint8 GetUpdate() const;
 };
 
-mpt::Wine::Version GetMinimumWineVersion();
+mpt::OS::Wine::Version GetMinimumWineVersion();
 
 class VersionContext
 {
@@ -281,7 +285,7 @@ protected:
 	std::string m_RawBuildID;
 	std::string m_RawHostSysName;
 	std::string m_RawHostRelease;
-	mpt::Wine::Version m_Version;
+	mpt::OS::Wine::Version m_Version;
 	mpt::OS::Class m_HostClass;
 public:
 	VersionContext();
@@ -292,12 +296,12 @@ public:
 	std::string RawBuildID() const { return m_RawBuildID; }
 	std::string RawHostSysName() const { return m_RawHostSysName; }
 	std::string RawHostRelease() const { return m_RawHostRelease; }
-	mpt::Wine::Version Version() const { return m_Version; }
+	mpt::OS::Wine::Version Version() const { return m_Version; }
 	mpt::OS::Class HostClass() const { return m_HostClass; }
 };
 
 } // namespace Wine
-
+} // namespace OS
 } // namespace mpt
 
 #endif // MODPLUG_TRACKER

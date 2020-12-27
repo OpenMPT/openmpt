@@ -82,6 +82,8 @@ mpt::OS::Class GetClass()
 
 namespace mpt
 {
+namespace OS
+{
 namespace Windows
 {
 
@@ -89,45 +91,45 @@ namespace Windows
 #if MPT_OS_WINDOWS
 
 
-static mpt::Windows::Version VersionFromNTDDI_VERSION() noexcept
+static mpt::OS::Windows::Version VersionFromNTDDI_VERSION() noexcept
 {
 	// Initialize to used SDK version
-	mpt::Windows::Version::System System =
+	mpt::OS::Windows::Version::System System =
 		#if NTDDI_VERSION >= 0x0A000000 // NTDDI_WIN10
-			mpt::Windows::Version::Win10
+			mpt::OS::Windows::Version::Win10
 		#elif NTDDI_VERSION >= 0x06030000 // NTDDI_WINBLUE
-			mpt::Windows::Version::Win81
+			mpt::OS::Windows::Version::Win81
 		#elif NTDDI_VERSION >= 0x06020000 // NTDDI_WIN8
-			mpt::Windows::Version::Win8
+			mpt::OS::Windows::Version::Win8
 		#elif NTDDI_VERSION >= 0x06010000 // NTDDI_WIN7
-			mpt::Windows::Version::Win7
+			mpt::OS::Windows::Version::Win7
 		#elif NTDDI_VERSION >= 0x06000000 // NTDDI_VISTA
-			mpt::Windows::Version::WinVista
+			mpt::OS::Windows::Version::WinVista
 		#elif NTDDI_VERSION >= 0x05020000 // NTDDI_WS03
-			mpt::Windows::Version::WinXP64
+			mpt::OS::Windows::Version::WinXP64
 		#elif NTDDI_VERSION >= NTDDI_WINXP
-			mpt::Windows::Version::WinXP
+			mpt::OS::Windows::Version::WinXP
 		#elif NTDDI_VERSION >= NTDDI_WIN2K
-			mpt::Windows::Version::Win2000
+			mpt::OS::Windows::Version::Win2000
 		#else
-			mpt::Windows::Version::WinNT4
+			mpt::OS::Windows::Version::WinNT4
 		#endif
 		;
-	return mpt::Windows::Version(System, mpt::Windows::Version::ServicePack(((NTDDI_VERSION & 0xffffu) >> 8) & 0xffu, ((NTDDI_VERSION & 0xffffu) >> 0) & 0xffu), 0, 0);
+	return mpt::OS::Windows::Version(System, mpt::OS::Windows::Version::ServicePack(((NTDDI_VERSION & 0xffffu) >> 8) & 0xffu, ((NTDDI_VERSION & 0xffffu) >> 0) & 0xffu), 0, 0);
 }
 
 
-static mpt::Windows::Version::System SystemVersionFrom_WIN32_WINNT() noexcept
+static mpt::OS::Windows::Version::System SystemVersionFrom_WIN32_WINNT() noexcept
 {
 	#if defined(_WIN32_WINNT)
-		return mpt::Windows::Version::System((static_cast<uint64>(_WIN32_WINNT) & 0xff00u) >> 8, (static_cast<uint64>(_WIN32_WINNT) & 0x00ffu) >> 0);
+		return mpt::OS::Windows::Version::System((static_cast<uint64>(_WIN32_WINNT) & 0xff00u) >> 8, (static_cast<uint64>(_WIN32_WINNT) & 0x00ffu) >> 0);
 	#else
-		return mpt::Windows::Version::System();
+		return mpt::OS::Windows::Version::System();
 	#endif
 }
 
 
-static mpt::Windows::Version GatherWindowsVersion() noexcept
+static mpt::OS::Windows::Version GatherWindowsVersion() noexcept
 {
 #if MPT_OS_WINDOWS_WINRT
 	return VersionFromNTDDI_VERSION();
@@ -164,9 +166,9 @@ static mpt::Windows::Version GatherWindowsVersion() noexcept
 	{
 		dwProductType = PRODUCT_UNDEFINED;
 	}
-	return mpt::Windows::Version(
-		mpt::Windows::Version::System(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion),
-		mpt::Windows::Version::ServicePack(versioninfoex.wServicePackMajor, versioninfoex.wServicePackMinor),
+	return mpt::OS::Windows::Version(
+		mpt::OS::Windows::Version::System(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion),
+		mpt::OS::Windows::Version::ServicePack(versioninfoex.wServicePackMajor, versioninfoex.wServicePackMinor),
 		versioninfoex.dwBuildNumber,
 		dwProductType
 		);
@@ -179,7 +181,7 @@ static mpt::Windows::Version GatherWindowsVersion() noexcept
 namespace {
 struct WindowsVersionCache
 {
-	mpt::Windows::Version version;
+	mpt::OS::Windows::Version version;
 	WindowsVersionCache() noexcept
 		: version(GatherWindowsVersion())
 	{
@@ -187,7 +189,7 @@ struct WindowsVersionCache
 };
 }
 
-static mpt::Windows::Version GatherWindowsVersionFromCache() noexcept
+static mpt::OS::Windows::Version GatherWindowsVersionFromCache() noexcept
 {
 	static WindowsVersionCache gs_WindowsVersionCache;
 	return gs_WindowsVersionCache.version;
@@ -215,7 +217,7 @@ Version Version::NoWindows() noexcept
 }
 
 
-Version::Version(mpt::Windows::Version::System system, mpt::Windows::Version::ServicePack servicePack, mpt::Windows::Version::Build build, mpt::Windows::Version::TypeId type) noexcept
+Version::Version(mpt::OS::Windows::Version::System system, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build, mpt::OS::Windows::Version::TypeId type) noexcept
 	: m_SystemIsWindows(true)
 	, m_System(system)
 	, m_ServicePack(servicePack)
@@ -225,7 +227,7 @@ Version::Version(mpt::Windows::Version::System system, mpt::Windows::Version::Se
 }
 
 
-mpt::Windows::Version Version::Current() noexcept
+mpt::OS::Windows::Version Version::Current() noexcept
 {
 	#if MPT_OS_WINDOWS
 		#ifdef MODPLUG_TRACKER
@@ -234,7 +236,7 @@ mpt::Windows::Version Version::Current() noexcept
 			return GatherWindowsVersion();
 		#endif // MODPLUG_TRACKER
 	#else // !MPT_OS_WINDOWS
-		return mpt::Windows::Version::NoWindows();
+		return mpt::OS::Windows::Version::NoWindows();
 	#endif // MPT_OS_WINDOWS
 }
 
@@ -245,7 +247,7 @@ bool Version::IsWindows() const noexcept
 }
 
 
-bool Version::IsBefore(mpt::Windows::Version::System version) const noexcept
+bool Version::IsBefore(mpt::OS::Windows::Version::System version) const noexcept
 {
 	if(!m_SystemIsWindows)
 	{
@@ -255,7 +257,7 @@ bool Version::IsBefore(mpt::Windows::Version::System version) const noexcept
 }
 
 
-bool Version::IsBefore(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack) const noexcept
+bool Version::IsBefore(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack) const noexcept
 {
 	if(!m_SystemIsWindows)
 	{
@@ -273,7 +275,7 @@ bool Version::IsBefore(mpt::Windows::Version::System version, mpt::Windows::Vers
 }
 
 
-bool Version::IsBefore(mpt::Windows::Version::System version, mpt::Windows::Version::Build build) const noexcept
+bool Version::IsBefore(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::Build build) const noexcept
 {
 	if(!m_SystemIsWindows)
 	{
@@ -291,7 +293,7 @@ bool Version::IsBefore(mpt::Windows::Version::System version, mpt::Windows::Vers
 }
 
 
-bool Version::IsBefore(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack, mpt::Windows::Version::Build build) const noexcept
+bool Version::IsBefore(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build) const noexcept
 {
 	if(!m_SystemIsWindows)
 	{
@@ -317,7 +319,7 @@ bool Version::IsBefore(mpt::Windows::Version::System version, mpt::Windows::Vers
 }
 
 
-bool Version::IsAtLeast(mpt::Windows::Version::System version) const noexcept
+bool Version::IsAtLeast(mpt::OS::Windows::Version::System version) const noexcept
 {
 	if(!m_SystemIsWindows)
 	{
@@ -327,7 +329,7 @@ bool Version::IsAtLeast(mpt::Windows::Version::System version) const noexcept
 }
 
 
-bool Version::IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack) const noexcept
+bool Version::IsAtLeast(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack) const noexcept
 {
 	if(!m_SystemIsWindows)
 	{
@@ -345,7 +347,7 @@ bool Version::IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Ver
 }
 
 
-bool Version::IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Version::Build build) const noexcept
+bool Version::IsAtLeast(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::Build build) const noexcept
 {
 	if(!m_SystemIsWindows)
 	{
@@ -363,7 +365,7 @@ bool Version::IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Ver
 }
 
 
-bool Version::IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Version::ServicePack servicePack, mpt::Windows::Version::Build build) const noexcept
+bool Version::IsAtLeast(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build) const noexcept
 {
 	if(!m_SystemIsWindows)
 	{
@@ -389,25 +391,25 @@ bool Version::IsAtLeast(mpt::Windows::Version::System version, mpt::Windows::Ver
 }
 
 
-mpt::Windows::Version::System Version::GetSystem() const noexcept
+mpt::OS::Windows::Version::System Version::GetSystem() const noexcept
 {
 	return m_System;
 }
 
 
-mpt::Windows::Version::ServicePack Version::GetServicePack() const noexcept
+mpt::OS::Windows::Version::ServicePack Version::GetServicePack() const noexcept
 {
 	return m_ServicePack;
 }
 
 
-mpt::Windows::Version::Build Version::GetBuild() const noexcept
+mpt::OS::Windows::Version::Build Version::GetBuild() const noexcept
 {
 	return m_Build;
 }
 
 
-mpt::Windows::Version::TypeId Version::GetTypeId() const noexcept
+mpt::OS::Windows::Version::TypeId Version::GetTypeId() const noexcept
 {
 	return m_Type;
 }
@@ -415,20 +417,20 @@ mpt::Windows::Version::TypeId Version::GetTypeId() const noexcept
 
 static constexpr struct { Version::System version; const mpt::uchar * name; bool showDetails; } versionMap[] =
 {
-	{ mpt::Windows::Version::WinNewer, UL_("Windows 10 (or newer)"), false },
-	{ mpt::Windows::Version::Win10, UL_("Windows 10"), true },
-	{ mpt::Windows::Version::Win81, UL_("Windows 8.1"), true },
-	{ mpt::Windows::Version::Win8, UL_("Windows 8"), true },
-	{ mpt::Windows::Version::Win7, UL_("Windows 7"), true },
-	{ mpt::Windows::Version::WinVista, UL_("Windows Vista"), true },
-	{ mpt::Windows::Version::WinXP64, UL_("Windows XP x64 / Windows Server 2003"), true },
-	{ mpt::Windows::Version::WinXP, UL_("Windows XP"), true },
-	{ mpt::Windows::Version::Win2000, UL_("Windows 2000"), true },
-	{ mpt::Windows::Version::WinNT4, UL_("Windows NT4"), true }
+	{ mpt::OS::Windows::Version::WinNewer, UL_("Windows 10 (or newer)"), false },
+	{ mpt::OS::Windows::Version::Win10, UL_("Windows 10"), true },
+	{ mpt::OS::Windows::Version::Win81, UL_("Windows 8.1"), true },
+	{ mpt::OS::Windows::Version::Win8, UL_("Windows 8"), true },
+	{ mpt::OS::Windows::Version::Win7, UL_("Windows 7"), true },
+	{ mpt::OS::Windows::Version::WinVista, UL_("Windows Vista"), true },
+	{ mpt::OS::Windows::Version::WinXP64, UL_("Windows XP x64 / Windows Server 2003"), true },
+	{ mpt::OS::Windows::Version::WinXP, UL_("Windows XP"), true },
+	{ mpt::OS::Windows::Version::Win2000, UL_("Windows 2000"), true },
+	{ mpt::OS::Windows::Version::WinNT4, UL_("Windows NT4"), true }
 };
 
 
-mpt::ustring Version::VersionToString(mpt::Windows::Version::System version)
+mpt::ustring Version::VersionToString(mpt::OS::Windows::Version::System version)
 {
 	mpt::ustring result;
 	for(const auto &v : versionMap)
@@ -486,9 +488,9 @@ mpt::ustring Version::GetName() const
 	name += U_(")");
 	mpt::ustring result = name;
 	#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-		if(mpt::Windows::IsWine())
+		if(mpt::OS::Windows::IsWine())
 		{
-			mpt::Wine::VersionContext v;
+			mpt::OS::Wine::VersionContext v;
 			if(v.Version().IsValid())
 			{
 				result = MPT_UFORMAT("Wine {} ({})")(
@@ -512,9 +514,9 @@ mpt::ustring Version::GetName() const
 mpt::ustring Version::GetNameShort() const
 {
 	mpt::ustring name;
-	if(mpt::Windows::IsWine())
+	if(mpt::OS::Windows::IsWine())
 	{
-		mpt::Wine::VersionContext v;
+		mpt::OS::Wine::VersionContext v;
 		if(v.Version().IsValid())
 		{
 			name = MPT_UFORMAT("wine-{}")(v.Version().AsString());
@@ -535,22 +537,22 @@ mpt::ustring Version::GetNameShort() const
 #endif // MODPLUG_TRACKER
 
 
-mpt::Windows::Version::System Version::GetMinimumKernelLevel() noexcept
+mpt::OS::Windows::Version::System Version::GetMinimumKernelLevel() noexcept
 {
 	uint64 minimumKernelVersion = 0;
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
-		minimumKernelVersion = std::max(minimumKernelVersion, static_cast<uint64>(mpt::Windows::Version::WinVista));
+		minimumKernelVersion = std::max(minimumKernelVersion, static_cast<uint64>(mpt::OS::Windows::Version::WinVista));
 	#endif
-	return mpt::Windows::Version::System(minimumKernelVersion);
+	return mpt::OS::Windows::Version::System(minimumKernelVersion);
 }
 
 
-mpt::Windows::Version::System Version::GetMinimumAPILevel() noexcept
+mpt::OS::Windows::Version::System Version::GetMinimumAPILevel() noexcept
 {
 	#if MPT_OS_WINDOWS
 		return SystemVersionFrom_WIN32_WINNT();
 	#else // !MPT_OS_WINDOWS
-		return mpt::Windows::Version::System();
+		return mpt::OS::Windows::Version::System();
 	#endif // MPT_OS_WINDOWS
 }
 
@@ -803,12 +805,12 @@ void PreventWineDetection()
 
 bool IsOriginal()
 {
-	return mpt::Windows::Version::Current().IsWindows() && !SystemIsWine();
+	return mpt::OS::Windows::Version::Current().IsWindows() && !SystemIsWine();
 }
 
 bool IsWine()
 {
-	return mpt::Windows::Version::Current().IsWindows() && SystemIsWine();
+	return mpt::OS::Windows::Version::Current().IsWindows() && SystemIsWine();
 }
 
 
@@ -816,6 +818,7 @@ bool IsWine()
 
 
 } // namespace Windows
+} // namespace OS
 } // namespace mpt
 
 
@@ -823,6 +826,8 @@ bool IsWine()
 #if defined(MODPLUG_TRACKER)
 
 namespace mpt
+{
+namespace OS
 {
 namespace Wine
 {
@@ -880,9 +885,9 @@ Version::Version(uint8 vmajor, uint8 vminor, uint8 vupdate)
 }
 
 
-mpt::Wine::Version Version::FromInteger(uint32 version)
+mpt::OS::Wine::Version Version::FromInteger(uint32 version)
 {
-	mpt::Wine::Version result;
+	mpt::OS::Wine::Version result;
 	result.valid = (version <= 0xffffff);
 	result.vmajor = static_cast<uint8>(version >> 16);
 	result.vminor = static_cast<uint8>(version >> 8);
@@ -913,7 +918,7 @@ uint32 Version::AsInteger() const
 }
 
 
-bool Version::IsBefore(mpt::Wine::Version other) const
+bool Version::IsBefore(mpt::OS::Wine::Version other) const
 {
 	if(!IsValid())
 	{
@@ -923,7 +928,7 @@ bool Version::IsBefore(mpt::Wine::Version other) const
 }
 
 
-bool Version::IsAtLeast(mpt::Wine::Version other) const
+bool Version::IsAtLeast(mpt::OS::Wine::Version other) const
 {
 	if(!IsValid())
 	{
@@ -949,11 +954,11 @@ uint8 Version::GetUpdate() const
 }
 
 
-mpt::Wine::Version GetMinimumWineVersion()
+mpt::OS::Wine::Version GetMinimumWineVersion()
 {
-	mpt::Wine::Version minimumWineVersion = mpt::Wine::Version(0,0,0);
+	mpt::OS::Wine::Version minimumWineVersion = mpt::OS::Wine::Version(0,0,0);
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
-		minimumWineVersion = mpt::Wine::Version(1,8,0);
+		minimumWineVersion = mpt::OS::Wine::Version(1,8,0);
 	#endif
 	return minimumWineVersion;
 }
@@ -964,7 +969,7 @@ VersionContext::VersionContext()
 	, m_HostClass(mpt::OS::Class::Unknown)
 {
 	#if MPT_OS_WINDOWS
-		m_IsWine = mpt::Windows::IsWine();
+		m_IsWine = mpt::OS::Windows::IsWine();
 		if(!m_IsWine)
 		{
 			return;
@@ -993,13 +998,14 @@ VersionContext::VersionContext()
 			m_RawHostSysName = wine_host_sysname ? wine_host_sysname : "";
 			m_RawHostRelease = wine_host_release ? wine_host_release : "";
 		}
-		m_Version = mpt::Wine::Version(mpt::ToUnicode(mpt::Charset::UTF8, m_RawVersion));
+		m_Version = mpt::OS::Wine::Version(mpt::ToUnicode(mpt::Charset::UTF8, m_RawVersion));
 		m_HostClass = mpt::OS::GetClassFromSysname(mpt::ToUnicode(mpt::Charset::UTF8, m_RawHostSysName));
 	#endif // MPT_OS_WINDOWS
 }
 
 
 } // namespace Wine
+} // namespace OS
 } // namespace mpt
 
 #endif // MODPLUG_TRACKER

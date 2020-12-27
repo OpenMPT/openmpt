@@ -76,18 +76,18 @@ static constexpr const mpt::uchar *cacheSection = UL_("PluginCache");
 uint8 VSTPluginLib::GetNativePluginArch()
 {
 	uint8 result = 0;
-	switch(mpt::Windows::GetProcessArchitecture())
+	switch(mpt::OS::Windows::GetProcessArchitecture())
 	{
-	case mpt::Windows::Architecture::x86:
+	case mpt::OS::Windows::Architecture::x86:
 		result = PluginArch_x86;
 		break;
-	case mpt::Windows::Architecture::amd64:
+	case mpt::OS::Windows::Architecture::amd64:
 		result = PluginArch_amd64;
 		break;
-	case mpt::Windows::Architecture::arm:
+	case mpt::OS::Windows::Architecture::arm:
 		result = PluginArch_arm;
 		break;
-	case mpt::Windows::Architecture::arm64:
+	case mpt::OS::Windows::Architecture::arm64:
 		result = PluginArch_arm64;
 		break;
 	default:

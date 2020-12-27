@@ -143,15 +143,15 @@ struct UpdateInfo {
 
 static bool IsCurrentArchitecture(const mpt::ustring &architecture)
 {
-	return mpt::Windows::Name(mpt::Windows::GetProcessArchitecture()) == architecture;
+	return mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()) == architecture;
 }
 
 static bool IsArchitectureSupported(const mpt::ustring &architecture)
 {
-	const auto & architectures = mpt::Windows::GetSupportedProcessArchitectures(mpt::Windows::GetHostArchitecture());
+	const auto & architectures = mpt::OS::Windows::GetSupportedProcessArchitectures(mpt::OS::Windows::GetHostArchitecture());
 	for(const auto & arch : architectures)
 	{
-		if(mpt::Windows::Name(arch) == architecture)
+		if(mpt::OS::Windows::Name(arch) == architecture)
 		{
 			return true;
 		}
@@ -269,18 +269,18 @@ static UpdateInfo GetBestDownload(const Update::versions &versions)
 				}
 			}
 
-			if(mpt::Windows::Version::Current().IsBefore(
-					mpt::Windows::Version::System(mpt::saturate_cast<uint32>(download.required_windows_version->version_major), mpt::saturate_cast<uint32>(download.required_windows_version->version_minor)),
-					mpt::Windows::Version::ServicePack(mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_major), mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_minor)),
-					mpt::Windows::Version::Build(mpt::saturate_cast<uint32>(download.required_windows_version->build))
+			if(mpt::OS::Windows::Version::Current().IsBefore(
+					mpt::OS::Windows::Version::System(mpt::saturate_cast<uint32>(download.required_windows_version->version_major), mpt::saturate_cast<uint32>(download.required_windows_version->version_minor)),
+					mpt::OS::Windows::Version::ServicePack(mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_major), mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_minor)),
+					mpt::OS::Windows::Version::Build(mpt::saturate_cast<uint32>(download.required_windows_version->build))
 				))
 			{
 				download_supported = false;
 			}
 
-			if(mpt::Windows::IsWine() && theApp.GetWineVersion()->Version().IsValid())
+			if(mpt::OS::Windows::IsWine() && theApp.GetWineVersion()->Version().IsValid())
 			{
-				if(theApp.GetWineVersion()->Version().IsBefore(mpt::Wine::Version(mpt::saturate_cast<uint8>(download.required_windows_version->wine_major), mpt::saturate_cast<uint8>(download.required_windows_version->wine_minor), mpt::saturate_cast<uint8>(download.required_windows_version->wine_update))))
+				if(theApp.GetWineVersion()->Version().IsBefore(mpt::OS::Wine::Version(mpt::saturate_cast<uint8>(download.required_windows_version->wine_major), mpt::saturate_cast<uint8>(download.required_windows_version->wine_minor), mpt::saturate_cast<uint8>(download.required_windows_version->wine_update))))
 				{
 					download_supported = false;
 				}
@@ -587,27 +587,27 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 {
 	JSON::value j;
 	j["OpenMPT"]["Version"] = mpt::ufmt::val(Version::Current());
-	j["OpenMPT"]["Architecture"] = mpt::Windows::Name(mpt::Windows::GetProcessArchitecture());
+	j["OpenMPT"]["Architecture"] = mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture());
 	j["Update"]["PeriodDays"] = settings.periodDays;
-	j["System"]["Windows"]["Version"]["Name"] = mpt::Windows::Version::Current().GetName();
-	j["System"]["Windows"]["Version"]["Major"] = mpt::Windows::Version::Current().GetSystem().Major;
-	j["System"]["Windows"]["Version"]["Minor"] = mpt::Windows::Version::Current().GetSystem().Minor;
-	j["System"]["Windows"]["ServicePack"]["Major"] = mpt::Windows::Version::Current().GetServicePack().Major;
-	j["System"]["Windows"]["ServicePack"]["Minor"] = mpt::Windows::Version::Current().GetServicePack().Minor;
-	j["System"]["Windows"]["Build"] = mpt::Windows::Version::Current().GetBuild();
-	j["System"]["Windows"]["Architecture"] = mpt::Windows::Name(mpt::Windows::GetHostArchitecture());
-	j["System"]["Windows"]["IsWine"] = mpt::Windows::IsWine();
-	j["System"]["Windows"]["TypeRaw"] = MPT_FORMAT("0x{}")(mpt::fmt::HEX0<8>(mpt::Windows::Version::Current().GetTypeId()));
-	std::vector<mpt::Windows::Architecture> architectures = mpt::Windows::GetSupportedProcessArchitectures(mpt::Windows::GetHostArchitecture());
+	j["System"]["Windows"]["Version"]["Name"] = mpt::OS::Windows::Version::Current().GetName();
+	j["System"]["Windows"]["Version"]["Major"] = mpt::OS::Windows::Version::Current().GetSystem().Major;
+	j["System"]["Windows"]["Version"]["Minor"] = mpt::OS::Windows::Version::Current().GetSystem().Minor;
+	j["System"]["Windows"]["ServicePack"]["Major"] = mpt::OS::Windows::Version::Current().GetServicePack().Major;
+	j["System"]["Windows"]["ServicePack"]["Minor"] = mpt::OS::Windows::Version::Current().GetServicePack().Minor;
+	j["System"]["Windows"]["Build"] = mpt::OS::Windows::Version::Current().GetBuild();
+	j["System"]["Windows"]["Architecture"] = mpt::OS::Windows::Name(mpt::OS::Windows::GetHostArchitecture());
+	j["System"]["Windows"]["IsWine"] = mpt::OS::Windows::IsWine();
+	j["System"]["Windows"]["TypeRaw"] = MPT_FORMAT("0x{}")(mpt::fmt::HEX0<8>(mpt::OS::Windows::Version::Current().GetTypeId()));
+	std::vector<mpt::OS::Windows::Architecture> architectures = mpt::OS::Windows::GetSupportedProcessArchitectures(mpt::OS::Windows::GetHostArchitecture());
 	for(const auto & arch : architectures)
 	{
-		j["System"]["Windows"]["ProcessArchitectures"][mpt::ToCharset(mpt::Charset::UTF8, mpt::Windows::Name(arch))] = true;
+		j["System"]["Windows"]["ProcessArchitectures"][mpt::ToCharset(mpt::Charset::UTF8, mpt::OS::Windows::Name(arch))] = true;
 	}
-	j["System"]["Memory"] = mpt::Windows::GetSystemMemorySize() / 1024 / 1024;  // MB
+	j["System"]["Memory"] = mpt::OS::Windows::GetSystemMemorySize() / 1024 / 1024;  // MB
 	j["System"]["Threads"] = std::thread::hardware_concurrency();
-	if(mpt::Windows::IsWine())
+	if(mpt::OS::Windows::IsWine())
 	{
-		mpt::Wine::VersionContext v;
+		mpt::OS::Wine::VersionContext v;
 		j["System"]["Windows"]["Wine"]["Version"]["Raw"] = v.RawVersion();
 		if(v.Version().IsValid())
 		{
@@ -694,7 +694,7 @@ mpt::ustring CUpdateCheck::GetUpdateURLV2(const CUpdateCheck::Settings &settings
 	updateURL = mpt::String::Replace(updateURL, U_("$VERSION"), MPT_UFORMAT("{}-{}-{}")
 		( Version::Current()
 		, BuildVariants().GuessCurrentBuildName()
-		, settings.sendStatistics ? mpt::Windows::Version::Current().GetNameShort() : U_("unknown")
+		, settings.sendStatistics ? mpt::OS::Windows::Version::Current().GetNameShort() : U_("unknown")
 		));
 	updateURL = mpt::String::Replace(updateURL, U_("$GUID"), settings.sendStatistics ? mpt::ufmt::val(settings.statisticsUUID) : U_("anonymous"));
 	return updateURL;

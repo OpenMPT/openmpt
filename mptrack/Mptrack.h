@@ -123,7 +123,7 @@ protected:
 
 	std::unique_ptr<GdiplusRAII> m_Gdiplus;
 
-	std::shared_ptr<mpt::Wine::VersionContext> m_WineVersion;
+	std::shared_ptr<mpt::OS::Wine::VersionContext> m_WineVersion;
 
 	IniFileSettingsBackend *m_pSettingsIniFile;
 	SettingsContainer *m_pSettings = nullptr;
@@ -252,14 +252,14 @@ public:
 		return m_pSongSettingsIniFile->GetFilename();
 	}
 
-	void SetWineVersion(std::shared_ptr<mpt::Wine::VersionContext> wineVersion)
+	void SetWineVersion(std::shared_ptr<mpt::OS::Wine::VersionContext> wineVersion)
 	{
-		MPT_ASSERT_ALWAYS(mpt::Windows::IsWine());
+		MPT_ASSERT_ALWAYS(mpt::OS::Windows::IsWine());
 		m_WineVersion = wineVersion;
 	}
-	std::shared_ptr<mpt::Wine::VersionContext> GetWineVersion() const
+	std::shared_ptr<mpt::OS::Wine::VersionContext> GetWineVersion() const
 	{
-		MPT_ASSERT_ALWAYS(mpt::Windows::IsWine());
+		MPT_ASSERT_ALWAYS(mpt::OS::Windows::IsWine());
 		MPT_ASSERT_ALWAYS(m_WineVersion);  // Verify initialization order. We should not should reach this until after Wine is detected.
 		return m_WineVersion;
 	}

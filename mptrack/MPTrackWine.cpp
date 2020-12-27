@@ -130,7 +130,7 @@ static mpt::checksum::crc64_jones WineHashSettings(mpt::checksum::crc64_jones cr
 }
 
 
-mpt::ustring WineGetSystemInfoString(mpt::Wine::VersionContext & wineVersion)
+mpt::ustring WineGetSystemInfoString(mpt::OS::Wine::VersionContext & wineVersion)
 {
 	mpt::ustring msg;
 
@@ -148,7 +148,7 @@ mpt::ustring WineGetSystemInfoString(mpt::Wine::VersionContext & wineVersion)
 }
 
 
-bool WineSetupIsSupported(mpt::Wine::VersionContext & wineVersion)
+bool WineSetupIsSupported(mpt::OS::Wine::VersionContext & wineVersion)
 {
 	bool supported = true;
 	if(wineVersion.RawBuildID().empty()) supported = false;
@@ -246,7 +246,7 @@ bool IsCompiled()
 void Initialize()
 {
 
-	if(!mpt::Windows::IsWine())
+	if(!mpt::OS::Windows::IsWine())
 	{
 		return;
 	}
@@ -258,7 +258,7 @@ void Initialize()
 		return;
 	}
 
-	mpt::Wine::VersionContext wineVersion = *theApp.GetWineVersion();
+	mpt::OS::Wine::VersionContext wineVersion = *theApp.GetWineVersion();
 	if(!WineSetupIsSupported(wineVersion))
 	{
 		mpt::ustring msg;

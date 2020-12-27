@@ -413,7 +413,7 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 
 	static bool s_KeyboardHookReentryFlag = false; // work-around for https://bugs.openmpt.org/view.php?id=713
 
-	if(mpt::Windows::IsWine()) // work-around for https://bugs.openmpt.org/view.php?id=713
+	if(mpt::OS::Windows::IsWine()) // work-around for https://bugs.openmpt.org/view.php?id=713
 	{
 		// TODO: Properly fix this in same way or another.
 		if(code < 0)
@@ -459,7 +459,7 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 		result = CallNextHookEx(ghKbdHook, code, wParam, lParam);
 	}
 
-	if(mpt::Windows::IsWine()) // work-around for https://bugs.openmpt.org/view.php?id=713
+	if(mpt::OS::Windows::IsWine()) // work-around for https://bugs.openmpt.org/view.php?id=713
 	{
 		if(theApp.InGuiThread())
 		{
@@ -1901,7 +1901,7 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&pathsdlg);
 	dlg.AddPage(&updatedlg);
 	dlg.AddPage(&advanced);
-	if(mpt::Windows::IsWine()) dlg.AddPage(&winedlg);
+	if(mpt::OS::Windows::IsWine()) dlg.AddPage(&winedlg);
 	m_bOptionsLocked = true;
 	m_SoundCardOptionsDialog = &sounddlg;
 	m_UpdateOptionsDialog = &updatedlg;
@@ -3001,7 +3001,7 @@ TfLanguageProfileNotifySink::TfLanguageProfileNotifySink()
 
 TfLanguageProfileNotifySink::~TfLanguageProfileNotifySink()
 {
-	if(mpt::Windows::IsWine())
+	if(mpt::OS::Windows::IsWine())
 	{
 		// Calling UnadviseSink causes a random crash in Wine when computing its function pointer for some reason.
 		// Probably a race condition I don't understand, and probably a bug in Wine.

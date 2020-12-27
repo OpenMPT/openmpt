@@ -78,11 +78,11 @@ public:
 
 #else // !MPT_OS_WINDOWS_WINRT
 
-		mpt::Windows::Version WindowsVersion = mpt::Windows::Version::Current();
+		mpt::OS::Windows::Version WindowsVersion = mpt::OS::Windows::Version::Current();
 
 		// Check for KB2533623:
 		bool hasKB2533623 = false;
-		if(WindowsVersion.IsAtLeast(mpt::Windows::Version::Win8))
+		if(WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::Win8))
 		{
 			hasKB2533623 = true;
 		} else

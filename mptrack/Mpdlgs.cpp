@@ -1915,7 +1915,7 @@ void COptionsWine::DoDataExchange(CDataExchange* pDX)
 BOOL COptionsWine::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
-	GetDlgItem(IDC_CHECK_WINE_ENABLE)->EnableWindow(mpt::Windows::IsWine() ? TRUE : FALSE);
+	GetDlgItem(IDC_CHECK_WINE_ENABLE)->EnableWindow(mpt::OS::Windows::IsWine() ? TRUE : FALSE);
 	CheckDlgButton(IDC_CHECK_WINE_ENABLE, TrackerSettings::Instance().WineSupportEnabled ? BST_CHECKED : BST_UNCHECKED);
 	int index;
 	index = m_CbnPulseAudio.AddString(_T("Auto"    )); m_CbnPulseAudio.SetItemData(index, 1);

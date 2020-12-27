@@ -147,7 +147,7 @@ public:
 	}
 	bool DoInitialize() override
 	{
-		if(!mpt::Windows::Version::Current().IsAtLeast(mpt::Windows::Version::Win7))
+		if(!mpt::OS::Windows::Version::Current().IsAtLeast(mpt::OS::Windows::Version::Win7))
 		{
 			return false;
 		}

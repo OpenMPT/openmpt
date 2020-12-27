@@ -69,28 +69,28 @@ bool ComponentPluginBridge::DoInitialize()
 	switch(arch)
 	{
 	case PluginArch_x86:
-		if(mpt::Windows::HostCanRun(mpt::Windows::GetHostArchitecture(), mpt::Windows::Architecture::x86) == mpt::Windows::EmulationLevel::NA)
+		if(mpt::OS::Windows::HostCanRun(mpt::OS::Windows::GetHostArchitecture(), mpt::OS::Windows::Architecture::x86) == mpt::OS::Windows::EmulationLevel::NA)
 		{
 			return false;
 		}
 		archName = P_("x86");
 		break;
 	case PluginArch_amd64:
-		if(mpt::Windows::HostCanRun(mpt::Windows::GetHostArchitecture(), mpt::Windows::Architecture::amd64) == mpt::Windows::EmulationLevel::NA)
+		if(mpt::OS::Windows::HostCanRun(mpt::OS::Windows::GetHostArchitecture(), mpt::OS::Windows::Architecture::amd64) == mpt::OS::Windows::EmulationLevel::NA)
 		{
 			return false;
 		}
 		archName = P_("amd64");
 		break;
 	case PluginArch_arm:
-		if(mpt::Windows::HostCanRun(mpt::Windows::GetHostArchitecture(), mpt::Windows::Architecture::arm) == mpt::Windows::EmulationLevel::NA)
+		if(mpt::OS::Windows::HostCanRun(mpt::OS::Windows::GetHostArchitecture(), mpt::OS::Windows::Architecture::arm) == mpt::OS::Windows::EmulationLevel::NA)
 		{
 			return false;
 		}
 		archName = P_("arm");
 		break;
 	case PluginArch_arm64:
-		if(mpt::Windows::HostCanRun(mpt::Windows::GetHostArchitecture(), mpt::Windows::Architecture::arm64) == mpt::Windows::EmulationLevel::NA)
+		if(mpt::OS::Windows::HostCanRun(mpt::OS::Windows::GetHostArchitecture(), mpt::OS::Windows::Architecture::arm64) == mpt::OS::Windows::EmulationLevel::NA)
 		{
 			return false;
 		}
@@ -156,18 +156,18 @@ MPT_REGISTERED_COMPONENT(ComponentPluginBridge_arm64, "PluginBridge-arm64")
 PluginArch BridgeWrapper::GetNativePluginBinaryType()
 {
 	PluginArch result = PluginArch_unknown;
-	switch(mpt::Windows::GetProcessArchitecture())
+	switch(mpt::OS::Windows::GetProcessArchitecture())
 	{
-	case mpt::Windows::Architecture::x86:
+	case mpt::OS::Windows::Architecture::x86:
 		result = PluginArch_x86;
 		break;
-	case mpt::Windows::Architecture::amd64:
+	case mpt::OS::Windows::Architecture::amd64:
 		result = PluginArch_amd64;
 		break;
-	case mpt::Windows::Architecture::arm:
+	case mpt::OS::Windows::Architecture::arm:
 		result = PluginArch_arm;
 		break;
-	case mpt::Windows::Architecture::arm64:
+	case mpt::OS::Windows::Architecture::arm64:
 		result = PluginArch_arm64;
 		break;
 	default:
