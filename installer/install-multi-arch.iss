@@ -239,7 +239,7 @@ begin
 			end;
 		paARM64:
 			begin
-				WizardSelectComponents('archx86,!archamd64,archarm,archarm64');
+				WizardSelectComponents('archx86,archamd64,archarm,archarm64');
 			end;
 	end;
 end;

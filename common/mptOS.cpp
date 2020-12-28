@@ -614,6 +614,7 @@ static constexpr HostArchitecture hostArchitectureCanRun [] = {
 	{ Architecture::arm64  , Architecture::arm64  , EmulationLevel::Native   },
 	{ Architecture::arm64  , Architecture::arm    , EmulationLevel::Virtual  },
 	{ Architecture::arm64  , Architecture::x86    , EmulationLevel::Software },
+	{ Architecture::arm64  , Architecture::amd64  , EmulationLevel::Software },
 	{ Architecture::mips   , Architecture::mips   , EmulationLevel::Native   },
 	{ Architecture::ppc    , Architecture::ppc    , EmulationLevel::Native   },
 	{ Architecture::shx    , Architecture::shx    , EmulationLevel::Native   },
