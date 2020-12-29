@@ -335,7 +335,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, UpdateSendGUID_DEPRECATED(conf, U_("Update"), U_("SendGUID"), false)
 	, UpdateShowUpdateHint(conf, U_("Update"), U_("ShowUpdateHint"), true)
 	, UpdateIgnoreVersion(conf, U_("Update"), U_("IgnoreVersion"), _T(""))
-	, UpdateExperimentalNewAutoUpdate(conf, U_("Update"), U_("ExperimentalNewAutoUpdate"), false)
+#if MPT_UPDATE_LEGACY
+	, UpdateLegacyMethod(conf, U_("Update"), U_("LegacyMethod"), false)
+#endif // MPT_UPDATE_LEGACY
 	, UpdateSkipSignatureVerificationUNSECURE(conf, U_("Update"), U_("SkipSignatureVerification"), false)
 	, UpdateSigningKeysRootAnchors(conf, U_("Update"), U_("SigningKeysRootAnchors"), CUpdateCheck::GetDefaultUpdateSigningKeysRootAnchors())
 	// Wine suppport

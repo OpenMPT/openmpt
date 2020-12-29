@@ -870,7 +870,9 @@ public:
 	Setting<bool> UpdateSendGUID_DEPRECATED;
 	Setting<bool> UpdateShowUpdateHint;
 	Setting<CString> UpdateIgnoreVersion;
-	Setting<bool> UpdateExperimentalNewAutoUpdate;
+#if MPT_UPDATE_LEGACY
+	Setting<bool> UpdateLegacyMethod;
+#endif // MPT_UPDATE_LEGACY
 	Setting<bool> UpdateSkipSignatureVerificationUNSECURE;
 	Setting<std::vector<mpt::ustring>> UpdateSigningKeysRootAnchors;
 

@@ -475,7 +475,7 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 		if(secsSinceLastCheck > 0.0 && secsSinceLastCheck < updateCheckPeriod * 86400.0)
 		{
 #if MPT_UPDATE_LEGACY
-			if(!TrackerSettings::Instance().UpdateExperimentalNewAutoUpdate)
+			if(TrackerSettings::Instance().UpdateLegacyMethod)
 			{
 				return;
 			} else
@@ -556,7 +556,7 @@ CUpdateCheck::Settings::Settings()
 	, channel(static_cast<UpdateChannel>(TrackerSettings::Instance().UpdateChannel.Get()))
 	, persistencePath(theApp.GetConfigPath())
 #if MPT_UPDATE_LEGACY
-	, modeLegacy(!TrackerSettings::Instance().UpdateExperimentalNewAutoUpdate)
+	, modeLegacy(TrackerSettings::Instance().UpdateLegacyMethod)
 	, channelReleaseURL(TrackerSettings::Instance().UpdateChannelReleaseURL)
 	, channelNextURL(TrackerSettings::Instance().UpdateChannelNextURL)
 	, channelDevelopmentURL(TrackerSettings::Instance().UpdateChannelDevelopmentURL)
@@ -1452,7 +1452,7 @@ void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 
 #if MPT_UPDATE_LEGACY
 
-	if(!TrackerSettings::Instance().UpdateExperimentalNewAutoUpdate)
+	if(TrackerSettings::Instance().UpdateLegacyMethod)
 	{
 		if(result.UpdateAvailable && (!autoUpdate || result.Version != TrackerSettings::Instance().UpdateIgnoreVersion))
 		{
