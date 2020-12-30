@@ -306,7 +306,6 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -342,7 +341,6 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -384,7 +382,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -425,7 +422,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -467,7 +463,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -508,7 +503,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -543,7 +537,6 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -578,7 +571,6 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -620,7 +612,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -661,7 +652,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -703,7 +693,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -744,7 +733,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>

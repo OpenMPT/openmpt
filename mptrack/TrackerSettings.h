@@ -842,7 +842,6 @@ public:
 	// Plugins
 
 	Setting<bool> bridgeAllPlugins;
-	Setting<bool> FullyUnloadPlugins;
 	Setting<bool> enableAutoSuspend;
 	CachedSetting<bool> midiMappingInPluginEditor;
 	Setting<mpt::ustring> pluginProjectPath;
@@ -853,6 +852,7 @@ public:
 	// Broken Plugins Workarounds
 
 	Setting<bool> BrokenPluginsWorkaroundVSTMaskAllCrashes;
+	Setting<bool> BrokenPluginsWorkaroundVSTNeverUnloadAnyPlugin;
 
 	// Update
 

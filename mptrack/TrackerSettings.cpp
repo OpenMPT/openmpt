@@ -307,7 +307,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, mruListLength(conf, U_("Misc"), U_("MRUListLength"), 10)
 	// Plugins
 	, bridgeAllPlugins(conf, U_("VST Plugins"), U_("BridgeAllPlugins"), false)
-	, FullyUnloadPlugins(conf, U_("VST Plugins"), U_("FullyUnloadPlugins"), true)
 	, enableAutoSuspend(conf, U_("VST Plugins"), U_("EnableAutoSuspend"), false)
 	, midiMappingInPluginEditor(conf, U_("VST Plugins"), U_("EnableMidiMappingInEditor"), true)
 	, pluginProjectPath(conf, U_("VST Plugins"), U_("ProjectPath"), mpt::ustring())
@@ -316,6 +315,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, vstHostVendorVersion(conf, U_("VST Plugins"), U_("HostVendorVersion"), Version::Current().GetRawVersion())
 	// Broken Plugins Workarounds
 	, BrokenPluginsWorkaroundVSTMaskAllCrashes(conf, U_("Broken Plugins Workarounds"), U_("VSTMaskAllCrashes"), true)  // TODO: really should be false
+	, BrokenPluginsWorkaroundVSTNeverUnloadAnyPlugin(conf, U_("BrokenPluginsWorkarounds"), U_("VSTNeverUnloadAnyPlugin"), false)
 	// Update
 	, UpdateEnabled(conf, U_("Update"), U_("Enabled"), true)
 	, UpdateInstallAutomatically(conf, U_("Update"), U_("InstallAutomatically"), false)
@@ -473,6 +473,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	if(storedVersion < MPT_V("1.19.03.01") && vstHostProductString.Get() == "OpenMPT")
 	{
 		vstHostVendorVersion = Version::Current().GetRawVersion();
+	}
+	if(storedVersion < MPT_V("1.30.00.24"))
+	{
+		BrokenPluginsWorkaroundVSTNeverUnloadAnyPlugin = !conf.Read<bool>(U_("VST Plugins"), U_("FullyUnloadPlugins"), true);
+		conf.Remove(U_("VST Plugins"), U_("FullyUnloadPlugins"));
 	}
 
 	// Sound Settings
