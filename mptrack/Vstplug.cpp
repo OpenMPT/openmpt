@@ -1106,7 +1106,7 @@ intptr_t CVstPlugin::Dispatch(VstOpcodeToPlugin opCode, int32 index, intptr_t va
 		if(exception)
 		{
 			mpt::ustring codeStr;
-			if(opCode < std::size(VstOpCodes))
+			if(opCode < mpt::saturate_cast<int32>(std::size(VstOpCodes)))
 			{
 				codeStr = mpt::ToUnicode(mpt::Charset::ASCII, VstOpCodes[opCode]);
 			} else
