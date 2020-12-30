@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="common">
+      <UniqueIdentifier>{AEFEE3F6-9AA0-0ECD-835B-22216F9C951D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{B1A29A7C-9DD9-9B0D-46C6-811032DC170F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pluginBridge">
+      <UniqueIdentifier>{E1FAE259-CD5D-72FE-76E3-AAB462253E81}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\common\versionNumber.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\WriteMemoryDump.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\pluginBridge\AEffectWrapper.h">
+      <Filter>pluginBridge</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\pluginBridge\Bridge.h">
+      <Filter>pluginBridge</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\pluginBridge\BridgeCommon.h">
+      <Filter>pluginBridge</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\pluginBridge\BridgeOpCodes.h">
+      <Filter>pluginBridge</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\pluginBridge\Bridge.cpp">
+      <Filter>pluginBridge</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\pluginBridge\PluginBridge-win7.manifest">
+      <Filter>pluginBridge</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\pluginBridge\PluginBridge.rc">
+      <Filter>pluginBridge</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

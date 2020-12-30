@@ -94,6 +94,7 @@ def copy_binaries(from_path, to_path):
 
 def copy_pluginbridge(from_path, arch, to_path):
     copy_file(from_path + arch + "/", to_path, "PluginBridge-" + arch + ".exe")
+    copy_file(from_path + arch + "/", to_path, "PluginBridgeLegacy-" + arch + ".exe")
 
 def copy_symbols(from_path, to_path):
     os.makedirs(to_path)
@@ -104,6 +105,7 @@ def copy_symbols(from_path, to_path):
 
 def copy_symbols_pluginbridge(from_path, to_path, arch):
     copy_file(from_path, to_path, "PluginBridge-" + arch + ".pdb")
+    copy_file(from_path, to_path, "PluginBridgeLegacy-" + arch + ".pdb")
 
 def copy_other(to_path, openmpt_version_short):
     copy_tree("packageTemplate/", to_path, "ExampleSongs")

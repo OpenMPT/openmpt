@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -99,167 +99,201 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{1A147336-891E-49AC-9EAD-A750599A224C}</ProjectGuid>
+    <ProjectGuid>{BDEC2D44-C957-4940-A32B-02824AF6E21D}</ProjectGuid>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>PluginBridge</RootNamespace>
+    <RootNamespace>PluginBridgeLegacy</RootNamespace>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <LatestTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</LatestTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
     <WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
     <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <SpectreMitigation>Spectre</SpectreMitigation>
     <WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <SpectreMitigation>Spectre</SpectreMitigation>
     <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
     <WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
     <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
     <WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
     <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <SpectreMitigation>Spectre</SpectreMitigation>
     <WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <SpectreMitigation>Spectre</SpectreMitigation>
     <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
     <WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <SpectreMitigation>Spectre</SpectreMitigation>
     <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -340,170 +374,170 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2019-win10clangcl-static\x86\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\x86\Debug\</IntDir>
-    <TargetName>PluginBridge-x86</TargetName>
+    <OutDir>..\..\bin\debug\vs2017-win10-static\x86\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\x86\Debug\</IntDir>
+    <TargetName>PluginBridgeLegacy-x86</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2019-win10clangcl-static\amd64\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\x86_64\Debug\</IntDir>
-    <TargetName>PluginBridge-amd64</TargetName>
+    <OutDir>..\..\bin\debug\vs2017-win10-static\amd64\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\x86_64\Debug\</IntDir>
+    <TargetName>PluginBridgeLegacy-amd64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2019-win10clangcl-static\arm\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\arm\Debug\</IntDir>
-    <TargetName>PluginBridge-arm</TargetName>
+    <OutDir>..\..\bin\debug\vs2017-win10-static\arm\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\arm\Debug\</IntDir>
+    <TargetName>PluginBridgeLegacy-arm</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2019-win10clangcl-static\arm64\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\arm64\Debug\</IntDir>
-    <TargetName>PluginBridge-arm64</TargetName>
+    <OutDir>..\..\bin\debug\vs2017-win10-static\arm64\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\arm64\Debug\</IntDir>
+    <TargetName>PluginBridgeLegacy-arm64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2019-win10clangcl-static\x86\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\x86\Release\</IntDir>
-    <TargetName>PluginBridge-x86</TargetName>
+    <OutDir>..\..\bin\release\vs2017-win10-static\x86\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\x86\Release\</IntDir>
+    <TargetName>PluginBridgeLegacy-x86</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2019-win10clangcl-static\amd64\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\x86_64\Release\</IntDir>
-    <TargetName>PluginBridge-amd64</TargetName>
+    <OutDir>..\..\bin\release\vs2017-win10-static\amd64\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\x86_64\Release\</IntDir>
+    <TargetName>PluginBridgeLegacy-amd64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2019-win10clangcl-static\arm\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\arm\Release\</IntDir>
-    <TargetName>PluginBridge-arm</TargetName>
+    <OutDir>..\..\bin\release\vs2017-win10-static\arm\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\arm\Release\</IntDir>
+    <TargetName>PluginBridgeLegacy-arm</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2019-win10clangcl-static\arm64\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\arm64\Release\</IntDir>
-    <TargetName>PluginBridge-arm64</TargetName>
+    <OutDir>..\..\bin\release\vs2017-win10-static\arm64\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\arm64\Release\</IntDir>
+    <TargetName>PluginBridgeLegacy-arm64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2019-win10clangcl-static\x86\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\x86\Checked\</IntDir>
-    <TargetName>PluginBridge-x86</TargetName>
+    <OutDir>..\..\bin\checked\vs2017-win10-static\x86\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\x86\Checked\</IntDir>
+    <TargetName>PluginBridgeLegacy-x86</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2019-win10clangcl-static\amd64\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\x86_64\Checked\</IntDir>
-    <TargetName>PluginBridge-amd64</TargetName>
+    <OutDir>..\..\bin\checked\vs2017-win10-static\amd64\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\x86_64\Checked\</IntDir>
+    <TargetName>PluginBridgeLegacy-amd64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2019-win10clangcl-static\arm\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\arm\Checked\</IntDir>
-    <TargetName>PluginBridge-arm</TargetName>
+    <OutDir>..\..\bin\checked\vs2017-win10-static\arm\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\arm\Checked\</IntDir>
+    <TargetName>PluginBridgeLegacy-arm</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2019-win10clangcl-static\arm64\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\arm64\Checked\</IntDir>
-    <TargetName>PluginBridge-arm64</TargetName>
+    <OutDir>..\..\bin\checked\vs2017-win10-static\arm64\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\arm64\Checked\</IntDir>
+    <TargetName>PluginBridgeLegacy-arm64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2019-win10clangcl-shared\x86\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\x86\DebugShared\</IntDir>
-    <TargetName>PluginBridge-x86</TargetName>
+    <OutDir>..\..\bin\debug\vs2017-win10-shared\x86\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\x86\DebugShared\</IntDir>
+    <TargetName>PluginBridgeLegacy-x86</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2019-win10clangcl-shared\amd64\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\x86_64\DebugShared\</IntDir>
-    <TargetName>PluginBridge-amd64</TargetName>
+    <OutDir>..\..\bin\debug\vs2017-win10-shared\amd64\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\x86_64\DebugShared\</IntDir>
+    <TargetName>PluginBridgeLegacy-amd64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2019-win10clangcl-shared\arm\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\arm\DebugShared\</IntDir>
-    <TargetName>PluginBridge-arm</TargetName>
+    <OutDir>..\..\bin\debug\vs2017-win10-shared\arm\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\arm\DebugShared\</IntDir>
+    <TargetName>PluginBridgeLegacy-arm</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2019-win10clangcl-shared\arm64\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\arm64\DebugShared\</IntDir>
-    <TargetName>PluginBridge-arm64</TargetName>
+    <OutDir>..\..\bin\debug\vs2017-win10-shared\arm64\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\arm64\DebugShared\</IntDir>
+    <TargetName>PluginBridgeLegacy-arm64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2019-win10clangcl-shared\x86\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\x86\ReleaseShared\</IntDir>
-    <TargetName>PluginBridge-x86</TargetName>
+    <OutDir>..\..\bin\release\vs2017-win10-shared\x86\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\x86\ReleaseShared\</IntDir>
+    <TargetName>PluginBridgeLegacy-x86</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2019-win10clangcl-shared\amd64\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\x86_64\ReleaseShared\</IntDir>
-    <TargetName>PluginBridge-amd64</TargetName>
+    <OutDir>..\..\bin\release\vs2017-win10-shared\amd64\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\x86_64\ReleaseShared\</IntDir>
+    <TargetName>PluginBridgeLegacy-amd64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2019-win10clangcl-shared\arm\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\arm\ReleaseShared\</IntDir>
-    <TargetName>PluginBridge-arm</TargetName>
+    <OutDir>..\..\bin\release\vs2017-win10-shared\arm\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\arm\ReleaseShared\</IntDir>
+    <TargetName>PluginBridgeLegacy-arm</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2019-win10clangcl-shared\arm64\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\arm64\ReleaseShared\</IntDir>
-    <TargetName>PluginBridge-arm64</TargetName>
+    <OutDir>..\..\bin\release\vs2017-win10-shared\arm64\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\arm64\ReleaseShared\</IntDir>
+    <TargetName>PluginBridgeLegacy-arm64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2019-win10clangcl-shared\x86\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\x86\CheckedShared\</IntDir>
-    <TargetName>PluginBridge-x86</TargetName>
+    <OutDir>..\..\bin\checked\vs2017-win10-shared\x86\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\x86\CheckedShared\</IntDir>
+    <TargetName>PluginBridgeLegacy-x86</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2019-win10clangcl-shared\amd64\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\x86_64\CheckedShared\</IntDir>
-    <TargetName>PluginBridge-amd64</TargetName>
+    <OutDir>..\..\bin\checked\vs2017-win10-shared\amd64\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\x86_64\CheckedShared\</IntDir>
+    <TargetName>PluginBridgeLegacy-amd64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2019-win10clangcl-shared\arm\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\arm\CheckedShared\</IntDir>
-    <TargetName>PluginBridge-arm</TargetName>
+    <OutDir>..\..\bin\checked\vs2017-win10-shared\arm\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\arm\CheckedShared\</IntDir>
+    <TargetName>PluginBridgeLegacy-arm</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2019-win10clangcl-shared\arm64\</OutDir>
-    <IntDir>..\obj\vs2019win10clangcl\PluginBridge\arm64\CheckedShared\</IntDir>
-    <TargetName>PluginBridge-arm64</TargetName>
+    <OutDir>..\..\bin\checked\vs2017-win10-shared\arm64\</OutDir>
+    <IntDir>..\obj\vs2017win10\PluginBridgeLegacy\arm64\CheckedShared\</IntDir>
+    <TargetName>PluginBridgeLegacy-arm64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -528,7 +562,7 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -560,7 +594,8 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -591,7 +626,6 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -622,7 +656,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -660,7 +694,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -697,7 +731,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -734,7 +769,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -771,7 +805,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -809,7 +843,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -846,7 +880,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -883,7 +918,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -920,7 +954,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -951,7 +985,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -982,7 +1016,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1013,7 +1048,6 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1044,7 +1078,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1082,7 +1116,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1119,7 +1153,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1156,7 +1191,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1193,7 +1227,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1231,7 +1265,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1268,7 +1302,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1305,7 +1340,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1342,7 +1376,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>

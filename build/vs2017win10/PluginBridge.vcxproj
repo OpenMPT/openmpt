@@ -562,7 +562,6 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
@@ -595,9 +594,7 @@
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -660,7 +657,6 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -698,7 +694,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
@@ -736,9 +731,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -813,7 +806,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -851,7 +843,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
@@ -889,9 +880,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -966,7 +955,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -997,7 +985,6 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
@@ -1029,9 +1016,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1094,7 +1079,6 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1132,7 +1116,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
@@ -1170,9 +1153,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1247,7 +1228,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1285,7 +1265,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
@@ -1323,9 +1302,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1400,7 +1377,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>

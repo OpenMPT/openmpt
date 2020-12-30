@@ -85,34 +85,40 @@ Name: en; MessagesFile: compiler:Default.isl
 
 Source: ..\bin\{#BuildFolder}\x86\OpenMPT.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0
 Source: ..\bin\{#BuildFolder}\x86\PluginBridge-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0
+Source: ..\bin\{#BuildFolder}\x86\PluginBridgeLegacy-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0
 Source: ..\bin\{#BuildFolder}\x86\openmpt-lame.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0
 Source: ..\bin\{#BuildFolder}\x86\openmpt-mpg123.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0
 Source: ..\bin\{#BuildFolder}\x86\openmpt-soundtouch.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0
 Source: ..\bin\{#BuildFolderLegacyx86}\x86\OpenMPT.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0
 Source: ..\bin\{#BuildFolderLegacyx86}\x86\PluginBridge-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0
+Source: ..\bin\{#BuildFolderLegacyx86}\x86\PluginBridgeLegacy-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0
 Source: ..\bin\{#BuildFolderLegacyx86}\x86\openmpt-lame.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0
 Source: ..\bin\{#BuildFolderLegacyx86}\x86\openmpt-mpg123.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0
 Source: ..\bin\{#BuildFolderLegacyx86}\x86\openmpt-soundtouch.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0
 
 Source: ..\bin\{#BuildFolder}\amd64\OpenMPT.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0
 Source: ..\bin\{#BuildFolder}\amd64\PluginBridge-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0
+Source: ..\bin\{#BuildFolder}\amd64\PluginBridgeLegacy-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0
 Source: ..\bin\{#BuildFolder}\amd64\openmpt-lame.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0
 Source: ..\bin\{#BuildFolder}\amd64\openmpt-mpg123.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0
 Source: ..\bin\{#BuildFolder}\amd64\openmpt-soundtouch.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0
 Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\OpenMPT.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0
 Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\PluginBridge-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0
+Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\PluginBridgeLegacy-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0
 Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\openmpt-lame.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0
 Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\openmpt-mpg123.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0
 Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\openmpt-soundtouch.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0
 
 Source: ..\bin\{#BuildFolder}\arm\OpenMPT.exe; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm
 Source: ..\bin\{#BuildFolder}\arm\PluginBridge-arm.exe; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm
+Source: ..\bin\{#BuildFolder}\arm\PluginBridgeLegacy-arm.exe; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm
 Source: ..\bin\{#BuildFolder}\arm\openmpt-lame.dll; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm
 Source: ..\bin\{#BuildFolder}\arm\openmpt-mpg123.dll; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm
 Source: ..\bin\{#BuildFolder}\arm\openmpt-soundtouch.dll; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm
 
 Source: ..\bin\{#BuildFolder}\arm64\OpenMPT.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64
 Source: ..\bin\{#BuildFolder}\arm64\PluginBridge-arm64.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64
+Source: ..\bin\{#BuildFolder}\arm64\PluginBridgeLegacy-arm64.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64
 Source: ..\bin\{#BuildFolder}\arm64\openmpt-lame.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64
 Source: ..\bin\{#BuildFolder}\arm64\openmpt-mpg123.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64
 Source: ..\bin\{#BuildFolder}\arm64\openmpt-soundtouch.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64
@@ -187,24 +193,28 @@ Filename: {app}\bin\arm64\OpenMPT.exe; Parameters: """{code:RandomExampleFile}""
 
 Type: files; Name: {app}\bin\x86\OpenMPT.exe
 Type: files; Name: {app}\bin\x86\PluginBridge-x86.exe
+Type: files; Name: {app}\bin\x86\PluginBridgeLegacy-x86.exe
 Type: files; Name: {app}\bin\x86\openmpt-lame.dll
 Type: files; Name: {app}\bin\x86\openmpt-mpg123.dll
 Type: files; Name: {app}\bin\x86\openmpt-soundtouch.dll
 
 Type: files; Name: {app}\bin\amd64\OpenMPT.exe
 Type: files; Name: {app}\bin\amd64\PluginBridge-amd64.exe
+Type: files; Name: {app}\bin\amd64\PluginBridgeLegacy-amd64.exe
 Type: files; Name: {app}\bin\amd64\openmpt-lame.dll
 Type: files; Name: {app}\bin\amd64\openmpt-mpg123.dll
 Type: files; Name: {app}\bin\amd64\openmpt-soundtouch.dll
 
 Type: files; Name: {app}\bin\arm\OpenMPT.exe
 Type: files; Name: {app}\bin\arm\PluginBridge-arm.exe
+Type: files; Name: {app}\bin\arm\PluginBridgeLegacy-arm.exe
 Type: files; Name: {app}\bin\arm\openmpt-lame.dll
 Type: files; Name: {app}\bin\arm\openmpt-mpg123.dll
 Type: files; Name: {app}\bin\arm\openmpt-soundtouch.dll
 
 Type: files; Name: {app}\bin\arm64\OpenMPT.exe
 Type: files; Name: {app}\bin\arm64\PluginBridge-arm64.exe
+Type: files; Name: {app}\bin\arm64\PluginBridgeLegacy-arm64.exe
 Type: files; Name: {app}\bin\arm64\openmpt-lame.dll
 Type: files; Name: {app}\bin\arm64\openmpt-mpg123.dll
 Type: files; Name: {app}\bin\arm64\openmpt-soundtouch.dll

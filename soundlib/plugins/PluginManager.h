@@ -65,7 +65,7 @@ public:
 	PluginCategory category = catUnknown;
 	const bool isBuiltIn : 1;
 	bool isInstrument : 1;
-	bool useBridge : 1, shareBridgeInstance : 1;
+	bool useBridge : 1, shareBridgeInstance : 1, modernBridge : 1;
 protected:
 	mutable uint8 dllArch = 0;
 
@@ -83,7 +83,7 @@ public:
 #endif // MODPLUG_TRACKER
 		, category(catUnknown)
 		, isBuiltIn(isBuiltIn), isInstrument(false)
-		, useBridge(false), shareBridgeInstance(true)
+		, useBridge(false), shareBridgeInstance(true), modernBridge(true)
 	{
 	}
 
@@ -109,12 +109,14 @@ public:
 
 	uint32 EncodeCacheFlags() const
 	{
-		// Format: 00000000.00000000.AAAAAASB.CCCCCCCI
+		// Format: 00000000.0000000M.AAAAAASB.CCCCCCCI
 		return (isInstrument ? 1 : 0)
 			| (category << 1)
 			| (useBridge ? 0x100 : 0)
 			| (shareBridgeInstance ? 0x200 : 0)
-			| ((dllArch / 8) << 10);
+			| ((dllArch / 8) << 10)
+			| (modernBridge ? 0x10000 : 0)
+			;
 	}
 
 	void DecodeCacheFlags(uint32 flags)
@@ -132,6 +134,7 @@ public:
 		useBridge = (flags & 0x100) != 0;
 		shareBridgeInstance = (flags & 0x200) != 0;
 		dllArch = ((flags >> 10) & 0x3F) * 8;
+		modernBridge = (flags & 0x10000) != 0;
 	}
 };
 

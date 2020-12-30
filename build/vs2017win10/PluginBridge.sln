@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PluginBridge", "PluginBridge.vcxproj", "{1A147336-891E-49AC-9EAD-A750599A224C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PluginBridgeLegacy", "PluginBridgeLegacy.vcxproj", "{BDEC2D44-C957-4940-A32B-02824AF6E21D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Checked|ARM = Checked|ARM
@@ -43,6 +45,30 @@ Global
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Release|Win32.Build.0 = Release|Win32
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Release|x64.ActiveCfg = Release|x64
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Release|x64.Build.0 = Release|x64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Checked|ARM.ActiveCfg = Checked|ARM
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Checked|ARM.Build.0 = Checked|ARM
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Checked|ARM64.ActiveCfg = Checked|ARM64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Checked|ARM64.Build.0 = Checked|ARM64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Checked|Win32.ActiveCfg = Checked|Win32
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Checked|Win32.Build.0 = Checked|Win32
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Checked|x64.ActiveCfg = Checked|x64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Checked|x64.Build.0 = Checked|x64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Debug|ARM.ActiveCfg = Debug|ARM
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Debug|ARM.Build.0 = Debug|ARM
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Debug|ARM64.Build.0 = Debug|ARM64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Debug|Win32.Build.0 = Debug|Win32
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Debug|x64.ActiveCfg = Debug|x64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Debug|x64.Build.0 = Debug|x64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Release|ARM.ActiveCfg = Release|ARM
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Release|ARM.Build.0 = Release|ARM
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Release|ARM64.ActiveCfg = Release|ARM64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Release|ARM64.Build.0 = Release|ARM64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Release|Win32.ActiveCfg = Release|Win32
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Release|Win32.Build.0 = Release|Win32
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Release|x64.ActiveCfg = Release|x64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -41,6 +41,7 @@ BEGIN_MESSAGE_MAP(CSelectPluginDlg, ResizableDialog)
 	ON_COMMAND(IDC_BUTTON2,			&CSelectPluginDlg::OnRemovePlugin)
 	ON_COMMAND(IDC_CHECK1,			&CSelectPluginDlg::OnSetBridge)
 	ON_COMMAND(IDC_CHECK2,			&CSelectPluginDlg::OnSetBridge)
+	ON_COMMAND(IDC_CHECK3,			&CSelectPluginDlg::OnSetBridge)
 	ON_EN_CHANGE(IDC_NAMEFILTER,	&CSelectPluginDlg::OnNameFilterChanged)
 	ON_EN_CHANGE(IDC_PLUGINTAGS,	&CSelectPluginDlg::OnPluginTagsChanged)
 END_MESSAGE_MAP()
@@ -52,6 +53,7 @@ void CSelectPluginDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TREE1, m_treePlugins);
 	DDX_Control(pDX, IDC_CHECK1, m_chkBridge);
 	DDX_Control(pDX, IDC_CHECK2, m_chkShare);
+	DDX_Control(pDX, IDC_CHECK3, m_chkLegacyBridge);
 }
 
 
@@ -522,12 +524,20 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 			bool isBridgeAvailable =
 					((pPlug->GetDllArch() == PluginArch_x86) && IsComponentAvailable(pluginBridge_x86))
 				||
+					((pPlug->GetDllArch() == PluginArch_x86) && IsComponentAvailable(pluginBridgeLegacy_x86))
+				||
 					((pPlug->GetDllArch() == PluginArch_amd64) && IsComponentAvailable(pluginBridge_amd64))
+				||
+					((pPlug->GetDllArch() == PluginArch_amd64) && IsComponentAvailable(pluginBridgeLegacy_amd64))
 #if defined(MPT_WITH_WINDOWS10)
 				||
 					((pPlug->GetDllArch() == PluginArch_arm) && IsComponentAvailable(pluginBridge_arm))
 				||
+					((pPlug->GetDllArch() == PluginArch_arm) && IsComponentAvailable(pluginBridgeLegacy_arm))
+				||
 					((pPlug->GetDllArch() == PluginArch_arm64) && IsComponentAvailable(pluginBridge_arm64))
+				||
+					((pPlug->GetDllArch() == PluginArch_arm64) && IsComponentAvailable(pluginBridgeLegacy_arm64))
 #endif // MPT_WITH_WINDOWS10
 				;
 			if(TrackerSettings::Instance().bridgeAllPlugins || !isBridgeAvailable)
@@ -545,6 +555,9 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 			m_chkShare.SetCheck(pPlug->shareBridgeInstance ? BST_CHECKED : BST_UNCHECKED);
 			m_chkShare.EnableWindow(m_chkBridge.GetCheck() != BST_UNCHECKED);
 
+			m_chkLegacyBridge.SetCheck((!pPlug->modernBridge) ? BST_CHECKED : BST_UNCHECKED);
+			m_chkLegacyBridge.EnableWindow(m_chkBridge.GetCheck() != BST_UNCHECKED);
+
 			showBoxes = true;
 		}
 		enableTagsTextBox = TRUE;
@@ -561,8 +574,10 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 	{
 		m_chkBridge.EnableWindow(FALSE);
 		m_chkShare.EnableWindow(FALSE);
+		m_chkLegacyBridge.EnableWindow(FALSE);
 		m_chkBridge.SetCheck(BST_UNCHECKED);
 		m_chkShare.SetCheck(BST_UNCHECKED);
+		m_chkLegacyBridge.SetCheck(BST_UNCHECKED);
 	}
 	if (result) *result = 0;
 }
@@ -593,12 +608,13 @@ constexpr struct
 	int32 id2;
 	bool useBridge;
 	bool shareInstance;
+	bool modernBridge;
 } ForceBridgePlugins[] =
 {
-	{Vst::kEffectMagic, Vst::FourCC("fV2s"), true, false},  // V2 freezes on shutdown if there's more than one instance per process
-	{Vst::kEffectMagic, Vst::FourCC("frV2"), true, false},  // ditto
-	{Vst::kEffectMagic, Vst::FourCC("SKV3"), false, true},  // SideKick v3 always has to run in a shared instance
-	{Vst::kEffectMagic, Vst::FourCC("YWS!"), false, true},  // You Wa Shock ! always has to run in a shared instance
+	{Vst::kEffectMagic, Vst::FourCC("fV2s"), true, false, false},  // V2 freezes on shutdown if there's more than one instance per process
+	{Vst::kEffectMagic, Vst::FourCC("frV2"), true, false, false},  // ditto
+	{Vst::kEffectMagic, Vst::FourCC("SKV3"), false, true, false},  // SideKick v3 always has to run in a shared instance
+	{Vst::kEffectMagic, Vst::FourCC("YWS!"), false, true, false},  // You Wa Shock ! always has to run in a shared instance
 };
 }  // namespace
 #endif
@@ -626,6 +642,7 @@ bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
 		{
 			plug->useBridge = p.useBridge;
 			plug->shareBridgeInstance = p.shareInstance;
+			plug->modernBridge = p.modernBridge;
 			plug->WriteToCache();
 			break;
 		}
@@ -821,7 +838,9 @@ void CSelectPluginDlg::OnSetBridge()
 			plug->useBridge = m_chkBridge.GetCheck() != BST_UNCHECKED;
 		}
 		m_chkShare.EnableWindow(m_chkBridge.GetCheck() != BST_UNCHECKED);
+		m_chkLegacyBridge.EnableWindow(m_chkBridge.GetCheck() != BST_UNCHECKED);
 		plug->shareBridgeInstance = m_chkShare.GetCheck() != BST_UNCHECKED;
+		plug->modernBridge = m_chkLegacyBridge.GetCheck() == BST_UNCHECKED;
 		plug->WriteToCache();
 	}
 }
