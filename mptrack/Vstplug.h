@@ -19,6 +19,10 @@
 #include "../soundlib/Mixer.h"
 #include "plugins/VstDefinitions.h"
 #include "plugins/VstEventQueue.h"
+#if defined(MODPLUG_TRACKER)
+#include "ExceptionHandler.h"
+#endif // MODPLUG_TRACKER
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -31,6 +35,8 @@ struct VSTPluginLib;
 class CVstPlugin final : public IMidiPlugin
 {
 protected:
+
+	bool m_maskCrashes;
 	HMODULE m_hLibrary;
 	Vst::AEffect &m_Effect;
 	Vst::ProcessProc m_pProcessFP = nullptr; // Function pointer to AEffect processReplacing if supported, else process.
@@ -49,13 +55,29 @@ protected:
 	Vst::VstTimeInfo timeInfo;
 
 public:
+
 	const bool isBridged : 1;		// True if our built-in plugin bridge is being used.
 
+private:
+
+#if defined(MODPLUG_TRACKER)
+	ExceptionHandler::Context m_Ectx;
+#endif // MODPLUG_TRACKER
+
 public:
-	CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, Vst::AEffect &effect, CSoundFile &sndFile);
+	bool MaskCrashes() noexcept;
+
+public:
+	template <typename Tfn> static DWORD SETryOrError(bool maskCrashes, Tfn fn);
+
+private:
+	template <typename Tfn> DWORD SETryOrError(Tfn fn);
+
+public:
+	CVstPlugin(bool maskCrashes, HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, Vst::AEffect &effect, CSoundFile &sndFile);
 	~CVstPlugin();
 
-	static Vst::AEffect *LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool forceBridge);
+	static Vst::AEffect *LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE &library, bool forceBridge);
 
 protected:
 	void Initialize();
@@ -91,7 +113,7 @@ public:
 	CString GetParamLabel(PlugParamIndex param) override { return GetParamPropertyString(param, Vst::effGetParamLabel); };
 	CString GetParamDisplay(PlugParamIndex param) override { return GetParamPropertyString(param, Vst::effGetParamDisplay); };
 
-	static intptr_t DispatchSEH(Vst::AEffect *effect, Vst::VstOpcodeToPlugin opCode, int32 index, intptr_t value, void *ptr, float opt, unsigned long &exception);
+	static intptr_t DispatchSEH(bool maskCrashes, Vst::AEffect *effect, Vst::VstOpcodeToPlugin opCode, int32 index, intptr_t value, void *ptr, float opt, unsigned long &exception);
 	intptr_t Dispatch(Vst::VstOpcodeToPlugin opCode, int32 index, intptr_t value, void *ptr, float opt);
 
 	bool HasEditor() const override { return (m_Effect.flags & Vst::effFlagsHasEditor) != 0; }

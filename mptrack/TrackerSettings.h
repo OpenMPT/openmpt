@@ -850,6 +850,10 @@ public:
 	CachedSetting<mpt::lstring> vstHostVendorString;
 	CachedSetting<int32> vstHostVendorVersion;
 
+	// Broken Plugins Workarounds
+
+	Setting<bool> BrokenPluginsWorkaroundVSTMaskAllCrashes;
+
 	// Update
 
 	Setting<bool> UpdateEnabled;

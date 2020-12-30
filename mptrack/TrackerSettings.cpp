@@ -314,6 +314,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, vstHostProductString(conf, U_("VST Plugins"), U_("HostProductString"), "OpenMPT")
 	, vstHostVendorString(conf, U_("VST Plugins"), U_("HostVendorString"), "OpenMPT project")
 	, vstHostVendorVersion(conf, U_("VST Plugins"), U_("HostVendorVersion"), Version::Current().GetRawVersion())
+	// Broken Plugins Workarounds
+	, BrokenPluginsWorkaroundVSTMaskAllCrashes(conf, U_("Broken Plugins Workarounds"), U_("VSTMaskAllCrashes"), true)  // TODO: really should be false
 	// Update
 	, UpdateEnabled(conf, U_("Update"), U_("Enabled"), true)
 	, UpdateInstallAutomatically(conf, U_("Update"), U_("InstallAutomatically"), false)

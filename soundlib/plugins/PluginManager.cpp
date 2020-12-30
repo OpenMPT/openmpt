@@ -55,6 +55,7 @@
 #include "../../mptrack/TrackerSettings.h"
 #include "../../mptrack/AbstractVstEditor.h"
 #include "../../soundlib/AudioCriticalSection.h"
+#include "../mptrack/ExceptionHandler.h"
 #include "../common/mptCRC.h"
 #endif // MODPLUG_TRACKER
 
@@ -427,10 +428,10 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 
 // Extract instrument and category information from plugin.
 #ifndef NO_VST
-static void GetPluginInformation(Vst::AEffect *effect, VSTPluginLib &library)
+static void GetPluginInformation(bool maskCrashes, Vst::AEffect *effect, VSTPluginLib &library)
 {
 	unsigned long exception = 0;
-	library.category = static_cast<VSTPluginLib::PluginCategory>(CVstPlugin::DispatchSEH(effect, Vst::effGetPlugCategory, 0, 0, nullptr, 0, exception));
+	library.category = static_cast<VSTPluginLib::PluginCategory>(CVstPlugin::DispatchSEH(maskCrashes, effect, Vst::effGetPlugCategory, 0, 0, nullptr, 0, exception));
 	library.isInstrument = ((effect->flags & Vst::effFlagsIsSynth) || !effect->numInputs);
 
 	if(library.isInstrument)
@@ -443,7 +444,7 @@ static void GetPluginInformation(Vst::AEffect *effect, VSTPluginLib &library)
 
 #ifdef MODPLUG_TRACKER
 	std::vector<char> s(256, 0);
-	CVstPlugin::DispatchSEH(effect, Vst::effGetVendorString, 0, 0, s.data(), 0, exception);
+	CVstPlugin::DispatchSEH(maskCrashes, effect, Vst::effGetVendorString, 0, 0, s.data(), 0, exception);
 	library.vendor = mpt::ToCString(mpt::Charset::Locale, s.data());
 #endif // MODPLUG_TRACKER
 }
@@ -452,7 +453,7 @@ static void GetPluginInformation(Vst::AEffect *effect, VSTPluginLib &library)
 
 #ifdef MODPLUG_TRACKER
 // Add a plugin to the list of known plugins.
-VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const mpt::ustring &tags, bool fromCache, bool *fileFound)
+VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool maskCrashes, const mpt::ustring &tags, bool fromCache, bool *fileFound)
 {
 	const mpt::PathString fileName = dllPath.GetFileName();
 
@@ -535,32 +536,39 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, const
 	unsigned long exception = 0;
 	// Always scan plugins in a separate process
 	HINSTANCE hLib = NULL;
-	Vst::AEffect *pEffect = CVstPlugin::LoadPlugin(*plug, hLib, true);
-
-	if(pEffect != nullptr && pEffect->magic == Vst::kEffectMagic && pEffect->dispatcher != nullptr)
 	{
-		CVstPlugin::DispatchSEH(pEffect, Vst::effOpen, 0, 0, 0, 0, exception);
+#ifdef MODPLUG_TRACKER
+		ExceptionHandler::Context ectx{ MPT_UFORMAT("VST Plugin: {}")(plug->dllPath.ToUnicode()) };
+		ExceptionHandler::ContextSetter ectxguard{&ectx};
+#endif // MODPLUG_TRACKER
 
-		plug->pluginId1 = pEffect->magic;
-		plug->pluginId2 = pEffect->uniqueID;
+		Vst::AEffect *pEffect = CVstPlugin::LoadPlugin(maskCrashes, *plug, hLib, true);
 
-		GetPluginInformation(pEffect, *plug);
+		if(pEffect != nullptr && pEffect->magic == Vst::kEffectMagic && pEffect->dispatcher != nullptr)
+		{
+			CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effOpen, 0, 0, 0, 0, exception);
+
+			plug->pluginId1 = pEffect->magic;
+			plug->pluginId2 = pEffect->uniqueID;
+
+			GetPluginInformation(maskCrashes, pEffect, *plug);
 
 #ifdef VST_LOG
-		intptr_t nver = CVstPlugin::DispatchSEH(pEffect, Vst::effGetVstVersion, 0,0, nullptr, 0, exception);
-		if (!nver) nver = pEffect->version;
-		MPT_LOG(LogDebug, "VST", MPT_UFORMAT("{}: v{}.0, {} in, {} out, {} programs, {} params, flags=0x{} realQ={} offQ={}")(
-			plug->libraryName, nver,
-			pEffect->numInputs, pEffect->numOutputs,
-			mpt::ufmt::dec0<2>(pEffect->numPrograms), mpt::ufmt::dec0<2>(pEffect->numParams),
-			mpt::ufmt::HEX0<4>(static_cast<int32>(pEffect->flags)), pEffect->realQualities, pEffect->offQualities));
+			intptr_t nver = CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effGetVstVersion, 0,0, nullptr, 0, exception);
+			if (!nver) nver = pEffect->version;
+			MPT_LOG(LogDebug, "VST", MPT_UFORMAT("{}: v{}.0, {} in, {} out, {} programs, {} params, flags=0x{} realQ={} offQ={}")(
+				plug->libraryName, nver,
+				pEffect->numInputs, pEffect->numOutputs,
+				mpt::ufmt::dec0<2>(pEffect->numPrograms), mpt::ufmt::dec0<2>(pEffect->numParams),
+				mpt::ufmt::HEX0<4>(static_cast<int32>(pEffect->flags)), pEffect->realQualities, pEffect->offQualities));
 #endif // VST_LOG
 
-		CVstPlugin::DispatchSEH(pEffect, Vst::effClose, 0, 0, 0, 0, exception);
+			CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effClose, 0, 0, 0, 0, exception);
 
-		validPlug = true;
+			validPlug = true;
+		}
+
 	}
-
 	FreeLibrary(hLib);
 	if(exception != 0)
 	{
@@ -672,6 +680,8 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	}
 
 #ifdef MODPLUG_TRACKER
+	bool maskCrashes = TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes;
+
 	if(!pFound && (mixPlugin.GetLibraryName() != U_("")))
 	{
 		// Try finding the plugin DLL in the plugin directory or plugin cache instead.
@@ -682,7 +692,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		}
 		fullPath += mpt::PathString::FromUnicode(mixPlugin.GetLibraryName()) + P_(".dll");
 
-		pFound = AddPlugin(fullPath);
+		pFound = AddPlugin(fullPath, maskCrashes);
 		if(!pFound)
 		{
 			// Try plugin cache (search for library name)
@@ -696,7 +706,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 					fullPath = theApp.PathInstallRelativeToAbsolute(fullPath);
 					if(fullPath.IsFile())
 					{
-						pFound = AddPlugin(fullPath);
+						pFound = AddPlugin(fullPath, maskCrashes);
 					}
 				}
 			}
@@ -710,18 +720,18 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		HINSTANCE hLibrary = nullptr;
 		bool validPlugin = false;
 
-		pEffect = CVstPlugin::LoadPlugin(*pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins);
+		pEffect = CVstPlugin::LoadPlugin(maskCrashes, *pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins);
 
 		if(pEffect != nullptr && pEffect->dispatcher != nullptr && pEffect->magic == Vst::kEffectMagic)
 		{
 			validPlugin = true;
 
-			GetPluginInformation(pEffect, *pFound);
+			GetPluginInformation(maskCrashes, pEffect, *pFound);
 
 			// Update cached information
 			pFound->WriteToCache();
 
-			CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(hLibrary, *pFound, mixPlugin, *pEffect, sndFile);
+			CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(maskCrashes, hLibrary, *pFound, mixPlugin, *pEffect, sndFile);
 			if(pVstPlug == nullptr)
 			{
 				validPlugin = false;

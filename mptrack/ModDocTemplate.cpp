@@ -130,7 +130,7 @@ CDocument *CModDocManager::OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU
 	if(const auto fileExt = filename.GetFileExt(); !mpt::PathString::CompareNoCase(fileExt, P_(".dll")) || !mpt::PathString::CompareNoCase(fileExt, P_(".vst3")))
 	{
 		CVstPluginManager *pPluginManager = theApp.GetPluginManager();
-		if(pPluginManager && pPluginManager->AddPlugin(filename) != nullptr)
+		if(pPluginManager && pPluginManager->AddPlugin(filename, TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes) != nullptr)
 		{
 			return nullptr;
 		}

@@ -1847,6 +1847,8 @@ void CTrackApp::InitializeDXPlugins()
 	m_pPluginManager = new CVstPluginManager;
 	const size_t numPlugins = GetSettings().Read<int32>(U_("VST Plugins"), U_("NumPlugins"), 0);
 
+	bool maskCrashes = TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes;
+
 	std::vector<VSTPluginLib *> nonFoundPlugs;
 	const mpt::PathString failedPlugin = GetSettings().Read<mpt::PathString>(U_("VST Plugins"), U_("FailedPlugin"), P_(""));
 
@@ -1911,7 +1913,7 @@ void CTrackApp::InitializeDXPlugins()
 			mpt::ustring plugTags = GetSettings().Read<mpt::ustring>(U_("VST Plugins"), tagFormat(plug), mpt::ustring());
 
 			bool plugFound = true;
-			VSTPluginLib *lib = m_pPluginManager->AddPlugin(plugPath, plugTags, true, &plugFound);
+			VSTPluginLib *lib = m_pPluginManager->AddPlugin(plugPath, maskCrashes, plugTags, true, &plugFound);
 			if(!plugFound && lib != nullptr)
 			{
 				nonFoundPlugs.push_back(lib);

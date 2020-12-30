@@ -19,6 +19,7 @@
 #include "AbstractVstEditor.h"
 #include "VSTEditor.h"
 #include "DefaultVstEditor.h"
+#include "ExceptionHandler.h"
 #endif // MODPLUG_TRACKER
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/MIDIEvents.h"
@@ -29,6 +30,7 @@
 #include "../pluginBridge/BridgeOpCodes.h"
 #include "../soundlib/plugins/OpCodes.h"
 #include "../soundlib/plugins/PluginManager.h"
+#include "../common/mptOSException.h"
 
 using namespace Vst;
 DECLARE_FLAGSET(Vst::VstTimeInfoFlags)
@@ -41,55 +43,58 @@ static VstTimeInfo g_timeInfoFallback = { 0 };
 #define VST_LOG
 #endif
 
-// Try loading the VST library.
-static bool LoadLibrarySEH(const mpt::RawPathString &pluginPath, HMODULE &library)
+
+using VstCrash = Windows::SEH::Code;
+
+
+bool CVstPlugin::MaskCrashes() noexcept
 {
-	__try
-	{
-		library = LoadLibrary(pluginPath.c_str());
-		return true;
-	} __except(EXCEPTION_EXECUTE_HANDLER)
-	{
-		return false;
-	}
+	return m_maskCrashes;
 }
 
 
-static AEffect *CallMainProc(Vst::MainProc pMainProc)
+template <typename Tfn>
+DWORD CVstPlugin::SETryOrError(bool maskCrashes, Tfn fn)
 {
-	__try
+	DWORD exception = 0;
+	if(maskCrashes)
 	{
-		return pMainProc(CVstPlugin::MasterCallBack);
-	} __except(EXCEPTION_EXECUTE_HANDLER)
-	{
-		return nullptr;
-	}
-}
-
-
-// Try loading the VST plugin and retrieve the AEffect structure.
-static AEffect *GetAEffectSEH(HMODULE library)
-{
-	auto pMainProc = (Vst::MainProc)GetProcAddress(library, "VSTPluginMain");
-	if(pMainProc == nullptr)
-	{
-		pMainProc = (Vst::MainProc)GetProcAddress(library, "main");
-	}
-
-	if(pMainProc != nullptr)
-	{
-		return CallMainProc(pMainProc);
+		exception = Windows::SEH::TryOrError(fn);
+		if(exception)
+		{
+			ExceptionHandler::TaintProcess(ExceptionHandler::TaintReason::Plugin);
+		}
 	} else
 	{
-#ifdef VST_LOG
-		MPT_LOG(LogDebug, "VST", MPT_UFORMAT("Entry point not found! (handle={})")(mpt::ufmt::PTR(library)));
-#endif // VST_LOG
-		return nullptr;
+		fn();
 	}
+	return exception;
 }
 
 
-AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool forceBridge)
+template <typename Tfn>
+DWORD CVstPlugin::SETryOrError(Tfn fn)
+{
+	DWORD exception = 0;
+	if(MaskCrashes())
+	{
+		exception = Windows::SEH::TryOrError(fn);
+		if(exception)
+		{
+			ExceptionHandler::TaintProcess(ExceptionHandler::TaintReason::Plugin);
+		}
+	} else
+	{
+#ifdef MODPLUG_TRACKER
+		ExceptionHandler::ContextSetter ectxguard{&m_Ectx};
+#endif // MODPLUG_TRACKER
+		fn();
+	}
+	return exception;
+}
+
+
+AEffect *CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE &library, bool forceBridge)
 {
 	const mpt::PathString &pluginPath = plugin.dllPath;
 
@@ -137,9 +142,17 @@ AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool for
 		plugin.useBridge = false;
 	}
 
-	if(!LoadLibrarySEH(pluginPath.AsNative(), library))
 	{
-		CVstPluginManager::ReportPlugException(MPT_UFORMAT("Exception caught while loading {}")(pluginPath));
+#ifdef MODPLUG_TRACKER
+		ExceptionHandler::Context ectx{ MPT_UFORMAT("VST Plugin: {}")(plugin.dllPath.ToUnicode()) };
+		ExceptionHandler::ContextSetter ectxguard{&ectx};
+#endif // MODPLUG_TRACKER
+		DWORD exception = SETryOrError(maskCrashes, [&](){ library = LoadLibrary(pluginPath.AsNative().c_str()); });
+		if(exception)
+		{
+			CVstPluginManager::ReportPlugException(MPT_UFORMAT("Exception caught while loading {}")(pluginPath));
+			return nullptr;
+		}
 	}
 	if(library == nullptr)
 	{
@@ -167,7 +180,30 @@ AEffect *CVstPlugin::LoadPlugin(VSTPluginLib &plugin, HMODULE &library, bool for
 
 	if(library != nullptr && library != INVALID_HANDLE_VALUE)
 	{
-		effect = GetAEffectSEH(library);
+		auto pMainProc = (Vst::MainProc)GetProcAddress(library, "VSTPluginMain");
+		if(pMainProc == nullptr)
+		{
+			pMainProc = (Vst::MainProc)GetProcAddress(library, "main");
+		}
+
+		if(pMainProc != nullptr)
+		{
+#ifdef MODPLUG_TRACKER
+			ExceptionHandler::Context ectx{ MPT_UFORMAT("VST Plugin: {}")(plugin.dllPath.ToUnicode()) };
+			ExceptionHandler::ContextSetter ectxguard{&ectx};
+#endif // MODPLUG_TRACKER
+			DWORD exception = SETryOrError(maskCrashes, [&](){ effect = pMainProc(CVstPlugin::MasterCallBack); });
+			if(exception)
+			{
+				return nullptr;
+			}
+		} else
+		{
+#ifdef VST_LOG
+			MPT_LOG(LogDebug, "VST", MPT_UFORMAT("Entry point not found! (handle={})")(mpt::ufmt::PTR(library)));
+#endif // VST_LOG
+			return nullptr;
+		}
 	}
 
 	return effect;
@@ -809,8 +845,9 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 // CVstPlugin
 //
 
-CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixStruct, AEffect &effect, CSoundFile &sndFile)
+CVstPlugin::CVstPlugin(bool maskCrashes, HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixStruct, AEffect &effect, CSoundFile &sndFile)
 	: IMidiPlugin(factory, sndFile, &mixStruct)
+	, m_maskCrashes(maskCrashes)
 	, m_Effect(effect)
 	, timeInfo{}
 	, isBridged(!memcmp(&effect.reservedForHost2, "OMPT", 4))
@@ -829,6 +866,9 @@ CVstPlugin::CVstPlugin(HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mi
 
 void CVstPlugin::Initialize()
 {
+
+	m_Ectx = { MPT_UFORMAT("VST Plugin: {}")(m_Factory.dllPath.ToUnicode()) };
+
 	// If filename matched during load but plugin ID didn't, make sure it's updated.
 	m_pMixStruct->Info.dwPluginId1 = m_Factory.pluginId1 = m_Effect.magic;
 	m_pMixStruct->Info.dwPluginId2 = m_Factory.pluginId2 = m_Effect.uniqueID;
@@ -1020,16 +1060,17 @@ int32 CVstPlugin::GetVersion() const
 
 
 // Wrapper for VST dispatch call with structured exception handling.
-intptr_t CVstPlugin::DispatchSEH(AEffect *effect, VstOpcodeToPlugin opCode, int32 index, intptr_t value, void *ptr, float opt, unsigned long &exception)
+intptr_t CVstPlugin::DispatchSEH(bool maskCrashes, AEffect *effect, VstOpcodeToPlugin opCode, int32 index, intptr_t value, void *ptr, float opt, unsigned long &exception)
 {
-	__try
+	if(effect->dispatcher != nullptr)
 	{
-		if(effect->dispatcher != nullptr)
+		intptr_t result = 0;
+		DWORD e = SETryOrError(maskCrashes, [&](){ result = effect->dispatcher(effect, opCode, index, value, ptr, opt); });
+		if(e)
 		{
-			return effect->dispatcher(effect, opCode, index, value, ptr, opt);
+			exception = e;
 		}
-	} __except((exception = GetExceptionCode()), EXCEPTION_EXECUTE_HANDLER)
-	{
+		return result;
 	}
 	return 0;
 }
@@ -1037,29 +1078,39 @@ intptr_t CVstPlugin::DispatchSEH(AEffect *effect, VstOpcodeToPlugin opCode, int3
 
 intptr_t CVstPlugin::Dispatch(VstOpcodeToPlugin opCode, int32 index, intptr_t value, void *ptr, float opt)
 {
-	unsigned long exception = 0;
 #ifdef VST_LOG
 	{
 		mpt::ustring codeStr;
 		if(opCode < std::size(VstOpCodes))
+		{
 			codeStr = mpt::ToUnicode(mpt::Charset::ASCII, VstOpCodes[opCode]);
-		else
+		} else
+		{
 			codeStr = mpt::ufmt::val(opCode);
+		}
 		MPT_LOG(LogDebug, "VST", MPT_UFORMAT("About to Dispatch({}) (Plugin=\"{}\"), index: {}, value: {}, ptr: {}, opt: {}!\n")(codeStr, m_Factory.libraryName, index, mpt::ufmt::PTR(value), mpt::ufmt::PTR(ptr), mpt::ufmt::flt(opt, 3)));
 	}
 #endif
-	intptr_t result = DispatchSEH(&m_Effect, opCode, index, value, ptr, opt, exception);
-
-	if(exception)
+	if(!m_Effect.dispatcher)
 	{
-		mpt::ustring codeStr;
-		if(opCode < static_cast<int32>(std::size(VstOpCodes)))
-			codeStr = mpt::ToUnicode(mpt::Charset::ASCII, VstOpCodes[opCode]);
-		else
-			codeStr = mpt::ufmt::val(opCode);
-		ReportPlugException(MPT_UFORMAT("Exception {} in Dispatch({})")(mpt::ufmt::HEX0<8>(exception), codeStr));
+		return 0;
 	}
-
+	intptr_t result = 0;
+	{
+		DWORD exception = SETryOrError([&](){ result = m_Effect.dispatcher(&m_Effect, opCode, index, value, ptr, opt); });
+		if(exception)
+		{
+			mpt::ustring codeStr;
+			if(opCode < std::size(VstOpCodes))
+			{
+				codeStr = mpt::ToUnicode(mpt::Charset::ASCII, VstOpCodes[opCode]);
+			} else
+			{
+				codeStr = mpt::ufmt::val(opCode);
+			}
+			ReportPlugException(MPT_UFORMAT("Exception {} in Dispatch({})")(mpt::ufmt::HEX0<8>(exception), codeStr));
+		}
+	}
 	return result;
 }
 
@@ -1163,10 +1214,8 @@ PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 	float fResult = 0;
 	if(nIndex < m_Effect.numParams && m_Effect.getParameter != nullptr)
 	{
-		__try
-		{
-			fResult = m_Effect.getParameter(&m_Effect, nIndex);
-		} __except(EXCEPTION_EXECUTE_HANDLER)
+		DWORD exception = SETryOrError([&](){ fResult = m_Effect.getParameter(&m_Effect, nIndex); });
+		if(exception)
 		{
 			//ReportPlugException(U_("Exception in getParameter (Plugin=\"{}\")!\n"), m_Factory.szLibraryName);
 		}
@@ -1177,16 +1226,15 @@ PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 
 void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 {
-	__try
+	DWORD exception = 0;
+	if(nIndex < m_Effect.numParams && m_Effect.setParameter)
 	{
-		if(nIndex < m_Effect.numParams && m_Effect.setParameter)
-		{
-			m_Effect.setParameter(&m_Effect, nIndex, fValue);
-		}
-		ResetSilence();
-	} __except(EXCEPTION_EXECUTE_HANDLER)
+		exception = SETryOrError([&](){ m_Effect.setParameter(&m_Effect, nIndex, fValue); });
+	}
+	ResetSilence();
+	if(exception)
 	{
-		//ReportPlugException(MPT_UFORMAT("Exception in SetParameter({}, {})!")(nIndex, fValue));
+		//ReportPlugException(mpt::format(U_("Exception in SetParameter({}, {})!"))(nIndex, fValue));
 	}
 }
 
@@ -1273,8 +1321,7 @@ void CVstPlugin::ProcessVSTEvents()
 	// Process VST events
 	if(m_Effect.dispatcher != nullptr && vstEvents.Finalise() > 0)
 	{
-		unsigned long exception = 0;
-		DispatchSEH(&m_Effect, effProcessEvents, 0, 0, &vstEvents, 0, exception);
+		DWORD exception = SETryOrError([&](){ m_Effect.dispatcher(&m_Effect, effProcessEvents, 0, 0, &vstEvents, 0); });
 		ResetSilence();
 		if(exception)
 		{
@@ -1342,18 +1389,6 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 }
 
 
-// Wrapper for VST process call with structured exception handling.
-static void ProcessSEH(Vst::ProcessProc processFP, AEffect* effect, float** inputs, float** outputs, int32 sampleFrames, unsigned long &exception)
-{
-	__try
-	{
-		processFP(effect, inputs, outputs, sampleFrames);
-	} __except((exception = GetExceptionCode()), EXCEPTION_EXECUTE_HANDLER)
-	{
-	}
-}
-
-
 void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 {
 	ProcessVSTEvents();
@@ -1382,14 +1417,15 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		}
 
 		// Do the VST processing magic
-		ASSERT(numFrames <= MIXBUFFERSIZE);
-		unsigned long exception = 0;
-		ProcessSEH(m_pProcessFP, &m_Effect, m_mixBuffer.GetInputBufferArray(), outputBuffers, numFrames, exception);
-		if(exception)
+		MPT_ASSERT(numFrames <= MIXBUFFERSIZE);
 		{
-			Bypass();
-			mpt::ustring processMethod = (m_Effect.flags & effFlagsCanReplacing) ? U_("processReplacing") : U_("process");
-			ReportPlugException(MPT_UFORMAT("The plugin threw an exception ({}) in {}. It has automatically been set to \"Bypass\".")(mpt::ufmt::HEX0<8>(exception), processMethod));
+			DWORD exception = SETryOrError([&](){ m_pProcessFP(&m_Effect, m_mixBuffer.GetInputBufferArray(), outputBuffers, numFrames); });
+			if(exception)
+			{
+				Bypass();
+				mpt::ustring processMethod = (m_Effect.flags & effFlagsCanReplacing) ? U_("processReplacing") : U_("process");
+				ReportPlugException(MPT_UFORMAT("The plugin threw an exception ({}) in {}. It has automatically been set to \"Bypass\".")(mpt::ufmt::HEX0<8>(exception), processMethod));
+			}
 		}
 
 		// Mix outputs of multi-output VSTs:

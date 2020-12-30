@@ -658,7 +658,7 @@ void CSelectPluginDlg::OnAddPlugin()
 
 	for(const auto &file : dlg.GetFilenames())
 	{
-		VSTPluginLib *lib = plugManager->AddPlugin(file, mpt::ustring(), false);
+		VSTPluginLib *lib = plugManager->AddPlugin(file, TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes, mpt::ustring(), false);
 		if(lib != nullptr)
 		{
 			update = true;
@@ -715,6 +715,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 	pluginScanDlg.ShowWindow(SW_SHOW);
 
 	FolderScanner scan(path, FolderScanner::kOnlyFiles | FolderScanner::kFindInSubDirectories);
+	bool maskCrashes = TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes;
 	mpt::PathString fileName;
 	int files = 0;
 	while(scan.Next(fileName) && pluginScanDlg.IsWindowVisible())
@@ -731,7 +732,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 				::DispatchMessage(&msg);
 			}
 
-			VSTPluginLib *lib = pManager->AddPlugin(fileName, mpt::ustring(), false);
+			VSTPluginLib *lib = pManager->AddPlugin(fileName, maskCrashes, mpt::ustring(), false);
 			if(lib)
 			{
 				update = true;
