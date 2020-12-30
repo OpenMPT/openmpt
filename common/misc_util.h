@@ -231,6 +231,32 @@ template <typename T> inline mpt::ustring BinToBase64url(mpt::span<T> src) { ret
 
 } // namespace Util
 
+namespace Util
+{
+
+template <typename T>
+class heap_value
+{
+private:
+	std::unique_ptr<T> m_value{};
+public:
+	template <typename ... Targs>
+	heap_value(Targs && ... args)
+		: m_value(std::make_unique<T>(std::forward<Targs>(args) ...))
+	{
+		return;
+	}
+	const T & value() const
+	{
+		return *m_value;
+	}
+	T & value()
+	{
+		return *m_value;
+	}
+};
+
+} // namespace Util
 
 #if defined(MODPLUG_TRACKER) || (defined(LIBOPENMPT_BUILD) && defined(LIBOPENMPT_BUILD_TEST))
 
