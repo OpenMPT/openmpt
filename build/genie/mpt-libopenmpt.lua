@@ -7,7 +7,6 @@
   mpt_projectname = "libopenmpt"
   dofile "../../build/genie/genie-defaults-LIBorDLL.lua"
   dofile "../../build/genie/genie-defaults.lua"
-  dofile "../../build/genie/genie-defaults-winver.lua"
   local extincludedirs = {
    "../../include",
    "../../include/mpg123/ports/MSVC++",

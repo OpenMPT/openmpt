@@ -6,7 +6,6 @@
   mpt_projectname = "mpg123"
   dofile "../../build/genie/genie-defaults-DLL.lua"
   dofile "../../build/genie/genie-defaults.lua"
-  dofile "../../build/genie/genie-defaults-winver.lua"
   targetname "openmpt-mpg123"
   includedirs {
    "../../include/mpg123/ports/MSVC++",

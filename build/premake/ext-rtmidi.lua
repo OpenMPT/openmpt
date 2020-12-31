@@ -6,7 +6,6 @@
   mpt_projectname = "rtmidi"
   dofile "../../build/premake/premake-defaults-LIB.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-rtmidi"
 	filter {}
 	filter { "action:vs*" }

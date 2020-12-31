@@ -6,7 +6,6 @@
   mpt_projectname = "zlib"
   dofile "../../build/genie/genie-defaults-LIBorDLL.lua"
   dofile "../../build/genie/genie-defaults.lua"
-  dofile "../../build/genie/genie-defaults-winver.lua"
   targetname "openmpt-zlib"
   includedirs { "../../include/zlib" }
   flags { "Unicode" }

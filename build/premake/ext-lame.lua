@@ -6,7 +6,6 @@
   mpt_projectname = "lame"
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-lame"
   includedirs { "../../include/lame/include" }
   includedirs { "../../include/lame/mpglib" }

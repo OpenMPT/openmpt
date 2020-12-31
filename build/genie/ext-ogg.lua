@@ -6,7 +6,6 @@
   mpt_projectname = "ogg"
   dofile "../../build/genie/genie-defaults-LIBorDLL.lua"
   dofile "../../build/genie/genie-defaults.lua"
-  dofile "../../build/genie/genie-defaults-winver.lua"
   targetname "openmpt-ogg"
   includedirs { "../../include/ogg/include" }
   flags { "Unicode" }

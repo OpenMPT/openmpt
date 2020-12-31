@@ -7,7 +7,6 @@
   mpt_projectname = "vorbis"
   dofile "../../build/genie/genie-defaults-LIBorDLL.lua"
   dofile "../../build/genie/genie-defaults.lua"
-  dofile "../../build/genie/genie-defaults-winver.lua"
   targetname "openmpt-vorbis"
   local extincludedirs = {
    "../../include/ogg/include",

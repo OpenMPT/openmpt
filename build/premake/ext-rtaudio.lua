@@ -6,7 +6,6 @@
   mpt_projectname = "rtaudio"
   dofile "../../build/premake/premake-defaults-LIB.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-rtaudio"
 	filter {}
 	filter { "action:vs*" }

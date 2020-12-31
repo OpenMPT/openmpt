@@ -6,12 +6,6 @@
   mpt_projectname = "portaudio"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
---  dofile "../../build/premake/premake-defaults-winver.lua"
-  filter {}
-  filter { "action:vs*" }
-   defines { "_WIN32_WINNT=0x0601" }
-  filter {}
-
   targetname "openmpt-portaudio"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/src/common", "../../include/portaudio/src/os/win" }
 	filter {}

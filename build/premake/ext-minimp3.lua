@@ -6,7 +6,6 @@
   mpt_projectname = "minimp3"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-minimp3"
   includedirs { }
 	filter {}

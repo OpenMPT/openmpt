@@ -6,7 +6,6 @@
   mpt_projectname = "miniz"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
-  dofile "../../build/premake/premake-defaults-winver.lua"
   targetname "openmpt-miniz"
 	filter {}
 	filter { "action:vs*" }
