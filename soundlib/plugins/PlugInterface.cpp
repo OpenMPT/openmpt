@@ -836,6 +836,9 @@ void IMidiPlugin::MidiVibrato(int32 depth, int8 pwd, CHANNELINDEX trackerChn)
 
 void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vol, CHANNELINDEX trackChannel)
 {
+	if(trackChannel >= MAX_CHANNELS)
+		return;
+
 	auto midiCh = GetMidiChannel(trackChannel);
 	PlugInstrChannel &channel = m_MidiCh[midiCh];
 
@@ -914,7 +917,7 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 	}
 
 	// Note On
-	else if(ModCommand::IsNote(static_cast<ModCommand::NOTE>(note)))
+	else if(note >= NOTE_MIN && note < NOTE_MIN + mpt::array_size<decltype(channel.noteOnMap)>::size)
 	{
 		note -= NOTE_MIN;
 
@@ -929,15 +932,8 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 		// This is to send a note off for each instance of a note, for plugs like Fabfilter.
 		// Problem: if a note dies out naturally and we never send a note off, this counter
 		// will block at max until note off. Is this a problem?
-		// Safe to assume we won't need more than 16 note offs max on a given note?
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:6385) // false-positive: Reading invalid data from 'channel.noteOnMap': the readable size is '32768' bytes, but 'note' bytes may be read.
-#endif // MPT_COMPILER_MSVC
+		// Safe to assume we won't need more than 255 note offs max on a given note?
 		if(channel.noteOnMap[note][trackChannel] < uint8_max)
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
 		{
 			channel.noteOnMap[note][trackChannel]++;
 		}
