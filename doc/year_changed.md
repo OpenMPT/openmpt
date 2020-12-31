@@ -11,6 +11,8 @@ Things to update when the year has changed
  *  `openmpt123/openmpt123.cpp` (3 occurrences)
  *  `libopenmpt/xmp-openmpt.cpp` (1 occurrence)
  *  `libopenmpt/in_openmpt.cpp` (1 occurrence)
+ *  `contrib/libmodplug-0.8.8.5/LICENSE` (1 occurrence)
+ *  `contrib/libmodplug-0.8.9.0/LICENSE` (1 occurrence)
  *  [https://wiki.openmpt.org/Manual:_Acknowledgments](https://wiki.openmpt.org/Manual:_Acknowledgments)
  *  [https://lib.openmpt.org/libopenmpt/license/](https://lib.openmpt.org/libopenmpt/license/)
 
