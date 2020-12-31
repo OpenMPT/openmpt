@@ -13,7 +13,6 @@
 #endif
 #endif // _MSC_VER
 
-#define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
 #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS // Avoid binary bloat from linking unused MFC controls
 
 #include <afxwin.h>
