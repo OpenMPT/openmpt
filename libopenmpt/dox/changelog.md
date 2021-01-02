@@ -26,7 +26,15 @@ is just a high-level summary.
  *  [**Regression**] Building with Android NDK older than NDK r19c is not
     supported any more.
 
-### libopenmpt 0.5.0-pre
+ *  libopenmpt can now detect infinite pattern loops and treats them as the song
+    end. This means that setting a repeat count other than -1 now always
+    guarantees that playback will eventually end. The song loop counter is
+    decremented each time it ends up at the start of the infinite loop, so the
+    song does not restart from the beginning even if the repeat count is not 0.
+ *  `openmpt::module::set_position_seconds()` accuracy has been improved for
+    modules with pattern loops.
+
+### libopenmpt 0.5.0 (2020-05-24)
 
  *  [**New**] OggMod compressed FastTracker 2 XM (OXM) modules are now
     supported.

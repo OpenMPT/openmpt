@@ -3928,7 +3928,6 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), MixLevels::Compatible);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, TempoMode::Classic);
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwLastSavedWithVersion, resaved ? Version(Version::Current().GetRawVersion() & 0xFFFF0000u) : MPT_V("1.27.00.00"));
-	VERIFY_EQUAL_NONCONT(sndFile.Order().GetRestartPos(), 0);
 
 	// Channels
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumChannels(), 4);
@@ -3948,8 +3947,8 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 4);
 	{
 		const ModSample &sample = sndFile.GetSample(1);
-		VERIFY_EQUAL_NONCONT((sndFile.m_szNames[1] == "Sample_1__________________X"), true);
-		VERIFY_EQUAL_NONCONT((sample.filename == "Filename_1_X"), true);
+		VERIFY_EQUAL_NONCONT(sndFile.m_szNames[1], "Sample_1__________________X");
+		VERIFY_EQUAL_NONCONT(sample.filename, "Filename_1_X");
 		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
 		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
 		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
@@ -3975,15 +3974,15 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 
 	{
 		const ModSample &sample = sndFile.GetSample(2);
-		VERIFY_EQUAL_NONCONT((sndFile.m_szNames[2] == "Empty"), true);
+		VERIFY_EQUAL_NONCONT(sndFile.m_szNames[2], "Empty");
 		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_S3M), 16384);
 		VERIFY_EQUAL_NONCONT(sample.nVolume, 2 * 4);
 	}
 
 	{
 		const ModSample &sample = sndFile.GetSample(3);
-		VERIFY_EQUAL_NONCONT((sndFile.m_szNames[3] == "Stereo / 16-Bit"), true);
-		VERIFY_EQUAL_NONCONT((sample.filename == "Filename_3_X"), true);
+		VERIFY_EQUAL_NONCONT(sndFile.m_szNames[3], "Stereo / 16-Bit");
+		VERIFY_EQUAL_NONCONT(sample.filename, "Filename_3_X");
 		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 4);
 		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 2);
 		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 2);
@@ -4004,7 +4003,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 
 	{
 		const ModSample &sample = sndFile.GetSample(4);
-		VERIFY_EQUAL_NONCONT((sndFile.m_szNames[4] == "adlib"), true);
+		VERIFY_EQUAL_NONCONT(sndFile.m_szNames[4], "adlib");
 		VERIFY_EQUAL_NONCONT((sample.filename == ""), true);
 		VERIFY_EQUAL_NONCONT(sample.GetSampleRate(MOD_TYPE_S3M), 8363);
 		VERIFY_EQUAL_NONCONT(sample.nVolume, 58 * 4);
@@ -4013,6 +4012,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	}
 
 	// Orders
+	VERIFY_EQUAL_NONCONT(sndFile.Order().GetRestartPos(), 0);
 	VERIFY_EQUAL_NONCONT(sndFile.Order().GetLengthTailTrimmed(), 5);
 	VERIFY_EQUAL_NONCONT(sndFile.Order()[0], 0);
 	VERIFY_EQUAL_NONCONT(sndFile.Order()[1], sndFile.Order.GetIgnoreIndex());
@@ -4044,6 +4044,86 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(63, 3)->param, 0x04);
 }
 
+
+// Check if our test file was loaded correctly.
+static void TestLoadMODFile(CSoundFile &sndFile)
+{
+	// Global Variables
+	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "MOD_Test___________X");
+	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_PT_MODE | SONG_AMIGALIMITS | SONG_ISAMIGA);
+	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), MixLevels::Compatible);
+	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, TempoMode::Classic);
+	VERIFY_EQUAL_NONCONT(sndFile.GetNumChannels(), 4);
+	VERIFY_EQUAL_NONCONT(sndFile.m_playBehaviour[kMODOneShotLoops], true);
+	VERIFY_EQUAL_NONCONT(sndFile.m_playBehaviour[kMODSampleSwap], true);
+	VERIFY_EQUAL_NONCONT(sndFile.m_playBehaviour[kMODIgnorePanning], true);
+	VERIFY_EQUAL_NONCONT(sndFile.m_playBehaviour[kMODVBlankTiming], false);
+
+	// Test GetLength code, in particular with subsongs
+	VERIFY_EQUAL_NONCONT(sndFile.GetLength(eNoAdjust, GetLengthTarget(0, 4)).back().targetReached, false);
+
+	const auto allSubSongs = sndFile.GetLength(eNoAdjust, GetLengthTarget(true));
+	VERIFY_EQUAL_NONCONT(allSubSongs.size(), 2);
+	VERIFY_EQUAL_EPS(allSubSongs[0].duration, 2.04, 0.1);
+	VERIFY_EQUAL_EPS(allSubSongs[1].duration, 118.84, 0.1);
+	VERIFY_EQUAL_NONCONT(allSubSongs[0].lastOrder, 0);
+	VERIFY_EQUAL_NONCONT(allSubSongs[0].lastRow, 1);
+	VERIFY_EQUAL_NONCONT(allSubSongs[1].lastOrder, 2);
+	VERIFY_EQUAL_NONCONT(allSubSongs[1].lastRow, 61);
+	VERIFY_EQUAL_NONCONT(allSubSongs[1].startOrder, 2);
+	VERIFY_EQUAL_NONCONT(allSubSongs[1].startRow, 0);
+
+	// Samples
+	VERIFY_EQUAL_NONCONT(sndFile.GetNumSamples(), 31);
+	{
+		const ModSample &sample = sndFile.GetSample(1);
+		VERIFY_EQUAL_NONCONT(sndFile.m_szNames[1], "Sample_1_____________X");
+		VERIFY_EQUAL_NONCONT(sample.GetBytesPerSample(), 1);
+		VERIFY_EQUAL_NONCONT(sample.GetNumChannels(), 1);
+		VERIFY_EQUAL_NONCONT(sample.GetElementarySampleSize(), 1);
+		VERIFY_EQUAL_NONCONT(sample.GetSampleSizeInBytes(), 1244);
+		VERIFY_EQUAL_NONCONT(sample.nFineTune, 0x70);
+		VERIFY_EQUAL_NONCONT(sample.RelativeTone, 0);
+		VERIFY_EQUAL_NONCONT(sample.nVolume, 256);
+		VERIFY_EQUAL_NONCONT(sample.nGlobalVol, 64);
+		VERIFY_EQUAL_NONCONT(sample.uFlags, CHN_LOOP);
+
+		VERIFY_EQUAL_NONCONT(sample.nLoopStart, 0);
+		VERIFY_EQUAL_NONCONT(sample.nLoopEnd, 128);
+
+		// Sample Data
+		VERIFY_EQUAL_NONCONT(sample.sample8()[0], 0);
+		VERIFY_EQUAL_NONCONT(sample.sample8()[1], 0);
+		VERIFY_EQUAL_NONCONT(sample.sample8()[2], -29);
+	}
+	{
+		const ModSample &sample = sndFile.GetSample(3);
+		VERIFY_EQUAL_NONCONT(sndFile.m_szNames[3], "OpenMPT Module Loader");
+		VERIFY_EQUAL_NONCONT(sample.GetSampleSizeInBytes(), 0);
+		VERIFY_EQUAL_NONCONT(sample.nFineTune, -0x80);
+		VERIFY_EQUAL_NONCONT(sample.RelativeTone, 0);
+		VERIFY_EQUAL_NONCONT(sample.nVolume, 4);
+		VERIFY_EQUAL_NONCONT(sample.nGlobalVol, 64);
+	}
+
+	// Orders
+	VERIFY_EQUAL_NONCONT(sndFile.Order().GetRestartPos(), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Order().GetLengthTailTrimmed(), 4);
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[0], 0);
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[1], 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[2], 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[3], 0);
+
+	// Patterns
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns.GetNumPatterns(), 3);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[2].GetNumRows(), 64);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[2].GetpModCommand(1, 0)->note, NOTE_MIDDLEC + 12);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[2].GetpModCommand(16, 3)->instr, 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[2].GetpModCommand(19, 3)->command, CMD_PANNING8);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[2].GetpModCommand(19, 3)->param, 0x28);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[2].GetpModCommand(20, 0)->command, CMD_TEMPO);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[2].GetpModCommand(20, 1)->command, CMD_SPEED);
+}
 
 
 #ifdef MODPLUG_TRACKER
@@ -4092,26 +4172,17 @@ static void DestroySoundFileContainer(TSoundFileContainer &sndFile)
 	sndFile->OnCloseDocument();
 }
 
-static void SaveIT(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
+static void SaveTestFile(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
 	sndFile->DoSave(filename);
 	// Saving the file puts it in the MRU list...
 	theApp.RemoveMruItem(0);
 }
 
-static void SaveXM(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
-{
-	sndFile->DoSave(filename);
-	// Saving the file puts it in the MRU list...
-	theApp.RemoveMruItem(0);
-}
-
-static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
-{
-	sndFile->DoSave(filename);
-	// Saving the file puts it in the MRU list...
-	theApp.RemoveMruItem(0);
-}
+const auto SaveIT = SaveTestFile;
+const auto SaveXM = SaveTestFile;
+const auto SaveS3M = SaveTestFile;
+const auto SaveMOD = SaveTestFile;
 
 #else // !MODPLUG_TRACKER
 
@@ -4173,6 +4244,12 @@ static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &f
 {
 	mpt::ofstream f(filename, std::ios::binary);
 	sndFile->SaveS3M(f);
+}
+
+static void SaveMOD(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
+{
+	mpt::ofstream f(filename, std::ios::binary);
+	sndFile->SaveMod(f);
 }
 
 #endif // !MODPLUG_NO_FILESAVE
@@ -4305,6 +4382,31 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		RemoveFile(filenameBase + P_("saved.s3m"));
 	}
 	#endif
+
+	// Test MOD file loading
+	{
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + P_("mod"));
+		auto &sndFile = GetSoundFile(sndFileContainer);
+
+		TestLoadMODFile(sndFile);
+
+#ifndef MODPLUG_NO_FILESAVE
+		// Test file saving
+		SaveMOD(sndFileContainer, filenameBase + P_("saved.mod"));
+#endif
+
+		DestroySoundFileContainer(sndFileContainer);
+	}
+
+	// Reload the saved file and test if everything is still working correctly.
+#ifndef MODPLUG_NO_FILESAVE
+	{
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + P_("saved.mod"));
+		TestLoadMODFile(GetSoundFile(sndFileContainer));
+		DestroySoundFileContainer(sndFileContainer);
+		RemoveFile(filenameBase + P_("saved.mod"));
+	}
+#endif
 
 	// General file I/O tests
 	{

@@ -802,6 +802,7 @@ Declare Function openmpt_module_get_repeat_count(ByVal module As openmpt_module 
 
   \param module The module handle to work on.
   \return Approximate duration of current sub-song in seconds.
+  \remarks The function may return infinity if the pattern data is too complex to evaluate.
 '/
 Declare Function openmpt_module_get_duration_seconds(ByVal module As openmpt_module Ptr) As Double
 

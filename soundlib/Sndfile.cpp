@@ -88,7 +88,7 @@ CSoundFile::CSoundFile() :
 #endif
 	Order(*this),
 	m_PRNG(mpt::make_prng<mpt::fast_prng>(mpt::global_prng())),
-	visitedSongRows(*this)
+	m_visitedRows(*this)
 {
 	MemsetZero(MixSoundBuffer);
 	MemsetZero(MixRearBuffer);
@@ -457,6 +457,8 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 				m_songMessage.assign(mpt::ToCharset(mpt::Charset::Locale, unarchiver.GetComment()));
 			}
 #endif
+
+			m_visitedRows.Initialize(true);
 		} catch(mpt::out_of_memory e)
 		{
 			mpt::delete_out_of_memory(e);
@@ -471,6 +473,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	{
 		// New song
 		InitializeGlobals();
+		m_visitedRows.Initialize(true);
 		m_dwCreatedWithVersion = Version::Current();
 	}
 
@@ -558,13 +561,12 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	m_PlayState.m_nRow = 0;
 	m_PlayState.m_nPatternDelay = 0;
 	m_PlayState.m_nFrameDelay = 0;
-	m_PlayState.m_nNextPatStartRow = 0;
+	m_PlayState.m_nextPatStartRow = 0;
 	m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
 
 	m_nMaxOrderPosition = 0;
 
 	RecalculateSamplesPerTick();
-	visitedSongRows.Initialize(true);
 
 	for(auto &order : Order)
 	{
@@ -765,7 +767,7 @@ void CSoundFile::ResetPlayPos()
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 		m_PlayState.Chn[i].Reset(ModChannel::resetSetPosFull, *this, i);
 
-	visitedSongRows.Initialize(true);
+	m_visitedRows.Initialize(true);
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 
 	m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
@@ -781,7 +783,7 @@ void CSoundFile::ResetPlayPos()
 	m_PlayState.m_nBufferCount = 0;
 	m_PlayState.m_nPatternDelay = 0;
 	m_PlayState.m_nFrameDelay = 0;
-	m_PlayState.m_nNextPatStartRow = 0;
+	m_PlayState.m_nextPatStartRow = 0;
 	m_PlayState.m_lTotalSampleCount = 0;
 }
 
@@ -829,7 +831,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		m_PlayState.m_nBufferCount = 0;
 		m_PlayState.m_nPatternDelay = 0;
 		m_PlayState.m_nFrameDelay = 0;
-		m_PlayState.m_nNextPatStartRow = 0;
+		m_PlayState.m_nextPatStartRow = 0;
 	}
 
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
@@ -959,7 +961,7 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 		m_PlayState.m_nPatternDelay = 0;
 		m_PlayState.m_nFrameDelay = 0;
 		m_PlayState.m_nBufferCount = 0;
-		m_PlayState.m_nNextPatStartRow = 0;
+		m_PlayState.m_nextPatStartRow = 0;
 		m_SongFlags.set(SONG_PATTERNLOOP);
 	}
 }
@@ -975,7 +977,7 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 	m_PlayState.m_nPatternDelay = 0;
 	m_PlayState.m_nFrameDelay = 0;
 	m_PlayState.m_nBufferCount = 0;
-	m_PlayState.m_nNextPatStartRow = 0;
+	m_PlayState.m_nextPatStartRow = 0;
 	m_SongFlags.reset(SONG_PATTERNLOOP);
 }
 

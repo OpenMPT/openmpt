@@ -59,9 +59,6 @@ public:
 	std::unique_ptr<CSoundFile::PlayState> state;
 	struct ChnSettings
 	{
-		double patLoop = 0.0;
-		CSoundFile::samplecount_t patLoopSmp = 0;
-		ROWINDEX patLoopStart = 0;
 		uint32 ticksToRender = 0;	// When using sample sync, we still need to render this many ticks
 		bool incChanged = false;	// When using sample sync, note frequency has changed
 		uint8 vol = 0xFF;
@@ -258,6 +255,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	CSoundFile::PlayState &playState = *memory.state;
 	// Temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
 	RowVisitor visitedRows(*this, sequence);
+	ROWINDEX allowedPatternLoopComplexity = 32768;
 
 	playState.m_nNextRow = playState.m_nRow = target.startRow;
 	playState.m_nNextOrder = playState.m_nCurrentOrder = target.startOrder;
@@ -268,11 +266,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 	if(adjustSamplePos)
 	{
-		forbiddenCommands.set(CMD_ARPEGGIO);             forbiddenCommands.set(CMD_PORTAMENTOUP);
-		forbiddenCommands.set(CMD_PORTAMENTODOWN);       forbiddenCommands.set(CMD_XFINEPORTAUPDOWN);
-		forbiddenCommands.set(CMD_NOTESLIDEUP);          forbiddenCommands.set(CMD_NOTESLIDEUPRETRIG);
-		forbiddenCommands.set(CMD_NOTESLIDEDOWN);        forbiddenCommands.set(CMD_NOTESLIDEDOWNRETRIG);
-		forbiddenVolCommands.set(VOLCMD_PORTAUP);        forbiddenVolCommands.set(VOLCMD_PORTADOWN);
+		forbiddenCommands.set(CMD_ARPEGGIO);       forbiddenCommands.set(CMD_PORTAMENTOUP);
+		forbiddenCommands.set(CMD_PORTAMENTODOWN); forbiddenCommands.set(CMD_XFINEPORTAUPDOWN);
+		forbiddenCommands.set(CMD_NOTESLIDEUP);    forbiddenCommands.set(CMD_NOTESLIDEUPRETRIG);
+		forbiddenCommands.set(CMD_NOTESLIDEDOWN);  forbiddenCommands.set(CMD_NOTESLIDEDOWNRETRIG);
+		forbiddenVolCommands.set(VOLCMD_PORTAUP);  forbiddenVolCommands.set(VOLCMD_PORTADOWN);
 
 		// Optimize away channels for which it's pointless to adjust sample positions
 		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
@@ -300,22 +298,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 	// If samples are being synced, force them to resync if tick duration changes
 	uint32 oldTickDuration = 0;
+	bool breakToRow = false;
 
 	for (;;)
 	{
-		playState.m_nRow = playState.m_nNextRow;
-		playState.m_nCurrentOrder = playState.m_nNextOrder;
-
-		if(orderList.IsValidPat(playState.m_nCurrentOrder) && playState.m_nRow >= Patterns[orderList[playState.m_nCurrentOrder]].GetNumRows())
-		{
-			playState.m_nRow = 0;
-			if(m_playBehaviour[kFT2LoopE60Restart])
-			{
-				playState.m_nRow = playState.m_nNextPatStartRow;
-				playState.m_nNextPatStartRow = 0;
-			}
-			playState.m_nCurrentOrder = ++playState.m_nNextOrder;
-		}
+		const bool ignoreRow = NextRow(playState, breakToRow).first;
 
 		// Time target reached.
 		if(target.mode == GetLengthTarget::SeekSeconds && memory.elapsedTime >= target.time)
@@ -326,9 +313,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 		// Check if pattern is valid
 		playState.m_nPattern = playState.m_nCurrentOrder < orderList.size() ? orderList[playState.m_nCurrentOrder] : orderList.GetInvalidPatIndex();
-		bool positionJumpOnThisRow = false, positionJumpRightOfPatternLoop = false;
-		bool patternBreakOnThisRow = false;
-		bool patternLoopEndedOnThisRow = false, patternLoopStartedOnThisRow = false;
 
 		if(!Patterns.IsValidPat(playState.m_nPattern) && playState.m_nPattern != orderList.GetInvalidPatIndex() && target.mode == GetLengthTarget::SeekPosition && playState.m_nCurrentOrder == target.pos.order)
 		{
@@ -352,7 +336,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			}
 			playState.m_nPattern = (playState.m_nCurrentOrder < orderList.size()) ? orderList[playState.m_nCurrentOrder] : orderList.GetInvalidPatIndex();
 			playState.m_nNextOrder = playState.m_nCurrentOrder;
-			if((!Patterns.IsValidPat(playState.m_nPattern)) && visitedRows.IsVisited(playState.m_nCurrentOrder, 0, true))
+			if((!Patterns.IsValidPat(playState.m_nPattern)) && visitedRows.Visit(playState.m_nCurrentOrder, 0, playState.Chn, ignoreRow))
 			{
 				if(!hasSearchTarget)
 				{
@@ -421,7 +405,19 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			break;
 		}
 
-		if(visitedRows.IsVisited(playState.m_nCurrentOrder, playState.m_nRow, true))
+		// If pattern loops are nested too deeply, they can cause an effectively infinite amount of loop evalations to be generated.
+		// As we don't want the user to wait forever, we bail out if the pattern loops are too complex.
+		const bool moduleTooComplex = target.mode != GetLengthTarget::SeekSeconds && visitedRows.ModuleTooComplex(allowedPatternLoopComplexity);
+		if(moduleTooComplex)
+		{
+			memory.elapsedTime = std::numeric_limits<decltype(memory.elapsedTime)>::infinity();
+			// Decrease allowed complexity with each subsong, as this seems to be a malicious module
+			if(allowedPatternLoopComplexity > 256)
+				allowedPatternLoopComplexity /= 2;
+			visitedRows.ResetComplexity();
+		}
+
+		if(visitedRows.Visit(playState.m_nCurrentOrder, playState.m_nRow, playState.Chn, ignoreRow) || moduleTooComplex)
 		{
 			if(!hasSearchTarget)
 			{
@@ -449,25 +445,18 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		retval.endRow = playState.m_nRow;
 
 		// Update next position
-		playState.m_nNextRow = playState.m_nRow + 1;
+		SetupNextRow(playState, false);
 
 		// Jumped to invalid pattern row?
 		if(playState.m_nRow >= Patterns[playState.m_nPattern].GetNumRows())
 		{
 			playState.m_nRow = 0;
 		}
-		// New pattern?
-		if(!playState.m_nRow)
-		{
-			for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
-			{
-				memory.chnSettings[chn].patLoop = memory.elapsedTime;
-				memory.chnSettings[chn].patLoopSmp = playState.m_lTotalSampleCount;
-			}
-		}
+
+		if(ignoreRow)
+			continue;
 
 		// For various effects, we need to know first how many ticks there are in this row.
-		uint32 rowDelay = 0, tickDelay = 0;
 		const ModCommand *p = Patterns[playState.m_nPattern].GetpModCommand(playState.m_nRow, 0);
 		const bool ignoreMutedChn = m_playBehaviour[kST3NoMutedChannels];
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, p++)
@@ -508,15 +497,15 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if((p->param & 0xF0) == 0x60)
 				{
 					// Fine Pattern Delay
-					tickDelay += (p->param & 0x0F);
-				} else if((p->param & 0xF0) == 0xE0 && !rowDelay)
+					playState.m_nFrameDelay += (p->param & 0x0F);
+				} else if((p->param & 0xF0) == 0xE0 && !playState.m_nPatternDelay)
 				{
 					// Pattern Delay
 					if(!(GetType() & MOD_TYPE_S3M) || (p->param & 0x0F) != 0)
 					{
 						// While Impulse Tracker *does* count S60 as a valid row delay (and thus ignores any other row delay commands on the right),
 						// Scream Tracker 3 simply ignores such commands.
-						rowDelay = 1 + (p->param & 0x0F);
+						playState.m_nPatternDelay = 1 + (p->param & 0x0F);
 					}
 				}
 				break;
@@ -525,14 +514,17 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if((p->param & 0xF0) == 0xE0)
 				{
 					// Pattern Delay
-					rowDelay = 1 + (p->param & 0x0F);
+					playState.m_nPatternDelay = 1 + (p->param & 0x0F);
 				}
 				break;
 			}
 		}
-		if(rowDelay == 0) rowDelay = 1;
-		const uint32 numTicks = (playState.m_nMusicSpeed + tickDelay) * rowDelay;
-		const uint32 nonRowTicks = numTicks - rowDelay;
+		const uint32 numTicks = playState.TicksOnRow();
+		const uint32 nonRowTicks = numTicks - std::max(playState.m_nPatternDelay, uint32(1));
+
+		playState.m_patLoopRow = ROWINDEX_INVALID;
+		playState.m_breakRow = ROWINDEX_INVALID;
+		playState.m_posJump = ORDERINDEX_INVALID;
 
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 		{
@@ -597,41 +589,15 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			{
 			// Position Jump
 			case CMD_POSITIONJUMP:
-				positionJumpOnThisRow = positionJumpRightOfPatternLoop = true;
-				playState.m_nNextOrder = static_cast<ORDERINDEX>(CalculateXParam(playState.m_nPattern, playState.m_nRow, nChn));
-				playState.m_nNextPatStartRow = 0;  // FT2 E60 bug
-				// see https://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
-				// Test case: PatternJump.mod
-				if(!patternBreakOnThisRow || (GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)))
-					playState.m_nNextRow = 0;
-
-				if (adjustMode & eAdjust)
-				{
-					chn.nPatternLoopCount = 0;
-					chn.nPatternLoop = 0;
-				}
+				PositionJump(playState, nChn);
 				break;
+
 			// Pattern Break
 			case CMD_PATTERNBREAK:
-				{
-					ROWINDEX row = PatternBreak(playState, nChn, param);
-					if(row != ROWINDEX_INVALID)
-					{
-						patternBreakOnThisRow = true;
-						playState.m_nNextRow = row;
+				if(ROWINDEX row = PatternBreak(playState, nChn, param); row != ROWINDEX_INVALID)
+					playState.m_breakRow = row;
+			break;
 
-						if(!positionJumpOnThisRow)
-						{
-							playState.m_nNextOrder = playState.m_nCurrentOrder + 1;
-						}
-						if(adjustMode & eAdjust)
-						{
-							chn.nPatternLoopCount = 0;
-							chn.nPatternLoop = 0;
-						}
-					}
-				}
-				break;
 			// Set Tempo
 			case CMD_TEMPO:
 				if(!m_playBehaviour[kMODVBlankTiming])
@@ -660,7 +626,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					}
 
 					TEMPO tempoMin = GetModSpecifications().GetTempoMin(), tempoMax = GetModSpecifications().GetTempoMax();
-					if(m_playBehaviour[kTempoClamp])	// clamp tempo correctly in compatible mode
+					if(m_playBehaviour[kTempoClamp])  // clamp tempo correctly in compatible mode
 					{
 						tempoMax.Set(255);
 					}
@@ -673,54 +639,18 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 				case 0x90:
 					if(param <= 0x91)
-					{
 						chn.dwFlags.set(CHN_SURROUND, param == 0x91);
-					}
 					break;
 
-				case 0xA0:
-					// High sample offset
+				case 0xA0:  // High sample offset
 					chn.nOldHiOffset = param & 0x0F;
 					break;
-				
-				case 0xB0:
-					// Pattern Loop
-					{
-						positionJumpRightOfPatternLoop = false;
-						CHANNELINDEX firstChn = nChn, lastChn = nChn;
-						if(GetType() == MOD_TYPE_S3M)
-						{
-							// ST3 has only one global loop memory.
-							firstChn = 0;
-							lastChn = GetNumChannels() - 1;
-						}
-						if(param & 0x0F)
-						{
-							if(m_playBehaviour[kITPatternLoopTargetReset] || (GetType() == MOD_TYPE_S3M))
-							{
-								for(CHANNELINDEX c = firstChn; c <= lastChn; c++)
-								{
-									playState.Chn[c].nPatternLoop = playState.m_nRow + 1;
-								}
-							}
-							patternLoopEndedOnThisRow = true;
-						}
-						else
-						{
-							for(CHANNELINDEX c = firstChn; c <= lastChn; c++)
-							{
-								memory.chnSettings[c].patLoop = memory.elapsedTime;
-								memory.chnSettings[c].patLoopSmp = playState.m_lTotalSampleCount;
-								memory.chnSettings[c].patLoopStart = playState.m_nRow;
-								playState.Chn[c].nPatternLoop = playState.m_nRow;
-							}
-							patternLoopStartedOnThisRow = true;
-						}
-					}
-					break;
 
-				case 0xF0:
-					// Active macro
+				case 0xB0:  // Pattern Loop
+					PatternLoop(playState, chn, param & 0x0F);
+					break;
+				
+				case 0xF0:  // Active macro
 					chn.nActiveMacro = param & 0x0F;
 					break;
 				}
@@ -729,24 +659,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_MODCMDEX:
 				switch(param & 0xF0)
 				{
-				case 0x60:
-					// Pattern Loop
-					if (param & 0x0F)
-					{
-						playState.m_nNextPatStartRow = memory.chnSettings[nChn].patLoopStart; // FT2 E60 bug
-						patternLoopEndedOnThisRow = true;
-					} else
-					{
-						patternLoopStartedOnThisRow = true;
-						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
-						memory.chnSettings[nChn].patLoopSmp = playState.m_lTotalSampleCount;
-						memory.chnSettings[nChn].patLoopStart = playState.m_nRow;
-						playState.Chn[nChn].nPatternLoop = playState.m_nRow;
-					}
+				case 0x60:  // Pattern Loop
+					PatternLoop(playState, chn, param & 0x0F);
 					break;
 
-				case 0xF0:
-					// Active macro
+				case 0xF0:  // Active macro
 					chn.nActiveMacro = param & 0x0F;
 					break;
 				}
@@ -754,12 +671,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 			case CMD_XFINEPORTAUPDOWN:
 				// ignore high offset in compatible mode
-				if(((param & 0xF0) == 0xA0) && !m_playBehaviour[kFT2RestrictXCommand]) chn.nOldHiOffset = param & 0x0F;
+				if(((param & 0xF0) == 0xA0) && !m_playBehaviour[kFT2RestrictXCommand])
+					chn.nOldHiOffset = param & 0x0F;
 				break;
 			}
 
 			// The following calculations are not interesting if we just want to get the song length.
-			if (!(adjustMode & eAdjust)) continue;
+			if(!(adjustMode & eAdjust))
+				continue;
 			switch(command)
 			{
 			// Portamento Up/Down
@@ -993,7 +912,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				uint32 paramHi = m.param >> 4, paramLo = m.param & 0x0F;
 				uint32 startTick = 0;
 				bool porta = m.command == CMD_TONEPORTAMENTO || m.command == CMD_TONEPORTAVOL || m.volcmd == VOLCMD_TONEPORTAMENTO;
-				bool stopNote = patternLoopStartedOnThisRow;	// It's too much trouble to keep those pattern loops in sync...
+				bool stopNote = false;
 
 				if(m.instr) chn.prevNoteOffset = 0;
 				if(m.IsNote())
@@ -1016,9 +935,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					{
 						startTick = paramHi;
 					}
-					if(rowDelay > 1 && startTick != 0 && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
+					if(playState.m_nPatternDelay > 1 && startTick != 0 && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 					{
-						startTick += (playState.m_nMusicSpeed + tickDelay) * (rowDelay - 1);
+						startTick += (playState.m_nMusicSpeed + playState.m_nFrameDelay) * (playState.m_nPatternDelay - 1);
 					}
 					if(!porta) memory.chnSettings[nChn].ticksToRender = 0;
 
@@ -1200,65 +1119,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 		oldTickDuration = tickDuration;
 
-		// Pattern loop is not executed in FT2 if there are any position jump or pattern break commands on the same row.
-		// Pattern loop is not executed in IT if there are any position jump commands to the right (and to the left in older OpenMPT versions).
-		// Test case for FT2 exception: PatLoop-Jumps.xm, PatLoop-Various.xm
-		// Test case for IT: exception: LoopBreak.it, sbx-priority.it
-		if(patternLoopEndedOnThisRow
-		   && (!m_playBehaviour[kFT2PatternLoopWithJumps] || !(positionJumpOnThisRow || patternBreakOnThisRow))
-		   && (!m_playBehaviour[kITPatternLoopWithJumpsOld] || !positionJumpOnThisRow)
-		   && (!m_playBehaviour[kITPatternLoopWithJumps] || !positionJumpRightOfPatternLoop))
-		{
-			std::map<double, int> startTimes;
-			// This is really just a simple estimation for nested pattern loops. It should handle cases correctly where all parallel loops start and end on the same row.
-			// If one of them starts or ends "in between", it will most likely calculate a wrong duration.
-			// For S3M files, it's also way off.
-			for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
-			{
-				ModChannel &chn = playState.Chn[nChn];
-				ModCommand::COMMAND command = chn.rowCommand.command;
-				ModCommand::PARAM param = chn.rowCommand.param;
-				if((command == CMD_S3MCMDEX && param >= 0xB1 && param <= 0xBF)
-					|| (command == CMD_MODCMDEX && param >= 0x61 && param <= 0x6F))
-				{
-					const double start = memory.chnSettings[nChn].patLoop;
-					if(!startTimes[start]) startTimes[start] = 1;
-					startTimes[start] = std::lcm(startTimes[start], 1 + (param & 0x0F));
-				}
-			}
-			for(const auto &[startTime, loopCount] : startTimes)
-			{
-				memory.elapsedTime += (memory.elapsedTime - startTime) * (loopCount - 1);
-				//memory.elapsedBeats += 1.0 / playState.m_nCurrentRowsPerBeat;
-				for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
-				{
-					if(memory.chnSettings[nChn].patLoop == startTime)
-					{
-						playState.m_lTotalSampleCount += (playState.m_lTotalSampleCount - memory.chnSettings[nChn].patLoopSmp) * (loopCount - 1);
-						if(m_playBehaviour[kITPatternLoopTargetReset] || (GetType() == MOD_TYPE_S3M))
-						{
-							memory.chnSettings[nChn].patLoop = memory.elapsedTime;
-							memory.chnSettings[nChn].patLoopSmp = playState.m_lTotalSampleCount;
-							memory.chnSettings[nChn].patLoopStart = playState.m_nRow + 1;
-						}
-						break;
-					}
-				}
-			}
-			if(GetType() == MOD_TYPE_IT)
-			{
-				// IT pattern loop start row update - at the end of a pattern loop, set pattern loop start to next row (for upcoming pattern loops with missing SB0)
-				for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
-				{
-					ModChannel &chn = playState.Chn[nChn];
-					if((chn.rowCommand.command == CMD_S3MCMDEX && chn.rowCommand.param >= 0xB1 && chn.rowCommand.param <= 0xBF))
-					{
-						memory.chnSettings[nChn].patLoop = memory.elapsedTime;
-						memory.chnSettings[nChn].patLoopSmp = playState.m_lTotalSampleCount;
-					}
-				}
-			}
-		}
+		breakToRow = HandleNextRow(playState, false);
 	}
 
 	// Now advance the sample positions for sample seeking on channels that are still playing
@@ -1356,7 +1217,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 	}
 	if(adjustMode & (eAdjust | eAdjustOnlyVisitedRows))
-		visitedSongRows.MoveVisitedRowsFrom(visitedRows);
+		m_visitedRows.MoveVisitedRowsFrom(visitedRows);
 
 	return results;
 }
@@ -2442,9 +2303,9 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 
 bool CSoundFile::ProcessEffects()
 {
-	ROWINDEX nBreakRow = ROWINDEX_INVALID;		// Is changed if a break to row command is encountered
-	ROWINDEX nPatLoopRow = ROWINDEX_INVALID;	// Is changed if a pattern loop jump-back is executed
-	ORDERINDEX nPosJump = ORDERINDEX_INVALID;
+	m_PlayState.m_breakRow = ROWINDEX_INVALID;    // Is changed if a break to row command is encountered
+	m_PlayState.m_patLoopRow = ROWINDEX_INVALID;  // Is changed if a pattern loop jump-back is executed
+	m_PlayState.m_posJump = ORDERINDEX_INVALID;
 
 	for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 	{
@@ -2569,37 +2430,7 @@ bool CSoundFile::ProcessEffects()
 			} else if(m_SongFlags[SONG_FIRSTTICK])
 			{
 				// Pattern Loop ?
-				if((((param & 0xF0) == 0x60 && cmd == CMD_MODCMDEX)
-					|| ((param & 0xF0) == 0xB0 && cmd == CMD_S3MCMDEX))
-					&& !(m_playBehaviour[kST3NoMutedChannels] && ChnSettings[nChn].dwFlags[CHN_MUTE]))	// not even effects are processed on muted S3M channels
-				{
-					ROWINDEX nloop = PatternLoop(chn, param & 0x0F);
-					if (nloop != ROWINDEX_INVALID)
-					{
-						// FT2 compatibility: E6x overwrites jump targets of Dxx effects that are located left of the E6x effect.
-						// Test cases: PatLoop-Jumps.xm, PatLoop-Various.xm
-						if(nBreakRow != ROWINDEX_INVALID && m_playBehaviour[kFT2PatternLoopWithJumps])
-						{
-							nBreakRow = nloop;
-						}
-
-						nPatLoopRow = nloop;
-						// IT compatibility: SBx is prioritized over Position Jump (Bxx) effects that are located left of the SBx effect.
-						// Test case: sbx-priority.it, LoopBreak.it
-						if(m_playBehaviour[kITPatternLoopWithJumps])
-							nPosJump = ORDERINDEX_INVALID;
-					}
-
-					if(GetType() == MOD_TYPE_S3M)
-					{
-						// ST3 doesn't have per-channel pattern loop memory, so spam all changes to other channels as well.
-						for (CHANNELINDEX i = 0; i < GetNumChannels(); i++)
-						{
-							m_PlayState.Chn[i].nPatternLoop = chn.nPatternLoop;
-							m_PlayState.Chn[i].nPatternLoopCount = chn.nPatternLoopCount;
-						}
-					}
-				} else if ((param & 0xF0) == 0xE0)
+				if((param & 0xF0) == 0xE0)
 				{
 					// Pattern Delay
 					// In Scream Tracker 3 / Impulse Tracker, only the first delay command on this row is considered.
@@ -3498,31 +3329,19 @@ bool CSoundFile::ProcessEffects()
 
 		// Position Jump
 		case CMD_POSITIONJUMP:
-			m_PlayState.m_nNextPatStartRow = 0; // FT2 E60 bug
-			nPosJump = static_cast<ORDERINDEX>(CalculateXParam(m_PlayState.m_nPattern, m_PlayState.m_nRow, nChn));
-
-			// see https://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
-			// Test case: PatternJump.mod
-			if((GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)) && nBreakRow != ROWINDEX_INVALID)
-			{
-				nBreakRow = 0;
-			}
+			PositionJump(m_PlayState, nChn);
 			break;
 
 		// Pattern Break
 		case CMD_PATTERNBREAK:
+			if(ROWINDEX row = PatternBreak(m_PlayState, nChn, static_cast<ModCommand::PARAM>(param)); row != ROWINDEX_INVALID)
 			{
-				ROWINDEX row = PatternBreak(m_PlayState, nChn, static_cast<ModCommand::PARAM>(param));
-				if(row != ROWINDEX_INVALID)
+				m_PlayState.m_breakRow = row;
+				if(m_SongFlags[SONG_PATTERNLOOP])
 				{
-					nBreakRow = row;
-					if(m_SongFlags[SONG_PATTERNLOOP])
-					{
-						//If song is set to loop and a pattern break occurs we should stay on the same pattern.
-						//Use nPosJump to force playback to "jump to this pattern" rather than move to next, as by default.
-						//rewbs.to
-						nPosJump = m_PlayState.m_nCurrentOrder;
-					}
+					//If song is set to loop and a pattern break occurs we should stay on the same pattern.
+					//Use nPosJump to force playback to "jump to this pattern" rather than move to next, as by default.
+					m_PlayState.m_posJump = m_PlayState.m_nCurrentOrder;
 				}
 			}
 			break;
@@ -3584,72 +3403,79 @@ bool CSoundFile::ProcessEffects()
 	// Navigation Effects
 	if(m_SongFlags[SONG_FIRSTTICK])
 	{
-		const bool doPatternLoop = (nPatLoopRow != ROWINDEX_INVALID);
-		const bool doBreakRow = (nBreakRow != ROWINDEX_INVALID);
-		const bool doPosJump = (nPosJump != ORDERINDEX_INVALID);
-
-		// Pattern Break / Position Jump only if no loop running
-		// Exception: FastTracker 2 in all cases, Impulse Tracker in case of position jump
-		// Test case for FT2 exception: PatLoop-Jumps.xm, PatLoop-Various.xm
-		// Test case for IT: exception: LoopBreak.it, sbx-priority.it
-		if((doBreakRow || doPosJump)
-		   && (!doPatternLoop
-		       || m_playBehaviour[kFT2PatternLoopWithJumps]
-		       || (m_playBehaviour[kITPatternLoopWithJumps] && doPosJump)
-		       || (m_playBehaviour[kITPatternLoopWithJumpsOld] && doPosJump)))
-		{
-			if(!doPosJump) nPosJump = m_PlayState.m_nCurrentOrder + 1;
-			if(!doBreakRow) nBreakRow = 0;
+		if(HandleNextRow(m_PlayState, true))
 			m_SongFlags.set(SONG_BREAKTOROW);
-
-			if(nPosJump >= Order().size())
-			{
-				nPosJump = Order().GetRestartPos();
-			}
-
-			// IT / FT2 compatibility: don't reset loop count on pattern break.
-			// Test case: gm-trippy01.it, PatLoop-Break.xm, PatLoop-Weird.xm, PatLoop-Break.mod
-			if(nPosJump != m_PlayState.m_nCurrentOrder
-				&& !m_playBehaviour[kITPatternLoopBreak] && !m_playBehaviour[kFT2PatternLoopWithJumps] && GetType() != MOD_TYPE_MOD)
-			{
-				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
-				{
-					m_PlayState.Chn[i].nPatternLoopCount = 0;
-				}
-			}
-
-			m_PlayState.m_nNextRow = nBreakRow;
-			if(!m_SongFlags[SONG_PATTERNLOOP])
-				m_PlayState.m_nNextOrder = nPosJump;
-		} else if(doPatternLoop)
-		{
-			// Pattern Loop
-			m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder;
-			m_PlayState.m_nNextRow = nPatLoopRow;
-			// FT2 skips the first row of the pattern loop if there's a pattern delay, ProTracker sometimes does it too (didn't quite figure it out yet).
-			// But IT and ST3 don't do this.
-			// Test cases: PatLoopWithDelay.it, PatLoopWithDelay.s3m
-			if(m_PlayState.m_nPatternDelay
-			   && (GetType() != MOD_TYPE_IT || !m_playBehaviour[kITPatternLoopWithJumps])
-			   && GetType() != MOD_TYPE_S3M)
-			{
-				m_PlayState.m_nNextRow++;
-			}
-
-			// IT Compatibility: If the restart row is past the end of the current pattern
-			// (e.g. when continued from a previous pattern without explicit SB0 effect), continue the next pattern.
-			// Test case: LoopStartAfterPatternEnd.it
-			if(nPatLoopRow >= Patterns[m_PlayState.m_nPattern].GetNumRows())
-			{
-				m_PlayState.m_nNextOrder++;
-				m_PlayState.m_nNextRow = 0;
-			}
-
-			// As long as the pattern loop is running, mark the looped rows as not visited yet
-			visitedSongRows.ResetPatternLoop(m_PlayState.m_nCurrentOrder, nPatLoopRow);
-		}
 	}
 	return true;
+}
+
+
+bool CSoundFile::HandleNextRow(PlayState &state, bool honorPatternLoop) const
+{
+	const bool doPatternLoop = (state.m_patLoopRow != ROWINDEX_INVALID);
+	const bool doBreakRow = (state.m_breakRow != ROWINDEX_INVALID);
+	const bool doPosJump = (state.m_posJump != ORDERINDEX_INVALID);
+	bool breakToRow = false;
+
+	// Pattern Break / Position Jump only if no loop running
+	// Exception: FastTracker 2 in all cases, Impulse Tracker in case of position jump
+	// Test case for FT2 exception: PatLoop-Jumps.xm, PatLoop-Various.xm
+	// Test case for IT: exception: LoopBreak.it, sbx-priority.it
+	if((doBreakRow || doPosJump)
+	   && (!doPatternLoop
+	       || m_playBehaviour[kFT2PatternLoopWithJumps]
+	       || (m_playBehaviour[kITPatternLoopWithJumps] && doPosJump)
+	       || (m_playBehaviour[kITPatternLoopWithJumpsOld] && doPosJump)))
+	{
+		if(!doPosJump)
+			state.m_posJump = state.m_nCurrentOrder + 1;
+		if(!doBreakRow)
+			state.m_breakRow = 0;
+		breakToRow = true;
+
+		if(state.m_posJump >= Order().size())
+			state.m_posJump = Order().GetRestartPos();
+
+		// IT / FT2 compatibility: don't reset loop count on pattern break.
+		// Test case: gm-trippy01.it, PatLoop-Break.xm, PatLoop-Weird.xm, PatLoop-Break.mod
+		if(state.m_posJump != state.m_nCurrentOrder
+		   && !m_playBehaviour[kITPatternLoopBreak] && !m_playBehaviour[kFT2PatternLoopWithJumps] && GetType() != MOD_TYPE_MOD)
+		{
+			for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+			{
+				state.Chn[i].nPatternLoopCount = 0;
+			}
+		}
+
+		state.m_nNextRow = state.m_breakRow;
+		if(!honorPatternLoop || !m_SongFlags[SONG_PATTERNLOOP])
+			state.m_nNextOrder = state.m_posJump;
+	} else if(doPatternLoop)
+	{
+		// Pattern Loop
+		state.m_nNextOrder = state.m_nCurrentOrder;
+		state.m_nNextRow = state.m_patLoopRow;
+		// FT2 skips the first row of the pattern loop if there's a pattern delay, ProTracker sometimes does it too (didn't quite figure it out yet).
+		// But IT and ST3 don't do this.
+		// Test cases: PatLoopWithDelay.it, PatLoopWithDelay.s3m
+		if(state.m_nPatternDelay
+		   && (GetType() != MOD_TYPE_IT || !m_playBehaviour[kITPatternLoopWithJumps])
+		   && GetType() != MOD_TYPE_S3M)
+		{
+			state.m_nNextRow++;
+		}
+
+		// IT Compatibility: If the restart row is past the end of the current pattern
+		// (e.g. when continued from a previous pattern without explicit SB0 effect), continue the next pattern.
+		// Test case: LoopStartAfterPatternEnd.it
+		if(state.m_patLoopRow >= Patterns[state.m_nPattern].GetNumRows())
+		{
+			state.m_nNextOrder++;
+			state.m_nNextRow = 0;
+		}
+	}
+
+	return breakToRow;
 }
 
 
@@ -3723,6 +3549,20 @@ uint32 CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX 
 }
 
 
+void CSoundFile::PositionJump(PlayState &state, CHANNELINDEX chn) const
+{
+	state.m_nextPatStartRow = 0;  // FT2 E60 bug
+	state.m_posJump = static_cast<ORDERINDEX>(CalculateXParam(state.m_nPattern, state.m_nRow, chn));
+
+	// see https://forum.openmpt.org/index.php?topic=2769.0 - FastTracker resets Dxx if Bxx is called _after_ Dxx
+	// Test case: PatternJump.mod
+	if((GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM)) && state.m_breakRow != ROWINDEX_INVALID)
+	{
+		state.m_breakRow = 0;
+	}
+}
+
+
 ROWINDEX CSoundFile::PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 param) const
 {
 	if(param >= 64 && (GetType() & MOD_TYPE_S3M))
@@ -3731,7 +3571,7 @@ ROWINDEX CSoundFile::PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 para
 		return ROWINDEX_INVALID;
 	}
 
-	state.m_nNextPatStartRow = 0; // FT2 E60 bug
+	state.m_nextPatStartRow = 0; // FT2 E60 bug
 
 	return static_cast<ROWINDEX>(CalculateXParam(state.m_nPattern, state.m_nRow, chn));
 }
@@ -4630,6 +4470,10 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 				}
 				break;
 	// E6x: Pattern Loop
+	case 0x60:
+		if(m_SongFlags[SONG_FIRSTTICK])
+			PatternLoop(m_PlayState, chn, param & 0x0F);
+		break;
 	// E7x: Set Tremolo WaveForm
 	case 0x70:	chn.nTremoloType = param & 0x07; break;
 	// E8x: Set 4-bit Panning
@@ -4826,6 +4670,10 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 				}
 				break;
 	// SBx: Pattern Loop
+	case 0xB0:
+		if(m_SongFlags[SONG_FIRSTTICK])
+			PatternLoop(m_PlayState, chn, param & 0x0F);
+		break;
 	// SCx: Note Cut
 	case 0xC0:
 		if(param == 0)
@@ -5901,50 +5749,76 @@ void CSoundFile::SetTempo(TEMPO param, bool setFromUI)
 }
 
 
-ROWINDEX CSoundFile::PatternLoop(ModChannel &chn, uint32 param)
+void CSoundFile::PatternLoop(PlayState &state, ModChannel &chn, ModCommand::PARAM param) const
 {
-	if (param)
-	{
-		// Loop Repeat
-		if(chn.nPatternLoopCount)
-		{
-			// There's a loop left
-			chn.nPatternLoopCount--;
-			if(!chn.nPatternLoopCount)
-			{
-				// IT compatibility 10. Pattern loops (+ same fix for S3M files)
-				// When finishing a pattern loop, the next loop without a dedicated SB0 starts on the first row after the previous loop.
-				if(m_playBehaviour[kITPatternLoopTargetReset] || (GetType() == MOD_TYPE_S3M))
-				{
-					chn.nPatternLoop = m_PlayState.m_nRow + 1;
-				}
+	if(m_playBehaviour[kST3NoMutedChannels] && chn.dwFlags[CHN_MUTE])
+		return;  // not even effects are processed on muted S3M channels
 
-				return ROWINDEX_INVALID;
-			}
-		} else
-		{
-			// First time we get into the loop => Set loop count.
-
-			// IT compatibility 10. Pattern loops (+ same fix for XM / MOD / S3M files)
-			if(!m_playBehaviour[kITFT2PatternLoop] && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
-			{
-				ModChannel *p = m_PlayState.Chn;
-				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++, p++) if (p != &chn)
-				{
-					// Loop on other channel
-					if(p->nPatternLoopCount) return ROWINDEX_INVALID;
-				}
-			}
-			chn.nPatternLoopCount = static_cast<uint8>(param);
-		}
-		m_PlayState.m_nNextPatStartRow = chn.nPatternLoop; // Nasty FT2 E60 bug emulation!
-		return chn.nPatternLoop;
-	} else
+	if(!param)
 	{
 		// Loop Start
-		chn.nPatternLoop = m_PlayState.m_nRow;
+		chn.nPatternLoop = state.m_nRow;
+		return;
 	}
-	return ROWINDEX_INVALID;
+
+	// Loop Repeat
+	if(chn.nPatternLoopCount)
+	{
+		// There's a loop left
+		chn.nPatternLoopCount--;
+		if(!chn.nPatternLoopCount)
+		{
+			// IT compatibility 10. Pattern loops (+ same fix for S3M files)
+			// When finishing a pattern loop, the next loop without a dedicated SB0 starts on the first row after the previous loop.
+			if(m_playBehaviour[kITPatternLoopTargetReset] || (GetType() == MOD_TYPE_S3M))
+				chn.nPatternLoop = state.m_nRow + 1;
+
+			return;
+		}
+	} else
+	{
+		// First time we get into the loop => Set loop count.
+
+		// IT compatibility 10. Pattern loops (+ same fix for XM / MOD / S3M files)
+		if(!m_playBehaviour[kITFT2PatternLoop] && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
+		{
+			auto p = std::cbegin(state.Chn);
+			for(CHANNELINDEX i = 0; i < GetNumChannels(); i++, p++)
+			{
+				// Loop on other channel
+				if(p != &chn && p->nPatternLoopCount)
+					return;
+			}
+		}
+		chn.nPatternLoopCount = param;
+	}
+	state.m_nextPatStartRow = chn.nPatternLoop;  // Nasty FT2 E60 bug emulation!
+
+	const auto loopTarget = chn.nPatternLoop;
+	if(loopTarget != ROWINDEX_INVALID)
+	{
+		// FT2 compatibility: E6x overwrites jump targets of Dxx effects that are located left of the E6x effect.
+		// Test cases: PatLoop-Jumps.xm, PatLoop-Various.xm
+		if(state.m_breakRow != ROWINDEX_INVALID && m_playBehaviour[kFT2PatternLoopWithJumps])
+			state.m_breakRow = loopTarget;
+
+		state.m_patLoopRow = loopTarget;
+		// IT compatibility: SBx is prioritized over Position Jump (Bxx) effects that are located left of the SBx effect.
+		// Test case: sbx-priority.it, LoopBreak.it
+		if(m_playBehaviour[kITPatternLoopWithJumps])
+			state.m_posJump = ORDERINDEX_INVALID;
+	}
+
+	if(GetType() == MOD_TYPE_S3M)
+	{
+		// ST3 doesn't have per-channel pattern loop memory, so spam all changes to other channels as well.
+		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+		{
+			state.Chn[i].nPatternLoop = chn.nPatternLoop;
+			state.Chn[i].nPatternLoopCount = chn.nPatternLoopCount;
+		}
+	}
+
 }
 
 

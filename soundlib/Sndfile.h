@@ -448,7 +448,7 @@ public:
 	uint32 m_OPLVolumeFactor;  // 16.16
 	static constexpr uint32 m_OPLVolumeFactorScale = 1 << 16;
 
-	bool IsGlobalVolumeUnset() const { return IsFirstTick(); }
+	constexpr bool IsGlobalVolumeUnset() const noexcept { return IsFirstTick(); }
 #ifndef MODPLUG_TRACKER
 	uint32 m_nFreqFactor = 65536; // Pitch shift factor (65536 = no pitch shifting). Only used in libopenmpt (openmpt::ext::interactive::set_pitch_factor)
 	uint32 m_nTempoFactor = 65536; // Tempo factor (65536 = no tempo adjustment). Only used in libopenmpt (openmpt::ext::interactive::set_tempo_factor)
@@ -521,7 +521,11 @@ public:
 		ROWINDEX m_nRow = 0;      // Current row being processed
 		ROWINDEX m_nNextRow = 0;  // Next row to process
 	protected:
-		ROWINDEX m_nNextPatStartRow = 0;  // For FT2's E60 bug
+		ROWINDEX m_nextPatStartRow = 0;  // For FT2's E60 bug
+		ROWINDEX m_breakRow = 0;          // Candidate target row for pattern break
+		ROWINDEX m_patLoopRow = 0;        // Candidate target row for pattern loop
+		ORDERINDEX m_posJump = 0;         // Candidate target order for position jump
+
 	public:
 		PATTERNINDEX m_nPattern = 0;                     // Current pattern being processed
 		ORDERINDEX m_nCurrentOrder = 0;                  // Current order being processed
@@ -567,7 +571,7 @@ public:
 
 protected:
 	// For handling backwards jumps and stuff to prevent infinite loops when counting the mod length or rendering to wav.
-	RowVisitor visitedSongRows;
+	RowVisitor m_visitedRows;
 
 public:
 #ifdef MODPLUG_TRACKER
@@ -748,7 +752,7 @@ public:
 	const char *GetInstrumentName(INSTRUMENTINDEX nInstr) const;
 	uint32 GetMusicSpeed() const { return m_PlayState.m_nMusicSpeed; }
 	TEMPO GetMusicTempo() const { return m_PlayState.m_nMusicTempo; }
-	bool IsFirstTick() const { return (m_PlayState.m_lTotalSampleCount == 0); }
+	constexpr bool IsFirstTick() const noexcept { return (m_PlayState.m_lTotalSampleCount == 0); }
 
 	// Get song duration in various cases: total length, length to specific order & row, etc.
 	std::vector<GetLengthType> GetLength(enmGetLengthResetMode adjustMode, GetLengthTarget target = GetLengthTarget());
@@ -948,6 +952,8 @@ public:
 	bool ReadNote();
 	bool ProcessRow();
 	bool ProcessEffects();
+	std::pair<bool, bool> NextRow(PlayState &playState, const bool breakRow) const;
+	void SetupNextRow(PlayState &playState, const bool patternLoop) const;
 	CHANNELINDEX GetNNAChannel(CHANNELINDEX nChn) const;
 	CHANNELINDEX CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, bool forceCut);
 	void NoteChange(ModChannel &chn, int note, bool bPorta = false, bool bResetEnv = true, bool bManual = false, CHANNELINDEX channelHint = CHANNELINDEX_INVALID) const;
@@ -1035,11 +1041,13 @@ protected:
 	void SampleOffset(ModChannel &chn, SmpLength param) const;
 	void ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const;
 	void NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample);
-	ROWINDEX PatternLoop(ModChannel &chn, uint32 param);
+	void PatternLoop(PlayState &state, ModChannel &chn, ModCommand::PARAM param) const;
+	bool HandleNextRow(PlayState &state, bool honorPatternLoop) const;
 	void ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
 	void ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
 	void ExtendedChannelEffect(ModChannel &chn, uint32 param);
 	void InvertLoop(ModChannel &chn);
+	void PositionJump(PlayState& state, CHANNELINDEX chn) const;
 	ROWINDEX PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 param) const;
 	void GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSlide);
 

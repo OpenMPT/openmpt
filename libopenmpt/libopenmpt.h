@@ -901,6 +901,7 @@ LIBOPENMPT_API int32_t openmpt_module_get_repeat_count( openmpt_module * mod );
  *
  * \param mod The module handle to work on.
  * \return Approximate duration of current sub-song in seconds.
+ * \remarks The function may return infinity if the pattern data is too complex to evaluate.
  */
 LIBOPENMPT_API double openmpt_module_get_duration_seconds( openmpt_module * mod );
 

@@ -599,6 +599,7 @@ public:
 	//! Get approximate song duration
 	/*!
 	  \return Approximate duration of current sub-song in seconds.
+	  \remarks The function may return infinity if the pattern data is too complex to evaluate.
 	*/
 	double get_duration_seconds() const;
 

@@ -419,31 +419,7 @@ bool CSoundFile::ProcessRow()
 {
 	while(++m_PlayState.m_nTickCount >= m_PlayState.TicksOnRow())
 	{
-		// When having an EEx effect on the same row as a Dxx jump, the target row is not played in ProTracker.
-		// Test case: DelayBreak.mod (based on condom_corruption by Travolta)
-		const bool ignoreRow = m_PlayState.m_nPatternDelay != 0 && m_SongFlags[SONG_BREAKTOROW] && GetType() == MOD_TYPE_MOD;
-
-		// Done with the last row of the pattern or jumping somewhere else
-		const bool patternTransition = m_PlayState.m_nNextRow == 0 || m_SongFlags[SONG_BREAKTOROW];
-		if(patternTransition)
-		{
-			if(GetType() == MOD_TYPE_S3M)
-			{
-				// Reset pattern loop start
-				// Test case: LoopReset.s3m
-				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
-				{
-					m_PlayState.Chn[i].nPatternLoop = 0;
-				}
-			}
-		}
-
-		m_PlayState.m_nPatternDelay = 0;
-		m_PlayState.m_nFrameDelay = 0;
-		m_PlayState.m_nTickCount = 0;
-		m_PlayState.m_nRow = m_PlayState.m_nNextRow;
-		// Reset Pattern Loop Effect
-		m_PlayState.m_nCurrentOrder = m_PlayState.m_nNextOrder;
+		const auto [ignoreRow, patternTransition] = NextRow(m_PlayState, m_SongFlags[SONG_BREAKTOROW]);
 
 #ifdef MODPLUG_TRACKER
 		if(patternTransition)
@@ -460,6 +436,8 @@ bool CSoundFile::ProcessRow()
 		{
 			m_PlayState.m_nCurrentOrder = m_lockOrderStart;
 		}
+#else
+		MPT_UNUSED_VARIABLE(patternTransition);
 #endif // MODPLUG_TRACKER
 
 		// Check if pattern is valid
@@ -472,9 +450,6 @@ bool CSoundFile::ProcessRow()
 				// End of song?
 				if ((m_PlayState.m_nPattern == Order.GetInvalidPatIndex()) || (m_PlayState.m_nCurrentOrder >= Order().size()))
 				{
-
-					//if (!m_nRepeatCount) return false;
-
 					ORDERINDEX restartPosOverride = Order().GetRestartPos();
 					if(restartPosOverride == 0 && m_PlayState.m_nCurrentOrder <= Order().size() && m_PlayState.m_nCurrentOrder > 0)
 					{
@@ -542,7 +517,6 @@ bool CSoundFile::ProcessRow()
 					}
 
 					//Handle Repeat position
-					//if (m_nRepeatCount > 0) m_nRepeatCount--;
 					m_PlayState.m_nCurrentOrder = restartPosOverride;
 					m_SongFlags.reset(SONG_BREAKTOROW);
 					//If restart pos points to +++, move along
@@ -554,7 +528,7 @@ bool CSoundFile::ProcessRow()
 					if (m_PlayState.m_nCurrentOrder >= Order().size()
 						|| !Order().IsValidPat(m_PlayState.m_nCurrentOrder))
 					{
-						visitedSongRows.Initialize(true);
+						m_visitedRows.Initialize(true);
 						return false;
 					}
 				} else
@@ -588,9 +562,7 @@ bool CSoundFile::ProcessRow()
 		// the pattern loop (editor flag, not to be confused with the pattern loop effect)
 		// flag is set - because in that case, the module would stop after the first pattern loop...
 		const bool overrideLoopCheck = (m_nRepeatCount != -1) && m_SongFlags[SONG_PATTERNLOOP];
-		// If a row is jumped over due to a ProTracker quirk, don't add it to the visited rows (unless we notice that we are stuck in a loop by repeatedly playing that row)
-		const bool checkIgnoreRow = !ignoreRow || visitedSongRows.GetLastVisitedRow() == m_PlayState.m_nRow;
-		if(!overrideLoopCheck && checkIgnoreRow && visitedSongRows.IsVisited(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow, true))
+		if(!overrideLoopCheck && m_visitedRows.Visit(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow, m_PlayState.Chn, ignoreRow))
 		{
 			if(m_nRepeatCount)
 			{
@@ -600,19 +572,16 @@ bool CSoundFile::ProcessRow()
 					m_nRepeatCount--;
 				}
 				// Forget all but the current row.
-				visitedSongRows.Initialize(true);
-				visitedSongRows.Visit(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow);
+				m_visitedRows.Initialize(true);
+				m_visitedRows.Visit(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow, m_PlayState.Chn, ignoreRow);
 			} else
 			{
 #ifdef MODPLUG_TRACKER
 				// Let's check again if this really is the end of the song.
 				// The visited rows vector might have been screwed up while editing...
 				// This is of course not possible during rendering to WAV, so we ignore that case.
-				bool isReallyAtEnd = false;
-				if(IsRenderingToDisc())
-				{
-					isReallyAtEnd = true;
-				} else
+				bool isReallyAtEnd = IsRenderingToDisc();
+				if(!isReallyAtEnd)
 				{
 					for(const auto &t : GetLength(eNoAdjust, GetLengthTarget(true)))
 					{
@@ -627,7 +596,7 @@ bool CSoundFile::ProcessRow()
 				if(isReallyAtEnd)
 				{
 					// This is really the song's end!
-					visitedSongRows.Initialize(true);
+					m_visitedRows.Initialize(true);
 					return false;
 				} else
 				{
@@ -638,7 +607,7 @@ bool CSoundFile::ProcessRow()
 				if(m_SongFlags[SONG_PLAYALLSONGS])
 				{
 					// When playing all subsongs consecutively, first search for any hidden subsongs...
-					if(!visitedSongRows.GetFirstUnvisitedRow(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow, true))
+					if(!m_visitedRows.GetFirstUnvisitedRow(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow, true))
 					{
 						// ...and then try the next sequence.
 						m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder = 0;
@@ -646,11 +615,11 @@ bool CSoundFile::ProcessRow()
 						if(Order.GetCurrentSequenceIndex() >= Order.GetNumSequences() - 1)
 						{
 							Order.SetSequence(0);
-							visitedSongRows.Initialize(true);
+							m_visitedRows.Initialize(true);
 							return false;
 						}
 						Order.SetSequence(Order.GetCurrentSequenceIndex() + 1);
-						visitedSongRows.Initialize(true);
+						m_visitedRows.Initialize(true);
 					}
 					// When jumping to the next subsong, stop all playing notes from the previous song...
 					for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
@@ -665,32 +634,19 @@ bool CSoundFile::ProcessRow()
 					m_PlayState.m_nNextRow = m_PlayState.m_nRow;
 					if(Order().size() > m_PlayState.m_nCurrentOrder)
 						m_PlayState.m_nPattern = Order()[m_PlayState.m_nCurrentOrder];
-					visitedSongRows.Visit(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow);
+					m_visitedRows.Visit(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow, m_PlayState.Chn, ignoreRow);
 					if (!Patterns.IsValidPat(m_PlayState.m_nPattern))
 						return false;
 				} else
 				{
-					visitedSongRows.Initialize(true);
+					m_visitedRows.Initialize(true);
 					return false;
 				}
 #endif // MODPLUG_TRACKER
 			}
 		}
 
-		m_PlayState.m_nNextRow = m_PlayState.m_nRow + 1;
-		if (m_PlayState.m_nNextRow >= Patterns[m_PlayState.m_nPattern].GetNumRows())
-		{
-			if (!m_SongFlags[SONG_PATTERNLOOP]) m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder + 1;
-			m_PlayState.m_nNextRow = 0;
-
-			// FT2 idiosyncrasy: When E60 is used on a pattern row x, the following pattern also starts from row x
-			// instead of the beginning of the pattern, unless there was a Bxx or Dxx effect.
-			if(m_playBehaviour[kFT2LoopE60Restart])
-			{
-				m_PlayState.m_nNextRow = m_PlayState.m_nNextPatStartRow;
-				m_PlayState.m_nNextPatStartRow = 0;
-			}
-		}
+		SetupNextRow(m_PlayState, m_SongFlags[SONG_PATTERNLOOP]);
 
 		// Reset channel values
 		ModCommand *m = Patterns[m_PlayState.m_nPattern].GetpModCommand(m_PlayState.m_nRow, 0);
@@ -781,6 +737,54 @@ bool CSoundFile::ProcessRow()
 
 	// Update Effects
 	return ProcessEffects();
+}
+
+
+std::pair<bool, bool> CSoundFile::NextRow(PlayState &playState, const bool breakRow) const
+{
+	// When having an EEx effect on the same row as a Dxx jump, the target row is not played in ProTracker.
+	// Test case: DelayBreak.mod (based on condom_corruption by Travolta)
+	const bool ignoreRow = playState.m_nPatternDelay > 1 && breakRow && GetType() == MOD_TYPE_MOD;
+
+	// Done with the last row of the pattern or jumping somewhere else (could also be a result of pattern loop to row 0, but that doesn't matter here)
+	const bool patternTransition = playState.m_nNextRow == 0 || breakRow;
+	if(patternTransition && GetType() == MOD_TYPE_S3M)
+	{
+		// Reset pattern loop start
+		// Test case: LoopReset.s3m
+		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+		{
+			playState.Chn[i].nPatternLoop = 0;
+		}
+	}
+
+	playState.m_nPatternDelay = 0;
+	playState.m_nFrameDelay = 0;
+	playState.m_nTickCount = 0;
+	playState.m_nRow = playState.m_nNextRow;
+	playState.m_nCurrentOrder = playState.m_nNextOrder;
+
+	return {ignoreRow, patternTransition};
+}
+
+
+void CSoundFile::SetupNextRow(PlayState &playState, const bool patternLoop) const
+{
+	playState.m_nNextRow = playState.m_nRow + 1;
+	if(playState.m_nNextRow >= Patterns[playState.m_nPattern].GetNumRows())
+	{
+		if(!patternLoop)
+			playState.m_nNextOrder = playState.m_nCurrentOrder + 1;
+		playState.m_nNextRow = 0;
+
+		// FT2 idiosyncrasy: When E60 is used on a pattern row x, the following pattern also starts from row x
+		// instead of the beginning of the pattern, unless there was a Bxx or Dxx effect.
+		if(m_playBehaviour[kFT2LoopE60Restart])
+		{
+			playState.m_nNextRow = playState.m_nextPatStartRow;
+			playState.m_nextPatStartRow = 0;
+		}
+	}
 }
 
 
