@@ -50,6 +50,7 @@ public:
 	~CSelectPluginDlg();
 
 	static VSTPluginLib *ScanPlugins(const mpt::PathString &path, CWnd *parent);
+	static bool VerifyPlugin(VSTPluginLib *plug, CWnd *parent);
 
 protected:
 	HTREEITEM AddTreeItem(const TCHAR *title, int image, bool sort, HTREEITEM hParent = TVI_ROOT, LPARAM lParam = NULL);
@@ -60,7 +61,6 @@ protected:
 	void ReloadMissingPlugins(const VSTPluginLib *lib) const;
 
 	void UpdatePluginsList(const VSTPluginLib *forceSelect = nullptr);
-	static bool VerifyPlug(VSTPluginLib *plug, CWnd *parent);
 
 	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;

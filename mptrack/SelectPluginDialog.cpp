@@ -604,7 +604,7 @@ constexpr struct
 #endif
 
 
-bool CSelectPluginDlg::VerifyPlug(VSTPluginLib *plug, CWnd *parent)
+bool CSelectPluginDlg::VerifyPlugin(VSTPluginLib *plug, CWnd *parent)
 {
 #ifndef NO_VST
 	for(const auto &p : ProblematicPlugins)
@@ -662,7 +662,7 @@ void CSelectPluginDlg::OnAddPlugin()
 		if(lib != nullptr)
 		{
 			update = true;
-			if(!VerifyPlug(lib, this))
+			if(!VerifyPlugin(lib, this))
 			{
 				plugManager->RemovePlugin(lib);
 			} else
@@ -680,7 +680,7 @@ void CSelectPluginDlg::OnAddPlugin()
 		UpdatePluginsList(plugLib);
 	} else
 	{
-		Reporting::Error("At least one selected file was not a valid VST Plugin.");
+		Reporting::Error("No valid VST Plugin was selected.");
 	}
 }
 
@@ -735,7 +735,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 			if(lib)
 			{
 				update = true;
-				if(!VerifyPlug(lib, parent))
+				if(!VerifyPlugin(lib, parent))
 				{
 					pManager->RemovePlugin(lib);
 				} else
