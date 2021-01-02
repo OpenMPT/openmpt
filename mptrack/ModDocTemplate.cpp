@@ -14,6 +14,7 @@
 #include "Moddoc.h"
 #include "ModDocTemplate.h"
 #include "Reporting.h"
+#include "SelectPluginDialog.h"
 #include "../soundlib/plugins/PluginManager.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -129,10 +130,16 @@ CDocument *CModDocManager::OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU
 
 	if(const auto fileExt = filename.GetFileExt(); !mpt::PathString::CompareNoCase(fileExt, P_(".dll")) || !mpt::PathString::CompareNoCase(fileExt, P_(".vst3")))
 	{
-		CVstPluginManager *pPluginManager = theApp.GetPluginManager();
-		if(pPluginManager && pPluginManager->AddPlugin(filename, TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes) != nullptr)
+		if(auto plugManager = theApp.GetPluginManager(); plugManager != nullptr)
 		{
-			return nullptr;
+			if(auto plugLib = plugManager->AddPlugin(filename, TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes); plugLib != nullptr)
+			{
+				if(!CSelectPluginDlg::VerifyPlugin(plugLib, nullptr))
+				{
+					plugManager->RemovePlugin(plugLib);
+				}
+				return nullptr;
+			}
 		}
 	}
 
