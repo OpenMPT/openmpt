@@ -2042,7 +2042,7 @@ BEGIN
     EDITTEXT        IDC_PLUGINTAGS,36,198,204,14,ES_AUTOHSCROLL
     CONTROL         "Use Plugin &Bridge",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,216,72,12
     CONTROL         "Share Bridge between all &Instances",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,84,216,156,12
-    CONTROL         "Increace &compatibility for broken Plugins",IDC_CHECK3,
+    CONTROL         "Increase &compatibility for broken Plugins",IDC_CHECK3,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,228,228,12
     EDITTEXT        IDC_TEXT_CURRENT_VSTPLUG,12,246,227,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
     EDITTEXT        IDC_VENDOR,12,258,227,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
