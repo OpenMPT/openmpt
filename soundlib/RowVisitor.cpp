@@ -31,7 +31,7 @@ RowVisitor::LoopState::LoopState(const ChannelStates &chnState, const bool ignor
 	uint64 hash = FNV1a_BASIS;
 	if(ignoreRow)
 	{
-		hash = (FNV1a_BASIS ^ 0xFFu) * FNV1a_PRIME;
+		hash = (hash ^ 0xFFu) * FNV1a_PRIME;
 #ifdef MPT_VERIFY_ROWVISITOR_LOOPSTATE
 		m_counts.emplace_back(uint8(0xFF), uint8(0xFF));
 #endif
@@ -42,7 +42,7 @@ RowVisitor::LoopState::LoopState(const ChannelStates &chnState, const bool ignor
 		if(chnState[chn].nPatternLoopCount)
 		{
 			static_assert(MAX_BASECHANNELS <= 256, "Channel index cannot be used as byte input for hash generator");
-			static_assert(std::numeric_limits<decltype(chnState[0].nPatternLoopCount)>::max() < 256, "Loop count cannot be used as byte input for hash generator");
+			static_assert(sizeof(chnState[0].nPatternLoopCount) <= sizeof(uint8), "Loop count cannot be used as byte input for hash generator");
 			hash = (hash ^ chn) * FNV1a_PRIME;
 			hash = (hash ^ chnState[chn].nPatternLoopCount) * FNV1a_PRIME;
 #ifdef MPT_VERIFY_ROWVISITOR_LOOPSTATE
