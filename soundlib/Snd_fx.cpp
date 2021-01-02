@@ -156,6 +156,9 @@ public:
 			int vol = 0;
 			sndFile.ProcessInstrumentFade(chn, vol);
 
+			if(chn.dwFlags[CHN_ADLIB])
+				continue;
+
 			if(updateInc || chnSettings[channel].incChanged)
 			{
 				chn.increment = sndFile.GetChannelIncrement(chn, period, 0);
@@ -552,11 +555,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					if(Samples[smp].uFlags[CHN_PANNING])
 						chn.nPan = Samples[smp].nPan;
-					if(Samples[smp].uFlags[CHN_ADLIB])
-					{
-						memory.state->Chn[nChn].Stop();
-						memory.chnSettings[nChn].ticksToRender = 0;
-					}
 				}
 			}
 
@@ -1272,18 +1270,25 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			m_PlayState.m_nFrameDelay = m_PlayState.m_nPatternDelay = 0;
 			m_PlayState.m_nTickCount = Util::MaxValueOfType(m_PlayState.m_nTickCount) - 1;
 			m_PlayState.m_bPositionChanged = true;
+			if(m_opl != nullptr)
+				m_opl->Reset();
 			for(CHANNELINDEX n = 0; n < GetNumChannels(); n++)
 			{
-				if(m_PlayState.Chn[n].nLastNote != NOTE_NONE)
+				auto &chn = m_PlayState.Chn[n];
+				if(chn.nLastNote != NOTE_NONE)
 				{
-					m_PlayState.Chn[n].nNewNote = m_PlayState.Chn[n].nLastNote;
+					chn.nNewNote = chn.nLastNote;
 				}
 				if(memory.chnSettings[n].vol != 0xFF && !adjustSamplePos)
 				{
-					m_PlayState.Chn[n].nVolume = std::min(memory.chnSettings[n].vol, uint8(64)) * 4;
+					chn.nVolume = std::min(memory.chnSettings[n].vol, uint8(64)) * 4;
+				}
+				if(chn.pModSample != nullptr && chn.pModSample->uFlags[CHN_ADLIB] && m_opl)
+				{
+					m_opl->Patch(n, chn.pModSample->adlib);
+					m_opl->NoteCut(n);
 				}
 			}
-			if(m_opl != nullptr) m_opl->Reset();
 
 #ifndef NO_PLUGINS
 			// If there were any PC events, update plugin parameters to their latest value.
