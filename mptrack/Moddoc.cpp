@@ -204,7 +204,8 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			FileReader file = GetFileReader(f);
 			MPT_ASSERT(GetPathNameMpt().empty());
 			SetPathName(filename, FALSE);	// Path is not set yet, but loaders processing external samples/instruments (ITP/MPTM) need this for relative paths.
-			m_SndFile.Create(file, CSoundFile::loadCompleteModule, this);
+			if(!m_SndFile.Create(file, CSoundFile::loadCompleteModule, this))
+				return FALSE;
 		}
 
 		MPT_LOG(LogDebug, "Loader", U_("Open."));
