@@ -21,6 +21,7 @@ EXTRA_DIST += libopenmpt/libopenmpt_version.mk
 EXTRA_DIST += openmpt123/.clang-format
 EXTRA_DIST += test/test.xm
 EXTRA_DIST += test/test.s3m
+EXTRA_DIST += test/test.mod
 EXTRA_DIST += test/test.mptm
 EXTRA_DIST += man/openmpt123.1
 EXTRA_DIST += examples/.clang-format
