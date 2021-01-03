@@ -19,7 +19,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 // CPatternGotoDialog dialog
 
-CPatternGotoDialog::CPatternGotoDialog(CWnd *pParent, ROWINDEX row, CHANNELINDEX chan, PATTERNINDEX pat, ORDERINDEX ord, const CSoundFile &sndFile)
+CPatternGotoDialog::CPatternGotoDialog(CWnd *pParent, ROWINDEX row, CHANNELINDEX chan, PATTERNINDEX pat, ORDERINDEX ord, CSoundFile &sndFile)
 	: CDialog(IDD_EDIT_GOTO, pParent)
 	, m_SndFile(sndFile)
 	, m_nRow(row)
@@ -43,6 +43,9 @@ void CPatternGotoDialog::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CPatternGotoDialog, CDialog)
 	ON_EN_CHANGE(IDC_GOTO_PAT, &CPatternGotoDialog::OnPatternChanged)
 	ON_EN_CHANGE(IDC_GOTO_ORD, &CPatternGotoDialog::OnOrderChanged)
+	ON_EN_CHANGE(IDC_GOTO_ROW, &CPatternGotoDialog::OnRowChanged)
+	ON_EN_CHANGE(IDC_EDIT5,    &CPatternGotoDialog::OnTimeChanged)
+	ON_EN_CHANGE(IDC_EDIT6,    &CPatternGotoDialog::OnTimeChanged)
 END_MESSAGE_MAP()
 
 
@@ -57,6 +60,7 @@ BOOL CPatternGotoDialog::OnInitDialog()
 	SetDlgItemInt(IDC_GOTO_CHAN, m_nChannel);
 	SetDlgItemInt(IDC_GOTO_PAT, m_nPattern);
 	SetDlgItemInt(IDC_GOTO_ORD, m_nOrder);
+	UpdateTime();
 	UnlockControls();
 	return TRUE;
 }
@@ -91,9 +95,7 @@ void CPatternGotoDialog::OnOK()
 void CPatternGotoDialog::OnPatternChanged()
 {
 	if(ControlsLocked())
-	{
-		return;	// The change to textbox did not come from user.
-	}
+		return;  // The change to textbox did not come from user.
 
 	m_nPattern = mpt::saturate_cast<PATTERNINDEX>(GetDlgItemInt(IDC_GOTO_PAT));
 	m_nOrder = m_SndFile.Order().FindOrder(m_nPattern, m_nActiveOrder);
@@ -105,6 +107,7 @@ void CPatternGotoDialog::OnPatternChanged()
 
 	LockControls();
 	SetDlgItemInt(IDC_GOTO_ORD, m_nOrder);
+	UpdateTime();
 	UnlockControls();
 }
 
@@ -112,9 +115,7 @@ void CPatternGotoDialog::OnPatternChanged()
 void CPatternGotoDialog::OnOrderChanged()
 {
 	if(ControlsLocked())
-	{
-		return;	//the change to textbox did not come from user.
-	}
+		return;  // The change to textbox did not come from user.
 
 	m_nOrder = mpt::saturate_cast<ORDERINDEX>(GetDlgItemInt(IDC_GOTO_ORD));
 	if(m_SndFile.Order().IsValidPat(m_nOrder))
@@ -124,6 +125,60 @@ void CPatternGotoDialog::OnOrderChanged()
 
 	LockControls();
 	SetDlgItemInt(IDC_GOTO_PAT, m_nPattern);
+	UpdateTime();
+	UnlockControls();
+}
+
+
+void CPatternGotoDialog::OnRowChanged()
+{
+	if(ControlsLocked())
+		return;  // The change to textbox did not come from user.
+
+	m_nRow = mpt::saturate_cast<ROWINDEX>(GetDlgItemInt(IDC_GOTO_ROW));
+	UpdateTime();
+}
+
+
+void CPatternGotoDialog::OnTimeChanged()
+{
+	if(ControlsLocked())
+		return;  // The change to textbox did not come from user.
+
+	BOOL success = TRUE;
+	auto minutes = GetDlgItemInt(IDC_EDIT5, &success);
+	if(!success)
+		return;
+	auto seconds = GetDlgItemInt(IDC_EDIT6, &success);
+	if(!success)
+		return;
+
+	auto result = m_SndFile.GetLength(eNoAdjust, GetLengthTarget(minutes * 60.0 + seconds)).back();
+	if(!result.targetReached)
+		return;
+
+	m_nOrder = result.lastOrder;
+	m_nRow = result.lastRow;
+	if(m_SndFile.Order().IsValidPat(m_nOrder))
+		m_nPattern = m_SndFile.Order()[m_nOrder];
+
+	LockControls();
+	SetDlgItemInt(IDC_GOTO_ORD, m_nOrder);
+	SetDlgItemInt(IDC_GOTO_ROW, m_nRow);
+	SetDlgItemInt(IDC_GOTO_PAT, m_nPattern);
+	UnlockControls();
+}
+
+
+void CPatternGotoDialog::UpdateTime()
+{
+	const double length = m_SndFile.GetPlaybackTimeAt(m_nOrder, m_nRow, false, false);
+	if(length < 0.0)
+		return;
+	const double minutes = std::floor(length / 60.0), seconds = std::fmod(length, 60.0);
+	LockControls();
+	SetDlgItemInt(IDC_EDIT5, static_cast<int>(minutes));
+	SetDlgItemInt(IDC_EDIT6, static_cast<int>(seconds));
 	UnlockControls();
 }
 
