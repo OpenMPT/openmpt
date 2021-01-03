@@ -104,7 +104,7 @@ public:
 
 protected:
 	// Get the needed vector size for a given pattern.
-	[[nodiscard]] size_t VisitedRowsVectorSize(PATTERNINDEX pattern) const noexcept;
+	[[nodiscard]] ROWINDEX VisitedRowsVectorSize(PATTERNINDEX pattern) const noexcept;
 
 	[[nodiscard]] const ModSequence &Order() const;
 };

@@ -204,7 +204,7 @@ bool RowVisitor::Visit(ORDERINDEX ord, ROWINDEX row, const ChannelStates &chnSta
 
 
 // Get the needed vector size for a given pattern.
-size_t RowVisitor::VisitedRowsVectorSize(PATTERNINDEX pattern) const noexcept
+ROWINDEX RowVisitor::VisitedRowsVectorSize(PATTERNINDEX pattern) const noexcept
 {
 	if(m_sndFile.Patterns.IsValidPat(pattern))
 		return m_sndFile.Patterns[pattern].GetNumRows();
