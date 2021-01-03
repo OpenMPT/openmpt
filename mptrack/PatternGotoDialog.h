@@ -34,10 +34,11 @@ public:
 	BOOL OnInitDialog() override;
 
 protected:
-	bool m_bControlLock;
-	inline bool ControlsLocked() { return m_bControlLock; }
-	inline void LockControls() { m_bControlLock = true; }
-	inline void UnlockControls() { m_bControlLock = false; }
+	bool m_controlLock = true;
+
+	inline bool ControlsLocked() const { return m_controlLock; }
+	inline void LockControls() { m_controlLock = true; }
+	inline void UnlockControls() { m_controlLock = false; }
 
 	void DoDataExchange(CDataExchange* pDX) override;
 	void OnOK() override;
