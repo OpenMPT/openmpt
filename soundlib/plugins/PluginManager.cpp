@@ -451,6 +451,39 @@ static void GetPluginInformation(bool maskCrashes, Vst::AEffect *effect, VSTPlug
 #endif // NO_VST
 
 
+#ifndef NO_VST
+static bool TryLoadPlugin(bool maskCrashes, VSTPluginLib *plug, HINSTANCE hLib, bool forceLegacy, unsigned long &exception)
+{
+	Vst::AEffect *pEffect = CVstPlugin::LoadPlugin(maskCrashes, *plug, hLib, true, forceLegacy);
+	if(!pEffect || pEffect->magic != Vst::kEffectMagic || !pEffect->dispatcher)
+	{
+		return false;
+	}
+
+	CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effOpen, 0, 0, 0, 0, exception);
+
+	plug->pluginId1 = pEffect->magic;
+	plug->pluginId2 = pEffect->uniqueID;
+
+	GetPluginInformation(maskCrashes, pEffect, *plug);
+
+#ifdef VST_LOG
+	intptr_t nver = CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effGetVstVersion, 0,0, nullptr, 0, exception);
+	if (!nver) nver = pEffect->version;
+	MPT_LOG(LogDebug, "VST", MPT_UFORMAT("{}: v{}.0, {} in, {} out, {} programs, {} params, flags=0x{} realQ={} offQ={}")(
+		plug->libraryName, nver,
+		pEffect->numInputs, pEffect->numOutputs,
+		mpt::ufmt::dec0<2>(pEffect->numPrograms), mpt::ufmt::dec0<2>(pEffect->numParams),
+		mpt::ufmt::HEX0<4>(static_cast<int32>(pEffect->flags)), pEffect->realQualities, pEffect->offQualities));
+#endif // VST_LOG
+
+	CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effClose, 0, 0, 0, 0, exception);
+
+	return true;
+}
+#endif // !NO_NVST
+
+
 #ifdef MODPLUG_TRACKER
 // Add a plugin to the list of known plugins.
 VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool maskCrashes, const mpt::ustring &tags, bool fromCache, bool *fileFound)
@@ -533,6 +566,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	}
 
 #ifndef NO_VST
+	bool requiresLegacyBridge = false;
 	unsigned long exception = 0;
 	// Always scan plugins in a separate process
 	HINSTANCE hLib = NULL;
@@ -542,30 +576,13 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		ExceptionHandler::ContextSetter ectxguard{&ectx};
 #endif // MODPLUG_TRACKER
 
-		Vst::AEffect *pEffect = CVstPlugin::LoadPlugin(maskCrashes, *plug, hLib, true);
-
-		if(pEffect != nullptr && pEffect->magic == Vst::kEffectMagic && pEffect->dispatcher != nullptr)
+		validPlug = TryLoadPlugin(maskCrashes, plug, hLib, false, exception);
+		if(!validPlug || (exception != 0))
 		{
-			CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effOpen, 0, 0, 0, 0, exception);
-
-			plug->pluginId1 = pEffect->magic;
-			plug->pluginId2 = pEffect->uniqueID;
-
-			GetPluginInformation(maskCrashes, pEffect, *plug);
-
-#ifdef VST_LOG
-			intptr_t nver = CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effGetVstVersion, 0,0, nullptr, 0, exception);
-			if (!nver) nver = pEffect->version;
-			MPT_LOG(LogDebug, "VST", MPT_UFORMAT("{}: v{}.0, {} in, {} out, {} programs, {} params, flags=0x{} realQ={} offQ={}")(
-				plug->libraryName, nver,
-				pEffect->numInputs, pEffect->numOutputs,
-				mpt::ufmt::dec0<2>(pEffect->numPrograms), mpt::ufmt::dec0<2>(pEffect->numParams),
-				mpt::ufmt::HEX0<4>(static_cast<int32>(pEffect->flags)), pEffect->realQualities, pEffect->offQualities));
-#endif // VST_LOG
-
-			CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effClose, 0, 0, 0, 0, exception);
-
-			validPlug = true;
+			validPlug = false;
+			exception = 0;
+			requiresLegacyBridge = true;
+			validPlug = TryLoadPlugin(maskCrashes, plug, hLib, true, exception);
 		}
 
 	}
@@ -574,6 +591,13 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	{
 		CVstPluginManager::ReportPlugException(MPT_UFORMAT("Exception {} while trying to load plugin \"{}\"!\n")(mpt::ufmt::HEX0<8>(exception), plug->libraryName));
 	}
+
+	if(requiresLegacyBridge)
+	{
+		plug->useBridge = true;
+		plug->modernBridge = false;
+	}
+
 #endif // NO_VST
 
 	// Now it should be safe to assume that this plugin loaded properly. :)
@@ -720,7 +744,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		HINSTANCE hLibrary = nullptr;
 		bool validPlugin = false;
 
-		pEffect = CVstPlugin::LoadPlugin(maskCrashes, *pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins);
+		pEffect = CVstPlugin::LoadPlugin(maskCrashes, *pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins, false);
 
 		if(pEffect != nullptr && pEffect->dispatcher != nullptr && pEffect->magic == Vst::kEffectMagic)
 		{

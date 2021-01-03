@@ -200,7 +200,7 @@ public:
 	static bool IsPluginNative(const mpt::PathString &pluginPath) { return GetPluginBinaryType(pluginPath) == GetNativePluginBinaryType(); }
 	static uint64 GetFileVersion(const WCHAR *exePath);
 
-	static Vst::AEffect *Create(const VSTPluginLib &plugin);
+	static Vst::AEffect *Create(const VSTPluginLib &plugin, bool forceLegacy);
 
 protected:
 	BridgeWrapper();

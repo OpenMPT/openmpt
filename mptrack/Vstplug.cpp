@@ -94,7 +94,7 @@ DWORD CVstPlugin::SETryOrError(Tfn fn)
 }
 
 
-AEffect *CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE &library, bool forceBridge)
+AEffect *CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE &library, bool forceBridge, bool forceLegacy)
 {
 	const mpt::PathString &pluginPath = plugin.dllPath;
 
@@ -106,7 +106,7 @@ AEffect *CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE 
 	{
 		try
 		{
-			effect = BridgeWrapper::Create(plugin);
+			effect = BridgeWrapper::Create(plugin, forceLegacy);
 			if(effect != nullptr)
 			{
 				return effect;

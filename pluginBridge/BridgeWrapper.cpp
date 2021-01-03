@@ -257,11 +257,11 @@ uint64 BridgeWrapper::GetFileVersion(const WCHAR *exePath)
 
 
 // Create a plugin bridge object
-AEffect *BridgeWrapper::Create(const VSTPluginLib &plugin)
+AEffect *BridgeWrapper::Create(const VSTPluginLib &plugin, bool forceLegacy)
 {
 	BridgeWrapper *wrapper = new(std::nothrow) BridgeWrapper();
 	BridgeWrapper *sharedInstance = nullptr;
-	const Generation wantedGeneration = plugin.modernBridge ? Generation::Modern : Generation::Legacy;
+	const Generation wantedGeneration = (plugin.modernBridge && !forceLegacy) ? Generation::Modern : Generation::Legacy;
 
 	// Should we share instances?
 	if(plugin.shareBridgeInstance)

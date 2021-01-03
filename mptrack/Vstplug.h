@@ -77,7 +77,7 @@ public:
 	CVstPlugin(bool maskCrashes, HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, Vst::AEffect &effect, CSoundFile &sndFile);
 	~CVstPlugin();
 
-	static Vst::AEffect *LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE &library, bool forceBridge);
+	static Vst::AEffect *LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE &library, bool forceBridge, bool forceLegacy);
 
 protected:
 	void Initialize();
