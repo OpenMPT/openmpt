@@ -187,10 +187,9 @@ static void ConvertStereoToMonoMixImpl(T *pDest, const SmpLength length)
 
 
 template <class T>
-static void ConvertStereoToMonoOneChannelImpl(T *pDest, const SmpLength length)
+static void ConvertStereoToMonoOneChannelImpl(T *pDest, const T *pSource, const SmpLength length)
 {
-	const T *pEnd = pDest + length;
-	for(T *pSource = pDest; pDest != pEnd; pDest++, pSource += 2)
+	for(const T *pEnd = pDest + length; pDest != pEnd; pDest++, pSource += 2)
 	{
 		*pDest = *pSource;
 	}
@@ -218,9 +217,9 @@ bool ConvertToMono(ModSample &smp, CSoundFile &sndFile, StereoToMonoMode convers
 			conversionMode = onlyLeft;
 		}
 		if(smp.GetElementarySampleSize() == 2)
-			ConvertStereoToMonoOneChannelImpl(smp.sample16() + (conversionMode == onlyLeft ? 0 : 1), smp.nLength);
+			ConvertStereoToMonoOneChannelImpl(smp.sample16(), smp.sample16() + (conversionMode == onlyLeft ? 0 : 1), smp.nLength);
 		else if(smp.GetElementarySampleSize() == 1)
-			ConvertStereoToMonoOneChannelImpl(smp.sample8() + (conversionMode == onlyLeft ? 0 : 1), smp.nLength);
+			ConvertStereoToMonoOneChannelImpl(smp.sample8(), smp.sample8() + (conversionMode == onlyLeft ? 0 : 1), smp.nLength);
 		else
 			return false;
 	}
