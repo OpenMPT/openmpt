@@ -1085,7 +1085,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kFT2FinetunePrecision);
 		playBehaviour.set(kFT2NoteOffFlags);
 		playBehaviour.set(kRowDelayWithNoteDelay);
-		playBehaviour.set(kFT2TremoloRampWaveform);
+		playBehaviour.set(kFT2MODTremoloRampWaveform);
 		playBehaviour.set(kFT2PortaUpDownMemory);
 		playBehaviour.set(kFT2PanSustainRelease);
 		playBehaviour.set(kFT2NoteDelayWithoutInstr);
@@ -1116,6 +1116,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kMODOutOfRangeNoteDelay);
 		playBehaviour.set(kMODTempoOnSecondTick);
 		playBehaviour.set(kRowDelayWithNoteDelay);
+		playBehaviour.set(kFT2MODTremoloRampWaveform);
 		break;
 
 	default:

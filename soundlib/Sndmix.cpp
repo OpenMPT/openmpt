@@ -889,7 +889,7 @@ void CSoundFile::ProcessTremolo(ModChannel &chn, int &vol) const
 			const uint8 attenuation = ((GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) || m_playBehaviour[kITVibratoTremoloPanbrello]) ? 5 : 6;
 
 			int delta = GetVibratoDelta(chn.nTremoloType, chn.nTremoloPos);
-			if((chn.nTremoloType & 0x03) == 1 && m_playBehaviour[kFT2TremoloRampWaveform])
+			if((chn.nTremoloType & 0x03) == 1 && m_playBehaviour[kFT2MODTremoloRampWaveform])
 			{
 				// FT2 compatibility: Tremolo ramp down / triangle implementation is weird and affected by vibrato position (copypaste bug)
 				// Test case: TremoloWaveforms.xm, TremoloVibrato.xm
