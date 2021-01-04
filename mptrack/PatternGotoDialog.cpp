@@ -27,7 +27,6 @@ CPatternGotoDialog::CPatternGotoDialog(CWnd *pParent, ROWINDEX row, CHANNELINDEX
 	, m_nPattern(pat)
 	, m_nOrder(ord)
 	, m_nActiveOrder(ord)
-	, m_bControlLock(false)
 { }
 
 
@@ -58,6 +57,7 @@ BOOL CPatternGotoDialog::OnInitDialog()
 	SetDlgItemInt(IDC_GOTO_CHAN, m_nChannel);
 	SetDlgItemInt(IDC_GOTO_PAT, m_nPattern);
 	SetDlgItemInt(IDC_GOTO_ORD, m_nOrder);
+	UnlockControls();
 	return TRUE;
 }
 
