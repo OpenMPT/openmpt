@@ -443,6 +443,19 @@ void CViewSample::SetZoom(int nZoom, SmpLength centeredSample)
 }
 
 
+SmpLength CViewSample::SnapToGrid(const SmpLength pos) const
+{
+	if(m_nGridSegments <= 0 || GetDocument() == nullptr)
+		return pos;
+	const auto &sample = GetDocument()->GetSoundFile().GetSample(m_nSample);
+	if(m_nGridSegments >= sample.nLength)
+		return pos;
+	
+	const auto samplesPerSegment = static_cast<double>(sample.nLength) / m_nGridSegments;
+	return static_cast<SmpLength>(mpt::round(pos / samplesPerSegment) * samplesPerSegment);
+}
+
+
 void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 {
 	if(GetDocument() == nullptr)
@@ -451,13 +464,8 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 	CSoundFile &sndFile = GetDocument()->GetSoundFile();
 	const ModSample &sample = sndFile.GetSample(m_nSample);
 
-	// Snap to grid
-	if(m_nGridSegments > 0 && m_nGridSegments < sample.nLength)
-	{
-		auto samplesPerSegment = static_cast<double>(sample.nLength) / m_nGridSegments;
-		nBegin = static_cast<SmpLength>(mpt::round(nBegin / samplesPerSegment) * samplesPerSegment);
-		nEnd = static_cast<SmpLength>(mpt::round(nEnd / samplesPerSegment) * samplesPerSegment);
-	}
+	nBegin = SnapToGrid(nBegin);
+	nEnd = SnapToGrid(nEnd);
 
 	if(nBegin > nEnd)
 	{
@@ -1921,7 +1929,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 
 		// Note: point.x might have changed in if block above in case we're scrolling.
 		const bool fineDrag = (flags & MK_SHIFT) && m_startDragValue != MAX_SAMPLE_LENGTH && !m_dwStatus[SMPSTATUS_DRAWING];
-		const SmpLength x = fineDrag ? m_startDragValue + (point.x - m_startDragPoint.x) / Util::ScalePixels(2, m_hWnd) : ScreenToSample(point.x);
+		const SmpLength x = fineDrag ? m_startDragValue + (point.x - m_startDragPoint.x) / Util::ScalePixels(2, m_hWnd) : SnapToGrid(ScreenToSample(point.x));
 		
 		if((flags & MK_SHIFT) && !fineDrag)
 		{

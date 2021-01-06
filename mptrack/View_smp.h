@@ -149,6 +149,8 @@ protected:
 
 	int CalcScroll(int &currentPos, int amount, int style, int bar);
 
+	SmpLength SnapToGrid(const SmpLength pos) const;
+
 public:
 	//{{AFX_VIRTUAL(CViewSample)
 	void OnDraw(CDC *) override;
