@@ -2299,7 +2299,10 @@ bool CSoundFile::ReadNote()
 					// In ST3, a sample rate of 8363 Hz is mapped to middle-C, which is 261.625 Hz in a tempered scale at A4 = 440.
 					// Hence, we have to translate our "sample rate" into pitch.
 					const auto freq = hasTuning ? chn.nPeriod : GetFreqFromPeriod(period, chn.nC5Speed, nPeriodFrac);
-					const auto milliHertz = Util::muldivr_unsigned(freq, 261625, 8363 << FREQ_FRACBITS);
+					auto milliHertz = Util::muldivr_unsigned(freq, 261625, 8363 << FREQ_FRACBITS);
+#ifndef MODPLUG_TRACKER
+					milliHertz = Util::muldivr_unsigned(milliHertz, m_nFreqFactor, 65536);
+#endif  // !MODPLUG_TRACKER
 					const bool keyOff = chn.dwFlags[CHN_KEYOFF] || (chn.dwFlags[CHN_NOTEFADE] && chn.nFadeOutVol == 0);
 					if(!m_playBehaviour[kOPLNoteStopWith0Hz] || !keyOff)
 						m_opl->Frequency(nChn, milliHertz, keyOff, m_playBehaviour[kOPLBeatingOscillators]);
