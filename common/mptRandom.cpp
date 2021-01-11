@@ -105,6 +105,8 @@ static T generate_timeseed()
 		hash(std::begin(bytes), std::end(bytes));
 	}
 
+#if !MPT_OS_EMSCRIPTEN
+	// Avoid std::chrono::high_resolution_clock on Emscripten because availability is problematic in AudioWorklet context.
 	{
 		std::clock_t c = std::clock();
 		mpt::byte bytes[sizeof(c)];
@@ -115,6 +117,7 @@ static T generate_timeseed()
 		}
 		hash(std::begin(bytes), std::end(bytes));
 	}
+#endif // !MPT_OS_EMSCRIPTEN
 
 	return static_cast<T>(hash.result());
 
