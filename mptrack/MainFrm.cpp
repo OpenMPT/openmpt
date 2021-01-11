@@ -2665,7 +2665,7 @@ LRESULT CMainFrame::OnUpdateCheckCanceled(WPARAM wparam, LPARAM lparam)
 LRESULT CMainFrame::OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam)
 {
 	bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
-	CString updateText = MPT_CFORMAT("Checking for updates failed: {}")(CUpdateCheck::GetFailureMessage(wparam, lparam)).GetString();
+	CString updateText = MPT_CFORMAT("Checking for updates failed: {}")(CUpdateCheck::GetFailureMessage(wparam, lparam));
 	if(isAutoUpdate)
 	{
 		SetHelpText(updateText);
@@ -2699,7 +2699,7 @@ LRESULT CMainFrame::OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam)
 LRESULT CMainFrame::OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam)
 {
 	bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
-	CString updateText = MPT_CFORMAT("Checking for updates... Done.")().GetString();
+	CString updateText = _T("Checking for updates... Done.");
 	// TODO:
 	// UpdateToolbarUpdateIndicator(CUpdateCheck::ResultFromMessage(wparam, lparam));
 	if(isAutoUpdate)
