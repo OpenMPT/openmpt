@@ -85,6 +85,8 @@ static T generate_timeseed()
 		hash(std::begin(bytes), std::end(bytes));
 	}
 
+#if !MPT_OS_EMSCRIPTEN
+	// Avoid std::chrono::high_resolution_clock on Emscripten because availability is problematic in AudioWorklet context.
 	{
 		uint64be time;
 		time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock().now().time_since_epoch()).count();
@@ -92,6 +94,7 @@ static T generate_timeseed()
 		std::memcpy(bytes, &time, sizeof(time));
 		hash(std::begin(bytes), std::end(bytes));
 	}
+#endif // !MPT_OS_EMSCRIPTEN
 
 	return static_cast<T>(hash.result());
 
