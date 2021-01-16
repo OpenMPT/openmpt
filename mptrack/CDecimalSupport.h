@@ -54,7 +54,7 @@ protected:
 	/// the locale dependant negative sign
 	TCHAR m_NegativeSign[6];
 
-	bool m_allowNegative, m_allowFractions;
+	bool m_allowNegative = true, m_allowFractions = true;
 
 public:
 
@@ -70,8 +70,6 @@ public:
 	/// \brief Initialize m_DecimalSeparator and m_NegativeSign
 	/// \remarks calls InitDecimalSeparator and InitNegativeSign
 	CDecimalSupport()
-		: m_allowNegative(true)
-		, m_allowFractions(true)
 	{
 		InitDecimalSeparator();
 		InitNegativeSign();
@@ -119,8 +117,8 @@ public:
 		for (TCHAR* x = buffer; *x; ++x)
 		{
 			if (x - buffer == nStartChar) x += nEndChar - nStartChar;
-			if (*x == m_DecimalSeparator[0] ||*x == _T('.')) ++dec_point;
-			if (*x == m_NegativeSign[0]) ++neg_sign;
+			if (*x == m_DecimalSeparator[0] || *x == _T('.')) ++dec_point;
+			if (*x == m_NegativeSign[0] || *x == _T('-')) ++neg_sign;
 		}
 
 #ifdef _UNICODE
@@ -144,7 +142,7 @@ public:
 				bHandled = true;
 				for (TCHAR* s = lptstr; *s; ++s)
 				{
-					if (*s == m_NegativeSign[0] && m_allowNegative)
+					if ((*s == m_NegativeSign[0] ||*s == _T('-')) && m_allowNegative)
 					{
 
 						for (TCHAR* t = m_NegativeSign + 1; *t; ++t, ++s)
@@ -230,7 +228,7 @@ public:
 			bHandled = true;
 		}
 
-		if (static_cast<TCHAR>(wParam) == m_NegativeSign[0] && m_allowNegative)
+		if ((static_cast<TCHAR>(wParam) == m_NegativeSign[0] || wParam == _T('-')) && m_allowNegative)
 		{
 			T* pT = static_cast<T*>(this);
 			int nStartChar;
