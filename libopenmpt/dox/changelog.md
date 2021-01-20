@@ -12,6 +12,9 @@ is just a high-level summary.
     a single file with reduced dependencies suitable to be used in an
     AudioWorkletProcessor.
 
+ *  [**Bug**] stb_vorbis: Fix decoding of Vorbis streams without comments which
+    affected most Vorbis samples since stb_vorbis v1.20.
+
  *  mpg123: Update to v1.26.4 (2020-12-24).
  *  pugixml: Update to v1.11.4 (2020-12-22).
 
