@@ -9,6 +9,10 @@ is just a high-level summary.
 
  *  mpg123: Update to v1.26.4 (2020-12-24).
  *  pugixml: Update to v1.11.4 (2020-12-22).
+ *  [**New**] `Makefile` `CONFIG=emscripten` now supports
+    `EMSCRIPTEN_TARGET=audioworkletprocessor` which builds an ES6 module in
+    a single file with reduced dependencies suitable to be used in an
+    AudioWorkletProcessor.
 
 ### libopenmpt 0.5.4 (2020-11-29)
 
