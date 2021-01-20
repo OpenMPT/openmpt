@@ -11,6 +11,10 @@ is just a high-level summary.
     supported.
  *  [**New**] openmpt123: openmpt123 will now expand file wildcards passed on
     the command line in Windows when built with MSVC.
+ *  [**New**] `Makefile` `CONFIG=emscripten` now supports
+    `EMSCRIPTEN_TARGET=audioworkletprocessor` which builds an ES6 module in
+    a single file with reduced dependencies suitable to be used in an
+    AudioWorkletProcessor.
 
  *  [**Change**] `Makefile` `CONFIG=emscripten` now supports
     `EMSCRIPTEN_TARGET=all` which provides WebAssembly as well as fallback to

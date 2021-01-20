@@ -27,6 +27,8 @@ namespace mpt
 {
 
 
+#if !defined(MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE)
+
 template <typename T>
 static T log2(T x)
 {
@@ -58,6 +60,8 @@ static MPT_CONSTEXPRINLINE bool is_mask(T x)
 	return false;
 }
 
+#endif // !MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE
+
 
 namespace {
 template <typename T> struct default_hash { };
@@ -85,8 +89,7 @@ static T generate_timeseed()
 		hash(std::begin(bytes), std::end(bytes));
 	}
 
-#if !MPT_OS_EMSCRIPTEN
-	// Avoid std::chrono::high_resolution_clock on Emscripten because availability is problematic in AudioWorklet context.
+#if !defined(MPT_COMPILER_QUIRK_CHRONO_NO_HIGH_RESOLUTION_CLOCK)
 	{
 		uint64be time;
 		time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock().now().time_since_epoch()).count();
@@ -94,7 +97,7 @@ static T generate_timeseed()
 		std::memcpy(bytes, &time, sizeof(time));
 		hash(std::begin(bytes), std::end(bytes));
 	}
-#endif // !MPT_OS_EMSCRIPTEN
+#endif // !MPT_COMPILER_QUIRK_CHRONO_NO_HIGH_RESOLUTION_CLOCK
 
 	return static_cast<T>(hash.result());
 
@@ -102,8 +105,11 @@ static T generate_timeseed()
 
 
 sane_random_device::sane_random_device()
+#if !defined(MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE)
 	: rd_reliable(false)
+#endif // MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE
 {
+#if !defined(MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE)
 	try
 	{
 		prd = std::make_unique<std::random_device>();
@@ -116,6 +122,7 @@ sane_random_device::sane_random_device()
 		rd_reliable = false;	
 	}
 	if(!rd_reliable)
+#endif // MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE
 	{
 		init_fallback();
 	}
@@ -123,8 +130,11 @@ sane_random_device::sane_random_device()
 
 sane_random_device::sane_random_device(const std::string & token_)
 	: token(token_)
+#if !defined(MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE)
 	, rd_reliable(false)
+#endif // MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE
 {
+#if !defined(MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE)
 	try
 	{
 		prd = std::make_unique<std::random_device>(token);
@@ -137,6 +147,7 @@ sane_random_device::sane_random_device(const std::string & token_)
 		rd_reliable = false;	
 	}
 	if(!rd_reliable)
+#endif // MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE
 	{
 		init_fallback();
 	}
@@ -174,6 +185,7 @@ sane_random_device::result_type sane_random_device::operator()()
 {
 	mpt::lock_guard<mpt::mutex> l(m);
 	result_type result = 0;
+#if !defined(MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE)
 	if(prd)
 	{
 		try
@@ -220,6 +232,7 @@ sane_random_device::result_type sane_random_device::operator()()
 		rd_reliable = false;
 	}
 	if(!rd_reliable)
+#endif // MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE
 	{ // std::random_device is unreliable
 		//  XOR the generated random number with more entropy from the time-seeded
 		// PRNG.
