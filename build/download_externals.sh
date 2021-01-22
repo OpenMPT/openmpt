@@ -82,12 +82,12 @@ fi
 
 
 
-download_and_unpack_zip "allegro42" "http://na.mirror.garr.it/mirrors/djgpp/current/v2tk/allegro/all422ar2.zip" "build/externals/all422ar2.zip" "."
-download "http://na.mirror.garr.it/mirrors/djgpp/current/v2tk/allegro/all422s.zip" "build/externals/all422s.zip"
+download_and_unpack_zip "allegro42" "https://djgpp.mirror.garr.it/current/v2tk/allegro/all422ar2.zip" "build/externals/all422ar2.zip" "."
+download                            "https://djgpp.mirror.garr.it/current/v2tk/allegro/all422s.zip" "build/externals/all422s.zip"
+download_and_unpack_zip "cwsdpmi"   "https://djgpp.mirror.garr.it/current/v2misc/csdpmi7b.zip" "build/externals/csdpmi7b.zip" "."
+download                            "https://djgpp.mirror.garr.it/current/v2misc/csdpmi7s.zip" "build/externals/csdpmi7s.zip"
 #download_and_unpack_zip "allegro42" "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/allegro/all422ar2.zip" "build/externals/all422ar2.zip" "."
-#download "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/allegro/all422s.zip" "build/externals/all422s.zip"
-download_and_unpack_zip "cwsdpmi" "http://na.mirror.garr.it/mirrors/djgpp/current/v2misc/csdpmi7b.zip" "build/externals/csdpmi7b.zip" "."
-download "http://na.mirror.garr.it/mirrors/djgpp/current/v2misc/csdpmi7s.zip" "build/externals/csdpmi7s.zip"
-#download_and_unpack_zip "cwsdpmi" "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/cwsdpmi/csdpmi7b.zip" "build/externals/csdpmi7b.zip" "."
-#download "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/cwsdpmi/csdpmi7s.zip" "build/externals/csdpmi7s.zip"
+#download                            "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/allegro/all422s.zip" "build/externals/all422s.zip"
+#download_and_unpack_zip "cwsdpmi"   "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/cwsdpmi/csdpmi7b.zip" "build/externals/csdpmi7b.zip" "."
+#download                            "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/cwsdpmi/csdpmi7s.zip" "build/externals/csdpmi7s.zip"
 
