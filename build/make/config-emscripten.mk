@@ -36,6 +36,11 @@ CXXFLAGS += -Os
 CFLAGS   += -Os
 LDFLAGS  += -Os
 
+# Enable LTO as recommended by Emscripten
+CXXFLAGS += -flto=thin
+CFLAGS   += -flto=thin
+LDFLAGS  += -flto=thin -Wl,--thinlto-jobs=all
+
 ifeq ($(EMSCRIPTEN_TARGET),default)
 # emits whatever is emscripten's default, currently (1.38.8) this is the same as "wasm" below.
 CPPFLAGS += -DMPT_BUILD_WASM
