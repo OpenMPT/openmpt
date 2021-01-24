@@ -1185,8 +1185,8 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 		InvalidateSelection();
 		if(pointCursor.GetRow() < sndFile.Patterns[m_nPattern].GetNumRows())
 		{
-			m_StartSel.Set(pointCursor);
-			SetCurSel(pointCursor, PatternCursor(pointCursor.GetRow(), sndFile.GetNumChannels() - 1, PatternCursor::lastColumn));
+			m_StartSel.Set(pointCursor.GetRow(), 0);
+			SetCurSel(m_StartSel, PatternCursor(pointCursor.GetRow(), sndFile.GetNumChannels() - 1, PatternCursor::lastColumn));
 			m_Status.set(psRowSelection);
 		}
 	}
@@ -3765,18 +3765,15 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			switch(channel)
 			{
 			case MIDIEvents::sysStart:  //Start song
-				if(GetDocument())
-					GetDocument()->OnPlayerPlayFromStart();
+				pModDoc->OnPlayerPlayFromStart();
 				break;
 
 			case MIDIEvents::sysContinue:  //Continue song
-				if(GetDocument())
-					GetDocument()->OnPlayerPlay();
+				pModDoc->OnPlayerPlay();
 				break;
 
 			case MIDIEvents::sysStop:  //Stop song
-				if(GetDocument())
-					GetDocument()->OnPlayerStop();
+				pModDoc->OnPlayerStop();
 				break;
 			}
 		}
@@ -3788,7 +3785,8 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	{
 		const bool liveRecord = IsLiveRecord();
 
-		PatternEditPos editpos = GetEditPos(sndFile, liveRecord);
+		const auto &modSpecs = sndFile.GetModSpecifications();
+		const auto editpos = GetEditPos(sndFile, liveRecord);
 		ModCommand &m = GetModCommand(sndFile, editpos);
 		bool update = false;
 
@@ -3797,11 +3795,12 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
 			m.SetValueEffectCol(static_cast<decltype(m.GetValueEffectCol())>(Util::muldivr(midiByte2, ModCommand::maxColumnValue, 127)));
 			update = true;
-		} else if(m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI)
+		} else if((m.command == CMD_NONE || m.command == CMD_SMOOTHMIDI || m.command == CMD_MIDI)
+			&& (modSpecs.HasCommand(CMD_SMOOTHMIDI) || modSpecs.HasCommand(CMD_MIDI)))
 		{
 			// Write command only if there's no existing command or already a midi macro command.
 			pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
-			m.command = CMD_SMOOTHMIDI;
+			m.command = modSpecs.HasCommand(CMD_SMOOTHMIDI) ? CMD_SMOOTHMIDI : CMD_MIDI;
 			m.param = midiByte2;
 			update = true;
 		}
