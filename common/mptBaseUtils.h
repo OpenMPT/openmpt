@@ -825,7 +825,7 @@ namespace mpt
 {
 
 template <typename TContainer, typename TVal>
-inline bool contains(const TContainer &container, const TVal &value) noexcept(noexcept(std::find(std::begin(container), std::end(container), value)))
+MPT_CONSTEXPR20_FUN bool contains(const TContainer &container, const TVal &value) noexcept(noexcept(std::find(std::begin(container), std::end(container), value)))
 {
 	return std::find(std::begin(container), std::end(container), value) != std::end(container);
 }
