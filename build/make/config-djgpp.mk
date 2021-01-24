@@ -37,14 +37,13 @@ DEBUG=0
 OPTIMIZE=0
 OPTIMIZE_SIZE=1
 
-MPT_COMPILER_NOGCSECTIONS=1
-
 IS_CROSS=1
 
 # generates warnings
 MPT_COMPILER_NOVISIBILITY=1
 
-# causes crashes on process shutdown
+# causes crashes on process shutdown,
+# makes memory locking difficult
 MPT_COMPILER_NOGCSECTIONS=1
 
 NO_ZLIB=1
