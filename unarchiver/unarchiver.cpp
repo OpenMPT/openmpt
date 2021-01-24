@@ -89,7 +89,7 @@ std::size_t CUnarchiver::FindBestFile(const std::vector<const char *> &extension
 		}
 
 		// Compare with list of preferred extensions
-		if(std::find(extensions.begin(), extensions.end(), ext) != extensions.end())
+		if(mpt::contains(extensions, ext))
 		{
 			bestIndex = i;
 			break;

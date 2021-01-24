@@ -1568,7 +1568,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	uint32 illegalBytes = 0, totalNumDxx = 0;
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
-		bool patternInUse = std::find(Order().cbegin(), Order().cend(), pat) != Order().cend();
+		const bool patternInUse = mpt::contains(Order(), pat);
 		uint8 numDxx = 0;
 		uint8 emptyCmds = 0;
 		MODPatternData patternData;

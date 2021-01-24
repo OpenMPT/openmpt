@@ -1862,8 +1862,7 @@ bool CSoundFile::IsSampleReferencedByInstrument(SAMPLEINDEX sample, INSTRUMENTIN
 	if(targetIns == nullptr)
 		return false;
 
-	const auto end = targetIns->Keyboard.begin() + NOTE_MAX;  // targetIns->Keyboard.end()
-	return std::find(targetIns->Keyboard.begin(), end, sample) != end;
+	return mpt::contains(mpt::as_span(targetIns->Keyboard).first(NOTE_MAX), sample);
 }
 
 

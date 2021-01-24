@@ -1136,7 +1136,7 @@ void CSampleMapDlg::OnUpdateSamples()
 
 	for(SAMPLEINDEX i = 1; i <= sndFile.GetNumSamples(); i++)
 	{
-		bool isUsed = showAll || std::find(std::begin(KeyboardMap), std::end(KeyboardMap), i) != std::end(KeyboardMap);
+		bool isUsed = showAll || mpt::contains(KeyboardMap, i);
 		if(isUsed)
 		{
 			CString sampleName;

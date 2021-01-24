@@ -248,7 +248,7 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, mpt::Charset
 			}
 
 			// Checking if not found tuning already noticed.
-			if(std::find(notFoundTunings.begin(), notFoundTunings.end(), str) == notFoundTunings.end())
+			if(!mpt::contains(notFoundTunings, str))
 			{
 				notFoundTunings.push_back(str);
 				csf.AddToLog(LogWarning, U_("Tuning '") + str + U_("' used by the module was not found."));

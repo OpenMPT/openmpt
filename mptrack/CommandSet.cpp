@@ -801,7 +801,7 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 	auto &kcList = m_commands[cmd].kcList;
 
 	// Avoid duplicate
-	if(std::find(kcList.begin(), kcList.end(), kc) != kcList.end())
+	if(mpt::contains(kcList, kc))
 	{
 		return CString();
 	}

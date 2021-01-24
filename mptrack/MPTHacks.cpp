@@ -82,7 +82,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 #endif // NO_PLUGINS
 
 	// Check for invalid order items
-	if(!originalSpecs->hasIgnoreIndex && std::find(m_SndFile.Order().begin(), m_SndFile.Order().end(), m_SndFile.Order.GetIgnoreIndex()) != m_SndFile.Order().end())
+	if(!originalSpecs->hasIgnoreIndex && mpt::contains(m_SndFile.Order(), m_SndFile.Order.GetIgnoreIndex()))
 	{
 		foundHacks = true;
 		AddToLog("This format does not support separator (+++) patterns");

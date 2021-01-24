@@ -2015,19 +2015,19 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 				extPS = mpt::PathString::FromUTF8(ext);
 			}
 
-			if(std::find(instrExts.begin(), instrExts.end(), ext) != instrExts.end())
+			if(mpt::contains(instrExts, ext))
 			{
 				if(showInstrs)
 					return IMAGE_INSTRUMENTS;
-			} else if(std::find(sampleExts.begin(), sampleExts.end(), ext) != sampleExts.end())
+			} else if(mpt::contains(sampleExts, ext))
 			{
 				if(showInstrs)
 					return IMAGE_SAMPLES;
-			} else if(std::find(m_modExtensions.begin(), m_modExtensions.end(), ext) != m_modExtensions.end())
+			} else if(mpt::contains(m_modExtensions, ext))
 			{
 				if(showDirs)
 					return IMAGE_FOLDERSONG;
-			} else if(!extPS.empty() && std::find(m_MediaFoundationExtensions.begin(), m_MediaFoundationExtensions.end(), extPS) != m_MediaFoundationExtensions.end())
+			} else if(!extPS.empty() && mpt::contains(m_MediaFoundationExtensions, extPS))
 			{
 				if(showInstrs)
 					return IMAGE_SAMPLES;
@@ -2036,11 +2036,11 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 				// Amiga-style prefix (i.e. mod.songname)
 				std::string prefixExt = fileName.ToUTF8();
 				const auto dotPos = prefixExt.find('.');
-				if(dotPos != std::string::npos && std::find(m_modExtensions.begin(), m_modExtensions.end(), prefixExt.erase(dotPos)) != m_modExtensions.end())
+				if(dotPos != std::string::npos && mpt::contains(m_modExtensions, prefixExt.erase(dotPos)))
 					return IMAGE_FOLDERSONG;
 			}
 				
-			if(m_showAllFiles && std::find(allExtsBlacklist.begin(), allExtsBlacklist.end(), ext) == allExtsBlacklist.end())
+			if(m_showAllFiles && !mpt::contains(allExtsBlacklist, ext))
 				return IMAGE_SAMPLES;
 				
 			return FILTER_REJECT_FILE;

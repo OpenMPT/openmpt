@@ -346,14 +346,14 @@ CVstPluginManager::~CVstPluginManager()
 
 bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib) const
 {
-	return std::find(pluginList.begin(), pluginList.end(), pLib) != pluginList.end();
+	return mpt::contains(pluginList, pLib);
 }
 
 
 void CVstPluginManager::EnumerateDirectXDMOs()
 {
 #if defined(MPT_WITH_DMO)
-	constexpr mpt::UUID knownDMOs[] =
+	static constexpr mpt::UUID knownDMOs[] =
 	{
 		"745057C7-F353-4F2D-A7EE-58434477730E"_uuid, // AEC (Acoustic echo cancellation, not usable)
 		"EFE6629C-81F7-4281-BD91-C9D604A95AF6"_uuid, // Chorus
@@ -381,7 +381,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 			mpt::winstring formattedKey = mpt::winstring(_T("{")) + mpt::winstring(keyname) + mpt::winstring(_T("}"));
 			if(Util::VerifyStringToCLSID(formattedKey, clsid))
 			{
-				if(std::find(std::begin(knownDMOs), std::end(knownDMOs), clsid) == std::end(knownDMOs))
+				if(!mpt::contains(knownDMOs, clsid))
 				{
 					HKEY hksub;
 					formattedKey = mpt::winstring(_T("software\\classes\\DirectShow\\MediaObjects\\")) + mpt::winstring(keyname);

@@ -804,7 +804,7 @@ int COptionsKeyboard::GetCategoryFromCommandID(CommandID command) const
 	for(size_t cat = 0; cat < commandCategories.size(); cat++)
 	{
 		const auto &cmds = commandCategories[cat].commands;
-		if(std::find(cmds.begin(), cmds.end(), command) != cmds.end())
+		if(mpt::contains(cmds, command))
 			return static_cast<int>(cat);
 	}
 	return -1;

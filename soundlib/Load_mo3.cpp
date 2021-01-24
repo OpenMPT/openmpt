@@ -1541,8 +1541,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				dataStreamSerials.clear();
 				while(Ogg::ReadPageAndSkipJunk(sampleChunk.chunk, oggPageInfo, oggPageData))
 				{
-					auto it = std::find(dataStreamSerials.begin(), dataStreamSerials.end(), oggPageInfo.header.bitstream_serial_number);
-					if(it == dataStreamSerials.end())
+					if(!mpt::contains(dataStreamSerials, oggPageInfo.header.bitstream_serial_number))
 					{
 						dataStreamSerials.push_back(oggPageInfo.header.bitstream_serial_number);
 					}
@@ -1569,8 +1568,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						std::size_t extraIndex = (it - headStreamSerials.begin()) - dataStreamSerials.size();
 						for(newSerial = 1; newSerial < 0xffffffffu; ++newSerial)
 						{
-							auto dss = std::find(dataStreamSerials.begin(), dataStreamSerials.end(), newSerial);
-							if(dss == dataStreamSerials.end())
+							if(!mpt::contains(dataStreamSerials, newSerial))
 							{
 								extraIndex -= 1;
 							}

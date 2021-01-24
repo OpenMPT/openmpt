@@ -521,16 +521,9 @@ void COptionsSoundcard::UpdateSampleFormat()
 	const std::vector<SampleFormat> allSampleFormats = AllSampleFormats<std::vector<SampleFormat>>();
 	for(const auto sampleFormat : allSampleFormats)
 	{
-		if(!sampleformats.empty())
+		if(!sampleformats.empty() && !mpt::contains(sampleformats, sampleFormat))
 		{
-			if(std::find(
-					sampleformats.begin(),
-					sampleformats.end(),
-					sampleFormat) == sampleformats.end()
-				)
-			{
-				continue;
-			}
+			continue;
 		}
 		CString name;
 		if(sampleFormat.IsFloat())

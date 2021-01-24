@@ -161,7 +161,7 @@ static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEIND
 					continue;
 				}
 
-				if(std::find(foundSlots.begin(), foundSlots.end(), j) == foundSlots.end())
+				if(!mpt::contains(foundSlots, j))
 				{
 					// Empty sample slot that is not occupied by the current instrument. Yay!
 					candidateSlot = j;

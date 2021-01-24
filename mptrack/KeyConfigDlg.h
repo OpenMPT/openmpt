@@ -28,7 +28,7 @@ public:
 
 	bool SeparatorAt(CommandID c) const
 	{
-		return std::find(separators.begin(), separators.end(), c) != separators.end();
+		return mpt::contains(separators, c);
 	}
 
 	void AddCommands(CommandID first, CommandID last, bool addSeparatorAtEnd = false);

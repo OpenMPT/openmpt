@@ -185,7 +185,7 @@ bool RowVisitor::Visit(ORDERINDEX ord, ROWINDEX row, const ChannelStates &chnSta
 	// Check if new state is part of row state already. If so, we visited this row already and thus the module must be looping
 	if(!oldHadLoops && !newHasLoops && wasVisited)
 		return true;
-	if(oldHadLoops && std::find(rowLoopState->second.begin(), rowLoopState->second.end(), newState) != rowLoopState->second.end())
+	if(oldHadLoops && mpt::contains(rowLoopState->second, newState))
 		return true;
 
 	if(newHasLoops)

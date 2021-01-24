@@ -821,5 +821,16 @@ namespace Util {
 } // namespace Util
 
 
+namespace mpt
+{
+
+template <typename TContainer, typename TVal>
+inline bool contains(const TContainer &container, const TVal &value) noexcept(noexcept(std::find(std::begin(container), std::end(container), value)))
+{
+	return std::find(std::begin(container), std::end(container), value) != std::end(container);
+}
+
+}  // namespace mpt
+
 
 OPENMPT_NAMESPACE_END

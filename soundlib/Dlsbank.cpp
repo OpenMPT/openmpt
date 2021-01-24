@@ -1063,7 +1063,7 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 					dlsEnv.wVolRelease = SF2TimeToDLS(gen.genAmount);
 					break;
 				case SF2_GEN_INSTRUMENT:
-					if(std::find(instruments.begin(), instruments.end(), gen.genAmount) == instruments.end())
+					if(!mpt::contains(instruments, gen.genAmount))
 						instruments.push_back(gen.genAmount);
 					break;
 				case SF2_GEN_ATTENUATION:
