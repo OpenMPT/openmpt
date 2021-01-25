@@ -640,10 +640,19 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 
 					switch(effect2)
 					{
-					case 1:		// Note Finetune
-						effect2 = static_cast<ModCommand::COMMAND>(effectParam2 < 128 ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN);
-						if(effectParam2 > 128) effectParam2 = 255 - effectParam2 + 1;
-						effectParam2 = 0xF0 | std::min(uint8(0x0F), effectParam2);	// Well, this is not too accurate...
+					case 1:  // Note Finetune (1/16th of a semitone signed 8-bit value, not 1/128th as the interface claims)
+						effect2 = (effectParam2 < 128) ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN;
+						if(effectParam2 >= 128)
+							effectParam2 = ~effectParam2 + 1;
+						if(effectParam2 >= 16 && m->IsNote())
+						{
+							if(effect2 == CMD_PORTAMENTOUP)
+								m->note = static_cast<ModCommand::NOTE>(std::min(m->note + effectParam2 / 16, static_cast<int>(NOTE_MAX)));
+							else
+								m->note = static_cast<ModCommand::NOTE>(std::max(m->note - effectParam2 / 16, static_cast<int>(NOTE_MIN)));
+							effectParam2 %= 16u;
+						}
+						effectParam2 = 0xF0 | std::min(uint8(0x0F), effectParam2);
 						break;
 					case 2:		// Note Delay (wtf is the difference to Sample Delay?)
 						effectParam2 = DMFdelay2MPT(effectParam2, settings.internalTicks);
@@ -664,7 +673,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, DMFPatternSettings &sett
 					case 4:		// Portamento Up
 					case 5:		// Portamento Down
 						effectParam2 = DMFporta2MPT(effectParam2, settings.internalTicks, true);
-						effect2 = static_cast<ModCommand::COMMAND>(effect2 == 4 ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN);
+						effect2 = (effect2 == 4) ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN;
 						useMem2 = true;
 						break;
 					case 6:		// Portamento to Note
