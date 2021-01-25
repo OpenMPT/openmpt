@@ -343,7 +343,10 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 
 	const double newFundamentalFreq = NoteToFrequency(static_cast<double>(69 - targetNote) + static_cast<double>(minimumBin) / BINS_PER_NOTE, pitchReference);
 
-	m_sample.nC5Speed = mpt::saturate_round<uint32>(sampleFreq * pitchReference / newFundamentalFreq);
+	if(const auto newFreq = mpt::saturate_round<uint32>(sampleFreq * pitchReference / newFundamentalFreq); newFreq != sampleFreq)
+		m_sample.nC5Speed = newFreq;
+	else
+		return false;
 
 	if((m_modType & (MOD_TYPE_XM | MOD_TYPE_MOD)))
 	{
