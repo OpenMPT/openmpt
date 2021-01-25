@@ -2051,8 +2051,6 @@ void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
 }
 
 
-#define MAX_BUFFER_LENGTH	8192
-
 void CCtrlSamples::ReadTimeStretchParameters()
 {
 	CString str;
@@ -2277,9 +2275,7 @@ public:
 				SetProgress(percent);
 				ProcessMessages();
 				if(m_abort)
-				{
 					break;
-				}
 
 				timeLast = timeNow;
 			}
@@ -2379,16 +2375,13 @@ public:
 
 	TimeStretchPitchShiftResult PitchShift()
 	{
+		static constexpr SmpLength MAX_BUFFER_LENGTH = 8192;
 		ModSample &sample = m_modDoc.GetSoundFile().GetSample(m_sample);
 
 		if(!sample.HasSampleData() || m_ratio < 0.5f || m_ratio > 2.0f)
 		{
 			return kAbort;
 		}
-
-		// Get number of channels & sample size
-		const uint8 smpsize = sample.GetElementarySampleSize();
-		const uint8 numChans = sample.GetNumChannels();
 
 		// Get selected oversampling - quality - (also refered as FFT overlapping) factor
 		CComboBox *combo = (CComboBox *)m_parent.GetDlgItem(IDC_COMBO5);
@@ -2417,26 +2410,38 @@ public:
 			return kOutOfMemory;
 		}
 
-		int8 *pNewSample = static_cast<int8 *>(ModSample::AllocateSample(sample.nLength, sample.GetBytesPerSample()));
+		const auto smpSize = sample.GetElementarySampleSize();
+		const auto numChans = sample.GetNumChannels();
+		const auto bps = sample.GetBytesPerSample();
+		int8 *pNewSample = static_cast<int8 *>(ModSample::AllocateSample(sample.nLength, bps));
 		if(pNewSample == nullptr)
 			return kOutOfMemory;
 
 		DWORD timeLast = 0;
 
+		const auto selection = m_parent.GetSelectionPoints();
+
 		// Process each channel separately
 		for(uint8 chn = 0; chn < numChans; chn++)
 		{
-
-			SmpLength pos = 0;
-			SmpLength len = MAX_BUFFER_LENGTH;
-
 			// Process sample buffer using MAX_BUFFER_LENGTH (max) sized chunk steps (in order to allow
 			// the processing of BIG samples...)
-			while(pos < sample.nLength)
+			for(SmpLength pos = selection.nStart; pos < selection.nEnd;)
 			{
+				DWORD timeNow = timeGetTime();
+				if(timeNow - timeLast >= m_updateInterval)
+				{
+					TCHAR progress[32];
+					uint32 percent = static_cast<uint32>(chn * 50.0 + (100.0 / numChans) * (pos - selection.nStart) / (selection.nEnd - selection.nStart));
+					wsprintf(progress, _T("Pitch Shift... %u%%"), percent);
+					SetText(progress);
+					SetProgress(percent);
+					ProcessMessages();
+					if(m_abort)
+						break;
 
-				// Current chunk size limit test
-				if(pos + len >= sample.nLength) len = sample.nLength - pos;
+					timeLast = timeNow;
+				}
 
 				// TRICK : output buffer offset management
 				// as the pitch-shifter adds  some blank signal in head of output  buffer (matching FFT
@@ -2446,31 +2451,15 @@ public:
 				// (all 0.0f) at the end of the buffer (those extra samples will benefit from  internal
 				// FFT data  computed during the previous  steps resulting in a  correct and consistent
 				// signal output).
-				bool bufstart = ( pos == 0 );
-				bool bufend   = ( pos + MAX_BUFFER_LENGTH >= sample.nLength );
-				SmpLength startoffset = ( bufstart ? fft : 0 );
-				SmpLength inneroffset = ( bufstart ? 0 : fft );
-				SmpLength finaloffset = ( bufend   ? fft : 0 );
-
-				DWORD timeNow = timeGetTime();
-				if(timeNow - timeLast >= m_updateInterval)
-				{
-					TCHAR progress[32];
-					uint32 percent = static_cast<uint32>((float)chn * 50.0f + (100.0f / numChans) * (pos + len) / sample.nLength);
-					wsprintf(progress, _T("Pitch Shift... %u%%"), percent);
-					SetText(progress);
-					SetProgress(percent);
-					ProcessMessages();
-					if(m_abort)
-					{
-						break;
-					}
-
-					timeLast = timeNow;
-				}
+				const SmpLength processLen = (pos + MAX_BUFFER_LENGTH <= selection.nEnd) ? MAX_BUFFER_LENGTH : (selection.nEnd - pos);
+				const bool bufStart = (pos == selection.nStart);
+				const bool bufEnd = (pos + processLen >= selection.nEnd);
+				const SmpLength startOffset = (bufStart ? fft : 0);
+				const SmpLength innerOffset = (bufStart ? 0 : fft);
+				const SmpLength finalOffset = (bufEnd ? fft : 0);
 
 				// Re-initialize pitch-shifter with blank FFT before processing 1st chunk of current channel
-				if(bufstart)
+				if(bufStart)
 				{
 					std::fill(buffer.begin(), buffer.begin() + fft, 0.0f);
 					smbPitchShift(m_ratio, fft, fft, ovs, sampleRate, buffer.data(), buffer.data());
@@ -2478,46 +2467,51 @@ public:
 
 				// Convert current channel's data chunk to float
 				SmpLength offset = pos * numChans + chn;
-				switch(smpsize)
+				switch(smpSize)
 				{
 				case 1:
-					CopySample<SC::ConversionChain<SC::Convert<float, int8>, SC::DecodeIdentity<int8>>>(buffer.data(), len, 1, sample.sample8() + offset, sizeof(int8) * len * numChans, numChans);
+					CopySample<SC::ConversionChain<SC::Convert<float, int8>, SC::DecodeIdentity<int8>>>(buffer.data(), processLen, 1, sample.sample8() + offset, sizeof(int8) * processLen * numChans, numChans);
 					break;
 				case 2:
-					CopySample<SC::ConversionChain<SC::Convert<float, int16>, SC::DecodeIdentity<int16>>>(buffer.data(), len, 1, sample.sample16() + offset, sizeof(int16) * len * numChans, numChans);
+					CopySample<SC::ConversionChain<SC::Convert<float, int16>, SC::DecodeIdentity<int16>>>(buffer.data(), processLen, 1, sample.sample16() + offset, sizeof(int16) * processLen * numChans, numChans);
 					break;
 				}
 
 				// Fills extra blank samples (read TRICK description comment above)
-				if(bufend)
-					std::fill(buffer.begin() + len, buffer.begin() + len + finaloffset, 0.0f);
+				if(bufEnd)
+					std::fill(buffer.begin() + processLen, buffer.begin() + processLen + finalOffset, 0.0f);
 
 				// Apply pitch shifting
-				smbPitchShift(m_ratio, static_cast<long>(len + finaloffset), fft, ovs, sampleRate, buffer.data(), buffer.data());
+				smbPitchShift(m_ratio, static_cast<long>(processLen + finalOffset), fft, ovs, sampleRate, buffer.data(), buffer.data());
 
 				// Restore pitched-shifted float sample into original sample buffer
-				void *ptr = pNewSample + (pos - inneroffset) * smpsize * numChans + chn * smpsize;
-				const SmpLength copyLength = len + finaloffset - startoffset + 1;
+				void *ptr = pNewSample + (pos - innerOffset) * smpSize * numChans + chn * smpSize;
+				const SmpLength copyLength = processLen + finalOffset - startOffset + 1;
 
-				switch(smpsize)
+				switch(smpSize)
 				{
 				case 1:
-					CopySample<SC::ConversionChain<SC::Convert<int8, float>, SC::DecodeIdentity<float>>>(static_cast<int8 *>(ptr), copyLength, numChans, buffer.data() + startoffset, sizeof(float) * bufferSize, 1);
+					CopySample<SC::ConversionChain<SC::Convert<int8, float>, SC::DecodeIdentity<float>>>(static_cast<int8 *>(ptr), copyLength, numChans, buffer.data() + startOffset, sizeof(float) * bufferSize, 1);
 					break;
 				case 2:
-					CopySample<SC::ConversionChain<SC::Convert<int16, float>, SC::DecodeIdentity<float>>>(static_cast<int16 *>(ptr), copyLength, numChans, buffer.data() + startoffset, sizeof(float) * bufferSize, 1);
+					CopySample<SC::ConversionChain<SC::Convert<int16, float>, SC::DecodeIdentity<float>>>(static_cast<int16 *>(ptr), copyLength, numChans, buffer.data() + startOffset, sizeof(float) * bufferSize, 1);
 					break;
 				}
 
 				// Next buffer chunk
-				pos += MAX_BUFFER_LENGTH;
+				pos += processLen;
 			}
 		}
 
 		if(!m_abort)
 		{
 			m_parent.PrepareUndo("Pitch Shift", sundo_replace);
+			memcpy(pNewSample, sample.sampleb(), selection.nStart * bps);
+			memcpy(pNewSample + selection.nEnd * bps, sample.sampleb() + selection.nEnd * bps, (sample.nLength - selection.nEnd) * bps);
 			ctrlSmp::ReplaceSample(sample, pNewSample, sample.nLength, m_modDoc.GetSoundFile());
+		} else
+		{
+			ModSample::FreeSample(pNewSample);
 		}
 
 		// Restore mouse cursor
@@ -3569,12 +3563,19 @@ void CCtrlSamples::OnAutotune()
 		{
 			BeginWaitCursor();
 			PrepareUndo("Automatic Sample Tuning");
-			if (IsOPLInstrument())
-				sample.nC5Speed = mpt::saturate_round<uint32>(dlg.GetPitchReference() * (8363.0 / 440.0) * std::pow(2.0, dlg.GetTargetNote() / 12.0));
-			else
-				at.Apply(static_cast<double>(dlg.GetPitchReference()), dlg.GetTargetNote());
+			bool modified = true;
+			if(IsOPLInstrument())
+			{
+				const uint32 newFreq = mpt::saturate_round<uint32>(dlg.GetPitchReference() * (8363.0 / 440.0) * std::pow(2.0, dlg.GetTargetNote() / 12.0));
+				modified = (newFreq != sample.nC5Speed);
+				sample.nC5Speed = newFreq;
+			} else
+			{
+				modified = at.Apply(static_cast<double>(dlg.GetPitchReference()), dlg.GetTargetNote());
+			}
 			OnFineTuneChangedDone();
-			SetModified(SampleHint().Info(), true, false);
+			if(modified)
+				SetModified(SampleHint().Info(), true, false);
 			EndWaitCursor();
 		}
 	}
