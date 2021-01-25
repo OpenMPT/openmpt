@@ -2390,6 +2390,8 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 		startRow--; \
 		mStart -= sndFile->GetNumChannels(); \
 	} \
+	if(startRow > maxRow) \
+		break; \
 	while(endRow <= maxRow && (endCond)) \
 	{ \
 		endRow++; \
