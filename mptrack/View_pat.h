@@ -523,6 +523,7 @@ private:
 	bool IsInterpolationPossible(PatternCursor::Columns colType) const;
 	bool IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX chan, PatternCursor::Columns colType) const;
 	void Interpolate(PatternCursor::Columns type);
+	PatternRect SweepPattern(bool (*startCond)(const ModCommand &), bool (*endCond)(const ModCommand &, const ModCommand &)) const;
 
 	// Return true if recording live (i.e. editing while following playback).
 	bool IsLiveRecord() const

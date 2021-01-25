@@ -2350,13 +2350,54 @@ void CViewPattern::OnVisualizeEffect()
 }
 
 
+// Helper function for sweeping the pattern up and down to find suitable start and end points for interpolation.
+// startCond must return true for the start row, endCond must return true for the end row.
+PatternRect CViewPattern::SweepPattern(bool(*startCond)(const ModCommand &), bool(*endCond)(const ModCommand &, const ModCommand &)) const
+{
+	const auto &pattern = GetSoundFile()->Patterns[m_nPattern];
+	const ROWINDEX numRows = pattern.GetNumRows();
+	const ROWINDEX cursorRow = m_Selection.GetStartRow();
+	if(cursorRow >= numRows)
+		return {};
+
+	const ModCommand *start = pattern.GetpModCommand(cursorRow, m_Selection.GetStartChannel()), *end = start;
+
+	// Sweep up
+	ROWINDEX startRow = ROWINDEX_INVALID;
+	for(ROWINDEX row = 0; row <= cursorRow; row++, start -= pattern.GetNumChannels())
+	{
+		if(startCond(*start))
+		{
+			startRow = cursorRow - row;
+			break;
+		}
+	}
+	if(startRow == ROWINDEX_INVALID)
+		return {};
+
+	// Sweep down
+	ROWINDEX endRow = ROWINDEX_INVALID;
+	for(ROWINDEX row = cursorRow; row < numRows; row++, end += pattern.GetNumChannels())
+	{
+		if(endCond(*start, *end))
+		{
+			endRow = row;
+			break;
+		}
+	}
+	
+	if(endRow == ROWINDEX_INVALID)
+		return {};
+	
+	return {PatternCursor(startRow, m_Selection.GetUpperLeft()), PatternCursor(endRow, m_Selection.GetUpperLeft())};
+}
+
+
 void CViewPattern::Interpolate(PatternCursor::Columns type)
 {
 	CSoundFile *sndFile = GetSoundFile();
 	if(sndFile == nullptr || !sndFile->Patterns.IsValidPat(m_nPattern) || !IsEditingEnabled())
-	{
 		return;
-	}
 
 	bool changed = false;
 	std::vector<CHANNELINDEX> validChans;
@@ -2378,53 +2419,41 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 	if(m_Selection.GetUpperLeft() == m_Selection.GetLowerRight() && !validChans.empty())
 	{
 		// No selection has been made: Interpolate between closest non-zero values in this column.
-		const ModCommand *mStart = sndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel()), *mEnd = mStart;
-		const ROWINDEX maxRow = sndFile->Patterns[m_nPattern].GetNumRows() - 1;
-		ROWINDEX startRow = m_Selection.GetStartRow(), endRow = startRow;
-
-// Shortcut macro for sweeping the pattern up and down to find suitable start and end points for interpolation.
-// While startCond / endCond evaluates to true, sweeping is continued upwards / downwards.
-#define SweepPattern(startCond, endCond) \
-	while(startRow >= 0 && startRow <= maxRow && (startCond)) \
-	{ \
-		startRow--; \
-		mStart -= sndFile->GetNumChannels(); \
-	} \
-	if(startRow > maxRow) \
-		break; \
-	while(endRow <= maxRow && (endCond)) \
-	{ \
-		endRow++; \
-		mEnd += sndFile->GetNumChannels(); \
-	}
+		PatternRect sweepSelection;
 
 		switch(type)
 		{
 		case PatternCursor::noteColumn:
 			// Allow note-to-note interpolation only.
-			SweepPattern(mStart->note == NOTE_NONE, !mStart->IsNote() || !mEnd->IsNote());
+			sweepSelection = SweepPattern(
+				[](const ModCommand &start) { return start.note != NOTE_NONE; },
+				[](const ModCommand &start, const ModCommand &end) { return start.IsNote() && end.IsNote(); });
 			break;
 		case PatternCursor::instrColumn:
 			// Allow interpolation between same instrument, as long as it's not a PC note.
-			SweepPattern(mStart->instr == 0 || mStart->IsPcNote(), mEnd->instr != mStart->instr);
+			sweepSelection = SweepPattern(
+				[](const ModCommand &start) { return start.instr != 0 && !start.IsPcNote(); },
+				[](const ModCommand &start, const ModCommand &end) { return end.instr == start.instr; });
 			break;
 		case PatternCursor::volumeColumn:
 			// Allow interpolation between same volume effect, as long as it's not a PC note.
-			SweepPattern(mStart->volcmd == VOLCMD_NONE || mStart->IsPcNote(), mEnd->volcmd != mStart->volcmd);
+			sweepSelection = SweepPattern(
+				[](const ModCommand &start) { return start.volcmd != VOLCMD_NONE && !start.IsPcNote(); },
+				[](const ModCommand &start, const ModCommand &end) { return end.volcmd == start.volcmd && !end.IsPcNote(); });
 			break;
 		case PatternCursor::effectColumn:
 		case PatternCursor::paramColumn:
 			// Allow interpolation between same effect, or anything if it's a PC note.
-			SweepPattern(mStart->command == CMD_NONE && !mStart->IsPcNote(), (mEnd->command != mStart->command && !mStart->IsPcNote()) || (mStart->IsPcNote() && !mEnd->IsPcNote()));
+			sweepSelection = SweepPattern(
+				[](const ModCommand &start) { return start.command != CMD_NONE || start.IsPcNote(); },
+				[](const ModCommand &start, const ModCommand &end) { return (end.command == start.command || start.IsPcNote()) && (!start.IsPcNote() || end.IsPcNote()); });
 			break;
 		}
 
-#undef SweepPattern
-
-		if(startRow >= 0 && startRow < endRow && endRow <= maxRow)
+		if(sweepSelection.GetNumRows() > 1)
 		{
 			// Found usable end and start commands: Extend selection.
-			SetCurSel(PatternCursor(startRow, m_Selection.GetUpperLeft()), PatternCursor(endRow, m_Selection.GetUpperLeft()));
+			SetCurSel(sweepSelection);
 		}
 	}
 
@@ -2523,7 +2552,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 				vsrc = srcCmd.GetValueEffectCol();
 				vdest = destCmd.GetValueEffectCol();
 				PCparam = srcCmd.GetValueVolCol();
-				if(PCparam == 0)
+				if((PCparam == 0 && destCmd.IsPcNote()) || !srcCmd.IsPcNote())
 					PCparam = destCmd.GetValueVolCol();
 				PCinst = srcCmd.instr;
 				if(PCinst == 0)
