@@ -52,12 +52,12 @@ template <> struct TraitsExternal<long double> { using type = long double; using
 struct Int16MSB { std::array<std::byte, 2> data; };
 struct Int24MSB { std::array<std::byte, 3> data; };
 struct Int32MSB { std::array<std::byte, 4> data; };
-struct Int32MSB16 { std::array<std::byte, 4> data;  };
-struct Int32MSB18 { std::array<std::byte, 4> data;  };
-struct Int32MSB20 { std::array<std::byte, 4> data;  };
-struct Int32MSB24 { std::array<std::byte, 4> data;  };
-struct Float32MSB { std::array<std::byte, 4> data;  };
-struct Float64MSB { std::array<std::byte, 8> data;  };
+struct Int32MSB16 { std::array<std::byte, 4> data; };
+struct Int32MSB18 { std::array<std::byte, 4> data; };
+struct Int32MSB20 { std::array<std::byte, 4> data; };
+struct Int32MSB24 { std::array<std::byte, 4> data; };
+struct Float32MSB { std::array<std::byte, 4> data; };
+struct Float64MSB { std::array<std::byte, 8> data; };
 
 struct Int16LSB { std::array<std::byte, 2> data; };
 struct Int24LSB { std::array<std::byte, 3> data; };
