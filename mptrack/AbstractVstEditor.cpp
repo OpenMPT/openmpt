@@ -79,6 +79,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_COMMAND(ID_PLUG_PASSKEYS,		&CAbstractVstEditor::OnPassKeypressesToPlug)
 	ON_COMMAND(ID_PRESET_SAVE,			&CAbstractVstEditor::OnSavePreset)
 	ON_COMMAND(ID_PRESET_RANDOM,		&CAbstractVstEditor::OnRandomizePreset)
+	ON_COMMAND(ID_RENAME_PLUGIN,		&CAbstractVstEditor::OnRenamePlugin)
 	ON_COMMAND(ID_PREVIOUSVSTPRESET,	&CAbstractVstEditor::OnSetPreviousVSTPreset)
 	ON_COMMAND(ID_NEXTVSTPRESET,		&CAbstractVstEditor::OnSetNextVSTPreset)
 	ON_COMMAND(ID_VSTPRESETBACKWARDJUMP,&CAbstractVstEditor::OnVSTPresetBackwardJump)
@@ -261,6 +262,29 @@ void CAbstractVstEditor::OnRandomizePreset()
 			m_VstPlugin.SetParameter(p, val);
 		}
 		UpdateParamDisplays();
+	}
+}
+
+
+void CAbstractVstEditor::OnRenamePlugin()
+{
+	auto &sndFile = m_VstPlugin.GetSoundFile();
+	auto &plugin = sndFile.m_MixPlugins[m_VstPlugin.m_nSlot];
+
+	CInputDlg dlg(this, _T("New name for this plugin instance:"), mpt::ToCString(plugin.GetName()), std::size(plugin.Info.szName.buf));
+	if(dlg.DoModal() == IDOK)
+	{
+		if(dlg.resultAsString != mpt::ToCString(plugin.GetName()))
+		{
+			plugin.Info.szName = mpt::ToCharset(mpt::Charset::Locale, dlg.resultAsString);
+			if(auto *modDoc = sndFile.GetpModDoc(); modDoc != nullptr)
+			{
+				if(sndFile.GetModSpecifications().supportsPlugins)
+					modDoc->SetModified();
+				modDoc->UpdateAllViews(nullptr, PluginHint(m_VstPlugin.m_nSlot + 1).Info().Names(), this);
+			}
+			SetTitle();
+		}
 	}
 }
 

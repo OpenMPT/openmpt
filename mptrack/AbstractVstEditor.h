@@ -73,6 +73,7 @@ public:
 	afx_msg void OnCopyParameters();
 	afx_msg void OnPasteParameters();
 	afx_msg void OnRandomizePreset();
+	afx_msg void OnRenamePlugin();
 	afx_msg void OnSetPreset(UINT nID);
 	afx_msg void OnBypassPlug();
 	afx_msg void OnRecordAutomation();

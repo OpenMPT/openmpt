@@ -3466,6 +3466,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Create &instrument from plugin", ID_PLUGINTOINSTRUMENT
         MENUITEM "&Randomize Parameters",       ID_PRESET_RANDOM
+        MENUITEM SEPARATOR
+        MENUITEM "Re&name Plugin",              ID_RENAME_PLUGIN
     END
     POPUP "&Info"
     BEGIN
