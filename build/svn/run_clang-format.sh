@@ -1,10 +1,14 @@
 #!/bin/bash
 set -e
 
-#cd libopenmpt
-# clang-format-3.7 -i *.h *.c *.hpp *.cpp
-#cd ..
+cd libopenmpt
+ clang-format-10 -i *.hpp *.cpp *.h
+cd ..
 
 cd examples
- clang-format-3.7 -i *.c *.cpp
+ clang-format-10 -i *.cpp *.c
+cd ..
+
+cd openmpt123
+ clang-format-10 -i *.hpp *.cpp
 cd ..
