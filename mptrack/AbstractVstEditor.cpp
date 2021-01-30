@@ -271,7 +271,7 @@ void CAbstractVstEditor::OnRenamePlugin()
 	auto &sndFile = m_VstPlugin.GetSoundFile();
 	auto &plugin = sndFile.m_MixPlugins[m_VstPlugin.m_nSlot];
 
-	CInputDlg dlg(this, _T("New name for this plugin instance:"), mpt::ToCString(plugin.GetName()), std::size(plugin.Info.szName.buf));
+	CInputDlg dlg(this, _T("New name for this plugin instance:"), mpt::ToCString(plugin.GetName()), static_cast<int32>(std::size(plugin.Info.szName.buf)));
 	if(dlg.DoModal() == IDOK)
 	{
 		if(dlg.resultAsString != mpt::ToCString(plugin.GetName()))
