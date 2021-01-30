@@ -118,4 +118,4 @@ StatementMacros: [] #?
 TabWidth: 2
 TypenameMacros: [] #?
 UseCRLF: false
-UseTab: ForContinuationAndIndentation
+UseTab: ForIndentation
