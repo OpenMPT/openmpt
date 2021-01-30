@@ -119,4 +119,4 @@ StatementMacros: [ 'OPENMPT_NAMESPACE_BEGIN', 'OPENMPT_NAMESPACE_END', 'MPT_MSVC
 TabWidth: 4
 TypenameMacros: [] #?
 UseCRLF: false
-UseTab: ForIndentation
+UseTab: ForContinuationAndIndentation
