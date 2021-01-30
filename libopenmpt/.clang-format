@@ -25,7 +25,7 @@ AlwaysBreakTemplateDeclarations: Yes
 BinPackArguments: true
 BinPackParameters: false
 BraceWrapping:
- AfterCaseLabel: false
+ AfterCaseLabel: true
  AfterClass: false
  AfterControlStatement: MultiLine
  AfterEnum: false
@@ -94,7 +94,7 @@ PointerAlignment: Middle
 #RawStringFormats
 ReflowComments: false
 SortIncludes: false
-SortUsingDeclarations: false
+SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: true
@@ -106,7 +106,7 @@ SpaceBeforeParens: ControlStatements
 SpaceBeforeRangeBasedForLoopColon: true
 SpaceBeforeSquareBrackets: false
 SpaceInEmptyBlock: true
-SpaceInEmptyParentheses: true
+SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 2
 SpacesInAngles: false
 SpacesInCStyleCastParentheses: false
