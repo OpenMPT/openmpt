@@ -201,6 +201,18 @@ void CSelectPluginDlg::OnOK()
 		// Clear plugin info
 		MemsetZero(m_pPlugin->Info);
 		changed = true;
+		if(m_pModDoc)
+		{
+			for(PLUGINDEX plug = 0; plug < m_nPlugSlot; plug++)
+			{
+				auto &srcPlug = m_pModDoc->GetSoundFile().m_MixPlugins[plug];
+				if(srcPlug.GetOutputPlugin() == m_nPlugSlot)
+				{
+					srcPlug.SetOutputToMaster();
+					m_pModDoc->UpdateAllViews(nullptr, PluginHint(static_cast<PLUGINDEX>(plug + 1)).Info());
+				}
+			}
+		}
 	}
 
 	//remember window size:
