@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.5.5-pre
+### libopenmpt 0.5.5 (2021-01-31)
 
  *  [**New**] `Makefile` `CONFIG=emscripten` now supports
     `EMSCRIPTEN_TARGET=audioworkletprocessor` which builds an ES6 module in
