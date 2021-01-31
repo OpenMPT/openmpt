@@ -10,6 +10,8 @@ is just a high-level summary.
  *  [**Bug**] stb_vorbis: Fix decoding of Vorbis streams without comments which
     affected most Vorbis samples since stb_vorbis v1.20.
 
+ *  DMF: Improve import of finetune effect with parameters larger than +/-15.
+
  *  mpg123: Update to v1.26.4 (2020-12-24).
 
 ### libopenmpt 0.3.25 (2020-11-29)
