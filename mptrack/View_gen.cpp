@@ -518,12 +518,12 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		SetDlgItemText(IDC_TEXT6, s);
 	}
 	
-	if(updateWholePluginView || plugHint.GetPlugin() != 0)
+	if(updateWholePluginView || plugHint.GetPlugin() > m_nCurrentPlugin)
 	{
 		int insertAt = 1;
+		m_CbnOutput.SetRedraw(FALSE);
 		if(updateWholePluginView)
 		{
-			m_CbnOutput.SetRedraw(FALSE);
 			m_CbnOutput.ResetContent();
 			m_CbnOutput.SetItemData(m_CbnOutput.AddString(_T("Default")), 0);
 
@@ -538,7 +538,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			}
 		} else
 		{
-			const DWORD_PTR changedPlugin = plugin.GetOutputPlugin() + 0x80;
+			const DWORD_PTR changedPlugin = 0x80 + (plugHint.GetPlugin() - 1);
 			const int items = m_CbnOutput.GetCount();
 			for(insertAt = 1; insertAt < items; insertAt++)
 			{
@@ -550,7 +550,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			}
 		}
 
-		int outputSel = 0;
+		int outputSel = plugin.IsOutputToMaster() ? 0 : -1;
 		for(PLUGINDEX iOut = m_nCurrentPlugin + 1; iOut < MAX_MIXPLUGINS; iOut++)
 		{
 			if(!updateWholePluginView && (iOut + 1) != plugHint.GetPlugin())
@@ -570,8 +570,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 
 				insertAt = m_CbnOutput.InsertString(insertAt, s);
 				m_CbnOutput.SetItemData(insertAt, 0x80 + iOut);
-				if (!sndFile.m_MixPlugins[m_nCurrentPlugin].IsOutputToMaster()
-					&& (sndFile.m_MixPlugins[m_nCurrentPlugin].GetOutputPlugin() == iOut))
+				if(!plugin.IsOutputToMaster() && (plugin.GetOutputPlugin() == iOut))
 				{
 					outputSel = insertAt;
 				}
@@ -579,7 +578,8 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			}
 		}
 		m_CbnOutput.SetRedraw(TRUE);
-		m_CbnOutput.SetCurSel(outputSel);
+		if(outputSel >= 0)
+			m_CbnOutput.SetCurSel(outputSel);
 	}
 	if (plugHint.GetType()[HINT_PLUGINPARAM] && updatePlug)
 	{
