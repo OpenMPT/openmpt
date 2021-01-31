@@ -415,14 +415,16 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 	}
 
 	// Update plugin names
-	if (genHint.GetType()[HINT_MODTYPE | HINT_MODCHANNELS] || plugHint.GetType()[HINT_PLUGINNAMES])
+	if(genHint.GetType()[HINT_MODTYPE | HINT_MODCHANNELS] || plugHint.GetType()[HINT_PLUGINNAMES])
 	{
-		PopulateChannelPlugins();
+		PopulateChannelPlugins(plugHint.GetPlugin() ? plugHint.GetPlugin() - 1 : PLUGINDEX_INVALID);
 		SetDlgItemText(IDC_EDIT13, mpt::ToCString(sndFile.m_MixPlugins[m_nCurrentPlugin].GetName()));
 	}
 	// Update plugin info
+	const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
 	const bool updatePlug = (plugHint.GetPlugin() == 0 || plugHint.GetPlugin() == m_nCurrentPlugin + 1);
-	if (updateAll || (plugHint.GetType()[HINT_MIXPLUGINS] && updatePlug))
+	const bool updateWholePluginView = updateAll || (plugHint.GetType()[HINT_MIXPLUGINS] && updatePlug);
+	if(updateWholePluginView)
 	{
 		m_CbnPlugin.SetRedraw(FALSE);
 		m_CbnPlugin.ResetContent();
@@ -430,7 +432,6 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		m_CbnPlugin.SetRedraw(TRUE);
 		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
-		const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
 		SetDlgItemText(IDC_EDIT13, mpt::ToCString(plugin.GetName()));
 		CheckDlgButton(IDC_CHECK9, plugin.IsMasterEffect() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK10, plugin.IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
@@ -515,46 +516,70 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 			GetDlgItem(IDC_EDIT14)->EnableWindow(FALSE);
 		}
 		SetDlgItemText(IDC_TEXT6, s);
-		int outputsel = 0;
-		m_CbnOutput.SetRedraw(FALSE);
-		m_CbnOutput.ResetContent();
-		m_CbnOutput.SetItemData(m_CbnOutput.AddString(_T("Default")), 0);
-
-		for(PLUGINDEX i = m_nCurrentPlugin + 1; i < MAX_MIXPLUGINS; i++)
+	}
+	
+	if(updateWholePluginView || plugHint.GetPlugin() != 0)
+	{
+		int insertAt = 1;
+		if(updateWholePluginView)
 		{
-			if(!sndFile.m_MixPlugins[i].IsValidPlugin())
+			m_CbnOutput.SetRedraw(FALSE);
+			m_CbnOutput.ResetContent();
+			m_CbnOutput.SetItemData(m_CbnOutput.AddString(_T("Default")), 0);
+
+			for(PLUGINDEX i = m_nCurrentPlugin + 1; i < MAX_MIXPLUGINS; i++)
 			{
-				m_CbnOutput.SetItemData(m_CbnOutput.AddString(_T("New Plugin...")), 1);
-				break;
+				if(!sndFile.m_MixPlugins[i].IsValidPlugin())
+				{
+					m_CbnOutput.SetItemData(m_CbnOutput.AddString(_T("New Plugin...")), 1);
+					insertAt = 2;
+					break;
+				}
+			}
+		} else
+		{
+			const DWORD_PTR changedPlugin = plugin.GetOutputPlugin() + 0x80;
+			const int items = m_CbnOutput.GetCount();
+			for(insertAt = 1; insertAt < items; insertAt++)
+			{
+				DWORD_PTR thisPlugin = m_CbnOutput.GetItemData(insertAt);
+				if(thisPlugin == changedPlugin)
+					m_CbnOutput.DeleteString(insertAt);
+				if(thisPlugin >= changedPlugin)
+					break;
 			}
 		}
 
-		for (PLUGINDEX iOut = m_nCurrentPlugin + 1; iOut < MAX_MIXPLUGINS; iOut++)
+		int outputSel = 0;
+		for(PLUGINDEX iOut = m_nCurrentPlugin + 1; iOut < MAX_MIXPLUGINS; iOut++)
 		{
+			if(!updateWholePluginView && (iOut + 1) != plugHint.GetPlugin())
+				continue;
 			const SNDMIXPLUGIN &outPlug = sndFile.m_MixPlugins[iOut];
 			if(outPlug.IsValidPlugin())
 			{
-				mpt::ustring libName = outPlug.GetLibraryName();
+				const auto name = outPlug.GetName(), libName = outPlug.GetLibraryName();
 				s.Format(_T("FX%d: "), iOut + 1);
-				s += mpt::ToCString(libName);
-				if(outPlug.GetName() != U_("") && libName != outPlug.GetName())
+				s += mpt::ToCString(name.empty() ? libName : name);
+				if(!name.empty() && libName != name)
 				{
 					s += _T(" (");
-					s += mpt::ToCString(outPlug.GetName());
+					s += mpt::ToCString(libName);
 					s += _T(")");
 				}
 
-				int n = m_CbnOutput.AddString(s);
-				m_CbnOutput.SetItemData(n, 0x80 + iOut);
+				insertAt = m_CbnOutput.InsertString(insertAt, s);
+				m_CbnOutput.SetItemData(insertAt, 0x80 + iOut);
 				if (!sndFile.m_MixPlugins[m_nCurrentPlugin].IsOutputToMaster()
 					&& (sndFile.m_MixPlugins[m_nCurrentPlugin].GetOutputPlugin() == iOut))
 				{
-					outputsel = n;
+					outputSel = insertAt;
 				}
+				insertAt++;
 			}
 		}
 		m_CbnOutput.SetRedraw(TRUE);
-		m_CbnOutput.SetCurSel(outputsel);
+		m_CbnOutput.SetCurSel(outputSel);
 	}
 	if (plugHint.GetType()[HINT_PLUGINPARAM] && updatePlug)
 	{
@@ -569,7 +594,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 }
 
 
-void CViewGlobals::PopulateChannelPlugins()
+void CViewGlobals::PopulateChannelPlugins(PLUGINDEX plugin)
 {
 	// Channel effect lists
 	const CSoundFile &sndFile = GetDocument()->GetSoundFile();
@@ -577,28 +602,49 @@ void CViewGlobals::PopulateChannelPlugins()
 	for(CHANNELINDEX ichn = 0; ichn < CHANNELS_IN_TAB; ichn++)
 	{
 		const CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + ichn;
+		auto &comboBox = m_CbnEffects[ichn];
 		if(nChn < MAX_BASECHANNELS)
 		{
-			m_CbnEffects[ichn].SetRedraw(FALSE);
-			m_CbnEffects[ichn].ResetContent();
-			m_CbnEffects[ichn].SetItemData(m_CbnEffects[ichn].AddString(_T("No plugin")), 0);
-			int fxsel = 0;
-			for (PLUGINDEX ifx = 0; ifx < MAX_MIXPLUGINS; ifx++)
+			comboBox.SetRedraw(FALSE);
+			int insertAt = 1;
+			if(plugin == PLUGINDEX_INVALID)
 			{
-				if (sndFile.m_MixPlugins[ifx].IsValidPlugin()
+				comboBox.ResetContent();
+				comboBox.SetItemData(comboBox.AddString(_T("No plugin")), 0);
+			} else
+			{
+				const int items = comboBox.GetCount();
+				for(insertAt = 1; insertAt < items; insertAt++)
+				{
+					auto thisPlugin = static_cast<PLUGINDEX>(comboBox.GetItemData(insertAt));
+					if(thisPlugin == (plugin + 1))
+						comboBox.DeleteString(insertAt);
+					if(thisPlugin >= (plugin + 1))
+						break;
+				}
+			}
+			int fxsel = 0;
+			for(PLUGINDEX ifx = 0; ifx < MAX_MIXPLUGINS; ifx++)
+			{
+				if(plugin != PLUGINDEX_INVALID && ifx != plugin)
+					continue;
+				if(sndFile.m_MixPlugins[ifx].IsValidPlugin()
 					|| (sndFile.m_MixPlugins[ifx].GetName() != U_(""))
 					|| (sndFile.ChnSettings[nChn].nMixPlugin == ifx + 1))
 				{
 					s = MPT_CFORMAT("FX{}: ")(ifx + 1);
 					s += mpt::ToCString(sndFile.m_MixPlugins[ifx].GetName());
-					int n = m_CbnEffects[ichn].AddString(s);
-					m_CbnEffects[ichn].SetItemData(n, ifx + 1);
-					if (sndFile.ChnSettings[nChn].nMixPlugin == ifx + 1) fxsel = n;
+					insertAt = comboBox.InsertString(insertAt, s);
+					comboBox.SetItemData(insertAt, ifx + 1);
+					if(sndFile.ChnSettings[nChn].nMixPlugin == ifx + 1)
+						fxsel = insertAt;
+					insertAt++;
 				}
 			}
-			m_CbnEffects[ichn].SetRedraw(TRUE);
-			m_CbnEffects[ichn].SetCurSel(fxsel);
-			m_CbnEffects[ichn].Invalidate(FALSE);
+			comboBox.SetRedraw(TRUE);
+			if(plugin == PLUGINDEX_INVALID || fxsel > 0)
+				comboBox.SetCurSel(fxsel);
+			comboBox.Invalidate(FALSE);
 		}
 	}
 }
@@ -990,7 +1036,7 @@ void CViewGlobals::OnPluginNameChanged()
 				pPlugin->GetEditor()->SetTitle();
 			}
 			// Update channel plugin assignments
-			PopulateChannelPlugins();
+			PopulateChannelPlugins(m_nCurrentPlugin);
 		}
 	}
 }
