@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.17-pre
+### libopenmpt 0.4.17 (2021-01-31)
 
  *  [**Bug**] stb_vorbis: Fix decoding of Vorbis streams without comments which
     affected most Vorbis samples since stb_vorbis v1.20.
