@@ -15,6 +15,14 @@ is just a high-level summary.
  *  [**Bug**] stb_vorbis: Fix decoding of Vorbis streams without comments which
     affected most Vorbis samples since stb_vorbis v1.20.
 
+ *  `openmpt::ext::interactive::set_pitch_factor` wasn't applied to OPL voices.
+ *  OPL channel state (in particular current patch) is now updated when seeking.
+ *  The FT2 tremolo quirk is now also applied to MOD files. FT2 just copied the
+    quirky code from ProTracker!
+ *  DMF: Preserve effects better in some situations where there is more than one
+    effect in a pattern cell.
+ *  DMF: Improve import of finetune effect with parameters larger than +/-15.
+
  *  mpg123: Update to v1.26.4 (2020-12-24).
  *  pugixml: Update to v1.11.4 (2020-12-22).
 

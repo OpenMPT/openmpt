@@ -31,6 +31,52 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.07.00 (31 January 2021, revision 14108)
+---------------------------------------------
+General tab
+- [Imp] <js> Using the spinner, tempo is now incremented and decremented in steps of 1 BPM in all formats. The old behaviour for MPTM - using a 0.1 BPM step size - is now applied when holding Shift (similar to 0.01 BPM steps when holding Ctrl).
+- [Mod] <js> "Output To" plugin list now shows user-chosen name first, then library name.
+- [Mod] <js> "Output To" plugin list was not updated when a plugin was renamed.
+- [Fix] <js> Renaming a plugin could become really slow the more plugins were loaded.
+
+Pattern tab
+- [Imp] <js> Update OPL channel state (in particular currently used instrument) when seeking.
+- [Fix] <js> Rare crash when trying to interpolate a column without a selection (tx coda).
+- [Fix] <js> Selecting a whole row by clicking on its row number didn't copy any channels left of the current scroll position.
+- [Fix] <js> MIDI recording erroneously allowed writing smooth MIDI commands with formats that don't support this command.
+- [Fix] <js> The Pattern Goto Dialog was not initialized correctly, not using the current pattern and order list location as intended.
+
+Sample tab
+- [Imp] <js> Pitch Shift can now also be applied to sample selections.
+- [Imp] <js> Autotune no longer marks the module as modified if the frequency didn't change.
+- [Imp] <da> Stereo 8SVX files are now supported.
+- [Fix] <js> Converting a stereo sample to mono by only taking the right channel caused the first sample from the left channel to remain in the sample, and thus offseting the whole sample by one.
+- [Fix] <js> There was a memory leak when aborting a Pitch Shift operation.
+
+VST / DMO Plugins
+- [Mod] <js> Removing a plugin from a module now removes all output routings to that plugin slot. Previously, loading a new plugin into the same slot caused other plugins to (unexpectedly) route their output to it.
+- [Fix] <js> Dropping a VST plugin file on the OpenMPT window didn't apply plugin bridge default settings like when adding it through the Plugin Manager dialog.
+
+MPTM::Custom Tuning
+- [Fix] <jh> Allow editing note name also if a note outside the primary group is selected (http://forum.openmpt.org/index.php?topic=6531.0).
+
+MOD
+- [Fix] MOD: The FT2 tremolo quirk is now also applied to MOD files. FT2 just copied the quirky code from ProTracker!
+
+Other formats
+- [Imp] <js> DMF: Preserve effects better in some situations where there is more than one effect in a pattern cell.
+- [Imp] <js> DMF: Improve import of finetune effect with parameters larger than +/-15.
+
+Misc
+- [Imp] <js> Always support inputting '-' as negative sign in numeric input fields, even if the system locale would use a different character.
+- [Mod] <js> "Find MPT Hacks" no longer warns about artist name being set in MOD / S3M files, as it cannot be stored in those file types anyway.
+- [Fix] <js> A memory leak was possible in some situations when loading a module failed due to insufficient memory being available.
+- [Fix] <js> MIDI Export: Possible crash during after importing an SF2 instrument (http://bugs.openmpt.org/view.php?id=1399).
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.26.4), UnRAR (v6.0.3)
+
+
 v1.29.06.00 (29 November 2020, revision 13926)
 ----------------------------------------------
 General tab
@@ -254,6 +300,7 @@ Pattern tab::Chord Editor
 
 Sample tab
 - [New] <js> Support little-endian AU / SND files.
+- [Imp] <js> Time Stretch can now be applied to sample selections.
 - [Imp] <js> Instantly apply result of auto-tuning to playing channels.
 - [Imp] <js> Allow resampling ratios greater than 1:512 or 512:1 again with r8brain.
 - [Imp] <js> Cross-fading can now also be applied if no loop has been set but a selection has been made. The selection is then automatically set to be the sample loop.
@@ -2023,7 +2070,7 @@ Pattern tab
 Sample tab
 - [Imp] <js> Pre-select the input field in the sample resize dialog (http://bugs.openmpt.org/view.php?id=705).
 - [Imp] <js> Silence tool now works the same way for stereo samples as it does for mono samples.
-- [Imp] <js> Time stretch and pitch shift are now abortable.
+- [Imp] <js> Time Stretch and Pitch Shift are now abortable.
 - [Imp] <js> When trying to load a module into a sample slot, open it directly in the tree view for importing samples.
 - [Imp] <js> Forward / backward mouse buttons can be used to switch to next / previous sample.
 - [Mod] <js> When loading several samples, only ask once if they should be associated with an instrument (http://bugs.openmpt.org/view.php?id=340).
