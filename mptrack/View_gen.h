@@ -54,7 +54,7 @@ public:
 	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
 	bool IsLocked() const noexcept { return (m_nLockCount > 0); }
 	int GetDlgItemIntEx(UINT nID);
-	void PopulateChannelPlugins();
+	void PopulateChannelPlugins(PLUGINDEX plugin = PLUGINDEX_INVALID);
 	void BuildEmptySlotList(std::vector<PLUGINDEX> &emptySlots);
 	bool MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat = AdjustPattern);
 
