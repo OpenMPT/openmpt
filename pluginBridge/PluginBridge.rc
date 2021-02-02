@@ -80,7 +80,7 @@ BEGIN
             VALUE "FileDescription", "OpenMPT Plugin Bridge"
             VALUE "FileVersion", VER_FILEVERSION_STR
             VALUE "InternalName", "PluginBridge.exe"
-            VALUE "LegalCopyright", "Copyright Â© 2013-2021 OpenMPT Project Developers and Contributors"
+            VALUE "LegalCopyright", "Copyright © 2013-2021 OpenMPT Project Developers and Contributors"
             VALUE "OriginalFilename", "PluginBridge.exe"
             VALUE "ProductName", "OpenMPT"
             VALUE "ProductVersion", VER_FILEVERSION_STR
