@@ -41,6 +41,11 @@ How to compile
         being 2017 or 2019) and hit the compile button. Other target systems can
         be found in the `vs2017*` and `vs2019*` sibling folders.
 
+        Note that you have to build the `PluginBridge` and `PluginBridgeLegacy`
+        projects manually for architectures other than the one you are building
+        OpenMPT for, as Visual Studio only builds one architecture configuration
+        at a time.
+
  -  OpenMPT requires the compile host system to be 64bit x86-64.
 
  -  The Windows 8.1 SDK is required to build OpenMPT with Visual Studio 2017
