@@ -204,7 +204,7 @@ bool COrderList::IsPlaying() const
 ORDERINDEX COrderList::GetOrderFromPoint(const CRect &rect, const CPoint &pt) const
 {
 	if(m_cxFont)
-		return static_cast<ORDERINDEX>(m_nXScroll + (pt.x - rect.left) / m_cxFont);
+		return mpt::saturate_cast<ORDERINDEX>(m_nXScroll + (pt.x - rect.left) / m_cxFont);
 	return 0;
 }
 
@@ -308,11 +308,11 @@ ORDERINDEX COrderList::GetLength()
 	CRect rcClient;
 	GetClientRect(&rcClient);
 	if(m_cxFont > 0)
-		return static_cast<ORDERINDEX>(rcClient.right / m_cxFont);
+		return mpt::saturate_cast<ORDERINDEX>(rcClient.right / m_cxFont);
 	else
 	{
 		const int fontWidth = GetFontWidth();
-		return (fontWidth > 0) ? static_cast<ORDERINDEX>(rcClient.right / fontWidth) : 0;
+		return (fontWidth > 0) ? mpt::saturate_cast<ORDERINDEX>(rcClient.right / fontWidth) : 0;
 	}
 }
 
@@ -787,8 +787,9 @@ void COrderList::OnPaint()
 		}
 
 		// Scrolling the shown orders(the showns rectangles)?
-		for(ORDERINDEX ord = m_nXScroll; rect.left < rcClient.right; ord++, rect.left += m_cxFont)
+		for(size_t pos = m_nXScroll; rect.left < rcClient.right; pos++, rect.left += m_cxFont)
 		{
+			const ORDERINDEX ord = mpt::saturate_cast<ORDERINDEX>(pos);
 			dc.SetTextColor(colorText);
 			const bool inSelection = (ord >= selection.firstOrd && ord <= selection.lastOrd);
 			const bool highLight = (isFocussed && inSelection);
@@ -816,7 +817,7 @@ void COrderList::OnPaint()
 			LineTo(dc, rect.right, rect.bottom);
 
 			// Drawing the 'ctrl-transition' indicator
-			if(ord == sndFile.m_PlayState.m_nSeqOverride)
+			if(ord == sndFile.m_PlayState.m_nSeqOverride && sndFile.m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID)
 			{
 				dc.FillSolidRect(CRect{rect.left + 4, rect.bottom - 4 - lineWidth1, rect.right - 4, rect.bottom - 4}, separatorColor);
 			}
@@ -1219,7 +1220,7 @@ void COrderList::OnSize(UINT nType, int cx, int cy)
 		nPos = smax;
 	if(m_nXScroll != nPos)
 	{
-		m_nXScroll = static_cast<ORDERINDEX>(nPos);
+		m_nXScroll = mpt::saturate_cast<ORDERINDEX>(nPos);
 		SetScrollPos(m_nXScroll);
 		Invalidate(FALSE);
 	}
@@ -1425,7 +1426,7 @@ LRESULT COrderList::OnDragonDropping(WPARAM doDrop, LPARAM lParam)
 	ScreenToClient(&pt);
 	if(pt.x < 0)
 		pt.x = 0;
-	ORDERINDEX posDest = static_cast<ORDERINDEX>(m_nXScroll + (pt.x / m_cxFont));
+	ORDERINDEX posDest = mpt::saturate_cast<ORDERINDEX>(m_nXScroll + (pt.x / m_cxFont));
 	if(posDest >= Order().size())
 		return FALSE;
 	switch(pDropInfo->dropType)
@@ -1627,7 +1628,7 @@ BOOL COrderList::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *)
 		CString text;
 		const CSoundFile &sndFile = m_modDoc.GetSoundFile();
 		const ModSequence &order = Order();
-		const ORDERINDEX ord = static_cast<ORDERINDEX>(pNMHDR->idFrom), ordLen = order.GetLengthTailTrimmed();
+		const ORDERINDEX ord = mpt::saturate_cast<ORDERINDEX>(pNMHDR->idFrom), ordLen = order.GetLengthTailTrimmed();
 		text.Format(_T("Position %u of %u [%02Xh of %02Xh]"), ord, ordLen, ord, ordLen);
 		if(order.IsValidPat(ord))
 		{
