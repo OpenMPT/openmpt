@@ -390,10 +390,6 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		OnNextInstrument();
 		break;
 
-	case CTRLMSG_SETCURRENTPATTERN:
-		SetCurrentPattern((PATTERNINDEX)lParam);
-		break;
-
 	case CTRLMSG_NOTIFYCURRENTORDER:
 		if(m_OrderList.GetCurSel().GetSelCount() > 1 || m_OrderList.m_bDragging)
 		{
@@ -420,14 +416,6 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_PAT_SETINSTRUMENT:
 		return SetCurrentInstrument(static_cast<uint32>(lParam));
 
-	case CTRLMSG_PLAYPATTERN:
-		switch(lParam)
-		{
-			case -2: OnPatternPlayNoLoop(); break;
-			case -1: OnPatternPlayFromStart(); break;
-			default: OnPatternPlay();
-		}
-
 	case CTRLMSG_SETVIEWWND:
 		{
 			SendViewMessage(VIEWMSG_FOLLOWSONG, IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
@@ -440,15 +428,9 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		}
 		break;
 
-	case CTRLMSG_GETSPACING:
-		return GetDlgItemInt(IDC_EDIT_SPACING);
-
 	case CTRLMSG_SETSPACING:
 		SetDlgItemInt(IDC_EDIT_SPACING, static_cast<UINT>(lParam));
 		break;
-
-	case CTRLMSG_ISRECORDING:
-		return m_bRecord;
 
 	case CTRLMSG_SETFOCUS:
 		GetParentFrame()->SetActiveView(&m_parent);
