@@ -752,14 +752,14 @@ void CCtrlPatterns::OnPatternNew()
 	} else
 	{
 		// Use currently edited pattern for new pattern length
-		curPat = (PATTERNINDEX)SendViewMessage(VIEWMSG_GETCURRENTPATTERN);
+		curPat = static_cast<PATTERNINDEX>(SendViewMessage(VIEWMSG_GETCURRENTPATTERN));
 	}
 	if(m_sndFile.Patterns.IsValidPat(curPat))
 	{
 		rows = m_sndFile.Patterns[curPat].GetNumRows();
 	}
 	rows = Clamp(rows, m_sndFile.GetModSpecifications().patternRowsMin, m_sndFile.GetModSpecifications().patternRowsMax);
-	PATTERNINDEX newPat = m_modDoc.InsertPattern(rows, curOrd);
+	const PATTERNINDEX newPat = m_modDoc.InsertPattern(rows, curOrd);
 	if(m_sndFile.Patterns.IsValidPat(newPat))
 	{
 		// update time signature
@@ -777,8 +777,8 @@ void CCtrlPatterns::OnPatternNew()
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(NULL, PatternHint(newPat).Names(), this);
 		m_modDoc.UpdateAllViews(NULL, SequenceHint().Data(), this);
+		SwitchToView();
 	}
-	SwitchToView();
 }
 
 
