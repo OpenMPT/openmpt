@@ -3,6 +3,7 @@ The following changes have been made:
 - Obviously, unnecessary folders and files (doc, examples, m4, macos, macosx,
   symbian, test, vq) have been removed.
 - Building for ARM64 has been fixed.
+- Building for DJGPP has been fixed.
 - All modifications have been marked with /* OpenMPT */.
 - For building, premake is used to generate Visual Studio project files.
   See ../build/premake/ for details.
