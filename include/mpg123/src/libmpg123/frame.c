@@ -873,10 +873,18 @@ void frame_gapless_update(mpg123_handle *fr, off_t total_samples)
 	off_t gapless_samples = fr->gapless_frames*fr->spf;
 	if(fr->gapless_frames < 1) return;
 
+#if 0 // OpenMPT
 	debug2("gapless update with new sample count %"OFF_P" as opposed to known %"OFF_P, total_samples, gapless_samples);
+#else // OpenMPT
+	debug2("gapless update with new sample count %"OFF_P" as opposed to known %"OFF_P, (off_p)total_samples, (off_p)gapless_samples); // OpenMPT
+#endif // OpenMPT
 	if(NOQUIET && total_samples != gapless_samples)
+#if 0 // OpenMPT
 	fprintf(stderr, "\nWarning: Real sample count %"OFF_P" differs from given gapless sample count %"OFF_P". Frankenstein stream?\n"
 	, total_samples, gapless_samples);
+#else // OpenMPT
+	fprintf(stderr, "\nWarning: Real sample count %"OFF_P" differs from given gapless sample count %"OFF_P". Frankenstein stream?\n", (off_p)total_samples, (off_p)gapless_samples); // OpenMPT
+#endif // OpenMPT
 
 	if(gapless_samples > total_samples)
 	{
