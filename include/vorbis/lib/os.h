@@ -62,8 +62,10 @@ void *_alloca(size_t size);
 
 #endif
 
+#if !defined(__DJGPP__)
 #ifdef HAVE_ALLOCA_H
 #  include <alloca.h>
+#endif
 #endif
 
 #ifdef USE_MEMORY_H
