@@ -12,7 +12,9 @@
 #define HAVE_DIRENT_H 1
 
 #define HAVE_UNISTD_H 1
+#if !defined(__DJGPP__)
 #define HAVE_SYS_SIGNAL_H 1
+#endif
 #define HAVE_SYS_TIME_H 1
 #define HAVE_STRINGS_H 1
 #define HAVE_SYS_TYPES_H 1
