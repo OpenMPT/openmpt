@@ -17,6 +17,7 @@ endif
 
 CFLAGS_SILENT += -Wno-cast-qual
 CFLAGS_SILENT += -Wno-empty-body
+CFLAGS_SILENT += -Wno-float-conversion
 CFLAGS_SILENT += -Wno-implicit-fallthrough
 CFLAGS_SILENT += -Wno-old-style-declaration
 CFLAGS_SILENT += -Wno-sign-compare
