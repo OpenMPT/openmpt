@@ -15,6 +15,9 @@ is just a high-level summary.
     `EMSCRIPTEN_TARGET=audioworkletprocessor` which builds an ES6 module in
     a single file with reduced dependencies suitable to be used in an
     AudioWorkletProcessor.
+ *  [**New**] `Makefile` `CONFIG=djgpp` now supports builds zlib, mpg123,
+    and vorbis locally instead of only uspporting miniz, minimp3, and
+    stb_vorbis via `ALLOW_LGPL=1`.
 
  *  [**Change**] `Makefile` `CONFIG=emscripten` now supports
     `EMSCRIPTEN_TARGET=all` which provides WebAssembly as well as fallback to
