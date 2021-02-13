@@ -428,7 +428,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		sampleHeader.ConvertToMPT(Samples[smp + 1]);
+		sampleHeader.ConvertToMPT(Samples[smp + 1], isST3);
 		mpt::String::Read<mpt::String::nullTerminated>(m_szNames[smp + 1], sampleHeader.name);
 
 		if(sampleHeader.sampleType >= S3MSampleHeader::typeAdMel)
@@ -563,12 +563,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 					} else
 					{
 						if(m.param < 0x08)
-						{
 							zxxCountLeft++;
-						} else if(m.param > 0x08)
-						{
+						else if(m.param > 0x08)
 							zxxCountRight++;
-						}
 					}
 				}
 			}
