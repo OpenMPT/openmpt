@@ -1,11 +1,11 @@
 /*
-* LFOPlugin.cpp
-* -------------
-* Purpose: Plugin for automating other plugins' parameters
-* Notes  : (currently none)
-* Authors: OpenMPT Devs
-* The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
-*/
+ * LFOPlugin.cpp
+ * -------------
+ * Purpose: Plugin for automating other plugins' parameters
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
 
 #include "stdafx.h"

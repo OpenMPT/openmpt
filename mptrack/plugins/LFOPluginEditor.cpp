@@ -1,11 +1,11 @@
 /*
-* LFOPluginEditor.cpp
-* -------------------
-* Purpose: Editor interface for the LFO plugin.
-* Notes  : (currently none)
-* Authors: Johannes Schultz (OpenMPT Devs)
-* The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
-*/
+ * LFOPluginEditor.cpp
+ * -------------------
+ * Purpose: Editor interface for the LFO plugin.
+ * Notes  : (currently none)
+ * Authors: Johannes Schultz (OpenMPT Devs)
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
 #include "stdafx.h"
 
@@ -168,7 +168,7 @@ void LFOPluginEditor::UpdateParam(int32 p)
 }
 
 
-void LFOPluginEditor::UpdateView(UpdateHint &hint)
+void LFOPluginEditor::UpdateView(UpdateHint hint)
 {
 	CAbstractVstEditor::UpdateView(hint);
 	if(hint.GetType()[HINT_PLUGINNAMES | HINT_MIXPLUGINS])

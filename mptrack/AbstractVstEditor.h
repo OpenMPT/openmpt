@@ -101,7 +101,7 @@ public:
 	virtual void DoClose();
 	virtual void UpdateParamDisplays() { if(m_updateDisplay) { SetupMenu(true); m_updateDisplay = false; } }
 	virtual void UpdateParam(int32 /*param*/) { }
-	virtual void UpdateView(UpdateHint &/*hint*/) { }
+	virtual void UpdateView(UpdateHint hint);
 
 	virtual bool IsResizable() const = 0;
 	virtual bool SetSize(int contentWidth, int contentHeight) = 0;

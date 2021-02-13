@@ -1,11 +1,11 @@
 /*
-* LFOPlugin.h
-* -----------
-* Purpose: Plugin for automating other plugins' parameters
-* Notes  : (currently none)
-* Authors: OpenMPT Devs
-* The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
-*/
+ * LFOPlugin.h
+ * -----------
+ * Purpose: Plugin for automating other plugins' parameters
+ * Notes  : (currently none)
+ * Authors: OpenMPT Devs
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
+ */
 
 
 #pragma once
@@ -66,7 +66,7 @@ protected:
 	mpt::fast_prng m_PRNG;
 
 #ifdef MODPLUG_TRACKER
-	enum : int { WM_PARAM_UDPATE = WM_USER + 500 };
+	static constexpr int WM_PARAM_UDPATE = WM_USER + 500;
 #endif
 
 public:

@@ -415,6 +415,7 @@ void CAbstractVstEditor::OnBypassPlug()
 	{
 		m_VstPlugin.GetModDoc()->SetModified();
 	}
+	SetTitle();
 }
 
 
@@ -475,6 +476,19 @@ bool CAbstractVstEditor::HandleKeyMessage(MSG &msg)
 }
 
 
+void CAbstractVstEditor::UpdateView(UpdateHint hint)
+{
+	if(!hint.GetType()[HINT_PLUGINNAMES | HINT_MIXPLUGINS])
+		return;
+
+	PLUGINDEX hintPlug = hint.ToType<PluginHint>().GetPlugin();
+	if(hintPlug > 0 && (hintPlug - 1) != m_VstPlugin.GetSlot())
+		return;
+
+	SetTitle();
+}
+
+
 void CAbstractVstEditor::SetTitle()
 {
 	if(m_VstPlugin.m_pMixStruct)
@@ -493,6 +507,9 @@ void CAbstractVstEditor::SetTitle()
 		if(vstPlugin != nullptr && vstPlugin->isBridged)
 			title += MPT_CFORMAT(" ({} Bridged)")(m_VstPlugin.GetPluginFactory().GetDllArchNameUser());
 #endif // NO_VST
+
+		if(m_VstPlugin.IsBypassed())
+			title += _T(" - Bypass");
 
 		SetWindowText(title);
 	}
