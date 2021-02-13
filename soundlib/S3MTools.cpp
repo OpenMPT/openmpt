@@ -17,7 +17,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 // Convert an S3M sample header to OpenMPT's internal sample header.
-void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
+void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp, bool isST3) const
 {
 	mptSmp.Initialize(MOD_TYPE_S3M);
 	mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
@@ -52,13 +52,14 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp) const
 
 	// C-5 frequency
 	mptSmp.nC5Speed = c5speed;
+	// ST3 ignores the high 16 bits
+	if(isST3)
+		mptSmp.nC5Speed &= 0xFFFF;
+
 	if(mptSmp.nC5Speed == 0)
-	{
 		mptSmp.nC5Speed = 8363;
-	} else if(mptSmp.nC5Speed < 1024)
-	{
+	else if(mptSmp.nC5Speed < 1024)
 		mptSmp.nC5Speed = 1024;
-	}
 
 }
 
