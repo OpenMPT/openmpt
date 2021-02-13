@@ -53,6 +53,7 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp, bool isST3) const
 			mptSmp.nC5Speed = 8363;
 		else if(mptSmp.nC5Speed < 1024)
 			mptSmp.nC5Speed = 1024;
+	}
 }
 
 
