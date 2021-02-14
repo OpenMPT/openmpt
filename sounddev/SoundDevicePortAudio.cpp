@@ -89,11 +89,17 @@ bool CPortaudioDevice::InternalOpen()
 	m_CurrentFrameBufferInput = 0;
 	m_CurrentFrameCount = 0;
 	m_StreamParameters.device = m_DeviceIndex;
-	if(m_StreamParameters.device == -1) return false;
+	if(m_StreamParameters.device == -1)
+	{
+		return false;
+	}
 	m_StreamParameters.channelCount = m_Settings.Channels;
 	if(m_Settings.sampleFormat.IsFloat())
 	{
-		if(m_Settings.sampleFormat.GetBitsPerSample() != 32) return false;
+		if(m_Settings.sampleFormat.GetBitsPerSample() != 32)
+		{
+			return false;
+		}
 		m_StreamParameters.sampleFormat = paFloat32;
 	} else
 	{
@@ -222,7 +228,10 @@ bool CPortaudioDevice::InternalOpen()
 	{
 		flags |= paDitherOff;
 	}
-	if(Pa_OpenStream(&m_Stream, (m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, flags, StreamCallbackWrapper, reinterpret_cast<void*>(this)) != paNoError) return false;
+	if(Pa_OpenStream(&m_Stream, (m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, flags, StreamCallbackWrapper, reinterpret_cast<void*>(this)) != paNoError)
+	{
+		return false;
+	}
 	m_StreamInfo = Pa_GetStreamInfo(m_Stream);
 	if(!m_StreamInfo)
 	{
@@ -271,7 +280,10 @@ void CPortaudioDevice::InternalStop()
 
 void CPortaudioDevice::InternalFillAudioBuffer()
 {
-	if(m_CurrentFrameCount == 0) return;
+	if(m_CurrentFrameCount == 0)
+	{
+		return;
+	}
 	SourceLockedAudioReadPrepare(m_CurrentFrameCount, mpt::saturate_cast<std::size_t>(mpt::saturate_round<int64>(m_CurrentRealLatency * m_StreamInfo->sampleRate)));
 	SourceLockedAudioRead(m_CurrentFrameBuffer, m_CurrentFrameBufferInput, m_CurrentFrameCount);
 	m_StatisticPeriodFrames.store(m_CurrentFrameCount);
@@ -281,7 +293,10 @@ void CPortaudioDevice::InternalFillAudioBuffer()
 
 int64 CPortaudioDevice::InternalGetStreamPositionFrames() const
 {
-	if(Pa_IsStreamActive(m_Stream) != 1) return 0;
+	if(Pa_IsStreamActive(m_Stream) != 1)
+	{
+		return 0;
+	}
 	return static_cast<int64>(Pa_GetStreamTime(m_Stream) * m_StreamInfo->sampleRate);
 }
 

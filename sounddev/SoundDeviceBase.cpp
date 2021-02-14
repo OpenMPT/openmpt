@@ -91,7 +91,10 @@ bool Base::Open(const SoundDevice::Settings &settings)
 bool Base::Close()
 {
 	MPT_TRACE_SCOPE();
-	if(!IsOpen()) return true;
+	if(!IsOpen())
+	{
+		return true;
+	}
 	Stop();
 	bool result = InternalClose();
 	m_RequestFlags.store(0);
@@ -243,7 +246,10 @@ void Base::SendDeviceMessage(LogLevel level, const mpt::ustring &str)
 bool Base::Start()
 {
 	MPT_TRACE_SCOPE();
-	if(!IsOpen()) return false; 
+	if(!IsOpen())
+	{
+		return false; 
+	}
 	if(!IsPlaying())
 	{
 		m_StreamPositionRenderFrames = 0;
@@ -266,7 +272,10 @@ bool Base::Start()
 void Base::Stop()
 {
 	MPT_TRACE_SCOPE();
-	if(!IsOpen()) return;
+	if(!IsOpen())
+	{
+		return;
+	}
 	if(IsPlaying())
 	{
 		InternalStop();
