@@ -122,7 +122,7 @@ public:
 				{
 					val += (e >> 1);
 				}
-				int rounded = (val + noise + round_offset) & round_mask;;
+				int rounded = (val + noise + round_offset) & round_mask;
 				e = val - rounded;
 				sample = rounded;
 				error = e;
