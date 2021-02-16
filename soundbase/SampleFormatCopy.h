@@ -35,7 +35,7 @@ OPENMPT_NAMESPACE_BEGIN
 // Template arguments:
 // SampleConversion: Functor of type SampleConversionFunctor to apply sample conversion (see above for existing functors).
 template <typename SampleConversion>
-size_t CopySample(typename SampleConversion::output_t * MPT_RESTRICT outBuf, size_t numSamples, size_t incTarget, const typename SampleConversion::input_t * MPT_RESTRICT inBuf, size_t sourceSize, size_t incSource, SampleConversion conv = SampleConversion())
+size_t CopySample(typename SampleConversion::output_t *MPT_RESTRICT outBuf, size_t numSamples, size_t incTarget, const typename SampleConversion::input_t *MPT_RESTRICT inBuf, size_t sourceSize, size_t incSource, SampleConversion conv = SampleConversion())
 {
 	const size_t sampleSize = incSource * SampleConversion::input_inc * sizeof(typename SampleConversion::input_t);
 	LimitMax(numSamples, sourceSize / sampleSize);
@@ -55,7 +55,7 @@ size_t CopySample(typename SampleConversion::output_t * MPT_RESTRICT outBuf, siz
 
 // Copy numChannels interleaved sample streams.
 template <typename SampleConversion>
-void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_RESTRICT outBuf, const typename SampleConversion::input_t * MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, SampleConversion *conv)
+void CopyInterleavedSampleStreams(typename SampleConversion::output_t *MPT_RESTRICT outBuf, const typename SampleConversion::input_t *MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, SampleConversion *conv)
 {
 	while(numFrames--)
 	{
@@ -71,25 +71,25 @@ void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_REST
 
 // Copy numChannels interleaved sample streams.
 template <typename SampleConversion>
-void CopyInterleavedSampleStreams(typename SampleConversion::output_t * MPT_RESTRICT outBuf, const typename SampleConversion::input_t * MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, std::vector<SampleConversion> &conv)
+void CopyInterleavedSampleStreams(typename SampleConversion::output_t *MPT_RESTRICT outBuf, const typename SampleConversion::input_t *MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, std::vector<SampleConversion> &conv)
 {
 	MPT_ASSERT(conv.size() >= numChannels);
 	CopyInterleavedSampleStreams(outBuf, inBuf, numFrames, numChannels, &(conv[0]));
 }
 
 
-template<int fractionalBits, bool clipOutput, typename TOutBuf, typename TInBuf, typename Tdither>
-void ConvertBufferMixFixedToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither & dither, std::size_t channels, std::size_t count)
+template <int fractionalBits, bool clipOutput, typename TOutBuf, typename TInBuf, typename Tdither>
+void ConvertBufferMixFixedToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
-	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
+	using TInSample  = typename std::remove_const<typename TInBuf::sample_type>::type;
 	MPT_ASSERT(inBuf.size_channels() >= channels);
 	MPT_ASSERT(outBuf.size_channels() >= channels);
 	MPT_ASSERT(inBuf.size_frames() >= count);
 	MPT_ASSERT(outBuf.size_frames() >= count);
 	constexpr int ditherBits = SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).IsInt()
-		? SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).GetBitsPerSample()
-		: 0;
+								   ? SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).GetBitsPerSample()
+								   : 0;
 	SC::ClipFixed<int32, fractionalBits, clipOutput> clip;
 	SC::ConvertFixedPoint<TOutSample, TInSample, fractionalBits> conv;
 	for(std::size_t i = 0; i < count; ++i)
@@ -102,11 +102,11 @@ void ConvertBufferMixFixedToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither & dithe
 }
 
 
-template<int fractionalBits, typename TOutBuf, typename TInBuf>
+template <int fractionalBits, typename TOutBuf, typename TInBuf>
 void ConvertBufferToBufferMixFixed(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
-	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
+	using TInSample  = typename std::remove_const<typename TInBuf::sample_type>::type;
 	MPT_ASSERT(inBuf.size_channels() >= channels);
 	MPT_ASSERT(outBuf.size_channels() >= channels);
 	MPT_ASSERT(inBuf.size_frames() >= count);
@@ -122,18 +122,18 @@ void ConvertBufferToBufferMixFixed(TOutBuf outBuf, TInBuf inBuf, std::size_t cha
 }
 
 
-template<bool clipOutput, typename TOutBuf, typename TInBuf, typename Tdither>
-void ConvertBufferMixFloatToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither & dither, std::size_t channels, std::size_t count)
+template <bool clipOutput, typename TOutBuf, typename TInBuf, typename Tdither>
+void ConvertBufferMixFloatToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
-	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
+	using TInSample  = typename std::remove_const<typename TInBuf::sample_type>::type;
 	MPT_ASSERT(inBuf.size_channels() >= channels);
 	MPT_ASSERT(outBuf.size_channels() >= channels);
 	MPT_ASSERT(inBuf.size_frames() >= count);
 	MPT_ASSERT(outBuf.size_frames() >= count);
 	constexpr int ditherBits = SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).IsInt()
-		? SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).GetBitsPerSample()
-		: 0;
+								   ? SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).GetBitsPerSample()
+								   : 0;
 	SC::ClipFloat<TInSample, clipOutput> clip;
 	SC::Convert<TOutSample, TInSample> conv;
 	for(std::size_t i = 0; i < count; ++i)
@@ -146,11 +146,11 @@ void ConvertBufferMixFloatToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither & dithe
 }
 
 
-template<typename TOutBuf, typename TInBuf>
+template <typename TOutBuf, typename TInBuf>
 void ConvertBufferToBufferMixFloat(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
-	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
+	using TInSample  = typename std::remove_const<typename TInBuf::sample_type>::type;
 	MPT_ASSERT(inBuf.size_channels() >= channels);
 	MPT_ASSERT(outBuf.size_channels() >= channels);
 	MPT_ASSERT(inBuf.size_frames() >= count);
@@ -166,11 +166,11 @@ void ConvertBufferToBufferMixFloat(TOutBuf outBuf, TInBuf inBuf, std::size_t cha
 }
 
 
-template<typename TOutBuf, typename TInBuf>
+template <typename TOutBuf, typename TInBuf>
 void ConvertBufferToBuffer(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
-	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
+	using TInSample  = typename std::remove_const<typename TInBuf::sample_type>::type;
 	MPT_ASSERT(inBuf.size_channels() >= channels);
 	MPT_ASSERT(outBuf.size_channels() >= channels);
 	MPT_ASSERT(inBuf.size_frames() >= count);
@@ -188,7 +188,7 @@ void ConvertBufferToBuffer(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, s
 
 // Copy from an interleaed buffer of #channels.
 template <typename SampleConversion>
-void CopyInterleavedToChannel(typename SampleConversion::output_t * MPT_RESTRICT dst, const typename SampleConversion::input_t * MPT_RESTRICT src, std::size_t channels, std::size_t countChunk, std::size_t channel, SampleConversion conv = SampleConversion())
+void CopyInterleavedToChannel(typename SampleConversion::output_t *MPT_RESTRICT dst, const typename SampleConversion::input_t *MPT_RESTRICT src, std::size_t channels, std::size_t countChunk, std::size_t channel, SampleConversion conv = SampleConversion())
 {
 	SampleConversion sampleConv(conv);
 	src += channel;
@@ -203,7 +203,7 @@ void CopyInterleavedToChannel(typename SampleConversion::output_t * MPT_RESTRICT
 
 // Copy buffer to an interleaed buffer of #channels.
 template <typename SampleConversion>
-void CopyChannelToInterleaved(typename SampleConversion::output_t * MPT_RESTRICT dst, const typename SampleConversion::input_t * MPT_RESTRICT src, std::size_t channels, std::size_t countChunk, std::size_t channel, SampleConversion conv = SampleConversion())
+void CopyChannelToInterleaved(typename SampleConversion::output_t *MPT_RESTRICT dst, const typename SampleConversion::input_t *MPT_RESTRICT src, std::size_t channels, std::size_t countChunk, std::size_t channel, SampleConversion conv = SampleConversion())
 {
 	SampleConversion sampleConv(conv);
 	dst += channel;

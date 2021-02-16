@@ -23,13 +23,15 @@ struct audio_buffer_planar
 {
 public:
 	using sample_type = SampleType;
+
 private:
-	SampleType * const * m_buffers;
+	SampleType *const *m_buffers;
 	std::size_t m_channels;
 	std::size_t m_frames;
 	std::size_t m_offset;
+
 public:
-	constexpr audio_buffer_planar(SampleType * const * buffers, std::size_t channels, std::size_t frames)
+	constexpr audio_buffer_planar(SampleType *const *buffers, std::size_t channels, std::size_t frames)
 		: m_buffers(buffers)
 		, m_channels(channels)
 		, m_frames(frames)
@@ -37,11 +39,11 @@ public:
 	{
 		return;
 	}
-	SampleType & operator()(std::size_t channel, std::size_t frame)
+	SampleType &operator()(std::size_t channel, std::size_t frame)
 	{
 		return m_buffers[channel][m_offset + frame];
 	}
-	const SampleType & operator()(std::size_t channel, std::size_t frame) const
+	const SampleType &operator()(std::size_t channel, std::size_t frame) const
 	{
 		return m_buffers[channel][m_offset + frame];
 	}
@@ -53,7 +55,7 @@ public:
 	{
 		return m_frames;
 	}
-	audio_buffer_planar & advance(std::size_t numFrames)
+	audio_buffer_planar &advance(std::size_t numFrames)
 	{
 		m_offset += numFrames;
 		m_frames -= numFrames;
@@ -66,31 +68,33 @@ struct audio_buffer_interleaved
 {
 public:
 	using sample_type = SampleType;
+
 private:
-	SampleType * m_buffer;
+	SampleType *m_buffer;
 	std::size_t m_channels;
 	std::size_t m_frames;
+
 public:
-	constexpr audio_buffer_interleaved(SampleType* buffer, std::size_t channels, std::size_t frames)
+	constexpr audio_buffer_interleaved(SampleType *buffer, std::size_t channels, std::size_t frames)
 		: m_buffer(buffer)
 		, m_channels(channels)
 		, m_frames(frames)
 	{
 		return;
 	}
-	SampleType * data()
+	SampleType *data()
 	{
 		return m_buffer;
 	}
-	const SampleType * data() const
+	const SampleType *data() const
 	{
 		return m_buffer;
 	}
-	SampleType & operator()(std::size_t channel, std::size_t frame)
+	SampleType &operator()(std::size_t channel, std::size_t frame)
 	{
 		return m_buffer[m_channels * frame + channel];
 	}
-	const SampleType & operator()(std::size_t channel, std::size_t frame) const
+	const SampleType &operator()(std::size_t channel, std::size_t frame) const
 	{
 		return m_buffer[m_channels * frame + channel];
 	}
@@ -102,7 +106,7 @@ public:
 	{
 		return m_frames;
 	}
-	audio_buffer_interleaved & advance(std::size_t numFrames)
+	audio_buffer_interleaved &advance(std::size_t numFrames)
 	{
 		m_buffer += size_channels() * numFrames;
 		m_frames -= numFrames;
@@ -111,7 +115,7 @@ public:
 };
 
 template <typename SampleType>
-std::size_t planar_audio_buffer_valid_channels(SampleType * const * buffers, std::size_t maxChannels)
+std::size_t planar_audio_buffer_valid_channels(SampleType *const *buffers, std::size_t maxChannels)
 {
 	std::size_t channel;
 	for(channel = 0; channel < maxChannels; ++channel)

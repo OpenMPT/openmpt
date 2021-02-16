@@ -24,10 +24,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 enum DitherMode
 {
-	DitherNone       = 0,
-	DitherDefault    = 1, // chosen by OpenMPT code, might change
-	DitherModPlug    = 2, // rectangular, 0.5 bit depth, no noise shaping (original ModPlug Tracker)
-	DitherSimple     = 3, // rectangular, 1 bit depth, simple 1st order noise shaping
+	DitherNone    = 0,
+	DitherDefault = 1,  // chosen by OpenMPT code, might change
+	DitherModPlug = 2,  // rectangular, 0.5 bit depth, no noise shaping (original ModPlug Tracker)
+	DitherSimple  = 3,  // rectangular, 1 bit depth, simple 1st order noise shaping
 	NumDitherModes
 };
 
@@ -78,11 +78,12 @@ public:
 };
 
 
-template<int ditherdepth = 1, bool triangular = false, bool shaped = true>
+template <int ditherdepth = 1, bool triangular = false, bool shaped = true>
 struct Dither_SimpleImpl
 {
 private:
 	int32 error = 0;
+
 public:
 	template <uint32 targetbits, typename Trng>
 	MPT_FORCEINLINE MixSampleInt process(MixSampleInt sample, Trng &prng)
@@ -94,7 +95,7 @@ public:
 		} else
 		{
 			static_assert(sizeof(MixSampleInt) == 4);
-			constexpr int rshift = (32-targetbits) - MixSampleIntTraits::mix_headroom_bits();
+			constexpr int rshift = (32 - targetbits) - MixSampleIntTraits::mix_headroom_bits();
 			if constexpr(rshift <= 1)
 			{
 				MPT_UNREFERENCED_PARAMETER(prng);
@@ -102,13 +103,13 @@ public:
 				return sample;
 			} else
 			{
-				constexpr int rshiftpositive = (rshift > 1) ? rshift : 1; // work-around warnings about negative shift with C++14 compilers
-				constexpr int round_mask = ~((1<<rshiftpositive)-1);
-				constexpr int round_offset = 1<<(rshiftpositive-1);
-				constexpr int noise_bits = rshiftpositive + (ditherdepth - 1);
-				constexpr int noise_bias = (1<<(noise_bits-1));
-				int32 e = error;
-				unsigned int unoise = 0;
+				constexpr int rshiftpositive = (rshift > 1) ? rshift : 1;  // work-around warnings about negative shift with C++14 compilers
+				constexpr int round_mask     = ~((1 << rshiftpositive) - 1);
+				constexpr int round_offset   = 1 << (rshiftpositive - 1);
+				constexpr int noise_bits     = rshiftpositive + (ditherdepth - 1);
+				constexpr int noise_bias     = (1 << (noise_bits - 1));
+				int32 e                      = error;
+				unsigned int unoise          = 0;
 				if constexpr(triangular)
 				{
 					unoise = (mpt::random<unsigned int>(prng, noise_bits) + mpt::random<unsigned int>(prng, noise_bits)) >> 1;
@@ -116,16 +117,16 @@ public:
 				{
 					unoise = mpt::random<unsigned int>(prng, noise_bits);
 				}
-				int noise = static_cast<int>(unoise) - noise_bias; // un-bias
-				int val = sample;
+				int noise = static_cast<int>(unoise) - noise_bias;  // un-bias
+				int val   = sample;
 				if constexpr(shaped)
 				{
 					val += (e >> 1);
 				}
 				int rounded = (val + noise + round_offset) & round_mask;
-				e = val - rounded;
-				sample = rounded;
-				error = e;
+				e           = val - rounded;
+				sample      = rounded;
+				error       = e;
 				return sample;
 			}
 		}
@@ -147,6 +148,7 @@ class MultiChannelDither
 {
 private:
 	std::array<Tdither, channels> DitherChannels;
+
 public:
 	void Reset()
 	{
@@ -172,7 +174,10 @@ template <std::size_t channels>
 class DitherTemplate<Dither_None, channels>
 	: public MultiChannelDither<Dither_None, channels>
 {
-	struct {} prng;
+	struct
+	{
+	} prng;
+
 public:
 	template <typename Trd>
 	DitherTemplate(Trd &)
@@ -197,6 +202,7 @@ class DitherTemplate<Dither_ModPlug, channels>
 {
 private:
 	mpt::rng::modplug_dither prng;
+
 public:
 	template <typename Trd>
 	DitherTemplate(Trd &)
@@ -222,9 +228,10 @@ class DitherTemplate<Dither_Simple, channels>
 {
 private:
 	mpt::fast_prng prng;
+
 public:
 	template <typename Trd>
-	DitherTemplate(Trd & rd)
+	DitherTemplate(Trd &rd)
 		: prng(rd)
 	{
 		return;
@@ -250,11 +257,11 @@ public:
 		mpt::ustring result;
 		switch(mode)
 		{
-			case DitherNone   : result = U_("no"     ); break;
+			case DitherNone: result = U_("no"); break;
 			case DitherDefault: result = U_("default"); break;
 			case DitherModPlug: result = U_("0.5 bit"); break;
-			case DitherSimple : result = U_("1 bit"  ); break;
-			default           : result = U_(""       ); break;
+			case DitherSimple: result = U_("1 bit"); break;
+			default: result = U_(""); break;
 		}
 		return result;
 	}
@@ -267,7 +274,6 @@ class DitherChannels
 {
 
 private:
-
 	DitherTemplate<Dither_None, channels> ditherNone;
 	DitherTemplate<Dither_ModPlug, channels> ditherModPlug;
 	DitherTemplate<Dither_Simple, channels> ditherSimple;
@@ -275,9 +281,8 @@ private:
 	DitherMode mode = DitherDefault;
 
 public:
-
 	template <typename Trd>
-	DitherChannels(Trd & rd)
+	DitherChannels(Trd &rd)
 		: ditherNone(rd)
 		, ditherModPlug(rd)
 		, ditherSimple(rd)
@@ -290,22 +295,22 @@ public:
 		ditherSimple.Reset();
 	}
 
-	DitherTemplate<Dither_None, channels> & NoDither()
+	DitherTemplate<Dither_None, channels> &NoDither()
 	{
 		MPT_ASSERT(mode == DitherNone);
 		return ditherNone;
 	}
-	DitherTemplate<Dither_ModPlug, channels> & DefaultDither()
+	DitherTemplate<Dither_ModPlug, channels> &DefaultDither()
 	{
 		MPT_ASSERT(mode == DitherDefault);
 		return ditherModPlug;
 	}
-	DitherTemplate<Dither_ModPlug, channels> & ModPlugDither()
+	DitherTemplate<Dither_ModPlug, channels> &ModPlugDither()
 	{
 		MPT_ASSERT(mode == DitherModPlug);
 		return ditherModPlug;
 	}
-	DitherTemplate<Dither_Simple, channels> & SimpleDither()
+	DitherTemplate<Dither_Simple, channels> &SimpleDither()
 	{
 		MPT_ASSERT(mode == DitherSimple);
 		return ditherSimple;
@@ -316,11 +321,11 @@ public:
 	{
 		switch(GetMode())
 		{
-		case DitherNone:    return fn(NoDither());      break;
-		case DitherModPlug: return fn(ModPlugDither()); break;
-		case DitherSimple:  return fn(SimpleDither());  break;
-		case DitherDefault: return fn(DefaultDither()); break;
-		default:            return fn(DefaultDither()); break;
+			case DitherNone: return fn(NoDither()); break;
+			case DitherModPlug: return fn(ModPlugDither()); break;
+			case DitherSimple: return fn(SimpleDither()); break;
+			case DitherDefault: return fn(DefaultDither()); break;
+			default: return fn(DefaultDither()); break;
 		}
 	}
 
@@ -332,7 +337,6 @@ public:
 	{
 		return mode;
 	}
-
 };
 
 
