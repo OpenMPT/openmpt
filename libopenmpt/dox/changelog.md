@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.6-pre
 
+ *  vorbis: Update to v1.3.7 (2020-07-04).
+
 ### libopenmpt 0.5.5 (2021-01-31)
 
  *  [**New**] `Makefile` `CONFIG=emscripten` now supports
