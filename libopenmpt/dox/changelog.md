@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.27-pre
 
+ *  vorbis: Update to v1.3.7 (2020-07-04).
+
 ### libopenmpt 0.3.26 (2021-01-31)
 
  *  [**Bug**] stb_vorbis: Fix decoding of Vorbis streams without comments which
