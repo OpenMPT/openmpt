@@ -721,7 +721,6 @@
     <ClCompile Include="..\..\mptrack\wine\Native.cpp" />
     <ClCompile Include="..\..\mptrack\wine\NativeSoundDevice.cpp" />
     <ClCompile Include="..\..\mptrack\wine\NativeUtils.cpp" />
-    <ClCompile Include="..\..\soundbase\Dither.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDevice.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceASIO.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp" />

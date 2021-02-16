@@ -506,9 +506,6 @@
     <ClCompile Include="..\..\libopenmpt\libopenmpt_test.cpp">
       <Filter>libopenmpt</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\soundbase\Dither.cpp">
-      <Filter>soundbase</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\sounddsp\AGC.cpp">
       <Filter>sounddsp</Filter>
     </ClCompile>

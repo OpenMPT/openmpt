@@ -876,8 +876,6 @@
     </ClCompile>
     <ClCompile Include="..\..\common\version.cpp">
     </ClCompile>
-    <ClCompile Include="..\..\soundbase\Dither.cpp">
-    </ClCompile>
     <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\ContainerMMCMP.cpp">

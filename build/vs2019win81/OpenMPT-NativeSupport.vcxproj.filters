@@ -353,9 +353,6 @@
     <ClCompile Include="..\..\mptrack\wine\NativeUtils.cpp">
       <Filter>mptrack\wine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\soundbase\Dither.cpp">
-      <Filter>soundbase</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDevice.cpp">
       <Filter>sounddev</Filter>
     </ClCompile>

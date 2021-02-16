@@ -245,7 +245,19 @@ public:
 class DitherNames
 {
 public:
-	static mpt::ustring GetModeName(DitherMode mode);
+	static mpt::ustring GetModeName(DitherMode mode)
+	{
+		mpt::ustring result;
+		switch(mode)
+		{
+			case DitherNone   : result = U_("no"     ); break;
+			case DitherDefault: result = U_("default"); break;
+			case DitherModPlug: result = U_("0.5 bit"); break;
+			case DitherSimple : result = U_("1 bit"  ); break;
+			default           : result = U_(""       ); break;
+		}
+		return result;
+	}
 };
 
 

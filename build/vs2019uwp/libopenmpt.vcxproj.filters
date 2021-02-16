@@ -476,9 +476,6 @@
     <ClCompile Include="..\..\common\version.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\soundbase\Dither.cpp">
-      <Filter>soundbase</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\soundlib\AudioCriticalSection.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

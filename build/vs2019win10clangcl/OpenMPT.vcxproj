@@ -1856,7 +1856,6 @@
     <ClCompile Include="..\..\mptrack\tuningRatioMapWnd.cpp" />
     <ClCompile Include="..\..\mptrack\view_com.cpp" />
     <ClCompile Include="..\..\pluginBridge\BridgeWrapper.cpp" />
-    <ClCompile Include="..\..\soundbase\Dither.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDevice.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceASIO.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp" />

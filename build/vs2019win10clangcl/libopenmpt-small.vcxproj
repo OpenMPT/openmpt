@@ -1341,7 +1341,6 @@
     <ClCompile Include="..\..\libopenmpt\libopenmpt_cxx.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_ext_impl.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_impl.cpp" />
-    <ClCompile Include="..\..\soundbase\Dither.cpp" />
     <ClCompile Include="..\..\sounddsp\AGC.cpp" />
     <ClCompile Include="..\..\sounddsp\DSP.cpp" />
     <ClCompile Include="..\..\sounddsp\EQ.cpp" />
