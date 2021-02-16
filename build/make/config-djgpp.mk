@@ -18,12 +18,6 @@ LDFLAGS  +=
 LDLIBS   += -lm
 ARFLAGS  := rcs
 
-ifeq ($(BUNDLED_ALLEGRO42),1)
-CPPFLAGS_ALLEGRO42 := -Iinclude/allegro42/include -DALLEGRO_HAVE_STDINT_H -DLONG_LONG="long long"
-LDFLAGS_ALLEGRO42 := 
-LDLIBS_ALLEGRO42 := include/allegro42/lib/liballeg.a
-endif
-
 include build/make/warnings-gcc.mk
 
 EXESUFFIX=.exe
@@ -69,3 +63,18 @@ NO_SDL2=1
 NO_SNDFILE=1
 NO_FLAC=1
 
+ifeq ($(BUNDLED_ALLEGRO42),1)
+
+CPPFLAGS_ALLEGRO42 := -Iinclude/allegro42/include -DALLEGRO_HAVE_STDINT_H -DLONG_LONG="long long"
+LDFLAGS_ALLEGRO42 := 
+LDLIBS_ALLEGRO42 := include/allegro42/lib/djgpp/liballeg.a
+
+include/allegro42/lib/djgpp/liballeg.a:
+	+cd include/allegro42 && ./xmake.sh clean
+	+cd include/allegro42 && ./xmake.sh lib
+
+bin/openmpt123$(EXESUFFIX): include/allegro42/lib/djgpp/liballeg.a
+
+MISC_OUTPUTS += include/allegro42/lib/djgpp/liballeg.a
+
+endif

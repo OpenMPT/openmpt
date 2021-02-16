@@ -122,6 +122,9 @@
 #
 
 
+.PHONY: all
+all:
+
 
 INFO       = @echo
 SILENT     = @
@@ -1429,9 +1432,7 @@ bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip:
 	mkdir -p                                     bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p                                     bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES
 	svn export ./LICENSE                         bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE.TXT          --native-eol CRLF
-	cd bin/dist-dos && unzip ../../build/externals/all422s.zip allegro/readme.txt
-	mv bin/dist-dos/allegro/readme.txt           bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/ALLEGRO.TXT
-	rmdir bin/dist-dos/allegro
+	cp include/allegro42/readme.txt              bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/ALLEGRO.TXT
 	cp include/cwsdpmi/bin/cwsdpmi.doc           bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/CWSDPMI.TXT
 ifeq ($(ALLOW_LGPL),1)
 	svn export ./include/mpg123/COPYING          bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/MPG123.TXT   --native-eol CRLF

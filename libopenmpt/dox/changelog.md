@@ -22,6 +22,8 @@ is just a high-level summary.
  *  [**Change**] `Makefile` `CONFIG=emscripten` now supports
     `EMSCRIPTEN_TARGET=all` which provides WebAssembly as well as fallback to
     JavaScript in a single build.
+ *  [**Change**] openmpt123: DOS builds now use the Mercury fork of
+    `liballegro 4.2` for improved hardware compatibility.
 
  *  [**Regression**] `Makefile` `CONFIG=emscripten` does not support
     `EMSCRIPTEN_TARGET=asmjs` or `EMSCRIPTEN_TARGET=asmjs128m` any more because
