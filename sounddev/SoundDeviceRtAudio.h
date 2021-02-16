@@ -95,7 +95,7 @@ public:
 
 class ComponentRtAudio : public ComponentBuiltin
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentRtAudio, "RtAudio")
 public:
 	ComponentRtAudio();
 	virtual ~ComponentRtAudio();

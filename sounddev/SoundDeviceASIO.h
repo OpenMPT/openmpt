@@ -38,7 +38,8 @@ namespace SoundDevice {
 
 class ComponentASIO : public ComponentBuiltin
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentASIO, "ASIO")
+
 public:
 	ComponentASIO() { }
 	virtual ~ComponentASIO() { }

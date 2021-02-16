@@ -58,7 +58,7 @@ typedef ssize_t mpg123_ssize_t;
 class ComponentMPG123
 	: public ComponentBuiltin
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentMPG123, "")
 
 public:
 
@@ -106,7 +106,7 @@ public:
 		}
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentMPG123, "")
+
 
 static mpt::ustring ReadMPG123String(const mpg123_string &str)
 {

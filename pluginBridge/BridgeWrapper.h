@@ -66,7 +66,7 @@ public:
 class ComponentPluginBridge_x86
 	: public ComponentPluginBridge
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPluginBridge_x86, "PluginBridge-x86")
 public:
 	ComponentPluginBridge_x86() : ComponentPluginBridge(PluginArch_x86, Generation::Modern) { }
 };
@@ -74,7 +74,7 @@ public:
 class ComponentPluginBridgeLegacy_x86
 	: public ComponentPluginBridge
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPluginBridgeLegacy_x86, "PluginBridgeLegacy-x86")
 public:
 	ComponentPluginBridgeLegacy_x86() : ComponentPluginBridge(PluginArch_x86, Generation::Legacy) { }
 };
@@ -82,7 +82,7 @@ public:
 class ComponentPluginBridge_amd64
 	: public ComponentPluginBridge
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPluginBridge_amd64, "PluginBridge-amd64")
 public:
 	ComponentPluginBridge_amd64() : ComponentPluginBridge(PluginArch_amd64, Generation::Modern) { }
 };
@@ -90,7 +90,7 @@ public:
 class ComponentPluginBridgeLegacy_amd64
 	: public ComponentPluginBridge
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPluginBridgeLegacy_amd64, "PluginBridgeLegacy-amd64")
 public:
 	ComponentPluginBridgeLegacy_amd64() : ComponentPluginBridge(PluginArch_amd64, Generation::Legacy) { }
 };
@@ -100,7 +100,7 @@ public:
 class ComponentPluginBridge_arm
 	: public ComponentPluginBridge
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPluginBridge_arm, "PluginBridge-arm")
 public:
 	ComponentPluginBridge_arm() : ComponentPluginBridge(PluginArch_arm, Generation::Modern) { }
 };
@@ -108,7 +108,7 @@ public:
 class ComponentPluginBridgeLegacy_arm
 	: public ComponentPluginBridge
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPluginBridgeLegacy_arm, "PluginBridgeLegacy-arm")
 public:
 	ComponentPluginBridgeLegacy_arm() : ComponentPluginBridge(PluginArch_arm, Generation::Legacy) { }
 };
@@ -116,7 +116,7 @@ public:
 class ComponentPluginBridge_arm64
 	: public ComponentPluginBridge
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPluginBridge_arm64, "PluginBridge-arm64")
 public:
 	ComponentPluginBridge_arm64() : ComponentPluginBridge(PluginArch_arm64, Generation::Modern) { }
 };
@@ -124,10 +124,12 @@ public:
 class ComponentPluginBridgeLegacy_arm64
 	: public ComponentPluginBridge
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPluginBridgeLegacy_arm64, "PluginBridgeLegacy-arm64")
 public:
 	ComponentPluginBridgeLegacy_arm64() : ComponentPluginBridge(PluginArch_arm64, Generation::Legacy) { }
 };
+
+
 
 #endif // MPT_WITH_WINDOWS10
 

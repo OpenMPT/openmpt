@@ -828,8 +828,6 @@ ComponentWineWrapper::~ComponentWineWrapper()
 	}
 }
 
-MPT_REGISTERED_COMPONENT(ComponentWineWrapper, "WineWrapper")
-
 
 namespace WineIntegration {
 

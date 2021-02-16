@@ -33,7 +33,7 @@ namespace SoundDevice {
 
 class ComponentWaveOut : public ComponentBuiltin
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentWaveOut, "WaveOut")
 public:
 	ComponentWaveOut() { }
 	virtual ~ComponentWaveOut() { }

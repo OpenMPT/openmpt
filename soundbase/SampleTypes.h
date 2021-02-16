@@ -24,7 +24,7 @@ OPENMPT_NAMESPACE_BEGIN
 using AudioSampleInt = int16;
 using AudioSampleFloat = nativefloat;
 
-using AudioSample = std::conditional<mpt::float_traits<nativefloat>::is_hard, AudioSampleFloat, AudioSampleInt>::type;
+using AudioSample = std::conditional<mpt::float_traits<AudioSampleFloat>::is_hard, AudioSampleFloat, AudioSampleInt>::type;
 
 
 template <typename Tsample, std::size_t MIX_HEADROOM_BITS, std::size_t FILTER_HEADROOM_BITS>

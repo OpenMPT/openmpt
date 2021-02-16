@@ -582,9 +582,6 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 }
 
 
-MPT_REGISTERED_COMPONENT(ComponentRtAudio, "RtAudio")
-
-
 ComponentRtAudio::ComponentRtAudio()
 {
 	return;

@@ -103,7 +103,7 @@ private:
 
 class ComponentPortAudio : public ComponentBuiltin
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPortAudio, "PortAudio")
 public:
 	ComponentPortAudio();
 	virtual ~ComponentPortAudio();

@@ -392,20 +392,29 @@ struct ComponentListEntry
 	ComponentListEntry *next;
 	void (*reg)(ComponentManager &componentManager);
 };
-		
+
 bool ComponentListPush(ComponentListEntry *entry);
 
-#define MPT_DECLARE_COMPONENT_MEMBERS public: static const char * const g_ID; static const char * const g_SettingsKey;
-		
-#define MPT_REGISTERED_COMPONENT(name, settingsKey) \
-	static void RegisterComponent ## name (ComponentManager &componentManager) \
-	{ \
-		componentManager.Register(ComponentFactory< name >()); \
-	} \
-	static ComponentListEntry Component ## name ## ListEntry = { nullptr, & RegisterComponent ## name }; \
-	bool Component ## name ## Registered = ComponentListPush(& Component ## name ## ListEntry ); \
-	const char * const name :: g_ID = #name ; \
-	const char * const name :: g_SettingsKey = settingsKey ; \
+template <typename TComponent>
+struct ComponentRegisterer
+{
+	static inline void RegisterComponent(ComponentManager &componentManager)
+	{
+		componentManager.Register(ComponentFactory<TComponent>());
+	}
+	static inline ComponentListEntry &GetComponentListEntry()
+	{
+		static ComponentListEntry s_ComponentListEntry = {nullptr, &RegisterComponent};
+		return s_ComponentListEntry;
+	}
+	static inline bool g_ComponentRegistered = ComponentListPush(&GetComponentListEntry());
+};
+
+#define MPT_DECLARE_COMPONENT_MEMBERS(name, settingsKey) \
+	public: \
+		static constexpr const char *g_ID = #name ; \
+		static constexpr const char *g_SettingsKey = settingsKey ; \
+		static inline ComponentRegisterer< name > s_ComponentRegisterer; \
 /**/
 
 
@@ -432,9 +441,7 @@ inline mpt::PathString GetComponentPath()
 #else // !MPT_COMPONENT_MANAGER
 
 
-#define MPT_DECLARE_COMPONENT_MEMBERS
-
-#define MPT_REGISTERED_COMPONENT(name, settingsKey)
+#define MPT_DECLARE_COMPONENT_MEMBERS(name, settingsKey)
 
 
 template <typename type>

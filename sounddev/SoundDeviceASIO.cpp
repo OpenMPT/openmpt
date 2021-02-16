@@ -46,9 +46,6 @@ namespace SoundDevice {
 #ifdef MPT_WITH_ASIO
 
 
-MPT_REGISTERED_COMPONENT(ComponentASIO, "ASIO")
-
-
 static constexpr uint64 AppID1 = 0x4f70656e4d50542dull; // "OpenMPT-"
 static constexpr uint64 AppID2 = 0x4153494f00000000ull; // "ASIO"
 

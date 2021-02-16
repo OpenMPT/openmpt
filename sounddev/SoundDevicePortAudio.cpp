@@ -1013,9 +1013,6 @@ static void PortaudioLog(const char *text)
 #endif // MPT_COMPILER_MSVC
 
 
-MPT_REGISTERED_COMPONENT(ComponentPortAudio, "PortAudio")
-
-
 ComponentPortAudio::ComponentPortAudio()
 {
 	return;

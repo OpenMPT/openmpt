@@ -142,23 +142,6 @@ bool ComponentPluginBridge::DoInitialize()
 }
 
 
-MPT_REGISTERED_COMPONENT(ComponentPluginBridge_x86, "PluginBridge-x86")
-MPT_REGISTERED_COMPONENT(ComponentPluginBridgeLegacy_x86, "PluginBridgeLegacy-x86")
-
-MPT_REGISTERED_COMPONENT(ComponentPluginBridge_amd64, "PluginBridge-amd64")
-MPT_REGISTERED_COMPONENT(ComponentPluginBridgeLegacy_amd64, "PluginBridgeLegacy-amd64")
-
-#if defined(MPT_WITH_WINDOWS10)
-
-MPT_REGISTERED_COMPONENT(ComponentPluginBridge_arm, "PluginBridge-arm")
-MPT_REGISTERED_COMPONENT(ComponentPluginBridgeLegacy_arm, "PluginBridgeLegacy-arm")
-
-MPT_REGISTERED_COMPONENT(ComponentPluginBridge_arm64, "PluginBridge-arm64")
-MPT_REGISTERED_COMPONENT(ComponentPluginBridgeLegacy_arm64, "PluginBridgeLegacy-arm64")
-
-#endif  // MPT_WITH_WINDOWS10
-
-
 PluginArch BridgeWrapper::GetNativePluginBinaryType()
 {
 	PluginArch result = PluginArch_unknown;

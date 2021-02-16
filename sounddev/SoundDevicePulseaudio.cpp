@@ -30,9 +30,6 @@ namespace SoundDevice {
 #if defined(MPT_WITH_PULSEAUDIO)
 
 
-MPT_REGISTERED_COMPONENT(ComponentPulseaudio, "Pulseaudio")
-
-
 mpt::ustring Pulseaudio::PulseErrorString(int error)
 {
 	if(error == 0)

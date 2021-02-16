@@ -138,7 +138,7 @@ static FileTags ReadMFMetadata(IMFMediaSource *mediaSource)
 
 class ComponentMediaFoundation : public ComponentLibrary
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentMediaFoundation, "MediaFoundation")
 public:
 	ComponentMediaFoundation()
 		: ComponentLibrary(ComponentTypeSystem)
@@ -176,7 +176,6 @@ public:
 		}
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentMediaFoundation, "MediaFoundation")
 
 #endif // MPT_WITH_MEDIAFOUNDATION
 

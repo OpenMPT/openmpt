@@ -35,7 +35,7 @@ namespace C {
 class ComponentSoundDeviceManager
 	: public ComponentBuiltin
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentSoundDeviceManager, "SoundDeviceManager")
 private:
 	SoundDevice::Manager manager;
 public:
@@ -54,7 +54,6 @@ public:
 		return const_cast<SoundDevice::Manager &>(manager);
 	}
 };
-MPT_REGISTERED_COMPONENT(ComponentSoundDeviceManager, "SoundDeviceManager")
 
 static mpt::ustring GetTypePrefix()
 {

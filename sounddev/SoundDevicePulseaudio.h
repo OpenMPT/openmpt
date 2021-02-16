@@ -40,7 +40,7 @@ namespace SoundDevice {
 class ComponentPulseaudio
 	: public ComponentBuiltin
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPulseaudio, "Pulseaudio")
 public:
 	ComponentPulseaudio() { }
 	virtual ~ComponentPulseaudio() { }

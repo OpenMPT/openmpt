@@ -70,7 +70,7 @@ void Load();
 class ComponentWineWrapper
 	: public ComponentLibrary
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentWineWrapper, "WineWrapper")
 
 public:
 
