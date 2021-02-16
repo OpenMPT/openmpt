@@ -36,52 +36,52 @@ inline namespace ASIO_VERSION_NAMESPACE {
 
 
 class Error
-	: public std::runtime_error
-{
+	: public std::runtime_error {
 private:
 	ErrorCode m_Code;
+
 private:
 	static constexpr std::string_view Message(ErrorCode ec) noexcept {
 		std::string_view message = "";
 		switch (ec) {
-		case ErrorCode::OK:
-			message = "OK";
-			break;
-		case ErrorCode::SUCCESS:
-			message = "SUCCESS";
-			break;
-		case ErrorCode::NotPresent:
-			message = "NotPresent";
-			break;
-		case ErrorCode::HWMalfunction:
-			message = "HWMalfunction";
-			break;
-		case ErrorCode::InvalidParameter:
-			message = "InvalidParameter";
-			break;
-		case ErrorCode::InvalidMode:
-			message = "InvalidMode";
-			break;
-		case ErrorCode::SPNotAdvancing:
-			message = "SPNotAdvancing";
-			break;
-		case ErrorCode::NoClock:
-			message = "NoClock";
-			break;
-		case ErrorCode::NoMemory:
-			message = "NoMemory";
-			break;
-		default:
-			message = "";
-			break;
+			case ErrorCode::OK:
+				message = "OK";
+				break;
+			case ErrorCode::SUCCESS:
+				message = "SUCCESS";
+				break;
+			case ErrorCode::NotPresent:
+				message = "NotPresent";
+				break;
+			case ErrorCode::HWMalfunction:
+				message = "HWMalfunction";
+				break;
+			case ErrorCode::InvalidParameter:
+				message = "InvalidParameter";
+				break;
+			case ErrorCode::InvalidMode:
+				message = "InvalidMode";
+				break;
+			case ErrorCode::SPNotAdvancing:
+				message = "SPNotAdvancing";
+				break;
+			case ErrorCode::NoClock:
+				message = "NoClock";
+				break;
+			case ErrorCode::NoMemory:
+				message = "NoMemory";
+				break;
+			default:
+				message = "";
+				break;
 		}
 		return message;
 	}
+
 public:
 	Error(ErrorCode ec)
 		: std::runtime_error(std::string("ASIO Error ") + std::string(Message(ec)))
-		, m_Code(ec)
-	{
+		, m_Code(ec) {
 		return;
 	}
 	ErrorCode Code() const noexcept {
@@ -92,16 +92,16 @@ public:
 
 
 struct CallbacksWithContext {
-	void (*bufferSwitch) (void * context, Long doubleBufferIndex, Bool directProcess) noexcept = nullptr;
-	void (*sampleRateDidChange) (void * context, SampleRate sRate) noexcept = nullptr;
-	Long (*asioMessage) (void * context, MessageSelector selector, const Long value, const void * message, const Double * opt) noexcept = nullptr;
-	const Time * (*bufferSwitchTimeInfo) (void * context, const Time * params, Long doubleBufferIndex, Bool directProcess) noexcept = nullptr;
+	void (*bufferSwitch)(void * context, Long doubleBufferIndex, Bool directProcess) noexcept                                          = nullptr;
+	void (*sampleRateDidChange)(void * context, SampleRate sRate) noexcept                                                             = nullptr;
+	Long (*asioMessage)(void * context, MessageSelector selector, const Long value, const void * message, const Double * opt) noexcept = nullptr;
+	const Time * (*bufferSwitchTimeInfo)(void * context, const Time * params, Long doubleBufferIndex, Bool directProcess) noexcept     = nullptr;
 };
 
 
 struct CallbacksWrapperState {
 	CallbacksWithContext callbacks;
-	void * context = nullptr;
+	void *               context = nullptr;
 };
 
 
@@ -115,20 +115,21 @@ template <typename Tarray, Tarray * A, std::size_t I>
 class CallbacksWrapper {
 public:
 	static constexpr Callbacks init() noexcept {
-		Callbacks result = { &CallbackBufferSwitch, &CallbackSampleRateDidChange, &CallbackAsioMessage, &CallbackBufferSwitchTimeInfo };
+		Callbacks result = {&CallbackBufferSwitch, &CallbackSampleRateDidChange, &CallbackAsioMessage, &CallbackBufferSwitchTimeInfo};
 		return result;
 	}
+
 public:
-	static void ASIO_CALL CallbackBufferSwitch ASIO_ATTR_CALL (Long doubleBufferIndex, Bool directProcess) noexcept {
+	static void ASIO_CALL CallbackBufferSwitch ASIO_ATTR_CALL(Long doubleBufferIndex, Bool directProcess) noexcept {
 		return (*A)[I].callbacks.bufferSwitch((*A)[I].context, doubleBufferIndex, directProcess);
 	}
-	static void ASIO_CALL CallbackSampleRateDidChange ASIO_ATTR_CALL (SampleRate sRate) noexcept {
+	static void ASIO_CALL CallbackSampleRateDidChange ASIO_ATTR_CALL(SampleRate sRate) noexcept {
 		return (*A)[I].callbacks.sampleRateDidChange((*A)[I].context, sRate);
 	}
-	static Long ASIO_CALL CallbackAsioMessage ASIO_ATTR_CALL (MessageSelector selector, Long value, const void * message, const Double * opt) noexcept {
+	static Long ASIO_CALL CallbackAsioMessage ASIO_ATTR_CALL(MessageSelector selector, Long value, const void * message, const Double * opt) noexcept {
 		return (*A)[I].callbacks.asioMessage((*A)[I].context, selector, value, message, opt);
 	}
-	static const Time * ASIO_CALL CallbackBufferSwitchTimeInfo ASIO_ATTR_CALL (const Time * params, Long doubleBufferIndex, Bool directProcess) noexcept {
+	static const Time * ASIO_CALL CallbackBufferSwitchTimeInfo ASIO_ATTR_CALL(const Time * params, Long doubleBufferIndex, Bool directProcess) noexcept {
 		return (*A)[I].callbacks.bufferSwitchTimeInfo((*A)[I].context, params, doubleBufferIndex, directProcess);
 	}
 };
@@ -148,7 +149,7 @@ constexpr std::array<T, N> init_array(const Tx & x) {
 	return result;
 }
 
-} // namespace deail
+} // namespace detail
 
 
 template <std::uint64_t AppID1, std::uint64_t AppID2, std::size_t MaxInstances>
@@ -156,13 +157,15 @@ class AsioCallbacksMultiplexerGlobalState {
 private:
 	template <typename Tarray, Tarray * a, std::size_t... Is>
 	static constexpr auto construct_callbacks_array(std::index_sequence<Is...>) noexcept -> std::array<Callbacks, sizeof...(Is)> {
-		return { CallbacksWrapper<Tarray, a, Is>::init() ... };
+		return {CallbacksWrapper<Tarray, a, Is>::init()...};
 	}
+
 private:
-	static inline std::mutex s_AllocationMutex;
-	static inline std::array<bool, MaxInstances> s_Allocation = detail::init_array<bool, MaxInstances>(false);
-	static inline std::array<CallbacksWrapperState, MaxInstances> s_AsioCallbackWrapperStates = detail::init_array<CallbacksWrapperState, MaxInstances>(CallbacksWrapperState{ { nullptr, nullptr, nullptr, nullptr }, nullptr });
-	static constexpr inline std::array<Callbacks, MaxInstances> s_AsioCallbacks = construct_callbacks_array<std::array<CallbacksWrapperState, MaxInstances>, &s_AsioCallbackWrapperStates>(std::make_index_sequence<MaxInstances>());
+	static inline std::mutex                                      s_AllocationMutex;
+	static inline std::array<bool, MaxInstances>                  s_Allocation                = detail::init_array<bool, MaxInstances>(false);
+	static inline std::array<CallbacksWrapperState, MaxInstances> s_AsioCallbackWrapperStates = detail::init_array<CallbacksWrapperState, MaxInstances>(CallbacksWrapperState{{nullptr, nullptr, nullptr, nullptr}, nullptr});
+	static constexpr inline std::array<Callbacks, MaxInstances>   s_AsioCallbacks             = construct_callbacks_array<std::array<CallbacksWrapperState, MaxInstances>, &s_AsioCallbackWrapperStates>(std::make_index_sequence<MaxInstances>());
+
 private:
 	static std::size_t Alloc() {
 		std::lock_guard<std::mutex> guard(s_AllocationMutex);
@@ -179,10 +182,11 @@ private:
 		assert(s_Allocation[index]);
 		s_Allocation[index] = false;
 	}
+
 public:
 	static std::pair<std::size_t, Callbacks> Multiplex(void * context, CallbacksWithContext callbacks) {
-		std::size_t cookie = Alloc();
-		s_AsioCallbackWrapperStates[cookie] = { callbacks, context };
+		std::size_t cookie                  = Alloc();
+		s_AsioCallbackWrapperStates[cookie] = {callbacks, context};
 		return std::make_pair(cookie, s_AsioCallbacks[cookie]);
 	}
 	static void Unmultiplex(std::pair<std::size_t, Callbacks> state) noexcept {
@@ -194,32 +198,35 @@ public:
 class IMultiplexedCallbacks {
 protected:
 	IMultiplexedCallbacks() = default;
+
 public:
-	IMultiplexedCallbacks(const IMultiplexedCallbacks&) = delete;
-	IMultiplexedCallbacks& operator=(const IMultiplexedCallbacks&) = delete;
+	IMultiplexedCallbacks(const IMultiplexedCallbacks &) = delete;
+	IMultiplexedCallbacks & operator=(const IMultiplexedCallbacks &) = delete;
+
 public:
 	virtual ~IMultiplexedCallbacks() = default;
+
 public:
-	virtual operator const Callbacks*() const noexcept = 0;
-	virtual operator const Callbacks&() const noexcept = 0;
-	virtual operator Callbacks*() noexcept = 0;
-	virtual operator Callbacks&() noexcept = 0;
+	virtual operator const Callbacks *() const noexcept = 0;
+	virtual operator const Callbacks &() const noexcept = 0;
+	virtual operator Callbacks *() noexcept             = 0;
+	virtual operator Callbacks &() noexcept             = 0;
 };
 
 
 template <std::uint64_t AppID1, std::uint64_t AppID2, std::size_t MaxInstances>
 class MultiplexedCallbacks
-	: public IMultiplexedCallbacks
-{
+	: public IMultiplexedCallbacks {
 public:
 	using GlobalState = AsioCallbacksMultiplexerGlobalState<AppID1, AppID2, MaxInstances>;
-	using State = std::unique_ptr<IMultiplexedCallbacks>;
+	using State       = std::unique_ptr<IMultiplexedCallbacks>;
+
 private:
 	std::pair<std::size_t, Callbacks> m_State;
+
 public:
 	MultiplexedCallbacks(void * context, CallbacksWithContext callbacks)
-		: m_State(GlobalState::Multiplex(context, callbacks))
-	{
+		: m_State(GlobalState::Multiplex(context, callbacks)) {
 		if (!callbacks.bufferSwitch) {
 			m_State.second.bufferSwitch = nullptr;
 		}
@@ -233,24 +240,26 @@ public:
 			m_State.second.bufferSwitchTimeInfo = nullptr;
 		}
 	}
-	MultiplexedCallbacks(const MultiplexedCallbacks&) = delete;
-	MultiplexedCallbacks& operator=(const MultiplexedCallbacks&) = delete;
+	MultiplexedCallbacks(const MultiplexedCallbacks &) = delete;
+	MultiplexedCallbacks & operator=(const MultiplexedCallbacks &) = delete;
 	~MultiplexedCallbacks() final {
 		GlobalState::Unmultiplex(m_State);
 	}
+
 public:
-	operator const Callbacks*() const noexcept final {
+	operator const Callbacks *() const noexcept final {
 		return &m_State.second;
 	}
-	operator const Callbacks&() const noexcept final {
+	operator const Callbacks &() const noexcept final {
 		return m_State.second;
 	}
-	operator Callbacks*() noexcept final {
+	operator Callbacks *() noexcept final {
 		return &m_State.second;
 	}
-	operator Callbacks&() noexcept final {
+	operator Callbacks &() noexcept final {
 		return m_State.second;
 	}
+
 public:
 	static std::unique_ptr<MultiplexedCallbacks> make(void * context, CallbacksWithContext callbacks) {
 		return std::make_unique<MultiplexedCallbacks>(context, callbacks);
@@ -287,45 +296,40 @@ struct SamplePosition {
 struct BufferIndex {
 	std::uint8_t Index : 1;
 	constexpr BufferIndex() noexcept
-		: Index(0)
-	{
+		: Index(0) {
 	}
 	constexpr BufferIndex(Long doubleBufferIndex) noexcept
-		: Index(static_cast<std::uint8_t>(static_cast<ULong>(doubleBufferIndex) & 1u))
-	{
+		: Index(static_cast<std::uint8_t>(static_cast<ULong>(doubleBufferIndex) & 1u)) {
 	}
 	constexpr BufferIndex(std::size_t bufferIndex) noexcept
-		: Index(static_cast<std::uint8_t>(bufferIndex & 1u))
-	{
+		: Index(static_cast<std::uint8_t>(bufferIndex & 1u)) {
 	}
 	constexpr operator std::size_t() const noexcept {
 		return Index;
 	}
 };
 
-class Driver
-{
+class Driver {
 
 public:
-
-	class ICallbackHandler
-	{
+	class ICallbackHandler {
 	protected:
 		ICallbackHandler() = default;
+
 	public:
 		ICallbackHandler(const ICallbackHandler &) = delete;
 		ICallbackHandler & operator=(const ICallbackHandler &) = delete;
-		virtual ~ICallbackHandler() = default;
+		virtual ~ICallbackHandler()                            = default;
+
 	public:
-		virtual Long CallbackMessage(Driver & driver, MessageSelector selector, Long value, const void * message, const Double * opt) noexcept = 0;
-		virtual void CallbackSampleRateDidChange(Driver & driver, SampleRate sRate) noexcept = 0;
-		virtual void CallbackBufferSwitch(Driver & driver, Long doubleBufferIndex, Bool directProcess) noexcept = 0;
-		virtual const Time * CallbackBufferSwitchTimeInfo(Driver & driver, const Time * params, Long doubleBufferIndex, Bool directProcess) noexcept = 0;
+		virtual Long         CallbackMessage(Driver & driver, MessageSelector selector, Long value, const void * message, const Double * opt) noexcept = 0;
+		virtual void         CallbackSampleRateDidChange(Driver & driver, SampleRate sRate) noexcept                                                   = 0;
+		virtual void         CallbackBufferSwitch(Driver & driver, Long doubleBufferIndex, Bool directProcess) noexcept                                = 0;
+		virtual const Time * CallbackBufferSwitchTimeInfo(Driver & driver, const Time * params, Long doubleBufferIndex, Bool directProcess) noexcept   = 0;
 	};
 
 	class CallbackHandler
-		: public ICallbackHandler
-	{
+		: public ICallbackHandler {
 		/*
 		void MessageResetRequest() noexcept override;
 		bool MessageBufferSizeChange(ASIO::Long newSize) noexcept override;
@@ -340,59 +344,60 @@ public:
 		void RealtimeBufferSwitch(ASIO::BufferIndex bufferIndex) noexcept override;
 		*/
 	public:
-		CallbackHandler() = default;
+		CallbackHandler()                        = default;
 		CallbackHandler(const CallbackHandler &) = delete;
 		CallbackHandler & operator=(const CallbackHandler &) = delete;
-		virtual ~CallbackHandler() = default;
+		virtual ~CallbackHandler()                           = default;
+
 	public:
 		bool MessageSelectorSupported(MessageSelector selector) const noexcept {
 			bool result = false;
 			switch (selector) {
-			case MessageSelector::SelectorSupported:
-				result = true;
-				break;
-			case MessageSelector::EngineVersion:
-				result = true;
-				break;
-			case MessageSelector::ResetRequest:
-				result = true;
-				break;
-			case MessageSelector::BufferSizeChange:
-				result = true;
-				break;
-			case MessageSelector::ResyncRequest:
-				result = true;
-				break;
-			case MessageSelector::LatenciesChanged:
-				result = true;
-				break;
-			case MessageSelector::SupportsTimeInfo:
-				result = true;
-				break;
-			case MessageSelector::SupportsTimeCode:
-				result = true;
-				break;
-			case MessageSelector::MMCCommand:
-				result = true;
-				break;
-			case MessageSelector::SupportsInputMonitor:
-				result = true;
-				break;
-			case MessageSelector::SupportsInputGain:
-				result = true;
-				break;
-			case MessageSelector::SupportsInputMeter:
-				result = true;
-				break;
-			case MessageSelector::SupportsOutputGain:
-				result = true;
-				break;
-			case MessageSelector::SupportsOutputMeter:
-				result = true;
-				break;
-			case MessageSelector::Overload:
-				result = true;
-				break;
+				case MessageSelector::SelectorSupported:
+					result = true;
+					break;
+				case MessageSelector::EngineVersion:
+					result = true;
+					break;
+				case MessageSelector::ResetRequest:
+					result = true;
+					break;
+				case MessageSelector::BufferSizeChange:
+					result = true;
+					break;
+				case MessageSelector::ResyncRequest:
+					result = true;
+					break;
+				case MessageSelector::LatenciesChanged:
+					result = true;
+					break;
+				case MessageSelector::SupportsTimeInfo:
+					result = true;
+					break;
+				case MessageSelector::SupportsTimeCode:
+					result = true;
+					break;
+				case MessageSelector::MMCCommand:
+					result = true;
+					break;
+				case MessageSelector::SupportsInputMonitor:
+					result = true;
+					break;
+				case MessageSelector::SupportsInputGain:
+					result = true;
+					break;
+				case MessageSelector::SupportsInputMeter:
+					result = true;
+					break;
+				case MessageSelector::SupportsOutputGain:
+					result = true;
+					break;
+				case MessageSelector::SupportsOutputMeter:
+					result = true;
+					break;
+				case MessageSelector::Overload:
+					result = true;
+					break;
 			}
 			return result;
 		}
@@ -457,62 +462,63 @@ public:
 			static_cast<void>(time);
 		}
 		virtual void RealtimeBufferSwitch(ASIO::BufferIndex bufferIndex) noexcept = 0;
+
 	public:
 		Long CallbackMessage(Driver & driver, MessageSelector selector, Long value, const void * message, const Double * opt) noexcept final {
 			static_cast<void>(driver);
 			Long result = 0;
 			switch (selector) {
-			case MessageSelector::SelectorSupported:
-				result = MessageSelectorSupported(static_cast<MessageSelector>(value)) ? 1 : 0;
-				break;
-			case MessageSelector::EngineVersion:
-				result = MessageEngineVersion();
-				break;
-			case MessageSelector::ResetRequest:
-				MessageResetRequest();
-				result = 1;
-				break;
-			case MessageSelector::BufferSizeChange:
-				result = MessageBufferSizeChange(value) ? 1 : 0;
-				break;
-			case MessageSelector::ResyncRequest:
-				result = MessageResyncRequest() ? 1 : 0;
-				break;
-			case MessageSelector::LatenciesChanged:
-				MessageLatenciesChanged();
-				result = 1;
-				break;
-			case MessageSelector::SupportsTimeInfo:
-				result = MessageSupportsTimeInfo() ? 1 : 0;
-				break;
-			case MessageSelector::SupportsTimeCode:
-				result = MessageSupportsTimeCode() ? 1 : 0;
-				break;
-			case MessageSelector::MMCCommand:
-				result = MessageMMCCommand(value, message, opt);
-				break;
-			case MessageSelector::SupportsInputMonitor:
-				result = MessageSupportsInputMonitor() ? 1 : 0;
-				break;
-			case MessageSelector::SupportsInputGain:
-				result = MessageSupportsInputGain() ? 1 : 0;
-				break;
-			case MessageSelector::SupportsInputMeter:
-				result = MessageSupportsInputMeter() ? 1 : 0;
-				break;
-			case MessageSelector::SupportsOutputGain:
-				result = MessageSupportsOutputGain() ? 1 : 0;
-				break;
-			case MessageSelector::SupportsOutputMeter:
-				result = MessageSupportsOutputMeter() ? 1 : 0;
-				break;
-			case MessageSelector::Overload:
-				MessageOverload();
-				result = 1;
-				break;
-			default:
-				result = MessageUnknown(selector, value, message, opt);
-				break;
+				case MessageSelector::SelectorSupported:
+					result = MessageSelectorSupported(static_cast<MessageSelector>(value)) ? 1 : 0;
+					break;
+				case MessageSelector::EngineVersion:
+					result = MessageEngineVersion();
+					break;
+				case MessageSelector::ResetRequest:
+					MessageResetRequest();
+					result = 1;
+					break;
+				case MessageSelector::BufferSizeChange:
+					result = MessageBufferSizeChange(value) ? 1 : 0;
+					break;
+				case MessageSelector::ResyncRequest:
+					result = MessageResyncRequest() ? 1 : 0;
+					break;
+				case MessageSelector::LatenciesChanged:
+					MessageLatenciesChanged();
+					result = 1;
+					break;
+				case MessageSelector::SupportsTimeInfo:
+					result = MessageSupportsTimeInfo() ? 1 : 0;
+					break;
+				case MessageSelector::SupportsTimeCode:
+					result = MessageSupportsTimeCode() ? 1 : 0;
+					break;
+				case MessageSelector::MMCCommand:
+					result = MessageMMCCommand(value, message, opt);
+					break;
+				case MessageSelector::SupportsInputMonitor:
+					result = MessageSupportsInputMonitor() ? 1 : 0;
+					break;
+				case MessageSelector::SupportsInputGain:
+					result = MessageSupportsInputGain() ? 1 : 0;
+					break;
+				case MessageSelector::SupportsInputMeter:
+					result = MessageSupportsInputMeter() ? 1 : 0;
+					break;
+				case MessageSelector::SupportsOutputGain:
+					result = MessageSupportsOutputGain() ? 1 : 0;
+					break;
+				case MessageSelector::SupportsOutputMeter:
+					result = MessageSupportsOutputMeter() ? 1 : 0;
+					break;
+				case MessageSelector::Overload:
+					MessageOverload();
+					result = 1;
+					break;
+				default:
+					result = MessageUnknown(selector, value, message, opt);
+					break;
 			}
 			return result;
 		}
@@ -530,13 +536,13 @@ public:
 			} else {
 				try {
 					HiLoLongLong samplePosition = 0;
-					HiLoLongLong systemTime = 0;
+					HiLoLongLong systemTime     = 0;
 					if (driver.realDriver().getSamplePosition(&samplePosition, &systemTime) == ErrorCode::OK) {
 						time.timeInfo.flags |= TimeInfoFlagSamplePositionValid | TimeInfoFlagSystemTimeValid;
 						time.timeInfo.samplePosition = samplePosition;
-						time.timeInfo.systemTime = systemTime;
-						time.timeInfo.speed = 1.0;
-						SampleRate sampleRate = 0.0;
+						time.timeInfo.systemTime     = systemTime;
+						time.timeInfo.speed          = 1.0;
+						SampleRate sampleRate        = 0.0;
 						if (driver.realDriver().getSampleRate(&sampleRate) == ErrorCode::OK) {
 							if (sampleRate >= 0.0) {
 								time.timeInfo.flags |= TimeInfoFlagSampleRateValid;
@@ -557,7 +563,6 @@ public:
 
 
 private:
-
 	std::unique_ptr<IDriver> m_Driver;
 
 	ICallbackHandler * m_CallbackHandler = nullptr;
@@ -565,7 +570,6 @@ private:
 	std::unique_ptr<IMultiplexedCallbacks> m_Callbacks;
 
 private:
-	
 	const IDriver & realDriver() const noexcept {
 		return *m_Driver;
 	}
@@ -574,10 +578,8 @@ private:
 	}
 
 public:
-
 	explicit Driver(std::unique_ptr<IDriver> driver)
-		: m_Driver(std::move(driver))
-	{
+		: m_Driver(std::move(driver)) {
 		return;
 	}
 
@@ -590,7 +592,6 @@ public:
 	}
 
 private:
-
 	[[nodiscard]] static ErrorCode CheckResultOutOfMemory(ErrorCode ec) {
 		if (ec == ErrorCode::NoMemory) {
 			throw std::bad_alloc();
@@ -628,7 +629,6 @@ private:
 	}
 
 private:
-
 	static Driver * ThisFromVoid(void * context) noexcept {
 		return reinterpret_cast<Driver *>(context);
 	}
@@ -638,12 +638,11 @@ private:
 	}
 
 	static constexpr CallbacksWithContext MyCallbacks() noexcept {
-		CallbacksWithContext result = { &CallbackBufferSwitch, &CallbackSampleRateDidChange, &CallbackAsioMessage, &CallbackBufferSwitchTimeInfo };
+		CallbacksWithContext result = {&CallbackBufferSwitch, &CallbackSampleRateDidChange, &CallbackAsioMessage, &CallbackBufferSwitchTimeInfo};
 		return result;
 	}
 
 private:
-
 	static void CallbackBufferSwitch(void * context, Long doubleBufferIndex, Bool directProcess) noexcept {
 		assert(context);
 		assert(ThisFromVoid(context)->m_CallbackHandler);
@@ -666,7 +665,6 @@ private:
 	}
 
 public:
-
 	std::string getDriverName() const {
 		DriverName name = "";
 		m_Driver->getDriverName(&name);
@@ -719,7 +717,7 @@ public:
 
 	SampleRate getSampleRate() const {
 		SampleRate sampleRate = 0.0;
-		ErrorCode ec = m_Driver->getSampleRate(&sampleRate);
+		ErrorCode  ec         = m_Driver->getSampleRate(&sampleRate);
 		if ((ec != ErrorCode::OK) && (ec != ErrorCode::NoClock)) {
 			CheckOK(ec);
 		}
@@ -732,7 +730,7 @@ public:
 
 	std::vector<ClockSource> getClockSources() const {
 		std::vector<ClockSource> clocks(1);
-		Long numSources = 1;
+		Long                     numSources = 1;
 		CheckOK(m_Driver->getClockSources(clocks.data(), &numSources));
 		if (numSources > 1) {
 			clocks.resize(numSources);
@@ -747,11 +745,11 @@ public:
 
 	SamplePosition getSamplePosition() const {
 		HiLoLongLong samplePosition = 0;
-		HiLoLongLong systemTime = 0;
+		HiLoLongLong systemTime     = 0;
 		CheckOK(m_Driver->getSamplePosition(&samplePosition, &systemTime));
 		SamplePosition result;
 		result.samplePosition = samplePosition;
-		result.systemTime = systemTime;
+		result.systemTime     = systemTime;
 		return result;
 	}
 
@@ -768,11 +766,11 @@ public:
 		assert(!m_CallbackHandler);
 		assert(!m_Callbacks);
 		m_CallbackHandler = &handler;
-		m_Callbacks = MultiplexedCallbacks<AppID1, AppID2, MaxInstances>::make(MyContext(), MyCallbacks());
+		m_Callbacks       = MultiplexedCallbacks<AppID1, AppID2, MaxInstances>::make(MyContext(), MyCallbacks());
 		try {
 			CheckOKNoOutOfMemory(m_Driver->createBuffers(bufferInfos.data(), static_cast<Long>(bufferInfos.size()), bufferSize, *m_Callbacks));
 		} catch (...) {
-			m_Callbacks = nullptr;
+			m_Callbacks       = nullptr;
 			m_CallbackHandler = nullptr;
 			throw;
 		}
@@ -784,11 +782,11 @@ public:
 		try {
 			CheckOK(m_Driver->disposeBuffers());
 		} catch (...) {
-			m_Callbacks = nullptr;
+			m_Callbacks       = nullptr;
 			m_CallbackHandler = nullptr;
 			throw;
 		}
-		m_Callbacks = nullptr;
+		m_Callbacks       = nullptr;
 		m_CallbackHandler = nullptr;
 	}
 
@@ -824,7 +822,7 @@ public:
 		ChannelControls channelControls;
 		channelControls.channel = channel;
 		channelControls.isInput = input;
-		channelControls.gain = gain;
+		channelControls.gain    = gain;
 		CheckSUCCESS(m_Driver->future(FutureSelector::SetInputGain, &channelControls));
 	}
 
@@ -840,7 +838,7 @@ public:
 		ChannelControls channelControls;
 		channelControls.channel = channel;
 		channelControls.isInput = input;
-		channelControls.gain = gain;
+		channelControls.gain    = gain;
 		CheckSUCCESS(m_Driver->future(FutureSelector::SetOutputGain, &channelControls));
 	}
 
@@ -911,7 +909,7 @@ public:
 	bool canDoIoFormat(IoFormatType type) {
 		IoFormat ioFormat;
 		ioFormat.FormatType = type;
-		ErrorCode ec = CheckResultOutOfMemory(m_Driver->future(FutureSelector::CanDoIoFormat, &ioFormat));
+		ErrorCode ec        = CheckResultOutOfMemory(m_Driver->future(FutureSelector::CanDoIoFormat, &ioFormat));
 		return (ec == ErrorCode::SUCCESS);
 	}
 
@@ -922,7 +920,7 @@ public:
 
 	InternalBufferInfo getInternalBufferSamples() const {
 		InternalBufferInfo internalBufferInfo;
-		ErrorCode ec = CheckResultOutOfMemory(m_Driver->future(FutureSelector::CanReportOverload, &internalBufferInfo));
+		ErrorCode          ec = CheckResultOutOfMemory(m_Driver->future(FutureSelector::CanReportOverload, &internalBufferInfo));
 		if (ec != ErrorCode::SUCCESS) {
 			return InternalBufferInfo();
 		}
@@ -940,7 +938,6 @@ public:
 	void outputReady() {
 		CheckOK(m_Driver->outputReady());
 	}
-
 };
 
 

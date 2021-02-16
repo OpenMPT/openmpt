@@ -18,7 +18,7 @@
 
 
 
-#if defined( _WIN32 )
+#if defined(_WIN32)
 #define ASIO_SYSTEM_WINDOWS 1
 #endif
 
@@ -27,11 +27,11 @@
 #endif
 
 
-#if defined( __clang__ )
+#if defined(__clang__)
 #define ASIO_COMPILER_CLANG 1
-#elif defined( _MSC_VER )
+#elif defined(_MSC_VER)
 #define ASIO_COMPILER_MSVC 1
-#elif defined( __GNUC__ )
+#elif defined(__GNUC__)
 #define ASIO_COMPILER_GCC 1
 #endif
 
@@ -77,8 +77,8 @@ namespace ASIO {
 
 #define ASIO_PP_STRINGIFY(x) #x
 
-#define ASIO_PP_JOIN_HELPER(a, b) a ## b
-#define ASIO_PP_JOIN(a, b) ASIO_PP_JOIN_HELPER(a, b)
+#define ASIO_PP_JOIN_HELPER(a, b) a##b
+#define ASIO_PP_JOIN(a, b)        ASIO_PP_JOIN_HELPER(a, b)
 
 #define ASIO_PP_UNIQUE_IDENTIFIER(prefix) ASIO_PP_JOIN(prefix, __LINE__)
 
@@ -90,7 +90,7 @@ namespace ASIO {
 #define ASIO_WARNING(text) _Pragma(MPT_PP_STRINGIFY(GCC warning text))
 #else
 #define ASIO_WARNING(text) \
-	static inline int ASIO_PP_UNIQUE_IDENTIFIER(ASIO_WARNING_NAME) () noexcept { \
+	static inline int ASIO_PP_UNIQUE_IDENTIFIER(ASIO_WARNING_NAME)() noexcept { \
 		int warning [[deprecated("Warning: " text)]] = 0; \
 		return warning; \
 	} \
@@ -240,28 +240,35 @@ using PaddingLong = ULong;
 struct Bool {
 private:
 	ULong m_val;
+
 public:
-	constexpr Bool() noexcept : m_val(0) {}
-	constexpr Bool(bool val) noexcept : m_val(val ? 1 : 0) {}
-	constexpr explicit Bool(ULong val) noexcept : m_val(val ? 1 : 0) {}
-	constexpr bool operator!() const noexcept { return m_val ? false : true; }
-	constexpr operator bool() const noexcept { return m_val ? true : false; }
+	constexpr Bool() noexcept
+		: m_val(0) { }
+	constexpr Bool(bool val) noexcept
+		: m_val(val ? 1 : 0) { }
+	constexpr explicit Bool(ULong val) noexcept
+		: m_val(val ? 1 : 0) { }
+	constexpr bool operator!() const noexcept {
+		return m_val ? false : true;
+	}
+	constexpr operator bool() const noexcept {
+		return m_val ? true : false;
+	}
 };
 
 struct HiLoLongLong {
 private:
 	ULong m_hi;
 	ULong m_lo;
+
 public:
 	constexpr HiLoLongLong() noexcept
 		: m_hi(0)
-		, m_lo(0)
-	{
+		, m_lo(0) {
 	}
 	constexpr HiLoLongLong(LongLong val) noexcept
 		: m_hi(static_cast<ULong>((static_cast<ULongLong>(val) & 0xffffffff00000000ull) >> 32))
-		, m_lo(static_cast<ULong>((static_cast<ULongLong>(val) & 0x00000000ffffffffull) >>  0))
-	{
+		, m_lo(static_cast<ULong>((static_cast<ULongLong>(val) & 0x00000000ffffffffull) >> 0)) {
 	}
 	constexpr operator LongLong() const noexcept {
 		return static_cast<LongLong>((static_cast<ULongLong>(m_hi) << 32) | (static_cast<ULongLong>(m_lo) << 0));
@@ -271,46 +278,43 @@ public:
 using ResultBool = ULong;
 
 template <std::size_t size>
-struct CharBuf
-{
+struct CharBuf {
 private:
 	Char buf[size] = "";
+
 public:
-	CharBuf() = default;
+	CharBuf()                = default;
 	CharBuf(const CharBuf &) = default;
-	CharBuf(CharBuf &&) = default;
-	CharBuf & operator = (const CharBuf &) = default;
-	CharBuf & operator = (CharBuf &&) = default;
+	CharBuf(CharBuf &&)      = default;
+	CharBuf & operator=(const CharBuf &) = default;
+	CharBuf & operator=(CharBuf &&) = default;
+
 public:
 	constexpr CharBuf(std::nullptr_t) noexcept
-		: CharBuf()
-	{
+		: CharBuf() {
 	}
 	inline CharBuf(const char * str) noexcept
-		: CharBuf()
-	{
+		: CharBuf() {
 		if (str) {
 			std::copy(str, str + std::min(std::strlen(str), size - 1), buf);
 			std::fill(buf + std::min(std::strlen(str), size - 1), buf + size, Char('\0'));
 		}
 	}
 	inline CharBuf(const std::string_view & str) noexcept
-		: CharBuf()
-	{
+		: CharBuf() {
 		std::copy(str.data(), str.data() + std::min(str.length(), size - 1), buf);
 		std::fill(buf + std::min(str.length(), size - 1), buf + size, Char('\0'));
 	}
 	inline CharBuf(const std::string & str) noexcept
-		: CharBuf()
-	{
+		: CharBuf() {
 		std::copy(str.data(), str.data() + std::min(str.length(), size - 1), buf);
 		std::fill(buf + std::min(str.length(), size - 1), buf + size, Char('\0'));
 	}
-	inline CharBuf & operator = (std::nullptr_t) noexcept {
+	inline CharBuf & operator=(std::nullptr_t) noexcept {
 		std::fill(buf, buf + size, Char('\0'));
 		return *this;
 	}
-	inline CharBuf & operator = (const char * str) noexcept {
+	inline CharBuf & operator=(const char * str) noexcept {
 		if (str) {
 			std::copy(str, str + std::min(std::strlen(str), size - 1), buf);
 			std::fill(buf + std::min(std::strlen(str), size - 1), buf + size, Char('\0'));
@@ -319,34 +323,34 @@ public:
 		}
 		return *this;
 	}
-	inline CharBuf & operator = (const std::string & str) noexcept {
+	inline CharBuf & operator=(const std::string & str) noexcept {
 		std::fill(buf, buf + size, Char('\0'));
 		std::copy(str.data(), str.data() + std::min(str.length(), size - 1), buf);
 		std::fill(buf + std::min(str.length(), size - 1), buf + size, Char('\0'));
 		return *this;
 	}
-	inline CharBuf & operator = (const std::string_view & str) noexcept {
+	inline CharBuf & operator=(const std::string_view & str) noexcept {
 		std::fill(buf, buf + size, Char('\0'));
 		std::copy(str.data(), str.data() + std::min(str.length(), size - 1), buf);
 		std::fill(buf + std::min(str.length(), size - 1), buf + size, Char('\0'));
 		return *this;
 	}
-	inline explicit operator std::string_view () const noexcept {
+	inline explicit operator std::string_view() const noexcept {
 		std::size_t len = std::find(buf, buf + size - 1, Char('\0')) - buf;
 		return std::string_view(buf, buf + len);
 	}
-	inline operator std::string () const {
+	inline operator std::string() const {
 		std::size_t len = std::find(buf, buf + size - 1, Char('\0')) - buf;
 		return std::string(buf, buf + len);
 	}
 };
 
-static constexpr std::size_t SizeOfChar = sizeof(Char);
-static constexpr std::size_t SizeOfByte = sizeof(Byte);
-static constexpr std::size_t SizeOfBool = sizeof(Bool);
-static constexpr std::size_t SizeOfLong = sizeof(Long);
-static constexpr std::size_t SizeOfLongLong = sizeof(LongLong);
-static constexpr std::size_t SizeOfDouble = sizeof(Double);
+static constexpr std::size_t SizeOfChar         = sizeof(Char);
+static constexpr std::size_t SizeOfByte         = sizeof(Byte);
+static constexpr std::size_t SizeOfBool         = sizeof(Bool);
+static constexpr std::size_t SizeOfLong         = sizeof(Long);
+static constexpr std::size_t SizeOfLongLong     = sizeof(LongLong);
+static constexpr std::size_t SizeOfDouble       = sizeof(Double);
 static constexpr std::size_t SizeOfHiLoLongLong = sizeof(HiLoLongLong);
 
 static_assert(SizeOfChar == 1);
