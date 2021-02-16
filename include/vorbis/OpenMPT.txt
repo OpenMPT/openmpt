@@ -1,4 +1,4 @@
-libvorbis library version 1.3.6.
+libvorbis library version 1.3.7.
 The following changes have been made:
 - Obviously, unnecessary folders and files (doc, examples, m4, macos, macosx,
   symbian, test, vq) have been removed.
