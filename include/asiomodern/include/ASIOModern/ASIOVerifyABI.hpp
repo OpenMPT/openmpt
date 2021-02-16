@@ -34,7 +34,7 @@ inline namespace ASIO_VERSION_NAMESPACE {
 
 
 
-static_assert(sizeof(ASIO::SysHandle) == sizeof(void*));
+static_assert(sizeof(ASIO::SysHandle) == sizeof(void *));
 static_assert(sizeof(ASIO::Byte) == sizeof(char));
 static_assert(sizeof(ASIO::Long) == sizeof(long));
 static_assert(sizeof(ASIO::ULong) == sizeof(unsigned long));
@@ -72,7 +72,7 @@ static_assert(sizeof(ASIO::IoFormat) == sizeof(::ASIOIoFormat));
 static_assert(sizeof(ASIO::InternalBufferInfo) == sizeof(::ASIOInternalBufferInfo));
 static_assert(sizeof(ASIO::ISystemDriver) == sizeof(::IASIO));
 
-static_assert(alignof(ASIO::SysHandle) == alignof(void*));
+static_assert(alignof(ASIO::SysHandle) == alignof(void *));
 static_assert(alignof(ASIO::Byte) == alignof(char));
 static_assert(alignof(ASIO::Long) == alignof(long));
 static_assert(alignof(ASIO::ULong) == alignof(unsigned long));

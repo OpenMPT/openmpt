@@ -71,7 +71,7 @@ inline namespace Ansi {
 struct DriverInfo {
 	std::basic_string<TCHAR> Key;
 	std::basic_string<TCHAR> Id;
-	CLSID Clsid{};
+	CLSID                    Clsid{};
 	std::basic_string<TCHAR> Name;
 	std::basic_string<TCHAR> Description;
 	std::basic_string<TCHAR> DisplayName() const {
@@ -86,8 +86,9 @@ struct DriverInfo {
 class HKey {
 private:
 	HKEY m_Key = NULL;
+
 public:
-	HKey() = default;
+	HKey()             = default;
 	HKey(const HKey &) = delete;
 	HKey & operator=(const HKey &) = delete;
 	~HKey() {
@@ -95,10 +96,10 @@ public:
 			RegCloseKey(m_Key);
 		}
 	}
-	operator HKEY & () {
+	operator HKEY &() {
 		return m_Key;
 	}
-	operator HKEY * () {
+	operator HKEY *() {
 		return &m_Key;
 	}
 };
@@ -121,23 +122,23 @@ inline HRESULT CheckHRESULTOutOfMemory(HRESULT hr) {
 
 inline std::vector<DriverInfo> EnumerateDrivers() {
 	std::vector<DriverInfo> drivers;
-	HKey hkAsioEnum;
+	HKey                    hkAsioEnum;
 	if (CheckLRESULTOutOfMemory(RegOpenKeyEx(HKEY_LOCAL_MACHINE, TEXT("SOFTWARE\\ASIO"), 0, KEY_READ, hkAsioEnum)) != ERROR_SUCCESS) {
 		return drivers;
 	}
-	DWORD numSubKeys = 0;
+	DWORD numSubKeys   = 0;
 	DWORD maxSubKeyLen = 0;
 	if (CheckLRESULTOutOfMemory(RegQueryInfoKey(hkAsioEnum, NULL, NULL, NULL, &numSubKeys, &maxSubKeyLen, NULL, NULL, NULL, NULL, NULL, NULL)) != ERROR_SUCCESS) {
 		return drivers;
 	}
 	for (DWORD i = 0; i < numSubKeys; ++i) {
 		std::vector<TCHAR> bufKey(static_cast<std::size_t>(maxSubKeyLen) + 1);
-		DWORD lenKey = static_cast<DWORD>(bufKey.size());
+		DWORD              lenKey = static_cast<DWORD>(bufKey.size());
 		if (CheckLRESULTOutOfMemory(RegEnumKeyEx(hkAsioEnum, i, bufKey.data(), &lenKey, NULL, NULL, NULL, NULL)) != ERROR_SUCCESS) {
 			continue;
 		}
 		std::basic_string<TCHAR> key(bufKey.data(), bufKey.data() + lenKey);
-		HKey hkDriver;
+		HKey                     hkDriver;
 		if (CheckLRESULTOutOfMemory(RegOpenKeyEx(hkAsioEnum, key.c_str(), 0, KEY_READ, hkDriver)) != ERROR_SUCCESS) {
 			continue;
 		}
@@ -146,36 +147,36 @@ inline std::vector<DriverInfo> EnumerateDrivers() {
 			continue;
 		}
 		std::vector<TCHAR> bufClsid(static_cast<std::size_t>(maxValueLen) + 1);
-		DWORD lenClsid = static_cast<DWORD>(bufClsid.size()) * sizeof(TCHAR);
-		DWORD typeClsid = REG_SZ;
+		DWORD              lenClsid  = static_cast<DWORD>(bufClsid.size()) * sizeof(TCHAR);
+		DWORD              typeClsid = REG_SZ;
 		if (CheckLRESULTOutOfMemory(RegQueryValueEx(hkDriver, TEXT("CLSID"), NULL, &typeClsid, reinterpret_cast<LPBYTE>(bufClsid.data()), &lenClsid)) != ERROR_SUCCESS) {
 			continue;
 		}
 		std::basic_string<TCHAR> strClsid(bufClsid.data(), bufClsid.data() + (lenClsid / sizeof(TCHAR)));
-		std::vector<OLECHAR> oleClsid(strClsid.c_str(), strClsid.c_str() + strClsid.length() + 1);
-		CLSID clsid = CLSID();
+		std::vector<OLECHAR>     oleClsid(strClsid.c_str(), strClsid.c_str() + strClsid.length() + 1);
+		CLSID                    clsid = CLSID();
 		if (CheckHRESULTOutOfMemory(CLSIDFromString(oleClsid.data(), &clsid)) != NOERROR) {
 			continue;
 		}
-		std::vector<TCHAR> bufName(static_cast<std::size_t>(maxValueLen) + 1);
-		DWORD lenName = static_cast<DWORD>(bufName.size()) * sizeof(TCHAR);
-		DWORD typeName = REG_SZ;
+		std::vector<TCHAR>       bufName(static_cast<std::size_t>(maxValueLen) + 1);
+		DWORD                    lenName  = static_cast<DWORD>(bufName.size()) * sizeof(TCHAR);
+		DWORD                    typeName = REG_SZ;
 		std::basic_string<TCHAR> name;
 		if (CheckLRESULTOutOfMemory(RegQueryValueEx(hkDriver, TEXT(""), NULL, &typeName, reinterpret_cast<LPBYTE>(bufName.data()), &lenName)) == ERROR_SUCCESS) {
 			name = std::basic_string<TCHAR>(bufName.data(), bufName.data() + (lenName / sizeof(TCHAR)));
 		}
-		std::vector<TCHAR> bufDesc(static_cast<std::size_t>(maxValueLen) + 1);
-		DWORD lenDesc = static_cast<DWORD>(bufDesc.size()) * sizeof(TCHAR);
-		DWORD typeDesc = REG_SZ;
+		std::vector<TCHAR>       bufDesc(static_cast<std::size_t>(maxValueLen) + 1);
+		DWORD                    lenDesc  = static_cast<DWORD>(bufDesc.size()) * sizeof(TCHAR);
+		DWORD                    typeDesc = REG_SZ;
 		std::basic_string<TCHAR> desc;
 		if (CheckLRESULTOutOfMemory(RegQueryValueEx(hkDriver, TEXT("Description"), NULL, &typeDesc, reinterpret_cast<LPBYTE>(bufDesc.data()), &lenDesc)) == ERROR_SUCCESS) {
 			desc = std::basic_string<TCHAR>(bufDesc.data(), bufDesc.data() + (lenDesc / sizeof(TCHAR)));
 		}
 		DriverInfo info;
-		info.Key = key;
-		info.Id = strClsid;
-		info.Clsid = clsid;
-		info.Name = name;
+		info.Key         = key;
+		info.Id          = strClsid;
+		info.Clsid       = clsid;
+		info.Name        = name;
 		info.Description = desc;
 		drivers.push_back(std::move(info));
 	}
@@ -185,7 +186,7 @@ inline std::vector<DriverInfo> EnumerateDrivers() {
 
 [[nodiscard]] inline ISystemDriver * OpenDriver(CLSID clsid) {
 	ISystemDriver * driver = nullptr;
-	if (CheckHRESULTOutOfMemory(CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, reinterpret_cast<void * *>(&driver))) != S_OK) {
+	if (CheckHRESULTOutOfMemory(CoCreateInstance(clsid, 0, CLSCTX_INPROC_SERVER, clsid, reinterpret_cast<void **>(&driver))) != S_OK) {
 		return nullptr;
 	}
 	return driver;
@@ -197,39 +198,31 @@ inline ULONG CloseDriver(ISystemDriver * driver) {
 
 
 struct DriverLoadFailed
-	: public std::runtime_error
-{
+	: public std::runtime_error {
 	DriverLoadFailed()
-		: std::runtime_error("ASIO Driver load failed.")
-	{
+		: std::runtime_error("ASIO Driver load failed.") {
 		return;
 	}
 };
 
 
 struct DriverInitFailed
-	: public std::runtime_error
-{
+	: public std::runtime_error {
 	DriverInitFailed()
-		: std::runtime_error("ASIO Driver init failed.")
-	{
+		: std::runtime_error("ASIO Driver init failed.") {
 		return;
 	}
 };
 
 
 class Driver
-	: public IDriver
-{
+	: public IDriver {
 
 private:
-
 	ISystemDriver * m_Driver = nullptr;
 
 public:
-
-	explicit Driver(CLSID clsid, HWND wnd)
-	{
+	explicit Driver(CLSID clsid, HWND wnd) {
 		m_Driver = openDriver(clsid);
 		if (!m_Driver) {
 			throw DriverLoadFailed();
@@ -249,7 +242,6 @@ public:
 	}
 
 private:
-
 	ISystemDriver * openDriver(CLSID clsid) {
 		return OpenDriver(clsid);
 	}
@@ -259,13 +251,11 @@ private:
 	}
 
 private:
-
 	Bool initDriver(HWND sysHandle) {
 		return static_cast<Bool>(m_Driver->init(reinterpret_cast<SysHandle>(sysHandle)));
 	}
 
 public:
-
 	void getDriverName(DriverName * name) final {
 		return m_Driver->getDriverName(name);
 	}
@@ -326,7 +316,6 @@ public:
 	[[nodiscard]] ErrorCode outputReady() final {
 		return m_Driver->outputReady();
 	}
-
 };
 
 
@@ -335,15 +324,16 @@ namespace SEH {
 
 struct DriverCrash {
 private:
-	DWORD m_Code;
+	DWORD            m_Code;
 	std::string_view m_Func;
+
 public:
 	explicit constexpr DriverCrash(DWORD code, std::string_view func) noexcept
 		: m_Code(code)
-		, m_Func(func)
-	{
+		, m_Func(func) {
 		return;
 	}
+
 public:
 	constexpr DWORD code() const noexcept {
 		return m_Code;
@@ -356,9 +346,11 @@ public:
 class IState {
 protected:
 	IState() noexcept = default;
+
 public:
 	IState(const IState &) = delete;
 	IState & operator=(const IState &) = delete;
+
 public:
 	virtual ~IState() = default;
 };
@@ -366,23 +358,26 @@ public:
 class ITranslator {
 protected:
 	ITranslator() noexcept = default;
+
 public:
 	ITranslator(const ITranslator &) = delete;
 	ITranslator & operator=(const ITranslator &) = delete;
+
 public:
 	virtual ~ITranslator() = default;
+
 public:
 	[[nodiscard]] virtual LONG TranslatorFilter(std::unique_ptr<IState> & state, DWORD code, LPEXCEPTION_POINTERS records, std::string_view func) const noexcept = 0;
-	[[noreturn]] virtual void TranslatorHandler(std::unique_ptr<IState> & state, DWORD code, std::string_view func) const = 0;
+	[[noreturn]] virtual void  TranslatorHandler(std::unique_ptr<IState> & state, DWORD code, std::string_view func) const                                       = 0;
 };
 
 class DefaultTranslator
-	: public ITranslator
-{
+	: public ITranslator {
 public:
 	virtual ~DefaultTranslator() = default;
+
 public:
-	[[nodiscard]] LONG TranslatorFilter(std::unique_ptr<IState> & /* state */, DWORD /* code */ , LPEXCEPTION_POINTERS /* records */ , std::string_view /* func */ ) const noexcept final {
+	[[nodiscard]] LONG TranslatorFilter(std::unique_ptr<IState> & /* state */, DWORD /* code */, LPEXCEPTION_POINTERS /* records */, std::string_view /* func */) const noexcept final {
 		return EXCEPTION_EXECUTE_HANDLER;
 	}
 	[[noreturn]] void TranslatorHandler(std::unique_ptr<IState> & /* state */, DWORD code, std::string_view func) const final {
@@ -391,40 +386,40 @@ public:
 };
 
 class Driver
-	: public IDriver
-{
-	
-private:
+	: public IDriver {
 
-	ISystemDriver * m_Driver = nullptr;
+private:
+	ISystemDriver *              m_Driver     = nullptr;
 	std::unique_ptr<ITranslator> m_Translator = nullptr;
 
 private:
-
-	template <typename Tfn> static auto TranslateSEtry(std::unique_ptr<ITranslator> & translator, std::unique_ptr<IState> & state, Tfn fn, std::string_view func) -> decltype(fn()) {
-		__try {
+	template <typename Tfn>
+	static auto TranslateSEtry(std::unique_ptr<ITranslator> & translator, std::unique_ptr<IState> & state, Tfn fn, std::string_view func) -> decltype(fn()) {
+		__try
+		{
 			return fn();
-		} __except(translator->TranslatorFilter(state, GetExceptionCode(), GetExceptionInformation(), func)) {
+		} __except (translator->TranslatorFilter(state, GetExceptionCode(), GetExceptionInformation(), func))
+		{
 			translator->TranslatorHandler(state, GetExceptionCode(), func);
 		}
 		throw DriverCrash(0, func);
 	}
 
-	template <typename Tfn> auto TranslateSE(Tfn fn, std::string_view func) -> decltype(fn()) {
+	template <typename Tfn>
+	auto TranslateSE(Tfn fn, std::string_view func) -> decltype(fn()) {
 		assert(m_Translator);
 		std::unique_ptr<IState> state;
 		return TranslateSEtry(m_Translator, state, fn, func);
 	}
 
-	template <typename Tfn> auto CallDriver(Tfn fn, std::string_view func) -> decltype(fn()) {
+	template <typename Tfn>
+	auto CallDriver(Tfn fn, std::string_view func) -> decltype(fn()) {
 		return TranslateSE(fn, func);
 	}
 
 public:
-
 	explicit Driver(CLSID clsid, HWND wnd, std::unique_ptr<ITranslator> translator = std::make_unique<DefaultTranslator>())
-		: m_Translator(std::move(translator))
-	{
+		: m_Translator(std::move(translator)) {
 		m_Driver = openDriver(clsid);
 		if (!m_Driver) {
 			throw DriverLoadFailed();
@@ -444,23 +439,20 @@ public:
 	}
 
 private:
-
 	ISystemDriver * openDriver(CLSID clsid) {
-		return CallDriver([&](){ return OpenDriver(clsid); }, __func__);
+		return CallDriver([&]() { return OpenDriver(clsid); }, __func__);
 	}
 
 	ULONG closeDriver(ISystemDriver * driver) {
-		return CallDriver([&](){ return CloseDriver(driver); }, __func__);
+		return CallDriver([&]() { return CloseDriver(driver); }, __func__);
 	}
 
 private:
-
 	Bool initDriver(HWND sysHandle) {
 		return static_cast<Bool>(CallDriver([&]() { return m_Driver->init(reinterpret_cast<SysHandle>(sysHandle)); }, __func__));
 	}
 
 public:
-
 	void getDriverName(DriverName * name) final {
 		return CallDriver([&]() { return m_Driver->getDriverName(name); }, __func__);
 	}
@@ -521,39 +513,35 @@ public:
 	[[nodiscard]] ErrorCode outputReady() final {
 		return CallDriver([&]() { return m_Driver->outputReady(); }, __func__);
 	}
-
 };
 
 
 
-} // namepsace SEH
+} // namespace SEH
 
 
 
 class IBufferSwitchDispatcher {
 public:
 	virtual ~IBufferSwitchDispatcher() = default;
+
 public:
 	virtual void Dispatch(std::size_t bufferIndex) = 0;
 };
 
 class BufferSwitchDispatcherBase
-	: public IBufferSwitchDispatcher
-{
+	: public IBufferSwitchDispatcher {
 
 private:
+	HANDLE m_hBufferSwitch[2] = {NULL, NULL};
 
-	HANDLE m_hBufferSwitch[2] = { NULL, NULL };
-
-	HANDLE m_hStarted = NULL;
+	HANDLE m_hStarted     = NULL;
 	HANDLE m_hStopRequest = NULL;
 
 	HANDLE m_hThread = NULL;
 
 public:
-
-	BufferSwitchDispatcherBase()
-	{
+	BufferSwitchDispatcherBase() {
 		m_hBufferSwitch[0] = CreateEvent(NULL, FALSE, FALSE, NULL);
 		if (m_hBufferSwitch[0] == NULL) {
 			goto error;
@@ -584,7 +572,7 @@ public:
 			goto error;
 		}
 		return;
-	error:
+error:
 		if (m_hThread != NULL) {
 			CloseHandle(m_hThread);
 		}
@@ -614,10 +602,9 @@ public:
 	}
 
 	BufferSwitchDispatcherBase(const BufferSwitchDispatcherBase &) noexcept = delete;
-	BufferSwitchDispatcherBase & operator =(const BufferSwitchDispatcherBase &) noexcept = delete;
+	BufferSwitchDispatcherBase & operator=(const BufferSwitchDispatcherBase &) noexcept = delete;
 
 private:
-
 	static DWORD WINAPI ThreadProc(LPVOID lpParameter) noexcept {
 		if (!lpParameter) {
 			return 1;
@@ -626,14 +613,14 @@ private:
 	}
 
 	[[nodiscard]] bool ThreadMain() noexcept {
-		DWORD task_idx = 0;
-		HANDLE hTask = AvSetMmThreadCharacteristics(TEXT("Pro Audio"), &task_idx);
+		DWORD  task_idx = 0;
+		HANDLE hTask    = AvSetMmThreadCharacteristics(TEXT("Pro Audio"), &task_idx);
 		SetEvent(m_hStarted);
 		bool result = ThreadLoop();
 		if (hTask) {
 			AvRevertMmThreadCharacteristics(hTask);
 		}
-		hTask = NULL;
+		hTask    = NULL;
 		task_idx = 0;
 		return result;
 	}
@@ -641,65 +628,57 @@ private:
 	[[nodiscard]] bool ThreadLoop() noexcept {
 		bool stop = false;
 		while (!stop) {
-			HANDLE events[3] = { m_hBufferSwitch[0], m_hBufferSwitch[1], m_hStopRequest };
+			HANDLE events[3] = {m_hBufferSwitch[0], m_hBufferSwitch[1], m_hStopRequest};
 			switch (WaitForMultipleObjects(3, events, FALSE, INFINITE)) {
-			case WAIT_OBJECT_0 + 0:
-				CallFunc(0);
-				break;
-			case WAIT_OBJECT_0 + 1:
-				CallFunc(1);
-				break;
-			case WAIT_OBJECT_0 + 2:
-				stop = true;
-				break;
-			default:
-				return false;
-				break;
+				case WAIT_OBJECT_0 + 0:
+					CallFunc(0);
+					break;
+				case WAIT_OBJECT_0 + 1:
+					CallFunc(1);
+					break;
+				case WAIT_OBJECT_0 + 2:
+					stop = true;
+					break;
+				default:
+					return false;
+					break;
 			}
 		}
 		return true;
 	}
 
 protected:
-
 	virtual void CallFunc(std::size_t bufferIndex) = 0;
 
 public:
-
 	void Dispatch(std::size_t bufferIndex) final {
 		if (SetEvent(m_hBufferSwitch[bufferIndex & 1u]) != TRUE) {
 			throw std::bad_alloc();
 		}
 	}
-
 };
 
 template <typename Tfunc>
 class BufferSwitchDispatcher
-	: public BufferSwitchDispatcherBase
-{
+	: public BufferSwitchDispatcherBase {
 
 private:
-
 	Tfunc m_func;
 
 public:
-
 	BufferSwitchDispatcher(Tfunc func)
-		: m_func(func)
-	{
+		: m_func(func) {
 		return;
 	}
 
 protected:
-
 	void CallFunc(std::size_t bufferIndex) final {
 		m_func(bufferIndex);
 	}
-
 };
 
-template <typename Tfunc> inline std::unique_ptr<IBufferSwitchDispatcher> CreateBufferSwitchDispatcher(Tfunc func) {
+template <typename Tfunc>
+inline std::unique_ptr<IBufferSwitchDispatcher> CreateBufferSwitchDispatcher(Tfunc func) {
 	return std::make_unique<BufferSwitchDispatcher<Tfunc>>(func);
 }
 
