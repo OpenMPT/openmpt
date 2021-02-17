@@ -26,14 +26,14 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-void BufferRead(audio_buffer_interleaved<MixSampleInt> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat);
-void BufferRead(audio_buffer_planar<MixSampleInt> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat);
+void BufferReadFixedPoint(audio_buffer_interleaved<MixSampleInt> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat);
+void BufferReadFixedPoint(audio_buffer_planar<MixSampleInt> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat);
 
 void BufferRead(audio_buffer_interleaved<MixSampleFloat> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat);
 void BufferRead(audio_buffer_planar<MixSampleFloat> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat);
 
-void BufferWrite(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_interleaved<const MixSampleInt> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat);
-void BufferWrite(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_planar<const MixSampleInt> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat);
+void BufferWriteFixedPoint(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_interleaved<const MixSampleInt> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat);
+void BufferWriteFixedPoint(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_planar<const MixSampleInt> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat);
 
 void BufferWrite(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_interleaved<const MixSampleFloat> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat);
 void BufferWrite(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_planar<const MixSampleFloat> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat);
@@ -69,10 +69,24 @@ public:
 		m_countFramesReadProcessed += countChunk;
 	}
 	template <typename Tbuffer>
+	inline void ReadFixedPoint(Tbuffer & dst, std::size_t countChunk)
+	{
+		MPT_ASSERT(m_countFramesReadProcessed + countChunk <= m_countFramesTotal);
+		SoundDevice::BufferReadFixedPoint(dst, m_src, m_countFramesTotal, m_countFramesReadProcessed, countChunk, m_bufferFormat.InputChannels, m_bufferFormat.sampleFormat);
+		m_countFramesReadProcessed += countChunk;
+	}
+	template <typename Tbuffer>
 	inline void Write(Tbuffer & src, std::size_t countChunk)
 	{
 		MPT_ASSERT(m_countFramesWriteProcessed + countChunk <= m_countFramesTotal);
 		SoundDevice::BufferWrite(m_dst, m_countFramesTotal, m_countFramesWriteProcessed, src, countChunk, m_bufferFormat.Channels, m_dither, m_bufferFormat.sampleFormat, m_bufferFormat.NeedsClippedFloat);
+		m_countFramesWriteProcessed += countChunk;
+	}
+	template <typename Tbuffer>
+	inline void WriteFixedPoint(Tbuffer & src, std::size_t countChunk)
+	{
+		MPT_ASSERT(m_countFramesWriteProcessed + countChunk <= m_countFramesTotal);
+		SoundDevice::BufferWriteFixedPoint(m_dst, m_countFramesTotal, m_countFramesWriteProcessed, src, countChunk, m_bufferFormat.Channels, m_dither, m_bufferFormat.sampleFormat, m_bufferFormat.NeedsClippedFloat);
 		m_countFramesWriteProcessed += countChunk;
 	}
 };

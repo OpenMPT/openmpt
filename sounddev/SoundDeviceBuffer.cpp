@@ -271,12 +271,12 @@ static void BufferWriteTemplateFloat(void * dst, std::size_t dstTotal, std::size
 
 
 
-void BufferRead(audio_buffer_interleaved<MixSampleInt> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
+void BufferReadFixedPoint(audio_buffer_interleaved<MixSampleInt> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
 {
 	BufferReadTemplateFixed(dst, src, srcTotal, srcPos, numFrames, numChannels, sampleFormat);
 }
 
-void BufferRead(audio_buffer_planar<MixSampleInt> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
+void BufferReadFixedPoint(audio_buffer_planar<MixSampleInt> & dst, const void * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels, SampleFormat sampleFormat)
 {
 	BufferReadTemplateFixed(dst, src, srcTotal, srcPos, numFrames, numChannels, sampleFormat);
 }
@@ -291,12 +291,12 @@ void BufferRead(audio_buffer_planar<MixSampleFloat> & dst, const void * src, std
 	BufferReadTemplateFloat(dst, src, srcTotal, srcPos, numFrames, numChannels, sampleFormat);
 }
 
-void BufferWrite(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_interleaved<const MixSampleInt> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
+void BufferWriteFixedPoint(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_interleaved<const MixSampleInt> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
 {
 	BufferWriteTemplateFixed(dst, dstTotal, dstPos, src, numFrames, numChannels, dither, sampleFormat, clipFloat);
 }
 
-void BufferWrite(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_planar<const MixSampleInt> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
+void BufferWriteFixedPoint(void * dst, std::size_t dstTotal, std::size_t dstPos, audio_buffer_planar<const MixSampleInt> & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, SampleFormat sampleFormat, bool clipFloat)
 {
 	BufferWriteTemplateFixed(dst, dstTotal, dstPos, src, numFrames, numChannels, dither, sampleFormat, clipFloat);
 }
