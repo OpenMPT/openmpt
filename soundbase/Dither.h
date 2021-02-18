@@ -35,6 +35,15 @@ enum DitherMode
 struct Dither_None
 {
 public:
+	using prng_type = struct {
+	};
+	template <typename Trd>
+	static prng_type prng_init(Trd &)
+	{
+		return prng_type{};
+	}
+
+public:
 	template <uint32 targetbits, typename Trng>
 	MPT_FORCEINLINE MixSampleInt process(MixSampleInt sample, Trng &)
 	{
@@ -50,6 +59,14 @@ public:
 
 struct Dither_ModPlug
 {
+public:
+	using prng_type = mpt::rng::modplug_dither;
+	template <typename Trd>
+	static prng_type prng_init(Trd &)
+	{
+		return prng_type{0, 0};
+	}
+
 public:
 	template <uint32 targetbits, typename Trng>
 	MPT_FORCEINLINE MixSampleInt process(MixSampleInt sample, Trng &rng)
@@ -81,6 +98,14 @@ public:
 template <int ditherdepth = 1, bool triangular = false, bool shaped = true>
 struct Dither_SimpleImpl
 {
+public:
+	using prng_type = mpt::fast_prng;
+	template <typename Trd>
+	static prng_type prng_init(Trd &rd)
+	{
+		return prng_type{rd};
+	}
+
 private:
 	int32 error = 0;
 
@@ -143,108 +168,37 @@ public:
 using Dither_Simple = Dither_SimpleImpl<>;
 
 
-template <typename Tdither, std::size_t channels>
+template <typename Tdither>
 class MultiChannelDither
 {
 private:
-	std::array<Tdither, channels> DitherChannels;
+	std::vector<Tdither> DitherChannels = std::vector<Tdither>(4);
+	typename Tdither::prng_type prng;
 
 public:
+	template <typename Trd>
+	MultiChannelDither(Trd &rd)
+		: prng(Tdither::prng_init(rd))
+	{
+		return;
+	}
+	void SetChannels(std::size_t channels)
+	{
+		DitherChannels = std::vector<Tdither>(channels);
+	}
 	void Reset()
 	{
-		DitherChannels.fill(Tdither());
+		DitherChannels = std::vector<Tdither>(DitherChannels.size());
 	}
-	template <uint32 targetbits, typename Trng>
-	MPT_FORCEINLINE MixSampleInt process(std::size_t channel, MixSampleInt sample, Trng &prng)
+	template <uint32 targetbits>
+	MPT_FORCEINLINE MixSampleInt process(std::size_t channel, MixSampleInt sample)
 	{
 		return DitherChannels[channel].template process<targetbits>(sample, prng);
 	}
-	template <uint32 targetbits, typename Trng>
-	MPT_FORCEINLINE MixSampleFloat process(std::size_t channel, MixSampleFloat sample, Trng &prng)
+	template <uint32 targetbits>
+	MPT_FORCEINLINE MixSampleFloat process(std::size_t channel, MixSampleFloat sample)
 	{
 		return DitherChannels[channel].template process<targetbits>(sample, prng);
-	}
-};
-
-
-template <typename Tdither, std::size_t channels>
-class DitherTemplate;
-
-template <std::size_t channels>
-class DitherTemplate<Dither_None, channels>
-	: public MultiChannelDither<Dither_None, channels>
-{
-	struct
-	{
-	} prng;
-
-public:
-	template <typename Trd>
-	DitherTemplate(Trd &)
-	{
-		return;
-	}
-	template <uint32 targetbits>
-	MPT_FORCEINLINE MixSampleInt process(std::size_t channel, MixSampleInt sample)
-	{
-		return MultiChannelDither<Dither_None, channels>::template process<targetbits>(channel, sample, prng);
-	}
-	template <uint32 targetbits>
-	MPT_FORCEINLINE MixSampleFloat process(std::size_t channel, MixSampleFloat sample)
-	{
-		return MultiChannelDither<Dither_None, channels>::template process<targetbits>(channel, sample, prng);
-	}
-};
-
-template <std::size_t channels>
-class DitherTemplate<Dither_ModPlug, channels>
-	: public MultiChannelDither<Dither_ModPlug, channels>
-{
-private:
-	mpt::rng::modplug_dither prng;
-
-public:
-	template <typename Trd>
-	DitherTemplate(Trd &)
-		: prng(0, 0)
-	{
-		return;
-	}
-	template <uint32 targetbits>
-	MPT_FORCEINLINE MixSampleInt process(std::size_t channel, MixSampleInt sample)
-	{
-		return MultiChannelDither<Dither_ModPlug, channels>::template process<targetbits>(channel, sample, prng);
-	}
-	template <uint32 targetbits>
-	MPT_FORCEINLINE MixSampleFloat process(std::size_t channel, MixSampleFloat sample)
-	{
-		return MultiChannelDither<Dither_ModPlug, channels>::template process<targetbits>(channel, sample, prng);
-	}
-};
-
-template <std::size_t channels>
-class DitherTemplate<Dither_Simple, channels>
-	: public MultiChannelDither<Dither_Simple, channels>
-{
-private:
-	mpt::fast_prng prng;
-
-public:
-	template <typename Trd>
-	DitherTemplate(Trd &rd)
-		: prng(rd)
-	{
-		return;
-	}
-	template <uint32 targetbits>
-	MPT_FORCEINLINE MixSampleInt process(std::size_t channel, MixSampleInt sample)
-	{
-		return MultiChannelDither<Dither_Simple, channels>::template process<targetbits>(channel, sample, prng);
-	}
-	template <uint32 targetbits>
-	MPT_FORCEINLINE MixSampleFloat process(std::size_t channel, MixSampleFloat sample)
-	{
-		return MultiChannelDither<Dither_Simple, channels>::template process<targetbits>(channel, sample, prng);
 	}
 };
 
@@ -268,49 +222,55 @@ public:
 };
 
 
-template <std::size_t channels>
-class DitherChannels
+class Dither
 	: public DitherNames
 {
 
 private:
-	DitherTemplate<Dither_None, channels> ditherNone;
-	DitherTemplate<Dither_ModPlug, channels> ditherModPlug;
-	DitherTemplate<Dither_Simple, channels> ditherSimple;
+	MultiChannelDither<Dither_None> ditherNone;
+	MultiChannelDither<Dither_ModPlug> ditherModPlug;
+	MultiChannelDither<Dither_Simple> ditherSimple;
 
 	DitherMode mode = DitherDefault;
 
 public:
 	template <typename Trd>
-	DitherChannels(Trd &rd)
+	Dither(Trd &rd)
 		: ditherNone(rd)
 		, ditherModPlug(rd)
 		, ditherSimple(rd)
 	{
 		return;
 	}
+	void SetChannels(std::size_t channels)
+	{
+		ditherNone.SetChannels(channels);
+		ditherModPlug.SetChannels(channels);
+		ditherSimple.SetChannels(channels);
+	}
 	void Reset()
 	{
+		ditherNone.Reset();
 		ditherModPlug.Reset();
 		ditherSimple.Reset();
 	}
 
-	DitherTemplate<Dither_None, channels> &NoDither()
+	MultiChannelDither<Dither_None> &NoDither()
 	{
 		MPT_ASSERT(mode == DitherNone);
 		return ditherNone;
 	}
-	DitherTemplate<Dither_ModPlug, channels> &DefaultDither()
+	MultiChannelDither<Dither_ModPlug> &DefaultDither()
 	{
 		MPT_ASSERT(mode == DitherDefault);
 		return ditherModPlug;
 	}
-	DitherTemplate<Dither_ModPlug, channels> &ModPlugDither()
+	MultiChannelDither<Dither_ModPlug> &ModPlugDither()
 	{
 		MPT_ASSERT(mode == DitherModPlug);
 		return ditherModPlug;
 	}
-	DitherTemplate<Dither_Simple, channels> &SimpleDither()
+	MultiChannelDither<Dither_Simple> &SimpleDither()
 	{
 		MPT_ASSERT(mode == DitherSimple);
 		return ditherSimple;
@@ -338,9 +298,6 @@ public:
 		return mode;
 	}
 };
-
-
-using Dither = DitherChannels<4>;
 
 
 OPENMPT_NAMESPACE_END
