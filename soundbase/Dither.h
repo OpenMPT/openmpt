@@ -35,7 +35,8 @@ enum DitherMode
 struct Dither_None
 {
 public:
-	using prng_type = struct {
+	using prng_type = struct
+	{
 	};
 	template <typename Trd>
 	static prng_type prng_init(Trd &)
