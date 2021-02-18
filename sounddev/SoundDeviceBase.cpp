@@ -208,7 +208,8 @@ void Base::SourceLockedAudioReadPrepare(std::size_t numFrames, std::size_t frame
 }
 
 
-void Base::SourceLockedAudioRead(void *buffer, const void *inputBuffer, std::size_t numFrames)
+template <typename Tsample>
+void Base::SourceLockedAudioReadImpl(Tsample *buffer, const Tsample *inputBuffer, std::size_t numFrames)
 {
 	MPT_TRACE_SCOPE();
 	if(numFrames <= 0)
@@ -218,6 +219,72 @@ void Base::SourceLockedAudioRead(void *buffer, const void *inputBuffer, std::siz
 	if(m_Source)
 	{
 		m_Source->SoundSourceLockedRead(GetBufferFormat(), numFrames, buffer, inputBuffer);
+	}
+}
+
+void Base::SourceLockedAudioRead(uint8 *buffer, const uint8 *inputBuffer, std::size_t numFrames)
+{
+	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+}
+
+void Base::SourceLockedAudioRead(int8 *buffer, const int8 *inputBuffer, std::size_t numFrames)
+{
+	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+}
+
+void Base::SourceLockedAudioRead(int16 *buffer, const int16 *inputBuffer, std::size_t numFrames)
+{
+	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+}
+
+void Base::SourceLockedAudioRead(int24 *buffer, const int24 *inputBuffer, std::size_t numFrames)
+{
+	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+}
+
+void Base::SourceLockedAudioRead(int32 *buffer, const int32 *inputBuffer, std::size_t numFrames)
+{
+	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+}
+
+void Base::SourceLockedAudioRead(float *buffer, const float *inputBuffer, std::size_t numFrames)
+{
+	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+}
+
+void Base::SourceLockedAudioRead(double *buffer, const double *inputBuffer, std::size_t numFrames)
+{
+	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+}
+
+void Base::SourceLockedAudioReadVoid(void *buffer, const void *inputBuffer, std::size_t numFrames)
+{
+	switch(GetBufferFormat().sampleFormat)
+	{
+	case SampleFormatUnsigned8:
+		SourceLockedAudioRead(static_cast<uint8*>(buffer), static_cast<const uint8*>(inputBuffer), numFrames);
+		break;
+	case SampleFormatInt8:
+		SourceLockedAudioRead(static_cast<int8*>(buffer), static_cast<const int8*>(inputBuffer), numFrames);
+		break;
+	case SampleFormatInt16:
+		SourceLockedAudioRead(static_cast<int16*>(buffer), static_cast<const int16*>(inputBuffer), numFrames);
+		break;
+	case SampleFormatInt24:
+		SourceLockedAudioRead(static_cast<int24*>(buffer), static_cast<const int24*>(inputBuffer), numFrames);
+		break;
+	case SampleFormatInt32:
+		SourceLockedAudioRead(static_cast<int32*>(buffer), static_cast<const int32*>(inputBuffer), numFrames);
+		break;
+	case SampleFormatFloat32:
+		SourceLockedAudioRead(static_cast<float*>(buffer), static_cast<const float*>(inputBuffer), numFrames);
+		break;
+	case SampleFormatFloat64:
+		SourceLockedAudioRead(static_cast<double*>(buffer), static_cast<const double*>(inputBuffer), numFrames);
+		break;
+	case SampleFormatInvalid:
+		// nothing
+		break;
 	}
 }
 

@@ -285,7 +285,7 @@ void CPortaudioDevice::InternalFillAudioBuffer()
 		return;
 	}
 	SourceLockedAudioReadPrepare(m_CurrentFrameCount, mpt::saturate_cast<std::size_t>(mpt::saturate_round<int64>(m_CurrentRealLatency * m_StreamInfo->sampleRate)));
-	SourceLockedAudioRead(m_CurrentFrameBuffer, m_CurrentFrameBufferInput, m_CurrentFrameCount);
+	SourceLockedAudioReadVoid(m_CurrentFrameBuffer, m_CurrentFrameBufferInput, m_CurrentFrameCount);
 	m_StatisticPeriodFrames.store(m_CurrentFrameCount);
 	SourceLockedAudioReadDone();
 }

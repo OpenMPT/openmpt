@@ -12,6 +12,8 @@ extern "C" {
 
 OPENMPT_WINESUPPORT_API char * OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_EnumerateDevices();
 
+typedef void OpenMPT_int24;
+
 typedef struct OpenMPT_SoundDevice_StreamPosition {
 	int64_t Frames;
 	double Seconds;
@@ -76,7 +78,13 @@ typedef struct OpenMPT_SoundDevice_ISource {
 	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockFunc)( void * inst );
 	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedGetReferenceClockNowNanosecondsFunc)( void * inst, uint64_t * result );
 	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadPrepareFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
-	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, void * buffer, const void * inputBuffer );
+	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadUint8Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, uint8_t * buffer, const uint8_t * inputBuffer );
+	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadInt8Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int8_t * buffer, const int8_t * inputBuffer );
+	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadInt16Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int16_t * buffer, const int16_t * inputBuffer );
+	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadInt24Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, OpenMPT_int24 * buffer, const OpenMPT_int24 * inputBuffer );
+	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadInt32Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int32_t * buffer, const int32_t * inputBuffer );
+	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadFloatFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, float * buffer, const float * inputBuffer );
+	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadDoubleFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, double * buffer, const double * inputBuffer );
 	void (OPENMPT_WINESUPPORT_CALL * SoundSourceLockedReadDoneFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
 	void (OPENMPT_WINESUPPORT_CALL * SoundSourceUnlockFunc)( void * inst );
 } OpenMPT_SoundDevice_ISource;

@@ -101,7 +101,16 @@ protected:
 	void SourceFillAudioBufferLocked();
 	uint64 SourceLockedGetReferenceClockNowNanoseconds() const;
 	void SourceLockedAudioReadPrepare(std::size_t numFrames, std::size_t framesLatency);
-	void SourceLockedAudioRead(void *buffer, const void *inputBuffer, std::size_t numFrames);
+	template <typename Tsample>
+	void SourceLockedAudioReadImpl(Tsample *buffer, const Tsample *inputBuffer, std::size_t numFrames);
+	void SourceLockedAudioRead(uint8 *buffer, const uint8 *inputBuffer, std::size_t numFrames);
+	void SourceLockedAudioRead(int8 *buffer, const int8 *inputBuffer, std::size_t numFrames);
+	void SourceLockedAudioRead(int16 *buffer, const int16 *inputBuffer, std::size_t numFrames);
+	void SourceLockedAudioRead(int24 *buffer, const int24 *inputBuffer, std::size_t numFrames);
+	void SourceLockedAudioRead(int32 *buffer, const int32 *inputBuffer, std::size_t numFrames);
+	void SourceLockedAudioRead(float *buffer, const float *inputBuffer, std::size_t numFrames);
+	void SourceLockedAudioRead(double *buffer, const double *inputBuffer, std::size_t numFrames);
+	void SourceLockedAudioReadVoid(void *buffer, const void *inputBuffer, std::size_t numFrames);
 	void SourceLockedAudioReadDone();
 
 	void RequestClose() { m_RequestFlags.fetch_or(RequestFlagClose); }

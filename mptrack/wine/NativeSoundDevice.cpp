@@ -215,14 +215,68 @@ public:
 		OpenMPT_SoundDevice_TimeInfo c_timeInfo = C::encode(timeInfo);
 		return impl.SoundSourceLockedReadPrepareFunc(impl.inst, &c_timeInfo);
 	}
-	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, void *buffer, const void *inputBuffer)
+	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, uint8 *buffer, const uint8 *inputBuffer)
 	{
-		if(!impl.SoundSourceLockedReadFunc)
+		if(!impl.SoundSourceLockedReadUint8Func)
 		{
 			return;
 		}
 		OpenMPT_SoundDevice_BufferFormat c_bufferFormat = C::encode(bufferFormat);
-		return impl.SoundSourceLockedReadFunc(impl.inst, &c_bufferFormat, numFrames, buffer, inputBuffer);
+		return impl.SoundSourceLockedReadUint8Func(impl.inst, &c_bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int8 *buffer, const int8 *inputBuffer)
+	{
+		if(!impl.SoundSourceLockedReadInt8Func)
+		{
+			return;
+		}
+		OpenMPT_SoundDevice_BufferFormat c_bufferFormat = C::encode(bufferFormat);
+		return impl.SoundSourceLockedReadInt8Func(impl.inst, &c_bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int16 *buffer, const int16 *inputBuffer)
+	{
+		if(!impl.SoundSourceLockedReadInt16Func)
+		{
+			return;
+		}
+		OpenMPT_SoundDevice_BufferFormat c_bufferFormat = C::encode(bufferFormat);
+		return impl.SoundSourceLockedReadInt16Func(impl.inst, &c_bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int24 *buffer, const int24 *inputBuffer)
+	{
+		if(!impl.SoundSourceLockedReadInt24Func)
+		{
+			return;
+		}
+		OpenMPT_SoundDevice_BufferFormat c_bufferFormat = C::encode(bufferFormat);
+		return impl.SoundSourceLockedReadInt24Func(impl.inst, &c_bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int32 *buffer, const int32 *inputBuffer)
+	{
+		if(!impl.SoundSourceLockedReadInt32Func)
+		{
+			return;
+		}
+		OpenMPT_SoundDevice_BufferFormat c_bufferFormat = C::encode(bufferFormat);
+		return impl.SoundSourceLockedReadInt32Func(impl.inst, &c_bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, float *buffer, const float *inputBuffer)
+	{
+		if(!impl.SoundSourceLockedReadFloatFunc)
+		{
+			return;
+		}
+		OpenMPT_SoundDevice_BufferFormat c_bufferFormat = C::encode(bufferFormat);
+		return impl.SoundSourceLockedReadFloatFunc(impl.inst, &c_bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, double *buffer, const double *inputBuffer)
+	{
+		if(!impl.SoundSourceLockedReadDoubleFunc)
+		{
+			return;
+		}
+		OpenMPT_SoundDevice_BufferFormat c_bufferFormat = C::encode(bufferFormat);
+		return impl.SoundSourceLockedReadDoubleFunc(impl.inst, &c_bufferFormat, numFrames, buffer, inputBuffer);
 	}
 	virtual void SoundSourceLockedReadDone(SoundDevice::TimeInfo timeInfo)
 	{

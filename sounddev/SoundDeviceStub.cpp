@@ -168,7 +168,61 @@ static void __cdecl SoundSourceLockedReadPrepareFunc( void * inst, const OpenMPT
 	}
 	source->SoundSourceLockedReadPrepare(ti);
 }
-static void __cdecl SoundSourceLockedReadFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, void * buffer, const void * inputBuffer ) {
+static void __cdecl SoundSourceLockedReadUint8Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, uint8_t * buffer, const uint8_t * inputBuffer ) {
+	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
+	if(!source)
+	{
+		return;
+	}
+	source->SoundSourceLockedRead(bf, numFrames, buffer, inputBuffer);
+}
+static void __cdecl SoundSourceLockedReadInt8Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int8_t  * buffer, const int8_t * inputBuffer ) {
+	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
+	if(!source)
+	{
+		return;
+	}
+	source->SoundSourceLockedRead(bf, numFrames, buffer, inputBuffer);
+}
+static void __cdecl SoundSourceLockedReadInt16Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int16_t * buffer, const int16_t * inputBuffer ) {
+	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
+	if(!source)
+	{
+		return;
+	}
+	source->SoundSourceLockedRead(bf, numFrames, buffer, inputBuffer);
+}
+static void __cdecl SoundSourceLockedReadInt24Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, OpenMPT_int24 * buffer, const OpenMPT_int24 * inputBuffer ) {
+	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
+	if(!source)
+	{
+		return;
+	}
+	source->SoundSourceLockedRead(bf, numFrames, static_cast<int24*>(buffer), static_cast<const int24*>(inputBuffer));
+}
+static void __cdecl SoundSourceLockedReadInt32Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int32_t * buffer, const int32_t * inputBuffer ) {
+	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
+	if(!source)
+	{
+		return;
+	}
+	source->SoundSourceLockedRead(bf, numFrames, buffer, inputBuffer);
+}
+static void __cdecl SoundSourceLockedReadFloatFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, float * buffer, const float * inputBuffer ) {
+	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
+	if(!source)
+	{
+		return;
+	}
+	source->SoundSourceLockedRead(bf, numFrames, buffer, inputBuffer);
+}
+static void __cdecl SoundSourceLockedReadDoubleFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, double * buffer, const double * inputBuffer ) {
 	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
 	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
 	if(!source)
@@ -206,7 +260,13 @@ void SoundDeviceStub::SetSource(SoundDevice::ISource *isource) {
 	source.SoundSourceLockFunc = &SoundSourceLockFunc;
 	source.SoundSourceLockedGetReferenceClockNowNanosecondsFunc = &SoundSourceLockedGetReferenceClockNowNanosecondsFunc;
 	source.SoundSourceLockedReadPrepareFunc = &SoundSourceLockedReadPrepareFunc;
-	source.SoundSourceLockedReadFunc = &SoundSourceLockedReadFunc;
+	source.SoundSourceLockedReadUint8Func = &SoundSourceLockedReadUint8Func;
+	source.SoundSourceLockedReadInt8Func = &SoundSourceLockedReadInt8Func;
+	source.SoundSourceLockedReadInt16Func = &SoundSourceLockedReadInt16Func;
+	source.SoundSourceLockedReadInt24Func = &SoundSourceLockedReadInt24Func;
+	source.SoundSourceLockedReadInt32Func = &SoundSourceLockedReadInt32Func;
+	source.SoundSourceLockedReadFloatFunc = &SoundSourceLockedReadFloatFunc;
+	source.SoundSourceLockedReadDoubleFunc = &SoundSourceLockedReadDoubleFunc;
 	source.SoundSourceLockedReadDoneFunc = &SoundSourceLockedReadDoneFunc;
 	source.SoundSourceUnlockFunc = &SoundSourceUnlockFunc;
 	return w->OpenMPT_Wine_Wrapper_SoundDevice_SetSource(impl, &source);

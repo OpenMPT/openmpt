@@ -642,14 +642,15 @@ void CMainFrame::SoundSourceUnlock()
 }
 
 
+template <typename Tsample>
 class StereoVuMeterSourceWrapper
 	: public IAudioSource
 {
 private:
-	SoundDevice::BufferIO &bufferio;
+	SoundDevice::BufferIO<Tsample> &bufferio;
 	VUMeter &vumeter;
 public:
-	inline StereoVuMeterSourceWrapper(SoundDevice::BufferIO &bufferIO, VUMeter &vumeter)
+	inline StereoVuMeterSourceWrapper(SoundDevice::BufferIO<Tsample> &bufferIO, VUMeter &vumeter)
 		: bufferio(bufferIO)
 		, vumeter(vumeter)
 	{
@@ -670,14 +671,15 @@ public:
 };
 
 
+template <typename Tsample>
 class StereoVuMeterTargetWrapper
 	: public IAudioReadTarget
 {
 private:
-	SoundDevice::BufferIO &bufferio;
+	SoundDevice::BufferIO<Tsample> &bufferio;
 	VUMeter &vumeter;
 public:
-	inline StereoVuMeterTargetWrapper(SoundDevice::BufferIO &bufferIO, VUMeter &vumeter)
+	inline StereoVuMeterTargetWrapper(SoundDevice::BufferIO<Tsample> &bufferIO, VUMeter &vumeter)
 		: bufferio(bufferIO)
 		, vumeter(vumeter)
 	{
@@ -711,7 +713,8 @@ void CMainFrame::SoundSourceLockedReadPrepare(SoundDevice::TimeInfo timeInfo)
 }
 
 
-void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, void *buffer, const void *inputBuffer)
+template <typename Tsample>
+void CMainFrame::SoundSourceLockedReadImpl(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, Tsample *buffer, const Tsample *inputBuffer)
 {
 	MPT_TRACE_SCOPE();
 	MPT_ASSERT(InAudioThread());
@@ -719,9 +722,9 @@ void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, s
 	MPT_ASSERT(numFrames <= std::numeric_limits<CSoundFile::samplecount_t>::max());
 	CSoundFile::samplecount_t framesToRender = static_cast<CSoundFile::samplecount_t>(numFrames);
 	m_Dither.SetMode((DitherMode)bufferFormat.DitherType);
-	SoundDevice::BufferIO bufferIO(buffer, inputBuffer, numFrames, m_Dither, bufferFormat);
-	StereoVuMeterSourceWrapper source(bufferIO, m_VUMeterInput);
-	StereoVuMeterTargetWrapper target(bufferIO, m_VUMeterOutput);
+	SoundDevice::BufferIO<Tsample> bufferIO(buffer, inputBuffer, numFrames, m_Dither, bufferFormat);
+	StereoVuMeterSourceWrapper<Tsample> source(bufferIO, m_VUMeterInput);
+	StereoVuMeterTargetWrapper<Tsample> target(bufferIO, m_VUMeterOutput);
 	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(framesToRender, target, source);
 	MPT_ASSERT(renderedFrames <= framesToRender);
 	CSoundFile::samplecount_t remainingFrames = framesToRender - renderedFrames;
@@ -732,12 +735,48 @@ void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, s
 		std::size_t frameSize = bufferFormat.Channels * (bufferFormat.sampleFormat.GetBitsPerSample()/8);
 		if(bufferFormat.sampleFormat.IsUnsigned())
 		{
-			std::memset(mpt::void_cast<std::byte*>(buffer) + renderedFrames * frameSize, 0x80, remainingFrames * frameSize);
+			std::memset(buffer + renderedFrames * bufferFormat.Channels, 0x80, remainingFrames * frameSize);
 		} else
 		{
-			std::memset(mpt::void_cast<std::byte*>(buffer) + renderedFrames * frameSize, 0, remainingFrames * frameSize);
+			std::memset(buffer + renderedFrames * bufferFormat.Channels, 0, remainingFrames * frameSize);
 		}
 	}
+}
+
+
+void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, uint8 *buffer, const uint8 *inputBuffer)
+{
+	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+}
+
+void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int8 *buffer, const int8 *inputBuffer)
+{
+	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+}
+
+void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int16 *buffer, const int16 *inputBuffer)
+{
+	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+}
+
+void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int24 *buffer, const int24 *inputBuffer)
+{
+	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+}
+
+void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int32 *buffer, const int32 *inputBuffer)
+{
+	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+}
+
+void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, float *buffer, const float *inputBuffer)
+{
+	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+}
+
+void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, double *buffer, const double *inputBuffer)
+{
+	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
 }
 
 
