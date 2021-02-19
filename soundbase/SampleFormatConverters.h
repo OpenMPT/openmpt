@@ -182,7 +182,7 @@ struct EncodeuLaw
 			abs ^= 0x7fff;
 			abs += 1;
 		}
-		x         = static_cast<uint16>(std::clamp(abs + (33 << 2), 0u, 0x7fffu));
+		x         = static_cast<uint16>(std::clamp(static_cast<uint32>(abs + (33 << 2)), static_cast<uint32>(0), static_cast<uint32>(0x7fff)));
 		int index = mpt::countl_zero(x);
 		out |= exp_table[index];
 		out |= (x >> mant_table[index]) & 0x0f;
