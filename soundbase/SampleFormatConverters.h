@@ -77,7 +77,7 @@ struct DecodeInt7
 	static constexpr std::size_t input_inc = 1;
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
-		return Clamp(mpt::byte_cast<int8>(*inBuf), static_cast<int8>(-64), static_cast<int8>(63)) * 2;
+		return std::clamp(mpt::byte_cast<int8>(*inBuf), static_cast<int8>(-64), static_cast<int8>(63)) * 2;
 	}
 };
 
@@ -1033,7 +1033,7 @@ struct ConvertFixedPoint<int32, int32, fractionalBits>
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
-		return static_cast<int32>(Clamp(val, static_cast<int>(-((1 << fractionalBits) - 1)), static_cast<int>(1 << fractionalBits) - 1)) << (sizeof(input_t) * 8 - 1 - fractionalBits);
+		return static_cast<int32>(std::clamp(val, static_cast<int>(-((1 << fractionalBits) - 1)), static_cast<int>(1 << fractionalBits) - 1)) << (sizeof(input_t) * 8 - 1 - fractionalBits);
 	}
 };
 
