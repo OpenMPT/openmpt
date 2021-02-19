@@ -69,27 +69,27 @@ public:
 	{
 	}
 
-	friend MPT_CONSTEXPRINLINE  bool operator==(const SampleFormat &a, const SampleFormat &b) noexcept
+	friend MPT_CONSTEXPRINLINE bool operator==(const SampleFormat &a, const SampleFormat &b) noexcept
 	{
 		return a.value == b.value;
 	}
-	friend MPT_CONSTEXPRINLINE  bool operator!=(const SampleFormat &a, const SampleFormat &b) noexcept
+	friend MPT_CONSTEXPRINLINE bool operator!=(const SampleFormat &a, const SampleFormat &b) noexcept
 	{
 		return a.value != b.value;
 	}
-	friend MPT_CONSTEXPRINLINE  bool operator==(const SampleFormat::Enum &a, const SampleFormat &b) noexcept
+	friend MPT_CONSTEXPRINLINE bool operator==(const SampleFormat::Enum &a, const SampleFormat &b) noexcept
 	{
 		return a == b.value;
 	}
-	friend MPT_CONSTEXPRINLINE  bool operator!=(const SampleFormat::Enum &a, const SampleFormat &b) noexcept
+	friend MPT_CONSTEXPRINLINE bool operator!=(const SampleFormat::Enum &a, const SampleFormat &b) noexcept
 	{
 		return a != b.value;
 	}
-	friend MPT_CONSTEXPRINLINE  bool operator==(const SampleFormat &a, const SampleFormat::Enum &b) noexcept
+	friend MPT_CONSTEXPRINLINE bool operator==(const SampleFormat &a, const SampleFormat::Enum &b) noexcept
 	{
 		return a.value == b;
 	}
-	friend MPT_CONSTEXPRINLINE  bool operator!=(const SampleFormat &a, const SampleFormat::Enum &b) noexcept
+	friend MPT_CONSTEXPRINLINE bool operator!=(const SampleFormat &a, const SampleFormat::Enum &b) noexcept
 	{
 		return a.value != b;
 	}
