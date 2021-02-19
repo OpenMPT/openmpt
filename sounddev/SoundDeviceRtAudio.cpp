@@ -315,31 +315,31 @@ SoundDevice::DynamicCaps CRtAudioDevice::GetDeviceDynamicCaps(const std::vector<
 	std::reverse(caps.supportedSampleRates.begin(), caps.supportedSampleRates.end());
 	mpt::append(caps.supportedExclusiveSampleRates, rtinfo.sampleRates);
 	std::reverse(caps.supportedExclusiveSampleRates.begin(), caps.supportedExclusiveSampleRates.end());
-	caps.supportedSampleFormats = { SampleFormatFloat32 };
+	caps.supportedSampleFormats = { SampleFormat::Float32 };
 	caps.supportedExclusiveModeSampleFormats.clear();
 	if(rtinfo.nativeFormats & RTAUDIO_SINT8)
 	{
-		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt8);
+		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Int8);
 	}
 	if(rtinfo.nativeFormats & RTAUDIO_SINT16)
 	{
-		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt16);
+		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Int16);
 	}
 	if(rtinfo.nativeFormats & RTAUDIO_SINT24)
 	{
-		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt24);
+		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Int24);
 	}
 	if(rtinfo.nativeFormats & RTAUDIO_SINT32)
 	{
-		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt32);
+		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Int32);
 	}
 	if(rtinfo.nativeFormats & RTAUDIO_FLOAT32)
 	{
-		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatFloat32);
+		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Float32);
 	}
 	if(rtinfo.nativeFormats & RTAUDIO_FLOAT64)
 	{
-		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatFloat64);
+		caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Float64);
 	}
 	for(unsigned int channel = 0; channel < rtinfo.outputChannels; ++channel)
 	{

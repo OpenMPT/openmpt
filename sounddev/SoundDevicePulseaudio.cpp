@@ -260,7 +260,7 @@ SoundDevice::Caps Pulseaudio::InternalGetDeviceCaps()
 	caps.ExclusiveModeDescription = U_("Use early requests");
 	caps.DefaultSettings.Latency = 0.030;
 	caps.DefaultSettings.UpdateInterval = 0.005;
-	caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+	caps.DefaultSettings.sampleFormat = SampleFormat::Float32;
 	caps.DefaultSettings.ExclusiveMode = true;
 	return caps;
 }
@@ -271,8 +271,8 @@ SoundDevice::DynamicCaps Pulseaudio::GetDeviceDynamicCaps(const std::vector<uint
 	SoundDevice::DynamicCaps caps;
 	caps.supportedSampleRates = baseSampleRates;
 	caps.supportedExclusiveSampleRates = baseSampleRates;
-	caps.supportedSampleFormats = { SampleFormatFloat32 };
-	caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32 };
+	caps.supportedSampleFormats = { SampleFormat::Float32 };
+	caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32 };
 	return caps;
 }
 
@@ -285,7 +285,7 @@ bool Pulseaudio::InternalIsOpen() const
 
 bool Pulseaudio::InternalOpen()
 {
-	if(m_Settings.sampleFormat != SampleFormatFloat32)
+	if(m_Settings.sampleFormat != SampleFormat::Float32)
 	{
 		InternalClose();
 		return false;

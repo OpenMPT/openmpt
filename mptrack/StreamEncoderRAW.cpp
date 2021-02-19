@@ -88,7 +88,7 @@ RAWEncoder::RAWEncoder()
 		int samplerate = traits.samplerates[i];
 		for(int channels = 1; channels <= traits.maxChannels; channels *= 2)
 		{
-			const std::array<SampleFormat, 7> sampleFormats = { SampleFormatFloat64, SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatInt8, SampleFormatUnsigned8 };
+			const std::array<SampleFormat, 7> sampleFormats = { SampleFormat::Float64, SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Int8, SampleFormat::Unsigned8 };
 			for(const auto sampleFormat : sampleFormats)
 			{
 				Encoder::Format format;

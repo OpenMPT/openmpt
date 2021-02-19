@@ -215,7 +215,7 @@ FLACEncoder::FLACEncoder()
 		int samplerate = traits.samplerates[i];
 		for(int channels = 1; channels <= traits.maxChannels; channels *= 2)
 		{
-			const std::array<SampleFormat, 3> sampleFormats = { SampleFormatInt24, SampleFormatInt16, SampleFormatInt8 };
+			const std::array<SampleFormat, 3> sampleFormats = { SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Int8 };
 			for(const auto sampleFormat : sampleFormats)
 			{
 				Encoder::Format format;

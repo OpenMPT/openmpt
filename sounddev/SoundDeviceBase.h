@@ -181,7 +181,7 @@ public:
 	virtual bool OnIdle() { return false; }
 
 	SoundDevice::Settings GetSettings() const { return m_Settings; }
-	SampleFormat GetActualSampleFormat() const { return IsOpen() ? m_Settings.sampleFormat : SampleFormat(SampleFormatInvalid); }
+	SampleFormat GetActualSampleFormat() const { return IsOpen() ? m_Settings.sampleFormat : SampleFormat(SampleFormat::Invalid); }
 	SoundDevice::BufferFormat GetBufferFormat() const
 	{
 		BufferFormat bufferFormat;

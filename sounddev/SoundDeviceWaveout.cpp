@@ -94,10 +94,10 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 	caps.ExclusiveModeDescription = U_("Use direct mode");
 	if(GetSysInfo().IsOriginal())
 	{
-		caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+		caps.DefaultSettings.sampleFormat = SampleFormat::Float32;
 	} else
 	{
-		caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+		caps.DefaultSettings.sampleFormat = SampleFormat::Int16;
 	}
 	return caps;
 }
@@ -109,12 +109,12 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 	SoundDevice::DynamicCaps caps;
 	if(GetSysInfo().IsOriginal())
 	{
-		caps.supportedSampleFormats = { SampleFormatFloat32 };
-		caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32 };
+		caps.supportedSampleFormats = { SampleFormat::Float32 };
+		caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32 };
 	} else
 	{
-		caps.supportedSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
-		caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
+		caps.supportedSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
+		caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
 	}
 	WAVEOUTCAPS woc;
 	MemsetZero(woc);
@@ -145,11 +145,11 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 			}
 			if(woc.dwFormats & (WAVE_FORMAT_1M08 | WAVE_FORMAT_2M08 | WAVE_FORMAT_4M08 | WAVE_FORMAT_48M08 | WAVE_FORMAT_96M08 | WAVE_FORMAT_1S08 | WAVE_FORMAT_2S08 | WAVE_FORMAT_4S08 | WAVE_FORMAT_48S08 | WAVE_FORMAT_96S08))
 			{
-				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatUnsigned8);
+				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Unsigned8);
 			}
 			if(woc.dwFormats & (WAVE_FORMAT_1M16 | WAVE_FORMAT_2M16 | WAVE_FORMAT_4M16 | WAVE_FORMAT_48M16 | WAVE_FORMAT_96M16 | WAVE_FORMAT_1S16 | WAVE_FORMAT_2S16 | WAVE_FORMAT_4S16 | WAVE_FORMAT_48S16 | WAVE_FORMAT_96S16))
 			{
-				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt16);
+				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Int16);
 			}
 		}
 	}
@@ -218,9 +218,9 @@ bool CWaveDevice::InternalOpen()
 		InternalClose();
 		return false;
 	}
-	if(m_Settings.sampleFormat == SampleFormatInt8)
+	if(m_Settings.sampleFormat == SampleFormat::Int8)
 	{
-		m_Settings.sampleFormat  = SampleFormatUnsigned8;
+		m_Settings.sampleFormat  = SampleFormat::Unsigned8;
 	}
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;

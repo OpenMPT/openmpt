@@ -19,6 +19,7 @@
 #include "NativeSoundDeviceMarshalling.h"
 
 #include <string>
+#include <type_traits>
 
 #include <cstdint>
 #include <cstdlib>
@@ -447,7 +448,7 @@ OPENMPT_WINESUPPORT_API char * OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_GetS
 }
 
 OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_GetActualSampleFormat( const OpenMPT_SoundDevice * sd, int32_t * result ) {
-	*result = sd->impl->GetActualSampleFormat();
+	*result = static_cast<std::underlying_type<OPENMPT_NAMESPACE::SampleFormat::Enum>::type>(sd->impl->GetActualSampleFormat());
 }
 
 OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_GetEffectiveBufferAttributes( const OpenMPT_SoundDevice * sd, OpenMPT_SoundDevice_BufferAttributes * result ) {

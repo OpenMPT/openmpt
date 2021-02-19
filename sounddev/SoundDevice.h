@@ -398,7 +398,7 @@ struct Settings
 		, Samplerate(48000)
 		, Channels(2)
 		, InputChannels(0)
-		, sampleFormat(SampleFormatFloat32)
+		, sampleFormat(SampleFormat::Float32)
 		, ExclusiveMode(false)
 		, BoostThreadPriority(true)
 		, KeepDeviceRunning(true)

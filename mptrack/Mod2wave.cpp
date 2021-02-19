@@ -55,56 +55,56 @@ private:
 	{
 		switch(sampleFormat)
 		{
-			case SampleFormatUnsigned8:
+			case SampleFormat::Unsigned8:
 				{
-					typedef SampleFormatToType<SampleFormatUnsigned8>::type Tsample;
+					typedef SampleFormatToType<SampleFormat::Unsigned8>::type Tsample;
 					AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
-			case SampleFormatInt8:
+			case SampleFormat::Int8:
 				{
-					typedef SampleFormatToType<SampleFormatInt8>::type Tsample;
+					typedef SampleFormatToType<SampleFormat::Int8>::type Tsample;
 					AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
-			case SampleFormatInt16:
+			case SampleFormat::Int16:
 				{
-					typedef SampleFormatToType<SampleFormatInt16>::type Tsample;
+					typedef SampleFormatToType<SampleFormat::Int16>::type Tsample;
 					AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
-			case SampleFormatInt24:
+			case SampleFormat::Int24:
 				{
-					typedef SampleFormatToType<SampleFormatInt24>::type Tsample;
+					typedef SampleFormatToType<SampleFormat::Int24>::type Tsample;
 					AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
-			case SampleFormatInt32:
+			case SampleFormat::Int32:
 				{
-					typedef SampleFormatToType<SampleFormatInt32>::type Tsample;
+					typedef SampleFormatToType<SampleFormat::Int32>::type Tsample;
 					AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
-			case SampleFormatFloat32:
+			case SampleFormat::Float32:
 				{
-					typedef SampleFormatToType<SampleFormatFloat32>::type Tsample;
+					typedef SampleFormatToType<SampleFormat::Float32>::type Tsample;
 					AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
 					target.DataCallback(MixSoundBuffer, channels, countChunk);
 				}
 				break;
-			case SampleFormatFloat64:
+			case SampleFormat::Float64:
 			{
-				typedef SampleFormatToType<SampleFormatFloat64>::type Tsample;
+				typedef SampleFormatToType<SampleFormat::Float64>::type Tsample;
 				AudioReadTargetBuffer<audio_buffer_interleaved<Tsample>> target(audio_buffer_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
 				target.DataCallback(MixSoundBuffer, channels, countChunk);
 			}
 			break;
-			case SampleFormatInvalid:
+			case SampleFormat::Invalid:
 				// nothing
 				break;
 		}
@@ -559,7 +559,7 @@ void CWaveConvert::FillFormats()
 				{ // out of bounds
 					continue;
 				}
-				if(format.Sampleformat != SampleFormatInvalid && encTraits->formats[currentFormat].Sampleformat == format.Sampleformat)
+				if(format.Sampleformat != SampleFormat::Invalid && encTraits->formats[currentFormat].Sampleformat == format.Sampleformat)
 				{
 					sel = ndx;
 				}
@@ -579,7 +579,7 @@ void CWaveConvert::FillDither()
 	EncoderSettingsConf &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnDither.CComboBox::ResetContent();
 	int format = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()) & 0xffff;
-	if((encTraits->modes & Encoder::ModeEnumerated) && encTraits->formats[format].Sampleformat != SampleFormatInvalid && encTraits->formats[format].Sampleformat != SampleFormatFloat32)
+	if((encTraits->modes & Encoder::ModeEnumerated) && encTraits->formats[format].Sampleformat != SampleFormat::Invalid && encTraits->formats[format].Sampleformat != SampleFormat::Float32)
 	{
 		m_CbnDither.EnableWindow(TRUE);
 		for(int dither = 0; dither < NumDitherModes; ++dither)
@@ -883,9 +883,9 @@ void CWaveConvert::SaveEncoderSettings()
 	if(encTraits->modes & Encoder::ModeEnumerated)
 	{
 		int format = (int)((dwFormat >> 0) & 0xffff);
-		if(encTraits->formats[format].Sampleformat == SampleFormatInvalid)
+		if(encTraits->formats[format].Sampleformat == SampleFormat::Invalid)
 		{
-			m_Settings.FinalSampleFormat = SampleFormatFloat32;
+			m_Settings.FinalSampleFormat = SampleFormat::Float32;
 		} else
 		{
 			m_Settings.FinalSampleFormat = encTraits->formats[format].Sampleformat;
@@ -897,7 +897,7 @@ void CWaveConvert::SaveEncoderSettings()
 		encSettings.Quality = encTraits->defaultQuality;
 	} else
 	{
-		m_Settings.FinalSampleFormat = SampleFormatFloat32;
+		m_Settings.FinalSampleFormat = SampleFormat::Float32;
 		encSettings.Dither = static_cast<int>(m_CbnDither.GetItemData(m_CbnDither.GetCurSel()));
 		Encoder::Mode mode = (Encoder::Mode)((dwFormat >> 24) & 0xff);
 		int quality = (int)((dwFormat >> 0) & 0xff);
@@ -971,7 +971,7 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 	: EncoderFactories(encFactories)
 	, EncoderName(conf, U_("Export"), U_("Encoder"), U_(""))
 	, EncoderIndex(FindEncoder(EncoderName))
-	, FinalSampleFormat(SampleFormatInt16)
+	, FinalSampleFormat(SampleFormat::Int16)
 	, storedTags(conf)
 	, repeatCount(0)
 	, minOrder(ORDERINDEX_INVALID), maxOrder(ORDERINDEX_INVALID)
@@ -1156,9 +1156,9 @@ void CDoWaveConvert::Run()
 	for (UINT n = 0; ; n++)
 	{
 		UINT lRead = 0;
-		if(m_Settings.normalize || m_Settings.FinalSampleFormat == SampleFormatFloat32)
+		if(m_Settings.normalize || m_Settings.FinalSampleFormat == SampleFormat::Float32)
 		{
-			lRead = ReadInterleaved(m_SndFile, floatbuffer, MIXBUFFERSIZE, SampleFormatFloat32, dither);
+			lRead = ReadInterleaved(m_SndFile, floatbuffer, MIXBUFFERSIZE, SampleFormat::Float32, dither);
 		} else
 		{
 			lRead = ReadInterleaved(m_SndFile, buffer, MIXBUFFERSIZE, m_Settings.FinalSampleFormat, dither);
@@ -1207,7 +1207,7 @@ void CDoWaveConvert::Run()
 		{
 
 			const std::streampos oldPos = fileStream.tellp();
-			if(m_Settings.FinalSampleFormat == SampleFormatFloat32)
+			if(m_Settings.FinalSampleFormat == SampleFormat::Float32)
 			{
 				fileEnc->WriteInterleaved(lRead, floatbuffer);
 			} else
@@ -1299,14 +1299,14 @@ void CDoWaveConvert::Run()
 			}
 
 			const std::streampos oldPos = fileStream.tellp();
-			if(m_Settings.FinalSampleFormat == SampleFormatFloat32)
+			if(m_Settings.FinalSampleFormat == SampleFormat::Float32)
 			{
 				fileEnc->WriteInterleaved(framesChunk, floatbuffer);
 			} else
 			{
 				switch(m_Settings.FinalSampleFormat)
 				{
-				case SampleFormatUnsigned8:
+				case SampleFormat::Unsigned8:
 					dither.WithDither(
 						[&](auto &ditherInstance)
 						{
@@ -1314,7 +1314,7 @@ void CDoWaveConvert::Run()
 						}
 					);
 					break;
-				case SampleFormatInt8:
+				case SampleFormat::Int8:
 					dither.WithDither(
 						[&](auto &ditherInstance)
 						{
@@ -1322,7 +1322,7 @@ void CDoWaveConvert::Run()
 						}
 					);
 					break;
-				case SampleFormatInt16:
+				case SampleFormat::Int16:
 					dither.WithDither(
 						[&](auto &ditherInstance)
 						{
@@ -1330,7 +1330,7 @@ void CDoWaveConvert::Run()
 						}
 					);
 					break;
-				case SampleFormatInt24:
+				case SampleFormat::Int24:
 					dither.WithDither(
 						[&](auto &ditherInstance)
 						{
@@ -1338,7 +1338,7 @@ void CDoWaveConvert::Run()
 						}
 					);
 					break;
-				case SampleFormatInt32:
+				case SampleFormat::Int32:
 					dither.WithDither(
 						[&](auto &ditherInstance)
 						{
@@ -1346,7 +1346,7 @@ void CDoWaveConvert::Run()
 						}
 					);
 					break;
-				case SampleFormatFloat64:
+				case SampleFormat::Float64:
 					dither.WithDither(
 						[&](auto &ditherInstance)
 						{

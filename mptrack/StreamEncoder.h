@@ -68,7 +68,7 @@ namespace Encoder
 	{
 		uint32 Samplerate = 0;
 		int Channels = 0;
-		SampleFormat Sampleformat = SampleFormatInvalid;
+		SampleFormat Sampleformat = SampleFormat::Invalid;
 
 		int Bitrate = 0;
 		mpt::ustring Description;

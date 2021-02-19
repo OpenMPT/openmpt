@@ -184,7 +184,7 @@ AUEncoder::AUEncoder()
 		int samplerate = traits.samplerates[i];
 		for(int channels = 1; channels <= traits.maxChannels; channels *= 2)
 		{
-			const std::array<SampleFormat, 6> sampleFormats = { SampleFormatFloat64, SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
+			const std::array<SampleFormat, 6> sampleFormats = { SampleFormat::Float64, SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
 			for(const auto sampleFormat : sampleFormats)
 			{
 				Encoder::Format format;

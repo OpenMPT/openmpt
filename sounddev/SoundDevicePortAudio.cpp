@@ -395,7 +395,7 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 	caps.HasNamedInputSources = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = true;
-	caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+	caps.DefaultSettings.sampleFormat = SampleFormat::Float32;
 	const PaDeviceInfo *deviceInfo = Pa_GetDeviceInfo(m_DeviceIndex);
 	if(deviceInfo)
 	{
@@ -414,7 +414,7 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 	{
 		caps.CanBoostThreadPriority = true;
 		caps.CanDriverPanel = true;
-		caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+		caps.DefaultSettings.sampleFormat = SampleFormat::Float32;
 		if(m_DeviceIsDefault)
 		{
 			caps.CanExclusiveMode = false;
@@ -433,28 +433,28 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 	} else if(m_HostApiType == paWDMKS)
 	{
 		caps.CanUpdateInterval = false;
-		caps.DefaultSettings.sampleFormat = SampleFormatInt32;
+		caps.DefaultSettings.sampleFormat = SampleFormat::Int32;
 	} else if(m_HostApiType == paDirectSound)
 	{
 		if(GetSysInfo().IsOriginal())
 		{
-			caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+			caps.DefaultSettings.sampleFormat = SampleFormat::Float32;
 		} else
 		{
-			caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+			caps.DefaultSettings.sampleFormat = SampleFormat::Int16;
 		}
 	} else if(m_HostApiType == paMME)
 	{
 		if(GetSysInfo().IsOriginal())
 		{
-			caps.DefaultSettings.sampleFormat = SampleFormatFloat32;
+			caps.DefaultSettings.sampleFormat = SampleFormat::Float32;
 		} else
 		{
-			caps.DefaultSettings.sampleFormat = SampleFormatInt16;
+			caps.DefaultSettings.sampleFormat = SampleFormat::Int16;
 		}
 	} else if(m_HostApiType == paASIO)
 	{
-		caps.DefaultSettings.sampleFormat = SampleFormatInt32;
+		caps.DefaultSettings.sampleFormat = SampleFormat::Int32;
 	}
 	if(m_HostApiType == paDirectSound)
 	{
@@ -513,26 +513,26 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 	{
 		if(GetSysInfo().IsOriginal())
 		{
-			caps.supportedSampleFormats = { SampleFormatFloat32 };
+			caps.supportedSampleFormats = { SampleFormat::Float32 };
 		}
 	} else if(m_HostApiType == paMME)
 	{
 		if(GetSysInfo().IsOriginal())
 		{
-			caps.supportedSampleFormats = { SampleFormatFloat32 };
+			caps.supportedSampleFormats = { SampleFormat::Float32 };
 		}
 	} else if(m_HostApiType == paJACK)
 	{
-		caps.supportedSampleFormats = { SampleFormatFloat32 };
+		caps.supportedSampleFormats = { SampleFormat::Float32 };
 	} else if(m_HostApiType == paWASAPI)
 	{
-		caps.supportedSampleFormats = { SampleFormatFloat32 };
+		caps.supportedSampleFormats = { SampleFormat::Float32 };
 	}
 #if MPT_OS_WINDOWS
 	if(m_HostApiType == paWASAPI && !m_DeviceIsDefault)
 	{
 		caps.supportedExclusiveModeSampleFormats.clear();
-		const std::array<SampleFormat, 5> sampleFormats { SampleFormatInt8, SampleFormatInt16, SampleFormatInt24, SampleFormatInt32, SampleFormatFloat32 };
+		const std::array<SampleFormat, 5> sampleFormats { SampleFormat::Int8, SampleFormat::Int16, SampleFormat::Int24, SampleFormat::Int32, SampleFormat::Float32 };
 		for(const SampleFormat sampleFormat : sampleFormats)
 		{
 			for(const auto sampleRate : caps.supportedExclusiveSampleRates)
@@ -575,7 +575,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 	{
 		caps.supportedSampleFormats.clear();
 		caps.supportedExclusiveModeSampleFormats.clear();
-		const std::array<SampleFormat, 5> sampleFormats { SampleFormatInt8, SampleFormatInt16, SampleFormatInt24, SampleFormatInt32, SampleFormatFloat32 };
+		const std::array<SampleFormat, 5> sampleFormats { SampleFormat::Int8, SampleFormat::Int16, SampleFormat::Int24, SampleFormat::Int32, SampleFormat::Float32 };
 		for(const SampleFormat sampleFormat : sampleFormats)
 		{
 			for(const auto sampleRate : caps.supportedSampleRates)

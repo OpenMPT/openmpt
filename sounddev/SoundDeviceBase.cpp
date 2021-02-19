@@ -261,28 +261,28 @@ void Base::SourceLockedAudioReadVoid(void *buffer, const void *inputBuffer, std:
 {
 	switch(GetBufferFormat().sampleFormat)
 	{
-	case SampleFormatUnsigned8:
+	case SampleFormat::Unsigned8:
 		SourceLockedAudioRead(static_cast<uint8*>(buffer), static_cast<const uint8*>(inputBuffer), numFrames);
 		break;
-	case SampleFormatInt8:
+	case SampleFormat::Int8:
 		SourceLockedAudioRead(static_cast<int8*>(buffer), static_cast<const int8*>(inputBuffer), numFrames);
 		break;
-	case SampleFormatInt16:
+	case SampleFormat::Int16:
 		SourceLockedAudioRead(static_cast<int16*>(buffer), static_cast<const int16*>(inputBuffer), numFrames);
 		break;
-	case SampleFormatInt24:
+	case SampleFormat::Int24:
 		SourceLockedAudioRead(static_cast<int24*>(buffer), static_cast<const int24*>(inputBuffer), numFrames);
 		break;
-	case SampleFormatInt32:
+	case SampleFormat::Int32:
 		SourceLockedAudioRead(static_cast<int32*>(buffer), static_cast<const int32*>(inputBuffer), numFrames);
 		break;
-	case SampleFormatFloat32:
+	case SampleFormat::Float32:
 		SourceLockedAudioRead(static_cast<float*>(buffer), static_cast<const float*>(inputBuffer), numFrames);
 		break;
-	case SampleFormatFloat64:
+	case SampleFormat::Float64:
 		SourceLockedAudioRead(static_cast<double*>(buffer), static_cast<const double*>(inputBuffer), numFrames);
 		break;
-	case SampleFormatInvalid:
+	case SampleFormat::Invalid:
 		// nothing
 		break;
 	}
