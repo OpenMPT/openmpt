@@ -170,8 +170,8 @@ struct EncodeuLaw
 {
 	typedef int16 input_t;
 	typedef std::byte output_t;
-	static constexpr uint8 exp_table[16]  = {0, 7 << 4, 6 << 4, 5 << 4, 4 << 4, 3 << 4, 2 << 4, 1 << 4, 0 << 4, 0, 0, 0, 0, 0, 0, 0};
-	static constexpr uint8 mant_table[16] = {0, 10, 9, 8, 7, 6, 5, 4, 3, 3, 3, 3, 3, 3, 3, 3};
+	static constexpr uint8 exp_table[17]  = {0, 7 << 4, 6 << 4, 5 << 4, 4 << 4, 3 << 4, 2 << 4, 1 << 4, 0 << 4, 0, 0, 0, 0, 0, 0, 0, 0};
+	static constexpr uint8 mant_table[17] = {0, 10, 9, 8, 7, 6, 5, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3};
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
 		uint16 x   = static_cast<uint16>(val);
@@ -243,8 +243,8 @@ struct EncodeALaw
 {
 	typedef int16 input_t;
 	typedef std::byte output_t;
-	static constexpr uint8 exp_table[16]  = {0, 7 << 4, 6 << 4, 5 << 4, 4 << 4, 3 << 4, 2 << 4, 1 << 4, 0 << 4, 0, 0, 0, 0, 0, 0, 0};
-	static constexpr uint8 mant_table[16] = {0, 10, 9, 8, 7, 6, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4};
+	static constexpr uint8 exp_table[17]  = {0, 7 << 4, 6 << 4, 5 << 4, 4 << 4, 3 << 4, 2 << 4, 1 << 4, 0 << 4, 0, 0, 0, 0, 0, 0, 0, 0};
+	static constexpr uint8 mant_table[17] = {0, 10, 9, 8, 7, 6, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
 		int16 sx  = std::clamp(val, static_cast<int16>(-32767), static_cast<int16>(32767));
