@@ -5253,6 +5253,71 @@ static MPT_NOINLINE void TestSampleConversion()
 		}
 	}
 
+	// ALaw
+	{
+		for(unsigned int i = 0; i < 256; ++i)
+		{
+			std::byte in = mpt::byte_cast<std::byte>(static_cast<uint8>(i));
+			std::byte out = SC::EncodeALaw{}(SC::DecodeInt16ALaw{}(&in));
+			VERIFY_EQUAL_NONCONT(in, out);
+		}
+		VERIFY_EQUAL_NONCONT(SC::EncodeALaw{}(-32768), SC::EncodeALaw{}(-32256));
+		VERIFY_EQUAL_NONCONT(SC::EncodeALaw{}(-32767), SC::EncodeALaw{}(-32256));
+		VERIFY_EQUAL_NONCONT(SC::EncodeALaw{}(-1), SC::EncodeALaw{}(-8));
+		VERIFY_EQUAL_NONCONT(SC::EncodeALaw{}(0), SC::EncodeALaw{}(8));
+		VERIFY_EQUAL_NONCONT(SC::EncodeALaw{}(1), SC::EncodeALaw{}(8));
+		VERIFY_EQUAL_NONCONT(SC::EncodeALaw{}(32766), SC::EncodeALaw{}(32256));
+		VERIFY_EQUAL_NONCONT(SC::EncodeALaw{}(32767), SC::EncodeALaw{}(32256));
+#if 0
+		// compare with reference impl
+		for (int i = -32768; i <= 32767; ++i)
+		{
+			VERIFY_EQUAL_NONCONT(SC::EncodeALaw{}(i), mpt::byte_cast<std::byte>(alaw_encode(i)));
+		}
+#endif
+	}
+
+	// uLaw
+	{
+		for(unsigned int i = 0; i < 256; ++i)
+		{
+			std::byte in = mpt::byte_cast<std::byte>(static_cast<uint8>(i));
+			std::byte out = SC::EncodeuLaw{}(SC::DecodeInt16uLaw{}(&in));
+			VERIFY_EQUAL_NONCONT(in, out);
+		}
+#if 0
+		// compare with reference impl
+		/*
+		bool lastMatch = true;
+		*/
+		for(int i = -32768; i <= 32767; ++i)
+		{
+			/*
+			uint8 mine = mpt::byte_cast<uint8>(SC::EncodeuLaw{}(i));
+			uint8 ref = ulaw_encode(i);
+			if(lastMatch)
+			{
+				if(mine == ref)
+				{
+					VERIFY_EQUAL_NONCONT(mine, ref);
+					lastMatch = true;
+				} else
+				{
+					VERIFY_EQUAL_NONCONT(std::abs(static_cast<int>(mine) - static_cast<int>(ref)) <= 1, true);
+					lastMatch = false;
+				}
+			} else
+			{
+				VERIFY_EQUAL_NONCONT(mine, ref);
+				lastMatch = true;
+			}
+			*/
+			//MPT_LOG(LogNotification, "test", MPT_UFORMAT("{} {} {}")(i, ulaw_encode(i), mpt::byte_cast<uint8>(SC::EncodeuLaw{}(i))));
+			VERIFY_EQUAL_NONCONT(SC::EncodeuLaw{}(i), mpt::byte_cast<std::byte>(ulaw_encode(i)));
+		}
+#endif
+	}
+
 	// Range checks
 	{
 		int8 oneSample = 1;
