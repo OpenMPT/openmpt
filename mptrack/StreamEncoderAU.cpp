@@ -128,7 +128,7 @@ public:
 				{
 					frameData[channel] = IEEE754binary32BE(interleaved[channel]);
 				}
-				mpt::IO::WriteRaw(f, reinterpret_cast<const char*>(frameData.data()), formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8));
+				mpt::IO::WriteRaw(f, reinterpret_cast<const char*>(frameData.data()), formatInfo.Channels * formatInfo.Sampleformat.GetSampleSize());
 				interleaved += formatInfo.Channels;
 			}
 		}
@@ -148,7 +148,7 @@ public:
 			}
 		} else
 		{
-			mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8));
+			mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * formatInfo.Sampleformat.GetSampleSize());
 		}
 	}
 	void WriteCues(const std::vector<uint64> &cues) override

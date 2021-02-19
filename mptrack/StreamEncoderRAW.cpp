@@ -53,7 +53,7 @@ public:
 	}
 	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
 	{
-		mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample() / 8));
+		mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * formatInfo.Sampleformat.GetSampleSize());
 	}
 	void WriteCues(const std::vector<uint64> &cues) override
 	{

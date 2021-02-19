@@ -131,7 +131,7 @@ public:
 	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
 	{
 		sampleBuf.resize(frameCount * formatInfo.Channels);
-		switch(formatInfo.Sampleformat.GetBitsPerSample()/8)
+		switch(formatInfo.Sampleformat.GetSampleSize())
 		{
 			case 1:
 			{

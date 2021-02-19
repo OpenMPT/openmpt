@@ -431,7 +431,7 @@ struct Settings
 	}
 	std::size_t GetBytesPerFrame() const
 	{
-		return (sampleFormat.GetBitsPerSample()/8) * Channels;
+		return sampleFormat.GetSampleSize() * Channels;
 	}
 	std::size_t GetBytesPerSecond() const
 	{

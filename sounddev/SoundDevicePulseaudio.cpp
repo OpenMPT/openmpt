@@ -307,7 +307,7 @@ bool Pulseaudio::InternalOpen()
 	m_EffectiveBufferAttributes.Latency = static_cast<double>(ba.maxlength) / static_cast<double>(m_Settings.GetBytesPerSecond());
 	m_EffectiveBufferAttributes.UpdateInterval = static_cast<double>(ba.minreq) / static_cast<double>(m_Settings.GetBytesPerSecond());
 	m_EffectiveBufferAttributes.NumBuffers = 1;
-	m_OutputBuffer.resize(ba.minreq / (m_Settings.sampleFormat.GetBitsPerSample()/8));
+	m_OutputBuffer.resize(ba.minreq / m_Settings.sampleFormat.GetSampleSize());
 	m_PA_SimpleOutput = pa_simple_new(
 		NULL,
 		mpt::ToCharset(mpt::Charset::UTF8, m_AppInfo.GetName()).c_str(),

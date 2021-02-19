@@ -732,7 +732,7 @@ void CMainFrame::SoundSourceLockedReadImpl(SoundDevice::BufferFormat bufferForma
 	{
 		// The sound device interface expects the whole buffer to be filled, always.
 		// Clear remaining buffer if not enough samples got rendered.
-		std::size_t frameSize = bufferFormat.Channels * (bufferFormat.sampleFormat.GetBitsPerSample()/8);
+		std::size_t frameSize = bufferFormat.Channels * (bufferFormat.sampleFormat.GetSampleSize());
 		if(bufferFormat.sampleFormat.IsUnsigned())
 		{
 			std::memset(buffer + renderedFrames * bufferFormat.Channels, 0x80, remainingFrames * frameSize);

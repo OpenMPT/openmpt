@@ -109,7 +109,7 @@ private:
 				break;
 		}
 		// increment output buffer for potentially next callback
-		buffer = mpt::void_cast<std::byte*>(buffer) + (sampleFormat.GetBitsPerSample()/8) * channels * countChunk;
+		buffer = mpt::void_cast<std::byte*>(buffer) + (sampleFormat.GetSampleSize()) * channels * countChunk;
 	}
 public:
 	void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
@@ -1215,7 +1215,7 @@ void CDoWaveConvert::Run()
 				MPT_ASSERT(!mpt::endian_is_weird());
 				if(fileEnc->GetConvertedEndianness() != mpt::get_endian())
 				{
-					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetBitsPerSample()/8, buffer, lRead * encSettings.Channels);
+					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetSampleSize(), buffer, lRead * encSettings.Channels);
 				}
 				fileEnc->WriteInterleavedConverted(lRead, buffer);
 			}
@@ -1359,7 +1359,7 @@ void CDoWaveConvert::Run()
 				MPT_ASSERT(!mpt::endian_is_weird());
 				if(fileEnc->GetConvertedEndianness() != mpt::get_endian())
 				{
-					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetBitsPerSample()/8, buffer, framesChunk * channels);
+					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetSampleSize(), buffer, framesChunk * channels);
 				}
 				fileEnc->WriteInterleavedConverted(framesChunk, buffer);
 			}

@@ -76,14 +76,14 @@ public:
 				{
 					frameData[channel] = IEEE754binary32LE(interleaved[channel]);
 				}
-				fileWAV->Write(mpt::span(reinterpret_cast<const std::byte*>(frameData.data()), formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8)));
+				fileWAV->Write(mpt::span(reinterpret_cast<const std::byte*>(frameData.data()), formatInfo.Channels * formatInfo.Sampleformat.GetSampleSize()));
 				interleaved += formatInfo.Channels;
 			}
 		}
 	}
 	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
 	{
-		fileWAV->Write(mpt::span(data, frameCount * formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8)));
+		fileWAV->Write(mpt::span(data, frameCount * formatInfo.Channels * formatInfo.Sampleformat.GetSampleSize()));
 	}
 	void WriteCues(const std::vector<uint64> &cues) override
 	{
