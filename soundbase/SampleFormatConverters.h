@@ -99,7 +99,7 @@ struct DecodeUint8
 	static constexpr std::size_t input_inc = 1;
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
-		return static_cast<int8>(int(mpt::byte_cast<uint8>(*inBuf)) - 128);
+		return static_cast<int8>(static_cast<int>(mpt::byte_cast<uint8>(*inBuf)) - 128);
 	}
 };
 
