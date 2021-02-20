@@ -270,6 +270,9 @@
 #define IDC_RADIO7                      1407
 #define IDC_RADIO8                      1408
 #define IDC_RADIO9                      1409
+#define IDC_RADIO10                     1410
+#define IDC_RADIO11                     1411
+#define IDC_RADIO12                     1412
 #define IDC_SLIDER1                     1501
 #define IDC_SLIDER2                     1502
 #define IDC_SLIDER3                     1503

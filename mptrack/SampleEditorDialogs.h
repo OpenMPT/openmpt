@@ -13,6 +13,7 @@
 
 #include "BuildSettings.h"
 
+#include "../common/FileReaderFwd.h"
 #include "../soundlib/SampleIO.h"
 #include "../tracklib/FadeLaws.h"
 #include "CDecimalSupport.h"
@@ -63,24 +64,42 @@ protected:
 
 class CRawSampleDlg: public CDialog
 {
-protected:
-	static SampleIO m_nFormat;
-	bool m_bRememberFormat = false;
-
-public:
-	static SampleIO GetSampleFormat() { return m_nFormat; }
-	static void SetSampleFormat(SampleIO nFormat) { m_nFormat = nFormat; }
-	bool GetRemeberFormat() const { return m_bRememberFormat; };
-	void SetRememberFormat(bool bRemember) { m_bRememberFormat = bRemember; };
-
-public:
-	CRawSampleDlg(CWnd *parent = nullptr)
-	    : CDialog(IDD_LOADRAWSAMPLE, parent) {}
+	friend class AutodetectFormatDlg;
 
 protected:
+	static SampleIO m_format;
+	static SmpLength m_offset;
+
+	CSpinButtonCtrl m_SpinOffset;
+	FileReader &m_file;
+	bool m_rememberFormat = false;
+
+public:
+	SampleIO GetSampleFormat() const { return m_format; }
+	void SetSampleFormat(SampleIO nFormat) { m_format = nFormat; }
+
+	bool GetRemeberFormat() const { return m_rememberFormat; };
+	void SetRememberFormat(bool remember) { m_rememberFormat = remember; };
+
+	SmpLength GetOffset() const { return m_offset; }
+	void SetOffset(SmpLength offset) { m_offset = offset; }
+
+public:
+	CRawSampleDlg(FileReader &file, CWnd *parent = nullptr)
+		: CDialog(IDD_LOADRAWSAMPLE, parent)
+		, m_file(file) {}
+
+protected:
+	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;
 	void OnOK() override;
 	void UpdateDialog();
+
+	void OnBitDepthChanged(UINT id);
+	void OnEncodingChanged(UINT id);
+	void OnAutodetectFormat();
+
+	DECLARE_MESSAGE_MAP()
 };
 
 

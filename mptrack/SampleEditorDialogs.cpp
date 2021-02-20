@@ -18,6 +18,7 @@
 #include "../soundlib/Snd_defs.h"
 #include "../soundlib/ModSample.h"
 #include "SampleEditorDialogs.h"
+#include "ProgressDialog.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -164,11 +165,36 @@ void CAmpDlg::OnOK()
 //////////////////////////////////////////////////////////////
 // Sample import dialog
 
-SampleIO CRawSampleDlg::m_nFormat(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::unsignedPCM);
+SampleIO CRawSampleDlg::m_format(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::signedPCM);
+SmpLength CRawSampleDlg::m_offset = 0;
+
+BEGIN_MESSAGE_MAP(CRawSampleDlg, CDialog)
+	ON_COMMAND_RANGE(IDC_RADIO1, IDC_RADIO4, &CRawSampleDlg::OnBitDepthChanged)
+	ON_COMMAND_RANGE(IDC_RADIO7, IDC_RADIO10, &CRawSampleDlg::OnEncodingChanged)
+	ON_COMMAND(IDC_BUTTON1, &CRawSampleDlg::OnAutodetectFormat)
+END_MESSAGE_MAP()
+
+
+void CRawSampleDlg::DoDataExchange(CDataExchange *pDX)
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CRawSampleDlg)
+	DDX_Control(pDX, IDC_SPIN1, m_SpinOffset);
+	//}}AFX_DATA_MAP
+}
+
 
 BOOL CRawSampleDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+	if(const auto filename = m_file.GetOptionalFileName(); filename)
+	{
+		CString title;
+		GetWindowText(title);
+		title += _T(" - ") + filename->GetFullFileName().ToCString();
+		SetWindowText(title);
+	}
+	m_SpinOffset.SetRange32(0, mpt::saturate_cast<int>(m_file.GetLength() - 1u));
 	UpdateDialog();
 	return TRUE;
 }
@@ -176,23 +202,224 @@ BOOL CRawSampleDlg::OnInitDialog()
 
 void CRawSampleDlg::OnOK()
 {
-	if(IsDlgButtonChecked(IDC_RADIO1)) m_nFormat |= SampleIO::_8bit;
-	if(IsDlgButtonChecked(IDC_RADIO2)) m_nFormat |= SampleIO::_16bit;
-	if(IsDlgButtonChecked(IDC_RADIO3)) m_nFormat |= SampleIO::unsignedPCM;
-	if(IsDlgButtonChecked(IDC_RADIO4)) m_nFormat |= SampleIO::signedPCM;
-	if(IsDlgButtonChecked(IDC_RADIO5)) m_nFormat |= SampleIO::mono;
-	if(IsDlgButtonChecked(IDC_RADIO6)) m_nFormat |= SampleIO::stereoInterleaved;
-	m_bRememberFormat = IsDlgButtonChecked(IDC_CHK_REMEMBERSETTINGS) != BST_UNCHECKED;
+	if(IsDlgButtonChecked(IDC_RADIO1))
+		m_format |= SampleIO::_8bit;
+	else if(IsDlgButtonChecked(IDC_RADIO2))
+		m_format |= SampleIO::_16bit;
+	else if(IsDlgButtonChecked(IDC_RADIO3))
+		m_format |= SampleIO::_24bit;
+	else if(IsDlgButtonChecked(IDC_RADIO4))
+		m_format |= SampleIO::_32bit;
+	if(IsDlgButtonChecked(IDC_RADIO5))
+		m_format |= SampleIO::mono;
+	else if(IsDlgButtonChecked(IDC_RADIO6))
+		m_format |= SampleIO::stereoInterleaved;
+	if(IsDlgButtonChecked(IDC_RADIO7))
+		m_format |= SampleIO::signedPCM;
+	else if(IsDlgButtonChecked(IDC_RADIO8))
+		m_format |= SampleIO::unsignedPCM;
+	else if(IsDlgButtonChecked(IDC_RADIO9))
+		m_format |= SampleIO::deltaPCM;
+	else if(IsDlgButtonChecked(IDC_RADIO10))
+		m_format |= SampleIO::floatPCM;
+	if(IsDlgButtonChecked(IDC_RADIO11))
+		m_format |= SampleIO::littleEndian;
+	else if(IsDlgButtonChecked(IDC_RADIO12))
+		m_format |= SampleIO::bigEndian;
+	m_rememberFormat = IsDlgButtonChecked(IDC_CHK_REMEMBERSETTINGS) != BST_UNCHECKED;
+	m_offset = GetDlgItemInt(IDC_EDIT1, nullptr, FALSE);
 	CDialog::OnOK();
 }
 
 
 void CRawSampleDlg::UpdateDialog()
 {
-	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, (m_nFormat.GetBitDepth() == 8) ? IDC_RADIO1 : IDC_RADIO2 );
-	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, (m_nFormat.GetEncoding() == SampleIO::unsignedPCM) ? IDC_RADIO3 : IDC_RADIO4);
-	CheckRadioButton(IDC_RADIO5, IDC_RADIO6, (m_nFormat.GetChannelFormat() == SampleIO::mono) ? IDC_RADIO5 : IDC_RADIO6);
-	CheckDlgButton(IDC_CHK_REMEMBERSETTINGS, (m_bRememberFormat ? BST_CHECKED : BST_UNCHECKED));
+	const int bitDepthID = IDC_RADIO1 + m_format.GetBitDepth() / 8 - 1;
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO4, bitDepthID);
+	CheckRadioButton(IDC_RADIO5, IDC_RADIO6, (m_format.GetChannelFormat() == SampleIO::mono) ? IDC_RADIO5 : IDC_RADIO6);
+	int encodingID = IDC_RADIO7;
+	switch(m_format.GetEncoding())
+	{
+	case SampleIO::signedPCM: encodingID = IDC_RADIO7; break;
+	case SampleIO::unsignedPCM: encodingID = IDC_RADIO8; break;
+	case SampleIO::deltaPCM: encodingID = IDC_RADIO9; break;
+	case SampleIO::floatPCM: encodingID = IDC_RADIO10; break;
+	default: MPT_ASSERT_NOTREACHED();
+	}
+	CheckRadioButton(IDC_RADIO7, IDC_RADIO10, encodingID);
+	CheckRadioButton(IDC_RADIO11, IDC_RADIO12, (m_format.GetEndianness() == SampleIO::littleEndian) ? IDC_RADIO11 : IDC_RADIO12);
+	CheckDlgButton(IDC_CHK_REMEMBERSETTINGS, (m_rememberFormat ? BST_CHECKED : BST_UNCHECKED));
+	SetDlgItemInt(IDC_EDIT1, m_offset, FALSE);
+
+	OnBitDepthChanged(bitDepthID);
+	OnEncodingChanged(encodingID);
+}
+
+
+void CRawSampleDlg::OnBitDepthChanged(UINT id)
+{
+	const auto bits = (id - IDC_RADIO1 + 1) * 8;
+	// 8-bit: endianness doesn't matter
+	BOOL enableEndianness = (bits == 8) ? FALSE : TRUE;
+	GetDlgItem(IDC_RADIO11)->EnableWindow(enableEndianness);
+	GetDlgItem(IDC_RADIO12)->EnableWindow(enableEndianness);
+	if(bits == 8)
+		CheckRadioButton(IDC_RADIO11, IDC_RADIO12, IDC_RADIO11);
+
+	const BOOL hasUnsignedDelta = (bits <= 16) ? TRUE : FALSE;
+	const BOOL hasFloat = (bits == 32) ? TRUE : FALSE;
+
+	GetDlgItem(IDC_RADIO8)->EnableWindow(hasUnsignedDelta);
+	GetDlgItem(IDC_RADIO9)->EnableWindow(hasUnsignedDelta);
+	GetDlgItem(IDC_RADIO10)->EnableWindow(hasFloat);
+
+	if((IsDlgButtonChecked(IDC_RADIO8) && !hasUnsignedDelta)
+	   || (IsDlgButtonChecked(IDC_RADIO9) && !hasUnsignedDelta)
+	   || (IsDlgButtonChecked(IDC_RADIO10) && !hasFloat))
+		CheckRadioButton(IDC_RADIO7, IDC_RADIO10, IDC_RADIO7);
+}
+
+
+void CRawSampleDlg::OnEncodingChanged(UINT id)
+{
+	const bool isUnsignedDelta = (id == IDC_RADIO8) || (id == IDC_RADIO9);
+	const bool isFloat         = (id == IDC_RADIO10);
+
+	GetDlgItem(IDC_RADIO1)->EnableWindow(isFloat ? FALSE : TRUE);
+	GetDlgItem(IDC_RADIO2)->EnableWindow(isFloat ? FALSE : TRUE);
+	GetDlgItem(IDC_RADIO3)->EnableWindow((isFloat || isUnsignedDelta) ? FALSE : TRUE);
+	GetDlgItem(IDC_RADIO4)->EnableWindow(isUnsignedDelta ? FALSE : TRUE);
+
+	if(!IsDlgButtonChecked(IDC_RADIO4) && isFloat)
+		CheckRadioButton(IDC_RADIO1, IDC_RADIO4, IDC_RADIO4);
+	if((IsDlgButtonChecked(IDC_RADIO3) || IsDlgButtonChecked(IDC_RADIO4)) && isUnsignedDelta)
+		CheckRadioButton(IDC_RADIO1, IDC_RADIO4, IDC_RADIO1);
+}
+
+
+class AutodetectFormatDlg : public CProgressDialog
+{
+	CRawSampleDlg &m_parent;
+
+public:
+	SampleIO m_bestFormat;
+
+	AutodetectFormatDlg(CRawSampleDlg &parent)
+		: CProgressDialog(&parent)
+		, m_parent(parent) {}
+
+	void Run() override
+	{
+		// Probed raw formats... little-endian and stereo versions are automatically checked as well.
+		static constexpr SampleIO ProbeFormats[] =
+			{
+				// 8-Bit
+				{SampleIO::_8bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::signedPCM},
+				{SampleIO::_8bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::unsignedPCM},
+				{SampleIO::_8bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::deltaPCM},
+				// 16-Bit
+				{SampleIO::_16bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::signedPCM},
+				{SampleIO::_16bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::unsignedPCM},
+				{SampleIO::_16bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::deltaPCM},
+				// 24-Bit
+				{SampleIO::_24bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::signedPCM},
+				// 32-Bit
+				{SampleIO::_32bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::signedPCM},
+				{SampleIO::_32bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::floatPCM},
+			};
+
+		SetTitle(_T("Raw Import"));
+		SetText(_T("Determining raw format..."));
+		SetRange(0, std::size(ProbeFormats) * 4);
+
+		double bestError = DBL_MAX;
+		uint64 progress  = 0;
+
+		for(SampleIO format : ProbeFormats)
+		{
+			for(const auto endianness : {SampleIO::littleEndian, SampleIO::bigEndian})
+			{
+				if(endianness == SampleIO::bigEndian && format.GetBitDepth() == SampleIO::_8bit)
+					continue;
+				format |= endianness;
+				for(const auto channels : {SampleIO::mono, SampleIO::stereoInterleaved})
+				{
+					format |= channels;
+
+					ModSample sample;
+					m_parent.m_file.Seek(m_parent.m_offset);
+					const auto bytesPerSample = format.GetNumChannels() * format.GetBitDepth() / 8u;
+					sample.nLength            = mpt::saturate_cast<SmpLength>(m_parent.m_file.BytesLeft() / bytesPerSample);
+					if(!format.ReadSample(sample, m_parent.m_file))
+						continue;
+
+					const uint8 numChannels = sample.GetNumChannels();
+					double error            = 0.0;
+					for(uint8 chn = 0; chn < numChannels; chn++)
+					{
+						int32 prev = 0;
+						if(sample.uFlags[CHN_16BIT])
+						{
+							const double factor = 1.0 / 32768.0;
+							const auto *v       = sample.sample16() + chn;
+							for(SmpLength i = sample.nLength; i != 0; i--, v += numChannels)
+							{
+								auto diff = (*v - prev) * factor;
+								error += diff * diff;
+								prev = *v;
+							}
+						} else
+						{
+							const double factor = 1.0 / 128.0;
+							const auto *v       = sample.sample8() + chn;
+							for(SmpLength i = sample.nLength; i != 0; i--, v += numChannels)
+							{
+								auto diff = (*v - prev) * factor;
+								error += diff * diff;
+								prev = *v;
+							}
+						}
+					}
+					sample.FreeSample();
+
+					double errorFactor = format.GetBitDepth() * format.GetBitDepth() / 64;
+					// Delta PCM often produces slightly worse error compared to signed PCM for real delta samples, so give it a bit of an advantage.
+					if(format.GetEncoding() == SampleIO::deltaPCM)
+						errorFactor *= 0.75;
+
+					error *= errorFactor;
+
+					if(error < bestError)
+					{
+						bestError  = error;
+						m_bestFormat = format;
+					}
+
+					SetProgress(++progress);
+					ProcessMessages();
+					if(m_abort)
+					{
+						EndDialog(IDCANCEL);
+						return;
+					}
+				}
+			}
+		}
+
+		EndDialog(IDOK);
+	}
+};
+
+
+void CRawSampleDlg::OnAutodetectFormat()
+{
+	m_offset = GetDlgItemInt(IDC_EDIT1, nullptr, FALSE);
+	AutodetectFormatDlg dlg(*this);
+	if(dlg.DoModal() == IDOK)
+	{
+		m_format = dlg.m_bestFormat;
+		UpdateDialog();
+	}
 }
 
 

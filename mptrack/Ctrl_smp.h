@@ -51,7 +51,6 @@ protected:
 	uint32 m_nSequenceMs = 0;
 	uint32 m_nSeekWindowMs = 0;
 	uint32 m_nOverlapMs = 0;
-	SampleIO m_nPreviousRawFormat;
 	SAMPLEINDEX m_nSample = 1;
 	bool m_rememberRawFormat = false;
 	bool m_startedEdit = false;

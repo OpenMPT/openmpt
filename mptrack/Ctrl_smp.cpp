@@ -174,7 +174,6 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 
 CCtrlSamples::CCtrlSamples(CModControlView &parent, CModDoc &document)
 	: CModControlDlg(parent, document)
-	, m_nPreviousRawFormat(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::unsignedPCM)
 {
 	m_nLockCount = 1;
 }
@@ -1000,42 +999,26 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampl
 
 	if(!bOk && types[OpenSampleRaw])
 	{
-		CRawSampleDlg dlg(this);
-		if(m_rememberRawFormat)
-		{
-			dlg.SetSampleFormat(m_nPreviousRawFormat);
-			dlg.SetRememberFormat(true);
-		}
+		CRawSampleDlg dlg(file, this);
 		EndWaitCursor();
 		if(m_rememberRawFormat || dlg.DoModal() == IDOK)
 		{
-			m_nPreviousRawFormat = dlg.GetSampleFormat();
-			m_rememberRawFormat = dlg.GetRemeberFormat();
+			SampleIO sampleIO   = dlg.GetSampleFormat();
+			m_rememberRawFormat = m_rememberRawFormat || dlg.GetRemeberFormat();
 
 			BeginWaitCursor();
 
-			m_sndFile.DestroySampleThreadsafe(m_nSample);
-			sample.nLength = mpt::saturate_cast<SmpLength>(file.GetLength());
+			file.Seek(dlg.GetOffset());
 
-			SampleIO sampleIO = dlg.GetSampleFormat();
+			m_sndFile.DestroySampleThreadsafe(m_nSample);
+			const auto bytesPerSample = sampleIO.GetNumChannels() * sampleIO.GetBitDepth() / 8u;
+			sample.nLength            = mpt::saturate_cast<SmpLength>(file.BytesLeft() / bytesPerSample);
 
 			if(TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad)
 			{
 				sampleIO.MayNormalize();
 			}
 
-			if(sampleIO.GetBitDepth() != 8)
-			{
-				sample.nLength /= 2;
-			}
-
-			// Interleaved Stereo Sample
-			if(sampleIO.GetChannelFormat() != SampleIO::mono)
-			{
-				sample.nLength /= 2;
-			}
-
-			file.Rewind();
 			if(sampleIO.ReadSample(sample, file))
 			{
 				bOk = true;
@@ -1821,7 +1804,8 @@ void CCtrlSamples::OnQuickFade()
 void CCtrlSamples::OnResample()
 {
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB]) return;
+	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
+		return;
 
 	const uint32 oldRate = sample.GetSampleRate(m_sndFile.GetType());
 	CResamplingDlg dlg(this, oldRate, TrackerSettings::Instance().sampleEditorDefaultResampler);
