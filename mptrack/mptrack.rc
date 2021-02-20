@@ -1314,6 +1314,8 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "Unknown file type"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
+    DEFPUSHBUTTON   "&OK",IDOK,138,108,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,192,108,50,14
     LTEXT           "Load it as a raw sample of the following format:",IDC_STATIC,6,6,156,12
     PUSHBUTTON      "&Auto-Detect Format",IDC_BUTTON1,6,84,72,14
     LTEXT           "Offset (Bytes):",IDC_STATIC,90,87,50,8
@@ -1337,8 +1339,6 @@ BEGIN
     CONTROL         "&Big Endian",IDC_RADIO12,"Button",BS_AUTORADIOBUTTON,186,39,54,10
     CONTROL         "Remember these settings",IDC_CHK_REMEMBERSETTINGS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,120,60,126,12
-    DEFPUSHBUTTON   "&OK",IDOK,138,108,50,14
-    PUSHBUTTON      "&Cancel",IDCANCEL,192,108,50,14
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,6,102,234,1
 END
 
