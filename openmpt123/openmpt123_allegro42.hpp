@@ -21,6 +21,7 @@
 #pragma GCC diagnostic ignored "-Wfloat-conversion"
 #endif
 #include <allegro.h>
+#include <allegro/internal/aintern.h>
 #if defined(__GNUC__) && !defined(__clang__) && !defined(_MSC_VER)
 #pragma GCC diagnostic pop
 #endif
@@ -115,6 +116,7 @@ public:
 		set_queue_size_frames( period_frames );
 		if ( flags.verbose ) {
 			log << "Allegro-4.2:" << std::endl;
+			log << " allegro samplerate: " << _sound_freq << std::endl;
 			log << " latency: " << flags.buffer << std::endl;
 			log << " period: " << flags.period << std::endl;
 			log << " frames per buffer: " << period_frames << std::endl;
