@@ -68,8 +68,6 @@ OPLInstrDlg::OPLInstrDlg(CWnd &parent, const CSoundFile &sndFile)
 	CRect rect;
 	GetClientRect(rect);
 	m_windowSize = rect.BottomRight();
-	SetParent(&parent);
-	ModifyStyle(WS_POPUP, WS_CHILD);
 }
 
 
