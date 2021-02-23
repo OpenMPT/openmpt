@@ -126,7 +126,7 @@ public:
 	}
 	explicit MPT_CONSTEXPRINLINE operator std::underlying_type<SampleFormat::Enum>::type() const noexcept
 	{
-		return static_cast<std::underlying_type<SampleFormat::Enum>::type>(value);
+		return mpt::to_underlying(value);
 	}
 
 	// backward compatibility, conversion to/from integers
@@ -136,11 +136,11 @@ public:
 	}
 	static MPT_CONSTEXPRINLINE int ToInt(SampleFormat x) noexcept
 	{
-		return static_cast<std::underlying_type<SampleFormat::Enum>::type>(x.value);
+		return mpt::to_underlying(x.value);
 	}
 	MPT_CONSTEXPRINLINE int AsInt() const noexcept
 	{
-		return static_cast<std::underlying_type<SampleFormat::Enum>::type>(value);
+		return mpt::to_underlying(value);
 	}
 };
 

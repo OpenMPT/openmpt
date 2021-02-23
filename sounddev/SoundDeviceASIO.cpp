@@ -57,12 +57,6 @@ static constexpr inline auto value_cast(ASIO::Bool b) noexcept -> bool
 	return static_cast<bool>(b);
 }
 
-template <typename Tenum, typename std::enable_if<std::is_enum<Tenum>::value, int>::type = 0>
-static constexpr inline auto value_cast(Tenum e) noexcept -> typename std::underlying_type<Tenum>::type
-{
-	return static_cast<typename std::underlying_type<Tenum>::type>(e);
-}
-
 
 // Helper class to temporarily open a driver for a query.
 class TemporaryASIODriverOpener
@@ -375,7 +369,7 @@ bool CASIODevice::InternalOpen()
 				, m_Settings.Channels.ToDevice(channel)
 				, value_cast(m_ChannelInfo[channel].isActive)
 				, m_ChannelInfo[channel].channelGroup
-				, value_cast(m_ChannelInfo[channel].type)
+				, mpt::to_underlying(m_ChannelInfo[channel].type)
 				, mpt::ToUnicode(mpt::Charset::Locale, m_ChannelInfo[channel].name)
 				));
 		}
@@ -1175,7 +1169,7 @@ ASIO::Long CASIODevice::MessageUnknown(ASIO::MessageSelector selector, ASIO::Lon
 	MPT_TRACE_SCOPE();
 	ASIO::Long result = 0;
 	MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: AsioMessage(selector={}, value={}, message={}, opt={}) => result={}")
-		( value_cast(selector)
+		(mpt::to_underlying(selector)
 		, value
 		, reinterpret_cast<std::uintptr_t>(message)
 		, opt ? mpt::ufmt::val(*opt) : U_("NULL")

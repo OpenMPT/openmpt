@@ -790,7 +790,7 @@ Tuning::SerializationResult CTuning::Serialize(std::ostream& outStrm) const
 		ssb.WriteItem(m_TuningName, "0", WriteStr);
 	uint16 dummyEditMask = 0xffff;
 	ssb.WriteItem(dummyEditMask, "1");
-	ssb.WriteItem(static_cast<std::underlying_type<Type>::type>(m_TuningType), "2");
+	ssb.WriteItem(mpt::to_underlying(m_TuningType), "2");
 	if (m_NoteNameMap.size() > 0)
 		ssb.WriteItem(m_NoteNameMap, "3", WriteNoteMap);
 	if (GetFineStepCount() > 0)

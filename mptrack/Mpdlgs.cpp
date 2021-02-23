@@ -537,7 +537,7 @@ void COptionsSoundcard::UpdateSampleFormat()
 			name = MPT_CFORMAT("{} Bit")(sampleFormat.GetBitsPerSample());
 		}
 		UINT ndx = m_CbnSampleFormat.AddString(name);
-		m_CbnSampleFormat.SetItemData(ndx, static_cast<std::underlying_type<SampleFormat::Enum>::type>(sampleFormat));
+		m_CbnSampleFormat.SetItemData(ndx, mpt::to_underlying<SampleFormat::Enum>(sampleFormat));
 		if(sampleFormat == m_Settings.sampleFormat)
 		{
 			n = ndx;

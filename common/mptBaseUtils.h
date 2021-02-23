@@ -130,6 +130,26 @@ constexpr std::array<T, N> init_array(const Tx & x)
 namespace mpt
 {
 
+#if MPT_CXX_AT_LEAST(23)
+
+using std::to_underlying;
+
+#else // !C++23
+
+template <typename T>
+constexpr std::underlying_type_t<T> to_underlying(T value) noexcept
+{
+	return static_cast<typename std::underlying_type<T>::type>(value);
+}
+
+#endif // C++23
+
+} // namespace mpt
+
+
+namespace mpt
+{
+
 // Work-around for the requirement of at least 1 non-throwing function argument combination in C++ (17,2a).
 
 template <typename Exception>
