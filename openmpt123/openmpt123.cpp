@@ -75,6 +75,9 @@ static const char * const license =
 #include <fcntl.h>
 #include <io.h>
 #include <stdio.h>
+#if defined(__MINGW32__) && !defined(__MINGW64__)
+#include <string.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <windows.h>
