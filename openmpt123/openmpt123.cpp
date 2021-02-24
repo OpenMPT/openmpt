@@ -2288,8 +2288,13 @@ static int main( int argc, char * argv [] ) {
 #endif
 	textout_dummy dummy_log;
 #if defined(WIN32)
+#if defined(UNICODE)
 	textout_ostream_console std_out( std::wcout, STD_OUTPUT_HANDLE );
 	textout_ostream_console std_err( std::wclog, STD_ERROR_HANDLE );
+#else
+	textout_ostream_console std_out( std::cout, STD_OUTPUT_HANDLE );
+	textout_ostream_console std_err( std::clog, STD_ERROR_HANDLE );
+#endif
 #else
 	textout_ostream std_out( std::cout );
 	textout_ostream std_err( std::clog );
