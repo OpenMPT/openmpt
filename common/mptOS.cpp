@@ -161,11 +161,13 @@ static mpt::OS::Windows::Version GatherWindowsVersion() noexcept
 		return VersionFromNTDDI_VERSION();
 	}
 	DWORD dwProductType = 0;
-	dwProductType = PRODUCT_UNDEFINED;
-	if(GetProductInfo(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion, versioninfoex.wServicePackMajor, versioninfoex.wServicePackMinor, &dwProductType) == FALSE)
-	{
+	#if (_WIN32_WINNT >= 0x0600) // _WIN32_WINNT_VISTA
 		dwProductType = PRODUCT_UNDEFINED;
-	}
+		if(GetProductInfo(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion, versioninfoex.wServicePackMajor, versioninfoex.wServicePackMinor, &dwProductType) == FALSE)
+		{
+			dwProductType = PRODUCT_UNDEFINED;
+		}
+	#endif
 	return mpt::OS::Windows::Version(
 		mpt::OS::Windows::Version::System(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion),
 		mpt::OS::Windows::Version::ServicePack(versioninfoex.wServicePackMajor, versioninfoex.wServicePackMinor),
