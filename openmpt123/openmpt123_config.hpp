@@ -58,11 +58,15 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+#ifdef _UNICODE
 #ifndef UNICODE
 #define UNICODE
 #endif
+#endif
+#ifdef UNICODE
 #ifndef _UNICODE
 #define _UNICODE
+#endif
 #endif
 #endif // WIN32
 
