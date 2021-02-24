@@ -74,6 +74,7 @@ static const char * const license =
 #include <conio.h>
 #include <fcntl.h>
 #include <io.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <windows.h>
