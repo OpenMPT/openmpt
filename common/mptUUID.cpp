@@ -415,22 +415,31 @@ UUID UUID::GenerateLocalUseOnly()
 			return mpt::UUID::RFC4122Random();
 		#endif
 	#elif MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
-		::UUID uuid = ::UUID();
-		RPC_STATUS status = ::UuidCreateSequential(&uuid);
-		if(status != RPC_S_OK && status != RPC_S_UUID_LOCAL_ONLY)
-		{
+		#if _WIN32_WINNT >= 0x0501
+			// Available since Win2000, but we check for WinXP in order to not use this
+			// function in Win32old builds. It is not available on some non-fully
+			// patched Win98SE installs in the wild.
+			::UUID uuid = ::UUID();
+			RPC_STATUS status = ::UuidCreateSequential(&uuid);
+			if(status != RPC_S_OK && status != RPC_S_UUID_LOCAL_ONLY)
+			{
+				return Generate();
+			}
+			status = RPC_S_OK;
+			if(UuidIsNil(&uuid, &status) != FALSE)
+			{
+				return mpt::UUID::RFC4122Random();
+			}
+			if(status != RPC_S_OK)
+			{
+				return mpt::UUID::RFC4122Random();
+			}
+			return mpt::UUIDFromWin32(uuid);
+		#else
+			// Fallback to ::UuidCreate is safe as ::UuidCreateSequential is only a
+			// tiny performance optimization.
 			return Generate();
-		}
-		status = RPC_S_OK;
-		if(UuidIsNil(&uuid, &status) != FALSE)
-		{
-			return mpt::UUID::RFC4122Random();
-		}
-		if(status != RPC_S_OK)
-		{
-			return mpt::UUID::RFC4122Random();
-		}
-		return mpt::UUIDFromWin32(uuid);
+		#endif
 	#else
 		return RFC4122Random();
 	#endif
