@@ -604,6 +604,15 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		GetDocument()->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Edit OPL Patch");
 		break;
 
+	case VIEWMSG_SETFOCUS:
+	case VIEWMSG_SETACTIVE:
+		GetParentFrame()->SetActiveView(this);
+		if(IsOPLInstrument() && m_oplEditor)
+			m_oplEditor->SetFocus();
+		else
+			SetFocus();
+		break;
+
 	default:
 		return CModScrollView::OnModViewMsg(wParam, lParam);
 	}
