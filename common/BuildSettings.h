@@ -20,12 +20,16 @@
 
 #if MPT_OS_WINDOWS
 
-#ifndef _WIN32_WINNT
+#if !defined(WINVER) && !defined(_WIN32_WINDOWS) && !defined(_WIN32_WINNT)
 #define _WIN32_WINNT 0x0601 // _WIN32_WINNT_WIN7
 #endif
 
 #ifndef WINVER
-#define WINVER       _WIN32_WINNT
+#if defined(_WIN32_WINNT)
+#define WINVER _WIN32_WINNT
+#elif defined(_WIN32_WINDOWS)
+#define WINVER _WIN32_WINDOWS
+#endif
 #endif
 
 #endif // MPT_OS_WINDOWS
