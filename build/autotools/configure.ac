@@ -237,8 +237,8 @@ AS_IF([test "x$with_portaudiocpp" != "xno"],
   have_portaudiocpp=0
  ]
 )
-],[have_portaudicppo=0])
-AM_CONDITIONAL([HAVE_PORTAUDIOCPP], [test x$have_portaudio = x1])
+],[have_portaudiocpp=0])
+AM_CONDITIONAL([HAVE_PORTAUDIOCPP], [test x$have_portaudiocpp = x1])
 
 # Optional disabled openmpt123 dependency: libsdl2
 AC_ARG_WITH([sdl2], AS_HELP_STRING([--with-sdl2], [Enable use of libsdl2. Enabling libsdl2 automatically disables libsdl.]))
