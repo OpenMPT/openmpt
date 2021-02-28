@@ -84,7 +84,7 @@ rem PowerShell 3 on Windows 7 requires https://www.microsoft.com/en-us/download/
 powershell -Version 3 -Command "(Get-Content include\lame.def -Raw).replace(\"libmp3lame.DLL\", \"\") | Set-Content include\lame.def -Force" || goto error
 cd ..\.. || goto error
 
-call :download_and_unpack "htmlhelp" "https://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "htmlhelp.exe" "." "-" || goto error
+call :download_and_unpack "htmlhelp" "https://web.archive.org/web/20200918004813if_/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "htmlhelp.exe" "." "-" || goto error
 
 goto ok
 
