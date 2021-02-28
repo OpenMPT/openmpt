@@ -56,7 +56,7 @@ if "%MPT_DOWNLOAD%" == "yes" (
  call build\scriptlib\download.cmd "https://www.un4seen.com/files/xmp-sdk.zip"                                                       "build\externals\xmp-sdk.zip"     || goto error
  call build\scriptlib\download.cmd "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                                          "build\externals\asiosdk2.3.zip"  || goto error
 
- call build\scriptlib\download.cmd "https://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "build\externals\htmlhelp.exe"    || goto error
+ call build\scriptlib\download.cmd "https://web.archive.org/web/20200918004813if_/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "build\externals\htmlhelp.exe"    || goto error
 
  call build\scriptlib\download.cmd "https://www.python.org/ftp/python/3.7.2/python-3.7.2.post1-embed-win32.zip"                      "build\externals\python-3.7.2.post1-embed-win32.zip" || goto error
 
