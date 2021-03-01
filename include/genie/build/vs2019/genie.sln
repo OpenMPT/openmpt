@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2019
+# Visual Studio Version 16
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "genie", "genie.vcxproj", "{2D20800F-9934-A8C0-62B6-4B20CE89A4F1}"
 EndProject
 Global

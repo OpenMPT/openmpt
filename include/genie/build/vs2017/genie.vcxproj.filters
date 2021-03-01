@@ -19,14 +19,14 @@
     <Filter Include="src\actions\qbs">
       <UniqueIdentifier>{1CE712CF-8872-8093-9183-0388FD8DDC93}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\actions\fastbuild">
-      <UniqueIdentifier>{D4DBEDB4-4048-A9AF-093C-410D7567CB17}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\actions\make">
       <UniqueIdentifier>{34946DB1-208D-8C03-49BF-718835176C0F}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\actions\xcode">
       <UniqueIdentifier>{4952E8DF-B568-E675-FEDF-71976A35B7FD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\actions\jcdb">
+      <UniqueIdentifier>{A9F66BB1-95EF-8A03-BE21-7088AA796A0F}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\actions\ninja">
       <UniqueIdentifier>{06A436DF-72BA-3475-BB31-C096278705FD}</UniqueIdentifier>
@@ -216,15 +216,6 @@
     <None Include="..\..\src\actions\qbs\qbs_solution.lua">
       <Filter>src\actions\qbs</Filter>
     </None>
-    <None Include="..\..\src\actions\fastbuild\fastbuild_project.lua">
-      <Filter>src\actions\fastbuild</Filter>
-    </None>
-    <None Include="..\..\src\actions\fastbuild\_fastbuild.lua">
-      <Filter>src\actions\fastbuild</Filter>
-    </None>
-    <None Include="..\..\src\actions\fastbuild\fastbuild_solution.lua">
-      <Filter>src\actions\fastbuild</Filter>
-    </None>
     <None Include="..\..\src\actions\make\make_csharp.lua">
       <Filter>src\actions\make</Filter>
     </None>
@@ -258,6 +249,9 @@
     <None Include="..\..\src\actions\xcode\xcode10.lua">
       <Filter>src\actions\xcode</Filter>
     </None>
+    <None Include="..\..\src\actions\xcode\xcode11.lua">
+      <Filter>src\actions\xcode</Filter>
+    </None>
     <None Include="..\..\src\actions\xcode\xcode_scheme.lua">
       <Filter>src\actions\xcode</Filter>
     </None>
@@ -266,6 +260,12 @@
     </None>
     <None Include="..\..\src\actions\xcode\xcode_project.lua">
       <Filter>src\actions\xcode</Filter>
+    </None>
+    <None Include="..\..\src\actions\jcdb\_jcdb.lua">
+      <Filter>src\actions\jcdb</Filter>
+    </None>
+    <None Include="..\..\src\actions\jcdb\jcdb_solution.lua">
+      <Filter>src\actions\jcdb</Filter>
     </None>
     <None Include="..\..\src\actions\ninja\ninja_cpp.lua">
       <Filter>src\actions\ninja</Filter>
@@ -441,9 +441,6 @@
     <None Include="..\..\tests\actions\vstudio\vc200x\header.lua">
       <Filter>tests\actions\vstudio\vc200x</Filter>
     </None>
-    <None Include="..\..\tests\actions\vstudio\vc200x\test_mfc.lua">
-      <Filter>tests\actions\vstudio\vc200x</Filter>
-    </None>
     <None Include="..\..\tests\actions\vstudio\vc2010\test_config_props.lua">
       <Filter>tests\actions\vstudio\vc2010</Filter>
     </None>
@@ -472,9 +469,6 @@
       <Filter>tests\actions\vstudio\vc2010</Filter>
     </None>
     <None Include="..\..\tests\actions\vstudio\vc2010\test_debugdir.lua">
-      <Filter>tests\actions\vstudio\vc2010</Filter>
-    </None>
-    <None Include="..\..\tests\actions\vstudio\vc2010\test_mfc.lua">
       <Filter>tests\actions\vstudio\vc2010</Filter>
     </None>
     <None Include="..\..\tests\actions\vstudio\sln2005\platforms.lua">

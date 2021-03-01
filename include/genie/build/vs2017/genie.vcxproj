@@ -307,9 +307,6 @@
     <None Include="..\..\src\actions\qbs\qbs_base.lua" />
     <None Include="..\..\src\actions\qbs\_qbs.lua" />
     <None Include="..\..\src\actions\qbs\qbs_solution.lua" />
-    <None Include="..\..\src\actions\fastbuild\fastbuild_project.lua" />
-    <None Include="..\..\src\actions\fastbuild\_fastbuild.lua" />
-    <None Include="..\..\src\actions\fastbuild\fastbuild_solution.lua" />
     <None Include="..\..\src\actions\make\make_csharp.lua" />
     <None Include="..\..\src\actions\make\make_vala.lua" />
     <None Include="..\..\src\actions\make\make_solution.lua" />
@@ -321,9 +318,12 @@
     <None Include="..\..\src\actions\xcode\_xcode.lua" />
     <None Include="..\..\src\actions\xcode\xcode_workspace.lua" />
     <None Include="..\..\src\actions\xcode\xcode10.lua" />
+    <None Include="..\..\src\actions\xcode\xcode11.lua" />
     <None Include="..\..\src\actions\xcode\xcode_scheme.lua" />
     <None Include="..\..\src\actions\xcode\xcode9.lua" />
     <None Include="..\..\src\actions\xcode\xcode_project.lua" />
+    <None Include="..\..\src\actions\jcdb\_jcdb.lua" />
+    <None Include="..\..\src\actions\jcdb\jcdb_solution.lua" />
     <None Include="..\..\src\actions\ninja\ninja_cpp.lua" />
     <None Include="..\..\src\actions\ninja\ninja_swift_incremental.lua" />
     <None Include="..\..\src\actions\ninja\_ninja.lua" />
@@ -382,7 +382,6 @@
     <None Include="..\..\tests\actions\vstudio\vc200x\test_files.lua" />
     <None Include="..\..\tests\actions\vstudio\vc200x\debugdir.lua" />
     <None Include="..\..\tests\actions\vstudio\vc200x\header.lua" />
-    <None Include="..\..\tests\actions\vstudio\vc200x\test_mfc.lua" />
     <None Include="..\..\tests\actions\vstudio\vc2010\test_config_props.lua" />
     <None Include="..\..\tests\actions\vstudio\vc2010\test_link_settings.lua" />
     <None Include="..\..\tests\actions\vstudio\vc2010\test_filters.lua" />
@@ -393,7 +392,6 @@
     <None Include="..\..\tests\actions\vstudio\vc2010\test_project_refs.lua" />
     <None Include="..\..\tests\actions\vstudio\vc2010\test_pch.lua" />
     <None Include="..\..\tests\actions\vstudio\vc2010\test_debugdir.lua" />
-    <None Include="..\..\tests\actions\vstudio\vc2010\test_mfc.lua" />
     <None Include="..\..\tests\actions\vstudio\sln2005\platforms.lua" />
     <None Include="..\..\tests\actions\vstudio\sln2005\layout.lua" />
     <None Include="..\..\tests\actions\vstudio\sln2005\projects.lua" />
