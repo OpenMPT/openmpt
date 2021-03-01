@@ -32,6 +32,15 @@
 	configuration { "ReleaseShared", "ARM" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm" )
   
+	configuration { "Debug", "ARM64" }
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm64" )
+	configuration { "DebugShared", "ARM64" }
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm64" )
+	configuration { "Release", "ARM64" }
+		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm64" )
+	configuration { "ReleaseShared", "ARM64" }
+		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm64" )
+  
   configuration "Debug"
    defines { "DEBUG" }
    defines { "MPT_BUILD_DEBUG" }
