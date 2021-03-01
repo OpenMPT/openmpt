@@ -58,6 +58,7 @@
 /build/vs2017win7/Release
 /build/vs2017win7/*.user
 /build/vs2017win7/.vs
+/build/vs2019uwp/.vs
 /build/vs2019win10/*.user
 /build/vs2019win10/.vs
 /build/vs2019win10clangcl/*.user
@@ -130,6 +131,7 @@
 /include/asiomodern/package.cmd
 /include/asiomodern/package_helper_getversion.cmd
 /include/asiomodern/package_helper_getversion.cpp
+/include/asiomodern/run_clang-format.sh
 /include/ASIOSDK2/*
 /include/cwsdpmi/*
 /include/flac/aclocal.m4
@@ -657,6 +659,8 @@
 /include/stb_vorbis/*.o
 /include/vorbis/aclocal.m4
 /include/vorbis/autogen.sh
+/include/vorbis/cmake
+/include/vorbis/CMakeLists.txt
 /include/vorbis/compile
 /include/vorbis/config.guess
 /include/vorbis/config.h.in
@@ -691,6 +695,7 @@
 /include/vorbis/include/Makefile.in
 /include/vorbis/include/vorbis/Makefile.am
 /include/vorbis/include/vorbis/Makefile.in
+/include/vorbis/lib/CMakeLists.txt
 /include/vorbis/lib/*.d
 /include/vorbis/lib/Makefile.am
 /include/vorbis/lib/Makefile.in
