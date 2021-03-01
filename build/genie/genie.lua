@@ -58,7 +58,11 @@ end
 solution "libopenmpt"
 	location ( "../../build/" .. mpt_projectpathname )
 	configurations { "Debug", "Release", "DebugShared", "ReleaseShared" }
-	platforms { "x32", "x64", "ARM" }
+	if _OPTIONS["target"] == "winstore10" then
+		platforms { "x32", "x64", "ARM", "ARM64" }
+	else
+		platforms { "x32", "x64", "ARM" }
+	end
 
 	dofile "../../build/genie/mpt-libopenmpt.lua"
 	dofile "../../build/genie/ext-mpg123.lua"
