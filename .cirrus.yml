@@ -19,13 +19,13 @@ task:
     macos_instance:
         image: big-sur-xcode-12.4
     install_script: brew update && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile
-    build_script: make STRICT=1 NO_SDL=1 NO_SDL2=1
-    test_script: make STRICT=1 NO_SDL=1 NO_SDL2=1 check
+    build_script: make STRICT=1 FORCE_DEPS=1 NO_SDL=1 NO_SDL2=1 NO_PULSEAUDIO=1
+    test_script: make STRICT=1 FORCE_DEPS=1 NO_SDL=1 NO_SDL2=1 NO_PULSEAUDIO=1 check
 
 task:
     name: macos-xcode11
     macos_instance:
         image: catalina-xcode-11.6
     install_script: brew update && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile
-    build_script: make STRICT=1 NO_SDL=1 NO_SDL2=1
-    test_script: make STRICT=1 NO_SDL=1 NO_SDL2=1 check
+    build_script: make STRICT=1 FORCE_DEPS=1 NO_SDL=1 NO_SDL2=1 NO_PULSEAUDIO=1
+    test_script: make STRICT=1 FORCE_DEPS=1 NO_SDL=1 NO_SDL2=1 NO_PULSEAUDIO=1 check
