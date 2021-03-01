@@ -130,14 +130,6 @@
 			_p(2, '<PreferredToolArchitecture>x64</PreferredToolArchitecture>')
 		end
 
-		if cfg.flags.MFC then
-			_p(2,'<UseOfMfc>%s</UseOfMfc>', iif(cfg.flags.StaticRuntime, "Static", "Dynamic"))
-		end
-
-		if cfg.flags.ATL or cfg.flags.StaticATL then
-			_p(2,'<UseOfAtl>%s</UseOfAtl>', iif(cfg.flags.StaticATL, "Static", "Dynamic"))
-		end
-
 		if cfg.flags.Unicode then
 			_p(2,'<CharacterSet>Unicode</CharacterSet>')
 		end
@@ -194,7 +186,8 @@
 			if #cfg.propertysheets > 0 then
 				local dirs = cfg.propertysheets
 				for _, dir in ipairs(dirs) do
-					_p(2,'<Import Project="%s" />', path.translate(dir))
+					local translated = path.translate(dir)
+					_p(2,'<Import Project="%s" Condition="exists(\'%s\')" />', translated, translated)
 				end
 			end
 
@@ -236,6 +229,12 @@
 			if cfg.kind == "SharedLib" then
 				local ignore = (cfg.flags.NoImportLib ~= nil)
 				_p(2,'<IgnoreImportLibrary>%s</IgnoreImportLibrary>', tostring(ignore))
+			end
+
+			if cfg.platform == "NX32" or cfg.platform == "NX64" then
+				if cfg.flags.Cpp17 then
+					_p(2,'<CppLanguageStandard>Gnu++17</CppLanguageStandard>')
+				end
 			end
 
 			if cfg.platform == "Durango" then
@@ -361,6 +360,12 @@
 			if cfg.flags.NoExceptions then
 				_p(3, '<GccExceptionHandling>false</GccExceptionHandling>')
 			end
+		elseif cfg.platform == "NX32" or cfg.platform == "NX64" then
+			if cfg.flags.NoExceptions then
+				_p(3, '<CppExceptions>false</CppExceptions>')
+			else
+				_p(3, '<CppExceptions>true</CppExceptions>')
+			end
 		else
 			if cfg.flags.NoExceptions then
 				_p(3, '<ExceptionHandling>false</ExceptionHandling>')
@@ -412,6 +417,10 @@
 			end
 		elseif cfg.platform == "TegraAndroid" then
 			-- TODO: tegra setting
+		elseif cfg.platform == "NX32" or cfg.platform == "NX64" then
+			if cfg.flags.FloatFast then
+				_p(3, '<FastMath>true</FastMath>')
+			end
 		else
 			if cfg.flags.FloatFast then
 				_p(3,'<FloatingPointModel>Fast</FloatingPointModel>')
@@ -480,6 +489,11 @@
 			_p(3,'<GenerateDebugInformation>%s</GenerateDebugInformation>', tostring(cfg.flags.Symbols ~= nil))
 		end
 
+		if cfg.platform == "NX32" or cfg.platform == "NX64" then
+			unsignedChar = "-funsigned-char ";
+			_p(3,'<GenerateDebugInformation>%s</GenerateDebugInformation>', tostring(cfg.flags.Symbols ~= nil))
+		end
+
 		if cfg.language == "C" and not cfg.options.ForceCPP then
 			buildoptions = table.join(buildoptions, cfg.buildoptions_c)
 		else
@@ -511,6 +525,17 @@
 				_p(3,'<OptimizationLevel>Level2</OptimizationLevel>')
 			end
 		elseif cfg.platform == "TegraAndroid" then
+			local opt = optimisation(cfg)
+			if opt == "Disabled" then
+				_p(3,'<OptimizationLevel>O0</OptimizationLevel>')
+			elseif opt == "MinSpace" then
+				_p(3,'<OptimizationLevel>Os</OptimizationLevel>')
+			elseif opt == "MaxSpeed" then
+				_p(3,'<OptimizationLevel>O3</OptimizationLevel>')
+			else
+				_p(3,'<OptimizationLevel>O2</OptimizationLevel>')
+			end
+		elseif cfg.platform == "NX32" or cfg.platform == "NX64" then
 			local opt = optimisation(cfg)
 			if opt == "Disabled" then
 				_p(3,'<OptimizationLevel>O0</OptimizationLevel>')
@@ -602,6 +627,23 @@
 				_p(3, '<Warnings>DisableAllWarnings</Warnings>')
 			else
 				_p(3, '<Warnings>NormalWarnings</Warnings>')
+			end
+			if cfg.flags.FatalWarnings then
+				_p(3, '<WarningsAsErrors>true</WarningsAsErrors>')
+			end
+		elseif cfg.platform == "NX32" or cfg.platform == "NX64" then
+			if cfg.flags.PedanticWarnings then
+				_p(3, '<Warnings>MoreWarnings</Warnings>')
+				_p(3, '<ExtraWarnings>true</ExtraWarnings>')
+			elseif cfg.flags.ExtraWarnings then
+				_p(3, '<Warnings>NormalWarnings</Warnings>')
+				_p(3, '<ExtraWarnings>true</ExtraWarnings>')
+			elseif cfg.flags.MinimumWarnings then
+				_p(3, '<Warnings>WarningsOff</Warnings>')
+				_p(3, '<ExtraWarnings>false</ExtraWarnings>')
+			else
+				_p(3, '<Warnings>NormalWarnings</Warnings>')
+				_p(3, '<ExtraWarnings>false</ExtraWarnings>')
 			end
 			if cfg.flags.FatalWarnings then
 				_p(3, '<WarningsAsErrors>true</WarningsAsErrors>')
@@ -819,7 +861,7 @@
 			-- _WIN64:  For 64-bit platforms
 			-- _EXPORT: `EXPORT` for shared libraries, empty for other project kinds
 			table.insertflat(defines, iif(premake.config.isdebugbuild(cfg), "_DEBUG", {}))
-			table.insert(defines, iif(cfg.platform == "x64", "_WIN64", "_WIN32"))
+			table.insert(defines, iif(cfg.platform == "x64" or cfg.platform == "ARM64", "_WIN64", "_WIN32"))
 			table.insert(defines, iif(prj.kind == "SharedLib", "_EXPORT=EXPORT", "_EXPORT="))
 
 			_p(3, '<PreprocessorDefinitions>%s;%%(PreprocessorDefinitions)</PreprocessorDefinitions>'

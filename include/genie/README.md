@@ -1,3 +1,7 @@
+<p align="center">
+<img src="https://repository-images.githubusercontent.com/23779242/961ad700-8d21-11ea-85d3-1d64eccc4531" width="1280"> 
+</p>
+
 [GENie](https://github.com/bkaradzic/genie#what-is-it) - Project generator tool
 ===============================================================================
 
@@ -9,8 +13,8 @@ generates project from Lua script, making applying the same settings for
 multiple projects easy.
 
 Supported project generators:
- * FASTBuild (experimental)
  * GNU Makefile
+ * [JSON Compilation Database][jcdb]
  * Ninja (experimental)
  * Qbs / QtCreator (experimental)
  * Visual Studio 2010, 2012, 2013, 2015, 2017, 2019
@@ -21,7 +25,7 @@ Download (stable)
 
 [![Build Status](https://travis-ci.org/bkaradzic/GENie.svg?branch=master)](https://travis-ci.org/bkaradzic/GENie)
 
-	version 1115 (commit cd9b1a624810b166d11788d01c2aa4daf2ea42e6)
+	version 1153 (commit bedc68359ffe4329fbde68307034de7cf482b36a)
 
 Linux:  
 https://github.com/bkaradzic/bx/raw/master/tools/bin/linux/genie
@@ -90,7 +94,7 @@ of Premake 4.4 beta 5, and there is no intention to keep it compatible with it.
  - Added support for generating PS4/Orbis projects.
  - Fixed PCH race when using concurrent Makefile build.
  - Added Green Hills Software compiler support.
- - Added edit & continue support for 64-bit builds in VS2013 upwards.
+ - Added edit & continue support for 64-bit builds in vs2013 upwards.
  - Added `windowstargetplatformversion` to specify VS Windows target version.
  - Added `NoWinRT` flag to disable WinRT CX builds.
  - Added `NoBufferSecurityCheck` flag to disable security checks in VS.
@@ -120,7 +124,7 @@ of Premake 4.4 beta 5, and there is no intention to keep it compatible with it.
  - Added `iostargetplatformversion`, `macostargetplatformversion`, and
    `tvostargetplatformversion` to specify XCode OS target version.
  - Removed the `xcode3`, and `xcode4` actions.
- - Added the `xcode8`, `xcode9`, and `xcode10` actions.
+ - Added the `xcode8`, `xcode9`, `xcode10`, and `xcode11` actions.
  - Added `systemincludedirs` that are always searched after directories added
    using `includedirs`.
  - Added `NoRuntimeChecks` flag to disable Basic Runtime Checks in non-optimized
@@ -130,7 +134,10 @@ of Premake 4.4 beta 5, and there is no intention to keep it compatible with it.
    and `CppLatest`.
  - Added `xcodeprojectopts` and `xcodetargetopts`.
  - Added vs2019 support.
- - Added UnitySupport flag to enable Unity (Jumbo) builds in Visual Studio 2019
+ - Added `UnitySupport` flag to enable Unity (Jumbo) builds in vs2019
+ - Added the `jcdb` action for generating a [JSON compilation database][jcdb].
+ - Added support for generating Switch/NX32 Switch/NX64 projects.
+ - Removed FASTBuild.
 
 build - GENie build system scripts
 ----------------------------------
@@ -240,4 +247,5 @@ Developer Crackshell used GENie for development of games
 	OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 	OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+  [jcdb]: https://clang.llvm.org/docs/JSONCompilationDatabase.html
   [zbs]: https://studio.zerobrane.com
