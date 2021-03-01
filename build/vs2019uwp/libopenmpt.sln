@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2019
+# Visual Studio Version 16
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vcxproj", "{9C5101EF-3E20-4558-809B-277FDD50E878}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1654FB18-FDE6-406F-9D84-BA12BFBD67B2} = {1654FB18-FDE6-406F-9D84-BA12BFBD67B2}
