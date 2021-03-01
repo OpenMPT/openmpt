@@ -141,6 +141,10 @@ end
   dpiawareness "None"
   largeaddressaware ( true )
   characterset(charset)
+if charset == "Unicode" then
+else
+	defines { "NO_WARN_MBCS_MFC_DEPRECATION" }
+end
 if stringmode == "UTF8" then
 	defines { "MPT_USTRING_MODE_UTF8_FORCE" }
 end

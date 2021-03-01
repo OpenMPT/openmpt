@@ -630,19 +630,6 @@
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS		// Define to disable the "This function or variable may be unsafe" warnings.
-#endif
-#define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES			1
-#define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT	1
-#ifndef _SCL_SECURE_NO_WARNINGS
-#define _SCL_SECURE_NO_WARNINGS
-#endif
-
-#ifndef NO_WARN_MBCS_MFC_DEPRECATION
-#define NO_WARN_MBCS_MFC_DEPRECATION
-#endif
-
 #pragma warning(default:4800) // Implicit conversion from 'int' to bool. Possible information loss
 
 #pragma warning(disable:4355) // 'this' : used in base member initializer list

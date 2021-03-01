@@ -61,8 +61,15 @@
   configuration {}
    defines { "MPT_BUILD_MSVC" }
    
-  configuration {}
-   defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
+	configuration {}
+		defines {
+			"WIN32",
+			"_CRT_NONSTDC_NO_WARNINGS",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1",
+			"_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1",
+			"_SCL_SECURE_NO_WARNINGS",
+		}
 
   configuration {}
 
