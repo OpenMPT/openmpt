@@ -47,10 +47,6 @@ rm genie.lua
 
 
 
-${PREMAKE} --file=build/vcpkg/premake5.lua vs2017
-
-
-
 echo dofile \"build/premake/premake.lua\" > premake5.lua
 
 ${PREMAKE} --group=libopenmpt_test vs2017 --win7

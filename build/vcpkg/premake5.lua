@@ -1,2 +1,0 @@
-
-dofile "libopenmpt.lua"

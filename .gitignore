@@ -37,9 +37,6 @@
 /build/android_ndk/jni
 /build/android_ndk/libs
 /build/android_ndk/obj
-/build/vcpkg/bin
-/build/vcpkg/obj
-/build/vcpkg/.vs
 /build/vs2017uwp/*.db
 /build/vs2017uwp/Generated Files
 /build/vs2017uwp/obj

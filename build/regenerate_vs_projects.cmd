@@ -44,10 +44,6 @@ del genie.lua || goto err
 
 
 
-%PREMAKE% --file=build\vcpkg\premake5.lua vs2017 || goto err
-
-
-
 echo dofile "build/premake/premake.lua" > premake5.lua || goto err
 
 %PREMAKE% --group=libopenmpt_test vs2017 --win7 || goto err
