@@ -40,6 +40,6 @@ install:
   - true
 
 script:
-  - make STRICT=1 NO_SDL=1 NO_SDL2=1
-  - make STRICT=1 NO_SDL=1 NO_SDL2=1 check
+  - make STRICT=1 NO_SDL2=1
+  - make STRICT=1 NO_SDL2=1 check
 
