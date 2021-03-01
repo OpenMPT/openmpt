@@ -82,7 +82,7 @@ template <int fractionalBits, bool clipOutput, typename TOutBuf, typename TInBuf
 void ConvertBufferMixFixedToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
-	using TInSample  = typename std::remove_const<typename TInBuf::sample_type>::type;
+	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
 	MPT_ASSERT(inBuf.size_channels() >= channels);
 	MPT_ASSERT(outBuf.size_channels() >= channels);
 	MPT_ASSERT(inBuf.size_frames() >= count);
@@ -106,7 +106,7 @@ template <int fractionalBits, typename TOutBuf, typename TInBuf>
 void ConvertBufferToBufferMixFixed(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
-	using TInSample  = typename std::remove_const<typename TInBuf::sample_type>::type;
+	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
 	MPT_ASSERT(inBuf.size_channels() >= channels);
 	MPT_ASSERT(outBuf.size_channels() >= channels);
 	MPT_ASSERT(inBuf.size_frames() >= count);
@@ -126,7 +126,7 @@ template <bool clipOutput, typename TOutBuf, typename TInBuf, typename Tdither>
 void ConvertBufferMixFloatToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
-	using TInSample  = typename std::remove_const<typename TInBuf::sample_type>::type;
+	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
 	MPT_ASSERT(inBuf.size_channels() >= channels);
 	MPT_ASSERT(outBuf.size_channels() >= channels);
 	MPT_ASSERT(inBuf.size_frames() >= count);
@@ -150,7 +150,7 @@ template <typename TOutBuf, typename TInBuf>
 void ConvertBufferToBufferMixFloat(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
-	using TInSample  = typename std::remove_const<typename TInBuf::sample_type>::type;
+	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
 	MPT_ASSERT(inBuf.size_channels() >= channels);
 	MPT_ASSERT(outBuf.size_channels() >= channels);
 	MPT_ASSERT(inBuf.size_frames() >= count);
@@ -170,7 +170,7 @@ template <typename TOutBuf, typename TInBuf>
 void ConvertBufferToBuffer(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
-	using TInSample  = typename std::remove_const<typename TInBuf::sample_type>::type;
+	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
 	MPT_ASSERT(inBuf.size_channels() >= channels);
 	MPT_ASSERT(outBuf.size_channels() >= channels);
 	MPT_ASSERT(inBuf.size_frames() >= count);

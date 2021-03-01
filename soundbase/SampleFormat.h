@@ -23,23 +23,23 @@ class SampleFormat
 public:
 	enum class Enum : uint8
 	{
-		Unsigned8 = 9,         // do not change value (for compatibility with old configuration settings)
-		Int8      = 8,         // do not change value (for compatibility with old configuration settings)
-		Int16     = 16,        // do not change value (for compatibility with old configuration settings)
-		Int24     = 24,        // do not change value (for compatibility with old configuration settings)
-		Int32     = 32,        // do not change value (for compatibility with old configuration settings)
-		Float32   = 32 + 128,  // do not change value (for compatibility with old configuration settings)
-		Float64   = 64 + 128,  // do not change value (for compatibility with old configuration settings)
-		Invalid   = 0
+		Unsigned8 = 9,       // do not change value (for compatibility with old configuration settings)
+		Int8 = 8,            // do not change value (for compatibility with old configuration settings)
+		Int16 = 16,          // do not change value (for compatibility with old configuration settings)
+		Int24 = 24,          // do not change value (for compatibility with old configuration settings)
+		Int32 = 32,          // do not change value (for compatibility with old configuration settings)
+		Float32 = 32 + 128,  // do not change value (for compatibility with old configuration settings)
+		Float64 = 64 + 128,  // do not change value (for compatibility with old configuration settings)
+		Invalid = 0
 	};
 	static constexpr SampleFormat::Enum Unsigned8 = SampleFormat::Enum::Unsigned8;
-	static constexpr SampleFormat::Enum Int8      = SampleFormat::Enum::Int8;
-	static constexpr SampleFormat::Enum Int16     = SampleFormat::Enum::Int16;
-	static constexpr SampleFormat::Enum Int24     = SampleFormat::Enum::Int24;
-	static constexpr SampleFormat::Enum Int32     = SampleFormat::Enum::Int32;
-	static constexpr SampleFormat::Enum Float32   = SampleFormat::Enum::Float32;
-	static constexpr SampleFormat::Enum Float64   = SampleFormat::Enum::Float64;
-	static constexpr SampleFormat::Enum Invalid   = SampleFormat::Enum::Invalid;
+	static constexpr SampleFormat::Enum Int8 = SampleFormat::Enum::Int8;
+	static constexpr SampleFormat::Enum Int16 = SampleFormat::Enum::Int16;
+	static constexpr SampleFormat::Enum Int24 = SampleFormat::Enum::Int24;
+	static constexpr SampleFormat::Enum Int32 = SampleFormat::Enum::Int32;
+	static constexpr SampleFormat::Enum Float32 = SampleFormat::Enum::Float32;
+	static constexpr SampleFormat::Enum Float64 = SampleFormat::Enum::Float64;
+	static constexpr SampleFormat::Enum Invalid = SampleFormat::Enum::Invalid;
 
 private:
 	SampleFormat::Enum value;
@@ -48,7 +48,7 @@ private:
 	static MPT_CONSTEXPRINLINE SampleFormat::Enum Sanitize(T x) noexcept
 	{
 		using uT = typename std::make_unsigned<T>::type;
-		uT ux    = static_cast<uT>(x);
+		uT ux = static_cast<uT>(x);
 		if(ux == static_cast<uT>(-8))
 		{
 			ux = 8 + 1;

@@ -24,10 +24,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 enum DitherMode
 {
-	DitherNone    = 0,
+	DitherNone = 0,
 	DitherDefault = 1,  // chosen by OpenMPT code, might change
 	DitherModPlug = 2,  // rectangular, 0.5 bit depth, no noise shaping (original ModPlug Tracker)
-	DitherSimple  = 3,  // rectangular, 1 bit depth, simple 1st order noise shaping
+	DitherSimple = 3,   // rectangular, 1 bit depth, simple 1st order noise shaping
 	NumDitherModes
 };
 
@@ -130,12 +130,12 @@ public:
 			} else
 			{
 				constexpr int rshiftpositive = (rshift > 1) ? rshift : 1;  // work-around warnings about negative shift with C++14 compilers
-				constexpr int round_mask     = ~((1 << rshiftpositive) - 1);
-				constexpr int round_offset   = 1 << (rshiftpositive - 1);
-				constexpr int noise_bits     = rshiftpositive + (ditherdepth - 1);
-				constexpr int noise_bias     = (1 << (noise_bits - 1));
-				int32 e                      = error;
-				unsigned int unoise          = 0;
+				constexpr int round_mask = ~((1 << rshiftpositive) - 1);
+				constexpr int round_offset = 1 << (rshiftpositive - 1);
+				constexpr int noise_bits = rshiftpositive + (ditherdepth - 1);
+				constexpr int noise_bias = (1 << (noise_bits - 1));
+				int32 e = error;
+				unsigned int unoise = 0;
 				if constexpr(triangular)
 				{
 					unoise = (mpt::random<unsigned int>(prng, noise_bits) + mpt::random<unsigned int>(prng, noise_bits)) >> 1;
@@ -144,15 +144,15 @@ public:
 					unoise = mpt::random<unsigned int>(prng, noise_bits);
 				}
 				int noise = static_cast<int>(unoise) - noise_bias;  // un-bias
-				int val   = sample;
+				int val = sample;
 				if constexpr(shaped)
 				{
 					val += (e >> 1);
 				}
 				int rounded = (val + noise + round_offset) & round_mask;
-				e           = val - rounded;
-				sample      = rounded;
-				error       = e;
+				e = val - rounded;
+				sample = rounded;
+				error = e;
 				return sample;
 			}
 		}

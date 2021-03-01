@@ -21,7 +21,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-using AudioSampleInt   = int16;
+using AudioSampleInt = int16;
 using AudioSampleFloat = nativefloat;
 
 using AudioSample = std::conditional<mpt::float_traits<AudioSampleFloat>::is_hard, AudioSampleFloat, AudioSampleInt>::type;
@@ -55,7 +55,7 @@ struct FixedPointSampleTraits
 
 using MixSampleIntTraits = FixedPointSampleTraits<int32, 4, 8>;
 
-using MixSampleInt   = MixSampleIntTraits::sample_type;
+using MixSampleInt = MixSampleIntTraits::sample_type;
 using MixSampleFloat = AudioSampleFloat;
 
 using MixSample = std::conditional<mpt::float_traits<nativefloat>::is_hard, MixSampleFloat, MixSampleInt>::type;
