@@ -29,7 +29,7 @@ echo dofile "build/genie/genie.lua" > genie.lua || goto err
 
 %GENIE% --target="winstore82"   vs2017 || goto err
 
-%GENIE% --target="winstore82"   vs2019 || goto err
+%GENIE% --target="winstore10"   vs2019 || goto err
 
 del genie.lua || goto err
 

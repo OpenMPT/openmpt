@@ -24,6 +24,7 @@ newoption {
   { "winphone81"  , "winphone81" },
   { "winstore81"  , "winstore81" },
   { "winstore82"  , "winstore82" },
+  { "winstore10"  , "winstore10" },
  }
 }
 
@@ -34,7 +35,7 @@ if _ACTION == "vs2019" then
 		mpt_projectpathname = "vs2019win81"
 		mpt_bindirsuffix = "win81"
 	end
-	if _OPTIONS["target"] == "winstore82" then
+	if _OPTIONS["target"] == "winstore10" then
 		mpt_projectpathname = "vs2019uwp"
 		mpt_bindirsuffix = "uwp"
 	end

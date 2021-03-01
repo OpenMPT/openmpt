@@ -92,6 +92,10 @@
 			action.vstudio.windowsTargetPlatformVersion = "10.0.10240.0"
 			action.vstudio.windowsTargetPlatformMinVersion = "10.0.10240.0"
 
+		elseif _OPTIONS["target"] == "winstore10" then
+			defines { "_WIN32_WINNT=0x0A00" }
+			premake.vstudio.storeapp = "10.0"
+
 		end
 
 	end

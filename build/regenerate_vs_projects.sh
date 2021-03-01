@@ -32,7 +32,7 @@ echo dofile \"build/genie/genie.lua\" > genie.lua
 
 ${GENIE} --target="winstore82"   vs2017
 
-${GENIE} --target="winstore82"   vs2019
+${GENIE} --target="winstore10"   vs2019
 
 rm genie.lua
 
