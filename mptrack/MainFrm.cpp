@@ -3002,12 +3002,14 @@ BOOL CMainFrame::OnQueryEndSession()
 		if(modDoc->IsModified())
 			modifiedCount++;
 	}
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 	ShutdownBlockReasonDestroy(m_hWnd);
 	if(modifiedCount > 0)
 	{
 		ShutdownBlockReasonCreate(m_hWnd,
 			MPT_WFORMAT("There {} {} unsaved file{}.")(modifiedCount == 1 ? L"is" : L"are", modifiedCount, modifiedCount == 1 ? L"" : L"s").c_str());
 	}
+#endif
 	return modifiedCount ? FALSE : TRUE;
 }
 
