@@ -4360,6 +4360,9 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			}
 		case kcChannelTranspose: m_MenuCursor = m_Cursor; OnTransposeChannel(); return wParam;
 		case kcChannelDuplicate: m_MenuCursor = m_Cursor; OnDuplicateChannel(); return wParam;
+		case kcChannelAddBefore: m_MenuCursor = m_Cursor; OnAddChannelFront(); return wParam;
+		case kcChannelAddAfter: m_MenuCursor = m_Cursor; OnAddChannelAfter(); return wParam;
+		case kcChannelRemove: m_MenuCursor = m_Cursor; OnRemoveChannel(); return wParam;
 		case kcChannelMoveLeft:
 			if(CHANNELINDEX chn = m_Selection.GetStartChannel(); chn > 0)
 				DragChannel(chn, chn - 1u, m_Selection.GetNumChannels(), false);

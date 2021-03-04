@@ -738,6 +738,9 @@ static constexpr struct
 	{2011, kcChannelMoveRight, _T("Move Channels to Right")},
 	{2012, kcSampleConvertPingPongLoop, _T("Convert Ping-Pong Loop to Unidirectional") },
 	{2013, kcSampleConvertPingPongSustain, _T("Convert Ping-Pong Sustain Loop to Unidirectional") },
+	{2014, kcChannelAddBefore, _T("Add Channel Before Current")},
+	{2015, kcChannelAddAfter, _T("Add Channel After Current") },
+	{2016, kcChannelRemove, _T("Remove Channel") },
 };
 
 // Get command descriptions etc.. loaded up.
