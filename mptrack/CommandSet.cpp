@@ -733,6 +733,9 @@ static constexpr struct
 	{2007, kcNextSequence, _T("Next Sequence")},
 	{2010, kcChannelMoveLeft, _T("Move Channels to Left")},
 	{2011, kcChannelMoveRight, _T("Move Channels to Right")},
+	{2014, kcChannelAddBefore, _T("Add Channel Before Current")},
+	{2015, kcChannelAddAfter, _T("Add Channel After Current") },
+	{2016, kcChannelRemove, _T("Remove Channel") },
 };
 
 // Get command descriptions etc.. loaded up.
