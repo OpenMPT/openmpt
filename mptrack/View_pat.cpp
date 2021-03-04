@@ -6379,12 +6379,12 @@ bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu, CInputHandler *ih) co
 
 	HMENU addChannelMenu = ::CreatePopupMenu();
 	AppendMenu(hMenu, MF_POPUP | canAddChannels, reinterpret_cast<UINT_PTR>(addChannelMenu), _T("&Add Channel\t"));
-	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_FRONT, _T("&Before this channel"));
-	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_AFTER, _T("&After this channel"));
+	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_FRONT, ih->GetKeyTextFromCommand(kcChannelAddBefore, _T("&Before this channel")));
+	AppendMenu(addChannelMenu, MF_STRING, ID_PATTERN_ADDCHANNEL_AFTER, ih->GetKeyTextFromCommand(kcChannelAddAfter, _T("&After this channel")));
 
 	HMENU removeChannelMenu = ::CreatePopupMenu();
 	AppendMenu(hMenu, MF_POPUP | canRemoveChannels, reinterpret_cast<UINT_PTR>(removeChannelMenu), _T("Remo&ve Channel\t"));
-	AppendMenu(removeChannelMenu, MF_STRING, ID_PATTERN_REMOVECHANNEL, _T("&Remove this channel\t"));
+	AppendMenu(removeChannelMenu, MF_STRING, ID_PATTERN_REMOVECHANNEL, ih->GetKeyTextFromCommand(kcChannelRemove, _T("&Remove this channel\t")));
 	AppendMenu(removeChannelMenu, MF_STRING, ID_PATTERN_REMOVECHANNELDIALOG, _T("&Choose channels to remove...\t"));
 
 
