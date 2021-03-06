@@ -2889,26 +2889,21 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 			{
 				// Split sample into two slots
 				rightSmp = pModDoc->InsertSample();
-				if(rightSmp != SAMPLEINDEX_INVALID)
-				{
-					sndFile.ReadSampleFromSong(rightSmp, sndFile, m_nSample);
-				} else
-				{
+				if(rightSmp == SAMPLEINDEX_INVALID)
 					return;
-				}
 			}
 
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Mono Conversion");
 
-			if(ctrlSmp::ConvertToMono(sample, sndFile, convert))
+			bool success = false;
+			if(convert == ctrlSmp::splitSample)
 			{
-				if(convert == ctrlSmp::splitSample)
-				{
-					// Split mode: We need to convert the right channel as well!
-					ModSample &right = sndFile.GetSample(rightSmp);
-					ctrlSmp::ConvertToMono(right, sndFile, ctrlSmp::onlyRight);
+				ModSample &right = sndFile.GetSample(rightSmp);
+				success = ctrlSmp::SplitStereo(sample, sample, right, sndFile);
 
-					// Try to create a new instrument as well which maps to the right sample.
+				// Try to create a new instrument as well which maps to the right sample.
+				if(success)
+				{
 					INSTRUMENTINDEX ins = pModDoc->FindSampleParent(m_nSample);
 					if(ins != INSTRUMENTINDEX_INVALID)
 					{
@@ -2934,11 +2929,15 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 					}
 					pModDoc->UpdateAllViews(this, SampleHint(rightSmp).Info().Data().Names(), this);
 				}
-				SetModified(SampleHint().Info().Data().Names(), true, true);
 			} else
 			{
-				pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
+				success = ctrlSmp::ConvertToMono(sample, sndFile, convert);
 			}
+			
+			if(success)
+				SetModified(SampleHint().Info().Data().Names(), true, true);
+			else
+				pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
 		}
 	}
 	EndWaitCursor();
