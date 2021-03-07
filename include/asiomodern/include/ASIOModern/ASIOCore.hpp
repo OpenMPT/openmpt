@@ -34,7 +34,8 @@ using TimeStamp = HiLoLongLong;
 
 using SampleRate = Double;
 
-enum class SampleType : Long {
+enum class SampleType : Long
+{
 	Int16MSB    = 0,
 	Int24MSB    = 1,
 	Int32MSB    = 2,
@@ -59,7 +60,8 @@ enum class SampleType : Long {
 };
 static_assert(sizeof(SampleType) == SizeOfLong);
 
-enum class ErrorCode : Long {
+enum class ErrorCode : Long
+{
 	OK               = 0,
 	SUCCESS          = 0x3f4847a0,
 	NotPresent       = -1000,
@@ -72,7 +74,8 @@ enum class ErrorCode : Long {
 };
 static_assert(sizeof(ErrorCode) == SizeOfLong);
 
-enum TimeCodeFlags : ULong {
+enum TimeCodeFlags : ULong
+{
 	TimeCodeFlagValid      = 1 << 0,
 	TimeCodeFlagRunning    = 1 << 1,
 	TimeCodeFlagReverse    = 1 << 2,
@@ -117,7 +120,8 @@ struct TimeCode {
 #endif // ASIO_SYSTEM_WINDOWS && ASIO_HAVE_PRAGMA_PACK
 static_assert(sizeof(TimeCode) == (SizeOfDouble + SizeOfLongLong + SizeOfLong + 64));
 
-enum TimeInfoFlags : ULong {
+enum TimeInfoFlags : ULong
+{
 	TimeInfoFlagSystemTimeValid     = 1 << 0,
 	TimeInfoFlagSamplePositionValid = 1 << 1,
 	TimeInfoFlagSampleRateValid     = 1 << 2,
@@ -177,7 +181,8 @@ struct Time {
 #endif // ASIO_SYSTEM_WINDOWS && ASIO_HAVE_PRAGMA_PACK
 static_assert(sizeof(Time) == (4 * SizeOfLong + sizeof(TimeInfo) + sizeof(TimeCode)));
 
-enum class MessageSelector : Long {
+enum class MessageSelector : Long
+{
 	SelectorSupported    = 1,
 	EngineVersion        = 2,
 	ResetRequest         = 3,
@@ -263,7 +268,8 @@ struct BufferInfo {
 #endif // ASIO_SYSTEM_WINDOWS && ASIO_HAVE_PRAGMA_PACK
 static_assert(sizeof(BufferInfo) == (SizeOfBool + SizeOfLong + 2 * sizeof(void *)));
 
-enum class FutureSelector : Long {
+enum class FutureSelector : Long
+{
 	EnableTimeCodeRead       = 1,
 	DisableTimeCodeRead      = 2,
 	SetInputMonitor          = 3,
@@ -319,7 +325,8 @@ struct ChannelControls {
 #endif // ASIO_SYSTEM_WINDOWS && ASIO_HAVE_PRAGMA_PACK
 static_assert(sizeof(ChannelControls) == (SizeOfLong + SizeOfBool + SizeOfLong + SizeOfLong + 32));
 
-enum class TransportCommand : Long {
+enum class TransportCommand : Long
+{
 	Start      = 1,
 	Stop       = 2,
 	Locate     = 3,
@@ -349,7 +356,8 @@ struct TransportParameters {
 #endif // ASIO_SYSTEM_WINDOWS && ASIO_HAVE_PRAGMA_PACK
 static_assert(sizeof(TransportParameters) == (sizeof(TransportCommand) + SizeOfLongLong + SizeOfLong + 64 + 64));
 
-enum class IoFormatType : Long {
+enum class IoFormatType : Long
+{
 	Invalid = -1,
 	PCM     = 0,
 	DSD     = 1,
