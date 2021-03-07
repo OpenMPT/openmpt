@@ -4,16 +4,18 @@ Standard: c++17
 AccessModifierOffset: -4 #?
 AlignAfterOpenBracket: AlwaysBreak
 AlignConsecutiveAssignments: true
+AlignConsecutiveBitFields: true
 AlignConsecutiveDeclarations: true
 AlignConsecutiveMacros: true
 AlignEscapedNewlines: DontAlign
-AlignOperands: true
+AlignOperands: DontAlign
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLambdasOnASingleLine: Inline
@@ -36,6 +38,8 @@ BraceWrapping:
  AfterExternBlock: false
  BeforeCatch: false
  BeforeElse: false
+ BeforeLambdaBody: false
+ BeforeWhile: false
  IndentBraces: false
  SplitEmptyFunction: true
  SplitEmptyRecord: false
@@ -63,8 +67,11 @@ IncludeCategories: [] #?
 IncludeIsMainRegex: '' #?
 IncludeIsMainSourceRegex: '' #?
 IndentCaseLabels: true
+IndentCaseBlocks: true
+IndentExternBlock: NoIndent
 IndentGotoLabels: false
 IndentPPDirectives: None
+InsertTrailingCommas: None
 #BeforeHash
 IndentWidth: 4
 IndentWrappedFunctionNames: true
@@ -79,6 +86,7 @@ NamespaceIndentation: None
 NamespaceMacros: [] #?
 #ObjCBinPackProtocolList
 #ObjCBlockIndentWidth
+#ObjCBreakBeforeNestedBlockParam
 #ObjCSpaceAfterProperty
 #ObjCSpaceBeforeProtocolList
 #PenaltyBreakAssignment
@@ -118,3 +126,5 @@ TabWidth: 4
 TypenameMacros: [] #?
 UseCRLF: false
 UseTab: ForContinuationAndIndentation
+WhitespaceSensitiveMacros:
+  - ASIO_PP_STRINGIFY

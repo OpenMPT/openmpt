@@ -545,78 +545,114 @@ inline void ConvertBuffer(Tdst * dst, std::size_t dst_stride, const Tsrc * src, 
 
 inline void ClearBufferASIO(void * dst, SampleType type, std::size_t count) noexcept {
 	switch (type) {
-		case SampleType::Int16MSB: {
-			using SampleType = detail::Int16MSB;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int16LSB: {
-			using SampleType = detail::Int16LSB;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int24MSB: {
-			using SampleType = detail::Int24MSB;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int24LSB: {
-			using SampleType = detail::Int24LSB;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int32MSB: {
-			using SampleType = detail::Int32MSB;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int32LSB: {
-			using SampleType = detail::Int32LSB;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Float32MSB: {
-			using SampleType = detail::Float32MSB;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Float32LSB: {
-			using SampleType = detail::Float32LSB;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Float64MSB: {
-			using SampleType = detail::Float64MSB;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Float64LSB: {
-			using SampleType = detail::Float64LSB;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int32MSB16: {
-			using SampleType = detail::Int32MSB16;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int32LSB16: {
-			using SampleType = detail::Int32LSB16;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int32MSB18: {
-			using SampleType = detail::Int32MSB18;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int32LSB18: {
-			using SampleType = detail::Int32LSB18;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int32MSB20: {
-			using SampleType = detail::Int32MSB20;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int32LSB20: {
-			using SampleType = detail::Int32LSB20;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int32MSB24: {
-			using SampleType = detail::Int32MSB24;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
-		case SampleType::Int32LSB24: {
-			using SampleType = detail::Int32LSB24;
-			detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
-		} break;
+		case SampleType::Int16MSB:
+			{
+				using SampleType = detail::Int16MSB;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int16LSB:
+			{
+				using SampleType = detail::Int16LSB;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int24MSB:
+			{
+				using SampleType = detail::Int24MSB;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int24LSB:
+			{
+				using SampleType = detail::Int24LSB;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int32MSB:
+			{
+				using SampleType = detail::Int32MSB;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int32LSB:
+			{
+				using SampleType = detail::Int32LSB;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Float32MSB:
+			{
+				using SampleType = detail::Float32MSB;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Float32LSB:
+			{
+				using SampleType = detail::Float32LSB;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Float64MSB:
+			{
+				using SampleType = detail::Float64MSB;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Float64LSB:
+			{
+				using SampleType = detail::Float64LSB;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int32MSB16:
+			{
+				using SampleType = detail::Int32MSB16;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int32LSB16:
+			{
+				using SampleType = detail::Int32LSB16;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int32MSB18:
+			{
+				using SampleType = detail::Int32MSB18;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int32LSB18:
+			{
+				using SampleType = detail::Int32LSB18;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int32MSB20:
+			{
+				using SampleType = detail::Int32MSB20;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int32LSB20:
+			{
+				using SampleType = detail::Int32LSB20;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int32MSB24:
+			{
+				using SampleType = detail::Int32MSB24;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
+		case SampleType::Int32LSB24:
+			{
+				using SampleType = detail::Int32LSB24;
+				detail::ClearBuffer(static_cast<SampleType *>(dst), 1, count);
+			}
+			break;
 		default:
 			assert(false);
 			break;
@@ -639,78 +675,114 @@ inline void CopyRawToASIO(void * dst, const Tsrc * src, std::size_t src_stride, 
 template <typename Tdst>
 inline void ConvertFromASIO(Tdst * dst, std::size_t dst_stride, SampleType type, const void * src, std::size_t count) noexcept {
 	switch (type) {
-		case SampleType::Int16MSB: {
-			using SampleType = detail::Int16MSB;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int16LSB: {
-			using SampleType = detail::Int16LSB;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int24MSB: {
-			using SampleType = detail::Int24MSB;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int24LSB: {
-			using SampleType = detail::Int24LSB;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int32MSB: {
-			using SampleType = detail::Int32MSB;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int32LSB: {
-			using SampleType = detail::Int32LSB;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Float32MSB: {
-			using SampleType = detail::Float32MSB;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Float32LSB: {
-			using SampleType = detail::Float32LSB;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Float64MSB: {
-			using SampleType = detail::Float64MSB;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Float64LSB: {
-			using SampleType = detail::Float64LSB;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int32MSB16: {
-			using SampleType = detail::Int32MSB16;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int32LSB16: {
-			using SampleType = detail::Int32LSB16;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int32MSB18: {
-			using SampleType = detail::Int32MSB18;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int32LSB18: {
-			using SampleType = detail::Int32LSB18;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int32MSB20: {
-			using SampleType = detail::Int32MSB20;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int32LSB20: {
-			using SampleType = detail::Int32LSB20;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int32MSB24: {
-			using SampleType = detail::Int32MSB24;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
-		case SampleType::Int32LSB24: {
-			using SampleType = detail::Int32LSB24;
-			detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
-		} break;
+		case SampleType::Int16MSB:
+			{
+				using SampleType = detail::Int16MSB;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int16LSB:
+			{
+				using SampleType = detail::Int16LSB;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int24MSB:
+			{
+				using SampleType = detail::Int24MSB;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int24LSB:
+			{
+				using SampleType = detail::Int24LSB;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int32MSB:
+			{
+				using SampleType = detail::Int32MSB;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int32LSB:
+			{
+				using SampleType = detail::Int32LSB;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Float32MSB:
+			{
+				using SampleType = detail::Float32MSB;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Float32LSB:
+			{
+				using SampleType = detail::Float32LSB;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Float64MSB:
+			{
+				using SampleType = detail::Float64MSB;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Float64LSB:
+			{
+				using SampleType = detail::Float64LSB;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int32MSB16:
+			{
+				using SampleType = detail::Int32MSB16;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int32LSB16:
+			{
+				using SampleType = detail::Int32LSB16;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int32MSB18:
+			{
+				using SampleType = detail::Int32MSB18;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int32LSB18:
+			{
+				using SampleType = detail::Int32LSB18;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int32MSB20:
+			{
+				using SampleType = detail::Int32MSB20;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int32LSB20:
+			{
+				using SampleType = detail::Int32LSB20;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int32MSB24:
+			{
+				using SampleType = detail::Int32MSB24;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
+		case SampleType::Int32LSB24:
+			{
+				using SampleType = detail::Int32LSB24;
+				detail::ConvertBuffer(dst, dst_stride, static_cast<const SampleType *>(src), 1, count, [](SampleType smp) { return detail::external_from_sample<Tdst, SampleType>(smp); });
+			}
+			break;
 		default:
 			assert(false);
 			break;
@@ -720,78 +792,114 @@ inline void ConvertFromASIO(Tdst * dst, std::size_t dst_stride, SampleType type,
 template <typename Tsrc>
 inline void ConvertToASIO(void * dst, SampleType type, const Tsrc * src, std::size_t src_stride, std::size_t count) noexcept {
 	switch (type) {
-		case SampleType::Int16MSB: {
-			using SampleType = detail::Int16MSB;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int16LSB: {
-			using SampleType = detail::Int16LSB;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int24MSB: {
-			using SampleType = detail::Int24MSB;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int24LSB: {
-			using SampleType = detail::Int24LSB;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int32MSB: {
-			using SampleType = detail::Int32MSB;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int32LSB: {
-			using SampleType = detail::Int32LSB;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Float32MSB: {
-			using SampleType = detail::Float32MSB;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Float32LSB: {
-			using SampleType = detail::Float32LSB;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Float64MSB: {
-			using SampleType = detail::Float64MSB;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Float64LSB: {
-			using SampleType = detail::Float64LSB;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int32MSB16: {
-			using SampleType = detail::Int32MSB16;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int32LSB16: {
-			using SampleType = detail::Int32LSB16;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int32MSB18: {
-			using SampleType = detail::Int32MSB18;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int32LSB18: {
-			using SampleType = detail::Int32LSB18;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int32MSB20: {
-			using SampleType = detail::Int32MSB20;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int32LSB20: {
-			using SampleType = detail::Int32LSB20;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int32MSB24: {
-			using SampleType = detail::Int32MSB24;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
-		case SampleType::Int32LSB24: {
-			using SampleType = detail::Int32LSB24;
-			detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
-		} break;
+		case SampleType::Int16MSB:
+			{
+				using SampleType = detail::Int16MSB;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int16LSB:
+			{
+				using SampleType = detail::Int16LSB;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int24MSB:
+			{
+				using SampleType = detail::Int24MSB;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int24LSB:
+			{
+				using SampleType = detail::Int24LSB;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int32MSB:
+			{
+				using SampleType = detail::Int32MSB;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int32LSB:
+			{
+				using SampleType = detail::Int32LSB;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Float32MSB:
+			{
+				using SampleType = detail::Float32MSB;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Float32LSB:
+			{
+				using SampleType = detail::Float32LSB;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Float64MSB:
+			{
+				using SampleType = detail::Float64MSB;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Float64LSB:
+			{
+				using SampleType = detail::Float64LSB;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int32MSB16:
+			{
+				using SampleType = detail::Int32MSB16;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int32LSB16:
+			{
+				using SampleType = detail::Int32LSB16;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int32MSB18:
+			{
+				using SampleType = detail::Int32MSB18;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int32LSB18:
+			{
+				using SampleType = detail::Int32LSB18;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int32MSB20:
+			{
+				using SampleType = detail::Int32MSB20;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int32LSB20:
+			{
+				using SampleType = detail::Int32LSB20;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int32MSB24:
+			{
+				using SampleType = detail::Int32MSB24;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
+		case SampleType::Int32LSB24:
+			{
+				using SampleType = detail::Int32LSB24;
+				detail::ConvertBuffer(static_cast<SampleType *>(dst), 1, src, src_stride, count, [](Tsrc smp) { return detail::sample_from_external<SampleType, Tsrc>(smp); });
+			}
+			break;
 		default:
 			assert(false);
 			break;
@@ -807,132 +915,168 @@ struct Traits {
 	bool        is_be      = false;
 	constexpr explicit Traits(SampleType type) noexcept {
 		switch (type) {
-			case SampleType::Int16MSB: {
-				using Type = detail::Types<detail::Int16MSB>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int24MSB: {
-				using Type = detail::Types<detail::Int24MSB>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int32MSB: {
-				using Type = detail::Types<detail::Int32MSB>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Float32MSB: {
-				using Type = detail::Types<detail::Float32MSB>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Float64MSB: {
-				using Type = detail::Types<detail::Float64MSB>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int32MSB16: {
-				using Type = detail::Types<detail::Int32MSB16>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int32MSB18: {
-				using Type = detail::Types<detail::Int32MSB18>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int32MSB20: {
-				using Type = detail::Types<detail::Int32MSB20>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int32MSB24: {
-				using Type = detail::Types<detail::Int32MSB24>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int16LSB: {
-				using Type = detail::Types<detail::Int16LSB>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int24LSB: {
-				using Type = detail::Types<detail::Int24LSB>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int32LSB: {
-				using Type = detail::Types<detail::Int32LSB>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Float32LSB: {
-				using Type = detail::Types<detail::Float32LSB>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Float64LSB: {
-				using Type = detail::Types<detail::Float64LSB>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int32LSB16: {
-				using Type = detail::Types<detail::Int32LSB16>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int32LSB18: {
-				using Type = detail::Types<detail::Int32LSB18>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int32LSB20: {
-				using Type = detail::Types<detail::Int32LSB20>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
-			case SampleType::Int32LSB24: {
-				using Type = detail::Types<detail::Int32LSB24>;
-				size_bytes = sizeof(Type::type);
-				valid_bits = Type::valid_bits;
-				is_float   = Type::is_float;
-				is_be      = Type::is_be;
-			} break;
+			case SampleType::Int16MSB:
+				{
+					using Type = detail::Types<detail::Int16MSB>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int24MSB:
+				{
+					using Type = detail::Types<detail::Int24MSB>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int32MSB:
+				{
+					using Type = detail::Types<detail::Int32MSB>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Float32MSB:
+				{
+					using Type = detail::Types<detail::Float32MSB>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Float64MSB:
+				{
+					using Type = detail::Types<detail::Float64MSB>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int32MSB16:
+				{
+					using Type = detail::Types<detail::Int32MSB16>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int32MSB18:
+				{
+					using Type = detail::Types<detail::Int32MSB18>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int32MSB20:
+				{
+					using Type = detail::Types<detail::Int32MSB20>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int32MSB24:
+				{
+					using Type = detail::Types<detail::Int32MSB24>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int16LSB:
+				{
+					using Type = detail::Types<detail::Int16LSB>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int24LSB:
+				{
+					using Type = detail::Types<detail::Int24LSB>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int32LSB:
+				{
+					using Type = detail::Types<detail::Int32LSB>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Float32LSB:
+				{
+					using Type = detail::Types<detail::Float32LSB>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Float64LSB:
+				{
+					using Type = detail::Types<detail::Float64LSB>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int32LSB16:
+				{
+					using Type = detail::Types<detail::Int32LSB16>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int32LSB18:
+				{
+					using Type = detail::Types<detail::Int32LSB18>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int32LSB20:
+				{
+					using Type = detail::Types<detail::Int32LSB20>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
+			case SampleType::Int32LSB24:
+				{
+					using Type = detail::Types<detail::Int32LSB24>;
+					size_bytes = sizeof(Type::type);
+					valid_bits = Type::valid_bits;
+					is_float   = Type::is_float;
+					is_be      = Type::is_be;
+				}
+				break;
 			default:
 				break;
 		}
