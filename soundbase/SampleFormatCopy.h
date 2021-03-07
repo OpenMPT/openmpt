@@ -88,8 +88,8 @@ void ConvertBufferMixFixedToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither
 	MPT_ASSERT(inBuf.size_frames() >= count);
 	MPT_ASSERT(outBuf.size_frames() >= count);
 	constexpr int ditherBits = SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).IsInt()
-								   ? SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).GetBitsPerSample()
-								   : 0;
+		? SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).GetBitsPerSample()
+		: 0;
 	SC::ClipFixed<int32, fractionalBits, clipOutput> clip;
 	SC::ConvertFixedPoint<TOutSample, TInSample, fractionalBits> conv;
 	for(std::size_t i = 0; i < count; ++i)
@@ -132,8 +132,8 @@ void ConvertBufferMixFloatToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither
 	MPT_ASSERT(inBuf.size_frames() >= count);
 	MPT_ASSERT(outBuf.size_frames() >= count);
 	constexpr int ditherBits = SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).IsInt()
-								   ? SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).GetBitsPerSample()
-								   : 0;
+		? SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).GetBitsPerSample()
+		: 0;
 	SC::ClipFloat<TInSample, clipOutput> clip;
 	SC::Convert<TOutSample, TInSample> conv;
 	for(std::size_t i = 0; i < count; ++i)

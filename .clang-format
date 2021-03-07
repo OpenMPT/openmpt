@@ -1,4 +1,4 @@
-# clang-format 10
+# clang-format 11
 
 Language: Cpp
 Standard: c++17
@@ -6,10 +6,11 @@ Standard: c++17
 AccessModifierOffset: -4 #?
 AlignAfterOpenBracket: AlwaysBreak
 AlignConsecutiveAssignments: false
+AlignConsecutiveBitFields: false
 AlignConsecutiveDeclarations: false
 AlignConsecutiveMacros: true
 AlignEscapedNewlines: DontAlign
-AlignOperands: true
+AlignOperands: DontAlign
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
@@ -38,6 +39,8 @@ BraceWrapping:
  AfterExternBlock: true
  BeforeCatch: false
  BeforeElse: false
+ BeforeLambdaBody: true
+ BeforeWhile: false
  IndentBraces: false
  SplitEmptyFunction: true
  SplitEmptyRecord: true
@@ -64,12 +67,15 @@ IncludeBlocks: Preserve
 IncludeCategories: [] #?
 IncludeIsMainRegex: '' #?
 IncludeIsMainSourceRegex: '' #?
+IndentCaseBlocks: true
 IndentCaseLabels: true
+IndentExternBlock: NoIndent
 IndentGotoLabels: false
 IndentPPDirectives: None
 #BeforeHash
 IndentWidth: 4
 IndentWrappedFunctionNames: true
+InsertTrailingCommas: None
 #JavaImportGroups
 #JavaScriptQuotes
 #JavaScriptWrapImports
@@ -81,6 +87,7 @@ NamespaceIndentation: None
 NamespaceMacros: [] #?
 #ObjCBinPackProtocolList
 #ObjCBlockIndentWidth
+#ObjCBreakBeforeNestedBlockParam
 #ObjCSpaceAfterProperty
 #ObjCSpaceBeforeProtocolList
 #PenaltyBreakAssignment
@@ -120,3 +127,5 @@ TabWidth: 4
 TypenameMacros: [] #?
 UseCRLF: false
 UseTab: ForContinuationAndIndentation
+WhitespaceSensitiveMacros:
+  - MPT_PP_STRINGIFY

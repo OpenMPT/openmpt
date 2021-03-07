@@ -1,14 +1,15 @@
-# clang-format 10
+# clang-format 11
 Language: Cpp
 Standard: c++17
 
 AccessModifierOffset: -2 #?
 AlignAfterOpenBracket: AlwaysBreak
 AlignConsecutiveAssignments: false
+AlignConsecutiveBitFields: false
 AlignConsecutiveDeclarations: false
 AlignConsecutiveMacros: true
 AlignEscapedNewlines: DontAlign
-AlignOperands: true
+AlignOperands: DontAlign
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
@@ -37,6 +38,8 @@ BraceWrapping:
  AfterExternBlock: false
  BeforeCatch: false
  BeforeElse: false
+ BeforeLambdaBody: true
+ BeforeWhile: false
  IndentBraces: false
  SplitEmptyFunction: true
  SplitEmptyRecord: false
@@ -63,11 +66,14 @@ IncludeBlocks: Preserve
 IncludeCategories: [] #?
 IncludeIsMainRegex: '' #?
 IncludeIsMainSourceRegex: '' #?
+IndentCaseBlocks: true
 IndentCaseLabels: true
+IndentExternBlock: NoIndent
 IndentGotoLabels: false
 IndentPPDirectives: None
 #BeforeHash
 IndentWidth: 2
+InsertTrailingCommas: None
 IndentWrappedFunctionNames: true
 #JavaImportGroups
 #JavaScriptQuotes
@@ -80,6 +86,7 @@ NamespaceIndentation: None
 NamespaceMacros: [] #?
 #ObjCBinPackProtocolList
 #ObjCBlockIndentWidth
+#ObjCBreakBeforeNestedBlockParam
 #ObjCSpaceAfterProperty
 #ObjCSpaceBeforeProtocolList
 #PenaltyBreakAssignment
@@ -118,4 +125,6 @@ StatementMacros: ['MPT_WARNING'] #?
 TabWidth: 2
 TypenameMacros: [] #?
 UseCRLF: false
-UseTab: ForIndentation # ForContinuationAndIndentation generates awful things with insertion operator<<.
+UseTab: ForContinuationAndIndentation
+WhitespaceSensitiveMacros:
+  - MPT_PP_STRINGIFY
