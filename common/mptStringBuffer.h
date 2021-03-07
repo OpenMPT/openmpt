@@ -418,7 +418,7 @@ public:
 	{
 		std::fill(buf, buf + size, Tchar('\0'));
 		std::copy(str.GetString(), str.GetString() + std::min(static_cast<std::size_t>(str.GetLength()), size - 1), buf);
-		buf[size - 1] = Tchar('\0');
+		std::fill(buf + std::min(static_cast<std::size_t>(str.GetLength()), size - 1), buf + size, Tchar('\0'));
 		return *this;
 	}
 };
