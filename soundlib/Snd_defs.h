@@ -567,13 +567,14 @@ protected:
 	value_t v = 0;
 
 public:
-	enum : uint32 { fractMax = 0xFFFFFFFFu };
+	static constexpr uint32 fractMax = 0xFFFFFFFFu;
 
 	MPT_CONSTEXPRINLINE SamplePosition() { }
 	MPT_CONSTEXPRINLINE explicit SamplePosition(value_t pos) : v(pos) { }
 	MPT_CONSTEXPRINLINE SamplePosition(int32 intPart, uint32 fractPart) : v((static_cast<value_t>(intPart) * (1ll << 32)) | fractPart) { }
 	static SamplePosition Ratio(uint32 dividend, uint32 divisor) { return SamplePosition((static_cast<int64>(dividend) << 32) / divisor); }
 	static SamplePosition FromDouble(double pos) { return SamplePosition(static_cast<value_t>(pos * 4294967296.0)); }
+	double ToDouble() const { return v / 4294967296.0; }
 
 	// Set integer and fractional part
 	MPT_CONSTEXPRINLINE SamplePosition &Set(int32 intPart, uint32 fractPart = 0) { v = (static_cast<int64>(intPart) << 32) | fractPart; return *this; }
