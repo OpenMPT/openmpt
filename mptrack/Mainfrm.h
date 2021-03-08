@@ -533,6 +533,7 @@ protected:
 	afx_msg LRESULT OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam);
 	afx_msg void OnHelp();
+	afx_msg BOOL OnDeviceChange(UINT nEventType, DWORD_PTR dwData);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg BOOL OnQueryEndSession();
 	//}}AFX_MSG
