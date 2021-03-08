@@ -48,6 +48,7 @@
 #include "FileDialog.h"
 #include "ProgressDialog.h"
 #include <HtmlHelp.h>
+#include <Dbt.h>  // device change messages
 
 
 #ifdef _DEBUG
@@ -76,6 +77,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_CLOSE()
 	ON_WM_CREATE()
 	ON_WM_RBUTTONDOWN()
+	ON_WM_DEVICECHANGE()
 	ON_WM_DROPFILES()
 	ON_WM_QUERYENDSESSION()
 	ON_COMMAND(ID_VIEW_OPTIONS,				&CMainFrame::OnViewOptions)
@@ -389,6 +391,19 @@ void CMainFrame::OnClose()
 }
 
 
+BOOL CMainFrame::OnDeviceChange(UINT nEventType, DWORD_PTR dwData)
+{
+	if(nEventType == DBT_DEVNODES_CHANGED && shMidiIn)
+	{
+		// Calling this (or most other MIDI input related functions) makes the MIDI driver realize
+		// that the connection to USB MIDI devices was lost and send a MIM_CLOSE message.
+		// Otherwise, after disconnecting a USB MIDI device, the MIDI callback will stay alive forever but return no data.
+		midiInGetNumDevs();
+	}
+	return CMDIFrameWnd::OnDeviceChange(nEventType, dwData);
+}
+
+
 // Drop files from Windows
 void CMainFrame::OnDropFiles(HDROP hDropInfo)
 {
@@ -401,6 +416,28 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 		if(::DragQueryFile(hDropInfo, f, fileName.data(), size))
 		{
 			const mpt::PathString file = mpt::PathString::FromNative(fileName.data());
+#ifdef MPT_BUILD_DEBUG
+			// Debug Hack: Quickly scan a folder containing module files (without running out of window handles ;)
+			if(m_InputHandler->CtrlPressed() && m_InputHandler->AltPressed() && m_InputHandler->ShiftPressed() && file.IsDirectory())
+			{
+				FolderScanner scanner(file, FolderScanner::kOnlyFiles | FolderScanner::kFindInSubDirectories);
+				mpt::PathString scanName;
+				size_t failed = 0, total = 0;
+				while(scanner.Next(scanName))
+				{
+					InputFile inputFile(scanName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+					if(!inputFile.IsValid())
+						continue;
+					auto sndFile = std::make_unique<CSoundFile>();
+					MPT_LOG(LogDebug, "info", U_("Loading ") + scanName.ToUnicode());
+					if(!sndFile->Create(GetFileReader(inputFile), CSoundFile::loadCompleteModule, nullptr))
+						failed++;
+					total++;
+				}
+				Reporting::Information(MPT_UFORMAT("Scanned {} files, {} failed")(total, failed));
+				break;
+			}
+#endif
 			theApp.OpenDocumentFile(file.ToCString());
 		}
 	}
@@ -2050,14 +2087,6 @@ void CMainFrame::OnTimer(UINT_PTR timerID)
 
 void CMainFrame::OnTimerGUI()
 {
-	// Calling this (or most other MIDI input related functions) periodically makes the MIDI driver realize
-	// that the connection to USB MIDI devices was lost and send a MIM_CLOSE message.
-	// Otherwise, after disconnecting a USB MIDI device, the MIDI callback will stay alive forever but return no data.
-	if(shMidiIn)
-	{
-		midiInGetNumDevs();
-	}
-
 	IdleHandlerSounddevice();
 
 	// Display Time in status bar
