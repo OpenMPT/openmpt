@@ -31,6 +31,39 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.08.00 (14 March 2021, revision 14303)
+-------------------------------------------
+General tab
+- [Fix] <js> "Output To" plugin list could contain garbage when a plugin name was edited in another view of the same module.
+
+Pattern tab
+- [New] <js> Added keyboard shortcuts for adding and removing channels (http://bugs.openmpt.org/view.php?id=1427).
+- [Mod] <js> If the order list is already longer than the format-supported maximum (e.g. because of import from another format), don't shrink the order list anymore when trying to duplicate a pattern.
+
+Sample tab
+- [Imp] <js> Splitting a stereo sample into two mono samples wastes less memory.
+- [Fix] <js> On some systems, the OPL patch editor caused keyboard shortcuts to stop working (http://bugs.openmpt.org/view.php?id=1382).
+
+Comments tab
+- [Fix] <js> When activating the tab, the keyboard focus is set to the text editor (http://bugs.openmpt.org/view.php?id=1365).
+
+S3M
+- [Fix] <js> Some samples or OPL patches were imported with a too high sample rate if module was saved with Scream Tracker 3 (http://bugs.openmpt.org/view.php?id=1412).
+
+Other formats
+- [Imp] <js> Support loading 64-bit PCM and floating-point WAV files as a module.
+- [Fix] <js> Possible crash when loading floating-point WAV file that claimed to have a bit depth of 8 bits or lower as a module.
+- [Fix] <js> AMS: Avoid allocating excessive amount of memory for compressed song message in malformed files.
+
+General
+- [Mod] <js> Only force to rescan MIDI devices after receiving a device change notification from the system. Might fix a crash with buggy MIDI drivers.
+- [Fix] <js> Properly resize text labels on main toolbar according to actual font size used (http://forum.openmpt.org/index.php?topic=6569.0).
+- [Fix] <js> Some keys were missing when resetting the default keymap (tx isdera).
+
+Third-Party Libraries
+- [Imp] Update libvorbis (v1.3.7), UnRAR (v6.0.4)
+
+
 v1.29.07.00 (31 January 2021, revision 14108)
 ---------------------------------------------
 General tab
@@ -71,7 +104,7 @@ Misc
 - [Imp] <js> Always support inputting '-' as negative sign in numeric input fields, even if the system locale would use a different character.
 - [Mod] <js> "Find MPT Hacks" no longer warns about artist name being set in MOD / S3M files, as it cannot be stored in those file types anyway.
 - [Fix] <js> A memory leak was possible in some situations when loading a module failed due to insufficient memory being available.
-- [Fix] <js> MIDI Export: Possible crash during after importing an SF2 instrument (http://bugs.openmpt.org/view.php?id=1399).
+- [Fix] <js> MIDI Export: Possible crash after importing an SF2 instrument (http://bugs.openmpt.org/view.php?id=1399).
 
 Third-Party Libraries
 - [Imp] Update mpg123 (v1.26.4), UnRAR (v6.0.3)
@@ -689,7 +722,7 @@ Pattern tab
 Sample tab
 - [New] <jh> Add Apple CAF and Sony Wave64 sample import. Only basic uncompressed formats are supported and no detailed instrument or sample metadata is imported for now.
 - [New] <js> Can now read SBI (OPL2 instrument) files. 
-- [New] <js> Can now write S3I (ScreamTracker 3 instrument) files, mainly intended for saving OPL instruments.
+- [New] <js> Can now write S3I (Scream Tracker 3 instrument) files, mainly intended for saving OPL instruments.
 - [Imp] <js> Faster sample normalization.
 - [Imp] <jh> Read sample title from AU files.
 - [Imp] <jh> WAV files are now written with a CSET chunk to specify the metadata encoding as UTF-8.
@@ -1638,7 +1671,7 @@ IT
 - [Fix] <js> Correctly write MIDI program and bank instrument properties in a way that is also read by other IT-compatible applications.
 
 MOD
-- [Fix] <js> Avoid enabling some ProTracker quirks for files most likely created with ScreamTracker 3 (fixes BASIC001.MOD, tx Borg-).
+- [Fix] <js> Avoid enabling some ProTracker quirks for files most likely created with Scream Tracker 3 (fixes BASIC001.MOD, tx Borg-).
 - [Fix] <js> Tremolo effect only had half the intended strength.
 
 Other formats
@@ -1951,7 +1984,7 @@ XM::Compatible Playback Mode
 - [Fix] <js> Portamento with no active note still played the new note if the previous note just stopped playing on the previous tick (fixes u-k3symb.xm).
 
 S3M
-- [New] <js> Added support for old vibrato style which cannot be enabled in the ScreamTracker UI and is probably not used by any modules anyway.
+- [New] <js> Added support for old vibrato style which cannot be enabled in the Scream Tracker UI and is probably not used by any modules anyway.
 - [Fix] <js> Pattern loop start resets on pattern transitions (http://bugs.openmpt.org/view.php?id=757).
 - [Fix] <js> Do not distinguish between vibrato types in effect memory, so that e.g. U1F followed by H00 causes the second effect to play a H1F vibrato. Effectively, this also means that Kxx will never play a fine vibrato (tx eightbitbubsy).
 
@@ -2107,7 +2140,7 @@ MPTM::Custom Tuning
 - [Fix] <js> Pitch effects (portamento, arpeggio) triggered after a note-off were broken since OpenMPT 1.22.
 
 MOD
-- [Mod] <js> As the majority of trackers including ProTracker seem to interpret F20 as tempo rather than speed, OpenMPT now does the same. The only other programs I could find that treat F20 as speed are ScreamTracker 3 and Impulse Tracker.
+- [Mod] <js> As the majority of trackers including ProTracker seem to interpret F20 as tempo rather than speed, OpenMPT now does the same. The only other programs I could find that treat F20 as speed are Scream Tracker 3 and Impulse Tracker.
 - [Fix] <js> Invert Loop position was not reset with instrument numbers.
 - [Fix] <js> Offset beyond sample loop end was broken.
 
@@ -2580,7 +2613,7 @@ XM::Compatible Playback Mode
 - [Fix] <js> Make arpeggio after portamento effect behave even more like in Fasttracker 2.
 
 S3M::Compatible Playback Mode
-- [New] <js> Compatible playback mode for S3M: When enabled, OpenMPT emulates certain ScreamTracker quirks as it did until now (linked pattern effect memory and ignored effects on muted channels). Compatible mode is disabled automatically for files made with less compatible trackers. S3M files made with OpenMPT always have this mode enabled, and its state is not saved in S3M files.
+- [New] <js> Compatible playback mode for S3M: When enabled, OpenMPT emulates certain Scream Tracker quirks as it did until now (linked pattern effect memory and ignored effects on muted channels). Compatible mode is disabled automatically for files made with less compatible trackers. S3M files made with OpenMPT always have this mode enabled, and its state is not saved in S3M files.
 
 MOD
 - [Imp] <js> Amiga frequency limits can now also be enforced without activating ProTracker 1/2 mode.
@@ -3936,7 +3969,7 @@ S3M
 
 S3M::Loading
 - [Imp] <js> Default channel panning is now scaled better when loading and saving, for a full 0...256 range.
-- [Imp] <js> PixPlay panning heuristics only apply to modules made with versions of ScreamTracker older than 3.20.
+- [Imp] <js> PixPlay panning heuristics only apply to modules made with versions of Scream Tracker older than 3.20.
 - [Fix] <js> MIDI Macros are now cleared when loading S3M files saved with Impulse Tracker 2.13 or older (fixes BABYLON.S3M by Necros)
 - [Fix] <js> Some malicious S3M files could previously crash OpenMPT.
 
