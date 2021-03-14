@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.5.7-pre
+
 ### libopenmpt 0.5.6 (2021-03-14)
 
  *  AMS: Avoid allocating excessive amount of memory for compressed song message
