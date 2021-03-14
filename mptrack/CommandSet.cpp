@@ -1723,7 +1723,7 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 
 bool CCommandSet::LoadDefaultKeymap()
 {
-	std::istringstream ss;
+	std::istringstream ss{ GetDefaultKeymap() };
 	return LoadFile(ss, U_("\"executable resource\""));
 }
 
