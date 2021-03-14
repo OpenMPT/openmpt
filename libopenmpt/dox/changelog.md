@@ -7,12 +7,12 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.27-pre
 
- *  vorbis: Update to v1.3.7 (2020-07-04).
-
  *  AMS: Avoid allocating excessive amount of memory for compressed song message
     in malformed files.
  *  S3M: Some samples were imported with a too high sample rate if module was
     saved with Scream Tracker 3.
+
+ *  vorbis: Update to v1.3.7 (2020-07-04).
 
 ### libopenmpt 0.3.26 (2021-01-31)
 
