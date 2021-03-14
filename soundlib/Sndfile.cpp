@@ -529,8 +529,14 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	m_nInstruments = maxInstr;
 
 	// Set default play state values
-	if (!m_nDefaultTempo.GetInt()) m_nDefaultTempo.Set(125);
-	if (!m_nDefaultSpeed) m_nDefaultSpeed = 6;
+	if(!m_nDefaultTempo.GetInt())
+		m_nDefaultTempo.Set(125);
+	else
+		LimitMax(m_nDefaultTempo, TEMPO(uint16_max, 0));
+	if(!m_nDefaultSpeed)
+		m_nDefaultSpeed = 6;
+	if(m_nDefaultRowsPerMeasure < m_nDefaultRowsPerBeat)
+		m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat;
 	m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
 	m_PlayState.m_nMusicTempo = m_nDefaultTempo;
 	m_PlayState.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
