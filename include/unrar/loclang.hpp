@@ -321,7 +321,7 @@
 #define   MStreamUnknown     L"\nWARNING: Unknown format of %s stream data\n"
 #define   MInvalidName       L"\nERROR: Invalid file name %s"
 #define   MProcessArc        L"\n\nProcessing archive %s"
-#define   MCorrectingName    L"\nWARNING: Attempting to correct the invalid file name"
+#define   MCorrectingName    L"\nWARNING: Attempting to correct the invalid file or directory name"
 #define   MUnpCannotMerge    L"\nWARNING: You need to start extraction from a previous volume to unpack %s"
 #define   MUnknownOption     L"\nERROR: Unknown option: %s"
 #define   MSubHeadCorrupt    L"\nERROR: Corrupt data header found, ignored"
