@@ -1231,6 +1231,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					m_PlayState.Chn[n].nVolume = std::min(memory.chnSettings[n].vol, uint8(64)) * 4;
 				}
+				chn.pCurrentSample = nullptr;
 			}
 
 #ifndef NO_PLUGINS
