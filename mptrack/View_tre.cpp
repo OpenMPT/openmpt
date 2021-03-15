@@ -370,6 +370,8 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 		ModItem item = GetModItem(GetSelectedItem());
 		switch(item.type)
 		{
+		case MODITEM_SAMPLE:
+		case MODITEM_INSTRUMENT:
 		case MODITEM_MIDIINSTRUMENT:
 		case MODITEM_MIDIPERCUSSION:
 		case MODITEM_INSLIB_SAMPLE:
