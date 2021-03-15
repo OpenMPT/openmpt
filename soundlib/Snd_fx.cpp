@@ -1288,6 +1288,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					m_opl->Patch(n, chn.pModSample->adlib);
 					m_opl->NoteCut(n);
 				}
+				chn.pCurrentSample = nullptr;
 			}
 
 #ifndef NO_PLUGINS

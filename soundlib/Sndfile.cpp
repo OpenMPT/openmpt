@@ -955,10 +955,10 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 		m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
 		m_PlayState.m_nPatternDelay = 0;
 		m_PlayState.m_nFrameDelay = 0;
-		m_PlayState.m_nBufferCount = 0;
 		m_PlayState.m_nNextPatStartRow = 0;
 		m_SongFlags.set(SONG_PATTERNLOOP);
 	}
+	m_PlayState.m_nBufferCount = 0;
 }
 
 
