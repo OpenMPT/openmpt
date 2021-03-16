@@ -28,20 +28,8 @@ IMixPlugin* LFOPlugin::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIX
 
 LFOPlugin::LFOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
-	, m_nextRandom(0)
-	, m_tempo(0)
 	, m_PRNG(mpt::make_prng<mpt::fast_prng>(mpt::global_prng()))
 {
-	m_amplitude = 0.5f;
-	m_offset = 0.5f;
-	m_frequency = 0.290241f;
-	m_tempoSync = false;
-	m_waveForm = kSine;
-	m_polarity = false;
-	m_bypassed = false;
-	m_outputToCC = false;
-	m_outputParam = int32_max;
-	m_oneshot = false;
 	RecalculateFrequency();
 	RecalculateIncrement();
 
@@ -99,7 +87,7 @@ void LFOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			value = m_random;
 			break;
 		case kSmoothNoise:
-			value = m_phase * m_phase * m_phase * (m_phase * (m_phase * 6 - 15) + 10);	// Smootherstep
+			value = m_phase * m_phase * m_phase * (m_phase * (m_phase * 6 - 15) + 10);  // Smootherstep
 			value = m_nextRandom * value + m_random * (1.0 - value);
 			break;
 		default:
@@ -306,9 +294,9 @@ struct PluginData
 {
 	char     magic[4];
 	uint32le version;
-	uint32le amplitude;	// float
-	uint32le offset;	// float
-	uint32le frequency;	// float
+	uint32le amplitude;  // float
+	uint32le offset;     // float
+	uint32le frequency;  // float
 	uint32le waveForm;
 	uint32le outputParam;
 	uint8le  tempoSync;
@@ -367,6 +355,14 @@ void LFOPlugin::SetChunk(const ChunkData &chunk, bool)
 
 
 #ifdef MODPLUG_TRACKER
+
+std::pair<PlugParamValue, PlugParamValue> LFOPlugin::GetParamUIRange(PlugParamIndex param)
+{
+	if(param == kWaveform)
+		return {0.0f, WaveformToParam(static_cast<LFOWaveform>(kNumWaveforms - 1))};
+	else
+		return {0.0f, 1.0f};
+}
 
 CString LFOPlugin::GetParamName(PlugParamIndex param)
 {

@@ -181,6 +181,12 @@ public:
 	virtual void CacheProgramNames(int32 /*firstProg*/, int32 /*lastProg*/) { }
 	virtual void CacheParameterNames(int32 /*firstParam*/, int32 /*lastParam*/) { }
 
+	// Allowed value range for a parameter
+	virtual std::pair<PlugParamValue, PlugParamValue> GetParamUIRange(PlugParamIndex /*param*/) { return {0.0f, 1.0f}; }
+	// Scale allowed value range of a parameter to/from [0,1]
+	PlugParamValue GetScaledUIParam(PlugParamIndex param);
+	void SetScaledUIParam(PlugParamIndex param, PlugParamValue value);
+
 	virtual CString GetParamName(PlugParamIndex param) = 0;
 	virtual CString GetParamLabel(PlugParamIndex param) = 0;
 	virtual CString GetParamDisplay(PlugParamIndex param) = 0;

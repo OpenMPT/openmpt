@@ -96,6 +96,21 @@ void IMixPlugin::SetSlot(PLUGINDEX slot)
 }
 
 
+PlugParamValue IMixPlugin::GetScaledUIParam(PlugParamIndex param)
+{
+	const auto [paramMin, paramMax] = GetParamUIRange(param);
+	return (std::clamp(GetParameter(param), paramMin, paramMax) - paramMin) / (paramMax - paramMin);
+}
+
+
+void IMixPlugin::SetScaledUIParam(PlugParamIndex param, PlugParamValue value)
+{
+	const auto [paramMin, paramMax] = GetParamUIRange(param);
+	const auto scaledVal = paramMin + std::clamp(value, 0.0f, 1.0f) * (paramMax - paramMin);
+	SetParameter(param, scaledVal);
+}
+
+
 CString IMixPlugin::GetFormattedParamName(PlugParamIndex param)
 {
 	CString paramName = GetParamName(param);

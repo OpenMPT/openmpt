@@ -459,7 +459,7 @@ void CDefaultVstEditor::SetParam(PlugParamIndex param, int value)
 		return;
 	}
 
-	m_VstPlugin.SetParameter(param, static_cast<PlugParamValue>(value) / static_cast<PlugParamValue>(PARAM_RESOLUTION));
+	m_VstPlugin.SetScaledUIParam(param, static_cast<PlugParamValue>(value) / static_cast<PlugParamValue>(PARAM_RESOLUTION));
 
 	// Update other GUI controls
 	UpdateParamDisplay(param);
@@ -480,7 +480,7 @@ void CDefaultVstEditor::UpdateParamDisplay(PlugParamIndex param)
 	}
 
 	// Get the actual parameter value from the plugin
-	const int val = static_cast<int>(m_VstPlugin.GetParameter(param) * static_cast<float>(PARAM_RESOLUTION) + 0.5f);
+	const int val = static_cast<int>(m_VstPlugin.GetScaledUIParam(param) * static_cast<float>(PARAM_RESOLUTION) + 0.5f);
 
 	// Update the GUI controls
 

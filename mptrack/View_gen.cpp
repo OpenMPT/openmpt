@@ -913,7 +913,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					{
 						if (nSBCode == SB_THUMBPOSITION || nSBCode == SB_THUMBTRACK || nSBCode == SB_ENDSCROLL)
 						{
-							pPlugin->SetParameter(m_nCurrentParam, 0.01f * n);
+							pPlugin->SetScaledUIParam(m_nCurrentParam, 0.01f * n);
 							OnParamChanged();
 							SetPluginModified();
 						}
@@ -1120,18 +1120,19 @@ void CViewGlobals::OnParamChanged()
 		if(cursel >= 0 && cursel < nParams) m_nCurrentParam = cursel;
 		if(m_nCurrentParam < nParams)
 		{
-			int nValue = mpt::saturate_round<int>(pPlugin->GetParameter(m_nCurrentParam) * 100.0f);
+			const auto value = pPlugin->GetScaledUIParam(m_nCurrentParam);
+			int intValue = mpt::saturate_round<int>(value * 100.0f);
 			LockControls();
 			if(GetFocus() != GetDlgItem(IDC_EDIT14))
 			{
 				CString s = pPlugin->GetFormattedParamValue(m_nCurrentParam).Trim();
 				if(s.IsEmpty())
 				{
-					s.Format(_T("%f"), pPlugin->GetParameter(m_nCurrentParam));
+					s.Format(_T("%f"), value);
 				}
 				SetDlgItemText(IDC_EDIT14, s);
 			}
-			m_sbValue.SetPos(nValue);
+			m_sbValue.SetPos(intValue);
 			UnlockControls();
 			return;
 		}
@@ -1151,7 +1152,7 @@ void CViewGlobals::OnFocusParam()
 		if(m_nCurrentParam < nParams)
 		{
 			TCHAR s[32];
-			float fValue = pPlugin->GetParameter(m_nCurrentParam);
+			float fValue = pPlugin->GetScaledUIParam(m_nCurrentParam);
 			_stprintf(s, _T("%f"), fValue);
 			LockControls();
 			SetDlgItemText(IDC_EDIT14, s);
@@ -1226,7 +1227,7 @@ void CViewGlobals::OnSetParameter()
 		if ((m_nCurrentParam < nParams) && (s[0]))
 		{
 			float fValue = (float)_tstof(s);
-			pPlugin->SetParameter(m_nCurrentParam, fValue);
+			pPlugin->SetScaledUIParam(m_nCurrentParam, fValue);
 			OnParamChanged();
 			SetPluginModified();
 		}
