@@ -397,6 +397,8 @@ static bool UnpackMO3Data(FileReader &file, std::vector<uint8> &uncompressed, co
 		if(!carry)
 		{
 			// a 0 ctrl bit means 'copy', not compressed byte
+			if(!file.CanRead(1))
+				break;
 			uncompressed.push_back(file.ReadUint8());
 			size--;
 		} else
