@@ -400,7 +400,7 @@ static bool UnpackMO3Data(FileReader &file, std::vector<uint8> &uncompressed, co
 			if(!file.CanRead(1))
 				break;
 			uncompressed.push_back(file.ReadUint8());
-			size--;
+			remain--;
 		} else
 		{
 			// a 1 ctrl bit means compressed bytes are following
