@@ -2736,10 +2736,7 @@ bool CSoundFile::ProcessEffects()
 				{
 					CheckNNA(nChn, instr, note, false);
 				}
-			}
 
-			if(note)
-			{
 				if(chn.nRestorePanOnNewNote > 0)
 				{
 					chn.nPan = (chn.nRestorePanOnNewNote & 0x7FFF) - 1;
