@@ -3,7 +3,7 @@
  * ----------------
  * Purpose: UMX (Unreal Music) module ripper
  * Notes  : Obviously, this code only rips modules from older Unreal Engine games, such as Unreal 1, Unreal Tournament 1 and Deus Ex.
- * Authors: Johannes Schultz (inspired by code from http://wiki.beyondunreal.com/Legacy:Package_File_Format)
+ * Authors: OpenMPT Devs (inspired by code from http://wiki.beyondunreal.com/Legacy:Package_File_Format)
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -17,24 +17,11 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+using namespace UMX;
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderUMX(MemoryFileReader file, const uint64 *pfilesize)
 {
-	UMXFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader))
-	{
-		return ProbeWantMoreData;
-	}
-	if(!fileHeader.IsValid())
-	{
-		return ProbeFailure;
-	}
-	if(!FindUMXNameTableEntryMemory(file, fileHeader, "music"))
-	{
-		return ProbeFailure;
-	}
-	MPT_UNREFERENCED_PARAMETER(pfilesize);
-	return ProbeSuccess;
+	return ProbeFileHeader(file, pfilesize, "music");
 }
 
 
@@ -44,59 +31,26 @@ bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, Con
 	containerItems.clear();
 
 	UMXFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader))
-	{
+	if(!file.ReadStruct(fileHeader) || !fileHeader.IsValid())
 		return false;
-	}
-	if(!fileHeader.IsValid())
-	{
-		return false;
-	}
 
 	// Note that this can be a false positive, e.g. Unreal maps will have music and sound
 	// in their name table because they usually import such files. However, it spares us
 	// from wildly seeking through the file, as the name table is usually right at the
 	// start of the file, so it is hopefully a good enough heuristic for our purposes.
 	if(!FindUMXNameTableEntry(file, fileHeader, "music"))
-	{
 		return false;
-	}
-
-	if(loadFlags == ContainerOnlyVerifyHeader)
-	{
+	else if(!file.CanRead(fileHeader.GetMinimumAdditionalFileSize()))
+		return false;
+	else if(loadFlags == ContainerOnlyVerifyHeader)
 		return true;
-	}
 
-	// Read name table
-	std::vector<std::string> names = ReadUMXNameTable(file, fileHeader);
-
-	// Read import table
-	if(!file.Seek(fileHeader.importOffset))
-	{
-		return false;
-	}
-
-	std::vector<int32> classes;
-	const uint32 importCount = std::min(fileHeader.importCount.get(), mpt::saturate_cast<uint32>(file.BytesLeft() / 4u));
-	classes.reserve(importCount);
-	for(uint32 i = 0; i < importCount && file.CanRead(4); i++)
-	{
-		int32 objName = ReadUMXImportTableEntry(file, fileHeader.packageVersion);
-		if(static_cast<size_t>(objName) < names.size())
-		{
-			classes.push_back(objName);
-		}
-	}
+	const std::vector<std::string> names = ReadUMXNameTable(file, fileHeader);
+	const std::vector<int32> classes = ReadUMXImportTable(file, fileHeader, names);
 
 	// Read export table
-	if(!file.Seek(fileHeader.exportOffset))
-	{
-		return false;
-	}
-
-	// Now we can be pretty sure that we're doing the right thing.
-	
-	for(uint32 i = 0; i < fileHeader.exportCount && file.CanRead(4); i++)
+	file.Seek(fileHeader.exportOffset);
+	for(uint32 i = 0; i < fileHeader.exportCount && file.CanRead(8); i++)
 	{
 		int32 objClass, objOffset, objSize, objName;
 		ReadUMXExportTableEntry(file, objClass, objOffset, objSize, objName, fileHeader.packageVersion);
@@ -181,7 +135,6 @@ bool UnpackUMX(std::vector<ContainerItem> &containerItems, FileReader &file, Con
 			item.file = chunk.ReadChunk(size);
 
 			containerItems.push_back(std::move(item));
-
 		}
 	}
 

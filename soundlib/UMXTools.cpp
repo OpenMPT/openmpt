@@ -1,9 +1,9 @@
 /*
 * UMXTools.h
 * ------------
-* Purpose: UMX/UAX (Unreal) helper functions
-* Notes  : None.
-* Authors: Johannes Schultz (inspired by code from http://wiki.beyondunreal.com/Legacy:Package_File_Format)
+* Purpose: UMX/UAX (Unreal package) helper functions
+* Notes  : (currently none)
+* Authors: OpenMPT Devs (inspired by code from http://wiki.beyondunreal.com/Legacy:Package_File_Format)
 * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
 */
 
@@ -15,12 +15,46 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+namespace UMX
+{
+
 bool UMXFileHeader::IsValid() const
 {
 	return !std::memcmp(magic, "\xC1\x83\x2A\x9E", 4)
-		&& nameCount != 0
-		&& exportCount != 0
-		&& importCount != 0;
+		&& nameOffset >= sizeof(UMXFileHeader)
+		&& exportOffset >= sizeof(UMXFileHeader)
+		&& importOffset >= sizeof(UMXFileHeader)
+		&& nameCount > 0 && nameCount <= uint32_max / 5u
+		&& exportCount > 0 && exportCount <= uint32_max / 8u
+		&& importCount > 0 && importCount <= uint32_max / 4u
+		&& uint32_max - nameCount * 5u >= nameOffset
+		&& uint32_max - exportCount * 8u >= exportOffset
+		&& uint32_max - importCount * 4u >= importOffset;
+}
+
+
+uint32 UMXFileHeader::GetMinimumAdditionalFileSize() const
+{
+	return std::max({nameOffset + nameCount * 5u, exportOffset + exportCount * 8u, importOffset + importCount * 4u}) - sizeof(UMXFileHeader);
+}
+
+
+CSoundFile::ProbeResult ProbeFileHeader(MemoryFileReader file, const uint64 *pfilesize, const char *requiredType)
+{
+	UMXFileHeader fileHeader;
+	if(!file.ReadStruct(fileHeader))
+	{
+		return CSoundFile::ProbeWantMoreData;
+	}
+	if(!fileHeader.IsValid())
+	{
+		return CSoundFile::ProbeFailure;
+	}
+	if(requiredType != nullptr && !FindUMXNameTableEntryMemory(file, fileHeader, requiredType))
+	{
+		return CSoundFile::ProbeFailure;
+	}
+	return CSoundFile::ProbeAdditionalSize(file, pfilesize, fileHeader.GetMinimumAdditionalFileSize());
 }
 
 
@@ -77,8 +111,8 @@ static bool FindUMXNameTableEntryImpl(TFile &file, const UMXFileHeader &fileHead
 	{
 		return false;
 	}
-	std::size_t name_len = std::strlen(name);
-	if(name_len == 0)
+	std::size_t nameLen = std::strlen(name);
+	if(nameLen == 0)
 	{
 		return false;
 	}
@@ -86,7 +120,7 @@ static bool FindUMXNameTableEntryImpl(TFile &file, const UMXFileHeader &fileHead
 	const FileReader::off_t oldpos = file.GetPosition();
 	if(file.Seek(fileHeader.nameOffset))
 	{
-		for(uint32 i = 0; i < fileHeader.nameCount && file.CanRead(4); i++)
+		for(uint32 i = 0; i < fileHeader.nameCount && file.CanRead(5); i++)
 		{
 			if(fileHeader.packageVersion >= 64)
 			{
@@ -102,13 +136,13 @@ static bool FindUMXNameTableEntryImpl(TFile &file, const UMXFileHeader &fileHead
 			while((c = file.ReadUint8()) != 0)
 			{
 				c = mpt::ToLowerCaseAscii(c);
-				if(pos < name_len)
+				if(pos < nameLen)
 				{
 					match = match && (c == name[pos]);
 				}
 				pos++;
 			}
-			if(pos != name_len)
+			if(pos != nameLen)
 			{
 				match = false;
 			}
@@ -169,14 +203,10 @@ std::string ReadUMXNameTableEntry(FileReader &chunk, uint16 packageVersion)
 // Read complete name table.
 std::vector<std::string> ReadUMXNameTable(FileReader &file, const UMXFileHeader &fileHeader)
 {
+	file.Seek(fileHeader.nameOffset);  // nameOffset and nameCount were validated when parsing header
 	std::vector<std::string> names;
-	if(!file.Seek(fileHeader.nameOffset))
-	{
-		return names;
-	}
-	const uint32 nameCount = std::min(fileHeader.nameCount.get(), mpt::saturate_cast<uint32>(file.BytesLeft() / 5u));
-	names.reserve(nameCount);
-	for(uint32 i = 0; i < nameCount && file.CanRead(5); i++)
+	names.reserve(fileHeader.nameCount);
+	for(uint32 i = 0; i < fileHeader.nameCount && file.CanRead(5); i++)
 	{
 		names.push_back(ReadUMXNameTableEntry(file, fileHeader.packageVersion));
 	}
@@ -187,30 +217,48 @@ std::vector<std::string> ReadUMXNameTable(FileReader &file, const UMXFileHeader 
 // Read an entry from the import table.
 int32 ReadUMXImportTableEntry(FileReader &chunk, uint16 packageVersion)
 {
-	ReadUMXIndex(chunk);		// Class package
-	ReadUMXIndex(chunk);		// Class name
+	ReadUMXIndex(chunk);  // Class package
+	ReadUMXIndex(chunk);  // Class name
 	if(packageVersion >= 60)
 	{
-		chunk.Skip(4); // Package
+		chunk.Skip(4);  // Package
 	} else
 	{
-		ReadUMXIndex(chunk); // ??
+		ReadUMXIndex(chunk);  // ??
 	}
-	return ReadUMXIndex(chunk);	// Object name (offset into the name table)
+	return ReadUMXIndex(chunk);  // Object name (offset into the name table)
+}
+
+
+// Read import table.
+std::vector<int32> ReadUMXImportTable(FileReader &file, const UMXFileHeader &fileHeader, const std::vector<std::string> &names)
+{
+	file.Seek(fileHeader.importOffset);  // importOffset and importCount were validated when parsing header
+	std::vector<int32> classes;
+	classes.reserve(fileHeader.importCount);
+	for(uint32 i = 0; i < fileHeader.importCount && file.CanRead(4); i++)
+	{
+		int32 objName = ReadUMXImportTableEntry(file, fileHeader.packageVersion);
+		if(static_cast<size_t>(objName) < names.size())
+		{
+			classes.push_back(objName);
+		}
+	}
+	return classes;
 }
 
 
 // Read an entry from the export table.
 void ReadUMXExportTableEntry(FileReader &chunk, int32 &objClass, int32 &objOffset, int32 &objSize, int32 &objName, uint16 packageVersion)
 {
-	objClass = ReadUMXIndex(chunk);	// Object class
-	ReadUMXIndex(chunk);			// Object parent
+	objClass = ReadUMXIndex(chunk);  // Object class
+	ReadUMXIndex(chunk);             // Object parent
 	if(packageVersion >= 60)
 	{
-		chunk.Skip(4);				// Internal package / group of the object
+		chunk.Skip(4);  // Internal package / group of the object
 	}
-	objName = ReadUMXIndex(chunk);	// Object name (offset into the name table)
-	chunk.Skip(4);					// Object flags
+	objName = ReadUMXIndex(chunk);  // Object name (offset into the name table)
+	chunk.Skip(4);                  // Object flags
 	objSize = ReadUMXIndex(chunk);
 	if(objSize > 0)
 	{
@@ -218,5 +266,6 @@ void ReadUMXExportTableEntry(FileReader &chunk, int32 &objClass, int32 &objOffse
 	}
 }
 
+}  // namespace UMX
 
 OPENMPT_NAMESPACE_END
