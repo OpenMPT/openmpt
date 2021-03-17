@@ -18,12 +18,12 @@ OPENMPT_NAMESPACE_BEGIN
 namespace UMX
 {
 
-bool UMXFileHeader::IsValid() const
+bool FileHeader::IsValid() const
 {
 	return !std::memcmp(magic, "\xC1\x83\x2A\x9E", 4)
-		&& nameOffset >= sizeof(UMXFileHeader)
-		&& exportOffset >= sizeof(UMXFileHeader)
-		&& importOffset >= sizeof(UMXFileHeader)
+		&& nameOffset >= sizeof(FileHeader)
+		&& exportOffset >= sizeof(FileHeader)
+		&& importOffset >= sizeof(FileHeader)
 		&& nameCount > 0 && nameCount <= uint32_max / 5u
 		&& exportCount > 0 && exportCount <= uint32_max / 8u
 		&& importCount > 0 && importCount <= uint32_max / 4u
@@ -33,15 +33,15 @@ bool UMXFileHeader::IsValid() const
 }
 
 
-uint32 UMXFileHeader::GetMinimumAdditionalFileSize() const
+uint32 FileHeader::GetMinimumAdditionalFileSize() const
 {
-	return std::max({nameOffset + nameCount * 5u, exportOffset + exportCount * 8u, importOffset + importCount * 4u}) - sizeof(UMXFileHeader);
+	return std::max({nameOffset + nameCount * 5u, exportOffset + exportCount * 8u, importOffset + importCount * 4u}) - sizeof(FileHeader);
 }
 
 
 CSoundFile::ProbeResult ProbeFileHeader(MemoryFileReader file, const uint64 *pfilesize, const char *requiredType)
 {
-	UMXFileHeader fileHeader;
+	FileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader))
 	{
 		return CSoundFile::ProbeWantMoreData;
@@ -50,7 +50,7 @@ CSoundFile::ProbeResult ProbeFileHeader(MemoryFileReader file, const uint64 *pfi
 	{
 		return CSoundFile::ProbeFailure;
 	}
-	if(requiredType != nullptr && !FindUMXNameTableEntryMemory(file, fileHeader, requiredType))
+	if(requiredType != nullptr && !FindNameTableEntryMemory(file, fileHeader, requiredType))
 	{
 		return CSoundFile::ProbeFailure;
 	}
@@ -60,15 +60,15 @@ CSoundFile::ProbeResult ProbeFileHeader(MemoryFileReader file, const uint64 *pfi
 
 // Read compressed unreal integers - similar to MIDI integers, but signed values are possible.
 template <typename Tfile>
-static int32 ReadUMXIndexImpl(Tfile &chunk)
+static int32 ReadIndexImpl(Tfile &chunk)
 {
 	enum
 	{
-		signMask		= 0x80,	// Highest bit of first byte indicates if value is signed
-		valueMask1		= 0x3F,	// Low 6 bits of first byte are actual value
-		continueMask1	= 0x40,	// Second-highest bit of first byte indicates if further bytes follow
-		valueMask		= 0x7F,	// Low 7 bits of following bytes are actual value
-		continueMask	= 0x80,	// Highest bit of following bytes indicates if further bytes follow
+		signMask      = 0x80,  // Highest bit of first byte indicates if value is signed
+		valueMask1    = 0x3F,  // Low 6 bits of first byte are actual value
+		continueMask1 = 0x40,  // Second-highest bit of first byte indicates if further bytes follow
+		valueMask     = 0x7F,  // Low 7 bits of following bytes are actual value
+		continueMask  = 0x80,  // Highest bit of following bytes indicates if further bytes follow
 	};
 
 	// Read first byte
@@ -97,21 +97,21 @@ static int32 ReadUMXIndexImpl(Tfile &chunk)
 	return result;
 }
 
-int32 ReadUMXIndex(FileReader &chunk)
+int32 ReadIndex(FileReader &chunk)
 {
-	return ReadUMXIndexImpl(chunk);
+	return ReadIndexImpl(chunk);
 }
 
 
 // Returns true if the given nme exists in the name table.
 template <typename TFile>
-static bool FindUMXNameTableEntryImpl(TFile &file, const UMXFileHeader &fileHeader, const char *name)
+static bool FindNameTableEntryImpl(TFile &file, const FileHeader &fileHeader, const char *name)
 {
 	if(!name)
 	{
 		return false;
 	}
-	std::size_t nameLen = std::strlen(name);
+	const std::size_t nameLen = std::strlen(name);
 	if(nameLen == 0)
 	{
 		return false;
@@ -124,7 +124,7 @@ static bool FindUMXNameTableEntryImpl(TFile &file, const UMXFileHeader &fileHead
 		{
 			if(fileHeader.packageVersion >= 64)
 			{
-				int32 length = ReadUMXIndexImpl(file);
+				int32 length = ReadIndexImpl(file);
 				if(length <= 0)
 				{
 					continue;
@@ -157,25 +157,25 @@ static bool FindUMXNameTableEntryImpl(TFile &file, const UMXFileHeader &fileHead
 	return result;
 }
 
-bool FindUMXNameTableEntry(FileReader &file, const UMXFileHeader &fileHeader, const char *name)
+bool FindNameTableEntry(FileReader &file, const FileHeader &fileHeader, const char *name)
 {
-	return FindUMXNameTableEntryImpl(file, fileHeader, name);
+	return FindNameTableEntryImpl(file, fileHeader, name);
 }
 
-bool FindUMXNameTableEntryMemory(MemoryFileReader &file, const UMXFileHeader &fileHeader, const char *name)
+bool FindNameTableEntryMemory(MemoryFileReader &file, const FileHeader &fileHeader, const char *name)
 {
-	return FindUMXNameTableEntryImpl(file, fileHeader, name);
+	return FindNameTableEntryImpl(file, fileHeader, name);
 }
 
 
 // Read an entry from the name table.
-std::string ReadUMXNameTableEntry(FileReader &chunk, uint16 packageVersion)
+std::string ReadNameTableEntry(FileReader &chunk, uint16 packageVersion)
 {
 	std::string name;
 	if(packageVersion >= 64)
 	{
 		// String length
-		int32 length = ReadUMXIndex(chunk);
+		int32 length = ReadIndex(chunk);
 		if(length <= 0)
 		{
 			return "";
@@ -195,50 +195,50 @@ std::string ReadUMXNameTableEntry(FileReader &chunk, uint16 packageVersion)
 		name.append(1, static_cast<char>(chr));
 	}
 
-	chunk.Skip(4);	// Object flags
+	chunk.Skip(4);  // Object flags
 	return name;
 }
 
 
 // Read complete name table.
-std::vector<std::string> ReadUMXNameTable(FileReader &file, const UMXFileHeader &fileHeader)
+std::vector<std::string> ReadNameTable(FileReader &file, const FileHeader &fileHeader)
 {
 	file.Seek(fileHeader.nameOffset);  // nameOffset and nameCount were validated when parsing header
 	std::vector<std::string> names;
 	names.reserve(fileHeader.nameCount);
 	for(uint32 i = 0; i < fileHeader.nameCount && file.CanRead(5); i++)
 	{
-		names.push_back(ReadUMXNameTableEntry(file, fileHeader.packageVersion));
+		names.push_back(ReadNameTableEntry(file, fileHeader.packageVersion));
 	}
 	return names;
 }
 
 
 // Read an entry from the import table.
-int32 ReadUMXImportTableEntry(FileReader &chunk, uint16 packageVersion)
+int32 ReadImportTableEntry(FileReader &chunk, uint16 packageVersion)
 {
-	ReadUMXIndex(chunk);  // Class package
-	ReadUMXIndex(chunk);  // Class name
+	ReadIndex(chunk);  // Class package
+	ReadIndex(chunk);  // Class name
 	if(packageVersion >= 60)
 	{
 		chunk.Skip(4);  // Package
 	} else
 	{
-		ReadUMXIndex(chunk);  // ??
+		ReadIndex(chunk);  // ??
 	}
-	return ReadUMXIndex(chunk);  // Object name (offset into the name table)
+	return ReadIndex(chunk);  // Object name (offset into the name table)
 }
 
 
 // Read import table.
-std::vector<int32> ReadUMXImportTable(FileReader &file, const UMXFileHeader &fileHeader, const std::vector<std::string> &names)
+std::vector<int32> ReadImportTable(FileReader &file, const FileHeader &fileHeader, const std::vector<std::string> &names)
 {
 	file.Seek(fileHeader.importOffset);  // importOffset and importCount were validated when parsing header
 	std::vector<int32> classes;
 	classes.reserve(fileHeader.importCount);
 	for(uint32 i = 0; i < fileHeader.importCount && file.CanRead(4); i++)
 	{
-		int32 objName = ReadUMXImportTableEntry(file, fileHeader.packageVersion);
+		int32 objName = ReadImportTableEntry(file, fileHeader.packageVersion);
 		if(static_cast<size_t>(objName) < names.size())
 		{
 			classes.push_back(objName);
@@ -249,22 +249,83 @@ std::vector<int32> ReadUMXImportTable(FileReader &file, const UMXFileHeader &fil
 
 
 // Read an entry from the export table.
-void ReadUMXExportTableEntry(FileReader &chunk, int32 &objClass, int32 &objOffset, int32 &objSize, int32 &objName, uint16 packageVersion)
+std::pair<FileReader, int32> ReadExportTableEntry(FileReader &file, const FileHeader &fileHeader, const std::vector<int32> &classes, const std::vector<std::string> &names, const char *filterType)
 {
-	objClass = ReadUMXIndex(chunk);  // Object class
-	ReadUMXIndex(chunk);             // Object parent
-	if(packageVersion >= 60)
+	const uint32 objClass = ~static_cast<uint32>(ReadIndex(file));  // Object class
+	if(objClass >= classes.size())
+		return {};
+
+	ReadIndex(file);  // Object parent
+	if(fileHeader.packageVersion >= 60)
 	{
-		chunk.Skip(4);  // Internal package / group of the object
+		file.Skip(4);  // Internal package / group of the object
 	}
-	objName = ReadUMXIndex(chunk);  // Object name (offset into the name table)
-	chunk.Skip(4);                  // Object flags
-	objSize = ReadUMXIndex(chunk);
-	if(objSize > 0)
+	int32 objName = ReadIndex(file);  // Object name (offset into the name table)
+	file.Skip(4);                     // Object flags
+	int32 objSize = ReadIndex(file);
+	int32 objOffset = ReadIndex(file);
+	if(objSize <= 0 || objOffset <= sizeof(FileHeader))
+		return {};
+
+	// If filterType is set, reject any objects not of that type
+	if(filterType != nullptr && names[classes[objClass]] != filterType)
+		return {};
+
+	FileReader chunk = file.GetChunkAt(objOffset, objSize);
+	if(!chunk.IsValid())
+		return {};
+
+	if(fileHeader.packageVersion < 40)
 	{
-		objOffset = ReadUMXIndex(chunk);
+		chunk.Skip(8);  // 00 00 00 00 00 00 00 00
 	}
+	if(fileHeader.packageVersion < 60)
+	{
+		chunk.Skip(16);  // 81 00 00 00 00 00 FF FF FF FF FF FF FF FF 00 00
+	}
+	// Read object properties
+#if 0
+	size_t propertyName = static_cast<size_t>(ReadIndex(chunk));
+	if(propertyName >= names.size() || names[propertyName] != "none")
+	{
+		// Can't bother to implement property reading, as no UMX files I've seen so far use properties for the relevant objects,
+		// and only the UAX files in the Unreal 1997/98 beta seem to use this and still load just fine when ignoring it.
+		// If it should be necessary to implement this, check CUnProperty.cpp in http://ut-files.com/index.php?dir=Utilities/&file=utcms_source.zip
+		MPT_ASSERT_NOTREACHED();
+		continue;
+	}
+#else
+	ReadIndex(chunk);
+#endif
+
+	if(fileHeader.packageVersion >= 120)
+	{
+		// UT2003 Packages
+		ReadIndex(chunk);
+		chunk.Skip(8);
+	} else if(fileHeader.packageVersion >= 100)
+	{
+		// AAO Packages
+		chunk.Skip(4);
+		ReadIndex(chunk);
+		chunk.Skip(4);
+	} else if(fileHeader.packageVersion >= 62)
+	{
+		// UT Packages
+		// Mech8.umx and a few other UT tunes have packageVersion = 62.
+		// In CUnSound.cpp, the condition above reads "packageVersion >= 63" but if that is used, those tunes won't load properly.
+		ReadIndex(chunk);
+		chunk.Skip(4);
+	} else
+	{
+		// Old Unreal Packagaes
+		ReadIndex(chunk);
+	}
+
+	int32 size = ReadIndex(chunk);
+	return {chunk.ReadChunk(size), objName};
 }
+
 
 }  // namespace UMX
 
