@@ -264,7 +264,7 @@ std::pair<FileReader, int32> ReadExportTableEntry(FileReader &file, const FileHe
 	file.Skip(4);                     // Object flags
 	int32 objSize = ReadIndex(file);
 	int32 objOffset = ReadIndex(file);
-	if(objSize <= 0 || objOffset <= sizeof(FileHeader))
+	if(objSize <= 0 || objOffset <= static_cast<int32>(sizeof(FileHeader)))
 		return {};
 
 	// If filterType is set, reject any objects not of that type
