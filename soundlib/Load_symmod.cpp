@@ -219,7 +219,7 @@ struct SymVirtualInst
 		SmpLength writeOffset = 0;
 		while(writeOffset < target.nLength)
 		{
-			std::array<mixsample_t, MIXBUFFERSIZE * 2>(buffer){{}};
+			std::array<mixsample_t, MIXBUFFERSIZE * 2> buffer{};
 			const SmpLength writeCount = std::min(static_cast<SmpLength>(MIXBUFFERSIZE), target.nLength - writeOffset);
 
 			for(auto &chn : channels)
