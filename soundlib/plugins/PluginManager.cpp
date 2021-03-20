@@ -21,6 +21,7 @@
 // Built-in plugins
 #include "DigiBoosterEcho.h"
 #include "LFOPlugin.h"
+#include "SymMODEcho.h"
 #include "dmo/DMOPlugin.h"
 #include "dmo/Chorus.h"
 #include "dmo/Compressor.h"
@@ -294,6 +295,8 @@ CVstPluginManager::CVstPluginManager()
 		{ DigiBoosterEcho::Create, "", "DigiBooster Pro Echo", MagicLE("DBM0"), MagicLE("Echo"), VSTPluginLib::catRoomFx, false, true },
 		// LFO
 		{ LFOPlugin::Create, "", "LFO", MagicLE("OMPT"), MagicLE("LFO "), VSTPluginLib::catGenerator, false, true },
+		// SymMOD Echo
+		{ SymMODEcho::Create, "", "SymMOD Echo", MagicLE("SymM"), MagicLE("Echo"), VSTPluginLib::catRoomFx, false, true },
 #ifdef MODPLUG_TRACKER
 		{ MidiInOut::Create, "", "MIDI Input Output", PLUGMAGIC('V','s','t','P'), PLUGMAGIC('M','M','I','D'), VSTPluginLib::catSynth, true, true },
 #endif // MODPLUG_TRACKER
@@ -672,7 +675,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 #if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 		const bool matchName = !mpt::PathString::CompareNoCase(plug->libraryName, libraryName);
 #else
-		const bool matchName = (mpt::ToLowerCaseAscii(plug->libraryName.ToUTF8()) == libraryName);
+		const bool matchName = !mpt::CompareNoCaseAscii(plug->libraryName.ToUTF8(), libraryName);
 #endif
 
 		if(matchID && matchName)

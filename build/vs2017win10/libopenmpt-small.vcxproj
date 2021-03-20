@@ -1336,6 +1336,7 @@
     <ClInclude Include="..\..\soundlib\plugins\PluginManager.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginMixBuffer.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h" />
+    <ClInclude Include="..\..\soundlib\plugins\SymMODEcho.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Chorus.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\Compressor.h" />
     <ClInclude Include="..\..\soundlib\plugins\dmo\DMOPlugin.h" />
@@ -1420,6 +1421,7 @@
     <ClCompile Include="..\..\soundlib\Load_sfx.cpp" />
     <ClCompile Include="..\..\soundlib\Load_stm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_stp.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_symmod.cpp" />
     <ClCompile Include="..\..\soundlib\Load_uax.cpp" />
     <ClCompile Include="..\..\soundlib\Load_ult.cpp" />
     <ClCompile Include="..\..\soundlib\Load_wav.cpp" />
@@ -1472,6 +1474,7 @@
     <ClCompile Include="..\..\soundlib\plugins\LFOPlugin.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\PlugInterface.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\PluginManager.cpp" />
+    <ClCompile Include="..\..\soundlib\plugins\SymMODEcho.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\dmo\Chorus.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\dmo\Compressor.cpp" />
     <ClCompile Include="..\..\soundlib\plugins\dmo\DMOPlugin.cpp" />

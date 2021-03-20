@@ -29,6 +29,9 @@ void ReplaceSample(ModSample &smp, void *pNewSample,  const SmpLength newLength,
 // Propagate loop point changes to player
 bool UpdateLoopPoints(const ModSample &smp, CSoundFile &sndFile);
 
+// Reverse sample data
+bool ReverseSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile);
+
 // Invert sample data (flip by 180 degrees)
 bool InvertSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile);
 

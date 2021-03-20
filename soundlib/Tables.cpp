@@ -94,6 +94,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_MOD,  UL_("Soundtracker"),               "stk" },
 	{ MOD_TYPE_STM,  UL_("ScreamTracker 2"),            "stm" },
 	{ MOD_TYPE_STP,  UL_("Soundtracker Pro II"),        "stp" },
+	{ MOD_TYPE_MPT,  UL_("Symphonie"),                  "symmod"},
 	{ MOD_TYPE_ULT,  UL_("UltraTracker"),               "ult" },
 	{ MOD_TYPE_MOD,  UL_("Mod's Grave"),                "wow" },
 	// converted formats (no MODTYPE)
@@ -705,26 +706,23 @@ static void getsinc(SINC_TYPE *psinc, double beta, double cutoff)
 	}
 	const double izeroBeta = Izero(beta);
 	const double kPi = 4.0 * std::atan(1.0) * cutoff;
-	for (int isrc=0; isrc<8*SINC_PHASES; isrc++)
+	for(int isrc = 0; isrc < 8 * SINC_PHASES; isrc++)
 	{
 		double fsinc;
 		int ix = 7 - (isrc & 7);
-		ix = (ix*SINC_PHASES)+(isrc>>3);
-		if (ix == (4*SINC_PHASES))
+		ix = (ix * SINC_PHASES) + (isrc >> 3);
+		if(ix == (4 * SINC_PHASES))
 		{
 			fsinc = 1.0;
 		} else
 		{
-			const double x = (double)(ix - (4*SINC_PHASES)) * (double)(1.0/SINC_PHASES);
+			const double x = (double)(ix - (4 * SINC_PHASES)) * (double)(1.0 / SINC_PHASES);
 			const double xPi = x * kPi;
 			fsinc = std::sin(xPi) * Izero(beta * std::sqrt(1 - x * x * (1.0 / 16.0))) / (izeroBeta * xPi); // Kaiser window
 		}
 		double coeff = fsinc * cutoff;
 #ifdef MPT_INTMIXER
-		int n = (int)std::floor(coeff * (1<<SINC_QUANTSHIFT) + 0.5);
-		MPT_ASSERT(n <= int16_max);
-		MPT_ASSERT(n > int16_min);
-		*psinc++ = static_cast<SINC_TYPE>(n);
+		*psinc++ = mpt::saturate_round<SINC_TYPE>(coeff * (1 << SINC_QUANTSHIFT));
 #else
 		*psinc++ = static_cast<SINC_TYPE>(coeff);
 #endif

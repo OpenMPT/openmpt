@@ -378,6 +378,9 @@
     <ClInclude Include="..\..\soundlib\plugins\PluginStructs.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\plugins\SymMODEcho.h">
+      <Filter>soundlib\plugins</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\dmo\Chorus.h">
       <Filter>soundlib\plugins\dmo</Filter>
     </ClInclude>
@@ -641,6 +644,9 @@
     <ClCompile Include="..\..\soundlib\Load_stp.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_symmod.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_uax.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
@@ -795,6 +801,9 @@
       <Filter>soundlib\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\PluginManager.cpp">
+      <Filter>soundlib\plugins</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\plugins\SymMODEcho.cpp">
       <Filter>soundlib\plugins</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\plugins\dmo\Chorus.cpp">

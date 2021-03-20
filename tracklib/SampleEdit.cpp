@@ -368,39 +368,10 @@ bool AmplifySample(ModSample &smp, SmpLength start, SmpLength end, double amplif
 }
 
 
-template <class T>
-static void ReverseSampleImpl(T *pStart, const SmpLength length)
-{
-	for(SmpLength i = 0; i < length / 2; i++)
-	{
-		std::swap(pStart[i], pStart[length - 1 - i]);
-	}
-}
-
 // Reverse sample data
 bool ReverseSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
 {
-	if(!smp.HasSampleData()) return false;
-	if(end == 0 || start > smp.nLength || end > smp.nLength)
-	{
-		start = 0;
-		end = smp.nLength;
-	}
-
-	if(end - start < 2) return false;
-
-	static_assert(MaxSamplingPointSize <= 4);
-	if(smp.GetBytesPerSample() == 4)	// 16 bit stereo
-		ReverseSampleImpl(static_cast<int32 *>(smp.samplev()) + start, end - start);
-	else if(smp.GetBytesPerSample() == 2)	// 16 bit mono / 8 bit stereo
-		ReverseSampleImpl(static_cast<int16 *>(smp.samplev()) + start, end - start);
-	else if(smp.GetBytesPerSample() == 1)	// 8 bit mono
-		ReverseSampleImpl(static_cast<int8 *>(smp.samplev()) + start, end - start);
-	else
-		return false;
-
-	smp.PrecomputeLoops(sndFile, false);
-	return true;
+	return ctrlSmp::ReverseSample(smp, start, end, sndFile);
 }
 
 

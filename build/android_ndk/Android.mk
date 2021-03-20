@@ -150,6 +150,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_sfx.cpp \
 	soundlib/Load_stm.cpp \
 	soundlib/Load_stp.cpp \
+	soundlib/Load_symmod.cpp \
 	soundlib/Load_ult.cpp \
 	soundlib/Load_uax.cpp \
 	soundlib/Load_wav.cpp \
@@ -214,6 +215,7 @@ LOCAL_SRC_FILES += \
 	soundlib/plugins/LFOPlugin.cpp \
 	soundlib/plugins/PluginManager.cpp \
 	soundlib/plugins/PlugInterface.cpp \
+	soundlib/plugins/SymMODEcho.cpp \
 	sounddsp/AGC.cpp \
 	sounddsp/DSP.cpp \
 	sounddsp/EQ.cpp \
