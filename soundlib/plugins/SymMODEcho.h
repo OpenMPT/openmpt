@@ -123,7 +123,7 @@ protected:
 	void RecalculateEchoParams();
 };
 
-MPT_BINARY_STRUCT(SymMODEcho::PluginChunk, 7);
+MPT_BINARY_STRUCT(SymMODEcho::PluginChunk, 7)
 
 
 OPENMPT_NAMESPACE_END
