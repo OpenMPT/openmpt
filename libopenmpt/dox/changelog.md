@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**New**] `MUS` files from Psycho Pinball and Micro Machines 2 are now
     supported.
+ *  [**New**] `SymMOD` files created with Symphonie / Symphonie Pro are now
+    supported.
  *  [**New**] openmpt123: openmpt123 will now expand file wildcards passed on
     the command line in Windows when built with MSVC.
  *  [**New**] `Makefile` `CONFIG=emscripten` now supports
