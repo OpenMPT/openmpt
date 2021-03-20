@@ -233,8 +233,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 {
 	std::vector<GetLengthType> results;
 	GetLengthType retval;
-	retval.startOrder = target.startOrder;
-	retval.startRow = target.startRow;
 
 	// Are we trying to reach a certain pattern position?
 	const bool hasSearchTarget = target.mode != GetLengthTarget::NoTarget;
@@ -249,8 +247,18 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	// Temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
 	RowVisitor visitedRows(*this, sequence);
 
-	playState.m_nNextRow = playState.m_nRow = target.startRow;
-	playState.m_nNextOrder = playState.m_nCurrentOrder = target.startOrder;
+	// If sequence starts with some non-existent patterns, find a better start
+	{
+		ORDERINDEX startOrder = target.startOrder;
+		ROWINDEX startRow = target.startRow;
+		if(visitedRows.GetFirstUnvisitedRow(startOrder, startRow, true))
+		{
+			target.startOrder = startOrder;
+			target.startRow = startRow;
+		}
+	}
+	retval.startRow = playState.m_nNextRow = playState.m_nRow = target.startRow;
+	retval.startOrder = playState.m_nNextOrder = playState.m_nCurrentOrder = target.startOrder;
 
 	// Fast LUTs for commands that are too weird / complicated / whatever to emulate in sample position adjust mode.
 	std::bitset<MAX_EFFECTS> forbiddenCommands;
