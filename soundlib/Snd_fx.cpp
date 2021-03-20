@@ -4705,7 +4705,14 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	// S2x: Set FineTune
 	case 0x20:	if(!m_SongFlags[SONG_FIRSTTICK])
 					break;
-				if(GetType() != MOD_TYPE_669)
+				if(GetType() == MOD_TYPE_IMF)
+				{
+					if(chn.nPeriod && chn.pModSample)
+					{
+						chn.nC5Speed = Util::muldivr(chn.pModSample->nC5Speed, 1712, ProTrackerTunedPeriods[param * 12]);
+						chn.nPeriod = GetPeriodFromNote(chn.nNote, 0, chn.nC5Speed);
+					}
+				} else if(GetType() != MOD_TYPE_669)
 				{
 					chn.nC5Speed = S3MFineTuneTable[param];
 					chn.nFineTune = MOD2XMFineTune(param);
